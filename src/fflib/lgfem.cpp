@@ -3449,7 +3449,7 @@ void  init_lgfem()
   cout <<"lg_fem ";
 #ifdef HAVE_CADNA
   cout << "cadna ";
-  cadna_init(-1);
+  cadna_init(0); // pas de fichier 
 #endif  
 //Dcl_Type<const C_args*>(); // to store compilation expression
  
