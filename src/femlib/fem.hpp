@@ -18,6 +18,8 @@ template<class T> inline void Exchange (T& a,T& b) {T c=a;a=b;b=c;}
 template<class T> inline T Max (const T &a,const T & b,const T & c){return Max(Max(a,b),c);}
 template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(Min(a,b),c);}
 
+inline double norm(double x){return x*x;} 
+inline float norm(float x){return x*x;}
 
 // definition R
 typedef double R;
