@@ -86,7 +86,7 @@ WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
 
 deb:
 	dpkg-buildpackage -rfakeroot
-	@echo Now run '"cd debian && ./CopyToServer.sh \<dir>"'
+	@echo Now run CopyToServer.sh in debian subdirectory
 
 # Build all versions
 # ------------------
