@@ -66,8 +66,8 @@ CYGWIN*)
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwin" != yes
 	then
-		CXXFLAGS="$CXXFLAGS -mno-cygwin -I/usr/include/mingw"
-		LIBS="$LIBS -mno-cygwin -L/lib/mingw"
+		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -I/usr/include/mingw"
+		LIBS="$LIBS -mno-cygwin -mwindows -L/lib/mingw -lws2_32"
 	fi
 	;;
 *)ff_win32=no;;
