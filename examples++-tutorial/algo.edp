@@ -4,14 +4,6 @@ real umax=0;
   // work array 
   real[int] matx(10),b(10),x(10); 
   
-  
-  func real[int] mat(real[int] &x)
-    { 
-      for (int i=0;i<x.n;i++)
-	matx[i]=(i+1)*x[i];
-      matx -= b; // sub the right hand side
-      return matx;  // return of global variable ok 
-    };
   func real J(real[int] & x)
     {
       real s=0;
@@ -20,6 +12,25 @@ real umax=0;
       cout << "J ="<< s << " x =" <<  x[0] << " " << x[1] << "...\n" ;
       return s;
     }
+
+//  the grad of J (this is a affine version (the RHS is in  )
+  func real[int] DJ(real[int] &x)
+    { 
+      for (int i=0;i<x.n;i++)
+	matx[i]=(i+1)*x[i];
+      matx -= b; // sub the right hand side
+      return matx;  // return of global variable ok 
+    };
+
+// the grad of the bilinear part of J (the RHS in remove)
+  func real[int] DJ0(real[int] &x)
+    { 
+      for (int i=0;i<x.n;i++)
+	matx[i]=(i+1)*x[i];
+      return matx;  // return of global variable ok 
+    };
+
+
   func real error(real[int] & x,real[int] & b)
    {
    real s=0;
@@ -27,21 +38,33 @@ real umax=0;
 	s += abs((i+1)*x[i] - b[i]);
    return s;    
    }
+
   func real[int] matId(real[int] &x) { return x;};
   
   b=1; x=0; // set  right hand side and initial gest
-  LinearCG(mat,x,eps=1.e-6,nbiter=20,precon=matId);
-  cout << "LinearCG: J(x) = " << J(x) << " err=" << error(x,b) << endl;
+  LinearCG(DJ,x,eps=1.e-6,nbiter=20,precon=matId);
+  cout << "LinearCG (Affine)  : J(x) = " << J(x) << " err=" << error(x,b) << endl;
   assert(error(x,b) < 1e-5);
 
   b=1; x=0; // set  right hand side and initial gest
-  NLCG(mat,x,eps=1.e-6,nbiter=20,precon=matId);
+  LinearCG(DJ0,x,b,eps=1.e-6,nbiter=20,precon=matId);
+  cout << "LinearCG (Linear) : J(x) = " << J(x) << " err=" << error(x,b) << endl;
+  assert(error(x,b) < 1e-5);
+
+  b=1; x=0; // set  right hand side and initial gest
+ //   LinearGMRES(DJ,x,eps=1.e-6,nbiter=20,precon=matId); // bug don't work compile error v1.44
+  LinearGMRES(DJ0,x,b,eps=1.e-6,nbiter=20,precon=matId);
+  cout << "LinearGMRES: J(x) = " << J(x) << " err=" << error(x,b) << endl;
+  assert(error(x,b) < 1e-5);
+
+  b=1; x=0; // set  right hand side and initial gest
+  NLCG(DJ,x,eps=1.e-6,nbiter=20,precon=matId);
   cout << "NLCG: J(x) = " << J(x) << " err=" << error(x,b) << endl;
   assert(error(x,b) < 1e-5);
 
   // warning BFGS use a full matrix of size nxn (where n=x.n) 
   b=1; x=2; // set  right hand side and initial gest
-  BFGS(J,mat,x,eps=1.e-6,nbiter=20,nbiterline=20);
+  BFGS(J,DJ,x,eps=1.e-6,nbiter=20,nbiterline=20);
    cout << "BFGS: J(x) = " << J(x) << " err=" << error(x,b) << endl;
   assert(error(x,b) < 1e-5);
 
