@@ -28,26 +28,37 @@ Other useful configuration variables include:
 - LDFLAGS linking flags
 - LDADD extra options for the linking stage
 
-Linear algebra libraries
-------------------------
+Linear algebra libraries and eigen value problem
+-----------------------------------------------
+
 
 By default, "./configure" looks for the BLAS, ARPACK and UMFPACK
-libraries on the local system. If configure cannot find the libraries
-by itself, you can specify the full path to a library file (ending
-with ".a") with the following options:
+libraries on the local system.
+ARPACK is use to compute eigenvalue.
+and UMFPACK is a new fast sparce linear solver.
 
---with-blas=library file
---with-arpack=library file
---with-amd=library file
---with-umfpack=library file
+
+ If configure cannot find the libraries
+by itself, you can specify the full path to a library file (ending
+with ".a") or the options use by the linker (ex: "-L/usr/local/lib -lblas")
+with the following options:
+
+--with-blas="blas linker options"  
+--with-arpack="arpack linker options"
+--with-amd="amd linker options"
+--with-umfpack="umfpack linker options"
 
 Or, if the configuration flag "--enable-download" is specified, the
 compilation step ("make") will try to download the missing libraries
 (from their official websites) and compile them.
 
+Remark, under linux or window the simplest way to get
+a not to bad version is
+./configure --enable download --enable-generic_blas
+
 Here are the different versions of FreeFem++ produced by one
 compilation (some versions may be missing if your system does not
-support them):
+support them):OA
 
 * FreeFem++: standard version (using X11 graphics on Linux and MacOS
   10, Win32 on Windows and  MacOS X) (located in src/std)
