@@ -59,32 +59,32 @@ inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE
 
 template<class R>
 void MatriceElementairePleine<R>::call(int k,int ie,int label,void * stack) {
-  for (int i=0;i<lga;i++) 
-     a[i]=0;
-  if(onFace)
+  for (int i=0;i<this->lga;i++) 
+     this->a[i]=0;
+  if(this->onFace)
     { 
      throwassert(faceelement);
-     const Mesh &Th(Vh.Th);
+     const Mesh &Th(this->Vh.Th);
      
      int iie=ie,kk=Th.TriangleAdj(k,iie);
      if(kk==k|| kk<0) kk=-1;
-     if ( &Vh == &Uh)
+     if ( &this->Vh == &this->Uh)
       {
-       FElement Kv(Vh[k]);
+       FElement Kv(this->Vh[k]);
        if(kk<0)
         { // return ; // on saute ????  bof bof 
-         n=m=BuildMEK_KK(lnk,ni,nik,nikk,&Kv,0);
-         int n2 =m*n; 
-         for (int i=0;i<n2;i++) a[i]=0;
-         faceelement(*this,Kv,Kv,Kv,Kv,data,ie,iie,label,stack);
+         this->n=this->m=BuildMEK_KK(this->lnk,this->ni,this->nik,this->nikk,&Kv,0);
+         int n2 =this->m*this->n; 
+         for (int i=0;i<n2;i++) this->a[i]=0;
+         faceelement(*this,Kv,Kv,Kv,Kv,this->data,ie,iie,label,stack);
         }
         else
         {
-         FElement KKv(Vh[kk]);
-         n=m=BuildMEK_KK(lnk,ni,nik,nikk,&Kv,&KKv);
+         FElement KKv(this->Vh[kk]);
+         this->n=this->m=BuildMEK_KK(this->lnk,this->ni,this->nik,this->nikk,&Kv,&KKv);
         
          
-         faceelement(*this,Kv,KKv,Kv,KKv,data,ie,iie,label,stack);
+         faceelement(*this,Kv,KKv,Kv,KKv,this->data,ie,iie,label,stack);
 
         }
       }
@@ -97,27 +97,27 @@ void MatriceElementairePleine<R>::call(int k,int ie,int label,void * stack) {
    }
   else {
   throwassert(element);
-  const FElement&Kv(Vh[k]);
+  const FElement&Kv(this->Vh[k]);
   int nbdf =Kv.NbDoF();
   for (int i=0;i<nbdf;i++)
-     ni[i] = Kv(i); // copy the numbering 
-  m=n=nbdf;  
+     this->ni[i] = Kv(i); // copy the numbering 
+  this->m=this->n=nbdf;  
 
-  if(ni != nj) { // 
-    const FElement&Ku(Uh[k]);
+  if(this->ni != this->nj) { // 
+    const FElement&Ku(this->Uh[k]);
     int nbdf =Ku.NbDoF();
     for (int i=0;i<nbdf;i++)
-      nj[i] = Ku(i); // copy the numbering 
-     m=nbdf;
-     int n2 =m*n; 
-     for (int i=0;i<n2;i++) a[i]=0;
-     element(*this,Ku,Kv,data,ie,label,stack);
+      this->nj[i] = Ku(i); // copy the numbering 
+     this->m=nbdf;
+     int n2 =this->m*this->n; 
+     for (int i=0;i<n2;i++) this->a[i]=0;
+     element(*this,Ku,Kv,this->data,ie,label,stack);
   }
   else 
     {
-     int n2 =m*n;
-     for (int i=0;i<n2;i++) a[i]=0;
-     element(*this,Kv,Kv,data,ie,label,stack);
+     int n2 =this->m*this->n;
+     for (int i=0;i<n2;i++) this->a[i]=0;
+     element(*this,Kv,Kv,this->data,ie,label,stack);
    // call the elementary mat 
     }  
   }  
@@ -126,34 +126,34 @@ void MatriceElementairePleine<R>::call(int k,int ie,int label,void * stack) {
 template<class R>
 void MatriceElementaireSymetrique<R>::call(int k,int ie,int label,void * stack) {
   // mise a zero de la matrice elementaire, plus sur
-  for (int i=0;i<lga;i++) 
-     a[i]=0;
-  if(onFace)
+  for (int i=0;i<this->lga;i++) 
+     this->a[i]=0;
+  if(this->onFace)
     { 
        assert(0); // a faire 
     }
   else {
 
- if (k< Uh.Th.nt)
+ if (k< this->Uh.Th.nt)
   {
   throwassert(element);
-  const FElement K(Uh[k]);
+  const FElement K(this->Uh[k]);
   int nbdf =K.NbDoF();
   for (int i=0;i<nbdf;i++)
-     ni[i] = K(i); // copy the numbering 
-  m=n = nbdf; 
+     this->ni[i] = K(i); // copy the numbering 
+  this->m=this->n = nbdf; 
 
-  element(*this,K,data,ie,label,stack); 
+  element(*this,K,this->data,ie,label,stack); 
   }// call the elementary mat 
   else
   {
   throwassert(mortar);
   {
-  const FMortar K(&Uh,k);
+  const FMortar K(&(this->Uh),k);
   int nbdf = K.NbDoF();
   for (int i=0;i<nbdf;i++)
-     ni[i] = K(i); // copy the numbering 
-  m=n = nbdf; 
+     this->ni[i] = K(i); // copy the numbering 
+  this->m=this->n = nbdf; 
   // mise a zero de la matrice elementaire, plus sur
   
    mortar(*this,K,stack);}
@@ -163,7 +163,7 @@ void MatriceElementaireSymetrique<R>::call(int k,int ie,int label,void * stack) 
 
 template<class R>
 MatriceProfile<R>::~MatriceProfile() {
-  if(!dummy) 
+  if(!this->dummy) 
     { //cout << " del mat profile " << endl ;
     if (U && (U !=L))  delete [] U;
     if (D)  delete [] D;
@@ -176,11 +176,11 @@ MatriceProfile<R>::~MatriceProfile() {
 template<class R>
 int MatriceProfile<R>::size() const {
   int s = sizeof(MatriceProfile<R>);
-  if (D) s += n*sizeof(R);
-  if (pL) s += n*sizeof(int);
-  if (pU && (pU != pL)) s += n*sizeof(int);
-  if (L) s += pL[n]*sizeof(int);
-  if (U && (U != L)) s += pU[n]*sizeof(int);
+  if (D) s += this->n*sizeof(R);
+  if (pL) s += this->n*sizeof(int);
+  if (pU && (pU != pL)) s += this->n*sizeof(int);
+  if (L) s += pL[this->n]*sizeof(int);
+  if (U && (U != L)) s += pU[this->n]*sizeof(int);
   return s;
 }
 
@@ -197,20 +197,20 @@ bool MatriceProfile<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
  if(!coef) return  L == U ;
  int i,j,kf,k;
   if(D)
-   for( i=0;i<n;i++)
+   for( i=0;i<this->n;i++)
     if(D[i])
      mij[make_pair(i,i)] += coef*D[i];
    else
-   for(int i=0;i<n;i++) // no dia => identity dai
+   for(int i=0;i<this->n;i++) // no dia => identity dai
      mij[make_pair(i,i)]=mij[make_pair(i,i)] += coef;
      
  if (L && pL )    
-   for (kf=pL[0],i=0;  i<n;   i++  )  
+   for (kf=pL[0],i=0;  i<this->n;   i++  )  
      for ( k=kf,kf=pL[i+1], j=i-kf+k;   k<kf; j++,  k++  )
         if(L[k])
         mij[make_pair(i,j)]=L[k]*coef;
  if (U && pU)     
-   for (kf=pU[0],j=0;  j<m;  j++)  
+   for (kf=pU[0],j=0;  j<this->m;  j++)  
      for (k=kf,kf=pU[j+1], i=j-kf+k;   k<kf; i++,  k++  )
       if(U[k])
         mij[make_pair(i,j)]=U[k]*coef;
@@ -220,10 +220,10 @@ template<class R>
 MatriceProfile<R>::MatriceProfile(const int nn,const R *a)
   :MatriceCreuse<R>(nn,nn,0),typefac(FactorizationNO)
 {
-  int *pf = new int [n+1];
+  int *pf = new int [this->n+1];
   int i,j,k;
   k=0;
-  for (i=0;i<=n;k+=i++)
+  for (i=0;i<=this->n;k+=i++)
     {
       pf[i]=k;
       //  cout << " pf " << i<< " = " << k  << endl;
@@ -231,12 +231,12 @@ MatriceProfile<R>::MatriceProfile(const int nn,const R *a)
   throwassert( pf[n]*2 == n*(n-1));
   pU = pf; // pointeur profile U
   pL = pf; // pointeur profile L
-  U = new R[pf[n]];
-  L = new R[pf[n]];
-  D = new R[n];  
+  U = new R[pf[this->n]];
+  L = new R[pf[this->n]];
+  D = new R[this->n];  
   const R *aij=a;
-  for (i=0;i<n;i++)
-    for (j=0;j<n;j++)
+  for (i=0;i<this->n;i++)
+    for (j=0;j<this->n;j++)
       if      (j<i)   L[pL[i+1]-i+j] = *aij++;
       else if (j>i)   U[pU[j+1]-j+i] = *aij++;
       else            D[i] = *aij++;
@@ -251,19 +251,19 @@ MatriceProfile<R>::MatriceProfile(const FESpace & Vh,bool VF)
    // VF = false => Finite element 
    // F. Hecht nov 2003
    // -----
-  dummy=0;
-  n = m = Vh.NbOfDF;
+  this->dummy=0;
+  this->n = this->m = Vh.NbOfDF;
   int i,j,k,ke,ie,mn,jl;
   int itab,tabk[5]; 
-  int *pf = new int [n+1];
-  for (i=0;i<n;i++)  pf[i]=0;
+  int *pf = new int [this->n+1];
+  for (i=0;i<this->n;i++)  pf[i]=0;
   for (ke=0;ke<Vh.NbOfElements;ke++)
     { 
       itab=0;
       tabk[itab++]=ke;
       if(VF) itab += Vh.Th.GetAllTriangleAdj(ke,tabk+itab);
       tabk[itab]=-1;    
-      mn = n;
+      mn = this->n;
       for( k=tabk[ie=0]; ie <itab; k=tabk[++ie])
         for (j=Vh(k,jl=0);jl<(int) Vh(k);j=Vh(k,++jl)) 
 	      mn = Min ( mn , Vh.FirstDFOfNode(j) ) ;
@@ -279,8 +279,8 @@ MatriceProfile<R>::MatriceProfile(const FESpace & Vh,bool VF)
 	     }
     }
   int l =0;
-  for (i=0;i<n;i++)  {int tmp=l;l += pf[i]; pf[i]=tmp;}
-  pf[n] = l;
+  for (i=0;i<this->n;i++)  {int tmp=l;l += pf[i]; pf[i]=tmp;}
+  pf[this->n] = l;
   if(verbosity >3) 
     cout << "  -- SizeOfSkyline =" <<l << endl;
 
@@ -293,24 +293,24 @@ MatriceProfile<R>::MatriceProfile(const FESpace & Vh,bool VF)
 
 template<class R>
 void MatriceProfile<R>::addMatMul(const KN_<R> &x,KN_<R> &ax) const 
-{if (x.n!= n ) ERREUR(MatriceProfile MatMut(xa,x) ," longueur incompatible x (in) ") ;
- if (ax.n!= n ) ERREUR(MatriceProfile MatMut(xa,x) ," longueur incompatible ax (out)") ;
+{if (x.n!= this->n ) ERREUR(MatriceProfile MatMut(xa,x) ," longueur incompatible x (in) ") ;
+ if (ax.n!= this->n ) ERREUR(MatriceProfile MatMut(xa,x) ," longueur incompatible ax (out)") ;
  int i,j,k,kf;
  throwassert(n == m);
  if (D) 
-   for (i=0;i<n;i++) 
+   for (i=0;i<this->n;i++) 
      ax[i] += D[i]*x[i];
  else
-   for (i=0;i<n;i++) // no dia => identyty dai
+   for (i=0;i<this->n;i++) // no dia => identyty dai
      ax[i] +=x[i];
       
  if (L && pL )    
-   for (kf=pL[0],i=0;  i<n;   i++  )  
+   for (kf=pL[0],i=0;  i<this->n;   i++  )  
      for ( k=kf,kf=pL[i+1], j=i-kf+k;   k<kf; j++,  k++  )
        ax[i] += L[k]*x[j],throwassert(i>=0 && i <n && j >=0 && j < m && k>=0 && k < pL[n]);
        
  if (U && pU)     
-   for (kf=pU[0],j=0;  j<m;  j++)  
+   for (kf=pU[0],j=0;  j<this->m;  j++)  
      for (k=kf,kf=pU[j+1], i=j-kf+k;   k<kf; i++,  k++  )
        ax[i] += U[k]*x[j],throwassert(i>=0 && i <n && j >=0 && j < m &&  k>=0 && k < pU[n]);
  
@@ -335,14 +335,14 @@ MatriceCreuse<R>  & MatriceProfile<R>::operator +=(MatriceElementaire<R> & me) {
   int il,jl,i,j,k;
   int * mi=me.ni, *mj=me.nj;
   if (!D)  // matrice vide 
-    { D  = new R[n];
-    L  = pL[n] ? new R[pL[n]] :0 ;
-    for (i =0;i<n;i++) D[i] =0;
-    for (k =0;k<pL[n];k++) L[k] =0;
+    { D  = new R[this->n];
+    L  = pL[this->n] ? new R[pL[this->n]] :0 ;
+    for (i =0;i<this->n;i++) D[i] =0;
+    for (k =0;k<pL[this->n];k++) L[k] =0;
     switch (me.mtype) {
     case MatriceElementaire<R>::Full :     
-      U  = pU[n] ? new R[pU[n]] : 0;
-      for (k =0;k<pU[n];k++) U[k] =0;
+      U  = pU[this->n] ? new R[pU[this->n]] : 0;
+      for (k =0;k<pU[this->n];k++) U[k] =0;
       break;
     case MatriceElementaire<R>::Symetric :     
       U = L; 
@@ -380,7 +380,7 @@ MatriceCreuse<R>  & MatriceProfile<R>::operator +=(MatriceElementaire<R> & me) {
 
 template<class R>
 ostream& MatriceProfile<R>::dump (ostream& f) const 
-{f<< " matrice profile " << n << '\t' << m << '\t' ;
+{f<< " matrice profile " << this->n << '\t' << this->m << '\t' ;
  f <<  "  this " << endl;
  f << " pL = " << pL << " L ="  << L << endl
    << " pU = " << pU << " U ="  << U << endl
@@ -389,7 +389,7 @@ ostream& MatriceProfile<R>::dump (ostream& f) const
    if (pL && L) 
      {f << " matrice profile symetrique " <<endl;
      int i,j,k;
-     for (i = 0;i<n;i++) 
+     for (i = 0;i<this->n;i++) 
        { f << i << " {" << pL[i+1]-pL[i] << "}" <<'\t' ;
        for (k=pL[i];k<pL[i+1];k++)
 	 { j=i-(pL[i+1]-k);
@@ -403,7 +403,7 @@ ostream& MatriceProfile<R>::dump (ostream& f) const
    { 
      f << " matrice profile non symetrique " << endl;
      int i,k;
-     for (i = 0;i<n;i++) 
+     for (i = 0;i<this->n;i++) 
        {
 	 f << i ;
 	 if (pL && L) 
@@ -440,7 +440,7 @@ void MatriceProfile<R>::cholesky(R eps) const {
   typefac = FactorizationCholeski;
   D[0] = sqrt(D[0]); 
   ij = L ; // pointeur sur le terme ij de la matrice avec j<i 
-  for (i=1;i<n;i++) // boucle sur les lignes 
+  for (i=1;i<this->n;i++) // boucle sur les lignes 
     { ii = L+pL[i+1]; // pointeur sur le terme fin de la ligne +1 =>  ij < ii;
     xii = D[i] ; 
     for ( ; ij < ii ; ij++) // pour les j la ligne i
@@ -467,7 +467,7 @@ void MatriceProfile<R>::crout(R eps) const  {
   typefac = FactorizationCrout;
    
   ij = L ; // pointeur sur le terme ij de la matrice avec j<i 
-  for (i=1;i<n;i++) // boucle sur les lignes 
+  for (i=1;i<this->n;i++) // boucle sur les lignes 
     { ii = L+pL[i+1]; // pointeur sur le terme fin de la ligne +1 =>  ij < ii;
     xii = D[i] ; 
     for ( ; ij < ii ; ij++) // pour les j la ligne i
@@ -490,12 +490,12 @@ template<class R>
 void MatriceProfile<R>::LU(R eps) const  {
   R s,uii;
   int i,j,k;
-  if (L == U && ( pL[n]  || pU[n] ) ) ERREUR(LU,"matrice  symetrique");
+  if (L == U && ( pL[this->n]  || pU[this->n] ) ) ERREUR(LU,"matrice  symetrique");
   if(verbosity>3)
   cout << " -- LU " << endl;
   typefac=FactorizationLU;
 
-  for (i=1;i<n;i++) // boucle sur les sous matrice de rang i 
+  for (i=1;i<this->n;i++) // boucle sur les sous matrice de rang i 
     { 
       // for L(i,j)  j=j0,i-1
       int j0 = i-(pL[i+1]-pL[i]);
@@ -622,22 +622,22 @@ template <class R>
       {
       
   symetrique = true;
-  dummy=false;
+  this->dummy=false;
   int nbcoeff=0;
-  for(int i=0;i<n;i++)
-    for(int j=0;j<m;j++)
+  for(int i=0;i<this->n;i++)
+    for(int j=0;j<this->m;j++)
       if(fabs(A(i,j))>tol) nbcoeff++;
 
   nbcoef=nbcoeff;
   a=new R[nbcoef] ;
-  lg=new int [n+1];
+  lg=new int [this->n+1];
   cl=new int [nbcoef];
   nbcoeff=0;
   R aij;
-  for(int i=0;i<n;i++)
+  for(int i=0;i<this->n;i++)
    { 
     lg[i]=nbcoeff;
-    for(int j=0;j<m;j++)
+    for(int j=0;j<this->m;j++)
      
       if(fabs(aij=A(i,j))>tol)
        {
@@ -646,7 +646,7 @@ template <class R>
          nbcoeff++;
        }
     }
-   lg[n]=nbcoeff;
+   lg[this->n]=nbcoeff;
 
   
 }
@@ -655,7 +655,7 @@ template <class R>
     :MatriceCreuse<R>(n),solver(0) 
       {
   symetrique = true;
-  dummy=false;
+  this->dummy=false;
   nbcoef=n;
   a=new R[n] ;
   lg=new int [n+1];
@@ -671,14 +671,14 @@ lg[n]=n;
 template <class R> 
 int MatriceMorse<R>::size() const 
 {
-  return nbcoef*(sizeof(int)+sizeof(R))+ sizeof(int)*(n+1);
+  return nbcoef*(sizeof(int)+sizeof(R))+ sizeof(int)*(this->n+1);
 }
 template <class R> 
 ostream& MatriceMorse<R>::dump(ostream & f) const 
 {
-  f << " Nb line = " << n << " Nb Colonne " << m << " symetrique " << symetrique << " nbcoef = " << nbcoef <<endl;
+  f << " Nb line = " << this->n << " Nb Colonne " << this->m << " symetrique " << symetrique << " nbcoef = " << nbcoef <<endl;
   int k=lg[0];
-  for (int i=0;i<n;i++)
+  for (int i=0;i<this->n;i++)
    { 
     
     f << i << " : " << lg[i] <<","<< lg[i+1]-1 << " : " ;
@@ -693,8 +693,8 @@ ostream& MatriceMorse<R>::dump(ostream & f) const
 template <class R> 
 inline R*  MatriceMorse<R>::pij(int i,int j) const 
  {
-   if (! (i<n && j< m)) 
-   throwassert(i<n && j< m);
+   if (! (i<this->n && j< this->m)) 
+   throwassert(i<this->n && j< this->m);
    int i0=lg[i];
    int i1=lg[i+1]-1;
    while (i0<=i1) // dichotomie
@@ -715,7 +715,7 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
    // F. Hecht nov 2003
    // -----
   symetrique = sym;
-  dummy=false;
+  this->dummy=false;
   a=0;
   lg=0;
   cl=0;
@@ -762,7 +762,7 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
   
   int color=0;
   mark=color++;
-  lg = new int [n+1];
+  lg = new int [this->n+1];
   throwassert(lg);
   for (int step=0;step<2;step++) 
    { 
@@ -849,33 +849,33 @@ template<class R>
    
    assert(dummy==false);  
    int *llg= new int[nbcoef];
-   int *clg= new int[m+1];
+   int *clg= new int[this->m+1];
    
-   for (int i=0;i<n;i++)
+   for (int i=0;i<this->n;i++)
      for (int k=lg[i];k<lg[i+1];k++)
         llg[k]=i;
  
   HeapSort(cl,llg,a,nbcoef);
-  for(int k=0;k<m;k++)
+  for(int k=0;k<this->m;k++)
     clg[k]=-1;
 
   // build new line end (old column)
   for(int k=0;k<nbcoef;k++)
     clg[cl[k]+1]=k+1;
       
-   for(int kk=0, k=0;k<=m;k++)
+   for(int kk=0, k=0;k<=this->m;k++)
    if (clg[k]==-1)
       clg[k]=kk;
     else kk=clg[k];
     
-  clg[m]=nbcoef;
+  clg[this->m]=nbcoef;
   // sort the new column (old line)
-  for(int i=0;i<m;i++)  
+  for(int i=0;i<this->m;i++)  
     HeapSort(llg+clg[i],cl+clg[i],a+clg[i],clg[i+1]-clg[i]); 
 
   delete[] cl;
   delete[] lg;
-  Exchange(n,m);       
+  Exchange(this->n,this->m);       
   cl=llg;
   lg=clg;
    
@@ -940,7 +940,7 @@ bool MatriceMorse<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
   int i,j,k;
   if (symetrique)
    {
-     for ( i=0;i<n;i++)
+     for ( i=0;i<this->n;i++)
        for ( k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
@@ -955,7 +955,7 @@ bool MatriceMorse<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
    }
   else
    {
-     for ( i=0;i<n;i++)
+     for ( i=0;i<this->n;i++)
        for ( k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
@@ -1009,7 +1009,7 @@ template<class R>
    
    set<pair<int,int> > sij;
    
-     for (int i=0;i<n;i++)
+     for (int i=0;i<this->n;i++)
        for (int k=lg[i];k<lg[i+1];k++)
          {    
            int j=cl[k];
@@ -1037,7 +1037,7 @@ template<class R>
             }
            
          }
-    int nn=n;
+    int nn=this->n;
     int mm=B.m;
     int * llg=new int[nn+1];
     int * lcl=new int[sij.size()];  
@@ -1073,7 +1073,7 @@ template<class R>
      AB.symetrique=sym;
      AB.dummy=false;
      AB = R();
-     for (int i=0;i<n;i++)
+     for (int i=0;i<this->n;i++)
        for (int k=lg[i];k<lg[i+1];k++)
          {    
            int j=cl[k];
@@ -1120,7 +1120,7 @@ template<class R>
   throwassert(m==x.N());  
   if (symetrique)
    {
-     for (i=0;i<n;i++)
+     for (i=0;i<this->n;i++)
        for (k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
@@ -1132,7 +1132,7 @@ template<class R>
    }
   else
    {
-     for (i=0;i<n;i++)
+     for (i=0;i<this->n;i++)
        for (k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
@@ -1149,7 +1149,7 @@ template<class R>
   throwassert(n==x.N());  
   if (symetrique)
    {
-     for (i=0;i<n;i++)
+     for (i=0;i<this->n;i++)
        for (k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
@@ -1161,7 +1161,7 @@ template<class R>
    }
   else
    {
-     for (i=0;i<n;i++)
+     for (i=0;i<this->n;i++)
        for (k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
@@ -1174,11 +1174,11 @@ template<class R>
 MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
   int il,jl,i,j;
   int * mi=me.ni, *mj=me.nj;
-  if ((n==0) && (m==0))
+  if ((this->n==0) && (this->m==0))
    {
    
-    n=me.Uh.NbOfDF;
-    m=me.Vh.NbOfDF;
+    this->n=me.Uh.NbOfDF;
+    this->m=me.Vh.NbOfDF;
     if(verbosity>3)
     cout << " -- Matrice morse  vide on la construit" << endl;
     switch (me.mtype) {

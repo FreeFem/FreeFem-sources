@@ -152,7 +152,7 @@ class MatriceElementairePleine:public MatriceElementaire<R> {
      ------------------*/
 
 public:
-  R & operator() (int i,int j) {return a[i*m+j];}
+  R & operator() (int i,int j) {return this->a[i*this->m+j];}
   // MatPleineElementFunc element;
   void  (* element)(MatriceElementairePleine &,const FElement &,const FElement &, R*,int ie,int label,void *) ; 
    void  (* faceelement)(MatriceElementairePleine &,const FElement &,const FElement &,const FElement &,const FElement &, R*,int ie,int iee, int label,void *) ; 
@@ -165,7 +165,7 @@ public:
                            const QuadratureFormular1d & fie =QF_GaussLegendre3)  
     :MatriceElementaire<R>(VVh,
 			Square(VVh.MaximalNbOfDF()),
-			new int[VVh.MaximalNbOfDF()],Full,fit,fie),
+			new int[VVh.MaximalNbOfDF()],this->Full,fit,fie),
     element(0),faceelement(0) {}
  
    //  matrice for VF or Galerkin Discontinus
@@ -176,7 +176,7 @@ public:
 			Square(VVh.MaximalNbOfDF()*2),
 			new int[VVh.MaximalNbOfDF()*2],
 			VF?VVh.MaximalNbOfDF()*2:0,
-			Full,fit,fie),			
+			this->Full,fit,fie),			
     element(0),faceelement(0) {}
 
   MatriceElementairePleine(const FESpace & UUh,const FESpace & VVh,
@@ -185,7 +185,7 @@ public:
     :MatriceElementaire<R>(UUh,VVh,
 			UUh.MaximalNbOfDF()*VVh.MaximalNbOfDF(),
 			new int[UUh.MaximalNbOfDF()],
-			new int[VVh.MaximalNbOfDF()],Full,fit,fie),
+			new int[VVh.MaximalNbOfDF()],this->Full,fit,fie),
     element(0),faceelement(0) {}
 
 }; 
@@ -203,7 +203,7 @@ class MatriceElementaireSymetrique:public MatriceElementaire<R> {
 
 public:
   R & operator()(int i,int j) 
-  {return j < i ? a[(i*(i+1))/2 + j] : a[(j*(j+1))/2 + i] ;}
+  {return j < i ? this->a[(i*(i+1))/2 + j] : this->a[(j*(j+1))/2 + i] ;}
   void (* element)(MatriceElementaireSymetrique &,const FElement &, R*,int ie,int label,void *) ; 
   void (* mortar)(MatriceElementaireSymetrique &,const FMortar &,void *) ; 
   void call(int k,int ie,int label,void * stack);
@@ -213,7 +213,7 @@ public:
     :MatriceElementaire<R>(
            VVh,
 	   int(VVh.MaximalNbOfDF()*(VVh.MaximalNbOfDF()+1)/2),
-	   new int[VVh.MaximalNbOfDF()],Symetric,
+	   new int[VVh.MaximalNbOfDF()],this->Symetric,
        fit,fie),
        element(0),mortar(0) {}
   MatriceElementaireSymetrique & operator()(int k,int ie,int label,void * stack=0) 
@@ -286,27 +286,27 @@ public:
       MatriceCreuse<R>(NbOfDF),typefac(tf),typesolver(FactorizationNO){}
 
   const MatriceProfile t() const   
-     {return MatriceProfile(n,D,L,pL,U,pU,typefac);}
+     {return MatriceProfile(this->n,D,L,pL,U,pU,typefac);}
   const MatriceProfile lt() const  
  
   
-     {return MatriceProfile(n,0,L,pL,0,0);}
+     {return MatriceProfile(this->n,0,L,pL,0,0);}
   const MatriceProfile l() const  
-     {return MatriceProfile(n,0,0,0,L,pL);}
+     {return MatriceProfile(this->n,0,0,0,L,pL);}
   const MatriceProfile d() const   
-     {return MatriceProfile(n,D,0,0,0,0);}
+     {return MatriceProfile(this->n,D,0,0,0,0);}
   const MatriceProfile ld() const  
-     {return MatriceProfile(n,D,0,0,L,pL);}
+     {return MatriceProfile(this->n,D,0,0,L,pL);}
   const MatriceProfile ldt() const 
-     {return MatriceProfile(n,D,L,pL,0,0);}
+     {return MatriceProfile(this->n,D,L,pL,0,0);}
   const MatriceProfile du() const  
-     {return MatriceProfile(n,D,U,pU,0,0);}
+     {return MatriceProfile(this->n,D,U,pU,0,0);}
   const MatriceProfile u() const   
-     {return MatriceProfile(n,0,U,pU,0,0);}
+     {return MatriceProfile(this->n,0,U,pU,0,0);}
   const MatriceProfile ut() const  
     
     
-    {return MatriceProfile(n,0,0,0,U,pU);}
+    {return MatriceProfile(this->n,0,0,0,U,pU);}
   void Solve(KN_<R> &x,const KN_<R> &b) const {
      if (typefac==0)
        switch(typefac) {
@@ -389,9 +389,9 @@ public:
            }
   MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa,int *ll,int *cc,bool dd, const VirtualSolver * s=0,bool transpose=false )
     :MatriceCreuse<R>(nn,mm,dd && !transpose),nbcoef(nbc),symetrique(sym), // transpose = true => dummy false (new matrix)
-     a(docpyornot(dummy,aa,nbc)),
-     lg(docpyornot(dummy,ll,nn+1)),
-     cl(docpyornot(dummy,cc,nbc)),
+     a(docpyornot(this->dummy,aa,nbc)),
+     lg(docpyornot(this->dummy,ll,nn+1)),
+     cl(docpyornot(this->dummy,cc,nbc)),
      solver(s)
    { if(transpose) dotransposition(); };
   void Solve(KN_<R> &x,const KN_<R> &b) const;
@@ -401,7 +401,7 @@ public:
   MatriceMorse & operator +=(MatriceElementaire<R> &);
   void operator=(const R & v) 
     { for (int i=0;i< nbcoef;i++) a[i]=v;}
-  virtual ~MatriceMorse(){ if (!dummy) { delete [] a; delete [] cl;delete [] lg;}}
+  virtual ~MatriceMorse(){ if (!this->dummy) { delete [] a; delete [] cl;delete [] lg;}}
   ostream&  dump(ostream & f) const ;
   R * pij(int i,int j) const ;
   R  operator()(int i,int j) const {R * p= pij(i,j) ;throwassert(p); return *p;}
@@ -413,7 +413,7 @@ public:
   bool sym() const {return symetrique;}
  void  prod(const MatriceMorse & B, MatriceMorse & AB);
  MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {
-     return new MatriceMorse(n,m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
+     return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
   bool  addMatTo(R coef,map< pair<int,int>, R> &mij);
 
   private:
