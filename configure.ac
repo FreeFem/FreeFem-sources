@@ -643,11 +643,28 @@ then
 	AC_MSG_RESULT($ff_dynload)
 fi
 
+# Checks that we also have the corresponding library
+if test "$ff_dynload" = yes
+then
+	AC_CHECK_LIB(dl,dlinfo)
+
+	# Checks that everythings works ok
+	AC_MSG_CHECKING(whether dlopen links ok)
+	AC_LINK_IFELSE(
+[#include <dlfcn.h>
+int main(int argc,char **argv){
+  dlopen("",RTLD_LAZY);
+  return 0;
+}],
+	ff_dynload=yes,
+	ff_dynload=no)
+	AC_MSG_RESULT($ff_dynload)
+fi
+
 #  the -rdynamic don't exist on macos 
-if test "$ff_dynload" = yes  ;
+if test "$ff_dynload" = yes
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
-	AC_CHECK_LIB(dl,dlinfo)
 
 	# Activate dynamic loading tests (see examples++-load/Makefile.am)
 	AC_SUBST(LOAD_TESTS,../regtests.sh)
