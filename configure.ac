@@ -166,8 +166,10 @@ then
 	then
 		ff_x11=yes
 		ff_x11prog=FreeFem++-x11${EXEEXT}
-		CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
-		LIBS="$LIBS -L/usr/X11R6/lib -lX11 -lXext -lXpm -lm"
+		ff_x11_includes="-I/usr/X11R6/include"
+		AC_SUBST(X11_INCLUDES,$ff_x11_includes)
+		ff_x11_libs="-L/usr/X11R6/lib -lX11 -lXext -lXpm -lm"
+		AC_SUBST(X11_LIBS,$ff_x11_libs)
 	fi
 fi
 
@@ -671,9 +673,13 @@ if test "$ff_win32" = yes;
 then
 	ff_std_graph_obj=Pcrgraph.$OBJEXT
 	ff_std_ldflags=-mwindows
+	ff_std_includes=
+	ff_std_libs=
 else
 	ff_std_graph_obj=Xrgraph.$OBJEXT
 	ff_std_ldflags=
+	ff_std_includes=$ff_x11_includes
+	ff_std_libs=$ff_x11_libs
 
 	# If the standard version already uses x11, we do not need to
 	# make the contents of the src/x11 directory.
@@ -681,6 +687,9 @@ else
 fi
 AC_SUBST(STD_GRAPH_OBJ,$ff_std_graph_obj)
 AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
+
+AC_SUBST(STD_LIBS,$ff_std_libs)
+AC_SUBST(STD_INCLUDES,$ff_std_includes)
 
 # Can we produce an IDE?
 # ----------------------
@@ -719,6 +728,12 @@ then
 	ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-cs-server${EXEEXT}"
 
 	AC_SUBST(FLTK_CONFIG,$ff_fltk_config)
+
+	if test "$ff_x11" = yes
+	then
+		AC_SUBST(IDE_INCLUDEES,$ff_x11_includes)
+		AC_SUBST(IDE_LIBS,$ff_x11_libs)
+	fi
 fi
 
 # creating all makefiles
