@@ -26,7 +26,7 @@ endif
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-	./configure --prefix=$(CURDIR)/debian/tmp/usr --enable-generic
+	./configure --prefix=$(CURDIR)/debian/tmp/usr --enable-generic --disable-pdf
 	touch configure-stamp
 
 
