@@ -168,6 +168,8 @@ struct  VirtualMatrice { public:
    plusAtx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) {} };
   struct  solveAxeqb { const VirtualMatrice * A; const KN_<R> &  b;
    solveAxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y) {} };
+  
+  
 };
 
     
@@ -1088,6 +1090,11 @@ template<class R> inline bool  SameShape(const ShapeOfArray & a,const Mul_KNM_KN
            { return true ;} //  pas de test car la matrice peut etre rectangulaire
  inline bool  SameShape(const ShapeOfArray & a,const VirtualMatrice<double>::plusAtx & b) 
            { return true ;} //  pas de test car la matrice peut etre rectangulaire
+ inline bool  SameShape(const ShapeOfArray & a,const VirtualMatrice<complex<double> >::plusAx & b) 
+           { return true ;} //  pas de test car la matrice peut etre rectangulaire
+ inline bool  SameShape(const ShapeOfArray & a,const VirtualMatrice<complex<double> >::plusAtx & b) 
+           { return true ;} //  pas de test car la matrice peut etre rectangulaire
+
  inline bool  SameShape(const ShapeOfArray & a,const double) 
            { return true;} 
  inline bool  SameShape(const ShapeOfArray & a,const complex<double>) 
