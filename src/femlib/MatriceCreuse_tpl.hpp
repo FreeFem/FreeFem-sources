@@ -448,9 +448,10 @@ void MatriceProfile<R>::cholesky(R eps) const {
       k = Max( j - (pL[j+1]-pL[j]) ,  i-(pL[i+1]-pL[i]) ); 
       ik =  ii - (i - k); 
       jk =  L + pL[j+1] -(j - k); 
-      k = j - k ; 
-      while ( k-- ) *ij -= *ik++ * *jk++;  
-      *ij /=  D[j] ;
+      k = j - k ;
+      R s= -*ij; 
+      while(k--) s += *ik++ * *jk++;  
+      *ij =  -s/D[j] ;
       xii -= *ij * *ij ;
       }
     if (xii < eps*Abs(D[i])) 
@@ -477,8 +478,9 @@ void MatriceProfile<R>::crout(R eps) const  {
       jk =  L + pL[j+1] -(j - k); 
       dkk = D + k;
       k = j - k ; 
-      while ( k-- ) *ij -= *ik++ * *jk++ * *dkk++;  
-      *ij /=  *dkk ; // k = j ici 
+      R s=-*ij;
+      while ( k-- ) s += *ik++ * *jk++ * *dkk++;  
+      *ij = s/ *dkk ; // k = j ici 
       xii -= *ij * *ij * *dkk;
       }
     if (Abs(xii) <= Max(eps*Abs(D[i]),1.0e-30))
