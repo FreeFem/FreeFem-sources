@@ -532,6 +532,9 @@ Make Version 1.42
    //  with $0 <= i <  Wh.ndofK $ and  $0 <= k <  Wh.nt $ 
 
 }
+  build the source and compile version 1.43 
 01/11/04
 --------
    correct problem on period adapted mesh if orientation are reverse.
+   add cvs tag release_1_43
+   now thow the current version is 1.44
