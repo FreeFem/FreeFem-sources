@@ -370,14 +370,17 @@ bool mylex::ExpandParam(int &ret)
   {
     string arg=buf;
     //cout << " < EP " << buf << " > " ; 
-    for(list<MapMacroParam>::const_iterator i=listMacroParam->begin(); i != listMacroParam->end(); i++)
+    int kbspe=1;
+    for(list<MapMacroParam>::const_iterator i=listMacroParam->begin(); i != listMacroParam->end(); i++,kbspe++)
+      if(kbspe>beginStackParamExpand) // on saute les parameter deja fait ???? FH 
       {
         MapMacroParam::const_iterator j=i->find(arg);
         if ( j != i->end() )
           {
-            if(debugmacro)
-             cout << "macro arg : " <<  arg << " -> " << j->second << endl;
-            input(j->second, 0);
+            if(debugmacro )
+             cout << "\n macro arg : " <<  arg << " -> " << j->second << " bspe " << beginStackParamExpand 
+                  << " k= " << kbspe << " lvl = " << level << endl;
+            input(j->second, 0,kbspe);
             ret = basescan(); 
             arg=buf;
             continue; // next macro 
@@ -517,11 +520,12 @@ bool mylex::ExpandParam(int &ret)
         lex->cout << " Error openning file " <<ff<< endl;
         lgerror("lex: Error input openning file ");};
     }
-  void  mylex::xxxx::readin(mylex *lex,const string & s,int nbparam) 
+  void  mylex::xxxx::readin(mylex *lex,const string & s,int nbparam,int bstackparam) 
     {
       cas= nbparam;
       filename=0;
       l=0;
+      beginStackParamExpand=bstackparam; 
       nf=f= new istringstream(s.c_str()); 
       
       if (!f || !*f) {
@@ -543,22 +547,24 @@ bool mylex::ExpandParam(int &ret)
         
       pilesource[level+1].open(this,filename);
       pilesource[level+1].cas =0;
+      pilesource[level+1].beginStackParamExpand =0; 
       pilesource[level+1].l =0;
      // cout << "\n ++include " << filename << ";" << level+1 << endl;
       linenumber = 0;     
-      level++;
-      
+      level++;      
+      beginStackParamExpand=0; 
     }
-  void mylex::input(const string & str,int nbparam) 
+  void mylex::input(const string & str,int nbparam,int bstackparam) 
     {
       assert(nbparam>=0);
       withmacropara += nbparam; 
+      beginStackParamExpand=bstackparam; 
       assert(level<99 && level >= -1);
       if (level>=0) 
         { pilesource[level].l =linenumber;
         }
       
-      pilesource[level+1].readin(this,str,nbparam);
+      pilesource[level+1].readin(this,str,nbparam,bstackparam);
       linenumber = 0;     
       level++;
       
@@ -584,6 +590,7 @@ bool mylex::ExpandParam(int &ret)
       if (--level<0)
         return false;
       linenumber = pilesource[level].l;
+      beginStackParamExpand =  pilesource[level].beginStackParamExpand;
        if(debugmacro) cout << "wmp " << withmacropara  << endl;
        
        return true;}
