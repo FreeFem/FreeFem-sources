@@ -86,9 +86,9 @@ class MyMap {
  // map<K,V>::iterator j=m->find(k);
   
  // cout << " m->find(k)->second   " <<  i->second  << ";" <<  j->second <<endl;
-   
+  typedef typename map<K,V>::value_type   value_type;
   if  (i==m->end())
-     i=m->insert(map<K,V>::value_type(k,V())).first;
+     i=m->insert(value_type(k,V())).first;
   V &  v= i->second ;  
   return v;
 }
