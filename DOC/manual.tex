@@ -1,12 +1,117 @@
 %&LaTeX  
-\documentclass[a4paper,twoside,12pt]{book}
-\usepackage{styles}
+%   mettre l'example pour calculer les indicateurs d'erreur
+%   intalledges
+%    -----------
+
+\documentclass[twoside]{book}
+
+
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX
+\else
+\pdfoutput=1 % we are running PDFLaTeX
+\pdftrue
+\fi
+
+%\usepackage{times}
+%\usepackage{amsmath}
+\usepackage{calc}
+\usepackage[latin1]{inputenc}
+\usepackage{FFF}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\usepackage{FFF}
+\usepackage{makeidx}
+\usepackage{color}
+\usepackage{multicol}
+\usepackage{graphicx}
+%\usepackage{dessin}
+
+\topmargin -1.54cm
+\oddsidemargin 0cm   %marge a 2 cm
+\evensidemargin 0cm  %marge a 2 cm
+\newcommand{\indente}{\hbox to \parindent {\hss}}
+\parindent 0cm
+\headsep 0.5cm
+\topskip .5cm
+\footskip 1cm
+\headheight 1.0cm
+\textwidth  16.5cm
+%  \parindent 0cm
+\textheight 24cm
+
+\def\freefempp{\texttt{freefem++ }}
+\def\textRed{\color{red}}
+\def\textBlack{\color{black}}
+
+\def\Blue#1{\textcolor{blue}{#1}}
+\def\Black#1{\textcolor{black}{#1}}
+\def\Red#1{\textcolor{red}{#1}}
+\def\Magenta#1{\textcolor{magenta}{#1}}
+\def\hin{\hbox{ in }}
+\def\hon{\hbox{ on }}
+\def\Cpp{\texttt{C++~}}
+\def\R{\mathrm{I\!R}}
+\def\example{\textbf{Example:}}
+\def\eq#1{\Blue{\[#1\]}}
+\def\R{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\itemtt[#1]{ \item[\texttt{#1}]}
+
+\def\plot[#1]#2#3{\begin{figure}[hbt]
+\begin{center}
+    \includegraphics*[#1]{#2}
+\end{center}
+\caption{\label{#2} #3}
+\end{figure}
+}
+
+\def\Ostream{\texttt{ostream}}
+\def\Istream{\texttt{istream}}
+\def\Bool{\texttt{bool}}
+\def\Real{\texttt{real}}
+\def\Int{\texttt{int}}
+
+\def\vecttwo#1#2{\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\vdeux(#1,#2){\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\HLINE#1{\hbox to \hsize {#1}}
+\def\twoplot[#1]#2#3#4#5{
+\begin{figure}[hbt]
+\begin{multicols}{2}
+\begin{center}
+    \includegraphics*[#1]{#2}
+    \caption{\label{#2} #4}
+\end{center}
+
+\begin{center}
+    \includegraphics*[#1]{#3}
+    \caption{\label{#3} #5}
+\end{center}
+\end{multicols}
+\end{figure}
+}% end twoplot macro
+
+\newtheorem{remark}{\textbf{Remark}}
+\newtheorem{bug}{\textbf{Bug:}}
+\newtheorem{proposition}{\textbf{Proposition}}
+\newtheorem{algorithm}{\textbf{Algorithm}}
+
+\newenvironment{ttlist}
+   {\begin{list}{}{\renewcommand{\makelabel}[1]{\texttt{##1}\hfil}%
+        \setlength{\labelwidth}{3cm}
+        \setlength{\leftmargin}{\labelwidth+\labelsep}
+    }}%
+   {\end{list}}
+
 \title{
-%\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
- {\Blue{ \TitreFont FreeFem++ \\ \vglue 1cm  Manual}} \\ \vglue 3cm  ~ \\  
-      \normalsize  { version 1.40  \Red{(Under construction)} }
- \\ \vglue 0.7cm
- \large \url{http://www.freefem.org} \\
+\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{80pt}
+ {\Blue{ \TitreFont Freefem++ \\ \vglue 1cm  Manual}} \\ \vglue 5cm  ~ \\  
+      \normalsize  { version 1.34  \Red{(Under construction)} }
+ \\ \vglue 1cm
+ \Large \url{http://www.freefem.org} \\
 \url{http://www.ann.jussieu.fr/\string~hecht/freefem++.htm} 
 }
 \author{F. Hecht \thanks{\url{mailto:hecht@ann.jussieu.fr}},
@@ -35,109 +140,63 @@ of several variables and its (partial) derivatives.
  Many problems in physics, engineering, mathematics and even banking
 are modeled by one or several partial differential equations.
 \\\\
-
-\texttt{Freefem} is a software to solve these equations numerically.
-As its name says, it is public domain software based on the Finite
-Element Method. This software runs on all unix OS (with g++ 2.95.2 or
-better and X11R6) , on Window95, 98, 2000, NT, XP and   on MacOS 9 and
-X.  \\\\
-%%% alh? Is it really public domain? (no restriction whatsoever!)
-Many phenomena involve several different fields.  Fluid-structure
-interactions, Lorenz forces in liquid aluminium and ocean-atmosphere
-problems are three such systems. These require approximations of
-different degrees, possibly on different meshes.  Some algorithms such
-as Schwarz' domain decomposition method also require data
-interpolation on different meshes within one
-program. \texttt{freefem++} can handle these difficulties, i.e. {\it
-arbitrary finite element spaces on arbitrary unstructured and adapted
-meshes}.  \\\\
-
-The characteristics of \freefempp are:
-\begin{itemize}
-%%% alh? ``no scalar element''?
-\item A large variety of finites elements : linear and quadratic
- Lagrangian elements, discontinuous P1 and Raviart-Thomas elements,
- elements of a non-scalar type, mini-element, ...
-\item  Automatic interpolation of data on different meshes to an over mesh.
-%
-\item Linear problems description thanks to a formal variational form, 
-with access to the vectors and the matrix if needed.
-%
-\item Includes tools to define discontinuous Galerkin formulations
-(please refer to the following keywords: ``jump'', ``average'',
-``intalledges'')
-%
-\item Analytic description of boundaries. When two boundaries
-intersect, the user must specify the intersection points.
-%
-\item Automatic mesh generator, based on the Delaunay-Voronoi
-algorithm. Inner points density is proportional to the density of
-points on the boundary \cite{George}.
-%
-\item Metric-based anisotropic mesh adaptation. The metric can be
-computed automatically from the Hessien of a solution \cite{bamg}.
-%
-%\item Every variable is typed. For instance \texttt{f} is a function, specified
-%by the keyword \texttt{func}.
-%
-\item Solvers : LU, Cholesky, Crout, CG, GMRES, UMFPACK linear solver,
-eigenvalue and eigenvector computation.
-%
-\item Online graphics, C++-like syntax.
-%
-\item Many examples: Navier-Stokes, elasticity, Fluid structure,
-Schwarz's domain decomposition method, Eigen value problem, residual
-error indicator, ...
-%
-\item Parallel version using \texttt{mpi}
-\end{itemize}
-
+\texttt{Freefem} is a software to solve numerically these equations.
+As its name tells, it is  public domain software based on the
+Finite Element Method.
+\\\\
+Many phenomena involve several different fields.
+Fluid-structure interactions, Lorenz forces in liquid aluminium
+and ocean-atmosphere problems are three such systems. These
+require approximations of different degrees possibly on different meshes.
+  Some algorithms such as Schwarz' domain decomposition method require
+also the interpolation of data on different meshes within one
+program. Thus \texttt{freefem++} can handle these difficulties:
+{\it arbitrary finite element spaces on arbitrary unstructured and
+adaptated meshes}
 
 \subsection{History}
 
-The project has evolved from \texttt{MacFem, PCfem}, written in
-Pascal. The first C version was \texttt{freefem 3.4}; it offered mesh
-adaptation on a single mesh.  A thorough rewriting in C++ led to
-\texttt{freefem+ 1.2.10}, which also included interpolation over
-multiple meshes (functions defined on one mesh can be used on any
-other mesh).  Implementing the interpolation from one unstructured
-mesh to another was not easy because it had to be fast and
-non-diffusive; for each point, one had to find the containing
-triangle. This is one of the basic problems of computational geometry
-(see Preparata \& Shamos\cite{Preparata} for example). Doing it in a
-minimum number of operations was a challenge.  Our implementation was
-$O(n\log n)$ and based on a quadtree.  \\\\
-
-We are now introducing \freefempp, an entirely new program written
-in C++ and based on \texttt{bison} for a more adaptable
+The project has evolved from \texttt{MacFem, PCfem}, written
+in Pascal. The first version written in C was  \texttt{freefem 3.4};
+it had mesh adaptation but on a single mesh.
+Later  \texttt{freefem+ 1.2.10} was the result of a thorough rewriting in C++.
+It had multiple meshes with interpolation (functions defined on one mesh can be
+used on any other mesh).
+Interpolation from one unstructured mesh to another is not easy because it
+has to be fast and non-diffusive; one has to find for each
+point
+the triangle which contains it and that is one of the basic problems
+of computational geometry (see Preparata \& Shamos\cite{Preparata} for
+example). To do it in the minimum number of operations is the challenge.
+We use an implementation which is $O(n\log n)$, based on a quadtree.
+\\\\
+We are now introducing  \texttt{freefem++}, an entirely new program written
+in C++ and based on \texttt{bison} for an easy modification of the
 freefem language.
 \\\\
-
-The freefem language allows for a quick specification of any partial
-differential system of equations.  The language syntax of \freefempp
-is the result of a new design which makes use of the STL \cite{cpp},
-templates and \texttt{bison} for its implementation.  The outcome is a
-versatile software in which any new finite element can be included in
-a few hours; but a recompilation is then necessary.  The library of
-finite elements available in \freefempp will therefore grow with the
-version number.  So far we have linear and quadratic Lagrangian
-elements, discontinuous P1 and Raviart-Thomas elements.
+  The freefem language allows for a quick specification of any
+  partial differential system of equations.
+The language syntax of \freefempp is
+redesigned and makes use of STL \cite{cpp},
+templates and \texttt{bison} for its implementation.
+ The outcome is a versatile software in which any new finite element
+can be included in a few hours; but a recompilation is then necessary.
+ The library of finite elements available in \freefempp will therefore depend
+ on the version number.  So far we have  linear and quadratic Lagrangian
+ elements, discontinuous P1 and Raviart-Thomas elements.
 
 \subsection{The language}
 
-Basically \freefempp is a \index{compiler} compiler.  The language it
-defines is typed, polymorphic and reentrant with macro generation (see
-\ref{macro}).  Every variable must be typed and declared in a
-statement; each statement separated from the next by a semicolon
-`\texttt{;}'.
-
-\smallskip
-
-Here is a simple example solving the Dirichlet problem inside the unit
-circle. We have chosen $xy$ as the right hand side for the Laplace
-operator, a second degree finite element method on triangles, and a
-mesh with 50 points on the boundary.  The linear system is solved by a
-Gauss LU factorisation.
+Basically \freefempp  is a \index{compiler} compiler,
+  the language is typed, polymorphic and reentrant with macro generation\ref{macro}.
+Every variable must be typed, declared in a  statement; each statement separated
+from the next by a semicolon `\texttt{;}'.  
+The following
+is a simple example whereby the Dirichlet problem with right hand side
+$xy$ for the Laplace
+operator is solved inside the unit circle. The finite element method of degree
+2 on triangles is used with a mesh which has 50 points on the unit circle.
+The linear system is solved by a Gauss LU factorization.
 
 \bFF
 @border a(t=0,2*@pi){@x=cos(t); @y=sin(t);@label=5;};
@@ -147,7 +206,7 @@ Vh u,v;
 @func f= x*y;
 @problem laplace(u,v,@solver=LU) =
     @int2d(Th)(@dx(u)*@dx(v) + @dy(u)*@dy(v))   //  bilinear part
-    - @int2d(Th)( f*v)          // right hand side 
+    - @int2d(Th)( f*v)          // right hand size part 
     + @on(5,u=0)  ;  // Dirichlet boundary condition
 
 @real cpu=clock();
@@ -155,15 +214,11 @@ laplace; // SOLVE THE PDE
 @plot(u);
 @cout << " CPU = " << clock()-cpu << @endl;
 \eFF
-
-Reserved words are shown in blue. \texttt{pi, x, y, label, solver} are
-reserved variables. It is allowed (although not advisable) to redefine
-these variables, so they will not be highlighted in other example
-programs.\\\\
-
-
-%%% alh stopped here
-This example shows some of the characteristics of \freefempp~:
+We have written in blue the reserved words of the language. Later we will not
+write \texttt{pi,x,y,label, solver} in blue because these are reserved
+variables, the redefinition of which is dangerous, yet allowed.
+\\\\
+This example shows some of the characteristics of \freefempp
 
 \begin{itemize}
 \item Analytic description of boundaries (by opposition to CSG), therefore
@@ -186,56 +241,8 @@ by the keyword \texttt{func}.
 \item C++ like syntax.
 
 \end{itemize}
-\subsection{Installation}
 
- First under unix, you must compile the software. To do that you 
- have to download the source version from 
- \url{http://www.ann.jussieu.fr/~hecht/ftp/freefem/freefem++.tgz}
- in a shell window enter to  extracts files from the  compress archive file
- \texttt{freefem++.tgz} and build the directory call FreeFem++vX.XX, where
- 
- X.XX is the version number.
-\bFF
-tar zxvf freefem++.tgz
-cd FreeFem++vX.XX
-\eFF
-To compile just follow the \texttt{README} file.
-
-After installation, the following file can be create depending on  make option: 
-\begin{enumerate}
-\item \texttt{FreeFem++}            optimized with X11 graphic version
-\item \texttt{FreeFem++-g}          debug  with X11 graphic X11 version
-\item \texttt{FreeFem++-nw}         optimized with postscript graphic version (batch version)
-\item \texttt{FreeFem++-nw-g}       debug     postscript  version (batch version)
-\item \texttt{FreeFem++-mpi}        optimized mpi version with postscript graphic
-\item \texttt{FreeFem++-mpi-g}      debug mpi version with postscript graphic
-\item \texttt{FreeFem++-glx}        optimized OpenGl with X11 graphic version
-\item \texttt{FreeFem++-glx-g}      debug OpenGl with X11 graphic version
-\item \texttt{/Applications/FreeFem++.app}   Drag and Drop CoCoa MacOs Application
-\item \texttt{FreeFem++-CoCoa}      MacOS Shell script  for MacOS  OpenGL version  (MacOS 10.2 or better),
-         remark:           it  use  /Applications/FreeFem++.app
-
-\end{enumerate}
-
-in a directory set with makevariable \texttt{BIN\_DIR} defined in file \texttt{src/Makefile-xxxxx}
-where \texttt{xxxxx} this the type of the host.
-
-To test, just go in an directory example \texttt{examples++-tutorial}
-and try  the exemple \texttt{LaplaceP1.edp}, and enter in a shell window:
-\bFF
-FreeFem++  LaplaceP1.edp
-\eFF
-or 
-\bFF
-<< BIN_DIR >>/FreeFem++  LaplaceP1.edp
-\eFF
-\textBlack
-
-
-
-
-\section{ Syntax}
-\textBlack
+\section{Syntax}
 \subsection{Data Types}
 
 Every variable must be declared together with its type.
@@ -265,7 +272,7 @@ The scope of a variable is the current block $\{
 The type declarations are  compulsory in \freefempp  because it is easy
 to make bugs in a language with many types. \index{variable} The
 variable name is just an alphanumeric \index{alphanumeric} string, the
-underscore character  \texttt{\_} is not allowed, because
+ubderscore character  \texttt{\_} is not allowed, because
 it will be used as an operator in the future.\index{\_}
 
 \subsubsection{Another Example}
@@ -277,10 +284,10 @@ Vh u = x+ exp(y);
 @func f = z * x + r * log(y);
 @plot(u,wait=1);
 {  // new block
-  @real r= 2; // not the same r \textBlack\space
-  @fespace Vh(Th,@P1);//  error because Vh is a global name\textBlack\space
+  @real r= 2; // not the same r
+  @fespace Vh(Th,@P1);//  error because Vh is a global name 
 }
-//  here r==0.01 \textBlack\space
+//  here r==0.01
 \eFF
 
 \begin{remark} Notice the use of \texttt{wait} to monitor the time
@@ -305,11 +312,7 @@ value;\index{bool}\index{true}\index{false}
 \item[\texttt{ifstream}]   \ttCC{ifstream} to input from a file
 
 \item[\texttt{real[int]}]   array of real (integer index) ; \index{array!integer index}
-\item[\texttt{real[int,int]}]   martix of real (2 integers index) ; 
-\index{matrix!integer index}
 \item[\texttt{real[string]}]   array of real (string index) ; \index{array!string index}
-\item[\texttt{mesh[int]}]   array of mesh (integer index) ; \index{array!mesh index}
-
 \item[\texttt{func}] define a line function without argument  \ttCC{ func
 f=cos(x)+sin(y) ;}\index{func}. Remark the function's type is given by the expression's type.
 
@@ -327,7 +330,7 @@ elements are  \index{fespace}
      \item[RT0] \index{RT0} the Raviat-Thomas finite element,
      \item[P1nc]  nonconforming $P_1$ finite element,   \index{P1nc}
      \item[P1dc]  linear piecewise discontinuous finite element \index{P1dc}
-     \item[P2dc]  $P_{2}$ piecewise discontinuous finite element \index{P2dc}
+     \item[P2dc]  $P_{2}$ piecewise discontinuous finite element index{P2dc}
      \item[P1b]  linear piecewise continuous finite element + bublle \index{P1b}
 
 \end{description}
@@ -339,21 +342,6 @@ elements are  \index{fespace}
 \item[\texttt{solve}]  to define a pde problem and solve it.\index{solve}
 \item[\texttt{varf}]   to define a full variational form. \index{varf}
 \item[\texttt{matrix}] to define a sparce matrix. \index{matrix}
-\end{description}
-
-The constante value of the program can be: 
-\begin{description}
-\itemtt[true] is the contant  bool equal to true,\index{true}
-\itemtt[false] is the contant bool equal to false, \index{false}
-\itemtt[ 123] is the contant  integer  $123$,\index{integer!contant}
-\itemtt[123.] is  a contant  real number $123$.\index{real!contant}
-\itemtt[123.e10]  is contant  real number $123\,10^{10}$, remark the syntaxe of a number real 
-is like in \Cpp or in fortran.
-
-
-\itemtt["abcd"]  is a constant string charactere contening \texttt{abcd}, remark the two
- escape charactere are \texttt{\string\n} to enter a newline character or  \texttt{\string\"}
- to enter a \texttt{"}  in a string. \index{\n@\verb=\n=}\index{\"@\verb=\"=} \index{string!constant}
 \end{description}
 }
 \subsection{Globals}
@@ -369,21 +357,17 @@ the language to the finite element tools:
     \item[\texttt{region}]   a function which returns an \texttt{int},
     the region number of  the current point (x,y). \index{region}
     \item[\texttt{P}]   the  current point  ($R^{2}$ value. \index{P}
-    \texttt{P.x}, \texttt{P.y}, \texttt{P.z})
+    \texttt{P.x},\texttt{P.y},\texttt{P.z})
     \item[\texttt{N}]   the normal at the  current point  ($\R^{3}$) value,
-    \texttt{N.x}, \texttt{N.y}, \texttt{N.z}) \index{N}.
+    \texttt{N.x},\texttt{N.y},\texttt{N.z}) \index{N}.
     \itemtt[lenEdge]  len of the current edge\index{lenEdge}
-    \itemtt[hTriangle] size of the current triangle  \index{hTriangle}
-    \itemtt[nuTriangle] number of the current triangle  \index{nuTriangle}
-   \itemtt[nuEdge] number of the current edge in the triangle  \index{nuEdge}
-   \itemtt[nTonEdge] number triangle on the current edge   \index{nTonEdge}
+    \itemtt[hTriangle] size of the current triangle  \index{lenEdge}
     \itemtt[area]  area of the current triangle \index{area}
-    \itemtt[cout]  console  \Ostream\index{cout}
-    \itemtt[cin]  console  \Istream \index{cin}
-    \itemtt[true]    true  \Bool\ value\index{true}
-    \itemtt[false]   false  \Bool\ value\index{false}
-    \itemtt[pi]   \Real ~approximation of $\pi$ \index{pi} 
-    \itemtt[endl] the end of line string \index{endl}  
+    \itemtt[cout]  console  \Ostream
+    \itemtt[cin]  console  \Istream
+    \itemtt[true]    true  \Bool value
+    \itemtt[false]   false  \Bool value
+    \itemtt[pi]   \Real ~approximation of $\pi$    
 \end{description}
 
 \medskip
@@ -392,25 +376,23 @@ Here is how to show all the types, and all the operator and functions.
 \bFF
  @dumptable(@cout);
 \eFF \index{dumptable}
-To execute a system command in the string (not implemented on Carbon MacOs)
+To execute a system command in the string (not implemented on MacOs)
 \bFF
-  @exec("shell command");
+  exec("shell command");
 \eFF
 \index{exec}
 \subsection{Arithmetic}
 The operators known to the language are the usual C-operators:
 \\\\
 \verb@+ - * / \% ~ ^ | || & @
-\verb@ && ! == != < > <= >= = += -= *= /= << >>@
-
-\verb@++ -- , @
+\verb@ && ! == != < > <= >= = += -= *= /= << >> ++ -- , @
 \\\\
 with the same
 meaning as in \texttt{C++} except for
 
 \begin{itemize}
 \item \ttCC{~\^} which is the power
-operator (with right  precedence as in math or in maple),
+operator (with right  precedence (as in math)),
 
 \item
  \ttCC{| \& !} are the three boolean operators `or' , `and' , `not',
@@ -418,8 +400,8 @@ operator (with right  precedence as in math or in maple),
 \item and we have added \verb@' .* ./ @  two array operator (like in matlab or scilab), where
 \begin{itemize}
 \item  \verb@'@  is unary right transposition of array, matrix \index{transpose}
- \item \verb@.*@ is the term to term multiply operator. \index{.*@\verb=.*=} \index{'@\verb='=} \index{divide!term to term}
- \item \verb@./@ is the term to term divide operator. \index{.*@\verb=.*=} \index{product!term to term}
+ \item \verb@.*@ is the term to term multiply operator. \index{.*} \index{\string'} \index{divide!term to term}
+ \item \verb@./@ is the term to term divide operator. \index{./} \index{\string'} \index{product!term to term}
 \end{itemize}
 some compound operator: 
 \begin{itemize}
@@ -438,12 +420,12 @@ some compound operator:
  a subset  of the 4 sets $ bool, int, real , complex $ in the sense 
 "make the string of the value".
 \\\\
-\example{ basics}\index{<<@\verb=<<=}
+\example{ basics}
 \bFF
 @real  x=3.14,y;
 @int  i,j;
 @complex c;
-@cout << " x = " << x << "\n";  
+@cout << " x = " << x << "\n"; // \index{$<<$}
 x = 1;y=2;
 x=y;
 i=0;j=1;
@@ -524,11 +506,11 @@ with the \ttCC{KN<>} class so all the vector operator of
   \index{array}\index{array!FE function}
 }
  For the second case, it is just
- a map of the STL\footnote{Standard template Library, now part of standard \Cpp}\cite{cpp}
+ a map of the STL\footnote{Standard template Library, now part of standard \Cpp}\cite{STL}
  so no vector operation except the
  selection of an item is allowed . \index{dot product}\index{transpose}
 
-The transpose operator is \texttt{\string'} like  MathLab or SciLab, so the way 
+The transpose operator is texttt{\string'} like  MathLab or SciLab, so the way 
 to compute the dot product of two array \ttCC{a,b} is  \ttCC{@real\ ab=\ a'*b}\index{product!dot}.
 
 \bFF
@@ -585,10 +567,9 @@ same as in \Cpp with \texttt{break} and \texttt{continue} keywords.
 \index{cout}\index{cint}\index{ifstream}\index{ofstream}\index{endl}
 
 The syntax of input/output statements is similar  to \Cpp syntax. It
-uses \texttt{cout}, \texttt{cin}, \texttt{endl}, \texttt{<<}, \texttt{>>}.
+uses \texttt{cout,cin,endl,<<,>>}.
 
-To write  to (resp. read from)  a file, \index{<<@\verb=<<=}\index{>>@\verb=>>=}
-\index{append} \index{ofstream!append}
+To write  to (resp. read from)  a file, \index{$<<$} \index{$>>$}\index{append}index{ofstream!append}
 declare a new variable \texttt{ofstream ofile("filename");} or \texttt{ofstream ofile("filename",append);} (resp.
 \texttt{ifstream ifile("filename");} ) and use \texttt{ofile}  (resp. \texttt{ifile})
 as \texttt{cout} (resp. \texttt{cin}). The word \texttt{append} in  \texttt{ofstream ofile("filename",append);} 
@@ -613,7 +594,7 @@ at the exit of the enclosing block,
    f >> i;
 }
 {
-  @ofstream f("toto.txt",append); // to append data to the file "toto.txt"
+  @ofstream f("toto.txt",append); // to append to the existing file "toto.txt"
   f << i << "coucou'\n";
 }; //  close the file f because the variable f is delete
 
@@ -624,13 +605,11 @@ at the exit of the enclosing block,
 \section{Mesh Generation}
 The following keywords are discussed in this section:
 
-\texttt{\bf square, border, buildmesh,  movemesh ,
- adaptmesh, readmesh, trunc, triangulate, splitmesh, emptymesh}
+\centerline{\texttt{\bf square, border, buildmesh,  movemesh ,
+ adaptmesh, readmesh, trunc, triangulate}}
 
  \index{square}\index{border}\index{buildmesh}\index{movemesh}\index{adaptmesh}
- \index{readmesh}\index{triangulate}\index{splitmesh}\index{emptymesh}
- 
- All This examples are includes in files \texttt{mesh.edp} and \texttt{tablefunction.edp}.
+ \index{readmesh}\index{triangulate}
 
 \subsection{Square}
 For easy and simple testing we have included a constructor for rectangles.
@@ -644,8 +623,8 @@ The following
   @mesh th=@square(4,5);
   @plot(Th,th,ps="twosquare.eps");
 \eFF
-constructs a grid $n× m$ in the rectangle $[1.2,1.8]×[0,1]$ and
-a grid  $4× 5$ in the unit square $[0,1]^2$.
+constructs a grid $n\times m$ in the rectangle $[1.2,1.8]\times[0,1]$ and
+a grid  $4\times 5$ in the unit square $[0,1]^2$.
 
 \begin{remark} The label of \index{label}
 boundaries are $1,2,3,4$ for bottom, right, top, left side (before the
@@ -666,11 +645,9 @@ For instance the unit circle with a small circular hole inside would be
 @real pi=4*atan(1);
 @border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
 @border b(t=0,2*pi){ x=0.3+0.3*cos(t); y=0.3*sin(t);label=2;}
-plot(a(50)+b(+30)) ; // to see a plot of the border mesh \index{plot!border} 
 @mesh Thwithouthole= @buildmesh(a(50)+b(+30));
 @mesh Thwithhole   = @buildmesh(a(50)+b(-30));
 @plot(Thwithouthole,wait=1,ps="Thwithouthole.eps"); //figure \ref{Thwithouthole}
-\index{plot!mesh}
 @plot(Thwithhole,wait=1,ps="Thwithhole.eps"); // figure \ref{Thwithhole}
 \eFF
 \begin{remark}
@@ -680,37 +657,34 @@ to generate a postscript file identical to the plot shown on screen.
 
 \twoplot[height=6cm]{Thwithouthole}{Thwithhole}{mesh without hole}{mesh with hole}
 
-%Polygons are best described as unions of straight segments such as below for
-%the
-%$(0,2)×(0,1)$ rectangle:\index{border}\index{label}
+Polygons are best described as unions of straight segments such as below for
+the
+$(0,2)\times(0,1)$ rectangle:\index{border}\index{label}
 
-%\bFF
-%@border a(t=0,2){x=t; y=0;label=1;}; // the label can be depend of t
-%@border b(t=0,1){x=2; y=t;label=1;};
-%@border c(t=2,0){x=t; y=1;label=1;};
-%@border d(t=1,0){x=0; y=t;label=1;};
-%@border sq = [ label=1 ,[0,0],[ 0,2],  [1,2,label=2]  [1,0],  [0,0,label=0] ];
-%@int n = 20;
-%@mesh th= @buildmesh(a(2*n)+b(n)+c(2*n)+d(n));
-%@mesh Th= @buildmesh(sq(8*n));
-%\eFF
+\bFF
+@border a(t=0,2){x=t; y=0;label=1;}; // the label can be depend of t
+@border b(t=0,1){x=2; y=t;label=1;};
+@border c(t=2,0){x=t; y=1;label=1;};
+@border d(t=1,0){x=0; y=t;label=1;};
+@border sq = [ label=1 ,[0,0],[ 0,2],  [1,2,label=2]  [1,0],  [0,0,label=0] ];
+@int n = 20;
+@mesh th= @buildmesh(a(2*n)+b(n)+c(2*n)+d(n));
+@mesh Th= @buildmesh(sq(8*n));
+\eFF
 
-%\begin{remark} On the mesh \texttt{Th} the label of the polygon line
-%with vertices $  \vdeux(0,0),\vdeux(0,2),
-%\vdeux(1,2)  $ is $1$ ,  the label of the polygon line of vertices
-%$ \vdeux(1,2),\vdeux(1,0),  \vdeux(0,0) $ , to close the polygon the two
-%labels corresponding are the same.
-%\end{remark}
+\begin{remark} On the mesh \texttt{Th} the label of the polygon line
+with vertices $  \vdeux(0,0),\vdeux(0,2),
+\vdeux(1,2)  $ is $1$ ,  the label of the polygon line of vertices
+$ \vdeux(1,2),\vdeux(1,0),  \vdeux(0,0) $ , to close the polygon the two
+labels corresponding are the same.
+\end{remark}
 
 Note that boundaries must cross at end points only.
 
 \subsection{Movemesh}\index{movemesh}\index{checkmovemesh}
 
 Mesh motion is allowed as in the next two last statement of this
-example, but some time the move mesh become invalid because some triangle
-as be reverse with a negative area, so we add new function \texttt{checkmovemesh} to 
-compute the minimal area of the transform mesh before the real transformation.
-
+example.
 \bFF
 
 @real Pi=atan(1)*4;
@@ -725,64 +699,30 @@ func uu= sin(y*Pi)/10;
 func vv= cos(x*Pi)/10;
 
 mesh Th = buildmesh ( a(6) + b(4) + c(4) +d(4) + e(4) + f(6));
-plot(Th,wait=1,fill=1,ps="Lshape.eps");// see figure \ref{Lshape}
+plot(Th,wait=1,fill=1,ps="Lshape.eps");// figure \ref{Lshape}
 real coef=1;  
 real minT0= checkmovemesh(Th,[x,y]); // the min triangle area
 while(1) // find a correct move mesh 
 {
-  real minT=checkmovemesh(Th,[x+coef*uu,y+coef*vv]);//the min triangle area
+  real minT= checkmovemesh(Th,[x+coef*uu,y+coef*vv]); // the min triangle area
   if (minT > minT0/5) break ; // if big enough 
   coef=/1.5; 
 }
 
 Th=movemesh(Th,[x+coef*uu,y+coef*vv]);
-plot(Th,wait=1,fill=1,ps="movemesh.eps");// see figure \ref{movemesh}
+plot(Th,wait=1,fill=1,ps="movemesh.eps");// figure \ref{movemesh}
 \eFF
-%%% alh? Lshape.eps not found
-%%%\twoplot[height=6cm]{Lshape}{movemesh}{   L-shape}{  moved L-shape }
+\twoplot[height=6cm]{Lshape}{movemesh}{   L-shape}{  moved L-shape }
 
 \begin{remark}
 Consider a function u defined on a mesh Th. A statement like
 \texttt{Th=movemesh(Th...} does not change $u$ and so the old mesh still
 exists. It will be destroyed when no function use it. Therefore a statement
-like $u=u$ will redefine $u$ on the new mesh Th with interpolation and therefore destroy the old Th
+like $u=u$ will redefine $u$ on the new Th and therefore destroy the old Th
 if $u$ was the only function using it.
 \end{remark}
 
-Now, a sample exemple of moving mesh, with lagrangian\index{lagrangian} function $u$ defined on the moving mesh.
-
-\bFF
-// simple movemesh example
-@mesh Th=square(10,10);
-@fespace Vh(Th,P1); 
-@real t=0;
-// ---
-//  problem is how to build data without interpolation
-//  so the data u is moving with the mesh hse you can see in the plot
-// ---
-Vh u=y;
-@for (int i=0;i<4;i++)
-{ 
- t=i*0.1;
- Vh f= x*t;
- @real minarea=checkmovemesh(Th,[x,y+f]);
- if (minarea >0 ) //  the movemesh will be ok 
-   Th=movemesh(Th,[x,y+f]);
-
- cout << " Min area  " << minarea << endl;
- 
- Vh tmp;     // =u[],  sorry no init of FEspace function with array. 
- tmp[]=u[];  //save the value  
- u=0;        // to change the FEspace and mesh associated to u
- u[]=tmp[];  // set le value of the array without no mesh update 
- @plot(Th,u,wait=1);
-};
-//  remark, in this programme we have no solution with link to a previous
-//  mesh so all the old meshes are delete in memory
-//   -------- 
-\eFF
-
-\subsection{Read and write mesh}
+\subsection{Read and writre mesh}
 \index{readmesh}\index{savemesh}
 Freefem can read and write files which can be reused once read but the
 names of the borders are lost and they have to be replaced by the number
@@ -814,8 +754,7 @@ triangulation is a mesh Delaunay of the convex hull of the set of point.
 This can be usefull to build table function.
 
 
-The coordinate of the set of point and the value of the table function 
-are set in a file like :
+The coordinate of the set of point are set in a file like :
 
 \bFF
 0.51387 0.175741 0.636237
@@ -826,33 +765,26 @@ are set in a file like :
 0.0838988 0.389647 0.456045
 
 \eFF
-here the third column  by line is  unused in the command  \texttt{triangulate}.
+here the third number by line is use in the command  \texttt{triangulate}.
 
 But you can use this  to defined a  table fonction with rows of the form: 
 \texttt{x y f(x,y))}.
-
-%%% alh? Thxy.eps and xyf.eps not found
-%%%\twoplot[height=6cm]{Thxy}{xyf}{Delaunay mesh of the convexe hull of point set in file xyf}{Isovalue of table function}
-
 \index{function!tables}
 
 \bFF
-@mesh Thxy=triangulate("xyf"); // build the Delaunay mesh of the convexe hull 
-// with point defined with the 2 firsts column of file \texttt{xyf}
-@plot(Thxy,ps="Thxyf.ps"); // (see figure  \ref{Thxy})
+mesh Thxy=triangulate("xyf");
 
-@fespace Vhxy(Thxy,P1); // make P1 interpolation 
+fespace Vhxy(Thxy,P1); // make P1 interpolation 
 Vhxy fxy; // the function
 
 // reading the third row to define the function
-{ @ifstream file("xyf");
-   @real xx,yy;
-   @for(@int i=0;i<fxy.n;i++)
-   file >> xx >>yy >> fxy[][i];  // to only read third row and xx and yy are just skip
+{ ifstream file("xyf");
+   real xx,yy;
+   for(int i=0;i<fxy.n;i++)
+   file >> xx >>yy >> fxy[][i];  // to only read third row
 }
-@plot(fxu,ps="xyf.ps"); // plot the function (see figure  \ref{xyf})
+plot(fxu); // plot the function 
 \eFF
-
 
 \subsection{Adaptmesh}\index{adaptmesh}
 Mesh adaptation is a very powerful tool which should be
@@ -875,7 +807,7 @@ func g= 0;
 int i=0;
 @real error=0.1, coef= 0.1^(1./5.);
 
-@problem Problem1(u,v,solver=CG,init=i,eps=-1.0e-6) =// \index{problem!solver=}\index{problem!init}\index{problem!eps}
+@problem Problem1(u,v,solver=CG,init=i,eps=-1.0e-6) =
     @int2d(Th)(  @dx(u)*@dx(v) + @dy(u)*@dy(v))
   + @int2d(Th) ( v*f )
   + @on(1,2,3,4,u=g)  ;
@@ -1001,7 +933,7 @@ default parameters which can be overwritten for better results.
     \index{adaptmesh!keepbackvertices=}
 
     \item[\texttt{isMetric=}] if it is true the metric is given
-    by hand (false is the default's value).  So 1 or 3 functions $m_{11}, m_{12}, m_{22}$ given defining 
+    by hand (false is the default's value).  So 1 or 3 functions given defining 
     directly a symmetric matrix field (if one function is given then isotropic mesh
     size is given directly at every point through a function) , 
    otherwise  for all  given functions,  its Hessian is computed
@@ -1012,24 +944,6 @@ default parameters which can be overwritten for better results.
      exponent power of the Hessian to compute the
     metric (1 is the default's value).
     \index{adaptmesh!powerin=}
-    
-    \item[\texttt{thetamax =}]  to change the angle limit value in degree of a corner
-    by default the value is 0.
-    
-    \item[\texttt{splitin2 =}]  bool value to slip all triangle of the final mesh in 4 sub-triangles \index{adaptmesh!splitin2}
-    
-
-    \item[\texttt{metric=}] \index{adaptmesh!metric=}
-      an array of 3 array real  to set or  get metric data information,
-      the size of this tree array must by the number of vertices, so if 
-      \texttt{m11,m12,m22} are three finite element P1 of the mesh of 
-      adapt, you ca	n  write: \texttt{metric=[m11[],m12[],m22[]]},
-                  ( see example convect-apt.edp for a full example)
-    \itemtt[nomeshgeneration=]  \index{adaptmesh!nomeshgeneration=}
-    to do or not the mesh generation, by default we do the mesh generation (it is usefull 
-    to just compute metric).
-    \item[periodic=]  \index{adaptmesh!periodic=} for future: use to build 
-    periodic adapted mesh (see periodic finite element space \ref{periodic BC})
 
 \end{description}
 
@@ -1041,18 +955,18 @@ boolean function.
 The two named parameter 
 \begin{description} \index{split=} \index{label=}\index{trunc!split=} \index{trunc!label=}
   \itemtt[label=] sets the label number of new boundary item (one by default)
-  \itemtt[split=] sets the level $n$ of triangle splitting. each triangle is splitted in  $n× n$ ( one by default).
+  \itemtt[split=] sets the level $n$ of triangle splitting. each triangle is splitted in  $n\times n$ ( one by default).
 \end{description}
 
 To create the mesh \texttt{Th3}  
-where alls  triangles of a mesh \texttt{Th}  are splitted in $3×3$ , just write:
+where alls  triangles of a mesh \texttt{Th}  are splitted in $3\times3$ , just write:
 \bFF
   mesh Th3 = trunc(Th,1,split=3); 
 \eFF
 
 The  \texttt{truncmesh.edp} exemple construct 
 all "trunc" mesh  to the support of the basic function  of the space \texttt{Vh} (cf. \texttt{abs(u)>0}), 
-split all the  triangles in $5× 5$, and put a label number to $2$ on new boundary.
+split all the  triangles in $5\times 5$, and put a label number to $2$ on new boundary.
 \bFF
 @mesh Th=square(3,3);
 @fespace Vh(Th,P1);
@@ -1064,112 +978,13 @@ u=0;
   u[][i]=1;        //  the basic function i 
   @plot(u,wait=1);
   @mesh Sh1=trunc(Th,abs(u)>1.e-10,split=5,label=2);
-  plot(Th,Sh1,wait=1,ps="trunc"+i+".eps");// plot the mesh of
-  // the function's support                  
+  plot(Th,Sh1,wait=1,ps="trunc"+i+".eps");  //  plot the mesh  the function's support                  
   u[][i]=0;      // reset 
  }
 \eFF
-\twoplot[height=6cm]{trunc0}{trunc6}{ mesh of support the function P1  number 0, splitted in $5×5$ }{
-mesh of support the function P1  number 6, splitted in $5×5$ }
-\subsection{splitmesh}
-A other way to split mesh triangle:
-\bFF
-{  //  new stuff 2004 splitmesh (version 1.37)
-  assert(version>=1.37);
-  @border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
-  @plot(Th,wait=1,ps="nosplitmesh.eps"); // see figure \ref{fig nosplitmesh}
-  @mesh Th=@buildmesh(a(20));
-  @plot(Th,wait=1);
-  @Th=@splitmesh(Th,1+5*(square(x-0.5)+y*y));
-  @plot(Th,wait=1,ps="splitmesh.eps"); // see figure \ref{fig splitmesh}
-}
-\eFF
+\twoplot[height=6cm]{trunc0}{trunc6}{ mesh of support the function P1  number 0, splitted in $5\times5$ }{
+mesh of support the function P1  number 6, splitted in $5\times5$ }
 
-\twoplot[height=6cm]{nosplitmesh}{splitmesh}{\label{fig nosplitmesh}initial mesh}{\label{fig splitmesh}all left mesh triangle is split  conformaly in \texttt{int(1+5*(square(x-0.5)+y*y)\^2} triangles.}
-\subsection{build empty mesh}\index{emptymesh}
-The idea is when you want to defined Finite Element  space 
-on boundary you can use a mesh with no internal points (call empty mesh).
-It is can by usefull we you have a Lagrange multiplier definied on the border.
-
-So the fonction emptymesh remove all the internal point of a mesh expect if the
-point is on internal boundary.
-
-\bFF
-{  //  new stuff 2004 emptymesh (version 1.40)
- // -- usefull to build Multiplicator space 
- //  build a mesh without internal point
- // with the same boundary 
- //  -----
-  assert(version>=1.40);
-  @border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
-  @mesh Th=buildmesh(a(20));
-   Th=@emptymesh(Th);
-  @plot(Th,wait=1,ps="emptymesh-1.eps");//see figure \ref{fig emptymesh-1}
-}
-\eFF
-
-or it is also possible to build a empty mesh of peusdo subregion  
-with \texttt{emptymesh(Th,ssd)} with the set of edges of the mesh \texttt{Th}
-a edge $e$ is in  this set  if the two adjacent triangles $e =t1\cap t2$ 
-and  $ ssd[T1] \neq ssd[T2]$ where \texttt{ssd}  defined the peusdo region numbering of triangle. It is an user \texttt{int[int]} array of size the number of triangles.
-\bFF
-{  //  new stuff 2004 emptymesh (version 1.40) \hfilll
- // -- usefull to build Multiplicator space \hfilll
- //  build a mesh without internal point \hfilll
- // of peusdo sub domain  \hfilll
- //  ----- \hfilll
-  assert(version>=1.40);
-  mesh Th=square(10,10);
-  int[int] ssd(Th.nt);  
-  for(int i=0;i<ssd.n;i++) // build the  peusdo region numbering
-   {  int iq=i/2;   // because 2 traingle per quad 
-      int ix=iq%10; // 
-      int iy=iq/10; // 
-    ssd[i]= 1 + (ix>=5) +  (iy>=5)*2;
-   }
-  Th=emptymesh(Th,ssd); // build emtpy  with 
-  //  all edge $e = T1 \cap T2$ and $ ssd[T1] \neq ssd[T2]$ 
-  plot(Th,wait=1,ps="emptymesh-2.eps");//see figure \ref{fig emptymesh-2} 
-  savemesh(Th,"emptymesh-2.msh");
-}
-\eFF
-
-\twoplot[height=6cm]{emptymesh-1}{emptymesh-2}{ The empty mesh with boundary 
-\label{fig emptymesh-1}}{An empty mesh 
-defined from a peusdo region numbering of triangle\label{fig emptymesh-2}}
-
-\subsection{Get Mesh numbering}
-\index{triangle![]}\index{triangle!label}\index{triangle!label}
-\index{vertex!x}\index{vertex!y}\index{vertex!label}
-\bFF
-{  // get mesh information (version 1.37)
-  @mesh Th=square(2,2);
-  // get data of the mesh
-  @int nbtriangles=Th.nt;
-  @for (@int i=0;i<nbtriangles;i++)
-    @for (@int j=0; j <3; j++)
-      @cout << i << " " << j << " Th[i][j] = "
-           << Th[i][j] << "  x = "<< Th[i][j].x  << " , y= "<< Th[i][j].y
-           << ",  label=" << Th[i][j].label << endl;
-}
-\eFF
-the output is:
-\bFF
-0 0 Th[i][j] = 0  x = 0 , y= 0,  label=4
-0 1 Th[i][j] = 1  x = 0.5 , y= 0,  label=1
-0 2 Th[i][j] = 4  x = 0.5 , y= 0.5,  label=0
-1 0 Th[i][j] = 0  x = 0 , y= 0,  label=4
-1 1 Th[i][j] = 4  x = 0.5 , y= 0.5,  label=0
-1 2 Th[i][j] = 3  x = 0 , y= 0.5,  label=4
-.......
-5 2 Th[i][j] = 6  x = 0 , y= 1,  label=4
-6 0 Th[i][j] = 4  x = 0.5 , y= 0.5,  label=0
-6 1 Th[i][j] = 5  x = 1 , y= 0.5,  label=2
-6 2 Th[i][j] = 8  x = 1 , y= 1,  label=3
-7 0 Th[i][j] = 4  x = 0.5 , y= 0.5,  label=0
-7 1 Th[i][j] = 8  x = 1 , y= 1,  label=3
-7 2 Th[i][j] = 7  x = 0.5 , y= 1,  label=3
-\eFF
 \subsection{Meshing examples}
 
 \example{ 1: The mesh for a corner singularity}
@@ -1198,7 +1013,7 @@ To test the domain decomposition algorithms described below we will need
 @border d(t=1,0){x = 0; y = t;};
 @border e(t=0, pi/2){ x= cos(t); y = sin(t);};
 @border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);};
-n=4;
+n:=4;
 mesh sh = buildmesh(a(5*n)+a1(5*n)+b(5*n)+c(10*n)+d(5*n));
 mesh SH = buildmesh ( e(5*n) + e1(25*n) );
 plot(sh,SH);
@@ -1226,16 +1041,11 @@ Two rectangles touching by a side.
  To use a finite element, one needs to define a finite element
 space with  the keyword \ttCC{fespace} (short of finite element space)
 like\\
-\bFF
-     @fespace IDspace(IDmesh,<IDFE>) ;
-\eFF
+\centerline{\ttCC{@fespace\ IDspace(IDmesh,<IDFE>)} } 
 or with $k$ pair of periodic boundary condition
-\bFF
-     @fespace IDspace(IDmesh,<IDFE>,
-                      periodic=[[la$_1$,sa$_1$],[lb$_1$,sb$_1$],
-                                ...  
-                                [la$_k$,sa$_k$],[lb$_k$,sb$_k$]]); 
-\eFF
+
+\centerline{\ttCC{@fespace\ IDspace(IDmesh,<IDFE>,periodic=[[la$_1$,sa$_1$],[lb$_1$,sb$_1$],...,[la$_k$,sa$_k$],[lb$_k$,sb$_k$]])}}
+
 
 \medskip
 
@@ -1244,7 +1054,7 @@ or with $k$ pair of periodic boundary condition
 \ttCC{IDspace} is the name of the space for example \ttCC{Vh},
 \ttCC{IDmesh} is the name of the associated mesh and  \ttCC{<IDFE>}
 is a identifier of finite element type, 
-where a pair of periodic boundary condition \label{periodic BC}
+where a pair of periodic boundary condition
 is defined by \ttCC{[la$_i$,sa$_i$],[lb$_i$,sb$_i$]}. 
 The \texttt{int} expressions  \ttCC{la$_i$} and \ttCC{lb$_i$}
 are defined the 2 labels of the piece of the boundary to
@@ -1252,15 +1062,15 @@ be equivalence, and the   \texttt{real} expressions \ttCC{sa$_i$} and \ttCC{sb$_
 a give two common abcissa  on the two boundary curve, and two points are identify 
 if the two abcissa are equal.
 
-\medskip
+
  As of today, the known
-types of finite element  are: \index{type of finite element}
+types of finite element  are \index{type of finite element}
 \begin{description}
      \item[P0]  piecewise constante discontinuous finite element
      \index{P0|textbf}\index{fespace!P0}
     \begin{equation}
-     P0_{h} = \{ v \in L^2(\Omega) / \forall K \in \mathcal{T}_{h}\;\;\exists \alpha_{K}\in \R :
-        \;\; v_{|K} = \alpha_{K } \} \label{eq:P0}
+     P0_{h} = \{ v \in L^2(\Omega) / \forall K \in \mathcal{T}_{h}
+        \quad v_{|K} = \alpha_{K }\hbox{constant of } \R \} \label{eq:P0}
      \end{equation}
      \item[P1]  piecewise linear  continuous finite element
      \index{P1|textbf}\index{fespace!P1}
@@ -1268,19 +1078,19 @@ types of finite element  are: \index{type of finite element}
      P1_{h} = \{ v \in H^{1}(\Omega) / \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{1} \} \label{eq:P1}
      \end{equation}
-     \item[P1dc]  piecewise linear  discontinuous finite element
+     \item[P1dc]  piecewise linear  continuous finite element
      \index{P1dc|textbf}\index{fespace!P1dc}
      \begin{equation}
-     P1dc_{h} = \{ v \in L^{2}(\Omega) / \forall K \in \mathcal{T}_{h}
-        \quad v_{|K} \in P_{1} \} \label{eq:P1dc}
+     P1_{h} = \{ v \in L^{2}(\Omega) / \forall K \in \mathcal{T}_{h}
+        \quad v_{|K} \in P_{1} \} \label{eq:P1}
      \end{equation}
      \item[P1b]  piecewise linear  continuous finite element plus bubble
      \index{P1b|textbf}\index{fespace!P1b}
      \begin{equation}
-     P1b_{h} = \left\{ v \in H^{1}(\Omega) / \forall K \in \mathcal{T}_{h}
-        \quad v_{|K} \in P_{1} \oplus Span\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right\} \label{eq:P1b}
+     P1_{h} = \left\{ v \in L^{2}(\Omega) / \forall K \in \mathcal{T}_{h}
+        \quad v_{|K} \in P_{1} \bigoplus Span\{ \Pi^{2}_{i=0} \lambda^{K}_{i} \} \right\} \label{eq:P1b}
      \end{equation}
-     where $\lambda ^{K}_{i}, i=0,1,2$ are the 3 barycentric coordinate functions of the triangle $K$
+     where $\lambda ^{K}_{i}$ is the barycentric coordinate fonction of the traingle $K$
 
      \item[P2] piecewise $P_{2}$  continuous finite element,
      \index{P2|textbf}\index{fespace!P2}
@@ -1293,7 +1103,7 @@ types of finite element  are: \index{type of finite element}
      \item[P2dc] piecewise $P_{2}$  discontinuous finite element,
      \index{P2dc|textbf}\index{fespace!P2dc}
      \begin{equation}
-     P2dc_{h} = \{ v \in L^{2}(\Omega) / \forall K \in \mathcal{T}_{h}
+     P2_{h} = \{ v \in L^{2}(\Omega) / \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{2} \}
      \end{equation}
      \item[RT0]  Raviart-Thomas finite element
@@ -1325,14 +1135,14 @@ $$  R_{h} = \{ \mathbf{v} \in H^{1}(]0,1[^2)^{2} / \forall K \in \mathcal{T}_{h}
  \mathbf{v}_{|K}(x,y) =
          \vecttwo{\alpha_{K}}{\beta_{K}} + \gamma_{K}\vecttwo{x}{y} \}$$
 
-where $\mathcal{T}$ is a mesh $10× 10$ of the unit square $]0,1[^2$,
+where $\mathcal{T}$ is a mesh $10\times 10$ of the unit square $]0,1[^2$,
 \\\\
 the corresponding \freefempp definitions are:
 
 \bFF
   @mesh Th=@square(10,10);  // border label: 1 down, 2 left, 3 up, 4 right 
   @fespace Xh(Th,@P1);      //  scalar FE
-  @fespace Xph(Th,P1,periodic=[[2,y],[4,y],[1,x],[3,x]]);//  bi-periodic FE 
+  @fespace Xph(Th,P1,periodic=[[2,y],[4,y],[1,x],[3,x]]);   //  bi-periodic FE space 
   @fespace Mh(Th,@P2);      //  scalar FE
   @fespace Rh(Th,@RT0);     //  vectorial FE
 \eFF
@@ -1340,15 +1150,15 @@ the corresponding \freefempp definitions are:
 so \texttt{Xh,Mh,Rh} are finite element spaces (called FE spaces
 \index{FE space}).
 Now to  use functions $ u_{h},v_{h} \in X_{h} $ and $ p_{h},q_{h} \in M_{h} $
-and $U_{h},V_{h} \in R_{h}$
+and $U_{h},V_{h} \in \R_{h}$
 one can  define the FE function \index{FE function} like this
 \bFF
   Xh uh,vh;
   Xph uph,vph;
   Mh ph,qh;
   Rh [Uxh,Uyh],[Vxh,Vyh];
-  Xh[@int] Uh(10); //  array of 10 function in Xh 
-  Rh[@int] [Wxh,Wyh](10); //  array of 10 functions in Rh.\index{array!fespace}
+  Xh[@int] Uh(10); //  array of 10 function in Xh
+  Rh[@int] [Wxh,Wyh](10); //  array of 10 functions in Rh.
 \eFF
 
 The functions $U_{h},V_{h}$ have two components so we have
@@ -1357,7 +1167,7 @@ $$U_{h}=\vecttwo{Uxh}{Uyh}  \quad \mbox{and}\quad V_{h}=\vecttwo{Vxh}{Vyh}$$.
  Like in the previous  version, \texttt{freefem+}, the finite element functions
  (type \texttt{FE}
  functions) are both
- functions from  $\R^{2}$ to $\R^{N}$ with $N=1$ for scalar function and arrays of real.
+ functions from  $\R^{2}$ to $\R^{N}$ and arrays of real.
 
  To interpolate \index{interpolation} \index{FE function!set} a function,
  one writes
@@ -1365,16 +1175,15 @@ $$U_{h}=\vecttwo{Uxh}{Uyh}  \quad \mbox{and}\quad V_{h}=\vecttwo{Vxh}{Vyh}$$.
  \bFF
    uh = x^2 + y^2;               //  ok uh is scalar FE function
   [Uxh,Uyh] = [sin(x),cos(y)];   // ok vectorial FE function
-  Uxh = x;    // error: impossible to set only 1 component
-         // of  a vector FE function.
+  Uxh = x;    // error: impossible to set only 1 component of  a vector FE function.
   vh = Uxh;  // ok
   Th=@square(5,5);
-  vh=vh;     //  re-interpolates vh on the new mesh square(5,5);\index{interpolation}
+  vh=vh;     //  re-interpolates vh on the new mesh square(5,5);
   vh([x-1/2,y])= x^2 + y^2;  // interpole vh = $((x-1/2)^2 + Y^2)  $
  \eFF
 
  To get the value at a point $x=1,y=2$ of the FE function \texttt{uh},
- or \texttt{[Uxh,Uyh]},one writes
+ or \texttt{uh},\texttt{[Uxh,Uyh]},one writes
 
 \bFF
    @real value;
@@ -1391,7 +1200,7 @@ $$U_{h}=\vecttwo{Uxh}{Uyh}  \quad \mbox{and}\quad V_{h}=\vecttwo{Vxh}{Vyh}$$.
   \texttt{uh}, one writes
 
   \index{FE function!value}\index{FE function![]|textbf}
-  \index{FE function!n|textbf}\index{[]@\verb=[]=}\index{n}
+  \index{FE  function!n|textbf}\index{[]}\index{n}
 
 \bFF
    @real value = uh[][0] ; // get the value of degree of freedom 0
@@ -1399,21 +1208,16 @@ $$U_{h}=\vecttwo{Uxh}{Uyh}  \quad \mbox{and}\quad V_{h}=\vecttwo{Vxh}{Vyh}$$.
    @int size = uh.n; // the number of degree of freedom
    @real[int] array(uh.n)= uh[]; //  copy the array of the function uh
 \eFF
-Warning for no scalar finite element function   \texttt{[Uxh,Uyh]}
- the two array \texttt{Uxh[]} and  \texttt{Uyh[]} are the same array, because
- the degre of freedom can touch more than one componant. 
-
-
 
 The other way to set a FE function  is to solve a `problem' (see
 below).
 
-\begin{remark} \label{meshchange}
+\begin{remark}
  It is possible to \index{mesh!change}  change a mesh to do a convergence
 test  for example, but see what happens in this trivial example. In fact a
  FE function is three pointers, one pointer to the values, second a pointer to
  the definition of \texttt{fespace}, third a pointer to the \texttt{fespace}. This
- \texttt{fespace} can be rebuild if the associated mesh have changed 
+ \texttt{fespace} is defined
  when the FE function is set with operator \texttt{ =} or when a \texttt{problem}
  is solved.
 \end{remark}
@@ -1432,8 +1236,8 @@ test  for example, but see what happens in this trivial example. In fact a
             // to get the new vh on 10x10 mesh.
    @plot(vh,ps="onnewmesh.eps"); // figure \ref{onnewmesh}
 \eFF
-\twoplot[height=6cm]{onoldmesh}{onnewmesh}{ vh Iso on mesh $2× 2$}{
-vh Iso on mesh $5× 5$}
+\twoplot[height=6cm]{onoldmesh}{onnewmesh}{ vh Iso on mesh $2\times 2$}{
+vh Iso on mesh $5\times 5$}
 
 \subsection{Problem and solve}
 
@@ -1443,7 +1247,7 @@ and possibly a boundary condition form must be input.
  \index{problem}
  For example consider the Dirichlet problem:
 
-\eq{ -\Delta v = 1 \hbox{ in } \Omega=]0,1[^2,
+\eq{ -\Delta v = 1 \hbox{ in } \Omega=\{(x,y)\in ]0,1[^2 \},
 ~~~v=0\hbox{ on } \Gamma=\partial\Omega.
 }
 The problem can be  solved by the finite element method, namely:
@@ -1464,14 +1268,14 @@ The \freefempp version of the same is
  @func f=1;                 //  right hand side function
  @func g=0;                 //  boundary condition function
 
- @solve laplace(uh,vh) =    //  definion of  the problem and solve
+ @solve laplace(uh,vh) =                    //  definion of  the problem and solve
     @int2d(Th)( @dx(uh)*@dx(vh) + @dy(uh)*@dy(vh) ) //  bilinear form \index{int2d}
   + @int2d(Th)( -f*vh )                          //  linear form
-  + @on(1,2,3,4,uh=g) ;    //  a lock boundary condition form\index{on}
+  + @on(1,2,3,4,uh=g) ;                      //  a lock boundary condition form\index{on}
 
  f=x+y;
  laplace; // solve again the problem with this new f
- @plot(uh,ps="Laplace.eps",value=true); // to see the result (figure \ref{fig Laplace})
+ @plot(uh,ps="Laplace.eps",value=true); // to see the result
 \eFF
 
 \begin{remark} Using the keywork \texttt{problem} in place of
@@ -1479,7 +1283,7 @@ The \freefempp version of the same is
 \index{solve}
 \end{remark}
 
-\plot[height=6cm]{Laplace}{ \label{fig Laplace}  Isovalues of the solution  }
+\plot[height=6cm]{Laplace}{  Isovalues of the solution  }
 
  A laplacian in mixed finite formulation \index{mixed FEM formulation}
 \index{Neumann} \index{N!x} \index{N!y}.
@@ -1492,7 +1296,7 @@ The \freefempp version of the same is
 Vh [u1,u2],[v1,v2];
 Ph p,q;
 
-@problem laplaceMixte([u1,u2,p],[v1,v2,q],solver=LU,eps=1.0e-30) = // \index{problem!solver=}\index{LU}
+@problem laplaceMixte([u1,u2,p],[v1,v2,q],solver=LU,eps=1.0e-30) =
    @int2d(Th)( p*q*1e-10+ u1*v1 + u2*v2 + p*(dx(v1)+dy(v2)) + (dx(u1)+dy(u2))*q )
  + @int2d(Th) ( q)
  + @int1d(Th)( (v1*N.x +v2*N.y)/-2);   //  int on gamma
@@ -1508,57 +1312,9 @@ $(u_{1},u_{2})$}{Isovalue of $p$ }
 To make programs more readable we stop now using blue color on dx,dy.
 \end{remark}
 
-An other formulation of the Laplace equation with Discontinuous Galerkine
-formulation with $P_{2}$ discontinuous can be write (see LapDC.epd and \cite{DGgirault}) 
-
-\bFF
-// file:  LapDG2.edp  
-//  solve $ -\Delta u = f$ on $\Omega$ and $u= g$ on $\Gamma$
-@macro dn(u) (N.x*dx(u)+N.y*dy(u) ) //  def the normal derivative
-
-@mesh Th = square(10,10); // unite square
-@fespace Vh(Th,P2dc);     // Discontinous P2 finite element
-//  if pena = 0 => Vh must be P2 otherwise we need some penalisation
-real pena=0; // a paramater to add penalisation
-varf Ans(u,v)=
-   int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v)  )
- + intalledges(Th)(//  loop on all  edge of all triangle
-       // the edge are see nTonEdge times so we / nTonEdge
-       // remark: nTonEdge =1 on border edge and =2 on internal
-       // we are in a triange th normal is the exterior normal
-       // def: jump = external - internal value; on border exter value =0 \index{jump}
-       //  average = (external + internal value)/2, on border just internal value \index{average}
-     ( jump(v)*average(dn(u)) - jump(u)*average(dn(v)) + pena*jump(u)*jump(v) ) / nTonEdge
-) ;
-func f=1;
-func g=0;
-Vh u,v;
-Xh uu,vv;
-problem A(u,v,solver=UMFPACK) // \index{UMFPACK}
-       =   Ans
-         - int2d(Th)(f*v)
-         - int1d(Th)(g*dn(v)  + pena*g*v)
-;
-problem A1(uu,vv,solver=CG)// \index{CG}
-=
- int2d(Th)(dx(uu)*dx(vv)+dy(uu)*dy(vv)) - int2d(Th)(f*vv) + on(1,2,3,4,uu=g);
-
- A; // solve  DG
-\eFF
-
-where 
-\begin{itemize}
-\item \texttt{nTonEdge}\index{nTonEdge} is the number on triangle which see the current edge, 
- with \texttt{nTonEdge==2} on internal edge and \texttt{nTonEdge==1} on boundary edge,
- 
-\item  \texttt{jump}\index{jump} give the jump in the direction of the external normal: external minus internal value on internal edges, and minus the internal value 
-\item \texttt{average}\index{average} is the half of the external plus internal value
-on internal edges and the internal value on boundary edges.
-\end{itemize}
-
 \subsection{Parameter Description for \texttt{solve} and \texttt{problem}}
 
-The parameters are FE function, the number $n$ of qfo is even
+The parameters are FE function, the number $n$ of FE function is even
 ($n=2*k$), the $k$ first function parameters are unknown, and the $k$
 last are test functions.
 
@@ -1572,16 +1328,14 @@ implemented. So all the finite element space use for test or unknow functions
 in a problem, must  have the same  type of periodic boundary condition or 
 no periodic boundary condition. 
 No clean message is given and the result is
-impredictible, Sorry.\index{periodic}\index{fespace!periodic=}
+impredictible, Sorry.\index{periodic}\index{fespace!periodic}
 \end{bug}
 
-\index{solver=!LU}\index{solver=!CG}\index{solver=!Crout}\index{solver=!GMRES}\index{solver=!Cholesky}\index{solver=!UMFPACK}
-\index{LU}\index{CG}\index{Crout}\index{GMRES}\index{Cholesky}\index{UMFPACK}
-
+\index{solver!LU}\index{solver!CG}\index{solver!Crout}\index{solver!GMRES}\index{solver!Cholesky}
 The named parameters are:
 \begin{description}
-    \item[solver=]   \texttt{LU}, \texttt{CG},\index{solve!solver=}\index{problem!solver=}
-    \texttt{Crout},\texttt{Cholesky},\texttt{GMRES},\texttt{UMFPACK} ...
+    \item[solver=]   \texttt{LU}, \texttt{CG},
+    \texttt{Crout},\texttt{Cholesky},\texttt{GMRES} ...
 
     The default solver is \texttt{LU}.
     The storage mode of the matrix of the underlying linear system
@@ -1590,74 +1344,55 @@ The named parameters are:
     symmetric, for \texttt{Crout} the matrix is sky-line symmetric, for
     \texttt{Cholesky} the matrix is sky-line symmetric positive
     definite,  for \texttt{CG}   the matrix is sparse symmetric positive,
-    and for \texttt{GMRES} or \texttt{UMFPACK} the matrix is just  sparse.
+    and for \texttt{GMRES} the matrix is just  sparse.
 
-    \item[eps=]  \index{problem!eps=}  \index{solve!eps=} a real expression. $\varepsilon$  sets the stopping test for
+    \item[eps=]  \index{problem!eps=}  \index{solver!eps=} a real expression. $\varepsilon$  sets the stopping test for
     the iterative methods like \texttt{CG}. Note that if $\varepsilon$
     is negative  then the stopping test is:
     $$  || A x - b || < |\varepsilon| $$
     if it is positive then the stopping test is \index{stop test}
         $$  || A x - b || < \frac{|\varepsilon|}{|| A x_{0} - b ||} $$
 
-    \item[init=]   \index{problem!init=}  \index{solve!init=}boolean expression, if it is false or 0 \index{init=}
+    \item[init=]   \index{problem!init=}  \index{solver!init=}boolean expression, if it is false or 0 \index{init=}
     the matrix is reconstructed. Note that if the mesh changes the matrix is
     reconstructed too.
-    \item[precon=]  \index{problem!precon=}  \index{solve!precon=}name of a function (for example \texttt{P}) to set the precondioner. \index{precon=}
+    \item[precon=]  \index{problem!precon=}  \index{solver!precon=}name of a function (for example \texttt{P}) to set the precondioner. \index{precon=}
     The prototype for the function \texttt{P} must be
 \bFF
     @func @real[@int]  P(@real[@int] & xx) ;
 \eFF
-      \item[tgv=]  \index{problem!tgv=}  \index{solve!tgv=}  Huge value ($10^{30}$), to lock boundary conditions
+      \item[tgv=]  \index{problem!tgv=}  \index{solver!tgv=}  Huge value, for lock boundary conditions
+      \item[dimKrylov=]  \index{problem! dimKrylov =}  \index{solver! dimKrylov =}  dimension of the Krylov space.
 \end{description}
 
 \subsection{Problem definition}
 
-Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
+Below  \texttt{v} is the unknown function and \texttt{vv} is the test function.
 
   After the "=" sign, one may find sums of:
-  \index{int1d}\index{int2d}\index{intalledges}
+  \index{int1d}\index{int2d}
 
 \begin{itemize}
     \item a name; this is the name given to the
      variational form (type \texttt{varf} \index{varf}) for possible reuse.
-    \item  the bilinear form term:
-    \begin{itemize}
-       \item[-)]   \texttt{ int2d(Th)( K*v*w) } $ \displaystyle =       \sum_{T\in\mathtt{Th}}\int_{T } K\,v\,w  $ 
-       \item[-)]   \texttt{ int2d(Th,1)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{1}}\int_{T} K\,v\,w  $ 
-          
-       \item[-)] \texttt{ int1d(Th,2,5)( K*v*w) }  $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\partial T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5})
-          } K\,v\,w  $ 
- 
-       \item[-)] \texttt{ intalledges(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{\partial T } K\,v\,w  $ 
-       \item[-)] \texttt{ intalledges(Th,1)( K*v*w) } $ \displaystyle = \sum_{{T\in\mathtt{Th},T\subset \Omega_{1}}}\int_{\partial T } K\,v\,w  $ 
+    \item  A bilinear form
+         \texttt{ int1d(Th)( K*v*vv) },
+        \texttt{ int1d(Th,2,5)( K*v*vv) },
+        a sparce matrix of type \texttt{matrix}
+    \item  A linear form
+         \texttt{ int1d(Th)( K*v) },
+        \texttt{ int1d(Th,2,5)( K*v) },
+        a vector of type  \texttt{real[int]}
 
-
-        
-       \item[-)]  a sparce matrix of type \texttt{matrix}
-       \end{itemize}
-    \item  the linear form term:
-         \begin{itemize}
-       \item[-)]
-         \texttt{ int1d(Th)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T
-          } K\,w  $ 
-
-      \item[-)] \texttt{ int1d(Th,2,5)( K*w) }   $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\partial T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5})
-          } K \,w  $ 
-
-       \item[-)] \texttt{ intalledges(Th)( f*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{\partial T } f\,w  $ 
-
-       \item[-)] a vector of type  \texttt{real[int]}
-      \end{itemize}
- 
-    \item  The boundary condition form term :
+    \item  The boundary condition form
     \begin{itemize}
         \item  An "on" form (for Dirichlet ) :\index{on}
      \texttt{ on(1, u = g )}\index{on}
         \item  a linear form on $\Gamma$  (for Neumann )
-         \texttt{ -int1d(Th))( f*w) } or \texttt{ -int1d(Th,3))( f*w) }
+         \texttt{ int1d(Th))( -f*vv) } or \texttt{ int1d(Th,3))( -f*vv) }
         \item   a bilinear form on $\Gamma$  or $\Gamma_{2}$ (for  Robin )
-         \texttt{ int1d(Th))( K*v*w) } or
-         \texttt{ int1d(Th,2))( K*v*w)}.
+         \texttt{ int1d(Th))( K*v*vv) } or
+         \texttt{ int1d(Th,2))( K*v*vv)}.
 
     \end{itemize}
 
@@ -1674,32 +1409,15 @@ fonction can be different in the case of linear form.
 
 {\bf Important}: it is not possible to write in the same integral the
 linear part and the bilinear part such as in
-\texttt{ int1d(Th)( K*v*w - f*w) }.
+\texttt{ int1d(Th)( K*v*vv - f*vv }.
 
 \subsection{Integrals}
   There are three kinds of integrals:
   \begin{itemize}
   \item surface integral defined with the keyword \texttt{int2d}
   \item integrals on curves \texttt{int1d}.
-  \item integrals on the three edges of all triangles   \texttt{intalledges},	 remark the edges are
-   see two times. \index{intalledges}\index{int2d}\index{int1d}
+  \item integrals on the edges of all triangle  \texttt{intalledges}.\index{intalledges}\index{int2d}\index{int1d}
   \end{itemize}
-
-the syntaxe is :
-\bFF
-  keywork(domain_parameters)( function ) 
-\eFF
-where the \texttt{(domain\_parameters)} given the 
-definition of the domain of integration and the kind of quadrature formulae.
-
-The \texttt{(domain\_parameters)} can be :
-\begin{itemize}
-\item \texttt{(Th)}    ???
-\item \texttt{(Th,1)}  ???
-\item \texttt{(Th,1,qforder=2)} ??? 
-\item \texttt{(Th,1,qft= qf3pT, qfe= qf2pE)} ??? 
-\end{itemize}
-where where \texttt{Th} is a mesh.
 
 Integrals can be used to define the variational form, or to
 compute integrals proper. It is possible to choose the order of the
@@ -1708,8 +1426,8 @@ order of the Gauss formula, or directly the name of the formula
  with \texttt{qft=name} in 2d integrals and \texttt{qfe=name}
   in 1d integrals.
 
- The quadrature formulae on triangles are:
-  \index{qforder=}\index{qft=}
+ The integration formulae on triangles are:
+  \index{qforder=}\index{qforder=}
    \index{int2d}\index{qf1pT}\index{qf2pT}\index{qf2pT}
 
 \bigskip
@@ -1725,16 +1443,11 @@ order of the Gauss formula, or directly the name of the formula
     \hline
     \texttt{qf3pT} & triangle & 6 & 4 & 7  \\
     \hline
-    \texttt{qf1pTlump} & triangle &  & 4 & 3  \\
-    \hline
-    \texttt{qf2pT4P1} & triangle &  & 2 & 9  \\
-    \hline
-    
 \end{tabular}
 
 \bigskip
 
-The quadrature formulae on edges are:
+The integration formulae on edges are:
   \index{int1d}\index{qf1pE}\index{qf2pE}\index{qf2pE}
 
 \bigskip
@@ -1800,13 +1513,13 @@ Here we have three matrices $A,Bx,By$, and we can solve the problem:\\
 find $ u_{1} \in X_{h}$ such that
 $$ a(v_{1},u_{1})= by(v_{1},f), \forall v_{1}\in X_{0h}, $$
 $$ u_{1} = g , \quad \mbox{on~} \Gamma_{1}, \mbox{and}\quad u_{1}=0 \quad \mbox{on~}  \Gamma_{1}\cup \Gamma_{2}\cup \Gamma_{4}$$
-with the following line (where $f=x$, and $ g=sin(x)$)\index{[]@\verb=[]=}
+with the following line (where $f=x$, and $ g=sin(x)$)
 \bFF
 Mh f=x;
 Xh g=sin(x);
-b[]  = Bx'*f[]; // 
+b[]  = Bx'*f[]; // \index{[]}
 b[] += bc1[] .*bcx[]; // u1= g on $\Gamma_{3}$ boundary see following remark
-u1[] = A^-1*b[]; // solve the linear system \index{solve!linear system}\index{\string^-1}
+u1[] = A^-1*b[]; // solve the linear system \index{solve!linear system}
 \eFF
 \begin{remark} The boundary condition \index{boundary condition} is implemented
  by penalization and the vector \texttt{bc1[]} contains
@@ -1814,7 +1527,7 @@ u1[] = A^-1*b[]; // solve the linear system \index{solve!linear system}\index{\s
 so to change the boundary condition,
 we have just to multiply the vector $bc1[]$ by the value $f$
  of the new boundary condition term by term
-with the operator \texttt{.*}.\index{.*@\verb=.*=}
+with the operator \texttt{.*}.\index{.*}
 The \texttt{StokesUzawa.edp} \ref{Uzawa} gives
  a real example of using all this features.
 \end{remark}
@@ -1857,7 +1570,6 @@ and the matrix $B$.
          \item[\texttt{ivalue=}]     the array to store the imag. part of the eigenvalues 
          \item[\texttt{vector=}]    the array to store the eigenvectors. 
  For real nonsymmetric problems, complex eigenvectors are given as two consecutive vectors, so if eigenvalue $k$ and $k+1$ are complex conjugate eigenvalues, the $k$th vector will contain the real part and the $k+1$th vector the imaginary part of the corresponding complex conjugate eigenvectors. 
-
          \item[\texttt{tol=}]        the relative accuracy to which eigenvalues are to be determined;
          \item[\texttt{sigma=}]    the shift value;
          \item[\texttt{maxit=}]    the maximum number of iterations allowed;
@@ -1869,7 +1581,7 @@ and the matrix $B$.
 In the first example, we compute   the eigenvalue and the eigenvector of the 
  Dirichlet problem  on square $\Omega=]0,\pi[^2$. 
 
-The problem is find:   $\lambda$, and $\nabla u_{\lambda}$  in $\mathbb{R}× H^1_0(\Omega)$
+The problem is find:   $\lambda$, and $\nabla u_{\lambda}$  in $\mathbb{R}\times H^1_0(\Omega)$
 $$ \int_\Omega \nabla u_{\lambda} \nabla v = \lambda int_\Omega u  v \quad  \forall v \in H^1_0(\Omega)$$
 
 The exact 
@@ -1917,11 +1629,10 @@ Vh u1,u2;
 int nev=20;  // number of computed eigen valeu close to sigma
 
 real[int] ev(nev); // to store the  nev eigenvalue
-Vh[int] eV(nev);   // to store the nev eigenvector \index{EigenValue}
+Vh[int] eV(nev);   // to store the nev eigenvector
 
-
-@int k=@EigenValue(OP,B,sym=true,sigma=sigma,value=ev,vector=eV,
-                   tol=1e-10,maxit=0,ncv=0);
+// \index{EigenValue}
+@int k=@EigenValue(OP,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0);
 
 //   tol= the tolerace \hfilll
 //   maxit= the maximal iteration see arpack doc.\hfilll
@@ -2040,14 +1751,13 @@ The named parameter are
     
     \itemtt[ps=]  \index{plot!ps=}  string expression to save the plot on postscript file
     \itemtt[coef=]  \index{plot!coef=} the vector arrow coef between arrow unit and domain unit.
-    \itemtt[fill=]  \index{plot!coef=} to fill between isovalues.
+    \itemtt[fill=]  \index{\index{plot!coef=}}to fill between isovalues.
      \itemtt[cmm=]  \index{plot!cmm=}string expression to write in the graphic window
      \itemtt[value=]  \index{plot!value=}to plot the value of isoline and the value of vector arrow.
     \itemtt[aspectratio=] \index{plot! aspectratio =}boolean to be sure that the aspect ratio of plot
  is preserved or not.
     \itemtt[bb=] \index{plot!bb=}array of 2 array ( like \texttt{ [[0.1,0.2],[0.5,0.6]]}),
        to set the bounding box and specify a partial view where the  box defined by the two corner points [0.1,0.2] and [0.5,0.6].
-
     \itemtt[nbiso=]  \index{plot! nbiso =}(int) sets the number of isovalues (20 by default) 
     \itemtt[nbarrow=] \index{plot!nbarraw=} (int) sets the number of colors of arrow values (20 by default) 
     \itemtt[viso=]  \index{plot!viso=}sets the array  value of isovalues (an array real[int]) 
@@ -2070,10 +1780,8 @@ Vh uh=x*x+y*y,vh=-y^2+x^2;
    yy[i]=uh; // value of uh at point (i/10. , i/10.)
  }
  @plot(Th,uh,[uh,vh],value=true,ps="three.eps",wait=true); // figure \ref{three}
- //  zoom on box defined by the two corner points [0.1,0.2] and [0.5,0.6]
- @plot(uh,[uh,vh],bb=[[0.1,0.2],[0.5,0.6]],
-        wait=true,grey=1,fill=1,value=1,ps="threeg.eps"); // figure \ref{threeg}
- @plot([xx,yy],ps="likegnu.eps",wait=true); // figure \ref{likegnu}
+ //  zoom on box defined by the two corner points [0.1,0.2] and [0.5,0.6] @plot(uh,[uh,vh],bb=[[0.1,0.2],[0.5,0.6]],
+        wait=true,grey=1,fill=1,value=1,ps="threeg.eps"); // figure \ref{threeg} @plot([xx,yy],ps="likegnu.eps",wait=true); // figure \ref{likegnu}
 \eFF
 \twoplot[height=6cm]{three}{threeg}{ mesh, isovalue, and
 vector}{inlargement in grey of isovalue, and
@@ -2088,24 +1796,8 @@ only on unix computer.
 
 You just and to the previous exemple: 
 {\def\bks{$\backslash$}
-\bFF
-// file for gnuplot
-{
-  @ofstream gnu("plot.gp");
-  @for (int i=0;i<=n;i++)
-   {
-     gnu <<  xx[i] << " " << yy[i] << endl;
-    }
-} //  the file plot.gp is close because the variable gnu is delete
-
-//  to call gnuplot command and wait 5 second (tanks to unix command)
-//  and make postscipt plot 
-@exec("echo 'plot \bks"plot.gp\bks" w l \bks
-pause 5 \bks
-set term postscript \bks
-set output \bks"gnuplot.eps\bks" \bks
-replot \bks
-quit' | gnuplot"); 
+\bFF// file for gnuplot{  @ofstream gnu("plot.gp");  @for (int i=0;i<=n;i++)   {     gnu <<  xx[i] << " " << yy[i] << endl;    }} //  the file plot.gp is close because the variable gnu is delete
+//  to call gnuplot command and wait 5 second (tanks to unix command)//  and make postscipt plot @exec("echo 'plot \bks"plot.gp\bks" w l \bkspause 5 \bksset term postscript \bksset output \bks"gnuplot.eps\bks" \bksreplot \bksquit' | gnuplot"); 
 \eFF}
 \plot[height=7cm,angle=270]{gnuplot}{Plots a cut of uh with gnuplot}
 
@@ -2116,25 +1808,7 @@ software is installed.
 \index{medit}\index{exec}
 
 \bFF
-// build square $]-1,1[^2$
-mesh Th=square(10,10,[2*x-1,2*y-1]); 
-fespace Vh(Th,P1);
-Vh u=2-x*x-y*y;
-
-   savemesh(Th,"mm",[x,y,u*.5]); //save mm.points and mm.faces file 
-// for medit
-   // build a mm.bb file 
-	{ ofstream file("mm.bb"); 
-	file << "2 1 1 "<< u[].n << " 2 \n";
-	int j;
-	for (j=0;j<u[].n ; j++)  
-	  file << u[][j] << endl; 
-    }  
-    // call medit command 	
-    exec("medit mm");
-    // clean files on unix OS
-    exec("rm mm.bb      mm.faces   mm.points");
-
+// build square $]-1,1[^2$mesh Th=square(10,10,[2*x-1,2*y-1]); fespace Vh(Th,P1);Vh u=2-x*x-y*y;   savemesh(Th,"mm",[x,y,u*.5]); //  save mm.points and mm.faces file for medit   // build a mm.bb file 	{ ofstream file("mm.bb"); 	file << "2 1 1 "<< u[].n << " 2 \n";	int j;	for (j=0;j<u[].n ; j++)  	  file << u[][j] << endl;     }      // call medit command 	    exec("medit mm");    // clean files on unix OS    exec("rm mm.bb      mm.faces   mm.points");
 \eFF
 \plot[height=10cm]{medit}{medit plot}
 
@@ -2166,12 +1840,10 @@ quadrature errors the scheme is unconditionnally stable.
 \itemtt[<exp4>]   is the name of  the finite element function which is convected (u in the exemple above)
 \end{description}
 {\bf Warning} 
-\texttt{convect}  is a non-local operator; in  the instruction \texttt{phi=convec([u1,u2],-dt,phi0)} every values of
-\texttt{phi0} are used to compute \texttt{phi}, So \ttCC{phi=convec([u1,u2],-dt,phi0)} won't work.
+\texttt{convect}  is a non-local operator; in  the instruction "phi=convec([u1,u2],-dt,phi0)" every values of
+phi0 are used to compute phi So \ttCC{phi=convec([u1,u2],-dt,phi0)} won't work.
 
 \section{algorithm}
-
- The associated example is fully defined in \texttt{algo.edp} file.
 
  \subsection{conjugate Gradient}
 
@@ -2185,10 +1857,6 @@ which compute $\frac{\partial J}{\partial x_i}$, so the two parameters
 are the name of the function with prototype \ttCC{@func\ @real[@int]\  dJ(@real[@int] \& xx)} 
  which compute $\frac{\partial J}{\partial x_i}$, 
 a vector \ttCC{x} of type \ttCC{@real[@int]} to initialize the process and get the result.
-
-remark, you can use the \texttt{macro} tools (see \ref{macro}) to build easily the differential
- see example \texttt{Newtow.edp}.
-
 
 
 Two version are available:
@@ -2204,9 +1872,9 @@ The named parameter of this two function are:
 \itemtt[precon=] set the preconditionner function (\texttt{P} for exemple)   by default it is the identity, remark the prototype 
 is \ttCC{@func\ @real[\@int]\ P(@real[@int] \&x)}.
 \itemtt[eps=] set the value of the stop test $\varepsilon$ ($=10^{-6}$ by default) if positive then relative test 
-$||dJ(x)||_P\leq \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\leq |\varepsilon|$.
+$||dJ(x)||_P\le \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\le |\varepsilon|$.
 \itemtt[veps=] set et return the value of the stop test,  if positive then relative test 
-$||dJ(x)||_P\leq \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\leq |\varepsilon|$.
+$||dJ(x)||_P\le \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\le |\varepsilon|$.
 The return value is  minus  the real stop test (remark: it is usefull in loop).
 
 \end{description}
@@ -2268,129 +1936,8 @@ Example of utilization of \texttt{algo.edp}
 \section{More examples}
 
 \subsection{A\_tutorial.edp}
+\include{A_tutorial}
 
-Consider the problem
-\eq{ -\Delta v = 1 \hbox{ in } \Omega=\{(x,y)\in R^2 : x^2+y^2\leq
-1\},~~~v=0\hbox{ on } \Gamma=\partial\Omega.
-}
-The problem is solved by the finite element method, namely:
-\\
-Find $u\in V$ the space of continuous \index{femp1}piecewise linear functions
-on a triangulation of $\Omega$ which are zero on the boundary
-$\partial\Omega$ such that
-\eq{
-    \int_\Omega \nabla u\cdot\nabla w = \int_\Omega w~~~\forall
-    w\in V
-}
-The first thing to do is to prepare the mesh (i.e. the triangulation) ;
-that is done by first defining the border\index{border} (the
-unit circle) with label one \index{label} and then call the mesh generator \index{buildmesh}(buildmesh) with
-the right orientation of the \index{border}border (by definition $\Omega$ is
-on the left side of the oriented $\Gamma$, the ).
-
-\bFF
-@border a(t=0,2*pi){ x = cos(t); y = sin(t);@label=1;};
-@mesh disk = @buildmesh(a(50));
-@plot(disk);  // to see the mesh
-\eFF
-
-The second thing is to define the continuous piecewise linear functions spaces.
-
-\index{fespace}
-\bFF
-@fespace femp1(disk,@P1);  // define the femp1 space
-femp1 u,v;  //  introduice the function and test function
-\eFF
-Next, \texttt{freefem++} will define
-the PDE discretized by FEM in variational form with the following
-instruction,  and solve the problem
-
-\bFF
-  @problem laplace(u,v) =  // u is the unknown and v is the test function
-    @int2d(disk)( dx(u)*dx(v) + dy(u)*dy(v) )     //  bilinear form
-  + @int2d(disk)( -1*v )                          //  linear form
-  + @on(1,u=0) ;                                // boundary condition
-
-laplace;  // solve the problem
-\eFF
-Next we can check that the result is correct.
-Here we display the result first and then display the error field
-and compute the $L^2$ error and the $H^1$ error
-
-\bFF
-@plot (u,value=true,wait=true); // to see the value of isoline  and wait
-@femp1 error=u-(1-x^2-y^2)/4;// you only plot FE function,
-//  so do interpolation
-@plot(error,value=true,wait=true); // plot the error
-
-@cout << "error L2=" << sqrt(@int2d(disk)( (u-(1-x^2-y^2)/4) ^2) )<< @endl;
-@cout << "error H10=" << sqrt(   @int2d(disk)((dx(u)+x/2)^2)
-                              + @int2d(disk)((dy(u)+y/2)^2))<< @endl;
-\eFF
-For better results we can use mesh adaptation. This module constructs a mesh which fits
-best a function of $V$, so $u$ is the main argument of \texttt{adaptmesh}.
-Note that \index{adaptmesh}adaptmesh "improves" a mesh, so it requires also the name of a mesh for argument.
-Therefore mesh adaptation is done in \texttt{freefem++} by
-\bFF
- disk = @adaptmesh(disk,u,err=0.01);
- @plot(disk,wait=1);
-\eFF
-where \texttt{disk} is now a new mesh adapted to $u$.
-
-To check that this mesh is better, we solve the problem again and compute the errors.
-Notice the improvement!
-
-\bFF
-laplace;
-@plot (u,value=true,wait=true);
-err =u-(1-x^2-y^2)/4;
-@plot(err,value=true,wait=true);
-@cout << "error L2=" << sqrt(@int2d(disk)( (u-(1-x^2-y^2)/4) ^2) )<< @endl;
-@cout << "error H10=" << sqrt(  @int2d(disk)((dx(u)+x/2)^2)
-                             + @int2d(disk)((dy(u)+y/2)^2))<< @endl;
-\eFF
-Output seen on the console:
-{\small
-\bFF
-  Nb of common points 1
-  --  mesh:  Nb of Triangles =    434, Nb of Vertices 243
-   Nb of edges on Mortars  = 0
-   Nb of edges on Boundary = 50, neb = 50
-    Nb Mortars 0
-    Number of Edges                 = 676
-    Number of Boundary Edges        = 50
-    Number of Mortars  Edges        = 0
-    Nb Of Mortars with Paper Def    = 0 Nb Of Mortars = 0
-    Euler Number nt- NbOfEdges + nv = 1= Nb of Connected Componant - Nb Of Hole
- min xy -1 -0.998027 max xy1 0.998027
- Nb Of Nodes = 243
- Nb of DF = 243
- -- Solve :           min 5.343e-32  max 0.249999
- -- borne de la function  (DF)-0.000890628 0.000858928
- min xy -1 -0.998027 max xy1 0.998027
- min xy -1 -0.998027 max xy1 0.998027
-error L2=0.00211901
-error H10=0.0383498
-  --  mesh:  Nb of Triangles =   1535, Nb of Vertices 813
-   Nb of edges on Mortars  = 0
-   Nb of edges on Boundary = 89, neb = 89
-    Nb Mortars 0
-    Number of Edges                 = 2347
-    Number of Boundary Edges        = 89
-    Number of Mortars  Edges        = 0
-    Nb Of Mortars with Paper Def    = 0 Nb Of Mortars = 0
-    Euler Number nt- NbOfEdges + nv = 1= Nb of Connected Componant - Nb Of Hole
- min xy -0.999441 -0.999752 max xy1 0.999828
- Nb Of Nodes = 813
- Nb of DF = 813
- -- Solve :           min 3.18031e-32  max 0.249946
- min xy -0.999441 -0.999752 max xy1 0.999828
- -- function's bound   -0.000303323 0.000402198
- min xy -0.999441 -0.999752 max xy1 0.999828
-error L2=0.000585005
-error H10=0.0189227
-\eFF
-}
 
 \subsection{Periodic }\index{periodic}\index{fespace!periodic=}
 Solve of the Laplace equation 
@@ -2400,8 +1947,8 @@ a  square $]0,2\pi[^2$ with bi-periodic boundary condition.
 \bFF
 @mesh Th=square(10,10,[2*x*pi,2*y*pi]);
 // defined the \bgroup\tt fespace\egroup  with periodic condition
-//    label :  2 and 4  are left and right   side with y the curve abcissa 
-//             1 and 2  are bottom and upper side with x the curve abcissa
+//    label :  2 and 4  are left and right   side with y abcissa 
+//             1 and 2  are bottom and upper side with x abcissa
 @fespace Vh(Th,P2,periodic=[[2,y],[4,y],[1,x],[3,x]]);   
  Vh uh,vh;              // unkown and test function. 
  @func f=sin(x+pi/4.)*cos(y+pi/4.);      //  right hand side function 
@@ -2417,7 +1964,7 @@ a  square $]0,2\pi[^2$ with bi-periodic boundary condition.
 
 \plot[height=6cm]{period}{The isovalue of solution $u$ with periodic boundary condition}
 
-An over exemple is in \texttt{periodic4.edp} file, with 
+An over exemple is in {periodic4.edp} file, with 
 periodic condition no parallel to the axis.
 
 Solve a diamond with a hole:
@@ -2495,7 +2042,7 @@ There are several formats available to store the mesh.
 Now we are going to solve the Laplace equation with \index{Dirichlet}
 Dirichlet boundary conditions. The problem is coercive and symmetric,
 so the linear system can be solved with the conjugate gradient
-method \index{solver=!CG} (parameter \texttt{solver=CG}
+method \index{solver!CG} (parameter \texttt{solver=CG}
 with the stopping criteria on the residual, here
 \texttt{eps=1.0e-6}).
 \\ Next we solve  he same problem on an adapted (and finer) mesh 4 times:
@@ -2544,33 +2091,16 @@ The list   with their default value is in section \ref{adaptmesh}.
 In this exemple,  we do metric mesh adaption and we computionj the classical 
 residual error indicator $\eta_{K}$ on the element $K$ for the Poisson problem.
 
-
 First, we solve the same problem as in a previous example.
 \bFF
-@border ba(t=0,1.0){x=t;   y=0;  label=1;}; // comment 
-@border bb(t=0,0.5){x=1;   y=t;  label=2;};
-@border bc(t=0,0.5){x=1-t; y=0.5;label=3;};
-@border bd(t=0.5,1){x=0.5; y=t;  label=4;};
-@border be(t=0.5,1){x=1-t; y=1;  label=5;};
-@border bf(t=0.0,1){x=0;   y=1-t;label=6;};
-@mesh Th = buildmesh (ba(6) + bb(4) + bc(4) +bd(4) + be(4) + bf(6));
-
-@fespace Vh(Th,P2);
-Vh u,v;
-
-@real error=0.01;
-func f=(x-y);
-problem Probem1(u,v,solver=CG,eps=1.0e-6) =
-    int2d(Th,qforder=5)( u*v*1.0e-10+  dx(u)*dx(v) + dy(u)*dy(v)) 
-  + int2d(Th,qforder=5)( -f*v);
+@border ba(t=0,1.0){x=t;   y=0;  label=1;}; // comment @border bb(t=0,0.5){x=1;   y=t;  label=2;};@border bc(t=0,0.5){x=1-t; y=0.5;label=3;};@border bd(t=0.5,1){x=0.5; y=t;  label=4;};@border be(t=0.5,1){x=1-t; y=1;  label=5;};@border bf(t=0.0,1){x=0;   y=1-t;label=6;};@mesh Th = buildmesh (ba(6) + bb(4) + bc(4) +bd(4) + be(4) + bf(6));
+@fespace Vh(Th,P2);Vh u,v;@real error=0.01;func f=(x-y);problem Probem1(u,v,solver=CG,eps=1.0e-6) =    int2d(Th,qforder=5)( u*v*1.0e-10+  dx(u)*dx(v) + dy(u)*dy(v))   + int2d(Th,qforder=5)( -f*v);
 \eFF
 \index{jump}\index{intalledges}\index{square}\index{lenEdge}\index{hTriangle}%\index{area}
- \index{qforder=}
+
 Now, the local  error indicator $\eta_{K}$ is:
 \def\Th{\mathcal{T}_{h}}
-
 \def\AK{\mathcal{E}_{K}}
-
 
   $$\eta_{K} =\left(  h_{K}^{2} || f -\Delta u_{{h}} ||_{L^{2}(K)}^{2} +\sum_{e\in \AK} h_{e} \,||\, [ \frac{\partial u_{h}}{\partial n_{k}}] \,||^{2}_{L^{2}(e)} \right)^{\frac{1}{2}}
    $$
@@ -2580,32 +2110,10 @@ Now, the local  error indicator $\eta_{K}$ is:
  
  
 Of coarse, we can use a variational form to compute $\eta_{K}^{2}$,
-with test function constante function by triangle.
-\bFF  
-@fespace Nh(Th,P0); // the set function constante function by triangle
-Nh eta,logeta;
-@varf indicator2(uu,chiK) = 
-       intalledges(Th)(chiK*lenEdge*square(jump(N.x*dx(u)+N.y*dy(u))))
-       +int2d(Th)(chiK*square(hTriangle*(f-dxx(u)-dyy(u))) );
+with test function constante function by triangle.\bFF  
+@fespace Nh(Th,P0); // the set function constante function by triangleNh eta,logeta;@varf indicator2(uu,chiK) = intalledges(Th)(chiK*lenEdge*square(jump(N.x*dx(u)+N.y*dy(u))))                         +int2d(Th)(chiK*square(hTriangle*(f-dxx(u)-dyy(u))) );
 \eFF
-\bFF
-@for (int i=0;i< 4;i++)
-{   
-  Probem1; 
-   cout << u[].min << " " << u[].max << endl; 
-   plot(u,wait=1);
-   cout << " indicator2 " << endl;
-   
-   eta[] = indicator2(0,Nh);
-   eta=sqrt(eta);
-   cout << eta[].min << " " << eta[].max << endl;
-   plot(eta,fill=1,wait=1,cmm="indicator density ",ps="rhoP2.eps");
-   Th=adaptmesh(Th,[dx(u),dy(u)],err=error,anisomax=1);
-   plot(Th,wait=1);
-   u=u;
-   eta=eta;
-  error = error/2;
-} ;
+\bFF@for (int i=0;i< 4;i++){     Probem1;    cout << u[].min << " " << u[].max << endl;    plot(u,wait=1);   cout << " indicator2 " << endl;      eta[] = indicator2(0,Nh);   eta=sqrt(eta);   cout << eta[].min << " " << eta[].max << endl;   plot(eta,fill=1,wait=1,cmm="indicator density ",ps="rhoP2.eps");   Th=adaptmesh(Th,[dx(u),dy(u)],err=error,anisomax=1);   plot(Th,wait=1);   u=u;   eta=eta;  error = error/2;} ;
 \eFF
 If the method is correct, we espect an almost constant function $\eta$, as you can see 
 on the graphics .label{fig rhop2}.
@@ -2779,7 +2287,7 @@ compute respectively $ \nabla J$ and $ \nabla^2 J$
     real res= v[]'*v[]; // the dot product 
     cout << i <<  " residu^2 = " <<  res  << endl;
     @if( res< 1e-12) @break;
-    @matrix H= vhJ(Vh,Vh,factorize=1,solver=LU); //\index{matrix!factorize=}
+    @matrix H= vhJ(Vh,Vh,factorize=1,solver=LU); 
     w[]=H^-1*v[];
     u[] -= w[];
    }
@@ -2806,7 +2314,7 @@ on the velocity,  $u=u_{\Gamma}$ on $\Gamma$.
 A classical way to discretize the Stokes equation with a mixed formulation,
 is to solve the variational problem and then discretize it:
 
-Find $(u_{h},p_{h}) \in X_{h}^2 × M_{h}$ such that $u_{h} = u_{\Gamma h}$,
+Find $(u_{h},p_{h}) \in X_{h}^2 \times M_{h}$ such that $u_{h} = u_{\Gamma h}$,
 and such that
 \Blue{
 \begin{equation} \label{eq vf Stokes}
@@ -2864,8 +2372,8 @@ P_{1} \}$$}
 The FE spaces and functions  are constructed by
 
 \bFF
-@fespace Xh(Th,@P2); //  definition of the velocity component space
-@fespace Mh(Th,@P1);  //  definition of the pressure space
+@fespace Xh(Th,@P2);
+@fespace Mh(Th,@P1);
 Xh u2,v2;
 Xh u1,v1;
 Xh p,q;
@@ -2906,7 +2414,7 @@ Crout needs it: all the sub-matrices must be invertible.
 
 If the \index{streamlines}streamlines are required, they can be
 computed by finding $\psi$ such that rot$\psi=u$ or better,
-\Blue{$$-\Delta\psi=\nabla× u$$}
+\Blue{$$-\Delta\psi=\nabla\times u$$}
 \bFF
 Xh psi,phi;
 
@@ -2920,7 +2428,7 @@ Xh psi,phi;
 
 Now the Navier-Stokes equations are solved
 \eq{
-    {\partial {u}\over\partial t} +u\cdot\nabla u-\nu \Delta u+\nabla p=0,~~~ \nabla\cdot u=0
+    {\partial u\over\partial t} +u\cdot\nabla u-\Delta u+\nabla p=0,~~~ \nabla\cdot u=0
 }
 with the same boundary conditions and with initial conditions $u=0$.
 
@@ -3042,7 +2550,7 @@ divup(p[]); // compute the final solution
  in the driven-cavity,
  with the Uzawa  algorithm preconditioned by the Cahouet-Chabart method.
 
- The idea of the preconditionner is that in a periodic domain, all
+ The idea of the precondioner is that in a periodic domain, all
  differential operators commute and  the  Uzawa algorithm comes to solving the
  linear operator  $ \nabla. ( (\alpha Id + \nu \Delta)^{-1} \nabla$,
  where $Id$ is the identity operator.
@@ -3063,9 +2571,9 @@ Then we define the time step $ \Delta t$, viscosity, and new variational form, a
                         + xnu*dy(u1)*dy(u2) + u1*u2*alpha  )
                         +  @on(1,2,4,u1=0)  + @on(3,u1=1) ;
 
-A = at(Xh,Xh,solver=CG);  //  change the matrix \index{matrix!=}\index{matrix!solver=}
+A = at(Xh,Xh,solver=CG);  //  change the matrix \index{matrix!=}
 
-//  set the 2 convect variational form \index{qforder=} \index{convect}
+//  set the 2 convect variational form \index{qforder} \index{convect}
 @varf  vfconv1(uu,vv)  = @int2d(Th,qforder=5) (@convect([u1,u2],-dt,u1)*vv*alpha);
 @varf  vfconv2(v2,v1)  = @int2d(Th,qforder=5) (@convect([u1,u2],-dt,u2)*v1*alpha);
 
@@ -3186,7 +2694,7 @@ the Schwarz algorithm  runs like this
     u^{m+1}_2|_{\Gamma_2}=u^m_1
 }
  where $\Gamma_i$ is the boundary of $\Omega_i$ and on the
-condition that $\Omega_1\cap\Omega_2\neq\emptyset$ and that $u_i$
+condition that $\Omega_1\cap\Omega_2\ne\emptyset$ and that $u_i$
 are zero at iteration 1.
 \\\\
 Here we take $\Omega_1$ to be a quadrangle, $\Omega_2$ a disk and
@@ -3272,8 +2780,8 @@ where  $u_i$ is solution of the following Laplace problem:
 
 To solve this problem we just make a loop
 with upgrading$\lambda$ with
-$$\lambda = \lambda ± \frac{(u_1-u_2)}{2}$$
-where the sign $+$ or $-$ of $±$ is choose to have convergence.
+$$\lambda = \lambda \pm \frac{(u_1-u_2)}{2}$$
+where the sign $+$ or $-$ of $\pm$ is choose to have convergence.
 
 \bFF
 // schwarz1 without overlapping
@@ -3414,7 +2922,7 @@ $$
 Remark, the  difference between the two notations \ttCC{v1} and \ttCC{v1[]}  is: 
  \ttCC{v1} is the finite element  function and \ttCC{v1[]} 
 is the vector in the canonical basis of the   finite element  function  \ttCC{v1} .
-\index{[]@\verb=[]=}
+\index{[]}
  
 \bFF
 Vh1 p=0,q=0; 
@@ -3456,7 +2964,7 @@ for the displacement vector $v(x)\in V$ as
 \forall \vec w\in V
 $$}
 
-The  elastic solids  is a rectangle beam $[0,10]×[0,2]$.
+The  elastic solids  is a rectangle beam $[0,10]\times[0,2]$.
 The data are the gravity force $\vec g$ and the
 boundary stress i$\vec h$ is zero on lower and upper side, and on the  two vertical sides of the beam are locked.
 \bFF
@@ -3479,8 +2987,8 @@ Vh [uu,vv], [w,s];
 // deformation of a beam under its own weight 
 @solve  bb([uu,vv],[w,s])  = 
     @int2d(th)(
-                2*mu*(dx(uu)*dx(w)+dy(vv)*dy(s)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/2 )
-               + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))
+                 2*mu*(dx(uu)*dx(w)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/4 )
+               + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))/2 
              ) 
   + @int2d(th) (-gravity*s)
   + @on(1,uu=0,vv=0)
@@ -3497,7 +3005,7 @@ Vh [uu,vv], [w,s];
 \index{fluid-structure interaction}
 
 
-This problem involves the Lamé system of elasticity
+This problem involves the Lam\'e system of elasticity
 and the Stokes system for viscous fluids with velocity $\vec u$ and pressure $p$:
 \begin{eqnarray*}\Blue
 -\Delta \vec u +\vec\nabla p = 0, \,
@@ -3539,14 +3047,14 @@ $$}
 The data are the gravity force $\vec g$ and the
 boundary stress $\vec h$.
 
-In our example the Lamé system and the Stokes system are coupled by a
+In our example the Lam\'e system and the Stokes system are coupled by a
 common boundary on which
 the fluid  stress creates a displacement of the boundary and hence
 changes the shape of the domain where the Stokes problem is integrated.
 The geometry is that of a vertical driven cavity with an elastic lid.
 The lid is a beam with weight so it will
 be deformed by its own weight and by the normal stress due to the fluid reaction.
-The cavity is the $10 × 10$ square and the lid is a rectangle of height $l=2$.
+The cavity is the $10 \times 10$ square and the lid is a rectangle of height $l=2$.
 \\\\
 A beam sits on a box full of fluid rotating because the left vertical side has velocity one.
 The beam is bent by its own weight, but the pressure of the fluid modifies the bending.
@@ -3760,26 +3268,14 @@ The domain $\Omega$ is defined with:
 The free boundary problem is: 
  
 Find $u$ and $\Omega$ such that:
-
- $$ \left\{\begin{array}{cl} 
- \displaystyle - \Delta u = 0  & \mbox{in } \Omega\\
- \displaystyle      u = y         &\mbox{on } \Gamma_b \\
- \displaystyle      {\partial u  \over \partial n} = 0   &\mbox{on } \Gamma_d \cup \Gamma_a \\
- \displaystyle    {\partial u  \over \partial n} = { q\over K} n_x  
-	        \mbox{\ and \ } {u = y}  &\mbox{on\ } \Gamma_ f
-\end{array}\right. $$
+ $$ \left\{\begin{array}{cl}  \displaystyle - \Delta u = 0  & \mbox{in } \Omega\\ \displaystyle      u = y         &\mbox{on } \Gamma_b \\ \displaystyle      {\partial u  \over \partial n} = 0   &\mbox{on } \Gamma_d \cup \Gamma_a \\ \displaystyle    {\partial u  \over \partial n} = { q\over K} n_x  	        \mbox{\ and \ } {u = y}  &\mbox{on\ } \Gamma_ f\end{array}\right. $$
 
 
 We use a fixe point method;
 $\Omega^0 = \Omega$
 
 in two step, fist we solve the classical following problem:
-$$ \left\{\begin{array}{rll} 
- \displaystyle - \Delta u &= 0  & \mbox{in } \Omega^n\\
- \displaystyle      u &= y         &\mbox{on } \Gamma^n_b \\
- \displaystyle      {\partial u  \over \partial n} &= 0   &\mbox{on } \Gamma^n_d \cup \Gamma^n_a\\
- \displaystyle    u &= y        &\mbox{on\ } \Gamma^n_ f
-\end{array}\right. $$
+$$ \left\{\begin{array}{rll}  \displaystyle - \Delta u &= 0  & \mbox{in } \Omega^n\\ \displaystyle      u &= y         &\mbox{on } \Gamma^n_b \\ \displaystyle      {\partial u  \over \partial n} &= 0   &\mbox{on } \Gamma^n_d \cup \Gamma^n_a\\ \displaystyle    u &= y        &\mbox{on\ } \Gamma^n_ f\end{array}\right. $$
 
 The varitional formulation is:
 
@@ -3789,18 +3285,11 @@ $$
 \Gamma^n_b \cup \Gamma^n_f
 $$
 
-
 and secondly to construte a domain deformation $\mathcal{F}(x,y)=[x,y-v(x,y)]$ 
 
 where $v$ is  solution of  the following problem: 
 
- $$ \left\{\begin{array}{rll} 
- \displaystyle - \Delta v &= 0  & \mbox{in } \Omega^n\\
- \displaystyle      v  &= 0         &\mbox{on } \Gamma^n_a \\
- \displaystyle      {\partial v \over \partial n} &= 0   &\mbox{on } \Gamma^n_b \cup \Gamma^n_d \\
- \displaystyle    {\partial v  \over \partial n}  &=  \displaystyle {\partial u  \over \partial n} - { q\over K} n_x  
-	          &\mbox{on\ } \Gamma^n_ f
-\end{array}\right. $$
+ $$ \left\{\begin{array}{rll}  \displaystyle - \Delta v &= 0  & \mbox{in } \Omega^n\\ \displaystyle      v  &= 0         &\mbox{on } \Gamma^n_a \\ \displaystyle      {\partial v \over \partial n} &= 0   &\mbox{on } \Gamma^n_b \cup \Gamma^n_d \\ \displaystyle    {\partial v  \over \partial n}  &=  \displaystyle {\partial u  \over \partial n} - { q\over K} n_x  	          &\mbox{on\ } \Gamma^n_ f\end{array}\right. $$
 
 The varitional formulation is:
 
@@ -3812,7 +3301,6 @@ $$
 
 finaly the new domain 
 $\Omega^{n+1} = \mathcal{F}(\Omega^n)$
-
 
 
 
@@ -3883,39 +3371,21 @@ verbosity=1;
 \end{figure}
 
 \textBlack\subsection{nolinear-elas.edp}
-\textBlack
-The nonlinear elasticity  problem is find  the deplacement $(u_{1},u_{2})$  minimizing  $J$
-$$ \min J(u_{1},u_{2}) = \int_{\Omega} f(F2) -  \int_{\Gamma_{p}} P_{a} \,  u_{2} $$
+\textBlackThe nonlinear elasticity  problem is find  the deplacement $(u_{1},u_{2})$  minimizing  $J$$$ \min J(u_{1},u_{2}) = \int_{\Omega} f(F2) -  \int_{\Gamma_{p}} Pa  u_{2} $$
 where  $F2(u_{1},u_{2}) =  A(E[u_{1},u_{2}],E[u_{1},u_{2}])$ and $A(X,Y)$ is bilinear sym. positive form with respect two matrix $X,Y$.
 where $f$ is a given $\mathcal{C}^2$  function, and $E[u_{1},u_{2}] = (E_{ij})_{i=1,2,\,j=1,2}$ is the Green-Saint Venant deformation tensor defined  with: 
-$$  E_{ij} = 0.5 ( \partial_i u_j + \partial_j u_i ) + \sum_k \partial_i u_k × \partial_j u_k  $$ 
+$$  E_{ij} = 0.5 ( d_i u_j + d_j u_i ) + \sum_k d_i u_k * d_j*u_k  $$ 
 
 
 
-The differential of $J$ is 
-  $$ DJ(u_{1},u_{2})(v_{1},v_{2}) = \int 2 A(E[u_{1},u_{2}],DE[u_{1},u_{2}](v_{1},v_{2})) f'(F2(u_{1},u_{2}))) -  \int_{\Gamma_{p}} P_{a}  u_{2}  $$
-
-denote $\mathbf{u}=u_{1},u_{2}$, $\mathbf{v}=v_{1},v_{2}$, $\mathbf{w}=(w_{1},w_{2})$ and  
-the second order differential is
- {\begin{eqnarray*}
- D^2 J(\mathbf{u})((\mathbf{v}),(\mathbf{w}))  &= & A(E[\mathbf{u}],DE[\mathbf{u}](\mathbf{v})) A(E[\mathbf{u}],DE[\mathbf{u}](\mathbf{w})) f''(F2(\mathbf{u}))) \\
- & + &  A(DE[\mathbf{u}](\mathbf{v}),DE[\mathbf{u}](\mathbf{w})) f'(F2(\mathbf{u}))) \\
- &+&  A(DE[\mathbf{u}],D^{2}E[\mathbf{u}]((\mathbf{v}),(\mathbf{w}))) f'(F2(\mathbf{u}))) 
-\end{eqnarray*}}
- where $DE$ and $D^{2}E$ are the first and second differential of $E$.
- 
- \medskip
- 
-
+The differential of $J$ is   $$ DJ(u_{1},u_{2})(v_{1},v_{2}) = \int 2 A(E[u_{1},u_{2}],DE[u_{1},u_{2}](v_{1},v_{2})) f'(F2(u_{1},u_{2}))) -  \int_{\Gamma_{p}} Pa  u_{2}  $$ \begin{eqnarray*} D^2Ju_{1},u_{2})((v_{1},v_{2}),(w_{1},w_{2}))  &= & A(E[u_{1},u_{2}],DE[u_{1},u_{2}](v_{1},v_{2})) A(E[u_{1},u_{2}],DE[u_{1},u_{2}](w_{1},w_{2})) f''(F2(u_{1},u_{2}))) \\
+ & & +  A(DE[u_{1},u_{2}](v_{1},v_{2}),DE[u_{1},u_{2}](w_{1},w_{2})) f'(F2(u_{1},u_{2}))) \\ & & +  A(DE[u_{1},u_{2}],DDE[u_{1},u_{2}]((v_{1},v_{2}),(w_{1},w_{2}))) f'(F2(u_{1},u_{2}))) \end{eqnarray*}
 The Newton Method is
 
-choose $ n=0$,and $u_O,v_O$ the initial displacement 
-\begin{itemize}
-\item loop: \par
-\item  \hspace{1cm}    find $(du,dv)$ :  solution of 
+choose $ n=0$,$u_n,v_n$ initial displacement 
+\begin{itemize}\item loop: \par\item  \hspace{1cm}    find $(du,dv)$ :  solution of 
 $$ D^2J(u_n,v_n)((w,s),(du,dv)) =  DJ(u_n,v_n)(w,s) , \quad \forall w,s $$
-\item  \hspace{1cm}      $un =un - du,\quad vn =vn - dv$ 
-\item  \hspace{1cm}      until $(du,dv)$ small is enough
+\item  \hspace{1cm}      $un =un - du,\quad vn =vn - dv$ \item  \hspace{1cm}      until $(du,dv)$ small is enough
 \end{itemize}
 
 \color{black}The way to implement this algorithme in \freefempp is
@@ -3965,13 +3435,14 @@ And  it is easy to make automatic differentiation.
 // non linear par of EE (bilinear)  simple to differential \hfilll
 @macro bEENL(di,dj,u1,u2,v1,v2) (di(u1)*dj(v1)*.5+di(u2)*dj(v2)*0.5) 
 // 
-@macro EENL(di,dj,u1,u2) bEENL(di,dj,u1,u2,u1,u2) // 
-@macro dEENL(di,dj,u1,u2,du1,du2) ( bEENL(di,dj,du1,du2,u1,u2) 
-                                  + bEENL(di,dj,u1,u2,du1,du2) )   
+@macro EENL(di,dj,u1,u2) bEENL(di,dj,u1,u2,u1,u2) 
+// 
+@macro dEENL(di,dj,u1,u2,du1,du2) ( bEENL(di,dj,du1,du2,u1,u2) +  bEENL(di,dj,u1,u2,du1,du2) )   
 //   ------------ \hfilll
-@macro EE(di,dj,ui,uj,u1,u2) (EEL(di,dj,u1,uj) + EENL(di,dj,u1,u2)) //
-@macro dEE(di,dj,dui,duj,u1,u2,du1,du2) (EEL(di,dj,du1,duj) 
-                                         + dEENL(di,dj,u1,u2,du1,du2)) //
+@macro EE(di,dj,ui,uj,u1,u2) (EEL(di,dj,u1,uj) + EENL(di,dj,u1,u2)) 
+//
+@macro dEE(di,dj,dui,duj,u1,u2,du1,du2) (EEL(di,dj,du1,duj) + dEENL(di,dj,u1,u2,du1,du2)) 
+//
 @macro ddEE(di,dj,du1,du2,ddu1,ddu2) ( dEENL(di,dj,du1,du2,ddu1,ddu2)) 
 //
 // remark  : \hfilll
@@ -3982,15 +3453,23 @@ And  it is easy to make automatic differentiation.
 // --- \hfilll
 
 //  the macro corresponding to the 3 componante of E \hfilll
-@macro E1(u,v)  /*E11*/EE(dx,dx,u,u,u,v)  //
-@macro E2(u,v)  /*E12*/EE(dx,dy,u,v,u,v)  //
-@macro E3(u,v)  /*E22*/EE(dy,dy,v,v,u,v)  //
+@macro E1(u,v)  /*E11*/EE(dx,dx,u,u,u,v) 
+ //
+@macro E2(u,v)  /*E12*/EE(dx,dy,u,v,u,v) 
+ //
+@macro E3(u,v)  /*E22*/EE(dy,dy,v,v,u,v) 
+ //
 
-@macro dE1(u,v,uu,vv) /*dE11*/dEE(dx,dx,uu,uu,u,v,uu,vv) // 
-@macro dE2(u,v,uu,vv) /*dE12*/dEE(dx,dy,uu,vv,u,v,uu,vv) //
-@macro dE3(u,v,uu,vv) /*dE22*/dEE(dy,dy,vv,vv,u,v,uu,vv) //
-@macro ddE1(u,v,uu,vv,uuu,vvv) /*ddE11*/ddEE(dx,dx,uu,vv,uuu,vvv) //
-@macro ddE2(u,v,uu,vv,uuu,vvv) /*ddE12*/ddEE(dx,dy,uu,vv,uuu,vvv) //
+@macro dE1(u,v,uu,vv) /*dE11*/dEE(dx,dx,uu,uu,u,v,uu,vv) 
+// 
+@macro dE2(u,v,uu,vv) /*dE12*/dEE(dx,dy,uu,vv,u,v,uu,vv) 
+//
+@macro dE3(u,v,uu,vv) /*dE22*/dEE(dy,dy,vv,vv,u,v,uu,vv) 
+//
+@macro ddE1(u,v,uu,vv,uuu,vvv) /*ddE11*/ddEE(dx,dx,uu,vv,uuu,vvv) 
+//
+@macro ddE2(u,v,uu,vv,uuu,vvv) /*ddE12*/ddEE(dx,dy,uu,vv,uuu,vvv) 
+//
 @macro ddE3(u,v,uu,vv,uuu,vvv) /*ddE22*/ddEE(dy,dy,uu,vv,uuu,vvv) 
 //
 //  a formal bilinear term \hfilll
@@ -4003,12 +3482,13 @@ And  it is easy to make automatic differentiation.
 @macro ddPP(A,B,dA,dB,ddA,ddB,u,v,uu,vv,uuu,vvv) (
   dA(u,v,uu,vv)*dB(u,v,uuu,vvv) + dA(u,v,uuu,vvv)*dB(u,v,uu,vv) 
   +  ddA(u,v,uu,vv,uuu,vvv)*B(u,v) + A(u,v)*ddB(u,v,uu,vv,uuu,vvv) 
-  ) //
+  ) 
+//
 // so the @matrix A is 6 coef \hfilll
 //      
-//     a11 a12 a13 \hfilll
-//     a12 a22 a23 \hfilll
-//     a13 a23 a33 \hfilll
+//     a11 a12 a13
+//     a12 a22 a23
+//     a13 a23 a33
 @macro F2(u,v)  /* F2 */  (
      a11*PP(E1,E1,u,v)
   +  a22*PP(E2,E2,u,v)
@@ -4019,7 +3499,8 @@ And  it is easy to make automatic differentiation.
   +  a12*PP(E2,E1,u,v)
   +  a23*PP(E2,E3,u,v)
   +  a23*PP(E3,E2,u,v)
-)  // end macro F2
+) 
+// end macro F2
 
 @macro dF2(u,v,uu,vv)  /* dF2 */  (
        a11*dPP(E1,E1,dE1,dE1,u,v,uu,vv)
@@ -4031,7 +3512,8 @@ And  it is easy to make automatic differentiation.
      + a31*dPP(E3,E1,dE3,dE1,u,v,uu,vv)
      + a32*dPP(E3,E2,dE3,dE2,u,v,uu,vv)
      + a33*dPP(E3,E3,dE3,dE3,u,v,uu,vv)
-) // end macro dF2 ($D F2$)
+) 
+// end macro dF2 ($D F2$)
 
 @macro ddF2(u,v,uu,vv,uuu,vvv)  /* ddF2 */  (
        a11*ddPP(E1,E1,dE1,dE1,ddE1,ddE1,u,v,uu,vv,uuu,vvv)
@@ -4043,12 +3525,13 @@ And  it is easy to make automatic differentiation.
      + a31*ddPP(E3,E1,dE3,dE1,ddE3,ddE1,u,v,uu,vv,uuu,vvv)
      + a32*ddPP(E3,E2,dE3,dE2,ddE3,ddE2,u,v,uu,vv,uuu,vvv)
      + a33*ddPP(E3,E3,dE3,dE3,ddE3,ddE3,u,v,uu,vv,uuu,vvv)
-) // end macro ddF2  ($D^{2}  F2$)
+)
+// end macro ddF2  ($D^{2}  F2$)
 
-//  differential of J: \hfilll
+//  differential of J:
 
-//  @for hyper elasticity @problem  \hfilll
-//  ------------------------------ \hfilll
+//  @for hyper elasticity @problem 
+//  ------------------------------
 
 @macro f(u) (u) // end of macro  
 @macro df(u) (1) // end of macro  $df=f'$
@@ -4088,10 +3571,16 @@ And  it is easy to make automatic differentiation.
 @int bottom=1, right=2,upper=3,left=4;
 
 @plot(Th);
+
+
  
 @fespace Wh(Th,P1dc);
 @fespace Vh(Th,[P1,P1]);
 @fespace Sh(Th,P1);
+
+
+
+
 
 Wh e2,fe2,dfe2,ddfe2; // optimisation 
 Wh ett,ezz,err,erz; // optimisation 
@@ -4108,7 +3597,7 @@ Vh [uu,vv], [w,s],[un,vn];
                ddF2(un,vn,uu,vv,w,s)* dfe2 
 	     + dF2(un,vn,uu,vv)*dF2(un,vn,w,s)*ddfe2        
 	      )
-   -@int2d(Th,<1)( // $(D J(un))$ part
+   -@int2d(Th,qforder=1)( // $(D J(un))$ part
            dF2(un,vn,w,s) * dfe2  )
    - @int1d(Th,3)(Pa*s) 
    + @on(right,left,uu=0,vv=0);
@@ -4142,12 +3631,12 @@ Sh u1,v1;
 
 @plot([un,vn],wait=1);
 @mesh th1 = @movemesh(Th, [x+un, y+vn]);
-@plot(th1,wait=1); //  see figure \ref{fig nl-elas}
-\eFF
+@plot(th1,wait=1);
+ \eFF
 
 \begin{figure}[hbt]
-\begin{center}\includegraphics[width=16cm]{nl-elas}\end{center}
-\caption{\label{fig nl-elas} The deformated domain}
+\includegraphics[width=15cm]{nl-elas}
+\caption{The deformated domain}
 \end{figure}
 
 
@@ -4156,45 +3645,23 @@ Sh u1,v1;
 A first test of parallisation of \texttt{FreeFem++} is make under mpi.
 We add three word in the language:
 \begin{description}
-\itemtt[mpisize] The total number of  processes\index{mpisize}
-\itemtt[mpirank]  the number of my current process in $\{0,..., mpisize-1\}$.\index{mpirank}
+\itemtt[mpisize] The total number of  processes
+\itemtt[mpirank]  the number of my curent process in $\{0,..., mpisize-1\}$.
 \itemtt [processor] a function to set the possessor to send or receive data 
-\itemtt [broadcast] a function to broadcast from a processor to all other a data \index{broadcast}\index{processor}
 \bFF
     processor(10) << a ; // send to the process 10 the data a;
     processor(10) >> a ; // receive from the process 10 the data a;
 
 \eFF
 \end{description}
-\subsection{Schwarz in parallel}
+\section{Schwarz in parallel}
 If exemple is just the rewritting of exemple \texttt{schwarz-overlap} 
-in section \ref{schwarz-overlap}.\index{schwarz}\index{broadcast}\index{processor}
-\index{array!mesh}
-
-How to use 
-\bFF
-[examples++-mpi] hecht%lamboot
-
-LAM 6.5.9/MPI 2 C++/ROMIO - Indiana University
-
-
-[examples++-mpi] hecht% mpirun -np 2 FreeFem++-mpi schwarz-c.edp
-\eFF
+page \ref{schwarz-overlap.edp}\index{schwarz}
 
 \bFF
-//  a new coding verion c,   methode de schwarz in parallele \hfilll
-// with 2 proc. \hfilll
-//  ------------------------------- \hfilll
-// F.Hecht december 2003 \hfilll
-// ---------------------------------- \hfilll
-//  to test the broadcast instruction \hfilll
-//  and array of mesh  \hfilll
-//  add add the stop test \hfilll
-//  --------------------------------- \hfilll
-
-@if ( mpisize != 2 ) {
+@if ( @mpisize != 2 ) {
   @cout << " sorry number of processeur !=2 " << endl;
-  exit(1);}
+  @exit(1);}
 @verbosity=3;
 @real pi=4*atan(1);
 @int inside = 2;
@@ -4206,47 +3673,55 @@ LAM 6.5.9/MPI 2 C++/ROMIO - Indiana University
 @border e(t=0, pi/2){ x= cos(t); y = sin(t);label=inside;};
 @border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=outside;}; 
 @int n=4;
-@mesh[int]  Th(mpisize);
-@if (mpirank == 0) 
- Th[0] = buildmesh( a(5*n) + b(5*n) + c(10*n) + d(5*n));
-@else
- Th[1] = buildmesh ( e(5*n) + e1(25*n) );
+@mesh th,TH;
 
-@broadcast(@processor(0),Th[0]);
-@broadcast(@processor(1),Th[1]);
+@if (@mpirank == 0) 
+ {
+   th = @buildmesh( a(5*n) + b(5*n) + c(10*n) + d(5*n));
+   @processor(1) << th ;
+   @processor(1) >> TH;
+}
+else
+ {
+   TH = buildmesh ( e(5*n) + e1(25*n) );
+   @cout << " end TH  " << endl;
+   @processor(0) << TH ;
+   @processor(0) >> th;
+ }
 
-@fespace Vh(Th[mpirank],P1);
-@fespace Vhother(Th[1-mpirank],P1);
 
-Vh u=0,v;
-Vhother U=0;
+
+@fespace vh(th,P1);
+@fespace VH(TH,P1);
+vh u=0,v; VH U,V;
 @int i=0;
 
-@problem pb(u,v,init=i,solver=Cholesky) = 
-    @int2d(Th[mpirank])( dx(u)*dx(v)+dy(u)*dy(v) )
-  - @int2d(Th[mpirank])( v) 
-  + @on(inside,u = U)  +  @on(outside,u= U ) ;
+@problem PB(U,V,init=i,solver=@Cholesky) = 
+    @int2d(TH)( dx(U)*dx(V)+dy(U)*dy(V) )
+  + @int2d(TH)( -V) + @on(inside,U = u)  +    on(outside,U= 0 ) ;
+problem pb(u,v,init=i,solver=Cholesky) = 
+    @int2d(th)( dx(u)*dx(v)+dy(u)*dy(v) )
+  + @int2d(th)( -v) + @on(inside ,u = U)  +    on(outside,u = 0 ) ;
 
-@for ( i=0 ;i< 20; i++) 
+
+@for ( i=0 ;i< 10; i++) 
 { 
-  @cout << mpirank << " looP " << i << endl;
-   pb; 
-   //  send u  to the other proc, receive in U
-   @processor(1-mpirank) << u[];   @processor(1-mpirank) >> U[];
-   @real err0,err1;
-   err0 = int1d(Th[mpirank],inside)(square(U-u)) ;
-   // send err0  to the other proc, receive in err1
-   @processor(1-mpirank)<<err0;   @processor(1-mpirank)>>err1;
-   @real err= sqrt(err0+err1);
-   @cout <<" err = " << err << " err0 = " << err0 << ", err1 = " << err1 << endl;
-   @if(err<1e-3) @break;
+  @if (mpirank == 0)
+  {   
+   PB;                    // compute U
+   @processor(1) << U[];  // send    U   to 1
+   @processor(1) >> u[];  // receive u from 1
+  }
+  @else 
+  {
+   pb;                   // compute u
+   @processor(0) << u[]; // send    u     to 0
+   @processor(0) >> U[]; // recieve U from 0
+  }
 };
-@if (mpirank==0)  
-    @plot(u,U,ps="uU.eps");
-
+ if (mpirank==0)  
+    plot(U,u,ps="Uu.eps");
 \eFF
-
-\include{docFFGUI}
 
 \section{ Mesh Files}
  \def\Chars#1{{\tt (C*)}  #1}
@@ -4267,7 +3742,7 @@ Vhother U=0;
  \def\need#1{\hfill{\it  requiert le champ\,:\,#1}}
 
 \subsection{File mesh data structure}
-\index{file!data base}\index{file!bamg}
+\index{file:data base}\index{file:bamg}
 The mesh data structure, output of a mesh generation algorithm, 
 refers to the geometric data structure and in some case to another
 mesh data structure.
@@ -4389,8 +3864,8 @@ where
   \begin{itemize}
    \item $\mathtt{typesol^k = 1}$ the solution {\tt k} is scalare  (1  value per vertex)
    \item $\mathtt{typesol^k = 2}$ the solution {\tt k} is vectorial  (2 values per unknown)
-   \item $\mathtt{typesol^k = 3}$ the solution {\tt k} is a  $2× 2$ symmetric matrix  (3 values per vertex)
-   \item $\mathtt{typesol^k = 4}$ the solution  {\tt k} is a  $2× 2$ matrix  (4 values per vertex)
+   \item $\mathtt{typesol^k = 3}$ the solution {\tt k} is a  $2\times 2$ symmetric matrix  (3 values per vertex)
+   \item $\mathtt{typesol^k = 4}$ the solution  {\tt k} is a  $2\times 2$ matrix  (4 values per vertex)
    \end{itemize}
 
 \item  {\tt nbv} is  a integer equal to the number of vertices
@@ -4522,7 +3997,7 @@ In fortran the  {\tt ftq}  files are read as follows:
 where   if {\tt  k(j) = 3} then the element $j$  is  a triangle and if {\tt k = 4}
 the the element $j$   is a quadrilateral.
 
-\include{addfe}
+\input{addfe}
 
 \section{Grammar}
 \subsection{Keywords}
@@ -4542,7 +4017,6 @@ the the element $j$   is a quadrilateral.
       ifstream 
       include 
       int 
-      load      
       macro
       matrix
       mesh 
@@ -4554,7 +4028,6 @@ the the element $j$   is a quadrilateral.
       string 
       varf 
       while
-
 \eFF
 \subsection{The bison grammar}
 \bFF
@@ -4645,7 +4118,6 @@ while_loop:  'while' ;
 
 instruction:   ';' 
          | 'include'  @STRING  
-         | 'load'  @STRING           
          |  Expr  ';' 
          |  declaration  
          |  for_loop  '(' Expr ';' Expr ';' Expr ')' instruction  
@@ -4745,26 +4217,6 @@ primary:
 \eFF
 \subsection{The Types of the languages, and cast}
 \begin{verbatim}
- the types 
- --lgElement =  <lgElement>
-    [,  type :<Polymorphic>
-   operator : 
-	 (	  <lgVertex> :   <lgElement>, <long> )
-
-
- --lgVertex =  <lgVertex>
-    label,  type :<Polymorphic>
-   operator. : 
-	 (	  <long> :   <lgVertex> )
-
-    x,  type :<Polymorphic>
-   operator. : 
-	 (	  <double> :   <lgVertex> )
-
-    y,  type :<Polymorphic>
-   operator. : 
-	 (	  <double> :   <lgVertex> )
-
  --Add_KN_<double> =  <Add_KN_<double>>
 
  --Add_Mulc_KN_<double> * =  <Add_Mulc_KN_<double>>
@@ -5106,16 +4558,6 @@ primary:
   - int2d,  type :<Polymorphic>   operator() : 
 	 (	  <CDomainOfIntegration> :   <Fem2D::Mesh>... )
 
-  - intalledges,  type :<Polymorphic>
-   operator( : 
-	 (	  <CDomainOfIntegration> :   <Fem2D::Mesh>... )
-
-  - jump,  type :<Polymorphic>
-   operator( : 
-	 (	  <LinearComb<MDroit, C_F0>> :   <LinearComb<MDroit, C_F0>> )
-	 (	  <double> :   <double> )
-	 (	  <LinearComb<MGauche, C_F0>> :   <LinearComb<MGauche, C_F0>> )
-
   - label,  type :<long *>
   - log,  type :<Polymorphic>   operator() : 
 	 (	  <double> :   <double> )
@@ -5128,10 +4570,6 @@ primary:
 	 (	  <double> :   <double>, <double> )
 	 (	  <long> :   <long>, <long> )
 
-  - mean,  type :<Polymorphic>
-   operator( : 
-	 (	  <double> :   <double> )
-
   - min,  type :<Polymorphic>  operator() : 
 	 (	  <double> :   <double>, <double> )
 	 (	  <long> :   <long>, <long> )
@@ -5139,19 +4577,9 @@ primary:
   - movemesh,  type :<Polymorphic>   operator() : 
 	 (	  <Fem2D::Mesh> :   <Fem2D::Mesh>, <E_Array>... )
 
-  - norm,  type :<Polymorphic>
-   operator( : 
-	 (	  <double> :   <std::complex<double>> )
-
-  - nuTriangle,  type :<long>
-  - nuEdge,  type :<long>
+  - nu_triangle,  type :<long *>
   - on,  type :<Polymorphic>   operator() : 
 	 (	  <BC_set<double>> :   <long>... )
-
-  - otherside,  type :<Polymorphic>
-   operator( : 
-	 (	  <LinearComb<MDroit, C_F0>> :   <LinearComb<MDroit, C_F0>> )
-	 (	  <LinearComb<MGauche, C_F0>> :   <LinearComb<MGauche, C_F0>> )
 
   - pi,  type :<double>
   - plot,  type :<Polymorphic>   operator() : 
@@ -5163,13 +4591,10 @@ primary:
 
   - qf1pE,  type :<Fem2D::QuadratureFormular1d>
   - qf1pT,  type :<Fem2D::QuadratureFormular>
-  - qf1pTlump,  type :<Fem2D::QuadratureFormular>
   - qf2pE,  type :<Fem2D::QuadratureFormular1d>
   - qf2pT,  type :<Fem2D::QuadratureFormular>
-  - qf2pT4P1,  type :<Fem2D::QuadratureFormular>
   - qf3pE,  type :<Fem2D::QuadratureFormular1d>
   - qf5pT,  type :<Fem2D::QuadratureFormular>
-
   - readmesh,  type :<Polymorphic>   operator() : 
 	 (	  <Fem2D::Mesh> :   <string> )
 
@@ -5210,22 +4635,13 @@ primary:
   - z,  type :<double *>    
 \end{verbatim}
 
-\subsection{History of the software}
-{\scriptsize
-\inputFF{../HISTORY}
-}
-%\include{BF_CHAP2}
+
 \begin{thebibliography}{xx}
 
 \bibitem{arpack} R. B. Lehoucq, D. C. Sorensen, and C. Yang
 {\it ARPACK Users' Guide: Solution of Large-Scale Eigenvalue Problems with Implicitly Restarted Arnoldi Methods}
 SIAM,  ISBN 0-89871-407-9 //
  \url{http://www.caam.rice.edu/software/ARPACK/}
-
-\bibitem{umfpack} {\sc T. A. Davis} {Algorithm 8xx: UMFPACK V4.1, an unsymmetric-pattern multifrontal method}
-TOMS, 
-2003 (under submission)
- \url{ http://www.cise.ufl.edu/research/sparse/umfpack}
 
 \bibitem{freefemp} D. Bernardi, F.Hecht, K. Ohtsuka, O. Pironneau: {\it
 freefem+ documentation}, on the web at  ftp://www.freefem.org/freefemplus.
@@ -5266,14 +4682,7 @@ Workshop on applied CFD, Univ of Tennessee Space Institute, August 1991.
   Addison-Wesley 1997.
 \bibitem{coool} COOOL: a package of tools for writing optimization code and solving optimization problems,
 
-\bibitem{DGgirault}  B. Riviere, M.   Wheeler, V. Girault,
-A priori error estimates for finite element
- methods based on discontinuous approximation spaces
- for elliptic problems.
-  SIAM J. Numer. Anal. 39 (2001), no. 3, 902--931 (electronic).
-
-\bibitem{COOLL} COOL package\url{http://coool.mines.edu}
-  
+  \url{http://coool.mines.edu}
 \end{thebibliography}
 \printindex
 \end{document}
