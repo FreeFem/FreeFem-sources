@@ -642,8 +642,29 @@ TheOperators->Add("+",
 
 //extern Map_type_of_map map_type_of_map ; //  to store te type 
 //extern Map_type_of_map map_pair_of_type ; //  to store te type 
+extern int lineno(); 
+class  PrintErrorCompile : public OneOperator {
+    public: 
+    const char * cmm;
+    E_F0 * code(const basicAC_F0 & ) const 
+     { ErrorCompile(cmm,lineno());
+      return 0;} 
+    PrintErrorCompile(const char * cc): OneOperator(map_type[typeid(R).name()]),cmm(cc){}
 
+};
+
+class PrintErrorCompileIM :  public E_F0info { public:  
+ typedef double  Result;
+ static E_F0 *   f(const basicAC_F0 & args)  
+    {   
+     lgerror("\n\n *** change interplotematrix in interpole.\n  *** Bad name in previous version,\n *** sorry FH.\n\n");
+     return 0;  }   
+    static ArrayOfaType  typeargs() {return  ArrayOfaType(true);}
+    operator aType () const { return atype<double>();} 
+
+};
 void  init_lgmat() 
+
 {
    map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<double*>())]=atype<Matrice_Creuse<double> *>();
    map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<Complex*>())]=atype<Matrice_Creuse<Complex> *>();
@@ -651,7 +672,11 @@ void  init_lgmat()
     AddSparceMat<Complex>();
  
  Add<const MatrixInterpolation::Op *>("<-","(", new MatrixInterpolation);
- Global.Add("interplotematrix","(",new MatrixInterpolation);
+ Global.Add("interpolate","(",new MatrixInterpolation);
+ Global.Add("interplotematrix","(",new  OneOperatorCode<PrintErrorCompileIM>);
+       
+
+ // pour compatibiliter 
 
   TheOperators->Add("=",
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation));

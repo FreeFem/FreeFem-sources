@@ -492,7 +492,9 @@ class LinearCG : public OneOperator
       if (nargs[0]) eps= GetAny<double>((*nargs[0])(stack));
       if (nargs[1]) nbitermax = GetAny<long>((*nargs[1])(stack));
       if (nargs[3]) eps= *GetAny<double*>((*nargs[3])(stack));
-      KN<R>  bzero(n,0,R()); // const array zero
+     
+      KN<R>  bzero(B?1:n); // const array zero
+      bzero=R(); 
       KN<R> *bb=&bzero; 
       if (B) {
         Kn &b = *GetAny<Kn *>((*B)(stack));
@@ -500,8 +502,8 @@ class LinearCG : public OneOperator
        if (p) 
          {
           // ExecError("Sorry LinearCG work only with nul right hand side, so put the right hand in the function");
-           bb = &b;
           }
+         bb = &b;
       }
       int ret;
       if (cas<0) {

@@ -10,8 +10,8 @@ fespace VH(TH,P1);
 fespace Vh(th,P1);
 fespace Wh(Th,P1);
 
-matrix B= interplotematrix(VH,Vh);  // build interpolation matrix Vh->Vh 
-matrix BB= interplotematrix(Wh,Vh);  // build interpolation matrix
+matrix B= interpolate(VH,Vh);  // build interpolation matrix Vh->Vh 
+matrix BB= interpolate(Wh,Vh);  // build interpolation matrix
 varf vA(u,v) = int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v))+ int1d(Th)(u*v); 
 matrix A=vA(Wh,Wh);
 Vh ml=0;
