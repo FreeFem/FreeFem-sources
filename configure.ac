@@ -348,7 +348,7 @@ then
 	then
 		AC_CHECK_LIB(umfpack,umf_i_malloc,
 			AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
-			ff_umfpack_ok=yes)
+			ff_umfpack_ok=yes,,-lamd)
 	fi
 fi
 
