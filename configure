@@ -10058,6 +10058,8 @@ then
 echo "$as_me: not using default FLTK" >&6;}
 	ff_fltk=no
 else
+
+	# Checks that fltk-config exists
 	ff_fltk_config=fltk-config
 	# Extract the first word of "fltk-config", so it can be a program name with args.
 set dummy fltk-config; ac_word=$2
@@ -10095,6 +10097,54 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+
+	# Checks that FLTK is compiled with threads enabled
+	echo "$as_me:$LINENO: checking that FLTK is compiled with threads" >&5
+echo $ECHO_N "checking that FLTK is compiled with threads... $ECHO_C" >&6
+	cat >conftest.$ac_ext <<_ACEOF
+#include <FL/Fl.H>
+main(){
+  Fl::lock();
+}
+
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ff_fltk_threads=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ff_fltk_threads=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+	echo "$as_me:$LINENO: result: $ff_fltk_threads" >&5
+echo "${ECHO_T}$ff_fltk_threads" >&6
+	if test "$ff_fltk_threads" = no
+	then
+		ff_fltk=no
+		{ echo "$as_me:$LINENO: not using default FLTK because it does not know threads" >&5
+echo "$as_me: not using default FLTK because it does not know threads" >&6;}
+	fi
 fi
 
 # Downloading and compiling FLTK

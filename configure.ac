@@ -739,8 +739,27 @@ then
 	AC_MSG_NOTICE(not using default FLTK)
 	ff_fltk=no
 else
+
+	# Checks that fltk-config exists
 	ff_fltk_config=fltk-config
 	AC_CHECK_PROG(ff_fltk,fltk-config,yes,no)
+
+	# Checks that FLTK is compiled with threads enabled
+	AC_MSG_CHECKING(that FLTK is compiled with threads)
+	AC_COMPILE_IFELSE(
+[#include <FL/Fl.H>
+main(){
+  Fl::lock();
+}
+],
+		ff_fltk_threads=yes,
+		ff_fltk_threads=no)
+	AC_MSG_RESULT($ff_fltk_threads)
+	if test "$ff_fltk_threads" = no
+	then
+		ff_fltk=no
+		AC_MSG_NOTICE(not using default FLTK because it does not know threads)
+	fi	
 fi
 
 # Downloading and compiling FLTK
