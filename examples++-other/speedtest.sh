@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Speed benchmark for FreeFem++
 # $Id$
 
@@ -20,3 +20,7 @@ $ffexe lap3-cpu.edp	\
 		|grep -E --					\
 		'-- lap (cholesky|CG|UMFPACK) +[0-9]+x[0-9]+'	\
 		|tee -a speedtest.out
+if test $PIPESTATUS != 0
+    then
+    exit 1
+fi

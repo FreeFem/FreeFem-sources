@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Runs all regression tests on all compiled FreeFem++ versions
 # ------------------------------------------------------------
 
@@ -17,7 +17,7 @@ function dotest(){
     ffcmd="$1 $3|tee regtests-$2.log"
     echo $ffcmd
     eval $ffcmd
-    if test $? != 0
+    if test $PIPESTATUS != 0
 	then
 	exit 1
     fi
