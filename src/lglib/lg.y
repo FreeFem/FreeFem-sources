@@ -213,6 +213,11 @@ start:   input ENDOFFILE {
 			  cerr << " err code " << err.errcode() << endl;
                           return err.errcode();
                         }
+                         catch( ...) { cerr << "Strange catch exception ???\n"; 
+                          cerr << " at exec line  " << TheCurrentLine << endl;
+                          return 1; 
+                         }
+
                         cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " <<  CPUtime()-CPUcompile << "s\n";
                         deleteStack(stack);
                         //debugstack.clear() 
