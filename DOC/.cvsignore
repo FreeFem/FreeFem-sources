@@ -1,0 +1,14 @@
+*.sit
+*.zip
+*.aux
+*.log
+*.dvi
+*.toc
+*.pdfsync
+*.idx
+*.toc
+*.ind
+*.tmp
+*.out
+Makefile
+Makefile.in
