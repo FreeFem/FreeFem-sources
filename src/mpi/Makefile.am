@@ -4,6 +4,9 @@
 
 CXX=mpiCC -CC=@CXX@
 
+# To create statically linked executables (see configure.ac)
+CXXLD=$(STATICTOOL) $(CXX)
+
 # MPI may not be installed. Checked in configure.ac
 bin_PROGRAMS=$(MPIPROG)
 EXTRA_PROGRAMS=FreeFem++-mpi
