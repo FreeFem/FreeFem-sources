@@ -1,6 +1,13 @@
+bug une fonction with string parameter
+ 
+  func bool  write(string  fn,real[int] & u)
+    {
+      cout << fn << endl;  //  delete 2 times
+      return true;
+   }
 
 
-Now, problem:
+Now, problem: (correct in version 1.14)
    adpation and periodic boundary condition are incompatible.
    no way to inforce periodic adpated  mesh  today.
 
