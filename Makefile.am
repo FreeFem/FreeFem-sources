@@ -59,6 +59,8 @@ deb:
 
 native:FreeFem++v$(VERSION)_MacOS FreeFem++v$(VERSION)_MacOsX.tgz
 	echo "done"
+nativeX: FreeFem++v$(VERSION)_MacOsX.tgz
+	echo "done"
 
 clean-local::
 	-rm freefem++-$(VERSION).tar.gz
@@ -67,7 +69,7 @@ clean-local::
 # Native MacOS packaging
 # ----------------------
 
-FreeFem++v$(VERSION)_MacOS:documentation
+FreeFem++v$(VERSION)_MacOS:documentation	
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen
 	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++ 
 	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
@@ -89,7 +91,7 @@ FreeFem++v$(VERSION)_MacOsX: all documentation
 	sed <Info-plist.am >FreeFem++.app/Contents/Info.plist \
            -e "s/@VERSION@/$(VERSION)/g" \
            -e "s/@DATE@/`date`/g"  
-	cp src/agl/ FreeFem++-agl FreeFem++v$(VERSION)_MacOsX/FreeFem++.app/Contents/MacOS/FreeFem++
+	cp src/agl/FreeFem++-agl FreeFem++v$(VERSION)_MacOsX/FreeFem++.app/Contents/MacOS/FreeFem++
 	cp src/FreeFem++-CoCoa $@
 
 FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
