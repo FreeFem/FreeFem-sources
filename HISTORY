@@ -548,3 +548,14 @@ Make Version 1.42
    But in LinearGMRES must the function must compute A*x and 
    b0 can't exist. 
    see algo.edp  exist for  a full example
+
+06/12/2004
+__________
+  change  function name interplotematrix to interpolate
+  correct  bug introduce in 04/12 change
+  a new graphic FreeFem++-cs: integrated development environment (located in src/ide)
+  see REAME and maunal-full.pdf
+  add new examples++-tutorial
+  mat_interpol.edp  # to test interpolate function
+  shur-comp.edp  # a shur complement domaine decomposition
+
