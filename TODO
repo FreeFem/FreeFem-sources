@@ -42,6 +42,8 @@ o [lehyaric] Save and reload window settings and configuration
 
 o [lehyaric] List of recently opened files
 
+o [lehyaric] Option to run server on remote machine
+
 o [lehyaric] Properly define postscript output location
 
 o [lehyaric] Coloring in output window (and associate commands like
