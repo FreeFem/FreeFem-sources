@@ -430,6 +430,18 @@ AC_SUBST(UMFPACKLIB,$ff_umfpack_lib)
 # asinh acosh atanh are not in Mingw yet
 AC_CHECK_FUNCS(asinh acosh atanh)
 
+# If times() and sysconf() are not here, UMFPACK should know
+if test "$ff_umfpack_ok" = yes
+then
+	AC_CHECK_FUNCS(times sysconf,
+			     ff_umfpack_posix_ok=yes,
+			     ff_umfpack_posix_ok=no)
+	if test "$ff_umfpack_posix_ok" = no
+	then
+		AC_SUBST(FF_UMFPACK_POSIX,-DNPOSIX)
+	fi
+fi
+
 # Dynamic loading of compiled functions
 # -------------------------------------
 
