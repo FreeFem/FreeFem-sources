@@ -1,5 +1,5 @@
 
-
+real umax=0;
 {
   // work array 
   real[int] matx(10),b(10),x(10); 
@@ -158,6 +158,7 @@ func real[int] C(real[int] & x)
     matrix H= vhJ(Vh,Vh,factorize=1,solver=LU);
     w[]=H^-1*v[];
     u[] -= w[];
+    umax = u[].max; 
    }
    plot (u,wait=1,cmm="solution with Newtow Ralphson");
 
