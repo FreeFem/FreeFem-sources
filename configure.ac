@@ -47,13 +47,11 @@ AC_MSG_RESULT($ff_mac)
 # -------------------------------------------------------------------
 
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
-ff_pcprog=
 fflibdl="-ldl"
 ff_uname=`uname`
 case $ff_uname in
 CYGWIN*)
 	ff_win32=yes
-	ff_pcprog=FreeFem++-pc${EXEEXT}
 
 	# No need for libdl under Windows
 	ff_libdl=
@@ -66,7 +64,6 @@ CYGWIN*)
 *)ff_win32=no;;
 esac
 AC_MSG_RESULT($ff_win32)
-AC_SUBST(PCPROG,$ff_pcprog)
 AC_SUBST(LIBDL,$ff_libdl)
 
 # FreeFem++-specific version information
@@ -127,8 +124,7 @@ ff_x11=no
 if test -d /usr/X11R6 -a "$ff_win32" = no;
 then
 	ff_x11=yes
-	AC_SUBST(STDPROG,FreeFem++${EXEEXT})
-	AC_SUBST(X11PROG,FreeFem++-x11${EXEEXT})
+	ff_x11prog=FreeFem++-x11${EXEEXT}
 	AC_SUBST(INCLUDEX11,/usr/X11R6/include)
 	AC_SUBST(LIBX11,"-L/usr/X11R6/lib -lX11 -lm")
 fi
@@ -348,11 +344,38 @@ then
 	AC_SUBST(DOCPDF,manual.pdf)
 fi
 
+# Choosing compilation options for the standard version (in src/std)
+# ------------------------------------------------------------------
+
+# The "standard" configured version can use win32 (mingw) or x11
+
+if test "$ff_win32" = yes;
+then
+	ff_std_graph_obj=Pcrgraph.$OBJEXT
+	ff_std_x11_lib=
+	ff_std_x11_inc=
+	ff_std_ldflags=-mwindows
+else
+	ff_std_graph_obj=Xrgraph.$OBJEXT
+	ff_std_x11_lib=$LIBX11
+	ff_std_x11_inc=$INCLUDEX11
+	ff_std_ldflags=
+
+	# If the standard version already uses x11, we do not need to
+	# compile the src/x11 directory.
+	ff_x11prog=
+fi
+AC_SUBST(STD_GRAPH_OBJ,$ff_std_graph_obj)
+AC_SUBST(STD_X11_LIB,$ff_std_x11_lib)
+AC_SUBST(STD_X11_INC,$ff_std_x11_inc)
+AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
+
 # creating all makefiles
 # ----------------------
 
 AC_SUBST(GLXPROG,$ff_glxprog)
 AC_SUBST(AGLPROG,$ff_aglprog)
+AC_SUBST(X11PROG,$ff_x11prog)
 AC_OUTPUT(Makefile
 	src/Makefile
 	src/bamglib/Makefile
@@ -366,7 +389,6 @@ AC_OUTPUT(Makefile
 	src/mpi/Makefile
 	src/agl/Makefile
 	src/glx/Makefile
-	src/pc/Makefile
 	examples++/Makefile
 	examples++-eigen/Makefile
 	examples++-tutorial/Makefile

@@ -3,8 +3,8 @@
 
 // $Id$
 
-// This include file is necessary for platforms where the configure
-// script does not run.
+// This wrapper is necessary for platforms where the configure script
+// does not run.
 
 #ifndef CONFIG_WRAPPER_H
 #define CONFIG_WRAPPER_H
