@@ -31,6 +31,17 @@ clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
 	-rm examples*/*.eps 
 
+# Testing
+# -------
+
+# Standard automake goal "make check" is also valid. It just does not
+# run any test that could prevent the user from working on its machine
+# (because of unexpected windows opening right in the middle of the
+# workspace).
+
+visualtest: all
+	src/std/FreeFem++ examples++-tutorial/all.edp
+
 speedtest: all
 	src/nw/FreeFem++-nw examples++-other/lap3-cpu.edp \
 		|grep -E -- '-- lap (cholesky|CG|UMFPACK) +[0-9]+x[0-9]+'
