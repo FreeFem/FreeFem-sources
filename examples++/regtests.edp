@@ -1,0 +1,234 @@
+// Regression tests
+// ----------------
+
+// $Id$
+
+// The values tested here may not have a physical or mathematical
+// meaning. Their main property is to gather numerical values from the
+// whole domain, to be checked against previous runs for consistency.
+
+NoUseOfWait=true;int verbosityy=verbosity;
+
+cout << "--------- file : aadaptation.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "aadaptation.edp";
+// Regression check
+real ref=u[]'*u[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<0.140396);
+assert(ref>0.140394);
+};
+
+cout << "--------- file : aalapacien.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "aalapacien.edp";
+// Regression check
+real ref=u[]'*u[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<122060);
+assert(ref>122058);
+};
+
+cout << "--------- file : aalaplace-nc.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "aalaplace-nc.edp";
+// Regression check
+real ref=u[]'*u[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<1713.49);
+assert(ref>1713.47);
+};
+
+cout << "--------- file : aamove.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "aamove.edp";
+// Regression check
+real ref=u[]'*u[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<0.070847);
+assert(ref>0.070845);
+};
+
+cout << "--------- file : aaRT.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "aaRT.edp";
+// Regression check
+real ref=u1[]'*u1[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<280.926);
+assert(ref>280.924);
+};
+
+cout << "--------- file : arrayoFVh.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "arrayoFVh.edp";
+// Regression check
+real ref=u[]'*u[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<4560.75);
+assert(ref>4560.73);
+};
+
+cout << "--------- file : bilap.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "bilap.edp";
+// Regression check
+real ref=xx'*xx;
+cout<<"reference value="<<ref<<endl;
+assert(ref<33.836);
+assert(ref>33.834);
+};
+
+cout << "--------- file : ccc-adp.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "ccc-adp.edp";
+// Regression check
+real ref=fh[]'*fh[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<639.5);
+assert(ref>639.3);
+};
+
+cout << "--------- file : D2.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "D2.edp";
+// Regression check
+real ref=w[]'*w[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<1e-30);
+assert(ref>-1e-30);
+};
+
+cout << "--------- file : demo1.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "demo1.edp";
+// Regression check
+real ref=u[]'*u[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<1.31894);
+assert(ref>1.31892);
+};
+
+cout << "--------- file : demo.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "demo.edp";
+// Regression check
+real ref=u[]'*u[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<1.34638);
+assert(ref>1.34636);
+};
+
+cout << "--------- file : funct.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "funct.edp";
+// Regression check
+real ref=myfunction(1.0,3.);
+cout<<"reference value="<<ref<<endl;
+assert(ref<4.000001);
+assert(ref>3.999999);
+};
+
+cout << "--------- file : include.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "include.edp";
+// Regression check
+real ref=u[]'*u[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<0.070847);
+assert(ref>0.070845);
+};
+
+cout << "--------- file : lapacienprecon.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "lapacienprecon.edp";
+// Regression check
+real ref=u[]'*u[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<122060);
+assert(ref>122058);
+};
+
+cout << "--------- file : lap_mat.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "lap_mat.edp";
+// Regression check
+real ref=u1[]'*u1[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<85.3777);
+assert(ref>85.3775);
+};
+
+cout << "--------- file : NSP1P1b.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "NSP1P1b.edp";
+// Regression check
+real ref=u1[]'*u1[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<94.14010675);
+assert(ref>94.14010673);
+};
+
+cout << "--------- file : NSP1P1.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "NSP1P1.edp";
+// Regression check
+real ref=u1x[]'*u1x[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<4.35592);
+assert(ref>4.35590);
+};
+
+cout << "--------- file : NSP1P2.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "NSP1P2.edp";
+// Regression check
+real ref=u1[]'*u1[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<176.8673899);
+assert(ref>176.8673897);
+};
+
+cout << "--------- file : parareal.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "parareal.edp";
+// Regression check
+real ref=pu'*pu;
+cout<<"reference value="<<ref<<endl;
+assert(ref<1383.28);
+assert(ref>1383.26);
+};
+
+cout << "--------- file : Richard.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "Richard.edp";
+// Regression check
+real ref=h[]'*h[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<1383.28);
+assert(ref>1383.26);
+};
+
+cout << "--------- file : teste.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "teste.edp";
+// Regression check
+real ref=P.x;
+cout<<"reference value="<<ref<<endl;
+assert(ref<1.965e+04);
+assert(ref>1.963e+04);
+};
+
+cout << "--------- file : testFE.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "testFE.edp";};
+
+cout << "--------- file : wafer-heating-laser-axi.edp ------------" << endl;
+verbosity=verbosityy;
+{ include "wafer-heating-laser-axi.edp";
+// Regression check
+real ref=xx'*xx;
+cout<<"reference value="<<ref<<endl;
+assert(ref<286);
+assert(ref>284);
+};
