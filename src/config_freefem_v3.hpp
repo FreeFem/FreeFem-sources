@@ -19,9 +19,9 @@
 #define DRAWING
 #endif
 
-#ifndef LONG_LONG
+#ifndef BAMG_LONG_LONG
 #ifndef __INTEL__
-#define LONG_LONG
+#define BAMG_LONG_LONG
 #endif
 #endif
 

@@ -20,7 +20,7 @@
 // DESCRIPTION:  
 // DESCRIP-END.
 //
-#ifdef nnnLONG_LONG
+#ifdef nnnBAMG_LONG_LONG
 #define LONG8 long long
 #define DLONG8LONG8 1e12
 #define MAXCOOR ((double) 1073741823 )
