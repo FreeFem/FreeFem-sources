@@ -1,7 +1,7 @@
 # $Id$
 
 all-local: all.edp regtests.edp
-TESTS=../regtests.pl
+TESTS=../regtests.sh
 TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp	\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)	\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) VISUALCHECK=$(VISUALCHECK)

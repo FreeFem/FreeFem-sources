@@ -1,7 +1,7 @@
 # $Id$
 
 all-local: myfunction.so
-TESTS=../regtests.pl
+TESTS=../regtests.sh
 TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=load.edp	\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)	\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) VISUALCHECK=$(VISUALCHECK)
