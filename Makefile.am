@@ -31,6 +31,10 @@ clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
 	-rm examples*/*.eps 
 
+speedtest: all
+	src/nw/FreeFem++-nw examples++-other/lap3-cpu.edp \
+		|grep -E -- '-- lap (cholesky|CG|UMFPACK) +[0-9]+x[0-9]+'
+
 # Build all versions
 # ------------------
 
