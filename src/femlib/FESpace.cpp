@@ -88,6 +88,9 @@ namespace  Fem2D {
 
 ListOfTFE * ListOfTFE::all ; // list of all object of this type 
 
+void init_static_FE(); //   to correct so probleme with static Library FH aout 2004
+//  the list of other FE file to force the link 
+
 ListOfTFE::ListOfTFE (const char * n,TypeOfFE *t) : name(n),tfe(t) 
 {
   if(!t)
@@ -97,6 +100,8 @@ ListOfTFE::ListOfTFE (const char * n,TypeOfFE *t) : name(n),tfe(t)
     all=0; // init of all in dependant of the ordre of the objet file   
   next=all;
   all=this;
+ //  to correct so probleme with static Library FH aout 2004 
+ init_static_FE();
 }
 
 const TypeOfFE ** Make(const FESpace **l,int k) {
@@ -1815,5 +1820,12 @@ static  ListOfTFE typefemRTOrtho("RT0Ortho", &RTLagrangeOrtho);
  static ListOfTFE typefemP1nc("P1nc", &P1ncLagrange);
  static ListOfTFE typefemP1ttdc("P1dc", &P1ttdc);
  static ListOfTFE typefemP2ttdc("P2dc", &P2ttdc);
+
+// correct Probleme of static library link with new make file 
+void init_static_FE()
+{ //  list of other FE file.o 
+   extern void init_FE_P2h() ;
+  init_FE_P2h() ;
+}
  
 } // fin de namespace Fem2D 
