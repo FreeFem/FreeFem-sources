@@ -21,7 +21,6 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_YACC
 AM_PROG_LEX
-# AC_F77_LIBRARY_LDFLAGS
 
 # Some useful libraries
 
@@ -50,7 +49,7 @@ AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
 #  ------------------------------------------------
 
 AC_ARG_ENABLE(debug,
-     [  --enable-debug    Turn on debug versions of FreeFem++],
+     --enable-debug	Turn on debug versions of FreeFem++,
      [case "${enableval}" in
        yes) ff_debug=true ;;
        no)  ff_debug=false ;;
@@ -152,23 +151,55 @@ fi
 # Looking for ARPACK
 # ------------------
 
-# Trying default locations
-#
+# We need the following g77 libraries to connect to the Fortran 77
+# Arpack.
+
+if test "$ff_blas_ok" = yes;
+then
+	ff_g2c_ok=no
+	AC_CHECK_LIB(g2c,G77_second_0,
+		LIBS="$LIBS -lg2c"
+		ff_g2c_ok=yes)
+
+	if test "$ff_g2c_ok" = no;
+	then
+	        AC_MSG_CHECKING(for G77_second_0 in /sw/lib/libg2c.a)
+		ff_save_libs="$LIBS"
+		LIBS="$LIBS -L/sw/lib -lg2c"
+		AC_LINK_IFELSE(
+			[AC_LANG_CALL(,G77_second_0)],
+			ff_g2c_ok=yes,
+			LIBS="$ff_save_libs")
+		AC_MSG_RESULT($ff_g2c_ok)
+	fi
+fi
+
 ff_arpack_ok=no   
 ff_save_libs="$LIBS"
 ff_arpack_libs=
 if test "$ff_blas_ok" = yes;
-   then	
-   AC_CHECK_LIB(arpack,dsaupd_,
-	ff_arpack_libs="-larpack -llapack -rdynamic"
-        ff_arpack_ok=yes,,
-	-llapack -rdynamic)
+then
+
+	# User-specified location
+	AC_ARG_WITH(arpack,
+		--with-arpack=archive	Use a specific version of Arpack,
+		ff_arpack_ok=yes
+		ff_arpack_libs="${withval}")
+
+	# Default locations
+	if test "$ff_arpack_ok" = no;
+	then
+		AC_CHECK_LIB(arpack,dsaupd_,
+			ff_arpack_libs="-larpack -llapack -rdynamic"
+			ff_arpack_ok=yes,,
+			-llapack -rdynamic)
+	fi
 
    # Trying to "locate" Arpack
    if test "$ff_arpack_ok" = no;
    then
         AC_MSG_CHECKING(for libarpack with locate)
-        ff_lib_arpack=`locate libarpack|grep  'libarpack.*.a$'|head -1`" -L/sw/lib -lg2c"
+        ff_lib_arpack=`locate libarpack|grep  'libarpack.*.a$'|head -1`
 	LIBS="$ff_lib_arpack $LIBS"
         AC_LINK_IFELSE(
                 [AC_LANG_CALL(,dsaupd_)],
@@ -177,7 +208,7 @@ if test "$ff_blas_ok" = yes;
         AC_MSG_RESULT($ff_arpack_ok)
     fi
 fi
-LIBS="$ff_save_libs $ff_arpack_libs"
+LIBS="$ff_arpack_libs $ff_save_libs"
 
 if test "$ff_arpack_ok" = yes;
 then
@@ -190,13 +221,36 @@ AC_SUBST([EIGENOBJ])
 # Looking for UMFPACK
 # -------------------
 
-# Trying default locations
-
+ff_amd_ok=no
+ff_umfpack_ok=no
 if test "$ff_blas_ok" = yes;
 then
+        # User-specified location                                               
+        AC_ARG_WITH(umfpack,
+                --with-umfpack=archive	Use a specific version of Umfpack,
+                ff_umfpack_ok=yes
+                LIBS="${withval} $LIBS"
+		AC_DEFINE(HAVE_LIBUMFPACK,1,
+			Umfpack is used for sparse matrices computations))
+
+        AC_ARG_WITH(amd,
+                --with-amd=archive	Use a specific version of AMD,
+                ff_amd_ok=yes
+                LIBS="${withval} $LIBS")
+
+	# Trying default locations
+
 	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h)
-	AC_CHECK_LIB(amd,amd_info)
-	AC_CHECK_LIB(umfpack,umf_i_malloc)
+
+	if test "$ff_amd_ok" = no;
+	then
+		AC_CHECK_LIB(amd,amd_info)
+	fi
+
+	if test "$ff_umfpack_ok" = no;
+	then
+		AC_CHECK_LIB(umfpack,umf_i_malloc)
+	fi
 fi
 
 # Checking wether we can produce a parallel version
