@@ -1444,9 +1444,14 @@ void InitProblem( int Nb, const FESpace & Uh,
                  << "  " << &Th <<  endl;
         }
       else
-        {
+        { //  copy the previous soluton to initialize CG, GMRES, etc ...
           if (Nb==1) 
-            *X= * u_h[0]->x();
+	    {  // modif  FH 0701/2005
+	    if (u_h[0]->x())
+	      *X= * u_h[0]->x();
+	    else
+	      *X=R();
+	    }
           else { // dispatch the solution  
             const FElement ** sK= new const FElement * [Nb];  
             KN<R> ** sol= new KN<R> * [Nb];
