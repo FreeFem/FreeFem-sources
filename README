@@ -72,6 +72,15 @@ Automake and Autoconf with the command:
 
 > autoreconf
 
+Extra utilities
+---------------
+
+To run an interactive test of FreeFem++ (standard version):
+> make visualtest
+
+To run a speed test:
+> make speedtest
+
 Examples
 --------
 

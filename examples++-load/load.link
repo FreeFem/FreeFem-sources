@@ -19,8 +19,8 @@ if [ -f "$1.cpp" ] ; then
     echo g++ -c $INC $PIC $1.cpp
     g++ -c $INC $PIC  $1.cpp
 
-    echo g++ $SHARED $1.lo -o $1.so
-    g++ $SHARED $1.lo -o $1.so
+    echo g++ $SHARED $1.o -o $1.so
+    g++ $SHARED $1.o -o $1.so
 
 else
     echo "sorry file $1.cpp does not exist"
