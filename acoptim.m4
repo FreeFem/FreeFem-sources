@@ -65,6 +65,8 @@ then
     if test -x /usr/bin/hostinfo
 	then
 
+	AC_MSG_CHECKING(PowerPC architecture)
+
         # CPU detection
 	ff_cpu=unkown
 	if test `/usr/bin/hostinfo|grep ppc7450|wc -l` -gt 0
@@ -72,24 +74,22 @@ then
 	    ff_cpu=G4
 	elif test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
 	    then
-	    ff_cpu=g5
+	    ff_cpu=G5
 	fi
 	if test $ff_cpu == unknown;
 	    then
 	    AC_MSG_ERROR(cannot determine PowerPC cpu type)
 	fi
 
+	AC_MSG_RESULT($ff_cpu)
+
+	# If we are on MacOS X
+
 	# At the moment, we do not know how to produce correct
 	# optimizated code on G5.
 
-	if test $ff_cpu == G5;
-	    then
-	    AC_MSG_WARN(G5 detected, but G4 optimization options preferred)
-	    ff_cpu=G4
-	fi
-
-	# If we are on MacOS X
-	if test `/usr/bin/hostinfo|grep Darwin|wc -l` -gt 0
+	if test `/usr/bin/hostinfo|grep Darwin|wc -l` -gt 0 \
+		-a $ff_cpu != G5
 	    then
 
 	    # Optimization flags: -fast option do not work because the
