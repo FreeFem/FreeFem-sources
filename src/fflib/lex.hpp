@@ -95,6 +95,7 @@ class mylex  {
        
   private: 
     int basescan();  
+    int scan1();
     bool SetMacro(int &ret);
     bool CallMacro(int &ret);
     bool ExpandParam(int &ret);

@@ -21,11 +21,11 @@ equation, linear elliptic PDE's">
 alink="#F0000F">
 &nbsp;
 <center><table WIDTH="500" 
-BACKGROUND="@ffd@bar.jpg" >
+BACKGROUND="@imagedir@bar.jpg" >
 <tr>
 <td ALIGN=LEFT><font color="#0000FF"><font 
 size=+2>FreeFem++  version @ver@
- <img src="@ffd@new.gif">
+ <img src="@imagedir@new.gif">
 </font></font></td> <td ALIGN=left><font size=+3 
 color="#FF0000"><b><A HREF="#download"> download </font></b></A></td>
 </tr>
@@ -76,7 +76,7 @@ Hecht&nbsp;</a> .
 <font color="#FF0000"><a href="http://www.ann.jussieu.fr/~lehyaric">Antoine Le Hyaric</a></font>.
 
 
-<p><img SRC="@ffd@bar.jpg" 
+<p><img SRC="@imagedir@bar.jpg" 
 ALT="bar"  align=CENTER>
 <menu>&nbsp;</menu>
 A very small example of what you can do to solve&nbsp; Poisson&nbsp; 
@@ -112,12 +112,12 @@ for (i=0;i< 10;i++)
 } ;
 
 </PRE></TT></blockquote>
-<p><img SRC="@ffd@bar.jpg" 
+<p><img SRC="@imagedir@bar.jpg" 
 ALT="bar"  align=CENTER>
 <center>
-<p><img SRC="@ffd@u4.jpg" 
+<p><img SRC="@imagedir@u4.jpg" 
 BORDER=0 height=250 width=250><img 
-SRC="@ffd@th4.jpg" BORDER=0 
+SRC="@imagedir@th4.jpg" BORDER=0 
 height=250 width=250> </p>
 <p> Solution on adapted mesh and associated mesh. </p>
 </center>
@@ -142,7 +142,7 @@ License, GPL)&nbsp;</li>
 <a href="http://www.ann.jussieu.fr/~hecht/ftp/freefem"> directory </A>
 contains the different version of <i>FreeFem</i>.</font>
 <p><font size=0>The latest version of  <i>Freefem++</i> is 
-<tt><font color="#FF0000"> @last@ </font> </tt></font>
+<tt><font color="#FF0000"> @ver@ </font> </tt></font>
 and you can get  the source from a csv server, do the following unix shell commands:
 <PRE><tt>
 cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs login
@@ -153,47 +153,20 @@ cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs co FFedit
 </tt></PRE>
 
 <menu>
-
-<li> All the sources and makefile <font size=-1>
-<a 
-href="@dir@@ftgz@"> @ftgz@
-(tar+gzip)</a>
-@tgz@  </font></li>
-
-<li>
-MacOS 9 Powerpc  (carbon) <font size=-1>
-<a href="@dir@@fsit@"> @fsit@
-(stuffit)  </a>     @sit@ </font>
+<UL>
+@download@
+<li> To install the current debian package for PC/linux
+<OL>
+<li>  Add in  /etc/apt/sources.list the following ligne 
+<BR>   <FONT >    deb http://www.freefem.org/debian testing ff++ </font>  </li>
+<li>  Do: <FONT > apt-get update </FONT> </li>
+<li>  Do: <FONT > apt-get install freefem++ </FONT> </li>
+</OH>
 </li>
-
-<li>
-MacOS X Powerpc  (CoCoa and OpenGL) <font size=-1>
-<a href="@dir@@fapp@"> @fapp@ (tgz)  </a>     @app@ </font>
-</li>
-
-<li>
-Window 95,98,NT,2000,  XP <font size=-1>
-<a href="@dir@@fexe@"> @fexe@ (a setup file)
-</a>
- @exe@ </font>
-
-<li>
-Linux static binary file  <font size=-1>
-<a href="@dir@@flinux@"> @flinux@ 
-</a>
- @exe@ </font>
-
- </font>
-</li>
-<li> the  documentation 
-<a href="@dir@manual-full.pdf"> manual-full</a> @manpdf@.
-<li> the old  documentation (smaller) 
-<a href="@dir@manual.pdf"> manual</a> @omanpdf@.
-</li>
+</UL>
 </menu>
 
-<center><img 
-SRC="@ffd@bar.jpg" ALT="bar"  
+<center><img SRC="@imagedir@bar.jpg" ALT="bar"  
 align=CENTER></center>
 
 <p><br>
@@ -203,9 +176,9 @@ HREF="mailto:hecht@ann.jussieu.fr">Fr&eacute;d&eacute;ric
 	Hecht</A></ADDRESS>
     
     <P>
-<!-- Created: Mon Mar  9 11:35:07 MET 1998 -->
+<!-- Created: from ff++.hmtx file with ListeFF.pl   -->
 <!-- hhmts start -->
-Last modified: Mon May 13 13:56:46 CEST 2002
+Last modified:  @dateofday@
 <!-- hhmts end -->
     <HR>
     

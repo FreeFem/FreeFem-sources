@@ -224,6 +224,7 @@ int mylex::basescan()
       case ']': 
       case ',': 
       case ';': 
+      case '#': 
         break;
       case '*': 
         if (nc == '=') ret=MULEQ;       
@@ -287,7 +288,8 @@ int mylex::basescan()
   typetoken=ret; 
   return ret;
 }
-int mylex::scan(int lvl)
+
+int mylex::scan1()
 {
 
   extern long mpirank;
@@ -304,7 +306,35 @@ int mylex::scan(int lvl)
   
   if ( ret == ID)
     while ((CallMacro(ret)))0;
-    
+  return ret;
+}    
+
+int mylex::scan(int lvl)
+{
+ 
+  int ret= scan1(); 
+  if (ret==ID)  
+   {
+    bool cont=true;
+    while(cont)
+    {
+    cont=false;
+    string concat;
+    while(1) {
+     concat += buf;
+     while ( ( source().peek() == EOF) &&  close() ); 
+     if ( source().peek() != '#' ) break;
+     source().get() ; // eat #
+     ret= scan1(); 
+     }
+   ret=ID;
+   if(concat.length()>1000) erreur("Concat ID too long");
+   strcpy(buf,concat.c_str());
+   while ((CallMacro(ret))) cont=true;
+   }
+   
+ }
+   
       
   if ( ret == ID) {
     if (! InMotClef(lglval.type,ret))  {
@@ -507,7 +537,7 @@ bool mylex::ExpandParam(int &ret)
             if(debugmacro)
             cout <<   " input in : -> " << macroparm[nbparam]  << " " << nbparam << endl;
             input(macroparm[nbparam], nbparam);
-            ret =  scan(1); // Correction FH 6/06/2004 of string parameter
+            ret =  scan1(); // Correction FH 6/06/2004 of string parameter
             return true;        
           }
         }
