@@ -150,6 +150,10 @@ inline void  SetInternalErrorRoutine(TypeofInternalErrorRoutine f)
 }
 #endif
 //  -- 
+template<class P,class Q> 
+   struct PplusQ { const P & p;const Q & q;
+    PplusQ(const P & pp,const Q & qq) : p(pp),q(qq){}
+    };
 
 template<class R> 
 struct  VirtualMatrice { public:
@@ -162,13 +166,13 @@ struct  VirtualMatrice { public:
   virtual void Solve( KN_<R> &  x,const KN_<R> & b) const 
     { InternalError("VirtualMatrice::solve not implemented "); } 
   struct  plusAx { const VirtualMatrice * A; const KN_<R> &  x;
-   plusAx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) {} };
+   plusAx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) {}
+    };
    plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
   struct  plusAtx { const VirtualMatrice * A; const KN_<R> &  x;
    plusAtx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) {} };
   struct  solveAxeqb { const VirtualMatrice * A; const KN_<R> &  b;
    solveAxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y) {} };
-  
   
 };
 
@@ -383,7 +387,7 @@ public:
     {  Ax.A->addMatTransMul(Ax.x,*this);return *this;}
    KN_& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
     {*this=R(); Ab.A->Solve(*this,Ab.b);return *this;}
-  
+   
 //   KN_& operator =(const MatriceCreuseDivKN_<R> &)  ;
 
  friend   ostream & operator<< <R>(ostream & f,const KN_<const_R> & v)  ;
@@ -740,7 +744,14 @@ class KN :public KN_<R> { public:
         { if(this->unset()) set(new R[Ax.x.N()],Ax.x.N());KN_<R>::operator=(Ax);return *this;}
    KN& operator +=(const typename VirtualMatrice<R>::plusAtx & Ax)  
         { if(this->unset()) set(new R[Ax.x.N()],Ax.x.N());KN_<R>::operator+=(Ax);return *this;}
-        
+
+   template<class P,class Q> 
+     KN& operator =(const  PplusQ<P,Q> & PQ)  
+      { *this=PQ.p; *this+=PQ.q; } 
+   template<class P,class Q> 
+     KN& operator +=(const  PplusQ<P,Q> & PQ)  
+      { *this+=PQ.p; *this+=PQ.q; } 
+           
    KN& operator -=(const_R a)  
         { KN_<R>::operator-=(a);return *this;}
    KN& operator -=(const KN_<R>& a)  
@@ -1004,6 +1015,7 @@ class Mulc_KN_ { public:
   const KN_<const_R> & a;  const_R  b;
   Mulc_KN_(const KN_<const_R> & aa,const_R  bb) : a(aa),b(bb) {}
   Mulc_KN_(const Mulc_KN_<R> & aa,const_R  bb) : a(aa.a),b(aa.b*bb) {}
+  Mulc_KN_ operator-() const {return Mulc_KN_(a,-b);}
   outProduct_KN_<R> operator*(const  TKN_<double> & bb)
 {  return outProduct_KN_<R>(a,bb,b);} 
 
@@ -1114,6 +1126,23 @@ template<class R> inline long SameAdress(const KN_<R> &a, const KN_<R> &b) { ret
 //template<class R> inline
 //  KN_<R>::operator const KN<R> &() const { return *(const KN<R> *) ( const void *) this;}
 
+//  operateur y=Ax-b ou y=Ax + b pour le GC
+template<class R> 
+   PplusQ< typename VirtualMatrice<R>::plusAx, Mulc_KN_<R> >  operator-(const typename VirtualMatrice<R>::plusAx & A,const KN_<R> & B)  
+    { return PplusQ< typename VirtualMatrice<R>::plusAx, Mulc_KN_<R> >(A,Mulc_KN_<R>(B,R(-1.)));}
+
+template<class R> 
+   PplusQ< typename VirtualMatrice<R>::plusAx, KN_<R> >  operator+(const typename VirtualMatrice<R>::plusAx & A,const KN_<R> & B)  
+    { return PplusQ< typename VirtualMatrice<R>::plusAx, KN_<R> >(A,B);}
+
+template<class R> 
+   PplusQ< typename VirtualMatrice<R>::plusAx, Mulc_KN_<R> >  operator-(const typename VirtualMatrice<R>::plusAx & A,const KN<R> & B)  
+    { return PplusQ< typename VirtualMatrice<R>::plusAx, Mulc_KN_<R> >(A,Mulc_KN_<R>(B,R(-1.)));}
+
+template<class R> 
+   PplusQ< typename VirtualMatrice<R>::plusAx, KN_<R> >  operator+(const typename VirtualMatrice<R>::plusAx & A,const KN<R> & B)  
+    { return PplusQ< typename VirtualMatrice<R>::plusAx, KN_<R> >(A,B);}
+    
 
 template<class R>
 KN_<R> diagonal(const KNM<R> & A) { 
