@@ -466,7 +466,7 @@ then
 	then
 	CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
 	else
-	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
+	true
 	fi
 fi
 
