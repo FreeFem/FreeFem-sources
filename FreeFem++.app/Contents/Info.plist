@@ -24,7 +24,7 @@
 	<key>CFBundleExecutable</key>
 	<string>FreeFem++</string>
 	<key>CFBundleGetInfoString</key>
-	<string>@Version@ Version Wed Jul  7 14:23:18 CEST 2004 ,  LJLL Univerty Pierre et Marie , Curie , Paris, France </string>
+	<string>@Version@ Version Wed Jul  7 14:47:58 CEST 2004 ,  LJLL Univerty Pierre et Marie , Curie , Paris, France </string>
 	<key>CFBundleIconFile</key>
 	<string>FreeFem++.icns</string>
 	<key>CFBundleIdentifier</key>
