@@ -1,3 +1,73 @@
+2005-02-25 10:50  lehyaric
+
+	* Added new "resize" reserved word into the highlighting grammar.
+
+2005-02-24 21:27  hecht
+
+	* correct the documentation
+
+2005-02-24 20:44  hecht
+
+	* correct  mistake in return type in complex mean and jump new
+	  function (FH)
+
+2005-02-24 15:33  hecht
+
+	* resize of array and matrices, continuing
+
+2005-02-24 15:32  hecht
+
+	* add resize of int,real and complex array or matrices, exemple:
+	  real [int] tab2=[1,2,3,3.14]; tab2.resize(10); // to set the new
+	  siez of array to 10
+
+2005-02-24 15:08  lehyaric
+
+	* Grammar-driven highlighting works. Regression tests for it are
+	  included in "make check". Include file and macros are not scanned
+	  during highlighting.
+
+2005-02-24 09:44  hecht
+
+	* correct bug  in array of complex FE function like
+	  Vh<complex>[int]  Wh(10); // where Vh is a fespace
+
+2005-02-23 15:51  lehyaric
+
+	* Highlighting test procedure not ready for regression tests yet:
+	  disabled from "make check".
+
+2005-02-23 15:40  lehyaric
+
+	* Renamed some FreeFem++ tokens to avoid collisions with
+	  system-dependant defines.
+
+2005-02-23 15:37  lehyaric
+
+	* Properly compiled lex and yacc source, for machines that do not
+	  have working versions of lex or yacc.
+
+2005-02-23 15:35  lehyaric
+
+	* No CVS keyword in lex and yacc source files to avoid recompiling
+	  them after a "cvs commit" on machines that do not have proper
+	  versions of this software.
+
+2005-02-23 15:22  lehyaric
+
+	* "testhighlight" regression tests now work up to (but not
+	  including) array.edp
+
+2005-02-23 14:50  lehyaric
+
+	* Added highlighting grammar files into CVS, in case the compiling
+	  environment does not include a working version of bison or lex.
+
+2005-02-23 13:44  lehyaric
+
+	* The HISTORY file is now created from CVS logs thanks to "cvs2cl".
+	  Previous HISTORY items are saved as HISTORY_BEFORE_2005.
+
 2005-02-23 12:45  lehyaric
 
 	*     FreeFem++-cs: grammar-driven syntax highlighting works on
