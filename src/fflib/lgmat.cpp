@@ -361,7 +361,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
              fait=false;
 	     }
     }
-    
+    sij.clear();
   //assert(0); // a faire to do
 }
 
