@@ -18,16 +18,16 @@
 #define HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the `amd' library (-lamd). */
-#undef HAVE_LIBAMD
+#define HAVE_LIBAMD 1
 
 /* Arpack is used for eigenvalue computation */
-#undef HAVE_LIBARPACK
+#define HAVE_LIBARPACK 1
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #define HAVE_LIBPTHREAD 1
 
 /* Define to 1 if you have the `umfpack' library (-lumfpack). */
-#undef HAVE_LIBUMFPACK 
+#define HAVE_LIBUMFPACK 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
