@@ -1,5 +1,7 @@
 aclocal.m4
 autom4te.cache
+build-arch-stamp
+build-indep-stamp
 c-*
 config.h
 config.h.in
@@ -9,6 +11,7 @@ config-version.h
 configure
 configure.param
 configure.lineno
+configure-stamp
 *.exe
 freefem++-1.41.zip
 ListOfUnAllocPtr.bin
@@ -19,3 +22,4 @@ speedtest.out
 stamp-h
 stamp-h1
 *.tar.gz
+WindowsPackage.iss
