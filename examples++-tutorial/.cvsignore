@@ -3,6 +3,7 @@ f.txt
 lestables
 ListOfUnAllocPtr.bin
 *.log
+machinefile
 Makefile
 Makefile.in
 makeref.edp
