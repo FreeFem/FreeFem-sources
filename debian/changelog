@@ -1,3 +1,8 @@
+freefem++ (1.44-6) testing unstable; urgency=low
+
+  * Created package for "testing" distribution
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Thu, 18 Nov 2004 10:39:46 +0100
 freefem++ (1.44-5) unstable; urgency=low
 
   * Default package set to -x11
