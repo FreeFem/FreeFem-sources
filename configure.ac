@@ -229,7 +229,7 @@ fi
 # Looking for useful configuration utilities
 # ------------------------------------------
 
-AC_ARG_ENABLE(download,[  --enable-download	Try to download missing libraries (BLAS,ARPACK,UMFPACK)])
+AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK)])
 if test "$enable_download" = yes
 then
 	AC_CHECK_PROG(ff_wget,wget,yes,no)
