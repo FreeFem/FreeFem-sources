@@ -14,7 +14,7 @@ configure-stamp
 .DS_Store
 *.exe
 freefem++-?.??
-freefem++-?.??.zip
+freefem++-?.??-*.zip
 FreeFem++v*_linux-*_libc-*
 FreeFem++v*_linux-*_libc-*.tgz
 ListOfUnAllocPtr.bin
