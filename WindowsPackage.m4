@@ -21,8 +21,6 @@ OutputBaseFilename=FreeFem++-VERSION
 ; Programs
 Source: "src\std\FreeFem++.exe"; DestDir: "{app}"
 Source: "src\ide\FreeFem++-cs.exe"; DestDir: "{app}"
-Source: "src\ide\FreeFem++-client.exe"; DestDir: "{app}"
-Source: "src\ide\FreeFem++-server.exe"; DestDir: "{app}"
 Source: "src\nw\FreeFem++-nw.exe"; DestDir: "{app}"
 
 ; mingwm10.dll is necessary when "-mthreads" is used as a compilation
