@@ -17,8 +17,8 @@ basicAC_F0::name_and_type  MatrixInterpolation::Op::name_param[]= {
      "op", &typeid(long),
      "inside",&typeid(bool)
 };
-
-basicAC_F0::name_and_type  SetMatrix<R>::Op::name_param[]= {
+template <class R> 
+basicAC_F0::name_and_type  SetMatrix<R>::Op::name_param[9]= {
      "init", &typeid(bool),
      "solver", &typeid(TypeSolveMat*),
      "eps", &typeid(double)  ,
@@ -53,6 +53,8 @@ basicAC_F0::name_and_type  Problem::name_param[]= {
      "strategy",&typeid(long )
      
 };
+
+template <class C_args> 
 basicAC_F0::name_and_type  OpCall_FormBilinear<C_args>::name_param[]= {
      "init", &typeid(bool),
      "solver", &typeid(TypeSolveMat*),
@@ -65,29 +67,19 @@ basicAC_F0::name_and_type  OpCall_FormBilinear<C_args>::name_param[]= {
      "strategy",&typeid(long )
           
 };
-basicAC_F0::name_and_type  OpCall_FormBilinear<FormBilinear>::name_param[]= {
-     "init", &typeid(bool),
-     "solver", &typeid(TypeSolveMat*),
-     "eps", &typeid(double)  ,
-     "precon",&typeid(Polymorphic*), 
-     "dimKrylov",&typeid(long),
-     "bmat",&typeid(Matrice_Creuse<R>* ),
-     "tgv",&typeid(double ),
-     "factorize",&typeid(bool),
-     "strategy",&typeid(long )     
-};
+
+
+template <class FormBilinear> 
 basicAC_F0::name_and_type  OpCall_FormLinear<FormLinear>::name_param[]= {
      "tgv",&typeid(double )
 };
+
+template <class FormBilinear> 
 basicAC_F0::name_and_type  OpCall_FormLinear2<FormBilinear>::name_param[]= {
      "tgv",&typeid(double )
 };
-basicAC_F0::name_and_type  OpCall_FormLinear<C_args>::name_param[]= {
-     "tgv",&typeid(double )
-};
-basicAC_F0::name_and_type  OpCall_FormLinear2<C_args>::name_param[]= {
-     "tgv",&typeid(double )
-};
+
+
 
 namespace Fem2D {
 

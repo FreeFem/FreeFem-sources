@@ -11,6 +11,7 @@ class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMa
   mutable KN<R> xx; 
   Expression xx_del, code_del; 
   Stack stack;
+  typedef typename VirtualMatrice<R>::plusAx plusAx;
  
   public:
   SolveGCPrecon(const MatriceMorse<R> &A,const OneOperator * C,Stack stk,double epsilon=1e-6) : 
@@ -36,7 +37,7 @@ class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMa
     // cout << " epsr = " << epsr << endl;
      ConjuguedGradient<R,MatriceMorse<R>,SolveGCPrecon<R> >(a,*this,b,x,nbitermax,epsr);
    }
-typename VirtualMatrice<R>::plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
+plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
 
 
  void addMatMul(const KN_<R> & x, KN_<R> & Ax) const 
@@ -71,6 +72,7 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
   mutable KN<R> xx;  
   Stack stack;
   int dKrylov; 
+  typedef typename VirtualMatrice<R>::plusAx plusAx;
   public:
   SolveGMRESPrecon(const MatriceMorse<R> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6) : 
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),precon(0),stack(stk),eps(epsilon),epsr(0),dKrylov(dk),
@@ -96,7 +98,7 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
       int res=GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
 
    }
-typename VirtualMatrice<R>::plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
+plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
 
 
  void addMatMul(const KN_<R> & x, KN_<R> & Ax) const 
@@ -127,12 +129,14 @@ class SolveGMRESDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualM
   int dKrilov;
   KN<R> D1;
   public:
+  typedef typename VirtualMatrice<R>::plusAx plusAx;
   SolveGMRESDiag(const MatriceMorse<R> &A,int nbk=50,int itmax=0,double epsilon=1e-6) : 
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),D1(n),eps(epsilon),epsr(0),
     dKrilov(nbk) { 
     R aii=0;
     for (int i=0;i<n;i++)
       D1[i] = (fabs(aii=A(i,i)) < 1e-10 ? 1. : 1./aii);}
+
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
       epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
@@ -141,8 +145,9 @@ class SolveGMRESDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualM
       int k=dKrilov,nn=nbitermax;
       int res=GMRES(a,(KN<R> &)x,(const KN<R> &)b,*this,H,k,nn,epsr);
 
-   }
-typename VirtualMatrice<R>::plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
+ }
+
+plusAx  operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
 
 
  void addMatMul(const KN_<R> & x, KN_<R> & Ax) const 
