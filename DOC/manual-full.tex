@@ -650,8 +650,11 @@ gg = exp(pi*x*i);
 @varf mat(u,v) =
   int2d(Th)(1*dx(u)*dx(v)+2*dx(u)*dy(v)+3*dy(u)*dx(v)+4*dy(u)*dy(v))
   + on(1,2,3,4,u=1);
+@varf mati(u,v) =
+  int2d(Th)(1*dx(u)*dx(v)+2i*dx(u)*dy(v)+3*dy(u)*dx(v)+4*dy(u)*dy(v))
+  + on(1,2,3,4,u=1);
 @matrix A = mat(Vh,Vh);
-@matrix<complex> AA = mat(Vh,Vh); // a complex sparce matrix \index{matrix:complex}
+@matrix<complex> AA = mati(Vh,Vh); // a complex sparce matrix \index{matrix:complex}
 
 Vh m0; m0[] = A*f[];
 Vh m01; m01[] = A'*f[];
@@ -720,10 +723,9 @@ A&=&\borderarray{[}{]}{1em}{1.2ex}{rrrrrrrr}{
 \end{eqnarray*}
 \end{example}
 \begin{note}
-The operators \verb|'  ^-1| cannot create the matrix by themselves.
+The operators \verb|^-1| cannot create the matrix by themselves.
 Indeed, the following occur errors
 \bT
-@matrix AA = A';
 @matrix AAA = A^-1;
 \eT
 \end{note}
@@ -828,10 +830,13 @@ as follows,
 
 There are binary packages available for Microsoft Windows and Apple
 Mac OS. For all other platforms, \freefempp must be compiled and
-installed from the source archive. This archive is available from
-\url{http://www.ann.jussieu.fr/~hecht/ftp/freefem/freefem++.tgz}. To
+installed from the source archive. This archive is available from:
+
+\url{http://www.ann.jussieu.fr/~hecht/ftp/freefem/freefem++.tgz}.
+ 
+ To
 extract files from the compressed archive \texttt{freefem++.tgz} into
-a directory called freefem++-X.XX (where X.XX is the version number)
+a directory called \texttt{freefem++-X.XX} (where X.XX is the version number)
 enter the following commands in a shell window~:
 
 \bFF
@@ -1292,7 +1297,7 @@ the four arithmetic operations and superposition of them
 FE-functions.
 We can add \emph{new formulas} easily, if we want.
 Here, FE-function is an element of
-finite element space (see Section \refSec{Finite Elements}).
+finite element space (real or complex) (see Section \refSec{Finite Elements}).
 Or to put it another way: \emph{formulas} are the 
 mathematical expressions combining its numerical analogs, but
 it is independent of meshes (triangulations).
@@ -1304,13 +1309,15 @@ The projection of a formula $f$ to FE-space is done as in
 func f=x^2*(1+y)^3+y^2;
 mesh Th = square(20,20,[-2+2*x,-2+2*y]); // square $]-2,2[^2$
 fespace Vh(Th,P1);
-Vh fh=f;  // fh is the projection of f to Vh
+Vh fh=f;  // fh is the  projection of f to Vh (real value)
+func zf=(x^2*(1+y)^3+y^2)*exp(x+1i*y);
+Vh<complex> zh = zf; // zh is the  projection of zf to Vh  (complex value) 
 \eT
 The construction of \ttCC{fh} (=$f_h$) is explained in
 \refSec{Finite Elements}.
 
 \begin{note}
-The command \ttCC{@plot} is valid only for FE-functions.
+The command \ttCC{@plot} is valid only for real  FE-functions.
 \end{note}
 Complex valued function create functions with 2 variables \ttCC{x, y} as follows,
 \bT
