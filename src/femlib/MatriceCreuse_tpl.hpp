@@ -508,7 +508,7 @@ void MatriceProfile<R>::cholesky(double eps) const {
       *ij =  -s/D[j] ;
       xii -= *ij * *ij ;
       }
-    if ( abs(xii) < eps*abs(D[i])) 
+    if ( norm(xii) < norm(eps*D[i])) 
       ERREUR(cholesky,"pivot (" << i << ")= " << xii << " < " << eps*abs(D[i]))
     D[i] = sqrt(xii);
     }
@@ -538,8 +538,8 @@ void MatriceProfile<R>::crout(double eps) const  {
 
       xii -= *ij * *ij * *dkk;
       }
-    if (abs(xii) <= Max(eps*abs(D[i]),1.0e-30))
-      ERREUR(crout,"pivot (" << i << " )= " << abs(xii) << " <= " << eps*abs(D[i]) << " eps = " << eps)
+    if (norm(xii) <= Max(norm(eps*D[i]),1.0e-60))
+      ERREUR(crout,"pivot (" << i << " )= " << abs(xii)<< " <= " << eps*abs(D[i]) << " eps = " << eps)
 	D[i] = xii;
     }
 }
@@ -603,7 +603,7 @@ void MatriceProfile<R>::LU(double eps) const  {
       // cout << " k0 " << k0 << " i = " << i << " " <<  s << endl;
       uii = D[i] -s;
       
-      if (abs(uii) <= Max(eps*abs(D[i]),1.0e-30))
+      if (norm(uii) <= Max(norm(eps*D[i]),1.0e-30))
 	ERREUR(LU,"pivot (" << i << " )= " << abs(uii) << " <= " << eps*abs(D[i]) << " eps = " << eps);     
       
       D[i] = uii;
@@ -691,13 +691,13 @@ template <class R>
  MatriceMorse<R>::MatriceMorse(KNM_<R> & A,double tol)
     :MatriceCreuse<R>(A.N(),A.M(),false),solver(0) 
       {
-      
+  double tol2=tol*tol;    
   symetrique = true;
   this->dummy=false;
   int nbcoeff=0;
   for(int i=0;i<this->n;i++)
     for(int j=0;j<this->m;j++)
-      if(fabs(A(i,j))>tol) nbcoeff++;
+      if(norm(A(i,j))>tol2) nbcoeff++;
 
   nbcoef=nbcoeff;
   a=new R[nbcoef] ;
@@ -710,7 +710,7 @@ template <class R>
     lg[i]=nbcoeff;
     for(int j=0;j<this->m;j++)
      
-      if(fabs(aij=A(i,j))>tol)
+      if(norm(aij=A(i,j))>tol2)
        {
          cl[nbcoeff]=j;
          a[nbcoeff]=aij;
@@ -755,7 +755,7 @@ ostream& MatriceMorse<R>::dump(ostream & f) const
     f << i << " : " << lg[i] <<","<< lg[i+1]-1 << " : " ;
     int ke=lg[i+1];
     for (;k<ke;k++)
-      if (abs(a[k])) f  << cl[k] << " " << a[k]<< ", ";
+      if (norm(a[k])) f  << cl[k] << " " << a[k]<< ", ";
       else f  << cl[k] << " 0., " ;
     f << endl;    
    }
@@ -1080,12 +1080,13 @@ template<class R>
     }
    
    set<pair<int,int> > sij;
-   
+   R zero=R();
+
      for (int i=0;i<this->n;i++)
        for (int k=lg[i];k<lg[i+1];k++)
          {    
            int j=cl[k];
-           if(!a[k]) continue;
+           if(a[k]==zero) continue;
            int ii[2],jj[2];
            ii[0]=i;ii[1]=j;
            jj[0]=j;jj[1]=i;
@@ -1103,7 +1104,7 @@ template<class R>
                      bjk=B(kz,j);
                    else
                       bjk=B(j,kz);
-                   if( bjk && (!sym || kz<=i))
+                   if( bjk!=zero && (!sym || kz<=i))
                      sij.insert(make_pair(i,kz));
                   }
             }
@@ -1145,12 +1146,13 @@ template<class R>
      AB.symetrique=sym;
      AB.dummy=false;
      AB = R();
+  //   R zero=R();
      for (int i=0;i<this->n;i++)
        for (int k=lg[i];k<lg[i+1];k++)
          {    
            int j=cl[k];
            R aij = a[k];
-           if(!aij) continue;
+           if(aij == zero) continue;
            int ii[2],jj[2];
            ii[0]=i;ii[1]=j;
            jj[0]=j;jj[1]=i;
@@ -1169,7 +1171,7 @@ template<class R>
                    else
                       bjk=B(j,k);
                 //   cout << i << "," << "," << j << "," << k << " " << aij << " " << bjk << endl;
-                   if( bjk && (!sym || k<=i))
+                   if( bjk != zero  && (!sym || k<=i))
                        AB(i,k) += aij*bjk;
                   }
             }
