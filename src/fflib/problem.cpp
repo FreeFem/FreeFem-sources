@@ -937,40 +937,35 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     typedef DotSlash_KN_<R> DotSlash;
     list<C_F0>::const_iterator ii,ib=largs.begin(),
       ie=largs.end();
-    aType tFB( atype<const  FormBilinear *>() );                       
-    aType tMat( atype<Matrice_Creuse<R>*>() );                       
-    aType tFL( atype<const  FormLinear *>() );                       
-    aType tTab( atype<KN<R> *>() );                       
-    aType tMatX( atype<typename VirtualMatrice<R>::plusAx >() );  
-    aType tMatTX( atype<typename VirtualMatrice<R>::plusAtx >() );  
-    aType tDotStar(atype<DotStar >() );
-    aType tBC( atype<const  BC_set  *>()) ;                    
+     using namespace FreeFempp;  
+     TypeVarForm<R> *tvf=TypeVarForm<R>::Global;
+     assert( tvf);
     for (ii=ib;ii != ie;ii++)
       {
         Expression e=ii->LeftValue();
         aType r = ii->left();
       //  if(A)        cout << "AssembleVarForm " <<  * r << " " <<  (*A)(0,3) << endl;
-        if (r==tFB) 
+        if (r==  tvf->tFB) 
           { if (A)
             AssembleBilinearForm<R>( stack,Th,Uh,Vh,sym,*A,dynamic_cast<const  FormBilinear *>(e));
           
           }
-        else if (r==tMat)
+        else if (r==tvf->tMat)
           {
             if (A)
               InternalError(" Add sparce matrice; to do, sorry");
           }
-        else if (r==tFL)
+        else if (r==tvf->tFL)
           {
             if (B)
               AssembleLinearForm<R>( stack,Th, Vh, B,dynamic_cast<const  FormLinear *>(e)) ;
           }
-        else if (r==tTab)
+        else if (r==tvf->tTab)
           {
             if ( B) 
               *B += *GetAny<KN<R> *>( (*e)(stack) );
           }
-        else if (r==tDotStar)
+        else if (r==tvf->tDotStar)
           {
             if ( B) 
               {
@@ -978,21 +973,21 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                 *B += ab;
               }
           }
-        else if (r==tMatX)
+        else if (r==tvf->tMatX)
           {
             if ( B) 
               { 
                 *B += GetAny<typename VirtualMatrice<R>::plusAx >( (*e)(stack) )  ;
               }
           }
-        else if (r==tMatTX)
+        else if (r==tvf->tMatTX)
           {
             if ( B) 
               { 
                 *B += GetAny<typename VirtualMatrice<R>::plusAtx >( (*e)(stack) )  ;
               }
           }
-        else if (r== tBC) 
+        else if (r== tvf->tBC) 
           ret=true;
         else 
           { 
