@@ -1,13 +1,22 @@
 
 %\RequirePackage{everyshi}%
 \newif\ifpdf
-\ifx\pdfoutput\undefined
-\pdffalse % we are not running PDFLaTeX
-\else
-\usepackage{pdfsync} 
-\pdfoutput=1 % we are running PDFLaTeX
-\pdftrue
+\pdffalse
+\@ifundefined{pdfoutput}{\message{-- no pdf -- }}{
+    \ifcase\pdfoutput
+    \message{-- no  pdf -- }
+    \else
+    \pdftrue
+    \message{--  ++ pdf -- }
+    \fi}
+
+\ifpdf
+\usepackage{pdfsync}
 \fi
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
 
 %\usepackage{times}
 %\usepackage{amsmath}
@@ -17,14 +26,13 @@
 \usepackage{FFF}
 \usepackage{amsfonts}
 \usepackage{amsmath}
-\usepackage{hyperref}
+
+
 
 
 %\usepackage{FFF}
 \usepackage{makeidx}
-\usepackage{color}
 \usepackage{multicol}
-\usepackage{graphicx}
 
 %\usepackage{dessin}
 

@@ -20,10 +20,10 @@ Hiroshima Kokusai Gakuin University, Hiroshima, Japan
 \makeindex
 \begin{document}
 \graphicspath{{./}{plots/}}
-\ifpdf
-\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\ifx\pdfoutput\undefined  
+\DeclareGraphicsExtensions{.eps,.ps,.jpg}
 \else
-\DeclareGraphicsExtensions{.eps,.ps, .jpg}
+\DeclareGraphicsExtensions{.pdf,.jpg, .tif}
 \fi
 \maketitle
 
