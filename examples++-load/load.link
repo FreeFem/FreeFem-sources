@@ -1,8 +1,21 @@
 #!/bin/sh
-export MACOSX_DEPLOYMENT_TARGET=10.3
 FFsource=..
 INC="-I$FFsource/src -I$FFsource/src/femlib  -I$FFsource/src/Graphics" 
-echo g++ -c $INC $1.cpp
-g++ -c $INC $1.cpp
-g++ -bundle $1.o -o $1.so -undefined dynamic_lookup
-  
+if [ -f "$1.cpp" ] ; then
+case `uname -s` in
+Darwin) 
+   export MACOSX_DEPLOYMENT_TARGET=10.3
+   SHARED="-bundle -undefined dynamic_lookup"  ;;
+Linux)
+   SHARED="-shared " ;;
+*)
+    echo "sorry unkwon achitecture "`uname`
+    exit 1
+esac
+echo g++ -c $INC $PIC $1.cpp
+g++ -c $INC $PIC  $1.cpp
+echo g++ $SHARED  $1.o -o $1.so 
+g++ $SHARED  $1.o -o $1.so 
+else
+  echo " sorry file $1.cpp do notexist "
+fi
