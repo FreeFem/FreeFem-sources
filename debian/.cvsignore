@@ -1,6 +1,9 @@
+files
 freefem++
 freefem++-doc
 freefem++-glx
 freefem++-mpi
 freefem++-nw
 freefem++-x11
+*.substvars
+tmp

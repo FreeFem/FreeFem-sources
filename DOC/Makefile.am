@@ -12,7 +12,7 @@ documentation:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 %.gz:%
 	gzip -c  -9 $*  >$*.gz
 clean:
-	-rm *.dvi *.pdf *~ *.aux *.log *.ps *.toc *.ind *.glo *.out *.blg *ilg *.idx *.bbl *.tmp
-
+	-rm *.dvi *.pdf *~ *.aux *.log *.ps *.ps.gz \
+		*.toc *.ind *.glo *.out *.blg *ilg *.idx *.bbl *.tmp
 
 EXTRA_DIST=plots/*.eps *.sty *.tex manual.ps.gz manual.pdf
