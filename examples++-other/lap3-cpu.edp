@@ -22,13 +22,37 @@ verbosity=5;
   + int2d(Th)( -f*vh )                          //  linear form
   + on(2,3,4,uh=g) ;                      //  boundary condition form
 
+ problem laplaceLU(uh,vh,solver=LU,tgv=1e30) =                    //  definion of  the problem 
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  + int1d(Th,1)( uh*vh) 
+  + int1d(Th,1)( - vh)
+  + int2d(Th)( -f*vh )                          //  linear form
+  + on(2,3,4,uh=g) ;                      //  boundary condition form
+
+ problem laplaceCrout(uh,vh,solver=Crout,tgv=1e30) =                    //  definion of  the problem 
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  + int1d(Th,1)( uh*vh) 
+  + int1d(Th,1)( - vh)
+  + int2d(Th)( -f*vh )                          //  linear form
+  + on(2,3,4,uh=g) ;                      //  boundary condition form
+
 real cpu=clock() ;
 laplace0; // solve the problem plot(uh); // to see the result
-cout << "-- lap cholesky " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s" << endl;
+cout << "-- lap Cholesky " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s" << endl;
 uh=0;
 cpu=clock() ;
 laplace1; // solve the problem plot(uh); // to see the result
 cout << "-- lap CG       " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s" << endl;
+uh=0;
+
+cpu=clock() ;
+laplaceLU; // solve the problem plot(uh); // to see the result
+cout << "-- lap LU       " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s" << endl;
+uh=0;
+
+cpu=clock() ;
+laplaceCrout; // solve the problem plot(uh); // to see the result
+cout << "-- lap Crout    " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s" << endl;
 uh=0;
 
 if(HaveUMFPACK){
