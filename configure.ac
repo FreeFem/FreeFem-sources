@@ -241,6 +241,30 @@ then
 else
 	ff_wget=no
 fi
+#  modif FH -----
+#  -- looking for cadna  
+#  the round-off error propagation 
+# the web site http://www-anp.lip6.fr/cadna/
+#  --------------------
+ff_cadna_ok=no
+ff_libs_old="$LIBS"
+ff_ldflag_old="$LDFLAGS"
+ff_cadna_dir="${curdir}/download/cadna"
+  LDFLAGS="$LDFLAGS -L$ff_cadna_dir"
+  AC_CHECK_LIB(cadnafree,arit_zero,
+                ff_cadna_ok=yes)
+  AC_CHECK_HEADERS(${ff_cadna_dir}/cadnafree.h,
+       ff_cadna_h=yes, ff_cadna_h=no)
+
+   if test "$ff_cadna_ok" = yes  -a "$ff_cadna_h" = yes 
+    then
+      AC_DEFINE(HAVE_CADNA,1, freecadna is use to evalute the round-off error propagation )
+      CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
+       LIBS="-lcadnafree $ff_libs_old"
+   else
+       LIBS="$ff_libs_old"
+       LDFLAGS="$ff_ldflags_old"    
+   fi
 
 # Looking for the BLAS
 # --------------------

@@ -23,7 +23,7 @@ extern "C" {
 #ifdef WITHBLAS 
 template<class R> inline R blas_sdot(const int n,const R *sx,const int incx,const R *sy,const int  incy)
 {
-  R s=0;
+  R s=R();
   
   if(incx == 1 && incy == 1)
    for (int k = 0; k< n; k++)
@@ -232,7 +232,25 @@ int MatriceProfile<R>::size() const {
   if (U && (U != L)) s += pU[this->n]*sizeof(int);
   return s;
 }
-
+/*
+template<class R>
+int MatriceProfile<R>::MatriceProfile(const MatriceProfile<RR> & A )
+  : MatriceCreuse<R>(A.n,A.m,0)
+  {
+    
+    typefac=A.typefac;
+    pL=  docpy<int,int>(A.pL,n+1);
+    D = docpy<R,RR>(A.D,n);
+    if ( A.pL == A.pU ) pU=pL;
+    else pU=  docpy<int,int>(A.pU,m+1);
+    
+      L= docpy<R,RR>(A.L,pL[n]);
+      
+    if ( A.L == A.U ) U=L;
+    else  U= docpy<R,RR>(A.U,pU[m]);
+    
+  
+  }*/
 template<class R>
   MatriceMorse<R> *MatriceProfile<R>::toMatriceMorse(bool transpose,bool copy) const 
   {
@@ -370,7 +388,7 @@ void MatriceProfile<R>::addMatMul(const KN_<R> &x,KN_<R> &ax) const
 
 template<class R>
 void MatriceProfile<R>::operator=(const R & v) {
-  if(v!=0.0)
+  if(v!=R())
     { cerr << " Mise a zero d'une matrice MatriceProfile<R>::operator=(R v) uniquement v=" << v << endl;
     throw(ErrorExec("exit",1));
     }
@@ -483,6 +501,7 @@ ostream& MatriceProfile<R>::dump (ostream& f) const
 }
 template<class R>
 void MatriceProfile<R>::cholesky(double eps) const {
+  double eps2=eps*eps;
   R  *ij , *ii  , *ik , *jk , xii;
   int i,j,k;
   if (L != U) ERREUR(factorise,"matrice non symetrique");
@@ -508,7 +527,7 @@ void MatriceProfile<R>::cholesky(double eps) const {
       *ij =  -s/D[j] ;
       xii -= *ij * *ij ;
       }
-    if ( norm(xii) < norm(eps*D[i])) 
+    if ( norm(xii) < eps2*norm(D[i])) 
       ERREUR(cholesky,"pivot (" << i << ")= " << xii << " < " << eps*abs(D[i]))
     D[i] = sqrt(xii);
     }
@@ -517,6 +536,7 @@ template<class R>
 void MatriceProfile<R>::crout(double eps) const  {
   R  *ij , *ii  , *ik , *jk , xii, *dkk;
   int i,j,k;
+  double eps2=eps*eps;
   if (L != U) ERREUR(factorise,"matrice non symetrique");
   U = 0; // 
   typefac = FactorizationCrout;
@@ -538,7 +558,7 @@ void MatriceProfile<R>::crout(double eps) const  {
 
       xii -= *ij * *ij * *dkk;
       }
-    if (norm(xii) <= Max(norm(eps*D[i]),1.0e-60))
+    if (norm(xii) <= Max(eps2*norm(D[i]),1.0e-60))
       ERREUR(crout,"pivot (" << i << " )= " << abs(xii)<< " <= " << eps*abs(D[i]) << " eps = " << eps)
 	D[i] = xii;
     }
@@ -546,6 +566,7 @@ void MatriceProfile<R>::crout(double eps) const  {
 template<class R>
 void MatriceProfile<R>::LU(double eps) const  {
   R s,uii;
+  double eps2=eps*eps;
   int i,j,k;
   if (L == U && ( pL[this->n]  || pU[this->n] ) ) ERREUR(LU,"matrice  symetrique");
   if(verbosity>3)
@@ -603,7 +624,7 @@ void MatriceProfile<R>::LU(double eps) const  {
       // cout << " k0 " << k0 << " i = " << i << " " <<  s << endl;
       uii = D[i] -s;
       
-      if (norm(uii) <= Max(norm(eps*D[i]),1.0e-30))
+      if (norm(uii) <= Max(eps2*norm(D[i]),1.0e-30))
 	ERREUR(LU,"pivot (" << i << " )= " << abs(uii) << " <= " << eps*abs(D[i]) << " eps = " << eps);     
       
       D[i] = uii;

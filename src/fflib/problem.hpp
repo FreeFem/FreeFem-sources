@@ -309,25 +309,60 @@ public:
 
 
 
+// hack build template 
+template<class T> struct CadnaType{
+   typedef T  Scalaire;
+ }; 
+#ifdef  HAVE_CADNA
+#include <cadnafree.h>
+// specialisation 
+template<> struct CadnaType<complex<double> >{
+   typedef complex<double_st> Scalaire;
+ };
+template<> struct CadnaType<double> {
+   typedef double_st Scalaire;
+ };
+ 
+ inline double norm(complex<double_st> x){return x.real()*x.real()+x.imag()*x.imag();} 
+ inline double norm(double_st x){return x*x;} 
+ namespace std {
+inline complex<double_st> min(const complex<double_st> &a,complex<double_st> &b)
+{ return complex<double_st>(min(real(a),real(b)),min(imag(a),imag(b)));}
+inline complex<double_st> max(const complex<double_st> &a,const complex<double_st> &b)
+{ return complex<double_st>(max(real(a),real(b)),max(imag(a),imag(b)));}
+}
+inline int cestac(const complex<double_st> & z) 
+{return min(cestac(z.real()),cestac(z.imag()));}
+#endif
 class Problem  : public Polymorphic { 
 //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =9;
+  static const int n_name_param =10;
   int Nitem,Mitem;
+
 public:
   struct Data {
     const Mesh * pTh; 
     CountPointer<const FESpace> Uh;
     CountPointer<const FESpace> Vh;
     CountPointer<MatriceCreuse<double> > AR;   
-    CountPointer<MatriceCreuse<Complex> > AC;   
-    void init()  {pTh=0; Uh.init(),Vh.init();AR.init();AC.init();}
+    CountPointer<MatriceCreuse<Complex> > AC; 
+    typedef  CadnaType<double>::Scalaire double_st;  
+    typedef  CadnaType<complex<double> >::Scalaire cmplx_st;  
+    MatriceCreuse<double_st>  * AcadnaR;
+    MatriceCreuse<cmplx_st>  * AcadnaC;
+
+    void init()  {pTh=0; AcadnaR=0;AcadnaC=0; Uh.init(),Vh.init();AR.init();AC.init();}
     void destroy() { 
       pTh=0;
       Uh.destroy(); 
       Vh.destroy();
       AR.destroy();       
-      AC.destroy();}        
+      AC.destroy();
+      
+      if(AcadnaR) AcadnaR->destroy();
+      if(AcadnaC) AcadnaC->destroy();
+      }        
   } ;
   const OneOperator *precon;
   
@@ -348,15 +383,16 @@ public:
   void destroy(Stack stack)  const  {dataptr(stack)->destroy();}
 
   template <class R>
-  AnyType eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & dataA) const;
+  AnyType eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & dataA,
+  MatriceCreuse< typename CadnaType<R>::Scalaire >  * & dataCadna) const;
 
   AnyType operator()(Stack stack) const
   {
      Data *data= dataptr(stack);
     if (complextype) 
-     return eval<Complex>(stack,data,data->AC);
+     return eval<Complex>(stack,data,data->AC,data->AcadnaC);
     else
-     return eval<double>(stack,data,data->AR);
+     return eval<double>(stack,data,data->AR,data->AcadnaR);
 
   }
   
