@@ -123,7 +123,7 @@ for ($i=0;$i<=$#filei;$i++)
 #    print "\n @write_secs $date_str \n";
 #    $date_str = ctime((stat($file))[9]);
 #    $date_str =scalar localtime($write_secs);    
-   $download .=  "\n<li>  $tt[$i] \n   <a href=\"$file\">\n  <font size=-1>  $size Kb $date_str  </font> </li> \n";
+   $download .=  "\n<li>  $tt[$i] \n   <a href=\"$file\"> $bfile </a>\n  <font size=-1>  $size Kb $date_str  </font> </li> \n";
 }
 $manpdf=FileInfo($dir."/manual-full.pdf");
 $omanpdf=FileInfo($dir."/manual.pdf");

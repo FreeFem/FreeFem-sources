@@ -563,3 +563,5 @@ __________
  TAG release_1_44
  now the current version is 1.45
 
+29/12/2004  
+   add concat operator # in macro generator.
