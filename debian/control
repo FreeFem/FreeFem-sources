@@ -7,7 +7,7 @@ Standards-Version: 3.6.1.0
 
 Package: freefem++
 Architecture: all
-Depends: freefem++-cs (= ${Source-Version}) | freefem++-x11 (= ${Source-Version}) | freefem++-glx (= ${Source-Version}) | freefem++-nw (= ${Source-Version})
+Depends: freefem++-x11 (= ${Source-Version}) | freefem++-cs (= ${Source-Version}) | freefem++-glx (= ${Source-Version}) | freefem++-nw (= ${Source-Version})
 Suggests: freefem++-doc
 Description: A PDE oriented language using Finite Element Method
  FreeFem++ is an implementation of a language dedicated to the finite element
