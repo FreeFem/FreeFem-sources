@@ -1,13 +1,13 @@
 #include  <complex>
 #include  <string>
 #include  <iostream>
-#include  <iomanip>
 #include  "error.hpp"
 #include  <ctype.h>
 #include  <stdlib.h>
 #include  <map>
 #include "AFunction.hpp"
 //class pfes;
+#include  <iomanip>                                                                                                        
 #include "lg.tab.hpp"
 #include "lex.hpp"
 
@@ -78,6 +78,9 @@ int mylex::basescan()
   buf[3]=0; //
  debut:
   TheCurrentLine=linenumber;
+  // modif FH 
+  if (firsttime) 
+    firsttime=false,cout << setw(5) <<linenumber << " : " ; 
   do {
     incomment = 0;
     c = source().get();
@@ -550,7 +553,7 @@ bool mylex::ExpandParam(int &ret)
       pilesource[level+1].beginStackParamExpand =0; 
       pilesource[level+1].l =0;
      // cout << "\n ++include " << filename << ";" << level+1 << endl;
-      linenumber = 0;     
+      linenumber = 1;     
       level++;      
       beginStackParamExpand=0; 
     }
