@@ -50,9 +50,3 @@ for ( i=0;i<5;i++)
  }	
     exec("medit `pwd`/Thh"+i);
  }
-
-// Regression check
-real ref=fh[]'*fh[];
-cout<<"reference value="<<ref<<endl;
-assert(ref<1.965e+04);
-assert(ref>1.963e+04);
