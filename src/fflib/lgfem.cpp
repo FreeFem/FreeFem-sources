@@ -2589,6 +2589,10 @@ AnyType Plot::operator()(Stack s) const  {
         int Na=Varrow.N();
         R2 O((Pmin+Pmax)/2);
         R rx(Pmax.x-Pmin.x),ry(Pmax.y-Pmin.y);
+        // bug   version 1.14 correct FH to remove div by zero.
+        rx = Max(rx,1e-30);
+        ry = Max(ry,1e-30);
+        // -- end correction
         R r =  (Max(rx,ry)*0.55);
         showgraphic();
         if (aspectratio)
