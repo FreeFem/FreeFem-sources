@@ -207,10 +207,17 @@ fi
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
 
-AC_MSG_CHECKING(for mpiCC)
-ff_save_cxx="$CXX"
-CXX=mpiCC
-AC_LINK_IFELSE(
+# We need to be able to disable the parallel version because on some
+# machines mpiCC exists but does not produce desirable results.
+
+AC_ARG_ENABLE(mpi,[  --disable-mpi	Disable parallel version])
+
+if test "$enable_mpi" = yes
+then
+	AC_MSG_CHECKING(for mpiCC)
+	ff_save_cxx="$CXX"
+	CXX=mpiCC
+	AC_LINK_IFELSE(
 [#include <stdio.h>
 #include <mpi.h>
 int main(int argc,char **argv){
@@ -225,17 +232,18 @@ int main(int argc,char **argv){
 }],
 ff_mpi=yes,
 ff_mpi=no)
-CXX="$ff_save_cxx"
-AC_MSG_RESULT($ff_mpi)
+	CXX="$ff_save_cxx"
+	AC_MSG_RESULT($ff_mpi)
 
-if test "$ff_mpi" = yes;
-then
+	if test "$ff_mpi" = yes;
+	then
 
-	# We do not AC_DEFINE any special flag for parallel
-	# computation here, because it must only be set when the
-	# parallel program is compiled (see src/mpi/Makfile.am)
+		# We do not AC_DEFINE any special flag for parallel
+		# computation here, because it must only be set when the
+		# parallel program is compiled (see src/mpi/Makfile.am)
 
-	AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
+		AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
+	fi
 fi
 
 # Looking for useful configuration utilities
