@@ -826,6 +826,7 @@ template<class A0>
 };
 
 inline int clexico(int i,int j) { return i==0 ? j : i;}
+inline int clexico(int i,int j,int k) { int ll=clexico(i,j);  return  ll==0 ? k : ll;}
 
 template<class R,class TA0,class TA1>
  class E_F_F0F0 :public  E_F0 { public:

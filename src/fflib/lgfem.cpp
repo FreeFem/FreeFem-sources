@@ -57,6 +57,78 @@ void init_lgmesh() ;
 
 
 
+
+template<class R,class TA0,class TA1,class TA2>
+ class E_F_F0F0F0 :public  E_F0 { public:
+   template <class T> struct remove_reference     {typedef T type;};
+   template <class T> struct remove_reference<T&> {typedef T type;};
+   typedef typename remove_reference<TA0>::type A0;
+   typedef typename remove_reference<TA1>::type A1;
+   typedef typename remove_reference<TA2>::type A2;
+   typedef  R (*func)( A0 , A1, A2 ) ;
+    
+  func f;
+  Expression a0,a1,a2;
+  E_F_F0F0F0(func ff,Expression aa0,Expression aa1,Expression aa2) 
+    : f(ff),a0(aa0),a1(aa1),a2(aa2) {}
+  AnyType operator()(Stack s)  const 
+    {return SetAny<R>( f( GetAny<A0>((*a0)(s)) , GetAny<A1>((*a1)(s)),  GetAny<A2>((*a2)(s)) ) );}  
+   bool EvaluableWithOutStack() const 
+      {return a0->EvaluableWithOutStack() && a1->EvaluableWithOutStack() && a2->EvaluableWithOutStack() ;} // 
+   bool MeshIndependent() const 
+      {return a0->MeshIndependent() && a1->MeshIndependent() && a2->MeshIndependent();} // 
+  int compare (const E_F0 *t) const { 
+     int rr;
+    // cout << "cmp " << typeid(*this).name() << " and " << typeid(t).name() << endl;
+     const  E_F_F0F0F0* tt=dynamic_cast<const E_F_F0F0F0 *>(t);
+     if (tt && f == tt->f) rr= clexico(a0->compare(tt->a0),a1->compare(tt->a1),a2->compare(tt->a2));
+     else rr = E_F0::compare(t);
+     return rr;
+     } // to give a order in instuction 
+
+      
+   int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const
+    {
+
+       int rr = find(m);
+       if (rr) return rr;
+
+       return insert(new Opt(*this,a0->Optimize(l,m,n),a1->Optimize(l,m,n),a2->Optimize(l,m,n)),l,m,n);
+    }
+     // build optimisation
+
+     class Opt: public E_F_F0F0F0  { public :
+       size_t ia,ib,ic;  
+       Opt(const  E_F_F0F0F0 &t,size_t iaa,size_t ibb,size_t icc) 
+         : E_F_F0F0F0(t) ,
+         ia(iaa),ib(ibb),ic(icc) {}
+      AnyType operator()(Stack s)  const 
+       {
+         //A0 aa =*static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia));
+         //A1 bb=*static_cast<A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ;
+         //cout << ia << " " << ib <<  "f( " << aa << "," << bb  << " )   = "<< f(aa,bb) << endl;
+         return SetAny<R>( f( *static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
+                             *static_cast<A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ,
+                             *static_cast<A2 *>(static_cast<void*>(static_cast<char *>(s)+ic)) 
+                             ) );}  
+         
+      };     
+       
+    
+};
+template<class R,class A=R,class B=A,class C=A,class CODE=E_F_F0F0F0<R,A,B,C> >
+class  OneOperator3 : public OneOperator {
+    aType r; //  return type 
+    typedef typename CODE::func func;
+    //typedef  R (*func)(A,B) ;
+    func f;
+    public: 
+    E_F0 * code(const basicAC_F0 & args) const 
+     { return  new CODE(f,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[3]));} 
+    OneOperator3(func  ff): 
+      OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()],map_type[typeid(C).name()]),
+      f(ff){}
+};
 const E_Array * Array(const C_F0 & a) { 
   if (a.left() == atype<E_Array>() )
     return dynamic_cast<const E_Array *>(a.LeftValue());
@@ -1611,6 +1683,23 @@ long pmesh_nt(pmesh * p)
  { throwassert(p && *p) ;  return (**p).nt ;}
 long pmesh_nv(pmesh * p)
  { throwassert(p && *p) ;  return (**p).nv ;}
+long pVh_ndof(pfes * p)
+ { throwassert(p && *p);
+   FESpace *fes=**p; ;  return fes->NbOfDF ;}
+long pVh_nt(pfes * p)
+ { throwassert(p && *p);
+   FESpace *fes=**p; ;  return fes->NbOfElements ;}
+long pVh_ndofK(pfes * p)
+ { throwassert(p && *p);
+   FESpace *fes=**p;   return (*fes)[0].NbDoF() ;}
+
+long pVh_ndf(pfes * p,long k,long i)
+ { throwassert(p && *p);
+   FESpace *fes=**p; 
+   throwassert(fes && k >=0 && k < fes->NbOfElements );
+   FElement K=(*fes)[k];
+   throwassert(i>=0 && i <K.NbDoF() );
+   return K(i) ;}
 
 
 
@@ -3436,6 +3525,11 @@ void  init_lgfem()
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
  Add<pmesh*>("nv",".",new OneOperator1<long,pmesh*>(pmesh_nv));
+ Add<pfes*>("ndof",".",new OneOperator1<long,pfes*>(pVh_ndof));
+ Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
+ Add<pfes*>("ndofK",".",new OneOperator1<long,pfes*>(pVh_ndofK));
+ Add<pfes*>("(","",new OneOperator3<long,pfes*,long,long>(pVh_ndf));
+ 
  atype<Matrice_Creuse<R> * >()->AddCast(new OneOperatorCode<pb2mat<R> >);
  atype<Matrice_Creuse<Complex> * >()->AddCast(new OneOperatorCode<pb2mat<Complex> >);
 /*

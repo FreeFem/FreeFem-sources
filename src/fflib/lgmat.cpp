@@ -411,6 +411,7 @@ AnyType ProdMat(Stack stack,Expression emat,Expression prodmat)
   }
   MatriceMorse<RAB> *mAB=new MatriceMorse<RA>();
   mA->prod(*mB,*mAB);
+  
   sparce_mat->typemat=(mA->n == mB->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparce_mat->A.master(mAB);
   delete mA;
