@@ -1648,6 +1648,10 @@ void Init_map_type()
      
    //  NEW_TYPE( mapSd  );
   //   NEW_TYPE_I( mapSd  );
+    // FH aout 2004 : STRING ARRAY OF STRING STRING[STRING] 
+     map_type[typeid(MyMap<String,string*>*).name()] = new ForEachType<MyMap<String,string*>*>(Initialize<MyMap<String,string*> >,Delete<MyMap<String,string*> >) ;         
+     map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMap<String,string*>*>();      
+     atype<MyMap<String,string*>*>()->Add("[","",new OneOperator2_<string**,MyMap<String,string*>*,string*>(get_element<string*>));
      
           
      tables_of_identifier.push_back(&Global);

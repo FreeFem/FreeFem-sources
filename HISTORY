@@ -487,6 +487,23 @@ cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs login
 cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs freefem++ co
 the TAG release_1_41_before_packaging is created
 
+30/08/04
+--------
+ Correct  divide by 0 in plot instruction  when the bounding box is flat.
+ Set default solver to LU because UMFPACK sometime by bad result.
+ Correct all g++-3.4 error
+ Optimize Choleski and Crout solver (divide cpu time by two on pentium)
+ Add stuff for adding new finite element due to the new software achitecture.
+
+31/08/04
+--------
+ Add string[string] array
+ correct bug in  macro expansion 
+     macro parameter will be not expanded 
+  example of bug:
+     macro a(i) i //
+     macro b  a(x)  //  bug here 
+     b = 1 ; // we get "i=1" or we want "x =1"
 
 
      

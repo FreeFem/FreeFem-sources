@@ -21,7 +21,7 @@ class mylex  {
 
   private:
   int level;
-  bool withmacropara;
+  int withmacropara;
   char buf[1024];
   int typetoken;
   bool echo;
@@ -54,7 +54,7 @@ class mylex  {
     cout(out),
     echo(mpirank == 0),
     level(-1),
-    withmacropara(false),
+    withmacropara(0),
     listMacroDef(new list<MapMacroDef>),
     listMacroParam(0) {
     listMacroDef->push_front(MapMacroDef());};
