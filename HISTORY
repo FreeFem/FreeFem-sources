@@ -505,5 +505,8 @@ the TAG release_1_41_before_packaging is created
      macro b  a(x)  //  bug here 
      b = 1 ; // we get "i=1" or we want "x =1"
 
+Make Version 1.42
+-----------------
+
 
      
