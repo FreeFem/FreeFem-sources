@@ -49,6 +49,7 @@ agl:
 	cd src/agl&& make
 
 ide:
+	cd download && make
 	cd src/lglib && make
 	cd src/fflib && make
 	cd src/ide && make FreeFem++-cs FreeFem++-cs-server
