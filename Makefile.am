@@ -90,7 +90,7 @@ FreeFem++v$(VERSION)_MacOsX: all documentation
            -e "s/@VERSION@/$(VERSION)/g" \
            -e "s/@DATE@/`date`/g"  
 	cp src/agl/ FreeFem++-agl FreeFem++v$(VERSION)_MacOsX/FreeFem++.app/Contents/MacOS/FreeFem++
-	cp script/FreeFem++-CoCoa $@
+	cp src/FreeFem++-CoCoa $@
 
 FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
 	tar zcvf FreeFem++v$(VERSION)_MacOsX.tgz FreeFem++v$(VERSION)_MacOsX
