@@ -10,7 +10,9 @@
 \url{http://www.ann.jussieu.fr/\string~hecht/freefem++.htm} 
 }
 \author{F. Hecht \thanks{\url{mailto:hecht@ann.jussieu.fr}},
- O. Pironneau \thanks{\url{mailto:pironneau@ann.jussieu.fr}},   \\ Université Pierre et Marie Curie,\\  Laboratoire Jacques-Louis Lions, 
+ O. Pironneau \thanks{\url{mailto:pironneau@ann.jussieu.fr}},   
+\\ Université Pierre et Marie Curie,
+\\  Laboratoire Jacques-Louis Lions, 
 \\175 rue du Chevaleret ,PARIS XIII
 \\ ~ \\  K. Ohtsuka  \thanks{\url{mailto:ohtsuka@barnard.cs.hkg.ac.jp}}, \\
 Hiroshima Kokusai Gakuin University, Hiroshima, Japan
@@ -875,9 +877,8 @@ freefem web page.  \\
 triangulation is a Delaunay mesh of the convex hull of the set of points.
 It can be useful to build a table function.
 
-%%%alh
-The coordinate of the set of point and the value of the table function 
-are set in a file like :
+The coordinates of the points and the value of the table function 
+are defined in a separate file which looks like :
 
 \bFF
 0.51387 0.175741 0.636237
@@ -888,40 +889,42 @@ are set in a file like :
 0.0838988 0.389647 0.456045
 
 \eFF
-here the third column  by line is  unused in the command  \texttt{triangulate}.
 
-But you can use this  to defined a  table fonction with rows of the form: 
-\texttt{x y f(x,y))}.
+
+The third column of each line is left untouched by the
+\texttt{triangulate} command. But you can use this third value to
+define a table function with rows of the form: \texttt{x y f(x,y)}.
 
 %%% alh? Thxy.eps and xyf.eps not found
-%%%\twoplot[height=6cm]{Thxy}{xyf}{Delaunay mesh of the convexe hull of point set in file xyf}{Isovalue of table function}
+%%%\twoplot[height=6cm]{Thxy}{xyf}{Delaunay mesh of the convex hull of point set in file xyf}{Isovalue of table function}
 
 \index{function!tables}
 
 \bFF
-@mesh Thxy=triangulate("xyf"); // build the Delaunay mesh of the convexe hull 
-// with point defined with the 2 firsts column of file \texttt{xyf}
+@mesh Thxy=triangulate("xyf"); // build the Delaunay mesh of the convex hull 
+// points are defined by the first 2 columns of file \texttt{xyf}
 @plot(Thxy,ps="Thxyf.ps"); // (see figure  \ref{Thxy})
 
-@fespace Vhxy(Thxy,P1); // make P1 interpolation 
+@fespace Vhxy(Thxy,P1); // create a P1 interpolation 
 Vhxy fxy; // the function
 
 // reading the third row to define the function
 { @ifstream file("xyf");
    @real xx,yy;
    @for(@int i=0;i<fxy.n;i++)
-   file >> xx >>yy >> fxy[][i];  // to only read third row and xx and yy are just skip
+   file >> xx >>yy >> fxy[][i];  // to read third row only. xx and yy are just skipped
 }
 @plot(fxu,ps="xyf.ps"); // plot the function (see figure  \ref{xyf})
 \eFF
 
 
 \subsection{Adaptmesh}\index{adaptmesh}
-Mesh adaptation is a very powerful tool which should be
-used whenever possible for best results.  \freefempp uses a variable
-metric/Delaunay automatic mesh algorithm which takes for input one
-or more functions ( see in the following example) and builds a mesh
-adapted to the second differentiated field of the prescribed function.
+
+Mesh adaptation is a very powerful tool which should be used whenever
+possible. \freefempp uses a variable metric/Delaunay automatic meshing
+algorithm. It takes one or more functions as input (see in the
+following example) and builds a mesh adapted to the second derivative
+of the given function.
 
 \bFF
 verbosity=2;
@@ -957,67 +960,61 @@ for (i=0;i< 10;i++)
  @cout << " CPU = " << clock()-cpu << @endl;
 \eFF
 
-The method is described in detail in \cite{bamg}. It has a number of
-default parameters which can be overwritten for better results.
+This method is described in detail in \cite{bamg}. It has a number of
+default parameters which can be modified~:
+
 \label{adaptmesh}
 \begin{description}
-    \item[\texttt{hmin=}] Sets the value of the minimal edge size.
-    \index{adaptmesh!hmin=}
-    ({\tt val} is of type double precision and default value is
-    related to the size of the domain to be meshed and the precision
-    of the mesh generator).
 
-    \item[\texttt{hmax=}] Sets the value of the maximal edge size.
-    ({\tt val} is of type double precision and the default value is the
-    diameter of the domain to be meshed)
-    \index{adaptmesh!hmax=}
+    \item[\texttt{hmin=}] Minimum edge size.  \index{adaptmesh!hmin=}
+    ({\tt val} is a double precision value. Its default is related to
+    the size of the domain to be meshed and the precision of the mesh
+    generator).
 
-    \item[\texttt{err=}] Sets the level of the $P^1$ interpolation
-    error (0.01 is the default's value).
-        \index{adaptmesh!err=}
+    \item[\texttt{hmax=}] Maximum edge size.  ({\tt val} is a double
+    precision value. It defaults to the diameter of the domain to be
+    meshed) \index{adaptmesh!hmax=}
 
-    \item[\texttt{errg=}] Sets the value of the relative error on
-    geometry. By default this error is 0.01, and in any case this value
-    must be greater than $1/\sqrt{2}$.  Remark that mesh size created by
-    this option can be smaller than the {\tt -hmin } argument due to
-    geometrical constraint.
+    \item[\texttt{err=}] $P^1$ interpolation error level (0.01 is the
+    default).  \index{adaptmesh!err=}
+
+    \item[\texttt{errg=}] Relative geometrical error. By default this
+    error is 0.01, and in any case it must be lower than $1/\sqrt{2}$.
+    Meshes created with this option may have some edges smaller than
+    the {\tt -hmin } argument due to geometrical constraints.
     \index{adaptmesh!errg=}
 
-    \item[\texttt{nbvx=}] Sets the maximal number of vertices
-    generated by the mesh generator (9000 is the default's value).
+    \item[\texttt{nbvx=}] Maximum number of vertices generated by the
+    mesh generator (9000 is the default).
     \index{adaptmesh!nbvx=}
 
-    \item[\texttt{nbsmooth=}] Set the number of iterations of the
-    smoothing procedure (5 is the default's value).
-    \index{adaptmesh!nbsmooth=}
+    \item[\texttt{nbsmooth=}] number of iterations of the smoothing
+    procedure (5 is the default).  \index{adaptmesh!nbsmooth=}
 
-    \item[\texttt{nbjacoby=}] Set the number of iterations in a
-    smoothing procedure during the metric construction, 0 imply no
-    smoothing (6 is the default's value).
-    \index{adaptmesh!nbjacoby=}
+    \item[\texttt{nbjacoby=}] number of iterations in a smoothing
+    procedure during the metric construction, 0 means no smoothing (6
+    is the default).  \index{adaptmesh!nbjacoby=}
 
-    \item[\texttt{ratio=}] Set the ratio for a prescribed smoothing
-    on the metric.  If the value is 0 or less than 1.1 no smoothing on
-    the metric is done (1.8 is the default's value).
+    \item[\texttt{ratio=}] ratio for a prescribed smoothing on the
+    metric.  If the value is 0 or less than 1.1 no smoothing is done
+    on the metric (1.8 is the default).
 
-     If \texttt{ratio}  $> 1.1$ the speed of mesh size variation is
-     bounded by $log(\mathtt{ratio})$.  Remark: As {\tt ratio} is
-     closer to {\tt 1}, the number of vertices generated
-     increases.  This may be useful to control the thickness of
-     refined regions near shocks or boundary layers  .
-    \index{adaptmesh!ratio=}
+    If \texttt{ratio} $> 1.1$, the speed of mesh size variations is
+    bounded by $log(\mathtt{ratio})$.  Note: As {\tt ratio} gets
+    closer to {\tt 1}, the number of generated vertices increases.
+    This may be useful to control the thickness of refined regions
+    near shocks or boundary layers .  \index{adaptmesh!ratio=}
 
-   \item[\texttt{omega=}] Set the relaxation parameter of the
-   smoothing procedure (1.0 is the default's value).
-    \index{adaptmesh!omega=}
+   \item[\texttt{omega=}] relaxation parameter for the smoothing
+   procedure (1.0 is the default).  \index{adaptmesh!omega=}
 
-    \item[\texttt{iso=}] Forces the metric to be isotropic or
-    not (false is the default's value).
-    \index{adaptmesh!iso=}
+    \item[\texttt{iso=}] If true, forces the metric to be isotropic
+    (false is the default).  \index{adaptmesh!iso=}
 
-    \item[\texttt{abserror=}] If false the metric is evaluated
-    using the criterium of equi-repartion of relative error (false is the default's value).  In this
-    case the metric is defined by
+    \item[\texttt{abserror=}] If false, the metric is evaluated using
+    the criterium of equi-repartion of relative error (false is the
+    default).  In this case the metric is defined by
+
 \begin{equation}
   \mathcal{M} = \left({1\over\mathtt{err}\,\, \mathtt{coef}^2} \quad {
   |\mathcal{H}| \over max(\mathtt{CutOff},|\eta|)}\right)^p
@@ -1025,73 +1022,78 @@ default parameters which can be overwritten for better results.
 \end{equation}
     \index{adaptmesh!abserror=}
 
- otherwire, the metric is evaluated using the criterium of equidistribution
- of errors.  In this case the metric is define by
+    otherwise, the metric is evaluated using the criterium of
+    equi-distribution of errors.  In this case the metric is defined
+    by
+
 \begin{equation}
   \mathcal{M} = \left({1\over \mathtt{err}\,\,\mathtt{coef}^2} \quad
   {|{\mathcal{H}} \over
   {\mathit{sup}(\eta)-\mathit{inf}(\eta)}}\right)^p.\label{eq err abs}
 \end{equation}
 
-    \item[\texttt{cutoff=}] Sets the limit value of the relative
-    error evaluation (1.0e-6 is the default's value).
+    \item[\texttt{cutoff=}] lower limit for the relative error
+    evaluation (1.0e-6 is the default).
     \index{adaptmesh!cutoff=}
 
-    \item[\texttt{verbosity=}] Sets the level of printing
-    (verbosity , which can be chosen between 0 and $\infty$) verbosity, 
-    and change the value of the global variable verbosity (obsolete).
-    \index{adaptmesh!verbosity= }
+    \item[\texttt{verbosity=}] informational messages level (can be
+    chosen between 0 and $\infty$). Also changes the value of the
+    global variable verbosity (obsolete).  \index{adaptmesh!verbosity=
+    }
 
-    \item[\texttt{inquire=}] To inquire or not the mesh  (false is the default's value).
-    \index{adaptmesh!inquire=}
+    \item[\texttt{inquire=}] To inquire about the mesh (false is the
+    default).  \index{adaptmesh!inquire=}
 
-    \item[\texttt{splitpbedge=}] If is true then split in two all
-    internal edges with two boundary vertices (true is the default's value).
+    \item[\texttt{splitpbedge=}] If true, splits all internal edges in
+    half with two boundary vertices (true is the default).
     \index{adaptmesh!splitpbedge=}
 
-    \item[\texttt{maxsubdiv=}] Change the metric such that the
-    maximal subdivision of a background's edge is bound by the {\tt
-    val} number (always limited by 10,and 10 is also the default's value).
+    \item[\texttt{maxsubdiv=}] Changes the metric such that the
+    maximum subdivision of a background edge is bound by {\tt val}
+    (always limited by 10, and 10 is also the default).
     \index{adaptmesh!maxsubdiv=}
 
-    \item[\texttt{rescaling=}] the function with respect to which
-    the mesh is adapted is re-scaled to be between 0 and 1 (true is the default's value).
-    \index{adaptmesh!rescaling=}
+    \item[\texttt{rescaling=}] if true, the function with respect to
+    which the mesh is adapted is rescaled to be between 0 and 1 (true
+    is the default).  \index{adaptmesh!rescaling=}
 
-    \item[\texttt{keepbackvertices=}] if true will try to keep as
-    many vertices of the previous mesh as possible (true is the default's value).  
+    \item[\texttt{keepbackvertices=}] if true, tries to keep as many
+    vertices from the original mesh as possible (true is the default).
     \index{adaptmesh!keepbackvertices=}
 
-    \item[\texttt{isMetric=}] if it is true the metric is given
-    by hand (false is the default's value).  So 1 or 3 functions $m_{11}, m_{12}, m_{22}$ given defining 
-    directly a symmetric matrix field (if one function is given then isotropic mesh
-    size is given directly at every point through a function) , 
-   otherwise  for all  given functions,  its Hessian is computed
-    to define a metric. 
-    \index{adaptmesh!isMetric=}
+    \item[\texttt{isMetric=}] if true, the metric is defined
+    explicitly (false is the default).  If the 3 functions $m_{11},
+    m_{12}, m_{22}$ are given, they directly define a symmetric matrix
+    field whose Hessian is computed to define a metric. If only one
+    function is given, then it represents the isotropic mesh size at
+    every point.  \index{adaptmesh!isMetric=}
 
-    \item[\texttt{power=}]
-     exponent power of the Hessian to compute the
-    metric (1 is the default's value).
-    \index{adaptmesh!powerin=}
+    \item[\texttt{power=}] exponent power of the Hessian used to
+    compute the metric (1 is the default).  \index{adaptmesh!powerin=}
     
-    \item[\texttt{thetamax =}]  to change the angle limit value in degree of a corner
-    by default the value is 0.
+    \item[\texttt{thetamax=}] minimum corner angle in degrees (default
+    is 0).
     
-    \item[\texttt{splitin2 =}]  bool value to slip all triangle of the final mesh in 4 sub-triangles \index{adaptmesh!splitin2}
-    
+    \item[\texttt{splitin2=}] boolean value. If true, splits all
+    triangles of the final mesh into 4
+    sub-triangles. \index{adaptmesh!splitin2}
 
-    \item[\texttt{metric=}] \index{adaptmesh!metric=}
-      an array of 3 array real  to set or  get metric data information,
-      the size of this tree array must by the number of vertices, so if 
-      \texttt{m11,m12,m22} are three finite element P1 of the mesh of 
-      adapt, you ca	n  write: \texttt{metric=[m11[],m12[],m22[]]},
-                  ( see example convect-apt.edp for a full example)
-    \itemtt[nomeshgeneration=]  \index{adaptmesh!nomeshgeneration=}
-    to do or not the mesh generation, by default we do the mesh generation (it is useful 
-    to just compute metric).
-    \item[periodic=]  \index{adaptmesh!periodic=} for future: use to build 
-    periodic adapted mesh (see periodic finite element space \ref{periodic BC})
+    \item[\texttt{metric=}] \index{adaptmesh!metric=} an array of 3
+    real arrays to set or get metric data information. The size of
+    these three arrays must be the number of vertices. So if
+    \texttt{m11,m12,m22} are three P1 finite elements related to the
+    mesh to adapt, you can write: \texttt{metric=[m11[],m12[],m22[]]}
+    (see file convect-apt.edp for a full example)
+
+    \itemtt[nomeshgeneration=] \index{adaptmesh!nomeshgeneration=} If
+    true, no adapted mesh is generated (useful to compute only a
+    metric).
+
+    \itemtt[periodic=] \index{adaptmesh!periodic=} reserved for future
+    use: to build a adapted periodic mesh (see periodic finite element
+    space \ref{periodic BC})
+
+%%%alh detail \ref{periodic BC}?
 
 \end{description}
 
@@ -1153,7 +1155,7 @@ The idea is when you want to defined Finite Element  space
 on boundary you can use a mesh with no internal points (call empty mesh).
 It is can by useful we you have a Lagrange multiplier definied on the border.
 
-So the fonction emptymesh remove all the internal point of a mesh expect if the
+So the function emptymesh remove all the internal point of a mesh expect if the
 point is on internal boundary.
 
 \bFF
@@ -1457,7 +1459,7 @@ $$U_{h}=\vecttwo{Uxh}{Uyh}  \quad \mbox{and}\quad V_{h}=\vecttwo{Vxh}{Vyh}$$.
 
 \bFF
    @real value = uh[][0] ; // get the value of degree of freedom 0
-   @real maxdf = uh[].max; //  maximal value of degree of freedom
+   @real maxdf = uh[].max; //  maximum value of degree of freedom
    @int size = uh.n; // the number of degree of freedom
    @real[int] array(uh.n)= uh[]; //  copy the array of the function uh
 \eFF
@@ -1728,7 +1730,7 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
 If needed, the different kind of terms in the sum can appear more than once.
 
 Remark: the integral mesh and the mesh associated to test function or unkwon 
-fonction can be different in the case of linear form.
+function can be different in the case of linear form.
 
 \begin{note}
  \texttt{N.x} and \texttt{N.y} are the normal's components. \index{normal}\index{N}
@@ -1986,7 +1988,7 @@ Vh[int] eV(nev);   // to store the nev eigenvector \index{EigenValue}
                    tol=1e-10,maxit=0,ncv=0);
 
 //   tol= the tolerace \hfilll
-//   maxit= the maximal iteration see arpack doc.\hfilll
+//   maxit= the maximum iteration see arpack doc.\hfilll
 //   ncv   see arpack doc. \url{http://www.caam.rice.edu/software/ARPACK/}\hfilll
 //  the return value is number of converged eigen value.\hfilll
 
@@ -2241,7 +2243,7 @@ If we want to solve  the euler problem: find $ x\in \R^n $  such that
 $$ \frac{\partial J}{\partial x_i} (x) = 0 $$
 where $ J$ is a functional to minimize from  $ \R^n$ to $ \R$.
 
-if the function is convexe we can use the conjugate gradient to solve the problem, an 
+if the function is convex we can use the conjugate gradient to solve the problem, an 
 we just need the function (named \texttt{dJ} for example)
 which compute $\frac{\partial J}{\partial x_i}$, so the two parameters
 are the name of the function with prototype \ttCC{@func\ @real[@int]\  dJ(@real[@int] \& xx)} 
@@ -2256,7 +2258,7 @@ remark, you can use the \texttt{macro} tools (see \ref{macro}) to build easily t
 Two version are available:
 \begin{description} \index{linearCG} \index{NLCG}
 \itemtt[linearCG] linear case , the functional $J$ is quadratic.
-\itemtt[NLCG] non linear case (the function is just convexe).
+\itemtt[NLCG] non linear case (the function is just convex).
 \end{description}
 
 The named parameter of this two function are:
@@ -3776,7 +3778,7 @@ one does:
 int nupper=reg(0.4,0.9); // get the region number of point (0.4,0.9)
 int nlower=reg(0.9,0.1);  // get the region number of point (0.4,0.1)
 cout << " nlower " <<  nlower << ", nupper = " << nupper<< endl;
-//  defined the characteristics fonctions of upper and lower region
+//  defined the characteristics functions of upper and lower region
 Ph nu=1+5*(region==nlower) + 10*(region==nupper);
 plot(nu,fill=1,wait=1);
 \eFF
