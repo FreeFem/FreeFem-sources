@@ -31,6 +31,11 @@ CXXFLAGS=
 
 AC_CHECK_LIB(pthread,pthread_create)
 
+# Necessary absolute pathname for local directory when some libraries
+# are used from several different locations (for instance locally in
+# configure.ac and in a subdir).
+curdir=`pwd`
+
 # Checking wether we can produce a MacIntosh-specific version
 # -----------------------------------------------------------
 
@@ -126,7 +131,7 @@ if test -d /usr/X11R6 -a "$ff_win32" = no;
 then
 	ff_x11=yes
 	ff_x11prog=FreeFem++-x11${EXEEXT}
-	AC_SUBST(INCLUDEX11,/usr/X11R6/include)
+	AC_SUBST(INCLUDEX11,-I/usr/X11R6/include)
 	AC_SUBST(LIBX11,"-L/usr/X11R6/lib -lX11 -lm")
 fi
 AC_MSG_RESULT($ff_x11)
@@ -143,6 +148,39 @@ AC_CHECK_HEADER(GL/gl.h,
 
 # If we cannot find glx.h, "FreeFem++-glx" cannot be produced
 AC_CHECK_HEADER(GL/glx.h,,ff_glxprog=)
+
+# Checking wether we can produce a parallel version
+# -------------------------------------------------
+
+AC_MSG_CHECKING(for mpiCC)
+ff_save_cxx="$CXX"
+CXX=mpiCC
+AC_LINK_IFELSE(AC_LANG_SOURCE(
+#include <stdio.h>
+#include <mpi.h>
+,
+  char name[BUFSIZ];
+  int length;
+  
+  MPI_Init(&argc, &argv);
+  MPI_Get_processor_name(name, &length);
+  printf("%s: hello world\n", name);
+  MPI_Finalize();)
+,
+ff_mpi=yes,
+ff_mpi=no)
+CXX="$ff_save_cxx"
+AC_MSG_RESULT($ff_mpi)
+
+if test "$ff_mpi" = yes;
+then
+
+	# We do not AC_DEFINE any special flag for parallel
+	# computation here, because it must only be set when the
+	# parallel program is compiled (see src/mpi/Makfile.am)
+
+	AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
+fi
 
 # Looking for the BLAS
 # --------------------
@@ -189,8 +227,8 @@ if test "$ff_blas_ok" = no;
 then
 	AC_MSG_NOTICE(using downloaded Blas)
 	AC_SUBST(DOWNLOAD_BLAS,blas)
-	LIBS='${top_srcdir}/download/ATLAS/lib/ff++/libatlas.a'" $LIBS"
-	ff_blas_lib='${top_srcdir}/download/ATLAS/lib/ff++/libatlas.a'
+	ff_blas_lib="${curdir}/download/ATLAS/lib/ff++/libatlas.a"
+	LIBS="$ff_blas_lib $LIBS"
 	ff_blas_ok=yes
 fi
 AC_SUBST(BLASLIB,$ff_blas_lib)
@@ -262,7 +300,7 @@ then
 	then
 		AC_MSG_NOTICE(using downloaded Arpack)
 		AC_SUBST(DOWNLOAD_ARPACK,arpack)
-		ff_arpack_libs='${top_srcdir}/download/arpack/ARPACK/libarpack_ff++.a'
+		ff_arpack_libs="${curdir}/download/arpack/ARPACK/libarpack_ff++.a"
 		ff_arpack_ok=yes
 	fi
 fi
@@ -319,7 +357,7 @@ if test "$ff_umfpack_ok" = no;
 then
 	AC_MSG_NOTICE(using downloaded Umfpack)
 	AC_SUBST(DOWNLOAD_UMFPACK,umfpack)
-	LIBS='${top_srcdir}/download/umfpack/UMFPACKv4.3/UMFPACK/Lib/libumfpack.a ${top_srcdir}/download/umfpack/UMFPACKv4.3/AMD/Lib/libamd.a'" $LIBS"
+	LIBS="${curdir}/download/umfpack/UMFPACKv4.3/UMFPACK/Lib/libumfpack.a ${curdir}/download/umfpack/UMFPACKv4.3/AMD/Lib/libamd.a $LIBS"
 	AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
 	ff_umfpack_ok=yes
 fi
@@ -342,20 +380,6 @@ AC_MSG_RESULT($ff_dlfcn)
 if test "$ff_dlfcn" = yes;
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
-fi
-
-# Checking wether we can produce a parallel version
-# -------------------------------------------------
-
-AC_CHECK_PROG(ff_mpi,mpiCC,yes,no)
-if test "$ff_mpi" = yes;
-then
-
-	# We do not AC_DEFINE any special flag for parallel
-	# computation here, because it must only be set when the
-	# parallel program is compiled (see src/mpi/Makfile.am)
-
-	AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
 fi
 
 # Checking wether we can generate some documentation
