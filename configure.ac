@@ -132,15 +132,31 @@ AC_MSG_RESULT($ff_x11)
 # Checking that OpenGL is accessible
 # ----------------------------------
 
-# If we cannot find gl.h, no OpenGL version can be produced
-AC_CHECK_HEADER(GL/gl.h,
-	ff_glxprog=FreeFem++-glx${EXEEXT},
-	ff_glxprog=
-	ff_aglprog=
-)
+# On Darwin, gl.h is not reachable by default
+if test -f /usr/X11R6/include/GL/gl.h
+then
+	CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
+fi
 
-# If we cannot find glx.h, "FreeFem++-glx" cannot be produced
-AC_CHECK_HEADER(GL/glx.h,,ff_glxprog=)
+# If we cannot find gl.h, no OpenGL version can be produced
+AC_CHECK_HEADERS(GL/gl.h,
+	ff_gl_ok=yes,
+	ff_gl_ok=no)
+AC_CHECK_HEADERS(GL/glx.h,
+	ff_glx_ok=yes,
+	ff_glx_ok=no)
+
+# If we cannot find GL, we cannot compile FreeFem++-agl
+if test "$ff_gl_ok" = no
+then
+	ff_aglprog=
+fi
+
+# If we cannot find GLX, we cannot compile FreeFem++ with it
+if test "$ff_glx_ok" = yes
+then
+	ff_glxprog=FreeFem++-glx${EXEEXT}
+fi
 
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
