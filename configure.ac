@@ -15,6 +15,7 @@ AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # another name
 
 AC_SUBST(FREEFEM_PACKAGING,2)
+AC_SUBST(FFV_PREFIX,FreeFem++-v$VERSION-$FREEFEM_PACKAGING)
 
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
@@ -85,10 +86,10 @@ CYGWIN*)
                 enable_cygwin=no;
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
 		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -L/lib/mingw -lws2_32"
+         	# Resources for FreeFem++-cs in Microsoft Windows format
+	        AC_SUBST(WINDRESOBJ,windres.o)
 	fi
 
-	# Resources for FreeFem++-cs in Microsoft Windows format
-	AC_SUBST(WINDRESOBJ,windres.o)
 
 	;;
 *)ff_win32=no;;
@@ -680,7 +681,7 @@ fi
 
 # PDF documentation building sometimes poses problems because of
 # pdfsync.sty. So we need to be able to disable it.
-
+enable_pdf=yes
 AC_ARG_ENABLE(pdf,[  --disable-pdf	Disable PDF documentation building])
 if test "$enable_pdf" = yes
 then
