@@ -216,8 +216,9 @@ class Minus_Form: public  E_F0mps    {public:
     
 };
 
-template<class RR=double>
+//template<class RR=double>
 class BC_set : public E_F0mps { public:
+   bool  complextype;
   typedef const BC_set* Result;
   vector<Expression> on;
   vector<pair<int,Expression> > bc; //  n¡ de l'inconnue+ valeur
@@ -227,7 +228,13 @@ class BC_set : public E_F0mps { public:
     AC_F0::const_iterator ii=args.named_parameter->begin();
     AC_F0::const_iterator ie=args.named_parameter->end();
     bc.resize(args.named_parameter->size());
-    
+    complextype=false;
+    for (int kk=0;ii!=ie;kk++,ii++)
+     {
+      if( ! BCastTo<double>(ii->second)) 
+       complextype = true; 
+     } 
+    ii=args.named_parameter->begin();
     for (int kk=0;ii!=ie;kk++,ii++)
       { //
         C_F0 x=Find(ii->first);
@@ -238,6 +245,9 @@ class BC_set : public E_F0mps { public:
         const MGauche *ui=uu->simple();
         throwassert(ui && ui->second == op_id);
         // cout << ii->first << " n¡" << ui->first <<   " = ? " << endl;
+        if (complextype)
+        bc[kk]= make_pair(ui->first,CastTo<Complex>(ii->second));
+        else
         bc[kk]= make_pair(ui->first,CastTo<double>(ii->second));
         ii->second;
       }     
@@ -343,9 +353,9 @@ public:
   AnyType operator()(Stack stack) const
   {
      Data *data= dataptr(stack);
-//    if (complextype) 
- //    return eval<Complex>(stack,data,data->AC);
-//    else
+    if (complextype) 
+     return eval<Complex>(stack,data,data->AC);
+    else
      return eval<double>(stack,data,data->AR);
 
   }
@@ -798,7 +808,7 @@ template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FE
 template<class R>   void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                             MatriceCreuse<R>  & A, const  FormBilinear * b  );
 template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const  BC_set<R> * bc , double tgv   );
+                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const  BC_set * bc , double tgv   );
 template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                   MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const list<C_F0> &largs , double tgv  );
   

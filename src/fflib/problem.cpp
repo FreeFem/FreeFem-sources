@@ -74,8 +74,7 @@ void Check(const Opera &Op,int N,int  M)
      ExecError("Check BilinearOperator N M");
    }
  }
-template<class R>
- void Check(const  BC_set<R> * bc,int N)
+ void Check(const  BC_set * bc,int N)
  {
    int err=0;
    int kk=bc->bc.size();
@@ -1077,7 +1076,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     aType tMatX( atype<typename VirtualMatrice<R>::plusAx >() );  
     aType tMatTX( atype<typename VirtualMatrice<R>::plusAtx >() );  
     aType tDotStar(atype<DotStar >() );
-    aType tBC( atype<const  BC_set<R>  *>()) ;                    
+    aType tBC( atype<const  BC_set  *>()) ;                    
     for (ii=ib;ii != ie;ii++)
       {
         Expression e=ii->LeftValue();
@@ -1141,13 +1140,13 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
   {
     list<C_F0>::const_iterator ii,ib=largs.begin(),
       ie=largs.end();
-    aType tBC( atype<const  BC_set<R>  *>()) ;                    
+    aType tBC( atype<const  BC_set  *>()) ;                    
     for (ii=ib;ii != ie;ii++)
       {
         Expression e=ii->LeftValue();
         aType r = ii->left();
         if (r==tBC)
-          AssembleBC(stack,Th,Uh,Vh,sym,A,B,X, dynamic_cast<const  BC_set<R> *>(e),tgv);
+          AssembleBC(stack,Th,Uh,Vh,sym,A,B,X, dynamic_cast<const  BC_set *>(e),tgv);
       }
     
   }
@@ -1155,7 +1154,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
 
  template<class R>
   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const  BC_set<R> * bc, double tgv  )
+                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const  BC_set * bc, double tgv  )
     
   {
     MeshPoint *mps= MeshPointStack(stack),mp=*mps;
@@ -1603,12 +1602,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
 
   if(verbosity>2) cout << "   Problem(): initmat " << initmat << " VF (discontinuous Galerkin) = " << VF << endl;
   
-  if(complextype)
-  {
-    ExecError("Problem just Real problem no complex do day");
-  }
-  else
-  ;
+
   
   if (initmat) 
    {
@@ -1677,7 +1671,8 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
         }
         
       }
-  if(verbosity>3) cout << "   B  min " << B->min() << " ,  max = " << B->max() << endl;
+      
+ // if(verbosity>3) cout << "   B  min " << B->min() << " ,  max = " << B->max() << endl;
   if (verbosity>99)
    {
     cout << " X= " << *X << endl;
@@ -1741,9 +1736,10 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
 
 
 
-void GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,int n_name_param,
+bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,int n_name_param,
                       Expression *nargs,int & N,int & M,  vector<Expression> & var )
 {
+  bool unset=true,complextype=false;
   
   for (int i=0;i<n_name_param;i++)
     nargs[i]=0;
@@ -1786,7 +1782,14 @@ void GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,in
             const UnId & idi((*array[k])[i]);
             if (idi.r == 0 && idi.re  == 0 && idi.array==0 ) 
               { C_F0 c=::Find( idi.id);
-              var[j++]=CastTo<pfer>(c); }         
+              if (unset) 
+                complextype =  BCastTo<pfec>(c) , unset=false;
+
+              if(complextype) 
+              var[j++]=CastTo<pfec>(c);
+              else 
+              var[j++]=CastTo<pfer>(c);
+               }         
             else 
               CompileError(" Just Variable in array parameter ");   
           }   
@@ -1801,11 +1804,16 @@ void GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,in
         if (l[i].r == 0 && l[i].re  == 0 && l[i].array==0 ) 
           {
             C_F0 c=::Find(l[i].id);
-            var[j++]=CastTo<pfer>(c);
-          } 
+              if (unset) 
+                complextype =  BCastTo<pfec>(c) , unset=false;
+              if(complextype) 
+              var[j++]=CastTo<pfec>(c);
+              else 
+              var[j++]=CastTo<pfer>(c);
+         } 
       
     }
-  
+  return complextype;
 }
 
  
@@ -1832,6 +1840,12 @@ bool FieldOfForm(const C_args *op)  // true => complex problem
           if (! ll->l->mappable(BCastToR)) 
             complextype=true;
         }
+      else if (r == atype<const  BC_set *>())
+       {
+          const  BC_set * bc=dynamic_cast<const  BC_set *>(e);
+          if (bc->complextype)  complextype=true;
+
+       }
     }
   for (ii=ib;ii != ie;ii++)
     {
@@ -1862,7 +1876,7 @@ Problem::Problem(const C_args * ca,const ListOfId &l,size_t & top) :
 {
   SHOWVERB(cout << "Problem : -----------------------------" << top << endl);
   top = offset + sizeof(Data);
-  GetBilinearParam(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
+  bool iscomplex=GetBilinearParam(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
   
         
   precon = 0; //  a changer 
@@ -1875,10 +1889,11 @@ Problem::Problem(const C_args * ca,const ListOfId &l,size_t & top) :
 
   VF=isVF(op->largs);   
  // cout << " Problem ) VF = " << VF << endl;
-  complextype =  FieldOfForm(op);
- if( complextype) 
-    CompileError("Problem just Real problem no complex do day");
-  
+  complextype =  iscomplex ||FieldOfForm(op)   ;
+ if( complextype && !iscomplex) 
+    CompileError("Error: Problem  a complex problem with no complex FE function ");
+ if( verbosity > 1)
+    cout << " -- Problem type  ( complex : " << complextype << " )  "  <<endl;  
 }
 
 Expression IsFebaseArray(Expression f)
@@ -1925,9 +1940,11 @@ bool C_args::IsLinearOperator() const {
   for (const_iterator i=largs.begin(); i != largs.end();i++) 
     {  C_F0  c= *i;Expression e=c; aType r=c.left();
     if (     ( r != atype<const  FormLinear *>() )
-             &&  ( r != atype<const  BC_set<R> *>() )
+             &&  ( r != atype<const  BC_set *>() )
              &&  ( r != atype<VirtualMatrice<R>::plusAx >() )
              &&  ( r != atype<VirtualMatrice<R>::plusAtx >() )
+             &&  ( r != atype<VirtualMatrice<Complex>::plusAx >() )
+             &&  ( r != atype<VirtualMatrice<Complex>::plusAtx >() )
              &&  ( r != tRn) 
              ) return false;
     }
@@ -1938,7 +1955,7 @@ bool C_args::IsBilinearOperator() const {
       for (const_iterator i=largs.begin(); i != largs.end();i++) 
         {  C_F0  c= *i;Expression e=c; aType r=c.left();
         if (     ( r!= atype<const  FormBilinear *>() )
-                 &&  ( r != atype<const  BC_set<R> *>() )
+                 &&  ( r != atype<const  BC_set *>() )
                  &&  ( r != tRn) 
                  ) return false;
         }
@@ -2367,7 +2384,7 @@ template  void AssembleLinearForm<double>(Stack stack,const Mesh & Th,const FESp
 template   void AssembleBilinearForm<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                             MatriceCreuse<double>  & A, const  FormBilinear * b  );
 template   void AssembleBC<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<double>  * A,KN<double> * B,KN<double> * X, const  BC_set<double> * bc , double tgv   );
+                  MatriceCreuse<double>  * A,KN<double> * B,KN<double> * X, const  BC_set * bc , double tgv   );
 template   void AssembleBC<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                   MatriceCreuse<double>  * A,KN<double> * B,KN<double> * X, const list<C_F0> &largs , double tgv  );
 // instantiation  des template en Complex
@@ -2381,7 +2398,7 @@ template   void AssembleBilinearForm<Complex>(Stack stack,const Mesh & Th,const 
                             MatriceCreuse<Complex>  & A, const  FormBilinear * b  );
                             
 template   void AssembleBC<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<Complex>  * A,KN<Complex> * B,KN<Complex> * X, const  BC_set<Complex> * bc , double tgv   );
+                  MatriceCreuse<Complex>  * A,KN<Complex> * B,KN<Complex> * X, const  BC_set * bc , double tgv   );
 template   void AssembleBC<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                   MatriceCreuse<Complex>  * A,KN<Complex> * B,KN<Complex> * X, const list<C_F0> &largs , double tgv  );
 
