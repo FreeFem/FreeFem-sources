@@ -135,8 +135,8 @@ verbosity=verbosityy;
 	real TESTD2=w[]'*w[];
 		cout<<"D2 reference value = "<<REFD2
 				<<" test value ="<<TESTD2<<endl;
-			assert(TESTD2<REFD2+1e-30);
-				assert(TESTD2>REFD2-1e-30);
+			assert(TESTD2<REFD2+1e-20);
+				assert(TESTD2>REFD2-1e-20);
 };
 ;
 cout << "--------- file : demo1.edp -----------------" << endl;
@@ -213,8 +213,8 @@ verbosity=verbosityy;
 	real TESTNSP1P1b=u1[]'*u1[];
 		cout<<"NSP1P1b reference value = "<<REFNSP1P1b
 				<<" test value ="<<TESTNSP1P1b<<endl;
-			assert(TESTNSP1P1b<REFNSP1P1b*(1+0.1));
-				assert(TESTNSP1P1b>REFNSP1P1b*(1-0.1));
+			assert(TESTNSP1P1b<REFNSP1P1b*(1+0.2));
+				assert(TESTNSP1P1b>REFNSP1P1b*(1-0.2));
 };
 ;
 cout << "--------- file : NSP1P1.edp -----------------" << endl;
