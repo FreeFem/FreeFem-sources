@@ -446,7 +446,14 @@ if test "$ff_dynload" = yes;
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
 	AC_CHECK_LIB(dl,dlinfo)
-	CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
+
+	# gcc on MacOS does not produce an error with "-rdynamic" but
+	# still complains about it.
+
+	if test "$ff_mac" = no
+	then
+		CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
+	fi
 fi
 
 # Checking wether we can generate some documentation
