@@ -6,7 +6,7 @@
 
 # $Id$
 
-SUBDIRS=download src DOC examples++ examples++-tutorial	\
+SUBDIRS=download src DOC examples++-tutorial examples++	\
 	examples++-eigen examples++-load examples++-mpi	\
 	examples++-bug examples++-other
 

@@ -373,11 +373,11 @@ void OneOperator::Show(const ArrayOfaType & at,ostream &f) const
               }
          if (n==0) 
           {
-           f << " List of choises "<< endl;
+           f << " List of choices "<< endl;
            Show(f);            
           }
          else if (np != 1) 
-           f << " We have ambigu•ty " << n << endl; 
+           f << " We have ambiguity " << n << endl; 
  }   
        
 const  OneOperator * Polymorphic::Find(const char *op, const  ArrayOfaType &at) const
