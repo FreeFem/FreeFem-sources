@@ -1,6 +1,5 @@
 .deps
 .libs
 ListOfUnAllocPtr.bin
-Makefile
-Makefile.in
 FreeFem++-nw
+Makefile
