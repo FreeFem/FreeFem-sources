@@ -10,19 +10,19 @@ ftpk=baobab.ann.jussieu.fr:public_html/ftp/freefem/
 
 
 if [ -f $listf ]; then
- rsync -vzupogt --rsh=ssh $list1  $ftpk
+ rsync -vzupogt --rsh="ssh -l hecht" $list1  $ftpk
 # rsync -vzupogt --rsh=ssh $list1  $ftp
- rsync -vzupogt --rsh=ssh  HISTORY  baobab.ann.jussieu.fr:www/.
+ rsync -vzupogt --rsh="ssh -l hecht"  HISTORY  baobab.ann.jussieu.fr:www/.
 fi
 for ((i=0;${#listf[$i]};i++)); do
 f=${listf[$i]}
 lf=${listl[$i]}
 echo file : $f 
 if [ -f $f ]; then
-    rsync -vzupogt --rsh=ssh $f  $ftpk
+    rsync -vzupogt --rsh="ssh -l hecht" $f  $ftpk
 #    rsync -vzupogtl --rsh=ssh $f  $ftp
 fi
 done;
-echo ssh  baobab.ann.jussieu.fr "cd www/.; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
-ssh  baobab.ann.jussieu.fr "cd www/.; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
+echo ssh  hecht@baobab.ann.jussieu.fr "cd www/.; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
+ssh  hecht@baobab.ann.jussieu.fr "cd www/.; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
 # ssh rascasse.inria.fr "cd ~/public_html/; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
