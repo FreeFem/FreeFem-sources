@@ -4368,7 +4368,7 @@ Now, the local  error indicator $\eta_{T}$ is:
 \def\Th{\mathcal{T}_{h}}
 \def\AK{\mathcal{E}_{K}}
 
-$$\eta_{T} =\left(  h_{T}^{2} || f -\Delta u_{{h}} ||_{L^{2}(T)}^{2} +\sum_{e\in \AK} h_{e} \,||\, [ \frac{\partial u_{h}}{\partial n_{k}}] \,||^{2}_{L^{2}(e)} \right)^{\frac{1}{2}}
+$$\eta_{T} =\left(  h_{T}^{2} || f + \Delta u_{{h}} ||_{L^{2}(T)}^{2} +\sum_{e\in \AK} h_{e} \,||\, [ \frac{\partial u_{h}}{\partial n_{k}}] \,||^{2}_{L^{2}(e)} \right)^{\frac{1}{2}}
    $$
 where $h_{T}$ is the longest's edge of  $T$, $\AK$ is the set of $T$ edge not on 
 $\Gamma=\partial \Omega$, $n_{T}$ is the  outside unit normal to $K$, $h_{e}$ is the length of edge $e$,
@@ -4381,7 +4381,7 @@ with test function constant function in each triangle.
 30 :
 31 : @varf indicator2(uu,chiK) =
 32 :      @intalledges(Th)(chiK*lenEdge*square(jump(N.x*dx(u)+N.y*dy(u))))
-33 :     +@int2d(Th)(chiK*square(hTriangle*(f-dxx(u)-dyy(u))) );
+33 :     +@int2d(Th)(chiK*square(hTriangle*(f+dxx(u)+dyy(u))) );
 34 : for (int i=0;i< 4;i++)
 35 : {
 36 :   Probem1;
