@@ -333,7 +333,7 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,
 
 
 
-Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary) 
+Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax=0) 
 {
   using namespace bamg;
   using bamg::Abs;
@@ -578,8 +578,9 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
     m=bamg2msh(*Gh);
   else 
     {
-      Gh->AfterRead();   
-      Triangles *Th = new Triangles( (Gh->nbv*Gh->nbv)/9 +1000 ,*Gh);
+      Gh->AfterRead();  
+      int nbtx= nbvmax ? nbvmax :  (Gh->nbv*Gh->nbv)/9 +1000;
+      Triangles *Th = new Triangles( nbtx ,*Gh);
       m=bamg2msh(Th,true);      
       delete Th;
     }

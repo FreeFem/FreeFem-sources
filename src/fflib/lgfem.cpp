@@ -3647,8 +3647,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  zzzfff->Add("Cmatrix",atype<Matrice_Creuse<Complex> *>()); // a voir
 
  
- Global.Add("buildmesh","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMesh));
- Global.Add("buildmeshborder","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMeshBorder));
+
  Global.Add("LinearCG","(",new LinearCG<R>()); // old form  with rhs (must be zer
  Global.Add("LinearGMRES","(",new LinearGMRES<R>()); // old form  with rhs (must be zer
 // Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  with rhs (must be zer
