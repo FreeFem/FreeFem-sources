@@ -624,11 +624,11 @@ struct OpMatrixtoBilinearForm: public OneOperator {
     OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear*>()) {}
 };
 
-
+template<class R>
 class IntFunction  : public E_F0mps { public:
-  typedef double Result;
+  typedef R Result;
   typedef const CDomainOfIntegration * A;
-  typedef double  B;
+  typedef R  B;
   A  di;
   Expression fonc;    
   IntFunction(const basicAC_F0 & args) {

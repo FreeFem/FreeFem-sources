@@ -2448,9 +2448,10 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
     return a;}
 };
   
-  AnyType IntFunction::operator()(Stack stack) const  { 
+ template<class R> 
+  AnyType IntFunction<R>::operator()(Stack stack) const  { 
   MeshPoint mp=* MeshPointStack(stack);
- double r=0;
+ R r=0;
  
              SHOWVERB(cout << " int " << endl);
              const vector<Expression>  & what(di->what);
@@ -2487,17 +2488,17 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                         int ie,i =Th.BoundaryTriangle(e,ie);
                         const Triangle & K(Th[i]);   
                         R2 E=K.Edge(ie);
-                        R le = sqrt((E,E)); 
+                        double le = sqrt((E,E)); 
                         R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
                         PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
                         
                         for (int npi=0;npi<FI.n;npi++) // loop on the integration point
                           {
                             QuadratureFormular1d::Point pi( FI[npi]);
-                            R sa=pi.x,sb=1-sa;
+                            double sa=pi.x,sb=1.-sa;
                             R2 Pt(PA*sa+PB*sb ); //  
                             MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th.bedges[e].lab,R2(E.y,-E.x)/le,ie);
-                            r += le*pi.a*GetAny<double>( (*fonc)(stack));
+                            r += le*pi.a*GetAny<R>( (*fonc)(stack));
  		          }
                        }
                     }
@@ -2513,7 +2514,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                      {
                        QuadraturePoint pi(FI[npi]);
                        MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);                       
-                       r += K.area*pi.a*GetAny<double>( (*fonc)(stack)); 
+                       r += K.area*pi.a*GetAny<R>( (*fonc)(stack)); 
                      }
                }
                }
@@ -2526,17 +2527,17 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        {                                
                         const Triangle & K(Th[i]);   
                         R2 E=K.Edge(ie);
-                        R le = sqrt((E,E)); 
+                        double le = sqrt((E,E)); 
                         R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
                         PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
                         
                         for (int npi=0;npi<FI.n;npi++) // loop on the integration point
                           {
                             QuadratureFormular1d::Point pi( FI[npi]);
-                            R sa=pi.x,sb=1-sa;
+                            double sa=pi.x,sb=1-sa;
                             R2 Pt(PA*sa+PB*sb ); //  
                             MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th[ie].lab,R2(E.y,-E.x)/le,ie);
-                            r += le*pi.a*GetAny<double>( (*fonc)(stack));
+                            r += le*pi.a*GetAny<R>( (*fonc)(stack));
  		                   }
                        }
                     }
@@ -2546,7 +2547,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
              }            
            
   *MeshPointStack(stack)=mp;
-  return SetAny<double>(r);
+  return SetAny<R>(r);
   }
   
 void Show(const char * s,int k=1)
@@ -3524,7 +3525,8 @@ void  init_lgfem()
  aType t_C_args = map_type[typeid(const C_args*).name()] = new TypeFormOperator;
  map_type[typeid(const Problem*).name()] = new TypeSolve<false,Problem>;
  map_type[typeid(const Solve*).name()] = new TypeSolve<true,Solve>;
- Dcl_Type<const IntFunction*>(); 
+ Dcl_Type<const IntFunction<double>*>(); 
+ Dcl_Type<const IntFunction<complex<double> >*>(); 
  basicForEachType * t_solve=atype<const  Solve *>();
  basicForEachType * t_problem=atype<const  Problem *>();
  basicForEachType * t_fbilin=atype<const  FormBilinear *>();
@@ -3871,7 +3873,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Add<const CDomainOfIntegration*>("(","",new OneOperatorCode<FormBilinear> );
  Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<FormLinear> );
  
- Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<IntFunction>);
+ Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<IntFunction<double> >);
+ Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<IntFunction<complex<double> > >);
  
 
 
