@@ -1,5 +1,94 @@
 #include "gmres.hpp"
 namespace  Fem2D {
+
+// hack ---  F. Hecht -----
+
+//  une fonction pour change un tableau de 
+
+// complex en tableau de real 
+
+//  Idee faire
+
+// Une class qui tranforme une matrice complex en matric real
+
+// et faire de transformateur de vecteur
+
+inline KN_<double> C2R(KN_<complex<double> > & vc)
+
+{ 
+
+  assert(vc.step==1); 
+
+  complex<double> * pc=vc; // pointeur du tableau
+
+  double *pr = static_cast<double*>(static_cast<void*>(pc));
+
+  return KN_<double>(pr,vc.N()*2);
+
+}
+
+
+
+inline KN_<complex<double> > R2C(KN_<double>  & vr)
+
+{
+
+  assert(vr.step==1 && vr.N() %2 ==0);
+
+  double *pr =vr; // pointeur du tableau
+
+   complex<double> * pc  = static_cast<complex<double>* >(static_cast<void*>(pr));
+
+  return KN_<complex<double> >(pc,vr.N()/2);
+
+}
+
+
+
+inline const KN_<complex<double> > R2C(const KN_<double>  & vr)
+
+{
+
+  assert(vr.step==1 && vr.N() %2 ==0);
+
+  double *pr =vr; // pointeur du tableau
+
+   complex<double> * pc  = static_cast<complex<double>* >(static_cast<void*>(pr));
+
+  return KN_<complex<double> >(pc,vr.N()/2);
+
+}
+
+
+
+//  une classe pour transforme une Matrice complex en Matrice  real 
+
+// -----------------------------------------------------------------
+
+template <class M>
+
+class MatC2R : public VirtualMatrice<double> { public:
+
+  typedef typename VirtualMatrice<double>::plusAx plusAx;
+
+  //  typedef  VirtualMatrice<complex<double> > M;
+
+  const M &m;
+
+  MatC2R(const M &mm):m(mm) {}
+
+  void addMatMul(const  KN_<double>  & x, KN_<double> & Ax) const {
+
+    R2C(Ax) += m*R2C(x);
+
+  }
+
+  plusAx operator*(const KN<double> &  x) const {return plusAx(this,x);}
+
+};
+
+
+
 template<class R>
 class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMatrice<R>{
   int n;
@@ -125,7 +214,7 @@ class SolveGMRESDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualM
   int n;
   int nbitermax;
   double eps;
-  mutable R  epsr;
+  mutable double  epsr;
   int dKrilov;
   KN<R> D1;
   public:
@@ -158,5 +247,105 @@ plusAx  operator*(const KN_<R> &  x) const {return plusAx(this,x);}
      
 
 };   
+
+template<>
+class SolveGMRESDiag<Complex> :   public MatriceMorse<Complex>::VirtualSolver , public VirtualMatrice<Complex>{
+  int n;
+  int nbitermax;
+  double eps;
+  mutable double  epsr;
+  int dKrilov;
+  KN<Complex> D1;
+  public:
+  typedef  VirtualMatrice<Complex>::plusAx plusAx;
+  SolveGMRESDiag(const MatriceMorse<Complex> &A,int nbk=50,int itmax=0,double epsilon=1e-6) : 
+    n(A.n),nbitermax(itmax?itmax: Max(100,n)),D1(n),eps(epsilon),epsr(0),
+    dKrilov(nbk) { 
+    Complex aii=0;
+    for (int i=0;i<n;i++)
+      D1[i] = (abs(aii=A(i,i)) < 1e-10 ? Complex(1.) : Complex(1.)/aii);}
+
+   void Solver(const MatriceMorse<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {
+      epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+    // cout << " epsr = " << epsr << endl;
+   //  ConjuguedGradient<Complex,MatriceMorse<Complex>,SolveGCDiag<Complex> >(a,*this,b,x,nbitermax,epsr);
+         KNM<R> H(dKrilov+1,dKrilov+1);
+      int k=dKrilov,nn=nbitermax;
+       assert(0); //  a faire 
+     // int res=GMRES(a,(KN<R> &)x,(const KN<R> &)b,*this,H,k,nn,epsr);
+
+ }
+
+plusAx  operator*(const KN_<Complex> &  x) const {return plusAx(this,x);} 
+
+
+ void addMatMul(const KN_<Complex> & x, KN_<Complex> & Ax) const 
+  { 
+     assert(x.N()==Ax.N());
+   for (int i=0;i<n;i++) 
+     Ax[i]+= D1[i]*x[i];}
+     
+
+};   
+
+template<>
+class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver , public VirtualMatrice<Complex>{
+  int n;
+  int nbitermax;
+  double eps;
+  mutable double  epsr;
+  const E_F0 * precon;
+  KN<Complex> D1;  
+  mutable KN<Complex> xx;  
+  Stack stack;
+  int dKrylov; 
+  typedef  VirtualMatrice<Complex>::plusAx plusAx;
+  public:
+  SolveGMRESPrecon(const MatriceMorse<Complex> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6) : 
+    n(A.n),nbitermax(itmax?itmax: Max(100,n)),precon(0),stack(stk),eps(epsilon),epsr(0),dKrylov(dk),
+    D1(n),xx(n)
+{
+      assert(C); 
+      C_F0 e_xx(CPValue(xx));
+      precon =  to<KN<Complex> *>(C_F0(C->code(basicAC_F0_wa(e_xx)),*C));
+      
+      throwassert(precon);
+      Complex aii;
+      for (int i=0;i<n;i++)
+       D1[i] = abs(aii=A(i,i))<1e10 ? Complex(1.0) : Complex(1.)/aii;
+      
+}
+   void Solver(const MatriceMorse<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {
+     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+    // cout << " epsr = " << epsr << endl;
+  //   ConjuguedGradient<Complex,MatriceMorse<Complex>,SolveGCPrecon<Complex> >(a,*this,b,x,nbitermax,epsr);
+      KNM<R> H(dKrylov+1,dKrylov+1);
+      int k=dKrylov,nn=nbitermax;
+       assert(0); // a faire 
+      //int res=GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
+
+   }
+plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);} 
+
+
+ void addMatMul(const KN_<Complex> & x, KN_<Complex> & Ax) const 
+  { 
+    assert(x.N()==Ax.N());
+      
+    xx=x;
+   // cout << x[0] << "  ";
+    xx=*GetAny<KN<Complex> *>((*precon)(stack));
+//    cout << (xx)[0] << "  " << endl;
+    Complex dii;
+    for (int i=0;i<n;i++) 
+       Ax[i] += ((dii=D1[i])==1.0) ? (xx)[i] : x[i]*dii;
+  }
+
+    
+  ~SolveGMRESPrecon(){
+  // cout << "~SolveGMRESPrecon; " << endl;
+ }
+};     
+
 }
 
