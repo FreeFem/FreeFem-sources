@@ -71,6 +71,26 @@ AC_DEFINE_UNQUOTED(VersionFreeFempp,$VERSION,FreeFem++ version as a float)
 FF_DATE=`date`
 AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
 
+cat << EOF > config-version.h
+/* Define to the full name and version of this package. */
+#define PACKAGE_STRING "$PACKAGE_STRING"
+
+/* Define to the one symbol short name of this package. */
+#define PACKAGE_TARNAME "$PACKAGE_TARNAME"
+
+/* Define to the version of this package. */
+#define PACKAGE_VERSION "$PACKAGE_VERSION"
+
+/* Version number of package */
+#define VERSION "$VERSION"
+
+/* FreeFem++ build date */
+#define VersionFreeFemDate "$VersionFreeFemDate"
+
+/* FreeFem++ version as a float */
+#define VersionFreeFempp $VersionFreeFempp
+EOF
+
 # Checking wether to produce a debug version
 # ------------------------------------------
 
@@ -503,4 +523,5 @@ AC_OUTPUT(Makefile
 	examples++-mpi/Makefile
 	examples++-load/Makefile
 	examples++-bug/Makefile
+	examples++-other/Makefile
 	DOC/Makefile)

@@ -6,8 +6,9 @@
 
 # $Id$
 
-SUBDIRS=download src DOC examples++ examples++-tutorial		\
-	examples++-eigen examples++-load examples++-mpi
+SUBDIRS=download src DOC examples++ examples++-tutorial	\
+	examples++-eigen examples++-load examples++-mpi	\
+	examples++-bug examples++-other
 
 EXTRA_DIST=regtests.pl arpack/arpack++/include/*.h src/*/*.h			  \
 FreeFem++.*mcp.sit ffpc*mcp.zip HISTORY README BUGS TODO			  \
@@ -37,19 +38,16 @@ clean-local::
 # Testing
 # -------
 
-# Standard automake goal "make check" is also valid. It just does not
-# run any test that could prevent the user from working on its machine
-# (because of unexpected windows opening right in the middle of the
-# workspace).
+# The standard automake goal "make check" is also valid. It just does
+# not run any test that could prevent the user from working on its
+# machine (because of unexpected windows opening right in the middle
+# of the workspace).
 
 visualtest: all
-	src/std/FreeFem++ examples++-tutorial/all.edp
+	make check VISUALCHECK=yes
 
 speedtest: all
-	src/nw/FreeFem++-nw examples++-other/lap3-cpu.edp	\
-		|grep -E --					\
-		'-- lap (cholesky|CG|UMFPACK) +[0-9]+x[0-9]+'	\
-		|tee speedtest.out
+	cd examples-other && make check
 
 # Build all versions
 # ------------------

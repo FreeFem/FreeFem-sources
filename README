@@ -1,8 +1,8 @@
 Compilation of FreeFem++ under unix, MacOs 10 or cygwin
 -------------------------------------------------------
 
-This file details specific "./configure" options for FreeFem++. For
-standard options, please refer to the file named "INSTALL".
+This file details specific configuration details for FreeFem++. For
+a standard installation, please refer to the file named "INSTALL".
 
 Debugging and optimization
 --------------------------
@@ -75,14 +75,20 @@ Automake and Autoconf with the command:
 Extra utilities
 ---------------
 
-To run an interactive test of FreeFem++ (standard version):
+To run an interactive test of FreeFem++:
 > make visualtest
 
 To run a speed test:
 > make speedtest
 
-Creating the documentation in .ps and .pdf format (in the "DOC" directory):
+To create the documentation in .ps and .pdf format (in the "DOC" directory):
 > make doc
+
+To Create a Microsoft Windows self-installable package containing all
+FreeFem++ executables and examples, you need to install "Inno Setup"
+(http://www.jrsoftware.org/isinfo.php) on your machine first. Then run
+it on the file "WindowsPackage.iss" once you have configured and
+compiled FreeFem++ (see INSTALL).
 
 Examples
 --------

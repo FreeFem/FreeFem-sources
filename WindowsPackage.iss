@@ -19,6 +19,8 @@ Source: "src\nw\FreeFem++-nw.exe"; DestDir: "{app}"
 Source: "examples++\*"; DestDir: "{app}\examples++"
 Source: "examples++-eigen\*"; DestDir: "{app}\examples++-eigen"
 Source: "examples++-tutorial\*"; DestDir: "{app}\examples++-tutorial"
+Source: "examples++-load\*"; DestDir: "{app}\examples++-load"
+Source: "examples++-other\*"; DestDir: "{app}\examples++-other"
 Source: "DOC\manual.pdf"; DestDir: "{app}"
 Source: "logo.ico"; DestDir: "{app}"
 
