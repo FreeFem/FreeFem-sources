@@ -14,9 +14,7 @@ function dotest(){
     # Running FreeFem++ on regtests.edp (specific to regression
     # tests), otherwise on all.edp.
 
-    ffcmd="$1 $3|tee regtests-$2.log"
-    echo $ffcmd
-    eval $ffcmd
+    $1 $3|tee regtests-$2.log
     if test $PIPESTATUS != 0
 	then
 	exit 1
