@@ -48,6 +48,12 @@ visualcheck: all
 speedtest: all
 	cd examples++-other && make check
 
+# Debian packaging
+# ----------------
+
+deb:
+	dpkg-buildpackage -rfakeroot
+
 # Build all versions
 # ------------------
 

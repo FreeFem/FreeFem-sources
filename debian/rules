@@ -28,9 +28,7 @@ endif
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-
-	./configure --prefix=$(CURDIR)/debian/tmp/usr
-
+	./configure --prefix=$(CURDIR)/debian/tmp/usr --enable-generic
 	touch configure-stamp
 
 
@@ -38,13 +36,11 @@ configure-stamp:
 build-arch: configure build-arch-stamp
 build-arch-stamp:
 	$(MAKE)
-	
 	touch build-arch-stamp
 
 build-indep: configure build-indep-stamp
 build-indep-stamp:
-	cd DOC && $(MAKE) doc && cd ..
-
+	cd DOC && $(MAKE) documentation && cd ..
 	touch build-indep-stamp
 
 build: build-arch build-indep
@@ -53,10 +49,8 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-
 	-$(MAKE) clean
 	-$(MAKE) distclean
-
 	dh_clean 
 
 install: build
@@ -64,10 +58,8 @@ install: build
 	dh_testroot
 	dh_clean -k 
 	dh_installdirs
-
 	$(MAKE) install
 	mv $(CURDIR)/debian/tmp/usr/bin/FreeFem++ $(CURDIR)/debian/tmp/usr/bin/FreeFem++-x11
-
 	dh_install
 
 # This single target is used to build all the packages, all at once, or
