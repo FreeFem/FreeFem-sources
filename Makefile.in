@@ -605,6 +605,7 @@ uninstall-info: uninstall-info-recursive
 changelog:
 	cvs2cl
 
+# History before 2005 is stored in the file "HISTORY_BEFORE_2005"
 all-local:: @HISTORY@
 history:
 	cvs2cl --hide-filenames -l "-d>01/01/2005" --file HISTORY
