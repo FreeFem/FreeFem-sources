@@ -54,14 +54,14 @@ SRCdir       = $(home)/SRC
 # | NOTE: ARPACK assumes the use of LAPACK version 2 codes.           |
 # %-------------------------------------------------------------------%
 #
-DIRS         = $(UTILdir) $(SRCdir)
+DIRS         = $(LAPACKdir) $(UTILdir) $(SRCdir)
 #
 # %---------------------------------------------------%
 # | The name of the libraries to be created/linked to |
 # %---------------------------------------------------%
 #
 ARPACKLIB  = $(home)/libarpack_$(PLAT).a
-LAPACKLIB = 
+LAPACKLIB = $(home)/liblapack_$(PLAT).a
 #BLASLIB = 
 #
 ALIBS =  $(ARPACKLIB) $(LAPACKLIB) $(BLASLIB) 
