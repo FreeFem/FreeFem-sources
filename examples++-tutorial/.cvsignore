@@ -5,6 +5,7 @@ ListOfUnAllocPtr.bin
 *.log
 Makefile
 Makefile.in
+makeref.edp
 *.msh
 plot.gp
 *.ps

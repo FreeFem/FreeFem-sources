@@ -1,6 +1,11 @@
 // Regression tests
 // ----------------
 
+// The tests are checked against the reference values by "make check"
+
+// The reference file "ref.edp" containing all reference values may be
+// rebuilt with "make Ref"
+
 // $Id$
 
 // The values tested here may not have a physical or mathematical
@@ -10,410 +15,549 @@
 NoUseOfWait=true;
 int verbosityy=verbosity;
 
+
+include "ref.edp";
+
+
+
+
 cout << "--------- file : adapt.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "adapt.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTadapt=u[]'*u[];
+		cout<<"REFadapt="<<REFadapt
+				<<" TESTadapt="<<TESTadapt<<endl;
+			assert(TESTadapt<REFadapt*(1+1e-2));
+				assert(TESTadapt>REFadapt*(1-1e-2));
 };
 
 cout << "--------- file : adaptindicatorP1.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "adaptindicatorP1.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTadaptindicatorP1=u[]'*u[];
+		cout<<"REFadaptindicatorP1="<<REFadaptindicatorP1
+				<<" TESTadaptindicatorP1="<<TESTadaptindicatorP1<<endl;
+			assert(TESTadaptindicatorP1<REFadaptindicatorP1*(1+1e-2));
+				assert(TESTadaptindicatorP1>REFadaptindicatorP1*(1-1e-2));
 };
 
 cout << "--------- file : adaptindicatorP2.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "adaptindicatorP2.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTadaptindicatorP2=u[]'*u[];
+		cout<<"REFadaptindicatorP2="<<REFadaptindicatorP2
+				<<" TESTadaptindicatorP2="<<TESTadaptindicatorP2<<endl;
+			assert(TESTadaptindicatorP2<REFadaptindicatorP2+1);
+				assert(TESTadaptindicatorP2>REFadaptindicatorP2-1);
 };
 
 cout << "--------- file : algo.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "algo.edp";
+	
 };
 
 cout << "--------- file : algowithmacro.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "algowithmacro.edp";
+	
 };
 
 cout << "--------- file : array.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "array.edp";
+	
 };
 
 cout << "--------- file : a_tutorial.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "a_tutorial.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTaXtutorial=u[]'*u[];
+		cout<<"REFaXtutorial="<<REFaXtutorial
+				<<" TESTaXtutorial="<<TESTaXtutorial<<endl;
+			assert(TESTaXtutorial<REFaXtutorial*(1+1e-2));
+				assert(TESTaXtutorial>REFaXtutorial*(1-1e-2));
 };
 
 cout << "--------- file : beam.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "beam.edp";
-	real ref=uu[]'*uu[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTbeam=uu[]'*uu[];
+		cout<<"REFbeam="<<REFbeam
+				<<" TESTbeam="<<TESTbeam<<endl;
+			assert(TESTbeam<REFbeam*(1+1e-2));
+				assert(TESTbeam>REFbeam*(1-1e-2));
 };
 
 cout << "--------- file : blakschol.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "blakschol.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTblakschol=u[]'*u[];
+		cout<<"REFblakschol="<<REFblakschol
+				<<" TESTblakschol="<<TESTblakschol<<endl;
+			assert(TESTblakschol<REFblakschol*(1+1e-2));
+				assert(TESTblakschol>REFblakschol*(1-1e-2));
 };
 
 cout << "--------- file : calculus.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "calculus.edp";
+	
 };
 
 cout << "--------- file : cavity.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "cavity.edp";
-	real ref=psi[]'*psi[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTcavity=psi[]'*psi[];
+		cout<<"REFcavity="<<REFcavity
+				<<" TESTcavity="<<TESTcavity<<endl;
+			assert(TESTcavity<REFcavity*(1+1e-2));
+				assert(TESTcavity>REFcavity*(1-1e-2));
 };
 
 cout << "--------- file : convect2.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "convect2.edp";
-	real ref=v[]'*v[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTconvect2=v[]'*v[];
+		cout<<"REFconvect2="<<REFconvect2
+				<<" TESTconvect2="<<TESTconvect2<<endl;
+			assert(TESTconvect2<REFconvect2*(1+1e-2));
+				assert(TESTconvect2>REFconvect2*(1-1e-2));
 };
 
 cout << "--------- file : convect-apt.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "convect-apt.edp";
-	real ref=v[]'*v[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTconvectXapt=v[]'*v[];
+		cout<<"REFconvectXapt="<<REFconvectXapt
+				<<" TESTconvectXapt="<<TESTconvectXapt<<endl;
+			assert(TESTconvectXapt<REFconvectXapt*(1+1e-2));
+				assert(TESTconvectXapt>REFconvectXapt*(1-1e-2));
 };
 
 cout << "--------- file : convect.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "convect.edp";
-	real ref=v[]'*v[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTconvect=v[]'*v[];
+		cout<<"REFconvect="<<REFconvect
+				<<" TESTconvect="<<TESTconvect<<endl;
+			assert(TESTconvect<REFconvect*(1+1e-2));
+				assert(TESTconvect>REFconvect*(1-1e-2));
 };
 
 cout << "--------- file : dumptable.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "dumptable.edp";
+	
 };
 
 cout << "--------- file : ex-vf.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "ex-vf.edp";
+	
 };
 
 cout << "--------- file : FE.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "FE.edp";
-	real ref=wdc[]'*wdc[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTFE=wdc[]'*wdc[];
+		cout<<"REFFE="<<REFFE
+				<<" TESTFE="<<TESTFE<<endl;
+			assert(TESTFE<REFFE*(1+1e-2));
+				assert(TESTFE>REFFE*(1-1e-2));
 };
 
 cout << "--------- file : fluidStructAdapt.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "fluidStructAdapt.edp";
-	real ref=uu[]'*uu[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTfluidStructAdapt=uu[]'*uu[];
+		cout<<"REFfluidStructAdapt="<<REFfluidStructAdapt
+				<<" TESTfluidStructAdapt="<<TESTfluidStructAdapt<<endl;
+			assert(TESTfluidStructAdapt<REFfluidStructAdapt*(1+1e-2));
+				assert(TESTfluidStructAdapt>REFfluidStructAdapt*(1-1e-2));
 };
 
 cout << "--------- file : fluidStruct.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "fluidStruct.edp";
-	real ref=uu[]'*uu[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTfluidStruct=uu[]'*uu[];
+		cout<<"REFfluidStruct="<<REFfluidStruct
+				<<" TESTfluidStruct="<<TESTfluidStruct<<endl;
+			assert(TESTfluidStruct<REFfluidStruct*(1+1e-2));
+				assert(TESTfluidStruct>REFfluidStruct*(1-1e-2));
 };
 
 cout << "--------- file : freeboundary.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "freeboundary.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTfreeboundary=u[]'*u[];
+		cout<<"REFfreeboundary="<<REFfreeboundary
+				<<" TESTfreeboundary="<<TESTfreeboundary<<endl;
+			assert(TESTfreeboundary<REFfreeboundary*(1+1e-2));
+				assert(TESTfreeboundary>REFfreeboundary*(1-1e-2));
 };
 
 cout << "--------- file : freeboundary-weak.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "freeboundary-weak.edp";
-	real ref=p[]'*p[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTfreeboundaryXweak=p[]'*p[];
+		cout<<"REFfreeboundaryXweak="<<REFfreeboundaryXweak
+				<<" TESTfreeboundaryXweak="<<TESTfreeboundaryXweak<<endl;
+			assert(TESTfreeboundaryXweak<REFfreeboundaryXweak*(1+1e-2));
+				assert(TESTfreeboundaryXweak>REFfreeboundaryXweak*(1-1e-2));
 };
 
 cout << "--------- file : LapDG2.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "LapDG2.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTLapDG2=u[]'*u[];
+		cout<<"REFLapDG2="<<REFLapDG2
+				<<" TESTLapDG2="<<TESTLapDG2<<endl;
+			assert(TESTLapDG2<REFLapDG2*(1+1e-2));
+				assert(TESTLapDG2>REFLapDG2*(1-1e-2));
 };
 
 cout << "--------- file : Laplace.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "Laplace.edp";
-	real ref=uh[]'*uh[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTLaplace=uh[]'*uh[];
+		cout<<"REFLaplace="<<REFLaplace
+				<<" TESTLaplace="<<TESTLaplace<<endl;
+			assert(TESTLaplace<REFLaplace*(1+1e-2));
+				assert(TESTLaplace>REFLaplace*(1-1e-2));
 };
 
 cout << "--------- file : LaplaceP1bis.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "LaplaceP1bis.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTLaplaceP1bis=u[]'*u[];
+		cout<<"REFLaplaceP1bis="<<REFLaplaceP1bis
+				<<" TESTLaplaceP1bis="<<TESTLaplaceP1bis<<endl;
+			assert(TESTLaplaceP1bis<REFLaplaceP1bis*(1+1e-2));
+				assert(TESTLaplaceP1bis>REFLaplaceP1bis*(1-1e-2));
 };
 
 cout << "--------- file : LaplaceP1.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "LaplaceP1.edp";
-	real ref=uh[]'*uh[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTLaplaceP1=uh[]'*uh[];
+		cout<<"REFLaplaceP1="<<REFLaplaceP1
+				<<" TESTLaplaceP1="<<TESTLaplaceP1<<endl;
+			assert(TESTLaplaceP1<REFLaplaceP1*(1+1e-2));
+				assert(TESTLaplaceP1>REFLaplaceP1*(1-1e-2));
 };
 
 cout << "--------- file : LaplaceP1P2h.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "LaplaceP1P2h.edp";
-	real ref=u2h[]'*u2h[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTLaplaceP1P2h=u2h[]'*u2h[];
+		cout<<"REFLaplaceP1P2h="<<REFLaplaceP1P2h
+				<<" TESTLaplaceP1P2h="<<TESTLaplaceP1P2h<<endl;
+			assert(TESTLaplaceP1P2h<REFLaplaceP1P2h*(1+1e-2));
+				assert(TESTLaplaceP1P2h>REFLaplaceP1P2h*(1-1e-2));
 };
 
 cout << "--------- file : LaplaceRT.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "LaplaceRT.edp";
-	real ref=u1[]'*u1[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTLaplaceRT=u1[]'*u1[];
+		cout<<"REFLaplaceRT="<<REFLaplaceRT
+				<<" TESTLaplaceRT="<<TESTLaplaceRT<<endl;
+			assert(TESTLaplaceRT<REFLaplaceRT*(1+1e-2));
+				assert(TESTLaplaceRT>REFLaplaceRT*(1-1e-2));
 };
 
 cout << "--------- file : mesh.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "mesh.edp";
+	
 };
 
 cout << "--------- file : movemesh.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "movemesh.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTmovemesh=u[]'*u[];
+		cout<<"REFmovemesh="<<REFmovemesh
+				<<" TESTmovemesh="<<TESTmovemesh<<endl;
+			assert(TESTmovemesh<REFmovemesh*(1+1e-2));
+				assert(TESTmovemesh>REFmovemesh*(1-1e-2));
 };
 
 cout << "--------- file : nolinear-elas.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "nolinear-elas.edp";
-	real ref=un[]'*un[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTnolinearXelas=un[]'*un[];
+		cout<<"REFnolinearXelas="<<REFnolinearXelas
+				<<" TESTnolinearXelas="<<TESTnolinearXelas<<endl;
+			assert(TESTnolinearXelas<REFnolinearXelas*(1+1e-2));
+				assert(TESTnolinearXelas>REFnolinearXelas*(1-1e-2));
 };
 
 cout << "--------- file : NSUzawaCahouetChabart.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "NSUzawaCahouetChabart.edp";
-	real ref=u1[]'*u1[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTNSUzawaCahouetChabart=u1[]'*u1[];
+		cout<<"REFNSUzawaCahouetChabart="<<REFNSUzawaCahouetChabart
+				<<" TESTNSUzawaCahouetChabart="<<TESTNSUzawaCahouetChabart<<endl;
+			assert(TESTNSUzawaCahouetChabart<REFNSUzawaCahouetChabart*(1+1e-2));
+				assert(TESTNSUzawaCahouetChabart>REFNSUzawaCahouetChabart*(1-1e-2));
 };
 
 cout << "--------- file : onde.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "onde.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTonde=u[]'*u[];
+		cout<<"REFonde="<<REFonde
+				<<" TESTonde="<<TESTonde<<endl;
+			assert(TESTonde<REFonde*(1+1e-2));
+				assert(TESTonde>REFonde*(1-1e-2));
 };
 
 cout << "--------- file : periodic4.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "periodic4.edp";
-	real ref=uh[]'*uh[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTperiodic4=uh[]'*uh[];
+		cout<<"REFperiodic4="<<REFperiodic4
+				<<" TESTperiodic4="<<TESTperiodic4<<endl;
+			assert(TESTperiodic4<REFperiodic4*(1+1e-2));
+				assert(TESTperiodic4>REFperiodic4*(1-1e-2));
 };
 
 cout << "--------- file : Periodic.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "Periodic.edp";
-	real ref=uh[]'*uh[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTPeriodic=uh[]'*uh[];
+		cout<<"REFPeriodic="<<REFPeriodic
+				<<" TESTPeriodic="<<TESTPeriodic<<endl;
+			assert(TESTPeriodic<REFPeriodic*(1+1e-2));
+				assert(TESTPeriodic>REFPeriodic*(1-1e-2));
 };
 
 cout << "--------- file : plot.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "plot.edp";
-	real ref=uh[]'*uh[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTplot=uh[]'*uh[];
+		cout<<"REFplot="<<REFplot
+				<<" TESTplot="<<TESTplot<<endl;
+			assert(TESTplot<REFplot*(1+1e-2));
+				assert(TESTplot>REFplot*(1-1e-2));
 };
 
 cout << "--------- file : readmesh.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "readmesh.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTreadmesh=u[]'*u[];
+		cout<<"REFreadmesh="<<REFreadmesh
+				<<" TESTreadmesh="<<TESTreadmesh<<endl;
+			assert(TESTreadmesh<REFreadmesh*(1+1e-2));
+				assert(TESTreadmesh>REFreadmesh*(1-1e-2));
 };
 
 cout << "--------- file : region.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "region.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTregion=u[]'*u[];
+		cout<<"REFregion="<<REFregion
+				<<" TESTregion="<<TESTregion<<endl;
+			assert(TESTregion<REFregion*(1+1e-2));
+				assert(TESTregion>REFregion*(1-1e-2));
 };
 
 cout << "--------- file : saverestore.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "saverestore.edp";
+	
 };
 
 cout << "--------- file : schwarz-gc.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "schwarz-gc.edp";
-	real ref=u1[]'*u1[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTschwarzXgc=u1[]'*u1[];
+		cout<<"REFschwarzXgc="<<REFschwarzXgc
+				<<" TESTschwarzXgc="<<TESTschwarzXgc<<endl;
+			assert(TESTschwarzXgc<REFschwarzXgc*(1+1e-2));
+				assert(TESTschwarzXgc>REFschwarzXgc*(1-1e-2));
 };
 
 cout << "--------- file : schwarz-no-overlap.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "schwarz-no-overlap.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTschwarzXnoXoverlap=u[]'*u[];
+		cout<<"REFschwarzXnoXoverlap="<<REFschwarzXnoXoverlap
+				<<" TESTschwarzXnoXoverlap="<<TESTschwarzXnoXoverlap<<endl;
+			assert(TESTschwarzXnoXoverlap<REFschwarzXnoXoverlap*(1+1e-2));
+				assert(TESTschwarzXnoXoverlap>REFschwarzXnoXoverlap*(1-1e-2));
 };
 
 cout << "--------- file : schwarz-overlap.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "schwarz-overlap.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTschwarzXoverlap=u[]'*u[];
+		cout<<"REFschwarzXoverlap="<<REFschwarzXoverlap
+				<<" TESTschwarzXoverlap="<<TESTschwarzXoverlap<<endl;
+			assert(TESTschwarzXoverlap<REFschwarzXoverlap*(1+1e-2));
+				assert(TESTschwarzXoverlap>REFschwarzXoverlap*(1-1e-2));
 };
 
 cout << "--------- file : sparse-matrix.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "sparse-matrix.edp";
-	real ref=xx[]'*xx[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTsparseXmatrix=xx[]'*xx[];
+		cout<<"REFsparseXmatrix="<<REFsparseXmatrix
+				<<" TESTsparseXmatrix="<<TESTsparseXmatrix<<endl;
+			assert(TESTsparseXmatrix<REFsparseXmatrix*(1+1e-2));
+				assert(TESTsparseXmatrix>REFsparseXmatrix*(1-1e-2));
 };
 
 cout << "--------- file : StokesUzawa.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "StokesUzawa.edp";
-	real ref=u1[]'*u1[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTStokesUzawa=u1[]'*u1[];
+		cout<<"REFStokesUzawa="<<REFStokesUzawa
+				<<" TESTStokesUzawa="<<TESTStokesUzawa<<endl;
+			assert(TESTStokesUzawa<REFStokesUzawa*(1+1e-2));
+				assert(TESTStokesUzawa>REFStokesUzawa*(1-1e-2));
 };
 
 cout << "--------- file : tablefunction.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+	
+	
 	include "tablefunction.edp";
-	real ref=fxy[]'*fxy[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTtablefunction=fxy[]'*fxy[];
+		cout<<"REFtablefunction="<<REFtablefunction
+				<<" TESTtablefunction="<<TESTtablefunction<<endl;
+			assert(TESTtablefunction<REFtablefunction*(1+1e-2));
+				assert(TESTtablefunction>REFtablefunction*(1-1e-2));
 };
+
