@@ -58,7 +58,7 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //   est le sous tableau  3,3  n'est pas numeroter consecutivement 
 //  
 //    Donc la fonction  IsVector1() nous dit si un tableau 
-//    \u00f5 un 2 ou 3 indices est ou non consecutif en memoire
+//    a un 2 ou 3 indices est ou non consecutif en memoire
 //    
 //  --  ajoute d'une classe VirtualMatrice
 // pour modeliser le produit matrice vecteur 
@@ -82,8 +82,24 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //   version jan 2004
 //   correction pour go ++ 
 //   des operateur  #=  pour les matrices et tenseurs
-//  
-// 
+//  ----------------------
+//   version  feb 2004 
+//   v(i(:)) =  w   //  i(1:10) 
+//   w=u(i(:))  //  
+//   version mars 2004 make small correction
+//   in  ITAB operator problem if non type R a defi 
+ //   -------------------
+//   Modif pour version avec les Complex   mai 2004                                                                                                 
+//   (u,v)  donne le produit complex utiliser dans le produit matrice vecteur
+//   (u,conj(v))  donne le produit hermitiene pour le gradient conjugue
+//
+//   -- de fonction dans le cas real                                                                                                                 
+inline double  conj(double x){return x;}
+inline float  conj(float x){return x;}
+inline double  real(double x){return x;}
+inline float  real(float x){return x;}
+//  ----                                                                                                                                             
+
 template<class R> class KNMK_ ;
 template<class R> class KNM_ ;
 template<class R> class KN_ ;
@@ -93,6 +109,7 @@ template<class R> class KNMK ;
 template<class R> class KNM ;
 template<class R> class KN ;
 
+template<class R> class conj_KN_ ;
 template<class R> class Add_KN_;
 template<class R> class Sub_KN_;
 template<class R> class Mulc_KN_;
@@ -101,7 +118,9 @@ template<class R> class Mul_KNM_KN_;
 template<class R> class DotStar_KN_;
 template<class R> class DotSlash_KN_;
 template<class R> class outProduct_KN_;
-template<class R> class VirtualMatrice;
+template<class R,class I> class KN_ITAB; 
+
+
 
 
 // gestion des erreur interne --
@@ -233,6 +252,7 @@ class KN_: public  ShapeOfArray {
 protected:
   R *v;
 public:
+  typedef R K; // type of data 
   long N() const {return n;}
   bool unset() const { return !v;}
   void set(R * vv,int nn,int st=1,int nx=-1) {v=vv;n=nn;step=st;next=nx;}
@@ -242,6 +262,7 @@ public:
   KN_(const KN_<R> & U,const SubArray & sa)  : ShapeOfArray(U,sa),v(U.v + U.index(sa.start)) {}
 
   KN_ operator()(const SubArray & sa) const { return KN_(*this,sa);} // sub array 
+  
   R & operator[](long i) const {return v[index(i)];}
   R & operator()(long i) const {return v[index(i)];}
   R & operator[](int i) const {return v[index(i)];}
@@ -263,13 +284,21 @@ public:
    KN_& operator /=(const_R  a) ;
    KN_& operator *=(const_R  a) ;
   
+   KN_& operator  = (R*  a) { return operator =(KN_<R>(a,n));}
+   KN_& operator += (R*  a) { return operator+=(KN_<R>(a,n));}  
+   KN_& operator -= (R*  a) { return operator-=(KN_<R>(a,n));}  
+   KN_& operator *= (R*  a) { return operator*=(KN_<R>(a,n));}  
+   KN_& operator /= (R*  a) { return operator/=(KN_<R>(a,n));}  
+
+  
   R min() const ;
   R max() const ;
   R sum() const ;
+  double norm() const ;
   template<class T> long last(const T &) const;
   template<class T> long first(const T &) const;
   
-  KN_ & map(R (*f)(R ));
+  void map(R (*f)(R )); // apply the f fonction a all element of the array
   
    KN_& operator =(const DotStar_KN_<R> & u) ;
    KN_& operator+=(const DotStar_KN_<R> & u) ;
@@ -288,6 +317,22 @@ public:
    KN_& operator-=(const Add_KN_<R> & u) ;
    KN_& operator*=(const Add_KN_<R> & u) ;
    KN_& operator/=(const Add_KN_<R> & u) ;
+  
+   template<class I,class T> KN_& operator =  (const KN_ITAB<T,I> & u);
+   template<class I,class T> KN_& operator +=  (const KN_ITAB<T,I> & u);
+   template<class I,class T> KN_& operator -=  (const KN_ITAB<T,I> & u);
+   template<class I,class T> KN_& operator *=  (const KN_ITAB<T,I> & u);
+   template<class I,class T> KN_& operator /=  (const KN_ITAB<T,I> & u);
+
+
+   KN_ITAB< KN_<R>,const KN_<int> >  operator()(const KN_<int> &itab) ;
+   KN_ITAB< KN_<R>,const KN_<long> >  operator()(const KN_<long> &itab) ;
+   KN_ITAB<const KN_<R>,const KN_<int> > operator()(const KN_<int> &itab) const ;
+   KN_ITAB<const KN_<R>,const KN_<long> >  operator()(const KN_<long> &itab) const ;
+
+
+    
+
   
    KN_& operator =(const Sub_KN_<R> & u) ;
    KN_& operator-=(const Sub_KN_<R> & u) ;
@@ -316,15 +361,15 @@ public:
  //  KN_& operator =(const MatriceCreuseMulKN_<R> & ) ;
  //  KN_& operator +=(const MatriceCreuseMulKN_<R> & ) ;
    KN_& operator =(const typename VirtualMatrice<R>::plusAx & Ax)  
-    {*this=0; Ax.A->addMatMul(Ax.x,*this);return *this;}
+    {*this=R(); Ax.A->addMatMul(Ax.x,*this);return *this;}
    KN_& operator =(const typename VirtualMatrice<R>::plusAtx & Ax)  
-    {*this=0; Ax.A->addMatTransMul(Ax.x,*this);return *this;}
+    {*this=R(); Ax.A->addMatTransMul(Ax.x,*this);return *this;}
    KN_& operator +=(const typename VirtualMatrice<R>::plusAx & Ax)  
     {  Ax.A->addMatMul(Ax.x,*this);return *this;}
    KN_& operator +=(const typename VirtualMatrice<R>::plusAtx & Ax)  
     {  Ax.A->addMatTransMul(Ax.x,*this);return *this;}
    KN_& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
-    {*this=0; Ab.A->Solve(*this,Ab.b);return *this;}
+    {*this=R(); Ab.A->Solve(*this,Ab.b);return *this;}
   
 //   KN_& operator =(const MatriceCreuseDivKN_<R> &)  ;
 
@@ -371,7 +416,7 @@ class KNM_: public KN_<R> {
   ShapeOfArray shapei;
   ShapeOfArray shapej;
   public:
-  long IsVector1() const  {  return (shapei.n*shapej.n) ==  n ;} 
+  long IsVector1() const  {  return (shapei.n*shapej.n) ==  this->n ;} 
   long N() const {return shapei.n;}
   long M() const {return shapej.n;}  
   long size() const { return shapei.n*shapej.n;}
@@ -412,23 +457,23 @@ class KNM_: public KN_<R> {
   long indexij(long i,long j)        const   
             { return index(shapei.index(i)+shapej.index(j));}
   R & operator()(long i,long j)     const   
-            { return v[indexij(i,j)];}
+            { return this->v[indexij(i,j)];}
   R & operator()(int i,int j)     const   
-            { return v[indexij(i,j)];}
+            { return this->v[indexij(i,j)];}
             
             
   KN_<R> operator()(const char,long j    )  const   // une colonne j  ('.',j)
-            { return KN_<R>(&v[index(shapej.index(j))],shapei*step);} 
+            { return KN_<R>(&this->v[index(shapej.index(j))],shapei*this->step);} 
   KN_<R> operator()(long i    ,const char)  const   // une ligne i  (i,'.')
-            { return KN_<R>(&v[index(shapei.index(i))],shapej*step);}  
+            { return KN_<R>(&this->v[index(shapei.index(i))],shapej*this->step);}  
   KN_<R> operator()(const char,int j    )  const   // une colonne j  ('.',j)
-            { return KN_<R>(&v[index(shapej.index(j))],shapei*step);} 
+            { return KN_<R>(&this->v[index(shapej.index(j))],shapei*this->step);} 
   KN_<R> operator()(int i    ,const char)  const   // une ligne i  (i,'.')
-            { return KN_<R>(&v[index(shapei.index(i))],shapej*step);}  
+            { return KN_<R>(&this->v[index(shapei.index(i))],shapej*this->step);}  
   KN_<R> operator()(const char,const char)  const   // tous 
             { return *this;}
   KNM_<R> t() const
-    { return KNM_<R>(v,*this,shapej,shapei);} //  before  { return KNM_<R>(*this,shapej,shapei,v);}
+    { return KNM_<R>(this->v,*this,shapej,shapei);} //  before  { return KNM_<R>(*this,shapej,shapei,v);}
   
    KNM_& operator =(const KNM_<const_R> & u) ;
    KNM_& operator =(const_R a)               ;
@@ -448,10 +493,10 @@ class KNM_: public KN_<R> {
    KNM_ &operator *=(const outProduct_KN_<R> &); // bofbof
 
 private:  
-  KNM_& operator++() {v += next;return *this;} // ++U
-  KNM_& operator--() {v -= next;return *this;} // ++U
-  KNM_  operator++(int ){KNM_<R> old=*this;v = v +next;return old;} // U++
-  KNM_  operator--(int ){KNM_<R> old=*this;v = v -next;return old;} // U--
+  KNM_& operator++() {this->v += this->next;return *this;} // ++U
+  KNM_& operator--() {this->v -= this->next;return *this;} // ++U
+  KNM_  operator++(int ){KNM_<R> old=*this;this->v = this->v +this->next;return old;} // U++
+  KNM_  operator--(int ){KNM_<R> old=*this;this->v = this->v -this->next;return old;} // U--
 
 
  friend class KN_<R>;   
@@ -461,6 +506,25 @@ private:
  friend class KNM<R>;   
  friend class KNMK<R>;   
 };
+
+template<class T,class I> 
+struct KN_ITAB
+{
+  KN_ITAB( T &vv, I &iindex) : v(vv),index(iindex) {}
+  T &v;
+  I & index;
+  KN_ITAB & operator=(const T & t);
+  KN_ITAB & operator+=(const T & t);
+  KN_ITAB & operator-=(const T & t);
+  KN_ITAB & operator*=(const T & t);
+  KN_ITAB & operator/=(const T & t);
+};
+
+template<class R>  KN_ITAB<const KN_<R>,const KN_<int> >  KN_<R>::operator()(const KN_<int>  &itab) const { return KN_ITAB<const KN_<R>,const KN_<int> > (*this,itab);}
+template<class R>  KN_ITAB<const KN_<R>,const KN_<long> >  KN_<R>::operator()(const KN_<long>  &itab) const { return KN_ITAB<const KN_<R>,const KN_<long> > (*this,itab);}
+template<class R>  KN_ITAB< KN_<R>,const KN_<int> >  KN_<R>::operator()(const KN_<int>  &itab) { return KN_ITAB<KN_<R>,const KN_<int> > (*this,itab);}
+template<class R>  KN_ITAB< KN_<R>,const KN_<long> >  KN_<R>::operator()(const KN_<long>  &itab) { return KN_ITAB<KN_<R>,const KN_<long> > (*this,itab);}
+
 
 template<class R>
 struct TKN_:public KN_<R> {
@@ -497,7 +561,7 @@ class KNMK_: public KN_<R> {
   ShapeOfArray shapej;
   ShapeOfArray shapek;
   public:
-  long IsVector1() const {  return (shapei.n*shapej.n*shapek.n) == n ;} 
+  long IsVector1() const {  return (shapei.n*shapej.n*shapek.n) == this->n ;} 
   long N() const {return shapei.n;}
   long M() const {return shapej.n;}
   long K() const {return shapek.n;}
@@ -531,8 +595,8 @@ class KNMK_: public KN_<R> {
   long indexijk(long i,long j,long k) const 
               {return index(shapei.index(i)+shapej.index(j)+shapek.index(k));} 
                            
-  R & operator()(long i,long j,long k)   const   {return v[indexijk(i,j,k)];}
-  R & operator()(int i,int j,int k)   const   {return v[indexijk(i,j,k)];}
+  R & operator()(long i,long j,long k)   const   {return this->v[indexijk(i,j,k)];}
+  R & operator()(int i,int j,int k)   const   {return this->v[indexijk(i,j,k)];}
   
 //  pas de tableau suivant
  KN_<R>  operator()(const char ,long j,long k)  const  { // le tableau (.,j,k) 
@@ -605,21 +669,27 @@ class KN :public KN_<R> { public:
   KN(const long nn, R * p) : KN_<R>(new R[nn],nn)  
     { KN_<R>::operator=(KN_<R>(p,nn));}
   KN(const long nn,R (*f)(long i) ) : KN_<R>(new R[nn],nn) 
-        {for(long i=0;i<n;i++) v[i]=f(i);}  
+        {for(long i=0;i<this->n;i++) this->v[i]=f(i);}  
   KN(const long nn,const  R & a) : KN_<R>(new R[nn],nn) 
         { KN_<R>::operator=(a);} 
   KN(const long nn,long s,const  R  a) : KN_<R>(new R[nn],nn,s) 
         { KN_<R>::operator=(a);} 
   template<class S>   KN(const KN_<S> & s):KN_<R>(new R[s.n],s.n) 
-        {for (long i=0;i<n;i++) v[i] = s[i];}
+        {for (long i=0;i<this->n;i++) this->v[i] = s[i];}
   template<class S>  KN(const KN_<S> & s,R (*f)(S )):KN_<R>(new R[s.n],s.n) 
-        {for (long i=0;i<n;i++) v[i] = f(s[i]);}
+        {for (long i=0;i<this->n;i++) this->v[i] = f(s[i]);}
   KN(const KN<R> & u):KN_<R>(new R[u.n],u.n)
         { KN_<R>::operator=(u);}
   //  explicit KN(const KN_<R> & u):KN_<R>(new R[u.n],u.n) 
   //      { KN_<R>::operator=(u);}
         
-  ~KN(){delete [] v;}
+  ~KN(){delete [] this->v;}
+  void CheckSet() { if(!n) {cerr << "Error RNM set array\n";K_throwassert(0); exit(1);}}
+   KN& operator  = (R*  a) { CheckSet(); return operator =(KN_<R>(a,n));}
+   KN& operator += (R*  a) { CheckSet(); return operator+=(KN_<R>(a,n));}  
+   KN& operator -= (R*  a) { CheckSet(); return operator-=(KN_<R>(a,n));}  
+   KN& operator *= (R*  a) { CheckSet(); return operator*=(KN_<R>(a,n));}  
+   KN& operator /= (R*  a) { CheckSet(); return operator/=(KN_<R>(a,n));}  
   
    KN& operator =(const_R a)  
         { if(unset()) set(new R[1],1,0,0); KN_<R>::operator= (a);return *this;}
@@ -727,6 +797,18 @@ class KN :public KN_<R> { public:
    KN& operator *=(const Mul_KNM_KN_<R> & u) 
         { KN_<R>::operator*=(u);return *this;}
         
+  
+  template<class I,class T> KN& operator =   (const KN_ITAB<T ,I> & ui)
+     {  KN_<R>::operator =(ui);  return *this;}
+  template<class I,class T> KN& operator +=   (const KN_ITAB<T ,I> & ui)
+     {  KN_<R>::operator +=(ui);  return *this;}
+  template<class I,class T> KN& operator -=   (const KN_ITAB<T ,I> & ui)
+     {  KN_<R>::operator -=(ui);  return *this;}
+  template<class I,class T> KN& operator *=   (const KN_ITAB<T ,I> & ui)
+     {  KN_<R>::operator *=(ui);  return *this;}
+  template<class I,class T> KN& operator /=   (const KN_ITAB<T ,I> & ui)
+     {  KN_<R>::operator /=(ui);  return *this;}
+        
         
   //  two opertor to cast to an array of constant      
 //    operator KN_<const_R> & ()  
@@ -737,8 +819,8 @@ class KN :public KN_<R> { public:
 //          { return   (KN<const_R> &) *this;}
 //    operator KN<const_R> const & ()  const 
 //          { return (const KN<const_R>& ) *this;}
-  void init(long nn) {n=nn;step=1;next=-1;v=new R[nn];}
-  void destroy(){delete [] v; v=0;n=0;}
+  void init(long nn) {this->n=nn;this->step=1;this->next=-1;this->v=new R[nn];}
+  void destroy(){delete [] this->v; this->v=0;this->n=0;}
 };
 
 //  Array with 2 indices
@@ -756,7 +838,7 @@ class KNM: public KNM_<R>{ public:
         :KNM_<R>(new R[u.size()],u.N(),u.M()) 
         { KNM_<R>::operator=(u);}
         
-  ~KNM(){delete [] v;}
+  ~KNM(){delete [] this->v;}
   
    KNM& operator=(const KNM_<const_R> & u)   
         { KNM_<R>::operator=(u);return *this;}
@@ -805,11 +887,11 @@ class KNM: public KNM_<R>{ public:
 //          { return *(const KNM<const_R>*) this;}
   void init(long nn,long mm) {
     ShapeOfArray::init(nn*mm);
-    shapei.init(nn,1,nn);
-    shapej.init(mm,nn,1),
-    v=new R[nn*mm];}
+    this->shapei.init(nn,1,nn);
+    this->shapej.init(mm,nn,1),
+    this->v=new R[nn*mm];}
     
-  void destroy(){delete [] v;n=0 ;}
+  void destroy(){delete [] this->v;this->n=0 ;}
 
 };
 
@@ -827,7 +909,7 @@ class KNMK: public KNMK_<R>{ public:
      :KNMK_<R>(new R[u.size()],u.N(),u.M(),u.K()) 
      { KNMK_<R>::operator=(u);}
      
-  ~KNMK(){delete [] v;}
+  ~KNMK(){delete [] this->v;}
   
   KNMK& operator=(const KNMK_<const_R> & u)   
      { KNMK_<R>::operator=(u);return *this;}
@@ -865,15 +947,28 @@ class KNMK: public KNMK_<R>{ public:
 
 //  -------------  optimization ---------------------
 template<class R> 
+class conj_KN_{public:
+  const KN_<const_R> & a;
+  conj_KN_(const KN_<const_R> & aa) : a(aa){}
+};
+
+
+inline const KN_<double> conj(const KN_<double> &a){ return a;}
+inline const KN_<float> conj(const KN_<float> &a){ return a;}
+
+//template<class R> conj_KN_<R> conj(const KN<R> &a){ return a;}
+template<class R> conj_KN_<R> conj(const KN_<R> &a){ return a;}
+
+template<class R> 
 class DotStar_KN_{public: 
   const KN_<const_R> & a; const KN_<const_R> & b;
-  DotStar_KN_( KN_<const_R> & aa, KN_<const_R> & bb) : a(aa),b(bb)  {}
+  DotStar_KN_(const KN_<const_R> & aa,const KN_<const_R> & bb) : a(aa),b(bb)  {}
  }; 
  
 template<class R> 
 class DotSlash_KN_{public: 
   const KN_<const_R> & a; const KN_<const_R> & b;
-  DotSlash_KN_( KN_<const_R> & aa, KN_<const_R> & bb) : a(aa),b(bb)  {}
+  DotSlash_KN_(const KN_<const_R> & aa,const KN_<const_R> & bb) : a(aa),b(bb)  {}
  }; 
 
 template<class R> 
@@ -917,7 +1012,7 @@ template<class R>
 class Mul_KNM_KN_ { public:
   const KNM_<const_R> &A;
   const KN_<const_R> &b;
-  Mul_KNM_KN_(const  KNM_<const_R> & aa,const KN_<const_R> & bb)  
+  Mul_KNM_KN_(const  KNM_<const_R>  &aa,const KN_<const_R>  &bb)  
         : A(aa),b(bb) {K_throwassert(SameShape(A.shapej,b));} 
 };
 

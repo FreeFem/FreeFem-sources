@@ -698,7 +698,7 @@ class pb2mat : public E_F0 { public:
   static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);} 
   
   AnyType operator()(Stack s) const {
-    Problem::Data *data= pb->dataptr(stack); 
+    Problem::Data *data= pb->dataptr(this->stack); 
     throwassert( !!data->A);  
     return  SetAny<Matrice_Creuse<K> * >(&data->A) ;}
   
@@ -756,7 +756,7 @@ AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const
   FESpace & Vh = *pVh ;
   R tgv= 1e30;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));  
-  xx=0; 
+  xx=R(); 
   if ( AssembleVarForm(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
     AssembleBC(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   // cout << xx.min() << " " << xx.max() << endl;
