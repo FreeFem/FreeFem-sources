@@ -7,7 +7,7 @@ sub FileInfo {
    return  "$size Kb $date_str";
 }
 use File::Basename;
-$imagedir="./";
+$imagedir="./icons";
 $dir=" il manque un parametre $#ARGV ";
 if ( $#ARGV == 0 )  { 
  $dir=$ARGV[0];
