@@ -240,14 +240,23 @@ fi
 # Looking for the BLAS
 # --------------------
 
-# Trying default locations
+# User-specified location
 ff_blas_ok=no
-ff_save_libs="$LIBS"
-AC_CHECK_LIB(blas,daxpy_,
-	LIBS="$LIBS -lblas"
+AC_ARG_WITH(blas,
+	--with-blas=library	Use a specific version of the Blas,
 	ff_blas_ok=yes
-	ff_blas_lib="-lblas",
-	LIBS="$ff_save_libs")
+	ff_blas_libs="${withval}")
+
+# Trying default locations
+if test "$ff_blas_ok" = no;
+then
+	ff_save_libs="$LIBS"
+	AC_CHECK_LIB(blas,daxpy_,
+		LIBS="$LIBS -lblas"
+		ff_blas_ok=yes
+		ff_blas_lib="-lblas",
+		LIBS="$ff_save_libs")
+fi
 
 # Trying Atlas (location corresponding to Debian package)
 if test "$ff_blas_ok" = no;
@@ -281,13 +290,28 @@ fi
 if test "$ff_blas_ok" = no -a "$ff_wget" = yes
 then
 	AC_MSG_NOTICE(using downloaded Blas)
-	AC_SUBST(DOWNLOAD_BLAS,blas)
+
+	# There are precompiled versions for Windows. We cannot
+	# distinguish the different versions easily so we just
+	# download the most generic one. A more specific version can
+	# always be downloaded by hand.
+
+	if test "$ff_win32" = yes -a "$enable_generic" = yes
+	   then
+		ff_download_blas=binary
+		ff_blas_dir=WinNT_PPRO256
+	else
+		ff_download_blas=source
+		ff_blas_dir=ATLAS/lib/ff++
+	fi
+
+	AC_SUBST(DOWNLOAD_BLAS,$ff_download_blas)
 
 	# Do not update $LIBS, but create an extra LIB variable,
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
 
-	ff_blas_lib="-L${curdir}/download/blas/ATLAS/lib/ff++ -lf77blas -lcblas -latlas"
+	ff_blas_lib="-L${curdir}/download/blas/${ff_blas_dir} -lf77blas -lcblas -latlas"
 	ff_blas_ok=yes
 fi
 AC_SUBST(BLASLIB,$ff_blas_lib)
