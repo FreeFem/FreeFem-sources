@@ -228,44 +228,45 @@ FreeFem++ LaplaceP1.edp
 
 \textBlack
 
-
-
-
 \section{ Syntax}
 \textBlack
 \subsection{Data Types}
 
-Every variable must be declared together with its type.
-The language allows the manipulation of basic types
-integers (\texttt{int}), reals (\texttt{real}), strings (\texttt{string}),
-arrays (example: \texttt{real[int]}),
- bidimensional (2D) finite element meshes (\texttt{mesh}),
-2D finite element spaces (\texttt{fespace}) , finite element functions
-(\texttt{func}), arrays of
-finite element functions (\texttt{func$[basic_type]$}),
-linear and bilinear operators, sparse matrices, vectors , etc. For instance
+Every variable must be declared together with its type.  The language
+allows the manipulation of basic types~: integers (\texttt{int}),
+reals (\texttt{real}), strings (\texttt{string}), arrays (example:
+\texttt{real[int]}), bidimensional (2D) finite element meshes
+(\texttt{mesh}), 2D finite element spaces (\texttt{fespace}), finite
+element functions (\texttt{func}), arrays of finite element functions
+(\texttt{func$[basic type]$}), linear and bilinear operators, sparse
+matrices, vectors, etc. For instance~:
 
 \bFF
   @int i,n=20;               //  $ i,n \in \Z $
   @real pi=4*atan(1);        // $ pi \in \R $
   @real[@int] xx(n),yy(n);    //  two array of size n
-  @for (i=0;i<=20;i++)       // which can be used in statements such as
+  @for (i=0;i<=20;i++)       // which can be used in statements such as this
    { xx[i]= cos(i*pi/10); yy[i]= sin(i*pi/10); }
 \eFF
-where \texttt{int}, \texttt{real}, , \texttt{complex}
-correspond to the C-types \texttt{long}, \texttt{double},
-\texttt{complex<double>}.
+
+where \texttt{int}, \texttt{real}, \texttt{complex} correspond to the
+C types \texttt{long}, \texttt{double}, \texttt{complex<double>}.
 \\\\
-The scope of a variable is the current block $\{
-\ldots \}$ like in \Cpp, except the \texttt{fespace} variable, and the in variables local to a block are destroyed at the end of the block .
-\\\\
-The type declarations are  compulsory in \freefempp  because it is easy
-to make bugs in a language with many types. \index{variable} The
-variable name is just an alphanumeric \index{alphanumeric} string, the
-underscore character  \texttt{\_} is not allowed, because
-it will be used as an operator in the future.\index{\_}
+
+The scope of a variable is the current block (delimited by ``$\{
+\ldots \}$'') as in \Cpp, except the \texttt{fespace} variable. The
+variables which are local to a block are destroyed at the end of the
+block.  \\\\
+
+Type declarations are compulsory in \freefempp. This is necessary to
+prevent many potential programming errors related to type
+mismatch. \index{variable} A variable name is just an alphanumeric
+\index{alphanumeric} string. The underscore character \texttt{\_} is
+not allowed because it will be used as an operator in the
+future.\index{\_}
 
 \subsubsection{Another Example}
+
 \bFF
 @real r= 0.01;
 @mesh Th=@square(10,10); // unit square mesh
@@ -279,121 +280,156 @@ Vh u = x+ exp(y);
 }
 //  here r==0.01 \textBlack\space
 \eFF
-
-\begin{remark} Notice the use of \texttt{wait} to monitor the time
+\begin{note} Notice the use of \texttt{wait} to monitor the time
 a graph stays on screen (i.e. the time freefem stops before going to the
 next instruction).
-\end{remark}
-
-Generally like in \Cpp the variable is destroyed at the the end of block
-( in \texttt{\{...\}} ) except for the fespace name \index{block}
-\index{fespace}
+\end{note}
 
 \subsection{List of major types}
 {\small
 \begin{description}
-\item[\texttt{bool}]  a \Cpp true, false
+\item[\texttt{bool}] a \Cpp true, false
 value;\index{bool}\index{true}\index{false}
-\item[\texttt{int}]  long integer;\index{int}
-\item[\texttt{string}]  a \Cpp string;\index{string}
-\item[\texttt{real}]   double ;\index{real}
-\item[\texttt{complex}]   \ttCC{complex<double>};\index{complex}
-\item[\texttt{ofstream}]   \ttCC{ofstream} to output to a file
-\item[\texttt{ifstream}]   \ttCC{ifstream} to input from a file
-
-\item[\texttt{real[int]}]   array of real (integer index) ; \index{array!integer index}
-\item[\texttt{real[int,int]}]   martix of real (2 integers index) ; 
+\item[\texttt{int}] long integer;\index{int}
+\item[\texttt{string}] a \Cpp string;\index{string}
+\item[\texttt{real}] double;\index{real}
+\item[\texttt{complex}] \ttCC{complex<double>};\index{complex}
+\item[\texttt{ofstream}] \ttCC{ofstream} to output to a file
+\item[\texttt{ifstream}] \ttCC{ifstream} to input from a file
+\item[\texttt{real[int]}] array of reals (integer index);
+\index{array!integer index}
+\item[\texttt{real[int,int]}] matrix of reals (2 integers indices);
 \index{matrix!integer index}
-\item[\texttt{real[string]}]   array of real (string index) ; \index{array!string index}
-\item[\texttt{mesh[int]}]   array of mesh (integer index) ; \index{array!mesh index}
+\item[\texttt{real[string]}] array of reals (string index);
+\index{array!string index}
+\item[\texttt{mesh[int]}] array of meshes (integer index);
+\index{array!mesh index}
 
-\item[\texttt{func}] define a line function without argument  \ttCC{ func
-f=cos(x)+sin(y) ;}\index{func}. Remark the function's type is given by the expression's type.
+\item[\texttt{func}] define a function (on one line, without
+arguments) \ttCC{ func f=cos(x)+sin(y);}\index{func}. Please note that
+the function type is given by the type of the expression.
 
-\item[\texttt{mesh}]  \index{mesh}
-to define a mesh \ttCC{mesh Th=buildmesh(circle(10));}
-\item[\texttt{fespace}]  to define a new type of finite element space.
-Ex: \ttCC{ fespace Vh(Th,P1);} so far the known finite
-elements are  \index{fespace}
+\item[\texttt{mesh}] \index{mesh} defines a mesh. e.g. \ttCC{mesh
+Th=buildmesh(circle(10));}
+
+\item[\texttt{fespace}] to define a new type of finite element space.
+e.g. \ttCC{ fespace Vh(Th,P1);}. At present, the available finite
+elements are \index{fespace}:
 \begin{description}
-     \item[P0]  constant discontinuous finite element \index{P0}
-     \item[P1]  linear piecewise continuous finite element \index{P1}
-     \item[P2]  $P_{2}$ piecewise continuous finite element, where
-     \index{P2}
-     $P_{2}$ is the set of polynom of $\R^{2}$ de degrees two,
-     \item[RT0] \index{RT0} the Raviat-Thomas finite element,
-     \item[P1nc]  nonconforming $P_1$ finite element,   \index{P1nc}
-     \item[P1dc]  linear piecewise discontinuous finite element \index{P1dc}
+     \item[P0] constant discontinuous finite element \index{P0}
+     \item[P1] linear piecewise continuous finite element \index{P1}
+     \item[P2] $P_{2}$ piecewise continuous finite element, where
+     \index{P2} $P_{2}$ is the set of polynoms of $\R^{2}$ of degree
+     two,
+     \item[RT0] \index{RT0} the Raviart-Thomas finite element,
+     \item[P1nc] non-conforming $P_1$ finite element, \index{P1nc}
+     \item[P1dc] linear piecewise discontinuous finite element
+     \index{P1dc}
      \item[P2dc]  $P_{2}$ piecewise discontinuous finite element \index{P2dc}
-     \item[P1b]  linear piecewise continuous finite element + bublle \index{P1b}
+     \item[P1b] linear piecewise continuous finite element + bubble
+     \index{P1b}
 
 \end{description}
 
-\item To define a function $p$ in this fespace \texttt{Vh} or a array $a$ of  10 functions
- \texttt{  Vh p; Vh a[10];} \index{array!FE function}
+\item To define $p$ as a function belonging to fespace \texttt{Vh}~:
+\texttt{Vh p;}. T odefine $a$ as an array of 10 functions from
+\texttt{Vh}~: \texttt{Vh a[10];} \index{array!FE function}
 
-\item[\texttt{problem}]  to define a pde problem without solving it. \index{problem}
-\item[\texttt{solve}]  to define a pde problem and solve it.\index{solve}
-\item[\texttt{varf}]   to define a full variational form. \index{varf}
-\item[\texttt{matrix}] to define a sparce matrix. \index{matrix}
+\item[\texttt{problem}] defines a pde problem without solving
+it. \index{problem}
+\item[\texttt{solve}] defines a pde problem and solves it.\index{solve}
+\item[\texttt{varf}] defines a full variational form. \index{varf}
+\item[\texttt{matrix}] defines a sparse matrix. \index{matrix}
 \end{description}
 
-The constante value of the program can be: 
+Constant values for the above type can be~: 
 \begin{description}
-\itemtt[true] is the contant  bool equal to true,\index{true}
-\itemtt[false] is the contant bool equal to false, \index{false}
-\itemtt[ 123] is the contant  integer  $123$,\index{integer!contant}
-\itemtt[123.] is  a contant  real number $123$.\index{real!contant}
-\itemtt[123.e10]  is contant  real number $123\,10^{10}$, remark the syntaxe of a number real 
-is like in \Cpp or in fortran.
+\itemtt[true] is a constant of type bool,\index{true}
+\itemtt[false] is a constant of type bool, \index{false}
+\itemtt[123] is an integer,\index{integer!constant}
+\itemtt[123.] is of type real,\index{real!constant}
 
+\itemtt[123.e10] is a constant of type real and value
+$123\,10^{10}$. Please note that the syntax of a real number is the
+same as in \Cpp or fortran.
 
-\itemtt["abcd"]  is a constant string charactere contening \texttt{abcd}, remark the two
- escape charactere are \texttt{\string\n} to enter a newline character or  \texttt{\string\"}
- to enter a \texttt{"}  in a string. \index{\n@\verb=\n=}\index{\"@\verb=\"=} \index{string!constant}
+\itemtt["abcd"] is a constant of type string. There are two escape
+characters allowed in string constants~: \texttt{\string\n} to insert
+a newline and \texttt{\string\"} to insert a
+\texttt{"}. \index{\n@\verb=\n=}\index{\"@\verb=\"=}
+\index{string!constant}
+
 \end{description}
 }
+
 \subsection{Globals}
- The names \ttCC{x,y,z,label,region,P,N,nu\_triangle, lenEdge, area, hTriangle} are used to link
-the language to the finite element tools: 
+
+The following names are related to the underlying finite element
+abstractions~:
+
 \begin{description}
-    \item[\texttt{x}]  the $x$ coordinate of current point (real value) \index{x}
-    \item[\texttt{y}]  the $y$ coordinate  of current point (real value) \index{y}
-    \item[\texttt{z}]  the $z$ coordinate of current point (real value) \index{z},
-    (reserved for future use).
-    \item[\texttt{label}]   the label number of boundary if the  current point is on a boundary otherwise 0
-     (int value). \index{label}
-    \item[\texttt{region}]   a function which returns an \texttt{int},
-    the region number of  the current point (x,y). \index{region}
-    \item[\texttt{P}]   the  current point  ($R^{2}$ value. \index{P}
+    \item[\texttt{x}] the $x$ coordinate of the current point (real
+    value) \index{x}
+    \item[\texttt{y}] the $y$ coordinate of the current point (real
+    value) \index{y}
+    \item[\texttt{z}] the $z$ coordinate of the current point (real
+    value)\index{z}, (reserved for future use).
+    \item[\texttt{label}] the boundary label number of the current
+    point if it is on a boundary, otherwise 0 (integer
+    value). \index{label}
+    \item[\texttt{region}] a function returning the region number of
+    the current point (x,y). Integer value. \index{region}
+%%%alh (x,y,z) in R^2?
+    \item[\texttt{P}] current point ($R^{2}$ value. \index{P}
     \texttt{P.x}, \texttt{P.y}, \texttt{P.z})
-    \item[\texttt{N}]   the normal at the  current point  ($\R^{3}$) value,
-    \texttt{N.x}, \texttt{N.y}, \texttt{N.z}) \index{N}.
-    \itemtt[lenEdge]  len of the current edge\index{lenEdge}
-    \itemtt[hTriangle] size of the current triangle  \index{hTriangle}
-    \itemtt[nuTriangle] number of the current triangle  \index{nuTriangle}
-   \itemtt[nuEdge] number of the current edge in the triangle  \index{nuEdge}
-   \itemtt[nTonEdge] number triangle on the current edge   \index{nTonEdge}
-    \itemtt[area]  area of the current triangle \index{area}
-    \itemtt[cout]  console  \Ostream\index{cout}
-    \itemtt[cin]  console  \Istream \index{cin}
-    \itemtt[true]    true  \Bool\ value\index{true}
-    \itemtt[false]   false  \Bool\ value\index{false}
-    \itemtt[pi]   \Real ~approximation of $\pi$ \index{pi} 
-    \itemtt[endl] the end of line string \index{endl}  
+    \item[\texttt{N}] normal vector at the current point ($\R^{3}$
+    value, \texttt{N.x}, \texttt{N.y}, \texttt{N.z}) \index{N}.
+    \itemtt[lenEdge] length of the current edge\index{lenEdge}
+    \itemtt[hTriangle] size of the current triangle \index{hTriangle}
+
+    \itemtt[nuTriangle] integer index of the current triangle
+    \index{nuTriangle}
+
+    \itemtt[nuEdge] integer index of the current edge in the triangle
+    \index{nuEdge}
+
+    \itemtt[nTonEdge] integer index of the triangle on the current
+    edge \index{nTonEdge}
+
+    \itemtt[area] area of the current triangle \index{area}
+
+    \itemtt[cout] console \Ostream\index{cout}
+
+    \itemtt[cin] console \Istream \index{cin}
+
+    \itemtt[true] \Bool\ value\index{true}
+
+    \itemtt[false] \Bool\ value\index{false}
+
+%%%alh ``pi'' and ``endl'' should be among constants and not variables?
+    \itemtt[pi] \Real approximation of $\pi$ \index{pi}
+
+    \itemtt[endl] the end of line string \index{endl}
+
 \end{description}
 
 \medskip
 
-Here is how to show all the types, and all the operator and functions.
+Here is how to show all types, operators and functions from inside a
+\freefempp program~:
+
 \bFF
  @dumptable(@cout);
 \eFF \index{dumptable}
-To execute a system command in the string (not implemented on Carbon MacOs)
+
+To run a system command stored in a string (not implemented on Carbon
+MacOs)~:
+
 \bFF
   @exec("shell command");
 \eFF
 \index{exec}
+
 \subsection{Arithmetic}
 The operators known to the language are the usual C-operators:
 \\\\
@@ -591,9 +627,9 @@ declare a new variable \texttt{ofstream ofile("filename");} or \texttt{ofstream 
 as \texttt{cout} (resp. \texttt{cin}). The word \texttt{append} in  \texttt{ofstream ofile("filename",append);} 
  means openning a file in append mode.
 
-\begin{remark} The file is closed
+\begin{note} The file is closed
 at the exit of the enclosing block, 
-\end{remark}
+\end{note}
 
 \bFF
 @int i;
@@ -644,10 +680,10 @@ The following
 constructs a grid $n× m$ in the rectangle $[1.2,1.8]×[0,1]$ and
 a grid  $4× 5$ in the unit square $[0,1]^2$.
 
-\begin{remark} The label of \index{label}
+\begin{note} The label of \index{label}
 boundaries are $1,2,3,4$ for bottom, right, top, left side (before the
 mapping $[x0+(x1-x0)*x,y0+(y1-y0)*y]$ (the mapping can be non linear).
-\end{remark}
+\end{note}
 
 \plot[height=6cm]{twosquare}{The 2 square meshes}
 
@@ -670,10 +706,10 @@ plot(a(50)+b(+30)) ; // to see a plot of the border mesh \index{plot!border}
 \index{plot!mesh}
 @plot(Thwithhole,wait=1,ps="Thwithhole.eps"); // figure \ref{Thwithhole}
 \eFF
-\begin{remark}
+\begin{note}
 Notice the use of \texttt{ps="fileName"}
 to generate a postscript file identical to the plot shown on screen.
-\end{remark}
+\end{note}
 
 \twoplot[height=6cm]{Thwithouthole}{Thwithhole}{mesh without hole}{mesh with hole}
 
@@ -692,12 +728,12 @@ to generate a postscript file identical to the plot shown on screen.
 %@mesh Th= @buildmesh(sq(8*n));
 %\eFF
 
-%\begin{remark} On the mesh \texttt{Th} the label of the polygon line
+%\begin{note} On the mesh \texttt{Th} the label of the polygon line
 %with vertices $  \vdeux(0,0),\vdeux(0,2),
 %\vdeux(1,2)  $ is $1$ ,  the label of the polygon line of vertices
 %$ \vdeux(1,2),\vdeux(1,0),  \vdeux(0,0) $ , to close the polygon the two
 %labels corresponding are the same.
-%\end{remark}
+%\end{note}
 
 Note that boundaries must cross at end points only.
 
@@ -738,13 +774,13 @@ plot(Th,wait=1,fill=1,ps="movemesh.eps");// see figure \ref{movemesh}
 %%% alh? Lshape.eps not found
 %%%\twoplot[height=6cm]{Lshape}{movemesh}{   L-shape}{  moved L-shape }
 
-\begin{remark}
+\begin{note}
 Consider a function u defined on a mesh Th. A statement like
 \texttt{Th=movemesh(Th...} does not change $u$ and so the old mesh still
 exists. It will be destroyed when no function use it. Therefore a statement
 like $u=u$ will redefine $u$ on the new mesh Th with interpolation and therefore destroy the old Th
 if $u$ was the only function using it.
-\end{remark}
+\end{note}
 
 Now, a sample exemple of moving mesh, with lagrangian\index{lagrangian} function $u$ defined on the moving mesh.
 
@@ -1405,7 +1441,7 @@ Warning for no scalar finite element function   \texttt{[Uxh,Uyh]}
 The other way to set a FE function  is to solve a `problem' (see
 below).
 
-\begin{remark} \label{meshchange}
+\begin{note} \label{meshchange}
  It is possible to \index{mesh!change}  change a mesh to do a convergence
 test  for example, but see what happens in this trivial example. In fact a
  FE function is three pointers, one pointer to the values, second a pointer to
@@ -1413,7 +1449,7 @@ test  for example, but see what happens in this trivial example. In fact a
  \texttt{fespace} can be rebuild if the associated mesh have changed 
  when the FE function is set with operator \texttt{ =} or when a \texttt{problem}
  is solved.
-\end{remark}
+\end{note}
 \bFF
   @mesh Th=@square(2,2);
   @fespace Xh(Th,@P1);
@@ -1471,10 +1507,10 @@ The \freefempp version of the same is
  @plot(uh,ps="Laplace.eps",value=true); // to see the result (figure \ref{fig Laplace})
 \eFF
 
-\begin{remark} Using the keywork \texttt{problem} in place of
+\begin{note} Using the keywork \texttt{problem} in place of
 \texttt{solve} would define the problem only and not solve it.
 \index{solve}
-\end{remark}
+\end{note}
 
 \plot[height=6cm]{Laplace}{ \label{fig Laplace}  Isovalues of the solution  }
 
@@ -1501,9 +1537,9 @@ Ph p,q;
 \twoplot[height=6cm]{lapRTuv}{laRTp}{Flux
 $(u_{1},u_{2})$}{Isovalue of $p$ }
 
-\begin{remark}
+\begin{note}
 To make programs more readable we stop now using blue color on dx,dy.
-\end{remark}
+\end{note}
 
 An other formulation of the Laplace equation with Discontinuous Galerkine
 formulation with $P_{2}$ discontinuous can be write (see LapDC.epd and \cite{DGgirault}) 
@@ -1559,10 +1595,10 @@ The parameters are FE function, the number $n$ of qfo is even
 ($n=2*k$), the $k$ first function parameters are unknown, and the $k$
 last are test functions.
 
-\begin{remark} If the functions are a part of
+\begin{note} If the functions are a part of
 vectoriel FE then you must give  all the functions of the vectorial
 FE in the same order (see laplaceMixte problem for example).
-\end{remark}
+\end{note}
 \begin{bug}
 The mixing of \texttt{fespace} with differents periodic boundary condition is not
 implemented. So all the finite element space use for test or unknow functions
@@ -1630,7 +1666,7 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
 
 
         
-       \item[-)]  a sparce matrix of type \texttt{matrix}
+       \item[-)]  a sparse matrix of type \texttt{matrix}
        \end{itemize}
     \item  the linear form term:
          \begin{itemize}
@@ -1665,9 +1701,9 @@ If needed, the different kind of terms in the sum can appear more than once.
 Remark: the integral mesh and the mesh associated to test function or unkwon 
 fonction can be different in the case of linear form.
 
-\begin{remark}
+\begin{note}
  \texttt{N.x} and \texttt{N.y} are the normal's components. \index{normal}\index{N}
- \end{remark}
+ \end{note}
 
 {\bf Important}: it is not possible to write in the same integral the
 linear part and the bilinear part such as in
@@ -1786,13 +1822,13 @@ Xh b;
 //  where $b^x_j$ is a basis of Xh, and $b^m_j$ is a basis of Mh.
 @matrix By= by(Xh,Mh);    // $ By= (By_{ij})$ and $ By_{ij}= by(b^x_j,b^m_j)$
 \eFF
-\begin{remark}
+\begin{note}
 The line of the matrix corresponding to test function on the bilinear form.
-\end{remark}
+\end{note}
 
-\begin{remark}
+\begin{note}
 The vector $bc1[]$ contains the contribution of the boundary condition $u_{1}=1$.
-\end{remark}
+\end{note}
 Here we have three matrices $A,Bx,By$, and we can solve the problem:\\
 find $ u_{1} \in X_{h}$ such that
 $$ a(v_{1},u_{1})= by(v_{1},f), \forall v_{1}\in X_{0h}, $$
@@ -1805,7 +1841,7 @@ b[]  = Bx'*f[]; //
 b[] += bc1[] .*bcx[]; // u1= g on $\Gamma_{3}$ boundary see following remark
 u1[] = A^-1*b[]; // solve the linear system \index{solve!linear system}\index{\string^-1}
 \eFF
-\begin{remark} The boundary condition \index{boundary condition} is implemented
+\begin{note} The boundary condition \index{boundary condition} is implemented
  by penalization and the vector \texttt{bc1[]} contains
  the contribution of the boundary condition $u_{1}=1$ ,
 so to change the boundary condition,
@@ -1814,7 +1850,7 @@ we have just to multiply the vector $bc1[]$ by the value $f$
 with the operator \texttt{.*}.\index{.*@\verb=.*=}
 The \texttt{StokesUzawa.edp} \ref{Uzawa} gives
  a real example of using all this features.
-\end{remark}
+\end{note}
 
 We add automatic expression optimization by default, if this optimization trap
 you can remove the use of this optimization by writing for example : \index{optimize=}
@@ -2896,10 +2932,10 @@ of the matrix of the underlying discrete linear system,
 otherwise it will be ill conditioned.
 \index{Neumann}
 
-\begin{remark}
+\begin{note}
 Notice the term \texttt{p*q*(0.000001)}  is added, because the  solver
 Crout needs it: all the sub-matrices must be invertible.
-\end{remark}
+\end{note}
 
 If the \index{streamlines}streamlines are required, they can be
 computed by finding $\psi$ such that rot$\psi=u$ or better,
