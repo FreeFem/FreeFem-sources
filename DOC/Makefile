@@ -1,3 +1,4 @@
+
 doc=manual
 all:$(doc).ps.gz $(doc).pdf
 
