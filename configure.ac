@@ -25,14 +25,30 @@ AM_PROG_LEX
 AC_CHECK_LIB(pthread,pthread_create)
 
 
+# Checking wether we can produce a X11 version
+# --------------------------------------------
+
+AC_MSG_CHECKING(wether we have X11)
+ff_x11=no
+if test `locate Xlib.h|wc -l` gt 0;
+then
+	ff_x11=yes
+	AC_SUBST(STDPROG,FreeFem++)
+	AC_SUBST(X11PROG,FreeFem++-x11)
+fi
+AC_MSG_RESULT($ff_x11)
+
 # Checking wether we can produce a MacIntosh-specific version
 # -----------------------------------------------------------
 
-AC_CHECK_PROG(ff_agl,agl,yes,no)
-if test "$ff_agl" = yes;
+AC_MSG_CHECKING(wether we are on a MacIntosh)
+ff_mac=no
+if test `uname` = Darwin;
 then
+	ff_mac=yes
 	AC_SUBST(AGLPROG,FreeFem++-agl)
 fi
+AC_MSG_RESULT($ff_mac)
 
 # Looking for the BLAS
 # --------------------
@@ -127,13 +143,14 @@ AC_ARG_ENABLE(debug,
 if test "$ff_debug" = true;
 then
 	CXXFLAGS="-DDRAWING -DLONG_LONG -DCHECK_KN -g"
-	if test "ff_agl" = yes;
+	if test "ff_mac" = yes;
 	then
 		CXXFLAGS="$CXXFLAGS -fno-inline -fpascal-strings -fexceptions"
 	fi
 else
 	CXXFLAGS="-DDRAWING -DLONG_LONG  -DNCHECKPTR -O"
-	if test "ff_agl" = yes;
+	if test "ff_mac" = yes;
+	then
 		CXXFLAGS="$CXXFLAGS  -fpascal-strings"
 	fi
 fi
