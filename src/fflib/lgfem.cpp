@@ -41,12 +41,31 @@ template<class R>
  TypeVarForm<R> * TypeVarForm<R>::Global;
 }
 
+
+template<class K> 
  class E_F_StackF0F0opt2 :public  E_F0mps { public:
   typedef   AnyType (*func)(Stack,Expression ,Expression ) ; 
   func f;
   Expression a0,a1;
   E_F_StackF0F0opt2(func ff,Expression aa0,Expression aa1) 
     : f(ff),a0(aa0),a1(aa1) {
+    
+     const E_FEcomp<K> * e= dynamic_cast<const E_FEcomp<K>*>(a0);
+     if ( e  && e->N != 1)
+      { 
+        cerr << " err interpolation of  no scalar FE function componant ("<<  e->comp<< " in  0.." << e->N<< ") <<  with scalar function \n" ;
+        CompileError("interpolation of  no scalar FE function componant with scalar function ");
+      } 
+       
+/*  //  inutil car a0 est un composante d'un vecteur ???? 
+   // pour l'instant on a juste une erreur a l'execution
+   // et non a la compilation.
+   
+     if (a0->nbitem() != a1->nbitem() ) 
+      { // bofbof 
+        cerr << " err interpolation of  no scalar FE function ("<<  a0->nbitem() << " != "  <<  a1->nbitem()  << ") <<  with scalar function \n" ;
+        CompileError("interpolation of  no scalar FE function  with scalar function ");
+      } */
      deque<pair<Expression,int> > ll;
      MapOfE_F0 m;
      size_t top =  currentblock->OffSet(0), topbb=top; // FH. bofbof ??? 
@@ -1839,7 +1858,11 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
  //   R F[100]; // buffer 
     TabFuncArg tabexp(s,Vh.N);
     tabexp[0]=e;
-    throwassert(Vh.N==1); 
+    
+    if(Vh.N!=1)
+    {  cerr << " Try to set a  vectorial  FE function  (nb  componant=" <<  Vh.N << ") with one scalar " << endl;
+       ExecError(" Error interploation (set)  FE function (vectorial) with a scalar");
+    }
     KN<R> * y=new  KN<R>(Vh.NbOfDF);
     KN<R> & yy(*y);
     KN<R> Viso(100);
@@ -3841,8 +3864,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        );
 //  interpolation   operator 
  TheOperators->Add("=",
-       new OneOperator2_<pfer,pfer,double,E_F_StackF0F0opt2 >(set_fe<double>) ,
-       new OneOperator2_<pfec,pfec,Complex,E_F_StackF0F0opt2 >(set_fe<Complex>) 
+       new OneOperator2_<pfer,pfer,double,E_F_StackF0F0opt2<double> >(set_fe<double>) ,
+       new OneOperator2_<pfec,pfec,Complex,E_F_StackF0F0opt2<Complex> >(set_fe<Complex>) 
        
        ) ;     
      //  new OneOperator2_<pferbase,pferbase,E_Array,E_F_StackF0F0 >(set_fev));

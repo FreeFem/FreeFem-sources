@@ -28,3 +28,8 @@ solve pb(u,v) =
   + int1d(th2,5)( -g*v)
   + on(1,u=0) ;
 plot (th2,u);
+cout << " (u[],u[]) = " << (u[]'*u[]) << endl; 
+{
+ofstream file("u.txt");
+file << u[] << endl;
+}

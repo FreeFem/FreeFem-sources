@@ -371,7 +371,7 @@ void Triangles::inquire()
 	  if(dd < d) {
 	    j=i;
 	    d=dd;}}
-	  cout << " sommet " << j << "= " <<	vertices[j]  << ", d = " << d << endl;
+	  cout << " sommet " << j << "= " <<	vertices[j]  << ", d = " << d << " " << vertices[j].m << endl;
 	  vertices[j].Draw(j);
 	  DrawMark(vertices[j].r);
 	  if( c=='s')  vertices[j].m.Draw(vertices[j]);

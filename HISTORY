@@ -618,3 +618,8 @@ __________
    add 2 new quadrature formular qf7pT and qf9pT with respectively 15 and 21 points
    add  P2b a new finite element  : P2 + bubble 
    make drag and drop on ide version + copy paste 
+
+14/02/2005
+   create a error  when you do   uh = ..  when uh is a  componant of a vectorial fe 
+     element function (for exemple fespace Vh(Th,TR), Vh [uh,vh]; uh = 1 (error here ;)
+     because it's impossible to build   uh and vh independantly.

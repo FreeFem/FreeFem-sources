@@ -23,6 +23,7 @@ public:
   R x,y;
   P2 () :x(0),y(0) {};
   P2 (R a,R b)  :x(a),y(b)  {}
+  P2 (P2 A,P2 B) : x(B.x-A.x),y(B.y-A.y) {}
   P2<R,RR>   operator+(const P2<R,RR> & cc) const {return P2<R,RR>(x+cc.x,y+cc.y);}
   P2<R,RR>   operator-(const P2<R,RR> & cc) const {return P2<R,RR>(x-cc.x,y-cc.y);}
   P2<R,RR>   operator-()  const{return P2<R,RR>(-x,-y);}

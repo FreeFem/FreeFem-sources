@@ -49,7 +49,7 @@ dnl ONETEST(periodic4,uh[]'*uh[],1e-2)
 dnl ONETEST(Periodic,uh[]'*uh[],1e-2)
 
 ONETEST(plot,uh[]'*uh[],1e-2)
-ONETEST(readmesh,u[]'*u[],5e-2)
+ONETEST(readmesh,u[]'*u[],2e-1)
 ONETEST(region,u[]'*u[],1e-1)
 ONETEST(saverestore)
 ONETEST(schwarz-gc,u1[]'*u1[],5e-2)

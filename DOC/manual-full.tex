@@ -7958,261 +7958,262 @@ primary:
 
 \eFF
 \subsection{The Types of the languages, and cast}
-\begin{verbatim}
- the types 
- --lgElement =  <lgElement>
-    [,  type :<Polymorphic>
-   operator : 
-   (    <lgVertex> :   <lgElement>, <long> )
+%\begin{verbatim}
+% the types 
+% --lgElement =  <lgElement>
+%    [,  type :<Polymorphic>
+%   operator : 
+%   (    <lgVertex> :   <lgElement>, <long> )
 
+%
+% --lgVertex =  <lgVertex>
+%    label,  type :<Polymorphic>
+%   operator. : 
+%   (    <long> :   <lgVertex> )
 
- --lgVertex =  <lgVertex>
-    label,  type :<Polymorphic>
-   operator. : 
-   (    <long> :   <lgVertex> )
+%    x,  type :<Polymorphic>
+%   operator. : 
+%   (    <double> :   <lgVertex> )
 
-    x,  type :<Polymorphic>
-   operator. : 
-   (    <double> :   <lgVertex> )
+%    y,  type :<Polymorphic>
+%   operator. : 
+%   (    <double> :   <lgVertex> )
 
-    y,  type :<Polymorphic>
-   operator. : 
-   (    <double> :   <lgVertex> )
+% --Add_KN_<double> =  <Add_KN_<double>>
 
- --Add_KN_<double> =  <Add_KN_<double>>
+% --Add_Mulc_KN_<double> * =  <Add_Mulc_KN_<double>>
 
- --Add_Mulc_KN_<double> * =  <Add_Mulc_KN_<double>>
+% --AnyTypeWithOutCheck =  <AnyTypeWithOutCheck>
 
- --AnyTypeWithOutCheck =  <AnyTypeWithOutCheck>
+% --C_F0 =  <C_F0>
 
- --C_F0 =  <C_F0>
+% --DotStar_KN_<double> =  <DotStar_KN_<double>>
 
- --DotStar_KN_<double> =  <DotStar_KN_<double>>
+% --E_Array =  <E_Array>
 
- --E_Array =  <E_Array>
+% --FEbase<double> * =  <FEbase<double>>
+%    <FEbase<double>> :   <FEbase<double>> 
+% --FEbase<double> ** =  <FEbase<double> **>
 
- --FEbase<double> * =  <FEbase<double>>
-    <FEbase<double>> :   <FEbase<double>> 
- --FEbase<double> ** =  <FEbase<double> **>
+% --FEbaseArray<double> * =  <FEbaseArray<double>>
 
- --FEbaseArray<double> * =  <FEbaseArray<double>>
+% --FEbaseArray<double> ** =  <FEbaseArray<double> **>
+%    []  type :<Polymorphic>   operator : 
+%   (    <FEbase<double> **> :   <FEbaseArray<double> **>, <long> )
 
- --FEbaseArray<double> ** =  <FEbaseArray<double> **>
-    []  type :<Polymorphic>   operator : 
-   (    <FEbase<double> **> :   <FEbaseArray<double> **>, <long> )
+%
+% --Fem2D::Mesh * =  <Fem2D::Mesh>
+%    <Fem2D::Mesh> :   <Fem2D::Mesh **> 
+% --Fem2D::Mesh ** =  <Fem2D::Mesh **>
+%    <-,  type :<Polymorphic>
+%   (    <Fem2D::Mesh> :   <string> )
+%   (    <long> :   <Fem2D::Mesh **>, <double>, <double> )
 
+%    area,  type :<Polymorphic>   operator. : 
+%   (    <double> :   <Fem2D::Mesh **> )
 
- --Fem2D::Mesh * =  <Fem2D::Mesh>
-    <Fem2D::Mesh> :   <Fem2D::Mesh **> 
- --Fem2D::Mesh ** =  <Fem2D::Mesh **>
-    <-,  type :<Polymorphic>
-   (    <Fem2D::Mesh> :   <string> )
-   (    <long> :   <Fem2D::Mesh **>, <double>, <double> )
+%    nt,  type :<Polymorphic>
+%   operator. : 
+%   (    <long> :   <Fem2D::Mesh **> )
 
-    area,  type :<Polymorphic>   operator. : 
-   (    <double> :   <Fem2D::Mesh **> )
+%    nv,  type :<Polymorphic>   operator. : 
+%   (    <long> :   <Fem2D::Mesh **> )
 
-    nt,  type :<Polymorphic>
-   operator. : 
-   (    <long> :   <Fem2D::Mesh **> )
+%
+% --Fem2D::MeshPoint * =  <Fem2D::MeshPoint>
+%    N,  type :<Polymorphic>   operator. : 
+%   (    <Fem2D::R3> :   <Fem2D::MeshPoint> )
 
-    nv,  type :<Polymorphic>   operator. : 
-   (    <long> :   <Fem2D::Mesh **> )
+%    P,  type :<Polymorphic>   operator. : 
+%   (    <Fem2D::R3> :   <Fem2D::MeshPoint> )
 
+%
+% --Fem2D::R2 * =  <Fem2D::R2>
 
- --Fem2D::MeshPoint * =  <Fem2D::MeshPoint>
-    N,  type :<Polymorphic>   operator. : 
-   (    <Fem2D::R3> :   <Fem2D::MeshPoint> )
+% --Fem2D::R3 * =  <Fem2D::R3>
+%    x,  type :<Polymorphic>   operator. : 
+%   (    <double *> :   <Fem2D::R3> )
 
-    P,  type :<Polymorphic>   operator. : 
-   (    <Fem2D::R3> :   <Fem2D::MeshPoint> )
+%    y,  type :<Polymorphic>   operator. : 
+%   (    <double *> :   <Fem2D::R3> )
 
+%    z,  type :<Polymorphic>   operator. : 
+%   (    <double *> :   <Fem2D::R3> )
 
- --Fem2D::R2 * =  <Fem2D::R2>
+%
+% --Fem2D::TypeOfFE * =  <Fem2D::TypeOfFE>
 
- --Fem2D::R3 * =  <Fem2D::R3>
-    x,  type :<Polymorphic>   operator. : 
-   (    <double *> :   <Fem2D::R3> )
+% --KN<double> =  <KN<double>>
+%    []  type :<Polymorphic>   operator : 
+%   (    <double *> :   <KN<double>>, <long> )
 
-    y,  type :<Polymorphic>   operator. : 
-   (    <double *> :   <Fem2D::R3> )
+%
+% --KN<double> * =  <KN<double> *>
+%    <-,  type :<Polymorphic>   
+%   (    <KN<double> *> :   <KN<double> *>, <long> )
 
-    z,  type :<Polymorphic>   operator. : 
-   (    <double *> :   <Fem2D::R3> )
+%    []  type :<Polymorphic>   operator : 
+%   (    <double *> :   <KN<double> *>, <long> )
 
+%    max,  type :<Polymorphic>   operator. : 
+%   (    <double> :   <KN<double> *> )
 
- --Fem2D::TypeOfFE * =  <Fem2D::TypeOfFE>
+%    min,  type :<Polymorphic>   operator. : 
+%   (    <double> :   <KN<double> *> )
 
- --KN<double> =  <KN<double>>
-    []  type :<Polymorphic>   operator : 
-   (    <double *> :   <KN<double>>, <long> )
+%    n,  type :<Polymorphic>
+%   operator. : 
+%   (    <long> :   <KN<double> *> )
 
+%    sum,  type :<Polymorphic>   operator. : 
+%   (    <double> :   <KN<double> *> )
 
- --KN<double> * =  <KN<double> *>
-    <-,  type :<Polymorphic>   
-   (    <KN<double> *> :   <KN<double> *>, <long> )
+%
+% --KN_<double> =  <KN_<double>>
 
-    []  type :<Polymorphic>   operator : 
-   (    <double *> :   <KN<double> *>, <long> )
+% --KN_<double> * =  <KN_<double> *>
 
-    max,  type :<Polymorphic>   operator. : 
-   (    <double> :   <KN<double> *> )
+% --Matrice_Creuse<double> * =  <Matrice_Creuse<double>>
+%    <Matrice_Creuse<double>> :   <Problem> 
+% --Matrice_Creuse_Transpose<double> =  <Matrice_Creuse_Transpose<double>>
 
-    min,  type :<Polymorphic>   operator. : 
-   (    <double> :   <KN<double> *> )
+% --Matrice_Creuse_inv<double> =  <Matrice_Creuse_inv<double>>
 
-    n,  type :<Polymorphic>
-   operator. : 
-   (    <long> :   <KN<double> *> )
+% --Mulc_KN_<double> =  <Mulc_KN_<double>>
 
-    sum,  type :<Polymorphic>   operator. : 
-   (    <double> :   <KN<double> *> )
+% --MyMap<String, double> * =  <MyMap<String, double>>
+%    []  type :<Polymorphic>   operator : 
+%   (    <double *> :   <MyMap<String, double>>, <string> )
 
+%
+% --Polymorphic * =  <Polymorphic>
 
- --KN_<double> =  <KN_<double>>
+% --Sub_KN_<double> =  <Sub_KN_<double>>
 
- --KN_<double> * =  <KN_<double> *>
+% --Transpose<KN<double>> =  <Transpose<KN<double>>>
 
- --Matrice_Creuse<double> * =  <Matrice_Creuse<double>>
-    <Matrice_Creuse<double>> :   <Problem> 
- --Matrice_Creuse_Transpose<double> =  <Matrice_Creuse_Transpose<double>>
+% --TypeSolveMat * =  <TypeSolveMat>
 
- --Matrice_Creuse_inv<double> =  <Matrice_Creuse_inv<double>>
+% --VirtualMatrice<double>::plusAtx =  <VirtualMatrice<double>::plusAtx>
 
- --Mulc_KN_<double> =  <Mulc_KN_<double>>
+% --VirtualMatrice<double>::plusAx =  <VirtualMatrice<double>::plusAx>
 
- --MyMap<String, double> * =  <MyMap<String, double>>
-    []  type :<Polymorphic>   operator : 
-   (    <double *> :   <MyMap<String, double>>, <string> )
+% --VirtualMatrice<double>::solveAxeqb =  <VirtualMatrice<double>::solveAxeqb>
 
+% --bool =  <bool>
+%    <bool> :   <bool *> 
+% --bool * =  <bool *>
 
- --Polymorphic * =  <Polymorphic>
+% --char * =  <char>
 
- --Sub_KN_<double> =  <Sub_KN_<double>>
+% --const BC_set<double> * =  <BC_set<double>>
 
- --Transpose<KN<double>> =  <Transpose<KN<double>>>
+% --const CDomainOfIntegration * =  <CDomainOfIntegration>
+%    ()  type :<Polymorphic>   operator : 
+%   (    <FormBilinear> :   <CDomainOfIntegration>, <LinearComb<std::pair<MGauche, MDroit>, C_F0>> )
+%   (    <double> :   <CDomainOfIntegration>, <double> )
+%   (    <FormLinear> :   <CDomainOfIntegration>, <LinearComb<MDroit, C_F0>> )
 
- --TypeSolveMat * =  <TypeSolveMat>
+%
+% --const C_args * =  <C_args>
+%    <C_args> :   <FormBilinear>     ()  type :<Polymorphic>   operator : 
+%   (    <Call_FormLinear> :   <C_args>, <long>, <v_fes **> )
+%   (    <Call_FormBilinear> :   <C_args>, <v_fes **>, <v_fes **> )
 
- --VirtualMatrice<double>::plusAtx =  <VirtualMatrice<double>::plusAtx>
+%
+% --const Call_FormBilinear * =  <Call_FormBilinear>
 
- --VirtualMatrice<double>::plusAx =  <VirtualMatrice<double>::plusAx>
+% --const Call_FormLinear * =  <Call_FormLinear>
 
- --VirtualMatrice<double>::solveAxeqb =  <VirtualMatrice<double>::solveAxeqb>
+% --const E_Border * =  <E_Border>
 
- --bool =  <bool>
-    <bool> :   <bool *> 
- --bool * =  <bool *>
+% --const E_BorderN * =  <E_BorderN>
 
- --char * =  <char>
+% --const Fem2D::QuadratureFormular * =  <Fem2D::QuadratureFormular>
 
- --const BC_set<double> * =  <BC_set<double>>
+% --const Fem2D::QuadratureFormular1d * =  <Fem2D::QuadratureFormular1d>
 
- --const CDomainOfIntegration * =  <CDomainOfIntegration>
-    ()  type :<Polymorphic>   operator : 
-   (    <FormBilinear> :   <CDomainOfIntegration>, <LinearComb<std::pair<MGauche, MDroit>, C_F0>> )
-   (    <double> :   <CDomainOfIntegration>, <double> )
-   (    <FormLinear> :   <CDomainOfIntegration>, <LinearComb<MDroit, C_F0>> )
+% --const FormBilinear * =  <FormBilinear>
+%    ()  type :<Polymorphic>   operator : 
+%   (    <Call_FormBilinear> :   <FormBilinear>, <v_fes **>, <v_fes **> )
+%   (    <Call_FormLinear> :   <FormBilinear>, <long>, <v_fes **> )
 
+%
+% --const FormLinear * =  <FormLinear>
+%    ()  type :<Polymorphic>   operator : 
+%   (    <Call_FormLinear> :   <FormLinear>, <v_fes **> )
 
- --const C_args * =  <C_args>
-    <C_args> :   <FormBilinear>     ()  type :<Polymorphic>   operator : 
-   (    <Call_FormLinear> :   <C_args>, <long>, <v_fes **> )
-   (    <Call_FormBilinear> :   <C_args>, <v_fes **>, <v_fes **> )
+%
+% --const IntFunction * =  <IntFunction>
 
+% --const LinearComb<MDroit, C_F0> * =  <LinearComb<MDroit, C_F0>>
 
- --const Call_FormBilinear * =  <Call_FormBilinear>
+% --const LinearComb<MGauche, C_F0> * =  <LinearComb<MGauche, C_F0>>
 
- --const Call_FormLinear * =  <Call_FormLinear>
+% --const LinearComb<std::pair<MGauche, MDroit>, C_F0> * =  <LinearComb<std::pair<MGauche, MDroit>, C_F0>>
 
- --const E_Border * =  <E_Border>
+% --const Problem * =  <Problem>
 
- --const E_BorderN * =  <E_BorderN>
+% --const Solve * =  <Solve>
 
- --const Fem2D::QuadratureFormular * =  <Fem2D::QuadratureFormular>
+% --const char * =  <char>
 
- --const Fem2D::QuadratureFormular1d * =  <Fem2D::QuadratureFormular1d>
+% --double =  <double>
+%    <double> :   <double *>     ()  type :<Polymorphic>   operator : 
+%   (    <double> :   <double>, <double>, <double> )
 
- --const FormBilinear * =  <FormBilinear>
-    ()  type :<Polymorphic>   operator : 
-   (    <Call_FormBilinear> :   <FormBilinear>, <v_fes **>, <v_fes **> )
-   (    <Call_FormLinear> :   <FormBilinear>, <long>, <v_fes **> )
+%
+% --double * =  <double *>
 
+% --interpolate_f_X_1<double>::type =  <interpolate_f_X_1<double>::type>
 
- --const FormLinear * =  <FormLinear>
-    ()  type :<Polymorphic>   operator : 
-   (    <Call_FormLinear> :   <FormLinear>, <v_fes **> )
+% --long =  <long>
+%    <long> :   <long *> 
+% --long * =  <long *>
 
+% --istream * =  <istream>
+%    <istream> :   <istream **> 
+% --istream ** =  <istream **>
 
- --const IntFunction * =  <IntFunction>
+% --ostream * =  <ostream>
+%    <ostream> :   <ostream **> 
+% --ostream ** =  <ostream **>
+%    <-,  type :<Polymorphic>   operator( ): 
+%   (    <ostream> :   <string> )
 
- --const LinearComb<MDroit, C_F0> * =  <LinearComb<MDroit, C_F0>>
+%
+% --string * =  <string>
+%    <string> :   <string **> 
+% --string ** =  <string **>
 
- --const LinearComb<MGauche, C_F0> * =  <LinearComb<MGauche, C_F0>>
+% --std::complex<double> =  <complex>
+%    <complex> :   <complex *> 
+% --std::complex<double> * =  <complex *>
 
- --const LinearComb<std::pair<MGauche, MDroit>, C_F0> * =  <LinearComb<std::pair<MGauche, MDroit>, C_F0>>
+% --std::ios_base::openmode =  <std::ios_base::openmode>
 
- --const Problem * =  <Problem>
+% --std::pair<FEbase<double> *, int> =  <std::pair<FEbase<double> *, int>>
+%    (),  type :<Polymorphic>   operator : 
+%   (    <double> :   <std::pair<FEbase<double> *, int>>, <double>, <double> )
+%   (    <interpolate_f_X_1<double>::type> :   <std::pair<FEbase<double> *, int>>, <E_Array> )
 
- --const Solve * =  <Solve>
+%    [],  type :<Polymorphic>  operator. : 
+%   (    <KN<double> *> :   <std::pair<FEbase<double> *, int>> )
 
- --const char * =  <char>
+%    n,  type :<Polymorphic>   operator. : 
+%   (    <long> :   <std::pair<FEbase<double> *, int>> )
+% --std::pair<FEbaseArray<double> *, int> =  <std::pair<FEbaseArray<double> *, int>>
+%    []  type :<Polymorphic>
+%   operator : 
+%   (    <std::pair<FEbase<double> *, int>> :   <std::pair<FEbaseArray<double> *, int>>, <long> )
+% --std::pair<Fem2D::Mesh **, int> * =  <std::pair<Fem2D::Mesh **, int>>
+% --v_fes * =  <v_fes>
+%    <v_fes> :   <v_fes **> 
+% --v_fes ** =  <v_fes **>
 
- --double =  <double>
-    <double> :   <double *>     ()  type :<Polymorphic>   operator : 
-   (    <double> :   <double>, <double>, <double> )
+% --void =  <void>
+%\end{verbatim}
 
-
- --double * =  <double *>
-
- --interpolate_f_X_1<double>::type =  <interpolate_f_X_1<double>::type>
-
- --long =  <long>
-    <long> :   <long *> 
- --long * =  <long *>
-
- --istream * =  <istream>
-    <istream> :   <istream **> 
- --istream ** =  <istream **>
-
- --ostream * =  <ostream>
-    <ostream> :   <ostream **> 
- --ostream ** =  <ostream **>
-    <-,  type :<Polymorphic>   operator( ): 
-   (    <ostream> :   <string> )
-
-
- --string * =  <string>
-    <string> :   <string **> 
- --string ** =  <string **>
-
- --std::complex<double> =  <complex>
-    <complex> :   <complex *> 
- --std::complex<double> * =  <complex *>
-
- --std::ios_base::openmode =  <std::ios_base::openmode>
-
- --std::pair<FEbase<double> *, int> =  <std::pair<FEbase<double> *, int>>
-    (),  type :<Polymorphic>   operator : 
-   (    <double> :   <std::pair<FEbase<double> *, int>>, <double>, <double> )
-   (    <interpolate_f_X_1<double>::type> :   <std::pair<FEbase<double> *, int>>, <E_Array> )
-
-    [],  type :<Polymorphic>  operator. : 
-   (    <KN<double> *> :   <std::pair<FEbase<double> *, int>> )
-
-    n,  type :<Polymorphic>   operator. : 
-   (    <long> :   <std::pair<FEbase<double> *, int>> )
- --std::pair<FEbaseArray<double> *, int> =  <std::pair<FEbaseArray<double> *, int>>
-    []  type :<Polymorphic>
-   operator : 
-   (    <std::pair<FEbase<double> *, int>> :   <std::pair<FEbaseArray<double> *, int>>, <long> )
- --std::pair<Fem2D::Mesh **, int> * =  <std::pair<Fem2D::Mesh **, int>>
- --v_fes * =  <v_fes>
-    <v_fes> :   <v_fes **> 
- --v_fes ** =  <v_fes **>
-
- --void =  <void>
-\end{verbatim}
 \subsection{All the operators}
 \begin{verbatim}
   - CG,  type :<TypeSolveMat>

@@ -1,4 +1,6 @@
-// Schwarz without overlapping (Shur complenement Neumann -> Dirichet)  
+// Schwarz without overlapping (Shur complement Neumann -> Dirichet)  
+//  with matrix ---
+//  ------------
 verbosity=2;
 real cpu=clock();
 
@@ -105,7 +107,7 @@ plot(gamma,wait=1,cmm="gamma",value=1);
 varf vM(u,v) =  int1d(The)( u*v) ;
 matrix M = vM(Mhe,Mhe,solver=UMFPACK) ;
  
-// debut macro par  ssd 
+// debut macro par ssd 
 macro Pb(A,B,a,P,Th,u1,v1,Xh)
    cout << " -- PB -- " << endl;
   varf a(u1,v1) =   int2d(Th)( dx(u1)*dx(v1)+dy(u1)*dy(v1) )
