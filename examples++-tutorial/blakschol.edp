@@ -1,0 +1,77 @@
+// verbosity=1; 
+int s=10; // y-scale
+int m=30;
+int L=80;
+int LL=80;
+border aa(t=0,L){x=t;y=0;};
+border bb(t=0,LL){x=L;y=t;};
+border cc(t=L,0){x=t ;y=LL;};
+border dd(t=LL,0){x = 0; y = t;};
+
+mesh th = buildmesh(aa(m)+bb(m)+cc(m)+dd(m));
+fespace Vh(th,P1);
+
+real sigmax=0.3;
+real sigmay=0.3;
+real rho=0.3;
+real r=0.05;
+real K=40;
+real dt=0.01;
+
+real eps=0.3;
+
+func f = max(K-max(x,y),0.);
+
+Vh u=f,v,w;
+
+func beta = 1;//(w<=f-eps)*eps + (w>=f) + (w<f)*(w>f-eps)*(eps+(w-f+eps)/eps)*(1-eps);
+
+plot(u,wait=1);
+
+ th = adaptmesh(th,u,abserror=1,nbjacoby=2,
+				err=0.004, nbvx=5000, omega=1.8,ratio=1.8, nbsmooth=3,
+        		splitpbedge=1, maxsubdiv=5,rescaling=1 ); 
+ u=u;
+
+Vh xveloc = -x*r+x*sigmax^2+x*rho*sigmax*sigmay/2;
+Vh yveloc = -y*r+y*sigmay^2+y*rho*sigmax*sigmay/2;
+
+int j=0;
+int n;
+problem eq1(u,v,init=j,solver=LU) = int2d(th)(
+                          u*v*(r+1/dt/beta) 
+                        + dx(u)*dx(v)*(x*sigmax)^2/2. 
+                        + dy(u)*dy(v)*(y*sigmay)^2/2.
+	 		+ dy(u)*dx(v)*rho*sigmax*sigmay*x*y/2.
+	                + dx(u)*dy(v)*rho*sigmax*sigmay*x*y/2.   )
+	          + int2d(th)( -v*convect([xveloc,yveloc],dt,w)/dt/beta) 
+                  + on(bb,cc,u=f)//*exp(-r*t);
+;
+int ww=1;
+for ( n=0; n*dt <= 1.0; n++) 
+{
+  cout <<" iteration " << n   <<  " j=" << j << endl; 
+  w=u; 
+  eq1; 
+  v = max(u-f,0.);
+  plot(v,wait=ww);
+  u = max(u,f);
+  ww=0;
+ 
+  if(j>10)  { cout << " adaptmesh " << endl;
+    th = adaptmesh(th,u,verbosity=1,abserror=1,nbjacoby=2,
+			err=0.001, nbvx=5000, omega=1.8, ratio=1.8, nbsmooth=3,
+        		splitpbedge=1, maxsubdiv=5,rescaling=1) ; 
+        j=-1;
+     xveloc = -x*r+x*sigmax^2+x*rho*sigmax*sigmay/2;
+     yveloc = -y*r+y*sigmay^2+y*rho*sigmax*sigmay/2;
+     u=u;
+     ww=1;
+    };
+  j=j+1; 
+  cout << " j = " <<  j << endl;
+};
+v = max(u-f,0.);
+plot(v,wait=1,value=1);
+plot(u,wait=1,value=1);
+

@@ -1,0 +1,70 @@
+//  laplace with matrix  
+verbosity=1;
+mesh Th=square(20,20,[2*pi*x,2*pi*y]);
+fespace Vh(Th,P2);
+Vh u1,u2;
+int n=u1.n;
+real[int] Bu1(n),Bu2(n);
+real[int] Au1(n),Au2(n);
+
+real sigma = 1;                     
+real nu=0.1;
+
+varf  op(u1,u2)= int2d(Th)(  nu*(dx(u1)*dx(u2) + dy(u1)*dy(u2)) + (dx(u1)+dy(u1))*u2 - sigma* u1*u2 )
+                    +  on(1,2,3,4,u1=0)
+;
+varf  a(u1,u2)= int2d(Th)(  nu*(dx(u1)*dx(u2) + dy(u1)*dy(u2)) + (dx(u1)+dy(u1))*u2 )
+                    +  on(1,2,3,4,u1=0)
+;
+                   
+varf b([u1],[u2]) = int2d(Th)(  u1*u2 ) ;//+  on(1,2,3,4,u1=0);
+
+
+matrix OP= op(Vh,Vh,solver=LU,factorize=1); 
+matrix A= a(Vh,Vh,solver=GMRES); 
+matrix B= b(Vh,Vh,solver=CG,eps=1e-20); 
+int nev=10;
+
+real[int] ev(nev); // to store 10 eigein value real part
+real[int] evi(nev); // to store 10 eigein value imag part
+Vh[int] eV(nev);   // to store 10 eigen vector  
+/*
+ For real nonsymmetric problems, complex eigenvectors are
+ given as two consecutive vectors, so if Eigenvalue $k$ and $k+1$ 
+ are complex conjugate eigenvalues, 
+the vector eV[K] will contain the real part and 
+the vector eV[K] the imaginary part of the corresponding 
+complex conjugate eigenvectors. 
+*/
+
+
+int k=EigenValue(OP,B,sym=false,sigma=sigma,value=ev,vector=eV,
+	         tol=1e-10,maxit=0,ncv=0,ivalue=evi);
+k=min(k,nev); //  some time the number of converged eigen value 
+              // can be greater than nev;
+for (int kk=0;kk<k;kk++)
+{ 
+  int i=kk;
+  u1=eV[i];
+  u2=0;
+  real er=ev[i],ei=evi[i];
+  complex v= er+ei*1i;
+  if(ei) { // complex case
+    int j=++kk;
+    if (j>=k) break; 
+    u2 = eV[j];
+  }
+
+  Bu1=B*u1[];
+  Bu2=B*u2[];
+  Au1=A*u1[];
+  Au2=A*u2[];
+    //  The Rayleigh quotient lambda = x'Ax/x'Bx 
+    //  given the eigen value 
+  real xBx = u1[]'*Bu1 + u2[]'*Bu2;
+  complex xAx = u1[]'*Au1 + u2[]'*Au2 + 1i*(u1[]'*Au2 - u2[]'*Au1);
+  complex eigenvalue = xAx/xBx;
+  cout << " ---- " <<  i<< " " <<  v <<" eigenvalue= " << eigenvalue << endl;
+  plot(eV[i],cmm="Eigen  Vector "+i+" valeur =" + er + " , " + ei  ,wait=1,value=1);
+}
+

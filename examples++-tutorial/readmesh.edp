@@ -1,0 +1,30 @@
+border floor(t=0,1){ x=t; y=0; label=1;}; // the unit square
+border right(t=0,1){ x=1; y=t; label=5;};
+border ceiling(t=1,0){ x=t; y=1; label=5;};
+border left(t=1,0){ x=0; y=t; label=5;};
+int n=10;
+mesh th= buildmesh(floor(n)+right(n)+ceiling(n)+left(n));
+savemesh(th,"toto.am_fmt");// format "formated Marrocco"
+savemesh(th,"toto.Th");//format database "bamg"
+savemesh(th,"toto.dbg");//format debug
+savemesh(th,"toto.msh"); //format freefem
+mesh th2 = readmesh("toto.msh");
+fespace femp1(th,P1);
+femp1 f = sin(x)*cos(y),g;
+{
+ofstream file("f.txt");
+file << f[] << endl;
+}
+{
+ifstream file("f.txt");
+file >> g[] ;
+}
+fespace Vh2(th2,P1);
+Vh2 u,v;
+plot(g);
+solve pb(u,v) =
+    int2d(th2)( u*v -dx(u)*dx(v)-dy(u)*dy(v) )
+  + int2d(th2)(-g*v) 
+  + int1d(th2,5)( -g*v)
+  + on(1,u=0) ;
+plot (th2,u);

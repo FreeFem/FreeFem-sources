@@ -1,0 +1,145 @@
+remark: all lines beginning   with $ are shell command.
+
+1) download the arpack software in directory ../arpack 
+------------------------------------------------------
+
+ under Debian linux , the arpark tool are precompile package, 
+you can use apt-get or dselect command to get the 
+two package arpack library and arpack++, and after  
+ser  HOSTTYPE=Debian. 
+
+Otherwise 
+
+if the curl command is present do:
+$ make get-arpack
+or user you favorit brower and get the three file in the arpack dir 
+         http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz 
+         http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz 
+         http://www.caam.rice.edu/software/ARPACK/ARPACK++/arpack++.tar.gz 
+  uncompress files with
+  go in the arpack dir and done unbder shell command:
+$ gunzip -c arpack96.tar.gz | tar xvf - 
+$ gunzip -c patch.tar.gz | tar xvf - 
+$ gunzip -c arpack++.tar.gz| tar xvf -
+
+
+2) compile the fortran ARPACK library
+-------------------------------------
+
+cd ARPACK
+edit ARmake.inc file
+change the flowing line for a linux computer
+28c28
+< home = $(HOME)/arpack/ARPACK
+---
+> home = $(HOME)/ARPACK
+35c35
+< PLAT = linux
+---
+> PLAT = SUN4
+104,105c104,105
+< FC      = g77
+< FFLAGS        = -O 
+---
+> FC      = f77
+> FFLAGS        = -O -cg89
+115c115
+< MAKE    = /usr/bin/make
+---
+> MAKE    = /bin/make
+
+
+3) try to complie FreeFem++
+---------------------------
+edite the file src/Makefile-$HOSTTYPE:
+
+set the 4 variables on linux: 
+EIGEN= eigenvalue.o  # to compile the target eigenvalue.o
+LIBARPACK= -L../../arpack/ARPACK -larpack_linux -llapack -lblas
+LIBF77=   -lg2c
+INCARPACKPP = -DEIGENVALUE -I../../arpack/arpack++/include
+
+go in freefem++ directory.
+
+
+$ make all-g HOSTTYPE=$HOSTTYPE
+
+g++        -c -g    -DDRAWING -DLONG_LONG -DCHECK_KN  -I/usr/X11R6/include    -I/home/hecht/FreeFem++v1.28/src -I/home/hecht/FreeFem++v1.28/src/femlib -I/home/hecht/FreeFem++v1.28/src/bamglib -I/home/hecht/FreeFem++v1.28/src/Graphics -I/home/hecht/FreeFem++v1.28/src/mpi -I/home/hecht/FreeFem++v1.28/src/Algo  -DEIGENVALUE -I../../arpack/arpack++/include /home/hecht/FreeFem++v1.28/src/Eigen/eigenvalue.cpp 
+In file included from ../../arpack/arpack++/include/lapackc.h:17,
+                 from /home/hecht/FreeFem++v1.28/src/Eigen/eigenvalue.cpp:7:
+../../arpack/arpack++/include/arch.h:54: generic.h: No such file or directory
+
+if the file generic.h  does not exist and if the fortran  compile add _ 
+to fonction name 
+the result of the following command is
+$ nm /home/hecht/arpack/ARPACK/libarpack_linux.a|grep zstatn_
+            U zstatn_
+   00000000 T zstatn_
+
+   change in file arpack++/include/arch.h
+   54,55c54,56
+   < #include <generic.h> 
+   < #define F77NAME(x) name2(x,_)
+   ---
+   > //#include <generic.h>  
+   > //#define F77NAME(x) name2(x,_)
+   > #define F77NAME(x) x ## _
+
+if the result is
+$ nm /home/hecht/arpack/ARPACK/libarpack_linux.a|grep zstatn_
+         U zstatn
+00000000 T zstatn
+    change in file arpack++/include/arch.h
+    54,55c54,56
+    < #include <generic.h>
+    < #define F77NAME(x) name2(x,_)
+    ---
+    > //#include <generic.h>
+    > //#define F77NAME(x) name2(x,_)
+    > #define F77NAME(x) x 
+
+My three modifications  in  arpack++ files are:
+-----------------------------------------------
+
+diff -r arpack++/include/arch.h /Users/hecht/work/FreeFem++/arpack/arpack++/include/arch.h
+54,55c54,56
+< #include <generic.h>
+< #define F77NAME(x) name2(x,_)
+---
+> //#include <generic.h>
+> #define F77NAME(x) x ## _
+> //name2(x,_)
+
+
+diff -r arpack++/include/arcomp.h /Users/hecht/work/FreeFem++/arpack/arpack++/include/arcomp.h
+20,22c20,22
+< #include <complex.h>
+<
+< #ifdef __GNUG__
+---
+> #include <complex>
+> using namespace std;
+> #if defined(__GNUG__)|| defined(__MWERKS__)
+
+diff -r arpack++/include/arrseig.h /Users/hecht/work/FreeFem++/arpack/arpack++/include/arrseig.h
+1157c1157
+< Eigenvectors(TYPE* &EigVecp, bool ischur = false)
+---
+> Eigenvectors(TYPE* &EigVecp, bool ischur )
+
+
+4) retry of compile FreeFem++
+-----------------------------
+
+
+Good Luck.
+
+Frederic Hecht
+-------------
+
+
+
+
+
+
+

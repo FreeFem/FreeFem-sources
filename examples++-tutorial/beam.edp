@@ -1,0 +1,43 @@
+//  Fluid-structure interaction for a weighting beam sitting on a
+// square cavity filled with a fluid.
+
+int bottombeam = 2;
+border a(t=2,0)  { x=0; y=t ;label=1;};        //  left beam
+border b(t=0,10) { x=t; y=0 ;label=bottombeam;};        //  bottom of beam
+border c(t=0,2)  { x=10; y=t ;label=1;};       //  rigth beam
+border d(t=0,10) { x=10-t; y=2; label=3;};     //  top beam 
+real E = 21.5;
+real sigma = 0.29;
+real mu = E/(2*(1+sigma));
+real lambda = E*sigma/((1+sigma)*(1-2*sigma));
+real gravity = -0.05;
+mesh th = buildmesh( b(20)+c(5)+d(20)+a(5));
+fespace Vh(th,[P1,P1]);
+Vh [uu,vv], [w,s];
+cout << "lambda,mu,gravity ="<<lambda<< " " << mu << " " << gravity << endl;
+// deformation of a beam under its own weight 
+
+solve bb([uu,vv],[w,s],solver=Crout)=
+	int2d(th)(  
+		2*mu*(dx(uu)*dx(w)+dy(vv)*dy(s)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/2 )
+               + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))
+             )
+  - int2d(th) (gravity*s)
+  + on(1,uu=0,vv=0)
+  ;
+/*  old version with bug 
+solve  bb([uu,vv],[w,s])  = 
+    int2d(th)(
+    
+                 2*mu*(dx(uu)*dx(w)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/4 )
+               + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))/2 
+             ) 
+  + int2d(th) (-gravity*s)
+  + on(1,uu=0,vv=0)
+ ;
+*/
+//verbosity=100;
+plot([uu,vv],wait=1);
+plot([uu,vv],wait=1,bb=[[-0.5,2.5],[2.5,-0.5]]);
+mesh th1 = movemesh(th, [x+uu, y+vv]);
+plot(th1,wait=1);

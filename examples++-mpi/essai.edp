@@ -1,0 +1,17 @@
+verbosity=100;
+cout << " rank = " << mpirank << " " << " size " << mpisize << endl;
+if ( mpisize == 2 && mpirank==0) 
+ {
+   cout << " send to 1 " << endl;
+   processor(1) << 123456;
+ }
+if (mpirank==1) 
+  {
+   int k;
+   processor(0) >> k;
+   cout << " recived " << k << endl;
+}
+int l= mpirank+100;
+cout << " l == " << l << " broadcast l from 0   mpirank = " << mpirank << endl;
+broadcast(processor(0),l);
+cout << " l == " << l << "  mpirank ="<< mpirank << endl;

@@ -1,0 +1,65 @@
+
+
+Now, problem:
+   adpation and periodic boundary condition are incompatible.
+   no way to inforce periodic adpated  mesh  today.
+
+before version 1.28:
+  bug when 
+  passing a parameter of funct to a  parameter
+  parameter
+  like:
+    func int fi(real a)
+     {
+       int i=a*a/0;
+       return i;
+     }; 
+    func real myfunction(real a,real b)
+    {
+     real z =fi(a)+b/0; // bug loop in E_F0para::operator()(void*) const ()
+     return z;
+    };
+
+
+
+
+before version 1.21, bug in interpolation on non connexe 
+   domain, (some pieces of code are lose)
+
+    on(1,u=N.x); the normal is not set  (correct in version 1.20)
+
+
+bug in version 1.18 and before
+  The no symetric matrix set form a variationnal form
+  is make with 2 transpositions one on the space and one 
+  at the level of the bilineair form
+  fespace Ph(Th,P1),Vh(Th,P2);
+  varf a(p,v)=int2d(Th)(p*dx(v));
+  matrix A=a(Ph,Vh); // is n m matrix n (resp. m) is the 
+  number of DF of Ph (resp. Vh), so the 
+  construct matrix is Aij= int2d(Th)(v_j*dx(p_i));
+
+ 
+ 
+ 
+bug in version 1.16 and after:
+The mixing of fespace with differents periodic boundary condition is not
+implemented in no-scalar problem. So all the finite element space use for test or unknow functions in a problem, must  have the same  type of periodic boundary condition or no periodic boundary condition. 
+No clean message is give and the result is
+impredictible, Sorry.
+
+
+bug in version 1.15 and before: 
+bug know bug:  example-bug/aaa.edp
+
+Do not make copy mesh and fespace
+
+Mesh Thh;
+{
+Mesh Th=readmesh( ..); // OK
+Th=Thh;  // BUG the mesh is delete twice.
+}
+plot(Thh); // trap because the mesh is delete
+
+the same probleme  occure with fespace
+

@@ -1,0 +1,124 @@
+//    example for mesh work 
+// --------------------------
+{ // square 
+  real x0=1.2,x1=1.8;
+  real y0=0,y1=1;
+  int n=5,m=20;
+  mesh Th=square(n,m,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+  mesh th=square(4,5);
+  plot(Th,th,ps="twosquare.eps");
+
+}
+// ------------------------------------------------------------
+{ //    hole 
+real pi=4*atan(1);
+border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+border b(t=0,2*pi){ x=0.3+0.3*cos(t); y=0.3*sin(t);label=2;}
+mesh Thwithouthole= buildmesh(a(50)+b(+30));
+mesh Thwithhole   = buildmesh(a(50)+b(-30));
+plot(Thwithouthole,wait=1,ps="Thwithouthole.eps");
+plot(Thwithhole,wait=1,ps="Thwithhole.eps");
+}
+// ------------------------------------------------------------
+{ //  square with border 
+border a(t=0,2){x=t; y=0;label=1;};
+border b(t=0,1){x=2; y=t;label=1;};
+border c(t=2,0){x=t; y=1;label=1;};
+border d(t=1,0){x=0; y=t;label=1;};
+int n = 20;
+plot(a(2*n)+b(n)+c(2*n)+d(n),wait=1,ps="squarebb.eps");
+mesh th= buildmesh(a(2*n)+b(n)+c(2*n)+d(n)); 
+plot(th,ps="squareb.eps");
+}
+// ------------------------------------------------------------
+{ // L shape 
+border a(t=0,1){x=t;y=0;label=1;};
+border b(t=0,0.5){x=1;y=t;label=1;};
+border c(t=0,0.5){x=1-t;y=0.5;label=1;};
+border d(t=0.5,1){x=0.5;y=t;label=1;};
+border e(t=0.5,1){x=1-t;y=1;label=1;};
+border f(t=0,1){x=0;y=1-t;label=1;};
+     
+mesh rh = buildmesh (a(6) + b(4) + c(4) +d(4) + e(4) + f(6));
+plot(rh,ps="lshape.eps");
+
+}
+// ------------------------------------------------------------
+{ // readmesh 
+  mesh th("aile.msh");
+  plot(th);
+  
+}
+// ------------------------------------------------------------
+{ // movemesh 
+  real Pi=atan(1)*4;
+  verbosity=4;
+  border a(t=0,1){x=t;y=0;label=1;};
+  border b(t=0,0.5){x=1;y=t;label=1;};
+  border c(t=0,0.5){x=1-t;y=0.5;label=1;};
+  border d(t=0.5,1){x=0.5;y=t;label=1;};
+  border e(t=0.5,1){x=1-t;y=1;label=1;};
+  border f(t=0,1){x=0;y=1-t;label=1;};
+  func uu= sin(y*Pi)/10;
+  func vv= cos(x*Pi)/10;
+  
+  mesh Th = buildmesh ( a(6) + b(4) + c(4) +d(4) + e(4) + f(6));
+  
+  // find a good deformation coef. 
+  // ---------------------------------
+  // return the minimal area of a triangle of Th 
+  real okareamin = checkmovemesh(Th,[x,y])/10;
+  // we accept to divide by 10 the area of the smallest triangles
+  real coef=1000,cc=0;
+  while (okareamin > (cc=checkmovemesh(Th,[x+coef*uu,y+coef*vv]) ) )
+    {
+      cout << " coef = " << coef << " min area " << cc << endl;
+      coef /=2;
+    }
+  
+  
+  Th=movemesh(Th,[x+coef*uu,y+coef*vv]);
+  plot(Th,wait=1,fill=1,ps="movemesh.eps");
+  
+  // save mesh 
+  int i=12;
+  string filename="Th"+i+".msh";
+  savemesh(Th,filename);
+}
+// ------------------------------------------------------------
+{  //  trunc mesh  tools exemples 
+  mesh Th=square(3,3);
+  fespace Vh(Th,P1);
+  Vh u;	
+  int i,n=u.n;
+  u=0;
+  for (i=0;i<n;i++)
+    {
+      u[][i]=1;
+      plot(u,wait=1);
+      mesh Shi=trunc(Th,abs(u)>1e-10,split=5,label=2);
+      plot(Th,Shi,wait=1,ps="trunc"+i+".eps");                    
+      u[][i]=0;
+    }
+}
+// ------------------------------------------------------------
+{  //  new stuff 2004 splitmesh (version 1.37)
+  assert(version>=1.37);
+  border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+  mesh Th=buildmesh(a(20));
+  plot(Th,wait=1,ps="nosplitmesh.eps");
+  plot(Th,wait=1);
+  Th=splitmesh(Th,1+5*(square(x-0.5)+y*y));
+  plot(Th,wait=1,ps="splitmesh.eps");
+}
+  // ------------------------------------------------------------
+{  // get mesh information (version 1.37)
+  mesh Th=square(2,2);
+  // get data of the mesh 
+  int nbtriangles=Th.nt;
+  for (int i=0;i<nbtriangles;i++)
+    for (int j=0; j <3; j++)
+      cout << i << " " << j << " Th[i][j] = "
+	   << Th[i][j] << "  x = "<< Th[i][j].x  << " , y= "<< Th[i][j].y 
+	   << ",  label=" << Th[i][j].label << endl;
+}

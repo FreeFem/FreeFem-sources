@@ -1,0 +1,50 @@
+#!/bin/sh
+#  
+# EXTENSIONS  : ".edp"				# Accepted file extentions
+# OSTYPES     : "****"				# Accepted file types
+# ROLE        : None				# Role (Editor, Viewer, None)
+# SERVICEMENU : FreeFem++     			# Name of Service menu item
+#
+dir=`dirname $0`;
+ff="$dir/FreeFem++"
+q="'"
+end="exit;"
+begin="cd $PWD;"
+
+# begin the cmd generation ----------
+cmd=""
+# -----------------
+for i in "$@"; do
+ d=`dirname $i`;
+ f=`basename $i`;
+ cmd="$cmd cd $d; $ff $q$f$q;"
+done
+# ------------------ 
+if [ -z "$cmd" ]; then
+ cmd="$ff;"
+fi
+# ------------------
+cmd="$cmd"
+# ---- end of cmd generation ----
+echo 'do script "'$cmd'"'
+#
+#
+#  send the command $cmd to the apple terminal via osascript
+#
+# (echo $0;echo $*;echo "--$TERM--";printenv;set)  >/tmp/tutu
+
+if [ -z "$TERM_PROGRAM" ] ; then 
+echo '
+tell application "Terminal"
+	activate
+	try
+	  do script "'$begin$cmd$end'" 
+	end try
+end tell 
+' | osascript 	
+else
+set -e
+eval  $cmd
+fi;
+
+

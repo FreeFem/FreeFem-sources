@@ -1,0 +1,232 @@
+This is the ARPACK++ include directory.
+
+1) Files included in this directory:
+
+   a) Files that contain ARPACK++ classes definitions:
+
+      i) Base classes:
+
+      file              class
+      ----------        ----------------
+      arrseig.h         ARrcStdEig
+      arrgeig.h         ARrcGenEig
+      arseig.h          ARStdEig
+      argeig.h          ARGenEig
+      armat.h           ARMatrix
+
+
+      ii) Classes that require matrix-vector product functions:
+
+      file              class
+      ----------        ----------------
+      arssym.h          ARSymStdEig
+      arsnsym.h         ARNonSymStdEig
+      arscomp.h         ARCompStdEig
+      argsym.h          ARSymGenEig
+      argnsym.h         ARNonSymGenEig
+      argcomp.g         ARCompGenEig
+
+
+      iii) Classes that require matrices in CSC format (SuperLU version):
+
+      file              class
+      ----------        ----------------
+      arlssym.h         ARluSymStdEig
+      arlsnsym.h        ARluNonSymStdEig
+      arlscomp.h        ARluCompStdEig
+      arlgsym.h         ARluSymGenEig
+      arlgnsym.h        ARluNonSymGenEig
+      arlgcomp.h        ARluCompGenEig
+
+
+      iv) Classes that require matrices in CSC format (UMFPACK version):
+
+      file              class
+      ----------        ----------------
+      arussym.h         ARluSymStdEig
+      arusnsym.h        ARluNonSymStdEig
+      aruscomp.h        ARluCompStdEig
+      arugsym.h         ARluSymGenEig
+      arugnsym.h        ARluNonSymGenEig
+      arugcomp.h        ARluCompGenEig
+
+
+      v) Classes that require matrices in band format:
+
+      file              class
+      ----------        ----------------
+      arbssym.h         ARluSymStdEig
+      arbsnsym.h        ARluNonSymStdEig
+      arbscomp.h        ARluCompStdEig
+      arbgsym.h         ARluSymGenEig
+      arbgnsym.h        ARluNonSymGenEig
+      arbgcomp.h        ARluCompGenEig
+
+
+      vi) Reverse communication classes:
+
+      file              class
+      ----------        ----------------
+      arrssym.h         ARrcSymStdEig
+      arrsnsym.h        ARrcNonSymStdEig
+      arrscomp.h        ARrcCompStdEig
+      arrgsym.h         ARrcSymGenEig
+      arrgnsym.h        ARrcNonSymGenEig
+      arrgcomp.h        ARrcCompGenEig
+
+
+      vii) Matrix classes:
+
+      file              class
+      ----------        ----------------
+      arlsmat.h         ARluSymMatrix
+      arlspen.h         ARluSymPencil
+      arlnsmat.h        ARluNonSymMatrix
+      arlnspen.h        ARluNonSymPencil
+      arusmat.h         ARumSymMatrix
+      aruspen.h         ARumSymPencil
+      arunsmat.h        ARumNonSymMatrix
+      arunspen.h        ARumNonSymPencil
+      arbsmat.h         ARbdSymMatrix
+      arbspen.h         ARbdSymPencil
+      arbnsmat.h        ARbdNonSymMatrix
+      arbnspen.h        ARbdNonSymPencil
+      arhbmat.h         ARhbMatrix
+
+
+   b) Package interface files:
+
+      i) ARPACK FORTRAN interface:
+
+      file              Contents
+      ----------        -----------------------------------------------
+      saupp.h           Interface with dsaupd and ssaupd subroutines.
+      seupp.h           Interface with dseupd and sseupd subroutines.
+      naupp.h           Interface with dnaupd and snaupd subroutines.
+      neupp.h           Interface with dneupd and sneupd subroutines.
+      caupp.h           Interface with znaupd and cnaupd subroutines.
+      ceupp.h           Interface with zneupd and cneupd subroutines.
+      debug.h           Interface with ARPACK debugging variables.
+      arpackf.h         Fortran to C function prototypes convertion.
+
+
+      ii) LAPACK and BLAS1 interface:
+
+      file              Contents
+      ----------        -----------------------------------------------
+      lapackc.h         Various LAPACK function declarations.
+      lapackf.h         Fortran to C function prototypes convertion.
+      blas1c.h          Various BLAS1 function declarations.
+      blas1f.h          Fortran to C function prototypes convertion.
+
+
+      iii) SuperLU interface:
+
+      file              Contents
+      ----------        -----------------------------------------------
+      superluc.h        Various SuperLU function declarations.
+      arlspdef.h        Altered version of ssp_defs.h, dsp_defs.h,
+                        csp_defs.h and zsp_defs.h header files.
+      arlsupm.h         Unaltered copy of supermatrix.h header file.
+      arlnames.h        Unaltered copy of Cnames.h header file.
+      arlutil.h         Unaltered copy of util.h header file.
+      arlcomp.h         Unaltered copy of dcomplex.h and scomplex.h.
+
+
+      iv) UMFPACK interface:
+
+      file              Contents
+      ----------        -----------------------------------------------
+      umfpackc.h        Various UMFPACK function declarations.
+      umfpackf.h        Fortran to C function prototypes convertion.
+
+
+   c) Other auxiliary files:
+
+      file              Contents
+      ----------        -----------------------------------------------
+      arch.h            Machine dependent functions and variable types.
+      arcomp.h          "arcomplex" complex type definition.
+      arerror.h         "ArpackError" class definition.
+
+
+
+2) Compiler-dependent instructions.
+
+   Some compiler-dependent functions and data types used by arpack++ are
+   grouped in the file arch.h. This file should be changed to reflect the
+   characteristics of your system. Another file, arcomp.h, contains the
+   definition of a class template called arcomplex, created to emulate
+   the g++ complex class when another compiler is being used. This file
+   must also be changed if g++ (or CC) is not being used.
+
+   a) Changing ARPACK++ parameters and definitions included in arch.h:
+
+   All ARPACK++ parameters that are not intended to be changed frequently
+   were included in the arch.h file. Are defined in this file
+
+     i) Some machine and problem-dependent umfpack parameters.
+
+        If the umfpack is to be used, the user can modify some of its
+        parameters to correctly reflect the environment and the class
+        of problems being solved. The constants included in arch.h
+        correspond to a subset of the parameters generated by the um21i
+        umfpack function. Other relevant parameters can also be passed
+        to the ARumNonSymMatrix class constructor.
+
+    ii) Some fortran to c conversion functions.
+
+        Because fortran and c++ functions tend to have different
+        representations in different platforms, a function that
+        converts a fortran function name to the c++ format is
+        defined in arch.h. This function can be altered by the user
+        if the environment being used was not included in arch.h.
+
+   iii) Some fortran to c type conversion rules.
+
+        arch.h also includes the definition of some rules required
+        to convert INTEGER and LOGICAL FORTRAN types to c++.
+
+    iv) The c++ bool type.
+
+        If the c++ compiler being used does not include a bool type,
+        this type can also be defined in arch.h.
+
+
+   b) Redefining arcomplex class in arcomp.h:
+
+   ARPACK++ uses a self-defined complex class called arcomplex.
+   Actually, arcomplex is a class template used to represent
+   both single and double precision complex numbers. It was created
+   in an effort to permit ARPACK++ to deal with different compilers,
+   since c++ does not define a unique complex type.
+   arcomplex is intended to emulate the gnu g++ complex class when
+   other compilers are being used (when g++ is used, ARPACK++ simply
+   declares arcomplex to be the standard complex type). arcomp.h
+   includes a complex class definition for the CC compiler only. At
+   the present time, no other compiler was used to generate ARPACK++
+   programs, so further work must be done to permit the use of the
+   library with other compilers.
+   To define a new complex type, the user must create a class
+   template (called arcomplex) that contains at least three members:
+
+     i) A default constructor;
+    ii) A copy constructor; and
+   iii) A constructor that takes two real numbers as parameters (one
+        is the real and other the imaginary part of the complex number).
+
+   Naturally, all usual mathematical operations on complex numbers,
+   such as addition, multiplication, multiplication by a real number,
+   etc, should also be defined. But because most compilers include a
+   complex data type, the simplest way of defining arcomplex is to use
+   only the three constructors mentioned above to establish a relation
+   between the actual complex class and the gnu g++ standard.
+
+
+5) ARPACK (fortran) authors:
+
+   Danny Sorensen   (sorensen@caam.rice.edu)
+   Richard Lehoucq  (lehoucq@mcs.anl.gov)
+   Chao Yang        (chao@caam.rice.edu)
+   Kristi Maschhoff (kristyn@caam.rice.edu)
+

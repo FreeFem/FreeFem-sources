@@ -1,0 +1,40 @@
+
+verbosity=0;
+real x0=0.0, x1=1.5;
+real y0=0.0, y1=2.0;
+real xx0=0.5, xx1=1.;
+real yy0=0.5, yy1=1.;
+int acc,ref, i;
+real sH;
+ref=10;
+
+border a( t= x0,x1){ x= t ; y= y0; label=1; };
+border b( t= y0,y1){ x= x0; y= t ; label=2; };
+border c( t= x0,x1){ x= t ; y= y1; label=3; };
+border d( t= y0,y1){ x= x1; y= t ; label=4; };
+border aa( t= xx0,xx1){ x= t ; y= yy0; label=1; };
+border bb( t= yy0,yy1){ x= xx0; y= t ; label=2; };
+border cc( t= xx0,xx1){ x= t ; y= yy1; label=3; };
+border dd( t= yy0,yy1){ x= xx1; y= t ; label=4; };
+
+//cout << "enter accuracy = ";
+//cin >> acc;
+acc=0;
+// Creation des maillages grossier et fin
+
+//mesh TH=square(ref,ref,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+
+mesh TH = buildmesh( a(10) + b(-10) + c(-10) + d(+10)
+                    +aa(-10) + bb(+10) + cc(+10) + dd(-10) );
+plot(TH,wait=1);
+end;
+
+{ //    hole 
+real pi=4.0*atan(1);
+border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;};
+border b(t=0,2*pi){ x=0.3+0.3*cos(t); y=0.3*sin(t);label=2;};
+mesh Thwithouthole= buildmesh(a(50)+b(+30));
+mesh Thwithhole   = buildmesh(a(50)+b(-30));
+plot(Thwithouthole,wait=1,ps="Thwithouthole.eps");
+plot(Thwithhole,wait=1,ps="Thwithhole.eps");
+}

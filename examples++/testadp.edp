@@ -1,0 +1,53 @@
+//  -----  
+real eps =  0.0001;
+real h=1;
+real hmin=0.05;
+func f = 10.0*x*x*x+y*y*y+h*atan2(eps,sin(5.0*y)-2.0*x);
+
+func fx = 30.0*x*x+h*2.0*eps/pow(sin(5.0*y)-2.0*x,2.0)/(1.0+eps*eps/pow(sin(5.0*y)-2.0*x,2.0));
+
+func  fy =  3.0*y*y-h*5.0*eps/pow(sin(5.0*y)-2.0*x,2.0)*cos(5.0*y)/(1.0+eps*eps/pow(sin(5.0*y)-2.0*x,2.0));
+
+func  fxy =  h*(-20.0*eps/pow(sin(5.0*y)-2.0*x,3.0)*cos(5.0*y)/(1.0+eps*eps/pow(sin(5.0*y)-2.0*x,2.0))
++20.0*eps*eps*eps/pow(sin(5.0*y)-2.0*x,5.0)*cos(5.0*y)/pow(1.0+eps*eps/pow(sin(5.0*y)-2.0*x,2.0),2.0));
+
+func  fxx= 60.0*x+h*(8.0*eps/pow(sin(5.0*y)-2.0*x,3.0)/(1.0+eps*eps/pow(sin(5.0*y)
+-2.0*x,2.0))-8.0*eps*eps*eps/pow(sin(5.0*y)-2.0*x,5.0)/pow(1.0+eps*eps/pow(sin(
+5.0*y)-2.0*x,2.0),2.0));
+
+func  d = fx*fy - fxy*fxy;
+func  fyy= 6.0*y+h*(50.0*eps/pow(sin(5.0*y)-2.0*x,3.0)*pow(cos(5.0*y),2.0)/(1.0+
+eps*eps/pow(sin(5.0*y)-2.0*x,2.0))+25.0*eps/pow(sin(5.0*y)-2.0*x,2.0)*sin(5.0*y
+)/(1.0+eps*eps/pow(sin(5.0*y)-2.0*x,2.0))-50.0*eps*eps*eps/pow(sin(5.0*y)-2.0*x
+,5.0)*pow(cos(5.0*y),2.0)/pow(1.0+eps*eps/pow(sin(5.0*y)-2.0*x,2.0),2.0));
+
+border cercle(t=0,2*pi){ x=cos(t);y=sin(t);}
+mesh Th=buildmesh(cercle(20));
+fespace Ph(Th,P0);
+fespace Vh(Th,P1);
+fespace V2h(Th,P2);
+Vh fh=f;
+int i;
+real coef=10;
+for ( i=0;i<5;i++)
+ {
+ //  Th=adaptmesh(Th,f);
+      verbosity=4;
+      Th=adaptmesh(Th,fxx*coef,fxy*coef,fyy*coef,IsMetric=1,nbvx=10000,hmin=hmin);
+
+   fh=f;
+   Ph e=abs(fh-f);
+   Vh dh=(d>0)*2-1;
+   plot(Th,fh,dh,wait=1);
+   plot(e,fill=1,value=1,wait=1);
+   savemesh(Th,"Th"+i+".mesh");
+   savemesh(Th,"Thh"+i,[x,y,fh/2]);
+ {   ofstream file("Th"+i+".gbb");
+   file << "2 1 1 "<< fh[].n << " 2 \n";
+   int j;
+   for (j=0;j<fh[].n ; j++)  {
+     file << fh[][j] << endl; }
+ }	
+    exec("medit `pwd`/Thh"+i);
+ }
+

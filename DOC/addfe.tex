@@ -1,0 +1,199 @@
+\section{Add new finite element}
+
+\subsection{Some notation}
+\def\Fb#1{\boldsymbol{\omega}^{K}_{#1}}
+\def\fbi{\mathbf{\omega}^{K}_{ij}}
+
+The finite element is at value in $\R^{N}$.
+The degrees of freedom of the finite element are associated to a node,
+
+A node is link to a geometry of the support,
+
+
+
+
+
+ 
+
+we denotes $\Fb{i}$ the $i$ basis function
+  for  $i\in \{0,..,NbDoF-1\}$, and
+  the componante $j$  are denote $\fbi$.
+  
+We denote $\Pi_{h}$ the interpolator of the finite element.
+We have the following equality $\Fb{i} =  \Pi_{h} \Fb{i} $.
+
+Let $\boldsymbol{f}$ a function to interpole,
+formally we can defined the operator $\Pi_{h}$ 
+the following formular:
+  
+\begin{equation}
+\Pi_{h} \boldsymbol{f} = \sum_{k=0}^{\mathtt{kPi}-1} \alpha_k \boldsymbol{f}({P_{p_{k}}})_{j_{k}} \Fb{i_{k}} \label{eq-interpo}
+\end{equation}
+  
+where $P_{p}$ is a set of $npPi$ points, 
+
+Remark, in a formula (\ref{eq-interpo}),the list $ p_{k},j_{k},i_{k}$ depend just of  the type of finite element not of the element, but the coefficient  $\alpha_{k}$ can depending of the 
+element. 
+
+\medskip
+ Example 1: classical scalar  Lagrange finite element, first we have $\mathtt{kPi}=\mathtt{npPi}=\mathtt{NbOfNode}$ and
+\begin{itemize}\item $P_{p}$ is the point of the nodal points
+\item  the $\alpha_k=1$, because we take the value  of the function at the point $P_{k}$
+\item $p_{k}=k$ ,  $j_{k}=k$ because we have one node per  function.
+\item $j_{k}=0$ because $N=1$\end{itemize}
+  
+ Example 2: The Raviart-Thomas finite element: 
+    \begin{equation}
+         RT0_{h} = \{ \mathbf{v} \in H(div) / \forall K \in
+         \mathcal{T}_{h} \quad  \mathbf{v}_{|K}(x,y) =
+         \vecttwo{\alpha_{K}}{\beta_{K}} + \gamma_{K}\vecttwo{x}{y}  \}
+         \label{eq:RT0-fe}
+     \end{equation}
+ The degree of freedom are the flux   throw an edge $e$ of the mesh, where the flux of
+ the function $\mathbf{f} : \R^2 \longrightarrow \R^2 $ is $\int_{e} \mathbf{f}.n_{e}$,
+ $n_{e}$ is the unit normal of edge $e$ (this implies a orientation of all  the edges of the mesh,
+ for exemple we can use the global numbering of the edge vertices and we just go to small to large number).
+ 
+ 
+  To compute this flux, we use an quadrature formular with one point, the middle point
+  of the edge. let a triangle $T$ with three vertices $(\mathbf{a},\mathbf{b},\mathbf{c})$.Let denote, the  vertices number are  $i_{a},i_{b},i_{c}$, the three edge vector $\mathbf{e}^{0},\mathbf{e}^{1},\mathbf{e}^{2}$ are 
+  defined by $ sgn(i_{b}-i_{c})(\mathbf{b}-\mathbf{c})$, $sgn(i_{c}-i_{a})(\mathbf{c}-\mathbf{a})$, $sgn(i_{a}-i_{b})(\mathbf{a}-\mathbf{b})$, 
+  
+  For the finite element the three basis functions are:
+ $$\Fb{0}= \frac{sgn(i_{b}-i_{c})}{|T]}(x-a),\quad
+  \Fb{1}= \frac{sgn(i_{c}-i_{a})}{|T]}(x-b),\quad
+  \Fb{2}= \frac{sgn(i_{a}-i_{b})}{|T]}(x-c),$$
+   where $|T|$ is the area of the triangle $T$.
+   \medskip
+  
+So we have  $N=2$,$\mathtt{kPi}=6; \mathtt{npPi}=3;$ and:
+\begin{itemize}\item $P_{p} = \{ \frac{\mathbf{b}+\mathbf{c}}{2},\frac{\mathbf{a}+\mathbf{c}}{2}, \frac{\mathbf{b}+{\mathbf{a}}}{2}\}$
+
+\item 
+ $\alpha_{0}= - {e}^{0}_{2}, \alpha_{1}= {e}^{0}_{1}$,  
+ $\alpha_{2}= - {e}^{1}_{2}, \alpha_{3}= {e}^{1}_{1}$,   
+ $\alpha_{4}= - {e}^{2}_{2}, \alpha_{5}= {e}^{2}_{1}$ (effectively, the vector 
+ $ ( -{e}^{m}_{2}, {e}^{m}_{1}) $ is orthogonal to the edge $\mathbf{e}^{m}= (e^m_{1},e^m_{2})$ with 
+ a length equal to the side of the edge or equal to  $\int_{e^m} 1$).
+\item $i_{k}=\{0,0,1,1,2,2\}$, 
+\item $p_{k}=\{0,0,1,1,2,2\}$ ,  $j_{k}=\{0,1,0,1,0,1,0,1\}$.
+
+ 
+\end{itemize}
+
+    
+
+\subsection{Which class of add} 
+
+
+
+First, you are just a class which derive for \texttt{ public  TypeOfFE} like:
+\bFF
+@class TypeOfFE_RTortho : public  TypeOfFE { public:  
+  static int Data[]; // some numbers \hfilll
+  TypeOfFE_RTortho(): 
+    TypeOfFE( 0+3+0,   // nb degre of freedom on element \hfilll
+	     2,      // dimension $N$  of  vectorial FE (1 if scalar FE)\hfilll
+	     Data,   // the array data\hfilll
+	     1,      // nb of subdivision for plotting\hfilll
+	     1,      // nb of sub finite element (generaly 1)\hfilll
+	     6,      // number $kPi$ of coef to build the interpolator  (\ref{eq-interpo})\hfilll
+	     3,      // number $npPi$ of integration point to build interpolator\hfilll
+	     0       // an array to store the coef $ \alpha_k$ to build interpolator \hfilll
+	             // here this array is no constant so so we have \hfilll
+	             // to rebuitd for each element.\hfilll
+	     )
+  {
+    const R2 Pt[] = { R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0) }; 
+    // the set of Point in $\hat{K}$
+    for (int p=0,kk=0;p<3;p++) { 
+      P_Pi_h[p]=Pt[p];   
+      for (int j=0;j<2;j++) 
+        pij_alpha[kk++]= IPJ(p,p,j); }} // definition of $i_{k},p_{k},j_{k}$ in (\ref{eq-interpo})
+  
+  void FB(const bool * watdd, const Mesh & Th,const Triangle & K,
+          const R2 &PHat, RNMK_ & val) const;
+          
+  void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const ;
+  
+} ; 
+\eFF
+where  the array data is form with the concatenation of  five array of size \texttt{NbDoF} and one
+array of size \texttt{N}.
+ 
+This array is: 
+\bFF
+int TypeOfFE_RTortho::Data[]={
+       // for each df 0,1,3 :  \hfilll
+        3,4,5,  // the support of the node of the df   \hfilll
+        0,0,0,  // the number of the df on  the node   \hfilll
+        0,1,2,  // the node of the df  \hfilll
+        0,0,0,  //  the df come from which FE (generaly 0) \hfilll
+        0,1,2,  //  which are de df on sub FE \hfilll
+        0,0 };  // for each compontant $j=0,N-1$ it give the sub FE associated \hfilll
+\eFF
+where the support is a number $0,1,2$ for vertex support, $3,4,5$ for edge support, 
+and finaly $6$ for element support.
+
+
+
+
+The function to defined the function $\Fb{i}$, this function return 
+the value of all the basics function or this derivatives in array
+\texttt{val}, computed at point \texttt{PHat} on the reference triangle corresponding 
+to point \texttt{R2 P=K(Phat);} on the current triangle \texttt{K}.
+
+The index $i,j,k$ of the array $val(i,j,k)$   corresponding to:
+\begin{description}\item[$i$]  is basic function number on finite element  $i \in [0,NoF[ $\item[$j$]  is the value of component   $ j \in [0,N[ $\item[$k$]  is the type of computed value $f(P),dx(f)(P), dy(f)(P), ...$ $i \in [0,\mathtt{last\_operatortype}[ $. Remark for optimisation, this value is computed only if  $whatd[k]$ is true, and the numbering is defined with  
+\bFF
+@enum operatortype { op_id=0,    op_dx=1,op_dy=2,   op_dxx=3,op_dyy=4,   op_dyx=5,op_dxy=5,      op_dz=6,   op_dzz=7,        op_dzx=8,op_dxz=8,    op_dzy=9,op_dyz=9      }; 
+const int last_operatortype=10;
+\eFF\end{description}
+
+The other parameter, ar
+\bFF
+ void TypeOfFE_RTortho::FB(const bool *whatd,const Mesh & Th,const Triangle & K,
+                           const R2 & PHat,RNMK_ & val) const{ //    R2 P(K(PHat));  R2 A(K[0]), B(K[1]),C(K[2]);  R l0=1-P.x-P.y,l1=P.x,l2=P.y;   assert(val.N() >=3);  assert(val.M()==2 );  val=0;    R a=1./(2*K.area);  R a0=   K.EdgeOrientation(0) * a ;  R a1=   K.EdgeOrientation(1) * a  ;  R a2=   K.EdgeOrientation(2) * a ;  //  ------------  @if (whatd[op_id])  // value of the function   {     @assert(val.K()>op_id);     RN_ f0(val('.',0,0)); // value first component     RN_ f1(val('.',1,0)); // value second component     f1[0] =  (P.x-A.x)*a0;     f0[0] = -(P.y-A.y)*a0;       f1[1] =  (P.x-B.x)*a1;     f0[1] = -(P.y-B.y)*a1;       f1[2] =  (P.x-C.x)*a2;     f0[2] = -(P.y-C.y)*a2;    }  // ----------------    @if (whatd[op_dx]) // value of the dx of function    {     assert(val.K()>op_dx);     val(0,1,op_dx) =  a0;       val(1,1,op_dx) =  a1;       val(2,1,op_dx) =  a2;      }     @if (whatd[op_dy])    {     assert(val.K()>op_dy);     val(0,0,op_dy) =  -a0;       val(1,0,op_dy) =  -a1;       val(2,0,op_dy) =  -a2;      }
+                           
+  @for (@int i= op_dy; i< last_operatortype ; i++)                       
+   @if (whatd[op_dx])     @assert(op_dy);                           }
+\eFF
+
+The function to defined the coefficient $\alpha_{k}$:
+\bFF
+void TypeOfFE_RT::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const {  const Triangle & T(K.T);   for (int i=0,k=0;i<3;i++)     {          R2 E(T.Edge(i));        R signe = T.EdgeOrientation(i) ;        v[k++]= signe*E.y;        v[k++]=-signe*E.x;     }   }
+\eFF
+
+Now to finish, we just need to add a new key work in \texttt{FreeFem++}
+
+\bFF
+//  let the 2 globals variables 
+static TypeOfFE_RTortho The_TypeOfFE_RTortho; //  
+//                         -----  the name in freefem ----
+static  ListOfTFE typefemRTOrtho("RT0Ortho", & The_TypeOfFE_RTortho); //  
+\eFF
+
+
+
+\subsection{How to add}
+
+First, create a file contening all this code, like in  file \texttt{src/femlib/Element\_P2h.cpp},
+after modifier the Makefile  by  adding the name of your file without suffix
+to the variable \texttt{OBJETS} like:
+
+\begin{verbatim}OBJETS= $(EIGEN) AFunction.o   lex.o  lgfem.o  lgmesh.o \
+ Drawing.o    \
+ gibbs.o CheckPtr.o fem.o FormuleIntegration.o FESpace.o \
+ Element_RT.o mshptg.o FQuadTree.o \
+ QuadTree.o R2.o Meshio.o Mesh2.o Metric.o \
+ BamgFreeFem.o MeshDraw.o MeshGeom.o MeshQuad.o SetOfE4.o \
+ MeshRead.o MeshWrite.o problem.o strversionnumber.o InitFunct.o \
+ lgalgo.o Element_P2h.o\end{verbatim}
+ 
+ 
+For codewarrior compilation add the file in the project an remove the flag
+in panal  PPC linker FreeFEm++ Setting Dead-strip Static Initializition Code Flag.
+
+
+
+

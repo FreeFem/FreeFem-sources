@@ -1,0 +1,187 @@
+//int Nh=20;
+// d u /dt = cos(t), u= sin(t) + u0
+//  avec de methode para reel.
+// schema euler explicite 
+//   (u,v)' = (v,-u) 
+//    u_n+1 - u_n = v_n*dt,  u_n+1 = u_n + v_n*dt
+//    v_n+1 - v_n = -u_n*dt,
+//   u=cos(t)  u' = - sin(t) = v
+//   v=sin(t), v' = cos(t) = u
+// ----------------------------
+real DT=0.4;
+int nbT=50;   // nb de big time step 
+int ksub=50;  // nb of small time step 
+int Nbig=20;  // max  number of Big iteration
+real T0=0;    // initial time
+real tol=1e-5; // tolerance 
+// ----------------------------------------------------
+int nbt=ksub*nbT;
+real dt=DT/ksub;
+//  array for plotting 
+real[int] pt(nbt+1),pT(nbT+1),pu(nbt+1),pU(nbT+1);
+
+//  gros maillage
+mesh TH=square(3,3);
+// maillage fin
+mesh Th=trunc(TH,1,split=1);
+fespace VH(TH,P1);
+fespace Vh(Th,P1);
+int n=2;
+int N=2;
+
+func real Norm(real[int] & U)
+{
+  return sqrt(square(U[10])+square(U[11]));
+}
+// restriction
+func bool h2H(real[int] & u,real[int] & U)
+{
+ U=0;
+ U[10+0]=u[0];
+ U[10+1]=u[1];
+
+ return true;
+}
+//  prolongement
+func bool H2h(real[int] & U,real[int] & u)
+{
+ u=0;
+ u[0]=U[10+0];
+ u[1]=U[10+1];
+ return true;
+}
+
+func bool initG(real[int]  & U)
+{
+  U=0;
+  U[10+0]=1;// cos(0)
+  U[10+1]=0;// sin(0)
+}
+// un pas de temps  FIN
+
+func bool  F(real[int]  & u,real[int]  & up)
+{
+   u[0] = up[0] + up[1]*dt;
+   u[1] = up[1] - up[0]*dt;
+//   cout << up[0] << " " << up[1] << endl;
+   return true;
+}
+
+// pas de temps grossier
+func bool  G(real[int]  & U,real[int]  & Up)
+{
+   U[0+10] = Up[0+10] + Up[1+10]*DT;
+   U[1+10] = Up[1+10] - Up[0+10]*DT;
+//   cout << Up[10] << " " << Up[11] << endl;
+   return true;
+}
+
+func bool AddGp(real[int]  & U,int I)
+{
+  pT[I]= T0+I*DT;
+  pU[I]=U[10];
+  return true;
+}
+func bool AddFp(real[int]  & u,int I,int i)
+{
+  pt[I*ksub+i]= T0+I*DT+i*dt;
+  pu[I*ksub+i]= u[0];
+  return true;
+}
+
+Vh ustart[nbT+1],uend[nbT]; // start 
+VH Uend[nbT];
+VH U0,U1;
+
+
+
+real t=T0,T=T0; // temps courant
+int it=0,iT=0; 
+pt[it]=t;
+pT[iT]=T;
+initG(U0[]);
+AddGp(U0[],iT);
+H2h(U0[], ustart[iT][]);
+
+//  initial 
+for (int I=0;I<nbT;I++)
+  {
+    G(U1[],U0[]);
+    U0[]=U1[];
+    Uend[I][]=U1[];
+    H2h(U0[],ustart[I+1][]);
+    AddGp(U1[],I+1); 
+  }
+cout << pT.max << " " << pU.min << " " << pU.max << endl;
+
+
+real[int] exact(nbt+1),fu(nbt+1);
+{
+Vh u0,u1; 
+u0[]=ustart[0][];
+for (int i=0;i<=nbt;i++)
+ {
+   pt[i]=T0+i*dt;
+   exact[i]=cos(pt[i]);
+   F(u1[],u0[]);
+   u0[]=u1[];
+   AddFp(u0[],0,i);
+ }
+}
+fu=pu;
+plot([pT,pU],[pt,exact],[pt,fu],wait=1);
+// big loop 
+for (int K=0;K< Nbig;K++)
+{
+
+//  para real loop --
+
+for (int I=0;I<nbT;I++)
+ {
+    Vh u0,u1;
+    u0[]=ustart[I][];
+    AddFp(u0[],I,0);
+    for (int i=0;i<ksub;i++)
+     {
+      F(u1[],u0[]);
+      u0[]=u1[];
+      AddFp(u0[],I,i+1);
+     }
+    uend[I][]=u0[];
+ }
+
+plot([pT,pU],[pt,pu],[pt,exact],cmm="iteration "+K);
+ 
+// update loop  
+ustart[K+1]=uend[K];
+real err=0;
+for (int I=K+1;I<nbT;I++)
+ {
+   // Attention  pb fin grossier 
+   VH U0,U1;
+   h2H(ustart[I][],U0[]);
+   AddGp(U0[],I); 
+   G(U1[],U0[]);
+   AddGp(U1[],I+1); 
+   U0[]=U1[];
+   U1[] -=Uend[I][]; // U1=U1-U1(old)
+   err += Norm(U1[]);
+   Uend[I][]=U0[]; // save U1 
+   Vh u1;
+   H2h(U1[],u1[]);
+   ustart[I+1][] = u1[]+ uend[I][] ;     
+ }
+
+ cout << "\n\n big iteration " <<  K << "  err= " << err << endl;
+ if (err < tol) break;
+//plot([pT,pU],wait=1,clean=0);
+
+}
+plot([pt,pu],[pt,exact],[pt,fu],wait=1,cmm=" final fin");
+plot([pT,pU],[pt,exact],[pt,fu],wait=1,cmm=" final grossier");
+
+  
+  
+
+
+

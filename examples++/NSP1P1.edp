@@ -1,0 +1,66 @@
+// correct pressure sign 
+real s0=clock();
+mesh Th=square(10,10);
+fespace Vh2(Th,P1);
+fespace Vh(Th,P1);
+Vh2 u2,v2,up1,up2;
+Vh2 u1,v1; 
+Vh  u1x=0,u1y,u2x,u2y, vv;
+problem Pu1(u1x,vv,solver=CG) = int2d(Th)( u1x*vv) + int2d(Th)(-vv*u1);
+problem Pu2(u2x,vv,solver=CG) = int2d(Th)( u2x*vv) + int2d(Th)(-vv*u2);
+
+up1=0;
+up2=0; 
+func g=(x)*(1-x)*4; 
+Vh p=0,q;
+real alpha=0;
+real  nu=1;
+int i=0,iter=0;
+real dt=0;
+solve NS (u1,u2,p,v1,v2,q,solver=Crout,init=i) =
+    int2d(Th)(
+             alpha*( u1*v1 + u2*v2) 
+            + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
+            +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+            + (dx(p)*dx(q)+dy(p)*dy(q))*(0.00001) // sabilasation term
+            - p*dx(v1) - p*dy(v2)
+            - dx(u1)*q - dy(u2)*q
+           )
+  + int2d(Th) ( -alpha*convect([up1,up2],-dt,up1)*v1 -alpha*convect([up1,up2],-dt,up2)*v2 )
+  + on(3,u1=g,u2=0) 
+  + on(1,2,4,u1=0,u2=0) ;
+plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],value=1);
+
+dt = 0.1;
+int nbiter = 3;
+real coefdt = 0.25^(1./nbiter);
+real coefcut = 0.25^(1./nbiter) , cut=0.4;
+real tol=0.8,coeftol = 0.5^(1./nbiter);
+nu=0.01;   
+
+for (iter=0;iter<nbiter;iter++)
+{
+  cout << " dt = " << dt << " ------------------------ " << endl;
+  alpha=1/dt;
+  for (i=0;i<=10;i++)
+   {
+     up1=u1;
+     up2=u2;
+     NS;
+     if ( !(i % 10)) 
+     plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ps="plotNS_"+iter+"_"+i+".eps",value=1);  
+     cout << "CPU " << clock()-s0 << "s " << endl;     
+   } 
+ 
+  if (iter>= nbiter) break;
+ 
+  u1x=0;u1y=0;
+  Pu1;Pu2;
+  plot([u1x,u2x],wait=1);
+  Th=adaptmesh(Th,[u1x,u2x],abserror=0,cutoff=cut,err=tol, inquire=0);
+  plot(Th);
+  dt = dt*coefdt;
+  tol = tol *coeftol;
+  cut = cut *coefcut;
+}
+cout << "CPU " << clock()-s0 << "s " << endl;     

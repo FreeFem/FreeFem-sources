@@ -1,0 +1,38 @@
+verbosity=1;
+mesh Th=square(5,5);
+fespace Vh(Th,P1);
+Vh u,v;
+real[int] X(9);  // array of 9 real
+X=5; // fill X with 1
+cout << "  norme^2 of X  " <<  sqrt(X' * X) <<  " == 15 \n";
+Vh[int] uu(10);  // array of 10 solution 
+/*  to do 
+mesh[int] aTh(10); // array of 10 meshes 
+aTh[1]= square(2,2);
+*/ 
+int i;
+for ( i=0;i<10;i++)
+ uu[i]=x+i*y; 
+
+func f= 0;
+func g= x*x+y*y*2;
+u=0; 
+// dcl the problem and solve
+solve a(u,v,solver=CG) =
+    int2d(Th)(  dx(u)*dx(v) + dy(u)*dy(v)) 
+  + int2d(Th) ( v*f ) 
+  + on(1,2,3,4,u=g+i); 
+
+cout << "-------------------" << endl;  
+plot(u);
+
+// exemple de calcul de semi norme H_1
+varf  lap(u,v)  = int2d(Th)(  dx(u)*dx(v) + dy(u)*dy(v) ); 
+matrix A= lap(Vh,Vh);
+cout <<  " (semi norme H^1)^2 of u =" << (v[]=A*u[])' * u[] << endl; 
+cout <<  " (semi norme H^1)^2 of u =" << int2d(Th)(  dx(u)*dx(u) + dy(u)*dy(u) ) << endl; 
+
+for ( i=0;i<10;i++)
+ cout << "|x +"<< i <<"y|_H_1 = " << sqrt((v[]=A*uu[i][])' * uu[i][])  << endl;
+
+

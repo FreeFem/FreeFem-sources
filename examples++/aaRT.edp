@@ -1,0 +1,60 @@
+verbosity=4;
+
+mesh Th=square(10,10,[10*x,5*y]);
+fespace Vh(Th,RT0);
+fespace Rh(Th,RT0Ortho);
+fespace Ph(Th,P0);
+
+Vh [u1,u2],[v1,v2];
+Rh [r1,r2];
+Ph p,q; 
+cout << 1. / 2. << endl;
+[u1,u2]= [1+x,2+y];
+[r1,r2]= [-2-y,1+x];
+//  verification of the finite function 
+cout << "   [u1,u2]  = ["<< u1(1,2) << "," << u2(1,2) << "]  == [2,4] \n";
+cout << "dx([u1,u2]) = ["<< dx(u1)(1,2) << "," << dx(u2)(1,2) << "]  == [1,0] \n";
+cout << "dy([u1,u2]) = ["<< dy(u1)(1,2) << "," << dy(u2)(1,2) << "]  == [0,1] \n";
+//  verification of the finite function 
+cout << "   [r1,r2]  = ["<< r1(1,2) << "," << r2(1,2) << "]  == [-4,2] \n";
+cout << "dx([r1,r2]) = ["<< dx(r1)(1,2) << "," << dx(r2)(1,2) << "]  == [0,1] \n";
+cout << "dy([r1,r2]) = ["<< dy(r1)(1,2) << "," << dy(r2)(1,2) << "]  == [-1,0] \n";
+ 
+plot(u1,u2,[u1,u2],wait=1);
+plot(r1,r2,[r1,r2],wait=1);
+
+problem Probem1(u1,u2,v1,v2,solver=LU,eps=-1.0e-6) =
+    int2d(Th)(  u1*v1+u2*v2 + dx(u1)*v1+ u2*dx(v2)) 
+  + int2d(Th) ( x*v1+y*v2 + v1 + y*dx(v2) ) 
+  
+  + on(1,2,3,4,u1=-x,u2=-y)  ;
+
+problem Probem2(p,q,solver=LU,eps=-1.0e-6) =
+    int2d(Th)(  p*q ) + int2d(Th) ( q ) 
+  ;
+
+cout << " probem 1 \n";
+Probem1; // solve problem1
+cout << " probem 2 \n";
+Probem2; // solve problem2
+
+plot(u1,u2,[u1,u2]);
+
+problem lap(u1,u2,p,v1,v2,q,solver=LU,eps=1.0e-30) =
+    int2d(Th)( p*q*1e-10+ u1*v1 + u2*v2 + p*(dx(v1)+dy(v2)) + (dx(u1)+dy(u2))*q )
+    + int2d(Th) ( q)
+   + int1d(Th)( (v1*N.x +v2*N.y)/-2);
+
+cout << " lap RT \n";
+    
+lap;
+
+plot([u1,u2],wait=1); 
+   
+plot(p,fill=1,wait=1);    
+    
+cout << " int2d(Th)(p-0.5) " << int2d(Th)(p-0.5) << "  == 0 " << endl;
+
+cout << " int2d(Th)(x+y) " << int2d(Th)(x+y) << " ==  " << (10*5)*(10+5)/2 <<  endl;
+cout << " -------------\n\n " << endl;
+

@@ -1,0 +1,71 @@
+{ // ---  a real non linear test ---
+mesh Th=square(10,10);  // mesh definition of $\Omega$
+Th = adaptmesh(Th,0.05,IsMetric=1,splitpbedge=1);
+
+//plot(Th,wait=1);
+//Th = adaptmesh(Th,0.1,IsMetric=1,splitpbedge=1);
+plot(Th,wait=0);
+fespace Vh(Th,P1);      // finite element space
+fespace Ph(Th,P1dc);      // make optimization 
+
+Vh b=1;  // to defined b 
+// $ J(u) = \int_\Omega f(|\nabla u|^2) - \int\Omega  u b $
+// $ f(x) = a*x + x-ln(1+x), \quad f'(x) = a+\frac{x}{1+x}, \quad f''(x) =  \frac{1}{(1+x)^2}$
+real a=0.001;
+func real f(real u) { return u*a+u-log(1+u); }
+func real df(real u) { return a+u/(1+u);}
+func real ddf(real u) { return 1/((1+u)*(1+u));}
+
+Vh u=0; //  the current value of the solution
+Ph alpha; // to store  $ (|\nabla u|^2)$
+Ph dfalpha; // to store  $f' (|\nabla u|^2)$
+Ph ddfalpha ; //to store = $f''( |\nabla u|^2) $  optimisation
+
+int iter=0;
+
+
+//   methode of  Newton Ralphson to solve dJ(u)=0;
+//    $$ u^{n+1} = u^n - (\frac{\partial dJ}{\partial u_i})^{-1}*dJ(u^n) $$ 
+//   ---------------------------------------------
+  // the variationnal form of evaluate  dJ 
+  // --------------------------------------
+  //  dJ =  f'()*( dx(u)*dx(vh) + dy(u)*dy(vh) 
+  varf vdJ(uh,vh) =  int2d(Th)( dfalpha*( dx(u)*dx(vh) + dy(u)*dy(vh) ) - b*vh)
+  + on(1,2,3,4, uh=0);
+  // the variationnal form of evaluate  ddJ   
+  // hJ(uh,vh) =  f'()*( dx(uh)*dx(vh) + dy(uh)*dy(vh)
+  //            + f''()( dx(u)*dx(uh) + dy(u)*dy(uh) ) * (dx(u)*dx(vh) + dy(u)*dy(vh)) 
+  varf vhJ(uh,vh) = int2d(Th)( dfalpha*( dx(uh)*dx(vh) + dy(uh)*dy(vh) )
+   +  ddfalpha*( dx(u)*dx(vh) + dy(u)*dy(vh)  )*( dx(u)*dx(uh) + dy(u)*dy(uh) ) )
+   + on(1,2,3,4, uh=0);
+   
+ // the newton algorithm  
+  Vh v,w; 
+  u=0;
+  for (int i=0;i<100;i++)
+   {
+    alpha = dx(u)*dx(u) + dy(u)*dy(u);// optimization
+    dfalpha = df( alpha ) ; // optimization
+    ddfalpha = ddf(alpha ) ; // optimization
+    v[]= vdJ(0,Vh);
+    real res= v[]'*v[];
+    cout << i <<  " residu^2 = " <<  res  << endl;
+    if( res< 1e-12) break;
+    matrix H= vhJ(Vh,Vh,factorize=1,solver=LU);
+    w[]=H^-1*v[];
+    u[] -= w[];
+    plot (u,wait=0,cmm="solution with Newton Raphson");
+
+   }
+   savemesh(Th,"N",[x,y,u*1.5]);
+	{ ofstream file("N.bb");
+	file << "2 1 1 "<< u[].n << " 2 \n";
+	int j;
+	for (j=0;j<u[].n ; j++)  
+	  file << u[][j] << endl; 
+    }  	
+    exec("medit N");
+    exec("rm N.*");
+    
+
+}

@@ -1,0 +1,61 @@
+%&LaTeX
+\documentclass[a4paper,twoside]{book}
+\topmargin -1.54cm
+\oddsidemargin 0cm   %marge a 2 cm
+\evensidemargin 0cm  %marge a 2 cm
+\newcommand{\indente}{\hbox to \parindent {\hss}}
+\parindent 0cm
+\headsep 0.5cm
+\topskip .5cm
+\footskip 1cm
+\headheight 1.0cm
+\textwidth  16.5cm
+%  \parindent 0cm
+\textheight 24cm
+
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX
+\else
+\pdfoutput=1 % we are running PDFLaTeX
+\pdftrue
+\fi
+
+%\usepackage{times}
+%\usepackage{amsmath}
+\usepackage{calc}
+\usepackage[latin1]{inputenc}
+\usepackage{FFF}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\usepackage{makeidx}
+\usepackage{color}
+\usepackage{multicol}
+\usepackage{graphicx}
+\def\ttitem[#1]{\item[\texttt{#1}]}
+\def\textRed{\color{red}}
+\def\textBlack{\color{black}}
+
+\def\Blue#1{\textcolor{blue}{#1}}
+\def\Black#1{\textcolor{black}{#1}}
+\def\Red#1{\textcolor{red}{#1}}
+\def\Magenta#1{\textcolor{magenta}{#1}}
+\def\hin{\hbox{ in }}
+\def\hon{\hbox{ on }}
+\def\Cpp{\texttt{C++~}}
+%\def\R{\mathrm{I\!R}}
+\def\example{\textbf{Example:}}
+\def\eq#1{\Blue{\[#1\]}}
+\def\R{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\itemtt[#1]{ \item[\texttt{#1}]}
+\def\Fb#1{\boldsymbol{\omega}^{K}_{#1}}
+\def\fbi{\mathbf{\omega}^{K}_{ij}}
+\def\vecttwo#1#2{\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+
+\begin{document}
+\include{addfe}
+\end{document}
+

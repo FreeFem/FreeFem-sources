@@ -1,0 +1,26 @@
+int n=20,nn=n+10;
+real[int] xx(nn),yy(nn);
+mesh Th=square(5,5);
+fespace Vh(Th,P2);
+Vh uh=x*x+y*y,vh=-y^2+x^2;
+assert(n+1 < nn);
+//  compute a cut 
+for (int i=0;i<=n;i++)
+ {
+   xx[i]=i;
+   yy[i]=uh(real(i)/n,real(i)/n); // value of uh at point (i/10. , i/10.) 
+ }
+ 
+ plot(Th,uh,[uh,vh],value=true,ps="three.eps",wait=true); // plot mesh, isovalue, and vector
+ //  zoom on box defined by the two corner points [0.1,0.2] and [0.5,0.6]
+ plot(uh,[uh,vh],bb=[[0.1,0.2],[0.5,0.6]],wait=true,grey=1,fill=1,value=1,ps="threeg.eps");  // in grey with filling
+ plot([xx(0:n),yy(0:n)],[xx(0:n:5),yy(0:n:5)],ps="likegnu.eps",wait=true); //  like gnuplot plot a cut of uh
+
+ real[int] viso(31);
+ 
+ for (int i=0;i<viso.n;i++)
+   viso[i]=i*0.1;
+   
+ plot(uh,viso=viso(0:viso.n-1),value=1,fill=1,wait=1);
+
+   

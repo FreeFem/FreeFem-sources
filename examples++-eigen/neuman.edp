@@ -1,0 +1,24 @@
+border ccc(t=0,2*pi){x=cos(t);y=sin(t);}
+mesh Th=buildmesh(ccc(10));
+//mesh Th=readmesh("Th.msh");
+fespace Vh(Th,P2);
+Vh u1,u2;
+real sigma = 1e-5;
+
+varf  a(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) - sigma* u1*u2 );
+
+                   
+varf b([u1],[u2]) = int2d(Th)(  u1*u2 ) ; // no  Boundary condition
+
+matrix A= a(Vh,Vh,solver=Crout,factorize=1); 
+matrix B= b(Vh,Vh,solver=CG,eps=1e-20); 
+
+int nev=20;  // number of computed eigen valeu close to sigma
+
+real[int] ev(nev); // to store nev eigein value
+Vh[int] eV(nev);   // to store nev eigen vector
+
+int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0);
+
+for(int i=0;i<k;i++)
+  cout << " Valeur propre " << i << " = " << ev[i] << endl;

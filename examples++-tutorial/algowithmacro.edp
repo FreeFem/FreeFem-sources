@@ -1,0 +1,164 @@
+
+
+{
+  // work array 
+  real[int] matx(10),b(10),x(10); 
+  
+  
+  func real[int] mat(real[int] &x)
+    { 
+      for (int i=0;i<x.n;i++)
+	matx[i]=(i+1)*x[i];
+      matx -= b; // sub the right hand side
+      return matx;  // return of global variable ok 
+    };
+  func real J(real[int] & x)
+    {
+      real s=0;
+      for (int i=0;i<x.n;i++)
+	s +=(i+1)*x[i]*x[i]*0.5 - b[i]*x[i];
+      cout << "J ="<< s << " x =" <<  x[0] << " " << x[1] << "...\n" ;
+      return s;
+    }
+  func real error(real[int] & x,real[int] & b)
+   {
+   real s=0;
+     for (int i=0;i<x.n;i++)
+	s += abs((i+1)*x[i] - b[i]);
+   return s;    
+   }
+  func real[int] matId(real[int] &x) { return x;};
+  
+  b=1; x=0; // set  right hand side and initial gest
+  LinearCG(mat,x,eps=1.e-6,nbiter=20,precon=matId);
+  cout << "LinearCG: J(x) = " << J(x) << " err=" << error(x,b) << endl;
+  assert(error(x,b) < 1e-5);
+
+  b=1; x=0; // set  right hand side and initial gest
+  NLCG(mat,x,eps=1.e-6,nbiter=20,precon=matId);
+  cout << "NLCG: J(x) = " << J(x) << " err=" << error(x,b) << endl;
+  assert(error(x,b) < 1e-5);
+
+  // warning BFGS use a full matrix of size nxn (where n=x.n) 
+  b=1; x=2; // set  right hand side and initial gest
+  BFGS(J,mat,x,eps=1.e-6,nbiter=20,nbiterline=20);
+   cout << "BFGS: J(x) = " << J(x) << " err=" << error(x,b) << endl;
+  assert(error(x,b) < 1e-5);
+
+  
+};
+{ // ---  a real non linear test ---
+mesh Th=square(10,10);  // mesh definition of $\Omega$
+fespace Vh(Th,P1);      // finite element space
+fespace Ph(Th,P0);      // make optimization
+ 
+// Hack to construct an array :
+//  1 on interior nodes and 0 on boundary nodes
+varf vCl(u,v) = on(1,2,3,4,u=1);
+Vh Cl;
+Cl[]= vCl(0,Vh,tgv=1);  //  0 and tgv 
+real tgv=Cl[].max;     // 
+Cl[] = -Cl[];  Cl[] += tgv; Cl[] /=tgv;
+
+Vh b=1;  // to defined b 
+// $ J(u) = \int_\Omega f(|\nabla u|^2) - \int\Omega  u b $
+// $ f(x) = a*x + x-ln(1+x), \quad f'(x) = a+\frac{x}{1+x}, \quad f''(x) =  \frac{1}{(1+x)^2}$
+real a=0.001;
+func real f(real u) { return u*a+u-log(1+u); }
+func real df(real u) { return a+u/(1+u);}
+func real ddf(real u) { return 1/((1+u)*(1+u));}
+
+// the functionnal J 
+
+func real J(real[int] & x)
+  {
+    Vh u;u[]=x; 
+    real r=int2d(Th)(f( dx(u)*dx(u) + dy(u)*dy(u) ) - b*u) ;
+    cout << "J(x) =" << r << " " << x.min <<  " " << x.max << endl;
+    return r;
+  }
+// -----------------------
+
+Vh u=0; //  the current value of the solution
+Vh alpha; // of store  $f(|\nabla u|^2)$
+int iter=0;
+alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization 
+
+func real[int] dJ(real[int] & x)
+  {
+    int verb=verbosity; verbosity=0; 
+    Vh u;u[]=x; 
+    alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization 
+    varf au(uh,vh) = int2d(Th)( alpha*( dx(u)*dx(vh) + dy(u)*dy(vh) ) - b*vh);
+    x= au(0,Vh);  
+    x = x.* Cl[]; //  the grad in 0 on boundary 
+    verbosity=verb;
+    return x; // warning no return of local array  
+  }
+
+varf alap(uh,vh,solver=Cholesky,init=iter)=  
+   int2d(Th)( alpha *( dx(uh)*dx(vh) + dy(uh)*dy(vh) ))   + on(1,2,3,4,uh=0);
+
+varf amass(uh,vh,solver=Cholesky,init=iter)=  int2d(Th)( uh*vh)  + on(1,2,3,4,uh=0);
+
+matrix Amass = alap(Vh,Vh,solver=CG);
+
+matrix Alap=  alap(Vh,Vh,solver=Cholesky,factorize=1);   
+func real[int] C(real[int] & x)
+{
+   real[int] u(x.n);
+   u=Amass*x;
+   x = Alap^-1*u;
+   x = x .* Cl[];     
+   return x; // no return of local array  variable 
+}
+   verbosity=5;
+   int conv=0;
+   real eps=1e-6; 
+   for(int i=0;i<20;i++)
+   {
+     conv=NLCG(dJ,u[],nbiter=10,precon=C,veps=eps); 
+
+     if (conv) break; 
+     alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization 
+     Alap = alap(Vh,Vh,solver=Cholesky,factorize=1);   
+     cout << " restart with new preconditionner " << conv << " eps =" << eps << endl;
+   }
+   plot (u,wait=1,cmm="solution with NLCG");
+   Vh sss= df( dx(u)*dx(u) + dy(u)*dy(u) ) ;
+   plot (sss,wait=0,fill=1,value=1);
+
+//   methode of  Newtow Ralphson to solve dJ(u)=0;
+//    $$ u^{n+1} = u^n - (\frac{\partial dJ}{\partial u_i})^{-1}*dJ(u^n) $$ 
+//   ---------------------------------------------
+  Ph dalpha ; //to store = $f''( |\nabla u|^2) $  optimisation
+  // the variationnal form of evaluate  dJ 
+  // --------------------------------------
+  //  dJ =  f'()*( dx(u)*dx(vh) + dy(u)*dy(vh) 
+  varf vdJ(uh,vh) =  int2d(Th)( alpha*( dx(u)*dx(vh) + dy(u)*dy(vh) ) - b*vh)
+  + on(1,2,3,4, uh=0);
+  // the variationnal form of evaluate  ddJ   
+  // hJ(uh,vh) =  f'()*( dx(uh)*dx(vh) + dy(uh)*dy(vh)
+  //            + f''()( dx(u)*dx(uh) + dy(u)*dy(uh) ) * (dx(u)*dx(vh) + dy(u)*dy(vh)) 
+  varf vhJ(uh,vh) = int2d(Th)( alpha*( dx(uh)*dx(vh) + dy(uh)*dy(vh) )
+   +  dalpha*( dx(u)*dx(vh) + dy(u)*dy(vh)  )*( dx(u)*dx(uh) + dy(u)*dy(uh) ) )
+   + on(1,2,3,4, uh=0);
+   
+ // the newtow algorithme  
+  Vh v,w; 
+  u=0;
+  for (int i=0;i<100;i++)
+   {
+    alpha = df( dx(u)*dx(u) + dy(u)*dy(u) ) ; // optimization
+    dalpha = ddf( dx(u)*dx(u) + dy(u)*dy(u) ) ; // optimization
+    v[]= vdJ(0,Vh);
+    real res= v[]'*v[];
+    cout << i <<  " residu^2 = " <<  res  << endl;
+    if( res< 1e-12) break;
+    matrix H= vhJ(Vh,Vh,factorize=1,solver=LU);
+    w[]=H^-1*v[];
+    u[] -= w[];
+   }
+   plot (u,wait=1,cmm="solution with Newtow Ralphson");
+
+}

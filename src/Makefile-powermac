@@ -1,0 +1,51 @@
+LIBLOCAL = -ldl
+BUILD_COCOA=agl agl-g
+BUILD_MPI=mpi mpi-g
+LIBX11= -L/usr/X11R6/lib -lX11 -lm 
+INCLUDEX11 = /usr/X11R6/include
+CXX=g++       #C++ compiler 
+CXXMPI=mpic++   # compilation with mpi
+OOPTFLAGS= -O -fpascal-strings  # compilation with optimisation
+GOPTFLAGS= -g -fno-inline -fpascal-strings -fexceptions # compilation with debugging 
+GL= -framework Carbon -framework OpenGL -framework AGL  -framework GLU
+LIBGL=-framework Carbon -framework OpenGL -framework AGL  
+LIBGLX= $(LIBX11) -lGL -lGLU
+#------------------------------------------------
+LIBBLAS= -framework vecLib
+#------------------------------------------------
+#  UMFPACK
+#-----------------------
+UMFPACKDIR=$(src)/../../LinearSolver/UMFPACKv4.1
+IUMFPACK= -DUMFPACK -I$(UMFPACKDIR)/UMFPACK/Include -I$(UMFPACKDIR)/AMD/Include 
+LIBUMFPACK= -L$(UMFPACKDIR)/AMD/Lib -L$(UMFPACKDIR)/UMFPACK/Lib  -lumfpack -lamd  $(LIBBLAS)
+#--------------------------------------------------
+#  the flag of eigen value part with arpack++ tools
+#-------------------------------------------------
+EIGEN= eigenvalue.o
+LIBARPACK= -L$(HOME)/ARPACK -larpack_Darwin $(LIBBLAS) 
+LIBF77= -L/sw/lib -lg2c
+INCARPACKPP = -DEIGENVALUE -I$(src)/../arpack/arpack++/include
+# ------------------------------
+# compilation flags of FreeFem++ 
+# ------------------------------
+#  -DDRAWING  bamg active some drawing facility in bamg (inquire mesh)
+#  -DLONG_LONG active the use of  long long in bamg
+#  -DDEBUG active the  checking in bamg  
+#  -DNCHECKPTR remove check pointer facility 
+#  -DCHECK_KN active subscripting of some array  
+#  -DWITHCHECK of the dynamic type ckecking of the langague (very slow)
+#  -DEIGENVALUE  to compile the eigen value part
+#  ------------------------------------------------
+# FLAGS for optimisated version 
+OFFFLAGS= -DDRAWING -DLONG_LONG  -DNCHECKPTR 
+#  flags for debug version  
+GFFFLAGS= -DDRAWING -DLONG_LONG -DCHECK_KN  #-DWITHCHECK
+# ---------------------------
+#  install and compile dir.
+# ----------------------
+BIN_DIR=$(HOME)/bin/$(MACHTYPE)-$(VENDOR)-$(OSTYPE)
+COMPILE_DIR=c-$(HOSTTYPE)
+#----------------------
+
+
+

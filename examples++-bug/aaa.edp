@@ -1,0 +1,18 @@
+verbosity=2;
+border aaa(t=0,1){x=t;y=0;};
+border bbb(t=0,0.5){x=1;y=t;};
+border ccc(t=0,0.5){x=1-t;y=0.5;};
+border ddd(t=0.5,1){x=0.5;y=t;};
+border eee(t=0.5,1){x=1-t;y=1;};
+border fff(t=0,1){x=0;y=1-t;};
+mesh TTh;
+{
+mesh Th = buildmesh (aaa(6) + bbb(4) + ccc(4) +ddd(4) + eee(4) + fff(6));
+mesh Thh = buildmesh (aaa(6) + bbb(4) + ccc(4) +ddd(4) + eee(4) + fff(6));
+cout << Th.nt << " " << Thh.nt << endl;
+plot(Th,Thh,wait=1);
+verbosity=10;
+
+TTh=Th; // copy the mesh 
+}
+plot(TTh,wait=1);

@@ -1,0 +1,57 @@
+int i;
+real [int] tab(10), tab1(10); // 2 array of 10 real 
+complex [int] ctab(10), ctab1(10); // 2 array of 10 complex 
+//  real [int] tab2; //  bug 
+tab = 1;  //  set all the array to 1
+tab[1]=2;
+ctab = 1+2i;  //  set all the array to 1+2i
+ctab[1]=2;
+cout << tab[1] << " " << tab[9] << " size of tab = " << tab.n << endl;
+cout << ctab[1] << " " << ctab[9] << " size of ctab = " << ctab.n << endl;
+
+tab1=tab;
+tab=tab+tab1;
+tab=2*tab+tab1*5;
+tab1=2*tab-tab1*5;
+tab+=tab;
+cout << tab << endl;
+cout << tab[1] << " " << tab[9] <<  endl;
+
+ctab1=ctab;
+ctab=ctab+ctab1;
+ctab=2*ctab+ctab1*5;
+ctab1=2*ctab-ctab1*5;
+ctab+=ctab;
+cout << ctab << endl;
+cout << ctab[1] << " " << ctab[9] <<  endl;
+
+
+real [string] map; //  a dynamique array
+for (i=0;i<10;i=i+1)
+  {
+    tab[i] = i*i;
+    cout << i << " " << tab[i] << "\n";
+  };
+
+map["1"]=2.0;
+map[2]=3.0; //  2 is automaticaly cast to the string "2"
+
+cout << " map[\"1\"] = " << map["1"] << " == 2.0 ; "<< endl;
+cout << " map[2] = " << map[2] << " == 3.0 "<< endl;
+assert( abs(map["1"]-2.0)<1.e-6);
+assert(abs(map[2]-3.0)<1e-6);
+
+real [int] tab2=[1,2,3,3.14];
+cout << tab2 << endl;
+
+real [int,int] mat(10,10);
+mat=0;
+for(int i=0;i<mat.n;i++)
+  for(int j=0;j<mat.m;j++)
+    mat(i,j)=i+100*(j+1);
+cout << mat << endl;
+
+// array of mesh 
+mesh[int] aTh(10);
+aTh[1]= square(2,2);
+plot(aTh[1]);

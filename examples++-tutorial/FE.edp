@@ -1,0 +1,26 @@
+//  test all FEspace
+verbosity=10;
+mesh Th=square(5,5);
+verbosity = 10;
+cout << " P0 " << endl;
+fespace Ph(Th,P0);
+cout << " P1 " << endl;
+fespace Vh(Th,P1);
+cout << " P2 " << endl;
+fespace Wh(Th,P2);
+cout << " P1nc " << endl;
+fespace Vnch(Th,P1nc);
+cout << " P2dc " << endl;
+fespace Wdch(Th,P2dc);
+cout << " P1dc " << endl;
+fespace Vdch(Th,P1dc);
+Wh w=x*x*y,dxw=2*x*y;
+Vdch vdc = dx(w);
+Wdch wdc = dx(w)*x;
+plot(vdc,dxw,wait=1);
+plot(wdc);
+Vnch vnc = x*x;
+Vh vh = x*x;
+Ph p = x*x;
+
+

@@ -1,0 +1,204 @@
+Compilation under unix and MacOs 10.2 or cygwin  with g++ 
+--------------------------------------------------------
+please read all before began and read READ_ARPACK for eigen value tools
+
+for compilation  under window or MacOs 
+with codewarrior compiler  see the README_CW.
+
+
+The makefile is now parameter with the shell variable HOSTTYPE.
+All the local compilation variable is now defined in  file
+src/Makefile-$HOSTTYPE
+
+the list of Makefile-*
+Makefile-Debian              # with    arpack, install the debian package arpak and arpack++
+Makefile-hp9000s700          # without arpack on hpux with g++
+Makefile-i386                # without arpack on i386 with g++
+Makefile-linux               # with    arpack    on linux with g++
+Makefile-linux-arpack        # with    arpack    on linux with g++
+Makefile-linux-noarpack      # without arpack    on linux with g++
+Makefile-macintosh           # with    arpack on MacOsX 10.2  with g++
+Makefile-macintosh-noarpack  # without arpack on MacOsX 10.2  with g++
+Makefile-macintosh-arpack    # with arpack  on MacOsX 10.2 with g++
+
+Suppose you HOSTTYPE are xxx begin by a version without arpack 
+
+1) cp src/Makefile-... src/Makefile-xxx 
+2) edit src/Makefile-xxx 
+and  change if necessary the variables 
+
+LIBLOCAL = -ldl   # for dlopen (see man dlopen and or load.cpp)
+LIBX11= -L/usr/X11R6/lib -lX11 -lm 
+INCLUDEX11 = /usr/X11R6/include
+CXX=g++      #C++ compiler 
+BIN_DIR=$(HOME)/bin-$(HOSTTYPE)
+
+In this case:
+
+- the following file must be exist
+  /usr/X11R6/lib/libX11.a       see  the variable LIBX11
+  /usr/X11R6/include/X11/Xlib.h         see  the variable INCLUDEX11
+
+- the shell command exist 
+  >  g++ -v 
+     Reading specs from /usr/libexec/gcc/darwin/ppc/3.3/specs
+     Thread model: posix
+     gcc version 3.3 20030304 (Apple Computer, Inc. build 1435)
+  The version must  be 2.95.2,  2.95.3 our 3.1 or better
+
+- the BIN_DIR variable is the place to install (copy) the software.
+
+
+ 
+if you need the eigen-value computation
+install the arpack and arpack++ library see README_ARPACK
+
+To defined $HOSTTYPE to linux  under sh shell
+> export HOSTTYPE=linux 
+or add HOSTTYPE=linux at the end of the make command, like
+> make all  HOSTTYPE=linux
+
+
+The variable defined in this file src/Makefile-$HOSTTYPE are :
+OOPTFLAGS= -O  # compilation with optimization
+GOPTFLAGS= -g  # compilation with debugging 
+# FLAGS for optimisated version 
+OFFFLAGS= -DDRAWING -DLONG_LONG  -DNCHECKPTR 
+#  flags for debug version  
+GFFFLAGS= -DDRAWING -DLONG_LONG -DCHECK_KN #-DWITHCHECK
+BIN_DIR=$(HOME)/bin-$(HOSTTYPE)   #install dir
+COMPILE_DIR=c-$(HOSTTYPE)        #compile dir.
+
+Freefem++ with eigen value
+EIGEN= eigenvalue.o  # to compile the target eigenvalue.o 
+LIBARPACK=  (the arparck fortran  library)
+LIBF77=   (the fortan library)
+INCARPACKPP = -DEIGENVALUE -I(arpack++ include directory)
+
+Freefem++ without eigen value 
+EIGEN=
+LIBARPACK= 
+LIBF77=
+INCARPACKPP=
+
+
+
+So to compile create the file  src/Makefile-$HOSTTYPE
+to add /or change the compiler, change the 
+location of X11R6 include and library.
+
+
+
+to compile optimized version (compilation take more than 30m)
+> make all 
+this create file 
+ $(COMPILE_DIR)/FreeFem++
+ $(COMPILE_DIR)/FreeFem++-nw
+
+
+or (for the debug version)
+> make all-g 
+this create file 
+ $(COMPILE_DIR)-g/FreeFem++
+ $(COMPILE_DIR)-g/FreeFem++-nw
+
+>make mpi 
+to make parallele version , defined correctly the MPI variable
+
+>make gl
+to make the MacOS OpenGL optimize  version for FreeFem++ CoCoa application
+
+>make glx
+to make the OpenGL optimize version for FreeFem++  application with X11 window
+
+>make mpi-g 
+to make parallele version , defined correctly the MPI variable
+
+>make gl-g
+to make the MacOS OpenGL version for FreeFem++ CoCoa application
+
+>make glx-g
+to make the OpenGL version for FreeFem++  application with X11 window
+
+the list of exec file can be 
+
+optimze version:
+
+ $(COMPILE_DIR)/FreeFem++             application with X11 graphix
+ $(COMPILE_DIR)/FreeFem++-nw          application without graphic window
+ $(COMPILE_DIR)/FreeFem++-glx         application with X11 and OpenGL
+ $(COMPILE_DIR)/FreeFem++-agl         cocoa application for macos with apple OpenGL
+ $(COMPILE_DIR)/FreeFem++-mpi         mpi application without window graphic
+ $(COMPILE_DIR)/FreeFem++-x11         application with X11 graphic
+
+same application with debug version: 
+
+ $(COMPILE_DIR)-g/FreeFem++
+ $(COMPILE_DIR)-g/FreeFem++-nw
+ $(COMPILE_DIR)-g/FreeFem++-glx
+ $(COMPILE_DIR)-g/FreeFem++-agl
+ $(COMPILE_DIR)-g/FreeFem++-mpi
+ $(COMPILE_DIR)-g/FreeFem++-x11
+
+
+
+> make install 
+to install all the  current version in directory  $(BIN_DIR)
+(this Makefile variable is define in src/Makefile-$HOSTTYPE) 
+remark: the directory must exist before install.
+
+The install file can be:
+
+ FreeFem++          #  optimized X11 version
+ FreeFem++-g        #  debug X11 version
+ FreeFem++-nw       #  optimized postscript  version 
+ FreeFem++-nw-g     #  debug     postscript  version 
+ FreeFem++-mpi      #  optimized mpi version 
+ FreeFem++-mpi-g    #  debug mpi version 
+ FreeFem++-glx      #  optimized OpenGl with X11  version 
+ FreeFem++-glx-g    #  debug OpenGl with X11 version 
+ /Applications/FreeFem++.app  # Drag and Drop CoCoa MacOs Application with 
+ FreeFem++-CoCoa    #  MacOS Shell script  for MacOS  OpenGL version  (MacOS 10.2 or better)
+                    #  use  /Applications/FreeFem++.app
+
+
+--tested  under linux or MacOs/Darwin with the compilers 
+g++  version 2.95.2, 2.95.3, 3.01 3.1 3.3
+
+it take 15 mn to compile all all-g  on my PowerBook G4 666Mhz 256MB,
+and it take more than 1hour under linux.
+
+Under window or MacOs the soft was precompile
+
+All the Examples are in the  two directories
+examples++ and examples++-tutorial the suffixe is .edp 
+ (equations aux derivees partielles in french)
+
+to test all the exemple under unix: 
+
+cd examples++; ../c-$HOSTTYPE/FreeFem++  all.edp
+cd examples++-tutorial; ../c-$HOSTTYPE/FreeFem++   all.edp
+
+
+Under MacOS 10.2 under terminal application:
+1) edit src/Makefile-macintosh to set your
+BIN_DIR=$(HOME)/bin/$(MACHTYPE)-$(VENDOR)-$(OSTYPE)
+for example to (if you have root access)
+BIN_DIR=/usr/local/bin 
+remark the BIN_DIR must be in your PATH shell variable
+2) compile with:
+make all all-g gl-g gl
+3) install:
+make install
+4) to run 
+FreeFem-CoCoa examples++-tutorial/all.edp
+
+
+Warning on MacOSX, some link problem occures because the  RTTI and template
+with the apple version c++ (version 2.95.2)  and
+this working now  with new g++3 compiler (default compiler in MacOs 10.2) 
+and also with  g++-3.3 compiler
+
+
+
+

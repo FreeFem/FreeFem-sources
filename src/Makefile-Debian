@@ -1,0 +1,38 @@
+LIBLOCAL = -ldl   # for dlopen (see load.cpp)
+BUILD_MPI=mpi mpi-g  # to buidl automaticaly mpi version (make world )
+LIBX11= -L/usr/X11R6/lib -lX11 -lm 
+INCLUDEX11 = /usr/X11R6/include
+CXX=g++      #C++ compiler 
+CXXMPI=mpiCC   # compilation with mpi
+OOPTFLAGS= -O  # compilation with optimisation
+GOPTFLAGS= -g  # compilation with debugging 
+LIBGLX= $(LIBX11) -lGL -lGLU
+#--------------------------------------------------
+#  the flag of eigen value part with arpack++ tools
+#-------------------------------------------------
+EIGEN= eigenvalue.o
+LIBARPACK= -larpack -llapack -lblas
+LIBF77= -lg2c
+INCARPACKPP = -DEIGENVALUE -I/usr/include/arpack++
+# ------------------------------
+# compilation flags of FreeFem++ 
+# ------------------------------
+#  -DDRAWING  bamg active some drawing facility in bamg (inquire mesh)
+#  -DLONG_LONG active the use of  long long in bamg
+#  -DDEBUG active the  checking in bamg  
+#  -DNCHECKPTR remove check pointer facility 
+#  -DCHECK_KN active subscripting of some array  
+#  -DWITHCHECK of the dynamic type ckecking of the langague (very slow)
+#  -DEIGENVALUE  to compile the eigen value part
+#  ------------------------------------------------
+# FLAGS for optimisated version 
+OFFFLAGS= -DDRAWING -DLONG_LONG  -DNCHECKPTR 
+#  flags for debug version  
+GFFFLAGS= -DDRAWING -DLONG_LONG -DCHECK_KN #-DWITHCHECK
+# ---------------------------
+#  install and compile dir.
+# ----------------------
+BIN_DIR=/opt/bin
+COMPILE_DIR=c-$(HOSTTYPE)
+#----------------------
+

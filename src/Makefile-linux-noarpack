@@ -1,0 +1,36 @@
+LIBLOCAL = -ldl
+LIBX11= -L/usr/X11R6/lib -lX11 -lm 
+INCLUDEX11 = /usr/X11R6/include
+CXX=g++      #C++ compiler 
+CXXMPI=mpiCC   # compilation with mpi
+OOPTFLAGS= -O  # compilation with optimisation
+GOPTFLAGS= -g  # compilation with debugging 
+#--------------------------------------------------
+#  the flag of eigen value part with arpack++ tools
+#-------------------------------------------------
+EIGEN= #eigenvalue.o
+LIBARPACK= #-L$(HOME)/ARPACK -larpack_Darwin -framework vecLib
+LIBF77= #/usr/lib/gcc/darwin/2.95.2/libg2c.a
+INCARPACKPP = #-DEIGENVALUE -I$(HOME)/arpack++/include
+# ------------------------------
+# compilation flags of FreeFem++ 
+# ------------------------------
+#  -DDRAWING  bamg active some drawing facility in bamg (inquire mesh)
+#  -DLONG_LONG active the use of  long long in bamg
+#  -DDEBUG active the  checking in bamg  
+#  -DNCHECKPTR remove check pointer facility 
+#  -DCHECK_KN active subscripting of some array  
+#  -DWITHCHECK of the dynamic type ckecking of the langague (very slow)
+#  -DEIGENVALUE  to compile the eigen value part
+#  ------------------------------------------------
+# FLAGS for optimisated version 
+OFFFLAGS= -DDRAWING -DLONG_LONG  -DNCHECKPTR 
+#  flags for debug version  
+GFFFLAGS= -DDRAWING -DLONG_LONG -DCHECK_KN #-DWITHCHECK
+# ---------------------------
+#  install and compile dir.
+# ----------------------
+BIN_DIR=$(HOME)/bin-$(HOSTTYPE)
+COMPILE_DIR=c-$(HOSTTYPE)
+#----------------------
+

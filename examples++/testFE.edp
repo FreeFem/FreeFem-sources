@@ -1,0 +1,47 @@
+
+// exact solution is [x*x,y]  -Delta [x*x,y] = [-2,0]
+// This exemple is buggus before version 1.26
+{ 
+// test of product of same FE
+verbosity = 2;
+ mesh Th=square(2,2);
+ fespace Vh(Th,P2);
+ 
+ Vh uHx=0;
+ Vh uHy=0;
+ Vh vHx;
+ Vh vHy;
+ 
+ solve  deuxlap([uHx,uHy],[vHx,vHy],solver=CG) =
+    int2d(Th)(    dx(uHx)*dx(vHx) + dy(uHx)*dy(vHx)
+               +  dx(uHy)*dx(vHy) + dy(uHy)*dy(vHy)  )
+    - int2d(Th)( -2* vHx )        
+    +  on(1,2,3,4,uHx=x*x,uHy=y);
+   // plot(uHx, uHy,wait=1);
+    real err2= sqrt( int2d(Th)(square(uHx-x*x)+square(uHy-y)));
+    cout << " Error in L2 norme " << err2 << endl ;
+    assert(err2 < 1e-10);
+}
+
+{ 
+// test of product of different  FE
+verbosity = 2;
+ mesh Th=square(2,2);
+ fespace Vh(Th,P2);
+ fespace Vh1(Th,P1);
+ 
+ Vh uHx=0;
+ Vh1 uHy=0;
+ Vh vHx;
+ Vh1 vHy;
+ 
+ solve  deuxlap([uHx,uHy],[vHx,vHy],solver=CG) =
+    int2d(Th)(    dx(uHx)*dx(vHx) + dy(uHx)*dy(vHx)
+               +  dx(uHy)*dx(vHy) + dy(uHy)*dy(vHy)  )
+    - int2d(Th)( -2* vHx )        
+    +  on(1,2,3,4,uHx=x*x,uHy=y);
+   // plot(uHx, uHy,wait=1);
+    real err2= sqrt( int2d(Th)(square(uHx-x*x)+square(uHy-y)));
+    cout << " Error in L2 norme " << err2 << endl ;
+    assert(err2 < 1e-10);
+}

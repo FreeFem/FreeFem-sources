@@ -1,0 +1,8 @@
+#!/bin/sh
+export MACOSX_DEPLOYMENT_TARGET=10.3
+FFsource=..
+INC="-I$FFsource/src -I$FFsource/src/femlib  -I$FFsource/src/Graphics" 
+echo g++ -c $INC $1.cpp
+g++ -c $INC $1.cpp
+g++ -bundle $1.o -o $1.so -undefined dynamic_lookup
+  

@@ -1,0 +1,432 @@
+beginning:  november 21,  2001:  version 1.08.
+----------------------------------------------
+
+2001/11/22:  correction  of operator == and != 
+2001/11/23 , version: 1.09: correction  (with g++) 
+template<class A>  struct SameType, type of OK must be int and not bool 
+
+2001/11/24   add fonctionality in plot,  bb=[[x1,y1],[x2,y2]] 
+ add  loop if enter  character +,-,=,c,C,r  in graphic window.
+2001/11/28
+ correction bug initialization of QuadTree if less than 4 points in the quadtree
+ files  QuadTree.cpp and FQuadTree.hpp
+ add exec("xxx..."); //to execute on system command. "xxx ... " 
+ add  dumptable(cout); //to show all internal table
+2001/11/29:  
+  Version ans graphique + ajout d'option dans plot (cf. doc)
+  correction ajoute renum() des maillage crees. 
+2001/12/10
+  Correct missing check in plot  
+     ex:  plot(1);  trap before now, genere a compile error
+  Correct in the interpolation is full not conforme FE, 
+  do not prolonged by continuity. change 
+  add after line 479 in file lgfem.cpp
+  if (outside && !KK.tfe->NbDfOnVertex && !KK.tfe->NbDfOnEdge) 
+    return   SetAny<R>(0.0); 
+2001/12/12
+  correction in gibbs (mesh renum) reconstruct the array of
+  triangle for each vertex (PB. of interpolation in non 
+  convexe domain) Big bug.
+
+Make version 1.14
+-----------------
+
+2001/12/14
+  correction in trunc mesh, bug if empty mesh is created,
+  and move  a little the test point in a triangle 
+  is not exactly the barycenter.  
+
+2002/01/14
+  correction in probem.cpp line 1309  bug when we write   qft= ...  , in int2d 
+   if (nargs[0]) return *GetAny<const Fem2D::QuadratureFormular*>((*nargs[1])...
+  becomes:
+   if (nargs[0]) return *GetAny<const Fem2D::QuadratureFormular*>((*nargs[0])...
+2002/01/15
+  in lgfem.cpp remove line 522  reffecran();//bug if not graphique some time
+  in file MeshGeom.cpp line 108 bug if name == 0 ;  add test before the cout like 
+    if(name) cout << " ... " << name << .... 
+  correct the name of the exec file (FreeFee++ -> FreeFem++) in Makefile
+2002/02/03
+  in Mesh2.cpp in preinit() add call to srand(),
+    to get the same  mesh with the same data. 
+  correct 
+  mesh tth=th; 
+  
+Make version 1.15
+-----------------
+
+2002/02/20
+   Add periodic boundary condition see the manual //\index{periodic}
+
+Make version 1.16
+-----------------
+
+  Add Parallele Mpi 
+  correct bug in SegmentationFault.edp missing placing of delete[] operator
+  put declaration in  for
+  wait =xx change the default value of wait
+  ofstream f("foo.txt",append)  open a file in append mode
+   add NoUseOfWait=true;    never wait for run test easly\index{NoUseOfWait}
+
+Make version 1.17 2002/03/20
+----------------------------
+
+  Make default iso value changing with zoom option.
+  Add GMRES solver   dimKrylov= ,  tgv= //\index{GMRES}\index{problem!dimKrylov=}\index{solve!tgv=}\index{problem!tgv=}
+ 
+april 2002
+  Make the current version without CheckPtr, and 
+  correct some bug in string allocation (forgetting +1 in some length)
+  Improving the speed of the software
+  add CPUTime global bool variable to print the CPU time of each instruction.
+  correct some printing without verbosity 
+  adding some checking in array management 
+  Add option in the Makefile (gnumake)
+
+Make version 1.18 the 2002/04/08  
+--------------------------------
+  
+  Big correction in automatic cast see  bugv1.18.edp
+  correction in interpolation of  label see also bugv1.18.edp
+  Big correction in construction of non-symetrix matrix (see BUG)
+
+
+
+Make version 1.19 2002/04/18
+----------------------------
+
+   Correction in Quadtree integer overflow when 
+   interpolate solution of from one big domain to a very small one.
+
+   Correction in embedded function (return problem)
+   Correction in return type of function (right value an note left value)
+   Correction cast bool to int, so lots of bug in expression 
+   like  (region==2)*5 given alway 0, invisibl before 1.18 (because bug in
+   automatics cast)
+
+Make version 1.20 2002/04/25
+----------------------------
+
+  Correction of bug in interpolation on non convexe domain.
+  correction of bug in periodic boundary condition (pb of sens(in french))
+  correction some compilation bug under g++ v3.0 in RNM file
+  correction find common point buildmesh (change threshold value)
+
+Make version 1.21 2002/04/29
+----------------------------
+
+  Add Non linear Conjugued Gradient (CGNL) routine.
+  correct bug in linearGC with non zero right and size.
+
+Make version 1.22 2002/05/02
+----------------------------
+
+ all optimisation tool from //\url{http://coool.mines.edu/}
+ Add BFGS optimisation tools form  cool //\index{BFGS}
+ correct bug in CGNL, correct tgv=, in linear form //\index{CGNL}
+ make algo.edp example 
+
+Make version 1.23 2002/05/13
+----------------------------
+
+  correct bug of the symetric matrix are independ of  x,y,..
+   add line at  285, in file problem.cpp: 
+          MeshPointStack(stack)->set(T(pi),pi,Ku);
+
+  correct bug in sign of int1d in linearform, 
+    so change in exemple fluidstructure, schwarz-no-overlap, LaplaceP1, 
+    aalapacien, lapacienprecon
+  correct some bug in -= operator with  result of *. */ 
+  add some operator:
+    -square(u) = u^2  //\index{square}
+    -intalledges(Th)(...) to compute integrale on all edges of all triangle //\index{intalledges}  
+    for error indicator add global :
+    -lenEdge the len of the current edge //\index{lenEdge}
+    -hTriangle the size of the current triangle //\index{hTriangle}
+    -area the area of the current triangle //\index{area} 
+
+Make version 1.24
+-----------------
+
+  add in BamgFreeFem.cpp after line 211 to set name 
+    Tn->name= new char[strlen("msh2bamg")+1];
+    strcpy(Tn->name,"msh2bamg");
+   add -  of linearform and bilinearform see LaplaceP1bis.edp 
+
+   correct: July 8, 2002
+   Vh u1,u2,v1,v2; 
+   bug in problem(u1,u2,v1,v2,.... ) = 
+   in file: FESSpace.hpp line 193:
+   { throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);
+     for(int i=0,n0=0,l=0,i0=0; i<k;  i++,n0+=t.N,i0+=t.NbDoF)
+         for (int j=0;j<t.pij_alpha.N();j++,l++) {
+           pij_alpha[l].i=t.pij_alpha[j].i+i0;
+           pij_alpha[l].p=t.pij_alpha[j].p;
+           pij_alpha[l].j=t.pij_alpha[j].j+n0;
+         }                         
+    } 
+
+    add plot of list of border //\index{plot!border}
+
+    add init array:
+
+    real[int] a=[1,2,3,5.6,7,8,9]; //\index{array!initialisation}
+
+Make version 1.25 
+-----------------
+
+ 13 aout 2002 Major Bug in : FESpace.hpp ligne 199
+
+  All the non scalar problem with same kind
+     of finite element do not work: 
+
+    FESpace.hpp ligne 199
+      for(int i=0,n0=0,l=0,i0=0; i<k;  i++,n0+=t.N,i0+=t.NbDoF)
+        for (int j=0;j<t.pij_alpha.N();j++,l++) {
+          pij_alpha[l].i=t.pij_alpha[j].i+i0;
+          pij_alpha[l].p=t.pij_alpha[j].p;
+          pij_alpha[l].j=t.pij_alpha[j].j+n0;
+          }                         
+    become
+     // Warning the componant is moving first 
+        for (int j=0,l=0;j<t.pij_alpha.N();j++) // for all sub DF
+          for(int i=0,i0=0; i<k; i++,l++) // for componate
+          {
+          pij_alpha[l].i=t.pij_alpha[j].i*k+i;   //  DoF number
+          pij_alpha[l].p=t.pij_alpha[j].p;       //  point of interpolation
+          pij_alpha[l].j=t.pij_alpha[j].j+i*t.N; //  componante of interpolation
+          }                         
+ 
+   two corrections in problem.cpp :
+     2 missing  delete     (example laplacienprecon.edp)
+     2 delete -> delete [] (example testFE.edp) 
+
+ 26 septembre 2002 
+   add New Finite element RTortho (a conforme //\index{RTortho}
+    FE in $H(curl)$ like RT  conforme FE in $H(div)$.
+    see exemple aaRT.epd
+   correct the computation of dx(v) and dy(u) in [u,v] RT finite element
+    function. 
+   compile on hpux 11 with gcc 3.2 see Makefile-hp9000s700
+   correct argument passing in GMRES routine
+
+Make version 1.26 le 26 septembre 2002
+--------------------------------------
+
+ 05 nov. 2002 Correct very small mistake in bamglib  part.
+
+ 19 nov 2002:
+  add:
+   -tanh function //\index{tanh}
+   -qf2pT4P1 a triangular QuadratureFormular  
+	(4P1 the qf2pT QuadratureFormular) //\index{qf2pT4P1}
+   small change une meshadapt to just compute the metrix see exemple
+      convectapt.edp 
+    make interpolation matrix between to FEspace (not wet finish)
+
+ 3/12/2002 
+  make correction to get a not to bad linenumber in error.
+  add add test is used of unset x,y to make a error.
+  add checkmovemesh(Th,[x+u,y+v]) function to return the //\index{checkmovemesh}
+  value of the area of the minimal triangle of the movemesh.
+  see mesh.edp example.
+
+ 23/12/2002:
+  add eigen value solver  //\index{eigenvalue}
+  see eigen README_ARPACK to compile
+  see  examples++-eigen to test.
+
+Make  version 1.28 2/1/2003 
+---------------------
+09/1/2003: 
+ add sub array option in array:  //\index{array!sub}
+  real[int] tab(100);
+  tab(:) = array from 0 to 99=tab.n-1
+  tab(2:10)  sub array from 2 to 10
+  tab(2:10:2)  sub array from 2 to 10 by step 2
+  tab(2:10:2)[0] = 5 ; => modificaton of tab[2] = 5;
+  tab(2:10:2)[1] = 6 ; => modificaton of tab[2+2] = 6;
+  
+  
+16/01/2003
+add macro generation like cpp preprosseur://\index{macro}
+this is usefull to make automatic diff
+exemple: 
+real cc=2;
+macro f(u) (cc*(exp(u)-1)) //
+macro df(f) (cc*(exp(f)))  //
+real u=1;
+cout << (cc*(exp(u)-1)) << endl;
+cout << f(u) << endl;
+cout << df(f(u)) << endl;
+
+see macro.edp  for more detail:
+  
+22/01/2003 
+in file lex.cpp add .c_str() for compilation problem 
+on g++ 2.95   
+  
+15/04/2003
+add new finite element:
+ P1b  P1 + Bubble  //\index{P1b}
+ P1dc P1 discontinious //\index{P1dc}
+ P2dc P2 discontinious //\index{P2dc}
+
+correct bug periodic BC with vectorial FESpace, 
+add the code.
+
+Make version 1.31
+-----------------  
+
+23/04/2003
+  small correction to compile with  g++ 2.95.2 in eigen value tools
+
+26/04/2003
+  add function triangulate(filename) to build the //\index{triangulate}
+  Delaunay Triangulation of a set of points in R^2.
+ to build a function form a set of : x y f(x,y)
+ see exemple mesh.edp  
+
+
+make version 1.32 (29/04/2003)
+-----------------
+
+ -add optimization in automatique interpolation 
+  CPU of all tutoral exemples 172 s( mon my Mac) new version 1.33 (with graphics)
+  CPU of all tutoral exemples 167 s( mon my Mac) new version 1.33 (without graphics)
+  CPU of all tutoral exemples 169 s( mon my Mac) new version 1.32 (without graphics)
+  bofbof.
+  
+ -correct bug in macro generation, a macro existe just in a block {..}.
+
+ //  lex.cpp  
+    if ( ret =='{') { /*cout << " listMacroDef->push_back"<< endl; */
+      listMacroDef->push_back( MapMacroDef() );}
+  else if (ret == '}') {/*cout << " listMacroDef->pop_back"<< endl;  */
+       listMacroDef->pop_back( );}
+
+ -small correction to be compatible with g++ version 3.3
+
+Make version 1.33 01/07/2003
+-----------------------------
+
+ - small correction in parallelempi.cpp add a ; line 159
+
+ - comment line 519 in file AFunction.hpp (pb with g++ 3.3.1)
+	 // operator Expression() const {return f;}
+  (double definition)see line 527
+	  operator  const  E_F0 *  () const {return f;}
+
+ - correct Makefile for mpi version
+ 
+
+21/08/2003:
+ -  Bug in optmization in case on non constant robin boundary condition
+    correct 
+ -  add grey=1  ion plot command to make  grey plot, and //\index{grey=}\index{plot!grey=}
+   correct small mistake ( on mac and X11 , ...)
+ 
+ 
+Make version 1.34 (22/08/2003)
+------------------------------
+
+16/09/2003
+ - bug in local variable stack if the size is larger the 8 ( complex)
+  complex a;real b;
+  a=0;b=1; 
+  // here a is 0+i; 
+  correction is:
+  voila la correction dans AFunction.hpp vers la ligne 1486: 
+  template<class T>
+  inline Type_Expr  NewVariable(aType t,size_t &off) 
+   { 
+     size_t o= align8(off);//  align    
+   //  off += t->un\_ptr\_type->size;
+   // bug    off += t->size;
+    off += t->un_ptr_type->size; // correction 
+    return  Type_Expr(t,new T(o,t));
+   }
+
+02/11/2003
+  -correct probleme of renumbering the traingles of a  mesh 
+   when reading in the bamg software (with readmesh command).
+   This implies error when we restore mesh and non P1 finite element
+   solution, see example saveandrestore.edp. 
+  
+28/11/2003
+  -correction of bug in window version 
+   add the umfpack sparce linear solver (this solver have some problem
+   in some case), so I do'nt put this one in default linearsolver. 
+   remark, I think is due to the way of taking Dirichlet boundary condition
+   Huge value on diagonal (tgv=1e30) and Stokes matrice.//\index{problem!tgv=}\index{solve!tgv=}
+
+  -put this file on the web
+  -put on the web 
+  -the codewarroir projet to build arpack ands umfpack lib.
+  
+Make version 1.36   
+-------------------
+
+ - Change the graphic window in Window xx version
+
+8/12/2003
+ - repare in mpi version  get mesh via mpi
+ - forget build quadtree soo the interpolation bugs
+ - add 4 line in file parallelempi.cpp in mesh serialization (recivied
+   //  add 3 line FH 08/12/2003  forget build quadtree sorry      
+       Fem2D::R2 Pn,Px;
+       a->BoundingBox(Pn,Px);
+       a->quadtree=new FQuadTree(m,Pn,Px,m->nv);
+      
+18/12/2003
+  - add in mpi version://\index{broadcast}
+    broadcast(processor(1),th); //  broadcast  th from proc 1 to all other.
+    see the mpi exemple
+    change the precision to 6 to 12 is savemesh.
+  - add tool to change the default precision on ostream or ofstream 
+    with the C++ syntaxe
+    see saverestore.edp example.
+    cout.precision(12); //\index{precision}
+  - add UMFPACK linear solver ( not well test)   //\index{UMFPACK}
+    http://www.cise.ufl.edu/research/sparse/umfpack
+  - add full matrix with few operator //\index{matrix!full}
+     real [int,int] A(10,10); 
+     A= 2;
+     A(5,5) = 2;
+     cout << A << endl;
+  -add array of mesh //\index{array!mesh}
+
+08/01/2004
+   - merge all mesh example in one file call mesh.edp
+   - add discontinuous Galerkin method (see LapDG2.edp example)
+   - add syntaxe to get mesh information  (see end of mesh.edp exemple)
+   - add meshsplit  function to make conformal recusive locat mesh spliting //\index{meshsplit}
+     (see mesh.edp example)
+   - add dynamic load via dlopen  see load.edp in example++-load  //\index{dynamic load}
+
+Make version 1.37 
+-----------------
+
+15/01/2004
+  - change metrix= in metric= the in adapted mesh metric=[m11,m12,m22]//  \index{meshadapt!metric=}
+    (change the ordre to compatible with the fonction order with IsMetric=1)
+
+02/02/2004
+  - change printing in gmres algorithme
+  - print the size of matrix 
+06/02/2004
+  - change intalledges  in change of discontinuous Galerkin loop also boundary edge//\index{intalledges}
+	 jump(u) is external - internal value of u with normal go to internal to external 
+	 jump(u)  on boundary is -internal value of u //\index{jump}
+	 average(u)  on boundary is internal value of u  //\index{average}
+  - add nTonEdge to get the number of Triangles which see the  current edge//\index{nTonEdge}
+  so see the new LapDG2.edp example for full detail
+07/02/2004
+  - correct bug in real[string] map; // map array  \index{array!string}
+        change in get_element and operator <  of String 
+Make Version 1.38
+----------------
+
+
+
+

@@ -1,0 +1,18 @@
+For compile on MacOs or Window we need 
+the metrowerks Codewarrior compiler pro 8
+see http://www.metrowerks.com
+we given different project of different achitures.
+
+
+FreeFem++.mpc.sit  (Carbon version for G3 and G4 Mac under MacOS 8.6 or newer)
+ffpc.mpc.zip   (Window95 or Better version of the  Project)
+in this two versions,  I also put the associed library arpack and umfpack
+this library must be in subdirectory lib  of FreeFem
+
+the arpack source and the metrowerk project are  available
+arpack-cw
+ 
+
+
+FreeFem++.cw7.mpc.sit  (Carbon version for G3 and G4 Mac under MacOS 8.6 or newer Project CW 7)
+ffpc.cw7.mcp.zip (Window95 or Better version of the  Project CW 7)

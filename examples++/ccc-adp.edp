@@ -1,0 +1,47 @@
+//  -----  
+real eps =  0.0001;
+real h=1;
+real hmin=0.000005;
+real val=50; 
+real coef=50; // err = 1/100
+int nbiter=10,firstplot=3;
+func f = y*x*x+y*y*y+h*tanh(val*(sin(5.0*y)-2.0*x));
+ofstream fff("err.dat");
+cout << atanh(1) << endl;
+func fx = .0*y*x-0.2E1*h*(1.0-pow(tanh(val*(sin(0.5E1*y)-0.2E1*x)),2.0))*val;
+func fy =  x*x+3.0*y*y+0.5E1*h*(1.0-pow(tanh(val*(sin(0.5E1*y)-0.2E1*x)),2.0))*val*cos(0.5E1*y);
+
+func  fxy =   2.0*(x*pow(cosh(val*sin(5.0*y)-2.0*val*x),3.0)+10.0*h*val*val*cos(5.0*y)
+		   *sinh(val*sin(5.0*y)-2.0*val*x))/pow(cosh(val*sin(5.0*y)-2.0*val*x),3.0);
+
+func  fxx= 2.0*(y*pow(cosh(val*sin(5.0*y)-2.0*val*x),3.0)-4.0*h*val*val
+		*sinh(val*sin(5.0*y)-2.0*val*x))/pow(cosh(val*sin(5.0*y)-2.0*val*x),3.0);
+
+func  d = fx*fy - fxy*fxy;
+func  fyy=(6.0*y*pow(cosh(val*sin(5.0*y)-2.0*val*x),3.0)-50.0*h*val*val*
+	   pow(cos(5.0*y),2.0)*sinh(val*sin(5.0*y)-2.0*val*x)-25.0*h*val*sin(5.0*y)*cosh(val*
+           sin(5.0*y)-2.0*val*x))/pow(cosh(val*sin(5.0*y)-2.0*val*x),3.0);
+           
+border cercle(t=0,2*pi){ x=cos(t);y=sin(t);}
+mesh Th=buildmesh(cercle(20));
+
+fespace Ph(Th,P0);
+fespace Vh(Th,P1);
+fespace V2h(Th,P2);
+Vh fh=f;
+plot(fh,wait=0); //
+
+for (int i=0;i<nbiter;i++)
+{
+  //  Th=adaptmesh(Th,f);
+  verbosity=4;
+  Vh fxxh=fxx, fxyh=fxy, fyyh = fyy;
+  cout << " min max f_xx :  " <<  fxxh[].min << " " << fxxh[].max << endl;
+  cout << " min max f_yy :  " <<  fyyh[].min << " " << fyyh[].max << endl;
+  cout << " min max f_xy :  " <<  fxyh[].min << " " << fxyh[].max << endl;
+  Th=adaptmesh(Th,f,err=0.1);
+  fh=f;
+  real err=sqrt(int2d(Th)(square(fh-f)));
+  fff  << i<< " " << err << " " << Th.nt << " " << Th.nv <<  endl;  
+}
+

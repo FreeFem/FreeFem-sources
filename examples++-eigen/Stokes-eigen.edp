@@ -1,0 +1,46 @@
+// remark: the sign of p is correct 
+real s0=clock();
+mesh Th=square(20,20);
+fespace Xh(Th,P2);
+fespace Mh(Th,P1);
+fespace XhxXhxMh(Th,[P2,P2,P1]);
+
+Xh u1,u2;
+Mh p;
+
+real alpha=0;
+real  nu=1;
+int i=0,iter=0;
+
+varf vfStokes ([u1,u2,p],[v1,v2,q]) =
+    int2d(Th)(
+             alpha*( u1*v1 + u2*v2) 
+            + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
+            +        dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+            + p*q*(0.000001) 
+            - p*dx(v1) - p*dy(v2)
+            - dx(u1)*q - dy(u2)*q
+           )
+  + on(1,2,3,4,u1=0,u2=0) 
+;
+varf b([u1,u2,p],[v1,v2,q]) = int2d(Th)(  u1*v2+u2*v2+p*q*1e-10) ; // no  Boundary condition
+
+matrix A= vfStokes(XhxXhxMh,XhxXhxMh,solver=Crout,factorize=1); 
+matrix B= b(XhxXhxMh,XhxXhxMh,solver=CG,eps=1e-20); 
+
+real sigma=0;
+int nev=20;  // number of computed eigen valeu close to sigma
+
+real[int] ev(nev); // to store nev eigein value
+XhxXhxMh[int] [eu1,eu2,ep](nev);   // to store nev eigen vector
+
+int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eu1,tol=1e-10,maxit=0,ncv=0);
+for (int i=0;i<k;i++)
+{
+  u1=eu1[i];
+  u2=eu2[i];
+  p=ep[i];
+  plot([u1,u2],p,cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,ps="Stokes-eigen"+i+".eps");
+}
+
+cout << "CPU " << clock()-s0 << "s " << endl;     

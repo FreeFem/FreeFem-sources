@@ -1,0 +1,22 @@
+int n=20,nn=n+10;
+real[int] xx(nn),yy(nn);
+// build square $]-1,1[^2$
+mesh Th=square(10,10,[2*x-1,2*y-1]); 
+fespace Vh(Th,P1);
+Vh u=2-x*x-y*y;
+
+   savemesh(Th,"mm",[x,y,u*.5]); //  save mm.points and mm.faces file for medit
+   // build a mm.bb file 
+	{ ofstream file("mm.bb"); 
+	file << "2 1 1 "<< u[].n << " 2 \n";
+	int j;
+	for (j=0;j<u[].n ; j++)  
+	  file << u[][j] << endl; 
+    }  
+    // call medit command 	
+    exec("medit mm");
+    // clean files
+    exec("rm mm.bb mm.faces mm.points");
+    
+
+

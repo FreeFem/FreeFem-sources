@@ -1,0 +1,54 @@
+//  Computation of the eigen value and eigen vector of the 
+// Dirichlet problem  on square $]0,\pi[^2$
+// ----------------------------------------
+// we use the inverse shift mode 
+// the shift is given with sigma real
+// -------------------------------------
+//  find $\lamda$ such that:
+// $$  \int_{\omega}  \nabla u_ \nabla v = \lamba \int_{\omega} u \nabla v  $$
+verbosity=1;
+mesh Th=square(20,20,[pi*x,pi*y]);
+fespace Vh(Th,P2);
+Vh u1,u2;
+
+
+real sigma = 20;  // value of the shift 
+
+varf  a(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) - sigma* u1*u2 )
+                    +  on(1,2,3,4,u1=0) ;  // Boundary condition
+                   
+varf b([u1],[u2]) = int2d(Th)(  u1*u2 ) ; // no  Boundary condition
+
+matrix A= a(Vh,Vh,solver=Crout,factorize=1); 
+matrix B= b(Vh,Vh,solver=CG,eps=1e-20); 
+
+// important remark:
+// the boundary condition is make with exact penalisation:
+//     we put 1e30=tgv  on the diagonal term of the lock degre of freedom.
+//  So take dirichlet boundary condition just on $a$ variationnal form
+// and not on  $b$ variationnanl form.
+// because we solve
+//  $$ w=A^-1*B*v $$
+
+int nev=20;  // number of computed eigen valeu close to sigma
+
+real[int] ev(nev); // to store nev eigein value
+Vh[int] eV(nev);   // to store nev eigen vector
+
+
+int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0);
+//   tol= the tolerace
+//   maxit= the maximal iteration see arpack doc.
+//   ncv   see arpack doc.
+//  the return value is number of converged eigen value.
+
+for (int i=0;i<k;i++)
+{
+  u1=eV[i];
+  real gg = int2d(Th)(dx(u1)*dx(u1) + dy(u1)*dy(u1));
+  real mm= int2d(Th)(u1*u1) ;
+  cout << " ---- " <<  i<< " " << ev[i]<< " err= " 
+       <<int2d(Th)(dx(u1)*dx(u1) + dy(u1)*dy(u1) - (ev[i])*u1*u1) << " --- "<<endl;
+  plot(eV[i],cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,ps="eigen"+i+".eps");
+}
+

@@ -1,0 +1,152 @@
+\newenvironment{sectionbib}[2]
+     {\subsubsection{#2}
+      \list{\@biblabel{\@arabic\c@enumiv}}%
+           {\settowidth\labelwidth{\@biblabel{#1}}%
+            \leftmargin\labelwidth
+            \advance\leftmargin\labelsep
+            \@openbib@code
+            \usecounter{enumiv}%
+            \let\p@enumiv\@empty
+            \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+      \sloppy
+      \clubpenalty4000
+      \@clubpenalty \clubpenalty
+      \widowpenalty4000%
+      \sfcode`\.\@m}
+     {\def\@noitemerr
+       {\@latex@warning{Empty `sectionbib' environment}}%
+      \endlist}
+
+
+\chardef\other=12
+\renewcommand{\ttdefault}{pcr}
+\renewcommand{\bfdefault}{b}
+\DeclareFixedFont{\MotClefFont}{\encodingdefault}{pcr}{b}{\shapedefault}{10pt}
+\def\sizeFF{\footnotesize}
+
+\gdef\myendgraf{\textBlack\catcode`\{=\active % left brace is begin-group character
+\catcode`\}=\active\catcode`\^=\other\catcode`\_=11
+% right brace is end-group character
+% ---- FH --- remarque -------
+%%%  pour avoir des lignes blanche 
+\ifcmm\egroup \fi\upshape\cmmfalse\hbox to 0pt{}\textBlack\endgraf}
+%%%  sans avoir des lignes blanche 
+%\ifcmm\egroup \fi\upshape\cmmfalse\endgraf\textBlack}
+% --------------------------------
+\catcode`\@=\active
+\def@{\bgroup\MotClefFont%\bfserie\ttfamily
+      \catcode`\0 = 11
+      \catcode`\1 = 11
+      \catcode`\2 = 11
+      \catcode`\3 = 11
+      \catcode`\4 = 11
+      \catcode`\5 = 11
+      \catcode`\6 = 11
+      \catcode`\7 = 11
+      \catcode`\8 = 11
+      \catcode`\9 = 11
+      \catcode`\_ = 11
+      \afterassignment\lecturecar\let\next= }
+\catcode`\@=11
+
+\def\lecturecar{%
+     \ifcat\noexpand\next a%
+     {\Blue{\next}}%
+     \def \nextnext{\afterassignment\lecturecar\let\next= }%
+     \else \ifcat\noexpand\next \space%
+     \space\fi
+     \global\let\nextnext\next\egroup
+     \fi
+     \nextnext}
+{
+  \catcode`\>=2
+  \catcode`\<=1
+  \catcode`\}=\active
+  \catcode`\{=\active
+  \catcode`\[=\active
+  \catcode`\]=\active
+  \gdef\SetBrace<
+  \gdef}<\texttt<\string}>>
+  \gdef{<\string{>
+  \gdef[<\string[>
+  \gdef]<\string]>
+  >
+  \catcode`\}=2
+  \catcode`\{=1
+  \catcode`\>=\other
+  \catcode`\<=\other
+}
+
+\def\ttCC{\bgroup\catcode`\@=\active\ttCCC}
+\def\ttCCC#1{{\sizeFF\texttt{#1}}\egroup} 
+{
+ \catcode`\<=\active
+  \catcode`\>=\active
+ \catcode`\/ = \active
+%\gdef
+
+\gdef\FFverbatim{
+\begingroup\newif\ifcmm\cmmfalse
+\let\mypar=\par\let\par=\myendgraf\sizeFF
+\let\it=\itshape
+\catcode`\è=\active\defè{\`e}
+\catcode`\à=\active\defà{\`a}
+\catcode`\î=\active\defî{\^\i}
+ % \catcode`\$=\other
+  \def\expo##1{^{##1}}
+  \def\expo!##1!{^{##1}}
+  \def\indice##1{_{##1}}
+  \catcode`\&=\other
+  \catcode`\%=\other
+  \catcode`\#=\other
+  \catcode`\%=\other
+  \catcode`\~=\active\def~{\string~}
+%  \catcode`\_=\other  
+  \catcode`\^=\other%\def\^{\string^}
+  \catcode`\}=\other
+  \catcode`\:=\other
+  \catcode`\{=\other
+  \catcode`\[=\other%\def[{$]$}
+  \catcode`\]=\other%\def]{$[$}
+  \catcode`\<=\other%\active\def<{\texttt{\string<}}
+  \catcode`\>=\other%\active\def>{\texttt{\string>}}
+  \catcode`\@= 13
+  \catcode`\0 = 11
+  \catcode`\1 = 11
+  \catcode`\2 = 11
+  \catcode`\3 = 11
+  \catcode`\4 = 11
+  \catcode`\5 = 11
+  \catcode`\6 = 11
+  \catcode`\7 = 11
+  \catcode`\8 = 11
+  \catcode`\9 = 11
+  \catcode`\_ = 11
+  \def\"{\string\"}
+  \def\n{\string\n}
+  \def\0{\string\0}
+  \def\t{\string\t}
+  \def\f{\string\f}
+  \def\\{\string\\}
+  \def\commentaire{\cmmtrue\bgroup\textRed\itshape\hfill\string/\string/ \catcode`\{=1 % left brace is begin-group character
+\catcode`\}=2 % right brace is end-group character
+\catcode`\$=3 % dollar sign is math shift
+\catcode`\^=7
+\catcode`\_=8
+\catcode`\ =10
+\catcode`\@=10\def\@{\string@}% le @ est un espace et \@ et @
+\def\hfilll{\hskip 0pt plus 1filll}
+\def/{\string/}
+ }%
+  \catcode`\/ = \active
+  \def/{\afterassignment\FFcomment\let\next= }
+  \def\FFcomment{\ifx/\next\commentaire  \else \string/\next \fi}   
+  \obeyspaces\obeylines}
+{\obeyspaces\gdef {\ }}\SetBrace}
+
+\outer\def\bFF{\bgroup\smallskip\par\parskip=1pt plus 3pt%\parskip=\z@\rightskip-5pc\medskip 
+\FFverbatim  \sizeFF \tt}
+\def\eFF{\ifcmm\egroup\fi\endgroup\par\egroup\medskip}
+
+\outer\def\inputFF#1{\par\def\includefile{\input{#1}}\parskip=0pt plus 2pt
+\FFverbatim\tt\includefile\endgroup}
