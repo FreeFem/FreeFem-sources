@@ -748,7 +748,7 @@ inline  complex<R> FElement::operator()(const R2 & PHat,const KN_<complex<R> > &
   const KN_<R>  ur(pr,u.n,u.step*2);
   const KN_<R>  ui(pr+1,u.n,u.step*2);
   
-   return complex<R>((*tfe)(*this,PHat,ur,i,op),(*tfe)(*this,PHat,ur,i,op));
+   return complex<R>((*tfe)(*this,PHat,ur,i,op),(*tfe)(*this,PHat,ui,i,op));
 }
 
 }
