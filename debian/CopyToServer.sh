@@ -4,6 +4,9 @@
 # Any error stops the script
 set -e
 
+# Displays all commands
+set -v
+
 # $1 must point to the directory where the files will be copied
 if ssh $3 test ! -d $1
     then
