@@ -13,7 +13,7 @@
 //
 // ORIG-DATE:     Dec 97
 
-
+//#define DRAWING1
 
 #include <stdlib.h>
 #include <math.h>
@@ -309,6 +309,7 @@ class GeometricalEdge {
   int Cracked() const {return flag & 1;}
   int Dup() const { return flag & 32;}
   int Equi()const {return flag & 2;}
+  int ReverseEqui()const {return flag & 1024;}
   int TgA()const {return flag &4;}
   int TgB()const {return flag &8;}
   int Tg(int i) const{return i==0 ? TgA() : TgB();}
@@ -322,6 +323,7 @@ class GeometricalEdge {
   void SetMark()    { flag|=16;}
   void SetUnMark()  { flag &= 1007 /* 1023-16*/;}
   void SetRequired() { flag |= 64;}
+  int SetReverseEqui()const {return flag & 1024;}
   
   inline void Set(const GeometricalEdge & rec,const Geometry & Th ,Geometry & ThNew);
 
@@ -331,6 +333,17 @@ class GeometricalEdge {
   
 };
   
+class Curve {public:
+ GeometricalEdge * be,*ee; // begin et end edge
+ int kb,ke;  //  begin vetex and end vertex
+ Curve *next; // next curve equi to this
+ bool master; // true => of equi curve point on this curve  
+ inline void Set(const Curve & rec,const Geometry & Th ,Geometry & ThNew);
+ Curve() : be(0),ee(0),kb(0),ke(0),next(0),master(true) {} 
+ void Reverse() { Exchange(be,ee); Exchange(kb,ke);} //  revese the sens of the curse 
+};
+  
+   
 
 /////////////////////////////////////////////////////////////////////////////////////
 class Triangle {
@@ -874,7 +887,7 @@ public:
 #endif
  friend ostream& operator <<(ostream& f,  const  Triangles & Th); 
   void  Write(const char * filename);
-  void ConsGeometry(Real8 =-1.0); // construct a geometry if no geo 
+  void ConsGeometry(Real8 =-1.0,int *equiedges=0); // construct a geometry if no geo 
   void FillHoleInMesh() ;
   int CrackMesh();
  private:
@@ -907,7 +920,7 @@ public:
   GeometricalEdge * edges;
   QuadTree *quadtree;
   GeometricalSubDomain *subdomains;
-
+  Curve *curves;
   ~Geometry(); 
   Geometry(const Geometry & Gh); //Copy  Operator 
   Geometry(int nbg,const Geometry ** ag); // intersection operator 
@@ -942,6 +955,7 @@ public:
   Int4 Number(const GeometricalVertex * t) const  { return t - vertices;}
   Int4 Number(const GeometricalEdge & t) const  { return &t - edges;}
   Int4 Number(const GeometricalEdge * t) const  { return t - edges;}
+  Int4 Number(const Curve * c) const  { return c - curves;}
   
   void UnMarkEdges() {
     for (Int4 i=0;i<nbe;i++) edges[i].SetUnMark();}
@@ -1051,6 +1065,15 @@ inline void GeometricalEdge::Set(const GeometricalEdge & rec,const Geometry & Gh
    if (Adj[0]) Adj[0] =  GhNew.edges + Gh.Number(Adj[0]);     
    if (Adj[1]) Adj[1] =  GhNew.edges + Gh.Number(Adj[1]);     
  }
+ 
+inline void Curve::Set(const Curve & rec,const Geometry & Gh ,Geometry & GhNew)
+{
+  *this = rec;
+   be = GhNew.edges + Gh.Number(be);    
+   ee = GhNew.edges + Gh.Number(ee); 
+   if(next) next= GhNew.curves + Gh.Number(next); 
+}
+
 inline void Triangle::Set(const Triangle & rec,const Triangles & Th ,Triangles & ThNew)
  { 
    *this = rec;
