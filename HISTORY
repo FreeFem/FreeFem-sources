@@ -1,3 +1,22 @@
+2005-03-13 16:32  hecht
+
+	* correct compilation problem in RNM (resize) with g++3.4 (add
+	  this->)
+
+2005-03-02 11:50  lehyaric
+
+	* Correcting compilation problem on RedHat
+
+2005-03-02 11:29  lehyaric
+
+	* New packaging including FreeFem++-cs features: fast graphics,
+	  grammar highlighting, error-line display
+
+2005-03-02 11:22  lehyaric
+
+	* FreeFem++-cs MinGW bug corrected: does not crash anymore when
+	  reading a file name from the command line
+
 2005-03-01 16:06  lehyaric
 
 	* Removed unnecessary #includes

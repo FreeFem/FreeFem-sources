@@ -27,8 +27,18 @@ AM_MAINTAINER_MODE
 
 # Necessary compilers
 
-AC_PROG_F77
-AC_PROG_CC
+AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available (BLAS, ARPACK and UMFPACK need it)])
+if test "$enable_fortran" != no
+then
+	AC_PROG_F77
+fi
+
+AC_ARG_ENABLE(c,[  --disable-c		No C compiler available (C BLAS need it)])
+if test "$enable_c" != no
+then
+	AC_PROG_CC
+fi
+
 AC_PROG_CXX
 AM_PROG_LEX
 AC_PROG_YACC
@@ -382,7 +392,8 @@ fi
 done
 
 # If all else fails, download!
-if test "$ff_blas_ok" = no -a "$ff_wget" = yes
+if test "$ff_blas_ok" = no -a "$ff_wget" = yes \
+   -a "$enable_fortran" != no -a "$enable_c" != no
 then
 	AC_CHECK_PROG(ff_unzip,unzip,yes,no)
 
@@ -507,7 +518,8 @@ then
     fi
 
 	# If all else fails, download!
-	if test "$ff_arpack_ok" = no -a "$ff_wget" = yes
+	if test "$ff_arpack_ok" = no -a "$ff_wget" = yes \
+	   -a "$enable_fortran" != no
 	then
 		AC_MSG_NOTICE(using downloaded Arpack)
 		AC_SUBST(DOWNLOAD_ARPACK,arpack)
@@ -585,7 +597,8 @@ then
 fi
 
 # If all else fails, download!
-if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes
+if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes \
+   -a "$enable_fortran" != no
 then
 	AC_MSG_NOTICE(using downloaded Umfpack)
 	AC_SUBST(DOWNLOAD_UMFPACK,umfpack)
