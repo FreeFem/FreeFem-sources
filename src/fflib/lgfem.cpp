@@ -3369,9 +3369,11 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("GMRES",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::GMRES)));
 #ifdef HAVE_LIBUMFPACK
  Global.New("UMFPACK",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::UMFpack)));
+ Global.New("HaveUMFPACK",CConstant<bool>(true));
 #else 
  cout << " --  no UMFPACK => replace UMFPACK  by LU  " << endl;
  Global.New("UMFPACK",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::LU)));
+ Global.New("HaveUMFPACK",CConstant<bool>(false));
 #endif 
 //  init pmesh  
  Add<pmesh*>("<-","(",
