@@ -3,6 +3,9 @@
 //  mais si la maillage change alors 
 //  l'espace change 
 //   cf la fonction set qui reconstruit FESpace
+
+void init_lgmat(); // initialisation for sparce mat functionnallity
+
 class v_fes; 
 typedef v_fes *pfes;
 
