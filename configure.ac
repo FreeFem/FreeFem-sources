@@ -250,7 +250,7 @@ ff_blas_ok=no
 AC_ARG_WITH(blas,
 	--with-blas=library	Use a specific version of the Blas,
 	ff_blas_ok=yes
-	ff_blas_libs="${withval}")
+	ff_blas_lib="${withval}")
 
 # Trying  blas library 
 for iblas in \
