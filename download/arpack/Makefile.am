@@ -12,7 +12,7 @@ ARPACKLIB=ARPACK/libarpack_ff++.a
 
 arpack: $(ARPACKLIB)
 
-$(ARPACKLIB): arpack96.tar.gz patch.tar.gz
+$(ARPACKLIB): arpack96.tar.gz patch.tar.gz ARmake.inc
 	gunzip -c arpack96.tar.gz | tar xvf -
 	gunzip -c patch.tar.gz | tar xvf -
 	cp ARmake.inc ARPACK
