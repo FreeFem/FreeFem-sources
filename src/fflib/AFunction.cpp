@@ -182,6 +182,11 @@ inline   string ** get_element<string*>( MyMap<String,string*> *  const  &  a,st
     delete b;
     return ret;}
 
+inline   string ** get_elements( MyMap<String,String> *  const  &  a,string*  const   & b)
+ { String* Sret=  &((*a)[*b]); // correction FH feb 2004
+    delete b;
+    return Sret->getap();}
+
 template<class RR,class A,class B>  
 RR * get_element_(const A & a,const B & b){ 
   if( b<0 || a.N() <= b) 
@@ -1657,9 +1662,14 @@ void Init_map_type()
    //  NEW_TYPE( mapSd  );
   //   NEW_TYPE_I( mapSd  );
     // FH aout 2004 : STRING ARRAY OF STRING STRING[STRING] 
-     map_type[typeid(MyMap<String,string*>*).name()] = new ForEachType<MyMap<String,string*>*>(Initialize<MyMap<String,string*> >,Delete<MyMap<String,string*> >) ;         
+/*     map_type[typeid(MyMap<String,string*>*).name()] = new ForEachType<MyMap<String,string*>*>(Initialize<MyMap<String,string*> >,Delete<MyMap<String,string*> >) ;         
      map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMap<String,string*>*>();      
      atype<MyMap<String,string*>*>()->Add("[","",new OneOperator2_<string**,MyMap<String,string*>*,string*>(get_element<string*>));
+*/
+typedef MyMap<String,String> MyMapSS;
+     map_type[typeid(MyMapSS*).name()] = new ForEachType<MyMapSS*>(Initialize<MyMapSS >,Delete<MyMapSS >) ;         
+     map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMapSS*>();      
+     atype<MyMapSS*>()->Add("[","",new OneOperator2_<string**,MyMapSS*,string*>(get_elements));
      
           
      tables_of_identifier.push_back(&Global);
