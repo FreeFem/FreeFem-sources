@@ -1,4 +1,7 @@
+*.eps
 ListOfUnAllocPtr.bin
 *.log
 Makefile
 Makefile.in
+*.ps
+regtests.edp
