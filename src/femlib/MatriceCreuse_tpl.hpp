@@ -11,7 +11,9 @@
 //  on MacOS9 under MWERKS
 //  cblas_ddot macos-9 is not 
 #ifdef HAVE_CBLAS_H
+extern "C" {
 #include <cblas.h> 
+}
 #define WITHBLAS 1
 #elif HAVE_VECLIB_CBLAS_H
 #include <vecLib/cblas.h> 
