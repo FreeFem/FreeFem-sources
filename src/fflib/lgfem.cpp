@@ -396,9 +396,13 @@ class LinearCG : public OneOperator
 
   class E_LCG: public E_F0mps { public:
    const int cas;// <0 => Nolinear
+   static const int n_name_param=4;
+
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =4;
-   Expression nargs[n_name_param];
+
+
+  Expression nargs[n_name_param];
+   
   const OneOperator *A, *C; 
   Expression X,B;
 
@@ -468,6 +472,7 @@ class LinearCG : public OneOperator
                              atype<KN<R> *>()),cas(cc){}
    
 };
+
 
 template<class R>
 basicAC_F0::name_and_type  LinearCG<R>::E_LCG::name_param[]= {
@@ -597,6 +602,7 @@ class LinearGMRES : public OneOperator
                              atype<KN<R> *>()),cas(cc){}
    
 };
+
 
 template<class R>
 basicAC_F0::name_and_type  LinearGMRES<R>::E_LGMRES::name_param[]= {
@@ -1598,7 +1604,7 @@ inline pfes* MakePtr2(pfes * const &p,pfes * const &  a,long const & n){
  
 
 template<class K>    
-KN<K> * pfer2vect( pair<FEbase<R> *,int> p)
+KN<K> * pfer2vect( pair<FEbase<K> *,int> p)
  {  
     KN<K> * x=p.first->x();
     if ( !x) {  // defined 
@@ -1633,6 +1639,7 @@ long get_mat_m(Matrice_Creuse<R> * p)
  { throwassert(p ) ;  return p->A ?p->A->m: 0  ;}
  
 
+
 class Op_CopyArray : public OneOperator { public:
     Op_CopyArray():OneOperator(atype<void>(),atype<E_Array>(),atype<E_Array>()) {}
     E_F0 * code(const basicAC_F0 & args) const ; 
@@ -1641,7 +1648,7 @@ class Op_CopyArray : public OneOperator { public:
 template<class R,int dd>
 AnyType pfer2R(Stack s,const AnyType &a)
 {
-  pfer ppfe=GetAny<pfer>(a);
+  pair< FEbase<R> *  ,int> ppfe=GetAny<pair< FEbase<R> *,int> >(a);
    FEbase<R> & fe( *ppfe.first);
   int componante=ppfe.second;
   if ( !fe.x()) {
@@ -1715,6 +1722,20 @@ AnyType pfer2R(Stack s,const AnyType &a)
   return SetAny<R>(rr);
 }
 
+template<class R>
+  ostream & ShowBound(const KN<R> & y,ostream & f)
+ {
+  f << " -- vector function's bound  " << y.min() << " " << y.max() ;
+  return f;
+ }
+template<>
+  ostream & ShowBound<Complex>(const KN<Complex> & y,ostream & f)
+ {
+  f << " -- vector function's bound : (no complex Value) " ;
+  return f;
+ }
+ 
+template<class R>
 AnyType set_fe (Stack s,Expression ppfe, Expression e)
   { 
    long kkff = Mesh::kfind,  kkth = Mesh::kthrough;
@@ -1739,7 +1760,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
       
     FElement::aIPJ ipj(Vh[0].Pi_h_ipj()); 
     FElement::aR2  PtHat(Vh[0].Pi_h_R2()); 
-    KN<R>   Aipj(ipj.N());
+    KN<double>   Aipj(ipj.N());
     KN<R>   Vp(PtHat.N());
     const E_F0 & ff(* (const  E_F0 *) e ) ;
 
@@ -1758,7 +1779,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
          if  ( &K[2] == &v) il=2;
          assert(il>=0);
          mps->set(Th,v,TriangleHat[il],K,v.lab);
-         yy[iv] = GetAny<double>( ff(s) );
+         yy[iv] = GetAny<R>( ff(s) );
        }
       
     }
@@ -1777,7 +1798,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
          for (int p=0;p<PtHat.N();p++)
           { 
             mps->set(K.T(PtHat[p]),PtHat[p],K);
-            Vp[p]=GetAny<double>( ff(s) );
+            Vp[p]=GetAny<R>( ff(s) );
            }
          for (int i=0;i<Aipj.N();i++)
           { 
@@ -1796,7 +1817,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
      kkth = Mesh::kthrough -kkth;
 
     if(verbosity>1)
-      cout << " -- vector function's bound   " << y->min() << " " << y->max() 
+      ShowBound(*y,cout)  
            << " " << kkth << "/" << kkff << " =  " << double(kkth)/Max<double>(1.,kkff) << endl;
     return SetAny<FEbase<R>*>(&fe); 
   }
@@ -1837,6 +1858,7 @@ AnyType set_feoX_1 (Stack s,Expression ppfeX_1, Expression e)
     cout << " -- interpole f= g*X^-1, function's bound:  " << y->min() << " " << y->max() << endl; 
     return SetAny<FEbase<R>*>(&fe); 
   }
+template<class K>
 class E_set_fev: public E_F0mps {public:
   E_Array  aa;
   Expression   ppfe;
@@ -1851,15 +1873,15 @@ class E_set_fev: public E_F0mps {public:
              
 };
 
-
-E_set_fev::E_set_fev(const E_Array * a,Expression pp) 
+template<class K>
+E_set_fev<K>::E_set_fev(const E_Array * a,Expression pp) 
   :aa(*a),ppfe(pp),optimize(true),
    where_in_stack_opt(0),optiexp0(0),optiexpK(0) 
    { 
-    aa.map(to<R>) ;
+    aa.map(to<K>) ;
     bool kdump=false;
     if(optimize)
-			{ // new code Optimez  -------
+			{ // new code Optimized  -------
 			     int n=aa.size();
 			    deque<pair<Expression,int> > ll;
 			    MapOfE_F0 m;
@@ -1904,43 +1926,57 @@ E_set_fev::E_set_fev(const E_Array * a,Expression pp)
    
    
    }
-AnyType E_set_fev::operator()(Stack s)  const
+   
+  
+template<class K>   
+AnyType E_set_fev<K>::operator()(Stack s)  const
 {   
     MeshPoint *mps=MeshPointStack(s), mp=*mps;   
-    FEbase<R> ** pp=GetAny< FEbase<R> **>((*ppfe)(s));
-    FEbase<R> & fe(**pp);
+    FEbase<K> ** pp=GetAny< FEbase<K> **>((*ppfe)(s));
+    FEbase<K> & fe(**pp);
     const  FESpace & Vh(*fe.newVh());
-    KN<R> gg(Vh.MaximalNbOfDF()); 
+    KN<K> gg(Vh.MaximalNbOfDF()); 
     
     
     const  Mesh & Th(Vh.Th);
     const int dim=Vh.N;
-    double ** copt=0;
-    if (optimize)   copt= new double *[dim];
+    K ** copt=0;
+    if (optimize)   copt= new K *[dim];
     if(copt) {
       assert(dim== where_in_stack_opt.size());
       for (int i=0;i<dim;i++)
        {
         int offset=where_in_stack_opt[i];
         assert(offset>10);
-        copt[i]= static_cast<double *>(static_cast<void *>((char*)s+offset));
+        copt[i]= static_cast<K *>(static_cast<void *>((char*)s+offset));
         *(copt[i])=0;
        }
     if (optiexp0) (*optiexp0)(s); // init 
     }
+
     assert(dim<100);
  //   R F[100]; // buffer 
+
     TabFuncArg tabexp(s,Vh.N);
 //   const E_Array * aa = dynamic_cast<const E_Array *>(e);
    throwassert( aa.size() == Vh.N);
    for (int i=0;i<dim;i++)
      tabexp[i]=aa[i]; 
-   KN<R> * y=new  KN<R>(Vh.NbOfDF);
-   KN<R> & yy(*y);
+  
+   KN<K> * y=new  KN<K>(Vh.NbOfDF);
+   KN<K> & yy(*y);
+ 
     FElement::aIPJ ipj(Vh[0].Pi_h_ipj()); 
     FElement::aR2  PtHat(Vh[0].Pi_h_R2()); 
-    KN<R>   Aipj(ipj.N());
-    KNM<R>  Vp(dim,PtHat.N());
+ 
+    KN<double>   Aipj(ipj.N());
+
+
+//   KNM<K>  Vp(dim,PtHat.N());// bug 
+// g++ error: too many initializers for `const __class_type_info_pseudo
+
+   KN<K>  Vp1(dim*PtHat.N());
+   
    
    if (Vh.isFEMesh() )
     {
@@ -1951,40 +1987,42 @@ AnyType E_set_fev::operator()(Stack s)  const
          const E_F0 & ff(* (const  E_F0 *) aa[0]  ) ;
          const Vertex & v(Th(iv));
          int ik=Th.Contening(&v);
-         const Triangle & K(Th[ik]);
+         const Triangle & Kt(Th[ik]);
          int il=-1;
-         if  ( &K[0] == &v) il=0;
-         if  ( &K[1] == &v) il=1;
-         if  ( &K[2] == &v) il=2;
+         if  ( &Kt[0] == &v) il=0;
+         if  ( &Kt[1] == &v) il=1;
+         if  ( &Kt[2] == &v) il=2;
          assert(il>=0);
-         mps->set(Th,v,TriangleHat[il],K,v.lab);
+         mps->set(Th,v,TriangleHat[il],Kt,v.lab);
          if (copt) {
            if (optiexpK) (*optiexpK)(s); 
             yy[iv] =  *(copt[0]);
           }
           else 
-           yy[iv] = GetAny<double>( ff(s) );
+           yy[iv] = GetAny<K>( ff(s) );
        }
       
     }
    else
      for (int t=0;t<Th.nt;t++)
       {
-         FElement K(Vh[t]);
-         int nbdf=K.NbDoF();
+         FElement Kt(Vh[t]);
+         int nbdf=Kt.NbDoF();
         
-         gg=R();
+         gg=K();
          
 #ifdef OLDPih    
 // old method          
-         K.Pi_h(gg,F_Pi_h,F,&tabexp);
+         Kt.Pi_h(gg,F_Pi_h,F,&tabexp);
 #else               
-         K.Pi_h(Aipj);
+         Kt.Pi_h(Aipj);
+         
          for (int p=0;p<PtHat.N();p++)
           { 
-            mps->set(K.T(PtHat[p]),PtHat[p],K);
+            mps->set(Kt.T(PtHat[p]),PtHat[p],Kt);
 
-            KN_<double> Vpp(Vp('.',p));
+      //      KN_<K> Vpp(Vp('.',p));
+            KN_<K> Vpp(Vp1,SubArray(dim,p*dim)); // a Change FHHHHHHHH
             if (copt) { // optimize  version 
              if (optiexpK) (*optiexpK)(s);
              for (int j=0;j<dim;j++)
@@ -1993,46 +2031,50 @@ AnyType E_set_fev::operator()(Stack s)  const
             else  // old version 
             for (int j=0;j<dim;j++)
              if (tabexp[j]) 
-               Vpp[j]=GetAny<double>( (*tabexp[j])(s) );
+               Vpp[j]=GetAny<K>( (*tabexp[j])(s) );
               else Vpp[j]=0;
            }
            
          for (int i=0;i<Aipj.N();i++)
           { 
            const FElement::IPJ &ipj_i(ipj[i]);
-           gg[ipj_i.i] += Aipj[i]*Vp(ipj_i.j,ipj_i.p);           
-          }
+         //  gg[ipj_i.i] += Aipj[i]*Vp(ipj_i.j,ipj_i.p);           
+             gg[ipj_i.i] += Aipj[i]*Vp1(ipj_i.j+ipj_i.p*dim); // index a la main            
+          } 
 #endif          
 
          for (int df=0;df<nbdf;df++)         
-           yy[K(df)] =  gg[df] ;
+           yy[Kt(df)] =  gg[df] ;
       }
    //  MeshPointStack(s)->unset();
     fe=y;
     if (copt) delete [] copt;
     *MeshPointStack(s) = mp;
     if(verbosity>1)
-    cout << " -- function's bound  (DF)" << y->min() << " " << y->max() << endl; 
+        ShowBound(*y,cout) << endl ;
+   //HHHH*/       
     return Nothing;
   }
-  
 
 
-
-inline pferbase MakePtrFE(pfes * const &  a){ 
-  pferbase p=new FEbase<R>(a);
+template<class K>
+inline FEbase<K> * MakePtrFE(pfes * const &  a){ 
+  FEbase<K> * p=new FEbase<K>(a);
   //cout << "MakePtrFE " << p<< endl; 
   return p ;}
   
-inline pferbase* MakePtrFE2(pferbase * const &  p,pfes * const &  a){ 
-  *p=new FEbase<R>(a);
+template<class K>
+inline FEbase<K> ** MakePtrFE2(FEbase<K> * * const &  p,pfes * const &  a){ 
+  *p=new FEbase<K>(a);
+  //cout << "MakePtrFE2 " << *p<< endl; 
+  return p ;}
+
+template<class K>  
+inline FEbaseArray<K> ** MakePtrFE3(FEbaseArray<K> * * const &  p,pfes * const &  a,const long & N){ 
+  *p=new FEbaseArray<K>(a,N);
   //cout << "MakePtrFE2 " << *p<< endl; 
   return p ;}
   
-inline pferbasearray* MakePtrFE3(pferbasearray * const &  p,pfes * const &  a,const long & N){ 
-  *p=new FEbaseArray<R>(a,N);
-  //cout << "MakePtrFE2 " << *p<< endl; 
-  return p ;}
 /*
 inline pmesharray*  MakePtr(pmesharray*  const &  p,long   const &  a){ 
   p->first=new pmesh [a];
@@ -2041,27 +2083,31 @@ inline pmesharray*  MakePtr(pmesharray*  const &  p,long   const &  a){
      p->first[i]=0; // nuset 
   return p ;}
 */  
+template<class K>
 class  OneOperatorMakePtrFE : public OneOperator { public:
  // il faut Optimize 
-    typedef pferbase* R;
+  // typedef double K;
+    typedef  FEbase<K> ** R;
     typedef pfes* B;
-    typedef double K;
     class CODE : public E_F0mps  { public:
        Expression fer,fes;
-       E_set_fev * e_set_fev;
+       E_set_fev<K> * e_set_fev;
        const E_Array * v;
        CODE(const basicAC_F0 & args) : 
          fer(to<R>(args[0])),
          fes(to<B>(args[1])),
          e_set_fev(0) 
           {
-          	if (BCastToR(args[2]) )
+             if (BCastTo<K>(args[2]) )
               v = new E_Array(basicAC_F0_wa(to<K>(args[2]))); 
             else 
               v = dynamic_cast<const E_Array *>( args[2].LeftValue() );
-            if (!v) ErrorCompile(" We wait  a double expression or a array expression",1);
+            if (!v) {
+               cout << "Error: type of arg :" << *args[2].left()  << " in " << typeid(K).name() << " case " << endl;
+               ErrorCompile(" We wait  a double/complex expression or a array expression",1);
+              }
             //v->map(to<K>);
-			  e_set_fev=  new   E_set_fev(v,fer);
+			  e_set_fev=  new   E_set_fev<K>(v,fer);
  
           }
          
@@ -3082,8 +3128,8 @@ struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
 
 // Fin Add FH Houston --------
 
-
-class Op3_pfer2R : public ternary_function<pfer,R,R,R> { public:
+template<class K>
+class Op3_pfe2K : public ternary_function<pair<FEbase<K> *,int>,R,R,K> { public:
 
 
   class Op : public E_F0mps { public:
@@ -3095,7 +3141,7 @@ class Op3_pfer2R : public ternary_function<pfer,R,R,R> { public:
            R yy(GetAny<R>((*c)(s)));
            MeshPoint & mp = *MeshPointStack(s),mps=mp;
            mp.set(xx,yy,0.0);
-           AnyType ret = pfer2R<R,0>(s,(*a)(s));
+           AnyType ret = pfer2R<K,0>(s,(*a)(s));
            mp=mps;
            return  ret;}
    
@@ -3289,6 +3335,14 @@ void  init_lgfem()
  Dcl_TypeandPtr<pferbasearray>(); // il faut le 2 pour pourvoir initialiser 
  Dcl_Type< pfer >(); 
  Dcl_Type< pferarray >(); 
+
+//  pour des Func FE complex   // FH  v 1.43
+ Dcl_TypeandPtr<pfecbase>(); // il faut le 2 pour pourvoir initialiser 
+ Dcl_TypeandPtr<pfecbasearray>(); // il faut le 2 pour pourvoir initialiser 
+ Dcl_Type< pfec >(); 
+ Dcl_Type< pfecarray >(); 
+//  FH v 1.43
+
 // Dcl_Type< pmesharray *>(); // il faut le 2 pour pourvoir initialiser 
 
  map_type[typeid(pfes).name()] = new ForEachType<pfes>(); 
@@ -3342,7 +3396,9 @@ void  init_lgfem()
  atype<pferbase>()->AddCast(  new E_F1_funcT<pferbase,pferbase>(UnRef<pferbase>));
  
  Add<pfer>("[]",".",new OneOperator1<KN<double> *,pfer>(pfer2vect<R>));
- Add<pfer>("(","",new OneTernaryOperator<Op3_pfer2R,Op3_pfer2R::Op> );
+ Add<pfec>("[]",".",new OneOperator1<KN<Complex> *,pfec>(pfer2vect<Complex>));
+ Add<pfer>("(","",new OneTernaryOperator<Op3_pfe2K<R>,Op3_pfe2K<R>::Op> );
+ Add<pfec>("(","",new OneTernaryOperator<Op3_pfe2K<Complex>,Op3_pfe2K<Complex>::Op> );
  Add<double>("(","",new OneTernaryOperator<Op3_K2R<R>,Op3_K2R<R>::Op> );
  
  Add<pfer>("n",".",new OneOperator1<long,pfer>(pfer_nbdf<R>));
@@ -3624,18 +3680,27 @@ TheOperators->Add("+",
        
  TheOperators->Add("<-",
        new OneOperator2_<pferbase*,pferbase*,pfes* >(MakePtrFE2),
-       new OneOperator3_<pferbasearray*,pferbasearray*,pfes*,long >(MakePtrFE3) //,
+       new OneOperator3_<pferbasearray*,pferbasearray*,pfes*,long >(MakePtrFE3),  
+
+
+       new OneOperator2_<pfecbase*,pfecbase*,pfes* >(MakePtrFE2),
+       new OneOperator3_<pfecbasearray*,pfecbasearray*,pfes*,long >(MakePtrFE3) //,
      //  new OneOperator2_<pmesharray*,pmesharray*,long >(MakePtr)
        
        
        );
  TheOperators->Add("<-",
-       new OneOperatorMakePtrFE(atype<double>()),  //  scalar case
-       new OneOperatorMakePtrFE(atype<E_Array>())  //  vect case
+       new OneOperatorMakePtrFE<double>(atype<double>()),  //  scalar case
+       new OneOperatorMakePtrFE<double>(atype<E_Array>()),  //  vect case
+       new OneOperatorMakePtrFE<Complex>(atype<Complex>()),  //  scalar complex  case
+       new OneOperatorMakePtrFE<Complex>(atype<E_Array>())  //  vect complex case
        );
 //  interpolation   operator 
  TheOperators->Add("=",
-       new OneOperator2_<pfer,pfer,double,E_F_StackF0F0opt2 >(set_fe) ) ;     
+       new OneOperator2_<pfer,pfer,double,E_F_StackF0F0opt2 >(set_fe<double>) ,
+       new OneOperator2_<pfec,pfec,Complex,E_F_StackF0F0opt2 >(set_fe<Complex>) 
+       
+       ) ;     
      //  new OneOperator2_<pferbase,pferbase,E_Array,E_F_StackF0F0 >(set_fev));
        
 //  Attention il y a moralement un bug
@@ -3705,9 +3770,10 @@ TheOperators->Add("+",
 template<class K>
 Expression IsFEcomp(const C_F0 &c,int i)
 {
+//  typedef double K;
   if(atype<typename E_FEcomp<K>::Result>() == c.left())
    {
-     const E_FEcomp<K> * e=dynamic_cast<const E_FEcomp<R>*>(c.LeftValue() );
+     const E_FEcomp<K> * e= dynamic_cast<const E_FEcomp<K>*>(c.LeftValue() );
      throwassert(e);
      if (e->comp !=i) return 0;
      else return e->a0;
@@ -3715,6 +3781,20 @@ Expression IsFEcomp(const C_F0 &c,int i)
   else return 0;
 }
 
+/*
+Expression IsCFEcomp(const C_F0 &c,int i)
+{
+  typedef Complex K;
+  if(atype<E_FEcomp<K>::Result>() == c.left())
+   {
+     const E_FEcomp<K> * e= dynamic_cast<const E_FEcomp<K>*>(c.LeftValue() );
+     throwassert(e);
+     if (e->comp !=i) return 0;
+     else return e->a0;
+   }
+  else return 0;
+}
+*/
 
  E_F0 * Op_CopyArray::code(const basicAC_F0 & args) const  {
        E_F0 * ret=0;
@@ -3723,36 +3803,61 @@ Expression IsFEcomp(const C_F0 &c,int i)
       int na=a.size();
       int nb=b.size();
       if (na != nb ) 
-        CompileError("Size Of Array incompatible");
-        const  E_F0 * rr=0;
+        CompileError("Copy of Array with incompatible size!");
+        
+       const  E_F0 * rr=0;
+       //  try real voctor value FE interpolation 
+       rr=IsFEcomp<double>(a[0],0) ;
+       if (rr !=0) 
+        {
+          for (int i=1;i<nb;i++)
+              if (rr!= IsFEcomp<double>(a[i],i))  
+                CompileError("Copy of Array with incompatible real vector value FE function () !");;           
+           return  new E_set_fev<double>(&b,rr);
+         }
+       //  try complex vector value FE interpolation 
 
-          for (int i=0;i<nb;i++)
-           {
-            if ( rr ==0 ) {rr=IsFEcomp<R>(a[i],i) ; if (rr==0) goto general;}
-             else  if (rr!= IsFEcomp<R>(a[i],i))  goto general;
-           }
-         return new E_set_fev(&b,rr);
- general:
+       rr=IsFEcomp<Complex>(a[0],0) ;
+       if (rr !=0) 
+        {
+          for (int i=1;i<nb;i++)
+              if (rr!= IsFEcomp<Complex>(a[i],i))  
+                CompileError("Copy of Array with incompatible complex vector value FE function () !");;           
+           return  new E_set_fev<Complex>(&b,rr);
+         }
         CompileError("Internal Error: General Copy of Array : to do ");
       return ret;}
 
-C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 init)
+C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx)
 {
   ListOfId lid;
   lid.push_back(UnId(id));
-  return NewFEvariable(&lid,currentblock,fespacetype,init);
+  return NewFEvariable(&lid,currentblock,fespacetype,init,cplx);
 }
 
-C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 init)
+C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx)
 {
+//   if (cplx)
+//   cout << "NewFEvariable  cplx=" << cplx << endl;
    typedef FEbase<double> FE;
    typedef E_FEcomp<R> FEi;
    typedef E_FEcomp<R>::Result FEiR;
+
+   typedef FEbase<Complex> CFE;
+   typedef E_FEcomp<Complex> CFEi;
+   typedef E_FEcomp<Complex>::Result CFEiR;
    
    Expression fes =fespacetype;
+   
     aType dcltype=atype<FE **>();
     aType cf0type=atype<C_F0>();
     aType rtype=atype<FEiR>();
+    if(cplx)
+      {
+        dcltype=atype<CFE **>();
+        rtype=atype<CFEiR>();
+        
+      }
     throwassert(pids);
     ListOfId &ids(*pids);
     
@@ -3775,7 +3880,10 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
      C_F0 ret= binit ? currentblock->NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,init))
                      : currentblock->NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype));
      C_F0 base = currentblock->Find(name);
-     
+     if (cplx)
+      for (int i=0;i<n;i++) 
+         currentblock->NewID(cf0type,ids[i].id, C_F0(new CFEi(base,i,n), rtype) ); 
+     else
       for (int i=0;i<n;i++) 
          currentblock->NewID(cf0type,ids[i].id, C_F0(new FEi(base,i,n), rtype) ); 
 
@@ -3803,18 +3911,23 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
     return dim;
 }
 
-C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray)
+C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray,bool cplx)
 { 
   ListOfId lid;
   lid.push_back(UnId(id));
-  return NewFEarray(&lid,currentblock,fespacetype,sizeofarray);
+  return NewFEarray(&lid,currentblock,fespacetype,sizeofarray,cplx);
 }
    
-C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray)
+C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray,bool cplx)
 {
+  // assert(!cplx);
    typedef FEbaseArray<double>  FE;
    typedef  E_FEcomp<R,FE > FEi;
    typedef FEi::Result FEiR;
+
+   typedef FEbaseArray<Complex>  CFE;
+   typedef  E_FEcomp<Complex,FE > CFEi;
+   typedef CFEi::Result CFEiR;
    
    Expression fes =fespacetype;
     aType dcltype=atype<FE **>();
@@ -3822,6 +3935,12 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
     aType rtype=atype<FEiR>();
     throwassert(pids);
     ListOfId &ids(*pids);
+    if(cplx)
+      {
+        dcltype=atype<CFE **>();
+        rtype=atype<CFEiR>();
+        
+      }
     
     string str("[");
     
@@ -3840,13 +3959,17 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
      char * name = strcpy(new char[str.size()+1],str.c_str());
      C_F0 ret=  currentblock->NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,sizeofarray)); 
      C_F0 base = currentblock->Find(name);
-     
+     if(cplx)
+      for (int i=0;i<n;i++) 
+         currentblock->NewID(cf0type,ids[i].id, C_F0(new CFEi(base,i,n), rtype) ); 
+     else
       for (int i=0;i<n;i++) 
          currentblock->NewID(cf0type,ids[i].id, C_F0(new FEi(base,i,n), rtype) ); 
 
       return ret ; 
 
 }
+
 #include "InitFunct.hpp"
 static addingInitFunct TheaddingInitFunct(-20,init_lgfem);
 
