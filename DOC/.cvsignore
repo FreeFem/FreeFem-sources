@@ -1,6 +1,3 @@
-c-*
-*.exe
-*.tar.gz
 *.sit
 *.zip
 *.aux
@@ -12,3 +9,4 @@ c-*
 *.toc
 *.ind
 *.tmp
+*.out
