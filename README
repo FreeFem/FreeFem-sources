@@ -82,7 +82,7 @@ To run a speed test:
 > make speedtest
 
 To create the documentation in .ps and .pdf format (in the "DOC" directory):
-> make doc
+> make documentation
 
 To Create a Microsoft Windows self-installable package containing all
 FreeFem++ executables and examples, you need to install "Inno Setup"

@@ -69,10 +69,10 @@ then
 	if test `/usr/bin/hostinfo|grep Darwin|wc -l` -gt 0
 	    then
 
-	    # " will be followed by "-mcpu" to give an exact CPU
-	    # reference.
-	    # -fast option do not work because the -malign-natural flags create wrong IO code 
-	    ff_fast='-O3 -funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64'
+	    # -fast option do not work because the -malign-natural
+	    # flags create wrong IO code
+
+	    ff_fast='-funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64'
 
 	    CHECK_COMPILE_FLAG(C,$ff_fast,CFLAGS)
 	    CHECK_COMPILE_FLAG(C++,$ff_fast,CXXFLAGS)
@@ -132,7 +132,7 @@ then
 	# If we did not find a processor type (this happens with
 	# cygwin), try and select separate capabilities instead.
 
-	if test "$proc_type" = no
+	if test "$proc_type" = unknown
 	    then
 	    if test `grep -e '^flags.*mmx' /proc/cpuinfo|wc -l` -gt 0
 		then
