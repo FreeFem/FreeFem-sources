@@ -221,7 +221,7 @@ if test "$ff_blas_ok" = no;
 then
 	AC_MSG_NOTICE(using downloaded Blas)
 	AC_SUBST(DOWNLOAD_BLAS,blas)
-	ff_blas_lib="${curdir}/download/ATLAS/lib/ff++/libatlas.a"
+	ff_blas_lib="-L${curdir}/download/blas/ATLAS/lib/ff++ -lf77blas -lcblas -latlas"
 	LIBS="$ff_blas_lib $LIBS"
 	ff_blas_ok=yes
 fi
@@ -238,6 +238,7 @@ then
 	ff_g2c_ok=no
 	AC_CHECK_LIB(g2c,G77_second_0,
 		LIBS="$LIBS -lg2c"
+		ff_g2c_lib="-lg2c"
 		ff_g2c_ok=yes)
 
 	if test "$ff_g2c_ok" = no;
@@ -247,11 +248,17 @@ then
 		LIBS="$LIBS -L/sw/lib -lg2c"
 		AC_LINK_IFELSE(
 			[AC_LANG_CALL(,G77_second_0)],
+			ff_g2c_lib="-L/sw/lib -lg2c"
 			ff_g2c_ok=yes,
 			LIBS="$ff_save_libs")
 		AC_MSG_RESULT($ff_g2c_ok)
 	fi
 fi
+
+# Copy the result of g2c investigations into a separate variable
+# because UMFPACK compilation will need it.
+
+AC_SUBST(G2CLIB,$ff_g2c_lib)
 
 # Arpack itself
 
