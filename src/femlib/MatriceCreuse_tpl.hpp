@@ -1010,36 +1010,7 @@ template<class R>
      } 
     int nbcoef=mij.size();
     if(sym) nbcoef = (nbcoef+n)/2;
-/*    MatriceMorse<R> * r=new  MatriceMorse<R>();
-    
-    r->n=n;
-    r->m=m;
-    int *lg, *cl;
-    R *a;
-    r->lg=lg=new int[n+1];
-     r->cl=cl=new int [nbcoef];
-     r->a=a=new R [nbcoef];        
-     r->nbcoef=nbcoef;
-     r->symetrique=sym;
-     r->dummy=false;
-     lg[0]=0;
-     int k=0;
-     bool nosym=!sym;
-     for (typename map< pair<int,int>, R>::iterator iter=mij.begin();iter!=mij.end();++iter)
-      { 
-        int i=iter->first.first;
-        int j=iter->first.second;
-        R aij=iter->second;
-       if(j<=i || nosym)
-        {
-        cl[k]=j;
-        a[k]=aij;
-        lg[i+1]=++k;
-        }
-       }
-   
-     return r;
- */
+
    return new   MatriceMorse<R>(n,m,mij,sym);   
      
   }
@@ -1082,27 +1053,27 @@ template<class R>
   MatriceMorse<R>::MatriceMorse(int nn,int mm, map< pair<int,int>, K> & m, bool sym):
    MatriceCreuse<R>(nn,mm,0),solver(0),nbcoef(m.size()),symetrique(sym),  
    a(new R[nbcoef]),
-   lg(new int[this->n+1]),
+   lg(new int[nn+1]),
    cl(new int[nbcoef])     
   {
      lg[0]=0;
      int k=0;
      bool nosym=!sym;
      typename map< pair<int,int>, R>::iterator iter=m.begin(), mend=m.end();
-     for (;iter!=mend;++iter)
+     while(iter!=mend)
       { 
         int i=iter->first.first;
         int j=iter->first.second;
-        K aij=iter->second;
+        K & aij=iter->second;
         if(j<=i || nosym)
         {
          cl[k]=j;
          a[k]=aij;
          lg[i+1]=++k;
         }
+        ++iter;
        }
-  
-  
+   assert(nbcoef==k);  
   }
 
 template<class RA>
