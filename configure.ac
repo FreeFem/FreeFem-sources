@@ -34,13 +34,13 @@ AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
 # Checking wether we can produce a X11 version
 # --------------------------------------------
 
-AC_MSG_CHECKING(wether we can use X11)
+AC_MSG_CHECKING(wether we can compile for X11)
 ff_x11=no
 if test -d /usr/X11R6;
 then
 	ff_x11=yes
-	AC_SUBST(STDPROG,FreeFem++)
-	AC_SUBST(X11PROG,FreeFem++-x11)
+	AC_SUBST(STDPROG,FreeFem++${EXEEXT})
+	AC_SUBST(X11PROG,FreeFem++-x11${EXEEXT})
 	AC_SUBST(INCLUDEX11,/usr/X11R6/include)
 	AC_SUBST(LIBX11,"-L/usr/X11R6/lib -lX11 -lm")
 fi
@@ -55,7 +55,7 @@ ff_aglprog=
 if test `uname` = Darwin;
 then
 	ff_mac=yes
-	ff_aglprog=FreeFem++-agl
+	ff_aglprog=FreeFem++-agl${EXEEXT}
 fi
 AC_MSG_RESULT($ff_mac)
 
@@ -103,7 +103,7 @@ fi
 
 # If we cannot find gl.h, no OpenGL version can be produced
 AC_CHECK_HEADER(GL/gl.h,
-	ff_glxprog=FreeFem++-glx,
+	ff_glxprog=FreeFem++-glx${EXEEXT},
 	ff_glxprog=
 	ff_aglprog=
 )
@@ -190,7 +190,7 @@ AC_SUBST([EIGENOBJ])
 
 if test "$ff_blas_ok" = yes;
 then
-	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h top_srcdir/src/umfpack/umfpack.h)
+	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h)
 	AC_CHECK_LIB(amd,amd_info)
 	AC_CHECK_LIB(umfpack,umf_i_malloc)
 fi
@@ -206,7 +206,7 @@ then
 	# computation here, because it must only be set when the
 	# parallel program is compiled (see src/mpi/Makfile.am)
 
-	AC_SUBST(MPIPROG,FreeFem++-mpi)
+	AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
 fi
 
 # Checking wether we can generate some documentation

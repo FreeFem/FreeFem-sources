@@ -12,9 +12,10 @@ extern "C" {
 #ifdef HAVE_UMFPACK_UMFPACK_H
 #include <umfpack/umfpack.h>
 #else
-#ifdef HAVE_TOP_SRCDIR_SRC_UMFPACK_UMFPACK_H
+
+  // Defaults to a local version of the UMFPACK headers
 #include "../umfpack/umfpack.h"
-#endif
+
 #endif
 #endif
 }
