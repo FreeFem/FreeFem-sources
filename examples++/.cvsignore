@@ -1,0 +1,6 @@
+regtests.edp
+ListOfUnAllocPtr.bin
+Makefile
+Makefile.in
+*.eps
+*.log
