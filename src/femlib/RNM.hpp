@@ -684,12 +684,12 @@ class KN :public KN_<R> { public:
   //      { KN_<R>::operator=(u);}
         
   ~KN(){delete [] this->v;}
-  void CheckSet() { if(!n) {cerr << "Error RNM set array\n";K_throwassert(0); exit(1);}}
-   KN& operator  = (R*  a) { CheckSet(); return operator =(KN_<R>(a,n));}
-   KN& operator += (R*  a) { CheckSet(); return operator+=(KN_<R>(a,n));}  
-   KN& operator -= (R*  a) { CheckSet(); return operator-=(KN_<R>(a,n));}  
-   KN& operator *= (R*  a) { CheckSet(); return operator*=(KN_<R>(a,n));}  
-   KN& operator /= (R*  a) { CheckSet(); return operator/=(KN_<R>(a,n));}  
+  void CheckSet() { if(!(this->n)) {cerr << "Error RNM set array\n";K_throwassert(0); exit(1);}}
+   KN& operator  = (R*  a) { CheckSet(); return operator =(KN_<R>(a,this->n));}
+   KN& operator += (R*  a) { CheckSet(); return operator+=(KN_<R>(a,this->n));}  
+   KN& operator -= (R*  a) { CheckSet(); return operator-=(KN_<R>(a,this->n));}  
+   KN& operator *= (R*  a) { CheckSet(); return operator*=(KN_<R>(a,this->n));}  
+   KN& operator /= (R*  a) { CheckSet(); return operator/=(KN_<R>(a,this->n));}  
   
    KN& operator =(const_R a)  
         { if(unset()) set(new R[1],1,0,0); KN_<R>::operator= (a);return *this;}
