@@ -19,7 +19,7 @@ all.edp:
 # Special test script, without any troublesome window-opening scripts
 regtests.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
-	for i in *`ls *.edp|grep -v -E '^(medit|Newton|all|regtests)\.edp$$'` ; do  \
+	for i in *`ls *.edp|grep -v -E '^(medit|Newton|all|gnuplot|regtests)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;" ; \
 		echo \{ include \"$$i\"\;\}\; ;\
