@@ -115,6 +115,9 @@ then
 	elif test `grep 'Intel(R) Xeon(TM) CPU' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=pentium4
+	elif test `grep 'AMD Athlon(tm) Processor' /proc/cpuinfo|wc -l` -gt 0
+	    then
+	    proc_type=athlon
 	elif test `grep 'AMD Athlon(tm) XP' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=athlon-xp
