@@ -4,9 +4,20 @@
 template<class T>
  T Square(const T & r){return r*r;}
  
-#ifdef UMFPACK  
+#ifdef HAVE_LIBUMFPACK  
 extern "C" {
-#include "umfpack.h"
+#ifdef HAVE_UMFPACK_H
+#include <umfpack.h>
+#else
+#ifdef HAVE_UMFPACK_UMFPACK_H
+#include <umfpack/umfpack.h>
+#else
+
+  // Defaults to a local version of the UMFPACK headers
+#include "../umfpack/umfpack.h"
+
+#endif
+#endif
 }
 #endif
 #include "RNM.hpp"
@@ -571,7 +582,7 @@ typename VirtualMatrice<R>::plusAx operator*(const KN_<R> &  x) const {return pl
 
 };
 
-#ifdef UMFPACK
+#ifdef HAVE_LIBUMFPACK
 template<class R>
 class SolveUMFPack :   public MatriceMorse<R>::VirtualSolver  {
   double eps;
