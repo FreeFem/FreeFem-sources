@@ -20,16 +20,16 @@ Source: "examples++\*.edp"; DestDir: "{app}\examples++"
 Source: "examples++-eigen\*.edp"; DestDir: "{app}\examples++-eigen"
 Source: "examples++-tutorial\*.edp"; DestDir: "{app}\examples++-tutorial"
 Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
-Source: "DOC\manual.pdf"; DestDir: "{app}"
-Source: "DOC\manual.ps"; DestDir: "{app}"
+Source: "DOC\manual-full.pdf"; DestDir: "{app}"
+Source: "DOC\manual-full.ps"; DestDir: "{app}"
 Source: "logo.ico"; DestDir: "{app}"
 
 [Icons]
 
 ; Menu
 Name: "{group}\FreeFem++"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
-Name: "{group}\PDF manual"; Filename: "{app}\manual.pdf"
-Name: "{group}\Postscript manual"; Filename: "{app}\manual.ps"
+Name: "{group}\PDF manual"; Filename: "{app}\manual-full.pdf"
+Name: "{group}\Postscript manual"; Filename: "{app}\manual-full.ps"
 Name: "{group}\Examples\Tutorial"; Filename: "{app}\examples++-tutorial"
 Name: "{group}\Examples\Main"; Filename: "{app}\examples++"
 Name: "{group}\Examples\Eigenvalues"; Filename: "{app}\examples++-eigen"
