@@ -379,6 +379,7 @@ int AllocExtern::ShowAlloc(char *s,size_t & lg) {
 int ShowAlloc(char *s,size_t & lg) 
 {  return  AllocExternData.ShowAlloc(s,lg);}
 #else
-int ShowAlloc(char *s,size_t & lg); 
+#include <stdlib.h>
+int ShowAlloc(char *s,size_t & lg)
 {lg=0; return 0;}
 #endif
