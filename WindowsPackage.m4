@@ -38,11 +38,10 @@ Source: "examples++-eigen\*.edp"; DestDir: "{app}\examples++-eigen"
 Source: "examples++-tutorial\*.edp"; DestDir: "{app}\examples++-tutorial"
 Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
 
-; PDF and PS documentation may need to be copied from another machine
-; if Cygwin refuses to build them.
+; Documentation files may need to be copied from another machine if
+; Cygwin refuses to build them.
 
 Source: "DOC\manual-full.pdf"; DestDir: "{app}"
-Source: "DOC\manual-full.ps"; DestDir: "{app}"
 
 ; Icons for Windows can be created from a 32x32 image with icotool
 ; (Linux Debian unstable), or IrfanView (Windows, not very good

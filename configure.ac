@@ -4,18 +4,13 @@
 # Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
 # $Id$
 
-AC_INIT(FreeFem++,1.45,hecht@ann.jussieu.fr,freefem++)
+# Version numbering: x.xx-pp where "pp" is the package version (when
+# the same FreeFem++ version is packaged several times). For
+# coherency, this should have the same value as the top-most package
+# number in debian/changelog.
+
+AC_INIT(FreeFem++,1.45-5,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
-
-# Package version (when the same FreeFem++ version is packaged several
-# times). For coherency, this should have the same value as the
-# top-most package number in debian/changelog.
-
-# "PACKAGE_VERSION" is already taken by autoconf, so we need to choose
-# another name
-
-AC_SUBST(FREEFEM_PACKAGING,3)
-AC_SUBST(FFV_PREFIX,FreeFem++-v$VERSION-$FREEFEM_PACKAGING)
 
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
@@ -104,7 +99,9 @@ fi
 # FreeFem++-specific version information
 # --------------------------------------
 
-AC_DEFINE_UNQUOTED(VersionFreeFempp,$VERSION,FreeFem++ version as a float)
+# Version numbering, converted to a floating point value
+ff_numver=echo $VERSION|sed "s/-\(.*\)/+\1*0.000001/"
+AC_DEFINE_UNQUOTED(VersionFreeFempp,$ff_numver,FreeFem++ version as a float)
 FF_DATE=`date`
 AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
 
@@ -131,7 +128,7 @@ cat << EOF > config-version.h
 #define VersionFreeFemDate "$FF_DATE"
 
 /* FreeFem++ version as a float */
-#define VersionFreeFempp $VERSION
+#define VersionFreeFempp ($ff_numver)
 EOF
 
 # Checking wether to produce a debug version

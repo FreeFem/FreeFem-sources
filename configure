@@ -1360,7 +1360,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # "PACKAGE_VERSION" is already taken by autoconf, so we need to choose
 # another name
 
-FREEFEM_PACKAGING=3
+FREEFEM_PACKAGING=4
 
 FFV_PREFIX=FreeFem++-v$VERSION-$FREEFEM_PACKAGING
 
