@@ -1108,6 +1108,9 @@ void Init_map_type()
      Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow));
      Global.Add("sqrt","(",new OneOperator1_<Complex>(sqrt));
      Global.Add("conj","(",new OneOperator1_<Complex>(conj));
+     TheOperators->Add("\'",new OneOperator1_<Complex>(conj));       
+     
+     
      Global.Add("imag","(",new OneOperator1_<double,Complex>(Imag));
     // Global.Add("real","(",new OneOperator1_<double,Complex>(Real));
      Add<Complex>(atype<double>()->name(),".",new OneOperator1_<double,Complex>(Real));

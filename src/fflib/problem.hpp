@@ -300,7 +300,7 @@ public:
 
 
 class Problem  : public Polymorphic { 
-  typedef double R;
+//  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
   static const int n_name_param =8;
   int Nitem,Mitem;
@@ -309,13 +309,15 @@ public:
     const Mesh * pTh; 
     CountPointer<const FESpace> Uh;
     CountPointer<const FESpace> Vh;
-    CountPointer<MatriceCreuse<R> > A;   
-    void init()  {pTh=0; Uh.init(),Vh.init();A.init();}
+    CountPointer<MatriceCreuse<double> > AR;   
+    CountPointer<MatriceCreuse<Complex> > AC;   
+    void init()  {pTh=0; Uh.init(),Vh.init();AR.init();AC.init();}
     void destroy() { 
       pTh=0;
       Uh.destroy(); 
       Vh.destroy();
-      A.destroy();}        
+      AR.destroy();       
+      AC.destroy();}        
   } ;
   const OneOperator *precon;
   
@@ -334,7 +336,19 @@ public:
     // cout << " init  " << (char *) dataptr(stack) - (char*) stack  << " " << offset <<  endl; 
     dataptr(stack)->init();}
   void destroy(Stack stack)  const  {dataptr(stack)->destroy();}
-  AnyType operator()(Stack stack) const;
+
+  template <class R>
+  AnyType eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & dataA) const;
+
+  AnyType operator()(Stack stack) const
+  {
+     Data *data= dataptr(stack);
+//    if (complextype) 
+ //    return eval<Complex>(stack,data,data->AC);
+//    else
+     return eval<double>(stack,data,data->AR);
+
+  }
   
   bool Empty() const {return false;}     
   size_t nbitem() const { return Nitem;}     
@@ -777,21 +791,26 @@ namespace Fem2D {
     tabe.eval_2(v);
   }
   
-  bool AssembleVarForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+template<class R>  bool AssembleVarForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                        MatriceCreuse<R>  * A,KN<R> * B,const list<C_F0> &largs );
   
-  void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN<R> * B,const  FormLinear * const l);
-  void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN<R> * B,const  FormLinear * const l);
+template<class R>   void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                             MatriceCreuse<R>  & A, const  FormBilinear * b  );
-  void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const  BC_set<R> * bc , R tgv   );
-  void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const list<C_F0> &largs , R tgv  );
+template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const  BC_set<R> * bc , double tgv   );
+template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const list<C_F0> &largs , double tgv  );
   
-  void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,R * p,void * stack,KN_<R> & B,bool all);
-  void  Element_rhs(const FElement & Kv,const LOperaD &Op,R * p,void * stack,KN_<R> & B);
-  void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FElement & Kv,R * p,int ie,int label, void *stack);
-  void  Element_Op(MatriceElementaireSymetrique<R> & mat,const FElement & Ku,R * p,int ie,int label, void * stack);
+template<class R>   void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all);
+template<class R>   void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B);
+template<class R>   void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FElement & Kv,double * p,int ie,int label, void *stack);
+template<class R>   void  Element_Op(MatriceElementaireSymetrique<R> & mat,const FElement & Ku,double * p,int ie,int label, void * stack);
+
+//------
+
+
+
 }
 
 template<class R>
@@ -805,8 +824,8 @@ AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const
   R tgv= 1e30;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));  
   xx=R(); 
-  if ( AssembleVarForm(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
-    AssembleBC(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
+  if ( AssembleVarForm<R>(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
+    AssembleBC<R>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   // cout << xx.min() << " " << xx.max() << endl;
   /* for (const_iterator i=l->largs.begin();i!=l->largs.end();i++)
      {
@@ -933,8 +952,8 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
         A.A.master( new  MatriceMorse<R>(Vh,Uh,VF) ); // lines corresponding to test functions 
     }
   *A.A=0; // reset value of the matrix
-  if ( AssembleVarForm( stack,Th,Uh,Vh,typemat.sym,A.A,0,b->largs) )
-    AssembleBC( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
+  if ( AssembleVarForm<R>( stack,Th,Uh,Vh,typemat.sym,A.A,0,b->largs) )
+    AssembleBC<R>( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
   if( factorize ) {
     MatriceProfile<R> * pf = dynamic_cast<MatriceProfile<R> *>((MatriceCreuse<R> *) A.A);
     assert(pf);
