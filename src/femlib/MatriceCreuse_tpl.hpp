@@ -767,18 +767,25 @@ int MatriceMorse<R>::size() const
 template <class R> 
 ostream& MatriceMorse<R>::dump(ostream & f) const 
 {
-  f << " Nb line = " << this->n << " Nb Colonne " << this->m << " symetrique " << symetrique << " nbcoef = " << nbcoef <<endl;
+  f << "# Sparce Matrix (Morse)  " << endl;
+  f << "# first line: n m issymetic nbcoef \n";
+  f << "# after for each nozero coefficant:   i j a_ij \n";  
+  
+  f << this->n << " " << this->m << " " << symetrique << "  " << nbcoef <<endl;
   int k=lg[0];
+  int pold= f.precision();
   for (int i=0;i<this->n;i++)
    { 
     
-    f << i << " : " << lg[i] <<","<< lg[i+1]-1 << " : " ;
+//    f << i << " : " << lg[i] <<","<< lg[i+1]-1 << " : " ;
     int ke=lg[i+1];
     for (;k<ke;k++)
-      if (norm(a[k])) f  << cl[k] << " " << a[k]<< ", ";
-      else f  << cl[k] << " 0., " ;
-    f << endl;    
+      f << setw(9) << i+1 << ' ' << setw(9) << cl[k]+1 << ' ' << setprecision( 20) << a[k]<< '\n' ;
+     // if (norm(a[k])) f  << cl[k] << " " << a[k]<< ", ";
+     // else f  << cl[k] << " 0., " ;
+   // f << endl;    
    }
+   f.precision(pold);
   return f;
 }
 template <class R> 

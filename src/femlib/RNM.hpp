@@ -94,15 +94,15 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //   (u,conj(v))  donne le produit hermitiene pour le gradient conjugue
 //
 //   -- de fonction dans le cas real                                                                                                                 
-inline double  conj(double x){return x;}
-inline float  conj(float x){return x;}
-inline double  real(double x){return x;}
-inline float  real(float x){return x;}
+inline double  conj(const double & x){return x;}
+inline float  conj(const float &x){return x;}
+inline double  real(const double &x){return x;}
+inline float  real(const float &x){return x;}
 
 namespace std {
-inline complex<double> min(complex<double> a,complex<double> b)
+inline complex<double> min(const complex<double> &a,complex<double> &b)
 { return complex<double>(min(real(a),real(b)),min(imag(a),imag(b)));}
-inline complex<double> max(complex<double> a,complex<double> b)
+inline complex<double> max(const complex<double> &a,const complex<double> &b)
 { return complex<double>(max(real(a),real(b)),max(imag(a),imag(b)));}
 }
 //  ----                                                                                                                                             
@@ -308,6 +308,10 @@ public:
   template<class T> long first(const T &) const;
   
   void map(R (*f)(R )); // apply the f fonction a all element of the array
+  void map(R (*f)(const  R& )); // apply the f fonction a all element of the array
+
+ template<class T>
+   void set(R (*f)(const  T& ),KN_<T> & u); // apply the f fonction a all element of the array u
   
    KN_& operator =(const DotStar_KN_<R> & u) ;
    KN_& operator+=(const DotStar_KN_<R> & u) ;
