@@ -152,11 +152,11 @@ fi
 #
 ff_arpack_ok=no   
 ff_save_libs="$LIBS"
-AC_SUBST(arpacklib,[])
+ff_arpack_libs=
 if test "$ff_blas_ok" = yes;
    then	
    AC_CHECK_LIB(arpack,dsaupd_,
-	AC_SUBST(arpacklib,-larpack -llapack -rdynamic)
+	ff_arpack_libs="-larpack -llapack -rdynamic"
         ff_arpack_ok=yes,,
 	-llapack -rdynamic)
 
@@ -169,18 +169,31 @@ if test "$ff_blas_ok" = yes;
         AC_LINK_IFELSE(
                 [AC_LANG_CALL(,dsaupd_)],
                 ff_arpack_ok=yes
-                AC_SUBST(arpacklib,$ff_lib_arpack))
+                ff_arpack_libs=$ff_lib_arpack)
         AC_MSG_RESULT($ff_arpack_ok)
     fi
 fi
-LIBS=$ff_save_libs
+LIBS="$ff_save_libs $ff_arpack_libs"
 
 if test "$ff_arpack_ok" = yes;
 then
 	EIGENOBJ='eigenvalue.$(OBJEXT)'
-	CXXFLAGS="$CXXFLAGS -DEIGENVALUE"
+	AC_DEFINE(HAVE_LIBARPACK,1,
+		Arpack is used for eigenvalue computation)
 fi
 AC_SUBST([EIGENOBJ])
+
+# Looking for UMFPACK
+# -------------------
+
+# Trying default locations
+
+if test "$ff_blas_ok" = yes;
+then
+	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h top_srcdir/src/umfpack/umfpack.h)
+	AC_CHECK_LIB(amd,amd_info)
+	AC_CHECK_LIB(umfpack,umf_i_malloc)
+fi
 
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
@@ -188,6 +201,11 @@ AC_SUBST([EIGENOBJ])
 AC_CHECK_PROG(ff_mpi,mpiCC,yes,no)
 if test "$ff_mpi" = yes;
 then
+
+	# We do not AC_DEFINE any special flag for parallel
+	# computation here, because it must only be set when the
+	# parallel program is compiled (see src/mpi/Makfile.am)
+
 	AC_SUBST(MPIPROG,FreeFem++-mpi)
 fi
 

@@ -813,7 +813,7 @@ void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool
         else 
           AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,NbSpace,itmax,eps));
         break;
-#ifdef UMFPACK         
+#ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::UMFpack :
             AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv));
         break;
@@ -984,7 +984,7 @@ AnyType SetMatrix<R>::Op::operator()(Stack stack)  const
   bool VF=false;
   bool factorize=false;
 // type de matrice par default
-#ifdef UMFPACKxxxx         
+#ifdef HAVE_LIBUMFPACKxxxx         
      TypeSolveMat tmat(TypeSolveMat::UMFpack); 
 #else            
     TypeSolveMat tmat(TypeSolveMat::GMRES);

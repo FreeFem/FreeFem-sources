@@ -1,4 +1,4 @@
-all:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
+doc:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 
 %.dvi:%.tex
 	latex $*

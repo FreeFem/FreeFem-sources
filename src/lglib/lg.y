@@ -1,5 +1,6 @@
 %{ 
 
+#include "../../config.h"
 #define eflval yylval 
 #include <iostream>
 #include  <complex>
@@ -33,7 +34,7 @@ mylex *zzzfff;
   void init_lgparallele();
   void end_parallele();
 #endif
-#ifdef EIGENVALUE
+#ifdef HAVE_LIBARPACK
   void init_eigenvalue();
 #endif
    
@@ -566,13 +567,13 @@ int mymain (int  argc, char **argv)
    init_lgmesh() ;
    init_algo();
    
-#ifdef EIGENVALUE
+#ifdef HAVE_LIBARPACK
    init_eigenvalue();
 #endif   
 #ifdef PARALLELE
    init_lgparallele(); 
 #endif 
-#ifdef UMFPACK   
+#ifdef HAVE_LIBUMFPACK   
   cout << " UMFPACK ";  
 #endif
  // callInitsFunct(); Pb opimisation 

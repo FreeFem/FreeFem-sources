@@ -1,3 +1,4 @@
+#include "../../config.h"
 #ifdef __MWERKS__
 #pragma optimization_level 0
 //#pragma inline_depth(0)
@@ -3367,7 +3368,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("Crout",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::CROUT)));
  Global.New("Cholesky",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::CHOLESKY)));
  Global.New("GMRES",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::GMRES)));
-#ifdef UMFPACK
+#ifdef HAVE_LIBUMFPACK
  Global.New("UMFPACK",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::UMFpack)));
 #else 
  cout << " --  no UMFPACK => replace UMFPACK  by LU  " << endl;

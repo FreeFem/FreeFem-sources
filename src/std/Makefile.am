@@ -8,4 +8,4 @@ FreeFem___SOURCES=../Graphics/Xrgraph.cpp
 FreeFem___DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
 FreeFem___LDADD=../lglib/liblg.a ../fflib/libff.a
 INCLUDES=-I$(INCLUDEX11)
-LIBS=$(LIBX11) -ldl
+LIBS+=$(LIBX11) -ldl
