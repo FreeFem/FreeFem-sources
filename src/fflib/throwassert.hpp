@@ -12,6 +12,7 @@
 #define throwassert(i) ((void) 0)
 #else
 #define throwassert(condition)  ((condition) ? (0) : throw(ErrorAssert(#condition,__FILE__, __LINE__)))
+#define ffassert(condition)  ((condition) ? (0) : throw(ErrorAssert(#condition,__FILE__, __LINE__)))
  
 #undef assert
 #define assert(condition) throwassert(condition)
