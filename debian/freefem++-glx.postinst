@@ -20,7 +20,7 @@ set -e
 case "$1" in
     configure|abort-upgrade)
       update-alternatives \
-        --install /usr/bin/FreeFem++ FreeFem++ /usr/bin/FreeFem++-glx 30
+        --install /usr/bin/FreeFem++ FreeFem++ /usr/bin/FreeFem++-glx 20
     ;;
 
     abort-remove|abort-deconfigure)
