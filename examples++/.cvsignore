@@ -2,6 +2,7 @@
 *.eps
 err.dat
 *.faces
+.gdb_history
 *.gmsh
 *.gbb
 *.log
