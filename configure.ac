@@ -59,6 +59,45 @@ then
 fi
 AC_MSG_RESULT($ff_mac)
 
+# Checking wether to produce a debug version
+# ------------------------------------------
+
+# ------------------------------
+# compilation flags of FreeFem++ 
+# ------------------------------
+#  -DDRAWING  bamg active some drawing facility in bamg (inquire mesh)
+#  -DLONG_LONG active the use of  long long in bamg
+#  -DDEBUG active the  checking in bamg  
+#  -DNCHECKPTR remove check pointer facility 
+#  -DCHECK_KN active subscripting of some array  
+#  -DWITHCHECK of the dynamic type ckecking of the langague (very slow)
+#  -DEIGENVALUE  to compile the eigen value part
+#  ------------------------------------------------
+
+AC_ARG_ENABLE(debug,
+     [  --enable-debug    Turn on debug versions of FreeFem++],
+     [case "${enableval}" in
+       yes) ff_debug=true ;;
+       no)  ff_debug=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
+     esac],
+     [ff_debug=false])
+
+if test "$ff_debug" = true;
+then
+	CXXFLAGS="-DDRAWING -DLONG_LONG -DCHECK_KN -g"
+	if test "ff_mac" = yes;
+	then
+		CXXFLAGS="$CXXFLAGS -fno-inline -fpascal-strings -fexceptions"
+	fi
+else
+	CXXFLAGS="-DDRAWING -DLONG_LONG  -DNCHECKPTR -O"
+	if test "ff_mac" = yes;
+	then
+		CXXFLAGS="$CXXFLAGS  -fpascal-strings"
+	fi
+fi
+
 # Checking that OpenGL is accessible
 # ----------------------------------
 
@@ -117,9 +156,10 @@ AC_SUBST(arpacklib,[])
 if test "$ff_blas_ok" = yes;
    then	
    AC_CHECK_LIB(arpack,dsaupd_,
-	AC_SUBST(arpacklib,-larpack)
-        ff_arpack_ok=yes)
-	
+	AC_SUBST(arpacklib,-larpack -llapack -rdynamic)
+        ff_arpack_ok=yes,,
+	-llapack -rdynamic)
+
    # Trying to "locate" Arpack
    if test "$ff_arpack_ok" = no;
    then
@@ -135,44 +175,12 @@ if test "$ff_blas_ok" = yes;
 fi
 LIBS=$ff_save_libs
 
-# Checking wether to produce a debug version
-# ------------------------------------------
-
-# ------------------------------
-# compilation flags of FreeFem++ 
-# ------------------------------
-#  -DDRAWING  bamg active some drawing facility in bamg (inquire mesh)
-#  -DLONG_LONG active the use of  long long in bamg
-#  -DDEBUG active the  checking in bamg  
-#  -DNCHECKPTR remove check pointer facility 
-#  -DCHECK_KN active subscripting of some array  
-#  -DWITHCHECK of the dynamic type ckecking of the langague (very slow)
-#  -DEIGENVALUE  to compile the eigen value part
-#  ------------------------------------------------
-
-AC_ARG_ENABLE(debug,
-     [  --enable-debug    Turn on debug versions of FreeFem++],
-     [case "${enableval}" in
-       yes) ff_debug=true ;;
-       no)  ff_debug=false ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
-     esac],
-     [ff_debug=false])
-
-if test "$ff_debug" = true;
+if test "$ff_arpack_ok" = yes;
 then
-	CXXFLAGS="-DDRAWING -DLONG_LONG -DCHECK_KN -g"
-	if test "ff_mac" = yes;
-	then
-		CXXFLAGS="$CXXFLAGS -fno-inline -fpascal-strings -fexceptions"
-	fi
-else
-	CXXFLAGS="-DDRAWING -DLONG_LONG  -DNCHECKPTR -O"
-	if test "ff_mac" = yes;
-	then
-		CXXFLAGS="$CXXFLAGS  -fpascal-strings"
-	fi
+	EIGENOBJ='eigenvalue.$(OBJEXT)'
+	CXXFLAGS="$CXXFLAGS -DEIGENVALUE"
 fi
+AC_SUBST([EIGENOBJ])
 
 # Checking wether we can produce a parallel version
 # -------------------------------------------------

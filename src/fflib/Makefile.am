@@ -16,4 +16,10 @@ libff_a_SOURCES=AFunction.cpp lex.cpp lgmesh.cpp ../femlib/Drawing.cpp	\
 InitFunct.cpp ../Algo/lgalgo.cpp ../femlib/Element_P2h.cpp load.cpp	\
 lgfem.cpp
 
-INCLUDES=-I../fflib -I../bamglib -I../Graphics -I../femlib
+# eigenvalue.cpp is optional (see configure.ac)
+EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
+libff_a_LIBADD=@EIGENOBJ@
+libff_a_DEPENDENCIES=@EIGENOBJ@
+
+INCLUDES=-I../fflib -I../bamglib -I../Graphics -I../femlib	\
+-I$(top_srcdir)/arpack/arpack++/include
