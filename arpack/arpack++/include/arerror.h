@@ -30,8 +30,8 @@
 #define ARERROR_H
 
 #include "arch.h"
-#include <iostream.h>
-#include <stdlib.h>
+#include <iostream>
+#include <cstdlib>
 
 class ArpackError {
 

@@ -9,11 +9,11 @@
 #ifndef __SUPERLU_UTIL /* allow multiple inclusions */
 #define __SUPERLU_UTIL
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <malloc.h>
-#include <assert.h>
+#include <cassert>
 
 /* Macros */
 #ifndef USER_ABORT
