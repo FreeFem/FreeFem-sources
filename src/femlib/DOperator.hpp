@@ -62,16 +62,22 @@ template<class I,class R>
    array v;
    vector<size_type> where_in_stack_opt;
    Expression optiexp0,optiexpK;
+   bool isoptimize;
    
-   LinearComb(): v(),optiexp0(),optiexpK(),where_in_stack_opt(0) {}
-   LinearComb(const I& i,const R& r) :v(1),optiexp0(),optiexpK(),where_in_stack_opt(0) {
+   LinearComb(): v(),optiexp0(),optiexpK(),where_in_stack_opt(0),isoptimize(false) {}
+   LinearComb(const I& i,const R& r) :v(1),optiexp0(),optiexpK(),where_in_stack_opt(0),isoptimize(false) {
     v[0]=make_pair<I,R>(i,r);}
     
    LinearComb(const LinearComb &l) 
-      :v(l.v),optiexp0(l.optiexp0),optiexpK(l.optiexpK),where_in_stack_opt(l.where_in_stack_opt){}  
+      :v(l.v),optiexp0(l.optiexp0),optiexpK(l.optiexpK),where_in_stack_opt(l.where_in_stack_opt),isoptimize(false){}  
        
-   void operator=(const LinearComb<I,R> &l) {v=l.v;}
-   
+   void operator=(const LinearComb<I,R> &l) {
+     v=l.v;
+     where_in_stack_opt=l.where_in_stack_opt;
+     optiexp0=l.optiexp0;
+     optiexpK=l.optiexpK;
+     isoptimize=l.isoptimize; 
+     }
    const I * simple() const { if (v.size()==1) return & v.begin()->first;else return  0;}     
    void  add(const I& i,const R &r)  { 
      for (iterator k=v.begin();k!=v.end();k++)
@@ -190,6 +196,7 @@ template<class I,class R>
       rr.optiexp0 = new E_F0_Optimize(l0,m,0);  
     if (k1) 
       rr.optiexpK = new E_F0_Optimize(l1,m,0);
+    rr.isoptimize=true;
     if (kdump) cout << "LinearCom Optimize k0(mi) = " << k0 << " k1 = " << k1 << "\n\n"<<endl;
     return r;
   }    
