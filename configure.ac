@@ -252,44 +252,26 @@ AC_ARG_WITH(blas,
 	ff_blas_ok=yes
 	ff_blas_libs="${withval}")
 
-# Trying default locations
+# Trying  blas library 
+for iblas in \
+"-lblas" "-framework vecLib" "-L/usr/lib/atlas -lblas" \
+"-L${curdir}/download/blas -lcblas -lf77blas" \
+"-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas" \ 
+"-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas" 
+do 
 if test "$ff_blas_ok" = no;
 then
-	ff_save_libs="$LIBS"
-	AC_CHECK_LIB(blas,daxpy_,
-		LIBS="$LIBS -lblas"
-		ff_blas_ok=yes
-		ff_blas_lib="-lblas",
-		LIBS="$ff_save_libs")
-fi
-
-# Trying Atlas (location corresponding to Debian package)
-if test "$ff_blas_ok" = no;
-then
-	AC_MSG_CHECKING(for daxpy_ in /usr/lib/atlas/libblas.a)
-	ff_save_libs="$LIBS"
-	LIBS="$LIBS -L/usr/lib/atlas -lblas"
-	AC_LINK_IFELSE(
-		[AC_LANG_CALL(,daxpy_)],
-		ff_blas_ok=yes
-		ff_blas_lib="-L/usr/lib/atlas -lblas",
-		LIBS="$ff_save_libs")
-	AC_MSG_RESULT($ff_blas_ok)
-fi
-
-# Trying  freebsd framework (on darwin/ MacOS X)
-if test "$ff_blas_ok" = no;
-then
-        AC_MSG_CHECKING(for daxpy_ in framework vecLib)
+        AC_MSG_CHECKING(for daxpy_ in $iblas)
         ff_save_libs="$LIBS"
-        LIBS="$LIBS -framework vecLib"
+        LIBS="$LIBS $iblas"
         AC_LINK_IFELSE(
                 [AC_LANG_CALL(,daxpy_)],
                 ff_blas_ok=yes
-		ff_blas_lib="-framework vecLib",
+		ff_blas_lib="$iblas",
                 LIBS="$ff_save_libs")
         AC_MSG_RESULT($ff_blas_ok)
 fi
+done
 
 # If all else fails, download!
 if test "$ff_blas_ok" = no -a "$ff_wget" = yes
