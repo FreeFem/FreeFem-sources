@@ -1,0 +1,29 @@
+Compiling FreeFem++ from CVS sources
+------------------------------------
+
+$Id$
+
+To download a working copy from the CVS repository:
+
+> export CVSROOT=:ext:<username>@hydre.ann.jussieu.fr:/home/lehyaric/FreeFem++-cvs
+> export CVS_RSH=ssh
+> cvs checkout freefem++
+
+(this produces a directory named "freefem++" containing the most
+recent version of all the source files)
+
+To update all the makefiles and the "configure" script if
+"configure.ac" has been modified:
+
+> autoreconf
+
+To compile, check and install FreeFem++:
+
+> ./configure [--enable-debug] [other options found in README and INSTALL...]
+> make
+> make check
+> make install
+
+To build an archive containing all the source files:
+
+> make dist
