@@ -871,6 +871,9 @@ Int4 ListofIntersectionTriangles::NewPoints(Vertex * vertices,Int4 & nbv,Int4  n
     if ( nbv<nbvx) {
       vertices[nbv].r = C;
       vertices[nbv++].m = Metric(cx,lIntTria[ii-1].m,cy,lIntTria[ii].m);
+      if((verbosity/100%10)==2)
+      cout << "   -- Add point " << nbv-1 << " " << vertices[nbv-1] << " " << vertices[nbv-1].m << endl;
+
 #ifdef DEBUG
       if(k>1) {
 	R2 AB = vertices[nbv-2].r - vertices[nbv-1].r ;

@@ -263,7 +263,7 @@ Vertex *   QuadTree::ToClose(Vertex & v,Real8 seuil,Icoor1 hx,Icoor1 hy)
 	    I2 i2 =  b->v[k]->i;
 	    if ( ABS(i-i2.x) <hx && ABS(j-i2.y) <hy )
 	      {
-		R2 XY(X-b->v[k]->r);
+		R2 XY(X,b->v[k]->r);
 		Real8 dd;
 	      // old code	        if( Mx(XY) + b->v[k]->m(XY) < seuil )
 	        if( (dd= LengthInterpole(Mx(XY), b->v[k]->m(XY)))  < seuil )
