@@ -61,19 +61,56 @@ template<class I,class R>
    typedef typename array::iterator iterator;
    array v;
    vector<size_type> where_in_stack_opt;
+   vector<bool> mesh_indep_stack_opt;
    Expression optiexp0,optiexpK;
    bool isoptimize;
    
-   LinearComb(): v(),optiexp0(),optiexpK(),where_in_stack_opt(0),isoptimize(false) {}
-   LinearComb(const I& i,const R& r) :v(1),optiexp0(),optiexpK(),where_in_stack_opt(0),isoptimize(false) {
+   LinearComb(): v(),optiexp0(),optiexpK(),
+          where_in_stack_opt(0),mesh_indep_stack_opt(0),isoptimize(false) {}
+   LinearComb(const I& i,const R& r) :v(1),optiexp0(),optiexpK(),
+          where_in_stack_opt(0),mesh_indep_stack_opt(0),isoptimize(false) {
     v[0]=make_pair<I,R>(i,r);}
     
    LinearComb(const LinearComb &l) 
-      :v(l.v),optiexp0(l.optiexp0),optiexpK(l.optiexpK),where_in_stack_opt(l.where_in_stack_opt),isoptimize(false){}  
+      :v(l.v),optiexp0(l.optiexp0),optiexpK(l.optiexpK),
+        where_in_stack_opt(l.where_in_stack_opt),
+        mesh_indep_stack_opt(l.mesh_indep_stack_opt),
+        isoptimize(false){}  
+        
+   int nbtrue(bool *ok) const 
+     { 
+        int k=0; 
+        for (int i=0;i<v.size();i++) 
+          if (ok[i]) k++;
+         return k;
+     }
+     
+   //  copy just les parties ok   
+   LinearComb(const LinearComb &l,bool * ok) 
+      :v(l.nbtrue(ok) ),optiexp0(l.optiexp0),optiexpK(l.optiexpK),
+        where_in_stack_opt(v.size()),
+        mesh_indep_stack_opt(v.size()),
+        isoptimize(l.isoptimize) 
+      {
+        int k=0;
+        const_iterator lll= l.v.begin();
+        iterator ll=v.begin(); 
+        for (int i=0,k=0;lll!= l.v.end();++lll,++i) 
+          if (ok[i]) 
+            {
+            *ll++=*lll;
+            where_in_stack_opt[k]=l.where_in_stack_opt[i];
+            mesh_indep_stack_opt[k]=l.mesh_indep_stack_opt[i];
+            ++k;            
+            }
+         
+      }  
+        
        
    void operator=(const LinearComb<I,R> &l) {
      v=l.v;
      where_in_stack_opt=l.where_in_stack_opt;
+     mesh_indep_stack_opt=l.mesh_indep_stack_opt;
      optiexp0=l.optiexp0;
      optiexpK=l.optiexpK;
      isoptimize=l.isoptimize; 
@@ -150,7 +187,7 @@ template<class I,class R>
   } 
  LinearComb * Optimize(Block * b) const 
   {
-    const bool kdump=false;
+    const bool kdump=(verbosity/1000)%10==1;
     if (kdump)
     cout << "\n\n Optimize " << endl;
     LinearComb * r=new LinearComb(*this);
@@ -160,6 +197,7 @@ template<class I,class R>
     deque<pair<Expression,int> > ll;
     MapOfE_F0 m;
     rr.where_in_stack_opt.resize(n);
+    rr.mesh_indep_stack_opt.resize(n);
     size_type top = b->OffSet(0), topbb=top; // FH. bofbof ??? 
     for (int i=0; i<n; i++)
       {
@@ -167,6 +205,7 @@ template<class I,class R>
        Expression ee= ri.second.LeftValue();
        if (kdump)
        cout << "Optimize :  type exp: " << typeid(*ee).name() << " "<<endl;
+        rr.mesh_indep_stack_opt[i]=ee->MeshIndependent(); 
        rr.where_in_stack_opt[i]=ee->Optimize(ll, m, top);
        if (kdump)
        cout  << "\n\t\t"<< i << " " << ri.first << ": " << rr.where_in_stack_opt[i] << endl;

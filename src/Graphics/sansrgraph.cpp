@@ -88,19 +88,29 @@ int getprog(char* fn,int argc, char** argvptr)
 	return (2);
 }
 #else
+extern long verbosity;
+
 int getprog(char* fn,int argc, char **argv)
 {
+  int ret=0;
  if (argc > 2) 
   {
     for (int i=1; i<argc-1;i++)
-     if  (strcmp(argv[i],"-f")==0)
+     if  (strcmp(argv[i],"-f")==0 )
        {
           strcpy(fn,argv[i+1]);
           printf(" file : %s\n",fn);
-          return 1;
+          ret=1;
        }
-    printf(" if more than 1 argument then  use -f filename");
-    return 0; 
+     else if   (strcmp(argv[i],"-v")==0 )
+       {
+	 verbosity = atoi(argv[i+1]);
+	 printf(" verbosity : %d\n",verbosity);
+       }
+
+    if(ret==0) 
+      printf(" if more than 1 argument then  use -f filename");
+    return ret; 
   }
  else if (argc > 1) 
   { 

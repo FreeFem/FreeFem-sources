@@ -1028,6 +1028,7 @@ template<class R>
        MatriceCreuse<R> & M=*i->second;
        assert( &M);
        R coef=i->first;
+      // cout << "BuildCombMat + " << coef << "*" << &M << " " << sym << endl;
        if (n==0) { n=M.n; m=M.m;}
        else { assert(n== M.n && m==M.m);}
        sym = M.addMatTo(coef,mij) && sym;              
@@ -1065,7 +1066,7 @@ bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij)
          {
            j=cl[k];
            if(norm(coef*a[k])>eps0)
-           mij[make_pair(i,j)] = coef*a[k];
+           mij[make_pair(i,j)] += coef*a[k];
          }
    }
 

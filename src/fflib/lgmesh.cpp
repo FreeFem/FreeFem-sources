@@ -944,6 +944,8 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack)
     }     
     
  {
+  if(verbosity) cout << " -- square mesh : nb vertices  =" << nbv 
+                     << " ,  nb triangles = " << nbt << " ,  nb boundary edges " << neb << endl;  
   Mesh * m = new Mesh(nbv,nbt,neb,v,t,b);
   R2 Pn,Px;
   m->BoundingBox(Pn,Px);
