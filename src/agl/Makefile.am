@@ -3,7 +3,7 @@
 # $Id$
 
 bin_PROGRAMS=$(AGLPROG)
-EXTRA_PROGRAMS=FreeFem++-agl${FF_PROG_EXT}${EXEEXT}
+EXTRA_PROGRAMS=FreeFem++-agl
 
 FreeFem___agl_SOURCES=../Graphics/glrgraph.hpp ../Graphics/macglrgraf.cpp
 FreeFem___agl_DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a

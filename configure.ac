@@ -82,8 +82,8 @@ ff_x11=no
 if test -d /usr/X11R6;
 then
 	ff_x11=yes
-	AC_SUBST(STDPROG,FreeFem++${FF_PROG_EXT}${EXEEXT})
-	AC_SUBST(X11PROG,FreeFem++-x11${FF_PROG_EXT}${EXEEXT})
+	AC_SUBST(STDPROG,FreeFem++)
+	AC_SUBST(X11PROG,FreeFem++-x11)
 	AC_SUBST(INCLUDEX11,/usr/X11R6/include)
 	AC_SUBST(LIBX11,"-L/usr/X11R6/lib -lX11 -lm")
 fi
@@ -98,7 +98,7 @@ ff_aglprog=
 if test `uname` = Darwin;
 then
 	ff_mac=yes
-	ff_aglprog=FreeFem++-agl${FF_PROG_EXT}${EXEEXT}
+	ff_aglprog=FreeFem++-agl
 fi
 AC_MSG_RESULT($ff_mac)
 
@@ -107,7 +107,7 @@ AC_MSG_RESULT($ff_mac)
 
 # If we cannot find gl.h, no OpenGL version can be produced
 AC_CHECK_HEADER(GL/gl.h,
-	ff_glxprog=FreeFem++-glx${FF_PROG_EXT}${EXEEXT},
+	ff_glxprog=FreeFem++-glx,
 	ff_glxprog=
 	ff_aglprog=
 )
@@ -210,7 +210,7 @@ then
 	# computation here, because it must only be set when the
 	# parallel program is compiled (see src/mpi/Makfile.am)
 
-	AC_SUBST(MPIPROG,FreeFem++-mpi${FF_PROG_EXT}${EXEEXT})
+	AC_SUBST(MPIPROG,FreeFem++-mpi)
 fi
 
 # Checking wether we can generate some documentation
