@@ -1,4 +1,4 @@
-//  sparce matrix test  ---
+//  sparse matrix test  ---
 // example of the new matrix feature in version 1.40
 // -------------------------------------------------
 mesh  TH = square(3,4);
@@ -62,12 +62,12 @@ real [int] a(N),b(N);
    }
   b=A*b;
 cout << "xxxx\n"; 
-matrix sparceA=A;
-cout << sparceA << endl;
-sparceA = 2*sparceA+sparceA;
-sparceA = 4*sparceA+sparceA*5; //  * 27
-matrix sparceB=sparceA+sparceA+sparceA; ;
-cout << sparceA << endl;
-cout << sparceB << endl; // *81 
-cout << "sparceB = " << sparceB(0,0) << endl;
+matrix sparseA=A;
+cout << sparseA << endl;
+sparseA = 2*sparseA+sparseA;
+sparseA = 4*sparseA+sparseA*5; //  * 27
+matrix sparseB=sparseA+sparseA+sparseA; ;
+cout << sparseA << endl;
+cout << sparseB << endl; // *81 
+cout << "sparseB = " << sparseB(0,0) << endl;
 }
