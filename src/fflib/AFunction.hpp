@@ -2590,6 +2590,8 @@ inline    int E_F0::find(const MapOfE_F0 & m) const {  //  exp
      }
 
 extern queue<pair<const E_Routine*,int> > debugstack;
+
+extern basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
   
 #endif
 
