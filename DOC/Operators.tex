@@ -1,0 +1,316 @@
+\documentclass[twoside]{book}
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX
+\else
+\pdfoutput=1 % we are running PDFLaTeX
+\pdftrue
+\fi
+%\usepackage{times}
+%\usepackage{amsmath}
+\usepackage{calc}
+\usepackage[latin1]{inputenc}
+\usepackage{FFF}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{FFF}
+\usepackage{makeidx}
+\usepackage{color}
+\usepackage{multicol}
+\usepackage{graphicx}
+%\usepackage{dessin}
+\topmargin -1.54cm
+\oddsidemargin 0cm   %marge a 2 cm
+\evensidemargin 0cm  %marge a 2 cm
+\newcommand{\indente}{\hbox to \parindent {\hss}}
+\parindent 0cm
+\headsep 0.5cm
+\topskip .5cm
+\footskip 1cm
+\headheight 1.0cm
+\textwidth  16.5cm
+%  \parindent 0cm
+\textheight 24cm
+\def\freefempp{\texttt{freefem++ }}
+\def\textRed{\color{red}}
+\def\textBlack{\color{black}}
+\def\Blue#1{\textcolor{blue}{#1}}
+\def\Black#1{\textcolor{black}{#1}}
+\def\Red#1{\textcolor{red}{#1}}
+\def\Magenta#1{\textcolor{magenta}{#1}}
+\def\hin{\hbox{ in }}
+\def\hon{\hbox{ on }}
+\def\Cpp{\texttt{C++~}}
+\def\R{\mathrm{I\!R}}
+\def\example{\textbf{Example:}}
+\def\eq#1{\Blue{\[#1\]}}
+\def\R{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\itemtt[#1]{ \item[\texttt{#1}]}
+\def\plot[#1]#2#3{\begin{figure}[hbt]
+\begin{center}
+    \includegraphics*[#1]{#2}
+\end{center}
+\caption{\label{#2} #3}
+\end{figure}
+}
+\def\Ostream{\texttt{ostream}}
+\def\Istream{\texttt{istream}}
+\def\Bool{\texttt{bool}}
+\def\Real{\texttt{real}}
+\def\Int{\texttt{int}}
+\def\vecttwo#1#2{\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\vdeux(#1,#2){\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\HLINE#1{\hbox to \hsize {#1}}
+\def\twoplot[#1]#2#3#4#5{
+\begin{figure}[hbt]
+\begin{multicols}{2}
+\begin{center}
+    \includegraphics*[#1]{#2}
+    \caption{\label{#2} #4}
+\end{center}
+\begin{center}
+    \includegraphics*[#1]{#3}
+    \caption{\label{#3} #5}
+\end{center}
+\end{multicols}
+\end{figure}
+}% end twoplot macro
+\newtheorem{remark}{\textbf{Remark}}
+\newtheorem{bug}{\textbf{Bug:}}
+\newtheorem{proposition}{\textbf{Proposition}}
+\newtheorem{algorithm}{\textbf{Algorithm}}
+\newenvironment{ttlist}
+   {\begin{list}{}{\renewcommand{\makelabel}[1]{\texttt{##1}\hfil}%
+        \setlength{\labelwidth}{3cm}
+        \setlength{\leftmargin}{\labelwidth+\labelsep}
+    }}%
+   {\end{list}}
+
+
+\begin{document}
+\graphicspath{{./}{plots/}}
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps,.ps, .jpg}
+\fi
+
+\let\subsubsection\subsection
+\let\subsection\section
+\let\section\chapter
+ 
+\begin{verbatim}
+
+  - CG,  type :<TypeSolveMat>
+  - Cholesky,  type :<TypeSolveMat>
+  - Crout,  type :<TypeSolveMat>
+  - GMRES,  type :<TypeSolveMat>
+  - LU,  type :<TypeSolveMat>
+  - LinearCG,  type :<Polymorphic>   operator() : 
+	 (	  <long> :   <Polymorphic>, <KN<double> *>, <KN<double> *> )
+
+  - N,  type :<Fem2D::R3>
+  - NoUseOfWait,  type :<bool *>
+  - P,  type :<Fem2D::R3>
+  - P0,  type :<Fem2D::TypeOfFE>
+  - P1,  type :<Fem2D::TypeOfFE>
+  - P1nc,  type :<Fem2D::TypeOfFE>
+  - P2,  type :<Fem2D::TypeOfFE>
+  - RT0,  type :<Fem2D::TypeOfFE>
+  - RTmodif,  type :<Fem2D::TypeOfFE>
+  - abs,  type :<Polymorphic>  operator() : 
+	 (	  <double> :   <double> )
+
+  - acos,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+
+  - acosh,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+
+  - adaptmesh,  type :<Polymorphic>   operator() : 
+	 (	  <Fem2D::Mesh> :   <Fem2D::Mesh>... )
+
+  - append,  type :<std::ios_base::openmode>
+  - asin,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+
+  - asinh,  type :<Polymorphic>  operator() : 
+	 (	  <double> :   <double> )
+
+  - atan,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+	 (	  <double> :   <double>, <double> )
+
+  - atan2,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double>, <double> )
+
+  - atanh,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+
+  - buildmesh,  type :<Polymorphic>   operator() : 
+	 (	  <Fem2D::Mesh> :   <E_BorderN> )
+
+  - buildmeshborder,  type :<Polymorphic>   operator() : 
+	 (	  <Fem2D::Mesh> :   <E_BorderN> )
+
+  - cin,  type :<istream>
+  - clock,  type :<Polymorphic>   
+	 (	  <double> :   )
+
+  - conj,  type :<Polymorphic>   operator() : 
+	 (	  <complex> :   <complex> )
+
+  - convect,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <E_Array>, <double>, <double> )
+
+  - cos,  type :<Polymorphic>  operator() : 
+	 (	  <double> :   <double> )
+	 (	  <complex> :   <complex> )
+
+  - cosh,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+	 (	  <complex> :   <complex> )
+
+  - cout,  type :<ostream>
+  - dumptable,  type :<Polymorphic>   operator() : 
+	 (	  <ostream> :   <ostream> )
+
+  - dx,  type :<Polymorphic>   operator() : 
+	 (	  <LinearComb<MDroit, C_F0>> :   <LinearComb<MDroit, C_F0>> )
+	 (	  <double> :   <std::pair<FEbase<double> *, int>> )
+	 (	  <LinearComb<MGauche, C_F0>> :   <LinearComb<MGauche, C_F0>> )
+
+  - dy,  type :<Polymorphic>   operator() : 
+	 (	  <LinearComb<MDroit, C_F0>> :   <LinearComb<MDroit, C_F0>> )
+	 (	  <double> :   <std::pair<FEbase<double> *, int>> )
+	 (	  <LinearComb<MGauche, C_F0>> :   <LinearComb<MGauche, C_F0>> )
+
+  - endl,  type :<char>
+  - exec,  type :<Polymorphic>   operator() : 
+	 (	  <long> :   <string> )
+
+  - exit,  type :<Polymorphic>  operator() : 
+	 (	  <long> :   <long> )
+
+  - exp,  type :<Polymorphic>  operator() : 
+	 (	  <double> :   <double> )
+	 (	  <complex> :   <complex> )
+
+  - false,  type :<bool>
+  - imag,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <complex> )
+
+  - int1d,  type :<Polymorphic>   operator() : 
+	 (	  <CDomainOfIntegration> :   <Fem2D::Mesh>... )
+
+  - int2d,  type :<Polymorphic>   operator() : 
+	 (	  <CDomainOfIntegration> :   <Fem2D::Mesh>... )
+
+  - intalledges,  type :<Polymorphic>
+   operator( : 
+	 (	  <CDomainOfIntegration> :   <Fem2D::Mesh>... )
+
+  - jump,  type :<Polymorphic>
+   operator( : 
+	 (	  <LinearComb<MDroit, C_F0>> :   <LinearComb<MDroit, C_F0>> )
+	 (	  <double> :   <double> )
+	 (	  <LinearComb<MGauche, C_F0>> :   <LinearComb<MGauche, C_F0>> )
+
+  - label,  type :<long *>
+  - log,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+	 (	  <complex> :   <complex> )
+
+  - log10,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+
+  - max,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double>, <double> )
+	 (	  <long> :   <long>, <long> )
+
+  - mean,  type :<Polymorphic>
+   operator( : 
+	 (	  <double> :   <double> )
+
+  - min,  type :<Polymorphic>  operator() : 
+	 (	  <double> :   <double>, <double> )
+	 (	  <long> :   <long>, <long> )
+
+  - movemesh,  type :<Polymorphic>   operator() : 
+	 (	  <Fem2D::Mesh> :   <Fem2D::Mesh>, <E_Array>... )
+
+  - norm,  type :<Polymorphic>
+   operator( : 
+	 (	  <double> :   <std::complex<double>> )
+
+  - nuTriangle,  type :<long>
+  - nuEdge,  type :<long>
+  - on,  type :<Polymorphic>   operator() : 
+	 (	  <BC_set<double>> :   <long>... )
+
+  - otherside,  type :<Polymorphic>
+   operator( : 
+	 (	  <LinearComb<MDroit, C_F0>> :   <LinearComb<MDroit, C_F0>> )
+	 (	  <LinearComb<MGauche, C_F0>> :   <LinearComb<MGauche, C_F0>> )
+
+  - pi,  type :<double>
+  - plot,  type :<Polymorphic>   operator() : 
+	 (	  <long> :  ... )
+
+  - pow,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double>, <double> )
+	 (	  <complex> :   <complex>, <complex> )
+
+  - qf1pE,  type :<Fem2D::QuadratureFormular1d>
+  - qf1pT,  type :<Fem2D::QuadratureFormular>
+  - qf1pTlump,  type :<Fem2D::QuadratureFormular>
+  - qf2pE,  type :<Fem2D::QuadratureFormular1d>
+  - qf2pT,  type :<Fem2D::QuadratureFormular>
+  - qf2pT4P1,  type :<Fem2D::QuadratureFormular>
+  - qf3pE,  type :<Fem2D::QuadratureFormular1d>
+  - qf5pT,  type :<Fem2D::QuadratureFormular>
+
+  - readmesh,  type :<Polymorphic>   operator() : 
+	 (	  <Fem2D::Mesh> :   <string> )
+
+  - real,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <complex> )
+
+  - region,  type :<long *>
+  - savemesh,  type :<Polymorphic>  operator() : 
+	 (	  <Fem2D::Mesh> :   <Fem2D::Mesh>, <string>... )
+
+  - sin,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+	 (	  <complex> :   <complex> )
+
+  - sinh,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+	 (	  <complex> :   <complex> )
+
+  - sqrt,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+	 (	  <complex> :   <complex> )
+
+  - square,  type :<Polymorphic>    operator() : 
+	 (	  <Fem2D::Mesh> :   <long>, <long> )
+	 (	  <Fem2D::Mesh> :   <long>, <long>, <E_Array> )
+
+  - tan,  type :<Polymorphic>   operator() : 
+	 (	  <double> :   <double> )
+
+  - true,  type :<bool>
+  - trunc,  type :<Polymorphic>   operator() : 
+	 (	  <Fem2D::Mesh> :   <Fem2D::Mesh>, <bool> )
+
+  - verbosity,  type :<long *>
+  - wait,  type :<bool *>
+  - x,  type :<double *>
+  - y,  type :<double *>
+  - z,  type :<double *>    
+\end{verbatim}
+
+
+\end{document}

@@ -1,0 +1,210 @@
+\documentclass[a4paper]{report}
+\usepackage{graphicx}
+
+\begin{document}
+
+
+\section{Installation of Cygwin}
+\huge
+First you have to go to the site:\\
+http://www.cygwin.com \\
+Click on ``Install or Update now''\\
+A window appears. \\
+Click on ``Open'' then ``Next'' and then choose ``Install from Internet''\\
+Click on ``Next'' twice and choose ``Direct Connection''.\\
+Then choose one of the download sites.\\
+For instance : ftp://ftp-stud.fht-esslingen.de\\
+Then choose in each category the options to install. \\
+(click on the symbol + for each, you can then see the options appear)\\
+\\
+Here are the required options for FreeFem++ and TCL TK to work :\\
++ all options of ``Devel'' (it includes gcc ...etc...)\\
++ all options of ``Graphics'' (specially ``Gnuplot'' to be able \\
+to see the results of FreeFem++ on a graphic)\\
++ all options of X11 and XFree86 \\
+\\
+You can install ``Xemacs'' and others editors in the category ``Editors''.\\
+\\
+Then click on ``Next'' and wait that Cygwin is installed.\\
+Then an icône appears on yours Desktop.\\
+Click on it and the Cygwin window is opened. It is like an Unix terminal.\\
+\\
+To work on a terminal X type : \\
+-$>$ startX\\
+You will have to work on a terminal X to have Gnuplot and visualize \\
+the results of FreeFem++ scripts)\\
+\\
+Now you have to compile and install FreeFem++.\\
+\\
+\section{Compilation and Installation of FreeFem++ under Cygwin}
+\huge
+go to the site :\\
+http://www.freefem.org\\
+click on FreeFem++\\
+and download FreeFem++ (the version when I wrote this is 1.38)\\
+Choose to download in your cygwin/home/you directory.\\
+\\
+Then on your terminal Cygwin type :\\
+-$>$ tar zxvf freefem++.tgz\\
+to uncompress this file.\\
+\\
+Go into FreeFem++v1.38 directory by typing:\\
+-$>$ cd FreeFem++v1.38\\
+\\
+Now you have to compile FreeFem++.\\
+type:\\
+-$>$ make all HOSTTYPE=i-386\\
+to compile FreeFem++\\
+If there is an error : ``... -ldl : no such file or directory''\\
+Then you have to modify the Makefile-i386 which is in the directory src:\\
+-$>$ cd src \\
+Edit it (with xemacs for example):\\
+-$>$ xemacs Makefile-i386\\
+at line 1 : replace ``LIBLOCAL = -ldl'' by ``\#LIBLOCAL = -ldl''\\
+It will comment this line because -ldl is not on your machine.\\
+Then return to the main directory\\
+-$>$ cd\\
+and type:\\
+-$>$ make all HOSTTYPE=i-386\\
+\\
+At the end of compilation, a directory called ``c-i386'' is created.\\
+In this directory you can find the binary FreeFem++.\\
+\\
+You can now run an example:\\
+First open an X terminal:\\
+-$>$ startX\\
+In this terminal go in to FreeFem++v1.38:\\
+-$>$ cd FreeFem++v1.38\\
+and type:\\
+-$>$c-i386/FreeFem++ examples++-tutorial/adapt.edp\\
+You can then see the gnuplot window with the graphical results.\\
+\\
+Now if you want to use the Graphical User Interface of FreeFem++\\
+(called FFGUI)\\
+you have to install the language TCL TK in which FFGUI has been written.\\
+The version which works under cygwin is tcl8.4.0 and tk8.4.0\\
+The latest version when I wrote this is tcl8.4.6 and tk8.4.6\\
+\\
+DON'T USE IT \\
+\\
+It works under Linux and MacOsX but not under Cygwin.\\
+\\
+You have to download tcl8.4.0 and tk8.4.0 :\\
+For instance, go to Google.fr and type download tcl tk 8.4.0\\
+And choose the ``Sourceforge.net: Project Filelist''.\\
+Choose :\\
+tcl8.4.0-src.tar.gz and tk8.4.0-src.tar.gz\\
+When the download is finished you have to uncompress these directories:\\
+-$>$ tar zxvf tcl8.4.0-src.tar.gz\\
+-$>$ tar zxvf tk8.4.0-src.tar.gz\\
+\\
+\\
+tcl8.4.0 and tk8.4.0 will work under Cygwin only if you apply \\
+a patch on both:\\
+These patches are on the site:\\
+http://www.xraylith.wisc.edu/~khan/software/tcl\\
+Choose ``Tcl/Tk8.4.0 for Cygwin\\
+Click on ``very preliminary Cygwin ports of Tcl/Tk8.4.0\\
+You are then on the site ftp\\
+Follow the instructions of the README or follow these instructions:\\
+\\
+1) Run :\\
+-$>$ xemacs tcl-8.4.0-cygwin.diff\\
+By doing this, you create a new file called ``tcl-8.4.0-cygwin.diff''\\
+on the site ftp click on ``tcl-8.4.0-cygwin.diff''\\
+Do a Copy/Paste of the contain into your xemacs window and save it.\\
+\\
+2) Do the same with ``tk-8.4.0-cygwin.diff''\\
+\\
+Now you have to apply the patch in tcl8.4.0 and tk8.4.0\\
+The two previous patch files (.diff) must be respectively \\
+in tcl8.4.0 and tk8.4.0 directories.\\
+-$>$ cp tcl-8.4.0-cygwin.diff tcl8.4.0\\
+-$>$ cp tcl-8.4.0-cygwin.diff tk8.4.0\\
+(If the two files are one level under tcl8.4.0 and tk8.4.0)\\
+\\
+Now apply the patches:\\
+type:\\
+\\
+-$>$ cd tcl8.4.0\\
+-$>$ patch -p0 -s < tcl-8.4.0-cygwin.diff\\
+\\
+-$>$ cd
+\\
+-$>$ cd tk8.4.0\\
+-$>$ patch -p0 -s < tk-8.4.0-cygwin.diff\\
+\\
+Now you can compile and install TCL TK under Cygwin:\\
+\\
+
+\section{Compilation and Installation of tcl8.4.0 and  tk8.4.0 under Cygwin}
+\section{compilation and installation of tcl8.4.0}
+\huge
+Go in to the directory tcl8.4.0/win\\
+-$>$ cd tcl8.4.0\\
+-$>$ cd win\\
+Then type :\\
+-$>$ ./configure\\
+The two steps remaining are make and make install\\
+type\\
+-$>$ make\\
+The compilation starts, when finished install by typing:\\
+-$>$ make install\\
+\\
+When finished try to see if it works by typing:\\
+-$>$ tclsh84\\
+if ok quit by typing ctrl-c\\
+
+\section{Compilation and installation of tk8.4.0}
+\huge
+Go in to the directory tk8.4.0/win\\
+-$>$ cd tk8.4.0\\
+-$>$ cd win\\
+Then type :\\
+-$>$ ./configure\\
+The two steps remaining are make and make install\\
+type\\
+-$>$ make\\
+The compilation starts, if you have errors like :\\
+\\
+windres -o tk.res.o --include ``C:/cygwin/home/ly/tk8.4.0/generic'' \\
+--include ``C Option-I is deprecated for setting the input format,\\
+ please use -J instead''\\
+windres : can't open icon file 'tk.ico' : no such file or directory\\
+\\
+This file 'tk.ico' is in fact in the directory win/rc\\
+You have to copy it in the directory 'generic':\\
+Be in tk8.4.0\\
+type :\\
+-$>$ cp win/rc/tk.ico generic/\\
+\\
+If you compile again you will see that there is the same \\
+errors with the files:\\
+``buttons.bmp'' ``cursor00.cur'' ``cursor02.cur'' ...etc... \\
+``wish.exe.manifest'' and ``wish.ico''\\
+\\
+Do the same for these files.\\
+For the cursor*.cur files do one the command:\\
+-$>$ cp win/rc/cursor*.cur generic/\\
+\\
+when finished install by typing:\\
+-$>$ make install\\
+\\
+When finished try to see if it works by typing:\\
+-$>$ wish84\\
+if ok quit by typing ctrl-c\\
+
+\section{Use}
+\huge
+Now everything is ok to use FFGUI and FreeFem++ under Windows by Cygwin.\\
+WARNING: if you work on the Cygwin terminal you will not be able \\
+to see the graphical results of FreeFem++.\\
+You have to run an X terminal and run FFGUI under this X terminal:\\
+To run an X terminal under cygwin type on your Cygwin terminal:\\
+-$>$ startX\\
+An X terminal runs:\\
+Under this terminal:\\
+type\\
+-$>$ cd FFGUI\\
+-$>$ ./FreeFem++.tcl\\
+\end{document}

@@ -1,0 +1,228 @@
+\documentclass[twoside]{book}
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX
+\else
+\pdfoutput=1 % we are running PDFLaTeX
+\pdftrue
+\fi
+%\usepackage{times}
+%\usepackage{amsmath}
+\usepackage{calc}
+\usepackage[latin1]{inputenc}
+\usepackage{FFF}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{FFF}
+\usepackage{makeidx}
+\usepackage{color}
+\usepackage{multicol}
+\usepackage{graphicx}
+%\usepackage{dessin}
+\topmargin -1.54cm
+\oddsidemargin 0cm   %marge a 2 cm
+\evensidemargin 0cm  %marge a 2 cm
+\newcommand{\indente}{\hbox to \parindent {\hss}}
+\parindent 0cm
+\headsep 0.5cm
+\topskip .5cm
+\footskip 1cm
+\headheight 1.0cm
+\textwidth  16.5cm
+%  \parindent 0cm
+\textheight 24cm
+\def\freefempp{\texttt{freefem++ }}
+\def\textRed{\color{red}}
+\def\textBlack{\color{black}}
+\def\Blue#1{\textcolor{blue}{#1}}
+\def\Black#1{\textcolor{black}{#1}}
+\def\Red#1{\textcolor{red}{#1}}
+\def\Magenta#1{\textcolor{magenta}{#1}}
+\def\hin{\hbox{ in }}
+\def\hon{\hbox{ on }}
+\def\Cpp{\texttt{C++~}}
+\def\R{\mathrm{I\!R}}
+\def\example{\textbf{Example:}}
+\def\eq#1{\Blue{\[#1\]}}
+\def\R{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\itemtt[#1]{ \item[\texttt{#1}]}
+\def\plot[#1]#2#3{\begin{figure}[hbt]
+\begin{center}
+    \includegraphics*[#1]{#2}
+\end{center}
+\caption{\label{#2} #3}
+\end{figure}
+}
+\def\Ostream{\texttt{ostream}}
+\def\Istream{\texttt{istream}}
+\def\Bool{\texttt{bool}}
+\def\Real{\texttt{real}}
+\def\Int{\texttt{int}}
+\def\vecttwo#1#2{\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\vdeux(#1,#2){\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\HLINE#1{\hbox to \hsize {#1}}
+\def\twoplot[#1]#2#3#4#5{
+\begin{figure}[hbt]
+\begin{multicols}{2}
+\begin{center}
+    \includegraphics*[#1]{#2}
+    \caption{\label{#2} #4}
+\end{center}
+\begin{center}
+    \includegraphics*[#1]{#3}
+    \caption{\label{#3} #5}
+\end{center}
+\end{multicols}
+\end{figure}
+}% end twoplot macro
+\newtheorem{remark}{\textbf{Remark}}
+\newtheorem{bug}{\textbf{Bug:}}
+\newtheorem{proposition}{\textbf{Proposition}}
+\newtheorem{algorithm}{\textbf{Algorithm}}
+\newenvironment{ttlist}
+   {\begin{list}{}{\renewcommand{\makelabel}[1]{\texttt{##1}\hfil}%
+        \setlength{\labelwidth}{3cm}
+        \setlength{\leftmargin}{\labelwidth+\labelsep}
+    }}%
+   {\end{list}}
+
+
+\begin{document}
+\graphicspath{{./}{plots/}}
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps,.ps, .jpg}
+\fi
+
+\let\subsubsection\subsection
+\let\subsection\section
+\let\section\chapter
+
+
+\bFF
+
+mesh Th=square(10,10);  // mesh definition of $\Omega$
+fespace Vh(Th,P1);      // finite element space
+fespace Ph(Th,P0);      // make optimization
+
+\eFF
+
+A small hack to construct a function 
+$$Cl= \left\{\begin{array}{cl} 1 & \mbox{ on interior degree of freedom} \cr
+ 0 & \mbox{ on boundary degree of freedom} \end{array}\right. $$
+\bFF
+
+// Hack to construct an array :
+//  1 on interior nodes and 0 on boundary nodes
+varf vCl(u,v) = on(1,2,3,4,u=1);
+Vh Cl;
+Cl[]= vCl(0,Vh,tgv=1);  //  0 and tgv 
+real tgv=Cl[].max;     // 
+Cl[] = -Cl[];  Cl[] += tgv; Cl[] /=tgv;
+
+ 
+\eFF
+
+the definition of $f$, $f'$, $f''$ and $b$
+\bFF
+
+// $ J(u) = \int_\Omega f(|\nabla u|^2) - \int\Omega  u b $
+// $ f(x) = a*x + x-ln(1+x), \quad f'(x) = a+\frac{x}{1+x}, \quad f''(x) =  \frac{1}{(1+x)^2}$
+real a=0.001;
+
+func real f(real u) { return u*a+u-log(1+u); }
+func real df(real u) { return a+u/(1+u);}
+func real ddf(real u) { return 1/((1+u)*(1+u));}
+Vh b=1;  // to defined b
+\eFF
+
+the routine to compute the functional $J$
+\bFF
+
+func real J(real[int] & x)
+  {
+    Vh u;u[]=x; 
+    real r=int2d(Th)(f( dx(u)*dx(u) + dy(u)*dy(u) ) - b*u) ;
+    cout << "J(x) =" << r << " " << x.min <<  " " << x.max << endl;
+    return r;
+  }
+\eFF
+
+The function  \index{function}to compute $D J$, where $u$ is the current solution.
+\bFF
+
+Vh u=0; //  the current value of the solution
+Vh alpha; // of store  $f(|\nabla u|^2)$
+int iter=0;
+alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization 
+
+func real[int] dJ(real[int] & x)
+  {
+    int verb=verbosity; verbosity=0; 
+    Vh u;u[]=x; 
+    alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization 
+    varf au(uh,vh) = int2d(Th)( alpha*( dx(u)*dx(vh) + dy(u)*dy(vh) ) - b*vh);
+    x= au(0,Vh);  
+    x = x.* Cl[]; //  the grad in 0 on boundary 
+    verbosity=verb;
+    return x; // warning no return of local array  
+  }
+\eFF
+
+We want to construct also a preconditionner function $C$
+with solving the problem:  find $u_h \in V_{0h}$ such that
+$$\forall v_h \in V_{0h}, \quad  \int_\Omega \alpha \nabla u_h . \nabla vh = \int_\Omega b v_h  $$
+where $ \alpha=f(|\nabla u|^2)$.
+\bFF
+
+varf alap(uh,vh,solver=Cholesky,init=iter)=  
+   int2d(Th)( alpha *( dx(uh)*dx(vh) + dy(uh)*dy(vh) ))   + on(1,2,3,4,uh=0);
+
+varf amass(uh,vh,solver=Cholesky,init=iter)=  int2d(Th)( uh*vh)  + on(1,2,3,4,uh=0);
+
+matrix Amass = alap(Vh,Vh,solver=CG); // \index{matrix}
+
+matrix Alap=  alap(Vh,Vh,solver=Cholesky,factorize=1);   // \index{Cholesky}\index{factorize=}\index{solver=}
+
+// the preconditionner function
+func real[int] C(real[int] & x)
+{
+   real[int] u(x.n);
+   u=Amass*x;
+   x = Alap^-1*u; 
+   x = x .* Cl[];     
+   return x; // no return of local array  variable 
+}
+\eFF
+
+A good idea the solve the problem, is make 10 iteration of the conjugate gradient, 
+recompute de preconditonner and restart the conjugate gradient:
+\bFF
+
+   verbosity=5;
+   int conv=0;
+   real eps=1e-6; 
+   for(int i=0;i<20;i++)
+   {
+     conv=NLCG(dJ,u[],nbiter=10,precon=C,veps=eps); // \index{veps=}\index{NLCG}
+     if (conv) break;  // if converge break loop
+    
+     alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // recompute alpha optimization 
+     Alap = alap(Vh,Vh,solver=Cholesky,factorize=1);   
+     cout << " restart with new preconditionner " << conv << " eps =" << eps << endl;
+   }
+
+   plot (u,wait=1,cmm="solution with NLCG");
+\eFF
+
+{\bf Remark:} the keycode  \texttt{veps=eps} change the value of the current \texttt{eps}, this is
+usefule in this case, because at the first iteration  the value of \texttt{eps} is change 
+to $-$ the absolute stop test and we save this initial stop test of for the all process. We remove the problem
+of the relative stop test in iterative procedure, because we start close to the solution
+and  the relative stop test become very hard  to reach.
+
+
+\end{document}
