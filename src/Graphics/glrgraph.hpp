@@ -418,7 +418,8 @@ int main (int argc, char **argv)
    try {                  
           ret=mymain(argc,argv);}
    catch( Error & err) {
-                          cerr  << err.what() << endl;                        
+     ret=err.errcode();
+     cerr  << err.what() << endl;                        
                         }
    catch( ...) { cerr << "catch exception ???";}
                         

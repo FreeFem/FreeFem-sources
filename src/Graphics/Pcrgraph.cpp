@@ -1096,16 +1096,18 @@ BOOL mainFreeFEM()
  	rattente(1);
  	
  	rattente(1);
- 	} catch(Error &e){cout<<" error "<<e.what(); myexit(1); };                   
+ 	} catch(Error &e){
+	  ret=e.errcode();
+	  cout<<" error "<<e.what(); myexit(1); };                   
  
  if (projet!=NULL)
   fclose(projet);
 
  SetWindowText(hWnd,"End of FreeFEM++");
  if (winf_flg & winf_NOWAIT) {	// option "-s" 
-   	myexit(0);
+   	myexit(ret);
  };
-  return true;
+  return ret==0;
 }
 
 // error without console

@@ -28,6 +28,6 @@ foreach my $ff (@progs) {
   print "checking $ff\n";
 
   # Run FreeFem++
-  my $output = `$ff all.edp`;
-  die "$ff could not be run" if $?;
+  system "$ff all.edp > regtests.log";
+  die if $?;
 }

@@ -1,3 +1,4 @@
+assert(0);
 verbosity=1;
 mesh Th=square(5,5);
 fespace Vh(Th,P1);

@@ -210,7 +210,8 @@ start:   input ENDOFFILE {
                           return 1; }
                         catch( Error & err) {
                           cerr << err.what() << endl;
-                          return 1;
+			  cerr << " err code " << err.errcode() << endl;
+                          return err.errcode();
                         }
                         cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " <<  CPUtime()-CPUcompile << "s\n";
                         deleteStack(stack);
@@ -520,6 +521,7 @@ const char * StrVersionNumber();
 
 int mymain (int  argc, char **argv)
 {
+  int retvalue=0;
 #ifdef PARALLELE
    initparallele(argc,argv);
 #endif
@@ -559,7 +561,7 @@ int mymain (int  argc, char **argv)
    zzzfff->Add("break",BREAK);
    zzzfff->Add("continue",CONTINUE);
    zzzfff->Add("return",RETURN);
-  zzzfff->Add("border",BORDER);
+   zzzfff->Add("border",BORDER);
    zzzfff->Add("fespace",FESPACEID);
    Init_map_type();
    cout << " Load: ";
@@ -583,24 +585,26 @@ int mymain (int  argc, char **argv)
   currentblock=0;
   currentblock = new Block(currentblock);  
   try {
-    ok=yyparse(); //  compile
-   if(ok==0)  
-    if(currentblock) 
-     cerr <<  "Error:a block is not close" << endl;   
-    else 
-     cerr <<  "Bien: On a fini Normalement" << endl; 
+    retvalue=yyparse(); //  compile
+    if(retvalue==0)  
+      if(currentblock) 
+	retvalue=1,cerr <<  "Error:a block is not close" << endl;   
+      else 
+	cerr <<  "Bien: On a fini Normalement" << endl; 
   }
 
   catch (Error & e) 
-   {
-     cerr << "error " << e.what() << endl;
-   }
+    {
+      retvalue=e.errcode();
+      cerr << "error " << e.what() 
+	   << "\n code = "<<  retvalue << endl;
+    }
 #ifdef PARALLELE
-   end_parallele();
+  end_parallele();
 #endif
-//  currentblock->close(currentblock).eval(thestack);
-   fingraphique();
-   return 0;
+  //  currentblock->close(currentblock).eval(thestack);
+  fingraphique();
+  return retvalue;
 }
 
 

@@ -155,18 +155,19 @@ AC_CHECK_HEADER(GL/glx.h,,ff_glxprog=)
 AC_MSG_CHECKING(for mpiCC)
 ff_save_cxx="$CXX"
 CXX=mpiCC
-AC_LINK_IFELSE(AC_LANG_SOURCE(
-#include <stdio.h>
+AC_LINK_IFELSE(
+[#include <stdio.h>
 #include <mpi.h>
-,
-  char name[BUFSIZ];
+int main(int argc,char **argv){
+  char name[[BUFSIZ]];
   int length;
   
   MPI_Init(&argc, &argv);
   MPI_Get_processor_name(name, &length);
   printf("%s: hello world\n", name);
-  MPI_Finalize();)
-,
+  MPI_Finalize();
+  return 0;
+}],
 ff_mpi=yes,
 ff_mpi=no)
 CXX="$ff_save_cxx"

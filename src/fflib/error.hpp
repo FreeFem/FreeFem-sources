@@ -54,6 +54,7 @@ protected:
     ShowDebugStack();
     if (c!=NONE) cerr  << message << endl; cerr << " at exec line  " << TheCurrentLine << endl; }
 public:
+  virtual int errcode() const {return code;} 
   virtual const char *  what() const   throw () { return message.c_str(); } 
   virtual  ~Error() throw () {}      
 };
@@ -69,7 +70,7 @@ class ErrorExec : public Error
 {  
  public:
   ErrorExec(const char * Text,int l) :
-    Error(NONE,"Exec error : ",Text, ", number :", l)  {}
+    Error(UNKNOWN,"Exec error : ",Text, ", number :", l)  {}
 };
 
 class ErrorInternal : public Error
@@ -82,7 +83,7 @@ class ErrorAssert : public Error
 {  
  public:
   ErrorAssert(const char * Text,const char *file,const int line) :
-    Error(NONE,"Assertion fail : (",Text, ")\n\tline :", line,", in file ",file)  {}
+    Error(ASSERT_ERROR,"Assertion fail : (",Text, ")\n\tline :", line,", in file ",file)  {}
 };
 
 class ErrorMesh : public Error
@@ -99,9 +100,13 @@ class ErrorMemory : public Error
 };
 
 class ErrorExit : public Error
-{ public:
-  ErrorExit(const char * ,int l) : 
+{
+  int codeexit;
+public:
+  ErrorExit(const char * ,int l) :codeexit(l) ,
     Error(NONE,"exit","(","",l,")")  {}
+    // the exit code fo freefem++ is given by l 
+  int errcode() const{return codeexit;}
 };
 
 #endif
