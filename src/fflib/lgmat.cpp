@@ -197,7 +197,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
   m->nbcoef=0;
   m->n=n;
   m->m=mm;
-  
+  int n1=n+1;
   const  Mesh & ThU =Uh.Th; // line 
   const  Mesh & ThV =Vh.Th; // colunm
   bool samemesh =  &Uh.Th == &Vh.Th;  // same Mesh
@@ -211,7 +211,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
   KN<int> mark(n);
   mark=0;
   
-  int *lg = new int [n+1];
+  int *lg = new int [n1];
   int * cl = 0;
   double *a=0;
   
@@ -256,7 +256,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
    whatd[op]=true; // the value of function
    KN<bool> fait(Uh.NbOfDF);
    fait=false;
-  set< pair<int,int> > sij; 
+  map< pair<int,int> , double > sij; 
   
   for (int step=0;step<2;step++) 
    {
@@ -318,13 +318,16 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	                if(transpose) Exchange(i,j);
 	                // le term dfu,dfv existe dans la matrice
 	                R c= fbj[idfv]*aipj;
-	                // cout << " Mat inter " << i << " , "<< j << " = " << c << endl; 
+	                //  cout << " Mat inter " << i << " , "<< j << " = " << c << " " <<step << " " << it << " " <<  endl; 
 	                if(Abs(c)>eps)
+	                 //
+	                   sij[make_pair(i,j)] = c;
+	                /*   
 	                 if(step==0)
 	                   sij.insert(make_pair(i,j));
 	                 else	                  
 	                   (*m)(i,j)=c;
-
+                        */
 	              }
 	              
 	                      
@@ -344,16 +347,23 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	         cl = new int[nbcoef];
 	         a = new double[nbcoef];
 	         int k=0;
-	         lg[0]=0;
-	         for (set<pair<int,int> >::iterator kk=sij.begin();kk!=sij.end();++kk)
+	         for(int i=0;i<n1;i++)
+	           lg[i]=0;
+	          
+	         for (map<pair<int,int>, double >::iterator kk=sij.begin();kk!=sij.end();++kk)
 	          { 
-	            int i= kk->first;
-	            int j= kk->second;
+	            int i= kk->first.first;
+	            int j= kk->first.second;
 	           // cout << " Mat inter " << i << " , "<< j  << endl;
 	            cl[k]=j;
+	            a[k]= kk->second;	            
 	            lg[i+1]=++k;
 	          }
 	         assert(k==nbcoef);
+	         //  on bouche les ligne vide   lg[i]=0; 
+	         //  lg est un tableau croissant  =>
+	         for(int i=1;i<n1;i++)
+	              lg[i]=max(lg[i-1],lg[i]) ;
 	         m->lg=lg;
              m->cl=cl;
              m->a=a;

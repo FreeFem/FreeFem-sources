@@ -33,7 +33,7 @@ void debugunalloc()
 #include <stdio.h>
 #include "error.hpp"
 
-int ShowAlloc(char *s); 
+int ShowAlloc(char *s,size_t & lg); 
         
 //inline void *operator new(size_t, void *place) { return place; }
 
@@ -138,7 +138,7 @@ private:
   AllocExtern();
   ~AllocExtern();
   void init();  
-  int ShowAlloc(char *s) ;
+ int ShowAlloc(char *s,size_t & lg); 
   bool IsUnDelPtr(long nn) { // dichotomic find 
     long i=0;
     long j=NbuDelPtr-1;
@@ -368,14 +368,17 @@ AllocExtern::AllocExtern()
  void operator delete[](void * pp)
 {  AllocExternData.MyDeleteOperator(pp,true);}
 
-int AllocExtern::ShowAlloc(char *s) {
+int AllocExtern::ShowAlloc(char *s,size_t & lg) {
   AllocExtern::AllocData * p=AllocExtern::AllocHead;
   if (!NbAllocShow) NbAllocShow=NbAlloc;
   int i=N100-1;
    printf ("----------CheckPtr:-----%s------ NbUndelPtr  %d  Alloc: %d  NbPtr %d \n",s,NbPtr,AllocSize,NbAlloc);
+   lg = AllocSize;
    return NbPtr;
 }
-int ShowAlloc(char *s){ return  AllocExternData.ShowAlloc(s);}
+int ShowAlloc(char *s,size_t & lg) 
+{  return  AllocExternData.ShowAlloc(s,lg);}
 #else
-int ShowAlloc(char *s){ return 0;}
+int ShowAlloc(char *s,size_t & lg); 
+{lg=0; return 0;}
 #endif
