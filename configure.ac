@@ -743,11 +743,14 @@ then
    fi
 fi
 
-# HISTORY logging through CVS
-AC_CHECK_PROG(ff_history,cvs2cl,yes,no)
-if test "$ff_history" = yes
+# HISTORY logging through CVS, but only if we are in a CVS working area
+if test -d CVS
 then
-   AC_SUBST(HISTORY,history)
+	AC_CHECK_PROG(ff_history,cvs2cl,yes,no)
+	if test "$ff_history" = yes
+	then
+	   AC_SUBST(HISTORY,history)
+	fi
 fi
 
 # Choosing compilation options for the standard version (in src/std)
