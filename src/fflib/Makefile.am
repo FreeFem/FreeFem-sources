@@ -14,7 +14,10 @@ libff_a_SOURCES=AFunction.cpp lex.cpp lgmesh.cpp ../femlib/Drawing.cpp	\
 ../bamglib/MeshQuad.cpp ../bamglib/SetOfE4.cpp ../bamglib/MeshRead.cpp	\
 ../bamglib/MeshWrite.cpp problem.cpp strversionnumber.cpp		\
 InitFunct.cpp ../Algo/lgalgo.cpp ../femlib/Element_P2h.cpp load.cpp	\
-lgfem.cpp
+lgfem.cpp AFunction.hpp AnyType.hpp error.hpp gmres.hpp InitFunct.hpp	\
+lex.hpp lgfem.hpp lgsolver.hpp Operator.hpp problem.hpp Serialize.hpp	\
+showverb.hpp String.hpp throwassert.hpp versionnumber.hpp
+
 
 # eigenvalue.cpp is optional (see configure.ac)
 EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
