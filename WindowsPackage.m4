@@ -43,7 +43,8 @@ Source: "logo.ico"; DestDir: "{app}"
 [Icons]
 
 ; Menu
-Name: "{group}\FreeFem++"; Filename: "{app}\FreeFem++-cs.exe"; IconFilename: "{app}\logo.ico"
+Name: "{group}\FreeFem++"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
+Name: "{group}\FreeFem++ graphical interface"; Filename: "{app}\FreeFem++-cs.exe"; IconFilename: "{app}\logo.ico"
 Name: "{group}\PDF manual"; Filename: "{app}\manual-full.pdf"
 Name: "{group}\Postscript manual"; Filename: "{app}\manual-full.ps"
 Name: "{group}\Examples\Tutorial"; Filename: "{app}\examples++-tutorial"
@@ -52,7 +53,7 @@ Name: "{group}\Examples\Eigenvalues"; Filename: "{app}\examples++-eigen"
 Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
 
 ; Desktop
-Name: "{userdesktop}\FreeFem++ VERSION"; Filename: "{app}\FreeFem++-cs.exe"; IconFilename: "{app}\logo.ico"
+Name: "{userdesktop}\FreeFem++ VERSION"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
 
 [Registry]
 
@@ -60,4 +61,4 @@ Name: "{userdesktop}\FreeFem++ VERSION"; Filename: "{app}\FreeFem++-cs.exe"; Ico
 Root: HKCR; Subkey: ".edp"; ValueType: string; ValueName: ""; ValueData: "FreeFemVERSIONScript"; Flags: uninsdeletevalue
 Root: HKCR; Subkey: "FreeFemVERSIONScript"; ValueType: string; ValueName: ""; ValueData: "FreeFem++ Script"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "FreeFemVERSIONScript\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\logo.ico"
-Root: HKCR; Subkey: "FreeFemVERSIONScript\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\FreeFem++-cs.exe"" ""%1"""
+Root: HKCR; Subkey: "FreeFemVERSIONScript\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\FreeFem++.exe"" ""%1"""
