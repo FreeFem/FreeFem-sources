@@ -1,4 +1,5 @@
 *.eps
 *.log
+machinefile
 Makefile
 Makefile.in
