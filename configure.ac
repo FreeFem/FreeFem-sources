@@ -64,19 +64,22 @@ AC_MSG_RESULT($ff_mac)
 
 # Checking wether we can produce a Microsoft Windows-specific version
 # -------------------------------------------------------------------
-
 AC_ARG_ENABLE(cygwin,
 	[  --enable-cygwin	On Microsoft Windows, uses Cygwin instead of Mingw])
 
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
 ff_uname=`uname`
+#  flag to build window 32   version   ff_mingw = yes 
+ff_mingw=no
 case $ff_uname in
 CYGWIN*)
-	ff_win32=yes
-
+        ff_win32=yes;
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwin" != yes
 	then
+                ff_mingw=yes
+        	ff_win32=yes
+                enable_cygwin=no;
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
 		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -L/lib/mingw -lws2_32"
 	fi
@@ -171,7 +174,7 @@ ff_x11=no
 # At the moment, we cannot compile for X11 on Mingw because /usr/X11R6
 # is part of Cygwin, not Mingw.
 
-if test "$ff_win32" = no -o "$enable_cygwin" = yes
+if test "$ff_mingw" = no 
 then
 	if test -d /usr/X11R6
 	then
@@ -647,7 +650,7 @@ then
 
 	# gcc on MacOS does not produce an error with "-rdynamic" but
 	# still complains about it.
-	if test "$ff_mac" = "no";
+	if test "$ff_mac" = "no" -a "$ff_win32"  = "no" ;
 	then
 		CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
 	else
@@ -690,7 +693,7 @@ fi
 
 # The "standard" configured version can use win32 (mingw) or x11
 
-if test "$ff_win32" = yes;
+if test "$ff_mingw" = yes 
 then
 	ff_std_graph_obj=Pcrgraph.$OBJEXT
 	ff_std_ldflags=-mwindows
@@ -744,15 +747,24 @@ then
 	# For the moment, FreeFem++-ide${EXEEXT} is not built
 	# because it first needs FreeFEM++ to accept several
 	# successive runs without restart.
-
+        
 	ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-cs-server${EXEEXT}"
+	if test "$enable_cygwin" = yes 
+	 then
+           AC_SUBST(FLTK_CONFIG_PARAM,"--enable-localzlib --enable-cygwin")
+        elif test "$ff_mingw" = yes 
+	 then
+           AC_SUBST(FLTK_CONFIG_PARAM,"--enable-localzlib --disable-cygwin")
+	else
+           AC_SUBST(FLTK_CONFIG_PARAM,"--disable-cygwin")
+	fi
 
 	AC_SUBST(FLTK_CONFIG,$ff_fltk_config)
 
 	# Only links X11 libraries into FreeFem++-cs if we are not on
-	# Windows or Macintosh (these do not need X11)
+	# Windows (Mingw) or Macintosh (these do not need X11)
 
-	if test "$ff_mac" != yes -a "$ff_win32" != yes
+	if test "$ff_mac" != yes -a "$ff_mingw" != yes 
 	then
 		AC_SUBST(IDE_LIBS,$ff_x11_libs)
 	fi
