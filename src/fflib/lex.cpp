@@ -499,15 +499,19 @@ bool mylex::CallMacro(int &ret)
 	    { 
 	      string p;
 	      int kend= ( k+1 == nbparam) ? ')' : ',';
+	      int lvl=0;
 	      while (1) {
 		int rr = basescan();
-		if (rr==kend) break;
-		else if (rr==')' || rr==',')  {// Correction FH 2/06/2004
+		if(lvl && rr==')') lvl--; //   if ( then  we eat next ) 
+		else if (rr=='(') lvl++ ;  //  eat next 		
+		else if (lvl<=0) {
+		  if (rr==kend ) break;
+		  else if  (rr==')' || rr==',')  {// Correction FH 2/06/2004
 		  cerr << "Error in macro expantion "<< j->first 
 		       << ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
 		  cerr << " number of macro parameter in definition is " << nbparam << endl;
 		  ErrorScan(" Wrong number of parameter in  macro call");
-		}
+		}}
 		
 		if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
 		p += token(); // Correction FH 2/06/2004 of string parameter

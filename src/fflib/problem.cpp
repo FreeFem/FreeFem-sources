@@ -1016,7 +1016,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     
   }
   
-  
+ /* 
  template<class R>
   void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                             MatriceCreuse<R>  & A, const  FormBilinear * b  )
@@ -1074,10 +1074,11 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
      }
     if(&optiexp0) optiexp0(stack);
     if (verbosity/100 && verbosity % 10 == 2)
-     {
-    int il=0;
-    for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-       cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il]) << " offset=" << b->b->where_in_stack_opt[il] <<endl;
+     { 
+      int il=0;
+      for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+       cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il]) 
+                  << " offset=" << b->b->where_in_stack_opt[il] << " dep mesh " << l->second.MeshIndependent() << endl;
     }
     }
     Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
@@ -1153,7 +1154,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
   }
   
 
-
+*/
  template<class R>
   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                   MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const  BC_set * bc, double tgv  )

@@ -579,3 +579,16 @@ __________
    in argument subtition
    correct error in line numbering in case of newline in string
    cosmetic change in output 
+20/01/2005
+   count () in macro parameter to handle   couple of () in macro parameter.
+   macro sum(a,b) (a+b); 
+   sum((1),2) // now works and given (1)+2
+   sum(atan2(2,1),2) // now works and given atan2(2,1)+2
+   
+   correct bug in linear combination of sparce matrix:
+   the correction is:
+    change line 1069, in file MatriceCreuse_tpl.hpp
+           mij[make_pair(i,j)] = coef*a[k];
+    to
+           mij[make_pair(i,j)] += coef*a[k];
+   
