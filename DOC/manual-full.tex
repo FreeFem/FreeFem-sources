@@ -22,7 +22,7 @@
 \title{
 %\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
  {\Blue{ \TitreFont FreeFem++ \\ \vglue 1cm  Manual}} \\ \vglue 3cm  ~ \\  
-      \normalsize  { version 1.45-10  \Red{(Under construction)} }
+      \normalsize  { version 1.45-5  \Red{(Under construction)} }
  \\ \vglue 0.7cm
  \large \url{http://www.freefem.org} \\
 \url{http://www.ann.jussieu.fr/\string~hecht/freefem++.htm} 
@@ -1354,11 +1354,21 @@ with the \ttCC{KN<>} class so all the vector operator of
 tab = 1.03;                //  set all the array to 1.03
 tab[1]=2.15;
 @cout << tab[1] << " " << tab[9] << " size of tab = "
-     << tab.n << " " << tab.min << " " << tab.max << " " <<  @endl;
+     << tab.n << " min: " << tab.min << "  max:" << tab.max 
+     << " sum : "   << tab.sum <<   endl; //      
+tab.resize(12); //  change the size of array tab 
+  // to 12 with preserving first value 
+tab(10:11)=3.14; //  set unset value 
+cout <<" resize tab: " <<  tab << endl;  
 \eT
+\index{array!resize}\index{resize}\index{max}\index{array!max} \index{min}\index{array!min}\index{sum}\index{array!sum}
 produce the output
 \bT
-2.15 1.03 size of tab = 10 1.03 2.15
+2.15 1.03 size of tab = 10 min: 1.03  max:2.15 sum : 11.42
+ resize tab: 12
+        1.03    2.15    1.03    1.03    1.03
+        1.03    1.03    1.03    1.03    1.03
+        3.14    3.14
 \eT
 
 It is also possible to make an array of FE function, with the same syntax, 
@@ -1394,14 +1404,14 @@ Poisson; uu[2] = u;
 
 The transpose operator is \texttt{\string'} like  MathLab or SciLab, so the way 
 to compute the dot product of two array \ttCC{a,b} is  \ttCC{@real\ ab=\ a'*b}\index{product!dot}.
-
+\index{min}\index{array!min}
 \bFF
 @int i;
 @real [int] tab(10), tab1(10); // 2 array of 10 real
   \it  real [int] tab2;    //  bug array with no size
 tab = 1;                //  set all the array to 1
 tab[1]=2;
-@cout << tab[1] << " " << tab[9] << " size of tab = "
+@cout << tab[1] << " " << tab[9] << " size of tab = " 
      << tab.n << " " << tab.min << " " << tab.max << " " <<  @endl;
 tab1=tab;
 tab=tab+tab1;
@@ -2949,7 +2959,7 @@ V_h=\{\mathbf{w}=(w_1,w_2)|\; w_1\in V_h(\mathcal{T}_h,P_0),\,
 w_2\in V_h(\mathcal{T}_h,P_1)\}
 \]
 
-\subsubsection{Raviant-Thomas element}
+\subsubsection{Raviart-Thomas element}
 In the Raviart-Thomas finite element $RT0_{h}$,
 the degree of freedom are the flux  throw an edge $e$ of the mesh, where the flux of the function $\mathbf{f} : \R^2 \longrightarrow \R^2 $ is $\int_{e} \mathbf{f}.n_{e}$,
  $n_{e}$ is the unit normal of edge $e$.
@@ -3446,38 +3456,38 @@ Remark, it is all possible to build interpolation matrix, like in
 \index{interpolate}\index{matrix!interpolate}
 the following exemple:
 \bFF
-mesh  TH = square(3,4);
-mesh  th = square(2,3);
-mesh  Th = square(4,4);
+@mesh  TH = square(3,4);
+@mesh  th = square(2,3);
+@mesh  Th = square(4,4);
 
 
-fespace VH(TH,P1);
-fespace Vh(th,P1);
-fespace Wh(Th,P1);
+@fespace VH(TH,P1);
+@fespace Vh(th,P1);
+@fespace Wh(Th,P1);
 
-matrix B= interpolate(VH,Vh);  // build interpolation matrix  Vh->VH 
-matrix BB= interpolate(Wh,Vh);  // build interpolation matrix  Vh->Wh 
+@matrix B= interpolate(VH,Vh);  // build interpolation matrix  Vh->VH 
+@matrix BB= interpolate(Wh,Vh);  // build interpolation matrix  Vh->Wh 
 \eFF
-and after some operation on sparce matrix are avialable for example
+and after some operations on sparce matrices are avialable for example
 \bFF
-  int N=10;
-  real [int,int] A(N,N);  // a full matrix
-  real [int] a(N),b(N);
+  @int N=10;
+  @real [int,int] A(N,N);  // a full matrix
+  @real [int] a(N),b(N);
   A =0; 
-  for (int i=0;i<N;i++)
+  @for (@int i=0;i<N;i++)
     {
-      A(i,i)=1+i;
-      if(i+1 < N)    A(i,i+1)=-i;
+      @A(i,i)=1+i;
+      @if(i+1 < N)    A(i,i+1)=-i;
       a[i]=i;
     }
   b=A*b;
-  cout << "xxxx\n"; 
-  matrix sparseA=A; 
+  @cout << "xxxx\n"; 
+  @matrix sparseA=A; 
   cout << sparseA << endl;
-  sparseA = 2*sparseA+sparseA';  
-  sparseA = 4*sparseA+sparseA*5; //  
+  @sparseA = 2*sparseA+sparseA';  
+  @sparseA = 4*sparseA+sparseA*5; //  
   matrix sparseB=sparseA+sparseA+sparseA; ;
-  cout << "sparseB = " << sparseB(0,0) << endl;
+  @cout << "sparseB = " << sparseB(0,0) << endl;
 \eFF
 \subsection{Interpolation matrix}
 
@@ -3485,7 +3495,6 @@ and after some operation on sparce matrix are avialable for example
  a finite element space $V_h$ to  $W_h$ with \texttt{interpolate} function.
 Note by default the continuous finite function are extended. by continuity on ouside 
 domain part.
-
 
 The named parameter of function \texttt{interpolate} are:
 \begin{description}
@@ -8329,6 +8338,7 @@ primary:
    operator( : 
    (    <LinearComb<MDroit, C_F0>> :   <LinearComb<MDroit, C_F0>> )
    (    <double> :   <double> )
+   (    <complex > :   <complex > )
    (    <LinearComb<MGauche, C_F0>> :   <LinearComb<MGauche, C_F0>> )
 
   - label,  type :<long *>
@@ -8346,6 +8356,7 @@ primary:
   - mean,  type :<Polymorphic>
    operator( : 
    (    <double> :   <double> )
+   (    <complex> :   <complex> )
 
   - min,  type :<Polymorphic>  operator() : 
    (    <double> :   <double>, <double> )
