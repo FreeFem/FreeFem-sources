@@ -65,32 +65,32 @@ then
     if test -x /usr/bin/hostinfo
 	then
 
+        # CPU detection
+	ff_cpu=unkown
+	if test `/usr/bin/hostinfo|grep ppc7450|wc -l` -gt 0
+	    then
+	    ff_cpu=G4
+	elif test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
+	    then
+	    ff_cpu=g5
+	fi
+	if test $ff_cpu == unknown;
+	    then
+	    AC_MSG_ERROR(cannot determine PowerPC cpu type)
+	fi
+
+	# At the moment, we do not know how to produce correct
+	# optimizated code on G5.
+
+	if test $ff_cpu == G5;
+	    then
+	    AC_MSG_WARN(G5 detected, but G4 optimization options preferred)
+	    ff_cpu=G4
+	fi
+
 	# If we are on MacOS X
 	if test `/usr/bin/hostinfo|grep Darwin|wc -l` -gt 0
 	    then
-
-	    # CPU detection
-	    ff_cpu=unkown
-	    if test `/usr/bin/hostinfo|grep ppc7450|wc -l` -gt 0
-		then
-		ff_cpu=G4
-	    elif test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
-		then
-		ff_cpu=g5
-	    fi
-	    if test "$ff_cpu" == unknown;
-		then
-		AC_MSG_ERROR(cannot determine PowerPC cpu type)
-	    fi
-
-	    # At the moment, we do not know how to produce correct
-	    # optimization code on G5.
-
-	    if test $ff_cpu == G5;
-		then
-		AC_MSG_WARN(G5 detected, but G4 optimization options preferred)
-		ff_cpu=G4
-	    fi
 
 	    # Optimization flags: -fast option do not work because the
 	    # -malign-natural flags create wrong IO code
