@@ -5,7 +5,7 @@ TESTS=../regtests.sh
 TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp	\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)	\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) VISUALCHECK=$(VISUALCHECK)
-EXTRA_DIST=*.edp aile.msh xyf all.edp regtests.edp regtests.m4
+EXTRA_DIST=*.edp aile.msh xyf all.edp regtests.edp regtests.m4 ref.edp
 
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
