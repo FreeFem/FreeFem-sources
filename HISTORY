@@ -519,3 +519,16 @@ Make Version 1.42
  Matrix<complex> A = vav(Vh,Vh); 
  // warning don't mixte Matrix<complex> and Matrix<real> in a expression     
  
+19/10/04
+--------
+  correct UMFPACK driver problem, ands set this solver as a default 
+    solver.
+  add finite element connectivite inquire ice FE.epd exemple 
+  fespace Wh(Th,P2);
+   Wh.nt //  given the number of element 
+   Wh.ndof //  given the number of degree of freedom
+   Wh.ndofK //  given the number of degree of freedom on one element 
+   Wh(k,i)  // given the number of i  degree of freedom of element k.
+   //  with $0 <= i <  Wh.ndofK $ and  $0 <= k <  Wh.nt $ 
+
+}
