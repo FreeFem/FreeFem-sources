@@ -13,7 +13,7 @@ function dotest(){
     # Running FreeFem++ on regtests.edp (specific to regression
     # tests), otherwise on all.edp.
 
-    ffcmd="$1 $REGEDP > regtests-$2.log"
+    ffcmd="$1 $REGEDP|tee regtests-$2.log"
     echo $ffcmd
     eval $ffcmd
     if test $? != 0
