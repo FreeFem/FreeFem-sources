@@ -3935,6 +3935,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  
   Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));
   Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
+  Add<pfecarray>("[","",new OneOperator2_<pfec,pfecarray,long>(get_element));
+  
  // Add<pmesharray>("[","",new OneOperator2_<pmesh*,pmesharray*,long>(get_element));
 
   TheOperators->Add("\'",       
@@ -4115,7 +4117,7 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
    typedef FEi::Result FEiR;
 
    typedef FEbaseArray<Complex>  CFE;
-   typedef  E_FEcomp<Complex,FE > CFEi;
+   typedef  E_FEcomp<Complex,CFE > CFEi;
    typedef CFEi::Result CFEiR;
    
    Expression fes =fespacetype;
