@@ -129,26 +129,8 @@ void dump_table()
     }
 };
 */
-template<class A,class B>  A Build(B b) {  return A(b);}
 
-template<class K>
-class OneBinaryOperatorA_inv : public OneOperator { public:  
-  OneBinaryOperatorA_inv() : OneOperator(atype<Matrice_Creuse_inv<K> >(),atype<Matrice_Creuse<K> *>(),atype<long>()) {}
-    E_F0 * code(const basicAC_F0 & args) const 
-     { Expression p=args[1];
-       if ( ! p->EvaluableWithOutStack() ) 
-        { 
-          bool bb=p->EvaluableWithOutStack();
-          cout << bb << " " <<  * p <<  endl;
-          CompileError(" A^p, The p must be a constant == -1, sorry");}
-       long pv = GetAny<long>((*p)(0));
-        if (pv !=-1)   
-         { char buf[100];
-           sprintf(buf," A^%d, The pow must be  == -1, sorry",pv);
-           CompileError(buf);}     
-       return  new E_F_F0<Matrice_Creuse_inv<R>,Matrice_Creuse<K> *>(Build<Matrice_Creuse_inv<R>,Matrice_Creuse<K> *>,t[0]->CastTo(args[0])); 
-    }
-};
+
 
 
 
@@ -2969,7 +2951,7 @@ AnyType Convect::operator()(Stack s) const
 
 
 
-
+/*
 template<class RR,class AA=RR,class BB=AA> 
 struct Op2_mulAv: public binary_function<AA,BB,RR> { 
   static RR f(const AA & a,const BB & b)  
@@ -2982,7 +2964,7 @@ struct Op2_mulvirtAv: public binary_function<AA,BB,RR> {
   { return RR( (*a).A, *b );} 
 };
 
-
+*/
 
 // Debut FH Houston -------- avril 2004 ---------
 //  class for operator on sparce matrix 
@@ -3296,7 +3278,7 @@ void DclTypeMatrix()
   Dcl_Type<typename VirtualMatrice<R>::solveAxeqb >();       // A^t*x (A'*x)
   Dcl_Type<const typename MatrixInterpolation::Op *>(); 
   SetMatrix_Op<R>::btype = Dcl_Type<const  SetMatrix_Op<R> * >();
-  Dcl_Type<Matrix_Prod<R> >();
+  Dcl_Type<Matrix_Prod<R,R> >();
   Dcl_Type<list<pair<R,MatriceCreuse<R> *> >*>();
 }
 
@@ -3458,13 +3440,14 @@ void  init_lgfem()
  Add<pmesh*>("nv",".",new OneOperator1<long,pmesh*>(pmesh_nv));
  atype<Matrice_Creuse<R> * >()->AddCast(new OneOperatorCode<pb2mat<R> >);
  atype<Matrice_Creuse<Complex> * >()->AddCast(new OneOperatorCode<pb2mat<Complex> >);
-
+/*
 TheOperators->Add("*", 
         new OneBinaryOperator<Op2_mulvirtAv<VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN<R>* > >,
         new OneBinaryOperator<Op2_mulvirtAv<VirtualMatrice<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN<R>* > >,
         new OneBinaryOperator<Op2_mulvirtAv<VirtualMatrice<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN<R>* > >     
         );
 TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
+*/
 //   Add all Finite Element "P0","P1","P2","RT0", ... 
   for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
     {
@@ -3674,10 +3657,21 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OpArraytoLinearForm<double >  ,
        new OpMatrixtoBilinearForm<double >);
 
+ TheOperators->Add("=",
+       new OneBinaryOperator<set_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
+       new OneBinaryOperator<set_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,      
+       new OneBinaryOperator<set_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >  ,      
+       new OpArraytoLinearForm<Complex >  ,
+       new OpMatrixtoBilinearForm<Complex >);
      
  TheOperators->Add("+=",
        new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAx > > ,       
        new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAtx > >        
+       );
+
+ TheOperators->Add("+=",
+       new OneBinaryOperator<set_eqarray_add<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
+       new OneBinaryOperator<set_eqarray_add<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > >        
        );
 
 
@@ -3741,7 +3735,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  
  TheOperators->Add("<<",
        new OneBinaryOperator<PrintPnd<R3*>  >,
-       new OneBinaryOperator<PrintPnd<Matrice_Creuse<R>*> >
+       new OneBinaryOperator<PrintPnd<Matrice_Creuse<R>*> >,
+       new OneBinaryOperator<PrintPnd<Matrice_Creuse<Complex>*> >
 
        );   
  
@@ -3788,7 +3783,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  // Add<pmesharray>("[","",new OneOperator2_<pmesh*,pmesharray*,long>(get_element));
 
   TheOperators->Add("\'",       
-       new OneOperator1<Matrice_Creuse_Transpose<R>,Matrice_Creuse<R> *>(&Build<Matrice_Creuse_Transpose<R>,Matrice_Creuse<R> *>)
+       new OneOperator1<Matrice_Creuse_Transpose<R>,Matrice_Creuse<R> *>(&Build<Matrice_Creuse_Transpose<R>,Matrice_Creuse<R> *>),
+       new OneOperator1<Matrice_Creuse_Transpose<Complex>,Matrice_Creuse<Complex> *>(&Build<Matrice_Creuse_Transpose<Complex>,Matrice_Creuse<Complex> *>)
   );
   
  Add<pfer>("(","",new interpolate_f_X_1<R> ); 

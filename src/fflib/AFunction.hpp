@@ -273,11 +273,12 @@ public:
 
 template<typename T> 
 inline basicForEachType * atype() { 
-  basicForEachType * r=map_type[typeid(T).name()];
-  if (! r) { cerr << "Error: aType  '" << typeid(T).name() << "', D'ont exist\n";
+  map<const string,basicForEachType *>::iterator ir=map_type.find(typeid(T).name());
+ // basicForEachType * r=map_type[];
+  if (ir == map_type.end()) { cerr << "Error: aType  '" << typeid(T).name() << "', D'ont exist\n";
              ShowType(cerr);
             throw(ErrorExec("exit",1));}
-  return r;}
+  return ir->second;}
 
 
 //  --------
@@ -1718,6 +1719,7 @@ inline   AnyType ListOfInst::operator()(Stack s) const {
       return r;}
       
 aType TypeArray(aType,aType);
+aType TypeTemplate(aType,aType);
 aType TypeArray(aType c,aType b,aType a);
 
 void Init_map_type();
