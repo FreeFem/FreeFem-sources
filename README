@@ -36,6 +36,7 @@ libraries on the local system. If configure cannot find the libraries
 by itself, you can specify the full path to a library file (ending
 with ".a") with the following options:
 
+--with-blas=library file
 --with-arpack=library file
 --with-amd=library file
 --with-umfpack=library file

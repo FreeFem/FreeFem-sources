@@ -10,3 +10,14 @@ http://www.freefem.org
 
 3) Open a Cygwin bash shell and follow the instructions from the
 FreeFem++ INSTALL and README files.
+
+Precompiled BLAS libraries
+--------------------------
+
+Precompiled ATLAS libraries are available at
+http://www.netlib.org/atlas/archives/windows/. There are several
+processor type dependant libraries to choose from. If FreeFem++ is
+configured with the options "--enable-generic" and
+"--enable-download", it will download the most generic version. Or you
+can download a more optimized version and specify it to "./configure"
+with the option "--with-blas=..." (see README).
