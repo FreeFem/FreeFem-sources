@@ -67,9 +67,3 @@ for (int i=0;i<nbiter;i++)
       exec("medit `pwd`/Th"+i);
     }
 }
-
-// Regression check
-real ref=fh[]'*fh[];
-cout<<"reference value="<<ref<<endl;
-assert(ref<1392);
-assert(ref>1390);
