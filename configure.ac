@@ -226,8 +226,8 @@ then
 	AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
 fi
 
-# Looking for wget before we decide to download anything
-# ------------------------------------------------------
+# Looking for useful configuration utilities
+# ------------------------------------------
 
 AC_ARG_ENABLE(download,[  --enable-download	Try to download missing libraries (BLAS,ARPACK,UMFPACK)])
 if test "$enable_download" = yes
@@ -289,14 +289,17 @@ fi
 # If all else fails, download!
 if test "$ff_blas_ok" = no -a "$ff_wget" = yes
 then
-	AC_MSG_NOTICE(using downloaded Blas)
+	AC_CHECK_PROG(ff_unzip,unzip,yes,no)
+
+	AC_MSG_CHECKING(for BLAS version to download)
 
 	# There are precompiled versions for Windows. We cannot
 	# distinguish the different versions easily so we just
 	# download the most generic one. A more specific version can
 	# always be downloaded by hand.
 
-	if test "$ff_win32" = yes -a "$enable_generic" = yes
+	if test "$ff_win32" = yes -a "$enable_generic" = yes \
+	   -a "$ff_unzip" = yes
 	   then
 		ff_download_blas=binary
 		ff_blas_dir=WinNT_PPRO256
@@ -304,14 +307,14 @@ then
 		ff_download_blas=source
 		ff_blas_dir=ATLAS/lib/ff++
 	fi
-
+	AC_MSG_RESULT($ff_download_blas)
 	AC_SUBST(DOWNLOAD_BLAS,$ff_download_blas)
 
 	# Do not update $LIBS, but create an extra LIB variable,
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
 
-	ff_blas_lib="-L${curdir}/download/blas/${ff_blas_dir} -lf77blas -lcblas -latlas"
+	ff_blas_lib="-L${curdir}/download/blas/${ff_blas_dir} -lcblas -lf77blas -latlas"
 	ff_blas_ok=yes
 fi
 AC_SUBST(BLASLIB,$ff_blas_lib)
