@@ -1,3 +1,19 @@
+freefem++ (1.44-4) unstable; urgency=low
+
+  * Upstream bug fix: FreeFem++-cs-server was not called properly
+    when FreeFem++-cs was started through an alias
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 17 Nov 2004 11:49:30 +0100
+freefem++ (1.44-3) unstable; urgency=low
+
+  * Bug correction: libarpack not found, added shlibs.local to fix this.
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 17 Nov 2004 10:47:51 +0100
+freefem++ (1.44-2) unstable; urgency=low
+
+  * Bug correction: FreeFem++-cs-server was missing from freefem++-cs package
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 17 Nov 2004 09:53:01 +0100
 freefem++ (1.44-1) unstable; urgency=low
 
   * New upstream release

@@ -44,7 +44,7 @@ Description: A PDE oriented language using Finite Element Method
 
 Package: freefem++-cs
 Architecture: any
-Depends: freefem++ (= ${Source-Version}), ${shlibs:Depends}
+Depends: freefem++ (= ${Source-Version}), ${shlibs:Depends}, libfltk1.1c102
 Description: A PDE oriented language using Finite Element Method
  FreeFem++ is an implementation of a language dedicated to the finite element
  method. It provides you a way to solve Partial Differential Equations (PDE)
