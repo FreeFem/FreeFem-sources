@@ -845,12 +845,13 @@ class KN :public KN_<R> { public:
 //          { return (const KN<const_R>& ) *this;}
   void init(long nn) {this->n=nn;this->step=1;this->next=-1;this->v=new R[nn];}
   void resize(long nn) {
-    R *vo=v;
+    R *vo=this->v;
     long no=std::min(this->n,nn), so=this->step;
     ShapeOfArray::init(nn);
     this->v=new R[this->n];
     // copy
-    if(v && vo) for(long i=0,j=0;j<no;i++,j+=so) v[i]=vo[j]; 
+    if(this->v && vo) for(long i=0,j=0;j<no;i++,j+=so) 
+      this->v[i]=vo[j]; 
     delete []vo;}
   void destroy(){delete [] this->v; this->v=0;this->n=0;}
 };
@@ -926,12 +927,13 @@ class KNM: public KNM_<R>{ public:
   void resize(long nn,long mm) {     
     long kk=nn*mm;
 
-    R *vo=v;
+    R *vo=this->v;
     long no=std::min(this->n,kk), so=this->step;
     ShapeOfArray::init(kk);
     this->v=new R[this->n];
     // copy
-    if(v && vo) for(long i=0,j=0;j<no;i++,j+=so) v[i]=vo[j]; 
+    if(this->v && vo) for(long i=0,j=0;j<no;i++,j+=so)
+      this->v[i]=vo[j]; 
     delete []vo;
         
     this->shapei.init(nn,1,nn);
