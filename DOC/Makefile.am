@@ -6,8 +6,11 @@ documentation:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 	makeindex $*
 	latex $*
 %.ps:%.dvi
-	dvips -u +psfonts.map -u +pdftex.map -u +Ttbbold.map -z -K manual -o $@
+	dvips -u +psfonts.map -u +pdftex.map -u +Ttbbold.map -z -K $* -o $@
 %.pdf:%.tex %.dvi
+	pdflatex $*
+	pdflatex $*
+	makeindex $*
 	pdflatex $*
 %.gz:%
 	gzip -c  -9 $*  >$*.gz

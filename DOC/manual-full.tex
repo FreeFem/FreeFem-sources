@@ -3413,6 +3413,41 @@ you can remove the use of this optimization by writing for example : \index{opti
                     +  @on(1,2,4,u1=0)  +  @on(3,u1=1) ;
 \eFF
 
+Remark, it is all possible to build interpolation matrix, like in 
+\index{interpolation}\index{matrix!interpolation}
+the following exemple:
+\bFF
+mesh  TH = square(3,4);mesh  th = square(2,3);mesh  Th = square(4,4);fespace VH(TH,P1);fespace Vh(th,P1);fespace Wh(Th,P1);matrix B= interplotematrix(VH,Vh);  // build interpolation matrix Vh->Vh matrix BB= interplotematrix(Wh,Vh);  // build interpolation matrix
+\eFF
+and after some operation on sparce matrix are avialable for example
+\bFF
+  int N=10;  real [int,int] A(N,N);  // a full matrix  real [int] a(N),b(N);  A =0;   for (int i=0;i<N;i++)    {      A(i,i)=1+i;      if(i+1 < N)    A(i,i+1)=-i;      a[i]=i;    }  b=A*b;  cout << "xxxx\n";   matrix sparseA=A;   cout << sparseA << endl;  sparseA = 2*sparseA+sparseA';    sparseA = 4*sparseA+sparseA*5; //    matrix sparseB=sparseA+sparseA+sparseA; ;  cout << "sparseB = " << sparseB(0,0) << endl;
+\eFF
+
+\subsection{Finite elements connectivity}
+
+With the following expression we can get the
+connectivity information of a finite element space $W_h$
+\index{nt} \index{ndof} \index{ndofK} \index{connectivity}
+\index{FEspace!nt}\index{FEspace!ndof} \index{FEspace!(int ,int )}
+\begin{itemize}
+\item   \ttCC{Wh.nt}  gives the number of element of $W_h$\item   \ttCC{   Wh.ndof}  gives the number of degree of freedom or unknows \item   \ttCC{   Wh.ndofK }  gives the number of degree of freedom on one element \item   \ttCC{   Wh(k,i) }   gives the number of $i$th  degree of freedom of element $k$. 
+\end{itemize}
+See the following for an exemple:
+\bFF
+mesh Th=square(5,5);
+fespace Wh(Th,P2);cout << " nb of degre of freedom           : " << Wh.ndof << endl;cout << " nb of degre of freedom / ELEMENT : " << Wh.ndofK << endl; int k= 2;  // element 2  int kdf= Wh.ndofK ; cout << " df of element " << k << ":" ; for (int i=0;i<kdf;i++)    cout << Wh(k,i) << " "; cout << endl;
+\eFF
+and the output is:
+\bFF
+ Nb Of Nodes = 121
+ Nb of DF = 121
+ FESpace:Gibbs: old skyline = 5841  new skyline = 1377
+ nb of degre of freedom           : 121
+ nb of degre of freedom / ELEMENT : 6
+ df of element 2:78 95 83 87 79 92 
+\eFF
+
 
 \section{Visualization}
 Numerical results in FEM create huge data, so it is very important to
