@@ -49,7 +49,7 @@ double CPUcompileInit =0;
 C_F0  fespacetype;
 bool fespacecomplex;
 
-int ShowAlloc(char *s);
+int ShowAlloc(char *s,size_t &);
 inline int yylex()  {return zzzfff->scan();}
 inline int lineno() {return zzzfff->lineno();}
 void ShowKeyWord(ostream & f ) 
@@ -199,8 +199,9 @@ start:   input ENDOFFILE {
 	            
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
                         $1+=currentblock->close(currentblock);
-                        cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;                         
-                        int NbPtr = ShowAlloc("init execution "); // number of un delele ptr
+                        cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
+                        size_t lg0,lg1;                       
+                        int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
                         cout << endl;  
                         { Stack stack = newStack(sizestack);
                         double CPUcompile= CPUtime();
@@ -224,9 +225,9 @@ start:   input ENDOFFILE {
                         //debugstack.clear() 
                         } 
                         fingraphique();
-                        NbPtr = ShowAlloc("end execution -- ") - NbPtr;
+                        NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         
-                        if (NbPtr) { cout << " ######## We forget of deleting   " << NbPtr << " Nb pointer  " << endl;}
+                        if (NbPtr) { cout << " ######## We forget of deleting   " << NbPtr << " Nb pointer,   " <<  lg1-lg0 << "Bytes\n" ;}
   return 0;}
 ;
 
@@ -523,8 +524,8 @@ void ForDebug()
   int i=0;
   i++;
 }
-extern void ShowAlloc(const char *s);
-extern void ShowNbAlloc(const char *s);
+extern void ShowAlloc(const char *s, size_t lg);
+//extern void ShowNbAlloc(const char *s);
 void init_lgfem() ;
 void init_lgmesh() ;
 void init_algo();
