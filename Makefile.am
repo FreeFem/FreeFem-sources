@@ -29,7 +29,7 @@ changelog:
 	cvs2cl -w -S --fsf
 
 documentation:
-	cd DOC && make doc
+	cd DOC && make documentation
 
 clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
@@ -47,7 +47,7 @@ visualcheck: all
 	make check VISUALCHECK=yes
 
 speedtest: all
-	cd examples-other && make check
+	cd examples++-other && make check
 
 # Build all versions
 # ------------------
