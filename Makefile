@@ -6,8 +6,8 @@ include $(src)/Makefile-$(HOSTTYPE)
 CXXFLAGS =  $(OPTFLAGS)  $(FFFLAGS) $(includedir)  $(INCARPACKPP)
 CXXMPIFLAGS=   $(CXXFLAGS) $(MPIFLAGS) -DPARALLELE $(INCARPACKPP)
 LIBS=$(LIBUMFPACK) $(LIBARPACK) $(LIBF77)  $(LIBLOCAL)
-VERSION=1.38
-www=rascasse.inria.fr:/net/saupe/www_gamma/Gamma/cdrom/ftp/freefem/
+VERSION=1.41
+www=rascasse.inria.fr:www_gamma/Gamma/cdrom/ftp/freefem/
 ftp=rascasse.inria.fr:/ftp_gamma/freefem/
 ftpk=baobab.ann.jussieu.fr:public_html/ftp/freefem/
 OBJETS= $(EIGEN) AFunction.o   lex.o  lgfem.o  lgmesh.o \
@@ -202,7 +202,7 @@ www:  FreeFem++v$(VERSION)_Win.zip  FreeFem++v$(VERSION)_MacOS.sit FreeFem++v$(V
 	ssh  baobab.ann.jussieu.fr "cd www/ftp/freefem;ln -sf FreeFem++v$(VERSION).tar.gz freefem++.tar.gz"
 	ssh  baobab.ann.jussieu.fr "cd www/ftp/freefem;ln -sf FreeFem++v$(VERSION).tar.gz freefem++.tgz"
 	ssh  baobab.ann.jussieu.fr "cd www/ftp/freefem;ln -sf FreeFem++v$(VERSION)_MacOsX.tgz freefem++_MacOsX.tgz"
-	scp  HISTORY  baobab.ann.jussieu.fr:/www/.
+	scp  HISTORY  baobab.ann.jussieu.fr:www/.
 	ssh  baobab.ann.jussieu.fr "cd www/.; ./.update++ $(VERSION) <ff++.htmx >freefem++.htm"
 	scp  HISTORY DOC/manual.pdf DOC/manual.ps.gz FreeFem++v$(VERSION).tar.gz FreeFem++v$(VERSION)_MacOsX.tgz FreeFem++v$(VERSION)_Win.zip  FreeFem++v$(VERSION)_MacOS.sit  $(ftp)
 	scp HISTORY DOC/manual.pdf DOC/manual.ps.gz  $(www)
