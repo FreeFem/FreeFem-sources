@@ -21,6 +21,9 @@ AC_PROG_CXX
 AC_PROG_YACC
 AM_PROG_LEX
 
+# Some useful libraries
+AC_CHECK_LIB(pthread,pthread_create)
+
 # Looking for the BLAS
 # --------------------
 
@@ -35,13 +38,34 @@ AC_CHECK_LIB(blas,daxpy_,
 # Trying Atlas (location corresponding to Debian package)
 if test "$ff_blas_ok" = no;
 then
+	AC_MSG_CHECKING(for daxpy_ in /usr/lib/atlas/libblas.a)
 	ff_save_libs="$LIBS"
-	LIBS="$LIBS -L/usr/lib/atlas"
-	AC_CHECK_LIB(blas,daxpy_,
-		LIBS="$LIBS -lblas"
+	LIBS="$LIBS -L/usr/lib/atlas -lblas"
+	AC_LINK_IFELSE(
+		[AC_LANG_CALL(,daxpy_)],
 		ff_blas_ok=yes,
 		LIBS="$ff_save_libs")
+	AC_MSG_RESULT($ff_blas_ok)
 fi
+
+# Nothing can be compiled without the BLAS
+if test "$ff_blas_ok" = no;
+then
+	AC_MSG_ERROR(Cannot find BLAS library)
+fi
+
+# Checking wether we can produce a parallel version
+# -------------------------------------------------
+
+AC_SUBST(mpiprogs,[])
+AC_CHECK_PROG(ff_mpi,mpiCC,yes,no)
+if test "$ff_mpi" = yes;
+then
+	AC_SUBST(mpiprogs,mpi mpi-g)
+fi
+
+# Creating all makefiles
+# ----------------------
 
 AC_OUTPUT(Makefile
 	src/Makefile

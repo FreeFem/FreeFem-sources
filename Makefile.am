@@ -1,12 +1,14 @@
 # Makefile for FreeFem++, adapted to Automake
 # -------------------------------------------
 
-# Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
+# Adaptation to Automake: Antoine Le Hyaric - LJLL Paris 6 -
+# lehyaric@ann.jussieu.fr - 13/5/04
+
 # $Id$
 
 # All the versions of FreeFem++ to compile when "make" is invoked
 all-local:: $(src)/versionnumber.hpp \
-	std std-g glx glx-g x11 x11-g $(BUILD_COCOA) mpi mpi-g
+	std std-g glx glx-g x11 x11-g $(BUILD_COCOA) @mpiprogs@
 
 # Object files for different architectures are located in separate
 # directories.
@@ -37,7 +39,7 @@ INCLUDEX11 = /usr/X11R6/include
 CXXMPI=mpiCC   # compilation with mpi
 OOPTFLAGS= -O  # compilation with optimisation
 GOPTFLAGS= -g  # compilation with debugging 
-LIBGLX= $(LIBX11) -lGL -lGLU
+LIBGLX= -lGL -lGLU $(LIBX11)
 #--------------------------------------------------
 #  the flag of eigen value part with arpack++ tools
 #-------------------------------------------------
