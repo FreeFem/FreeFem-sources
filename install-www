@@ -12,7 +12,7 @@ if [ -f Output/FreeFem++-$VERSION.exe ]; then
   scp Output/FreeFem++-${VERSION}.exe  $ftp
   scp Output/FreeFem++-${VERSION}.exe  $www/freefem.exe
 else
-list1="HISTORY DOC/manual.pdf DOC/manual.ps.gz"
+list1="HISTORY DOC/manual-full.pdf DOC/manual-full.ps.gz"
 
 
 

@@ -65,7 +65,7 @@ speedtest: all
 # ---------------
 
 # Windows package script (for Inno Setup)
-WindowsPackage.iss: WindowsPackage.m4 configure.ac
+WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
 	m4 -DVERSION=$(VERSION) WindowsPackage.m4 > WindowsPackage.iss
 
 # Debian package
@@ -100,7 +100,7 @@ FreeFem++v$(VERSION)_MacOS:documentation
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
 	-cp  examples++-bug/*.edp   $@/examples++-bug
-	cp  DOC/manual.ps.gz DOC/manual.pdf $@
+	cp  DOC/manual-full.ps.gz DOC/manual-full.pdf $@
 
 FreeFem++v$(VERSION)_MacOsX: all documentation
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
@@ -109,7 +109,7 @@ FreeFem++v$(VERSION)_MacOsX: all documentation
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	-cp  examples++-bug/*.edp   $@/examples++-bug
-	cp  DOC/manual.ps.gz DOC/manual.pdf $@
+	cp  DOC/manual-full.ps.gz DOC/manual-full.pdf $@
 	cp -r FreeFem++.app FreeFem++v$(VERSION)_MacOsX 
 	sed <Info-plist.am >FreeFem++.app/Contents/Info.plist \
            -e "s/@VVERSION@/$(VERSION)/g" \
