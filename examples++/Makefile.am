@@ -20,9 +20,9 @@ all.edp:
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
 
-makeref.edp: regtests.m4
+makeref.edp: regtests.m4 ../regtests.m4
 	m4 regtests.m4 > makeref.edp
 
 # To check the scripts against their reference values
-regtests.edp: regtests.m4
+regtests.edp: regtests.m4 ../regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
