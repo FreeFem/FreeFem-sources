@@ -42,7 +42,9 @@ assert( abs(map["1"]-2.0)<1.e-6);
 assert(abs(map[2]-3.0)<1e-6);
 
 real [int] tab2=[1,2,3,3.14];
+int  [int] itab2=[1,2,3,5];
 cout << tab2 << endl;
+cout << itab2 << endl;
 
 real [int,int] mat(10,10);
 mat=0;

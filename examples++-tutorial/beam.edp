@@ -25,17 +25,7 @@ solve bb([uu,vv],[w,s],solver=Crout)=
   - int2d(th) (gravity*s)
   + on(1,uu=0,vv=0)
   ;
-/*  old version with bug 
-solve  bb([uu,vv],[w,s])  = 
-    int2d(th)(
-    
-                 2*mu*(dx(uu)*dx(w)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/4 )
-               + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))/2 
-             ) 
-  + int2d(th) (-gravity*s)
-  + on(1,uu=0,vv=0)
- ;
-*/
+
 //verbosity=100;
 plot([uu,vv],wait=1);
 plot([uu,vv],wait=1,bb=[[-0.5,2.5],[2.5,-0.5]]);

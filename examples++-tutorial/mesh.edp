@@ -111,6 +111,44 @@ plot(rh,ps="lshape.eps");
   Th=splitmesh(Th,1+5*(square(x-0.5)+y*y));
   plot(Th,wait=1,ps="splitmesh.eps");
 }
+
+// ------------------------------------------------------------
+{  //  new stuff 2004 emptymesh (version 1.40)
+ // -- usefull to build Multiplicator space 
+ //  build a mesh without internal point
+ // with the same boundary 
+ //  -----
+  assert(version>=1.40);
+  border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+  mesh Th=buildmesh(a(20));
+  plot(Th,wait=1,ps="nosplitmesh.eps");
+  plot(Th,wait=1);
+  Th=emptymesh(Th);
+  plot(Th,wait=1,ps="emptymesh-1.eps");
+}
+{  //  new stuff 2004 emptymesh (version 1.40)
+ // -- usefull to build Multiplicator space 
+ //  build a mesh without internal point
+ //   if the adj triangle 
+ //  -----
+  assert(version>=1.40);
+  mesh Th=square(10,10);
+  int[int] ssd(Th.nt);
+  fespace Ph(Th,P0);
+   Ph sd;
+  for(int i=0;i<ssd.n;i++)
+   {  int iq=i/2;   // because 2 traingle per quad 
+      int ix=iq%10;
+      int iy=iq/10;  
+    ssd[i]= 1 + (ix>=5) +  (iy>=5)*2;
+    sd[][i]=ssd[i];
+   }
+  plot(sd,fill=1,wait=1);
+  Th=emptymesh(Th,ssd);
+  plot(Th,wait=1,ps="emptymesh-2.eps");
+  savemesh(Th,"emptymesh-2.msh");
+}
+
   // ------------------------------------------------------------
 {  // get mesh information (version 1.37)
   mesh Th=square(2,2);
