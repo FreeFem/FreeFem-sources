@@ -777,6 +777,11 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 # Can we produce an IDE?
 # ----------------------
 
+# For development purposes, we may need to use X libraries instead of
+# native libraries (mainly to run the programs remotely)
+
+AC_ARG_WITH(xfltk,[  --with-xfltk	When recompiling FLTK, use X libraries instead of native Win32 or MacOS])
+
 # Sometimes (under cygwin for instance) the default version of FLTK
 # does not fit our purpose
 
@@ -855,6 +860,11 @@ then
 	if test "$ff_mac" != yes -a "$ff_mingw" != yes 
 	then
 		AC_SUBST(IDE_LIBS,$ff_x11_libs)
+	fi
+
+	if test "$with_xfltk" = yes
+	then
+		AC_SUBST(FLTK_XONLY,"--with-x")
 	fi
 fi
 
