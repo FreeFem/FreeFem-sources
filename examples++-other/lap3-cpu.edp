@@ -38,21 +38,21 @@ verbosity=5;
 
 real cpu=clock() ;
 laplace0; // solve the problem plot(uh); // to see the result
-cout << "-- lap Cholesky " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s" << endl;
+cout << "-- lap Cholesky " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
 uh=0;
 cpu=clock() ;
 laplace1; // solve the problem plot(uh); // to see the result
-cout << "-- lap CG       " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s" << endl;
+cout << "-- lap CG       " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
 uh=0;
 
 cpu=clock() ;
 laplaceLU; // solve the problem plot(uh); // to see the result
-cout << "-- lap LU       " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s" << endl;
+cout << "-- lap LU       " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
 uh=0;
 
 cpu=clock() ;
 laplaceCrout; // solve the problem plot(uh); // to see the result
-cout << "-- lap Crout    " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s" << endl;
+cout << "-- lap Crout    " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
 uh=0;
 
 if(HaveUMFPACK){
@@ -66,7 +66,7 @@ if(HaveUMFPACK){
   cpu=clock(); 
   laplace2; // solve the problem plot(uh); // to see the result
   cout << "-- lap UMFPACK  " << nn << "x" << nn << "  : "
-       <<  -cpu+clock() << " s" << endl;
+       <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
 }
 else{
   cout << "-- lap UMFPACK  " << nn << "x" << nn << "  : "
