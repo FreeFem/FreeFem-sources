@@ -41,7 +41,7 @@ verbosity=verbosityy;
 		
 	
 	include "aadaptation.edp";
-	real TESTaadaptation=u[]'*u[];
+	real TESTaadaptation=regvalue;
 		cout<<"aadaptation reference value = "<<REFaadaptation
 				<<" test value ="<<TESTaadaptation<<endl;
 			assert(TESTaadaptation<REFaadaptation*(1+0.1));
