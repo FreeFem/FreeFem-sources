@@ -35,96 +35,109 @@ of several variables and its (partial) derivatives.
  Many problems in physics, engineering, mathematics and even banking
 are modeled by one or several partial differential equations.
 \\\\
-\texttt{Freefem} is a software to solve numerically these equations.
-As its name tells, it is  public domain software based on the
-Finite Element Method. This software run on all unix OS (with g++ 2.95.2 or better and X11R6) , on Window95, 98, 2000, NT, XP  and   on MacOS 9 and X.
-\\\\
-Many phenomena involve several different fields.
-Fluid-structure interactions, Lorenz forces in liquid aluminium
-and ocean-atmosphere problems are three such systems. These
-require approximations of different degrees possibly on different meshes.
-  Some algorithms such as Schwarz' domain decomposition method require
-also the interpolation of data on different meshes within one
-program. Thus \texttt{freefem++} can handle these difficulties:
-{\it arbitrary finite element spaces on arbitrary unstructured and
-adaptated meshes}
-\\\\
+
+\texttt{Freefem} is a software to solve these equations numerically.
+As its name says, it is public domain software based on the Finite
+Element Method. This software runs on all unix OS (with g++ 2.95.2 or
+better and X11R6) , on Window95, 98, 2000, NT, XP and   on MacOS 9 and
+X.  \\\\
+%%% alh? Is it really public domain? (no restriction whatsoever!)
+Many phenomena involve several different fields.  Fluid-structure
+interactions, Lorenz forces in liquid aluminium and ocean-atmosphere
+problems are three such systems. These require approximations of
+different degrees, possibly on different meshes.  Some algorithms such
+as Schwarz' domain decomposition method also require data
+interpolation on different meshes within one
+program. \texttt{freefem++} can handle these difficulties, i.e. {\it
+arbitrary finite element spaces on arbitrary unstructured and adapted
+meshes}.  \\\\
 
 The characteristics of \freefempp are:
 \begin{itemize}
-\item Lot of finites elements :   linear and quadratic Lagrangian
- elements, discontinuous P1 and Raviart-Thomas elements, no scalar element , mini-element, ...
+%%% alh? ``no scalar element''?
+\item A large variety of finites elements : linear and quadratic
+ Lagrangian elements, discontinuous P1 and Raviart-Thomas elements,
+ elements of a non-scalar type, mini-element, ...
 \item  Automatic interpolation of data on different meshes to an over mesh.
 %
-\item Definition of the linear problem with a formal variational form with access  to the vectors and the
-matrix if need.
-\item Tools  to defined discontinuous Galerkin formulation (see: jump, average, intalledges)
-
+\item Linear problems description thanks to a formal variational form, 
+with access to the vectors and the matrix if needed.
 %
-\item Analytic description of boundaries, therefore
-the user must specify the intersection points in case two boundaries intersect.
+\item Includes tools to define discontinuous Galerkin formulations
+(please refer to the following keywords: ``jump'', ``average'',
+``intalledges'')
 %
-\item Automatic mesh generator, based on the Delaunay-Voronoi algorithm with
-inner points generated with a density proportional to the density of points
-on the boundary \cite{George}.
+\item Analytic description of boundaries. When two boundaries
+intersect, the user must specify the intersection points.
 %
-\item Mesh anisotropic adaptation based on metric, where the metric can automatically
-computed from the Hessien of a solution \cite{bamg}.
+\item Automatic mesh generator, based on the Delaunay-Voronoi
+algorithm. Inner points density is proportional to the density of
+points on the boundary \cite{George}.
+%
+\item Metric-based anisotropic mesh adaptation. The metric can be
+computed automatically from the Hessien of a solution \cite{bamg}.
 %
 %\item Every variable is typed. For instance \texttt{f} is a function, specified
 %by the keyword \texttt{func}.
 %
-\item LU, Cholesky, Crout, CG, GMRES, UMFPACK linear solver, and eigen value and vector computation. 
+\item Solvers : LU, Cholesky, Crout, CG, GMRES, UMFPACK linear solver,
+eigenvalue and eigenvector computation.
 %
-\item Online graphics, C++ like syntax.
-\item lots of examples: Navier-Stokes, elasticity, Fluid structure,  Schwarz's domain decomposition method, Eigen value problem, residual error indicator,  ...
-\item parallele version with \texttt{mpi}
+\item Online graphics, C++-like syntax.
+%
+\item Many examples: Navier-Stokes, elasticity, Fluid structure,
+Schwarz's domain decomposition method, Eigen value problem, residual
+error indicator, ...
+%
+\item Parallel version using \texttt{mpi}
 \end{itemize}
 
 
 \subsection{History}
 
-The project has evolved from \texttt{MacFem, PCfem}, written
-in Pascal. The first version written in C was  \texttt{freefem 3.4};
-it had mesh adaptation but on a single mesh.
-Later  \texttt{freefem+ 1.2.10} was the result of a thorough rewriting in C++.
-It had multiple meshes with interpolation (functions defined on one mesh can be
-used on any other mesh).
-Interpolation from one unstructured mesh to another is not easy because it
-has to be fast and non-diffusive; one has to find for each
-point
-the triangle which contains it and that is one of the basic problems
-of computational geometry (see Preparata \& Shamos\cite{Preparata} for
-example). To do it in the minimum number of operations is the challenge.
-We use an implementation which is $O(n\log n)$, based on a quadtree.
-\\\\
-We are now introducing  \texttt{freefem++}, an entirely new program written
-in C++ and based on \texttt{bison} for an easy modification of the
+The project has evolved from \texttt{MacFem, PCfem}, written in
+Pascal. The first C version was \texttt{freefem 3.4}; it offered mesh
+adaptation on a single mesh.  A thorough rewriting in C++ led to
+\texttt{freefem+ 1.2.10}, which also included interpolation over
+multiple meshes (functions defined on one mesh can be used on any
+other mesh).  Implementing the interpolation from one unstructured
+mesh to another was not easy because it had to be fast and
+non-diffusive; for each point, one had to find the containing
+triangle. This is one of the basic problems of computational geometry
+(see Preparata \& Shamos\cite{Preparata} for example). Doing it in a
+minimum number of operations was a challenge.  Our implementation was
+$O(n\log n)$ and based on a quadtree.  \\\\
+
+We are now introducing \freefempp, an entirely new program written
+in C++ and based on \texttt{bison} for a more adaptable
 freefem language.
 \\\\
-  The freefem language allows for a quick specification of any
-  partial differential system of equations.
-The language syntax of \freefempp is
-redesigned and makes use of STL \cite{cpp},
-templates and \texttt{bison} for its implementation.
- The outcome is a versatile software in which any new finite element
-can be included in a few hours; but a recompilation is then necessary.
- The library of finite elements available in \freefempp will therefore depend
- on the version number.  So far we have  linear and quadratic Lagrangian
- elements, discontinuous P1 and Raviart-Thomas elements.
+
+The freefem language allows for a quick specification of any partial
+differential system of equations.  The language syntax of \freefempp
+is the result of a new design which makes use of the STL \cite{cpp},
+templates and \texttt{bison} for its implementation.  The outcome is a
+versatile software in which any new finite element can be included in
+a few hours; but a recompilation is then necessary.  The library of
+finite elements available in \freefempp will therefore grow with the
+version number.  So far we have linear and quadratic Lagrangian
+elements, discontinuous P1 and Raviart-Thomas elements.
 
 \subsection{The language}
 
-Basically \freefempp  is a \index{compiler} compiler,
-  the language is typed, polymorphic and reentrant with macro generation (see \ref{macro}).
-Every variable must be typed, declared in a  statement; each statement separated
-from the next by a semicolon `\texttt{;}'.  
-The following
-is a simple example whereby the Dirichlet problem with right hand side
-$xy$ for the Laplace
-operator is solved inside the unit circle. The finite element method of degree
-2 on triangles is used with a mesh which has 50 points on the unit circle.
-The linear system is solved by a Gauss LU factorization.
+Basically \freefempp is a \index{compiler} compiler.  The language it
+defines is typed, polymorphic and reentrant with macro generation (see
+\ref{macro}).  Every variable must be typed and declared in a
+statement; each statement separated from the next by a semicolon
+`\texttt{;}'.
+
+\smallskip
+
+Here is a simple example solving the Dirichlet problem inside the unit
+circle. We have chosen $xy$ as the right hand side for the Laplace
+operator, a second degree finite element method on triangles, and a
+mesh with 50 points on the boundary.  The linear system is solved by a
+Gauss LU factorisation.
 
 \bFF
 @border a(t=0,2*@pi){@x=cos(t); @y=sin(t);@label=5;};
@@ -134,7 +147,7 @@ Vh u,v;
 @func f= x*y;
 @problem laplace(u,v,@solver=LU) =
     @int2d(Th)(@dx(u)*@dx(v) + @dy(u)*@dy(v))   //  bilinear part
-    - @int2d(Th)( f*v)          // right hand size part 
+    - @int2d(Th)( f*v)          // right hand side 
     + @on(5,u=0)  ;  // Dirichlet boundary condition
 
 @real cpu=clock();
@@ -142,11 +155,15 @@ laplace; // SOLVE THE PDE
 @plot(u);
 @cout << " CPU = " << clock()-cpu << @endl;
 \eFF
-We have written in blue the reserved words of the language. Later we will not
-write \texttt{pi,x,y,label, solver} in blue because these are reserved
-variables, the redefinition of which is dangerous, yet allowed.
-\\\\
-This example shows some of the characteristics of \freefempp
+
+Reserved words are shown in blue. \texttt{pi, x, y, label, solver} are
+reserved variables. It is allowed (although not advisable) to redefine
+these variables, so they will not be highlighted in other example
+programs.\\\\
+
+
+%%% alh stopped here
+This example shows some of the characteristics of \freefempp~:
 
 \begin{itemize}
 \item Analytic description of boundaries (by opposition to CSG), therefore
@@ -169,7 +186,7 @@ by the keyword \texttt{func}.
 \item C++ like syntax.
 
 \end{itemize}
-\subsection{How to use}
+\subsection{Installation}
 
  First under unix, you must compile the software. To do that you 
  have to download the source version from 
@@ -627,8 +644,8 @@ The following
   @mesh th=@square(4,5);
   @plot(Th,th,ps="twosquare.eps");
 \eFF
-constructs a grid $n\times m$ in the rectangle $[1.2,1.8]\times[0,1]$ and
-a grid  $4\times 5$ in the unit square $[0,1]^2$.
+constructs a grid $n× m$ in the rectangle $[1.2,1.8]×[0,1]$ and
+a grid  $4× 5$ in the unit square $[0,1]^2$.
 
 \begin{remark} The label of \index{label}
 boundaries are $1,2,3,4$ for bottom, right, top, left side (before the
@@ -665,7 +682,7 @@ to generate a postscript file identical to the plot shown on screen.
 
 %Polygons are best described as unions of straight segments such as below for
 %the
-%$(0,2)\times(0,1)$ rectangle:\index{border}\index{label}
+%$(0,2)×(0,1)$ rectangle:\index{border}\index{label}
 
 %\bFF
 %@border a(t=0,2){x=t; y=0;label=1;}; // the label can be depend of t
@@ -721,7 +738,8 @@ while(1) // find a correct move mesh
 Th=movemesh(Th,[x+coef*uu,y+coef*vv]);
 plot(Th,wait=1,fill=1,ps="movemesh.eps");// see figure \ref{movemesh}
 \eFF
-\twoplot[height=6cm]{Lshape}{movemesh}{   L-shape}{  moved L-shape }
+%%% alh? Lshape.eps not found
+%%%\twoplot[height=6cm]{Lshape}{movemesh}{   L-shape}{  moved L-shape }
 
 \begin{remark}
 Consider a function u defined on a mesh Th. A statement like
@@ -813,7 +831,8 @@ here the third column  by line is  unused in the command  \texttt{triangulate}.
 But you can use this  to defined a  table fonction with rows of the form: 
 \texttt{x y f(x,y))}.
 
-\twoplot[height=6cm]{Thxy}{xyf}{Delaunay mesh of the convexe hull of point set in file xyf}{Isovalue of table function}
+%%% alh? Thxy.eps and xyf.eps not found
+%%%\twoplot[height=6cm]{Thxy}{xyf}{Delaunay mesh of the convexe hull of point set in file xyf}{Isovalue of table function}
 
 \index{function!tables}
 
@@ -1022,18 +1041,18 @@ boolean function.
 The two named parameter 
 \begin{description} \index{split=} \index{label=}\index{trunc!split=} \index{trunc!label=}
   \itemtt[label=] sets the label number of new boundary item (one by default)
-  \itemtt[split=] sets the level $n$ of triangle splitting. each triangle is splitted in  $n\times n$ ( one by default).
+  \itemtt[split=] sets the level $n$ of triangle splitting. each triangle is splitted in  $n× n$ ( one by default).
 \end{description}
 
 To create the mesh \texttt{Th3}  
-where alls  triangles of a mesh \texttt{Th}  are splitted in $3\times3$ , just write:
+where alls  triangles of a mesh \texttt{Th}  are splitted in $3×3$ , just write:
 \bFF
   mesh Th3 = trunc(Th,1,split=3); 
 \eFF
 
 The  \texttt{truncmesh.edp} exemple construct 
 all "trunc" mesh  to the support of the basic function  of the space \texttt{Vh} (cf. \texttt{abs(u)>0}), 
-split all the  triangles in $5\times 5$, and put a label number to $2$ on new boundary.
+split all the  triangles in $5× 5$, and put a label number to $2$ on new boundary.
 \bFF
 @mesh Th=square(3,3);
 @fespace Vh(Th,P1);
@@ -1050,8 +1069,8 @@ u=0;
   u[][i]=0;      // reset 
  }
 \eFF
-\twoplot[height=6cm]{trunc0}{trunc6}{ mesh of support the function P1  number 0, splitted in $5\times5$ }{
-mesh of support the function P1  number 6, splitted in $5\times5$ }
+\twoplot[height=6cm]{trunc0}{trunc6}{ mesh of support the function P1  number 0, splitted in $5×5$ }{
+mesh of support the function P1  number 6, splitted in $5×5$ }
 \subsection{splitmesh}
 A other way to split mesh triangle:
 \bFF
@@ -1092,7 +1111,7 @@ point is on internal boundary.
 or it is also possible to build a empty mesh of peusdo subregion  
 with \texttt{emptymesh(Th,ssd)} with the set of edges of the mesh \texttt{Th}
 a edge $e$ is in  this set  if the two adjacent triangles $e =t1\cap t2$ 
-and  $ ssd[T1] \ne ssd[T2]$ where \texttt{ssd}  defined the peusdo region numbering of triangle. It is an user \texttt{int[int]} array of size the number of triangles.
+and  $ ssd[T1] \neq ssd[T2]$ where \texttt{ssd}  defined the peusdo region numbering of triangle. It is an user \texttt{int[int]} array of size the number of triangles.
 \bFF
 {  //  new stuff 2004 emptymesh (version 1.40) \hfilll
  // -- usefull to build Multiplicator space \hfilll
@@ -1109,7 +1128,7 @@ and  $ ssd[T1] \ne ssd[T2]$ where \texttt{ssd}  defined the peusdo region number
     ssd[i]= 1 + (ix>=5) +  (iy>=5)*2;
    }
   Th=emptymesh(Th,ssd); // build emtpy  with 
-  //  all edge $e = T1 \cap T2$ and $ ssd[T1] \ne ssd[T2]$ 
+  //  all edge $e = T1 \cap T2$ and $ ssd[T1] \neq ssd[T2]$ 
   plot(Th,wait=1,ps="emptymesh-2.eps");//see figure \ref{fig emptymesh-2} 
   savemesh(Th,"emptymesh-2.msh");
 }
@@ -1306,7 +1325,7 @@ $$  R_{h} = \{ \mathbf{v} \in H^{1}(]0,1[^2)^{2} / \forall K \in \mathcal{T}_{h}
  \mathbf{v}_{|K}(x,y) =
          \vecttwo{\alpha_{K}}{\beta_{K}} + \gamma_{K}\vecttwo{x}{y} \}$$
 
-where $\mathcal{T}$ is a mesh $10\times 10$ of the unit square $]0,1[^2$,
+where $\mathcal{T}$ is a mesh $10× 10$ of the unit square $]0,1[^2$,
 \\\\
 the corresponding \freefempp definitions are:
 
@@ -1413,8 +1432,8 @@ test  for example, but see what happens in this trivial example. In fact a
             // to get the new vh on 10x10 mesh.
    @plot(vh,ps="onnewmesh.eps"); // figure \ref{onnewmesh}
 \eFF
-\twoplot[height=6cm]{onoldmesh}{onnewmesh}{ vh Iso on mesh $2\times 2$}{
-vh Iso on mesh $5\times 5$}
+\twoplot[height=6cm]{onoldmesh}{onnewmesh}{ vh Iso on mesh $2× 2$}{
+vh Iso on mesh $5× 5$}
 
 \subsection{Problem and solve}
 
@@ -1850,7 +1869,7 @@ and the matrix $B$.
 In the first example, we compute   the eigenvalue and the eigenvector of the 
  Dirichlet problem  on square $\Omega=]0,\pi[^2$. 
 
-The problem is find:   $\lambda$, and $\nabla u_{\lambda}$  in $\mathbb{R}\times H^1_0(\Omega)$
+The problem is find:   $\lambda$, and $\nabla u_{\lambda}$  in $\mathbb{R}× H^1_0(\Omega)$
 $$ \int_\Omega \nabla u_{\lambda} \nabla v = \lambda int_\Omega u  v \quad  \forall v \in H^1_0(\Omega)$$
 
 The exact 
@@ -2185,9 +2204,9 @@ The named parameter of this two function are:
 \itemtt[precon=] set the preconditionner function (\texttt{P} for exemple)   by default it is the identity, remark the prototype 
 is \ttCC{@func\ @real[\@int]\ P(@real[@int] \&x)}.
 \itemtt[eps=] set the value of the stop test $\varepsilon$ ($=10^{-6}$ by default) if positive then relative test 
-$||dJ(x)||_P\le \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\le |\varepsilon|$.
+$||dJ(x)||_P\leq \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\leq |\varepsilon|$.
 \itemtt[veps=] set et return the value of the stop test,  if positive then relative test 
-$||dJ(x)||_P\le \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\le |\varepsilon|$.
+$||dJ(x)||_P\leq \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\leq |\varepsilon|$.
 The return value is  minus  the real stop test (remark: it is usefull in loop).
 
 \end{description}
@@ -2787,7 +2806,7 @@ on the velocity,  $u=u_{\Gamma}$ on $\Gamma$.
 A classical way to discretize the Stokes equation with a mixed formulation,
 is to solve the variational problem and then discretize it:
 
-Find $(u_{h},p_{h}) \in X_{h}^2 \times M_{h}$ such that $u_{h} = u_{\Gamma h}$,
+Find $(u_{h},p_{h}) \in X_{h}^2 × M_{h}$ such that $u_{h} = u_{\Gamma h}$,
 and such that
 \Blue{
 \begin{equation} \label{eq vf Stokes}
@@ -2887,7 +2906,7 @@ Crout needs it: all the sub-matrices must be invertible.
 
 If the \index{streamlines}streamlines are required, they can be
 computed by finding $\psi$ such that rot$\psi=u$ or better,
-\Blue{$$-\Delta\psi=\nabla\times u$$}
+\Blue{$$-\Delta\psi=\nabla× u$$}
 \bFF
 Xh psi,phi;
 
@@ -3167,7 +3186,7 @@ the Schwarz algorithm  runs like this
     u^{m+1}_2|_{\Gamma_2}=u^m_1
 }
  where $\Gamma_i$ is the boundary of $\Omega_i$ and on the
-condition that $\Omega_1\cap\Omega_2\ne\emptyset$ and that $u_i$
+condition that $\Omega_1\cap\Omega_2\neq\emptyset$ and that $u_i$
 are zero at iteration 1.
 \\\\
 Here we take $\Omega_1$ to be a quadrangle, $\Omega_2$ a disk and
@@ -3253,8 +3272,8 @@ where  $u_i$ is solution of the following Laplace problem:
 
 To solve this problem we just make a loop
 with upgrading$\lambda$ with
-$$\lambda = \lambda \pm \frac{(u_1-u_2)}{2}$$
-where the sign $+$ or $-$ of $\pm$ is choose to have convergence.
+$$\lambda = \lambda ± \frac{(u_1-u_2)}{2}$$
+where the sign $+$ or $-$ of $±$ is choose to have convergence.
 
 \bFF
 // schwarz1 without overlapping
@@ -3437,7 +3456,7 @@ for the displacement vector $v(x)\in V$ as
 \forall \vec w\in V
 $$}
 
-The  elastic solids  is a rectangle beam $[0,10]\times[0,2]$.
+The  elastic solids  is a rectangle beam $[0,10]×[0,2]$.
 The data are the gravity force $\vec g$ and the
 boundary stress i$\vec h$ is zero on lower and upper side, and on the  two vertical sides of the beam are locked.
 \bFF
@@ -3478,7 +3497,7 @@ Vh [uu,vv], [w,s];
 \index{fluid-structure interaction}
 
 
-This problem involves the Lam\'e system of elasticity
+This problem involves the Lamé system of elasticity
 and the Stokes system for viscous fluids with velocity $\vec u$ and pressure $p$:
 \begin{eqnarray*}\Blue
 -\Delta \vec u +\vec\nabla p = 0, \,
@@ -3520,14 +3539,14 @@ $$}
 The data are the gravity force $\vec g$ and the
 boundary stress $\vec h$.
 
-In our example the Lam\'e system and the Stokes system are coupled by a
+In our example the Lamé system and the Stokes system are coupled by a
 common boundary on which
 the fluid  stress creates a displacement of the boundary and hence
 changes the shape of the domain where the Stokes problem is integrated.
 The geometry is that of a vertical driven cavity with an elastic lid.
 The lid is a beam with weight so it will
 be deformed by its own weight and by the normal stress due to the fluid reaction.
-The cavity is the $10 \times 10$ square and the lid is a rectangle of height $l=2$.
+The cavity is the $10 × 10$ square and the lid is a rectangle of height $l=2$.
 \\\\
 A beam sits on a box full of fluid rotating because the left vertical side has velocity one.
 The beam is bent by its own weight, but the pressure of the fluid modifies the bending.
@@ -3869,7 +3888,7 @@ The nonlinear elasticity  problem is find  the deplacement $(u_{1},u_{2})$  mini
 $$ \min J(u_{1},u_{2}) = \int_{\Omega} f(F2) -  \int_{\Gamma_{p}} P_{a} \,  u_{2} $$
 where  $F2(u_{1},u_{2}) =  A(E[u_{1},u_{2}],E[u_{1},u_{2}])$ and $A(X,Y)$ is bilinear sym. positive form with respect two matrix $X,Y$.
 where $f$ is a given $\mathcal{C}^2$  function, and $E[u_{1},u_{2}] = (E_{ij})_{i=1,2,\,j=1,2}$ is the Green-Saint Venant deformation tensor defined  with: 
-$$  E_{ij} = 0.5 ( \partial_i u_j + \partial_j u_i ) + \sum_k \partial_i u_k \times \partial_j u_k  $$ 
+$$  E_{ij} = 0.5 ( \partial_i u_j + \partial_j u_i ) + \sum_k \partial_i u_k × \partial_j u_k  $$ 
 
 
 
@@ -4370,8 +4389,8 @@ where
   \begin{itemize}
    \item $\mathtt{typesol^k = 1}$ the solution {\tt k} is scalare  (1  value per vertex)
    \item $\mathtt{typesol^k = 2}$ the solution {\tt k} is vectorial  (2 values per unknown)
-   \item $\mathtt{typesol^k = 3}$ the solution {\tt k} is a  $2\times 2$ symmetric matrix  (3 values per vertex)
-   \item $\mathtt{typesol^k = 4}$ the solution  {\tt k} is a  $2\times 2$ matrix  (4 values per vertex)
+   \item $\mathtt{typesol^k = 3}$ the solution {\tt k} is a  $2× 2$ symmetric matrix  (3 values per vertex)
+   \item $\mathtt{typesol^k = 4}$ the solution  {\tt k} is a  $2× 2$ matrix  (4 values per vertex)
    \end{itemize}
 
 \item  {\tt nbv} is  a integer equal to the number of vertices
