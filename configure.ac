@@ -25,6 +25,15 @@ AM_PROG_LEX
 AC_CHECK_LIB(pthread,pthread_create)
 
 
+# Checking wether we can produce a MacIntosh-specific version
+# -----------------------------------------------------------
+
+AC_CHECK_PROG(ff_agl,agl,yes,no)
+if test "$ff_agl" = yes;
+then
+	AC_SUBST(AGLPROG,FreeFem++-agl)
+fi
+
 # Looking for the BLAS
 # --------------------
 
@@ -118,18 +127,24 @@ AC_ARG_ENABLE(debug,
 if test "$ff_debug" = true;
 then
 	CXXFLAGS="-DDRAWING -DLONG_LONG -DCHECK_KN -g"
+	if test "ff_agl" = yes;
+	then
+		CXXFLAGS="$CXXFLAGS -fno-inline -fpascal-strings -fexceptions"
+	fi
 else
 	CXXFLAGS="-DDRAWING -DLONG_LONG  -DNCHECKPTR -O"
+	if test "ff_agl" = yes;
+		CXXFLAGS="$CXXFLAGS  -fpascal-strings"
+	fi
 fi
 
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
 
-NOINSTPROGS=FreeFem++-g FreeFem++-nw-g FreeFem++-x11-g FreeFem++-glx-g
 AC_CHECK_PROG(ff_mpi,mpiCC,yes,no)
 if test "$ff_mpi" = yes;
 then
-	NOINSTPROGS="$NOINSTPROGS FreeFem++-mpi-g"
+	AC_SUBST(MPIPROG,FreeFem++-mpi)
 fi
 
 # Creating all makefiles
