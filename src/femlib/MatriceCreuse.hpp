@@ -350,13 +350,13 @@ public:
   
   template<class F> void map(const  F & f)
   {
-    for(int i=0;i<n;++i)
+    for(int i=0;i<this->n;++i)
       D[i]=f(D[i]);
     if (L)
-    for(int i=0;i<pL[n];++i)
+    for(int i=0;i<pL[this->n];++i)
       L[i]=f(L[i]);
     if (L && (L != U) )
-    for(int i=0;i<pL[m];++i)
+    for(int i=0;i<pL[this->m];++i)
       U[i]=f(U[i]);
   }
   
@@ -365,15 +365,15 @@ public:
   {
     
     typefac=A.typefac;
-    pL=  docpy<int,int>(A.pL,n+1);
-    D = docpy<R,RR>(A.D,n);
+    pL=  docpy<int,int>(A.pL,this->n+1);
+    D = docpy<R,RR>(A.D,this->n);
     if ( A.pL == A.pU ) pU=pL;
-    else pU=  docpy<int,int>(A.pU,m+1);
+    else pU=  docpy<int,int>(A.pU,this->m+1);
     
-      L= docpy<R,RR>(A.L,pL[n]);
+      L= docpy<R,RR>(A.L,pL[this->n]);
       
     if ( A.L == A.U ) U=L;
-    else  U= docpy<R,RR>(A.U,pU[m]);
+    else  U= docpy<R,RR>(A.U,pU[this->m]);
     
   
   }

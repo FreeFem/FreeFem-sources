@@ -296,7 +296,7 @@ MatriceProfile<R>::MatriceProfile(const int nn,const R *a)
       pf[i]=k;
       //  cout << " pf " << i<< " = " << k  << endl;
     }
-  throwassert( pf[n]*2 == n*(n-1));
+  throwassert( pf[this->n]*2 == this->n*(this->n-1));
   pU = pf; // pointeur profile U
   pL = pf; // pointeur profile L
   U = new R[pf[this->n]];
@@ -364,7 +364,7 @@ void MatriceProfile<R>::addMatMul(const KN_<R> &x,KN_<R> &ax) const
 {if (x.n!= this->n ) ERREUR(MatriceProfile MatMut(xa,x) ," longueur incompatible x (in) ") ;
  if (ax.n!= this->n ) ERREUR(MatriceProfile MatMut(xa,x) ," longueur incompatible ax (out)") ;
  int i,j,k,kf;
- throwassert(n == m);
+ throwassert(this->n == this->m);
  if (D) 
    for (i=0;i<this->n;i++) 
      ax[i] += D[i]*x[i];
@@ -375,12 +375,12 @@ void MatriceProfile<R>::addMatMul(const KN_<R> &x,KN_<R> &ax) const
  if (L && pL )    
    for (kf=pL[0],i=0;  i<this->n;   i++  )  
      for ( k=kf,kf=pL[i+1], j=i-kf+k;   k<kf; j++,  k++  )
-       ax[i] += L[k]*x[j],throwassert(i>=0 && i <n && j >=0 && j < m && k>=0 && k < pL[n]);
+       ax[i] += L[k]*x[j],throwassert(i>=0 && i <this->n && j >=0 && j < this->m && k>=0 && k < pL[this->n]);
        
  if (U && pU)     
    for (kf=pU[0],j=0;  j<this->m;  j++)  
      for (k=kf,kf=pU[j+1], i=j-kf+k;   k<kf; i++,  k++  )
-       ax[i] += U[k]*x[j],throwassert(i>=0 && i <n && j >=0 && j < m &&  k>=0 && k < pU[n]);
+       ax[i] += U[k]*x[j],throwassert(i>=0 && i <this->n && j >=0 && j < this->m &&  k>=0 && k < pU[this->n]);
  
 
 }
@@ -977,7 +977,7 @@ template<class R>
  {
    if(symetrique) return; 
    
-   assert(dummy==false);  
+   assert(this->dummy==false);  
    int *llg= new int[nbcoef];
    int *clg= new int[this->m+1];
    
@@ -1109,7 +1109,7 @@ template<class RA>
   bool sym=this == & B &&symetrique;
   int *blg=B.lg;
   int *bcl=B.cl;
-  assert(m==B.n); 
+  assert(this->m==B.n); 
   bool delbl= B.symetrique;
   if (delbl)
     {
@@ -1189,7 +1189,7 @@ template<class RA>
        }
      for (int i=1;i<=nn;i++)
        llg[i]+=llg[i-1];
-     assert(llg[n]==sij.size());
+     assert(llg[this->n]==sij.size());
      for (set<pair<int,int> >::iterator iter=sij.begin();iter!=sij.end();++iter)
       { 
         int i=iter->first;
@@ -1252,8 +1252,8 @@ template<class R>
   void  MatriceMorse<R>::addMatMul(const KN_<R> &  x, KN_<R> & ax) const   
 {
   int i,j,k;
-  throwassert(n==ax.N());
-  throwassert(m==x.N());  
+  throwassert(this->n==ax.N());
+  throwassert(this->m==x.N());  
   if (symetrique)
    {
      for (i=0;i<this->n;i++)
@@ -1281,8 +1281,8 @@ template<class R>
   void  MatriceMorse<R>::addMatTransMul(const KN_<R> &  x, KN_<R> & ax) const   
 {
   int i,j,k;
-  throwassert(m==ax.N());
-  throwassert(n==x.N());  
+  throwassert(this->m==ax.N());
+  throwassert(this->n==x.N());  
   if (symetrique)
    {
      for (i=0;i<this->n;i++)

@@ -451,10 +451,10 @@ class KNM_: public KN_<R> {
              
   KNM_(const KN_<R> &u,const ShapeOfArray & si,const ShapeOfArray & sj,long offset=0) 
              : KN_<R>(&u[offset],si.last()+sj.last()+1,u.step),shapei(si),shapej(sj) 
-             {K_throwassert( offset>=0 && n+ (v-(R*)u) <= u.n);}
+             {K_throwassert( offset>=0 && this->n+ (this->v-(R*)u) <= u.n);}
   KNM_(const KN_<R> &u,const ShapeOfArray & si,const ShapeOfArray & sj,long offset,long nnext) 
              : KN_<R>(&u[offset],si.last()+sj.last()+1,u.step,nnext),shapei(si),shapej(sj) 
-             {K_throwassert( offset>=0 && n+ (v-(R*)u) <= u.n);}
+             {K_throwassert( offset>=0 && this->n+ (this->v-(R*)u) <= u.n);}
   
   KNM_(KNM_<R> U,const SubArray & si,const SubArray & sj)  
              :KN_<R>(U,SubArray(U.ij(si.len1(),sj.len1())+1,U.ij(si.start,sj.start))),
