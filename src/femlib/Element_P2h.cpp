@@ -93,7 +93,7 @@ namespace  Fem2D {
  
 }
 // link with FreeFem++  do not work with static library .a 
-//  FH so add a extern name to call it version   aout 2004
+//  FH so add a extern name to call in init_static_FE (see end of FESpace.cpp)
 void init_FE_P2h() { };
 
 extern  ListOfTFE typefem_P2h;
