@@ -640,14 +640,18 @@ AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 # Sometimes (under cygwin for instance) the default version of FLTK
 # does not fit our purpose
 
-AC_ARG_ENABLE(default-fltk,[  --disable-default-fltk	Does not use default FLTK])
+AC_ARG_ENABLE(default-fltk,
+	[  --disable-default-fltk	Does not use default FLTK])
 
 # The current IDE version needs Cygwin on Windows, mainly for threads
 # and sockets.
 if test "$ff_win32" = no -o "$enable_cygwin" = yes
 then
+
+	# Default FLTK (in the machine's default PATH)
 	if test "$enable_default_fltk" = no
 	then
+		AC_MSG_NOTICE(not using default FLTK)
 		ff_fltk=no
 	else
 		ff_fltk_config=fltk-config
