@@ -646,8 +646,9 @@ public:
     }
 
     if (Symbolic) umfpack_di_free_symbolic (&Symbolic),Symbolic=0; 
-    cout << "umfpack_di_build LU " << n <<  endl;
-    if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
+    if(verbosity>3)
+    cout << "  -- umfpack_di_build LU " << n <<  endl;
+    if(verbosity>5)     (void)  umfpack_di_report_info(Control,Info);
 
   }
   void Solver(const MatriceMorse<R> &A,KN_<R> &x,const KN_<R> &b) const  {
@@ -660,7 +661,6 @@ public:
     for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
     
      umfpack_di_defaults (Control) ;
-    cout << " b min max " << b.min() << " " <<b.max() << endl;
     int status = umfpack_di_solve (UMFPACK_At, A.lg, A.cl, A.a, x, b, Numeric,Control,Info) ;
     if (status < 0)
     {
@@ -669,13 +669,16 @@ public:
 	cerr << "umfpack_di_solve failed" << endl;
 	assert(0);
     }
-    
-    cout << "umfpack_di_solve " << endl;
+     if(verbosity>2)
+    cout << " -- umfpack_di_solve " << endl;
+    if(verbosity>3)
+    cout << "   b min max " << b.min() << " " <<b.max() << endl;
     if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
-    cout << " x min max " << x.min() << " " <<x.max() << endl;
+    cout << "   x min max " << x.min() << " " <<x.max() << endl;
   }
 
   ~SolveUMFPack() { 
+   if(verbosity>3)
     cout << "~SolveUMFPack S:" << Symbolic << " N:" << Numeric <<endl;
     if (Symbolic)   umfpack_di_free_symbolic  (&Symbolic),Symbolic=0; 
     if (Numeric)    umfpack_di_free_numeric (&Numeric),Numeric=0;
@@ -758,8 +761,9 @@ public:
     }
 
     if (Symbolic) umfpack_zi_free_symbolic (&Symbolic),Symbolic=0; 
+    if(verbosity>3)
     cout << "umfpack_zi_build LU " << n <<  endl;
-    if(verbosity>3)     (void)  umfpack_zi_report_info(Control,Info);
+    if(verbosity>5)     (void)  umfpack_zi_report_info(Control,Info);
 
   }
   void Solver(const MatriceMorse<Complex> &A,KN_<Complex> &x,const KN_<Complex> &b) const  {
@@ -781,14 +785,15 @@ public:
 	assert(0);
     }
     RR2C(n,xr,xi,x);
-    
-    cout << "umfpack_zi_solve " << endl;
+    if(verbosity>1)
+    cout << "  -- umfpack_zi_solve " << endl;
     if(verbosity>3)     (void)  umfpack_zi_report_info(Control,Info);
-    cout << " b min max " << b.min() << " " <<b.max() << endl;
-    cout << " x min max " << x.min() << " " <<x.max() << endl;
+    cout << "   b min max " << b.min() << " " <<b.max() << endl;
+    cout << "   x min max " << x.min() << " " <<x.max() << endl;
   }
 
   ~SolveUMFPack() { 
+    if(verbosity>5)
     cout << "~SolveUMFPack " << endl;
     if (Symbolic)   umfpack_zi_free_symbolic  (&Symbolic),Symbolic=0; 
     if (Numeric)    umfpack_zi_free_numeric (&Numeric),Numeric=0;
