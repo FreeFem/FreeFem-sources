@@ -258,4 +258,9 @@ const QuadratureFormular1d QF_GaussLegendre2(
                   QuadratureFormular1d::Point(0.5,gauss_n2_2)); 
 
 const QuadratureFormular1d QF_GaussLegendre1(QuadratureFormular1d::Point(1,0.5)); 
+
+const QuadratureFormular1d QF_LumpP1_1D(
+                  QuadratureFormular1d::Point(0.5,0.),
+                  QuadratureFormular1d::Point(0.5,1.)); 
+
 }
