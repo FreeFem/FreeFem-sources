@@ -8,4 +8,4 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=load.edp	\
 EXTRA_DIST=load.edp load.link myfunction.cpp
 
 myfunction.so: myfunction.cpp
-	./load.link myfunction
+	CXX=$CXX ./load.link myfunction
