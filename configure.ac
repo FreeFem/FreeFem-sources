@@ -124,19 +124,13 @@ if test -d /usr/X11R6 -a "$ff_win32" = no;
 then
 	ff_x11=yes
 	ff_x11prog=FreeFem++-x11${EXEEXT}
-	AC_SUBST(INCLUDEX11,-I/usr/X11R6/include)
-	AC_SUBST(LIBX11,"-L/usr/X11R6/lib -lX11 -lm")
+	CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
+	LIBS="$LIBS -L/usr/X11R6/lib -lX11 -lm"
 fi
 AC_MSG_RESULT($ff_x11)
 
 # Checking that OpenGL is accessible
 # ----------------------------------
-
-# On Darwin, gl.h is not reachable by default
-if test -f /usr/X11R6/include/GL/gl.h
-then
-	CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
-fi
 
 # If we cannot find gl.h, no OpenGL version can be produced
 AC_CHECK_HEADERS(GL/gl.h,
@@ -145,6 +139,13 @@ AC_CHECK_HEADERS(GL/gl.h,
 AC_CHECK_HEADERS(GL/glx.h,
 	ff_glx_ok=yes,
 	ff_glx_ok=no)
+if test "$ff_gl_ok" = yes
+then
+	AC_CHECK_LIB(GL,
+		glXGetCurrentContext,
+		ff_gl_ok=yes,
+		ff_gl_ok=no)
+fi
 
 # If we cannot find GL, we cannot compile FreeFem++-agl
 if test "$ff_gl_ok" = no
@@ -444,22 +445,16 @@ fi
 if test "$ff_win32" = yes;
 then
 	ff_std_graph_obj=Pcrgraph.$OBJEXT
-	ff_std_x11_lib=
-	ff_std_x11_inc=
 	ff_std_ldflags=-mwindows
 else
 	ff_std_graph_obj=Xrgraph.$OBJEXT
-	ff_std_x11_lib=$LIBX11
-	ff_std_x11_inc=$INCLUDEX11
 	ff_std_ldflags=
 
 	# If the standard version already uses x11, we do not need to
-	# compile the src/x11 directory.
+	# make the contents of the src/x11 directory.
 	ff_x11prog=
 fi
 AC_SUBST(STD_GRAPH_OBJ,$ff_std_graph_obj)
-AC_SUBST(STD_X11_LIB,$ff_std_x11_lib)
-AC_SUBST(STD_X11_INC,$ff_std_x11_inc)
 AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 
 # Special cases
