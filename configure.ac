@@ -4,7 +4,7 @@
 # Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
 # $Id$
 
-AC_INIT(FreeFem++,1.41,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,1.42,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old

@@ -291,6 +291,7 @@ int mylex::scan(int lvl)
  // bool echo = mpirank == 0; 
 
   int ret= basescan();
+ // cout << "  <scan " << buf << " nmp:" << withmacropara << " " << ret <<" >   ";
   if ( ret == ID)
     while ((SetMacro(ret)))0;
 
@@ -364,9 +365,11 @@ char * mylex::match(int i)
 
 bool mylex::ExpandParam(int &ret)
 {
-  if (listMacroParam )
+   assert(withmacropara>=0);
+  if (listMacroParam && ret == ID)
   {
     string arg=buf;
+    //cout << " < EP " << buf << " > " ; 
     for(list<MapMacroParam>::const_iterator i=listMacroParam->begin(); i != listMacroParam->end(); i++)
       {
         MapMacroParam::const_iterator j=i->find(arg);
@@ -413,7 +416,7 @@ bool mylex::ExpandParam(int &ret)
                 macroparm.push_back(buf);
                 rr =  basescan(); 
                 if (rr  == ')') break;          
-                if ( rr != ',') erreur("in macro def: waiting for , or ) "); 
+                if ( rr != ',') erreur("in macro def: waiting  , or  ) "); 
                 rr =  basescan();
                 
               } while(1); 
@@ -463,7 +466,7 @@ bool mylex::ExpandParam(int &ret)
           MapMacroDef::const_iterator j= i->find(buf);
           
           if (j != i->end()) {
-            bool inmacroold=withmacropara;
+            int inmacroold=withmacropara;
             const deque<string>  & macroparm= j->second;
             int nbparam= macroparm.size()-1;
             if (nbparam > 0 ) { 
@@ -547,7 +550,8 @@ bool mylex::ExpandParam(int &ret)
     }
   void mylex::input(const string & str,int nbparam) 
     {
-      withmacropara= nbparam>0; ; 
+      assert(nbparam>=0);
+      withmacropara += nbparam; 
       assert(level<99 && level >= -1);
       if (level>=0) 
         { pilesource[level].l =linenumber;
@@ -560,22 +564,26 @@ bool mylex::ExpandParam(int &ret)
     }
   
   bool mylex::close() { 
-      if(debugmacro)
-       cout << "\n close " << level << " " << pilesource[level].cas << " " << (listMacroParam ==0 ? 0 :listMacroParam->size()) << endl;
+      if(debugmacro )
+       cout << "\n close " << level << " " << pilesource[level].cas << " " << (listMacroParam ==0 ? 0 :listMacroParam->size()) ;
       assert(level >=0 && level < 100);
       if (pilesource[level].cas>0) //  macro with parameter 
         {
           assert(listMacroParam);
+          int nbp = pilesource[level].cas; 
+          withmacropara -=  nbp;
+          assert(withmacropara>=0);
+          if(debugmacro) cout << " -" << nbp << ' ' << withmacropara;
           listMacroParam->pop_front();
-           if(debugmacro) cout << " " << listMacroParam->size();
+          // cout << " <<" << withmacropara << "," << nbp << ">> " ;
          }
-       if(debugmacro) cout << endl;
      // cout << "\n-- close " << level << endl;
       pilesource[level].close(); 
      // cout << "\n ++   " << level << endl;
       if (--level<0)
         return false;
       linenumber = pilesource[level].l;
-       withmacropara = listMacroParam && listMacroParam->size();
+       if(debugmacro) cout << "wmp " << withmacropara  << endl;
+       
        return true;}
   
