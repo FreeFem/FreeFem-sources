@@ -1,0 +1,14 @@
+Document: freefem++
+Title: FreeFem++ Manual
+Author: F. Hecht, O. Pironneau, K. Ohtsuka
+Abstract: A detailed description of, FreeFem++
+ a language for the numerical resolution of
+ Partial Differential Equations using the
+ Finite Element Method.
+Section: Apps/Math
+
+Format: PDF
+Files: /usr/share/doc/freefem++-doc/manual.pdf.gz
+
+Format: PostScript
+Files: /usr/share/doc/freefem++-doc/manual.ps.gz
