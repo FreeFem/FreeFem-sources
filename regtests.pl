@@ -25,6 +25,9 @@ push @progs,"$ENV{PROGLOC}/agl/FreeFem++-agl$ENV{EXEEXT}"
 push @progs,"$ENV{PROGLOC}/mpi/FreeFem++-mpi$ENV{EXEEXT}"
   if $ENV{MPIPROG} ne "";
 
+# For the example++-load tests
+$ENV{LD_LIBRARY_PATH}=".";
+
 # Loop on all available FreeFem programs
 my $count=0;
 foreach my $ff (@progs) {
