@@ -13,7 +13,7 @@ fi
 # Write some build information into the trace file
 echo ------------------------------------------- >> speedtest.out
 date >> speedtest.out
-echo $CXXFLAGS >> speedtest.out
+echo CXXFLAGS=$CXXFLAGS >> speedtest.out
 
 # Run the actual test
 $ffexe lap3-cpu.edp	\
