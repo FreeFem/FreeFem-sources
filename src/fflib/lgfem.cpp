@@ -57,7 +57,7 @@ void init_lgmesh() ;
 
 
 
-
+/*
 template<class R,class TA0,class TA1,class TA2>
  class E_F_F0F0F0 :public  E_F0 { public:
    template <class T> struct remove_reference     {typedef T type;};
@@ -129,6 +129,7 @@ class  OneOperator3 : public OneOperator {
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()],map_type[typeid(C).name()]),
       f(ff){}
 };
+*/
 const E_Array * Array(const C_F0 & a) { 
   if (a.left() == atype<E_Array>() )
     return dynamic_cast<const E_Array *>(a.LeftValue());
@@ -1693,14 +1694,29 @@ long pVh_ndofK(pfes * p)
  { throwassert(p && *p);
    FESpace *fes=**p;   return (*fes)[0].NbDoF() ;}
 
-long pVh_ndf(pfes * p,long k,long i)
- { throwassert(p && *p);
-   FESpace *fes=**p; 
-   throwassert(fes && k >=0 && k < fes->NbOfElements );
-   FElement K=(*fes)[k];
-   throwassert(i>=0 && i <K.NbDoF() );
-   return K(i) ;}
 
+class pVh_ndf : public ternary_function<pfes *,long,long,long> { public:
+
+
+  class Op : public E_F0mps { public:
+      Expression a,b,c;
+       Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}       
+       AnyType operator()(Stack s)  const 
+        { 
+           pfes * p(GetAny<pfes *>((*a)(s)));
+           long  k(GetAny<long>((*b)(s)));
+           long  i(GetAny<long>((*c)(s)));
+           throwassert(p && *p);
+           FESpace *fes=**p;
+           throwassert(fes && k >=0 && k < fes->NbOfElements );
+           FElement K=(*fes)[k];
+           throwassert(i>=0 && i <K.NbDoF() );
+           long ret(K(i));
+           return  ret;
+         }
+   
+  };
+};
 
 
 class Op_CopyArray : public OneOperator { public:
@@ -3528,7 +3544,8 @@ void  init_lgfem()
  Add<pfes*>("ndof",".",new OneOperator1<long,pfes*>(pVh_ndof));
  Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
  Add<pfes*>("ndofK",".",new OneOperator1<long,pfes*>(pVh_ndofK));
- Add<pfes*>("(","",new OneOperator3<long,pfes*,long,long>(pVh_ndf));
+ Add<pfes*>("(","", new OneTernaryOperator<pVh_ndf,pVh_ndf::Op>  );
+ //new OneOperator3<long,pfes*,long,long>(pVh_ndf));
  
  atype<Matrice_Creuse<R> * >()->AddCast(new OneOperatorCode<pb2mat<R> >);
  atype<Matrice_Creuse<Complex> * >()->AddCast(new OneOperatorCode<pb2mat<Complex> >);
