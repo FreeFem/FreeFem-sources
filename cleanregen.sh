@@ -9,3 +9,6 @@ rm configure
 rm src/fflib/strversionnumber.cpp
 rm examples++-tutorial/StokesUzawa.edp
 rm config.h.in
+rm src/ide/hl_lex.c++
+rm src/ide/hl_yacc.h
+rm src/ide/hl_yacc.c++
