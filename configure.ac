@@ -279,6 +279,18 @@ ff_mpi=no)
 	CXX="$ff_save_cxx"
 	AC_MSG_RESULT($ff_mpi)
 
+	# Also check that mpirun is there. If it isn't, then MPI is
+	# not fully installed.
+
+	if test "$ff_mpi" = yes;
+	then
+		AC_CHECK_PROG(ff_mpirun,mpirun,yes,no)
+		if test "$ff_mpirun" = no
+		then
+			ff_mpi=no
+		fi
+	fi
+
 	if test "$ff_mpi" = yes;
 	then
 
