@@ -1,3 +1,8 @@
+freefem++ (1.45-6) unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Tue, 08 Feb 2005 14:20:59 +0100
 freefem++ (1.44-9) testing unstable; urgency=low
 
   * Postscript files now work in FreeFem++-cs
