@@ -1,4 +1,3 @@
-#ifdef PARALLELE
 #include <complex>
 #include "rgraph.hpp"
 #include "AFunction.hpp"
@@ -266,5 +265,3 @@ void init_lgparallele()
    }
 //   MPI::COMM_WORLD.Recv(&msg, 1, MPI::INT, from, MPI::ANY_TAG);
 //    MPI::COMM_WORLD.Send(&msg, 1, MPI::INT, to, 4);
-  
-#endif
