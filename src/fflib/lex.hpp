@@ -22,6 +22,7 @@ class mylex  {
   private:
   int level;
   int withmacropara;
+  int beginStackParamExpand; // debut de la pile de paramtere a expandre (use in ExpandParam)
   char buf[1024];
   int typetoken;
   bool echo;
@@ -30,12 +31,12 @@ class mylex  {
    istream * f;
    istream * nf;
    int l;
-   int cas;
-   
+   int cas;   //  nb de parameter de la macro 
+   int beginStackParamExpand; // debut de la pile de paramtere a expandre
    const char * filename; 
-   xxxx() : l(0), f(0) , filename(0),cas(0),nf(0) {}   
+   xxxx() : l(0), f(0) , filename(0),cas(0),nf(0),beginStackParamExpand(0) {}   
    void  open(mylex *lexx,const char * ff) ;
-   void  readin(mylex *lexx,const string & s,int cc) ;
+   void  readin(mylex *lexx,const string & s,int cc,int bstackparam=0) ;
    void close() ;
    };
   friend struct mylex::xxxx;
@@ -55,6 +56,7 @@ class mylex  {
     echo(mpirank == 0),
     level(-1),
     withmacropara(0),
+    beginStackParamExpand(0),
     listMacroDef(new list<MapMacroDef>),
     listMacroParam(0) {
     listMacroDef->push_front(MapMacroDef());};
@@ -83,7 +85,7 @@ class mylex  {
     return "-- unkown --";}
     
   void input(const char *  filename) ;
-  void input(const string &str,int nbparam) ;   
+  void input(const string &str,int nbparam,int bstackparam=0) ;   
   bool close() ;
        
   private: 
