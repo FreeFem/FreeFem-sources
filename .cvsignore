@@ -14,6 +14,8 @@ configure.lineno
 configure-stamp
 *.exe
 freefem++-1.41.zip
+FreeFem++v*_Linux
+FreeFem++v*_Linux.tgz
 ListOfUnAllocPtr.bin
 Makefile
 Makefile.in
