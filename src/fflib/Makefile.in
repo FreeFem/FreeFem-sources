@@ -254,7 +254,7 @@ INCLUDES = -I../lglib -I../bamglib -I../Graphics -I../femlib	\
 # Build date changes at every build
 EXTRA_DIST = strversionnumber.m4
 BUILT_SOURCES = strversionnumber.cpp
-<<<<<<< Makefile.in
+
 subdir = src/fflib
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -319,8 +319,6 @@ DIST_SOURCES = $(libff_a_SOURCES) $(EXTRA_libff_a_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
 SOURCES = $(libff_a_SOURCES) $(EXTRA_libff_a_SOURCES)
 
-=======
->>>>>>> 1.30
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
