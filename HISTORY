@@ -467,4 +467,7 @@ Make Version 1.40
 02/06/2004
 ----------
   -  correction in call macro with string "..." parameter  
-   
+24/06/2004
+----------
+   add tools to bluid periodic adapmesh  see sphere.edp of exemple
+   add HaveUMFPACK global variable see sparse-matrix.edp exemple   
