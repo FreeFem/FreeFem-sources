@@ -18,6 +18,12 @@ typedef FEbase<double> * pferbase ;
 typedef FEbaseArray<double> * pferbasearray ;
 typedef pair<pferbase,int> pfer ;
 typedef pair<pferbasearray,int> pferarray ;
+
+typedef FEbase<Complex> * pfecbase ;
+typedef FEbaseArray<Complex> * pfecbasearray ;
+typedef pair<pfecbase,int> pfec ;
+typedef pair<pfecbasearray,int> pfecarray ;
+
 //typedef pair<pmesh *,int> pmesharray ;
 
 typedef   LinearComb<MGauche,C_F0> Finconnue;
