@@ -602,3 +602,9 @@ __________
 24/01/2005
    add  named parameter nbtx=..  in buildmesh  function to change the default 
    maximal number of vertex in the build mesh.
+
+26/01/2005
+   correct pb with  --disable-pdf in configure.ac
+   correct pdflatex and latex compilation 
+   correct  FreeFem++.app probleme when usind in a shell script FreeFem++-CoCoa
+   

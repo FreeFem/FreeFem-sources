@@ -41,6 +41,11 @@ agl:
 	cd src/fflib && make
 	cd src/agl&& make
 
+nw:
+	cd src/lglib && make
+	cd src/fflib && make
+	cd src/nw&& make
+
 ide:
 	cd download && make
 	cd src/lglib && make
@@ -95,21 +100,21 @@ deb:
 # Build all versions
 # ------------------
 
-native:FreeFem++v$(VERSION)_MacOS FreeFem++v$(VERSION)_MacOsX.tgz
+native:FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOS FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX.tgz
 	echo "done"
-native9:FreeFem++v$(VERSION)_MacOS 
+native9:FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOS 
 	echo "done"
-nativeX: FreeFem++v$(VERSION)_MacOsX.tgz
+nativeX: FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX.tgz
 	echo "done"
 
 clean-local::
-	-rm freefem++-$(VERSION).tar.gz
+	-rm freefem++-$(VERSION)-$(FREEFEM_PACKAGING).tar.gz
 	-rm -rf FreeFem++v*_MacOS
 
 # Native MacOS packaging
 # ----------------------
 
-FreeFem++v$(VERSION)_MacOS:documentation	
+FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOS:documentation	
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen
 	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++ 
 	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
@@ -119,7 +124,7 @@ FreeFem++v$(VERSION)_MacOS:documentation
 	-cp  examples++-bug/*.edp   $@/examples++-bug
 	cp   DOC/manual-full.pdf $@
 
-FreeFem++v$(VERSION)_MacOsX: all documentation
+FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX: all documentation
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
 	cp COPYRIGHT HISTORY README BUGS TODO INSTALL-MacOSX  $@
 	cp  examples++/*.edp   $@/examples++
@@ -127,16 +132,17 @@ FreeFem++v$(VERSION)_MacOsX: all documentation
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	-cp  examples++-bug/*.edp   $@/examples++-bug
 	cp   DOC/manual-full.pdf $@
-	cd  FreeFem++v$(VERSION)_MacOsX ; tar zvf ../FreeFem.app.tgz
+	cd  FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX ; tar zxf ../FreeFem++.app.tgz
 	sed <Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
-           -e "s/@VVERSION@/$(VERSION)/g" \
+           -e "s/@VVERSION@/$(VERSION)-$(FREEFEM_PACKAGING)/g" \
            -e "s/@DATE@/`date`/g"  
+	-mkdir -p  $@/FreeFem++.app/Contents/FreeFem++.app/Contents
 	cp $@/FreeFem++.app/Contents/Info.plist $@/FreeFem++.app/Contents/FreeFem++.app/Contents/Info.plist
 	cp src/agl/FreeFem++-agl $@/FreeFem++.app/Contents/FreeFem++.app
 	cp src/FreeFem++-CoCoa $@
 
-FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
-	tar zcvf FreeFem++v$(VERSION)_MacOsX.tgz FreeFem++v$(VERSION)_MacOsX
+FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX.tgz: FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX
+	tar zcvf FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX.tgz  FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX
 
 # Linux binary-only package
 # -------------------------
