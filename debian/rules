@@ -12,8 +12,6 @@
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
-
-
 CFLAGS = -Wall -g
 
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
@@ -40,7 +38,7 @@ build-arch-stamp:
 
 build-indep: configure build-indep-stamp
 build-indep-stamp:
-	cd DOC && $(MAKE) documentation && cd ..
+	$(MAKE) documentation
 	touch build-indep-stamp
 
 build: build-arch build-indep
@@ -48,7 +46,7 @@ build: build-arch build-indep
 clean:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp configure-stamp
+	-rm -f build-arch-stamp build-indep-stamp configure-stamp
 	-$(MAKE) clean
 	-$(MAKE) distclean
 	dh_clean 
@@ -59,7 +57,8 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 	$(MAKE) install
-	mv $(CURDIR)/debian/tmp/usr/bin/FreeFem++ $(CURDIR)/debian/tmp/usr/bin/FreeFem++-x11
+	mv $(CURDIR)/debian/tmp/usr/bin/FreeFem++ \
+		$(CURDIR)/debian/tmp/usr/bin/FreeFem++-x11
 	dh_install
 
 # This single target is used to build all the packages, all at once, or
@@ -80,6 +79,7 @@ binary-common:
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
+
 # Build architecture independant packages using the common target.
 binary-indep: build install
 	dh_installchangelogs -k HISTORY
