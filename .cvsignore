@@ -5,6 +5,7 @@ config.h
 config.h.in
 config.log
 config.status
+config-version.h
 configure
 configure.lineno
 *.exe
