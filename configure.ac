@@ -167,7 +167,7 @@ then
 		ff_x11=yes
 		ff_x11prog=FreeFem++-x11${EXEEXT}
 		CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
-		ff_x11_libs="-L/usr/X11R6/lib -lX11 -lXext -lXpm -lm"
+		ff_x11_libs="-L/usr/X11R6/lib -lXext -lXpm -lX11 -lm"
 		AC_SUBST(X11_LIBS,$ff_x11_libs)
 	fi
 fi
@@ -743,6 +743,22 @@ then
 	then
 		AC_SUBST(IDE_LIBS,$ff_x11_libs)
 	fi
+fi
+
+# Find out kernel and libc versions
+# ---------------------------------
+
+if test "$ff_win32" != yes -a "$ff_mac" != yes
+then
+	AC_MSG_CHECKING(kernel version)
+	ff_kernel_version=`cat /proc/version|perl -e '<STDIN>=~/(\d+\.\d+\.\d+)/;print $1;'`
+	AC_MSG_RESULT($ff_kernel_version)
+	AC_SUBST(KERNEL_VERSION,$ff_kernel_version)
+
+	AC_MSG_CHECKING(libc version)
+	ff_libc_version=`ldd /bin/sh | awk '/libc/{print $3}' | xargs readlink | sed -e 's/\.so$//'`
+	AC_MSG_RESULT($ff_libc_version)
+	AC_SUBST(LIBC_VERSION,$ff_libc_version)
 fi
 
 # creating all makefiles

@@ -136,7 +136,11 @@ FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
 # Linux binary-only package
 # -------------------------
 
-FreeFem++v$(VERSION)_Linux:all
+# Include kernel and libc version in static package name
+PACKAGE_NAME=FreeFem++v$(VERSION)_linux-$(KERNEL_VERSION)_$(LIBC_VERSION)
+
+linux-package: $(PACKAGE_NAME).tgz
+$(PACKAGE_NAME):all
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug \
 		$@/examples++-eigen $@/examples++-load
 	cp src/std/FreeFem++ $@
@@ -158,5 +162,8 @@ FreeFem++v$(VERSION)_Linux:all
 		examples++-tutorial/*.edp   $@/examples++-tutorial
 	-cp  examples++-bug/*.edp   $@/examples++-bug
 
-FreeFem++v$(VERSION)_Linux.tgz: FreeFem++v$(VERSION)_Linux
-	tar zcvf FreeFem++v$(VERSION)_Linux.tgz FreeFem++v$(VERSION)_Linux
+$(PACKAGE_NAME).tgz: $(PACKAGE_NAME)
+	tar cvzf $@ $<
+
+clean-local::
+	-rm $(PACKAGE_NAME) $(PACKAGE_NAME).tgz
