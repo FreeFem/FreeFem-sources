@@ -75,3 +75,8 @@ if test "${MPIPROG}" != ""
 
     dotest "mpirun -np $nprocs -machinefile machinefile ${PROGLOC}/mpi/FreeFem++-mpi${EXEEXT}" mpi $script
 fi
+
+if test "${IDEPROG}" != "" -a "${VISUALCHECK}" = "yes"
+then
+    dotest ${PROGLOC}/ide/FreeFem++-cs${EXEEXT} ide $script
+fi
