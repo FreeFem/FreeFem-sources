@@ -1,0 +1,218 @@
+\documentclass[twoside]{book}
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX
+\else
+\pdfoutput=1 % we are running PDFLaTeX
+\pdftrue
+\fi
+%\usepackage{times}
+%\usepackage{amsmath}
+\usepackage{calc}
+\usepackage[latin1]{inputenc}
+\usepackage{FFF}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{FFF}
+\usepackage{makeidx}
+\usepackage{color}
+\usepackage{multicol}
+\usepackage{graphicx}
+%\usepackage{dessin}
+\topmargin -1.54cm
+\oddsidemargin 0cm   %marge a 2 cm
+\evensidemargin 0cm  %marge a 2 cm
+\newcommand{\indente}{\hbox to \parindent {\hss}}
+\parindent 0cm
+\headsep 0.5cm
+\topskip .5cm
+\footskip 1cm
+\headheight 1.0cm
+\textwidth  16.5cm
+%  \parindent 0cm
+\textheight 24cm
+\def\freefempp{\texttt{freefem++ }}
+\def\textRed{\color{red}}
+\def\textBlack{\color{black}}
+\def\Blue#1{\textcolor{blue}{#1}}
+\def\Black#1{\textcolor{black}{#1}}
+\def\Red#1{\textcolor{red}{#1}}
+\def\Magenta#1{\textcolor{magenta}{#1}}
+\def\hin{\hbox{ in }}
+\def\hon{\hbox{ on }}
+\def\Cpp{\texttt{C++~}}
+\def\R{\mathrm{I\!R}}
+\def\example{\textbf{Example:}}
+\def\eq#1{\Blue{\[#1\]}}
+\def\R{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\itemtt[#1]{ \item[\texttt{#1}]}
+\def\plot[#1]#2#3{\begin{figure}[hbt]
+\begin{center}
+    \includegraphics*[#1]{#2}
+\end{center}
+\caption{\label{#2} #3}
+\end{figure}
+}
+\def\Ostream{\texttt{ostream}}
+\def\Istream{\texttt{istream}}
+\def\Bool{\texttt{bool}}
+\def\Real{\texttt{real}}
+\def\Int{\texttt{int}}
+\def\vecttwo#1#2{\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\vdeux(#1,#2){\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\HLINE#1{\hbox to \hsize {#1}}
+\def\twoplot[#1]#2#3#4#5{
+\begin{figure}[hbt]
+\begin{multicols}{2}
+\begin{center}
+    \includegraphics*[#1]{#2}
+    \caption{\label{#2} #4}
+\end{center}
+\begin{center}
+    \includegraphics*[#1]{#3}
+    \caption{\label{#3} #5}
+\end{center}
+\end{multicols}
+\end{figure}
+}% end twoplot macro
+\newtheorem{remark}{\textbf{Remark}}
+\newtheorem{bug}{\textbf{Bug:}}
+\newtheorem{proposition}{\textbf{Proposition}}
+\newtheorem{algorithm}{\textbf{Algorithm}}
+\newenvironment{ttlist}
+   {\begin{list}{}{\renewcommand{\makelabel}[1]{\texttt{##1}\hfil}%
+        \setlength{\labelwidth}{3cm}
+        \setlength{\leftmargin}{\labelwidth+\labelsep}
+    }}%
+   {\end{list}}
+
+
+\begin{document}
+\graphicspath{{./}{plots/}}
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps,.ps, .jpg}
+\fi
+
+\let\subsubsection\subsection
+\let\subsection\section
+\let\section\chapter
+
+
+
+
+To solve\index{domain decomposition}\index{shurr}
+\eq{ -\Delta u =f \hin\Omega=\Omega_1\cup\Omega_2\quad u|_\Gamma=0,}
+the Schwarz algorithm for domain decomposition without overlapping  runs like this
+
+Let introduce  $\Gamma_i$ is  common the boundary of $\Omega_1$ and
+$\Omega_2$ and    $\Gamma_e^i= \partial \Omega_i \setminus  \Gamma_i$.
+
+The probem  find  $\lambda$ such that $ (u_1|_{\Gamma_i}=u_2|_{\Gamma_i}) $
+where  $u_i$ is solution of the following Laplace problem:
+\eq{
+    -\Delta u_i=f\hin\Omega_i\quad
+    u_i|_{\Gamma_i}=\lambda \quad
+    u_i|_{\Gamma_e^i} = 0 
+ }
+
+The version of this example for  Shur componant. The border problem
+is solve with conjugate gradient. 
+
+First, we construct the two domain 
+\bFF
+
+// Schwarz without overlapping (Shur complenement Neumann -> Dirichet)  
+real cpu=clock();
+int inside = 2; 
+int outside = 1; 
+
+border Gamma1(t=1,2){x=t;y=0;label=outside;};
+border Gamma2(t=0,1){x=2;y=t;label=outside;};
+border Gamma3(t=2,0){x=t ;y=1;label=outside;};
+
+border GammaInside(t=1,0){x = 1-t; y = t;label=inside;};
+
+border GammaArc(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=outside;}; 
+int n=4;
+//  build the mesh of $\Omega_1$ and $\Omega_2$
+mesh Th1 = buildmesh( Gamma1(5*n) + Gamma2(5*n) + GammaInside(5*n) + Gamma3(5*n));
+mesh Th2 = buildmesh ( GammaInside(-5*n) + GammaArc(25*n) );
+plot(Th1,Th2);
+
+// defined the 2 FE space
+fespace Vh1(Th1,P1),      Vh2(Th2,P1);
+\eFF
+
+Remark, to day is not possible to
+defined a function just on a border, so the $\ lambda $
+function is defined on the all domain $\Omega_1$
+by:
+
+\bFF
+
+Vh1 lambda=0;  // take $\lambda \in V_{h1}$
+\eFF
+
+The two Laplace problem:
+\bFF
+
+Vh1 u1,v1;              Vh2 u2,v2;
+int i=0;  // for factorization optimization 
+problem Pb2(u2,v2,init=i,solver=Cholesky) = 
+    int2d(Th2)( dx(u2)*dx(v2)+dy(u2)*dy(v2) )
+  + int2d(Th2)( -v2) 
+  + int1d(Th2,inside)(-lambda*v2) +    on(outside,u2= 0 ) ;
+problem Pb1(u1,v1,init=i,solver=Cholesky) = 
+    int2d(Th1)( dx(u1)*dx(v1)+dy(u1)*dy(v1) )
+  + int2d(Th1)( -v1) 
+  + int1d(Th1,inside)(+lambda*v1) +    on(outside,u1 = 0 ) ;
+\eFF
+
+Now, we define a border matrix , because the
+ $\ lambda $ function is none zero inside the domain $\Omega_1$:
+\bFF
+
+varf b(u2,v2,solver=CG) =int1d(Th1,inside)(u2*v2);
+matrix B= b(Vh1,Vh1,solver=CG);
+\eFF
+
+The boundary problem function,
+  $$
+  \lambda \longrightarrow  \int_{\Gamma_i }(u_1-u_2) v_{1}
+$$
+\bFF
+
+func real[int] BoundaryProblem(real[int] &l)
+{ 
+   lambda[]=l; // make FE function form l
+   Pb1;     Pb2;
+   i++;  //  no  refactorization i !=0
+   v1=-(u1-u2); 
+   lambda[]=B*v1[];
+   return lambda[] ;
+};
+\eFF
+
+Remark, the  difference between the two notations v1 and v1[]  is: 
+ \ttCC{v1} is the finite element  function and v1[] 
+is the vector in the canonical basis of the   finite element  function  v1.
+\index{[]\verb=[]=}
+ 
+\bFF
+
+Vh1 p=0,q=0; 
+//  solve the problem with Conjugue Gradient
+LinearCG(BoundaryProblem,p[],eps=1.e-6,nbiter=100);
+//  compute the final solution, because CG works with increment
+BoundaryProblem(p[]); // solve again  to have right u1,u2
+
+cout << " -- CPU time  schwarz-gc:" <<  clock()-cpu << endl;
+plot(u1,u2); // plot 
+\eFF
+
+
+\end{document}

@@ -1,0 +1,178 @@
+\documentclass[twoside]{book}
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX
+\else
+\pdfoutput=1 % we are running PDFLaTeX
+\pdftrue
+\fi
+%\usepackage{times}
+%\usepackage{amsmath}
+\usepackage{calc}
+\usepackage[latin1]{inputenc}
+\usepackage{FFF}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{FFF}
+\usepackage{makeidx}
+\usepackage{color}
+\usepackage{multicol}
+\usepackage{graphicx}
+%\usepackage{dessin}
+\topmargin -1.54cm
+\oddsidemargin 0cm   %marge a 2 cm
+\evensidemargin 0cm  %marge a 2 cm
+\newcommand{\indente}{\hbox to \parindent {\hss}}
+\parindent 0cm
+\headsep 0.5cm
+\topskip .5cm
+\footskip 1cm
+\headheight 1.0cm
+\textwidth  16.5cm
+%  \parindent 0cm
+\textheight 24cm
+\def\freefempp{\texttt{freefem++ }}
+\def\textRed{\color{red}}
+\def\textBlack{\color{black}}
+\def\Blue#1{\textcolor{blue}{#1}}
+\def\Black#1{\textcolor{black}{#1}}
+\def\Red#1{\textcolor{red}{#1}}
+\def\Magenta#1{\textcolor{magenta}{#1}}
+\def\hin{\hbox{ in }}
+\def\hon{\hbox{ on }}
+\def\Cpp{\texttt{C++~}}
+\def\R{\mathrm{I\!R}}
+\def\example{\textbf{Example:}}
+\def\eq#1{\Blue{\[#1\]}}
+\def\R{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\itemtt[#1]{ \item[\texttt{#1}]}
+\def\plot[#1]#2#3{\begin{figure}[hbt]
+\begin{center}
+    \includegraphics*[#1]{#2}
+\end{center}
+\caption{\label{#2} #3}
+\end{figure}
+}
+\def\Ostream{\texttt{ostream}}
+\def\Istream{\texttt{istream}}
+\def\Bool{\texttt{bool}}
+\def\Real{\texttt{real}}
+\def\Int{\texttt{int}}
+\def\vecttwo#1#2{\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\vdeux(#1,#2){\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\HLINE#1{\hbox to \hsize {#1}}
+\def\twoplot[#1]#2#3#4#5{
+\begin{figure}[hbt]
+\begin{multicols}{2}
+\begin{center}
+    \includegraphics*[#1]{#2}
+    \caption{\label{#2} #4}
+\end{center}
+\begin{center}
+    \includegraphics*[#1]{#3}
+    \caption{\label{#3} #5}
+\end{center}
+\end{multicols}
+\end{figure}
+}% end twoplot macro
+\newtheorem{remark}{\textbf{Remark}}
+\newtheorem{bug}{\textbf{Bug:}}
+\newtheorem{proposition}{\textbf{Proposition}}
+\newtheorem{algorithm}{\textbf{Algorithm}}
+\newenvironment{ttlist}
+   {\begin{list}{}{\renewcommand{\makelabel}[1]{\texttt{##1}\hfil}%
+        \setlength{\labelwidth}{3cm}
+        \setlength{\leftmargin}{\labelwidth+\labelsep}
+    }}%
+   {\end{list}}
+
+
+\begin{document}
+\graphicspath{{./}{plots/}}
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps,.ps, .jpg}
+\fi
+
+\let\subsubsection\subsection
+\let\subsection\section
+\let\section\chapter
+
+%\subsection{Periodic }
+\index{periodic}\index{fespace!periodic=}
+Solve of the Laplace equation 
+$$ -\Delta u= sin(x+\pi/4.)*cos(y+\pi/4.)$$ on 
+a  square $]0,2\pi[^2$ with bi-periodic boundary condition.
+
+\bFF
+
+mesh Th=square(10,10,[2*x*pi,2*y*pi]);
+// defined the \bgroup\tt fespace\egroup  with periodic condition
+//    label :  2 and 4  are left and right   side with y the curve abcissa 
+//             1 and 2  are bottom and upper side with x the curve abcissa
+fespace Vh(Th,P2,periodic=[[2,y],[4,y],[1,x],[3,x]]);   
+ Vh uh,vh;              // unkown and test function. 
+ func f=sin(x+pi/4.)*cos(y+pi/4.);      //  right hand side function 
+
+ problem laplace(uh,vh) =                      //  definion of  the problem 
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  + int2d(Th)( -f*vh )                         //  linear form
+;                
+
+  laplace; // solve the problem plot(uh); // to see the result
+  plot(uh,ps="period.eps",value=true);
+\eFF
+
+\plot[height=6cm]{period}{The isovalue of solution $u$ with periodic boundary condition}
+
+An over exemple is in \texttt{periodic4.edp} file, with 
+periodic condition no parallel to the axis.
+
+Solve a diamond with a hole:
+\bFF
+
+real r=0.25;
+// a diamond with a hole
+border a(t=0,1){x=-t+1; y=t;label=1;}; 
+border b(t=0,1){ x=-t; y=1-t;label=2;};
+border c(t=0,1){ x=t-1; y=-t;label=3;};
+border d(t=0,1){ x=t; y=-1+t;label=4;};
+border e(t=0,2*pi){ x=r*cos(t); y=-r*sin(t);label=0;};
+int n = 10;
+mesh Th= buildmesh(a(n)+b(n)+c(n)+d(n)+e(n)); 
+plot(Th,wait=1);
+real r2=1.732;
+func abs=sqrt(x^2+y^2);
+//  warning for periodic condition: \hfilll
+//  side a and c \hfilll
+//  on side a (label 1) $ x \in [0,1] $ or $ x-y\in [-1,1] $ \hfilll
+//  on side c (label 3) $ x \in [-1,0]$ or $ x-y\in[-1,1] $\hfilll
+// so the common abcissa can be repectively $x$ and $x+1$
+// or you can can try curviline abcissa $x-y$ and $x-y$ 
+//  1 first way \hfilll
+// fespace Vh(Th,P2,periodic=[[2,1+x],[4,x],[1,x],[3,1+x]]);  \hfilll    
+// 2 second way \hfilll
+ fespace Vh(Th,P2,periodic=[[2,x+y],[4,x+y],[1,x-y],[3,x-y]]);     
+
+ Vh uh,vh;             
+
+ func f=(y+x+1)*(y+x-1)*(y-x+1)*(y-x-1);                
+ real intf = int2d(Th)(f);
+ real mTh = int2d(Th)(1);
+ real k =  intf/mTh; 
+ cout << k << endl; 
+ problem laplace(uh,vh) =                     
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) + int2d(Th)( (k-f)*vh ) ;                
+ laplace; 
+ plot(uh,wait=1,ps="perio4.eps"); 
+\eFF
+
+\plot[height=6cm]{perio4}{The isovalue of solution $u$ for
+$ \Delta u = ((y+x)^{2}+1)((y-x)^{2}+1) - k$, in $\Omega$ and $\partial_{n} u =0 $ on hole,and with two periodic boundary condition on external border}
+
+
+
+\end{document}

@@ -1,0 +1,163 @@
+\documentclass[twoside]{book}
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX
+\else
+\pdfoutput=1 % we are running PDFLaTeX
+\pdftrue
+\fi
+%\usepackage{times}
+%\usepackage{amsmath}
+\usepackage{calc}
+\usepackage[latin1]{inputenc}
+\usepackage{FFF}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{FFF}
+\usepackage{makeidx}
+\usepackage{color}
+\usepackage{multicol}
+\usepackage{graphicx}
+%\usepackage{dessin}
+\topmargin -1.54cm
+\oddsidemargin 0cm   %marge a 2 cm
+\evensidemargin 0cm  %marge a 2 cm
+\newcommand{\indente}{\hbox to \parindent {\hss}}
+\parindent 0cm
+\headsep 0.5cm
+\topskip .5cm
+\footskip 1cm
+\headheight 1.0cm
+\textwidth  16.5cm
+%  \parindent 0cm
+\textheight 24cm
+\def\freefempp{\texttt{freefem++ }}
+\def\textRed{\color{red}}
+\def\textBlack{\color{black}}
+\def\Blue#1{\textcolor{blue}{#1}}
+\def\Black#1{\textcolor{black}{#1}}
+\def\Red#1{\textcolor{red}{#1}}
+\def\Magenta#1{\textcolor{magenta}{#1}}
+\def\hin{\hbox{ in }}
+\def\hon{\hbox{ on }}
+\def\Cpp{\texttt{C++~}}
+\def\R{\mathrm{I\!R}}
+\def\example{\textbf{Example:}}
+\def\eq#1{\Blue{\[#1\]}}
+\def\R{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\itemtt[#1]{ \item[\texttt{#1}]}
+\def\plot[#1]#2#3{\begin{figure}[hbt]
+\begin{center}
+    \includegraphics*[#1]{#2}
+\end{center}
+\caption{\label{#2} #3}
+\end{figure}
+}
+\def\Ostream{\texttt{ostream}}
+\def\Istream{\texttt{istream}}
+\def\Bool{\texttt{bool}}
+\def\Real{\texttt{real}}
+\def\Int{\texttt{int}}
+\def\vecttwo#1#2{\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\vdeux(#1,#2){\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\HLINE#1{\hbox to \hsize {#1}}
+\def\twoplot[#1]#2#3#4#5{
+\begin{figure}[hbt]
+\begin{multicols}{2}
+\begin{center}
+    \includegraphics*[#1]{#2}
+    \caption{\label{#2} #4}
+\end{center}
+\begin{center}
+    \includegraphics*[#1]{#3}
+    \caption{\label{#3} #5}
+\end{center}
+\end{multicols}
+\end{figure}
+}% end twoplot macro
+\newtheorem{remark}{\textbf{Remark}}
+\newtheorem{bug}{\textbf{Bug:}}
+\newtheorem{proposition}{\textbf{Proposition}}
+\newtheorem{algorithm}{\textbf{Algorithm}}
+\newenvironment{ttlist}
+   {\begin{list}{}{\renewcommand{\makelabel}[1]{\texttt{##1}\hfil}%
+        \setlength{\labelwidth}{3cm}
+        \setlength{\leftmargin}{\labelwidth+\labelsep}
+    }}%
+   {\end{list}}
+
+
+\begin{document}
+\graphicspath{{./}{plots/}}
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps,.ps, .jpg}
+\fi
+
+\let\subsubsection\subsection
+\let\subsection\section
+\let\section\chapter
+
+
+
+\index{read files}
+\index{write files}
+Freefem can read and write files which can be reused once read but the
+names of the borders are lost and they have to be replaced by the number
+which corresponds to their order of appearance in the program, unless
+the number is forced by the keyword "label".
+\bFF
+
+border floor(t=0,1){ x=t; y=0; label=1;}; // the unit square
+border right(t=0,1){ x=1; y=t; label=5;};
+border ceiling(t=1,0){ x=t; y=1; label=5;};
+border left(t=1,0){ x=0; y=t; label=5;};
+int n=10;
+mesh th= buildmesh(floor(n)+right(n)+ceiling(n)+left(n));
+savemesh(th,"toto.am_fmt");  // format "formated Marrocco" \index{file!am\_fmt}
+savemesh(th,"toto.Th");      // format database  db mesh "bamg"   \index{file!bamg}
+savemesh(th,"toto.msh");     // format freefem \index{file!mesh}
+savemesh(th,"toto.nopo");     // modulef format \index{file!nopo} see \cite{nopo}
+mesh th2 = readmesh("toto.msh");
+fespace femp1(th,P1);
+femp1 f = sin(x)*cos(y),g;
+{ // save solution
+ofstream file("f.txt");
+file << f[] << endl;
+}  // close the file (end block)
+{  // read
+ifstream file("f.txt");
+file >> g[] ;
+} // close reading file (end block)
+fespace Vh2(th2,P1);
+Vh2 u,v;
+plot(g);
+solve pb(u,v) =
+    int2d(th)( u*v - dx(u)*dx(v)-dy(u)*dy(v) )
+  + int2d(th)(-g*v)
+  + int1d(th,5)( g*v)
+  + on(1,u=0) ;
+plot (th2,u);
+\eFF
+
+There are many formats of mesh files available for communication with other tools such as
+emc2, modulef..., the suffix gives the chosen type.\index{bamg}
+More details can be found in the article by F. Hecht "bamg : a bidimentional
+anisotropic mesh generator"  available from the freefem web page.
+\\
+Note also the wrong sign in the Laplace equation, but freefem can handle it as long as it
+is not a resonance mode (i.e. the matrix of the linear system should be non-singular).
+\subsection{Domain decomposition}
+We present, three classique exemples, of domain decomposition
+technique:
+first, Schwarz algorithm with overlapping, second 
+Schwarz algorithm without  overlapping (also call Shur complement), and
+last we show to use the conjugate gradient 
+to solve the boundary problem of the Shur complement.
+ 
+
+
+\end{document}
