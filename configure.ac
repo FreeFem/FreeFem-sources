@@ -321,7 +321,7 @@ then
 		ff_download_blas=generic
 		ff_blas_lib="-L${curdir}/download/blas -lcblas -lf77blas"
 		AC_SUBST(GENERIC_BLAS,"libf77blas.a libcblas.a")
-		AC_SUBST(GENERIC_BLAS_BUILT_SOURCES,"BLAS CBLAS")
+		AC_SUBST(GENERIC_BLAS_BUILT_SOURCES,'BLAS CBLAS  $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
 	else
 		# There are precompiled versions for Windows. We cannot
 		# distinguish the different versions easily so we just
