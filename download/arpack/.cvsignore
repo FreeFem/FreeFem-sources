@@ -2,6 +2,5 @@ ARPACK
 arpack++
 arpack++.tar.gz
 arpack96.tar.gz
-Makefile
-Makefile.in
 patch.tar.gz
+Makefile
