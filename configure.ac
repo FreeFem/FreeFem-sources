@@ -55,7 +55,7 @@ AC_MSG_RESULT($ff_mac)
 # -------------------------------------------------------------------
 
 AC_ARG_ENABLE(cygwin,
-	[  --disable-cygwin	On Microsoft Windows, uses Mingw instead of Cygwin])
+	[  --disable-cygwin	On Microsoft Windows, uses Mingw instead of Cygwin (FreeFem++-cs will not be built because it needs Cygwin)])
 
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
 ff_uname=`uname`
@@ -73,6 +73,11 @@ CYGWIN*)
 *)ff_win32=no;;
 esac
 AC_MSG_RESULT($ff_win32)
+
+if test "$ff_win32" = no
+then
+	enable_cygwin=no
+fi
 
 # FreeFem++-specific version information
 # --------------------------------------
@@ -151,13 +156,17 @@ ff_x11=no
 # At the moment, we cannot compile for X11 on Mingw because /usr/X11R6
 # is part of Cygwin, not Mingw.
 
-if test -d /usr/X11R6 -a "$ff_win32" = no;
+if test "$ff_win32" = no -o "$enable_cygwin" = yes
 then
-	ff_x11=yes
-	ff_x11prog=FreeFem++-x11${EXEEXT}
-	CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
-	LIBS="$LIBS -L/usr/X11R6/lib -lX11 -lm"
+	if test -d /usr/X11R6
+	then
+		ff_x11=yes
+		ff_x11prog=FreeFem++-x11${EXEEXT}
+		CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
+		LIBS="$LIBS -L/usr/X11R6/lib -lX11 -lm"
+	fi
 fi
+
 AC_MSG_RESULT($ff_x11)
 
 # Checking that OpenGL is accessible
@@ -635,7 +644,7 @@ AC_ARG_ENABLE(default-fltk,[  --disable-default-fltk	Does not use default FLTK])
 
 # The current IDE version needs Cygwin on Windows, mainly for threads
 # and sockets.
-if test "$enable_cygwin" = yes
+if test "$ff_win32" = no -o "$enable_cygwin" = yes
 then
 	if test "$enable_default_fltk" = no
 	then
