@@ -13,7 +13,7 @@ function dotest(){
 
     # Running FreeFem++ on regtests.edp (specific to regression
     # tests), otherwise on all.edp.
-
+    echo $1
     $1 $3|tee regtests-$2.log
     if test $PIPESTATUS != 0
 	then
@@ -31,6 +31,14 @@ then
     script=all.edp
 fi
 
+# Number of processors in parallel mode
+if test "$NPROCS" != ""
+    then
+    nprocs=$NPROCS
+else
+    nprocs=1
+fi
+
 # Do not test windowed programs by default, because their windows are
 # too invasive.
 
@@ -39,7 +47,10 @@ then
     dotest ${PROGLOC}/std/FreeFem++${EXEEXT} std $script
 fi
 
-dotest ${PROGLOC}/nw/FreeFem++-nw${EXEEXT} nw $script
+if test $nprocs = 1
+    then
+    dotest ${PROGLOC}/nw/FreeFem++-nw${EXEEXT} nw $script
+fi
 
 if test "${X11PROG}" != "" -a "${VISUALCHECK}" = "yes"
 then
@@ -62,11 +73,5 @@ if test "${MPIPROG}" != ""
     echo $host>machinefile
     echo $host>>machinefile
 
-    if test "$NPROCS" != ""
-	then
-	nprocs=$NPROCS
-    else
-	nprocs=1
-    fi
     dotest "mpirun -np $nprocs -machinefile machinefile ${PROGLOC}/mpi/FreeFem++-mpi${EXEEXT}" mpi $script
 fi
