@@ -424,9 +424,43 @@ Make version 1.37
 07/02/2004
   - correct bug in real[string] map; // map array  \index{array!string}
         change in get_element and operator <  of String 
+  - add int array 
 Make Version 1.38
 ----------------
+  - remove (void) line 14 of throwassert.hpp file (erreur compile g++3.3.5 )
+  make change in macro expansion of shell (no perfect to day)
+     
+ 16/04/2004 
+  - add matrix tools 
+    bluid interpolation interpolation matric from a FEspace VH  to an other FEspace Vh
+       matrix Ih=matrix B= interplotematrix(VH,Vh); 
+	// where  Vh correspond to  line and Vh to column 
+       the named parameters can be 
+          t= true or false  (to bluid the transpose or not matrix)
+          op=0 ,1 or 2 (to build the interpolation of value, dx,dy )
+          inside=true or false  (to remove or not  all ouside interpolation  quadrature point)
+     build diagonal  sparce  matrix (type is morse)
+     do the matrice product of to sparce matrix (type is morse)
+   add build a sparce matrix from a full matrix so if you have install UMFPACK solver
+     it is possible to solve systeme with full matrix.
+   add set function to change the solver 
+   see exemple  sparce-matrix.edp 
+	   
+  - correct bug flag ouside of mesh 
+    add line in file fem.cpp line 864
+       outside=true; 
+     so some time the P0 interpolatation is no zero
+     add new king of mesh of multiplicator data :
+     mesh emptyTh=emptymesh(Th); // to build a mesh with no internal point 
+     see mesh.edp example
 
+Make Version 1.40
+-----------------
 
-
+  - add les linear combination of sparce matrice
+  - set a sparce solver to a sparce matrice (to day just UMFPACK)
+  - transforme a full matrix in sparce matrix
+  - add istream f("toto");
+     f.good() or f.EOF to test state the file 
+     remark: the state is set after the read so the previous value is wrong
 

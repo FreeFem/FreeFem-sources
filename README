@@ -2,6 +2,7 @@ Compilation under unix and MacOs 10.2 or cygwin  with g++
 --------------------------------------------------------
 please read all before began and read READ_ARPACK for eigen value tools
 
+
 for compilation  under window or MacOs 
 with codewarrior compiler  see the README_CW.
 
@@ -27,7 +28,11 @@ Suppose you HOSTTYPE are xxx begin by a version without arpack
 2) edit src/Makefile-xxx 
 and  change if necessary the variables 
 
-LIBLOCAL = -ldl   # for dlopen (see man dlopen and or load.cpp)
+LIBLOCAL = -ldl -rdynamic  # for dlopen (see man dlopen and or load.cpp) on linux Debian 
+LIBLOCAL = -ldl  # for dlopen (see man dlopen and or load.cpp) on MacOS 10.3 or FreeBSD????
+or add   flags -DNO_LOAD if no  dlopen on you systeme to OFFFLAGS and GFFFLAGS  variable
+
+
 LIBX11= -L/usr/X11R6/lib -lX11 -lm 
 INCLUDEX11 = /usr/X11R6/include
 CXX=g++      #C++ compiler 
@@ -62,6 +67,8 @@ or add HOSTTYPE=linux at the end of the make command, like
 The variable defined in this file src/Makefile-$HOSTTYPE are :
 OOPTFLAGS= -O  # compilation with optimization
 GOPTFLAGS= -g  # compilation with debugging 
+
+
 # FLAGS for optimisated version 
 OFFFLAGS= -DDRAWING -DLONG_LONG  -DNCHECKPTR 
 #  flags for debug version  
@@ -69,7 +76,10 @@ GFFFLAGS= -DDRAWING -DLONG_LONG -DCHECK_KN #-DWITHCHECK
 BIN_DIR=$(HOME)/bin-$(HOSTTYPE)   #install dir
 COMPILE_DIR=c-$(HOSTTYPE)        #compile dir.
 
-Freefem++ with eigen value
+if no include file dlfcn.h add   flags -DNO_LOAD on you systeme to OFFFLAGS and GFFFLAGS  variable 
+because dlopen and dynamic link is not avialaible on your systeme.
+
+Freefem++ with eigen value (ARPACK)
 EIGEN= eigenvalue.o  # to compile the target eigenvalue.o 
 LIBARPACK=  (the arparck fortran  library)
 LIBF77=   (the fortan library)
@@ -81,7 +91,29 @@ LIBARPACK=
 LIBF77=
 INCARPACKPP=
 
+and you can use the sparce linear solver  UMFPACK solver 
+#-----------------------
+#  UMFPACK
+#-----------------------
+UMFPACKDIR=$(src)/../../LinearSolver/UMFPACKv4.1
+#  include dir + -DUMFPACK flag 
+IUMFPACK= -DUMFPACK -I$(UMFPACKDIR)/UMFPACK/Include -I$(UMFPACKDIR)/AMD/Include 
+#  library 
+LIBUMFPACK= -L$(UMFPACKDIR)/AMD/Lib -L$(UMFPACKDIR)/UMFPACK/Lib  -lumfpack -lamd  $(LIBBLAS)
 
+To install umfpack 
+ get umfpack at
+ http://www.cise.ufl.edu/research/sparse/umfpack
+ extarct all the file in a directory
+ go to in the extract directory 
+ edit the file UMFPACK/Make/Make.include ( the difficuly is to choose the de BLAS library)
+  so read the README file.
+ build the 2 library  UMFPACK and AMD 
+ go in top of extract directory and do:
+ cd ../UMFPACK;make lib 
+ cd ../AMD;make lib 
+ the 2 library are : AMD/Lib/libamd.a                UMFPACK/Lib/libumfpack.a
+Good luck.  
 
 So to compile create the file  src/Makefile-$HOSTTYPE
 to add /or change the compiler, change the 
@@ -192,6 +224,44 @@ make all all-g gl-g gl
 make install
 4) to run 
 FreeFem-CoCoa examples++-tutorial/all.edp
+5) to try the  dynamic linking loader exemple
+go to example++-load
+to compile with FreeFem++ software:  do:
+hecht@hydre:~/FreeFem++v1.38/examples++-load$ ./load.link myfunction 
+g++ -c -I../src -I../src/femlib -I../src/Graphics myfunction.cpp
+g++ -shared myfunction.o -o myfunction.so
+
+the test : 
+hecht@hydre:~/FreeFem++v1.38/examples++-load$ ../c-Debian-g/FreeFem++-nw load.edp
+-- FreeFem++ v1.38 (date Tue Feb 10 12:04:30 CET 2004)
+ file : load.edp
+ Load: lg_fem  --  no UMFPACK => replace UMFPACK  by LU  
+lg_mesh eigenvalue 
+ load "./myfunction.so" lood: myfunction 
+load: dlopen(./myfunction.so) = 0x84be700
+
+    1 :  mesh Th=square(5,5);
+    2 :  fespace Vh(Th,P1);
+    3 :  Vh uh=myfunction(); // warning  do not forget () 
+    4 :  cout << uh[].min << " " << uh[].max << endl;
+    5 : 
+    6 : 
+    7 :  sizestack + 1024 =1224  ( 200 )
+----------CheckPtr:-----init execution ------ NbUndelPtr  996  Alloc: 79131  NbPtr 1011 
+
+   Nb of edges on Mortars  = 0
+   Nb of edges on Boundary = 20, neb = 20
+ Nb Of Nodes = 36
+ Nb of DF = 36
+0 0.841471
+times: compile 0.01s, execution -2.0837e-19s
+----------CheckPtr:-----end execution -- ------ NbUndelPtr  996  Alloc: 79131  NbPtr 1048 
+Bien: On a fini Normalement
+                CheckPtr:Nb of undelete pointer is 995 last 101
+                CheckPtr:Max Memory used     93.672 kbytes  Memory undelete 78619 
+
+remark, if the this do not word, you have to read carefully 
+the man of dlopen of you computer. 
 
 
 Warning on MacOSX, some link problem occures because the  RTTI and template
