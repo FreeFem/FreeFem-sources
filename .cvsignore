@@ -7,6 +7,7 @@ config.log
 config.status
 configure
 *.exe
+freefem++-1.41.zip
 ListOfUnAllocPtr.bin
 Makefile
 Makefile.in

@@ -4,11 +4,11 @@
 # Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
 # $Id$
 
-AC_INIT(FreeFem++,1.41)
+AC_INIT(FreeFem++,1.41,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
-AM_INIT_AUTOMAKE(1.6.3)
+AM_INIT_AUTOMAKE(1.6.3 dist-zip)
 
 AM_CONFIG_HEADER(config.h)
 AC_PROG_MAKE_SET
@@ -257,5 +257,8 @@ AC_OUTPUT(Makefile
 	examples++/Makefile
 	examples++-eigen/Makefile
 	examples++-tutorial/Makefile
+	examples++-mpi/Makefile
+	examples++-load/Makefile
+	examples++-bug/Makefile
 	DOC/Makefile,
         echo timestamp > stamp-h)

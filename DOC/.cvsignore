@@ -12,3 +12,7 @@
 *.out
 Makefile
 Makefile.in
+manual.ilg
+manual.pdf
+manual.ps
+manual.ps.gz

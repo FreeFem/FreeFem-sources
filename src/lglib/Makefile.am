@@ -12,3 +12,5 @@ lg.tab.hpp  lg.tab.cpp: lg.y
 	-rm lg.tab.hpp  lg.tab.cpp lg.tab.cpp.h
 	bison -dtv -p lg  $< -o lg.tab.cpp
 	-mv lg.tab.cpp.h  lg.tab.hpp # pour un  pb entre des versions de bison 
+
+EXTRA_DIST=lg.y

@@ -1,115 +1,10 @@
 %&LaTeX  
 \documentclass[a4paper,twoside,12pt]{book}
-
-%\RequirePackage{everyshi}%
-\newif\ifpdf
-\ifx\pdfoutput\undefined
-\pdffalse % we are not running PDFLaTeX
-\else
-\usepackage{pdfsync} 
-\pdfoutput=1 % we are running PDFLaTeX
-\pdftrue
-\fi
-
-%\usepackage{times}
-%\usepackage{amsmath}
-\usepackage{verbatim}
-\usepackage{calc}
-\usepackage[latin1]{inputenc}
-\usepackage{FFF}
-\usepackage{amsfonts}
-\usepackage{amsmath}
-\usepackage{hyperref}
-
-
-%\usepackage{FFF}
-\usepackage{makeidx}
-\usepackage{color}
-\usepackage{multicol}
-\usepackage{graphicx}
-
-%\usepackage{dessin}
-
-\topmargin -2.cm
-\oddsidemargin 0cm   %marge a 2 cm
-\evensidemargin 0cm  %marge a 2 cm
-\newcommand{\indente}{\hbox to \parindent {\hss}}
-\parindent 0cm
-\headsep 0.5cm
-\topskip .5cm
-\footskip 1cm
-\headheight 1.0cm
-\textwidth  16.5cm
-%  \parindent 0cm
-\textheight 24cm
-
-\def\freefempp{\texttt{freefem++ }}
-\def\textRed{\color{red}}
-\def\textBlack{\color{black}}
-
-\def\Blue#1{\textcolor{blue}{#1}}
-\def\Black#1{\textcolor{black}{#1}}
-\def\Red#1{\textcolor{red}{#1}}
-\def\Magenta#1{\textcolor{magenta}{#1}}
-\def\hin{\hbox{ in }}
-\def\hon{\hbox{ on }}
-\def\Cpp{\texttt{C++~}}
-\def\R{\mathrm{I\!R}}
-\def\example{\textbf{Example:}}
-\def\eq#1{\Blue{\[#1\]}}
-\def\R{\mathbb{R}}
-\def\Z{\mathbb{Z}}
-\def\itemtt[#1]{ \item[\texttt{#1}]}
-
-\def\plot[#1]#2#3{\begin{figure}[hbt]
-\begin{center}
-    \includegraphics*[#1]{#2}
-\end{center}
-\caption{\label{#2} #3}
-\end{figure}
-}
-
-\def\Ostream{\texttt{ostream}}
-\def\Istream{\texttt{istream}}
-\def\Bool{\texttt{bool}}
-\def\Real{\texttt{real}}
-\def\Int{\texttt{int}}
-
-\def\vecttwo#1#2{\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
-\def\vdeux(#1,#2){\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
-\def\HLINE#1{\hbox to \hsize {#1}}
-\def\twoplot[#1]#2#3#4#5{
-\begin{figure}[hbt]
-\begin{multicols}{2}
-\begin{center}
-    \includegraphics*[#1]{#2}
-    \caption{\label{#2} #4}
-\end{center}
-
-\begin{center}
-    \includegraphics*[#1]{#3}
-    \caption{\label{#3} #5}
-\end{center}
-\end{multicols}
-\end{figure}
-}% end twoplot macro
-
-\newtheorem{remark}{\textbf{Remark}}
-\newtheorem{bug}{\textbf{Bug:}}
-\newtheorem{proposition}{\textbf{Proposition}}
-\newtheorem{algorithm}{\textbf{Algorithm}}
-
-\newenvironment{ttlist}
-   {\begin{list}{}{\renewcommand{\makelabel}[1]{\texttt{##1}\hfil}%
-        \setlength{\labelwidth}{3cm}
-        \setlength{\leftmargin}{\labelwidth+\labelsep}
-    }}%
-   {\end{list}}
-
+\usepackage{styles}
 \title{
-\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
+%\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
  {\Blue{ \TitreFont FreeFem++ \\ \vglue 1cm  Manual}} \\ \vglue 3cm  ~ \\  
-      \normalsize  { version 1.38  \Red{(Under construction)} }
+      \normalsize  { version 1.40  \Red{(Under construction)} }
  \\ \vglue 0.7cm
  \large \url{http://www.freefem.org} \\
 \url{http://www.ann.jussieu.fr/\string~hecht/freefem++.htm} 
@@ -302,7 +197,9 @@ After installation, the following file can be create depending on  make option:
 \item \texttt{/Applications/FreeFem++.app}   Drag and Drop CoCoa MacOs Application
 \item \texttt{FreeFem++-CoCoa}      MacOS Shell script  for MacOS  OpenGL version  (MacOS 10.2 or better),
          remark:           it  use  /Applications/FreeFem++.app
-\end{enumerate}
+
+\end{enumerate}
+
 in a directory set with makevariable \texttt{BIN\_DIR} defined in file \texttt{src/Makefile-xxxxx}
 where \texttt{xxxxx} this the type of the host.
 
@@ -711,10 +608,10 @@ at the exit of the enclosing block,
 The following keywords are discussed in this section:
 
 \texttt{\bf square, border, buildmesh,  movemesh ,
- adaptmesh, readmesh, trunc, triangulate, splitmesh}
+ adaptmesh, readmesh, trunc, triangulate, splitmesh, emptymesh}
 
  \index{square}\index{border}\index{buildmesh}\index{movemesh}\index{adaptmesh}
- \index{readmesh}\index{triangulate}\index{splitmesh}
+ \index{readmesh}\index{triangulate}\index{splitmesh}\index{emptymesh}
  
  All This examples are includes in files \texttt{mesh.edp} and \texttt{tablefunction.edp}.
 
@@ -824,7 +721,7 @@ while(1) // find a correct move mesh
 Th=movemesh(Th,[x+coef*uu,y+coef*vv]);
 plot(Th,wait=1,fill=1,ps="movemesh.eps");// see figure \ref{movemesh}
 \eFF
-\twoplot[height=6cm]{Lshape}{movemesh}{   L-shape}{  moved L-shape }
+%%%\twoplot[height=6cm]{Lshape}{movemesh}{   L-shape}{  moved L-shape }
 
 \begin{remark}
 Consider a function u defined on a mesh Th. A statement like
@@ -837,10 +734,34 @@ if $u$ was the only function using it.
 Now, a sample exemple of moving mesh, with lagrangian\index{lagrangian} function $u$ defined on the moving mesh.
 
 \bFF
-// simple movemesh example@mesh Th=square(10,10);@fespace Vh(Th,P1); @real t=0;// ---//  problem is how to build data without interpolation//  so the data u is moving with the mesh hse you can see in the plot// ---Vh u=y;@for (int i=0;i<4;i++){  t=i*0.1; Vh f= x*t; @real minarea=checkmovemesh(Th,[x,y+f]); if (minarea >0 ) //  the movemesh will be ok    Th=movemesh(Th,[x,y+f]);
+// simple movemesh example
+@mesh Th=square(10,10);
+@fespace Vh(Th,P1); 
+@real t=0;
+// ---
+//  problem is how to build data without interpolation
+//  so the data u is moving with the mesh hse you can see in the plot
+// ---
+Vh u=y;
+@for (int i=0;i<4;i++)
+{ 
+ t=i*0.1;
+ Vh f= x*t;
+ @real minarea=checkmovemesh(Th,[x,y+f]);
+ if (minarea >0 ) //  the movemesh will be ok 
+   Th=movemesh(Th,[x,y+f]);
 
- cout << " Min area  " << minarea << endl;  Vh tmp;     // =u[],  sorry no init of FEspace function with array.  tmp[]=u[];  //save the value   u=0;        // to change the FEspace and mesh associated to u u[]=tmp[];  // set le value of the array without no mesh update 
- @plot(Th,u,wait=1);};//  remark, in this programme we have no solution with link to a previous//  mesh so all the old meshes are delete in memory//   -------- 
+ cout << " Min area  " << minarea << endl;
+ 
+ Vh tmp;     // =u[],  sorry no init of FEspace function with array. 
+ tmp[]=u[];  //save the value  
+ u=0;        // to change the FEspace and mesh associated to u
+ u[]=tmp[];  // set le value of the array without no mesh update 
+ @plot(Th,u,wait=1);
+};
+//  remark, in this programme we have no solution with link to a previous
+//  mesh so all the old meshes are delete in memory
+//   -------- 
 \eFF
 
 \subsection{Read and write mesh}
@@ -892,7 +813,7 @@ here the third column  by line is  unused in the command  \texttt{triangulate}.
 But you can use this  to defined a  table fonction with rows of the form: 
 \texttt{x y f(x,y))}.
 
-\twoplot[height=6cm]{Thxy}{xyf}{Delaunay mesh of the convexe hull of point set in file xyf}{Isovalue of table function}
+%%%\twoplot[height=6cm]{Thxy}{xyf}{Delaunay mesh of the convexe hull of point set in file xyf}{Isovalue of table function}
 
 \index{function!tables}
 
@@ -1146,6 +1067,57 @@ A other way to split mesh triangle:
 \eFF
 
 \twoplot[height=6cm]{nosplitmesh}{splitmesh}{\label{fig nosplitmesh}initial mesh}{\label{fig splitmesh}all left mesh triangle is split  conformaly in \texttt{int(1+5*(square(x-0.5)+y*y)\^2} triangles.}
+\subsection{build empty mesh}\index{emptymesh}
+The idea is when you want to defined Finite Element  space 
+on boundary you can use a mesh with no internal points (call empty mesh).
+It is can by usefull we you have a Lagrange multiplier definied on the border.
+
+So the fonction emptymesh remove all the internal point of a mesh expect if the
+point is on internal boundary.
+
+\bFF
+{  //  new stuff 2004 emptymesh (version 1.40)
+ // -- usefull to build Multiplicator space 
+ //  build a mesh without internal point
+ // with the same boundary 
+ //  -----
+  assert(version>=1.40);
+  @border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+  @mesh Th=buildmesh(a(20));
+   Th=@emptymesh(Th);
+  @plot(Th,wait=1,ps="emptymesh-1.eps");//see figure \ref{fig emptymesh-1}
+}
+\eFF
+
+or it is also possible to build a empty mesh of peusdo subregion  
+with \texttt{emptymesh(Th,ssd)} with the set of edges of the mesh \texttt{Th}
+a edge $e$ is in  this set  if the two adjacent triangles $e =t1\cap t2$ 
+and  $ ssd[T1] \ne ssd[T2]$ where \texttt{ssd}  defined the peusdo region numbering of triangle. It is an user \texttt{int[int]} array of size the number of triangles.
+\bFF
+{  //  new stuff 2004 emptymesh (version 1.40) \hfilll
+ // -- usefull to build Multiplicator space \hfilll
+ //  build a mesh without internal point \hfilll
+ // of peusdo sub domain  \hfilll
+ //  ----- \hfilll
+  assert(version>=1.40);
+  mesh Th=square(10,10);
+  int[int] ssd(Th.nt);  
+  for(int i=0;i<ssd.n;i++) // build the  peusdo region numbering
+   {  int iq=i/2;   // because 2 traingle per quad 
+      int ix=iq%10; // 
+      int iy=iq/10; // 
+    ssd[i]= 1 + (ix>=5) +  (iy>=5)*2;
+   }
+  Th=emptymesh(Th,ssd); // build emtpy  with 
+  //  all edge $e = T1 \cap T2$ and $ ssd[T1] \ne ssd[T2]$ 
+  plot(Th,wait=1,ps="emptymesh-2.eps");//see figure \ref{fig emptymesh-2} 
+  savemesh(Th,"emptymesh-2.msh");
+}
+\eFF
+
+\twoplot[height=6cm]{emptymesh-1}{emptymesh-2}{ The empty mesh with boundary 
+\label{fig emptymesh-1}}{An empty mesh 
+defined from a peusdo region numbering of triangle\label{fig emptymesh-2}}
 
 \subsection{Get Mesh numbering}
 \index{triangle![]}\index{triangle!label}\index{triangle!label}
@@ -1866,6 +1838,7 @@ and the matrix $B$.
          \item[\texttt{ivalue=}]     the array to store the imag. part of the eigenvalues 
          \item[\texttt{vector=}]    the array to store the eigenvectors. 
  For real nonsymmetric problems, complex eigenvectors are given as two consecutive vectors, so if eigenvalue $k$ and $k+1$ are complex conjugate eigenvalues, the $k$th vector will contain the real part and the $k+1$th vector the imaginary part of the corresponding complex conjugate eigenvectors. 
+
          \item[\texttt{tol=}]        the relative accuracy to which eigenvalues are to be determined;
          \item[\texttt{sigma=}]    the shift value;
          \item[\texttt{maxit=}]    the maximum number of iterations allowed;
@@ -2055,6 +2028,7 @@ The named parameter are
  is preserved or not.
     \itemtt[bb=] \index{plot!bb=}array of 2 array ( like \texttt{ [[0.1,0.2],[0.5,0.6]]}),
        to set the bounding box and specify a partial view where the  box defined by the two corner points [0.1,0.2] and [0.5,0.6].
+
     \itemtt[nbiso=]  \index{plot! nbiso =}(int) sets the number of isovalues (20 by default) 
     \itemtt[nbarrow=] \index{plot!nbarraw=} (int) sets the number of colors of arrow values (20 by default) 
     \itemtt[viso=]  \index{plot!viso=}sets the array  value of isovalues (an array real[int]) 
@@ -2077,8 +2051,10 @@ Vh uh=x*x+y*y,vh=-y^2+x^2;
    yy[i]=uh; // value of uh at point (i/10. , i/10.)
  }
  @plot(Th,uh,[uh,vh],value=true,ps="three.eps",wait=true); // figure \ref{three}
- //  zoom on box defined by the two corner points [0.1,0.2] and [0.5,0.6] @plot(uh,[uh,vh],bb=[[0.1,0.2],[0.5,0.6]],
-        wait=true,grey=1,fill=1,value=1,ps="threeg.eps"); // figure \ref{threeg} @plot([xx,yy],ps="likegnu.eps",wait=true); // figure \ref{likegnu}
+ //  zoom on box defined by the two corner points [0.1,0.2] and [0.5,0.6]
+ @plot(uh,[uh,vh],bb=[[0.1,0.2],[0.5,0.6]],
+        wait=true,grey=1,fill=1,value=1,ps="threeg.eps"); // figure \ref{threeg}
+ @plot([xx,yy],ps="likegnu.eps",wait=true); // figure \ref{likegnu}
 \eFF
 \twoplot[height=6cm]{three}{threeg}{ mesh, isovalue, and
 vector}{inlargement in grey of isovalue, and
@@ -2093,8 +2069,24 @@ only on unix computer.
 
 You just and to the previous exemple: 
 {\def\bks{$\backslash$}
-\bFF// file for gnuplot{  @ofstream gnu("plot.gp");  @for (int i=0;i<=n;i++)   {     gnu <<  xx[i] << " " << yy[i] << endl;    }} //  the file plot.gp is close because the variable gnu is delete
-//  to call gnuplot command and wait 5 second (tanks to unix command)//  and make postscipt plot @exec("echo 'plot \bks"plot.gp\bks" w l \bkspause 5 \bksset term postscript \bksset output \bks"gnuplot.eps\bks" \bksreplot \bksquit' | gnuplot"); 
+\bFF
+// file for gnuplot
+{
+  @ofstream gnu("plot.gp");
+  @for (int i=0;i<=n;i++)
+   {
+     gnu <<  xx[i] << " " << yy[i] << endl;
+    }
+} //  the file plot.gp is close because the variable gnu is delete
+
+//  to call gnuplot command and wait 5 second (tanks to unix command)
+//  and make postscipt plot 
+@exec("echo 'plot \bks"plot.gp\bks" w l \bks
+pause 5 \bks
+set term postscript \bks
+set output \bks"gnuplot.eps\bks" \bks
+replot \bks
+quit' | gnuplot"); 
 \eFF}
 \plot[height=7cm,angle=270]{gnuplot}{Plots a cut of uh with gnuplot}
 
@@ -2105,8 +2097,25 @@ software is installed.
 \index{medit}\index{exec}
 
 \bFF
-// build square $]-1,1[^2$mesh Th=square(10,10,[2*x-1,2*y-1]); fespace Vh(Th,P1);Vh u=2-x*x-y*y;   savemesh(Th,"mm",[x,y,u*.5]); //save mm.points and mm.faces file 
-// for medit   // build a mm.bb file 	{ ofstream file("mm.bb"); 	file << "2 1 1 "<< u[].n << " 2 \n";	int j;	for (j=0;j<u[].n ; j++)  	  file << u[][j] << endl;     }      // call medit command 	    exec("medit mm");    // clean files on unix OS    exec("rm mm.bb      mm.faces   mm.points");
+// build square $]-1,1[^2$
+mesh Th=square(10,10,[2*x-1,2*y-1]); 
+fespace Vh(Th,P1);
+Vh u=2-x*x-y*y;
+
+   savemesh(Th,"mm",[x,y,u*.5]); //save mm.points and mm.faces file 
+// for medit
+   // build a mm.bb file 
+	{ ofstream file("mm.bb"); 
+	file << "2 1 1 "<< u[].n << " 2 \n";
+	int j;
+	for (j=0;j<u[].n ; j++)  
+	  file << u[][j] << endl; 
+    }  
+    // call medit command 	
+    exec("medit mm");
+    // clean files on unix OS
+    exec("rm mm.bb      mm.faces   mm.points");
+
 \eFF
 \plot[height=10cm]{medit}{medit plot}
 
@@ -2516,16 +2525,33 @@ The list   with their default value is in section \ref{adaptmesh}.
 In this exemple,  we do metric mesh adaption and we computionj the classical 
 residual error indicator $\eta_{K}$ on the element $K$ for the Poisson problem.
 
+
 First, we solve the same problem as in a previous example.
 \bFF
-@border ba(t=0,1.0){x=t;   y=0;  label=1;}; // comment @border bb(t=0,0.5){x=1;   y=t;  label=2;};@border bc(t=0,0.5){x=1-t; y=0.5;label=3;};@border bd(t=0.5,1){x=0.5; y=t;  label=4;};@border be(t=0.5,1){x=1-t; y=1;  label=5;};@border bf(t=0.0,1){x=0;   y=1-t;label=6;};@mesh Th = buildmesh (ba(6) + bb(4) + bc(4) +bd(4) + be(4) + bf(6));
-@fespace Vh(Th,P2);Vh u,v;@real error=0.01;func f=(x-y);problem Probem1(u,v,solver=CG,eps=1.0e-6) =    int2d(Th,qforder=5)( u*v*1.0e-10+  dx(u)*dx(v) + dy(u)*dy(v))   + int2d(Th,qforder=5)( -f*v);
+@border ba(t=0,1.0){x=t;   y=0;  label=1;}; // comment 
+@border bb(t=0,0.5){x=1;   y=t;  label=2;};
+@border bc(t=0,0.5){x=1-t; y=0.5;label=3;};
+@border bd(t=0.5,1){x=0.5; y=t;  label=4;};
+@border be(t=0.5,1){x=1-t; y=1;  label=5;};
+@border bf(t=0.0,1){x=0;   y=1-t;label=6;};
+@mesh Th = buildmesh (ba(6) + bb(4) + bc(4) +bd(4) + be(4) + bf(6));
+
+@fespace Vh(Th,P2);
+Vh u,v;
+
+@real error=0.01;
+func f=(x-y);
+problem Probem1(u,v,solver=CG,eps=1.0e-6) =
+    int2d(Th,qforder=5)( u*v*1.0e-10+  dx(u)*dx(v) + dy(u)*dy(v)) 
+  + int2d(Th,qforder=5)( -f*v);
 \eFF
 \index{jump}\index{intalledges}\index{square}\index{lenEdge}\index{hTriangle}%\index{area}
  \index{qforder=}
 Now, the local  error indicator $\eta_{K}$ is:
 \def\Th{\mathcal{T}_{h}}
+
 \def\AK{\mathcal{E}_{K}}
+
 
   $$\eta_{K} =\left(  h_{K}^{2} || f -\Delta u_{{h}} ||_{L^{2}(K)}^{2} +\sum_{e\in \AK} h_{e} \,||\, [ \frac{\partial u_{h}}{\partial n_{k}}] \,||^{2}_{L^{2}(e)} \right)^{\frac{1}{2}}
    $$
@@ -2535,11 +2561,32 @@ Now, the local  error indicator $\eta_{K}$ is:
  
  
 Of coarse, we can use a variational form to compute $\eta_{K}^{2}$,
-with test function constante function by triangle.\bFF  
-@fespace Nh(Th,P0); // the set function constante function by triangleNh eta,logeta;@varf indicator2(uu,chiK) = 
-       intalledges(Th)(chiK*lenEdge*square(jump(N.x*dx(u)+N.y*dy(u))))       +int2d(Th)(chiK*square(hTriangle*(f-dxx(u)-dyy(u))) );
+with test function constante function by triangle.
+\bFF  
+@fespace Nh(Th,P0); // the set function constante function by triangle
+Nh eta,logeta;
+@varf indicator2(uu,chiK) = 
+       intalledges(Th)(chiK*lenEdge*square(jump(N.x*dx(u)+N.y*dy(u))))
+       +int2d(Th)(chiK*square(hTriangle*(f-dxx(u)-dyy(u))) );
 \eFF
-\bFF@for (int i=0;i< 4;i++){     Probem1;    cout << u[].min << " " << u[].max << endl;    plot(u,wait=1);   cout << " indicator2 " << endl;      eta[] = indicator2(0,Nh);   eta=sqrt(eta);   cout << eta[].min << " " << eta[].max << endl;   plot(eta,fill=1,wait=1,cmm="indicator density ",ps="rhoP2.eps");   Th=adaptmesh(Th,[dx(u),dy(u)],err=error,anisomax=1);   plot(Th,wait=1);   u=u;   eta=eta;  error = error/2;} ;
+\bFF
+@for (int i=0;i< 4;i++)
+{   
+  Probem1; 
+   cout << u[].min << " " << u[].max << endl; 
+   plot(u,wait=1);
+   cout << " indicator2 " << endl;
+   
+   eta[] = indicator2(0,Nh);
+   eta=sqrt(eta);
+   cout << eta[].min << " " << eta[].max << endl;
+   plot(eta,fill=1,wait=1,cmm="indicator density ",ps="rhoP2.eps");
+   Th=adaptmesh(Th,[dx(u),dy(u)],err=error,anisomax=1);
+   plot(Th,wait=1);
+   u=u;
+   eta=eta;
+  error = error/2;
+} ;
 \eFF
 If the method is correct, we espect an almost constant function $\eta$, as you can see 
 on the graphics .label{fig rhop2}.
@@ -3694,14 +3741,26 @@ The domain $\Omega$ is defined with:
 The free boundary problem is: 
  
 Find $u$ and $\Omega$ such that:
- $$ \left\{\begin{array}{cl}  \displaystyle - \Delta u = 0  & \mbox{in } \Omega\\ \displaystyle      u = y         &\mbox{on } \Gamma_b \\ \displaystyle      {\partial u  \over \partial n} = 0   &\mbox{on } \Gamma_d \cup \Gamma_a \\ \displaystyle    {\partial u  \over \partial n} = { q\over K} n_x  	        \mbox{\ and \ } {u = y}  &\mbox{on\ } \Gamma_ f\end{array}\right. $$
+
+ $$ \left\{\begin{array}{cl} 
+ \displaystyle - \Delta u = 0  & \mbox{in } \Omega\\
+ \displaystyle      u = y         &\mbox{on } \Gamma_b \\
+ \displaystyle      {\partial u  \over \partial n} = 0   &\mbox{on } \Gamma_d \cup \Gamma_a \\
+ \displaystyle    {\partial u  \over \partial n} = { q\over K} n_x  
+	        \mbox{\ and \ } {u = y}  &\mbox{on\ } \Gamma_ f
+\end{array}\right. $$
 
 
 We use a fixe point method;
 $\Omega^0 = \Omega$
 
 in two step, fist we solve the classical following problem:
-$$ \left\{\begin{array}{rll}  \displaystyle - \Delta u &= 0  & \mbox{in } \Omega^n\\ \displaystyle      u &= y         &\mbox{on } \Gamma^n_b \\ \displaystyle      {\partial u  \over \partial n} &= 0   &\mbox{on } \Gamma^n_d \cup \Gamma^n_a\\ \displaystyle    u &= y        &\mbox{on\ } \Gamma^n_ f\end{array}\right. $$
+$$ \left\{\begin{array}{rll} 
+ \displaystyle - \Delta u &= 0  & \mbox{in } \Omega^n\\
+ \displaystyle      u &= y         &\mbox{on } \Gamma^n_b \\
+ \displaystyle      {\partial u  \over \partial n} &= 0   &\mbox{on } \Gamma^n_d \cup \Gamma^n_a\\
+ \displaystyle    u &= y        &\mbox{on\ } \Gamma^n_ f
+\end{array}\right. $$
 
 The varitional formulation is:
 
@@ -3711,11 +3770,18 @@ $$
 \Gamma^n_b \cup \Gamma^n_f
 $$
 
+
 and secondly to construte a domain deformation $\mathcal{F}(x,y)=[x,y-v(x,y)]$ 
 
 where $v$ is  solution of  the following problem: 
 
- $$ \left\{\begin{array}{rll}  \displaystyle - \Delta v &= 0  & \mbox{in } \Omega^n\\ \displaystyle      v  &= 0         &\mbox{on } \Gamma^n_a \\ \displaystyle      {\partial v \over \partial n} &= 0   &\mbox{on } \Gamma^n_b \cup \Gamma^n_d \\ \displaystyle    {\partial v  \over \partial n}  &=  \displaystyle {\partial u  \over \partial n} - { q\over K} n_x  	          &\mbox{on\ } \Gamma^n_ f\end{array}\right. $$
+ $$ \left\{\begin{array}{rll} 
+ \displaystyle - \Delta v &= 0  & \mbox{in } \Omega^n\\
+ \displaystyle      v  &= 0         &\mbox{on } \Gamma^n_a \\
+ \displaystyle      {\partial v \over \partial n} &= 0   &\mbox{on } \Gamma^n_b \cup \Gamma^n_d \\
+ \displaystyle    {\partial v  \over \partial n}  &=  \displaystyle {\partial u  \over \partial n} - { q\over K} n_x  
+	          &\mbox{on\ } \Gamma^n_ f
+\end{array}\right. $$
 
 The varitional formulation is:
 
@@ -3727,6 +3793,7 @@ $$
 
 finaly the new domain 
 $\Omega^{n+1} = \mathcal{F}(\Omega^n)$
+
 
 
 
@@ -3797,28 +3864,39 @@ verbosity=1;
 \end{figure}
 
 \textBlack\subsection{nolinear-elas.edp}
-\textBlackThe nonlinear elasticity  problem is find  the deplacement $(u_{1},u_{2})$  minimizing  $J$$$ \min J(u_{1},u_{2}) = \int_{\Omega} f(F2) -  \int_{\Gamma_{p}} P_{a} \,  u_{2} $$
+\textBlack
+The nonlinear elasticity  problem is find  the deplacement $(u_{1},u_{2})$  minimizing  $J$
+$$ \min J(u_{1},u_{2}) = \int_{\Omega} f(F2) -  \int_{\Gamma_{p}} P_{a} \,  u_{2} $$
 where  $F2(u_{1},u_{2}) =  A(E[u_{1},u_{2}],E[u_{1},u_{2}])$ and $A(X,Y)$ is bilinear sym. positive form with respect two matrix $X,Y$.
 where $f$ is a given $\mathcal{C}^2$  function, and $E[u_{1},u_{2}] = (E_{ij})_{i=1,2,\,j=1,2}$ is the Green-Saint Venant deformation tensor defined  with: 
 $$  E_{ij} = 0.5 ( \partial_i u_j + \partial_j u_i ) + \sum_k \partial_i u_k \times \partial_j u_k  $$ 
 
 
 
-The differential of $J$ is   $$ DJ(u_{1},u_{2})(v_{1},v_{2}) = \int 2 A(E[u_{1},u_{2}],DE[u_{1},u_{2}](v_{1},v_{2})) f'(F2(u_{1},u_{2}))) -  \int_{\Gamma_{p}} P_{a}  u_{2}  $$
+The differential of $J$ is 
+  $$ DJ(u_{1},u_{2})(v_{1},v_{2}) = \int 2 A(E[u_{1},u_{2}],DE[u_{1},u_{2}](v_{1},v_{2})) f'(F2(u_{1},u_{2}))) -  \int_{\Gamma_{p}} P_{a}  u_{2}  $$
 
 denote $\mathbf{u}=u_{1},u_{2}$, $\mathbf{v}=v_{1},v_{2}$, $\mathbf{w}=(w_{1},w_{2})$ and  
-the second order differential is {\begin{eqnarray*} D^2 J(\mathbf{u})((\mathbf{v}),(\mathbf{w}))  &= & A(E[\mathbf{u}],DE[\mathbf{u}](\mathbf{v})) A(E[\mathbf{u}],DE[\mathbf{u}](\mathbf{w})) f''(F2(\mathbf{u}))) \\
- & + &  A(DE[\mathbf{u}](\mathbf{v}),DE[\mathbf{u}](\mathbf{w})) f'(F2(\mathbf{u}))) \\ &+&  A(DE[\mathbf{u}],D^{2}E[\mathbf{u}]((\mathbf{v}),(\mathbf{w}))) f'(F2(\mathbf{u}))) \end{eqnarray*}}
+the second order differential is
+ {\begin{eqnarray*}
+ D^2 J(\mathbf{u})((\mathbf{v}),(\mathbf{w}))  &= & A(E[\mathbf{u}],DE[\mathbf{u}](\mathbf{v})) A(E[\mathbf{u}],DE[\mathbf{u}](\mathbf{w})) f''(F2(\mathbf{u}))) \\
+ & + &  A(DE[\mathbf{u}](\mathbf{v}),DE[\mathbf{u}](\mathbf{w})) f'(F2(\mathbf{u}))) \\
+ &+&  A(DE[\mathbf{u}],D^{2}E[\mathbf{u}]((\mathbf{v}),(\mathbf{w}))) f'(F2(\mathbf{u}))) 
+\end{eqnarray*}}
  where $DE$ and $D^{2}E$ are the first and second differential of $E$.
  
  \medskip
  
+
 The Newton Method is
 
 choose $ n=0$,and $u_O,v_O$ the initial displacement 
-\begin{itemize}\item loop: \par\item  \hspace{1cm}    find $(du,dv)$ :  solution of 
+\begin{itemize}
+\item loop: \par
+\item  \hspace{1cm}    find $(du,dv)$ :  solution of 
 $$ D^2J(u_n,v_n)((w,s),(du,dv)) =  DJ(u_n,v_n)(w,s) , \quad \forall w,s $$
-\item  \hspace{1cm}      $un =un - du,\quad vn =vn - dv$ \item  \hspace{1cm}      until $(du,dv)$ small is enough
+\item  \hspace{1cm}      $un =un - du,\quad vn =vn - dv$ 
+\item  \hspace{1cm}      until $(du,dv)$ small is enough
 \end{itemize}
 
 \color{black}The way to implement this algorithme in \freefempp is
@@ -4149,7 +4227,7 @@ Vhother U=0;
 
 \eFF
 
-\include{docGUI}
+\include{docFFGUI}
 
 \section{ Mesh Files}
  \def\Chars#1{{\tt (C*)}  #1}
