@@ -28,7 +28,7 @@ FreeFem++.app/Contents/Resources/script
 changelog:
 	cvs2cl -w -S --fsf
 
-doc:
+documentation:
 	cd DOC && make doc
 
 clean-local::
@@ -62,9 +62,9 @@ clean-local::
 # Native MacOS packaging
 # ----------------------
 
-FreeFem++v$(VERSION)_MacOS:
+FreeFem++v$(VERSION)_MacOS:documentation
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen
-	/Developer/Tools/CpMac FreeFem++ $@ 
+	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++ 
 	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
 	cp  examples++/*.edp   $@/examples++
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
@@ -72,7 +72,7 @@ FreeFem++v$(VERSION)_MacOS:
 	-cp  examples++-bug/*.edp   $@/examples++-bug
 	cp  DOC/manual.ps.gz DOC/manual.pdf $@
 
-FreeFem++v$(VERSION)_MacOsX:
+FreeFem++v$(VERSION)_MacOsX: all documentation
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
 	cp COPYRIGHT HISTORY README BUGS TODO INSTALL-MacOSX  $@
 	cp  examples++/*.edp   $@/examples++
@@ -81,6 +81,7 @@ FreeFem++v$(VERSION)_MacOsX:
 	-cp  examples++-bug/*.edp   $@/examples++-bug
 	cp  DOC/manual.ps.gz DOC/manual.pdf $@
 	cp -r FreeFem++.app FreeFem++v$(VERSION)_MacOsX/FreeFem++.app
+	cp src/agl/ FreeFem++-agl FreeFem++v$(VERSION)_MacOsX/FreeFem++.app/Contents/MacOS/FreeFem++
 	cp script/FreeFem++-CoCoa $@
 
 FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
