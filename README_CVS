@@ -11,7 +11,10 @@ To download a working copy from the CVS repository:
 > export CVSROOT=:ext:<username>@hydre.ann.jussieu.fr:/home/lehyaric/FreeFem++-cvs
 > export CVS_RSH=ssh
 > cvs checkout freefem++
-
+To update you freefem++ tree
+> cvs update 
+To update if new directory is created 
+> cvs update -d
 (this produces a directory named "freefem++" containing the most
 recent version of all the source files)
 
