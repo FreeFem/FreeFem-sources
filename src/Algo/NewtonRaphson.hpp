@@ -38,10 +38,10 @@ template <class LS>
 Newt<LS>::Newt(LS* p, int it, Real eps, int verb) 
   :Optima<LS>(verb)
 {
-  ls=p;
-  iterMax 	= 	it;
-  tol 		= 	eps;
-  iterNum 	= 	0;
+  this->ls=p;
+  this->iterMax 	= 	it;
+  this->tol 		= 	eps;
+  this->iterNum 	= 	0;
 }
 
 // Nécessite pour la classe MAT:
@@ -49,12 +49,12 @@ Newt<LS>::Newt(LS* p, int it, Real eps, int verb)
 template <class LS>
 typename Newt<LS>::Param Newt<LS>::optimizer( Param& model0)
 {
-  //reset the residue history for every new optimizer
-  iterNum = 0;
-  if (residue != NULL)
+  //reset the this->residue history for every new optimizer
+  this->iterNum = 0;
+  if (this->residue != NULL)
 	{
-      delete residue;
-      residue = new mlist;
+      delete this->residue;
+      this->residue = new mlist;
 	}
   
   // Initial settings for some parameters
@@ -63,19 +63,19 @@ typename Newt<LS>::Param Newt<LS>::optimizer( Param& model0)
   double lambda = 0.025;
   double descent = 0.;
 
-  g0= *(ls->gradient(model0));
+  g0= *(this->ls->gradient(model0));
   
   // check the gradient, in case the initial model is the optimal
   double err = (Real)sqrt((g0,g0));
   
-  if (isVerbose) cerr << "Initial residue : " << err << endl;
+  if (this->isVerbose) cerr << "Initial this->residue : " << err << endl;
 
-  appendResidue(err);	// residual
+  this->appendResidue(err);	// residual
 
-  if (err < tol)
+  if (err < this->tol)
 	{
-      if (isVerbose) cerr << "Initial guess was great! \n";
-      isSuccess = 1;
+      if (this->isVerbose) cerr << "Initial guess was great! \n";
+      this->isSuccess = 1;
       return model0;
 	}
    
@@ -83,29 +83,29 @@ typename Newt<LS>::Param Newt<LS>::optimizer( Param& model0)
   Vect s(n);
   Param model1(model0);
   
-  while (finalResidue() > tol && iterNum < iterMax)
+  while (this->finalResidue() > this->tol && this->iterNum < this->iterMax)
 	{
 	  //searching directions
-	 // s = g0/(*ls->hessian(model0)); //on réinitialise LU a chaque fois
-	  ls->hessian(model0)->Solve(s,g0);
+	 // s = g0/(*this->ls->hessian(model0)); //on réinitialise LU a chaque fois
+	  this->ls->hessian(model0)->Solve(s,g0);
 	  s = -1.*s;
 
 	  descent = (s,g0);
 	  // Cubic Line Search
-	  model1 = ls->search(model0, s, descent, lambda);
-	  g1 = *(ls->gradient(model1));
+	  model1 = this->ls->search(model0, s, descent, lambda);
+	  g1 = *(this->ls->gradient(model1));
 	  err = (Real)sqrt((g1,g1));
 	  
-	  if (isVerbose)
-		cerr << "Iteration (" << iterNum << ") : "<<"current value of the objective function: "
-			 <<ls->currentValue() << "\t current residue: "<< err << endl;
+	  if (this->isVerbose)
+		cerr << "Iteration (" << this->iterNum << ") : "<<"current value of the objective function: "
+			 <<this->ls->currentValue() << "\t current this->residue: "<< err << endl;
 	  
-	  appendResidue(err);	// residual
+	  this->appendResidue(err);	// residual
 	  
 	  g0=g1;
 	  model0=model1;
 	  
-	  iterNum ++;
+	  this->iterNum ++;
 	}
   
   return(model1);

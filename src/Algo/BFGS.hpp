@@ -80,12 +80,12 @@ typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0)
   
   if (this->isVerbose) cerr << "Initial residue : " << err << endl;
 
-  appendResidue(err);	// residual
+  this->appendResidue(err);	// residual
 
-  if (err < tol)
+  if (err < this->tol)
 	{
       if (this->isVerbose) cerr << "Initial guess was great! \n";
-      isSuccess = 1;
+      this->isSuccess = 1;
       return model0;
 	}
    
@@ -104,21 +104,21 @@ typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0)
    assert(s.max() <1e100);
    
    //cubic line search for a new model
-   model1 = ls->search(model0, s, descent, lambda);
-   g1 = *(ls->gradient(model1));
+   model1 = this->ls->search(model0, s, descent, lambda);
+   g1 = *(this->ls->gradient(model1));
    err = (Real)sqrt((g1,g1));
-   if (isVerbose)
-	 cerr << "Iteration (" << iterNum << ") : "
+   if (this->isVerbose)
+	 cerr << "Iteration (" << this->iterNum << ") : "
 		  <<"current value of the objective function: "
-		  <<ls->currentValue() << "\t current residue: "<< err << endl;
+		  <<this->ls->currentValue() << "\t current residue: "<< err << endl;
 
-   appendResidue(err);	// residual
-   iterNum ++;
+   this->appendResidue(err);	// residual
+   this->iterNum ++;
 
    Mat B(n,n);
 
    
-   while (finalResidue() > tol && iterNum < iterMax)
+   while (this->finalResidue() > this->tol && this->iterNum < this->iterMax)
    {
 	 gamma = g1 - g0;
 	 delta = model1 - model0;
@@ -162,16 +162,16 @@ typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0)
 	 s=Real();
 	 s -= H*g0;
 	 descent = (s,g0);
-	 model1 = ls->search(model0, s, descent, lambda);
-	 g1 = *(ls->gradient(model1));
+	 model1 = this->ls->search(model0, s, descent, lambda);
+	 g1 = *(this->ls->gradient(model1));
 	 err = (Real)sqrt((g1,g1));
 	 
-	 if (isVerbose)
-	   cerr << "Iteration (" << iterNum << ") : "<<"current value of the objective function: "
-			<<ls->currentValue() << "\t current residue: "<< err << endl;
+	 if (this->isVerbose)
+	   cerr << "Iteration (" << this->iterNum << ") : "<<"current value of the objective function: "
+			<<this->ls->currentValue() << "\t current residue: "<< err << endl;
 
-	 appendResidue(err);	// residual
-	 iterNum ++;
+	 this->appendResidue(err);	// residual
+	 this->iterNum ++;
    }
    
    return(model1);

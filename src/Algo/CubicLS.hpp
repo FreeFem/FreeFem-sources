@@ -67,13 +67,13 @@ public:
 template <class LS>
 CubicLineSearch<LS>::CubicLineSearch(NRJ* f, int it) 
 : LS(f)
-{	iterMax	=	it;
+{	this->iterMax	=	it;
 }
 
 template <class LS>
 CubicLineSearch<LS>::CubicLineSearch(NRJ* f, int it, Vect* interval)
 : LS(f,interval)
-{	iterMax	=	it;
+{	this->iterMax	=	it;
 }
 
 template <class LS>
@@ -95,29 +95,29 @@ typename CubicLineSearch<LS>::Param CubicLineSearch<LS>::search(const Param& cur
   Param new_solution(current_solution);
   cout << " search " << p.max() << endl;
   assert(p.max() <1e100);
-  old_m = nrj->getVal(current_solution); // Evaluation at the current solution
-  iterNum = 0; iterNum++;				// iteration counter
+  old_m = this->nrj->getVal(current_solution); // Evaluation at the current solution
+  this->iterNum = 0; this->iterNum++;				// iteration counter
   alpha = 1.;					// updating step
 
   new_solution = update(current_solution,1,alpha,p);	// updating
-  new_m = nrj->getVal(new_solution);     	// Evaluation at the 
+  new_m = this->nrj->getVal(new_solution);     	// Evaluation at the 
 							// new solution
-  iterNum++;
+  this->iterNum++;
 
   // Implementing Goldstein's test for alpha too small
-  while (new_m < old_m + (1. - lambda)*alpha*slope && iterNum< iterMax)
+  while (new_m < old_m + (1. - lambda)*alpha*slope && this->iterNum< this->iterMax)
 	{
 	  alpha *= 3;
 	  new_solution = update(current_solution,1, alpha, p);
-	  new_m = nrj->getVal(new_solution);
-	  iterNum++;
+	  new_m = this->nrj->getVal(new_solution);
+	  this->iterNum++;
 	}
-  if (iterNum == iterMax)
+  if (this->iterNum == this->iterMax)
 	cerr << "Alpha over flowed! \n";
   
   // Armijo's test for alpha too large
   alpha_prev = alpha; // H.L. Deng, 6/13/95
-  while (new_m > old_m + lambda*alpha*slope && iterNum < iterMax)
+  while (new_m > old_m + lambda*alpha*slope && this->iterNum < this->iterMax)
 	{
 	  alpha2 = alpha * alpha;
 	  f1 = new_m - old_m - slope * alpha;
@@ -161,16 +161,16 @@ typename CubicLineSearch<LS>::Param CubicLineSearch<LS>::search(const Param& cur
 		alpha = alpha_tmp;
 	  
 	  new_solution = update(current_solution,1, alpha, p);
-	  new_m = nrj->getVal(new_solution);
-	  iterNum++;
+	  new_m = this->nrj->getVal(new_solution);
+	  this->iterNum++;
 	}
-  if (iterNum == iterMax){
+  if (this->iterNum == this->iterMax){
 	cerr << "Alpha under flowed! \n";
-	cerr << iterMax;
+	cerr << this->iterMax;
   }
   
-  value = new_m;
-  appendSearchNumber();
+  this->value = new_m;
+  this->appendSearchNumber();
   return (new_solution);				// # of iterations
 }
 

@@ -50,8 +50,8 @@ class ARrcNonSymGenEig:
 
  // c.1) Functions that provides access to internal variables' values.
 
-  FLOAT GetShiftImag() { return sigmaI; }
-  // Returns the imaginary part of the shift (when in shift and invert mode).
+  FLOAT GetShiftImag() { return this->sigmaI; }
+  // Returns the imaginary part of the shift (when in shift and invert this->mode).
 
 
  // c.2) Functions that allow changes in problem parameters.
@@ -60,14 +60,14 @@ class ARrcNonSymGenEig:
   // Changes "part" to 'R' (real) or 'I' (imaginary).
 
   virtual void ChangeShift(FLOAT sigmaRp, FLOAT sigmaIp = 0.0);
-  // Turns the problem to shift-and-invert mode
+  // Turns the problem to shift-and-invert this->mode
   // with shift defined by sigmaRp and sigmaIp.
 
   virtual void SetShiftInvertMode(FLOAT sigmaRp);
-  // Turns the problem to real shift-and-invert mode with sigmaRp as shift.
+  // Turns the problem to real shift-and-invert this->mode with sigmaRp as shift.
 
   virtual void SetComplexShiftMode(char partp, FLOAT sigmaRp, FLOAT sigmaIp);
-  // Turns the problem to complex shift-and-invert mode with shift
+  // Turns the problem to complex shift-and-invert this->mode with shift
   // defined by sigmaRp and sigmaIp.
 
 
@@ -79,18 +79,18 @@ class ARrcNonSymGenEig:
   ARrcNonSymGenEig(int np, int nevp, char* whichp = "LM",
                    int ncvp = 0, FLOAT tolp = 0.0, int maxitp = 0,
                    FLOAT* residp = NULL, bool ishiftp = true);
-  // Long constructor (regular mode).
+  // Long constructor (regular this->mode).
 
   ARrcNonSymGenEig(int np, int nevp, FLOAT sigmap,
                    char* whichp = "LM", int ncvp = 0, FLOAT tolp = 0.0,
                    int maxitp = 0, FLOAT* residp = NULL, bool ishiftp = true);
-  // Long constructor (real shift and invert mode).
+  // Long constructor (real shift and invert this->mode).
 
   ARrcNonSymGenEig(int np, int nevp,
                    char partp, FLOAT sigmaRp, FLOAT sigmaIp,
                    char* whichp = "LM", int ncvp = 0, FLOAT tolp = 0.0,
                    int maxitp = 0, FLOAT* residp = NULL, bool ishiftp = true);
-  // Long constructor (complex shift and invert mode).
+  // Long constructor (complex shift and invert this->mode).
 
   ARrcNonSymGenEig(const ARrcNonSymGenEig& other) { Copy(other); }
   // Copy constructor.
@@ -138,13 +138,13 @@ inline void ARrcNonSymGenEig<FLOAT>::ChangePart(char partp)
 
   part = CheckPart(partp);
   if (part == 'R') {
-    mode    = 3;    // Real part.
+    this->mode    = 3;    // Real part.
   }
   else {
-    mode    = 4;    // Imaginary part.
+    this->mode    = 4;    // Imaginary part.
   }
-  iparam[7] = mode;
-  Restart();
+  this->iparam[7] = this->mode;
+  this->Restart();
 
 } // ChangePart.
 
@@ -154,8 +154,8 @@ inline void ARrcNonSymGenEig<FLOAT>::
 ChangeShift(FLOAT sigmaRp, FLOAT sigmaIp)
 {
 
-  sigmaR    = sigmaRp;
-  sigmaI    = sigmaIp;
+  this->sigmaR    = sigmaRp;
+  this->sigmaI    = sigmaIp;
   ChangePart(part);
 
 } // ChangeShift.
@@ -189,11 +189,11 @@ ARrcNonSymGenEig(int np, int nevp, char* whichp, int ncvp, FLOAT tolp,
                  int maxitp, FLOAT* residp, bool ishiftp)
 {
 
-  part = 'R';                // Considering mode = 3 in ChangeShift.
-  NoShift();
+  part = 'R';                // Considering this->mode = 3 in ChangeShift.
+  this->NoShift();
   DefineParameters(np, nevp, whichp, ncvp, tolp, maxitp, residp, ishiftp);
 
-} // Long constructor (regular mode).
+} // Long constructor (regular this->mode).
 
 
 template<class FLOAT>
@@ -206,7 +206,7 @@ ARrcNonSymGenEig(int np, int nevp, FLOAT sigmap, char* whichp, int ncvp,
   DefineParameters(np, nevp, whichp, ncvp, tolp, maxitp, residp, ishiftp);
 
 
-} // Long constructor (real shift and invert mode).
+} // Long constructor (real shift and invert this->mode).
 
 
 template<class FLOAT>
@@ -219,7 +219,7 @@ ARrcNonSymGenEig(int np, int nevp, char partp, FLOAT sigmaRp,
   SetComplexShiftMode(partp, sigmaRp, sigmaIp);
   DefineParameters(np, nevp, whichp, ncvp, tolp, maxitp, residp, ishiftp);
 
-} // Long constructor (shift and invert mode).
+} // Long constructor (shift and invert this->mode).
 
 
 template<class FLOAT>
@@ -228,7 +228,7 @@ operator=(const ARrcNonSymGenEig<FLOAT>& other)
 {
 
   if (this != &other) { // Stroustrup suggestion.
-    ClearMem();
+    this->ClearMem();
     Copy(other);
   }
   return *this;

@@ -35,11 +35,11 @@ class ARrcNonSymStdEig: public virtual ARrcStdEig<FLOAT, FLOAT> {
 
  // a.1) Memory control functions.
 
-  int ValSize() { return nev+1; }
+  int ValSize() { return this->nev+1; }
   // Provides the size of array EigVal.
 
   void ValAllocate();
-  // Creates arrays EigValR and EigValI.
+  // Creates arrays this->EigValR and this->EigValI.
 
   void WorkspaceAllocate();
   // Allocates workspace for nonsymmetric problems.
@@ -57,13 +57,13 @@ class ARrcNonSymStdEig: public virtual ARrcStdEig<FLOAT, FLOAT> {
  // a.3) Functions that check user defined parameters.
 
   int CheckNev(int nevp);
-  // Does Range checking on nev.
+  // Does Range checking on this->nev.
 
 
  // a.4) Auxiliary functions required when using STL vector class.
 
   bool ConjEigVec(int i);
-  // Indicates if EigVec[i] is the second eigenvector in 
+  // Indicates if this->EigVec[i] is the second eigenvector in 
   // a complex conjugate pair.
 
 #ifdef ARCOMP_H
@@ -106,7 +106,7 @@ class ARrcNonSymStdEig: public virtual ARrcStdEig<FLOAT, FLOAT> {
  // b.2) Functions that permit step by step execution of ARPACK.
 
   FLOAT* GetVectorImag();
-  // When ido = 3, this function indicates where the imaginary part
+  // When this->ido = 3, this function indicates where the imaginary part
   // of the eigenvalues of the current Hessenberg matrix are located.
 
 
@@ -225,10 +225,10 @@ template<class FLOAT>
 inline void ARrcNonSymStdEig<FLOAT>::ValAllocate()
 {
 
-  if (EigValR == NULL) {
-    EigValR = new FLOAT[ValSize()];
-    EigValI = new FLOAT[ValSize()];
-    newVal = true;
+  if (this->EigValR == NULL) {
+    this->EigValR = new FLOAT[this->ValSize()];
+    this->EigValI = new FLOAT[this->ValSize()];
+    this->newVal = true;
   }
 
 } // ValAllocate.
@@ -238,11 +238,11 @@ template<class FLOAT>
 inline void ARrcNonSymStdEig<FLOAT>::WorkspaceAllocate()
 {
 
-  lworkl  = 3*ncv*(ncv+2);
-  lworkv  = 3*ncv;
-  lrwork  = 0;
-  workl   = new FLOAT[lworkl+1];
-  workv   = new FLOAT[lworkv+1];
+  this->lworkl  = 3*this->ncv*(this->ncv+2);
+  this->lworkv  = 3*this->ncv;
+  this->lrwork  = 0;
+  this->workl   = new FLOAT[this->lworkl+1];
+  this->workv   = new FLOAT[this->lworkv+1];
 
 } // WorkspaceAllocate.
 
@@ -251,8 +251,8 @@ template<class FLOAT>
 inline void ARrcNonSymStdEig<FLOAT>::Aupp()
 {
 
-  naupp(ido, bmat, n, which, nev, tol, resid, ncv, V, n,
-        iparam, ipntr, workd, workl, lworkl, info);
+  naupp(this->ido, this->bmat, this->n, this->which, this->nev, this->tol, this->resid, this->ncv, this->V, this->n,
+        this->iparam, this->ipntr, this->workd, this->workl, this->lworkl, this->info);
 
 } // Aupp.
 
@@ -261,9 +261,9 @@ template<class FLOAT>
 inline void ARrcNonSymStdEig<FLOAT>::Eupp()
 {
 
-  neupp(rvec, HowMny, EigValR, EigValI, EigVec, n, sigmaR,
-        sigmaI, workv, bmat, n, which, nev, tol, resid, ncv, V,
-        n, iparam, ipntr, workd, workl, lworkl, info);
+  neupp(this->rvec, this->HowMny, this->EigValR, this->EigValI, this->EigVec, this->n, this->sigmaR,
+        this->sigmaI, this->workv, this->bmat, this->n, this->which, this->nev, this->tol, this->resid, this->ncv, this->V,
+        this->n, this->iparam, this->ipntr, this->workd, this->workl, this->lworkl, this->info);
 
 } // Eupp.
 
@@ -272,7 +272,7 @@ template<class FLOAT>
 inline int ARrcNonSymStdEig<FLOAT>::CheckNev(int nevp)
 {
 
-  if ((nevp<=1)||(nevp>=(n-1))) { // nev must satisfy 1 < nev < n-1.
+  if ((nevp<=1)||(nevp>=(this->n-1))) { // this->nev must satisfy 1 < this->nev < this->n-1.
     throw ArpackError(ArpackError::NEV_OUT_OF_BOUNDS);
   }
   return nevp;
@@ -284,9 +284,9 @@ template<class FLOAT>
 bool ARrcNonSymStdEig<FLOAT>::ConjEigVec(int i)
 {
 
-  if (EigValI[i] == (FLOAT)0.0) return false;
+  if (this->EigValI[i] == (FLOAT)0.0) return false;
   int j = i-1;
-  while ((j >= 0) && (EigValI[j] != (FLOAT)0.0)) j--;
+  while ((j >= 0) && (this->EigValI[j] != (FLOAT)0.0)) j--;
   if (((i-j)%2) == 0) {
     return true;
   }
@@ -394,10 +394,10 @@ template<class FLOAT>
 FLOAT* ARrcNonSymStdEig<FLOAT>::GetVectorImag()
 {
 
-  if (ido != 3) {
+  if (this->ido != 3) {
     throw ArpackError(ArpackError::CANNOT_GET_VECTOR, "GetVectorImag");
   }
-  return &workl[ipntr[6]];
+  return &this->workl[this->ipntr[6]];
 
 } // GetVectorImag.
 
@@ -407,14 +407,14 @@ int ARrcNonSymStdEig<FLOAT>::
 Eigenvalues(FLOAT* &EigValRp, FLOAT* &EigValIp, bool ivec, bool ischur)
 {
 
-  if (ValuesOK) {                                 // Eigenvalues are available.
+  if (this->ValuesOK) {                                 // Eigenvalues are available.
     if ((EigValRp == NULL)&&(EigValIp == NULL)) { // Moving eigenvalues.
-      EigValRp = EigValR;
-      EigValIp = EigValI;
-      EigValR  = NULL;
-      EigValI  = NULL;
-      newVal   = false;
-      ValuesOK = false;
+      EigValRp = this->EigValR;
+      EigValIp = this->EigValI;
+      this->EigValR  = NULL;
+      this->EigValI  = NULL;
+      this->newVal   = false;
+      this->ValuesOK = false;
     }
     else {                                        // Copying eigenvalues.
       try {
@@ -422,33 +422,33 @@ Eigenvalues(FLOAT* &EigValRp, FLOAT* &EigValIp, bool ivec, bool ischur)
         if (EigValIp == NULL) EigValIp = new FLOAT[ValSize()];
       }
       catch (ArpackError) { return 0; }
-      copy(nconv,EigValR,1,EigValRp,1);
-      copy(nconv,EigValI,1,EigValIp,1);
+      copy(this->nconv,this->EigValR,1,EigValRp,1);
+      copy(this->nconv,this->EigValI,1,EigValIp,1);
     }
   }
   else {
-    if (newVal) {
-      delete[] EigValR;
-      delete[] EigValI;
-      newVal = false;
+    if (this->newVal) {
+      delete[] this->EigValR;
+      delete[] this->EigValI;
+      this->newVal = false;
     }
     try {
       if (EigValRp == NULL) EigValRp = new FLOAT[ValSize()];
       if (EigValIp == NULL) EigValIp = new FLOAT[ValSize()];
     }
     catch (ArpackError) { return 0; }
-    EigValR = EigValRp;
-    EigValI = EigValIp;
+    this->EigValR = EigValRp;
+    this->EigValI = EigValIp;
     if (ivec) {                              // Finding eigenvalues and vectors.
-      nconv = FindEigenvectors(ischur);
+      this->nconv = this->FindEigenvectors(ischur);
     }
     else {                                   // Finding eigenvalues only.
-      nconv = FindEigenvalues();
+      this->nconv = this->FindEigenvalues();
     }
-    EigValR = NULL;
-    EigValI = NULL;
+    this->EigValR = NULL;
+    this->EigValI = NULL;
   }
-  return nconv;
+  return this->nconv;
 
 } // Eigenvalues(EigValRp, EigValIp, ivec, ischur).
 
@@ -459,35 +459,35 @@ EigenValVectors(FLOAT* &EigVecp, FLOAT* &EigValRp,
                 FLOAT* &EigValIp, bool ischur)
 {
 
-  if (ValuesOK) {               // Eigenvalues are already available .
-    nconv = Eigenvalues(EigValRp, EigValIp, false);
-    nconv = Eigenvectors(EigVecp, ischur);
+  if (this->ValuesOK) {               // Eigenvalues are already available .
+    this->nconv = Eigenvalues(EigValRp, EigValIp, false);
+    this->nconv = Eigenvectors(EigVecp, ischur);
   }
   else {                        // Eigenvalues ans vectors are not available.
-    if (newVec) {
-      delete[] EigVec;
-      newVec = false;
+    if (this->newVec) {
+      delete[] this->EigVec;
+      this->newVec = false;
     }
-    if (newVal) {
-      delete[] EigValR;
-      delete[] EigValI;
-      newVal = false;
+    if (this->newVal) {
+      delete[] this->EigValR;
+      delete[] this->EigValI;
+      this->newVal = false;
     }
     try {
-      if (EigVecp  == NULL) EigVecp  = new FLOAT[ValSize()*n];
+      if (EigVecp  == NULL) EigVecp  = new FLOAT[ValSize()*this->n];
       if (EigValRp == NULL) EigValRp = new FLOAT[ValSize()];
       if (EigValIp == NULL) EigValIp = new FLOAT[ValSize()];
     }
     catch (ArpackError) { return 0; }
-    EigVec  = EigVecp;
-    EigValR = EigValRp;
-    EigValI = EigValIp;
-    nconv   = FindEigenvectors(ischur);
-    EigVec  = NULL;
-    EigValR = NULL;
-    EigValI = NULL;
+    this->EigVec  = EigVecp;
+    this->EigValR = EigValRp;
+    this->EigValI = EigValIp;
+    this->nconv   = this->FindEigenvectors(ischur);
+    this->EigVec  = NULL;
+    this->EigValR = NULL;
+    this->EigValI = NULL;
   }
-  return nconv;
+  return this->nconv;
 
 } // EigenValVectors(EigVecp, EigValRp, EigValIp, ischur).
 
@@ -499,13 +499,13 @@ inline arcomplex<FLOAT> ARrcNonSymStdEig<FLOAT>::Eigenvalue(int i)
 
   // Returning i-eth eigenvalue.
 
-  if (!ValuesOK) {
+  if (!this->ValuesOK) {
     throw ArpackError(ArpackError::VALUES_NOT_OK, "Eigenvalue(i)");
   }
-  else if ((i>=nconv)||(i<0)) {
+  else if ((i>=this->nconv)||(i<0)) {
     throw ArpackError(ArpackError::RANGE_ERROR, "Eigenvalue(i)");
   }
-  return arcomplex<FLOAT>(EigValR[i],EigValI[i]);
+  return arcomplex<FLOAT>(this->EigValR[i],this->EigValI[i]);
 
 } // Eigenvalue(i).
 #endif // ARCOMP_H
@@ -517,13 +517,13 @@ inline FLOAT ARrcNonSymStdEig<FLOAT>::EigenvalueReal(int i)
 
   // Returning the real part of i-eth eigenvalue.
 
-  if (!ValuesOK) {
+  if (!this->ValuesOK) {
     throw ArpackError(ArpackError::VALUES_NOT_OK, "EigenvalueReal(i)");
   }
-  else if ((i>=nconv)||(i<0)) {
+  else if ((i>=this->nconv)||(i<0)) {
     throw ArpackError(ArpackError::RANGE_ERROR, "EigenvalueReal(i)");
   }
-  return EigValR[i];
+  return this->EigValR[i];
 
 } // EigenvalueReal(i).
 
@@ -534,13 +534,13 @@ inline FLOAT ARrcNonSymStdEig<FLOAT>::EigenvalueImag(int i)
 
   // Returning the imaginary part of i-eth eigenvalue.
 
-  if (!ValuesOK) {
+  if (!this->ValuesOK) {
     throw ArpackError(ArpackError::VALUES_NOT_OK, "EigenvalueImag(i)");
   }
-  else if ((i>=nconv)||(i<0)) {
+  else if ((i>=this->nconv)||(i<0)) {
     throw ArpackError(ArpackError::RANGE_ERROR, "EigenvalueImag(i)");
   }
-  return EigValI[i];
+  return this->EigValI[i];
 
 } // EigenvalueImag(i).
 
@@ -553,21 +553,21 @@ Eigenvector(int i, int j)
 
   // Returning element j of i-eth eigenvector.
 
-  if ((!VectorsOK)||(!ValuesOK)) {
+  if ((!this->VectorsOK)||(!this->ValuesOK)) {
     throw ArpackError(ArpackError::VECTORS_NOT_OK, "Eigenvector(i,j)");
   }
-  else if ((i>=nconv)||(i<0)||(j>=n)||(j<0)) {
+  else if ((i>=this->nconv)||(i<0)||(j>=this->n)||(j<0)) {
     throw ArpackError(ArpackError::RANGE_ERROR, "Eigenvector(i,j)");
   }
-  if (EigValI[i]==(FLOAT)0.0) {   // Real eigenvalue.
-    return arcomplex<FLOAT>(EigVec[i*n+j],(FLOAT)0.0);
+  if (this->EigValI[i]==(FLOAT)0.0) {   // Real eigenvalue.
+    return arcomplex<FLOAT>(this->EigVec[i*this->n+j],(FLOAT)0.0);
   }
   else {                          // Complex eigenvalue.
-    if (EigValI[i]>(FLOAT)0.0) {  // with positive imaginary part.
-      return arcomplex<FLOAT>(EigVec[i*n+j], EigVec[(i+1)*n+j]);
+    if (this->EigValI[i]>(FLOAT)0.0) {  // with positive imaginary part.
+      return arcomplex<FLOAT>(this->EigVec[i*this->n+j], this->EigVec[(i+1)*this->n+j]);
     }
     else {                        // with negative imaginary part.
-      return arcomplex<FLOAT>(EigVec[(i-1)*n+j], -EigVec[i*n+j]);
+      return arcomplex<FLOAT>(this->EigVec[(i-1)*this->n+j], -this->EigVec[i*this->n+j]);
     }
   }
 
@@ -581,13 +581,13 @@ inline FLOAT ARrcNonSymStdEig<FLOAT>::EigenvectorReal(int i, int j)
 
   // Returning the real part of element j of i-eth eigenvector.
 
-  if (!VectorsOK) {
+  if (!this->VectorsOK) {
     throw ArpackError(ArpackError::VECTORS_NOT_OK, "EigenvectorReal(i,j)");
   }
-  else if ((i>=nconv)||(i<0)||(j>=n)||(j<0)) {
+  else if ((i>=this->nconv)||(i<0)||(j>=this->n)||(j<0)) {
     throw ArpackError(ArpackError::RANGE_ERROR, "EigenvectorReal(i,j)");
   }
-  return EigVec[i*n+j];
+  return this->EigVec[i*this->n+j];
 
 } // EigenvectorReal(i,j).
 
@@ -598,21 +598,21 @@ inline FLOAT ARrcNonSymStdEig<FLOAT>::EigenvectorImag(int i, int j)
 
   // Returning the imaginary part of element j of i-eth eigenvector.
 
-  if ((!VectorsOK)||(!ValuesOK)) {
+  if ((!this->VectorsOK)||(!this->ValuesOK)) {
     throw ArpackError(ArpackError::VECTORS_NOT_OK, "EigenvectorImag(i,j)");
   }
-  else if ((i>=nconv)||(i<0)||(j>=n)||(j<0)) {
+  else if ((i>=this->nconv)||(i<0)||(j>=this->n)||(j<0)) {
     throw ArpackError(ArpackError::RANGE_ERROR, "EigenvectorImag(i,j)");
   }
-  if (EigValI[i]==(FLOAT)0.0) {   // Real eigenvalue.
+  if (this->EigValI[i]==(FLOAT)0.0) {   // Real eigenvalue.
     return (FLOAT)0.0;
   }
   else {                          // Complex eigenvalue.
-    if (EigValI[i]>(FLOAT)0.0) {  // with positive imaginary part.
-      return EigVec[(i+1)*n+j];
+    if (this->EigValI[i]>(FLOAT)0.0) {  // with positive imaginary part.
+      return this->EigVec[(i+1)*this->n+j];
     }
     else {                        // with negative imaginary part.
-      return -EigVec[i*n+j];
+      return -this->EigVec[i*this->n+j];
     }
   }
 
@@ -623,10 +623,10 @@ template<class FLOAT>
 inline FLOAT* ARrcNonSymStdEig<FLOAT>::RawEigenvaluesImag()
 {
 
-  if (!ValuesOK) {
+  if (!this->ValuesOK) {
     throw ArpackError(ArpackError::VALUES_NOT_OK, "RawEigenvaluesImag");
   }
-  return EigValI;
+  return this->EigValI;
 
 } // RawEigenvaluesImag.
 
@@ -658,7 +658,7 @@ StlEigenvalues(bool ivec, bool ischur)
 
   ValRPtr = StlEigValR->begin();
   ValIPtr = StlEigValI->begin();
-  nconv = Eigenvalues(ValRPtr, ValIPtr, ivec, ischur);
+  this->nconv = Eigenvalues(ValRPtr, ValIPtr, ivec, ischur);
   vector<arcomplex<FLOAT> >* Val = GenComplex(StlEigValR, StlEigValI);
 
   // Deleting temporary variables.
@@ -680,11 +680,11 @@ inline vector<FLOAT>* ARrcNonSymStdEig<FLOAT>::StlEigenvaluesReal()
 
   vector<FLOAT>* StlEigValR;
   
-  if (!ValuesOK) {
+  if (!this->ValuesOK) {
     throw ArpackError(ArpackError::VALUES_NOT_OK, "StlEigenvaluesReal");
   }
   try {
-    StlEigValR = new vector<FLOAT>(EigValR, &EigValR[ValSize()]);
+    StlEigValR = new vector<FLOAT>(this->EigValR, &this->EigValR[ValSize()]);
   }
   catch (ArpackError) { return NULL; }
   return StlEigValR;
@@ -700,11 +700,11 @@ inline vector<FLOAT>* ARrcNonSymStdEig<FLOAT>::StlEigenvaluesImag()
 
   vector<FLOAT>* StlEigValI;
 
-  if (!ValuesOK) {
+  if (!this->ValuesOK) {
     throw ArpackError(ArpackError::VALUES_NOT_OK, "StlEigenvaluesImag");
   }
   try {
-    StlEigValI = new vector<FLOAT>(EigValI, &EigValI[ValSize()]);
+    StlEigValI = new vector<FLOAT>(this->EigValI, &this->EigValI[ValSize()]);
   }
   catch (ArpackError) { return NULL; }
   return StlEigValI;
@@ -720,20 +720,20 @@ StlEigenvector(int i)
 
   // Returning the i-th eigenvector in a STL vector.
 
-  if (!VectorsOK) {
+  if (!this->VectorsOK) {
     throw ArpackError(ArpackError::VECTORS_NOT_OK, "StlEigenvector(i)");
   }
   else if ((i>=ValSize())||(i<0)) {
     throw ArpackError(ArpackError::RANGE_ERROR, "StlEigenvector(i)");
   }
-  if (EigValI[i] == (FLOAT)0.0) { // Real eigenvector.
-    return GenComplex(n, &EigVec[i*n]);
+  if (this->EigValI[i] == (FLOAT)0.0) { // Real eigenvector.
+    return GenComplex(this->n, &this->EigVec[i*this->n]);
   }
   else if (!ConjEigVec(i)) {      // First eigenvector in a conjugate pair.
-    return GenComplex(n, &EigVec[i*n], &EigVec[(i+1)*n]);
+    return GenComplex(this->n, &this->EigVec[i*this->n], &this->EigVec[(i+1)*this->n]);
   }
   else {                          // Second eigenvector in a conjugate pair.
-    return GenComplex(n, &EigVec[(i-1)*n], &EigVec[i*n], true);
+    return GenComplex(this->n, &this->EigVec[(i-1)*this->n], &this->EigVec[i*this->n], true);
   }
 
 } // StlEigenvector(i).
@@ -748,7 +748,7 @@ inline vector<FLOAT>* ARrcNonSymStdEig<FLOAT>::StlEigenvectorReal(int i)
 
   vector<FLOAT>* Vec;
 
-  if (!VectorsOK) {
+  if (!this->VectorsOK) {
     throw ArpackError(ArpackError::VECTORS_NOT_OK, "StlEigenvectorReal(i)");
   }
   else if ((i>=ValSize())||(i<0)) {
@@ -756,14 +756,14 @@ inline vector<FLOAT>* ARrcNonSymStdEig<FLOAT>::StlEigenvectorReal(int i)
   }
   if (!ConjEigVec(i)) { // Real eigenvector or first in a conj. pair.
     try {
-      Vec = new vector<FLOAT>(&EigVec[i*n], &EigVec[(i+1)*n]);
+      Vec = new vector<FLOAT>(&this->EigVec[i*this->n], &this->EigVec[(i+1)*this->n]);
     }
     catch (ArpackError) { return NULL; }
     return Vec;
   }
   else {                // Second eigenvector in a conjugate pair.
     try {
-      Vec = new vector<FLOAT>(&EigVec[(i-1)*n], &EigVec[i*n]);
+      Vec = new vector<FLOAT>(&this->EigVec[(i-1)*this->n], &this->EigVec[i*this->n]);
     }
     catch (ArpackError) { return NULL; }
     return Vec;
@@ -780,13 +780,13 @@ inline vector<FLOAT>* ARrcNonSymStdEig<FLOAT>::StlEigenvectorImag(int i)
 
   vector<FLOAT>* Vec;
 
-  if (!VectorsOK) {
+  if (!this->VectorsOK) {
     throw ArpackError(ArpackError::VECTORS_NOT_OK, "StlEigenvectorImag(i)");
   }
   else if ((i>=ValSize())||(i<0)) {
     throw ArpackError(ArpackError::RANGE_ERROR, "StlEigenvectorImag(i)");
   }
-  if (EigValI[i] == (FLOAT)0.0) { // Real eigenvector.
+  if (this->EigValI[i] == (FLOAT)0.0) { // Real eigenvector.
     try {
       Vec = new vector<FLOAT>(ValSize(), (FLOAT)0.0);
     }
@@ -795,14 +795,14 @@ inline vector<FLOAT>* ARrcNonSymStdEig<FLOAT>::StlEigenvectorImag(int i)
   }
   else if (!ConjEigVec(i)) {      // First eigenvector in a conjugate pair.
     try {
-      Vec = new vector<FLOAT>(&EigVec[(i+1)*n], &EigVec[(i+2)*n]);
+      Vec = new vector<FLOAT>(&this->EigVec[(i+1)*this->n], &this->EigVec[(i+2)*this->n]);
     }
     catch (ArpackError) { return NULL; }
     return Vec;
   }
   else {                          // Second eigenvector in a conjugate pair.
     try {
-      Vec = new vector<FLOAT>(&EigVec[i*n], &EigVec[(i+1)*n]);
+      Vec = new vector<FLOAT>(&this->EigVec[i*this->n], &this->EigVec[(i+1)*this->n]);
     }
     catch (ArpackError) { return NULL; }
     for (FLOAT* s = Vec->begin(); s != Vec->end(); s++) *s = -(*s);
@@ -821,7 +821,7 @@ ARrcNonSymStdEig(int np, int nevp, char* whichp, int ncvp,
 
 {
 
-  NoShift();
+  this->NoShift();
   DefineParameters(np, nevp, whichp, ncvp, tolp, maxitp, residp, ishiftp);
 
 } // Long constructor (regular mode).
@@ -834,7 +834,7 @@ ARrcNonSymStdEig(int np, int nevp, FLOAT sigmap, char* whichp, int ncvp,
 
 {
 
-  ChangeShift(sigmap);
+  this->ChangeShift(sigmap);
   DefineParameters(np, nevp, whichp, ncvp, tolp, maxitp, residp, ishiftp);
 
 } // Long constructor (shift and invert mode).
@@ -846,7 +846,7 @@ operator=(const ARrcNonSymStdEig<FLOAT>& other)
 {
 
   if (this != &other) { // Stroustrup suggestion.
-    ClearMem();
+    this->ClearMem();
     Copy(other);
   }
   return *this;
