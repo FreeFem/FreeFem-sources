@@ -1,0 +1,73 @@
+//  sparce matrix test  ---
+// example of the new matrix feature in version 1.40
+// -------------------------------------------------
+mesh  TH = square(3,4);
+mesh  th = square(2,3);
+mesh  Th = square(4,4);
+
+
+fespace VH(TH,P1);
+fespace Vh(th,P1);
+fespace Wh(Th,P1);
+
+matrix B= interplotematrix(VH,Vh);  // build interpolation matrix Vh->Vh 
+matrix BB= interplotematrix(Wh,Vh);  // build interpolation matrix
+varf vA(u,v) = int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v))+ int1d(Th)(u*v); 
+matrix A=vA(Wh,Wh);
+Vh ml=0;
+varf vML(u,v) = int2d(th)(1*v);
+ml[]=vML(0,Vh); // build the P1 mass lump of P1
+cout << ml[] << endl;
+matrix ML(ml[]); // matrix diagonal
+cout << "ML="<<ML << endl;
+cout << "B="<<B << endl;
+matrix BML=B*ML;
+matrix tB=B';        // transpose 
+cout << "tB=" << tB << endl;
+matrix MLtB=ML'*B'; // 
+
+cout << "BML="<<BML << endl;
+cout << "MLtB=" << MLtB << endl;
+set(A,solver=UMFPACK); // set a solver 
+VH uH=0;
+Vh uh=x+y;
+uH[]= B*uh[];
+plot(uH,wait=1);
+matrix BtA = BB'*A;
+matrix BtAB = BtA*BB;
+set(BtAB,solver=UMFPACK);  
+
+
+
+Vh ff=1;
+Vh xx;
+cout << " ------ " << endl;
+
+xx[]=BtAB^-1*ff[];
+cout << " ------ " << endl;
+xx[]=BtAB^-1*ff[];
+cout << " ------ " << endl;
+plot(xx, wait=1);
+
+{
+int N=10;
+real [int,int] A(N,N);
+real [int] a(N),b(N);
+  A =0;
+  for (int i=0;i<N;i++)
+   {
+   A(i,i)=1+i;
+   if(i+1 < N)    A(i,i+1)=-i;
+   a[i]=i;
+   }
+  b=A*b;
+cout << "xxxx\n"; 
+matrix sparceA=A;
+cout << sparceA << endl;
+sparceA = 2*sparceA+sparceA;
+sparceA = 4*sparceA+sparceA*5; //  * 27
+matrix sparceB=sparceA+sparceA+sparceA; ;
+cout << sparceA << endl;
+cout << sparceB << endl; // *81 
+cout << "sparceB = " << sparceB(0,0) << endl;
+}
