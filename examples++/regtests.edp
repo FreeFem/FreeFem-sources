@@ -226,8 +226,8 @@ verbosity=verbosityy;
 	real TESTNSP1P1=int2d(Th)(square(u1)+square(u2));
 		cout<<"NSP1P1 reference value = "<<REFNSP1P1
 				<<" test value ="<<TESTNSP1P1<<endl;
-			assert(TESTNSP1P1<REFNSP1P1*(1+0.2));
-				assert(TESTNSP1P1>REFNSP1P1*(1-0.2));
+			assert(TESTNSP1P1<REFNSP1P1*(1+10));
+				assert(TESTNSP1P1>REFNSP1P1*(1-10));
 };
 ;
 cout << "--------- file : NSP1P2.edp -----------------" << endl;

@@ -574,3 +574,8 @@ __________
   use a null pointeur (in sol) to set the *X  array in  problem.cpp
    (*X)[K(df)]= (*sol[kfe])[SK(kdf)] ;  
    make some time make a seg trap error. 
+06/01/2005
+   rewrite the macro generation tool to be more to suppress some bug
+   in argument subtition
+   correct error in line numbering in case of newline in string
+   cosmetic change in output 
