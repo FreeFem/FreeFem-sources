@@ -32,7 +32,8 @@
 
 #ifdef __cplusplus
 
-#include "config.h"
+#include "config-wrapper.h"
+
 
 extern "C" {
 
