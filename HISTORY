@@ -471,3 +471,10 @@ Make Version 1.40
 ----------
    add tools to bluid periodic adapmesh  see sphere.edp of exemple
    add HaveUMFPACK global variable see sparse-matrix.edp exemple   
+   Change all the structure of the software 
+   Use ./configure to build all the make file see (README)
+
+Make Version 1.40
+-----------------
+
+     

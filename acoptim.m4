@@ -69,12 +69,14 @@ then
 	if test `/usr/bin/hostinfo|grep Darwin|wc -l` -gt 0
 	    then
 
-	    # "-fast" will be followed by "-mcpu" to give an exact CPU
+	    # " will be followed by "-mcpu" to give an exact CPU
 	    # reference.
+	    # -fast option do not work because the -malign-natural flags create wrong IO code 
+	    ff_fast='-O3 -funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64'
 
-	    CHECK_COMPILE_FLAG(C,-fast,CFLAGS)
-	    CHECK_COMPILE_FLAG(C++,-fast,CXXFLAGS)
-	    CHECK_COMPILE_FLAG(Fortran 77,-fast,FFLAGS)
+	    CHECK_COMPILE_FLAG(C,$ff_fast,CFLAGS)
+	    CHECK_COMPILE_FLAG(C++,$ff_fast,CXXFLAGS)
+	    CHECK_COMPILE_FLAG(Fortran 77,$ff_fast,FFLAGS)
 	fi
 
 	# CPU reference
@@ -87,7 +89,7 @@ then
 	elif test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
 	    then
 
-	    # -fast implies -mcpu=G5, but at least this way we can see
+	    # but at least this way we can see
 	    # that the automatic detection worked.
 
 	    CHECK_COMPILE_FLAG(C,-mcpu=G5,CFLAGS)
