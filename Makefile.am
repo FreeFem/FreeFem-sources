@@ -93,7 +93,7 @@ FreeFem++v$(VERSION)_MacOsX: all documentation
 	sed <Info-plist.am >FreeFem++.app/Contents/Info.plist \
            -e "s/@VERSION@/$(VERSION)/g" \
            -e "s/@DATE@/`date`/g"  
-	cp src/agl/FreeFem++-agl FreeFem++v$(VERSION)_MacOsX/FreeFem++.app/Contents/MacOS/FreeFem++
+	cp src/agl/FreeFem++-agl FreeFem++v$(VERSION)_MacOsX/FreeFem++.app/Contents/Resources/FreeFem++
 	cp src/FreeFem++-CoCoa $@
 
 FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
