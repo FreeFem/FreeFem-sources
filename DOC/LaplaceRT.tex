@@ -1,0 +1,191 @@
+\documentclass[twoside]{book}
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX
+\else
+\pdfoutput=1 % we are running PDFLaTeX
+\pdftrue
+\fi
+%\usepackage{times}
+%\usepackage{amsmath}
+\usepackage{calc}
+\usepackage[latin1]{inputenc}
+\usepackage{FFF}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{FFF}
+\usepackage{makeidx}
+\usepackage{color}
+\usepackage{multicol}
+\usepackage{graphicx}
+%\usepackage{dessin}
+\topmargin -1.54cm
+\oddsidemargin 0cm   %marge a 2 cm
+\evensidemargin 0cm  %marge a 2 cm
+\newcommand{\indente}{\hbox to \parindent {\hss}}
+\parindent 0cm
+\headsep 0.5cm
+\topskip .5cm
+\footskip 1cm
+\headheight 1.0cm
+\textwidth  16.5cm
+%  \parindent 0cm
+\textheight 24cm
+\def\freefempp{\texttt{freefem++ }}
+\def\textRed{\color{red}}
+\def\textBlack{\color{black}}
+\def\Blue#1{\textcolor{blue}{#1}}
+\def\Black#1{\textcolor{black}{#1}}
+\def\Red#1{\textcolor{red}{#1}}
+\def\Magenta#1{\textcolor{magenta}{#1}}
+\def\hin{\hbox{ in }}
+\def\hon{\hbox{ on }}
+\def\Cpp{\texttt{C++~}}
+\def\R{\mathrm{I\!R}}
+\def\example{\textbf{Example:}}
+\def\eq#1{\Blue{\[#1\]}}
+\def\R{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\itemtt[#1]{ \item[\texttt{#1}]}
+\def\plot[#1]#2#3{\begin{figure}[hbt]
+\begin{center}
+    \includegraphics*[#1]{#2}
+\end{center}
+\caption{\label{#2} #3}
+\end{figure}
+}
+\def\Ostream{\texttt{ostream}}
+\def\Istream{\texttt{istream}}
+\def\Bool{\texttt{bool}}
+\def\Real{\texttt{real}}
+\def\Int{\texttt{int}}
+\def\vecttwo#1#2{\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\vdeux(#1,#2){\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\HLINE#1{\hbox to \hsize {#1}}
+\def\twoplot[#1]#2#3#4#5{
+\begin{figure}[hbt]
+\begin{multicols}{2}
+\begin{center}
+    \includegraphics*[#1]{#2}
+    \caption{\label{#2} #4}
+\end{center}
+\begin{center}
+    \includegraphics*[#1]{#3}
+    \caption{\label{#3} #5}
+\end{center}
+\end{multicols}
+\end{figure}
+}% end twoplot macro
+\newtheorem{remark}{\textbf{Remark}}
+\newtheorem{bug}{\textbf{Bug:}}
+\newtheorem{proposition}{\textbf{Proposition}}
+\newtheorem{algorithm}{\textbf{Algorithm}}
+\newenvironment{ttlist}
+   {\begin{list}{}{\renewcommand{\makelabel}[1]{\texttt{##1}\hfil}%
+        \setlength{\labelwidth}{3cm}
+        \setlength{\leftmargin}{\labelwidth+\labelsep}
+    }}%
+   {\end{list}}
+
+
+\begin{document}
+\graphicspath{{./}{plots/}}
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps,.ps, .jpg}
+\fi
+
+\let\subsubsection\subsection
+\let\subsection\section
+\let\section\chapter
+
+
+
+Consider the problem
+\begin{equation}
+ -\Delta p = f \hbox{ in } \Omega=\{(x,y)\in R^2 : 0 \le x \le 1 , 0 \le y \le 1\}
+\end{equation}
+\begin{equation}
+p = g \hbox{ on } \Gamma
+\end{equation}
+
+This problem is equivalent to the next problem : 
+\begin{equation}
+ u = -\nabla p 
+\end{equation}
+\begin{equation}
+ \nabla.u = f
+\end{equation}
+\begin{equation}
+\hbox{ in } \Omega=\{(x,y)\in R^2 : 0 \le x \le 1 , 0 \le y \le 1\}
+\end{equation}
+\begin{equation}
+p = g \hbox{ on } \Gamma
+\end{equation}
+
+The problem is solved by the finite element method, namely:
+\\
+Find $u\in V$ the space of Raviart Thomas functions on a triangulation of $\Omega$ 
+\begin{equation}
+   \int_\Omega p*q*1e-15 + u\cdot v -p\nabla.v -q\nabla.u +f*q + \int_{\Gamma} gv\cdot n = 0
+\end{equation}
+The first thing to do is to prepare the mesh (i.e. the triangulation) ;
+that is done by first defining the border\index{border} (the sqare) with labels one two three and four \index{label} and then call the mesh generator \index{buildmesh}(buildmesh) with the right orientation of the \index{border}border (by definition $\Omega$ is on the left side of the oriented $\Gamma$).
+
+\bFF
+
+mesh Th = square(10,10);
+\eFF
+
+
+The second thing is to define the functions spaces.
+
+\index{fespace}
+\bFF
+
+fespace Vh(Th,RT0);  // define the Vh space
+Vh [u1,u2],[v1,v2];  //  introduice the function and test function
+\eFF
+
+func f=1;
+func g=1/2;
+Next, \texttt{freefem++} will define
+the PDE discretized by FEM in variational form with the following
+instruction,  and solve the problem
+
+\bFF
+
+problem laplaceMixte(u1,u2,p,v1,v2,q,
+solver=CG,eps=1.0e-10,tgv=1e30,
+dimKrylov=150) =  
+// definition of the problem
+int2d(Th)( p*q*1e-15 + u1*v1 + u2*v2 
+-p*(dx(v1)+dy(v2)) 
+-q*(dx(u1)+dy(u2)))     //  bilinear form
++ int2d(Th)( f*q )                    //  linear form
++ int1d(Th,1)( g*(v1*N.x + v2*N.y) );  // boundary condition
+
+laplaceMixte;  // solve the problem
+plot([u1,u2],coef=0.1,wait=1,
+     ps=''lapRTuv.eps'',value=true);
+\eFF
+ 
+Next we can check that the result is correct.
+Here we display the result 
+\begin{figure}[htbp]
+	\begin{center}
+		\includegraphics[scale=0.6]{LaplaceRT1.ps}
+	\end{center}
+	\caption{The isovalue of solution p}
+\end{figure}
+
+\begin{figure}[htbp]
+	\begin{center}
+		\includegraphics[scale=0.6]{LaplaceRT2.ps}
+	\end{center}
+	\caption{The solution $[u1,u2]$}
+\end{figure}
+
+\end{document}

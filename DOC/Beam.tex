@@ -1,0 +1,171 @@
+\documentclass[twoside]{book}
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX
+\else
+\pdfoutput=1 % we are running PDFLaTeX
+\pdftrue
+\fi
+%\usepackage{times}
+%\usepackage{amsmath}
+\usepackage{calc}
+\usepackage[latin1]{inputenc}
+\usepackage{FFF}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{FFF}
+\usepackage{makeidx}
+\usepackage{color}
+\usepackage{multicol}
+\usepackage{graphicx}
+%\usepackage{dessin}
+\topmargin -1.54cm
+\oddsidemargin 0cm   %marge a 2 cm
+\evensidemargin 0cm  %marge a 2 cm
+\newcommand{\indente}{\hbox to \parindent {\hss}}
+\parindent 0cm
+\headsep 0.5cm
+\topskip .5cm
+\footskip 1cm
+\headheight 1.0cm
+\textwidth  16.5cm
+%  \parindent 0cm
+\textheight 24cm
+\def\freefempp{\texttt{freefem++ }}
+\def\textRed{\color{red}}
+\def\textBlack{\color{black}}
+\def\Blue#1{\textcolor{blue}{#1}}
+\def\Black#1{\textcolor{black}{#1}}
+\def\Red#1{\textcolor{red}{#1}}
+\def\Magenta#1{\textcolor{magenta}{#1}}
+\def\hin{\hbox{ in }}
+\def\hon{\hbox{ on }}
+\def\Cpp{\texttt{C++~}}
+\def\R{\mathrm{I\!R}}
+\def\example{\textbf{Example:}}
+\def\eq#1{\Blue{\[#1\]}}
+\def\R{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\itemtt[#1]{ \item[\texttt{#1}]}
+\def\plot[#1]#2#3{\begin{figure}[hbt]
+\begin{center}
+    \includegraphics*[#1]{#2}
+\end{center}
+\caption{\label{#2} #3}
+\end{figure}
+}
+\def\Ostream{\texttt{ostream}}
+\def\Istream{\texttt{istream}}
+\def\Bool{\texttt{bool}}
+\def\Real{\texttt{real}}
+\def\Int{\texttt{int}}
+\def\vecttwo#1#2{\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\vdeux(#1,#2){\left|\begin{smallmatrix} #1 \\ #2 \end{smallmatrix}\right.}
+\def\HLINE#1{\hbox to \hsize {#1}}
+\def\twoplot[#1]#2#3#4#5{
+\begin{figure}[hbt]
+\begin{multicols}{2}
+\begin{center}
+    \includegraphics*[#1]{#2}
+    \caption{\label{#2} #4}
+\end{center}
+\begin{center}
+    \includegraphics*[#1]{#3}
+    \caption{\label{#3} #5}
+\end{center}
+\end{multicols}
+\end{figure}
+}% end twoplot macro
+\newtheorem{remark}{\textbf{Remark}}
+\newtheorem{bug}{\textbf{Bug:}}
+\newtheorem{proposition}{\textbf{Proposition}}
+\newtheorem{algorithm}{\textbf{Algorithm}}
+\newenvironment{ttlist}
+   {\begin{list}{}{\renewcommand{\makelabel}[1]{\texttt{##1}\hfil}%
+        \setlength{\labelwidth}{3cm}
+        \setlength{\leftmargin}{\labelwidth+\labelsep}
+    }}%
+   {\end{list}}
+
+
+\begin{document}
+\graphicspath{{./}{plots/}}
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps,.ps, .jpg}
+\fi
+
+\let\subsubsection\subsection
+\let\subsection\section
+\let\section\chapter
+
+
+
+
+Elastic solids subject to forces deform: a point in the solid,
+originaly at (x,y)
+goes to (X,Y) after.  When the displacement vector
+$\vec v=(v_1,v_2) = (X-x, Y-y)$  is small, Hooke's
+law relates the stress tensor $\sigma$ inside the solid to the
+deformation tensor $\epsilon$:
+\Blue{
+ $$ \sigma_{ij} = \lambda \delta_{ij} \nabla.\vec v + \mu\epsilon_{ij},
+\,
+\epsilon_{ij} = {1\over 2}({\partial v_i\over\partial x_j} +
+{\partial v_j\over\partial x_i} )$$
+}
+where $\delta$ is the Kronecker symbol
+and where $\lambda, \mu$ are two constants describing the material mechanical
+properties in terms of the modulus of
+elasticity, and Young's modulus.
+
+The equations of elasticity are naturally written in variational form
+for the displacement vector $v(x)\in V$ as
+\Blue{$$\int_\Omega [\mu\epsilon_{ij}(\vec v)\epsilon_{ij}(\vec w)
++\lambda \epsilon_{ii}(v)\epsilon_{jj}(\vec w)]
+=\int_\Omega \vec g\cdot \vec w +\int_\Gamma \vec h\cdot \vec w,%\`{u}
+\forall \vec w\in V
+$$}
+
+The  elastic solids  is a rectangle beam $[0,10]\times[0,2]$.
+The data are the gravity force $\vec g$ and the
+boundary stress i$\vec h$ is zero on lower and upper side, and on the  two vertical sides of the beam are locked.
+\bFF
+
+//   a weighting beam sitting on a
+
+int bottombeam = 2;
+border a(t=2,0)  { x=0; y=t ;label=1;};        //  left beam
+border b(t=0,10) { x=t; y=0 ;label=bottombeam;};        //  bottom of beam
+border c(t=0,2)  { x=10; y=t ;label=1;};       //  rigth beam
+border d(t=0,10) { x=10-t; y=2; label=3;};     //  top beam 
+real E = 21.5;
+real sigma = 0.29;
+real mu = E/(2*(1+sigma));
+real lambda = E*sigma/((1+sigma)*(1-2*sigma));
+real gravity = -0.05;
+mesh th = buildmesh( b(20)+c(5)+d(20)+a(5));
+fespace Vh(th,[P1,P1]);
+Vh [uu,vv], [w,s];
+cout << "lambda,mu,gravity ="<<lambda<< " " << mu << " " << gravity << endl;
+// deformation of a beam under its own weight 
+solve  bb([uu,vv],[w,s])  = 
+    int2d(th)(
+                2*mu*(dx(uu)*dx(w)+dy(vv)*dy(s)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/2 )
+               + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))
+             ) 
+  + int2d(th) (-gravity*s)
+  + on(1,uu=0,vv=0)
+ ;
+
+
+plot([uu,vv],wait=1);
+plot([uu,vv],wait=1,bb=[[-0.5,2.5],[2.5,-0.5]]); 
+mesh th1 = movemesh(th, [x+uu, y+vv]);
+plot(th1,wait=1);
+\eFF
+
+
+\end{document}
