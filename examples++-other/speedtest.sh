@@ -19,4 +19,4 @@ echo $CXXFLAGS >> speedtest.out
 $ffexe lap3-cpu.edp	\
 		|grep -E --					\
 		'-- lap (cholesky|CG|UMFPACK) +[0-9]+x[0-9]+'	\
-		|tee speedtest.out
+		|tee -a speedtest.out
