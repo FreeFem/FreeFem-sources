@@ -3149,7 +3149,7 @@ class Op3_pfe2K : public ternary_function<pair<FEbase<K> *,int>,R,R,K> { public:
 };
 
 template<class K>
-class Op3_K2R : public ternary_function<K,R,R,R> { public:
+class Op3_K2R : public ternary_function<K,R,R,K> { public:
 
   class Op : public E_F0mps { public:
       Expression a,b,c;
@@ -3784,6 +3784,13 @@ TheOperators->Add("+",
  Global.Add("dyy","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dyy>));
  Global.Add("dxy","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dxy>));
  Global.Add("dyx","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dyx>));
+
+ Global.Add("dx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dx>));
+ Global.Add("dy","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dy>));
+ Global.Add("dxx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dxx>));
+ Global.Add("dyy","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dyy>));
+ Global.Add("dxy","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dxy>));
+ Global.Add("dyx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dyx>));
 
  
   Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));
