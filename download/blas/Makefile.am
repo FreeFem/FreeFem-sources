@@ -14,7 +14,7 @@ blas: $(BLASLIB)
 
 $(BLASLIB): atlas3.6.0.tar.bz2
 	tar xjf atlas3.6.0.tar.bz2
-	cd ATLAS && make
+	cd ATLAS && make < ../script
 	cd ATLAS && make install arch=ff++
 
 atlas3.6.0.tar.bz2:
