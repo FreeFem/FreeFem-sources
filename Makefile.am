@@ -58,6 +58,12 @@ ide-client:
 	cd src/fflib && make
 	cd src/ide && make FreeFem++-cs$(EXEEXT)
 
+# Cleaning generated files which are stored in the CVS repository, to
+# avoid technical CVS conflicts.
+clean-gen:
+	-rm configure
+	-find . -name Makefile.in -exec rm {} \;
+
 # Testing
 # -------
 
