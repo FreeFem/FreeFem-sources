@@ -64,6 +64,8 @@ CYGWIN*)
 	CXXFLAGS="$CXXFLAGS -mno-cygwin -I/usr/include/mingw"
 	LIBS="$LIBS -mno-cygwin -L/lib/mingw"
 
+	# Windows package script (for Inno Setup)
+	m4 -DVERSION=$VERSION WindowsPackage.m4 > WindowsPackage.iss
 	;;
 *)ff_win32=no;;
 esac

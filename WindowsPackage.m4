@@ -4,10 +4,10 @@
 ; No source file here. They are in the source tar ball.
 
 [Setup]
-AppName=FreeFem++
-AppVerName=FreeFem++ version 1.41
-DefaultDirName={pf}\FreeFem++
-DefaultGroupName=FreeFem++
+AppName=FreeFem++-VERSION
+AppVerName=FreeFem++ version VERSION
+DefaultDirName={pf}\FreeFem++-VERSION
+DefaultGroupName=FreeFem++-VERSION
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -44,4 +44,3 @@ Root: HKCR; Subkey: ".edp"; ValueType: string; ValueName: ""; ValueData: "FreeFe
 Root: HKCR; Subkey: "FreeFemScript"; ValueType: string; ValueName: ""; ValueData: "FreeFem++ Script"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "FreeFemScript\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\logo.ico"
 Root: HKCR; Subkey: "FreeFemScript\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\src\std\FreeFem++.exe"" ""%1"""
-
