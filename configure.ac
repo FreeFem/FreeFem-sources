@@ -33,6 +33,11 @@ AC_CHECK_LIB(pthread,pthread_create)
 # configure.ac and in a subdir).
 curdir=`pwd`
 
+# Configure options
+# -----------------
+
+echo $ac_configure_args > configure.param
+
 # Checking wether we can produce a MacIntosh-specific version
 # -----------------------------------------------------------
 
