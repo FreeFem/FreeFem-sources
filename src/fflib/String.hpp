@@ -88,6 +88,7 @@ class String {
   ~String(){/* cout << "~String" << p << *p << endl;*/delete p; p=0;}
    operator const string & () const {return *p;}
    operator  string & ()  {return *p;}
+   string **  getap()  {return &p;}
   friend inline  ostream & operator<<(ostream & f,const String & s) {throwassert(s.p); f << *s.p ; return f;}
   bool operator<(const String &t) const {assert(p && t.p);return *p<*t.p;} // correction FH feb 2004
   bool operator>(const String &t) const {assert(p && t.p);return *p>*t.p;} // correction FH feb 2004
