@@ -1,12 +1,60 @@
+# All the versions of FreeFem++ to compile when "make" is invoked
+all-local:: $(src)/versionnumber.hpp \
+	std std-g glx glx-g x11 x11-g $(BUILD_COCOA) mpi mpi-g
+
+# Object files for different architectures are located in separate
+# directories.
+COMPILE_DIR=c-@build@
+
+# The version number is specified in configure.ac
+VERSION=@VERSION@
+
+# ------------------------------
+# compilation flags of FreeFem++ 
+# ------------------------------
+#  -DDRAWING  bamg active some drawing facility in bamg (inquire mesh)
+#  -DLONG_LONG active the use of  long long in bamg
+#  -DDEBUG active the  checking in bamg  
+#  -DNCHECKPTR remove check pointer facility 
+#  -DCHECK_KN active subscripting of some array  
+#  -DWITHCHECK of the dynamic type ckecking of the langague (very slow)
+#  -DEIGENVALUE  to compile the eigen value part
+#  ------------------------------------------------
+# FLAGS for optimisated version 
+OFFFLAGS= -DDRAWING -DLONG_LONG  -DNCHECKPTR 
+#  flags for debug version  
+GFFFLAGS= -DDRAWING -DLONG_LONG -DCHECK_KN #-DWITHCHECK
+
+LIBLOCAL = -ldl   # for dlopen (see load.cpp)
+LIBX11= -L/usr/X11R6/lib -lX11 -lm 
+INCLUDEX11 = /usr/X11R6/include
+CXXMPI=mpiCC   # compilation with mpi
+OOPTFLAGS= -O  # compilation with optimisation
+GOPTFLAGS= -g  # compilation with debugging 
+LIBGLX= $(LIBX11) -lGL -lGLU
+#--------------------------------------------------
+#  the flag of eigen value part with arpack++ tools
+#-------------------------------------------------
+EIGEN= eigenvalue.o
+LIBARPACK= -larpack -llapack -lblas -rdynamic
+LIBF77= -lg2c
+INCARPACKPP = -DEIGENVALUE -I../arpack/arpack++/include
+#------------------------------------------------
+#  UMFPACK
+#-----------------------
+UMFPACKDIR=$(src)/../../LinearSolver/UMFPACKv4.1
+IUMFPACK= -DUMFPACK -I/usr/include/umfpack -I/usr/include/amd 
+LIBUMFPACK=   -lumfpack -lamd  $(LIBBLAS)
+
+BIN_DIR=/opt/bin
+
 # -----  not change after this line ------------
 TARGETS=FreeFem++ FreeFem++-x11 FreeFem++-mpi  FreeFem++-nw FreeFem++-glx
 # --------------------
-src?=./src
-include $(src)/Makefile-$(HOSTTYPE)
+src=./src
+
 CXXFLAGS =  $(OPTFLAGS)  $(FFFLAGS) $(includedir)  $(INCARPACKPP)
 CXXMPIFLAGS=   $(CXXFLAGS) $(MPIFLAGS) -DPARALLELE $(INCARPACKPP)
-LIBS=$(LIBUMFPACK) $(LIBARPACK) $(LIBF77)  $(LIBLOCAL)
-VERSION=1.41
 www=rascasse.inria.fr:www_gamma/Gamma/cdrom/ftp/freefem/
 ftp=rascasse.inria.fr:/ftp_gamma/freefem/
 ftpk=baobab.ann.jussieu.fr:public_html/ftp/freefem/
@@ -19,18 +67,19 @@ OBJETS= $(EIGEN) AFunction.o   lex.o  lgfem.o  lgmesh.o \
  MeshRead.o MeshWrite.o problem.o strversionnumber.o InitFunct.o \
  lgalgo.o Element_P2h.o load.o
 
+LIBS=$(LIBUMFPACK) $(LIBARPACK) $(LIBF77)  $(LIBLOCAL) @LIBS@
 
-VPATH= $(src) $(src)/femlib $(src)/bamglib $(src)/Graphics $(src)/mpi $(src)/Algo $(src)/Eigen
-includedir= -I$(INCLUDEX11)    -I$(src) -I$(src)/femlib -I$(src)/bamglib -I$(src)/Graphics -I$(src)/mpi -I$(src)/Algo $(IUMFPACK)
+VPATH= $(src) $(src)/femlib $(src)/bamglib $(src)/Graphics $(src)/mpi \
+	$(src)/Algo $(src)/Eigen
+includedir= -I$(INCLUDEX11)    -I$(src) -I$(src)/femlib -I$(src)/bamglib \
+	-I$(src)/Graphics -I$(src)/mpi -I$(src)/Algo $(IUMFPACK)
 
-.SUFFIXES:.cpp .o
+SUFFIXES=.cpp .o
 
-all: $(COMPILE_DIR) FORCE 
+std: $(COMPILE_DIR) FORCE 
 	$(MAKE) -C $(COMPILE_DIR) allc -f`pwd`/Makefile OPTFLAGS="$(OOPTFLAGS)" FFFLAGS="$(OFFFLAGS)" src=`pwd`/src
-all-g: $(COMPILE_DIR)-g FORCE 
+std-g: $(COMPILE_DIR)-g FORCE 
 	$(MAKE) -C $(COMPILE_DIR)-g allc -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
-
-world: all all-g glx glx-g x11 x11-g $(BUILD_COCOA) $(BUILD_MPI)
 
 $(COMPILE_DIR):
 	-mkdir $@
@@ -173,14 +222,6 @@ tyty: $(src)/. $(src)/*/.
 	/.h:#/ { nn=split($$1,bbb,"[/]");c=bbb[nn];d=$$(NF-1); l[c] = l[c] " " d  ;} \
 	/.cpp:#/  {nn=split($$1,bbb,"[/.]");c=bbb[nn-1];d=$$(NF-1);print c ".o:" d,l[d] }' 
     
-$(src)/MakeDepend: $(src)/. $(src)/*/. 
-	egrep '^# *include' src/*/*.h src/*/*.hpp src/*.hpp src/*/*.cpp src/*.cpp | grep -v alloca.h| grep '"' \
-	    | awk -F'[:"]' ' \
-	/.hpp:#/ { nn=split($$1,bbb,"[/]");c=bbb[nn];d=$$(NF-1); l[c] = l[c] " " d  ;} \
-	/.h:#/ { nn=split($$1,bbb,"[/]");c=bbb[nn];d=$$(NF-1); l[c] = l[c] " " d  ;} \
-	/.cpp:#/  {nn=split($$1,bbb,"[/.]");c=bbb[nn-1];d=$$(NF-1);print c ".o:" d,l[d] } \
-	' >$@
-
 %/all.edp:% FORCE 
 	(cd $*; echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
          for i in *`ls *.edp|grep -v ^all.edp$$` ; do  \
@@ -191,9 +232,6 @@ $(src)/MakeDepend: $(src)/. $(src)/*/.
 	done) > $@
 lex.o: lg.tab.hpp
 lg.tab.o:lg.tab.hpp 
-
-include $(src)/MakeDepend
-
 
 www:  FreeFem++v$(VERSION)_Win.zip  FreeFem++v$(VERSION)_MacOS.sit FreeFem++v$(VERSION)_MacOsX.tgz
 	scp  HISTORY DOC/manual.pdf DOC/manual.ps.gz FreeFem++v$(VERSION).tar.gz FreeFem++v$(VERSION)_MacOsX.tgz FreeFem++v$(VERSION)_Win.zip  FreeFem++v$(VERSION)_MacOS.sit  $(ftpk)
@@ -241,8 +279,7 @@ install:   $(BIN_DIR)/.
                 (tar cf - FreeFem++.app| (cd /Applications;tar xf -)) ;\
                 echo Install FreeFem++-CoCoa; \
                 cp src/FreeFem++-CoCoa  $(BIN_DIR);\
-	   fi ; \
-           
+	   fi ;
 	echo "End of Installation "
 
 get-arpack:
