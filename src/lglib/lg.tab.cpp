@@ -202,7 +202,7 @@ aType rettype[nbembtype];
 int kkembtype=-1;
 int inloopcount=0;
 Block *currentblock;
-static double CPUcompileInit =0;
+double CPUcompileInit =0;
 //class pfes;
 C_F0  fespacetype;
 bool fespacecomplex;
@@ -2591,6 +2591,7 @@ int mymain (int  argc, char **argv)
 //  local=&xlocal;
   lexdebug = false;
   lgdebug = false;
+
   cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
   char *  cc= new char [1024];
   istream * ccin=0;
