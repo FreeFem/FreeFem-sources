@@ -650,7 +650,7 @@ public:
     cout << "umfpack_di_solve " << endl;
     if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
     cout << " b min max " << b.min() << " " <<b.max() << endl;
-    cout << " x min max " << b.min() << " " <<x.max() << endl;
+    cout << " x min max " << x.min() << " " <<x.max() << endl;
   }
 
   ~SolveUMFPack() { 
