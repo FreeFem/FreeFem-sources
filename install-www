@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=$1
+VERSION=`awk '/#define VersionFreeFempp/ {print $3}' config-version.h`
 list1="HISTORY DOC/manual.pdf DOC/manual.ps.gz"
 
 listf=(freefem++-${VERSION}.tar.gz FreeFem++v${VERSION}_MacOsX.tgz FreeFem++v${VERSION}_Win.zip  FreeFem++v${VERSION}_MacOS.sit)
