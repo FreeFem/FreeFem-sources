@@ -1,3 +1,9 @@
+freefem++ (1.45-7) testing unstable; urgency=low
+
+  * FreeFem++-cs: faster graphics, grammar-driven highlighting,
+    runtime error-line hihglighting.
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 02 Mar 2005 11:18:18 +0100
 freefem++ (1.45-6) testing unstable; urgency=low
 
   * New upstream release
