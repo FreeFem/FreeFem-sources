@@ -27,6 +27,9 @@ FreeFem++.app/Contents/Resources/script
 changelog:
 	cvs2cl -w -S --fsf
 
+doc:
+	cd DOC && make doc
+
 clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
 	-rm examples*/*.eps 
@@ -43,8 +46,10 @@ visualtest: all
 	src/std/FreeFem++ examples++-tutorial/all.edp
 
 speedtest: all
-	src/nw/FreeFem++-nw examples++-other/lap3-cpu.edp \
-		|grep -E -- '-- lap (cholesky|CG|UMFPACK) +[0-9]+x[0-9]+'
+	src/nw/FreeFem++-nw examples++-other/lap3-cpu.edp	\
+		|grep -E --					\
+		'-- lap (cholesky|CG|UMFPACK) +[0-9]+x[0-9]+'	\
+		|tee speedtest.out
 
 # Build all versions
 # ------------------

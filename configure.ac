@@ -415,7 +415,7 @@ AC_MSG_CHECKING(for dlfcn.h)
 AC_COMPILE_IFELSE([#include <dlfcn.h>],
 	ff_dynload=yes,
 	ff_dynload=no)
-AC_MSG_RESULT($ff_dlfcn)
+AC_MSG_RESULT($ff_dynload)
 if test "$ff_dynload" = yes;
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
