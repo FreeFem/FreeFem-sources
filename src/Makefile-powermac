@@ -1,4 +1,4 @@
-LIBLOCAL = -ldl
+LIBLOCAL = -ldl   # for dlopen (see load.cpp)
 BUILD_COCOA=agl agl-g
 BUILD_MPI=mpi mpi-g
 LIBX11= -L/usr/X11R6/lib -lX11 -lm 
@@ -43,7 +43,7 @@ GFFFLAGS= -DDRAWING -DLONG_LONG -DCHECK_KN  #-DWITHCHECK
 # ---------------------------
 #  install and compile dir.
 # ----------------------
-BIN_DIR=$(HOME)/bin/$(MACHTYPE)-$(VENDOR)-$(OSTYPE)
+BIN_DIR=$(HOME)/bin/powerpc-apple-darwin
 COMPILE_DIR=c-$(HOSTTYPE)
 #----------------------
 

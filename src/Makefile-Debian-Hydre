@@ -1,4 +1,4 @@
-LIBLOCAL = -ldl   # for dlopen (see load.cpp)
+LIBLOCAL = -ldl  -rdynamic  # for dlopen (see load.cpp)
 BUILD_MPI=mpi mpi-g  # to buidl automaticaly mpi version (make world )
 LIBX11= -L/usr/X11R6/lib -lX11 -lm 
 INCLUDEX11 = /usr/X11R6/include
@@ -6,6 +6,7 @@ CXX=g++      #C++ compiler
 CXXMPI=mpiCC   # compilation with mpi
 OOPTFLAGS= -O  # compilation with optimisation
 GOPTFLAGS= -g  # compilation with debugging 
+LIBGLX= $(LIBX11) -lGL -lGLU
 #--------------------------------------------------
 #  the flag of eigen value part with arpack++ tools
 #-------------------------------------------------
