@@ -1,3 +1,8 @@
+freefem++ (1.44-8) testing unstable; urgency=low
+
+  * FreeFem++-cs updated
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Fri, 26 Nov 2004 16:53:20 +0100
 freefem++ (1.44-7) testing unstable; urgency=low
 
   * Added mpich binary package
