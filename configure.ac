@@ -69,6 +69,10 @@ CYGWIN*)
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -I/usr/include/mingw"
 		LIBS="$LIBS -mno-cygwin -mwindows -L/lib/mingw -lws2_32"
 	fi
+
+	# Resources for FreeFem++-cs in Microsoft Windows format
+	AC_SUBST(WINDRESOBJ,windres.o)
+
 	;;
 *)ff_win32=no;;
 esac
