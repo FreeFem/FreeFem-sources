@@ -25,13 +25,21 @@ class Mesh;
 class FQuadTree {
  public:
   class I2 { public:
+     static bool INTER_SEG1d(long a,long b,long x,long y) { return (((y) > (a)) && ((x) <(b)));}
      long x,y;
+     I2() {}
      I2(long i,long j): x(i),y(j) {}
-     I2(long i,long j,long k,long l): x(i+(( k&1) ? l : 0)),y(j+(( k&2) ? l : 0)) {}
+     I2(const I2 &pp,long k,long l): x(pp.x+(( k&1) ? l : 0)),y(pp.y+(( k&2) ? l : 0)) {}
+     void Add(long k,long l) { x+= (( k&1) ? l : 0) ; y+= (( k&2) ? l : 0);}
      I2(const I2 &A,const I2 &B) : x(B.x-A.x),y(B.y-A.y) {}
 
-     long Case(long l) const  { ( ( y & l) ? (( x & l) ? 3 : 2 ) :( ( x & l)? 1 : 0 ));}
+     long Case(long l) const  { return ( ( y & l) ? (( x & l) ? 3 : 2 ) :( ( x & l)? 1 : 0 ));}
      long norm() const { return Max(abs(x),abs(y));}
+     bool less(I2 h) const  { return abs(x) <h.x && abs(y) <h.y;}
+     bool interseg(I2 pp,long hb,long h) const { 
+        return INTER_SEG1d(x,x+hb,pp.x-h,pp.x+h) && INTER_SEG1d(y,y+hb,pp.y-h,pp.y+h);}
+     bool interseg(const I2 &pp,long hb,const I2 &h) const { 
+        return INTER_SEG1d(x,x+hb,pp.x-h.x,pp.x+h.x) && INTER_SEG1d(y,y+hb,pp.y-h.y,pp.y+h.y);}
   };
 
   class QuadTreeBox { 
@@ -102,8 +110,8 @@ public:
 void  ILineTo(long i,long j)
  {rlineto(float(i)/coef+cMin.x ,float(j)/coef+cMin.y  );}
     void Draw();
-  void FQuadTree::PlotQuad(R2 pp,long hb);
-  void FQuadTree::PlotX(R2 pp,long hb);
+  void PlotQuad(I2 pp,long hb);
+  void PlotX(I2 pp,long hb);
 
 #endif
 

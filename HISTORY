@@ -611,5 +611,6 @@ __________
 
 02/01/2005
    correct problem with socket in FLTK in freefem++-cs  (not wet finish) ALH
-   
+   add nbvx=  named parameter to change the default maximum number vertices in creted mesh
+   in builmesh (see mesh.edp exemple)  
    

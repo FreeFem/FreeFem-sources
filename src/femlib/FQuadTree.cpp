@@ -47,7 +47,7 @@ using namespace Fem2D;
 //  new version ----------
 //  ----------------------
 #ifdef DRAWING
-void FQuadTree::PlotQuad(R2 pp,long hb)
+void FQuadTree::PlotQuad(I2 pp,long hb)
 {
 		  IMoveTo(pp.x,pp.y);
 		  ILineTo(pp.x+hb,pp.y);
@@ -56,12 +56,12 @@ void FQuadTree::PlotQuad(R2 pp,long hb)
 		  ILineTo(pp.x   ,pp.y);
 }
 
-void FQuadTree::PlotX(R2 pp,long hb)
-{		  
-  IMoveTo(iii,     jjj);
-		  ILineTo(iii+hb/2,jjj+hb/2);
-		  IMoveTo(iii+hb/2,jjj);
-		  ILineTo(iii     ,jjj+hb/2);
+void FQuadTree::PlotX(I2 p,long hb)
+{	
+  IMoveTo(p.x,     p.y);
+  ILineTo(p.x+hb/2,p.y+hb/2);
+  IMoveTo(p.x+hb/2,p.y);
+  ILineTo(p.x     ,p.y+hb/2);
 }
 void  FQuadTree::Draw()
 {
@@ -76,7 +76,7 @@ void  FQuadTree::Draw()
   long kkk =0;
   pb[0]=  root;
   pi[0]= root->n>0 ?(int)  root->n : 4  ;;
-  ii[0]=jj[0]=0;
+  pp[0].x=pp[0].y=0;//ii[0]=jj[0]=0;
   do{    
     b= pb[l];
 
@@ -131,7 +131,7 @@ Vertex *  FQuadTree::NearestVertex(long xi,long yj)
   IntQuad  h=MaxISize,h0;
   IntQuad hb =  MaxISize;
   I2   p0(0,0);
-  I2  plus( xi<MaxISize?(xi<0?0:xi):MaxISize-1,jplus( yj<MaxISize?(yj<0?0:yj):MaxISize-1);
+  I2  plus( xi<MaxISize?(xi<0?0:xi):MaxISize-1,yj<MaxISize?(yj<0?0:yj):MaxISize-1);
   
   Vertex *vn=0;
   
@@ -152,7 +152,7 @@ Vertex *  FQuadTree::NearestVertex(long xi,long yj)
 	break; // null box or empty   => break 	    
       NbQuadTreeBoxSearch++;
       b=b0;
-      p0.add(k,hb2);	
+      p0.Add(k,hb2);	
       hb = hb2; 
     }
   
@@ -185,7 +185,7 @@ Vertex *  FQuadTree::NearestVertex(long xi,long yj)
 	  { 
 	    NbVerticesSearch++;
 	    I2 i2 =  R2ToI2(b->v[k]);
-	    h0 = h0 = I2(i2,plus).norm();; NORM(iplus,i2.x,jplus,i2.y);
+	    h0 = h0 = I2(i2,plus).norm();//  NORM(iplus,i2.x,jplus,i2.y);
 	    if (h0 <h) 
 	      {
 		h = h0;
@@ -201,11 +201,11 @@ Vertex *  FQuadTree::NearestVertex(long xi,long yj)
 		hb >>=1 ; // div by 2
 		I2 ppp(pp[l],k,hb);
 		
-		if  (INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h)) 
+		if  ( ppp.interseg(plus,hb,h) )//(INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h)) 
 		  {
 		    pb[++l]=  b;
 		    pi[l]= b->n>0 ?(int)  b->n : 4  ;
-		    pp[i]=ppp;		    
+		    pp[l]=ppp;		    
 		  }
 		else
 		  b=b0, hb <<=1 ;
@@ -224,21 +224,23 @@ Vertex *  FQuadTree::NearestVertex(long xi,long yj)
 
 Vertex *  FQuadTree::ToClose(const R2 & v,R seuil,long hx,long hy)
 {
-  const long i=XtoI(v.x);
-  const long j=YtoJ(v.y);
+  I2 H(hx,hy);
+  const I2 p(XtoI(v.x),YtoJ(v.y));
   const R2 X(v);
   R seuil2 = seuil*seuil;
  // const Metric  Mx(v.m);
 
   QuadTreeBox * pb[ MaxDeep ];
   int  pi[ MaxDeep  ];
-  long ii[  MaxDeep ], jj [ MaxDeep];
+    I2 pp[  MaxDeep ];
+
+//  long ii[  MaxDeep ], jj [ MaxDeep];
   int l=0; // level
   QuadTreeBox * b;
   long h=MaxISize;
   long hb =  MaxISize;
-  long i0=0,j0=0;
-  
+  //long i0=0,j0=0;
+  I2 p0(0,0);
   //  Vertex *vn=0;
   
   if (!root->n)
@@ -247,8 +249,7 @@ Vertex *  FQuadTree::ToClose(const R2 & v,R seuil,long hx,long hy)
   // general case -----
   pb[0]= root;
   pi[0]=  root->n>0 ?(int)  root->n : 4 ;
-  ii[0]=i0;
-  jj[0]=j0;
+  pp[0]=p0;
   h=hb;
   do {    
     b= pb[l];
@@ -261,17 +262,12 @@ Vertex *  FQuadTree::ToClose(const R2 & v,R seuil,long hx,long hy)
 	    NbVerticesSearch++;
 	    Vertex & V(*b->v[k]);
 	    I2 i2 =  R2ToI2(V);
-	    if ( ABS(i-i2.x) <hx && ABS(j-i2.y) <hy )
+	    if ( I2(i2,p).less(H) )
 	      {
 		R2 XY(X,V);
 		R dd;
-	      // old code	        if( Mx(XY) + b->v[k]->m(XY) < seuil )
 	        if( (dd= (XY,XY) ) < seuil ) // LengthInterpole(Mx(XY), b->v[k]->m(XY)))  < seuil )
-		  {
-		    //  cout <<  CurrentTh->Number(v) << "is To Close " 
-		    // << CurrentTh->Number( b->v[k]) << " l=" <<dd<<endl;
 		    return &V; 
-		  }
 	      }
 	  }
 	else // Pointer QuadTreeBox 
@@ -281,16 +277,12 @@ Vertex *  FQuadTree::ToClose(const R2 & v,R seuil,long hx,long hy)
 	    if ((b=b->b[k])) 
 	      {
 		hb >>=1 ; // div by 2
-	        long iii = ii[l]+I_IJ(k,hb);
-		long jjj = jj[l]+J_IJ(k,hb);
-		
-		if  (INTER_SEG(iii,iii+hb,i-hx,i+hx) && INTER_SEG(jjj,jjj+hb,j-hy,j+hy)) 
+	        I2 ppp(pp[l],k,hb);
+		if (ppp.interseg(p,hb,H))
 		  {
 		    pb[++l]=  b;
 		    pi[l]= b->n>0 ?(int)  b->n : 4  ;
-		    ii[l]= iii;
-		    jj[l]= jjj;
-		    
+		    pp[l]=ppp;		    
 		  }
 		else
 		  b=b0, hb <<=1 ;
@@ -309,14 +301,15 @@ Vertex *  FQuadTree::ToClose(const R2 & v,R seuil,long hx,long hy)
 void  FQuadTree::Add( Vertex & w)
 {
   QuadTreeBox ** pb , *b;
-  long i= XtoI(w.x), j=YtoJ(w.y),l=MaxISize;
+  I2 p(XtoI(w.x),YtoJ(w.y));
+  long l=MaxISize;
   pb = &root;
   //    cout << pb << " " << &root << endl;
   while( (b=*pb) && (b->n<0))
     { 
       b->n--;
       l >>= 1;
-      pb = &b->b[IJ(i,j,l)];
+      pb = &b->b[p.Case(l)];
     }
   if  (b) {      
     if (b->n > 3 &&  b->v[3] == &w) return;
@@ -345,7 +338,7 @@ void  FQuadTree::Add( Vertex & w)
 	  //    cout << bb << " " << k << " "  << ij <<  endl;
 	  bb->v[bb->n++] = v4[k];
 	}
-      pb = &b->b[IJ(i,j,l)];
+      pb = &b->b[p.Case(l)];
     }
   if (!(b = *pb))
     b=*pb= NewQuadTreeBox(); //  alloc the QuadTreeBox 
