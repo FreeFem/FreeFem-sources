@@ -4,6 +4,7 @@
 # $Id$
 
 all-local: $(DOWNLOAD_UMFPACK)
+EXTRA_DIST=AMD_Make.include UMFPACK_Make.include
 
 # Downloading and compiling UMFPACK
 # ---------------------------------
