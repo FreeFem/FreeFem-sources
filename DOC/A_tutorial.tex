@@ -1,0 +1,139 @@
+
+
+Consider the problem
+\begin{equation}
+ -\Delta v = 1 \hbox{ in } \Omega=\{(x,y)\in R^2 : x^2+y^2\le
+1\}
+\\
+v=0\hbox{ on } \Gamma=\partial\Omega.
+\end{equation}
+
+The problem is solved by the finite element method, namely:
+\\
+Find $u\in V$ the space of continuous \index{femp1}piecewise linear functions
+on a triangulation of $\Omega$ which are zero on the boundary
+$\partial\Omega$ such that
+\begin{equation}
+    \int_\Omega \nabla u\cdot\nabla w = \int_\Omega w~~~\forall
+    w\in V
+\end{equation}
+The first thing to do is to prepare the mesh (i.e. the triangulation) ;
+that is done by first defining the border\index{border} (the
+unit circle) with label one \index{label} and then call the mesh generator \index{buildmesh}(buildmesh) with
+the right orientation of the \index{border}border (by definition $\Omega$ is
+on the left side of the oriented $\Gamma$, the ).
+
+\bFF
+
+border a(t=0,2*pi){ x = cos(t); y = sin(t);@label=1;};
+mesh disk = @buildmesh(a(50));
+plot(disk);  // to see the mesh
+\eFF
+
+The second thing is to define the continuous piecewise linear functions spaces.
+
+\index{fespace}
+\bFF
+
+fespace femp1(disk,P1);  // define the femp1 space
+femp1 u,v;  //  introduice the function and test function
+\eFF
+
+Next, \texttt{freefem++} will define
+the PDE discretized by FEM in variational form with the following
+instruction,  and solve the problem
+
+\bFF
+
+  problem laplace(u,v) =  // u is the unknown and v is the test function
+    int2d(disk)( dx(u)*dx(v) + dy(u)*dy(v) )     //  bilinear form
+  + int2d(disk)( -1*v )                          //  linear form
+  + on(1,u=0) ;                                // boundary condition
+
+laplace;  // solve the problem
+\eFF
+
+Next we can check that the result is correct.
+Here we display the result first and then display the error field
+and compute the $L^2$ error and the $H^1$ error
+
+\bFF
+
+plot (u,value=true,wait=true); // to see the value of isoline  and wait
+femp1 error=u-(1-x^2-y^2)/4;      // you only plot FE function, so do interpolation
+plot(error,value=true,wait=true); // plot the error
+
+cout << "error L2=" << sqrt(int2d(disk)( (u-(1-x^2-y^2)/4) ^2) )<< endl;
+cout << "error H10=" << sqrt(   int2d(disk)((dx(u)+x/2)^2)
+                              + int2d(disk)((dy(u)+y/2)^2))<< endl;
+\eFF
+
+For better results we can use mesh adaptation. This module constructs a mesh which fits
+best a function of $V$, so $u$ is the main argument of \texttt{adaptmesh}.
+Note that \index{adaptmesh}adaptmesh "improves" a mesh, so it requires also the name of a mesh for argument.
+Therefore mesh adaptation is done in \texttt{freefem++} by
+\bFF
+
+ disk = adaptmesh(disk,u,err=0.01);
+ plot(disk,wait=1);
+\eFF
+
+where \texttt{disk} is now a new mesh adapted to $u$.
+
+To check that this mesh is better, we solve the problem again and compute the errors.
+Notice the improvement!
+
+\bFF
+
+laplace;
+plot (u,value=true,wait=true);
+err =u-(1-x^2-y^2)/4;
+plot(err,value=true,wait=true);
+cout << "error L2=" << sqrt(int2d(disk)( (u-(1-x^2-y^2)/4) ^2) )<< endl;
+cout << "error H10=" << sqrt(  int2d(disk)((dx(u)+x/2)^2)
+                             + int2d(disk)((dy(u)+y/2)^2))<< endl;
+\eFF
+
+Output seen on the console:
+{\small
+\bFF
+
+  Nb of common points 1
+  --  mesh:  Nb of Triangles =    434, Nb of Vertices 243
+   Nb of edges on Mortars  = 0
+   Nb of edges on Boundary = 50, neb = 50
+    Nb Mortars 0
+    Number of Edges                 = 676
+    Number of Boundary Edges        = 50
+    Number of Mortars  Edges        = 0
+    Nb Of Mortars with Paper Def    = 0 Nb Of Mortars = 0
+    Euler Number nt- NbOfEdges + nv = 1= Nb of Connected Componant - Nb Of Hole
+ min xy -1 -0.998027 max xy1 0.998027
+ Nb Of Nodes = 243
+ Nb of DF = 243
+ -- Solve :           min 5.343e-32  max 0.249999
+ -- borne de la function  (DF)-0.000890628 0.000858928
+ min xy -1 -0.998027 max xy1 0.998027
+ min xy -1 -0.998027 max xy1 0.998027
+error L2=0.00211901
+error H10=0.0383498
+  --  mesh:  Nb of Triangles =   1535, Nb of Vertices 813
+   Nb of edges on Mortars  = 0
+   Nb of edges on Boundary = 89, neb = 89
+    Nb Mortars 0
+    Number of Edges                 = 2347
+    Number of Boundary Edges        = 89
+    Number of Mortars  Edges        = 0
+    Nb Of Mortars with Paper Def    = 0 Nb Of Mortars = 0
+    Euler Number nt- NbOfEdges + nv = 1= Nb of Connected Componant - Nb Of Hole
+ min xy -0.999441 -0.999752 max xy1 0.999828
+ Nb Of Nodes = 813
+ Nb of DF = 813
+ -- Solve :           min 3.18031e-32  max 0.249946
+ min xy -0.999441 -0.999752 max xy1 0.999828
+ -- function's bound   -0.000303323 0.000402198
+ min xy -0.999441 -0.999752 max xy1 0.999828
+error L2=0.000585005
+error H10=0.0189227
+\eFF
+}
