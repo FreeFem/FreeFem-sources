@@ -4,7 +4,7 @@
 # Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
 # $Id$
 
-AC_INIT(FreeFem++,1.42,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,1.43,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -557,11 +557,13 @@ AC_CHECK_PROG(ff_dvips,dvips,yes,no)
 if test "$ff_latex" = yes -a "$ff_makeindex" = yes -a "$ff_dvips" = yes;
 then
 	AC_SUBST(DOCPS,manual.ps)
+	AC_SUBST(DOCPS,manual-full.ps)
 
 	AC_CHECK_PROG(ff_gzip,gzip,yes,no)
 	if test "$ff_gzip" = yes;
 	then
 		AC_SUBST(DOCPSGZ,manual.ps.gz)
+		AC_SUBST(DOCPSGZ,manual-full.ps.gz)
 	fi
 fi
 
@@ -569,6 +571,7 @@ AC_CHECK_PROG(ff_pdflatex,pdflatex,yes,no)
 if test "$ff_pdflatex" = yes;
 then
 	AC_SUBST(DOCPDF,manual.pdf)
+	AC_SUBST(DOCPDF,manual-full.pdf)
 fi
 
 # Choosing compilation options for the standard version (in src/std)
