@@ -219,6 +219,11 @@ then
 	AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
 fi
 
+# Looking for wget before we decide to download anything
+# ------------------------------------------------------
+
+AC_CHECK_PROG(ff_wget,wget,yes,no)
+
 # Looking for the BLAS
 # --------------------
 
@@ -260,7 +265,7 @@ then
 fi
 
 # If all else fails, download!
-if test "$ff_blas_ok" = no;
+if test "$ff_blas_ok" = no -a "$ff_wget" = yes
 then
 	AC_MSG_NOTICE(using downloaded Blas)
 	AC_SUBST(DOWNLOAD_BLAS,blas)
@@ -344,7 +349,7 @@ then
     fi
 
 	# If all else fails, download!
-	if test "$ff_arpack_ok" = no;
+	if test "$ff_arpack_ok" = no -a "$ff_wget" = yes
 	then
 		AC_MSG_NOTICE(using downloaded Arpack)
 		AC_SUBST(DOWNLOAD_ARPACK,arpack)
@@ -408,7 +413,7 @@ then
 fi
 
 # If all else fails, download!
-if test "$ff_umfpack_ok" = no;
+if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes
 then
 	AC_MSG_NOTICE(using downloaded Umfpack)
 	AC_SUBST(DOWNLOAD_UMFPACK,umfpack)
@@ -526,6 +531,8 @@ AC_OUTPUT(Makefile
 	download/umfpack/Makefile
 	src/Makefile
 	src/bamglib/Makefile
+	src/iml/Makefile
+	src/Graphics/Makefile
 	src/femlib/Makefile
 	src/Algo/Makefile
 	src/lglib/Makefile

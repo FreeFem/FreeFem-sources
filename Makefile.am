@@ -10,10 +10,9 @@ SUBDIRS=download src DOC examples++ examples++-tutorial	\
 	examples++-eigen examples++-load examples++-mpi	\
 	examples++-bug examples++-other
 
-EXTRA_DIST=regtests.sh arpack/arpack++/include/*.h src/*/*.h			  \
-FreeFem++.*mcp.sit ffpc*mcp.zip HISTORY README BUGS TODO			  \
-FreeFem++.app/Contents/Info.plist						  \
-FreeFem++.app/Contents/MacOS/FreeFem++ FreeFem++.app/Contents/PkgInfo		  \
+EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h		  \
+FreeFem++.*mcp HISTORY README BUGS TODO						  \
+FreeFem++.app/Contents/Info.plist FreeFem++.app/Contents/PkgInfo		  \
 FreeFem++.app/Contents/Resources/Contents/Info.plist				  \
 FreeFem++.app/Contents/Resources/Credits.rtf					  \
 FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/classes.nib		  \
