@@ -3,24 +3,30 @@ VERSION=$1
 list1="HISTORY DOC/manual.pdf DOC/manual.ps.gz"
 
 listf=(freefem++-${VERSION}.tar.gz FreeFem++v${VERSION}_MacOsX.tgz FreeFem++v${VERSION}_Win.zip  FreeFem++v${VERSION}_MacOS.sit)
+listcd=(freefem++.tar.gz           ""                              freefem++.zip                 freefem++.sit)
 
-www=rascasse.inria.fr:www_gamma/Gamma/cdrom/ftp/freefem/
-ftp=rascasse.inria.fr:/ftp_gamma/freefem/
-ftpk=baobab.ann.jussieu.fr:public_html/ftp/freefem/
+www=hecht@rascasse.inria.fr:www_gamma/Gamma/cdrom/ftp/freefem/
+ftp=hecht@rascasse.inria.fr:/ftp_gamma/freefem/
+ftpk=hecht@baobab.ann.jussieu.fr:public_html/ftp/freefem/
 
 
 if [ -f $listf ]; then
  rsync -vzupogt --rsh="ssh -l hecht" $list1  $ftpk
 # rsync -vzupogt --rsh=ssh $list1  $ftp
  rsync -vzupogt --rsh="ssh -l hecht"  HISTORY  baobab.ann.jussieu.fr:www/.
+ scp HISTORY hecht@rascasse.inria.fr:www_gamma/Gamma/cdrom/www/freefem/
 fi
 for ((i=0;${#listf[$i]};i++)); do
 f=${listf[$i]}
-lf=${listl[$i]}
+lcd=${listcd[$i]}
 echo file : $f 
 if [ -f $f ]; then
     rsync -vzupogt --rsh="ssh -l hecht" $f  $ftpk
-#    rsync -vzupogtl --rsh=ssh $f  $ftp
+    scp $f $ftp
+    if [ -n "$lcd" ] ; then
+      scp $f $www$lcd
+    fi
+
 fi
 done;
 echo ssh  hecht@baobab.ann.jussieu.fr "cd www/.; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
