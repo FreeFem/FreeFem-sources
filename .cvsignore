@@ -12,6 +12,7 @@ configure
 configure.param
 configure.lineno
 configure-stamp
+.DS_Store
 *.exe
 freefem++-1.41.zip
 FreeFem++v*_Linux

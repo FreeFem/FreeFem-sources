@@ -166,8 +166,7 @@ then
 	then
 		ff_x11=yes
 		ff_x11prog=FreeFem++-x11${EXEEXT}
-		ff_x11_includes="-I/usr/X11R6/include"
-		AC_SUBST(X11_INCLUDES,$ff_x11_includes)
+		CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
 		ff_x11_libs="-L/usr/X11R6/lib -lX11 -lXext -lXpm -lm"
 		AC_SUBST(X11_LIBS,$ff_x11_libs)
 	fi
@@ -178,33 +177,44 @@ AC_MSG_RESULT($ff_x11)
 # Checking that OpenGL is accessible
 # ----------------------------------
 
-# GL libraries seem to depend on some dlopen capabilities
 ff_gl_ok=no
+ff_glx_ok=no
+ff_agl_ok=no
+
+# GL libraries seem to depend on some dlopen capabilities
 if test "$enable_static" != yes
 then
 	# If we cannot find gl.h, no OpenGL version can be produced
 	AC_CHECK_HEADERS(GL/gl.h,
-		ff_gl_ok=yes,
-		ff_gl_ok=no)
-	AC_CHECK_HEADERS(GL/glx.h,
-		ff_glx_ok=yes,
-		ff_glx_ok=no)
+		ff_gl_ok=yes
+		ff_agl_ok=yes,
+		ff_gl_ok=no
+		ff_agl_ok=no)
 	if test "$ff_gl_ok" = yes
+	then
+		AC_CHECK_HEADERS(GL/glx.h,
+			ff_glx_ok=yes,
+			ff_glx_ok=no)
+	fi
+	if test "$ff_glx_ok" = yes
 	then
 		AC_CHECK_LIB(GL,
 			glBegin,
-			ff_gl_ok=yes,
-			ff_gl_ok=no)
+			ff_glx_ok=yes,
+			ff_glx_ok=no)
+	fi
+	if test "$ff_glx_ok" = yes
+	then
 		AC_CHECK_LIB(GLU,
 			gluSphere,
-			ff_gl_ok=yes,
-			ff_gl_ok=no,
+			ff_glx_ok=yes,
+			ff_glx_ok=no,
 			-lGL)
 	fi
 fi
 
 # If we cannot find GL, we cannot compile FreeFem++-agl
-if test "$ff_gl_ok" = no
+if test "$ff_agl_ok" = no
 then
 	ff_aglprog=
 fi
@@ -673,12 +683,10 @@ if test "$ff_win32" = yes;
 then
 	ff_std_graph_obj=Pcrgraph.$OBJEXT
 	ff_std_ldflags=-mwindows
-	ff_std_includes=
 	ff_std_libs=
 else
 	ff_std_graph_obj=Xrgraph.$OBJEXT
 	ff_std_ldflags=
-	ff_std_includes=$ff_x11_includes
 	ff_std_libs=$ff_x11_libs
 
 	# If the standard version already uses x11, we do not need to
@@ -689,7 +697,6 @@ AC_SUBST(STD_GRAPH_OBJ,$ff_std_graph_obj)
 AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 
 AC_SUBST(STD_LIBS,$ff_std_libs)
-AC_SUBST(STD_INCLUDES,$ff_std_includes)
 
 # Can we produce an IDE?
 # ----------------------
@@ -729,9 +736,11 @@ then
 
 	AC_SUBST(FLTK_CONFIG,$ff_fltk_config)
 
-	if test "$ff_x11" = yes
+	# Only links X11 libraries into FreeFem++-cs if we are not on
+	# Windows or Macintosh (these do not need X11)
+
+	if test "$ff_mac" != yes -a "$ff_win32" != yes
 	then
-		AC_SUBST(IDE_INCLUDEES,$ff_x11_includes)
 		AC_SUBST(IDE_LIBS,$ff_x11_libs)
 	fi
 fi
