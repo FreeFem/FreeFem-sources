@@ -5,7 +5,9 @@
 class basicForEachType;
 typedef const  basicForEachType * aType;
 
-typedef  unsigned char  AnyData[24]; 
+//typedef  unsigned char  AnyData[24]; 
+
+typedef  unsigned char  AnyData[2*(sizeof(void*)+2*sizeof(double))];
 
 extern map<const string,basicForEachType *> map_type;
 

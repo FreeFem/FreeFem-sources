@@ -9,16 +9,10 @@
 # The version number is specified in configure.ac
 VERSION=@VERSION@
 
-# Object files for different architectures are located in separate
-# directories.
-COMPILE_DIR=@top_srcdir@/c-@build@
-
 SUBDIRS=src DOC
 
 LIBLOCAL = -ldl   # for dlopen (see load.cpp)
-LIBX11= -L/usr/X11R6/lib -lX11 -lm 
-CXXMPI=mpiCC   # compilation with mpi
-LIBGLX= -lGL -lGLU $(LIBX11)
+
 #--------------------------------------------------
 #  the flag of eigen value part with arpack++ tools
 #-------------------------------------------------

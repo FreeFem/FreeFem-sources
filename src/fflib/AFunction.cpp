@@ -911,6 +911,7 @@ long exec(string *s)
  
 template<class K> long get_n(KN<K> * p){ return p->N();}
 template<class K> long get_n(KNM<K> * p){ return p->N();}
+
 template<class K> long get_m(KNM<K> * p){ return p->M();}
 template<class K> double get_max(KN<K> * p){ return p->max();}
 template<class K> double get_min(KN<K> * p){ return p->min();}
@@ -944,11 +945,22 @@ typedef dot1_F0<mem_fun_t<long,ostream> > ostream_prec;
   ostream * f;
    operator long () const {return f->precision();}
  };
- 
  ostream_precis ostream_precision(ostream **f){ return ostream_precis(*f);}
   ostream_precis ostream_precision(ostream *f){ return ostream_precis(f);}
 long get_precis( ostream_precis  pf) { return pf.f->precision();}
  long set_precis( ostream_precis  pf, long  l) { return pf.f->precision(l);}
+
+ class istream_good { public:
+  istream_good(istream * ff) :f(ff) {}
+  istream * f;
+  operator bool () const {return f->good();}
+ };
+ inline istream_good to_istream_good(istream **f){ return istream_good(*f);}
+ inline istream_good to_istream_good(istream *f){ return istream_good(f);}
+  
+  inline long get_good( istream_good  pf) { return pf.f->good();}
+  inline bool get_eof(istream ** p){ return (**p).eof();}
+ 
  
 template<class K>
 void ArrayDCL()
@@ -969,6 +981,7 @@ void ArrayDCL()
     Dcl_Type<DotSlash_KN_<K> >();
     Dcl_Type<Sub_KN_<K> >();
     Dcl_Type<Mulc_KN_<K> >();
+    Dcl_Type<Mul_KNM_KN_<K> >();
     Dcl_Type<Add_Mulc_KN_<K> *>();
 
      map_type[typeid(KN_<K> ).name()]->AddCast(
@@ -980,6 +993,23 @@ void ArrayDCL()
     map_type_of_map[make_pair(atype<pair<long,long> >(),atype<K>())]=atype<KNM<K>*>(); // matrix                                               
 }
 
+/*
+template<class set_eqarray,class KN,class K>
+void AddOpeqarray(const char op[])
+ {
+     typedef  KN<K> Kn;
+     TheOperators->Add(op,
+        new OneBinaryOperator<set_eqarray<KN<K> ,K > > ,
+        new OneBinaryOperator<set_eqarray<KN<K> ,Add_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray<KN<K> ,DotStar_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray<KN<K> ,DotSlash_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray<KN<K> ,Sub_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray<KN<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarraypd<KN<K> ,Add_Mulc_KN_<K>* > > ,
+        new OneBinaryOperator<set_eqarrayp<KN<K> ,KN<K>* > >       
+      );
+  }
+*/
 template<class K>
 void ArrayOperator()
 {
@@ -1010,6 +1040,8 @@ void ArrayOperator()
      Add<KNM<K> *>("n",".",new OneOperator1<long,KNM<K> *>(get_n));
      Add<KNM<K> *>("m",".",new OneOperator1<long,KNM<K> *>(get_m));
      
+//     AddOpeqarray<set_eqarray,KN,K>("=");
+     
      TheOperators->Add("=",
         new OneBinaryOperator<set_eqarray<KN<K> ,K > > ,
         new OneBinaryOperator<set_eqarray<KN<K> ,Add_KN_<K> > > ,
@@ -1017,6 +1049,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eqarray<KN<K> ,DotSlash_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray<KN<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray<KN<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray<KN<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eqarraypd<KN<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eqarrayp<KN<K> ,KN<K>* > >       
       );
@@ -1032,6 +1065,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eq_array<KN_<K> ,DotSlash_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array<KN_<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array<KN_<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eq_array<KN_<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eq_arraypd<KN_<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eq_arrayp<KN_<K> ,KN<K>* > >       
       );
@@ -1043,6 +1077,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eqarray_add<KN<K> ,DotSlash_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray_add<KN<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray_add<KN<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray_add<KN<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eqarraypd_add<KN<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eqarrayp_add<KN<K> ,KN<K>* > >        
       );
@@ -1053,6 +1088,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eq_array_add<KN_<K> ,DotSlash_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array_add<KN_<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array_add<KN_<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eq_array_add<KN_<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eq_arraypd_add<KN_<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eq_arrayp_add<KN_<K> ,KN<K>* > >        
       );
@@ -1064,6 +1100,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eqarray_sub<KN<K> ,DotSlash_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray_sub<KN<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray_sub<KN<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray_sub<KN<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eqarraypd_sub<KN<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eqarrayp_sub<KN<K> ,KN<K>* > >        
       );
@@ -1075,6 +1112,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eq_array_sub<KN_<K> ,DotSlash_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array_sub<KN_<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array_sub<KN_<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eq_array_sub<KN_<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eq_arraypd_sub<KN_<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eq_arrayp_sub<KN_<K> ,KN<K>* > >        
       );
@@ -1084,6 +1122,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eqarray_mul<KN<K> ,Add_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray_mul<KN<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray_mul<KN<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray_mul<KN<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eqarraypd_mul<KN<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eqarrayp_mul<KN<K> ,KN<K>* > >       
       );
@@ -1093,6 +1132,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eq_array_mul<KN_<K> ,Add_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array_mul<KN_<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array_mul<KN_<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eq_array_mul<KN_<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eq_arraypd_mul<KN_<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eq_arrayp_mul<KN_<K> ,KN<K>* > >       
       );
@@ -1102,6 +1142,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eq_array_div<KN<K> ,Add_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array_div<KN<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array_div<KN<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eq_array_div<KN<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eq_arraypd_div<KN_<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eq_arrayp_div<KN_<K> ,KN<K>* > >        
      );
@@ -1111,6 +1152,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eqarray_div<KN<K> ,Add_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray_div<KN<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray_div<KN<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray_div<KN<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eqarraypd_div<KN<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eqarrayp_div<KN<K> ,KN<K>* > >        
      );
@@ -1132,6 +1174,7 @@ void ArrayOperator()
      TheOperators->Add("*",
        new OneBinaryOperator<Op2_mulpc<Mulc_KN_<K>,KN<K>*,K> >,
        new OneBinaryOperator<Op2_mulcp<Mulc_KN_<K>,K,KN<K>*> >,
+       new OneBinaryOperator<Op2_mulpcp<Mul_KNM_KN_<K>,KNM<K>*,KN<K>*> >,
        new OneBinaryOperator<Op2_dotproduct<K> >,
        new OneBinaryOperator<Op2_dotproduct_<K> >
        
@@ -1185,6 +1228,7 @@ void Init_map_type()
     Dcl_TypeandPtr<ostream*>(0,0,::InitializePtr<ostream*>,::DeletePtr<ostream*>);
     Dcl_TypeandPtr<istream*>(0,0,::InitializePtr<istream*>,::DeletePtr<istream*>);
     Dcl_Type< ostream_precis > ();
+    Dcl_Type< istream_good > ();
     
     Dcl_Type<Polymorphic*>();
     
@@ -1201,6 +1245,7 @@ void Init_map_type()
     
     ArrayDCL<double>();
     ArrayDCL<Complex>();
+    ArrayDCL<long>();
     
     Dcl_Type<ios::openmode>();
     
@@ -1416,6 +1461,7 @@ void Init_map_type()
        
      ArrayOperator<double>();
      ArrayOperator<Complex>();
+     ArrayOperator<long>();
      
  
 
@@ -1508,8 +1554,19 @@ void Init_map_type()
     //  Add<ostream*>("precision",".",precis);
      Add<ostream**>("precision",".",new OneOperator1<ostream_precis,ostream**>(ostream_precision));
      Add<ostream*>("precision",".",new OneOperator1<ostream_precis,ostream*>(ostream_precision));
+     
+     
      Add<ostream_precis>("(","",new OneOperator1<long,ostream_precis>(get_precis),
                                 new OneOperator2<long,ostream_precis,long>(set_precis));
+//  add v 1.41   
+     Add<istream**>("good",".",new OneOperator1<istream_good,istream**>(to_istream_good));
+     Add<istream*>("good",".",new OneOperator1<istream_good,istream*>(to_istream_good));
+     Add<istream*>("good",".",new OneOperator1<istream_good,istream*>(to_istream_good));    
+     Add<istream_good>("(","",new OneOperator1<long,istream_good>(get_good));
+
+     Add<istream**>("eof",".",new OneOperator1<bool,istream**>(get_eof));
+   
+                               
                                 
       
      TheOperators->Add("[]",new OneOperator_array );

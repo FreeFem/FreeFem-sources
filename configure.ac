@@ -10,6 +10,8 @@ AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AC_PROG_MAKE_SET
 
+AC_PROG_RANLIB
+
 # Necessary compilers
 
 AC_PROG_CC
@@ -17,11 +19,6 @@ AC_PROG_CXX
 AC_PROG_YACC
 AM_PROG_LEX
 # AC_F77_LIBRARY_LDFLAGS
-
-# We do not need the default optimization options that autoconf
-# chooses
-
-CXXFLAGS=
 
 # Some useful libraries
 
@@ -94,29 +91,62 @@ if test "$ff_blas_ok" = yes;
 fi
 LIBS=$ff_save_libs
 
+# Checking wether to produce a debug version
+# ------------------------------------------
+
+# ------------------------------
+# compilation flags of FreeFem++ 
+# ------------------------------
+#  -DDRAWING  bamg active some drawing facility in bamg (inquire mesh)
+#  -DLONG_LONG active the use of  long long in bamg
+#  -DDEBUG active the  checking in bamg  
+#  -DNCHECKPTR remove check pointer facility 
+#  -DCHECK_KN active subscripting of some array  
+#  -DWITHCHECK of the dynamic type ckecking of the langague (very slow)
+#  -DEIGENVALUE  to compile the eigen value part
+#  ------------------------------------------------
+
+AC_ARG_ENABLE(debug,
+     [  --enable-debug    Turn on debug versions of FreeFem++],
+     [case "${enableval}" in
+       yes) ff_debug=true ;;
+       no)  ff_debug=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
+     esac],
+     [ff_debug=false])
+
+if test "$ff_debug" = true;
+then
+	CXXFLAGS="-DDRAWING -DLONG_LONG -DCHECK_KN -g"
+else
+	CXXFLAGS="-DDRAWING -DLONG_LONG  -DNCHECKPTR -O"
+fi
+
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
 
+NOINSTPROGS=FreeFem++-g FreeFem++-nw-g FreeFem++-x11-g FreeFem++-glx-g
 AC_CHECK_PROG(ff_mpi,mpiCC,yes,no)
-AM_CONDITIONAL(WITHMPI,test "$ff_mpi" = yes)
-
-# Checking wether we can produce an optimized version
-# ---------------------------------------------------
-
-AC_ARG_ENABLE(ff_optim,
-     [  --enable-optim    Turn on optimized versions of FreeFem++],
-     [case "${enableval}" in
-       yes) ff_optim=true ;;
-       no)  ff_optim=false ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-optim) ;;
-     esac],
-     [ff_optim=true])
-AM_CONDITIONAL(OPTIM,test "$ff_optim" = true)
+if test "$ff_mpi" = yes;
+then
+	NOINSTPROGS="$NOINSTPROGS FreeFem++-mpi-g"
+fi
 
 # Creating all makefiles
 # ----------------------
 
 AC_OUTPUT(Makefile
 	src/Makefile
+	src/bamglib/Makefile
+	src/femlib/Makefile
+	src/Algo/Makefile
+	src/lglib/Makefile
+	src/fflib/Makefile
+	src/std/Makefile
+	src/x11/Makefile
+	src/nw/Makefile
+	src/mpi/Makefile
+	src/agl/Makefile
+	src/glx/Makefile
 	DOC/Makefile,
         echo timestamp > stamp-h)

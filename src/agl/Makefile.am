@@ -2,4 +2,3 @@
 # ----------------------------------
 # $Id$
 
-SUBDIRS=bamglib femlib Algo lglib fflib std x11 nw mpi agl glx
