@@ -225,13 +225,14 @@ fi
 
 # Looking for useful configuration utilities
 # ------------------------------------------
+
 AC_ARG_ENABLE(generic_blas,[  --enable-generic_blas	Download generic blas (implie --enable-download)])
 
 AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK,FLTK)])
 
 if test "$enable_generic_blas" = yes
 then
-enable_download = yes
+	enable_download=yes
 fi
 
 if test "$enable_download" = yes
@@ -597,15 +598,25 @@ AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 # Can we produce an IDE?
 # ----------------------
 
-ff_fltk_config=fltk-config
-AC_CHECK_PROG(ff_fltk,fltk-config,yes,no)
+# Sometimes (under cygwin for instance) the defulat version of FLTK
+# does not fit our purpose
+
+AC_ARG_ENABLE(default-fltk,[  --disable-default-fltk	Does not use default FLTK])
+
+if test "$enable_default_fltk"==no
+then
+	ff_fltk=no
+else
+	ff_fltk_config=fltk-config
+	AC_CHECK_PROG(ff_fltk,fltk-config,yes,no)
+fi
 
 # Downloading and compiling FLTK. (todo)
 if test "$ff_fltk" = no -a "$enable_download" = yes
 then
 	AC_MSG_NOTICE(using downloaded FLTK)
 	AC_SUBST(DOWNLOAD_FLTK,fltk)
-	ff_fltk_config=$curdir/download/fltk/fltk-1.1.5/install/bin/fltk-config
+	ff_fltk_config="$curdir/download/fltk/fltk-1.1.5/install/bin/fltk-config"
 	ff_fltk=yes
 fi
 
@@ -617,20 +628,18 @@ then
 	ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-cs-server${EXEEXT}"
 
 	AC_SUBST(FLTK_CONFIG,$ff_fltk_config)
-
-	# Automake does not want to see "fltk-config --ldflags" in *_LDADD,
-	# so we need to evaluate this here
-
-	AC_SUBST(FLTK_LDADD,`$ff_fltk_config --ldflags`)
 fi
 
 # creating all makefiles
 # ----------------------
 
+# The final list of executable programs
 AC_SUBST(GLXPROG,$ff_glxprog)
 AC_SUBST(AGLPROG,$ff_aglprog)
 AC_SUBST(X11PROG,$ff_x11prog)
 AC_SUBST(IDEPROG,$ff_ideprog)
+
+# All makefiles
 AC_OUTPUT(Makefile
 	download/Makefile
 	download/blas/Makefile
