@@ -521,13 +521,18 @@ if test "$ff_dynload" = yes  ;
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
 	AC_CHECK_LIB(dl,dlinfo)
+
+	# Activate dynamic loading tests (see examples++-load/Makefile.am)
+	AC_SUBST(LOAD_TESTS,../regtests.sh)
+	AC_SUBST(LOAD_COMPILE,myfunction.so)
+
 	# gcc on MacOS does not produce an error with "-rdynamic" but
 	# still complains about it.
 	if test "$ff_mac" = "no";
 	then
-	CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
+		CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
 	else
-	true
+		true
 	fi
 fi
 
