@@ -226,8 +226,8 @@ inline void ARrcNonSymStdEig<FLOAT>::ValAllocate()
 {
 
   if (this->EigValR == NULL) {
-    this->EigValR = new FLOAT[this->ValSize()];
-    this->EigValI = new FLOAT[this->ValSize()];
+    this->EigValR = new FLOAT[this->ValSize()*2]; // modif FH ??? 29032005 *2
+    this->EigValI = new FLOAT[this->ValSize()*2]; // modif FH ??? 29032005 *2
     this->newVal = true;
   }
 
@@ -418,8 +418,8 @@ Eigenvalues(FLOAT* &EigValRp, FLOAT* &EigValIp, bool ivec, bool ischur)
     }
     else {                                        // Copying eigenvalues.
       try {
-        if (EigValRp == NULL) EigValRp = new FLOAT[ValSize()];
-        if (EigValIp == NULL) EigValIp = new FLOAT[ValSize()];
+        if (EigValRp == NULL) EigValRp = new FLOAT[ValSize()*2];// modif FH ??? 29032005 *2
+        if (EigValIp == NULL) EigValIp = new FLOAT[ValSize()*2];// modif FH ??? 29032005 *2
       }
       catch (ArpackError) { return 0; }
       copy(this->nconv,this->EigValR,1,EigValRp,1);
@@ -433,8 +433,8 @@ Eigenvalues(FLOAT* &EigValRp, FLOAT* &EigValIp, bool ivec, bool ischur)
       this->newVal = false;
     }
     try {
-      if (EigValRp == NULL) EigValRp = new FLOAT[ValSize()];
-      if (EigValIp == NULL) EigValIp = new FLOAT[ValSize()];
+      if (EigValRp == NULL) EigValRp = new FLOAT[ValSize()*2];// modif FH ??? 29032005 *2
+      if (EigValIp == NULL) EigValIp = new FLOAT[ValSize()*2];// modif FH ??? 29032005 *2
     }
     catch (ArpackError) { return 0; }
     this->EigValR = EigValRp;

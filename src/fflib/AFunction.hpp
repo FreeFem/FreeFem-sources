@@ -21,6 +21,7 @@
 #include <algorithm>
 extern bool showCPU;
 #include <time.h> 
+#include "CodeAlloc.hpp"
 
 inline double CPUtime(){
 #ifdef SYSTIMES
@@ -97,7 +98,25 @@ struct UnId {
   UnId() :id(0),r(0),e(0),array(0),re(0),ref(false) {}
   UnId(const char * idd) :id(idd),r(0),e(0),array(0),re(0),ref(false) {}
   UnId(const char * idd,const C_F0 & ee,aType rr,bool reff) ;  
-  UnId(deque<UnId>  * d) : id(0),e(0),array(d),re(0),ref(false) {}
+  UnId(deque<UnId>  * d) : id(0),r(0),e(0),array(d?new deque<UnId>(*d):0),re(0),ref(false) {}
+  UnId(const UnId & u) : 
+    id(u.id),r(u.r),e(u.e),
+    array(u.array?new deque<UnId>(*u.array):0),
+    re(u.re),ref(u.ref) {}
+   // Modif 24032005  
+  void  operator= (const UnId & u) {
+    id=u.id;
+    r=u.r;
+    e=u.e;
+    re=u.re;
+    ref=u.ref;
+    if(array) delete array;
+    array=0;
+    if(u.array) array= new deque<UnId>(*u.array);
+  }
+    
+  ~UnId(){ if( array) delete array;} // Modif 24032005  
+  
 };
 
 typedef deque<UnId> ListOfId;
@@ -111,15 +130,8 @@ typedef deque<UnId> ListOfId;
 #define NEW_TYPE_PtrNIND(type) map_type[typeid(type*).name()] = new ForEachTypePtr<type >(0,0)
 //#define NEW_TYPE_PtrI(type) map_type[typeid(type*).name()] = new ForEachTypePtr<type*>(Initialize<type>)
 */
-class CodeAlloc { public:
-/*   static size_t nb,lg;   
-   static void * mem;
-   static void * lgmax;
-   void *operator new(size_t ll ) { nb++;lg+=ll; return malloc(ll);} 
-   void *operator new[](size_t ll ) {nb++;lg+=ll; return malloc(ll);} 
-   void operator delete(void * pp)   {free(pp);}
-   void operator delete[](void * pp) { free(pp);} */
-};
+
+
 
 
 extern Polymorphic * TheOperators, * TheRightOperators;
@@ -177,6 +189,7 @@ class TableOfIdentifier:CodeAlloc {
   void Add(Key k,Key op,OneOperator *p0,OneOperator *p1=0,
       OneOperator *p2=0,OneOperator *p3=0,OneOperator *p4=0,
       OneOperator *p5=0,OneOperator *p6=0)  ;
+  void clear(); 
 template<class T>         
   C_F0 NewVar(Key k,aType t,size_t & top,const C_F0 &i) ;
 template<class T>         
@@ -267,6 +280,7 @@ public:
     ostream & ShowTable(ostream & f) const { f << ti; return f;}
     
   //  basicForEachType * funct_type;
+  virtual ~basicForEachType();
     
 };
 
@@ -397,6 +411,7 @@ class  ArrayOfaType : public CodeAlloc{
     
 class  OneOperator : public ArrayOfaType {
     friend class MakeVectSpaceN;
+    friend class basicForEachType;
     const basicForEachType * r; //  return type 
     OneOperator *next; // to make a list of OneOperator
     public: 
@@ -457,7 +472,7 @@ class Polymorphic:  public E_F0mps {
 //  by default Empty and do nothing      
  virtual AnyType operator()(Stack ) const  { return Nothing;}
  virtual bool Empty() const {return true;} //  by default Empty 
- 
+ void clear() { m.clear();}
  const  OneOperator * Find(const char *op, const ArrayOfaType &at) const;
  const  OneOperator * FindWithOutCast(const char *op,const  ArrayOfaType &at) const;
  void Show(const char *op,const ArrayOfaType & at,ostream &f=cerr)const ; 
@@ -1193,7 +1208,8 @@ class ListOfInst : public  E_F0mps {
    Expression * ptr() const {return list;}
    int * nlines() const {return linenumber;}
  //  void destroy() { if (list) delete [] list; list=0;}
- 
+  ~ListOfInst(){ cout << " ----- ~ListOfInst " << endl;
+  if(list) delete [] list;list=0;if(linenumber)  delete[] linenumber; linenumber=0;}
 };
 
 class CListOfInst  {  private:
@@ -1276,7 +1292,6 @@ class basicAC_F0 {
  } ;
  
   void SetNameParam(int n=0,name_and_type *l=0 , Expression * e=0) const ;
-   
 };
 
 
@@ -1292,7 +1307,10 @@ class AC_F0: public basicAC_F0 { //  a Array of C_F0
 
   AC_F0 & operator=(long k) {throwassert(k==0);named_parameter=0;a=new C_F0[MaxSize]; nb=0;return *this;}     
   AC_F0 & operator=(const C_F0& c) {named_parameter=0; a=new C_F0[MaxSize]; nb=0;a[nb++]=c;return *this;} 
-  AC_F0 & operator+=(const C_F0& c) { throwassert(a&& nb<MaxSize);a[nb++]=c;return *this;} 
+  AC_F0 & operator+=(const C_F0& c) { 
+       if ( ! (a&& nb<MaxSize))
+         CompileError("Sorry the number of parameter < 1024");
+       a[nb++]=c;return *this;} 
   AC_F0 & Add(const char * nm,const C_F0 &c)  {
      if (!named_parameter) named_parameter=new maptype();
     iterator i=named_parameter->find(nm);
@@ -1302,10 +1320,13 @@ class AC_F0: public basicAC_F0 { //  a Array of C_F0
   int size() const {return nb;}
   const C_F0 & operator [] (int i) const {throwassert(a && i<nb);return a[i];}
   void destroy() {
-       if (a) delete []  a;
-        nb=0;
+      
+        nb=0;       
         if(named_parameter) 
-          delete named_parameter;}
+          delete named_parameter;
+        if (a)
+           delete []  a;
+        a=0;named_parameter=0;}
   
 }; 
 
@@ -1492,7 +1513,7 @@ inline Type_Expr  NewVariable(aType t,size_t &off)
    size_t o= align8(off);//  align    
  //  off += t->un_ptr_type->size;
  // bug    off += t->size;
-   off += t->un_ptr_type->size; // coorection 16/09/2003 merci ˆ Richard MICHEL
+   off += t->un_ptr_type->size; // coorection 16/09/2003 merci à Richard MICHEL
    return  Type_Expr(t,new T(o,t));
 } 
 
@@ -2498,13 +2519,13 @@ class Routine: public OneOperator{  public:
    size_t offset;
    aType tfunc,tret;
    const char * name;
-   const ListOfId &param;
+   const ListOfId param;
    Block * currentblock;
    Expression  ins;   
    Expression  clean;
    
     E_F0 * code(const basicAC_F0 & args) const  ;
-   Routine(aType tf,aType tr,const char * iden, const ListOfId *l,Block * & cb);
+   Routine(aType tf,aType tr,const char * iden,  ListOfId *l,Block * & cb);
    Block * Set(C_F0   instr) ;
 };
 
@@ -2596,6 +2617,8 @@ extern queue<pair<const E_Routine*,int> > debugstack;
 
 extern basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
   
+  
+ void ClearMem(); 
 #endif
 
 

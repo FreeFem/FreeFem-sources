@@ -419,7 +419,7 @@ int main (int argc, char **argv)
    for (int i=0;i<256;i++)
      wn[i] = 0;
    strcpy(wn,"   -- FreeFem++ ");
-   strcat(wn,StrVersionNumber());
+   strcat(wn,StrVersionNumber().c_str());
    
    SIOUXSetTitle((unsigned char *) wn);
    int ret=15;  

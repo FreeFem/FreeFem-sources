@@ -17,12 +17,12 @@
 
 static const bool debugmacro = false;
 
-inline char * newcopy(const char * s)
+/*inline char * newcopy(const char * s)
 {
   char *r(new char  [strlen(s)+1]);
   strcpy(r, s);return r;
 }
-
+*/
 void  mylex::Add(Key k,int i)   
 {
   Check(!i,k,"mot clef");
@@ -346,7 +346,8 @@ int mylex::scan(int lvl)
     if (! InMotClef(lglval.type,ret))  {
       if (  FindType(buf) == 1)  
          ret =  FESPACE;
-     lglval.str = newcopy(buf); }}
+     lglval.str = newcopy(buf);
+      }}
   
   if ( ret =='{') { //cout << " listMacroDef->push_back"<< endl; 
       listMacroDef->push_back( MapMacroDef() );}
@@ -620,3 +621,12 @@ bool mylex::close() {
   return true;
 }
   
+ mylex::~mylex()
+{
+  delete listMacroDef;
+  while( ! strdata.empty()) 
+   {
+      delete [] strdata.top(); // bug  ????? FH  25032005 
+      strdata.pop();
+   }
+}
