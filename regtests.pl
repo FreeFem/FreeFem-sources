@@ -32,9 +32,7 @@ foreach my $ff (@progs) {
 
   # Running FreeFem++ on regtests.edp (specific to regression tests),
   # otherwise on all.edp.
-  my $test="all.edp";
-  $test="regtests.edp" if -f "regtests.edp";
-  my $cmd="$ff $test > regtests-$count.log";
+  my $cmd="$ff ".$ENV{REGEDP}." > regtests-$count.log";
   print "$cmd\n";
   system $cmd;
   die if $?;
