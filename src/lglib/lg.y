@@ -47,6 +47,7 @@ Block *currentblock;
 static double CPUcompileInit =0;
 //class pfes;
 C_F0  fespacetype;
+bool fespacecomplex;
 
 int ShowAlloc(char *s);
 inline int yylex()  {return zzzfff->scan();}
@@ -285,22 +286,25 @@ type_of_dcl:   TYPE
 
 
 ID_space:
-    ID                                  { $$ =  NewFEvariable($1,currentblock,fespacetype); }
- |  ID '[' no_set_expr ']'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3); }
- |  ID '=' no_set_expr                  { $$ =  NewFEvariable($1,currentblock,fespacetype,$3) }
- |  '[' list_of_id1 ']'                 { $$ =  NewFEvariable($2,currentblock,fespacetype) }
- |  '[' list_of_id1 ']' '[' no_set_expr ']'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5) }
- |  '[' list_of_id1 ']' '=' no_set_expr { $$ =  NewFEvariable($2,currentblock,fespacetype,$5) }
+    ID                                  { $$ =  NewFEvariable($1,currentblock,fespacetype,fespacecomplex); }
+ |  ID '[' no_set_expr ']'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
+ |  ID '=' no_set_expr                  { $$ =  NewFEvariable($1,currentblock,fespacetype,$3,fespacecomplex) }
+ |  '[' list_of_id1 ']'                 { $$ =  NewFEvariable($2,currentblock,fespacetype,fespacecomplex) }
+ |  '[' list_of_id1 ']' '[' no_set_expr ']'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
+ |  '[' list_of_id1 ']' '=' no_set_expr { $$ =  NewFEvariable($2,currentblock,fespacetype,$5,fespacecomplex) }
 ; 
 ID_array_space:
-    ID '(' no_set_expr ')'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3); }
- |  '[' list_of_id1 ']' '(' no_set_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5) }
+    ID '(' no_set_expr ')'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
+ |  '[' list_of_id1 ']' '(' no_set_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
 
 ;
 
-fespace: FESPACE { fespacetype = Find($1);};
-/* fespacearray: FESPACE '[' TYPE']'{ fespacetype = Find($1); }
-*/
+fespace:  FESPACE {fespacecomplex=false;  fespacetype = Find($1);}
+        | FESPACE '<' TYPE '>' {
+             if ($3 != typevarreal && $3 != typevarcomplex) yyerror(" type of finite element <real> or <complex>");
+             fespacecomplex=($3==typevarcomplex);
+             fespacetype = Find($1);}
+;        
 spaceIDa  :      ID_array_space {  $$ = $1  } 
             |    spaceIDa ',' ID_array_space { $$=C_F0($1,$3);} ;
             
