@@ -17,6 +17,7 @@ AC_PROG_RANLIB
 
 # Necessary compilers
 
+AC_PROG_F77
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_YACC
@@ -47,7 +48,7 @@ AC_MSG_RESULT($ff_mac)
 # -------------------------------------------------------------------
 
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
-fflibdl="-ldl"
+ff_libdl="-ldl"
 ff_uname=`uname`
 case $ff_uname in
 CYGWIN*)
@@ -151,7 +152,8 @@ ff_blas_ok=no
 ff_save_libs="$LIBS"
 AC_CHECK_LIB(blas,daxpy_,
 	LIBS="$LIBS -lblas"
-	ff_blas_ok=yes,
+	ff_blas_ok=yes
+	ff_blas_lib="-lblas",
 	LIBS="$ff_save_libs")
 
 # Trying Atlas (location corresponding to Debian package)
@@ -162,7 +164,8 @@ then
 	LIBS="$LIBS -L/usr/lib/atlas -lblas"
 	AC_LINK_IFELSE(
 		[AC_LANG_CALL(,daxpy_)],
-		ff_blas_ok=yes,
+		ff_blas_ok=yes
+		ff_blas_lib="-L/usr/lib/atlas -lblas",
 		LIBS="$ff_save_libs")
 	AC_MSG_RESULT($ff_blas_ok)
 fi
@@ -175,10 +178,22 @@ then
         LIBS="$LIBS -framework vecLib"
         AC_LINK_IFELSE(
                 [AC_LANG_CALL(,daxpy_)],
-                ff_blas_ok=yes,
+                ff_blas_ok=yes
+		ff_blas_lib="-framework vecLib",
                 LIBS="$ff_save_libs")
         AC_MSG_RESULT($ff_blas_ok)
 fi
+
+# If all else fails, download!
+if test "$ff_blas_ok" = no;
+then
+	AC_MSG_NOTICE(using downloaded Blas)
+	AC_SUBST(DOWNLOAD_BLAS,blas)
+	LIBS='${top_srcdir}/download/ATLAS/lib/ff++/libatlas.a'" $LIBS"
+	ff_blas_lib='${top_srcdir}/download/ATLAS/lib/ff++/libatlas.a'
+	ff_blas_ok=yes
+fi
+AC_SUBST(BLASLIB,$ff_blas_lib)
 
 # Looking for ARPACK
 # ------------------
@@ -241,14 +256,22 @@ then
                 ff_arpack_libs=$ff_lib_arpack)
         AC_MSG_RESULT($ff_arpack_ok)
     fi
+
+	# If all else fails, download!
+	if test "$ff_arpack_ok" = no;
+	then
+		AC_MSG_NOTICE(using downloaded Arpack)
+		AC_SUBST(DOWNLOAD_ARPACK,arpack)
+		ff_arpack_libs='${top_srcdir}/download/arpack/ARPACK/libarpack_ff++.a'
+		ff_arpack_ok=yes
+	fi
 fi
 LIBS="$ff_arpack_libs $ff_save_libs"
 
 if test "$ff_arpack_ok" = yes;
 then
 	EIGENOBJ='eigenvalue.$(OBJEXT)'
-	AC_DEFINE(HAVE_LIBARPACK,1,
-		Arpack is used for eigenvalue computation)
+	AC_DEFINE(HAVE_LIBARPACK,1,Arpack is used for eigenvalue computation)
 fi
 AC_SUBST([EIGENOBJ])
 
@@ -278,13 +301,27 @@ then
 
 	if test "$ff_amd_ok" = no;
 	then
-		AC_CHECK_LIB(amd,amd_info)
+		AC_CHECK_LIB(amd,amd_info,
+			AC_DEFINE(HAVE_LIBAMD,1,AMD for UMFPACK)
+			ff_amd_ok=yes)
 	fi
 
-	if test "$ff_umfpack_ok" = no;
+	if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
 	then
-		AC_CHECK_LIB(umfpack,umf_i_malloc)
+		AC_CHECK_LIB(umfpack,umf_i_malloc,
+			AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
+			ff_umfpack_ok=yes)
 	fi
+fi
+
+# If all else fails, download!
+if test "$ff_umfpack_ok" = no;
+then
+	AC_MSG_NOTICE(using downloaded Umfpack)
+	AC_SUBST(DOWNLOAD_UMFPACK,umfpack)
+	LIBS='${top_srcdir}/download/umfpack/UMFPACKv4.3/UMFPACK/Lib/libumfpack.a ${top_srcdir}/download/umfpack/UMFPACKv4.3/AMD/Lib/libamd.a'" $LIBS"
+	AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
+	ff_umfpack_ok=yes
 fi
 
 # Checking for some functions that may not appear everywhere
@@ -377,6 +414,10 @@ AC_SUBST(GLXPROG,$ff_glxprog)
 AC_SUBST(AGLPROG,$ff_aglprog)
 AC_SUBST(X11PROG,$ff_x11prog)
 AC_OUTPUT(Makefile
+	download/Makefile
+	download/blas/Makefile
+	download/arpack/Makefile
+	download/umfpack/Makefile
 	src/Makefile
 	src/bamglib/Makefile
 	src/femlib/Makefile

@@ -1,5 +1,7 @@
-; Installation of FreeFem++ on Microsoft Windows with Inno Setup
+; Creating a FreeFem++ package for Microsoft Windows with Inno Setup
 ; $Id$
+
+; No source file here. They are in the source tar ball.
 
 [Setup]
 AppName=FreeFem++
