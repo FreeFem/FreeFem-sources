@@ -14,7 +14,7 @@ AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # "PACKAGE_VERSION" is already taken by autoconf, so we need to choose
 # another name
 
-AC_SUBST(FREEFEM_PACKAGING,2)
+AC_SUBST(FREEFEM_PACKAGING,3)
 AC_SUBST(FFV_PREFIX,FreeFem++-v$VERSION-$FREEFEM_PACKAGING)
 
 # Automake 1.4 is too old
