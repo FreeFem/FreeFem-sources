@@ -13,29 +13,32 @@ step ("make") downloads the missing ones (from their official
 websites) and compiles them. But you can specify a library
 file (ending with ".a") instead with the following options:
 
---with-arpack=archive
---with-amd=archive
---with-umfpack=archive
+--with-arpack=library file
+--with-amd=library file
+--with-umfpack=library file
 
 Here are the different versions of FreeFem++ produced by one
 compilation (some versions may be missing if your system does not
 support them):
 
 * FreeFem++: standard version (using X11 graphics on Linux and MacOS
-  10, Win32 on Windows and CoCoa on MacOS 9)
+  10, Win32 on Windows and CoCoa on MacOS 9) (located in src/std)
 
-* FreeFem++-nw: without graphics
+* FreeFem++-nw: without graphics (located in src/nw)
 
-* FreeFem++-glx: graphics based on OpenGL
+* FreeFem++-glx: graphics based on OpenGL (located in src/glx)
 
-* FreeFem++-agl: graphics based on MacOS CoCoa
+* FreeFem++-agl: graphics based on MacOS CoCoa (located in src/agl)
 
-* FreeFem++-mpi: parallel version, without graphics
+* FreeFem++-mpi: parallel version, without graphics (located in src/mpi)
+
+The compilation procedure (produced with automake) builds all the
+libraries and executables sequentially. Running "make" in a
+subdirectory does not rebuild dependencies in other directories.
 
 The compilation has been tested under linux and MacOs/Darwin with g++
 version 2.95.2, 2.95.3, 3.01 3.1 3.3. It take 15 mn to compile all on
-my PowerBook G4 666Mhz 256MB, and it take more than 1 hour under
-linux.
+my PowerBook G4 666Mhz 256MB.
 
 Examples
 --------
