@@ -867,6 +867,8 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-maintainer-mode enable make rules and dependencies not useful
                           (and sometimes confusing) to the casual installer
+  --disable-fortran	No Fortran compiler available (BLAS, ARPACK and UMFPACK need it)
+  --disable-c		No C compiler available (C BLAS need it)
   --disable-dependency-tracking Speeds up one-time builds
   --enable-dependency-tracking  Do not reject slow dependency extractors
   --enable-cygwin	On Microsoft Windows, uses Cygwin instead of Mingw
@@ -1899,7 +1901,14 @@ fi
 
 # Necessary compilers
 
-ac_ext=f
+# Check whether --enable-fortran or --disable-fortran was given.
+if test "${enable_fortran+set}" = set; then
+  enableval="$enable_fortran"
+
+fi;
+if test "$enable_fortran" != no
+then
+	ac_ext=f
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
@@ -1991,7 +2000,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:1994:" \
+echo "$as_me:2003:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -2314,7 +2323,16 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-ac_ext=c
+fi
+
+# Check whether --enable-c or --disable-c was given.
+if test "${enable_c+set}" = set; then
+  enableval="$enable_c"
+
+fi;
+if test "$enable_c" != no
+then
+	ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -3203,6 +3221,8 @@ else
   am__fastdepCC_FALSE=
 fi
 
+
+fi
 
 ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -8099,7 +8119,8 @@ fi
 done
 
 # If all else fails, download!
-if test "$ff_blas_ok" = no -a "$ff_wget" = yes
+if test "$ff_blas_ok" = no -a "$ff_wget" = yes \
+   -a "$enable_fortran" != no -a "$enable_c" != no
 then
 	# Extract the first word of "unzip", so it can be a program name with args.
 set dummy unzip; ac_word=$2
@@ -8794,7 +8815,8 @@ echo "${ECHO_T}$ff_arpack_ok" >&6
     fi
 
 	# If all else fails, download!
-	if test "$ff_arpack_ok" = no -a "$ff_wget" = yes
+	if test "$ff_arpack_ok" = no -a "$ff_wget" = yes \
+	   -a "$enable_fortran" != no
 	then
 		{ echo "$as_me:$LINENO: using downloaded Arpack" >&5
 echo "$as_me: using downloaded Arpack" >&6;}
@@ -9313,7 +9335,8 @@ fi
 fi
 
 # If all else fails, download!
-if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes
+if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes \
+   -a "$enable_fortran" != no
 then
 	{ echo "$as_me:$LINENO: using downloaded Umfpack" >&5
 echo "$as_me: using downloaded Umfpack" >&6;}
