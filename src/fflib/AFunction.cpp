@@ -1,7 +1,7 @@
 //#pragma dont_inline on
 //#pragma inline_depth(1)
 
-#include <config-wrapper.h>
+#include "config-wrapper.h"
 
 #include <complex>
 #include "AFunction.hpp"
