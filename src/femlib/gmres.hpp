@@ -52,9 +52,9 @@ abs(Real x)
 
 
 template < class Operator, class Vector, class Preconditioner,
-           class Matrix, class Real >
+           class Matrix, class Real , class Vector_>
 int 
-GMRES(const Operator &A, Vector &x, const Vector &b,
+GMRES_(const Operator &A, Vector_ &x, const Vector_ &b,
       const Preconditioner &M, Matrix &H, int &m, int &max_iter,
       Real &tol)
 {
@@ -162,4 +162,11 @@ void ApplyPlaneRotation(Real &dx, Real &dy, Real &cs, Real &sn)
   dy = -sn * dx + cs * dy;
   dx = temp;
 }
+template < class Operator, class Vector, class Preconditioner,
+           class Matrix, class Real >
+int 
+GMRES(const Operator &A, Vector &x, const Vector &b,
+      const Preconditioner &M, Matrix &H, int &m, int &max_iter,
+      Real &tol)
+{ return   GMRES_<Operator,Vector,Preconditioner,Matrix,Real,Vector>(A,x,b,M,H,m,max_iter,tol); }   
 
