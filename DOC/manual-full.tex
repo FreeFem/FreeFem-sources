@@ -644,7 +644,7 @@ there are some compound operator:
 Vh f,g; 
 f = x*y;
 g = sin(pi*x);
-Vh<complex> ff,gg; // a complex valued finite element function \index{FE:complex}
+Vh<complex> ff,gg; // a complex valued finite element function \index{FE function!complex}
 ff= x*(y+1i);
 gg = exp(pi*x*i);
 @varf mat(u,v) =
@@ -1311,7 +1311,8 @@ mesh Th = square(20,20,[-2+2*x,-2+2*y]); // square $]-2,2[^2$
 fespace Vh(Th,P1);
 Vh fh=f;  // fh is the  projection of f to Vh (real value)
 func zf=(x^2*(1+y)^3+y^2)*exp(x+1i*y);
-Vh<complex> zh = zf; // zh is the  projection of zf to Vh  (complex value) 
+Vh<complex> zh = zf; // zh is the projection of zf 
+// to complex value Vh space   \index{FE function!complex}
 \eT
 The construction of \ttCC{fh} (=$f_h$) is explained in
 \refSec{Finite Elements}.
@@ -3062,13 +3063,15 @@ in the same time, you can use the keywork \texttt{solve},
 
 \subsection{Parameter Description for \texttt{solve} and \texttt{problem}}
 
-The parameters are FE function, the number $n$ of parameters is even
+The parameters are FE function real or complex, the number $n$ of parameters is even
 ($n=2*k$), the $k$ first function parameters are unknown, and the $k$
 last are test functions.
 
 \begin{note} If the functions are a part of
 vectoriel FE then you must give  all the functions of the vectorial
 FE in the same order (see laplaceMixte problem for example).
+\end{note}
+\begin{note} Don't mixte  complex and real parameters  FE function. %add  FH 
 \end{note}
 \begin{bug}
 The mixing of \texttt{fespace} with differents periodic boundary condition is not
@@ -3335,8 +3338,6 @@ where * stands for the name of quadrature formulas or the order of the Gauss for
 \bFF
 @mesh Th=@square(10,10);
 @fespace Xh(Th,@P2),Mh(Th,@P1);
-Xh u1,u2,v1,v2;
-Mh p,q,ppp;
 
 @varf bx(u1,q) = @int2d(Th)( (dx(u1)*q));
 \eFF
@@ -3350,6 +3351,11 @@ $$ by(u_{1},q)= \int_{\Omega_{h}} \frac{\partial u_{1}}{\partial y} q $$
 @varf a(u1,u2)= @int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
                     +  @on(1,2,4,u1=0)  +  @on(3,u1=1) ;
 \eFF
+\begin{note}
+ the parameters of the variationnal form are completely formal,  but is not the case
+ in \texttt{problem} and \texttt{solve} functionality. %FH add
+\end{note}
+
 $$ a(u_{1},v_{2}) = \int_{\Omega_{h}}  \nabla u_{1}.\nabla u_{2}; \quad
              \quad u_{1} = 1*g \mbox{ on } \Gamma_{3}, u_{1} =0 \mbox{ on } \Gamma_{1}\cup \Gamma_{2}\cup \Gamma_{4} $$
  where $f$ is defined later.
@@ -3357,10 +3363,15 @@ $$ a(u_{1},v_{2}) = \int_{\Omega_{h}}  \nabla u_{1}.\nabla u_{2}; \quad
  Later variational forms can be used to construct right hand side vectors,
 matrices associated to them, or to define a new problem;\index{matrix}
 \bFF
+Xh u1,u2,v1,v2;
+Mh p,q,ppp;
+
 Xh bc1; bc1[] = a(0,Xh);  //  right hand side for boundary condition
 Xh b;
 
 @matrix A= a(Xh,Xh,solver=CG);   // the Laplace matrix \index{matrix!solver} \index{GC} 
+@matrix<complex> CA= a(Xh,Xh,solver=CG);   // the complex Laplace matrix \index{matrix!complex} \index{GC} 
+
 @matrix Bx= bx(Xh,Mh);    // $ Bx = (Bx_{ij})$ and $ Bx_{ij}= bx(b^x_j,b^m_j)$
 //  where $b^x_j$ is a basis of Xh, and $b^m_j$ is a basis of Mh.
 @matrix By= by(Xh,Mh);    // $ By= (By_{ij})$ and $ By_{ij}= by(b^x_j,b^m_j)$
@@ -3407,7 +3418,7 @@ you can remove the use of this optimization by writing for example : \index{opti
 Numerical results in FEM create huge data, so it is very important to
 make obtained results visible.
 There are two ways of visualization in \freefempp:
-One is default view supporting the draw of meshes, isovalue of FE-functions
+One is default view supporting the draw of meshes, isovalue of real  FE-functions
 and vector fields by the command \ttCC{@plot} (see \refSec{Plot}).
 For documentation, \freefempp make the plotting stored as postscript files.
 
@@ -3419,8 +3430,8 @@ Another method is to use the external tools, for example, gnuplot
    With the command plot,
    meshes, isovalues and vector fields can be displayed.
 
-The parameters of the plot command can be , meshes, FE functions ,
-arrays of 2 FE functions, arrays of two arrays of double, to plot
+The parameters of the plot command can be , meshes,real FE functions ,
+arrays of 2  real FE functions, arrays of two arrays of double, to plot
 respectively mesh,
 isovalue, vector field, or curve defined by the two arrays of double.
 
