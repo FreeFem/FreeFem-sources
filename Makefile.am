@@ -87,7 +87,8 @@ speedtest: all
 # number as well.
 
 WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
-	m4 -DVERSION=$(VERSION)-$(PACKAGE_VERSION)$(OPTIM_TYPE) WindowsPackage.m4 > WindowsPackage.iss
+	m4 -DVERSION=$(VERSION)-$(PACKAGE_VERSION)$(OPTIM_TYPE) \
+		WindowsPackage.m4 > WindowsPackage.iss
 
 # Debian package
 # --------------
