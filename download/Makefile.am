@@ -3,4 +3,4 @@
 
 # $Id$
 
-SUBDIRS=blas arpack umfpack
+SUBDIRS=blas arpack umfpack fltk
