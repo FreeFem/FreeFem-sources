@@ -1,6 +1,8 @@
 files
 freefem++
 freefem++-doc
+freefem++-doc.postinst.debhelper
+freefem++-doc.prerm.debhelper
 freefem++-glx
 freefem++-mpi
 freefem++-nw
