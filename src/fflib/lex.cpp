@@ -380,6 +380,7 @@ bool mylex::ExpandParam(int &ret)
             input(j->second, 0);
             ret = basescan(); 
             arg=buf;
+            continue; // next macro 
             //return true;
           }     
       }
