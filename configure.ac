@@ -380,6 +380,9 @@ if test "$ff_arpack_ok" = yes;
 then
 	EIGENOBJ='eigenvalue.$(OBJEXT)'
 	AC_DEFINE(HAVE_LIBARPACK,1,Arpack is used for eigenvalue computation)
+
+	# Determines whether to run the eigenvalue tests
+	AC_SUBST([EIGENTEST],../regtests.sh)
 fi
 AC_SUBST([EIGENOBJ])
 
