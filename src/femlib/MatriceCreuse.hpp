@@ -560,7 +560,8 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
    if (verbosity>99) kprint=1;
    R ro=1;
    Rn g(n),h(n),Ah(n), & Cg(Ah);  // on utilise Ah pour stocke Cg  
-   g = A*x-b;  
+   g = A*x;
+   g -= b;  
    Cg = C*g; // gradient preconditionne 
    h =-Cg; 
    R g2 = (Cg,g);
@@ -576,7 +577,8 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
      { 
        R rop = ro; 
        x += rop*h;      //   x+ rop*h  , g=Ax   (x old)
-       Ah = A*x-b;        //   Ax + rop*Ah = rop*Ah + g  =
+       Ah = A*x;
+       Ah -= b;        //   Ax + rop*Ah = rop*Ah + g  =
        Ah -= g;         //   Ah*rop  
        R hAh =(h,Ah);
        if (norm(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
