@@ -747,10 +747,10 @@ class KN :public KN_<R> { public:
 
    template<class P,class Q> 
      KN& operator =(const  PplusQ<P,Q> & PQ)  
-      { *this=PQ.p; *this+=PQ.q; } 
+      { *this=PQ.p; *this+=PQ.q;return *this; } 
    template<class P,class Q> 
      KN& operator +=(const  PplusQ<P,Q> & PQ)  
-      { *this+=PQ.p; *this+=PQ.q; } 
+      { *this+=PQ.p; *this+=PQ.q;return *this; } 
            
    KN& operator -=(const_R a)  
         { KN_<R>::operator-=(a);return *this;}

@@ -12,8 +12,8 @@ fespace VH(TH,P1);
 fespace Vh(th,P1);
 fespace Wh(Th,P1);
 
-matrix RB= interplotematrix(VH,Vh);  // build interpolation matrix Vh->Vh 
-matrix RBB= interplotematrix(Wh,Vh);  // build interpolation matrix
+matrix RB= interpolate(VH,Vh);  // build interpolation matrix Vh->Vh 
+matrix RBB= interpolate(Wh,Vh);  // build interpolation matrix
 matrix<complex> B=RB;
 B = B*(1+2i);
 

@@ -1034,6 +1034,7 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
   
 }
 
+
 class MatrixInterpolation : public OneOperator { public:  
 
     class Op : public E_F0info { public:

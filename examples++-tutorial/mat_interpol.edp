@@ -6,22 +6,29 @@ fespace Vh4(Th4,P1);
 fespace Wh(Th,P0);
 fespace Wh4(Th4,P0);
 
-matrix IV= interplotematrix(Vh,Vh4);
+// remark in previous version (before v1.44)
+// the name of interpolate function is interplotematrix
+
+matrix IV= interpolate(Vh,Vh4); //  here the function is 
+// exended by continuity
+
 cout << " IV Vh<-Vh4 " << IV << endl;
 
-matrix IV0= interplotematrix(Vh,Vh4,inside=1);
+matrix IV0= interpolate(Vh,Vh4,inside=1);//  here the function is 
+// exended by zero
+
 cout << " IV Vh<-Vh4 (inside=1)  " << IV0 << endl;
 
-matrix IVt0= interplotematrix(Vh,Vh4,inside=1,t=1);
+matrix IVt0= interpolate(Vh,Vh4,inside=1,t=1);
 cout << " IV Vh<-Vh4^t (inside=1)  " << IVt0 << endl;
 
-matrix IV4t0= interplotematrix(Vh4,Vh);
+matrix IV4t0= interpolate(Vh4,Vh);
 cout << " IV Vh4<-Vh^t  " << IV4t0 << endl;
 
-matrix IW4= interplotematrix(Wh4,Wh);
+matrix IW4= interpolate(Wh4,Wh);
 cout << " IV Wh4<-Wh  " << IW4  << endl;
 
-matrix IW4V= interplotematrix(Wh4,Vh);
+matrix IW4V= interpolate(Wh4,Vh);
 cout << " IV Wh4<-Vh  " << IW4  << endl;
 
 

@@ -577,6 +577,9 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
      { 
        R rop = ro; 
        x += rop*h;      //   x+ rop*h  , g=Ax   (x old)
+       //       ((Ah = A*x - b) - g);
+       // Ah -= b;        //   Ax + rop*Ah = rop*Ah + g  =
+       // Ah -= g;         //   Ah*rop  
        Ah = A*x;
        Ah -= b;        //   Ax + rop*Ah = rop*Ah + g  =
        Ah -= g;         //   Ah*rop  

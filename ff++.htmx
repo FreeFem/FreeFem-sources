@@ -8,9 +8,7 @@ element method">
    <meta name="Keywords" content="language, c++, Multi-platform, free      
 software, Navier-Stokes, elasticity, convection-diffusion, heat      
 equation, linear elliptic PDE's">
-   <meta name="GENERATOR" content="Mozilla/4.5 (Macintosh; I; PPC) 
-[Netscape]">
-   <title>Freefem++ Home Page (07-juillet-2004)</title>
+   <title>Freefem++ Home Page (03-december-2004)</title>
 <!-- SUMMARY:                                -->
 <!-- AUTHOR:       Frederic hecht     -->
 <!-- ORG:                                    -->
@@ -176,6 +174,12 @@ MacOS X Powerpc  (CoCoa and OpenGL) <font size=-1>
 <li>
 Window 95,98,NT,2000,  XP <font size=-1>
 <a href="@dir@@fexe@"> @fexe@ (a setup file)
+</a>
+ @exe@ </font>
+
+<li>
+Linux static binary file  <font size=-1>
+<a href="@dir@@flinux@"> @flinux@ 
 </a>
  @exe@ </font>
 
