@@ -559,3 +559,7 @@ __________
   mat_interpol.edp  # to test interpolate function
   shur-comp.edp  # a shur complement domaine decomposition
 
+11/12/2004
+ TAG release_1_44
+ now the current version is 1.45
+
