@@ -2375,6 +2375,8 @@ const Fem2D::QuadratureFormular & CDomainOfIntegration::FIT(Stack stack) const
   if( QuadratureFormular_T_1.exact >= exact ) return QuadratureFormular_T_1;
   if( QuadratureFormular_T_2.exact >= exact ) return QuadratureFormular_T_2;
   if( QuadratureFormular_T_5.exact >= exact ) return QuadratureFormular_T_5;
+  if( QuadratureFormular_T_7.exact >= exact ) return QuadratureFormular_T_7;
+  if( QuadratureFormular_T_9.exact >= exact ) return QuadratureFormular_T_9;
   cerr << " Ordre of the Integration Formular ordre " << exact+1 << " exact = " << exact << endl;
   ExecError(" We find  no Integration Formular on Triangle for this  order to hight");
   return QuadratureFormular_T_1;

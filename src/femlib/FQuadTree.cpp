@@ -32,17 +32,8 @@ using namespace Fem2D;
 
 
 
-#define INTER_SEG(a,b,x,y) (((y) > (a)) && ((x) <(b)))
-#define ABS(i) ((i)<0 ?-(i) :(i))
-#define MAX1(i,j) ((i)>(j) ?(i) :(j))
-#define NORM(i1,j1,i2,j2) MAX1(ABS((i1)-(j1)),ABS((i2)-(j2)))
 
-#define IJ(i,j,l) ( ( j & l) ? (( i & l) ? 3 : 2 ) :( ( i & l)? 1 : 0 ))
-#define I_IJ(k,l)  (( k&1) ? l : 0)
-#define J_IJ(k,l)  (( k&2) ? l : 0)
-
-
-#ifdef NEWQUADTREE
+#ifndef NEWQUADTREE
 
 //  new version ----------
 //  ----------------------
@@ -332,7 +323,7 @@ void  FQuadTree::Add( Vertex & w)
       for (int k=0;k<4;k++) // for the 4 vertices find the sub QuadTreeBox ij
 	{ 
 	  int ij;
-	  QuadTreeBox * bb =  b->b[ij=IJ(XtoI(v4[k]->x),YtoJ(v4[k]->y),l)];
+	  QuadTreeBox * bb =  b->b[ij=R2ToI2(v4[k]).Case(l)];
 	  if (!bb) 
 	    bb=b->b[ij]=NewQuadTreeBox(); // alloc the QuadTreeBox 
 	  //    cout << bb << " " << k << " "  << ij <<  endl;
@@ -417,14 +408,14 @@ Vertex *  FQuadTree::NearestVertexWithNormal(const R2 &P)//(long xi,long yj)
   long xi(XtoI(P.x)),yj(YtoJ(P.y));
   QuadTreeBox * pb[ MaxDeep ];
   int  pi[ MaxDeep  ];
-  long ii[  MaxDeep ], jj [ MaxDeep];
+  //long ii[  MaxDeep ], jj [ MaxDeep];
+  I2 pp[ MaxDeep];
   int l; // level
   QuadTreeBox * b;
   IntQuad  h=MaxISize,h0;
   IntQuad hb =  MaxISize;
-  long  i0=0,j0=0;
-  long  iplus( xi<MaxISize?(xi<0?0:xi):MaxISize-1);
-  long  jplus( yj<MaxISize?(yj<0?0:yj):MaxISize-1);
+  I2   p0(0,0);
+  I2  plus( xi<MaxISize?(xi<0?0:xi):MaxISize-1,yj<MaxISize?(yj<0?0:yj):MaxISize-1);
   
   Vertex *vn=0;
  // Vertex *vc;  // the current vertex
@@ -440,14 +431,13 @@ Vertex *  FQuadTree::NearestVertexWithNormal(const R2 &P)//(long xi,long yj)
       // search the non empty 
       // QuadTreeBox containing  the point (i,j)
       long hb2 = hb >> 1 ;
-      int k = IJ(iplus,jplus,hb2);// QuadTreeBox number of size hb2 contening i;j
+      int k = plus.Case(hb2);//(iplus,jplus,hb2);// QuadTreeBox number of size hb2 contening i;j
       QuadTreeBox * b0= b->b[k];
       if ( ( b0 == 0) || (b0->n == 0) ) 
 	break; // null box or empty   => break 	    
       NbQuadTreeBoxSearch++;
       b=b0;	
-      i0 += I_IJ(k,hb2); // i orign of QuadTreeBox
-      j0 += J_IJ(k,hb2); // j orign of QuadTreeBox 
+      p0.Add(k,hb2);	
       hb = hb2; 
     }
   
@@ -460,7 +450,7 @@ Vertex *  FQuadTree::NearestVertexWithNormal(const R2 &P)//(long xi,long yj)
 	  if (v->ninside(P)) {
 	   I2 i2 =  R2ToI2(v);
 	  //   try if is in the right sens -- 
-	   h0 = NORM(iplus,i2.x,jplus,i2.y);
+	   h0 = I2(i2,plus).norm();// h0 = NORM(iplus,i2.x,jplus,i2.y);
 	   if (h0 <h) {
 	    h = h0;
 	    vn = v;}
@@ -473,8 +463,7 @@ Vertex *  FQuadTree::NearestVertexWithNormal(const R2 &P)//(long xi,long yj)
   l =0; // level 
   pb[0]= b;
   pi[0]= b->n>0 ?(int)  b->n : 4  ;
-  ii[0]=i0;
-  jj[0]=j0;
+  pp[0]=p0;
   h=hb;
   L1: 
   do {   // walk on the tree  
@@ -490,7 +479,7 @@ Vertex *  FQuadTree::NearestVertexWithNormal(const R2 &P)//(long xi,long yj)
 	     NbVerticesSearch++;
 	     I2 i2 =  R2ToI2(v);
 	     // if good sens when try -- 
-	     h0 = NORM(iplus,i2.x,jplus,i2.y);
+	     h0 = h0 = I2(i2,plus).norm();//  NORM(iplus,i2.x,jplus,i2.y);
 	     if (h0 <h) 
 	      {
 		   h = h0;
@@ -504,19 +493,16 @@ Vertex *  FQuadTree::NearestVertexWithNormal(const R2 &P)//(long xi,long yj)
 	    if ((b=b->b[k])) 
 	      {
 		hb >>=1 ; // div by 2
-		long iii = ii[l]+I_IJ(k,hb);
-		long jjj = jj[l]+J_IJ(k,hb);
+		I2 ppp(pp[l],k,hb);
 		
-		if  (INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h)) 
+		if  ( ppp.interseg(plus,hb,h) )//(INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h)) 
 		  {
 		    pb[++l]=  b;
 		    pi[l]= b->n>0 ?(int)  b->n : 4  ;
-		    ii[l]= iii;
-		    jj[l]= jjj;
-		    
+		    pp[l]=ppp;		    
 		  }
 		else
-		 b=b0, hb <<=1 ;
+		  b=b0, hb <<=1 ;
 	      }
 	    else
 	      b=b0;
@@ -528,13 +514,11 @@ Vertex *  FQuadTree::NearestVertexWithNormal(const R2 &P)//(long xi,long yj)
    {// cas particulier on repart du sommet on avais rien trouver 
     b=root;
    hb =  MaxISize;
-   i0=0;
-   j0=0;
+   p0=I2(0,0);
    l=0;
    pb[0]= b;
    pi[0]= b->n>0 ?(int)  b->n : 4  ;
-   ii[0]=i0;
-   jj[0]=j0;
+   pp[0]=I2(0,0);
    
      goto L1;
    }

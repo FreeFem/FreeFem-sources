@@ -22,7 +22,7 @@
 \title{
 %\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
  {\Blue{ \TitreFont FreeFem++ \\ \vglue 1cm  Manual}} \\ \vglue 3cm  ~ \\  
-      \normalsize  { version 1.44  \Red{(Under construction)} }
+      \normalsize  { version 1.45-10  \Red{(Under construction)} }
  \\ \vglue 0.7cm
  \large \url{http://www.freefem.org} \\
 \url{http://www.ann.jussieu.fr/\string~hecht/freefem++.htm} 
@@ -241,7 +241,7 @@ at the vertices of $T_k$ and their middle points that continuous in $\Omega$.
 Here $w_k$ are called the degree of freedom of $w$ and $M$ the number of 
 the degree of freedom.
 Already \freefempp implemented
-P0, P1, P2, RT0, P1nc, P1dc, P2dc, P1b-elements.
+P0, P1, P2, RT0, P1nc, P1dc, P2dc, P1b, P2b elements, .
 The user can easily add a part of arbitrary degree elements to \freefempp,
 so the available finite elements will differ with the version.\\
 
@@ -399,7 +399,7 @@ as stated below.
   The user can easily compare between mathematical modelling and \freefempp program.
 \end{itemize}
 
-\subsection{Projectoin or Interpolation}
+\subsection{Projection or Interpolation}
 \index{P1-projection}
 For a finite element space $V_h$, $P_1$-projection $\Pi_h$ is defined by
 \[
@@ -2695,6 +2695,13 @@ types of finite element are: \index{type of finite element}
      \end{equation}
      where
      $P_{2}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 2$.
+     \item[P2b] piecewise $P_{2} $ continuous finite element  plus bubble,
+     \index{P2|textbf}\index{fespace!P2}
+     \begin{equation}
+     P2_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
+        \quad v_{|K} \in P_{2} \oplus Span\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right.\right\}
+     \end{equation}
+
      \item[P2dc] piecewise $P_{2}$  discontinuous finite element,
      \index{P2dc|textbf}\index{fespace!P2dc}
      \begin{equation}
@@ -3229,11 +3236,18 @@ where * stands for the name of quadrature formulas or the order of the Gauss for
     2 & qf2pE&3& $(1-\sqrt{1/3})/2$ & $|q^iq^j|/2$ & 3 \\
     & &&$(1+\sqrt{1/3})/2$ & $|q^iq^j|/2$ &  \\
     \hline
-    3 & qf3pE&6&$(1-\sqrt{3/5})/2$ & $(5/18)|q^iq^j|$ & 7  \\
+    3 & \textbf{qf3pE} &6&$(1-\sqrt{3/5})/2$ & $(5/18)|q^iq^j|$ & 5  \\
     & & & $1/2$ & $(8/18)|q^iq^j|$ & \\
     & & & $(1+\sqrt{3/5})/2$ & $(5/18)|q^iq^j|$ &\\
     \hline
+    2 &qf1pElump E&2& $-1$ & $|q^iq^j|/2$ & 1 \\
+    & &&$+1$ & $|q^iq^j|/2$ &  \\
+    \hline
+
 \end{tabular}
+\index{quadrature:qf1pE}\index{quadrature:qf2pE}%
+\index{quadrature:qf3pE}%
+\index{quadrature:qf1pElump}%
 \end{figure}
 where $|q^iq^j|$ is the length of segment $\overline{q^iq^j}$.
 For a part $\Gamma_1$ of $\Gamma_h$ with the label ``1'', we can 
@@ -3305,7 +3319,7 @@ where * stands for the name of quadrature formulas or the order of the Gauss for
     & &&$\left(\frac{1}{2},0\right)$ & $|T_k|/3$ &  \\
     & &&$\left(0,\frac{1}{2}\right)$ & $|T_k|/3$ &  \\
     \hline
-    7 & qf5pT&6&$\left(\frac{1}{3},\frac{1}{3}\right)$ & $0.225|T_k|$ & 4  \\
+    7 & \textbf{qf5pT}&6&$\left(\frac{1}{3},\frac{1}{3}\right)$ & $0.225|T_k|$ & 5 \\
     & & & $\left(\frac{6-\sqrt{15}}{21},\frac{6-\sqrt{15}}{21}\right)$ & $
     \frac{(155-\sqrt{15})|T_k|}{1200}$ & \\
     & & & $\left(\frac{6-\sqrt{15}}{21},\frac{9+2\sqrt{15}}{21}\right)$ & $\frac{(155-\sqrt{15})|T_k|}{1200}$ &\\
@@ -3314,11 +3328,11 @@ where * stands for the name of quadrature formulas or the order of the Gauss for
     & & & $\left(\frac{6+\sqrt{15}}{21},\frac{9-2\sqrt{15}}{21}\right)$ & $\frac{(155+\sqrt{15})|T_k|}{1200}$ &\\
     & & & $\left(\frac{9-2\sqrt{15}}{21},\frac{6+\sqrt{15}}{21}\right)$ & $\frac{(155+\sqrt{15})|T_k|}{1200}$ &\\
     \hline
-    3 & qf1pT1ump& & $\left(0,0\right)$ & $|T_k|/3$ & 2 \\
+    3 & qf1pT1ump& & $\left(0,0\right)$ & $|T_k|/3$ & 1 \\
     & &&$\left(1,0\right)$ & $|T_k|/3$ &  \\
     & &&$\left(0,1\right)$ & $|T_k|/3$ &  \\
     \hline
-    9 & qf2pT4P1& &$\left(\frac{1}{4},\frac{3}{4}\right)$ & $|T_k|/12$ & 4  \\
+    9 & qf2pT4P1& &$\left(\frac{1}{4},\frac{3}{4}\right)$ & $|T_k|/12$ & 1  \\
       &         & &$\left(\frac{3}{4},\frac{1}{4}\right)$ & $|T_k|/12$ &   \\
       &         & &$\left(0,\frac{1}{4}\right)$ & $|T_k|/12$ &   \\
       &         & &$\left(0,\frac{3}{4}\right)$ & $|T_k|/12$ &   \\
@@ -3328,10 +3342,22 @@ where * stands for the name of quadrature formulas or the order of the Gauss for
       &         & &$\left(\frac{1}{4},\frac{1}{2}\right)$ & $|T_k|/6$ &   \\
       &         & &$\left(\frac{1}{2},\frac{1}{4}\right)$ & $|T_k|/6$ &   \\
     \hline
+    15 & qf7pT& 8 & see  \cite{0501496} for detail  & &7 \\
+       \hline
+    21 & qf9pT& 10 & see \cite{0501496} for detail  & &9 \\
+    \hline
+
 \end{tabular}
+\index{quadrature:qf1pT} \index{quadrature:qf2pT}\index{quadrature: qf5pT}
+\index{quadrature:qf1pT1ump}\index{quadrature:qf2pT4P1}
+\index{quadrature:qf7pT}\index{quadrature:qf7pT}
+
+\index{quadrature:qfe=} \index{quadrature:qft=}\index{quadrature:qforder=}
 \end{figure}
 
-
+\begin{note}
+ By default,  we use the formular exact for polynomes of degrees $5$ on triangles or edges (in bold in two tables)\index{quadrature:default}.
+\end{note}
 
 
 
@@ -7712,12 +7738,14 @@ $H^1(\Omega)^2=H^1(\Omega)\times H^1(\Omega)$
 \section{Grammar}
 \subsection{Keywords}
 \bFF
+      Cmatrix
       R3  
       bool 
       border 
       break 
       complex 
       continue 
+      element
       else
       end 
       fespace
@@ -7737,6 +7765,7 @@ $H^1(\Omega)^2=H^1(\Omega)\times H^1(\Omega)$
       return
       solve
       string 
+      vertex
       varf 
       while
 
@@ -8486,8 +8515,11 @@ A priori error estimates for finite element
  for elliptic problems.
   SIAM J. Numer. Anal. 39 (2001), no. 3, 902--931 (electronic).
 
-\bibitem{COOLL} COOL package\url{http://coool.mines.edu}
+\bibitem{COOLL} COOL package , \url{http://coool.mines.edu}
   
+\bibitem{0501496} {\sc M. A. Taylor,  B. A. 
+Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integration in the triangle , Report-no: SAND2005-0034J, 
+ \url{http://xyz.lanl.gov/format/math.NA/0501496}
 \end{thebibliography}
 \printindex
 \end{document}
