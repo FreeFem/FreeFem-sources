@@ -91,6 +91,12 @@ then
 	    CHECK_COMPILE_FLAG(C,-march=pentium4,CFLAGS)
 	    CHECK_COMPILE_FLAG(C++,-march=pentium4,CXXFLAGS)
 	    CHECK_COMPILE_FLAG(Fortran 77,-march=pentium4,FFLAGS)
+	elif test `grep 'Intel(R) Xeon(TM) CPU' /proc/cpuinfo|wc -l` -gt 0
+	    then
+	    proc_type=pentium4
+	    CHECK_COMPILE_FLAG(C,-march=pentium4,CFLAGS)
+	    CHECK_COMPILE_FLAG(C++,-march=pentium4,CXXFLAGS)
+	    CHECK_COMPILE_FLAG(Fortran 77,-march=pentium4,FFLAGS)
 	elif test `grep 'AMD Athlon(tm) XP' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=athlon-xp
