@@ -18,11 +18,7 @@ int verbosityy=verbosity;
 dnl May write or read a reference file
 changequote([[,]])
 
-dnl UMFPACK give results that are different enough
-dnl to create a specific reference file
-ifelse(UMFPACKLIB,,
-	[[define(REFFILE,"refnoumf.edp")]],
-	[[define(REFFILE,"refumf.edp")]])
+define(REFFILE,"ref.edp")
 ifdef([[ASSERT]],
 	include REFFILE;,
 	ofstream ref(REFFILE);)
