@@ -7,7 +7,7 @@
 
 # Note: changes AC_LANG()
 
-AC_DEFUN(CHECK_COMPILE_FLAG,
+AC_DEFUN([CHECK_COMPILE_FLAG],
 	[AC_MSG_CHECKING(whether the $1 compiler accepts $2)
 	check_save_flags="$$3"
 	AC_LANG_PUSH($1)
