@@ -485,12 +485,6 @@ class LinearCG : public OneOperator
      
      virtual AnyType operator()(Stack stack)  const {
       Kn &x = *GetAny<Kn *>((*X)(stack));
-      if (B) {
-        Kn &b = *GetAny<Kn *>((*B)(stack));
-        R p = (b,b);
-        if (p) 
-           ExecError("Sorry LinearCG work only with nul right hand side, so put the right hand in the function");
-      }
       int n=x.N();
       MatF_O AA(n,stack,A);
       double eps = 1.0e-6;
@@ -498,7 +492,17 @@ class LinearCG : public OneOperator
       if (nargs[0]) eps= GetAny<double>((*nargs[0])(stack));
       if (nargs[1]) nbitermax = GetAny<long>((*nargs[1])(stack));
       if (nargs[3]) eps= *GetAny<double*>((*nargs[3])(stack));
-      
+      KN<R>  bzero(n,0,R()); // const array zero
+      KN<R> *bb=&bzero; 
+      if (B) {
+        Kn &b = *GetAny<Kn *>((*B)(stack));
+        R p = (b,b);
+       if (p) 
+         {
+          // ExecError("Sorry LinearCG work only with nul right hand side, so put the right hand in the function");
+           bb = &b;
+          }
+      }
       int ret;
       if (cas<0) {
        if (C) 
@@ -510,9 +514,9 @@ class LinearCG : public OneOperator
       else 
       if (C) 
        { MatF_O CC(n,stack,C);
-         ret = ConjuguedGradient2(AA,CC,x,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
+         ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
       else 
-         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
+         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(),x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
       if( nargs[3]) *GetAny<double*>((*nargs[3])(stack)) = -(eps);
       return SetAny<long>(ret);
        
@@ -3638,7 +3642,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("buildmeshborder","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMeshBorder));
  Global.Add("LinearCG","(",new LinearCG<R>()); // old form  with rhs (must be zer
  Global.Add("LinearGMRES","(",new LinearGMRES<R>()); // old form  with rhs (must be zer
- Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  with rhs (must be zer
+// Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  with rhs (must be zer
  Global.Add("LinearCG","(",new LinearCG<R>(1)); //  without right handsize
  Global.Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
   zzzfff->AddF("varf",t_form);    //  var. form ~

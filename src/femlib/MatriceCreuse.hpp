@@ -505,7 +505,7 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
 }
 
 template<class R,class M,class P> 
-int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000)
+int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const int nbitermax, double &eps,long kprint=1000000000)
 {
 //  ConjuguedGradient2 affine A*x = 0 est toujours appele avec les condition aux limites 
 //  -------------
@@ -515,7 +515,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const int nbitermax, do
    if (verbosity>99) kprint=1;
    R ro=1;
    Rn g(n),h(n),Ah(n), & Cg(Ah);  // on utilise Ah pour stocke Cg  
-   g = A*x;  
+   g = A*x-b;  
    Cg = C*g; // gradient preconditionne 
    h =-Cg; 
    R g2 = (Cg,g);
@@ -531,7 +531,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const int nbitermax, do
      { 
        R rop = ro; 
        x += rop*h;      //   x+ rop*h  , g=Ax   (x old)
-       Ah = A*x;        //   Ax + rop*Ah = rop*Ah + g  =
+       Ah = A*x-b;        //   Ax + rop*Ah = rop*Ah + g  =
        Ah -= g;         //   Ah*rop  
        R hAh =(h,Ah);
        if (norm(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
