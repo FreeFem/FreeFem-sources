@@ -1492,14 +1492,37 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
       long nbt=0;
       mshptg8_ (cr, h, c, nu, &nbs, nbs, tri, arete, nba, (long *) sd, nbsd, reft, &nbt, .25, .75, &err);
       assert(err==0 && nbt !=0);
+    // Correction FH bug  trunc  mesh with hole 25032005
       delete [] triangles;
-      nt = nbt;
-     if(verbosity>1)
+      int kt=0;
+
+       for(int i=0,k=0;i<nbt;i++,k+=3)
+      {
+        R2 A=vertices[nu[k]-1],B=vertices[nu[k+1]-1],C=vertices[nu[k+2]-1];
+        R2 G=(A+B+C)/3.,PHat;
+        bool outside;
+        const Triangle * t=Th.Find(G,PHat,outside,0);
+        if(!outside) { 
+           reft[i]=Th(t);
+           kt++;
+        }
+        else 
+          reft[i]=-1;
+        }
+        
       
-      cout << " Nb Triangles = " << nbt << endl;
+      
+      nt=kt;
+     if(verbosity>1)      
+      cout << " Nb Triangles = " << nt <<  " remove triangle in hole :" <<  nbt - nt << endl;
       triangles = new Triangle[nt];
-      for(int i=0,k=0;i<nt;i++,k+=3)
-         triangles[i].set(vertices,nu[k]-1,nu[k+1]-1,nu[k+2]-1,reft[i]);
+      kt=0;
+      for(int i=0,k=0;i<nbt;i++,k+=3)
+        if(reft[i]>=0) 
+         triangles[kt++].set(vertices,nu[k]-1,nu[k+1]-1,nu[k+2]-1,Th[reft[i]].lab);
+      assert(kt==nt);
+    // END  Correction FH bug  trunc  mesh with hole 25032005
+      
       delete [] arete;
       delete [] nu;
       delete [] c;
