@@ -1,0 +1,33 @@
+#!/bin/bash
+
+list1="HISTORY DOC/manual.pdf DOC/manual.ps.gz"
+listf=(freefem++-${VERSION}.tar.gz FreeFem++v${VERSION}_MacOsX.tgz FreeFem++v${VERSION}_Win.zip  FreeFem++v${VERSION}_MacOS.sit)
+listl=(freefem++.tar.gz            freefem++_MacOsX.tgz            freefem++.zip                 freefem++.sit)
+
+www=rascasse.inria.fr:www_gamma/Gamma/cdrom/ftp/freefem/
+ftp=rascasse.inria.fr:/ftp_gamma/freefem/
+ftpk=baobab.ann.jussieu.fr:public_html/ftp/freefem/
+
+#        ssh  baobab.ann.jussieu.fr "cd www/ftp/freefem;ln -sf FreeFem++v${VERSION}_Win.zip  freefem++.zip"
+#        ssh  baobab.ann.jussieu.fr "cd www/ftp/freefem;ln -sf FreeFem++v${VERSION}_MacOS.sit freefem++.sit"
+#        ssh  baobab.ann.jussieu.fr "cd www/ftp/freefem;ln -sf freefem++-${VERSION}.tar.gz freefem++.tar.gz"
+#        ssh  baobab.ann.jussieu.fr "cd www/ftp/freefem;ln -sf freefem++-${VERSION}.tar.gz freefem++.tgz"
+#        ssh  baobab.ann.jussieu.fr "cd www/ftp/freefem;ln -sf FreeFem++v${VERSION}_MacOsX.tgz freefem++_MacOsX.tgz"
+if [ -f $listf ]; then
+echo rsync -vzupogt --rsh=ssh $list1  $ftpk
+echo rsync -vzupogt --rsh=ssh $list1  $ftp
+echo rsync -vzupogt --rsh=ssh  HISTORY  baobab.ann.jussieu.fr:www/.
+fi
+for ((i=0;${#listf[$i]};i++)); do
+f=${listf[$i]}
+lf=${listl[$i]}
+if [ -f $f ]; then
+   echo rsync -vzupogt --rsh=ssh $f  $ftpk
+   echo rsync -vzupogtl --rsh=ssh $f  $ftp
+   echo rsync -vzupogtL --rsh=ssh $fl  $ftp
+   echo ssh  baobab.ann.jussieu.fr "cd www/ftp/freefem;ln -sf $f $lf"
+   echo ssh rascasse.inria.fr "cd /ftp_gamma/freefem;ln -sf  $f $lf"
+fi
+done;
+echo ssh  baobab.ann.jussieu.fr "cd www/.; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
+echo ssh rascasse.inria.fr "cd ~/public_html/; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"

@@ -479,4 +479,14 @@ Make Version 1.40
 Make Version 1.41 
 -----------------
 
+07/07/2004 
+----------
+an anonymous CVS server is avialable to get FreeFem++ source
+cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs login
+(password = freefem++)
+cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs freefem++ co
+the TAG release_1_41_before_packaging is created
+
+
+
      
