@@ -431,7 +431,8 @@ MacOs)~:
 \index{exec}
 
 \subsection{Arithmetic}
-The operators known to the language are the usual C-operators:
+
+The available operators are the usual C operators:
 \\\\
 \verb@+ - * / \% ~ ^ | || & @
 \verb@ && ! == != < > <= >= = += -= *= /= << >>@
@@ -446,31 +447,41 @@ meaning as in \texttt{C++} except for
 operator (with right  precedence as in math or in maple),
 
 \item
- \ttCC{| \& !} are the three boolean operators `or' , `and' , `not',
+ \ttCC{| \& !} are the three boolean operators `or' , `and' , `not'
 
-\item and we have added \verb@' .* ./ @  two array operator (like in matlab or scilab), where
+\item \verb@' .* ./ @ are array operators (as in matlab or scilab),
+where
+
 \begin{itemize}
-\item  \verb@'@  is unary right transposition of array, matrix \index{transpose}
- \item \verb@.*@ is the term to term multiply operator. \index{.*@\verb=.*=} \index{'@\verb='=} \index{divide!term to term}
- \item \verb@./@ is the term to term divide operator. \index{.*@\verb=.*=} \index{product!term to term}
+\item \verb@'@ is the unary right transposition of an array or a
+matrix \index{transpose}
+\item \verb@.*@ is the term by term multiply
+operator. \index{.*@\verb=.*=} \index{'@\verb='=} \index{divide!term
+to term}
+\item \verb@./@ is the term by term divide
+operator. \index{.*@\verb=.*=} \index{product!term to term}
 \end{itemize}
-some compound operator: 
+
+some compound operators: 
+
 \begin{itemize}
- \item \verb@^-1@ is for  solving the linear system (example: \verb$ b = A^-1 x$) \index{solve!linear system}
- \item \verb@' *@ is the compound  of transposition and matrix product, so it is the dot product 
-(example \verb$real DotProduct=a'*b$) \index{dot product}\index{product!dot} 
+ \item \verb@^-1@ means solving a linear system (example:
+ \verb$ b = A^-1 x$) \index{solve!linear system}
+ \item \verb@' *@ is a transposition followed by a matrix product,
+i.e. the dot product (example \verb$real DotProduct=a'*b$) \index{dot
+product}\index{product!dot}
 \end{itemize}
 \end{itemize}
 
- There are  automatic casts from a type to an other like in \Cpp.
- So in some sense we have
+As in \Cpp, there are automatic casts from a type to another. So in
+some sense we have
  \[
   bool \subset int \subset real \subset complex
  \]
- and $ string $ is also
- a subset  of the 4 sets $ bool, int, real , complex $ in the sense 
-"make the string of the value".
-\\\\
+
+and if any of these four types is copied into a $ string $, it will be
+converted into a human-readable value.  \\\\
+
 \example{ basics}\index{<<@\verb=<<=}
 \bFF
 @real  x=3.14,y;
@@ -532,9 +543,9 @@ P.x = 1
 The usual mathematical functions are implemented:
 \medskip
 
-\centerline{\texttt{\bf
-sqrt, pow, exp, log, sin, cos, atan, cosh, sinh, tanh, min, max
-}, etc...}
+\centerline{\texttt{\bf sqrt, pow, exp, log, sin, cos, atan, cosh,
+sinh, tanh, min, max}, etc...}
+
 
 And usual \Cpp functions are implemented:
 {\texttt{\bf
@@ -542,33 +553,29 @@ exit, assert}} \index{exit}\index{assert}
 
 
 \subsection{Array}
-\index{array}
-There are 2 kinds of arrays:
- arrays with integer indices
-and
-arrays with string indices.
+\index{array} There are 2 kinds of arrays: arrays with integer indices
+and arrays with string indices.
 
-In the first case, the size of this array
-must be know at the execution time, and the implementation is done
-with the \ttCC{KN<>} class so all the vector operator of
- \ttCC{KN<>} are implemented.
- It is also possible to make an array of FE function, with the same syntax
- \centerline{
-  \index{array}\index{array!FE function}
-}
- For the second case, it is just
- a map of the STL\footnote{Standard template Library, now part of standard \Cpp}\cite{cpp}
- so no vector operation except the
- selection of an item is allowed . \index{dot product}\index{transpose}
 
-The transpose operator is \texttt{\string'} like  MathLab or SciLab, so the way 
-to compute the dot product of two array \ttCC{a,b} is  \ttCC{@real\ ab=\ a'*b}\index{product!dot}.
+In the first case, the size of this array must be known at execution
+time, and the implementation is done with the \ttCC{KN<>} class so all
+the vector operations of \ttCC{KN<>} are implemented.  It is also
+possible to build an array of FE functions with the same syntax.
+
+\centerline{ \index{array}\index{array!FE function} } The second case
+is just a map of the STL\footnote{Standard template Library, now part
+of standard \Cpp}\cite{cpp} so no vector operation is allowed, except
+for the selection of an item. \index{dot product}\index{transpose}
+
+The transpose operator is \texttt{\string'} (as in MathLab or SciLab),
+so the way to compute the dot product of two arrays \ttCC{a,b} is
+\ttCC{@real\ ab=\ a'*b}\index{product!dot}.
 
 \bFF
 @int i;
-@real [int] tab(10), tab1(10); // 2 array of 10 real
-  \it  real [int] tab2;    //  bug array with no size
-tab = 1;                //  set all the array to 1
+@real [int] tab(10), tab1(10); // 2 arrays of 10 reals
+  \it  real [int] tab2;    //  bug! missing array size
+tab = 1;                //  set all array elements to 1
 tab[1]=2;
 @cout << tab[1] << " " << tab[9] << " size of tab = "
      << tab.n << " " << tab.min << " " << tab.max << " " <<  @endl;
@@ -580,7 +587,7 @@ tab+=tab;
 @cout << " dot product " << tab'*tab << @endl; //  ${}^{t}{tab}\,{tab} $ 
 @cout << tab << @endl;
 @cout << tab[1] << " " << tab[9] <<  @endl;
-@real[string] map;        //  a dynamique array
+@real[string] map;        //  a dynamic array
 @for (i=0;i<10;i=i+1)
   {
     tab[i] = i*i;
@@ -595,14 +602,13 @@ map[2]=3.0;             //  2 is automatically cast to the string "2"
 \eFF
 
 
-
-
 \subsection{Loops}
 
-The \texttt{for} and \texttt{while}  loops are implemented, and the semantic is the
-same as in \Cpp with \texttt{break} and \texttt{continue} keywords.
-\index{for}\index{while}
+\texttt{for} and \texttt{while} loops are implemented, with the same
+semantics as in \Cpp, including keywords \texttt{break} and
+\texttt{continue}.  \index{for}\index{while}
 \index{break}\index{continue}
+
 \bFF
 @int i;
 @for (i=0;i<10;i=i+1)
@@ -614,21 +620,24 @@ same as in \Cpp with \texttt{break} and \texttt{continue} keywords.
    @cout << eps << @endl;}
 \eFF
 
+
 \subsection{Input/Output}
 \index{cout}\index{cint}\index{ifstream}\index{ofstream}\index{endl}
 
 The syntax of input/output statements is similar  to \Cpp syntax. It
 uses \texttt{cout}, \texttt{cin}, \texttt{endl}, \texttt{<<}, \texttt{>>}.
 
-To write  to (resp. read from)  a file, \index{<<@\verb=<<=}\index{>>@\verb=>>=}
-\index{append} \index{ofstream!append}
-declare a new variable \texttt{ofstream ofile("filename");} or \texttt{ofstream ofile("filename",append);} (resp.
-\texttt{ifstream ifile("filename");} ) and use \texttt{ofile}  (resp. \texttt{ifile})
-as \texttt{cout} (resp. \texttt{cin}). The word \texttt{append} in  \texttt{ofstream ofile("filename",append);} 
- means openning a file in append mode.
+To write to (resp. read from) a file,
+\index{<<@\verb=<<=}\index{>>@\verb=>>=} \index{append}
+\index{ofstream!append} declare a new variable \texttt{ofstream
+ofile("filename");} or \texttt{ofstream ofile("filename",append);}
+(resp.  \texttt{ifstream ifile("filename");} ) and use \texttt{ofile}
+(resp. \texttt{ifile}) as \texttt{cout} (resp. \texttt{cin}). The word
+\texttt{append} in \texttt{ofstream ofile("filename",append);} means
+opening a file in append mode.
 
 \begin{note} The file is closed
-at the exit of the enclosing block, 
+at the end of the enclosing block,
 \end{note}
 
 \bFF
@@ -639,16 +648,16 @@ at the exit of the enclosing block,
 {
   @ofstream f("toto.txt");
   f << i << "coucou'\n";
-}; //  close the file f because the variable f is delete
+}; // file f closed here because variable f is deleted
 
 {
   @ifstream f("toto.txt");
    f >> i;
 }
 {
-  @ofstream f("toto.txt",append); // to append data to the file "toto.txt"
+  @ofstream f("toto.txt",append); // appending data to file "toto.txt"
   f << i << "coucou'\n";
-}; //  close the file f because the variable f is delete
+}; // file f closed here because variable f is deleted
 
   @cout << i << @endl;
 \eFF
@@ -663,12 +672,15 @@ The following keywords are discussed in this section:
  \index{square}\index{border}\index{buildmesh}\index{movemesh}\index{adaptmesh}
  \index{readmesh}\index{triangulate}\index{splitmesh}\index{emptymesh}
  
- All This examples are includes in files \texttt{mesh.edp} and \texttt{tablefunction.edp}.
+All the examples in this section come from the files \texttt{mesh.edp}
+and \texttt{tablefunction.edp}.
 
 \subsection{Square}
-For easy and simple testing we have included a constructor for rectangles.
-All other shapes should be handled with \texttt{border+buildmesh}.
-The following
+
+For easy and simple testing we have included a constructor for
+rectangles.  All other shapes should be handled with \texttt{border}
+and \texttt{buildmesh}.  The following
+
 \bFF
   @real x0=1.2,x1=1.8;
   @real y0=0,y1=1;
@@ -677,24 +689,32 @@ The following
   @mesh th=@square(4,5);
   @plot(Th,th,ps="twosquare.eps");
 \eFF
-constructs a grid $n× m$ in the rectangle $[1.2,1.8]×[0,1]$ and
-a grid  $4× 5$ in the unit square $[0,1]^2$.
 
-\begin{note} The label of \index{label}
-boundaries are $1,2,3,4$ for bottom, right, top, left side (before the
+constructs a $n× m$ grid in the rectangle $[1.2,1.8]×[0,1]$ and
+a  $4× 5$ grid in the unit square $[0,1]^2$.
+
+\begin{note} Boundary labels \index{label}
+are numbered $1,2,3,4$ for bottom, right, top, left side (before the
 mapping $[x0+(x1-x0)*x,y0+(y1-y0)*y]$ (the mapping can be non linear).
 \end{note}
 
 \plot[height=6cm]{twosquare}{The 2 square meshes}
 
 \subsection{Border}\index{border}\index{label}
- A domain is defined as being on the left (resp right)
- of its oriented boundary with the parametrization if the sign of the expression that returns the
-number of vertices on the boundary is positive (resp negative).
 
-{\bf remark: the label must be none zero if you you want take boundary condition on this border}
+A domain is defined as being on the left (resp right) of its
+parameterized boundary (when looking towards increasing values of the
+parameter) if the sign of the expression that returns the number of
+vertices on the boundary is positive (resp negative).
 
-For instance the unit circle with a small circular hole inside would be
+
+{\bf note: the boundary label must be non-zero if you you want to
+specify a boundary condition on this border}
+
+
+For instance the domain delimited by the unit circle, with a small
+circular hole inside would be described as:
+
 \bFF
 @real pi=4*atan(1);
 @border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
@@ -703,12 +723,13 @@ plot(a(50)+b(+30)) ; // to see a plot of the border mesh \index{plot!border}
 @mesh Thwithouthole= @buildmesh(a(50)+b(+30));
 @mesh Thwithhole   = @buildmesh(a(50)+b(-30));
 @plot(Thwithouthole,wait=1,ps="Thwithouthole.eps"); //figure \ref{Thwithouthole}
+%%%alh index not found?
 \index{plot!mesh}
 @plot(Thwithhole,wait=1,ps="Thwithhole.eps"); // figure \ref{Thwithhole}
 \eFF
 \begin{note}
-Notice the use of \texttt{ps="fileName"}
-to generate a postscript file identical to the plot shown on screen.
+The use of \texttt{ps="fileName"} generates a postscript file
+identical to the plot shown on screen.
 \end{note}
 
 \twoplot[height=6cm]{Thwithouthole}{Thwithhole}{mesh without hole}{mesh with hole}
@@ -735,14 +756,15 @@ to generate a postscript file identical to the plot shown on screen.
 %labels corresponding are the same.
 %\end{note}
 
-Note that boundaries must cross at end points only.
+Note that boundaries can only intersect at their end points.
 
 \subsection{Movemesh}\index{movemesh}\index{checkmovemesh}
 
-Mesh motion is allowed as in the next two last statement of this
-example, but some time the move mesh become invalid because some triangle
-as be reverse with a negative area, so we add new function \texttt{checkmovemesh} to 
-compute the minimal area of the transform mesh before the real transformation.
+As the two last statements in the example below show, mesh motion is
+possible. Sometimes the moved mesh is invalid because some triangle
+becomes reversed (with a negative area). This is why we check the
+minimum triangle area in the transformed mesh with
+\texttt{checkmovemesh} before any real transformation.
 
 \bFF
 
@@ -776,13 +798,15 @@ plot(Th,wait=1,fill=1,ps="movemesh.eps");// see figure \ref{movemesh}
 
 \begin{note}
 Consider a function u defined on a mesh Th. A statement like
-\texttt{Th=movemesh(Th...} does not change $u$ and so the old mesh still
-exists. It will be destroyed when no function use it. Therefore a statement
-like $u=u$ will redefine $u$ on the new mesh Th with interpolation and therefore destroy the old Th
-if $u$ was the only function using it.
+\texttt{Th=movemesh(Th...} does not change $u$ and so the old mesh
+still exists. It will be destroyed when no function use it. A
+statement like $u=u$ redefines $u$ on the new mesh Th with
+interpolation and therefore destroys the old Th if $u$ was the only
+function using it.
 \end{note}
 
-Now, a sample exemple of moving mesh, with lagrangian\index{lagrangian} function $u$ defined on the moving mesh.
+Now, an example of moving mesh, with lagrangian\index{lagrangian}
+function $u$ defined on the moving mesh.
 
 \bFF
 // simple movemesh example
@@ -790,8 +814,8 @@ Now, a sample exemple of moving mesh, with lagrangian\index{lagrangian} function
 @fespace Vh(Th,P1); 
 @real t=0;
 // ---
-//  problem is how to build data without interpolation
-//  so the data u is moving with the mesh hse you can see in the plot
+//  the problem is how to build data without interpolation
+//  so the data u is moving with the mesh as you can see in the plot
 // ---
 Vh u=y;
 @for (int i=0;i<4;i++)
@@ -799,28 +823,30 @@ Vh u=y;
  t=i*0.1;
  Vh f= x*t;
  @real minarea=checkmovemesh(Th,[x,y+f]);
- if (minarea >0 ) //  the movemesh will be ok 
+ if (minarea >0 ) // movemesh will be ok 
    Th=movemesh(Th,[x,y+f]);
 
  cout << " Min area  " << minarea << endl;
  
- Vh tmp;     // =u[],  sorry no init of FEspace function with array. 
- tmp[]=u[];  //save the value  
- u=0;        // to change the FEspace and mesh associated to u
- u[]=tmp[];  // set le value of the array without no mesh update 
+ real[int] tmp(u[].u);
+ tmp=u[];  // save the value  
+ u=0;        // to change the FEspace and mesh associated with u
+ u[]=tmp;  // set the value of u without any mesh update 
  @plot(Th,u,wait=1);
 };
-//  remark, in this programme we have no solution with link to a previous
-//  mesh so all the old meshes are delete in memory
+// In this program, since u is only defined on the last mesh, all the
+// previous meshes are deleted from memory.
 //   -------- 
 \eFF
 
-\subsection{Read and write mesh}
-\index{readmesh}\index{savemesh}
-Freefem can read and write files which can be reused once read but the
-names of the borders are lost and they have to be replaced by the number
+\subsection{Reading and writing a mesh}
+
+\index{readmesh}\index{savemesh} Freefem can read and write files. A
+mesh file can be read back into \freefempp but the names of the
+borders are lost. So these borders have to be referenced by the number
 which corresponds to their order of appearance in the program, unless
-the number is forced by the keyword "label".
+this number is forced by the keyword "label".
+
 \bFF
 @border floor(t=0,1){ x=t; y=0; label=1;}; // the unit square
 @border right(t=0,1){ x=1; y=t; label=5;};
@@ -828,25 +854,28 @@ the number is forced by the keyword "label".
 @border left(t=1,0){ x=0; y=t; label=5;};
 @int n=10;
 @mesh th= buildmesh(floor(n)+right(n)+ceiling(n)+left(n));
-@savemesh(th,"toto.am_fmt");  // format "formated Marrocco" \index{file!am\_fmt}
-@savemesh(th,"toto.Th");      // format database  db mesh "bamg"   \index{file!bamg}
-@savemesh(th,"toto.msh");     // format freefem \index{file!mesh}
+@savemesh(th,"toto.am_fmt");  // "formatted Marrocco" format \index{file!am\_fmt}
+@savemesh(th,"toto.Th");      // "bamg"-type mesh   \index{file!bamg}
+@savemesh(th,"toto.msh");     // freefem format \index{file!mesh}
+%%%alh \cite{nopo} not found
 @savemesh(th,"toto.nopo");     // modulef format \index{file!nopo} see \cite{nopo}
 @mesh th2 = readmesh("toto.msh"); // read the mesh 
 
 \eFF
 
-There are many formats of mesh files available for communication with other tools such as
-emc2, modulef..., the suffix gives the chosen type.\index{bamg}
-More details can be found in the article by F. Hecht "bamg : a bidimentional
-anisotropic mesh generator"  available from the freefem web page.
-\\
+There are many mesh file formats available for communication with
+other tools such as emc2, modulef... The suffix gives the chosen
+type.\index{bamg} More details can be found in the article by F. Hecht
+"bamg : a bidimentional anisotropic mesh generator" available from the
+freefem web page.  \\
+
 \subsection{Triangulate}\index{triangulate}
-Build a triangulation from a set point, this 
-triangulation is a mesh Delaunay of the convex hull of the set of point.
-This can be usefull to build table function.
 
+\freefempp is able to build a triangulation from a set of points. This 
+triangulation is a Delaunay mesh of the convex hull of the set of points.
+It can be useful to build a table function.
 
+%%%alh
 The coordinate of the set of point and the value of the table function 
 are set in a file like :
 
@@ -1059,7 +1088,7 @@ default parameters which can be overwritten for better results.
       adapt, you ca	n  write: \texttt{metric=[m11[],m12[],m22[]]},
                   ( see example convect-apt.edp for a full example)
     \itemtt[nomeshgeneration=]  \index{adaptmesh!nomeshgeneration=}
-    to do or not the mesh generation, by default we do the mesh generation (it is usefull 
+    to do or not the mesh generation, by default we do the mesh generation (it is useful 
     to just compute metric).
     \item[periodic=]  \index{adaptmesh!periodic=} for future: use to build 
     periodic adapted mesh (see periodic finite element space \ref{periodic BC})
@@ -1083,7 +1112,7 @@ where alls  triangles of a mesh \texttt{Th}  are splitted in $3×3$ , just write:
   mesh Th3 = trunc(Th,1,split=3); 
 \eFF
 
-The  \texttt{truncmesh.edp} exemple construct 
+The  \texttt{truncmesh.edp} example construct 
 all "trunc" mesh  to the support of the basic function  of the space \texttt{Vh} (cf. \texttt{abs(u)>0}), 
 split all the  triangles in $5× 5$, and put a label number to $2$ on new boundary.
 \bFF
@@ -1122,14 +1151,14 @@ A other way to split mesh triangle:
 \subsection{build empty mesh}\index{emptymesh}
 The idea is when you want to defined Finite Element  space 
 on boundary you can use a mesh with no internal points (call empty mesh).
-It is can by usefull we you have a Lagrange multiplier definied on the border.
+It is can by useful we you have a Lagrange multiplier definied on the border.
 
 So the fonction emptymesh remove all the internal point of a mesh expect if the
 point is on internal boundary.
 
 \bFF
 {  //  new stuff 2004 emptymesh (version 1.40)
- // -- usefull to build Multiplicator space 
+ // -- useful to build Multiplicator space 
  //  build a mesh without internal point
  // with the same boundary 
  //  -----
@@ -1147,7 +1176,7 @@ a edge $e$ is in  this set  if the two adjacent triangles $e =t1\cap t2$
 and  $ ssd[T1] \neq ssd[T2]$ where \texttt{ssd}  defined the peusdo region numbering of triangle. It is an user \texttt{int[int]} array of size the number of triangles.
 \bFF
 {  //  new stuff 2004 emptymesh (version 1.40) \hfilll
- // -- usefull to build Multiplicator space \hfilll
+ // -- useful to build Multiplicator space \hfilll
  //  build a mesh without internal point \hfilll
  // of peusdo sub domain  \hfilll
  //  ----- \hfilll
@@ -1973,7 +2002,7 @@ Vh[int] eV(nev);   // to store the nev eigenvector \index{EigenValue}
 
 \eFF
 
-The output of this exemple is:
+The output of this example is:
 
 \bFF
 
@@ -2119,7 +2148,7 @@ in combination with gnuplot}
 First this work only if gnuplot\footnote{\url{http://www.gnuplot.info/}} is installed , and 
 only on unix computer.
 
-You just and to the previous exemple: 
+You just and to the previous example: 
 {\def\bks{$\backslash$}
 \bFF
 // file for gnuplot
@@ -2196,7 +2225,7 @@ quadrature errors the scheme is unconditionnally stable.
 \itemtt[<exp1>]   is real expression of  the x-velocity,
 \itemtt[<exp2>]   is real expression of  the y-velocity,
 \itemtt[<exp3>]   is    \textbf{minus}\footnote{The minus is due to the backwark schema}  the time step,
-\itemtt[<exp4>]   is the name of  the finite element function which is convected (u in the exemple above)
+\itemtt[<exp4>]   is the name of  the finite element function which is convected (u in the example above)
 \end{description}
 {\bf Warning} 
 \texttt{convect}  is a non-local operator; in  the instruction \texttt{phi=convec([u1,u2],-dt,phi0)} every values of
@@ -2234,13 +2263,13 @@ The named parameter of this two function are:
 \begin{description}  \index{linearCG!nbiter=} \index{linearCG!precon=} \index{linearCG!eps=}\index{linearCG!veps=}
 \index{NLCG!nbiter=}  \index{NLCG!eps=}\index{NLCG!veps=}
 \itemtt[nbiter=] set the number of iteration (by default $100$)
-\itemtt[precon=] set the preconditionner function (\texttt{P} for exemple)   by default it is the identity, remark the prototype 
+\itemtt[precon=] set the preconditionner function (\texttt{P} for example)   by default it is the identity, remark the prototype 
 is \ttCC{@func\ @real[\@int]\ P(@real[@int] \&x)}.
 \itemtt[eps=] set the value of the stop test $\varepsilon$ ($=10^{-6}$ by default) if positive then relative test 
 $||dJ(x)||_P\leq \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\leq |\varepsilon|$.
 \itemtt[veps=] set et return the value of the stop test,  if positive then relative test 
 $||dJ(x)||_P\leq \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\leq |\varepsilon|$.
-The return value is  minus  the real stop test (remark: it is usefull in loop).
+The return value is  minus  the real stop test (remark: it is useful in loop).
 
 \end{description}
 
@@ -2450,7 +2479,7 @@ a  square $]0,2\pi[^2$ with bi-periodic boundary condition.
 
 \plot[height=6cm]{period}{The isovalue of solution $u$ with periodic boundary condition}
 
-An over exemple is in \texttt{periodic4.edp} file, with 
+An over example is in \texttt{periodic4.edp} file, with 
 periodic condition no parallel to the axis.
 
 Solve a diamond with a hole:
@@ -2574,7 +2603,7 @@ The list   with their default value is in section \ref{adaptmesh}.
 
 \subsection{adaptindicatorP2.edp}
 
-In this exemple,  we do metric mesh adaption and we computionj the classical 
+In this example,  we do metric mesh adaption and we computionj the classical 
 residual error indicator $\eta_{K}$ on the element $K$ for the Poisson problem.
 
 
@@ -3199,7 +3228,7 @@ anisotropic mesh generator"  available from the freefem web page.
 Note also the wrong sign in the Laplace equation, but freefem can handle it as long as it
 is not a resonance mode (i.e. the matrix of the linear system should be non-singular).
 \subsection{Domain decomposition}
-We present, three classique exemples, of domain decomposition
+We present, three classique examples, of domain decomposition
 technique:
 first, Schwarz algorithm with overlapping, second 
 Schwarz algorithm without  overlapping (also call Shur complement), and
@@ -4200,7 +4229,7 @@ We add three word in the language:
 \eFF
 \end{description}
 \subsection{Schwarz in parallel}
-If exemple is just the rewritting of exemple \texttt{schwarz-overlap} 
+If example is just the rewritting of example \texttt{schwarz-overlap} 
 in section \ref{schwarz-overlap}.\index{schwarz}\index{broadcast}\index{processor}
 \index{array!mesh}
 
