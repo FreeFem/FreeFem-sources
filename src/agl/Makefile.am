@@ -16,13 +16,11 @@ AM_LDFLAGS=-framework Carbon -framework OpenGL -framework AGL
 install-exec-local:: $(AGLPROG)
 	if test "$(AGLPROG)" != ""; then						     \
 		echo " Install $(top_srcdir)/FreeFem++.app/Contents/MacOS/FreeFem++";	     \
-		cp "FreeFem++-agl" $(top_srcdir)/FreeFem++.app/Contents/MacOS/FreeFem++;     \
-		echo " Install FreeFem++.app/Resources/MacOS/FreeFem++-agl";		     \
 		cp "FreeFem++-agl" $(top_srcdir)/FreeFem++.app/Contents/Resources/FreeFem++; \
 		echo Install /Applications/FreeFem++.app;				     \
 		sed <$(top_srcdir)/Info-plist.am					     \
 >$(top_srcdir)/FreeFem++.app/Contents/Info.plist -e					     \
-"s/@Version@/$(VERSION)/g" -e "s/@DATE@/`date`/g" ;					     \
+"s/@VVERSION@/$(VERSION)/g" -e "s/@DATE@/`date`/g" ;					     \
 		(cd $(top_srcdir); tar cf - FreeFem++.app| (cd /Applications;tar xf -)) ;    \
 		echo Install FreeFem++-CoCoa;						     \
 		cp $(top_srcdir)/src/FreeFem++-CoCoa $(bindir);				     \
