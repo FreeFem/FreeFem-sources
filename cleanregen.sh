@@ -14,3 +14,4 @@ rm src/ide/hl_yacc.h
 rm src/ide/hl_yacc.c++
 rm HISTORY
 rm examples++/regtests.edp
+rm src/lglib/lg.tab.?pp
