@@ -532,3 +532,6 @@ Make Version 1.42
    //  with $0 <= i <  Wh.ndofK $ and  $0 <= k <  Wh.nt $ 
 
 }
+01/11/04
+--------
+   correct problem on period adapted mesh if orientation are reverse.
