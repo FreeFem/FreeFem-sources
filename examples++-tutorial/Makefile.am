@@ -1,8 +1,9 @@
 # $Id$
 
 TESTS=../regtests.pl
-TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src \
-	EXEEXT=$(EXEEXT)
+TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src			\
+	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)	\
+	AGLPROG=$(AGLPROG)
 EXTRA_DIST=*.edp aile.msh xyf all.edp
 
 all.edp:

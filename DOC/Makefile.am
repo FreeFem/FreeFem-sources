@@ -1,5 +1,3 @@
-all-local: $(DOCPDF)
-
 doc:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 
 %.dvi:%.tex

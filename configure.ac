@@ -328,17 +328,17 @@ ff_umfpack_ok=no
 if test "$ff_blas_ok" = yes;
 then
         # User-specified location
-        AC_ARG_WITH(umfpack,
-                --with-umfpack=archive	Use a specific version of Umfpack,
-                ff_umfpack_ok=yes
-                LIBS="${withval} $LIBS"
-		AC_DEFINE(HAVE_LIBUMFPACK,1,
-			Umfpack is used for sparse matrices computations))
-
         AC_ARG_WITH(amd,
                 --with-amd=archive	Use a specific version of AMD,
                 ff_amd_ok=yes
-                LIBS="${withval} $LIBS")
+		ff_umfpack_lib="${withval}")
+
+        AC_ARG_WITH(umfpack,
+                --with-umfpack=archive	Use a specific version of Umfpack,
+                ff_umfpack_ok=yes
+                ff_umfpack_lib="$ff_umfpack_lib ${withval}"
+		AC_DEFINE(HAVE_LIBUMFPACK,1,
+			Umfpack is used for sparse matrices computations))
 
 	# Trying default locations
 
@@ -347,15 +347,16 @@ then
 	if test "$ff_amd_ok" = no;
 	then
 		AC_CHECK_LIB(amd,amd_info,
-			AC_DEFINE(HAVE_LIBAMD,1,AMD for UMFPACK)
+			ff_umfpack_lib="-lamd"
 			ff_amd_ok=yes)
 	fi
 
 	if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
 	then
 		AC_CHECK_LIB(umfpack,umf_i_malloc,
-			AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
-			ff_umfpack_ok=yes,,-lamd)
+			AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)	
+			ff_umfpack_lib="$ff_umfpack_lib -lumfpack"
+			ff_umfpack_ok=yes,,$ff_umfpack_lib)
 	fi
 fi
 
@@ -369,10 +370,12 @@ then
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
 
-	AC_SUBST(UMFPACKLIB,"${curdir}/download/umfpack/UMFPACKv4.3/UMFPACK/Lib/libumfpack.a ${curdir}/download/umfpack/UMFPACKv4.3/AMD/Lib/libamd.a")
+	ff_umfpack_lib="${curdir}/download/umfpack/UMFPACKv4.3/UMFPACK/Lib/libumfpack.a ${curdir}/download/umfpack/UMFPACKv4.3/AMD/Lib/libamd.a"
 	AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
 	ff_umfpack_ok=yes
 fi
+
+AC_SUBST(UMFPACKLIB,$ff_umfpack_lib)
 
 # Checking for some functions that may not appear everywhere
 # ----------------------------------------------------------
