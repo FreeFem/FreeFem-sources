@@ -51,7 +51,7 @@ class lgElement { public:
 
 };
 
-}; // end namespace blanc
+} // end namespace blanc
 
 void GetPeriodic(Expression perio,    int & nbcperiodic ,    Expression * &periodic);
 
@@ -331,3 +331,5 @@ inline FESpace * v_fes::update() {
      else 
        return  buildupdate();
 }
+
+template<class A,class B>  A Build(B b) {  return A(b);}

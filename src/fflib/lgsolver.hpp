@@ -28,6 +28,22 @@ inline KN_<double> C2R(KN_<complex<double> > & vc)
 }
 
 
+inline const KN_<double> C2R(const KN_<complex<double> > & vc)
+
+{ 
+
+  assert(vc.step==1); 
+
+  complex<double> * pc=vc; // pointeur du tableau
+
+  double *pr = static_cast<double*>(static_cast<void*>(pc));
+
+  return KN_<double>(pr,vc.N()*2);
+
+}
+
+
+
 
 inline KN_<complex<double> > R2C(KN_<double>  & vr)
 
@@ -269,10 +285,15 @@ class SolveGMRESDiag<Complex> :   public MatriceMorse<Complex>::VirtualSolver , 
       epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
    //  ConjuguedGradient<Complex,MatriceMorse<Complex>,SolveGCDiag<Complex> >(a,*this,b,x,nbitermax,epsr);
-         KNM<R> H(dKrilov+1,dKrilov+1);
+         KNM<double> H(dKrilov+1,dKrilov+1);
       int k=dKrilov,nn=nbitermax;
-       assert(0); //  a faire 
-     // int res=GMRES(a,(KN<R> &)x,(const KN<R> &)b,*this,H,k,nn,epsr);
+      KN_<double> rx=C2R(x);
+      const  KN_<double> rb=C2R(b);
+      typedef MatC2R<MatriceMorse<Complex> > VA;
+      typedef MatC2R<SolveGMRESDiag<Complex> > VC;
+      VA AR(a);
+      VC CR(*this);
+      int res=GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr);
 
  }
 
@@ -319,10 +340,19 @@ class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver 
      epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
   //   ConjuguedGradient<Complex,MatriceMorse<Complex>,SolveGCPrecon<Complex> >(a,*this,b,x,nbitermax,epsr);
-      KNM<R> H(dKrylov+1,dKrylov+1);
+      KNM<double> H(dKrylov+1,dKrylov+1);
       int k=dKrylov,nn=nbitermax;
-       assert(0); // a faire 
-      //int res=GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
+
+      KN_<double> rx=C2R(x);
+      const  KN_<double> rb=C2R(b);
+      typedef MatC2R<MatriceMorse<Complex> > VA;
+      typedef MatC2R<SolveGMRESPrecon<Complex> > VC;
+      VA AR(a);
+      VC CR(*this);
+      int res=GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr);
+      
+      // assert(0); // a faire 
+      //int res=GMRES(a,(KN<double> &)x, (const KN<double> &)b,*this,H,k,nn,epsr);
 
    }
 plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);} 
