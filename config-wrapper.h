@@ -10,7 +10,7 @@
 #define CONFIG_WRAPPER_H
 
 #ifdef __MWERKS__
-#include <config-macos9.h>
+#include "config-macos9.h"
 #else
 #include <config.h>
 #endif
