@@ -10,16 +10,16 @@ cout << " P2 " << endl;
 fespace Wh(Th,P2);
 cout << " nb of degre of freedom           : " << Wh.ndof << endl;
 cout << " nb of degre of freedom / ELEMENT : " << Wh.ndofK << endl;
-/*  don't work to day in progresse
+//*  don't work to day in progresse
 {
  int k= 2;
  int kdf= Wh.ndofK ;
 cout << " df of element " << k << ":" ;
-for (int i=0;i<kdf;k++)
+for (int i=0;i<kdf;i++)
   cout << Wh(k,i) << " ";
  cout << endl;
 }
-*/
+//*/
 cout << " P1nc " << endl;
 fespace Vnch(Th,P1nc);
 cout << " P2dc " << endl;
