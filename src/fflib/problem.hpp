@@ -376,11 +376,15 @@ class FormBilinear : public E_F0mps { public:
   typedef const CDomainOfIntegration * A;
   typedef const foperator  *  B;
   A  di;
-  B b;    
+  Foperator * b;    
   FormBilinear(const basicAC_F0 & args) {
    di= dynamic_cast<A>(CastTo<A>(args[0]));
    B  bb= dynamic_cast<B>(CastTo<B>(args[1]));
-   b = bb->Optimize(currentblock);
+  // b = bb->Optimize(currentblock); // FH1004
+  b=new Foperator(*bb); // FH1004  no optimisation here because we don't the type of the bilinear form here.
+  //  the opimisation is done after in FieldOfForm routine 
+  // to find if the form is real or complex 
+  
   // delete bb; il ne faut pas detruire .. car bb peut etre dans une variable 
     throwassert(di && b); }
   
@@ -389,7 +393,8 @@ class FormBilinear : public E_F0mps { public:
    operator aType () const { return atype<Result>();}         
 
   static  E_F0 * f(const basicAC_F0 & args) { return new FormBilinear(args);}  
-  FormBilinear(A a,Expression bb) : di(a),b(dynamic_cast<B>(bb)->Optimize(currentblock)) {throwassert(b);}   
+  FormBilinear(A a,Expression bb) : di(a),b(new Foperator(*dynamic_cast<B>(bb))/*->Optimize(currentblock) FH1004 */) 
+  {throwassert(b);}   
   FormBilinear operator-() const { return  FormBilinear(di,C_F0(TheOperators,"-",C_F0(b,atype<B>())));}
   bool VF() const { return MaxOp(b) >= last_operatortype;}
 
@@ -402,7 +407,7 @@ class FormLinear : public E_F0mps { public:
   typedef const CDomainOfIntegration * A;
   typedef const ftest  *  B;
   A  di;
-  B l;
+  Ftest * l;
    
   FormLinear(const basicAC_F0 & args) {
     di= dynamic_cast<A>(CastTo<A>(args[0]));
@@ -412,7 +417,7 @@ class FormLinear : public E_F0mps { public:
    // cout << " ---FormLinear: "<< a1 << "  " << typeid(*a1).name() << *a1 <<endl;
     B ll= dynamic_cast<B>(a1);
     assert(ll);
-    l = ll->Optimize(currentblock);
+    l = new Ftest(*ll); // FH1004 ->Optimize(currentblock);  same as bilinear
     // delete ll; // il ne faut pas detruire car ll peut etre dans une variable
     assert(l);
     throwassert(di && l); 
@@ -424,7 +429,7 @@ class FormLinear : public E_F0mps { public:
    operator aType () const { return atype<Result>();}         
   
   static  E_F0 * f(const basicAC_F0 & args) { return new FormLinear(args);}    
-  FormLinear(A a,Expression bb) : di(a),l(dynamic_cast<B>(bb)->Optimize(currentblock)) {throwassert(l);}   
+  FormLinear(A a,Expression bb) : di(a),l(new Ftest(*dynamic_cast<B>(bb))/*->Optimize(currentblock) FH1004 */) {throwassert(l);}   
   FormLinear operator-() const { return  FormLinear(di,C_F0(TheOperators,"-",C_F0(l,atype<B>())));}
   //  void init(Stack stack) const {}
   
@@ -803,14 +808,16 @@ namespace Fem2D {
   
 template<class R>  bool AssembleVarForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                        MatriceCreuse<R>  * A,KN<R> * B,const list<C_F0> &largs );
-  
+
+template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const list<C_F0> &largs , double tgv  );
+
+ 
 template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN<R> * B,const  FormLinear * const l);
 template<class R>   void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                             MatriceCreuse<R>  & A, const  FormBilinear * b  );
 template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                   MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const  BC_set * bc , double tgv   );
-template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const list<C_F0> &largs , double tgv  );
   
 template<class R>   void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all);
 template<class R>   void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B);

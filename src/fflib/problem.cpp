@@ -124,7 +124,7 @@ void Check(const Opera &Op,int N,int  M)
    assert(mat.onFace); //   Finite Volume or discontinous Galerkine 
     assert(ie>=0 && ie < 3); //  int on edge 
     MeshPoint mp= *MeshPointStack(stack);
-    double ** copt = Stack_Ptr<double*>(stack,ElemMatPtrOffset);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
 
   bool same = &Ku == & Kv;
   assert(same); 
@@ -253,7 +253,7 @@ void Check(const Opera &Op,int N,int  M)
                         R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
                        if ( copt && Kv.number <1)
                         {
-                         double cc  =  GetAny<double>(ll.second.eval(stack));
+                         R cc  =  GetAny<R>(ll.second.eval(stack));
                          if ( ccc != cc) { 
                           cerr << cc << " != " << ccc << " => ";
                          cerr << "Sorry error in Optimization (b) add:  int2d(Th,optimize=0)(...)" << endl;
@@ -291,7 +291,7 @@ void Check(const Opera &Op,int N,int  M)
 void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FElement & Kv,double * p,int ie,int label,void *stack)
   {
     MeshPoint mp= *MeshPointStack(stack);
-    double ** copt = Stack_Ptr<double*>(stack,ElemMatPtrOffset);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
 
   bool same = &Ku == & Kv;
   const Triangle & T  = Ku.T;
@@ -361,7 +361,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                     R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
                 if ( copt && Kv.number <1)
                  {
-                     double cc  =  GetAny<double>(ll.second.eval(stack));
+                     R cc  =  GetAny<R>(ll.second.eval(stack));
                      //cout << *(copt[il]) << " == " <<  cc << endl;
                      if ( ccc != cc) { 
                         cerr << cc << " != " << ccc << " => ";
@@ -415,7 +415,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                     R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
                 if ( copt && Kv.number <1)
                  {
-                     double cc  =  GetAny<double>(ll.second.eval(stack));
+                     R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( ccc != cc) { 
                         cerr << cc << " != " << ccc << " => ";
                        cerr << "Sorry error in Optimization (b) add:  int2d(Th,optimize=0)(...)" << endl;
@@ -449,7 +449,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
   void  Element_Op(MatriceElementaireSymetrique<R> & mat,const FElement & Ku,double * p,int ie,int label, void * stack)
   {
     MeshPoint mp= *MeshPointStack(stack);
-    double ** copt = Stack_Ptr<double*>(stack,ElemMatPtrOffset);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     const Triangle & T  = Ku.T;
     //  const QuadratureFormular & FI = QuadratureFormular_T_2;
     //  const QuadratureFormular1d & FIb = QF_GaussLegendre2;
@@ -472,7 +472,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     
     const Opera &Op(*mat.bilinearform);
     bool classoptm = copt && Op.optiexpK;
-    assert(  (copt !=0) ||  (Op.where_in_stack_opt.size() !=0) );
+   // assert(  (copt !=0) ||  (Op.where_in_stack_opt.size() !=0) );
   if (Ku.number<1  && verbosity/100 && verbosity % 10 == 2 ) 
      cout << "Element_Op S: copt = " << copt << " " << classoptm << endl;
     assert(Op.MaxOp() <last_operatortype);
@@ -519,7 +519,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                       R c = copt ? *(copt[il]): GetAny<R>(ll.second.eval(stack));
                 if ( copt && Ku.number <1)
                  {
-                     double cc  =  GetAny<double>(ll.second.eval(stack));
+                     R cc  =  GetAny<R>(ll.second.eval(stack));
                     // cout << *(copt[il]) << " == " <<  cc << endl;
                      if ( c != cc) { 
                        cerr << c << " != " << cc << " => ";
@@ -576,7 +576,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                       R ccc = copt ? *(copt[il]): GetAny<R>(ll.second.eval(stack));
                 if ( copt && Ku.number <1)
                  {
-                     double cc  =  GetAny<double>(ll.second.eval(stack));
+                     R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( ccc != cc) { 
                        cerr << ccc << " != " << cc << ", xy = "<< T(Pt) << " => ";
                        cerr << "Sorry error in Optimization (d)  add:  int2d(Th,optimize=0)(...)" << endl;
@@ -622,7 +622,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                     const QuadratureFormular & FI = QuadratureFormular_T_2)
   {
     MeshPoint mp=*MeshPointStack(stack) ;
-    double ** copt = Stack_Ptr<double*>(stack,ElemMatPtrOffset);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     const Triangle & T  = Kv.T;
     //  const QuadratureFormular & FI = QuadratureFormular_T_2;
     //  const QuadratureFormular & FI = QuadratureFormular_T_2;
@@ -635,7 +635,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
    // char * yyy[] ={" ","_x ","_y "};
     
     bool classoptm = copt && Op.optiexpK;
-    assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
+   // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (Kv.number<1  && verbosity/100 && verbosity % 10 == 2) 
      cout << "Element_rhs S0: copt = " << copt << " " << classoptm << endl;
 
@@ -671,7 +671,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                 R c = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack)); //GetAny<double>(ll.second.eval(stack));
                 if ( copt && Kv.number <1)
                  {
-                     double cc  =  GetAny<double>(ll.second.eval(stack));
+                     R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
                        cerr << c << " != " << cc << " => ";
                        cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
@@ -697,13 +697,13 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                     const QuadratureFormular & FI = QuadratureFormular_T_2)
   {
     MeshPoint mp=*MeshPointStack(stack) ;
-    double ** copt = Stack_Ptr<double*>(stack,ElemMatPtrOffset);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
 //    int maxd = Op.MaxOp();
 //    assert(maxd<last_operatortype);
     const Triangle * Kp=0;
 
     bool classoptm = copt && Op.optiexpK;
-    assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
+   // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (ThI(KI)<1 && verbosity/100 && verbosity % 10 == 2)
 
      cout << "Element_rhs 3: copt = " << copt << " " << classoptm << endl;
@@ -746,7 +746,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                     R c = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));;//GetAny<double>(ll.second.eval(stack));
                 if ( copt && ThI(KI) <1)
                  {
-                     double cc  =  GetAny<double>(ll.second.eval(stack));
+                     R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
                        cerr << c << " != " << cc << " => ";
                        cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
@@ -771,7 +771,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                     const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false)
   {
     MeshPoint mp=*MeshPointStack(stack) ;
-    double ** copt = Stack_Ptr<double*>(stack,ElemMatPtrOffset);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     const Triangle & T  = Kv.T;
     // const QuadratureFormular1d & FI = QF_GaussLegendre2;
     long npi;
@@ -783,7 +783,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     char * yyy[] ={" ","_x ","_y "};
 
     bool classoptm = copt && Op.optiexpK;
-    assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
+   // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2) 
      cout << "Element_rhs S: copt = " << copt << " " << classoptm << endl;
     KN<bool> Dop(last_operatortype);
@@ -821,7 +821,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                   R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
                 if ( copt && Kv.number<1 <1)
                  {
-                     double cc  =  GetAny<double>(ll.second.eval(stack));
+                     R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
                        cerr << "Sorry orrer in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
@@ -850,11 +850,11 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     
     
     MeshPoint mp=*MeshPointStack(stack) ;
-    double ** copt = Stack_Ptr<double*>(stack,ElemMatPtrOffset);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     
 
     bool classoptm = copt && Op.optiexpK;
-    assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
+    //assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (ThI.number(KI)<1 && verbosity/100 && verbosity % 10 == 2) 
      cout << "Element_rhs S: copt = " << copt << " " << classoptm << endl;
     KN<bool> Dop(last_operatortype);
@@ -907,7 +907,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                   R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
                 if ( copt && Kv.number<1 <1)
                  {
-                     double cc  =  GetAny<double>(ll.second.eval(stack));
+                     R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
                        cerr << "Sorry orrer in Optimization add:  int1d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
@@ -926,140 +926,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     
   } 
   
-  
-  
- template<class R>
-  void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                            MatriceCreuse<R>  & A, const  FormBilinear * b  )
-    
-  {
-    const CDomainOfIntegration & di= *b->di;
-    const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
-    if ( pThdi != &Th) { 
-      ExecError("No way to compute bilinear form with integrale of on mesh \n"
-                "  test  or unkwon function  defined on an other mesh! sorry to hard.   ");
-    }
-    SHOWVERB(cout << " FormBilinear " << endl);
-    MatriceElementaireSymetrique<R> *mates =0;
-    MatriceElementairePleine<R> *matep =0;
-    const bool useopt=di.UseOpt(stack);    
-    double binside=di.binside(stack);
 
-    const vector<Expression>  & what(di.what);             
-    CDomainOfIntegration::typeofkind  kind = di.kind;
-    set<int> setoflab;
-    bool all=true; 
-    const QuadratureFormular1d & FIE = di.FIE(stack);
-    const QuadratureFormular & FIT = di.FIT(stack);
-    bool VF=b->VF();  // finite Volume or discontinous Galerkin
-    if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
-    if (verbosity>3) 
-      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border  " ;
-      else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
-      else cout << "  --  int  in  " ;
-    for (int i=0;i<what.size();i++)
-      {long  lab  = GetAny<long>( (*what[i])(stack));
-      setoflab.insert(lab);
-      if ( verbosity>3) cout << lab << " ";
-      all=false;
-      }
-     if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
-  const E_F0 & optiexp0=*b->b->optiexp0;
-  const E_F0 & optiexpK=*b->b->optiexpK;
-  int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
-  double** where_in_stack =0;
-  if (n_where_in_stack_opt && useopt)
-    where_in_stack = new double * [n_where_in_stack_opt];
-  if (where_in_stack)
-   {
-    assert(b->b->v.size()==n_where_in_stack_opt);
-    for (int i=0;i<n_where_in_stack_opt;i++)
-    {
-      int offset=b->b->where_in_stack_opt[i];
-      assert(offset>10);
-      where_in_stack[i]= static_cast<double *>(static_cast<void *>((char*)stack+offset));
-      *(where_in_stack[i])=0;
-     }
-    if(&optiexp0) optiexp0(stack);
-    if (verbosity/100 && verbosity % 10 == 2)
-     {
-    int il=0;
-    for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-       cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il]) << " offset=" << b->b->where_in_stack_opt[il] <<endl;
-    }
-    }
-    Stack_Ptr<double*>(stack,ElemMatPtrOffset) =where_in_stack;
-    void *paramate=stack;
-    pair<void *,double *> parammatElement_OpVF;  
-    parammatElement_OpVF.first = stack;
-    parammatElement_OpVF.second= & binside;
-    
-    if (verbosity >3) 
-      if (all) cout << " all " << endl ;
-      else cout << endl;
-    if(VF) {
-      if(&Uh != &Vh || sym)
-       ExecError("To Day in bilinear form with discontinous Galerkin:   \n"
-                "  test or unkwon function must be  defined on the same FEspace, \n"
-                "  and the matrice is not symetric. \n" 
-                " To do other case in a future (F. Hecht) dec. 2003 ");
-      
-      matep= new MatriceElementairePleine<R>(Uh,VF,FIT,FIE);
-      matep->faceelement = Element_OpVF;   
-      paramate= &parammatElement_OpVF;            
-    }
-    else if (sym) {
-      mates= new MatriceElementaireSymetrique<R>(Uh,FIT,FIE);
-      mates->element = Element_Op<R>;               
-    }
-    else {
-      matep= new MatriceElementairePleine<R>(Uh,Vh,FIT,FIE);
-      matep->element = Element_Op<R>;               
-    }
-    MatriceElementaire<R> & mate(*( sym? (MatriceElementaire<R> *)mates : (MatriceElementaire<R> *) matep));
-    
-    
-    mate.bilinearform=b->b;
-    
-    Check(*mate.bilinearform,mate.Uh.N,mate.Vh.N);
-    
-    if (di.kind == CDomainOfIntegration::int1d )
-      {
-        for( int e=0;e<Th.neb;e++)
-          {
-            if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
-              {                  
-                int ie,i =Th.BoundaryTriangle(e,ie);
-                A += mate(i,ie,Th.bedges[e].lab,stack);  
-              }
-          }
-      }
-    else if (di.kind == CDomainOfIntegration::intalledges)
-      {
-        for (int i=0;i< Th.nt; i++) 
-          {
-            if ( all || setoflab.find(Th[i].lab) != setoflab.end())
-             for (int ie=0;ie<3;ie++)   
-              A += mate(i,ie,Th[i].lab,paramate);   
-          }
-         
-      }      
-    else if (di.kind == CDomainOfIntegration::int2d )
-      {
-        for (int i=0;i< Th.nt; i++) 
-          {
-            if ( all || setoflab.find(Th[i].lab) != setoflab.end())  
-              A += mate(i,-1,Th[i].lab,stack);   
-            // AA += mate;
-          }
-      } 
-    else 
-      InternalError(" kind of CDomainOfIntegration unkown");
-      
-    if (where_in_stack) delete [] where_in_stack;
-    delete &mate;
-  }
-  
  template<class R>
   bool AssembleVarForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                        MatriceCreuse<R>  * A,KN<R> * B,const list<C_F0> &largs)
@@ -1150,6 +1017,143 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
       }
     
   }
+  
+  
+ template<class R>
+  void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+                            MatriceCreuse<R>  & A, const  FormBilinear * b  )
+    
+  {
+  
+   //  cout <<  " b->b " <<  b->b << " " <<  b->b <<  " " << b->b->isoptimize <<endl;  endl;                
+
+    const CDomainOfIntegration & di= *b->di;
+    const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
+    if ( pThdi != &Th) { 
+      ExecError("No way to compute bilinear form with integrale of on mesh \n"
+                "  test  or unkwon function  defined on an other mesh! sorry to hard.   ");
+    }
+    SHOWVERB(cout << " FormBilinear " << endl);
+    MatriceElementaireSymetrique<R> *mates =0;
+    MatriceElementairePleine<R> *matep =0;
+    const bool useopt=di.UseOpt(stack);    
+    double binside=di.binside(stack);
+
+    const vector<Expression>  & what(di.what);             
+    CDomainOfIntegration::typeofkind  kind = di.kind;
+    set<int> setoflab;
+    bool all=true; 
+    const QuadratureFormular1d & FIE = di.FIE(stack);
+    const QuadratureFormular & FIT = di.FIT(stack);
+    bool VF=b->VF();  // finite Volume or discontinous Galerkin
+    if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+    if (verbosity>3) 
+      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border  " ;
+      else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
+      else cout << "  --  int  in  " ;
+    for (int i=0;i<what.size();i++)
+      {long  lab  = GetAny<long>( (*what[i])(stack));
+      setoflab.insert(lab);
+      if ( verbosity>3) cout << lab << " ";
+      all=false;
+      }
+     if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
+  const E_F0 & optiexp0=*b->b->optiexp0;
+  const E_F0 & optiexpK=*b->b->optiexpK;
+  int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
+  R** where_in_stack =0;
+  if (n_where_in_stack_opt && useopt)
+    where_in_stack = new R * [n_where_in_stack_opt];
+  if (where_in_stack)
+   {
+    assert(b->b->v.size()==n_where_in_stack_opt);
+    for (int i=0;i<n_where_in_stack_opt;i++)
+    {
+      int offset=b->b->where_in_stack_opt[i];
+      assert(offset>10);
+      where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
+      *(where_in_stack[i])=0;
+     }
+    if(&optiexp0) optiexp0(stack);
+    if (verbosity/100 && verbosity % 10 == 2)
+     {
+    int il=0;
+    for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+       cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il]) << " offset=" << b->b->where_in_stack_opt[il] <<endl;
+    }
+    }
+    Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
+    void *paramate=stack;
+    pair<void *,double *> parammatElement_OpVF;  
+    parammatElement_OpVF.first = stack;
+    parammatElement_OpVF.second= & binside;
+    
+    if (verbosity >3) 
+      if (all) cout << " all " << endl ;
+      else cout << endl;
+    if(VF) {
+      if(&Uh != &Vh || sym)
+       ExecError("To Day in bilinear form with discontinous Galerkin:   \n"
+                "  test or unkwon function must be  defined on the same FEspace, \n"
+                "  and the matrice is not symetric. \n" 
+                " To do other case in a future (F. Hecht) dec. 2003 ");
+      
+      matep= new MatriceElementairePleine<R>(Uh,VF,FIT,FIE);
+      matep->faceelement = Element_OpVF;   
+      paramate= &parammatElement_OpVF;            
+    }
+    else if (sym) {
+      mates= new MatriceElementaireSymetrique<R>(Uh,FIT,FIE);
+      mates->element = Element_Op<R>;               
+    }
+    else {
+      matep= new MatriceElementairePleine<R>(Uh,Vh,FIT,FIE);
+      matep->element = Element_Op<R>;               
+    }
+    MatriceElementaire<R> & mate(*( sym? (MatriceElementaire<R> *)mates : (MatriceElementaire<R> *) matep));
+    
+    
+    mate.bilinearform=b->b;
+    
+    Check(*mate.bilinearform,mate.Uh.N,mate.Vh.N);
+    
+    if (di.kind == CDomainOfIntegration::int1d )
+      {
+        for( int e=0;e<Th.neb;e++)
+          {
+            if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
+              {                  
+                int ie,i =Th.BoundaryTriangle(e,ie);
+                A += mate(i,ie,Th.bedges[e].lab,stack);  
+              }
+          }
+      }
+    else if (di.kind == CDomainOfIntegration::intalledges)
+      {
+        for (int i=0;i< Th.nt; i++) 
+          {
+            if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+             for (int ie=0;ie<3;ie++)   
+              A += mate(i,ie,Th[i].lab,paramate);   
+          }
+         
+      }      
+    else if (di.kind == CDomainOfIntegration::int2d )
+      {
+        for (int i=0;i< Th.nt; i++) 
+          {
+            if ( all || setoflab.find(Th[i].lab) != setoflab.end())  
+              A += mate(i,-1,Th[i].lab,stack);   
+            // AA += mate;
+          }
+      } 
+    else 
+      InternalError(" kind of CDomainOfIntegration unkown");
+      
+    if (where_in_stack) delete [] where_in_stack;
+    delete &mate;
+  }
+  
 
 
  template<class R>
@@ -1314,9 +1318,9 @@ template<class R>
   const E_F0 & optiexp0=*l->l->optiexp0;
   const E_F0 & optiexpK=*l->l->optiexpK;
   int n_where_in_stack_opt=l->l->where_in_stack_opt.size();
-  double** where_in_stack =0;
+  R** where_in_stack =0;
   if (n_where_in_stack_opt && useopt)
-    where_in_stack = new double * [n_where_in_stack_opt];
+    where_in_stack = new R * [n_where_in_stack_opt];
   if (where_in_stack)
    {
     assert(l->l->v.size()==n_where_in_stack_opt);
@@ -1324,7 +1328,7 @@ template<class R>
     {
       int offset=l->l->where_in_stack_opt[i];
       assert(offset>10);
-      where_in_stack[i]= static_cast<double *>(static_cast<void *>((char*)stack+offset));
+      where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
       *(where_in_stack[i])=0;
      }
      if(&optiexp0) optiexp0(stack);
@@ -1340,7 +1344,7 @@ template<class R>
          cout << "const coef " << i << " = " << *(where_in_stack[i]) << endl;
        }
     }
-    Stack_Ptr<double*>(stack,ElemMatPtrOffset) =where_in_stack;
+    Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
     
     
     if (verbosity >3) 
@@ -1389,6 +1393,7 @@ template<class R>
   
   
 }
+
 
 bool isVF(const list<C_F0> & largs)  // true => VF type of Matrix   
 {
@@ -1819,11 +1824,11 @@ bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,in
  
 
 
-bool FieldOfForm(const C_args *op)  // true => complex problem 
+bool FieldOfForm(const C_args *op,bool complextype)  // true => complex problem 
 {
   list<C_F0>::const_iterator ii,ib=op->largs.begin(),
     ie=op->largs.end();
-  bool complextype =false;   
+ // bool complextype =false;   
   for (ii=ib;ii != ie;ii++)
     {
       Expression e=ii->LeftValue();
@@ -1853,18 +1858,26 @@ bool FieldOfForm(const C_args *op)  // true => complex problem
       aType r = ii->left();
       if (r==atype<const  FormBilinear *>()) 
         {
-          const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
+          const FormBilinear * bb=dynamic_cast<const FormBilinear *>(e);
           Foperator * b=const_cast<  Foperator *>(bb->b);
-          
+         // const Foperator * b=bb->b;
+          assert(b->isoptimize==false);
           if (complextype)  b->mapping(&CCastToC);
-          else b->mapping(&CCastToR) ;                
+          else b->mapping(&CCastToR) ;  
+          Foperator * bn = b->Optimize(currentblock);  
+          *bb->b = *bn;
+         // cout <<  " bb->b " <<  bb->b << " " <<  bb->b <<  " " << bb->b->isoptimize <<endl;  endl;                
+                      
         }
       else if (r==atype<const  FormLinear *>())
         {
           const  FormLinear * ll=dynamic_cast<const  FormLinear *>(e);
           Ftest * l= const_cast<Ftest *>(ll->l);
           if (complextype)  l->mapping(&CCastToC) ;
-          else l->mapping(&CCastToR) ;                
+          else l->mapping(&CCastToR) ; 
+          Ftest * ln = l->Optimize(currentblock);  
+          *ll->l=*ln; 
+         // cout <<  " ll->l " <<  ll->l << " " << ll->l->isoptimize <<endl;                
         }
     } 
   return complextype;
@@ -1889,7 +1902,7 @@ Problem::Problem(const C_args * ca,const ListOfId &l,size_t & top) :
 
   VF=isVF(op->largs);   
  // cout << " Problem ) VF = " << VF << endl;
-  complextype =  iscomplex ||FieldOfForm(op)   ;
+  complextype =  FieldOfForm(op,iscomplex)  ;  // Warning do the casting of all expression in double or complex
  if( complextype && !iscomplex) 
     CompileError("Error: Problem  a complex problem with no complex FE function ");
  if( verbosity > 1)
@@ -1937,6 +1950,7 @@ Call_FormLinear::Call_FormLinear(Expression *na,Expression  LL, Expression ft)
 bool C_args::IsLinearOperator() const {
   int n=largs.size();
   aType tRn =atype<KN<R>* >();
+  aType tCn =atype<KN<Complex>* >();
   for (const_iterator i=largs.begin(); i != largs.end();i++) 
     {  C_F0  c= *i;Expression e=c; aType r=c.left();
     if (     ( r != atype<const  FormLinear *>() )
@@ -1946,17 +1960,20 @@ bool C_args::IsLinearOperator() const {
              &&  ( r != atype<VirtualMatrice<Complex>::plusAx >() )
              &&  ( r != atype<VirtualMatrice<Complex>::plusAtx >() )
              &&  ( r != tRn) 
+             &&  ( r != tCn) 
              ) return false;
     }
   return true;}
 bool C_args::IsBilinearOperator() const {
       int n=largs.size();
       aType tRn =atype<Matrice_Creuse<R>* >();
+      aType tCn =atype<Matrice_Creuse<Complex>* >();
       for (const_iterator i=largs.begin(); i != largs.end();i++) 
         {  C_F0  c= *i;Expression e=c; aType r=c.left();
         if (     ( r!= atype<const  FormBilinear *>() )
                  &&  ( r != atype<const  BC_set *>() )
                  &&  ( r != tRn) 
+                 &&  ( r != tCn)
                  ) return false;
         }
       return true;}
