@@ -4,6 +4,42 @@
 #include <set>
 #include <list>
 #include <map>
+#endif
+#define WITHBLAS 1
+#ifdef WITHBLAS 
+#include <vecLib/cblas.h>     
+template<class R> inline R blas_sdot(const int n,const R *sx,const int incx,const R *sy,const int  incy)
+{
+  R s=0;
+  
+  if(incx == 1 && incy == 1)
+   for (int k = 0; k< n; k++)
+    s += *sx++ * * sy++;
+  else
+   for (int k = 0; k< n; k++, sx += incx, sy += incy)
+    s += *sx * *sy;   
+   return  s;
+}
+template<> inline float blas_sdot(const int n,const  float *sx,const int incx,const float *sy,const int  incy)
+{
+  return cblas_sdot(n,sx,incx,sy,incy);
+}
+template<> inline double blas_sdot(const int n,const  double *sx,const int incx,const double *sy,const int  incy)
+{
+  return cblas_ddot(n,sx,incx,sy,incy);
+}
+template<> inline  complex<double> blas_sdot(const int n,const  complex<double> *sx,const int incx,const complex<double> *sy,const int  incy)
+{
+  complex<double> s;
+   cblas_zdotu_sub(n,(const void *)sx,incx,(const void *)sy,incy,( void *)&s);
+  return s;
+}
+template<> inline  complex<float> blas_sdot(const int n,const  complex<float> *sx,const int incx,const complex<float> *sy,const int  incy)
+{
+  complex<float> s;
+   cblas_zdotu_sub(n,(const void *)sx,incx,(const void *)sy,incy,( void *)&s);
+  return s;
+}
 
 #endif
 using Fem2D::HeapSort;
@@ -450,7 +486,11 @@ void MatriceProfile<R>::cholesky(R eps) const {
       jk =  L + pL[j+1] -(j - k); 
       k = j - k ;
       R s= -*ij; 
+#ifdef WITHBLAS
+      s = blas_sdot(k,ik,1,jk,1);
+#else
       while(k--) s += *ik++ * *jk++;  
+#endif
       *ij =  -s/D[j] ;
       xii -= *ij * *ij ;
       }
@@ -481,6 +521,7 @@ void MatriceProfile<R>::crout(R eps) const  {
       R s=-*ij;
       while ( k-- ) s += *ik++ * *jk++ * *dkk++;  
       *ij = -s/ *dkk ; // k = j ici 
+
       xii -= *ij * *ij * *dkk;
       }
     if (Abs(xii) <= Max(eps*Abs(D[i]),1.0e-30))
