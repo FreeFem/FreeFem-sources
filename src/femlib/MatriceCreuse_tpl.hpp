@@ -259,7 +259,7 @@ template<class R>
    return 0;
   }
 template<class R>
-bool MatriceProfile<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
+bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij)
 {
    double eps0=numeric_limits<double>::min();
  if( norm(coef)<eps0) return  L == U ;
@@ -1019,7 +1019,7 @@ template<class R>
     lconst_iterator end=lM.end();
     lconst_iterator i;
     
-    map< pair<int,int>, R> mij;
+    std::map< pair<int,int>, R> mij;
     
     int n=0,m=0;
     bool sym=true;
@@ -1039,7 +1039,7 @@ template<class R>
      
   }
 template<class R>
-bool MatriceMorse<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
+bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij)
 {
   double eps0=numeric_limits<double>::min();
   int i,j,k;
@@ -1074,7 +1074,7 @@ return symetrique;
  
 template<class R> 
  template<class K>
-  MatriceMorse<R>::MatriceMorse(int nn,int mm, map< pair<int,int>, K> & m, bool sym):
+  MatriceMorse<R>::MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bool sym):
    MatriceCreuse<R>(nn,mm,0),solver(0),nbcoef(m.size()),symetrique(sym),  
    a(new R[nbcoef]),
    lg(new int[nn+1]),
@@ -1083,7 +1083,7 @@ template<class R>
      lg[0]=0;
      int k=0;
      bool nosym=!sym;
-     typename map< pair<int,int>, R>::iterator iter=m.begin(), mend=m.end();
+     typename std::map< pair<int,int>, R>::iterator iter=m.begin(), mend=m.end();
      while(iter!=mend)
       { 
         int i=iter->first.first;
