@@ -4133,6 +4133,10 @@ cat >>confdefs.h <<_ACEOF
 #define VersionFreeFempp $ff_numver
 _ACEOF
 
+
+# Since src/fflib/strversionnumber.cpp is recreated at each build, this
+# date is only useful for config-version.h
+
 FF_DATE=`date`
 
 cat >>confdefs.h <<_ACEOF
