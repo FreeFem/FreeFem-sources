@@ -7,6 +7,12 @@
 AC_INIT(FreeFem++,1.44,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
+# Package version (when the same FreeFem++ version is packaged several
+# times). For coherency, this should have the same value as the
+# top-most package number in debian/changelog.
+
+AC_SUBST(PACKAGE_VERSION,9)
+
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
 

@@ -76,12 +76,15 @@ then
 
         # CPU detection
 	ff_cpu=unkown
+	ff_optim_type=
 	if test `/usr/bin/hostinfo|grep ppc7450|wc -l` -gt 0
 	    then
 	    ff_cpu=G4
+	    ff_optim_type=-G4
 	elif test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
 	    then
 	    ff_cpu=G5
+	    ff_optim_type=-G5
 	fi
 	if test $ff_cpu == unknown;
 	    then
@@ -145,24 +148,31 @@ then
 
 	# Specific processors
 	proc_type=unknown
+	ff_optim_type=
 	if test `grep 'Pentium III (Coppermine)' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=pentium3
+	    ff_optim_type=-P3
 	elif test `grep 'Intel(R) Pentium(R) III ' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=pentium3
+	    ff_optim_type=-P3
 	elif test `grep 'Intel(R) Pentium(R) 4 ' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=pentium4
+	    ff_optim_type=-P4
 	elif test `grep 'Intel(R) Xeon(TM) CPU' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=pentium4
+	    ff_optim_type=-P4
 	elif test `grep 'AMD Athlon(tm) Processor' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=athlon
+	    ff_optim_type=-Athlon
 	elif test `grep 'AMD Athlon(tm) XP' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=athlon-xp
+	    ff_optim_type=-AthlonXP
 	fi
 
 	if test "$proc_type" != unknown
@@ -204,3 +214,9 @@ then
 	fi
     fi
 fi
+
+# Defines a variable containing the optimization type, to be used in
+# binary archive names. It may be empty if only generic optimization
+# is used.
+
+AC_SUBST(OPTIM_TYPE,$ff_optim_type)

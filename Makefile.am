@@ -75,9 +75,12 @@ speedtest: all
 # Windows package
 # ---------------
 
-# Windows package script (for Inno Setup)
+# Windows package script (for Inno Setup). We extract version
+# information from the Debian Changelog to get the package release
+# number as well.
+
 WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
-	m4 -DVERSION=$(VERSION) WindowsPackage.m4 > WindowsPackage.iss
+	m4 -DVERSION=$(VERSION)-$(PACKAGE_VERSION)$(OPTIM_TYPE) WindowsPackage.m4 > WindowsPackage.iss
 
 # Debian package
 # --------------
@@ -135,7 +138,7 @@ FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
 # -------------------------
 
 # Include kernel and libc version in static package name
-PACKAGE_NAME=FreeFem++v$(VERSION)_linux-$(KERNEL_VERSION)_$(LIBC_VERSION)
+PACKAGE_NAME=FreeFem++v$(VERSION).$(PACKAGE_VERSION)_linux-$(KERNEL_VERSION)_$(LIBC_VERSION)$(OPTIM_TYPE)
 
 linux-package: $(PACKAGE_NAME).tgz
 $(PACKAGE_NAME):all
