@@ -1,7 +1,7 @@
 Source: freefem++
 Section: non-free/math
 Priority: optional
-Maintainer: Alexis Darrasse <darrasse@ortsa.com>
+Maintainer: Antoine Le Hyaric <lehyaric@ann.jussieu.fr>
 Build-Depends: debhelper (>= 4.0.0), blas-dev (>= 1.1), arpack++ (>= 2.1), libumfpack4-dev (>= 4.1)
 Standards-Version: 3.6.1.0
 
