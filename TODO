@@ -27,6 +27,9 @@ Client/Server version (src/ide/FreeFem++-cs) TODO list:
 
 (Most important first)
 
+o [lehyaric] Remove message "Enter ? for help" from the graphical
+   window (see in MeshDraw.cpp, Show())
+
 o [lehyaric] Allow bigger FreeFem++ programs (more than 10KBytes) to
    go through sockets
 
