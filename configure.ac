@@ -50,14 +50,10 @@ AC_MSG_RESULT($ff_mac)
 # -------------------------------------------------------------------
 
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
-ff_libdl="-ldl"
 ff_uname=`uname`
 case $ff_uname in
 CYGWIN*)
 	ff_win32=yes
-
-	# No need for libdl under Windows
-	ff_libdl=
 
 	# We need Mingw (to avoid Cygwin's extra DLLs)
 	CXXFLAGS="$CXXFLAGS -mno-cygwin -I/usr/include/mingw"
@@ -67,7 +63,6 @@ CYGWIN*)
 *)ff_win32=no;;
 esac
 AC_MSG_RESULT($ff_win32)
-AC_SUBST(LIBDL,$ff_libdl)
 
 # FreeFem++-specific version information
 # --------------------------------------
@@ -142,9 +137,14 @@ AC_CHECK_HEADERS(GL/glx.h,
 if test "$ff_gl_ok" = yes
 then
 	AC_CHECK_LIB(GL,
-		glXGetCurrentContext,
+		glBegin,
 		ff_gl_ok=yes,
 		ff_gl_ok=no)
+	AC_CHECK_LIB(GLU,
+		gluSphere,
+		ff_gl_ok=yes,
+		ff_gl_ok=no,
+		-lGL)
 fi
 
 # If we cannot find GL, we cannot compile FreeFem++-agl
@@ -299,9 +299,9 @@ then
 	if test "$ff_arpack_ok" = no;
 	then
 		AC_CHECK_LIB(arpack,dsaupd_,
-			ff_arpack_libs="-larpack -llapack -rdynamic"
+			ff_arpack_libs="-larpack -llapack"
 			ff_arpack_ok=yes,,
-			-llapack -rdynamic)
+			-llapack)
 	fi
 
    # Trying to "locate" Arpack
@@ -404,18 +404,23 @@ AC_SUBST(UMFPACKLIB,$ff_umfpack_lib)
 # asinh acosh atanh are not in Mingw yet
 AC_CHECK_FUNCS(asinh acosh atanh)
 
+# Dynamic loading of compiled functions
+# -------------------------------------
+
 # Availability of dlopen(). Use AC_COMPILE rather than
-# AC_CHECK_HEADERS the latter has problems seeing it (in Cygwin) when
-# it does not compile (in Mingw).
+# AC_CHECK_HEADERS because the latter has problems seeing it (in
+# Cygwin) when it does not compile (in Mingw).
 
 AC_MSG_CHECKING(for dlfcn.h)
 AC_COMPILE_IFELSE([#include <dlfcn.h>],
-	ff_dlfcn=yes,
-	ff_dlfcn=no)
+	ff_dynload=yes,
+	ff_dynload=no)
 AC_MSG_RESULT($ff_dlfcn)
-if test "$ff_dlfcn" = yes;
+if test "$ff_dynload" = yes;
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
+	AC_CHECK_LIB(dl,dlinfo)
+	CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
 fi
 
 # Checking wether we can generate some documentation

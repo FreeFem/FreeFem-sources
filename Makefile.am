@@ -7,7 +7,7 @@
 # $Id$
 
 SUBDIRS=download src DOC examples++ examples++-tutorial		\
-examples++-eigen examples++-load examples++-mpi
+	examples++-eigen examples++-load examples++-mpi
 
 EXTRA_DIST=regtests.pl arpack/arpack++/include/*.h src/*/*.h			  \
 FreeFem++.*mcp.sit ffpc*mcp.zip HISTORY README BUGS TODO			  \
