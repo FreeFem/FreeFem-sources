@@ -167,9 +167,11 @@ BLAS: blas.tgz
 	mkdir -p BLAS
 	cd BLAS && tar xvzf ../blas.tgz
 	cp BLAS/xerbla.f blas_xerbla.f
+$(F77BLAS_SOURCES): BLAS
 
 CBLAS: cblas.tgz
 	tar xvzf cblas.tgz
+$(CBLAS_SOURCES): CBLAS
 
 blas.tgz:
 	wget -N http://www.netlib.org/blas/blas.tgz
