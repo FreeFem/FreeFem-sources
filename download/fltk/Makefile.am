@@ -16,8 +16,10 @@ INSTALL=install
 
 fltk: $(SRCDIR)/$(INSTALL)
 
+# Using system JPEG and PNG lib is a problem under Cygwin
 $(SRCDIR)/$(INSTALL): $(SRCDIR)
-	cd $(SRCDIR) && ./configure --enable-threads --prefix=`pwd`/$(INSTALL)
+	cd $(SRCDIR) && ./configure --enable-threads --enable-localjpeg \
+		--enable-localpng --prefix=`pwd`/$(INSTALL)
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 
