@@ -19,11 +19,39 @@ problem a(u,v, sheme=Euler , dt = 0.1, tinit = 0, tfinal = 10 , previous=[u1]) =
 explicit:
 problem a(u,v, sheme=thetaScheme(0.5) , dt = 0.1 , tinit = 0  , tfinal = 10 , previous=[u1]) = 
   int2d( u_t*v) + int(dx(u1)*dx(v)+dy(u1)*dy(v)) ;
+
+
   
+Client/Server version (src/ide/FreeFem++-cs) TODO list:
+-------------------------------------------------------
 
+(Most important first)
 
+o [lehyaric] Allow bigger FreeFem++ programs (more than 10KBytes) to
+   go through sockets
 
+o [lehyaric] Compile for Microsoft Windows
 
+o [lehyaric] Add more graphical tools (postscript output, ...)
+   See standard FreeFem++ X11 version for list of tools
 
+o [lehyaric] Optimize client/server communication through socket by
+   using binary data instead of strings
 
+o [lehyaric] Save and reload window settings and configuration
 
+o [lehyaric] List of recently opened files
+
+o [lehyaric] Properly define postscript output location
+
+o [lehyaric] Coloring in output window (and associate commands like
+   error display on mouse clicks)
+
+o [lehyaric] Macro highlighting in editor (see
+   example++-tutorial/nolinear-elas.edp)
+
+o [lehyaric] Syntactically correct parameter highlighting (instead of
+   just recognizing words) in editor window
+
+o [lehyaric] Use more efficient select() call instead of poll()
+   in cs.cpp
