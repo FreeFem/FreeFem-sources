@@ -11,17 +11,17 @@ DefaultGroupName=FreeFem++-VERSION
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
-OutputBaseFilename=FreeFem++-bin
+OutputBaseFilename=FreeFem++-VERSION
 
 [Files]
 Source: "src\std\FreeFem++.exe"; DestDir: "{app}"
 Source: "src\nw\FreeFem++-nw.exe"; DestDir: "{app}"
-Source: "examples++\*"; DestDir: "{app}\examples++"
-Source: "examples++-eigen\*"; DestDir: "{app}\examples++-eigen"
-Source: "examples++-tutorial\*"; DestDir: "{app}\examples++-tutorial"
-Source: "examples++-load\*"; DestDir: "{app}\examples++-load"
-Source: "examples++-other\*"; DestDir: "{app}\examples++-other"
+Source: "examples++\*.edp"; DestDir: "{app}\examples++"
+Source: "examples++-eigen\*.edp"; DestDir: "{app}\examples++-eigen"
+Source: "examples++-tutorial\*.edp"; DestDir: "{app}\examples++-tutorial"
+Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
 Source: "DOC\manual.pdf"; DestDir: "{app}"
+Source: "DOC\manual.ps"; DestDir: "{app}"
 Source: "logo.ico"; DestDir: "{app}"
 
 [Icons]
@@ -29,18 +29,19 @@ Source: "logo.ico"; DestDir: "{app}"
 ; Menu
 Name: "{group}\FreeFem++"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
 Name: "{group}\PDF manual"; Filename: "{app}\manual.pdf"
-Name: "{group}\Tutorial Examples"; Filename: "{app}\examples++-tutorial"
-Name: "{group}\Examples"; Filename: "{app}\examples++"
-Name: "{group}\Eigenvalues Examples"; Filename: "{app}\examples++-eigen"
-Name: "{group}\Uninstall FreeFem++"; Filename: "{uninstallexe}"
+Name: "{group}\Postscript manual"; Filename: "{app}\manual.ps"
+Name: "{group}\Examples\Tutorial"; Filename: "{app}\examples++-tutorial"
+Name: "{group}\Examples\Main"; Filename: "{app}\examples++"
+Name: "{group}\Examples\Eigenvalues"; Filename: "{app}\examples++-eigen"
+Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
 
 ; Desktop
-Name: "{userdesktop}\FreeFem++"; Filename: "{app}\src\std\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
+Name: "{userdesktop}\FreeFem++ VERSION"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
 
 [Registry]
 
 ; Link .edp file extension to FreeFem++
-Root: HKCR; Subkey: ".edp"; ValueType: string; ValueName: ""; ValueData: "FreeFemScript"; Flags: uninsdeletevalue
-Root: HKCR; Subkey: "FreeFemScript"; ValueType: string; ValueName: ""; ValueData: "FreeFem++ Script"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "FreeFemScript\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\logo.ico"
-Root: HKCR; Subkey: "FreeFemScript\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\src\std\FreeFem++.exe"" ""%1"""
+Root: HKCR; Subkey: ".edp"; ValueType: string; ValueName: ""; ValueData: "FreeFemVERSIONScript"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "FreeFemVERSIONScript"; ValueType: string; ValueName: ""; ValueData: "FreeFem++ Script"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "FreeFemVERSIONScript\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\logo.ico"
+Root: HKCR; Subkey: "FreeFemVERSIONScript\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\FreeFem++.exe"" ""%1"""
