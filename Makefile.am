@@ -34,6 +34,14 @@ clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
 	-rm examples*/*.eps 
 
+# Reduced compilation
+# -------------------
+
+quick:
+	cd src/lglib && make
+	cd src/fflib && make
+	cd src/std && make
+
 # Testing
 # -------
 
