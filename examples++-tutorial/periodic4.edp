@@ -25,7 +25,7 @@ func abs=sqrt(x^2+y^2);
 
  func f=(y+x+1)*(y+x-1)*(y-x+1)*(y-x-1);                
  real intf = int2d(Th)(f);
- real mTh = int2d(Th)(1);
+ real mTh = int2d(Th)(1.);
 real moyf =  intf/mTh;
 cout << moyf << endl; 
  problem laplace(uh,vh) =                     
