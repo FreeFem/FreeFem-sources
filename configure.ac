@@ -841,7 +841,7 @@ then
 	# because it first needs FreeFEM++ to accept several
 	# successive runs without restart.
         
-	ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-client{EXEEXT} FreeFem++-server${EXEEXT}"
+	ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-client${EXEEXT} FreeFem++-server${EXEEXT}"
 	if test "$enable_cygwin" = yes 
 	 then
            AC_SUBST(FLTK_CONFIG_PARAM,"--enable-localzlib --enable-cygwin")

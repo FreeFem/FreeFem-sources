@@ -55,7 +55,7 @@ ide:
 	cd download && make
 	cd src/lglib && make
 	cd src/fflib && make
-	cd src/ide && make FreeFem++-cs$(EXEEXT) FreeFem++-cs-server$(EXEEXT)
+	cd src/ide && make FreeFem++-cs$(EXEEXT)
 
 ide-client:
 	cd download && make
