@@ -1,8 +1,6 @@
 .deps
 .DS_Store
 MakeDepend
-Makefile
-Makefile.in
 versionnumber.hpp
 FreeFem++
 FreeFem++-g
@@ -14,3 +12,4 @@ FreeFem++-glx
 FreeFem++-glx-g
 FreeFem++-mpi
 FreeFem++-mpi-g
+Makefile

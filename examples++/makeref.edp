@@ -41,7 +41,7 @@ verbosity=verbosityy;
 		
 	
 	include "aadaptation.edp";
-	real TESTaadaptation=u[]'*u[];
+	real TESTaadaptation=regvalue;
 		ref<<"real REFaadaptation="<<TESTaadaptation<<";"<<endl;
 };
 ;
