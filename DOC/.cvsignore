@@ -1,6 +1,7 @@
 *.sit
 *.zip
 *.aux
+*.ilg
 *.log
 *.dvi
 *.toc
@@ -10,3 +11,5 @@
 *.ind
 *.tmp
 *.out
+manual.ps.gz
+manual.pdf
