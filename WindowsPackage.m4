@@ -48,7 +48,7 @@ Source: "logo.ico"; DestDir: "{app}"
 
 ; Menu
 Name: "{group}\FreeFem++"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
-Name: "{group}\FreeFem++ graphical interface"; Filename: "{app}\FreeFem++-cs.exe"
+Name: "{group}\FreeFem++ GUI"; Filename: "{app}\FreeFem++-cs.exe"
 Name: "{group}\PDF manual"; Filename: "{app}\manual-full.pdf"
 Name: "{group}\Postscript manual"; Filename: "{app}\manual-full.ps"
 Name: "{group}\Examples\Tutorial"; Filename: "{app}\examples++-tutorial"
@@ -58,7 +58,7 @@ Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
 
 ; Desktop
 Name: "{userdesktop}\FreeFem++ VERSION"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
-Name: "{userdesktop}\FreeFem++ VERSION graphical interface"; Filename: "{app}\FreeFem++-cs.exe"
+Name: "{userdesktop}\FreeFem++ VERSION GUI"; Filename: "{app}\FreeFem++-cs.exe"
 
 [Registry]
 
