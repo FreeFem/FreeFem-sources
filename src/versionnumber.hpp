@@ -1,2 +1,2 @@
-#define VersionFreeFempp  1.38
-#define VersionFreeFemDate  "Sat Feb 7 19:32:44 CET 2004"
+#define VersionFreeFempp  1.41
+#define VersionFreeFemDate  "Wed May 12 11:29:20 CEST 2004"
