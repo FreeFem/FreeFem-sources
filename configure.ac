@@ -227,7 +227,7 @@ fi
 # ------------------------------------------
 AC_ARG_ENABLE(generic_blas,[  --enable-generic_blas	Download generic blas (implie --enable-download)])
 
-AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK)])
+AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK,FLTK)])
 
 if test "$enable_generic_blas" = yes
 then
@@ -597,21 +597,31 @@ AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 # Can we produce an IDE?
 # ----------------------
 
-AC_CHECK_PROG(ff_fltkconfig,fltk-config,yes,no)
+ff_fltk_config=fltk-config
+AC_CHECK_PROG(ff_fltk,fltk-config,yes,no)
 
 # Downloading and compiling FLTK. (todo)
-###if test "$ff_fltkconfig" = no
-###then
-###	AC_SUBST(DOWNLOAD_FLTK,fltk)
-###	ff_fltkconfig=yes
-###fi
+if test "$ff_fltk" = no -a "$enable_download" = yes
+then
+	AC_MSG_NOTICE(using downloaded FLTK)
+	AC_SUBST(DOWNLOAD_FLTK,fltk)
+	ff_fltk_config=$curdir/download/fltk/fltk-1.1.5/install/bin/fltk-config
+	ff_fltk=yes
+fi
 
-if test "$ff_fltkconfig" = no
+if test "$ff_fltk" = yes
 then
 	# For the moment, FreeFem++-ide${EXEEXT} is not built because it first
 	# needs FreeFEM++ to accept several successive runs without restart.
 
 	ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-cs-server${EXEEXT}"
+
+	AC_SUBST(FLTK_CONFIG,$ff_fltk_config)
+
+	# Automake does not want to see "fltk-config --ldflags" in *_LDADD,
+	# so we need to evaluate this here
+
+	AC_SUBST(FLTK_LDADD,`$ff_fltk_config --ldflags`)
 fi
 
 # creating all makefiles
@@ -626,6 +636,7 @@ AC_OUTPUT(Makefile
 	download/blas/Makefile
 	download/arpack/Makefile
 	download/umfpack/Makefile
+	download/fltk/Makefile
 	src/Makefile
 	src/bamglib/Makefile
 	src/iml/Makefile
