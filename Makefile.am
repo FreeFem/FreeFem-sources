@@ -59,6 +59,8 @@ deb:
 
 native:FreeFem++v$(VERSION)_MacOS FreeFem++v$(VERSION)_MacOsX.tgz
 	echo "done"
+native9:FreeFem++v$(VERSION)_MacOS 
+	echo "done"
 nativeX: FreeFem++v$(VERSION)_MacOsX.tgz
 	echo "done"
 
