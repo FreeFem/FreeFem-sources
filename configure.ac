@@ -594,12 +594,33 @@ fi
 AC_SUBST(STD_GRAPH_OBJ,$ff_std_graph_obj)
 AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 
+# Can we produce an IDE?
+# ----------------------
+
+AC_CHECK_PROG(ff_fltkconfig,fltk-config,yes,no)
+
+# Downloading and compiling FLTK. (todo)
+###if test "$ff_fltkconfig" = no
+###then
+###	AC_SUBST(DOWNLOAD_FLTK,fltk)
+###	ff_fltkconfig=yes
+###fi
+
+if test "$ff_fltkconfig" = no
+then
+	# For the moment, FreeFem++-ide${EXEEXT} is not built because it first
+	# needs FreeFEM++ to accept several successive runs without restart.
+
+	ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-cs-server${EXEEXT}"
+fi
+
 # creating all makefiles
 # ----------------------
 
 AC_SUBST(GLXPROG,$ff_glxprog)
 AC_SUBST(AGLPROG,$ff_aglprog)
 AC_SUBST(X11PROG,$ff_x11prog)
+AC_SUBST(IDEPROG,$ff_ideprog)
 AC_OUTPUT(Makefile
 	download/Makefile
 	download/blas/Makefile
@@ -616,6 +637,7 @@ AC_OUTPUT(Makefile
 	src/fflib/Makefile
 	src/std/Makefile
 	src/x11/Makefile
+	src/ide/Makefile
 	src/nw/Makefile
 	src/mpi/Makefile
 	src/agl/Makefile
