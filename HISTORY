@@ -464,3 +464,7 @@ Make Version 1.40
      f.good() or f.EOF to test state the file 
      remark: the state is set after the read so the previous value is wrong
 
+02/06/2004
+----------
+  -  correction in call macro with string "..." parameter  
+   
