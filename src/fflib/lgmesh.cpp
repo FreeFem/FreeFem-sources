@@ -131,6 +131,9 @@ class Adaptation :   public E_F0mps { public:
     Expression em11,em22,em12;
     int  typesol[100];
     vector<Expression> sol;
+    int nbcperiodic;
+    Expression *periodic;
+    
     
     double arg(int i,Stack stack,double a) const { return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
     long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
@@ -197,6 +200,11 @@ class Adaptation :   public E_F0mps { public:
           
           
      }
+     nbcperiodic=0;
+     periodic=0;
+     GetPeriodic(nargs[25],nbcperiodic,periodic);
+     
+     
    }  
     
     static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<pmesh>(),true);}
@@ -441,8 +449,6 @@ AnyType Adaptation::operator()(Stack stack) const
   using bamg::Max;
   using bamg::Abs;
   
-  int nbcperiodic=0;
-  Expression *periodic=0;
 
   Real8 err         = arg(2,stack,0.01);    // coef in the metric
   Real8  errg       = Min(arg(3,stack,0.01),err);
@@ -467,8 +473,9 @@ AnyType Adaptation::operator()(Stack stack) const
   bool split                    = arg(22,stack,false) ;
   bool nomeshgeneration         = arg(23,stack,false) ;
   const E_Array * expmetrix = dynamic_cast<const E_Array *>(nargs[24]);
-  GetPeriodic(nargs[25],nbcperiodic,periodic);
-
+  //   the 25th param is periodic and it store at compilation time
+  // in nbcperiodic,periodic  variable 
+  
   KN<double> *mm11=0, *mm12=0,* mm22=0;
 
   using Fem2D::MeshPoint;
@@ -482,8 +489,9 @@ AnyType Adaptation::operator()(Stack stack) const
     int nbdfv=0,nbdfe=0;      
     BuildPeriodic(nbcperiodic,periodic,*Thh,stack,nbdfv,ndfv,nbdfe,ndfe);
      oTh = msh2bamg(*Thh,cutoffradian,nbdfv,ndfv,nbdfe,ndfe);
-    cerr << " Sorry periodic mesh adaptation is not well implemented "<< endl;
-    ExecError("adaptmesh( ... )");
+     
+  //  cerr << " Sorry periodic mesh adaptation is not well implemented "<< endl;
+  //  ExecError("adaptmesh( ... )");
   }
   else
    oTh = msh2bamg(*Thh,cutoffradian);
