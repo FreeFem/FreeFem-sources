@@ -11,10 +11,8 @@ SUBDIRS=download src DOC examples++-tutorial examples++	\
 	examples++-bug examples++-other
 
 EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h		  \
-FreeFem++.*mcp HISTORY README BUGS TODO						  \
-regtests.m4 \
+FreeFem++.*mcp HISTORY README BUGS TODO regtests.m4				  \
 FreeFem++.app/Contents/Info.plist FreeFem++.app/Contents/PkgInfo		  \
-FreeFem++.app/Contents/Resources/Contents/Info.plist				  \
 FreeFem++.app/Contents/Resources/Credits.rtf					  \
 FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/classes.nib		  \
 FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/info.nib		  \
