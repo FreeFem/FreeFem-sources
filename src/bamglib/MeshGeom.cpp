@@ -375,9 +375,12 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
         if(i!=j) {
           if(verbosity>9)  
              cout << " Edges Equi " << i << " <=> " << j << " sens = " << sens  << endl;
+           if( sens==0)
            Gh.edges[i].SetEqui();
+           else 
+            Gh.edges[i].SetReverseEqui();
            Gh.edges[i].link= & Gh.edges[j];
-           assert(sens==0);//  meme sens pour l'instant
+           //assert(sens==0);//  meme sens pour l'instant
         }
       }
        

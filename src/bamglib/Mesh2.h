@@ -294,7 +294,9 @@ class GeometricalEdge {
   //   if tg[0] =0 => no continuite 
   GeometricalEdge * Adj [2]; 
   int SensAdj[2];
+//  private:
   int flag ;
+  public: 
   GeometricalEdge * link; // if   Cracked() or Equi()
 
 // end of data 
@@ -309,7 +311,7 @@ class GeometricalEdge {
   int Cracked() const {return flag & 1;}
   int Dup() const { return flag & 32;}
   int Equi()const {return flag & 2;}
-  int ReverseEqui()const {return flag & 1024;}
+  int ReverseEqui()const {return flag & 128;}
   int TgA()const {return flag &4;}
   int TgB()const {return flag &8;}
   int Tg(int i) const{return i==0 ? TgA() : TgB();}
@@ -323,7 +325,7 @@ class GeometricalEdge {
   void SetMark()    { flag|=16;}
   void SetUnMark()  { flag &= 1007 /* 1023-16*/;}
   void SetRequired() { flag |= 64;}
-  int SetReverseEqui()const {return flag & 1024;}
+  void SetReverseEqui() {flag |= 128;}
   
   inline void Set(const GeometricalEdge & rec,const Geometry & Th ,Geometry & ThNew);
 
