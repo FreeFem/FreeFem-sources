@@ -1,0 +1,4 @@
+*.eps
+*.log
+Makefile
+Makefile.in
