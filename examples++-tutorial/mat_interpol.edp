@@ -1,0 +1,28 @@
+mesh Th=square(4,4);
+mesh Th4=square(2,2,[x*0.5,y*0.5]);
+plot(Th,Th4,ps="ThTh4.eps",wait=1);
+fespace Vh(Th,P1);
+fespace Vh4(Th4,P1);
+fespace Wh(Th,P0);
+fespace Wh4(Th4,P0);
+
+matrix IV= interplotematrix(Vh,Vh4);
+cout << " IV Vh<-Vh4 " << IV << endl;
+
+matrix IV0= interplotematrix(Vh,Vh4,inside=1);
+cout << " IV Vh<-Vh4 (inside=1)  " << IV0 << endl;
+
+matrix IVt0= interplotematrix(Vh,Vh4,inside=1,t=1);
+cout << " IV Vh<-Vh4^t (inside=1)  " << IVt0 << endl;
+
+matrix IV4t0= interplotematrix(Vh4,Vh);
+cout << " IV Vh4<-Vh^t  " << IV4t0 << endl;
+
+matrix IW4= interplotematrix(Wh4,Wh);
+cout << " IV Wh4<-Wh  " << IW4  << endl;
+
+matrix IW4V= interplotematrix(Wh4,Vh);
+cout << " IV Wh4<-Vh  " << IW4  << endl;
+
+
+
