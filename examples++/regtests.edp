@@ -54,11 +54,11 @@ verbosity=verbosityy;
 		
 	
 	include "aalapacien.edp";
-	real TESTaalapacien=u[]'*u[];
+	real TESTaalapacien=1+err;
 		cout<<"aalapacien reference value = "<<REFaalapacien
 				<<" test value ="<<TESTaalapacien<<endl;
-			assert(TESTaalapacien<REFaalapacien*(1+0.1));
-				assert(TESTaalapacien>REFaalapacien*(1-0.1));
+			assert(TESTaalapacien<REFaalapacien*(1+0.00001));
+				assert(TESTaalapacien>REFaalapacien*(1-0.00001));
 };
 ;
 cout << "--------- file : aalaplace-nc.edp -----------------" << endl;
@@ -210,7 +210,7 @@ verbosity=verbosityy;
 		
 	
 	include "NSP1P1b.edp";
-	real TESTNSP1P1b=u1[]'*u1[];
+	real TESTNSP1P1b=int2d(Th)(square(u1)+square(u2));
 		cout<<"NSP1P1b reference value = "<<REFNSP1P1b
 				<<" test value ="<<TESTNSP1P1b<<endl;
 			assert(TESTNSP1P1b<REFNSP1P1b*(1+0.2));
@@ -223,11 +223,11 @@ verbosity=verbosityy;
 		
 	
 	include "NSP1P1.edp";
-	real TESTNSP1P1=u1x[]'*u1x[];
+	real TESTNSP1P1=int2d(Th)(square(u1)+square(u2));
 		cout<<"NSP1P1 reference value = "<<REFNSP1P1
 				<<" test value ="<<TESTNSP1P1<<endl;
-			assert(TESTNSP1P1<REFNSP1P1*(1+0.1));
-				assert(TESTNSP1P1>REFNSP1P1*(1-0.1));
+			assert(TESTNSP1P1<REFNSP1P1*(1+0.2));
+				assert(TESTNSP1P1>REFNSP1P1*(1-0.2));
 };
 ;
 cout << "--------- file : NSP1P2.edp -----------------" << endl;
@@ -236,11 +236,11 @@ verbosity=verbosityy;
 		
 	
 	include "NSP1P2.edp";
-	real TESTNSP1P2=u1[]'*u1[];
+	real TESTNSP1P2=int2d(Th)(square(u1)+square(u2));
 		cout<<"NSP1P2 reference value = "<<REFNSP1P2
 				<<" test value ="<<TESTNSP1P2<<endl;
-			assert(TESTNSP1P2<REFNSP1P2*(1+0.1));
-				assert(TESTNSP1P2>REFNSP1P2*(1-0.1));
+			assert(TESTNSP1P2<REFNSP1P2*(1+0.2));
+				assert(TESTNSP1P2>REFNSP1P2*(1-0.2));
 };
 ;
 cout << "--------- file : parareal.edp -----------------" << endl;
@@ -257,6 +257,19 @@ verbosity=verbosityy;
 };
 ;
 
+ cout << "--------- file : Richard.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "Richard.edp";
+	real TESTRichard=hmax;
+		cout<<"Richard reference value = "<<REFRichard
+				<<" test value ="<<TESTRichard<<endl;
+			assert(TESTRichard<REFRichard*(1+0.1));
+				assert(TESTRichard>REFRichard*(1-0.1));
+};
+;
 
 cout << "--------- file : teste.edp -----------------" << endl;
 verbosity=verbosityy;
