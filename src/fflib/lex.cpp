@@ -11,6 +11,9 @@
 #include "lg.tab.hpp"
 #include "lex.hpp"
 
+//  New version of macro expantion more classical
+//  and more  simple
+// FH Jan. 2005
 
 static const bool debugmacro = false;
 
@@ -66,12 +69,81 @@ void mylex::dump(ostream & f )
     }
 }   
 
+int mylex::EatCommentAndSpace(string *data)
+{
+ // if data is !0 then add reading char in data
+ // return the last read char c
+ //  --------------------
+  int c,caux;
+  int incomment =0;
+  do {
+    incomment = 0;
+    c = source().peek();
+    
+    // eat spaces 
+    while (isspace(c) || c == 10 || c == 13 )
+     {
+      c = source().get();
+      if(c==10 || c==13) c='\n';
+      if (echo) cout << (char) c;
+      if(c=='\n') { linenumber++; if (echo) cout << setw(5) <<linenumber << " : " ;};             
+       if(data) *data+=char(c);
+       c=source().peek();
+      } 
+     
+    // eat comment  
+    if(c=='/') 
+      { c = source().get();
+        caux=source().peek(); 
+        if(caux =='/') incomment = 1;
+        else if (caux == '*' ) incomment = 2;
+        if(!incomment) source().putback(c);
+      }
+      
+      
+    if(incomment==1) 
+      {
+        if (echo) cout << "//" ;source().get();
+        if(data) *data+="//";
+
+        do {c=source().get();            
+        if(c==10 || c==13) c='\n';
+        if (echo) cout << (char) c;
+        if(data) *data+=char(c);
+        if(c=='\n') { linenumber++; if (echo) cout << setw(5) <<linenumber << " : " ;};             
+        }
+      while( (c!= '\n') && (c!= 10)  && (c!= 13)  &&  ( c != EOF) );
+      }
+    else if(incomment==2) 
+      {
+        if (echo) cout << "/*" ;
+        if(data) *data+="/*";
+
+        source().get();
+        do {    
+          c=source().get(); 
+          if(c==10 || c==13) c='\n';
+          if (echo) cout << (char) c ;
+          if(data) *data+=char(c);
+          if(c=='\n') { linenumber++; if (echo) cout << setw(5) <<linenumber << " : " ;};             
+          caux = source().peek();
+        } while(c != EOF && !(c=='*' && caux=='/') ) ;
+        
+        if(c != EOF)  
+          {     c = source().get();
+          if (echo) cout << (char) c ;
+          if(data) *data+=char(c);          
+          }
+        else erreur( " Unterminated comment");
+      }
+  } while (incomment);
+  return c;
+}
 int mylex::basescan()
 {
   extern long mpirank;
    
-  int c,caux;
-  int incomment =0;
+  int c;
   buf[0]=0;
   buf[1]=0;
   buf[2]=0;
@@ -81,51 +153,9 @@ int mylex::basescan()
   // modif FH 
   if (firsttime) 
     firsttime=false,cout << setw(5) <<linenumber << " : " ; 
-  do {
-    incomment = 0;
-    c = source().get();
-    
-    while (isspace(c) || c == 10 || c == 13 ){
-      if(c==10 || c==13) c='\n';
-      if (echo) cout << (char) c;
-      if(c=='\n') { linenumber++; if (echo) cout << setw(5) <<linenumber << " : " ;};             
-      c=source().get();} 
-    if(c=='/') 
-      { 
-        caux=source().peek(); 
-        if(caux =='/') incomment = 1;
-        else if (caux == '*' ) incomment = 2;
-      }
-    if(incomment==1) 
-      {
-        if (echo) cout << "//" ;source().get();
-        do {c=source().get();            
-        if(c==10 || c==13) c='\n';
-        if (echo) cout << (char) c;
-        if(c=='\n') { linenumber++; if (echo) cout << setw(5) <<linenumber << " : " ;};             
-        }
-      while( (c!= '\n') && (c!= 10)  && (c!= 13)  &&  ( c != EOF) );
-      }
-    else if(incomment==2) 
-      {
-        if (echo) cout << "/*" ;
-        source().get();
-        do {    
-          c=source().get(); 
-          if(c==10 || c==13) c='\n';
-          if (echo) cout << (char) c ;
-          if(c=='\n') { linenumber++; if (echo) cout << setw(5) <<linenumber << " : " ;};             
-          caux = source().peek();
-        } while(c != EOF && !(c=='*' && caux=='/') ) ;
-        
-        if(c != EOF)  
-          {     c = source().get();
-          if (echo) cout << (char) c ;
-          }
-        else erreur( " Unterminated comment");
-      }
-  } while (incomment);
-  
+
+  EatCommentAndSpace(); 
+  c =source().get(); // the current char 
   char nc = source().peek(); // next char
   buf[0]=c;
   buf[1]=nc;
@@ -174,10 +204,6 @@ int mylex::basescan()
       if (i == 256) 
         erreur ("Identifyier too long");
       buf[i] = 0;
-      /*      if (! InMotClef(lglval.type,ret))  {
-              if (  FindType(buf) == 1)  
-              ret =  FESPACE;
-              lglval.str = newcopy(buf); }*/
       
     }
   else  if (c=='"')
@@ -185,7 +211,7 @@ int mylex::basescan()
       int i;
       char cc;
       for (     i = 0,cc=source().peek(); 
-                i < 256 &&  (isprint(cc) && cc !='\n' && cc !='"');
+                i < 256 &&  (isprint(cc) && cc !='\n'  && cc !='"');
                 cc=source().peek(),++i
                 ) 
         {       
@@ -196,6 +222,11 @@ int mylex::basescan()
               switch (cc) {
               case 'n': buf[i]='\n';break;
               case 'f': buf[i]='\f';break;
+              case 10:
+              case 13:
+		cc='\n';
+		linenumber++;
+		//if (echo) cout << setw(5) <<linenumber << " : " ;		
               default : buf[i]=cc  ;break;              
               }
             }
@@ -296,14 +327,10 @@ int mylex::scan1()
  // bool echo = mpirank == 0; 
 
   int ret= basescan();
- // cout << "  <scan " << buf << " nmp:" << withmacropara << " " << ret <<" >   ";
+
   if ( ret == ID)
     while ((SetMacro(ret)))0;
 
-  if (withmacropara)
-    if (ret==ID)
-       (ExpandParam(ret));
-  
   if ( ret == ID)
     while ((CallMacro(ret)))0;
   return ret;
@@ -313,28 +340,7 @@ int mylex::scan(int lvl)
 {
  
   int ret= scan1(); 
-  if (ret==ID)  
-   {
-    bool cont=true;
-    while(cont)
-    {
-    cont=false;
-    string concat;
-    while(1) {
-     concat += buf;
-     while ( ( source().peek() == EOF) &&  close() ); 
-     if ( source().peek() != '#' ) break;
-     source().get() ; // eat #
-     ret= scan1(); 
-     }
-   ret=ID;
-   if(concat.length()>1000) erreur("Concat ID too long");
-   strcpy(buf,concat.c_str());
-   while ((CallMacro(ret))) cont=true;
-   }
-   
- }
-   
+  
       
   if ( ret == ID) {
     if (! InMotClef(lglval.type,ret))  {
@@ -374,13 +380,17 @@ int mylex::scan(int lvl)
   void mylex::print(ostream &f) const
   {
    int i=-1;
+   int k=0;
     if (typetoken == STRING) 
       {
+	
         f <<'"';
-        while (buf[++i]) 
-          if (buf[i]=='\n') f << "\\n"; 
-          else if (buf[i]=='"') f << "\\\""; 
-          else f << buf[i] ;
+        while (buf[++i]) { k++;
+	if (buf[i]=='\n') k++, f << "\\n"; 
+	else if (buf[i]=='"') k++,f << "\\\""; 
+	else f << buf[i] ;
+	if ( k%50==49) f << "\n  ... : ";  
+	}
         f << '"';
       }
     else 
@@ -396,235 +406,213 @@ char * mylex::match(int i)
   ErrorScan(" err macro ");};
  return buf; }
 
-bool mylex::ExpandParam(int &ret)
-{
-   assert(withmacropara>=0);
-  if (listMacroParam && ret == ID)
-  {
-    string arg=buf;
-    //cout << " < EP " << buf << " > " ; 
-    int kbspe=1;
-    for(list<MapMacroParam>::const_iterator i=listMacroParam->begin(); i != listMacroParam->end(); i++,kbspe++)
-      if(kbspe>beginStackParamExpand) // on saute les parameter deja fait ???? FH 
-      {
-        MapMacroParam::const_iterator j=i->find(arg);
-        if ( j != i->end() )
-          {
-            if(debugmacro )
-             cout << "\n macro arg : " <<  arg << " -> " << j->second << " bspe " << beginStackParamExpand 
-                  << " k= " << kbspe << " lvl = " << level << endl;
-            input(j->second, 0,kbspe);
-            ret = basescan(); 
-            arg=buf;
-            continue; // next macro 
-            //return true;
-          }     
-      }
-  }
-      return false;
-      }
-  
-  bool mylex::SetMacro(int &ret)
-    { 
-      bool rt=false;
-      if (strcmp(buf,"macro")==0)
-        {
-          char *macroname=newcopy(match(ID));
-          int nbparam =0;
-          deque<string> macroparm;
-          int rr=basescan(); 
-          string def;                          
-          if (rr!='(') 
-           def += buf;
-           else
-            { // a '(' after macro name
-            rr =  basescan();
-            
-            if (rr != ')' ) 
-              do { 
-                if (nbparam++>= 100) 
-                  { cerr << "in macro " <<macroname << endl;
-                  ErrorScan(" Too much (more than 100) parameters"); }  
-                
-                //cout << " \t\t " << ID << " " << rr << " " << buf << endl;
-                if (rr != ID)  
-                  { cout <<" Erreur waiting of an ID: " << buf << " " << rr <<  endl;
-                    erreur("in macro def: waiting for a ID"); }
-                macroparm.push_back(buf);
-                rr =  basescan(); 
-                if (rr  == ')') break;          
-                if ( rr != ',') erreur("in macro def: waiting  , or  ) "); 
-                rr =  basescan();
-                
-              } while(1); 
-          }
-                
-          do {
-            int i = source().get();
-            if (i == ENDOFFILE) {  cerr << "in macro " <<macroname <<  endl;
-            ErrorScan(" ENDOFFILE in macro definition. remark:a macro end with // ");}
-            int ii = source().peek();
-            if (i == '/' && ii == '/') { source().putback('/'); break;} 
-            def +=char(i);        
-          } while(1);
-          macroparm.push_back(def);
-          cout << "macro " << macroname  ;
-          for (int i=0;i<macroparm.size()-1;i++)
-            cout << ( (i == 0) ? '(' : ',') << macroparm[i];
-          if (nbparam)
-            cout << " )  " ;
-          for (int i=0;i<def.size();i++)
-            if (def[i] == 10 || (def[i] == 13 ) ) 
-             {
-              def[i]='\n';         
-             linenumber++; cout << '\n' << setw(5) <<linenumber << " : " ;
-             }            
 
-            else 
-              cout << def[i]   ;
+bool mylex::SetMacro(int &ret)
+{ 
+  bool rt=false;
+  if (strcmp(buf,"macro")==0)
+    {
+      char *macroname=newcopy(match(ID));
+      int nbparam =0;
+      deque<string> macroparm;
+      int rr=basescan(); 
+      string def;                          
+      if (rr!='(') 
+	def += buf;
+      else
+	{ // a '(' after macro name
+	  rr =  basescan();
+	  
+	  if (rr != ')' ) 
+	    do { 
+	      if (nbparam++>= 100) 
+		{ cerr << "in macro " <<macroname << endl;
+		ErrorScan(" Too much (more than 100) parameters"); }  
+	      
+	      //cout << " \t\t " << ID << " " << rr << " " << buf << endl;
+	      if (rr != ID) {
+		cout <<" Erreur waiting of an ID: " << buf << " " << rr <<  endl;
+		erreur("in macro def: waiting for a ID"); }
+	      macroparm.push_back(buf);
+	      rr =  basescan(); 
+	      if (rr  == ')') break;          
+	      if ( rr != ',') erreur("in macro def: waiting  , or  ) "); 
+	      rr =  basescan();
+	      
+	    } while(1); 
+	}
+      
+      do {
+	int i = source().get();
+	if (i == ENDOFFILE) {  cerr << "in macro " <<macroname <<  endl;
+	ErrorScan(" ENDOFFILE in macro definition. remark:a macro end with // ");}
+	int ii = source().peek();
+	if (i == '/' && ii == '/') { source().putback('/'); break;} 
+	def +=char(i);        
+      } while(1);
+      macroparm.push_back(def);
+      cout << "macro " << macroname  ;
+      for (int i=0;i<macroparm.size()-1;i++)
+	cout << ( (i == 0) ? '(' : ',') << macroparm[i];
+      if (nbparam)
+	cout << " )  " ;
+      for (int i=0;i<def.size();i++)
+	if (def[i] == 10 || (def[i] == 13 ) ) 
+	  {
+	    def[i]='\n';         
+	    linenumber++; cout << '\n' << setw(5) <<linenumber << " : " ;
+	  }                  
+	else 
+	  cout << def[i]   ;
          // cout << macroparm.back() ;
-          MapMacroDef & MacroDef =listMacroDef->back();
-          MapMacroDef::const_iterator i=MacroDef.find(macroname);
-          if ( i == MacroDef.end() )
-            MacroDef[macroname]=macroparm;
-          else { 
-            cerr << "ERREUR in macro name:" <<macroname << endl;
-            ErrorScan(" The macro already exist, sorry");}
-          rt=true;
-          ret= basescan();
-        }
-      return rt;
+      MapMacroDef & MacroDef =listMacroDef->back();
+      MapMacroDef::const_iterator i=MacroDef.find(macroname);
+      if ( i == MacroDef.end() )
+	MacroDef[macroname]=macroparm;
+      else { 
+	cerr << "ERREUR in macro name:" <<macroname << endl;
+	ErrorScan(" The macro already exist, sorry");}
+      rt=true;
+      ret= basescan();
     }
-  bool mylex::CallMacro(int &ret)
+  return rt;
+}
+
+
+bool mylex::CallMacro(int &ret)
+{
+  // New Version with direct macro expansion
+  // FH  jan 2005 
+  // -----------------------------------------
+  for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
     {
+      MapMacroDef::const_iterator j= i->find(buf);
       
-      for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
-        {
-          MapMacroDef::const_iterator j= i->find(buf);
-          
-          if (j != i->end()) {
-            int inmacroold=withmacropara;
-            const deque<string>  & macroparm= j->second;
-            int nbparam= macroparm.size()-1;
-            if (nbparam > 0 ) { 
-              match('(');
-              if (!listMacroParam) listMacroParam= new  list<MapMacroParam>;
-              listMacroParam->push_front(MapMacroParam());
-              MapMacroParam & lp=listMacroParam->front();
-              for (int k=0;k<nbparam;k++)
-                { 
-                  string p;
-                  int kend= ( k+1 == nbparam) ? ')' : ',';
-                  while (1) {
-                    int rr = basescan();
-                    if (rr==kend) break;
-                    else if (rr==')' || rr==',')  {// Correction FH 2/06/2004
-                      cerr << "Error in macro expantion "<< j->first << ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
-                      cerr << " number of macro parameter in definition is " << nbparam << endl;
-                      ErrorScan(" Wrong number of parameter in  macro call");
-                      }
-                   // if (rr==kend) break;
-                    
-                    if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
-                    p += token(); // Correction FH 2/06/2004 of string parameter
-                  }
-                  if(debugmacro)
-                  cout << "macro arg "<< k << " :" << macroparm[k] << " -> " <<  p << endl;
-                  lp.insert(make_pair<string,string>(macroparm[k],p));
-                  //lp[macroparm[k]] = p; 
-                }
-            }
-            if(debugmacro)
-            cout <<   " input in : -> " << macroparm[nbparam]  << " " << nbparam << endl;
-            input(macroparm[nbparam], nbparam);
-            ret =  scan1(); // Correction FH 6/06/2004 of string parameter
-            return true;        
-          }
-        }
-      return false;
+      if (j != i->end()) {
+	// int inmacroold=withmacropara;
+	const deque<string>  & macroparm= j->second;
+	int nbparam= macroparm.size()-1;
+	MapMacroParam  lp;
+	if (nbparam > 0 ) { 
+	  match('(');
+	  for (int k=0;k<nbparam;k++)
+	    { 
+	      string p;
+	      int kend= ( k+1 == nbparam) ? ')' : ',';
+	      while (1) {
+		int rr = basescan();
+		if (rr==kend) break;
+		else if (rr==')' || rr==',')  {// Correction FH 2/06/2004
+		  cerr << "Error in macro expantion "<< j->first 
+		       << ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
+		  cerr << " number of macro parameter in definition is " << nbparam << endl;
+		  ErrorScan(" Wrong number of parameter in  macro call");
+		}
+		
+		if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
+		p += token(); // Correction FH 2/06/2004 of string parameter
+	      }
+	      if(debugmacro)
+		cout << "macro arg "<< k << " :" << macroparm[k] << " -> " <<  p << endl;
+	      lp.insert(make_pair<string,string>(macroparm[k],p));
+	      //lp[macroparm[k]] = p; 
+	    }
+	}
+	if(debugmacro)
+	  cout <<   " input in : -> " << macroparm[nbparam]  << " " << nbparam << endl;
+	input(macroparm[nbparam]);
+	// ici il faut faire la substitution  de parameter 
+	// -----------------------------------------------
+	string expandtxt;
+	bool echosave=echo;
+	while(1) {
+	  int c= EatCommentAndSpace(&expandtxt); // eat comment to save it;
+	  if (c == EOF) break;
+	  ret = basescan();
+	  if(ret== ENDOFFILE) break; 
+	  if (nbparam && ret == ID) 
+	    {  
+	      MapMacroParam::const_iterator j=lp.find(buf);
+	      if ( j !=  lp.end()) 
+		expandtxt+=j->second;
+	      else 
+		expandtxt+=buf; 
+	    }
+	  else if (ret!='#')  //  macro concatenation operator 
+	    expandtxt+=buf;
+	}
+	echo=echosave;
+	input(expandtxt);
+	ret =  scan1(); // Correction FH 6/06/2004 of string parameter
+	return true;        
+      }
+    }
+  return false;
+}
+
+void  mylex::xxxx::open(mylex *lex,const char * ff) 
+{
+  filename=ff;
+  l=0;
+  nf=f= new ifstream(ff);     
+  if (!f || !*f) {
+    lex->cout << " Error openning file " <<ff<< endl;
+    lgerror("lex: Error input openning file ");};
+}
+void  mylex::xxxx::readin(mylex *lex,const string & s)//,int nbparam,int bstackparam) 
+{
+  filename=0;
+  l=0;
+  nf=f= new istringstream(s.c_str()); 
+  
+  if (!f || !*f) {
+    lex->cout << " Error readin string  :" <<s<< endl;
+    lgerror("lex: Error readin macro ");};
+}
+
+void mylex::xxxx::close() 
+{ 
+  if( nf)  delete nf;
+  if (filename) delete [] filename;
+  
+}
+void mylex::input(const char *  filename) 
+{
+  assert(level<99 && level >= -1);
+  if (level>=0) 
+    pilesource[level].l =linenumber;
+  
+  pilesource[level+1].open(this,filename);
+  pilesource[level+1].l =0;
+  // cout << "\n ++include " << filename << ";" << level+1 << endl;
+  linenumber = 1;     
+  level++;      
+}
+
+void mylex::input(const string & str) 
+{
+  
+  assert(level<99 && level >= -1);
+  if (level>=0) 
+    { pilesource[level].l =linenumber;
     }
   
-  void  mylex::xxxx::open(mylex *lex,const char * ff) 
-    {
-      filename=ff;
-      l=0;
-      nf=f= new ifstream(ff);     
-      if (!f || !*f) {
-        lex->cout << " Error openning file " <<ff<< endl;
-        lgerror("lex: Error input openning file ");};
-    }
-  void  mylex::xxxx::readin(mylex *lex,const string & s,int nbparam,int bstackparam) 
-    {
-      cas= nbparam;
-      filename=0;
-      l=0;
-      beginStackParamExpand=bstackparam; 
-      nf=f= new istringstream(s.c_str()); 
-      
-      if (!f || !*f) {
-        lex->cout << " Error readin string  :" <<s<< endl;
-        lgerror("lex: Error readin macro ");};
-    }
-    
-  void mylex::xxxx::close() 
-    { 
-      if( nf)  delete nf;
-      if (filename) delete [] filename;
-      
-    }
-  void mylex::input(const char *  filename) 
-    {
-      assert(level<99 && level >= -1);
-      if (level>=0) 
-        pilesource[level].l =linenumber;
-        
-      pilesource[level+1].open(this,filename);
-      pilesource[level+1].cas =0;
-      pilesource[level+1].beginStackParamExpand =0; 
-      pilesource[level+1].l =0;
-     // cout << "\n ++include " << filename << ";" << level+1 << endl;
-      linenumber = 1;     
-      level++;      
-      beginStackParamExpand=0; 
-    }
-  void mylex::input(const string & str,int nbparam,int bstackparam) 
-    {
-      assert(nbparam>=0);
-      withmacropara += nbparam; 
-      beginStackParamExpand=bstackparam; 
-      assert(level<99 && level >= -1);
-      if (level>=0) 
-        { pilesource[level].l =linenumber;
-        }
-      
-      pilesource[level+1].readin(this,str,nbparam,bstackparam);
-      linenumber = 0;     
-      level++;
-      
-    }
+  pilesource[level+1].readin(this,str);
+  linenumber = 0;     
+  level++;
   
-  bool mylex::close() { 
-      if(debugmacro )
-       cout << "\n close " << level << " " << pilesource[level].cas << " " << (listMacroParam ==0 ? 0 :listMacroParam->size()) ;
-      assert(level >=0 && level < 100);
-      if (pilesource[level].cas>0) //  macro with parameter 
-        {
-          assert(listMacroParam);
-          int nbp = pilesource[level].cas; 
-          withmacropara -=  nbp;
-          assert(withmacropara>=0);
-          if(debugmacro) cout << " -" << nbp << ' ' << withmacropara;
-          listMacroParam->pop_front();
-          // cout << " <<" << withmacropara << "," << nbp << ">> " ;
-         }
-     // cout << "\n-- close " << level << endl;
-      pilesource[level].close(); 
-     // cout << "\n ++   " << level << endl;
-      if (--level<0)
-        return false;
-      linenumber = pilesource[level].l;
-      beginStackParamExpand =  pilesource[level].beginStackParamExpand;
-       if(debugmacro) cout << "wmp " << withmacropara  << endl;
-       
-       return true;}
+}
+  
+bool mylex::close() { 
+  if(debugmacro )
+    cout << "\n close " << level ;
+  assert(level >=0 && level < 100);
+  // cout << "\n-- close " << level << endl;
+  pilesource[level].close(); 
+  // cout << "\n ++   " << level << endl;
+  if (--level<0)
+    return false;
+  linenumber = pilesource[level].l;
+  return true;
+}
   

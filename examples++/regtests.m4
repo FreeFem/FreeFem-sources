@@ -25,7 +25,7 @@ ONETEST(funct,myfunction(1.0,3.),0.1);
 ONETEST(lapacienprecon,u[]'*u[],0.1);
 ONETEST(lap_mat,u1[]'*u1[],0.1);
 ONETEST(NSP1P1b,int2d(Th)(square(u1)+square(u2)),0.2);
-ONETEST(NSP1P1,int2d(Th)(square(u1)+square(u2)),0.2);
+ONETEST(NSP1P1,int2d(Th)(square(u1)+square(u2)),10);
 ONETEST(NSP1P2,int2d(Th)(square(u1)+square(u2)),0.2);
 ONETEST(parareal,pu'*pu,0.1);
 

@@ -1,9 +1,10 @@
 #ifndef MY_LEX_HPP_
 #define MY_LEX_HPP_
+// with New version of macro expansion more simple and more stable 
+// FH jan 2005
+
 extern bool lexdebug;
 extern long mpisize,mpirank;
-
-//#include  <iomanip>
 
 class mylex  { 
   public:
@@ -14,17 +15,15 @@ class mylex  {
   typedef   map<const char *,Value,Keyless> MapMotClef;
   typedef   map<const char *, deque<string> ,Keyless >  MapMacroDef;
   typedef   map<string, string  >  MapMacroParam;
-//  typedef   map<const char *,Value,Keyless> MapMotType;
   typedef   MapMotClef::const_iterator const_iterator;
   typedef   MapMotClef::iterator iterator;
-//  typedef   MapMotType::const_iterator const_iterType;
+
   public: 
   int linenumber,charnumber;
   private:
   bool firsttime;
   int level;
-  int withmacropara;
-  int beginStackParamExpand; // debut de la pile de paramtere a expandre (use in ExpandParam)
+
   char buf[1024];
   int typetoken;
   bool echo;
@@ -33,20 +32,20 @@ class mylex  {
    istream * f;
    istream * nf;
    int l;
-   int cas;   //  nb de parameter de la macro 
-   int beginStackParamExpand; // debut de la pile de paramtere a expandre
+
    const char * filename; 
-   xxxx() : l(0), f(0) , filename(0),cas(0),nf(0),beginStackParamExpand(0) {}   
+   xxxx() : l(0), f(0) , filename(0),nf(0)   {}   
    void  open(mylex *lexx,const char * ff) ;
-   void  readin(mylex *lexx,const string & s,int cc,int bstackparam=0) ;
+   void  readin(mylex *lexx,const string & s);
    void close() ;
    };
+
   friend struct mylex::xxxx;
   
   xxxx pilesource[100];
   istream & source() const {return  * pilesource[level].f;} 
   ostream & cout ;
-//  ostream & cerr ;
+
   MapMotClef  MotClef;
   list<MapMacroDef> *listMacroDef;
   list<MapMacroParam> *listMacroParam;
@@ -58,52 +57,53 @@ class mylex  {
     echo(mpirank == 0),
     firsttime(true),
     level(-1),
-    withmacropara(0),
-    beginStackParamExpand(0),
     listMacroDef(new list<MapMacroDef>),
     listMacroParam(0) {
     listMacroDef->push_front(MapMacroDef());
-//    cout << setw(5) <<linenumber << " : ";
    };
   string token() const;
   void print(ostream &f) const; 
   int scan(int lvl=0);
   int lineno(){return linenumber;}
   char * YYText() { return buf;}
- void dump(ostream & f ) ;    
+  void dump(ostream & f ) ;
+  
   void erreur(char * s) {
     cerr << " Erreur line number" <<linenumber << ": " << s << endl;
     throw(ErrorCompile("lex:",linenumber)); }
-
+  
   bool InMotClef  (aType & t, int & r) const ;
   void  Add(Key k,int r,aType t);
+  
   void Check(bool b,Key k,const char * s) {
     if(b) {cout <<"Add " << s << "  null: " << k << endl;
     CompileError();}}
+  
   void Add(Key k,int i) ;//    {Check(!i,k,"mot clef");Add(k,i,0); }
   void Add(Key k,aType t);//   {Check(!t,k,"type");Add(k,TYPE,t); }
   void AddF(Key k,aType t);//  {Check(!t,k,"type");Add(k,FUNCTION,t); }
   void AddSpace(Key k,aType t);//  {Check(!t,k,"type");Add(k,FUNCTION,t); }
+
   const char * filename() const { 
     if ( level >=0 ) 
       return  pilesource[level].filename ? pilesource[level].filename : " -- in macro -- ";
     return "-- unkown --";}
     
   void input(const char *  filename) ;
-  void input(const string &str,int nbparam,int bstackparam=0) ;   
+  void input(const string &str);
   bool close() ;
-       
-  private: 
-    int basescan();  
-    int scan1();
-    bool SetMacro(int &ret);
-    bool CallMacro(int &ret);
-    bool ExpandParam(int &ret);
-    char * match(int i);
-   void ErrorScan(char * s) {
-      throw(ErrorCompile(s,lineno(),YYText() ) );}    
-    
-     
+  
+private: 
+  int basescan();  
+  int EatCommentAndSpace(string *data=0);
+  int scan1();
+  bool SetMacro(int &ret);
+  bool CallMacro(int &ret);
+  char * match(int i);
+  void ErrorScan(char * s) {
+    throw(ErrorCompile(s,lineno(),YYText() ) );}    
+  
+  
 } ;
 extern mylex *zzzfff;
 #endif
