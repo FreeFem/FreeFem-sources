@@ -19,6 +19,8 @@ push @progs,"$ENV{PROGLOC}/glx/FreeFem++-glx$ENV{EXEEXT}"
   if -e "$ENV{PROGLOC}/glx/FreeFem++-glx$ENV{EXEEXT}";
 push @progs,"$ENV{PROGLOC}/agl/FreeFem++-agl$ENV{EXEEXT}"
   if -e "$ENV{PROGLOC}/agl/FreeFem++-agl$ENV{EXEEXT}";
+push @progs,"$ENV{PROGLOC}/pc/FreeFem++-pc$ENV{EXEEXT}"
+  if -e "$ENV{PROGLOC}/pc/FreeFem++-pc$ENV{EXEEXT}";
 
 # Loop on all available FreeFem programs
 foreach my $ff (@progs) {

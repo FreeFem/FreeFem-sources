@@ -1,10 +1,12 @@
+#include <config-wrapper.h> // needed for HAVE_DLFCN_H
+
 #include  <iostream>
 #include  <map>
 #include "AFunction.hpp"
 using namespace std;
 #include "lex.hpp"
 #define LOAD 1
-#if defined(__INTEL__) || defined(__MWERKS__) || defined(NO_LOAD)
+#if defined(__INTEL__) || defined(__MWERKS__) || !defined(HAVE_DLFCN_H)
 #undef LOAD
 #endif
 

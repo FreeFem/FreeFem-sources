@@ -21,10 +21,53 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_YACC
 AM_PROG_LEX
+AC_LANG(C++)
+
+# We do not use the default C++ flags
+CXXFLAGS=
 
 # Some useful libraries
 
 AC_CHECK_LIB(pthread,pthread_create)
+
+# Checking wether we can produce a MacIntosh-specific version
+# -----------------------------------------------------------
+
+AC_MSG_CHECKING(wether we are on a MacIntosh)
+ff_mac=no
+ff_aglprog=
+if test `uname` = Darwin;
+then
+	ff_mac=yes
+	ff_aglprog=FreeFem++-agl${EXEEXT}
+fi
+AC_MSG_RESULT($ff_mac)
+
+# Checking wether we can produce a Microsoft Windows-specific version
+# -------------------------------------------------------------------
+
+AC_MSG_CHECKING(wether we are on Microsoft Windows)
+ff_pcprog=
+fflibdl="-ldl"
+ff_uname=`uname`
+case $ff_uname in
+CYGWIN*)
+	ff_win32=yes
+	ff_pcprog=FreeFem++-pc${EXEEXT}
+
+	# No need for libdl under Windows
+	ff_libdl=
+
+	# We need Mingw (to avoid Cygwin's extra DLLs)
+	CXXFLAGS="$CXXFLAGS -mno-cygwin -I/usr/include/mingw"
+	LIBS="$LIBS -mno-cygwin -L/lib/mingw"
+
+	;;
+*)ff_win32=no;;
+esac
+AC_MSG_RESULT($ff_win32)
+AC_SUBST(PCPROG,$ff_pcprog)
+AC_SUBST(LIBDL,$ff_libdl)
 
 # FreeFem++-specific version information
 # --------------------------------------
@@ -59,14 +102,13 @@ AC_ARG_ENABLE(debug,
 
 if test "$ff_debug" = true;
 then
-	CXXFLAGS="-DDRAWING -DLONG_LONG -DCHECK_KN -g"
+	CXXFLAGS="$CXXFLAGS -DDRAWING -DLONG_LONG -DCHECK_KN -g"
 	if test "ff_mac" = yes;
 	then
 		CXXFLAGS="$CXXFLAGS -fno-inline -fpascal-strings -fexceptions"
 	fi
-	AC_SUBST(FF_PROG_EXT,-g)
 else
-	CXXFLAGS="-DDRAWING -DLONG_LONG  -DNCHECKPTR -O"
+	CXXFLAGS="$CXXFLAGS -DDRAWING -DLONG_LONG  -DNCHECKPTR -O"
 	if test "ff_mac" = yes;
 	then
 		CXXFLAGS="$CXXFLAGS  -fpascal-strings"
@@ -78,38 +120,32 @@ fi
 
 AC_MSG_CHECKING(wether we can compile for X11)
 ff_x11=no
-if test -d /usr/X11R6;
+
+# At the moment, we cannot compile for X11 on Mingw because /usr/X11R6
+# is part of Cygwin, not Mingw.
+
+if test -d /usr/X11R6 -a "$ff_win32" = no;
 then
 	ff_x11=yes
-	AC_SUBST(STDPROG,FreeFem++)
-	AC_SUBST(X11PROG,FreeFem++-x11)
+	AC_SUBST(STDPROG,FreeFem++${EXEEXT})
+	AC_SUBST(X11PROG,FreeFem++-x11${EXEEXT})
 	AC_SUBST(INCLUDEX11,/usr/X11R6/include)
 	AC_SUBST(LIBX11,"-L/usr/X11R6/lib -lX11 -lm")
 fi
 AC_MSG_RESULT($ff_x11)
-
-# Checking wether we can produce a MacIntosh-specific version
-# -----------------------------------------------------------
-
-AC_MSG_CHECKING(wether we are on a MacIntosh)
-ff_mac=no
-ff_aglprog=
-if test `uname` = Darwin;
-then
-	ff_mac=yes
-	ff_aglprog=FreeFem++-agl
-fi
-AC_MSG_RESULT($ff_mac)
 
 # Checking that OpenGL is accessible
 # ----------------------------------
 
 # If we cannot find gl.h, no OpenGL version can be produced
 AC_CHECK_HEADER(GL/gl.h,
-	ff_glxprog=FreeFem++-glx,
+	ff_glxprog=FreeFem++-glx${EXEEXT},
 	ff_glxprog=
 	ff_aglprog=
 )
+
+# If we cannot find glx.h, "FreeFem++-glx" cannot be produced
+AC_CHECK_HEADER(GL/glx.h,,ff_glxprog=)
 
 # Looking for the BLAS
 # --------------------
@@ -255,6 +291,26 @@ then
 	fi
 fi
 
+# Checking for some functions that may not appear everywhere
+# ----------------------------------------------------------
+
+# asinh acosh atanh are not in Mingw yet
+AC_CHECK_FUNCS(asinh acosh atanh)
+
+# Availability of dlopen(). Use AC_COMPILE rather than
+# AC_CHECK_HEADERS the latter has problems seeing it (in Cygwin) when
+# it does not compile (in Mingw).
+
+AC_MSG_CHECKING(for dlfcn.h)
+AC_COMPILE_IFELSE([#include <dlfcn.h>],
+	ff_dlfcn=yes,
+	ff_dlfcn=no)
+AC_MSG_RESULT($ff_dlfcn)
+if test "$ff_dlfcn" = yes;
+then
+	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
+fi
+
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
 
@@ -266,7 +322,7 @@ then
 	# computation here, because it must only be set when the
 	# parallel program is compiled (see src/mpi/Makfile.am)
 
-	AC_SUBST(MPIPROG,FreeFem++-mpi)
+	AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
 fi
 
 # Checking wether we can generate some documentation
@@ -310,6 +366,7 @@ AC_OUTPUT(Makefile
 	src/mpi/Makefile
 	src/agl/Makefile
 	src/glx/Makefile
+	src/pc/Makefile
 	examples++/Makefile
 	examples++-eigen/Makefile
 	examples++-tutorial/Makefile

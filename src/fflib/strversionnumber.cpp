@@ -1,4 +1,4 @@
-#include <config.h>
+#include <config-wrapper.h>
 #include <cstdlib>
 using namespace std;
 #define TOSTRING1(i) #i

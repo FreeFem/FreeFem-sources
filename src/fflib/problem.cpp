@@ -1,4 +1,4 @@
-#include "../../config.h"
+#include <config-wrapper.h>
 #include  <iostream>
 using namespace std;
 

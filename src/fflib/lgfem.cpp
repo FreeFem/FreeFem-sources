@@ -1,4 +1,5 @@
-#include "../../config.h"
+#include <config-wrapper.h>
+
 #ifdef __MWERKS__
 #pragma optimization_level 0
 //#pragma inline_depth(0)

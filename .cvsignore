@@ -6,6 +6,7 @@ config.h.in
 config.log
 config.status
 configure
+configure.lineno
 *.exe
 freefem++-1.41.zip
 ListOfUnAllocPtr.bin

@@ -1,6 +1,8 @@
 //#pragma dont_inline on
 //#pragma inline_depth(1)
 
+#include <config-wrapper.h>
+
 #include <complex>
 #include "AFunction.hpp"
 #include <cstdarg>
@@ -1586,11 +1588,17 @@ void Init_map_type()
      Global.Add("sinh","(",new OneOperator1<double>(sinh));
      Global.Add("cosh","(",new OneOperator1<double>(cosh));
      Global.Add("tanh","(",new OneOperator1<double>(tanh));
+#ifdef HAVE_ATANH
      Global.Add("atanh","(",new OneOperator1<double>(atanh));
+#endif
      Global.Add("asin","(",new OneOperator1<double>(asin));
      Global.Add("acos","(",new OneOperator1<double>(acos));
+#ifdef HAVE_ASINH
      Global.Add("asinh","(",new OneOperator1<double>(asinh));
+#endif
+#ifdef HAVE_ACOSH
      Global.Add("acosh","(",new OneOperator1<double>(acosh));
+#endif
      Global.Add("exp","(",new OneOperator1<double>(exp));
      Global.Add("log","(",new OneOperator1<double>(log));
      Global.Add("log10","(",new OneOperator1<double>(log10));

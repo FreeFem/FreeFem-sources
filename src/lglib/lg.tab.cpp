@@ -158,7 +158,7 @@
 #line 1 "lg.y"
  
 
-#include "../../config.h"
+#include <config-wrapper.h>
 #define eflval yylval 
 #include <iostream>
 #include  <complex>
