@@ -1,4 +1,5 @@
 .deps
+.DS_Store
 .libs
 Makefile
 Makefile.in
