@@ -1003,7 +1003,7 @@ Also \texttt{P.z} is reserved.
 \texttt{N.z} is reserved. \index{N}.
     \itemtt[lenEdge] give the length of the current edge\index{lenEdge}\\
     \[
-    \texttt{leEdge} = |q^i-q^j|\quad \textrm{if the current edge is }[q^i,q^j]
+    \texttt{lenEdge} = |q^i-q^j|\quad \textrm{if the current edge is }[q^i,q^j]
     \]
     
     \itemtt[hTriangle] give the size of the current triangle \index{hTriangle}
@@ -1116,15 +1116,15 @@ $$
 bool\subset int \subset real\subset complex,
 $$
 the operators 
-``$+,\, -,\, *,\, /$'' and ``\ttCC{\^}''.
-However, ``\%,\, max, min'' fall into disuse.
+``$+,\, -,\, *,\, /$'' and ``\ttCC{\^}'' are also applicable in complex-type, 
+but ``\%,\, max, min'' fall into disuse.
 Complex number such as \texttt{5+9i},\, i$=\sqrt{-1}$, can be a little tricky.
 For real variables \texttt{a=2.45, b=5.33}, we must write the complex numbers 
 \texttt{a+b*i} and \ttCC{a+@sqrt(2.0)*i} as 
 \bT
 @complex z1 = a+b*1i, z2=a+@sqrt(2.0)*1i;
 \eT 
-The imarginary and real parts of complex number \texttt{z} is obtained by
+The imaginary and real parts of complex number \texttt{z} is obtained by
 \ttCC{@imag} and \ttCC{@real}.
 The conjugate of $a+bi$ ($a,b$ are real) is defined by $a-bi$, which
 is denoted by \ttCC{@conj(a+b*1i)} in \freefempp.
@@ -1132,7 +1132,7 @@ is denoted by \ttCC{@conj(a+b*1i)} in \freefempp.
 The complex number $z=a+ib$ is considered as
 the pair $(a,b)$ of real numbers $a,\, b$.
 Now we draw the point $(a,b)$ in the plane (Cartesian rectangular system
-of axes) and marks on the $x$-axis the real numbers in the usual way, on the 
+of axes) and mark on the $x$-axis the real numbers in the usual way, on the 
 $y$-axis the imaginary numbers with $i$ as unit.
 By changing Cartesian coordinate $(a,b)$ to the polar coordinate $(r,\phi)$,
 the complex number $z$ has another expression $z=r(\cos \phi+i\sin\phi )$,
