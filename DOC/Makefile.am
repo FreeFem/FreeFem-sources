@@ -7,7 +7,7 @@ documentation:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 	latex $*
 %.ps:%.dvi
 	dvips -u +psfonts.map -u +pdftex.map -u +Ttbbold.map -z -K $* -o $@
-%.pdf:%.tex %.dvi
+%.pdf:%.tex
 	pdflatex $*
 	pdflatex $*
 	makeindex $*
