@@ -64,3 +64,9 @@ for (iter=0;iter<nbiter;iter++)
   cut = cut *coefcut;
 }
 cout << "CPU " << clock()-s0 << "s " << endl;     
+
+// Regression check
+real ref=u1x[]'*u1x[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<4.35592);
+assert(ref>4.35590);

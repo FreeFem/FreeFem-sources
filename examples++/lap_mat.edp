@@ -32,3 +32,9 @@ u2= x^2 + y^2;
 cout << "  u1(1,2) =" <<  u1(.1,.2) << " ~= " << u2(.1,.2) 
      << " ==  " << .1^2+.2^2 <<  endl;
 plot(u1,cmm="solution = $x^2 + y^2$ ",wait=1,value=1);
+
+// Regression check
+real ref=u1[]'*u1[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<85.3777);
+assert(ref>85.3775);
