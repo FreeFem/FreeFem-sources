@@ -163,7 +163,7 @@ then
 		ff_x11=yes
 		ff_x11prog=FreeFem++-x11${EXEEXT}
 		CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
-		LIBS="$LIBS -L/usr/X11R6/lib -lX11 -lm"
+		LIBS="$LIBS -L/usr/X11R6/lib -lX11 -lXext -lm"
 	fi
 fi
 
@@ -172,24 +172,29 @@ AC_MSG_RESULT($ff_x11)
 # Checking that OpenGL is accessible
 # ----------------------------------
 
-# If we cannot find gl.h, no OpenGL version can be produced
-AC_CHECK_HEADERS(GL/gl.h,
-	ff_gl_ok=yes,
-	ff_gl_ok=no)
-AC_CHECK_HEADERS(GL/glx.h,
-	ff_glx_ok=yes,
-	ff_glx_ok=no)
-if test "$ff_gl_ok" = yes
+# GL libraries seem to depend on some dlopen capabilities
+ff_gl_ok=no
+if test "$enable_static" != yes
 then
-	AC_CHECK_LIB(GL,
-		glBegin,
+	# If we cannot find gl.h, no OpenGL version can be produced
+	AC_CHECK_HEADERS(GL/gl.h,
 		ff_gl_ok=yes,
 		ff_gl_ok=no)
-	AC_CHECK_LIB(GLU,
-		gluSphere,
-		ff_gl_ok=yes,
-		ff_gl_ok=no,
-		-lGL)
+	AC_CHECK_HEADERS(GL/glx.h,
+		ff_glx_ok=yes,
+		ff_glx_ok=no)
+	if test "$ff_gl_ok" = yes
+	then
+		AC_CHECK_LIB(GL,
+			glBegin,
+			ff_gl_ok=yes,
+			ff_gl_ok=no)
+		AC_CHECK_LIB(GLU,
+			gluSphere,
+			ff_gl_ok=yes,
+			ff_gl_ok=no,
+			-lGL)
+	fi
 fi
 
 # If we cannot find GL, we cannot compile FreeFem++-agl
