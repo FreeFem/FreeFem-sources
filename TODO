@@ -33,7 +33,7 @@ o [lehyaric] Remove message "Enter ? for help" from the graphical
 o [lehyaric] Allow bigger FreeFem++ programs (more than 10KBytes) to
    go through sockets
 
-o [lehyaric] Compile for Microsoft Windows
+* Compile for Microsoft Windows (DONE)
 
 o [lehyaric] Add more graphical tools (postscript output, ...)
    See standard FreeFem++ X11 version for list of tools
@@ -58,5 +58,5 @@ o [lehyaric] Macro highlighting in editor (see
 o [lehyaric] Syntactically correct parameter highlighting (instead of
    just recognizing words) in editor window
 
-o [lehyaric] Use more efficient select() call instead of poll()
-   in cs.cpp
+* Use more efficient select() call instead of poll()
+   in cs.cpp (NO LONGER NEEDED)
