@@ -473,8 +473,10 @@ Make Version 1.40
    add HaveUMFPACK global variable see sparse-matrix.edp exemple   
    Change all the structure of the software 
    Use ./configure to build all the make file see (README)
+   you can build the Window version with g++ under cygwin 
+   ( http: cygwin.... )
 
-Make Version 1.40
+Make Version 1.41 
 -----------------
 
      

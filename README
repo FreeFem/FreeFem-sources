@@ -1,5 +1,5 @@
-Compilation of FreeFem++ under unix, MacOs 10 or cygwin
--------------------------------------------------------
+Compilation of FreeFem++ under unix, MacOs 10 or cygwin (Window)
+----------------------------------------------------------------
 
 This file details specific configuration details for FreeFem++. For
 a standard installation, please refer to the file named "INSTALL".
