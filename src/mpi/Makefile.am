@@ -11,7 +11,7 @@ EXTRA_PROGRAMS=FreeFem++-mpi
 FreeFem___mpi_SOURCES=../Graphics/sansrgraph.cpp parallelempi.cpp	\
 ../lglib/lg.tab.cpp
 FreeFem___mpi_DEPENDENCIES=../fflib/libff.a
-LDADD=../fflib/libff.a @UMFPACKLIB@ @ARPACKLIB@ $(LIBDL)
+LDADD=../fflib/libff.a @UMFPACKLIB@ @ARPACKLIB@ @BLASLIB@
 
 AM_CXXFLAGS=-DPARALLELE
 INCLUDES=-I../fflib -I../Graphics -I../femlib
