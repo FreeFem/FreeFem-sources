@@ -24,14 +24,14 @@
 \DeclareFixedFont{\MotClefFont}{\encodingdefault}{pcr}{b}{\shapedefault}{10pt}
 \def\sizeFF{\footnotesize}
 
-\gdef\myendgraf{\textBlack\catcode`\{=\active % left brace is begin-group character
+\gdef\myendgraf{\catcode`\{=\active % left brace is begin-group character
 \catcode`\}=\active\catcode`\^=\other\catcode`\_=11
 % right brace is end-group character
 % ---- FH --- remarque -------
 %%%  pour avoir des lignes blanche 
-\ifcmm\egroup \fi\upshape\cmmfalse\hbox to 0pt{}\textBlack\endgraf}
+\ifcmm\egroup \fi\upshape\cmmfalse\hbox to 0pt{}\endgraf}
 %%%  sans avoir des lignes blanche 
-%\ifcmm\egroup \fi\upshape\cmmfalse\endgraf\textBlack}
+%\ifcmm\egroup \fi\upshape\cmmfalse\endgraf}
 % --------------------------------
 \catcode`\@=\active
 \def@{\bgroup\MotClefFont%\bfserie\ttfamily
