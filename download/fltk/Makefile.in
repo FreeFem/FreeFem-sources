@@ -86,6 +86,7 @@ DOWNLOAD_UMFPACK = @DOWNLOAD_UMFPACK@
 EIGENOBJ = @EIGENOBJ@
 EIGENTEST = @EIGENTEST@
 F77 = @F77@
+FFV_PREFIX = @FFV_PREFIX@
 FF_UMFPACK_POSIX = @FF_UMFPACK_POSIX@
 FLTK_CONFIG = @FLTK_CONFIG@
 FLTK_CONFIG_PARAM = @FLTK_CONFIG_PARAM@
@@ -267,7 +268,7 @@ fltk: $(SRCDIR)/$(INSTALL)
 # Using system JPEG and PNG lib is a problem under Cygwin
 $(SRCDIR)/$(INSTALL): $(SRCDIR)
 	cd $(SRCDIR) && ./configure --enable-threads --enable-localjpeg	\
-		--enable-localpng $(FLTK_CONFIG_PARAM) --disable-gl		\
+		--enable-localpng $(FLTK_CONFIG_PARAM) --disable-gl	\
 		--prefix=`pwd`/$(INSTALL)
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
