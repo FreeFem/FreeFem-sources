@@ -5,9 +5,16 @@
 #include <list>
 #include <map>
 #endif
+
+// test blas 
+#ifdef HAVE_CBLAS_H
+#include <cblas.h> 
 #define WITHBLAS 1
+#elif HAVE_VECLIB_CBLAS_H
+#include <vecLib/cblas.h> 
+#define WITHBLAS 1
+#endif    
 #ifdef WITHBLAS 
-#include <vecLib/cblas.h>     
 template<class R> inline R blas_sdot(const int n,const R *sx,const int incx,const R *sy,const int  incy)
 {
   R s=0;
@@ -40,8 +47,8 @@ template<> inline  complex<float> blas_sdot(const int n,const  complex<float> *s
    cblas_zdotu_sub(n,(const void *)sx,incx,(const void *)sy,incy,( void *)&s);
   return s;
 }
-
 #endif
+//  end modif FH
 using Fem2D::HeapSort;
 
 //  -----------
@@ -487,7 +494,7 @@ void MatriceProfile<R>::cholesky(R eps) const {
       k = j - k ;
       R s= -*ij; 
 #ifdef WITHBLAS
-      s = blas_sdot(k,ik,1,jk,1);
+      s += blas_sdot(k,ik,1,jk,1);
 #else
       while(k--) s += *ik++ * *jk++;  
 #endif
@@ -548,8 +555,13 @@ void MatriceProfile<R>::LU(R eps) const  {
           R *Lik = L + pL[i+1]-i+k0; // lower
           R *Ukj = U + pU[j+1]-j+k0; // upper
           s =0;
+#ifdef WITHBLAS
+	  s = blas_sdot(j-k0,Lik,1,Ukj,1);
+	  Lik += j-k0;
+#else
           for (k=k0;k<j;k++) // k < j < i ;
 	    s += *Lik++ * *Ukj++ ;     // a(i,k)*a(k,j);
+#endif
 	  *Lik -= s;
 	  *Lik /= D[j]; //  k == j here
         }
@@ -561,8 +573,13 @@ void MatriceProfile<R>::LU(R eps) const  {
 	  int k0 = Max(j0,j-pL[j+1]+pL[j]);
 	  R *Ljk = L + pL[j+1]-j+k0;   
 	  R *Uki = U + pU[i+1]-i+k0;   
+#ifdef WITHBLAS
+	  s = blas_sdot(j-k0,Ljk,1,Uki,1);
+          Uki += j-k0;
+#else
 	  for (k=k0  ;k<j;k++)    // 
 	    s +=  *Ljk++ * *Uki++ ;
+#endif
 	  *Uki -= s;  // k = j here 
 	}
       // for D (i,i) in last because we need L(i,k) and U(k,i) for k<j
@@ -570,8 +587,12 @@ void MatriceProfile<R>::LU(R eps) const  {
       R *Lik = L + pL[i+1]-i+k0; // lower
       R *Uki = U + pU[i+1]-i+k0; // upper
       s =0;
+#ifdef WITHBLAS
+       s = blas_sdot(i-k0,Lik,1,Uki,1);
+#else
       for (k=k0;k<i;k++) // k < i < i ;
 	s += *Lik++ * *Uki++ ;     // a(i,k)*a(k,i);
+#endif
       // cout << " k0 " << k0 << " i = " << i << " " <<  s << endl;
       uii = D[i] -s;
       
