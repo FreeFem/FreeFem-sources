@@ -24,12 +24,24 @@ AM_PROG_LEX
 # Looking for the BLAS
 # --------------------
 
-# Trying Atlas
-alh_save_libs="$LIBS"
-LIBS="$LIBS -L/usr/lib/atlas"
+# Trying default locations
+ff_blas_ok=no
+ff_save_libs="$LIBS"
 AC_CHECK_LIB(blas,daxpy_,
-	LIBS="$LIBS -lblas",
-	LIBS="$alh_save_libs")
+	LIBS="$LIBS -lblas"
+	ff_blas_ok=yes,
+	LIBS="$ff_save_libs")
+
+# Trying Atlas (location corresponding to Debian package)
+if test "$ff_blas_ok" = no;
+then
+	ff_save_libs="$LIBS"
+	LIBS="$LIBS -L/usr/lib/atlas"
+	AC_CHECK_LIB(blas,daxpy_,
+		LIBS="$LIBS -lblas"
+		ff_blas_ok=yes,
+		LIBS="$ff_save_libs")
+fi
 
 AC_OUTPUT(Makefile
 	src/Makefile

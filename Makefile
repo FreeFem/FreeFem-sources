@@ -13,6 +13,12 @@
 # PARTICULAR PURPOSE.
 
 
+
+# Makefile for FreeFem++, adapted to Automake
+# -------------------------------------------
+
+# Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
+# $Id$
 SHELL = /bin/sh
 
 srcdir = .
@@ -149,7 +155,7 @@ OBJETS = $(EIGEN) AFunction.o   lex.o  lgfem.o  lgmesh.o \
  lgalgo.o Element_P2h.o load.o
 
 
-LIBS = $(LIBUMFPACK) $(LIBARPACK) $(LIBF77)  $(LIBLOCAL)  -L/usr/lib/atlas -lblas
+LIBS = $(LIBUMFPACK) $(LIBARPACK) $(LIBF77)  $(LIBLOCAL)  -lblas
 
 SUFFIXES = .cpp .o
 subdir = .
@@ -394,11 +400,11 @@ agl-g:$(COMPILE_DIR)-g FORCE
 	$(MAKE) -C $(COMPILE_DIR)-g FreeFem++-agl -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
 glx-g:$(COMPILE_DIR)-g FORCE
 	$(MAKE) -C $(COMPILE_DIR)-g FreeFem++-glx -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
-glx:$(COMPILE_DIR)-g FORCE
+glx:$(COMPILE_DIR) FORCE
 	$(MAKE) -C $(COMPILE_DIR) FreeFem++-glx -f`pwd`/Makefile OPTFLAGS="$(OOPTFLAGS)" FFFLAGS="$(OFFFLAGS)" src=`pwd`/src
 x11-g:$(COMPILE_DIR)-g FORCE
 	$(MAKE) -C $(COMPILE_DIR)-g FreeFem++-x11 -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
-x11:$(COMPILE_DIR)-g FORCE
+x11:$(COMPILE_DIR) FORCE
 	$(MAKE) -C $(COMPILE_DIR) FreeFem++-x11 -f`pwd`/Makefile OPTFLAGS="$(OOPTFLAGS)" FFFLAGS="$(OFFFLAGS)" src=`pwd`/src
 
 allex:examples++-tutorial/all.edp examples++/all.edp examples++-eigen/all.edp
