@@ -1168,7 +1168,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     Check(bc,Nbcomp);
     assert(Vh.N == Uh.N);
     TabFuncArg tabexp(stack,Vh.N);
-    KN<double> buf(Vh.MaximalNbOfDF()*3*Vh.N);
+    KN<double> buf(Vh.MaximalNbOfDF()*last_operatortype*Vh.N);
     KN<R> gg(buf);
     if ( B && B->N() != Vh.NbOfDF) ExecError("AssembleBC size rhs and nb of DF of Vh");
     if(verbosity>99) cout << " Problem : BC_set " ;
@@ -1284,7 +1284,7 @@ template<class R>
     Check(l->l,Vh.N);
     if ( B && B->N() != Vh.NbOfDF) ExecError("AssembleLinearForm size rhs and nb of DF of Vh");
    
-    KN<double> buf(Vh.MaximalNbOfDF()*3*Vh.N);
+    KN<double> buf(Vh.MaximalNbOfDF()*last_operatortype*Vh.N);
     
     //            const  FormLinear * l=dynamic_cast<const  FormLinear *>(e);
     const CDomainOfIntegration & di= *l->di;
