@@ -51,7 +51,7 @@ verbosity=verbosityy;
 		
 	
 	include "aalapacien.edp";
-	real TESTaalapacien=u[]'*u[];
+	real TESTaalapacien=1+err;
 		ref<<"real REFaalapacien="<<TESTaalapacien<<";"<<endl;
 };
 ;
@@ -171,7 +171,7 @@ verbosity=verbosityy;
 		
 	
 	include "NSP1P1b.edp";
-	real TESTNSP1P1b=u1[]'*u1[];
+	real TESTNSP1P1b=int2d(Th)(square(u1)+square(u2));
 		ref<<"real REFNSP1P1b="<<TESTNSP1P1b<<";"<<endl;
 };
 ;
@@ -181,7 +181,7 @@ verbosity=verbosityy;
 		
 	
 	include "NSP1P1.edp";
-	real TESTNSP1P1=u1x[]'*u1x[];
+	real TESTNSP1P1=int2d(Th)(square(u1)+square(u2));
 		ref<<"real REFNSP1P1="<<TESTNSP1P1<<";"<<endl;
 };
 ;
@@ -191,7 +191,7 @@ verbosity=verbosityy;
 		
 	
 	include "NSP1P2.edp";
-	real TESTNSP1P2=u1[]'*u1[];
+	real TESTNSP1P2=int2d(Th)(square(u1)+square(u2));
 		ref<<"real REFNSP1P2="<<TESTNSP1P2<<";"<<endl;
 };
 ;
@@ -206,6 +206,16 @@ verbosity=verbosityy;
 };
 ;
 
+ cout << "--------- file : Richard.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "Richard.edp";
+	real TESTRichard=hmax;
+		ref<<"real REFRichard="<<TESTRichard<<";"<<endl;
+};
+;
 
 cout << "--------- file : teste.edp -----------------" << endl;
 verbosity=verbosityy;
