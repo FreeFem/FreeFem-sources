@@ -133,17 +133,17 @@ FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
 FreeFem++v$(VERSION)_Linux:all
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
 	cp src/std/FreeFem++ $@
-	cp `ldd src/std/FreeFem++|awk '{print $$3}'` $@
+	./copysharedlibs.sh src/std/FreeFem++ $@
 	cp src/nw/FreeFem++-nw $@
-	cp `ldd src/nw/FreeFem++-nw|awk '{print $$3}'` $@
+	./copysharedlibs.sh src/nw/FreeFem++-nw $@
 	cp src/ide/FreeFem++-cs $@
-	cp `ldd src/ide/FreeFem++-cs|awk '{print $$3}'` $@
+	./copysharedlibs.sh src/ide/FreeFem++-cs $@
 	cp src/ide/FreeFem++-cs-server $@
-	cp `ldd src/ide/FreeFem++-cs-server|awk '{print $$3}'` $@
+	./copysharedlibs.sh src/ide/FreeFem++-cs-server $@
 	-cp src/glx/FreeFem++-glx $@
-	-cp `ldd src/glx/FreeFem++-glx|awk '{print $$3}'` $@
+	-./copysharedlibs.sh src/glx/FreeFem++-glx $@
 	-cp src/mpi/FreeFem++-mpi $@
-	-cp `ldd src/mpi/FreeFem++-mpi|awk '{print $$3}'` $@
+	-./copysharedlibs.sh src/mpi/FreeFem++-mpi $@
 	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
 	cp  examples++/*.edp   $@/examples++
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
