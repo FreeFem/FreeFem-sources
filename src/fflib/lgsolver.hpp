@@ -29,7 +29,7 @@ class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMa
       throwassert(precon);
       R aii;
       for (int i=0;i<n;i++)
-       D1[i] = Abs(aii=A(i,i))<1e10 ? 1.0 : 1/aii;
+       D1[i] = abs(aii=A(i,i))<1e10 ? R(1.0) : R(1.)/aii;
       
 }
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
@@ -85,7 +85,7 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
       throwassert(precon);
       R aii;
       for (int i=0;i<n;i++)
-       D1[i] = Abs(aii=A(i,i))<1e10 ? 1.0 : 1/aii;
+       D1[i] = abs(aii=A(i,i))<1e10 ? R(1.0) : R(1.)/aii;
       
 }
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
@@ -135,7 +135,7 @@ class SolveGMRESDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualM
     dKrilov(nbk) { 
     R aii=0;
     for (int i=0;i<n;i++)
-      D1[i] = (fabs(aii=A(i,i)) < 1e-10 ? 1. : 1./aii);}
+      D1[i] = (abs(aii=A(i,i)) < 1e-10 ? R(1.) : R(1.)/aii);}
 
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
       epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;

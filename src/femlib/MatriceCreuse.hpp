@@ -72,7 +72,7 @@ public:
   const FESpace &Vh;
   const QuadratureFormular & FIT;
   const QuadratureFormular1d & FIE;
-  KN<R> data;
+  KN<double> data; // to store value of basic function 
   MatriceElementaire(const FESpace & UUh,const FESpace & VVh,int llga
                      ,int *nnj,int * nni,TypeOfMatriceElementaire t=Full,
                                const QuadratureFormular & fit=QuadratureFormular_T_5,
@@ -158,8 +158,8 @@ class MatriceElementairePleine:public MatriceElementaire<R> {
 public:
   R & operator() (int i,int j) {return this->a[i*this->m+j];}
   // MatPleineElementFunc element;
-  void  (* element)(MatriceElementairePleine &,const FElement &,const FElement &, R*,int ie,int label,void *) ; 
-   void  (* faceelement)(MatriceElementairePleine &,const FElement &,const FElement &,const FElement &,const FElement &, R*,int ie,int iee, int label,void *) ; 
+  void  (* element)(MatriceElementairePleine &,const FElement &,const FElement &, double*,int ie,int label,void *) ; 
+   void  (* faceelement)(MatriceElementairePleine &,const FElement &,const FElement &,const FElement &,const FElement &, double*,int ie,int iee, int label,void *) ; 
  void call(int k,int ie,int label,void *);
   
   MatriceElementairePleine & operator()(int k,int ie,int label,void * stack=0)
@@ -208,7 +208,7 @@ class MatriceElementaireSymetrique:public MatriceElementaire<R> {
 public:
   R & operator()(int i,int j) 
   {return j < i ? this->a[(i*(i+1))/2 + j] : this->a[(j*(j+1))/2 + i] ;}
-  void (* element)(MatriceElementaireSymetrique &,const FElement &, R*,int ie,int label,void *) ; 
+  void (* element)(MatriceElementaireSymetrique &,const FElement &, double*,int ie,int label,void *) ; 
   void (* mortar)(MatriceElementaireSymetrique &,const FMortar &,void *) ; 
   void call(int k,int ie,int label,void * stack);
   MatriceElementaireSymetrique(const FESpace & VVh,
@@ -525,7 +525,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const int nbitermax, do
        Ah = A*x;        //   Ax + rop*Ah = rop*Ah + g  =
        Ah -= g;         //   Ah*rop  
        R hAh =(h,Ah);
-       if (Abs(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
+       if (abs(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
        ro =  - (g,h)*rop/hAh ; // ro optimal (produit scalaire usuel)
        x += (ro-rop) *h;
        g += (ro/rop) *Ah; // plus besoin de Ah, on utilise avec Cg optimisation
@@ -570,7 +570,7 @@ class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatr
   SolveGCDiag(const MatriceMorse<R> &A,double epsilon=1e-6) : 
     n(A.n),nbitermax(Max(n,100)),D1(n),eps(epsilon),epsr(0) { throwassert(A.sym());
     for (int i=0;i<n;i++)
-      D1[i] = 1/A(i,i);}
+      D1[i] = 1./A(i,i);}
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
      epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
