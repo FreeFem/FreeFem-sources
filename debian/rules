@@ -35,17 +35,27 @@ configure-stamp:
 
 
 #Architecture 
-build: configure build-stamp
-build-stamp:
-	make
-	touch build-stamp
+build-arch: configure build-arch-stamp
+build-arch-stamp:
+	$(MAKE)
+	
+	touch build-arch-stamp
+
+build-indep: configure build-indep-stamp
+build-indep-stamp:
+	cd DOC && $(MAKE) doc && cd ..
+
+	touch build-indep-stamp
+
+build: build-arch build-indep
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
 
-	-make clean
+	-$(MAKE) clean
+	-$(MAKE) distclean
 
 	dh_clean 
 
@@ -55,7 +65,7 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 
-	make install
+	$(MAKE) install
 	mv $(CURDIR)/debian/tmp/usr/bin/FreeFem++ $(CURDIR)/debian/tmp/usr/bin/FreeFem++-x11
 
 	dh_install
