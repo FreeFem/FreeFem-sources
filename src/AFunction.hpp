@@ -2137,15 +2137,15 @@ class  OneOperator3_ : public OneOperator {
 }
 */
 //
-template<class CODE>
+template<class CODE,int ppref=0>
 class  OneOperatorCode : public OneOperator {
     public: 
     E_F0 * code(const basicAC_F0 & args) const  { return CODE::f(args);} 
-    OneOperatorCode():  OneOperator(atype<typename CODE::Result>(),CODE::typeargs()) {}
-    OneOperatorCode(aType r,const ArrayOfaType & l):  OneOperator(r,l)  {}
-    OneOperatorCode(aType r,aType a):  OneOperator(r,a)  {}
-    OneOperatorCode(aType r,aType a,aType b):  OneOperator(r,a,b)  {}
-    OneOperatorCode(aType r,aType a,aType b,aType c):  OneOperator(r,a,b,c)  {}
+    OneOperatorCode():  OneOperator(atype<typename CODE::Result>(),CODE::typeargs()) {pref=ppref;}
+    OneOperatorCode(aType r,const ArrayOfaType & l):  OneOperator(r,l)  {pref=ppref;}
+    OneOperatorCode(aType r,aType a):  OneOperator(r,a)  {pref=ppref;}
+    OneOperatorCode(aType r,aType a,aType b):  OneOperator(r,a,b)  {pref=ppref;}
+    OneOperatorCode(aType r,aType a,aType b,aType c):  OneOperator(r,a,b,c)  {pref=ppref;}
     
 };
 

@@ -3500,18 +3500,42 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
     
  TheOperators->Add("*",  
     new OneOperatorCode<CODE_L_Mul<Foperator,Ftest,Finconnue> > ,
-    new OneOperatorCode<CODE_L_Mul<Foperator,Finconnue,Ftest> > ,
-    new OneOperatorCode<CODE_L_MulLR<Finconnue,double> > ,
-    new OneOperatorCode<CODE_L_MulLR<Foperator,double> > ,
-    new OneOperatorCode<CODE_L_MulLR<Ftest,double> > ,
-    new OneOperatorCode<CODE_L_MulRL<double,Finconnue> > ,
-    new OneOperatorCode<CODE_L_MulRL<double,Foperator> > ,
-    new OneOperatorCode<CODE_L_MulRL<double,Ftest> > 
+    new OneOperatorCode<CODE_L_Mul<Foperator,Finconnue,Ftest> > );
+    
+// Warning just double or complex in following operator 
+// ----------------------------------------------------    
+//   in case of  ambiguity we take the double version  
+//   case    long -> double
+//           long -> complex
+ TheOperators->Add("*",      
+    new OneOperatorCode<CODE_L_MulLR<Finconnue,double>, 20> ,
+    new OneOperatorCode<CODE_L_MulLR<Foperator,double>, 20 > ,
+    new OneOperatorCode<CODE_L_MulLR<Ftest,double>, 20 > ,
+    new OneOperatorCode<CODE_L_MulRL<double,Finconnue>, 20 > ,
+    new OneOperatorCode<CODE_L_MulRL<double,Foperator>, 20 > ,
+    new OneOperatorCode<CODE_L_MulRL<double,Ftest>, 20 > 
   );
+ TheOperators->Add("*",       
+    new OneOperatorCode<CODE_L_MulLR<Finconnue,Complex>, 10 > ,
+    new OneOperatorCode<CODE_L_MulLR<Foperator,Complex>, 10 > ,
+    new OneOperatorCode<CODE_L_MulLR<Ftest,Complex>, 10 > ,
+    new OneOperatorCode<CODE_L_MulRL<Complex,Finconnue>, 10 > ,
+    new OneOperatorCode<CODE_L_MulRL<Complex,Foperator>, 10 > ,
+    new OneOperatorCode<CODE_L_MulRL<Complex,Ftest>, 10 > 
+  );
+  
  TheOperators->Add("/",  
-    new OneOperatorCode<CODE_L_DivLR<Finconnue,double> > ,
-    new OneOperatorCode<CODE_L_DivLR<Foperator,double> > ,
-    new OneOperatorCode<CODE_L_DivLR<Ftest,double> > ),
+    new OneOperatorCode<CODE_L_DivLR<Finconnue,double>, 20 > ,
+    new OneOperatorCode<CODE_L_DivLR<Foperator,double>, 20 > ,
+    new OneOperatorCode<CODE_L_DivLR<Ftest,double>, 20 > );
+
+ TheOperators->Add("/",  
+    new OneOperatorCode<CODE_L_DivLR<Finconnue,Complex>, 10 > ,
+    new OneOperatorCode<CODE_L_DivLR<Foperator,Complex>, 10 > ,
+    new OneOperatorCode<CODE_L_DivLR<Ftest,Complex>, 10 > );
+    
+// Warning just double or complex in previous operator 
+// ----------------------------------------------------    
   
 // TheOperators->Add("=",new OneOperatorCode<BC_set1<double> >);
 
