@@ -30,7 +30,7 @@ fespace Vh(Th,P1);
 fespace V2h(Th,P2);
 Vh fh=f;
 plot(fh,wait=0); //
-
+real err;
 for (int i=0;i<nbiter;i++)
 {
   //  Th=adaptmesh(Th,f);
@@ -41,6 +41,8 @@ for (int i=0;i<nbiter;i++)
   cout << " min max f_xy :  " <<  fxyh[].min << " " << fxyh[].max << endl;
   Th=adaptmesh(Th,f,err=0.1);
   fh=f;
-  real err=sqrt(int2d(Th)(square(fh-f)));
+  err=sqrt(int2d(Th)(square(fh-f)));
   fff  << i<< " " << err << " " << Th.nt << " " << Th.nv <<  endl;  
 }
+//  for regtest 
+real regvalue=err;
