@@ -43,15 +43,15 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-ACLOCAL = ${SHELL} /home/lehyaric/freefem++/doc/missing --run aclocal-1.7
+ACLOCAL = ${SHELL} /home/lehyaric/freefem++/main/debug/missing --run aclocal-1.7
 AGLPROG = 
 AMDEP_FALSE = #
 AMDEP_TRUE = 
-AMTAR = ${SHELL} /home/lehyaric/freefem++/doc/missing --run tar
+AMTAR = ${SHELL} /home/lehyaric/freefem++/main/debug/missing --run tar
 ARPACKLIB = 
-AUTOCONF = ${SHELL} /home/lehyaric/freefem++/doc/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/lehyaric/freefem++/doc/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/lehyaric/freefem++/doc/missing --run automake-1.7
+AUTOCONF = ${SHELL} /home/lehyaric/freefem++/main/debug/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/lehyaric/freefem++/main/debug/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/lehyaric/freefem++/main/debug/missing --run automake-1.7
 AWK = mawk
 BLASLIB = -L/usr/lib/atlas -lblas
 CC = gcc
@@ -94,7 +94,7 @@ LIBOBJS =
 LIBS = -larpack -llapack -rdynamic -lpthread  -L/usr/lib/atlas -lblas -lg2c
 LIBX11 = -L/usr/X11R6/lib -lX11 -lm
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/lehyaric/freefem++/doc/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/lehyaric/freefem++/main/debug/missing --run makeinfo
 MPIPROG = 
 OBJEXT = o
 PACKAGE = freefem++
@@ -112,7 +112,7 @@ STD_LDFLAGS =
 STD_X11_INC = -I/usr/X11R6/include
 STD_X11_LIB = -L/usr/X11R6/lib -lX11 -lm
 STRIP = 
-UMFPACKLIB = /home/lehyaric/freefem++/doc/download/umfpack/UMFPACKv4.3/UMFPACK/Lib/libumfpack.a /home/lehyaric/freefem++/doc/download/umfpack/UMFPACKv4.3/AMD/Lib/libamd.a
+UMFPACKLIB = /home/lehyaric/freefem++/main/debug/download/umfpack/UMFPACKv4.3/UMFPACK/Lib/libumfpack.a /home/lehyaric/freefem++/main/debug/download/umfpack/UMFPACKv4.3/AMD/Lib/libamd.a
 VERSION = 1.41
 X11PROG = 
 YACC = bison -y
@@ -140,7 +140,7 @@ ff_pdflatex = yes
 host_alias = 
 includedir = ${prefix}/include
 infodir = ${prefix}/info
-install_sh = /home/lehyaric/freefem++/doc/install-sh
+install_sh = /home/lehyaric/freefem++/main/debug/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localstatedir = ${prefix}/var
@@ -577,6 +577,9 @@ uninstall-info: uninstall-info-recursive
 	ps-recursive tags tags-recursive uninstall uninstall-am \
 	uninstall-info-am uninstall-info-recursive uninstall-recursive
 
+
+changelog:
+	cvs2cl -w -S --fsf
 
 clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
