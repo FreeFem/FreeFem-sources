@@ -1,3 +1,7 @@
+// Example C++ function "myfunction", dynamically loaded into "load.edp"
+// ---------------------------------------------------------------------
+// $Id$
+
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
@@ -39,10 +43,10 @@ class  OneOperator0s : public OneOperator {
 public: 
   E_F0 * code(const basicAC_F0 & ) const 
   { return  new E_F0_F(f);} 
-   OneOperator0s(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
+  OneOperator0s(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
 };
 
-//  hack to do something at in
+//  hack to do something at initialisation time
 
 class Init { public:
   Init();
@@ -51,7 +55,4 @@ Init init;
 Init::Init(){
   cout << " lood: myfunction " << endl;
   Global.Add("myfunction","(",new OneOperator0s<double>(myfunction));
-
 }
-
-
