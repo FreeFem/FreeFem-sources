@@ -48,6 +48,13 @@ visualcheck: all
 speedtest: all
 	cd examples++-other && make check
 
+# Windows package
+# ---------------
+
+# Windows package script (for Inno Setup)
+WindowsPackage.iss: WindowsPackage.m4 configure.ac
+	m4 -DVERSION=$(VERSION) WindowsPackage.m4 > WindowsPackage.iss
+
 # Debian package
 # --------------
 
