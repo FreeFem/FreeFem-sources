@@ -85,6 +85,14 @@ $ nm /home/hecht/arpack/ARPACK/libarpack_linux.a|grep zstatn_
    > //#define F77NAME(x) name2(x,_)
    > #define F77NAME(x) x ## _
 
+   change in file arpack++/include/arerror.h 
+33,34c33,34
+< #include <iostream.h>
+< #include <stdlib.h>
+---
+> #include <iostream>
+> #include <cstdlib>
+
 if the result is
 $ nm /home/hecht/arpack/ARPACK/libarpack_linux.a|grep zstatn_
          U zstatn
