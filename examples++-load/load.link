@@ -2,6 +2,12 @@
 # Create a loadable object from a C++ function defined in a .cpp file
 # $Id$
 
+# Default compiler
+if "$CXX" == "";
+then
+    CXX=g++
+fi
+
 FFsource=..
 INC="-I$FFsource -I$FFsource/src/fflib -I$FFsource/src/femlib -I$FFsource/src/Graphics" 
 if [ -f "$1.cpp" ] ; then
