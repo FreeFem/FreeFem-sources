@@ -36,4 +36,11 @@ Vnch vnc = x*x;
 Vh vh = x*x;
 Ph p = x*x;
 
-
+{
+func f=x*x+10*y*y+50*x*y;
+cout << " P2b " << endl;
+fespace Wh2b(Th,P2);
+Wh2b vh=f;
+cout << " ?? " << vh(0.1,0.4) << " == " << f(0.1,0.4) <<  " diff = " << vh(0.1,0.4) - f(0.1,0.4) <<endl;
+assert( abs(vh(0.1,0.4) - f(0.1,0.4)) < 1e-12 );
+}
