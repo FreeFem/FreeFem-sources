@@ -3045,7 +3045,7 @@ divup(p[]); // compute the final solution
  The idea of the preconditionner is that in a periodic domain, all
  differential operators commute and  the  Uzawa algorithm comes to solving the
  linear operator  $ \nabla. ( (\alpha Id + \nu \Delta)^{-1} \nabla$,
- where $Id$ is the identity operator.
+ where $ Id $ is the identity operator.
  So  the preconditioner suggested is $ \alpha \Delta^{-1} + \nu Id$.
 \\\\
 To implement this, we reuse the previous example, by including \index{include} a file.
@@ -4414,7 +4414,7 @@ where
 \begin{itemize}
 \item {\tt  nbv} is  a integer equal to the number of vertices.
 \item   {\tt h$_i$} is the wanted mesh size near the vertex $i$ on background mesh,
-the metric is $\mathcal{M}_i=h_i^{-2} Id$, where $Id$ is the identity matrix.
+the metric is $\mathcal{M}_i=h_i^{-2} Id$, where $ Id $ is the identity matrix.
 \end{itemize}
 
 The metric anisotrope
