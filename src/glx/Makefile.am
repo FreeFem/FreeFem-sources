@@ -2,6 +2,9 @@
 # ----------------------------------
 # $Id$
 
+# To create statically linked executables (see configure.ac)
+CXXLD=$(STATICTOOL) $(CXX)
+
 bin_PROGRAMS=$(GLXPROG)
 EXTRA_PROGRAMS=FreeFem++-glx
 FreeFem___glx_SOURCES=../Graphics/xglrgraf.cpp

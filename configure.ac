@@ -567,18 +567,41 @@ then
 	fi
 fi
 
+# Enable static linking (no shared libraries)
+# -------------------------------------------
+
+AC_ARG_ENABLE(static,
+	[  --enable-static	Build binaries with no shared library dependencies])
+if test "$enable_static" = yes
+then
+	AC_CHECK_PROG(ff_libtool,libtool,yes,no)
+	if test "$ff_libtool" = yes
+	then
+		LDFLAGS="$LDFLAGS -all-static"
+		AC_SUBST(STATICTOOL,libtool)
+	else
+		AC_MSG_ERROR(libtool not found)
+	fi
+fi
+
 # Dynamic loading of compiled functions
 # -------------------------------------
 
-# Availability of dlopen(). Use AC_COMPILE rather than
-# AC_CHECK_HEADERS because the latter has problems seeing it (in
-# Cygwin) when it does not compile (in Mingw).
+# Not if we don't want shared libraries
+ff_dynload=no
+if test "$enable_static" != yes
+then
 
-AC_MSG_CHECKING(for dlfcn.h)
-AC_COMPILE_IFELSE([#include <dlfcn.h>],
-	ff_dynload=yes,
-	ff_dynload=no)
-AC_MSG_RESULT($ff_dynload)
+	# Availability of dlopen(). Use AC_COMPILE rather than
+	# AC_CHECK_HEADERS because the latter has problems seeing it (in
+	# Cygwin) when it does not compile (in Mingw).
+
+	AC_MSG_CHECKING(for dlfcn.h)
+	AC_COMPILE_IFELSE([#include <dlfcn.h>],
+		ff_dynload=yes,
+		ff_dynload=no)
+	AC_MSG_RESULT($ff_dynload)
+fi
 
 #  the -rdynamic don't exist on macos 
 if test "$ff_dynload" = yes  ;

@@ -126,3 +126,24 @@ FreeFem++v$(VERSION)_MacOsX: all documentation
 
 FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
 	tar zcvf FreeFem++v$(VERSION)_MacOsX.tgz FreeFem++v$(VERSION)_MacOsX
+
+# Linux binary-only package
+# -------------------------
+
+FreeFem++v$(VERSION)_Linux:all documentation	
+	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
+	-cp src/std/FreeFem++ $@
+	cp src/nw/FreeFem++-nw $@
+	cp src/ide/FreeFem++-cs $@
+	cp src/ide/FreeFem++-cs-server $@
+	-cp src/glx/FreeFem++-glx $@
+	-cp src/mpi/FreeFem++-mpi $@
+	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
+	cp  examples++/*.edp   $@/examples++
+	cp  examples++-eigen/*.edp   $@/examples++-eigen
+	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
+	-cp  examples++-bug/*.edp   $@/examples++-bug
+	cp  DOC/manual-full.ps.gz DOC/manual-full.pdf $@
+
+FreeFem++v$(VERSION)_Linux.tgz: FreeFem++v$(VERSION)_Linux
+	tar zcvf FreeFem++v$(VERSION)_Linux.tgz FreeFem++v$(VERSION)_Linux
