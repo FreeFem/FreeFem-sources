@@ -61,8 +61,8 @@ CYGWIN*)
 	ff_win32=yes
 
 	# We need Mingw (to avoid Cygwin's extra DLLs)
-	CXXFLAGS="$CXXFLAGS -mno-cygwin -I/usr/include/mingw"
-	LIBS="$LIBS -mno-cygwin -L/lib/mingw"
+	###CXXFLAGS="$CXXFLAGS -mno-cygwin -I/usr/include/mingw"
+	###LIBS="$LIBS -mno-cygwin -L/lib/mingw"
 	;;
 *)ff_win32=no;;
 esac
