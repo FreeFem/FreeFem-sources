@@ -9,8 +9,8 @@ all-local: $(DOWNLOAD_FLTK)
 # ------------------------------
 
 # FLTK information
-SRCDIR=fltk-1.1.5
-PACKAGE=fltk-1.1.5-source.tar.bz2
+SRCDIR=fltk-$(FLTK_VERSION)
+PACKAGE=fltk-$(FLTK_VERSION)-source.tar.bz2
 SERVER=http://ovh.dl.sourceforge.net/sourceforge/fltk
 INSTALL=install
 
@@ -18,8 +18,9 @@ fltk: $(SRCDIR)/$(INSTALL)
 
 # Using system JPEG and PNG lib is a problem under Cygwin
 $(SRCDIR)/$(INSTALL): $(SRCDIR)
-	cd $(SRCDIR) && ./configure --enable-threads --enable-localjpeg \
-		--enable-localpng --prefix=`pwd`/$(INSTALL)
+	cd $(SRCDIR) && ./configure --enable-threads --enable-localjpeg	\
+		--enable-localpng --disable-cygwin --disable-gl		\
+		--prefix=`pwd`/$(INSTALL)
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 
@@ -30,4 +31,4 @@ $(PACKAGE):
 	wget -N $(SERVER)/$(PACKAGE)
 
 clean-local:
-	-rm -r $(PACKAGE) $(SRCDIR)
+	-rm -r fltk-*
