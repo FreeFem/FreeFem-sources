@@ -1,2 +1,4 @@
+*.eps
+machinefile
 Makefile
 Makefile.in
