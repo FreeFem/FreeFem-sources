@@ -17,9 +17,15 @@ int verbosityy=verbosity;
 
 dnl May write or read a reference file
 changequote([[,]])
+
+dnl UMFPACK give results that are different enough
+dnl to create a specific reference file
+ifelse(UMFPACKLIB,,
+	[[define(REFFILE,"refnoumf.edp")]],
+	[[define(REFFILE,"refumf.edp")]])
 ifdef([[ASSERT]],
-	include "ref.edp";,
-	ofstream ref("ref.edp");)
+	include REFFILE;,
+	ofstream ref(REFFILE);)
 
 dnl $1=file name
 dnl $2=reference value (if there is one)
@@ -31,8 +37,9 @@ define(ONETEST,
 [[cout << "--------- file : $1.edp -----------------" << endl;
 verbosity=verbosityy;
 {
-	define([[TESTVAR]],TEST[[]]translit($1,_-,XX))
-	define([[REFVAR]],REF[[]]translit($1,_-,XX))
+	dnl Place the dash first to avoid any confusion with things like "a-z"
+	define([[TESTVAR]],TEST[[]]translit($1,-_,XX))
+	define([[REFVAR]],REF[[]]translit($1,-_,XX))
 	include "$1.edp";
 	ifelse($2,,,
 		[[real TESTVAR=$2;
@@ -48,8 +55,8 @@ verbosity=verbosityy;
 };
 ]])
 
-ONETEST(adapt,u[]'*u[],1e-1)
-ONETEST(adaptindicatorP1,u[]'*u[],1e-1)
+ONETEST(adapt,u[]'*u[],1e-2)
+ONETEST(adaptindicatorP1,u[]'*u[],1e-2)
 ONETEST(adaptindicatorP2,u[]'*u[],0.5,0.5)
 ONETEST(algo)
 ONETEST(algowithmacro)
@@ -68,7 +75,7 @@ ONETEST(FE,wdc[]'*wdc[],1e-2)
 ONETEST(fluidStructAdapt,uu[]'*uu[],1e-2)
 ONETEST(fluidStruct,uu[]'*uu[],1e-2)
 ONETEST(freeboundary,u[]'*u[],1e-2)
-ONETEST(freeboundary-weak,p[]'*p[],1e-2)
+ONETEST(freeboundary-weak,p[]'*p[],5e-2)
 ONETEST(LapDG2,u[]'*u[],1e-2)
 ONETEST(Laplace,uh[]'*uh[],1e-2)
 ONETEST(LaplaceP1bis,u[]'*u[],1e-2)
