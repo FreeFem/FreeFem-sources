@@ -2694,11 +2694,11 @@ types of finite element are: \index{type of finite element}
          \label{eq:RT0}
      \end{equation}
       where by writing 
-      $\textrm{div}\mathbf{w}=\partial w_1/\partial x+\partial w_2/\partial y,
+      $\textrm{div }\mathbf{w}=\partial w_1/\partial x+\partial w_2/\partial y,
       \, \mathbf{w}=(w_1,w_2)$,
       $$
       H(\textrm{div})=\left\{\mathbf{w}\in L^{2}(\Omega)^2\left| 
-      \textrm{div}\mathbf{w}\in L^{2}(\Omega)
+      \textrm{div } \mathbf{w}\in L^{2}(\Omega)
       \right.\right\}
       $$ 
       and 
@@ -2726,7 +2726,8 @@ we only write in \freefempp as follows:
 \bT
 @mesh Th=@square(10,10);  
 @fespace Xh(Th,@P1);      //  scalar FE
-@fespace Xph(Th,P1,periodic=[[2,y],[4,y],[1,x],[3,x]]);//  bi-periodic FE 
+@fespace Xph(Th,P1,
+         periodic=[[2,y],[4,y],[1,x],[3,x]]);//bi-periodic FE 
 @fespace Mh(Th,@P2);      //  scalar FE
 @fespace Rh(Th,@RT0);     //  vectorial FE
 \eT
@@ -2957,7 +2958,7 @@ $$
 where $n_{i_lj_l}$ is the $j_l$-th component of the normal vector 
 $\vec{n}_{i_l}$,
 $$
-\{m^1,m^2,m^3\} = \left\{\frac{\mathbf{b}+\mathbf{c}}{2},
+\{m_1,m_2,m_3\} = \left\{\frac{\mathbf{b}+\mathbf{c}}{2},
 \frac{\mathbf{a}+\mathbf{c}}{2}, 
 \frac{\mathbf{b}+\mathbf{a}}{2} \right\}
 $$
