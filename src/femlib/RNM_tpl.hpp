@@ -172,7 +172,7 @@ template<class R>
     for (long i=0;i<n;i++)
       {  R & x(v[index(i)]);
           x =  f(x);}
-   
+  return *this; 
   }
 
 

@@ -1,6 +1,10 @@
 #ifndef  MatriceCreuse_tpl_
 #ifndef  MatriceCreuse_h_
 #include "MatriceCreuse.hpp"
+#include <set>
+#include <list>
+#include <map>
+
 #endif
 using Fem2D::HeapSort;
 
@@ -178,6 +182,39 @@ int MatriceProfile<R>::size() const {
   if (L) s += pL[n]*sizeof(int);
   if (U && (U != L)) s += pU[n]*sizeof(int);
   return s;
+}
+
+template<class R>
+  MatriceMorse<R> *MatriceProfile<R>::toMatriceMorse(bool transpose,bool copy) const 
+  {
+  // A FAIRE;
+    assert(0); // TODO
+   return 0;
+  }
+template<class R>
+bool MatriceProfile<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
+{
+ if(!coef) return  L == U ;
+ int i,j,kf,k;
+  if(D)
+   for( i=0;i<n;i++)
+    if(D[i])
+     mij[make_pair(i,i)] += coef*D[i];
+   else
+   for(int i=0;i<n;i++) // no dia => identity dai
+     mij[make_pair(i,i)]=mij[make_pair(i,i)] += coef;
+     
+ if (L && pL )    
+   for (kf=pL[0],i=0;  i<n;   i++  )  
+     for ( k=kf,kf=pL[i+1], j=i-kf+k;   k<kf; j++,  k++  )
+        if(L[k])
+        mij[make_pair(i,j)]=L[k]*coef;
+ if (U && pU)     
+   for (kf=pU[0],j=0;  j<m;  j++)  
+     for (k=kf,kf=pU[j+1], i=j-kf+k;   k<kf; i++,  k++  )
+      if(U[k])
+        mij[make_pair(i,j)]=U[k]*coef;
+ return L == U ; // symetrique               
 }
 template<class R>
 MatriceProfile<R>::MatriceProfile(const int nn,const R *a)
@@ -580,6 +617,58 @@ KN_<R> & operator/=(KN_<R> & x ,const MatriceProfile<R> & a)
 }
 
 template <class R> 
+ MatriceMorse<R>::MatriceMorse(KNM_<R> & A,double tol)
+    :MatriceCreuse<R>(A.N(),A.M(),false),solver(0) 
+      {
+      
+  symetrique = true;
+  dummy=false;
+  int nbcoeff=0;
+  for(int i=0;i<n;i++)
+    for(int j=0;j<m;j++)
+      if(fabs(A(i,j))>tol) nbcoeff++;
+
+  nbcoef=nbcoeff;
+  a=new R[nbcoef] ;
+  lg=new int [n+1];
+  cl=new int [nbcoef];
+  nbcoeff=0;
+  R aij;
+  for(int i=0;i<n;i++)
+   { 
+    lg[i]=nbcoeff;
+    for(int j=0;j<m;j++)
+     
+      if(fabs(aij=A(i,j))>tol)
+       {
+         cl[nbcoeff]=j;
+         a[nbcoeff]=aij;
+         nbcoeff++;
+       }
+    }
+   lg[n]=nbcoeff;
+
+  
+}
+template <class R> 
+ MatriceMorse<R>::MatriceMorse(const int  n,const R *aa)
+    :MatriceCreuse<R>(n),solver(0) 
+      {
+  symetrique = true;
+  dummy=false;
+  nbcoef=n;
+  a=new R[n] ;
+  lg=new int [n+1];
+  cl=new int [n];
+  for(int i=0;i<n;i++)
+   {
+    lg[i]=i;
+    cl[i]=i;
+    a[i]=aa[i];      
+      }
+lg[n]=n;
+}
+template <class R> 
 int MatriceMorse<R>::size() const 
 {
   return nbcoef*(sizeof(int)+sizeof(R))+ sizeof(int)*(n+1);
@@ -587,7 +676,7 @@ int MatriceMorse<R>::size() const
 template <class R> 
 ostream& MatriceMorse<R>::dump(ostream & f) const 
 {
-  f << " Nb line = " << n << " Nb Colonne " << m << " symetrique " << symetrique << endl;
+  f << " Nb line = " << n << " Nb Colonne " << m << " symetrique " << symetrique << " nbcoef = " << nbcoef <<endl;
   int k=lg[0];
   for (int i=0;i<n;i++)
    { 
@@ -752,6 +841,277 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
    }
   
 }
+
+template<class R>
+ void  MatriceMorse<R>::dotransposition()
+ {
+   if(symetrique) return; 
+   
+   assert(dummy==false);  
+   int *llg= new int[nbcoef];
+   int *clg= new int[m+1];
+   
+   for (int i=0;i<n;i++)
+     for (int k=lg[i];k<lg[i+1];k++)
+        llg[k]=i;
+ 
+  HeapSort(cl,llg,a,nbcoef);
+  for(int k=0;k<m;k++)
+    clg[k]=-1;
+
+  // build new line end (old column)
+  for(int k=0;k<nbcoef;k++)
+    clg[cl[k]+1]=k+1;
+      
+   for(int kk=0, k=0;k<=m;k++)
+   if (clg[k]==-1)
+      clg[k]=kk;
+    else kk=clg[k];
+    
+  clg[m]=nbcoef;
+  // sort the new column (old line)
+  for(int i=0;i<m;i++)  
+    HeapSort(llg+clg[i],cl+clg[i],a+clg[i],clg[i+1]-clg[i]); 
+
+  delete[] cl;
+  delete[] lg;
+  Exchange(n,m);       
+  cl=llg;
+  lg=clg;
+   
+ }
+template<class R>
+  MatriceMorse<R> * BuildCombMat(const list<pair<R,MatriceCreuse<R> *> >  &lM)
+  {
+    typedef typename list<pair<R,MatriceCreuse<R> *> >::const_iterator lconst_iterator;
+    
+    lconst_iterator begin=lM.begin();
+    lconst_iterator end=lM.end();
+    lconst_iterator i;
+    
+    map< pair<int,int>, R> mij;
+    
+    int n=0,m=0;
+    bool sym=true;
+    for(i=begin;i!=end;i++++)
+     {
+       MatriceCreuse<R> & M=*i->second;
+       assert( &M);
+       R coef=i->first;
+       if (n==0) { n=M.n; m=M.m;}
+       else { assert(n== M.n && m==M.m);}
+       sym = M.addMatTo(coef,mij) && sym;              
+     } 
+    int nbcoef=mij.size();
+    if(sym) nbcoef = (nbcoef+n)/2;
+    MatriceMorse<R> * r=new  MatriceMorse<R>();
+    
+    r->n=n;
+    r->m=m;
+    int *lg, *cl;
+    R *a;
+    r->lg=lg=new int[n+1];
+     r->cl=cl=new int [nbcoef];
+     r->a=a=new R [nbcoef];        
+     r->nbcoef=nbcoef;
+     r->symetrique=sym;
+     r->dummy=false;
+     lg[0]=0;
+     int k=0;
+     bool nosym=!sym;
+     for (typename map< pair<int,int>, R>::iterator iter=mij.begin();iter!=mij.end();++iter)
+      { 
+        int i=iter->first.first;
+        int j=iter->first.second;
+        R aij=iter->second;
+       if(j<=i || nosym)
+        {
+        cl[k]=j;
+        a[k]=aij;
+        lg[i+1]=++k;
+        }
+       }
+   
+     return r;
+  }
+template<class R>
+bool MatriceMorse<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
+{
+  int i,j,k;
+  if (symetrique)
+   {
+     for ( i=0;i<n;i++)
+       for ( k=lg[i];k<lg[i+1];k++)
+         {
+           j=cl[k];
+           if(coef*a[k])
+           {
+           mij[make_pair(i,j)] += coef*a[k];
+           if (i!=j)
+             mij[make_pair(j,i)] += coef*a[k];
+           }
+         }
+           
+   }
+  else
+   {
+     for ( i=0;i<n;i++)
+       for ( k=lg[i];k<lg[i+1];k++)
+         {
+           j=cl[k];
+           if(coef*a[k])
+           mij[make_pair(i,j)] = coef*a[k];
+         }
+   }
+
+return symetrique;
+}
+ 
+template<class R>
+ void  MatriceMorse<R>::prod(const MatriceMorse<R> & B, MatriceMorse<R> & AB)
+ {
+   //  compute the s
+  bool sym=this == & B &&symetrique;
+  int *blg=B.lg;
+  int *bcl=B.cl;
+  assert(m==B.n); 
+  bool delbl= B.symetrique;
+  if (delbl)
+    {
+     int nn=B.n;
+      blg = new int[nn+1];
+     for (int i=0;i<B.n;i++)
+         blg[i]=B.lg[i+1]-B.lg[i];
+      blg[nn]=0;   
+      
+      for (int i=0;i<nn;i++)
+        for (int k= B.lg[i];k<B.lg[i+1];k++)
+          {  int j=B.cl[k];
+              assert(j <= i);
+             if (j!=i)  
+               blg[j]++;
+             }
+             
+      for (int i=1;i<=nn;i++)
+       blg[i]+=blg[i-1];
+      int nbnz = blg[nn];
+      bcl= new int[nbnz];
+      
+      for (int i=0;i<B.n;i++)
+        for (int k= B.lg[i];k<B.lg[i+1];k++)
+          {  int j=B.cl[k];
+             assert(j <= i);
+             bcl[--blg[i] ]=j;
+             if(i !=j)
+               bcl[--blg[j]]=i;
+          }
+    }
+   
+   set<pair<int,int> > sij;
+   
+     for (int i=0;i<n;i++)
+       for (int k=lg[i];k<lg[i+1];k++)
+         {    
+           int j=cl[k];
+           if(!a[k]) continue;
+           int ii[2],jj[2];
+           ii[0]=i;ii[1]=j;
+           jj[0]=j;jj[1]=i;
+           int kk=1;
+           if(symetrique && i != j) kk=2;
+           for (int ll=0;ll<kk;ll++)
+            {
+                int i=ii[ll];
+                int j=jj[ll];
+                for (int kkb=blg[j];kkb<blg[j+1];kkb++)
+                  { 
+                   int kz= bcl[kkb];
+                   R bjk;
+                   if (B.symetrique && kz > j)
+                     bjk=B(kz,j);
+                   else
+                      bjk=B(j,kz);
+                   if( bjk && (!sym || kz<=i))
+                     sij.insert(make_pair(i,kz));
+                  }
+            }
+           
+         }
+    int nn=n;
+    int mm=B.m;
+    int * llg=new int[nn+1];
+    int * lcl=new int[sij.size()];  
+    R * aa = new R[sij.size()];
+    for(int i=0;i<=nn;i++)
+        llg[i]=0;
+        
+    for (set<pair<int,int> >::iterator iter=sij.begin();iter!=sij.end();++iter)
+      { 
+        int i=iter->first;
+        int j=iter->second;
+        llg[i]++;
+       }
+     for (int i=1;i<=nn;i++)
+       llg[i]+=llg[i-1];
+     assert(llg[n]==sij.size());
+     for (set<pair<int,int> >::iterator iter=sij.begin();iter!=sij.end();++iter)
+      { 
+        int i=iter->first;
+        int j=iter->second;
+       // cout << i << " , " << j << endl;
+        lcl[--llg[i]]=j;
+       }
+     for(int i=0;i<nn;i++)  
+       HeapSort(lcl+llg[i],llg[i+1]-llg[i]); 
+       
+     AB.n=nn;
+     AB.m=mm;
+     AB.lg=llg;
+     AB.cl=lcl;
+     AB.a=aa;        
+     AB.nbcoef=sij.size();
+     AB.symetrique=sym;
+     AB.dummy=false;
+     AB = R();
+     for (int i=0;i<n;i++)
+       for (int k=lg[i];k<lg[i+1];k++)
+         {    
+           int j=cl[k];
+           R aij = a[k];
+           if(!aij) continue;
+           int ii[2],jj[2];
+           ii[0]=i;ii[1]=j;
+           jj[0]=j;jj[1]=i;
+           int kk=1;
+           if(symetrique && i != j) kk=2;
+           for (int ll=0;ll<kk;ll++)
+            {
+                int i=ii[ll];
+                int j=jj[ll];
+                for (int kb=blg[j];kb<blg[j+1];kb++)
+                  { 
+                   int k= bcl[kb];
+                   R bjk;
+                   if (B.symetrique && k > j)
+                     bjk=B(k,j);
+                   else
+                      bjk=B(j,k);
+                //   cout << i << "," << "," << j << "," << k << " " << aij << " " << bjk << endl;
+                   if( bjk && (!sym || k<=i))
+                       AB(i,k) += aij*bjk;
+                  }
+            }
+           
+         }
+
+    if (delbl) {
+      delete [] blg;
+      delete [] bcl;
+    }
+     
+     
+ }
+
 template<class R>
   void  MatriceMorse<R>::addMatMul(const KN_<R> &  x, KN_<R> & ax) const   
 {
