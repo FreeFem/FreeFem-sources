@@ -248,14 +248,15 @@ class FE_ : public FE<K>{public:
 };
 
 */
-C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 init);
-C_F0 NewFEarray(ListOfId * ids,Block *currentblock,C_F0 & fespacetype,CC_F0 init);
-C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 init);
-C_F0 NewFEvariable(ListOfId * ids,Block *currentblock,C_F0 & fespacetype,CC_F0 init);
-inline C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype)
-  { CC_F0 init;init=0;return NewFEvariable( id,currentblock,fespacetype, init);}
-inline C_F0 NewFEvariable(ListOfId * ids,Block *currentblock,C_F0 & fespacetype)
-  { CC_F0 init;init=0;return NewFEvariable( ids,currentblock,fespacetype, init);}
+C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx);
+C_F0 NewFEarray(ListOfId * ids,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx);
+C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx);
+C_F0 NewFEvariable(ListOfId * ids,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx);
+inline C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype,bool cplx)
+  { CC_F0 init;init=0;return NewFEvariable( id,currentblock,fespacetype, init, cplx);}
+    
+inline C_F0 NewFEvariable(ListOfId * ids,Block *currentblock,C_F0 & fespacetype,bool cplx)
+  { CC_F0 init;init=0;return NewFEvariable( ids,currentblock,fespacetype, init,cplx);}
  
  size_t dimFESpaceImage(const basicAC_F0 &args) ;
 
@@ -267,7 +268,9 @@ class E_FEcomp : public E_F0mps { public:
     AnyType operator()(Stack s)  const {
        return SetAny<Result>( Result( *GetAny<FE **>((*a0)(s)),comp) );}  
     E_FEcomp(const C_F0 & x,const int cc,int NN) : a0(x.LeftValue()),comp(cc),N(NN)
-      {throwassert(x.left()==atype<FE **>() &&a0);} 
+      {if(x.left()!=atype<FE **>() ) 
+        cout << "E_FEcomp: Bug " << *x.left() << " != " << *atype<FE **>() << "  case " <<typeid(K).name() << endl;
+       throwassert(x.left()==atype<FE **>() &&a0);} 
     operator aType () const { return atype<Result>();}         
          
 };
