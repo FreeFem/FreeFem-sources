@@ -5,29 +5,35 @@
 set -e
 
 # $1 must point to the directory where the files will be copied
-if test ! -d $1
+if ssh $3 test ! -d $1
     then
-    echo "Usage: CopyToServer.sh <directory to copy files to>"
+    echo "Usage: CopyToServer.sh <directory to copy files to> <testing/unstable> <remote server location>"
+    exit 1
+fi
+
+# $2=testing/unstable
+if ssh $3 test "$2" != testing -a "$2" != unstable
+    then
+    echo "Usage: CopyToServer.sh <directory to copy files to> <testing/unstable> <remote server location>"
     exit 1
 fi
 
 # Directory structure we want to build
-if test -d $1/dists
+if ssh $3 test -d $1/dists/$2
 then
-    rm -r $1/dists
+    ssh $3 rm -r $1/dists/$2
 fi
-basedir='dists/packages/ff++/binary-i386'
-mkdir -p $1/$basedir
+basedir="dists/$2/ff++/binary-i386"
+ssh $3 mkdir -p $1/$basedir
 
 # Server configuration file
-cp apt-ftparchive.conf $1
+scp apt-ftparchive.conf $3:$1
 
 # Copies all packages (potential improvement: we could spread
 # architecture-independant packages into a separate directory).
 
-cp ../../freefem++*.{dsc,deb,tar.gz} $1/$basedir
+scp ../../freefem++*.{dsc,deb,tar.gz} $3:$1/$basedir
 
 # Create package list
-cd $1
-apt-ftparchive packages ./$basedir > ./$basedir/Packages
-gzip -c ./$basedir/Packages > ./$basedir/Packages.gz
+ssh $3 "cd $1 && apt-ftparchive packages ./$basedir > ./$basedir/Packages"
+ssh $3 "cd $1 && gzip -c ./$basedir/Packages > ./$basedir/Packages.gz"
