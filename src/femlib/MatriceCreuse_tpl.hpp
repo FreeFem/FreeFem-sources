@@ -753,7 +753,7 @@ template<class K>
   assert(a && lg &&  cl);
   for (int i=0;i<=this->n;i++)
     lg[i]=A.lg[i];
-  for (int k=0;k<=nbcoef;k++)
+  for (int k=0;k<nbcoef;k++)
    {
     cl[k]=A.cl[k];
     a[k]=A.a[k];
