@@ -8,8 +8,7 @@ err.dat
 *.log
 ListOfUnAllocPtr.bin
 machinefile
-Makefile
-Makefile.in
 *.mesh
 *.points
 toto.txt
+Makefile
