@@ -627,3 +627,8 @@ __________
 17/02/2005
    FreeFem++-cs: Communication speed between client and server has been
    increased ten-fold (ALH)
+
+   
+23/02/2005
+     add jump and mean of complex function  (FH)
+
