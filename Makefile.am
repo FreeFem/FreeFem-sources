@@ -131,7 +131,8 @@ FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
 # -------------------------
 
 FreeFem++v$(VERSION)_Linux:all
-	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
+	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug \
+		$@/examples++-eigen $@/examples++-load
 	cp src/std/FreeFem++ $@
 	./copysharedlibs.sh src/std/FreeFem++ $@
 	cp src/nw/FreeFem++-nw $@
@@ -147,7 +148,8 @@ FreeFem++v$(VERSION)_Linux:all
 	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
 	cp  examples++/*.edp   $@/examples++
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
-	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
+	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf \
+		examples++-tutorial/*.edp   $@/examples++-tutorial
 	-cp  examples++-bug/*.edp   $@/examples++-bug
 
 FreeFem++v$(VERSION)_Linux.tgz: FreeFem++v$(VERSION)_Linux

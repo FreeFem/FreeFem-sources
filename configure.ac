@@ -156,7 +156,7 @@ ff_x11=no
 # At the moment, we cannot compile for X11 on Mingw because /usr/X11R6
 # is part of Cygwin, not Mingw.
 
-if test "$ff_win32" = no -o "$enable_cygwin" = yes
+if test "$ff_win32" = no -o "$enable_cygwin" != no
 then
 	if test -d /usr/X11R6
 	then
@@ -689,7 +689,7 @@ AC_ARG_ENABLE(default-fltk,
 
 # The current IDE version needs Cygwin on Windows, mainly for threads
 # and sockets.
-if test "$ff_win32" = no -o "$enable_cygwin" = yes
+if test "$ff_win32" = no -o "$enable_cygwin" != no
 then
 
 	# Default FLTK (in the machine's default PATH)
