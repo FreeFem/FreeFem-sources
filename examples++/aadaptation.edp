@@ -39,3 +39,4 @@ for (i=0;i< 5;i++)
  cout << " CPU = " << clock()-cpu << endl;
 //  for regtest 
 real regvalue=int2d(Th)(u*u);
+cout<<"regvalue="<<regvalue<<endl;
