@@ -48,11 +48,12 @@ visualcheck: all
 speedtest: all
 	cd examples++-other && make check
 
-# Debian packaging
-# ----------------
+# Debian package
+# --------------
 
 deb:
 	dpkg-buildpackage -rfakeroot
+	@echo Now run '"cd debian && ./CopyToServer.sh \<dir>"'
 
 # Build all versions
 # ------------------
