@@ -142,7 +142,7 @@ void yyerror (const char* s)
 %right <oper>  '_' 
 %left  <oper>  '(' '[' '.'
 
-%token <oper> ')' ',' ']' 
+%token <oper> ')'  ']' 
  
 %token <lnum> LNUM
 %token <dnum> DNUM
