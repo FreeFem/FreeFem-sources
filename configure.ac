@@ -77,8 +77,8 @@ CYGWIN*)
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwin" != yes
 	then
-		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -I/usr/include/mingw"
-		LIBS="$LIBS -mno-cygwin -mwindows -L/lib/mingw -lws2_32"
+		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
+		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -L/lib/mingw -lws2_32"
 	fi
 
 	# Resources for FreeFem++-cs in Microsoft Windows format
@@ -733,7 +733,9 @@ if test "$ff_fltk" = no -a "$enable_download" = yes
 then
 	AC_MSG_NOTICE(using downloaded FLTK)
 	AC_SUBST(DOWNLOAD_FLTK,fltk)
-	ff_fltk_config="$curdir/download/fltk/fltk-1.1.5/install/bin/fltk-config"
+	ff_fltk_version=1.1.6
+	AC_SUBST(FLTK_VERSION,$ff_fltk_version)
+	ff_fltk_config="$curdir/download/fltk/fltk-$ff_fltk_version/install/bin/fltk-config"
 	ff_fltk=yes
 fi
 
