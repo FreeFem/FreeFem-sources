@@ -39,9 +39,9 @@ are modeled by one or several partial differential equations.
 \\\\
 
 \texttt{Freefem} is a software to solve these equations numerically.
-As its name says, it is public domain software based on the Finite
+As its name says, it is a free software based (see copyright for full detail) on the Finite
 Element Method. This software runs on all unix OS (with g++ 2.95.2 or
-better and X11R6) , on Window95, 98, 2000, NT, XP and   on MacOS 9 and
+better and X11R6) , on Window95, 98, 2000, NT, XP,  on MacOS 9 and
 X.  \\\\
 %%% alh? Is it really public domain? (no restriction whatsoever!)
 Many phenomena involve several different fields.  Fluid-structure
@@ -56,7 +56,7 @@ meshes}.  \\\\
 
 The characteristics of \freefempp are:
 \begin{itemize}
-%%% alh? ``no scalar element''?
+%%% alh? ``no scalar element''? si 
 \item A large variety of finites elements : linear and quadratic
  Lagrangian elements, discontinuous P1 and Raviart-Thomas elements,
  elements of a non-scalar type, mini-element, ...
@@ -245,7 +245,7 @@ matrices, vectors, etc. For instance~:
 
 \bFF
   @int i,n=20;               //  $ i,n \in \Z $
-  @real pi=4*atan(1);        // $ pi \in \R $
+  @real pi=4*atan(1.);        // $ pi \in \R (redefine) $
   @real[@int] xx(n),yy(n);    //  two array of size n
   @for (i=0;i<=20;i++)       // which can be used in statements such as this
    { xx[i]= cos(i*pi/10); yy[i]= sin(i*pi/10); }
@@ -380,7 +380,7 @@ abstractions~:
     point if it is on a boundary, otherwise 0 (integer
     value). \index{label}
     \item[\texttt{region}] a function returning the region number of
-    the current point (x,y). Integer value. \index{region}
+    the current point (x,y,z). Integer value. \index{region}
 %%%alh (x,y,z) in R^2?
     \item[\texttt{P}] current point ($\R^{3}$ value. \index{P}
     \texttt{P.x}, \texttt{P.y}, \texttt{P.z})
@@ -408,7 +408,7 @@ abstractions~:
 
     \itemtt[false] \Bool\ value\index{false}
 
-%%%alh ``pi'' and ``endl'' should be among constants and not variables?
+%%%alh ``pi'' and ``endl'' should be among constants and not variables? 
     \itemtt[pi] \Real approximation of $\pi$ \index{pi}
 
     \itemtt[endl] the end of line string \index{endl}
@@ -794,7 +794,7 @@ Th=movemesh(Th,[x+coef*uu,y+coef*vv]);
 plot(Th,wait=1,fill=1,ps="movemesh.eps");// see figure \ref{movemesh}
 \eFF
 %%% alh? Lshape.eps not found
-%%%\twoplot[height=6cm]{Lshape}{movemesh}{   L-shape}{  moved L-shape }
+\twoplot[height=6cm]{lshape}{movemesh}{ L-shape}{  moved L-shape }
 
 \begin{note}
 Consider a function u defined on a mesh Th. A statement like
@@ -892,8 +892,8 @@ The third column of each line is left untouched by the
 \texttt{triangulate} command. But you can use this third value to
 define a table function with rows of the form: \texttt{x y f(x,y)}.
 
-%%% alh? Thxy.eps and xyf.eps not found
-%%%\twoplot[height=6cm]{Thxy}{xyf}{Delaunay mesh of the convex hull of point set in file xyf}{Isovalue of table function}
+%%% alh? Thxy.eps and xyf.eps not found 
+\twoplot[height=6cm]{Thxy}{xyf}{Delaunay mesh of the convex hull of point set in file xyf}{Isovalue of table function}
 
 \index{function!tables}
 
@@ -1086,9 +1086,10 @@ default parameters which can be modified~:
     true, no adapted mesh is generated (useful to compute only a
     metric).
 
-    \itemtt[periodic=] \index{adaptmesh!periodic=} reserved for future
-    use: builds an adapted periodic mesh (see periodic finite element
-    spaces \ref{periodic BC})
+    \itemtt[periodic=] \index{adaptmesh!periodic=} %%% modif FH 
+    use: builds an adapted periodic mesh, you can write \texttt{periodic=[[4,y],[2,y],[1,x],[3,x]];}
+    to build a biperiodic mesh of a square.
+    (see periodic finite element   spaces \ref{periodic BC}, and see \texttt{sphere.edp} for a  full example)
 
 %%%alh detail \ref{periodic BC}?
 
