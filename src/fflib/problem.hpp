@@ -312,7 +312,7 @@ public:
 class Problem  : public Polymorphic { 
 //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =8;
+  static const int n_name_param =9;
   int Nitem,Mitem;
 public:
   struct Data {
@@ -333,7 +333,7 @@ public:
   
   mutable vector<Expression> var; // list des var pour les solutions et test 
   bool complextype,VF;
-  const C_args *op; // the list of all operator 
+  C_args *op; // the list of all operator 
   //   Expression noinit,type,epsilon;
   Expression nargs[n_name_param];
   
@@ -368,7 +368,7 @@ public:
 class Solve : public Problem { public:
   // just a problem with implicit solve 
   Solve(const C_args * ca,const ListOfId &l,size_t & top) 
-    : Problem(ca,l,top) {} 
+    : Problem(new C_args(*ca),l,top) {} 
 };
 
 class FormBilinear : public E_F0mps { public:
@@ -398,6 +398,7 @@ class FormBilinear : public E_F0mps { public:
   FormBilinear operator-() const { return  FormBilinear(di,C_F0(TheOperators,"-",C_F0(b,atype<B>())));}
   bool VF() const { return MaxOp(b) >= last_operatortype;}
 
+  FormBilinear(const FormBilinear & fb) : di(fb.di),b(new Foperator(*fb.b) ) {}
   //  void init(Stack stack) const {}
 };
 
@@ -432,6 +433,7 @@ class FormLinear : public E_F0mps { public:
   FormLinear(A a,Expression bb) : di(a),l(new Ftest(*dynamic_cast<B>(bb))/*->Optimize(currentblock) FH1004 */) {throwassert(l);}   
   FormLinear operator-() const { return  FormLinear(di,C_F0(TheOperators,"-",C_F0(l,atype<B>())));}
   //  void init(Stack stack) const {}
+  FormLinear(const FormLinear & fb) : di(fb.di),l(new Ftest(*fb.l) ) {}
   
 };
 
@@ -460,8 +462,7 @@ class Call_FormBilinear: public E_F0mps { public:
   AnyType operator()(Stack stack) const  
   { InternalError(" bug: no eval of Call_FormBilinear ");} 
    operator aType () const { return atype<void>();}         
-  
-  
+    
 };
 
 template<class T>
@@ -542,7 +543,7 @@ basicAC_F0::name_and_type  OpCall_FormLinear2<FormBilinear>::name_param[]= {
 };
 
 
-bool FieldOfForm(const list<C_F0> & largs ,bool complextype);
+bool FieldOfForm( list<C_F0> & largs ,bool complextype);
 template<class A>  struct IsComplexType { static const bool value=false;};
 template<>  struct IsComplexType<Complex> { static const bool value=true;};
 
@@ -551,11 +552,12 @@ struct OpArraytoLinearForm: public OneOperator {
   typedef Call_FormLinear::const_iterator const_iterator;
   
   class Op : public E_F0mps { public:
-    const Call_FormLinear *l;
+    Call_FormLinear *l;
     Expression x;
     AnyType operator()(Stack s)  const ;// {ExecError("Internal Error:to do");} 
     Op(Expression xx,Expression  ll) 
-      : l(dynamic_cast<const Call_FormLinear *>(ll)),x(xx) {assert(l);FieldOfForm(l->largs,IsComplexType<R>::value); }
+      : l(new Call_FormLinear(*dynamic_cast<const Call_FormLinear *>(ll))),x(xx) 
+       {assert(l);FieldOfForm(l->largs,IsComplexType<R>::value); }
      operator aType () const { return atype<KN<R> *>();} 
       
   };
@@ -571,11 +573,11 @@ struct OpMatrixtoBilinearForm: public OneOperator {
   typedef Call_FormBilinear::const_iterator const_iterator;
   
   class Op : public E_F0mps { public:
-    const Call_FormBilinear *b;
+     Call_FormBilinear *b;
     Expression a;
     AnyType operator()(Stack s)  const ;
     Op(Expression aa,Expression  bb) 
-      : b(dynamic_cast<const Call_FormBilinear *>(bb)),a(aa) 
+      : b(new Call_FormBilinear(* dynamic_cast<const Call_FormBilinear *>(bb))),a(aa) 
     {assert(b && b->nargs);FieldOfForm(b->largs,IsComplexType<R>::value)  ;}
      operator aType () const { return atype<Matrice_Creuse<R>  *>();} 
 

@@ -491,6 +491,8 @@ primary:
   |        primary '[' sub_script_expr ',' sub_script_expr ']'  {$$=C_F0($1,$2,$3,$5)}
   |        primary '['  ']'        {$$=C_F0($1,"[]")}
   |        primary '.'  ID       { $$=C_F0($1,$3) ;}
+  |        FESPACE '.'  ID       { $$=C_F0(Find($1),$3) ;}
+  |        FESPACE '(' parameters ')'     { $$=C_F0(Find($1),$2,$3) ;}
   |        primary PLUSPLUS      {$$=C_F0(TheRightOperators,$2,$1)} 
   |        primary MOINSMOINS    {$$=C_F0(TheRightOperators,$2,$1)} 
   |        TYPE '('  Expr ')' {

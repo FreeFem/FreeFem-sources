@@ -39,7 +39,8 @@ basicAC_F0::name_and_type  Problem::name_param[]= {
      "dimKrylov",&typeid(long),
      "bmat",&typeid(Matrice_Creuse<R>* ),
      "tgv",&typeid(double ),
-     "strategy",&typeid(long )
+     "strategy",&typeid(long ),
+     "save",&typeid(string* )
      
 };
 
@@ -948,6 +949,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
       {
         Expression e=ii->LeftValue();
         aType r = ii->left();
+      //  if(A)        cout << "AssembleVarForm " <<  * r << " " <<  (*A)(0,3) << endl;
         if (r==tFB) 
           { if (A)
             AssembleBilinearForm<R>( stack,Th,Uh,Vh,sym,*A,dynamic_cast<const  FormBilinear *>(e));
@@ -1422,18 +1424,19 @@ void InitProblem( int Nb, const FESpace & Uh,
                                const FESpace & Vh,
                                KN<R> *&B,KN<R> *&X,vector<  pair< FEbase<R> * ,int> > &u_hh,
                  TypeSolveMat    *typemat ,
-                 vector<  FEbase<R> *  > & u_h,const FESpace ** LL )
+                 vector<  FEbase<R> *  > & u_h,const FESpace ** LL, bool initx )
 {
 
   *B=R();
   
-  bool initx = typemat->t==TypeSolveMat::GC;
+//  bool initx = typemat->t==TypeSolveMat::GC;
   
   const  Mesh & Th(Uh.Th);
   
   if (initx) 
     {
-      X=new KN<R>(B->N());
+      if (!X || (X =B) )
+        X=new KN<R>(B->N());
       const FEbase<R> & u_h0 = *(u_h[0]);
       const FESpace  * u_Vh = &*u_h0.Vh ;
       
@@ -1487,13 +1490,14 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   long NbSpace = 50; 
   long itmax=0; 
   double eps=1e-6;
+  string * save=0;
 //  bool VF=false;
 //  VF=isVF(op->largs);
  // assert(!VF); 
   double tgv = 1e30;
 // type de matrice par default
 #ifdef HAVE_LIBUMFPACK        
-     TypeSolveMat tmat(TypeSolveMat::LU); 
+     TypeSolveMat tmat(TypeSolveMat::UMFpack); 
 #else            
     TypeSolveMat tmat(TypeSolveMat::LU);
 #endif    
@@ -1508,7 +1512,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   if (nargs[4]) NbSpace= GetAny<long>((*nargs[4])(stack));
   if (nargs[6]) tgv= GetAny<double>((*nargs[6])(stack));
   if (nargs[7]) umfpackstrategy = GetAny<long>((*nargs[7])(stack));
-  
+  if (nargs[8]) save = GetAny<string*>((*nargs[8])(stack));
   bool sym = typemat->sym;
   
   list<C_F0>::const_iterator ii,ib=op->largs.begin(),
@@ -1600,10 +1604,17 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   const FESpace & Vh(*data->Vh);
   throwassert(Nbcomp==Uh.N && Nbcomp==Vh.N); 
   KN<R> *B=new KN<R>(Vh.NbOfDF);
-  KN<R> *X=B;
+  KN<R> *X=B; //
   const  Mesh & Th(Uh.Th);
-  bool initx = typemat->t==TypeSolveMat::GC;
-  InitProblem(  Nb,  Uh, Vh, B, X,u_hh,typemat , u_h,  LL );
+  bool initx = true; //typemat->t==TypeSolveMat::GC ; //  make x and b different in all case 
+  // more safe for the future ( 4 days lose with is optimaze FH )
+/*  
+#ifdef HAVE_LIBUMFPACK         
+ // for UMFPACK and B must Be different 
+   initx |= typemat->t==TypeSolveMat::UMFpack ;
+#endif   
+*/  
+  InitProblem(  Nb,  Uh, Vh, B, X,u_hh,typemat , u_h,  LL,  initx);
 
   if(verbosity>2) cout << "   Problem(): initmat " << initmat << " VF (discontinuous Galerkin) = " << VF << endl;
   
@@ -1627,6 +1638,10 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   if  (AssembleVarForm( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, op->largs)) 
     { 
       *B = - *B; 
+      // hach FH 
+      for (int i=0, n= B->N(); i< n; i++)
+        if( abs((*B)[i]) < 1.e-60 ) (*B)[i]=0;
+        
       AssembleBC<R>     ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  op->largs, tgv );
     }
   else 
@@ -1635,6 +1650,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   if (initmat)
     if (typemat->profile)
       {
+        if(verbosity>5) cout << " Matrix skyline type:" << typemat->t <<endl;
         MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
         throwassert(&AA);
         switch (typemat->t) {
@@ -1648,7 +1664,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
       }
     else 
       {
-        if(verbosity>5) cout << " Matrice morse GC Precond diag" << endl;
+        if(verbosity>5) cout << " Matrix morse type:" << typemat->t <<endl;
         MatriceMorse<R> & AA(dynamic_cast<MatriceMorse<R> &>(A));
         throwassert(&AA);
         switch (typemat->t) {
@@ -1678,6 +1694,20 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
       }
       
  // if(verbosity>3) cout << "   B  min " << B->min() << " ,  max = " << B->max() << endl;
+  if( save)
+  {
+      string savem=*save+".matrix";
+      string saveb=*save+".b";
+    {
+     ofstream outmtx( savem.c_str());
+     outmtx << A << endl;
+    }  
+    {
+     ofstream outb(saveb.c_str());
+     outb<< *B << endl;
+    }  
+     
+  }
   if (verbosity>99)
    {
     cout << " X= " << *X << endl;
@@ -1733,6 +1763,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
       cout  << "          min " << (u_h[i])->x()->min() << "  max " << (u_h[i])->x()->max() << endl ;
     }
     delete [] LL;
+    if (save) delete save; // clean memorie
     *mps=mp;
     return SetAny<const Problem *>(this);
 }
@@ -1824,9 +1855,9 @@ bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,in
  
 
 
-bool FieldOfForm(const list<C_F0> & largs ,bool complextype)  // true => complex problem 
+bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex problem 
 {
-  list<C_F0>::const_iterator ii,ib=largs.begin(),
+  list<C_F0>::iterator ii,ib=largs.begin(),
     ie=largs.end();
  // bool complextype =false;   
   for (ii=ib;ii != ie;ii++)
@@ -1858,26 +1889,27 @@ bool FieldOfForm(const list<C_F0> & largs ,bool complextype)  // true => complex
       aType r = ii->left();
       if (r==atype<const  FormBilinear *>()) 
         {
-          const FormBilinear * bb=dynamic_cast<const FormBilinear *>(e);
+          FormBilinear * bb=new FormBilinear(*dynamic_cast<const FormBilinear *>(e));
           Foperator * b=const_cast<  Foperator *>(bb->b);
          // const Foperator * b=bb->b;
+          //cout << b <<  " bb->b " <<  bb->b << " " <<  bb->b <<  " " << bb->b->isoptimize <<endl;                 
           assert(b->isoptimize==false);
           if (complextype)  b->mapping(&CCastToC);
           else b->mapping(&CCastToR) ;  
           Foperator * bn = b->Optimize(currentblock);  
           *bb->b = *bn;
-         // cout <<  " bb->b " <<  bb->b << " " <<  bb->b <<  " " << bb->b->isoptimize <<endl;  endl;                
-                      
+           *ii=C_F0(bb,r);           
         }
       else if (r==atype<const  FormLinear *>())
         {
-          const  FormLinear * ll=dynamic_cast<const  FormLinear *>(e);
+            FormLinear * ll=new FormLinear(*dynamic_cast<const  FormLinear *>(e));
           Ftest * l= const_cast<Ftest *>(ll->l);
           if (complextype)  l->mapping(&CCastToC) ;
           else l->mapping(&CCastToR) ; 
           Ftest * ln = l->Optimize(currentblock);  
           *ll->l=*ln; 
-         // cout <<  " ll->l " <<  ll->l << " " << ll->l->isoptimize <<endl;                
+           *ii=C_F0(ll,r);    
+          //cout << l <<   " ll->l " <<  ll->l << " " << ll->l->isoptimize <<endl;                
         }
     } 
   return complextype;
@@ -1885,7 +1917,7 @@ bool FieldOfForm(const list<C_F0> & largs ,bool complextype)  // true => complex
 
 
 Problem::Problem(const C_args * ca,const ListOfId &l,size_t & top) :
-  op(ca),var(l.size()),offset(align8(top)),VF(false) 
+  op(new C_args(*ca)),var(l.size()),offset(align8(top)),VF(false) 
 {
   SHOWVERB(cout << "Problem : -----------------------------" << top << endl);
   top = offset + sizeof(Data);
