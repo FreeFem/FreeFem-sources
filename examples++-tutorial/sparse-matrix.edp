@@ -28,46 +28,53 @@ matrix MLtB=ML'*B'; //
 
 cout << "BML="<<BML << endl;
 cout << "MLtB=" << MLtB << endl;
-set(A,solver=UMFPACK); // set a solver 
-VH uH=0;
-Vh uh=x+y;
-uH[]= B*uh[];
-plot(uH,wait=1);
-matrix BtA = BB'*A;
-matrix BtAB = BtA*BB;
-set(BtAB,solver=UMFPACK);  
 
-
-
-Vh ff=1;
-Vh xx;
-cout << " ------ " << endl;
-
-xx[]=BtAB^-1*ff[];
-cout << " ------ " << endl;
-xx[]=BtAB^-1*ff[];
-cout << " ------ " << endl;
-plot(xx, wait=1);
+// WARNING if UMFPACK is not install
+// the UMFPACK solver is replace by LU 
+//  but LU need skyline matrix 
+if(HaveUMFPACK)
+  set(A,solver=UMFPACK); // set a solver 
+else 
+  set(A,solver=GMRES); // set a solver 
+  VH uH=0;
+  Vh uh=x+y;
+  uH[]= B*uh[];
+  plot(uH,wait=1);
+  matrix BtA = BB'*A;
+  matrix BtAB = BtA*BB;
+if(HaveUMFPACK)  
+  set(BtAB,solver=UMFPACK);  
+else 
+  set(BtAB,solver=GMRES);  
+  Vh ff=1;
+  Vh xx;
+  cout << " ------ " << endl;
+  
+  xx[]=BtAB^-1*ff[];
+  cout << " ------ " << endl;
+  xx[]=BtAB^-1*ff[];
+  cout << " ------ " << endl;
+  plot(xx, wait=1);
 
 {
-int N=10;
-real [int,int] A(N,N);
-real [int] a(N),b(N);
+  int N=10;
+  real [int,int] A(N,N);
+  real [int] a(N),b(N);
   A =0;
   for (int i=0;i<N;i++)
-   {
-   A(i,i)=1+i;
-   if(i+1 < N)    A(i,i+1)=-i;
-   a[i]=i;
-   }
+    {
+      A(i,i)=1+i;
+      if(i+1 < N)    A(i,i+1)=-i;
+      a[i]=i;
+    }
   b=A*b;
-cout << "xxxx\n"; 
-matrix sparseA=A;
-cout << sparseA << endl;
-sparseA = 2*sparseA+sparseA;
-sparseA = 4*sparseA+sparseA*5; //  * 27
-matrix sparseB=sparseA+sparseA+sparseA; ;
-cout << sparseA << endl;
-cout << sparseB << endl; // *81 
-cout << "sparseB = " << sparseB(0,0) << endl;
+  cout << "xxxx\n"; 
+  matrix sparseA=A;
+  cout << sparseA << endl;
+  sparseA = 2*sparseA+sparseA;
+  sparseA = 4*sparseA+sparseA*5; //  * 27
+  matrix sparseB=sparseA+sparseA+sparseA; ;
+  cout << sparseA << endl;
+  cout << sparseB << endl; // *81 
+  cout << "sparseB = " << sparseB(0,0) << endl;
 }
