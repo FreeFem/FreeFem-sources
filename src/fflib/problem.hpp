@@ -930,7 +930,7 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
   long NbSpace = 50; 
   long itermax=0; 
   double eps=1e-6;
-  R tgv = 1e30;
+  double tgv = 1e30;
   int umfpackstrategy=0;
   TypeSolveMat typemat(  & Uh == & Vh  ? TypeSolveMat::GMRES :TypeSolveMat::NONESQUARE);
   bool initmat=true;
@@ -968,7 +968,7 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
       else 
         A.A.master( new  MatriceMorse<R>(Vh,Uh,VF) ); // lines corresponding to test functions 
     }
-  *A.A=0; // reset value of the matrix
+  *A.A=R(); // reset value of the matrix
   if ( AssembleVarForm<R>( stack,Th,Uh,Vh,typemat.sym,A.A,0,b->largs) )
     AssembleBC<R>( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
   if( factorize ) {
@@ -1015,13 +1015,13 @@ class MatrixInterpolation : public OneOperator { public:
      }
 };
 
-template<class R>
-class SetMatrix : public OneOperator { public:  
 
-    class Op : public E_F0mps { public:
-      
+
+template<class R>
+   class SetMatrix_Op : public E_F0mps { public:
        Expression a; 
        
+       static  aType btype;
        static const int n_name_param =9;
        static basicAC_F0::name_and_type name_param[] ;
        Expression nargs[n_name_param];
@@ -1030,30 +1030,39 @@ class SetMatrix : public OneOperator { public:
        long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 
        public:
-       Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
+       SetMatrix_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
          args.SetNameParam(n_name_param,name_param,nargs);
          precon = 0; //  a changer 
          if ( nargs[3])
           {
            const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[3]);
            assert(op);
-           precon = op->Find("(",ArrayOfaType(atype<KN<double>* >(),false));
+           precon = op->Find("(",ArrayOfaType(atype<KN<R>* >(),false)); // strange bug in g++ is R become a double
           }
          
        } 
        AnyType operator()(Stack stack)  const ;
     };
 
-   SetMatrix() : OneOperator(atype<const typename SetMatrix<R>::Op *>(),atype<Matrice_Creuse<R> *>() ) {}
+
+template<class R>
+class SetMatrix : public OneOperator { public:  
+
+ 
+  // SetMatrix() : OneOperator(atype<const typename SetMatrix<R>::Op *>(),atype<Matrice_Creuse<R> *>() ) {}
+   SetMatrix() : OneOperator(SetMatrix_Op<R>::btype,atype<Matrice_Creuse<R> *>() ) {}
   
     E_F0 * code(const basicAC_F0 & args) const 
      { 
-       return  new Op(args,t[0]->CastTo(args[0])); 
+       return  new SetMatrix_Op<R>(args,t[0]->CastTo(args[0])); 
      }
 };
 
+template<class R>
+       aType  SetMatrix_Op<R>::btype=0;
+
 template <class R> 
-basicAC_F0::name_and_type  SetMatrix<R>::Op::name_param[]= {
+basicAC_F0::name_and_type  SetMatrix_Op<R>::name_param[]= {
      "init", &typeid(bool),
      "solver", &typeid(TypeSolveMat*),
      "eps", &typeid(double)  ,
@@ -1066,7 +1075,7 @@ basicAC_F0::name_and_type  SetMatrix<R>::Op::name_param[]= {
 };
 
 template<class R>
-AnyType SetMatrix<R>::Op::operator()(Stack stack)  const 
+AnyType SetMatrix_Op<R>::operator()(Stack stack)  const 
 {
    Matrice_Creuse<R> *  A= GetAny<Matrice_Creuse<R> *>((*a)(stack));
    assert(A && A->A);
@@ -1076,7 +1085,7 @@ AnyType SetMatrix<R>::Op::operator()(Stack stack)  const
 //  bool VF=false;
 //  VF=isVF(op->largs);
  // assert(!VF); 
-  R tgv = 1e30;
+  double tgv = 1e30;
   bool VF=false;
   bool factorize=false;
 // type de matrice par default
@@ -1124,13 +1133,17 @@ AnyType SetMatrix<R>::Op::operator()(Stack stack)  const
    
 }
 
-AnyType SetMatrixInterpolation(Stack,Expression ,Expression);
-AnyType ProdMat(Stack,Expression ,Expression);
-AnyType DiagMat(Stack,Expression ,Expression);
-AnyType CopyTrans(Stack stack,Expression emat,Expression eA);
-AnyType CopyMat(Stack stack,Expression emat,Expression eA);
-AnyType CombMat(Stack stack,Expression emat,Expression combMat);
-AnyType MatFull2Sparce(Stack stack,Expression emat,Expression eA);
 
+AnyType SetMatrixInterpolation(Stack,Expression ,Expression);
+
+/*
+template<class R>
+AnyType ProdMat(Stack,Expression ,Expression);
+template<class R> AnyType DiagMat(Stack,Expression ,Expression);
+template<class R> AnyType CopyTrans(Stack stack,Expression emat,Expression eA);
+template<class R> AnyType CopyMat(Stack stack,Expression emat,Expression eA);
+template<class R> AnyType CombMat(Stack stack,Expression emat,Expression combMat);
+template<class R> AnyType MatFull2Sparce(Stack stack,Expression emat,Expression eA);
+*/
 
 #endif

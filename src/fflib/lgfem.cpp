@@ -1630,14 +1630,6 @@ long pmesh_nt(pmesh * p)
 long pmesh_nv(pmesh * p)
  { throwassert(p && *p) ;  return (**p).nv ;}
 
-template<class R>
-long get_mat_n(Matrice_Creuse<R> * p)
- { throwassert(p ) ;  return p->A ?p->A->n: 0  ;}
-
-template<class R>
-long get_mat_m(Matrice_Creuse<R> * p)
- { throwassert(p ) ;  return p->A ?p->A->m: 0  ;}
- 
 
 
 class Op_CopyArray : public OneOperator { public:
@@ -2990,11 +2982,7 @@ struct Op2_mulvirtAv: public binary_function<AA,BB,RR> {
   { return RR( (*a).A, *b );} 
 };
 
-template<class RR,class AA=RR,class BB=AA> 
-struct Op2_pair: public binary_function<AA,BB,RR> { 
-  static RR f(const AA & a,const BB & b)  
-  { return RR( a, b);} 
-};
+
 
 // Debut FH Houston -------- avril 2004 ---------
 //  class for operator on sparce matrix 
@@ -3006,7 +2994,7 @@ struct Op2_pair: public binary_function<AA,BB,RR> {
 //  list<pair<R,MatriceCreuse<R> *> > * is liste of 
 //  \sum_i a_i*A_i  where a_i is a scalare and A_i is a Sparce matrix
 //
-
+/*
 template<class R> 
 list<pair<R,MatriceCreuse<R> *> > * to(Matrice_Creuse<R> * M)
 {
@@ -3125,7 +3113,7 @@ struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
     
     
 };
-
+*/
 // Fin Add FH Houston --------
 
 template<class K>
@@ -3258,17 +3246,6 @@ long getlab(lgVertex const & a)
 {
   return a.lab();
 }
-
-template<class R>  
-R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & c){ 
-   MatriceCreuse<R> * a= ac ? ac->A:0 ;
-  if(  !a || a->n <= b || c<0 || a->m <= c  ) 
-   { cerr << " Out of bound  0 <=" << b << " < "  << a->n << ",  0 <= " << c << " < "  << a->m
-           << " array type = " << typeid(ac).name() << endl;
-     cerr << ac << " " << a << endl;
-     ExecError("Out of bound in operator Matrice_Creuse<R> (,)");}
-    return  &((*a)(b,c));}
- 
 /*
 pmesh* get_element(pmesharray *const & a, long const & n)
 {
@@ -3310,6 +3287,7 @@ void init_mesh_array()
 template <class R>
 void DclTypeMatrix()
 {
+ 
  Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >);
   Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')                             
   Dcl_Type<Matrice_Creuse_inv<R> >();      // matrice^-1   A^{-1}                          
@@ -3317,10 +3295,62 @@ void DclTypeMatrix()
   Dcl_Type<typename VirtualMatrice<R>::plusAtx >();       // A^t*x (A'*x)
   Dcl_Type<typename VirtualMatrice<R>::solveAxeqb >();       // A^t*x (A'*x)
   Dcl_Type<const typename MatrixInterpolation::Op *>(); 
-  Dcl_Type<const typename SetMatrix<R>::Op * >();
+  SetMatrix_Op<R>::btype = Dcl_Type<const  SetMatrix_Op<R> * >();
   Dcl_Type<Matrix_Prod<R> >();
   Dcl_Type<list<pair<R,MatriceCreuse<R> *> >*>();
 }
+
+/*
+template <class R>
+void AddSparceMat()
+{
+
+// matrix new code   FH (Houston 2004)        
+ TheOperators->Add("=",
+//       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R>,E_F_StackF0F0>(ProdMat),
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat),       
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans), 
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparce) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<pair<R,MatriceCreuse<R> *> > *,E_F_StackF0F0>(CombMat) 
+       );
+       
+ TheOperators->Add("<-",
+//       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R>,E_F_StackF0F0>(ProdMat),
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat)  ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans), 
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparce) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<pair<R,MatriceCreuse<R> *> > *,E_F_StackF0F0>(CombMat) 
+       
+       );
+TheOperators->Add("*", 
+        new OneBinaryOperator<Op2_pair<Matrix_Prod<R>,Matrice_Creuse<R>*,Matrice_Creuse<R>*> >,
+        new OneBinaryOperator<Op2_pair<Matrix_Prod<R>,Matrice_Creuse_Transpose<R>,Matrice_Creuse<R>* > >, 
+        new OneBinaryOperator<Op2_pair<Matrix_Prod<R>,Matrice_Creuse_Transpose<R>,Matrice_Creuse_Transpose<R> > >,
+        new OneBinaryOperator<Op2_pair<Matrix_Prod<R>,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R> > > ,
+        new OneBinaryOperator<Op2_ListCM<R> >  , 
+        new OneBinaryOperator<Op2_ListMC<R> >   
+        );
+TheOperators->Add("+", 
+        new OneBinaryOperator<Op2_ListCMCMadd<R> >,
+        new OneBinaryOperator<Op2_ListCMMadd<R> >,
+        new OneBinaryOperator<Op2_ListMCMadd<R> >,
+         new OneBinaryOperator<Op2_ListMMadd<R> >
+       
+       ); 
+      
+ Add<Matrice_Creuse<R> *>("n",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_n<R>) );
+ Add<Matrice_Creuse<R> *>("m",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_m<R>) );
+ Global.Add("set","(",new SetMatrix<R>);
+ atype<Matrice_Creuse<R> * >()->Add("(","",new OneOperator3_<R*,Matrice_Creuse<R> *,long,long >(get_elementp2mc<R>));
+
+      
+//  --- end  
+}
+*/
 void  init_lgfem() 
 {
   cout <<"lg_fem ";
@@ -3469,7 +3499,6 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 /*TheOperators->Add("<-",);
 
  );*/
- Add<const MatrixInterpolation::Op *>("<-","(", new MatrixInterpolation);
  
 //old --   
 //  init FESpace 
@@ -3506,6 +3535,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  zzzfff->Add("vertex",atype<lgVertex>());
 // zzzfff->Add("fespace",atype<pfes*>());
  zzzfff->Add("matrix",atype<Matrice_Creuse<R> *>());
+ zzzfff->Add("Cmatrix",atype<Matrice_Creuse<Complex> *>()); // a voir
 
  
  Global.Add("buildmesh","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMesh));
@@ -3644,50 +3674,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OpArraytoLinearForm<double >  ,
        new OpMatrixtoBilinearForm<double >);
 
-// matrix new code   FH (Houston 2004)        
- TheOperators->Add("=",
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R>,E_F_StackF0F0>(ProdMat),
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat),       
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans), 
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparce) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<pair<R,MatriceCreuse<R> *> > *,E_F_StackF0F0>(CombMat) 
-       );
-       
- TheOperators->Add("<-",
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R>,E_F_StackF0F0>(ProdMat),
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat)  ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans), 
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparce) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<pair<R,MatriceCreuse<R> *> > *,E_F_StackF0F0>(CombMat) 
-       
-       );
-TheOperators->Add("*", 
-        new OneBinaryOperator<Op2_pair<Matrix_Prod<R>,Matrice_Creuse<R>*,Matrice_Creuse<R>*> >,
-        new OneBinaryOperator<Op2_pair<Matrix_Prod<R>,Matrice_Creuse_Transpose<R>,Matrice_Creuse<R>* > >, 
-        new OneBinaryOperator<Op2_pair<Matrix_Prod<R>,Matrice_Creuse_Transpose<R>,Matrice_Creuse_Transpose<R> > >,
-        new OneBinaryOperator<Op2_pair<Matrix_Prod<R>,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R> > > ,
-        new OneBinaryOperator<Op2_ListCM<R> >  , 
-        new OneBinaryOperator<Op2_ListMC<R> >   
-        );
-TheOperators->Add("+", 
-        new OneBinaryOperator<Op2_ListCMCMadd<R> >,
-        new OneBinaryOperator<Op2_ListCMMadd<R> >,
-        new OneBinaryOperator<Op2_ListMCMadd<R> >,
-         new OneBinaryOperator<Op2_ListMMadd<R> >
-       
-       ); 
-      
- Add<Matrice_Creuse<R> *>("n",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_n<R>) );
- Add<Matrice_Creuse<R> *>("m",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_m<R>) );
- Global.Add("set","(",new SetMatrix<R>);
- atype<Matrice_Creuse<R> * >()->Add("(","",new OneOperator3_<R*,Matrice_Creuse<R> *,long,long >(get_elementp2mc<R>));
-
-      
-//  --- end       
+     
  TheOperators->Add("+=",
        new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAx > > ,       
        new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAtx > >        
@@ -3696,6 +3683,7 @@ TheOperators->Add("+",
 
        
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<double > );
+ TheOperators->Add("<-",new OpMatrixtoBilinearForm<Complex > );
        
  Add<const  FormLinear   *>("(","",new OpCall_FormLinear<FormLinear> );
  Add<const  FormBilinear *>("(","",new OpCall_FormBilinear<FormBilinear> );
@@ -3762,12 +3750,14 @@ TheOperators->Add("+",
  Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdges>);
  Global.Add("jump","(",new OneUnaryOperator<JumpOp<R>,JumpOp<R> >);
  Global.Add("mean","(",new OneUnaryOperator<MeanOp<R>,MeanOp<R> >);
- Global.Add("interplotematrix","(",new MatrixInterpolation);
+
   
  Add<const CDomainOfIntegration*>("(","",new OneOperatorCode<FormBilinear> );
  Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<FormLinear> );
  
  Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<IntFunction>);
+ 
+
 
  map_type[typeid(double).name()]->AddCast(
    new E_F1_funcT<double,pfer>(pfer2R<R,0>)
@@ -3804,6 +3794,7 @@ TheOperators->Add("+",
  Add<pfer>("(","",new interpolate_f_X_1<R> ); 
   TheOperators->Add("=", new OneOperator2_<void,interpolate_f_X_1<R>::type,double,E_F_StackF0F0 >(set_feoX_1) ) ; 
 // init_lgmesh() ;
+  init_lgmat();
   init_mesh_array();
 
  l2interpreter = new LinkToInterpreter;
