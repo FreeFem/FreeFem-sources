@@ -1,6 +1,7 @@
 #ifndef MY_LEX_HPP_
 #define MY_LEX_HPP_
 extern bool lexdebug;
+extern long mpisize,mpirank;
 
 class mylex  { 
   public:
@@ -23,6 +24,8 @@ class mylex  {
   bool withmacropara;
   char buf[1024];
   int typetoken;
+  bool echo;
+
   struct xxxx { 
    istream * f;
    istream * nf;
@@ -49,6 +52,7 @@ class mylex  {
     charnumber(0),
     linenumber(1),
     cout(out),
+    echo(mpirank == 0),
     level(-1),
     withmacropara(false),
     listMacroDef(new list<MapMacroDef>),
@@ -56,7 +60,7 @@ class mylex  {
     listMacroDef->push_front(MapMacroDef());};
   string token() const;
   void print(ostream &f) const; 
-  int scan();
+  int scan(int lvl=0);
   int lineno(){return linenumber;}
   char * YYText() { return buf;}
  void dump(ostream & f ) ;    

@@ -69,7 +69,7 @@ void mylex::dump(ostream & f )
 int mylex::basescan()
 {
   extern long mpirank;
-  bool echo = mpirank == 0; 
+   
   int c,caux;
   int incomment =0;
   buf[0]=0;
@@ -284,11 +284,11 @@ int mylex::basescan()
   typetoken=ret; 
   return ret;
 }
-int mylex::scan()
+int mylex::scan(int lvl)
 {
 
   extern long mpirank;
-  bool echo = mpirank == 0; 
+ // bool echo = mpirank == 0; 
 
   int ret= basescan();
   if ( ret == ID)
@@ -313,7 +313,7 @@ int mylex::scan()
   else if (ret == '}') {//cout << " listMacroDef->pop_back"<< endl;
        listMacroDef->pop_back( );}
   
-  if (! lexdebug && echo ) print(cout);
+  if (! lexdebug && echo && lvl==0 ) print(cout);
   
   return ret;
 }
@@ -497,7 +497,7 @@ bool mylex::ExpandParam(int &ret)
             if(debugmacro)
             cout <<   " input in : -> " << macroparm[nbparam]  << " " << nbparam << endl;
             input(macroparm[nbparam], nbparam);
-            ret =  scan(); // Correction FH 6/06/2004 of string parameter
+            ret =  scan(1); // Correction FH 6/06/2004 of string parameter
             return true;        
           }
         }
