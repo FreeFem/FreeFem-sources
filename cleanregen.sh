@@ -12,3 +12,5 @@ rm config.h.in
 rm src/ide/hl_lex.c++
 rm src/ide/hl_yacc.h
 rm src/ide/hl_yacc.c++
+rm HISTORY
+rm examples++/regtests.edp
