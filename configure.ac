@@ -298,8 +298,11 @@ then
 	# download the most generic one. A more specific version can
 	# always be downloaded by hand.
 
-	if test "$ff_win32" = yes -a "$enable_generic" = yes \
-	   -a "$ff_unzip" = yes
+	# BUG: at the moment, some necessary symbols are missing from
+	# the precompiled version (e.g. _dgemm_).
+
+###	if test "$ff_win32" = yes -a "$enable_generic" = yes -a "$ff_unzip" = yes
+	if false
 	   then
 		ff_download_blas=binary
 		ff_blas_dir=WinNT_PPRO256
