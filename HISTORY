@@ -623,3 +623,7 @@ __________
    create a error  when you do   uh = ..  when uh is a  componant of a vectorial fe 
      element function (for exemple fespace Vh(Th,TR), Vh [uh,vh]; uh = 1 (error here ;)
      because it's impossible to build   uh and vh independantly.
+
+17/02/2005
+   FreeFem++-cs: Communication speed between client and server has been
+   increased ten-fold (ALH)
