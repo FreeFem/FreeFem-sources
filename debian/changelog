@@ -1,3 +1,9 @@
+freefem++ (1.44-9) testing unstable; urgency=low
+
+  * Postscript files now work in FreeFem++-cs
+  * New package release number and optimization type in binary package names
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 15 Dec 2004 17:32:13 +0100
 freefem++ (1.44-8) testing unstable; urgency=low
 
   * FreeFem++-cs updated
