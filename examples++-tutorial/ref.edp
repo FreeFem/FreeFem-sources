@@ -1,6 +1,6 @@
-real REFadapt=0.121271;
-real REFadaptindicatorP1=0.117677;
-real REFadaptindicatorP2=0.117714;
+real REFadapt=0.238829;
+real REFadaptindicatorP1=0.239154;
+real REFadaptindicatorP2=0.239362;
 real REFalgo=0.283188;
 real REFalgowithmacro=0.283188;
 real REFaXtutorial=0.000305788;

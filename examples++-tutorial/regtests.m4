@@ -11,9 +11,9 @@ include(../regtests.m4)
 
 dnl (syntax of ONETEST macro defined in ../regtests.m4)
 
-ONETEST(adapt,u[].max,0.01)
-ONETEST(adaptindicatorP1,u[].max,0.01)
-ONETEST(adaptindicatorP2,u[].max,0.01)
+ONETEST(adapt,u[].max-u[].min,0.01)
+ONETEST(adaptindicatorP1,u[].max-u[].min,0.01)
+ONETEST(adaptindicatorP2,u[].max-u[].min,0.01)
 ONETEST(algo,umax,0.01)
 ONETEST(algowithmacro,umax,0.01)
 ONETEST(array)
