@@ -1,13 +1,19 @@
 #!/bin/bash
 VERSION=`awk '/#define VersionFreeFempp/ {print $3}' config-version.h`
-list1="HISTORY DOC/manual.pdf DOC/manual.ps.gz"
-
 listf=(freefem++-${VERSION}.tar.gz FreeFem++v${VERSION}_MacOsX.tgz FreeFem++v${VERSION}_Win.zip  FreeFem++v${VERSION}_MacOS.sit)
 listcd=(freefem++.tar.gz           "freefem++_macosx.tgz"          freefem++.zip                 freefem++.sit)
 
 www=hecht@rascasse.inria.fr:www_gamma/Gamma/cdrom/ftp/freefem/
 ftp=hecht@rascasse.inria.fr:/ftp_gamma/freefem/
 ftpk=hecht@baobab.ann.jussieu.fr:public_html/ftp/freefem/
+
+if [ -f Output/FreeFem++-$VERSION.exe ]; then
+  scp Output/FreeFem++-${VERSION}.exe  $ftpk
+  scp Output/FreeFem++-${VERSION}.exe  $ftp
+  scp Output/FreeFem++-${VERSION}.exe  $www/freefem.exe
+else
+list1="HISTORY DOC/manual.pdf DOC/manual.ps.gz"
+
 
 
 if [ -f $listf ]; then
@@ -29,6 +35,7 @@ if [ -f $f ]; then
 
 fi
 done;
+fi
 echo ssh  hecht@baobab.ann.jussieu.fr "cd www/.; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
 ssh  hecht@baobab.ann.jussieu.fr "cd www/.; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
 # ssh rascasse.inria.fr "cd ~/public_html/; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
