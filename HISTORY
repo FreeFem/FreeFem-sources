@@ -609,8 +609,12 @@ __________
    correct  FreeFem++.app problem when usind in a shell script FreeFem++-CoCoa
    correct web site and distrib file  freefem++-1.45-2.tar.gz
 
-02/01/2005
+02/02/2005
    correct problem with socket in FLTK in freefem++-cs  (not wet finish) ALH
    add nbvx=  named parameter to change the default maximum number vertices in creted mesh
    in builmesh (see mesh.edp exemple)  
    
+10/02/2005
+   add 2 new quadrature formular qf7pT and qf9pT with respectively 15 and 21 points
+   add  P2b a new finite element  : P2 + bubble 
+   make drag and drop on ide version + copy paste 
