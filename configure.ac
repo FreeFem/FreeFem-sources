@@ -598,10 +598,16 @@ AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 # ----------------------
 
 AC_CHECK_PROG(ff_fltkconfig,fltk-config,yes,no)
-if test "$ff_fltkconfig" = yes
+if test "$ff_fltkconfig" = no
 then
-	ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-cs-server${EXEEXT} FreeFem++-ide${EXEEXT}"
+	AC_SUBST(DOWNLOAD_FLTK,fltk)
+	ff_fltkconfig=yes
 fi
+
+# For the moment, FreeFem++-ide${EXEEXT} is not built because it first
+# needs FreeFEM++ to accept several successive runs without restart.
+
+ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-cs-server${EXEEXT}"
 
 # creating all makefiles
 # ----------------------
