@@ -22,7 +22,7 @@ function dotest(){
 }
 
 # For the example++-load tests
-export LD_LIBRARY_PATH=.
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:."
 
 # In visual checks, we can run even the most invasive programs
 script=$REGEDP
