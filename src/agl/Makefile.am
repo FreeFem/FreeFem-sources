@@ -7,7 +7,7 @@ EXTRA_PROGRAMS=FreeFem++-agl
 
 FreeFem___agl_SOURCES=../Graphics/glrgraph.hpp ../Graphics/macglrgraf.cpp
 FreeFem___agl_DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
-LDADD=../lglib/liblg.a ../fflib/libff.a @UMFPACKLIB@ @ARPACKLIB@ -ldl
+LDADD=../lglib/liblg.a ../fflib/libff.a @UMFPACKLIB@ @ARPACKLIB@ @BLASLIB@
 INCLUDES=-I../fflib -I../Graphics -I../femlib
 
 # Automake does not want to see "-framework" in LDADD
