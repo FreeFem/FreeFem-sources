@@ -3,6 +3,8 @@
 extern bool lexdebug;
 extern long mpisize,mpirank;
 
+//#include  <iomanip>
+
 class mylex  { 
   public:
   typedef const char * Key;
@@ -18,8 +20,8 @@ class mylex  {
 //  typedef   MapMotType::const_iterator const_iterType;
   public: 
   int linenumber,charnumber;
-
   private:
+  bool firsttime;
   int level;
   int withmacropara;
   int beginStackParamExpand; // debut de la pile de paramtere a expandre (use in ExpandParam)
@@ -54,12 +56,15 @@ class mylex  {
     linenumber(1),
     cout(out),
     echo(mpirank == 0),
+    firsttime(true),
     level(-1),
     withmacropara(0),
     beginStackParamExpand(0),
     listMacroDef(new list<MapMacroDef>),
     listMacroParam(0) {
-    listMacroDef->push_front(MapMacroDef());};
+    listMacroDef->push_front(MapMacroDef());
+//    cout << setw(5) <<linenumber << " : ";
+   };
   string token() const;
   void print(ostream &f) const; 
   int scan(int lvl=0);
