@@ -92,7 +92,10 @@ namespace  Fem2D {
  }
  
 }
-// link with FreeFem++ 
+// link with FreeFem++  do not work with static library .a 
+//  FH so add a extern name to call it version   aout 2004
+void init_FE_P2h() { };
+
 extern  ListOfTFE typefem_P2h;
 
 static TypeOfFE_P2hLagrange P2LagrangeP2h;
