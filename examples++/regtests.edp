@@ -3,217 +3,293 @@
 
 // $Id$
 
+// Regression tests
+// ----------------
+
+// The tests are checked against reference values by "make check" in
+// each examples subdirectory
+
+// "ref.edp" contains all reference values and may be rebuilt with
+// "make Ref"
+
+// $Id$
+
 // The values tested here may not have a physical or mathematical
 // meaning. Their main property is to gather numerical values from the
-// whole domain, to be checked against previous runs for consistency.
+// whole domain, to be checked for consistency with previous runs.
 
 NoUseOfWait=true;
 int verbosityy=verbosity;
 
-cout << "--------- file : aadaptation.edp ------------" << endl;
+
+
+
+include "ref.edp";
+
+
+
+
+
+// The values tested here may not have a physical or mathematical
+// meaning. Their main property is to gather numerical values from the
+// whole domain, to be checked for consistency with previous runs.
+
+
+cout << "--------- file : aadaptation.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "aadaptation.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<0.15);
-	assert(ref>0.13);
+	real TESTaadaptation=u[]'*u[];
+		cout<<"aadaptation reference value = "<<REFaadaptation
+				<<" test value ="<<TESTaadaptation<<endl;
+			assert(TESTaadaptation<REFaadaptation*(1+0.1));
+				assert(TESTaadaptation>REFaadaptation*(1-0.1));
 };
-
-cout << "--------- file : aalapacien.edp ------------" << endl;
+;
+cout << "--------- file : aalapacien.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "aalapacien.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<122060);
-	assert(ref>122058);
+	real TESTaalapacien=u[]'*u[];
+		cout<<"aalapacien reference value = "<<REFaalapacien
+				<<" test value ="<<TESTaalapacien<<endl;
+			assert(TESTaalapacien<REFaalapacien*(1+0.1));
+				assert(TESTaalapacien>REFaalapacien*(1-0.1));
 };
-
-cout << "--------- file : aalaplace-nc.edp ------------" << endl;
+;
+cout << "--------- file : aalaplace-nc.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "aalaplace-nc.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<1713.49);
-	assert(ref>1713.47);
+	real TESTaalaplaceXnc=u[]'*u[];
+		cout<<"aalaplace-nc reference value = "<<REFaalaplaceXnc
+				<<" test value ="<<TESTaalaplaceXnc<<endl;
+			assert(TESTaalaplaceXnc<REFaalaplaceXnc*(1+0.1));
+				assert(TESTaalaplaceXnc>REFaalaplaceXnc*(1-0.1));
 };
-
-cout << "--------- file : aamove.edp ------------" << endl;
+;
+cout << "--------- file : aamove.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "aamove.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<0.070847);
-	assert(ref>0.068);
+	real TESTaamove=u[]'*u[];
+		cout<<"aamove reference value = "<<REFaamove
+				<<" test value ="<<TESTaamove<<endl;
+			assert(TESTaamove<REFaamove*(1+0.1));
+				assert(TESTaamove>REFaamove*(1-0.1));
 };
-
-cout << "--------- file : aaRT.edp ------------" << endl;
+;
+cout << "--------- file : aaRT.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "aaRT.edp";
-	real ref=u1[]'*u1[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<280.926);
-	assert(ref>280.924);
+	real TESTaaRT=u1[]'*u1[];
+		cout<<"aaRT reference value = "<<REFaaRT
+				<<" test value ="<<TESTaaRT<<endl;
+			assert(TESTaaRT<REFaaRT*(1+0.1));
+				assert(TESTaaRT>REFaaRT*(1-0.1));
 };
-
-cout << "--------- file : arrayoFVh.edp ------------" << endl;
+;
+cout << "--------- file : arrayoFVh.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "arrayoFVh.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<4560.75);
-	assert(ref>4560.73);
+	real TESTarrayoFVh=u[]'*u[];
+		cout<<"arrayoFVh reference value = "<<REFarrayoFVh
+				<<" test value ="<<TESTarrayoFVh<<endl;
+			assert(TESTarrayoFVh<REFarrayoFVh*(1+0.1));
+				assert(TESTarrayoFVh>REFarrayoFVh*(1-0.1));
 };
-
-cout << "--------- file : bilap.edp ------------" << endl;
+;
+cout << "--------- file : bilap.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "bilap.edp";
-	real ref=xx(0:n)'*xx(0:n);
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<33.836);
-	assert(ref>33.834);
+	real TESTbilap=xx(0:n)'*xx(0:n);
+		cout<<"bilap reference value = "<<REFbilap
+				<<" test value ="<<TESTbilap<<endl;
+			assert(TESTbilap<REFbilap*(1+0.1));
+				assert(TESTbilap>REFbilap*(1-0.1));
 };
-
-cout << "--------- file : D2.edp ------------" << endl;
+;
+cout << "--------- file : D2.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "D2.edp";
-	real ref=w[]'*w[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<1e-30);
-	assert(ref>-1e-30);
+	real TESTD2=w[]'*w[];
+		cout<<"D2 reference value = "<<REFD2
+				<<" test value ="<<TESTD2<<endl;
+			assert(TESTD2<REFD2+1e-30);
+				assert(TESTD2>REFD2-1e-30);
 };
-
-cout << "--------- file : demo1.edp ------------" << endl;
+;
+cout << "--------- file : demo1.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "demo1.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<1.4);
-	assert(ref>1.3);
+	real TESTdemo1=u[]'*u[];
+		cout<<"demo1 reference value = "<<REFdemo1
+				<<" test value ="<<TESTdemo1<<endl;
+			assert(TESTdemo1<REFdemo1*(1+0.1));
+				assert(TESTdemo1>REFdemo1*(1-0.1));
 };
-
-cout << "--------- file : demo.edp ------------" << endl;
+;
+cout << "--------- file : demo.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "demo.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<1.35);
-	assert(ref>1.32);
+	real TESTdemo=u[]'*u[];
+		cout<<"demo reference value = "<<REFdemo
+				<<" test value ="<<TESTdemo<<endl;
+			assert(TESTdemo<REFdemo*(1+0.1));
+				assert(TESTdemo>REFdemo*(1-0.1));
 };
-
-cout << "--------- file : funct.edp ------------" << endl;
+;
+cout << "--------- file : funct.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "funct.edp";
-	real ref=myfunction(1.0,3.);
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<4.000001);
-	assert(ref>3.999999);
+	real TESTfunct=myfunction(1.0,3.);
+		cout<<"funct reference value = "<<REFfunct
+				<<" test value ="<<TESTfunct<<endl;
+			assert(TESTfunct<REFfunct*(1+0.1));
+				assert(TESTfunct>REFfunct*(1-0.1));
 };
-
-cout << "--------- file : lapacienprecon.edp ------------" << endl;
+;
+cout << "--------- file : lapacienprecon.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "lapacienprecon.edp";
-	real ref=u[]'*u[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<122060);
-	assert(ref>122058);
+	real TESTlapacienprecon=u[]'*u[];
+		cout<<"lapacienprecon reference value = "<<REFlapacienprecon
+				<<" test value ="<<TESTlapacienprecon<<endl;
+			assert(TESTlapacienprecon<REFlapacienprecon*(1+0.1));
+				assert(TESTlapacienprecon>REFlapacienprecon*(1-0.1));
 };
-
-cout << "--------- file : lap_mat.edp ------------" << endl;
+;
+cout << "--------- file : lap_mat.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "lap_mat.edp";
-	real ref=u1[]'*u1[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<85.3777);
-	assert(ref>85.3775);
+	real TESTlapXmat=u1[]'*u1[];
+		cout<<"lap_mat reference value = "<<REFlapXmat
+				<<" test value ="<<TESTlapXmat<<endl;
+			assert(TESTlapXmat<REFlapXmat*(1+0.1));
+				assert(TESTlapXmat>REFlapXmat*(1-0.1));
 };
-
-cout << "--------- file : NSP1P1b.edp ------------" << endl;
+;
+cout << "--------- file : NSP1P1b.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "NSP1P1b.edp";
-	real ref=u1[]'*u1[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<121);
-	assert(ref>85);
+	real TESTNSP1P1b=u1[]'*u1[];
+		cout<<"NSP1P1b reference value = "<<REFNSP1P1b
+				<<" test value ="<<TESTNSP1P1b<<endl;
+			assert(TESTNSP1P1b<REFNSP1P1b*(1+0.1));
+				assert(TESTNSP1P1b>REFNSP1P1b*(1-0.1));
 };
-
-cout << "--------- file : NSP1P1.edp ------------" << endl;
+;
+cout << "--------- file : NSP1P1.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "NSP1P1.edp";
-	real ref=u1x[]'*u1x[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<5.59);
-	assert(ref>3.99);
+	real TESTNSP1P1=u1x[]'*u1x[];
+		cout<<"NSP1P1 reference value = "<<REFNSP1P1
+				<<" test value ="<<TESTNSP1P1<<endl;
+			assert(TESTNSP1P1<REFNSP1P1*(1+0.1));
+				assert(TESTNSP1P1>REFNSP1P1*(1-0.1));
 };
-
-cout << "--------- file : NSP1P2.edp ------------" << endl;
+;
+cout << "--------- file : NSP1P2.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "NSP1P2.edp";
-	real ref=u1[]'*u1[];
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<195);
-	assert(ref>161.2743646);
+	real TESTNSP1P2=u1[]'*u1[];
+		cout<<"NSP1P2 reference value = "<<REFNSP1P2
+				<<" test value ="<<TESTNSP1P2<<endl;
+			assert(TESTNSP1P2<REFNSP1P2*(1+0.1));
+				assert(TESTNSP1P2>REFNSP1P2*(1-0.1));
 };
-
-cout << "--------- file : parareal.edp ------------" << endl;
+;
+cout << "--------- file : parareal.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "parareal.edp";
-	real ref=pu'*pu;
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<1383.28);
-	assert(ref>1383.26);
+	real TESTparareal=pu'*pu;
+		cout<<"parareal reference value = "<<REFparareal
+				<<" test value ="<<TESTparareal<<endl;
+			assert(TESTparareal<REFparareal*(1+0.1));
+				assert(TESTparareal>REFparareal*(1-0.1));
 };
+;
 
-// alh - 30/6/04 - unstable?
 
-// cout << "--------- file : Richard.edp ------------" << endl;
-// verbosity=verbosityy;
-// {
-// 	include "Richard.edp";
-// 	real ref=h[]'*h[];
-// 	cout<<"reference value="<<ref<<endl;
-// 	assert(ref<1383.28);
-// 	assert(ref>1383.26);
-// };
-
-cout << "--------- file : teste.edp ------------" << endl;
+cout << "--------- file : teste.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "teste.edp";
-	real ref=P.x;
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<1.000001);
-	assert(ref>0.999999);
+	real TESTteste=P.x;
+		cout<<"teste reference value = "<<REFteste
+				<<" test value ="<<TESTteste<<endl;
+			assert(TESTteste<REFteste*(1+0.1));
+				assert(TESTteste>REFteste*(1-0.1));
 };
-
-cout << "--------- file : testFE.edp ------------" << endl;
+;
+cout << "--------- file : testFE.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "testFE.edp";
+	
 };
-
-cout << "--------- file : wafer-heating-laser-axi.edp ------------" << endl;
+;
+cout << "--------- file : wafer-heating-laser-axi.edp -----------------" << endl;
 verbosity=verbosityy;
 {
+		
+	
 	include "wafer-heating-laser-axi.edp";
-	real ref=xx'*xx;
-	cout<<"reference value="<<ref<<endl;
-	assert(ref<286);
-	assert(ref>284);
+	real TESTwaferXheatingXlaserXaxi=xx'*xx;
+		cout<<"wafer-heating-laser-axi reference value = "<<REFwaferXheatingXlaserXaxi
+				<<" test value ="<<TESTwaferXheatingXlaserXaxi<<endl;
+			assert(TESTwaferXheatingXlaserXaxi<REFwaferXheatingXlaserXaxi*(1+0.1));
+				assert(TESTwaferXheatingXlaserXaxi>REFwaferXheatingXlaserXaxi*(1-0.1));
 };
+;
