@@ -13,7 +13,7 @@ BLASLIB=ATLAS/lib/ff++/libatlas.a
 blas: $(BLASLIB)
 
 $(BLASLIB): atlas3.6.0.tar.bz2
-	tar xjf atlas3.6.0.tar.bz2
+	tar -x --bzip -f atlas3.6.0.tar.bz2
 	@echo In the following questions, \"Architecture name\" must be ff++
 	@echo "(Press ENTER)"
 	@read
