@@ -3896,6 +3896,9 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdges>);
  Global.Add("jump","(",new OneUnaryOperator<JumpOp<R>,JumpOp<R> >);
  Global.Add("mean","(",new OneUnaryOperator<MeanOp<R>,MeanOp<R> >);
+ 
+ Global.Add("jump","(",new OneUnaryOperator<JumpOp<R>,JumpOp<Complex> >);
+ Global.Add("mean","(",new OneUnaryOperator<MeanOp<R>,MeanOp<Complex> >);
 
   
  Add<const CDomainOfIntegration*>("(","",new OneOperatorCode<FormBilinear> );
