@@ -464,6 +464,6 @@ basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
 void init_eigenvalue()
 {
   cout << "eigenvalue ";
-   Global.Add("EigenValue","(",new EigenValue(1));  //  j + dJ
+   Global->Add("EigenValue","(",new EigenValue(1));  //  j + dJ
     
 }

@@ -2569,6 +2569,11 @@ int mymain (int  argc, char **argv)
 //  local=&xlocal;
   lexdebug = false;
   lgdebug = false;
+
+  // ALH - Manipulate static objects through pointers so that they
+  // can be deleted between runs (for FreeFEM++-ide).
+  Global=new TableOfIdentifier();
+
   cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
   char *  cc= new char [1024];
   istream * ccin=0;
