@@ -45,7 +45,9 @@ real [int] tab2=[1,2,3,3.14];
 int  [int] itab2=[1,2,3,5];
 cout << tab2 << endl;
 cout << itab2 << endl;
-
+tab2.resize(10);
+for (int i=4;i<10;i++) tab2[i]=i;
+cout << "tab2 = " << tab2 << endl;
 real [int,int] mat(10,10);
 mat=0;
 for(int i=0;i<mat.n;i++)
