@@ -74,4 +74,5 @@ for ( n=0; n*dt <= 1.0; n++)
 v = max(u-f,0.);
 plot(v,wait=1,value=1);
 plot(u,wait=1,value=1);
-
+real normvL2=sqrt(int2d(th)(v*v));
+cout << " ||v||_L2 = " << normvL2 << endl;
