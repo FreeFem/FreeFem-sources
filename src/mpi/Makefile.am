@@ -2,7 +2,7 @@
 # ----------------------------------
 # $Id$
 
-CXX=mpiCC
+CXX=mpiCC -CC=@CXX@
 
 # MPI may not be installed. Checked in configure.ac
 bin_PROGRAMS=$(MPIPROG)
