@@ -10,18 +10,21 @@
 /* out our consent : fax (33)1 44 27 44 11            */
 /* (fax)    Olivier.Pironneau@ann.jussieu.fr          */
 /******************************************************/
-#include "versionnumber.hpp"
+#include <config-wrapper.h>
+
 #define TOSTRING1(i) #i
 #define TOSTRING(i) TOSTRING1(i)
 
 #include <stdlib.h>
+///#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <setjmp.h>
 
-#include <new.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <new>
+#include <iostream>
+#include <fstream>
+using namespace std;
 //#include "vect.h"
 #include "error.hpp"
 //#include <memory.h>
@@ -31,13 +34,13 @@
 */
 #include <windows.h>
 #include <commdlg.h>
-#include <direct.h>
+///#include <direct.h>
 #include <time.h>
 
 #include <stdio.h>
 #include <fcntl.h>
 #include <io.h>      //*OT  use for the console window
-#include <stat.h>
+///#include <stat.h>
 
 #define fill thequikdrawfill
 
@@ -287,12 +290,12 @@ void cadreortho(float centrex, float centrey, float rayon)
 
 int scalx(float x)
 {
-  return (x - rxmin) * echx;
+  return static_cast<int>((x - rxmin) * echx);
 }
 
 int scaly(float y)
 {
-  return (rymax - y) * echy;
+  return static_cast<int>((rymax - y) * echy);
 }
 
 float scali(int i)
@@ -581,7 +584,7 @@ void initgraphique(void)
     hOldFont = (HFONT)::SelectObject(hdc,hFont);
     ::GetTextMetrics(hdc, &tm);
     ::DeleteObject(hOldFont);
-    fontH =  (tm.tmHeight + tm.tmExternalLeading)*0.6;
+    fontH =  static_cast<int>((tm.tmHeight + tm.tmExternalLeading)*0.6);
   // end of font style
   INITGRAPH = 1;
   // cout << flush << "end  inigraphique " << endl;
@@ -614,7 +617,7 @@ void openPS(const char *filename )
   time(&t_loc);
   printf(" Save Postscript in file '%s'\n",filename?filename:"freefem.ps"),
   psfile=fopen(filename?filename:"freefem.ps","w");
-  if(psfile==0) {printf("Erreur %s \d",filename);exit(1);}
+  if(psfile==0) {printf("Erreur %s \n",filename);exit(1);}
     if(psfile) {
   fprintf(psfile,"%%!PS-Adobe-2.0 EPSF-2.0\n%%%%Creator: %s\n%%%%Title: FreeFem++\n","user");
   fprintf(psfile,"%%%%CreationDate: %s",ctime(&t_loc));
@@ -685,7 +688,7 @@ void myexit(int err)
   rattente(1);
 	
   if (GetConsoleBuff()==FALSE)
- 		FatalErr("Log file creat err !",0);
+ 		FatalErr("Log file creation error !",0);
  	if (!(winf_flg&winf_NOEDIT)) EditLog();
 
   if (INITGRAPH)
@@ -808,28 +811,46 @@ void Usage()
 // Hack the args and analysis 
 int StoreFname(char Line[], int len)
 {
-   	int i;
-   	char msg[256]; char *ext;
-   	for (i=0; i<len; i++)
-      if (Line[i] != ' ') fullName[i] = Line[i];
+  char msg[256]; char *ext;
+
+  // ALH - 2/6/04 - add treatments for names surrounded with quotes
+  // (but still breaks on names including quotes).
+  int i;
+  char stopchar = ' ';
+  bool skipone = false;
+  if(Line[0] == '"' || Line[0] == '\''){
+    stopchar = Line[0];
+    bool skipone = true;
+  }
+
+  // Copies the name string, including its surrounding quotes if
+  // necessary.
+  for (i=0; i<len; i++){
+    if (Line[i] != stopchar) fullName[i] = Line[i];
+    else{
+      if(skipone) skipone = false;
       else break;
-	fullName[i] = '\0';
+    }
+  }
+  fullName[i] = '\0';
  	
- 	ofstream check(fullName,ios::in);
- 	if (!check.is_open()) {
- 	   sprintf(msg,"%s does not exist!",fullName);
- 	   FatalErr(msg,-1);
- 	}
- 	else check.close();
+  ofstream check(fullName,ios::in);
+  if (!check.is_open()) {
+    sprintf(msg,"%s does not exist!",fullName);
+    FatalErr(msg,-1);
+  }
+  else check.close();
  	   
-	ext = strrchr(fullName,'.'); ext++;
-	if (toupper(*ext) != 'E' || toupper(*(ext+1)) != 'D' || toupper(*(ext+2)) != 'P') {
- 	   sprintf(msg,"%s is not program!",fullName);
- 	   FatalErr(msg,-1);
- 	}
+  ext = strrchr(fullName,'.'); ext++;
+  if (toupper(*ext) != 'E'
+      || toupper(*(ext+1)) != 'D'
+      || toupper(*(ext+2)) != 'P') {
+    sprintf(msg,"%s is not a FreeFem++ script!",fullName);
+    FatalErr(msg,-1);
+  }
 	
-   	GetFileName(fullName,shortName);
-    return i;
+  GetFileName(fullName,shortName);
+  return i;
 }
 
 // freefem+  arg1  arg2 arg3
@@ -842,38 +863,38 @@ DWORD GetOption(char lpszCmdLine[])
 
   while (i < CmdLen) { 
     while (lpszCmdLine[i] == ' ')
-              i++;
-  	if (lpszCmdLine[i] == '-') {
-    	i++;
-    	switch(lpszCmdLine[i]) {
-    	case 'f':
+      i++;
+    if (lpszCmdLine[i] == '-') {
+      i++;
+      switch(lpszCmdLine[i]) {
+      case 'f':
       	i++;
       	while (lpszCmdLine[i] == ' ')
-              ++i;
+	  ++i;
       	i += StoreFname(&lpszCmdLine[i],CmdLen-i);
-  		winf_flg |= winf_VFFEM;
+	winf_flg |= winf_VFFEM;
       	break;
-    	case 's':  // not wait at end of execution
-      		winf_flg |= winf_NOWAIT; ++i;
-      		break;
-    	case 'b':	// no color
-      		winf_flg |= winf_NOCOLOR; ++i;
-      		break;
-    	case 'n':
-      		winf_flg |= winf_NOEDIT; ++i;
-      		break;
-    	case 'h':
-      		winf_flg |= winf_Usage; ++i;
-      		break;
-    	default:
-      		while (lpszCmdLine[i]!=' ' && (i < CmdLen))
-        	i++;
-    	}
-  	}
-  	else  {
-  		i += StoreFname(&lpszCmdLine[i],CmdLen-i);
-  		break;
-  	}
+      case 's':  // not wait at end of execution
+	winf_flg |= winf_NOWAIT; ++i;
+	break;
+      case 'b':	// no color
+	winf_flg |= winf_NOCOLOR; ++i;
+	break;
+      case 'n':
+	winf_flg |= winf_NOEDIT; ++i;
+	break;
+      case 'h':
+	winf_flg |= winf_Usage; ++i;
+	break;
+      default:
+	while (lpszCmdLine[i]!=' ' && (i < CmdLen))
+	  i++;
+      }
+    }
+    else  {
+      i += StoreFname(&lpszCmdLine[i],CmdLen-i);
+      break;
+    }
   }
   return 0;
 }
@@ -924,9 +945,9 @@ BOOL Init(HINSTANCE hInstance,   HINSTANCE hPrevInstance,
   */
   int sx = GetSystemMetrics(SM_CXSCREEN);
   int sy = GetSystemMetrics(SM_CYSCREEN);
-  dd = Min(sx*0.7,sy*0.9);
-	   ddx0 = sx*0.28;
-	   ddy0=sy*0.05;	   
+  dd = static_cast<int>(Min(sx*0.7,sy*0.9));
+  ddx0 = static_cast<int>(sx*0.28);
+  ddy0 = static_cast<int>(sy*0.05);	   
   
   //cout << " Screen Size " << sx << " x " << sy << endl;
  // Rectangle  ss=Get_VirtualScreen();
@@ -956,18 +977,18 @@ BOOL Init(HINSTANCE hInstance,   HINSTANCE hPrevInstance,
   if (inittext()==FALSE) 
     myexit(1);
   else if (winf_flg & winf_VFFEM ) { // create only cache, option "-f" is given
-   if (!_getcwd(FreeFemCache,MAX_PATH)) {
+   if (!getcwd(FreeFemCache,MAX_PATH)) {
      FatalErr("Fail to get current path",-1);
    }
    strcat(FreeFemCache,"\\cache\\");
 
-   if (_chdir(FreeFemCache)) {  // check the cache directory
-     if (mkdir(FreeFemCache,0)) {
+   if (chdir(FreeFemCache)) {  // check the cache directory
+     if (mkdir(FreeFemCache)) {
        sprintf(errbuf,"Fail to create the directory %s",FreeFemCache); 
        FatalErr(errbuf,-1);
      }
    }
-   else (_chdir("..\\"));  // already created
+   else (chdir("..\\"));  // already created
    return TRUE;
   };
   
@@ -1075,16 +1096,18 @@ BOOL mainFreeFEM()
  	rattente(1);
  	
  	rattente(1);
- 	} catch(Error &e){cout<<" error "<<e.what(); myexit(1); };                   
+ 	} catch(Error &e){
+	  ret=e.errcode();
+	  cout<<" error "<<e.what(); myexit(1); };                   
  
  if (projet!=NULL)
   fclose(projet);
 
  SetWindowText(hWnd,"End of FreeFEM++");
  if (winf_flg & winf_NOWAIT) {	// option "-s" 
-   	myexit(0);
+   	myexit(ret);
  };
-  return true;
+  return ret==0;
 }
 
 // error without console
@@ -1129,10 +1152,18 @@ FILE *GetConsoleHandle(DWORD Device)
   FILE *Console = NULL;
 
   if ((hConOut = GetStdHandle(Device)) != INVALID_HANDLE_VALUE) {
+
+    // _open_osfhandle() is not in cygwin
+
+#if !defined(__CYGWIN__)
     Crt = _open_osfhandle((long)hConOut, _O_TEXT);
-    if (Device == STD_INPUT_HANDLE) 
-       Console = _fdopen(Crt, "r");
-    else Console = _fdopen(Crt, "w");
+    if (Device == STD_INPUT_HANDLE) Console = fdopen(Crt, "r");
+    else Console = fdopen(Crt, "w");
+#else
+    if (Device == STD_INPUT_HANDLE) Console = fdopen(0,"r");
+    else Console = fdopen(1,"w");
+#endif
+
     setvbuf(Console, NULL, _IONBF, 0);
     SetConsole(hConOut);
   }
