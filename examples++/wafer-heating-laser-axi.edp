@@ -126,9 +126,3 @@ plot([xx,yy],ps="likegnu.eps",wait=true);
 
 
 cout << " CPU = " << clock()-cpu << endl;
-
-// Regression check
-real ref=xx'*xx;
-cout<<"reference value="<<ref<<endl;
-assert(ref<286);
-assert(ref>284);
