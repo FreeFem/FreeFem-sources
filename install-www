@@ -3,20 +3,24 @@ if [ "$1" != "www" -a "$1" != "doc" ]; then
    echo "usage : $0 www    or $0 doc "
    exit 
 fi
+if [ -n "$2" ] ; then
+VERSION="$2"
+else
 VERSION=`awk '/#define VersionFreeFempp/ {print $3}' config-version.h`
+fi
 listf=(freefem++-${VERSION}.tar.gz FreeFem++v${VERSION}_MacOsX.tgz FreeFem++v${VERSION}_Win.zip  FreeFem++v${VERSION}_MacOS.sit)
 listcd=(freefem++.tar.gz           "freefem++_macosx.tgz"          freefem++.zip                 freefem++.sit)
-
-www=hecht@rascasse.inria.fr:www_gamma/Gamma/cdrom/ftp/freefem/
+dwww="www_gamma/Gamma/cdrom/ftp/freefem/"
+www=hecht@rascasse.inria.fr:"$dwww"
 ftp=hecht@rascasse.inria.fr:/ftp_gamma/freefem/
 ftpk=hecht@baobab.ann.jussieu.fr:public_html/ftp/freefem/
 
 if [ -f Output/FreeFem++-$VERSION.exe ]; then
   scp Output/FreeFem++-${VERSION}.exe  $ftpk
   scp Output/FreeFem++-${VERSION}.exe  $ftp
-  scp Output/FreeFem++-${VERSION}.exe  $www/freefem.exe
+  scp Output/FreeFem++-${VERSION}.exe  $www/freefem++.exe
 else
-list1="HISTORY DOC/manual-full.pdf DOC/manual-full.ps.gz"
+list1="HISTORY DOC/manual-full.pdf DOC/manual-full.ps.gz "
 
 
 if [ "$1" = "doc"  ]; then
@@ -24,6 +28,8 @@ if [ "$1" = "doc"  ]; then
  rsync -vzupogt --rsh="ssh -l hecht" $list1  $ftpk
  rsync -vzupogt --rsh="ssh -l hecht"  HISTORY  baobab.ann.jussieu.fr:www/.
  scp HISTORY hecht@rascasse.inria.fr:www_gamma/Gamma/cdrom/www/freefem/
+ scp  $list1  $www
+
 fi
 if [ "$1" = "www"  ]; then
 for ((i=0;${#listf[$i]};i++)); do
@@ -40,7 +46,11 @@ if [ -f $f ]; then
 fi
 done;
 fi
+# update the 2  web page 
+scp update_www ff++.htmx hecht@rascasse.inria.fr:/tmp
+scp update_www ff++.htmx hecht@baobab.ann.jussieu.fr:/tmp
+ssh  hecht@baobab.ann.jussieu.fr "cd www/.;  /tmp/update_www ${VERSION}   >freefem++.htm </tmp/ff++.htmx"
+ssh rascasse.inria.fr  "cd $dwww; /tmp/update_www ${VERSION} cdrom  >index.html </tmp/ff++.htmx"
 fi
-echo ssh  hecht@baobab.ann.jussieu.fr "cd www/.; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
-ssh  hecht@baobab.ann.jussieu.fr "cd www/.; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
-# ssh rascasse.inria.fr "cd ~/public_html/; ./.update++ ${VERSION} <ff++.htmx >freefem++.htm"
+
+
