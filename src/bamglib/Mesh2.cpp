@@ -2566,6 +2566,8 @@ void Triangles::ForceBoundary()
 
 void Triangles::FindSubDomain(int OutSide=0)
 {
+//#define DRAWING1
+
   if (verbosity >2)
     {
       if (OutSide)
@@ -2870,6 +2872,7 @@ void Triangles::FindSubDomain(int OutSide=0)
   inquire();
 #endif
 
+//#undef DRAWING1
   
   
 }
@@ -3180,6 +3183,7 @@ void Triangles::PreInit(Int4 inbvx,char *fname)
 
 void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices) 
 { 
+//#define DRAWING1
   Gh.NbRef++;// add a ref to Gh
 
   
@@ -3211,6 +3215,8 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
   reffecran(); 
   CurrentTh = this;}
 #endif
+  int * bcurve = new int[Gh.NbOfCurves]; // 
+  
   // we have 2 ways to make the loop 
   // 1) on the geometry 
   // 2) on the background mesh
@@ -3261,7 +3267,47 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 	 ;}
     }
   assert(NbVertexOnBThVertex == NbVerticesOnGeomVertex);
-
+// new stuff FH with curve
+//  find the begin of the curve in BTh
+{
+  Gh.UnMarkEdges();	
+  int bfind=0;
+/*
+   cout << " nb curves = " << Gh.NbOfCurves << endl;
+   for(int i=0;i<Gh.NbOfCurves ;i++)
+     {
+        cout << " Curve " << i << " begin e=" << Gh.Number(Gh.curves[i].be) << " k=" << Gh.curves[i].kb 
+             << "  end e= " << Gh.Number(Gh.curves[i].ee) << " k=" << Gh.curves[i].ke << endl;
+     }*/
+  for (int i=0;i<Gh.NbOfCurves;i++)
+   {
+    bcurve[i]=-1; 
+   }
+  
+  for (int iedge=0;iedge<BTh.nbe;iedge++) 
+    {      
+      Edge & ei = BTh.edges[iedge];
+      for(int je=0;je<2;je++) // for the 2 extremites
+	 if (!ei.on->Mark() && ei[je].on->IsRequiredVertex() )
+	    {
+	      // a begin of curve 
+	      int nc = ei.on->CurveNumber;
+	      
+	      //cout << "curve " <<  nc << " v " << Gh.Number((GeometricalVertex *) *ei[je].on) << " "
+	      //     << " e "  << " " << Gh.Number(ei.on) << " vc " << Gh.Number((*Gh.curves[nc].be)[Gh.curves[nc].kb]) << endl;
+	      if(
+	         ei.on==Gh.curves[nc].be    && 
+	         (GeometricalVertex *) *ei[je].on == &(*Gh.curves[nc].be)[Gh.curves[nc].kb] //  same extremity 
+	         )     
+	        { 
+	        // cout << " find " << endl;
+	         bcurve[nc]=iedge*2+je;
+	         bfind++;	
+	        }      
+            }
+    } 
+   assert( bfind==Gh.NbOfCurves);
+}          
 // method in 2 + 1 step 
 //  0.0) compute the length and the number of vertex to do allocation
 //  1.0)  recompute the length
@@ -3273,13 +3319,22 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
       Int4 NbOfNewEdge=0;
       Int4 iedge;
       Gh.UnMarkEdges();	
-      
+/*   add Curve loop  FH    
       // find a starting back groud edges to walk 
       for (iedge=0;iedge<BTh.nbe;iedge++) {      
 	    Edge & ei = BTh.edges[iedge];
 	    for(int jedge=0;jedge<2;jedge++) // for the 2 extremites
 	     if (!ei.on->Mark() && ei[jedge].on->IsRequiredVertex() )
 	    {
+*/  
+// new code FH 2004 
+       Real8 L=0;
+       for (int icurve=0;icurve<Gh.NbOfCurves;icurve++)
+            { 
+              iedge=bcurve[icurve]/2;
+              int jedge=bcurve[icurve]%2;
+              if( ! Gh.curves[icurve].master) continue; // we skip all equi curve
+	      Edge & ei = BTh.edges[iedge];
 	      // warning: ei.on->Mark() can be change in
 	      // loop for(jedge=0;jedge<2;jedge++) 
 	      // new curve  
@@ -3291,13 +3346,28 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 	      //    cout.precision(16);
 	      for(int phase=0;phase<=step;phase++) 
 		{
+
+		  for(Curve * curve= Gh.curves+icurve;curve;curve= curve->next)
+		     {
+
+		    int icurveequi= Gh.Number(curve);
+  
+                   if( phase == 0 &&  icurveequi != icurve)  continue;
+
                   int k0=jedge,k1;
-                  Edge * pe= &ei;
+                  Edge * pe=  BTh.edges+iedge;
 		  GeometricalEdge *ong = ei.on;
+                   int iedgeequi=bcurve[icurveequi]/2;
+                   int jedgeequi=bcurve[icurveequi]%2;
+
+                  int k0equi=jedgeequi,k1equi;		  
+                  Edge * peequi= BTh.edges+iedgeequi;
+		  GeometricalEdge *ongequi = peequi->on;
+		  
                   Real8 sNew=Lstep;// abcisse of the new points (phase==1) 
-                  Real8 L=0;// length of the curve
+                  L=0;// length of the curve
                   Int4 i=0;// index of new points on the curve
-                  register GeometricalVertex * GA0 = *ei[k0].on;
+                  register GeometricalVertex * GA0 = *(*peequi)[k0equi].on;
                   Vertex *A0;
                   A0 = GA0->to;  // the vertex in new mesh
                   Vertex *A1;
@@ -3311,7 +3381,10 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 		    {
 		      //   assert(pe && BTh.Number(pe)>=0 && BTh.Number(pe)<=BTh.nbe);
 		      Edge &ee=*pe; 
+		      Edge &eeequi=*peequi; 
 		      k1 = 1-k0; // next vertex of the edge 
+		      k1equi= 1 - k0equi;
+		      
 		      assert(pe  && ee.on);
 		      ee.on->SetMark();
 		      Vertex & v0=ee[0], & v1=ee[1];
@@ -3342,17 +3415,19 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 			  se =  abscisseInterpole(v0.m,v1.m,AB,se,1);
 #endif
 			  assert(se>=0 && se <= 1);
-			  se = k1 ? se : 1- se;
+			  //((k1==1) != (k1==k1equi))
+			  se = k1 ? se : 1. - se;
+			  se = k1==k1equi ? se : 1. - se;
+			  
 			  // cout << i << "+ New P "<< nbv-1 << " "  <<sNew<< " L0=" << L0 
 			  //	     << " AB=" << LAB << " s=" << (sNew-L0)/LAB << " se= "  
-			  //     << se <<" B edge " << BTh.Number(ee) << " signe = " << k1 <<endl;
-			  
-			  VertexOnBThEdge[NbVerticesOnGeomEdge++] = VertexOnEdge(A1,&ee,se); // save 
-			  ong = Gh.ProjectOnCurve(ee,se,*A1,*GA1);
-			  A1->ReferenceNumber = ee.ref;
+			  //           << se <<" B edge " << BTh.Number(ee) << " signe = " << k1 <<endl;
+			  VertexOnBThEdge[NbVerticesOnGeomEdge++] = VertexOnEdge(A1,&eeequi,se); // save 
+			  ongequi = Gh.ProjectOnCurve(eeequi,se,*A1,*GA1); 
+			  A1->ReferenceNumber = eeequi.ref;
 			  A1->DirOfSearch =NoDirOfSearch;
-			  //  cout << *A1 << endl;
-			  e->on = ong;
+			  //cout << icurveequi << " " << i << " " <<  *A1 << endl;
+			  e->on = ongequi;
 			  e->v[0]=  A0;
 			  e->v[1]=  A1;
 #ifdef DEBUG
@@ -3368,7 +3443,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 			    }
 
 #endif
-			  e->ref = ee.ref;
+			  e->ref = eeequi.ref;
 			  e->adj[0]=PreviousNewEdge;
 			  
 			  if (PreviousNewEdge)
@@ -3391,7 +3466,8 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 		      assert(ee.on->CurveNumber==ei.on->CurveNumber);
 		      
 		      if ( ee[k1].on->IsRequiredVertex()) {
-			register GeometricalVertex * GA1 = *ee[k1].on;
+		         assert(eeequi[k1equi].on->IsRequiredVertex());
+			register GeometricalVertex * GA1 = *eeequi[k1equi].on;
 			A1=GA1->to;// the vertex in new mesh
 			assert (A1-vertices>=0 && A1-vertices <nbv);
 			break;}
@@ -3402,19 +3478,22 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 			cerr << ee[k1].on->gv-Gh.vertices << endl;
 			}
 		      pe = ee.adj[k1]; // next edge
-		      k0 = pe->Intersection(ee);              
+		      k0 = pe->Intersection(ee); 
+		      peequi= eeequi.adj[k1equi];  // next edge
+		      k0equi=peequi->Intersection(eeequi);            
 		    }// for(;;) end of the curve
 		  
+
 		  if (phase) // construction of the last edge
                     {
 		      Edge *e = edges + nbe++;
-		      if (verbosity>5) 
-			cout << " Fin curve A1" << *A1 << "-------------" <<
+		      if (verbosity>10) 
+			cout << " Fin curve A1" << *A1 << " " << icurve << " <=> " << icurveequi <<"-----" <<
 			  NbCreatePointOnCurve << " == " <<i<<endl;
-                      e->on  = ong;
+                      e->on  = ongequi;
                       e->v[0]=  A0;
                       e->v[1]=	A1;
-                      e->ref = pe->ref;
+                      e->ref = peequi->ref;
                       e->adj[0]=PreviousNewEdge;
                       e->adj[1]=0;
                       if (PreviousNewEdge)
@@ -3431,25 +3510,35 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 		      //                      inquire();
 #endif
                       assert(i==NbCreatePointOnCurve);
-                      
-                    } 
-		  else { // 
+  
+                    }
+		   } //  end loop on equi curve 
+                     
+		  if (!phase)  { // 
 		    Int4 NbSegOnCurve = Max((Int4)(L+0.5),(Int4) 1);// nb of seg
 		    Lstep = L/NbSegOnCurve; 
 		    Lcurve = L;
-		    NbOfNewEdge += NbSegOnCurve;
 		    NbCreatePointOnCurve = NbSegOnCurve-1;
-		    NbOfNewPoints += NbCreatePointOnCurve;
+		    
+		    for(Curve * curve= Gh.curves+icurve;curve;curve= curve->next)
+		     {
+		       NbOfNewEdge += NbSegOnCurve;
+		       NbOfNewPoints += NbCreatePointOnCurve;
+		     }
 		    if(verbosity>5)
 		      cout << " NbSegOnCurve = " <<  NbSegOnCurve << " Lstep=" 
 			   << Lstep <<" " << NbOfNewPoints<< " NBPC= " << NbCreatePointOnCurve <<endl;
 		    // do'nt 
 		    //  if(NbCreatePointOnCurve<1) break;
 		  }
-		  
 		}//for(phase;;)
+/*  modif FH add Curve class  		  
 	    }}//for (iedge=0;iedge<BTh.nbe;iedge++) 
-      // do the allocation
+*/
+// new code Curve class  	
+     } //  end of curve loop 
+// end new code	    
+       // do the allocation
     if(step==0) 
       {
 	//if(!NbOfNewPoints) break;// nothing ????? bug 
@@ -3471,6 +3560,9 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
       }
     } // for(step;;)
   assert(nbe);
+
+ delete [] bcurve;
+ 
   
 #ifdef DRAWING1
   reffecran();
@@ -3494,6 +3586,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
   //    BTh[iv].i = toI2(BTh[iv].r);
   NewPoints(BTh,KeepBackVertices) ;
   CurrentTh = 0;
+//#undef  DRAWING1 
 }
 
 void Triangles::GeomToTriangles0(Int4 inbvx) 
@@ -3833,7 +3926,6 @@ Edge** Triangles::MakeGeometricalEdgeToEdge()
 	 //	 assert( e[i]);
        }
   if(kk) MeshError(997);
-
 
   return e;
  }
