@@ -2,6 +2,9 @@
 # ----------------------------------
 # $Id$
 
+# To create statically linked executables (see configure.ac)
+CXXLD=$(STATICTOOL) $(CXX)
+
 bin_PROGRAMS=FreeFem++
 FreeFem___SOURCES=
 EXTRA_FreeFem___SOURCES=../Graphics/Xrgraph.cpp ../Graphics/Pcrgraph.cpp
