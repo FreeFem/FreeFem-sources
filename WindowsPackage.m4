@@ -38,13 +38,18 @@ Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
 Source: "DOC\manual-full.pdf"; DestDir: "{app}"
 Source: "DOC\manual-full.ps"; DestDir: "{app}"
 
+; Icons for Windows can be created from a 32x32 image with icotool
+; (Linux Debian unstable), or IrfanView (Windows, not very good
+; results) or paint (Windows, save in .bmp then rename to .ico).
+
 Source: "logo.ico"; DestDir: "{app}"
+Source: "logo-gui.ico"; DestDir: "{app}"
 
 [Icons]
 
 ; Menu
 Name: "{group}\FreeFem++"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
-Name: "{group}\FreeFem++ graphical interface"; Filename: "{app}\FreeFem++-cs.exe"; IconFilename: "{app}\logo.ico"
+Name: "{group}\FreeFem++ graphical interface"; Filename: "{app}\FreeFem++-cs.exe"; IconFilename: "{app}\logo-gui.ico"
 Name: "{group}\PDF manual"; Filename: "{app}\manual-full.pdf"
 Name: "{group}\Postscript manual"; Filename: "{app}\manual-full.ps"
 Name: "{group}\Examples\Tutorial"; Filename: "{app}\examples++-tutorial"
@@ -54,6 +59,7 @@ Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
 
 ; Desktop
 Name: "{userdesktop}\FreeFem++ VERSION"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
+Name: "{userdesktop}\FreeFem++ VERSION graphical interface"; Filename: "{app}\FreeFem++-cs.exe"; IconFilename: "{app}\logo-gui.ico"
 
 [Registry]
 
