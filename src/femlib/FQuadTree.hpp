@@ -20,13 +20,18 @@ const IntQuad MaxISize = ( 1L << MaxDeep);
 
 
 class Mesh;
-class Vertex;
+//typename Vertex;
 
 class FQuadTree {
  public:
   class I2 { public:
      long x,y;
      I2(long i,long j): x(i),y(j) {}
+     I2(long i,long j,long k,long l): x(i+(( k&1) ? l : 0)),y(j+(( k&2) ? l : 0)) {}
+     I2(const I2 &A,const I2 &B) : x(B.x-A.x),y(B.y-A.y) {}
+
+     long Case(long l) const  { ( ( y & l) ? (( x & l) ? 3 : 2 ) :( ( x & l)? 1 : 0 ));}
+     long norm() const { return Max(abs(x),abs(y));}
   };
 
   class QuadTreeBox { 
@@ -97,6 +102,9 @@ public:
 void  ILineTo(long i,long j)
  {rlineto(float(i)/coef+cMin.x ,float(j)/coef+cMin.y  );}
     void Draw();
+  void FQuadTree::PlotQuad(R2 pp,long hb);
+  void FQuadTree::PlotX(R2 pp,long hb);
+
 #endif
 
   void  Add( Vertex & w);

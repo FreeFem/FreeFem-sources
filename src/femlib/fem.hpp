@@ -33,6 +33,7 @@ class R2 {
   { f >>  P.x >>  P.y  ; return f; }
 
 public:  
+  static const int d=2;
   typedef R Rcross; 
   R x,y;
   R2 () :x(0),y(0) {};
@@ -64,6 +65,9 @@ class R3: public R2 {
   { f >>  P.x >>  P.y >>  P.z  ; return f; }
 
 public:  
+
+  static const int d=3;
+  
   typedef R3 Rcross; 
   R z;
  
@@ -87,6 +91,23 @@ public:
   friend R3 operator/(R c,R3 P) {return P/c;}
 };
 
+inline R det(R3 A,R3 B, R3 C) {
+  // version optimize bofbof ..... FH a tester
+  R s=1.;
+  if(abs(A.x)<abs(B.x)) Exchange(A,B),s = -s;
+  if(abs(A.x)<abs(C.x)) Exchange(A,C),s = -s;
+  if(abs(A.x)<1e-50)
+   {
+      s *= A.x;
+      A.y /= A.x; A.z /= A.x;
+      B.y  -=  A.y*B.x  ;   B.z  -=  A.z*B.x ;
+      C.y  -=  A.y*C.x  ;   C.z  -=  A.z*C.x ;
+      return s* ( B.y*C.z - B.z*C.y) ;
+   }
+  else return 0.   ;
+};
+inline R det(R3 A,R3 B, R3 C, R3 D) { return det(R3(A,B),R3(A,C),R3(A,D));}
+
 inline void MoveTo(R2 P) { rmoveto((float) P.x,(float)P.y);}
 inline void LineTo(R2 P) { rlineto((float)P.x,(float)P.y);}
 
@@ -98,6 +119,15 @@ inline R Norme2(const R3 & A){ return sqrt((A,A));}
 inline R Norme_infty(const R2 & A){return Max(Abs(A.x),Abs(A.y));}
 inline R Norme_infty(const R3 & A){return Max(Abs(A.x),Abs(A.y),Abs(A.z));}
 inline R Theta(R2 P){ return atan2(P.y,P.x);}
+
+inline R2 Minc(const R2 & A,const R2& B) { return R2(Min(A.x,B.x),Min(A.y,B.y));}
+inline R2 Maxc(const R2 & A,const R2& B) { return R2(Max(A.x,B.x),Max(A.y,B.y));}
+inline R2 Minc(const R3 & A,const R3& B) { return R3(Min(A.x,B.x),Min(A.y,B.y),Min(A.z,B.z));}
+inline R2 Maxc(const R3 & A,const R3& B) { return R3(Max(A.x,B.x),Max(A.y,B.y),Max(A.z,B.z));}
+inline R2 Minc(const R2 & A,const R2& B,const R2& C) { return R2(Min(A.x,B.x,C.x),Min(A.y,B.y,C.y));}
+inline R2 Maxc(const R2 & A,const R2& B,const R2& C) { return R2(Max(A.x,B.x,C.x),Max(A.y,B.y,C.y));}
+inline R2 Minc(const R3 & A,const R3& B,const R3& C) { return R3(Min(A.x,B.x,C.x),Min(A.y,B.y,C.y),Min(A.z,B.z,C.z));}
+inline R2 Maxc(const R3 & A,const R3& B,const R3& C) { return R3(Max(A.x,B.x,C.x),Max(A.y,B.y,C.y),Max(A.z,B.z,C.z));}
 
 // def de numerotation dans un triangles direct sens (trigo)
 // the edge is oposite of the vertex
@@ -114,12 +144,25 @@ inline R Theta(R2 P){ return atan2(P.y,P.x);}
  //  array to same is some onwhat is on edge for boundary condition
  // is on a edge i  onwhat is in [0,7[ 
  // 2  on edge 1 and   
- const int onWhatIsEdge[3][7] = { {0,1,3, 2,0,0, 0}, // edge 0 
+ const int onWhatIsEdge[3][7] = {  {0,1,3, 2,0,0, 0}, // edge 0 
                                    {3,0,1, 0,2,0, 0},
                                    {1,3,0, 0,0,2, 0}};
                                   
-const   R2 TriangleHat[3]= { R2(0,0),R2(1,0),R2(0,1) } ; 
-                                  
+const   R2 TriangleHat[3]= { R2(0.,0.),R2(1.,0.),R2(0.,1.) } ;
+
+
+
+
+ const short int v_tet_face[4][3]=  {{3,2,1},{0,2,3},{ 3,1,0},{ 0,1,2}};
+ const short int a_tet_face[4][3]=  {{ 0,1,0},{ 0,2,0},{ 0,3,1},{ 1,2,1}};
+ const bool  sig_tet_face[4][3]=  {{ 0,1,0},{ 1,0,1},{ 0,1,0},{ 1,0,1}};
+ const short int v_tet_edge[6][2]= {{ 1,2},{1,3},{1,4},{2,3},{2,4},{3,4}}; 
+ const short int fadj_tet_edge[6][2]= {{4,3},{2,4},{3,2},{4,1},{1,3},{2,1}};
+ const short int op_tet_edge[6]={ 6, 5, 4, 3, 2, 1}; 
+ 
+const   R3 TetHat[4]= { R3(0.,0.,0.),R3(1.,0.,0.),R3(0.,1.,0.),R3(0.,0.,1.) } ; 
+
+ class Mesh;                                  
 // --------
 class Label {  // reference number for the physics
 public: 
@@ -135,69 +178,150 @@ inline ostream& operator <<(ostream& f,const Label & r  )
 inline istream& operator >>(istream& f, Label & r  )
   { f >>  r.lab ; return f; }
   
-
-class Vertex : public R2,public Label {
+template<class Rd>
+class TVertex : public Rd,public Label {
  friend class Mesh;
-   R2 *normal; // pointeur sur la normal exterieur pour filtre les
+   Rd *normal; // pointeur sur la normal exterieur pour filtre les
    // point de depart 
 public:
-  Vertex() : R2(),Label(),normal(0){};
-  Vertex(R2 P,int r=0): R2(P),Label(r),normal(0){}
-  bool ninside(const R2 & P) const { return normal? (R2(*this,P),*normal)<=0: true;}
-  void SetNormal(R2 *&n,const R2 & N)
+  TVertex() : Rd(),Label(),normal(0){};
+  TVertex(Rd P,int r=0): Rd(P),Label(r),normal(0){}
+  bool ninside(const Rd & P) const { return normal? (Rd(*this,P),*normal)<=0: true;}
+  void SetNormal(Rd *&n,const Rd & N)
      { if (normal) { 
-         R2 NN=*normal+N; 
+         Rd NN=*normal+N; 
          *normal= NN/Norme2(NN); }
        else *(normal=n++)=N;}
-  R2 Ne() const {return normal ? *normal: R2(0,0);}
-//  void operator=(const Vertex & v) { x=v.x;y=v.y;lab=v.lab;normal=0;}
+  Rd Ne() const {return normal ? *normal: Rd();}
+//  void operator=(const TVertex & v) { x=v.x;y=v.y;lab=v.lab;normal=0;}
 };
-inline ostream& operator <<(ostream& f, const Vertex & v )
-  { f << (R2) v << ' ' << (Label) v   ; return f; }
-inline istream& operator >> (istream& f,  Vertex & v )
-  { f >> (R2&) v >> (Label&) v ; return f; }
+
+typedef TVertex<R2> Vertex;
+
+template<class Rd>
+inline ostream& operator <<(ostream& f, const TVertex<Rd> & v )
+  { f << (Rd) v << ' ' << (Label) v   ; return f; }
+template<class Rd>
+inline istream& operator >> (istream& f,  TVertex<Rd> & v )
+  { f >> (Rd&) v >> (Label&) v ; return f; }
 
 
 
-class Triangle: public Label {
-  Vertex *vertices[3]; // an array of 3 pointer to vertex
+class Tetraedre: public Label {
+ 
+ public:
+ typedef TVertex<R3> Vertex;
+ private:
+  Vertex *vertices[4]; // an array of 3 pointer to vertex
 public:
-  R area;
-  Triangle(){};              // constructor empty for array
+  R volume;
+  Tetraedre(){};              // constructor empty for array
   Vertex & operator[](int i) const// to see triangle as a array of vertex
        {return *vertices[i];} 
        
   Vertex *& operator()(int i) // to see triangle as a array of vertex
        {return vertices[i];} 
   
-  Triangle(Vertex * v0,int i0,int i1,int i2,int r,R a=0.0): Label(r) 
-     { R2 A=*(vertices[0]=v0+i0);
-       R2 B=*(vertices[1]=v0+i1);
-       R2 C=*(vertices[2]=v0+i2); 
+  Tetraedre(Vertex * v0,int i0,int i1,int i2,int i3,int r,R a=0.0): Label(r) 
+     { set(v0,i0,i1,i2,i3,r,a);  }
+
+  void set(Vertex * v0,int i0,int i1,int i2,int i3,int r,R a=0.0)
+     { R3 A=*(vertices[0]=v0+i0);
+       R3 B=*(vertices[1]=v0+i1);
+       R3 C=*(vertices[2]=v0+i2); 
+       R3 D=*(vertices[3]=v0+i3); 
+       volume = a ==0 ? det(R3(A,B),R3(A,C),R3(A,D))/6. : a;
+       throwassert(volume>0);}
+            
+  Vertex & Face(int j,int i) const // Vertex j of edge i
+     {throwassert(j==0 || j==1 );return  *vertices[(i+j+1)%3];}
+  
+  R3 N2areaInternal(int i) const { return R3(*vertices[v_tet_face[i][0]],*vertices[v_tet_face[i][1]]) 
+                                 ^R3(*vertices[v_tet_face[i][0]],*vertices[v_tet_face[i][2]]) ; }
+  R3 n(int i) const //  unit exterior normal
+     {R3 Ni=N2areaInternal(i);return Ni/-Norme2(Ni);} 
+  
+  R3 H(int i)  const  // heigth ($\nabla \lambda_i$ 
+     {R3 Ni=N2areaInternal(i);return Ni/(3.*volume);} 
+     
+  R3 Edge(int i) const // opposite edge vertex i
+     {return (R3) *vertices[v_tet_edge[i][1]]-(R3) *vertices[v_tet_edge[i][0]];}
+     
+  Vertex & Edge(int j,int i) const // Vertex j of edge i
+     {throwassert(j==0 || j==1 );return  *vertices[v_tet_edge[i][j]];}
+  R lenEdge(int i) const {R3 E=Edge(i);return sqrt((E,E));}
+  R h() const { return Max( Max(lenEdge(0),lenEdge(1),lenEdge(2)),
+                            Max(lenEdge(3),lenEdge(4),lenEdge(5)) );}
+  
+  void Renum(Vertex   *v0, long * r)  { 
+    for (int i=0;i<4;i++) 
+      vertices[i]=v0+r[vertices[i]-v0];}
+      
+  Vertex & VerticeOfEdge(int i,int j) const  // vertex j of edge i 
+    {return  *vertices[v_tet_edge[i][j]];}  // vertex j of edge i 
+
+    R EdgeOrientation(int i) const { // return +1 or -1 
+     R Orient[2]={-1.,1.};
+    return  Orient[vertices[v_tet_edge[i][0]] < vertices[v_tet_edge[i][1]] ] ;}
+    
+  void SetVertex(int j,Vertex *v){vertices[j]=v;}
+
+  R3 operator() (const R3 & P) const{ // local to Global in triangle 
+      return    (const R3 &) *vertices[0] * (1-P.x-P.y-P.z) 
+             +  (const R3 &) *vertices[1] * (P.x) 
+             +  (const R3 &) *vertices[2] * (P.y) ;
+             +  (const R3 &) *vertices[3] * (P.z) ;}
+private:
+  Tetraedre(const Tetraedre &);  //  no copy of triangle
+  void operator=(const Tetraedre &);             
+
+};
+
+
+template<class Rd>
+class TTriangle: public Label {
+ public:
+ typedef TVertex<Rd> Vertex;
+ private:
+  Vertex *vertices[3]; // an array of 3 pointer to vertex
+public:
+  R area;
+  TTriangle(){};              // constructor empty for array
+  Vertex & operator[](int i) const// to see triangle as a array of vertex
+       {return *vertices[i];} 
+       
+  Vertex *& operator()(int i) // to see triangle as a array of vertex
+       {return vertices[i];} 
+  
+  TTriangle(Vertex * v0,int i0,int i1,int i2,int r,R a=0.0): Label(r) 
+     { Rd A=*(vertices[0]=v0+i0);
+       Rd B=*(vertices[1]=v0+i1);
+       Rd C=*(vertices[2]=v0+i2); 
        area = a ==0 ? (( B-A)^(C-A))*0.5 : a;
        throwassert(area>0);}
 
   void set(Vertex * v0,int i0,int i1,int i2,int r,R a=0.0)
      { lab=r; 
-       R2 A=*(vertices[0]=v0+i0);
-       R2 B=*(vertices[1]=v0+i1);
-       R2 C=*(vertices[2]=v0+i2); 
+       Rd A=*(vertices[0]=v0+i0);
+       Rd B=*(vertices[1]=v0+i1);
+       Rd C=*(vertices[2]=v0+i2); 
        area = a ==0 ? (( B-A)^(C-A))*0.5 : a;
        throwassert(area>0);}
        
-  R2 Edge(int i) const // opposite edge vertex i
-     {return (R2) *vertices[(i+2)%3]-(R2) *vertices[(i+1)%3];}
+  Rd Edge(int i) const // opposite edge vertex i
+     {return (Rd) *vertices[(i+2)%3]-(Rd) *vertices[(i+1)%3];}
      
   Vertex & Edge(int j,int i) const // Vertex j of edge i
      {throwassert(j==0 || j==1 );return  *vertices[(i+j+1)%3];}
+
+// il y a un problem sur d=3 ici ----  
+  Rd n(int i) const //  unit exterior normal
+     {Rd E=Edge(i);return Rd(E.y,-E.x)/Norme2(E);} 
   
-  R2 n(int i) const //  unit exterior normal
-     {R2 E=Edge(i);return R2(E.y,-E.x)/Norme2(E);} 
-  
-  R2 H(int i)  const  // heigth ($\nabla \lambda_i$ 
-     {R2 E=Edge(i);return R2(-E.y,E.x)/(2*area);} 
-     
-  R lenEdge(int i) const {R2 E=Edge(i);return sqrt((E,E));}
+  Rd H(int i)  const  // heigth ($\nabla \lambda_i$ 
+     {Rd E=Edge(i);return Rd(-E.y,E.x)/(2*area);} 
+// ------     
+  R lenEdge(int i) const {Rd E=Edge(i);return sqrt((E,E));}
   R h() const { return Max(lenEdge(0),lenEdge(1),lenEdge(2));}
   
   void Renum(Vertex   *v0, long * r)  { 
@@ -211,13 +335,12 @@ public:
      R Orient[2]={-1.,1.};
     return  Orient[vertices[ (i+1)%3] < vertices[ (i+2)%3] ] ;}
     
-  bool intersect(R2 P,R2 Q) const 
+  bool intersect(Rd P,Rd Q) const 
    { 
-     const R2 &A(*vertices[0]);
-     const R2 &B(*vertices[1]);
-     const R2 &C(*vertices[2]);
-     R2 mn(Min(A.x,B.x,C.x),Min(A.y,B.y,C.y)),
-        mx(Max(A.x,B.x,C.x),Max(A.y,B.y,C.y));
+     const Rd &A(*vertices[0]);
+     const Rd &B(*vertices[1]);
+     const Rd &C(*vertices[2]);
+     Rd mn(Minc(A,B,C)),  mx(Maxc(A,B,C));
      assert(P.x < Q.x && P.y < Q.y ); 
      return (mx.x >= P.x) && (mn.x <= Q.x) &&  (mx.y >= P.y) && (mn.y <= Q.y)  ;
 
@@ -228,25 +351,29 @@ public:
   void Fill(int color) const;
   void Draw(int edge,double shink=1) const;
   void SetVertex(int j,Vertex *v){vertices[j]=v;}
-  R2 operator()  (const R2 & P) const{ // local to Global in triangle 
-      return    (const R2 &) *vertices[0] * (1-P.x-P.y) 
-             +  (const R2 &) *vertices[1] * (P.x) 
-             +  (const R2 &) *vertices[2] * (P.y) ;}
+  Rd operator() (const Rd & P) const{ // local to Global in triangle 
+      return    (const Rd &) *vertices[0] * (1-P.x-P.y) 
+             +  (const Rd &) *vertices[1] * (P.x) 
+             +  (const Rd &) *vertices[2] * (P.y) ;}
 private:
-  Triangle(const Triangle &);  //  no copy of triangle
-  void operator=(const Triangle &);             
+  TTriangle(const TTriangle &);  //  no copy of triangle
+  void operator=(const TTriangle &);             
 
 };
 
-class BoundaryEdge: public Label {
+typedef TTriangle<R2> Triangle;
+
+template<class Rd>
+class TBoundaryEdge: public Label {
 public:
+ typedef TVertex<Rd> Vertex;
   Vertex *vertices[2];
-  BoundaryEdge(Vertex * v0,int i0,int i1,int r): Label(r) 
+  TBoundaryEdge(Vertex * v0,int i0,int i1,int r): Label(r) 
   { vertices[0]=v0+i0; vertices[1]=v0+i1; }
   void set(Vertex * v0,int i0,int i1,int r)
   { lab=r,vertices[0]=v0+i0; vertices[1]=v0+i1; }
   bool in(const Vertex * pv) const {return pv == vertices[0] || pv == vertices[1];}
-  BoundaryEdge(){}; // constructor empty for array 
+  TBoundaryEdge(){}; // constructor empty for array 
   void Draw() const;
   Vertex & operator[](int i) const {return *vertices[i];}
   R length() const { return Norme2(R2(*vertices[0],*vertices[1]));}
@@ -255,17 +382,20 @@ public:
       vertices[i]=v0+r[vertices[i]-v0];}
 };
 
+typedef TBoundaryEdge<R2> BoundaryEdge;
 typedef BoundaryEdge Edge;
-typedef Triangle Tet;  // just to play
+typedef Tetraedre Tet;  // just to play
 
-class Mortar { 
+template<class Rd>
+class TMortar { 
   public:
+ typedef TVertex<Rd> Vertex;  
   friend class Mesh;
   friend class ConstructDataFElement;
    Mesh * Th;
    int nleft,nright;
    int *left,*right;
-   Mortar(): Th(0),left(0),right(0),nleft(0),nright(0){}
+   TMortar(): Th(0),left(0),right(0),nleft(0),nright(0){}
    void Draw() const;
    public:
      int NbLeft() const{return nleft;} 
@@ -288,11 +418,15 @@ class Mortar {
      
      
 };
+typedef TMortar<R2> Mortar;
 
  
 class FQuadTree;
 
 class Mesh: public RefCounter { public:
+
+typedef TTriangle<R2> Triangle;
+
    static const char magicmesh[8]  ;
   int dim; 
   int nt,nv,neb,ne,ntet;

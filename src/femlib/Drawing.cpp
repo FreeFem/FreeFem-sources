@@ -482,7 +482,8 @@ void DrawIsoTfill(const R2 Pt[3],const R ff[3],const RN_ & Viso,double rapz)
      }
 } 
 
-void BoundaryEdge::Draw() const 
+template<class R2>
+void TBoundaryEdge<R2>::Draw() const 
 {
   couleur(2+(lab%6));
   MoveTo(*vertices[0]);
@@ -561,9 +562,11 @@ void  FESpace::Draw(const KN_<R>& U,const KN_<R>& V,const RN_ & Viso, R coef,int
 
 }
 
-void Triangle::Draw(double skrink) const
+
+template<class R2>
+void TTriangle<R2>::Draw(double skrink) const
 {
-  const Triangle & K(*this);
+  const TTriangle<R2> & K(*this);
   R2 A(K[0]),B(K[1]),C(K[2]),G((A+B+C)/3.);
   A = G + (A-G)*skrink;
   B = G + (B-G)*skrink;
@@ -573,16 +576,20 @@ void Triangle::Draw(double skrink) const
   LineTo(C);
   LineTo(A);
 }
-void Triangle::Draw(int edge,double skrink) const 
+
+template<class R2>
+void TTriangle<R2>::Draw(int edge,double skrink) const 
 {
-  const Triangle & K(*this);
+  const TTriangle<R2> & K(*this);
   R2 A(K[0]),B(K[1]),C(K[2]),G((A+B+C)/3.);
   MoveTo(G+(*vertices[(edge+1)%3]-G)*skrink);
   LineTo(G+(*vertices[(edge+2)%3]-G)*skrink);
 }
-void Triangle::Fill(int color) const 
+
+template<class R2>
+void TTriangle<R2>::Fill(int color) const 
 {
-  const Triangle & K(*this);
+  const TTriangle<R2> & K(*this);
   R2 A(K[0]),B(K[1]),C(K[2]);
   float p[]={A.x,A.y,B.x,B.y,C.x,C.y};
   int c=LaCouleur(); 
@@ -622,7 +629,9 @@ void DrawMark(R2 P,R k)
      }
    return 0; // outside 
  }
- void Mortar::Draw() const {
+
+template<class R2>
+ void TMortar<R2>::Draw() const {
    throwassert(Th);
    for (int i=0;i<nleft;i++)
      (*Th)[left[i]/3].Draw(left[i]%3,0.8);     
