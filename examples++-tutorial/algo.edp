@@ -101,7 +101,7 @@ varf alap(uh,vh,solver=Cholesky,init=iter)=
 
 varf amass(uh,vh,solver=Cholesky,init=iter)=  int2d(Th)( uh*vh)  + on(1,2,3,4,uh=0);
 
-matrix Amass = alap(Vh,Vh,solver=CG);
+matrix Amass = amass(Vh,Vh,solver=CG);
 
 matrix Alap=  alap(Vh,Vh,solver=Cholesky,factorize=1);   
 func real[int] C(real[int] & x)
