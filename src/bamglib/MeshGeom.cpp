@@ -29,8 +29,13 @@ using namespace std;
 #include "SetOfE4.h"
 namespace bamg {
 
-void Triangles::ConsGeometry(Real8 cutoffradian) // construct a geometry if no geo 
+void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a geometry if no geo 
 {
+  //  if equiedges existe taille nbe 
+  //   equiedges[i]/2 == i  original
+  //   equiedges[i]/2 = j  =>   equivalence entre i et j => meme maillage
+  //   equiedges[i]%2   : 0 meme sens , 1 pas meme sens 
+  // --------------------------
   if (verbosity>1) 
     cout << " -- construction of the geometry from the 2d mesh " << endl;
   if (nbt<=0 || nbv <=0 ) { MeshError(101);}
@@ -182,7 +187,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian) // construct a geometry if no g
 		 if (add<nbeold) // in file edge
 		    edges[add].ref = edgessave[add].ref;
 		 else
-		   edges[add].ref = Min(edges[add].v[0]->ref(),edges[add].v[1]->ref()); // no good choice
+		   edges[add].ref = Min(edges[add].v[0]->ref(),edges[add].v[1]->ref()); // no a good choice
 	    }
 	}
       throwassert(k==nbe);
@@ -364,7 +369,18 @@ void Triangles::ConsGeometry(Real8 cutoffradian) // construct a geometry if no g
       Gh.edges[i].tg[0]=R2();
       Gh.edges[i].tg[1]=R2();
       edges[i].on =  Gh.edges + i;
-      
+      if(equiedges && i < nbeold ) {
+        int j=equiedges[i]/2;
+        int sens=equiedges[i]%2;
+        if(i!=j) {
+          if(verbosity>9)  
+             cout << " Edges Equi " << i << " <=> " << j << " sens = " << sens  << endl;
+           Gh.edges[i].SetEqui();
+           Gh.edges[i].link= & Gh.edges[j];
+           assert(sens==0);//  meme sens pour l'instant
+        }
+      }
+       
       R2 x12 = Gh.vertices[j0].r-Gh.vertices[j1].r;
       Real8 l12=Norme2(x12);        
       hmin = Min(hmin,l12);
@@ -426,6 +442,7 @@ void Geometry::EmptyGeometry()  // empty geometry
   NbRef=0;
   name =0;
   quadtree=0;
+  curves=0;
  // edgescomponante=0;
   triangles=0;
   edges=0;
@@ -454,13 +471,17 @@ Geometry::Geometry(const Geometry & Gh)
    vertices = nbv ? new GeometricalVertex[nbv] : NULL;
    triangles = nbt ? new  Triangle[nbt]:NULL;
    edges = nbe ? new GeometricalEdge[nbe]:NULL;
+   curves= NbOfCurves ? new Curve[NbOfCurves]:NULL;
    subdomains = NbSubDomains ? new GeometricalSubDomain[NbSubDomains]:NULL;
    for (i=0;i<nbv;i++)
      vertices[i].Set(Gh.vertices[i],Gh,*this);
    for (i=0;i<nbe;i++)
      edges[i].Set(Gh.edges[i],Gh,*this);
+   for (i=0;i<NbOfCurves;i++)
+     curves[i].Set(Gh.curves[i],Gh,*this);
    for (i=0;i<NbSubDomains;i++)
      subdomains[i].Set(Gh.subdomains[i],Gh,*this);
+     
    //    for (i=0;i<nbt;i++)
    //      triangles[i].Set(Gh.triangles[i],Gh,*this);
    throwassert(!nbt);   
@@ -911,6 +932,9 @@ void Geometry::AfterRead()
       for (i=0;i<nbv;i++)
 	if (vertices[i].Required())
 	  cout << "     The  geo  vertices " << i << " is required " << endl;
+  
+   for (int step=0;step<2;step++)
+   {
     for (i=0;i<nbe;i++) 
       edges[i].SetUnMark();
     
@@ -925,11 +949,20 @@ void Geometry::AfterRead()
 	    int k0=jj,k1;
 	    GeometricalEdge *e = & ei;
 	    GeometricalVertex *a=(*e)(k0); // begin 
+	    if(curves) {
+	      curves[NbOfCurves].be=e;
+	      curves[NbOfCurves].kb=k0;
+	    }
 	    for(;;) { 
 	      k1 = 1-k0; // next vertex of the edge 
 	      e->SetMark();
 	      nbgem++;
 	      e->CurveNumber=NbOfCurves;
+	      if(curves) {
+	      curves[NbOfCurves].ee=e;
+	      curves[NbOfCurves].ke=k1;
+	      }
+	      
 	      GeometricalVertex *b=(*e)(k1);
 	      if (a == b ||  b->Required() ) break;
 	      k0 = e->SensAdj[k1];//  vertex in next edge
@@ -943,11 +976,40 @@ void Geometry::AfterRead()
 		     << "so the vertex " << Number(a) << " become required " <<endl;
 	      a->SetRequired();
 	    }
-
+       
 	  }} 
+	  throwassert(nbgem && nbe);
+
+	  if(step==0) {
+	    curves = new Curve[NbOfCurves];
+	  }
+    	} 
+    for(int i=0;i<NbOfCurves ;i++)
+     {
+       GeometricalEdge * be=curves[i].be, *eqbe=be->link;
+       GeometricalEdge * ee=curves[i].ee, *eqee=be->link;
+       curves[i].master=true;
+       if(be->Equi() || be->ReverseEqui() ) 
+        {
+          assert(eqbe);
+          int nc = eqbe->CurveNumber;
+          assert(i!=nc);
+          curves[i].next=curves[nc].next;
+          curves[i].master=false;
+          curves[nc].next=curves+i;
+          if(be->ReverseEqui())
+           curves[i].Reverse();           
+        }
+     }
+    	 
     if(verbosity>3)
       cout << "    End ReadGeometry: Number of curves in geometry is " << NbOfCurves <<endl; 
-    throwassert(nbgem && nbe);
+    if(verbosity>4)
+    for(int i=0;i<NbOfCurves ;i++)
+     {
+        cout << " Curve " << i << " begin e=" << Number(curves[i].be) << " k=" << curves[i].kb 
+             << "  end e= " << Number(curves[i].ee) << " k=" << curves[i].ke << endl;
+     }
     delete []ev;
     delete []hv;
     delete []eangle;
@@ -963,6 +1025,7 @@ Geometry::~Geometry()
  // if(edgescomponante) delete [] edgescomponante; edgescomponante=0;
   if(triangles) delete [] triangles;triangles=0;
   if(quadtree)  delete  quadtree;quadtree=0;
+  if(curves)  delete  []curves;curves=0;NbOfCurves=0;
   if(name) delete [] name;name=0;
   if(subdomains) delete [] subdomains;subdomains=0;
 //  if(ordre)     delete [] ordre;
