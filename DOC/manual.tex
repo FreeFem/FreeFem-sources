@@ -4,7 +4,7 @@
 \title{
 %\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
  {\Blue{ \TitreFont FreeFem++ \\ \vglue 1cm  Manual}} \\ \vglue 3cm  ~ \\  
-      \normalsize  { version 1.40  \Red{(Under construction)} }
+      \normalsize  { version 1.42  \Red{(Under construction)} }
  \\ \vglue 0.7cm
  \large \url{http://www.freefem.org} \\
 \url{http://www.ann.jussieu.fr/\string~hecht/freefem++.htm} 
@@ -303,6 +303,8 @@ value;\index{bool}\index{true}\index{false}
 \index{matrix!integer index}
 \item[\texttt{real[string]}] array of reals (string index);
 \index{array!string index}
+\item[\texttt{string[string]}] array of string (string index);
+\index{string!string index}
 \item[\texttt{mesh[int]}] array of meshes (integer index);
 \index{array!mesh index}
 
@@ -394,8 +396,8 @@ abstractions~:
     \itemtt[nuEdge] integer index of the current edge in the triangle
     \index{nuEdge}
 
-    \itemtt[nTonEdge] integer index of the triangle on the current
-    edge \index{nTonEdge}
+    \itemtt[nTonEdge] integer: number of triangle contening the current edge (1 or 2).
+    \index{nTonEdge}
 
     \itemtt[area] area of the current triangle \index{area}
 
@@ -599,7 +601,8 @@ map[2]=3.0;             //  2 is automatically cast to the string "2"
 
 @cout << " map[\"1\"] = " << map["1"] << "; "<< @endl;
 @cout << " map[2] = " << map[2] << "; "<< @endl;
-\eFF
+
+@string[@string] tt; // a array of string\eFF
 
 
 \subsection{Loops}
@@ -1319,25 +1322,25 @@ types of finite element  are: \index{type of finite element}
      \item[P0]  piecewise constante discontinuous finite element
      \index{P0|textbf}\index{fespace!P0}
     \begin{equation}
-     P0_{h} = \{ v \in L^2(\Omega) / \forall K \in \mathcal{T}_{h}\;\;\exists \alpha_{K}\in \R :
+     P0_{h} = \{ v \in L^2(\Omega) \SE \forall K \in \mathcal{T}_{h}\;\;\exists \alpha_{K}\in \R :
         \;\; v_{|K} = \alpha_{K } \} \label{eq:P0}
      \end{equation}
      \item[P1]  piecewise linear  continuous finite element
      \index{P1|textbf}\index{fespace!P1}
      \begin{equation}
-     P1_{h} = \{ v \in H^{1}(\Omega) / \forall K \in \mathcal{T}_{h}
+     P1_{h} = \{ v \in H^{1}(\Omega) \SE \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{1} \} \label{eq:P1}
      \end{equation}
      \item[P1dc]  piecewise linear  discontinuous finite element
      \index{P1dc|textbf}\index{fespace!P1dc}
      \begin{equation}
-     P1dc_{h} = \{ v \in L^{2}(\Omega) / \forall K \in \mathcal{T}_{h}
+     P1dc_{h} = \{ v \in L^{2}(\Omega) \SE \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{1} \} \label{eq:P1dc}
      \end{equation}
      \item[P1b]  piecewise linear  continuous finite element plus bubble
      \index{P1b|textbf}\index{fespace!P1b}
      \begin{equation}
-     P1b_{h} = \left\{ v \in H^{1}(\Omega) / \forall K \in \mathcal{T}_{h}
+     P1b_{h} = \left\{ v \in H^{1}(\Omega) \SE \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{1} \oplus Span\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right\} \label{eq:P1b}
      \end{equation}
      where $\lambda ^{K}_{i}, i=0,1,2$ are the 3 barycentric coordinate functions of the triangle $K$
@@ -1345,7 +1348,7 @@ types of finite element  are: \index{type of finite element}
      \item[P2] piecewise $P_{2}$  continuous finite element,
      \index{P2|textbf}\index{fespace!P2}
      \begin{equation}
-     P2_{h} = \{ v \in H^{1}(\Omega) / \forall K \in \mathcal{T}_{h}
+     P2_{h} = \{ v \in H^{1}(\Omega) \SE \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{2} \}
      \end{equation}
      where
@@ -1353,7 +1356,7 @@ types of finite element  are: \index{type of finite element}
      \item[P2dc] piecewise $P_{2}$  discontinuous finite element,
      \index{P2dc|textbf}\index{fespace!P2dc}
      \begin{equation}
-     P2dc_{h} = \{ v \in L^{2}(\Omega) / \forall K \in \mathcal{T}_{h}
+     P2dc_{h} = \{ v \in L^{2}(\Omega) \SE \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{2} \}
      \end{equation}
      \item[RT0]  Raviart-Thomas finite element
@@ -1373,14 +1376,14 @@ types of finite element  are: \index{type of finite element}
 \end{description}
 
 To define the finite element spaces
-$$  X_{h} = \{ v \in H^{1}(]0,1[^2) / \forall K \in \mathcal{T}_{h}
+$$  X_{h} = \{ v \in H^{1}(]0,1[^2) \SE \forall K \in \mathcal{T}_{h}
 \quad v_{|K} \in
 P_{1} \}$$
-$$ X_{ph} = \{  v \in X_{h} / v(\vecttwo{0}{.} ) =  v(\vecttwo{1}{.}) , v(\vecttwo{.}{0} ) =  v(\vecttwo{.}{1} )  \}$$
-$$  M_{h} = \{ v \in H^{1}(]0,1[^2) / \forall K \in \mathcal{T}_{h}
+$$ X_{ph} = \{  v \in X_{h} \SE v(\vecttwo{0}{.} ) =  v(\vecttwo{1}{.}) , v(\vecttwo{.}{0} ) =  v(\vecttwo{.}{1} )  \}$$
+$$  M_{h} = \{ v \in H^{1}(]0,1[^2) \SE \forall K \in \mathcal{T}_{h}
 \quad v_{|K} \in
 P_{2} \}$$
-$$  R_{h} = \{ \mathbf{v} \in H^{1}(]0,1[^2)^{2} / \forall K \in \mathcal{T}_{h}
+$$  R_{h} = \{ \mathbf{v} \in H^{1}(]0,1[^2)^{2} \SE \forall K \in \mathcal{T}_{h}
 \quad
  \mathbf{v}_{|K}(x,y) =
          \vecttwo{\alpha_{K}}{\beta_{K}} + \gamma_{K}\vecttwo{x}{y} \}$$
@@ -1742,7 +1745,7 @@ linear part and the bilinear part such as in
   \item surface integral defined with the keyword \texttt{int2d}
   \item integrals on curves \texttt{int1d}.
   \item integrals on the three edges of all triangles   \texttt{intalledges},	 remark the edges are
-   see two times. \index{intalledges}\index{int2d}\index{int1d}
+   see two times generaly (the variable \texttt{nTonEdge} give this number). \index{intalledges}\index{int2d}\index{int1d}
   \end{itemize}
 
 the syntaxe is :
@@ -2914,10 +2917,10 @@ the pressure is approximated with the $P_{1}$ FE ( $M_{h}$ space),
 \\\\
 where
 \Blue{
-$$  X_{h} = \{ v \in H^{1}(]0,1[^2) / \forall K \in \mathcal{T}_{h}
+$$  X_{h} = \{ v \in H^{1}(]0,1[^2) \SE \forall K \in \mathcal{T}_{h}
 \quad v_{|K} \in
 P_{2} \}$$} and
-\Blue{$$  M_{h} = \{ v \in H^{1}(]0,1[^2) / \forall K \in \mathcal{T}_{h}
+\Blue{$$  M_{h} = \{ v \in H^{1}(]0,1[^2) \SE \forall K \in \mathcal{T}_{h}
 \quad v_{|K} \in
 P_{1} \}$$}
 
@@ -3497,7 +3500,7 @@ $\vec v=(v_1,v_2) = (X-x, Y-y)$  is small, Hooke's
 law relates the stress tensor $\sigma$ inside the solid to the
 deformation tensor $\epsilon$:
 \Blue{
- $$ \sigma_{ij} = \lambda \delta_{ij} \nabla.\vec v + \mu\epsilon_{ij},
+ $$ \sigma_{ij} = \lambda \delta_{ij} \nabla.\vec v + 2\mu\epsilon_{ij},
 \,
 \epsilon_{ij} = {1\over 2}({\partial v_i\over\partial x_j} +
 {\partial v_j\over\partial x_i} )$$
