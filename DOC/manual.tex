@@ -239,8 +239,8 @@ allows the manipulation of basic types~: integers (\texttt{int}),
 reals (\texttt{real}), strings (\texttt{string}), arrays (example:
 \texttt{real[int]}), bidimensional (2D) finite element meshes
 (\texttt{mesh}), 2D finite element spaces (\texttt{fespace}), finite
-element functions (\texttt{func}), arrays of finite element functions
-(\texttt{func$[basic type]$}), linear and bilinear operators, sparse
+element functions (\texttt{fespace variable}),  functions (\texttt{func}), arrays of finite element functions
+(\texttt{fespace variable$[basic type]$}), linear and bilinear operators, sparse
 matrices, vectors, etc. For instance~:
 
 \bFF
@@ -382,7 +382,7 @@ abstractions~:
     \item[\texttt{region}] a function returning the region number of
     the current point (x,y). Integer value. \index{region}
 %%%alh (x,y,z) in R^2?
-    \item[\texttt{P}] current point ($R^{2}$ value. \index{P}
+    \item[\texttt{P}] current point ($\R^{3}$ value. \index{P}
     \texttt{P.x}, \texttt{P.y}, \texttt{P.z})
     \item[\texttt{N}] normal vector at the current point ($\R^{3}$
     value, \texttt{N.x}, \texttt{N.y}, \texttt{N.z}) \index{N}.
@@ -724,9 +724,7 @@ circular hole inside would be described as:
 plot(a(50)+b(+30)) ; // to see a plot of the border mesh \index{plot!border} 
 @mesh Thwithouthole= @buildmesh(a(50)+b(+30));
 @mesh Thwithhole   = @buildmesh(a(50)+b(-30));
-@plot(Thwithouthole,wait=1,ps="Thwithouthole.eps"); //figure \ref{Thwithouthole}
-%%%alh index not found?
-\index{plot!mesh}
+@plot(Thwithouthole,wait=1,ps="Thwithouthole.eps"); //figure \ref{Thwithouthole}\index{plot!mesh}
 @plot(Thwithhole,wait=1,ps="Thwithhole.eps"); // figure \ref{Thwithhole}
 \eFF
 \begin{note}
@@ -858,9 +856,8 @@ this number is forced by the keyword "label".
 @mesh th= buildmesh(floor(n)+right(n)+ceiling(n)+left(n));
 @savemesh(th,"toto.am_fmt");  // "formatted Marrocco" format \index{file!am\_fmt}
 @savemesh(th,"toto.Th");      // "bamg"-type mesh   \index{file!bamg}
-@savemesh(th,"toto.msh");     // freefem format \index{file!mesh}
-%%%alh \cite{nopo} not found
-@savemesh(th,"toto.nopo");     // modulef format \index{file!nopo} see \cite{nopo}
+@savemesh(th,"toto.msh");     // freefem format \index{file!mesh} 
+@savemesh(th,"toto.nopo");     // modulef format \index{file!nopo} see \cite{modulef}
 @mesh th2 = readmesh("toto.msh"); // read the mesh 
 
 \eFF
@@ -1041,7 +1038,7 @@ default parameters which can be modified~:
     global variable verbosity (obsolete).  \index{adaptmesh!verbosity=
     }
 
-    \item[\texttt{inquire=}] To inquire about the mesh (false is the
+    \item[\texttt{inquire=}] To inquire graphicaly about the mesh (false is the
     default).  \index{adaptmesh!inquire=}
 
     \item[\texttt{splitpbedge=}] If true, splits all internal edges in
@@ -3201,7 +3198,7 @@ the number is forced by the keyword "label".
 @savemesh(th,"toto.am_fmt");  // format "formated Marrocco" \index{file!am\_fmt}
 @savemesh(th,"toto.Th");      // format database  db mesh "bamg"   \index{file!bamg}
 @savemesh(th,"toto.msh");     // format freefem \index{file!mesh}
-@savemesh(th,"toto.nopo");     // modulef format \index{file!nopo} see \cite{nopo}
+@savemesh(th,"toto.nopo");     // modulef format \index{file!nopo} see \cite{modulef}
 @mesh th2 = readmesh("toto.msh");
 @fespace femp1(th,@P1);
 femp1 f = sin(x)*cos(y),g;
@@ -5305,6 +5302,9 @@ P.L. George: {\it Automatic triangulation}, Wiley 1996.
 
 \bibitem{bamg}
 F. Hecht: The mesh adapting software: bamg. INRIA report 1998.
+
+\bibitem{modulef}
+Modulef  ?????????
 
 \bibitem{Lions} J.L. Lions, O. Pironneau:
 Parallel Algorithms for boundary value problems, Note CRAS. Dec 1998.
