@@ -91,10 +91,10 @@ cat << EOF > config-version.h
 #define VERSION "$VERSION"
 
 /* FreeFem++ build date */
-#define VersionFreeFemDate "$VersionFreeFemDate"
+#define VersionFreeFemDate "$FF_DATE"
 
 /* FreeFem++ version as a float */
-#define VersionFreeFempp $VersionFreeFempp
+#define VersionFreeFempp $VERSION
 EOF
 
 # Checking wether to produce a debug version
