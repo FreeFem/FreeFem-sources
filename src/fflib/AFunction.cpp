@@ -21,6 +21,8 @@
 Map_type_of_map map_type_of_map ; //  to store te type 
 Map_type_of_map map_pair_of_type ; //  to store te type 
 
+basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
+
 double  VersionNumber(); 
 int TheCurrentLine=-1; // unset: by default
 long mpisize=0,mpirank=0;
@@ -735,9 +737,9 @@ void Init_map_type()
     
 //  les types des variables 
     
-  zzzfff->Add("real",atype<double*>());
+  zzzfff->Add("real",typevarreal=atype<double*>());
   zzzfff->Add("int",atype<long*>());
-  zzzfff->Add("complex",atype<Complex*>());
+  zzzfff->Add("complex",typevarcomplex=atype<Complex*>());
   zzzfff->Add("bool",atype<bool*>());
   zzzfff->Add("string",atype<string**>());
   zzzfff->Add("ifstream",atype<istream**>());

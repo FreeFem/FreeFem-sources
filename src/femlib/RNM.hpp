@@ -195,11 +195,11 @@ class ShapeOfArray{ protected:
     long next;  //  the   next array of same type in matrix for subarray  
               // by default  no next 
   ShapeOfArray(const ShapeOfArray & s,long nn): n(s.n),step(s.n),next(nn) {}              
-  ShapeOfArray(long nn): n(nn),step(1),next(-1) {}
+  ShapeOfArray(const long nn): n(nn),step(1),next(-1) {}
   
-  ShapeOfArray(long nn,long s): n(nn),step(s),next(-1) {}
+  ShapeOfArray(const long nn,const long s): n(nn),step(s),next(-1) {}
   
-  ShapeOfArray(long nn,long s,long nextt): n(nn),step(s),next(nextt) {}
+  ShapeOfArray(const long nn,const long s,const long nextt): n(nn),step(s),next(nextt) {}
   
   ShapeOfArray(const ShapeOfArray &old,const SubArray &sub) 
          : n(sub.n),step(old.step*sub.step),next(old.next)
@@ -425,11 +425,11 @@ class KNM_: public KN_<R> {
             const ShapeOfArray & si,
             const ShapeOfArray & sj)
              : KN_<R>(u,s),shapei(si),shapej(sj){} 
-  KNM_(R* u,long n,long m)
+  KNM_(R* u,const long n,const long m)
              : KN_<R>(u,ShapeOfArray(n*m)),shapei(n,1,n),shapej(m,n,1){}
-  KNM_(R* u,long n,long m, long s)
+  KNM_(R* u,const long n,const long m,const  long s)
              : KN_<R>(u,ShapeOfArray(n*m,s)),shapei(n,1,n),shapej(m,n,1){}                     
-  KNM_(KN_<R> u,long n,long m) 
+  KNM_(KN_<R> u,const long n,const long m) 
              : KN_<R>(u,ShapeOfArray(m*n)),shapei(n,1,n),shapej(m,n,1){ }
              
   KNM_(const KN_<R> &u,const ShapeOfArray & si,const ShapeOfArray & sj,long offset=0) 

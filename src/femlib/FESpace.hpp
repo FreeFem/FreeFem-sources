@@ -424,6 +424,8 @@ class FElement : public baseFElement { public:
   int DFOfNode(int df) const { return tfe->DFOfNode[df];} // the df number on the node 
  
   R operator()(const R2 & PHat,const KN_<R> & u,int i,int op)  const ;
+  complex<R> operator()(const R2 & PHat,const KN_<complex<R> > & u,int i,int op)  const ;
+  
  // FElementGlobalToLocal operator()(const KN_<R> & u ) const { return FElementGlobalToLocal(*this,u);}
   private:
   int nbsubdivision() const { return tfe->nbsubdivision;} // for draw 
@@ -737,6 +739,17 @@ inline   R FElement::operator()(const R2 & PHat,
  return (*tfe)(*this,PHat,u,i,op);
 }
 
+
+inline  complex<R> FElement::operator()(const R2 & PHat,const KN_<complex<R> > & u,int i,int op)  const 
+{
+ complex<double> * pu=u; // pointeur du tableau
+  double *pr = static_cast<double*>(static_cast<void*>(pu));
+
+  const KN_<R>  ur(pr,u.n,u.step*2);
+  const KN_<R>  ui(pr+1,u.n,u.step*2);
+  
+   return complex<R>((*tfe)(*this,PHat,ur,i,op),(*tfe)(*this,PHat,ur,i,op));
+}
 
 }
 
