@@ -705,6 +705,20 @@ Mesh::Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b)
          area += triangles[i].area;
       ConsAdjacence();  
     }  
+    else
+    {
+      bool removeouside=nbt>=0;
+      nt=0;
+      BuilTriangles(true,removeouside);
+  /*    if( ! removeouside)
+       {
+         neb=0; // remove the edge
+         delete [] bedges;
+         bedges=0;        
+
+       } */
+      ConsAdjacence();
+    }
 }  
  
 inline int BinaryRand(){
@@ -861,6 +875,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 //     int itdeb=it;     
 //     int count=0;
 //     L1: 
+    outside=true; 
     int its=it;
     int iib=-1,iit=-1;
     R delta=-1;
@@ -1115,15 +1130,24 @@ inline int NbOfSubInternalVertices(int k)
     bedges    =  0; 
     area=0;
     
-      long nba = neb;
+   
+   BuilTriangles(false) ;  
+    
+   ConsAdjacence();    
+   
+ }
+void Mesh::BuilTriangles(bool empty,bool removeouside)
+ {
+       long nba = neb;
      // 
-     long nbsd = 1; // bofbof 
+     long nbsd = 0; // bofbof 
+     if(!removeouside) nbsd=1;
       // faux just pour un test 
       long  *sd;
       sd=new long[2];
       sd[0]=-1;
       sd[1]=0;        
-      nbsd=0;
+      nbsd=removeouside?0:-1;
        
       long nbs=nv;
       long nbsmax=nv;
@@ -1132,16 +1156,17 @@ inline int NbOfSubInternalVertices(int k)
       long           *tri = 0;
       long           *nu = 0;
       long           *reft = 0;
-      float          *cr = 0;
-      float          *h = 0;
+      typedef double Rmesh;
+      Rmesh          *cr = 0;
+      Rmesh          *h = 0;
       long nbtmax = 2 * nbsmax;
       long * arete  = nba ? new long[2*nba] : 0; 
       nu = new long[6*nbtmax];
       c = new long[2*nbsmax];
       tri = new long[(4 * nbsmax + 2 * nbsd)];
       reft = new long[nbtmax];
-      cr = new float[(2 * nbsmax + 2)];
-      h = new float[nbsmax];
+      cr = new Rmesh[(2 * nbsmax + 2)];
+      h = new Rmesh[nbsmax];
       for(int i=0,k=0; i<nv; i++)
        { 
           cr[k++]  =vertices[i].x;
@@ -1156,12 +1181,16 @@ inline int NbOfSubInternalVertices(int k)
        
        
 extern int 
-mshptg_ (float *cr, float *h, long *c, long *nu, long *nbs, long nbsmx, long *tri,
+mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *tri,
 	 long *arete, long nba, long *sd,
-	 long nbsd, long *reft, long *nbt, float coef, float puis, long *err);
+	 long nbsd, long *reft, long *nbt, Rmesh coef, Rmesh puis, long *err);
       
       long nbt=0;
-      mshptg_ (cr, h, c, nu, &nbs, nbs, tri, arete, nba, (long *) sd, nbsd, reft, &nbt, .25, .75, &err);
+      mshptg8_ (cr, h, c, nu, &nbs, nbs, tri, arete, nba, (long *) sd, nbsd, reft, &nbt, .25, .75, &err);
+      if(err) {
+         cerr << " Sorry Error build delaunay triangle   error = " << err << endl;
+         
+      }
       assert(err==0 && nbt !=0);
       delete [] triangles;
       nt = nbt;
@@ -1183,10 +1212,6 @@ mshptg_ (float *cr, float *h, long *c, long *nu, long *nbs, long nbsmx, long *tr
       delete [] cr;
       delete [] h;
       delete [] sd;
-      
-    
-   ConsAdjacence();    
-   
  }
  Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
  { //  routine complique 
@@ -1435,16 +1460,17 @@ mshptg_ (float *cr, float *h, long *c, long *nu, long *nbs, long nbsmx, long *tr
       long           *tri = 0;
       long           *nu = 0;
       long           *reft = 0;
-      float          *cr = 0;
-      float          *h = 0;
+      typedef double Rmesh ;
+      Rmesh          *cr = 0;
+      Rmesh          *h = 0;
       long nbtmax = 2 * nbsmax;
       long * arete  = new long[2*nba]; 
       nu = new long[6*nbtmax];
       c = new long[2*nbsmax];
       tri = new long[(4 * nbsmax + 2 * nbsd)];
       reft = new long[nbtmax];
-      cr = new float[(2 * nbsmax + 2)];
-      h = new float[nbsmax];
+      cr = new Rmesh[(2 * nbsmax + 2)];
+      h = new Rmesh[nbsmax];
       for(int i=0,k=0; i<nv; i++)
        { 
           cr[k++]  =vertices[i].x;
@@ -1459,12 +1485,12 @@ mshptg_ (float *cr, float *h, long *c, long *nu, long *nbs, long nbsmx, long *tr
        
        
 extern int 
-mshptg_ (float *cr, float *h, long *c, long *nu, long *nbs, long nbsmx, long *tri,
+mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *tri,
 	 long *arete, long nba, long *sd,
-	 long nbsd, long *reft, long *nbt, float coef, float puis, long *err);
+	 long nbsd, long *reft, long *nbt, Rmesh coef, Rmesh puis, long *err);
       
       long nbt=0;
-      mshptg_ (cr, h, c, nu, &nbs, nbs, tri, arete, nba, (long *) sd, nbsd, reft, &nbt, .25, .75, &err);
+      mshptg8_ (cr, h, c, nu, &nbs, nbs, tri, arete, nba, (long *) sd, nbsd, reft, &nbt, .25, .75, &err);
       assert(err==0 && nbt !=0);
       delete [] triangles;
       nt = nbt;
@@ -1646,7 +1672,7 @@ void Mesh::Buildbnormalv()
        }
      }
   // cout << nb << " == " << n-bnormalv << endl;
-   assert(bnormalv+nb == n);
+   assert(n - bnormalv <= nb );
 }
 }
 //  static const R2 Triangle::Hat[3]= {R2(0,0),R2(1,0),R2(0,1)} ; 
