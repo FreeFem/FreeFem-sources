@@ -3,7 +3,7 @@ VERSION=$1
 list1="HISTORY DOC/manual.pdf DOC/manual.ps.gz"
 
 listf=(freefem++-${VERSION}.tar.gz FreeFem++v${VERSION}_MacOsX.tgz FreeFem++v${VERSION}_Win.zip  FreeFem++v${VERSION}_MacOS.sit)
-listcd=(freefem++.tar.gz           ""                              freefem++.zip                 freefem++.sit)
+listcd=(freefem++.tar.gz           "freefem++_macosx.tgz"          freefem++.zip                 freefem++.sit)
 
 www=hecht@rascasse.inria.fr:www_gamma/Gamma/cdrom/ftp/freefem/
 ftp=hecht@rascasse.inria.fr:/ftp_gamma/freefem/
