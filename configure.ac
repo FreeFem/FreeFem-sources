@@ -252,12 +252,16 @@ AC_ARG_WITH(blas,
 	ff_blas_ok=yes
 	ff_blas_lib="${withval}")
 
-# Trying  blas library 
+# Specific BLAS library location for FreeBSD
+ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
+
+# Trying  blas library
 for iblas in \
 "-lblas" "-framework vecLib" "-L/usr/lib/atlas -lblas" \
 "-L${curdir}/download/blas -lcblas -lf77blas" \
 "-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas" \ 
-"-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas" 
+"-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas" \
+$ff_freebsd_blas
 do 
 if test "$ff_blas_ok" = no;
 then
@@ -447,7 +451,18 @@ then
 
 	# Trying default locations
 
-	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h)
+	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h,ff_umfpack_header=yes)
+
+	# Somes systems like FreeBSD hide umfpack.h in a directory
+	# called UMFPACK (all capitals). This breaks the standard
+	# #define produced by autoconf in config.h.in.
+
+	if test "$ff_umfpack_header" != yes;
+	then
+		AC_CHECK_HEADER(UMFPACK/umfpack.h,
+			AC_DEFINE(HAVE_BIG_UMFPACK_UMFPACK_H,1,
+				If umfpack.h is located in UMFPACK subdir))
+	fi
 
 	if test "$ff_amd_ok" = no;
 	then
