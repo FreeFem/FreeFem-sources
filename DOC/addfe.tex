@@ -4,39 +4,40 @@
 \def\Fb#1{\boldsymbol{\omega}^{K}_{#1}}
 \def\fbi{\mathbf{\omega}^{K}_{ij}}
 
-The finite element is at value in $\R^{N}$.
-The degrees of freedom of the finite element are associated to a node,
+The values of finite element function  are in $\R^{N}$.
 
-A node is link to a geometry of the support,
+%The degrees of freedom ($NbDoF$ is the number degrees of freedom) of the finite element are associated to a node,
 
+%A node is link to a geometry of the support,
+% a modifer 
 
 
 
 
  
 
-we denotes $\Fb{i}$ the $i$ basis function
+We denotes $\Fb{i}$ the $i$ basis function
   for  $i\in \{0,..,NbDoF-1\}$, and
   the componante $j$  are denote $\fbi$.
   
 We denote $\Pi_{h}$ the interpolator of the finite element.
 We have the following equality $\Fb{i} =  \Pi_{h} \Fb{i} $.
 
-Let $\boldsymbol{f}$ a function to interpole,
+Let $\boldsymbol{f}=(f_j)_{j=0,...,N-1} $ a function to interpole,
 formally we can defined the operator $\Pi_{h}$ 
 the following formular:
   
 \begin{equation}
-\Pi_{h} \boldsymbol{f} = \sum_{k=0}^{\mathtt{kPi}-1} \alpha_k \boldsymbol{f}({P_{p_{k}}})_{j_{k}} \Fb{i_{k}} \label{eq-interpo}
+\Pi_{h} \boldsymbol{f} = \sum_{k=0}^{\mathtt{kPi}-1} \alpha_k \boldsymbol{f}_{j_{k}}({P_{p_{k}}}) \Fb{i_{k}} \label{eq-interpo}
 \end{equation}
   
 where $P_{p}$ is a set of $npPi$ points, 
 
-Remark, in a formula (\ref{eq-interpo}),the list $ p_{k},j_{k},i_{k}$ depend just of  the type of finite element not of the element, but the coefficient  $\alpha_{k}$ can depending of the 
+Remark, in a formula (\ref{eq-interpo}),the list $ p_{k},j_{k},i_{k}$ depend just of  the type of finite element not of the element, but the coefficient  $\alpha_{k}$ can be depending of the 
 element. 
 
 \medskip
- Example 1: classical scalar  Lagrange finite element, first we have $\mathtt{kPi}=\mathtt{npPi}=\mathtt{NbOfNode}$ and
+ Example 1: classical scalar  Lagrange finite element $(N=1)$, first we have $\mathtt{kPi}=\mathtt{npPi}=\mathtt{NbOfNode}$ and
 \begin{itemize}\item $P_{p}$ is the point of the nodal points
 \item  the $\alpha_k=1$, because we take the value  of the function at the point $P_{k}$
 \item $p_{k}=k$ ,  $j_{k}=k$ because we have one node per  function.
@@ -60,13 +61,13 @@ element.
   defined by $ sgn(i_{b}-i_{c})(\mathbf{b}-\mathbf{c})$, $sgn(i_{c}-i_{a})(\mathbf{c}-\mathbf{a})$, $sgn(i_{a}-i_{b})(\mathbf{a}-\mathbf{b})$, 
   
   For the finite element the three basis functions are:
- $$\Fb{0}= \frac{sgn(i_{b}-i_{c})}{|T]}(x-a),\quad
-  \Fb{1}= \frac{sgn(i_{c}-i_{a})}{|T]}(x-b),\quad
-  \Fb{2}= \frac{sgn(i_{a}-i_{b})}{|T]}(x-c),$$
-   where $|T|$ is the area of the triangle $T$.
+ $$\Fb{0}= \frac{sgn(i_{b}-i_{c})}{2|K|}(x-a),\quad
+  \Fb{1}= \frac{sgn(i_{c}-i_{a})}{2|K|}(x-b),\quad
+  \Fb{2}= \frac{sgn(i_{a}-i_{b})}{2|K]}(x-c),$$
+   where $|K|$ is the area of the triangle $K$.
    \medskip
   
-So we have  $N=2$,$\mathtt{kPi}=6; \mathtt{npPi}=3;$ and:
+So we have  $N=2$,$\mathtt{kPi}=6 (size of the formuar); \mathtt{npPi}=3;$ (number of points) and:
 \begin{itemize}\item $P_{p} = \{ \frac{\mathbf{b}+\mathbf{c}}{2},\frac{\mathbf{a}+\mathbf{c}}{2}, \frac{\mathbf{b}+{\mathbf{a}}}{2}\}$
 
 \item 
@@ -85,9 +86,13 @@ So we have  $N=2$,$\mathtt{kPi}=6; \mathtt{npPi}=3;$ and:
 
 \subsection{Which class of add} 
 
+Add file \texttt{FE\_ADD.cpp} in directory \texttt{src/femlib} for exemple 
+first to initialize :
+\bFF
+#include "error.hpp"#include "rgraph.hpp"using namespace std;  #include "RNM.hpp"#include "fem.hpp"#include "FESpace.hpp"namespace  Fem2D {
+\eFF
 
-
-First, you are just a class which derive for \texttt{ public  TypeOfFE} like:
+Second, you are just a class which derive for \texttt{ public  TypeOfFE} like:
 \bFF
 @class TypeOfFE_RTortho : public  TypeOfFE { public:  
   static int Data[]; // some numbers \hfilll
@@ -150,7 +155,7 @@ The index $i,j,k$ of the array $val(i,j,k)$   corresponding to:
 const int last_operatortype=10;
 \eFF\end{description}
 
-The other parameter, ar
+The shape function : 
 \bFF
  void TypeOfFE_RTortho::FB(const bool *whatd,const Mesh & Th,const Triangle & K,
                            const R2 & PHat,RNMK_ & val) const{ //    R2 P(K(PHat));  R2 A(K[0]), B(K[1]),C(K[2]);  R l0=1-P.x-P.y,l1=P.x,l2=P.y;   assert(val.N() >=3);  assert(val.M()==2 );  val=0;    R a=1./(2*K.area);  R a0=   K.EdgeOrientation(0) * a ;  R a1=   K.EdgeOrientation(1) * a  ;  R a2=   K.EdgeOrientation(2) * a ;  //  ------------  @if (whatd[op_id])  // value of the function   {     @assert(val.K()>op_id);     RN_ f0(val('.',0,0)); // value first component     RN_ f1(val('.',1,0)); // value second component     f1[0] =  (P.x-A.x)*a0;     f0[0] = -(P.y-A.y)*a0;       f1[1] =  (P.x-B.x)*a1;     f0[1] = -(P.y-B.y)*a1;       f1[2] =  (P.x-C.x)*a2;     f0[2] = -(P.y-C.y)*a2;    }  // ----------------    @if (whatd[op_dx]) // value of the dx of function    {     assert(val.K()>op_dx);     val(0,1,op_dx) =  a0;       val(1,1,op_dx) =  a1;       val(2,1,op_dx) =  a2;      }     @if (whatd[op_dy])    {     assert(val.K()>op_dy);     val(0,0,op_dy) =  -a0;       val(1,0,op_dy) =  -a1;       val(2,0,op_dy) =  -a2;      }
@@ -164,35 +169,55 @@ The function to defined the coefficient $\alpha_{k}$:
 void TypeOfFE_RT::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const {  const Triangle & T(K.T);   for (int i=0,k=0;i<3;i++)     {          R2 E(T.Edge(i));        R signe = T.EdgeOrientation(i) ;        v[k++]= signe*E.y;        v[k++]=-signe*E.x;     }   }
 \eFF
 
-Now to finish, we just need to add a new key work in \texttt{FreeFem++}
+Now , we just need to add a new key work in \texttt{FreeFem++}, so
+at the end of the file, we add:
 
 \bFF
 //  let the 2 globals variables 
 static TypeOfFE_RTortho The_TypeOfFE_RTortho; //  
 //                         -----  the name in freefem ----
-static  ListOfTFE typefemRTOrtho("RT0Ortho", & The_TypeOfFE_RTortho); //  
+static  ListOfTFE typefemRTOrtho("RT0Ortho", & The_TypeOfFE_RTortho); // 
+
+// link with FreeFem++  do not work with static library .a \hfilll//  FH so add a extern name to call in \texttt{init\_static\_FE} \hfilll
+// (see end of FESpace.cpp) \hfilllvoid init_FE_ADD() { }; // --- end --  \hfilll} // FEM2d namespace  
 \eFF
 
+To inforce in loading of this new finite element, 
+we have to add the two new lignes close to the end of files \texttt{src/femlib/FESpace.cpp} 
+like:
+\bFF
+// correct Probleme of static library link with new make file void init_static_FE(){ //  list of other FE file.o    extern void init_FE_P2h() ;  init_FE_P2h() ;   extern void init_FE_ADD() ;  // new ligne 1
+   init_FE_ADD();  // new ligne 2}
+
+\eFF
 
 
 \subsection{How to add}
 
-First, create a file contening all this code, like in  file \texttt{src/femlib/Element\_P2h.cpp},
-after modifier the Makefile  by  adding the name of your file without suffix
-to the variable \texttt{OBJETS} like:
+First, create a file \texttt{FE\_ADD.cpp} contening all this code, like in  file \texttt{src/femlib/Element\_P2h.cpp},
+after modifier the \texttt{Makefile.am}  by  adding the name of your file 
+to the variable \texttt{EXTRA\_DIST} like:
 
-\begin{verbatim}OBJETS= $(EIGEN) AFunction.o   lex.o  lgfem.o  lgmesh.o \
- Drawing.o    \
- gibbs.o CheckPtr.o fem.o FormuleIntegration.o FESpace.o \
- Element_RT.o mshptg.o FQuadTree.o \
- QuadTree.o R2.o Meshio.o Mesh2.o Metric.o \
- BamgFreeFem.o MeshDraw.o MeshGeom.o MeshQuad.o SetOfE4.o \
- MeshRead.o MeshWrite.o problem.o strversionnumber.o InitFunct.o \
- lgalgo.o Element_P2h.o\end{verbatim}
- 
- 
-For codewarrior compilation add the file in the project an remove the flag
-in panal  PPC linker FreeFEm++ Setting Dead-strip Static Initializition Code Flag.
+\begin{verbatim}# Makefile using Automake + Autoconf                                                             
+# ----------------------------------                                                             
+# $Id$                                      
+
+# This is not compiled as a separate library because its                                         
+# interconnections with other libraries have not been solved.                                    
+
+EXTRA_DIST=BamgFreeFem.cpp BamgFreeFem.hpp CGNL.hpp CheckPtr.cpp        \
+ConjuguedGradrientNL.cpp DOperator.hpp Drawing.cpp Element_P2h.cpp      \
+Element_P3.cpp Element_RT.cpp fem3.hpp fem.cpp fem.hpp FESpace.cpp      \
+FESpace.hpp FESpace-v0.cpp FQuadTree.cpp FQuadTree.hpp gibbs.cpp        \
+glutdraw.cpp gmres.hpp MatriceCreuse.hpp MatriceCreuse_tpl.hpp          \
+MeshPoint.hpp mortar.cpp mshptg.cpp QuadratureFormular.cpp              \
+QuadratureFormular.hpp RefCounter.hpp RNM.hpp RNM_opc.hpp RNM_op.hpp    \
+RNM_tpl.hpp   FE_ADD.cpp
+
+\end{verbatim}
+
+and recompile  
+
 
 
 
