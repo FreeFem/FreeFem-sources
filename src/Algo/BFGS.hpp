@@ -40,10 +40,10 @@ template <class LS>
 BFGS<LS>::BFGS(LS* p, int it, Real eps, int verb) 
   :Optima<LS>(verb)
 {
-  ls=p;
-  iterMax 	= 	it;
-  tol 		= 	eps;
-  iterNum 	= 	0;
+  this->ls=p;
+  this->iterMax 	= 	it;
+  this->tol 		= 	eps;
+  this->iterNum 	= 	0;
 }
 
 // Nécessite pour la classe MAT:
@@ -59,11 +59,11 @@ template <class LS>
 typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0)
 {
   //reset the residue history for every new optimizer
-  iterNum = 0;
-  if (residue != NULL)
+  this->iterNum = 0;
+  if (this->residue != NULL)
 	{
-      delete residue;
-      residue = new mlist;
+      delete this->residue;
+      this->residue = new mlist;
 	}
   
   // Initial settings for some parameters
@@ -73,18 +73,18 @@ typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0)
   double descent = 0.;
   
 
-  g0= *(ls->gradient(model0));
+  g0= *(this->ls->gradient(model0));
 	
   // check the gradient, in case the initial model is the optimal
   double err = (Real)sqrt((g0,g0));
   
-  if (isVerbose) cerr << "Initial residue : " << err << endl;
+  if (this->isVerbose) cerr << "Initial residue : " << err << endl;
 
   appendResidue(err);	// residual
 
   if (err < tol)
 	{
-      if (isVerbose) cerr << "Initial guess was great! \n";
+      if (this->isVerbose) cerr << "Initial guess was great! \n";
       isSuccess = 1;
       return model0;
 	}

@@ -25,7 +25,10 @@ double  VersionNumber();
 int TheCurrentLine=-1; // unset: by default
 long mpisize=0,mpirank=0;
 queue<pair<const E_Routine*,int> > debugstack;
-
+// FH  for g++ 3.4  the prototypage  have change
+double Imag(const  complex<double> & z){ return imag(z);}
+double Real(const  complex<double> & z){ return real(z);}
+// FH
 bool showCPU= false;
 template<class T> inline T Max (const T &a,const T & b){return a > b ? a : b;}
 template<class T> inline T Min (const T &a,const T & b){return a < b ? a : b;}
@@ -1624,9 +1627,9 @@ void Init_map_type()
      Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow));
      Global.Add("sqrt","(",new OneOperator1_<Complex>(sqrt));
      Global.Add("conj","(",new OneOperator1_<Complex>(conj));
-     Global.Add("imag","(",new OneOperator1_<double,Complex>(imag));
-    // Global.Add("real","(",new OneOperator1_<double,Complex>(real));
-     Add<Complex>(atype<double>()->name(),".",new OneOperator1_<double,Complex>(real));
+     Global.Add("imag","(",new OneOperator1_<double,Complex>(Imag));
+    // Global.Add("real","(",new OneOperator1_<double,Complex>(Real));
+     Add<Complex>(atype<double>()->name(),".",new OneOperator1_<double,Complex>(Real));
      Add<Complex*>(atype<double>()->name(),".",new OneOperator1_<double,Complex*>(preal));
     
      Global.Add("abs","(",new OneOperator1_<double,Complex>(abs));

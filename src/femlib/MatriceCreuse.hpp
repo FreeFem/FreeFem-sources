@@ -562,6 +562,7 @@ class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatr
   mutable double  epsr;
   KN<R> D1;
   public:
+  typedef typename VirtualMatrice<R>::plusAx plusAx;
   SolveGCDiag(const MatriceMorse<R> &A,double epsilon=1e-6) : 
     n(A.n),nbitermax(Max(n,100)),D1(n),eps(epsilon),epsr(0) { throwassert(A.sym());
     for (int i=0;i<n;i++)
@@ -571,7 +572,7 @@ class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatr
     // cout << " epsr = " << epsr << endl;
      ConjuguedGradient<R,MatriceMorse<R>,SolveGCDiag<R> >(a,*this,b,x,nbitermax,epsr);
    }
-typename VirtualMatrice<R>::plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
+plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
 
 
  void addMatMul(const KN_<R> & x, KN_<R> & Ax) const 
