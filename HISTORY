@@ -579,6 +579,7 @@ __________
    in argument subtition
    correct error in line numbering in case of newline in string
    cosmetic change in output 
+
 20/01/2005
    count () in macro parameter to handle   couple of () in macro parameter.
    macro sum(a,b) (a+b); 
@@ -591,4 +592,10 @@ __________
            mij[make_pair(i,j)] = coef*a[k];
     to
            mij[make_pair(i,j)] += coef*a[k];
+    
+    Correct a segfault if second derivative of test function exist in 
+    problem definition.  The Change in problem.cpp:
+    resize : KN<double> buf(Vh.MaximalNbOfDF()*3*Vh.N);
+    to     : KN<double> buf(Vh.MaximalNbOfDF()*last_operatortype*Vh.N);
+
    
