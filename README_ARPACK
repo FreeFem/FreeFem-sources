@@ -1,4 +1,8 @@
-remark: all lines beginning   with $ are shell command.
+How to adapt ARPACK for compilation with FreeFem++
+--------------------------------------------------
+
+NOTE: Since "./configure" is able to download ARPACK and compile it by
+itself, this file is only for reference.
 
 1) download the arpack software in directory ../arpack 
 ------------------------------------------------------
