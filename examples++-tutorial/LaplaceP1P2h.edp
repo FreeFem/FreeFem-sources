@@ -15,7 +15,7 @@
   plot(uh,ps="LaplaceP1P2h.eps",value=true);
 //  if error on macos version codeworrior 
 //  remove in panal  PPC linker FreeFEm++ Setting Dead-strip Static Initializition Code Flag
-  fespace V2h(Th,P2h);
+  fespace V2h(Th,P2);
  V2h u2h,v2h;              // unkown and test function. 
 
  problem errorh (u2h,v2h,solver=CG) =           //  definion of  the problem 
