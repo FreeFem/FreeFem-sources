@@ -11,5 +11,4 @@ Makefile
 Makefile.in
 *.mesh
 *.points
-regtests.edp
 toto.txt

@@ -1,6 +1,6 @@
 # $Id$
 
-all-local: all.edp regtests.edp
+all-local: all.edp
 TESTS=../regtests.sh
 TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp	\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)	\
@@ -10,16 +10,6 @@ EXTRA_DIST=*.edp aile.msh xyf all.edp regtests.edp
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests)\.edp$$'` ; do  \
-		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
-		echo "verbosity=verbosityy;" ; \
-		echo \{ include \"$$i\"\;\}\; ;\
-		echo ' cout << "------------------------------------------------------------------------------ " << endl;' ;\
-	done) > $@
-
-# Special test script, without any troublesome window-opening scripts
-regtests.edp:
-	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
-	for i in *`ls *.edp|grep -v -E '^(medit|Newton|all|gnuplot|regtests)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;" ; \
 		echo \{ include \"$$i\"\;\}\; ;\

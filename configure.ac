@@ -513,14 +513,6 @@ fi
 AC_SUBST(STD_GRAPH_OBJ,$ff_std_graph_obj)
 AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 
-# Special cases
-# -------------
-
-# src/fflib/lex.cpp is not compiled correctly if flag "-fast" is
-# specified with gcc on PowerPC G5.
-#ff_lexflags="`echo $CXXFLAGS|sed 's/-fast//g'`"
-#AC_SUBST(FF_LEXFLAGS,$ff_lexflags)
-
 # creating all makefiles
 # ----------------------
 

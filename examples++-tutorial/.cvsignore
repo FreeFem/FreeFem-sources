@@ -8,6 +8,5 @@ Makefile.in
 *.msh
 plot.gp
 *.ps
-regtests.edp
 toto.*
 u.txt
