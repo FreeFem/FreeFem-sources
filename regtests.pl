@@ -7,20 +7,16 @@
 
 use strict;
 
-# All FreeFem++ versions
+# All existing FreeFem++ versions for this platform
 my @progs;
-push @progs,"$ENV{PROGLOC}/std/FreeFem++$ENV{EXEEXT}"
-  if -e "$ENV{PROGLOC}/std/FreeFem++$ENV{EXEEXT}";
-push @progs,"$ENV{PROGLOC}/nw/FreeFem++-nw$ENV{EXEEXT}"
-  if -e "$ENV{PROGLOC}/nw/FreeFem++-nw$ENV{EXEEXT}";
+push @progs,"$ENV{PROGLOC}/std/FreeFem++$ENV{EXEEXT}";
+push @progs,"$ENV{PROGLOC}/nw/FreeFem++-nw$ENV{EXEEXT}";
 push @progs,"$ENV{PROGLOC}/x11/FreeFem++-x11$ENV{EXEEXT}"
-  if -e "$ENV{PROGLOC}/x11/FreeFem++-x11$ENV{EXEEXT}";
+  if $ENV{X11PROG} ne "";
 push @progs,"$ENV{PROGLOC}/glx/FreeFem++-glx$ENV{EXEEXT}"
-  if -e "$ENV{PROGLOC}/glx/FreeFem++-glx$ENV{EXEEXT}";
+  if $ENV{GLXPROG} ne "";
 push @progs,"$ENV{PROGLOC}/agl/FreeFem++-agl$ENV{EXEEXT}"
-  if -e "$ENV{PROGLOC}/agl/FreeFem++-agl$ENV{EXEEXT}";
-push @progs,"$ENV{PROGLOC}/pc/FreeFem++-pc$ENV{EXEEXT}"
-  if -e "$ENV{PROGLOC}/pc/FreeFem++-pc$ENV{EXEEXT}";
+  if $ENV{AGLPROG} ne "";
 
 # Loop on all available FreeFem programs
 foreach my $ff (@progs) {
