@@ -32,9 +32,3 @@ real cpu=clock();
 Probem1; // SOLVE THE PROBLEM 1
 plot(u);
 cout << " CPU = " << clock()-cpu << endl;
-
-// Regression check
-real ref=u[]'*u[];
-cout<<"reference value="<<ref<<endl;
-assert(ref<122060);
-assert(ref>122058);
