@@ -225,8 +225,15 @@ fi
 
 # Looking for useful configuration utilities
 # ------------------------------------------
+AC_ARG_ENABLE(generic_blas,[  --enable-generic_blas	Download generic blas (implie --enable-download)])
 
 AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK)])
+
+if test "$enable_generic_blas" = yes
+then
+enable_download = yes
+fi
+
 if test "$enable_download" = yes
 then
 	AC_CHECK_PROG(ff_wget,wget,yes,no)
@@ -238,6 +245,7 @@ fi
 # --------------------
 
 # User-specified location
+
 ff_blas_ok=no
 AC_ARG_WITH(blas,
 	--with-blas=library	Use a specific version of the Blas,
@@ -297,7 +305,7 @@ then
 	# When compiling a generic version, we do not need an
 	# optimized version of the BLAS.
 
-	if test "$enable_generic" = yes
+	if test "$enable_generic" = yes -o "$enable_generic_blas" = yes 
 	then
 		ff_download_blas=generic
 		ff_blas_lib="-L${curdir}/download/blas -lcblas -lf77blas"
