@@ -1,5 +1,4 @@
-doc=manual
-all:$(doc).ps.gz $(doc).pdf
+all:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 
 %.dvi:%.tex
 	latex $*

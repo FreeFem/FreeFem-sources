@@ -24,7 +24,6 @@ AM_PROG_LEX
 
 AC_CHECK_LIB(pthread,pthread_create)
 
-
 # Checking wether we can produce a X11 version
 # --------------------------------------------
 
@@ -45,12 +44,23 @@ AC_MSG_RESULT($ff_x11)
 
 AC_MSG_CHECKING(wether we are on a MacIntosh)
 ff_mac=no
+ff_aglprog=
 if test `uname` = Darwin;
 then
 	ff_mac=yes
-	AC_SUBST(AGLPROG,FreeFem++-agl)
+	ff_aglprog=FreeFem++-agl
 fi
 AC_MSG_RESULT($ff_mac)
+
+# Checking that OpenGL is accessible
+# ----------------------------------
+
+# If we cannot find gl.h, no OpenGL version can be produced
+AC_CHECK_HEADER(GL/gl.h,
+	ff_glxprog=FreeFem++-glx,
+	ff_glxprog=
+	ff_aglprog=
+)
 
 # Looking for the BLAS
 # --------------------
@@ -166,9 +176,34 @@ then
 	AC_SUBST(MPIPROG,FreeFem++-mpi)
 fi
 
-# Creating all makefiles
+# Checking wether we can generate some documentation
+# --------------------------------------------------
+
+AC_CHECK_PROG(ff_latex,latex,yes,no)
+AC_CHECK_PROG(ff_makeindex,makeindex,yes,no)
+AC_CHECK_PROG(ff_dvips,dvips,yes,no)
+if test "$ff_latex" = yes -a "$ff_makeindex" = yes -a "$ff_dvips" = yes;
+then
+	AC_SUBST(DOCPS,manual.ps)
+
+	AC_CHECK_PROG(ff_gzip,gzip,yes,no)
+	if test "$ff_gzip" = yes;
+	then
+		AC_SUBST(DOCPSGZ,manual.ps.gz)
+	fi
+fi
+
+AC_CHECK_PROG(ff_pdflatex,pdflatex,yes,no)
+if test "$ff_pdflatex" = yes;
+then
+	AC_SUBST(DOCPDF,manual.pdf)
+fi
+
+# creating all makefiles
 # ----------------------
 
+AC_SUBST(GLXPROG,$ff_glxprog)
+AC_SUBST(AGLPROG,$ff_aglprog)
 AC_OUTPUT(Makefile
 	src/Makefile
 	src/bamglib/Makefile
