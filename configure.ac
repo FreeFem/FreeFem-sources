@@ -163,7 +163,7 @@ then
 		ff_x11=yes
 		ff_x11prog=FreeFem++-x11${EXEEXT}
 		CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
-		LIBS="$LIBS -L/usr/X11R6/lib -lX11 -lXext -lm"
+		LIBS="$LIBS -L/usr/X11R6/lib -lX11 -lXext -lXpm -lm"
 	fi
 fi
 
