@@ -150,3 +150,8 @@
 
 \outer\def\inputFF#1{\par\def\includefile{\input{#1}}\parskip=0pt plus 2pt
 \FFverbatim\tt\includefile\endgroup}
+
+%OT
+\def\bT{\\\FFverbatim \small \tt
+\hspace*{4ex}\begin{minipage}{.9\textwidth}}
+\def\eT{\end{minipage}\endgroup\medskip\\}
