@@ -3,13 +3,40 @@
 
 
 #include <map>
+#include <cstdio>
 
-
+// BUG option compilation -fast 
+/*
 template<class T>
 string * toString(const T& a)
 { ostringstream r;
   r << a  ENDS ;
   return new string(r.str());
+}
+
+*/
+// 
+inline string * toString(const double& a)
+{
+  char buf[30];
+  sprintf(buf,"%g",a);
+ return new string(buf);
+}
+inline string * toString(const long& a)
+{
+  char buf[30];
+  sprintf(buf,"%ld",a);
+  return new string(buf);
+}
+inline string * toString(const bool& a)
+{
+  return new string(a?"T":"F");
+}
+inline string * toString(const complex<double> a)
+{
+  char buf[60];
+  sprintf(buf,"%g+%gi",a.real(),a.imag());
+  return new string(buf);
 }
 
 
