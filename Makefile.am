@@ -63,6 +63,7 @@ ide-client:
 clean-gen:
 	-rm configure
 	-find . -name Makefile.in -exec rm {} \;
+	-rm examples++/regtests.edp
 
 # Testing
 # -------
