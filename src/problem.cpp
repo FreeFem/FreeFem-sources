@@ -1620,59 +1620,19 @@ AnyType Problem::operator()(Stack stack) const
   throwassert(Nbcomp==Uh.N && Nbcomp==Vh.N); 
   RN *B=new RN(Vh.NbOfDF);
   RN *X=B;
-  
-  *B=0;
-  
-  bool initx = typemat->t==TypeSolveMat::GC;
-  
   const  Mesh & Th(Uh.Th);
-  
-  if (initx) 
-    {
-      X=new KN<R>(B->N());
-      const FEbase<R> & u_h0 = *(u_h[0]);
-      const FESpace  * u_Vh = &*u_h0.Vh ;
-      
-      if ( u_Vh==0  || &(*(u_h[0])).Vh->Th != &Th )
-        {
-          *X=0;
-          if(verbosity>1)
-            cout << "   -- Change of Mesh " << (u_Vh ? & (*(u_h[0])).Vh->Th: 0 ) 
-                 << "  " << &Th <<  endl;
-        }
-      else
-        {
-          if (Nb==1) 
-            *X= * u_h[0]->x();
-          else { // dispatch the solution  
-            const FElement ** sK= new const FElement * [Nb];  
-            RN ** sol= new RN * [Nb];
-            for (int i=0;i<Nb;i++) {
-              
-              sol[i] = (*(u_h[i])).x() ;
-            }
-            
-            for (int it=0;it<Th.nt;it++)
-              {
-                const FElement K(Uh[it]);
-                const int nbdf=K.NbDoF();
-                for (int i=0;i<Nb;i++)
-                  sK[i]= new FElement( (*LL[i])[it]) ;
-                for (int df=0;df< nbdf;df++)
-                  {  int kfe=K.FromFE(df);
-                  int kdf=K.FromDF(df);
-                  const FElement & SK(*sK[kfe]);
-                  (*X)[K(df)]= (*sol[kfe])[SK(kdf)] ;
-                  }
-                for (int i=0;i<Nb;i++)
-                  delete sK[i];        
-              }
-            delete [] sol;
-            delete [] sK; 
-          }}
-    }
-    
+  bool initx = typemat->t==TypeSolveMat::GC;
+  InitProblem(  Nb,  Uh, Vh, B, X,u_hh,typemat , u_h,  LL );
+
   if(verbosity>2) cout << "   Problem(): initmat " << initmat << " VF (discontinuous Galerkin) = " << VF << endl;
+  
+  if(complextype)
+  {
+    ExecError("Problem just Real problem no complex do day");
+  }
+  else
+  ;
+  
   if (initmat) 
    {
     if (typemat->profile) 
@@ -1939,7 +1899,7 @@ Problem::Problem(const C_args * ca,const ListOfId &l,size_t & top) :
   VF=isVF(op->largs);   
  // cout << " Problem ) VF = " << VF << endl;
   complextype =  FieldOfForm(op);
-  if( complextype) 
+ if( complextype) 
     CompileError("Problem just Real problem no complex do day");
   
 }
