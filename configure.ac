@@ -443,6 +443,14 @@ AC_SUBST(STD_X11_LIB,$ff_std_x11_lib)
 AC_SUBST(STD_X11_INC,$ff_std_x11_inc)
 AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 
+# Special cases
+# -------------
+
+# src/fflib/lex.cpp is not compiled correctly if flag "-fast" is
+# specified with gcc on PowerPC G5.
+ff_lexflags="`echo $CXXFLAGS|sed 's/-fast//g'`"
+AC_SUBST(FF_LEXFLAGS,$ff_lexflags)
+
 # creating all makefiles
 # ----------------------
 

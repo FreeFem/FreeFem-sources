@@ -23,3 +23,15 @@ libff_a_DEPENDENCIES=@EIGENOBJ@
 
 INCLUDES=-I../lglib -I../bamglib -I../Graphics -I../femlib	\
 -I$(top_srcdir)/arpack/arpack++/include
+
+# lex.cpp is not compiled correctly with "-fast" on PowerPC G5, so we
+# need compile it separately.
+
+lex.@OBJEXT@:
+	source='$<' object='$@' libtool=no \
+	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' \
+	$(CXXDEPMODE) $(depcomp) \
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+        $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) @FF_LEXFLAGS@ \
+		-c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<
+

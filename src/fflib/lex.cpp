@@ -510,7 +510,7 @@ bool mylex::ExpandParam(int &ret)
       l=0;
       nf=f= new ifstream(ff);     
       if (!f || !*f) {
-        lex->cout << " Error openning file " <<filename<< endl;
+        lex->cout << " Error openning file " <<ff<< endl;
         lgerror("lex: Error input openning file ");};
     }
   void  mylex::xxxx::readin(mylex *lex,const string & s,int nbparam) 

@@ -64,13 +64,35 @@ then
     # MacOS X
     if test -x /usr/bin/hostinfo
 	then
-	if test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
+
+	# Check that we are on MacOS X
+	if test `/usr/bin/hostinfo|grep Darwin|wc -l` -gt 0
 	    then
 
-	    # -fast used by gcc on PowerPC G5
+	    # "-fast" will be followed by "-mcpu" to give an exact CPU
+	    # reference.
+
 	    CHECK_COMPILE_FLAG(C,-fast,CFLAGS)
 	    CHECK_COMPILE_FLAG(C++,-fast,CXXFLAGS)
 	    CHECK_COMPILE_FLAG(Fortran 77,-fast,FFLAGS)
+	fi
+
+	# CPU reference
+	if test `/usr/bin/hostinfo|grep ppc7450|wc -l` -gt 0
+	    then
+	    CHECK_COMPILE_FLAG(C,-mcpu=7450,CFLAGS)
+	    CHECK_COMPILE_FLAG(C++,-mcpu=7450,CXXFLAGS)
+	    CHECK_COMPILE_FLAG(Fortran 77,-mcpu=7450,FFLAGS)
+
+	elif test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
+	    then
+
+	    # -fast implies -mcpu=G5, but at least this way we can see
+	    # that the automatic detection worked.
+
+	    CHECK_COMPILE_FLAG(C,-mcpu=G5,CFLAGS)
+	    CHECK_COMPILE_FLAG(C++,-mcpu=G5,CXXFLAGS)
+	    CHECK_COMPILE_FLAG(Fortran 77,-mcpu=G5,FFLAGS)
 	fi
 
     # Linux
