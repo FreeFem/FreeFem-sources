@@ -1795,7 +1795,7 @@ case 152:
 {
              if (yyvsp[-3].type->right()->CastingFrom(yyvsp[-1].cexp.left()) ) 
                 yyval.cexp=yyvsp[-3].type->right()->CastTo(yyvsp[-1].cexp)  ;
-             else { yyval.cexp=C_F0(yyvsp[-1].cexp,yyvsp[-3].type->right()->name());
+             else { yyval.cexp=yyvsp[-3].type->right()->Find("<--",basicAC_F0_wa(yyvsp[-1].cexp));
              if (!yyval.cexp.left()) { cerr << " no wait to change " << yyvsp[-1].cexp.left()->right()->name() << " in " << 
                                         yyvsp[-3].type->right()->name() << endl;
                                 CompileError(" Error in type(exp) "); }

@@ -495,7 +495,7 @@ primary:
   |        TYPE '('  Expr ')' {
              if ($1->right()->CastingFrom($3.left()) ) 
                 $$=$1->right()->CastTo($3)  ;
-             else { $$=C_F0($3,$1->right()->name());
+             else { $$=$1->right()->Find("<--",basicAC_F0_wa($3));
              if (!$$.left()) { cerr << " no wait to change " << $3.left()->right()->name() << " in " << 
                                         $1->right()->name() << endl;
                                 CompileError(" Error in type(exp) "); }
