@@ -51,7 +51,7 @@ class ARrcSymStdEig: public virtual ARrcStdEig<FLOAT, FLOAT> {
  // a.3) Functions that check user defined parameters.
 
   char* CheckWhich(char* whichp);
-  // Determines if the value of variable "which" is valid.
+  // Determines if the value of variable "this->which" is valid.
 
 
  public:
@@ -72,8 +72,8 @@ class ARrcSymStdEig: public virtual ARrcStdEig<FLOAT, FLOAT> {
  // b.2) Functions that permit step by step execution of ARPACK.
 
   FLOAT* PutVector();
-  // When ido = -1, 1 or 2 and the user must perform a product in the form
-  // y <- M*x, this function indicates where to store y. When ido = 3, this
+  // When this->ido = -1, 1 or 2 and the user must perform a product in the form
+  // y <- M*x, this function indicates where to store y. When this->ido = 3, this
   // function indicates where to store the shifts.
 
 
@@ -156,10 +156,10 @@ template<class FLOAT>
 inline void ARrcSymStdEig<FLOAT>::WorkspaceAllocate()
 {
 
-  lworkl  = ncv*(ncv+9);
-  lworkv  = 0;
-  lrwork  = 0;
-  workl   = new FLOAT[lworkl+1];
+  this->lworkl  = this->ncv*(this->ncv+9);
+  this->lworkv  = 0;
+  this->lrwork  = 0;
+  this->workl   = new FLOAT[this->lworkl+1];
 
 } // WorkspaceAllocate.
 
@@ -168,8 +168,8 @@ template<class FLOAT>
 inline void ARrcSymStdEig<FLOAT>::Aupp()
 {
 
-  saupp(ido, bmat, n, which, nev, tol, resid, ncv, V, n,
-        iparam, ipntr, workd, workl, lworkl, info);
+  saupp(this->ido, this->bmat, this->n, this->which, this->nev, this->tol, this->resid, this->ncv, this->V, this->n,
+        this->iparam, this->ipntr, this->workd, this->workl, this->lworkl, this->info);
 
 } // Aupp.
 
@@ -178,9 +178,9 @@ template<class FLOAT>
 inline void ARrcSymStdEig<FLOAT>::Eupp()
 {
 
-  seupp(rvec, HowMny, EigValR, EigVec, n, sigmaR, bmat,
-        n, which, nev, tol, resid, ncv, V, n, iparam,
-        ipntr, workd, workl, lworkl, info);
+  seupp(this->rvec, this->HowMny, this->EigValR, this->EigVec, this->n, this->sigmaR, this->bmat,
+        this->n, this->which, this->nev, this->tol, this->resid, this->ncv, this->V, this->n, this->iparam,
+        this->ipntr, this->workd, this->workl, this->lworkl, this->info);
 
 } // Eupp.
 
@@ -210,13 +210,13 @@ template<class FLOAT>
 FLOAT* ARrcSymStdEig<FLOAT>::PutVector()
 {
 
-  switch (ido) {
+  switch (this->ido) {
   case -1:
   case  1:                    // Returning OP*x.
   case  2:
-    return &workd[ipntr[2]];  // Returning B*x.
+    return &this->workd[this->ipntr[2]];  // Returning B*x.
   case  3:
-    return &workl[ipntr[11]]; // Returning shifts.
+    return &this->workl[this->ipntr[11]]; // Returning shifts.
   default:
     throw ArpackError(ArpackError::CANNOT_PUT_VECTOR, "PutVector");
   }
@@ -229,36 +229,36 @@ int ARrcSymStdEig<FLOAT>::
 Eigenvalues(FLOAT* &EigValp, bool ivec, bool ischur)
 {
 
-  if (ValuesOK) {                      // Eigenvalues are available.
+  if (this->ValuesOK) {                      // Eigenvalues are available.
     if (EigValp == NULL) {             // Moving eigenvalues.
-      EigValp  = EigValR;
-      EigValR  = NULL;
-      newVal   = false;
-      ValuesOK = false;
+      EigValp  = this->EigValR;
+      this->EigValR  = NULL;
+      this->newVal   = false;
+      this->ValuesOK = false;
     }
     else {                             // Copying eigenvalues.
-      copy(nconv,EigValR,1,EigValp,1);
+      copy(this->nconv,this->EigValR,1,EigValp,1);
     }
   }
   else {                               // Eigenvalues are not available.
-    if (newVal) {
-      delete[] EigValR;
-      newVal = false;
+    if (this->newVal) {
+      delete[] this->EigValR;
+      this->newVal = false;
     }
     if (EigValp == NULL) {
-      try { EigValp = new FLOAT[ValSize()]; }
+      try { EigValp = new FLOAT[this->ValSize()]; }
       catch (ArpackError) { return 0; }
     }
-    EigValR = EigValp;
+    this->EigValR = EigValp;
     if (ivec) {                        // Finding eigenvalues and eigenvectors.
-      nconv = FindEigenvectors(ischur);
+      this->nconv = this->FindEigenvectors(ischur);
     }
     else {                             // Finding eigenvalues only.
-      nconv = FindEigenvalues();
+      this->nconv = this->FindEigenvalues();
     }
-    EigValR = NULL;
+    this->EigValR = NULL;
   }
-  return nconv;
+  return this->nconv;
 
 } // Eigenvalues(EigValp, ivec, ischur).
 
@@ -268,31 +268,31 @@ int ARrcSymStdEig<FLOAT>::
 EigenValVectors(FLOAT* &EigVecp, FLOAT* &EigValp, bool ischur)
 {
 
-  if (ValuesOK) {                  // Eigenvalues are already available .
-    nconv = Eigenvalues(EigValp, false);
-    nconv = Eigenvectors(EigVecp, ischur);
+  if (this->ValuesOK) {                  // Eigenvalues are already available .
+    this->nconv = Eigenvalues(EigValp, false);
+    this->nconv = Eigenvectors(EigVecp, ischur);
   }
   else {                           // Eigenvalues and vectors are not available.
     try {
-      if (EigVecp == NULL) EigVecp = new FLOAT[ValSize()*n];
-      if (EigValp == NULL) EigValp = new FLOAT[ValSize()];
+      if (EigVecp == NULL) EigVecp = new FLOAT[this->ValSize()*this->n];
+      if (EigValp == NULL) EigValp = new FLOAT[this->ValSize()];
     }
     catch (ArpackError) { return 0; }
-    if (newVec) {
-      delete[] EigVec;
-      newVec = false;
+    if (this->newVec) {
+      delete[] this->EigVec;
+      this->newVec = false;
     }
-    if (newVal) {
-      delete[] EigValR;
-      newVal = false;
+    if (this->newVal) {
+      delete[] this->EigValR;
+      this->newVal = false;
     }
-    EigVec  = EigVecp;
-    EigValR = EigValp;
-    nconv   = FindEigenvectors(ischur);
-    EigVec  = NULL;
-    EigValR = NULL;
+    this->EigVec  = EigVecp;
+    this->EigValR = EigValp;
+    this->nconv   = this->FindEigenvectors(ischur);
+    this->EigVec  = NULL;
+    this->EigValR = NULL;
   }
-  return nconv;
+  return this->nconv;
 
 } // EigenValVectors(EigVecp, EigValp, ischur).
 
@@ -303,13 +303,13 @@ inline FLOAT ARrcSymStdEig<FLOAT>::Eigenvalue(int i)
 
   // Returning i-eth eigenvalue.
 
-  if (!ValuesOK) {
+  if (!this->ValuesOK) {
     throw ArpackError(ArpackError::VALUES_NOT_OK, "Eigenvalue(i)");
   }
-  else if ((i>=nconv)||(i<0)) {
+  else if ((i>=this->nconv)||(i<0)) {
     throw ArpackError(ArpackError::RANGE_ERROR, "Eigenvalue(i)");
   }
-  return EigValR[i];
+  return this->EigValR[i];
 
 } // Eigenvalue(i).
 
@@ -320,13 +320,13 @@ inline FLOAT ARrcSymStdEig<FLOAT>::Eigenvector(int i, int j)
 
   // Returning element j of i-eth eigenvector.
 
-  if (!VectorsOK) {
+  if (!this->VectorsOK) {
     throw ArpackError(ArpackError::VECTORS_NOT_OK, "Eigenvector(i,j)");
   }
-  else if ((i>=nconv)||(i<0)||(j>=n)||(j<0)) {
+  else if ((i>=this->nconv)||(i<0)||(j>=this->n)||(j<0)) {
     throw ArpackError(ArpackError::RANGE_ERROR, "Eigenvector(i,j)");
   }
-  return EigVec[i*n+j];
+  return this->EigVec[i*this->n+j];
 
 } // Eigenvector(i,j).
 
@@ -346,7 +346,7 @@ StlEigenvalues(bool ivec, bool ischur)
   try { StlEigValR = new vector<FLOAT>(ValSize()); }
   catch (ArpackError) { return NULL; }
   ValPtr = StlEigValR->begin();
-  nconv = Eigenvalues(ValPtr, ivec, ischur);
+  this->nconv = Eigenvalues(ValPtr, ivec, ischur);
   return StlEigValR;
 
 } // StlEigenvalues.
@@ -360,14 +360,14 @@ inline vector<FLOAT>* ARrcSymStdEig<FLOAT>::StlEigenvector(int i)
 
   vector<FLOAT>* Vec;
 
-  if (!VectorsOK) {
+  if (!this->VectorsOK) {
     throw ArpackError(ArpackError::VECTORS_NOT_OK, "StlEigenvector(i)");
   }
   else if ((i>=ValSize())||(i<0)) {
     throw ArpackError(ArpackError::RANGE_ERROR, "StlEigenvector(i)");
   }
   try {
-    Vec = new vector<FLOAT>(&EigVec[i*n], &EigVec[(i+1)*n]);
+    Vec = new vector<FLOAT>(&this->EigVec[i*this->n], &this->EigVec[(i+1)*this->n]);
   }
   catch (ArpackError) { return NULL; }
   return Vec;
@@ -384,7 +384,7 @@ ARrcSymStdEig(int np, int nevp, char* whichp, int ncvp,
 
 {
 
-  NoShift();
+  this->NoShift();
   DefineParameters(np, nevp, whichp, ncvp, tolp, maxitp, residp, ishiftp);
 
 } // Long constructor (regular mode).
@@ -398,7 +398,7 @@ ARrcSymStdEig(int np, int nevp, FLOAT sigmap, char* whichp,
 
 {
 
-  ChangeShift(sigmap);
+  this->ChangeShift(sigmap);
   DefineParameters(np, nevp, whichp, ncvp, tolp, maxitp, residp, ishiftp);
 
 } // Long constructor (shift and invert mode).
@@ -410,7 +410,7 @@ operator=(const ARrcSymStdEig<FLOAT>& other)
 {
 
   if (this != &other) { // Stroustrup suggestion.
-    ClearMem();
+    this->ClearMem();
     Copy(other);
   }
   return *this;

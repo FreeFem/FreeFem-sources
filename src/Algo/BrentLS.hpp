@@ -25,7 +25,7 @@
 //		Here:
 //			model0:  Initial model to initiate the bracketing procedure
 // 			direction: Vector that defines the direction of the line search
-//			tol: The minimum is within the returned value +/- tol
+//			tol: The minimum is within the returned this->value +/- tol
 //			delta: Used in the bracketing procedure. The initial interval
 //				  for the bracketing is from 0 to delta * STEP_MAX, where
 //				  STEP_MAX is hard coded to 5.
@@ -91,7 +91,7 @@ class BrentLineSearch : public LS
 			Param& m0, 
 			///the direction of the line search
 			Vect& direction, 
-			///the minimum is within the returned value +/- tol
+			///the minimum is within the returned this->value +/- tol
 			Real tol, 
 			///a parameter used in the bracketing procedure
 			double delta);
@@ -105,7 +105,7 @@ template <class LS>
 BrentLineSearch<LS>::BrentLineSearch(NRJ * f, int it) 
 : LS(f)
 {
-  iterMax 	= 	it;
+  this->iterMax 	= 	it;
 }
 
 template <class LS>
@@ -116,7 +116,7 @@ BrentLineSearch<LS>::~BrentLineSearch()
 template <class LS>
 typename BrentLineSearch<LS>::Param BrentLineSearch<LS>::search(Param& model0,Vect& direction, Real tol, double delta)
 {
-    iterNum	=	0;
+    this->iterNum	=	0;
 	KN<double> steps(3);			// brackets
 	Vect of_values(3);			// OF evaluated inside bracket
 	Real dum;					// auxiliary quantity
@@ -138,9 +138,9 @@ typename BrentLineSearch<LS>::Param BrentLineSearch<LS>::search(Param& model0,Ve
 	steps[0] = 0.;
 	steps[1] = STEP_MAX * delta;
 
-	of_values[0]= nrj->getVal(model0);
-	of_values[1] =nrj->getVal(update(model0,1,steps[1],direction));
-	iterNum += 2;
+	of_values[0]= this->nrj->getVal(model0);
+	of_values[1] =this->nrj->getVal(update(model0,1,steps[1],direction));
+	this->iterNum += 2;
 
 	if (of_values[1] > of_values[0])
 	{
@@ -149,8 +149,8 @@ typename BrentLineSearch<LS>::Param BrentLineSearch<LS>::search(Param& model0,Ve
 	}	
 
 	steps[2] = steps[1] + GOLD * (steps[1] - steps[0]);
-	of_values[2] = nrj->getVal(update(model0,1,steps[2],direction));
-	iterNum++;
+	of_values[2] = this->nrj->getVal(update(model0,1,steps[2],direction));
+	this->iterNum++;
 	while (of_values[1] > of_values[2])
 	{
 		r = (steps[1] - steps[0]) * (of_values[1] - of_values[2]);
@@ -162,8 +162,8 @@ typename BrentLineSearch<LS>::Param BrentLineSearch<LS>::search(Param& model0,Ve
 
 		if ((steps[1] - u) * (u - steps[2]) > 0.)
 		{
-			fu = nrj->getVal(update(model0,1,u,direction));
-			iterNum++;
+			fu = this->nrj->getVal(update(model0,1,u,direction));
+			this->iterNum++;
 			if (fu < of_values[2])
 			{
 				steps[0] = steps[1];
@@ -180,14 +180,14 @@ typename BrentLineSearch<LS>::Param BrentLineSearch<LS>::search(Param& model0,Ve
 			}
 
 			u = steps[2] + GOLD * (steps[2] - steps[1]);
-			fu = nrj->getVal(update(model0,1,u,direction));
-			iterNum++;
+			fu = this->nrj->getVal(update(model0,1,u,direction));
+			this->iterNum++;
 
 		}
 		else if ((steps[2] - u) * (u - ulim) > 0.)
 		{
-			fu = nrj->getVal(update(model0,1,u,direction));
-			iterNum++;
+			fu = this->nrj->getVal(update(model0,1,u,direction));
+			this->iterNum++;
 			if (fu < of_values[2])
 			{
 				steps[1] = steps[2];
@@ -196,21 +196,21 @@ typename BrentLineSearch<LS>::Param BrentLineSearch<LS>::search(Param& model0,Ve
 
 				of_values[1] = of_values[2];
 				of_values[2] = fu;
-				fu = nrj->getVal(update(model0,1,u,direction));
-				iterNum ++;
+				fu = this->nrj->getVal(update(model0,1,u,direction));
+				this->iterNum ++;
 			}
 		}
 		else if ((u - ulim) * (ulim * steps[2]) >= 0.)
 		{
 			u = ulim;
-			fu = nrj->getVal(update(model0,1,u,direction));
-			iterNum ++;
+			fu = this->nrj->getVal(update(model0,1,u,direction));
+			this->iterNum ++;
 		}
 		else
 		{
 			u = steps[2] + GOLD * (steps[2] - steps[1]);
-			fu = nrj->getVal(update(model0,1,u,direction));
-			iterNum ++;
+			fu = this->nrj->getVal(update(model0,1,u,direction));
+			this->iterNum ++;
 		}
 
 		steps[0] = steps[1]; steps[1] = steps[2]; steps[2] = u;
@@ -253,14 +253,14 @@ typename BrentLineSearch<LS>::Param BrentLineSearch<LS>::search(Param& model0,Ve
 	x = w = v = steps[1];
 	fw = fv = fx = of_values[1];
 
-	for (; iterNum <= iterMax; iterNum++)
+	for (; this->iterNum <= this->iterMax; this->iterNum++)
 	{
 		xm = .5 * (steps[0] + steps[2]);
 		tol1 = tol * Abs(x) + ZEPS;
 		tol2 = 2.0 * tol1;
 		if (Abs(x - xm) <= (tol2 - .5 * (steps[2] - steps[0])))
 		{
-			value = fx;
+			this->value = fx;
 			Param new_model(update(model0,1,x,direction));
 			
 			return new_model;
@@ -318,7 +318,7 @@ typename BrentLineSearch<LS>::Param BrentLineSearch<LS>::search(Param& model0,Ve
 		else
 			u = x + Abs(tol1) / Sgn(d);
 
-		fu  = nrj->getVal(update(model0,1,u,direction));
+		fu  = this->nrj->getVal(update(model0,1,u,direction));
 
 		if (fu <= fx)
 		{
@@ -349,12 +349,12 @@ typename BrentLineSearch<LS>::Param BrentLineSearch<LS>::search(Param& model0,Ve
 		}
 	}
 	
-    appendSearchNumber();
+    this->appendSearchNumber();
 	//    cout << " Maximum number of iterations reached " << endl;
 
 
 	Param new_model(update(model0,1,x,direction));
-	value = nrj->getVal(new_model);			
+	this->value = this->nrj->getVal(new_model);			
 	return new_model;
 }
 

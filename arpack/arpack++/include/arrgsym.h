@@ -52,19 +52,19 @@ class ARrcSymGenEig:
 
   void ChangeInvertMode(char InvertModep);
   // Changes "InvertMode" to 'S' (shift-and-invert),
-  // 'B' (buckling) or 'C' (cayley) mode.
+  // 'B' (buckling) or 'C' (cayley) this->mode.
 
   virtual void ChangeShift(FLOAT sigmap);
   // Changes shift value.
 
   virtual void SetShiftInvertMode(FLOAT sigmap);
-  // Turns problem to shift and invert mode with shift defined by sigmap.
+  // Turns problem to shift and invert this->mode with shift defined by sigmap.
 
   virtual void SetBucklingMode(FLOAT sigmap);
-  // Turns problem to buckling mode with shift defined by sigmap.
+  // Turns problem to buckling this->mode with shift defined by sigmap.
 
   virtual void SetCayleyMode(FLOAT sigmap);
-  // Turns problem to Cayley mode with shift defined by sigmap.
+  // Turns problem to Cayley this->mode with shift defined by sigmap.
 
 
  // c.2) Constructors and destructor.
@@ -75,7 +75,7 @@ class ARrcSymGenEig:
   ARrcSymGenEig(int np, int nevp, char* whichp = "LM",
                 int ncvp = 0, FLOAT tolp = 0.0, int maxitp = 0,
                 FLOAT* residp = NULL, bool ishiftp = true);
-  // Long constructor (regular mode).
+  // Long constructor (regular this->mode).
 
   ARrcSymGenEig(char invertmodep, int np, int nevp, FLOAT sigmap,
                 char* whichp = "LM", int ncvp = 0, FLOAT tolp = 0.0,
@@ -129,17 +129,17 @@ inline void ARrcSymGenEig<FLOAT>::ChangeInvertMode(char InvertModep)
   InvertMode = CheckInvertMode(InvertModep);
   switch (InvertMode) {
   case 'S':
-    mode    = 3;    // Shift and invert mode.
+    this->mode    = 3;    // Shift and invert this->mode.
     break;
   case 'B':
-    mode    = 4;    // Buckling mode.
+    this->mode    = 4;    // Buckling this->mode.
     break;
   case 'C':
-    mode    = 5;    // Cayley mode.
+    this->mode    = 5;    // Cayley this->mode.
     break;
   }
-  iparam[7] = mode;
-  Restart();
+  this->iparam[7] = this->mode;
+  this->Restart();
 
 } // ChangeInvertMode.
 
@@ -148,9 +148,9 @@ template<class FLOAT>
 inline void ARrcSymGenEig<FLOAT>::ChangeShift(FLOAT sigmap)
 {
 
-  sigmaR    = sigmap;
-  sigmaI    = 0.0;
-  ChangeInvertMode(InvertMode);
+  this->sigmaR    = sigmap;
+  this->sigmaI    = 0.0;
+  this->ChangeInvertMode(InvertMode);
 
 } // ChangeShift.
 
@@ -195,11 +195,11 @@ ARrcSymGenEig(int np, int nevp, char* whichp, int ncvp, FLOAT tolp,
 
 {
 
-  InvertMode = 'S';   // Considering mode = 3 in ChangeShift.
-  NoShift();
+  InvertMode = 'S';   // Considering this->mode = 3 in ChangeShift.
+  this->NoShift();
   DefineParameters(np, nevp, whichp, ncvp, tolp, maxitp, residp, ishiftp);
 
-} // Long constructor (regular mode).
+} // Long constructor (regular this->mode).
 
 
 template<class FLOAT>
@@ -223,7 +223,7 @@ operator=(const ARrcSymGenEig<FLOAT>& other)
 {
 
   if (this != &other) { // Stroustrup suggestion.
-    ClearMem();
+    this->ClearMem();
     Copy(other);
   }
   return *this;

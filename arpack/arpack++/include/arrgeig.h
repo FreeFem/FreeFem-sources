@@ -35,7 +35,7 @@ class ARrcGenEig: virtual public ARrcStdEig<FLOAT, TYPE> {
  // a.1) Functions that allow changes in problem parameters.
 
   void NoShift();
-  // Turns the problem to regular mode.
+  // Turns the problem to regular this->mode.
 
 
  // a.2) Constructors and destructor.
@@ -66,11 +66,11 @@ template<class FLOAT, class TYPE>
 inline void ARrcGenEig<FLOAT, TYPE>::NoShift()
 {
 
-  sigmaR    = (TYPE)0;
-  sigmaI    = 0.0;
-  mode      = 2;
-  iparam[7] = mode;
-  Restart();
+  this->sigmaR    = (TYPE)0;
+  this->sigmaI    = 0.0;
+  this->mode      = 2;
+  this->iparam[7] = this->mode;
+  this->Restart();
 
 } // NoShift.
 
@@ -79,7 +79,7 @@ template<class FLOAT, class TYPE>
 inline ARrcGenEig<FLOAT, TYPE>::ARrcGenEig()
 {
 
-  bmat = 'G';   // This is a generalized problem.
+  this->bmat = 'G';   // This is a generalized problem.
   NoShift();
 
 } // Short constructor.
@@ -91,7 +91,7 @@ operator=(const ARrcGenEig<FLOAT, TYPE>& other)
 {
 
   if (this != &other) { // Stroustrup suggestion.
-    ClearMem();
+    this->ClearMem();
     Copy(other);
   }
   return *this;
