@@ -610,10 +610,14 @@ public:
     Symbolic(0),Numeric(0)   { 
 
     int status;
-    throwassert( !A.sym());
+    throwassert( !A.sym() && Numeric == 0 && Symbolic==0 );
     int n=A.n;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
+    
+    for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
+    for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
+    
     umfpack_di_defaults (Control) ;
     Control[UMFPACK_PRL]=1;
     if(verbosity>4) Control[UMFPACK_PRL]=2;
@@ -647,11 +651,16 @@ public:
 
   }
   void Solver(const MatriceMorse<R> &A,KN_<R> &x,const KN_<R> &b) const  {
+    assert ( &x[0] != &b[0]);
     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
+    for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
+    for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
+    
      umfpack_di_defaults (Control) ;
+    cout << " b min max " << b.min() << " " <<b.max() << endl;
     int status = umfpack_di_solve (UMFPACK_At, A.lg, A.cl, A.a, x, b, Numeric,Control,Info) ;
     if (status < 0)
     {
@@ -663,12 +672,11 @@ public:
     
     cout << "umfpack_di_solve " << endl;
     if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
-    cout << " b min max " << b.min() << " " <<b.max() << endl;
     cout << " x min max " << x.min() << " " <<x.max() << endl;
   }
 
   ~SolveUMFPack() { 
-    cout << "~SolveUMFPack " << endl;
+    cout << "~SolveUMFPack S:" << Symbolic << " N:" << Numeric <<endl;
     if (Symbolic)   umfpack_di_free_symbolic  (&Symbolic),Symbolic=0; 
     if (Numeric)    umfpack_di_free_numeric (&Numeric),Numeric=0;
   }
@@ -755,6 +763,7 @@ public:
 
   }
   void Solver(const MatriceMorse<Complex> &A,KN_<Complex> &x,const KN_<Complex> &b) const  {
+        assert ( &x[0] != &b[0]);
     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
     double Control[UMFPACK_CONTROL];
