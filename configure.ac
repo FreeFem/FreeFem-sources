@@ -6,7 +6,10 @@
 
 AC_INIT(FreeFem++,1.41)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
-AM_INIT_AUTOMAKE
+
+# Automake 1.4 is too old
+AM_INIT_AUTOMAKE(1.6.3)
+
 AM_CONFIG_HEADER(config.h)
 AC_PROG_MAKE_SET
 
@@ -30,34 +33,6 @@ AC_CHECK_LIB(pthread,pthread_create)
 AC_DEFINE_UNQUOTED(VersionFreeFempp,$VERSION,FreeFem++ version as a float)
 FF_DATE=`date`
 AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
-
-# Checking wether we can produce a X11 version
-# --------------------------------------------
-
-AC_MSG_CHECKING(wether we can compile for X11)
-ff_x11=no
-if test -d /usr/X11R6;
-then
-	ff_x11=yes
-	AC_SUBST(STDPROG,FreeFem++${EXEEXT})
-	AC_SUBST(X11PROG,FreeFem++-x11${EXEEXT})
-	AC_SUBST(INCLUDEX11,/usr/X11R6/include)
-	AC_SUBST(LIBX11,"-L/usr/X11R6/lib -lX11 -lm")
-fi
-AC_MSG_RESULT($ff_x11)
-
-# Checking wether we can produce a MacIntosh-specific version
-# -----------------------------------------------------------
-
-AC_MSG_CHECKING(wether we are on a MacIntosh)
-ff_mac=no
-ff_aglprog=
-if test `uname` = Darwin;
-then
-	ff_mac=yes
-	ff_aglprog=FreeFem++-agl${EXEEXT}
-fi
-AC_MSG_RESULT($ff_mac)
 
 # Checking wether to produce a debug version
 # ------------------------------------------
@@ -90,6 +65,7 @@ then
 	then
 		CXXFLAGS="$CXXFLAGS -fno-inline -fpascal-strings -fexceptions"
 	fi
+	AC_SUBST(FF_PROG_EXT,-g)
 else
 	CXXFLAGS="-DDRAWING -DLONG_LONG  -DNCHECKPTR -O"
 	if test "ff_mac" = yes;
@@ -98,12 +74,40 @@ else
 	fi
 fi
 
+# Checking wether we can produce a X11 version
+# --------------------------------------------
+
+AC_MSG_CHECKING(wether we can compile for X11)
+ff_x11=no
+if test -d /usr/X11R6;
+then
+	ff_x11=yes
+	AC_SUBST(STDPROG,FreeFem++${FF_PROG_EXT}${EXEEXT})
+	AC_SUBST(X11PROG,FreeFem++-x11${FF_PROG_EXT}${EXEEXT})
+	AC_SUBST(INCLUDEX11,/usr/X11R6/include)
+	AC_SUBST(LIBX11,"-L/usr/X11R6/lib -lX11 -lm")
+fi
+AC_MSG_RESULT($ff_x11)
+
+# Checking wether we can produce a MacIntosh-specific version
+# -----------------------------------------------------------
+
+AC_MSG_CHECKING(wether we are on a MacIntosh)
+ff_mac=no
+ff_aglprog=
+if test `uname` = Darwin;
+then
+	ff_mac=yes
+	ff_aglprog=FreeFem++-agl${FF_PROG_EXT}${EXEEXT}
+fi
+AC_MSG_RESULT($ff_mac)
+
 # Checking that OpenGL is accessible
 # ----------------------------------
 
 # If we cannot find gl.h, no OpenGL version can be produced
 AC_CHECK_HEADER(GL/gl.h,
-	ff_glxprog=FreeFem++-glx${EXEEXT},
+	ff_glxprog=FreeFem++-glx${FF_PROG_EXT}${EXEEXT},
 	ff_glxprog=
 	ff_aglprog=
 )
@@ -206,7 +210,7 @@ then
 	# computation here, because it must only be set when the
 	# parallel program is compiled (see src/mpi/Makfile.am)
 
-	AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
+	AC_SUBST(MPIPROG,FreeFem++-mpi${FF_PROG_EXT}${EXEEXT})
 fi
 
 # Checking wether we can generate some documentation
@@ -251,5 +255,7 @@ AC_OUTPUT(Makefile
 	src/agl/Makefile
 	src/glx/Makefile
 	examples++/Makefile
+	examples++-eigen/Makefile
+	examples++-tutorial/Makefile
 	DOC/Makefile,
         echo timestamp > stamp-h)

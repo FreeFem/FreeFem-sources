@@ -9,16 +9,16 @@ use strict;
 
 # All FreeFem++ versions
 my @progs;
-push @progs,"$ENV{PROGLOC}/std/FreeFem++"
-  if -e "$ENV{PROGLOC}/std/FreeFem++";
-push @progs,"$ENV{PROGLOC}/nw/FreeFem++-nw"
-  if -e "$ENV{PROGLOC}/nw/FreeFem++-nw";
-push @progs,"$ENV{PROGLOC}/x11/FreeFem++-x11"
-  if -e "$ENV{PROGLOC}/x11/FreeFem++-x11";
-push @progs,"$ENV{PROGLOC}/glx/FreeFem++-glx"
-  if -e "$ENV{PROGLOC}/glx/FreeFem++-glx";
-push @progs,"$ENV{PROGLOC}/agl/FreeFem++-agl"
-  if -e "$ENV{PROGLOC}/agl/FreeFem++-agl";
+push @progs,"$ENV{PROGLOC}/std/FreeFem++$ENV{FF_PROG_EXT}$ENV{EXEEXT}"
+  if -e "$ENV{PROGLOC}/std/FreeFem++$ENV{FF_PROG_EXT}$ENV{EXEEXT}";
+push @progs,"$ENV{PROGLOC}/nw/FreeFem++-nw$ENV{FF_PROG_EXT}$ENV{EXEEXT}"
+  if -e "$ENV{PROGLOC}/nw/FreeFem++-nw$ENV{FF_PROG_EXT}$ENV{EXEEXT}";
+push @progs,"$ENV{PROGLOC}/x11/FreeFem++-x11$ENV{FF_PROG_EXT}$ENV{EXEEXT}"
+  if -e "$ENV{PROGLOC}/x11/FreeFem++-x11$ENV{FF_PROG_EXT}$ENV{EXEEXT}";
+push @progs,"$ENV{PROGLOC}/glx/FreeFem++-glx$ENV{FF_PROG_EXT}$ENV{EXEEXT}"
+  if -e "$ENV{PROGLOC}/glx/FreeFem++-glx$ENV{FF_PROG_EXT}$ENV{EXEEXT}";
+push @progs,"$ENV{PROGLOC}/agl/FreeFem++-agl$ENV{FF_PROG_EXT}$ENV{EXEEXT}"
+  if -e "$ENV{PROGLOC}/agl/FreeFem++-agl$ENV{FF_PROG_EXT}$ENV{EXEEXT}";
 
 # All tests found locally
 my @tests = <*.edp>;

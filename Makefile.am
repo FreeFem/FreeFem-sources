@@ -26,7 +26,7 @@ clean-version:
 	-rm FreeFem++v$(VERSION).tar FreeFem++v$(VERSION).tar.gz 
 	-rm -rf FreeFem++v*_MacOS
 	-rm -rf FreeFem++v*_Win
-FreeFem++v$(VERSION).tar:  FORCE
+FreeFem++v$(VERSION).tar:
 	mkdir FreeFem++v$(VERSION)
 	(                                                             \
 	echo COPYRIGHT HISTORY BUGS  Makefile* README README_CW README_ARPACK TODO *.mcp.*             ; \
@@ -48,7 +48,7 @@ FreeFem++v$(VERSION).tar:  FORCE
 %.gz:%
 	gzip -9f $*
 
-FreeFem++v$(VERSION)_Win:pc/FreeFem++.exe FORCE
+FreeFem++v$(VERSION)_Win:pc/FreeFem++.exe
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen
 	cp  pc/FreeFem++.exe $@
 	cp COPYRIGHT HISTORY README BUGS TODO  $@ 
@@ -63,7 +63,7 @@ FreeFem++v$(VERSION)_Win.zip:FreeFem++v$(VERSION)_Win
 	-rm FreeFem++v$(VERSION)_Win.zip
 	zip -9l FreeFem++v$(VERSION)_Win.zip `find FreeFem++v$(VERSION)_Win -type f | egrep -v 'exe$$|pdf$$|gz$$'`
 	zip -9 FreeFem++v$(VERSION)_Win.zip `find FreeFem++v$(VERSION)_Win -type f | egrep  'exe$$|pdf$$|gz$$'`
-FreeFem++v$(VERSION)_MacOS: FORCE
+FreeFem++v$(VERSION)_MacOS:
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen
 	/Developer/Tools/CpMac FreeFem++ $@ 
 	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
@@ -75,7 +75,7 @@ FreeFem++v$(VERSION)_MacOS: FORCE
 
 
 
-FreeFem++v$(VERSION)_MacOsX: FORCE
+FreeFem++v$(VERSION)_MacOsX:
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
 	cp COPYRIGHT HISTORY README BUGS TODO INSTALL-MacOSX  $@
 	cp  examples++/*.edp   $@/examples++
@@ -88,18 +88,6 @@ FreeFem++v$(VERSION)_MacOsX: FORCE
 
 FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
 	tar zcvf FreeFem++v$(VERSION)_MacOsX.tgz FreeFem++v$(VERSION)_MacOsX;
-
-
-%/all.edp:% FORCE 
-	(cd $*; echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
-         for i in *`ls *.edp|grep -v ^all.edp$$` ; do  \
-	echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
-	echo "verbosity=verbosityy;" ; \
-        echo \{ include \"$$i\"\;\}\; ;\
-	echo ' cout << "------------------------------------------------------------------------------ " << endl;' ;\
-	done) > $@
-lex.o: lg.tab.hpp
-lg.tab.o:lg.tab.hpp 
 
 www:  FreeFem++v$(VERSION)_Win.zip  FreeFem++v$(VERSION)_MacOS.sit FreeFem++v$(VERSION)_MacOsX.tgz
 	scp  HISTORY DOC/manual.pdf DOC/manual.ps.gz FreeFem++v$(VERSION).tar.gz FreeFem++v$(VERSION)_MacOsX.tgz FreeFem++v$(VERSION)_Win.zip  FreeFem++v$(VERSION)_MacOS.sit  $(ftpk)
@@ -121,11 +109,6 @@ www:  FreeFem++v$(VERSION)_Win.zip  FreeFem++v$(VERSION)_MacOS.sit FreeFem++v$(V
 	ssh rascasse.inria.fr "cd /ftp_gamma/freefem;ln -sf FreeFem++v$(VERSION).tar.gz freefem++.tgz"
 	ssh rascasse.inria.fr "cd /ftp_gamma/freefem;ln -sf FreeFem++v$(VERSION)_MacOsX.tgz freefem++_MacOsX.tgz"
 	ssh rascasse.inria.fr "cd ~/public_html/; ./.update++ $(VERSION) <ff++.htmx >freefem++.htm"
-Makefile-$(HOSTTYPE):
-	echo " ------------------------------------ " ; \
-	echo "Sorry the the $(src)/Makefile-$HOSTYPE do not exist" ;\
-	echo "You can build  this file from existing  file :  $(src)/Makefile-macintosh" ;\
-	echo " ------------------------------------ " 
 
 install:   $(BIN_DIR)/.
 	   @for i in $(TARGETS) ; do \
@@ -159,5 +142,3 @@ get-arpack:
 	gunzip -c arpack96.tar.gz | tar xvf - ;\
 	gunzip -c patch.tar.gz | tar xvf - ;\
 	gunzip -c arpack++.tar.gz| tar xvf - 
-FORCE:
-
