@@ -508,5 +508,14 @@ the TAG release_1_41_before_packaging is created
 Make Version 1.42
 -----------------
 
+11/10/04
+--------
+ Add Finite element with complex value, and matrix<complex> 
+ see sparse-cmatrix.edp  and  FEComplex.edp files
+ for a full examples
 
-     
+ Vh<complex> ur; 
+ varf av(u,v)=int(Th)(u*v*(1i+1));
+ Matrix<complex> A = vav(Vh,Vh); 
+ // warning don't mixte Matrix<complex> and Matrix<real> in a expression     
+ 

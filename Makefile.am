@@ -42,6 +42,11 @@ quick:
 	cd src/fflib && make
 	cd src/std && make
 
+agl:
+	cd src/lglib && make
+	cd src/fflib && make
+	cd src/agl&& make
+
 # Testing
 # -------
 

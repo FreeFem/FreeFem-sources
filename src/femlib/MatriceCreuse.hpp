@@ -415,15 +415,24 @@ public:
   void SetSolver(const VirtualSolver & s){solver=&s;}
   void SetSolverMaster(const VirtualSolver * s){solver.master(s);}
   bool sym() const {return symetrique;}
- void  prod(const MatriceMorse & B, MatriceMorse & AB);
+  
+template<class K>
+  MatriceMorse(int nn,int mm, map< pair<int,int>, K> & m, bool sym);
+  
+ template<class RB,class RAB>
+ void  prod(const MatriceMorse<RB> & B, MatriceMorse<RAB> & AB);
+ 
  MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {
      return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
   bool  addMatTo(R coef,map< pair<int,int>, R> &mij);
 
+  template<class K>
+    MatriceMorse(const MatriceMorse<K> & );
+
   private:
   void dotransposition ()  ;  // do the transposition 
     CountPointer<const VirtualSolver> solver;
-    MatriceMorse(const MatriceMorse & );
+    
     void operator=(const MatriceMorse & );
   void  Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool VF=false);
 

@@ -243,12 +243,12 @@ template<class R>
 template<class R>
 bool MatriceProfile<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
 {
- R zero=R();
- if(coef!=zero) return  L == U ;
+   double eps0=numeric_limits<double>::min();
+ if( norm(coef)<eps0) return  L == U ;
  int i,j,kf,k;
   if(D)
    for( i=0;i<this->n;i++)
-    if(D[i]!=zero)
+    if( norm(D[i])>eps0)
      mij[make_pair(i,i)] += coef*D[i];
    else
    for(int i=0;i<this->n;i++) // no dia => identity dai
@@ -257,12 +257,12 @@ bool MatriceProfile<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
  if (L && pL )    
    for (kf=pL[0],i=0;  i<this->n;   i++  )  
      for ( k=kf,kf=pL[i+1], j=i-kf+k;   k<kf; j++,  k++  )
-        if(L[k]!=zero)
+        if(norm(L[k])>eps0)
         mij[make_pair(i,j)]=L[k]*coef;
  if (U && pU)     
    for (kf=pU[0],j=0;  j<this->m;  j++)  
      for (k=kf,kf=pU[j+1], i=j-kf+k;   k<kf; i++,  k++  )
-      if(U[k]!=zero)
+      if(norm(U[k])>eps0)
         mij[make_pair(i,j)]=U[k]*coef;
  return L == U ; // symetrique               
 }
@@ -692,7 +692,7 @@ template <class R>
     :MatriceCreuse<R>(A.N(),A.M(),false),solver(0) 
       {
   double tol2=tol*tol;    
-  symetrique = true;
+  symetrique = false;
   this->dummy=false;
   int nbcoeff=0;
   for(int i=0;i<this->n;i++)
@@ -739,6 +739,26 @@ template <class R>
       }
 lg[n]=n;
 }
+
+template<class R>
+template<class K>
+ MatriceMorse<R>::MatriceMorse(const MatriceMorse<K> & A)
+     : MatriceCreuse<R>(A.n,A.m,A.dummy),solver(0),nbcoef(A.nbcoef),
+      a(new R[nbcoef]),lg(new int [n+1]), cl(new int[nbcoef]),symetrique(false)
+{
+  assert(a && lg &&  cl);
+  for (int i=0;i<=n;i++)
+    lg[i]=A.lg[i];
+  for (int k=0;k<=nbcoef;k++)
+   {
+    cl[k]=A.cl[k];
+    a[k]=A.a[k];
+    }
+    
+}
+
+
+
 template <class R> 
 int MatriceMorse<R>::size() const 
 {
@@ -951,6 +971,7 @@ template<class R>
   lg=clg;
    
  }
+
 template<class R>
   MatriceMorse<R> * BuildCombMat(const list<pair<R,MatriceCreuse<R> *> >  &lM)
   {
@@ -975,7 +996,7 @@ template<class R>
      } 
     int nbcoef=mij.size();
     if(sym) nbcoef = (nbcoef+n)/2;
-    MatriceMorse<R> * r=new  MatriceMorse<R>();
+/*    MatriceMorse<R> * r=new  MatriceMorse<R>();
     
     r->n=n;
     r->m=m;
@@ -1004,11 +1025,14 @@ template<class R>
        }
    
      return r;
+ */
+   return new   MatriceMorse<R>(n,m,mij,sym);   
+     
   }
 template<class R>
 bool MatriceMorse<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
 {
-  R zero=R(0.);
+  double eps0=numeric_limits<double>::min();
   int i,j,k;
   if (symetrique)
    {
@@ -1016,7 +1040,7 @@ bool MatriceMorse<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
        for ( k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
-           if(coef*a[k]!=zero)
+           if(norm(coef*a[k])>eps0)
            {
            mij[make_pair(i,j)] += coef*a[k];
            if (i!=j)
@@ -1031,7 +1055,7 @@ bool MatriceMorse<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
        for ( k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
-           if(coef*a[k]!=zero)
+           if(norm(coef*a[k])>eps0)
            mij[make_pair(i,j)] = coef*a[k];
          }
    }
@@ -1039,8 +1063,37 @@ bool MatriceMorse<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
 return symetrique;
 }
  
-template<class R>
- void  MatriceMorse<R>::prod(const MatriceMorse<R> & B, MatriceMorse<R> & AB)
+template<class R> 
+ template<class K>
+  MatriceMorse<R>::MatriceMorse(int nn,int mm, map< pair<int,int>, K> & m, bool sym):
+   MatriceCreuse<R>(nn,mm,0),solver(0),nbcoef(m.size()),symetrique(sym),  
+   a(new R[nbcoef]),
+   lg(new int[n+1]),
+   cl(new int[nbcoef])     
+  {
+     lg[0]=0;
+     int k=0;
+     bool nosym=!sym;
+     typename map< pair<int,int>, R>::iterator iter=m.begin(), mend=m.end();
+     for (;iter!=mend;++iter)
+      { 
+        int i=iter->first.first;
+        int j=iter->first.second;
+        K aij=iter->second;
+        if(j<=i || nosym)
+        {
+         cl[k]=j;
+         a[k]=aij;
+         lg[i+1]=++k;
+        }
+       }
+  
+  
+  }
+
+template<class RA>
+ template<class RB,class RAB>
+ void  MatriceMorse<RA>::prod(const MatriceMorse<RB> & B, MatriceMorse<RAB> & AB)
  {
    //  compute the s
   bool sym=this == & B &&symetrique;
@@ -1080,13 +1133,13 @@ template<class R>
     }
    
    set<pair<int,int> > sij;
-   R zero=R();
+   double eps0=numeric_limits<double>::min();
 
      for (int i=0;i<this->n;i++)
        for (int k=lg[i];k<lg[i+1];k++)
          {    
            int j=cl[k];
-           if(a[k]==zero) continue;
+           if(norm(a[k])<eps0) continue;
            int ii[2],jj[2];
            ii[0]=i;ii[1]=j;
            jj[0]=j;jj[1]=i;
@@ -1099,12 +1152,12 @@ template<class R>
                 for (int kkb=blg[j];kkb<blg[j+1];kkb++)
                   { 
                    int kz= bcl[kkb];
-                   R bjk;
+                   RB bjk;
                    if (B.symetrique && kz > j)
                      bjk=B(kz,j);
                    else
                       bjk=B(j,kz);
-                   if( bjk!=zero && (!sym || kz<=i))
+                   if( norm(bjk)>eps0 && (!sym || kz<=i))
                      sij.insert(make_pair(i,kz));
                   }
             }
@@ -1114,7 +1167,7 @@ template<class R>
     int mm=B.m;
     int * llg=new int[nn+1];
     int * lcl=new int[sij.size()];  
-    R * aa = new R[sij.size()];
+    RAB * aa = new RAB[sij.size()];
     for(int i=0;i<=nn;i++)
         llg[i]=0;
         
@@ -1145,14 +1198,13 @@ template<class R>
      AB.nbcoef=sij.size();
      AB.symetrique=sym;
      AB.dummy=false;
-     AB = R();
-  //   R zero=R();
+     AB = RAB();
      for (int i=0;i<this->n;i++)
        for (int k=lg[i];k<lg[i+1];k++)
          {    
            int j=cl[k];
-           R aij = a[k];
-           if(aij == zero) continue;
+           RAB aij = a[k];
+           if(norm(aij) <eps0 ) continue;
            int ii[2],jj[2];
            ii[0]=i;ii[1]=j;
            jj[0]=j;jj[1]=i;
@@ -1165,13 +1217,13 @@ template<class R>
                 for (int kb=blg[j];kb<blg[j+1];kb++)
                   { 
                    int k= bcl[kb];
-                   R bjk;
+                   RB bjk;
                    if (B.symetrique && k > j)
                      bjk=B(k,j);
                    else
                       bjk=B(j,k);
                 //   cout << i << "," << "," << j << "," << k << " " << aij << " " << bjk << endl;
-                   if( bjk != zero  && (!sym || k<=i))
+                   if( norm( bjk)> eps0  && (!sym || k<=i))
                        AB(i,k) += aij*bjk;
                   }
             }
