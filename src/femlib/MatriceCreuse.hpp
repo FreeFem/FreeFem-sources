@@ -69,7 +69,7 @@ template <class T> T* docpyornot(bool nocpy,T* p,int n)
    if(p && n) { // do copy 
       r= new T[n]; assert(r);
       for(int i=0;i<n;i++) 
-        r[i]=p[i];
+        r[i]=T(p[i]); // pour cadna ???? FH 
       }
    return r;
  }
@@ -262,7 +262,7 @@ public:
   virtual R & diag(int i)=0;
   virtual R & operator()(int i,int j)=0;
   virtual MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not 
-  virtual bool addMatTo(R coef,map< pair<int,int>, R> &mij)=0;
+  virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij)=0;
 
 };
 
@@ -348,6 +348,18 @@ public:
   
   MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
   
+  template<class F> void map(const  F & f)
+  {
+    for(int i=0;i<n;++i)
+      D[i]=f(D[i]);
+    if (L)
+    for(int i=0;i<pL[n];++i)
+      L[i]=f(L[i]);
+    if (L && (L != U) )
+    for(int i=0;i<pL[m];++i)
+      U[i]=f(U[i]);
+  }
+  
   template<class RR> MatriceProfile(const MatriceProfile<RR> & A)
     : MatriceCreuse<R>(A.n,A.m,0)
   {
@@ -367,7 +379,7 @@ public:
   }
 
   
-  bool addMatTo(R coef,map< pair<int,int>, R> &mij);
+  bool addMatTo(R coef,std::map< pair<int,int>, R> &mij);
 
   
   /*----------------------------------------------------------------
@@ -450,14 +462,14 @@ public:
   bool sym() const {return symetrique;}
   
 template<class K>
-  MatriceMorse(int nn,int mm, map< pair<int,int>, K> & m, bool sym);
+  MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bool sym);
   
  template<class RB,class RAB>
  void  prod(const MatriceMorse<RB> & B, MatriceMorse<RAB> & AB);
  
  MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {
      return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
-  bool  addMatTo(R coef,map< pair<int,int>, R> &mij);
+  bool  addMatTo(R coef,std::map< pair<int,int>, R> &mij);
 
   template<class K>
     MatriceMorse(const MatriceMorse<K> & );
