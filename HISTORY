@@ -606,5 +606,8 @@ __________
 26/01/2005
    correct pb with  --disable-pdf in configure.ac
    correct pdflatex and latex compilation 
-   correct  FreeFem++.app probleme when usind in a shell script FreeFem++-CoCoa
+   correct  FreeFem++.app problem when usind in a shell script FreeFem++-CoCoa
+   correct web site and distrib file  freefem++-1.45-2.tar.gz
+   
+
    

@@ -7,7 +7,7 @@ sub FileInfo {
    return  "$size Kb $date_str";
 }
 use File::Basename;
-$imagedir="./icons";
+$imagedir="freefem/";
 $dir=" il manque un parametre $#ARGV ";
 if ( $#ARGV == 0 )  { 
  $dir=$ARGV[0];
@@ -34,14 +34,16 @@ while (<file>) {
     $v=$file;
     $s=$file;
 #    $v =~ s/.*\+\+[.v-]?//;
-    $v =~ s/^(.*\+\+[.v-]?)([1-9][-.0-9]*[0-9])(.*)$/\2/;
-    $p =~ s/^(.*\+\+[.v-]?)([1-9][-.0-9]*[0-9])(.*)$/\1/;
-    $s =~ s/^(.*\+\+[.v-]?)([1-9][-.0-9]*[0-9])(.*)$/\3/;
+    $v =~ s/^(.*\+\+[.v-]*)([1-9][-.0-9]*[0-9])(.*)$/\2/;
+    $p =~ s/^(.*\+\+[.v-]*)([1-9][-.0-9]*[0-9])(.*)$/\1/;
+    $s =~ s/^(.*\+\+[.v-]*)([1-9][-.0-9]*[0-9])(.*)$/\3/;
+    next FILE if  $v !~ /^[1-9][-.0-9]*[0-9]$/;
+
     ($va,$vb,$vc) = split(/[-.]/,$v);
     $clef="$p $s";
-    # print " -- $p $v $s $clef  \n";
-    if (  $iclef{$clef} == "" ) { $iclef{$clef}=$kk++;}
+    if (  $iclef{$clef} == "" ) { $iclef{$clef}=++$kk;}
     $i=$iclef{$clef};
+    # print " -- $p , $v , $s , $clef ,, $i  \n";
     $pi[$i]=$p;
     $si[$i]=$s;
     $vi[$i] = sprintf("%05d %05d %05d;%s",$va,$vb,$vc,$vi[$i]);
@@ -53,10 +55,11 @@ while (<file>) {
 
 #    @item=split(/-/);
 }
+#exit 1;
 ($vv1,$vv2,$vv3) = split(/ /,$VV);
 $ver = sprintf("%d.%d-%d",$vv1,$vv2,$vv3);
 print " last version: $ver \n";
-for ($i=0;$i<$kk;$i++)
+for ($i=1;$i<=$kk;$i++)
 {
   # print " $i --- \n" ;
   # print "  $pi[$i]\n";
@@ -132,8 +135,8 @@ $dateofday=localtime();
 open(fout,">freefem++.htm");
 while (<STDIN>)
 {
-    s/\@ver\@/$version/;
-    s/\@imagedir\@/$imagedir/;
+    s/\@ver\@/$ver/;
+    s,\@imagedir\@,$imagedir,;
     s/\@dateofday\@/$dateofday/;
     s/\@download\@/$download/;
     s/\@dir\@/$dir/;
