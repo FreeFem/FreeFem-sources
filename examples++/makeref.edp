@@ -34,6 +34,7 @@ ofstream ref("ref.edp");
 // meaning. Their main property is to gather numerical values from the
 // whole domain, to be checked for consistency with previous runs.
 
+
 cout << "--------- file : aadaptation.edp -----------------" << endl;
 verbosity=verbosityy;
 {
