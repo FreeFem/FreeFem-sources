@@ -16,8 +16,13 @@ AC_DEFUN(CHECK_COMPILE_FLAG,
 	# The program needs to contain something for the test source
 	# file to be created by autoconf.
 
-	AC_COMPILE_IFELSE([
-		],
+	# Some options really need to be linked (not only compiled) to
+	# check whether they work.
+
+	AC_LINK_IFELSE([ifelse($1,Fortran 77,
+[       program x
+       end],
+			[AC_LANG_PROGRAM])],
 		check_flag_ok=yes,
 		check_flag_ok=no)
 	AC_MSG_RESULT($check_flag_ok)
