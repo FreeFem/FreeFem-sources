@@ -542,6 +542,10 @@ basicAC_F0::name_and_type  OpCall_FormLinear2<FormBilinear>::name_param[]= {
 };
 
 
+bool FieldOfForm(const list<C_F0> & largs ,bool complextype);
+template<class A>  struct IsComplexType { static const bool value=false;};
+template<>  struct IsComplexType<Complex> { static const bool value=true;};
+
 template<class R>  //  to make   x=linearform(x)
 struct OpArraytoLinearForm: public OneOperator {
   typedef Call_FormLinear::const_iterator const_iterator;
@@ -551,7 +555,7 @@ struct OpArraytoLinearForm: public OneOperator {
     Expression x;
     AnyType operator()(Stack s)  const ;// {ExecError("Internal Error:to do");} 
     Op(Expression xx,Expression  ll) 
-      : l(dynamic_cast<const Call_FormLinear *>(ll)),x(xx) {assert(l);}
+      : l(dynamic_cast<const Call_FormLinear *>(ll)),x(xx) {assert(l);FieldOfForm(l->largs,IsComplexType<R>::value); }
      operator aType () const { return atype<KN<R> *>();} 
       
   };
@@ -572,7 +576,7 @@ struct OpMatrixtoBilinearForm: public OneOperator {
     AnyType operator()(Stack s)  const ;
     Op(Expression aa,Expression  bb) 
       : b(dynamic_cast<const Call_FormBilinear *>(bb)),a(aa) 
-    {assert(b && b->nargs);}
+    {assert(b && b->nargs);FieldOfForm(b->largs,IsComplexType<R>::value)  ;}
      operator aType () const { return atype<Matrice_Creuse<R>  *>();} 
 
   };
@@ -733,13 +737,14 @@ template<class K> class Matrice_Creuse  { public:
 
 template<class K> class Matrice_Creuse_Transpose;
 
- template<class K>   class Matrix_Prod { public:  
-  Matrice_Creuse<K> *A,*B;
+ template<class KA,class KB>   class Matrix_Prod { public:  
+  Matrice_Creuse<KA> *A;
+  Matrice_Creuse<KB> *B;
   bool ta,tb;
-  Matrix_Prod(Matrice_Creuse<K> *AA,Matrice_Creuse<K> *BB) : A(AA),B(BB),ta(false),tb(false) {assert(AA && BB);}
-  Matrix_Prod(Matrice_Creuse_Transpose<K> AA,Matrice_Creuse<K> *BB)           : A(AA),B(BB),ta(true),tb(false) {assert(AA && BB);}
-  Matrix_Prod(Matrice_Creuse<K> *AA,Matrice_Creuse_Transpose<K> BB)           : A(AA),B(BB),ta(false),tb(true) {assert(AA && BB);}
-  Matrix_Prod(Matrice_Creuse_Transpose<K> AA,Matrice_Creuse_Transpose<K> BB) : A(AA),B(BB),ta(true),tb(true) {assert(AA && BB);}
+  Matrix_Prod(Matrice_Creuse<KA> *AA,Matrice_Creuse<KB> *BB) : A(AA),B(BB),ta(false),tb(false) {assert(AA && BB);}
+  Matrix_Prod(Matrice_Creuse_Transpose<KA> AA,Matrice_Creuse<KB> *BB)           : A(AA),B(BB),ta(true),tb(false) {assert(AA && BB);}
+  Matrix_Prod(Matrice_Creuse<KA> *AA,Matrice_Creuse_Transpose<KB> BB)           : A(AA),B(BB),ta(false),tb(true) {assert(AA && BB);}
+  Matrix_Prod(Matrice_Creuse_Transpose<KA> AA,Matrice_Creuse_Transpose<KB> BB) : A(AA),B(BB),ta(true),tb(true) {assert(AA && BB);}
  };
  
 template<class K>  ostream & operator << (ostream & f,const Matrice_Creuse<K> & A) 
@@ -838,7 +843,7 @@ AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const
   pfes  &  pp= *GetAny<pfes * >((*l->ppfes)(stack));
   FESpace * pVh = *pp ;
   FESpace & Vh = *pVh ;
-  R tgv= 1e30;
+  double tgv= 1e30;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));  
   xx=R(); 
   if ( AssembleVarForm<R>(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )

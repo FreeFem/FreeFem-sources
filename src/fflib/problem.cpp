@@ -1824,10 +1824,10 @@ bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,in
  
 
 
-bool FieldOfForm(const C_args *op,bool complextype)  // true => complex problem 
+bool FieldOfForm(const list<C_F0> & largs ,bool complextype)  // true => complex problem 
 {
-  list<C_F0>::const_iterator ii,ib=op->largs.begin(),
-    ie=op->largs.end();
+  list<C_F0>::const_iterator ii,ib=largs.begin(),
+    ie=largs.end();
  // bool complextype =false;   
   for (ii=ib;ii != ie;ii++)
     {
@@ -1902,7 +1902,7 @@ Problem::Problem(const C_args * ca,const ListOfId &l,size_t & top) :
 
   VF=isVF(op->largs);   
  // cout << " Problem ) VF = " << VF << endl;
-  complextype =  FieldOfForm(op,iscomplex)  ;  // Warning do the casting of all expression in double or complex
+  complextype =  FieldOfForm(op->largs,iscomplex)  ;  // Warning do the casting of all expression in double or complex
  if( complextype && !iscomplex) 
     CompileError("Error: Problem  a complex problem with no complex FE function ");
  if( verbosity > 1)
