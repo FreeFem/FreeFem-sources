@@ -565,3 +565,6 @@ __________
 
 29/12/2004  
    add concat operator # in macro generator.
+
+04/01/2005
+   add new quadrature formular on edge (a,b) :qf1pElump  : 1/2(f(a)+f(b))*length(ab)
