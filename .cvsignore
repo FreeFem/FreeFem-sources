@@ -13,7 +13,8 @@ configure.lineno
 configure-stamp
 .DS_Store
 *.exe
-freefem++-?.??
+freefem++-?.??-?
+freefem++-?.??-??
 freefem++-?.??-*.zip
 FreeFem++v*_linux-*_libc-*
 FreeFem++v*_linux-*_libc-*.tgz

@@ -1,3 +1,30 @@
+2005-03-01 16:06  lehyaric
+
+	* Removed unnecessary #includes
+
+2005-03-01 15:33  lehyaric
+
+	* Simplified startup code. Hopefully, this will stop the MinGW
+	  segmentation fault bug (at startup when a filename is specified
+	  on the command line), but this is not proven yet.
+
+2005-03-01 14:21  lehyaric
+
+	* Segmentation violation error while loading a file from the
+	  command line in FreeFem++-cs. Debugging in progress.
+
+2005-02-28 18:06  lehyaric
+
+	* Now compiling fine under Cygwin
+
+2005-02-28 11:40  lehyaric
+
+	* Now compiling fine on MinGW
+
+2005-02-28 11:27  lehyaric
+
+	* Removed use of regex.h since it is not available under MinGW.
+
 2005-02-25 16:28  lehyaric
 
 	* Corrected a small compilation error.
