@@ -4,21 +4,16 @@
 
 noinst_LIBRARIES=libff.a
 
-libff_a_SOURCES=versionnumber.hpp AFunction.cpp lex.cpp lgmesh.cpp	\
-../femlib/Drawing.cpp ../femlib/gibbs.cpp ../femlib/CheckPtr.cpp	\
-../femlib/fem.cpp ../femlib/QuadratureFormular.cpp			\
-../femlib/FESpace.cpp ../femlib/Element_RT.cpp ../femlib/mshptg.cpp	\
-../femlib/FQuadTree.cpp ../bamglib/QuadTree.cpp ../bamglib/R2.cpp	\
-../bamglib/Meshio.cpp ../bamglib/Mesh2.cpp ../bamglib/Metric.cpp	\
-../femlib/BamgFreeFem.cpp ../bamglib/MeshDraw.cpp			\
-../bamglib/MeshGeom.cpp ../bamglib/MeshQuad.cpp ../bamglib/SetOfE4.cpp	\
-../bamglib/MeshRead.cpp ../bamglib/MeshWrite.cpp problem.cpp		\
-strversionnumber.cpp InitFunct.cpp ../Algo/lgalgo.cpp			\
-../femlib/Element_P2h.cpp load.cpp lgfem.cpp
+libff_a_SOURCES=AFunction.cpp lex.cpp lgmesh.cpp ../femlib/Drawing.cpp	\
+../femlib/gibbs.cpp ../femlib/CheckPtr.cpp ../femlib/fem.cpp		\
+../femlib/QuadratureFormular.cpp ../femlib/FESpace.cpp			\
+../femlib/Element_RT.cpp ../femlib/mshptg.cpp ../femlib/FQuadTree.cpp	\
+../bamglib/QuadTree.cpp ../bamglib/R2.cpp ../bamglib/Meshio.cpp		\
+../bamglib/Mesh2.cpp ../bamglib/Metric.cpp ../femlib/BamgFreeFem.cpp	\
+../bamglib/MeshDraw.cpp ../bamglib/MeshGeom.cpp				\
+../bamglib/MeshQuad.cpp ../bamglib/SetOfE4.cpp ../bamglib/MeshRead.cpp	\
+../bamglib/MeshWrite.cpp problem.cpp strversionnumber.cpp		\
+InitFunct.cpp ../Algo/lgalgo.cpp ../femlib/Element_P2h.cpp load.cpp	\
+lgfem.cpp
 
 INCLUDES=-I../fflib -I../bamglib -I../Graphics -I../femlib
-
-BUILT_SOURCES=versionnumber.hpp
-versionnumber.hpp:
-	(echo "#define VersionFreeFempp " '$(VERSION)'; \
-	echo "#define VersionFreeFemDate " '"'`date`'"') >$@

@@ -6,74 +6,18 @@
 
 # $Id$
 
-# The version number is specified in configure.ac
-VERSION=@VERSION@
-
 SUBDIRS=src DOC
 
-LIBLOCAL = -ldl   # for dlopen (see load.cpp)
-
-#--------------------------------------------------
-#  the flag of eigen value part with arpack++ tools
-#-------------------------------------------------
-EIGEN= eigenvalue.o
-LIBARPACK= -larpack -llapack -lblas -rdynamic
-LIBF77= -lg2c
-INCARPACKPP = -DEIGENVALUE -I../arpack/arpack++/include
-#------------------------------------------------
-#  UMFPACK
-#-----------------------
-UMFPACKDIR=$(src)/../../LinearSolver/UMFPACKv4.1
-IUMFPACK= -DUMFPACK -I/usr/include/umfpack -I/usr/include/amd 
-LIBUMFPACK=   -lumfpack -lamd  $(LIBBLAS)
-
-BIN_DIR=/opt/bin
-
-# -----  not change after this line ------------
-TARGETS=FreeFem++ FreeFem++-x11 FreeFem++-mpi  FreeFem++-nw FreeFem++-glx
-# --------------------
-
-CXXFLAGS =  $(OPTFLAGS)  $(FFFLAGS) $(includedir)  $(INCARPACKPP)
-CXXMPIFLAGS=   $(CXXFLAGS) $(MPIFLAGS) -DPARALLELE $(INCARPACKPP)
 www=rascasse.inria.fr:www_gamma/Gamma/cdrom/ftp/freefem/
 ftp=rascasse.inria.fr:/ftp_gamma/freefem/
 ftpk=baobab.ann.jussieu.fr:public_html/ftp/freefem/
 
-LIBS=$(LIBUMFPACK) $(LIBARPACK) $(LIBF77)  $(LIBLOCAL) @LIBS@
-
 allex:examples++-tutorial/all.edp examples++/all.edp examples++-eigen/all.edp
 
-yy:$(src)/lg.tab.hpp  $(src)/lg.tab.cpp $(src)/versionnumber.hpp
-	echo ""
-manuals:FORCE
-	cd DOC; make all
-FreeFem++:%: lg.tab.o   $(OBJETS) Xrgraph.o
-	$(CXX) $(CXXFLAGS) $<  -o $@   $(OBJETS) Xrgraph.o $(LIBX11) $(LIBS)
-FreeFem++-nw:%: lg.tab.o   $(OBJETS) sansrgraph.o
-	$(CXX) $(CXXFLAGS) $<  -o $@   $(OBJETS)  sansrgraph.o $(LIBS)
-FreeFem++-mpi: lg.tab.cpp  parallelempi.cpp $(OBJETS) sansrgraph.o  
-	$(CXXMPI) $(CXXMPIFLAGS)   $(src)/lg.tab.cpp  $(src)/mpi/parallelempi.cpp  -o $@   $(OBJETS)  sansrgraph.o $(LIBS) $(MPILIBS)
-FreeFem++-agl: lg.tab.cpp  macglrgraf.cpp  $(OBJETS) macglrgraf.o  
-	$(CXX) $(CXXFLAGS)   $(src)/lg.tab.cpp  -o $@   $(OBJETS)   macglrgraf.o $(LIBGL) $(LIBS)
-FreeFem++-glx: lg.tab.cpp  xglrgraf.cpp  $(OBJETS) xglrgraf.o  
-	$(CXX) $(CXXFLAGS)   $(src)/lg.tab.cpp  -o $@   $(OBJETS)   xglrgraf.o $(LIBGLX) $(LIBS)
-
-FreeFem++-x11:%: lg.tab.o   $(OBJETS) Xrgraph.o
-	$(CXX) $(CXXFLAGS) $<  -o $@   $(OBJETS) Xrgraph.o $(LIBX11) $(LIBS)
-%.o : %.c
-
-clean: 
-	-rm *.o  #* core
-	-rm lg.*
+clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
 	-rm examples*/*.eps 
-$(src)/lg.tab.hpp  $(src)/lg.tab.cpp: lg.y
-	-rm $(src)/lg.tab.hpp  $(src)/lg.tab.cpp lg.tab.cpp.h
-	bison -dtv -p lg  $< -o lg.tab.cpp
-	-mv lg.tab.cpp.h  lg.tab.hpp # pour un  pb entre des versions de bison 
-	mv lg.tab.[hc]pp $(src)  
-.cpp.o:
-	$(CXX)  -c $(CXXFLAGS) $< 
+
 versions:manuals  allex FreeFem++v$(VERSION).tar.gz FreeFem++v$(VERSION)_Win.zip FreeFem++v$(VERSION)_MacOS FreeFem++v$(VERSION)_MacOsX.tgz
 	echo "done"
 tgz: FreeFem++v$(VERSION).tar.gz 
@@ -103,7 +47,7 @@ FreeFem++v$(VERSION).tar:  FORCE
 	rm -rf FreeFem++v$(VERSION)
 %.gz:%
 	gzip -9f $*
-        
+
 FreeFem++v$(VERSION)_Win:pc/FreeFem++.exe FORCE
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen
 	cp  pc/FreeFem++.exe $@
@@ -146,13 +90,6 @@ FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
 	tar zcvf FreeFem++v$(VERSION)_MacOsX.tgz FreeFem++v$(VERSION)_MacOsX;
 
 
-tyty: $(src)/. $(src)/*/. 
-	egrep '^# *include' src/*/*.h src/*/*.hpp src/*.hpp src/*/*.cpp src/*.cpp | grep -v alloca.h| grep '"' \
-	    | awk -F'[:"]' ' \
-	/.hpp:#/ { nn=split($$1,bbb,"[/]");c=bbb[nn];d=$$(NF-1); l[c] = l[c] " " d  ;} \
-	/.h:#/ { nn=split($$1,bbb,"[/]");c=bbb[nn];d=$$(NF-1); l[c] = l[c] " " d  ;} \
-	/.cpp:#/  {nn=split($$1,bbb,"[/.]");c=bbb[nn-1];d=$$(NF-1);print c ".o:" d,l[d] }' 
-    
 %/all.edp:% FORCE 
 	(cd $*; echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
          for i in *`ls *.edp|grep -v ^all.edp$$` ; do  \

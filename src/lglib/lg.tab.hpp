@@ -122,7 +122,7 @@
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 78 "lg.y++"
+#line 78 "lg.y"
 typedef union YYSTYPE { 
  double dnum;
  long lnum;
@@ -137,13 +137,13 @@ typedef union YYSTYPE {
  ListOfId *clist_id;
 } YYSTYPE;
 /* Line 1240 of yacc.c.  */
-#line 141 "y.tab.h"
+#line 141 "lg.tab.hpp"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
 #endif
 
-extern YYSTYPE yylval;
+extern YYSTYPE lglval;
 
 
 

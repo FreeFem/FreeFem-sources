@@ -1,2 +1,3 @@
-#define VersionFreeFempp  1.41
+#include "../../config.h"
+#define VersionFreeFempp  VERSION
 #define VersionFreeFemDate  "jeu mai 13 14:10:02 CEST 2004"

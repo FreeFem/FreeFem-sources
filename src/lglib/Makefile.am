@@ -3,11 +3,12 @@
 # $Id$
 
 noinst_LIBRARIES=liblg.a
-liblg_a_SOURCES=lg.y++
+liblg_a_SOURCES=lg.tab.hpp lg.tab.cpp
 INCLUDES=-I../fflib -I../bamglib -I../Graphics -I../femlib
 
-BUILT_SOURCES=lg.h
+BUILT_SOURCES=lg.tab.hpp lg.tab.cpp
 
-lg.h: lg.c++
-
-AM_YFLAGS=-d
+lg.tab.hpp  lg.tab.cpp: lg.y
+	-rm lg.tab.hpp  lg.tab.cpp lg.tab.cpp.h
+	bison -dtv -p lg  $< -o lg.tab.cpp
+	-mv lg.tab.cpp.h  lg.tab.hpp # pour un  pb entre des versions de bison 

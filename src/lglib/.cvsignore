@@ -1,4 +1,4 @@
 .deps
 Makefile
 Makefile.in
-lg.tab.cpp
+lg.output

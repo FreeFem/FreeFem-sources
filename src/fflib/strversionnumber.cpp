@@ -1,4 +1,4 @@
-#include "versionnumber.hpp"
+#include <config.h>
 #include <cstdlib>
 using namespace std;
 #define TOSTRING1(i) #i

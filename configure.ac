@@ -24,6 +24,13 @@ AM_PROG_LEX
 
 AC_CHECK_LIB(pthread,pthread_create)
 
+# FreeFem++-specific version information
+# --------------------------------------
+
+AC_DEFINE_UNQUOTED(VersionFreeFempp,$VERSION,FreeFem++ version as a float)
+FF_DATE=`date`
+AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
+
 # Checking wether we can produce a X11 version
 # --------------------------------------------
 
@@ -35,7 +42,7 @@ then
 	AC_SUBST(STDPROG,FreeFem++)
 	AC_SUBST(X11PROG,FreeFem++-x11)
 	AC_SUBST(INCLUDEX11,/usr/X11R6/include)
-	AC_SUBST(LIBX11,-L/usr/X11R6/lib -lX11 -lm)
+	AC_SUBST(LIBX11,"-L/usr/X11R6/lib -lX11 -lm")
 fi
 AC_MSG_RESULT($ff_x11)
 
