@@ -1237,7 +1237,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
             
             for (int k=0;k<kk;k++)
               {
-                gg=0;
+                gg=R();
                 pair<int,Expression> xx=bc->bc[k];
                 tabexp=0; 
                 int comp = xx.first;
@@ -1446,7 +1446,7 @@ void InitProblem( int Nb, const FESpace & Uh,
                  vector< pferbase > & u_h,const FESpace ** LL )
 {
 
-  *B=0;
+  *B=R();
   
   bool initx = typemat->t==TypeSolveMat::GC;
   
@@ -1460,7 +1460,7 @@ void InitProblem( int Nb, const FESpace & Uh,
       
       if ( u_Vh==0  || &(*(u_h[0])).Vh->Th != &Th )
         {
-          *X=0;
+          *X=R();
           if(verbosity>1)
             cout << "   -- Change of Mesh " << (u_Vh ? & (*(u_h[0])).Vh->Th: 0 ) 
                  << "  " << &Th <<  endl;

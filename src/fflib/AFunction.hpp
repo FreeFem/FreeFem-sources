@@ -1042,12 +1042,12 @@ class E_F0_Func2 :public  E_F0 { public:
 
 
 //  the variable offset / stack (local variable)
-template<class R> class Value:public E_F0
+template<class R> class Value1:public E_F0
  { 
   size_t offset;
   public:
-  AnyType operator()(Stack s) const { return SetAny<R*>(static_cast<R *>(static_cast<void *>(s+offset)));}
-  Value(size_t o):offset(o) {}
+  AnyType operator()(Stack s) const { return SetAny<R*>(static_cast<R *>(static_cast<void *>(  static_cast<char *>(s)+offset)));}
+  Value1(size_t o):offset(o) {}
 };
 
 //  the variable globale
@@ -1523,7 +1523,7 @@ inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top,const basicAC_
 template<class T>   
 inline  C_F0 TableOfIdentifier::NewFESpace(Key k,aType t,size_t & top,const basicAC_F0 &args) 
    {  
-        return C_F0(TheOperators,"<-",basicAC_F0_wa(New(k,NewFESpace<T,U>(t,top,args)),args));}
+        return C_F0(TheOperators,"<-",basicAC_F0_wa(New(k,NewFESpace<T>(t,top,args)),args));}
         
 
 template<class T,class U>   

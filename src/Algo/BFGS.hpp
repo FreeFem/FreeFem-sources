@@ -98,7 +98,7 @@ typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0)
    Vect s(n),gamma(n),delta(n),g1(n);
 
    //searching directions
-   s=0;
+   s=Real();
    s -= H*g0;
    descent = (s,g0);
    assert(s.max() <1e100);
@@ -159,7 +159,7 @@ typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0)
 		 g0 = g1;
 		 model0 = model1;
 	   }
-	 s=0;
+	 s=Real();
 	 s -= H*g0;
 	 descent = (s,g0);
 	 model1 = ls->search(model0, s, descent, lambda);

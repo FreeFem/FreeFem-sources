@@ -60,13 +60,13 @@ template<class R> istream & operator>>(istream & f, KN_<R> & v)
  {
      int n;char c;
      f >> n;
-     assert(fdat.good());
+     assert(f.good());
      assert(n==v.N());
      while (f.get(c) &&  (c!='\n' && c!='\r' ) ) 0; // eat until control (new line
 
      for (int i=0;i<n;i++)
        f >> v[i] ;
-     assert(fdat.good());
+     assert(f.good());
      return f;
 }
 
@@ -127,6 +127,20 @@ template<class R>
     return s;
   }
 
+template<class R>
+ R  operator,(const KN_<const_R> & u,const conj_KN_<const_R> & vc) {
+  int n=u.n;
+    K_throwassert(n == vc.a.n);
+    R  s=0; 
+    R * l(u);
+    R  *r(vc.a);
+    int stepl= u.step, stepr=vc.a.step;    
+    for (long i=0;i<n;i++,l += stepl, r += stepr) s += *l * conj(*r);
+    return s;
+  }
+template<class R>
+ R  operator,(const KN<const_R> & u,const conj_KN_<const_R> & vc) {  return ( (KN_<R>) u,vc);}
+
 
 template<class R>
 R  KN_<R>::min() const {
@@ -151,6 +165,14 @@ R  KN_<R>::sum() const {
     return s;
   }
 
+template<class R>
+double  KN_<R>::norm() const {
+  double s = 0.;
+    for (long i=1;i<n;i++)
+      s +=  std::norm(v[index(i)]);
+    return s;
+  }
+
 template<class R> template<class T>
 long  KN_<R>::last(const T & a) const {
     for (long i=n;i-- >0;)
@@ -168,11 +190,11 @@ long  KN_<R>::first(const T & a) const {
 
 
 template<class R>
- KN_<R>&  KN_<R>::map(R (*f)(R )) {
+ void  KN_<R>::map(R (*f)(R )) {
     for (long i=0;i<n;i++)
       {  R & x(v[index(i)]);
           x =  f(x);}
-  return *this; 
+   
   }
 
 

@@ -535,7 +535,7 @@ class LinearGMRES : public OneOperator
       Kn b(x.n);
      
       if (B)   b = *GetAny<Kn *>((*B)(stack));
-      else     b=0;
+      else     b=0.;
       int n=x.N();
       int dKrylov=50;
       MatF_O AA(n,stack,A);
@@ -1605,7 +1605,7 @@ KN<K> * pfer2vect( pair<FEbase<R> *,int> p)
       FESpace * Vh= p.first->newVh();     
       throwassert( Vh);
       *p.first = x = new KN<K>(Vh->NbOfDF);
-      *x=0; 
+      *x=K(); 
     }
     return x;}
 
@@ -1768,7 +1768,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
       {
          FElement K(Vh[t]);
          int nbdf=K.NbDoF();
-         gg=0;   
+         gg=R();   
 #ifdef OLDPih    
 // old method          
          K.Pi_h(gg,F_Pi_h,F,&tabexp);
@@ -1825,7 +1825,7 @@ AnyType set_feoX_1 (Stack s,Expression ppfeX_1, Expression e)
          FElement K(Vh[t]);
          int nbdf=K.NbDoF();
         
-         gg=0;
+         gg=R();
          
          K.Pi_h(gg,FoX_1_Pi_h,F,&tabexp);
          for (int df=0;df<nbdf;df++)
@@ -1973,7 +1973,7 @@ AnyType E_set_fev::operator()(Stack s)  const
          FElement K(Vh[t]);
          int nbdf=K.NbDoF();
         
-         gg=0;
+         gg=R();
          
 #ifdef OLDPih    
 // old method          
