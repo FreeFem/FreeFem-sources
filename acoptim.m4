@@ -65,33 +65,63 @@ then
     if test -x /usr/bin/hostinfo
 	then
 
-	# Check that we are on MacOS X
+	# If we are on MacOS X
 	if test `/usr/bin/hostinfo|grep Darwin|wc -l` -gt 0
 	    then
 
-	    # -fast option do not work because the -malign-natural
-	    # flags create wrong IO code
+	    # CPU detection
+	    ff_cpu=unkown
+	    if test `/usr/bin/hostinfo|grep ppc7450|wc -l` -gt 0
+		then
+		ff_cpu=G4
+	    elif test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
+		then
+		ff_cpu=g5
+	    fi
+	    if test "$ff_cpu" == unknown;
+		then
+		AC_MSG_ERROR(cannot determine PowerPC cpu type)
+	    fi
+
+	    # At the moment, we do not know how to produce correct
+	    # optimization code on G5.
+
+	    if test $ff_cpu == G5;
+		then
+		AC_MSG_WARN(G5 detected, but G4 optimization options preferred)
+		ff_cpu=G4
+	    fi
+
+	    # Optimization flags: -fast option do not work because the
+	    # -malign-natural flags create wrong IO code
 
 	    ff_fast='-funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
-       if test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
-            then
-	# remove -fstrict-aliasing on G5 to much optim the code cash in GC
-         ff_fast="`echo $ff_fast| sed 's/-fstrict-aliasing //g'`"
 
-	fi
+	    # Specific PowerPC G5 optimization
+	    if test $ff_cpu == G5;
+		then
+
+	        # remove -fstrict-aliasing on G5 to much optim the
+	        # code cash in GC
+
+		ff_fast="`echo $ff_fast| sed 's/-fstrict-aliasing //g'`"
+
+	    fi
+
 	    CHECK_COMPILE_FLAG(C,$ff_fast,CFLAGS)
 	    CHECK_COMPILE_FLAG(C++,$ff_fast,CXXFLAGS)
 	    CHECK_COMPILE_FLAG(Fortran 77,$ff_fast,FFLAGS)
 	fi
 
-	# CPU reference
-	if test `/usr/bin/hostinfo|grep ppc7450|wc -l` -gt 0
+	# CPU reference: PowerPC G4
+	if test $ff_cpu == G4;
 	    then
 	    CHECK_COMPILE_FLAG(C,-mcpu=7450,CFLAGS)
 	    CHECK_COMPILE_FLAG(C++,-mcpu=7450,CXXFLAGS)
 	    CHECK_COMPILE_FLAG(Fortran 77,-mcpu=7450,FFLAGS)
 
-	elif test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
+	# CPU reference: PowerPC G5
+	elif test $ff_cpu == G5;
 	    then
 
 	    # but at least this way we can see
