@@ -73,11 +73,72 @@ static const QuadraturePoint P_QuadratureFormular_T_5[] = {
       QuadraturePoint(C_T5,u_T5,v_T5),
       QuadraturePoint(C_T5,v_T5,u_T5)
 };
+// ------------------
+//----
 
+ 
+// Thanks to http://xyz.lanl.gov/format/math.NA/0501496
+/*
+Mathematics, abstract
+math.NA/0501496
+From: Mark Taylor [view email]
+Date: Thu, 27 Jan 2005 19:17:37 GMT   (27kb)
 
+Several new quadrature formulas for polynomial integration in the  triangle
+Authors:  Mark A. Taylor,  Beth A. Wingate,  Len P. Bos
+Comments: 14 pages, 14 figures, 5 pages of tabulated quadrature points
+Report-no: SAND2005-0034J
+
+*/
 const QuadratureFormular QuadratureFormular_T_5(3,5,7,P_QuadratureFormular_T_5);
 // ----------------------------------------------------------------------
-  
+// awk '/15:/,/21:/ {print "QuadraturePoint(" $3 "/2," $1"," $2"),"}' coords.txt   
+static const QuadraturePoint P_QuadratureFormular_T_7[] = {  
+QuadraturePoint(0.0102558174092/2,1.0000000000000,0.0000000000000),
+QuadraturePoint(0.0102558174092/2,0.0000000000000,0.0000000000000),
+QuadraturePoint(0.0102558174092/2,0.0000000000000,1.0000000000000),
+QuadraturePoint(0.1116047046647/2,0.7839656651012,0.0421382841642),
+QuadraturePoint(0.1116047046647/2,0.1738960507345,0.7839656651012),
+QuadraturePoint(0.1116047046647/2,0.1738960507345,0.0421382841642),
+QuadraturePoint(0.1116047046647/2,0.0421382841642,0.1738960507345),
+QuadraturePoint(0.1116047046647/2,0.7839656651012,0.1738960507345),
+QuadraturePoint(0.1116047046647/2,0.0421382841642,0.7839656651012),
+QuadraturePoint(0.1679775595335/2,0.4743880861752,0.4743880861752),
+QuadraturePoint(0.1679775595335/2,0.4743880861752,0.0512238276497),
+QuadraturePoint(0.1679775595335/2,0.0512238276497,0.4743880861752),
+QuadraturePoint(0.2652238803946/2,0.2385615300181,0.5228769399639),
+QuadraturePoint(0.2652238803946/2,0.5228769399639,0.2385615300181),
+QuadraturePoint(0.2652238803946/2,0.2385615300181,0.2385615300181)
+};
+const QuadratureFormular QuadratureFormular_T_7(3,7,15,P_QuadratureFormular_T_7);
+
+// awk '/21:/,/28:/ {print "QuadraturePoint(" $3 "/2," $1"," $2"),"}' coords.txt
+static const QuadraturePoint P_QuadratureFormular_T_9[] = {  
+QuadraturePoint(0.0519871420646/2,0.0451890097844,0.0451890097844),
+QuadraturePoint(0.0519871420646/2,0.0451890097844,0.9096219804312),
+QuadraturePoint(0.0519871420646/2,0.9096219804312,0.0451890097844),
+QuadraturePoint(0.0707034101784/2,0.7475124727339,0.0304243617288),
+QuadraturePoint(0.0707034101784/2,0.2220631655373,0.0304243617288),
+QuadraturePoint(0.0707034101784/2,0.7475124727339,0.2220631655373),
+QuadraturePoint(0.0707034101784/2,0.2220631655373,0.7475124727339),
+QuadraturePoint(0.0707034101784/2,0.0304243617288,0.7475124727339),
+QuadraturePoint(0.0707034101784/2,0.0304243617288,0.2220631655373),
+QuadraturePoint(0.0909390760952/2,0.1369912012649,0.2182900709714),
+QuadraturePoint(0.0909390760952/2,0.6447187277637,0.2182900709714),
+QuadraturePoint(0.0909390760952/2,0.1369912012649,0.6447187277637),
+QuadraturePoint(0.0909390760952/2,0.2182900709714,0.6447187277637),
+QuadraturePoint(0.0909390760952/2,0.2182900709714,0.1369912012649),
+QuadraturePoint(0.0909390760952/2,0.6447187277637,0.1369912012649),
+QuadraturePoint(0.1032344051380/2,0.0369603304334,0.4815198347833),
+QuadraturePoint(0.1032344051380/2,0.4815198347833,0.0369603304334),
+QuadraturePoint(0.1032344051380/2,0.4815198347833,0.4815198347833),
+QuadraturePoint(0.1881601469167/2,0.4036039798179,0.1927920403641),
+QuadraturePoint(0.1881601469167/2,0.4036039798179,0.4036039798179),
+QuadraturePoint(0.1881601469167/2,0.1927920403641,0.4036039798179)
+};
+const QuadratureFormular QuadratureFormular_T_9(3,9,21,P_QuadratureFormular_T_9);
+
+
 // ----------------------------------------------------------------------
 
 static const QuadraturePoint P_QuadratureFormular_Q_1[1] = {
@@ -192,6 +253,7 @@ const QuadratureFormular QuadratureFormular_Q_7(4,7,25,P_QuadratureFormular_Q_7)
 
 void QuadratureFormular::Verification()
 {
+  const double tol=1.e-12;
   R err=0;
   // on triangle or Quad 
   R a,b,c,h;
@@ -228,7 +290,7 @@ void QuadratureFormular::Verification()
       err = Max(err,Abs(se-sa));
       err = Max(err,Abs(se-sb));
       err = Max(err,Abs(see-sc));
-      if (err>1.e-14)
+      if (err>tol)
 	if (on == 3) 
 	  cerr << "T Ordre= " << k << " 2!k!/(2+k)!= " << se << " " << sa << " " << sb << " " << sc 
 	       << " err= " << err << endl;
@@ -239,7 +301,7 @@ void QuadratureFormular::Verification()
 
     }
   
-  if(err>1.e-14)
+  if(err>tol)
     {
       cerr << "Erreur dans la formule d'integration on=" << on << " exact = " << exact 
 	   << " Nb Point = " << n << endl;

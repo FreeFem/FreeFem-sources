@@ -412,12 +412,32 @@ class TypeOfFE_P2Lagrange : public  TypeOfFE { public:
   // void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const;
 } ;
 
+
+class TypeOfFE_P2bLagrange : public  TypeOfFE { public:  
+  static int Data[];
+  static double Pi_h_coef[];
+  
+   TypeOfFE_P2bLagrange(): TypeOfFE(1,1,1,1,Data,3,1,7,7,Pi_h_coef)
+    { const R2 Pt[] = { R2(0,0), R2(1,0), R2(0,1),R2(0.5,0.5),R2(0,0.5),R2(0.5,0), R2(1./3.,1./3.) };
+      for (int i=0;i<NbDoF;i++) {
+       pij_alpha[i]= IPJ(i,i,0);
+       P_Pi_h[i]=Pt[i]; }
+     }
+   
+  // void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+ //  void D2_FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+  // void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const;
+} ;
+
 int TypeOfFE_P1Lagrange::Data[]={0,1,2,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
 int TypeOfFE_P1Bubble::Data[]={0,1,2,6,     0,0,0,0,     0,1,2,3,     0,0,0,0,        0,1,2,3,     0};
 int TypeOfFE_P2Lagrange::Data[]={0,1,2,3,4,5, 0,0,0,0,0,0, 0,1,2,3,4,5, 0,0,0,0,0,0,  0,1,2,3,4,5, 0};
+int TypeOfFE_P2bLagrange::Data[]={0,1,2,3,4,5,6, 0,0,0,0,0,0,0, 0,1,2,3,4,5,6, 0,0,0,0,0,0,0,  0,1,2,3,4,5,6, 0};
 double TypeOfFE_P1Lagrange::Pi_h_coef[]={1.,1.,1.};
 double TypeOfFE_P1Bubble::Pi_h_coef[]={1.,1.,1.,1.};
 double TypeOfFE_P2Lagrange::Pi_h_coef[]={1.,1.,1.,1.,1.,1.};
+double TypeOfFE_P2bLagrange::Pi_h_coef[]={1.,1.,1.,1.,1.,1.,1.};
 
 inline void dump(char *m,int n,int * p)
 {
@@ -1265,7 +1285,7 @@ void TypeOfFE_P1Bubble::FB(const bool *whatd,const Mesh & ,const Triangle & K,co
  if (whatd[op_dxx])
   {  
     RN_ fxx(val('.',0,op_dxx)); 
-    R lbdxx= 2*((Dl0.x*Dl1.x)*l2+(Dl1.x*Dl2.x)*l0+(Dl2.x*Dl0.x)*l1);
+    R lbdxx= 18*((Dl0.x*Dl1.x)*l2+(Dl1.x*Dl2.x)*l0+(Dl2.x*Dl0.x)*l1);
     fxx[0] = -lbdxx;
     fxx[1] = -lbdxx;
     fxx[2] = -lbdxx;
@@ -1275,7 +1295,7 @@ void TypeOfFE_P1Bubble::FB(const bool *whatd,const Mesh & ,const Triangle & K,co
  if (whatd[op_dyy])
   {  
     RN_ fyy(val('.',0,op_dyy));
-    R lbdyy= 2*((Dl0.y*Dl1.y)*l2+(Dl1.y*Dl2.y)*l0+(Dl2.y*Dl0.y)*l1);
+    R lbdyy= 18*((Dl0.y*Dl1.y)*l2+(Dl1.y*Dl2.y)*l0+(Dl2.y*Dl0.y)*l1);
      
     fyy[0] =  -lbdyy;
     fyy[1] =  -lbdyy;
@@ -1286,11 +1306,11 @@ void TypeOfFE_P1Bubble::FB(const bool *whatd,const Mesh & ,const Triangle & K,co
   {  
     assert(val.K()>op_dxy);
     RN_ fxy(val('.',0,op_dxy)); 
-    R lbdxy= (Dl0.x*Dl1.y+ Dl0.y*Dl1.x)*l2+(Dl1.x*Dl2.y+Dl1.y*Dl2.x)*l0+(Dl2.x*Dl0.y+Dl2.y*Dl0.x)*l1;  
-    fxy[0] = 4*Dl0.x*Dl0.y-9.*(l0-l1-l2);
-    fxy[1] = 4*Dl1.x*Dl1.y-9.*(l0-l1-l2);
-    fxy[2] = 4*Dl2.x*Dl2.y-9.*(l0-l1-l2);
-    fxy[3] = 27.*(l0-l1-l2);
+    R lbdxy= 9*(Dl0.x*Dl1.y+ Dl0.y*Dl1.x)*l2+(Dl1.x*Dl2.y+Dl1.y*Dl2.x)*l0+(Dl2.x*Dl0.y+Dl2.y*Dl0.x)*l1;  
+    fxy[0] = 4*Dl0.x*Dl0.y-lbdxy;
+    fxy[1] = 4*Dl1.x*Dl1.y-lbdxy;
+    fxy[2] = 4*Dl2.x*Dl2.y-lbdxy;
+    fxy[3] = +3*lbdxy;
   }
   }
 
@@ -1453,6 +1473,114 @@ void TypeOfFE_P2Lagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,
     fxy[3] =  4*(Dl1.x*Dl2.y + Dl1.y*Dl2.x);
     fxy[4] =  4*(Dl0.x*Dl2.y + Dl0.y*Dl2.x);
     fxy[5] =  4*(Dl0.x*Dl1.y + Dl0.y*Dl1.x);
+  }
+ 
+ }
+ 
+}
+
+
+void TypeOfFE_P2bLagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+{
+//  const Triangle & K(FE.T);
+  R2 A(K[0]), B(K[1]),C(K[2]);
+  R l0=1-P.x-P.y,l1=P.x,l2=P.y,lb=l0*l1*l2*3.;  
+  R l4_0=(4*l0-1),l4_1=(4*l1-1),l4_2=(4*l2-1); 
+  
+//  throwassert(FE.N == 1);  
+  throwassert( val.N()>=7);
+  throwassert(val.M()==1);
+//  throwassert(val.K()==3 );
+  
+  val=0; 
+// --     
+ if (whatd[op_id])
+  {
+   R lb4=lb*4;
+   RN_ f0(val('.',0,op_id)); 
+  f0[0] = l0*(2*l0-1)+lb;
+  f0[1] = l1*(2*l1-1)+lb;
+  f0[2] = l2*(2*l2-1)+lb;
+  f0[3] = 4*l1*l2-lb4; // oppose au sommet 0
+  f0[4] = 4*l0*l2-lb4; // oppose au sommet 1
+  f0[5] = 4*l1*l0-lb4; // oppose au sommet 3
+  f0[6] = 9*lb;
+  
+  }
+ if(  whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] ||  whatd[op_dxy])
+ {
+   R2 Dl0(K.H(0)), Dl1(K.H(1)), Dl2(K.H(2)),     Dlb((Dl0*l1*l2+Dl1*l0*l2+Dl2*l0*l1)*3.),
+    Dlb4(Dlb*4.);
+
+  if (whatd[op_dx])
+  {
+    RN_ f0x(val('.',0,op_dx)); 
+  f0x[0] = Dl0.x*l4_0 +Dlb.x;
+  f0x[1] = Dl1.x*l4_1 +Dlb.x;
+  f0x[2] = Dl2.x*l4_2 +Dlb.x;
+  f0x[3] = 4*(Dl1.x*l2 + Dl2.x*l1) -Dlb4.x;
+  f0x[4] = 4*(Dl2.x*l0 + Dl0.x*l2) -Dlb4.x;
+  f0x[5] = 4*(Dl0.x*l1 + Dl1.x*l0) -Dlb4.x;
+  f0x[6] = 9.*Dlb.x;
+  }
+
+ if (whatd[op_dy])
+  {  
+   RN_ f0y(val('.',0,op_dy)); 
+  f0y[0] = Dl0.y*l4_0  +Dlb.y;
+  f0y[1] = Dl1.y*l4_1  +Dlb.y;
+  f0y[2] = Dl2.y*l4_2  +Dlb.y;
+  f0y[3] = 4*(Dl1.y*l2 + Dl2.y*l1)  -Dlb4.y;
+  f0y[4] = 4*(Dl2.y*l0 + Dl0.y*l2)  -Dlb4.y;
+  f0y[5] = 4*(Dl0.y*l1 + Dl1.y*l0)  -Dlb4.y;
+  f0y[6] = 9*Dlb.y;
+  
+  }
+ 
+ if (whatd[op_dxx])
+  {  
+    RN_ fxx(val('.',0,op_dxx)); 
+    R lbdxx= 6*((Dl0.x*Dl1.x)*l2+(Dl1.x*Dl2.x)*l0+(Dl2.x*Dl0.x)*l1);
+    R lbd4xx= 4*lbdxx;
+
+    fxx[0] = 4*Dl0.x*Dl0.x  + lbdxx;
+    fxx[1] = 4*Dl1.x*Dl1.x  + lbdxx;;
+    fxx[2] = 4*Dl2.x*Dl2.x  + lbdxx;;
+    fxx[3] = 8*Dl1.x*Dl2.x  - lbd4xx;
+    fxx[4] = 8*Dl0.x*Dl2.x  - lbd4xx;
+    fxx[5] = 8*Dl0.x*Dl1.x  - lbd4xx;
+    fxx[6] = 9*lbdxx;  
+      }
+
+ if (whatd[op_dyy])
+  {  
+    RN_ fyy(val('.',0,op_dyy)); 
+    R lbdyy= 6*((Dl0.y*Dl1.y)*l2+(Dl1.y*Dl2.y)*l0+(Dl2.y*Dl0.y)*l1);
+    R lbd4yy= lbdyy*4;  
+ 
+    fyy[0] = 4*Dl0.y*Dl0.y + lbdyy;
+    fyy[1] = 4*Dl1.y*Dl1.y + lbdyy;
+    fyy[2] = 4*Dl2.y*Dl2.y + lbdyy;
+    fyy[3] = 8*Dl1.y*Dl2.y - lbd4yy;
+    fyy[4] = 8*Dl0.y*Dl2.y - lbd4yy;
+    fyy[5] = 8*Dl0.y*Dl1.y - lbd4yy;
+    fyy[6] = 9*lbdyy;  
+    
+  }
+ if (whatd[op_dxy])
+  {  
+    assert(val.K()>op_dxy);
+    RN_ fxy(val('.',0,op_dxy)); 
+    R lbdxy= 3*(Dl0.x*Dl1.y+ Dl0.y*Dl1.x)*l2+(Dl1.x*Dl2.y+Dl1.y*Dl2.x)*l0+(Dl2.x*Dl0.y+Dl2.y*Dl0.x)*l1;  
+    R lbd4xy= lbdxy*4;  
+  
+    fxy[0] = 4*Dl0.x*Dl0.y + lbdxy;
+    fxy[1] = 4*Dl1.x*Dl1.y + lbdxy;
+    fxy[2] = 4*Dl2.x*Dl2.y + lbdxy;
+    fxy[3] =  4*(Dl1.x*Dl2.y + Dl1.y*Dl2.x) - lbd4xy;
+    fxy[4] =  4*(Dl0.x*Dl2.y + Dl0.y*Dl2.x) - lbd4xy;
+    fxy[5] =  4*(Dl0.x*Dl1.y + Dl0.y*Dl1.x) - lbd4xy;
+    fxy[6] =  9.*lbdxy;
   }
  
  }
@@ -1803,8 +1931,10 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
 static TypeOfFE_P1Lagrange P1LagrangeP1;
 static TypeOfFE_P1Bubble P1BubbleP1;
 static TypeOfFE_P2Lagrange P2LagrangeP2;
+static TypeOfFE_P2bLagrange P2bLagrangeP2;
 
 TypeOfFE  & P2Lagrange(P2LagrangeP2);
+TypeOfFE  & P2bLagrange(P2bLagrangeP2);
 TypeOfFE  & P1Bubble(P1BubbleP1);
 TypeOfFE  & P1Lagrange(P1LagrangeP1);
 
@@ -1820,6 +1950,7 @@ static  ListOfTFE typefemRTOrtho("RT0Ortho", &RTLagrangeOrtho);
  static ListOfTFE typefemP1nc("P1nc", &P1ncLagrange);
  static ListOfTFE typefemP1ttdc("P1dc", &P1ttdc);
  static ListOfTFE typefemP2ttdc("P2dc", &P2ttdc);
+ static ListOfTFE typefemP2b("P2b", &P2bLagrangeP2);
 
 // correct Probleme of static library link with new make file 
 void init_static_FE()

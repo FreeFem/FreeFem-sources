@@ -77,6 +77,10 @@ extern const QuadratureFormular QuadratureFormular_T_1lump;
 extern const QuadratureFormular QuadratureFormular_T_2;
 extern const QuadratureFormular QuadratureFormular_T_5;
 extern const QuadratureFormular QuadratureFormular_T_2_4P1;
+extern const QuadratureFormular QuadratureFormular_T_7;
+extern const QuadratureFormular QuadratureFormular_T_9;
+
+
 //extern const QuadratureFormular QuadratureFormular_T_7;
 extern const QuadratureFormular QuadratureFormular_Q_1;
 extern const QuadratureFormular QuadratureFormular_Q_3;
