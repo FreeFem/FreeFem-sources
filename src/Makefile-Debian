@@ -1,4 +1,4 @@
-LIBLOCAL = -ldl   # for dlopen (see load.cpp)
+LIBLOCAL = -ldl  -rdynamic  # for dlopen (see load.cpp)
 BUILD_MPI=mpi mpi-g  # to buidl automaticaly mpi version (make world )
 LIBX11= -L/usr/X11R6/lib -lX11 -lm 
 INCLUDEX11 = /usr/X11R6/include
@@ -32,7 +32,7 @@ GFFFLAGS= -DDRAWING -DLONG_LONG -DCHECK_KN #-DWITHCHECK
 # ---------------------------
 #  install and compile dir.
 # ----------------------
-BIN_DIR=/opt/bin
+BIN_DIR=/usr/local/bin
 COMPILE_DIR=c-$(HOSTTYPE)
 #----------------------
 
