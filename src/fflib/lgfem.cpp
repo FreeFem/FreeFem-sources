@@ -3447,6 +3447,10 @@ TheOperators->Add("+",
 void  init_lgfem() 
 {
   cout <<"lg_fem ";
+#ifdef HAVE_CADNA
+  cout << "cadna ";
+  cadna_init(-1);
+#endif  
 //Dcl_Type<const C_args*>(); // to store compilation expression
  
  Dcl_Type<MeshPoint*>();
@@ -3584,7 +3588,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("UMFPACK",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::UMFpack)));
  Global.New("HaveUMFPACK",CConstant<bool>(true));
 #else 
- cout << " --  no UMFPACK => replace UMFPACK  by LU  " << endl;
+ cout << " ( no UMFPACK => replace UMFPACK  by LU ) " ;
  Global.New("UMFPACK",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::LU)));
  Global.New("HaveUMFPACK",CConstant<bool>(false));
 #endif 

@@ -63,6 +63,17 @@ template <class T> T* docpyornot(bool nocpy,T* p,int n)
       }
    return r;
  }
+ template <class T,class TT> T* docpy(TT* p,int n)
+{ 
+   T * r=0;
+   if(p && n) { // do copy 
+      r= new T[n]; assert(r);
+      for(int i=0;i<n;i++) 
+        r[i]=p[i];
+      }
+   return r;
+ }
+
 template <class R> 
 class MatriceElementaire {
 public:
@@ -336,6 +347,26 @@ public:
   R & operator()(int i,int j) { assert(0); return D[i];} // a faire 
   
   MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
+  
+  template<class RR> MatriceProfile(const MatriceProfile<RR> & A)
+    : MatriceCreuse<R>(A.n,A.m,0)
+  {
+    
+    typefac=A.typefac;
+    pL=  docpy<int,int>(A.pL,n+1);
+    D = docpy<R,RR>(A.D,n);
+    if ( A.pL == A.pU ) pU=pL;
+    else pU=  docpy<int,int>(A.pU,m+1);
+    
+      L= docpy<R,RR>(A.L,pL[n]);
+      
+    if ( A.L == A.U ) U=L;
+    else  U= docpy<R,RR>(A.U,pU[m]);
+    
+  
+  }
+
+  
   bool addMatTo(R coef,map< pair<int,int>, R> &mij);
 
   
@@ -347,6 +378,8 @@ public:
     si L = U => la matrice est symetrique 
     -------------------------------------------------------------------
   */ 
+  private:
+   void operator=(const MatriceProfile & A);
 };
 
 template <class R> 
