@@ -1,4 +1,4 @@
-#include <config-wrapper.h> // needed for HAVE_DLFCN_H
+#include "config-wrapper.h" // needed for HAVE_DLFCN_H
 
 #include  <iostream>
 #include  <map>
