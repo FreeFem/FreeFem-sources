@@ -2,9 +2,10 @@
 
 all-local: all.edp regtests.edp
 TESTS=../regtests.sh
-TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp	\
-	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)	\
-	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) VISUALCHECK=$(VISUALCHECK)
+TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
+	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
+	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG=$(IDEPROG)	\
+	VISUALCHECK=$(VISUALCHECK)
 EXTRA_DIST=*.edp aile.msh xyf all.edp regtests.edp regtests.m4 ref.edp
 
 all.edp: FORCE
