@@ -68,7 +68,7 @@ go in freefem++ directory.
 
 $ make all-g HOSTTYPE=$HOSTTYPE
 
-g++        -c -g    -DDRAWING -DLONG_LONG -DCHECK_KN  -I/usr/X11R6/include    -I/home/hecht/FreeFem++v1.28/src -I/home/hecht/FreeFem++v1.28/src/femlib -I/home/hecht/FreeFem++v1.28/src/bamglib -I/home/hecht/FreeFem++v1.28/src/Graphics -I/home/hecht/FreeFem++v1.28/src/mpi -I/home/hecht/FreeFem++v1.28/src/Algo  -DEIGENVALUE -I../../arpack/arpack++/include /home/hecht/FreeFem++v1.28/src/Eigen/eigenvalue.cpp 
+g++        -c -g    -DDRAWING -DBAMG_LONG_LONG -DCHECK_KN  -I/usr/X11R6/include    -I/home/hecht/FreeFem++v1.28/src -I/home/hecht/FreeFem++v1.28/src/femlib -I/home/hecht/FreeFem++v1.28/src/bamglib -I/home/hecht/FreeFem++v1.28/src/Graphics -I/home/hecht/FreeFem++v1.28/src/mpi -I/home/hecht/FreeFem++v1.28/src/Algo  -DEIGENVALUE -I../../arpack/arpack++/include /home/hecht/FreeFem++v1.28/src/Eigen/eigenvalue.cpp 
 In file included from ../../arpack/arpack++/include/lapackc.h:17,
                  from /home/hecht/FreeFem++v1.28/src/Eigen/eigenvalue.cpp:7:
 ../../arpack/arpack++/include/arch.h:54: generic.h: No such file or directory
