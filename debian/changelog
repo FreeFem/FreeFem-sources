@@ -1,8 +1,14 @@
+freefem++ (1.44-1) unstable; urgency=low
+
+  * New upstream release
+  * Added FreeFem++-cs
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Mon, 15 Nov 2004 16:56:53 +0100
 freefem++ (1.43-1) unstable; urgency=low
 
   * New upstream release
 
- -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  mer oct 20 17:14:16 CEST 2004
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed,  2 Oct 2004 17:11:55 +0200
 freefem++ (1.41-2) unstable; urgency=low
 
   * New upstream release
