@@ -14,10 +14,14 @@
 real pi=4*atan(1);
 border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
 border b(t=0,2*pi){ x=0.3+0.3*cos(t); y=0.3*sin(t);label=2;}
+border c(t=0,2*pi){ x=0.3+0.0001*cos(t); y=0.0001*sin(t);label=2;}
 mesh Thwithouthole= buildmesh(a(50)+b(+30));
 mesh Thwithhole   = buildmesh(a(50)+b(-30));
+mesh Thwithtinyhole   = buildmesh(a(50)+c(-5),nbvx=100000);
 plot(Thwithouthole,wait=1,ps="Thwithouthole.eps");
 plot(Thwithhole,wait=1,ps="Thwithhole.eps");
+plot(Thwithtinyhole,wait=1,ps="Thwithtinyhole.eps");
+
 }
 // ------------------------------------------------------------
 { //  square with border 
