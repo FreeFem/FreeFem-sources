@@ -15,6 +15,11 @@ AC_PROG_MAKE_SET
 
 AC_PROG_RANLIB
 
+# To allow anonymous CVS version to contain a "./configure" and
+# Makefiles
+
+AM_MAINTAINER_MODE
+
 # Necessary compilers
 
 AC_PROG_F77
