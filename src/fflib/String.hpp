@@ -32,7 +32,7 @@ inline string * toString(const bool& a)
 {
   return new string(a?"T":"F");
 }
-inline string * toString(const complex<double> a)
+inline string * toString(const complex<double> & a)
 {
   char buf[60];
   sprintf(buf,"%g+%gi",a.real(),a.imag());
