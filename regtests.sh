@@ -8,13 +8,14 @@
 # To run one set of tests on one executable
 # $1=program to run
 # $2=tag for trace file
-function dotest{
+function dotest(){
 
     # Running FreeFem++ on regtests.edp (specific to regression
     # tests), otherwise on all.edp.
-    cmd="$1 ${REGEDP} > regtests-$2.log"
-    echo $cmd
-    eval $cmd
+
+    ffcmd="$1 $REGEDP > regtests-$2.log"
+    echo $ffcmd
+    eval $ffcmd
     if test $? != 0
 	then
 	exit 1
