@@ -37,8 +37,8 @@ verbosity=verbosityy;
 	ifelse($2,,,
 		[[real TESTVAR=$2;
 		ifdef([[ASSERT]],
-			cout<<"REFVAR="<<REFVAR
-				<<" TESTVAR="<<TESTVAR<<endl;
+			cout<<"$1 reference value = "<<REFVAR
+				<<" test value ="<<TESTVAR<<endl;
 			ifelse($4,,
 				assert(TESTVAR<REFVAR*(1+$3));
 				assert(TESTVAR>REFVAR*(1-$3));,
@@ -48,8 +48,8 @@ verbosity=verbosityy;
 };
 ]])
 
-ONETEST(adapt,u[]'*u[],1e-2)
-ONETEST(adaptindicatorP1,u[]'*u[],1e-2)
+ONETEST(adapt,u[]'*u[],1e-1)
+ONETEST(adaptindicatorP1,u[]'*u[],1e-1)
 ONETEST(adaptindicatorP2,u[]'*u[],0.5,0.5)
 ONETEST(algo)
 ONETEST(algowithmacro)

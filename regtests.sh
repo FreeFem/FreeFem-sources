@@ -57,6 +57,16 @@ then
 fi
 
 if test "${MPIPROG}" != ""
-then
-    dotest ${PROGLOC}/mpi/FreeFem++-mpi${EXEEXT} mpi $script
+    then
+    host=`hostname`
+    echo $host>machinefile
+    echo $host>>machinefile
+
+    if test "$NPROCS" != ""
+	then
+	nprocs=$NPROCS
+    else
+	nprocs=1
+    fi
+    dotest "mpirun -np $nprocs -machinefile machinefile ${PROGLOC}/mpi/FreeFem++-mpi${EXEEXT}" mpi $script
 fi
