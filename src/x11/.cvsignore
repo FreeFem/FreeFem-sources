@@ -1,7 +1,6 @@
 .deps
-Makefile
-Makefile.in
 FreeFem++-x11
 FreeFem++-x11.exe
 FreeFem++-x11-g
 FreeFem++-x11-g.exe
+Makefile
