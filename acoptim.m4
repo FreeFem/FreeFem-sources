@@ -1,6 +1,13 @@
 # Choosing debugging and/or optimization flags for compilation
 # ------------------------------------------------------------
 
+AC_ARG_ENABLE(profiling,[  --enable-profiling	Turn on profiling])
+if test "$enable_profiling" = yes
+then
+	CXXFLAGS="$CXXFLAGS -pg"
+	LDFLAGS="$LDFLAGS -pg"
+fi
+
 # Debug mode (no optimisation)
 # ----------------------------
 
