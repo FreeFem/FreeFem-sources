@@ -35,9 +35,19 @@ template <class R> class MatriceCreuse;
 template <class R> class MatriceElementaire; 
 template <class R> class MatriceElementaireSymetrique;
 template <class R> class MatriceElementairePleine;
-
+template <class R> class MatriceMorse;
 //template <class R> R Square(R x){ return x*x;}
 
+template <class T> T* docpyornot(bool nocpy,T* p,int n)
+{ 
+  T * r=p;
+   if( !nocpy) { // do copy 
+      r= new T[n]; assert(r);
+      for(int i=0;i<n;i++) 
+        r[i]=p[i];
+      }
+   return r;
+ }
 template <class R> 
 class MatriceElementaire {
 public:
@@ -224,6 +234,10 @@ public:
   virtual void Solve(KN_<R> & x,const KN_<R> & b) const =0;
   virtual ~MatriceCreuse(){}
   virtual R & diag(int i)=0;
+  virtual R & operator()(int i,int j)=0;
+  virtual MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not 
+  virtual bool addMatTo(R coef,map< pair<int,int>, R> &mij)=0;
+
 };
 
 template <class R> 
@@ -304,6 +318,12 @@ public:
   void crout(R = EPSILON/8.) const ; //
   void LU(R = EPSILON/8.) const ; //
   R & diag(int i) { return D[i];}
+  R & operator()(int i,int j) { assert(0); return D[i];} // a faire 
+  
+  MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
+  bool addMatTo(R coef,map< pair<int,int>, R> &mij);
+
+  
   /*----------------------------------------------------------------
     D[i] = A[ii]
     L[k] = A[ij]  j < i avec:   pL[i]<= k < pL[i+1] et j = pL[i+1]-k
@@ -316,11 +336,22 @@ public:
 
 template <class R> 
 class MatriceMorse:public MatriceCreuse<R> {
+//  numebering  is no-symetric
+//  the all line  i :  
+//     k=   lg[i] .. lg[i+1]+1
+//        j = cl[k]
+//        aij=a[k]
+// otherwise  symetric  case
+// same but just the  LOWER part is store     (j <= i) 
+// and aii exist always in symetric case
+//  -----------------------------------------
+
 public:
   int nbcoef;
   bool symetrique;  
   R * a;
-  int * lg;
+  int * lg; 
+ 
   int * cl;  
 public:
 
@@ -330,19 +361,28 @@ public:
 };
 
   MatriceMorse():MatriceCreuse<R>(0),a(0),lg(0),cl(0),nbcoef(0),solver(0) {};
+  MatriceMorse(KNM_<R> & A, double tol) ;
   MatriceMorse(const int  n,const R *a);
+//    :MatriceCreuse<R>(n),solver(0) {}
+  
   MatriceMorse(const FESpace & Uh,bool sym,bool VF=false)
       :MatriceCreuse<R>(Uh.NbOfDF),solver(0) {Build(Uh,Uh,sym,VF);}
   MatriceMorse(const FESpace & Uh,const FESpace & Vh,bool VF=false)
       :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
         {Build(Uh,Vh,false,VF);}
   MatriceMorse(const FESpace & Uh,const FESpace & Vh,
-               void (*build)(MatriceMorse *,const FESpace & Uh,const FESpace & Vh)
+               void (*build)(MatriceMorse *,const FESpace & Uh,const FESpace & Vh,void *data),void *data=0
                 )
           :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
-           {build(this,Uh,Vh);           
+           {build(this,Uh,Vh,data);           
            }
-  const MatriceMorse t() const ;  
+  MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa,int *ll,int *cc,bool dd, const VirtualSolver * s=0,bool transpose=false )
+    :MatriceCreuse<R>(nn,mm,dd && !transpose),nbcoef(nbc),symetrique(sym), // transpose = true => dummy false (new matrix)
+     a(docpyornot(dummy,aa,nbc)),
+     lg(docpyornot(dummy,ll,nn+1)),
+     cl(docpyornot(dummy,cc,nbc)),
+     solver(s)
+   { if(transpose) dotransposition(); };
   void Solve(KN_<R> &x,const KN_<R> &b) const;
   int size() const ;
   void addMatMul(const KN_<R> &x,KN_<R> &ax) const;
@@ -356,14 +396,22 @@ public:
   R  operator()(int i,int j) const {R * p= pij(i,j) ;throwassert(p); return *p;}
   R & operator()(int i,int j)  {R * p= pij(i,j) ;throwassert(p); return *p;}
   R & diag(int i)  {R * p= pij(i,i) ;throwassert(p); return *p;}
+  
   void SetSolver(const VirtualSolver & s){solver=&s;}
   void SetSolverMaster(const VirtualSolver * s){solver.master(s);}
   bool sym() const {return symetrique;}
+ void  prod(const MatriceMorse & B, MatriceMorse & AB);
+ MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {
+     return new MatriceMorse(n,m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
+  bool  addMatTo(R coef,map< pair<int,int>, R> &mij);
+
   private:
+  void dotransposition ()  ;  // do the transposition 
     CountPointer<const VirtualSolver> solver;
     MatriceMorse(const MatriceMorse & );
     void operator=(const MatriceMorse & );
   void  Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool VF=false);
+
 };
 
 

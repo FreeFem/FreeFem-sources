@@ -915,8 +915,8 @@ class Add_Mulc_KN_ { public:
 
 template<class R> 
 class Mul_KNM_KN_ { public:
-  const KNM_<const_R> A;
-  const KN_<const_R> b;
+  const KNM_<const_R> &A;
+  const KN_<const_R> &b;
   Mul_KNM_KN_(const  KNM_<const_R> & aa,const KN_<const_R> & bb)  
         : A(aa),b(bb) {K_throwassert(SameShape(A.shapej,b));} 
 };
@@ -956,15 +956,15 @@ template<class R> inline Add_Mulc_KN_<R> operator-(const  Mulc_KN_<R>& a,const M
     { return Add_Mulc_KN_<R>(a,b.a,-b.b);}
 
 template<class R> inline Add_Mulc_KN_<R> operator+(const  Mulc_KN_<R>& a,const KN_<const_R> &b) 
-   { return Add_Mulc_KN_<R>(a,b,1.0);}
+   { return Add_Mulc_KN_<R>(a,b,R(1));}
 template<class R> inline Add_Mulc_KN_<R> operator-(const  Mulc_KN_<R>& a,const KN_<const_R> &b) 
-   { return Add_Mulc_KN_<R>(a,b,-1.0);}
+   { return Add_Mulc_KN_<R>(a,b,R(-1));}
 
 template<class R> inline Add_Mulc_KN_<R> operator+(const KN_<const_R> & b,const  Mulc_KN_<R>& a) 
-   { return Add_Mulc_KN_<R>(a,b,1.0);}
+   { return Add_Mulc_KN_<R>(a,b,R(1));}
 template<class R> inline Add_Mulc_KN_<R> operator-(const KN_<const_R> & b,const  Mulc_KN_<R>& a) 
-   { return Add_Mulc_KN_<R>(a,b,-1.0);}
-template<class R> inline Mul_KNM_KN_<R> operator*(const  KNM_<const_R> A,const  KN_<const_R> b) 
+   { return Add_Mulc_KN_<R>(a,b,R(-1));}
+template<class R> inline Mul_KNM_KN_<R> operator*(const  KNM_<const_R> & A,const  KN_<const_R> & b) 
     { return Mul_KNM_KN_<R>(A,b);}
 
 
@@ -980,6 +980,8 @@ template<class R> inline bool  SameShape(const ShapeOfArray & a,const DotStar_KN
            { return SameShape(a,b.a) ;} 
 template<class R> inline bool  SameShape(const ShapeOfArray & a,const DotSlash_KN_<R> & b) 
            { return SameShape(a,b.a) ;} 
+template<class R> inline bool  SameShape(const ShapeOfArray & a,const Mul_KNM_KN_<R> & b) 
+           { return a.n==b.A.N() ;} 
  inline bool  SameShape(const ShapeOfArray & a,const VirtualMatrice<double>::plusAx & b) 
            { return true ;} //  pas de test car la matrice peut etre rectangulaire
  inline bool  SameShape(const ShapeOfArray & a,const VirtualMatrice<double>::plusAtx & b) 
