@@ -686,7 +686,7 @@ inline void C2RR(int n,Complex *c,double *cr,double *ci)
  for (int i=0;i<n;i++)
   {
    cr[i]=real(c[i]);
-   cr[i]=imag(c[i]);
+   ci[i]=imag(c[i]);
   }
 }
 

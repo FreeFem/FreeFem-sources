@@ -61,12 +61,12 @@ double preal( Complex * const& p){return real(*p);}
 template<class K> 
 struct Op2_dotproduct: public binary_function<Transpose<KN<K> *>,KN<K> *,K> { 
   static K f( Transpose<KN<K> *> const & a, KN<K> * const& b)  
-   { return (*a.t,*b);} }; 
+   { return (conj(*a.t),*b);} }; 
 
 template<class K> 
 struct Op2_dotproduct_: public binary_function<Transpose<KN_<K> >,KN_<K> ,K> { 
   static K f( Transpose<KN_<K> > const & a, KN_<K>  const& b)  
-   { return (a.t,b);} }; 
+   { return (conj(a.t),b);} }; 
    
 template<class A,class B>  A Build(B b) {  return A(b);}
   

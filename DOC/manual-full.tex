@@ -22,7 +22,7 @@
 \title{
 %\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
  {\Blue{ \TitreFont FreeFem++ \\ \vglue 1cm  Manual}} \\ \vglue 3cm  ~ \\  
-      \normalsize  { version 1.42  \Red{(Under construction)} }
+      \normalsize  { version 1.43  \Red{(Under construction)} }
  \\ \vglue 0.7cm
  \large \url{http://www.freefem.org} \\
 \url{http://www.ann.jussieu.fr/\string~hecht/freefem++.htm} 
@@ -79,8 +79,8 @@ The characteristics of \freefempp are:
  elements of a non-scalar type, mini-element, ...
 \item  Automatic interpolation of data on different meshes to an over mesh.
 %
-\item Linear problems description thanks to a formal variational form, 
-with access to the vectors and the matrix if needed.
+\item Linear problems description (real or complex) thanks to a formal variational form, 
+with access to the vectors and the matrix if needed 
 %
 \item Includes tools to define discontinuous Galerkin formulations
 (please refer to the following keywords: ``jump'', ``average'',
@@ -641,14 +641,18 @@ there are some compound operator:
 \bFF
 @mesh Th = @square(2,1);
 @fespace Vh(Th,P1);
-Vh u,v,f,g;
+Vh f,g; 
 f = x*y;
 g = sin(pi*x);
-
+Vh<complex> ff,gg; // a complex valued finite element function \index{FE:complex}
+ff= x*(y+1i);
+gg = exp(pi*x*i);
 @varf mat(u,v) =
   int2d(Th)(1*dx(u)*dx(v)+2*dx(u)*dy(v)+3*dy(u)*dx(v)+4*dy(u)*dy(v))
   + on(1,2,3,4,u=1);
 @matrix A = mat(Vh,Vh);
+@matrix<complex> AA = mat(Vh,Vh); // a complex sparce matrix \index{matrix:complex}
+
 Vh m0; m0[] = A*f[];
 Vh m01; m01[] = A'*f[];
 Vh m1; m1[] = f[].*g[];
@@ -661,6 +665,7 @@ Vh m2; m2[] = f[]./g[];
 @cout << "m1 = "<< m1[] << @endl;
 @cout << "m2 = "<< m2[] << @endl;
 @cout << "dot Product = "<< f[]'*g[] << @endl;
+@cout << "hermitien Product = "<< ff[]'*gg[] << @endl;
 \eFF
 This produce the following:
 \begin{eqnarray*}

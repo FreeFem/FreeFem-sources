@@ -932,6 +932,13 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
    }
   
 }
+template<class R> inline void ConjArray( R  *v, int n) 
+{
+  for (int i=0;i<n;++i)
+    v[i] = conj(v[i]);
+}
+template<> inline void ConjArray<double>(double *v, int n) {}
+template<> inline void ConjArray<float>(float *v, int n) {}
 
 template<class R>
  void  MatriceMorse<R>::dotransposition()
@@ -963,13 +970,12 @@ template<class R>
   // sort the new column (old line)
   for(int i=0;i<this->m;i++)  
     HeapSort(llg+clg[i],cl+clg[i],a+clg[i],clg[i+1]-clg[i]); 
-
   delete[] cl;
   delete[] lg;
   Exchange(this->n,this->m);       
   cl=llg;
   lg=clg;
-   
+  ConjArray(a,nbcoef);    
  }
 
 template<class R>
