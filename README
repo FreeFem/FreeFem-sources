@@ -58,7 +58,7 @@ a not to bad version is
 
 Here are the different versions of FreeFem++ produced by one
 compilation (some versions may be missing if your system does not
-support them):OA
+support them):
 
 * FreeFem++: standard version (using X11 graphics on Linux and MacOS
   10, Win32 on Windows and  MacOS X) (located in src/std)
@@ -70,6 +70,8 @@ support them):OA
 * FreeFem++-agl: graphics based on MacOS X CoCoa (located in src/agl)
 
 * FreeFem++-mpi: parallel version, without graphics (located in src/mpi)
+
+* FreeFem++-cs: integrated development environment (located in src/ide)
 
 The compilation procedure (produced with automake) builds all the
 libraries and executables sequentially. Running "make" in a
