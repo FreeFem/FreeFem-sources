@@ -4,6 +4,7 @@
 # $Id$
 
 all-local: $(DOWNLOAD_ARPACK)
+EXTRA_DIST=ARmake.inc
 
 # Downloading and compiling ARPACK
 # --------------------------------
