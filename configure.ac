@@ -207,16 +207,20 @@ fi
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
 
-# We need to be able to disable the parallel version because on some
-# machines mpiCC exists but does not produce desirable results.
+# We need to choose between mpich and lam for the Debian package
+AC_ARG_WITH(mpi,[  --with-mpi=[mpich/lam/yes/no]	or --without-mpi	Choose MPI implementation (default is mpich)])
 
-AC_ARG_ENABLE(mpi,[  --disable-mpi	Disable parallel version])
-
-if test "$enable_mpi" = yes
+# Default is mpich
+if test "$with_mpi" = yes
 then
-	AC_MSG_CHECKING(for mpiCC)
+	with_mpi=mpich
+fi
+
+if test "$with_mpi" != no
+then
+	AC_MSG_CHECKING(for mpiCC.$with_mpi)
 	ff_save_cxx="$CXX"
-	CXX=mpiCC
+	CXX=mpiCC.$with_mpi
 	AC_LINK_IFELSE(
 [#include <stdio.h>
 #include <mpi.h>
