@@ -1,6 +1,14 @@
-regtests.edp
+*.BB
+*.eps
+err.dat
+*.faces
+*.gmsh
+*.gbb
+*.log
 ListOfUnAllocPtr.bin
 Makefile
 Makefile.in
-*.eps
-*.log
+*.mesh
+*.points
+regtests.edp
+toto.txt
