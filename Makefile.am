@@ -43,7 +43,7 @@ clean-local::
 # machine (because of unexpected windows opening right in the middle
 # of the workspace).
 
-visualtest: all
+visualcheck: all
 	make check VISUALCHECK=yes
 
 speedtest: all

@@ -76,7 +76,7 @@ Extra utilities
 ---------------
 
 To run an interactive test of FreeFem++:
-> make visualtest
+> make visualcheck
 
 To run a speed test:
 > make speedtest
