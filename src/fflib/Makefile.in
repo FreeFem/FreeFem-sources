@@ -199,6 +199,7 @@ INCLUDES = -I../lglib -I../bamglib -I../Graphics -I../femlib	\
 
 
 # Build date changes at every build
+EXTRA_DIST = strversionnumber.m4
 BUILT_SOURCES = strversionnumber.cpp
 subdir = src/fflib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4

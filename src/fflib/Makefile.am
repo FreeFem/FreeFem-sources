@@ -19,7 +19,6 @@ lgfem.cpp AFunction.hpp AnyType.hpp error.hpp gmres.hpp InitFunct.hpp	\
 lex.hpp lgfem.hpp lgsolver.hpp Operator.hpp problem.hpp Serialize.hpp	\
 showverb.hpp String.hpp throwassert.hpp versionnumber.hpp
 
-
 # eigenvalue.cpp is optional (see configure.ac)
 EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
 libff_a_LIBADD=@EIGENOBJ@
@@ -29,6 +28,7 @@ INCLUDES=-I../lglib -I../bamglib -I../Graphics -I../femlib	\
 -I$(top_srcdir)/arpack/arpack++/include
 
 # Build date changes at every build
+EXTRA_DIST=strversionnumber.m4
 BUILT_SOURCES=strversionnumber.cpp
 strversionnumber.cpp: FORCE
 	m4 -DVersionFreeFemDate="`date`" strversionnumber.m4 > $@
