@@ -12,7 +12,7 @@ function dotest{
 
     # Running FreeFem++ on regtests.edp (specific to regression
     # tests), otherwise on all.edp.
-    cmd="$1 ${REGEDP} > regtests-$2.log";
+    cmd="$1 ${REGEDP} > regtests-$2.log"
     echo $cmd
     eval $cmd
     if test $? != 0
