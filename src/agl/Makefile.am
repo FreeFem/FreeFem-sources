@@ -13,15 +13,15 @@ INCLUDES=-I../fflib -I../Graphics -I../femlib
 # Automake does not want to see "-framework" in LDADD
 AM_LDFLAGS=-framework Carbon -framework OpenGL -framework AGL
 
-install-exec-local::
-	if [ \( -f $(COMPILE_DIR)/FreeFem++-agl \) -a \( -n "$(BUILD_COCOA)"  \)  ] ; then \
-		echo " Install $(BIN_DIR)/../FreeFem++.app/Contents/MacOS/FreeFem++"; \
-		cp $(COMPILE_DIR)/FreeFem++-agl $(BIN_DIR)/../FreeFem++.app/Contents/MacOS/FreeFem++ ;\
-		echo " Install FreeFem++.app/Resources/MacOS/FreeFem++-agl"; \
-		cp $(COMPILE_DIR)/FreeFem++-agl ./FreeFem++.app/Contents/Resources/FreeFem++ ;\
-		echo Install /Applications/FreeFem++.app; \
-		(tar cf - FreeFem++.app| (cd /Applications;tar xf -)) ;\
-		echo Install FreeFem++-CoCoa; \
-		cp src/FreeFem++-CoCoa  $(BIN_DIR);\
-	fi;
+install-exec-local:: FreeFem++-agl
+		echo " Install $(top_srcdir)/FreeFem++.app/Contents/MacOS/FreeFem++"
+		cp "FreeFem++-agl" $(top_srcdir)/FreeFem++.app/Contents/MacOS/FreeFem++ 
+		echo " Install FreeFem++.app/Resources/MacOS/FreeFem++-agl"
+		cp "FreeFem++-agl" $(top_srcdir)/FreeFem++.app/Contents/Resources/FreeFem++ 
+		echo Install /Applications/FreeFem++.app; 
+		sed <$(top_srcdir)/Info-plist.am >$(top_srcdir)/FreeFem++.app/Contents/Info.plist \
+	            -e "s/@Version@/$(VERSION)/g"   -e "s/@DATE@/`date`/g" ; 
+		(cd $(top_srcdir); tar cf - FreeFem++.app| (cd /Applications;tar xf -)) ; 
+		echo Install FreeFem++-CoCoa; 
+		cp $(top_srcdir)/src/FreeFem++-CoCoa  $(bindir);
 	@echo "End of Installation"
