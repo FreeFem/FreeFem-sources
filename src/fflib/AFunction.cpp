@@ -298,6 +298,19 @@ aType TypeArray(aType b,aType a)
    return r;
 }
 
+aType TypeTemplate(aType b,aType a)
+{ // type of  b[a]
+   aType r=map_type_of_map[make_pair(b,a)];
+   if (!r) {
+      cerr << "Sorry is not possible to make a map "<< *b << "<" << *a << ">" << endl;
+      cerr << " list: " << endl;
+      Map_type_of_map::const_iterator i;
+      for(i=map_type_of_map.begin();i!=map_type_of_map.end();i++)
+        cerr << "\t " << *i->first.second << " <" << *i->first.first << ">" << "=" << *i->second << endl;        
+      CompileError();
+   }
+   return r;
+}
 aType TypeArray(aType c,aType b,aType a)
 {
    // type of  c[ b, a] 
