@@ -19,6 +19,7 @@ real umax=0;
       for (int i=0;i<x.n;i++)
 	matx[i]=(i+1)*x[i];
       matx -= b; // sub the right hand side
+	cout << matx << endl;
       return matx;  // return of global variable ok 
     };
 
@@ -41,7 +42,7 @@ real umax=0;
 
   func real[int] matId(real[int] &x) { return x;};
   
-  b=1; x=0; // set  right hand side and initial gest
+  b=0.; x=0.; // set  right hand side and initial gest
   LinearCG(DJ,x,eps=1.e-6,nbiter=20,precon=matId);
   cout << "LinearCG (Affine)  : J(x) = " << J(x) << " err=" << error(x,b) << endl;
   assert(error(x,b) < 1e-5);
