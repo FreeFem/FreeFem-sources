@@ -11,7 +11,7 @@ include(../regtests.m4)
 
 dnl (syntax of ONETEST macro defined in ../regtests.m4)
 
-ONETEST(aadaptation,u[]'*u[],0.1);
+ONETEST(aadaptation,regvalue,0.1);
 ONETEST(aalapacien,1+err,0.00001);
 ONETEST(aalaplace-nc,u[]'*u[],0.1);
 ONETEST(aamove,u[]'*u[],0.1);
