@@ -4,7 +4,7 @@
 
 noinst_LIBRARIES=libff.a
 
-libff_a_SOURCES=AFunction.cpp lex.cpp lgmesh.cpp ../femlib/Drawing.cpp	\
+libff_a_SOURCES=AFunction.cpp AFunction2.cpp lex.cpp lgmesh.cpp ../femlib/Drawing.cpp	\
 ../femlib/gibbs.cpp ../femlib/CheckPtr.cpp ../femlib/fem.cpp		\
 ../femlib/QuadratureFormular.cpp ../femlib/FESpace.cpp			\
 ../femlib/Element_RT.cpp ../femlib/mshptg.cpp ../femlib/FQuadTree.cpp	\
