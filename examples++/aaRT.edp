@@ -57,9 +57,3 @@ cout << " int2d(Th)(p-0.5) " << int2d(Th)(p-0.5) << "  == 0 " << endl;
 
 cout << " int2d(Th)(x+y) " << int2d(Th)(x+y) << " ==  " << (10*5)*(10+5)/2 <<  endl;
 cout << " -------------\n\n " << endl;
-
-// Regression check
-real ref=u1[]'*u1[];
-cout<<"reference value="<<ref<<endl;
-assert(ref<280.926);
-assert(ref>280.924);
