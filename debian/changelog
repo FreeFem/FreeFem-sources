@@ -2,6 +2,7 @@ freefem++ (1.41-1) unstable; urgency=low
 
   * New upstream release
   * Integrated the debian part in the upstream sources
+  * Put the documentation in a separate package
 
  -- Alexis Darrasse <darrasse@ortsa.com>  Wed, 23 Jun 2004 17:11:55 +0200
 

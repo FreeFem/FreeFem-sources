@@ -8,6 +8,7 @@ Standards-Version: 3.6.1.0
 Package: freefem++
 Architecture: all
 Depends: freefem++-glx (= ${Source-Version}) | freefem++-mpi (= ${Source-Version}) |  freefem++-x11 (= ${Source-Version}) | freefem++-nw (= ${Source-Version})
+Suggests: freefem++-doc
 Description: A PDE oriented language using Finite Element Method
  FreeFem++ is an implementation of a language dedicated to the finite element
  method. It provides you a way to solve Partial Differential Equations (PDE)
@@ -94,3 +95,22 @@ Description: A PDE oriented language using Finite Element Method
  This package contains the MPI-based version of FreeFem++
  .
  Homepage: http://www.freefem.org/
+
+Package: freefem++-doc
+Architecture: all
+Suggests: freefem++
+Description: A PDE oriented language using Finite Element Method
+ FreeFem++ is an implementation of a language dedicated to the finite element
+ method. It provides you a way to solve Partial Differential Equations (PDE)
+ simply.
+ .
+ Problems involving partial differential equations (pde) of  several branches
+ of physics such as fluid-structure interactions require interpolations of data
+ on several meshes and their manipulation within one program.
+ .
+ FreeFem++ is an extension of freefem, freefem+ written in C++.
+ .
+ This package contains the documentation for FreeFem++.
+ .
+ Homepage: http://www.freefem.org/
+
