@@ -984,7 +984,11 @@ BOOL Init(HINSTANCE hInstance,   HINSTANCE hPrevInstance,
    strcat(FreeFemCache,"\\cache\\");
 
    if (chdir(FreeFemCache)) {  // check the cache directory
+#ifndef __CYGWIN__
      if (mkdir(FreeFemCache)) {
+#else
+     if (mkdir(FreeFemCache,0777)) {
+#endif
        sprintf(errbuf,"Fail to create the directory %s",FreeFemCache); 
        FatalErr(errbuf,-1);
      }
