@@ -9,7 +9,7 @@ include(../regtests.m4)
 // meaning. Their main property is to gather numerical values from the
 // whole domain, to be checked for consistency with previous runs.
 
-// (syntax of ONETEST macro defined in ../regtests.m4)
+dnl (syntax of ONETEST macro defined in ../regtests.m4)
 
 ONETEST(adapt,u[]'*u[],5e-2)
 ONETEST(adaptindicatorP1,u[]'*u[],5e-2)
