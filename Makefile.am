@@ -21,6 +21,9 @@ FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/NSAppleMenuImage.tif
 FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/objects.nib		  \
 FreeFem++.app/Contents/Resources/script
 
+# Creates a file named "ChangeLog" containing the chronology of all
+# modifications to the source files. Needs "cvs2cl" to be installed.
+
 changelog:
 	cvs2cl -w -S --fsf
 
