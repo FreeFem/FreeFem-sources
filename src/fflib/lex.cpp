@@ -478,8 +478,15 @@ bool mylex::ExpandParam(int &ret)
                   while (1) {
                     int rr = basescan();
                     if (rr==kend) break;
+                    else if (rr==')' || rr==',')  {// Correction FH 2/06/2004
+                      cerr << "Error we wait : "<< char(kend) << " and with get: " << char(rr)<< endl;
+                      cerr << " number of macro parameter in definition is " << nbparam << endl;
+                      ErrorScan(" Wrong number of parameter in  macro call");
+                      }
+                   // if (rr==kend) break;
+                    
                     if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
-                    p += buf;
+                    p += token(); // Correction FH 2/06/2004 of string parameter
                   }
                   if(debugmacro)
                   cout << "macro arg "<< k << " :" << macroparm[k] << " -> " <<  p << endl;
