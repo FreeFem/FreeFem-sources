@@ -23,6 +23,12 @@ Source: "src\std\FreeFem++.exe"; DestDir: "{app}"
 Source: "src\ide\FreeFem++-cs.exe"; DestDir: "{app}"
 Source: "src\ide\FreeFem++-cs-server.exe"; DestDir: "{app}"
 Source: "src\nw\FreeFem++-nw.exe"; DestDir: "{app}"
+
+; mingwm10.dll is necessary when "-mthreads" is used as a compilation
+; flag.
+
+Source: "C:\Cygwin\bin\mingwm10.dll"; DestDir: "{app}"
+
 ; Does not include FreeFem++-x11 which would need the Cygwin X-Server
 ; Does not include FreeFem++-glx which would need the Cygwin X-Server
 
