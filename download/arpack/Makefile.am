@@ -17,7 +17,7 @@ $(ARPACKLIB): arpack96.tar.gz patch.tar.gz
 	gunzip -c patch.tar.gz | tar xvf -
 	cp ARmake.inc ARPACK
 	cd ARPACK && make lib home=`pwd` BLASLIB="$(BLASLIB)" \
-		FC="$(F77)" FFLAGS="$(FFLAGS)" LDFLAGS="$(LDFLAGS)"
+		FC="@F77@" FFLAGS="@FFLAGS@" LDFLAGS="@LDFLAGS@"
 
 arpack96.tar.gz:
 	wget -N http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz

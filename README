@@ -1,11 +1,35 @@
-Compilation under unix or MacOs 10 or cygwin with g++
------------------------------------------------------
+Compilation of FreeFem++ under unix, MacOs 10 or cygwin
+-------------------------------------------------------
 
 This file details specific "./configure" options for FreeFem++. For
 standard options, please refer to the file named "INSTALL".
 
+Debugging and optimization
+--------------------------
+
+Without any option, "./configure" selects the best optimization
+options for the local machine. To produce optimized binaries that can
+be ported to other machines, add the option "--enable-generic".
+
 To produce FreeFem++ programs containing debugging symbols and no
-optimization, use "--enable-debug".
+optimization, use "--enable-debug" (this implies "--enable-generic").
+
+If you need to add specific flags to the ones that ./configure
+chooses, just define the corresponding automake variable before
+running configure. For instance, to add flag "-x" to C++ compilations,
+say:
+
+> CXXFLAGS=-x ./configure
+
+Other useful configuration variables include:
+- CFLAGS for C compilation
+- FFLAGS for Fortran compilation
+- LIBS libraries for the linking stage
+- LDFLAGS linking flags
+- LDADD extra options for the linking stage
+
+Linear algebra libraries
+------------------------
 
 By default, "./configure" looks for the BLAS, ARPACK and UMFPACK
 libraries on the local system. If it cannot find them, the compilation

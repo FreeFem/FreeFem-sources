@@ -24,9 +24,6 @@ AC_PROG_YACC
 AM_PROG_LEX
 AC_LANG(C++)
 
-# We do not use the default C++ flags
-CXXFLAGS=
-
 # Some useful libraries
 
 AC_CHECK_LIB(pthread,pthread_create)
@@ -82,6 +79,10 @@ AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
 # Checking wether to produce a debug version
 # ------------------------------------------
 
+# Generic or hardware-dependant optimization
+m4_include(acmacros.m4)
+m4_include(acoptim.m4)
+
 # ------------------------------
 # compilation flags of FreeFem++ 
 # ------------------------------
@@ -94,25 +95,17 @@ AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
 #  -DEIGENVALUE  to compile the eigen value part
 #  ------------------------------------------------
 
-AC_ARG_ENABLE(debug,
-     --enable-debug	Turn on debug versions of FreeFem++,
-     [case "${enableval}" in
-       yes) ff_debug=true ;;
-       no)  ff_debug=false ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
-     esac],
-     [ff_debug=false])
-
-if test "$ff_debug" = true;
+# FreeFrem++-specific optimizations
+if test "$enable_debug" = yes;
 then
-	CXXFLAGS="$CXXFLAGS -DDRAWING -DLONG_LONG -DCHECK_KN -g"
-	if test "ff_mac" = yes;
+	CXXFLAGS="$CXXFLAGS -DDRAWING -DLONG_LONG -DCHECK_KN"
+	if test "$ff_mac" = yes;
 	then
 		CXXFLAGS="$CXXFLAGS -fno-inline -fpascal-strings -fexceptions"
 	fi
 else
-	CXXFLAGS="$CXXFLAGS -DDRAWING -DLONG_LONG  -DNCHECKPTR -O"
-	if test "ff_mac" = yes;
+	CXXFLAGS="$CXXFLAGS -DDRAWING -DLONG_LONG  -DNCHECKPTR"
+	if test "$ff_mac" = yes;
 	then
 		CXXFLAGS="$CXXFLAGS  -fpascal-strings"
 	fi
@@ -472,5 +465,4 @@ AC_OUTPUT(Makefile
 	examples++-mpi/Makefile
 	examples++-load/Makefile
 	examples++-bug/Makefile
-	DOC/Makefile,
-        echo timestamp > stamp-h)
+	DOC/Makefile)
