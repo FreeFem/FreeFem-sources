@@ -24,7 +24,7 @@
 	<key>CFBundleExecutable</key>
 	<string>FreeFem++</string>
 	<key>CFBundleGetInfoString</key>
-	<string>@VVERSION@ Version Tue Sep  7 20:35:33 CEST 2004 ,  LJLL Univerty Pierre et Marie , Curie , Paris, France </string>
+	<string>Version 1.44  Fri Nov  5 18:00:00 CET 2004 ,  LJLL Univerty Pierre et Marie , Curie , Paris, France </string>
 	<key>CFBundleIconFile</key>
 	<string>FreeFem++.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -36,11 +36,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.42</string>
+	<string>1.44</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.42</string>
+	<string>1.44</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
