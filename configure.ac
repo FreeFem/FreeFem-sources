@@ -28,13 +28,15 @@ AC_CHECK_LIB(pthread,pthread_create)
 # Checking wether we can produce a X11 version
 # --------------------------------------------
 
-AC_MSG_CHECKING(wether we have X11)
+AC_MSG_CHECKING(wether we can use X11)
 ff_x11=no
-if test `locate Xlib.h|wc -l` gt 0;
+if test -d /usr/X11R6;
 then
 	ff_x11=yes
 	AC_SUBST(STDPROG,FreeFem++)
 	AC_SUBST(X11PROG,FreeFem++-x11)
+	AC_SUBST(INCLUDEX11,/usr/X11R6/include)
+	AC_SUBST(LIBX11,-L/usr/X11R6/lib -lX11 -lm)
 fi
 AC_MSG_RESULT($ff_x11)
 
