@@ -4,7 +4,7 @@
 using namespace std;
 #include "lex.hpp"
 #define LOAD 1
-#if defined(__INTEL__) || defined(__MWERKS__)
+#if defined(__INTEL__) || defined(__MWERKS__) || defined(NO_LOAD)
 #undef LOAD
 #endif
 
