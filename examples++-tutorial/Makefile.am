@@ -7,7 +7,7 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp	\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) VISUALCHECK=$(VISUALCHECK)
 EXTRA_DIST=*.edp aile.msh xyf all.edp regtests.edp regtests.m4 ref.edp
 
-all.edp:
+all.edp: FORCE
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
@@ -26,3 +26,4 @@ makeref.edp: regtests.m4 ../regtests.m4
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
+FORCE:
