@@ -27,6 +27,7 @@ real cpu=clock();
 Probem1; // SOLVE THE PROBLEM 1
 plot(u);
 real err= sqrt( int2d(Th)( (u-g)^2) );
+// Regression Test: /err L\^2=3\.\d+e-14/
 cout << "err L^2=" << err <<endl;
 assert(err<1e-5); //  check the solution 
 cout << " CPU = " << clock()-cpu << endl;

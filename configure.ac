@@ -224,5 +224,6 @@ AC_OUTPUT(Makefile
 	src/mpi/Makefile
 	src/agl/Makefile
 	src/glx/Makefile
+	examples++/Makefile
 	DOC/Makefile,
         echo timestamp > stamp-h)

@@ -6,7 +6,7 @@
 
 # $Id$
 
-SUBDIRS=src DOC
+SUBDIRS=src DOC examples++
 
 www=rascasse.inria.fr:www_gamma/Gamma/cdrom/ftp/freefem/
 ftp=rascasse.inria.fr:/ftp_gamma/freefem/
