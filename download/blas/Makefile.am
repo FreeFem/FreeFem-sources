@@ -78,7 +78,7 @@ blas/icamax.f blas/srotm.f blas/strmv.f blas/zher2k.f blas/ztrsv.f	\
 blas/chpmv.f blas/dasum.f blas/dspr.f blas/idamax.f blas/srotmg.f	\
 blas/strsm.f blas/zher.f blas/chpr2.f blas/daxpy.f blas/dswap.f		\
 blas/isamax.f blas/ssbmv.f blas/strsv.f blas/zherk.f blas/chpr.f	\
-blas/dcabs1.f blas/dsymm.f blas/izamax.f blas/sscal.f blas/xerbla.f	\
+blas/dcabs1.f blas/dsymm.f blas/izamax.f blas/sscal.f blas_xerbla.f	\
 blas/zhpmv.f
 
 libcblas_a_SOURCES=CBLAS/src/cblas_caxpy.c CBLAS/src/cblas_drot.c	\
@@ -154,14 +154,15 @@ CBLAS/src/cblas_sgbmv.c CBLAS/src/cblas_zhemv.c CBLAS/src/zdotusub.f
 
 BUILT_SOURCES=@GENERIC_BLAS_BUILT_SOURCES@
 
-# Defining specific flags for libcblas.a also enables Automake to
-# distinguish between "xerbla" object files for BLAS and CBLAS.
-
 libcblas_a_CPPFLAGS=-DADD_
+
+# "xerbla" exists in both BLAS and CBLAS. So we need to rename it to
+# obtain two different object files.
 
 BLAS: blas.tgz
 	mkdir -p BLAS
 	cd blas && tar xvzf ../blas.tgz
+	cp BLAS/xerbla.f blas_xerbla.f
 
 CBLAS: cblas.tgz
 	tar xvzf cblas.tgz
@@ -174,5 +175,5 @@ cblas.tgz:
 
 
 clean-local::
-	-rm -r BLAS CBLAS
+	-rm -r BLAS CBLAS blas_xerbla.f
 	-rm blas.tgz cblas.tgz
