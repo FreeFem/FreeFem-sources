@@ -45,7 +45,7 @@ quick:
 quick-ide:
 	cd src/lglib && make
 	cd src/fflib && make
-	cd src/ide && make
+	cd src/ide && make FreeFem++-cs
 
 # Testing
 # -------
