@@ -599,3 +599,6 @@ __________
     to     : KN<double> buf(Vh.MaximalNbOfDF()*last_operatortype*Vh.N);
 
    
+24/01/2005
+   add  named parameter nbtx=..  in buildmesh  function to change the default 
+   maximal number of vertex in the build mesh.
