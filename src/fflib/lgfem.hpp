@@ -273,6 +273,7 @@ class E_FEcomp : public E_F0mps { public:
     E_FEcomp(const C_F0 & x,const int cc,int NN) : a0(x.LeftValue()),comp(cc),N(NN)
       {if(x.left()!=atype<FE **>() ) 
         cout << "E_FEcomp: Bug " << *x.left() << " != " << *atype<FE **>() << "  case " <<typeid(K).name() << endl;
+        //CompileError("E_FEcomp: Bug ?");
        throwassert(x.left()==atype<FE **>() &&a0);} 
     operator aType () const { return atype<Result>();}         
          
