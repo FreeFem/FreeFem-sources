@@ -47,10 +47,10 @@ fi
 done;
 fi
 # update the 2  web page 
-scp update_www ff++.htmx hecht@rascasse.inria.fr:/tmp
-scp update_www ff++.htmx hecht@baobab.ann.jussieu.fr:/tmp
-ssh  hecht@baobab.ann.jussieu.fr "cd www/.;  /tmp/update_www ${VERSION}   >freefem++.htm </tmp/ff++.htmx"
-ssh rascasse.inria.fr  "cd $dwww; /tmp/update_www ${VERSION} cdrom  >index.html </tmp/ff++.htmx"
+#scp update_www ff++.htmx hecht@rascasse.inria.fr:/tmp
+#scp update_www ff++.htmx hecht@baobab.ann.jussieu.fr:/tmp
+#ssh  hecht@baobab.ann.jussieu.fr "cd www/.;  /tmp/update_www ${VERSION}   >freefem++.htm </tmp/ff++.htmx"
+#ssh rascasse.inria.fr  "cd $dwww; /tmp/update_www ${VERSION} cdrom  >index.html </tmp/ff++.htmx"
 fi
 
 

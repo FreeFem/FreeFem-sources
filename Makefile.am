@@ -11,8 +11,8 @@ SUBDIRS=download src DOC examples++-tutorial examples++	\
 	examples++-bug examples++-other
 
 EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h		  \
-FreeFem++.*mcp HISTORY README BUGS TODO regtests.m4				  \
-FreeFem++.app.tgz 
+FreeFem++.*mcp HISTORY README BUGS TODO regtests.m4
+
 
 
 # Creates a file named "ChangeLog" containing the chronology of all
@@ -132,13 +132,13 @@ FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX: all documentation
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	-cp  examples++-bug/*.edp   $@/examples++-bug
 	cp   DOC/manual-full.pdf $@
-	cd  FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX ; tar zxf ../FreeFem++.app.tgz
-	sed <Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
+	cd  FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX ; tar zxf ../src/agl/FreeFem++.app.tgz
+	sed <src/agl/Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
            -e "s/@VVERSION@/$(VERSION)-$(FREEFEM_PACKAGING)/g" \
            -e "s/@DATE@/`date`/g"  
 	-mkdir -p  $@/FreeFem++.app/Contents/FreeFem++.app/Contents
 	cp $@/FreeFem++.app/Contents/Info.plist $@/FreeFem++.app/Contents/FreeFem++.app/Contents/Info.plist
-	cp src/agl/FreeFem++-agl $@/FreeFem++.app/Contents/FreeFem++.app
+	cp src/agl/FreeFem++-agl $@/FreeFem++.app/Contents/FreeFem++.app/FreeFem++
 	cp src/FreeFem++-CoCoa $@
 
 FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX.tgz: FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_MacOsX
