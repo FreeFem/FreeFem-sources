@@ -32,14 +32,17 @@ Linear algebra libraries
 ------------------------
 
 By default, "./configure" looks for the BLAS, ARPACK and UMFPACK
-libraries on the local system. If it cannot find them, the compilation
-step ("make") downloads the missing ones (from their official
-websites) and compiles them. But you can specify a library
-file (ending with ".a") instead with the following options:
+libraries on the local system. If configure cannot find the libraries
+by itself, you can specify the full path to a library file (ending
+with ".a") with the following options:
 
 --with-arpack=library file
 --with-amd=library file
 --with-umfpack=library file
+
+Or, if the configuration flag "--enable-download" is specified, the
+compilation step ("make") will try to download the missing libraries
+(from their official websites) and compile them.
 
 Here are the different versions of FreeFem++ produced by one
 compilation (some versions may be missing if your system does not

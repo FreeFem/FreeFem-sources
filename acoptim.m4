@@ -101,32 +101,30 @@ then
     elif test -f /proc/cpuinfo
 	then
 
-	# Processors
+	# Specific processors
 	proc_type=unknown
-	if test `grep 'Intel(R) Pentium(R) III ' /proc/cpuinfo|wc -l` -gt 0
+	if test `grep 'Pentium III (Coppermine)' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=pentium3
-	    CHECK_COMPILE_FLAG(C,-march=pentium3,CFLAGS)
-	    CHECK_COMPILE_FLAG(C++,-march=pentium3,CXXFLAGS)
-	    CHECK_COMPILE_FLAG(Fortran 77,-march=pentium3,FFLAGS)
+	elif test `grep 'Intel(R) Pentium(R) III ' /proc/cpuinfo|wc -l` -gt 0
+	    then
+	    proc_type=pentium3
 	elif test `grep 'Intel(R) Pentium(R) 4 ' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=pentium4
-	    CHECK_COMPILE_FLAG(C,-march=pentium4,CFLAGS)
-	    CHECK_COMPILE_FLAG(C++,-march=pentium4,CXXFLAGS)
-	    CHECK_COMPILE_FLAG(Fortran 77,-march=pentium4,FFLAGS)
 	elif test `grep 'Intel(R) Xeon(TM) CPU' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=pentium4
-	    CHECK_COMPILE_FLAG(C,-march=pentium4,CFLAGS)
-	    CHECK_COMPILE_FLAG(C++,-march=pentium4,CXXFLAGS)
-	    CHECK_COMPILE_FLAG(Fortran 77,-march=pentium4,FFLAGS)
 	elif test `grep 'AMD Athlon(tm) XP' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=athlon-xp
-	    CHECK_COMPILE_FLAG(C,-march=athlon-xp,CFLAGS)
-	    CHECK_COMPILE_FLAG(C++,-march=athlon-xp,CXXFLAGS)
-	    CHECK_COMPILE_FLAG(Fortran 77,-march=athlon-xp,FFLAGS)
+	fi
+
+	if test "$proc_type" != unknown
+	    then
+	    CHECK_COMPILE_FLAG(C,-march=$proc_type,CFLAGS)
+	    CHECK_COMPILE_FLAG(C++,-march=$proc_type,CXXFLAGS)
+	    CHECK_COMPILE_FLAG(Fortran 77,-march=$proc_type,FFLAGS)
 	fi
 
 	# If we did not find a processor type (this happens with
