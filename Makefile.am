@@ -1,3 +1,9 @@
+# Makefile for FreeFem++, adapted to Automake
+# -------------------------------------------
+
+# Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
+# $Id$
+
 # All the versions of FreeFem++ to compile when "make" is invoked
 all-local:: $(src)/versionnumber.hpp \
 	std std-g glx glx-g x11 x11-g $(BUILD_COCOA) mpi mpi-g
@@ -100,11 +106,11 @@ agl-g:$(COMPILE_DIR)-g FORCE
 	$(MAKE) -C $(COMPILE_DIR)-g FreeFem++-agl -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
 glx-g:$(COMPILE_DIR)-g FORCE
 	$(MAKE) -C $(COMPILE_DIR)-g FreeFem++-glx -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
-glx:$(COMPILE_DIR)-g FORCE
+glx:$(COMPILE_DIR) FORCE
 	$(MAKE) -C $(COMPILE_DIR) FreeFem++-glx -f`pwd`/Makefile OPTFLAGS="$(OOPTFLAGS)" FFFLAGS="$(OFFFLAGS)" src=`pwd`/src
 x11-g:$(COMPILE_DIR)-g FORCE
 	$(MAKE) -C $(COMPILE_DIR)-g FreeFem++-x11 -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
-x11:$(COMPILE_DIR)-g FORCE
+x11:$(COMPILE_DIR) FORCE
 	$(MAKE) -C $(COMPILE_DIR) FreeFem++-x11 -f`pwd`/Makefile OPTFLAGS="$(OOPTFLAGS)" FFFLAGS="$(OFFFLAGS)" src=`pwd`/src
 
 
