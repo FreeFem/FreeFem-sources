@@ -1,4 +1,5 @@
 .deps
+.DS_Store
 MakeDepend
 Makefile
 Makefile.in
