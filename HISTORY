@@ -568,3 +568,9 @@ __________
 
 04/01/2005
    add new quadrature formular on edge (a,b) :qf1pElump  : 1/2(f(a)+f(b))*length(ab)
+
+05/01/2005
+  correction bug  unset FE variable dans le .edp   =>
+  use a null pointeur (in sol) to set the *X  array in  problem.cpp
+   (*X)[K(df)]= (*sol[kfe])[SK(kdf)] ;  
+   make some time make a seg trap error. 
