@@ -158,24 +158,24 @@ laplace; // SOLVE THE PDE
 
 Reserved words are shown in blue. \texttt{pi, x, y, label, solver} are
 reserved variables. It is allowed (although not advisable) to redefine
-these variables, so they will not be highlighted in other example
-programs.\\\\
+these variables, so they will not be highlighted again in the
+following example programs.\\\\
 
-
-%%% alh stopped here
 This example shows some of the characteristics of \freefempp~:
 
 \begin{itemize}
-\item Analytic description of boundaries (by opposition to CSG), therefore
-the user must specify the intersection points in case two boundaries intersect.
-By convention the domain is on the left side of the oriented boundary.
 
-\item Automatic mesh generator, based on the Delaunay-Voronoi algorithm with
-inner points generated with a density proportional to the density of points
-on the boundary (hence refinement is obtained by augmenting the number of
-boundary points).
+\item Boundaries are described analytically (by opposition to CSG). In
+the case where two boundaries intersect, the user must specify the
+intersection points in case two boundaries intersect. The domain will
+be on the left side of the oriented boundary.
 
-\item Arbitrary degree of the element, from the pre-programmed library.
+\item Automatic mesh generation, based on the Delaunay-Voronoi
+algorithm.  Inner points are generated with a density proportional to
+the density of points on the boundary (hence a refined mesh is
+obtained by increasing the number of boundary points).
+
+\item Preprogrammed library of arbitrary degree elements.
 
 \item Every variable is typed. For instance \texttt{f} is a function, specified
 by the keyword \texttt{func}.
@@ -183,23 +183,26 @@ by the keyword \texttt{func}.
 \item Online graphics (see the documentation below
  for zoom, postscript and other commands).
 
-\item C++ like syntax.
+\item C++-like syntax.
 
 \end{itemize}
 \subsection{Installation}
 
- First under unix, you must compile the software. To do that you 
- have to download the source version from 
- \url{http://www.ann.jussieu.fr/~hecht/ftp/freefem/freefem++.tgz}
- in a shell window enter to  extracts files from the  compress archive file
- \texttt{freefem++.tgz} and build the directory call FreeFem++vX.XX, where
- 
- X.XX is the version number.
+There are binary packages available for Microsoft Windows and Apple
+Mac OS. For all other platforms, \freefempp must be compiled and
+installed from the source archive. This archive is available from
+\url{http://www.ann.jussieu.fr/~hecht/ftp/freefem/freefem++.tgz}. To
+extract files from the compressed archive \texttt{freefem++.tgz} into
+a directory called freefem++-X.XX (where X.XX is the version number)
+enter the following commands in a shell window~:
+
 \bFF
 tar zxvf freefem++.tgz
-cd FreeFem++vX.XX
+cd freefem++-X.XX
 \eFF
-To compile just follow the \texttt{README} file.
+
+To compile and install \freefempp, just follow the \texttt{INSTALL}
+and \texttt{README} files.
 
 After installation, the following file can be create depending on  make option: 
 \begin{enumerate}
