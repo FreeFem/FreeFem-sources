@@ -710,6 +710,13 @@ then
    fi
 fi
 
+# HISTORY logging through CVS
+AC_CHECK_PROG(ff_history,cvs2cl,yes,no)
+if test "$ff_history" = yes
+then
+   AC_SUBST(HISTORY,history)
+fi
+
 # Choosing compilation options for the standard version (in src/std)
 # ------------------------------------------------------------------
 

@@ -89,6 +89,7 @@ G2CLIB = @G2CLIB@
 GENERIC_BLAS = @GENERIC_BLAS@
 GENERIC_BLAS_BUILT_SOURCES = @GENERIC_BLAS_BUILT_SOURCES@
 GLXPROG = @GLXPROG@
+HISTORY = @HISTORY@
 IDEPROG = @IDEPROG@
 IDE_LIBS = @IDE_LIBS@
 INSTALL_DATA = @INSTALL_DATA@
@@ -158,6 +159,7 @@ exec_prefix = @exec_prefix@
 ff_dvips = @ff_dvips@
 ff_fltk = @ff_fltk@
 ff_gzip = @ff_gzip@
+ff_history = @ff_history@
 ff_latex = @ff_latex@
 ff_libtool = @ff_libtool@
 ff_makeindex = @ff_makeindex@
@@ -186,7 +188,7 @@ SUBDIRS = download src DOC examples++-tutorial examples++	\
 
 
 EXTRA_DIST = regtests.sh config-wrapper.h arpack/arpack++/include/*.h		  \
-FreeFem++.*mcp HISTORY README BUGS TODO regtests.m4
+FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005 README BUGS TODO regtests.m4
 
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -502,7 +504,7 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-recursive
-all-am: Makefile config.h
+all-am: Makefile config.h all-local
 installdirs: installdirs-recursive
 installdirs-am:
 
@@ -579,10 +581,10 @@ uninstall-am: uninstall-info-am
 
 uninstall-info: uninstall-info-recursive
 
-.PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am check check-am clean \
-	clean-generic clean-local clean-recursive ctags ctags-recursive \
-	dist dist-all dist-gzip dist-zip distcheck distclean \
-	distclean-generic distclean-hdr distclean-recursive \
+.PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am all-local check \
+	check-am clean clean-generic clean-local clean-recursive ctags \
+	ctags-recursive dist dist-all dist-gzip dist-zip distcheck \
+	distclean distclean-generic distclean-hdr distclean-recursive \
 	distclean-tags distcleancheck distdir distuninstallcheck dvi \
 	dvi-am dvi-recursive info info-am info-recursive install \
 	install-am install-data install-data-am install-data-recursive \
@@ -601,7 +603,11 @@ uninstall-info: uninstall-info-recursive
 # modifications to the source files. Needs "cvs2cl" to be installed.
 
 changelog:
-	cvs2cl -w -S --fsf
+	cvs2cl
+
+all-local:: @HISTORY@
+history:
+	cvs2cl --hide-filenames -l "-d>01/01/2005" --file HISTORY
 
 documentation:
 	cd DOC && make documentation
@@ -699,7 +705,7 @@ clean-local::
 FreeFem++v$(VERSION)_MacOS:documentation	
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen
 	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++ 
-	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
+	cp  COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO  $@ 
 	cp  examples++/*.edp   $@/examples++
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
@@ -708,7 +714,7 @@ FreeFem++v$(VERSION)_MacOS:documentation
 
 FreeFem++v$(VERSION)_MacOsX: all documentation
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
-	cp COPYRIGHT HISTORY README BUGS TODO INSTALL-MacOSX  $@
+	cp COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL-MacOSX  $@
 	cp  examples++/*.edp   $@/examples++
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
@@ -742,7 +748,7 @@ $(PACKAGE_NAME):all
 	-./copysharedlibs.sh src/glx/FreeFem++-glx $@
 	-cp src/mpi/FreeFem++-mpi $@
 	-./copysharedlibs.sh src/mpi/FreeFem++-mpi $@
-	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
+	cp  COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO  $@ 
 	cp  examples++/*.edp   $@/examples++
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf \

@@ -11,7 +11,7 @@ SUBDIRS=download src DOC examples++-tutorial examples++	\
 	examples++-bug examples++-other
 
 EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h		  \
-FreeFem++.*mcp HISTORY README BUGS TODO regtests.m4
+FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005 README BUGS TODO regtests.m4
 
 
 
@@ -19,7 +19,12 @@ FreeFem++.*mcp HISTORY README BUGS TODO regtests.m4
 # modifications to the source files. Needs "cvs2cl" to be installed.
 
 changelog:
-	cvs2cl -w -S --fsf
+	cvs2cl
+
+# History before 2005 is stored in the file "HISTORY_BEFORE_2005"
+all-local:: @HISTORY@
+history:
+	cvs2cl --hide-filenames -l "-d>01/01/2005" --file HISTORY
 
 documentation:
 	cd DOC && make documentation
@@ -117,7 +122,7 @@ clean-local::
 FreeFem++v$(VERSION)_MacOS:documentation	
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen
 	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++ 
-	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
+	cp  COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO  $@ 
 	cp  examples++/*.edp   $@/examples++
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
@@ -126,7 +131,7 @@ FreeFem++v$(VERSION)_MacOS:documentation
 
 FreeFem++v$(VERSION)_MacOsX: all documentation
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
-	cp COPYRIGHT HISTORY README BUGS TODO INSTALL-MacOSX  $@
+	cp COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL-MacOSX  $@
 	cp  examples++/*.edp   $@/examples++
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
@@ -166,7 +171,7 @@ $(PACKAGE_NAME):all
 	-./copysharedlibs.sh src/glx/FreeFem++-glx $@
 	-cp src/mpi/FreeFem++-mpi $@
 	-./copysharedlibs.sh src/mpi/FreeFem++-mpi $@
-	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
+	cp  COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO  $@ 
 	cp  examples++/*.edp   $@/examples++
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf \
