@@ -6,14 +6,18 @@
 #include <map>
 #endif
 
+#ifndef __MWERKS__
 // test blas 
+//  on MacOS9 under MWERKS
+//  cblas_ddot macos-9 is not 
 #ifdef HAVE_CBLAS_H
 #include <cblas.h> 
 #define WITHBLAS 1
 #elif HAVE_VECLIB_CBLAS_H
 #include <vecLib/cblas.h> 
 #define WITHBLAS 1
-#endif    
+#endif  
+#endif  
 #ifdef WITHBLAS 
 template<class R> inline R blas_sdot(const int n,const R *sx,const int incx,const R *sy,const int  incy)
 {

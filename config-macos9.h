@@ -1,12 +1,15 @@
 
 /* Define to 1 if you have the `acosh' function. */
-#undef HAVE_ACOSH 
+#define  HAVE_ACOSH  1
 
 /* Define to 1 if you have the `asinh' function. */
-#undef HAVE_ASINH 
+#define HAVE_ASINH 1
 
 /* Define to 1 if you have the `atanh' function. */
-#undef HAVE_ATANH
+#define HAVE_ATANH 1
+
+/* Define to 1 if you have the <cblas.h> header file. */
+#define HAVE_CBLAS_H 1
 
 /* Dynamic loading - not mandatory */
 /* #undef HAVE_DLFCN_H */
