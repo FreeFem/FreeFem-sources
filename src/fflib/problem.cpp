@@ -1511,7 +1511,7 @@ AnyType Problem::operator()(Stack stack) const
  // assert(!VF); 
   R tgv = 1e30;
 // type de matrice par default
-#ifdef HAVE_LIBUMFPACKxxxx         
+#ifdef HAVE_LIBUMFPACK        
      TypeSolveMat tmat(TypeSolveMat::UMFpack); 
 #else            
     TypeSolveMat tmat(TypeSolveMat::LU);

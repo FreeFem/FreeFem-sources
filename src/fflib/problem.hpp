@@ -87,7 +87,20 @@ struct TypeSolveMat {
                                  profile(t != GC && t != GMRES && t != NONESQUARE && t != UMFpack ) {}
 };
 
-
+inline ostream & operator<<(ostream & f,const  TypeSolveMat & tm)
+{
+  switch(tm.t) {
+   case TypeSolveMat::NONESQUARE:  f << "No Square (Sparse Morse)"; break;
+   case TypeSolveMat::LU:  f << "LU (Skyline)"; break;
+   case TypeSolveMat::CROUT:  f << "CROUT (Skyline)"; break;
+   case TypeSolveMat::CHOLESKY:  f << "CHOLESKY (Skyline)"; break;
+   case TypeSolveMat::GC:  f << "CG (Sparse Morse)"; break;
+   case TypeSolveMat::GMRES:  f << "GMRES (Sparse Morse)"; break;
+   case TypeSolveMat::UMFpack:  f << "UMFpack (Sparse Morse)"; break;
+   other: f << "Unknown  bug???";
+   }
+  return f;
+}
 class TabFuncArg { public:
   typedef double R;  
   typedef  Fem2D::R2 R2;
@@ -960,7 +973,7 @@ class SetMatrix : public OneOperator { public:
        AnyType operator()(Stack stack)  const ;
     };
 
-   SetMatrix() : OneOperator(atype<const SetMatrix<R>::Op *>(),atype<Matrice_Creuse<R> *>() ) {}
+   SetMatrix() : OneOperator(atype<const typename SetMatrix<R>::Op *>(),atype<Matrice_Creuse<R> *>() ) {}
   
     E_F0 * code(const basicAC_F0 & args) const 
      { 
@@ -984,7 +997,7 @@ AnyType SetMatrix<R>::Op::operator()(Stack stack)  const
   bool VF=false;
   bool factorize=false;
 // type de matrice par default
-#ifdef HAVE_LIBUMFPACKxxxx         
+#ifdef HAVE_LIBUMFPACK         
      TypeSolveMat tmat(TypeSolveMat::UMFpack); 
 #else            
     TypeSolveMat tmat(TypeSolveMat::GMRES);
@@ -1003,6 +1016,13 @@ AnyType SetMatrix<R>::Op::operator()(Stack stack)  const
   
   if (nargs[8]) umfpackstrategy = GetAny<long>((*nargs[8])(stack)); 
    
+   if(A->typemat.profile != typemat->profile) 
+   {
+     cerr << " type of matrix " << A->typemat<<endl;
+     cerr << " type of matrix for solver " <<*typemat<<endl;
+     
+     ExecError(" Set incompatibility beetween solver and type of matrix");
+   }
   if( factorize ) {
     MatriceProfile<R> * pf = dynamic_cast<MatriceProfile<R> *>((MatriceCreuse<R> *) A->A);
     assert(pf);
