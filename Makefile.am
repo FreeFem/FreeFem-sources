@@ -112,7 +112,7 @@ FreeFem++v$(VERSION)_MacOsX: all documentation
 	-cp  examples++-bug/*.edp   $@/examples++-bug
 	cp  DOC/manual-full.ps.gz DOC/manual-full.pdf $@
 	cp -r FreeFem++.app FreeFem++v$(VERSION)_MacOsX 
-	sed <Info-plist.am >FreeFem++.app/Contents/Info.plist \
+	sed <Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
            -e "s/@VVERSION@/$(VERSION)/g" \
            -e "s/@DATE@/`date`/g"  
 	cp src/agl/FreeFem++-agl FreeFem++v$(VERSION)_MacOsX/FreeFem++.app/Contents/Resources/FreeFem++
