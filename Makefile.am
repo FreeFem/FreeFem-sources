@@ -12,13 +12,8 @@ SUBDIRS=download src DOC examples++-tutorial examples++	\
 
 EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h		  \
 FreeFem++.*mcp HISTORY README BUGS TODO regtests.m4				  \
-FreeFem++.app/Contents/Info.plist FreeFem++.app/Contents/PkgInfo		  \
-FreeFem++.app/Contents/Resources/Credits.rtf					  \
-FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/classes.nib		  \
-FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/info.nib		  \
-FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/NSAppleMenuImage.tiff \
-FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/objects.nib		  \
-FreeFem++.app/Contents/Resources/script
+FreeFem++.app.tgz 
+
 
 # Creates a file named "ChangeLog" containing the chronology of all
 # modifications to the source files. Needs "cvs2cl" to be installed.
@@ -122,7 +117,7 @@ FreeFem++v$(VERSION)_MacOS:documentation
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
 	-cp  examples++-bug/*.edp   $@/examples++-bug
-	cp  DOC/manual-full.ps.gz DOC/manual-full.pdf $@
+	cp   DOC/manual-full.pdf $@
 
 FreeFem++v$(VERSION)_MacOsX: all documentation
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
@@ -131,12 +126,13 @@ FreeFem++v$(VERSION)_MacOsX: all documentation
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	-cp  examples++-bug/*.edp   $@/examples++-bug
-	cp  DOC/manual-full.ps.gz DOC/manual-full.pdf $@
-	cp -r FreeFem++.app FreeFem++v$(VERSION)_MacOsX 
+	cp   DOC/manual-full.pdf $@
+	cd  FreeFem++v$(VERSION)_MacOsX ; tar zvf ../FreeFem.app.tgz
 	sed <Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
            -e "s/@VVERSION@/$(VERSION)/g" \
            -e "s/@DATE@/`date`/g"  
-	cp src/agl/FreeFem++-agl FreeFem++v$(VERSION)_MacOsX/FreeFem++.app/Contents/Resources/FreeFem++
+	cp $@/FreeFem++.app/Contents/Info.plist $@/FreeFem++.app/Contents/FreeFem++.app/Contents/Info.plist
+	cp src/agl/FreeFem++-agl $@/FreeFem++.app/Contents/FreeFem++.app
 	cp src/FreeFem++-CoCoa $@
 
 FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX

@@ -6,7 +6,7 @@
 # SERVICEMENU : FreeFem++     			# Name of Service menu item
 #
 dir=`dirname $0`;
-ff="$dir/FreeFem++"
+ff="$dir/../FreeFem++.app/FreeFem++"
 q="'"
 end="exit;"
 begin="cd $PWD;"
