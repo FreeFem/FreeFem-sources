@@ -72,8 +72,13 @@ then
 	    # -fast option do not work because the -malign-natural
 	    # flags create wrong IO code
 
-	    ff_fast='-funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64'
+	    ff_fast='-funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
+       if test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
+            then
+	# remove -fstrict-aliasing on G5 to much optim the code cash in GC
+         ff_fast="`echo $ff_fast| sed 's/-fstrict-aliasing //g'`"
 
+	fi
 	    CHECK_COMPILE_FLAG(C,$ff_fast,CFLAGS)
 	    CHECK_COMPILE_FLAG(C++,$ff_fast,CXXFLAGS)
 	    CHECK_COMPILE_FLAG(Fortran 77,$ff_fast,FFLAGS)

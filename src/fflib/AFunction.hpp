@@ -14,6 +14,7 @@
 #include <deque>
 #include <list>
 #include <vector>
+#include <queue>
 #include <complex>
 #include <string>
 #include <cstdlib>
@@ -2587,6 +2588,8 @@ inline    int E_F0::find(const MapOfE_F0 & m) const {  //  exp
        m.insert(p); 
        return rr;
      }
+
+extern queue<pair<const E_Routine*,int> > debugstack;
   
 #endif
 
