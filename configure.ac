@@ -10,17 +10,18 @@ AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AC_PROG_MAKE_SET
 
-# Find out the architecture. This will be used as a name for the
-# directory containing objet files for each different architecture.
-
-AC_CANONICAL_BUILD
-
 # Necessary compilers
 
+AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_YACC
 AM_PROG_LEX
 # AC_F77_LIBRARY_LDFLAGS
+
+# We do not need the default optimization options that autoconf
+# chooses
+
+CXXFLAGS=
 
 # Some useful libraries
 
@@ -64,13 +65,6 @@ then
         AC_MSG_RESULT($ff_blas_ok)
 fi
 
-
-# Nothing can be compiled without the BLAS
-if test "$ff_blas_ok" = no;
-then
-	AC_MSG_ERROR(Cannot find BLAS library)
-fi
-
 # Looking for ARPACK
 # ------------------
 
@@ -85,32 +79,39 @@ if test "$ff_blas_ok" = yes;
 	AC_SUBST(arpacklib,-larpack)
         ff_arpack_ok=yes)
 	
-   # Trying "locate"
+   # Trying to "locate" Arpack
    if test "$ff_arpack_ok" = no;
    then
         AC_MSG_CHECKING(for libarpack with locate)
-        lib_arpack=`locate libarpack|grep  'libarpack.*.a$'|head -1`" -L/sw/lib -lg2c"
-	AC_MSG_CHECKING("----------------  $lib_arpack");
-	LIBS="$lib_arpack $LIBS"
+        ff_lib_arpack=`locate libarpack|grep  'libarpack.*.a$'|head -1`" -L/sw/lib -lg2c"
+	LIBS="$ff_lib_arpack $LIBS"
         AC_LINK_IFELSE(
                 [AC_LANG_CALL(,dsaupd_)],
                 ff_arpack_ok=yes
-                AC_SUBST(arpacklib,$lib_arpack))
+                AC_SUBST(arpacklib,$ff_lib_arpack))
         AC_MSG_RESULT($ff_arpack_ok)
     fi
 fi
 LIBS=$ff_save_libs
-# Looking for the ARPACK                                                                                                      
 
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
 
-AC_SUBST(mpiprogs,[])
 AC_CHECK_PROG(ff_mpi,mpiCC,yes,no)
-if test "$ff_mpi" = yes;
-then
-	AC_SUBST(mpiprogs,mpi mpi-g)
-fi
+AM_CONDITIONAL(WITHMPI,test "$ff_mpi" = yes)
+
+# Checking wether we can produce an optimized version
+# ---------------------------------------------------
+
+AC_ARG_ENABLE(ff_optim,
+     [  --enable-optim    Turn on optimized versions of FreeFem++],
+     [case "${enableval}" in
+       yes) ff_optim=true ;;
+       no)  ff_optim=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-optim) ;;
+     esac],
+     [ff_optim=true])
+AM_CONDITIONAL(OPTIM,test "$ff_optim" = true)
 
 # Creating all makefiles
 # ----------------------

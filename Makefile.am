@@ -6,39 +6,18 @@
 
 # $Id$
 
-# All the versions of FreeFem++ to compile when "make" is invoked
-all-local:: $(src)/versionnumber.hpp \
-	std std-g glx glx-g x11 x11-g $(BUILD_COCOA) @mpiprogs@
-
-# Object files for different architectures are located in separate
-# directories.
-COMPILE_DIR=c-@build@
-
 # The version number is specified in configure.ac
 VERSION=@VERSION@
 
-# ------------------------------
-# compilation flags of FreeFem++ 
-# ------------------------------
-#  -DDRAWING  bamg active some drawing facility in bamg (inquire mesh)
-#  -DLONG_LONG active the use of  long long in bamg
-#  -DDEBUG active the  checking in bamg  
-#  -DNCHECKPTR remove check pointer facility 
-#  -DCHECK_KN active subscripting of some array  
-#  -DWITHCHECK of the dynamic type ckecking of the langague (very slow)
-#  -DEIGENVALUE  to compile the eigen value part
-#  ------------------------------------------------
-# FLAGS for optimisated version 
-OFFFLAGS= -DDRAWING -DLONG_LONG  -DNCHECKPTR 
-#  flags for debug version  
-GFFFLAGS= -DDRAWING -DLONG_LONG -DCHECK_KN #-DWITHCHECK
+# Object files for different architectures are located in separate
+# directories.
+COMPILE_DIR=@top_srcdir@/c-@build@
+
+SUBDIRS=src DOC
 
 LIBLOCAL = -ldl   # for dlopen (see load.cpp)
 LIBX11= -L/usr/X11R6/lib -lX11 -lm 
-INCLUDEX11 = /usr/X11R6/include
 CXXMPI=mpiCC   # compilation with mpi
-OOPTFLAGS= -O  # compilation with optimisation
-GOPTFLAGS= -g  # compilation with debugging 
 LIBGLX= -lGL -lGLU $(LIBX11)
 #--------------------------------------------------
 #  the flag of eigen value part with arpack++ tools
@@ -59,62 +38,14 @@ BIN_DIR=/opt/bin
 # -----  not change after this line ------------
 TARGETS=FreeFem++ FreeFem++-x11 FreeFem++-mpi  FreeFem++-nw FreeFem++-glx
 # --------------------
-src=./src
 
 CXXFLAGS =  $(OPTFLAGS)  $(FFFLAGS) $(includedir)  $(INCARPACKPP)
 CXXMPIFLAGS=   $(CXXFLAGS) $(MPIFLAGS) -DPARALLELE $(INCARPACKPP)
 www=rascasse.inria.fr:www_gamma/Gamma/cdrom/ftp/freefem/
 ftp=rascasse.inria.fr:/ftp_gamma/freefem/
 ftpk=baobab.ann.jussieu.fr:public_html/ftp/freefem/
-OBJETS= $(EIGEN) AFunction.o   lex.o  lgfem.o  lgmesh.o \
- Drawing.o    \
- gibbs.o CheckPtr.o fem.o QuadratureFormular.o FESpace.o \
- Element_RT.o mshptg.o FQuadTree.o \
- QuadTree.o R2.o Meshio.o Mesh2.o Metric.o \
- BamgFreeFem.o MeshDraw.o MeshGeom.o MeshQuad.o SetOfE4.o \
- MeshRead.o MeshWrite.o problem.o strversionnumber.o InitFunct.o \
- lgalgo.o Element_P2h.o load.o
 
 LIBS=$(LIBUMFPACK) $(LIBARPACK) $(LIBF77)  $(LIBLOCAL) @LIBS@
-
-VPATH= $(src) $(src)/femlib $(src)/bamglib $(src)/Graphics $(src)/mpi \
-	$(src)/Algo $(src)/Eigen
-includedir= -I$(INCLUDEX11)    -I$(src) -I$(src)/femlib -I$(src)/bamglib \
-	-I$(src)/Graphics -I$(src)/mpi -I$(src)/Algo $(IUMFPACK)
-
-SUFFIXES=.cpp .o
-
-std: $(COMPILE_DIR) FORCE 
-	$(MAKE) -C $(COMPILE_DIR) allc -f`pwd`/Makefile OPTFLAGS="$(OOPTFLAGS)" FFFLAGS="$(OFFFLAGS)" src=`pwd`/src
-std-g: $(COMPILE_DIR)-g FORCE 
-	$(MAKE) -C $(COMPILE_DIR)-g allc -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
-
-$(COMPILE_DIR):
-	-mkdir $@
-$(COMPILE_DIR)-g:
-	-mkdir $@
-
-allc:  FreeFem++ FreeFem++-nw 
-
-
-mpi: $(COMPILE_DIR) FORCE
-	$(MAKE) -C $(COMPILE_DIR) FreeFem++-mpi -f`pwd`/Makefile OPTFLAGS="$(OOPTFLAGS)" FFFLAGS="$(OFFFLAGS)" src=`pwd`/src
-mpi-g: $(COMPILE_DIR)-g FORCE
-	$(MAKE) -C $(COMPILE_DIR)-g FreeFem++-mpi -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
-
-agl: $(COMPILE_DIR)-g FORCE
-	$(MAKE) -C $(COMPILE_DIR) FreeFem++-agl -f`pwd`/Makefile OPTFLAGS="$(OOPTFLAGS)" FFFLAGS="$(OFFFLAGS)" src=`pwd`/src
-agl-g:$(COMPILE_DIR)-g FORCE
-	$(MAKE) -C $(COMPILE_DIR)-g FreeFem++-agl -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
-glx-g:$(COMPILE_DIR)-g FORCE
-	$(MAKE) -C $(COMPILE_DIR)-g FreeFem++-glx -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
-glx:$(COMPILE_DIR) FORCE
-	$(MAKE) -C $(COMPILE_DIR) FreeFem++-glx -f`pwd`/Makefile OPTFLAGS="$(OOPTFLAGS)" FFFLAGS="$(OFFFLAGS)" src=`pwd`/src
-x11-g:$(COMPILE_DIR)-g FORCE
-	$(MAKE) -C $(COMPILE_DIR)-g FreeFem++-x11 -f`pwd`/Makefile OPTFLAGS="$(GOPTFLAGS)" FFFLAGS="$(GFFFLAGS)" src=`pwd`/src
-x11:$(COMPILE_DIR) FORCE
-	$(MAKE) -C $(COMPILE_DIR) FreeFem++-x11 -f`pwd`/Makefile OPTFLAGS="$(OOPTFLAGS)" FFFLAGS="$(OFFFLAGS)" src=`pwd`/src
-
 
 allex:examples++-tutorial/all.edp examples++/all.edp examples++-eigen/all.edp
 
@@ -149,8 +80,6 @@ $(src)/lg.tab.hpp  $(src)/lg.tab.cpp: lg.y
 	mv lg.tab.[hc]pp $(src)  
 .cpp.o:
 	$(CXX)  -c $(CXXFLAGS) $< 
-$(src)/versionnumber.hpp: FORCE
-	(echo "#define VersionFreeFempp " '$(VERSION)';echo "#define VersionFreeFemDate " '"'`date`'"') >$@
 versions:manuals  allex FreeFem++v$(VERSION).tar.gz FreeFem++v$(VERSION)_Win.zip FreeFem++v$(VERSION)_MacOS FreeFem++v$(VERSION)_MacOsX.tgz
 	echo "done"
 tgz: FreeFem++v$(VERSION).tar.gz 

@@ -1,4 +1,15 @@
+.deps
 MakeDepend
 Makefile
 Makefile.in
 versionnumber.hpp
+FreeFem++
+FreeFem++-g
+FreeFem++-nw
+FreeFem++-nw-g
+FreeFem++-x11
+FreeFem++-x11-g
+FreeFem++-glx
+FreeFem++-glx-g
+FreeFem++-mpi
+FreeFem++-mpi-g
