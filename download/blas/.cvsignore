@@ -7,6 +7,5 @@ blas_xerbla.f
 CBLAS
 cblas.tgz
 .deps
-Makefile
-Makefile.in
 WinNT_PPRO256
+Makefile

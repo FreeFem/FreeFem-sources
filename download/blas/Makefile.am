@@ -154,8 +154,8 @@ CBLAS/src/cblas_dger.c CBLAS/src/cblas_sdsdot.c				\
 CBLAS/src/cblas_zhemm.c CBLAS/src/zdotcsub.f CBLAS/src/cblas_dnrm2.c	\
 CBLAS/src/cblas_sgbmv.c CBLAS/src/cblas_zhemv.c CBLAS/src/zdotusub.f
 
-libf77blas_a_SOURCES=$(F77BLAS_SOURCES)
-libcblas_a_SOURCES=$(CBLAS_SOURCES)
+nodist_libf77blas_a_SOURCES=$(F77BLAS_SOURCES)
+nodist_libcblas_a_SOURCES=$(CBLAS_SOURCES)
 BUILT_SOURCES=@GENERIC_BLAS_BUILT_SOURCES@
 
 libcblas_a_CPPFLAGS=-DADD_
