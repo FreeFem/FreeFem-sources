@@ -293,31 +293,41 @@ then
 
 	AC_MSG_CHECKING(for BLAS version to download)
 
-	# There are precompiled versions for Windows. We cannot
-	# distinguish the different versions easily so we just
-	# download the most generic one. A more specific version can
-	# always be downloaded by hand.
-
-	# BUG: at the moment, some necessary symbols are missing from
-	# the precompiled version (e.g. _dgemm_).
-
-###	if test "$ff_win32" = yes -a "$enable_generic" = yes -a "$ff_unzip" = yes
-	if false
-	   then
-		ff_download_blas=binary
-		ff_blas_dir=WinNT_PPRO256
-	else
-		ff_download_blas=source
-		ff_blas_dir=ATLAS/lib/ff++
-	fi
-	AC_MSG_RESULT($ff_download_blas)
-	AC_SUBST(DOWNLOAD_BLAS,$ff_download_blas)
-
 	# Do not update $LIBS, but create an extra LIB variable,
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
 
-	ff_blas_lib="-L${curdir}/download/blas/${ff_blas_dir} -lcblas -lf77blas -latlas"
+	# When compiling a generic version, we do not need an
+	# optimized version of the BLAS.
+
+	if test "$enable_generic" = yes
+	then
+		ff_download_blas=generic
+		ff_blas_lib="-L${curdir}/download/blas -lcblas -lf77blas"
+		AC_SUBST(GENERIC_BLAS,"libf77blas.a libcblas.a")
+		AC_SUBST(GENERIC_BLAS_BUILT_SOURCES,"BLAS CBLAS")
+	else
+		# There are precompiled versions for Windows. We cannot
+		# distinguish the different versions easily so we just
+		# download the most generic one. A more specific version can
+		# always be downloaded by hand.
+
+		# BUG: at the moment, some necessary symbols are missing from
+		# the precompiled version (e.g. _dgemm_).
+
+###	if test "$ff_win32" = yes -a "$enable_generic" = yes -a "$ff_unzip" = yes
+		if false
+		then
+			ff_download_blas=atlas-binary
+			ff_blas_lib="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas"
+		else
+			ff_download_blas=atlas-source
+			ff_blas_lib="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas"
+		fi
+	fi
+
+	AC_MSG_RESULT($ff_download_blas)
+	AC_SUBST(DOWNLOAD_BLAS,$ff_download_blas)
 	ff_blas_ok=yes
 fi
 AC_SUBST(BLASLIB,$ff_blas_lib)
