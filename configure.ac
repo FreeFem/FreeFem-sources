@@ -123,7 +123,7 @@ m4_include(acoptim.m4)
 # compilation flags of FreeFem++ 
 # ------------------------------
 #  -DDRAWING  bamg active some drawing facility in bamg (inquire mesh)
-#  -DLONG_LONG active the use of  long long in bamg
+#  -DBAMG_LONG_LONG active the use of  long long in bamg
 #  -DDEBUG active the  checking in bamg  
 #  -DNCHECKPTR remove check pointer facility 
 #  -DCHECK_KN active subscripting of some array  
@@ -134,13 +134,13 @@ m4_include(acoptim.m4)
 # FreeFrem++-specific optimizations
 if test "$enable_debug" = yes;
 then
-	CXXFLAGS="$CXXFLAGS -DDRAWING -DLONG_LONG -DCHECK_KN"
+	CXXFLAGS="$CXXFLAGS -DDRAWING -DBAMG_LONG_LONG -DCHECK_KN"
 	if test "$ff_mac" = yes;
 	then
 		CXXFLAGS="$CXXFLAGS -fno-inline -fpascal-strings -fexceptions"
 	fi
 else
-	CXXFLAGS="$CXXFLAGS -DDRAWING -DLONG_LONG  -DNCHECKPTR"
+	CXXFLAGS="$CXXFLAGS -DDRAWING -DBAMG_LONG_LONG  -DNCHECKPTR"
 	if test "$ff_mac" = yes;
 	then
 		CXXFLAGS="$CXXFLAGS  -fpascal-strings"
@@ -596,22 +596,26 @@ AC_CHECK_PROG(ff_makeindex,makeindex,yes,no)
 AC_CHECK_PROG(ff_dvips,dvips,yes,no)
 if test "$ff_latex" = yes -a "$ff_makeindex" = yes -a "$ff_dvips" = yes;
 then
-	AC_SUBST(DOCPS,manual.ps)
-	AC_SUBST(DOCPS,manual-full.ps)
+	AC_SUBST(DOCPS,"manual.ps manual-full.ps")
 
 	AC_CHECK_PROG(ff_gzip,gzip,yes,no)
 	if test "$ff_gzip" = yes;
 	then
-		AC_SUBST(DOCPSGZ,manual.ps.gz)
-		AC_SUBST(DOCPSGZ,manual-full.ps.gz)
+		AC_SUBST(DOCPSGZ,"manual.ps.gz manual-full.ps.gz")
 	fi
 fi
 
-AC_CHECK_PROG(ff_pdflatex,pdflatex,yes,no)
-if test "$ff_pdflatex" = yes;
+# PDF documentation building sometimes poses problems because of
+# pdfsync.sty. So we need to be able to disable it.
+
+AC_ARG_ENABLE(pdf,[  --disable-pdf	Disable PDF documentation building])
+if test "$enable_pdf" = yes
 then
-	AC_SUBST(DOCPDF,manual.pdf)
-	AC_SUBST(DOCPDF,manual-full.pdf)
+   AC_CHECK_PROG(ff_pdflatex,pdflatex,yes,no)
+   if test "$ff_pdflatex" = yes;
+   then
+	AC_SUBST(DOCPDF,"manual.pdf manual-full.pdf")
+   fi
 fi
 
 # Choosing compilation options for the standard version (in src/std)
