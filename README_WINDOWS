@@ -21,3 +21,14 @@ configured with the options "--enable-generic" and
 "--enable-download", it will download the most generic version. Or you
 can download a more optimized version and specify it to "./configure"
 with the option "--with-blas=..." (see README).
+
+Creating a Windows package
+--------------------------
+
+To create a Microsoft Windows self-installable package containing
+FreeFem++ executables, examples and documentation, you need to install
+"Inno Setup" (http://www.jrsoftware.org/isinfo.php) on your machine
+first. Then run "make WindowsPackage.iss" and load the file
+"WindowsPackage.iss" into Inno Setup once you have configured and
+compiled FreeFem++ (see INSTALL). Inno Setup places the resulting
+archive in subdirectory "Output".
