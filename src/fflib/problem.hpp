@@ -784,7 +784,10 @@ class pb2mat : public E_F0 { public:
   AnyType operator()(Stack s) const {
     Problem::Data *data= pb->dataptr(this->stack); 
     throwassert( !!data->A);  
-    return  SetAny<Matrice_Creuse<K> * >(&data->A) ;}
+    if ( SameType<K,double>::OK )
+    return  SetAny<Matrice_Creuse<K> * >(&data->AR) ;
+    else  SetAny<Matrice_Creuse<K> * >(&data->AC) ;
+      }
   
   
 };  

@@ -745,10 +745,10 @@ template<class R>
 template<class K>
  MatriceMorse<R>::MatriceMorse(const MatriceMorse<K> & A)
      : MatriceCreuse<R>(A.n,A.m,A.dummy),solver(0),nbcoef(A.nbcoef),
-      a(new R[nbcoef]),lg(new int [n+1]), cl(new int[nbcoef]),symetrique(false)
+      a(new R[nbcoef]),lg(new int [this->n+1]), cl(new int[nbcoef]),symetrique(false)
 {
   assert(a && lg &&  cl);
-  for (int i=0;i<=n;i++)
+  for (int i=0;i<=this->n;i++)
     lg[i]=A.lg[i];
   for (int k=0;k<=nbcoef;k++)
    {
@@ -1082,7 +1082,7 @@ template<class R>
   MatriceMorse<R>::MatriceMorse(int nn,int mm, map< pair<int,int>, K> & m, bool sym):
    MatriceCreuse<R>(nn,mm,0),solver(0),nbcoef(m.size()),symetrique(sym),  
    a(new R[nbcoef]),
-   lg(new int[n+1]),
+   lg(new int[this->n+1]),
    cl(new int[nbcoef])     
   {
      lg[0]=0;
