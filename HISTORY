@@ -538,3 +538,13 @@ Make Version 1.42
    correct problem on period adapted mesh if orientation are reverse.
    add cvs tag release_1_43
    now thow the current version is 1.44
+
+04/11/004
+---------
+   correct problem in LinearGMRES and LinearGC 
+   in LinearCG algorithme for solving A*x = b0+b
+   the matrix function can compute A*x or A*x-b0 ,
+   and the other part b of the right end side can  exist or not.
+   But in LinearGMRES must the function must compute A*x and 
+   b0 can't exist. 
+   see algo.edp  exist for  full example

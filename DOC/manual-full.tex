@@ -3417,11 +3417,38 @@ Remark, it is all possible to build interpolation matrix, like in
 \index{interpolation}\index{matrix!interpolation}
 the following exemple:
 \bFF
-mesh  TH = square(3,4);mesh  th = square(2,3);mesh  Th = square(4,4);fespace VH(TH,P1);fespace Vh(th,P1);fespace Wh(Th,P1);matrix B= interplotematrix(VH,Vh);  // build interpolation matrix Vh->Vh matrix BB= interplotematrix(Wh,Vh);  // build interpolation matrix
+mesh  TH = square(3,4);
+mesh  th = square(2,3);
+mesh  Th = square(4,4);
+
+
+fespace VH(TH,P1);
+fespace Vh(th,P1);
+fespace Wh(Th,P1);
+
+matrix B= interplotematrix(VH,Vh);  // build interpolation matrix Vh->Vh 
+matrix BB= interplotematrix(Wh,Vh);  // build interpolation matrix
 \eFF
 and after some operation on sparce matrix are avialable for example
 \bFF
-  int N=10;  real [int,int] A(N,N);  // a full matrix  real [int] a(N),b(N);  A =0;   for (int i=0;i<N;i++)    {      A(i,i)=1+i;      if(i+1 < N)    A(i,i+1)=-i;      a[i]=i;    }  b=A*b;  cout << "xxxx\n";   matrix sparseA=A;   cout << sparseA << endl;  sparseA = 2*sparseA+sparseA';    sparseA = 4*sparseA+sparseA*5; //    matrix sparseB=sparseA+sparseA+sparseA; ;  cout << "sparseB = " << sparseB(0,0) << endl;
+  int N=10;
+  real [int,int] A(N,N);  // a full matrix
+  real [int] a(N),b(N);
+  A =0; 
+  for (int i=0;i<N;i++)
+    {
+      A(i,i)=1+i;
+      if(i+1 < N)    A(i,i+1)=-i;
+      a[i]=i;
+    }
+  b=A*b;
+  cout << "xxxx\n"; 
+  matrix sparseA=A; 
+  cout << sparseA << endl;
+  sparseA = 2*sparseA+sparseA';  
+  sparseA = 4*sparseA+sparseA*5; //  
+  matrix sparseB=sparseA+sparseA+sparseA; ;
+  cout << "sparseB = " << sparseB(0,0) << endl;
 \eFF
 
 \subsection{Finite elements connectivity}
@@ -3431,12 +3458,24 @@ connectivity information of a finite element space $W_h$
 \index{nt} \index{ndof} \index{ndofK} \index{connectivity}
 \index{FEspace!nt}\index{FEspace!ndof} \index{FEspace!(int ,int )}
 \begin{itemize}
-\item   \ttCC{Wh.nt}  gives the number of element of $W_h$\item   \ttCC{   Wh.ndof}  gives the number of degree of freedom or unknows \item   \ttCC{   Wh.ndofK }  gives the number of degree of freedom on one element \item   \ttCC{   Wh(k,i) }   gives the number of $i$th  degree of freedom of element $k$. 
+\item   \ttCC{Wh.nt}  gives the number of element of $W_h$
+\item   \ttCC{   Wh.ndof}  gives the number of degree of freedom or unknows 
+\item   \ttCC{   Wh.ndofK }  gives the number of degree of freedom on one element 
+\item   \ttCC{   Wh(k,i) }   gives the number of $i$th  degree of freedom of element $k$.
+ 
 \end{itemize}
 See the following for an exemple:
 \bFF
 mesh Th=square(5,5);
-fespace Wh(Th,P2);cout << " nb of degre of freedom           : " << Wh.ndof << endl;cout << " nb of degre of freedom / ELEMENT : " << Wh.ndofK << endl; int k= 2;  // element 2  int kdf= Wh.ndofK ; cout << " df of element " << k << ":" ; for (int i=0;i<kdf;i++)    cout << Wh(k,i) << " "; cout << endl;
+fespace Wh(Th,P2);
+cout << " nb of degre of freedom           : " << Wh.ndof << endl;
+cout << " nb of degre of freedom / ELEMENT : " << Wh.ndofK << endl;
+ int k= 2;  // element 2 
+ int kdf= Wh.ndofK ;
+ cout << " df of element " << k << ":" ;
+ for (int i=0;i<kdf;i++)
+    cout << Wh(k,i) << " ";
+ cout << endl;
 \eFF
 and the output is:
 \bFF
@@ -3598,11 +3637,11 @@ Vh u=2-x*x-y*y;
 
  The associated example is fully defined in \texttt{algo.edp} file.
 
- \subsection{conjugate Gradient}
+ \subsection{conjugate Gradient/GMRES}
 
 If we want to solve  the Euler problem: find $ x\in \R^n $  such that  
 $$ \frac{\partial J}{\partial x_i} (x) = 0 $$
-where $ J$ is a functional to minimize from  $ \R^n$ to $ \R$.
+where $ J$ is a functional (to minimize  for example) from  $ \R^n$ to $ \R$.
 
 if the function is convex we can use the conjugate gradient to solve the problem, and
 we just need the function (named \texttt{dJ} for example)
@@ -3611,19 +3650,26 @@ are the name of the function with prototype \ttCC{@func\ @real[@int]\  dJ(@real[
  which compute $\frac{\partial J}{\partial x_i}$, 
 a vector \ttCC{x} of type \ttCC{@real[@int]} to initialize the process and get the result.
 
+
+
 \begin{note}
 You can use the \texttt{macro} tools (see \ref{macro}) to build easily the differential, see example \texttt{Newtow.edp}.
 \end{note}
 
-Two version are available:
+Three versions are available:
 \begin{description} \index{linearCG} \index{NLCG}
-\itemtt[LinearCG] linear case , the functional $J$ is quadratic.
-\itemtt[NLCG] non linear case (the function is just convex).
+\itemtt[LinearCG] linear case , the functional $J$ is quadratic $J= 1/2 (x,Ax) - (b,x)$ where 
+ $A$ is a symetric positive matrix .
+\itemtt[LinearCMRES] linear case ,where  the functional $J= 1/2 (x,Ax) - (b,x)$ where  $A$ is a matrix.
+
+\itemtt[NLCG] non linear case (the functional is just convex).
 \end{description}
 
-The named parameter of these two functions are:
+The named parameter of these three functions are:
 \begin{description}  \index{linearCG!nbiter=} \index{linearCG!precon=} \index{linearCG!eps=}\index{linearCG!veps=}
 \index{NLCG!nbiter=}  \index{NLCG!eps=}\index{NLCG!veps=}
+\index{LinearCMRES!nbiter=} \index{LinearCMRES!precon=} \index{LinearCMRES!eps=}\index{LinearCMRES!veps=}
+
 \itemtt[nbiter=] set the number of iteration (by default $100$)
 \itemtt[precon=] set the preconditionner function (\texttt{P} for example)   by default it is the identity, remark the prototype 
 is \ttCC{@func\ @real[\@int]\ P(@real[@int] \&x)}.
@@ -3637,29 +3683,55 @@ The return value is  minus  the real stop test (remark: it is useful in loop).
 
 Example of use:
 \bFF
-real[int] matx(10),b(10),x(10); 
+  @real[int] matx(10),b(10),x(10);
 
-@func @real[@int] mat(real[int] &x)
-{
-  @for (int i=0;i<x.n;i++)
-    matx[i]=(i+1)*x[i];
-  matx -= b; // sub the right hand side
-  @return matx;  // return of global variable 
-};
+  @func @real J(@real[@int] & x)
+    {
+      @real s=0;
+      @for (@int i=0;i<x.n;i++)
+        s +=(i+1)*x[i]*x[i]*0.5 - b[i]*x[i];
+      @return s;
+    }
 
-@func @real[@int] matId(@real[@int] &x) { @return x;};
+//  the grad of J (this is a affine version (the RHS is in  ) \hfilll
+  @func @real[@int] dJ(@real[@int] &x)
+    { @for (@int i=0;i<x.n;i++)
+        matx[i]=(i+1)*x[i];
+      matx -= b; // sub the right hand side
+      @return matx;  // return of global variable ok
+    };
+// the grad of the bilinear part of J (the RHS in remove)\hfilll
+  @func @real[@int] dJ0(@real[@int] &x)
+    { @for (@int i=0;i<x.n;i++)
+        matx[i]=(i+1)*x[i];
+      @return matx;  // return of global variable ok
+    };
+//  \hfilll
+  @func @real error(@real[@int] & x,@real[@int] & b)
+   {  @real s=0;
+     @for (@int i=0;i<x.n;i++)
+        s += abs((i+1)*x[i] - b[i]);
+   @return s; }
 
-b=1; x=0; // set  right hand side and initial gest
-@LinearCG(mat,x,eps=1.e-6,nbiter=20,precon=matId);
-cout << x;
-// verification 
-@for (int i=0;i<x.n;i++)
-    assert(abs(x[i]*(i+1) - b[i]) < 1e-5);
-// 
-b=1; x=0; // set  right hand side and initial gest
-@NLCG(mat,x,eps=1.e-6,nbiter=20,precon=matId);
 
+  @func @real[@int] matId(@real[@int] &x) { @return x;};
+  
+  b=1; x=0; // here not rhs the CG (in dJ) 
+  LinearCG(dJ,x,eps=1.e-6,nbiter=20,precon=matId);
+  cout << "LinearCG (Affine)  : J(x) = " << J(x) << " err=" << error(x,b) << endl;
 
+  b=1; x=0;// here rhs the CG (in not dJ0)
+  LinearCG(dJ0,x,b,eps=1.e-6,nbiter=20,precon=matId);
+  cout << "LinearCG (Linear) : J(x) = " << J(x) << " err=" << error(x,b) << endl;
+
+  b=1; x=0; // here rhs the CG (in not dJ0)
+  LinearGMRES(dJ0,x,b,eps=1.e-6,nbiter=20,precon=matId);
+  cout << "LinearGMRES: J(x) = " << J(x) << " err=" << error(x,b) << endl;
+
+  b=1; x=0; // set  right hand side and initial gest
+  NLCG(dJ,x,eps=1.e-6,nbiter=20,precon=matId);
+  cout << "NLCG: J(x) = " << J(x) << " err=" << error(x,b) << endl;
+ 
 \eFF
 
 \subsection{Optimization}
@@ -3681,7 +3753,7 @@ Example of utilization of \texttt{algo.edp}
       return s;
     }
   b=1; x=2; // set  right hand side and initial gest
-  @BFGS(J,mat,x,eps=1.e-6,nbiter=20,nbiterline=20);
+  @BFGS(J,dJ,x,eps=1.e-6,nbiter=20,nbiterline=20);
   @cout << "BFGS: J(x) = " << J(x) << " err=" << error(x,b) << endl;
   
 \eFF
