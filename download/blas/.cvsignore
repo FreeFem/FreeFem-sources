@@ -3,6 +3,7 @@ atlas*.tar.bz2
 atlas321_WinNT_PPRO.zip
 BLAS
 blas.tgz
+blas_xerbla.f
 CBLAS
 cblas.tgz
 .deps
