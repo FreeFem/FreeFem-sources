@@ -125,7 +125,7 @@ ff_unzip = @ff_unzip@
 ff_wget = @ff_wget@
 install_sh = @install_sh@
 
-EXTRA_DIST = plots/*.eps *.sty *.tex manual-full.ps.gz
+EXTRA_DIST = plots/*.eps figures/*.eps *.sty *.tex manual-full.pdf
 subdir = DOC
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -150,7 +150,7 @@ top_distdir = ..
 distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 
 distdir: $(DISTFILES)
-	$(mkinstalldirs) $(distdir)/plots
+	$(mkinstalldirs) $(distdir)/figures $(distdir)/plots
 	@list='$(DISTFILES)'; for file in $$list; do \
 	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
 	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \

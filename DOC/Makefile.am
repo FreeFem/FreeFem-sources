@@ -18,4 +18,4 @@ clean:
 	-rm *.dvi *.pdf *~ *.aux *.log *.ps *.ps.gz \
 		*.toc *.ind *.glo *.out *.blg *ilg *.idx *.bbl *.tmp
 
-EXTRA_DIST=plots/*.eps *.sty *.tex manual-full.ps.gz
+EXTRA_DIST=plots/*.eps figures/*.eps *.sty *.tex manual-full.pdf
