@@ -328,7 +328,17 @@ then
 	ff_blas_ok=yes
 fi
 AC_SUBST(BLASLIB,$ff_blas_lib)
+#looking for cblas.h  FH 
+if test "$ff_blas_ok" = yes;
+then
+  AC_CHECK_HEADERS(cblas.h,
+       ff_cblas_h=yes,
+       ff_cblas_h=no)
+  AC_CHECK_HEADERS(vecLib/cblas.h,
+       ff_cblas_h=yes,
+       ff_cblas_h=no)
 
+fi
 # Looking for ARPACK
 # ------------------
 
