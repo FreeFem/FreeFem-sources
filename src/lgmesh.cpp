@@ -135,6 +135,7 @@ class Adaptation :   public E_F0mps { public:
     double arg(int i,Stack stack,double a) const { return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
     long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
     bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
+   int arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny<int>( (*nargs[i])(stack) ): a;}
     
     Adaptation(const basicAC_F0 & args) :nbsol(args.size()-1),sol(args.size()-1)
     {   
@@ -662,6 +663,123 @@ AnyType Adaptation::operator()(Stack stack) const
 }   
 
  
+
+
+Fem2D::Mesh  * EmptyTheMesh( Fem2D::Mesh *  const & pTh,long *ssd=0)
+{
+  using namespace Fem2D;
+  using  Fem2D::Triangle;
+  using  Fem2D::Vertex;
+  using  Fem2D::R2;
+  using  Fem2D::BoundaryEdge;
+  using  Fem2D::Mesh;
+  const Mesh & Th=*pTh;
+ // using  Fem2D::R;
+  using  Fem2D::MeshPointStack;
+  int nbv=Th.nv;
+  int nbt=0;
+  int neb=Th.neb;
+  KN<int> renum(Th.nv);
+  renum=-1;
+  if(ssd)
+   {
+    nbt=-1; //  pour ne pas retire l'exterieur
+    int nebb=0;
+    for (int i=0;i<Th.nt;i++)
+     for (int e=0;e<3;e++)
+      { int ee=e,ii=Th.TriangleAdj(i,ee);
+        if ( (ii>= 0 && ii != i) && (i<ii && ssd[ii] != ssd[i]) ) 
+          {
+           nebb++;
+           int i1= Th(i,VerticesOfTriangularEdge[e][0]);
+           int i2= Th(i,VerticesOfTriangularEdge[e][1]);
+           cout << i1 << " " << i2 << endl;
+           renum[i1]=1;
+           renum[i2]=1;
+         }
+      }
+      neb=nebb;
+   }
+   else 
+  for (int i=0;i<neb;i++)
+    {        
+     int i1=Th(Th.bedges[i][0]);
+     int i2=Th(Th.bedges[i][1]);
+     renum[i1]=1;
+     renum[i2]=1;
+     }
+  int nbvnew=0;
+  for(int i=0;i<nbv;i++)
+   if (renum[i]>=0)
+     renum[i]= nbvnew++;
+      
+  Vertex * v= new Vertex[nbvnew];
+  Triangle *t= 0;
+  BoundaryEdge *b= new BoundaryEdge[neb];
+  Vertex *vv=v;
+  Vertex *vo=Th.vertices;
+  BoundaryEdge * bb=b;
+
+  if(ssd)
+   {
+    int nebb=0;
+    for (int i=0;i<Th.nt;i++)
+     for (int e=0;e<3;e++)
+      { int ee=e,ii=Th.TriangleAdj(i,ee);
+        if ( (ii>= 0 && ii != i) && (i<ii && ssd[ii] != ssd[i]) ) 
+         {
+           nebb++;
+           int i1= renum[Th(i,VerticesOfTriangularEdge[e][0])];
+           int i2= renum[Th(i,VerticesOfTriangularEdge[e][1])];
+           int labM=0,labm=0;
+           labM=Th[i].lab;
+           if( ii >=0) labm=Th[ii].lab;
+           if( labM <labm) Exchange(labM,labm);
+           int lab= 100*labM+labm ;     
+           *bb++ = BoundaryEdge(v,i1,i2,lab);   
+         }
+      }
+   }
+   else   
+  for (int i=0;i<neb;i++)
+    {        
+     int i1=renum[Th(Th.bedges[i][0])];
+     int i2=renum[Th(Th.bedges[i][1])];
+     int lab=Th.bedges[i].lab;     
+     *bb++ = BoundaryEdge(v,i1,i2,lab);   
+    }
+  
+  for (int i=0;i<nbv;i++)
+   {
+     int j=renum[i];
+     if(j>=0) 
+      {
+        v[j].x=vo[i].x;
+        v[j].y=vo[i].y;
+        v[j].lab=vo[i].lab;
+      }   
+    }
+
+ {
+  Mesh * m = new Mesh(nbvnew,nbt,neb,v,0,b);
+  R2 Pn,Px;
+  m->BoundingBox(Pn,Px);
+  m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
+  m->decrement();  
+  return m;
+      
+}
+}
+Fem2D::Mesh  * EmptyTheMesh( Fem2D::Mesh *  const & pTh)
+{
+  return EmptyTheMesh(pTh,0);
+}
+Fem2D::Mesh  * EmptyTheMesh( Fem2D::Mesh *  const & pTh,  KN<long> * const &  k)
+{
+  return EmptyTheMesh(pTh,*k);
+}
+
+
 Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double> &V)
 {
   using  Fem2D::Triangle;
@@ -728,7 +846,7 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
   R2 Pn,Px;
   m->BoundingBox(Pn,Px);
   m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-//  m->decrement();  
+ //m->decrement();  
   return m;
       
 }
@@ -1193,6 +1311,8 @@ void init_lgmesh() {
    Global.Add("savemesh","(",new OneOperatorCode<SaveMesh>);
    Global.Add("trunc","(", new Op_trunc_mesh);
    Global.Add("readmesh","(",new OneOperator1_<pmesh,string*>(ReadMeshbamg));
+   Global.Add("emptymesh","(",new OneOperator1_<pmesh,pmesh>(EmptyTheMesh));
+   Global.Add("emptymesh","(",new OneOperator2_<pmesh,pmesh,KN<long> *>(EmptyTheMesh));
    Global.Add("triangulate","(",new OneOperator1_<pmesh,string*>(ReadTriangulate));
    TheOperators->Add("<-",
        new OneOperator2_<pmesh*,pmesh*,string* >(&initMesh));
