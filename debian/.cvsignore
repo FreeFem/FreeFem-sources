@@ -10,3 +10,4 @@ freefem++-nw
 freefem++-x11
 *.substvars
 tmp
+Makefile
