@@ -14,6 +14,7 @@ double VersionNumber(){
 
 string StrVersionNumber(){
   std::ostringstream buffer;
+  buffer.precision(8);
   buffer<<VersionNumber();
   return buffer.str()+" (date VersionFreeFemDate )" ;
 }

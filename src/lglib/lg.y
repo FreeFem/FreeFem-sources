@@ -530,7 +530,7 @@ void init_lgfem() ;
 void init_lgmesh() ;
 void init_algo();
 bool withrgraphique = false;
-const char * StrVersionNumber();
+string  StrVersionNumber();
 
 int mymain (int  argc, char **argv)
 {
