@@ -180,8 +180,8 @@ for (int I=K+1;I<nbT;I++)
 plot([pt,pu],[pt,exact],[pt,fu],wait=1,cmm=" final fin");
 plot([pT,pU],[pt,exact],[pt,fu],wait=1,cmm=" final grossier");
 
-  
-  
-
-
-
+// Regression check
+real ref=pu'*pu;
+cout<<"reference value="<<ref<<endl;
+assert(ref<1383.28);
+assert(ref>1383.26);

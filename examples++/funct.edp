@@ -12,3 +12,9 @@ func real myfunction(real a,real b)
 };
 // appele 
 cout << myfunction(1.0,3.) << " " << myfunction(1,3)  << endl;
+
+// Regression check
+real ref=myfunction(1.0,3.);
+cout<<"reference value="<<ref<<endl;
+assert(ref<4.000001);
+assert(ref>3.999999);

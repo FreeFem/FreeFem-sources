@@ -145,3 +145,9 @@ R3 P;
 P.x=1;
 x=P.x;
 cout << P.x << "\n";  
+
+// Regression check
+real ref=P.x;
+cout<<"reference value="<<ref<<endl;
+assert(ref<1.965e+04);
+assert(ref>1.963e+04);

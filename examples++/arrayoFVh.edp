@@ -35,4 +35,8 @@ cout <<  " (semi norme H^1)^2 of u =" << int2d(Th)(  dx(u)*dx(u) + dy(u)*dy(u) )
 for ( i=0;i<10;i++)
  cout << "|x +"<< i <<"y|_H_1 = " << sqrt((v[]=A*uu[i][])' * uu[i][])  << endl;
 
-
+// Regression check
+real ref=u[]'*u[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<4560.75);
+assert(ref>4560.73);

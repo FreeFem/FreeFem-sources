@@ -37,3 +37,9 @@ for (i=0;i< 5;i++)
 } ;
 
  cout << " CPU = " << clock()-cpu << endl;
+
+// Regression check
+real ref=u[]'*u[];
+cout<<"reference value="<<ref<<endl;
+assert(ref<0.140396);
+assert(ref>0.140394);
