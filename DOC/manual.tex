@@ -202,36 +202,30 @@ cd freefem++-X.XX
 \eFF
 
 To compile and install \freefempp, just follow the \texttt{INSTALL}
-and \texttt{README} files.
+and \texttt{README} files. The following programs are produced,
+depending on the system you are running (Linux, Windows, MacOS)~:
 
-After installation, the following file can be create depending on  make option: 
 \begin{enumerate}
-\item \texttt{FreeFem++}            optimized with X11 graphic version
-\item \texttt{FreeFem++-g}          debug  with X11 graphic X11 version
-\item \texttt{FreeFem++-nw}         optimized with postscript graphic version (batch version)
-\item \texttt{FreeFem++-nw-g}       debug     postscript  version (batch version)
-\item \texttt{FreeFem++-mpi}        optimized mpi version with postscript graphic
-\item \texttt{FreeFem++-mpi-g}      debug mpi version with postscript graphic
-\item \texttt{FreeFem++-glx}        optimized OpenGl with X11 graphic version
-\item \texttt{FreeFem++-glx-g}      debug OpenGl with X11 graphic version
-\item \texttt{/Applications/FreeFem++.app}   Drag and Drop CoCoa MacOs Application
-\item \texttt{FreeFem++-CoCoa}      MacOS Shell script  for MacOS  OpenGL version  (MacOS 10.2 or better),
-         remark:           it  use  /Applications/FreeFem++.app
-
+\item \texttt{FreeFem++}, standard version, with a graphical interface
+based on X11, Win32 or MacOS
+\item \texttt{FreeFem++-nw}, postscript output only (batch version, no windows)
+\item \texttt{FreeFem++-mpi}, parallel version, postscript output only
+\item \texttt{FreeFem++-glx}, graphics using OpenGL and X11
+\item \texttt{/Applications/FreeFem++.app}, Drag and Drop CoCoa MacOs
+Application
+\item \texttt{FreeFem++-CoCoa}, MacOS Shell script for MacOS OpenGL
+version (MacOS 10.2 or better) (note: it uses
+/Applications/FreeFem++.app)
 \end{enumerate}
 
-in a directory set with makevariable \texttt{BIN\_DIR} defined in file \texttt{src/Makefile-xxxxx}
-where \texttt{xxxxx} this the type of the host.
+As an installation test, go into the directory
+\texttt{examples++-tutorial} and run \freefempp on the example script
+\texttt{LaplaceP1.edp} with the command~:
 
-To test, just go in an directory example \texttt{examples++-tutorial}
-and try  the exemple \texttt{LaplaceP1.edp}, and enter in a shell window:
 \bFF
-FreeFem++  LaplaceP1.edp
+FreeFem++ LaplaceP1.edp
 \eFF
-or 
-\bFF
-<< BIN_DIR >>/FreeFem++  LaplaceP1.edp
-\eFF
+
 \textBlack
 
 

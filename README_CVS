@@ -24,6 +24,11 @@ To compile, check and install FreeFem++:
 > make check
 > make install
 
+To update the contents of "changelog" (which lists all modified files
+and the related commit messages):
+
+> make changelog (needs "cvs2cl" to be installed on the machine)
+
 To build an archive containing all the source files:
 
 > make dist
