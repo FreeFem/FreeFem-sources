@@ -222,7 +222,13 @@ fi
 # Looking for wget before we decide to download anything
 # ------------------------------------------------------
 
-AC_CHECK_PROG(ff_wget,wget,yes,no)
+AC_ARG_ENABLE(download,[  --enable-download	Try to download missing libraries (BLAS,ARPACK,UMFPACK)])
+if test "$enable_download" = yes
+then
+	AC_CHECK_PROG(ff_wget,wget,yes,no)
+else
+	ff_wget=no
+fi
 
 # Looking for the BLAS
 # --------------------
@@ -322,7 +328,7 @@ then
 
 	# User-specified location
 	AC_ARG_WITH(arpack,
-		--with-arpack=archive	Use a specific version of Arpack,
+		--with-arpack=library	Use a specific version of Arpack,
 		ff_arpack_ok=yes
 		ff_arpack_libs="${withval}")
 
@@ -381,12 +387,12 @@ if test "$ff_blas_ok" = yes;
 then
         # User-specified location
         AC_ARG_WITH(amd,
-                --with-amd=archive	Use a specific version of AMD,
+                --with-amd=library	Use a specific version of AMD,
                 ff_amd_ok=yes
 		ff_umfpack_lib="${withval}")
 
         AC_ARG_WITH(umfpack,
-                --with-umfpack=archive	Use a specific version of Umfpack,
+                --with-umfpack=library	Use a specific version of Umfpack,
                 ff_umfpack_ok=yes
                 ff_umfpack_lib="$ff_umfpack_lib ${withval}"
 		AC_DEFINE(HAVE_LIBUMFPACK,1,
@@ -535,6 +541,7 @@ AC_OUTPUT(Makefile
 	src/Graphics/Makefile
 	src/femlib/Makefile
 	src/Algo/Makefile
+	src/umfpack/Makefile
 	src/lglib/Makefile
 	src/fflib/Makefile
 	src/std/Makefile

@@ -9,7 +9,7 @@ if [ -f "$1.cpp" ] ; then
 	Darwin) 
 	export MACOSX_DEPLOYMENT_TARGET=10.3
 	SHARED="-bundle -undefined dynamic_lookup"  ;;
-	Linux)
+	Linux|CYGWIN*)
 	SHARED="-shared " ;;
 	*)
 	echo "sorry unknown achitecture "`uname`
