@@ -1723,6 +1723,18 @@ long pVh_ndofK(pfes * p)
  { throwassert(p && *p);
    FESpace *fes=**p;   return (*fes)[0].NbDoF() ;}
 
+long mp_nuTriangle(MeshPoint * p)
+ { throwassert(p  && p->Th && p->T);
+   long  nu((*p->Th)(p->T));
+   delete p;
+   return nu ;}
+   
+long mp_region(MeshPoint * p)
+ { throwassert(p && p->Th);
+   long  nu(p->region);
+   delete p;
+   return nu ;}
+
 
 class pVh_ndf : public ternary_function<pfes *,long,long,long> { public:
 
@@ -3274,6 +3286,29 @@ class Op3_K2R : public ternary_function<K,R,R,K> { public:
   };
 };
 
+//Add  FH 16032005
+class Op3_Mesh2mp : public ternary_function<pmesh*,R,R,MeshPoint *> { public:
+  class Op : public E_F0mps { public:
+      Expression a,b,c;
+       Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}       
+       AnyType operator()(Stack s)  const 
+        { 
+           R xx(GetAny<R>((*b)(s)));
+           R yy(GetAny<R>((*c)(s)));
+           pmesh *ppTh(GetAny<pmesh*>((*a)(s)));
+           if( !ppTh || !*ppTh) ExecError("Op3_Mesh2mp unset mesh ??");
+           pmesh pTh(*ppTh);
+           MeshPoint * mp = new MeshPoint();
+           mp->set(xx,yy,0.0);
+           R2 PHat;
+           bool outside;
+           const Triangle * K=pTh->Find(mp->P,PHat,outside);
+           mp->set(*pTh,(R2) mp->P,PHat,*K,0,outside);
+           return mp;}
+   
+  };
+};
+
 template<class RR,class AA=RR>
 class JumpOp : public E_F0mps  { public:
   typedef RR  R;
@@ -3539,7 +3574,7 @@ void  init_lgfem()
  
  Global.New("wait",CConstant<bool*>(&TheWait));
  Global.New("NoUseOfWait",CConstant<bool*>(&NoWait));
-
+ Dcl_Type<MeshPoint *>();
  Dcl_Type<finconnue *>();
  Dcl_Type<ftest *>();
  Dcl_Type<foperator *>();
@@ -3578,7 +3613,14 @@ void  init_lgfem()
  Add<pfer>("(","",new OneTernaryOperator<Op3_pfe2K<R>,Op3_pfe2K<R>::Op> );
  Add<pfec>("(","",new OneTernaryOperator<Op3_pfe2K<Complex>,Op3_pfe2K<Complex>::Op> );
  Add<double>("(","",new OneTernaryOperator<Op3_K2R<R>,Op3_K2R<R>::Op> );
+// Add<long>("(","",new OneTernaryOperator<Op3_K2R<long>,Op3_K2R<long>::Op> ); // FH stupide 
  Add<Complex>("(","",new OneTernaryOperator<Op3_K2R<Complex>,Op3_K2R<Complex>::Op> );
+ Add<pmesh *>("(","",new OneTernaryOperator<Op3_Mesh2mp,Op3_Mesh2mp::Op> );
+ 
+ 
+ Add<MeshPoint *>("nuTriangle",".",new OneOperator1<long,MeshPoint *>(mp_nuTriangle));
+ Add<MeshPoint *>("region",".",new OneOperator1<long,MeshPoint *>(mp_region));
+ 
  
  Add<pfer>("n",".",new OneOperator1<long,pfer>(pfer_nbdf<R>));
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
