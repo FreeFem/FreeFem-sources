@@ -7,6 +7,6 @@ FreeFem___SOURCES=
 EXTRA_FreeFem___SOURCES=../Graphics/Xrgraph.cpp ../Graphics/Pcrgraph.cpp
 FreeFem___DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a @STD_GRAPH_OBJ@
 LDADD=@STD_GRAPH_OBJ@ ../lglib/liblg.a ../fflib/libff.a \
-	@UMFPACKLIB@ @ARPACKLIB@ @STD_X11_LIB@ $(LIBDL)
-INCLUDES=-I../fflib @STD_X11_INC@
+	@UMFPACKLIB@ @ARPACKLIB@ $(LIBDL)
+INCLUDES=-I../fflib
 AM_LDFLAGS=@STD_LDFLAGS@
