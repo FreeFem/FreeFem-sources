@@ -632,3 +632,7 @@ __________
 23/02/2005
      add jump and mean of complex function  (FH)
 
+23/02/2005
+    FreeFem++-cs: grammar-driven syntax highlighting works on
+    (examples++-tutorial/...) Laplace.edp, adapt.edp and
+    adaptindicatorP1.edp (ALH)
