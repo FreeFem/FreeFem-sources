@@ -36,25 +36,6 @@ clean-local::
 	-rm -rf FreeFem++v*_MacOS
 	-rm -rf FreeFem++v*_Win
 
-# Native Windows version packaging
-# --------------------------------
-
-FreeFem++v$(VERSION)_Win:pc/FreeFem++.exe
-	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen
-	cp  pc/FreeFem++.exe $@
-	cp COPYRIGHT HISTORY README BUGS TODO  $@ 
-	cp  examples++/*.edp   $@/examples++
-	cp  examples++-eigen/*.edp   $@/examples++-eigen
-	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf examples++-tutorial/*.edp   $@/examples++-tutorial
-	-cp  examples++-bug/*.edp   $@/examples++-bug
-	cp  DOC/manual.ps.gz DOC/manual.pdf $@
-zip:FreeFem++v$(VERSION)_Win.zip
-
-FreeFem++v$(VERSION)_Win.zip:FreeFem++v$(VERSION)_Win
-	-rm FreeFem++v$(VERSION)_Win.zip
-	zip -9l FreeFem++v$(VERSION)_Win.zip `find FreeFem++v$(VERSION)_Win -type f | egrep -v 'exe$$|pdf$$|gz$$'`
-	zip -9 FreeFem++v$(VERSION)_Win.zip `find FreeFem++v$(VERSION)_Win -type f | egrep  'exe$$|pdf$$|gz$$'`
-
 # Native MacOS packaging
 # ----------------------
 

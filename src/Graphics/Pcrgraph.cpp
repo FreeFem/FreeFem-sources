@@ -811,28 +811,46 @@ void Usage()
 // Hack the args and analysis 
 int StoreFname(char Line[], int len)
 {
-   	int i;
-   	char msg[256]; char *ext;
-   	for (i=0; i<len; i++)
-      if (Line[i] != ' ') fullName[i] = Line[i];
+  char msg[256]; char *ext;
+
+  // ALH - 2/6/04 - add treatments for names surrounded with quotes
+  // (but still breaks on names including quotes).
+  int i;
+  char stopchar = ' ';
+  bool skipone = false;
+  if(Line[0] == '"' || Line[0] == '\''){
+    stopchar = Line[0];
+    bool skipone = true;
+  }
+
+  // Copies the name string, including its surrounding quotes if
+  // necessary.
+  for (i=0; i<len; i++){
+    if (Line[i] != stopchar) fullName[i] = Line[i];
+    else{
+      if(skipone) skipone = false;
       else break;
-	fullName[i] = '\0';
+    }
+  }
+  fullName[i] = '\0';
  	
- 	ofstream check(fullName,ios::in);
- 	if (!check.is_open()) {
- 	   sprintf(msg,"%s does not exist!",fullName);
- 	   FatalErr(msg,-1);
- 	}
- 	else check.close();
+  ofstream check(fullName,ios::in);
+  if (!check.is_open()) {
+    sprintf(msg,"%s does not exist!",fullName);
+    FatalErr(msg,-1);
+  }
+  else check.close();
  	   
-	ext = strrchr(fullName,'.'); ext++;
-	if (toupper(*ext) != 'E' || toupper(*(ext+1)) != 'D' || toupper(*(ext+2)) != 'P') {
- 	   sprintf(msg,"%s is not program!",fullName);
- 	   FatalErr(msg,-1);
- 	}
+  ext = strrchr(fullName,'.'); ext++;
+  if (toupper(*ext) != 'E'
+      || toupper(*(ext+1)) != 'D'
+      || toupper(*(ext+2)) != 'P') {
+    sprintf(msg,"%s is not a FreeFem++ script!",fullName);
+    FatalErr(msg,-1);
+  }
 	
-   	GetFileName(fullName,shortName);
-    return i;
+  GetFileName(fullName,shortName);
+  return i;
 }
 
 // freefem+  arg1  arg2 arg3
@@ -845,38 +863,38 @@ DWORD GetOption(char lpszCmdLine[])
 
   while (i < CmdLen) { 
     while (lpszCmdLine[i] == ' ')
-              i++;
-  	if (lpszCmdLine[i] == '-') {
-    	i++;
-    	switch(lpszCmdLine[i]) {
-    	case 'f':
+      i++;
+    if (lpszCmdLine[i] == '-') {
+      i++;
+      switch(lpszCmdLine[i]) {
+      case 'f':
       	i++;
       	while (lpszCmdLine[i] == ' ')
-              ++i;
+	  ++i;
       	i += StoreFname(&lpszCmdLine[i],CmdLen-i);
-  		winf_flg |= winf_VFFEM;
+	winf_flg |= winf_VFFEM;
       	break;
-    	case 's':  // not wait at end of execution
-      		winf_flg |= winf_NOWAIT; ++i;
-      		break;
-    	case 'b':	// no color
-      		winf_flg |= winf_NOCOLOR; ++i;
-      		break;
-    	case 'n':
-      		winf_flg |= winf_NOEDIT; ++i;
-      		break;
-    	case 'h':
-      		winf_flg |= winf_Usage; ++i;
-      		break;
-    	default:
-      		while (lpszCmdLine[i]!=' ' && (i < CmdLen))
-        	i++;
-    	}
-  	}
-  	else  {
-  		i += StoreFname(&lpszCmdLine[i],CmdLen-i);
-  		break;
-  	}
+      case 's':  // not wait at end of execution
+	winf_flg |= winf_NOWAIT; ++i;
+	break;
+      case 'b':	// no color
+	winf_flg |= winf_NOCOLOR; ++i;
+	break;
+      case 'n':
+	winf_flg |= winf_NOEDIT; ++i;
+	break;
+      case 'h':
+	winf_flg |= winf_Usage; ++i;
+	break;
+      default:
+	while (lpszCmdLine[i]!=' ' && (i < CmdLen))
+	  i++;
+      }
+    }
+    else  {
+      i += StoreFname(&lpszCmdLine[i],CmdLen-i);
+      break;
+    }
   }
   return 0;
 }

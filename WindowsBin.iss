@@ -9,15 +9,28 @@ DefaultGroupName=FreeFem++
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
+OutputBaseFilename=FreeFem++-bin
 
 [Files]
-Source: "*"; DestDir: "{app}"; Excludes: "*.o,*.a,*.Po,CVS"; Flags: recursesubdirs
+Source: "src\std\FreeFem++.exe"; DestDir: "{app}"
+Source: "src\nw\FreeFem++-nw.exe"; DestDir: "{app}"
+Source: "examples++"; DestDir: "{app}"
+Source: "examples++-eigen"; DestDir: "{app}"
+Source: "examples++-tutorial"; DestDir: "{app}"
+Source: "DOC\manual.pdf"; DestDir: "{app}"
 
 [Icons]
+
+; Menu
 Name: "{group}\FreeFem++"; Filename: "{app}\src\std\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
-Name: "{userdesktop}\FreeFem++"; Filename: "{app}\src\std\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
-Name: "{group}\examples"; Filename: "{app}\examples++"
+Name: "{group}\PDF manual"; Filename: "{app}\manual.pdf"
+Name: "{group}\Tutorial Examples"; Filename: "{app}\examples++-tutorial"
+Name: "{group}\Examples"; Filename: "{app}\examples++"
+Name: "{group}\Eigenvalues Examples"; Filename: "{app}\examples++-eigen"
 Name: "{group}\Uninstall FreeFem++"; Filename: "{uninstallexe}"
+
+; Desktop
+Name: "{userdesktop}\FreeFem++"; Filename: "{app}\src\std\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
 
 [Registry]
 
