@@ -98,6 +98,13 @@ inline double  conj(double x){return x;}
 inline float  conj(float x){return x;}
 inline double  real(double x){return x;}
 inline float  real(float x){return x;}
+
+namespace std {
+inline complex<double> min(complex<double> a,complex<double> b)
+{ return complex<double>(min(real(a),real(b)),min(imag(a),imag(b)));}
+inline complex<double> max(complex<double> a,complex<double> b)
+{ return complex<double>(max(real(a),real(b)),max(imag(a),imag(b)));}
+}
 //  ----                                                                                                                                             
 
 template<class R> class KNMK_ ;

@@ -243,11 +243,12 @@ template<class R>
 template<class R>
 bool MatriceProfile<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
 {
- if(!coef) return  L == U ;
+ R zero=R();
+ if(coef!=zero) return  L == U ;
  int i,j,kf,k;
   if(D)
    for( i=0;i<this->n;i++)
-    if(D[i])
+    if(D[i]!=zero)
      mij[make_pair(i,i)] += coef*D[i];
    else
    for(int i=0;i<this->n;i++) // no dia => identity dai
@@ -256,12 +257,12 @@ bool MatriceProfile<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
  if (L && pL )    
    for (kf=pL[0],i=0;  i<this->n;   i++  )  
      for ( k=kf,kf=pL[i+1], j=i-kf+k;   k<kf; j++,  k++  )
-        if(L[k])
+        if(L[k]!=zero)
         mij[make_pair(i,j)]=L[k]*coef;
  if (U && pU)     
    for (kf=pU[0],j=0;  j<this->m;  j++)  
      for (k=kf,kf=pU[j+1], i=j-kf+k;   k<kf; i++,  k++  )
-      if(U[k])
+      if(U[k]!=zero)
         mij[make_pair(i,j)]=U[k]*coef;
  return L == U ; // symetrique               
 }
@@ -481,7 +482,7 @@ ostream& MatriceProfile<R>::dump (ostream& f) const
  return f;
 }
 template<class R>
-void MatriceProfile<R>::cholesky(R eps) const {
+void MatriceProfile<R>::cholesky(double eps) const {
   R  *ij , *ii  , *ik , *jk , xii;
   int i,j,k;
   if (L != U) ERREUR(factorise,"matrice non symetrique");
@@ -507,13 +508,13 @@ void MatriceProfile<R>::cholesky(R eps) const {
       *ij =  -s/D[j] ;
       xii -= *ij * *ij ;
       }
-    if (xii < eps*Abs(D[i])) 
-      ERREUR(cholesky,"pivot (" << i << ")= " << xii << " < " << eps*Abs(D[i]))
-	D[i] = sqrt(xii);
+    if ( abs(xii) < eps*abs(D[i])) 
+      ERREUR(cholesky,"pivot (" << i << ")= " << xii << " < " << eps*abs(D[i]))
+    D[i] = sqrt(xii);
     }
 }
 template<class R>
-void MatriceProfile<R>::crout(R eps) const  {
+void MatriceProfile<R>::crout(double eps) const  {
   R  *ij , *ii  , *ik , *jk , xii, *dkk;
   int i,j,k;
   if (L != U) ERREUR(factorise,"matrice non symetrique");
@@ -537,13 +538,13 @@ void MatriceProfile<R>::crout(R eps) const  {
 
       xii -= *ij * *ij * *dkk;
       }
-    if (Abs(xii) <= Max(eps*Abs(D[i]),1.0e-30))
-      ERREUR(crout,"pivot (" << i << " )= " << Abs(xii) << " <= " << eps*Abs(D[i]) << " eps = " << eps)
+    if (abs(xii) <= Max(eps*abs(D[i]),1.0e-30))
+      ERREUR(crout,"pivot (" << i << " )= " << abs(xii) << " <= " << eps*abs(D[i]) << " eps = " << eps)
 	D[i] = xii;
     }
 }
 template<class R>
-void MatriceProfile<R>::LU(R eps) const  {
+void MatriceProfile<R>::LU(double eps) const  {
   R s,uii;
   int i,j,k;
   if (L == U && ( pL[this->n]  || pU[this->n] ) ) ERREUR(LU,"matrice  symetrique");
@@ -602,8 +603,8 @@ void MatriceProfile<R>::LU(R eps) const  {
       // cout << " k0 " << k0 << " i = " << i << " " <<  s << endl;
       uii = D[i] -s;
       
-      if (Abs(uii) <= Max(eps*Abs(D[i]),1.0e-30))
-	ERREUR(LU,"pivot (" << i << " )= " << Abs(uii) << " <= " << eps*Abs(D[i]) << " eps = " << eps);     
+      if (abs(uii) <= Max(eps*abs(D[i]),1.0e-30))
+	ERREUR(LU,"pivot (" << i << " )= " << abs(uii) << " <= " << eps*abs(D[i]) << " eps = " << eps);     
       
       D[i] = uii;
       
@@ -754,7 +755,7 @@ ostream& MatriceMorse<R>::dump(ostream & f) const
     f << i << " : " << lg[i] <<","<< lg[i+1]-1 << " : " ;
     int ke=lg[i+1];
     for (;k<ke;k++)
-      if (a[k]) f  << cl[k] << " " << a[k]<< ", ";
+      if (abs(a[k])) f  << cl[k] << " " << a[k]<< ", ";
       else f  << cl[k] << " 0., " ;
     f << endl;    
    }
@@ -1007,6 +1008,7 @@ template<class R>
 template<class R>
 bool MatriceMorse<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
 {
+  R zero=R(0.);
   int i,j,k;
   if (symetrique)
    {
@@ -1014,7 +1016,7 @@ bool MatriceMorse<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
        for ( k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
-           if(coef*a[k])
+           if(coef*a[k]!=zero)
            {
            mij[make_pair(i,j)] += coef*a[k];
            if (i!=j)
@@ -1029,7 +1031,7 @@ bool MatriceMorse<R>::addMatTo(R coef,map< pair<int,int>, R> &mij)
        for ( k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
-           if(coef*a[k])
+           if(coef*a[k]!=zero)
            mij[make_pair(i,j)] = coef*a[k];
          }
    }

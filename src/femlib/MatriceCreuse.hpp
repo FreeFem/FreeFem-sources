@@ -329,9 +329,9 @@ public:
   
   MatriceCreuse<R> & operator +=(MatriceElementaire<R> &);
   void operator=(const R & v); // Mise a zero 
-  void cholesky(R = EPSILON/8.) const ; //
-  void crout(R = EPSILON/8.) const ; //
-  void LU(R = EPSILON/8.) const ; //
+  void cholesky(double = EPSILON/8.) const ; //
+  void crout(double = EPSILON/8.) const ; //
+  void LU(double = EPSILON/8.) const ; //
   R & diag(int i) { return D[i];}
   R & operator()(int i,int j) { assert(0); return D[i];} // a faire 
   
@@ -444,29 +444,29 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
    throwassert(n==x.N());
    Rn g(n), h(n), Ah(n), & Cg(Ah);  // on utilise Ah pour stocke Cg  
    g = A*x;  
-   R xx= (x,x);
+   double xx= real((x,conj(x)));
    double epsold=eps;
    g -= b;// g = Ax-b
    Cg = C*g; // gradient preconditionne 
    h =-Cg; 
-   R g2 = (Cg,g);
+   double g2 = real((Cg,conj(g)));
    if (g2 < 1e-30) 
     { if(verbosity>1)
        cout << "GC  g^2 =" << g2 << " < 1.e-30  Nothing to do " << endl;
      return 2;  }
-   R reps2 =eps >0 ?  eps*eps*g2 : -eps; // epsilon relatif 
+   double reps2 =eps >0 ?  eps*eps*g2 : -eps; // epsilon relatif 
    eps = reps2;
    for (int iter=0;iter<=nbitermax;iter++)
      {      
        Ah = A*h;
-       R hAh =(h,Ah);
+       double hAh =real((h,conj(Ah)));
       // if (Abs(hAh)<1e-30) ExecError("CG2: Matrix non defined, sorry ");
-       R ro =  - (g,h)/ hAh; // ro optimal (produit scalaire usuel)
+       R ro =  - real((g,conj(h)))/ hAh; // ro optimal (produit scalaire usuel)
        x += ro *h;
        g += ro *Ah; // plus besoin de Ah, on utilise avec Cg optimisation
        Cg = C*g;
-       R g2p=g2; 
-       g2 = (Cg,g);
+       double g2p=g2; 
+       g2 = real((Cg,conj(g)));
        if ( !(iter%kprint) && iter && (verbosity>3) )
          cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
        if (g2 < reps2) { 
@@ -486,7 +486,7 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
            return 1;// ok 
           }
           }
-       R gamma = g2/g2p;       
+       double gamma = g2/g2p;       
        h *= gamma;
        h -= Cg;  //  h = -Cg * gamma* h       
      }
@@ -667,6 +667,120 @@ public:
   {  
     assert(x.N()==Ax.N());
     Ax +=  (const MatriceMorse<R> &) (*this) * x; 
+  }
+     
+
+}; 
+
+inline void C2RR(int n,Complex *c,double *cr,double *ci)
+{
+ for (int i=0;i<n;i++)
+  {
+   cr[i]=real(c[i]);
+   cr[i]=imag(c[i]);
+  }
+}
+
+inline void RR2C(int n,double *cr,double *ci,Complex *c)
+{
+ for (int i=0;i<n;i++)
+  {
+    c[i]=Complex(ci[i],cr[i]);   
+  }
+}
+
+template<>
+class SolveUMFPack<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
+  double eps;
+  double tgv;
+  mutable double  epsr;
+  void *Symbolic, *Numeric ;
+  double *ar,*ai;
+
+  int umfpackstrategy;
+public:
+  SolveUMFPack(const MatriceMorse<Complex> &A,int strategy,double ttgv, double epsilon=1e-6) : 
+    eps(epsilon),epsr(0),umfpackstrategy(strategy),tgv(ttgv),
+    Symbolic(0),Numeric(0)   { 
+    int status;
+    throwassert( !A.sym());
+    int n=A.n;
+    //  copy the coef of the matrice ---
+     ar= new double[A.nbcoef];
+     ai= new double[A.nbcoef];
+     assert(ar && ai);
+     C2RR(A.nbcoef,A.a,ar,ai);
+        
+    double Control[UMFPACK_CONTROL];
+    double Info[UMFPACK_INFO];
+    umfpack_zi_defaults (Control) ;
+    Control[UMFPACK_PRL]=1;
+    if(verbosity>4) Control[UMFPACK_PRL]=2;
+//    Control[UMFPACK_SYM_PIVOT_TOLERANCE]=1E-10;
+  //  Control[UMFPACK_PIVOT_TOLERANCE]=1E-10;
+  
+    Control[UMFPACK_STRATEGY]=umfpackstrategy;
+    status = umfpack_zi_symbolic (n, n, A.lg, A.cl, ar,ai, &Symbolic,Control,Info) ;
+    if (status < 0)
+    {
+      (void) umfpack_zi_report_matrix (n, n, A.lg, A.cl, ar,ai, 1, Control) ;
+
+	umfpack_zi_report_info (Control, Info) ;
+	umfpack_zi_report_status (Control, status) ;
+	cerr << "umfpack_zi_symbolic failed" << endl;
+	assert(0);
+    }
+
+    status = umfpack_zi_numeric (A.lg, A.cl, ar,ai, Symbolic, &Numeric,Control,Info) ;
+    if (status < 0)
+    {
+	umfpack_zi_report_info (Control, Info) ;
+	umfpack_zi_report_status (Control, status) ;
+	cerr << "umfpack_zi_numeric failed" << endl;
+	assert(0);
+    }
+
+    if (Symbolic) umfpack_zi_free_symbolic (&Symbolic),Symbolic=0; 
+    cout << "umfpack_zi_build LU " << n <<  endl;
+    if(verbosity>3)     (void)  umfpack_zi_report_info(Control,Info);
+
+  }
+  void Solver(const MatriceMorse<Complex> &A,KN_<Complex> &x,const KN_<Complex> &b) const  {
+    epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+    // cout << " epsr = " << epsr << endl;
+    double Control[UMFPACK_CONTROL];
+    double Info[UMFPACK_INFO];
+     umfpack_zi_defaults (Control) ;
+     int n = b.N();
+     KN<double> xr(n),xi(n),br(n),bi(n);
+     C2RR(n,b,br,bi);
+    int status = umfpack_zi_solve (UMFPACK_At, A.lg, A.cl, ar,ai, xr, xi, br,bi, Numeric,Control,Info) ;
+    if (status < 0)
+    {
+	umfpack_zi_report_info (Control, Info) ;
+	umfpack_zi_report_status (Control, status) ;
+	cerr << "umfpack_zi_solve failed" << endl;
+	assert(0);
+    }
+    RR2C(n,xr,xi,x);
+    
+    cout << "umfpack_zi_solve " << endl;
+    if(verbosity>3)     (void)  umfpack_zi_report_info(Control,Info);
+    cout << " b min max " << b.min() << " " <<b.max() << endl;
+    cout << " x min max " << x.min() << " " <<x.max() << endl;
+  }
+
+  ~SolveUMFPack() { 
+    cout << "~SolveUMFPack " << endl;
+    if (Symbolic)   umfpack_zi_free_symbolic  (&Symbolic),Symbolic=0; 
+    if (Numeric)    umfpack_zi_free_numeric (&Numeric),Numeric=0;
+    delete [] ar;
+    delete [] ai;   
+  }
+  void addMatMul(const KN_<Complex> & x, KN_<Complex> & Ax) const 
+  {  
+    assert(x.N()==Ax.N());
+    Ax +=  (const MatriceMorse<Complex> &) (*this) * x; 
   }
      
 

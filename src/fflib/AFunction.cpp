@@ -1112,9 +1112,12 @@ void Init_map_type()
      
      
      Global.Add("imag","(",new OneOperator1_<double,Complex>(Imag));
+     //  Big probleme  real is a type
+     Add<double>("<--","(",new OneOperator1_<double,Complex>(Real));
     // Global.Add("real","(",new OneOperator1_<double,Complex>(Real));
-     Add<Complex>(atype<double>()->name(),".",new OneOperator1_<double,Complex>(Real));
-     Add<Complex*>(atype<double>()->name(),".",new OneOperator1_<double,Complex*>(preal));
+    // Add<double>(typevarreal->right()->name(),".",new OneOperator1_<double,Complex>(Real));
+    // Global.Add(typevarreal->right()->name(),".",new OneOperator1_<double,Complex>(Real));
+    // Add<double*>(typevarreal->left()->name(),".",new OneOperator1_<double,Complex*>(preal));
     
      Global.Add("abs","(",new OneOperator1_<double,Complex>(abs));
 
