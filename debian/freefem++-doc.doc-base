@@ -7,8 +7,5 @@ Abstract: A detailed description of, FreeFem++
  Finite Element Method.
 Section: Apps/Math
 
-Format: PDF
-Files: /usr/share/doc/freefem++-doc/manual.pdf.gz
-
 Format: PostScript
-Files: /usr/share/doc/freefem++-doc/manual.ps.gz
+Files: /usr/share/doc/freefem++-doc/manual.ps.gz /usr/share/doc/freefem++-doc/manual-full.ps.gz
