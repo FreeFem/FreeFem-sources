@@ -100,8 +100,12 @@ fi
 # --------------------------------------
 
 # Version numbering, converted to a floating point value
-ff_numver=echo $VERSION|sed "s/-\(.*\)/+\1*0.000001/"
+ff_numver="`echo $VERSION|sed 's/-\(.*\)/+\1.0*0.000001/'`"
 AC_DEFINE_UNQUOTED(VersionFreeFempp,$ff_numver,FreeFem++ version as a float)
+
+# Since src/fflib/strversionnumber.cpp is recreated at each build, this
+# date is only useful for config-version.h
+
 FF_DATE=`date`
 AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
 

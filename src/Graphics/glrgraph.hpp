@@ -404,7 +404,7 @@ int main (int argc, char **argv)
 }
 #else
 extern int mymain(int argc,char **argv);
-const char * StrVersionNumber();
+string StrVersionNumber();
 
 int main (int argc, char **argv)
 {
@@ -412,7 +412,7 @@ int main (int argc, char **argv)
    for (int i=0;i<256;i++)
      wn[i] = 0;
    strcpy(wn,"   -- FreeFem++ ");
-   strcat(wn,StrVersionNumber());
+   strcat(wn,StrVersionNumber().c_str());
    
    int ret=15;  
    try {                  
