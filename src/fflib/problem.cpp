@@ -1536,7 +1536,11 @@ void DefSolver(Stack stack,
         
       }
   }  
+
+
   
+
+ 
 template<class R>
  MatriceCreuse<typename CadnaType<R>::Scalaire> * DefSolverCadna(Stack stack,
   TypeSolveMat    *typemat,
@@ -1821,9 +1825,18 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
      *X=XX;
      R_st xxmin = XX.min();
      R_st xxmax = XX.max();
+     *cadna =-1.;            
+
 #ifdef HAVE_CADNA     
       cout  << "    cadna:      min " <<  xxmin << "/ nd " << cestac(xxmin) 
             << " ,   max " << xxmax << " / nd " << cestac(xxmax)   << endl ;
+      int nn= XX.N();
+      if ( cadna->N() == nn )
+        for (int i=0;i<nn;++i)
+         (*cadna)[i] = cestac(XX[i]);
+       else
+         cerr << "Warning: Sorry array is incorrect size to store cestac " 
+              << nn << " != " << cadna->N() << endl;
 #endif
    }
   else
