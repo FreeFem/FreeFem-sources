@@ -3217,10 +3217,21 @@ pferbase* get_element(pferbasearray *const & a, long const & n)
 {
   return (**a)[n];
 }
+
 pfer get_element(pferarray const & a, long const & n)
 {
   return pfer( *(*a.first)[n],a.second);
 }
+//  complex case 
+pfecbase* get_element(pfecbasearray *const & a, long const & n)
+{
+  return (**a)[n];
+}
+pfec get_element(pfecarray const & a, long const & n)
+{
+  return pfec( *(*a.first)[n],a.second);
+}
+//  end complex case 
 
 lgElement get_element(pmesh const & a, long const & n)
 {
@@ -3295,7 +3306,21 @@ void init_mesh_array()
   map_type_of_map[make_pair(atype<long>(),atype<pmesh>())]=atype<KN<pmesh>*>(); // vector
 
  }
-
+ 
+template <class R>
+void DclTypeMatrix()
+{
+ Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >);
+  Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')                             
+  Dcl_Type<Matrice_Creuse_inv<R> >();      // matrice^-1   A^{-1}                          
+  Dcl_Type<typename VirtualMatrice<R>::plusAx >();       // A*x (A'*x)
+  Dcl_Type<typename VirtualMatrice<R>::plusAtx >();       // A^t*x (A'*x)
+  Dcl_Type<typename VirtualMatrice<R>::solveAxeqb >();       // A^t*x (A'*x)
+  Dcl_Type<const typename MatrixInterpolation::Op *>(); 
+  Dcl_Type<const typename SetMatrix<R>::Op * >();
+  Dcl_Type<Matrix_Prod<R> >();
+  Dcl_Type<list<pair<R,MatriceCreuse<R> *> >*>();
+}
 void  init_lgfem() 
 {
   cout <<"lg_fem ";
@@ -3318,16 +3343,9 @@ void  init_lgfem()
 
  Dcl_Type<TypeOfFE*>(); 
  Dcl_Type<TypeSolveMat*>();
- Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >);
-  Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')                             
-  Dcl_Type<Matrice_Creuse_inv<R> >();      // matrice^-1   A^{-1}                          
-  Dcl_Type<VirtualMatrice<R>::plusAx >();       // A*x (A'*x)
-  Dcl_Type<VirtualMatrice<R>::plusAtx >();       // A^t*x (A'*x)
-  Dcl_Type<VirtualMatrice<R>::solveAxeqb >();       // A^t*x (A'*x)
-  Dcl_Type<const MatrixInterpolation::Op *>(); 
-  Dcl_Type<const SetMatrix<R>::Op * >();
-  Dcl_Type<Matrix_Prod<R> >();
-  Dcl_Type<list<pair<R,MatriceCreuse<R> *> >*>();
+ DclTypeMatrix<R>();
+ DclTypeMatrix<Complex>();
+ 
 //  Dcl_Type<MatriceCreuseDivKN_<double> >();      //  A^(-1)  x
                                     
                                     
@@ -3369,7 +3387,7 @@ void  init_lgfem()
  Dcl_Type<ftest *>();
  Dcl_Type<foperator *>();
  Dcl_Type<foperator *>();
- Dcl_Type<const BC_set<R> *>();  // a set of boundary condition 
+ Dcl_Type<const BC_set *>();  // a set of boundary condition 
  Dcl_Type<const Call_FormLinear *>();    //   to set Vector
  Dcl_Type<const Call_FormBilinear *>();  // to set Matrix
  Dcl_Type<interpolate_f_X_1<double>::type>();  // to make  interpolation x=f o X^1 ;
@@ -3384,7 +3402,7 @@ void  init_lgfem()
  basicForEachType * t_problem=atype<const  Problem *>();
  basicForEachType * t_fbilin=atype<const  FormBilinear *>();
  basicForEachType * t_flin=atype<const  FormLinear *>();
- basicForEachType * t_BC=atype<const BC_set<R> *>();
+ basicForEachType * t_BC=atype<const BC_set *>();
  basicForEachType * t_form=atype<const C_args*>();
 
   Dcl_Type<const CDomainOfIntegration *>();
@@ -3393,19 +3411,24 @@ void  init_lgfem()
 
  atype<pmesh >()->AddCast( new E_F1_funcT<pmesh,pmesh*>(UnRef<pmesh >)); 
  atype<pfes >()->AddCast(  new E_F1_funcT<pfes,pfes*>(UnRef<pfes>));
+ 
  atype<pferbase>()->AddCast(  new E_F1_funcT<pferbase,pferbase>(UnRef<pferbase>));
+ atype<pfecbase>()->AddCast(  new E_F1_funcT<pfecbase,pfecbase>(UnRef<pfecbase>));
  
  Add<pfer>("[]",".",new OneOperator1<KN<double> *,pfer>(pfer2vect<R>));
  Add<pfec>("[]",".",new OneOperator1<KN<Complex> *,pfec>(pfer2vect<Complex>));
  Add<pfer>("(","",new OneTernaryOperator<Op3_pfe2K<R>,Op3_pfe2K<R>::Op> );
  Add<pfec>("(","",new OneTernaryOperator<Op3_pfe2K<Complex>,Op3_pfe2K<Complex>::Op> );
  Add<double>("(","",new OneTernaryOperator<Op3_K2R<R>,Op3_K2R<R>::Op> );
+ Add<Complex>("(","",new OneTernaryOperator<Op3_K2R<Complex>,Op3_K2R<Complex>::Op> );
  
  Add<pfer>("n",".",new OneOperator1<long,pfer>(pfer_nbdf<R>));
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
  Add<pmesh*>("nv",".",new OneOperator1<long,pmesh*>(pmesh_nv));
  atype<Matrice_Creuse<R> * >()->AddCast(new OneOperatorCode<pb2mat<R> >);
+ atype<Matrice_Creuse<Complex> * >()->AddCast(new OneOperatorCode<pb2mat<Complex> >);
+
 TheOperators->Add("*", 
         new OneBinaryOperator<Op2_mulvirtAv<VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN<R>* > >,
         new OneBinaryOperator<Op2_mulvirtAv<VirtualMatrice<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN<R>* > >,
@@ -3519,7 +3542,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("dxy","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dxy> >);
  Global.Add("dyx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dyx> >);
  
- Global.Add("on","(",new OneOperatorCode<BC_set<double> > );
+ Global.Add("on","(",new OneOperatorCode<BC_set > );
  Global.Add("plot","(",new OneOperatorCode<Plot> );
  Global.Add("convect","(",new OneOperatorCode<Convect> );
 
@@ -3548,16 +3571,27 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
   atype<const C_args*>()->AddCast( 
       new OneOperatorCode<C_args>(t_C_args,t_fbilin) ,       
       new OneOperatorCode<C_args>(t_C_args,t_flin)  ,     
-      new OneOperatorCode<C_args>(t_C_args,t_BC) ,      
+      new OneOperatorCode<C_args>(t_C_args,t_BC)       
+    );
+    
+  atype<const C_args*>()->AddCast( 
+      new OneOperatorCode<C_args>(t_C_args,atype<DotSlash_KN_<R> >()) ,
       new OneOperatorCode<C_args>(t_C_args,atype<KN<R>*>())  ,
       new OneOperatorCode<C_args>(t_C_args,atype<DotStar_KN_<R> >())  ,           
       new OneOperatorCode<C_args>(t_C_args,atype<Matrice_Creuse<R>*>()) ,
       new OneOperatorCode<C_args>(t_C_args,atype<VirtualMatrice<R>::plusAx >()),
       new OneOperatorCode<C_args>(t_C_args,atype<VirtualMatrice<R>::plusAtx >())   
-    );
-    
+       
+    );         
+
   atype<const C_args*>()->AddCast( 
-      new OneOperatorCode<C_args>(t_C_args,atype<DotSlash_KN_<R> >())  
+      new OneOperatorCode<C_args>(t_C_args,atype<DotSlash_KN_<Complex> >()) ,
+      new OneOperatorCode<C_args>(t_C_args,atype<KN<Complex>*>())  ,
+      new OneOperatorCode<C_args>(t_C_args,atype<DotStar_KN_<Complex> >())  ,           
+      new OneOperatorCode<C_args>(t_C_args,atype<Matrice_Creuse<Complex>*>()) ,
+      new OneOperatorCode<C_args>(t_C_args,atype<VirtualMatrice<Complex>::plusAx >()),
+      new OneOperatorCode<C_args>(t_C_args,atype<VirtualMatrice<Complex>::plusAtx >())   
+       
     );         
     
  TheOperators->Add("*",  
@@ -3737,6 +3771,10 @@ TheOperators->Add("+",
 
  map_type[typeid(double).name()]->AddCast(
    new E_F1_funcT<double,pfer>(pfer2R<R,0>)
+   );
+   
+ map_type[typeid(Complex).name()]->AddCast(
+   new E_F1_funcT<Complex,pfec>(pfer2R<Complex,0>)
    );
  
 // bof  
