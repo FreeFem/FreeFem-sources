@@ -444,6 +444,7 @@ struct OpCall_FormLinear: public OneOperator {
     OneOperator(atype<const Call_FormLinear*>(),atype<const T*>(),atype<pfes*>()) {}
 };
 
+
 template<class T>
 struct OpCall_FormLinear2: public OneOperator {
   static basicAC_F0::name_and_type name_param[] ;
@@ -479,6 +480,33 @@ struct OpCall_FormBilinear: public OneOperator {
     OneOperator(atype<const Call_FormBilinear*>(),atype<const T *>(),atype<pfes*>(),atype<pfes*>()) {}
 };
 
+
+template <class C_args> 
+basicAC_F0::name_and_type  OpCall_FormBilinear<C_args>::name_param[]= {
+     "init", &typeid(bool),
+     "solver", &typeid(TypeSolveMat*),
+     "eps", &typeid(double)  ,
+     "precon",&typeid(Polymorphic*), 
+     "dimKrylov",&typeid(long),
+     "bmat",&typeid(Matrice_Creuse<R>* ),
+     "tgv",&typeid(double ),
+     "factorize",&typeid(bool),
+     "strategy",&typeid(long )
+          
+};
+
+
+template <class T> 
+basicAC_F0::name_and_type  OpCall_FormLinear<T>::name_param[]= {
+     "tgv",&typeid(double )
+};
+
+template <class FormBilinear> 
+basicAC_F0::name_and_type  OpCall_FormLinear2<FormBilinear>::name_param[]= {
+     "tgv",&typeid(double )
+};
+
+
 template<class R>  //  to make   x=linearform(x)
 struct OpArraytoLinearForm: public OneOperator {
   typedef Call_FormLinear::const_iterator const_iterator;
@@ -497,6 +525,7 @@ struct OpArraytoLinearForm: public OneOperator {
   OpArraytoLinearForm() : 
     OneOperator(atype<KN<R>*>(),atype<KN<R>*>(),atype<const Call_FormLinear*>()) {}
 };
+
 
 template<class R>  //  to make   A=linearform(x)
 struct OpMatrixtoBilinearForm: public OneOperator {
@@ -981,6 +1010,18 @@ class SetMatrix : public OneOperator { public:
      }
 };
 
+template <class R> 
+basicAC_F0::name_and_type  SetMatrix<R>::Op::name_param[]= {
+     "init", &typeid(bool),
+     "solver", &typeid(TypeSolveMat*),
+     "eps", &typeid(double)  ,
+     "precon",&typeid(Polymorphic*), 
+     "dimKrylov",&typeid(long),
+     "bmat",&typeid(Matrice_Creuse<R>* ),
+     "tgv",&typeid(double ),
+     "factorize",&typeid(bool),
+     "strategy",&typeid(long )
+};
 
 template<class R>
 AnyType SetMatrix<R>::Op::operator()(Stack stack)  const 

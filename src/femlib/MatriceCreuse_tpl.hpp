@@ -480,7 +480,7 @@ void MatriceProfile<R>::crout(R eps) const  {
       k = j - k ; 
       R s=-*ij;
       while ( k-- ) s += *ik++ * *jk++ * *dkk++;  
-      *ij = s/ *dkk ; // k = j ici 
+      *ij = -s/ *dkk ; // k = j ici 
       xii -= *ij * *ij * *dkk;
       }
     if (Abs(xii) <= Max(eps*Abs(D[i]),1.0e-30))

@@ -12,22 +12,11 @@ using namespace std;
 #include "lgsolver.hpp"
 #include "problem.hpp"
 #include <set>
+
 basicAC_F0::name_and_type  MatrixInterpolation::Op::name_param[]= {
      "t", &typeid(bool), 
      "op", &typeid(long),
      "inside",&typeid(bool)
-};
-template <class R> 
-basicAC_F0::name_and_type  SetMatrix<R>::Op::name_param[9]= {
-     "init", &typeid(bool),
-     "solver", &typeid(TypeSolveMat*),
-     "eps", &typeid(double)  ,
-     "precon",&typeid(Polymorphic*), 
-     "dimKrylov",&typeid(long),
-     "bmat",&typeid(Matrice_Creuse<R>* ),
-     "tgv",&typeid(double ),
-     "factorize",&typeid(bool),
-     "strategy",&typeid(long )
 };
 
 
@@ -52,31 +41,6 @@ basicAC_F0::name_and_type  Problem::name_param[]= {
      "tgv",&typeid(double ),
      "strategy",&typeid(long )
      
-};
-
-template <class C_args> 
-basicAC_F0::name_and_type  OpCall_FormBilinear<C_args>::name_param[]= {
-     "init", &typeid(bool),
-     "solver", &typeid(TypeSolveMat*),
-     "eps", &typeid(double)  ,
-     "precon",&typeid(Polymorphic*), 
-     "dimKrylov",&typeid(long),
-     "bmat",&typeid(Matrice_Creuse<R>* ),
-     "tgv",&typeid(double ),
-     "factorize",&typeid(bool),
-     "strategy",&typeid(long )
-          
-};
-
-
-template <class FormBilinear> 
-basicAC_F0::name_and_type  OpCall_FormLinear<FormLinear>::name_param[]= {
-     "tgv",&typeid(double )
-};
-
-template <class FormBilinear> 
-basicAC_F0::name_and_type  OpCall_FormLinear2<FormBilinear>::name_param[]= {
-     "tgv",&typeid(double )
 };
 
 
@@ -1504,7 +1468,7 @@ AnyType Problem::operator()(Stack stack) const
   R tgv = 1e30;
 // type de matrice par default
 #ifdef HAVE_LIBUMFPACK        
-     TypeSolveMat tmat(TypeSolveMat::UMFpack); 
+     TypeSolveMat tmat(TypeSolveMat::LU); 
 #else            
     TypeSolveMat tmat(TypeSolveMat::LU);
 #endif    
