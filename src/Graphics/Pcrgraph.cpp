@@ -815,28 +815,29 @@ int StoreFname(char Line[], int len)
 
   // ALH - 2/6/04 - add treatments for names surrounded with quotes
   // (but still breaks on names including quotes).
-  int i;
   char stopchar = ' ';
   bool skipone = false;
   if(Line[0] == '"' || Line[0] == '\''){
     stopchar = Line[0];
-    bool skipone = true;
+    skipone = true;
   }
 
   // Copies the name string, including its surrounding quotes if
   // necessary.
+  int i;
+  int j=0;
   for (i=0; i<len; i++){
-    if (Line[i] != stopchar) fullName[i] = Line[i];
+    if (Line[i] != stopchar) fullName[j++] = Line[i];
     else{
       if(skipone) skipone = false;
       else break;
     }
   }
-  fullName[i] = '\0';
+  fullName[j] = '\0';
  	
   ofstream check(fullName,ios::in);
   if (!check.is_open()) {
-    sprintf(msg,"%s does not exist!",fullName);
+    sprintf(msg,"\"%s\" does not exist!",fullName);
     FatalErr(msg,-1);
   }
   else check.close();
@@ -845,7 +846,7 @@ int StoreFname(char Line[], int len)
   if (toupper(*ext) != 'E'
       || toupper(*(ext+1)) != 'D'
       || toupper(*(ext+2)) != 'P') {
-    sprintf(msg,"%s is not a FreeFem++ script!",fullName);
+    sprintf(msg,"\"%s\" is not a FreeFem++ script!",fullName);
     FatalErr(msg,-1);
   }
 	
