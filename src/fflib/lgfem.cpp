@@ -2324,21 +2324,21 @@ LinkToInterpreter::LinkToInterpreter()
    hTriangle  = make_Type_Expr(atype<R>(),new E_P_Stack_hTriangle);
    area       = make_Type_Expr(atype<R>(),new E_P_Stack_areaTriangle);
    inside     = make_Type_Expr(atype<R>(),new E_P_Stack_inside);
-  Global->New("x",x);
-  Global->New("y",y);
-  Global->New("z",z);
-  Global->New("label",label);
-  Global->New("region",region);
-  Global->New("nuTriangle",nu_triangle);   
-  Global->New("nuEdge",nu_edge);   
-  Global->New("P",P);   
-  Global->New("N",N);   
+  Global.New("x",x);
+  Global.New("y",y);
+  Global.New("z",z);
+  Global.New("label",label);
+  Global.New("region",region);
+  Global.New("nuTriangle",nu_triangle);   
+  Global.New("nuEdge",nu_edge);   
+  Global.New("P",P);   
+  Global.New("N",N);   
   
-  Global->New("lenEdge",lenEdge);   
-  Global->New("area",area);   
-  Global->New("hTriangle",hTriangle);
-  Global->New("inside",inside);   
-  Global->New("nTonEdge",make_Type_Expr(atype<long>(),new E_P_Stack_nTonEdge));   
+  Global.New("lenEdge",lenEdge);   
+  Global.New("area",area);   
+  Global.New("hTriangle",hTriangle);
+  Global.New("inside",inside);   
+  Global.New("nTonEdge",make_Type_Expr(atype<long>(),new E_P_Stack_nTonEdge));   
   
 }
 
@@ -3368,20 +3368,20 @@ void  init_lgfem()
  //   
  Dcl_Type<const QuadratureFormular *>();
  Dcl_Type<const QuadratureFormular1d *>();
- Global->New("qf1pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_1));
- Global->New("qf1pTlump",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_1lump));
- Global->New("qf2pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_2));
- Global->New("qf2pT4P1",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_2_4P1));
- Global->New("qf5pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_5));
+ Global.New("qf1pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_1));
+ Global.New("qf1pTlump",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_1lump));
+ Global.New("qf2pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_2));
+ Global.New("qf2pT4P1",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_2_4P1));
+ Global.New("qf5pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_5));
  
- Global->New("qf1pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre1));
- Global->New("qf2pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre2));
- Global->New("qf3pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre3));
+ Global.New("qf1pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre1));
+ Global.New("qf2pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre2));
+ Global.New("qf3pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre3));
  
  //  juste du code genere 
  
- Global->New("wait",CConstant<bool*>(&TheWait));
- Global->New("NoUseOfWait",CConstant<bool*>(&NoWait));
+ Global.New("wait",CConstant<bool*>(&TheWait));
+ Global.New("NoUseOfWait",CConstant<bool*>(&NoWait));
 
  Dcl_Type<finconnue *>();
  Dcl_Type<ftest *>();
@@ -3439,24 +3439,24 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
   for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
     {
      assert(i->tfe); // check 
-     Global->New(i->name, Type_Expr(atype<TypeOfFE*>(),new  EConstantTypeOfFE(i->tfe)));
+     Global.New(i->name, Type_Expr(atype<TypeOfFE*>(),new  EConstantTypeOfFE(i->tfe)));
     }
    
-// Global->New("P1",CConstant<TypeOfFE*>(&P1Lagrange));
-// Global->New("P2",CConstant<TypeOfFE*>(&P2Lagrange));
+// Global.New("P1",CConstant<TypeOfFE*>(&P1Lagrange));
+// Global.New("P2",CConstant<TypeOfFE*>(&P2Lagrange));
  
- Global->New("LU",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::LU))); 
- Global->New("CG",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::GC)));
- Global->New("Crout",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::CROUT)));
- Global->New("Cholesky",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::CHOLESKY)));
- Global->New("GMRES",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::GMRES)));
+ Global.New("LU",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::LU))); 
+ Global.New("CG",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::GC)));
+ Global.New("Crout",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::CROUT)));
+ Global.New("Cholesky",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::CHOLESKY)));
+ Global.New("GMRES",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::GMRES)));
 #ifdef HAVE_LIBUMFPACK
- Global->New("UMFPACK",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::UMFpack)));
- Global->New("HaveUMFPACK",CConstant<bool>(true));
+ Global.New("UMFPACK",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::UMFpack)));
+ Global.New("HaveUMFPACK",CConstant<bool>(true));
 #else 
  cout << " --  no UMFPACK => replace UMFPACK  by LU  " << endl;
- Global->New("UMFPACK",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::LU)));
- Global->New("HaveUMFPACK",CConstant<bool>(false));
+ Global.New("UMFPACK",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::LU)));
+ Global.New("HaveUMFPACK",CConstant<bool>(false));
 #endif 
 //  init pmesh  
  Add<pmesh*>("<-","(",
@@ -3508,43 +3508,43 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  zzzfff->Add("matrix",atype<Matrice_Creuse<R> *>());
 
  
- Global->Add("buildmesh","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMesh));
- Global->Add("buildmeshborder","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMeshBorder));
- Global->Add("LinearCG","(",new LinearCG<R>()); // old form  with rhs (must be zer
- Global->Add("LinearGMRES","(",new LinearGMRES<R>()); // old form  with rhs (must be zer
- Global->Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  with rhs (must be zer
- Global->Add("LinearCG","(",new LinearCG<R>(1)); //  without right handsize
- Global->Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
+ Global.Add("buildmesh","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMesh));
+ Global.Add("buildmeshborder","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMeshBorder));
+ Global.Add("LinearCG","(",new LinearCG<R>()); // old form  with rhs (must be zer
+ Global.Add("LinearGMRES","(",new LinearGMRES<R>()); // old form  with rhs (must be zer
+ Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  with rhs (must be zer
+ Global.Add("LinearCG","(",new LinearCG<R>(1)); //  without right handsize
+ Global.Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
   zzzfff->AddF("varf",t_form);    //  var. form ~
  zzzfff->AddF("solve",t_solve);
  zzzfff->AddF("problem",t_problem);
  
 
- Global->Add("jump","(",new OneOperatorCode<Code_VF<Ftest,Code_Jump> >);
- Global->Add("jump","(",new OneOperatorCode<Code_VF<Finconnue,Code_Jump> >);
- Global->Add("average","(",new OneOperatorCode<Code_VF<Ftest,Code_Mean> >);
- Global->Add("average","(",new OneOperatorCode<Code_VF<Finconnue,Code_Mean> >);
- Global->Add("otherside","(",new OneOperatorCode<Code_VF<Ftest,Code_OtherSide> >);
- Global->Add("otherside","(",new OneOperatorCode<Code_VF<Finconnue,Code_OtherSide> >);
+ Global.Add("jump","(",new OneOperatorCode<Code_VF<Ftest,Code_Jump> >);
+ Global.Add("jump","(",new OneOperatorCode<Code_VF<Finconnue,Code_Jump> >);
+ Global.Add("average","(",new OneOperatorCode<Code_VF<Ftest,Code_Mean> >);
+ Global.Add("average","(",new OneOperatorCode<Code_VF<Finconnue,Code_Mean> >);
+ Global.Add("otherside","(",new OneOperatorCode<Code_VF<Ftest,Code_OtherSide> >);
+ Global.Add("otherside","(",new OneOperatorCode<Code_VF<Finconnue,Code_OtherSide> >);
  
- Global->Add("dx","(",new OneOperatorCode<CODE_Diff<Ftest,op_dx> >);
- Global->Add("dy","(",new OneOperatorCode<CODE_Diff<Ftest,op_dy> >);
- Global->Add("dx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dx> >);
- Global->Add("dy","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dy> >);
+ Global.Add("dx","(",new OneOperatorCode<CODE_Diff<Ftest,op_dx> >);
+ Global.Add("dy","(",new OneOperatorCode<CODE_Diff<Ftest,op_dy> >);
+ Global.Add("dx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dx> >);
+ Global.Add("dy","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dy> >);
  
- Global->Add("dxx","(",new OneOperatorCode<CODE_Diff<Ftest,op_dxx> >);
- Global->Add("dxy","(",new OneOperatorCode<CODE_Diff<Ftest,op_dxy> >);
- Global->Add("dyx","(",new OneOperatorCode<CODE_Diff<Ftest,op_dyx> >);
- Global->Add("dyy","(",new OneOperatorCode<CODE_Diff<Ftest,op_dyy> >);
+ Global.Add("dxx","(",new OneOperatorCode<CODE_Diff<Ftest,op_dxx> >);
+ Global.Add("dxy","(",new OneOperatorCode<CODE_Diff<Ftest,op_dxy> >);
+ Global.Add("dyx","(",new OneOperatorCode<CODE_Diff<Ftest,op_dyx> >);
+ Global.Add("dyy","(",new OneOperatorCode<CODE_Diff<Ftest,op_dyy> >);
  
- Global->Add("dxx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dxx> >);
- Global->Add("dyy","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dyy> >);
- Global->Add("dxy","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dxy> >);
- Global->Add("dyx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dyx> >);
+ Global.Add("dxx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dxx> >);
+ Global.Add("dyy","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dyy> >);
+ Global.Add("dxy","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dxy> >);
+ Global.Add("dyx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dyx> >);
  
- Global->Add("on","(",new OneOperatorCode<BC_set > );
- Global->Add("plot","(",new OneOperatorCode<Plot> );
- Global->Add("convect","(",new OneOperatorCode<Convect> );
+ Global.Add("on","(",new OneOperatorCode<BC_set > );
+ Global.Add("plot","(",new OneOperatorCode<Plot> );
+ Global.Add("convect","(",new OneOperatorCode<Convect> );
 
 
  TheOperators->Add("+",
@@ -3683,7 +3683,7 @@ TheOperators->Add("+",
       
  Add<Matrice_Creuse<R> *>("n",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_n<R>) );
  Add<Matrice_Creuse<R> *>("m",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_m<R>) );
- Global->Add("set","(",new SetMatrix<R>);
+ Global.Add("set","(",new SetMatrix<R>);
  atype<Matrice_Creuse<R> * >()->Add("(","",new OneOperator3_<R*,Matrice_Creuse<R> *,long,long >(get_elementp2mc<R>));
 
       
@@ -3757,12 +3757,12 @@ TheOperators->Add("+",
 
        );   
  
- Global->Add("int2d","(",new OneOperatorCode<CDomainOfIntegration>);
- Global->Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationBorder>);
- Global->Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdges>);
- Global->Add("jump","(",new OneUnaryOperator<JumpOp<R>,JumpOp<R> >);
- Global->Add("mean","(",new OneUnaryOperator<MeanOp<R>,MeanOp<R> >);
- Global->Add("interplotematrix","(",new MatrixInterpolation);
+ Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegration>);
+ Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationBorder>);
+ Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdges>);
+ Global.Add("jump","(",new OneUnaryOperator<JumpOp<R>,JumpOp<R> >);
+ Global.Add("mean","(",new OneUnaryOperator<MeanOp<R>,MeanOp<R> >);
+ Global.Add("interplotematrix","(",new MatrixInterpolation);
   
  Add<const CDomainOfIntegration*>("(","",new OneOperatorCode<FormBilinear> );
  Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<FormLinear> );
@@ -3778,19 +3778,19 @@ TheOperators->Add("+",
    );
  
 // bof  
- Global->Add("dx","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dx>));
- Global->Add("dy","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dy>));
- Global->Add("dxx","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dxx>));
- Global->Add("dyy","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dyy>));
- Global->Add("dxy","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dxy>));
- Global->Add("dyx","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dyx>));
+ Global.Add("dx","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dx>));
+ Global.Add("dy","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dy>));
+ Global.Add("dxx","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dxx>));
+ Global.Add("dyy","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dyy>));
+ Global.Add("dxy","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dxy>));
+ Global.Add("dyx","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dyx>));
 
- Global->Add("dx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dx>));
- Global->Add("dy","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dy>));
- Global->Add("dxx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dxx>));
- Global->Add("dyy","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dyy>));
- Global->Add("dxy","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dxy>));
- Global->Add("dyx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dyx>));
+ Global.Add("dx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dx>));
+ Global.Add("dy","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dy>));
+ Global.Add("dxx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dxx>));
+ Global.Add("dyy","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dyy>));
+ Global.Add("dxy","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dxy>));
+ Global.Add("dyx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dyx>));
 
  
   Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));

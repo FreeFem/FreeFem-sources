@@ -1146,7 +1146,7 @@ typedef MyMap<String,String> MyMapSS;
      atype<MyMapSS*>()->Add("[","",new OneOperator2_<string**,MyMapSS*,string*>(get_elements));
      
           
-     tables_of_identifier.push_back(Global);
+     tables_of_identifier.push_back(&Global);
 
 }
 

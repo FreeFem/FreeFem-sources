@@ -1310,18 +1310,18 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 void init_lgmesh() {
     cout <<"lg_mesh ";
     bamg::MeshIstreamErrorHandler = MeshErrorIO;
-   Global->Add("adaptmesh","(",new OneOperatorCode<Adaptation>);
-   Global->Add("movemesh","(",new OneOperatorCode<MoveMesh>);
-   Global->Add("splitmesh","(",new OneOperatorCode<SplitMesh>);
-   Global->Add("checkmovemesh","(",new OneOperatorCode<CheckMoveMesh>);
-   Global->Add("square","(",new OneOperatorCode<MeshCarre2>);
-   Global->Add("square","(",new OneOperatorCode<MeshCarre2f>);
-   Global->Add("savemesh","(",new OneOperatorCode<SaveMesh>);
-   Global->Add("trunc","(", new Op_trunc_mesh);
-   Global->Add("readmesh","(",new OneOperator1_<pmesh,string*>(ReadMeshbamg));
-   Global->Add("emptymesh","(",new OneOperator1_<pmesh,pmesh>(EmptyTheMesh));
-   Global->Add("emptymesh","(",new OneOperator2_<pmesh,pmesh,KN<long> *>(EmptyTheMesh));
-   Global->Add("triangulate","(",new OneOperator1_<pmesh,string*>(ReadTriangulate));
+   Global.Add("adaptmesh","(",new OneOperatorCode<Adaptation>);
+   Global.Add("movemesh","(",new OneOperatorCode<MoveMesh>);
+   Global.Add("splitmesh","(",new OneOperatorCode<SplitMesh>);
+   Global.Add("checkmovemesh","(",new OneOperatorCode<CheckMoveMesh>);
+   Global.Add("square","(",new OneOperatorCode<MeshCarre2>);
+   Global.Add("square","(",new OneOperatorCode<MeshCarre2f>);
+   Global.Add("savemesh","(",new OneOperatorCode<SaveMesh>);
+   Global.Add("trunc","(", new Op_trunc_mesh);
+   Global.Add("readmesh","(",new OneOperator1_<pmesh,string*>(ReadMeshbamg));
+   Global.Add("emptymesh","(",new OneOperator1_<pmesh,pmesh>(EmptyTheMesh));
+   Global.Add("emptymesh","(",new OneOperator2_<pmesh,pmesh,KN<long> *>(EmptyTheMesh));
+   Global.Add("triangulate","(",new OneOperator1_<pmesh,string*>(ReadTriangulate));
    TheOperators->Add("<-",
        new OneOperator2_<pmesh*,pmesh*,string* >(&initMesh));
        

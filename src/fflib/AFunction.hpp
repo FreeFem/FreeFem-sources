@@ -1218,7 +1218,7 @@ AnyType FIf(Stack s ,const E_F0 * test,const E_F0 * i1,const E_F0 * i2,const E_F
 
 
 
-extern TableOfIdentifier *Global;
+extern TableOfIdentifier Global;
 void ShowType(ostream & );
 
 template<class T> 

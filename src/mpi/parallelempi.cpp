@@ -234,7 +234,7 @@ void init_lgparallele()
        
      TheOperators->Add("<-", 
        new OneOperator2_<MPIrank*,MPIrank*,MPIrank>(&set_copympi));
-     Global->Add("processor","(",new OneOperator1<MPIrank,long>(mpiwho));
+     Global.Add("processor","(",new OneOperator1<MPIrank,long>(mpiwho));
      cout << " Add " << endl;
      TheOperators->Add(">>",
 		       new OneBinaryOperator<Op_Readmpi<double> >,
@@ -249,14 +249,14 @@ void init_lgparallele()
        new OneBinaryOperator<Op_Writempi<Mesh *> > 
        );
        
-    Global->Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<double> >);
-    Global->Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<long> >);
-    Global->Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<double> > >);
-    Global->Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<Mesh *> >);
+    Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<double> >);
+    Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<long> >);
+    Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<double> > >);
+    Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<Mesh *> >);
     
  
-     Global->New("mpirank",CPValue<long>(mpirank));
-     Global->New("mpisize",CPValue<long>(mpisize));
+     Global.New("mpirank",CPValue<long>(mpirank));
+     Global.New("mpisize",CPValue<long>(mpisize));
     
   }
   void end_parallele()

@@ -214,6 +214,6 @@ basicAC_F0::name_and_type  OptimAlgo::E_LCG::name_param[]= {
 
 void init_algo()
 {
- Global->Add("BFGS","(",new OptimAlgo(1,1));  //  j + dJ
- Global->Add("Newtow","(",new OptimAlgo(2,2,2));  //  j + dJ
+ Global.Add("BFGS","(",new OptimAlgo(1,1));  //  j + dJ
+ Global.Add("Newtow","(",new OptimAlgo(2,2,2));  //  j + dJ
 }
