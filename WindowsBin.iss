@@ -14,15 +14,16 @@ OutputBaseFilename=FreeFem++-bin
 [Files]
 Source: "src\std\FreeFem++.exe"; DestDir: "{app}"
 Source: "src\nw\FreeFem++-nw.exe"; DestDir: "{app}"
-Source: "examples++"; DestDir: "{app}"
-Source: "examples++-eigen"; DestDir: "{app}"
-Source: "examples++-tutorial"; DestDir: "{app}"
+Source: "examples++\*"; DestDir: "{app}\examples++"
+Source: "examples++-eigen\*"; DestDir: "{app}\examples++-eigen"
+Source: "examples++-tutorial\*"; DestDir: "{app}\examples++-tutorial"
 Source: "DOC\manual.pdf"; DestDir: "{app}"
+Source: "logo.ico"; DestDir: "{app}"
 
 [Icons]
 
 ; Menu
-Name: "{group}\FreeFem++"; Filename: "{app}\src\std\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
+Name: "{group}\FreeFem++"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
 Name: "{group}\PDF manual"; Filename: "{app}\manual.pdf"
 Name: "{group}\Tutorial Examples"; Filename: "{app}\examples++-tutorial"
 Name: "{group}\Examples"; Filename: "{app}\examples++"

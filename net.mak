@@ -1,6 +1,9 @@
 # Installation of specific packages - Not distributed
 # ---------------------------------------------------
 
+# This file is not distributed because it contains sensitive
+# information about ftp servers.
+
 # $Id$
 
 # WWW access
@@ -30,16 +33,3 @@ www:  FreeFem++v$(VERSION)_Win.zip  FreeFem++v$(VERSION)_MacOS.sit FreeFem++v$(V
 	ssh rascasse.inria.fr "cd /ftp_gamma/freefem;ln -sf freefem++-$(VERSION).tar.gz freefem++.tgz"
 	ssh rascasse.inria.fr "cd /ftp_gamma/freefem;ln -sf FreeFem++v$(VERSION)_MacOsX.tgz freefem++_MacOsX.tgz"
 	ssh rascasse.inria.fr "cd ~/public_html/; ./.update++ $(VERSION) <ff++.htmx >freefem++.htm"
-
-# Downloading and compiling extra libraries
-# -----------------------------------------
-
-get-arpack:
-	-mkdir ../arpack;
-	cd ../arpack; \
-	wget  http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz ;\
-	wget  http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz  ;\
-	wget  http://www.caam.rice.edu/software/ARPACK/ARPACK++/arpack++.tar.gz ; \
-	gunzip -c arpack96.tar.gz | tar xvf - ;\
-	gunzip -c patch.tar.gz | tar xvf - ;\
-	gunzip -c arpack++.tar.gz| tar xvf - 
