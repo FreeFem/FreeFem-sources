@@ -88,7 +88,7 @@ inline void MyAssert(int i,char * ex,char * file,long line)
  Polymorphic * TheOperators=new Polymorphic(), 
              * TheRightOperators=new Polymorphic();
 
-TableOfIdentifier  Global;
+TableOfIdentifier Global;
 
  long E_Border::Count =0;
 
