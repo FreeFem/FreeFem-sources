@@ -1,10 +1,72 @@
 
 
-\section{The Graphic User Interface (FFedit)}
+\section{Graphical User Interface}
 
-\subsection{Unix version}
+There are two different graphical user interfaces available for
+\freefempp:
 
-This version is for Linux and MacOSX.\\
+\begin{itemize}
+\item \texttt{FreeFem++-cs} is part of the standard \freefempp
+package. It runs on Linux, MacOS X and Windows.
+\item \texttt{FFedit} is available as a separate package. It runs on
+Linux and MacOS~X and requires tcl/tk to be installed.
+\end{itemize}
+
+\subsection{FreeFem++-cs}
+
+``-cs'' stands for ``client/server''. The executable program named
+\texttt{FreeFem++-cs} is the client. It automatically starts a server
+program named \texttt{FreeFem++-cs-server} every time the user asks
+for a script to be run. To run \texttt{FreeFem++-cs}, just type its
+name in, optionally followed by a script name. It will open a window
+corresponding to fig. \ref{fig:FreeFem++-cs}.
+
+\begin{figure}[htbp]
+\begin{center}
+  \includegraphics[height=10cm]{figures/FreeFem++-cs}
+\end{center}
+  \caption{\texttt{FreeFem++-cs} main window}
+  \label{fig:FreeFem++-cs} \index{label}
+\end{figure}
+
+\bigskip
+
+The main characteristics of \texttt{FreeFem++-cs} are~:
+
+\begin{itemize}
+\item A main window composed of three panels~: editor with syntax
+highlighting (right), \freefempp messages (bottom) and graphics
+(left).
+\item Panel sizes can be changed. Any of the three panels can be made
+to fill the whole window.
+\item The edited script can be run at any time by clicking on the
+``Run'' button.
+\item Graphics can be examined (e.g. zoomed) while \freefempp is
+running.
+\item A running \freefempp computation can be paused or stopped at any
+time.
+\end{itemize}
+
+\bigskip
+
+All commands should be self-explanatory. Here are just a few
+useful hints~:
+
+\begin{itemize}
+\item There is no need to save a \freefempp script to run it. It is
+run exactly as displayed in the editor window, and the corresponding
+file is not touched.
+\item The current directory is updated every time a script is loaded
+or saved. All \texttt{include} directives are therefore relative to
+the directory where the main script is located.
+\item Specifying \texttt{wait=1} in a \texttt{plot} command is exactly
+equivalent to clicking on the ``Pause'' button when the plot is
+displayed.
+\end{itemize}
+
+\subsection{FFedit}
+
+FFedit runs on Linux and MacOSX.\\
 
 \subsubsection{Installation of Tcl and Tk}
 
