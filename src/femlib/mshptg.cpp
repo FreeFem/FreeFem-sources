@@ -20,7 +20,16 @@
 // DESCRIPTION:  
 // DESCRIP-END.
 //
-
+#ifdef nnnLONG_LONG
+#define LONG8 long long
+#define DLONG8LONG8 1e12
+#define MAXCOOR ((double) 1073741823 )
+#else
+#define LONG8 long 
+#define DLONG8LONG8 1e9
+#define MAXCOOR ((double) 32767. )
+#endif
+#define DET8(a11,a12,a21,a22) ( (LONG8) a11 * (LONG8) a22 - (LONG8) a21* (LONG8) a12)
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,7 +66,7 @@ III. Renvoie le type d'erreur:
 ------------------------------
      -  0 : pas d'erreur
      -(-1): pas assez de memoire
-     - >0 : erreur mshptg_
+     - >0 : erreur mshptg8_
   mshptg erreurs
 1: mshptg := 'le nb de point est < 3 or > que le nb max de point';
 2: mshptg := 'il y des points confondus ';
@@ -79,7 +88,7 @@ III. Renvoie le type d'erreur:
 /*
 long 
 MakeTriangulation (triangulation * t, long nbs, long nbsmax, long nba,
-		   float *crbdy, float *hbdy, long *arete, int *ngbdy, long *sd, long nbsd, int* flag, int fflag)
+		   double *crbdy, double *hbdy, long *arete, int *ngbdy, long *sd, long nbsd, int* flag, int fflag)
 {
   int             i, j;
   long            err = 0, nbt, nbsold = nbs;
@@ -88,8 +97,8 @@ MakeTriangulation (triangulation * t, long nbs, long nbsmax, long nba,
   long           *nu = NULL;
   long           *reft = NULL;
   int            *ngg = NULL;
-  float          *cr = NULL;
-  float          *h = NULL;
+  double          *cr = NULL;
+  double          *h = NULL;
 
   nbt = 2 * nbsmax;
   nu = new long[6*nbt];
@@ -97,8 +106,8 @@ MakeTriangulation (triangulation * t, long nbs, long nbsmax, long nba,
   ngg = new int[nbsmax];
   tri = new long[(4 * nbsmax + 2 * nbsd)];
   reft = new long[nbt];
-  cr = new float[(2 * nbsmax + 2)];
-  h = new float[nbsmax];
+  cr = new double[(2 * nbsmax + 2)];
+  h = new double[nbsmax];
 
   for (i = 0; i < 2 * nba; i++)
     arete[i]++;
@@ -112,7 +121,7 @@ MakeTriangulation (triangulation * t, long nbs, long nbsmax, long nba,
   for (i = nbs; i < nbsmax; i++)
     ngg[i] = 0;
 
-  mshptg_ (cr, h, c, nu, &nbs, nbsmax, tri, arete, nba, (long *) sd, nbsd, reft, &nbt, .25, .75, &err);
+  mshptg8_ (cr, h, c, nu, &nbs, nbsmax, tri, arete, nba, (long *) sd, nbsd, reft, &nbt, .25, .75, &err);
   for (i = 0; i < 2 * nba; i++)
     arete[i]--;
   if (err)
@@ -163,10 +172,10 @@ L1:
 
 
 int 
-verifietr (float *cr, int ns)
+verifietr (double *cr, int ns)
 {
   int             i;
-  float           xh, diameter = 1.F;
+  double           xh, diameter = 1.F;
 
   if (ns == 0)
     return -1;
@@ -189,18 +198,18 @@ verifietr (float *cr, int ns)
 
 */
 
-int             mshrgl_ (float *c, long *nrfs, long *nbs, long *nu, long *w1,
-			 long *w, float omega, long itermx, float eps);
+int             mshrgl_ (double *c, long *nrfs, long *nbs, long *nu, long *w1,
+			 long *w, double omega, long itermx, double eps);
 int             mshopt_ (long *c, long *nu, long *t, long a, long *err);
 void            mshvoi_ (long *nu, long *w1, long *w, long *nbt, long *nbs);
 int             msha1p_ (long *t, long *s, long *c, long *nu, long *reft, long *tete, long *nbt,
 			 long *err);
-int             mshtri_ (float *cr, long *c, long *nbs, long *tri, long *nu, float *trfri, long *err);
+int             mshtri_ (double *cr, long *c, long *nbs, long *tri, long *nu, double *trfri, long *err);
 int             mshcxi_ (long *c, long *nu, long *tri, long *nbs, long *tete, long *err);
 int             mshfrt_ (long *c, long *nu, long *nbs, long *arete, long nba, long *sd,
 			 long nbsd, long *reft, long *w, long *err);
-int             mshgpt_ (long *c, float *cr, long *nu, float *h, long *reft, long *nbs,
-    long nbsmx, long *nbt, float coef, float puis, float *trfri, long *err);
+int             mshgpt_ (long *c, double *cr, long *nu, double *h, long *reft, long *nbs,
+    long nbsmx, long *nbt, double coef, double puis, double *trfri, long *err);
 long            mshlcl_ (long *c, long *nu, long *tete, long *s);
 int             mshtr1_ (long *criter, long *record, long *n);
 int             mshcvx_ (long direct, long *c, long *nu, long *pfold, long *err);
@@ -209,16 +218,16 @@ int             mshfr2_ (long *c, long *nu, long *lst, long *nbac, long *t, long
 			 long *ss1, long *ss2, long *err);
 
 int 
-mshptg_ (float *cr, float *h, long *c, long *nu, long *nbs, long nbsmx, long *tri,
+mshptg8_ (double *cr, double *h, long *c, long *nu, long *nbs, long nbsmx, long *tri,
 	 long *arete, long nba, long *sd,
-	 long nbsd, long *reft, long *nbt, float coef, float puis, long *err)
+	 long nbsd, long *reft, long *nbt, double coef, double puis, long *err)
 {
   /* System generated locals */
   long            i_1;
 
   /* Local variables */
   static long     tete, i, j, k, t;
-  static float    trfri[4];
+  static double    trfri[4];
   static long     nbsgrn, nbtgrn;
 
 /* ----------------------------------------------------------------------- */
@@ -275,7 +284,7 @@ mshptg_ (float *cr, float *h, long *c, long *nu, long *nbs, long nbsmx, long *tr
 /*     nbtmx = 2*(nbs-1) ,  ltri = max(4*nbs+2*nbsd,nba) */
 /*     long : nu(6*nbtmx) , reft(nbtmx) , c(2*nbsmx) , tri(ltri) */
 /*     long : arete(2,nba), sd(2,nbsd) */
-/*     float    : cr(2*nbsmx) , h(nbsmx) */
+/*     double    : cr(2*nbsmx) , h(nbsmx) */
 
 /* ---------------------------------------------------------------------- */
 /*     programmeur F.Hecht, France */
@@ -464,21 +473,21 @@ mshvoi_ (long *nu, long *w1, long *w, long *nbt, long *nbs)
 
 /* ********************************************************************** */
 int 
-mshrgl_ (float *c, long *nrfs, long *nbs, long *nu, long *w1,
-	 long *w, float omega, long itermx, float eps)
+mshrgl_ (double *c, long *nrfs, long *nbs, long *nu, long *w1,
+	 long *w, double omega, long itermx, double eps)
 {
   /* System generated locals */
   long            i_1, i_2, i_3;
-  float           r_1, r_2;
+  double           r_1, r_2;
 
   /* Local variables */
-  static float    depx, depy;
+  static double    depx, depy;
   static long     iter;
-  static float    xmin, ymin, xmax, ymax;
+  static double    xmin, ymin, xmax, ymax;
   static long     i, k, i1, i2, ic;
-  static float    bx, by, dx;
+  static double    bx, by, dx;
   static long     is;
-  static float    err;
+  static double    err;
 
 
 /* REGULARISATION PAR MOYENNE BARYCENTRIQUE */
@@ -516,7 +525,7 @@ mshrgl_ (float *c, long *nrfs, long *nbs, long *nu, long *w1,
   i_1 = itermx;
   for (iter = 1; iter <= i_1; ++iter)
      {
-       err = (float) 0.;
+       err = (double) 0.;
        i2 = w1[0];
        i_2 = *nbs;
        for (is = 1; is <= i_2; ++is)
@@ -525,8 +534,8 @@ mshrgl_ (float *c, long *nrfs, long *nbs, long *nu, long *w1,
 	    i2 = w1[is];
 	    if (i2 >= i1 && nrfs[is] == 0)
 	       {
-		 bx = (float) 0.;
-		 by = (float) 0.;
+		 bx = (double) 0.;
+		 by = (double) 0.;
 		 i_3 = i2;
 		 for (i = i1; i <= i_3; ++i)
 		    {
@@ -563,25 +572,25 @@ mshrgl_ (float *c, long *nrfs, long *nbs, long *nu, long *w1,
 
 /* ********************************************************************** */
 int 
-mshgpt_ (long *c, float *cr, long *nu, float *h, long *reft, long *nbs,
-     long nbsmx, long *nbt, float coef, float puis, float *trfri, long *err)
+mshgpt_ (long *c, double *cr, long *nu, double *h, long *reft, long *nbs,
+     long nbsmx, long *nbt, double coef, double puis, double *trfri, long *err)
 {
   /* System generated locals */
   long            i_1;
-  float           r_1, r_2, r_3;
+  double           r_1, r_2, r_3;
   double          d_1, d_2, d_3, d_4, d_5, d_6, d_7, d_8;
 
   /* Local variables */
-  static float    aire;
+  static double    aire;
   static long     tete;
   static long     t;
-  static float    x, y;
+  static double    x, y;
   static long     itera;
-  static float    h1, h2, h3;
+  static double    h1, h2, h3;
   static long     s1, s2, s3;
-  static float    hs;
+  static double    hs;
   static long     ix, iy, nbsold;
-  static float    det, pui;
+  static double    det, pui;
 
   /* Parameter adjustments */
   --trfri;
@@ -626,7 +635,7 @@ L20:
 		    - cr[(s1 << 1) + 2]) - (cr[(s2 << 1) + 2] - cr[(s1 << 1)
 			    + 2]) * (cr[(s3 << 1) + 1] - cr[(s1 << 1) + 1]);
 	    aire = det * coef;
-	    if (puis > (float) 0.)
+	    if (puis > (double) 0.)
 	       {
 		 d_2 = (double) h[s1];
 		 d_3 = (double) pui;
@@ -634,36 +643,36 @@ L20:
 		 d_5 = (double) pui;
 		 d_6 = (double) h[s3];
 		 d_7 = (double) pui;
-		 d_1 = (pow (d_2, d_3) + pow (d_4, d_5) + pow (d_6, d_7)) / (float) 3.;
+		 d_1 = (pow (d_2, d_3) + pow (d_4, d_5) + pow (d_6, d_7)) / (double) 3.;
 		 d_8 = (double) (1.F / pui);
-		 hs = (float)pow (d_1, d_8);
+		 hs = (double)pow (d_1, d_8);
 	       }
-	    else if (puis > (float) -1.)
+	    else if (puis > (double) -1.)
 	       {
 		 d_1 = (double) (h[s1] * h[s2] * h[s3]);
-		 hs = (float)pow (d_1, 1. / 3);
+		 hs = (double)pow (d_1, 1. / 3);
 	       }
-	    else if (puis > (float) -2.)
+	    else if (puis > (double) -2.)
 	       {
-		 hs = h[s1] * (float) 3. *h[s2] * h[s3] / (h[s1] * h[s2] + h[
+		 hs = h[s1] * (double) 3. *h[s2] * h[s3] / (h[s1] * h[s2] + h[
 					       s1] * h[s3] + h[s2] * h[s3]);
 	       }
 	    else
 	       {
 /* Computing 2nd power */
-		 r_1 = (float)sqrt (h[s1] * h[s2]);
+		 r_1 = (double)sqrt (h[s1] * h[s2]);
 /* Computing 2nd power */
 		 r_2 = h[s1] * h[s3];
 /* Computing 2nd power */
 		 r_3 = h[s2] * h[s3];
-		 hs = (float)sqrt (3.0) * (h[s1] * h[s2] * h[s3]
+		 hs = (double)sqrt (3.0) * (h[s1] * h[s2] * h[s3]
 			 / (r_1 * r_1) + r_2 * r_2 + r_3 * r_3);
 	       }
 	    if (aire > hs * hs)
 	       {
-		 h1 = (float) 1.;
-		 h2 = (float) 1.;
-		 h3 = (float) 1.;
+		 h1 = (double) 1.;
+		 h2 = (double) 1.;
+		 h3 = (double) 1.;
 		 x = (cr[(s1 << 1) + 1] * h1 + cr[(s2 << 1) + 1] * h2 + cr[(s3
 					  << 1) + 1] * h3) / (h1 + h2 + h3);
 		 y = (cr[(s1 << 1) + 2] * h1 + cr[(s2 << 1) + 2] * h2 + cr[(s3
@@ -807,7 +816,8 @@ mshlcl_ (long *c, long *nu, long *tete, long *s)
 
   /* Local variables */
   static long     init;
-  static long     x, y, pt, det, ppt;
+  static long     x, y, pt, ppt;
+  LONG8 det;
 
   /* Parameter adjustments */
   nu -= 7;
@@ -823,7 +833,7 @@ L10:
   pt = nu[pt * 6 + 4];
   if (pt != *tete)
      {
-       det = x * c[(nu[pt * 6 + 1] << 1) + 2] - y * c[(nu[pt * 6 + 1] << 1)
+       det = (LONG8) x * (LONG8) c[(nu[pt * 6 + 1] << 1) + 2] - (LONG8) y * (LONG8) c[(nu[pt * 6 + 1] << 1)
 						      + 1];
        if (det < 0)
 	  {
@@ -841,21 +851,22 @@ L10:
 
 /* ********************************************************************** */
 int 
-mshtri_ (float *cr, long *c, long *nbs, long *tri, long *nu, float *trfri, long *err)
+mshtri_ (double *cr, long *c, long *nbs, long *tri, long *nu, double *trfri, long *err)
 {
   /* System generated locals */
   long            i_1, i_2, i_3;
-  float           r_1;
+  double           r_1;
 
   /* Local variables */
   static long     ierr, trik;
-  static float    xmin, ymin, xmax, ymax;
+  static double    xmin, ymin, xmax, ymax;
   static long     i, j, k, ic, jc;
 
 //    extern int mshtr1_();
   static long     ip, xx;
-  static float    aa1, aa2;
-  static long     iii, det, tri3;
+  static double    aa1, aa2;
+  static long     iii, tri3;
+  LONG8 det;
 
   /* Parameter adjustments */
   --trfri;
@@ -892,8 +903,8 @@ mshtri_ (float *cr, long *c, long *nbs, long *tri, long *nu, float *trfri, long 
 	    iii = ic;
 	  }
      }
-  aa1 = (float) 32767. / (xmax - xmin);
-  aa2 = (float) 32767. / (ymax - ymin);
+  aa1 = MAXCOOR  / (xmax - xmin);
+  aa2 = MAXCOOR / (ymax - ymin);
   aa1 = amin (aa1, aa2);
   aa2 = aa1 * (cr[(iii << 1) + 2] - ymin);
   trfri[1] = aa1;
@@ -958,8 +969,8 @@ L50:
   if (k <= *nbs)
      {
        ++k;
-       det = c[(tri[2] << 1) + 1] * c[(tri[k] << 1) + 2] - c[(tri[2] << 1) +
-						  2] * c[(tri[k] << 1) + 1];
+       det = (LONG8) c[(tri[2] << 1) + 1] * (LONG8)  c[(tri[k] << 1) + 2] - (LONG8) c[(tri[2] << 1) +
+						  2] * (LONG8) c[(tri[k] << 1) + 1];
        if (det == 0)
 	  {
 	    goto L50;
@@ -1079,7 +1090,8 @@ mshcvx_ (long direct, long *c, long *nu, long *pfold, long *err)
                   pf, pp, ps;
 
 //    extern int mshopt_();
-  static long     tt4, tt5, det, ppf, psf;
+  static long     tt4, tt5,  ppf, psf;
+  LONG8 det;
 
   /* Parameter adjustments */
   nu -= 7;
@@ -1115,8 +1127,8 @@ L10:
   s1 = nu[ppf * 6 + 1];
   s2 = nu[pf * 6 + 1];
   s3 = nu[psf * 6 + 1];
-  det = (c[(s2 << 1) + 1] - c[(s1 << 1) + 1]) * (c[(s3 << 1) + 2] - c[(s1 <<
-	     1) + 2]) - (c[(s2 << 1) + 2] - c[(s1 << 1) + 2]) * (c[(s3 << 1)
+  det = (LONG8) (c[(s2 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[(s3 << 1) + 2] - c[(s1 <<
+	     1) + 2]) - (LONG8) (c[(s2 << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(s3 << 1)
 						   + 1] - c[(s1 << 1) + 1]);
   if (!(direct) && det > 0 || direct && det < 0)
      {
@@ -1317,11 +1329,12 @@ mshopt_ (long *c, long *nu, long *t, long a, long *err)
 
   /* Local variables */
   static long     pile[4096] /* was [2][256] */ ;
-  static float    reel1, reel2;
+  static double    reel1, reel2;
   static double   reel8;
   static long     i, a1, a2, s1, t1, t2, s2, s3, s4, aa, i11, i12, i13,
                   i21, i22, i23, tt;
-  static long     tt1, sgn, cos1, cos2, sin1, sin2;
+  static long     tt1, sgn;
+  LONG8  cos1, cos2, sin1, sin2;
 
   /* Parameter adjustments */
   nu -= 7;
@@ -1358,11 +1371,11 @@ L10:
        s2 = nu[i11 + t1 * 6];
        s3 = nu[i12 + t1 * 6];
        s4 = nu[i23 + t2 * 6];
-       sin1 = (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) * (c[(s2 << 1) + 1] - c[(
-	       s1 << 1) + 1]) - (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) * (c[(
+       sin1 = (LONG8) (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(s2 << 1) + 1] - c[(
+	       s1 << 1) + 1]) - (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[(
 					  s2 << 1) + 2] - c[(s1 << 1) + 2]);
-       cos1 = (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) * (c[(s3 << 1) + 1] - c[(
-	       s2 << 1) + 1]) + (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) * (c[(
+       cos1 = (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[(s3 << 1) + 1] - c[(
+	       s2 << 1) + 1]) + (LONG8) (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(
 					  s3 << 1) + 2] - c[(s2 << 1) + 2]);
        if (sin1 == 0 && cos1 == 0)
 	  {
@@ -1370,16 +1383,16 @@ L10:
 	    return 0;
 	  }
 /*       b est la cotangente de angle (s1,s3,s2) */
-       sin2 = (c[(s4 << 1) + 1] - c[(s1 << 1) + 1]) * (c[(s2 << 1) + 2] - c[(
-	       s1 << 1) + 2]) - (c[(s4 << 1) + 2] - c[(s1 << 1) + 2]) * (c[(
+       sin2 = (LONG8) (c[(s4 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[(s2 << 1) + 2] - c[(
+	       s1 << 1) + 2]) - (LONG8) (c[(s4 << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(
 					  s2 << 1) + 1] - c[(s1 << 1) + 1]);
        cos2 = (c[(s4 << 1) + 1] - c[(s2 << 1) + 1]) * (c[(s4 << 1) + 1] - c[(
 	       s1 << 1) + 1]) + (c[(s4 << 1) + 2] - c[(s2 << 1) + 2]) * (c[(
 					  s4 << 1) + 2] - c[(s1 << 1) + 2]);
-       reel1 = (float) cos2 *(float) sin1;
-       reel2 = (float) cos1 *(float) sin2;
+       reel1 = (double) cos2 *(double) sin1;
+       reel2 = (double) cos1 *(double) sin2;
 
-       if (aabs (reel1) + aabs (reel2) >= (float) 1073741824.)
+       if (aabs (reel1) + aabs (reel2) >= (double ) DLONG8LONG8)
 	  {
 	    reel8 = (double) cos2 *(double) sin1 + (double) cos1 *(double) sin2;
 
@@ -1471,7 +1484,8 @@ mshfrt_ (long *c, long *nu, long *nbs, long *arete, long nba, long *sd,
 
 //    extern int mshfr1_();
   static long     ie, ap, ta, is, nbacpp;
-  static long     is1, ss1, s2t, s3t, isd, jsd, nbt, det2, det3, err1;
+  static long     is1, ss1, s2t, s3t, isd, jsd, nbt, err1;
+  LONG8 det2, det3;
 
   /* Parameter adjustments */
   --w;
@@ -1625,13 +1639,13 @@ L50:
 /*             recherche si l' element coupe l''arete a */
 			   is1 = is;
 			   s3t = nu[p3[p3[is - 1] - 1] + t * 6];
-			   det2 = (c[(s2t << 1) + 1] - c[(s1 << 1) + 1]) * (c[(
-			      s2 << 1) + 2] - c[(s1 << 1) + 2]) - (c[(s2t <<
-				1) + 2] - c[(s1 << 1) + 2]) * (c[(s2 << 1) +
+			   det2 = (LONG8) (c[(s2t << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[(
+			      s2 << 1) + 2] - c[(s1 << 1) + 2]) - (LONG8) (c[(s2t <<
+				1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(s2 << 1) +
 						     1] - c[(s1 << 1) + 1]);
-			   det3 = (c[(s3t << 1) + 1] - c[(s1 << 1) + 1]) * (c[(
-			      s2 << 1) + 2] - c[(s1 << 1) + 2]) - (c[(s3t <<
-				1) + 2] - c[(s1 << 1) + 2]) * (c[(s2 << 1) +
+			   det3 = (LONG8) (c[(s3t << 1) + 1] - c[(s1 << 1) + 1]) *(LONG8)  (c[(
+			      s2 << 1) + 2] - c[(s1 << 1) + 2]) - (LONG8) (c[(s3t <<
+				1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(s2 << 1) +
 						     1] - c[(s1 << 1) + 1]);
 			   if (det2 > 0 && det3 < 0)
 			      {
@@ -1682,7 +1696,19 @@ L130:
 /*     prise en compte des sous domaines */
 /* ----------------------------------------------------------------------- */
 /*  add FH   si pas de nbsd ---  jan 2004 */
-    if (nbsd == 0) {
+    if (nbsd<0) {
+     i_1 = nbt;
+    for (ie = 1; ie <= i_1; ++ie)
+     { 
+       if (nu[ie * 6 + 1] > 0)
+	     {
+	    nu[ie * 6 + 1] = -nu[ie * 6 + 1];
+	     }
+     }
+     
+      goto L205; //  pas triangle retire
+      }    
+    else if (nbsd == 0) {
 	 long i__1 = nbt,nbssd,exter,i__,headt,nst,j;
 	for (t = 1; t <= i__1; ++t) {
 	    reft[t] = -1073741824;
@@ -1909,7 +1935,8 @@ mshfr1_ (long *c, long *nu, long *it1, long *ita, long *is1, long *s2, long *err
 
 //    extern int mshfr2_();
   static long     la, ta;
-  static long     s2t, s3t, det, lst[768] /* was [3][256] */ ;
+  static long     s2t, s3t,  lst[768] /* was [3][256] */ ;
+  LONG8 det;
 
   /* Parameter adjustments */
   nu -= 7;
@@ -1947,7 +1974,7 @@ L20:
   s3 = nu[p3[la - 3] + t * 6];
   if (s3 != *s2)
      {
-       det = x * (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) - y * (c[(s3 << 1) +
+       det = (LONG8) x * (LONG8) (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) - (LONG8) y * (LONG8) (c[(s3 << 1) +
 						     1] - c[(s1 << 1) + 1]);
        if (det > 0)
 	  {
@@ -1987,7 +2014,8 @@ mshfr2_ (long *c, long *nu, long *lst, long *nbac, long *t, long *ta,
                   y41, tt;
 
 //    extern int mshopt_();
-  static long     tt1, aas, det1, det2, det3, det4;
+  static long     tt1, aas;
+LONG8  det1, det2, det3, det4;
 
   /* Parameter adjustments */
   lst -= 4;
@@ -2027,10 +2055,10 @@ L30:
        s4 = nu[i23 + t2 * 6];
        x41 = c[(s4 << 1) + 1] - c[(s1 << 1) + 1];
        y41 = c[(s4 << 1) + 2] - c[(s1 << 1) + 2];
-       det2 = (c[(s2 << 1) + 1] - c[(s1 << 1) + 1]) * y41 - (c[(s2 << 1) + 2]
-						  - c[(s1 << 1) + 2]) * x41;
-       det3 = (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) * y41 - (c[(s3 << 1) + 2]
-						  - c[(s1 << 1) + 2]) * x41;
+       det2 = (LONG8) (c[(s2 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) y41 - (LONG8) (c[(s2 << 1) + 2]
+						  - c[(s1 << 1) + 2]) * (LONG8) x41;
+       det3 = (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8)  y41 - (LONG8) (c[(s3 << 1) + 2]
+						  - c[(s1 << 1) + 2]) * (LONG8)  x41;
        if (det2 > 0 && det3 < 0)
 	  {
 /*         le quadrilataire est convexe on le retourne */
@@ -2078,10 +2106,10 @@ L30:
 	       }
 	    nu[i12 + 3 + t1 * 6] = i22 + 3 + (t2 << 3);
 	    nu[i22 + 3 + t2 * 6] = i12 + 3 + (t1 << 3);
-	    det1 = (c[(s1 << 1) + 1] - c[(*ss1 << 1) + 1]) * y - (c[(s1 << 1)
-					     + 2] - c[(*ss1 << 1) + 2]) * x;
-	    det4 = (c[(s4 << 1) + 1] - c[(*ss1 << 1) + 1]) * y - (c[(s4 << 1)
-					     + 2] - c[(*ss1 << 1) + 2]) * x;
+	    det1 = (LONG8) (c[(s1 << 1) + 1] - c[(*ss1 << 1) + 1]) * (LONG8) y - (LONG8) (c[(s1 << 1)
+					     + 2] - c[(*ss1 << 1) + 2]) * (LONG8) x;
+	    det4 = (LONG8) (c[(s4 << 1) + 1] - c[(*ss1 << 1) + 1]) * (LONG8) y - (LONG8) (c[(s4 << 1)
+					     + 2] - c[(*ss1 << 1) + 2]) *(LONG8)  x;
 	    if (det1 < 0 && det4 > 0)
 	       {
 /*           le sommets s4 est dans omega */

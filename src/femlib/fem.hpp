@@ -384,13 +384,16 @@ private:
   void BuildBoundaryAdjacences();
   void ConsAdjacence();
   void Buildbnormalv(); 
-
+  void BuilTriangles(bool empty,bool removeoutside=true);
   // to construct the adj triangle               
   int *TheAdjacencesLink;
   int *BoundaryEdgeHeadLink;
   int *BoundaryAdjacencesHead;
   int *BoundaryAdjacencesLink; 
-  int *TriangleConteningVertex;               
+  int *TriangleConteningVertex;       
+  // no copy
+  Mesh(const Mesh &);
+  void operator=(const Mesh &);       
 };
 
 
