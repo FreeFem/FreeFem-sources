@@ -13,7 +13,6 @@ function dotest(){
 
     # Running FreeFem++ on regtests.edp (specific to regression
     # tests), otherwise on all.edp.
-    echo $1
     $1 $3|tee regtests-$2.log
     if test $PIPESTATUS != 0
 	then
