@@ -1464,8 +1464,11 @@ void InitProblem( int Nb, const FESpace & Uh,
                 for (int df=0;df< nbdf;df++)
                   {  int kfe=K.FromFE(df);
                   int kdf=K.FromDF(df);
-                  const FElement & SK(*sK[kfe]);
-                  (*X)[K(df)]= (*sol[kfe])[SK(kdf)] ;
+                  if (sol[kfe]) {
+                     const FElement & SK(*sK[kfe]);
+                     (*X)[K(df)]= (*sol[kfe])[SK(kdf)] ;
+                    }
+                   else (*X)[K(df)]= R();
                   }
                 for (int i=0;i<Nb;i++)
                   delete sK[i];        
