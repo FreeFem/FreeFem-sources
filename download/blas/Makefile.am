@@ -49,37 +49,37 @@ clean-local::
 noinst_LIBRARIES=@GENERIC_BLAS@
 EXTRA_LIBRARIES=libf77blas.a libcblas.a
 
-libf77blas_a_SOURCES=blas/caxpy.f blas/crotg.f blas/dcopy.f		\
-blas/dsymv.f blas/lsame.f blas/sspmv.f blas/zaxpy.f blas/zhpr2.f	\
-blas/ccopy.f blas/cscal.f blas/ddot.f blas/dsyr2.f blas/sasum.f		\
-blas/sspr2.f blas/zcopy.f blas/zhpr.f blas/cdotc.f blas/csrot.f		\
-blas/dgbmv.f blas/dsyr2k.f blas/saxpy.f blas/sspr.f blas/zdotc.f	\
-blas/zrotg.f blas/cdotu.f blas/csscal.f blas/dgemm.f blas/dsyr.f	\
-blas/scasum.f blas/sswap.f blas/zdotu.f blas/zscal.f blas/cgbmv.f	\
-blas/cswap.f blas/dgemv.f blas/dsyrk.f blas/scnrm2.f blas/ssymm.f	\
-blas/zdrot.f blas/zswap.f blas/cgemm.f blas/csymm.f blas/dger.f		\
-blas/dtbmv.f blas/scopy.f blas/ssymv.f blas/zdscal.f blas/zsymm.f	\
-blas/cgemv.f blas/csyr2k.f blas/dnrm2.f blas/dtbsv.f blas/sdot.f	\
-blas/ssyr2.f blas/zgbmv.f blas/zsyr2k.f blas/cgerc.f blas/csyrk.f	\
-blas/drot.f blas/dtpmv.f blas/sdsdot.f blas/ssyr2k.f blas/zgemm.f	\
-blas/zsyrk.f blas/cgeru.f blas/ctbmv.f blas/drotg.f blas/dtpsv.f	\
-blas/sgbmv.f blas/ssyr.f blas/zgemv.f blas/ztbmv.f blas/chbmv.f		\
-blas/ctbsv.f blas/drotm.f blas/dtrmm.f blas/sgemm.f blas/ssyrk.f	\
-blas/zgerc.f blas/ztbsv.f blas/chemm.f blas/ctpmv.f blas/drotmg.f	\
-blas/dtrmv.f blas/sgemv.f blas/stbmv.f blas/zgeru.f blas/ztpmv.f	\
-blas/chemv.f blas/ctpsv.f blas/dsbmv.f blas/dtrsm.f blas/sger.f		\
-blas/stbsv.f blas/zhbmv.f blas/ztpsv.f blas/cher2.f blas/ctrmm.f	\
-blas/dscal.f blas/dtrsv.f blas/snrm2.f blas/stpmv.f blas/zhemm.f	\
-blas/ztrmm.f blas/cher2k.f blas/ctrmv.f blas/dsdot.f blas/dzasum.f	\
-blas/srot.f blas/stpsv.f blas/zhemv.f blas/ztrmv.f blas/cher.f		\
-blas/ctrsm.f blas/dspmv.f blas/dznrm2.f blas/srotg.f blas/strmm.f	\
-blas/zher2.f blas/ztrsm.f blas/cherk.f blas/ctrsv.f blas/dspr2.f	\
-blas/icamax.f blas/srotm.f blas/strmv.f blas/zher2k.f blas/ztrsv.f	\
-blas/chpmv.f blas/dasum.f blas/dspr.f blas/idamax.f blas/srotmg.f	\
-blas/strsm.f blas/zher.f blas/chpr2.f blas/daxpy.f blas/dswap.f		\
-blas/isamax.f blas/ssbmv.f blas/strsv.f blas/zherk.f blas/chpr.f	\
-blas/dcabs1.f blas/dsymm.f blas/izamax.f blas/sscal.f blas_xerbla.f	\
-blas/zhpmv.f
+libf77blas_a_SOURCES=BLAS/caxpy.f BLAS/crotg.f BLAS/dcopy.f		\
+BLAS/dsymv.f BLAS/lsame.f BLAS/sspmv.f BLAS/zaxpy.f BLAS/zhpr2.f	\
+BLAS/ccopy.f BLAS/cscal.f BLAS/ddot.f BLAS/dsyr2.f BLAS/sasum.f		\
+BLAS/sspr2.f BLAS/zcopy.f BLAS/zhpr.f BLAS/cdotc.f BLAS/csrot.f		\
+BLAS/dgbmv.f BLAS/dsyr2k.f BLAS/saxpy.f BLAS/sspr.f BLAS/zdotc.f	\
+BLAS/zrotg.f BLAS/cdotu.f BLAS/csscal.f BLAS/dgemm.f BLAS/dsyr.f	\
+BLAS/scasum.f BLAS/sswap.f BLAS/zdotu.f BLAS/zscal.f BLAS/cgbmv.f	\
+BLAS/cswap.f BLAS/dgemv.f BLAS/dsyrk.f BLAS/scnrm2.f BLAS/ssymm.f	\
+BLAS/zdrot.f BLAS/zswap.f BLAS/cgemm.f BLAS/csymm.f BLAS/dger.f		\
+BLAS/dtbmv.f BLAS/scopy.f BLAS/ssymv.f BLAS/zdscal.f BLAS/zsymm.f	\
+BLAS/cgemv.f BLAS/csyr2k.f BLAS/dnrm2.f BLAS/dtbsv.f BLAS/sdot.f	\
+BLAS/ssyr2.f BLAS/zgbmv.f BLAS/zsyr2k.f BLAS/cgerc.f BLAS/csyrk.f	\
+BLAS/drot.f BLAS/dtpmv.f BLAS/sdsdot.f BLAS/ssyr2k.f BLAS/zgemm.f	\
+BLAS/zsyrk.f BLAS/cgeru.f BLAS/ctbmv.f BLAS/drotg.f BLAS/dtpsv.f	\
+BLAS/sgbmv.f BLAS/ssyr.f BLAS/zgemv.f BLAS/ztbmv.f BLAS/chbmv.f		\
+BLAS/ctbsv.f BLAS/drotm.f BLAS/dtrmm.f BLAS/sgemm.f BLAS/ssyrk.f	\
+BLAS/zgerc.f BLAS/ztbsv.f BLAS/chemm.f BLAS/ctpmv.f BLAS/drotmg.f	\
+BLAS/dtrmv.f BLAS/sgemv.f BLAS/stbmv.f BLAS/zgeru.f BLAS/ztpmv.f	\
+BLAS/chemv.f BLAS/ctpsv.f BLAS/dsbmv.f BLAS/dtrsm.f BLAS/sger.f		\
+BLAS/stbsv.f BLAS/zhbmv.f BLAS/ztpsv.f BLAS/cher2.f BLAS/ctrmm.f	\
+BLAS/dscal.f BLAS/dtrsv.f BLAS/snrm2.f BLAS/stpmv.f BLAS/zhemm.f	\
+BLAS/ztrmm.f BLAS/cher2k.f BLAS/ctrmv.f BLAS/dsdot.f BLAS/dzasum.f	\
+BLAS/srot.f BLAS/stpsv.f BLAS/zhemv.f BLAS/ztrmv.f BLAS/cher.f		\
+BLAS/ctrsm.f BLAS/dspmv.f BLAS/dznrm2.f BLAS/srotg.f BLAS/strmm.f	\
+BLAS/zher2.f BLAS/ztrsm.f BLAS/cherk.f BLAS/ctrsv.f BLAS/dspr2.f	\
+BLAS/icamax.f BLAS/srotm.f BLAS/strmv.f BLAS/zher2k.f BLAS/ztrsv.f	\
+BLAS/chpmv.f BLAS/dasum.f BLAS/dspr.f BLAS/idamax.f BLAS/srotmg.f	\
+BLAS/strsm.f BLAS/zher.f BLAS/chpr2.f BLAS/daxpy.f BLAS/dswap.f		\
+BLAS/isamax.f BLAS/ssbmv.f BLAS/strsv.f BLAS/zherk.f BLAS/chpr.f	\
+BLAS/dcabs1.f BLAS/dsymm.f BLAS/izamax.f BLAS/sscal.f blas_xerbla.f	\
+BLAS/zhpmv.f
 
 libcblas_a_SOURCES=CBLAS/src/cblas_caxpy.c CBLAS/src/cblas_drot.c	\
 CBLAS/src/cblas_sgemm.c CBLAS/src/cblas_zher2.c				\
@@ -161,7 +161,7 @@ libcblas_a_CPPFLAGS=-DADD_
 
 BLAS: blas.tgz
 	mkdir -p BLAS
-	cd blas && tar xvzf ../blas.tgz
+	cd BLAS && tar xvzf ../blas.tgz
 	cp BLAS/xerbla.f blas_xerbla.f
 
 CBLAS: cblas.tgz
