@@ -214,6 +214,25 @@ template<class R>
    
   }
 
+template<class R>
+ void  KN_<R>::map(R (*f)(const R& )) {
+    for (long i=0;i<n;i++)
+      {  R & x(v[index(i)]);
+          x =  f(x);}
+   
+  }
+  
+template<class R>
+template<class T>
+ void  KN_<R>::set(R (*f)(const  T& ),KN_<T> & u)
+ { 
+   K_throwassert(N() == u.N());
+   for (long i=0;i<n;i++)
+      {  R & x(v[index(i)]);
+          v[index(i)]= f(u[i]);}
+ } 
+  
+
 
 ///////////////// definition des operateurs d'affectation /////////////////////////
 #define oper =
