@@ -1,9 +1,8 @@
 .deps
 .DS_Store
 .libs
-Makefile
-Makefile.in
 FreeFem++
 FreeFem++.exe
 FreeFem++-g
 FreeFem++-g.exe
+Makefile
