@@ -238,8 +238,12 @@ if test "$ff_blas_ok" = no;
 then
 	AC_MSG_NOTICE(using downloaded Blas)
 	AC_SUBST(DOWNLOAD_BLAS,blas)
+
+	# Do not update $LIBS, but create an extra LIB variable,
+	# because this lib does not exist yet, and this could make the
+	# following tests fail.
+
 	ff_blas_lib="-L${curdir}/download/blas/ATLAS/lib/ff++ -lf77blas -lcblas -latlas"
-	LIBS="$ff_blas_lib $LIBS"
 	ff_blas_ok=yes
 fi
 AC_SUBST(BLASLIB,$ff_blas_lib)
