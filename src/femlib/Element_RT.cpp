@@ -1064,7 +1064,6 @@ double TypeOfFE_P2ttdc::Pi_h_coef[]={1.,1.,1.,1.,1.,1.};
 //
 // end ttdc
 // ------------------
-//  for the link to the language 
 
 static TypeOfFE_RTortho The_TypeOfFE_RTortho;
 static TypeOfFE_RT The_TypeOfFE_RT;
@@ -1080,6 +1079,5 @@ TypeOfFE  & P0Lagrange(The_TypeOfFE_P0);
 TypeOfFE  & P1ncLagrange(The_TypeOfFE_P1nc);
 TypeOfFE  & P1ttdc(The_TypeOfFE_P1ttdc);
 TypeOfFE  & P2ttdc(The_TypeOfFE_P2ttdc);
-
 
 }
