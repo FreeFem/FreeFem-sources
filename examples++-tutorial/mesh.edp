@@ -178,6 +178,26 @@ plot(rh,ps="lshape.eps");
   femp1 Thx=x,Thy=y; 
   cout << " nb of vertices = " << nbvertices << endl;
   for (int i=0;i<nbvertices;i++)
-	cout << i  << " " << Thx[][i] << " " << Thy[][i] << endl;	 
+	cout << i  << " : " << Thx[][i] << " " << Thy[][i] << endl;	 
+
+  //Hack  to get a triangle contening point x,y
+  //     or   region number
+  // -----------------------------------------
+  fespace femp0(Th,P0);
+  femp0 nuT; // a P0 function  to get triangle numbering
+    for (int i=0;i<Th.nt;i++)
+     nuT[][i]=i; 
+  femp0 nuReg=region; // a P0 function to get the region number
+  //  inquire 
+  int it0=nuT(0.55,0.6); //  number of triangle Th's contening point (0.55,0,6);
+  int nr0=nuReg(0.55,0.6); //  number of region of Th mesh contening point (0.55,0,6);
+  // new methode if   version > 1.450007
+  int it00 = Th(0.55,0.6).nuTriangle;
+  int nr00 = Th(0.55,0.6).region;
+  // dump  
+  cout << "  point (0.55,0,6) :triangle number " << it0 << " " << it00 
+       << ", region = " << nr0 << " == " << nr00 << endl;
+
 }
 
+ 

@@ -22,7 +22,7 @@
 \title{
 %\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
  {\Blue{ \TitreFont FreeFem++ \\ \vglue 1cm  Manual}} \\ \vglue 3cm  ~ \\  
-      \normalsize  { version 1.45-5  \Red{(Under construction)} }
+      \normalsize  { version 1.45-7  \Red{(Under construction)} }
  \\ \vglue 0.7cm
  \large \url{http://www.freefem.org} \\
 \url{http://www.ann.jussieu.fr/\string~hecht/freefem++.htm} 
@@ -1750,7 +1750,37 @@ The following example explains methods to obtain mesh information.
       @cout << i << " " << j << " Th[i][j] = "
            << Th[i][j] << "  x = "<< Th[i][j].x  << " , y= "<< Th[i][j].y
            << ",  label=" << Th[i][j].label << endl;
+           
+  // To Day:   this Hack works: to get x,y of vertex i \hfilll
+  // remark: i can be set with i= Th[it][j] \hfilll
+  // the idea is to build de interpolation of x and y function \hfilll
+  // with 2 array now given i -> x and i-> y. \hfilll
+
+  fespace femp1(Th,P1);
+  femp1 Thx=x,Thy=y;
+  cout << " nb of vertices = " << nbvertices << endl;
+  for (int i=0;i<nbvertices;i++)
+        cout << i  << " : " << Thx[][i] << " " << Thy[][i] << endl;
+
+  //Hack  to get a triangle number of mesh contening point x,y \hfilll
+  //     or  region number \hfilll
+  // ----------------------------------------- \hfilll
+  fespace femp0(Th,P0);
+  femp0 nuT; // a P0 function  to get triangle numbering
+    for (int i=0;i<Th.nt;i++)
+     nuT[][i]=i;
+  femp0 nuReg=region; // a P0 function to get the region number
+  //  inquire
+  int it0=nuT(0.55,0.6); //  number of triangle contening point (0.55,0,6);
+  int nr0=nuReg(0.55,0.6); //  number of region of mesh contening point (0.55,0,6);
+  // new method if   version > 1.450007
+  int it00 = Th(0.55,0.6).nuTriangle; // get the number of Th's triangle contening (0.55,0.6)
+  int nr00 = Th(0.55,0.6).region;; // get the region  number of Th's triangle 
+    // dump
+  cout << "  point (0.55,0,6) :triangle number " << it0 << " " << it00
+       << ", region = " << nr0 << " == " << nr00 << endl;                     
 }
+
 \eFF
 the output is:
 \bFF
@@ -1768,6 +1798,24 @@ the output is:
 7 0 Th[i][j] = 4  x = 0.5 , y= 0.5,  label=0
 7 1 Th[i][j] = 8  x = 1 , y= 1,  label=3
 7 2 Th[i][j] = 7  x = 0.5 , y= 1,  label=3
+ Nb Of Nodes = 9
+ Nb of DF = 9
+ -- vector function's bound  -0 1
+ -- vector function's bound  -0 1
+ nb of vertices = 9
+0 : -0 -0
+1 : 0.5 -0
+2 : 1 -0
+3 : -0 0.5
+4 : 0.5 0.5
+5 : 1 0.5
+6 : -0 1
+7 : 0.5 1
+8 : 1 1
+ Nb Of Nodes = 8
+ Nb of DF = 8
+ -- vector function's bound  -0 -0
+  point (0.55,0,6) :triangle number 7 7, region = 0 == 0
 \eFF
 \begin{example}[Readmesh.edp]
 \index{tutorial!readmesh.edp}
@@ -3637,7 +3685,7 @@ The named parameter are
        to set the bounding box and specify a partial view where the  box defined by the two corner points [0.1,0.2] and [0.5,0.6].
 
     \itemtt[nbiso=]  \index{plot! nbiso =}(int) sets the number of isovalues (20 by default) 
-    \itemtt[nbarrow=] \index{plot!nbarraw=} (int) sets the number of colors of arrow values (20 by default) 
+    \itemtt[nbarrow=] \index{plot!nbarrow=} (int) sets the number of colors of arrow values (20 by default) 
     \itemtt[viso=]  \index{plot!viso=}sets the array  value of isovalues (an array real[int]) 
     \itemtt[varrow=] \index{plot!varrow=}  sets the array value of color arrows (an array real[int])
     \itemtt[bw=] \index{plot!bw=} (bool)  sets or not the plot in black and white color.
@@ -6152,7 +6200,7 @@ Mh p,q,ppp;  //  ppp is a working pressure
 @varf a(u1,u2)= @int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
                     +  on(3,u1=1)  +  @on(1,2,4,u1=0) ;
 //  remark:  put the \ttCC{@on(3,u1=1)} before  \ttCC{@on(1,2,4,u1=0)} 
-//  because we want zero on intersection \index{on!intersection}
+//  because we want zero on intersection %\index{on!intersection}
  
 @matrix A= a(Xh,Xh,solver=CG);
 @matrix Bx= bx(Xh,Mh);  // $\vec{B}=(Bx\quad By)$
