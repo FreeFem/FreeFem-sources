@@ -454,17 +454,19 @@ AC_COMPILE_IFELSE([#include <dlfcn.h>],
 	ff_dynload=yes,
 	ff_dynload=no)
 AC_MSG_RESULT($ff_dynload)
-if test "$ff_dynload" = yes;
+
+#  the -rdynamic don't exist on macos 
+if test "$ff_dynload" = yes  ;
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
 	AC_CHECK_LIB(dl,dlinfo)
-
 	# gcc on MacOS does not produce an error with "-rdynamic" but
 	# still complains about it.
-
-	if test "$ff_mac" = no
+	if test "$ff_mac" = "no";
 	then
-		CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
+	CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
+	else
+	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
 	fi
 fi
 
@@ -516,8 +518,8 @@ AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 
 # src/fflib/lex.cpp is not compiled correctly if flag "-fast" is
 # specified with gcc on PowerPC G5.
-ff_lexflags="`echo $CXXFLAGS|sed 's/-fast//g'`"
-AC_SUBST(FF_LEXFLAGS,$ff_lexflags)
+#ff_lexflags="`echo $CXXFLAGS|sed 's/-fast//g'`"
+#AC_SUBST(FF_LEXFLAGS,$ff_lexflags)
 
 # creating all makefiles
 # ----------------------
