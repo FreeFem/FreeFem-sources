@@ -130,20 +130,25 @@ FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
 # Linux binary-only package
 # -------------------------
 
-FreeFem++v$(VERSION)_Linux:all documentation	
+FreeFem++v$(VERSION)_Linux:all
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
-	-cp src/std/FreeFem++ $@
+	cp src/std/FreeFem++ $@
+	cp `ldd src/std/FreeFem++|awk '{print $$3}'` $@
 	cp src/nw/FreeFem++-nw $@
+	cp `ldd src/nw/FreeFem++-nw|awk '{print $$3}'` $@
 	cp src/ide/FreeFem++-cs $@
+	cp `ldd src/ide/FreeFem++-cs|awk '{print $$3}'` $@
 	cp src/ide/FreeFem++-cs-server $@
+	cp `ldd src/ide/FreeFem++-cs-server|awk '{print $$3}'` $@
 	-cp src/glx/FreeFem++-glx $@
+	-cp `ldd src/glx/FreeFem++-glx|awk '{print $$3}'` $@
 	-cp src/mpi/FreeFem++-mpi $@
+	-cp `ldd src/mpi/FreeFem++-mpi|awk '{print $$3}'` $@
 	cp  COPYRIGHT HISTORY README BUGS TODO  $@ 
 	cp  examples++/*.edp   $@/examples++
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
 	-cp  examples++-bug/*.edp   $@/examples++-bug
-	cp  DOC/manual-full.ps.gz DOC/manual-full.pdf $@
 
 FreeFem++v$(VERSION)_Linux.tgz: FreeFem++v$(VERSION)_Linux
 	tar zcvf FreeFem++v$(VERSION)_Linux.tgz FreeFem++v$(VERSION)_Linux
