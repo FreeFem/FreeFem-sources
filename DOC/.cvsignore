@@ -11,5 +11,6 @@
 *.ind
 *.tmp
 *.out
+manual.ps
 manual.ps.gz
 manual.pdf
