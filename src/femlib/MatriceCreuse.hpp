@@ -525,7 +525,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const int nbitermax, do
        Ah = A*x;        //   Ax + rop*Ah = rop*Ah + g  =
        Ah -= g;         //   Ah*rop  
        R hAh =(h,Ah);
-       if (abs(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
+       if (norm(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
        ro =  - (g,h)*rop/hAh ; // ro optimal (produit scalaire usuel)
        x += (ro-rop) *h;
        g += (ro/rop) *Ah; // plus besoin de Ah, on utilise avec Cg optimisation

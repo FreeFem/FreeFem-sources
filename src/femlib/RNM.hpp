@@ -202,11 +202,11 @@ class ShapeOfArray{ protected:
     long next;  //  the   next array of same type in matrix for subarray  
               // by default  no next 
   ShapeOfArray(const ShapeOfArray & s,long nn): n(s.n),step(s.n),next(nn) {}              
-  ShapeOfArray(const long nn): n(nn),step(1),next(-1) {}
+  ShapeOfArray(long nn): n(nn),step(1),next(-1) {}
   
-  ShapeOfArray(const long nn,const long s): n(nn),step(s),next(-1) {}
+  ShapeOfArray(long nn,long s): n(nn),step(s),next(-1) {}
   
-  ShapeOfArray(const long nn,const long s,const long nextt): n(nn),step(s),next(nextt) {}
+  ShapeOfArray(long nn,long s,long nextt): n(nn),step(s),next(nextt) {}
   
   ShapeOfArray(const ShapeOfArray &old,const SubArray &sub) 
          : n(sub.n),step(old.step*sub.step),next(old.next)
@@ -432,11 +432,11 @@ class KNM_: public KN_<R> {
             const ShapeOfArray & si,
             const ShapeOfArray & sj)
              : KN_<R>(u,s),shapei(si),shapej(sj){} 
-  KNM_(R* u,const long n,const long m)
+  KNM_(R* u,long n,long m)
              : KN_<R>(u,ShapeOfArray(n*m)),shapei(n,1,n),shapej(m,n,1){}
-  KNM_(R* u,const long n,const long m,const  long s)
+  KNM_(R* u,long n,long m,long s)
              : KN_<R>(u,ShapeOfArray(n*m,s)),shapei(n,1,n),shapej(m,n,1){}                     
-  KNM_(KN_<R> u,const long n,const long m) 
+  KNM_(KN_<R> u,long n,long m) 
              : KN_<R>(u,ShapeOfArray(m*n)),shapei(n,1,n),shapej(m,n,1){ }
              
   KNM_(const KN_<R> &u,const ShapeOfArray & si,const ShapeOfArray & sj,long offset=0) 
@@ -459,7 +459,7 @@ class KNM_: public KN_<R> {
   KNM_ operator()(const SubArray & sa,const SubArray & sb) const 
             { return KNM_(*this,sa,sb);} // sub array 
   
-  long ij(const long i,const long j) const   
+  long ij(long i,long j) const   
             { return shapei.index(i)+shapej.index(j);}
   long indexij(long i,long j)        const   
             { return index(shapei.index(i)+shapej.index(j));}
@@ -580,7 +580,7 @@ class KNMK_: public KN_<R> {
 	    R * u)
     : KN_<R>(u,s),shapei(si),shapej(sj),shapek(sk){} 
     
-  KNMK_(R* u,const long n,const long m,const long k)
+  KNMK_(R* u,long n,long m,long k)
     : KN_<R>(u, ShapeOfArray(n*m*k)),shapei(n,1,n),shapej(m,n,1),shapek(k,n*m,n*m){};
     
 //  KNMK_(const KN_<R> & u,long n,long m,long k)
@@ -597,7 +597,7 @@ class KNMK_: public KN_<R> {
   KNMK_(const KNMK_<R> & u) :KN_<R>(u),shapei(u.shapei),shapej(u.shapej),shapek(u.shapek) {}
 
     
-  long ijk(const long i,const long j,const long k) const 
+  long ijk(long i,long j,long k) const 
               { return shapei.index(i)+shapej.index(j)+shapek.index(k);}
   long indexijk(long i,long j,long k) const 
               {return index(shapei.index(i)+shapej.index(j)+shapek.index(k));} 
@@ -672,14 +672,14 @@ class KN :public KN_<R> { public:
 
  // explicit  KN(const R & u):KN_<R>(new R(uu),1,0) {}
   KN() : KN_<R>(0,0) {}
-  KN(const long nn) : KN_<R>(new R[nn],nn)         {} 
-  KN(const long nn, R * p) : KN_<R>(new R[nn],nn)  
+  KN(long nn) : KN_<R>(new R[nn],nn)         {} 
+  KN(long nn, R * p) : KN_<R>(new R[nn],nn)  
     { KN_<R>::operator=(KN_<R>(p,nn));}
-  KN(const long nn,R (*f)(long i) ) : KN_<R>(new R[nn],nn) 
+  KN(long nn,R (*f)(long i) ) : KN_<R>(new R[nn],nn) 
         {for(long i=0;i<this->n;i++) this->v[i]=f(i);}  
-  KN(const long nn,const  R & a) : KN_<R>(new R[nn],nn) 
+  KN(long nn,const  R & a) : KN_<R>(new R[nn],nn) 
         { KN_<R>::operator=(a);} 
-  KN(const long nn,long s,const  R  a) : KN_<R>(new R[nn],nn,s) 
+  KN(long nn,long s,const  R  a) : KN_<R>(new R[nn],nn,s) 
         { KN_<R>::operator=(a);} 
   template<class S>   KN(const KN_<S> & s):KN_<R>(new R[s.n],s.n) 
         {for (long i=0;i<this->n;i++) this->v[i] = s[i];}
@@ -836,7 +836,7 @@ class KN :public KN_<R> { public:
 template<class R>
 class KNM: public KNM_<R>{ public:
 
-  KNM(const long n,const long m) 
+  KNM(long n,long m) 
         :KNM_<R>(new R[n*m],n,m){}
    KNM(const KNM<R> & u)  // PB si stepi ou stepj nulle
         :KNM_<R>(new R[u.size()],u.N(),u.M()) 
@@ -907,7 +907,7 @@ class KNM: public KNM_<R>{ public:
 template<class R>
 class KNMK: public KNMK_<R>{ public:
 
-  KNMK(const long n,const long m,const long k) 
+  KNMK(long n,long m,long k) 
      :KNMK_<R>(new R[n*m*k],n,m,k){}
   explicit KNMK(const KNMK_<R> & u)
      :KNMK_<R>(new R[u.size()],u.N(),u.M(),u.K()) 
