@@ -258,7 +258,36 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,
 {
   using namespace bamg;
   Triangles *Tn=new Triangles(Th.nv);
-  assert(nbdfe==0 && nbdfv==0); // a faire pour les maillages periodique 
+  KN<int> equiedges(Th.neb);
+  for(int i=0;i<Th.neb;i++)
+    equiedges[i]=2*i;
+  if(nbdfe !=0 )
+  {
+  KN<int>  kk(Th.neb),kn(Th.neb);
+   kk=0;
+    for(int i=0;i<Th.neb;i++)
+      {
+         int df=ndfe[i];
+         kk[df]++;
+         if(kk[df]==1) kn[df]=i;
+         else { 
+           int k=kn[df],sens=0;
+           int di0=ndfv[Th(Th.bedges[i][0])];
+           int di1=ndfv[Th(Th.bedges[i][1])];
+           int dk0=ndfv[Th(Th.bedges[k][0])];
+           int dk1=ndfv[Th(Th.bedges[k][1])];
+           if ((di0==dk0) &&(di1==dk1) ) sens=0;
+           else if ((di1==dk0) &&(di0==dk1) ) sens=1;
+           else  {
+              cout << "Error in periodic mesh " << di0 << " " << di1 << " <=> " << dk0 << " " << dk1 << endl;
+              ExecError("bug periodic mesh in ??? ");
+           }
+           equiedges[i]=2*k+sens;
+
+         }
+      }
+    
+  }; // a faire pour les maillages periodique 
   
   Tn->nbv = Th.nv;
   Tn->nbt = Th.nt;
@@ -295,7 +324,7 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,
       Tn->edges[i].ref = Th.bedges[i].lab;
     }
   //  Real8 cutoffradian = -1;
-  Tn->ConsGeometry(cutoffradian);
+  Tn->ConsGeometry(cutoffradian,equiedges);
   Tn->Gh.AfterRead();    
   Tn->SetIntCoor();
   Tn->FillHoleInMesh();
