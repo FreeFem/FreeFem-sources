@@ -499,8 +499,8 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
        h *= gamma;
        h -= Cg;  //  h = -Cg * gamma* h       
      }
-   cout << " Non convergence de la mŽthode du gradient conjugue =" << nbitermax 
-        <<  ", xx= "  << xx<< endl;
+   cout << " GC: method don't converge in " << nbitermax 
+        <<  " iteration , xx= "  << xx<< endl;
    return 0; 
 }
 
