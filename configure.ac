@@ -55,7 +55,7 @@ AC_MSG_RESULT($ff_mac)
 # -------------------------------------------------------------------
 
 AC_ARG_ENABLE(cygwin,
-	[  --disable-cygwin	On Microsoft Windows, uses Mingw instead of Cygwin (FreeFem++-cs will not be built because it needs Cygwin)])
+	[  --enable-cygwin	On Microsoft Windows, uses Cygwin instead of Mingw])
 
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
 ff_uname=`uname`
@@ -64,7 +64,7 @@ CYGWIN*)
 	ff_win32=yes
 
 	# We need Mingw to avoid Cygwin's extra DLLs
-	if test "$enable_cygwin" = no
+	if test "$enable_cygwin" != yes
 	then
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -I/usr/include/mingw"
 		LIBS="$LIBS -mno-cygwin -L/lib/mingw"
@@ -156,7 +156,7 @@ ff_x11=no
 # At the moment, we cannot compile for X11 on Mingw because /usr/X11R6
 # is part of Cygwin, not Mingw.
 
-if test "$ff_win32" = no -o "$enable_cygwin" != no
+if test "$ff_win32" = no -o "$enable_cygwin" = yes
 then
 	if test -d /usr/X11R6
 	then
@@ -687,40 +687,34 @@ AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 AC_ARG_ENABLE(default-fltk,
 	[  --disable-default-fltk	Does not use default FLTK])
 
-# The current IDE version needs Cygwin on Windows, mainly for threads
-# and sockets.
-if test "$ff_win32" = no -o "$enable_cygwin" != no
+# Default FLTK (in the machine's default PATH)
+if test "$enable_default_fltk" = no
 then
+	AC_MSG_NOTICE(not using default FLTK)
+	ff_fltk=no
+else
+	ff_fltk_config=fltk-config
+	AC_CHECK_PROG(ff_fltk,fltk-config,yes,no)
+fi
 
-	# Default FLTK (in the machine's default PATH)
-	if test "$enable_default_fltk" = no
-	then
-		AC_MSG_NOTICE(not using default FLTK)
-		ff_fltk=no
-	else
-		ff_fltk_config=fltk-config
-		AC_CHECK_PROG(ff_fltk,fltk-config,yes,no)
-	fi
+# Downloading and compiling FLTK
+if test "$ff_fltk" = no -a "$enable_download" = yes
+then
+	AC_MSG_NOTICE(using downloaded FLTK)
+	AC_SUBST(DOWNLOAD_FLTK,fltk)
+	ff_fltk_config="$curdir/download/fltk/fltk-1.1.5/install/bin/fltk-config"
+	ff_fltk=yes
+fi
 
-	# Downloading and compiling FLTK
-	if test "$ff_fltk" = no -a "$enable_download" = yes
-	then
-		AC_MSG_NOTICE(using downloaded FLTK)
-		AC_SUBST(DOWNLOAD_FLTK,fltk)
-		ff_fltk_config="$curdir/download/fltk/fltk-1.1.5/install/bin/fltk-config"
-		ff_fltk=yes
-	fi
+if test "$ff_fltk" = yes
+then
+	# For the moment, FreeFem++-ide${EXEEXT} is not built
+	# because it first needs FreeFEM++ to accept several
+	# successive runs without restart.
 
-	if test "$ff_fltk" = yes
-	then
-		# For the moment, FreeFem++-ide${EXEEXT} is not built
-		# because it first needs FreeFEM++ to accept several
-		# successive runs without restart.
+	ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-cs-server${EXEEXT}"
 
-		ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-cs-server${EXEEXT}"
-
-		AC_SUBST(FLTK_CONFIG,$ff_fltk_config)
-	fi
+	AC_SUBST(FLTK_CONFIG,$ff_fltk_config)
 fi
 
 # creating all makefiles
