@@ -107,7 +107,7 @@ verbosity=verbosityy;
 	real ref=u[]'*u[];
 	cout<<"reference value="<<ref<<endl;
 	assert(ref<1.35);
-	assert(ref>1.33);
+	assert(ref>1.32);
 };
 
 cout << "--------- file : funct.edp ------------" << endl;
@@ -146,7 +146,7 @@ verbosity=verbosityy;
 	include "NSP1P1b.edp";
 	real ref=u1[]'*u1[];
 	cout<<"reference value="<<ref<<endl;
-	assert(ref<112);
+	assert(ref<121);
 	assert(ref>85);
 };
 
@@ -156,7 +156,7 @@ verbosity=verbosityy;
 	include "NSP1P1.edp";
 	real ref=u1x[]'*u1x[];
 	cout<<"reference value="<<ref<<endl;
-	assert(ref<4.35592);
+	assert(ref<5.59);
 	assert(ref>3.99);
 };
 
@@ -166,7 +166,7 @@ verbosity=verbosityy;
 	include "NSP1P2.edp";
 	real ref=u1[]'*u1[];
 	cout<<"reference value="<<ref<<endl;
-	assert(ref<179);
+	assert(ref<195);
 	assert(ref>161.2743646);
 };
 

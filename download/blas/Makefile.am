@@ -9,14 +9,14 @@ ATLASBINLIB=WinNT_PPRO256/libatlas.a
 
 all-local:: $(DOWNLOAD_BLAS)
 generic: 
-atlas-source: $(SRCLIB)
-atlas-binary: $(BINLIB)
+atlas-source: $(ATLASSRCLIB)
+atlas-binary: $(ATLASBINLIB)
 
 # Downloading and compiling the Blas
 # ----------------------------------
 
 # ATLAS source
-$(SRCLIB): ATLAS/Make.ff++
+$(ATLASSRCLIB): ATLAS/Make.ff++
 	cd ATLAS && make install arch=ff++
 
 ATLAS/Make.ff++: atlas3.6.0.tar.bz2
@@ -34,9 +34,9 @@ clean-local::
 	-rm -r ATLAS
 
 # ATLAS binary
-$(BINLIB): atlas321_WinNT_PPRO.zip
+$(ATLASBINLIB): atlas321_WinNT_PPRO.zip
 	unzip atlas321_WinNT_PPRO.zip
-	touch $(BINLIB)
+	touch $(ATLASBINLIB)
 
 atlas321_WinNT_PPRO.zip:
 	wget -N http://www.netlib.org/atlas/archives/windows/atlas321_WinNT_PPRO.zip
