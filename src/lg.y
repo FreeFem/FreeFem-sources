@@ -191,7 +191,6 @@ void yyerror (const char* s)
 %token CURVE
 %token SOLVE
 
-
 %% 
 
 start:   input ENDOFFILE {

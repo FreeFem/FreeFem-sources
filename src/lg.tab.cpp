@@ -1,5 +1,5 @@
 
-/*  A Bison parser, made from /Users/hecht/work/FreeFem++/src/lg.y
+/*  A Bison parser, made from ./src/lg.y
     by GNU Bison version 1.28  */
 
 #define YYBISON 1  /* Identify Bison output.  */
@@ -55,7 +55,7 @@
 #define	CURVE	298
 #define	SOLVE	299
 
-#line 1 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 1 "./src/lg.y"
  
 
 #define eflval yylval 
@@ -132,7 +132,7 @@ void yyerror (const char* s)
 }
 
 
-#line 78 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 78 "./src/lg.y"
 typedef union{ 
  double dnum;
  long lnum;
@@ -284,22 +284,22 @@ static const short yyrhs[] = {    71,
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-   197,   226,   229,   230,   233,   234,   235,   236,   237,   238,
-   239,   240,   241,   242,   243,   244,   245,   246,   247,   250,
-   251,   254,   254,   256,   257,   258,   259,   265,   267,   268,
-   269,   270,   273,   274,   275,   281,   283,   284,   285,   286,
-   287,   289,   291,   295,   298,   299,   301,   302,   304,   305,
-   308,   312,   313,   316,   316,   317,   318,   319,   320,   325,
-   330,   332,   337,   338,   340,   341,   343,   345,   347,   348,
-   349,   350,   351,   352,   353,   357,   358,   359,   360,   362,
-   364,   367,   371,   375,   383,   389,   394,   396,   400,   402,
-   403,   404,   405,   408,   410,   411,   412,   413,   414,   417,
-   419,   420,   421,   422,   423,   424,   425,   426,   427,   428,
-   429,   430,   431,   432,   433,   434,   435,   436,   437,   441,
-   443,   444,   445,   448,   449,   450,   451,   452,   453,   454,
-   457,   458,   461,   463,   466,   467,   468,   469,   472,   474,
-   475,   476,   477,   478,   479,   480,   481,   482,   483,   484,
-   485,   494,   495
+   196,   225,   228,   229,   232,   233,   234,   235,   236,   237,
+   238,   239,   240,   241,   242,   243,   244,   245,   246,   249,
+   250,   253,   253,   255,   256,   257,   258,   264,   266,   267,
+   268,   269,   272,   273,   274,   280,   282,   283,   284,   285,
+   286,   288,   290,   294,   297,   298,   300,   301,   303,   304,
+   307,   311,   312,   315,   315,   316,   317,   318,   319,   324,
+   329,   331,   336,   337,   339,   340,   342,   344,   346,   347,
+   348,   349,   350,   351,   352,   356,   357,   358,   359,   361,
+   363,   366,   370,   374,   382,   388,   393,   395,   399,   401,
+   402,   403,   404,   407,   409,   410,   411,   412,   413,   416,
+   418,   419,   420,   421,   422,   423,   424,   425,   426,   427,
+   428,   429,   430,   431,   432,   433,   434,   435,   436,   440,
+   442,   443,   444,   447,   448,   449,   450,   451,   452,   453,
+   456,   457,   460,   462,   465,   466,   467,   468,   471,   473,
+   474,   475,   476,   477,   478,   479,   480,   481,   482,   483,
+   484,   493,   494
 };
 #endif
 
@@ -1177,7 +1177,7 @@ yyreduce:
   switch (yyn) {
 
 case 1:
-#line 197 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 196 "./src/lg.y"
 {
 	            
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
@@ -1207,339 +1207,339 @@ case 1:
   return 0;;
     break;}
 case 3:
-#line 229 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 228 "./src/lg.y"
 {yyval.cinst=yyvsp[0].cexp;;;;
     break;}
 case 4:
-#line 230 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 229 "./src/lg.y"
 { yyval.cinst= (yyvsp[-1].cinst+=yyvsp[0].cexp) ;
     break;}
 case 5:
-#line 233 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 232 "./src/lg.y"
 { yyval.clist_id=new ListOfId();;
     break;}
 case 6:
-#line 234 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 233 "./src/lg.y"
 { yyval.clist_id = new ListOfId(); yyval.clist_id->push_back(UnId(yyvsp[0].str));
     break;}
 case 7:
-#line 235 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 234 "./src/lg.y"
 { yyval.clist_id = new ListOfId(); yyval.clist_id->push_back(UnId(yyvsp[-2].str,yyvsp[0].cexp)) ;
     break;}
 case 8:
-#line 236 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 235 "./src/lg.y"
 { yyval.clist_id = new ListOfId(); yyval.clist_id->push_back(UnId(yyvsp[0].str,Find(yyvsp[-1].str),atype<FE<double> **>()));
     break;}
 case 9:
-#line 237 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 236 "./src/lg.y"
 { yyval.clist_id = new ListOfId(); yyval.clist_id->push_back(UnId(yyvsp[0].str,Find(yyvsp[-2].str),atype<FE<double> **>(),true));
     break;}
 case 10:
-#line 238 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 237 "./src/lg.y"
 { yyval.clist_id = new ListOfId(); yyval.clist_id->push_back(UnId(yyvsp[0].str,C_F0(),yyvsp[-1].type->right())) ;
     break;}
 case 11:
-#line 239 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 238 "./src/lg.y"
 { yyval.clist_id = new ListOfId(); yyval.clist_id->push_back(UnId(yyvsp[0].str,C_F0(),yyvsp[-2].type,true)) ;
     break;}
 case 12:
-#line 240 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 239 "./src/lg.y"
 { yyval.clist_id = new ListOfId(); yyval.clist_id->push_back(UnId(yyvsp[-1].clist_id)) ;
     break;}
 case 13:
-#line 241 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 240 "./src/lg.y"
 { yyval.clist_id = yyvsp[-2].clist_id; yyval.clist_id->push_back(UnId(yyvsp[0].str)) ;
     break;}
 case 14:
-#line 242 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 241 "./src/lg.y"
 { yyval.clist_id = yyvsp[-4].clist_id; yyval.clist_id->push_back(UnId(yyvsp[-1].clist_id)) ;
     break;}
 case 15:
-#line 243 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 242 "./src/lg.y"
 { yyval.clist_id = yyvsp[-4].clist_id; yyval.clist_id->push_back(UnId(yyvsp[-2].str,yyvsp[0].cexp)) ;
     break;}
 case 16:
-#line 244 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 243 "./src/lg.y"
 { yyval.clist_id = yyvsp[-3].clist_id; yyval.clist_id->push_back(UnId(yyvsp[0].str,Find(yyvsp[-1].str),atype<FE<double> **>())) ;
     break;}
 case 17:
-#line 245 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 244 "./src/lg.y"
 { yyval.clist_id = yyvsp[-4].clist_id; yyval.clist_id->push_back(UnId(yyvsp[0].str,Find(yyvsp[-2].str),atype<FE<double> **>(),true)) ;
     break;}
 case 18:
-#line 246 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 245 "./src/lg.y"
 { yyval.clist_id = yyvsp[-3].clist_id; yyval.clist_id->push_back(UnId(yyvsp[0].str,C_F0(),yyvsp[-1].type->right())) ;
     break;}
 case 19:
-#line 247 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 246 "./src/lg.y"
 { yyval.clist_id = yyvsp[-4].clist_id; yyval.clist_id->push_back(UnId(yyvsp[0].str,C_F0(),yyvsp[-2].type,true)) ;
     break;}
 case 20:
-#line 250 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 249 "./src/lg.y"
 { yyval.clist_id = new ListOfId(); yyval.clist_id->push_back(UnId(yyvsp[0].str)); ;
     break;}
 case 21:
-#line 251 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 250 "./src/lg.y"
 { yyval.clist_id=yyvsp[-2].clist_id  ; yyval.clist_id->push_back(UnId(yyvsp[0].str)); ;
     break;}
 case 24:
-#line 256 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 255 "./src/lg.y"
 {yyval.cexp=currentblock->NewVar<LocalVariable>(yyvsp[0].str,dcltype);
     break;}
 case 25:
-#line 257 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 256 "./src/lg.y"
 {yyval.cexp=currentblock->NewVar<LocalVariable>(yyvsp[-2].str,dcltype,yyvsp[0].cexp);
     break;}
 case 26:
-#line 258 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 257 "./src/lg.y"
 {yyval.cexp=currentblock->NewVar<LocalVariable>(yyvsp[-3].str,dcltype,yyvsp[-1].args);
     break;}
 case 27:
-#line 259 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 258 "./src/lg.y"
 {yyval.cexp=C_F0(yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 28:
-#line 266 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 265 "./src/lg.y"
 {yyval.args=yyvsp[0].cexp;
     break;}
 case 29:
-#line 267 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 266 "./src/lg.y"
 {yyval.args=Find(yyvsp[-1].str);
     break;}
 case 30:
-#line 268 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 267 "./src/lg.y"
 { yyval.args=make_pair<const char *,const C_F0>(yyvsp[-2].str,yyvsp[0].cexp);
     break;}
 case 31:
-#line 269 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 268 "./src/lg.y"
 { yyval.args = (yyvsp[-2].args += yyvsp[0].cexp) ;
     break;}
 case 32:
-#line 270 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 269 "./src/lg.y"
 { yyval.args= (yyvsp[-4].args+= make_pair<const char *,const C_F0>(yyvsp[-2].str,yyvsp[0].cexp));
     break;}
 case 34:
-#line 274 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 273 "./src/lg.y"
 {yyval.type=TypeArray(yyvsp[-3].type,yyvsp[-1].type);
     break;}
 case 35:
-#line 275 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 274 "./src/lg.y"
 {yyval.type=TypeArray(yyvsp[-5].type,yyvsp[-3].type,yyvsp[-1].type);
     break;}
 case 36:
-#line 282 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 281 "./src/lg.y"
 { yyval.cexp =  NewFEvariable(yyvsp[0].str,currentblock,fespacetype); ;
     break;}
 case 37:
-#line 283 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 282 "./src/lg.y"
 { yyval.cexp =  NewFEarray(yyvsp[-3].str,currentblock,fespacetype,yyvsp[-1].cexp); ;
     break;}
 case 38:
-#line 284 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 283 "./src/lg.y"
 { yyval.cexp =  NewFEvariable(yyvsp[-2].str,currentblock,fespacetype,yyvsp[0].cexp) ;
     break;}
 case 39:
-#line 285 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 284 "./src/lg.y"
 { yyval.cexp =  NewFEvariable(yyvsp[-1].clist_id,currentblock,fespacetype) ;
     break;}
 case 40:
-#line 286 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 285 "./src/lg.y"
 { yyval.cexp =  NewFEarray(yyvsp[-4].clist_id,currentblock,fespacetype,yyvsp[-1].cexp) ;
     break;}
 case 41:
-#line 287 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 286 "./src/lg.y"
 { yyval.cexp =  NewFEvariable(yyvsp[-3].clist_id,currentblock,fespacetype,yyvsp[0].cexp) ;
     break;}
 case 42:
-#line 290 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 289 "./src/lg.y"
 { yyval.cexp =  NewFEarray(yyvsp[-3].str,currentblock,fespacetype,yyvsp[-1].cexp); ;
     break;}
 case 43:
-#line 291 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 290 "./src/lg.y"
 { yyval.cexp =  NewFEarray(yyvsp[-4].clist_id,currentblock,fespacetype,yyvsp[-1].cexp) ;
     break;}
 case 44:
-#line 295 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 294 "./src/lg.y"
 { fespacetype = Find(yyvsp[0].str);;
     break;}
 case 45:
-#line 298 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 297 "./src/lg.y"
 {  yyval.cexp = yyvsp[0].cexp  ;
     break;}
 case 46:
-#line 299 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 298 "./src/lg.y"
 { yyval.cexp=C_F0(yyvsp[-2].cexp,yyvsp[0].cexp);;
     break;}
 case 47:
-#line 301 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 300 "./src/lg.y"
 {  yyval.cexp = yyvsp[0].cexp  ;
     break;}
 case 48:
-#line 302 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 301 "./src/lg.y"
 { yyval.cexp=C_F0(yyvsp[-2].cexp,yyvsp[0].cexp);;
     break;}
 case 49:
-#line 304 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 303 "./src/lg.y"
 { yyval.cexp=0;  yyval.cexp = yyvsp[0].cexp;
     break;}
 case 50:
-#line 305 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 304 "./src/lg.y"
 { yyval.cexp=0;  yyval.cexp = yyvsp[0].cexp;
     break;}
 case 51:
-#line 310 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 309 "./src/lg.y"
 {yyval.cexp=currentblock->NewVar<LocalVariableFES,size_t>(yyvsp[-3].str,atype<pfes*>(),yyvsp[-1].args,dimFESpaceImage(yyvsp[-1].args));
     break;}
 case 53:
-#line 313 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 312 "./src/lg.y"
 {yyval.cexp=C_F0(yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 54:
-#line 316 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 315 "./src/lg.y"
 {dcltype=yyvsp[0].type;
     break;}
 case 55:
-#line 316 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 315 "./src/lg.y"
 {yyval.cexp=yyvsp[-1].cexp;
     break;}
 case 56:
-#line 317 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 316 "./src/lg.y"
 {yyval.cexp=yyvsp[-1].cexp;
     break;}
 case 57:
-#line 318 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 317 "./src/lg.y"
 { yyval.cexp=yyvsp[-1].cexp;
     break;}
 case 58:
-#line 319 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 318 "./src/lg.y"
 {yyval.cexp=currentblock->NewID(yyvsp[-4].type,yyvsp[-3].str,yyvsp[-1].cexp);;
     break;}
 case 59:
-#line 321 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 320 "./src/lg.y"
 {   /* use the stack to store the prev return type*/
                       assert(kkembtype+1<nbembtype);
                       rettype[++kkembtype] = yyvsp[-4].type->right();
                       yyvsp[-1].routine=new Routine(yyvsp[-5].type,yyvsp[-4].type->right(),yyvsp[-3].str,yyvsp[-1].clist_id,currentblock);;
     break;}
 case 60:
-#line 326 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 325 "./src/lg.y"
 { currentblock=yyvsp[-5].routine->Set(yyvsp[-1].cinst);
                        currentblock->Add(yyvsp[-7].str,"(",yyvsp[-5].routine);
                        kkembtype--;
                        yyval.cexp=0 ;
     break;}
 case 61:
-#line 331 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 330 "./src/lg.y"
 {currentblock = new Block(currentblock); yyvsp[-4].type->SetArgs(yyvsp[-1].clist_id);;
     break;}
 case 62:
-#line 333 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 332 "./src/lg.y"
 {  yyval.cinst=currentblock->close(currentblock);
                          yyval.cexp=currentblock->NewID(yyvsp[-8].type,yyvsp[-7].str,yyvsp[-1].cexp,*yyvsp[-5].clist_id);
     break;}
 case 63:
-#line 337 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 336 "./src/lg.y"
 {  currentblock = new Block(currentblock);
     break;}
 case 64:
-#line 338 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 337 "./src/lg.y"
 {  yyval.cexp=currentblock->close(currentblock);
     break;}
 case 65:
-#line 340 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 339 "./src/lg.y"
 {inloopcount++;;
     break;}
 case 66:
-#line 341 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 340 "./src/lg.y"
 {inloopcount++;
     break;}
 case 67:
-#line 344 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 343 "./src/lg.y"
 {dcltype=yyvsp[0].type;currentblock = new Block(currentblock);
     break;}
 case 68:
-#line 345 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 344 "./src/lg.y"
 {yyval.cexp=yyvsp[0].cexp;
     break;}
 case 69:
-#line 347 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 346 "./src/lg.y"
 {yyval.cexp=0;;
     break;}
 case 70:
-#line 348 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 347 "./src/lg.y"
 {zzzfff->input(yyvsp[0].str);yyval.cexp= 0; ;
     break;}
 case 71:
-#line 349 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 348 "./src/lg.y"
 {load(yyvsp[0].str);yyval.cexp= 0; ;
     break;}
 case 72:
-#line 350 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 349 "./src/lg.y"
 {yyval.cexp=yyvsp[-1].cexp;
     break;}
 case 73:
-#line 351 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 350 "./src/lg.y"
 {yyval.cexp=yyvsp[0].cexp;
     break;}
 case 74:
-#line 352 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 351 "./src/lg.y"
 {inloopcount--; yyval.cexp=For(yyvsp[-6].cexp,yyvsp[-4].cexp,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 75:
-#line 354 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 353 "./src/lg.y"
 {inloopcount--; 
                 yyval.cexp=C_F0(For(yyvsp[-6].cexp,yyvsp[-4].cexp,yyvsp[-2].cexp,yyvsp[0].cexp),currentblock->close(currentblock));
     break;}
 case 76:
-#line 357 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 356 "./src/lg.y"
 {inloopcount--;yyval.cexp=While(yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 77:
-#line 358 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 357 "./src/lg.y"
 {yyval.cexp=FIf(yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 78:
-#line 359 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 358 "./src/lg.y"
 {yyval.cexp=FIf(yyvsp[-4].cexp,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 79:
-#line 360 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 359 "./src/lg.y"
 { 
                       yyval.cexp=C_F0(new E_block(yyvsp[-1].cinst,yyvsp[0].cexp),atype<void>()) ;
     break;}
 case 80:
-#line 362 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 361 "./src/lg.y"
 {
                       yyval.cexp=0;currentblock->NewID(atype<const E_Border *>(),yyvsp[-1].str,C_F0(TheOperators,"[border]",yyvsp[0].args));
     break;}
 case 81:
-#line 364 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 363 "./src/lg.y"
 {
                       yyval.cexp=0;currentblock->NewID(atype<const E_Border *>(),yyvsp[-4].str,C_F0(TheOperators,"[border]",yyvsp[-2].args));
     break;}
 case 82:
-#line 367 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 366 "./src/lg.y"
 {
                     if(inloopcount) 
                       yyval.cexp= C_F0(new E_throw(E_exception::e_break),atype<void>()); 
                     else lgerror("break not in loop") ;
     break;}
 case 83:
-#line 371 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 370 "./src/lg.y"
 { 
                     if(inloopcount)
                         yyval.cexp= C_F0(new E_throw(E_exception::e_continue),atype<void>()) ;
                     else lgerror("continue not in loop");
     break;}
 case 84:
-#line 375 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 374 "./src/lg.y"
 { 
                     if (kkembtype>=0)
                       yyval.cexp= C_F0(new E_throw(E_exception::e_return,rettype[kkembtype]->CastTo(yyvsp[-1].cexp)) ,atype<void>());
                      else lgerror(" return not in routine ") ;
     break;}
 case 85:
-#line 383 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 382 "./src/lg.y"
 { 
    currentblock = new Block(currentblock);
    yyval.args = currentblock->NewVar<LocalVariable>(yyvsp[-5].str,atype<double*>());
@@ -1547,229 +1547,229 @@ case 85:
    yyval.args+= yyvsp[-1].cexp ;
     break;}
 case 86:
-#line 389 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 388 "./src/lg.y"
 {   
    yyval.args = (yyvsp[-1].args += yyvsp[0].cexp);
    currentblock->close(currentblock);
     break;}
 case 88:
-#line 396 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 395 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);;
     break;}
 case 95:
-#line 410 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 409 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 96:
-#line 411 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 410 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,"+=",yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 97:
-#line 412 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 411 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,"-=",yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 98:
-#line 413 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 412 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,"*=",yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 99:
-#line 414 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 413 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,"/=",yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 101:
-#line 419 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 418 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 102:
-#line 420 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 419 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 103:
-#line 421 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 420 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 104:
-#line 422 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 421 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 105:
-#line 423 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 422 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 106:
-#line 424 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 423 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 107:
-#line 425 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 424 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 108:
-#line 426 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 425 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 109:
-#line 427 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 426 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 110:
-#line 428 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 427 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 111:
-#line 429 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 428 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 112:
-#line 430 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 429 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 113:
-#line 431 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 430 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 114:
-#line 432 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 431 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 115:
-#line 433 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 432 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 116:
-#line 434 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 433 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 117:
-#line 435 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 434 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 118:
-#line 436 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 435 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 119:
-#line 437 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 436 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 120:
-#line 442 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 441 "./src/lg.y"
 {yyval.cexp=yyvsp[0].cexp;
     break;}
 case 121:
-#line 443 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 442 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,":");
     break;}
 case 122:
-#line 444 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 443 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,":",yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 123:
-#line 445 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 444 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,":",yyvsp[-4].cexp,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 124:
-#line 448 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 447 "./src/lg.y"
 {yyval.args=0;
     break;}
 case 125:
-#line 449 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 448 "./src/lg.y"
 {yyval.args=Find(yyvsp[0].str);
     break;}
 case 126:
-#line 450 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 449 "./src/lg.y"
 { yyval.args=make_pair<const char *,const C_F0>(yyvsp[-2].str,yyvsp[0].cexp);
     break;}
 case 127:
-#line 451 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 450 "./src/lg.y"
 {yyval.args=yyvsp[0].cexp;
     break;}
 case 128:
-#line 452 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 451 "./src/lg.y"
 { yyval.args = (yyvsp[-2].args += Find(yyvsp[0].str)) ;
     break;}
 case 129:
-#line 453 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 452 "./src/lg.y"
 { yyval.args = (yyvsp[-2].args += yyvsp[0].cexp) ;
     break;}
 case 130:
-#line 454 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 453 "./src/lg.y"
 { yyval.args= (yyvsp[-4].args+= make_pair<const char *,const C_F0>(yyvsp[-2].str,yyvsp[0].cexp)) ;
     break;}
 case 131:
-#line 457 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 456 "./src/lg.y"
 {yyval.args=yyvsp[0].cexp;
     break;}
 case 132:
-#line 458 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 457 "./src/lg.y"
 {yyval.args = (yyvsp[-2].args += yyvsp[0].cexp) ;
     break;}
 case 134:
-#line 463 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 462 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[0].cexp);
     break;}
 case 136:
-#line 467 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 466 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 137:
-#line 468 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 467 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[-1].oper,yyvsp[-2].cexp,yyvsp[0].cexp);
     break;}
 case 138:
-#line 469 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 468 "./src/lg.y"
 {yyval.cexp=C_F0(TheOperators,yyvsp[0].oper,yyvsp[-1].cexp);
     break;}
 case 139:
-#line 473 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 472 "./src/lg.y"
 {yyval.cexp=Find(yyvsp[0].str);;
     break;}
 case 140:
-#line 474 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 473 "./src/lg.y"
 {yyval.cexp= CConstant(yyvsp[0].lnum);
     break;}
 case 141:
-#line 475 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 474 "./src/lg.y"
 {yyval.cexp= CConstant(yyvsp[0].dnum);
     break;}
 case 142:
-#line 476 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 475 "./src/lg.y"
 {yyval.cexp= CConstant(complex<double>(0,yyvsp[0].dnum));
     break;}
 case 143:
-#line 477 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 476 "./src/lg.y"
 {yyval.cexp= CConstant<const char *>(yyvsp[0].str);
     break;}
 case 144:
-#line 478 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 477 "./src/lg.y"
 {yyval.cexp=C_F0(yyvsp[-3].cexp,yyvsp[-2].oper,yyvsp[-1].args);;
     break;}
 case 145:
-#line 479 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 478 "./src/lg.y"
 {yyval.cexp=C_F0(yyvsp[-3].cexp,yyvsp[-2].oper,yyvsp[-1].cexp);
     break;}
 case 146:
-#line 480 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 479 "./src/lg.y"
 {yyval.cexp=C_F0(yyvsp[-5].cexp,yyvsp[-4].oper,yyvsp[-3].cexp,yyvsp[-1].cexp);
     break;}
 case 147:
-#line 481 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 480 "./src/lg.y"
 {yyval.cexp=C_F0(yyvsp[-2].cexp,"[]");
     break;}
 case 148:
-#line 482 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 481 "./src/lg.y"
 { yyval.cexp=C_F0(yyvsp[-2].cexp,yyvsp[0].str) ;;
     break;}
 case 149:
-#line 483 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 482 "./src/lg.y"
 {yyval.cexp=C_F0(TheRightOperators,yyvsp[0].oper,yyvsp[-1].cexp);
     break;}
 case 150:
-#line 484 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 483 "./src/lg.y"
 {yyval.cexp=C_F0(TheRightOperators,yyvsp[0].oper,yyvsp[-1].cexp);
     break;}
 case 151:
-#line 485 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 484 "./src/lg.y"
 {
              if (yyvsp[-3].type->right()->CastingFrom(yyvsp[-1].cexp.left()) ) 
                 yyval.cexp=yyvsp[-3].type->right()->CastTo(yyvsp[-1].cexp)  ;
@@ -1781,11 +1781,11 @@ case 151:
             ;
     break;}
 case 152:
-#line 494 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 493 "./src/lg.y"
 {yyval.cexp=yyvsp[-1].cexp;
     break;}
 case 153:
-#line 495 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 494 "./src/lg.y"
 { yyval.cexp=C_F0(TheOperators,"[]",yyvsp[-1].args);
     break;}
 }
@@ -2010,7 +2010,7 @@ yyerrhandle:
     }
   return 1;
 }
-#line 500 "/Users/hecht/work/FreeFem++/src/lg.y"
+#line 499 "./src/lg.y"
  
 
 
