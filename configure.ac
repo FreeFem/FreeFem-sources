@@ -174,6 +174,8 @@ then
 	fi
 fi
 
+# Arpack itself
+
 ff_arpack_ok=no   
 ff_save_libs="$LIBS"
 ff_arpack_libs=
@@ -225,7 +227,7 @@ ff_amd_ok=no
 ff_umfpack_ok=no
 if test "$ff_blas_ok" = yes;
 then
-        # User-specified location                                               
+        # User-specified location
         AC_ARG_WITH(umfpack,
                 --with-umfpack=archive	Use a specific version of Umfpack,
                 ff_umfpack_ok=yes
