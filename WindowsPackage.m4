@@ -1,8 +1,8 @@
 ; Creating a FreeFem++ package for Microsoft Windows with Inno Setup
 ; $Id$
 
-; The Inno Setup configuration file is built from this one with the
-; command "make WindowsPackage.iss".
+; The Inno Setup configuration file WindowsPackage.iss is built from
+; WindowsPackage.m4 with the command "make WindowsPackage.iss".
 
 ; No source file here. They are in the source tar ball.
 
@@ -17,17 +17,27 @@ ChangesAssociations=yes
 OutputBaseFilename=FreeFem++-VERSION
 
 [Files]
+
+; Programs
 Source: "src\std\FreeFem++.exe"; DestDir: "{app}"
 Source: "src\ide\FreeFem++-cs.exe"; DestDir: "{app}"
 Source: "src\ide\FreeFem++-cs-server.exe"; DestDir: "{app}"
 Source: "src\nw\FreeFem++-nw.exe"; DestDir: "{app}"
-Source: "c:/cygwin/bin/cygwin1.dll"; DestDir: "{app}"
+; Does not include FreeFem++-x11 which would need the Cygwin X-Server
+; Does not include FreeFem++-glx which would need the Cygwin X-Server
+
+; Examples
 Source: "examples++\*.edp"; DestDir: "{app}\examples++"
 Source: "examples++-eigen\*.edp"; DestDir: "{app}\examples++-eigen"
 Source: "examples++-tutorial\*.edp"; DestDir: "{app}\examples++-tutorial"
 Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
+
+; PDF and PS documentation may need to be copied from another machine
+; if Cygwin refuses to build them.
+
 Source: "DOC\manual-full.pdf"; DestDir: "{app}"
 Source: "DOC\manual-full.ps"; DestDir: "{app}"
+
 Source: "logo.ico"; DestDir: "{app}"
 
 [Icons]
