@@ -722,22 +722,23 @@ template <class R>
   
 }
 template <class R> 
- MatriceMorse<R>::MatriceMorse(const int  n,const R *aa)
-    :MatriceCreuse<R>(n),solver(0) 
+ MatriceMorse<R>::MatriceMorse(const int  nn,const R *aa)
+    :MatriceCreuse<R>(nn),solver(0) 
       {
   symetrique = true;
   this->dummy=false;
-  nbcoef=n;
-  a=new R[n] ;
-  lg=new int [n+1];
-  cl=new int [n];
-  for(int i=0;i<n;i++)
+  this->n=nn;
+  nbcoef=this->n;
+  a=new R[this->n] ;
+  lg=new int [this->n+1];
+  cl=new int [this->n];
+  for(int i=0;i<this->n;i++)
    {
     lg[i]=i;
     cl[i]=i;
     a[i]=aa[i];      
       }
-lg[n]=n;
+lg[this->n]=this->n;
 }
 
 template<class R>

@@ -1152,5 +1152,33 @@ template<class R> AnyType CopyMat(Stack stack,Expression emat,Expression eA);
 template<class R> AnyType CombMat(Stack stack,Expression emat,Expression combMat);
 template<class R> AnyType MatFull2Sparce(Stack stack,Expression emat,Expression eA);
 */
+namespace FreeFempp {
 
+template<class R>
+class TypeVarForm { public:
+    aType tFB;                       
+    aType tMat;                       
+    aType tFL;                       
+    aType tTab;                       
+    aType tMatX;  
+    aType tMatTX;  
+    aType tDotStar;
+    aType tBC ;                    
+TypeVarForm() :
+     tFB( atype<const  FormBilinear *>() ),                      
+     tMat( atype<Matrice_Creuse<R>*>() ),                       
+     tFL( atype<const  FormLinear *>() ),                       
+     tTab( atype<KN<R> *>() ),                       
+     tMatX( atype<typename VirtualMatrice<R>::plusAx >() ),  
+     tMatTX( atype<typename VirtualMatrice<R>::plusAtx >() ),  
+     tDotStar(atype< DotStar_KN_<R> >() ),
+     tBC( atype<const  BC_set  *>())                     
+     {
+     }
+
+
+ static TypeVarForm *Global;
+}; 
+
+}
 #endif

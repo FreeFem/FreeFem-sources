@@ -36,6 +36,10 @@ bool  NoWait=false;
 extern long verbosity;
 void init_lgmesh() ;
 
+namespace FreeFempp {
+template<class R>
+ TypeVarForm<R> * TypeVarForm<R>::Global;
+}
 
  class E_F_StackF0F0opt2 :public  E_F0mps { public:
   typedef   AnyType (*func)(Stack,Expression ,Expression ) ; 
@@ -3903,7 +3907,9 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
   init_mesh_array();
 
  l2interpreter = new LinkToInterpreter;
-        
+ using namespace FreeFempp; 
+ TypeVarForm<double>::Global = new TypeVarForm<double>();       
+ TypeVarForm<Complex>::Global = new TypeVarForm<Complex>();       
 
 }   
 
