@@ -79,7 +79,13 @@ then
 
 	# Processors
 	proc_type=unknown
-	if test `grep 'Intel(R) Pentium(R) 4 ' /proc/cpuinfo|wc -l` -gt 0
+	if test `grep 'Intel(R) Pentium(R) III ' /proc/cpuinfo|wc -l` -gt 0
+	    then
+	    proc_type=pentium3
+	    CHECK_COMPILE_FLAG(C,-march=pentium3,CFLAGS)
+	    CHECK_COMPILE_FLAG(C++,-march=pentium3,CXXFLAGS)
+	    CHECK_COMPILE_FLAG(Fortran 77,-march=pentium3,FFLAGS)
+	elif test `grep 'Intel(R) Pentium(R) 4 ' /proc/cpuinfo|wc -l` -gt 0
 	    then
 	    proc_type=pentium4
 	    CHECK_COMPILE_FLAG(C,-march=pentium4,CFLAGS)
