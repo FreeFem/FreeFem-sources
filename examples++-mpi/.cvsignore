@@ -1,5 +1,4 @@
 *.eps
 machinefile
-Makefile
-Makefile.in
 regtests-*.log
+Makefile
