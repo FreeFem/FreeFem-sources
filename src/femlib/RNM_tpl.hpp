@@ -138,8 +138,23 @@ template<class R>
     for (long i=0;i<n;i++,l += stepl, r += stepr) s += *l * conj(*r);
     return s;
   }
+
+template<class R>
+ R  operator,(const conj_KN_<const_R> & u,const KN_<const_R> & vc) {
+  int n=u.a.n;
+    K_throwassert(n == vc.n);
+    R  s=0; 
+    R * l(u.a);
+    R  *r(vc);
+    int stepl= u.a.step, stepr=vc.step;    
+    for (long i=0;i<n;i++,l += stepl, r += stepr) s += conj(*l) * (*r);
+    return s;
+  }
+
 template<class R>
  R  operator,(const KN<const_R> & u,const conj_KN_<const_R> & vc) {  return ( (KN_<R>) u,vc);}
+template<class R>
+ R  operator,(const conj_KN_<const_R> & u,const KN<const_R> & vc) {  return (  u, (KN_<R>) vc);}
 
 
 template<class R>

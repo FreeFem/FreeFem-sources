@@ -15,6 +15,7 @@ fespace Wh(Th,P1);
 matrix RB= interplotematrix(VH,Vh);  // build interpolation matrix Vh->Vh 
 matrix RBB= interplotematrix(Wh,Vh);  // build interpolation matrix
 matrix<complex> B=RB;
+B = B*(1+2i);
 matrix<complex> BB=RBB;
 
 varf vA(u,v) = int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v))+ int1d(Th)(u*v); 
@@ -28,7 +29,7 @@ matrix<complex> ML(ml[]); // matrix diagonal
 cout << "ML="<<ML << endl;
 cout << "B="<<B << endl;
 matrix<complex> BML=B*ML; // a faire 
-matrix<complex> tB=B';        // transpose 
+matrix<complex> tB=B';        // transpose and conjugate 
 cout << "tB=" << tB << endl;
 matrix<complex> MLtB=ML'*B'; // 
 
@@ -72,11 +73,16 @@ else
   A =0;
   for (int i=0;i<N;i++)
     {
-      A(i,i)=1+i;
-      if(i+1 < N)    A(i,i+1)=-i-1*i;
-      a[i]=i*(1+i);
+      A(i,i)=1.+i;
+      if(i+1 < N)    A(i,i+1)=-i-1i*i;
+      a[i]=i*(1.+2i);
     }
   b=A*a;
+  cout << " b =" << b << endl ;
+  cout << " a =" << a << endl ;
+  cout << " b'*b (hermissian product) = " << b'*b << endl;
+  cout << " a'*a = " << a'*a << endl;
+  assert( abs(imag(b'*b)) <1e-5);
   cout << "xxxx\n"; 
   matrix<complex> sparseA=A;
   cout << sparseA << endl;

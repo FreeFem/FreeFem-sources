@@ -2175,8 +2175,17 @@ class Convect : public E_F0mps  { public:
     
 };    
    
-
-
+  class plot_item 
+{ public :
+  class vplot { public :
+    virtual plot();
+  };
+  
+  
+}
+class DataPlot {  
+  list<plot_item> l;
+};
 
 class Plot :  public E_F0mps { public:
     typedef KN_<R>  tab;

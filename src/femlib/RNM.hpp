@@ -232,7 +232,7 @@ class ShapeOfArray{ protected:
 // protected:
   long operator[](long k) const {  K_throwassert( (k>=0) && ( (k <n) || !step) );
            return step*k;}     
-  void init(long nn,long s=1,long nextt=-1) { n=nn; step=s; next=next;}         
+  void init(long nn,long s=1,long nextt=-1) { n=nn; step=s; next=nextt;}         
 };
 
 ostream & operator<<(ostream & f,const ShapeOfArray & s);
@@ -962,6 +962,7 @@ class conj_KN_{public:
 };
 
 
+inline const KN_<long> conj(const KN_<long> &a){ return a;}
 inline const KN_<double> conj(const KN_<double> &a){ return a;}
 inline const KN_<float> conj(const KN_<float> &a){ return a;}
 
