@@ -11,7 +11,10 @@ AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # times). For coherency, this should have the same value as the
 # top-most package number in debian/changelog.
 
-AC_SUBST(PACKAGE_VERSION,2)
+# "PACKAGE_VERSION" is already taken by autoconf, so we need to choose
+# another name
+
+AC_SUBST(FREEFEM_PACKAGING,2)
 
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
