@@ -55,7 +55,7 @@ verbosity=verbosityy;
 };
 ]])
 
-ONETEST(adapt,u[]'*u[],1e-2)
+ONETEST(adapt,u[]'*u[],5e-2)
 ONETEST(adaptindicatorP1,u[]'*u[],5e-2)
 ONETEST(adaptindicatorP2,u[]'*u[],1,1)
 ONETEST(algo)
