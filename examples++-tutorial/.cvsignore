@@ -4,8 +4,6 @@ lestables
 ListOfUnAllocPtr.bin
 *.log
 machinefile
-Makefile
-Makefile.in
 makeref.edp
 *.msh
 plot.gp
@@ -13,3 +11,4 @@ plot.gp
 regtests.edp
 toto.*
 u.txt
+Makefile
