@@ -2,11 +2,11 @@
 #define MY_LEX_HPP_
 // with New version of macro expansion more simple and more stable 
 // FH jan 2005
-
+#include <stack> 
 extern bool lexdebug;
 extern long mpisize,mpirank;
 
-class mylex  { 
+class mylex : public CodeAlloc { 
   public:
   typedef const char * Key;
   typedef pair<int,aType> Value;
@@ -27,7 +27,7 @@ class mylex  {
   char buf[1024];
   int typetoken;
   bool echo;
-
+  stack<char *> strdata;
   struct xxxx { 
    istream * f;
    istream * nf;
@@ -92,7 +92,16 @@ class mylex  {
   void input(const char *  filename) ;
   void input(const string &str);
   bool close() ;
+
+  char * newcopy(const char * s)
+   {
+    char *r(new char  [strlen(s)+1]);
+    strcpy(r, s);
+    strdata.push(r);
+    return r;
+  }
   
+~mylex();
 private: 
   int basescan();  
   int EatCommentAndSpace(string *data=0);

@@ -18,6 +18,8 @@
 #include "InitFunct.hpp"
 #include <queue>
 
+
+
 Map_type_of_map map_type_of_map ; //  to store te type 
 Map_type_of_map map_pair_of_type ; //  to store te type 
 
@@ -85,8 +87,8 @@ inline void MyAssert(int i,char * ex,char * file,long line)
   C_F0 *pOne=0,*pZero=0,*pminusOne=0;
 // const C_F0 & One(*pOne), &Zero(*pZero);
  
- Polymorphic * TheOperators=new Polymorphic(), 
-             * TheRightOperators=new Polymorphic();
+ Polymorphic * TheOperators=0, //=new Polymorphic(), 
+             * TheRightOperators=0; //=new Polymorphic();
 
 TableOfIdentifier Global;
 
@@ -738,6 +740,8 @@ void ArrayOperator()
 }
 void Init_map_type()
 {
+   TheOperators=new Polymorphic(), 
+   TheRightOperators=new Polymorphic();
   //  cout << sizeof(string) << endl;
     map_type[typeid(AnyType).name()] = new ForTypeAnyType();
     map_type[typeid(void).name()] = new ForTypeVoid();
@@ -1189,7 +1193,52 @@ typedef MyMap<String,String> MyMapSS;
      tables_of_identifier.push_back(&Global);
 
 }
+int ShowAlloc(char *s,size_t & lg); 
+
+   void TableOfIdentifier::clear()
+   {
+     for (iterator i=m.begin();i!=m.end();++i)
+       {
+        
+   //     delete i->first;
+        }
+     m.clear();
+   } 
 
 
+ void clean_lgfem();
+
+ void ClearMem()
+ {
+     //debugstack->clear(); lg;
+     size_t lg;
+     ShowAlloc("ClearMem: begin" , lg);
+     clean_lgfem();
+     delete pZero;
+     delete pOne;
+     delete pminusOne;
+      
+     tables_of_identifier.clear();
+     for (map<const string,basicForEachType *>::iterator i=map_type.begin();i!=map_type.end();++i)
+        delete i->second;
+/*        
+     for (Map_type_of_map::iterator i=map_type_of_map.begin();i!=map_type_of_map.end();++i)
+        delete i->second;
+     for (Map_type_of_map::iterator i=map_pair_of_type.begin();i!=map_pair_of_type.end();++i)
+        delete i->second;
+*/        
+     map_type.clear();
+     map_type_of_map.clear();
+     map_pair_of_type.clear();
+     Global.clear();
+     if(TheOperators) 
+       TheOperators->clear();
+     if(TheRightOperators)
+       TheRightOperators->clear();
+        
+     CodeAlloc::clear();
+     ShowAlloc("ClearMem: end" , lg); 
+
+ } 
 static addingInitFunct TheaddingInitFunct(-10000,Init_map_type); 
 

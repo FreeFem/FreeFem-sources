@@ -5,7 +5,7 @@
 noinst_LIBRARIES=libff.a
 
 libff_a_SOURCES=AFunction.cpp AFunction2.cpp lex.cpp lgmesh.cpp \
-lgmat.cpp ../femlib/Drawing.cpp	\
+CodeAlloc.cpp lgmat.cpp ../femlib/Drawing.cpp	\
 ../femlib/gibbs.cpp ../femlib/CheckPtr.cpp ../femlib/fem.cpp		\
 ../femlib/QuadratureFormular.cpp ../femlib/FESpace.cpp			\
 ../femlib/Element_RT.cpp ../femlib/mshptg.cpp ../femlib/FQuadTree.cpp	\
@@ -17,7 +17,8 @@ lgmat.cpp ../femlib/Drawing.cpp	\
 InitFunct.cpp ../Algo/lgalgo.cpp ../femlib/Element_P2h.cpp load.cpp	\
 lgfem.cpp AFunction.hpp AnyType.hpp error.hpp gmres.hpp InitFunct.hpp	\
 lex.hpp lgfem.hpp lgsolver.hpp Operator.hpp problem.hpp Serialize.hpp	\
-showverb.hpp String.hpp throwassert.hpp versionnumber.hpp
+showverb.hpp String.hpp throwassert.hpp versionnumber.hpp               \
+CodeAlloc.cpp CodeAlloc.hpp 
 
 # eigenvalue.cpp is optional (see configure.ac)
 EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp

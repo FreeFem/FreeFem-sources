@@ -41,6 +41,9 @@ template<class R>
  TypeVarForm<R> * TypeVarForm<R>::Global;
 }
 
+const int nTypeSolveMat=10;
+int kTypeSolveMat;
+TypeSolveMat *dTypeSolveMat[nTypeSolveMat];
 
 template<class K> 
  class E_F_StackF0F0opt2 :public  E_F0mps { public:
@@ -3651,20 +3654,22 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
    
 // Global.New("P1",CConstant<TypeOfFE*>(&P1Lagrange));
 // Global.New("P2",CConstant<TypeOfFE*>(&P2Lagrange));
- 
- Global.New("LU",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::LU))); 
- Global.New("CG",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::GC)));
- Global.New("Crout",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::CROUT)));
- Global.New("Cholesky",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::CHOLESKY)));
- Global.New("GMRES",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::GMRES)));
+ kTypeSolveMat=0; 
+ Global.New("LU",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::LU))); 
+ Global.New("CG",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::GC)));
+ Global.New("Crout",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::CROUT)));
+ Global.New("Cholesky",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::CHOLESKY)));
+ Global.New("GMRES",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::GMRES)));
 #ifdef HAVE_LIBUMFPACK
- Global.New("UMFPACK",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::UMFpack)));
+ Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::UMFpack)));
  Global.New("HaveUMFPACK",CConstant<bool>(true));
 #else 
  cout << " ( no UMFPACK => replace UMFPACK  by LU ) " ;
- Global.New("UMFPACK",CConstant<TypeSolveMat*>(new TypeSolveMat(TypeSolveMat::LU)));
+ Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::LU)));
  Global.New("HaveUMFPACK",CConstant<bool>(false));
 #endif 
+ assert(kTypeSolveMat<nTypeSolveMat);
+
 //  init pmesh  
  Add<pmesh*>("<-","(",
              new OneOperator1_<pmesh,string*>(ReadMesh),
@@ -3994,12 +3999,20 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
  l2interpreter = new LinkToInterpreter;
  using namespace FreeFempp; 
- TypeVarForm<double>::Global = new TypeVarForm<double>();       
- TypeVarForm<Complex>::Global = new TypeVarForm<Complex>();       
+ FreeFempp::TypeVarForm<double>::Global = new TypeVarForm<double>();       
+ FreeFempp::TypeVarForm<Complex>::Global = new TypeVarForm<Complex>();       
 
 }   
 
-
+void clean_lgfem()
+{
+  for (int i=0;i<kTypeSolveMat;++i)
+    delete dTypeSolveMat[i];
+   
+  delete l2interpreter;
+  delete  FreeFempp::TypeVarForm<double>::Global;
+  delete  FreeFempp::TypeVarForm<Complex>::Global;
+}
 template<class K>
 Expression IsFEcomp(const C_F0 &c,int i)
 {
@@ -4063,9 +4076,9 @@ Expression IsCFEcomp(const C_F0 &c,int i)
 
 C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx)
 {
-  ListOfId lid;
-  lid.push_back(UnId(id));
-  return NewFEvariable(&lid,currentblock,fespacetype,init,cplx);
+  ListOfId * lid =new ListOfId;
+  lid->push_back(UnId(id));
+  return NewFEvariable(lid,currentblock,fespacetype,init,cplx);
 }
 
 C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx)
@@ -4109,7 +4122,7 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
     }
      str += "]";
      bool binit= !init.Empty(); 
-     char * name = strcpy(new char[str.size()+1],str.c_str());
+     char * name = strcpy(CodeAllocT<char>::New(str.size()+1),str.c_str());
      C_F0 ret= binit ? currentblock->NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,init))
                      : currentblock->NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype));
      C_F0 base = currentblock->Find(name);
@@ -4119,6 +4132,7 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
      else
       for (int i=0;i<n;i++) 
          currentblock->NewID(cf0type,ids[i].id, C_F0(new FEi(base,i,n), rtype) ); 
+      delete pids; // add FH 25032005 
 
       return ret ; 
 }
@@ -4146,9 +4160,9 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
 
 C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray,bool cplx)
 { 
-  ListOfId lid;
-  lid.push_back(UnId(id));
-  return NewFEarray(&lid,currentblock,fespacetype,sizeofarray,cplx);
+  ListOfId *lid= new ListOfId;
+  lid->push_back(UnId(id));
+  return NewFEarray(lid,currentblock,fespacetype,sizeofarray,cplx);
 }
    
 C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray,bool cplx)
@@ -4189,7 +4203,7 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
      if(i<n-1) str +=",";
     }
      str += "]";
-     char * name = strcpy(new char[str.size()+1],str.c_str());
+     char * name = strcpy(CodeAllocT<char>::New(str.size()+1),str.c_str());
      C_F0 ret=  currentblock->NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,sizeofarray)); 
      C_F0 base = currentblock->Find(name);
      if(cplx)
@@ -4197,8 +4211,9 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
          currentblock->NewID(cf0type,ids[i].id, C_F0(new CFEi(base,i,n), rtype) ); 
      else
       for (int i=0;i<n;i++) 
-         currentblock->NewID(cf0type,ids[i].id, C_F0(new FEi(base,i,n), rtype) ); 
-
+         currentblock->NewID(cf0type,ids[i].id, C_F0(new FEi(base,i,n), rtype) );
+         
+     delete pids ; // add FH 25032005 
       return ret ; 
 
 }

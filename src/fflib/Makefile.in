@@ -16,6 +16,8 @@
 
 # Makefile using Automake + Autoconf
 # ----------------------------------
+SHELL = @SHELL@
+
 # $Id$
 
 SOURCES = $(libff_a_SOURCES) $(EXTRA_libff_a_SOURCES)
@@ -225,7 +227,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 noinst_LIBRARIES = libff.a
 libff_a_SOURCES = AFunction.cpp AFunction2.cpp lex.cpp lgmesh.cpp \
-lgmat.cpp ../femlib/Drawing.cpp	\
+CodeAlloc.cpp lgmat.cpp ../femlib/Drawing.cpp	\
 ../femlib/gibbs.cpp ../femlib/CheckPtr.cpp ../femlib/fem.cpp		\
 ../femlib/QuadratureFormular.cpp ../femlib/FESpace.cpp			\
 ../femlib/Element_RT.cpp ../femlib/mshptg.cpp ../femlib/FQuadTree.cpp	\
@@ -237,7 +239,8 @@ lgmat.cpp ../femlib/Drawing.cpp	\
 InitFunct.cpp ../Algo/lgalgo.cpp ../femlib/Element_P2h.cpp load.cpp	\
 lgfem.cpp AFunction.hpp AnyType.hpp error.hpp gmres.hpp InitFunct.hpp	\
 lex.hpp lgfem.hpp lgsolver.hpp Operator.hpp problem.hpp Serialize.hpp	\
-showverb.hpp String.hpp throwassert.hpp versionnumber.hpp
+showverb.hpp String.hpp throwassert.hpp versionnumber.hpp               \
+CodeAlloc.cpp CodeAlloc.hpp 
 
 
 # eigenvalue.cpp is optional (see configure.ac)
@@ -251,6 +254,73 @@ INCLUDES = -I../lglib -I../bamglib -I../Graphics -I../femlib	\
 # Build date changes at every build
 EXTRA_DIST = strversionnumber.m4
 BUILT_SOURCES = strversionnumber.cpp
+<<<<<<< Makefile.in
+subdir = src/fflib
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES =
+LIBRARIES = $(noinst_LIBRARIES)
+
+libff_a_AR = $(AR) cru
+am_libff_a_OBJECTS = AFunction.$(OBJEXT) AFunction2.$(OBJEXT) \
+	lex.$(OBJEXT) lgmesh.$(OBJEXT) CodeAlloc.$(OBJEXT) \
+	lgmat.$(OBJEXT) Drawing.$(OBJEXT) gibbs.$(OBJEXT) \
+	CheckPtr.$(OBJEXT) fem.$(OBJEXT) QuadratureFormular.$(OBJEXT) \
+	FESpace.$(OBJEXT) Element_RT.$(OBJEXT) mshptg.$(OBJEXT) \
+	FQuadTree.$(OBJEXT) QuadTree.$(OBJEXT) R2.$(OBJEXT) \
+	Meshio.$(OBJEXT) Mesh2.$(OBJEXT) Metric.$(OBJEXT) \
+	BamgFreeFem.$(OBJEXT) MeshDraw.$(OBJEXT) MeshGeom.$(OBJEXT) \
+	MeshQuad.$(OBJEXT) SetOfE4.$(OBJEXT) MeshRead.$(OBJEXT) \
+	MeshWrite.$(OBJEXT) problem.$(OBJEXT) \
+	strversionnumber.$(OBJEXT) InitFunct.$(OBJEXT) lgalgo.$(OBJEXT) \
+	Element_P2h.$(OBJEXT) load.$(OBJEXT) lgfem.$(OBJEXT) \
+	CodeAlloc.$(OBJEXT)
+libff_a_OBJECTS = $(am_libff_a_OBJECTS)
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+am__depfiles_maybe = depfiles
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/AFunction.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/AFunction2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/BamgFreeFem.Po ./$(DEPDIR)/CheckPtr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CodeAlloc.Po ./$(DEPDIR)/Drawing.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Element_P2h.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Element_RT.Po ./$(DEPDIR)/FESpace.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/FQuadTree.Po ./$(DEPDIR)/InitFunct.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Mesh2.Po ./$(DEPDIR)/MeshDraw.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/MeshGeom.Po ./$(DEPDIR)/MeshQuad.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/MeshRead.Po ./$(DEPDIR)/MeshWrite.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Meshio.Po ./$(DEPDIR)/Metric.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/QuadTree.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/QuadratureFormular.Po ./$(DEPDIR)/R2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/SetOfE4.Po ./$(DEPDIR)/eigenvalue.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/fem.Po ./$(DEPDIR)/gibbs.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lex.Po ./$(DEPDIR)/lgalgo.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lgfem.Po ./$(DEPDIR)/lgmat.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lgmesh.Po ./$(DEPDIR)/load.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/mshptg.Po ./$(DEPDIR)/problem.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/strversionnumber.Po
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+CXXFLAGS = @CXXFLAGS@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libff_a_SOURCES) $(EXTRA_libff_a_SOURCES)
+DIST_COMMON = Makefile.am Makefile.in
+SOURCES = $(libff_a_SOURCES) $(EXTRA_libff_a_SOURCES)
+
+=======
+>>>>>>> 1.30
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -303,6 +373,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AFunction2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BamgFreeFem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CheckPtr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CodeAlloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Drawing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Element_P2h.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Element_RT.Po@am__quote@

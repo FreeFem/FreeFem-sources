@@ -263,7 +263,8 @@ id: ID | FESPACE;
 
 list_of_dcls:    ID                         {$$=currentblock->NewVar<LocalVariable>($1,dcltype)}   
               |  ID '='   no_comma_expr     {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3)}
-              |  ID  '(' parameters_list ')' {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3)}
+              |  ID  '(' parameters_list ')' {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3);
+                                              $3.destroy()}
               |  list_of_dcls ',' list_of_dcls  {$$=C_F0($1,$3)}
                            
               
@@ -319,7 +320,8 @@ spaceIDs :    fespace               spaceIDb    { $$=0;  $$ = $2}
 
 fespace_def:
    ID '(' parameters_list ')' 
-     {$$=currentblock->NewVar<LocalVariableFES,size_t>($1,atype<pfes*>(),$3,dimFESpaceImage($3))};
+     {$$=currentblock->NewVar<LocalVariableFES,size_t>($1,atype<pfes*>(),$3,dimFESpaceImage($3));
+     $3.destroy(); };
      
 fespace_def_list:  fespace_def
                  | fespace_def_list ',' fespace_def {$$=C_F0($1,$3)}
@@ -333,17 +335,23 @@ declaration:   type_of_dcl {dcltype=$1} list_of_dcls ';' {$$=$3}
                    {   /* use the stack to store the prev return type*/
                       assert(kkembtype+1<nbembtype);
                       rettype[++kkembtype] = $2->right();
-                      $<routine>5=new Routine($1,$2->right(),$3,$5,currentblock);}
+                      $<routine>5=new Routine($1,$2->right(),$3,$5,currentblock);
+                     // cout << " \n after new routine \n " << endl;                      
+                      }
                     '{' instructions'}' 
                      { currentblock=$<routine>5->Set($9);
                        currentblock->Add($3,"(",$<routine>5);
                        kkembtype--;
-                       $$=0 }
+                       $$=0;
+                    
+                        }
              | FUNCTION ID '(' list_of_id_args ')' 
                       {currentblock = new Block(currentblock); $1->SetArgs($4);}
                    '='   no_comma_expr  ';' 
                       {  $<cinst>$=currentblock->close(currentblock);
-                         $$=currentblock->NewID($1,$2,$8,*$4)} 
+                         $$=currentblock->NewID($1,$2,$8,*$4);
+                         delete $4; //  FH 23032005
+                         } 
 ;              
 
 begin: '{'  {  currentblock = new Block(currentblock)};
@@ -524,7 +532,7 @@ void ForDebug()
   int i=0;
   i++;
 }
-extern void ShowAlloc(const char *s, size_t lg);
+//extern void ShowAlloc(const char *s, size_t lg);
 //extern void ShowNbAlloc(const char *s);
 void init_lgfem() ;
 void init_lgmesh() ;
@@ -534,6 +542,8 @@ string  StrVersionNumber();
 
 int mymain (int  argc, char **argv)
 {
+  size_t lg000;
+ // ShowAlloc("begin main ",lg000);
   int retvalue=0;
 #ifdef PARALLELE
    initparallele(argc,argv);
@@ -603,8 +613,10 @@ int mymain (int  argc, char **argv)
     if(retvalue==0)  
       if(currentblock) 
 	retvalue=1,cerr <<  "Error:a block is not close" << endl;   
-      else 
+      else {
+        cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg << endl;
 	cerr <<  "Bien: On a fini Normalement" << endl; 
+	}
   }
 
   catch (Error & e) 
@@ -613,11 +625,31 @@ int mymain (int  argc, char **argv)
       cerr << "error " << e.what() 
 	   << "\n code = "<<  retvalue << endl;
     }
+  catch(std::ios_base::failure & e)
+    {
+     cerr << "std  catch io failure \n what : " << e.what() << endl;; 
+     cerr << " at exec line  " << TheCurrentLine << endl; 
+    }
+  catch(std::exception & e)
+    {
+     cerr << "std  catch exception \n what : " << e.what() << endl;; 
+     cerr << " at exec line  " << TheCurrentLine << endl; 
+    
+    }
+  catch(...)
+   {
+     cerr << "Strange catch exception ???\n"; 
+     cerr << " at exec line  " << TheCurrentLine << endl; 
+    }
+     
 #ifdef PARALLELE
   end_parallele();
 #endif
   //  currentblock->close(currentblock).eval(thestack);
   fingraphique();
+  delete zzzfff;
+  
+   // ClearMem();
   return retvalue;
 }
 
