@@ -13,6 +13,7 @@ ListOfUnAllocPtr.bin
 Makefile
 Makefile.in
 Output
+speedtest.out
 stamp-h
 stamp-h1
 *.tar.gz

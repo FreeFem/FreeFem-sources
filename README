@@ -81,6 +81,9 @@ To run an interactive test of FreeFem++ (standard version):
 To run a speed test:
 > make speedtest
 
+Creating the documentation in .ps and .pdf format (in the "DOC" directory):
+> make doc
+
 Examples
 --------
 
