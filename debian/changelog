@@ -1,0 +1,42 @@
+freefem++ (1.41-1) unstable; urgency=low
+
+  * New upstream release
+  * Integrated the debian part in the upstream sources
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Wed, 23 Jun 2004 17:11:55 +0200
+
+freefem++ (1.40-2) unstable; urgency=low
+
+  * Splitted to one binary package per flavor of FreeFem++
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Wed, 23 Jun 2004 17:11:55 +0200
+
+freefem++ (1.40-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Sat,  8 May 2004 19:27:57 +0200
+
+freefem++ (1.38-3) unstable; urgency=low
+
+  * Added the manual in the documentation
+  * Created a man page pointing to the manual
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Mon, 29 Mar 2004 01:16:34 +0200
+
+freefem++ (1.38-2) unstable; urgency=low
+
+  * Added the rest of the examples
+  * Added Freefem++-glx
+  * Changed g++ to c++ in the Makefile
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Tue, 23 Mar 2004 02:39:26 +0100
+
+freefem++ (1.38-1) unstable; urgency=low
+
+  * Initial Release.
+  * This is my first Debian package.
+  * Adjusted src/Makefile-Debian to fix $BIN_DIR problems.
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Tue, 17 Feb 2004 22:52:53 +0100
+
