@@ -21,5 +21,5 @@ EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
 libff_a_LIBADD=@EIGENOBJ@
 libff_a_DEPENDENCIES=@EIGENOBJ@
 
-INCLUDES=-I../fflib -I../bamglib -I../Graphics -I../femlib	\
+INCLUDES=-I../lglib -I../bamglib -I../Graphics -I../femlib	\
 -I$(top_srcdir)/arpack/arpack++/include
