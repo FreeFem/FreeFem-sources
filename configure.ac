@@ -1,5 +1,5 @@
-# Configure script using Automake + Autoconf for FreeFem++
-# --------------------------------------------------------
+# Configuration script using Automake + Autoconf for FreeFem++
+# ------------------------------------------------------------
 
 # Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
 # $Id$
@@ -10,12 +10,12 @@ AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AC_PROG_MAKE_SET
 
-# To locate objet files for different architectures in separate
-# directories
+# Find out the architecture. This will be used as a name for the
+# directory containing objet files for each different architecture.
 
 AC_CANONICAL_BUILD
 
-# Compilers
+# Necessary compilers
 
 AC_PROG_CXX
 AC_PROG_YACC
@@ -23,6 +23,7 @@ AM_PROG_LEX
 # AC_F77_LIBRARY_LDFLAGS
 
 # Some useful libraries
+
 AC_CHECK_LIB(pthread,pthread_create)
 
 
@@ -70,8 +71,9 @@ then
 	AC_MSG_ERROR(Cannot find BLAS library)
 fi
 
-# Looking for the ARPACK
-# ----------------------
+# Looking for ARPACK
+# ------------------
+
 # Trying default locations
 #
 ff_arpack_ok=no   
@@ -83,7 +85,7 @@ if test "$ff_blas_ok" = yes;
 	AC_SUBST(arpacklib,-larpack)
         ff_arpack_ok=yes)
 	
-   # Trying 
+   # Trying "locate"
    if test "$ff_arpack_ok" = no;
    then
         AC_MSG_CHECKING(for libarpack with locate)
