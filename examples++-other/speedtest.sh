@@ -18,7 +18,7 @@ echo CXXFLAGS=$CXXFLAGS >> speedtest.out
 # Run the actual test
 $ffexe lap3-cpu.edp	\
 		|grep -E --					\
-		'-- lap (cholesky|CG|UMFPACK) +[0-9]+x[0-9]+'	\
+		'-- lap (cholesky|CG|UMFPACK|LU|Crout) +[0-9]+x[0-9]+'	\
 		|tee -a speedtest.out
 if test $PIPESTATUS != 0
     then
