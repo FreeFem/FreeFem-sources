@@ -315,7 +315,7 @@ fi
 #  --------------------
 ff_cadna_ok=no
 ff_libs_old="$LIBS"
-ff_ldflag_old="$LDFLAGS"
+ff_ldflags_old="$LDFLAGS"
 ff_cadna_dir="${curdir}/download/cadna"
   LDFLAGS="$LDFLAGS -L$ff_cadna_dir"
   AC_CHECK_LIB(cadnafree,arit_zero,
@@ -537,7 +537,7 @@ then
         AC_ARG_WITH(umfpack,
                 --with-umfpack=library	Use a specific version of Umfpack,
                 ff_umfpack_ok=yes
-                ff_umfpack_lib="$ff_umfpack_lib ${withval}"
+                ff_umfpack_lib="${withval} $ff_umfpack_lib"
 		AC_DEFINE(HAVE_LIBUMFPACK,1,
 			Umfpack is used for sparse matrices computations))
 
