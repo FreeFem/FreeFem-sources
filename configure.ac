@@ -600,7 +600,7 @@ AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 AC_CHECK_PROG(ff_fltkconfig,fltk-config,yes,no)
 if test "$ff_fltkconfig" = yes
 then
-	ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-ide${EXEEXT}"
+	ff_ideprog="FreeFem++-cs${EXEEXT} FreeFem++-cs-server${EXEEXT} FreeFem++-ide${EXEEXT}"
 fi
 
 # creating all makefiles
