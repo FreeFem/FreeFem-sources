@@ -87,7 +87,7 @@ speedtest: all
 # number as well.
 
 WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
-	m4 -DVERSION=$(VERSION)-$(PACKAGE_VERSION)$(OPTIM_TYPE) \
+	m4 -DVERSION=$(VERSION)-$(FREEFEM_PACKAGING)$(OPTIM_TYPE) \
 		WindowsPackage.m4 > WindowsPackage.iss
 
 # Debian package
@@ -146,7 +146,7 @@ FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
 # -------------------------
 
 # Include kernel and libc version in static package name
-PACKAGE_NAME=FreeFem++v$(VERSION)-$(PACKAGE_VERSION)_linux-$(KERNEL_VERSION)_$(LIBC_VERSION)$(OPTIM_TYPE)
+PACKAGE_NAME=FreeFem++v$(VERSION)-$(FREEFEM_PACKAGING)_linux-$(KERNEL_VERSION)_$(LIBC_VERSION)$(OPTIM_TYPE)
 
 linux-package: $(PACKAGE_NAME).tgz
 $(PACKAGE_NAME):all
