@@ -1,0 +1,209 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Description" content="FreeFem++ is a language that allows 
+the resolution of partial      differential equation using the finite 
+element method">
+   <meta name="Keywords" content="language, c++, Multi-platform, free      
+software, Navier-Stokes, elasticity, convection-diffusion, heat      
+equation, linear elliptic PDE's">
+   <meta name="GENERATOR" content="Mozilla/4.5 (Macintosh; I; PPC) 
+[Netscape]">
+   <title>Freefem++ Home Page (07-juillet-2004)</title>
+<!-- SUMMARY:                                -->
+<!-- AUTHOR:       Frederic hecht     -->
+<!-- ORG:                                    -->
+<!-- ORIG-DATE:    23 nov 2001     -->
+<!-- DESCRIPTION:                            -->
+<!-- DESCRIP-END.                            -->
+<link href="mailto:hecht@ann.jussieu.fr" rev="Author">
+</head>
+<body text="#14277D" bgcolor="#FFFFFF" link="#9026D0" vlink="#609F98" 
+alink="#F0000F">
+&nbsp;
+<center><table WIDTH="500" 
+BACKGROUND="@ffd@bar.jpg" >
+<tr>
+<td ALIGN=LEFT><font color="#0000FF"><font 
+size=+2>FreeFem++  version @ver@
+ <img src="@ffd@new.gif">
+</font></font></td> <td ALIGN=left><font size=+3 
+color="#FF0000"><b><A HREF="#download"> download </font></b></A></td>
+</tr>
+</table></center>
+
+<center><table BORDER=0 WIDTH="600" >
+<tr>
+<center>
+<a href="http://www.upmc.fr"> Universit&eacute Pierre et Marie Curie</a> <a href="http://www.ann.jussieu.fr">  Laboratoire Jacques-Louis Lions</a>
+</font>
+</center>
+<tr>
+
+<td ALIGN=LEFT><b>FreeFem++</b> is an implementation of a language dedicated
+to the finite element method. It provides you a way to solve Partial 
+Differential
+Equations (PDE) simply.&nbsp; Problems involving partial differential 
+equations
+(pde) of&nbsp; several branches of physics such as fluid-structure 
+interactions
+require interpolations of data on several meshes and their manipulation
+within one program. In this report we build on a fast quadtree-based 
+interpolation
+algorithm, propose a language for the manipulation of data on multiple
+meshes (generated with <a 
+href="http://www-rocq.inria.fr/gamma/cdrom/www/freefem/../bamg/eng.htm">bamg</a>) 
+and test by designing an&nbsp; extension of 
+<a href="freefem/fraold.htm">freefem</a>,&nbsp;
+<a href="freefemplus.htm">freefem+</a>.&nbsp; For more detail see the
+<a href="@dir@manual-full.pdf"> the full manual (manual-full) </a> (@manpdf@) ; 
+<a href="@dir@manual.pdf"> or the old version but shorter </a> (@omanpdf@).
+
+<br><b>FreeFem++</b> is written in a C++ idioms, this software run on all
+unix OS (with g++ 2.95.2 or more and  X11R6 or OpenGL with GLUT)) , 
+ on  Window95, 98, 2000, NT, and&nbsp;&nbsp;
+ on  MacOS 9 (carbon version) and a full MacOS X version with OpenGL.
+
+
+<br><b>Remark:</b> the <a href="HISTORY"> history<a/> file give all the life of the software.
+<br> <font size +1 color="#0000FF"> Before downloading you can try  freefem++ on the web :
+<a href="http://www.freefem.org/ffw/index.php"> just click here  (ffw) </a> </font>
+<p>You may ask questions, send comments or bug reports to <a 
+href="mailto:hecht@ann.jussieu.fr">Fr&eacute;d&eacute;ric
+Hecht&nbsp;</a> .
+<p>the <b>FreeFem++ </b>team is:&nbsp; 
+<font color="#FF0000"><a href="http://www.ann.jussieu.fr/~pironnea">Olivier Pironneau</a></font> ,
+<font color="#FF0000"><a href="http://www.ann.jussieu.fr/~hecht">Fr&eacute;d&eacute;ric Hecht</a></font>.
+<font color="#FF0000"><a href="http://www.ann.jussieu.fr/~lehyaric">Antoine Le Hyaric</a></font>.
+
+
+<p><img SRC="@ffd@bar.jpg" 
+ALT="bar"  align=CENTER>
+<menu>&nbsp;</menu>
+A very small example of what you can do to solve&nbsp; Poisson&nbsp; 
+equation
+on L shape.
+<br>&nbsp;
+<blockquote><TT><font size=-1><PRE>
+border aaa(t=0,1){x=t;y=0;};
+border bbb(t=0,0.5){x=1;y=t;};
+border ccc(t=0,0.5){x=1-t;y=0.5;};
+border ddd(t=0.5,1){x=0.5;y=t;};
+border eee(t=0.5,1){x=1-t;y=1;};
+border fff(t=0,1){x=0;y=1-t;};
+mesh Th = buildmesh (aaa(6) + bbb(4) + ccc(4) +ddd(4) + eee(4) + fff(6));
+fespace Vh(Th,P1);  <font color=red> //  to change P1 in P2 to make P2 finite element.</font>
+Vh u=0,v;
+func f= 1;
+func g= 0;
+int i=0;
+real error=0.1, coef= 0.1^(1./5.);
+problem Probem1(u,v,solver=CG,eps=-1.0e-6) =
+    int2d(Th)(  dx(u)*dx(v) + dy(u)*dy(v)) 
+  + int2d(Th) ( v*f ) 
+  + on(aaa,bbb,ccc,ddd,eee,fff,u=g)  ;
+  
+for (i=0;i< 10;i++)
+{   
+  real d = clock();
+  Probem1; <font color=red>//  solve the problem </font>
+  plot(u,Th,wait=1);
+  Th=adaptmesh(Th,u,inquire=1,err=error);
+  error = error * coef;
+} ;
+
+</PRE></TT></blockquote>
+<p><img SRC="@ffd@bar.jpg" 
+ALT="bar"  align=CENTER>
+<center>
+<p><img SRC="@ffd@u4.jpg" 
+BORDER=0 height=250 width=250><img 
+SRC="@ffd@th4.jpg" BORDER=0 
+height=250 width=250> </p>
+<p> Solution on adapted mesh and associated mesh. </p>
+</center>
+<br>&nbsp;
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</pre>
+
+There is some on going work:
+<menu>
+<li>
+3D implementation: new solver, new mesh tools, new kind of finite element </li>
+
+<li>
+There will be some changes in the general policy for FreeFEM (GNU Public
+License, GPL)&nbsp;</li>
+</menu>
+</td>
+</tr>
+</table></center>
+<A NAME="download">
+
+<p><font size=0>This 
+<a href="http://www.ann.jussieu.fr/~hecht/ftp/freefem"> directory </A>
+contains the different version of <i>FreeFem</i>.</font>
+<p><font size=0>The latest version of  <i>Freefem++</i> is 
+<tt><font color="#FF0000"> @last@ </font> </tt></font>
+and you can get  the source from a csv server, do the following unix shell commands:
+<PRE><tt>
+cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs login
+<font color="#FF0000">(password = freefem++)</font>
+cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs co freefem++
+cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs co FFedit
+
+</tt></PRE>
+
+<menu>
+
+<li> All the sources and makefile <font size=-1>
+<a 
+href="@dir@@ftgz@"> @ftgz@
+(tar+gzip)</a>
+@tgz@  </font></li>
+
+<li>
+MacOS 9 Powerpc  (carbon) <font size=-1>
+<a href="@dir@@fsit@"> @fsit@
+(stuffit)  </a>     @sit@ </font>
+</li>
+
+<li>
+MacOS X Powerpc  (CoCoa and OpenGL) <font size=-1>
+<a href="@dir@@fapp@"> @fapp@ (tgz)  </a>     @app@ </font>
+</li>
+
+<li>
+Window 95,98,NT,2000,  XP <font size=-1>
+<a href="@dir@@fexe@"> @fexe@ (a setup file)
+</a>
+ @exe@ </font>
+
+ </font>
+</li>
+<li> the  documentation 
+<a href="@dir@manual-full.pdf"> manual-full</a> @manpdf@.
+<li> the old  documentation (smaller) 
+<a href="@dir@manual.pdf"> manual</a> @omanpdf@.
+</li>
+</menu>
+
+<center><img 
+SRC="@ffd@bar.jpg" ALT="bar"  
+align=CENTER></center>
+
+<p><br>
+<br>
+    <ADDRESS>Page cr&eacute;e par <A 
+HREF="mailto:hecht@ann.jussieu.fr">Fr&eacute;d&eacute;ric
+	Hecht</A></ADDRESS>
+    
+    <P>
+<!-- Created: Mon Mar  9 11:35:07 MET 1998 -->
+<!-- hhmts start -->
+Last modified: Mon May 13 13:56:46 CEST 2002
+<!-- hhmts end -->
+    <HR>
+    
+</body>
+</html>
