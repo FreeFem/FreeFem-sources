@@ -28,3 +28,8 @@ libff_a_DEPENDENCIES=@EIGENOBJ@
 INCLUDES=-I../lglib -I../bamglib -I../Graphics -I../femlib	\
 -I$(top_srcdir)/arpack/arpack++/include
 
+# Build date changes at every build
+BUILT_SOURCES=strversionnumber.cpp
+strversionnumber.cpp: FORCE
+	m4 -DVersionFreeFemDate="`date`" strversionnumber.m4 > $@
+FORCE:
