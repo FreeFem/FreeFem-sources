@@ -69,6 +69,8 @@ class QuadratureFormular1d {public:
 extern const QuadratureFormular1d QF_GaussLegendre1; 
 extern const QuadratureFormular1d QF_GaussLegendre2; 
 extern const QuadratureFormular1d QF_GaussLegendre3; 
+extern const QuadratureFormular1d QF_LumpP1_1D; 
+
 
 extern const QuadratureFormular QuadratureFormular_T_1;
 extern const QuadratureFormular QuadratureFormular_T_1lump;
