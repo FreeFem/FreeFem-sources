@@ -10,7 +10,7 @@ SUBDIRS=download src DOC examples++ examples++-tutorial		\
 examples++-eigen examples++-load examples++-mpi examples++-bug
 
 EXTRA_DIST=regtests.pl arpack/arpack++/include/*.h src/*/*.h			  \
-FreeFem++.*mcp.sit ffpc*mcp.zip COPYRIGHT HISTORY README BUGS TODO		  \
+FreeFem++.*mcp.sit ffpc*mcp.zip HISTORY README BUGS TODO			  \
 FreeFem++.app/Contents/Info.plist						  \
 FreeFem++.app/Contents/MacOS/FreeFem++ FreeFem++.app/Contents/PkgInfo		  \
 FreeFem++.app/Contents/Resources/Contents/Info.plist				  \
@@ -20,6 +20,9 @@ FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/info.nib		  \
 FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/NSAppleMenuImage.tiff \
 FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/objects.nib		  \
 FreeFem++.app/Contents/Resources/script
+
+changelog:
+	cvs2cl -w -S --fsf
 
 clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 

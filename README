@@ -1,238 +1,60 @@
-Compilation under unix and MacOs 10.2 or cygwin  with g++ 
---------------------------------------------------------
-please read all before began and read READ_ARPACK for eigen value tools
+Compilation under unix or MacOs 10 or cygwin with g++
+-----------------------------------------------------
 
+This file details specific "./configure" options for FreeFem++. For
+standard options, please refer to the file named "INSTALL".
 
-for compilation  under window or MacOs 
-with codewarrior compiler  see the README_CW.
+To produce FreeFem++ programs containing debugging symbols and no
+optimization, use "--enable-debug".
 
+By default, "./configure" looks for the BLAS, ARPACK and UMFPACK
+libraries on the local system. If it cannot find them, the compilation
+step ("make") downloads the missing ones (from their official
+websites) and compiles them. But you can specify a library
+file (ending with ".a") instead with the following options:
 
-The makefile is now parameter with the shell variable HOSTTYPE.
-All the local compilation variable is now defined in  file
-src/Makefile-$HOSTTYPE
+--with-arpack=archive
+--with-amd=archive
+--with-umfpack=archive
 
-the list of Makefile-*
-Makefile-Debian              # with    arpack, install the debian package arpak and arpack++
-Makefile-hp9000s700          # without arpack on hpux with g++
-Makefile-i386                # without arpack on i386 with g++
-Makefile-linux               # with    arpack    on linux with g++
-Makefile-linux-arpack        # with    arpack    on linux with g++
-Makefile-linux-noarpack      # without arpack    on linux with g++
-Makefile-macintosh           # with    arpack on MacOsX 10.2  with g++
-Makefile-macintosh-noarpack  # without arpack on MacOsX 10.2  with g++
-Makefile-macintosh-arpack    # with arpack  on MacOsX 10.2 with g++
+Here are the different versions of FreeFem++ produced by one
+compilation (some versions may be missing if your system does not
+support them):
 
-Suppose you HOSTTYPE are xxx begin by a version without arpack 
+* FreeFem++: standard version (using X11 graphics on Linux and MacOS
+  10, Win32 on Windows and CoCoa on MacOS 9)
 
-1) cp src/Makefile-... src/Makefile-xxx 
-2) edit src/Makefile-xxx 
-and  change if necessary the variables 
+* FreeFem++-nw: without graphics
 
-LIBLOCAL = -ldl -rdynamic  # for dlopen (see man dlopen and or load.cpp) on linux Debian 
-LIBLOCAL = -ldl  # for dlopen (see man dlopen and or load.cpp) on MacOS 10.3 or FreeBSD????
-or add   flags -DNO_LOAD if no  dlopen on you systeme to OFFFLAGS and GFFFLAGS  variable
+* FreeFem++-glx: graphics based on OpenGL
 
+* FreeFem++-agl: graphics based on MacOS CoCoa
 
-LIBX11= -L/usr/X11R6/lib -lX11 -lm 
-INCLUDEX11 = /usr/X11R6/include
-CXX=g++      #C++ compiler 
-BIN_DIR=$(HOME)/bin-$(HOSTTYPE)
+* FreeFem++-mpi: parallel version, without graphics
 
-In this case:
+The compilation has been tested under linux and MacOs/Darwin with g++
+version 2.95.2, 2.95.3, 3.01 3.1 3.3. It take 15 mn to compile all on
+my PowerBook G4 666Mhz 256MB, and it take more than 1 hour under
+linux.
 
-- the following file must be exist
-  /usr/X11R6/lib/libX11.a       see  the variable LIBX11
-  /usr/X11R6/include/X11/Xlib.h         see  the variable INCLUDEX11
+Examples
+--------
 
-- the shell command exist 
-  >  g++ -v 
-     Reading specs from /usr/libexec/gcc/darwin/ppc/3.3/specs
-     Thread model: posix
-     gcc version 3.3 20030304 (Apple Computer, Inc. build 1435)
-  The version must  be 2.95.2,  2.95.3 our 3.1 or better
+All the Examples are in the two directories examples++ and
+examples++-tutorial. The suffix is .edp ("equations aux derivees
+partielles" in French)
 
-- the BIN_DIR variable is the place to install (copy) the software.
+To test all the examples under unix: 
 
+> cd examples++; ../src/std/FreeFem++ all.edp
+> cd examples++-tutorial; ../src/std/FreeFem++ all.edp
 
- 
-if you need the eigen-value computation
-install the arpack and arpack++ library see README_ARPACK
-
-To defined $HOSTTYPE to linux  under sh shell
-> export HOSTTYPE=linux 
-or add HOSTTYPE=linux at the end of the make command, like
-> make all  HOSTTYPE=linux
-
-
-The variable defined in this file src/Makefile-$HOSTTYPE are :
-OOPTFLAGS= -O  # compilation with optimization
-GOPTFLAGS= -g  # compilation with debugging 
-
-
-# FLAGS for optimisated version 
-OFFFLAGS= -DDRAWING -DLONG_LONG  -DNCHECKPTR 
-#  flags for debug version  
-GFFFLAGS= -DDRAWING -DLONG_LONG -DCHECK_KN #-DWITHCHECK
-BIN_DIR=$(HOME)/bin-$(HOSTTYPE)   #install dir
-COMPILE_DIR=c-$(HOSTTYPE)        #compile dir.
-
-if no include file dlfcn.h add   flags -DNO_LOAD on you systeme to OFFFLAGS and GFFFLAGS  variable 
-because dlopen and dynamic link is not avialaible on your systeme.
-
-Freefem++ with eigen value (ARPACK)
-EIGEN= eigenvalue.o  # to compile the target eigenvalue.o 
-LIBARPACK=  (the arparck fortran  library)
-LIBF77=   (the fortan library)
-INCARPACKPP = -DEIGENVALUE -I(arpack++ include directory)
-
-Freefem++ without eigen value 
-EIGEN=
-LIBARPACK= 
-LIBF77=
-INCARPACKPP=
-
-and you can use the sparce linear solver  UMFPACK solver 
-#-----------------------
-#  UMFPACK
-#-----------------------
-UMFPACKDIR=$(src)/../../LinearSolver/UMFPACKv4.1
-#  include dir + -DUMFPACK flag 
-IUMFPACK= -DUMFPACK -I$(UMFPACKDIR)/UMFPACK/Include -I$(UMFPACKDIR)/AMD/Include 
-#  library 
-LIBUMFPACK= -L$(UMFPACKDIR)/AMD/Lib -L$(UMFPACKDIR)/UMFPACK/Lib  -lumfpack -lamd  $(LIBBLAS)
-
-To install umfpack 
- get umfpack at
- http://www.cise.ufl.edu/research/sparse/umfpack
- extarct all the file in a directory
- go to in the extract directory 
- edit the file UMFPACK/Make/Make.include ( the difficuly is to choose the de BLAS library)
-  so read the README file.
- build the 2 library  UMFPACK and AMD 
- go in top of extract directory and do:
- cd ../UMFPACK;make lib 
- cd ../AMD;make lib 
- the 2 library are : AMD/Lib/libamd.a                UMFPACK/Lib/libumfpack.a
-Good luck.  
-
-So to compile create the file  src/Makefile-$HOSTTYPE
-to add /or change the compiler, change the 
-location of X11R6 include and library.
-
-
-
-to compile optimized version (compilation take more than 30m)
-> make all 
-this create file 
- $(COMPILE_DIR)/FreeFem++
- $(COMPILE_DIR)/FreeFem++-nw
-
-
-or (for the debug version)
-> make all-g 
-this create file 
- $(COMPILE_DIR)-g/FreeFem++
- $(COMPILE_DIR)-g/FreeFem++-nw
-
->make mpi 
-to make parallele version , defined correctly the MPI variable
-
->make gl
-to make the MacOS OpenGL optimize  version for FreeFem++ CoCoa application
-
->make glx
-to make the OpenGL optimize version for FreeFem++  application with X11 window
-
->make mpi-g 
-to make parallele version , defined correctly the MPI variable
-
->make gl-g
-to make the MacOS OpenGL version for FreeFem++ CoCoa application
-
->make glx-g
-to make the OpenGL version for FreeFem++  application with X11 window
-
-the list of exec file can be 
-
-optimze version:
-
- $(COMPILE_DIR)/FreeFem++             application with X11 graphix
- $(COMPILE_DIR)/FreeFem++-nw          application without graphic window
- $(COMPILE_DIR)/FreeFem++-glx         application with X11 and OpenGL
- $(COMPILE_DIR)/FreeFem++-agl         cocoa application for macos with apple OpenGL
- $(COMPILE_DIR)/FreeFem++-mpi         mpi application without window graphic
- $(COMPILE_DIR)/FreeFem++-x11         application with X11 graphic
-
-same application with debug version: 
-
- $(COMPILE_DIR)-g/FreeFem++
- $(COMPILE_DIR)-g/FreeFem++-nw
- $(COMPILE_DIR)-g/FreeFem++-glx
- $(COMPILE_DIR)-g/FreeFem++-agl
- $(COMPILE_DIR)-g/FreeFem++-mpi
- $(COMPILE_DIR)-g/FreeFem++-x11
-
-
-
-> make install 
-to install all the  current version in directory  $(BIN_DIR)
-(this Makefile variable is define in src/Makefile-$HOSTTYPE) 
-remark: the directory must exist before install.
-
-The install file can be:
-
- FreeFem++          #  optimized X11 version
- FreeFem++-g        #  debug X11 version
- FreeFem++-nw       #  optimized postscript  version 
- FreeFem++-nw-g     #  debug     postscript  version 
- FreeFem++-mpi      #  optimized mpi version 
- FreeFem++-mpi-g    #  debug mpi version 
- FreeFem++-glx      #  optimized OpenGl with X11  version 
- FreeFem++-glx-g    #  debug OpenGl with X11 version 
- /Applications/FreeFem++.app  # Drag and Drop CoCoa MacOs Application with 
- FreeFem++-CoCoa    #  MacOS Shell script  for MacOS  OpenGL version  (MacOS 10.2 or better)
-                    #  use  /Applications/FreeFem++.app
-
-
---tested  under linux or MacOs/Darwin with the compilers 
-g++  version 2.95.2, 2.95.3, 3.01 3.1 3.3
-
-it take 15 mn to compile all all-g  on my PowerBook G4 666Mhz 256MB,
-and it take more than 1hour under linux.
-
-Under window or MacOs the soft was precompile
-
-All the Examples are in the  two directories
-examples++ and examples++-tutorial the suffixe is .edp 
- (equations aux derivees partielles in french)
-
-to test all the exemple under unix: 
-
-cd examples++; ../c-$HOSTTYPE/FreeFem++  all.edp
-cd examples++-tutorial; ../c-$HOSTTYPE/FreeFem++   all.edp
-
-
-Under MacOS 10.2 under terminal application:
-1) edit src/Makefile-macintosh to set your
-BIN_DIR=$(HOME)/bin/$(MACHTYPE)-$(VENDOR)-$(OSTYPE)
-for example to (if you have root access)
-BIN_DIR=/usr/local/bin 
-remark the BIN_DIR must be in your PATH shell variable
-2) compile with:
-make all all-g gl-g gl
-3) install:
-make install
-4) to run 
-FreeFem-CoCoa examples++-tutorial/all.edp
-5) to try the  dynamic linking loader exemple
-go to example++-load
-to compile with FreeFem++ software:  do:
-hecht@hydre:~/FreeFem++v1.38/examples++-load$ ./load.link myfunction 
-g++ -c -I../src -I../src/femlib -I../src/Graphics myfunction.cpp
-g++ -shared myfunction.o -o myfunction.so
-
-the test : 
-hecht@hydre:~/FreeFem++v1.38/examples++-load$ ../c-Debian-g/FreeFem++-nw load.edp
+To try the  dynamic linking loader example:
+> cd example++-load
+> ./load.link myfunction 
+> g++ -c -I../src/fflib -I../src/femlib -I../src/Graphics myfunction.cpp
+> g++ -shared myfunction.o -o myfunction.so
+> ../src/nw/FreeFem++-nw load.edp
 -- FreeFem++ v1.38 (date Tue Feb 10 12:04:30 CET 2004)
  file : load.edp
  Load: lg_fem  --  no UMFPACK => replace UMFPACK  by LU  
@@ -260,15 +82,10 @@ Bien: On a fini Normalement
                 CheckPtr:Nb of undelete pointer is 995 last 101
                 CheckPtr:Max Memory used     93.672 kbytes  Memory undelete 78619 
 
-remark, if the this do not word, you have to read carefully 
-the man of dlopen of you computer. 
+Note 1: if this does not work, please check the manual page of dlopen
+for your system.
 
-
-Warning on MacOSX, some link problem occures because the  RTTI and template
-with the apple version c++ (version 2.95.2)  and
-this working now  with new g++3 compiler (default compiler in MacOs 10.2) 
-and also with  g++-3.3 compiler
-
-
-
-
+Note 2: on MacOSX, link problems occur because of some incompatibility
+between RTTI, templates and the apple c++ version (2.95.2). But this
+is now working with the new g++3 compiler (default compiler in MacOs
+10.2) and also with g++-3.3.

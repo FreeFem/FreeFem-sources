@@ -1,0 +1,1285 @@
+2004-06-04 Friday 16:06  lehyaric
+
+	* .cvsignore, AUTHORS, COPYING, ChangeLog, INSTALL, Makefile,
+	Makefile.am, NEWS, WindowsPackage.iss, config-macos9.h,
+	config-wrapper.h, config.guess, config.sub, configure.ac, depcomp,
+	install-sh, logo.ico, missing, mkinstalldirs, net.mak, regtests.pl,
+	DOC/.cvsignore, DOC/Makefile, DOC/Makefile.am, DOC/manual.tex,
+	download/.cvsignore, download/Makefile.am,
+	download/arpack/.cvsignore, download/arpack/ARmake.inc,
+	download/arpack/Makefile.am, download/blas/.cvsignore,
+	download/blas/Makefile.am, download/umfpack/.cvsignore,
+	download/umfpack/AMD_Make.include, download/umfpack/Makefile.am,
+	download/umfpack/UMFPACK_Make.include, examples++/.cvsignore,
+	examples++/Makefile.am, examples++-bug/.cvsignore,
+	examples++-bug/Makefile.am, examples++-eigen/.cvsignore,
+	examples++-eigen/Makefile.am, examples++-load/.cvsignore,
+	examples++-load/Makefile.am, examples++-mpi/.cvsignore,
+	examples++-mpi/Makefile.am, examples++-tutorial/.cvsignore,
+	examples++-tutorial/Makefile.am, src/.cvsignore, src/AFunction.cpp,
+	src/AFunction.hpp, src/AnyType.hpp, src/InitFunct.cpp,
+	src/InitFunct.hpp, src/Makefile.am, src/Operator.hpp,
+	src/Serialize.hpp, src/String.hpp, src/config_freefem_mpi.hpp,
+	src/config_freefem_v3.hpp, src/config_freefem_v3_g.hpp,
+	src/depcomp, src/error.hpp, src/gmres.hpp, src/lex.cpp,
+	src/lex.hpp, src/lg.tab.cpp, src/lg.tab.hpp, src/lg.y,
+	src/lgfem.cpp, src/lgfem.hpp, src/lgmesh.cpp, src/lgsolver.hpp,
+	src/load.cpp, src/problem.cpp, src/problem.hpp, src/showverb.hpp,
+	src/strversionnumber.cpp, src/throwassert.hpp, src/Algo/.cvsignore,
+	src/Algo/Makefile.am, src/Graphics/Pcrgraph.cpp,
+	src/Graphics/glrgraph.hpp, src/agl/.cvsignore, src/agl/Makefile.am,
+	src/bamglib/.cvsignore, src/bamglib/Makefile.am,
+	src/femlib/.cvsignore, src/femlib/Makefile.am,
+	src/femlib/MatriceCreuse.hpp, src/fflib/.cvsignore,
+	src/fflib/AFunction.cpp, src/fflib/AFunction.hpp,
+	src/fflib/AnyType.hpp, src/fflib/InitFunct.cpp,
+	src/fflib/InitFunct.hpp, src/fflib/Makefile.am,
+	src/fflib/Operator.hpp, src/fflib/Serialize.hpp,
+	src/fflib/String.hpp, src/fflib/error.hpp, src/fflib/gmres.hpp,
+	src/fflib/lex.cpp, src/fflib/lex.hpp, src/fflib/lg.tab.hpp,
+	src/fflib/lgfem.cpp, src/fflib/lgfem.hpp, src/fflib/lgmesh.cpp,
+	src/fflib/lgsolver.hpp, src/fflib/load.cpp, src/fflib/problem.cpp,
+	src/fflib/problem.hpp, src/fflib/showverb.hpp,
+	src/fflib/strversionnumber.cpp, src/fflib/throwassert.hpp,
+	src/fflib/versionnumber.hpp, src/glx/.cvsignore,
+	src/glx/Makefile.am, src/lglib/.cvsignore, src/lglib/Makefile.am,
+	src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp, src/lglib/lg.y,
+	src/mpi/.cvsignore, src/mpi/Makefile.am, src/mpi/parallelempi.cpp,
+	src/nw/.cvsignore, src/nw/Makefile.am, src/std/.cvsignore,
+	src/std/Makefile.am, src/x11/.cvsignore, src/x11/Makefile.am:
+
+	Les modifications faites dans la branche "alh-autoconf" sont
+	réintégrées à la branche principale.
+
+2004-06-04 Friday 15:26  lehyaric
+
+	* configure.ac, regtests.pl, download/umfpack/Makefile.am,
+	examples++/arrayoFVh.edp, examples++-eigen/.cvsignore,
+	examples++-tutorial/.cvsignore, src/Graphics/Pcrgraph.cpp,
+	src/Graphics/glrgraph.hpp, src/fflib/error.hpp,
+	src/lglib/lg.tab.cpp, src/lglib/lg.y:
+
+	Compilation ok sur Hydre.  Codes de retour d'erreur mieux propagés
+	dans FreeFem++.
+
+2004-06-04 Friday 15:22  hecht
+
+	* examples++-tutorial/LaplaceP1bis.edp, src/AFunction.hpp,
+	src/lgfem.cpp, src/problem.cpp:
+
+	[no log message]
+
+2004-06-04 Friday 12:06  lehyaric
+
+	* configure.ac, download/umfpack/Makefile.am, src/x11/Makefile.am:
+
+	Compilation ok sur idared
+
+2004-06-03 Thursday 16:02  lehyaric
+
+	* .cvsignore, Makefile.am, WindowsBin.iss, WindowsPackage.iss,
+	WindowsSrc.iss, configure.ac, download/.cvsignore,
+	download/Makefile, download/Makefile.am,
+	download/arpack/.cvsignore, download/arpack/ARmake.inc,
+	download/arpack/Makefile.am, download/blas/.cvsignore,
+	download/blas/Makefile.am, download/umfpack/.cvsignore,
+	download/umfpack/AMD_Make.include, download/umfpack/Makefile.am,
+	download/umfpack/UMFPACK_Make.include:
+
+	Les bibliothèques BLAS, ARPACK et UMFPACK sont automatiquement
+	téléchargées et compilées si configure.ac ne trouve aucune version
+	locale. Testé sur Debian/unstable.
+
+2004-06-02 Wednesday 12:39  lehyaric
+
+	* download/Makefile:
+
+	Configuration des telechargements en cours
+
+2004-06-02 Wednesday 12:30  lehyaric
+
+	* .cvsignore, WindowsBin.iss, install.mak, net.mak,
+	DOC/Makefile.am:
+
+	Configuration des telechargements en cours
+
+2004-06-02 Wednesday 11:33  lehyaric
+
+	* Makefile.am, WindowsBin.iss, WindowsInstall.iss, WindowsSrc.iss,
+	src/Graphics/Pcrgraph.cpp, install.mak:
+
+	Ajout des libs Blas, Arpack et Umfpack en cours sous Windows
+
+2004-06-01 Tuesday 17:11  lehyaric
+
+	* .cvsignore, WindowsInstall.iss, logo.ico:
+
+	Premiere installation Windows
+
+2004-06-01 Tuesday 12:18  ly
+
+	* FFedit-1.2/: BUGS, CHANGES, DirBase.txt, DocName.txt, FFedit.tcl,
+	FFedit.vtp, FileName.txt, Makefile, MeshName.edp, README,
+	README-DOC, TODO, chemin.txt, couleurchar.txt, couleurfond.txt,
+	emc2cygwin.exe, emc2linux, emc2macosX, fontfamily.txt,
+	fontsize.txt, hosttype.txt, lestables, option-imprimante.txt,
+	optionimprimante.txt, pathwork.txt, runpath.txt,
+	tcl-8.4.0-cygwin.diff, th.msh, tk-8.4.0-cygwin.diff,
+	DOC/docFFedit.aux, DOC/docFFedit.log, DOC/docFFedit.pdf,
+	DOC/docFFedit.tex, NS/DirBase.txt, NS/FreeFem++_Navier-Stokes.tcl,
+	NS/FreeFem++_Navier-Stokes.tcl.bak,
+	NS/FreeFem++_Navier-Stokes.tcl~, NS/FreeFem++_Navier-Stokes.vtp,
+	NS/FreeFem++_Navier-Stokes.vtp.bak, NS/Navier-Stokes.edp,
+	NS/Navier-Stokes.edp~, NS/buildborder.edp, NS/chemin.txt,
+	NS/chemin.txt~, NS/donnees2NS.edp, NS/flowdata.edp,
+	NS/formulation-variationnelle.edp, NS/savemesh.edp,
+	NS/savemesh.vtp, NS/SaveMesh/savemesh.edp,
+	NS/SaveMesh/savemesh.tcl, NS/SaveMesh/savemesh.tcl.bak,
+	NS/SaveMesh/savemesh.vtp, NS/SaveMesh/savemesh.vtp.bak,
+	PBorder/DirBase.txt, PBorder/FreeFem++_Navier-Stokes.tcl,
+	PBorder/FreeFem++_Navier-Stokes.vtp, PBorder/buildborder.edp,
+	PBorder/chemin.txt, PBorder/chemin.txt~, PBorder/donnees2NS.edp,
+	PBorder/formulation-variationnelle.edp, PBorder/pborder.tcl,
+	PBorder/pborder.tcl.bak, PBorder/pborder.tcl~, PBorder/pborder.vtp,
+	PBorder/pborder.vtp.bak, PBorder/savemesh.edp,
+	PBorder/savemesh.vtp, PBorder/SaveMesh/savemesh.edp,
+	PBorder/SaveMesh/savemesh.tcl, PBorder/SaveMesh/savemesh.tcl.bak,
+	PBorder/SaveMesh/savemesh.vtp, PBorder/SaveMesh/savemesh.vtp.bak,
+	Print/FilePrint.tcl, Print/FilePrint.tcl.bak, Print/FilePrint.tcl~,
+	Print/FilePrint.vtp, Print/FilePrint.vtp.bak, Print/PrintName.txt,
+	Print/option-imprimante.txt, Printdoc/doc.tcl,
+	Printdoc/doc.tcl.bak, Printdoc/doc.tcl~, Printdoc/doc.vtp,
+	Printdoc/doc.vtp.bak, Printdoc/essai.tex,
+	Printdoc/Print2/BaseNameFileDocDep.txt,
+	Printdoc/Print2/DocPrint.tcl, Printdoc/Print2/DocPrint.tcl.bak,
+	Printdoc/Print2/DocPrint.tcl~, Printdoc/Print2/DocPrint.vtp,
+	Printdoc/Print2/DocPrint.vtp.bak, Printdoc/Print2/PrintName.txt,
+	Printdoc/documents/A_tutorial.edp.1.gif,
+	Printdoc/documents/A_tutorial.edp.2.gif,
+	Printdoc/documents/A_tutorial.edp.3.gif,
+	Printdoc/documents/A_tutorial.edp.4.gif,
+	Printdoc/documents/A_tutorial.edp.5.gif,
+	Printdoc/documents/A_tutorial.edp.6.gif,
+	Printdoc/documents/A_tutorial1.gif,
+	Printdoc/documents/A_tutorial2.gif,
+	Printdoc/documents/Adapt.edp.1.gif,
+	Printdoc/documents/Adapt.edp.2.gif,
+	Printdoc/documents/Adapt.edp.3.gif,
+	Printdoc/documents/AdaptindicatorP2.edp.1.gif,
+	Printdoc/documents/AdaptindicatorP2.edp.2.gif,
+	Printdoc/documents/AdaptindicatorP2.edp.3.gif,
+	Printdoc/documents/AdaptindicatorP2.edp.4.gif,
+	Printdoc/documents/Beam.edp.1.gif,
+	Printdoc/documents/Beam.edp.2.gif,
+	Printdoc/documents/Beam.edp.3.gif, Printdoc/documents/Beam.edp.gif,
+	Printdoc/documents/BisonGrammar.gif, Printdoc/documents/FF.sty,
+	Printdoc/documents/FFF.sty, Printdoc/documents/FFGUI_cygwin.1.gif,
+	Printdoc/documents/FFGUI_cygwin.10.gif,
+	Printdoc/documents/FFGUI_cygwin.11.gif,
+	Printdoc/documents/FFGUI_cygwin.2.gif,
+	Printdoc/documents/FFGUI_cygwin.3.gif,
+	Printdoc/documents/FFGUI_cygwin.4.gif,
+	Printdoc/documents/FFGUI_cygwin.5.gif,
+	Printdoc/documents/FFGUI_cygwin.6.gif,
+	Printdoc/documents/FFGUI_cygwin.7.gif,
+	Printdoc/documents/FFGUI_cygwin.8.gif,
+	Printdoc/documents/FFGUI_cygwin.9.gif,
+	Printdoc/documents/FluidStruct.edp.1.gif,
+	Printdoc/documents/FluidStruct.edp.2.gif,
+	Printdoc/documents/FluidStruct.edp.3.gif,
+	Printdoc/documents/FluidStruct.edp.4.gif,
+	Printdoc/documents/FluidStruct.edp.5.gif,
+	Printdoc/documents/FluidStruct.edp.6.gif,
+	Printdoc/documents/FluidStruct.edp.7.gif,
+	Printdoc/documents/FluidStruct.edp.8.gif,
+	Printdoc/documents/FreeBoundary.edp.1.gif,
+	Printdoc/documents/FreeBoundary.edp.2.gif,
+	Printdoc/documents/FreeBoundary.edp.3.gif,
+	Printdoc/documents/FreeBoundary.edp.4.gif,
+	Printdoc/documents/FreeBoundary.edp.5.gif,
+	Printdoc/documents/FreeBoundary.edp.6.gif,
+	Printdoc/documents/HISTORY, Printdoc/documents/LaplaceP1.edp.1.gif,
+	Printdoc/documents/LaplaceP1.edp.2.gif,
+	Printdoc/documents/LaplaceP1.edp.3.gif,
+	Printdoc/documents/LaplaceP1.edp.doc,
+	Printdoc/documents/LaplaceP1P2h.edp.1.gif,
+	Printdoc/documents/LaplaceP1P2h.edp.2.gif,
+	Printdoc/documents/LaplaceP1P2h.edp.doc,
+	Printdoc/documents/LaplaceP1bis.edp.doc,
+	Printdoc/documents/LaplaceP1bis.edp.gif,
+	Printdoc/documents/LaplaceRT.edp.1.gif,
+	Printdoc/documents/LaplaceRT.edp.2.gif,
+	Printdoc/documents/LaplaceRT.edp.3.gif,
+	Printdoc/documents/LaplaceRT.edp.4.gif,
+	Printdoc/documents/LaplaceRT.edp.5.gif,
+	Printdoc/documents/LaplaceRT.edp.doc,
+	Printdoc/documents/ListAM.edp.doc, Printdoc/documents/ListAM.gif,
+	Printdoc/documents/MetricFile.edp.doc,
+	Printdoc/documents/MetricFile.gif,
+	Printdoc/documents/NSUzawaCahouetChabart.edp.1.gif,
+	Printdoc/documents/NSUzawaCahouetChabart.edp.2.gif,
+	Printdoc/documents/NSUzawaCahouetChabart.edp.3.gif,
+	Printdoc/documents/NSUzawaCahouetChabart.edp.4.gif,
+	Printdoc/documents/NSUzawaCahouetChabart.edp.doc,
+	Printdoc/documents/Newton.edp.doc,
+	Printdoc/documents/NewtonRaphson.edp.1.gif,
+	Printdoc/documents/NewtonRaphson.edp.2.gif,
+	Printdoc/documents/NewtonRaphson.edp.3.gif,
+	Printdoc/documents/NewtonRaphson.edp.gif,
+	Printdoc/documents/No-linear-elas.edp.1.gif,
+	Printdoc/documents/No-linear-elas.edp.10.gif,
+	Printdoc/documents/No-linear-elas.edp.11.gif,
+	Printdoc/documents/No-linear-elas.edp.12.gif,
+	Printdoc/documents/No-linear-elas.edp.13.gif,
+	Printdoc/documents/No-linear-elas.edp.2.gif,
+	Printdoc/documents/No-linear-elas.edp.3.gif,
+	Printdoc/documents/No-linear-elas.edp.4.gif,
+	Printdoc/documents/No-linear-elas.edp.5.gif,
+	Printdoc/documents/No-linear-elas.edp.6.gif,
+	Printdoc/documents/No-linear-elas.edp.7.gif,
+	Printdoc/documents/No-linear-elas.edp.8.gif,
+	Printdoc/documents/No-linear-elas.edp.9.gif,
+	Printdoc/documents/NonlinearCG.edp.1.gif,
+	Printdoc/documents/NonlinearCG.edp.2.gif,
+	Printdoc/documents/NonlinearCG.edp.3.gif,
+	Printdoc/documents/NonlinearCG.edp.4.gif,
+	Printdoc/documents/NonlinearCG.edp.5.gif,
+	Printdoc/documents/NonlinearCG.edp.6.gif,
+	Printdoc/documents/NonlinearCG.edp.doc,
+	Printdoc/documents/Operators.edp.1.gif,
+	Printdoc/documents/Operators.edp.2.gif,
+	Printdoc/documents/Operators.edp.3.gif,
+	Printdoc/documents/Operators.edp.4.gif,
+	Printdoc/documents/Operators.edp.5.gif,
+	Printdoc/documents/Operators.edp.6.gif,
+	Printdoc/documents/Operators.edp.7.gif,
+	Printdoc/documents/Operators.edp.8.gif,
+	Printdoc/documents/Operators.edp.doc,
+	Printdoc/documents/Parallelversionexperimental.edp.1.gif,
+	Printdoc/documents/Parallelversionexperimental.edp.2.gif,
+	Printdoc/documents/Parallelversionexperimental.edp.doc,
+	Printdoc/documents/Parallelversionexperimental.gif,
+	Printdoc/documents/Periodic.edp.1.gif,
+	Printdoc/documents/Periodic.edp.2.gif,
+	Printdoc/documents/Periodic.edp.3.gif,
+	Printdoc/documents/Periodic.edp.4.gif,
+	Printdoc/documents/Periodic.edp.doc,
+	Printdoc/documents/Readmesh.edp.1.gif,
+	Printdoc/documents/Readmesh.edp.2.gif,
+	Printdoc/documents/Readmesh.edp.3.gif,
+	Printdoc/documents/Readmesh.edp.gif, Printdoc/documents/Region.,
+	Printdoc/documents/Region.edp.1.gif,
+	Printdoc/documents/Region.edp.2.gif,
+	Printdoc/documents/Region.edp.3.gif,
+	Printdoc/documents/Region.edp.4.gif, Printdoc/documents/Region.g,
+	Printdoc/documents/Region.gfi,
+	Printdoc/documents/Schwarz-GC.edp.1.gif,
+	Printdoc/documents/Schwarz-GC.edp.2.gif,
+	Printdoc/documents/Schwarz-GC.edp.3.gif,
+	Printdoc/documents/Schwarz-GC.edp.4.gif,
+	Printdoc/documents/Schwarz-GC.edp.5.gif,
+	Printdoc/documents/Schwarz-no-overlap.edp.1.gif,
+	Printdoc/documents/Schwarz-no-overlap.edp.2.gif,
+	Printdoc/documents/Schwarz-no-overlap.edp.3.gif,
+	Printdoc/documents/Schwarz-no-overlap.edp.4.gif,
+	Printdoc/documents/Schwarz-overlap.edp.1.gif,
+	Printdoc/documents/Schwarz-overlap.edp.2.gif,
+	Printdoc/documents/Schwarz-overlap.edp.3.gif,
+	Printdoc/documents/Schwarz-overlap.edp.4.gif,
+	Printdoc/documents/StokesNavierStokes.edp.doc,
+	Printdoc/documents/StokesNavierStokes.edp.gif,
+	Printdoc/documents/TypesofLanguage.gif,
+	Printdoc/documents/a_tutorial.edp.doc,
+	Printdoc/documents/adapt.edp.doc,
+	Printdoc/documents/adaptindicatorP2.edp.doc,
+	Printdoc/documents/bbFiletype.gif, Printdoc/documents/beam.edp.doc,
+	Printdoc/documents/cavity.edp.1.gif,
+	Printdoc/documents/cavity.edp.2.gif,
+	Printdoc/documents/cavity.edp.3.gif,
+	Printdoc/documents/cavity.edp.4.gif,
+	Printdoc/documents/cavity.edp.5.gif,
+	Printdoc/documents/cavity.edp.6.gif,
+	Printdoc/documents/cavity.edp.7.gif,
+	Printdoc/documents/cavity.edp.8.gif,
+	Printdoc/documents/cavity.edp.doc,
+	Printdoc/documents/docFFGUI_cygwin.doc,
+	Printdoc/documents/docFFGUI_cygwin.gif,
+	Printdoc/documents/docFFGUI_cygwin1.gif,
+	Printdoc/documents/docFFGUI_cygwin10.gif,
+	Printdoc/documents/docFFGUI_cygwin11.gif,
+	Printdoc/documents/docFFGUI_cygwin12.gif,
+	Printdoc/documents/docFFGUI_cygwin2.gif,
+	Printdoc/documents/docFFGUI_cygwin3.gif,
+	Printdoc/documents/docFFGUI_cygwin4.gif,
+	Printdoc/documents/docFFGUI_cygwin5.gif,
+	Printdoc/documents/docFFGUI_cygwin6.gif,
+	Printdoc/documents/docFFGUI_cygwin7.gif,
+	Printdoc/documents/docFFGUI_cygwin8.gif,
+	Printdoc/documents/docFFGUI_cygwin9.gif,
+	Printdoc/documents/docFFGUI_unix.doc,
+	Printdoc/documents/docGUI.gif, Printdoc/documents/docGUI1.gif,
+	Printdoc/documents/docGUI10.gif, Printdoc/documents/docGUI11.gif,
+	Printdoc/documents/docGUI2.gif, Printdoc/documents/docGUI3.gif,
+	Printdoc/documents/docGUI4.gif, Printdoc/documents/docGUI5.gif,
+	Printdoc/documents/docGUI6.gif, Printdoc/documents/docGUI7.gif,
+	Printdoc/documents/docGUI8.gif, Printdoc/documents/docGUI9.gif,
+	Printdoc/documents/fluidStruct.edp.doc,
+	Printdoc/documents/freeboundary.edp.doc,
+	Printdoc/documents/nolinear-elas.edp.doc,
+	Printdoc/documents/readmesh.edp.doc,
+	Printdoc/documents/region.edp.doc,
+	Printdoc/documents/schwarz-gc.edp.doc,
+	Printdoc/documents/schwarz-no-overlap.edp.doc,
+	Printdoc/documents/schwarz-overlap.edp.doc, Setup/DirBase.txt,
+	Setup/chemin.txt, Setup/hosttype.txt, Setup/setup.tcl,
+	Setup/setup.tcl.bak, Setup/setup.tcl~, Setup/setup.vtp,
+	Setup/setup.vtp.bak, Un_exemple/Un_exemple.edp,
+	Un_exemple/essai3.edp, Un_exemple/exemple2.edp:
+
+	ajout de l'interface graphique FFedit-1.2
+
+2004-05-28 Friday 14:13  lehyaric
+
+	* config-wrapper.h, configure.ac, src/Makefile.am,
+	src/pc/.cvsignore, src/pc/Makefile.am, src/std/Makefile.am:
+
+	Le rpertoir src/std contient maintenant non plus une version x11
+	mais la version par défaut pour l'architecture (par exemple win32)
+
+2004-05-27 Thursday 17:00  lehyaric
+
+	* .cvsignore, config-macos9.h, config-wrapper.h, configure.ac,
+	regtests.pl, examples++/.cvsignore, examples++/Makefile.am,
+	examples++-bug/Makefile.am, examples++-eigen/Makefile.am,
+	examples++-load/Makefile.am, examples++-mpi/Makefile.am,
+	examples++-tutorial/Makefile.am, src/Makefile.am,
+	src/Graphics/Pcrgraph.cpp, src/fflib/AFunction.cpp,
+	src/fflib/lgfem.cpp, src/fflib/load.cpp, src/fflib/problem.cpp,
+	src/fflib/strversionnumber.cpp, src/fflib/versionnumber.hpp,
+	src/glx/Makefile.am, src/lglib/lg.tab.cpp, src/mpi/Makefile.am,
+	src/nw/Makefile.am, src/pc/.cvsignore, src/pc/Makefile.am,
+	src/std/Makefile.am, src/x11/Makefile.am:
+
+	Toute première version de FreeFem++ compilable sur Windows avec
+	Cygwin, Mingw, Automake et Autoconf. La version Windows est stockée
+	pour l'instant dans le répertoire src/pc mais sera déplacée dans
+	src/std.
+
+2004-05-26 Wednesday 22:22  hecht
+
+	* FreeFem++.mcp:
+
+	[no log message]
+
+2004-05-26 Wednesday 21:58  hecht
+
+	* DOC/FFF.sty, FreeFem++.mcp:
+
+	[no log message]
+
+2004-05-26 Wednesday 11:21  lehyaric
+
+	* configure.ac:
+
+	Clarification de quelques commentaires.
+
+2004-05-26 Wednesday 11:10  lehyaric
+
+	* DOC/.cvsignore, DOC/manual.tex, src/.cvsignore:
+
+	manual.tex est réinitialisé à sa version 1.6, car les modifications
+	présentes dans la version 1.6 semblent avoir disparu de la version
+	1.7 (probablement à cause d'une erreur de manipulation). Les
+	modifications présentes dans la version 1.7 seront réinsérées dans
+	une version ultérieure.
+
+2004-05-25 Tuesday 16:14  lehyaric
+
+	* configure.ac:
+
+	Trois options de configuration manuelle ajoutées:
+	--with-arpack=fichier.a --with-amd=fichier.a --with-arpack=fichier.a
+	Options testées sur macserv2
+
+2004-05-25 Tuesday 15:05  lehyaric
+
+	* .cvsignore, Makefile.am, configure.ac, regtests.pl,
+	DOC/.cvsignore, DOC/Makefile.am, DOC/manual.tex,
+	examples++/Makefile.am, examples++/aalapacien.edp,
+	examples++-bug/.cvsignore, examples++-bug/Makefile.am,
+	examples++-eigen/.cvsignore, examples++-eigen/Makefile.am,
+	examples++-load/.cvsignore, examples++-load/Makefile.am,
+	examples++-mpi/.cvsignore, examples++-mpi/Makefile.am,
+	examples++-tutorial/.cvsignore, examples++-tutorial/Makefile.am,
+	src/Makefile.am, src/agl/Makefile.am, src/lglib/Makefile.am:
+
+	- Modification de la procédure de test pour exécuter les scripts
+	all.edp
+	- Mise au point de la procédure de création d'archive .tar.gz avec
+	"make dist"
+
+2004-05-25 Tuesday 13:51  hecht
+
+	* examples++-tutorial/algo.edp:
+
+	[no log message]
+
+2004-05-25 Tuesday 12:31  ly
+
+	* DOC/: A_tutorial.tex, Adapt.tex, AdaptindicatorP2.tex, Beam.tex,
+	BisonGrammar.tex, FFGUI_cygwin_huge.tex, FluidStruct.tex,
+	FreeBoundary.tex, LaplaceP1.tex, LaplaceP1P2h.tex,
+	LaplaceP1bis.tex, LaplaceP1huge.tex, LaplaceRT.tex, ListAM.tex,
+	Makefile, MetricFile.tex, NSUawaCahouetChabart.tex,
+	NewtonRaphson.tex, No-linear-elas.tex, NonlinearCG.tex,
+	Operators.tex, Parallelversionexperimental.tex, Periodic.tex,
+	Readmesh.tex, Region.tex, Schwarz-GC.tex, Schwarz-no-overlap.tex,
+	Schwarz-overlap.tex, StokesNavierStokes.tex, TypesofLanguage.tex,
+	bbFiletype.tex, cavity.tex, docFFGUI.tex, docFFGUI_cygwin.tex,
+	docFFGUI_cygwin_huge.tex, docFFGUI_cygwinhuge.tex,
+	docFFGUI_unix.tex, docFFGUI_unix_huge.tex, docGUI.tex, manual.tex:
+
+	Chaque exemple a ete reecrit dans un fichier tex separe, et inclus
+	dans le manuel par la commande 'include' de Latex.
+
+2004-05-25 Tuesday 10:50  lehyaric
+
+	* configure.ac, regtests.pl, src/agl/Makefile.am,
+	src/glx/Makefile.am, src/nw/Makefile.am, src/std/Makefile.am,
+	src/x11/Makefile.am:
+
+	Automake ok pour X11 sur MacOS X.
+
+2004-05-24 Monday 19:12  lehyaric
+
+	* Makefile.am, configure.ac, regtests.pl, examples++/Makefile.am,
+	examples++-eigen/Makefile.am, examples++-tutorial/Makefile.am,
+	src/agl/.cvsignore, src/agl/Makefile.am, src/glx/.cvsignore,
+	src/glx/Makefile.am, src/nw/Makefile.am, src/std/.cvsignore,
+	src/std/Makefile.am, src/x11/.cvsignore, src/x11/Makefile.am:
+
+	Ajoute l'extension "-g" à la version debug des programmes en vue de
+	la configuration de l'installation.
+
+2004-05-24 Monday 18:19  lehyaric
+
+	* src/mpi/Makefile.am:
+
+	Automake ok sur Debian/Testing.
+
+2004-05-24 Monday 17:31  lehyaric
+
+	* .cvsignore, src/agl/Makefile.am, src/glx/Makefile.am,
+	src/nw/Makefile.am, src/std/Makefile.am, src/x11/Makefile.am:
+
+	Test de la configuration Automake sur macserv2+X11: compilation ok.
+
+2004-05-24 Monday 14:57  lehyaric
+
+	* configure.ac, src/femlib/MatriceCreuse.hpp:
+
+	Début de configuration de FreeFem++ sur Windows/Cygwin.  Pour
+	l'instant le programme ne compile pas car Cygwin/g++ 3.3.1 plante
+	sur lg.tab.cpp (segmentation fault).
+
+2004-05-24 Monday 11:19  lehyaric
+
+	* configure.ac, DOC/Makefile.am, src/agl/Makefile.am,
+	src/femlib/MatriceCreuse.hpp, src/fflib/config_freefem_mpi.hpp,
+	src/fflib/config_freefem_v3.hpp, src/fflib/config_freefem_v3_g.hpp,
+	src/fflib/lgfem.cpp, src/fflib/problem.cpp, src/fflib/problem.hpp,
+	src/glx/Makefile.am, src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp,
+	src/lglib/lg.y, src/mpi/parallelempi.cpp, src/nw/Makefile.am,
+	src/std/Makefile.am, src/x11/Makefile.am:
+
+	Intégration de la bibliothèque Umfpack dans la configuration et
+	amélioration du test de Arpack.  Testé sur Debian Unstable.
+
+2004-05-19 Wednesday 15:46  lehyaric
+
+	* configure.ac, src/fflib/Makefile.am:
+
+	Ajoute src/Eigen/eigenvalue.cpp dans la bibliothèque
+	src/fflib/libff.a
+
+2004-05-19 Wednesday 15:06  lehyaric
+
+	* Makefile.am, configure.ac, regtests.pl, examples++/.cvsignore,
+	examples++/Makefile.am, examples++/aalapacien.edp,
+	src/agl/Makefile.am:
+
+	Première version de la procédure de test de non-regression.  Il
+	reste des questions sur l'emploi de "NoUseOfWait=true;" et sur les
+	valeurs à contrôler.
+
+2004-05-19 Wednesday 13:52  lehyaric
+
+	* Makefile.am, configure.ac, src/fflib/Makefile.am,
+	src/fflib/strversionnumber.cpp, src/fflib/versionnumber.hpp,
+	src/lglib/.cvsignore, src/lglib/Makefile.am, src/lglib/lg.c++,
+	src/lglib/lg.h, src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp,
+	src/lglib/lg.y, src/lglib/lg.y++:
+
+	Amélioration de la gestion des numéros de version.
+
+2004-05-19 Wednesday 11:05  lehyaric
+
+	* configure.ac, DOC/Makefile.am, src/agl/Makefile.am,
+	src/glx/Makefile.am:
+
+	Automake configuré sur macserv2
+
+2004-05-18 Tuesday 18:10  lehyaric
+
+	* configure.ac, src/std/Makefile.am, src/x11/Makefile.am:
+
+	Configuration de la compilation sur MacOSX toujours en cours.
+
+2004-05-18 Tuesday 18:00  lehyaric
+
+	* configure.ac, src/agl/Makefile.am, src/std/Makefile.am,
+	src/x11/Makefile.am:
+
+	Configuration de la procédure de compilation sur MacOSX en cours.
+
+2004-05-18 Tuesday 17:35  lehyaric
+
+	* configure.ac, src/agl/Makefile.am, src/mpi/Makefile.am:
+
+	Compilation ok sur Debian/Testing et Debian/Unstable
+
+2004-05-18 Tuesday 17:08  lehyaric
+
+	* Makefile.am, configure.ac, src/AFunction.cpp, src/AFunction.hpp,
+	src/AnyType.hpp, src/InitFunct.cpp, src/InitFunct.hpp,
+	src/Makefile.am, src/Operator.hpp, src/Serialize.hpp,
+	src/String.hpp, src/config_freefem_mpi.hpp,
+	src/config_freefem_v3.hpp, src/config_freefem_v3_g.hpp,
+	src/error.hpp, src/gmres.hpp, src/lex.cpp, src/lex.hpp,
+	src/lg.tab.cpp, src/lg.tab.hpp, src/lg.y, src/lgfem.cpp,
+	src/lgfem.hpp, src/lgmesh.cpp, src/lgsolver.hpp, src/load.cpp,
+	src/problem.cpp, src/problem.hpp, src/showverb.hpp,
+	src/strversionnumber.cpp, src/throwassert.hpp, src/Algo/.cvsignore,
+	src/Algo/Makefile.am, src/agl/.cvsignore, src/agl/Makefile.am,
+	src/bamglib/.cvsignore, src/bamglib/Makefile.am,
+	src/femlib/.cvsignore, src/femlib/Makefile.am,
+	src/fflib/.cvsignore, src/fflib/AFunction.cpp,
+	src/fflib/AFunction.hpp, src/fflib/AnyType.hpp,
+	src/fflib/InitFunct.cpp, src/fflib/InitFunct.hpp,
+	src/fflib/Makefile.am, src/fflib/Operator.hpp,
+	src/fflib/Serialize.hpp, src/fflib/String.hpp,
+	src/fflib/config_freefem_mpi.hpp, src/fflib/config_freefem_v3.hpp,
+	src/fflib/config_freefem_v3_g.hpp, src/fflib/error.hpp,
+	src/fflib/gmres.hpp, src/fflib/lex.cpp, src/fflib/lex.hpp,
+	src/fflib/lg.tab.hpp, src/fflib/lgfem.cpp, src/fflib/lgfem.hpp,
+	src/fflib/lgmesh.cpp, src/fflib/lgsolver.hpp, src/fflib/load.cpp,
+	src/fflib/problem.cpp, src/fflib/problem.hpp,
+	src/fflib/showverb.hpp, src/fflib/strversionnumber.cpp,
+	src/fflib/throwassert.hpp, src/fflib/versionnumber.hpp,
+	src/glx/.cvsignore, src/glx/Makefile.am, src/lglib/.cvsignore,
+	src/lglib/Makefile.am, src/lglib/lg.c++, src/lglib/lg.h,
+	src/lglib/lg.tab.cpp, src/lglib/lg.y++, src/mpi/.cvsignore,
+	src/mpi/Makefile.am, src/nw/.cvsignore, src/nw/Makefile.am,
+	src/std/.cvsignore, src/std/Makefile.am, src/x11/.cvsignore,
+	src/x11/Makefile.am:
+
+	Modification de l'arborescence des répertoires dans src/ afin de
+	placer chaque version de FreeFem++ dans un répertoire différent, ce
+	qui simplifie les Makefile.am
+
+2004-05-18 Tuesday 12:02  lehyaric
+
+	* Makefile.am, configure.ac, depcomp, src/.cvsignore,
+	src/Makefile.am, src/depcomp:
+
+	Transformation de la compilation de programmes multiples (-g, -nw,
+	-x11, ...) en fonction des conventions de Automake.
+
+2004-05-17 Monday 11:46  lehyaric
+
+	* configure.ac:
+
+	Intégration de Arpack et Umfpack en cours sur plusieurs
+	architectures
+
+2004-05-17 Monday 11:23  hecht
+
+	* configure.ac:
+
+	[no log message]
+
+2004-05-14 Friday 15:46  lehyaric
+
+	* DOC/manual.tex:
+
+	Début de la relecture de l'anglais de la doc.
+
+2004-05-14 Friday 11:48  lehyaric
+
+	* Makefile, Makefile.am, configure.ac, DOC/Makefile:
+
+	Test de la présence de mpiCC ajouté (s'il est absent, la version
+	parallèle de FreeFem++ n'est pas compilée)
+
+2004-05-14 Friday 10:58  lehyaric
+
+	* DOC/.cvsignore:
+
+	manual.pdf and manual.ps.gz are automaticalle regenerated, so they
+	should not be stored in the CVS repository.
+
+2004-05-14 Friday 10:43  lehyaric
+
+	* Makefile, DOC/Makefile:
+
+	Récupération des Makefiles (depuis l'archive de la version 1.40) qui
+	avaient disparu suite à une commande CVS qui aurait dû restée
+	localisée à la branche "alh-autoconf".
+
+2004-05-14 Friday 10:08  lehyaric
+
+	* Makefile, configure.ac:
+
+	Extension de la recherche de la bibliothèque BLAS.
+
+2004-05-13 Thursday 14:54  lehyaric
+
+	* COPYING, INSTALL, install-sh, missing, mkinstalldirs:
+
+	Quelques nouveaux fichiers installés par la procédure standard
+	Autoreconf -i.
+
+2004-05-13 Thursday 14:45  lehyaric
+
+	* Makefile, Makefile.am, DOC/Makefile:
+
+	La procédure Automake + Autoconf a été testée sur Hydre (Debian
+	Testing).
+
+2004-05-13 Thursday 14:08  lehyaric
+
+	* AUTHORS, ChangeLog, Makefile.am, NEWS, configure.ac,
+	DOC/Makefile.am, src/Makefile.am:
+
+	Essai de configuration de autoconf en cours.
+
+2004-05-13 Thursday 14:07  lehyaric
+
+	* AUTHORS, ChangeLog, Makefile.am, NEWS, configure.ac,
+	DOC/Makefile.am, src/Makefile.am:
+
+	Séparation d'une branche spéciale pour les essais de autoconf.
+
+2004-05-13 Thursday 14:00  lehyaric
+
+	* .cvsignore, AUTHORS, ChangeLog, Makefile, Makefile.am, NEWS,
+	config.guess, config.sub, configure.ac, DOC/.cvsignore,
+	DOC/Makefile, DOC/Makefile.am, src/.cvsignore, src/Makefile.am:
+
+	Intégration de Autoconf et Automake dans la procédure de build en
+	cours.
+
+2004-05-13 Thursday 09:54  lehyaric
+
+	* .cvsignore, DOC/.cvsignore, src/.cvsignore:
+
+	Ajout progressif de tous les fichiers à ignorer.
+
+2004-05-12 Wednesday 21:32  hecht
+
+	* examples++-tutorial/sparce-matrix.edp:
+
+	[no log message]
+
+2004-05-12 Wednesday 14:34  lehyaric
+
+	* src/versionnumber.hpp:
+
+	Fichier regénéré à la compilation
+
+2004-05-12 Wednesday 13:21  ly
+
+	* DOC/: docFFGUI.tex, docGUI.tex, manual.tex:
+
+	[no log message]
+
+2004-05-12 Wednesday 12:10  hecht
+
+	* src/: Makefile-Debian, lg.tab.cpp, lg.tab.hpp, lg.y,
+	versionnumber.hpp:
+
+	[no log message]
+
+2004-05-12 Wednesday 12:06  hecht
+
+	* arpack/arpack++/include/: ardfmat.h, arerror.h, arhbmat.h,
+	arlutil.h, arrseig.h:
+
+	[no log message]
+
+2004-05-12 Wednesday 11:35  hecht
+
+	* HISTORY, Makefile, README, README_ARPACK, DOC/.cvsignore,
+	DOC/manual.tex, DOC/styles.sty, DOC/plots/FIGII1.pdf,
+	DOC/plots/FIGII2.pdf, DOC/plots/FIGII3.pdf, DOC/plots/FIGII4.pdf,
+	DOC/plots/FIGII5.pdf, DOC/plots/FIGII6.pdf, DOC/plots/FIGII7.pdf,
+	DOC/plots/FIGII8.pdf, DOC/plots/FIGII9.pdf, DOC/plots/Laplace.pdf,
+	DOC/plots/ThrhoP2.pdf, DOC/plots/Thwithhole.pdf,
+	DOC/plots/Thwithouthole.pdf, DOC/plots/Thxy.pdf, DOC/plots/dTh.pdf,
+	DOC/plots/d_Thf.pdf, DOC/plots/d_u.pdf, DOC/plots/eigen11.pdf,
+	DOC/plots/eigen12.pdf, DOC/plots/emptymesh-1.eps,
+	DOC/plots/emptymesh-1.pdf, DOC/plots/emptymesh-2.eps,
+	DOC/plots/emptymesh-2.pdf, DOC/plots/emptymesh.eps,
+	DOC/plots/gnuplot.pdf, DOC/plots/laRTp.pdf, DOC/plots/lapRTuv.pdf,
+	DOC/plots/likegnu.pdf, DOC/plots/logo-g.tiff, DOC/plots/logo.jpg,
+	DOC/plots/logo.pdf, DOC/plots/logo.tiff, DOC/plots/lshape.pdf,
+	DOC/plots/medit.pdf, DOC/plots/movemesh.pdf, DOC/plots/nl-elas.pdf,
+	DOC/plots/nosplitmesh.pdf, DOC/plots/onnewmesh.pdf,
+	DOC/plots/onoldmesh.pdf, DOC/plots/perio4.pdf,
+	DOC/plots/period.pdf, DOC/plots/region.pdf,
+	DOC/plots/region_nu.pdf, DOC/plots/region_u.pdf,
+	DOC/plots/rhoP2.pdf, DOC/plots/schwarz-no-th.pdf,
+	DOC/plots/schwarz-no-u.pdf, DOC/plots/schwarz-no-u0.pdf,
+	DOC/plots/schwarz-th.pdf, DOC/plots/schwarz-u.pdf,
+	DOC/plots/schwarz-u0.pdf, DOC/plots/splitmesh.pdf,
+	DOC/plots/squareb.pdf, DOC/plots/three.pdf, DOC/plots/threeg.pdf,
+	DOC/plots/trunc0.pdf, DOC/plots/trunc6.pdf,
+	DOC/plots/twosquare.pdf, DOC/plots/xyf.pdf,
+	examples++-load/load.link, examples++-tutorial/all.edp,
+	examples++-tutorial/array.edp, examples++-tutorial/beam.edp,
+	examples++-tutorial/mesh.edp, src/AFunction.cpp, src/AnyType.hpp,
+	src/Makefile-Debian, src/Makefile-Debian-Hydre,
+	src/Makefile-arpack, src/Makefile-i386, src/Makefile-linux,
+	src/Makefile-linux-arpack, src/Makefile-linux-noarpack,
+	src/Makefile-powermac, src/Operator.hpp, src/lg.tab.cpp, src/lg.y,
+	src/lgfem.cpp, src/lgmesh.cpp, src/load.cpp, src/problem.cpp,
+	src/problem.hpp, src/throwassert.hpp, src/versionnumber.hpp,
+	src/femlib/MatriceCreuse.hpp, src/femlib/MatriceCreuse_tpl.hpp,
+	src/femlib/RNM.hpp, src/femlib/RNM_tpl.hpp, src/femlib/fem.cpp,
+	src/femlib/fem.hpp, src/femlib/mshptg.cpp:
+
+	[no log message]
+
+2004-05-11 Tuesday 17:37  ly
+
+	* DOC/manual.tex:
+
+	[no log message]
+
+2004-04-26 Monday 12:08  lehyaric
+
+	* DOC/: .cvsignore, manual.tex, plots/.cvsignore:
+
+	Mise à jour de la documentation enregistrée dans CVS à partir de la
+	version de hydre:~hecht/FreeFem++-doc datée du 9/4/04.
+
+2004-04-26 Monday 11:58  lehyaric
+
+	* BUGS, COPYRIGHT, FreeFem++.cw7.mcp.sit, FreeFem++.mcp.sit,
+	HISTORY, Makefile, Makefile-old, Makefile-unix, README,
+	README_ARPACK, README_CW, TODO, ffpc.cw7.mcp.zip, ffpc.mcp.zip,
+	DOC/FF.sty, DOC/FFF.sty, DOC/LB.tex, DOC/Makefile, DOC/addfe.tex,
+	DOC/dessin.sty, DOC/docGUI.tex, DOC/mainaddfe.tex, DOC/manual.tex,
+	DOC/plots/FIGII1.eps, DOC/plots/FIGII2.eps, DOC/plots/FIGII3.eps,
+	DOC/plots/FIGII4.eps, DOC/plots/FIGII5.eps, DOC/plots/FIGII6.eps,
+	DOC/plots/FIGII7.eps, DOC/plots/FIGII8.eps, DOC/plots/FIGII9.eps,
+	DOC/plots/Laplace.eps, DOC/plots/ThrhoP2.eps,
+	DOC/plots/Thwithhole.eps, DOC/plots/Thwithouthole.eps,
+	DOC/plots/dTh.eps, DOC/plots/d_Thf.eps, DOC/plots/d_u.eps,
+	DOC/plots/eigen11.eps, DOC/plots/eigen12.eps,
+	DOC/plots/gnuplot.eps, DOC/plots/laRTp.eps, DOC/plots/lapRTuv.eps,
+	DOC/plots/likegnu.eps, DOC/plots/logo.eps, DOC/plots/lshape.eps,
+	DOC/plots/medit.eps, DOC/plots/movemesh.eps, DOC/plots/nl-elas.eps,
+	DOC/plots/nosplitmesh.eps, DOC/plots/onnewmesh.eps,
+	DOC/plots/onoldmesh.eps, DOC/plots/perio4.eps,
+	DOC/plots/period.eps, DOC/plots/region.eps,
+	DOC/plots/region_nu.eps, DOC/plots/region_u.eps,
+	DOC/plots/rhoP2.eps, DOC/plots/schwarz-no-th.eps,
+	DOC/plots/schwarz-no-u.eps, DOC/plots/schwarz-no-u0.eps,
+	DOC/plots/schwarz-th.eps, DOC/plots/schwarz-u.eps,
+	DOC/plots/schwarz-u0.eps, DOC/plots/splitmesh.eps,
+	DOC/plots/squareb.eps, DOC/plots/three.eps, DOC/plots/threeg.eps,
+	DOC/plots/trunc0.eps, DOC/plots/trunc6.eps,
+	DOC/plots/twosquare.eps, FreeFem++.app/Contents/Info.plist,
+	FreeFem++.app/Contents/PkgInfo,
+	FreeFem++.app/Contents/MacOS/FreeFem++,
+	FreeFem++.app/Contents/Resources/Credits.rtf,
+	FreeFem++.app/Contents/Resources/script,
+	FreeFem++.app/Contents/Resources/Contents/Info.plist,
+	FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/NSAppleMenuImage.tiff,
+	FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/classes.nib,
+	FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/info.nib,
+	FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/objects.nib,
+	arpack/arpack++/include/.DS_Store, arpack/arpack++/include/README,
+	arpack/arpack++/include/arbgcomp.h,
+	arpack/arpack++/include/arbgnsym.h,
+	arpack/arpack++/include/arbgsym.h,
+	arpack/arpack++/include/arbnsmat.h,
+	arpack/arpack++/include/arbnspen.h,
+	arpack/arpack++/include/arbscomp.h,
+	arpack/arpack++/include/arbsmat.h,
+	arpack/arpack++/include/arbsnsym.h,
+	arpack/arpack++/include/arbspen.h,
+	arpack/arpack++/include/arbssym.h, arpack/arpack++/include/arch.h,
+	arpack/arpack++/include/arcomp.h,
+	arpack/arpack++/include/ardfmat.h,
+	arpack/arpack++/include/ardgcomp.h,
+	arpack/arpack++/include/ardgnsym.h,
+	arpack/arpack++/include/ardgsym.h,
+	arpack/arpack++/include/ardnsmat.h,
+	arpack/arpack++/include/ardnspen.h,
+	arpack/arpack++/include/ardscomp.h,
+	arpack/arpack++/include/ardsmat.h,
+	arpack/arpack++/include/ardsnsym.h,
+	arpack/arpack++/include/ardspen.h,
+	arpack/arpack++/include/ardssym.h,
+	arpack/arpack++/include/arerror.h,
+	arpack/arpack++/include/argcomp.h,
+	arpack/arpack++/include/argeig.h,
+	arpack/arpack++/include/argnsym.h,
+	arpack/arpack++/include/argsym.h,
+	arpack/arpack++/include/arhbmat.h,
+	arpack/arpack++/include/arlcomp.h,
+	arpack/arpack++/include/arlgcomp.h,
+	arpack/arpack++/include/arlgnsym.h,
+	arpack/arpack++/include/arlgsym.h,
+	arpack/arpack++/include/arlnames.h,
+	arpack/arpack++/include/arlnsmat.h,
+	arpack/arpack++/include/arlnspen.h,
+	arpack/arpack++/include/arlscomp.h,
+	arpack/arpack++/include/arlsmat.h,
+	arpack/arpack++/include/arlsnsym.h,
+	arpack/arpack++/include/arlspdef.h,
+	arpack/arpack++/include/arlspen.h,
+	arpack/arpack++/include/arlssym.h,
+	arpack/arpack++/include/arlsupm.h,
+	arpack/arpack++/include/arlutil.h, arpack/arpack++/include/armat.h,
+	arpack/arpack++/include/arpackf.h,
+	arpack/arpack++/include/arrgcomp.h,
+	arpack/arpack++/include/arrgeig.h,
+	arpack/arpack++/include/arrgnsym.h,
+	arpack/arpack++/include/arrgsym.h,
+	arpack/arpack++/include/arrscomp.h,
+	arpack/arpack++/include/arrseig.h,
+	arpack/arpack++/include/arrsnsym.h,
+	arpack/arpack++/include/arrssym.h,
+	arpack/arpack++/include/arscomp.h,
+	arpack/arpack++/include/arseig.h,
+	arpack/arpack++/include/arsnsym.h,
+	arpack/arpack++/include/arssym.h,
+	arpack/arpack++/include/arugcomp.h,
+	arpack/arpack++/include/arugnsym.h,
+	arpack/arpack++/include/arugsym.h,
+	arpack/arpack++/include/arunsmat.h,
+	arpack/arpack++/include/arunspen.h,
+	arpack/arpack++/include/aruscomp.h,
+	arpack/arpack++/include/arusmat.h,
+	arpack/arpack++/include/arusnsym.h,
+	arpack/arpack++/include/aruspen.h,
+	arpack/arpack++/include/arussym.h,
+	arpack/arpack++/include/blas1c.h, arpack/arpack++/include/blas1f.h,
+	arpack/arpack++/include/caupp.h, arpack/arpack++/include/ceupp.h,
+	arpack/arpack++/include/debug.h, arpack/arpack++/include/lapackc.h,
+	arpack/arpack++/include/lapackf.h, arpack/arpack++/include/naupp.h,
+	arpack/arpack++/include/neupp.h, arpack/arpack++/include/saupp.h,
+	arpack/arpack++/include/seupp.h,
+	arpack/arpack++/include/superluc.h,
+	arpack/arpack++/include/umfpackc.h,
+	arpack/arpack++/include/umfpackf.h, examples++/D2.edp,
+	examples++/NSP1P1.edp, examples++/NSP1P1b.edp,
+	examples++/NSP1P2.edp, examples++/Richard.edp, examples++/aaRT.edp,
+	examples++/aaa-adp.edp, examples++/aadaptation.edp,
+	examples++/aalapacien.edp, examples++/aalaplace-nc.edp,
+	examples++/aamove.edp, examples++/all.edp,
+	examples++/arrayoFVh.edp, examples++/bilap.edp,
+	examples++/ccc-adp.edp, examples++/demo.edp, examples++/demo1.edp,
+	examples++/funct.edp, examples++/include.edp,
+	examples++/lap_mat.edp, examples++/lapacienprecon.edp,
+	examples++/parareal.edp, examples++/testFE.edp,
+	examples++/testadp.edp, examples++/teste.edp,
+	examples++/wafer-heating-laser-axi.edp,
+	examples++-bug/SegmentationFault.edp, examples++-bug/aaa.edp,
+	examples++-bug/bugborder.edp, examples++-bug/bugf.edp,
+	examples++-bug/bugv1.18.edp, examples++-bug/func.edp,
+	examples++-bug/zArithmetic_bug1.edp,
+	examples++-eigen/BeamEigenValue.edp,
+	examples++-eigen/BeamEigenValueperio.edp,
+	examples++-eigen/LapEigenValue.edp,
+	examples++-eigen/LapnosymEigenValue.edp,
+	examples++-eigen/Stokes-eigen.edp, examples++-eigen/all.edp,
+	examples++-eigen/neuman.edp, examples++-load/load.edp,
+	examples++-load/load.link, examples++-load/myfunction.cpp,
+	examples++-mpi/essai.edp, examples++-mpi/schwarz-b.edp,
+	examples++-mpi/schwarz-c.edp, examples++-mpi/schwarz.edp,
+	examples++-tutorial/FE.edp, examples++-tutorial/LapDG2.edp,
+	examples++-tutorial/Laplace.edp, examples++-tutorial/LaplaceP1.edp,
+	examples++-tutorial/LaplaceP1P2h.edp,
+	examples++-tutorial/LaplaceP1bis.edp,
+	examples++-tutorial/LaplaceRT.edp,
+	examples++-tutorial/NSUzawaCahouetChabart.edp,
+	examples++-tutorial/Newton.edp, examples++-tutorial/Periodic.edp,
+	examples++-tutorial/StokesUzawa.edp,
+	examples++-tutorial/a_tutorial.edp, examples++-tutorial/adapt.edp,
+	examples++-tutorial/adaptindicatorP1.edp,
+	examples++-tutorial/adaptindicatorP2.edp,
+	examples++-tutorial/aile.msh, examples++-tutorial/algo.edp,
+	examples++-tutorial/algowithmacro.edp, examples++-tutorial/all.edp,
+	examples++-tutorial/array.edp, examples++-tutorial/beam.edp,
+	examples++-tutorial/blakschol.edp,
+	examples++-tutorial/calculus.edp, examples++-tutorial/cavity.edp,
+	examples++-tutorial/convect-apt.edp,
+	examples++-tutorial/convect.edp, examples++-tutorial/convect2.edp,
+	examples++-tutorial/dumptable.edp, examples++-tutorial/ex-vf.edp,
+	examples++-tutorial/fluidStruct.edp,
+	examples++-tutorial/fluidStructAdapt.edp,
+	examples++-tutorial/freeboundary-weak.edp,
+	examples++-tutorial/freeboundary.edp,
+	examples++-tutorial/gnuplot.edp, examples++-tutorial/medit.edp,
+	examples++-tutorial/mesh.edp, examples++-tutorial/movemesh.edp,
+	examples++-tutorial/nolinear-elas.edp,
+	examples++-tutorial/onde.edp, examples++-tutorial/periodic4.edp,
+	examples++-tutorial/plot.edp, examples++-tutorial/readmesh.edp,
+	examples++-tutorial/region.edp,
+	examples++-tutorial/saverestore.edp,
+	examples++-tutorial/schwarz-gc.edp,
+	examples++-tutorial/schwarz-no-overlap.edp,
+	examples++-tutorial/schwarz-overlap.edp,
+	examples++-tutorial/tablefunction.edp, examples++-tutorial/xyf,
+	src/AFunction.cpp, src/AFunction.hpp, src/AnyType.hpp,
+	src/Carbon.r, src/FreeFem++-CoCoa, src/InitFunct.cpp,
+	src/InitFunct.hpp, src/Makefile-Debian, src/Makefile-Debian-Hydre,
+	src/Makefile-arpack, src/Makefile-hp9000s700, src/Makefile-i386,
+	src/Makefile-linux, src/Makefile-linux-arpack,
+	src/Makefile-linux-noarpack, src/Makefile-macintosh,
+	src/Makefile-macintosh-noarpack, src/Makefile-powermac,
+	src/Operator.hpp, src/Serialize.hpp, src/String.hpp,
+	src/config_freefem_mpi.hpp, src/config_freefem_v3.hpp,
+	src/config_freefem_v3_g.hpp, src/error.hpp, src/gmres.hpp,
+	src/lex-old.cpp, src/lex.cpp, src/lex.hpp, src/lg.tab.cpp,
+	src/lg.tab.hpp, src/lg.y, src/lgfem.cpp, src/lgfem.hpp,
+	src/lgmesh.cpp, src/lgsolver.hpp, src/load.cpp, src/problem.cpp,
+	src/problem.hpp, src/showverb.hpp, src/strversionnumber.cpp,
+	src/throwassert.hpp, src/versionnumber.hpp, src/Algo/BFGS.hpp,
+	src/Algo/BrentLS.hpp, src/Algo/CG.hpp, src/Algo/CubicLS.hpp,
+	src/Algo/LineSearch.hpp, src/Algo/NRJ.hpp,
+	src/Algo/NewtonRaphson.hpp, src/Algo/Optima.hpp,
+	src/Algo/Param.hpp, src/Algo/RosenBrock.hpp, src/Algo/defs.hpp,
+	src/Algo/lgalgo.cpp, src/Eigen/eigenvalue.cpp,
+	src/Graphics/Pcrgraph.cpp, src/Graphics/Pcrgraph.cpp-v1.cpp,
+	src/Graphics/Xrgraph.cpp, src/Graphics/config.h,
+	src/Graphics/glrgraph.hpp, src/Graphics/glutrgraf-essai.cpp-zz.cpp,
+	src/Graphics/macglrgraf.cpp, src/Graphics/macrgraf.cpp,
+	src/Graphics/rgraph.hpp, src/Graphics/sansrgraph.cpp,
+	src/Graphics/xglrgraf.cpp, src/bamg/bamg.cpp, src/bamg/cvmsh2.cpp,
+	src/bamg/drawbdmesh.cpp, src/bamg/tt.cpp, src/bamglib/Mesh2.cpp,
+	src/bamglib/Mesh2.h, src/bamglib/MeshDraw.cpp,
+	src/bamglib/MeshGeom.cpp, src/bamglib/MeshQuad.cpp,
+	src/bamglib/MeshRead.cpp, src/bamglib/MeshWrite.cpp,
+	src/bamglib/Meshgibbs.cpp, src/bamglib/Meshio.cpp,
+	src/bamglib/Meshio.h, src/bamglib/Metric.cpp, src/bamglib/Metric.h,
+	src/bamglib/QuadTree.cpp, src/bamglib/QuadTree.h,
+	src/bamglib/R2.cpp, src/bamglib/R2.h, src/bamglib/SetOfE4.cpp,
+	src/bamglib/SetOfE4.h, src/bamglib/meshtype.h,
+	src/femlib/BamgFreeFem.cpp, src/femlib/BamgFreeFem.hpp,
+	src/femlib/CGNL.hpp, src/femlib/CheckPtr.cpp,
+	src/femlib/ConjuguedGradrientNL.cpp, src/femlib/DOperator.hpp,
+	src/femlib/Drawing.cpp, src/femlib/Element_P2h.cpp,
+	src/femlib/Element_P3.cpp, src/femlib/Element_RT.cpp,
+	src/femlib/FESpace-v0.cpp, src/femlib/FESpace.cpp,
+	src/femlib/FESpace.hpp, src/femlib/FQuadTree.cpp,
+	src/femlib/FQuadTree.hpp, src/femlib/MatriceCreuse.hpp,
+	src/femlib/MatriceCreuse_tpl.hpp, src/femlib/MeshPoint.hpp,
+	src/femlib/QuadratureFormular.cpp,
+	src/femlib/QuadratureFormular.hpp, src/femlib/RNM.hpp,
+	src/femlib/RNM_op.hpp, src/femlib/RNM_opc.hpp,
+	src/femlib/RNM_tpl.hpp, src/femlib/RefCounter.hpp,
+	src/femlib/fem.cpp, src/femlib/fem.hpp, src/femlib/fem3.hpp,
+	src/femlib/gibbs.cpp, src/femlib/glutdraw.cpp,
+	src/femlib/gmres.hpp, src/femlib/mortar.cpp, src/femlib/mshptg.cpp,
+	src/femlib/tools/Element_P3.hpp, src/femlib/tools/LagrangePk.cpp,
+	src/femlib/tools/P3_Lagrange.hpp, src/femlib/tools/Pkorder.cpp,
+	src/femlib/tools/toto.hpp, src/iml/bicg.h, src/iml/bicgstab.h,
+	src/iml/cg.h, src/iml/cgs.h, src/iml/cheby.h, src/iml/gmres.h,
+	src/iml/gmres.hpp, src/iml/ir.h, src/iml/qmr.h,
+	src/mpi/parallelempi.cpp, src/umfpack/amd.h, src/umfpack/umfpack.h,
+	src/umfpack/umfpack_col_to_triplet.h,
+	src/umfpack/umfpack_defaults.h, src/umfpack/umfpack_free_numeric.h,
+	src/umfpack/umfpack_free_symbolic.h,
+	src/umfpack/umfpack_get_lunz.h, src/umfpack/umfpack_get_numeric.h,
+	src/umfpack/umfpack_get_symbolic.h,
+	src/umfpack/umfpack_load_numeric.h,
+	src/umfpack/umfpack_load_symbolic.h, src/umfpack/umfpack_numeric.h,
+	src/umfpack/umfpack_qsymbolic.h,
+	src/umfpack/umfpack_report_control.h,
+	src/umfpack/umfpack_report_info.h,
+	src/umfpack/umfpack_report_matrix.h,
+	src/umfpack/umfpack_report_numeric.h,
+	src/umfpack/umfpack_report_perm.h,
+	src/umfpack/umfpack_report_status.h,
+	src/umfpack/umfpack_report_symbolic.h,
+	src/umfpack/umfpack_report_triplet.h,
+	src/umfpack/umfpack_report_vector.h,
+	src/umfpack/umfpack_save_numeric.h,
+	src/umfpack/umfpack_save_symbolic.h, src/umfpack/umfpack_scale.h,
+	src/umfpack/umfpack_solve.h, src/umfpack/umfpack_symbolic.h,
+	src/umfpack/umfpack_tictoc.h, src/umfpack/umfpack_timer.h,
+	src/umfpack/umfpack_transpose.h,
+	src/umfpack/umfpack_triplet_to_col.h, src/umfpack/umfpack_wsolve.h:
+
+	Import de FreeFem++ v1.38 par ALH
+
+2004-04-26 Monday 11:58  lehyaric
+
+	* BUGS, COPYRIGHT, FreeFem++.cw7.mcp.sit, FreeFem++.mcp.sit,
+	HISTORY, Makefile, Makefile-old, Makefile-unix, README,
+	README_ARPACK, README_CW, TODO, ffpc.cw7.mcp.zip, ffpc.mcp.zip,
+	DOC/FF.sty, DOC/FFF.sty, DOC/LB.tex, DOC/Makefile, DOC/addfe.tex,
+	DOC/dessin.sty, DOC/docGUI.tex, DOC/mainaddfe.tex, DOC/manual.tex,
+	DOC/plots/FIGII1.eps, DOC/plots/FIGII2.eps, DOC/plots/FIGII3.eps,
+	DOC/plots/FIGII4.eps, DOC/plots/FIGII5.eps, DOC/plots/FIGII6.eps,
+	DOC/plots/FIGII7.eps, DOC/plots/FIGII8.eps, DOC/plots/FIGII9.eps,
+	DOC/plots/Laplace.eps, DOC/plots/ThrhoP2.eps,
+	DOC/plots/Thwithhole.eps, DOC/plots/Thwithouthole.eps,
+	DOC/plots/dTh.eps, DOC/plots/d_Thf.eps, DOC/plots/d_u.eps,
+	DOC/plots/eigen11.eps, DOC/plots/eigen12.eps,
+	DOC/plots/gnuplot.eps, DOC/plots/laRTp.eps, DOC/plots/lapRTuv.eps,
+	DOC/plots/likegnu.eps, DOC/plots/logo.eps, DOC/plots/lshape.eps,
+	DOC/plots/medit.eps, DOC/plots/movemesh.eps, DOC/plots/nl-elas.eps,
+	DOC/plots/nosplitmesh.eps, DOC/plots/onnewmesh.eps,
+	DOC/plots/onoldmesh.eps, DOC/plots/perio4.eps,
+	DOC/plots/period.eps, DOC/plots/region.eps,
+	DOC/plots/region_nu.eps, DOC/plots/region_u.eps,
+	DOC/plots/rhoP2.eps, DOC/plots/schwarz-no-th.eps,
+	DOC/plots/schwarz-no-u.eps, DOC/plots/schwarz-no-u0.eps,
+	DOC/plots/schwarz-th.eps, DOC/plots/schwarz-u.eps,
+	DOC/plots/schwarz-u0.eps, DOC/plots/splitmesh.eps,
+	DOC/plots/squareb.eps, DOC/plots/three.eps, DOC/plots/threeg.eps,
+	DOC/plots/trunc0.eps, DOC/plots/trunc6.eps,
+	DOC/plots/twosquare.eps, FreeFem++.app/Contents/Info.plist,
+	FreeFem++.app/Contents/PkgInfo,
+	FreeFem++.app/Contents/MacOS/FreeFem++,
+	FreeFem++.app/Contents/Resources/Credits.rtf,
+	FreeFem++.app/Contents/Resources/script,
+	FreeFem++.app/Contents/Resources/Contents/Info.plist,
+	FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/NSAppleMenuImage.tiff,
+	FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/classes.nib,
+	FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/info.nib,
+	FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/objects.nib,
+	arpack/arpack++/include/.DS_Store, arpack/arpack++/include/README,
+	arpack/arpack++/include/arbgcomp.h,
+	arpack/arpack++/include/arbgnsym.h,
+	arpack/arpack++/include/arbgsym.h,
+	arpack/arpack++/include/arbnsmat.h,
+	arpack/arpack++/include/arbnspen.h,
+	arpack/arpack++/include/arbscomp.h,
+	arpack/arpack++/include/arbsmat.h,
+	arpack/arpack++/include/arbsnsym.h,
+	arpack/arpack++/include/arbspen.h,
+	arpack/arpack++/include/arbssym.h, arpack/arpack++/include/arch.h,
+	arpack/arpack++/include/arcomp.h,
+	arpack/arpack++/include/ardfmat.h,
+	arpack/arpack++/include/ardgcomp.h,
+	arpack/arpack++/include/ardgnsym.h,
+	arpack/arpack++/include/ardgsym.h,
+	arpack/arpack++/include/ardnsmat.h,
+	arpack/arpack++/include/ardnspen.h,
+	arpack/arpack++/include/ardscomp.h,
+	arpack/arpack++/include/ardsmat.h,
+	arpack/arpack++/include/ardsnsym.h,
+	arpack/arpack++/include/ardspen.h,
+	arpack/arpack++/include/ardssym.h,
+	arpack/arpack++/include/arerror.h,
+	arpack/arpack++/include/argcomp.h,
+	arpack/arpack++/include/argeig.h,
+	arpack/arpack++/include/argnsym.h,
+	arpack/arpack++/include/argsym.h,
+	arpack/arpack++/include/arhbmat.h,
+	arpack/arpack++/include/arlcomp.h,
+	arpack/arpack++/include/arlgcomp.h,
+	arpack/arpack++/include/arlgnsym.h,
+	arpack/arpack++/include/arlgsym.h,
+	arpack/arpack++/include/arlnames.h,
+	arpack/arpack++/include/arlnsmat.h,
+	arpack/arpack++/include/arlnspen.h,
+	arpack/arpack++/include/arlscomp.h,
+	arpack/arpack++/include/arlsmat.h,
+	arpack/arpack++/include/arlsnsym.h,
+	arpack/arpack++/include/arlspdef.h,
+	arpack/arpack++/include/arlspen.h,
+	arpack/arpack++/include/arlssym.h,
+	arpack/arpack++/include/arlsupm.h,
+	arpack/arpack++/include/arlutil.h, arpack/arpack++/include/armat.h,
+	arpack/arpack++/include/arpackf.h,
+	arpack/arpack++/include/arrgcomp.h,
+	arpack/arpack++/include/arrgeig.h,
+	arpack/arpack++/include/arrgnsym.h,
+	arpack/arpack++/include/arrgsym.h,
+	arpack/arpack++/include/arrscomp.h,
+	arpack/arpack++/include/arrseig.h,
+	arpack/arpack++/include/arrsnsym.h,
+	arpack/arpack++/include/arrssym.h,
+	arpack/arpack++/include/arscomp.h,
+	arpack/arpack++/include/arseig.h,
+	arpack/arpack++/include/arsnsym.h,
+	arpack/arpack++/include/arssym.h,
+	arpack/arpack++/include/arugcomp.h,
+	arpack/arpack++/include/arugnsym.h,
+	arpack/arpack++/include/arugsym.h,
+	arpack/arpack++/include/arunsmat.h,
+	arpack/arpack++/include/arunspen.h,
+	arpack/arpack++/include/aruscomp.h,
+	arpack/arpack++/include/arusmat.h,
+	arpack/arpack++/include/arusnsym.h,
+	arpack/arpack++/include/aruspen.h,
+	arpack/arpack++/include/arussym.h,
+	arpack/arpack++/include/blas1c.h, arpack/arpack++/include/blas1f.h,
+	arpack/arpack++/include/caupp.h, arpack/arpack++/include/ceupp.h,
+	arpack/arpack++/include/debug.h, arpack/arpack++/include/lapackc.h,
+	arpack/arpack++/include/lapackf.h, arpack/arpack++/include/naupp.h,
+	arpack/arpack++/include/neupp.h, arpack/arpack++/include/saupp.h,
+	arpack/arpack++/include/seupp.h,
+	arpack/arpack++/include/superluc.h,
+	arpack/arpack++/include/umfpackc.h,
+	arpack/arpack++/include/umfpackf.h, examples++/D2.edp,
+	examples++/NSP1P1.edp, examples++/NSP1P1b.edp,
+	examples++/NSP1P2.edp, examples++/Richard.edp, examples++/aaRT.edp,
+	examples++/aaa-adp.edp, examples++/aadaptation.edp,
+	examples++/aalapacien.edp, examples++/aalaplace-nc.edp,
+	examples++/aamove.edp, examples++/all.edp,
+	examples++/arrayoFVh.edp, examples++/bilap.edp,
+	examples++/ccc-adp.edp, examples++/demo.edp, examples++/demo1.edp,
+	examples++/funct.edp, examples++/include.edp,
+	examples++/lap_mat.edp, examples++/lapacienprecon.edp,
+	examples++/parareal.edp, examples++/testFE.edp,
+	examples++/testadp.edp, examples++/teste.edp,
+	examples++/wafer-heating-laser-axi.edp,
+	examples++-bug/SegmentationFault.edp, examples++-bug/aaa.edp,
+	examples++-bug/bugborder.edp, examples++-bug/bugf.edp,
+	examples++-bug/bugv1.18.edp, examples++-bug/func.edp,
+	examples++-bug/zArithmetic_bug1.edp,
+	examples++-eigen/BeamEigenValue.edp,
+	examples++-eigen/BeamEigenValueperio.edp,
+	examples++-eigen/LapEigenValue.edp,
+	examples++-eigen/LapnosymEigenValue.edp,
+	examples++-eigen/Stokes-eigen.edp, examples++-eigen/all.edp,
+	examples++-eigen/neuman.edp, examples++-load/load.edp,
+	examples++-load/load.link, examples++-load/myfunction.cpp,
+	examples++-mpi/essai.edp, examples++-mpi/schwarz-b.edp,
+	examples++-mpi/schwarz-c.edp, examples++-mpi/schwarz.edp,
+	examples++-tutorial/FE.edp, examples++-tutorial/LapDG2.edp,
+	examples++-tutorial/Laplace.edp, examples++-tutorial/LaplaceP1.edp,
+	examples++-tutorial/LaplaceP1P2h.edp,
+	examples++-tutorial/LaplaceP1bis.edp,
+	examples++-tutorial/LaplaceRT.edp,
+	examples++-tutorial/NSUzawaCahouetChabart.edp,
+	examples++-tutorial/Newton.edp, examples++-tutorial/Periodic.edp,
+	examples++-tutorial/StokesUzawa.edp,
+	examples++-tutorial/a_tutorial.edp, examples++-tutorial/adapt.edp,
+	examples++-tutorial/adaptindicatorP1.edp,
+	examples++-tutorial/adaptindicatorP2.edp,
+	examples++-tutorial/aile.msh, examples++-tutorial/algo.edp,
+	examples++-tutorial/algowithmacro.edp, examples++-tutorial/all.edp,
+	examples++-tutorial/array.edp, examples++-tutorial/beam.edp,
+	examples++-tutorial/blakschol.edp,
+	examples++-tutorial/calculus.edp, examples++-tutorial/cavity.edp,
+	examples++-tutorial/convect-apt.edp,
+	examples++-tutorial/convect.edp, examples++-tutorial/convect2.edp,
+	examples++-tutorial/dumptable.edp, examples++-tutorial/ex-vf.edp,
+	examples++-tutorial/fluidStruct.edp,
+	examples++-tutorial/fluidStructAdapt.edp,
+	examples++-tutorial/freeboundary-weak.edp,
+	examples++-tutorial/freeboundary.edp,
+	examples++-tutorial/gnuplot.edp, examples++-tutorial/medit.edp,
+	examples++-tutorial/mesh.edp, examples++-tutorial/movemesh.edp,
+	examples++-tutorial/nolinear-elas.edp,
+	examples++-tutorial/onde.edp, examples++-tutorial/periodic4.edp,
+	examples++-tutorial/plot.edp, examples++-tutorial/readmesh.edp,
+	examples++-tutorial/region.edp,
+	examples++-tutorial/saverestore.edp,
+	examples++-tutorial/schwarz-gc.edp,
+	examples++-tutorial/schwarz-no-overlap.edp,
+	examples++-tutorial/schwarz-overlap.edp,
+	examples++-tutorial/tablefunction.edp, examples++-tutorial/xyf,
+	src/AFunction.cpp, src/AFunction.hpp, src/AnyType.hpp,
+	src/Carbon.r, src/FreeFem++-CoCoa, src/InitFunct.cpp,
+	src/InitFunct.hpp, src/Makefile-Debian, src/Makefile-Debian-Hydre,
+	src/Makefile-arpack, src/Makefile-hp9000s700, src/Makefile-i386,
+	src/Makefile-linux, src/Makefile-linux-arpack,
+	src/Makefile-linux-noarpack, src/Makefile-macintosh,
+	src/Makefile-macintosh-noarpack, src/Makefile-powermac,
+	src/Operator.hpp, src/Serialize.hpp, src/String.hpp,
+	src/config_freefem_mpi.hpp, src/config_freefem_v3.hpp,
+	src/config_freefem_v3_g.hpp, src/error.hpp, src/gmres.hpp,
+	src/lex-old.cpp, src/lex.cpp, src/lex.hpp, src/lg.tab.cpp,
+	src/lg.tab.hpp, src/lg.y, src/lgfem.cpp, src/lgfem.hpp,
+	src/lgmesh.cpp, src/lgsolver.hpp, src/load.cpp, src/problem.cpp,
+	src/problem.hpp, src/showverb.hpp, src/strversionnumber.cpp,
+	src/throwassert.hpp, src/versionnumber.hpp, src/Algo/BFGS.hpp,
+	src/Algo/BrentLS.hpp, src/Algo/CG.hpp, src/Algo/CubicLS.hpp,
+	src/Algo/LineSearch.hpp, src/Algo/NRJ.hpp,
+	src/Algo/NewtonRaphson.hpp, src/Algo/Optima.hpp,
+	src/Algo/Param.hpp, src/Algo/RosenBrock.hpp, src/Algo/defs.hpp,
+	src/Algo/lgalgo.cpp, src/Eigen/eigenvalue.cpp,
+	src/Graphics/Pcrgraph.cpp, src/Graphics/Pcrgraph.cpp-v1.cpp,
+	src/Graphics/Xrgraph.cpp, src/Graphics/config.h,
+	src/Graphics/glrgraph.hpp, src/Graphics/glutrgraf-essai.cpp-zz.cpp,
+	src/Graphics/macglrgraf.cpp, src/Graphics/macrgraf.cpp,
+	src/Graphics/rgraph.hpp, src/Graphics/sansrgraph.cpp,
+	src/Graphics/xglrgraf.cpp, src/bamg/bamg.cpp, src/bamg/cvmsh2.cpp,
+	src/bamg/drawbdmesh.cpp, src/bamg/tt.cpp, src/bamglib/Mesh2.cpp,
+	src/bamglib/Mesh2.h, src/bamglib/MeshDraw.cpp,
+	src/bamglib/MeshGeom.cpp, src/bamglib/MeshQuad.cpp,
+	src/bamglib/MeshRead.cpp, src/bamglib/MeshWrite.cpp,
+	src/bamglib/Meshgibbs.cpp, src/bamglib/Meshio.cpp,
+	src/bamglib/Meshio.h, src/bamglib/Metric.cpp, src/bamglib/Metric.h,
+	src/bamglib/QuadTree.cpp, src/bamglib/QuadTree.h,
+	src/bamglib/R2.cpp, src/bamglib/R2.h, src/bamglib/SetOfE4.cpp,
+	src/bamglib/SetOfE4.h, src/bamglib/meshtype.h,
+	src/femlib/BamgFreeFem.cpp, src/femlib/BamgFreeFem.hpp,
+	src/femlib/CGNL.hpp, src/femlib/CheckPtr.cpp,
+	src/femlib/ConjuguedGradrientNL.cpp, src/femlib/DOperator.hpp,
+	src/femlib/Drawing.cpp, src/femlib/Element_P2h.cpp,
+	src/femlib/Element_P3.cpp, src/femlib/Element_RT.cpp,
+	src/femlib/FESpace-v0.cpp, src/femlib/FESpace.cpp,
+	src/femlib/FESpace.hpp, src/femlib/FQuadTree.cpp,
+	src/femlib/FQuadTree.hpp, src/femlib/MatriceCreuse.hpp,
+	src/femlib/MatriceCreuse_tpl.hpp, src/femlib/MeshPoint.hpp,
+	src/femlib/QuadratureFormular.cpp,
+	src/femlib/QuadratureFormular.hpp, src/femlib/RNM.hpp,
+	src/femlib/RNM_op.hpp, src/femlib/RNM_opc.hpp,
+	src/femlib/RNM_tpl.hpp, src/femlib/RefCounter.hpp,
+	src/femlib/fem.cpp, src/femlib/fem.hpp, src/femlib/fem3.hpp,
+	src/femlib/gibbs.cpp, src/femlib/glutdraw.cpp,
+	src/femlib/gmres.hpp, src/femlib/mortar.cpp, src/femlib/mshptg.cpp,
+	src/femlib/tools/Element_P3.hpp, src/femlib/tools/LagrangePk.cpp,
+	src/femlib/tools/P3_Lagrange.hpp, src/femlib/tools/Pkorder.cpp,
+	src/femlib/tools/toto.hpp, src/iml/bicg.h, src/iml/bicgstab.h,
+	src/iml/cg.h, src/iml/cgs.h, src/iml/cheby.h, src/iml/gmres.h,
+	src/iml/gmres.hpp, src/iml/ir.h, src/iml/qmr.h,
+	src/mpi/parallelempi.cpp, src/umfpack/amd.h, src/umfpack/umfpack.h,
+	src/umfpack/umfpack_col_to_triplet.h,
+	src/umfpack/umfpack_defaults.h, src/umfpack/umfpack_free_numeric.h,
+	src/umfpack/umfpack_free_symbolic.h,
+	src/umfpack/umfpack_get_lunz.h, src/umfpack/umfpack_get_numeric.h,
+	src/umfpack/umfpack_get_symbolic.h,
+	src/umfpack/umfpack_load_numeric.h,
+	src/umfpack/umfpack_load_symbolic.h, src/umfpack/umfpack_numeric.h,
+	src/umfpack/umfpack_qsymbolic.h,
+	src/umfpack/umfpack_report_control.h,
+	src/umfpack/umfpack_report_info.h,
+	src/umfpack/umfpack_report_matrix.h,
+	src/umfpack/umfpack_report_numeric.h,
+	src/umfpack/umfpack_report_perm.h,
+	src/umfpack/umfpack_report_status.h,
+	src/umfpack/umfpack_report_symbolic.h,
+	src/umfpack/umfpack_report_triplet.h,
+	src/umfpack/umfpack_report_vector.h,
+	src/umfpack/umfpack_save_numeric.h,
+	src/umfpack/umfpack_save_symbolic.h, src/umfpack/umfpack_scale.h,
+	src/umfpack/umfpack_solve.h, src/umfpack/umfpack_symbolic.h,
+	src/umfpack/umfpack_tictoc.h, src/umfpack/umfpack_timer.h,
+	src/umfpack/umfpack_transpose.h,
+	src/umfpack/umfpack_triplet_to_col.h, src/umfpack/umfpack_wsolve.h:
+
+	Initial revision
+
