@@ -25,7 +25,7 @@ typedef long   Int4;
  const Icoor1 MaxICoor = 1073741823; // 2^30-1
  const  Icoor2 MaxICoor22 = Icoor2(2)*Icoor2(MaxICoor) * Icoor2(MaxICoor) ;
 
-#elif  defined(LONG_LONG)
+#elif  defined(BAMG_LONG_LONG)
  typedef long  Icoor1;
  typedef long long   Icoor2;
  const Icoor1 MaxICoor =   1073741823;// 2^30-1
