@@ -26,6 +26,7 @@ AC_PROG_RANLIB
 AM_MAINTAINER_MODE
 
 # Necessary compilers
+AC_PROG_CXX
 
 AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available (BLAS, ARPACK and UMFPACK need it)])
 if test "$enable_fortran" != no
@@ -37,9 +38,16 @@ AC_ARG_ENABLE(c,[  --disable-c		No C compiler available (C BLAS need it)])
 if test "$enable_c" != no
 then
 	AC_PROG_CC
+else
+
+	# We need to define this otherwise ./configure crashes with
+	# the message "configure: error: conditional "am__fastdepCC"
+	# was never defined".
+
+	am__fastdepCC_TRUE=
+	am__fastdepCC_FALSE='#'
 fi
 
-AC_PROG_CXX
 AM_PROG_LEX
 AC_PROG_YACC
 AC_LANG(C++)
