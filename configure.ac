@@ -721,6 +721,13 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 AC_ARG_ENABLE(default-fltk,
 	[  --disable-default-fltk	Does not use default FLTK])
 
+# under mingw use download fltk version
+if test "$ff_mingw" = yes 
+then
+	AC_MSG_NOTICE(under mingw not using default FLTK)
+ enable_default_fltk=no 
+fi
+
 # Default FLTK (in the machine's default PATH)
 if test "$enable_default_fltk" = no
 then
@@ -785,6 +792,8 @@ then
 	AC_MSG_RESULT($ff_libc_version)
 	AC_SUBST(LIBC_VERSION,$ff_libc_version)
 fi
+#  def variable pour les makefiles 
+
 
 # creating all makefiles
 # ----------------------
