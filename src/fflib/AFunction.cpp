@@ -509,9 +509,30 @@ void AddOpeqarray(const char op[])
       );
   }
 */
+
+template<class T> struct  Resize{ T *v;
+  Resize( T * vv) : v(vv) {}
+ }; 
+
+template<class T> T *resize1(const Resize<T> & t,const long &n)
+ {  
+  t.v->resize(n);
+  return  t.v;
+ }
+ 
+template<class T> T *resize2(const Resize<T> & t,const long &n, const long & m)
+ {  
+  t.v->resize(n,m);
+  return  t.v;
+ }
+
+template<class T> Resize<T> to_Resize( T *v){ return Resize<T>(v);}
+
 template<class K>
 void ArrayOperator()
 {
+     Dcl_Type< Resize<KN<K> > > ();
+     Dcl_Type< Resize<KNM<K> > > ();
 
      atype<KN<K>* >()->Add("[","",new OneOperator2_<K*,KN<K>*,long >(get_elementp_<K,KN<K>*,long>));
      atype<KN<K>* >()->Add("(","",new OneOperator2_<K*,KN<K>*,long >(get_elementp_<K,KN<K>*,long>));
@@ -523,6 +544,12 @@ void ArrayOperator()
      atype<KNM<K>* >()->Add("(","",new OneOperator3_<K*,KNM<K>*,long,long >(get_elementp2_<K,KNM<K>*,long,long>));
 
      Add<KN<K> *>("sum",".",new OneOperator1<K,KN<K> *>(get_sum));
+
+     Add<KN<K> *>("resize",".",new OneOperator1< Resize<KN<K> >,KN<K> *>(to_Resize));
+     Add<KNM<K> *>("resize",".",new OneOperator1< Resize<KNM<K> >,KNM<K> *>(to_Resize));
+     
+     Add<Resize<KN<K> > >("(","",new OneOperator2_<KN<K> *,Resize<KN<K> > , long   >(resize1));
+     Add<Resize<KNM<K> > >("(","",new OneOperator3_<KNM<K> *,Resize<KNM<K> > , long, long  >(resize2));
 
      TheOperators->Add("<-", 
        new OneOperator2_<KN<K> *,KN<K> *,long>(&set_init),
