@@ -409,7 +409,7 @@ int main (int argc, char **argv)
 }
 #else
 extern int mymain(int argc,char **argv);
-const char * StrVersionNumber();
+string StrVersionNumber();
 
 int main (int argc, char **argv)
 {
