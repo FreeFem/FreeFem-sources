@@ -539,7 +539,7 @@ bool mylex::CallMacro(int &ret)
 		expandtxt+=buf; 
 	    }
 	  else if (ret!='#')  //  macro concatenation operator 
-	    expandtxt+=buf;
+	    expandtxt+=token();
 	}
 	echo=echosave;
 	input(expandtxt);
