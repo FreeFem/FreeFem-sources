@@ -17,7 +17,7 @@ ftpk=hecht@baobab.ann.jussieu.fr:public_html/ftp/freefem/
 
 if [ -f Output/FreeFem++-$VERSION.exe ]; then
   scp Output/FreeFem++-${VERSION}.exe  $ftpk
-  scp Output/FreeFem++-${VERSION}.exe  $ftp
+#  scp Output/FreeFem++-${VERSION}.exe  $ftp
   scp Output/FreeFem++-${VERSION}.exe  $www/freefem++.exe
 else
 list1="HISTORY HISTORY_BEFORE_2005  DOC/manual-full.pdf DOC/manual-full.ps.gz "
@@ -38,7 +38,7 @@ lcd=${listcd[$i]}
 echo file : $f 
 if [ -f $f ]; then
     rsync -vzupogt --rsh="ssh -l hecht" $f  $ftpk
-    scp $f $ftp
+#    scp $f $ftp
     if [ -n "$lcd" ] ; then
       scp $f $www$lcd
     fi
