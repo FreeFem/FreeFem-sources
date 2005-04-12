@@ -8,5 +8,5 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=load.edp		\
 	VISUALCHECK=$(VISUALCHECK)
 EXTRA_DIST=load.edp load.link myfunction.cpp
 
-myfunction.so: myfunction.cpp ../src/fflib/AFunction.o
+myfunction.so: myfunction.cpp ../src/fflib/AFunction.hpp ../config.h 
 	CXX=$(CXX) ./load.link myfunction

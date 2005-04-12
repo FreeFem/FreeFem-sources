@@ -10,8 +10,11 @@ SUBDIRS=download src DOC examples++-tutorial examples++	\
 	examples++-eigen examples++-load examples++-mpi	\
 	examples++-bug examples++-other
 
-EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h		  \
-FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005 README BUGS TODO regtests.m4
+EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h \
+FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
+WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS \
+logo.ico 
+
 
 
 

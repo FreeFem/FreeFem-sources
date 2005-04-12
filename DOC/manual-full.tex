@@ -619,7 +619,7 @@ $[bc_1,bc_2,\cdots,bc_M]$, $bc_i=0$ if $i\in I_{\Omega}$ and
 $bc_i=E (=10^{30})$ if $i\not\in I_{\Omega}$.
 If the finite approximation of $g$ is $g\approx g_1\phi_1+\cdots+g_M\phi_M$
 \begin{equation}
-\texttt{bc[] .* g[]}=\sum_{j=1}^M bc_jg_j
+\texttt{bc[] .* g[]}=\sum_{j=0}^{M-1} bc_jg_j
 \end{equation}
 \end{note}
 
@@ -2246,7 +2246,7 @@ default parameters which can be modified~:
 
 \begin{equation}
   \mathcal{M} = \left({1\over \mathtt{err}\,\,\mathtt{coef}^2} \quad
-  {|{\mathcal{H}} \over
+  {|{\mathcal{H}|} \over
   {\mathit{sup}(\eta)-\mathit{inf}(\eta)}}\right)^p.\label{eq err abs}
 \end{equation}
 
@@ -2379,86 +2379,6 @@ A other way to split mesh triangle:
 
 \twoplot[height=6cm]{nosplitmesh}{splitmesh}{\label{fig nosplitmesh}initial mesh}{\label{fig splitmesh}all left mesh triangle is split  conformaly in \texttt{int(1+5*(square(x-0.5)+y*y)\^2} triangles.}
 
-\subsection{A \setS{Fast Finite Element Interpolator}}
-\medskip
-In practice one may discretize the variational equations by the Finite Element method. Then
-there will be one mesh for $\Omega_1$ and another one for $\Omega_2$.  The computation
-of integrals of products of functions defined on different meshes is difficult.  
-Quadrature formulae and interpolations from one mesh to another at quadrature points are needed.
-We present below the interpolation operator which we have used and which is new, 
-to the best of our knowledge.
-\bigskip
-Let ${\cal T}_{h}^0=\cup_k T^0_k,{\cal T}_{h}^1=\cup_k T^1_k$ be two triangulations of a domain $\Omega$.
-Let 
-$$
-V({\hbox{${\cal T}$}_{h}^i}) =\{ C^0(\Omega_h^i)~:~f|_{T^i_k}\in P^1\},~~~i=0,1
-$$
-be the spaces of continuous piecewise affine functions on each triangulation.
-
-Let $f\in V({\cal T}_{h}^0)$. The problem is to find $g\in V({\cal T}_{h}^1)$ such that
-$$
-g(q) = f(q) \quad \forall q\hbox{~vertex of ~} {\cal T}_{h}^1
-$$
-Although this is a seemingly simple problem, it is difficult to find an 
-efficient algorithm in practice.
-We propose an algorithm which is of complexity  $N^1\log N^0$, where $N^i$ is
-the number of vertices of ${\hbox{${\cal T}$}_{h}^i}$, and which
-is very fast for most practical 2D applications.
-\bigskip
-
-{\bf Algorithm }\par
- The method has 5 steps.  
-  First a quadtree is built containing all the vertices of mesh ${\cal T}_{h}^0$ such that in
- each terminal cell there are at least one, and at most 4, vertices of ${\cal T}_{h}^0$ .\par
-For each $q^1$, vertex of ${\cal T}_{h}^1$ do:   
-\\\\
-\begin{description}
-\item[Step 1] 
-Find the terminal cell of the quadtree containing $q^1$. 
- \item[Step 2] Find the the nearest vertex $q^0_j$ to $q^1$ in that cell.
- \item[Step 3] Choose one triangle $T_k^0\in{\cal T}_{h}^0$ which has $q^0_j$ for vertex.
- \item[Step 4] Compute the barycentric coordinates $\{\lambda_j\}_{j=1,2,3}
- $ of $q^1$ in $T^0_k$.
-\begin{itemize}
- \item{$-$} if all barycentric coordinates are positive, go to Step 5
- \item{$-$} else if one barycentric coordinate $\lambda_i$ is negative replace $T^0_k$ by the
- adjacent triangle opposite $q^0_i$ and go to Step 4.
- \item{$-$} else two barycentric coordinates are negative so take one of the two randomly
- and replace $T^0_k$ by the adjacent triangle as above.
-\end{itemize}
-  \item[Step 5] Calculate $g(q^1)$ on $T^0_k$ by linear interpolation of $f$:
- $$
- g(q^1) = \sum_{j=1,2,3} \lambda_j f(q^0_j)
- $$
- \item[End]~
-\end{description}
-\plot[height=5cm]{fastInterpolat}{
- To interpolate a function at $q^0$ the knowledge of the triangle
-which contains $q^0$ is needed.  The algorithm may start at $q^1\in T_k^0$ and stall
-on the boundary (thick line) because the line $q^0q^1$ is not inside $\Omega$. But if the holes
-are triangulated too (doted line) then the problem does not arise.}
-
-Two problems needs to solved: 
-\begin{itemize}
-  \item {\it  What if $q^1$ is not in $\Omega^0_h$ ?}  Then Step 5 will stop with a
- boundary triangle. So we add a step which test the distance of $q^1$ with the
- two adjacent boundary edges and select the nearest, and so on till the distance
- grows.
- \medskip
- \item {\it What if $\Omega^0_h$ is not convex and the marching process of Step 4
- locks on a boundary?}
- By construction  Delaunay-Voronoi mesh generators always triangulate the convex
- hull of the vertices of the domain.  So we make sure that this information is not
- lost when ${\cal T}_{h}^0,{\cal T}_{h}^1$ are constructed and we keep the triangles which are
- outside the domain in a special list. Hence in step 5 we can use that list
- to step over holes if needed.
-\end{itemize}
-
-\begin{note}
- Step 3 requires an array of pointers 
- such that each vertex points to one triangle 
- of the triangulation.
-\end{note}
 
 \subsection{\setS{Meshing Examples}}
 
@@ -3111,6 +3031,88 @@ Warning for no scalar finite element function   \texttt{[Uxh,Uyh]}
 The other way to set a FE function  is to solve a `problem' (see
 below).
 
+%%Changed the place (OT 04/02/2005)
+\subsection{A \setS{Fast Finite Element Interpolator}}
+\medskip
+In practice one may discretize the variational equations by the Finite Element method. Then
+there will be one mesh for $\Omega_1$ and another one for $\Omega_2$.  The computation
+of integrals of products of functions defined on different meshes is difficult.  
+Quadrature formulae and interpolations from one mesh to another at quadrature points are needed.
+We present below the interpolation operator which we have used and which is new, 
+to the best of our knowledge.
+\bigskip
+Let ${\cal T}_{h}^0=\cup_k T^0_k,{\cal T}_{h}^1=\cup_k T^1_k$ be two triangulations of a domain $\Omega$.
+Let 
+$$
+V({\hbox{${\cal T}$}_{h}^i}) =\{ C^0(\Omega_h^i)~:~f|_{T^i_k}\in P^1\},~~~i=0,1
+$$
+be the spaces of continuous piecewise affine functions on each triangulation.
+
+Let $f\in V({\cal T}_{h}^0)$. The problem is to find $g\in V({\cal T}_{h}^1)$ such that
+$$
+g(q) = f(q) \quad \forall q\hbox{~vertex of ~} {\cal T}_{h}^1
+$$
+Although this is a seemingly simple problem, it is difficult to find an 
+efficient algorithm in practice.
+We propose an algorithm which is of complexity  $N^1\log N^0$, where $N^i$ is
+the number of vertices of ${\hbox{${\cal T}$}_{h}^i}$, and which
+is very fast for most practical 2D applications.
+\bigskip
+
+{\bf Algorithm }\par
+ The method has 5 steps.  
+  First a quadtree is built containing all the vertices of mesh ${\cal T}_{h}^0$ such that in
+ each terminal cell there are at least one, and at most 4, vertices of ${\cal T}_{h}^0$ .\par
+For each $q^1$, vertex of ${\cal T}_{h}^1$ do:   
+\\\\
+\begin{description}
+\item[Step 1] 
+Find the terminal cell of the quadtree containing $q^1$. 
+ \item[Step 2] Find the the nearest vertex $q^0_j$ to $q^1$ in that cell.
+ \item[Step 3] Choose one triangle $T_k^0\in{\cal T}_{h}^0$ which has $q^0_j$ for vertex.
+ \item[Step 4] Compute the barycentric coordinates $\{\lambda_j\}_{j=1,2,3}
+ $ of $q^1$ in $T^0_k$.
+\begin{itemize}
+ \item{$-$} if all barycentric coordinates are positive, go to Step 5
+ \item{$-$} else if one barycentric coordinate $\lambda_i$ is negative replace $T^0_k$ by the
+ adjacent triangle opposite $q^0_i$ and go to Step 4.
+ \item{$-$} else two barycentric coordinates are negative so take one of the two randomly
+ and replace $T^0_k$ by the adjacent triangle as above.
+\end{itemize}
+  \item[Step 5] Calculate $g(q^1)$ on $T^0_k$ by linear interpolation of $f$:
+ $$
+ g(q^1) = \sum_{j=1,2,3} \lambda_j f(q^0_j)
+ $$
+ \item[End]~
+\end{description}
+\plot[height=5cm]{fastInterpolat}{
+ To interpolate a function at $q^0$ the knowledge of the triangle
+which contains $q^0$ is needed.  The algorithm may start at $q^1\in T_k^0$ and stall
+on the boundary (thick line) because the line $q^0q^1$ is not inside $\Omega$. But if the holes
+are triangulated too (doted line) then the problem does not arise.}
+
+Two problems needs to solved: 
+\begin{itemize}
+  \item {\it  What if $q^1$ is not in $\Omega^0_h$ ?}  Then Step 5 will stop with a
+ boundary triangle. So we add a step which test the distance of $q^1$ with the
+ two adjacent boundary edges and select the nearest, and so on till the distance
+ grows.
+ \medskip
+ \item {\it What if $\Omega^0_h$ is not convex and the marching process of Step 4
+ locks on a boundary?}
+ By construction  Delaunay-Vorono\"{i} mesh generators always triangulate the convex
+ hull of the vertices of the domain.  So we make sure that this information is not
+ lost when ${\cal T}_{h}^0,{\cal T}_{h}^1$ are constructed and we keep the triangles which are
+ outside the domain in a special list. Hence in step 5 we can use that list
+ to step over holes if needed.
+\end{itemize}
+
+\begin{note}
+ Step 3 requires an array of pointers 
+ such that each vertex points to one triangle 
+ of the triangulation.
+\end{note}
+
 \subsection{Problem and solve}
 
  For \freefempp  a problem must be given in variational form, %\cite{blop},
@@ -3125,7 +3127,7 @@ and possibly a boundary condition form must be added.
 For example, see (\ref{eqn:weakform}).
 
 \begin{note} When you want to formulate the problem and to solve it 
-in the same time, you can use the keywork \texttt{solve},
+in the same time, you can use the keywork \texttt{solve}.
 \index{solve}
 \end{note}
 
@@ -3257,13 +3259,13 @@ if we can find particular points $\vec{\xi}_j,\, j=1,\cdots,J$ in $D$ and
 constants $\omega_j$ such that 
 \begin{eqnarray}
 \label{eqn:GaussInt}
-\int_{\Omega}f(\vec{x}) = \sum_{\ell =1}^L c_\ell f(\vec{\xi}_\ell)
+\int_{D}f(\vec{x}) = \sum_{\ell =1}^L c_\ell f(\vec{\xi}_\ell)
 \end{eqnarray}
 then we have the error estimation (see Crouzeix-Mignot (1984)),
 then there exists a constant $C>$ such that, 
 \begin{eqnarray}
 \label{eqn:GaussIntError}
-\left|\int_{\Omega}f(\vec{x}) - \sum_{\ell =1}^L \omega_\ell 
+\left|\int_{D}f(\vec{x}) - \sum_{\ell =1}^L \omega_\ell 
 f(\vec{\xi}_\ell )\right|
 \le C|D|h^{r+1}
 \end{eqnarray}
@@ -3474,7 +3476,7 @@ Here we have three matrices $A,Bx,By$, and we can solve the problem:\\
 find $ u_{1} \in X_{h}$ such that
 $$ a(v_{1},u_{1})= by(v_{1},f), \forall v_{1}\in X_{0h}, $$
 $$ u_{1} = g , \quad \mbox{on~} \Gamma_{1}, \mbox{and}\quad u_{1}=0 \quad \mbox{on~}  \Gamma_{1}\cup \Gamma_{2}\cup \Gamma_{4}$$
-with the following line (where $f=x$, and $ g=sin(x)$)\index{[]@\verb=[]=}
+with the following line (where $f=x$, and $ g=\sin(x)$)\index{[]@\verb=[]=}
 \bFF
 Mh f=x;
 Xh g=sin(x);
@@ -3539,16 +3541,17 @@ and after some operations on sparce matrices are avialable for example
 \eFF
 \subsection{Interpolation matrix}
 
- This possible to store the matrix of a linear interpolation operator from
+ This becomes possible to store the matrix of a linear interpolation operator from
  a finite element space $V_h$ to  $W_h$ with \texttt{interpolate} function.
-Note by default the continuous finite function are extended. by continuity on ouside 
-domain part.
+Note that the continuous finite functions are extended by continuity 
+to the outside of the domain.
+
 
 The named parameter of function \texttt{interpolate} are:
 \begin{description}
-\item[\texttt{inside=}] set to true value  to set the outside extention to zero.
-\item[\texttt{t=}] set to  true value to get the transposed matrix
-\item[\texttt{op=}] set a int value $i$ to get
+\item[\texttt{inside=}] set true to create zero-extension.
+\item[\texttt{t=}] set true to get the transposed matrix
+\item[\texttt{op=}] set an integer written below
 
 \begin{description}
 \item[0] the default value and interpolate of the function
@@ -3560,11 +3563,9 @@ The named parameter of function \texttt{interpolate} are:
  \index{inside=}\index{interpolate!inside=}
  \index{interpolate!t=}\index{interpolate!t=}.
  \index{interpolate!op=}\index{interpolate!op=}.
-
 \end{description}
 
-A sample example \texttt{mat\_interpol.edp}:
-
+\begin{example}[mat\_interpol.edp]~
 \bFF
 @mesh Th=square(4,4);
 @mesh Th4=square(2,2,[x*0.5,y*0.5]);
@@ -3591,14 +3592,13 @@ cout << " IV Wh4<-Wh  " << IW4  << endl;
 
 @matrix IW4V= interpolate(Wh4,Vh);
 cout << " IV Wh4<-Vh  " << IW4  << endl;
-
 \eFF
-
+\end{example}
 
 \subsection{Finite elements connectivity}
-
-With the following expression we can get the
-connectivity information of a finite element space $W_h$
+Here, we show how get the informations of a
+finite element space $W_h({\cal T}_n,*)$,
+where ``*'' denotes P1, P2, P1nc, etc.
 \index{nt} \index{ndof} \index{ndofK} \index{connectivity}
 \index{FEspace!nt}\index{FEspace!ndof} \index{FEspace!(int ,int )}
 \begin{itemize}
@@ -3608,19 +3608,21 @@ connectivity information of a finite element space $W_h$
 \item   \ttCC{   Wh(k,i) }   gives the number of $i$th  degree of freedom of element $k$.
  
 \end{itemize}
-See the following  exemple:
+See the following for an exemple:
+\begin{example}[FE.edp]
 \bFF
-mesh Th=square(5,5);
-fespace Wh(Th,P2);
-cout << " nb of degre of freedom           : " << Wh.ndof << endl;
-cout << " nb of degre of freedom / ELEMENT : " << Wh.ndofK << endl;
- int k= 2;  // element 2 
- int kdf= Wh.ndofK ;
- cout << " df of element " << k << ":" ;
- for (int i=0;i<kdf;i++)
-    cout << Wh(k,i) << " ";
- cout << endl;
+@mesh Th=@square(5,5);
+@fespace Wh(Th,P2);
+@cout << " nb of degree of freedom           : " << Wh.ndof << endl;
+@cout << " nb of degree of freedom / ELEMENT : " << Wh.ndofK << endl;
+ @int k= 2;  // element 2 
+ @int kdf= Wh.ndofK ;
+ @cout << " df of element " << k << ":" ;
+ @for (@int i=0;i<kdf;i++)
+    @cout << Wh(k,i) << " ";
+ @cout << @endl;
 \eFF
+\end{example}
 and the output is:
 \bFF
  Nb Of Nodes = 121
@@ -3685,7 +3687,7 @@ The named parameter are
        to set the bounding box and specify a partial view where the  box defined by the two corner points [0.1,0.2] and [0.5,0.6].
 
     \itemtt[nbiso=]  \index{plot! nbiso =}(int) sets the number of isovalues (20 by default) 
-    \itemtt[nbarrow=] \index{plot!nbarrow=} (int) sets the number of colors of arrow values (20 by default) 
+    \itemtt[nbarrow=] \index{plot!nbarraw=} (int) sets the number of colors of arrow values (20 by default) 
     \itemtt[viso=]  \index{plot!viso=}sets the array  value of isovalues (an array real[int]) 
     \itemtt[varrow=] \index{plot!varrow=}  sets the array value of color arrows (an array real[int])
     \itemtt[bw=] \index{plot!bw=} (bool)  sets or not the plot in black and white color.
@@ -3784,99 +3786,193 @@ Vh u=2-x*x-y*y;
  \subsection{conjugate Gradient/GMRES}
 
 If we want to solve  the Euler problem: find $ x\in \R^n $  such that  
-$$ \frac{\partial J}{\partial x_i} (x) = 0 $$
+\begin{equation}
+\label{eqn:dJ=0}
+\nabla J(x) = \left(\frac{\partial J}{\partial x_i} (\vec{x})\right) = 0
+\end{equation}
 where $ J$ is a functional (to minimize  for example) from  $ \R^n$ to $ \R$.
 
-if the function is convex we can use the conjugate gradient to solve the problem, and
-we just need the function (named \texttt{dJ} for example)
-which compute $\frac{\partial J}{\partial x_i}$, so the two parameters
+If the function is convex we can use the conjugate gradient to solve the problem, and we just need the function (named \texttt{dJ} for example)
+which compute $\nabla J$, so the two parameters
 are the name of the function with prototype \ttCC{@func\ @real[@int]\  dJ(@real[@int] \& xx)} 
- which compute $\frac{\partial J}{\partial x_i}$, 
+ which compute $\nabla J$, 
 a vector \ttCC{x} of type \ttCC{@real[@int]} to initialize the process and get the result.
 
 
-
-\begin{note}
-You can use the \texttt{macro} tools (see \ref{macro}) to build easily the differential, see example \texttt{Newtow.edp}.
-\end{note}
-
-Three versions are available:
-\begin{description} \index{linearCG} \index{NLCG}
-\itemtt[LinearCG] linear case , the functional $J$ is quadratic $J= 1/2 (x,Ax) - (b,x)$ where 
- $A$ is a symetric positive matrix .
-\itemtt[LinearCMRES] linear case ,where  the functional $J= 1/2 (x,Ax) - (b,x)$ where  $A$ is a matrix.
-
-\itemtt[NLCG] non linear case (the functional is just convex).
-\end{description}
-
+Given a staring value $\vec{x}^{(0)}$, a maximum number $i_{\max}$ 
+of iterations, and an error tolerance $0<\epsilon<1$: 
+Put $\vec{x}=\vec{x}^{(0)}$ and write
+\begin{quote}\texttt{
+NLCG($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\epsilon$);
+}
+\end{quote}
+Then we get the solution $\vec{x}$ of $\nabla J(\vec{x})=0$.
+We can omit parameters \texttt{precon, nbiter, eps}.
+Here $M$ is the preconditioner whose default is the identity matrix.
+The stopping test is 
+\[
+\| \nabla J(\vec{x})\|_P\le \epsilon\| \nabla J(\vec{x}^{(0)})\|_P
+\]
+Writing the minus value in \texttt{eps=}, i.e.,
+\begin{quote}\texttt{
+NLCG($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=-\epsilon$);
+}
+\end{quote}
+we can use the stopping test
+\[
+\| \nabla J(\vec{x})\|_P^2\le \epsilon
+\]
 The named parameter of these three functions are:
 \begin{description}  \index{linearCG!nbiter=} \index{linearCG!precon=} \index{linearCG!eps=}\index{linearCG!veps=}
 \index{NLCG!nbiter=}  \index{NLCG!eps=}\index{NLCG!veps=}
-\index{LinearCMRES!nbiter=} \index{LinearCMRES!precon=} \index{LinearCMRES!eps=}\index{LinearCMRES!veps=}
+\index{LinearGMRES!nbiter=} \index{LinearGMRES!precon=} \index{LinearCMRES!eps=}\index{LinearGMRES!veps=}
 
 \itemtt[nbiter=] set the number of iteration (by default $100$)
 \itemtt[precon=] set the preconditionner function (\texttt{P} for example)   by default it is the identity, remark the prototype 
 is \ttCC{@func\ @real[\@int]\ P(@real[@int] \&x)}.
 \itemtt[eps=] set the value of the stop test $\varepsilon$ ($=10^{-6}$ by default) if positive then relative test 
-$||dJ(x)||_P\leq \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\leq |\varepsilon|$.
+$||\nabla J(x)||_P\leq \varepsilon||\nabla J(x_0)||_P$, otherwise the  absolute test is  $||\nabla J(x)||_P^2\leq |\varepsilon|$.
 \itemtt[veps=] set and return the value of the stop test,  if positive then relative test 
-$||dJ(x)||_P\leq \varepsilon*||dJ(x_0)||_P$, otherwise the  absolute test is  $||dJ(x)||_P^2\leq |\varepsilon|$.
+$||\nabla J(x)||_P\leq \varepsilon||\nabla J(x_0)||_P$, otherwise the  absolute test is  $||\nabla J(x)||_P^2\leq |\varepsilon|$.
 The return value is  minus  the real stop test (remark: it is useful in loop).
 
 \end{description}
-
-Example of use:
+\begin{example}[from algo.edp]
+For a given function $b$, let us find the minimizer $u$ of the functional
+\begin{eqnarray*}
+ J(u) &=& \int_{\Omega} f(|\nabla u|^2) - \int_{\Omega}  u b \\
+ f(x) &=& ax + x-\ln(1+x), \quad f'(x) = a+\frac{x}{1+x}, \quad f''(x) =  \frac{1}{(1+x)^2}
+\end{eqnarray*}
+under the boundary condition $u=0$ on $\partial\Omega$.
 \bFF
-  @real[int] matx(10),b(10),x(10);
+@mesh Th=@square(10,10);  // mesh definition of $\Omega$
+@fespace Vh(Th,P1);      // finite element space
+@fespace Ph(Th,P0);      // make optimization
+\eFF
+/*
+A small hack to construct a function 
+\[
+Cl= \left\{
+\begin{array}{cl} 1 & \textrm{\rm on interior degree of freedom} \\
+ 0 & \textrm{\rm on boundary degree of freedom} 
+ \end{array}\right. 
+\]
+*/\\
+// Hack to construct an array :\\
+//  1 on interior nodes and 0 on boundary nodes
+\bFF
+@varf vCl(u,v) = @on(1,2,3,4,u=1);
+Vh Cl;
+Cl[]= vCl(0,Vh,tgv=1);  //  0 and tgv 
+@real tgv=Cl[].max;     // 
+Cl[] = -Cl[];  Cl[] += tgv; Cl[] /=tgv;
+\eFF
+// the definition of $f$, $f'$, $f''$ and $b$
+\bFF
+@real a=0.001;
 
-  @func @real J(@real[@int] & x)
-    {
-      @real s=0;
-      @for (@int i=0;i<x.n;i++)
-        s +=(i+1)*x[i]*x[i]*0.5 - b[i]*x[i];
-      @return s;
+@func @real f(@real u) { @return u*a+u-log(1+u); }
+@func @real df(@real u) { @return a+u/(1+u);}
+@func @real ddf(@real u) { @return 1/((1+u)*(1+u));}
+Vh b=1;  // to defined b
+// the routine to compute the functional $J$
+@func @real J(@real[int] & x)
+  {
+    Vh u;u[]=x; 
+    @real r=@int2d(Th)(f( dx(u)*dx(u) + dy(u)*dy(u) ) - b*u) ;
+    @cout << "J(x) =" << r << " " << x.min <<  " " << x.max << @endl;
+    @return r;
+  }
+// The function  \index{function}to compute $D J$, where $u$ is the current solution.
+Vh u=0; //  the current value of the solution
+Vh alpha; // of store  $f'(|\nabla u|^2)$
+@int iter=0;
+alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization 
+
+@func @real[@int] dJ(@real[int] & x)
+  {
+    @int verb=verbosity; verbosity=0; 
+    Vh u;u[]=x; 
+    alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization 
+    @varf au(uh,vh) = @int2d(Th)( alpha*( dx(u)*dx(vh) + dy(u)*dy(vh) ) - b*vh);
+    x= au(0,Vh);  
+    x = x.* Cl[]; //  the grad in 0 on boundary 
+    verbosity=verb;
+    @return x; // warning no return of local array  
+  }
+\eFF
+/*
+We want to construct also a preconditioner $C$
+with solving the problem:  find $u_h \in V_{0h}$ such that
+\[
+\forall v_h \in V_{0h}, \quad  \int_\Omega \alpha \nabla u_h . \nabla v_h = \int_\Omega b v_h  
+\]
+where $ \alpha=f'(|\nabla u|^2)$.
+*/
+\bFF
+@varf alap(uh,vh,solver=Cholesky,init=iter)=  
+   @int2d(Th)( alpha *( dx(uh)*dx(vh) + dy(uh)*dy(vh) )) + @on(1,2,3,4,uh=0);
+
+@varf amass(uh,vh,solver=Cholesky,init=iter)=  
+   @int2d(Th)( uh*vh)  + @on(1,2,3,4,uh=0);
+
+@matrix Amass = alap(Vh,Vh,solver=CG); // \index{matrix}
+
+@matrix Alap=  alap(Vh,Vh,solver=Cholesky,factorize=1);   // \index{Cholesky}\index{factorize=}\index{solver=}
+
+// the preconditionner function
+@func @real[@int] C(@real[@int] & x)
+{
+   @real[@int] u(x.n);
+   u=Amass*x;
+   x = Alap^-1*u; 
+   x = x .* Cl[];     
+   @return x; // no return of local array  variable 
+}
+\eFF
+/*
+To solve the problem, we make 10 iteration of the conjugate gradient, 
+recompute the preconditioner and restart the conjugate gradient:
+*/
+\bFF
+   verbosity=5;
+   @int conv=0;
+   @real eps=1e-6; 
+   @for(@int i=0;i<20;i++)
+   {
+     conv=NLCG(dJ,u[],nbiter=10,precon=C,veps=eps); // \index{veps=}\index{NLCG}
+     @if (conv) break;  // if converge break loop
+    
+     alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // recompute alpha optimization 
+     Alap = alap(Vh,Vh,solver=Cholesky,factorize=1);   
+     @cout << " restart with new preconditionner " << conv << " eps =" << eps << endl;
     }
 
-//  the grad of J (this is a affine version (the RHS is in  ) \hfilll
-  @func @real[@int] dJ(@real[@int] &x)
-    { @for (@int i=0;i<x.n;i++)
-        matx[i]=(i+1)*x[i];
-      matx -= b; // sub the right hand side
-      @return matx;  // return of global variable ok
-    };
-// the grad of the bilinear part of J (the RHS in remove)\hfilll
-  @func @real[@int] dJ0(@real[@int] &x)
-    { @for (@int i=0;i<x.n;i++)
-        matx[i]=(i+1)*x[i];
-      @return matx;  // return of global variable ok
-    };
-//  \hfilll
-  @func @real error(@real[@int] & x,@real[@int] & b)
-   {  @real s=0;
-     @for (@int i=0;i<x.n;i++)
-        s += abs((i+1)*x[i] - b[i]);
-   @return s; }
-
-
-  @func @real[@int] matId(@real[@int] &x) { @return x;};
-  
-  b=1; x=0; // here not rhs the CG (in dJ) 
-  LinearCG(dJ,x,eps=1.e-6,nbiter=20,precon=matId);
-  cout << "LinearCG (Affine)  : J(x) = " << J(x) << " err=" << error(x,b) << endl;
-
-  b=1; x=0;// here rhs the CG (in not dJ0)
-  LinearCG(dJ0,x,b,eps=1.e-6,nbiter=20,precon=matId);
-  cout << "LinearCG (Linear) : J(x) = " << J(x) << " err=" << error(x,b) << endl;
-
-  b=1; x=0; // here rhs the CG (in not dJ0)
-  LinearGMRES(dJ0,x,b,eps=1.e-6,nbiter=20,precon=matId);
-  cout << "LinearGMRES: J(x) = " << J(x) << " err=" << error(x,b) << endl;
-
-  b=1; x=0; // set  right hand side and initial gest
-  NLCG(dJ,x,eps=1.e-6,nbiter=20,precon=matId);
-  cout << "NLCG: J(x) = " << J(x) << " err=" << error(x,b) << endl;
- 
+   @plot (u,wait=1,cmm="solution with NLCG");
 \eFF
+\end{example}
+For a given symmetric positive matrix $A$, consider the quadratic form
+\[
+J(\vec{x})=\frac{1}{2}\vec{x}^TA\vec{x}-\vec{b}^T\vec{x}
+\]
+then $J(\vec{x})$ is minimized by the solution $\vec{x}$ of $A\vec{x}=\vec{b}$.
+In this case, we can use the function \texttt{LinearCG}
+\begin{quote}\texttt{
+LinearCG($A$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$);
+}
+\end{quote}
+If $A$ is not symmetric, we can use GMRES(Generalized Minimum Residual) algorithm by 
+\begin{quote}\texttt{
+LinearGMRES($A$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$);
+}
+\end{quote}
+Also, we can use the non-linear version of GMRES algorithm
+(the functional $J$ is just convex)
+\begin{quote}\texttt{
+LinearGMRES($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$);
+}
+\end{quote}
+For detail of these algorithms, refer to \cite{Lucquin}[Chapter IV, 1.3].
 
 \subsection{Optimization}
 Two algorithms of 
@@ -4512,7 +4608,7 @@ Now, the local  error indicator $\eta_{T}$ is:
 
 $$\eta_{T} =\left(  h_{T}^{2} || f + \Delta u_{{h}} ||_{L^{2}(T)}^{2} +\sum_{e\in \AK} h_{e} \,||\, [ \frac{\partial u_{h}}{\partial n_{k}}] \,||^{2}_{L^{2}(e)} \right)^{\frac{1}{2}}
    $$
-where $h_{T}$ is the longest's edge of  $T$, $\AK$ is the set of $T$ edge not on 
+where $h_{T}$ is the longest's edge of  $T$, ${\cal E}_T$ is the set of $T$ edge not on 
 $\Gamma=\partial \Omega$, $n_{T}$ is the  outside unit normal to $K$, $h_{e}$ is the length of edge $e$,
 $[ g ]$ is the jump of the function $g$ across edge (left value minus rigth value). 
 
@@ -4675,7 +4771,7 @@ The equations of elasticity are naturally written in variational form
 for the displacement vector $u(x)\in V$ as
 \Blue{$$
 \int_\Omega [2\mu\epsilon_{ij}(\vec u)\epsilon_{ij}(\vec v)
-+\lambda \epsilon_{ii}(u)\epsilon_{jj}(\vec v)]
++\lambda \epsilon_{ii}(\vec{u})\epsilon_{jj}(\vec v)]
 =\int_\Omega \vec f\cdot \vec v +\int_\Gamma \vec g\cdot \vec v,%\`{u}
 \forall \vec v\in V
 $$}
@@ -4977,120 +5073,6 @@ and $f$ defined by
 $$
 f(x) = a*x + x-ln(1+x), \quad f'(x) = a+\frac{x}{1+x}, \quad f''(x) =  \frac{1}{(1+x)^2}
 $$
-
-
-
-\subsubsection{Non linear conjugate gradient algorithm}
-\bFF
-
-@mesh Th=@square(10,10);  // mesh definition of $\Omega$
-@fespace Vh(Th,P1);      // finite element space
-@fespace Ph(Th,P0);      // make optimization
-
-\eFF
-A small hack to construct a function 
-$$Cl= \left\{\begin{array}{cl} 1 & \mbox{ on interior degree of freedom} \cr
- 0 & \mbox{ on boundary degree of freedom} \end{array}\right. $$
-\bFF
-// Hack to construct an array :
-//  1 on interior nodes and 0 on boundary nodes
-@varf vCl(u,v) = @on(1,2,3,4,u=1);
-Vh Cl;
-Cl[]= vCl(0,Vh,tgv=1);  //  0 and tgv 
-@real tgv=Cl[].max;     // 
-Cl[] = -Cl[];  Cl[] += tgv; Cl[] /=tgv;
-
- 
-\eFF
-the definition of $f$, $f'$, $f''$ and $b$
-\bFF
-// $ J(u) = \int_\Omega f(|\nabla u|^2) - \int\Omega  u b $ \hfilll
-// $ f(x) = a*x + x-ln(1+x), \quad f'(x) = a+\frac{x}{1+x}, \quad f''(x) =  \frac{1}{(1+x)^2}$ \hfilll
-@real a=0.001;
-
-@func real f(real u) { return u*a+u-log(1+u); }
-@func real df(real u) { return a+u/(1+u);}
-@func real ddf(real u) { return 1/((1+u)*(1+u));}
-Vh b=1;  // to defined b
-// the routine to compute the functional $J$ \hfilll
-@func real J(real[int] & x)
-  {
-    Vh u;u[]=x; 
-    @real r=@int2d(Th)(f( dx(u)*dx(u) + dy(u)*dy(u) ) - b*u) ;
-    @cout << "J(x) =" << r << " " << x.min <<  " " << x.max << @endl;
-    @return r;
-  }
-\eFF
-The function  \index{function}to compute $D J$, where $u$ is the current solution.
-\bFF
-Vh u=0; //  the current value of the solution
-Vh alpha; // of store  $f(|\nabla u|^2)$
-@int iter=0;
-alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization 
-
-@func real[int] dJ(real[int] & x)
-  {
-    @int verb=verbosity; verbosity=0; 
-    Vh u;u[]=x; 
-    alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization 
-    @varf au(uh,vh) = @int2d(Th)( alpha*( dx(u)*dx(vh) + dy(u)*dy(vh) ) - b*vh);
-    x= au(0,Vh);  
-    x = x.* Cl[]; //  the grad in 0 on boundary 
-    verbosity=verb;
-    @return x; // warning no return of local array  
-  }
-\eFF
-
-We want to construct also a preconditionner function $C$
-with solving the problem:  find $u_h \in V_{0h}$ such that
-$$\forall v_h \in V_{0h}, \quad  \int_\Omega \alpha \nabla u_h . \nabla v_h = \int_\Omega b v_h  $$
-where $ \alpha=f(|\nabla u|^2)$.
-\bFF
-@varf alap(uh,vh,solver=Cholesky,init=iter)=  
-   @int2d(Th)( alpha *( dx(uh)*dx(vh) + dy(uh)*dy(vh) ))   + @on(1,2,3,4,uh=0);
-
-@varf amass(uh,vh,solver=Cholesky,init=iter)=  @int2d(Th)( uh*vh)  + @on(1,2,3,4,uh=0);
-
-@matrix Amass = alap(Vh,Vh,solver=CG); // \index{matrix}
-
-@matrix Alap=  alap(Vh,Vh,solver=Cholesky,factorize=1);   // \index{Cholesky}\index{factorize=}\index{solver=}
-
-// the preconditionner function
-@func real[int] C(real[int] & x)
-{
-   @real[int] u(x.n);
-   u=Amass*x;
-   x = Alap^-1*u; 
-   x = x .* Cl[];     
-   @return x; // no return of local array  variable 
-}
-\eFF
-
-A good idea to solve the problem is make 10 iteration of the conjugate gradient, 
-recompute the preconditioning and restart the conjugate gradient:
-\bFF
-   verbosity=5;
-   @int conv=0;
-   @real eps=1e-6; 
-   @for (@int i=0;i<20;i++)
-   {
-     conv=NLCG(dJ,u[],nbiter=10,precon=C,veps=eps); // \index{veps=}\index{NLCG}
-     @if (conv) @break;  // if converge break loop
-    
-     alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // recompute alpha optimization 
-     Alap = alap(Vh,Vh,solver=Cholesky,factorize=1);   
-     @cout << " restart with new preconditionner " << conv << " eps =" << eps << @endl;
-   }
-
-   p@lot (u,wait=1,cmm="solution with NLCG");
-\eFF
-\begin{note}
- The keycode  \texttt{veps=eps} change the value of the current \texttt{eps}, this is
-usefule in this case, because at the first iteration  the value of \texttt{eps} is change 
-to $-$ the absolute stop test and we save this initial stop test of for the all process. We remove the problem
-of the relative stop test in iterative procedure, because we start close to the solution
-and  the relative stop test become very hard  to reach.
-\end{note}
 
 \subsubsection{Newton Ralphson algorithm}
 
@@ -5488,7 +5470,7 @@ if the following are satisfied:
   \item When $\theta\in [0,1/2)$, then we can take a time step $\tau$ in 
 such a way that
 \begin{eqnarray}
-\tau <\frac{2(1-\delta)}{(1-2\theta)c_0^2}h
+\tau <\frac{2(1-\delta)}{(1-2\theta)c_0^2}h^2
 \end{eqnarray}
 for arbitrary $\delta\in (0,1)$.
   \item When $1/2\le \theta\le 1$, we can take $\tau$ arbitrary.
@@ -6002,7 +5984,7 @@ and the corresponding algebraic problem
 \left(
 \begin{array}{cc}
 \vec{A}&B^*\\
-B&\epsilon I
+B&-\epsilon I
 \end{array}
 \right)
 \left(
@@ -7719,10 +7701,10 @@ Let $E,\, F,\, G$ be three sets and $A$ subset of $E$.
 \subsection{Numbers}
 For two real numbers $a,b$
 \begin{description}
-  \item[[$a,b$]] $\{x\in \R|\; a\le x\le b\}$
-  \item[]$a,b$]] $\{x\in \R|\; a< x\le b\}$
-  \item[[$a,b$[] $\{x\in \R|\; a\le x< b\}$
-  \item[]$a,b$[] $\{x\in \R|\; a< x< b\}$
+  \item[\quad]$[a,b]$ is the interval $\{x\in \R|\; a\le x\le b\}$
+  \item[\quad]$]a,b]$ is the interval $\{x\in \R|\; a< x\le b\}$
+  \item[\quad]$[a,b[$ is the interval $\{x\in \R|\; a\le x< b\}$
+  \item[\quad]$]a,b[$ is the interval $\{x\in \R|\; a< x< b\}$
 \end{description}
 
 \subsection{Differential Calculus}

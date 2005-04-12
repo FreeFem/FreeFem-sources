@@ -7,7 +7,7 @@ int n=u1.n;
 real[int] Bu1(n),Bu2(n);
 real[int] Au1(n),Au2(n);
 
-real sigma = 1;                     
+real sigma = 0;                     
 real nu=0.1;
 
 varf  op(u1,u2)= int2d(Th)(  nu*(dx(u1)*dx(u2) + dy(u1)*dy(u2)) + (dx(u1)+dy(u1))*u2 - sigma* u1*u2 )

@@ -3735,6 +3735,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("jump","(",new OneOperatorCode<Code_VF<Finconnue,Code_Jump> >);
  Global.Add("average","(",new OneOperatorCode<Code_VF<Ftest,Code_Mean> >);
  Global.Add("average","(",new OneOperatorCode<Code_VF<Finconnue,Code_Mean> >);
+ Global.Add("mean","(",new OneOperatorCode<Code_VF<Ftest,Code_Mean> >);
+ Global.Add("mean","(",new OneOperatorCode<Code_VF<Finconnue,Code_Mean> >);
  Global.Add("otherside","(",new OneOperatorCode<Code_VF<Ftest,Code_OtherSide> >);
  Global.Add("otherside","(",new OneOperatorCode<Code_VF<Finconnue,Code_OtherSide> >);
  

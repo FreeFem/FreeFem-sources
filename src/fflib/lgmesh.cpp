@@ -905,8 +905,10 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
       
 }
 }
-Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack)
+Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
 {
+  const int unionjack=1;
+  
   using  Fem2D::Vertex;
   using  Fem2D::Triangle;
   using  Fem2D::R2;
@@ -953,9 +955,26 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack)
        int i0 = i + j*nx1;
        int i1= i0+1;
        int i2=i1+nx1;
-       int i3=i2-1;   
+       int i3=i2-1;
+      bool cas = true;
+      switch (flags)
+       {
+       case unionjack:
+          cas =  (i+ j) %2 ; break;
+       otherwise:
+          cas = true;
+       }   
+      if (cas)
+       {     // diag 1     
        (tt++)->set(v,i0,i1,i2,0,0.0);
        (tt++)->set(v,i0,i2,i3,0,0.0);
+       }
+      else
+       {    // diag 2       
+       (tt++)->set(v,i0,i1,i3,0,0.0);
+       (tt++)->set(v,i3,i1,i2,0,0.0);
+       }
+      
      }  
   BoundaryEdge * bb=b;
   for (int i=0;i<nx;i++)
@@ -1008,8 +1027,16 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack)
 class MeshCarre2 :   public E_F0mps { public:
     typedef pmesh  Result;
      Expression nx,ny;
+   static basicAC_F0::name_and_type name_param[] ;
+   static const int n_name_param =1;
+    Expression nargs[n_name_param];
+   
+    long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+     
+     
      MeshCarre2(const basicAC_F0 & args) 
-    { args.SetNameParam();
+    {     
+      args.SetNameParam(n_name_param,name_param,nargs);
       nx=to<long>(args[0]); 
       ny=to<long>(args[1]); 
      }
@@ -1021,16 +1048,26 @@ class MeshCarre2 :   public E_F0mps { public:
         return new MeshCarre2(args);} 
         
     AnyType operator()(Stack s) const { 
-      return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)),0,0,s ));}
+           long flags=arg(0,s,0);
+      return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)),0,0,s,flags ));}
     operator aType () const { return atype<pmesh>();} 
       
 };
+
+
 class MeshCarre2f :   public E_F0mps { public:
     typedef pmesh  Result;
      Expression nx,ny;
      Expression fx,fy;
+   static basicAC_F0::name_and_type name_param[] ;
+   static const int n_name_param =1;
+    Expression nargs[n_name_param];
+   
+    long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+     
      MeshCarre2f(const basicAC_F0 & args) 
-    { args.SetNameParam();
+    { 
+      args.SetNameParam(n_name_param,name_param,nargs);
       nx=to<long>(args[0]); 
       ny=to<long>(args[1]); 
       const E_Array *  a= dynamic_cast<const E_Array*>(args[2].LeftValue());
@@ -1046,10 +1083,18 @@ class MeshCarre2f :   public E_F0mps { public:
         return new MeshCarre2f(args);} 
         
     AnyType operator()(Stack s) const { 
-      return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)), fx,fy,s ));}
+      long flags=arg(0,s,0);
+      return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)), fx,fy,s , flags));}
 
     operator aType () const { return atype<pmesh>();} 
       
+};
+
+basicAC_F0::name_and_type  MeshCarre2::name_param[]= {
+     "flags", &typeid(long) 
+};
+basicAC_F0::name_and_type  MeshCarre2f::name_param[]= {
+     "flags", &typeid(long) 
 };
 
 
