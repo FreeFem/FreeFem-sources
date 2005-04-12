@@ -270,7 +270,7 @@ basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
 	       }
 	     else 
 	       {  // cas non symetric ,
-		 
+		 nTraceOn(10, 1,1, 1,1,1, 1,1,1); 
 		 ARrcNonSymGenEig<K> prob( n, nbev, sigma,"LM",ncv,tol,maxit);
 		 
 		 
@@ -297,6 +297,7 @@ basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
 		     // and PutVector a pointer to the output vector, w.
 		     work = B*v;
 		     OP1.Solve(w,work);
+		     //  cout << " --- -1  " << v.sum() << " "<< w.sum() << endl;
 		     //    P.B.MultMv(prob.GetVector(), temp);
 		     //    P.MultOPv(temp, prob.PutVector());
 		     break;
@@ -311,6 +312,7 @@ basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
 		     // product Bv and PutVector a pointer to the output vector w.
 		     OP1.Solve(w,v);
 		     //P.MultOPv(prob.GetProd(), prob.PutVector());
+		     //cout << " --- 1 " << v.sum() << " "<< w.sum() << endl;
 		     break; }
 		     
 		   case  2: {
@@ -319,10 +321,11 @@ basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
 		     
 		     // Performing w <- B*v.
 		     //P.B.MultMv(prob.GetVector(), prob.PutVector());
+		     //cout << " --- 2 " << v.sum() << " "<< w.sum() << endl;
 		     w = B*v; 
 		   }
 		   }
-		   // cout<< " GetIdo = " << kkk << endl;
+		   //cout<< " GetIdo = " << kkk << endl;
 		 }
 		 
 		 // Finding eigenvalues and eigenvectors.
