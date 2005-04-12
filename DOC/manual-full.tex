@@ -22,7 +22,7 @@
 \title{
 %\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
  {\Blue{ \TitreFont FreeFem++ \\ \vglue 1cm  Manual}} \\ \vglue 3cm  ~ \\  
-      \normalsize  { version 1.45-7  \Red{(Under construction)} }
+      \normalsize  { version 1.46-0  \Red{(Under construction)} }
  \\ \vglue 0.7cm
  \large \url{http://www.freefem.org} \\
 \url{http://www.ann.jussieu.fr/\string~hecht/freefem++.htm} 
@@ -1581,6 +1581,15 @@ write
   @int n=5,m=20;
   @mesh Th=@square(n,m,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
 \eFF
+ \begin{note}
+You must notice that if you adding the name parameter \texttt{flags=1}, you  get a 
+Union Jack fags mesh pattern. \index{square!flags=} 
+\bFF
+  @mesh Th=@square(n,m,[x0+(x1-x0)*x,y0+(y1-y0)*y],flags=1);  
+\eFF
+\end{note}
+
+
 
 \subsubsection{\setS{Border}}\index{border}\index{label}
 
