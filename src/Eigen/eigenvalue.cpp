@@ -270,7 +270,7 @@ basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
 	       }
 	     else 
 	       {  // cas non symetric ,
-		 nTraceOn(10, 1,1, 1,1,1, 1,1,1); 
+		 //nTraceOn(10, 1,1, 1,1,1, 1,1,1); 
 		 ARrcNonSymGenEig<K> prob( n, nbev, sigma,"LM",ncv,tol,maxit);
 		 
 		 
