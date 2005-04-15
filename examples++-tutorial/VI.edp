@@ -1,0 +1,73 @@
+// variationnal inequality 
+// --------------------------
+//  Probleme:
+//  $ - \Delta u = f , \quad u=g \on \Gamma, \quad u < umax  $
+//  algo of   Primal-Dual Active set strategy as a semi smoth Newtow Method
+//   HinterMuller , K. Ito, K. Kunisch 
+//  to appeared in SIAM Option
+// Thank to O. Pironneau 
+// --------------------------
+// F. Hecht
+//  -----------------------
+ mesh Th=square(20,20);
+ real eps=1e-5;
+ fespace Vh(Th,P1);     // P1 FE space
+ int n = Vh.ndof; // number of Degree of freedom
+ Vh uh,uhp,Ah;              // unkown and test function. 
+real[int] rhs(n);
+real cc=10; 
+ func f=1;                 //  right hand side function 
+ func g=0;                 //  boundary condition function
+ Vh umax=0.05;
+//  
+real tgv = 1e30;
+
+ varf a(uh,vh) =                    //  definion of  the problem 
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  - int2d(Th)( f*vh )                          //  linear form
+  + on(1,2,3,4,uh=g) ;                      //  boundary condition form
+varf vM(uh,vh) = int2d(Th)(uh*vh);
+
+
+matrix A=a(Vh,Vh,tgv=tgv,solver=CG);
+matrix AA=a(Vh,Vh);
+matrix M=vM(Vh,Vh);
+rhs = a(0,Vh,tgv=tgv);
+real[int] Aii(n),Aiin(n),Ah1(n),b(n);
+
+Aii=A.diag; // get the diagonal of the matrix 
+//cout << " Aii= " << Aii << endl;
+Ah =0;
+uhp=0;
+Vh lh=0;
+for(int iter=0;iter<100;++iter)
+{
+
+ // solve the problem plot(uh); // to see the result
+  b = rhs;
+  //  add new lock condition on i / if (Ah[i] ==1 )
+  Ah1= 1.; Ah1  -= Ah[];  // Ah1  = ! Ah 
+  b = Ah[] .* umax[];  b *= tgv;       b  -=  Ah1 .* rhs;
+  Aiin = Ah[] *  tgv; Aiin  +=  Ah1  .* Aii;
+  A.diag = Aiin;
+  set(A,solver=CG); // important to change precondiconning 
+  uh[] = A^-1* b;
+  lh[] = AA * uh[];
+  lh[] += rhs;
+  plot(lh,wait=1);
+  Ah = ( lh + cc*( umax- uh)) < 0.; 
+  
+   plot(Ah, wait=1,cmm=" lock ",value=1 );
+   plot(uh,wait=1,cmm="uh");
+   real[int] d(n),Md(n);
+  d= uh[]-uhp[];    
+  Md = M*d;
+  real err = sqrt(Md'*d);
+  cout << " err norm L2 " << err << endl;
+  if(err< eps) break;
+  uhp[]=uh[];
+} 
+savemesh(Th,"mm",[x,y,uh*10]);
+  
+  
+  
