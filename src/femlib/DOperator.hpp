@@ -432,6 +432,15 @@ class CODE_L_Minus { public:
     return new L(*pminusOne * *a);}
    static ArrayOfaType  typeargs() {return ArrayOfaType(atype<const L*>());}
 };
+template<class L>
+class CODE_L_Plus { public:
+  typedef const L* Result;
+  static  E_F0 * f(const basicAC_F0 & args) { 
+    const L * a(dynamic_cast<const L*>((Expression) args[0]));
+    throwassert(a );
+    return new L( *a);}
+   static ArrayOfaType  typeargs() {return ArrayOfaType(atype<const L*>());}
+};
 
 template<class L,class A,class B>
 class CODE_L_Mul { public:

@@ -263,6 +263,12 @@ public:
   virtual R & operator()(int i,int j)=0;
   virtual MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not 
   virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij)=0;
+  // Add FH april 2005
+  virtual R pscal(const KN_<R> & x,const KN_<R> & y) =0 ; // produit scalaire  
+  virtual double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) =0;
+  virtual void setdiag(const KN_<R> & x)=0 ;
+  virtual void getdiag( KN_<R> & x) =0 ;
+  // end add
 
 };
 
@@ -381,6 +387,12 @@ public:
   
   bool addMatTo(R coef,std::map< pair<int,int>, R> &mij);
 
+  // Add FH april 2005
+  R pscal(const KN_<R> & x,const KN_<R> & y); // produit scalaire  
+  double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega);
+  void setdiag(const KN_<R> & x) ;
+  void getdiag( KN_<R> & x) ;
+  // end add
   
   /*----------------------------------------------------------------
     D[i] = A[ii]
@@ -460,7 +472,12 @@ public:
   void SetSolver(const VirtualSolver & s){solver=&s;}
   void SetSolverMaster(const VirtualSolver * s){solver.master(s);}
   bool sym() const {return symetrique;}
-  
+  // Add FH april 2005
+  R pscal(const KN_<R> & x,const KN_<R> & y); // produit scalaire  
+  double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega);
+  void setdiag(const KN_<R> & x) ;
+  void getdiag( KN_<R> & x) ;
+  // end add
 template<class K>
   MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bool sym);
   
@@ -470,6 +487,7 @@ template<class K>
  MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {
      return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
   bool  addMatTo(R coef,std::map< pair<int,int>, R> &mij);
+  
 
   template<class K>
     MatriceMorse(const MatriceMorse<K> & );

@@ -136,7 +136,9 @@ freefem language.
 The freefem language allows for a quick specification of any partial
 differential system of equations.  The language syntax of \freefempp
 is the result of a new design which makes use of the STL \cite{cpp},
-templates and \texttt{bison} for its implementation.  The outcome is a
+templates and \texttt{bison} for its implementation,
+ for more detail see \cite{FHcpp}.
+  The outcome is a
 versatile software in which any new finite element can be included in
 a few hours; but a recompilation is then necessary.  The library of
 finite elements available in \freefempp will therefore grow with the
@@ -1398,7 +1400,7 @@ Poisson; uu[2] = u;
 \end{example}
 
  For the second case, it is just
- a map of the STL\footnote{Standard template Library, now part of standard \Cpp}\cite{STL}
+ a map of the STL\footnote{Standard template Library, now part of standard \Cpp}\cite{cpp}
  so no vector operation except the
  selection of an item is allowed . \index{dot product}\index{transpose}
 
@@ -2190,7 +2192,7 @@ the point of intersection of $bc$ and $bd$ as in Fig. \ref{lshapeSol}.
 This method is described in detail in \cite{bamg}. It has a number of
 default parameters which can be modified~:
 
-\label{adaptmesh}
+\index{adaptmesh}
 \begin{description}
 
     \item[\texttt{hmin=}] Minimum edge size.  \index{adaptmesh!hmin=}
@@ -8494,7 +8496,7 @@ Babbu\v{s}ka, I: Error bounds for finite element method, Numer. Math. 16, 322-33
 freefem+ documentation}, on the web at  ftp://www.freefem.org/freefemplus.
 
 \bibitem{freefem} D. Bernardi, F.Hecht, O. Pironneau, C. Prud'homme: {\it
-freefem documentation}, on the web at  http://www.asci.fr
+freefem documentation}, on the web at  http://www. freefem.fr/freefem
 
 
 \bibitem{umfpack} 
@@ -8510,7 +8512,13 @@ George, P.L: {\it Automatic triangulation}, Wiley 1996.
 Hecht, F: The mesh adapting software: bamg. INRIA report 1998.
 
 \bibitem{modulef}
-Modulef  ?????????
+Library Modulef , INRIA, 
+\url{http://www.inria-rocq/modulef}
+
+\bibitem{FHcpp}
+{\sc F. Hecht.} 
+\newblock { C++ Tools to construct our user-level language.}
+\newblock   Vol 36, N°, 2002 pp 809-836,  Modél. math et Anal Numér.
 
 \bibitem{Lions} 
 J.L. Lions, O. Pironneau:
@@ -8519,6 +8527,11 @@ Also : Superpositions for composite domains (to appear)
 
 \bibitem{Lucquin} B. Lucquin, O. Pironneau: {\it Introduction to Scientific Computing}
 Wiley 1998.
+
+\bibitem{dan-hec-2003}
+I.~Danaila, F.~Hecht, and O.~Pironneau.
+\newblock {\em Simulation num\'erique en C++}.
+\newblock Dunod, Paris, 2003.
 
 \bibitem{Necas} J. Ne\v{c}as and L/ Hlav\'{a}\v{c}ek, 
 Mathematical theory of elastic and elasto-plastic bodies:

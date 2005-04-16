@@ -538,6 +538,16 @@ long get_mat_n(Matrice_Creuse<R> * p)
 template<class R>
 long get_mat_m(Matrice_Creuse<R> * p)
  { throwassert(p ) ;  return p->A ?p->A->m: 0  ;}
+
+
+
+template<class R>
+long get_diag(Matrice_Creuse<R> * p, KN<R> * x)
+ { throwassert(p && x ) ;  return p->A ?p->A->getdiag(*x): 0  ;}
+template<class R>
+long set_diag(Matrice_Creuse<R> * p, KN<R> * x)
+ { throwassert(p && x ) ;  return p->A ?p->A->setdiag(*x): 0  ;}
+
  
 template<class R>  
 R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & c){ 
@@ -562,7 +572,7 @@ struct Op2_mulvirtAv: public binary_function<AA,BB,RR> {
   { return RR( (*a).A, *b );} 
 };
  
-
+ 
 template<class K>
 class OneBinaryOperatorA_inv : public OneOperator { public:  
   OneBinaryOperatorA_inv() : OneOperator(atype<Matrice_Creuse_inv<K> >(),atype<Matrice_Creuse<K> *>(),atype<long>()) {}
@@ -581,9 +591,75 @@ class OneBinaryOperatorA_inv : public OneOperator { public:
        return  new E_F_F0<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>(Build<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>,t[0]->CastTo(args[0])); 
     }
 };
+
+template<class K>
+class Psor :  public E_F0 { public:  
+ 
+   typedef double  Result;
+   Expression mat;
+   Expression xx,gmn,gmx,oomega;  
+   Psor(const basicAC_F0 & args) 
+    {   
+      args.SetNameParam();
+      mat=to<Matrice_Creuse<K> *>(args[0]); 
+      gmn=to<KN<K>*>(args[1]); 
+      gmx=to<KN<K>*>(args[2]); 
+      xx=to<KN<K>*>(args[3]); 
+      oomega=to<double>(args[4]); 
+      
+   }   
+    static ArrayOfaType  typeargs() { 
+      return  ArrayOfaType( atype<double>(),
+                            atype<Matrice_Creuse<K> *>(),
+                            atype<KN<K>*>(),
+                            atype<KN<K>*>(),
+                            atype<KN<K>*>(),
+                            atype<double>(),false);}
+                            
+    static  E_F0 * f(const basicAC_F0 & args){ return new Psor(args);} 
+    
+    AnyType operator()(Stack s) const {
+      Matrice_Creuse<K>* A= GetAny<Matrice_Creuse<K>* >( (*mat)(s) );
+      KN<K>* gmin = GetAny<KN<K>* >( (*gmn)(s) );
+      KN<K>* gmax = GetAny<KN<K>* >( (*gmx)(s) );
+      KN<K>* x = GetAny<KN<K>* >( (*xx)(s) );
+      double omega = GetAny<double>((*oomega)(s));
+      return A->A->psor(*gmin,*gmax,*x,omega);
+    }
+  
+};
+template <class R>
+ struct TheDiagMat {
+  Matrice_Creuse<R> * A; 
+  TheDiagMat(Matrice_Creuse<R> * AA) :A(AA) {assert(A);}
+  void   get_mat_daig( KN_<R> & x) { assert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
+     A->A->getdiag(x);}
+  void   set_mat_daig(const  KN_<R> & x) { assert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
+     A->A->setdiag(x);}
+ };
+ 
+template<class R>
+TheDiagMat<R> thediag(Matrice_Creuse<R> * p)
+ {  return  TheDiagMat<R>(p);}
+ 
+template<class R>
+TheDiagMat<R> set_mat_daig(TheDiagMat<R> dm,KN<R> * x)
+{
+  dm.set_mat_daig(*x);
+  return dm;
+}
+template<class R>
+KN<R> * get_mat_daig(KN<R> * x,TheDiagMat<R> dm)
+{
+  dm.get_mat_daig(*x);
+  return x;
+}
+ 
 template <class R>
 void AddSparceMat()
 {
+ Dcl_Type<TheDiagMat<R> >();
+
 TheOperators->Add("*", 
         new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN<R>* > >,
         new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN<R>* > >,
@@ -630,8 +706,15 @@ TheOperators->Add("+",
         
  Add<Matrice_Creuse<R> *>("n",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_n<R>) );
  Add<Matrice_Creuse<R> *>("m",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_m<R>) );
-  
+ 
+ Add<Matrice_Creuse<R> *>("diag",".",new OneOperator1<TheDiagMat<R> ,Matrice_Creuse<R> *>(thediag<R>) );
+// Add<Matrice_Creuse<R> *>("setdiag",".",new OneOperator2<long,Matrice_Creuse<R> *,KN<R> *>(set_diag<R>) );
+ TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(get_mat_daig<R>) );
+ TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );
+ 
  Global.Add("set","(",new SetMatrix<R>);
+ //Global.Add("psor","(",new  OneOperatorCode<Psor<R> > );
+ 
  atype<Matrice_Creuse<R> * >()->Add("(","",new OneOperator3_<R*,Matrice_Creuse<R> *,long,long >(get_elementp2mc<R>));
 
 

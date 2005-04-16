@@ -366,7 +366,7 @@ class E_FN : public CodeAlloc{ public: virtual AnyType operator()(Stack,size_t N
 class basicAC_F0;
 class  ArrayOfaType : public CodeAlloc{ 
   //  class for the type of parameter
-   aType tt[4]; 
+   aType tt[6]; 
    protected:
    bool ellipse; 
    int n;
@@ -389,6 +389,10 @@ class  ArrayOfaType : public CodeAlloc{
    explicit ArrayOfaType(const aType & a,const aType & b,const aType & c,const aType & d,bool ell=false) 
        :n(4),t(tt),ellipse(ell)  {t[0]=a,t[1]=b;t[2]=c;t[3]=d;
        /* cout << * a << *b << * c << * d << " ---------" << endl; */}
+   explicit ArrayOfaType(const aType & a,const aType & b,const aType & c,const aType & d,const aType & e,bool ell=false) 
+       :n(5),t(tt),ellipse(ell)  {t[0]=a,t[1]=b;t[2]=c;t[3]=d; t[4]=e; }
+   explicit ArrayOfaType(const aType & a,const aType & b,const aType & c,const aType & d,const aType & e,const aType & f,bool ell=false) 
+       :n(6),t(tt),ellipse(ell)  {t[0]=a,t[1]=b;t[2]=c;t[3]=d; t[4]=e; t[5]=f; }
        
    ArrayOfaType(const basicAC_F0 & ) ;
    ArrayOfaType(const ArrayOfaType & ); // 
