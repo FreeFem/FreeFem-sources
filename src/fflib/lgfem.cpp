@@ -3508,6 +3508,20 @@ TheOperators->Add("+",
 //  --- end  
 }
 */
+/*
+// modif FH 13042005
+//  Operator de cast  pour + unair qui ne faire rien 
+template<class A> 
+class  OperatorIdentity  : public OneOperator{
+    public: 
+    E_F0 * code(const basicAC_F0 & args) const 
+     { return  args[0]();}   // pb const ????? 
+    OperatorIdentity(): 
+      OneOperator(map_type[typeid(A).name()],map_type[typeid(A).name()])
+      {}
+};
+// end modif 
+*/
 void  init_lgfem() 
 {
   cout <<"lg_fem ";
@@ -3764,7 +3778,9 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
     new OneOperatorCode<CODE_L_Add<Foperator> > ,
     new OneOperatorCode<CODE_L_Add<Ftest> > ,
     new OneOperatorCode<CODE_L_Add<Finconnue> > ,
-    new OneOperatorCode<C_args>(t_C_args,t_C_args,t_C_args)        
+    new OneOperatorCode<C_args>(t_C_args,t_C_args,t_C_args) // ,
+  //  new OperatorIdentity<FormBilinear>(), // add FH 13042005
+  //  new OperatorIdentity<FormLinear>()       // add FH 13042005  + int2d ( ..)
   );
  TheOperators->Add("-",
     new OneOperatorCode<CODE_L_Minus<Foperator> > ,

@@ -1072,6 +1072,7 @@ bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij)
 
 return symetrique;
 }
+
  
 template<class R> 
  template<class K>
@@ -1598,5 +1599,144 @@ void Int_L(const Interpolation &Uh,Vecteur &f,const Interpolation &Vh, Vecteur &
 
 
 */
+
+template<class R>
+double MatriceMorse<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) 
+{
+  double err=0;
+  int n=this->n;
+  assert(n==this->m);
+  assert(n==x.N());
+  assert(n==gmin.N());
+  assert(n==gmax.N());
+  if (symetrique)
+   {
+     ErrorExec("Error:sorry psor just for no symetric  morse matrices",1);
+   }
+  else
+   {
+     for (int i=0;i<this->n;i++)
+      {
+       R xnew =x[i];
+       R aii=R();
+       for (int k=lg[i];k<lg[i+1];k++)
+         {
+           int j=cl[k];
+           if(j!= i) 
+             xnew -= a[k]*x[j];
+            else aii=a[k];
+         }
+        if(aii != R())
+           xnew /= aii;
+         else ErrorExec("Error: psor diagonal coef = 0 ",1);
+        R dx  = (xnew - x[i])*omega ;
+        R xi = std::min(std::max(x[i]+dx,gmin[i]),gmax[i]);
+        dx = x[i]- xi;
+        err = Max(err, norm(dx));
+        x[i] = xi;
+        }
+   }  return sqrt(err);
+  
+}
+
+template<class R>
+double MatriceProfile<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) 
+{
+  double rr=0;
+  ErrorExec("Error:sorry psor just for no symetric  morse matrices (to do in futur FH???)",2);
+  return rr;
+  
+}
+
+template<class R>
+void MatriceProfile<R>::setdiag(const KN_<R> & x) 
+{
+  assert(D);
+ assert( this->n == x.N());
+  KN_<R> d(D,this->n) ;
+  d=x;
+}
+template<class R>
+void MatriceProfile<R>::getdiag(KN_<R> & x) 
+{
+  assert(D);
+  assert( this->n == x.N());
+  KN_<R> d(D,this->n) ;
+  x=d;  
+}
+template<class R>
+void MatriceMorse<R>::setdiag(const KN_<R> & x) 
+{
+ assert( this->n == this->m);
+ assert( this->n == x.N());
+ for (int i=0;i<n;++i)
+    diag(i) = x[i];
+}
+template<class R>
+void MatriceMorse<R>::getdiag(KN_<R> & x) 
+{
+ assert( this->n == this->m);
+ assert( this->n == x.N());
+ for (int i=0;i<n;++i)
+     x[i]= diag(i) ;
+  
+}
+template<class R>
+R MatriceMorse<R>::pscal(const KN_<R> & x,const KN_<R> & y)
+{ // (x, Ay)
+  R sum=R();
+  int i,j,k;
+  throwassert(this->n==x.N());
+  throwassert(this->m==y.N());  
+  if (symetrique)
+   {
+     for (i=0;i<this->n;i++)
+       for (k=lg[i];k<lg[i+1];k++)
+         {
+           j=cl[k];
+           sum += a[k]*x[i]*y[j];
+           if (i!=j)
+             sum += a[k]*x[j]*y[i];
+         }
+           
+   }
+  else
+   {
+     for (i=0;i<this->n;i++)
+       for (k=lg[i];k<lg[i+1];k++)
+         {
+           j=cl[k];
+           sum += a[k]*x[i]*y[j];
+         }
+   }
+  return sum;
+}
+template<class R>
+R MatriceProfile<R>::pscal(const KN_<R> & x,const KN_<R> & y)
+{
+ if (y.n != this->n || x.n != this->n ) ERREUR(MatriceProfile pscal(xa,x) ," longueur incompatible c (out)") ;
+ int i,j,k,kf;
+ R sum = R();
+ throwassert(this->n == this->m);
+ if (D) 
+   for (i=0;i<this->n;i++) 
+     sum += D[i]*x[i]*y[i];
+ else
+   for (i=0;i<this->n;i++) // no dia => identyty dai
+     sum +=x[i]*y[i];
+      
+ if (L && pL )    
+   for (kf=pL[0],i=0;  i<this->n;   i++  )  
+     for ( k=kf,kf=pL[i+1], j=i-kf+k;   k<kf; j++,  k++  )
+       sum += L[k]*x[i]*y[j],throwassert(i>=0 && i <this->n && j >=0 && j < this->m && k>=0 && k < pL[this->n]);
+       
+ if (U && pU)     
+   for (kf=pU[0],j=0;  j<this->m;  j++)  
+     for (k=kf,kf=pU[j+1], i=j-kf+k;   k<kf; i++,  k++  )
+       sum += U[k]*x[i]*y[j],throwassert(i>=0 && i <this->n && j >=0 && j < this->m &&  k>=0 && k < pU[this->n]);
+ 
+ return sum;
+}
+
 #endif
 
