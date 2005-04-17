@@ -1857,11 +1857,14 @@ file >> g[] ;
 @fespace Vh2(th2,P1);
 Vh2 u,v;
 @plot(g);
+//  find $u$ such that \hfilll
+// $ u - \Delta u = g $ in $\Omega $ , \hfilll
+// $ u=0$ on $\Gamma_1$ and $\frac{\partial u }{\partial n} = g$ on $\Gamma_2$  \hfilll
 @solve pb(u,v) =
     @int2d(th)( u*v - dx(u)*dx(v)-dy(u)*dy(v) )
   + @int2d(th)(-g*v)
-  + @int1d(th,5)( g*v)
-  + @on(1,u=0) ;
+  + @int1d(th,5)( g*v) //  $\frac{\partial u }{\partial n} = g$ on $\Gamma_2$  
+  + @on(1,u=0) ; 
 @plot (th2,u);
 \eFF
 \end{example}
@@ -3135,12 +3138,107 @@ and possibly a boundary condition form must be added.
      a(u,v) - $\ell$(f,v)
      + (boundary condition);
 \eT
-For example, see (\ref{eqn:weakform}).
+
 
 \begin{note} When you want to formulate the problem and to solve it 
 in the same time, you can use the keywork \texttt{solve}.
 \index{solve}
 \end{note}
+
+\subsubsection{Weak form and Boundary Condition}
+
+To Present the Principe  of Variationnal Formulation or of weak Formulation,
+let us take a model problem : a Poisson equation with  Dirichlet and Robin Boundary condition 
+\index{Dirichlet}\index{Robin}.
+\medskip 
+
+The problem is: Find $u$ a real function defined on  domain $\Omega$ of $\R^2$ such that
+
+\begin{equation} -  \nabla.(\nu \nabla u) = f  , \quad \mbox{in}\quad \Omega, \quad
+ a u + \nu \frac{\partial u}{\partial n} = b \quad\mbox{on}\quad \Gamma_r, \quad
+ u = g  \quad\mbox{on}\quad \Gamma_d 
+ \end{equation}
+ 
+where  
+\begin{itemize}
+\item $ \nabla.(\nu \nabla u) = \partial_x(\nu \partial_x u ) + \partial_y(\nu \partial_y u ) $
+with $ \partial_x u = \frac{\partial u}{\partial x}$ 
+and $\partial_y u = \frac{\partial u}{\partial y}$
+\item the border $\Gamma=\partial \Omega$ is split in $\Gamma_d$ and $\Gamma_n$
+such that $\Gamma_d \cup \Gamma_n = \emptyset$ and $ \Gamma_d \cap \Gamma_n = \partial \Omega$,
+\item $\nu$ is a given positive function, such that $\exists \nu_0 \in \R ,\quad 0 < \nu_0  \leq \nu $.
+\item  $a$ a given non negative function,
+\item  $ b$ a given function.
+\end{itemize}
+
+\begin{note}{} This problem,  we can be a classical 
+Neumann boundary condition  if  $a$ is  $0$, and if $\Gamma_d$ is empty. 
+In this case  
+the function is defined just by derivative, so this defined too a constant 
+ (if $u$ is a solution then  $ u+ 1$ is also a solution).
+\end{note}
+
+Let  ${ v} $  a regular test function  null  on  $\Gamma_d$ , by integration par part we get
+ \begin{equation}-\int_{\Omega}  \nabla.(\nu \nabla  u) \, { v} \,d\omega = \int_{\Omega}  \nu \nabla{ v} . \nabla u  \,d\omega= \int_{\Omega} f {v}  \,d\omega - \int_{\Gamma} {v}
+ \nu \frac{  \partial u}{\partial n}  \,d\gamma, 
+  \end{equation}
+
+where $ \nabla{ v} . \nabla u = \frac{\partial u}{\partial x}\frac{\partial { v}}{\partial x}
++\frac{\partial u}{\partial y}\frac{\partial { v}}{\partial y}$ , and where $n$ is the unitary ouside normal of 
+ $\partial\Omega$.
+
+Now we note that $ \nu \frac{  \partial u}{\partial n} = - a u + g $  on $\Gamma_r$ 
+and $  v = 0 $ on $ \Gamma_d $ and $ \partial \Omega = \Gamma_d \cup \Gamma_n $
+thus 
+$$
+  - \int_{\partial \Omega} {v}
+ \nu \frac{  \partial u}{\partial n} = \int_{\Gamma_r} a u v - \int_{\Gamma_r} b v 
+$$
+
+The problem become:
+
+Find   $u \in V_g = \{v \in H^1(\Omega) / v = g \mbox{ on } \Gamma_d \} $  such that 
+\begin{equation} {\int_{\Omega} \nu \nabla{ v} . \nabla u  \,d\omega
+ + \int_{\Gamma_r} a u v  \,d\gamma = \int_{\Omega} f {v}}  \,d\omega  + \int_{\Gamma_r} b v  \,d\gamma , \quad \forall v \in V_0 \label{eq:v-poisson}
+\end{equation}
+
+where  $  V_0 = \{v \in H^1(\Omega) / v = 0 \mbox{ on } \Gamma_d \} $ 
+ 
+The problem (\ref{eq:v-poisson}) is generaly weal posed if we do not have only  Neumann 
+boundary condition ( ie. $\Gamma_d = \emptyset$ and $a = 0$).  
+
+\begin{note}
+\label{note:fu} If we have only Neumann boundary condition, then the problem is defined 
+to a constant, and $ 1 \in V_0$ so the following compatibility condition may occur: \index{compatibility condition}
+$
+ \int_{\Omega} f   \,d\omega  + \int_{\Gamma} b \,d\gamma
+$
+and a way to fixe the constant is to solve the following problem.
+
+ Find $u \in H^1(\Omega)$ such that: 
+\begin{equation}
+ {\int_{\Omega} \varepsilon u v \,\,d\omega\; + \; \nu \nabla{ v} . \nabla u  \,d\omega
+  = \int_{\Omega} f {v}}  \,d\omega  + \int_{\Gamma_r} b v  \,d\gamma , \quad \forall v \in H^1(\Omega) \label{eq:v-poisson-N}
+\end{equation}
+where $\varepsilon$ is a small parameter ( $ \sim 10^{-10}$ ).
+
+Remark, if the solution
+is of order $ \frac{1}{\varepsilon}$ then the compatibility condition is unsatisfied, otherwise
+we get the solution such that $\int_\Omega u = 0 $. 
+ 
+\end{note}
+
+In \texttt{FreeFem++},  the problem (\ref{eq:v-poisson}) become 
+\bFF
+  problem Pw(u,v) = 
+       @int2d(Th)( nu* ( dx(u)*dx(u) +  dy(u)*dy(u)))  // $\int_{\Omega} \nu \nabla{v} . \nabla u  \,d\omega$ \hfilll
+     + @int1d(Th,gn)( a * u*v )                        // $\int_{\Gamma_r} a u v  \,d\gamma$  \hfilll
+     - @int2d(Th)(f*v)                                 // $\int_{\Omega} f v  \,d\omega $ \hfilll
+     - @int1d(Th,gn)( b * v )                          // $ \int_{\Gamma_r} b v  \,d\gamma$ \hfilll
+     + @on(gd)(u= g) ;                                 // $ u =g $ on $\Gamma_d$  \hfilll
+\eFF
+where \texttt{Th} is a mesh of the domain $\Omega$, and \texttt{gd} and \texttt{gn} are respectively the 
+boundary label of boundary $\Gamma_d$ and $\Gamma_n$.
 
 \subsection{Parameter Description for \texttt{solve} and \texttt{problem}}
 
@@ -3240,9 +3338,9 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
     \begin{itemize}
         \item  An "on" form (for Dirichlet ) :\index{on}
      \texttt{ on(1, u = g )}\index{on}
-        \item  a linear form on $\Gamma$  (for Neumann )
+        \item  a linear form on $\Gamma$  (for Neumann ) \index{Neumman}
          \texttt{ -int1d(Th))( f*w) } or \texttt{ -int1d(Th,3))( f*w) }
-        \item   a bilinear form on $\Gamma$  or $\Gamma_{2}$ (for  Robin )
+        \item   a bilinear form on $\Gamma$  or $\Gamma_{2}$ (for  Robin )\index{Robin}
          \texttt{ int1d(Th))( K*v*w) } or
          \texttt{ int1d(Th,2))( K*v*w)}.
 
@@ -3429,6 +3527,7 @@ where * stands for the name of quadrature formulas or the order of the Gauss for
 \begin{note}
  By default,  we use the formular exact for polynomes of degrees $5$ on triangles or edges (in bold in two tables)\index{quadrature:default}.
 \end{note}
+
 
 
 
@@ -5722,7 +5821,7 @@ An implicit Euler scheme with projection is used and a mesh adaptation is done e
 \frac{{\partial u}}{{\partial t}} + a_1 \frac{{\partial u}}{{\partial x}} + a_2 \frac{{\partial u}}{{\partial y}} \approx \frac{1}{{\tau }}\left( {u^{n + 1} \left( x \right) - u^n \left( {x - \vec \alpha\tau } \right)} \right)
 \end{eqnarray}
 \begin{example}~
-[blakschol.edp]\index{tutorial!blakschol.edp}
+[BlackSchol.edp]\index{tutorial!BlackSchol.edp}
 \bFF
 // verbosity=1; 
 int s=10; // y-scale
@@ -8481,6 +8580,8 @@ primary:
 %%%{\scriptsize
 %%%\inputFF{../HISTORY}
 %%%}
+
+
 
 \begin{thebibliography}{xx}
 
