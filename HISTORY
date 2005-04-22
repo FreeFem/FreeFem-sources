@@ -1,3 +1,48 @@
+2005-04-17 18:44  hecht
+
+	* add page to explain how to bluid weak form with Robin / Neumann
+	  coundary condition
+
+2005-04-16 21:36  hecht
+
+	*  add tool to solve variationnal inequality
+	   add change version to 1.46-1
+
+2005-04-15 22:48  hecht
+
+	*  the 2  new example have probleme with testhighlight.sh
+	   we disable the test in chech (FH)
+
+2005-04-15 22:06  hecht
+
+	* add tools to solve variationnal inequality   let d en array and A
+	  a square matrix (in .edp)    d=A.diag; // get the diagonal  of
+	  the matrix	A.diag = d; //set the diagonal	  set(A,solver=CG);
+	  // important to change precondiconning before solving
+
+2005-04-13 11:58  lehyaric
+
+	* IDE compiles again under MingW (an include file was missing)
+
+2005-04-12 18:37  hecht
+
+	*   add Modification Kohji Ohtsuka in a manual
+	    try too correct problem in eigen value in no symetric cas (??)
+
+2005-04-12 12:07  hecht
+
+	*  add flags to build unionkjack mesh on square
+	   example:  mesh Th=square(nn,mm,[x/ddx,y/ddy] ,flags=1);
+
+2005-04-05 15:08  lehyaric
+
+	* FreeFem+-ide compiles on MacOS X
+
+2005-04-05 14:33  lehyaric
+
+	* First version of FreeFem++-ide without sockets compiles under
+	  Linux
+
 2005-03-30 11:38  hecht
 
 	*   correct name of example  blakschol.edp in BlackSchole.edp
