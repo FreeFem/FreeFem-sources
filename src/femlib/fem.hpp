@@ -602,11 +602,13 @@ void  HeapSort(T *c,T1 *c1,T2 *c2,long n)
  R2 SubTriangle(const int N,const int n,const int l);
  
       //  warning  i is in [0, nleft]
- inline     Vertex & Mortar::VLeft(int i) const 
+template<class Rd>
+ inline     TVertex<Rd> & TMortar<Rd>::VLeft(int i) const 
   { throwassert(i>=0 && i <= nleft);
     return i< nleft ? (*Th)[TLeft( i  )][VerticesOfTriangularEdge[ELeft(i)][0]]
                     : (*Th)[TLeft( i-1)][VerticesOfTriangularEdge[ELeft(i-1)][1]];}
- inline Vertex & Mortar::VRight(int i) const 
+template<class Rd>
+ inline TVertex<Rd> & TMortar<Rd>::VRight(int i) const 
   { throwassert(i>=0 && i <= nright);
     return i< nright ? (*Th)[TRight( i  )][VerticesOfTriangularEdge[ERight(i)][1]]
                      : (*Th)[TRight( i-1)][VerticesOfTriangularEdge[ERight(i-1)][0]];}

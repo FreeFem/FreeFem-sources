@@ -1630,7 +1630,7 @@ double MatriceMorse<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gma
            xnew /= aii;
          else ErrorExec("Error: psor diagonal coef = 0 ",1);
         R dx  = (xnew - x[i])*omega ;
-        R xi = std::min(std::max(x[i]+dx,gmin[i]),gmax[i]);
+        R xi = RNM::Min(RNM::Max(x[i]+dx,gmin[i]),gmax[i]);
         dx = x[i]- xi;
         err = Max(err, norm(dx));
         x[i] = xi;
@@ -1643,7 +1643,7 @@ template<class R>
 double MatriceProfile<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) 
 {
   double rr=0;
-  ErrorExec("Error:sorry psor just for no symetric  morse matrices (to do in futur FH???)",2);
+  ErrorExec("Error:sorry psor just for no symetric  morse matrices (to do in futur FH??? )",2);
   return rr;
   
 }
@@ -1669,7 +1669,7 @@ void MatriceMorse<R>::setdiag(const KN_<R> & x)
 {
  assert( this->n == this->m);
  assert( this->n == x.N());
- for (int i=0;i<n;++i)
+ for (int i=0;i<this->n;++i)
     diag(i) = x[i];
 }
 template<class R>
@@ -1677,7 +1677,7 @@ void MatriceMorse<R>::getdiag(KN_<R> & x)
 {
  assert( this->n == this->m);
  assert( this->n == x.N());
- for (int i=0;i<n;++i)
+ for (int i=0;i<this->n;++i)
      x[i]= diag(i) ;
   
 }

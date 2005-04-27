@@ -161,14 +161,14 @@ template<class R>
 R  KN_<R>::min() const {
     R minv = v[index(0)];
     for (long i=1;i<n;i++)
-      minv = std::min(minv, v[index(i)]) ;
+      minv = RNM::Min(minv, v[index(i)]) ;
     return minv;
   }
 template<class R>
 R  KN_<R>::max() const {
     R maxv = v[index(0)];
     for (long i=1;i<n;i++)
-      maxv = std::max(maxv ,v[index(i)]);
+      maxv = RNM::Max(maxv ,v[index(i)]);
     return maxv;
   }
 

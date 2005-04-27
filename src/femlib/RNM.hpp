@@ -7,6 +7,8 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+
+
 using namespace std;
 #define const_R   R
 #ifdef CHECK_KN
@@ -99,12 +101,27 @@ inline float  conj(const float &x){return x;}
 inline double  real(const double &x){return x;}
 inline float  real(const float &x){return x;}
 
-namespace std {
-inline complex<double> min(const complex<double> &a,complex<double> &b)
-{ return complex<double>(min(real(a),real(b)),min(imag(a),imag(b)));}
-inline complex<double> max(const complex<double> &a,const complex<double> &b)
-{ return complex<double>(max(real(a),real(b)),max(imag(a),imag(b)));}
-}
+namespace RNM {
+template<class T> inline T Min (const T &a,const T &b){return a < b ? a : b;}
+template<class T> inline T Max (const T &a,const T & b){return a > b ? a : b;}
+template<class T> inline T Abs (const T &a){return a <0 ? -a : a;}
+
+template<class T> inline void Exchange (T& a,T& b) {T c=a;a=b;b=c;}
+template<class T> inline T Max (const T &a,const T & b,const T & c){return Max(Max(a,b),c);}
+template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(Min(a,b),c);}
+// specialisation cas complex ---
+template<class T> 
+inline complex<T> Min(const complex<T> &a,complex<T> &b)
+{ return complex<T>(min(a.real(),b.real()),min(a.imag(),b.imag()));}
+template<class T> 
+inline complex<T> Max(const complex<T> &a,const complex<T> &b)
+{ return complex<T>(max(a.real(),b.real()),max(a.imag(),b.imag()));}
+
+/*inline complex<double> Min(const complex<double> &a,complex<double> &b)
+{ return complex<double>(Min(real(a),real(b)),Min(imag(a),imag(b)));}
+inline complex<double> Max(const complex<double> &a,const complex<double> &b)
+{ return complex<double>(Max(real(a),real(b)),Max(imag(a),imag(b)));}
+*/ }
 //  ----                                                                                                                                             
 
 template<class R> class KNMK_ ;
