@@ -30,7 +30,7 @@ inline void initwhatd(bool *whatd,int k)
 typedef KN_<R> RN_;
 typedef KN<R>  RN;
 typedef KNM_<R> RNM_;
-typedef KNM<R>  RNM;
+//typedef KNM<R>  RNM;
 typedef KNMK_<R> RNMK_;
 typedef KNMK<R>  RNMK;
 

@@ -553,7 +553,7 @@ void ShowDebugStack()
  }
  
 
-  int  E_F0::Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const 
+  int  E_F0::Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n)  
      {
       int rr = find(m);
       if (rr) return rr;

@@ -197,7 +197,7 @@ AllocExtern::OneAlloc * AllocExtern::Alloc()
   init();
   AllocExtern::OneAlloc * a = Alloc();
   a->p = mymalloc(ll);
-  a->l = ll;
+  a->l = ll+1; // pour les allocation null
   a->n = ++NbAlloc;
   a->is_array = is_array;
   NbPtr++;
@@ -232,15 +232,15 @@ AllocExtern::OneAlloc * AllocExtern::Alloc()
 	if((p->a[i].l > 0) && (p->a[i].p == pp))
 	  {
 #ifdef SHOWALLOC    	  
-	    printf("\t%d\tCheckPtr: delete  Alloc %ld %lx when %ld \n",p->a[i].n,p->a[i].l,  p->a[i].p, p->a[i].n);
+	    printf("\t%d\tCheckPtr: delete  Alloc %ld %lx when %ld \n",p->a[i].n,p->a[i].l-1,  p->a[i].p, p->a[i].n);
 #endif
-        int ll = p->a[i].l;
-	    for (int kkk=0;kkk< p->a[i].l;kkk++) 
+        size_t ll = p->a[i].l-1;
+	    for (int kkk=0;kkk<ll;kkk++) 
 	      ((char *) pp)[kkk]=18;
 	      
 	    myfree((char*)pp,ll,p->a[i].n);
 
-	    AllocSize -= p->a[i].l;
+	    AllocSize -= ll;
 	    NbPtr--;
 	    p->a[i].l=0;
 	    p->a[i].p = NextFree;

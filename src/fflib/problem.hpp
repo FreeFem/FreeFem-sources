@@ -325,8 +325,6 @@ template<> struct CadnaType<double> {
  
  inline double norm(complex<double_st> x){return x.real()*x.real()+x.imag()*x.imag();} 
  inline double norm(double_st x){return x*x;} 
- namespace RNM {
-}
 inline int cestac(const complex<double_st> & z) 
 {return min(cestac(z.real()),cestac(z.imag()));}
 #endif

@@ -177,7 +177,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
      transpose=idata[0];
      op=idata[1];
      inside=idata[2];
-     assert(op>=0 && op < 4);
+     ffassert(op>=0 && op < 4);
    }
   if(verbosity>2) 
     {
@@ -230,7 +230,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
   int NVh= Vh0.N;
   int NUh= Uh0.N;
   
-  assert(NVh==NUh); 
+  ffassert(NVh==NUh); 
   
   
   int nbp= PtHatU.N(); // 
@@ -381,14 +381,14 @@ AnyType SetMatrixInterpolation(Stack stack,Expression emat,Expression einter)
   
   Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
   const MatrixInterpolation::Op * mi(dynamic_cast<const MatrixInterpolation::Op *>(einter));
-  assert(einter);
+  ffassert(einter);
 
   pfes * pUh = GetAny< pfes * >((* mi->a)(stack));
   pfes * pVh = GetAny<  pfes * >((* mi->b)(stack));
   FESpace * Uh = **pUh;
   FESpace * Vh = **pVh;
-  assert(Vh);
-  assert(Uh);
+  ffassert(Vh);
+  ffassert(Uh);
   int data[ MatrixInterpolation::Op::n_name_param];
   data[0]=mi->arg(0,stack,false); // transpose not
   data[1]=mi->arg(1,stack,(long) op_id); ; // get just value
@@ -533,20 +533,20 @@ struct Op2_pair: public binary_function<AA,BB,RR> {
 
 template<class R>
 long get_mat_n(Matrice_Creuse<R> * p)
- { throwassert(p ) ;  return p->A ?p->A->n: 0  ;}
+ { ffassert(p ) ;  return p->A ?p->A->n: 0  ;}
 
 template<class R>
 long get_mat_m(Matrice_Creuse<R> * p)
- { throwassert(p ) ;  return p->A ?p->A->m: 0  ;}
+ { ffassert(p ) ;  return p->A ?p->A->m: 0  ;}
 
 
 
 template<class R>
 long get_diag(Matrice_Creuse<R> * p, KN<R> * x)
- { throwassert(p && x ) ;  return p->A ?p->A->getdiag(*x): 0  ;}
+ { ffassert(p && x ) ;  return p->A ?p->A->getdiag(*x): 0  ;}
 template<class R>
 long set_diag(Matrice_Creuse<R> * p, KN<R> * x)
- { throwassert(p && x ) ;  return p->A ?p->A->setdiag(*x): 0  ;}
+ { ffassert(p && x ) ;  return p->A ?p->A->setdiag(*x): 0  ;}
 
  
 template<class R>  
@@ -631,10 +631,10 @@ class Psor :  public E_F0 { public:
 template <class R>
  struct TheDiagMat {
   Matrice_Creuse<R> * A; 
-  TheDiagMat(Matrice_Creuse<R> * AA) :A(AA) {assert(A);}
-  void   get_mat_daig( KN_<R> & x) { assert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
+  TheDiagMat(Matrice_Creuse<R> * AA) :A(AA) {ffassert(A);}
+  void   get_mat_daig( KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
      A->A->getdiag(x);}
-  void   set_mat_daig(const  KN_<R> & x) { assert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
+  void   set_mat_daig(const  KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
      A->A->setdiag(x);}
  };
  

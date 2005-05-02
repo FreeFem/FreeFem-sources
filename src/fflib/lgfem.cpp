@@ -223,7 +223,7 @@ void dump_table()
   AnyType operator()(Stack s) const { 
     SHOWVERB( cout << "\n\tget var " << offset << " " <<  t->name() << endl);  
    return PtrtoAny(static_cast<void *>(static_cast<char *>(s)+offset),t);}
-  LocalArrayVariable(size_t o,aType tt,Expression nn):offset(o),t(tt),n(nn) {throwassert(tt);
+  LocalArrayVariable(size_t o,aType tt,Expression nn):offset(o),t(tt),n(nn) {ffassert(tt);
     SHOWVERB(cout << "\n--------new var " << offset << " " <<  t->name() << endl);
     }
 };
@@ -466,9 +466,15 @@ class LinearCG : public OneOperator
      : stack(stk),
        x(n),c_x(CPValue(x)),
        mat(op->code(basicAC_F0_wa(c_x))) {}
-   ~MatF_O() { delete mat;delete c_x.LeftValue();}
+   ~MatF_O() { 
+     // cout << " del MatF_O mat " << endl;
+     delete mat;
+     // cout << " del MatF_Ocx ..." <<  endl;
+      Expression zzz = c_x;
+     // cout << " zzz "<< zzz << endl;
+     delete zzz;}
    void addMatMul(const  Kn_  & xx, Kn_ & Ax) const { 
-      assert(xx.N()==Ax.N());
+      ffassert(xx.N()==Ax.N());
       x =xx;
       Ax  += *GetAny<Kn*>((*mat)(stack)); } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
@@ -491,11 +497,11 @@ class LinearCG : public OneOperator
    {
       args.SetNameParam(n_name_param,name_param,nargs);
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[0].LeftValue());
-         assert(op);
+         ffassert(op);
          A = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
       if (nargs[2]) 
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[2]);
-         assert(op); 
+         ffassert(op); 
          C = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
        else  C =0;
       X = to<Kn*>(args[1]);
@@ -589,7 +595,7 @@ class LinearGMRES : public OneOperator
        mat(op->code(basicAC_F0_wa(c_x))) {}
    ~MatF_O() { delete mat;delete c_x.LeftValue();}
    void addMatMul(const  Kn_  & xx, Kn_ & Ax) const { 
-      assert(xx.N()==Ax.N());
+      ffassert(xx.N()==Ax.N());
       x =xx;
       Ax  += *GetAny<Kn*>((*mat)(stack)); } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
@@ -608,11 +614,11 @@ class LinearGMRES : public OneOperator
    {
       args.SetNameParam(n_name_param,name_param,nargs);
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[0].LeftValue());
-         assert(op);
+         ffassert(op);
          A = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
       if (nargs[2]) 
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[2]);
-         assert(op); 
+         ffassert(op); 
          C = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
        else  C =0;
       X = to<Kn*>(args[1]);
@@ -731,7 +737,7 @@ int numeroteclink(KN_<T> & ndfv)
              
              do {
                ii=ndfv[j];
-               assert(kkk++<10);
+               ffassert(kkk++<10);
              //  assert(ii>=nbdfv);
                ndfv[j]=nbdfv ;
                j=ii;
@@ -765,8 +771,8 @@ bool BuildPeriodic(
       
    //    KN<int> ndfv(Th.nv);
     //   KN<int> ndfe(Th.neb);
-       assert(ndfv.N()==Th.nv);
-       assert(ndfe.N()==Th.neb);
+       ffassert(ndfv.N()==Th.nv);
+       ffassert(ndfe.N()==Th.neb);
         
        MeshPoint *mp=MeshPointStack(stack),smp=*mp;   
        int n= nbcperiodic;
@@ -854,12 +860,12 @@ bool BuildPeriodic(
                  hmn=Min(hmn,Abs(x1-x0));
                }                                
              }
-            assert(hmn>1.0e-20);
+            ffassert(hmn>1.0e-20);
             double coef = 8/hmn;
             double x0 = xmn;
             if (verbosity > 2)
             cout << "  --Update: periodic " << xmn << " " << xmx << " " << " h=" << hmn << endl;
-            assert(coef>1e-10 && (xmx-xmn)*coef < 1.e7 );
+            ffassert(coef>1e-10 && (xmx-xmn)*coef < 1.e7 );
              
            //  map construction ----
            for (int i1=0;i1<n1;i1++)
@@ -1557,7 +1563,7 @@ struct OpMake_pfes: public OneOperator {
 
       aType t_tfe= atype<TypeOfFE*>();
        const E_Array * a2(dynamic_cast<const E_Array *>(args[2].LeftValue()));
-       assert(a2);
+       ffassert(a2);
        int N = a2->size(); ;
        if (!N) CompileError(" We wait an array of Type of Element ");
        for (int i=0;i< N; i++) 
@@ -1616,7 +1622,7 @@ void GetPeriodic(Expression perio,    int & nbcperiodic ,    Expression * &perio
          if( verbosity>1) 
          cout << "  -- Periodical Condition to do" << endl;
          const E_Array * a= dynamic_cast<const  E_Array *>(perio);
-         assert(a);
+         ffassert(a);
          int n = a->size();
         nbcperiodic= n/2;
         if( verbosity>1) 
@@ -1894,7 +1900,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
    if (Vh.isFEMesh() )
     {
       
-      assert(Vh.NbOfDF == Th.nv && Vh.N == 1 );
+      ffassert(Vh.NbOfDF == Th.nv && Vh.N == 1 );
       for (int iv=0;iv<Th.nv;iv++)
        {
          const Vertex & v(Th(iv));
@@ -2003,7 +2009,7 @@ class E_set_fev: public E_F0mps {public:
 template<class K>
 E_set_fev<K>::E_set_fev(const E_Array * a,Expression pp) 
   :aa(*a),ppfe(pp),optimize(true),
-   where_in_stack_opt(0),optiexp0(0),optiexpK(0) 
+   where_in_stack_opt(),optiexp0(),optiexpK() 
    { 
     aa.map(to<K>) ;
     bool kdump=false;
@@ -2081,12 +2087,12 @@ AnyType E_set_fev<K>::operator()(Stack s)  const
     if (optiexp0) (*optiexp0)(s); // init 
     }
 
-    assert(dim<100);
+    ffassert(dim<100);
  //   R F[100]; // buffer 
 
     TabFuncArg tabexp(s,Vh.N);
 //   const E_Array * aa = dynamic_cast<const E_Array *>(e);
-   throwassert( aa.size() == Vh.N);
+   ffassert( aa.size() == Vh.N);
    for (int i=0;i<dim;i++)
      tabexp[i]=aa[i]; 
   
@@ -2108,7 +2114,7 @@ AnyType E_set_fev<K>::operator()(Stack s)  const
    if (Vh.isFEMesh() )
     {
       
-      assert(Vh.NbOfDF == Th.nv && dim == 1 );
+      ffassert(Vh.NbOfDF == Th.nv && dim == 1 );
       for (int iv=0;iv<Th.nv;iv++)
        {
          const E_F0 & ff(* (const  E_F0 *) aa[0]  ) ;
@@ -2309,7 +2315,7 @@ class Convect : public E_F0mps  { public:
     {
       args.SetNameParam(); 
       const E_Array * a = dynamic_cast<const E_Array *>(args[0].LeftValue());
-            throwassert(a);
+            ffassert(a);
        if (a->size() != 2) 
           { CompileError("convect d'un vecteur ˆ qui n'a pas 2 composantes");}
        u= CastTo<double>((*a)[0]);
@@ -2369,7 +2375,7 @@ class Plot :  public E_F0mps { public:
           {
             l[i].composant=false;
             const E_Array * a = dynamic_cast<const E_Array *>(args[i].LeftValue());
-            throwassert(a);
+            ffassert(a);
             if (a->size() >2) { CompileError("plot d'un vecteur ˆ + 2 composantes");}
             if (BCastTo<pfer>((*a)[0]))
              {
@@ -2477,14 +2483,14 @@ struct set_eqmatrice_creuse_fbl: public binary_function<Matrice_Creuse<K>*,const
   
   // 2 set = or += 
     
-    throwassert(0);
+    ffassert(0);
     return a;}
 };
 
 template<class K>
 struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> {
   static KN<K>* f(KN<K>* const  & a,const  FormLinear * const & b)  {
-    throwassert(0);
+    ffassert(0);
     return a;}
 };
   
@@ -2496,7 +2502,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
              SHOWVERB(cout << " int " << endl);
              const vector<Expression>  & what(di->what);
              const Mesh  & Th = * GetAny<pmesh>( (*di->Th)(stack) );
-             throwassert(&Th);
+             ffassert(&Th);
              CDomainOfIntegration::typeofkind kind = di->kind;
              set<int> setoflab;
              bool all=true; 
@@ -3065,7 +3071,7 @@ AnyType Convect::operator()(Stack s) const
      {
 
             const Mesh & Th(*mp->Th);
-            throwassert(mp->Th && mp->T);
+            ffassert(mp->Th && mp->T);
             R l[3];
             l[1]=mpc.PHat.x;
             l[2]=mpc.PHat.y;
@@ -3076,7 +3082,7 @@ AnyType Convect::operator()(Stack s) const
             int it=Th(mpc.T);
             while ( (j=WalkInTriangle(Th,it,l,GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),ddt))>=0) 
                 { 
-                    throwassert( l[j] == 0);
+                    ffassert( l[j] == 0);
                     int jj  = j;            
                     R a= l[(j+1)%3], b= l[(j+2)%3];
                     int itt =  Th.TriangleAdj(it,j);
@@ -3086,7 +3092,7 @@ AnyType Convect::operator()(Stack s) const
                     l[(j+1)%3] = b;
                     l[(j+2)%3] = a;
                      mpc.change(R2(l[1],l[2]),Th[it],0);             
-                      throwassert(k++<1000);
+                      ffassert(k++<1000);
                 }
 
             mpc.change(R2(l[1],l[2]),Th[it],0);
@@ -3662,7 +3668,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 //   Add all Finite Element "P0","P1","P2","RT0", ... 
   for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
     {
-     assert(i->tfe); // check 
+     ffassert(i->tfe); // check 
      Global.New(i->name, Type_Expr(atype<TypeOfFE*>(),new  EConstantTypeOfFE(i->tfe)));
     }
    
@@ -3682,7 +3688,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::LU)));
  Global.New("HaveUMFPACK",CConstant<bool>(false));
 #endif 
- assert(kTypeSolveMat<nTypeSolveMat);
+ ffassert(kTypeSolveMat<nTypeSolveMat);
 
 //  init pmesh  
  Add<pmesh*>("<-","(",
@@ -4038,7 +4044,7 @@ Expression IsFEcomp(const C_F0 &c,int i)
   if(atype<typename E_FEcomp<K>::Result>() == c.left())
    {
      const E_FEcomp<K> * e= dynamic_cast<const E_FEcomp<K>*>(c.LeftValue() );
-     throwassert(e);
+     ffassert(e);
      if (e->comp !=i) return 0;
      else return e->a0;
    }
@@ -4052,7 +4058,7 @@ Expression IsCFEcomp(const C_F0 &c,int i)
   if(atype<E_FEcomp<K>::Result>() == c.left())
    {
      const E_FEcomp<K> * e= dynamic_cast<const E_FEcomp<K>*>(c.LeftValue() );
-     throwassert(e);
+     ffassert(e);
      if (e->comp !=i) return 0;
      else return e->a0;
    }
@@ -4069,7 +4075,7 @@ Expression IsCFEcomp(const C_F0 &c,int i)
       if (na != nb ) 
         CompileError("Copy of Array with incompatible size!");
         
-       const  E_F0 * rr=0;
+       Expression rr=0;
        //  try real voctor value FE interpolation 
        rr=IsFEcomp<double>(a[0],0) ;
        if (rr !=0) 
@@ -4122,13 +4128,13 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
         rtype=atype<CFEiR>();
         
       }
-    throwassert(pids);
+    ffassert(pids);
     ListOfId &ids(*pids);
     
     string str("[");
     
     const int n=ids.size();
-     throwassert(n>0);
+     ffassert(n>0);
    if ( fes->nbitem() != n) {
       cerr << " the array size must be " << fes->nbitem()  << " not " <<  n << endl;
       CompileError("Invalide array size  for  vectorial fespace function");
@@ -4166,7 +4172,7 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
      else if (args[i].left() == t_a)
        {
          const E_Array & ea= *dynamic_cast<const E_Array *>(args[i].LeftValue());
-         assert(&ea);
+         ffassert(&ea);
          for (int i=0;i<ea.size();i++)
            if (ea[i].left() == t_tfe)
             dim += ea[i].nbitem();
@@ -4185,7 +4191,7 @@ C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
    
 C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray,bool cplx)
 {
-  // assert(!cplx);
+  // ffassert(!cplx);
    typedef FEbaseArray<double>  FE;
    typedef  E_FEcomp<R,FE > FEi;
    typedef FEi::Result FEiR;
@@ -4198,7 +4204,7 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
     aType dcltype=atype<FE **>();
     aType cf0type=atype<C_F0>();
     aType rtype=atype<FEiR>();
-    throwassert(pids);
+    ffassert(pids);
     ListOfId &ids(*pids);
     if(cplx)
       {
@@ -4210,7 +4216,7 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
     string str("[");
     
     const int n=ids.size();
-     throwassert(n>0);
+     ffassert(n>0);
    if ( fes->nbitem() != n) {
       cerr << " the array size must be " << fes->nbitem()  << " not " <<  n << endl;
       CompileError("Invalide array size  for  vectorial fespace function");

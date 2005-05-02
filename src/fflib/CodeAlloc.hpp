@@ -21,7 +21,7 @@ class CodeAlloc { public:
   {
     if(p) {
       if(nbt>=nbpx) resize();
-      if(nbt>0) sort = sort || mem[nbt-1] < p;
+      if(nbt>0) sort = sort && mem[nbt-1] < p;
       nb++; 
       mem[nbt++]=(CodeAlloc*)p;  }
     return p;

@@ -85,7 +85,7 @@ class MoveMesh :  public E_F0mps { public:
       getmesh=to<pmesh>(args[0]); 
       const E_Array * a = dynamic_cast<const E_Array *>(args[1].LeftValue());
       
-      throwassert(a);
+      ffassert(a);
       if (a->size() !=2) CompileError("movemesh(Th,[u,v],...) need 2 componate in array ",atype<pmesh>());
       U=to<double>( (*a)[0]);
       V=to<double>( (*a)[1]);
@@ -184,12 +184,12 @@ class Adaptation :   public E_F0mps { public:
       args.SetNameParam(n_name_param,name_param,nargs);
       getmesh=to<pmesh>(args[0]); 
       int ksol=0; 
-      throwassert(nbsol<100);
+      ffassert(nbsol<100);
       for (int i=1;i<nbsol+1;i++)       
          if (args[i].left()==atype<E_Array>())
           {
             const E_Array * a = dynamic_cast<const E_Array *>(args[i].LeftValue());
-            throwassert(a);
+            ffassert(a);
             ksol+=a->size(); 
           }
          else
@@ -200,7 +200,7 @@ class Adaptation :   public E_F0mps { public:
          if (args[i].left()==atype<E_Array>())
           {
             const E_Array * a = dynamic_cast<const E_Array *>(args[i].LeftValue());
-            throwassert(a);
+            ffassert(a);
              int N=a->size();
             typesol[i-1]=N-1; // ok en 2D
             if (N<=4) {
@@ -311,7 +311,7 @@ extern Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool ju
 AnyType classBuildMesh::operator()(Stack stack)  const { 
     const E_BorderN * borders = GetAny<const E_BorderN *>((*getborders)(stack));
    long  nbtx         = arg(0,stack,0); 
-   assert(   nbtx >= 0);
+   ffassert(   nbtx >= 0);
    return SetAny<pmesh>(BuildMesh(stack,borders,false,nbtx));
 
 }
@@ -357,7 +357,7 @@ AnyType SplitMesh::operator()(Stack stack) const
   using  Fem2D::MeshPointStack;
    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
    Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
-   throwassert(Thh);
+   ffassert(Thh);
    int label=1;
    Mesh & Th(*Thh);
    long nbv=Thh->nv;
@@ -423,7 +423,7 @@ AnyType SaveMesh::operator()(Stack stack) const
       {
  //       cout << iv << endl;
         const Fem2D::Vertex  & v(Th(iv)); 
-        assert( iv == Th(num[iv]/3,num[iv]%3));
+        ffassert( iv == Th(num[iv]/3,num[iv]%3));
         mp->setP(Thh,num[iv]/3,num[iv]%3);
         
         fp << GetAny<double>((*xx)(stack)) << ' ';
@@ -455,7 +455,7 @@ AnyType MoveMesh::operator()(Stack stack) const
   using  Fem2D::MeshPointStack;
    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
    Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
-   throwassert(Thh);
+   ffassert(Thh);
    long nbv=Thh->nv;
    long nbt=Thh->nt;
    KN<double> u(nbv),v(nbv);
@@ -477,9 +477,9 @@ AnyType MoveMesh::operator()(Stack stack) const
      for (int i=0;i<sol.size();i++)
        { //  ale 
           pair<FEbase<R>,int> * s = GetAny<pair<FEbase<R>,int>*>( (*sol[i])(stack));
-          assert(s->first.Vh);
-          assert( &s->first.Vh->Th == Thh); // same old mesh
-          throwassert(0); // a faire ????
+          ffassert(s->first.Vh);
+          ffassert( &s->first.Vh->Th == Thh); // same old mesh
+          ffassert(0); // a faire ????
        }
    *mp=mps;
     pth->decrement();   
@@ -527,7 +527,7 @@ AnyType Adaptation::operator()(Stack stack) const
   using Fem2D::MeshPoint;
   using Fem2D::Mesh;
    Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
-  throwassert(Thh);
+  ffassert(Thh);
     Triangles * oTh =0;
   if (nbcperiodic) {
     KN<int> ndfv(Thh->nv);
@@ -1071,7 +1071,7 @@ class MeshCarre2f :   public E_F0mps { public:
       nx=to<long>(args[0]); 
       ny=to<long>(args[1]); 
       const E_Array *  a= dynamic_cast<const E_Array*>(args[2].LeftValue());
-      throwassert(a);fx=0;fy=0;
+      ffassert(a);fx=0;fy=0;
       if (a->size()>0) fx=to<double>( (*a)[0]);
       if (a->size()>1) fy=to<double>( (*a)[1]);
      }
@@ -1346,7 +1346,7 @@ class CheckMoveMesh :  public E_F0mps { public:
       getmesh=to<pmesh>(args[0]); 
       const E_Array * a = dynamic_cast<const E_Array *>(args[1].LeftValue());
       
-      throwassert(a);
+      ffassert(a);
       if (a->size() !=2) CompileError("CheckMoveMesh(Th,[u,v]) need 2 componate in array ",atype<pmesh>());
       U=to<double>( (*a)[0]);
       V=to<double>( (*a)[1]);
@@ -1373,7 +1373,7 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
    Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
    Mesh & Th(*Thh);
-   throwassert(Thh);
+   ffassert(Thh);
    long nbv=Thh->nv;
    long nbt=Thh->nt;
    KN<double> u(nbv),v(nbv);

@@ -721,9 +721,10 @@ template <class R>
       if(norm(A(i,j))>tol2) nbcoeff++;
 
   nbcoef=nbcoeff;
-  a=new R[nbcoef] ;
+  nbcoeff=Max(nbcoeff,1); // pour toujours alloue quelque chose FH Bug dans CheckPtr
+  a=new R[nbcoeff] ;
   lg=new int [this->n+1];
-  cl=new int [nbcoef];
+  cl=new int [nbcoeff];
   nbcoeff=0;
   R aij;
   for(int i=0;i<this->n;i++)
@@ -1082,10 +1083,11 @@ template<class R>
    lg(new int[nn+1]),
    cl(new int[nbcoef])     
   {
-     lg[0]=0;
      int k=0;
      bool nosym=!sym;
      typename std::map< pair<int,int>, R>::iterator iter=m.begin(), mend=m.end();
+     //  remarque lg est croissant Bug trouver par 
+     for(int i=0;i<=nn;i++) lg[i]=0; 
      while(iter!=mend)
       { 
         int i=iter->first.first;
@@ -1099,6 +1101,9 @@ template<class R>
         }
         ++iter;
        }
+    // lg est croissant  on bouche les trou   
+   for(int i=1;i<=nn;i++) lg[i]=Max(lg[i-1],lg[i]); 
+      
    assert(nbcoef==k);  
   }
 

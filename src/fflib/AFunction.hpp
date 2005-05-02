@@ -76,12 +76,12 @@ class C_F0;  //  une instruction  complie time
 class ListOfInst;
 class Polymorphic;
 class OneOperator;
-typedef const E_F0  *  Expression;
+typedef  E_F0  *  Expression; // 
 class AC_F0;
 class basicAC_F0;
 typedef complex<double> Complex;
 
-typedef pair<aType,const  E_F0  *>  Type_Expr ;// to store the type and the expression 
+typedef pair<aType,  E_F0  *>  Type_Expr ;// to store the type and the expression  29042005 FH
 
  int  FindType(const char * name) ; 
   void lgerror (const char* s) ;  
@@ -142,16 +142,16 @@ extern  C_F0 *pOne,*pZero,*pminusOne;
 
 typedef   AnyType (* Function1)(Stack, const AnyType &);
 typedef   AnyType (* Function2)(Stack, const AnyType &,const AnyType &);
-typedef   AnyType (* CFunction2)(Stack, const E_F0 *,const E_F0 *);
-typedef   AnyType (* CFunction4)(Stack, const E_F0 *,const E_F0 *,const E_F0 *,const E_F0 *);
+typedef   AnyType (* CFunction2)(Stack,  E_F0 *, E_F0  *);
+typedef   AnyType (* CFunction4)(Stack,  E_F0 *, E_F0 *, E_F0 *, E_F0 *);
 
 
 Expression NewExpression(Function1,Expression);
 Expression NewExpression(Function2,Expression,Expression);
 
 
-inline Type_Expr make_Type_Expr(aType t,const E_F0  * e) {return make_pair(t,e);}
-inline Type_Expr make_Type_Expr(const E_F0  * e,aType t) {return make_pair(t,e);}
+inline Type_Expr make_Type_Expr(aType t, E_F0  * e) {return make_pair(t,e);}
+inline Type_Expr make_Type_Expr( E_F0  * e,aType t) {return make_pair(t,e);}
 
 struct Keyless : binary_function<const char *,const char *, bool>
    { 
@@ -316,7 +316,7 @@ class E_F0 :public CodeAlloc{ public:
       int r1 = x->compare(y);// , r2 = y->compare(x);
      //assert(r1+r2==0);
      return r1<0;} };  
-   typedef map<const E_F0 *,int,kless> MapOfE_F0;
+   typedef map< E_F0 *,int,kless> MapOfE_F0;
 
     virtual AnyType operator()(Stack)  const =0;
     virtual bool Empty() const {return !this; }
@@ -330,14 +330,14 @@ class E_F0 :public CodeAlloc{ public:
     virtual int compare (const E_F0 *t) const { int r= (t==this) ? 0 : ( ( this<t) ?-1 : 1);
      //cout << "cmp " <<  typeid(*this).name() << r << endl; 
      return r;} // to give a order in instuction 
-    virtual int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const;  // build optimisation
+    virtual int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) ;  // build optimisation
     virtual AnyType operator()(Stack stack,AnyType *)  const { return operator()(stack);}  // call optim code
     virtual  operator aType ()  const { assert(0);return 0;}   // the type of the expression
     virtual ostream & dump(ostream &f) const  { f << ' ' << typeid(*this).name() << ' ' << this << ' '  ;return f; }
     // for OPTIMIZATION
     
-    int find(const MapOfE_F0 & m) const;
-    int insert(Expression  opt,deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const;
+    int find(const MapOfE_F0 & m) ;
+    int insert(Expression  opt,deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) ;
  };  
  
 inline ostream & operator<<(ostream & f,const E_F0 &e) { if(&e) e.dump(f); else f << " --0-- " ;return f;}
@@ -545,7 +545,7 @@ class basicAC_F0;
 	  
 	  aType left() const {return r;}
 	  aType right() const {return r->right();}
-	  operator  const  E_F0 *  () const {return f;}
+	  operator    E_F0 *  () const {return f;}
 	  bool Empty() const {return !f || f->Empty();}
 	  bool NotNull() const {return  f;}
 	  int  TYPEOFID() const { return r ? r->TYPEOFID(): 0;}
@@ -739,9 +739,9 @@ template<class A> AnyType Initialize(Stack,const AnyType &x,const AnyType &y){
   
 class E_F0_CFunc2 :public  E_F0mps { public:
    CFunction2  f2;
-   const  E_F0 *a,*b;
+   E_F0 *a,*b;
    AnyType operator()(Stack s)  const {return f2(s,a,b);}
-   E_F0_CFunc2( CFunction2 ff,const E_F0 *aa,const E_F0 *bb) : f2(ff),a(aa),b(bb){}
+   E_F0_CFunc2( CFunction2 ff,E_F0 *aa,E_F0 *bb) : f2(ff),a(aa),b(bb){}
    bool EvaluableWithOutStack() const 
       {return a->EvaluableWithOutStack() && b->EvaluableWithOutStack();} // 
     operator aType () const { return atype<void>();}         
@@ -750,9 +750,9 @@ class E_F0_CFunc2 :public  E_F0mps { public:
 
 class E_F0_CFunc4 :public  E_F0mps { public:
    CFunction4  f4;
-   const  E_F0 *a,*b,*c,*d;
+   E_F0 *a,*b,*c,*d;
    AnyType operator()(Stack s)  const {return f4(s,a,b,c,d);}
-   E_F0_CFunc4( CFunction4 ff,const E_F0 *aa,const E_F0 *bb,const E_F0 *cc,const E_F0 *dd) 
+   E_F0_CFunc4( CFunction4 ff,E_F0 *aa,E_F0 *bb,E_F0 *cc,E_F0 *dd) 
    : f4(ff),a(aa),b(bb),c(cc),d(dd){}
     operator aType () const { return atype<void>();}         
 
@@ -817,7 +817,7 @@ template<class R,class TA0>
      return rr;
      } // to give a order in instuction 
 
-   int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const
+   int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
     {
        int rr = find(m);
        if (rr) return rr;
@@ -874,7 +874,7 @@ template<class R,class TA0,class TA1>
      return rr;
      } // to give a order in instuction 
       
-   int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const
+   int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
     {
 
        int rr = find(m);
@@ -1028,9 +1028,9 @@ class E_F2_func :public  E_F2 { public:
 
 class E_F0_Func1 :public  E_F0 { public:
    Function1  f;
-   const  E_F0 *a;
+   E_F0 *a;
    AnyType operator()(Stack s)  const {return f(s,(*a)(s));}
-   E_F0_Func1( Function1 f1,const E_F0 *aa) : f(f1),a(aa){}
+   E_F0_Func1( Function1 f1,E_F0 *aa) : f(f1),a(aa){}
    bool EvaluableWithOutStack() const {return a->EvaluableWithOutStack();} // 
    bool MeshIndependent() const {return a->MeshIndependent();} // 
    int compare (const E_F0 *t) const { 
@@ -1052,9 +1052,9 @@ class E_F0_Func1 :public  E_F0 { public:
 };
 class E_F0_Func2 :public  E_F0 { public:
    Function2  f;
-   const  E_F0 *a,*b;
+   E_F0 *a,*b;
    AnyType operator()(Stack s)  const {return f(s,(*a)(s),(*b)(s));}
-   E_F0_Func2( Function2 f1,const E_F0 *aa,const E_F0 *bb) : f(f1),a(aa),b(bb){}
+   E_F0_Func2( Function2 f1,E_F0 *aa,E_F0 *bb) : f(f1),a(aa),b(bb){}
    bool EvaluableWithOutStack() const 
      {return a->EvaluableWithOutStack() &&b->EvaluableWithOutStack();} // 
    bool MeshIndependent() const {return a->MeshIndependent() && b->MeshIndependent();} // 
@@ -1234,9 +1234,9 @@ class CListOfInst  {  private:
 };
 
 
-AnyType FWhile(Stack ,const E_F0 * test,const E_F0 * ins);
-AnyType FFor(Stack s ,const E_F0 * i0,const E_F0 * i1,const E_F0 * i2,const E_F0 * ins);
-AnyType FIf(Stack s ,const E_F0 * test,const E_F0 * i1,const E_F0 * i2,const E_F0 * notuse);
+AnyType FWhile(Stack ,E_F0 * test,E_F0 * ins);
+AnyType FFor(Stack s ,E_F0 * i0,E_F0 * i1,E_F0 * i2,E_F0 * ins);
+AnyType FIf(Stack s ,E_F0 * test,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 
 
 
@@ -1569,7 +1569,7 @@ inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top)
 
 // save a expression 
 inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,size_t &top, bool del ) 
-   {  New(k,(make_pair<aType,const E_F0  *>(c.left(),c.LeftValue())),del);return 0; }
+   {  New(k,(make_pair<aType, E_F0  *>(c.left(),c.LeftValue())),del);return 0; }
  //  { return r->Initialization(New(k,r->SetParam(c,ListOfId(),top),del));}
 
 inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,const ListOfId & l,size_t & top,bool del) 
@@ -1703,7 +1703,7 @@ inline	  C_F0::C_F0(const C_F0 & e,const char *nm)
 	       }
 	       
 	   }
-inline const E_F0 * C_F0::LeftValue() const {
+inline  E_F0 * C_F0::LeftValue() const {
     return f;
 }
 
@@ -1959,7 +1959,7 @@ class  OneBinaryOperator : public OneOperator{
         {return  SetAny<R>(static_cast<R>(C::f( GetAny<A>((*a)(s)) , GetAny<B>((*b)(s)))));}
        Op(Expression aa,Expression bb) : a(aa),b(bb) {} 
        bool MeshIndependent() const { return a->MeshIndependent() && b->MeshIndependent();}
-       int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const
+       int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
          {
           int rr = find(m);
           if (rr) return rr;          
@@ -2587,7 +2587,7 @@ class E_F0_Optimize : public E_F0 {
 }; 
  
  
-inline    int E_F0::find(const MapOfE_F0 & m) const {  //  exp
+inline    int E_F0::find(const MapOfE_F0 & m)  {  //  exp
        // cout << " ffff :" ;
         MapOfE_F0::const_iterator i= m.find(this); 
         if(i != m.end()) {
@@ -2605,7 +2605,7 @@ inline    int E_F0::find(const MapOfE_F0 & m) const {  //  exp
            }     
         return i == m.end() ? 0 : i->second ;
     }
- inline   int E_F0::insert(Expression  opt,deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const
+ inline   int E_F0::insert(Expression  opt,deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
     {
      int rr=rr=align8(n);
      pair<Expression,int> p(this,rr);

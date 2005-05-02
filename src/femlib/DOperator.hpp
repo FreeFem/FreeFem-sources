@@ -66,9 +66,9 @@ template<class I,class R>
    bool isoptimize;
    
    LinearComb(): v(),optiexp0(),optiexpK(),
-          where_in_stack_opt(0),mesh_indep_stack_opt(0),isoptimize(false) {}
+          where_in_stack_opt(),mesh_indep_stack_opt(),isoptimize(false) {}
    LinearComb(const I& i,const R& r) :v(1),optiexp0(),optiexpK(),
-          where_in_stack_opt(0),mesh_indep_stack_opt(0),isoptimize(false) {
+          where_in_stack_opt(),mesh_indep_stack_opt(),isoptimize(false) {
     v[0]=make_pair<I,R>(i,r);}
     
    LinearComb(const LinearComb &l) 
@@ -185,7 +185,7 @@ template<class I,class R>
 
     return f;
   } 
- LinearComb * Optimize(Block * b) const 
+ LinearComb * Optimize(Block * b)  
   {
     const bool kdump=(verbosity/1000)%10==1;
     if (kdump)
