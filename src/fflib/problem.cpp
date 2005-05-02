@@ -2235,9 +2235,9 @@ Expression IsFebaseArray(Expression f)
 {
   assert(f);
   size_t N=f->nbitem();
-  const E_Array * vvi(dynamic_cast<const E_Array *>(f));
+   E_Array * vvi(dynamic_cast< E_Array *>(f));
   if ( ! vvi) return 0;
-  const E_Array & vi(*vvi);
+   E_Array & vi(*vvi);
   Expression febase=0;
   for (int i=0;i<N;i++)
     { 

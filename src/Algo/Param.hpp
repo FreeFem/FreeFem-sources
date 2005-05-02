@@ -47,7 +47,7 @@ public:
   
   //cf. Stroustrup page 612-613 pour l'implémentation de operator<<
   virtual ostream& toto(ostream&) const;
-  
+  private: // pas de copy
 };
 
 // Constructors
@@ -140,18 +140,17 @@ template<class Real>
 Param<Real>& Param<Real>::operator=(const Param<Real>& p)
 {
   //  cerr<<"Operateur = de Param"<<endl;
-
-  KN<Real>* a1;
-  KN<Real>* a2;
-  a1=this;
-  a2=(KN<Real> *)(&p);
-  *a1=*a2; // Operateur de copie de KN
+  // modif FH 042005 for gcc4.0 
+  KN<Real> & a1= *this;
+  const KN<Real> & a2= p;
+  a1=a2; // Operateur de copie de KN
   
   int ndim=p.size();
   
   if ((p.maxParam)==NULL)
 	maxParam=NULL;
-  else{
+  else{ 
+        if(maxParam) delete maxParam;
 	maxParam = new KN<Real>(ndim);
 	*maxParam=*(p.maxParam);
   }
@@ -159,6 +158,7 @@ Param<Real>& Param<Real>::operator=(const Param<Real>& p)
   if ((p.minParam)==NULL)
 	minParam=NULL;
   else{
+        if(minParam) delete minParam;
 	minParam = new KN<Real>(ndim);
 	*minParam=*(p.minParam);
   }

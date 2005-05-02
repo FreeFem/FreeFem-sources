@@ -267,7 +267,7 @@ template<class K,class FE=FEbase<K> >
 class E_FEcomp : public E_F0mps { public:
     typedef pair< FE * ,int> Result;
     const int comp, N;
-    const E_F0 *a0;
+    Expression a0;
     AnyType operator()(Stack s)  const {
        return SetAny<Result>( Result( *GetAny<FE **>((*a0)(s)),comp) );}  
     E_FEcomp(const C_F0 & x,const int cc,int NN) : a0(x.LeftValue()),comp(cc),N(NN)
