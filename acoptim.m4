@@ -72,6 +72,15 @@ then
     if test -x /usr/bin/hostinfo
 	then
 
+
+	# If we are on MacOS X to choise the optimisaztion 
+	AC_MSG_CHECKING(GCC version)
+
+        ff_gcc4=`gcc  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'` 
+	AC_MSG_RESULT($ff_gcc4)
+
+	# At the moment, we do not know how to produce correct
+	# optimizated code on G5.
 	AC_MSG_CHECKING(PowerPC architecture)
 
         # CPU detection
@@ -86,17 +95,12 @@ then
 	    ff_cpu=G5
 	    ff_optim_type=-G5
 	fi
-	if test $ff_cpu == unknown;
+	if test $ff_cpu = unknown;
 	    then
 	    AC_MSG_ERROR(cannot determine PowerPC cpu type)
 	fi
-
 	AC_MSG_RESULT($ff_cpu)
 
-	# If we are on MacOS X
-
-	# At the moment, we do not know how to produce correct
-	# optimizated code on G5.
 
 	if test `/usr/bin/hostinfo|grep Darwin|wc -l` -gt 0 \
 		-a $ff_cpu != G5
@@ -104,11 +108,14 @@ then
 
 	    # Optimization flags: -fast option do not work because the
 	    # -malign-natural flags create wrong IO code
-
+            if test  "$ff_gcc4" -eq 4 
+	    then
+             ff_fast='-fast '
+            else
 	    ff_fast='-funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
-
+	    fi
 	    # Specific PowerPC G5 optimization
-	    if test $ff_cpu == G5;
+	    if test "$ff_cpu" = G5;
 		then
 
 	        # remove -fstrict-aliasing on G5 to much optim the
@@ -124,14 +131,14 @@ then
 	fi
 
 	# CPU reference: PowerPC G4
-	if test $ff_cpu == G4;
+	if test "$ff_cpu" = G4;
 	    then
 	    CHECK_COMPILE_FLAG(C,-mcpu=7450,CFLAGS)
 	    CHECK_COMPILE_FLAG(C++,-mcpu=7450,CXXFLAGS)
 	    CHECK_COMPILE_FLAG(Fortran 77,-mcpu=7450,FFLAGS)
 
 	# CPU reference: PowerPC G5
-	elif test $ff_cpu == G5;
+	elif test "$ff_cpu" = G5;
 	    then
 
 	    # but at least this way we can see

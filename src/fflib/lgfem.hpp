@@ -110,7 +110,7 @@ class pfes_tefk : public v_fes { public:
   const TypeOfFE ** tef ;
   const int k;  
   pfes_tefk(const pmesh* t,const TypeOfFE ** tt,int kk,Stack s=0,int n=0,Expression *p=0 ) 
-    : v_fes(sum(tt,&TypeOfFE::N,kk),t,s,n,p),tef(tt),k(kk)  { 
+    : v_fes(sum(tt,&Fem2D::TypeOfFE::N,kk),t,s,n,p),tef(tt),k(kk)  { 
     // cout << "pfes_tefk const" << tef << " " << this << endl; 
      operator FESpace * ();} 
   FESpace * buildupdate() { 

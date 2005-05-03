@@ -172,19 +172,19 @@ m4_include(acoptim.m4)
 #  -DEIGENVALUE  to compile the eigen value part
 #  ------------------------------------------------
 
-# FreeFrem++-specific optimizations
+# FreeFrem++-specific optimizations -fpascal-strings
 if test "$enable_debug" = yes;
 then
 	CXXFLAGS="$CXXFLAGS -DDRAWING -DBAMG_LONG_LONG -DCHECK_KN"
 	if test "$ff_mac" = yes;
 	then
-		CXXFLAGS="$CXXFLAGS -fno-inline -fpascal-strings -fexceptions"
+		CXXFLAGS="$CXXFLAGS -fno-inline  -fexceptions"
 	fi
 else
 	CXXFLAGS="$CXXFLAGS -DDRAWING -DBAMG_LONG_LONG  -DNCHECKPTR"
 	if test "$ff_mac" = yes;
 	then
-		CXXFLAGS="$CXXFLAGS  -fpascal-strings"
+		CXXFLAGS="$CXXFLAGS "
 	fi
 fi
 
