@@ -55,6 +55,7 @@ static	AGLPixelFormat fmt;
 static	AGLContext ctx;
 
 int pStrCopy (StringPtr p1, char * p2);
+StringPtr c2p(const char * p,char *buf);
 #endif
 #ifdef XGL
 static  Display *dpy;
@@ -161,6 +162,16 @@ void InitMac();
 // --------------------------------------------------------------------------------------------------------------
 // APPLE EVENT SUPPORT ROUTINES
 // --------------------------------------------------------------------------------------------------------------
+
+StringPtr c2p(const char * p, unsigned char * buf)
+{
+  int l=strlen(p);
+  assert(l<255);
+
+  buf[0]=l;
+  memcpy(buf+1,p,l);
+  return buf; 
+}
 
 int pStrCopy (StringPtr p1, char * p2)
 /* copies a pascal string `p1 into a C string */
@@ -464,56 +475,57 @@ void initgraphique(void)
  //   cout <<"Initgraphique \n" ;
     fontList=0;
 #ifdef AGL 
-	BitMap	screenBitMap;
-	Rect	screenBits;
-	Cursor theArrow;
-	GetQDGlobalsScreenBits(&screenBitMap);
-	screenBits = screenBitMap.bounds;
-	SetCursor(GetQDGlobalsArrow(&theArrow));
-
-	boundsRect.top = 45;
-	boundsRect.left = (short) (15 +  (0.35 * screenBits.right));
-	boundsRect.bottom = screenBits.bottom -  25;
-	boundsRect.right =  screenBits.right-  25;
-	if((boundsRect.bottom - boundsRect.top) < (boundsRect.right - boundsRect.left))
-		boundsRect.right = boundsRect.left + boundsRect.bottom - boundsRect.top;
-	else
-		boundsRect.bottom = boundsRect.top + boundsRect.right - boundsRect.left;
-	grafWindow0=NewCWindow(0, &boundsRect, "\pFreeFem Graphics",true, 8, (WindowPtr) -1L, true, 0);
-	
-	//ShowWindow(grafWindow0);
-	BringToFront(grafWindow0);
-	//SelectWindow(grafWindow0);
-	SetPortWindowPort(grafWindow0);
-	GetPort(&grafPort0);
-	
-	height = boundsRect.bottom - boundsRect.top - 10;
-	width = boundsRect.right - boundsRect.left -10;
-	aspx = boundsRect.right - boundsRect.left -10;
-	aspy = boundsRect.bottom - boundsRect.top - 10;
-
-	
-	
-	GLint attrib[] = { AGL_RGBA, AGL_DOUBLEBUFFER, AGL_NONE };
-	
-	fmt = aglChoosePixelFormat(NULL, 0, attrib); /* Choose pixel format */
-
-	ctx = aglCreateContext(fmt, NULL); 	/* Create an AGL context */
-
-	aglDestroyPixelFormat(fmt); // pixel format is no longer needed
-
-	aglSetDrawable(ctx, GetWindowPort (grafWindow0)); /* Attach the context to the window */
-
-	{
-		EventRecord event;
-		WaitNextEvent (everyEvent, &event, 1, NULL);
-	}
-
-	aglSetCurrentContext(ctx);
+    unsigned char buf40[40];
+    BitMap	screenBitMap;
+    Rect	screenBits;
+    Cursor theArrow;
+    GetQDGlobalsScreenBits(&screenBitMap);
+    screenBits = screenBitMap.bounds;
+    SetCursor(GetQDGlobalsArrow(&theArrow));
+    
+    boundsRect.top = 45;
+    boundsRect.left = (short) (15 +  (0.35 * screenBits.right));
+    boundsRect.bottom = screenBits.bottom -  25;
+    boundsRect.right =  screenBits.right-  25;
+    if((boundsRect.bottom - boundsRect.top) < (boundsRect.right - boundsRect.left))
+      boundsRect.right = boundsRect.left + boundsRect.bottom - boundsRect.top;
+    else
+      boundsRect.bottom = boundsRect.top + boundsRect.right - boundsRect.left;
+    grafWindow0=NewCWindow(0, &boundsRect, c2p("FreeFem Graphics",buf40),true, 8, (WindowPtr) -1L, true, 0);
+    
+    //ShowWindow(grafWindow0);
+    BringToFront(grafWindow0);
+    //SelectWindow(grafWindow0);
+    SetPortWindowPort(grafWindow0);
+    GetPort(&grafPort0);
+    
+    height = boundsRect.bottom - boundsRect.top - 10;
+    width = boundsRect.right - boundsRect.left -10;
+    aspx = boundsRect.right - boundsRect.left -10;
+    aspy = boundsRect.bottom - boundsRect.top - 10;
+    
+    
+    
+    GLint attrib[] = { AGL_RGBA, AGL_DOUBLEBUFFER, AGL_NONE };
+    
+    fmt = aglChoosePixelFormat(NULL, 0, attrib); /* Choose pixel format */
+    
+    ctx = aglCreateContext(fmt, NULL); 	/* Create an AGL context */
+    
+    aglDestroyPixelFormat(fmt); // pixel format is no longer needed
+    
+    aglSetDrawable(ctx, GetWindowPort (grafWindow0)); /* Attach the context to the window */
+    
+    {
+      EventRecord event;
+      WaitNextEvent (everyEvent, &event, 1, NULL);
+    }
+    
+    aglSetCurrentContext(ctx);
     short int fNum;
-   // cout <<" GetFNum \n";
-   
-	GetFNum("\pGeneva", &fNum);									// build font
+    // cout <<" GetFNum \n";
+    unsigned char buf10[10];
+    GetFNum(c2p("Geneva",buf10), &fNum);									// build font
 	fontList = BuildFontGL (ctx, fNum, normal, 9); 
 #endif
 #ifdef XGL
