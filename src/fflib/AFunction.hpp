@@ -160,7 +160,7 @@ struct Keyless : binary_function<const char *,const char *, bool>
     
 
 // un table Iden     
-class TableOfIdentifier:CodeAlloc {
+class TableOfIdentifier: public CodeAlloc {
   public:
   struct Value;
   typedef const char * Key;
@@ -785,18 +785,6 @@ template<class R,class TA0>
    template <class T> struct remove_reference<const T&> {typedef T type;};
    typedef typename remove_reference<TA0>::type A0;
    
-     class Opt: public E_F_F0  { public :
-       size_t ia;  
-       Opt(const  E_F_F0 &t,size_t iaa) 
-         : E_F_F0(t) , ia(iaa) {assert(iaa<2000000 && iaa >0);}
-      AnyType operator()(Stack s)  const 
-       {
-      // A0 x =  *static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia));
-      // cout << " opt f (" << x << " ) = "   << ": " << ia << endl; 
-       return SetAny<R>( f( *static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia))  ) );}  
-         
-      };      
- 
  
   typedef  R (*func)(  TA0 ) ; 
   func f;
@@ -817,17 +805,33 @@ template<class R,class TA0>
      return rr;
      } // to give a order in instuction 
 
-   int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
-    {
-       int rr = find(m);
-       if (rr) return rr;
-       return insert(new Opt(*this,a->Optimize(l,m,n)),l,m,n);       
-    }
-    virtual ostream & dump(ostream &f) const  { f << typeid(*this).name() <<" f= " << f << " a= "<< *a << ' '  ;return f; }
-      
+   int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) ;
+   virtual ostream & dump(ostream &f) const  { f << typeid(*this).name() <<" f= " << f << " a= "<< *a << ' '  ;return f; }
 
 };
 
+// modif for xlc++ FH 
+template<class R,class TA0>
+class E_F_F0_Opt: public E_F_F0<R,TA0>  { public :
+  size_t ia;  
+  E_F_F0_Opt(const  E_F_F0<R,TA0>  &t,size_t iaa) 
+    : E_F_F0<R,TA0>(t) , ia(iaa) {assert(iaa<2000000 && iaa >0);}
+  AnyType operator()(Stack s)  const 
+  {
+    // A0 x =  *static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia));
+    // cout << " opt f (" << x << " ) = "   << ": " << ia << endl; 
+    return SetAny<R>( f( *static_cast<typename E_F_F0<R,TA0>::A0 *>(static_cast<void*>(static_cast<char *>(s)+ia))  ) );}  
+  
+};   
+
+template<class R,class TA0>   
+   int  E_F_F0<R,TA0>::Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
+    {
+       int rr = find(m);
+       if (rr) return rr;
+       return insert(new E_F_F0_Opt<R,TA0>(*this,a->Optimize(l,m,n)),l,m,n);       
+    } 
+// fin modif xlc++ 
 
 template<class A0>
  class E_VF_F0 :public  E_F0 { public:
@@ -874,33 +878,38 @@ template<class R,class TA0,class TA1>
      return rr;
      } // to give a order in instuction 
       
-   int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
+   int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) ;
+    
+};
+
+// modif for xlc++
+template<class R,class TA0,class TA1>
+class E_F_F0F0_Opt: public E_F_F0F0<R,TA0,TA1>  { public :
+  size_t ia,ib;  
+  E_F_F0F0_Opt(const  E_F_F0F0<R,TA0,TA1> &t,size_t iaa,size_t ibb) 
+    : E_F_F0F0<R,TA0,TA1>(t) ,
+      ia(iaa),ib(ibb) {}
+  AnyType operator()(Stack s)  const 
+  {
+    //A0 aa =*static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia));
+    //A1 bb=*static_cast<A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ;
+    //cout << ia << " " << ib <<  "f( " << aa << "," << bb  << " )   = "<< f(aa,bb) << endl;
+    return SetAny<R>( f( *static_cast<typename E_F_F0F0<R,TA0,TA1>::A0 *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
+			 *static_cast<typename E_F_F0F0<R,TA0,TA1>::A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ) );}  
+  
+};     
+       
+
+template<class R,class TA0,class TA1>
+   int E_F_F0F0<R,TA0,TA1>::Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
     {
 
        int rr = find(m);
        if (rr) return rr;
 
-       return insert(new Opt(*this,a0->Optimize(l,m,n),a1->Optimize(l,m,n)),l,m,n);
+       return insert(new E_F_F0F0_Opt<R,TA0,TA1>(*this,a0->Optimize(l,m,n),a1->Optimize(l,m,n)),l,m,n);
     }
-     // build optimisation
-     class Opt: public E_F_F0F0  { public :
-       size_t ia,ib;  
-       Opt(const  E_F_F0F0 &t,size_t iaa,size_t ibb) 
-         : E_F_F0F0(t) ,
-         ia(iaa),ib(ibb) {}
-      AnyType operator()(Stack s)  const 
-       {
-         //A0 aa =*static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia));
-         //A1 bb=*static_cast<A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ;
-         //cout << ia << " " << ib <<  "f( " << aa << "," << bb  << " )   = "<< f(aa,bb) << endl;
-         return SetAny<R>( f( *static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
-                             *static_cast<A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ) );}  
-         
-      };     
-       
-    
-};
-
+// add modif for xlc++
 
 
 
@@ -1469,7 +1478,7 @@ class E_Border  :public Polymorphic  {  public:
       Add("(",new OneOperator_borderN(this));}
       AnyType operator()(Stack)  const {
         return  SetAny<const  E_Border *>(this);}
-     double length(Stack stack) const { assert(0); /* a faire */ }
+     double length(Stack stack) const { ffassert(0);return 0.0; /* a faire */ }
 };
   
 inline  E_BorderN::E_BorderN(const E_Border *bb, C_F0  nn,const E_BorderN * nx)  
@@ -1950,67 +1959,64 @@ class  OneBinaryOperator : public OneOperator{
   typedef  typename C::result_type R;
   typedef typename C::first_argument_type A;
   typedef typename C::second_argument_type B;
-
-    class Op : public E_F0 {
-      typedef  typename C::result_type Result;
-         Expression a,b;
-       public:
-       AnyType operator()(Stack s)  const 
-        {return  SetAny<R>(static_cast<R>(C::f( GetAny<A>((*a)(s)) , GetAny<B>((*b)(s)))));}
-       Op(Expression aa,Expression bb) : a(aa),b(bb) {} 
-       bool MeshIndependent() const { return a->MeshIndependent() && b->MeshIndependent();}
-       int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
-         {
-          int rr = find(m);
-          if (rr) return rr;          
-          int Opa = a->Optimize(l,m,n);          
-          int Opb =b->Optimize(l,m,n);
-          return insert(new Opt(*this,Opa,Opb),l,m,n);       
-          } 
-   int compare (const E_F0 *t) const { 
-     int rr;
-     const  Op * tt=dynamic_cast<const Op *>(t);
-     if (tt ) rr =   clexico(a->compare(tt->a),b->compare(tt->b));
-     else rr = E_F0::compare(t);
-    // cout << "cmp E_F0_Func1 " << rr << endl;
-     return rr;
-     } // to give a order in instuction 
-  // int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const;  // build optimisation
-
+  
+  class Op : public E_F0 {
+    typedef  typename C::result_type Result;
+    Expression a,b;
+  public:
+    AnyType operator()(Stack s)  const 
+    {return  SetAny<R>(static_cast<R>(C::f( GetAny<A>((*a)(s)) , GetAny<B>((*b)(s)))));}
+    Op(Expression aa,Expression bb) : a(aa),b(bb) {} 
+    bool MeshIndependent() const { return a->MeshIndependent() && b->MeshIndependent();}
+    int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
+    {
+      int rr = find(m);
+      if (rr) return rr;          
+      int Opa = a->Optimize(l,m,n);          
+      int Opb =b->Optimize(l,m,n);
+      return insert(new Opt(*this,Opa,Opb),l,m,n);       
+    } 
+    int compare (const E_F0 *t) const { 
+      int rr;
+      const  Op * tt=dynamic_cast<const Op *>(t);
+      if (tt ) rr =   clexico(a->compare(tt->a),b->compare(tt->b));
+      else rr = E_F0::compare(t);
+      // cout << "cmp E_F0_Func1 " << rr << endl;
+      return rr;
+    } // to give a order in instuction 
+    // int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const;  // build optimisation
+    
     virtual ostream & dump(ostream &f) const  { 
-       f << "Op<" << typeid(C).name() 
-         << ">   \n\t\t\t( a= "<< *a<< ")  \n\t\t\t(b= "<< *b << ") "  ;
+      f << "Op<" << typeid(C).name() 
+	<< ">   \n\t\t\t( a= "<< *a<< ")  \n\t\t\t(b= "<< *b << ") "  ;
       return f; }
-          
-     // build optimisation
-     class Opt: public Op  { public :
-       size_t ia,ib;  
-       Opt(const  Op &t,size_t iaa,size_t ibb) 
-         : Op(t) ,
-         ia(iaa),ib(ibb) {}
-      AnyType operator()(Stack s)  const 
-       {
-       // cout <<  "Opt2 ::: " << ia << " "<< ib << " f = " 
-       //      <<  GetAny<double>(SetAny<R>(C::f( *static_cast<A *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
-        //                     *static_cast<B *>(static_cast<void*>(static_cast<char *>(s)+ib))))) << endl;
-              
-              
-         return SetAny<R>( C::f( *static_cast<A *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
-                             *static_cast<B *>(static_cast<void*>(static_cast<char *>(s)+ib)) ) );}  
-                        
-         
-      };     
-          
-                
-    };
- //   aType r; //  return type 
-    public: 
-    E_F0 * code(const basicAC_F0 & args) const 
-     { //cout << "A op B \n" ;
-       return  new Op(t[0]->CastTo(args[0]),t[1]->CastTo(args[1]));} 
-    OneBinaryOperator(): 
-      OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()])
-      {pref = SameType<A,B>::OK ;}
+  };
+    // build optimisation
+  class Opt: public Op  { public :
+    size_t ia,ib;  
+    Opt(const  Op &t,size_t iaa,size_t ibb) 
+      : Op(t) ,
+	ia(iaa),ib(ibb) {}
+    AnyType operator()(Stack s)  const 
+    {
+      // cout <<  "Opt2 ::: " << ia << " "<< ib << " f = " 
+      //      <<  GetAny<double>(SetAny<R>(C::f( *static_cast<A *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
+      //                     *static_cast<B *>(static_cast<void*>(static_cast<char *>(s)+ib))))) << endl;
+      
+      
+      return SetAny<R>( C::f( *static_cast<A *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
+			      *static_cast<B *>(static_cast<void*>(static_cast<char *>(s)+ib)) ) );}  
+    
+    
+  };     
+  //   aType r; //  return type 
+public: 
+  E_F0 * code(const basicAC_F0 & args) const 
+  { //cout << "A op B \n" ;
+    return  new Op(t[0]->CastTo(args[0]),t[1]->CastTo(args[1]));} 
+  OneBinaryOperator(): 
+    OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()])
+  {pref = SameType<A,B>::OK ;}
 };
 
 /* essai d'unification des classes 

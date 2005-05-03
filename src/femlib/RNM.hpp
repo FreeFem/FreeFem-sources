@@ -96,6 +96,9 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //   (u,conj(v))  donne le produit hermitiene pour le gradient conjugue
 //
 //   -- de fonction dans le cas real                                                                                                                 
+// modif for g++ 4.0 and xlc++   mai 2005
+//  adding some this-> 
+// ----------------
 inline double  conj(const double & x){return x;}
 inline float  conj(const float &x){return x;}
 inline double  real(const double &x){return x;}
@@ -489,7 +492,7 @@ class KNM_: public KN_<R> {
   long ij(long i,long j) const   
             { return shapei.index(i)+shapej.index(j);}
   long indexij(long i,long j)        const   
-            { return index(shapei.index(i)+shapej.index(j));}
+            { return this->index(shapei.index(i)+shapej.index(j));}
   R & operator()(long i,long j)     const   
             { return this->v[indexij(i,j)];}
   R & operator()(int i,int j)     const   
@@ -497,13 +500,13 @@ class KNM_: public KN_<R> {
             
             
   KN_<R> operator()(const char,long j    )  const   // une colonne j  ('.',j)
-            { return KN_<R>(&this->v[index(shapej.index(j))],shapei*this->step);} 
+            { return KN_<R>(&this->v[this->index(shapej.index(j))],shapei*this->step);} 
   KN_<R> operator()(long i    ,const char)  const   // une ligne i  (i,'.')
-            { return KN_<R>(&this->v[index(shapei.index(i))],shapej*this->step);}  
+            { return KN_<R>(&this->v[this->index(shapei.index(i))],shapej*this->step);}  
   KN_<R> operator()(const char,int j    )  const   // une colonne j  ('.',j)
-            { return KN_<R>(&this->v[index(shapej.index(j))],shapei*this->step);} 
+            { return KN_<R>(&this->v[this->index(shapej.index(j))],shapei*this->step);} 
   KN_<R> operator()(int i    ,const char)  const   // une ligne i  (i,'.')
-            { return KN_<R>(&this->v[index(shapei.index(i))],shapej*this->step);}  
+            { return KN_<R>(&this->v[this->index(shapei.index(i))],shapej*this->step);}  
   KN_<R> operator()(const char,const char)  const   // tous 
             { return *this;}
   KNM_<R> t() const

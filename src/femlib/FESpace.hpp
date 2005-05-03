@@ -3,7 +3,7 @@
 #include <cstdarg>
 
 namespace  Fem2D {
-
+  class FESpace; 
 class TypeOfFE;
 
 // numbering of derivative 
