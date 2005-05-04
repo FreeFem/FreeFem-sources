@@ -1,3 +1,28 @@
+2005-05-03 16:25  hecht
+
+	*   remove pascal in "\p  "  macos version
+
+2005-05-03 15:12  hecht
+
+	*   try to compile with de idm compiler xlc++
+	    work in progress
+	    remove  10^10 an 10.^10  (FH)
+
+2005-05-02 10:57  hecht
+
+	*     do correction for g++-4.0
+	      remove const in Expression type
+
+2005-04-27 14:23  hecht
+
+	*     do correction for g++ version 4.0  (new apple compiler on
+	  Tiger)
+	      small change in RNM and cadna  (FH)
+
+2005-04-22 11:58  lehyaric
+
+	* Debug checks are ok on Debian Testing
+
 2005-04-17 18:44  hecht
 
 	* add page to explain how to bluid weak form with Robin / Neumann

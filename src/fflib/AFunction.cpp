@@ -927,13 +927,13 @@ void Init_map_type()
        new OneUnaryOperator<Op1_neg<Complex> >);
               
      TheOperators->Add("^",
-		       //xlc++       new OneBinaryOperator<Op2_pow<long,long,long> >,
+		       new OneBinaryOperator<Op2_pow<long,long,long> >,
     //   new OneBinaryOperator<Op2_pow<double,long,double> >,
-       new OneBinaryOperator<Op2_pow<double,double,double> >,
-		       // xlc++       new OneBinaryOperator<Op2_pow<double,double,long> >,
+		       new OneBinaryOperator<Op2_pow<double,double,double> >,
+		       new OneBinaryOperator<Op2_pow<double,double,long> >,
     //   new OneBinaryOperator<Op2_pow<Complex,Complex,double> >,
     //  new OneBinaryOperator<Op2_pow<Complex,double,Complex> >,
-       new OneBinaryOperator<Op2_pow<Complex,Complex,Complex> >
+		       new OneBinaryOperator<Op2_pow<Complex,Complex,Complex> >
      );
      
      TheOperators->Add("<",
