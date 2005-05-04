@@ -78,7 +78,7 @@ plots/FIGII5.eps                plots/trunc0.eps \
 plots/FIGII6.eps                plots/trunc6.eps \
 plots/FIGII7.eps                plots/twosquare.eps \
 plots/FIGII8.eps                plots/xyf.eps \
-plots/FIGII9.eps \
+plots/FIGII9.eps 
 
 
 EXTRA_DIST= addfe.tex docFFGUI.tex manual-full.tex manual.tex FF.sty FFF.sty dessin.sty pdfsync.sty styles.sty \

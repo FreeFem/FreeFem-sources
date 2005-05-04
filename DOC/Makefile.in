@@ -185,60 +185,64 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-EXTRA_DIST = \
-A_tutorial.tex                  figures/Cassini.eps             plots/Thwithhole.eps	\
-Adapt.tex                       figures/Cycloid1.eps            plots/Thwithouthole.eps	\
-AdaptindicatorP2.tex            figures/Cycloid2.eps            plots/Thxy.eps	\
-Beam.tex                        figures/Engine.eps              plots/dTh.eps	\
-BisonGrammar.tex                figures/FreeFem++-cs.eps        plots/d_Thf.eps	\
-figures/L-shape.eps             plots/d_u.eps	\
-FF.sty                          figures/L-shape2.eps            plots/eigen11.eps	\
-FFF.sty                         figures/LastCOD.eps             plots/eigen12.eps	\
-FFGUI_cygwin_huge.tex           figures/LastCOD2.eps            plots/emptymesh-1.eps	\
-FluidStruct.tex                 figures/LastPhoto.eps           plots/emptymesh-2.eps	\
-FreeBoundary.tex                figures/LastPhoto2.eps          plots/emptymesh.eps	\
-LB.tex                          figures/NACA0012.eps            plots/err02.eps	\
-LaplaceP1.tex                   figures/P0P1P2P1nc.eps          plots/fastInterpolat.eps	\
-LaplaceP1P2h.tex                figures/P1P2.eps                plots/firstTh.eps	\
-LaplaceP1bis.tex                figures/SmileFace.eps           plots/firstU.eps	\
-LaplaceP1huge.tex               figures/ThreePoint.eps          plots/gnuplot.eps	\
-LaplaceRT.tex                   figures/TouchSide.eps           plots/hat.eps	\
-ListAM.tex                      figures/U-shape.eps             plots/laRTp.eps	\
-MetricFile.tex                  figures/V-shape.eps             plots/lapRTuv.eps	\
-NSUawaCahouetChabart.tex        figures/aTutorial.eps           plots/likegnu.eps	\
-NewtonRaphson.tex               figures/adaptmesh.eps           plots/logo.eps	\
-No-linear-elas.tex              figures/border.eps              plots/lshape.eps	\
-NonlinearCG.tex                 figures/cfunc1.eps              plots/lshapeSol.eps	\
-Operators.tex                   figures/cfunc2.eps              plots/medit.eps	\
-Parallelversionexperimental.tex figures/electro.eps             plots/movemesh.eps	\
-Periodic.tex                    figures/electroMesh.eps         plots/nl-elas.eps	\
-Readmesh.tex                    figures/mesh_sample.eps         plots/nosplitmesh.eps	\
-Region.tex                      figures/naca1.eps               plots/onnewmesh.eps	\
-Schwarz-GC.tex                  figures/naca2.eps               plots/onoldmesh.eps	\
-Schwarz-no-overlap.tex          figures/projP0.eps              plots/perio4.eps	\
-Schwarz-overlap.tex             figures/projP1.eps              plots/period.eps	\
-StokesNavierStokes.tex          figures/projP1b.eps             plots/region.eps	\
-TypesofLanguage.tex             figures/projP1nc.eps            plots/region_nu.eps	\
-addfe-old.tex                   figures/projP2.eps              plots/region_u.eps	\
-addfe.tex                       figures/soapfilm.eps            plots/rhoP2.eps	\
-bbFiletype.tex                  figures/soapfilm3d.eps          plots/schwarz-no-th.eps	\
-cavity.tex                      figures/square.eps              plots/schwarz-no-u.eps	\
-dessin.sty                      mainaddfe.tex                   plots/schwarz-no-u0.eps	\
-docFFGUI.tex                    manual-full.tex                 plots/schwarz-th.eps	\
-docFFGUI_cygwin.tex             manual.tex                      plots/schwarz-u.eps	\
-docFFGUI_cygwin_huge.tex        pdfsync.sty                     plots/schwarz-u0.eps	\
-docFFGUI_cygwinhuge.tex         plots/FIGII1.eps                plots/secondT.eps	\
-docFFGUI_unix.tex               plots/FIGII2.eps                plots/splitmesh.eps	\
-docFFGUI_unix_huge.tex          plots/FIGII3.eps                plots/squareb.eps	\
-docGUI.tex                      plots/FIGII4.eps                plots/three.eps	\
-figures/1stCOD.eps              plots/FIGII5.eps                plots/threeg.eps	\
-figures/1stCOD2.eps             plots/FIGII6.eps                plots/trunc0.eps	\
-figures/1stPhoto.eps            plots/FIGII7.eps                plots/trunc6.eps	\
-figures/1stPhoto2.eps           plots/FIGII8.eps                plots/twosquare.eps	\
-figures/BellInit.eps            plots/FIGII9.eps                plots/xyf.eps	\
-figures/BellLast.eps            plots/Laplace.eps               styles.sty	\
-figures/Bezier.eps              plots/RT0.eps	\
-figures/Cardioid.eps            plots/ThrhoP2.eps	
+FIGS_EPS = \
+figures/1stCOD.eps              plots/Laplace.eps \
+figures/1stCOD2.eps             plots/RT0.eps \
+figures/1stPhoto.eps            plots/ThrhoP2.eps \
+figures/1stPhoto2.eps           plots/Thwithhole.eps \
+figures/BellInit.eps            plots/Thwithouthole.eps \
+figures/BellLast.eps            plots/Thxy.eps \
+figures/Bezier.eps              plots/dTh.eps \
+figures/Cardioid.eps            plots/d_Thf.eps \
+figures/Cassini.eps             plots/d_u.eps \
+figures/Cycloid1.eps            plots/eigen11.eps \
+figures/Cycloid2.eps            plots/eigen12.eps \
+figures/Engine.eps              plots/emptymesh-1.eps \
+figures/FreeFem++-cs.eps        plots/emptymesh-2.eps \
+figures/L-shape.eps             plots/emptymesh.eps \
+figures/L-shape2.eps            plots/err02.eps \
+figures/LastCOD.eps             plots/fastInterpolat.eps \
+figures/LastCOD2.eps            plots/firstTh.eps \
+figures/LastPhoto.eps           plots/firstU.eps \
+figures/LastPhoto2.eps          plots/gnuplot.eps \
+figures/NACA0012.eps            plots/hat.eps \
+figures/P0P1P2P1nc.eps          plots/laRTp.eps \
+figures/P1P2.eps                plots/lapRTuv.eps \
+figures/SmileFace.eps           plots/likegnu.eps \
+figures/ThreePoint.eps          plots/logo.eps \
+figures/TouchSide.eps           plots/lshape.eps \
+figures/U-shape.eps             plots/lshapeSol.eps \
+figures/V-shape.eps             plots/medit.eps \
+figures/aTutorial.eps           plots/movemesh.eps \
+figures/adaptmesh.eps           plots/nl-elas.eps \
+figures/border.eps              plots/nosplitmesh.eps \
+figures/cfunc1.eps              plots/onnewmesh.eps \
+figures/cfunc2.eps              plots/onoldmesh.eps \
+figures/electro.eps             plots/perio4.eps \
+figures/electroMesh.eps         plots/period.eps \
+figures/mesh_sample.eps         plots/region.eps \
+figures/naca1.eps               plots/region_nu.eps \
+figures/naca2.eps               plots/region_u.eps \
+figures/projP0.eps              plots/rhoP2.eps \
+figures/projP1.eps              plots/schwarz-no-th.eps \
+figures/projP1b.eps             plots/schwarz-no-u.eps \
+figures/projP1nc.eps            plots/schwarz-no-u0.eps \
+figures/projP2.eps              plots/schwarz-th.eps \
+figures/soapfilm.eps            plots/schwarz-u.eps \
+figures/soapfilm3d.eps          plots/schwarz-u0.eps \
+figures/square.eps              plots/secondT.eps \
+plots/FIGII1.eps                plots/splitmesh.eps \
+plots/FIGII2.eps                plots/squareb.eps \
+plots/FIGII3.eps                plots/three.eps \
+plots/FIGII4.eps                plots/threeg.eps \
+plots/FIGII5.eps                plots/trunc0.eps \
+plots/FIGII6.eps                plots/trunc6.eps \
+plots/FIGII7.eps                plots/twosquare.eps \
+plots/FIGII8.eps                plots/xyf.eps \
+plots/FIGII9.eps 
+
+EXTRA_DIST = addfe.tex docFFGUI.tex manual-full.tex manual.tex FF.sty FFF.sty dessin.sty pdfsync.sty styles.sty \
+$(FIGS_EPS)
 
 all: all-am
 
@@ -391,7 +395,7 @@ uninstall-am: uninstall-info-am
 
 documentation:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 
-%.dvi:%.tex
+%.dvi:%.tex $(FIGS_EPS)
 	-rm $*.dvi $*.aux $*.log \
                 $*.toc $*.ind $*.glo $*.out $*.blg $*ilg $*.idx $*.bbl $*.tmp	
 	latex $*
@@ -400,7 +404,7 @@ documentation:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 	latex $*
 %.ps:%.dvi
 	dvips -u +psfonts.map -u +pdftex.map -u +Ttbbold.map -z -K $* -o $@
-%.pdf:%.tex
+%.pdf:%.tex $(patsubst %.eps,%..pdf,$(FIGS_EPS))
 	-rm $*.pdf $*.aux $*.log \
                 $*.toc $*.ind $*.glo $*.out $*.blg $*ilg $*.idx $*.bbl $*.tmp	
 	pdflatex $*
@@ -412,6 +416,8 @@ documentation:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 clean:
 	-rm *.dvi *.pdf *~ *.aux *.log *.ps *.ps.gz \
 		*.toc *.ind *.glo *.out *.blg *ilg *.idx *.bbl *.tmp
+%.pdf:%.eps
+	epstopdf $*.eps --outfile=$*.pdf
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
