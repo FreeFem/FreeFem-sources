@@ -1,533 +1,576 @@
+2005-05-03 16:25  hecht
+
+	*   remove pascal in "\p  "  macos version
+
+2005-05-03 15:12  hecht
+
+	*   try to compile with de idm compiler xlc++
+	    work in progress
+	    remove  10^10 an 10.^10  (FH)
+
+2005-05-02 10:57  hecht
+
+	*     do correction for g++-4.0
+	      remove const in Expression type
+
+2005-04-27 14:23  hecht
+
+	*     do correction for g++ version 4.0  (new apple compiler on
+	  Tiger)
+	      small change in RNM and cadna  (FH)
+
+2005-04-22 11:58  lehyaric
+
+	* Debug checks are ok on Debian Testing
+
+2005-04-17 18:44  hecht
+
+	* add page to explain how to bluid weak form with Robin / Neumann
+	  coundary condition
+
+2005-04-16 21:36  hecht
+
+	*  add tool to solve variationnal inequality
+	   add change version to 1.46-1
+
+2005-04-15 22:48  hecht
+
+	*  the 2  new example have probleme with testhighlight.sh
+	   we disable the test in chech (FH)
+
+2005-04-15 22:06  hecht
+
+	* add tools to solve variationnal inequality   let d en array and A
+	  a square matrix (in .edp)    d=A.diag; // get the diagonal  of
+	  the matrix	A.diag = d; //set the diagonal	  set(A,solver=CG);
+	  // important to change precondiconning before solving
+
+2005-04-13 11:58  lehyaric
+
+	* IDE compiles again under MingW (an include file was missing)
+
+2005-04-12 18:37  hecht
+
+	*   add Modification Kohji Ohtsuka in a manual
+	    try too correct problem in eigen value in no symetric cas (??)
+
+2005-04-12 12:07  hecht
+
+	*  add flags to build unionkjack mesh on square
+	   example:  mesh Th=square(nn,mm,[x/ddx,y/ddy] ,flags=1);
+
+2005-04-05 15:08  lehyaric
+
+	* FreeFem+-ide compiles on MacOS X
+
+2005-04-05 14:33  lehyaric
+
+	* First version of FreeFem++-ide without sockets compiles under
+	  Linux
+
+2005-03-30 11:38  hecht
+
+	*   correct name of example  blakschol.edp in BlackSchole.edp
+	    add file in distribution archive (logo2.ico)
+
+2005-03-30 11:05  hecht
+
+	*      add  src/ide/testhighlight.sh in distributed file
+	  (src/ide/Makefile.am) FH
+
+2005-03-30 11:02  lehyaric
+
+	* Not regenerating HISTORY if not in a CVS working area
+
+2005-03-30 10:42  hecht
+
+	* correct some mistake in Makefile.am (in: examples++-load/,
+	  src/ide/)
+
+2005-03-30 09:31  hecht
+
+	*    adding 2 new files for allocation (forgot in previous commit)
+
+2005-03-29 23:13  hecht
+
+	*	Big change in code generation alloc  (work in progress)
+		   to remove all undelete pointer.
+		May be correct trap in arpack++ (alloction problem not
+	  sure,
+		  very strange thing)
+		Put 1-46-0 version number
+		Inforce compile in example-load
+		remark, all test work on my Mac, FH.
+
+2005-03-25 17:59  hecht
+
+	*   correct bug in trunc function:
+	      The bug is  the mesh have hole the we get a mesh with
+	  triangle in the hole:
+	       border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+	       border b(t=0,2*pi){ x=0.3+0.3*cos(t); y=0.3*sin(t);label=2;}
+	       mesh Thwithhole	 = buildmesh(a(50)+b(-30));
+	       mesh Th2=trunc(Thwithhole,1,split=2,label=2);
+
+2005-03-25 14:54  lehyaric
+
+	* Compiling ok on Linux
+
+2005-03-25 12:37  lehyaric
+
+	* Client and server merged into one unique executable to make sure
+	  that the client can find its server program, even through
+	  symbolic links.
+
+2005-03-17 14:15  lehyaric
+
+	* Included src/lglib/lg.tab.?pp in cleanregen.sh
+
+2005-03-17 14:13  lehyaric
+
+	* Replaced sem_getvalue() with a separate counter on MacOSX.
+
+2005-03-16 22:28  hecht
+
+	*   add tool to get number of mesh triangle  contening a point
+	  (x,y)
+	    or to get the region number
+	    example:
+	     int it00 = Th(0.55,0.6).nuTriangle; // get the number of Th's
+	  triangle contening (0.55,0.6)
+	     int nr00 = Th(0.55,0.6).region;; // get the region number of
+	  Th's triangle contening (0.55,0.6)
+
+2005-03-16 15:37  hecht
+
+	* correct prototype of StrVersionNumber in macrgraf
+
+2005-03-16 15:05  lehyaric
+
+	* Updates to the no-F77 no-C configuration
+
+2005-03-16 14:41  lehyaric
+
+	* Fortran and C compilers are now optional (if they are missing, we
+	  just don't compile the libraries that need them).
+
+2005-03-16 12:08  hecht
+
+	* correct error in prototype of StrVersionNumber and add precision
+	  to show the correct version number
+
+2005-03-13 16:32  hecht
+
+	* correct compilation problem in RNM (resize) with g++3.4 (add
+	  this->)
+
+2005-03-02 11:50  lehyaric
+
+	* Correcting compilation problem on RedHat
+
+2005-03-02 11:29  lehyaric
+
+	* New packaging including FreeFem++-cs features: fast graphics,
+	  grammar highlighting, error-line display
+
+2005-03-02 11:22  lehyaric
+
+	* FreeFem++-cs MinGW bug corrected: does not crash anymore when
+	  reading a file name from the command line
+
+2005-03-01 16:06  lehyaric
+
+	* Removed unnecessary #includes
+
+2005-03-01 15:33  lehyaric
+
+	* Simplified startup code. Hopefully, this will stop the MinGW
+	  segmentation fault bug (at startup when a filename is specified
+	  on the command line), but this is not proven yet.
+
+2005-03-01 14:21  lehyaric
+
+	* Segmentation violation error while loading a file from the
+	  command line in FreeFem++-cs. Debugging in progress.
+
+2005-02-28 18:06  lehyaric
+
+	* Now compiling fine under Cygwin
+
+2005-02-28 11:40  lehyaric
+
+	* Now compiling fine on MinGW
+
+2005-02-28 11:27  lehyaric
+
+	* Removed use of regex.h since it is not available under MinGW.
+
+2005-02-25 16:28  lehyaric
+
+	* Corrected a small compilation error.
+
+2005-02-25 16:14  lehyaric
+
+	* FreeFem++-cs: compile-time or runtime errors are now highlighted
+	  in the editor (the corresponding line number is extracted from
+	  all the server messages thanks to a regex).
+
+2005-02-25 13:10  lehyaric
+
+	* More coherency checks in configure.ac for a correct MPI
+	  installation.
+
+2005-02-25 10:50  lehyaric
+
+	* Added new "resize" reserved word into the highlighting grammar.
+
+2005-02-24 21:27  hecht
+
+	* correct the documentation
+
+2005-02-24 20:44  hecht
+
+	* correct  mistake in return type in complex mean and jump new
+	  function (FH)
+
+2005-02-24 15:33  hecht
+
+	* resize of array and matrices, continuing
+
+2005-02-24 15:32  hecht
+
+	* add resize of int,real and complex array or matrices, exemple:
+	  real [int] tab2=[1,2,3,3.14]; tab2.resize(10); // to set the new
+	  siez of array to 10
+
+2005-02-24 15:08  lehyaric
+
+	* Grammar-driven highlighting works. Regression tests for it are
+	  included in "make check". Include file and macros are not scanned
+	  during highlighting.
+
+2005-02-24 09:44  hecht
+
+	* correct bug  in array of complex FE function like
+	  Vh<complex>[int]  Wh(10); // where Vh is a fespace
+
+2005-02-23 15:51  lehyaric
+
+	* Highlighting test procedure not ready for regression tests yet:
+	  disabled from "make check".
+
+2005-02-23 15:40  lehyaric
+
+	* Renamed some FreeFem++ tokens to avoid collisions with
+	  system-dependant defines.
+
+2005-02-23 15:37  lehyaric
+
+	* Properly compiled lex and yacc source, for machines that do not
+	  have working versions of lex or yacc.
+
+2005-02-23 15:35  lehyaric
+
+	* No CVS keyword in lex and yacc source files to avoid recompiling
+	  them after a "cvs commit" on machines that do not have proper
+	  versions of this software.
+
+2005-02-23 15:22  lehyaric
+
+	* "testhighlight" regression tests now work up to (but not
+	  including) array.edp
+
+2005-02-23 14:50  lehyaric
+
+	* Added highlighting grammar files into CVS, in case the compiling
+	  environment does not include a working version of bison or lex.
+
 2005-02-23 13:44  lehyaric
 
-	* ChangeLog, HISTORY, HISTORY_BEFORE_2005, Makefile.am,
-	  Makefile.in, configure, configure.ac, DOC/Makefile.in,
-	  DOC/manual-full.tex, download/Makefile.in,
-	  download/arpack/Makefile.in, download/blas/Makefile.in,
-	  download/fltk/Makefile.in, download/umfpack/Makefile.in,
-	  examples++/Makefile.in, examples++-bug/Makefile.in,
-	  examples++-eigen/Makefile.in, examples++-load/Makefile.in,
-	  examples++-mpi/Makefile.in, examples++-other/Makefile.in,
-	  examples++-tutorial/Makefile.in, src/Makefile.in,
-	  src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/agl/Makefile.in, src/bamglib/Makefile.in,
-	  src/femlib/Makefile.in, src/fflib/Makefile.in,
-	  src/glx/Makefile.in, src/ide/Makefile.in, src/iml/Makefile.in,
-	  src/lglib/Makefile.in, src/mpi/Makefile.in, src/nw/Makefile.in,
-	  src/std/Makefile.in, src/umfpack/Makefile.in,
-	  src/x11/Makefile.in: The HISTORY file is now created from CVS
-	  logs thanks to "cvs2cl".  Previous HISTORY items are saved as
-	  HISTORY_BEFORE_2005.
+	* The HISTORY file is now created from CVS logs thanks to "cvs2cl".
+	  Previous HISTORY items are saved as HISTORY_BEFORE_2005.
 
 2005-02-23 12:45  lehyaric
 
-	* HISTORY, src/ide/highlight.cpp, src/ide/hl_lexyacc.hpp,
-	  src/ide/hl_yacc.y++, src/ide/testhighlight.sh:     FreeFem++-cs:
-	  grammar-driven syntax highlighting works on
+	*     FreeFem++-cs: grammar-driven syntax highlighting works on
 	      (examples++-tutorial/...) Laplace.edp, adapt.edp and
 	      adaptindicatorP1.edp (ALH)
 
 2005-02-23 10:49  hecht
 
-	* HISTORY, src/fflib/lgfem.cpp: add jump and mean of complex
-	  function.
+	* add jump and mean of complex function.
 
 2005-02-22 17:37  lehyaric
 
-	* src/ide/: Makefile.am, cs.cpp, highlight.cpp, highlight.hpp,
-	  hl_lex.l++, hl_lexyacc.hpp, hl_yacc.y++, testhighlight.cpp,
-	  testhighlight.sh: FreeFem++-cs: grammar-driven highlighting
-	  procedure works on (examples++-tutorial/) Laplace.edp and
-	  adapt.edp.
+	* FreeFem++-cs: grammar-driven highlighting procedure works on
+	  (examples++-tutorial/) Laplace.edp and adapt.edp.
 
 2005-02-18 20:13  lehyaric
 
-	* Makefile.in, debian/changelog, download/Makefile.in,
-	  download/arpack/Makefile.in, download/blas/Makefile.in,
-	  download/fltk/Makefile.in, download/umfpack/Makefile.in,
-	  examples++/Makefile.in, examples++-bug/Makefile.in,
-	  examples++-eigen/Makefile.in, examples++-load/Makefile.in,
-	  examples++-mpi/Makefile.in, examples++-other/Makefile.in,
-	  examples++-tutorial/Makefile.in, src/Makefile.in,
-	  src/Algo/Makefile.in, src/agl/Makefile.in,
-	  src/bamglib/Makefile.in, src/femlib/Makefile.in,
-	  src/fflib/Makefile.in, src/glx/Makefile.in, src/ide/Makefile.am,
-	  src/ide/Makefile.in, src/ide/cs.cpp, src/ide/highlight.cpp,
-	  src/ide/highlight.hpp, src/ide/hl_lex.l++,
-	  src/ide/hl_lexyacc.hpp, src/ide/hl_yacc.y++,
-	  src/ide/testhighlight.cpp, src/iml/Makefile.in,
-	  src/lglib/Makefile.in, src/mpi/Makefile.in, src/nw/Makefile.in,
-	  src/std/Makefile.in, src/x11/Makefile.in: FreeFem++-cs syntax
-	  highlighting is now highlights keywords based on their location
-	  in the input buffer, which removes any need for backtracking in
-	  the bison grammar. The grammar is now much simpler thanks to
-	  this.
+	* FreeFem++-cs syntax highlighting is now highlights keywords based
+	  on their location in the input buffer, which removes any need for
+	  backtracking in the bison grammar. The grammar is now much
+	  simpler thanks to this.
 
 2005-02-18 18:00  hecht
 
-	* examples++-bug/fe-vect.edp: ajoute d'un test d'erreur
+	* ajoute d'un test d'erreur
 
 2005-02-17 16:54  lehyaric
 
-	* src/ide/: cs.cpp, highlight.hpp, hl_lex.l++, hl_yacc.y++:
-	  Progressive updates to the highlighting grammar.
+	* Progressive updates to the highlighting grammar.
 
 2005-02-17 16:02  lehyaric
 
-	* HISTORY: Added new developments
+	* Added new developments
 
 2005-02-17 15:05  lehyaric
 
-	* examples++-tutorial/all.edp, src/ide/threads.cpp: Compiles on
-	  MacOS X.
+	* Compiles on MacOS X.
 
 2005-02-17 15:05  lehyaric
 
-	* src/ide/: cs.cpp, highlight.hpp, hl_lex.l++, hl_yacc.y++,
-	  tostring.hpp: Grammar-driven highlighting now includes macros
-	  (but it stops highlighting a macro at the first "/").
+	* Grammar-driven highlighting now includes macros (but it stops
+	  highlighting a macro at the first "/").
 
 2005-02-17 14:27  lehyaric
 
-	* Makefile.in, configure, configure.ac, ylwrap,
-	  download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/Makefile.in,
-	  download/umfpack/Makefile.in, examples++/Makefile.in,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  src/Makefile.in, src/Algo/Makefile.in, src/agl/Makefile.in,
-	  src/bamglib/Makefile.in, src/femlib/Makefile.in,
-	  src/fflib/Makefile.in, src/glx/Makefile.in, src/ide/.cvsignore,
-	  src/ide/Makefile.am, src/ide/Makefile.in, src/ide/cs.cpp,
-	  src/ide/highlight.cpp, src/ide/highlight.hpp, src/ide/hl_lex.l++,
-	  src/ide/hl_yacc.y++, src/ide/ide.cpp, src/ide/testhighlight.cpp,
-	  src/ide/threads.cpp, src/ide/threads.hpp, src/iml/Makefile.in,
-	  src/lglib/Makefile.in, src/mpi/Makefile.in, src/nw/Makefile.in,
-	  src/std/Makefile.in, src/x11/Makefile.in: First working version
-	  of syntax highlighting through grammar file in FreeFem++-cs
-	  editor.
+	* First working version of syntax highlighting through grammar file
+	  in FreeFem++-cs editor.
 
 2005-02-16 18:13  hecht
 
-	* HISTORY, DOC/manual-full.tex, examples++/all.edp,
-	  examples++-tutorial/all.edp, examples++-tutorial/readmesh.edp,
-	  examples++-tutorial/regtests.m4,
-	  examples++-tutorial/shur-comp.edp, src/bamglib/Mesh2.cpp,
-	  src/bamglib/MeshDraw.cpp, src/bamglib/QuadTree.cpp,
-	  src/bamglib/R2.h, src/fflib/lgfem.cpp: 3D continuing +  truc
+	* 3D continuing +  truc
 
 2005-02-16 13:44  lehyaric
 
-	* examples++-other/.cvsignore, src/ide/socket.cpp,
-	  src/ide/socket.hpp: Socket buffering is now limited to avoid
-	  random communication errors.
+	* Socket buffering is now limited to avoid random communication
+	  errors.
 
 2005-02-16 12:29  lehyaric
 
-	* src/ide/: cs.cpp, socket.cpp, socket.hpp: Buffered socket writes
-	  implemented in FreeFem++-cs
+	* Buffered socket writes implemented in FreeFem++-cs
 
 2005-02-15 14:30  lehyaric
 
-	* src/ide/cs.cpp: Corrected comments
+	* Corrected comments
 
 2005-02-15 14:19  lehyaric
 
-	* src/ide/cs.cpp: FreeFem++-cs binary TCP flux optimized.
+	* FreeFem++-cs binary TCP flux optimized.
 
 2005-02-14 17:22  lehyaric
 
-	* examples++/all.edp, examples++-other/.cvsignore,
-	  examples++-other/graphics-benchmark.edp,
-	  examples++-tutorial/all.edp, src/ide/cs.cpp, src/ide/socket.cpp,
-	  src/ide/socket.hpp: Socket communication between client and
-	  server in FreeFem++-cs has been translated into binary format for
-	  speed.
+	* Socket communication between client and server in FreeFem++-cs
+	  has been translated into binary format for speed.
 
 2005-02-14 11:50  lehyaric
 
-	* src/ide/socket.cpp: Small spelling mistake
+	* Small spelling mistake
 
 2005-02-11 22:20  hecht
 
-	* DOC/manual-full.tex, examples++-tutorial/FE.edp,
-	  src/femlib/FQuadTree.cpp, src/fflib/problem.cpp: complet DOC
+	* complet DOC
 
 2005-02-11 18:00  hecht
 
-	* HISTORY, examples++/all.edp, examples++-tutorial/all.edp,
-	  src/femlib/FESpace.cpp, src/femlib/QuadratureFormular.cpp,
-	  src/femlib/QuadratureFormular.hpp, src/fflib/lgfem.cpp:    add 2
-	  new quadrature formular qf7pT and qf9pT with respectively 15 and
-	  21 points
+	*    add 2 new quadrature formular qf7pT and qf9pT with
+	  respectively 15 and 21 points
 	     add  P2b a new finite element  : P2 + bubble
 
 2005-02-11 15:57  lehyaric
 
-	* src/ide/cs.cpp: Now drag'n'drop and copy/paste work concurrently
-	  in the FreeFem++-cs editor window.
+	* Now drag'n'drop and copy/paste work concurrently in the
+	  FreeFem++-cs editor window.
 
 2005-02-08 17:26  hecht
 
-	* HISTORY, examples++-tutorial/mesh.edp, src/femlib/FQuadTree.cpp,
-	  src/femlib/FQuadTree.hpp: add 3D stuff in quadtree
+	* add 3D stuff in quadtree
 
 2005-02-08 16:52  lehyaric
 
-	* .cvsignore, TODO: Updated TODO list for FreeFem++-cs
+	* Updated TODO list for FreeFem++-cs
 
 2005-02-08 16:18  lehyaric
 
-	* Makefile.in, configure, configure.ac, download/Makefile.in,
-	  download/arpack/Makefile.in, download/blas/Makefile.in,
-	  download/fltk/Makefile.in, download/umfpack/Makefile.in,
-	  examples++/Makefile.in, examples++/all.edp,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  examples++-tutorial/all.edp, src/Makefile.in,
-	  src/Algo/Makefile.in, src/agl/Makefile.in,
-	  src/bamglib/Makefile.in, src/femlib/Makefile.in,
-	  src/fflib/Makefile.in, src/glx/Makefile.in, src/ide/Makefile.in,
-	  src/iml/Makefile.in, src/lglib/Makefile.in, src/mpi/Makefile.in,
-	  src/nw/Makefile.in, src/std/Makefile.in, src/x11/Makefile.in:
-	  Dynamic loading is now disabled if dlopen() does not link
+	* Dynamic loading is now disabled if dlopen() does not link
 	  properly (bug reported by Haiko Etzel)
 
 2005-02-08 15:18  hecht
 
-	* examples++-tutorial/mesh.edp: add  buildmesh example with nbvx=
-	  named parameter
+	* add  buildmesh example with nbvx=  named parameter
 
 2005-02-08 14:23  lehyaric
 
-	* debian/changelog: New Debian package
+	* New Debian package
 
 2005-02-04 16:47  lehyaric
 
-	* Makefile.in, configure, configure.ac, download/Makefile.in,
-	  download/arpack/Makefile.in, download/blas/Makefile.in,
-	  download/fltk/Makefile.in, download/umfpack/Makefile.in,
-	  examples++/Makefile.in, examples++-bug/Makefile.in,
-	  examples++-eigen/Makefile.in, examples++-load/Makefile.in,
-	  examples++-mpi/Makefile.in, examples++-other/Makefile.in,
-	  examples++-tutorial/Makefile.in, src/Makefile.in,
-	  src/Algo/Makefile.in, src/agl/Makefile.in,
-	  src/bamglib/Makefile.in, src/femlib/Makefile.in,
-	  src/fflib/Makefile.in, src/glx/Makefile.in, src/ide/Makefile.in,
-	  src/iml/Makefile.in, src/lglib/Makefile.in, src/mpi/Makefile.in,
-	  src/nw/Makefile.in, src/std/Makefile.in, src/x11/Makefile.in: Now
-	  checks that FLTK is compiled with threads before accepting it.
+	* Now checks that FLTK is compiled with threads before accepting
+	  it.
 
 2005-02-04 16:24  lehyaric
 
-	* Makefile.in, configure, configure.ac, DOC/Makefile.in,
-	  download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/Makefile.in,
-	  download/umfpack/Makefile.in, examples++/Makefile.in,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  src/Makefile.in, src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/agl/Makefile.in, src/bamglib/Makefile.in,
-	  src/femlib/Makefile.in, src/fflib/Makefile.in,
-	  src/glx/Makefile.in, src/ide/Makefile.in, src/iml/Makefile.in,
-	  src/lglib/Makefile.in, src/mpi/Makefile.in, src/nw/Makefile.in,
-	  src/std/Makefile.in, src/umfpack/Makefile.in,
-	  src/x11/Makefile.in: Patchs de configuration proposés par Thierry
-	  Thomas pour FreeBSD intégrés.
+	* Patchs de configuration proposés par Thierry Thomas pour FreeBSD
+	  intégrés.
 
 2005-02-04 15:30  hecht
 
-	* HISTORY, examples++-tutorial/all.edp,
-	  examples++-tutorial/mesh.edp, src/femlib/Drawing.cpp,
-	  src/femlib/FQuadTree.cpp, src/femlib/FQuadTree.hpp,
-	  src/femlib/fem.hpp: beginning of  3D version
+	* beginning of	3D version
 
 2005-02-01 17:17  lehyaric
 
-	* src/ide/threads.cpp: Compiles on MacOS X
+	* Compiles on MacOS X
 
 2005-02-01 16:49  lehyaric
 
-	* cleanregen.sh: New script to remove generated files (in order to
-	  prevent CVS conflicts)
+	* New script to remove generated files (in order to prevent CVS
+	  conflicts)
 
 2005-02-01 16:04  lehyaric
 
-	* Makefile.in, configure, configure.ac, DOC/Makefile.in,
-	  download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/Makefile.in,
-	  download/umfpack/Makefile.in, examples++/Makefile.in,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  src/Makefile.in, src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/agl/Makefile.in, src/bamglib/Makefile.in,
-	  src/femlib/Makefile.in, src/fflib/Makefile.in,
-	  src/glx/Makefile.in, src/ide/Makefile.in, src/ide/cs.cpp,
-	  src/iml/Makefile.in, src/lglib/Makefile.in, src/mpi/Makefile.in,
-	  src/nw/Makefile.in, src/std/Makefile.in, src/umfpack/Makefile.in,
-	  src/x11/Makefile.in: FreeFem++-cs compiling and running on
-	  Windows with fully blocking sockets
+	* FreeFem++-cs compiling and running on Windows with fully blocking
+	  sockets
 
 2005-02-01 15:01  lehyaric
 
-	* src/ide/threads.cpp: Cosmetic change
+	* Cosmetic change
 
 2005-02-01 14:38  lehyaric
 
-	* Makefile.in, download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/Makefile.in,
-	  download/umfpack/Makefile.in, examples++/Makefile.in,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  src/Makefile.in, src/Algo/Makefile.in, src/agl/Makefile.in,
-	  src/bamglib/Makefile.in, src/femlib/Makefile.in,
-	  src/fflib/Makefile.am, src/fflib/Makefile.in,
-	  src/glx/Makefile.in, src/ide/Makefile.in, src/ide/cs.cpp,
-	  src/iml/Makefile.in, src/lglib/Makefile.in, src/mpi/Makefile.in,
-	  src/nw/Makefile.in, src/std/Makefile.in, src/x11/Makefile.in:
-	  FreeFem++-cs works with fully-blocking sockets on Linux.
+	* FreeFem++-cs works with fully-blocking sockets on Linux.
 	  src/fflib/strversionnumber.m4 added to distribution list.
 
 2005-02-01 12:40  lehyaric
 
-	* src/ide/: cs.cpp, threads.cpp: Still problems with blocking
-	  communication. But FreeFem++-cs compiles
+	* Still problems with blocking communication. But FreeFem++-cs
+	  compiles
 
 2005-02-01 12:20  lehyaric
 
-	* examples++/all.edp, examples++-tutorial/all.edp,
-	  src/fflib/.cvsignore, src/ide/cs.cpp, src/ide/socket.cpp,
-	  src/ide/socket.hpp, src/ide/threads.cpp, src/ide/threads.hpp:
-	  Reverting FreeFem++-cs to blocking IO because of Microsoft
+	* Reverting FreeFem++-cs to blocking IO because of Microsoft
 	  Windows problems
 
 2005-01-31 15:21  lehyaric
 
-	* Makefile.am, Makefile.in, configure, download/Makefile.in,
-	  download/arpack/Makefile.in, download/blas/Makefile.in,
-	  download/fltk/Makefile.in, download/umfpack/Makefile.in,
-	  examples++/Makefile.in, examples++-bug/Makefile.in,
-	  examples++-eigen/Makefile.in, examples++-load/Makefile.in,
-	  examples++-mpi/Makefile.in, examples++-other/Makefile.in,
-	  examples++-tutorial/Makefile.in, src/Makefile.in,
-	  src/Algo/Makefile.in, src/agl/Makefile.in,
-	  src/bamglib/Makefile.in, src/femlib/Makefile.in,
-	  src/fflib/Makefile.in, src/glx/Makefile.in, src/ide/Makefile.in,
-	  src/iml/Makefile.in, src/lglib/Makefile.in, src/mpi/Makefile.in,
-	  src/nw/Makefile.in, src/std/Makefile.in, src/x11/Makefile.in: New
-	  version number in makefiles.
+	* New version number in makefiles.
 
 2005-01-31 15:17  lehyaric
 
-	* Makefile.in, configure, configure.ac, DOC/Makefile.in,
-	  download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/Makefile.in,
-	  download/umfpack/Makefile.in, examples++/Makefile.in,
-	  examples++/all.edp, examples++-bug/Makefile.in,
-	  examples++-eigen/Makefile.in, examples++-load/Makefile.in,
-	  examples++-mpi/Makefile.in, examples++-other/Makefile.in,
-	  examples++-tutorial/Makefile.in, examples++-tutorial/all.edp,
-	  src/Makefile.in, src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/Graphics/glrgraph.hpp, src/agl/Makefile.in,
-	  src/bamglib/Makefile.in, src/femlib/Makefile.in,
-	  src/fflib/Makefile.am, src/fflib/Makefile.in,
-	  src/fflib/strversionnumber.cpp, src/fflib/strversionnumber.m4,
-	  src/glx/Makefile.in, src/ide/Makefile.in, src/ide/cs.cpp,
-	  src/iml/Makefile.in, src/lglib/Makefile.in, src/lglib/lg.tab.cpp,
-	  src/mpi/Makefile.in, src/nw/Makefile.in, src/std/Makefile.in,
-	  src/umfpack/Makefile.in, src/x11/Makefile.in: Default version
-	  number now includes package number.  Build date changes at each
-	  build.
+	* Default version number now includes package number.  Build date
+	  changes at each build.
 
 2005-01-31 14:07  lehyaric
 
-	* Makefile.in, WindowsPackage.m4, configure, configure.ac,
-	  download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/Makefile.in,
-	  download/umfpack/Makefile.in, examples++/Makefile.in,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  src/Makefile.in, src/Algo/Makefile.in, src/agl/Makefile.in,
-	  src/bamglib/Makefile.in, src/femlib/Makefile.in,
-	  src/fflib/Makefile.in, src/glx/Makefile.in, src/ide/Makefile.am,
-	  src/ide/Makefile.in, src/ide/cs.cpp, src/ide/socket.cpp,
-	  src/ide/threads.cpp, src/ide/threads.hpp, src/iml/Makefile.in,
-	  src/lglib/Makefile.in, src/mpi/Makefile.in, src/nw/Makefile.in,
-	  src/std/Makefile.in, src/x11/Makefile.in: Problem with busy
-	  waiting under Windows solved.  Change in version numbering
-	  variables (see configure.ac).
+	* Problem with busy waiting under Windows solved.  Change in
+	  version numbering variables (see configure.ac).
 
 2005-01-29 10:15  hecht
 
-	* src/ide/cs.cpp: end g++3.4 correction on hydre CV:
+	* end g++3.4 correction on hydre CV:
 	  ----------------------------------------------------------------------
 
 2005-01-29 09:56  hecht
 
-	* examples++/makeref.edp, examples++-tutorial/algo.edp,
-	  src/femlib/MatriceCreuse.hpp, src/femlib/MatriceCreuse_tpl.hpp,
-	  src/femlib/RNM.hpp, src/fflib/problem.cpp, src/fflib/problem.hpp,
-	  src/ide/socket.cpp, src/ide/socket.hpp: correct some compile
-	  error with g++ 3.4 CV
+	* correct some compile error with g++ 3.4 CV
 	  ----------------------------------------------------------------------
 
 2005-01-28 14:52  lehyaric
 
-	* src/ide/cs.cpp: Corrected "cannot open '-psn_xxx' document" error
-	  on MacOS.
+	* Corrected "cannot open '-psn_xxx' document" error on MacOS.
 
 2005-01-28 14:00  lehyaric
 
-	* src/ide/cs.cpp: FreeFem++-cs compiles+runs ok on MacOS X
+	* FreeFem++-cs compiles+runs ok on MacOS X
 
 2005-01-28 13:27  lehyaric
 
-	* Makefile.in, configure, configure.ac, DOC/Makefile.in,
-	  download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/Makefile.in,
-	  download/umfpack/Makefile.in, examples++/Makefile.in,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  src/Makefile.in, src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/agl/Makefile.in, src/bamglib/Makefile.in,
-	  src/femlib/Makefile.in, src/fflib/Makefile.in,
-	  src/glx/Makefile.in, src/ide/Makefile.in, src/iml/Makefile.in,
-	  src/lglib/Makefile.in, src/mpi/Makefile.in, src/nw/Makefile.in,
-	  src/std/Makefile.in, src/umfpack/Makefile.in,
-	  src/x11/Makefile.in: Windows packaging for new improved socket
-	  implementation
+	* Windows packaging for new improved socket implementation
 
 2005-01-28 12:01  lehyaric
 
-	* src/ide/: cs.cpp, socket.hpp: ecompiling ok on Windows.
+	* ecompiling ok on Windows.
 
 2005-01-28 11:28  lehyaric
 
-	* Makefile.in, configure, DOC/Makefile.in, download/Makefile.in,
-	  download/arpack/Makefile.in, download/blas/Makefile.in,
-	  download/fltk/Makefile.in, download/umfpack/Makefile.in,
-	  examples++/Makefile.in, examples++-bug/Makefile.in,
-	  examples++-eigen/Makefile.in, examples++-load/Makefile.in,
-	  examples++-mpi/Makefile.in, examples++-other/Makefile.in,
-	  examples++-tutorial/Makefile.in, src/Makefile.in,
-	  src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/agl/Makefile.in, src/bamglib/Makefile.in,
-	  src/femlib/Makefile.in, src/fflib/Makefile.in,
-	  src/glx/Makefile.in, src/ide/Makefile.am, src/ide/Makefile.in,
-	  src/ide/cs.cpp, src/ide/socket.cpp, src/ide/socket.hpp,
-	  src/ide/tostring.hpp, src/iml/Makefile.in, src/lglib/Makefile.in,
-	  src/mpi/Makefile.in, src/nw/Makefile.in, src/std/Makefile.in,
-	  src/umfpack/Makefile.in, src/x11/Makefile.in: Still trying to
-	  resolve discrepancies between Linux and Windows sockets.
+	* Still trying to resolve discrepancies between Linux and Windows
+	  sockets.
 
 2005-01-27 19:01  hecht
 
-	* examples++-load/load.link: correct ; placement in if ...
+	* correct ; placement in if ...
 
 2005-01-27 18:30  hecht
 
-	* Makefile.in, DOC/Makefile.in, download/fltk/Makefile.in,
-	  examples++-tutorial/all.edp, src/agl/Makefile.in: pour mettre les
-	  makefile.in ok
+	* pour mettre les makefile.in ok
 
 2005-01-27 18:14  hecht
 
-	* src/agl/: Info-plist.am, FreeFem++.app.tgz: mac install
-	  continuing
+	* mac install continuing
 
 2005-01-27 18:07  hecht
 
-	* FreeFem++.app.tgz, HISTORY, Info-plist.am, Makefile.am,
-	  Makefile.in, install-www, mkff-html.pl, src/agl/Makefile.am,
-	  src/agl/Makefile.in, src/ide/Makefile.in: continuing coorect of
-	  macos application installation
+	* continuing coorect of macos application installation
 
 2005-01-27 17:16  lehyaric
 
-	* download/fltk/Makefile.am, src/ide/cs.cpp: Reorganising socket
-	  communication in FreeFem++-cs because of instabilities on
-	  Windows.
+	* Reorganising socket communication in FreeFem++-cs because of
+	  instabilities on Windows.
 
 2005-01-27 10:59  lehyaric
 
-	* DOC/docFFGUI.tex, src/ide/cs.cpp: Drag'n'drop works with Mozilla
-	  Firefox for Windows.	FreeFem++-cs documentation updated.
+	* Drag'n'drop works with Mozilla Firefox for Windows.  FreeFem++-cs
+	  documentation updated.
 
 2005-01-26 23:34  hecht
 
-	* FreeFem++.app.tgz: add .app.tgz of macos application
+	* add .app.tgz of macos application
 
 2005-01-26 23:31  hecht
 
-	* DOC/manual.tex: correct pb dvi pdf in manual.tex
+	* correct pb dvi pdf in manual.tex
 
 2005-01-26 23:25  hecht
 
-	* HISTORY, Makefile.am, Makefile.in, configure, configure.ac,
-	  download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/Makefile.in,
-	  download/umfpack/Makefile.in, examples++/Makefile.in,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  src/Makefile.in, src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/agl/Makefile.in, src/bamglib/Makefile.in,
-	  src/femlib/Makefile.in, src/fflib/Makefile.in,
-	  src/glx/Makefile.in, src/ide/Makefile.am, src/ide/Makefile.in,
-	  src/iml/Makefile.in, src/lglib/Makefile.in, src/mpi/Makefile.in,
-	  src/nw/Makefile.in, src/std/Makefile.in, src/umfpack/Makefile.in,
-	  src/x11/Makefile.in: correct stuff in dist generation correct
-	  trouble in configure.ac and tar.gz file
+	* correct stuff in dist generation correct trouble in configure.ac
+	  and tar.gz file
 
 2005-01-26 23:22  hecht
 
-	* DOC/: FFF.sty, Makefile.am, Makefile.in, manual-full.tex,
-	  manual.tex, styles.sty: correct problem dvi and pdf chose make
-	  lot of small change in configure.ac ...
+	* correct problem dvi and pdf chose make lot of small change in
+	  configure.ac ...
 
 2005-01-26 17:50  hecht
 
-	* FreeFem.app.tgz, Makefile.am, mkff-html.pl,
-	  FreeFem++.app/Contents/Resources/script,
-	  examples++-tutorial/all.edp: coorect macos X application)
+	* coorect macos X application)
 
 2005-01-26 17:35  lehyaric
 
-	* src/ide/cs.cpp: Drag'n'drop works with mozilla-firefox under X11.
+	* Drag'n'drop works with mozilla-firefox under X11.
 
 2005-01-26 13:58  lehyaric
 
-	* Makefile.am, configure, configure.ac: In configure.ac,
-	  PACKAGE_VERSION is already used by autoconf, so we create
-	  'FREEFEM_PACKAGING' instead.
+	* In configure.ac, PACKAGE_VERSION is already used by autoconf, so
+	  we create 'FREEFEM_PACKAGING' instead.
 
 2005-01-26 12:11  lehyaric
 
-	* examples++/regtests.edp, src/ide/cs.cpp: Drag'n'drop is now
-	  working in FreeFem++-cs.
+	* Drag'n'drop is now working in FreeFem++-cs.
 
 2005-01-26 11:30  lehyaric
 
-	* src/ide/cs.cpp: Drag'n'drop being implemented.
+	* Drag'n'drop being implemented.
 
 2005-01-24 11:28  hecht
 
-	* HISTORY, src/femlib/BamgFreeFem.cpp, src/fflib/lgfem.cpp,
-	  src/fflib/lgmesh.cpp:   add  named parameter nbtx=..	in
-	  buildmesh  function to change the default
+	*   add  named parameter nbtx=..  in buildmesh	function to change
+	  the default
 	     maximal number of vertex in the build mesh.
 
 2005-01-20 20:10  hecht
 
-	* HISTORY, src/fflib/problem.cpp:     Correct a segfault if second
-	  derivative of test function exist in
+	*     Correct a segfault if second derivative of test function
+	  exist in
 	      problem definition.  The Change in problem.cpp:
 	      resize : KN<double> buf(Vh.MaximalNbOfDF()*3*Vh.N);
 	      to     : KN<double>
@@ -535,3017 +578,69 @@
 
 2005-01-20 10:39  hecht
 
-	* HISTORY, configure.ac, src/Graphics/sansrgraph.cpp,
-	  src/femlib/DOperator.hpp, src/femlib/MatriceCreuse_tpl.hpp,
-	  src/fflib/AFunction2.cpp, src/fflib/lex.cpp,
-	  src/fflib/lgmesh.cpp, src/fflib/problem.cpp,
-	  src/fflib/problem.hpp: correct parameter passing () in macro
-	  argument correct linear combination of sparce matrix.
+	* correct parameter passing () in macro argument correct linear
+	  combination of sparce matrix.
 
 2005-01-11 13:38  lehyaric
 
-	* src/ide/cs.cpp: FreeFem++-cs compiles with cygwin. It is not
-	  tested yet. File paths may be a problem.
+	* FreeFem++-cs compiles with cygwin. It is not tested yet. File
+	  paths may be a problem.
 
 2005-01-10 22:19  hecht
 
-	* examples++-other/speedtest.sh: change c i C in speedtest.sh to
-	  get Cholesky cpu time
+	* change c i C in speedtest.sh to get Cholesky cpu time
 
 2005-01-10 14:03  hecht
 
-	* DOC/figures/FreeFem++-cs.pdf: add forgotten file .pdf
+	* add forgotten file .pdf
 
 2005-01-10 12:07  hecht
 
-	* configure.ac: window problem continue
+	* window problem continue
 
 2005-01-10 10:41  hecht
 
-	* Makefile.in, configure, configure.ac, DOC/Makefile.in,
-	  download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/Makefile.am,
-	  download/fltk/Makefile.in, download/umfpack/Makefile.in,
-	  examples++/Makefile.in, examples++/all.edp,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  examples++-tutorial/all.edp, src/Makefile.in,
-	  src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/agl/Makefile.in, src/bamglib/Makefile.in,
-	  src/femlib/Makefile.in, src/fflib/Makefile.in,
-	  src/glx/Makefile.in, src/ide/Makefile.in, src/iml/Makefile.in,
-	  src/lglib/Makefile.in, src/mpi/Makefile.in, src/nw/Makefile.in,
-	  src/std/Makefile.in, src/umfpack/Makefile.in,
-	  src/x11/Makefile.in:	correct ????  configure.ac under window
+	*  correct ????  configure.ac under window
 
 2005-01-07 17:05  hecht
 
-	* examples++/all.edp, examples++-tutorial/all.edp,
-	  src/fflib/lex.cpp:  correct expand string in macro
+	*  correct expand string in macro
 
 2005-01-07 15:55  hecht
 
-	* Makefile.in, config.h.in, configure, DOC/Makefile.in,
-	  download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/Makefile.in,
-	  download/umfpack/Makefile.in, examples++/Makefile.in,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  src/Makefile.in, src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/agl/Makefile.in, src/bamglib/Makefile.in,
-	  src/femlib/Makefile.in, src/fflib/Makefile.in,
-	  src/glx/Makefile.in, src/ide/Makefile.in, src/iml/Makefile.in,
-	  src/lglib/Makefile.in, src/mpi/Makefile.in, src/nw/Makefile.in,
-	  src/std/Makefile.in, src/umfpack/Makefile.in,
-	  src/x11/Makefile.in: add config.h.in
+	* add config.h.in
 
 2005-01-07 12:25  lehyaric
 
-	* Makefile.am: Cosmetic change
+	* Cosmetic change
 
 2005-01-07 11:50  hecht
 
-	* examples++/makeref.edp, src/fflib/problem.cpp: correct
-	  initialisation in solve in case of un set variable
+	* correct initialisation in solve in case of un set variable
 
 2005-01-06 21:58  hecht
 
-	* HISTORY, examples++/regtests.edp, examples++/regtests.m4,
-	  src/fflib/lex.cpp, src/fflib/lex.hpp, src/ide/cs.cpp:    rewrite
-	  the macro generation tool to be more to suppress some bug
+	*    rewrite the macro generation tool to be more to suppress some
+	  bug
 	     in argument subtition
 	     correct error in line numbering in case of newline in string
 	     cosmetic change in output
 
 2005-01-05 23:10  hecht
 
-	* HISTORY: update HISTORY file
+	* update HISTORY file
 
 2005-01-05 21:50  hecht
 
-	* src/fflib/problem.cpp: correct segmentation violation  error if
-	  some FE variable is un set before solving problem because we use
-	  this variable  to initialise data.
+	* correct segmentation violation  error if some FE variable is un
+	  set before solving problem because we use this variable  to
+	  initialise data.
 
 2005-01-04 16:58  hecht
 
-	* src/femlib/QuadratureFormular.cpp: continuing
-	  int1d(Th,3,qfe=qf1pElump)(
+	* continuing	   int1d(Th,3,qfe=qf1pElump)(
 
 2005-01-04 16:45  hecht
 
-	* HISTORY, examples++-bug/bug-arg-string.edp,
-	  src/femlib/QuadratureFormular.hpp, src/fflib/lgfem.cpp: add
-	  qf1pElump   new quadrature formular in int1d() ...
-
-2004-12-29 11:16  hecht
-
-	* HISTORY, configure, ff++.htmx, mkff-html.pl,
-	  examples++-tutorial/all.edp, src/fflib/lex.cpp,
-	  src/fflib/lex.hpp: add concat operator in macro generation #
-
-2004-12-21 18:24  hecht
-
-	* HISTORY, configure, configure.ac, mkff-html.pl: add mkff-html.pl
-	  file to update the web page.
-
-2004-12-17 17:22  lehyaric
-
-	* Makefile.in, WindowsPackage.m4, configure, configure.ac,
-	  download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/Makefile.in,
-	  download/umfpack/Makefile.in, examples++/Makefile.in,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  src/Makefile.in, src/Algo/Makefile.in, src/agl/Makefile.in,
-	  src/bamglib/Makefile.in, src/femlib/Makefile.in,
-	  src/fflib/Makefile.in, src/glx/Makefile.in, src/ide/Makefile.in,
-	  src/iml/Makefile.in, src/lglib/Makefile.in, src/mpi/Makefile.in,
-	  src/nw/Makefile.in, src/std/Makefile.in, src/x11/Makefile.in:
-	  Windows package including correction for Mingw -mthreads bug
-
-2004-12-17 15:40  lehyaric
-
-	* Makefile.in, configure, configure.ac, DOC/Makefile.in,
-	  download/Makefile.in, download/arpack/Makefile.in,
-	  download/blas/Makefile.in, download/fltk/.cvsignore,
-	  download/fltk/Makefile.am, download/fltk/Makefile.in,
-	  download/umfpack/Makefile.in, examples++/Makefile.in,
-	  examples++/regtests.edp, examples++-bug/Makefile.in,
-	  examples++-eigen/Makefile.in, examples++-load/Makefile.in,
-	  examples++-mpi/Makefile.in, examples++-other/Makefile.in,
-	  examples++-tutorial/Makefile.in, examples++-tutorial/all.edp,
-	  src/Makefile.in, src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/agl/Makefile.in, src/bamglib/Makefile.in,
-	  src/femlib/Makefile.in, src/fflib/Makefile.in,
-	  src/glx/Makefile.in, src/ide/Makefile.in, src/ide/images.hpp,
-	  src/iml/Makefile.in, src/lglib/Makefile.in, src/mpi/Makefile.in,
-	  src/nw/Makefile.in, src/std/Makefile.in, src/umfpack/Makefile.in,
-	  src/x11/Makefile.in: Bug solved: Random crashes in Windows GUI
-
-2004-12-17 11:17  lehyaric
-
-	* Makefile.am: Change naming conventions in package numbering
-
-2004-12-16 10:30  lehyaric
-
-	* Makefile.am, examples++-tutorial/all.edp: Added files to
-	  "clean-gen" goal
-
-2004-12-16 10:21  lehyaric
-
-	* Makefile.am: Added goal "clean-gen" to clean generated files
-	  which are included in the CVS repository (in case a technical
-	  conflict arises with "cvs update").
-
-2004-12-15 17:42  lehyaric
-
-	* Makefile.am, Makefile.in, acoptim.m4, configure, configure.ac,
-	  DOC/Makefile.in, debian/changelog, download/Makefile.in,
-	  download/arpack/Makefile.in, download/blas/Makefile.in,
-	  download/fltk/Makefile.in, download/umfpack/Makefile.in,
-	  examples++/Makefile.in, examples++-bug/Makefile.in,
-	  examples++-eigen/Makefile.in, examples++-load/Makefile.in,
-	  examples++-mpi/Makefile.in, examples++-other/Makefile.in,
-	  examples++-tutorial/Makefile.in, src/Makefile.in,
-	  src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/agl/Makefile.in, src/bamglib/Makefile.in,
-	  src/femlib/Makefile.in, src/fflib/Makefile.in,
-	  src/glx/Makefile.in, src/ide/Makefile.in, src/ide/cs.cpp,
-	  src/iml/Makefile.in, src/lglib/Makefile.in, src/mpi/Makefile.in,
-	  src/nw/Makefile.in, src/std/Makefile.in, src/umfpack/Makefile.in,
-	  src/x11/Makefile.in: Postscript output in FreeFem++-cs corrected.
-	  New $(OPTIM_TYPE) variable useful to name binary packages.  New
-	  $(PACKAGE_VERSION) variable to distinguish successive packages of
-	  the	     same FreeFem++ version.
-
-2004-12-11 15:25  hecht
-
-	* DOC/manual-full.tex, examples++-tutorial/all.edp,
-	  examples++-tutorial/shur-comp.edp, src/ide/Makefile.in: add one
-	  examples and load ide/makefile.in  file
-
-2004-12-07 17:26  hecht
-
-	* DOC/: Makefile.am, Makefile.in: put manual-full.pdf and remove
-	  manual-full.ps.gz in dist files
-
-2004-12-07 17:19  hecht
-
-	* HISTORY: adding change
-
-2004-12-07 16:47  hecht
-
-	* examples++-tutorial/all.edp, src/ide/Makefile.am: correct missing
-	  file in dist target in ide/Makefile.am CV
-	  ----------------------------------------------------------------------
-
-2004-12-07 15:46  hecht
-
-	* DOC/: Makefile.am, Makefile.in, pdfsync.sty: add pdfsync.sty
-
-2004-12-07 14:40  hecht
-
-	* Makefile.in, configure, ff++.htmx, update_www, DOC/Makefile.in,
-	  DOC/manual-full.tex, download/Makefile.in,
-	  download/arpack/Makefile.in, download/blas/Makefile.in,
-	  download/fltk/Makefile.in, download/umfpack/Makefile.in,
-	  examples++/Makefile.in, examples++/all.edp,
-	  examples++-bug/Makefile.in, examples++-eigen/Makefile.in,
-	  examples++-load/Makefile.in, examples++-mpi/Makefile.in,
-	  examples++-other/Makefile.in, examples++-tutorial/Makefile.in,
-	  examples++-tutorial/all.edp,
-	  examples++-tutorial/mat_interpol.edp,
-	  examples++-tutorial/sparse-cmatrix.edp,
-	  examples++-tutorial/sparse-matrix.edp, src/Makefile.in,
-	  src/Algo/Makefile.in, src/Graphics/Makefile.in,
-	  src/agl/Makefile.in, src/bamglib/Makefile.in,
-	  src/femlib/Makefile.in, src/femlib/MatriceCreuse.hpp,
-	  src/femlib/RNM.hpp, src/fflib/Makefile.in, src/fflib/lgfem.cpp,
-	  src/fflib/lgmat.cpp, src/fflib/problem.hpp, src/glx/Makefile.in,
-	  src/ide/Makefile.in, src/iml/Makefile.in, src/lglib/Makefile.in,
-	  src/mpi/Makefile.in, src/nw/Makefile.in, src/std/Makefile.in,
-	  src/umfpack/Makefile.in, src/x11/Makefile.in: correct bug in
-	  LinearGC change name interplotematrix in interpolate
-
-2004-12-06 16:17  lehyaric
-
-	* .cvsignore, Makefile.am, Makefile.in, configure, configure.ac,
-	  DOC/.cvsignore, DOC/Makefile.am, DOC/Makefile.in,
-	  DOC/plots/.cvsignore, debian/.cvsignore, download/.cvsignore,
-	  download/Makefile.in, download/arpack/.cvsignore,
-	  download/arpack/Makefile.in, download/blas/.cvsignore,
-	  download/blas/Makefile.am, download/blas/Makefile.in,
-	  download/fltk/.cvsignore, download/fltk/Makefile.in,
-	  download/umfpack/.cvsignore, download/umfpack/Makefile.in,
-	  examples++/.cvsignore, examples++/Makefile.in,
-	  examples++/makeref.edp, examples++-bug/.cvsignore,
-	  examples++-bug/Makefile.in, examples++-eigen/.cvsignore,
-	  examples++-eigen/Makefile.in, examples++-load/.cvsignore,
-	  examples++-load/Makefile.in, examples++-mpi/.cvsignore,
-	  examples++-mpi/Makefile.in, examples++-other/.cvsignore,
-	  examples++-other/Makefile.in, examples++-tutorial/.cvsignore,
-	  examples++-tutorial/Makefile.in, src/.cvsignore, src/Makefile.in,
-	  src/Algo/.cvsignore, src/Algo/Makefile.in,
-	  src/Graphics/.cvsignore, src/Graphics/Makefile.in,
-	  src/agl/.cvsignore, src/agl/Makefile.in, src/bamglib/.cvsignore,
-	  src/bamglib/Makefile.in, src/femlib/.cvsignore,
-	  src/femlib/Makefile.in, src/fflib/.cvsignore,
-	  src/fflib/Makefile.in, src/glx/.cvsignore, src/glx/Makefile.in,
-	  src/ide/.cvsignore, src/ide/Makefile.in, src/iml/.cvsignore,
-	  src/iml/Makefile.in, src/lglib/.cvsignore, src/lglib/Makefile.in,
-	  src/mpi/.cvsignore, src/mpi/Makefile.in, src/nw/.cvsignore,
-	  src/nw/Makefile.in, src/std/.cvsignore, src/std/Makefile.in,
-	  src/umfpack/.cvsignore, src/umfpack/Makefile.in,
-	  src/x11/.cvsignore, src/x11/Makefile.in: "make dist" does not try
-	  and include BLAS source files any more configure script and
-	  makefile.in are included in CVS (so that the users	of
-	  anonymous CVS can recompile without automake or autoconf)
-
-2004-12-03 15:27  lehyaric
-
-	* .cvsignore, Makefile.am, configure.ac, examples++/regtests.edp,
-	  examples++-tutorial/all.edp: Include kernel and libc versions in
-	  linux static package name
-
-2004-12-03 11:48  lehyaric
-
-	* Makefile.am: Wording change
-
-2004-12-02 13:51  lehyaric
-
-	* WindowsPackage.m4, examples++-tutorial/all.edp,
-	  src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp: New package for
-	  Windows done
-
-2004-12-02 13:26  lehyaric
-
-	* examples++/: aadaptation.edp, all.edp, ref.edp, regtests.m4:
-	  Changed reference value for regression tests
-
-2004-12-02 12:34  lehyaric
-
-	* examples++/Makefile.am, examples++-eigen/Makefile.am,
-	  examples++-load/Makefile.am, examples++-other/Makefile.am,
-	  examples++-tutorial/Makefile.am, examples++-tutorial/all.edp:
-	  Regression tests suite was not running. Corrected.
-
-2004-12-02 12:24  lehyaric
-
-	* src/: ide/cs.cpp, std/.cvsignore: FreeFem++-cs works on MacOSX
-	  (uses named semaphores)
-
-2004-12-02 11:40  lehyaric
-
-	* .cvsignore, configure.ac, examples++/all.edp,
-	  examples++-tutorial/all.edp, src/.cvsignore, src/agl/.cvsignore,
-	  src/ide/.cvsignore, src/ide/Makefile.am, src/ide/cs.cpp,
-	  src/nw/.cvsignore, src/std/Makefile.am, src/x11/Makefile.am: X11
-	  shared libraries dependencies removed on Mac OS X There is still
-	  a problem running FreeFem++-cs because of semaphores (they are
-	  not available under Mac OS X)
-
-2004-12-02 10:12  lehyaric
-
-	* regtests.sh, examples++/Makefile.am, examples++/ref.edp,
-	  examples++-eigen/Makefile.am, examples++-load/Makefile.am,
-	  examples++-other/Makefile.am, examples++-tutorial/Makefile.am:
-	  Added FreeFem++-cs to visual regression tests Changed reference
-	  value for examples++/NSP1P1.edp
-
-2004-12-01 18:10  lehyaric
-
-	* configure.ac, examples++/all.edp, examples++-tutorial/all.edp,
-	  examples++-tutorial/convect-apt.edp, examples++-tutorial/ref.edp,
-	  examples++-tutorial/regtests.m4, src/glx/Makefile.am,
-	  src/ide/Makefile.am, src/std/Makefile.am, src/x11/Makefile.am: -
-	  Tuned regression tests in examples++-tutorial (convect-apt.edp
-	  case) - Removed all X11 libraries dependencies from linking
-	  commands where they	     were not necessary. This avoids some
-	  runtime dependencies on the	     corresponding shared
-	  libraries.
-
-2004-11-30 22:00  hecht
-
-	* src/femlib/MatriceCreuse.hpp: remove operation g - A*x -b ; =>
-	  bug in opt version in congugate gradient 2 routine
-
-2004-11-30 17:18  lehyaric
-
-	* configure.ac, src/ide/Makefile.am, src/ide/cs.cpp,
-	  src/ide/windres.h, src/ide/windres.rc: Application icons now work
-	  on Windows
-
-2004-11-30 17:08  hecht
-
-	* examples++-tutorial/periodic4.edp: change 1 un 1. du to complex
-	  varf (ambiguity)
-
-2004-11-30 17:00  hecht
-
-	* src/femlib/CheckPtr.cpp: correct small compile error
-
-2004-11-30 14:26  lehyaric
-
-	* src/ide/windres.rc: More descriptive comments in resources file
-
-2004-11-30 14:14  lehyaric
-
-	* src/ide/: logo2.ico, windres.rc: Resources for Windows icons
-
-2004-11-30 14:00  lehyaric
-
-	* src/ide/: cs.cpp, images.hpp, logo2.bmp, logo2.png, logo2.xpm:
-	  Another icon (which does not need transparency) for FreeFem++-cs
-
-2004-11-30 13:43  lehyaric
-
-	* WindowsPackage.m4, configure.ac, logo-gui.ico, logo-gui.png,
-	  src/ide/cs.cpp, src/ide/images.hpp, src/ide/logo.ico,
-	  src/ide/logo.png: Added X-Windows icon to FreeFem++-cs
-
-2004-11-29 22:23  hecht
-
-	* DOC/manual-full.tex, examples++-tutorial/adaptindicatorP2.edp,
-	  examples++-tutorial/all.edp,
-	  examples++-tutorial/mat_interpol.edp, src/femlib/CheckPtr.cpp,
-	  src/fflib/lgmat.cpp, src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp,
-	  src/lglib/lg.y: Correction dans matrixinterpole
-
-2004-11-26 17:06  lehyaric
-
-	* src/ide/cs.cpp: Recompiled on Linux (after new developments on
-	  Windows)
-
-2004-11-26 16:54  lehyaric
-
-	* debian/changelog: New debian package (1.44-8)
-
-2004-11-26 16:52  lehyaric
-
-	* debian/control: Remove -mpich version from Debian packages since
-	  mpich Debian unstable package is broken.
-
-2004-11-26 15:18  lehyaric
-
-	* WindowsPackage.m4, logo-gui.ico, logo-gui.png, logo.bmp,
-	  examples++/all.edp, examples++-tutorial/all.edp: Windows
-	  packaging modified to improve icons management
-
-2004-11-26 11:15  lehyaric
-
-	* WindowsPackage.m4, src/ide/cs.cpp: Including FreeFem++-cs in the
-	  Windows packaging
-
-2004-11-25 16:25  lehyaric
-
-	* configure.ac, src/ide/cs.cpp: FreeFem++-cs compiles on Windows
-	  _without_ Cygwin
-
-2004-11-25 10:35  lehyaric
-
-	* examples++/all.edp, examples++-tutorial/all.edp, src/ide/cs.cpp:
-	  Recompiled on Linux (Debian unstable).
-
-2004-11-24 18:03  lehyaric
-
-	* src/ide/cs.cpp: FreeFem++-cs currently being recompiled. Not done
-	  yet.
-
-2004-11-24 14:46  lehyaric
-
-	* Makefile.am, WindowsPackage.m4, configure.ac, examples++/all.edp,
-	  examples++-tutorial/all.edp, src/Graphics/Pcrgraph.cpp,
-	  src/ide/.cvsignore, src/ide/cs.cpp: FreeFem++-cs currently being
-	  compiled without Cygwin (because of license problems)
-
-2004-11-23 16:51  lehyaric
-
-	* WindowsPackage.m4: We need cygwin1.dll for FreeFem++-cs
-
-2004-11-23 16:39  lehyaric
-
-	* Makefile.am, WindowsPackage.m4, configure.ac: FreeFem++-cs works
-	  on Windows
-
-2004-11-23 11:52  lehyaric
-
-	* src/ide/cs.cpp: Finding best size parameters for GUI interface
-
-2004-11-23 11:06  lehyaric
-
-	* debian/CopyToServer.sh: Cosmetic changes
-
-2004-11-23 10:42  lehyaric
-
-	* src/ide/cs.cpp: Changed a few labels to make them easier to
-	  understand.
-
-2004-11-22 17:00  lehyaric
-
-	* Makefile.am, configure.ac, copysharedlibs.sh, src/glx/.cvsignore,
-	  src/nw/.cvsignore: New binary package for Linux, containing
-	  static executables (configure option --enable-static).
-
-2004-11-22 15:09  lehyaric
-
-	* .cvsignore, Makefile.am: New Linux binary package
-
-2004-11-22 14:11  lehyaric
-
-	* Makefile.am, configure.ac, download/blas/Makefile.am,
-	  src/glx/Makefile.am, src/ide/.cvsignore, src/ide/Makefile.am,
-	  src/mpi/Makefile.am, src/nw/Makefile.am, src/std/.cvsignore,
-	  src/std/Makefile.am, src/x11/Makefile.am: Added new configure
-	  option --enable-static to have no shared library in the final
-	  executables.
-
-2004-11-19 15:41  lehyaric
-
-	* debian/: .cvsignore, freefem++-mpi.dirs, freefem++-mpi.install,
-	  freefem++-mpi.links, freefem++-mpi.postinst, freefem++-mpi.prerm,
-	  freefem++-mpich.dirs, freefem++-mpich.install,
-	  freefem++-mpich.links, freefem++-mpich.postinst,
-	  freefem++-mpich.prerm: Renamed MPI Debian package from -mpi to
-	  -mpich to reflect the fact that we chose mpich over lam for the
-	  binary parallel version
-
-2004-11-19 14:24  lehyaric
-
-	* src/ide/cs.cpp: Corrected a bug in the IDE, where FLTK would lock
-	  when an alert was displayed.
-
-2004-11-19 12:29  lehyaric
-
-	* configure.ac, debian/changelog, debian/control, debian/rules,
-	  examples++/regtests.edp: Added rules to create a Debian package
-	  with mpich
-
-2004-11-19 11:15  lehyaric
-
-	* src/ide/cs.cpp: Added "macro" in the list of highlighted keywords
-
-2004-11-19 10:57  lehyaric
-
-	* debian/control: More precise build dependencies for Debian
-	  package
-
-2004-11-18 11:05  lehyaric
-
-	* acoptim.m4: Added profiling option for configure.ac
-
-2004-11-18 11:03  lehyaric
-
-	* debian/: CopyToServer.sh, apt-ftparchive.conf, changelog: Added
-	  possibility to create separate packages for Debian testing and
-	  unstable.
-
-2004-11-17 15:37  lehyaric
-
-	* debian/: changelog, control: Default Debian package set to -x11
-
-2004-11-17 14:28  lehyaric
-
-	* TODO: Updated IDE TODO list
-
-2004-11-17 12:13  lehyaric
-
-	* debian/CopyToServer.sh, debian/changelog, debian/control,
-	  debian/freefem++-cs.install, debian/shlibs.local, src/ide/cs.cpp:
-	  Debian package (unstable) for FreeFem++ is ready
-
-2004-11-16 17:36  lehyaric
-
-	* src/ide/cs.cpp: Reduce the number of fl_alert() that come up at
-	  one time. There should ever be only one.
-
-2004-11-16 17:18  lehyaric
-
-	* configure.ac, debian/control, debian/rules: Debian packages
-	  curently being built. Not fully operational yet.
-
-2004-11-16 15:39  lehyaric
-
-	* DOC/docFFGUI.tex: Makes doc up-to-date with IDE.
-
-2004-11-16 15:35  lehyaric
-
-	* src/ide/cs.cpp: Added a mode where clicking with the mouse in the
-	  graphical window resumes a computation (like in the standard
-	  FreeFem++).
-
-2004-11-16 15:21  lehyaric
-
-	* README_ARPACK, configure.ac, debian/.cvsignore,
-	  debian/FreeFem++.1, debian/changelog, debian/control,
-	  debian/freefem++-cs.dirs, debian/freefem++-cs.install,
-	  debian/freefem++-cs.links, debian/freefem++-cs.postinst,
-	  debian/freefem++-cs.prerm, debian/freefem++-doc.doc-base,
-	  debian/freefem++-doc.docs, debian/rules,
-	  src/config_freefem_v3.hpp, src/config_freefem_v3_g.hpp,
-	  src/bamglib/meshtype.h, src/femlib/mshptg.cpp, src/ide/cs.cpp:
-	  Changed macro LONG_LONG to BAMG_LONG_LONG to avoid any
-	  interference with MPI.  Work in progress on Debian packaging.
-	  Work in progress on client/server IDE Pause/Resume buttons.
-
-2004-11-16 09:25  hecht
-
-	* src/fflib/: lgfem.cpp, problem.hpp: correct problem in
-	  integration of complex valued function
-
-2004-11-15 15:50  lehyaric
-
-	* TODO, DOC/.cvsignore, DOC/docFFGUI.tex, DOC/manual-full.tex,
-	  DOC/figures/FreeFem++-cs.eps, src/ide/cs.cpp: A paragraph about
-	  FreeFem++-cs has been added in the documentation.  A bug where
-	  FreeFem++-cs did not run FreeFem++-cs-server properly has been
-	  corrected.  A FreeFem++-cs screenshot for the documentation has
-	  been added only in .eps format. There may be further treatments
-	  necessary to add a pdf version.
-
-2004-11-15 13:56  lehyaric
-
-	* examples++/all.edp, examples++-tutorial/all.edp, src/ide/cs.cpp:
-	  FreeFem++-cs compiles on Cedre (Red-Hat Enterprise)
-
-2004-11-15 10:27  lehyaric
-
-	* TODO: Added TODO list for client/server IDE.
-
-2004-11-15 09:56  hecht
-
-	* DOC/manual-full.tex: orthographe in manual-full
-
-2004-11-13 18:09  lehyaric
-
-	* src/ide/cs.cpp: Added a new highlighting component for function
-	  parameters like "err=".
-
-2004-11-12 17:15  lehyaric
-
-	* src/ide/cs.cpp: Corrected several bugs noticed by JF Lague in the
-	  IDE: - "savemesh" keyword was not highlighted - "wait=1" in plots
-	  was not operational - meshes were not always displayed properly
-
-2004-11-12 10:53  lehyaric
-
-	* src/ide/cs.cpp: Color-coding bugs in IDE corrected.  IDE can now
-	  try and open several successive TCP ports if the first one has a
-	  problem.
-
-2004-11-12 08:31  hecht
-
-	* src/: femlib/MatriceCreuse.hpp, femlib/MatriceCreuse_tpl.hpp,
-	  fflib/lgfem.cpp, fflib/problem.cpp: cadna intergration
-	  continuing.
-
-2004-11-11 20:23  lehyaric
-
-	* src/ide/Makefile.am: IDE compiles on Linux again.
-
-2004-11-11 19:45  lehyaric
-
-	* configure.ac, src/ide/Makefile.am, src/ide/cs.cpp,
-	  src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp: Progressively
-	  debugging the IDE and making it usable.
-
-2004-11-10 21:27  hecht
-
-	* src/ide/Makefile.am: remove unused variable in
-	  src/ide/Makefile.am
-
-2004-11-10 20:12  lehyaric
-
-	* configure.ac: Some corrections for Cygwin configuration of the
-	  IDE.
-
-2004-11-10 12:38  lehyaric
-
-	* Makefile.am, configure.ac, src/ide/cs.cpp: Integrating
-	  Windows+Cygwin changes back into Linux.  configure now accepts
-	  the option: --disable-cygwin
-
-2004-11-10 10:48  lehyaric
-
-	* configure.ac, src/ide/cs.cpp: [no log message]
-
-2004-11-09 16:54  lehyaric
-
-	* configure.ac, download/blas/Makefile.am: There was a problem with
-	  downloaded BLAS source: it was included in dependencies even when
-	  downloading was not necessary. Corrected.
-
-2004-11-09 16:23  hecht
-
-	* configure.ac, examples++-tutorial/all.edp,
-	  src/femlib/MatriceCreuse.hpp, src/femlib/MatriceCreuse_tpl.hpp,
-	  src/fflib/lgfem.cpp, src/fflib/problem.cpp,
-	  src/fflib/problem.hpp: add interface with cadna
-
-2004-11-09 15:47  lehyaric
-
-	* configure.ac, download/blas/Makefile.am,
-	  download/fltk/Makefile.am, src/ide/Makefile.am, src/ide/cs.cpp,
-	  src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp: Windows version of
-	  FreeFem++ client/server IDE currently being developed.
-
-2004-11-09 10:42  lehyaric
-
-	* src/ide/Makefile.am: Added MacOS resources to IDE.
-
-2004-11-08 17:21  lehyaric
-
-	* README, configure.ac, download/fltk/.cvsignore,
-	  download/fltk/Makefile.am, src/ide/Makefile.am, src/ide/cs.cpp:
-	  FreeFem++ compiles on MacOSX. But it has not been tested yet.
-
-2004-11-08 15:02  lehyaric
-
-	* Makefile.am, configure.ac, download/Makefile.am,
-	  download/fltk/Makefile.am, src/Makefile.am,
-	  src/fflib/AFunction.cpp, src/fflib/AFunction.hpp,
-	  src/ide/.cvsignore, src/ide/Makefile.am, src/ide/cs.cpp,
-	  src/ide/ide.cpp, src/ide/images.hpp, src/lglib/lg.tab.cpp,
-	  src/lglib/lg.y: First stable version for the Integrated
-	  Development Environment (client/server version). Merged from the
-	  graphical user interface branch (which is useless now).  Works on
-	  Linux. Macintosh and Windows versions still to come.
-
-2004-11-05 20:58  hecht
-
-	* Makefile.am, FreeFem++.app/Contents/Info.plist,
-	  examples++-tutorial/all.edp: coorect bug in FreeFem++.app the
-	  plist file was wrong.x
-
-2004-11-05 17:55  lehyaric
-
-	* src/ide/cs.cpp: More tools are now working in the client/server
-	  IDE.
-
-2004-11-05 17:22  hecht
-
-	* FreeFem++.app/Contents/Resources/Contents/Info.plist: rm
-	  ./FreeFem++.app/Contents/Resources/Contents/Info.plist
-
-2004-11-05 15:01  hecht
-
-	* ff++.htmx, install-www, update_www: add install www files
-
-2004-11-04 17:26  lehyaric
-
-	* configure.ac, src/ide/Makefile.am, src/ide/cs.cpp: The zoom
-	  facility is operational.
-
-2004-11-04 11:10  lehyaric
-
-	* src/ide/: cs.cpp, images.hpp: The client/server IDE graphics are
-	  now of the same quality than the original FreeFem++ version.
-	  Still to do: interactive tools (like zoom) and server process
-	  control (pause and stop).
-
-2004-11-04 11:05  hecht
-
-	* HISTORY, install-www, DOC/manual-full.tex: small modif  for the
-	  look
-
-2004-11-04 10:38  hecht
-
-	* HISTORY, DOC/manual-full.tex, examples++/D2.edp,
-	  examples++/Richard.edp, examples++/bilap.edp,
-	  examples++/wafer-heating-laser-axi.edp,
-	  examples++-tutorial/algo.edp, examples++-tutorial/all.edp,
-	  examples++-tutorial/movemesh.edp, src/femlib/MatriceCreuse.hpp,
-	  src/femlib/RNM.hpp, src/fflib/lgfem.cpp: corret small problem in
-	  LinearCG LinearGMRES
-
-2004-11-02 16:27  lehyaric
-
-	* src/ide/: cs.cpp, images.hpp: Currently debugging
-	  FreeFem++/IDE/client-server and adding icons.
-
-2004-11-01 17:05  hecht
-
-	* examples++-tutorial/: ref.edp, regtests.m4: continuing regtest
-
-2004-11-01 17:00  hecht
-
-	* examples++-tutorial/: ref.edp, regtests.m4: correct stability of
-	  regtest
-
-2004-11-01 16:29  hecht
-
-	* examples++/: Richard.edp, makeref.edp, ref.edp, regtests.edp,
-	  regtests.m4: correct regtest in examples++
-
-2004-11-01 15:22  hecht
-
-	* examples++-tutorial/: algo.edp, algowithmacro.edp, all.edp,
-	  blakschol.edp, ref.edp, regtests.m4: correct sensibility problem
-	  in regtest value
-
-2004-11-01 14:34  hecht
-
-	* HISTORY, configure.ac: beginning  of 1.44 version
-
-2004-10-31 21:45  hecht
-
-	* HISTORY, examples++-tutorial/all.edp, src/bamglib/Mesh2.h,
-	  src/bamglib/MeshGeom.cpp, src/fflib/throwassert.hpp: correct
-	  probleme in periodic adapted mesh.
-
-2004-10-29 17:31  lehyaric
-
-	* src/ide/cs.cpp: The client-server program has reached the same
-	  level of functionalities as the IDE without sockets: it can run
-	  FreeFem++ once and display its graphical and textual output.
-
-2004-10-28 18:18  lehyaric
-
-	* configure.ac, download/Makefile.am, download/fltk/Makefile.am,
-	  src/ide/cs.cpp: IDE client currently being debugged. IDE server
-	  not connected yet.
-
-2004-10-27 16:16  lehyaric
-
-	* Makefile.am, configure.ac, src/ide/.cvsignore,
-	  src/ide/Makefile.am, src/ide/cs.cpp: Client/server IDE compiles,
-	  but the server process does not run yet.
-
-2004-10-25 17:29  lehyaric
-
-	* Makefile.am, configure.ac, src/ide/Makefile.am, src/ide/cs.cpp:
-	  client/server framework done. But the program is still far from
-	  compiling.
-
-2004-10-25 12:35  lehyaric
-
-	* src/ide/cs.cpp: IDE client/server version currently being
-	  developed. Not working yet.  Current development effort:
-	  communication socket (TCP) between server and client.
-
-2004-10-22 22:53  hecht
-
-	* examples++/ref.edp, examples++-load/Makefile.am,
-	  examples++-load/load.link, examples++-tutorial/all.edp,
-	  examples++-tutorial/ref.edp: correct the sparce-cmatrix.edp
-	  problem (bug in copy construct of MorseMatrice)
-
-2004-10-22 22:13  hecht
-
-	* examples++-tutorial/sparse-cmatrix.edp,
-	  src/femlib/MatriceCreuse_tpl.hpp: correct plus in copy of real
-	  matrix to complex Z CV
-	  ----------------------------------------------------------------------
-
-2004-10-22 20:55  hecht
-
-	* src/: femlib/MatriceCreuse_tpl.hpp, fflib/lgmat.cpp: try correct
-	  probleme with sparce_cmatrix.edp on hydre
-
-2004-10-22 20:50  lehyaric
-
-	* src/ide/cs.cpp: Client/server version currently being developed.
-	  Still not operational.
-
-2004-10-22 20:49  lehyaric
-
-	* src/ide/cs.cpp: Client/server version currently being developed.
-	  Not operational yet.
-
-2004-10-22 17:40  hecht
-
-	* examples++-tutorial/all.edp, src/femlib/MatriceCreuse_tpl.hpp:
-	  track a bug in complex matrix
-
-2004-10-22 13:17  hecht
-
-	* Makefile.am: correct spelling in Makefile.am
-
-2004-10-22 13:13  hecht
-
-	* Makefile.am, examples++/Makefile.am, examples++/all.edp,
-	  examples++/makeref.edp, examples++-tutorial/Makefile.am,
-	  examples++-tutorial/all.edp, examples++-tutorial/regtests.m4:
-	  correct missing file in dist TARGET
-
-2004-10-21 23:30  hecht
-
-	* regtests.sh: correct LD_LIBRARY_PATH in regtests.sh
-
-2004-10-21 19:53  hecht
-
-	* src/: femlib/MatriceCreuse_tpl.hpp, fflib/problem.hpp:
-	  correct compilation probleme with g++-3.4
-
-2004-10-21 17:19  lehyaric
-
-	* configure.ac, src/Algo/lgalgo.cpp, src/Eigen/eigenvalue.cpp,
-	  src/fflib/AFunction.cpp, src/fflib/AFunction.hpp,
-	  src/fflib/lgfem.cpp, src/fflib/lgmesh.cpp, src/ide/Makefile.am,
-	  src/ide/cs.cpp, src/lglib/lg.tab.cpp, src/mpi/parallelempi.cpp:
-	  Client/server version of FreeFEM++ IDE currently being
-	  implemented.
-
-2004-10-21 11:04  hecht
-
-	* DOC/figures/: V-shape.eps, V-shape.pdf, v-shape.eps, v-shape.pdf:
-	  olve pb of case in filename if figure dir
-
-2004-10-21 10:51  hecht
-
-	* README_CVS: add info in README_CVS  update -d
-
-2004-10-21 10:47  hecht
-
-	* WindowsPackage.m4: full manual continuing
-
-2004-10-21 10:39  lehyaric
-
-	* src/: Algo/lgalgo.cpp, Eigen/eigenvalue.cpp, fflib/AFunction.cpp,
-	  fflib/AFunction.hpp, fflib/lgfem.cpp, fflib/lgmesh.cpp,
-	  ide/ide.cpp, lglib/lg.tab.cpp, lglib/lg.y, mpi/parallelempi.cpp:
-	  Reverts object "Global" back to static storage temporarily, while
-	  Frederic is recoding it to split the initialisation step and the
-	  execution step.
-
-2004-10-21 10:37  hecht
-
-	* Makefile.am, install-www: change  default manual to manual-full
-
-2004-10-21 09:56  hecht
-
-	* DOC/figures/disk_sample.ps: add forgetted file
-
-2004-10-21 09:55  hecht
-
-	* DOC/: Makefile.am, manual-full.tex: correct ps generation n tag
-
-2004-10-21 08:26  hecht
-
-	* src/: femlib/MatriceCreuse_tpl.hpp, fflib/lgfem.cpp,
-	  fflib/problem.cpp, fflib/problem.hpp: correct problem
-	  AssembleVarForm compile with -O3 in hydre
-
-2004-10-20 17:26  lehyaric
-
-	* debian/changelog, src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp:
-	  Updates for building debian packages.
-
-2004-10-20 13:52  hecht
-
-	* src/femlib/MatriceCreuse.hpp: correct print in UMFPack driver
-
-2004-10-20 12:21  lehyaric
-
-	* src/ide/ide.cpp: The IDE does not crash anymore when FreeFEM++ is
-	  run multiple times, but FreeFEM++ refuses to scan a program more
-	  than once because some statically allocated objects like "Global"
-	  refuse to be initialized twice.
-
-2004-10-20 12:01  hecht
-
-	* HISTORY, examples++-tutorial/FE.edp, src/fflib/lgfem.cpp: add
-	  inquire of FE space connectivite (see HISTRY file)
-
-2004-10-19 23:31  hecht
-
-	* DOC/manual-full.tex, examples++-bug/aaa.edp,
-	  examples++-tutorial/FE.edp, src/femlib/MatriceCreuse.hpp,
-	  src/femlib/MatriceCreuse_tpl.hpp, src/femlib/RNM.hpp,
-	  src/femlib/RNM_tpl.hpp, src/fflib/AFunction.hpp,
-	  src/fflib/lgfem.cpp, src/fflib/lgmat.cpp, src/fflib/problem.cpp,
-	  src/fflib/problem.hpp, src/lglib/lg.tab.cpp, src/lglib/lg.y:
-	  correct bug in UMFPACK driver + improvement
-
-2004-10-19 15:53  lehyaric
-
-	* src/ide/ide.cpp: Standard cout hidden in the FreeFEM++ source
-	  code are redirected to an IDE widget.
-
-2004-10-18 15:55  lehyaric
-
-	* src/ide/ide.cpp: The editor window displays color-coded keywords
-	  correctly.  More buttons have been added to the editor and
-	  graphics contexts. But not all of them work yet.
-
-2004-10-15 16:57  lehyaric
-
-	* src/: Makefile.am, ide/ide.cpp, lglib/lg.tab.cpp: The IDE is
-	  programmed and compiled, but not running yet.
-
-2004-10-13 21:49  hecht
-
-	* DOC/manual-full.tex, src/fflib/lex.cpp, src/fflib/lex.hpp:
-	  correct line numbering probleme (lose the first line)
-
-2004-10-13 18:12  hecht
-
-	* src/femlib/: ConjuguedGradrientNL.cpp, MatriceCreuse.hpp: remove
-	  accent in GC routine
-
-2004-10-12 21:38  hecht
-
-	* src/fflib/lgfem.cpp: reput previous version (wrong test)
-
-2004-10-12 20:59  hecht
-
-	* DOC/manual-full.tex, examples++-tutorial/sparse-cmatrix.edp,
-	  src/femlib/MatriceCreuse.hpp, src/femlib/MatriceCreuse_tpl.hpp,
-	  src/femlib/RNM.hpp, src/femlib/RNM_tpl.hpp,
-	  src/fflib/AFunction.cpp, src/fflib/lgfem.cpp: correct probleme in
-	  A*x for full matrix and correct probleme in u' is the on complex
-	  vector the conj(u^t)
-
-2004-10-12 12:01  lehyaric
-
-	* src/ide/ide.cpp: The IDE editor can load a FreeFEM++ file and
-	  show it with colors (although not all colors are rightly placed).
-
-2004-10-12 07:28  hecht
-
-	* src/fflib/lgmat.cpp: add file src/fflib/lgmat.cpp
-
-2004-10-11 21:31  hecht
-
-	* HISTORY, Makefile.am, examples++-tutorial/sparse-cmatrix.edp,
-	  src/femlib/MatriceCreuse.hpp, src/femlib/MatriceCreuse_tpl.hpp,
-	  src/femlib/RNM.hpp, src/femlib/gmres.hpp,
-	  src/fflib/AFunction.cpp, src/fflib/AFunction.hpp,
-	  src/fflib/lgfem.cpp, src/fflib/lgfem.hpp, src/fflib/lgsolver.hpp,
-	  src/fflib/problem.cpp, src/fflib/problem.hpp,
-	  src/lglib/lg.tab.cpp, src/lglib/lg.y: complex pde , FE complex
-	  function, add complex matrix , first test is now working see
-	  FEComplex.edp and sparse-cmatrix.edp
-
-2004-10-08 18:39  hecht
-
-	* FreeFem++.mcp, src/femlib/MatriceCreuse.hpp,
-	  src/femlib/MatriceCreuse_tpl.hpp, src/femlib/RNM.hpp,
-	  src/femlib/fem.hpp, src/fflib/Makefile.am, src/fflib/lgfem.cpp,
-	  src/fflib/lgfem.hpp, src/fflib/lgsolver.hpp,
-	  src/fflib/problem.cpp, src/fflib/problem.hpp: complex matrix
-	  continuing
-
-2004-10-08 12:21  lehyaric
-
-	* Makefile.am, configure.ac, src/ide/.cvsignore,
-	  src/ide/Makefile.am, src/ide/ide.cpp, src/lglib/lg.tab.cpp,
-	  src/lglib/lg.tab.hpp: First model of an Integrated Development
-	  Environment for FreeFem++.  The main window layout is already in
-	  place.
-
-2004-10-06 22:24  hecht
-
-	* examples++-tutorial/FEComplex.edp: add a pde complex example
-
-2004-10-06 22:22  hecht
-
-	* src/: femlib/DOperator.hpp, fflib/lgfem.cpp, fflib/problem.cpp,
-	  fflib/problem.hpp: pde complex , continuing:	 first test is now
-	  working
-
-2004-10-05 21:29  hecht
-
-	* src/: femlib/FESpace.hpp, femlib/MatriceCreuse.hpp,
-	  femlib/MatriceCreuse_tpl.hpp, femlib/RNM.hpp, femlib/RNM_tpl.hpp,
-	  fflib/AFunction.cpp, fflib/AFunction2.cpp, fflib/lgfem.cpp,
-	  fflib/lgsolver.hpp, fflib/problem.cpp, fflib/problem.hpp,
-	  lglib/lg.tab.cpp, lglib/lg.y: complex pde probleme   ( first
-	  test) no validation
-
-2004-10-05 15:30  lehyaric
-
-	* Makefile.am: Added reduced compilation goal "quick" for
-	  development purposes.
-
-2004-10-04 10:22  hecht
-
-	* src/: femlib/MatriceCreuse.hpp, fflib/AFunction.cpp,
-	  fflib/lgsolver.hpp, fflib/problem.cpp, fflib/problem.hpp: add
-	  complex edp (continued)
-
-2004-09-30 14:50  hecht
-
-	* configure.ac, DOC/manual-full.tex, examples++-tutorial/FE.edp,
-	  src/femlib/FESpace.hpp, src/femlib/RNM.hpp,
-	  src/fflib/AFunction.cpp, src/fflib/AFunction.hpp,
-	  src/fflib/lgfem.cpp, src/fflib/lgfem.hpp, src/fflib/problem.hpp,
-	  src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp, src/lglib/lg.y: add
-	  complex FE function
-
-2004-09-28 10:58  hecht
-
-	* DOC/: FFF.sty, Makefile.am, addfe.tex, manual-full.tex,
-	  styles.sty, figures/1stCOD.eps, figures/1stCOD.pdf,
-	  figures/1stCOD2.eps, figures/1stCOD2.pdf, figures/1stPhoto.eps,
-	  figures/1stPhoto.pdf, figures/1stPhoto2.eps,
-	  figures/1stPhoto2.pdf, figures/BellInit.eps,
-	  figures/BellInit.pdf, figures/BellLast.eps, figures/BellLast.pdf,
-	  figures/Bezier.eps, figures/Bezier.pdf, figures/Cardioid.eps,
-	  figures/Cardioid.pdf, figures/Cassini.eps, figures/Cassini.pdf,
-	  figures/Cycloid1.eps, figures/Cycloid1.pdf, figures/Cycloid2.eps,
-	  figures/Cycloid2.pdf, figures/Engine.eps, figures/Engine.pdf,
-	  figures/L-shape.eps, figures/L-shape.pdf, figures/L-shape2.eps,
-	  figures/L-shape2.pdf, figures/LastCOD.eps, figures/LastCOD.pdf,
-	  figures/LastCOD2.eps, figures/LastCOD2.pdf,
-	  figures/LastPhoto.eps, figures/LastPhoto.pdf,
-	  figures/LastPhoto2.eps, figures/LastPhoto2.pdf,
-	  figures/NACA0012.eps, figures/NACA0012.pdf, figures/P0.jpg,
-	  figures/P0P1P2.jpg, figures/P0P1P2P1nc.eps,
-	  figures/P0P1P2P1nc.pdf, figures/P1.jpg, figures/P1P2.eps,
-	  figures/P1P2.pdf, figures/P1b.jpg, figures/P1nc.gif,
-	  figures/P1nc.jpg, figures/P2.jpg, figures/SmileFace.eps,
-	  figures/SmileFace.pdf, figures/ThreePoint.eps,
-	  figures/ThreePoint.pdf, figures/TouchSide.eps,
-	  figures/TouchSide.pdf, figures/U-shape.eps, figures/U-shape.pdf,
-	  figures/aTutorial.eps, figures/aTutorial.pdf,
-	  figures/adaptmesh.eps, figures/adaptmesh.jpg,
-	  figures/adaptmesh.pdf, figures/border.eps, figures/border.pdf,
-	  figures/cfunc1.eps, figures/cfunc1.pdf, figures/cfunc2.eps,
-	  figures/cfunc2.pdf, figures/electro.eps, figures/electro.pdf,
-	  figures/electroMesh.eps, figures/electroMesh.pdf,
-	  figures/mesh_sample.eps, figures/mesh_sample.pdf,
-	  figures/naca1.eps, figures/naca1.pdf, figures/naca2.eps,
-	  figures/naca2.pdf, figures/projP0.eps, figures/projP0.pdf,
-	  figures/projP1.eps, figures/projP1.pdf, figures/projP1b.eps,
-	  figures/projP1b.pdf, figures/projP1nc.eps, figures/projP1nc.pdf,
-	  figures/projP2.eps, figures/projP2.pdf, figures/soapfilm.eps,
-	  figures/soapfilm.pdf, figures/soapfilm3d.eps,
-	  figures/soapfilm3d.pdf, figures/square.eps, figures/square.pdf,
-	  figures/v-shape.eps, figures/v-shape.pdf, plots/RT0.eps,
-	  plots/RT0.pdf, plots/Thxy.eps, plots/err02.eps, plots/err02.pdf,
-	  plots/fastInterpolat.eps, plots/fastInterpolat.pdf,
-	  plots/firstTh.eps, plots/firstTh.pdf, plots/firstU.eps,
-	  plots/firstU.pdf, plots/hat.eps, plots/hat.pdf,
-	  plots/lshapeSol.eps, plots/lshapeSol.pdf, plots/secondT.eps,
-	  plots/secondT.pdf: add new manual call manual-full
-
-2004-09-17 17:29  lehyaric
-
-	* README_CVS: More information about CVS commands.
-
-2004-09-17 16:55  lehyaric
-
-	* acoptim.m4: Regression tests pass with reduced optimization
-	  options on PowerPC G5, fast mode.
-
-2004-09-17 16:13  lehyaric
-
-	* examples++/: Makefile.am, regtests.edp, regtests.m4: Regression
-	  tests pass again on Macintosh PPC (generic mode).
-
-2004-09-17 15:14  lehyaric
-
-	* examples++/Makefile.am, examples++/makeref.edp,
-	  examples++/ref.edp, examples++/regtests.edp,
-	  examples++/regtests.m4, examples++-tutorial/Makefile.am: Make
-	  regression tests work again on Macintosh PowerPC (debug mode).
-
-2004-09-16 17:24  lehyaric
-
-	* acoptim.m4: Still trying to find appropriate optimization options
-	  for PowerPC G5
-
-2004-09-16 10:43  lehyaric
-
-	* acoptim.m4: G5 optimization options reverted to G4 because of
-	  segmentation fault problems
-
-2004-09-15 21:50  hecht
-
-	* FreeFem++.mcp, acoptim.m4, src/fflib/AFunction.cpp,
-	  src/fflib/AFunction.hpp, src/fflib/AFunction2.cpp,
-	  src/fflib/Makefile.am: split AFunction.cpp in 2 files  and remove
-	  optim option on ppc G5
-
-2004-09-14 14:28  hecht
-
-	* examples++-load/Makefile.am: correct pb set var CXX  in load.sh
-	  call in exampelle++-Makefile.am
-
-2004-09-14 13:51  lehyaric
-
-	* examples++-load/load.link: Enables load.link work even when $CXX
-	  is not defined.
-
-2004-09-14 11:39  lehyaric
-
-	* regtests.sh, examples++-tutorial/regtests.m4: Corrected bug
-	  preventing examples++-tutorial/regtests.m4 from being converted
-	  in a working regtests.edp
-
-2004-09-14 11:20  lehyaric
-
-	* configure.ac, src/femlib/MatriceCreuse.hpp: More updates for
-	  FreeBSD compilation
-
-2004-09-13 16:05  lehyaric
-
-	* examples++-load/load.link: Modification proposée par Thierry
-	  Thomas pour FreeBSD
-
-2004-09-13 15:33  hecht
-
-	* Info-plist.am, FreeFem++.app/Contents/Info.plist: correct plist
-	  version
-
-2004-09-13 15:27  hecht
-
-	* FreeFem++.mcp, FreeFem++.app/Contents/Info.plist,
-	  src/femlib/MatriceCreuse_tpl.hpp: C++ encapsulte cblas.h in
-	  src/femlib/MatriceCreuse_tpl.hpp for freebsd OS
-
-2004-09-07 17:43  hecht
-
-	* install-www: corret of window install
-
-2004-09-07 16:47  hecht
-
-	* FreeFem++.app/Contents/MacOS/FreeFem++: add file for MacOS
-	  application
-
-2004-09-07 10:37  lehyaric
-
-	* regtests.m4, examples++/Makefile.am, examples++/makeref.edp,
-	  examples++/ref.edp, examples++/regtests.m4,
-	  examples++-tutorial/Makefile.am, examples++-tutorial/regtests.m4:
-	  Regression tests in examples++ directory re-implemented using
-	  regtests.m4
-
-2004-09-07 09:45  hecht
-
-	* configure.ac: correct with-blas=....	tags
-
-2004-09-07 09:36  hecht
-
-	* HISTORY, README, configure.ac, install-www, examples++/D2.edp,
-	  examples++/aadaptation.edp, examples++/ccc-adp.edp: add if
-	  previous download of blas reuse it
-
-2004-09-06 16:03  hecht
-
-	* examples++-tutorial/Makefile.am: add missing file regtest.m4 in
-	  dist make target in examples++-tutorial
-
-2004-09-06 14:00  hecht
-
-	* configure.ac: Add  -enable-generic_blas Download generic blas
-	  (implie --enable-download) configure
-
-2004-09-03 10:45  hecht
-
-	* download/blas/Makefile.am: empty SOURCESS variable in
-	  download/blas/Makefile.am  because dist target do not work before
-
-2004-09-02 16:04  hecht
-
-	* DOC/addfe.tex, DOC/manual.tex, DOC/styles.sty,
-	  src/femlib/Element_P2h.cpp: [no log message]
-
-2004-09-01 13:51  hecht
-
-	* config-macos9.h, src/fflib/AFunction.cpp, src/fflib/String.hpp:
-	  correct string[string] undelete pointer
-
-2004-09-01 09:33  hecht
-
-	* src/fflib/: AFunction.cpp, lex.cpp, lex.hpp: expand macro problem
-	  , suite (et fin?)
-
-2004-09-01 07:41  hecht
-
-	* src/fflib/: AFunction.cpp, lex.cpp: correct pb in macro
-	  generation (not finish)
-
-2004-08-31 17:35  hecht
-
-	* HISTORY, configure.ac, FreeFem++.app/Contents/Info.plist,
-	  src/fflib/AFunction.cpp, src/fflib/lex.cpp, src/fflib/lex.hpp:
-	  correct  bug in macro expansion set version to 1.42
-
-2004-08-30 17:10  hecht
-
-	* FreeFem++.mcp, config-macos9.h, src/femlib/MatriceCreuse_tpl.hpp:
-	  remove blas call on MacOS 9
-
-2004-08-30 15:56  hecht
-
-	* configure.ac, examples++-other/lap3-cpu.edp,
-	  src/femlib/MatriceCreuse_tpl.hpp: add blas call  in choleski and
-	  LU solver
-
-2004-08-30 14:13  hecht
-
-	* FreeFem++.mcp, Info-plist.am, Makefile.am,
-	  FreeFem++.app/Contents/Info.plist, src/agl/Makefile.am,
-	  src/femlib/MatriceCreuse_tpl.hpp: add blas in choleski
-
-2004-08-30 14:03  hecht
-
-	* src/mpi/Makefile.am: correct mpi/Makefile.am for compilation with
-	  g++-3.4
-
-2004-08-30 13:40  hecht
-
-	* arpack/arpack++/include/arrgeig.h,
-	  arpack/arpack++/include/arrgnsym.h,
-	  arpack/arpack++/include/arrgsym.h,
-	  arpack/arpack++/include/arrsnsym.h,
-	  arpack/arpack++/include/arrssym.h, src/Algo/BFGS.hpp,
-	  src/Algo/BrentLS.hpp, src/Algo/CubicLS.hpp,
-	  src/Algo/NewtonRaphson.hpp, src/Algo/RosenBrock.hpp,
-	  src/femlib/MatriceCreuse_tpl.hpp, src/fflib/lgfem.cpp,
-	  src/fflib/problem.cpp, src/fflib/problem.hpp: correction to by
-	  compatible wiath g++-3.4
-
-2004-08-27 17:42  hecht
-
-	* src/: Algo/BFGS.hpp, femlib/MatriceCreuse.hpp,
-	  fflib/AFunction.cpp, fflib/lgsolver.hpp, fflib/problem.cpp:
-	  correct g++-3.4 compilation probleme
-
-2004-08-26 16:51  hecht
-
-	* src/femlib/MatriceCreuse_tpl.hpp: optimize cpu times on choleski
-	  and crout
-
-2004-08-26 15:04  hecht
-
-	* examples++-other/lap3-cpu.edp, examples++-other/speedtest.sh,
-	  src/femlib/Element_P2h.cpp, src/femlib/Element_RT.cpp,
-	  src/femlib/FESpace.cpp, src/femlib/MatriceCreuse.hpp,
-	  src/fflib/lgfem.cpp: correct divide by zero in plot put default
-	  solver LU (UMFPACK is too unstable) add one fonction in FESpace
-	  to force link include of some finite element	 P2h because
-	  static library  do not include all the archive file (.o) so
-	  before we forget P2h FElement.
-
-2004-07-16 14:40  lehyaric
-
-	* Makefile.am, README, README_WINDOWS, WindowsPackage.m4,
-	  configure.ac, src/Graphics/Pcrgraph.cpp: Windows package for
-	  Version 1.41 complete.
-
-2004-07-15 10:32  lehyaric
-
-	* download/blas/Makefile.am, examples++/regtests.edp,
-	  examples++-tutorial/regtests.m4: Regression tests ok on an Athlon
-	  1.2 GHz.
-
-2004-07-13 14:20  lehyaric
-
-	* acoptim.m4, examples++/regtests.edp,
-	  examples++-tutorial/regtests.m4: Regression tests pass on cygwin.
-
-2004-07-13 11:13  lehyaric
-
-	* configure.ac: Small comment change.
-
-2004-07-13 11:12  lehyaric
-
-	* download/blas/: .cvsignore, Makefile.am: Downloaded generic BLAS
-	  now work on cedre (redhat, pentium 4).
-
-2004-07-13 11:01  lehyaric
-
-	* configure.ac, examples++-load/Makefile.am: Optimized BLAS
-	  replaced with generic BLAS for generic compilation.
-
-	  Speed results with generic BLAS on Pentium III with cygwin:
-
-	  -- lap cholesky 300x300  : 156.875 s -- lap CG       300x300	:
-	  94.829 s -- lap UMFPACK  300x300  : 16.469 s
-
-2004-07-13 10:29  lehyaric
-
-	* download/blas/Makefile.am: Duplicates xerbla.f when downloading
-	  generic blas.
-
-2004-07-12 17:38  lehyaric
-
-	* compile, configure.ac, download/blas/.cvsignore,
-	  download/blas/Makefile.am: Uses generic BLAS for generic
-	  compilation, because it is faster to compile (on cygwin) and we
-	  do not need as much optimization anyway.
-
-2004-07-09 18:10  lehyaric
-
-	* Makefile.am, debian/CopyToServer.sh, debian/apt-ftparchive.conf,
-	  debian/control: New script to upload Debian packages.
-
-2004-07-09 16:52  darrasse
-
-	* debian/copyright: Mise Ã  jour de la liste des auteurs
-
-2004-07-09 10:04  lehyaric
-
-	* configure.ac: Binary ATLAS download disabled for the moment.
-
-2004-07-08 15:31  hecht
-
-	* install-www: install-www in progress
-
-2004-07-08 15:22  lehyaric
-
-	* acmacros.m4, configure.ac, download/blas/.cvsignore,
-	  download/blas/Makefile.am, src/iml/Makefile.am: The precompiled
-	  ATLAS library is now correctly downloaded and uncompressed, but
-	  FreeFem++ fails to compile because some symbols are missing from
-	  that library, namely
-	  _dtrsm_,_dgemm_,_dger_,_dgemv_,_dtrsv_,_dscal_.
-
-2004-07-08 15:21  hecht
-
-	* install-www: correct install-www
-
-2004-07-08 13:15  lehyaric
-
-	* examples++-tutorial/: Makefile.am, ref.edp, refnoumf.edp,
-	  refumf.edp, regtests.m4: Reference values for regression tests
-	  with and without UMFPACK merged.
-
-2004-07-08 12:02  lehyaric
-
-	* README, README_WINDOWS, configure.ac, download/blas/Makefile.am:
-	  Option to download a precompiled version of ATLAS programmed in,
-	  but not tested yet.
-
-2004-07-08 10:44  lehyaric
-
-	* debian/: .cvsignore, changelog: Debian binary packages created,
-	  but not tested yet.
-
-2004-07-07 17:42  lehyaric
-
-	* DOC/Makefile.am, debian/.cvsignore, debian/control, debian/rules:
-	  Debian packaging in progress.
-
-2004-07-07 16:25  hecht
-
-	* Makefile.am, install-www, FreeFem++.app/Contents/Info.plist,
-	  FreeFem++.app/Contents/Resources/FreeFem++.icns: correction on
-	  macosX version
-
-2004-07-07 15:56  hecht
-
-	* Makefile.am: correct pb in freefem++.app on macosX
-
-2004-07-07 15:13  hecht
-
-	* install-www, FreeFem++.app/Contents/Info.plist: correct
-	  install-www script
-
-2004-07-07 14:40  hecht
-
-	* Makefile.am: add native9 make target for Mac9 version
-
-2004-07-07 14:29  hecht
-
-	* Makefile.am, install-www, FreeFem++.app/Contents/Info.plist:
-	  correct pb in MACOSX version and instal-www file
-
-2004-07-07 14:24  hecht
-
-	* Makefile.am, install-www: correct path of FreeFem++-CoCoa file in
-	  install
-
-2004-07-07 14:05  hecht
-
-	* COPYRIGHT: Add COPYRIGHT file
-
-2004-07-07 13:58  hecht
-
-	* INSTALL-MacOSX: Add INSTALL-MacOS file
-
-2004-07-07 12:51  lehyaric
-
-	* .cvsignore, Makefile.am, WindowsPackage.iss, WindowsPackage.m4,
-	  configure.ac, debian/.cvsignore, debian/rules,
-	  src/agl/Makefile.am: Debian packaging in progress.  VERSION
-	  included in WindowsPackage.iss
-
-2004-07-07 12:41  hecht
-
-	* examples++-tutorial/regtests.m4: mal change in epsilon for
-	  regtest (on idared)
-
-2004-07-07 12:09  hecht
-
-	* examples++-tutorial/Makefile.am: correct pb in m4 parameter for
-	  building  regtests.edp
-
-2004-07-07 11:32  hecht
-
-	* FreeFem++.mcp, HISTORY, install-www: add install-www to set web
-	  server
-
-2004-07-05 14:38  lehyaric
-
-	* regtests.sh: Remove debugging information
-
-2004-07-01 16:13  lehyaric
-
-	* examples++-tutorial/regtests.m4: Improvements on regression tests
-	  on Idared, but still a segmentation fault because of optimization
-	  options.
-
-2004-07-01 16:04  lehyaric
-
-	* configure.ac, examples++/regtests.edp,
-	  examples++-eigen/Makefile.am: All regression tests ok on Cedre.
-
-2004-07-01 15:33  lehyaric
-
-	* examples++/.cvsignore, examples++/regtests.edp,
-	  examples++-eigen/.cvsignore, examples++-load/.cvsignore,
-	  examples++-tutorial/.cvsignore, examples++-tutorial/regtests.m4:
-	  All regression tests ok on Hydre.
-
-2004-07-01 14:26  lehyaric
-
-	* regtests.sh, examples++-mpi/.cvsignore,
-	  examples++-mpi/regtests.sh: More updates to make parallel
-	  regression tests work.
-
-2004-07-01 14:18  lehyaric
-
-	* examples++-tutorial/: .cvsignore, regtests.edp: Correcting some
-	  problems with parallel regressions tests.
-
-2004-07-01 14:15  lehyaric
-
-	* examples++-tutorial/: Makefile.am, ref.edp, refnoumf.edp,
-	  refumf.edp, regtests.edp, regtests.m4: Separate set of reference
-	  values when UMFPACK is not available.
-
-2004-07-01 13:21  lehyaric
-
-	* regtests.sh, examples++-mpi/regtests.sh,
-	  examples++-tutorial/Makefile.am, examples++-tutorial/regtests.m4:
-	  More tests on the parallel version (FreeFem++-mpi)
-
-2004-06-30 15:47  lehyaric
-
-	* Makefile.am, examples++-tutorial/.cvsignore,
-	  examples++-tutorial/Makefile.am, examples++-tutorial/ref.edp,
-	  examples++-tutorial/regtests.edp,
-	  examples++-tutorial/regtests.m4, src/fflib/AFunction.cpp:
-	  Regression tests installed in examples++-tutorial, with a
-	  separate file containing all reference values. The values
-	  produced by periodic4.edp and Periodic.edp are accepted but
-	  suspicious.
-
-2004-06-30 14:29  lehyaric
-
-	* .cvsignore, configure.ac, examples++/regtests.edp,
-	  examples++-tutorial/regtests.edp: New file configure.param
-	  containing configure parameters.  Regression tests being
-	  developed.
-
-2004-06-30 10:47  lehyaric
-
-	* README_WINDOWS: Describes how to compile FreeFem++ on Windows.
-
-2004-06-30 10:45  lehyaric
-
-	* regtests.sh: Because of the way return codes are handled inside
-	  shell pipe "|" commands, regtests.sh was not able to detect
-	  errors in FreeFem++. Corrected.
-
-2004-06-29 18:41  lehyaric
-
-	* README, acoptim.m4, configure.ac, regtests.sh,
-	  examples++/regtests.edp, examples++-load/load.link,
-	  examples++-mpi/Makefile.am, examples++-other/lap3-cpu.edp,
-	  examples++-other/speedtest.sh, examples++-tutorial/regtests.edp,
-	  src/Makefile.am, src/Algo/Makefile.am, src/umfpack/.cvsignore,
-	  src/umfpack/Makefile.am: More upgrades to make the source tar
-	  file compilable on most architectures.
-
-2004-06-28 22:02  hecht
-
-	* src/fflib/: lex.cpp, lex.hpp: correct double echo in macro
-	  expansion
-
-2004-06-28 19:26  lehyaric
-
-	* Makefile.am, configure.ac, DOC/manual.tex,
-	  download/arpack/Makefile.am, download/blas/Makefile.am,
-	  download/umfpack/Makefile.am, src/Makefile.am,
-	  src/Graphics/.cvsignore, src/Graphics/Makefile.am,
-	  src/bamglib/Makefile.am, src/femlib/Makefile.am,
-	  src/fflib/Makefile.am, src/fflib/versionnumber.hpp,
-	  src/iml/.cvsignore, src/iml/Makefile.am: .tar.gz packages
-	  currently being tested and improved. Testing architectures are
-	  currently: MacOS G4+G5, RedHat 7+8+10, Debian Testing+Unstable,
-	  Cygwin.
-
-2004-06-28 12:36  lehyaric
-
-	* configure.ac, examples++/.cvsignore, examples++/D2.edp,
-	  examples++/Makefile.am, examples++/NSP1P1.edp,
-	  examples++/NSP1P1b.edp, examples++/NSP1P2.edp,
-	  examples++/Richard.edp, examples++/aaRT.edp,
-	  examples++/aaa-adp.edp, examples++/aadaptation.edp,
-	  examples++/aalapacien.edp, examples++/aalaplace-nc.edp,
-	  examples++/aamove.edp, examples++/all.edp,
-	  examples++/arrayoFVh.edp, examples++/bilap.edp,
-	  examples++/ccc-adp.edp, examples++/demo.edp,
-	  examples++/demo1.edp, examples++/funct.edp,
-	  examples++/lap_mat.edp, examples++/lapacienprecon.edp,
-	  examples++/parareal.edp, examples++/regtests.edp,
-	  examples++/testadp.edp, examples++/teste.edp,
-	  examples++/wafer-heating-laser-axi.edp,
-	  examples++-tutorial/.cvsignore, examples++-tutorial/Makefile.am,
-	  examples++-tutorial/regtests.edp: Gathering all regression check
-	  in one location (regtests.edp) to let the examples free of the
-	  checking constraints.
-
-2004-06-28 11:07  lehyaric
-
-	* Makefile.am, README, acoptim.m4, DOC/Makefile.am,
-	  examples++/.cvsignore, examples++-other/Makefile.am,
-	  examples++-other/speedtest.sh: Cleaning and improving the MacOS
-	  version.
-
-2004-06-28 09:41  hecht
-
-	* DOC/manual.tex: small correct
-
-2004-06-28 09:33  hecht
-
-	* examples++-tutorial/sphere.edp: FH correct pb in file name
-
-2004-06-28 09:29  hecht
-
-	* HISTORY, README, DOC/manual.tex, DOC/plots/xyf.eps,
-	  examples++-tutorial/sphere.edp: Correct small thing in DOC and
-	  add losed figure
-
-2004-06-27 17:18  hecht
-
-	* FreeFem++.mcp, Info-plist.am, Makefile.am,
-	  FreeFem++.app/Contents/Info.plist, src/agl/Makefile.am,
-	  src/agl/Contents/Info.plist: FH modif .plist file for MacOS
-	  application
-
-2004-06-25 18:39  lehyaric
-
-	* examples++/: D2.edp, NSP1P1.edp, NSP1P1b.edp, NSP1P2.edp,
-	  Richard.edp, aaRT.edp, aaa-adp.edp, aadaptation.edp,
-	  aalapacien.edp, aalaplace-nc.edp, aamove.edp, arrayoFVh.edp,
-	  bilap.edp, ccc-adp.edp, demo.edp, demo1.edp, funct.edp,
-	  lap_mat.edp, lapacienprecon.edp, parareal.edp, testadp.edp,
-	  teste.edp, wafer-heating-laser-axi.edp: Added a new scheme for
-	  checking numerical results in each example thanks to the "assert"
-	  keyword.
-
-2004-06-25 18:31  hecht
-
-	* examples++-bug/bug-arg-string.epd: FH: add bug example
-
-2004-06-25 18:30  hecht
-
-	* configure.ac, examples++-tutorial/sphere.edp,
-	  src/fflib/Makefile.am: FH:  compile FLAG optimization  on MACOS
-
-2004-06-25 17:54  hecht
-
-	* AUTHORS, BUGS, HISTORY, README, acoptim.m4, configure.ac: FH:
-	  correct the -fast compilation flag  on MACOS (remove
-	  -malign-natural)
-
-2004-06-25 17:30  lehyaric
-
-	* Makefile.am, README, regtests.sh,
-	  examples++-tutorial/Makefile.am: Making "make visualcheck" work.
-
-2004-06-25 15:46  lehyaric
-
-	* configure.ac, download/umfpack/Makefile.am: POSIX system calls
-	  times() and sysconf() are not defined in Mingw system libraries.
-	  This is checked and UMFPACK makefiles modified as necessary.
-
-2004-06-25 14:18  lehyaric
-
-	* regtests.sh: Displays test output as well as recording it during
-	  regression tests.
-
-2004-06-25 14:13  hecht
-
-	* src/fflib/String.hpp: add a forgottent  & in toString  Complex)
-
-2004-06-25 14:04  hecht
-
-	* src/fflib/String.hpp: change toString to remove problem of
-	  optimisation flag -fast on MacOS
-
-2004-06-25 13:53  lehyaric
-
-	* configure.ac: Avoids the gcc option "-rdynamic" (used for
-	  dlopen()) on MacOS.
-
-2004-06-25 13:42  lehyaric
-
-	* regtests.sh, src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp: Still
-	  more corrections to make regtests.sh work.
-
-2004-06-25 12:21  lehyaric
-
-	* regtests.sh: Corrected bug where FreeFem++ command was not
-	  correctly constructed
-
-2004-06-25 12:17  hecht
-
-	* FreeFem++.mcp, HISTORY, Makefile.am, config-macos9.h,
-	  examples++-tutorial/all.edp,
-	  examples++-tutorial/sparse-matrix.edp, src/bamglib/Mesh2.cpp,
-	  src/bamglib/Mesh2.h, src/bamglib/MeshGeom.cpp,
-	  src/femlib/BamgFreeFem.cpp, src/fflib/lgfem.cpp,
-	  src/fflib/lgmesh.cpp, src/fflib/problem.cpp,
-	  src/fflib/problem.hpp, src/lglib/lg.tab.cpp, src/lglib/lg.y: add
-	  periodic adaptmesh  stuff
-
-2004-06-25 12:12  lehyaric
-
-	* examples++-other/speedtest.sh: Corrected bug where file
-	  examples++-other/speedtest.out was not updated properly.
-
-2004-06-25 11:55  lehyaric
-
-	* Makefile.am, examples++/Makefile.am,
-	  examples++-eigen/Makefile.am, examples++-load/Makefile.am,
-	  examples++-tutorial/Makefile.am: Replaced all occurrences of
-	  regtests.pl with regtests.sh (shell is found more often than
-	  perl)
-
-2004-06-25 11:05  lehyaric
-
-	* configure.ac: Correcting the definition of VersionFreeFemDate and
-	  VersionFreeFempp in config-version.h
-
-2004-06-25 10:59  lehyaric
-
-	* configure.ac: More documentation for config-version.h generation.
-
-2004-06-25 10:55  lehyaric
-
-	* .cvsignore, Makefile.am, README, WindowsPackage.iss,
-	  configure.ac, regtests.pl, regtests.sh, examples++/Makefile.am,
-	  examples++-bug/Makefile.am, examples++-eigen/Makefile.am,
-	  examples++-load/Makefile.am, examples++-other/.cvsignore,
-	  examples++-other/Makefile.am, examples++-other/speedtest.sh,
-	  examples++-tutorial/Makefile.am: - Restructuring the regression
-	  tests suite to run all non windowed tests in one go.	- New
-	  configuration file "config-version.h" that can be included
-	  separately into MacOS 9 sources.
-
-2004-06-24 18:09  darrasse
-
-	* debian/: changelog, control, freefem++-doc.doc-base,
-	  freefem++-doc.docs, rules: Ajout du packet freefem++-doc
-	  contenant la documentation
-
-2004-06-24 17:08  lehyaric
-
-	* .cvsignore, Makefile.am, README, configure.ac: Some commands
-	  (like make speedtest and doc) are more thoroughly documented.
-
-2004-06-24 16:49  lehyaric
-
-	* regtests.pl: Give a value to LD_LIBRARY_PATH for the
-	  examples++-load regression tests.
-
-2004-06-24 16:05  lehyaric
-
-	* examples++-mpi/: .cvsignore, Makefile.am, regtests.sh: Regression
-	  tests for the parallel version are ok.
-
-2004-06-24 14:44  darrasse
-
-	* debian/: freefem++-glx.postinst, freefem++-x11.postinst:
-	  Changement de prioritÃ© des alternatives. x11 est prioritaire Ã 
-	  glx.
-
-2004-06-24 13:50  lehyaric
-
-	* Makefile.am, README, configure.ac, examples++-load/load.link,
-	  src/glx/Makefile.am: examples++-load now works on Cedre (Red
-	  Hat), with debug options.
-
-2004-06-24 12:27  lehyaric
-
-	* src/: agl/Makefile.am, glx/Makefile.am, mpi/Makefile.am,
-	  nw/Makefile.am, std/Makefile.am, x11/Makefile.am: [no log
-	  message]
-
-2004-06-24 11:52  lehyaric
-
-	* configure.ac: [no log message]
-
-2004-06-24 11:48  darrasse
-
-	* src/femlib/: MatriceCreuse.hpp, MatriceCreuse_tpl.hpp: Ajout de
-	  plusieurs this-> pour la compilation avec g++-3.4
-
-2004-06-24 10:44  lehyaric
-
-	* configure.ac, src/std/Makefile.am: GLX version was not compiled
-	  on MacOS X. Corrected.
-
-2004-06-24 09:46  lehyaric
-
-	* examples++-load/: Makefile.am, load.edp, load.link,
-	  myfunction.cpp: examples++-load is being worked on. It still
-	  poses problems.
-
-2004-06-24 08:09  hecht
-
-	* src/fflib/String.hpp: modif to bee  compatible with  g++ 3.4
-
-2004-06-24 04:12  darrasse
-
-	* src/femlib/RNM.hpp: Nouvel ajout de this-> pour la compilation
-	  avec g++-3.4
-
-2004-06-24 03:37  darrasse
-
-	* src/femlib/RNM.hpp: Ajout de quelques this-> pour la compilation
-	  avec g++ 3.4
-
-2004-06-24 02:16  darrasse
-
-	* debian/FreeFem++.1: Ajout d'une page man gÃ©nÃ©rique, obligatoire
-	  pour Debian.
-
-2004-06-24 02:12  darrasse
-
-	* debian/: changelog, compat, control, copyright,
-	  freefem++-glx.dirs, freefem++-glx.install, freefem++-glx.links,
-	  freefem++-glx.postinst, freefem++-glx.prerm, freefem++-mpi.dirs,
-	  freefem++-mpi.install, freefem++-mpi.links,
-	  freefem++-mpi.postinst, freefem++-mpi.prerm, freefem++-nw.dirs,
-	  freefem++-nw.install, freefem++-nw.links, freefem++-nw.postinst,
-	  freefem++-nw.prerm, freefem++-x11.dirs, freefem++-x11.install,
-	  freefem++-x11.links, freefem++-x11.postinst, freefem++-x11.prerm,
-	  freefem++.docs, freefem++.examples, freefem++.manpages, rules:
-	  Insertion du dossier debian contenant les fichiers nÃ©cessaires
-	  pour la crÃ©ation des packets Debian. En ce moment ils crÃ©ent
-	  cinq packets, freefem++, freefem++-nw, freefem++-x11,
-	  freefem++-glx et freefem++-mpi.  Le premier contient les fichiers
-	  communs et les autres les differentes versions de l'executable.
-
-2004-06-23 17:05  lehyaric
-
-	* regtests.pl, examples++/Makefile.am,
-	  examples++-eigen/Makefile.am, examples++-load/.cvsignore,
-	  examples++-mpi/Makefile.am, examples++-tutorial/.cvsignore,
-	  examples++-tutorial/Makefile.am: The regression tests have been
-	  checked up to examples++-load not included
-
-2004-06-23 15:47  lehyaric
-
-	* configure.ac: Problem with AGL on MasOSX solved: it was not
-	  selected for compilation by configure.ac
-
-2004-06-23 14:04  lehyaric
-
-	* Makefile.am, regtests.pl, examples++/.cvsignore,
-	  examples++/Makefile.am, examples++-eigen/Makefile.am,
-	  examples++-load/Makefile.am, examples++-mpi/Makefile.am,
-	  examples++-tutorial/.cvsignore,
-	  examples++-tutorial/LaplaceP1P2h.edp,
-	  examples++-tutorial/Makefile.am, examples++-tutorial/all.edp:
-	  Regression tests are currently being checked.  There seems to be
-	  a problem in examples++-tutorial on Hydre.
-
-2004-06-23 11:36  lehyaric
-
-	* Makefile.am, README, configure.ac, regtests.pl, DOC/Makefile.am,
-	  examples++/Makefile.am, examples++-eigen/Makefile.am,
-	  examples++-tutorial/Makefile.am: Mise à jour de la configuration
-	  de UMFPACK Début de reformattage du test des exemples (avec "make
-	  test")
-
-2004-06-22 18:44  lehyaric
-
-	* src/fflib/Makefile.am: Bug preventing the separate compilation of
-	  src/fflib/lex.cpp corrected.
-
-2004-06-22 18:25  lehyaric
-
-	* Makefile.am: New 'speedtest' goal to run FreeFem++-nw on
-	  examples++-other/lap3-cpu.edp
-
-2004-06-22 17:12  lehyaric
-
-	* acoptim.m4, configure.ac, src/fflib/Makefile.am,
-	  src/fflib/lex.cpp: Optimization ok on PowerPC G5 (Idared)
-
-2004-06-22 15:38  lehyaric
-
-	* configure.ac, download/arpack/ARmake.inc,
-	  download/arpack/Makefile.am, download/blas/Makefile.am,
-	  download/blas/script, download/umfpack/Makefile.am: Optimized
-	  version ok on cedre (Intel Xeon + gcc + Red Hat Linux)
-
-2004-06-22 15:32  darrasse
-
-	* configure.ac: correction de la dÃ©tection de UMFPACK
-
-2004-06-22 12:05  lehyaric
-
-	* README: Correction minime de l'explication de --enable-debug.
-
-2004-06-21 17:06  lehyaric
-
-	* acoptim.m4: Optimization ok on Debian/Testing.
-
-2004-06-21 16:56  hecht
-
-	* src/fflib/Makefile.am: [no log message]
-
-2004-06-21 16:49  hecht
-
-	* src/fflib/lg.tab.hpp: le fichier fflib/lg.tab.hpp est dans de dir
-	  lglib et genere par bison
-
-2004-06-21 16:24  lehyaric
-
-	* src/mpi/Makefile.am: Parallel version modified to use downloaded
-	  UMFPACK if available.
-
-2004-06-21 15:53  lehyaric
-
-	* acmacros.m4: Some corrections for the "generic" optimization
-	  mode.
-
-2004-06-21 15:31  lehyaric
-
-	* README, configure.ac, download/arpack/Makefile.am,
-	  download/umfpack/Makefile.am: Hardware-dependant optimization
-	  options currently being selected.
-
-2004-06-21 11:08  hecht
-
-	* FreeFem++.mcp, examples++-other/lap3-cpu.edp,
-	  src/Graphics/rgraph.hpp, src/lglib/lg.tab.cpp,
-	  src/lglib/lg.tab.hpp, src/lglib/lg.y:
-	  add example of test the optimised version
-
-2004-06-20 19:58  lehyaric
-
-	* acoptim.m4: Optimiztion for Pentium III added.
-
-2004-06-20 19:30  lehyaric
-
-	* acoptim.m4: Configuration of compiler optimization flags still
-	  being developed.
-
-2004-06-20 13:26  lehyaric
-
-	* acmacros.m4, acoptim.m4: acmacros.m4 and acoptim.m4 will
-	  centralize all the necessary treatments for selecting
-	  hardware-dependant optimization options for compilers.  They will
-	  be called from configure.ac
-
-2004-06-19 14:23  hecht
-
-	* DOC/manual.tex: [no log message]
-
-2004-06-18 17:50  hecht
-
-	* FreeFem++.mcp, src/Algo/BFGS.hpp, src/femlib/RNM.hpp,
-	  src/femlib/RNM_tpl.hpp, src/fflib/AFunction.hpp,
-	  src/fflib/lex.cpp, src/fflib/lgfem.cpp, src/fflib/problem.cpp,
-	  src/fflib/problem.hpp:
-	  add modif compilation avec gcc 3.4
-
-2004-06-18 10:31  lehyaric
-
-	* DOC/manual.tex: Documentation proofreading ok up to §3.6 included
-
-2004-06-17 14:34  lehyaric
-
-	* FreeFem++.cw7.mcp.sit, FreeFem++.mcp.sit, configure,
-	  ffpc.cw7.mcp.zip, ffpc.mcp.zip, DOC/manual.tex: - Documentation
-	  proofreading ok up to §3.6 included - Some old project files
-	  removed from the current version (they can still    be viewed in
-	  previous CVS versions) - configure removed from CVS because it
-	  can provoke conflicts if generated  with different versions of
-	  automake+autoconf (same problem as   with the makefiles)
-
-2004-06-16 14:47  lehyaric
-
-	* DOC/Makefile, DOC/manual.tex,
-	  examples++-tutorial/sparce-matrix.edp,
-	  examples++-tutorial/sparse-matrix.edp: - Removing emacs backup
-	  files - Removing automatically-generated makefiles because they
-	  are different   on every machine. They could create unnecessary
-	  conflicts.  - Proofreading: "sparce"->"sparse" and documentation
-	  ok up to §3.5
-
-2004-06-16 14:36  hecht
-
-	* FreeFem++.mcp:
-	  add projet codewarrior dans la base CVS en mode Binaire
-
-2004-06-16 14:35  hecht
-
-	* FreeFem++.mcp: [no log message]
-
-2004-06-16 14:32  hecht
-
-	* FreeFem++.mcp, HISTORY, DOC/Makefile, src/config_freefem_v3.hpp,
-	  src/config_freefem_v3_g.hpp, src/fflib/AFunction.cpp,
-	  src/fflib/lex.cpp, src/fflib/load.cpp,
-	  src/fflib/strversionnumber.cpp:
-	  correction of string argument in macro processing
-
-2004-06-16 14:25  hecht
-
-	* config-wrapper.h: [no log message]
-
-2004-06-15 12:08  lehyaric
-
-	* README, DOC/manual.tex, DOC/styles.sty: Proofreading ok up to
-	  §2.3 included.
-
-2004-06-10 10:16  lehyaric
-
-	* ChangeLog, Makefile, Makefile.am, README_CVS, DOC/manual.tex: -
-	  Relecture Anglais documentation: chapitre I ok.  - Procédure de
-	  mise à jour de "ChangeLog" ajoutée à Makefile.am
-
-2004-06-09 10:09  lehyaric
-
-	* README_CVS, configure: More help on CVS and automake.
-
-2004-06-08 16:10  lehyaric
-
-	* AUTHORS, DOC/manual.tex: Relecture anglais doc arrivé au § 1.3
-
-2004-06-07 16:34  lehyaric
-
-	* AUTHORS, COPYING, COPYRIGHT, ChangeLog, Makefile, Makefile-old,
-	  Makefile-unix, Makefile.am, README, README_ARPACK, DOC/Makefile,
-	  download/blas/Makefile.am, download/blas/script: Première
-	  relecture des fichiers README et associés.  Les contenus sont
-	  maintenant en correspondance avec la nouvelle procédure de
-	  configuration ("autoconf + automake") mais il faudra sans doute
-	  une deuxième relecture pour ajouter tous les nouveux détails de
-	  compilation.
-
-2004-06-04 16:06  lehyaric
-
-	* .cvsignore, AUTHORS, COPYING, ChangeLog, INSTALL, Makefile,
-	  Makefile.am, NEWS, WindowsPackage.iss, config-macos9.h,
-	  config-wrapper.h, config.guess, config.sub, configure.ac,
-	  depcomp, install-sh, logo.ico, missing, mkinstalldirs, net.mak,
-	  regtests.pl, DOC/.cvsignore, DOC/Makefile, DOC/Makefile.am,
-	  DOC/manual.tex, download/.cvsignore, download/Makefile.am,
-	  download/arpack/.cvsignore, download/arpack/ARmake.inc,
-	  download/arpack/Makefile.am, download/blas/.cvsignore,
-	  download/blas/Makefile.am, download/umfpack/.cvsignore,
-	  download/umfpack/AMD_Make.include, download/umfpack/Makefile.am,
-	  download/umfpack/UMFPACK_Make.include, examples++/.cvsignore,
-	  examples++/Makefile.am, examples++-bug/.cvsignore,
-	  examples++-bug/Makefile.am, examples++-eigen/.cvsignore,
-	  examples++-eigen/Makefile.am, examples++-load/.cvsignore,
-	  examples++-load/Makefile.am, examples++-mpi/.cvsignore,
-	  examples++-mpi/Makefile.am, examples++-tutorial/.cvsignore,
-	  examples++-tutorial/Makefile.am, src/.cvsignore,
-	  src/AFunction.cpp, src/AFunction.hpp, src/AnyType.hpp,
-	  src/InitFunct.cpp, src/InitFunct.hpp, src/Makefile.am,
-	  src/Operator.hpp, src/Serialize.hpp, src/String.hpp,
-	  src/config_freefem_mpi.hpp, src/config_freefem_v3.hpp,
-	  src/config_freefem_v3_g.hpp, src/depcomp, src/error.hpp,
-	  src/gmres.hpp, src/lex.cpp, src/lex.hpp, src/lg.tab.cpp,
-	  src/lg.tab.hpp, src/lg.y, src/lgfem.cpp, src/lgfem.hpp,
-	  src/lgmesh.cpp, src/lgsolver.hpp, src/load.cpp, src/problem.cpp,
-	  src/problem.hpp, src/showverb.hpp, src/strversionnumber.cpp,
-	  src/throwassert.hpp, src/Algo/.cvsignore, src/Algo/Makefile.am,
-	  src/Graphics/Pcrgraph.cpp, src/Graphics/glrgraph.hpp,
-	  src/agl/.cvsignore, src/agl/Makefile.am, src/bamglib/.cvsignore,
-	  src/bamglib/Makefile.am, src/femlib/.cvsignore,
-	  src/femlib/Makefile.am, src/femlib/MatriceCreuse.hpp,
-	  src/fflib/.cvsignore, src/fflib/AFunction.cpp,
-	  src/fflib/AFunction.hpp, src/fflib/AnyType.hpp,
-	  src/fflib/InitFunct.cpp, src/fflib/InitFunct.hpp,
-	  src/fflib/Makefile.am, src/fflib/Operator.hpp,
-	  src/fflib/Serialize.hpp, src/fflib/String.hpp,
-	  src/fflib/error.hpp, src/fflib/gmres.hpp, src/fflib/lex.cpp,
-	  src/fflib/lex.hpp, src/fflib/lg.tab.hpp, src/fflib/lgfem.cpp,
-	  src/fflib/lgfem.hpp, src/fflib/lgmesh.cpp,
-	  src/fflib/lgsolver.hpp, src/fflib/load.cpp,
-	  src/fflib/problem.cpp, src/fflib/problem.hpp,
-	  src/fflib/showverb.hpp, src/fflib/strversionnumber.cpp,
-	  src/fflib/throwassert.hpp, src/fflib/versionnumber.hpp,
-	  src/glx/.cvsignore, src/glx/Makefile.am, src/lglib/.cvsignore,
-	  src/lglib/Makefile.am, src/lglib/lg.tab.cpp,
-	  src/lglib/lg.tab.hpp, src/lglib/lg.y, src/mpi/.cvsignore,
-	  src/mpi/Makefile.am, src/mpi/parallelempi.cpp, src/nw/.cvsignore,
-	  src/nw/Makefile.am, src/std/.cvsignore, src/std/Makefile.am,
-	  src/x11/.cvsignore, src/x11/Makefile.am: Les modifications faites
-	  dans la branche "alh-autoconf" sont réintégrées à la branche
-	  principale.
-
-2004-06-04 15:26  lehyaric
-
-	* configure.ac, regtests.pl, download/umfpack/Makefile.am,
-	  examples++/arrayoFVh.edp, examples++-eigen/.cvsignore,
-	  examples++-tutorial/.cvsignore, src/Graphics/Pcrgraph.cpp,
-	  src/Graphics/glrgraph.hpp, src/fflib/error.hpp,
-	  src/lglib/lg.tab.cpp, src/lglib/lg.y: Compilation ok sur Hydre.
-	  Codes de retour d'erreur mieux propagés dans FreeFem++.
-
-2004-06-04 15:22  hecht
-
-	* examples++-tutorial/LaplaceP1bis.edp, src/AFunction.hpp,
-	  src/lgfem.cpp, src/problem.cpp: [no log message]
-
-2004-06-04 12:06  lehyaric
-
-	* configure.ac, download/umfpack/Makefile.am, src/x11/Makefile.am:
-	  Compilation ok sur idared
-
-2004-06-03 16:02  lehyaric
-
-	* .cvsignore, Makefile.am, WindowsBin.iss, WindowsPackage.iss,
-	  WindowsSrc.iss, configure.ac, download/.cvsignore,
-	  download/Makefile, download/Makefile.am,
-	  download/arpack/.cvsignore, download/arpack/ARmake.inc,
-	  download/arpack/Makefile.am, download/blas/.cvsignore,
-	  download/blas/Makefile.am, download/umfpack/.cvsignore,
-	  download/umfpack/AMD_Make.include, download/umfpack/Makefile.am,
-	  download/umfpack/UMFPACK_Make.include: Les bibliothèques BLAS,
-	  ARPACK et UMFPACK sont automatiquement téléchargées et compilées
-	  si configure.ac ne trouve aucune version locale. Testé sur
-	  Debian/unstable.
-
-2004-06-02 12:39  lehyaric
-
-	* download/Makefile: Configuration des telechargements en cours
-
-2004-06-02 12:30  lehyaric
-
-	* .cvsignore, WindowsBin.iss, install.mak, net.mak,
-	  DOC/Makefile.am: Configuration des telechargements en cours
-
-2004-06-02 11:33  lehyaric
-
-	* Makefile.am, WindowsBin.iss, WindowsInstall.iss, WindowsSrc.iss,
-	  src/Graphics/Pcrgraph.cpp, install.mak: Ajout des libs Blas,
-	  Arpack et Umfpack en cours sous Windows
-
-2004-06-01 17:11  lehyaric
-
-	* .cvsignore, WindowsInstall.iss, logo.ico: Premiere installation
-	  Windows
-
-2004-05-28 14:13  lehyaric
-
-	* config-wrapper.h, configure.ac, src/Makefile.am,
-	  src/pc/.cvsignore, src/pc/Makefile.am, src/std/Makefile.am: Le
-	  rpertoir src/std contient maintenant non plus une version x11
-	  mais la version par défaut pour l'architecture (par exemple
-	  win32)
-
-2004-05-27 17:00  lehyaric
-
-	* .cvsignore, config-macos9.h, config-wrapper.h, configure.ac,
-	  regtests.pl, examples++/.cvsignore, examples++/Makefile.am,
-	  examples++-bug/Makefile.am, examples++-eigen/Makefile.am,
-	  examples++-load/Makefile.am, examples++-mpi/Makefile.am,
-	  examples++-tutorial/Makefile.am, src/Makefile.am,
-	  src/Graphics/Pcrgraph.cpp, src/fflib/AFunction.cpp,
-	  src/fflib/lgfem.cpp, src/fflib/load.cpp, src/fflib/problem.cpp,
-	  src/fflib/strversionnumber.cpp, src/fflib/versionnumber.hpp,
-	  src/glx/Makefile.am, src/lglib/lg.tab.cpp, src/mpi/Makefile.am,
-	  src/nw/Makefile.am, src/pc/.cvsignore, src/pc/Makefile.am,
-	  src/std/Makefile.am, src/x11/Makefile.am: Toute première version
-	  de FreeFem++ compilable sur Windows avec Cygwin, Mingw, Automake
-	  et Autoconf. La version Windows est stockée pour l'instant dans
-	  le répertoire src/pc mais sera déplacée dans src/std.
-
-2004-05-26 22:22  hecht
-
-	* FreeFem++.mcp: [no log message]
-
-2004-05-26 21:58  hecht
-
-	* DOC/FFF.sty, FreeFem++.mcp: [no log message]
-
-2004-05-26 11:21  lehyaric
-
-	* configure.ac: Clarification de quelques commentaires.
-
-2004-05-26 11:10  lehyaric
-
-	* DOC/.cvsignore, DOC/manual.tex, src/.cvsignore: manual.tex est
-	  réinitialisé à sa version 1.6, car les modifications présentes
-	  dans la version 1.6 semblent avoir disparu de la version 1.7
-	  (probablement à cause d'une erreur de manipulation). Les
-	  modifications présentes dans la version 1.7 seront réinsérées
-	  dans une version ultérieure.
-
-2004-05-25 16:14  lehyaric
-
-	* configure.ac: Trois options de configuration manuelle ajoutées:
-	  --with-arpack=fichier.a --with-amd=fichier.a
-	  --with-arpack=fichier.a Options testées sur macserv2
-
-2004-05-25 15:05  lehyaric
-
-	* .cvsignore, Makefile.am, configure.ac, regtests.pl,
-	  DOC/.cvsignore, DOC/Makefile.am, DOC/manual.tex,
-	  examples++/Makefile.am, examples++/aalapacien.edp,
-	  examples++-bug/.cvsignore, examples++-bug/Makefile.am,
-	  examples++-eigen/.cvsignore, examples++-eigen/Makefile.am,
-	  examples++-load/.cvsignore, examples++-load/Makefile.am,
-	  examples++-mpi/.cvsignore, examples++-mpi/Makefile.am,
-	  examples++-tutorial/.cvsignore, examples++-tutorial/Makefile.am,
-	  src/Makefile.am, src/agl/Makefile.am, src/lglib/Makefile.am: -
-	  Modification de la procédure de test pour exécuter les scripts
-	  all.edp - Mise au point de la procédure de création d'archive
-	  .tar.gz avec "make dist"
-
-2004-05-25 13:51  hecht
-
-	* examples++-tutorial/algo.edp: [no log message]
-
-2004-05-25 12:31  ly
-
-	* DOC/: A_tutorial.tex, Adapt.tex, AdaptindicatorP2.tex, Beam.tex,
-	  BisonGrammar.tex, FFGUI_cygwin_huge.tex, FluidStruct.tex,
-	  FreeBoundary.tex, LaplaceP1.tex, LaplaceP1P2h.tex,
-	  LaplaceP1bis.tex, LaplaceP1huge.tex, LaplaceRT.tex, ListAM.tex,
-	  Makefile, MetricFile.tex, NSUawaCahouetChabart.tex,
-	  NewtonRaphson.tex, No-linear-elas.tex, NonlinearCG.tex,
-	  Operators.tex, Parallelversionexperimental.tex, Periodic.tex,
-	  Readmesh.tex, Region.tex, Schwarz-GC.tex, Schwarz-no-overlap.tex,
-	  Schwarz-overlap.tex, StokesNavierStokes.tex, TypesofLanguage.tex,
-	  bbFiletype.tex, cavity.tex, docFFGUI.tex, docFFGUI_cygwin.tex,
-	  docFFGUI_cygwin_huge.tex, docFFGUI_cygwinhuge.tex,
-	  docFFGUI_unix.tex, docFFGUI_unix_huge.tex, docGUI.tex,
-	  manual.tex: Chaque exemple a ete reecrit dans un fichier tex
-	  separe, et inclus dans le manuel par la commande 'include' de
-	  Latex.
-
-2004-05-25 10:50  lehyaric
-
-	* configure.ac, regtests.pl, src/agl/Makefile.am,
-	  src/glx/Makefile.am, src/nw/Makefile.am, src/std/Makefile.am,
-	  src/x11/Makefile.am: Automake ok pour X11 sur MacOS X.
-
-2004-05-24 19:12  lehyaric
-
-	* Makefile.am, configure.ac, regtests.pl, examples++/Makefile.am,
-	  examples++-eigen/Makefile.am, examples++-tutorial/Makefile.am,
-	  src/agl/.cvsignore, src/agl/Makefile.am, src/glx/.cvsignore,
-	  src/glx/Makefile.am, src/nw/Makefile.am, src/std/.cvsignore,
-	  src/std/Makefile.am, src/x11/.cvsignore, src/x11/Makefile.am:
-	  Ajoute l'extension "-g" à la version debug des programmes en vue
-	  de la configuration de l'installation.
-
-2004-05-24 18:19  lehyaric
-
-	* src/mpi/Makefile.am: Automake ok sur Debian/Testing.
-
-2004-05-24 17:31  lehyaric
-
-	* .cvsignore, src/agl/Makefile.am, src/glx/Makefile.am,
-	  src/nw/Makefile.am, src/std/Makefile.am, src/x11/Makefile.am:
-	  Test de la configuration Automake sur macserv2+X11: compilation
-	  ok.
-
-2004-05-24 14:57  lehyaric
-
-	* configure.ac, src/femlib/MatriceCreuse.hpp: Début de
-	  configuration de FreeFem++ sur Windows/Cygwin.  Pour l'instant le
-	  programme ne compile pas car Cygwin/g++ 3.3.1 plante sur
-	  lg.tab.cpp (segmentation fault).
-
-2004-05-24 11:19  lehyaric
-
-	* configure.ac, DOC/Makefile.am, src/agl/Makefile.am,
-	  src/femlib/MatriceCreuse.hpp, src/fflib/config_freefem_mpi.hpp,
-	  src/fflib/config_freefem_v3.hpp,
-	  src/fflib/config_freefem_v3_g.hpp, src/fflib/lgfem.cpp,
-	  src/fflib/problem.cpp, src/fflib/problem.hpp,
-	  src/glx/Makefile.am, src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp,
-	  src/lglib/lg.y, src/mpi/parallelempi.cpp, src/nw/Makefile.am,
-	  src/std/Makefile.am, src/x11/Makefile.am: Intégration de la
-	  bibliothèque Umfpack dans la configuration et amélioration du
-	  test de Arpack.  Testé sur Debian Unstable.
-
-2004-05-19 15:46  lehyaric
-
-	* configure.ac, src/fflib/Makefile.am: Ajoute
-	  src/Eigen/eigenvalue.cpp dans la bibliothèque src/fflib/libff.a
-
-2004-05-19 15:06  lehyaric
-
-	* Makefile.am, configure.ac, regtests.pl, examples++/.cvsignore,
-	  examples++/Makefile.am, examples++/aalapacien.edp,
-	  src/agl/Makefile.am: Première version de la procédure de test de
-	  non-regression.  Il reste des questions sur l'emploi de
-	  "NoUseOfWait=true;" et sur les valeurs à contrôler.
-
-2004-05-19 13:52  lehyaric
-
-	* Makefile.am, configure.ac, src/fflib/Makefile.am,
-	  src/fflib/strversionnumber.cpp, src/fflib/versionnumber.hpp,
-	  src/lglib/.cvsignore, src/lglib/Makefile.am, src/lglib/lg.c++,
-	  src/lglib/lg.h, src/lglib/lg.tab.cpp, src/lglib/lg.tab.hpp,
-	  src/lglib/lg.y, src/lglib/lg.y++: Amélioration de la gestion des
-	  numéros de version.
-
-2004-05-19 11:05  lehyaric
-
-	* configure.ac, DOC/Makefile.am, src/agl/Makefile.am,
-	  src/glx/Makefile.am: Automake configuré sur macserv2
-
-2004-05-18 18:10  lehyaric
-
-	* configure.ac, src/std/Makefile.am, src/x11/Makefile.am:
-	  Configuration de la compilation sur MacOSX toujours en cours.
-
-2004-05-18 18:00  lehyaric
-
-	* configure.ac, src/agl/Makefile.am, src/std/Makefile.am,
-	  src/x11/Makefile.am: Configuration de la procédure de compilation
-	  sur MacOSX en cours.
-
-2004-05-18 17:35  lehyaric
-
-	* configure.ac, src/agl/Makefile.am, src/mpi/Makefile.am:
-	  Compilation ok sur Debian/Testing et Debian/Unstable
-
-2004-05-18 17:08  lehyaric
-
-	* Makefile.am, configure.ac, src/AFunction.cpp, src/AFunction.hpp,
-	  src/AnyType.hpp, src/InitFunct.cpp, src/InitFunct.hpp,
-	  src/Makefile.am, src/Operator.hpp, src/Serialize.hpp,
-	  src/String.hpp, src/config_freefem_mpi.hpp,
-	  src/config_freefem_v3.hpp, src/config_freefem_v3_g.hpp,
-	  src/error.hpp, src/gmres.hpp, src/lex.cpp, src/lex.hpp,
-	  src/lg.tab.cpp, src/lg.tab.hpp, src/lg.y, src/lgfem.cpp,
-	  src/lgfem.hpp, src/lgmesh.cpp, src/lgsolver.hpp, src/load.cpp,
-	  src/problem.cpp, src/problem.hpp, src/showverb.hpp,
-	  src/strversionnumber.cpp, src/throwassert.hpp,
-	  src/Algo/.cvsignore, src/Algo/Makefile.am, src/agl/.cvsignore,
-	  src/agl/Makefile.am, src/bamglib/.cvsignore,
-	  src/bamglib/Makefile.am, src/femlib/.cvsignore,
-	  src/femlib/Makefile.am, src/fflib/.cvsignore,
-	  src/fflib/AFunction.cpp, src/fflib/AFunction.hpp,
-	  src/fflib/AnyType.hpp, src/fflib/InitFunct.cpp,
-	  src/fflib/InitFunct.hpp, src/fflib/Makefile.am,
-	  src/fflib/Operator.hpp, src/fflib/Serialize.hpp,
-	  src/fflib/String.hpp, src/fflib/config_freefem_mpi.hpp,
-	  src/fflib/config_freefem_v3.hpp,
-	  src/fflib/config_freefem_v3_g.hpp, src/fflib/error.hpp,
-	  src/fflib/gmres.hpp, src/fflib/lex.cpp, src/fflib/lex.hpp,
-	  src/fflib/lg.tab.hpp, src/fflib/lgfem.cpp, src/fflib/lgfem.hpp,
-	  src/fflib/lgmesh.cpp, src/fflib/lgsolver.hpp, src/fflib/load.cpp,
-	  src/fflib/problem.cpp, src/fflib/problem.hpp,
-	  src/fflib/showverb.hpp, src/fflib/strversionnumber.cpp,
-	  src/fflib/throwassert.hpp, src/fflib/versionnumber.hpp,
-	  src/glx/.cvsignore, src/glx/Makefile.am, src/lglib/.cvsignore,
-	  src/lglib/Makefile.am, src/lglib/lg.c++, src/lglib/lg.h,
-	  src/lglib/lg.tab.cpp, src/lglib/lg.y++, src/mpi/.cvsignore,
-	  src/mpi/Makefile.am, src/nw/.cvsignore, src/nw/Makefile.am,
-	  src/std/.cvsignore, src/std/Makefile.am, src/x11/.cvsignore,
-	  src/x11/Makefile.am: Modification de l'arborescence des
-	  répertoires dans src/ afin de placer chaque version de FreeFem++
-	  dans un répertoire différent, ce qui simplifie les Makefile.am
-
-2004-05-18 12:02  lehyaric
-
-	* Makefile.am, configure.ac, depcomp, src/.cvsignore,
-	  src/Makefile.am, src/depcomp: Transformation de la compilation de
-	  programmes multiples (-g, -nw, -x11, ...) en fonction des
-	  conventions de Automake.
-
-2004-05-17 11:46  lehyaric
-
-	* configure.ac: Intégration de Arpack et Umfpack en cours sur
-	  plusieurs architectures
-
-2004-05-17 11:23  hecht
-
-	* configure.ac: [no log message]
-
-2004-05-14 15:46  lehyaric
-
-	* DOC/manual.tex: Début de la relecture de l'anglais de la doc.
-
-2004-05-14 11:48  lehyaric
-
-	* Makefile, Makefile.am, configure.ac, DOC/Makefile: Test de la
-	  présence de mpiCC ajouté (s'il est absent, la version parallèle
-	  de FreeFem++ n'est pas compilée)
-
-2004-05-14 10:58  lehyaric
-
-	* DOC/.cvsignore: manual.pdf and manual.ps.gz are automaticalle
-	  regenerated, so they should not be stored in the CVS repository.
-
-2004-05-14 10:43  lehyaric
-
-	* Makefile, DOC/Makefile: Récupération des Makefiles (depuis
-	  l'archive de la version 1.40) qui avaient disparu suite à une
-	  commande CVS qui aurait dû restée localisée à la branche
-	  "alh-autoconf".
-
-2004-05-14 10:08  lehyaric
-
-	* Makefile, configure.ac: Extension de la recherche de la
-	  bibliothèque BLAS.
-
-2004-05-13 14:54  lehyaric
-
-	* COPYING, INSTALL, install-sh, missing, mkinstalldirs: Quelques
-	  nouveaux fichiers installés par la procédure standard Autoreconf
-	  -i.
-
-2004-05-13 14:45  lehyaric
-
-	* Makefile, Makefile.am, DOC/Makefile: La procédure Automake +
-	  Autoconf a été testée sur Hydre (Debian Testing).
-
-2004-05-13 14:08  lehyaric
-
-	* AUTHORS, ChangeLog, Makefile.am, NEWS, configure.ac,
-	  DOC/Makefile.am, src/Makefile.am: Essai de configuration de
-	  autoconf en cours.
-
-2004-05-13 14:07  lehyaric
-
-	* AUTHORS, ChangeLog, Makefile.am, NEWS, configure.ac,
-	  DOC/Makefile.am, src/Makefile.am: Séparation d'une branche
-	  spéciale pour les essais de autoconf.
-
-2004-05-13 14:00  lehyaric
-
-	* .cvsignore, AUTHORS, ChangeLog, Makefile, Makefile.am, NEWS,
-	  config.guess, config.sub, configure.ac, DOC/.cvsignore,
-	  DOC/Makefile, DOC/Makefile.am, src/.cvsignore, src/Makefile.am:
-	  Intégration de Autoconf et Automake dans la procédure de build en
-	  cours.
-
-2004-05-13 09:54  lehyaric
-
-	* .cvsignore, DOC/.cvsignore, src/.cvsignore: Ajout progressif de
-	  tous les fichiers à ignorer.
-
-2004-05-12 21:32  hecht
-
-	* examples++-tutorial/sparce-matrix.edp: [no log message]
-
-2004-05-12 14:34  lehyaric
-
-	* src/versionnumber.hpp: Fichier regénéré à la compilation
-
-2004-05-12 13:21  ly
-
-	* DOC/: docFFGUI.tex, docGUI.tex, manual.tex: [no log message]
-
-2004-05-12 12:10  hecht
-
-	* src/: Makefile-Debian, lg.tab.cpp, lg.tab.hpp, lg.y,
-	  versionnumber.hpp: [no log message]
-
-2004-05-12 12:06  hecht
-
-	* arpack/arpack++/include/: ardfmat.h, arerror.h, arhbmat.h,
-	  arlutil.h, arrseig.h: [no log message]
-
-2004-05-12 11:35  hecht
-
-	* HISTORY, Makefile, README, README_ARPACK, DOC/.cvsignore,
-	  DOC/manual.tex, DOC/styles.sty, DOC/plots/FIGII1.pdf,
-	  DOC/plots/FIGII2.pdf, DOC/plots/FIGII3.pdf, DOC/plots/FIGII4.pdf,
-	  DOC/plots/FIGII5.pdf, DOC/plots/FIGII6.pdf, DOC/plots/FIGII7.pdf,
-	  DOC/plots/FIGII8.pdf, DOC/plots/FIGII9.pdf,
-	  DOC/plots/Laplace.pdf, DOC/plots/ThrhoP2.pdf,
-	  DOC/plots/Thwithhole.pdf, DOC/plots/Thwithouthole.pdf,
-	  DOC/plots/Thxy.pdf, DOC/plots/dTh.pdf, DOC/plots/d_Thf.pdf,
-	  DOC/plots/d_u.pdf, DOC/plots/eigen11.pdf, DOC/plots/eigen12.pdf,
-	  DOC/plots/emptymesh-1.eps, DOC/plots/emptymesh-1.pdf,
-	  DOC/plots/emptymesh-2.eps, DOC/plots/emptymesh-2.pdf,
-	  DOC/plots/emptymesh.eps, DOC/plots/gnuplot.pdf,
-	  DOC/plots/laRTp.pdf, DOC/plots/lapRTuv.pdf,
-	  DOC/plots/likegnu.pdf, DOC/plots/logo-g.tiff, DOC/plots/logo.jpg,
-	  DOC/plots/logo.pdf, DOC/plots/logo.tiff, DOC/plots/lshape.pdf,
-	  DOC/plots/medit.pdf, DOC/plots/movemesh.pdf,
-	  DOC/plots/nl-elas.pdf, DOC/plots/nosplitmesh.pdf,
-	  DOC/plots/onnewmesh.pdf, DOC/plots/onoldmesh.pdf,
-	  DOC/plots/perio4.pdf, DOC/plots/period.pdf, DOC/plots/region.pdf,
-	  DOC/plots/region_nu.pdf, DOC/plots/region_u.pdf,
-	  DOC/plots/rhoP2.pdf, DOC/plots/schwarz-no-th.pdf,
-	  DOC/plots/schwarz-no-u.pdf, DOC/plots/schwarz-no-u0.pdf,
-	  DOC/plots/schwarz-th.pdf, DOC/plots/schwarz-u.pdf,
-	  DOC/plots/schwarz-u0.pdf, DOC/plots/splitmesh.pdf,
-	  DOC/plots/squareb.pdf, DOC/plots/three.pdf, DOC/plots/threeg.pdf,
-	  DOC/plots/trunc0.pdf, DOC/plots/trunc6.pdf,
-	  DOC/plots/twosquare.pdf, DOC/plots/xyf.pdf,
-	  examples++-load/load.link, examples++-tutorial/all.edp,
-	  examples++-tutorial/array.edp, examples++-tutorial/beam.edp,
-	  examples++-tutorial/mesh.edp, src/AFunction.cpp, src/AnyType.hpp,
-	  src/Makefile-Debian, src/Makefile-Debian-Hydre,
-	  src/Makefile-arpack, src/Makefile-i386, src/Makefile-linux,
-	  src/Makefile-linux-arpack, src/Makefile-linux-noarpack,
-	  src/Makefile-powermac, src/Operator.hpp, src/lg.tab.cpp,
-	  src/lg.y, src/lgfem.cpp, src/lgmesh.cpp, src/load.cpp,
-	  src/problem.cpp, src/problem.hpp, src/throwassert.hpp,
-	  src/versionnumber.hpp, src/femlib/MatriceCreuse.hpp,
-	  src/femlib/MatriceCreuse_tpl.hpp, src/femlib/RNM.hpp,
-	  src/femlib/RNM_tpl.hpp, src/femlib/fem.cpp, src/femlib/fem.hpp,
-	  src/femlib/mshptg.cpp: [no log message]
-
-2004-05-11 17:37  ly
-
-	* DOC/manual.tex: [no log message]
-
-2004-04-26 12:08  lehyaric
-
-	* DOC/: .cvsignore, manual.tex, plots/.cvsignore: Mise à jour de la
-	  documentation enregistrée dans CVS à partir de la version de
-	  hydre:~hecht/FreeFem++-doc datée du 9/4/04.
-
-2004-04-26 11:58  lehyaric
-
-	* BUGS, COPYRIGHT, FreeFem++.cw7.mcp.sit, FreeFem++.mcp.sit,
-	  HISTORY, Makefile, Makefile-old, Makefile-unix, README,
-	  README_ARPACK, README_CW, TODO, ffpc.cw7.mcp.zip, ffpc.mcp.zip,
-	  DOC/FF.sty, DOC/FFF.sty, DOC/LB.tex, DOC/Makefile, DOC/addfe.tex,
-	  DOC/dessin.sty, DOC/docGUI.tex, DOC/mainaddfe.tex,
-	  DOC/manual.tex, DOC/plots/FIGII1.eps, DOC/plots/FIGII2.eps,
-	  DOC/plots/FIGII3.eps, DOC/plots/FIGII4.eps, DOC/plots/FIGII5.eps,
-	  DOC/plots/FIGII6.eps, DOC/plots/FIGII7.eps, DOC/plots/FIGII8.eps,
-	  DOC/plots/FIGII9.eps, DOC/plots/Laplace.eps,
-	  DOC/plots/ThrhoP2.eps, DOC/plots/Thwithhole.eps,
-	  DOC/plots/Thwithouthole.eps, DOC/plots/dTh.eps,
-	  DOC/plots/d_Thf.eps, DOC/plots/d_u.eps, DOC/plots/eigen11.eps,
-	  DOC/plots/eigen12.eps, DOC/plots/gnuplot.eps,
-	  DOC/plots/laRTp.eps, DOC/plots/lapRTuv.eps,
-	  DOC/plots/likegnu.eps, DOC/plots/logo.eps, DOC/plots/lshape.eps,
-	  DOC/plots/medit.eps, DOC/plots/movemesh.eps,
-	  DOC/plots/nl-elas.eps, DOC/plots/nosplitmesh.eps,
-	  DOC/plots/onnewmesh.eps, DOC/plots/onoldmesh.eps,
-	  DOC/plots/perio4.eps, DOC/plots/period.eps, DOC/plots/region.eps,
-	  DOC/plots/region_nu.eps, DOC/plots/region_u.eps,
-	  DOC/plots/rhoP2.eps, DOC/plots/schwarz-no-th.eps,
-	  DOC/plots/schwarz-no-u.eps, DOC/plots/schwarz-no-u0.eps,
-	  DOC/plots/schwarz-th.eps, DOC/plots/schwarz-u.eps,
-	  DOC/plots/schwarz-u0.eps, DOC/plots/splitmesh.eps,
-	  DOC/plots/squareb.eps, DOC/plots/three.eps, DOC/plots/threeg.eps,
-	  DOC/plots/trunc0.eps, DOC/plots/trunc6.eps,
-	  DOC/plots/twosquare.eps, FreeFem++.app/Contents/Info.plist,
-	  FreeFem++.app/Contents/PkgInfo,
-	  FreeFem++.app/Contents/Resources/Credits.rtf,
-	  FreeFem++.app/Contents/Resources/script,
-	  FreeFem++.app/Contents/Resources/Contents/Info.plist,
-	  FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/NSAppleMenuImage.tiff,
-	  FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/classes.nib,
-	  FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/info.nib,
-	  FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/objects.nib,
-	  arpack/arpack++/include/.DS_Store,
-	  arpack/arpack++/include/README,
-	  arpack/arpack++/include/arbgcomp.h,
-	  arpack/arpack++/include/arbgnsym.h,
-	  arpack/arpack++/include/arbgsym.h,
-	  arpack/arpack++/include/arbnsmat.h,
-	  arpack/arpack++/include/arbnspen.h,
-	  arpack/arpack++/include/arbscomp.h,
-	  arpack/arpack++/include/arbsmat.h,
-	  arpack/arpack++/include/arbsnsym.h,
-	  arpack/arpack++/include/arbspen.h,
-	  arpack/arpack++/include/arbssym.h,
-	  arpack/arpack++/include/arch.h, arpack/arpack++/include/arcomp.h,
-	  arpack/arpack++/include/ardfmat.h,
-	  arpack/arpack++/include/ardgcomp.h,
-	  arpack/arpack++/include/ardgnsym.h,
-	  arpack/arpack++/include/ardgsym.h,
-	  arpack/arpack++/include/ardnsmat.h,
-	  arpack/arpack++/include/ardnspen.h,
-	  arpack/arpack++/include/ardscomp.h,
-	  arpack/arpack++/include/ardsmat.h,
-	  arpack/arpack++/include/ardsnsym.h,
-	  arpack/arpack++/include/ardspen.h,
-	  arpack/arpack++/include/ardssym.h,
-	  arpack/arpack++/include/arerror.h,
-	  arpack/arpack++/include/argcomp.h,
-	  arpack/arpack++/include/argeig.h,
-	  arpack/arpack++/include/argnsym.h,
-	  arpack/arpack++/include/argsym.h,
-	  arpack/arpack++/include/arhbmat.h,
-	  arpack/arpack++/include/arlcomp.h,
-	  arpack/arpack++/include/arlgcomp.h,
-	  arpack/arpack++/include/arlgnsym.h,
-	  arpack/arpack++/include/arlgsym.h,
-	  arpack/arpack++/include/arlnames.h,
-	  arpack/arpack++/include/arlnsmat.h,
-	  arpack/arpack++/include/arlnspen.h,
-	  arpack/arpack++/include/arlscomp.h,
-	  arpack/arpack++/include/arlsmat.h,
-	  arpack/arpack++/include/arlsnsym.h,
-	  arpack/arpack++/include/arlspdef.h,
-	  arpack/arpack++/include/arlspen.h,
-	  arpack/arpack++/include/arlssym.h,
-	  arpack/arpack++/include/arlsupm.h,
-	  arpack/arpack++/include/arlutil.h,
-	  arpack/arpack++/include/armat.h,
-	  arpack/arpack++/include/arpackf.h,
-	  arpack/arpack++/include/arrgcomp.h,
-	  arpack/arpack++/include/arrgeig.h,
-	  arpack/arpack++/include/arrgnsym.h,
-	  arpack/arpack++/include/arrgsym.h,
-	  arpack/arpack++/include/arrscomp.h,
-	  arpack/arpack++/include/arrseig.h,
-	  arpack/arpack++/include/arrsnsym.h,
-	  arpack/arpack++/include/arrssym.h,
-	  arpack/arpack++/include/arscomp.h,
-	  arpack/arpack++/include/arseig.h,
-	  arpack/arpack++/include/arsnsym.h,
-	  arpack/arpack++/include/arssym.h,
-	  arpack/arpack++/include/arugcomp.h,
-	  arpack/arpack++/include/arugnsym.h,
-	  arpack/arpack++/include/arugsym.h,
-	  arpack/arpack++/include/arunsmat.h,
-	  arpack/arpack++/include/arunspen.h,
-	  arpack/arpack++/include/aruscomp.h,
-	  arpack/arpack++/include/arusmat.h,
-	  arpack/arpack++/include/arusnsym.h,
-	  arpack/arpack++/include/aruspen.h,
-	  arpack/arpack++/include/arussym.h,
-	  arpack/arpack++/include/blas1c.h,
-	  arpack/arpack++/include/blas1f.h,
-	  arpack/arpack++/include/caupp.h, arpack/arpack++/include/ceupp.h,
-	  arpack/arpack++/include/debug.h,
-	  arpack/arpack++/include/lapackc.h,
-	  arpack/arpack++/include/lapackf.h,
-	  arpack/arpack++/include/naupp.h, arpack/arpack++/include/neupp.h,
-	  arpack/arpack++/include/saupp.h, arpack/arpack++/include/seupp.h,
-	  arpack/arpack++/include/superluc.h,
-	  arpack/arpack++/include/umfpackc.h,
-	  arpack/arpack++/include/umfpackf.h, examples++/D2.edp,
-	  examples++/NSP1P1.edp, examples++/NSP1P1b.edp,
-	  examples++/NSP1P2.edp, examples++/Richard.edp,
-	  examples++/aaRT.edp, examples++/aaa-adp.edp,
-	  examples++/aadaptation.edp, examples++/aalapacien.edp,
-	  examples++/aalaplace-nc.edp, examples++/aamove.edp,
-	  examples++/all.edp, examples++/arrayoFVh.edp,
-	  examples++/bilap.edp, examples++/ccc-adp.edp,
-	  examples++/demo.edp, examples++/demo1.edp, examples++/funct.edp,
-	  examples++/include.edp, examples++/lap_mat.edp,
-	  examples++/lapacienprecon.edp, examples++/parareal.edp,
-	  examples++/testFE.edp, examples++/testadp.edp,
-	  examples++/teste.edp, examples++/wafer-heating-laser-axi.edp,
-	  examples++-bug/SegmentationFault.edp, examples++-bug/aaa.edp,
-	  examples++-bug/bugborder.edp, examples++-bug/bugf.edp,
-	  examples++-bug/bugv1.18.edp, examples++-bug/func.edp,
-	  examples++-bug/zArithmetic_bug1.edp,
-	  examples++-eigen/BeamEigenValue.edp,
-	  examples++-eigen/BeamEigenValueperio.edp,
-	  examples++-eigen/LapEigenValue.edp,
-	  examples++-eigen/LapnosymEigenValue.edp,
-	  examples++-eigen/Stokes-eigen.edp, examples++-eigen/all.edp,
-	  examples++-eigen/neuman.edp, examples++-load/load.edp,
-	  examples++-load/load.link, examples++-load/myfunction.cpp,
-	  examples++-mpi/essai.edp, examples++-mpi/schwarz-b.edp,
-	  examples++-mpi/schwarz-c.edp, examples++-mpi/schwarz.edp,
-	  examples++-tutorial/FE.edp, examples++-tutorial/LapDG2.edp,
-	  examples++-tutorial/Laplace.edp,
-	  examples++-tutorial/LaplaceP1.edp,
-	  examples++-tutorial/LaplaceP1P2h.edp,
-	  examples++-tutorial/LaplaceP1bis.edp,
-	  examples++-tutorial/LaplaceRT.edp,
-	  examples++-tutorial/NSUzawaCahouetChabart.edp,
-	  examples++-tutorial/Newton.edp, examples++-tutorial/Periodic.edp,
-	  examples++-tutorial/StokesUzawa.edp,
-	  examples++-tutorial/a_tutorial.edp,
-	  examples++-tutorial/adapt.edp,
-	  examples++-tutorial/adaptindicatorP1.edp,
-	  examples++-tutorial/adaptindicatorP2.edp,
-	  examples++-tutorial/aile.msh, examples++-tutorial/algo.edp,
-	  examples++-tutorial/algowithmacro.edp,
-	  examples++-tutorial/all.edp, examples++-tutorial/array.edp,
-	  examples++-tutorial/beam.edp, examples++-tutorial/blakschol.edp,
-	  examples++-tutorial/calculus.edp, examples++-tutorial/cavity.edp,
-	  examples++-tutorial/convect-apt.edp,
-	  examples++-tutorial/convect.edp,
-	  examples++-tutorial/convect2.edp,
-	  examples++-tutorial/dumptable.edp, examples++-tutorial/ex-vf.edp,
-	  examples++-tutorial/fluidStruct.edp,
-	  examples++-tutorial/fluidStructAdapt.edp,
-	  examples++-tutorial/freeboundary-weak.edp,
-	  examples++-tutorial/freeboundary.edp,
-	  examples++-tutorial/gnuplot.edp, examples++-tutorial/medit.edp,
-	  examples++-tutorial/mesh.edp, examples++-tutorial/movemesh.edp,
-	  examples++-tutorial/nolinear-elas.edp,
-	  examples++-tutorial/onde.edp, examples++-tutorial/periodic4.edp,
-	  examples++-tutorial/plot.edp, examples++-tutorial/readmesh.edp,
-	  examples++-tutorial/region.edp,
-	  examples++-tutorial/saverestore.edp,
-	  examples++-tutorial/schwarz-gc.edp,
-	  examples++-tutorial/schwarz-no-overlap.edp,
-	  examples++-tutorial/schwarz-overlap.edp,
-	  examples++-tutorial/tablefunction.edp, examples++-tutorial/xyf,
-	  src/AFunction.cpp, src/AFunction.hpp, src/AnyType.hpp,
-	  src/Carbon.r, src/FreeFem++-CoCoa, src/InitFunct.cpp,
-	  src/InitFunct.hpp, src/Makefile-Debian,
-	  src/Makefile-Debian-Hydre, src/Makefile-arpack,
-	  src/Makefile-hp9000s700, src/Makefile-i386, src/Makefile-linux,
-	  src/Makefile-linux-arpack, src/Makefile-linux-noarpack,
-	  src/Makefile-macintosh, src/Makefile-macintosh-noarpack,
-	  src/Makefile-powermac, src/Operator.hpp, src/Serialize.hpp,
-	  src/String.hpp, src/config_freefem_mpi.hpp,
-	  src/config_freefem_v3.hpp, src/config_freefem_v3_g.hpp,
-	  src/error.hpp, src/gmres.hpp, src/lex-old.cpp, src/lex.cpp,
-	  src/lex.hpp, src/lg.tab.cpp, src/lg.tab.hpp, src/lg.y,
-	  src/lgfem.cpp, src/lgfem.hpp, src/lgmesh.cpp, src/lgsolver.hpp,
-	  src/load.cpp, src/problem.cpp, src/problem.hpp, src/showverb.hpp,
-	  src/strversionnumber.cpp, src/throwassert.hpp,
-	  src/versionnumber.hpp, src/Algo/BFGS.hpp, src/Algo/BrentLS.hpp,
-	  src/Algo/CG.hpp, src/Algo/CubicLS.hpp, src/Algo/LineSearch.hpp,
-	  src/Algo/NRJ.hpp, src/Algo/NewtonRaphson.hpp,
-	  src/Algo/Optima.hpp, src/Algo/Param.hpp, src/Algo/RosenBrock.hpp,
-	  src/Algo/defs.hpp, src/Algo/lgalgo.cpp, src/Eigen/eigenvalue.cpp,
-	  src/Graphics/Pcrgraph.cpp, src/Graphics/Pcrgraph.cpp-v1.cpp,
-	  src/Graphics/Xrgraph.cpp, src/Graphics/config.h,
-	  src/Graphics/glrgraph.hpp,
-	  src/Graphics/glutrgraf-essai.cpp-zz.cpp,
-	  src/Graphics/macglrgraf.cpp, src/Graphics/macrgraf.cpp,
-	  src/Graphics/rgraph.hpp, src/Graphics/sansrgraph.cpp,
-	  src/Graphics/xglrgraf.cpp, src/bamg/bamg.cpp,
-	  src/bamg/cvmsh2.cpp, src/bamg/drawbdmesh.cpp, src/bamg/tt.cpp,
-	  src/bamglib/Mesh2.cpp, src/bamglib/Mesh2.h,
-	  src/bamglib/MeshDraw.cpp, src/bamglib/MeshGeom.cpp,
-	  src/bamglib/MeshQuad.cpp, src/bamglib/MeshRead.cpp,
-	  src/bamglib/MeshWrite.cpp, src/bamglib/Meshgibbs.cpp,
-	  src/bamglib/Meshio.cpp, src/bamglib/Meshio.h,
-	  src/bamglib/Metric.cpp, src/bamglib/Metric.h,
-	  src/bamglib/QuadTree.cpp, src/bamglib/QuadTree.h,
-	  src/bamglib/R2.cpp, src/bamglib/R2.h, src/bamglib/SetOfE4.cpp,
-	  src/bamglib/SetOfE4.h, src/bamglib/meshtype.h,
-	  src/femlib/BamgFreeFem.cpp, src/femlib/BamgFreeFem.hpp,
-	  src/femlib/CGNL.hpp, src/femlib/CheckPtr.cpp,
-	  src/femlib/ConjuguedGradrientNL.cpp, src/femlib/DOperator.hpp,
-	  src/femlib/Drawing.cpp, src/femlib/Element_P2h.cpp,
-	  src/femlib/Element_P3.cpp, src/femlib/Element_RT.cpp,
-	  src/femlib/FESpace-v0.cpp, src/femlib/FESpace.cpp,
-	  src/femlib/FESpace.hpp, src/femlib/FQuadTree.cpp,
-	  src/femlib/FQuadTree.hpp, src/femlib/MatriceCreuse.hpp,
-	  src/femlib/MatriceCreuse_tpl.hpp, src/femlib/MeshPoint.hpp,
-	  src/femlib/QuadratureFormular.cpp,
-	  src/femlib/QuadratureFormular.hpp, src/femlib/RNM.hpp,
-	  src/femlib/RNM_op.hpp, src/femlib/RNM_opc.hpp,
-	  src/femlib/RNM_tpl.hpp, src/femlib/RefCounter.hpp,
-	  src/femlib/fem.cpp, src/femlib/fem.hpp, src/femlib/fem3.hpp,
-	  src/femlib/gibbs.cpp, src/femlib/glutdraw.cpp,
-	  src/femlib/gmres.hpp, src/femlib/mortar.cpp,
-	  src/femlib/mshptg.cpp, src/femlib/tools/Element_P3.hpp,
-	  src/femlib/tools/LagrangePk.cpp,
-	  src/femlib/tools/P3_Lagrange.hpp, src/femlib/tools/Pkorder.cpp,
-	  src/femlib/tools/toto.hpp, src/iml/bicg.h, src/iml/bicgstab.h,
-	  src/iml/cg.h, src/iml/cgs.h, src/iml/cheby.h, src/iml/gmres.h,
-	  src/iml/gmres.hpp, src/iml/ir.h, src/iml/qmr.h,
-	  src/mpi/parallelempi.cpp, src/umfpack/amd.h,
-	  src/umfpack/umfpack.h, src/umfpack/umfpack_col_to_triplet.h,
-	  src/umfpack/umfpack_defaults.h,
-	  src/umfpack/umfpack_free_numeric.h,
-	  src/umfpack/umfpack_free_symbolic.h,
-	  src/umfpack/umfpack_get_lunz.h,
-	  src/umfpack/umfpack_get_numeric.h,
-	  src/umfpack/umfpack_get_symbolic.h,
-	  src/umfpack/umfpack_load_numeric.h,
-	  src/umfpack/umfpack_load_symbolic.h,
-	  src/umfpack/umfpack_numeric.h, src/umfpack/umfpack_qsymbolic.h,
-	  src/umfpack/umfpack_report_control.h,
-	  src/umfpack/umfpack_report_info.h,
-	  src/umfpack/umfpack_report_matrix.h,
-	  src/umfpack/umfpack_report_numeric.h,
-	  src/umfpack/umfpack_report_perm.h,
-	  src/umfpack/umfpack_report_status.h,
-	  src/umfpack/umfpack_report_symbolic.h,
-	  src/umfpack/umfpack_report_triplet.h,
-	  src/umfpack/umfpack_report_vector.h,
-	  src/umfpack/umfpack_save_numeric.h,
-	  src/umfpack/umfpack_save_symbolic.h, src/umfpack/umfpack_scale.h,
-	  src/umfpack/umfpack_solve.h, src/umfpack/umfpack_symbolic.h,
-	  src/umfpack/umfpack_tictoc.h, src/umfpack/umfpack_timer.h,
-	  src/umfpack/umfpack_transpose.h,
-	  src/umfpack/umfpack_triplet_to_col.h,
-	  src/umfpack/umfpack_wsolve.h: Import de FreeFem++ v1.38 par ALH
-
-2004-04-26 11:58  lehyaric
-
-	* BUGS, COPYRIGHT, FreeFem++.cw7.mcp.sit, FreeFem++.mcp.sit,
-	  HISTORY, Makefile, Makefile-old, Makefile-unix, README,
-	  README_ARPACK, README_CW, TODO, ffpc.cw7.mcp.zip, ffpc.mcp.zip,
-	  DOC/FF.sty, DOC/FFF.sty, DOC/LB.tex, DOC/Makefile, DOC/addfe.tex,
-	  DOC/dessin.sty, DOC/docGUI.tex, DOC/mainaddfe.tex,
-	  DOC/manual.tex, DOC/plots/FIGII1.eps, DOC/plots/FIGII2.eps,
-	  DOC/plots/FIGII3.eps, DOC/plots/FIGII4.eps, DOC/plots/FIGII5.eps,
-	  DOC/plots/FIGII6.eps, DOC/plots/FIGII7.eps, DOC/plots/FIGII8.eps,
-	  DOC/plots/FIGII9.eps, DOC/plots/Laplace.eps,
-	  DOC/plots/ThrhoP2.eps, DOC/plots/Thwithhole.eps,
-	  DOC/plots/Thwithouthole.eps, DOC/plots/dTh.eps,
-	  DOC/plots/d_Thf.eps, DOC/plots/d_u.eps, DOC/plots/eigen11.eps,
-	  DOC/plots/eigen12.eps, DOC/plots/gnuplot.eps,
-	  DOC/plots/laRTp.eps, DOC/plots/lapRTuv.eps,
-	  DOC/plots/likegnu.eps, DOC/plots/logo.eps, DOC/plots/lshape.eps,
-	  DOC/plots/medit.eps, DOC/plots/movemesh.eps,
-	  DOC/plots/nl-elas.eps, DOC/plots/nosplitmesh.eps,
-	  DOC/plots/onnewmesh.eps, DOC/plots/onoldmesh.eps,
-	  DOC/plots/perio4.eps, DOC/plots/period.eps, DOC/plots/region.eps,
-	  DOC/plots/region_nu.eps, DOC/plots/region_u.eps,
-	  DOC/plots/rhoP2.eps, DOC/plots/schwarz-no-th.eps,
-	  DOC/plots/schwarz-no-u.eps, DOC/plots/schwarz-no-u0.eps,
-	  DOC/plots/schwarz-th.eps, DOC/plots/schwarz-u.eps,
-	  DOC/plots/schwarz-u0.eps, DOC/plots/splitmesh.eps,
-	  DOC/plots/squareb.eps, DOC/plots/three.eps, DOC/plots/threeg.eps,
-	  DOC/plots/trunc0.eps, DOC/plots/trunc6.eps,
-	  DOC/plots/twosquare.eps, FreeFem++.app/Contents/Info.plist,
-	  FreeFem++.app/Contents/PkgInfo,
-	  FreeFem++.app/Contents/Resources/Credits.rtf,
-	  FreeFem++.app/Contents/Resources/script,
-	  FreeFem++.app/Contents/Resources/Contents/Info.plist,
-	  FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/NSAppleMenuImage.tiff,
-	  FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/classes.nib,
-	  FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/info.nib,
-	  FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/objects.nib,
-	  arpack/arpack++/include/.DS_Store,
-	  arpack/arpack++/include/README,
-	  arpack/arpack++/include/arbgcomp.h,
-	  arpack/arpack++/include/arbgnsym.h,
-	  arpack/arpack++/include/arbgsym.h,
-	  arpack/arpack++/include/arbnsmat.h,
-	  arpack/arpack++/include/arbnspen.h,
-	  arpack/arpack++/include/arbscomp.h,
-	  arpack/arpack++/include/arbsmat.h,
-	  arpack/arpack++/include/arbsnsym.h,
-	  arpack/arpack++/include/arbspen.h,
-	  arpack/arpack++/include/arbssym.h,
-	  arpack/arpack++/include/arch.h, arpack/arpack++/include/arcomp.h,
-	  arpack/arpack++/include/ardfmat.h,
-	  arpack/arpack++/include/ardgcomp.h,
-	  arpack/arpack++/include/ardgnsym.h,
-	  arpack/arpack++/include/ardgsym.h,
-	  arpack/arpack++/include/ardnsmat.h,
-	  arpack/arpack++/include/ardnspen.h,
-	  arpack/arpack++/include/ardscomp.h,
-	  arpack/arpack++/include/ardsmat.h,
-	  arpack/arpack++/include/ardsnsym.h,
-	  arpack/arpack++/include/ardspen.h,
-	  arpack/arpack++/include/ardssym.h,
-	  arpack/arpack++/include/arerror.h,
-	  arpack/arpack++/include/argcomp.h,
-	  arpack/arpack++/include/argeig.h,
-	  arpack/arpack++/include/argnsym.h,
-	  arpack/arpack++/include/argsym.h,
-	  arpack/arpack++/include/arhbmat.h,
-	  arpack/arpack++/include/arlcomp.h,
-	  arpack/arpack++/include/arlgcomp.h,
-	  arpack/arpack++/include/arlgnsym.h,
-	  arpack/arpack++/include/arlgsym.h,
-	  arpack/arpack++/include/arlnames.h,
-	  arpack/arpack++/include/arlnsmat.h,
-	  arpack/arpack++/include/arlnspen.h,
-	  arpack/arpack++/include/arlscomp.h,
-	  arpack/arpack++/include/arlsmat.h,
-	  arpack/arpack++/include/arlsnsym.h,
-	  arpack/arpack++/include/arlspdef.h,
-	  arpack/arpack++/include/arlspen.h,
-	  arpack/arpack++/include/arlssym.h,
-	  arpack/arpack++/include/arlsupm.h,
-	  arpack/arpack++/include/arlutil.h,
-	  arpack/arpack++/include/armat.h,
-	  arpack/arpack++/include/arpackf.h,
-	  arpack/arpack++/include/arrgcomp.h,
-	  arpack/arpack++/include/arrgeig.h,
-	  arpack/arpack++/include/arrgnsym.h,
-	  arpack/arpack++/include/arrgsym.h,
-	  arpack/arpack++/include/arrscomp.h,
-	  arpack/arpack++/include/arrseig.h,
-	  arpack/arpack++/include/arrsnsym.h,
-	  arpack/arpack++/include/arrssym.h,
-	  arpack/arpack++/include/arscomp.h,
-	  arpack/arpack++/include/arseig.h,
-	  arpack/arpack++/include/arsnsym.h,
-	  arpack/arpack++/include/arssym.h,
-	  arpack/arpack++/include/arugcomp.h,
-	  arpack/arpack++/include/arugnsym.h,
-	  arpack/arpack++/include/arugsym.h,
-	  arpack/arpack++/include/arunsmat.h,
-	  arpack/arpack++/include/arunspen.h,
-	  arpack/arpack++/include/aruscomp.h,
-	  arpack/arpack++/include/arusmat.h,
-	  arpack/arpack++/include/arusnsym.h,
-	  arpack/arpack++/include/aruspen.h,
-	  arpack/arpack++/include/arussym.h,
-	  arpack/arpack++/include/blas1c.h,
-	  arpack/arpack++/include/blas1f.h,
-	  arpack/arpack++/include/caupp.h, arpack/arpack++/include/ceupp.h,
-	  arpack/arpack++/include/debug.h,
-	  arpack/arpack++/include/lapackc.h,
-	  arpack/arpack++/include/lapackf.h,
-	  arpack/arpack++/include/naupp.h, arpack/arpack++/include/neupp.h,
-	  arpack/arpack++/include/saupp.h, arpack/arpack++/include/seupp.h,
-	  arpack/arpack++/include/superluc.h,
-	  arpack/arpack++/include/umfpackc.h,
-	  arpack/arpack++/include/umfpackf.h, examples++/D2.edp,
-	  examples++/NSP1P1.edp, examples++/NSP1P1b.edp,
-	  examples++/NSP1P2.edp, examples++/Richard.edp,
-	  examples++/aaRT.edp, examples++/aaa-adp.edp,
-	  examples++/aadaptation.edp, examples++/aalapacien.edp,
-	  examples++/aalaplace-nc.edp, examples++/aamove.edp,
-	  examples++/all.edp, examples++/arrayoFVh.edp,
-	  examples++/bilap.edp, examples++/ccc-adp.edp,
-	  examples++/demo.edp, examples++/demo1.edp, examples++/funct.edp,
-	  examples++/include.edp, examples++/lap_mat.edp,
-	  examples++/lapacienprecon.edp, examples++/parareal.edp,
-	  examples++/testFE.edp, examples++/testadp.edp,
-	  examples++/teste.edp, examples++/wafer-heating-laser-axi.edp,
-	  examples++-bug/SegmentationFault.edp, examples++-bug/aaa.edp,
-	  examples++-bug/bugborder.edp, examples++-bug/bugf.edp,
-	  examples++-bug/bugv1.18.edp, examples++-bug/func.edp,
-	  examples++-bug/zArithmetic_bug1.edp,
-	  examples++-eigen/BeamEigenValue.edp,
-	  examples++-eigen/BeamEigenValueperio.edp,
-	  examples++-eigen/LapEigenValue.edp,
-	  examples++-eigen/LapnosymEigenValue.edp,
-	  examples++-eigen/Stokes-eigen.edp, examples++-eigen/all.edp,
-	  examples++-eigen/neuman.edp, examples++-load/load.edp,
-	  examples++-load/load.link, examples++-load/myfunction.cpp,
-	  examples++-mpi/essai.edp, examples++-mpi/schwarz-b.edp,
-	  examples++-mpi/schwarz-c.edp, examples++-mpi/schwarz.edp,
-	  examples++-tutorial/FE.edp, examples++-tutorial/LapDG2.edp,
-	  examples++-tutorial/Laplace.edp,
-	  examples++-tutorial/LaplaceP1.edp,
-	  examples++-tutorial/LaplaceP1P2h.edp,
-	  examples++-tutorial/LaplaceP1bis.edp,
-	  examples++-tutorial/LaplaceRT.edp,
-	  examples++-tutorial/NSUzawaCahouetChabart.edp,
-	  examples++-tutorial/Newton.edp, examples++-tutorial/Periodic.edp,
-	  examples++-tutorial/StokesUzawa.edp,
-	  examples++-tutorial/a_tutorial.edp,
-	  examples++-tutorial/adapt.edp,
-	  examples++-tutorial/adaptindicatorP1.edp,
-	  examples++-tutorial/adaptindicatorP2.edp,
-	  examples++-tutorial/aile.msh, examples++-tutorial/algo.edp,
-	  examples++-tutorial/algowithmacro.edp,
-	  examples++-tutorial/all.edp, examples++-tutorial/array.edp,
-	  examples++-tutorial/beam.edp, examples++-tutorial/blakschol.edp,
-	  examples++-tutorial/calculus.edp, examples++-tutorial/cavity.edp,
-	  examples++-tutorial/convect-apt.edp,
-	  examples++-tutorial/convect.edp,
-	  examples++-tutorial/convect2.edp,
-	  examples++-tutorial/dumptable.edp, examples++-tutorial/ex-vf.edp,
-	  examples++-tutorial/fluidStruct.edp,
-	  examples++-tutorial/fluidStructAdapt.edp,
-	  examples++-tutorial/freeboundary-weak.edp,
-	  examples++-tutorial/freeboundary.edp,
-	  examples++-tutorial/gnuplot.edp, examples++-tutorial/medit.edp,
-	  examples++-tutorial/mesh.edp, examples++-tutorial/movemesh.edp,
-	  examples++-tutorial/nolinear-elas.edp,
-	  examples++-tutorial/onde.edp, examples++-tutorial/periodic4.edp,
-	  examples++-tutorial/plot.edp, examples++-tutorial/readmesh.edp,
-	  examples++-tutorial/region.edp,
-	  examples++-tutorial/saverestore.edp,
-	  examples++-tutorial/schwarz-gc.edp,
-	  examples++-tutorial/schwarz-no-overlap.edp,
-	  examples++-tutorial/schwarz-overlap.edp,
-	  examples++-tutorial/tablefunction.edp, examples++-tutorial/xyf,
-	  src/AFunction.cpp, src/AFunction.hpp, src/AnyType.hpp,
-	  src/Carbon.r, src/FreeFem++-CoCoa, src/InitFunct.cpp,
-	  src/InitFunct.hpp, src/Makefile-Debian,
-	  src/Makefile-Debian-Hydre, src/Makefile-arpack,
-	  src/Makefile-hp9000s700, src/Makefile-i386, src/Makefile-linux,
-	  src/Makefile-linux-arpack, src/Makefile-linux-noarpack,
-	  src/Makefile-macintosh, src/Makefile-macintosh-noarpack,
-	  src/Makefile-powermac, src/Operator.hpp, src/Serialize.hpp,
-	  src/String.hpp, src/config_freefem_mpi.hpp,
-	  src/config_freefem_v3.hpp, src/config_freefem_v3_g.hpp,
-	  src/error.hpp, src/gmres.hpp, src/lex-old.cpp, src/lex.cpp,
-	  src/lex.hpp, src/lg.tab.cpp, src/lg.tab.hpp, src/lg.y,
-	  src/lgfem.cpp, src/lgfem.hpp, src/lgmesh.cpp, src/lgsolver.hpp,
-	  src/load.cpp, src/problem.cpp, src/problem.hpp, src/showverb.hpp,
-	  src/strversionnumber.cpp, src/throwassert.hpp,
-	  src/versionnumber.hpp, src/Algo/BFGS.hpp, src/Algo/BrentLS.hpp,
-	  src/Algo/CG.hpp, src/Algo/CubicLS.hpp, src/Algo/LineSearch.hpp,
-	  src/Algo/NRJ.hpp, src/Algo/NewtonRaphson.hpp,
-	  src/Algo/Optima.hpp, src/Algo/Param.hpp, src/Algo/RosenBrock.hpp,
-	  src/Algo/defs.hpp, src/Algo/lgalgo.cpp, src/Eigen/eigenvalue.cpp,
-	  src/Graphics/Pcrgraph.cpp, src/Graphics/Pcrgraph.cpp-v1.cpp,
-	  src/Graphics/Xrgraph.cpp, src/Graphics/config.h,
-	  src/Graphics/glrgraph.hpp,
-	  src/Graphics/glutrgraf-essai.cpp-zz.cpp,
-	  src/Graphics/macglrgraf.cpp, src/Graphics/macrgraf.cpp,
-	  src/Graphics/rgraph.hpp, src/Graphics/sansrgraph.cpp,
-	  src/Graphics/xglrgraf.cpp, src/bamg/bamg.cpp,
-	  src/bamg/cvmsh2.cpp, src/bamg/drawbdmesh.cpp, src/bamg/tt.cpp,
-	  src/bamglib/Mesh2.cpp, src/bamglib/Mesh2.h,
-	  src/bamglib/MeshDraw.cpp, src/bamglib/MeshGeom.cpp,
-	  src/bamglib/MeshQuad.cpp, src/bamglib/MeshRead.cpp,
-	  src/bamglib/MeshWrite.cpp, src/bamglib/Meshgibbs.cpp,
-	  src/bamglib/Meshio.cpp, src/bamglib/Meshio.h,
-	  src/bamglib/Metric.cpp, src/bamglib/Metric.h,
-	  src/bamglib/QuadTree.cpp, src/bamglib/QuadTree.h,
-	  src/bamglib/R2.cpp, src/bamglib/R2.h, src/bamglib/SetOfE4.cpp,
-	  src/bamglib/SetOfE4.h, src/bamglib/meshtype.h,
-	  src/femlib/BamgFreeFem.cpp, src/femlib/BamgFreeFem.hpp,
-	  src/femlib/CGNL.hpp, src/femlib/CheckPtr.cpp,
-	  src/femlib/ConjuguedGradrientNL.cpp, src/femlib/DOperator.hpp,
-	  src/femlib/Drawing.cpp, src/femlib/Element_P2h.cpp,
-	  src/femlib/Element_P3.cpp, src/femlib/Element_RT.cpp,
-	  src/femlib/FESpace-v0.cpp, src/femlib/FESpace.cpp,
-	  src/femlib/FESpace.hpp, src/femlib/FQuadTree.cpp,
-	  src/femlib/FQuadTree.hpp, src/femlib/MatriceCreuse.hpp,
-	  src/femlib/MatriceCreuse_tpl.hpp, src/femlib/MeshPoint.hpp,
-	  src/femlib/QuadratureFormular.cpp,
-	  src/femlib/QuadratureFormular.hpp, src/femlib/RNM.hpp,
-	  src/femlib/RNM_op.hpp, src/femlib/RNM_opc.hpp,
-	  src/femlib/RNM_tpl.hpp, src/femlib/RefCounter.hpp,
-	  src/femlib/fem.cpp, src/femlib/fem.hpp, src/femlib/fem3.hpp,
-	  src/femlib/gibbs.cpp, src/femlib/glutdraw.cpp,
-	  src/femlib/gmres.hpp, src/femlib/mortar.cpp,
-	  src/femlib/mshptg.cpp, src/femlib/tools/Element_P3.hpp,
-	  src/femlib/tools/LagrangePk.cpp,
-	  src/femlib/tools/P3_Lagrange.hpp, src/femlib/tools/Pkorder.cpp,
-	  src/femlib/tools/toto.hpp, src/iml/bicg.h, src/iml/bicgstab.h,
-	  src/iml/cg.h, src/iml/cgs.h, src/iml/cheby.h, src/iml/gmres.h,
-	  src/iml/gmres.hpp, src/iml/ir.h, src/iml/qmr.h,
-	  src/mpi/parallelempi.cpp, src/umfpack/amd.h,
-	  src/umfpack/umfpack.h, src/umfpack/umfpack_col_to_triplet.h,
-	  src/umfpack/umfpack_defaults.h,
-	  src/umfpack/umfpack_free_numeric.h,
-	  src/umfpack/umfpack_free_symbolic.h,
-	  src/umfpack/umfpack_get_lunz.h,
-	  src/umfpack/umfpack_get_numeric.h,
-	  src/umfpack/umfpack_get_symbolic.h,
-	  src/umfpack/umfpack_load_numeric.h,
-	  src/umfpack/umfpack_load_symbolic.h,
-	  src/umfpack/umfpack_numeric.h, src/umfpack/umfpack_qsymbolic.h,
-	  src/umfpack/umfpack_report_control.h,
-	  src/umfpack/umfpack_report_info.h,
-	  src/umfpack/umfpack_report_matrix.h,
-	  src/umfpack/umfpack_report_numeric.h,
-	  src/umfpack/umfpack_report_perm.h,
-	  src/umfpack/umfpack_report_status.h,
-	  src/umfpack/umfpack_report_symbolic.h,
-	  src/umfpack/umfpack_report_triplet.h,
-	  src/umfpack/umfpack_report_vector.h,
-	  src/umfpack/umfpack_save_numeric.h,
-	  src/umfpack/umfpack_save_symbolic.h, src/umfpack/umfpack_scale.h,
-	  src/umfpack/umfpack_solve.h, src/umfpack/umfpack_symbolic.h,
-	  src/umfpack/umfpack_tictoc.h, src/umfpack/umfpack_timer.h,
-	  src/umfpack/umfpack_transpose.h,
-	  src/umfpack/umfpack_triplet_to_col.h,
-	  src/umfpack/umfpack_wsolve.h: Initial revision
+	* add qf1pElump   new quadrature formular in int1d() ...
 
