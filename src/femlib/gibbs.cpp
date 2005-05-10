@@ -1032,7 +1032,7 @@ int Mesh::renum()
            for (int k=0;k<2;k++,j2++)
              {  
               int v = number(bedges[j][k]);
-              assert(v >=0 && v < nv);
+              ffassert(v >=0 && v < nv);
               BoundaryAdjacencesLink[j2]=BoundaryAdjacencesHead[v];
               BoundaryAdjacencesHead[v]=j2;
             }

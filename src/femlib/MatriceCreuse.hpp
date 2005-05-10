@@ -57,7 +57,7 @@ template <class T> T* docpyornot(bool nocpy,T* p,int n)
 { 
   T * r=p;
    if( !nocpy) { // do copy 
-      r= new T[n]; assert(r);
+      r= new T[n]; ffassert(r);
       for(int i=0;i<n;i++) 
         r[i]=p[i];
       }
@@ -67,7 +67,7 @@ template <class T> T* docpyornot(bool nocpy,T* p,int n)
 { 
    T * r=0;
    if(p && n) { // do copy 
-      r= new T[n]; assert(r);
+      r= new T[n]; ffassert(r);
       for(int i=0;i<n;i++) 
         r[i]=T(p[i]); // pour cadna ???? FH 
       }
@@ -122,7 +122,7 @@ public:
        nikk(nik+lk),
        njk(nik),
        njkk(nik+lk)
-       { assert(lk>=0);}
+       { ffassert(lk>=0);}
        
   int lga;  // size of array a    
   R* a;          // array  coef --
@@ -350,7 +350,7 @@ public:
   void crout(double = EPSILON/8.) const ; //
   void LU(double = EPSILON/8.) const ; //
   R & diag(int i) { return D[i];}
-  R & operator()(int i,int j) { assert(0); return D[i];} // a faire 
+  R & operator()(int i,int j) { ffassert(0); return D[i];} // a faire 
   
   MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
   
@@ -630,7 +630,7 @@ class MatriceIdentite: VirtualMatrice<R> { public:
  typedef typename VirtualMatrice<R>::plusAx plusAx;
  MatriceIdentite() {}; 
  void addMatMul(const  KN_<R>  & x, KN_<R> & Ax) const { 
-     assert(x.N()==Ax.N());
+     ffassert(x.N()==Ax.N());
    Ax+=x; } 
  plusAx operator*(const KN<R> &  x) const {return plusAx(this,x);} 
 };  
@@ -657,7 +657,7 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 
 
  void addMatMul(const KN_<R> & x, KN_<R> & Ax) const 
-  {  assert(x.N()==Ax.N());
+  {  ffassert(x.N()==Ax.N());
      for (int i=0;i<n;i++) 
      Ax[i]+= D1[i]*x[i];}
      
@@ -701,7 +701,7 @@ public:
 	umfpack_di_report_info (Control, Info) ;
 	umfpack_di_report_status (Control, status) ;
 	cerr << "umfpack_di_symbolic failed" << endl;
-	assert(0);
+	ffassert(0);
     }
 
     status = umfpack_di_numeric (A.lg, A.cl, A.a, Symbolic, &Numeric,Control,Info) ;
@@ -710,7 +710,7 @@ public:
 	umfpack_di_report_info (Control, Info) ;
 	umfpack_di_report_status (Control, status) ;
 	cerr << "umfpack_di_numeric failed" << endl;
-	assert(0);
+	ffassert(0);
     }
 
     if (Symbolic) umfpack_di_free_symbolic (&Symbolic),Symbolic=0; 
@@ -720,7 +720,7 @@ public:
 
   }
   void Solver(const MatriceMorse<R> &A,KN_<R> &x,const KN_<R> &b) const  {
-    assert ( &x[0] != &b[0]);
+    ffassert ( &x[0] != &b[0]);
     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
     double Control[UMFPACK_CONTROL];
@@ -735,7 +735,7 @@ public:
 	umfpack_di_report_info (Control, Info) ;
 	umfpack_di_report_status (Control, status) ;
 	cerr << "umfpack_di_solve failed" << endl;
-	assert(0);
+	ffassert(0);
     }
      if(verbosity>2)
     cout << " -- umfpack_di_solve " << endl;
@@ -753,7 +753,7 @@ public:
   }
   void addMatMul(const KN_<R> & x, KN_<R> & Ax) const 
   {  
-    assert(x.N()==Ax.N());
+    ffassert(x.N()==Ax.N());
     Ax +=  (const MatriceMorse<R> &) (*this) * x; 
   }
      
@@ -796,7 +796,7 @@ public:
     //  copy the coef of the matrice ---
      ar= new double[A.nbcoef];
      ai= new double[A.nbcoef];
-     assert(ar && ai);
+     ffassert(ar && ai);
      C2RR(A.nbcoef,A.a,ar,ai);
         
     double Control[UMFPACK_CONTROL];
@@ -816,7 +816,8 @@ public:
 	umfpack_zi_report_info (Control, Info) ;
 	umfpack_zi_report_status (Control, status) ;
 	cerr << "umfpack_zi_symbolic failed" << endl;
-	assert(0);
+	ffassert(0);
+	exit(2);
     }
 
     status = umfpack_zi_numeric (A.lg, A.cl, ar,ai, Symbolic, &Numeric,Control,Info) ;
@@ -825,7 +826,8 @@ public:
 	umfpack_zi_report_info (Control, Info) ;
 	umfpack_zi_report_status (Control, status) ;
 	cerr << "umfpack_zi_numeric failed" << endl;
-	assert(0);
+	ffassert(0);
+	exit(2);
     }
 
     if (Symbolic) umfpack_zi_free_symbolic (&Symbolic),Symbolic=0; 
@@ -835,7 +837,7 @@ public:
 
   }
   void Solver(const MatriceMorse<Complex> &A,KN_<Complex> &x,const KN_<Complex> &b) const  {
-        assert ( &x[0] != &b[0]);
+        ffassert ( &x[0] != &b[0]);
     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
     double Control[UMFPACK_CONTROL];
@@ -850,7 +852,8 @@ public:
 	umfpack_zi_report_info (Control, Info) ;
 	umfpack_zi_report_status (Control, status) ;
 	cerr << "umfpack_zi_solve failed" << endl;
-	assert(0);
+	ffassert(0);
+	exit(2);
     }
     RR2C(n,xr,xi,x);
     if(verbosity>1)
@@ -870,7 +873,7 @@ public:
   }
   void addMatMul(const KN_<Complex> & x, KN_<Complex> & Ax) const 
   {  
-    assert(x.N()==Ax.N());
+    ffassert(x.N()==Ax.N());
     Ax +=  (const MatriceMorse<Complex> &) (*this) * x; 
   }
      

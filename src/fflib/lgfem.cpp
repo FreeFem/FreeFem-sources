@@ -3336,7 +3336,7 @@ class JumpOp : public E_F0mps  { public:
            if ( mp->SetAdj() )
              rd = GetAny<A>((*a)(stack));  
            *mp=smp;         
-           return  SetAny<R>(rg-rd);
+           return  SetAny<R>(rd-rg);//  external - internal 
         }
        JumpOp(Expression aa) : a(aa) {} 
     };

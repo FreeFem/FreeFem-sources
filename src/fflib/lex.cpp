@@ -52,12 +52,12 @@ bool mylex::InMotClef  (aType & t, int & r) const {
   else {
     r=i->second.first;
     t=i->second.second;
-    throwassert(r);
+    ffassert(r);
     return true;}}
 
 void  mylex::Add(Key k,int r,aType t){ 
   iterator ii= MotClef.find(k);
-  throwassert(ii==MotClef.end());
+  ffassert(ii==MotClef.end());
   MotClef.insert(make_pair<const Key,Value>(k,make_pair(r,t))); }
 
 void mylex::dump(ostream & f ) 
@@ -583,7 +583,7 @@ void mylex::xxxx::close()
 }
 void mylex::input(const char *  filename) 
 {
-  assert(level<99 && level >= -1);
+  ffassert(level<99 && level >= -1);
   if (level>=0) 
     pilesource[level].l =linenumber;
   
@@ -597,7 +597,7 @@ void mylex::input(const char *  filename)
 void mylex::input(const string & str) 
 {
   
-  assert(level<99 && level >= -1);
+  ffassert(level<99 && level >= -1);
   if (level>=0) 
     { pilesource[level].l =linenumber;
     }
@@ -611,7 +611,7 @@ void mylex::input(const string & str)
 bool mylex::close() { 
   if(debugmacro )
     cout << "\n close " << level ;
-  assert(level >=0 && level < 100);
+  ffassert(level >=0 && level < 100);
   // cout << "\n-- close " << level << endl;
   pilesource[level].close(); 
   // cout << "\n ++   " << level << endl;

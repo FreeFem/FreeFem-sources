@@ -19,7 +19,7 @@ const int Meshtag =1000;
 struct MPIrank {
     
    int who; 
-   MPIrank(int i=0) : who(i) {assert(i>=0 && i < mpisize);} 
+   MPIrank(int i=0) : who(i) {ffassert(i>=0 && i < mpisize);} 
    
    const MPIrank & operator<<(double a)const  {
      MPI::COMM_WORLD.Send(&a, 1, MPI::DOUBLE, who, 4);
@@ -50,20 +50,20 @@ struct MPIrank {
        assert(&a);
       int n= a.N();
       MPI::COMM_WORLD.Recv((double *) a, n, MPI::DOUBLE, who, 10);
-      assert(a.N()==n);
+      ffassert(a.N()==n);
       return *this;
    }
    const MPIrank & Bcast(KN<double> & a) const {
        assert(&a);
       int n= a.N();
       (void)  MPI::COMM_WORLD.Bcast((double *) a, n, MPI::DOUBLE, who);
-     assert(a.N()==n);
+     ffassert(a.N()==n);
       return *this;
    }
    
    const MPIrank & operator<<(const KN<double> *aa)const  {
      const KN<double> & a=*aa;
-      assert(a); 
+      ffassert(a); 
       int n= a.N();
       MPI::COMM_WORLD.Send((double *) a, n, MPI::DOUBLE, who, 10);
       return *this;
@@ -74,7 +74,7 @@ struct MPIrank {
       assert(a); 
       int n= a.N();
       (void) MPI::COMM_WORLD.Bcast((double *) a, n, MPI::DOUBLE, who);
-      assert(a.N()==n);
+      ffassert(a.N()==n);
       return *this;
    }
    
@@ -112,7 +112,7 @@ struct MPIrank {
    const MPIrank & operator<<(Fem2D::Mesh *  a) const {
      if(verbosity>1) 
      cout << " MPI << (mesh *) " << a << endl;
-      assert(a);
+      ffassert(a);
       Serialize  buf=(*a).serialize();       
       buf.mpisend(*this,Meshtag);
       return *this;

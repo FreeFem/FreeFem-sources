@@ -85,7 +85,7 @@ inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE
            qkk[ndf++] = -1;
           } // end for ii
          } 
-      assert(ndf <=l);
+      ffassert(ndf <=l);
    // compression suppression des doublons
        Fem2D::HeapSort(p,pk,pkk,ndf);
        int k=0;  
@@ -140,7 +140,7 @@ void MatriceElementairePleine<R>::call(int k,int ie,int label,void * stack) {
      else 
       {
         ERREUR("A FAIRE/ TO DO  (see F. hecht) ", 0); 
-        assert(0); // a faire F. Hecht desole 
+        ffassert(0); // a faire F. Hecht desole 
        
       }
    }
@@ -179,7 +179,7 @@ void MatriceElementaireSymetrique<R>::call(int k,int ie,int label,void * stack) 
      this->a[i]=0;
   if(this->onFace)
     { 
-       assert(0); // a faire 
+       ffassert(0); // a faire 
     }
   else {
 
@@ -255,7 +255,7 @@ template<class R>
   MatriceMorse<R> *MatriceProfile<R>::toMatriceMorse(bool transpose,bool copy) const 
   {
   // A FAIRE;
-    assert(0); // TODO
+    ffassert(0); // TODO
    return 0;
   }
 template<class R>
@@ -772,7 +772,7 @@ template<class K>
       cl(new int[nbcoef]),
       symetrique(A.symetrique)
 {
-  assert(a && lg &&  cl);
+  ffassert(a && lg &&  cl);
   for (int i=0;i<=this->n;i++)
     lg[i]=A.lg[i];
   for (int k=0;k<nbcoef;k++)
@@ -978,7 +978,7 @@ template<class R>
  {
    if(symetrique) return; 
    
-   assert(this->dummy==false);  
+   ffassert(this->dummy==false);  
    int *llg= new int[nbcoef];
    int *clg= new int[this->m+1];
    
@@ -1027,11 +1027,11 @@ template<class R>
     for(i=begin;i!=end;i++++)
      {
        MatriceCreuse<R> & M=*i->second;
-       assert( &M);
+       ffassert( &M);
        R coef=i->first;
       // cout << "BuildCombMat + " << coef << "*" << &M << " " << sym << endl;
        if (n==0) { n=M.n; m=M.m;}
-       else { assert(n== M.n && m==M.m);}
+       else { ffassert(n== M.n && m==M.m);}
        sym = M.addMatTo(coef,mij) && sym;              
      } 
     int nbcoef=mij.size();
@@ -1104,7 +1104,7 @@ template<class R>
     // lg est croissant  on bouche les trou   
    for(int i=1;i<=nn;i++) lg[i]=Max(lg[i-1],lg[i]); 
       
-   assert(nbcoef==k);  
+   ffassert(nbcoef==k);  
   }
 
 template<class RA>
@@ -1115,7 +1115,7 @@ template<class RA>
   bool sym=this == & B &&symetrique;
   int *blg=B.lg;
   int *bcl=B.cl;
-  assert(this->m==B.n); 
+  ffassert(this->m==B.n); 
   bool delbl= B.symetrique;
   if (delbl)
     {
@@ -1195,7 +1195,7 @@ template<class RA>
        }
      for (int i=1;i<=nn;i++)
        llg[i]+=llg[i-1];
-     assert(llg[this->n]==sij.size());
+     ffassert(llg[this->n]==sij.size());
      for (set<pair<int,int> >::iterator iter=sij.begin();iter!=sij.end();++iter)
       { 
         int i=iter->first;
@@ -1610,10 +1610,10 @@ double MatriceMorse<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gma
 {
   double err=0;
   int n=this->n;
-  assert(n==this->m);
-  assert(n==x.N());
-  assert(n==gmin.N());
-  assert(n==gmax.N());
+  ffassert(n==this->m);
+  ffassert(n==x.N());
+  ffassert(n==gmin.N());
+  ffassert(n==gmax.N());
   if (symetrique)
    {
      ErrorExec("Error:sorry psor just for no symetric  morse matrices",1);
@@ -1656,32 +1656,32 @@ double MatriceProfile<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & g
 template<class R>
 void MatriceProfile<R>::setdiag(const KN_<R> & x) 
 {
-  assert(D);
- assert( this->n == x.N());
+  ffassert(D);
+ ffassert( this->n == x.N());
   KN_<R> d(D,this->n) ;
   d=x;
 }
 template<class R>
 void MatriceProfile<R>::getdiag(KN_<R> & x) 
 {
-  assert(D);
-  assert( this->n == x.N());
+  ffassert(D);
+  ffassert( this->n == x.N());
   KN_<R> d(D,this->n) ;
   x=d;  
 }
 template<class R>
 void MatriceMorse<R>::setdiag(const KN_<R> & x) 
 {
- assert( this->n == this->m);
- assert( this->n == x.N());
+ ffassert( this->n == this->m);
+ ffassert( this->n == x.N());
  for (int i=0;i<this->n;++i)
     diag(i) = x[i];
 }
 template<class R>
 void MatriceMorse<R>::getdiag(KN_<R> & x) 
 {
- assert( this->n == this->m);
- assert( this->n == x.N());
+ ffassert( this->n == this->m);
+ ffassert( this->n == x.N());
  for (int i=0;i<this->n;++i)
      x[i]= diag(i) ;
   
