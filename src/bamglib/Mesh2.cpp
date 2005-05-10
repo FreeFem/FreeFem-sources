@@ -1320,7 +1320,7 @@ Real8  Vertex::Smoothing(Triangles & Th,const Triangles & BTh,Triangle  * & tsta
      jc = NextEdge[tria->NuEdgeTriangleAdj(j)];
      tria = ttc;
      j = NextEdge[jc];
-     assert(k<2000);
+     ffassert(k<2000);
   } while ( tbegin != tria); 
   if (kk<4) return 0;
   PNew = PNew/(Real8)kk;
@@ -1391,7 +1391,7 @@ Real8  Vertex::Smoothing(Triangles & Th,const Triangles & BTh,Triangle  * & tsta
 	jc = NextEdge[tria->NuEdgeTriangleAdj(j)];
 	tria = ttc;
 	j = NextEdge[jc];
-	assert(k<2000);
+	ffassert(k<2000);
       } while ( tbegin != tria); 
       if (ok && loop) vP=vPsave; // no move 
       loop=0;
@@ -1550,7 +1550,7 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
         }      
 #endif
      }
-    assert(rswap);
+    ffassert(rswap);
   }
  
 #ifdef DEBUG 
@@ -2700,7 +2700,7 @@ void Triangles::FindSubDomain(int OutSide=0)
 	  mark[it]=k++;}
 	//    else if(mark[it] == -2 ) triangles[it].Draw(999);
 	it++;} // end white (it<nbt)
-      assert(k== NbSubDomains);
+      ffassert(k== NbSubDomains);
       if(OutSide) 
 	{
 	  //  to remove all the sub domain by parity adjacents
@@ -2979,7 +2979,7 @@ void Triangles::ReNumberingTheTriangleBySubDomain(bool justcompress)
     if (renu[it]==-1) 
       renu[it]=k++;
       
-    assert(k == nbt);
+    ffassert(k == nbt);
    // do the change on all the pointeur 
    for ( it=0;it<nbt;it++)
      triangles[it].ReNumbering(triangles,te,renu);
@@ -3014,7 +3014,7 @@ void Triangles::ReNumberingTheTriangleBySubDomain(bool justcompress)
  }
 Int4  Triangles::ConsRefTriangle(Int4 *reft) const
 {
-  assert(reft);
+  ffassert(reft);
   register Triangle *t0,*t;
   register Int4 k=0, num;   
   for (Int4 it=0;it<nbt;it++) 
@@ -3130,11 +3130,11 @@ void Triangles::PreInit(Int4 inbvx,char *fname)
 
   if (inbvx) {
     vertices=new Vertex[nbvx];
-    assert(vertices);
+    ffassert(vertices);
     ordre=new (Vertex* [nbvx]);
-    assert(ordre);
+    ffassert(ordre);
     triangles=new Triangle[nbtx];
-    assert(triangles);}
+    ffassert(triangles);}
   else {
     vertices=0;
     ordre=0;
@@ -3208,7 +3208,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
   2 internal 
   
   *************************************************************************/
-  assert(&BTh.Gh == &Gh);
+  ffassert(&BTh.Gh == &Gh);
   BTh.NbRef++; // add a ref to BackGround Mesh
   PreInit(inbvx);
   BTh.SetVertexFieldOn();
@@ -3247,7 +3247,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
       cerr << " Too much vertices on geometry " << NbVerticesOnGeomVertex << " >= " << nbvx << endl; 
       MeshError(1);
     }
-  assert(vertices);
+  ffassert(vertices);
   for (i=0;i<Gh.nbv;i++)
     if (Gh[i].Required()) {//Gh  vertices Required
         vertices[nbv] =  Gh[i];
@@ -3269,7 +3269,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 	 gv->to->m = bv->m; // for taking the metrix of the background mesh
 	 ;}
     }
-  assert(NbVertexOnBThVertex == NbVerticesOnGeomVertex);
+  ffassert(NbVertexOnBThVertex == NbVerticesOnGeomVertex);
 // new stuff FH with curve
 //  find the begin of the curve in BTh
 {
@@ -3309,7 +3309,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 	        }      
             }
     } 
-   assert( bfind==Gh.NbOfCurves);
+   ffassert( bfind==Gh.NbOfCurves);
 }          
 // method in 2 + 1 step 
 //  0.0) compute the length and the number of vertex to do allocation
@@ -3466,7 +3466,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 			}
 			
 		      }               
-		      assert(ee.on->CurveNumber==ei.on->CurveNumber);
+		      ffassert(ee.on->CurveNumber==ei.on->CurveNumber);
 		      
 		      if ( ee[k1].on->IsRequiredVertex()) {
 		         assert(eeequi[k1equi].on->IsRequiredVertex());
@@ -3512,7 +3512,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
                       A0->Draw();
 		      //                      inquire();
 #endif
-                      assert(i==NbCreatePointOnCurve);
+                      ffassert(i==NbCreatePointOnCurve);
   
                     }
 		   } //  end loop on equi curve 
@@ -3562,7 +3562,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 	NbOfNewEdge = 0;
       }
     } // for(step;;)
-  assert(nbe);
+  ffassert(nbe);
 
  delete [] bcurve;
  
@@ -3634,13 +3634,13 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
     //  cout << "--------- "  <<Number(Gh[i].to) << " " << Gh[i].to << " " << i << endl;
       nbv++;
     }
-//  assert( Gh.nbv < nbvx);
+//  ffassert( Gh.nbv < nbvx);
   
   // Method in 2 step:  0 and 1 
   // 1) compute de nb of edge 
   // 2) construct the edge    
   // generation of the curves
-  assert(! edges);
+  ffassert(! edges);
 #ifdef DRAWING1
   reffecran();
 #endif
@@ -3697,7 +3697,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 	     PreviousNewEdge=0;
              NbNewPoints=0;
              NbEdgeCurve=0;
-	     assert(nbvend < nbvx); 
+	     ffassert(nbvend < nbvx); 
 	    lcurve =0;
             s = lstep;
             int k=j;
@@ -3852,18 +3852,20 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
     } // for (i=0;i<nbe;i++)
     if(!step) {
      // cout << "edges " << edges << " VerticesOnGeomEdge " <<VerticesOnGeomEdge << endl;
-      assert(!edges);
-      assert(!VerticesOnGeomEdge);
+      ffassert(!edges);
+      ffassert(!VerticesOnGeomEdge);
       edges = new Edge[nbex=nbe];
       VerticesOnGeomEdge = new VertexOnGeom[NbVerticesOnGeomEdge0];
+      ffassert(edges);
+      ffassert(VerticesOnGeomEdge);
         // do the vertex on a geometrical vertex
        NbVerticesOnGeomEdge0 = NbVerticesOnGeomEdge;       
      }
      else 
-       assert(NbVerticesOnGeomEdge == NbVerticesOnGeomEdge0);
+       ffassert(NbVerticesOnGeomEdge == NbVerticesOnGeomEdge0);
     // cout << " Nb of Curves = " << NbOfCurves << "nbe = " << nbe 
     //	 << "== " << nbex << "  nbv = " << nbv <<  endl;
-    assert(nbex=nbe);
+    ffassert(nbex=nbe);
    } // for (step=0;step<2;step++)
 
 #ifdef DRAWING1
@@ -3889,7 +3891,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 
 Edge** Triangles::MakeGeometricalEdgeToEdge()
  {
-  assert(Gh.nbe);
+  ffassert(Gh.nbe);
   Edge **e= new (Edge* [Gh.nbe]);
   
   Int4 i;
@@ -3926,7 +3928,7 @@ Edge** Triangles::MakeGeometricalEdgeToEdge()
 	 if(kk++<10) {
 	   cerr << " Bug -- the geometrical edge " << i << " is on no edge curve = " << Gh.edges[i].CurveNumber 
 		<< " s0 " << Gh.Number( Gh.edges[i][0]) << " s1  " << Gh.Number( Gh.edges[i][1]) << endl; 
-	 //	 assert( e[i]);
+	 //	 ffassert( e[i]);
        }
   if(kk) MeshError(997);
 
@@ -3935,7 +3937,7 @@ Edge** Triangles::MakeGeometricalEdgeToEdge()
 
 Triangles::~Triangles() 
 {
-  assert(NbRef<=0);
+  ffassert(NbRef<=0);
   if (CurrentTh == this) CurrentTh=0;
   if(verbosity>10)
     cout << " ~Triangles "<< this  <<" "<< identity << endl;
@@ -3983,7 +3985,7 @@ void Triangles::SetIntCoor(char * strfrom)
     pmin = pmin-DD;
     pmax = pmax+DD; 
     coefIcoor= (MaxICoor)/(Max(pmax.x-pmin.x,pmax.y-pmin.y));
-    assert(coefIcoor >0);
+    ffassert(coefIcoor >0);
 
     // generation of integer coord  
     for (i=0;i<nbv;i++) {
@@ -4047,7 +4049,7 @@ void Triangles::FillHoleInMesh()
       cout << " -- FillHoleInMesh: Nb of vertices =" << nbv 
 	   << " Pmin = "<< pmin << " Pmax = "<< pmax << endl;
     
-    assert(ordre);
+    ffassert(ordre);
     for (i=0;i<nbv;i++) 
       ordre[i]= 0 ;
     
@@ -4289,7 +4291,7 @@ void Triangles::FillHoleInMesh()
 #endif
       }
 	 // cout <<      savenbt+NbTfillHoll << " " <<  savenbtx  << endl;
-     assert(savenbt+NbTfillHoll <= savenbtx );
+     ffassert(savenbt+NbTfillHoll <= savenbtx );
      // copy of the outside triangles in saveTriangles 
      for (i=0;i<nbt;i++)
        if(triangles[i].color>=0) 
@@ -4652,7 +4654,7 @@ void  Triangles::ShowHistogram() const
 
 int  Triangles::Crack()
   { 
-    assert(NbCrackedEdges ==0 || NbCrackedVertices >0); 
+    ffassert(NbCrackedEdges ==0 || NbCrackedVertices >0); 
     for (int i=0;i<NbCrackedEdges;i++)
        CrackedEdges[i].Crack();
     return NbCrackedEdges;
@@ -4660,7 +4662,7 @@ int  Triangles::Crack()
   
 int Triangles::UnCrack() 
 { 
-  assert(NbCrackedEdges ==0 || NbCrackedVertices >0); 
+  ffassert(NbCrackedEdges ==0 || NbCrackedVertices >0); 
   for (int i=0;i<NbCrackedEdges;i++)
     CrackedEdges[i].UnCrack();
   return NbCrackedEdges;
@@ -4713,7 +4715,7 @@ int Triangles::CrackMesh()
       int kkk =0; // nb triangle  with same number 
       Triangle * tbegin = v.t;
       int i  = v.vint;       
-      assert(tbegin && (i >= 0 ) && (i <3));
+      ffassert(tbegin && (i >= 0 ) && (i <3));
       // turn around the vertex v
       TriangleAdjacent ta(tbegin,EdgesVertexTriangle[i][0]);// previous edge
       int k=0;
@@ -4742,7 +4744,7 @@ int Triangles::CrackMesh()
 	
 	ta = Next(ta).Adj(); 
       } while ( (tbegin != ta)); 
-      assert(k);
+      ffassert(k);
       if (kc)  nbcrakev++;
     }
   
@@ -4870,7 +4872,7 @@ Triangles::Triangles(const Triangles & Tho,const int *flag ,const int *bb)
           vertices[nbv].ReferenceNumber = refv[i];
         nbv++;
       }
-  assert(inbvx == nbv);
+  ffassert(inbvx == nbv);
   for (i=0;i<Tho.nbt;i++)
     if(  reft[i] >=0 && flag[i]) 
       {
@@ -4886,7 +4888,7 @@ Triangles::Triangles(const Triangles & Tho,const int *flag ,const int *bb)
         triangles[nbt].color = Tho.subdomains[reft[i]].ref; 
         nbt++;           
       }
-  assert(kt==nbt);
+  ffassert(kt==nbt);
   if (nbt ==0 && nbv ==0) {
     cout << "Error all triangles was remove " << endl;
     MeshError(999);
@@ -4900,8 +4902,8 @@ Triangles::Triangles(const Triangles & Tho,const int *flag ,const int *bb)
   SetIntCoor();
   FillHoleInMesh();
    
-  assert(NbSubDomains);
-  assert(subdomains[0].head && subdomains[0].head->link);
+  ffassert(NbSubDomains);
+  ffassert(subdomains[0].head && subdomains[0].head->link);
              
 }
   
@@ -4918,7 +4920,7 @@ Triangle * Triangles::FindTriangleContening(const I2 & B,Icoor2 dete[3], Triangl
     t=tstart;
   else 
    {
-   assert(quadtree);
+   ffassert(quadtree);
    Vertex *a = quadtree->NearestVertex(B.x,B.y) ;
   
   if (! a || !a->t ) {
@@ -4928,13 +4930,13 @@ Triangle * Triangles::FindTriangleContening(const I2 & B,Icoor2 dete[3], Triangl
     cerr << " Pb with " << B << toR2(B) << endl;
     MeshError(7777);
   }
-  assert(a>= vertices && a < vertices+nbv);
+  ffassert(a>= vertices && a < vertices+nbv);
 #ifdef DRAWING1 
   a->Draw();
 #endif 
   //  int k=0;
    t = a->t;
-  assert(t>= triangles && t < triangles+nbt);
+  ffassert(t>= triangles && t < triangles+nbt);
    
    }
   Icoor2  detop ;

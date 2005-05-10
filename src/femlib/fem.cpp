@@ -229,7 +229,7 @@ void Mesh::ConsAdjacence()
       int * linkd = new int [nv]; //  to link
       int * NextT3= new int[3*nt];
       int * headT3= new int[nv];
-      throwassert( linkg && linkd);
+      ffassert( linkg && linkd);
       for (int i=0;i<nv;i++) 
         headT3[i]=linkg[i]=linkd[i]=-1; // empty
       //   create the 2 link 
@@ -308,7 +308,7 @@ void Mesh::ConsAdjacence()
         // one to compute the NbMortars
         // one to store in mortars and kdm 
         int * datag=0,*datad=0;
-        throwassert(step++<2);
+        ffassert(step++<2);
         if (NbMortars)
           { // do allocation 
           int kdm=kdmgaa+kdmdaa;
@@ -320,7 +320,7 @@ void Mesh::ConsAdjacence()
              datamortars[i]=0;
             datag=datamortars;
             datad=datamortars+kdmgaa;
-            throwassert(kdmg && kdmd);
+            ffassert(kdmg && kdmd);
           }
         int onbm=NbMortars;
        // cout << "begin " << NbMortars << " g " << kdmg << " d " <<kdmd << endl;
@@ -368,7 +368,7 @@ void Mesh::ConsAdjacence()
                         } 
                     }
                 }
-              throwassert(p!=-2);
+              ffassert(p!=-2);
               
               // throwassert(km % 2 == 0);
               HeapSort(bmortars,km); 
@@ -389,9 +389,9 @@ void Mesh::ConsAdjacence()
                     {//  same angle mod 2 * Pi
                      //  beginning of a mortars 
                       if(mortars)  { //  set the pointeur
-                        throwassert(NbMortars< onbm);
-                        throwassert(datag && datad);
-                        throwassert(datag< datamortars+ kdm);
+                        ffassert(NbMortars< onbm);
+                        ffassert(datag && datad);
+                        ffassert(datag< datamortars+ kdm);
                         mortars[NbMortars].left  = datag;
                         mortars[NbMortars].right = datad;
                         mortars[NbMortars].Th = this;
@@ -527,19 +527,19 @@ void Mesh::ConsAdjacence()
                          // cout << "    Mortars from " << is << " to " << sgd[0] << " " << nm[0] << " " << nm[1]<< " " <<  kdmg <<  " " << kdmd << endl;
 
 	                  if(mortars ) {
-	                        throwassert(NbMortars< onbm);
+	                        ffassert(NbMortars< onbm);
 	                        mortars[NbMortars].nleft  = nm[0];
 	                        mortars[NbMortars].nright = nm[1];
 	                      
 	                        //  check
 	                        for (int i=0;i++;i<mortars[NbMortars].nleft)
 	                           if ( mortars[NbMortars].left[i] <0 ||  mortars[NbMortars].left[i] < 3*nt)
-	                             throwassert(0);
+	                             ffassert(0);
 	                        for (int i=0;i++;i<mortars[NbMortars].nright)
 	                           if ( mortars[NbMortars].right[i] <0 ||  mortars[NbMortars].right[i] < 3*nt)
-	                             throwassert(0);                             
-	                        throwassert(datag <= datamortars + kdmgo + kdmdo); 
-	                        throwassert(datad <= datamortars + kdmgo + kdmdo); 
+	                             ffassert(0);                             
+	                        ffassert(datag <= datamortars + kdmgo + kdmdo); 
+	                        ffassert(datad <= datamortars + kdmgo + kdmdo); 
 	                        }
                             kdmg += nm[0];
                             kdmd += nm[1]; 
@@ -554,7 +554,7 @@ void Mesh::ConsAdjacence()
          {
        // cout << "end " << NbMortars << " g " << kdmg << " d " <<kdmd << endl;
         // cout << kdmgo << " " << kdmg << " " << kdmdo << " " << kdmd << endl;
-         throwassert(kdmgo == kdmgaa && kdmdo == kdmdaa);}
+         ffassert(kdmgo == kdmgaa && kdmdo == kdmdaa);}
       }  while (NbMortars && !mortars) ;
       
    //   rattente(1);
@@ -607,7 +607,7 @@ void Mesh::ConsAdjacence()
 }
 void  Mesh::BoundingBox(R2 &Pmin,R2 &Pmax) const 
 {
-    throwassert(nv);
+    ffassert(nv);
     Pmin=Pmax=vertices[0];
     for (int i=0;i<nv;i++)
         { 
@@ -643,26 +643,26 @@ void Mesh::read(const char * filename)
     if (!f) {
          cerr << "Erreur ouverture du fichier " << filename << endl;
          throw(ErrorExec("exit",1));}
-   // throwassert(f);
+   // ffassert(f);
    if(verbosity)
     cout << " Read On file \"" <<filename<<"\""<<  endl;
     f >> nv >> nt >> neb ;
    if(verbosity)
     cout << "   Nb of Vertex " << nv << " " << " Nb of Triangles " 
          << nt << " Nb of boundary edge " << neb <<  endl;
-    throwassert(f.good() && nt && nv) ;
+    ffassert(f.good() && nt && nv) ;
     triangles = new Triangle [nt];
     vertices  = new Vertex[nv];
     bedges    = new BoundaryEdge[neb];
     area=0;
-    throwassert(triangles && vertices && bedges);
+    ffassert(triangles && vertices && bedges);
 
     for (i=0;i<nv;i++)    
-        f >> vertices[i],throwassert(f.good());
+        f >> vertices[i],ffassert(f.good());
 
     for (i=0;i<nt;i++) { 
         f >> i0 >> i1 >> i2 >> ir;
-        throwassert(f.good() && i0>0 && i0<=nv && i1>0 && i1<=nv && i2>0 && i2<=nv);
+        ffassert(f.good() && i0>0 && i0<=nv && i1>0 && i1<=nv && i2>0 && i2<=nv);
         triangles[i].set(vertices,i0-1,i1-1,i2-1,ir); 
         area += triangles[i].area;}
    
@@ -853,7 +853,7 @@ int Walk(const Mesh & Th,int& it, R *l,
             l[j]=0;
             l[(j+1)%3] = b;
             l[(j+2)%3] = a;
-            throwassert(k++<1000);
+            ffassert(k++<1000);
         }
     return it;
 }
@@ -894,7 +894,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
             triangles[its].Fill(2);
             DrawMark(P,0.01);
             rattente(1);*/
-            throwassert(k++<1000);
+            ffassert(k++<1000);
             }
           int kk,n=0,nl[3];
            
@@ -1579,7 +1579,7 @@ Mesh::Mesh(const  Serialize &serialized)
     vertices  = new Vertex[nv];
     bedges    = new BoundaryEdge[neb];
     area=0;
-    throwassert(triangles && vertices && bedges);
+    ffassert(triangles && vertices && bedges);
 
     for (int i=0;i<nv;i++)    
      {

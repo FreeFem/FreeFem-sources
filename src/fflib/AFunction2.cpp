@@ -315,7 +315,7 @@ basicForEachType::~basicForEachType()
   }
 
  void basicForEachType::SetArgs(const ListOfId *lid) const
-{ SHOWVERB(cout << "SetArgs::\n ") ;throwassert(lid==0 || lid->size()==0);}
+{ SHOWVERB(cout << "SetArgs::\n ") ;ffassert(lid==0 || lid->size()==0);}
 
 
 const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
@@ -390,7 +390,7 @@ void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
    CastFunc ff[]={f1,f2,f3,f4,f5,f6,f7,f8,0};
    for (int i=0;ff[i];i++)
     {
-      throwassert(this == *ff[i] );
+      ffassert(this == *ff[i] );
       if (casting->FindSameR(*ff[i]))
        {
          cerr << " The casting to " << *ff[i] << " exist " << endl;
@@ -452,12 +452,12 @@ void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
  
 Expression NewExpression(Function1 f,Expression a)
 {
-  throwassert(f);
+  ffassert(f);
   return new E_F0_Func1(f,a);
 }
 Expression NewExpression(Function2 f,Expression a,Expression b)
 {
-  throwassert(f);
+  ffassert(f);
   return new E_F0_Func2(f,a,b);
  
 }
@@ -496,7 +496,7 @@ Expression NewExpression(Function2 f,Expression a,Expression b)
 /*
 FuncForEachType::FuncForEachType(const basicForEachType * t)
 : rtype(t),basicForEachType(t->,sizeof((void*)()),
-         0,0,0,0){ throwassert(t);}
+         0,0,0,0){ ffassert(t);}
 */
 
 E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)

@@ -1,3 +1,13 @@
+2005-05-04 13:09  hecht
+
+	*      do autoreconf to rebuild Makefile.in files
+
+2005-05-04 13:06  hecht
+
+	*      add  10^10 and  10.^10 operator (due to error in sphere
+	  .edp)
+	       and set the version number to 1.46-2
+
 2005-05-03 16:25  hecht
 
 	*   remove pascal in "\p  "  macos version

@@ -340,7 +340,7 @@ FESumConstruct::FESumConstruct(int kk,const TypeOfFE **t)
        xx=xxx;
      }
   
-  throwassert(c== 5*n+N);      
+  ffassert(c== 5*n+N);      
 /*  int cc=0;
    cout << " Data : " << endl;
   for ( i=0;i<5;i++)    {
@@ -590,7 +590,7 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
   int nbne = NbNodes;
   int nn=0;  
   int firstmul=0;
-  throwassert( tm || Th.NbMortars==0);
+  ffassert( tm || Th.NbMortars==0);
   NbOfElements = Th.nt; //  by default
   // if mortars 
   //
@@ -649,7 +649,7 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
         {
           samendf= false;
           NbOfNodeL=Th.NbMortars;
-          throwassert(tm);
+          ffassert(tm);
           FirstNodeOfElement = new int[NbOfElements+1];
           int k=0,kk=0;          
           for (k=0;k<Th.nt;k++,kk+=nbne)
@@ -761,12 +761,12 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
                
                //cout << im ;
                //dump(": ",i-iold, NodesOfElement+iold);
-               throwassert(i==FirstNodeOfElement[im+Th.nt+1]);
+               ffassert(i==FirstNodeOfElement[im+Th.nt+1]);
               }
              delete [] color;
           } 
         else
-          throwassert(i==Th.nt*nbne && i );
+          ffassert(i==Th.nt*nbne && i );
         NbOfNode=nn;
                 
         
@@ -776,7 +776,7 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
    if (! samendf) 
        {
          
-         throwassert(NodesOfElement);
+         ffassert(NodesOfElement);
          FirstDfOfNode= new int [nn+1];
          for (int i=0;i<=nn;i++) FirstDfOfNode[i]=-1; 
          int i=0;
@@ -967,7 +967,7 @@ void ConstructDataFElement::renum(const long *r,int l)
       else cout << "\n " << i << ":\t" << r[i] << "\t";
       cout << endl; 
 */
-   throwassert(this);
+   ffassert(this);
    if (NodesOfElement) 
      for (int i=0;i< l ; i++)
        NodesOfElement[i]=r[NodesOfElement[i]];
@@ -1633,9 +1633,9 @@ class TypeOfMortarCas1: public TypeOfMortar {
       }
   
    int NodeOfDF(const FESpace &Vh,const Mortar &M,int i) const 
-     {throwassert(0);return 0;}
+     {ffassert(0);return 0;}
    int DFOfNode(const FESpace &Vh,const Mortar &M,int i) const 
-     {throwassert(0);return 0;}
+     {ffassert(0);return 0;}
    TheSubFMortars  * Constructor(const FESpace &Vh,const Mortar &M);  
    void ConstructionOfNode(const Mesh &Th,int im,int * NodesOfElement,int *FirstNodeOfElement,int &lastnodenumber) const;
    void ConsTheSubMortar(FMortar & ) const; 
@@ -1744,8 +1744,8 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
      int l=0,g=0;
      R2 A(M.VLeft(0));
      R2 B(M.VLeft(nl));
-     throwassert(&M.VLeft(0) == &M.VRight(0));
-     throwassert(&M.VLeft(nl) == &M.VRight(nr));
+     ffassert(&M.VLeft(0) == &M.VRight(0));
+     ffassert(&M.VLeft(nl) == &M.VRight(nr));
     
      R2 AB(A,B);
      R lg=Norme2(AB);
@@ -1781,7 +1781,7 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
      } while (il<nl && ir < nr);
      
   //   cout << "k=" << k <<endl;
-     throwassert(nbsm==Max(nl,nr)); 
+     ffassert(nbsm==Max(nl,nr)); 
      //throwassert(nbsm<=k);
     nbsm=k;
     sm.nbsm=k;
@@ -1832,7 +1832,7 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
        }
       nmul++;
      // cout << " " << nmul << " " <<  sm.NbDoF(0) << endl;
-      throwassert(nmul==sm.NbDoF(0));
+      ffassert(nmul==sm.NbDoF(0));
      
    }
    
@@ -1845,7 +1845,7 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
        R2 AB(A,B);
        R lg=Norme2(AB);
        R leps = lg/1048576.0;
-       throwassert(nl==1 || nr==1);
+       ffassert(nl==1 || nr==1);
        R lgp=0,lgc=0,lgs=0;
        int nbmul=3; 
        if (nr==1) 
@@ -1892,7 +1892,7 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
             
          }
         }
-       throwassert(nbmul>2);
+       ffassert(nbmul>2);
        return nbmul;
       }  
 
@@ -1907,7 +1907,7 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
     nbn(Vh.NbOfNodesInElement(k)),
     tom(Vh.tom)
     
- { throwassert(k>=Vh.Th.nt && k <Vh.Th.nt + Vh.Th.NbMortars);
+ { ffassert(k>=Vh.Th.nt && k <Vh.Th.nt + Vh.Th.NbMortars);
    VVh->tom->ConsTheSubMortar(*this);}
    
  R TypeOfFE::operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const 

@@ -60,7 +60,7 @@ protected:
   void setparam( const Param<R>& x )
     {
      KN<double> *p=GetAny<KN<double> *>( (*theparame)(stack) );
-     assert( p->N() == x.N());
+     ffassert( p->N() == x.N());
      *p =x;
     }
 public:

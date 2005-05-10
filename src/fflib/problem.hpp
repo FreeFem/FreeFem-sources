@@ -135,7 +135,7 @@ class TabFuncArg { public:
         v[i] = 0;
   }
   TabFuncArg(Stack ss,int n) : s(ss),nb(n),e(new Expression[n]) {}
-  void operator=(int j) { throwassert(j==0); for (int i=0;i<nb;i++) e[i]=0;} // resert
+  void operator=(int j) { ffassert(j==0); for (int i=0;i<nb;i++) e[i]=0;} // resert
   Expression  & operator[](int i){return e[i];}
   ~TabFuncArg() {delete [] e;}
 private: // no copy 
@@ -176,11 +176,11 @@ class C_args: public E_F0mps  {public:
 class C_args_minus: public C_args  {public:
   C_args_minus(  const basicAC_F0 & args) { 
     int n=args.size();
-    throwassert(n==2);    
+    ffassert(n==2);    
     if (args[0].left() == atype<const C_args *>())
       {
         const C_args * a = dynamic_cast<const C_args *>(args[0].LeftValue());
-        throwassert(a);
+        ffassert(a);
         for (list<C_F0>::const_iterator i=a->largs.begin();i!=a->largs.end();i++)
           largs.push_back(*i);                   
       }
@@ -202,11 +202,11 @@ class Minus_Form: public  E_F0mps    {public:
   static ArrayOfaType  typeargs() { return ArrayOfaType(atype<const F *>());}
   static  E_F0 * f(const basicAC_F0 & args) { 
     int n=args.size();
-    throwassert(n==1);
+    ffassert(n==1);
     aType tF=atype<Result>();
-    throwassert(args[0].left() == tF);
+    ffassert(args[0].left() == tF);
     Result f = dynamic_cast<Result>(args[0].LeftValue());
-    throwassert(f);
+    ffassert(f);
     // F mf = -*f;
     F * rf=new F(-*f);
     return  rf;
@@ -224,7 +224,7 @@ class BC_set : public E_F0mps { public:
   vector<pair<int,Expression> > bc; //  n¡ de l'inconnue+ valeur
   BC_set(  const basicAC_F0 & args) :on(args.size()){
     int n = args.size();      
-    throwassert(args.named_parameter);
+    ffassert(args.named_parameter);
     AC_F0::const_iterator ii=args.named_parameter->begin();
     AC_F0::const_iterator ie=args.named_parameter->end();
     bc.resize(args.named_parameter->size());
@@ -241,9 +241,9 @@ class BC_set : public E_F0mps { public:
         if (x.left() != atype<const finconnue *>())
           CompileError("We wait for a unkown  u=... of the problem");
         const finconnue * uu = dynamic_cast<const finconnue *>(x.LeftValue());
-        throwassert(uu);
+        ffassert(uu);
         const MGauche *ui=uu->simple();
-        throwassert(ui && ui->second == op_id);
+        ffassert(ui && ui->second == op_id);
         // cout << ii->first << " n¡" << ui->first <<   " = ? " << endl;
         if (complextype)
         bc[kk]= make_pair(ui->first,CastTo<Complex>(ii->second));
@@ -416,7 +416,7 @@ class FormBilinear : public E_F0mps { public:
   // to find if the form is real or complex 
   
   // delete bb; il ne faut pas detruire .. car bb peut etre dans une variable 
-    throwassert(di && b); }
+    ffassert(di && b); }
   
   static ArrayOfaType  typeargs() { return ArrayOfaType(atype<A>(),atype<B>());}// all type
   AnyType operator()(Stack ) const { return SetAny<Result>(this);}
@@ -424,7 +424,7 @@ class FormBilinear : public E_F0mps { public:
 
   static  E_F0 * f(const basicAC_F0 & args) { return new FormBilinear(args);}  
   FormBilinear(A a,Expression bb) : di(a),b(new Foperator(*dynamic_cast<B>(bb))/*->Optimize(currentblock) FH1004 */) 
-  {throwassert(b);}   
+  {ffassert(b);}   
   FormBilinear operator-() const { return  FormBilinear(di,C_F0(TheOperators,"-",C_F0(b,atype<B>())));}
   bool VF() const { return MaxOp(b) >= last_operatortype;}
 
@@ -451,7 +451,7 @@ class FormLinear : public E_F0mps { public:
     l = new Ftest(*ll); // FH1004 ->Optimize(currentblock);  same as bilinear
     // delete ll; // il ne faut pas detruire car ll peut etre dans une variable
     assert(l);
-    throwassert(di && l); 
+    ffassert(di && l); 
   }
   bool VF() const { return MaxOp(l) >= last_operatortype;}
  
@@ -460,7 +460,7 @@ class FormLinear : public E_F0mps { public:
    operator aType () const { return atype<Result>();}         
   
   static  E_F0 * f(const basicAC_F0 & args) { return new FormLinear(args);}    
-  FormLinear(A a,Expression bb) : di(a),l(new Ftest(*dynamic_cast<B>(bb))/*->Optimize(currentblock) FH1004 */) {throwassert(l);}   
+  FormLinear(A a,Expression bb) : di(a),l(new Ftest(*dynamic_cast<B>(bb))/*->Optimize(currentblock) FH1004 */) {ffassert(l);}   
   FormLinear operator-() const { return  FormLinear(di,C_F0(TheOperators,"-",C_F0(l,atype<B>())));}
   //  void init(Stack stack) const {}
   FormLinear(const FormLinear & fb) : di(fb.di),l(new Ftest(*fb.l) ) {}
@@ -628,7 +628,7 @@ class IntFunction  : public E_F0mps { public:
   IntFunction(const basicAC_F0 & args) {
     di= dynamic_cast<A>(CastTo<A>(args[0]));
     fonc= CastTo<B>(args[1]);
-    throwassert(di && fonc); }
+    ffassert(di && fonc); }
   
   static ArrayOfaType  typeargs() { return ArrayOfaType(atype<A>(),atype<B>());}// all type
   AnyType operator()(Stack ) const;
@@ -705,7 +705,7 @@ public:
     } 
     SolveInit(const Type_Expr &  te) : a(dynamic_cast<const Problem *>(te.second))
     {  SHOWVERB(cout << "SolveInit " << te.second << endl);
-    throwassert(a);}
+    ffassert(a);}
   };
   
   class SolveDel: public  E_F0 { public:
@@ -713,7 +713,7 @@ public:
     SolveDel(const C_F0 & c) : a(dynamic_cast<const Problem *>(c.LeftValue()))
     {   
       SHOWVERB(cout << "SolveDel " << c.left()  << endl);
-      throwassert(a);}
+      ffassert(a);}
     
     AnyType operator()(Stack s)  const { 
       a->destroy(s);
@@ -806,7 +806,7 @@ class pb2mat : public E_F0 { public:
   typedef Matrice_Creuse<K> *  Result;
   const Problem * pb;
   pb2mat(const basicAC_F0 & args) : pb(dynamic_cast<const Problem *>(args[0].left()))  
-  {throwassert(pb);}
+  {ffassert(pb);}
   static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<const Problem *>());}
   
   static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);} 
@@ -816,12 +816,12 @@ class pb2mat : public E_F0 { public:
     Problem::Data *data= pb->dataptr(this->stack); 
     if ( SameType<K,double>::OK )
       {
-	throwassert( !!data->AR);  
+	ffassert( !!data->AR);  
 	return  SetAny<Matrice_Creuse<K> * >(&data->AR) ;
       }
     else 
       {
-	throwassert( !!data->AC);  
+	ffassert( !!data->AC);  
 	return SetAny<Matrice_Creuse<K> * >(&data->AC) ;
       }
   }
@@ -913,7 +913,7 @@ void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool
   if (typemat->profile)
     {
       MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
-      throwassert(&AA);
+      ffassert(&AA);
       switch (typemat->t) {
         
       case TypeSolveMat::LU       : AA.typesolver=FactorizationLU; break;
@@ -929,8 +929,8 @@ void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool
       typedef typename MatriceMorse<R>::VirtualSolver VirtualSolver;
       if(verbosity>5) cout << " Matrice morse GC Precond diag" << endl;
       MatriceMorse<R> & AA(dynamic_cast<MatriceMorse<R> &>(A));
-      throwassert(&AA);
-      //     throwassert(typemat->t==TypeSolveMat::GC);
+      ffassert(&AA);
+      //     ffassert(typemat->t==TypeSolveMat::GC);
       switch (typemat->t) {
       case    TypeSolveMat::GC:   
         if (precon)
