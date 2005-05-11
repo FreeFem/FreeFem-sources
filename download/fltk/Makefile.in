@@ -356,7 +356,7 @@ fltk: $(SRCDIR)/$(INSTALL)
 $(SRCDIR)/$(INSTALL): $(SRCDIR)
 	cd $(SRCDIR) && ./configure --enable-threads --enable-localjpeg	\
 		--enable-localpng $(FLTK_CONFIG_PARAM) --disable-gl	\
-		@FLTK_XONLY@ --prefix=`pwd`/$(INSTALL)
+		@FLTK_XONLY@ --prefix=`pwd`/$(INSTALL) CXX=$(CXX) CC=$(CC)
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 
