@@ -27,6 +27,7 @@
 using namespace std;
 //#include "vect.h"
 #include "error.hpp"
+#include "strversionnumber.hpp"
 //#include <memory.h>
 
 /*
@@ -496,7 +497,7 @@ char Getijc(int & x,int & y)
 //    ScreenToClient(hWnd,&xy);
  	ShowWindow(hWnd, SW_SHOW );
  // SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-    SetWindowText(hWnd,"FreeFem++ "  TOSTRING( VersionFreeFempp )  " works...");
+    SetWindowText(hWnd,   PACKAGE_STRING  " works...");
  	RECT rc;
     ScreenToClient(hWnd,&xy);
  	GetClientRect(hWnd, &rc);
@@ -727,7 +728,7 @@ BOOL inittext(VOID)
 
    ios::sync_with_stdio();
 
-   SetConsoleTitle("FreeFEM++ v" TOSTRING( VersionFreeFempp )  " console");
+   SetConsoleTitle(PACKAGE_STRING  " console");
    return TRUE;
 }
 
@@ -956,7 +957,7 @@ BOOL Init(HINSTANCE hInstance,   HINSTANCE hPrevInstance,
  
   GetOption(lpszCmdLine);
   hWnd = CreateWindow("FreeFEM++",
-      "FreeFEM++ v"  TOSTRING( VersionFreeFempp ) " for Windows",
+      PACKAGE_STRING " for Windows",
       dwStyle,ddx0,ddy0,dd,dd,/*
       CW_USEDEFAULT,
       CW_USEDEFAULT,
@@ -1078,7 +1079,7 @@ BOOL mainFreeFEM()
         FatalErr(prjName,-1);
  }   
  
- cout << "Welcome to freefem++ v " << TOSTRING( VersionFreeFempp )  <<endl;
+ cout << "Welcome to freefem++ v " << StrVersionNumber() <<endl;
  cout << "Program file [" << fullName <<']'<< endl;
  time_t ltime;         // write the time stump in console
  struct tm *now;
