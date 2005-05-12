@@ -28,7 +28,7 @@
 	<key>CFBundleIconFile</key>
 	<string>FreeFem++.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>ann.jussieu.fr.FreeFem++-</string>
+	<string>ann.jussieu.fr.FreeFem++</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
