@@ -12,7 +12,7 @@
 // E-MAIL :   Frederic.Hecht@Inria.fr   
 //
 // ORIG-DATE:     Dec 97
-
+#define INGRAPH
 #include <math.h>
 #include <time.h>
 #include <stdlib.h>

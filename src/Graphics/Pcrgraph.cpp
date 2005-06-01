@@ -10,6 +10,7 @@
 /* out our consent : fax (33)1 44 27 44 11            */
 /* (fax)    Olivier.Pironneau@ann.jussieu.fr          */
 /******************************************************/
+#define INGRAPH
 #include <config-wrapper.h>
 
 #define TOSTRING1(i) #i
