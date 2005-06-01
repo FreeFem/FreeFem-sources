@@ -365,13 +365,14 @@ void DeleteFontGL (GLuint fontList)
 		glDeleteLists (fontList, 256);
 }
 
-#ifdef FREEFEM
-
 void coutmode(short i) 
 { 
    cout <<  flush;
    cerr <<  flush;
 ;}
+
+#ifdef FREEFEM
+
 
 void myexit(int err)
 {
@@ -437,6 +438,11 @@ int main (int argc, char **argv)
 
  return ret;
 }
+
+void myexit(int err) { 
+  cout << " The End err=" << err << endl;
+  exit(err);}
+
 #endif
 
 void message(char *s)
@@ -1414,8 +1420,9 @@ void rattente(int waitm)
 // if(waitm) while(!Button()){ };
 }
 
-void GetSizeScreen(int & ix,int &iy);
-void GetSizeScreen(int & ix,int &iy)
+//void GetSizeScreen(int & ix,int &iy);
+// GetScreenSize_
+void GetScreenSize(int & ix,int &iy)
 {
   	ix = width ;
   	iy = height;

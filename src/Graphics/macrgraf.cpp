@@ -10,6 +10,7 @@
 /* (fax)    Olivier.Pironneau@ann.jussieu.fr          */
 /******************************************************/
 //#define TARGET_API_MAC_CARBON 1
+#define INGRAPH
 #include <MSLCarbonPrefix.h>
 #include <sioux.h>
 #include <SIOUXGlobals.h> //OP my hack
