@@ -12,7 +12,7 @@
 // E-MAIL :   Frederic.Hecht@Inria.fr   
 //
 // ORIG-DATE:     Dec 97
-#define INGRAPH
+#define FF_GRAPH_SET_PTR
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>

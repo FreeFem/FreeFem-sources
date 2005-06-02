@@ -10,7 +10,7 @@
 /* out our consent : fax (33)1 44 27 44 11            */
 /* (fax)    Olivier.Pironneau@ann.jussieu.fr          */
 /******************************************************/
-#define INGRAPH
+#define FF_GRAPH_SET_PTR
 #include <config-wrapper.h>
 
 #define TOSTRING1(i) #i
@@ -602,6 +602,12 @@ void closegraphique(void)
     ReleaseDC(hWnd,hdc); 
 //    DestroyWindow(hWnd);
 	}
+}
+
+void GetSizeScreen(int & ix,int &iy)
+{
+  ix = width ;
+  iy = height;
 }
 
 void openPS(const char *filename )
