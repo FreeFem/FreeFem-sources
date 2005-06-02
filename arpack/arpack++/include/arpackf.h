@@ -31,6 +31,17 @@ extern "C"
     integer mcaupd, mcaup2, mcaitr, mceigt, mcapps, mcgets, mceupd;
   } F77NAME(debug);
 
+  // add FH pour lib dynamic so win 32 
+  struct { 
+    integer           nopx, nbx, nrorth, nitref, nrstrt;
+    float           tsaupd, tsaup2, tsaitr, tseigt, tsgets, tsapps, tsconv,
+      tnaupd, tnaup2, tnaitr, tneigh, tngets, tnapps, tnconv,
+      tcaupd, tcaup2, tcaitr, tceigh, tcgets, tcapps, tcconv,
+      tmvopx, tmvbx, tgetv0, titref, trvec;
+    
+    
+  } F77NAME(timing);
+
 
 // double precision symmetric routines.
 
