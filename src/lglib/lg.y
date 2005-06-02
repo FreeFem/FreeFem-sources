@@ -16,13 +16,15 @@ class Iden;
 #endif
 #endif
 #include "AFunction.hpp"
+//  to reserve space to graphical pointer function
+#define  FF_GRAPH_PTR_DCL
 #include "rgraph.hpp"
 #include "RNM.hpp"
 #include "fem.hpp"
 #include "FESpace.hpp" 
 #include "lgfem.hpp" 
 #include "lex.hpp"
-#include "rgraph.hpp"
+
 class Routine;
 bool load(string s);
 

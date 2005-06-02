@@ -1,44 +1,40 @@
 /**************DO NOR REMOVE THIS BANNER***************/
-
-/*  FreeFEM : Language for a Finite Element Method    */
-
-/*  -------    Release 1.0:  June 1994.               */
-
+/*  FreeFEM++ : Language for a Finite Element Method  */
+/*  -------    Release 1.46:  June 2005.              */
+/* -------------------------------------------------- */
 /*  Authors: D. Bernardi, Y. Darmaillac F. Hecht,     */
-
 /*           O. Pironneau                             */
-
 /*  You may copy freely these files and use it for    */
-
 /* teaching or research. These or part of these may   */
-
 /* not be sold or used for a commercial purpose with- */
-
 /* out our consent : fax (33)1 44 27 44 11            */
-
 /*  modified for bamg by F Hecht  dec 1997            */
-
+/*  modified for dynamic DLL  F. hecht 2005           */
 /* add of  InPtScreen   and   InRecScreen             */
-
+/* -------------------                                */
 /* (e-mail)    Olivier.Pironneau@ann.jussieu.fr       */
-
-/* (e-mail)    Frederic.Hecht@inria.fr                */
-
+/* (e-mail)    hecht@ann.jussieu.fr                   */
 /******************************************************/
 
 #ifndef RGRAPH_H_
 
 #define RGRAPH_H_
 
-// Modif F Hecht for dll on window 
+// Modif F Hecht for dll on win32 
 // pass all the graphic function via pointeur
 //  now the real graphic function of a pointeur xxxx is call  xxxx_
-//   We just need to add INGRAPH in all graphic.cpp version
+//   We just need to add FF_GRAPH_SET_PTR in all graphic.cpp version
+//  the dcl of xxxx pointeur is  done via GRAPH_PTR_DCL macro (set one time ) 
+//  
 // ----- 
-#ifdef INGRAPH
-#define EXTERNFF(t,f,arg) t f##_ arg;t (*f) arg  = f##_; t f##_ arg 
+#ifdef FF_GRAPH_SET_PTR
+#define EXTERNFF(t,f,arg) t f##_ arg;  extern t (*f) arg ;
+#else
+#ifdef FF_GRAPH_PTR_DCL
+#define EXTERNFF(t,f,arg)  t (*f) arg
 #else
 #define EXTERNFF(t,f,arg) extern t (*f) arg
+#endif
 #endif
 #define EXTERN 
 #ifdef __cplusplus
@@ -73,8 +69,10 @@ EXTERNFF(	void ,reffecran,()) ;
 EXTERNFF(	void ,fillpoly,(int n, float *poly)) ;
 EXTERNFF(	void ,SetColorTable,(int nb)) ;
 EXTERNFF(	float ,GetHeigthFont,()) ; 
+//  old function for freefem+  
 //EXTERNFF(	void ,compile,(char *fname)) ;
 //EXTERNFF(	void ,compileString,(char *texte)) ;/*tlr: add a string stream */
+
 EXTERNFF(	void ,openPS,(const char * )) ;
 EXTERNFF(	void ,closePS,(void)) ;
 EXTERNFF(	void ,coutmode,(short i)) ;
@@ -88,7 +86,53 @@ EXTERNFF(    void ,setgrey,(bool )) ;
 EXTERNFF(    int ,getgrey,(    )) ;
 
 
-#ifdef  INGRAPH 
+// wrapping of function  -----
+#ifdef  FF_GRAPH_SET_PTR 
+static int init_ff_graph_ptr_func()
+{ //  a small function to set all pointeur
+	getcadre=getcadre_;
+	GetScreenSize=GetScreenSize_;
+	Getxyc=Getxyc_;
+	ShowHelp=ShowHelp_;
+	erreur=erreur_;
+	initgraphique=initgraphique_;
+	closegraphique=closegraphique_;
+	showgraphic=showgraphic_;
+	rattente=rattente_;
+	cadre=cadre_;
+	cadreortho=cadreortho_;
+	couleur=couleur_;
+	LaCouleur=LaCouleur_;
+	pointe=pointe_;
+	InPtScreen=InPtScreen_;
+	InRecScreen=InRecScreen_;
+	plotstring=plotstring_;
+	rmoveto=rmoveto_;
+	rlineto=rlineto_;
+	penthickness=penthickness_;
+	execute=execute_;
+	reffecran=reffecran_;
+	fillpoly=fillpoly_;
+	SetColorTable=SetColorTable_;
+	GetHeigthFont=GetHeigthFont_;
+	//compile=compile_;
+	//compileString=compileString_;
+	openPS=openPS_;
+	closePS=closePS_;
+	coutmode=coutmode_;
+	myexit=myexit_;
+	viderbuff=viderbuff_;
+	Commentaire=Commentaire_;
+	NoirEtBlanc=NoirEtBlanc_;
+	MettreDansPostScript=MettreDansPostScript_;
+	getprog=getprog_;
+	setgrey=setgrey_;
+	getgrey=getgrey_;
+  return 1;
+}
+//  to call the init function before main 
+static int init_ff_graph_ptr_func_call = init_ff_graph_ptr_func();
+
 #define getcadre getcadre_
 #define GetScreenSize GetScreenSize_
 #define Getxyc Getxyc_
@@ -114,8 +158,8 @@ EXTERNFF(    int ,getgrey,(    )) ;
 #define fillpoly fillpoly_
 #define SetColorTable SetColorTable_
 #define GetHeigthFont GetHeigthFont_
-#define compile compile_
-#define compileString compileString_
+//#define compile compile_
+//#define compileString compileString_
 #define openPS openPS_
 #define closePS closePS_
 #define coutmode coutmode_
@@ -128,7 +172,7 @@ EXTERNFF(    int ,getgrey,(    )) ;
 #define setgrey setgrey_
 #define getgrey getgrey_
 #endif
-	    
+// end wrapping ----	    
 #ifdef __cplusplus
 
 //}

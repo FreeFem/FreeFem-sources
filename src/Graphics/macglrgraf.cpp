@@ -1,3 +1,3 @@
 #define AGL 1
-#define INGRAPH
+#define FF_GRAPH_SET_PTR
 #include "glrgraph.hpp"

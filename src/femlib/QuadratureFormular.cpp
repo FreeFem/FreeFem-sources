@@ -73,6 +73,7 @@ static const QuadraturePoint P_QuadratureFormular_T_5[] = {
       QuadraturePoint(C_T5,u_T5,v_T5),
       QuadraturePoint(C_T5,v_T5,u_T5)
 };
+const QuadratureFormular QuadratureFormular_T_5(3,5,7,P_QuadratureFormular_T_5);
 // ------------------
 //----
 
@@ -90,7 +91,6 @@ Comments: 14 pages, 14 figures, 5 pages of tabulated quadrature points
 Report-no: SAND2005-0034J
 
 */
-const QuadratureFormular QuadratureFormular_T_5(3,5,7,P_QuadratureFormular_T_5);
 // ----------------------------------------------------------------------
 // awk '/15:/,/21:/ {print "QuadraturePoint(" $3 "/2," $1"," $2"),"}' coords.txt   
 static const QuadraturePoint P_QuadratureFormular_T_7[] = {  
