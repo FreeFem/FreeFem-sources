@@ -604,7 +604,7 @@ void closegraphique(void)
 	}
 }
 
-void GetSizeScreen(int & ix,int &iy)
+void GetScreenSize(int & ix,int &iy)
 {
   ix = width ;
   iy = height;
