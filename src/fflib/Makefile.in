@@ -67,7 +67,7 @@ am_libff_a_OBJECTS = AFunction.$(OBJEXT) AFunction2.$(OBJEXT) \
 	MeshWrite.$(OBJEXT) problem.$(OBJEXT) \
 	strversionnumber.$(OBJEXT) InitFunct.$(OBJEXT) \
 	lgalgo.$(OBJEXT) Element_P2h.$(OBJEXT) load.$(OBJEXT) \
-	lgfem.$(OBJEXT) CodeAlloc.$(OBJEXT)
+	lgfem.$(OBJEXT) 
 libff_a_OBJECTS = $(am_libff_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -258,7 +258,7 @@ strversionnumber.cpp InitFunct.cpp ../Algo/lgalgo.cpp			\
 ../femlib/Element_P2h.cpp load.cpp lgfem.cpp AFunction.hpp AnyType.hpp	\
 error.hpp gmres.hpp InitFunct.hpp lex.hpp lgfem.hpp lgsolver.hpp	\
 Operator.hpp problem.hpp Serialize.hpp showverb.hpp String.hpp		\
-throwassert.hpp versionnumber.hpp CodeAlloc.cpp CodeAlloc.hpp
+throwassert.hpp versionnumber.hpp  CodeAlloc.hpp
 
 
 # eigenvalue.cpp is optional (see configure.ac)
