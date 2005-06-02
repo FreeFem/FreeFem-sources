@@ -18,7 +18,7 @@ strversionnumber.cpp InitFunct.cpp ../Algo/lgalgo.cpp			\
 ../femlib/Element_P2h.cpp load.cpp lgfem.cpp AFunction.hpp AnyType.hpp	\
 error.hpp gmres.hpp InitFunct.hpp lex.hpp lgfem.hpp lgsolver.hpp	\
 Operator.hpp problem.hpp Serialize.hpp showverb.hpp String.hpp		\
-throwassert.hpp versionnumber.hpp CodeAlloc.cpp CodeAlloc.hpp
+throwassert.hpp versionnumber.hpp  CodeAlloc.hpp
 
 # eigenvalue.cpp is optional (see configure.ac)
 EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
