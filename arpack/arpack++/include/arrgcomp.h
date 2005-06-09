@@ -71,8 +71,8 @@ ARrcCompGenEig(int np, int nevp, char* whichp, int ncvp, FLOAT tolp,
 
 {
 
-  NoShift();
-  DefineParameters(np, nevp, whichp, ncvp, tolp, maxitp, residp, ishiftp);
+  this->NoShift();
+  this->DefineParameters(np, nevp, whichp, ncvp, tolp, maxitp, residp, ishiftp);
 
 } // Long constructor (regular mode).
 
@@ -97,7 +97,7 @@ operator=(const ARrcCompGenEig<FLOAT>& other)
 {
 
   if (this != &other) { // Stroustrup suggestion.
-    ClearMem();
+    this->ClearMem();
     Copy(other);
   }
   return *this;

@@ -359,28 +359,8 @@ int getprog(char* fn,int  argc, char** argvptr)
 }
 #ifdef FREEFEM
 
-void coutmode(short i) 
-{ 
-   cout <<  flush;
-   cerr <<  flush;
- //  if(i)(**(SIOUXTextWindow->edit)).txFace = 0;
- //  else (**(SIOUXTextWindow->edit)).txFace = 1;
-;}
 
-void myexit(int err)
-{
- if (INITGRAPH)
-  {
-    rattente(0);
-    closegraphique();
-  }
- if (err !=0)
-    cout << "Error: freefem+ has end with error code " <<err<<endl;
-// else cout << "Normal exit 0" << endl;
-  if (myenviron)
-   longjmp(environ,1);
-}
-void thisexit(){ myexit();}
+        void thisexit(){ myexit();}
 
 int main (int argc, char **argv)
 {
@@ -433,7 +413,21 @@ int main (int argc, char **argv)
 
  return ret;
 }
+ void myexit(int i)
+  {
+    exit(i);
+   
+  }
+ 
 #endif
+
+void coutmode(short i) 
+{ 
+   cout <<  flush;
+   cerr <<  flush;
+ //  if(i)(**(SIOUXTextWindow->edit)).txFace = 0;
+ //  else (**(SIOUXTextWindow->edit)).txFace = 1;
+;}
 
 void message(char *s)
 { 
@@ -1001,7 +995,7 @@ void rattente(int waitm)
 }
 
 void GetSizeScreen(int & ix,int &iy);
-void GetSizeScreen(int & ix,int &iy)
+void GetScreenSize(int & ix,int &iy)
 {
   	ix = width ;
   	iy = height;
