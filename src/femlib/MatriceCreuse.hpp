@@ -773,7 +773,7 @@ inline void RR2C(int n,double *cr,double *ci,Complex *c)
 {
  for (int i=0;i<n;i++)
   {
-    c[i]=Complex(ci[i],cr[i]);   
+    c[i]=Complex(cr[i],ci[i]);   
   }
 }
 
@@ -857,10 +857,13 @@ public:
     }
     RR2C(n,xr,xi,x);
     if(verbosity>1)
-    cout << "  -- umfpack_zi_solve " << endl;
-    if(verbosity>3)     (void)  umfpack_zi_report_info(Control,Info);
-    cout << "   b min max " << b.min() << " " <<b.max() << endl;
-    cout << "   x min max " << x.min() << " " <<x.max() << endl;
+    {
+     cout << "  -- umfpack_zi_solve " << endl;
+     if(verbosity>3)     (void)  umfpack_zi_report_info(Control,Info);
+    
+      cout << "   b min max " << b.min() << " " <<b.max() << endl;
+      cout << "   x min max " << x.min() << " " <<x.max() << endl;
+    }
   }
 
   ~SolveUMFPack() { 

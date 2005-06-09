@@ -3646,6 +3646,7 @@ void  init_lgfem()
  
  
  Add<pfer>("n",".",new OneOperator1<long,pfer>(pfer_nbdf<R>));
+ Add<pfec>("n",".",new OneOperator1<long,pfec>(pfer_nbdf<Complex>));
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
  Add<pmesh*>("nv",".",new OneOperator1<long,pmesh*>(pmesh_nv));
