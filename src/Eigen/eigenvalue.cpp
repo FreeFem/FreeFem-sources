@@ -168,7 +168,7 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
            
            int n=OP1.n;
            if (n != OP1.m) 
-              ExecError("Sorry the first matrix in EigneValue is not symetric.");
+              ExecError("Sorry the first matrix in EigneValue is not symmetric.");
            if (n != B.n ) 
               ExecError("Sorry the row's number of the secand matrix in EigneValue is wrong.");
            if (n != B.m ) 
@@ -323,7 +323,7 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
 		 
 	       }
 	     else 
-	       {  // cas non symetric ,
+	       {  // cas non symetrique ,
 		 //nTraceOn(10, 1,1, 1,1,1, 1,1,1); 
 		 ARrcNonSymGenEig<K> prob( n, nbev, sigma,"LM",ncv,tol,maxit);
 		 

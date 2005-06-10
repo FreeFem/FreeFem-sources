@@ -67,7 +67,7 @@ am_libff_a_OBJECTS = AFunction.$(OBJEXT) AFunction2.$(OBJEXT) \
 	MeshWrite.$(OBJEXT) problem.$(OBJEXT) \
 	strversionnumber.$(OBJEXT) InitFunct.$(OBJEXT) \
 	lgalgo.$(OBJEXT) Element_P2h.$(OBJEXT) load.$(OBJEXT) \
-	lgfem.$(OBJEXT) 
+	lgfem.$(OBJEXT)
 libff_a_OBJECTS = $(am_libff_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -146,6 +146,7 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 FF_UMFPACK_POSIX = @FF_UMFPACK_POSIX@
+FLIBS = @FLIBS@
 FLTK_CONFIG = @FLTK_CONFIG@
 FLTK_CONFIG_PARAM = @FLTK_CONFIG_PARAM@
 FLTK_VERSION = @FLTK_VERSION@

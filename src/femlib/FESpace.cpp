@@ -370,6 +370,74 @@ class TypeOfFE_P1Lagrange : public  TypeOfFE { public:
 virtual R operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const ;
    
 } ;
+///////////////////////////////////////////////////////////////////////////////
+// FH pour tester des idee de schema ----  Juin 2005 ---
+///////////////////////////////////////////////////////////////////////////////
+
+//  un VF cell centre 
+class TypeOfFE_P0VF : public  TypeOfFE { public:  
+  static int Data[];
+  static double Pi_h_coef[];
+   TypeOfFE_P0VF(): TypeOfFE(1,0,0,1,Data,1,1,3,3,Pi_h_coef)
+    { const R2 Pt[] = { R2(0,0), R2(1,0), R2(0,1) }; 
+      for (int i=0;i<NbDoF;i++) {
+       pij_alpha[i]= IPJ(i,i,0);
+       P_Pi_h[i]=Pt[i]; }
+     }
+   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+   virtual R operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const ;
+   
+} ;
+int TypeOfFE_P0VF::Data[]={0,1,2,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
+double TypeOfFE_P0VF::Pi_h_coef[]={1.,1.,1.}; //  bofbof a verifier ...
+
+ R TypeOfFE_P0VF::operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const 
+{ 
+   R u0(u(K(0))), u1(u(K(1))), u2(u(K(2)));
+   R r=0;
+   if (op==0)
+    {
+      R l0=0,l1=PHat.x,l2=PHat.y;
+      l1 = l1 * 3. < 1;
+      l2 = l2 * 3. < 1;
+      l0 = 1 - l0 -l2;
+      
+      r = u0*l0+u1*l1+l2*u2;
+    }
+   else
+    { 
+      r =0; 
+    }
+ //  cout << r << "\t";
+   return r;
+}
+
+
+void TypeOfFE_P0VF::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+{
+//  const Triangle & K(FE.T);
+  if (whatd[op_id]) 
+   {
+  R2 A(K[0]), B(K[1]),C(K[2]);
+  R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
+  l1 = l1 * 3. < 1;
+  l2 = l2 * 3. < 1;
+  l0 = 1 - l0 -l2;
+  
+  if (val.N() <3) 
+   throwassert(val.N() >=3);
+  throwassert(val.M()==1 );
+//  throwassert(val.K()==3 );
+  
+  val=0; 
+  RN_ f0(val('.',0,op_id)); 
+  
+    f0[0] = l0;
+    f0[1] = l1;
+    f0[2] = l2;}
+ 
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// NEW ////////////////////////////////////////
@@ -1929,6 +1997,7 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
   }
  
 static TypeOfFE_P1Lagrange P1LagrangeP1;
+static TypeOfFE_P0VF VFP0VF;
 static TypeOfFE_P1Bubble P1BubbleP1;
 static TypeOfFE_P2Lagrange P2LagrangeP2;
 static TypeOfFE_P2bLagrange P2bLagrangeP2;
@@ -1937,8 +2006,10 @@ TypeOfFE  & P2Lagrange(P2LagrangeP2);
 TypeOfFE  & P2bLagrange(P2bLagrangeP2);
 TypeOfFE  & P1Bubble(P1BubbleP1);
 TypeOfFE  & P1Lagrange(P1LagrangeP1);
+TypeOfFE  & P0VF(VFP0VF);
 
 static ListOfTFE typefemP1("P1", &P1LagrangeP1);
+static ListOfTFE typefemP0VF("P0VF", &P0VF);  // 
 static ListOfTFE typefemP1b("P1b", &P1BubbleP1);
 static ListOfTFE typefemP2("P2", &P2LagrangeP2);
 static  ListOfTFE typefemRT("RT0", &RTLagrange);

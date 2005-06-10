@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,1.46-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,1.47-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -32,6 +32,7 @@ AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available (BLAS, 
 if test "$enable_fortran" != no
 then
 	AC_PROG_F77
+	AC_F77_LIBRARY_LDFLAGS
 fi
 
 AC_ARG_ENABLE(c,[  --disable-c		No C compiler available (C BLAS need it)])
@@ -363,6 +364,38 @@ ff_cadna_dir="${curdir}/download/cadna"
        LDFLAGS="$ff_ldflags_old"    
    fi
 
+
+# Looking for the FFTW3
+# --------------------
+ff_fftw_ok=no
+ff_libs_old="$LIBS"
+ff_ldflags_old="$LDFLAGS"
+ff_cppflags_old="$CPPFLAGS"
+for ff_fftw_dir in "" "${curdir}/download/install";
+do
+   if test "$ff_fftw_ok" = no
+	then
+	  if test -n "$ff_fftw_dir"
+	  then
+           LDFLAGS="$LDFLAGS -L${ff_fftw_dir}/lib"
+           CPPFLAGS="$CPPFLAGS -I${ff_fftw_dir}/include"
+       	  fi
+
+  AC_CHECK_LIB(fftw3,fftw_execute,
+                ff_fftw_ok=yes)
+  AC_CHECK_HEADERS(fftw3.h,
+             ff_fftw_h=yes, ff_fftw_h=no)
+
+   if test "$ff_fftw_ok" = yes  -a "$ff_fftw_h" = yes 
+    then
+      AC_DEFINE(HAVE_FFTW,1, fftw is compute fft)
+   else
+       LIBS="$ff_libs_old"
+       LDFLAGS="$ff_ldflags_old"
+       CPPFLAGS="$ff_cppflags_old"    
+   fi
+fi
+done
 # Looking for the BLAS
 # --------------------
 
@@ -398,6 +431,7 @@ then
         AC_MSG_RESULT($ff_blas_ok)
 fi
 done
+
 
 # If all else fails, download!
 if test "$ff_blas_ok" = no -a "$ff_wget" = yes \

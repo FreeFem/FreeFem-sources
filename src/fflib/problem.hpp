@@ -267,7 +267,7 @@ public:
   static const int n_name_param =7;
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  enum typeofkind  { int2d=0, int1d=1, intalledges=2} ; 
+  enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3 } ; 
   typeofkind  kind; //  0 
   typedef const CDomainOfIntegration* Result;
   Expression Th; 
@@ -302,6 +302,12 @@ class CDomainOfIntegrationAllEdges: public CDomainOfIntegration {
 public:
   CDomainOfIntegrationAllEdges( const basicAC_F0 & args) :CDomainOfIntegration(args,intalledges) {}
   static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,intalledges);}    
+};
+
+class CDomainOfIntegrationVFEdges: public CDomainOfIntegration { 
+public:
+  CDomainOfIntegrationVFEdges( const basicAC_F0 & args) :CDomainOfIntegration(args,intallVFedges) {}
+  static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,intallVFedges);}    
 };
 
 
