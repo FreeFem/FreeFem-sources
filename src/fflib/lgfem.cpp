@@ -3999,7 +3999,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegration>);
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationBorder>);
  Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdges>);
- Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationVFEdges>);
+ Global.Add("intallVFedges","(",new OneOperatorCode<CDomainOfIntegrationVFEdges>);
  Global.Add("jump","(",new OneUnaryOperator<JumpOp<R>,JumpOp<R> >);
  Global.Add("mean","(",new OneUnaryOperator<MeanOp<R>,MeanOp<R> >);
  
