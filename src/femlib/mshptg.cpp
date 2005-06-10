@@ -255,11 +255,11 @@ mshptg8_ (double *cr, double *h, long *c, long *nu, long *nbs, long nbsmx, long 
 /*                          est a gauche de l'arete sinon il est a droite */
 /*                          sd(2,i) donne le numero du sous doimaine */
 
-/*           puis         coefficent de generation des points */
+/*           puis         coefficient de generation des points */
 /*                        .1  => on propage plus loin les rafinement */
 /*                               donnes par h */
 /*                        .25 => valeur conseillee */
-/*           coef         coefficent sur le test arret */
+/*           coef         coefficient sur le test arret */
 /*                          le valeur conseillee est .75 */
 /*                          remarque le nombre de point genere est en */
 /*                          O(coef**2) */

@@ -299,7 +299,7 @@ void Check(const Opera &Op,int N,int  M)
     const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
     if ( pThdi != &Th) { 
       ExecError("No way to compute bilinear form with integrale of on mesh \n"
-                "  test  or unkwon function  defined on an other mesh! sorry to hard.   ");
+                "  test  or unkown function  defined on an other mesh! sorry to hard.   ");
     }
     SHOWVERB(cout << " FormBilinear " << endl);
     MatriceElementaireSymetrique<R> *mates =0;
@@ -318,6 +318,7 @@ void Check(const Opera &Op,int N,int  M)
     if (verbosity>3) 
       if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border  " ;
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
+      else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges, "   ;
       else cout << "  --  int  in  " ;
     for (int i=0;i<what.size();i++)
       {long  lab  = GetAny<long>( (*what[i])(stack));
@@ -380,8 +381,8 @@ void Check(const Opera &Op,int N,int  M)
     if(VF) {
       if(&Uh != &Vh || sym)
        ExecError("To Day in bilinear form with discontinous Galerkin:   \n"
-                "  test or unkwon function must be  defined on the same FEspace, \n"
-                "  and the matrice is not symetric. \n" 
+                "  test or unkown function must be  defined on the same FEspace, \n"
+                "  and the matrix is not symmetric. \n" 
                 " To do other case in a future (F. Hecht) dec. 2003 ");
       
       matep= new MatriceElementairePleine<R>(Uh,VF,FIT,FIE);
@@ -416,6 +417,18 @@ void Check(const Opera &Op,int N,int  M)
       }
     else if (di.kind == CDomainOfIntegration::intalledges)
       {
+        for (int i=0;i< Th.nt; i++) 
+          {
+            if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+             for (int ie=0;ie<3;ie++)   
+              A += mate(i,ie,Th[i].lab,paramate);   
+          }
+         
+      }      
+    else if (di.kind == CDomainOfIntegration::intallVFedges)
+      {
+       cerr << " a faire intallVFedges " << endl;
+       ffassert(0);
         for (int i=0;i< Th.nt; i++) 
           {
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
@@ -1146,8 +1159,8 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
           ret=true;
         else 
           { 
-            cerr << "Problem:operator() unkwon type " << * r <<  endl;
-            throw(ErrorExec("Problem:operator() unkwon type",1));
+            cerr << "Problem:operator() unkown type " << * r <<  endl;
+            throw(ErrorExec("Problem:operator() unkown type",1));
           }
       }
     return ret;
@@ -1183,7 +1196,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
     if ( pThdi != &Th) { 
       ExecError("No way to compute bilinear form with integrale of on mesh \n"
-                "  test  or unkwon function  defined on an other mesh! sorry to hard.   ");
+                "  test  or unkown function  defined on an other mesh! sorry to hard.   ");
     }
     SHOWVERB(cout << " FormBilinear " << endl);
     MatriceElementaireSymetrique<R> *mates =0;
@@ -1247,7 +1260,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     if(VF) {
       if(&Uh != &Vh || sym)
        ExecError("To Day in bilinear form with discontinous Galerkin:   \n"
-                "  test or unkwon function must be  defined on the same FEspace, \n"
+                "  test or unkown function must be  defined on the same FEspace, \n"
                 "  and the matrice is not symetric. \n" 
                 " To do other case in a future (F. Hecht) dec. 2003 ");
       
@@ -1459,6 +1472,7 @@ template<class R>
     if ( verbosity>3) 
       if (kind==CDomainOfIntegration::int1d) cout << "  -- boundary int border " ;
       else if (kind==CDomainOfIntegration::intalledges) cout << "  -- boundary int all edges " ;
+      else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all edges " ;
       else cout << "  -- boundary int  " ;
     for (int i=0;i<what.size();i++)
       {long  lab  = GetAny<long>( (*what[i])(stack));
@@ -1530,6 +1544,19 @@ template<class R>
              else 
                 InternalError("To Do") ;
      }
+    else if (kind==CDomainOfIntegration::intallVFedges)
+     {
+      cerr << " intallVFedges a faire" << endl;
+      ffassert(0);
+      for (int i=0;i< ThI.nt; i++) 
+        if (all || setoflab.find(ThI[i].lab) != setoflab.end()) 
+         for (int ie=0;ie<3;ie++)
+            if ( sameMesh) 
+                Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIE,true); 
+             else 
+                InternalError("To Do") ;
+     }
+     
     else {
       
       for (int i=0;i< ThI.nt; i++) 
@@ -1562,8 +1589,8 @@ bool isVF(const list<C_F0> & largs)  // true => VF type of Matrix
         {
           const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
           bool vvf  = bb->VF();
-          if( vvf &&  bb->di->kind != CDomainOfIntegration::intalledges )
-            CompileError("Sorry, no  jump or moy in bilinear form no of type intalledges  ");
+          if( vvf &&  (bb->di->kind != CDomainOfIntegration::intalledges && bb->di->kind != CDomainOfIntegration::intallVFedges  ))
+            CompileError("Sorry, no  jump or moy in bilinear form no of type intalledges or intallVFedges ");
            VVF = vvf || VVF;
           }
     }

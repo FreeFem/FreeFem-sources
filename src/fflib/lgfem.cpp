@@ -2509,6 +2509,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
              if ( verbosity>3) 
                if (kind==CDomainOfIntegration::int1d) cout << "  -- boundary int border " ;
                else if (kind==CDomainOfIntegration::intalledges) cout << "  -- boundary int all edges " ;
+               else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all VF  edges " ;
                else cout << "  -- boundary int  " ;
              for (int i=0;i<what.size();i++)
                {long  lab  = GetAny<long>( (*what[i])(stack));
@@ -2587,9 +2588,41 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
  		                   }
                        }
                     }
+             else   if (kind==CDomainOfIntegration::intallVFedges)
+               {
+                double untier(1./3.);
+                 cerr << " a faire CDomainOfIntegration::intallVFedges " << endl; //%%%%%%%%%
+                 ffassert(0);
+                 const QuadratureFormular1d & FI = QF_GaussLegendre2;
+                 for (int i=0;i< Th.nt; i++) 
+                   if (all || setoflab.find(Th[i].lab) != setoflab.end()) 
+                    {
+                      const Triangle & K(Th[i]);
+                      const R2 GH(untier,untier);
+                      const R2 G=K(GH);
+                     for( int ie=0;ie<3;ie++)
+                       { 
+                        int ie0=VerticesOfTriangularEdge[ie][0] ;
+                        int ie1=VerticesOfTriangularEdge[ie][1] ;
+                        const R2 MH=(TriangleHat[ie0]+TriangleHat[ie1])*0.5;
+                        const R2 M(K(MH)); 
+                        R2 E(G,M);
+                        double le = sqrt((E,E)); 
+                                               
+                        for (int npi=0;npi<FI.n;npi++) // loop on the integration point
+                          {
+                            QuadratureFormular1d::Point pi( FI[npi]);
+                            double sa=pi.x,sb=1-sa;
+                            R2 Pt(GH*sa+MH*sb ); //  
+                            MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th[ie].lab,R2(E.y,-E.x)/le,ie,1);
+                            r += le*pi.a*GetAny<R>( (*fonc)(stack));
+ 		          }
+                       }
+                      }
+                    }
                 else
               {
-               InternalError("CDomainOfIntegration kind unkwon");
+               InternalError("CDomainOfIntegration kind unkown");
              }            
            
   *MeshPointStack(stack)=mp;
@@ -3966,6 +3999,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegration>);
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationBorder>);
  Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdges>);
+ Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationVFEdges>);
  Global.Add("jump","(",new OneUnaryOperator<JumpOp<R>,JumpOp<R> >);
  Global.Add("mean","(",new OneUnaryOperator<MeanOp<R>,MeanOp<R> >);
  

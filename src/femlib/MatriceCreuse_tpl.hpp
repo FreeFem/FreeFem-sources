@@ -412,7 +412,7 @@ MatriceCreuse<R>  & MatriceProfile<R>::operator +=(MatriceElementaire<R> & me) {
       U  = pU[this->n] ? new R[pU[this->n]] : 0;
       for (k =0;k<pU[this->n];k++) U[k] =0;
       break;
-    case MatriceElementaire<R>::Symetric :     
+    case MatriceElementaire<R>::Symmetric :     
       U = L; 
       break;
     default:
@@ -431,7 +431,7 @@ MatriceCreuse<R>  & MatriceProfile<R>::operator +=(MatriceElementaire<R> & me) {
 	else           D[i] += *al;
     break;
      
-  case MatriceElementaire<R>::Symetric : //throwassert(L ==U);   
+  case MatriceElementaire<R>::Symmetric : //throwassert(L ==U);   
     for (i=mi[il=0]; il<me.n; i=mi[++il])  
       for (j=mj[jl=0];jl< il+1 ; j=mj[++jl])  
 	if      (j<i)  L[ pL[i+1] - (i-j) ] += *al++;
@@ -448,14 +448,14 @@ MatriceCreuse<R>  & MatriceProfile<R>::operator +=(MatriceElementaire<R> & me) {
 
 template<class R>
 ostream& MatriceProfile<R>::dump (ostream& f) const 
-{f<< " matrice profile " << this->n << '\t' << this->m << '\t' ;
+{f<< " matrix skyline " << this->n << '\t' << this->m << '\t' ;
  f <<  "  this " << endl;
  f << " pL = " << pL << " L ="  << L << endl
    << " pU = " << pU << " U ="  << U << endl
    << " D = " << D << endl;
  if ( (pL == pU) &&  (U == L) )
    if (pL && L) 
-     {f << " matrice profile symetrique " <<endl;
+     {f << " skyline symmetric " <<endl;
      int i,j,k;
      for (i = 0;i<this->n;i++) 
        { f << i << " {" << pL[i+1]-pL[i] << "}" <<'\t' ;
@@ -466,10 +466,10 @@ ostream& MatriceProfile<R>::dump (ostream& f) const
        f <<  i  << ":" << D[i] << endl  ;
        }
      }
-   else f << " MatriceProfile: pointeur vide " <<endl; 
+   else f << "Skyline: pointeur null " <<endl; 
  else 
    { 
-     f << " matrice profile non symetrique " << endl;
+     f << " Skyline  non symmetric " << endl;
      int i,k;
      for (i = 0;i<this->n;i++) 
        {
@@ -504,7 +504,7 @@ void MatriceProfile<R>::cholesky(double eps) const {
   double eps2=eps*eps;
   R  *ij , *ii  , *ik , *jk , xii;
   int i,j,k;
-  if (L != U) ERREUR(factorise,"matrice non symetrique");
+  if (L != U) ERREUR(factorise,"Skyline matrix non symmetric");
   U = 0; // 
   typefac = FactorizationCholeski;
   D[0] = sqrt(D[0]); 
@@ -537,7 +537,7 @@ void MatriceProfile<R>::crout(double eps) const  {
   R  *ij , *ii  , *ik , *jk , xii, *dkk;
   int i,j,k;
   double eps2=eps*eps;
-  if (L != U) ERREUR(factorise,"matrice non symetrique");
+  if (L != U) ERREUR(factorise,"Skyline matrix  non symmetric");
   U = 0; // 
   typefac = FactorizationCrout;
    
@@ -568,7 +568,7 @@ void MatriceProfile<R>::LU(double eps) const  {
   R s,uii;
   double eps2=eps*eps;
   int i,j,k;
-  if (L == U && ( pL[this->n]  || pU[this->n] ) ) ERREUR(LU,"matrice  symetrique");
+  if (L == U && ( pL[this->n]  || pU[this->n] ) ) ERREUR(LU,"matrix LU  symmetric");
   if(verbosity>3)
   cout << " -- LU " << endl;
   typefac=FactorizationLU;
@@ -702,7 +702,7 @@ KN_<R> & operator/=(KN_<R> & x ,const MatriceProfile<R> & a)
     x  /= a.du();
     break;
     /*   default:
-	 ERREUR  (operator /=(MatriceProfile," Error unkwon type of Factorization  =" << typefac);
+	 ERREUR  (operator /=(MatriceProfile," Error unkown type of Factorization  =" << typefac);
     */
   }
   return x;
@@ -794,8 +794,8 @@ template <class R>
 ostream& MatriceMorse<R>::dump(ostream & f) const 
 {
   f << "# Sparce Matrix (Morse)  " << endl;
-  f << "# first line: n m issymetic nbcoef \n";
-  f << "# after for each nozero coefficant:   i j a_ij \n";  
+  f << "# first line: n m is symmetic nbcoef \n";
+  f << "# after for each nozero coefficient:   i j a_ij \n";  
   
   f << this->n << " " << this->m << " " << symetrique << "  " << nbcoef <<endl;
   int k=lg[0];
@@ -1327,7 +1327,7 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
      case MatriceElementaire<R>::Full : 
       Build(me.Uh,me.Vh,false);    
       break;
-     case MatriceElementaire<R>::Symetric :     
+     case MatriceElementaire<R>::Symmetric :     
       Build(me.Uh,me.Vh,true);    
       break;
      default:
@@ -1346,7 +1346,7 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
 	*aij += *al;}
     break;
      
-  case MatriceElementaire<R>::Symetric : throwassert(symetrique);   
+  case MatriceElementaire<R>::Symmetric : throwassert(symetrique);   
     for (i=mi[il=0]; il<me.n; i=mi[++il])  
       for (j=mj[jl=0];jl< il+1 ; j=mj[++jl]) { 
 	 aij =    (j<i) ? pij(i,j) : pij(j,i);
@@ -1392,7 +1392,7 @@ void  Element_Op(MatriceElementairePleine & mat,const int k)
   throwassert(mat.Op);
 
   const Opera &Op(*mat.Op);
-  if(k==0) cout << " Operator Non symetric: " << Op;
+  if(k==0) cout << " Operator Non symmetric: " << Op;
   for (i=0;i< nx;i++) 
     *pa++ = 0.;    
   for (npi=0;npi<FI.n;npi++) // loop on the integration point
@@ -1451,7 +1451,7 @@ void  Element_Op(MatriceElementaireSymetrique & mat,const int k,T_RNM & W,T_RNMK
   int nx = nn*(nn+1)/2;
   throwassert(mat.Op);
   const Opera &Op(*mat.Op);
-  if(k==0) cout << " Operator symetric: " << Op;
+  if(k==0) cout << " Operator symmetric: " << Op;
 
   for (i=0;i< nx ;i++) 
     *pa++ = 0.;  
@@ -1616,7 +1616,7 @@ double MatriceMorse<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gma
   ffassert(n==gmax.N());
   if (symetrique)
    {
-     ErrorExec("Error:sorry psor just for no symetric  morse matrices",1);
+     ErrorExec("Error:sorry psor just for no symmetric  morse matrices",1);
    }
   else
    {
@@ -1648,7 +1648,7 @@ template<class R>
 double MatriceProfile<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) 
 {
   double rr=0;
-  ErrorExec("Error:sorry psor just for no symetric  morse matrices (to do in futur FH??? )",2);
+  ErrorExec("Error:sorry psor just for no symmetric  morse matrices (to do in futur FH??? )",2);
   return rr;
   
 }

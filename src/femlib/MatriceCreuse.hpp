@@ -77,7 +77,7 @@ template <class T> T* docpyornot(bool nocpy,T* p,int n)
 template <class R> 
 class MatriceElementaire {
 public:
-  enum TypeOfMatriceElementaire {Full=1,Symetric=2};
+  enum TypeOfMatriceElementaire {Full=1,Symmetric=2};
   CountPointer<const FESpace> cUh,cVh;
   const FESpace &Uh;
   const FESpace &Vh;
@@ -97,7 +97,7 @@ public:
         {}
        
   MatriceElementaire(const FESpace & UUh,int llga,int *nni,
-                     TypeOfMatriceElementaire t=Symetric,
+                     TypeOfMatriceElementaire t=Symmetric,
                      const QuadratureFormular & fit=QuadratureFormular_T_5,
                      const QuadratureFormular1d & fie =QF_GaussLegendre3) 
       :cUh(UUh),cVh(UUh),Uh(UUh),Vh(UUh),
@@ -109,7 +109,7 @@ public:
  //  for discontinous Galerkine method
   MatriceElementaire(const FESpace & UUh,int llga,int *nni,
                      int lk,
-                     TypeOfMatriceElementaire t=Symetric,
+                     TypeOfMatriceElementaire t=Symmetric,
                      const QuadratureFormular & fit=QuadratureFormular_T_5,
                      const QuadratureFormular1d & fie =QF_GaussLegendre3) 
       :cUh(UUh),cVh(UUh),Uh(UUh),Vh(UUh),
@@ -228,7 +228,7 @@ public:
     :MatriceElementaire<R>(
            VVh,
 	   int(VVh.MaximalNbOfDF()*(VVh.MaximalNbOfDF()+1)/2),
-	   new int[VVh.MaximalNbOfDF()],this->Symetric,
+	   new int[VVh.MaximalNbOfDF()],this->Symmetric,
        fit,fie),
        element(0),mortar(0) {}
   MatriceElementaireSymetrique & operator()(int k,int ie,int label,void * stack=0) 
@@ -408,14 +408,14 @@ public:
 
 template <class R> 
 class MatriceMorse:public MatriceCreuse<R> {
-//  numebering  is no-symetric
+//  numebering  is no-symmetric
 //  the all line  i :  
 //     k=   lg[i] .. lg[i+1]+1
 //        j = cl[k]
 //        aij=a[k]
-// otherwise  symetric  case
+// otherwise  symmetric  case
 // same but just the  LOWER part is store     (j <= i) 
-// and aii exist always in symetric case
+// and aii exist always in symmetric case
 //  -----------------------------------------
 
 public:

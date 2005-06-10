@@ -10,6 +10,7 @@ class MeshPointBase { public:
   long  label;  
   R3 N; //  if on boundary 
   bool outside;
+  int VF; 
   void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K,int ll,const R2 &NN,int iedge)
    { 
      P.x=P2.x;
@@ -28,9 +29,10 @@ class MeshPointBase { public:
      throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
      N.x=NN.x;   
      N.y=NN.y;   
-     N.z=0;   
+     N.z=0; 
+     VF=0;  
    }
-  void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge)
+  void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge,int VFF=0)
    { 
      P.x=P2.x;
      P.y=P2.y;
@@ -49,6 +51,7 @@ class MeshPointBase { public:
      N.x=NN.x;   
      N.y=NN.y;   
      N.z=0;   
+     VF=VFF;
    }
    
   void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K,int ll)
@@ -68,6 +71,8 @@ class MeshPointBase { public:
      N.x=0;   
      N.y=0;   
      N.z=0;   
+     VF=0;  
+     
    }
    
      void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K)
@@ -106,6 +111,8 @@ class MeshPointBase { public:
      N.x=0;   
      N.y=0;   
      N.z=0;   
+     VF=0;  
+     
    }
 
   void set(const  Mesh &aTh, const R2 &P2,const R2 & P_Hat,const  Triangle & aK,const int ll,bool coutside=false)
@@ -125,6 +132,8 @@ class MeshPointBase { public:
      N.y=0;   
      N.z=0;   
      outside=coutside;
+     VF=0;  
+     
    }
    
   void setP(Mesh * pTh,int tt,int ss)
@@ -140,6 +149,7 @@ class MeshPointBase { public:
      label = V.lab;
      t=v=f=e=0;
      v=ss;
+     VF=0;  
    }
    
   void change(const R2 & PH,Triangle & tt,int ll)
@@ -150,6 +160,7 @@ class MeshPointBase { public:
      region = T->lab;
      label = ll;
      t=v=f=e=0;
+     VF=0;  
      
    }
    void unset() 
@@ -160,6 +171,7 @@ class MeshPointBase { public:
      T=0;
      Th=0;
       label =0;
+     VF=0;  
      
    }
    bool isUnset() const { return P.x == -1e30;} // BofBof   
@@ -172,7 +184,7 @@ class MeshPointBase { public:
      Th=0;
       label =0;
       t=f=e=v=-1; 
-     
+      VF=0;  
      
    }  
 };
@@ -184,6 +196,9 @@ class MeshPoint : public MeshPointBase { public:
      other.unset();}   
   void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge) {
     MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge);
+    other.unset();}
+  void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge,int VFF) {
+    MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge,VFF);
     other.unset();}
   void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K) {
      MeshPointBase::set(P2,P_Hat,K);
@@ -209,6 +224,8 @@ class MeshPoint : public MeshPointBase { public:
           && P.z == mp.P.z ;}
   bool  SetAdj() {
      assert(Th && T && t >=0 && e>=0);
+     if(VF==0)
+     {
      int ieo=e,to=t,ie=e;
      
      t=Th->TriangleAdj(t,ie);
@@ -229,7 +246,13 @@ class MeshPoint : public MeshPointBase { public:
      l[3-i1-i0]=0;
      PHat.x=l[1];
      PHat.y=l[2];
-     gsens = -gsens;     
+     gsens = -gsens;   
+     } 
+     else
+     { //  
+       VF = 1 + VF%2; 
+       ffassert(0); // a faire 
+     }  
      return true;         
    }
   };
