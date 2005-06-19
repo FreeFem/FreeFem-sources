@@ -1,0 +1,23 @@
+// Example of dynamic function load
+// --------------------------------
+// $Id$
+
+ load "dfft.so"
+ int nx=20,ny=20,N=nx*ny;
+ 
+ mesh Th=square(nx-1,ny-1);
+ fespace Vh(Th,P1);
+ Vh<complex> u=cos(x*2*pi)*cos(y*2*pi),v;
+ Vh w;
+ for(int i=0;i<w[].n;++i)
+  w[][i]=i;
+ plot(w,wait=1);
+
+ Vh  ur;
+ v[]=dfft(u[],ny,-1);
+ v = (square(x)+square(y)) * v;
+ u[]=dfft(v[],ny,+1);
+ ur=real(u/N);
+ cout << " ur max " << ur[].max << endl;
+ plot(ur,wait=1);
+ 

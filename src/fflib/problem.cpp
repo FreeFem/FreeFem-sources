@@ -453,6 +453,329 @@ void Check(const Opera &Op,int N,int  M)
     delete &mate;
   }
 // --------- FH 120105
+
+// --------- FH 170605  
+
+ template<class R> 
+void  AddMatElem(map<pair<int,int>, R > & A,const Mesh & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
+  const FESpace & Uh,const FESpace & Vh,
+   const QuadratureFormular & FI,
+   const QuadratureFormular1d & FIb,
+   double *p,   void *stack)
+  {
+    MeshPoint mp= *MeshPointStack(stack);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+  const Mesh & Thu(Uh.Th);
+  const Mesh & Thv(Vh.Th);
+  
+  bool same = &Uh == & Vh;
+  const Triangle & T  = Th[it];
+  long npi;
+  long i,j;
+    bool classoptm = copt && Op.optiexpK;
+    assert(Op.MaxOp() <last_operatortype);
+//
+  
+    
+  KN<bool> Dop(last_operatortype);
+  Op.DiffOp(Dop);  
+  int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+ //assert(lastop<=3);
+  
+  if (ie<0)    
+    for (npi=0;npi<FI.n;npi++) // loop on the integration point
+      {
+        QuadraturePoint pi(FI[npi]);
+        double coef = T.area*pi.a;
+        R2 Pt(pi),Ptu,Ptv;
+        R2 P(T(Pt));
+        bool outsideu,outsidev;
+         // ici trouve le T
+        int iut=0,ivt=0;
+        const Triangle * tu,*tv;
+        tu= Thu.Find(P,Ptu,outsideu);
+        if( !tu ||  outsideu) continue;
+        if(same)
+         {
+           tv=tu;
+           outsidev=outsideu;
+           Ptv=Ptu;
+           iut = Thu(tu);
+         }
+        else
+         {
+          tv= Thv.Find(P,Ptv,outsidev);
+          if( !tv || outsidev) continue;
+         ivt = Thv(tv);
+         } 
+
+        FElement Ku(Uh[iut]);
+        FElement Kv(Vh[ivt]);
+        long n= Kv.NbDoF() ,m=Ku.NbDoF();
+        long N= Kv.N;
+        long M= Ku.N;
+        RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
+        RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
+
+        
+        Ku.BF(Dop,Ptu,fu);
+        MeshPointStack(stack)->set(Th,P,Pt,T,label);
+        if (classoptm) (*Op.optiexpK)(stack); // call optim version 
+        if (!same) Kv.BF(Dop,Ptv,fv);      
+        for ( i=0;  i<n;   i++ )  
+          { 
+            
+            // attention la fonction test donne la ligne 
+            //  et la fonction test est en second      
+            int ig = Kv(i);
+            RNM_ wi(fv(i,'.','.'));         
+            for ( j=0;  j<m;   j++ ) 
+              { 
+                RNM_ wj(fu(j,'.','.'));
+                int il=0;
+                int jg(Ku(j));
+                if ( !sym ||  ig <= jg ) 
+                for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                  {  // attention la fonction test donne la ligne 
+                    //  et la fonction test est en second      
+                    BilinearOperator::K ll(*l);
+                    pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                    double w_i =  wi(ii.first,ii.second); 
+                    double w_j =  wj(jj.first,jj.second);
+                    R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack))   ;  
+                  //  cout << ig << " " << jg << " "  <<  " " << ccc << " " <<  coef * ccc * w_i*w_j << " on T \n"   ;                                        
+                    double wij =  w_i*w_j;
+                    if (abs(wij)>= 1e-10)                                          
+                    A[make_pair(ig,jg)] += coef * ccc * wij;
+                  }
+              }
+          }
+      }
+  else // int on edge ie 
+    for (npi=0;npi<FIb.n;npi++) // loop on the integration point
+      {
+        QuadratureFormular1d::Point pi( FIb[npi]);
+        R2 E=T.Edge(ie);
+        double le = sqrt((E,E));
+        double coef = le*pi.a;
+        double sa=pi.x,sb=1-sa;
+        R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
+          PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
+        R2 Pt(PA*sa+PB*sb ); // 
+
+        R2 Ptu,Ptv;
+        R2 P(T(Pt));
+        bool outsideu,outsidev;
+         // ici trouve le T
+        int iut=0,ivt=0;
+        const Triangle * tu, *tv;
+        tu= Thu.Find(P,Ptu,outsideu);
+        if( !tu ||  outsideu) continue;
+         iut = Thu(tu);
+        if(same)
+         {
+           tv=tu;
+           outsidev=outsideu;
+           Ptv=Ptu;
+         }
+        else
+         {
+          tv= Thv.Find(P,Ptv,outsidev);
+          if( !tv || outsidev) continue;
+          ivt = Thv(tv);
+         } 
+        FElement Ku(Uh[iut]);
+        FElement Kv(Vh[ivt]);
+        long n= Kv.NbDoF() ,m=Ku.NbDoF();
+        long N= Kv.N;
+        long M= Ku.N;
+      //  cout << P << " " <<  Pt << " " <<  iut << " " << ivt  << "  Ptu : " << Ptu << " Ptv: " << Ptv << " n:" << n << " m:" << m << endl;
+        RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
+        RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
+        
+        Ku.BF(Dop,Ptu,fu);
+        if( !same)
+         Kv.BF(Dop,Ptv,fv);
+
+         
+        // int label=-999999; // a passer en argument 
+        MeshPointStack(stack)->set(Th,P,Pt,T,label,R2(E.y,-E.x)/le,ie);
+        if (classoptm) (*Op.optiexpK)(stack); // call optim version 
+        
+        
+        for ( i=0;  i<n;   i++ )  
+         // if (onWhatIsEdge[ie][Kv.DFOnWhat(i)]) // juste the df on edge bofbof generaly wrong FH dec 2003
+            { 
+              RNM_ wi(fv(i,'.','.'));       
+              int ig=Kv(i);
+              for ( j=0;  j<m;   j++ ) 
+                { 
+                  RNM_ wj(fu(j,'.','.'));
+                  int il=0;
+                  int jg=Ku(j);
+                  if( ! sym || ig <= jg )
+                   for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                      {       
+                        BilinearOperator::K ll(*l);
+                        pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                        double w_i =  wi(ii.first,ii.second); 
+                        double w_j =  wj(jj.first,jj.second);
+                       // R ccc = GetAny<R>(ll.second.eval(stack));
+                       
+                        R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                        double wij =  w_i*w_j;
+                        if (abs(wij)>= 1e-10)  
+                       // cout << " \t\t\t" << ig << " " << jg << " "  <<  ccc <<  " " <<  coef * ccc * w_i*w_j << " on edge \n" ;  
+                       if (abs(wij)>= 1e-10)                                          
+                         A[make_pair(ig,jg)] += wij*coef*ccc ;
+                      }
+                }
+            } 
+      }
+  
+  
+  *MeshPointStack(stack) = mp;
+  }  
+
+ template<class R>
+  void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+                           map<pair<int,int>, R >  & A, const  FormBilinear * b  )
+    
+  {
+  
+
+    const CDomainOfIntegration & di= *b->di;
+    const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
+    SHOWVERB(cout << " FormBilinear () " << endl);
+    MatriceElementaireSymetrique<R> *mates =0;
+    MatriceElementairePleine<R> *matep =0;
+    const bool useopt=di.UseOpt(stack);    
+    double binside=di.binside(stack);
+    
+    if ( verbosity >1)
+     {
+      cout << " Integral   on Th nv :  " << Th.nv << " nt : " << Th.nt << endl;
+      cout << "        Th/ u nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
+      cout << "        Th/ v nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
+     }
+    assert(pThdi == & Th);
+    const vector<Expression>  & what(di.what);             
+    CDomainOfIntegration::typeofkind  kind = di.kind;
+    set<int> setoflab;
+    bool all=true; 
+    const QuadratureFormular1d & FIE = di.FIE(stack);
+    const QuadratureFormular & FIT = di.FIT(stack);
+    bool VF=b->VF();  // finite Volume or discontinous Galerkin
+    if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+    if (verbosity>3) 
+      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border  " ;
+      else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
+      else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges, "   ;
+      else cout << "  --  int  in  " ;
+    for (int i=0;i<what.size();i++)
+      {long  lab  = GetAny<long>( (*what[i])(stack));
+      setoflab.insert(lab);
+      if ( verbosity>3) cout << lab << " ";
+      all=false;
+      }
+     if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
+  const E_F0 & optiexp0=*b->b->optiexp0;
+  const E_F0 & optiexpK=*b->b->optiexpK;
+  int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
+  R** where_in_stack =0;
+  if (n_where_in_stack_opt && useopt)
+    where_in_stack = new R * [n_where_in_stack_opt];
+  if (where_in_stack)
+   {
+    assert(b->b->v.size()==n_where_in_stack_opt);
+    for (int i=0;i<n_where_in_stack_opt;i++)
+    {
+      int offset=b->b->where_in_stack_opt[i];
+      assert(offset>10);
+      where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
+      *(where_in_stack[i])=0;
+     }
+    
+    
+    if(&optiexp0) 
+      optiexp0(stack); 
+    KN<bool> ok(b->b->v.size());
+     {  //   remove the zero coef in the liste 
+      R zero=R();  
+      int il=0;
+      for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+        ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( norm(*(where_in_stack[il])) < 1e-100 ) );
+     }
+    BilinearOperator b_nozer(*b->b,ok); 
+    if (verbosity % 10 > 3 ) 
+      cout << "   -- nb term in bilinear form  (!0) : " << b_nozer.v.size() 
+           << "  total " << n_where_in_stack_opt << endl;
+    
+    if ( (verbosity/100) % 10 >= 2)   
+     { 
+      int il=0;
+      
+      for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+       cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il]) 
+                  << " offset=" << b->b->where_in_stack_opt[il] 
+                  << " dep mesh " << l->second.MeshIndependent() << b->b->mesh_indep_stack_opt[il] << endl;
+    }
+    }
+    Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
+  
+   KN<double>  p(Vh.esize()+ Uh.esize() );
+
+    
+    if (verbosity >3) 
+      if (all) cout << " all " << endl ;
+      else cout << endl;
+
+    
+    if (di.kind == CDomainOfIntegration::int1d )
+      {
+        for( int e=0;e<Th.neb;e++)
+          {
+            if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
+              {                  
+                int ie,i =Th.BoundaryTriangle(e,ie);
+                AddMatElem(A,Th,*b->b,sym,i,ie,Th.bedges[e].lab,Uh,Vh,FIT,FIE,p,stack);  
+              }
+          }
+      }
+    else if (di.kind == CDomainOfIntegration::intalledges)
+      {
+        ffassert(0); // a faire 
+        for (int i=0;i< Th.nt; i++) 
+          {
+            if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+             for (int ie=0;ie<3;ie++)   
+                AddMatElem(A,Th,*b->b,sym,i,ie,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);  
+          }
+         
+      }      
+    else if (di.kind == CDomainOfIntegration::intallVFedges)
+      {
+       
+       cerr << " a faire intallVFedges " << endl;
+       ffassert(0);
+         
+      }      
+    else if (di.kind == CDomainOfIntegration::int2d )
+      {
+       cerr << " a faire CDomainOfIntegration::int2d  " << endl;
+        for (int i=0;i< Th.nt; i++) 
+          {
+            if ( all || setoflab.find(Th[i].lab) != setoflab.end())  
+               AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);  
+          }
+
+      } 
+    else 
+      InternalError(" kind of CDomainOfIntegration unkown");
+      
+    if (where_in_stack) delete [] where_in_stack;
+  }
+// --------- FH 170605
  
  
  
@@ -1096,9 +1419,9 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
   } 
   
 
- template<class R>
+ template<class R,typename MC >
   bool AssembleVarForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                       MatriceCreuse<R>  * A,KN<R> * B,const list<C_F0> &largs)
+                       MC  * A,KN<R> * B,const list<C_F0> &largs)
   { // return true if BC 
     bool ret=false; 
     typedef DotStar_KN_<R> DotStar;
@@ -1115,8 +1438,11 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
       //  if(A)        cout << "AssembleVarForm " <<  * r << " " <<  (*A)(0,3) << endl;
         if (r==  tvf->tFB) 
           { if (A)
-            AssembleBilinearForm<R>( stack,Th,Uh,Vh,sym,*A,dynamic_cast<const  FormBilinear *>(e));
-          
+           { 
+            const  FormBilinear * bf =dynamic_cast<const  FormBilinear *>(e);
+            pmesh  Thbf = GetAny<pmesh>((*bf->di->Th)(stack));
+            AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
+           }
           }
         else if (r==tvf->tMat)
           {
@@ -1125,8 +1451,11 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
           }
         else if (r==tvf->tFL)
           {
-            if (B)
-              AssembleLinearForm<R>( stack,Th, Vh, B,dynamic_cast<const  FormLinear *>(e)) ;
+            if (B) {
+              const  FormLinear * bf =dynamic_cast<const  FormLinear *>(e);
+              pmesh  Thbf = GetAny<pmesh>((*bf->di->Th)(stack));            
+              AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf) ;
+             }
           }
         else if (r==tvf->tTab)
           {
@@ -1183,145 +1512,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     
   }
   
- /* 
- template<class R>
-  void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                            MatriceCreuse<R>  & A, const  FormBilinear * b  )
-    
-  {
-  
-   //  cout <<  " b->b " <<  b->b << " " <<  b->b <<  " " << b->b->isoptimize <<endl;  endl;                
 
-    const CDomainOfIntegration & di= *b->di;
-    const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
-    if ( pThdi != &Th) { 
-      ExecError("No way to compute bilinear form with integrale of on mesh \n"
-                "  test  or unkown function  defined on an other mesh! sorry to hard.   ");
-    }
-    SHOWVERB(cout << " FormBilinear " << endl);
-    MatriceElementaireSymetrique<R> *mates =0;
-    MatriceElementairePleine<R> *matep =0;
-    const bool useopt=di.UseOpt(stack);    
-    double binside=di.binside(stack);
-
-    const vector<Expression>  & what(di.what);             
-    CDomainOfIntegration::typeofkind  kind = di.kind;
-    set<int> setoflab;
-    bool all=true; 
-    const QuadratureFormular1d & FIE = di.FIE(stack);
-    const QuadratureFormular & FIT = di.FIT(stack);
-    bool VF=b->VF();  // finite Volume or discontinous Galerkin
-    if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
-    if (verbosity>3) 
-      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border  " ;
-      else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
-      else cout << "  --  int  in  " ;
-    for (int i=0;i<what.size();i++)
-      {long  lab  = GetAny<long>( (*what[i])(stack));
-      setoflab.insert(lab);
-      if ( verbosity>3) cout << lab << " ";
-      all=false;
-      }
-     if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
-  const E_F0 & optiexp0=*b->b->optiexp0;
-  const E_F0 & optiexpK=*b->b->optiexpK;
-  int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
-  R** where_in_stack =0;
-  if (n_where_in_stack_opt && useopt)
-    where_in_stack = new R * [n_where_in_stack_opt];
-  if (where_in_stack)
-   {
-    assert(b->b->v.size()==n_where_in_stack_opt);
-    for (int i=0;i<n_where_in_stack_opt;i++)
-    {
-      int offset=b->b->where_in_stack_opt[i];
-      assert(offset>10);
-      where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
-      *(where_in_stack[i])=0;
-     }
-    if(&optiexp0) optiexp0(stack);
-    if (verbosity/100 && verbosity % 10 == 2)
-     { 
-      int il=0;
-      for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-       cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il]) 
-                  << " offset=" << b->b->where_in_stack_opt[il] << " dep mesh " << l->second.MeshIndependent() << endl;
-    }
-    }
-    Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
-    void *paramate=stack;
-    pair<void *,double *> parammatElement_OpVF;  
-    parammatElement_OpVF.first = stack;
-    parammatElement_OpVF.second= & binside;
-    
-    if (verbosity >3) 
-      if (all) cout << " all " << endl ;
-      else cout << endl;
-    if(VF) {
-      if(&Uh != &Vh || sym)
-       ExecError("To Day in bilinear form with discontinous Galerkin:   \n"
-                "  test or unkown function must be  defined on the same FEspace, \n"
-                "  and the matrice is not symetric. \n" 
-                " To do other case in a future (F. Hecht) dec. 2003 ");
-      
-      matep= new MatriceElementairePleine<R>(Uh,VF,FIT,FIE);
-      matep->faceelement = Element_OpVF;   
-      paramate= &parammatElement_OpVF;            
-    }
-    else if (sym) {
-      mates= new MatriceElementaireSymetrique<R>(Uh,FIT,FIE);
-      mates->element = Element_Op<R>;               
-    }
-    else {
-      matep= new MatriceElementairePleine<R>(Uh,Vh,FIT,FIE);
-      matep->element = Element_Op<R>;               
-    }
-    MatriceElementaire<R> & mate(*( sym? (MatriceElementaire<R> *)mates : (MatriceElementaire<R> *) matep));
-    
-    
-    mate.bilinearform=b->b;
-    
-    Check(*mate.bilinearform,mate.Uh.N,mate.Vh.N);
-    
-    if (di.kind == CDomainOfIntegration::int1d )
-      {
-        for( int e=0;e<Th.neb;e++)
-          {
-            if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
-              {                  
-                int ie,i =Th.BoundaryTriangle(e,ie);
-                A += mate(i,ie,Th.bedges[e].lab,stack);  
-              }
-          }
-      }
-    else if (di.kind == CDomainOfIntegration::intalledges)
-      {
-        for (int i=0;i< Th.nt; i++) 
-          {
-            if ( all || setoflab.find(Th[i].lab) != setoflab.end())
-             for (int ie=0;ie<3;ie++)   
-              A += mate(i,ie,Th[i].lab,paramate);   
-          }
-         
-      }      
-    else if (di.kind == CDomainOfIntegration::int2d )
-      {
-        for (int i=0;i< Th.nt; i++) 
-          {
-            if ( all || setoflab.find(Th[i].lab) != setoflab.end())  
-              A += mate(i,-1,Th[i].lab,stack);   
-            // AA += mate;
-          }
-      } 
-    else 
-      InternalError(" kind of CDomainOfIntegration unkown");
-      
-    if (where_in_stack) delete [] where_in_stack;
-    delete &mate;
-  }
-  
-
-*/
  template<class R>
   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                   MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const  BC_set * bc, double tgv  )
@@ -1595,6 +1786,33 @@ bool isVF(const list<C_F0> & largs)  // true => VF type of Matrix
           }
     }
   return VVF;
+} 
+
+bool isSameMesh(const list<C_F0> & largs,const Mesh * Thu,const Mesh * Thv,Stack stack)  // true => VF type of Matrix   
+{
+  if( Thv != Thu ) return false;
+  list<C_F0>::const_iterator ii,ib=largs.begin(),
+    ie=largs.end();
+    
+  bool VVF =false;   
+  for (ii=ib;ii != ie;ii++)
+    {
+      Expression e=ii->LeftValue();
+      aType r = ii->left();
+      if (r==atype<const  FormBilinear *>()) 
+        {
+          const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
+          pmesh  Thbf = GetAny<pmesh>((*bb->di->Th)(stack));
+          if (Thbf != Thu) return false;
+          }
+      else if (r==atype<const  FormLinear *>()) 
+        {
+          const  FormLinear * bb=dynamic_cast<const  FormLinear *>(e);
+          pmesh  Thbf = GetAny<pmesh>((*bb->di->Th)(stack));
+          if (Thbf != Thu) return false;
+          }
+    }
+  return true;
 } 
 
 template<class R>
@@ -2427,25 +2645,43 @@ namespace Fem2D {
 
 
 // instantiation  des template en double
-template  bool AssembleVarForm<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+template  bool AssembleVarForm<double,MatriceCreuse<double> >(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                        MatriceCreuse<double>  * A,KN<double> * B,const list<C_F0> &largs );
+
+template  bool AssembleVarForm<double,map< pair<int,int>, double> >(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+                       map< pair<int,int>, double>  * A,KN<double> * B,const list<C_F0> &largs );
+
   
 template  void AssembleLinearForm<double>(Stack stack,const Mesh & Th,const FESpace & Vh,KN<double> * B,const  FormLinear * const l);
+
 template   void AssembleBilinearForm<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                             MatriceCreuse<double>  & A, const  FormBilinear * b  );
+template   void AssembleBilinearForm<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+                            map<pair<int,int>, double >  & A, const  FormBilinear * b  );
+
 template   void AssembleBC<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                   MatriceCreuse<double>  * A,KN<double> * B,KN<double> * X, const  BC_set * bc , double tgv   );
 template   void AssembleBC<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                   MatriceCreuse<double>  * A,KN<double> * B,KN<double> * X, const list<C_F0> &largs , double tgv  );
 // instantiation  des template en Complex
 
-template  bool AssembleVarForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+template  bool AssembleVarForm<Complex,MatriceCreuse<Complex> >(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                        MatriceCreuse<Complex>  * A,KN<Complex> * B,const list<C_F0> &largs );
+
+template  bool AssembleVarForm<Complex,map<pair<int,int>, Complex > >(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+                        map<pair<int,int>, Complex >  * A,KN<Complex> * B,const list<C_F0> &largs );
+
+//template  bool AssembleVarForm<double,map< pair<int,int>, Complex> >(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+//                       map< pair<int,int>, Complex>  * A,KN<double> * B,const list<C_F0> &largs );
   
 template  void AssembleLinearForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Vh,KN<Complex> * B,const  FormLinear * const l);
 
 template   void AssembleBilinearForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                             MatriceCreuse<Complex>  & A, const  FormBilinear * b  );
+                            
+template   void AssembleBilinearForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+                            map<pair<int,int>, Complex >  & A, const  FormBilinear * b  );
+                            
                             
 template   void AssembleBC<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                   MatriceCreuse<Complex>  * A,KN<Complex> * B,KN<Complex> * X, const  BC_set * bc , double tgv   );
