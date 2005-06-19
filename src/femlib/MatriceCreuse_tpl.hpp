@@ -1093,6 +1093,7 @@ template<class R>
         int i=iter->first.first;
         int j=iter->first.second;
         K & aij=iter->second;
+        assert( i < nn && j < mm);
         if(j<=i || nosym)
         {
          cl[k]=j;

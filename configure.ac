@@ -684,7 +684,7 @@ then
 	AC_CHECK_PROG(ff_libtool,libtool,yes,no)
 	if test "$ff_libtool" = yes
 	then
-		LDFLAGS="$LDFLAGS -all-static"
+		# LDFLAGS="$LDFLAGS -all-static"  ( modif FH juin 2005)
 		AC_SUBST(STATICTOOL,libtool)
 	else
 		AC_MSG_ERROR(libtool not found)
@@ -694,9 +694,9 @@ fi
 # Dynamic loading of compiled functions
 # -------------------------------------
 
-# Not if we don't want shared libraries
+# Not if we don't want shared libraries (non FH  modif FH juin 2005)
 ff_dynload=no
-if test "$enable_static" != yes
+if test "$enable_static" != yessss
 then
 
 	# Availability of dlopen(). Use AC_COMPILE rather than

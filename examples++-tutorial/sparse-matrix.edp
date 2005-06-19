@@ -78,3 +78,16 @@ else
   cout << sparseB << endl; // *81 
   cout << "sparseB = " << sparseB(0,0) << endl;
 }
+//  build FE  matrice with differente meshes (here 3) 
+varf vM(u,v)=int1d(Th,qforder=1)(u*v);
+matrix MM=vM(Vh,VH);
+cout << MM << endl;
+Vh unVh=0,wVh=0;
+VH unVH=0,wVH=0;
+unVh[]=1;
+unVH[]=1;
+wVh[] = MM' * unVH[] ; 
+wVH[] = MM * unVh[] ; 
+
+cout << "wWh : " << wVh[] << endl;
+cout <<" wVH : " << wVH[] << endl;

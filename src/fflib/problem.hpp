@@ -48,6 +48,8 @@ typedef  const Foperator foperator;
 Expression IsFebaseArray(Expression f);
 
 void SetArgsFormLinear(const ListOfId *lid,int ordre);
+bool isSameMesh(const list<C_F0> & largs,const Mesh * Thu,const Mesh * Thv,Stack stack)  ;
+
 
 inline C_F0 CCastToR(const C_F0 & f){ return C_F0(atype<double>()->CastTo(f),atype<double>());}
 inline bool BCastToR(const C_F0 & f){ return atype<double>()->CastingFrom(f.left());}
@@ -859,8 +861,8 @@ namespace Fem2D {
     tabe.eval_2(v);
   }
   
-template<class R>  bool AssembleVarForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                       MatriceCreuse<R>  * A,KN<R> * B,const list<C_F0> &largs );
+ template<class R,typename MC >  bool AssembleVarForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+                       MC  * A,KN<R> * B,const list<C_F0> &largs );
 
 template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                   MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const list<C_F0> &largs , double tgv  );
@@ -897,7 +899,7 @@ AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const
   double tgv= 1e30;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));  
   xx=R(); 
-  if ( AssembleVarForm<R>(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
+  if ( AssembleVarForm<R,MatriceCreuse<R> >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
     AssembleBC<R>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   // cout << xx.min() << " " << xx.max() << endl;
   /* for (const_iterator i=l->largs.begin();i!=l->largs.end();i++)
@@ -1001,7 +1003,7 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
   if ( b->nargs[3])
     {
       const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(b->nargs[3]);
-      assert(op);
+      ffassert(op);
       precon = op->Find("(",ArrayOfaType(atype<KN<double>* >(),false));
     }
   
@@ -1012,7 +1014,9 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
       A.Vh.destroy();
     }
   const Mesh & Th = Uh.Th;
-  assert( &Uh.Th==&Vh.Th);
+  bool same=isSameMesh(b->largs,&Uh.Th,&Vh.Th,stack);     
+  if ( same)
+   {
   A.typemat = typemat;
   if ( & Uh != A.Uh || & Vh != A.Vh ) 
     { // reconstruct all the matrix
@@ -1025,8 +1029,22 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
         A.A.master( new  MatriceMorse<R>(Vh,Uh,VF) ); // lines corresponding to test functions 
     }
   *A.A=R(); // reset value of the matrix
-  if ( AssembleVarForm<R>( stack,Th,Uh,Vh,typemat.sym,A.A,0,b->largs) )
+  
+  if ( AssembleVarForm<R,MatriceCreuse<R> >( stack,Th,Uh,Vh,typemat.sym,A.A,0,b->largs) )
     AssembleBC<R>( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
+   }
+   else
+   { // add FH 17 06 2005  int on different meshes. 
+     map<pair<int,int>, R >   AAA;
+     bool bc=AssembleVarForm<R,map<pair<int,int>, R >  >( stack,Th,Uh,Vh,typemat.sym,&AAA,0,b->largs);
+     if (typemat.profile)
+        { ExecError(" Sorry build Skyline matrix with different meshes is not implemented! ");}
+      else 
+        { A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA,typemat.sym) ); }
+      if (bc)
+           AssembleBC<R>( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
+    
+   }
   if( factorize ) {
     MatriceProfile<R> * pf = dynamic_cast<MatriceProfile<R> *>((MatriceCreuse<R> *) A.A);
     assert(pf);
