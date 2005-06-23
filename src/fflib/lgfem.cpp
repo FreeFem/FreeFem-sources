@@ -3442,6 +3442,10 @@ long getlab(lgVertex const & a)
 {
   return a.lab();
 }
+long getlab(lgElement const & a)
+{
+  return a.lab();
+}
 /*
 pmesh* get_element(pmesharray *const & a, long const & n)
 {
@@ -3762,6 +3766,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Add<lgVertex>("x",".",new OneOperator1_<R,lgVertex>(getx));
  Add<lgVertex>("y",".",new OneOperator1_<R,lgVertex>(gety));
  Add<lgVertex>("label",".",new OneOperator1_<long,lgVertex>(getlab));
+ Add<lgElement>("label",".",new OneOperator1_<long,lgElement>(getlab));
  
  
 //  new type  

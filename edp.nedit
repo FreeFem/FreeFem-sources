@@ -1,0 +1,17 @@
+nedit.highlightPatterns: edp:1:0{\n\
+		comment:"/\\*":"\\*/"::Comment::\n\
+		cplus comment:"//":"$"::Comment::\n\
+		string:"L?""":"""":"\\n":String::\n\
+		preprocessor line:"macro":"//"::Preprocessor::\n\
+		string escape chars:"\\\\(.|\\n)":::String1:string:\n\
+		preprocessor esc chars:"\\\\(.|\\n)":::Preprocessor1:preprocessor line:\n\
+		preprocessor comment:"/\\*":"\\*/"::Comment:preprocessor line:\n\
+		preproc cplus comment:"//":"$"::Comment:preprocessor line:\n\
+		numeric constant:"<((0(x|X)[0-9a-fA-F]*)|(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))((e|E)(\\+|-)?[0-9]+)?)(L|l|UL|ul|u|U|F|f)?>":::Numeric Const::D\n\
+		storage keyword:"<(func|real|int|double|mesh|fespace|varf|matrix|problem|solve|ifstream|ofstream|bool)>":::Storage Type::D\n\
+		keyword:"<(Cmatrix|R3|bool|border|break|complex|continue|element|else|end|fespace|for|func|if|ifstream|include|int|load|matrix|mesh|ofstream|problem|real|return|solve|string|varf|vertex|while)>":::Keyword::D\n\
+		functionff:"<(BFGS|EigenValue|LinearCG|LinearGMRES|NLCG|Newtow|abs|acos|acosh|adaptmesh|arg|asin|asinh|assert|atan|atan2|atanh|average|buildmesh|buildmeshborder|checkmovemesh|clock|conj|convect|cos|cosh|dumptable|dx|dxx|dxy|dy|dyx|dyy|emptymesh|exec|exit|exp|imag|int1d|int2d|intalledges|interplotematrix|interpolate|jump|log|log10|max|mean|min|movemesh|norm|on|otherside|plot|polar|pow|readmesh|savemesh|set|sin|sinh|splitmesh|sqrt|square|tan|tanh|triangulate|trunc)>":::Identifier1::D\n\
+		constantff:"<(CG|CPUTime|Cholesky|Crout|GMRES|HaveUMFPACK|LU|N|NoUseOfWait|P|P0|P1|P1b|P1dc|P1nc|P2|P2b|P2dc|P2h|RT0|RT0Ortho|RTmodif|UMFPACK|append|area|cin|cout|endl|false|hTriangle|inside|label|lenEdge|nTonEdge|nuEdge|nuTriangle|pi|qf1pE|qf1pElump|qf1pT|qf1pTlump|qf2pE|qf2pT|qf2pT4P1|qf3pE|qf5pT|qf7pT|qf9pT|region|true|verbosity|version|wait|x|y|z)>":::Identifier::D\n\
+		braces:"[{}]":::Keyword::D\n\
+	}
+nedit.languageModes: 	edp:.edp::::::".,/\\`'!|@#%^&*()-=+{}[]"":;<>?~"
