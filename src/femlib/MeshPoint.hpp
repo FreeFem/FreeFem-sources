@@ -87,6 +87,10 @@ class MeshPointBase { public:
      Th=&K.Vh.Th; 
      region = T->lab;
      v=f=e=-1;  
+     N.x=0;   
+     N.y=0;   
+     N.z=0;   
+     VF=0;  
      int l0(0),l1(0),l2(0),ke(-1),kk(0);
      if ( P_Hat.x<1.e-6) l1=1,ke=1,kk++;
      if ( P_Hat.y<1.e-6) l2=1,ke=2,kk++;
@@ -103,15 +107,15 @@ class MeshPointBase { public:
        Th->VerticesNumberOfEdge(K.T,ke,i1,i2);
        const BoundaryEdge * be=Th->TheBoundaryEdge(i1,i2);
        label= be ? be->lab : 0;
-//       cout << "lab =" <<  label << " " << ke << " " <<  kk << " " << P_Hat 
-//            << ": " <<  K.number << " , " << (R2) P << endl;
+      // R2 E(K.T.Edge(ke));
+      // (R2 &) N = E.perp()/Norme2(E);
+       
+   
+      //cout << "lab =" <<  label << " " << ke << " " <<  kk << " " << P_Hat 
+        //   << ": " <<  K.number << " , " << (R2) P << " " << N << endl;
       }
    
      t=(*Th)(T);
-     N.x=0;   
-     N.y=0;   
-     N.z=0;   
-     VF=0;  
      
    }
 

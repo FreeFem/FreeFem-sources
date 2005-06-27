@@ -772,7 +772,9 @@ template<class K> class Matrice_Creuse  { public:
     Vh.destroy();}   
   Matrice_Creuse( MatriceCreuse<K> * aa,const pfes  *ppUh,const pfes  *ppVh)
     :A(aa),pUh(ppUh),pVh(ppVh),Uh(*ppUh),Vh(*ppVh) {}
- 
+  long N() const { A ? A->n : 0;}
+  long M() const { A ? A->m : 0;}
+  
 };
 
 template<class K> class Matrice_Creuse_Transpose;

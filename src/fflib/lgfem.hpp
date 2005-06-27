@@ -46,7 +46,7 @@ class lgElement { public:
   lgElement(Mesh * Th,Triangle * kk): pTh(Th),k(kk) {}
   operator int() const { Check(); return (* pTh)(k);} 
   lgVertex operator [](const long & i) const { Check(); return lgVertex(pTh,&(*k)[i]);}   
-  R lab() const {Check() ; return k->lab;}
+  long lab() const {Check() ; return k ? k->lab : 0;}
   long n() const { return k ? 3: 0 ;}
 
 };

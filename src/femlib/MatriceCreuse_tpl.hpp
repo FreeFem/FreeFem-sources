@@ -258,8 +258,13 @@ template<class R>
     ffassert(0); // TODO
    return 0;
   }
+  
+ inline pair<int,int> ij_mat(bool trans,int ii00,int jj00,int i,int j) {
+  return trans ? make_pair<int,int>(j+jj00,i+ii00)
+                :  make_pair<int,int>(i+ii00,j+jj00) ; }
+ 
 template<class R>
-bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij)
+bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00)
 {
    double eps0=numeric_limits<double>::min();
  if( norm(coef)<eps0) return  L == U ;
@@ -267,21 +272,21 @@ bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij)
   if(D)
    for( i=0;i<this->n;i++)
     if( norm(D[i])>eps0)
-     mij[make_pair(i,i)] += coef*D[i];
+     mij[ij_mat(trans,ii00,jj00,i,i)] += coef*D[i];
    else
    for(int i=0;i<this->n;i++) // no dia => identity dai
-     mij[make_pair(i,i)]=mij[make_pair(i,i)] += coef;
+     mij[ij_mat(trans,ii00,jj00,i,i)] += coef;
      
  if (L && pL )    
    for (kf=pL[0],i=0;  i<this->n;   i++  )  
      for ( k=kf,kf=pL[i+1], j=i-kf+k;   k<kf; j++,  k++  )
         if(norm(L[k])>eps0)
-        mij[make_pair(i,j)]=L[k]*coef;
+        mij[ij_mat(trans,ii00,jj00,i,j)]=L[k]*coef;
  if (U && pU)     
    for (kf=pU[0],j=0;  j<this->m;  j++)  
      for (k=kf,kf=pU[j+1], i=j-kf+k;   k<kf; i++,  k++  )
       if(norm(U[k])>eps0)
-        mij[make_pair(i,j)]=U[k]*coef;
+        mij[ij_mat(trans,ii00,jj00,i,j)]=U[k]*coef;
  return L == U ; // symetrique               
 }
 template<class R>
@@ -296,7 +301,7 @@ MatriceProfile<R>::MatriceProfile(const int nn,const R *a)
       pf[i]=k;
       //  cout << " pf " << i<< " = " << k  << endl;
     }
-  throwassert( pf[this->n]*2 == this->n*(this->n-1));
+  ffassert( pf[this->n]*2 == this->n*(this->n-1));
   pU = pf; // pointeur profile U
   pL = pf; // pointeur profile L
   U = new R[pf[this->n]];
@@ -364,7 +369,7 @@ void MatriceProfile<R>::addMatMul(const KN_<R> &x,KN_<R> &ax) const
 {if (x.n!= this->n ) ERREUR(MatriceProfile MatMut(xa,x) ," longueur incompatible x (in) ") ;
  if (ax.n!= this->n ) ERREUR(MatriceProfile MatMut(xa,x) ," longueur incompatible ax (out)") ;
  int i,j,k,kf;
- throwassert(this->n == this->m);
+ ffassert(this->n == this->m);
  if (D) 
    for (i=0;i<this->n;i++) 
      ax[i] += D[i]*x[i];
@@ -844,7 +849,7 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
   lg=0;
   cl=0;
   bool same  = &Uh == & Vh;
-  throwassert( &Uh.Th == &Vh.Th);  // same Mesh
+  ffassert( &Uh.Th == &Vh.Th);  // same Mesh
   const Fem2D::Mesh & Th(Uh.Th);
   int nbt = Th.nt;
   int nbv = Th.nv;
@@ -875,7 +880,7 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
   if(verbosity>4) 
   cout <<" -- MatriceMorse<R>::Build " << kk << " " << nbn_u << " " << Uh.SizeToStoreAllNodeofElement() 
        << " " <<  nbn_u+1+Uh.SizeToStoreAllNodeofElement() << endl;
-  throwassert(kk== nbn_u+1+Uh.SizeToStoreAllNodeofElement());
+  ffassert(kk== nbn_u+1+Uh.SizeToStoreAllNodeofElement());
   for (int k=0;k<nbe;k++)
    { 
       int nbne=Uh(k);
@@ -887,7 +892,7 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
   int color=0;
   mark=color++;
   lg = new int [this->n+1];
-  throwassert(lg);
+  ffassert(lg);
   for (int step=0;step<2;step++) 
    { 
     int ilg=0;
@@ -958,7 +963,7 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
         cout << "  -- MatriceMorse: Nb coef !=0 " << nbcoef << endl;
       a = new R[nbcoef];
       cl = new int [nbcoef];}
-      throwassert( a && cl);
+      ffassert( a && cl);
       for (int i=0;i<nbcoef;i++) 
         a[i]=0;
     
@@ -1012,36 +1017,48 @@ template<class R>
  }
 
 template<class R>
-  MatriceMorse<R> * BuildCombMat(const list<pair<R,MatriceCreuse<R> *> >  &lM)
+ triplet<int,int,bool> BuildCombMat(std::map< pair<int,int>, R> & mij,const list<triplet<R,MatriceCreuse<R> *,bool> >  &lM,bool trans,int ii00,int jj00)
   {
-    typedef typename list<pair<R,MatriceCreuse<R> *> >::const_iterator lconst_iterator;
+    typedef typename list<triplet<R,MatriceCreuse<R> *,bool> >::const_iterator lconst_iterator;
     
     lconst_iterator begin=lM.begin();
     lconst_iterator end=lM.end();
     lconst_iterator i;
     
-    std::map< pair<int,int>, R> mij;
+   // std::map< pair<int,int>, R> mij;
     
     int n=0,m=0;
     bool sym=true;
     for(i=begin;i!=end;i++++)
      {
        MatriceCreuse<R> & M=*i->second;
+       bool transpose = i->third !=  trans;
        ffassert( &M);
        R coef=i->first;
-      // cout << "BuildCombMat + " << coef << "*" << &M << " " << sym << endl;
+       cout << "BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  i->third << endl;
        if (n==0) { n=M.n; m=M.m;}
-       else { ffassert(n== M.n && m==M.m);}
-       sym = M.addMatTo(coef,mij) && sym;              
+       else { if(transpose)  ffassert(n== M.m && m==M.n); else ffassert(n== M.n && m==M.m);}
+       sym = M.addMatTo(coef,mij,transpose,ii00,jj00) && sym;              
      } 
     int nbcoef=mij.size();
     if(sym) nbcoef = (nbcoef+n)/2;
 
-   return new   MatriceMorse<R>(n,m,mij,sym);   
+  // return new   MatriceMorse<R>(n,m,mij,sym);   
+    return make_triplet(n,m,sym);
+  }
+  
+template<class R>
+  MatriceMorse<R> * BuildCombMat(const list<triplet<R,MatriceCreuse<R> *,bool> >  &lM,bool trans,int ii00,int jj00)
+  {
+   
+    std::map< pair<int,int>, R> mij;
+    triplet<int,int,bool> nmsym=BuildCombMat(mij,lM,trans,ii00,jj00);
+
+   return new   MatriceMorse<R>(nmsym.first,nmsym.second,mij,nmsym.third);   
      
   }
 template<class R>
-bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij)
+bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00)
 {
   double eps0=numeric_limits<double>::min();
   int i,j,k;
@@ -1053,9 +1070,9 @@ bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij)
            j=cl[k];
            if(norm(coef*a[k])>eps0)
            {
-           mij[make_pair(i,j)] += coef*a[k];
+           mij[ij_mat(trans,ii00,jj00,i,j)] += coef*a[k];
            if (i!=j)
-             mij[make_pair(j,i)] += coef*a[k];
+             mij[ij_mat(trans,ii00,jj00,j,i)] += coef*a[k];
            }
          }
            
@@ -1067,7 +1084,7 @@ bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij)
          {
            j=cl[k];
            if(norm(coef*a[k])>eps0)
-           mij[make_pair(i,j)] += coef*a[k];
+           mij[ij_mat(trans,ii00,jj00,i,j)] += coef*a[k];
          }
    }
 
@@ -1259,8 +1276,8 @@ template<class R>
   void  MatriceMorse<R>::addMatMul(const KN_<R> &  x, KN_<R> & ax) const   
 {
   int i,j,k;
-  throwassert(this->n==ax.N());
-  throwassert(this->m==x.N());  
+  ffassert(this->n==ax.N());
+  ffassert(this->m==x.N());  
   if (symetrique)
    {
      for (i=0;i<this->n;i++)
@@ -1288,8 +1305,8 @@ template<class R>
   void  MatriceMorse<R>::addMatTransMul(const KN_<R> &  x, KN_<R> & ax) const   
 {
   int i,j,k;
-  throwassert(this->m==ax.N());
-  throwassert(this->n==x.N());  
+  ffassert(this->m==ax.N());
+  ffassert(this->n==x.N());  
   if (symetrique)
    {
      for (i=0;i<this->n;i++)
@@ -1339,7 +1356,7 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
   R * al = me.a; 
   R * aij;
   switch (me.mtype) {
-  case MatriceElementaire<R>::Full : throwassert(!symetrique);
+  case MatriceElementaire<R>::Full : ffassert(!symetrique);
     for (i=mi[il=0]; il<me.n; i=mi[++il])  
       for ( j=mj[jl=0]; jl< me.m ; j=mj[++jl],al++)  {
         aij = pij(i,j);
@@ -1347,7 +1364,7 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
 	*aij += *al;}
     break;
      
-  case MatriceElementaire<R>::Symmetric : throwassert(symetrique);   
+  case MatriceElementaire<R>::Symmetric : ffassert(symetrique);   
     for (i=mi[il=0]; il<me.n; i=mi[++il])  
       for (j=mj[jl=0];jl< il+1 ; j=mj[++jl]) { 
 	 aij =    (j<i) ? pij(i,j) : pij(j,i);
@@ -1692,8 +1709,8 @@ R MatriceMorse<R>::pscal(const KN_<R> & x,const KN_<R> & y)
 { // (x, Ay)
   R sum=R();
   int i,j,k;
-  throwassert(this->n==x.N());
-  throwassert(this->m==y.N());  
+  ffassert(this->n==x.N());
+  ffassert(this->m==y.N());  
   if (symetrique)
    {
      for (i=0;i<this->n;i++)
@@ -1723,7 +1740,7 @@ R MatriceProfile<R>::pscal(const KN_<R> & x,const KN_<R> & y)
  if (y.n != this->n || x.n != this->n ) ERREUR(MatriceProfile pscal(xa,x) ," longueur incompatible c (out)") ;
  int i,j,k,kf;
  R sum = R();
- throwassert(this->n == this->m);
+ ffassert(this->n == this->m);
  if (D) 
    for (i=0;i<this->n;i++) 
      sum += D[i]*x[i]*y[i];

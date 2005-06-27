@@ -1641,7 +1641,7 @@ template<class R>
   {
     Check(l->l,Vh.N);
     if ( B && B->N() != Vh.NbOfDF) ExecError("AssembleLinearForm size rhs and nb of DF of Vh");
-   
+    if ( & Th != &Vh.Th ) ExecError("AssembleLinearForm on different meshes  ( not implemented FH).");
     KN<double> buf(Vh.MaximalNbOfDF()*last_operatortype*Vh.N);
     
     //            const  FormLinear * l=dynamic_cast<const  FormLinear *>(e);
