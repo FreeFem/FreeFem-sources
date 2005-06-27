@@ -3164,20 +3164,20 @@ struct Op2_mulvirtAv: public binary_function<AA,BB,RR> {
 //  MatriceCreuse    real class for matrix sparce
 //  Matrice_Creuse   class for matrix sparce +  poiteur on FE space def 
 //         to recompute matrice in case of mesh change
-//  list<pair<R,MatriceCreuse<R> *> > * is liste of 
+//  list<triplet<R,MatriceCreuse<R> *,bool> > * is liste of 
 //  \sum_i a_i*A_i  where a_i is a scalare and A_i is a Sparce matrix
 //
 /*
 template<class R> 
-list<pair<R,MatriceCreuse<R> *> > * to(Matrice_Creuse<R> * M)
+list<triplet<R,MatriceCreuse<R> *,bool> > * to(Matrice_Creuse<R> * M)
 {
-  list<pair<R,MatriceCreuse<R> *> >  * l=new list<pair<R,MatriceCreuse<R> *> >;
+  list<triplet<R,MatriceCreuse<R> *,bool> >  * l=new list<triplet<R,MatriceCreuse<R> *,bool> >;
    l ->push_back(make_pair<R,MatriceCreuse<R> *>(1,M->A));
   return  l;
 }
 
 template<class R> 
-struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<pair<R,MatriceCreuse<R> *> > *> 
+struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<triplet<R,MatriceCreuse<R> *,bool> > *> 
  { 
    typedef pair<R,MatriceCreuse<R>*> P;
    typedef list<P> L;
@@ -3193,7 +3193,7 @@ struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<pair<R,Matr
 };
 
 template<class R> 
-struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<pair<R,MatriceCreuse<R> *> > *> 
+struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<triplet<R,MatriceCreuse<R> *,bool> > *> 
  { 
    typedef pair<R,MatriceCreuse<R>*> P;
    typedef list<P> L;
@@ -3210,9 +3210,9 @@ struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<pair<R,Matr
 
 
 template<class R> 
-struct Op2_ListCMCMadd: public binary_function<list<pair<R,MatriceCreuse<R> *> > *,
-                                               list<pair<R,MatriceCreuse<R> *> > *,
-                                               list<pair<R,MatriceCreuse<R> *> > *  >
+struct Op2_ListCMCMadd: public binary_function<list<triplet<R,MatriceCreuse<R> *,bool> > *,
+                                               list<triplet<R,MatriceCreuse<R> *,bool> > *,
+                                               list<triplet<R,MatriceCreuse<R> *,bool> > *  >
 {  //  ... + ...
    typedef pair<R,MatriceCreuse<R>*> P;
    typedef list<P> L;
@@ -3229,8 +3229,8 @@ struct Op2_ListCMCMadd: public binary_function<list<pair<R,MatriceCreuse<R> *> >
 
 template<class R> 
 struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
-                                              list<pair<R,MatriceCreuse<R> *> > *,                                               
-                                               list<pair<R,MatriceCreuse<R> *> > *  >
+                                              list<triplet<R,MatriceCreuse<R> *,bool> > *,                                               
+                                               list<triplet<R,MatriceCreuse<R> *,bool> > *  >
 {  //  M + ....
    typedef pair<R,MatriceCreuse<R>*> P;
    typedef list<P> L;
@@ -3248,9 +3248,9 @@ struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
 };
 
 template<class R> 
-struct Op2_ListCMMadd: public binary_function< list<pair<R,MatriceCreuse<R> *> > *,                                                                                              
+struct Op2_ListCMMadd: public binary_function< list<triplet<R,MatriceCreuse<R> *,bool> > *,                                                                                              
                                                Matrice_Creuse<R> * ,
-                                               list<pair<R,MatriceCreuse<R> *> > *>
+                                               list<triplet<R,MatriceCreuse<R> *,bool> > *>
 {  //   .... + M
    typedef pair<R,MatriceCreuse<R>*> P;
    typedef list<P> L;
@@ -3270,7 +3270,7 @@ struct Op2_ListCMMadd: public binary_function< list<pair<R,MatriceCreuse<R> *> >
 template<class R> 
 struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
                                               Matrice_Creuse<R> * ,
-                                              list<pair<R,MatriceCreuse<R> *> > *>
+                                              list<triplet<R,MatriceCreuse<R> *,bool> > *>
 {  //  M + M
    typedef pair<R,MatriceCreuse<R>*> P;
    typedef list<P> L;
@@ -3497,7 +3497,7 @@ void DclTypeMatrix()
   Dcl_Type<const typename MatrixInterpolation::Op *>(); 
   SetMatrix_Op<R>::btype = Dcl_Type<const  SetMatrix_Op<R> * >();
   Dcl_Type<Matrix_Prod<R,R> >();
-  Dcl_Type<list<pair<R,MatriceCreuse<R> *> >*>();
+  Dcl_Type<list<triplet<R,MatriceCreuse<R> *,bool> >*>();
 }
 
 /*
@@ -3513,7 +3513,7 @@ void AddSparceMat()
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans), 
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparce) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<pair<R,MatriceCreuse<R> *> > *,E_F_StackF0F0>(CombMat) 
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat) 
        );
        
  TheOperators->Add("<-",
@@ -3523,7 +3523,7 @@ void AddSparceMat()
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans), 
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparce) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<pair<R,MatriceCreuse<R> *> > *,E_F_StackF0F0>(CombMat) 
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat) 
        
        );
 TheOperators->Add("*", 

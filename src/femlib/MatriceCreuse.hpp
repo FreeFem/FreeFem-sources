@@ -250,6 +250,7 @@ public:
          : n(NbOfDF),m(NbOfDF),dummy(1){}
   int n,m,dummy;
   virtual int size() const =0;
+  
   virtual MatriceCreuse & operator +=(MatriceElementaire<R> & )=0;
   virtual void operator=(const R & v) =0; // Mise a zero 
   KN_<R> & MatMul(KN_<R> &ax,const KN_<R> &x) const { 
@@ -262,7 +263,7 @@ public:
   virtual R & diag(int i)=0;
   virtual R & operator()(int i,int j)=0;
   virtual MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not 
-  virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij)=0;
+  virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0)=0;
   // Add FH april 2005
   virtual R pscal(const KN_<R> & x,const KN_<R> & y) =0 ; // produit scalaire  
   virtual double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) =0;
@@ -385,7 +386,7 @@ public:
   }
 
   
-  bool addMatTo(R coef,std::map< pair<int,int>, R> &mij);
+  bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0);
 
   // Add FH april 2005
   R pscal(const KN_<R> & x,const KN_<R> & y); // produit scalaire  
@@ -486,7 +487,7 @@ template<class K>
  
  MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {
      return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
-  bool  addMatTo(R coef,std::map< pair<int,int>, R> &mij);
+  bool  addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0);
   
 
   template<class K>

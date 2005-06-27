@@ -77,6 +77,13 @@ else
   cout << sparseA << endl;
   cout << sparseB << endl; // *81 
   cout << "sparseB = " << sparseB(0,0) << endl;
+  cout << " -------- block matrix \n " << endl;
+  matrix B = [ [sparseA, 0 , sparseA ], [ 0, sparseA , 0 ] , [0, 0, sparseB' ]];
+  cout << " B = " << B << endl; 
+  cout << B(8,29) << " ===  " <<  sparseA(8,9) << endl;
+  cout << B(28,27) << " ===  " <<  sparseB(7,8) << endl;
+
+  cout << " -------- block matrix \n " << endl;
 }
 //  build FE  matrice with differente meshes (here 3) 
 varf vM(u,v)=int1d(Th,qforder=1)(u*v);
