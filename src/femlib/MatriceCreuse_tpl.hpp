@@ -260,7 +260,8 @@ template<class R>
   }
   
  inline pair<int,int> ij_mat(bool trans,int ii00,int jj00,int i,int j) {
-  return trans ? make_pair<int,int>(j+jj00,i+ii00)
+  // warning trans sub  matrix and not the block. 
+  return trans ? make_pair<int,int>(j+ii00,i+jj00)
                 :  make_pair<int,int>(i+ii00,j+jj00) ; }
  
 template<class R>
@@ -1035,7 +1036,8 @@ template<class R>
        bool transpose = i->third !=  trans;
        ffassert( &M);
        R coef=i->first;
-       cout << "BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  i->third << endl;
+       if(verbosity>3)
+       cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  i->third << endl;
        if (n==0) { n=M.n; m=M.m;}
        else { if(transpose)  ffassert(n== M.m && m==M.n); else ffassert(n== M.n && m==M.m);}
        sym = M.addMatTo(coef,mij,transpose,ii00,jj00) && sym;              
