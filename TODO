@@ -38,8 +38,8 @@ o [lehyaric] Allow bigger FreeFem++ programs (more than 10KBytes) to
 o [lehyaric] Add more graphical tools (postscript output, ...)
    See standard FreeFem++ X11 version for list of tools
 
-o [lehyaric] Optimize client/server communication through socket by
-   using binary data instead of strings
+* [lehyaric] Optimize client/server communication through socket by
+   using binary data instead of strings (DONE)
 
 o [lehyaric] Save and reload window settings and configuration
 
@@ -49,14 +49,14 @@ o [lehyaric] Option to run server on remote machine
 
 o [lehyaric] Properly define postscript output location
 
-o [lehyaric] Coloring in output window (and associate commands like
-   error display on mouse clicks)
+* [lehyaric] Coloring in output window (and associate commands like
+   error display on mouse clicks) (DONE)
 
 o [lehyaric] Macro highlighting in editor (see
    example++-tutorial/nolinear-elas.edp)
 
-o [lehyaric] Syntactically correct parameter highlighting (instead of
-   just recognizing words) in editor window
+* [lehyaric] Syntactically correct parameter highlighting (instead of
+   just recognizing words) in editor window (DONE)
 
 * Use more efficient select() call instead of poll()
    in cs.cpp (NO LONGER NEEDED)
