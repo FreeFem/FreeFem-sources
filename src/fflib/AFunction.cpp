@@ -578,6 +578,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eqarray<KN<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray<KN<K> ,Mulc_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray<KN<K> ,Mul_KNM_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray<KN<K> ,KN_<K> > > , // Add FH juin 2005         
         new OneBinaryOperator<set_eqarraypd<KN<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eqarrayp<KN<K> ,KN<K>* > >       
       );
@@ -592,6 +593,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eq_array<KN_<K> ,DotStar_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array<KN_<K> ,DotSlash_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array<KN_<K> ,Sub_KN_<K> > > ,
+        new OneBinaryOperator<set_eq_array<KN_<K> ,KN_<K> > > , // add FH juin 2005
         new OneBinaryOperator<set_eq_array<KN_<K> ,Mulc_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array<KN_<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eq_arraypd<KN_<K> ,Add_Mulc_KN_<K>* > > ,
