@@ -562,11 +562,13 @@ pair<long,long> get_NM(const list<triplet<R,MatriceCreuse<R> *,bool> > & lM)
      {
        ffassert(i->second);
        MatriceCreuse<R> & M=*i->second;
-       
-       if ( n==0) n = M.n;
-       if ( m==0) m = M.m;
-       if (n != 0) ffassert(M.n == n);
-       if (m != 0) ffassert(M.m == m);
+       bool t=i->third;
+       int nn= M.n,mm=M.m;
+       if (t) swap(nn,mm);
+       if ( n==0) n =  nn;
+       if ( m==0) m = mm;
+       if (n != 0) ffassert(nn == n);
+       if (m != 0) ffassert(mm == m);
       }
    return make_pair(n,m);    
 }
@@ -875,7 +877,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
   typedef list<triplet<R,MatriceCreuse<R> *,bool> > * L;
    KNM<L> Bij(N,M);
    KN<long> Oi(N+1), Oj(M+1);
-
+   if(verbosity>3) { cout << " Build Block Matrix : " << N << " x " << M << endl;}
    Bij = (L) 0;
    Oi = (long) 0;
    Oj = (long)0;
@@ -896,37 +898,61 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
       }
      }
      //  xompute size of matrix
+     int err=0;
     for (int i=0;i<N;++i)
      for (int j=0;j<M;++j) 
        if (Bij(i,j)) 
         {
           
           pair<long,long> nm = get_NM( *Bij(i,j));
-          if ( Oi(i+1) !=0) { ffassert(Oi(i+1) == nm.first);}
-          else  { Oi(i+1)=nm.first;}
-          if   ( Oj(j+1) !=0) { ffassert(Oj(j+1) == nm.second);}
-          else { Oj(j+1)=nm.second;}
-          
+          if(verbosity>3)
+          cout << " Block " << i << "," << j << " = " << nm.first << " x " << nm.second << endl;
+          if ( Oi(i+1) ==0 )  Oi(i+1)=nm.first;
+          else  if(Oi(i+1) != nm.first)
+            { 
+                 err++;
+                 cerr <<"Error Block Matrix,  size sub matrix" << i << ","<< j << " n (old) "  << Oi(i+1) 
+                       << " n (new) " << nm.first << endl;
+
+            }
+            
+          if   ( Oj(j+1) ==0) Oj(j+1)=nm.second;
+          else   if(Oj(j+1) != nm.second) 
+            { 
+              cerr <<"Error Block Matrix,  size sub matrix" << i << ","<< j << " m (old) "  << Oj(j+1) 
+                   << " m (new) " << nm.second << endl;
+              err++;}
         }
+    if (err)    ExecError("Error Block Matrix,  size sub matrix");
+//  cout << "Oi = " <<  Oi << endl;
+//  cout << "Oj = " <<  Oj << endl;
+
     for (int i=0;i<N;++i)
       Oi(i+1) += Oi(i);
     for (int j=0;j<N;++j)
       Oj(j+1) += Oi(j);
   long n=Oi(N),m=Oj(M);
-  cout << " Block Matrix NxM = " << N << "x" << M << "    nxm  =" <<n<< "x" << m <<endl;
-  cout << "Oi = " <<  Oi << endl;
-  cout << "Oj = " <<  Oj << endl;
+  if(verbosity>3)
+   {
+     cout << "     Oi = " <<  Oi << endl;
+     cout << "     Oj = " <<  Oj << endl;
+  }
   MatriceMorse<R> * amorse =0; 
 {
    map< pair<int,int>, R> Aij;
     for (int i=0;i<N;++i)
      for (int j=0;j<M;++j) 
        if (Bij(i,j)) 
+         {
+           if(verbosity>3)
+             cout << "  Add  Block " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << endl;
            BuildCombMat(Aij,*Bij(i,j),false,Oi(i),Oj(j));
-
+         }
            
   amorse=  new MatriceMorse<R>(n,m,Aij,false); 
   }
+  if(verbosity)
+     cout << " -- Block Matrix NxM = " << N << "x" << M << "    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
   
   Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(s));       
   sparce_mat->pUh=0;
@@ -939,6 +965,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
   for (int i=0;i<N;++i)
    for (int j=0;j<M;++j)
     if(Bij(i,j)) delete Bij(i,j);  
+   if(verbosity>3) { cout << "  End Build Blok Matrix : " << endl;}
    
  return sparce_mat;  
 
