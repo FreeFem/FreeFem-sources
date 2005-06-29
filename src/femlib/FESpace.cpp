@@ -2015,13 +2015,15 @@ static ListOfTFE typefemP2("P2", &P2LagrangeP2);
 static  ListOfTFE typefemRT("RT0", &RTLagrange);
 static  ListOfTFE typefemRTOrtho("RT0Ortho", &RTLagrangeOrtho);
  
- extern  TypeOfFE & RTmodifLagrange, & P1ttdc, & P2ttdc;
+ extern  TypeOfFE & RTmodifLagrange, & P1ttdc, & P2ttdc,   & P0edge;
  static  ListOfTFE typefemRTmodif("RTmodif", &RTmodifLagrange);
  static ListOfTFE typefemP0("P0", &P0Lagrange);
  static ListOfTFE typefemP1nc("P1nc", &P1ncLagrange);
  static ListOfTFE typefemP1ttdc("P1dc", &P1ttdc);
  static ListOfTFE typefemP2ttdc("P2dc", &P2ttdc);
  static ListOfTFE typefemP2b("P2b", &P2bLagrangeP2);
+ 
+ static ListOfTFE typefemP0edge("P0edge", &P0edge);
 
 // correct Probleme of static library link with new make file 
 void init_static_FE()
