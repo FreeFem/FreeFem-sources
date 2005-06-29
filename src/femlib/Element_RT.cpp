@@ -526,6 +526,48 @@ double TypeOfFE_P0::Pi_h_coef[]={1.0};
 //                     on what     nu df on node node of df    
  int TypeOfFE_P1ncLagrange::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
   double TypeOfFE_P1ncLagrange::Pi_h_coef[]={1.,1.,1.};
+
+
+ class TypeOfFE_ConsEdge : public  TypeOfFE { public:  
+  static int Data[];
+    static double Pi_h_coef[];
+
+   TypeOfFE_ConsEdge(): TypeOfFE(0,1,0,1,Data,1,1,3,3,Pi_h_coef)
+    {   const R2 Pt[] = { R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0) };
+      for (int i=0;i<NbDoF;i++) {
+       pij_alpha[i]= IPJ(i,i,0);
+       P_Pi_h[i]=Pt[i]; }
+     }
+//   void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+   void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+//   void D2_FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+  // void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const;
+} ;
+//                     on what     nu df on node node of df    
+ int TypeOfFE_ConsEdge::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
+  double TypeOfFE_ConsEdge::Pi_h_coef[]={1.,1.,1.};
+ void TypeOfFE_ConsEdge::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+{
+//  const Triangle & K(FE.T);
+  R2 A(K[0]), B(K[1]),C(K[2]);
+  R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
+  
+  if (val.N() <3) 
+   throwassert(val.N() >=3);
+  throwassert(val.M()==1 );
+  
+  val=0; 
+  if (whatd[op_id])
+   {
+     
+     RN_ f0(val('.',0,0)); 
+     //      
+    f0[0] =  double(l0 <= min(l1,l2) ); // arete  
+    f0[1] =  double(l1 <= min(l0,l2) );
+    f0[2] =  double(l2 <= min(l0,l1) );
+  }
+
+}
 /*
  void TypeOfFE_P1ncLagrange::D2_FB(const Mesh & ,const Triangle & ,const R2 & ,RNMK_ & val) const
 { //  
@@ -1072,6 +1114,7 @@ static TypeOfFE_P1ttdc The_TypeOfFE_P1ttdc;
 static TypeOfFE_P2ttdc The_TypeOfFE_P2ttdc;
 static TypeOfFE_RTmodif The_TypeOfFE_RTmodif;
 static TypeOfFE_P1ncLagrange The_TypeOfFE_P1nc;
+static TypeOfFE_ConsEdge The_TypeOfFE_ConsEdge; // add FH 
 TypeOfFE  & RTLagrangeOrtho(The_TypeOfFE_RTortho);
 TypeOfFE  & RTLagrange(The_TypeOfFE_RT);
 TypeOfFE  & RTmodifLagrange(The_TypeOfFE_RTmodif);
@@ -1079,5 +1122,6 @@ TypeOfFE  & P0Lagrange(The_TypeOfFE_P0);
 TypeOfFE  & P1ncLagrange(The_TypeOfFE_P1nc);
 TypeOfFE  & P1ttdc(The_TypeOfFE_P1ttdc);
 TypeOfFE  & P2ttdc(The_TypeOfFE_P2ttdc);
+TypeOfFE  & P0edge(The_TypeOfFE_ConsEdge);
 
 }
