@@ -21,6 +21,12 @@
 /* Dynamic loading - not mandatory */
 #undef HAVE_DLFCN_H
 
+/* fftw is compute fft */
+#undef HAVE_FFTW
+
+/* Define to 1 if you have the <fftw3.h> header file. */
+#undef HAVE_FFTW3_H
+
 /* Define to 1 if you have the <GL/glx.h> header file. */
 #undef HAVE_GL_GLX_H
 

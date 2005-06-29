@@ -31,6 +31,6 @@ INCLUDES=-I../lglib -I../bamglib -I../Graphics -I../femlib	\
 # Build date changes at every build
 EXTRA_DIST=strversionnumber.m4
 BUILT_SOURCES=strversionnumber.cpp
-strversionnumber.cpp: FORCE
+strversionnumber.cpp: @TAGGINGDEPEND@
 	m4 -DVersionFreeFemDate="`date`" strversionnumber.m4 > $@
 FORCE:
