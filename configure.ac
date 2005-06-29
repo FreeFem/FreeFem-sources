@@ -905,6 +905,22 @@ then
 	fi
 fi
 
+# Flex compatibility with Bison
+# -----------------------------
+
+# If Flex does not know Bison options, it cannot deal with
+# src/ide/hl_lex.l++. So we need to make src/ide/hl_lex.c++ up-to-date
+# by hand (under Cygwin, "cvs update" does not make hl_lex.c++ newer
+# than hl_lex.l++ even if it was when a commit was done).
+AC_MSG_CHECKING(flex compatibility with bison)
+if test `flex --help|fgrep bison|wc -l` = 0
+then
+	AC_MSG_RESULT(no)
+	touch src/ide/hl_lex.c++
+else
+	AC_MSG_RESULT(yes)
+fi
+
 # Find out kernel and libc versions
 # ---------------------------------
 
