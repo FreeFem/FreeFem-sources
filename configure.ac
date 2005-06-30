@@ -99,7 +99,7 @@ CYGWIN*)
         	ff_win32=yes
                 enable_cygwin=no;
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
-		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -L/lib/mingw -lws2_32"
+		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -lws2_32"
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(WINDRESOBJ,windres.o)
 	fi
@@ -684,7 +684,7 @@ then
 	AC_CHECK_PROG(ff_libtool,libtool,yes,no)
 	if test "$ff_libtool" = yes
 	then
-		# LDFLAGS="$LDFLAGS -all-static"  ( modif FH juin 2005)
+		LDFLAGS="$LDFLAGS -all-static"
 		AC_SUBST(STATICTOOL,libtool)
 	else
 		AC_MSG_ERROR(libtool not found)
@@ -696,7 +696,7 @@ fi
 
 # Not if we don't want shared libraries (non FH  modif FH juin 2005)
 ff_dynload=no
-if test "$enable_static" != yessss
+if test "$enable_static" != yes
 then
 
 	# Availability of dlopen(). Use AC_COMPILE rather than
