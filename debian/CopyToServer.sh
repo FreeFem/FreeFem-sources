@@ -10,14 +10,14 @@ set -v
 # $1 must point to the directory where the files will be copied
 if ssh $3 test ! -d $1
     then
-    echo "Usage: CopyToServer.sh <directory to copy files to> <testing/unstable> <remote server location>"
+    echo "Usage: CopyToServer.sh <directory to copy files to> <testing/unstable/debian64> <remote server location>"
     exit 1
 fi
 
-# $2=testing/unstable
-if ssh $3 test "$2" != testing -a "$2" != unstable
+# $2=testing/unstable/debian64
+if ssh $3 test "$2" != testing -a "$2" != unstable -a "$2" != debian64
     then
-    echo "Usage: CopyToServer.sh <directory to copy files to> <testing/unstable> <remote server location>"
+    echo "Usage: CopyToServer.sh <directory to copy files to> <testing/unstable/debian64> <remote server location>"
     exit 1
 fi
 
