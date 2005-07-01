@@ -669,8 +669,14 @@ changelog:
 
 # History before 2005 is stored in the file "HISTORY_BEFORE_2005"
 all-local:: @HISTORY@
+
+# try and avoid running this under fakeroot (otherwise we may face
+# problems trying to connect to CVS as pseudo-root). Debian packaging
+# uses fakeroot.
 history:
-	cvs2cl --hide-filenames -l "-d>01/01/2005" --file HISTORY
+	if test "$$FAKED_MODE" = ""; then\
+		cvs2cl --hide-filenames -l "-d>01/01/2005" --file HISTORY;\
+		fi
 
 documentation:
 	cd DOC && make documentation
@@ -682,6 +688,7 @@ clean-local::
 # "dist" targets
 clean-local::
 	-rm freefem++-*.tar.gz freefem++-*.zip
+	-rm Output/FreeFem++-*.exe
 
 # Reduced compilation
 # -------------------
