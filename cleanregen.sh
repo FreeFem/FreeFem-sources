@@ -7,7 +7,6 @@
 find . -name Makefile.in -exec rm {} \;
 rm configure
 rm src/fflib/strversionnumber.cpp
-rm examples++-tutorial/StokesUzawa.edp
 rm config.h.in
 rm src/ide/hl_lex.c++
 rm src/ide/hl_yacc.h
@@ -15,3 +14,4 @@ rm src/ide/hl_yacc.c++
 rm HISTORY
 rm examples++/regtests.edp
 rm src/lglib/lg.tab.?pp
+rm examples++-tutorial/all.edp
