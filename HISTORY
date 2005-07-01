@@ -1,3 +1,229 @@
+2005-07-01 11:59  lehyaric
+
+	* Building a new package
+
+2005-07-01 11:43  hecht
+
+	*   correct problem with splitmesh with internal boundary
+	    previously the internal boundary was lost. (FH)
+
+2005-07-01 10:57  lehyaric
+
+	* Test examples++-tutorial/freeboundary-weak also disabled from
+	  regression tests for the same reason as
+	  examples++-tutorial/freeboundary (crashes).
+
+2005-07-01 10:34  lehyaric
+
+	* Disabling example examples++-tutorial/freeboundary.edp from
+	  regression tests because it does not run under Mingw ("Error move
+	  mesh triangles was reverse").
+
+2005-06-30 13:33  lehyaric
+
+	* Added "P0edge" in FreeFem++-cs highlighting
+
+2005-06-30 12:22  lehyaric
+
+	* Configuration procedure updated with new Cygin/Mingw parameters
+
+2005-06-30 12:08  lehyaric
+
+	* Standard libraries locations have changed under Cygwin/Mingw
+
+2005-06-30 08:10  hecht
+
+	*  add FE-medit.edp example to show  plot of FE a basis function
+	  (FH)
+
+2005-06-29 21:40  hecht
+
+	*  Add a new finite element P0edge to build new error indicator
+	   on edge, this finite element is constant around each edge.
+
+2005-06-29 15:00  lehyaric
+
+	* configure.ac now checks whether flex is compatible with bison.
+	  Otherwise it touches src/ide/hl_lex.c++ to make sure that flex
+	  won't be called on src/ide/hl_lex.l++
+
+2005-06-29 13:59  lehyaric
+
+	* Added some comments inside lex files about producing
+	  bison-compatible lexers (flex 2.5.31 should be used).
+
+2005-06-29 11:57  lehyaric
+
+	* Options bison-bridge and bison-locations are not recognized undef
+	  cygwin flex 2.5.4. No solution found for that problem yet.
+
+2005-06-29 11:52  lehyaric
+
+	* At the moment, FreeFem++ does not compile under Cygwin because of
+	  problems with gcc 3.4 and flex 2.5.4. These modifications are
+	  starting to address this.
+
+2005-06-29 10:10  lehyaric
+
+	* Added a new configure option "--disable-tagging" to speed up
+	  recompilations when debugging: with this option, the date and
+	  time tag is not rebuilt into the compiled program at each "make".
+
+2005-06-28 16:57  lehyaric
+
+	* Some comments rewritten
+
+2005-06-28 16:52  lehyaric
+
+	* The highlighting regression test for highlighting passes again
+	  (the problem was with multi-line comments ending with an odd
+	  number of stars, like '*******/').
+
+2005-06-28 14:01  hecht
+
+	* correct compilaion of ide under macos with version of xcode 2.1
+	  juste swap include in cs.cpp
+
+2005-06-28 11:44  hecht
+
+	*   add instruction to copy sub array in array
+
+2005-06-28 11:27  lehyaric
+
+	* Color-coding in FreeFem++-cs now colors multi-line comments (/*
+	  ... */) only up to the first '*/', and not the last '*/' as
+	  before. So examples++-tutorial/schwarz-gc.edp is correctly
+	  highlighted.
+
+2005-06-28 11:07  lehyaric
+
+	* FreeFem++-cs no longer crashes under Windows when loading a
+	  second EDP program
+
+2005-06-28 10:23  hecht
+
+	*   correct trouble in block matrix with transpiose sub matrix
+	    and cleaning output.
+
+2005-06-27 16:23  hecht
+
+	*  add tools to build bock matrices like
+	    A = [[ 0,A],[A',0]];
+	   see sparce-matrice.edp for an example.
+
+2005-06-23 13:27  hecht
+
+	*   to add Highlighting Patterns for nedit editor of .edp file., do
+	    nedit -import edp.nedit
+
+2005-06-19 21:09  hecht
+
+	*   Add way to bluid matrix with varf on different meshes.
+	    I add this for mortar computation. (FH)
+
+2005-06-10 16:33  hecht
+
+	*   coorect error  in add
+	      Global.Add("intallVFedges","(",new
+	  OneOperatorCode<CDomainOfIntegrationVFEdges>);
+
+2005-06-10 16:23  hecht
+
+	*   correct some spelling error
+	    try to add fft coding (in progress)
+	    in progress add Finite Volume element
+
+2005-06-09 15:48  hecht
+
+	* add computation of eigen value for complex matrix correct
+	  problem  complex linear solving  Ax=b with UMFPACK ( mistake
+	  between real and imag part)
+
+2005-06-02 15:56  hecht
+
+	* correct une function name in Pcrgraph.cpp
+
+2005-06-02 15:02  hecht
+
+	*     try to build a dll file  continuing.
+
+2005-06-02 13:58  hecht
+
+	* [no log message]
+
+2005-06-02 13:56  hecht
+
+	* correct doible name (CodeAlloc.cpp)  in fflib/Makefile.am
+
+2005-06-02 13:54  hecht
+
+	*   continuing solve problem to make a dll file  of freefem
+
+2005-06-01 22:52  hecht
+
+	* Do big modification in rgraph.hpp:	now all the graphical
+	  function are now store in pointer to a functio    and this
+	  pointer  "xxxx" is  set to fonction "xxxx_"	 all is do
+	  automaticaly, I have just add INGRAPH macro parameter    in files
+	  we is defined all the graphics function Pcrgraph.cpp, Xrgraph.cpp
+	  macrgraf.cpp	  etc ...     I  do that for dynamical link under
+	  window.  FH
+
+2005-05-12 11:16  hecht
+
+	*   correct  problem of  CFMessagePort: bootstrap_register()
+
+2005-05-11 15:17  hecht
+
+	* cosmetic change in PC version
+
+2005-05-11 11:20  hecht
+
+	*   correct problem in acoptim.m4 (g++-4 and -fast optim flags)
+
+2005-05-11 10:09  hecht
+
+	* add CXX and CC setting  in fltk  configure parameters
+
+2005-05-10 21:19  hecht
+
+	*   add include <errno.hpp> in some ide files  (FH)
+	    change some assert in ffassert ( un removable assert) to
+	  correct
+	    forgotted trap like (  memory problem)
+
+2005-05-04 22:29  hecht
+
+	* add  examples++tutorial/xyf file in window distribution
+
+2005-05-04 22:04  hecht
+
+	* add aile.msh in window distribution
+
+2005-05-04 21:59  hecht
+
+	* correct  line endding in aile.msh file (make as unix file)
+
+2005-05-04 21:13  hecht
+
+	* correct DOC/Makefile.am
+
+2005-05-04 21:01  hecht
+
+	* correct the DOC directory and do autoreconf CV
+	  ----------------------------------------------------------------------
+
+2005-05-04 19:56  hecht
+
+	*   clean the DOC directory to build manual-full and
+	    add make target to build automaticaly .pdf figures from .eps
+	  files
+
+2005-05-04 14:26  hecht
+
+	*   rebuil all.edp in examples++-tutorial (to remove ref to
+	  bug.edp)
+
 2005-05-04 13:09  hecht
 
 	*      do autoreconf to rebuild Makefile.in files
