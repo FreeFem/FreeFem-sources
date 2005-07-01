@@ -152,7 +152,8 @@ void Mesh::ConsAdjacence()
               {
                 TonBoundary[n/3] += MaskEdge[n%3];
                 BoundaryEdgeHeadLink[i]=n;                  
-                break;
+                if(i0==jj0) break; // FH 01072005 bon cote de l'arete 
+                // sinon on regard si cela existe?
               }
           } 
         if ( BoundaryEdgeHeadLink[i] <0 && verbosity) 
@@ -1256,6 +1257,14 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
               int jt=j,it=Th.TriangleAdj(i,jt);
               if(it==i || it <0) neb += split[i];
               else if  (!split[it]) neb += split[i];
+              else 
+                {
+                    int ie0,ie1;
+                    Th.VerticesNumberOfEdge(Th[i],j,ie0,ie1);
+                     BoundaryEdge * pbe = Th.TheBoundaryEdge(ie0,ie1);
+                     if(pbe && &(*pbe)[0] == &Th(ie0))   
+                        neb += max(split[i],split[it]); // aretes frontiere (FH juillet 2005)
+              }
            }
         for (int j=0;j<3;j++)
         //   if ( setofv.insert(Th(i,j) ).second ) 
@@ -1269,8 +1278,8 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
    if(verbosity>2)
     cout << " -- nv old " << nvmax << endl;
   }
-//  attention il faut supprime les aretes frontiere  interne   
- 
+//  attention il faut supprime les aretes frontiere  interne   (corrige FH Jullet 2005)
+ //  modif FH juin 2005
 /*   for (int ieb=0,jj;ieb<Th.neb;ieb++)
      
        neb += split[Th.BoundaryTriangle(ieb,jj)];
@@ -1312,7 +1321,7 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
             vertices[nv] = Th[i][j];
             vertices[nv].normal=0;
             quadtree->Add(vertices[nv]);
-            nv++;}
+             nv++;}
          }
      // nv = Th.nv;`
      if(verbosity>2) 
@@ -1336,22 +1345,24 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
         {
          int jtt=jt,itt=Th.TriangleAdj(it,jtt);
        //  cout << it <<  " " << jt << " " << jt << " " << itt << !split[itt] << endl;
-         if ( itt == it || itt <0 || !split[itt]) 
-          {
-          int kold = it;   //Th.BoundaryTriangle(ieb,jj);
-          int n=split[kold];
-          if (!n) continue; 
-          int n1=n+1;
-         // BoundaryEdge & be(Th.bedges[ieb]);
          int ie0,ie1;
          Label  re(label); 
           Th.VerticesNumberOfEdge(Th[it],jt,ie0,ie1);
         //  cout << "++ ";
           BoundaryEdge * pbe = Th.TheBoundaryEdge(ie0,ie1);
+          
+         if ( itt == it || itt <0 || !split[itt] || (pbe && &(*pbe)[0] == &Th(ie0))) 
+          {
+          int kold = it;   //Th.BoundaryTriangle(ieb,jj);
+          int n=split[kold];
+          if( itt>=0) n = max(n,split[itt]); //  pour les aretes internes (FH juillet 2005)
+          if (!n) continue; 
+          int n1=n+1;
+         // BoundaryEdge & be(Th.bedges[ieb]);
          // cout << " v : " << ie0 << " " << ie1 << " -- " ; ;
           if (pbe ) {
              re = *pbe;
-         //    cout << " " << pbe-bedges << " " <<  re.lab ;
+            // cout << " " << pbe-bedges << " " <<  re.lab ;
           }
          // cout << " lab = " <<  re.lab << endl;
           Vertex *pva= quadtree->NearestVertex(Th(ie0));// vertices + (&be[0]-Th.vertices);
@@ -1384,7 +1395,7 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
          (Label &) bedges[neb]= re ;// be;
          neb++;
        } }   
-       
+  //   cout << "          (debug)  nb vertices on egdes " << nv << endl;  
  //  cout << " " <<  nebmax << " " << neb << endl;
     assert(neb==nebmax);
     
@@ -1491,36 +1502,61 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
       
       long nbt=0;
       mshptg8_ (cr, h, c, nu, &nbs, nbs, tri, arete, nba, (long *) sd, nbsd, reft, &nbt, .25, .75, &err);
-      assert(err==0 && nbt !=0);
+      if( !(err==0 && nbt !=0))
+       {
+          cerr << " Error mesh generation in mshptg : err = " << err << " nb triangles = " << nbt << endl;
+          ffassert(err==0 && nbt !=0);
+       }
+     // 
     // Correction FH bug  trunc  mesh with hole 25032005
+    
       delete [] triangles;
       int kt=0;
-
+       int *rr= new int[nbt+1];
+       for (int i=0;i<nbt;++i)
+         {
+           int ir = reft[i];
+           assert(ir>=0 && ir <= nbt);
+           rr[ir]=-1; 
+         }
+        int ksd=0;
        for(int i=0,k=0;i<nbt;i++,k+=3)
       {
-        R2 A=vertices[nu[k]-1],B=vertices[nu[k+1]-1],C=vertices[nu[k+2]-1];
-        R2 G=(A+B+C)/3.,PHat;
-        bool outside;
-        const Triangle * t=Th.Find(G,PHat,outside,0);
+         int ir = reft[i]; 
+         if(rr[ir]==-1) 
+         {
+          R2 A=vertices[nu[k]-1],B=vertices[nu[k+1]-1],C=vertices[nu[k+2]-1];
+          R2 G=(A+B+C)/3.,PHat;
+          bool outside;
+          const Triangle * t=Th.Find(G,PHat,outside,0);
         if(!outside) { 
-           reft[i]=Th(t);
-           kt++;
+          
+           if(rr[ir]==-1) ksd++;
+           //rr[reft[i]] = Th(t);
+           rr[ir]=Th(t);
+         //  kt++;
         }
-        else 
-          reft[i]=-1;
+       // else reft[i]=-1;
+       }
         }
         
       
-      
+      for (int i=0;i<nbt;++i)
+        {
+          reft[i]=rr[reft[i]];
+            if (reft[i] >= 0)  
+          kt++;
+         }
       nt=kt;
      if(verbosity>1)      
-      cout << " Nb Triangles = " << nt <<  " remove triangle in hole :" <<  nbt - nt << endl;
+      cout << " Nb Triangles = " << nt <<  " remove triangle in hole :" <<  nbt - nt << " nb comp ssd " << ksd << " " << nbsd <<endl;
       triangles = new Triangle[nt];
       kt=0;
       for(int i=0,k=0;i<nbt;i++,k+=3)
         if(reft[i]>=0) 
          triangles[kt++].set(vertices,nu[k]-1,nu[k+1]-1,nu[k+2]-1,Th[reft[i]].lab);
       assert(kt==nt);
+      delete [] rr;
     // END  Correction FH bug  trunc  mesh with hole 25032005
       
       delete [] arete;

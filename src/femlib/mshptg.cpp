@@ -19,7 +19,8 @@
 //
 // DESCRIPTION:  
 // DESCRIP-END.
-//
+
+// bof bof FH je ne sais pais pourquoi nnnBAMG_LONG_LONG
 #ifdef nnnBAMG_LONG_LONG
 #define LONG8 long long
 #define DLONG8LONG8 1e12
@@ -307,6 +308,7 @@ mshptg8_ (double *cr, double *h, long *c, long *nu, long *nbs, long nbsmx, long 
   if (*nbs < 3 || nbsmx < *nbs)
      {
        *err = 1;
+       printf("mshptg bug in number of points %d > %d == max nb points \n",*nbs,nbsmx);
        return 0;
      }
 /* ------------------------- */
@@ -962,6 +964,8 @@ mshtri_ (double *cr, long *c, long *nbs, long *tri, long *nu, double *trfri, lon
   if (ierr != 0)
      {
        *err = 2;
+       printf("mshptg bug 2 \n");
+
        return 0;
      }
   k = 2;
@@ -1639,14 +1643,10 @@ L50:
 /*             recherche si l' element coupe l''arete a */
 			   is1 = is;
 			   s3t = nu[p3[p3[is - 1] - 1] + t * 6];
-			   det2 = (LONG8) (c[(s2t << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[(
-			      s2 << 1) + 2] - c[(s1 << 1) + 2]) - (LONG8) (c[(s2t <<
-				1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(s2 << 1) +
-						     1] - c[(s1 << 1) + 1]);
-			   det3 = (LONG8) (c[(s3t << 1) + 1] - c[(s1 << 1) + 1]) *(LONG8)  (c[(
-			      s2 << 1) + 2] - c[(s1 << 1) + 2]) - (LONG8) (c[(s3t <<
-				1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(s2 << 1) +
-						     1] - c[(s1 << 1) + 1]);
+			   det2 = (LONG8) (c[(s2t << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[( s2 << 1) + 2] - c[(s1 << 1) + 2]) 
+			        - (LONG8) (c[(s2t << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[( s2 << 1) + 1] - c[(s1 << 1) + 1]);
+			   det3 = (LONG8) (c[(s3t << 1) + 1] - c[(s1 << 1) + 1]) *(LONG8)  (c[( s2 << 1) + 2] - c[(s1 << 1) + 2]) 
+			        - (LONG8) (c[(s3t << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[( s2 << 1) + 1] - c[(s1 << 1) + 1]);
 			   if (det2 > 0 && det3 < 0)
 			      {
 				mshfr1_ (&c[3], &nu[7], &t, &ta, &is1, &s2, err);
@@ -1659,10 +1659,26 @@ L50:
 			   else if (det2 == 0 && reft[s2t] == 0)
 			      {
 				err1 = 10;
+				printf(" det = %d %d %d %d %d == %d \n ",
+				   (c[(s2t << 1) + 1] - c[(s1 << 1) + 1]), (c[( s2 << 1) + 2] - c[(s1 << 1) + 2]) ,
+				   (c[(s2t << 1) + 2] - c[(s1 << 1) + 2]), (c[( s2 << 1) + 1] - c[(s1 << 1) + 1]) ,
+				   (c[(s2t << 1) + 1] - c[(s1 << 1) + 1]) * (c[( s2 << 1) + 2] - c[(s1 << 1) + 2]) ,
+				   (c[(s2t << 1) + 2] - c[(s1 << 1) + 2]) * (c[( s2 << 1) + 1] - c[(s1 << 1) + 1])
+				   );
+				   
+				 
+				printf("bug 2, mshptg: point %d is on boundary edge %d %d  \n",s2t,i_2,i_3);
 			      }
 			   else if (det3 == 0 && reft[s3t] == 0)
 			      {
 				err1 = 10;
+				printf(" det = %d %d %d %d  %d %d \n ",
+				    (c[(s3t << 1) + 1] - c[(s1 << 1) + 1]),  (c[( s2 << 1) + 2] - c[(s1 << 1) + 2]) ,
+				    (c[(s3t << 1) + 2] - c[(s1 << 1) + 2]),  (c[( s2 << 1) + 1] - c[(s1 << 1) + 1]) ,
+				    (c[(s3t << 1) + 1] - c[(s1 << 1) + 1]) * (c[( s2 << 1) + 2] - c[(s1 << 1) + 2]) ,
+				    (c[(s3t << 1) + 2] - c[(s1 << 1) + 2]) *  (c[( s2 << 1) + 1] - c[(s1 << 1) + 1])
+				    );
+				printf("bug 2, mshptg: point %d is on  boundary %d %d\n",s3t,i_2,i_3);
 			      }
 			   ap = a;
 			   a = w[a];
@@ -1986,7 +2002,8 @@ L20:
 	  }
        else
 	  {
-	    *err = 10;
+	    printf("mshptg: bug the point %d  is on boundary \n", s3 ); 
+	    *err = 10+s3*10;
 	    return 0;
 	  }
        goto L20;
