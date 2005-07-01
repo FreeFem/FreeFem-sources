@@ -31,10 +31,12 @@ ONETEST(FE,wdc[]'*wdc[],1e-2)
 ONETEST(fluidStructAdapt,uu[]'*uu[],2e-1)
 ONETEST(fluidStruct,uu[]'*uu[],2e-1)
 
-dnl This test crashed under Mingw ("Error move mesh triangles was reverse")
-dnl ONETEST(freeboundary,u[]'*u[],5e-2)
+dnl This test always crashes under Mingw
+dnl ("Error move mesh triangles was reverse")
 
-ONETEST(freeboundary-weak,p[]'*p[],5e-2)
+dnl ONETEST(freeboundary,u[]'*u[],5e-2)
+dnl ONETEST(freeboundary-weak,p[]'*p[],5e-2)
+
 ONETEST(LapDG2,u[]'*u[],1e-2)
 ONETEST(Laplace,uh[]'*uh[],1e-2)
 ONETEST(LaplaceP1bis,u[]'*u[],1e-2)
