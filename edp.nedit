@@ -12,7 +12,7 @@ nedit.highlightPatterns: edp:1:0{\n\
 		storage keyword:"<(func|real|int|double|mesh|fespace|varf|matrix|problem|solve|ifstream|ofstream|bool)>":::Storage Type::D\n\
 		keyword:"<(Cmatrix|R3|border|break|complex|continue|element|else|end|fespace|for|if|ifstream|include|load|mesh|problem|real|return|solve|string|varf|vertex|while)>":::Keyword::D\n\
 		functionff:"<(BFGS|EigenValue|LinearCG|LinearGMRES|NLCG|Newtow|abs|acos|acosh|adaptmesh|arg|asin|asinh|assert|atan|atan2|atanh|average|buildmesh|buildmeshborder|checkmovemesh|clock|conj|convect|cos|cosh|dumptable|dx|dxx|dxy|dy|dyx|dyy|emptymesh|exec|exit|exp|imag|int1d|int2d|intalledges|interplotematrix|interpolate|jump|log|log10|max|mean|min|movemesh|norm|on|otherside|plot|polar|pow|readmesh|savemesh|set|sin|sinh|splitmesh|sqrt|square|tan|tanh|triangulate|trunc)>":::Identifier1::D\n\
-		constantff:"<(CG|CPUTime|Cholesky|Crout|GMRES|HaveUMFPACK|LU|N|NoUseOfWait|P|P0|P1|P1b|P1dc|P1nc|P2|P2b|P2dc|P2h|RT0|RT0Ortho|RTmodif|UMFPACK|append|area|cin|cout|endl|false|hTriangle|inside|label|lenEdge|nTonEdge|nuEdge|nuTriangle|pi|qf1pE|qf1pElump|qf1pT|qf1pTlump|qf2pE|qf2pT|qf2pT4P1|qf3pE|qf5pT|qf7pT|qf9pT|region|true|verbosity|version|wait|x|y|z)>":::Identifier::D\n\
+		constantff:"<(CG|CPUTime|Cholesky|Crout|GMRES|HaveUMFPACK|LU|N|NoUseOfWait|P|P0|P0edge|P1|P1b|P1dc|P1nc|P2|P2b|P2dc|P2h|P2b|RT0|RT0Ortho|RTmodif|UMFPACK|append|area|cin|cout|endl|false|hTriangle|inside|label|lenEdge|nTonEdge|nuEdge|nuTriangle|pi|qf1pE|qf1pElump|qf1pT|qf1pTlump|qf2pE|qf2pT|qf2pT4P1|qf3pE|qf5pT|qf7pT|qf9pT|region|true|verbosity|version|wait|x|y|z)>":::Identifier::D\n\
 		braces:"[{}]":::Keyword::D\n\
 	}
 nedit.languageModes: 	edp:.edp::::::".,/\\`'!|@#%^&*()-=+{}[]"":;<>?~"
