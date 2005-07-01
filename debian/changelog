@@ -1,3 +1,8 @@
+freefem++ (1.47-2) testing unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Fri, 01 Jul 2005 11:46:15 +0200
 freefem++ (1.45-7) testing unstable; urgency=low
 
   * FreeFem++-cs: faster graphics, grammar-driven highlighting,
