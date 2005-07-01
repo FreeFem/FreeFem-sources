@@ -39,6 +39,7 @@ clean-local::
 # "dist" targets
 clean-local::
 	-rm freefem++-*.tar.gz freefem++-*.zip
+	-rm Output/FreeFem++-*.exe
 
 # Reduced compilation
 # -------------------
