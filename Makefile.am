@@ -36,6 +36,10 @@ clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
 	-rm examples*/*.eps 
 
+# "dist" targets
+clean-local::
+	-rm freefem++-*.tar.gz freefem++-*.zip
+
 # Reduced compilation
 # -------------------
 
@@ -63,9 +67,7 @@ ide:
 # Cleaning generated files which are stored in the CVS repository, to
 # avoid technical CVS conflicts.
 clean-gen:
-	-rm configure
-	-find . -name Makefile.in -exec rm {} \;
-	-rm examples++/regtests.edp
+	./cleanregen.sh
 
 # Testing
 # -------
@@ -179,4 +181,4 @@ $(PACKAGE_NAME).tgz: $(PACKAGE_NAME)
 	tar cvzf $@ $<
 
 clean-local::
-	-rm $(PACKAGE_NAME) $(PACKAGE_NAME).tgz
+	-rm -r $(PACKAGE_NAME) $(PACKAGE_NAME).tgz
