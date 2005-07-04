@@ -1,32 +1,50 @@
 #!/bin/sh
 # Create a loadable object from a C++ function defined in a .cpp file
 # $Id$
+do="yes"
+if [ "$1" = "-n" ]; then
+  shift
+  do="no"
+fi
+if [ "$1" = "-win32" ]; then
+  shift
+  uu="WIN32"
+else
+  uu=`uname -s` 
+fi
 
 # Default compiler
-if [ "$CXX" == "" ];
+if [ "$CXX" = "" ];
 then
     CXX=g++
 fi
 
 FFsource=..
 INC="-I$FFsource -I$FFsource/src/fflib -I$FFsource/src/femlib -I$FFsource/src/Graphics" 
+SUF=so
 if [ -f "$1.cpp" ] ; then
-    case `uname -s` in
+    case "$uu" in
 	Darwin) 
 	export MACOSX_DEPLOYMENT_TARGET=10.3
 	SHARED="-bundle -undefined dynamic_lookup"  ;;
-	Linux|FreeBSD|CYGWIN*)
+	CYGWIN*|Linux|FreeBSD)
 	SHARED="-shared " ;;
+        WIN32)
+        echo " window "
+	SHARED="-v -shared --unresolved-symbols=ignore-all"
+        FLAGS='-fPIC  -mno-cygwin '
+        LIBS="../src/lglib/liblg.a"
+        SUF=dll;;
 	*)
 	echo "sorry unknown achitecture "`uname`
 	exit 1
     esac
 
-    echo $CXX -c $INC $PIC $1.cpp
-    $CXX -c $INC $PIC  $1.cpp
+    echo $CXX -c $FLAGS $INC $PIC $1.cpp
+    test $do = yes &&$CXX -c $INC $FLAGS $PIC  $1.cpp
 
-    echo $CXX $SHARED $1.o -o $1.so
-    $CXX $SHARED $1.o -o $1.so
+    echo $CXX $SHARED $FLAGS $1.o -o $1.$SUF $LIBS
+    test $do = yes &&$CXX $SHARED $FLAGS $1.o -o $1.$SUF $LIBS
 
 else
     echo "sorry file $1.cpp does not exist"

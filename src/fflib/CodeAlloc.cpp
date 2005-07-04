@@ -76,6 +76,7 @@ static void  HeapSort(T *c,long n)
   }
     void CodeAlloc::clear()
   {
+     return ;
     cleanning=true;
     Sort_mem();
     cout << " Clear Alloc Mem: "<< nb << endl; ;
@@ -104,6 +105,7 @@ static void  HeapSort(T *c,long n)
      kerr++;  
   }
   void CodeAlloc::operator delete(void * pp) {
+     return ; // FH 
     if( ! sort  &&  (nb*2 > nbt)  )  Sort_mem();
     int ib=0,ie=nbt-1,im;
     if(pp< mem[ib]) ErrorDel(pp);

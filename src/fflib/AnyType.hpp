@@ -113,8 +113,10 @@ inline AnyTypeWithOutCheck PtrtoAny(void * p,aType )
   { return x;}
  template<> inline  AnyTypeWithOutCheck SetAny<bool>(const bool & x)
   { return x;}
- template<typename T>  inline  AnyTypeWithOutCheck SetAny( T * const & x)
- { return (void *) x;}
+ template<typename T>  inline  AnyTypeWithOutCheck SetAny( T *  x)
+ { return reinterpret_cast<void *>( x);}
+ template<typename T>  inline  AnyTypeWithOutCheck SetAny( const T * x)
+ { return reinterpret_cast<void *>( x);}
   
   
 #endif
