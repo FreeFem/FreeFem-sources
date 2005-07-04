@@ -27,8 +27,14 @@ if [ -f "$1.cpp" ] ; then
 	Darwin) 
 	export MACOSX_DEPLOYMENT_TARGET=10.3
 	SHARED="-bundle -undefined dynamic_lookup"  ;;
-	CYGWIN*|Linux|FreeBSD)
-	SHARED="-shared " ;;
+	CYGWIN*|FreeBSD)
+	    SHARED="-shared " ;;
+
+	# 64 bit Linux needs -fPIC (ALH)
+	Linux)
+	    FLAGS='-fPIC'
+	    SHARED="-shared " ;;
+
         WIN32)
         echo " window "
 	SHARED="-v -shared --unresolved-symbols=ignore-all"
