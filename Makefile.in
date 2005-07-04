@@ -808,8 +808,10 @@ $(PACKAGE_NAME):all
 	./copysharedlibs.sh src/nw/FreeFem++-nw $@
 	cp src/ide/FreeFem++-cs $@
 	./copysharedlibs.sh src/ide/FreeFem++-cs $@
-	cp src/ide/FreeFem++-cs-server $@
-	./copysharedlibs.sh src/ide/FreeFem++-cs-server $@
+	cp src/ide/FreeFem++-server $@
+	./copysharedlibs.sh src/ide/FreeFem++-server $@
+	cp src/ide/FreeFem++-client $@
+	./copysharedlibs.sh src/ide/FreeFem++-client $@
 	-cp src/glx/FreeFem++-glx $@
 	-./copysharedlibs.sh src/glx/FreeFem++-glx $@
 	-cp src/mpi/FreeFem++-mpi $@
