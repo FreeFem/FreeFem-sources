@@ -5,6 +5,10 @@
 void debugunalloc()
 { static long count=0;
  count++;}
+
+void debugalloc()
+{ static long count=0;
+ count++;}
  
 
 // ********** DO NOT REMOVE THIS BANNER **********
@@ -247,6 +251,8 @@ AllocExtern::OneAlloc * AllocExtern::Alloc()
 	    p->a[i].n =0;
 	    if (p->a[i].is_array != is_array)
 	      printf("\t\tCheckPtr:  erreur delete [] ");
+            if( p->a[i].n < NbAllocShow )
+              debugalloc();      
 	    NextFree = & p->a[i].p;
 	    return;}
       p = p->next;

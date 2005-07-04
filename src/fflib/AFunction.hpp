@@ -1151,12 +1151,12 @@ class LocalVariablePlus : public LocalVariable { public:
 };
 
 //  global variable bof bof 
-template<class R> class PValue:public E_F0
+template<class T> class PValue:public E_F0
  { 
-  R * p;
+  T * p;
   public:
-  AnyType operator()(Stack ) const { return SetAny<R*>(p);}
-  PValue(R * pp):p(pp) {}
+  AnyType operator()(Stack  ) const { return p;}
+  PValue(T * pp):p(pp) {}
 };
 template<class R> class PPValue:public E_F0
  { 

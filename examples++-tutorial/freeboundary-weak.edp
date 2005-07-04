@@ -1,6 +1,7 @@
 //  
 //   calcul d'une zone saturation en eau (nappe phréatique)
 //
+verbosity=4;
 real weak=0;
 string com= "  avec du/dn ";
 if(weak) com = " avec du/du = residu  ";
@@ -51,7 +52,7 @@ problem Pw(v,vv,solver=CG) = int2d(Th)( dx(v)*dx(vv)+dy(v)*dy(vv))
   
 
 real errv=1;
-verbosity=1;
+verbosity=4;
 while(errv>1e-6)
 {
   j++;       

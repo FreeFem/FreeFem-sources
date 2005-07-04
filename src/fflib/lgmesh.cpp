@@ -869,7 +869,9 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
        { nberr++;
         if (verbosity>1) 
          {
-          if (nberr==1) cerr << "Erreur: MoveMesh ";
+          if (nberr==1) { cerr << "Erreur: MoveMesh ";
+	  cerr << " T = " << Th[i] << endl;
+          }
           if (nberr < verbosity*5) {
             cerr << " " <<i;
             if ( nberr % 5 )  cerr << "\n\t";}
@@ -880,6 +882,9 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
       if (nberr)
        { if (verbosity) 
          cerr << "Error movemesh: " << nberr << " triangles was reverse  (=> no move)" <<  endl;  
+         cout << " u min " << U.min() << " max " << U.max() << endl;
+         cout << " v min " << V.min() << " max " << V.max() << endl;
+
          delete []v;
          delete []t;
          delete []b;   
