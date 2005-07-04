@@ -742,6 +742,7 @@ then
 	if test "$ff_mac" = "no" -a "$ff_win32"  = "no" ;
 	then
 		CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
+		CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
 	else
 		true
 	fi
