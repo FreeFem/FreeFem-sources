@@ -39,6 +39,11 @@ Source: "examples++-tutorial\aile.msh"; DestDir: "{app}\examples++-tutorial"
 Source: "examples++-tutorial\xyf"; DestDir: "{app}\examples++-tutorial"
 Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
 
+; Documentation files may need to be copied from another machine if
+; Cygwin refuses to build them.
+
+Source: "DOC\manual-full.pdf"; DestDir: "{app}"
+
 ; Icons for Windows can be created from a 32x32 image with icotool
 ; (Linux Debian unstable), or IrfanView (Windows, not very good
 ; results) or paint (Windows, save in .bmp then rename to .ico).
@@ -50,6 +55,8 @@ Source: "logo.ico"; DestDir: "{app}"
 ; Menu
 Name: "{group}\FreeFem++"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
 Name: "{group}\FreeFem++ GUI"; Filename: "{app}\FreeFem++-cs.exe"
+Name: "{group}\PDF manual"; Filename: "{app}\manual-full.pdf"
+Name: "{group}\Postscript manual"; Filename: "{app}\manual-full.ps"
 Name: "{group}\Examples\Tutorial"; Filename: "{app}\examples++-tutorial"
 Name: "{group}\Examples\Main"; Filename: "{app}\examples++"
 Name: "{group}\Examples\Eigenvalues"; Filename: "{app}\examples++-eigen"
