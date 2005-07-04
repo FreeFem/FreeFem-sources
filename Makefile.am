@@ -162,7 +162,11 @@ FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
 PACKAGE_NAME=FreeFem++v$(VERSION)_linux-$(KERNEL_VERSION)_$(LIBC_VERSION)$(OPTIM_TYPE)
 
 linux-package: $(PACKAGE_NAME).tgz
-$(PACKAGE_NAME):all
+
+# No direct dependency to "all" to be able to debug the packaging
+# procedure on its own.
+
+$(PACKAGE_NAME):
 	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug \
 		$@/examples++-eigen $@/examples++-load
 	cp src/std/FreeFem++ $@
