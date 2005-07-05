@@ -257,7 +257,7 @@ Vertex *  FQuadTree::ToClose(const R2 & v,R seuil,long hx,long hy)
 	      {
 		R2 XY(X,V);
 		R dd;
-	        if( (dd= (XY,XY) ) < seuil ) // LengthInterpole(Mx(XY), b->v[k]->m(XY)))  < seuil )
+	        if( (dd= (XY,XY) ) < seuil2 ) // LengthInterpole(Mx(XY), b->v[k]->m(XY)))  < seuil )
 		    return &V; 
 	      }
 	  }
