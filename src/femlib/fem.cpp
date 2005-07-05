@@ -1292,14 +1292,15 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
      nvmax += NbOfSubInternalVertices(split[i]) -3;
 
   //  compute the minimal Hsize of the new mesh  
-  R hm = Th[0].h();
+  R hm = Th[0].h_min();
 //  cout << " hm " << hm << endl;
+// change h() in h_min() bug correct  july 2005 FH  ----
   for (int it=0;it<Th.nt;it++)
     { 
       assert(split[it]>=0 && split[it]<=64);
 //      cout << " it = " <<it << " h " <<  Th[it].h() << " " << split[it] << " hm = " << hm <<  endl;
       if (split[it]) 
-        hm=Min(hm,Th[it].h()/(R) split[it]);
+        hm=Min(hm,Th[it].h_min()/(R) split[it]);
     }
    R seuil=hm/4.0;
    if(verbosity>2)   
@@ -1431,6 +1432,8 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
                  quadtree->Add(*pV);
                  nv++;                  
                }  //  end of new vertex
+               
+               //cout << j <<  "  " << *pV << " " << Pj << " " << number(pV) << " " << Norme2(Pj-*pV) << " " << nv << endl;
                vt[j]=number(pV); 
            //  triangles[kt].SetVertex(j,pV);
            } // for(int j=0;j<3;j++)
@@ -1509,56 +1512,39 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
           ffassert(err==0 && nbt !=0);
        }
      // 
-    // Correction FH bug  trunc  mesh with hole 25032005
     
       delete [] triangles;
+    // Correction FH bug  trunc  mesh with hole 25032005 +july 2005 
       int kt=0;
-       int *rr= new int[nbt+1];
-       for (int i=0;i<nbt;++i)
-         {
-           int ir = reft[i];
-           assert(ir>=0 && ir <= nbt);
-           rr[ir]=-1; 
-         }
-        int ksd=0;
        for(int i=0,k=0;i<nbt;i++,k+=3)
       {
          int ir = reft[i]; 
-         if(rr[ir]==-1) 
-         {
+          reft[i]=-1;
           R2 A=vertices[nu[k]-1],B=vertices[nu[k+1]-1],C=vertices[nu[k+2]-1];
           R2 G=(A+B+C)/3.,PHat;
           bool outside;
           const Triangle * t=Th.Find(G,PHat,outside,0);
-        if(!outside) { 
-          
-           if(rr[ir]==-1) ksd++;
-           //rr[reft[i]] = Th(t);
-           rr[ir]=Th(t);
-         //  kt++;
-        }
-       // else reft[i]=-1;
-       }
+          if(!outside ) { 
+            int k=Th(t);
+            if( split[k] )
+             {
+               reft[i] = k;
+               kt++;
+             }
+           }
         }
         
-      
-      for (int i=0;i<nbt;++i)
-        {
-          reft[i]=rr[reft[i]];
-            if (reft[i] >= 0)  
-          kt++;
-         }
       nt=kt;
      if(verbosity>1)      
-      cout << " Nb Triangles = " << nt <<  " remove triangle in hole :" <<  nbt - nt << " nb comp ssd " << ksd << " " << nbsd <<endl;
+      cout << " Nb Triangles = " << nt <<  " remove triangle in hole :" <<  nbt - nt 
+           <<endl;
       triangles = new Triangle[nt];
       kt=0;
       for(int i=0,k=0;i<nbt;i++,k+=3)
         if(reft[i]>=0) 
          triangles[kt++].set(vertices,nu[k]-1,nu[k+1]-1,nu[k+2]-1,Th[reft[i]].lab);
       assert(kt==nt);
-      delete [] rr;
-    // END  Correction FH bug  trunc  mesh with hole 25032005
+    // END  Correction FH bug  trunc  mesh with hole 25032005 + july 2005 
       
       delete [] arete;
       delete [] nu;
