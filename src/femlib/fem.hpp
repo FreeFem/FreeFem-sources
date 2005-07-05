@@ -322,7 +322,9 @@ public:
      {Rd E=Edge(i);return Rd(-E.y,E.x)/(2*area);} 
 // ------     
   R lenEdge(int i) const {Rd E=Edge(i);return sqrt((E,E));}
-  R h() const { return Max(lenEdge(0),lenEdge(1),lenEdge(2));}
+  R lenEdge2(int i) const {Rd E=Edge(i);return ((E,E));}
+  R h() const { return sqrt(Max(lenEdge2(0),lenEdge2(1),lenEdge2(2)));}
+  R h_min() const { return sqrt(Min(lenEdge2(0),lenEdge2(1),lenEdge2(2)));}
   
   void Renum(Vertex   *v0, long * r)  { 
     for (int i=0;i<3;i++) 
