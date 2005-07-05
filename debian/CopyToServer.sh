@@ -26,7 +26,12 @@ if ssh $3 test -d $1/dists/$2
 then
     ssh $3 rm -r $1/dists/$2
 fi
-basedir="dists/$2/ff++/binary-i386"
+if test "$HOSTNAME" = iris
+then
+    basedir="dists/$2/ff++/binary-amd64"
+else
+    basedir="dists/$2/ff++/binary-i386"
+fi
 ssh $3 mkdir -p $1/$basedir
 
 # Server configuration file
