@@ -183,7 +183,7 @@ public:
      if( delta) delete delta; 
      closetheparam.eval(stack); // clean memory 
      
-     return 0L;
+     return 0L; //SetAny<long>(0);  Modif FH  july 2005 
      }  
     operator aType () const { return atype<long>();}         
      

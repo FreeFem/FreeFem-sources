@@ -142,6 +142,7 @@ void Mesh::ConsAdjacence()
         int i1=number(be.vertices[1]);
         throwassert(i0 >=0 && i0 < nv);
         throwassert(i1 >=0 && i1 < nv);
+        throwassert(i1 != i0) ;
         int im=Min(i0,i1);
         BoundaryEdgeHeadLink[i]=-1; 
         for ( n=Head[i0+i1]; n>=0; n=TheAdjacencesLink[n])

@@ -77,6 +77,7 @@ static void  HeapSort(T *c,long n)
     void CodeAlloc::clear()
   {
      return ;
+
     cleanning=true;
     Sort_mem();
     cout << " Clear Alloc Mem: "<< nb << endl; ;
