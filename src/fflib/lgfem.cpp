@@ -2246,9 +2246,10 @@ class  OneOperatorMakePtrFE : public OneOperator { public:
          
         AnyType operator()(Stack stack)  const {
           R  p = GetAny<R>( (*fer)(stack));
-          B  a = GetAny<B>( (*fes)(stack));          
+          B  a = GetAny<B>( (*fes)(stack)); 
           *p=new FEbase<K>(a);
           (*e_set_fev)(stack); 
+        //  cout << "MakePtrFE: build p " << p << " " << *p << endl;         
           return SetAny<R>(p);
         }
           operator aType () const { return atype<R>();}         

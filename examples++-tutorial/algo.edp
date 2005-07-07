@@ -178,8 +178,9 @@ func real[int] C(real[int] & x)
     v[]= vdJ(0,Vh);
     real res= v[]'*v[];
     cout << i <<  " residu^2 = " <<  res  << endl;
+    matrix H;
     if( res< 1e-12) break;
-    matrix H= vhJ(Vh,Vh,factorize=1,solver=LU);
+    H= vhJ(Vh,Vh,factorize=1,solver=LU);
     w[]=H^-1*v[];
     u[] -= w[];
     umax = u[].max; 

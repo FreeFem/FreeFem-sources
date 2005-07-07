@@ -1,5 +1,17 @@
+bug in clean variable (delete) after a break , continue or return.
+example :
+  while(1) 
+{
+    ....
+    if ( ...) break;
+    matrix M= ...
+}  // here we delete the data associated to objet M
+but the variable M  is un set, so some time freefem trap
+when  we free unset pointer.
+
+
 bug une fonction with string parameter
- 
+hard to correct  
   func bool  write(string  fn,real[int] & u)
     {
       cout << fn << endl;  //  delete 2 times
