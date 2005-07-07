@@ -13,9 +13,7 @@ SUBDIRS=download src DOC examples++-tutorial examples++	\
 EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h \
 FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS \
-logo.ico copysharedlibs.sh COPYRIGHT 
-
-
+logo.ico copysharedlibs.sh COPYRIGHT edp.nedit
 
 
 # Creates a file named "ChangeLog" containing the chronology of all

@@ -160,7 +160,8 @@ class FEbase { public:
   FEbase(const pfes  *ppVh) :pVh(ppVh), xx(0),Vh(0) {}
   
  ~FEbase() { delete xx;}  
-  void destroy() { delete this;}
+  void destroy() { // cout << "~FEbase  destroy " << this << endl; 
+   delete this;}
     void operator=( KN<K> *y) { Vh=**pVh; 
        throwassert((bool) Vh);
        if (xx) delete xx;xx=y;

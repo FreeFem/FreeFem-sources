@@ -43,9 +43,15 @@ mylex *zzzfff;
   aType dcltype;
 const int nbembtype=10;
 aType rettype[nbembtype];
+Block * routineinblock[nbembtype]; // Add FH july 2005 pb clean on return 
 int kkembtype=-1;
 int inloopcount=0;
 Block *currentblock;
+// Add FH july 2005 
+//  problem clean variable after break,continue and return.
+const int sizeStackOfLoop=100; 
+Block * StackOfLoop[sizeStackOfLoop];
+// end ADD
 double CPUcompileInit =0;
 //class pfes;
 C_F0  fespacetype;
@@ -337,6 +343,7 @@ declaration:   type_of_dcl {dcltype=$1} list_of_dcls ';' {$$=$3}
                    {   /* use the stack to store the prev return type*/
                       assert(kkembtype+1<nbembtype);
                       rettype[++kkembtype] = $2->right();
+                      routineinblock[kkembtype] = currentblock;
                       $<routine>5=new Routine($1,$2->right(),$3,$5,currentblock);
                      // cout << " \n after new routine \n " << endl;                      
                       }
@@ -359,8 +366,11 @@ declaration:   type_of_dcl {dcltype=$1} list_of_dcls ';' {$$=$3}
 begin: '{'  {  currentblock = new Block(currentblock)};
 end:   '}'  {  $$=currentblock->close(currentblock)};
 
-for_loop:  FOR {inloopcount++;};
-while_loop:  WHILE {inloopcount++};
+for_loop:  FOR {ffassert(inloopcount<sizeStackOfLoop);  // modif FH july 2005
+                StackOfLoop[inloopcount++]=currentblock;};
+while_loop:  WHILE {ffassert(inloopcount<sizeStackOfLoop);
+                StackOfLoop[inloopcount++]=currentblock;}; // modif FH july 2005
+                
 
 declaration_for: 
     type_of_dcl {dcltype=$1;currentblock = new Block(currentblock)}
