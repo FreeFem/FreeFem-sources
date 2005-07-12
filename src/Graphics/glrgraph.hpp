@@ -382,7 +382,7 @@ void myexit(int err)
     closegraphique();
   }
  if (err !=0)
-    cout << "Error: freefem+ has end with error code " <<err<<endl;
+    cout << "Error: freefem+ has ended with error code " <<err<<endl;
 // else cout << "Normal exit 0" << endl;
   if (myenviron)
    longjmp(myenvironj,1);
@@ -410,7 +410,7 @@ int main (int argc, char **argv)
 	myenviron = 0;			
     }
   else
-    printf ("To launch freefem you must type freefem  and a file name\n");
+    printf ("To launch freefem you must type the keyword freefem  and a file name\n");
   
   return 0;
 }
@@ -552,7 +552,7 @@ void initgraphique(void)
       dpy = XOpenDisplay(0);
   if (!dpy) 
     {
-      cerr << " Erreur openning  dpy " << endl;
+      cerr << " Error openning  dpy " << endl;
       exit(2);
     }
 
@@ -944,7 +944,7 @@ int DoMouseDown (int windowPart, WindowPtr whichWindow, EventRecord *myEvent)
 				if (TrackGoAway(whichWindow, myEvent->where))
 					{ 
 					   closegraphique();
-					   cout << "Fin (fermeture fenetre graphique) " <<endl;
+					   cout << "The end (closing the graphic window) " <<endl;
 					   exit(0);
 					   //HideWindow(whichWindow);  
 					} 

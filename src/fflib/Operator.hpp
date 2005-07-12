@@ -129,14 +129,14 @@ template<class A>
 struct Op_ReadKN : public binary_function<istream*,KN<A>*,istream*> {
   static istream *  f(istream  * const  & f,KN<A>* const  &  a)  
    { 
-     if( !f || !*f) ExecError("Fatal Error file: not open in read array (Op_ReadKN)");
+     if( !f || !*f) ExecError("Fatal Error: file not open in read array (Op_ReadKN)");
      int n;char c;
      *f >> n;
-     if(!f->good()) ExecError("Fatal Error file  not good   in read array (Op_ReadKN)");
+     if(!f->good()) ExecError("Fatal Error: file  not good in read array (Op_ReadKN)");
      
      if(n !=a->N()) {
         cerr << " length on the array " << a->N() << " != " << n << " length in file " << endl;
-        ExecError("Fatal Error incompatible lengh in read array (Op_ReadKN)");
+        ExecError("Fatal Error: incompatible length in read array (Op_ReadKN)");
        assert(n==a->N());
        }
      while (f->get(c) &&  (c!='\n' && c!='\r' ) ) 0; // eat until control (new line

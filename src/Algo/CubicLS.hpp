@@ -113,7 +113,7 @@ typename CubicLineSearch<LS>::Param CubicLineSearch<LS>::search(const Param& cur
 	  this->iterNum++;
 	}
   if (this->iterNum == this->iterMax)
-	cerr << "Alpha over flowed! \n";
+	cerr << "Alpha overflowed! \n";
   
   // Armijo's test for alpha too large
   alpha_prev = alpha; // H.L. Deng, 6/13/95
@@ -165,7 +165,7 @@ typename CubicLineSearch<LS>::Param CubicLineSearch<LS>::search(const Param& cur
 	  this->iterNum++;
 	}
   if (this->iterNum == this->iterMax){
-	cerr << "Alpha under flowed! \n";
+	cerr << "Alpha underflowed! \n";
 	cerr << this->iterMax;
   }
   

@@ -24,10 +24,10 @@ class RefCounter {
   int destroy() const { 
    if(this) {throwassert(count>=0);
         if ( count--==0) {
-	            SHOWVERB( cout << "True  destroy of " << this <<  endl);
+	            SHOWVERB( cout << "True  destruction of " << this <<  endl);
              delete this;
              return true;} 
-        else{ SHOWVERB(cout << " no destroy count=" << count+1 << " " << this <<  endl);
+        else{ SHOWVERB(cout << " no destruction count=" << count+1 << " " << this <<  endl);
               return false;}}
    else return false;} 
    void increment() const {count++;} 

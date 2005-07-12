@@ -14,7 +14,7 @@
 // ORIG-DATE:     Dec 97
 
 // #define TRACETRIANGLE 3
-long verbosity =1;
+extern long verbosity ;
 //#define strcasecmp strcmp
 #include <cstdio>
 #include <string.h>

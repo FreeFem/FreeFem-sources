@@ -69,7 +69,7 @@ class mylex : public CodeAlloc {
   void dump(ostream & f ) ;
   
   void erreur(char * s) {
-    cerr << " Erreur line number" <<linenumber << ": " << s << endl;
+    cerr << " Error line number" <<linenumber << ": " << s << endl;
     throw(ErrorCompile("lex:",linenumber)); }
   
   bool InMotClef  (aType & t, int & r) const ;

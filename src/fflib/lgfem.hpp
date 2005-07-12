@@ -22,7 +22,7 @@ class lgVertex { public:
 
   CountPointer<Mesh> pTh;
   Vertex *v;
-  void Check() const {   if (!v || !pTh) { ExecError("Unset Vertex,Sorry!"); } }
+  void Check() const {   if (!v || !pTh) { ExecError("Too bad! Unset Vertex!"); } }
   void init() { v=0;pTh.init();}
   lgVertex(Mesh * Th,long kk): pTh(Th),v( &(*pTh)(kk)) {}
   lgVertex(Mesh * Th,Vertex * kk): pTh(Th),v(kk) {}
@@ -135,7 +135,7 @@ class pfes_fes : public v_fes { public:
   FESpace * buildupdate() {  return  new FESpace(***Vh,n);  }
   FESpace * buildupdate(int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) 
   {
-   InternalError(" No way to def periodic BC in this case, tensorisation of FEspace ");
+   InternalError(" No way to define a periodic BC in this case: tensorisation of FEspace ");
   //  return  new FESpace(***Vh,n,nbdfv,ndfv,nbdfe,ndfe);
   }
  };

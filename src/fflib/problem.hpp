@@ -67,7 +67,7 @@ inline bool BCastTo(const C_F0 & f) { return atype<Result>()->CastingFrom(f.left
 
 inline void Check(bool  v,const char * mess)
 {
-  if (!v) { cerr << " Erreur " << mess ;
+  if (!v) { cerr << " Error " << mess ;
   throw(ErrorExec(mess,1));
   }
 }           
@@ -241,7 +241,7 @@ class BC_set : public E_F0mps { public:
       { //
         C_F0 x=Find(ii->first);
         if (x.left() != atype<const finconnue *>())
-          CompileError("We wait for a unkown  u=... of the problem");
+          CompileError("We expected an unkown  u=... of the problem");
         const finconnue * uu = dynamic_cast<const finconnue *>(x.LeftValue());
         ffassert(uu);
         const MGauche *ui=uu->simple();
@@ -696,7 +696,7 @@ public:
   }  
   Type_Expr SetParam(const C_F0 & c,const ListOfId *l,size_t & top) const 
   {   if (c.left() != atype<const C_args*>())
-    CompileError(" Problem  a(...) = invalide type ",c.left());
+    CompileError(" Problem  a(...) = invalid type ",c.left());
   const C_args * ca = dynamic_cast<const C_args *>(c.LeftValue());
   Problem * pb=new Problem(ca,*l,top);
   SHOWVERB(cout << "solve:SetParam " << ca << " pb=" << pb << endl);
@@ -790,7 +790,7 @@ template<class K> class Matrice_Creuse_Transpose;
  };
  
 template<class K>  ostream & operator << (ostream & f,const Matrice_Creuse<K> & A) 
-{ if ( !A.A) f << " unset sparce matrix " << endl;
+{ if ( !A.A) f << " unset sparse matrix " << endl;
  else f << *A.A ;
  return f;  }
 
@@ -931,13 +931,13 @@ void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool
       case TypeSolveMat::CHOLESKY :  AA.typesolver=FactorizationCholeski; break;
       default:
         cerr << " type resolution " << typemat->t <<" sym=" <<  typemat->profile <<  endl;
-        CompileError("type resolution inconnue"); break;       
+        CompileError("type resolution unknown"); break;       
       }
     }
   else 
     {
       typedef typename MatriceMorse<R>::VirtualSolver VirtualSolver;
-      if(verbosity>5) cout << " Matrice morse GC Precond diag" << endl;
+      if(verbosity>5) cout << " Morse matrix GC Precond diag" << endl;
       MatriceMorse<R> & AA(dynamic_cast<MatriceMorse<R> &>(A));
       ffassert(&AA);
       //     ffassert(typemat->t==TypeSolveMat::GC);
@@ -968,7 +968,7 @@ void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool
       default:
       
         if (verbosity >5)
-          cout << "  SetSolver:: no  solver by  default " << endl;
+          cout << "  SetSolver:: no  default solver " << endl;
         // cerr << " type resolution " << typemat->t << endl;
         //  CompileError("type resolution inconnue"); break;       
       }
@@ -1040,7 +1040,7 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
      map<pair<int,int>, R >   AAA;
      bool bc=AssembleVarForm<R,map<pair<int,int>, R >  >( stack,Th,Uh,Vh,typemat.sym,&AAA,0,b->largs);
      if (typemat.profile)
-        { ExecError(" Sorry build Skyline matrix with different meshes is not implemented! ");}
+        { ExecError(" Sorry, construction of Skyline matrix with different meshes is not implemented! ");}
       else 
         { A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA,typemat.sym) ); }
       if (bc)
@@ -1054,7 +1054,7 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
     case TypeSolveMat::LU: pf->LU(Abs(eps));break;
     case TypeSolveMat::CROUT: pf->crout(Abs(eps));break;
     case TypeSolveMat::CHOLESKY: pf->cholesky(Abs(eps));break;
-    default: ExecError("Sorry no foctorize for this type for matrix"); 
+    default: ExecError("Sorry no factorize for this type for matrix"); 
     }
     
   }    
@@ -1190,7 +1190,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
      cerr << " type of matrix " << A->typemat<<endl;
      cerr << " type of matrix for solver " <<*typemat<<endl;
      
-     ExecError(" Set incompatibility beetween solver and type of matrix");
+     ExecError(" Set incompatibility between solver and type of matrix");
    }
   if( factorize ) {
     MatriceProfile<R> * pf = dynamic_cast<MatriceProfile<R> *>((MatriceCreuse<R> *) A->A);
@@ -1199,7 +1199,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
     case TypeSolveMat::LU: pf->LU(Abs(eps));break;
     case TypeSolveMat::CROUT: pf->crout(Abs(eps));break;
     case TypeSolveMat::CHOLESKY: pf->cholesky(Abs(eps));break;
-    default: ExecError("Sorry no foctorize for this type for matrix"); 
+    default: ExecError("Sorry no factorization for this type for matrix"); 
     }
     
   }    

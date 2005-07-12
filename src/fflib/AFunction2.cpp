@@ -302,6 +302,15 @@ C_F0 TableOfIdentifier::destroy()
  return C_F0(l);     
 }
 
+   void TableOfIdentifier::clear()
+   {
+     for (iterator i=m.begin();i!=m.end();++i)
+       {
+        
+   //     delete i->first;
+        }
+     m.clear();
+   } 
 
 Expression basicForEachType::Destroy(const C_F0 & e) const 
 {
@@ -633,3 +642,16 @@ void basicAC_F0::SetNameParam(int n,name_and_type *l , Expression * e) const
     CompileError("Unused named parameter");  
    }
 }
+
+
+//  change FH to bluid .dll 
+
+void lgerror (const char* s) 
+{
+  cerr << endl;
+  cerr <<" Error line number " << zzzfff->lineno() << ", in file " << zzzfff->filename() 
+       <<", before  token " <<zzzfff->YYText() << endl
+       << s << endl;
+   throw(ErrorCompile(s,zzzfff->lineno(),zzzfff->YYText() ));
+}
+

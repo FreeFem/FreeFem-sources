@@ -57,17 +57,17 @@ ARFLAGS = cru
 libff_a_AR = $(AR) $(ARFLAGS)
 am_libff_a_OBJECTS = AFunction.$(OBJEXT) AFunction2.$(OBJEXT) \
 	lex.$(OBJEXT) lgmesh.$(OBJEXT) CodeAlloc.$(OBJEXT) \
-	lgmat.$(OBJEXT) Drawing.$(OBJEXT) gibbs.$(OBJEXT) \
-	CheckPtr.$(OBJEXT) fem.$(OBJEXT) QuadratureFormular.$(OBJEXT) \
-	FESpace.$(OBJEXT) Element_RT.$(OBJEXT) mshptg.$(OBJEXT) \
-	FQuadTree.$(OBJEXT) QuadTree.$(OBJEXT) R2.$(OBJEXT) \
-	Meshio.$(OBJEXT) Mesh2.$(OBJEXT) Metric.$(OBJEXT) \
-	BamgFreeFem.$(OBJEXT) MeshDraw.$(OBJEXT) MeshGeom.$(OBJEXT) \
-	MeshQuad.$(OBJEXT) SetOfE4.$(OBJEXT) MeshRead.$(OBJEXT) \
-	MeshWrite.$(OBJEXT) problem.$(OBJEXT) \
-	strversionnumber.$(OBJEXT) InitFunct.$(OBJEXT) \
-	lgalgo.$(OBJEXT) Element_P2h.$(OBJEXT) load.$(OBJEXT) \
-	lgfem.$(OBJEXT)
+	lgmat.$(OBJEXT) global.$(OBJEXT) Drawing.$(OBJEXT) \
+	gibbs.$(OBJEXT) CheckPtr.$(OBJEXT) fem.$(OBJEXT) \
+	QuadratureFormular.$(OBJEXT) FESpace.$(OBJEXT) \
+	Element_RT.$(OBJEXT) mshptg.$(OBJEXT) FQuadTree.$(OBJEXT) \
+	QuadTree.$(OBJEXT) R2.$(OBJEXT) Meshio.$(OBJEXT) \
+	Mesh2.$(OBJEXT) Metric.$(OBJEXT) BamgFreeFem.$(OBJEXT) \
+	MeshDraw.$(OBJEXT) MeshGeom.$(OBJEXT) MeshQuad.$(OBJEXT) \
+	SetOfE4.$(OBJEXT) MeshRead.$(OBJEXT) MeshWrite.$(OBJEXT) \
+	problem.$(OBJEXT) strversionnumber.$(OBJEXT) \
+	InitFunct.$(OBJEXT) lgalgo.$(OBJEXT) Element_P2h.$(OBJEXT) \
+	load.$(OBJEXT) lgfem.$(OBJEXT)
 libff_a_OBJECTS = $(am_libff_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -87,11 +87,11 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/QuadratureFormular.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/R2.Po ./$(DEPDIR)/SetOfE4.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/eigenvalue.Po ./$(DEPDIR)/fem.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gibbs.Po ./$(DEPDIR)/lex.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/lgalgo.Po ./$(DEPDIR)/lgfem.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/lgmat.Po ./$(DEPDIR)/lgmesh.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/load.Po ./$(DEPDIR)/mshptg.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/problem.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gibbs.Po ./$(DEPDIR)/global.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lex.Po ./$(DEPDIR)/lgalgo.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lgfem.Po ./$(DEPDIR)/lgmat.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lgmesh.Po ./$(DEPDIR)/load.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/mshptg.Po ./$(DEPDIR)/problem.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/strversionnumber.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -247,7 +247,8 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 noinst_LIBRARIES = libff.a
 libff_a_SOURCES = AFunction.cpp AFunction2.cpp lex.cpp lgmesh.cpp		\
-CodeAlloc.cpp lgmat.cpp ../femlib/Drawing.cpp ../femlib/gibbs.cpp	\
+CodeAlloc.cpp lgmat.cpp global.cpp 					\
+../femlib/Drawing.cpp ../femlib/gibbs.cpp				\
 ../femlib/CheckPtr.cpp ../femlib/fem.cpp				\
 ../femlib/QuadratureFormular.cpp ../femlib/FESpace.cpp			\
 ../femlib/Element_RT.cpp ../femlib/mshptg.cpp ../femlib/FQuadTree.cpp	\
@@ -348,6 +349,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eigenvalue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gibbs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/global.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lgalgo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lgfem.Po@am__quote@

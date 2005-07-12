@@ -9,7 +9,7 @@ R argmin(R  rho,const DJ & dJ, KN_<R> &x,KN_<R> &h,KN_<R> &g,KN_<R> &w)
   R ro0=0, ro=rho,ro1=rho,rold=0;
   R p0= (g,h),p,p1;
   if(p0>0) { h=-g; p0=(g,h);
-    cout << "Reset searching directions to gradient! bofbof de F. hecht \n";
+    cout << "Reset searching directions to gradient! (Wow! says F. hecht) \n";
   } 
   R ap0=fabs(p0)*0.01; // on arrete quand on a divise par 100.
   
@@ -108,6 +108,6 @@ int NLCG(const DJ & dJ,const P & C,KN_<R> &x,const int nbitermax, double &eps,lo
       h -= Cg;  //  h = -Cg * gamma* h       
     }
   if(verbosity)
-  cout << " Non convergence de la mŽthode du gradient conjugue NL " <<endl;
+  cout << " Non convergence of the NL cojugate gradient " <<endl;
   return 0; 
 }
