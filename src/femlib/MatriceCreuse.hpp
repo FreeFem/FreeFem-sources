@@ -563,7 +563,7 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
        h *= gamma;
        h -= Cg;  //  h = -Cg * gamma* h       
      }
-   cout << " GC: method don't converge in " << nbitermax 
+   cout << " GC: method doesn't converge in " << nbitermax 
         <<  " iteration , xx= "  << xx<< endl;
    return 0; 
 }
@@ -614,7 +614,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
          cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
        if (g2 < reps2) { 
          if (verbosity )
-            cout << "CG converge: " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
+            cout << "CG converges " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
           return 1;// ok 
           }
        R gamma = g2/g2p;       

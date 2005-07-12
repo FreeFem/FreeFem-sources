@@ -75,7 +75,7 @@ list<Type> normalize(list<Type> l) {
   typename list<Type>::iterator il;
 	
   if (scale == 0) {
-	cerr << "Zero first element, cannot be normed! \n";
+	cerr << "First element is zero, cannot be normed! \n";
 	return v;
   }
   

@@ -20,7 +20,7 @@ then
 fi
 
 FFsource=..
-INC="-I$FFsource -I$FFsource/src/fflib -I$FFsource/src/femlib -I$FFsource/src/Graphics" 
+INC="-I$FFsource -I$FFsource/src/fflib -I$FFsource/src/femlib -I$FFsource/src/Graphics -I$FFsource/download/cadna"  
 SUF=so
 if [ -f "$1.cpp" ] ; then
     case "$uu" in
@@ -45,9 +45,9 @@ if [ -f "$1.cpp" ] ; then
 	echo "sorry unknown achitecture "`uname`
 	exit 1
     esac
-
-    echo $CXX -c $FLAGS $INC $PIC $1.cpp
-    test $do = yes &&$CXX -c $INC $FLAGS $PIC  $1.cpp
+   FLAGS="$FLAGS -g"
+    echo $CXX -c $FLAGS $INC $PIC $1.cpp 
+    test $do = yes &&$CXX -c $INC $FLAGS $PIC  $1.cpp 
 
     echo $CXX $SHARED $FLAGS $1.o -o $1.$SUF $LIBS
     test $do = yes &&$CXX $SHARED $FLAGS $1.o -o $1.$SUF $LIBS

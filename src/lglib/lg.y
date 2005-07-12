@@ -7,6 +7,7 @@
 #include <string>
 #include "error.hpp"
 class Iden;
+#include "strversionnumber.hpp"
 
 #ifdef __MWERKS__
 #ifdef __INTEL__
@@ -30,7 +31,7 @@ bool load(string s);
 
 template <class R> class FE;
 template <class R,int i> class FE_;
-mylex *zzzfff;
+extern mylex *zzzfff;
 #ifdef PARALLELE
   void initparallele(int &, char **&);
   void init_lgparallele();
@@ -60,11 +61,6 @@ bool fespacecomplex;
 int ShowAlloc(char *s,size_t &);
 inline int yylex()  {return zzzfff->scan();}
 inline int lineno() {return zzzfff->lineno();}
-void ShowKeyWord(ostream & f ) 
- {
-   zzzfff->dump(f);
- 
- }
 
 extern bool withrgraphique;
 inline void fingraphique()
@@ -74,14 +70,7 @@ inline void fingraphique()
     closegraphique();
   }}
 
-void yyerror (const char* s) 
-{
-  cerr << endl;
-  cerr <<" Error line number " <<lineno() << ", in file " << zzzfff->filename() 
-       <<", before  token " <<zzzfff->YYText() << endl
-       << s << endl;
-   throw(ErrorCompile(s,lineno(),zzzfff->YYText() ));
-}
+void lgerror (const char* s) ;
 
 %}
 
@@ -537,7 +526,7 @@ primary:
 #include <fstream>
 using namespace std;
 // bool lgdebug;
- bool lexdebug;
+// bool lexdebug;
 void ForDebug();
 void ForDebug()
 {
@@ -550,7 +539,52 @@ void init_lgfem() ;
 void init_lgmesh() ;
 void init_algo();
 bool withrgraphique = false;
-string  StrVersionNumber();
+//string  StrVersionNumber();
+
+int Compile()
+{
+  extern   YYSTYPE *plglval;  // modif FH 
+  plglval = &lglval;
+  int retvalue=0;
+  int ok;
+  
+  currentblock=0;
+  currentblock = new Block(currentblock);  
+  try {
+    retvalue=yyparse(); //  compile
+    if(retvalue==0)  
+      if(currentblock) 
+	retvalue=1,cerr <<  "Error:a block is not close" << endl;   
+      else {
+        cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg << endl;
+	cerr <<  "Bien: On a fini Normalement" << endl; 
+	}
+  }
+
+  catch (Error & e) 
+    {
+      retvalue=e.errcode();
+      cerr << "error " << e.what() 
+	   << "\n code = "<<  retvalue << endl;
+    }
+  catch(std::ios_base::failure & e)
+    {
+     cerr << "std  catch io failure \n what : " << e.what() << endl;; 
+     cerr << " at exec line  " << TheCurrentLine << endl; 
+    }
+  catch(std::exception & e)
+    {
+     cerr << "std  catch exception \n what : " << e.what() << endl;; 
+     cerr << " at exec line  " << TheCurrentLine << endl; 
+    
+    }
+  catch(...)
+   {
+     cerr << "Strange catch exception ???\n"; 
+     cerr << " at exec line  " << TheCurrentLine << endl; 
+    }
+  return retvalue; 
+}
 
 int mymain (int  argc, char **argv)
 {
@@ -616,44 +650,9 @@ int mymain (int  argc, char **argv)
 #endif
  // callInitsFunct(); Pb opimisation 
    cout << endl;
-  int ok;
-  
-  currentblock=0;
-  currentblock = new Block(currentblock);  
-  try {
-    retvalue=yyparse(); //  compile
-    if(retvalue==0)  
-      if(currentblock) 
-	retvalue=1,cerr <<  "Error:a block is not close" << endl;   
-      else {
-        cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg << endl;
-	cerr <<  "Bien: On a fini Normalement" << endl; 
-	}
-  }
-
-  catch (Error & e) 
-    {
-      retvalue=e.errcode();
-      cerr << "error " << e.what() 
-	   << "\n code = "<<  retvalue << endl;
-    }
-  catch(std::ios_base::failure & e)
-    {
-     cerr << "std  catch io failure \n what : " << e.what() << endl;; 
-     cerr << " at exec line  " << TheCurrentLine << endl; 
-    }
-  catch(std::exception & e)
-    {
-     cerr << "std  catch exception \n what : " << e.what() << endl;; 
-     cerr << " at exec line  " << TheCurrentLine << endl; 
-    
-    }
-  catch(...)
-   {
-     cerr << "Strange catch exception ???\n"; 
-     cerr << " at exec line  " << TheCurrentLine << endl; 
-    }
-     
+   
+  retvalue= Compile(); 
+      
 #ifdef PARALLELE
   end_parallele();
 #endif

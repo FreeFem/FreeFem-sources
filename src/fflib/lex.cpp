@@ -11,6 +11,8 @@
 #include "lg.tab.hpp"
 #include "lex.hpp"
 
+extern YYSTYPE *plglval;
+
 //  New version of macro expantion more classical
 //  and more  simple
 // FH Jan. 2005
@@ -186,12 +188,12 @@ int mylex::basescan()
     
     buf[i]=0;
     if (nc=='i' ) 
-      { buf[i++]=source().get(),buf[i]=0,lglval.dnum = atof(buf),ret=CNUM;}
+      { buf[i++]=source().get(),buf[i]=0,plglval->dnum = atof(buf),ret=CNUM;}
     else 
       if (real)
-        lglval.dnum = atof(buf),ret=DNUM;
+        plglval->dnum = atof(buf),ret=DNUM;
       else
-        lglval.lnum = atoi(buf),ret=LNUM;
+        plglval->lnum = atoi(buf),ret=LNUM;
     
     if(lexdebug) cout << " NUM : " << buf  << " "<<endl;
   }
@@ -236,7 +238,7 @@ int mylex::basescan()
       if (i == 256) erreur ("String too long");
       buf[i] = 0;
       if(source().get() != '"') erreur("End of String could not be found");
-      lglval.str = newcopy(buf);
+      plglval->str = newcopy(buf);
       if(lexdebug)  cout << "STRING=" << '"' << buf << '"' << endl;
       
       ret= STRING;
@@ -313,8 +315,8 @@ int mylex::basescan()
       
       if (ret!=c) source().get() ;
       else buf[1] = 0;
-      strcpy(lglval.oper,buf);
-      if(lexdebug)  cout << "Special '" <<  lglval.oper << "' " << ret << " ";
+      strcpy(plglval->oper,buf);
+      if(lexdebug)  cout << "Special '" <<  plglval->oper << "' " << ret << " ";
     }
   typetoken=ret; 
   return ret;
@@ -343,10 +345,10 @@ int mylex::scan(int lvl)
   
       
   if ( ret == ID) {
-    if (! InMotClef(lglval.type,ret))  {
+    if (! InMotClef(plglval->type,ret))  {
       if (  FindType(buf) == 1)  
          ret =  FESPACE;
-     lglval.str = newcopy(buf);
+     plglval->str = newcopy(buf);
       }}
   
   if ( ret =='{') { //cout << " listMacroDef->push_back"<< endl; 

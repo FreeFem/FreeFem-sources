@@ -689,7 +689,7 @@ inline ostream & operator << (ostream & f,const FElement & FE)
    }
 inline ostream & operator << (ostream & f,const FESpace & Vh)
    {
-     cout << " list of nodes per elements :" << endl;
+     cout << " list of nodes per element :" << endl;
      for (int k=0;k< Vh.NbOfElements;k++)
       { f <<setw(3) <<  k << ":";
       for (int j=0;j<Vh(k);j++)

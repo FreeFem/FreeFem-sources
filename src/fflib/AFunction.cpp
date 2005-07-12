@@ -20,19 +20,19 @@
 
 
 
-Map_type_of_map map_type_of_map ; //  to store te type 
-Map_type_of_map map_pair_of_type ; //  to store te type 
+extern Map_type_of_map map_type_of_map ; //  to store te type 
+extern Map_type_of_map map_pair_of_type ; //  to store te type 
 
-basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
+extern basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
 
-double  VersionNumber(); 
-int TheCurrentLine=-1; // unset: by default
-long mpisize=0,mpirank=0;
+extern int TheCurrentLine; // unset: by default
+extern long mpisize,mpirank;
 // FH  for g++ 3.4  the prototypage  have change
+double  VersionNumber(); 
 double Imag(const  complex<double> & z){ return imag(z);}
 double Real(const  complex<double> & z){ return real(z);}
 // FH
-bool showCPU= false;
+
 template<class T> inline T Max (const T &a,const T & b){return a > b ? a : b;}
 template<class T> inline T Min (const T &a,const T & b){return a < b ? a : b;}
 template<class T> inline T Abs (const T &a){return a <0 ? -a : a;}
@@ -84,6 +84,7 @@ inline void MyAssert(int i,char * ex,char * file,long line)
      CompileError();}
  }
 
+/*  
   C_F0 *pOne=0,*pZero=0,*pminusOne=0;
 // const C_F0 & One(*pOne), &Zero(*pZero);
  
@@ -99,7 +100,7 @@ typedef list<TableOfIdentifier *> ListOfTOfId;
   ListOfTOfId tables_of_identifier;
 
   const int AC_F0::MaxSize=1024; // maximal number of parameters
-  
+*/  
   
 template<class R>
 class  OneOperator0 : public OneOperator {
@@ -156,7 +157,6 @@ class  OneOperator_border_label : public OneOperator {public:
 };
 
 
-map<const string,basicForEachType *> map_type;
 
 template<class RR> RR LIncremantation(RR* a){ return ++(*a);}
 template<class RR> RR RIncremantation(RR* a){ return (*a)++;}
@@ -374,7 +374,13 @@ class  InitArrayfromArray : public OneOperator { public:
    
 
 
-extern void ShowKeyWord(ostream & f ); 
+
+void ShowKeyWord(ostream & f ) 
+ {
+   zzzfff->dump(f);
+ 
+ }
+
 ostream* dumptable(ostream* f)
 {
 
@@ -1197,15 +1203,6 @@ typedef MyMap<String,String> MyMapSS;
 }
 int ShowAlloc(char *s,size_t & lg); 
 
-   void TableOfIdentifier::clear()
-   {
-     for (iterator i=m.begin();i!=m.end();++i)
-       {
-        
-   //     delete i->first;
-        }
-     m.clear();
-   } 
 
 
  void clean_lgfem();
@@ -1243,4 +1240,5 @@ int ShowAlloc(char *s,size_t & lg);
 
  } 
 static addingInitFunct TheaddingInitFunct(-10000,Init_map_type); 
+
 

@@ -289,7 +289,7 @@ template<typename T>
 inline basicForEachType * atype() { 
   map<const string,basicForEachType *>::iterator ir=map_type.find(typeid(T).name());
  // basicForEachType * r=map_type[];
-  if (ir == map_type.end()) { cerr << "Error: aType  '" << typeid(T).name() << "', D'ont exist\n";
+  if (ir == map_type.end()) { cerr << "Error: aType  '" << typeid(T).name() << "', doesn't exist\n";
              ShowType(cerr);
             throw(ErrorExec("exit",1));}
   return ir->second;}
@@ -581,7 +581,7 @@ class ForEachType:  public basicForEachType{public:
     ForEachType(Function1 iv=0,Function1 id=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id) {
      if (sizeof(T) > sizeof(AnyTypeWithOutCheck) )
       {
-        cout << " Sorry the " <<typeid(T).name() << " is to large  ( " << sizeof(T) 
+        cout << " Sorry the " <<typeid(T).name() << " is too large  ( " << sizeof(T) 
              << " > " << sizeof(AnyTypeWithOutCheck) << " ) " << endl;
        throwassert(sizeof(T) <= sizeof(AnyTypeWithOutCheck) );
       }
@@ -1322,13 +1322,13 @@ class AC_F0: public basicAC_F0 { //  a Array of C_F0
   AC_F0 & operator=(const C_F0& c) {named_parameter=0; a=new C_F0[MaxSize]; nb=0;a[nb++]=c;return *this;} 
   AC_F0 & operator+=(const C_F0& c) { 
        if ( ! (a&& nb<MaxSize))
-         CompileError("Sorry the number of parameter < 1024");
+         CompileError("Sorry  number of parameters > 1024");
        a[nb++]=c;return *this;} 
   AC_F0 & Add(const char * nm,const C_F0 &c)  {
      if (!named_parameter) named_parameter=new maptype();
     iterator i=named_parameter->find(nm);
     if(i==named_parameter->end()) named_parameter->insert(make_pair(nm,c));
-    else {cerr << " the named in the list all ready exist "<< nm <<endl; CompileError();}
+    else {cerr << " the named in the list already exists "<< nm <<endl; CompileError();}
     return *this;}
   int size() const {return nb;}
   const C_F0 & operator [] (int i) const {throwassert(a && i<nb);return a[i];}
@@ -1385,7 +1385,7 @@ class E_Array  :public E_F0 {  public:
   basicAC_F0_wa *v;// the value
   E_Array(const basicAC_F0 & aa) : v(new basicAC_F0_wa(aa))  {throwassert(v);}
   AnyType operator()(Stack)  const {
-     cerr << " Pas evaluation d'un E_array" << endl;
+     cerr << " No evaluation of an E_array" << endl;
      throwassert(0);
      return  Nothing;}
  const C_F0 & operator [] (int i) const {throwassert(v );return (*v)[i];}
@@ -1605,7 +1605,7 @@ inline  C_F0 basicForEachType::Initialization(const Type_Expr & e) const
   {
      if(!InitExp) 
        { 
-          cerr << "Internal Error: Not Way to make the Initialization of this var type " << *this << endl;
+          cerr << "Internal Error: No Way to m Initialize this var type " << *this << endl;
           CompileError();
        }
    return C_F0(new  E_F0_Func1(InitExp,e.second),this);        
@@ -2461,7 +2461,7 @@ class E_exception : public exception { public:
   public:
   E_exception(CODE_exception c,AnyType rr=Nothing) : code(c),r(rr)  {}
   const int type() {return code;}
-  virtual const char *  what() const throw() { return "E_exception (break,continue ou return) "; }           
+  virtual const char *  what() const throw() { return "E_exception (break,continue or return) "; }           
 };
 
 

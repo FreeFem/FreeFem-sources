@@ -178,7 +178,7 @@ ConjugateGradient<LS>::Param ConjugateGradient<LS>::optimizer(Param& model0)
       if (descent > 0.)
 		{
 		  if (isVerbose){
-			cout << "Reset searching directions to gradient! \n";
+			cout << "Reset search direction to gradient vector! \n";
 		  }
 		  search = -1.*g1;
 		  descent = (search,g1);

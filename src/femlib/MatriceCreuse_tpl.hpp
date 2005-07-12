@@ -801,7 +801,7 @@ ostream& MatriceMorse<R>::dump(ostream & f) const
 {
   f << "# Sparce Matrix (Morse)  " << endl;
   f << "# first line: n m is symmetic nbcoef \n";
-  f << "# after for each nozero coefficient:   i j a_ij \n";  
+  f << "# after for each nonzero coefficient:   i j a_ij \n";  
   
   f << this->n << " " << this->m << " " << symetrique << "  " << nbcoef <<endl;
   int k=lg[0];
@@ -961,7 +961,7 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
     if (step==0) { // do allocation 
       nbcoef=ilg;
       if (verbosity >3)
-        cout << "  -- MatriceMorse: Nb coef !=0 " << nbcoef << endl;
+        cout << "  -- MorseMatrix: Nb coef !=0 " << nbcoef << endl;
       a = new R[nbcoef];
       cl = new int [nbcoef];}
       ffassert( a && cl);
@@ -1342,7 +1342,7 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
     this->n=me.Uh.NbOfDF;
     this->m=me.Vh.NbOfDF;
     if(verbosity>3)
-    cout << " -- Matrice morse  vide on la construit" << endl;
+    cout << " -- Morse Matrice is empt: let's build it" << endl;
     switch (me.mtype) {
      case MatriceElementaire<R>::Full : 
       Build(me.Uh,me.Vh,false);    
@@ -1351,7 +1351,7 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
       Build(me.Uh,me.Vh,true);    
       break;
      default:
-      cerr << "Big bug type MatriceElementaire unknown" << (int) me.mtype << endl;
+      cerr << "Big bug type MatriceElementaire is unknown" << (int) me.mtype << endl;
       throw(ErrorExec("exit",1));
       break; }     
    }
@@ -1386,7 +1386,7 @@ template<class R>
     if (solver)    
       solver->Solver(*this,x,b);
     else
-  {  cerr << "Pas de Solver dŽfine  pour cette matrice morse " << endl;
+  {  cerr << "No Solver defined  for this Morse matrix " << endl;
     throw(ErrorExec("exit",1));}
   }
 /*
@@ -1636,7 +1636,7 @@ double MatriceMorse<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gma
   ffassert(n==gmax.N());
   if (symetrique)
    {
-     ErrorExec("Error:sorry psor just for no symmetric  morse matrices",1);
+     ErrorExec("Error:sorry psor just for no symmetric Morse matrices",1);
    }
   else
    {
@@ -1668,7 +1668,7 @@ template<class R>
 double MatriceProfile<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) 
 {
   double rr=0;
-  ErrorExec("Error:sorry psor just for no symmetric  morse matrices (to do in futur FH??? )",2);
+  ErrorExec("Error:sorry psor just for no symmetric Morse matrices (will do in future FH??? )",2);
   return rr;
   
 }

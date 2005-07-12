@@ -187,8 +187,8 @@ typename LineSearch<P,V,M,VM,R>::Vect*	LineSearch<P,V,M,VM,R>::gradient(const Pa
   g=nrj->getGradient(m);
 
   if (g==NULL){
-	cerr<<"Gradient non défini pour cette fonction NRJ !"<<endl;
-	cerr<<"Utilisation d'un gradient numérique..."<<endl;
+	cerr<<"Undefined gradient for this NRJ function !"<<endl;
+	cerr<<"will use a numerical gradient..."<<endl;
 	numericalGradient(m);
   }
   else
@@ -205,7 +205,7 @@ typename LineSearch<P,V,M,VM,R>::VMat*	LineSearch<P,V,M,VM,R>::hessian(const Par
   h=nrj->getHessian(m);
 
   if (h==NULL){
-	cerr<<"Hessien non défini pour cette fonction NRJ !"<<endl;
+	cerr<<"Hessien is undefined for this NRJ function !"<<endl;
 	exit(1);
   }
   
@@ -231,7 +231,7 @@ typename  LineSearch<P,V,M,VM,R>::Param LineSearch<P,V,M,VM,R>::update(const Par
   Vect direction(dmod);
   
   if (direction.size() != ndim) {
-	cerr << "The length of the direction is different from dimensions." << endl;
+	cerr << "Size of direction is different from dimensions." << endl;
 	exit(1);
   }
   
