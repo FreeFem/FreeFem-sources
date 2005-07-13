@@ -12,7 +12,12 @@ if [ "$1" = "-win32" ]; then
 else
   uu=`uname -s` 
 fi
-
+if  [ "$1" = "-I" ]; then
+  INC=$2; shift;shift;
+fi
+ if  [ "$1" = "-l" ]; then
+  LIBS=$2; shift;shift;
+fi  
 # Default compiler
 if [ "$CXX" = "" ];
 then
@@ -20,7 +25,7 @@ then
 fi
 
 FFsource=..
-INC="-I$FFsource -I$FFsource/src/fflib -I$FFsource/src/femlib -I$FFsource/src/Graphics -I$FFsource/download/cadna"  
+INC="-Iinclude $INC"  
 SUF=so
 if [ -f "$1.cpp" ] ; then
     case "$uu" in
@@ -38,8 +43,8 @@ if [ -f "$1.cpp" ] ; then
         WIN32)
         echo " window "
 	SHARED="-v -shared --unresolved-symbols=ignore-all"
-        FLAGS='-fPIC  -mno-cygwin '
-        LIBS="../src/lglib/liblg.a"
+        FLAGS='  -mno-cygwin '
+        LIBS="libff0.dll libff1.dll libff2.dll $LIBS"
         SUF=dll;;
 	*)
 	echo "sorry unknown achitecture "`uname`

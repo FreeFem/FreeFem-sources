@@ -1205,14 +1205,14 @@ int ShowAlloc(char *s,size_t & lg);
 
 
 
- void clean_lgfem();
+//void clean_lgfem();
 
  void ClearMem()
  {
      //debugstack->clear(); lg;
      size_t lg;
      ShowAlloc("ClearMem: begin" , lg);
-     clean_lgfem();
+     //  clean_lgfem();
      delete pZero;
      delete pOne;
      delete pminusOne;

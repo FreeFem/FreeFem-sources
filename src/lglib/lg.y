@@ -18,7 +18,6 @@ class Iden;
 #endif
 #include "AFunction.hpp"
 //  to reserve space to graphical pointer function
-#define  FF_GRAPH_PTR_DCL
 #include "rgraph.hpp"
 #include "RNM.hpp"
 #include "fem.hpp"
