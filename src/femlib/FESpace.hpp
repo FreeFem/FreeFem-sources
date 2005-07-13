@@ -355,7 +355,6 @@ class TypeOfMortar {
   friend class FESpace;
   friend class FMortar;
   friend class ConstructDataFElement;
-  friend class TheSubFMortars;
   virtual int NbLagrangeMult(const Mesh &Th,const Mortar &M) const =0;
   virtual int NbDoF(const Mesh &Th,const Mortar &M,int i) const =0;
   virtual int NbOfNodes(const Mesh &Th,const Mortar &M) const =0;

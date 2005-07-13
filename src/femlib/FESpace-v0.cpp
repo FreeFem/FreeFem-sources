@@ -1408,7 +1408,6 @@ class TypeOfMortarCas1: public TypeOfMortar {
      {throwassert(0);return 0;}
    int DFOfNode(const FESpace &Vh,const Mortar &M,int i) const 
      {throwassert(0);return 0;}
-   TheSubFMortars  * Constructor(const FESpace &Vh,const Mortar &M);  
    void ConstructionOfNode(const Mesh &Th,int im,int * NodesOfElement,int *FirstNodeOfElement,int &lastnodenumber) const;
    void ConsTheSubMortar(FMortar & ) const; 
      
