@@ -2,7 +2,7 @@
 // --------------------------------
 // $Id$
 
- load "dfft.so"
+ load "dfft"
  int nx=20,ny=20,N=nx*ny;
  
  mesh Th=square(nx-1,ny-1);

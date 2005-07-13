@@ -32,3 +32,11 @@ first. Then run "make WindowsPackage.iss" and load the file
 "WindowsPackage.iss" into Inno Setup once you have configured and
 compiled FreeFem++ (see INSTALL). Inno Setup places the resulting
 archive in subdirectory "Output".
+
+TROUBLE:
+--------
+
+Infortunatly, all the .exe version without cygwin under  mingw
+do not run under cygwin shell,  they run under under the 
+command window NT  shell if the mingwm10.dll is in the right place:
+.exe directory or in 'C:\WINDOW\system32. 
