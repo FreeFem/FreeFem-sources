@@ -1,3 +1,89 @@
+2005-07-13 13:40  lehyaric
+
+	* Removed references to undefined class "TheSubFMortars" Added
+	  treatments for restricting "exec" keyword
+
+2005-07-13 12:10  hecht
+
+	*      OK, we can make dll under window.   first test
+	       try the scrip mkdll in dir src/fflib
+	       the example++-load/load.edp run if all the .dll and .exe
+	  files is put
+	       in the example dir.
+
+2005-07-12 11:22  hecht
+
+	*   Big modif to buil .dll under window ( it's hard)
+
+2005-07-07 09:50  hecht
+
+	*   find a new bug in cas if we declare new variable after a break,
+	  continue or a return
+	    correction in progress, change all the examples in this case.
+	    for full desciption of the bug,  see BUGS file.
+
+2005-07-05 16:24  hecht
+
+	*   correct problem in meshsplit function in case of final mesh
+	  with hole and
+	    initial mesh without hole.
+
+2005-07-05 13:11  hecht
+
+	*   change version to 1.47-3
+	    try to correct recurrente trap under window, (in progress)
+	    correct bug un meshpslit routine, bug threshold value (foregore
+	  a square)
+
+2005-07-05 11:48  lehyaric
+
+	* Tuning scripts for Debian amd64 packaging
+
+2005-07-04 17:29  lehyaric
+
+	* Re-enables PDF and PS documentation in Windows packaging after
+	  finding the proper Latex tools under Cygwin.
+
+2005-07-04 16:42  lehyaric
+
+	* Removed wrong dynamic linking option bug from configure.ac
+
+2005-07-04 16:26  lehyaric
+
+	* Added "-fPIC" in compilation options for 64 bit Linux
+
+2005-07-04 15:55  hecht
+
+	*    correct problem in antype castting under window
+
+2005-07-04 14:57  lehyaric
+
+	* Removed documentation from Windows executable package because PDF
+	  and PS builds do not work well under cygwin and the documentation
+	  is large.
+
+2005-07-04 13:59  lehyaric
+
+	* Changed Debian package dependency from "arpack++" to
+	  "libarpack++2-dev"
+
+2005-07-04 13:30  lehyaric
+
+	* Changing packaging procedure to include new FreeFem++-cs binaries
+
+2005-07-04 13:28  lehyaric
+
+	* Changing packaging procedure to include FreeFem++-cs binaries.
+
+2005-07-01 17:04  lehyaric
+
+	* Added 64bit debian package (amd64)
+
+2005-07-01 15:21  lehyaric
+
+	* Changed makefile to be able to run the Debian packaging
+	  procedure.
+
 2005-07-01 14:23  lehyaric
 
 	* Minor modifications in 'clean' goal.
