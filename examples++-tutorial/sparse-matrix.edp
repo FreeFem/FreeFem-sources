@@ -59,7 +59,7 @@ else
 {
   int N=10;
   real [int,int] A(N,N);
-  real [int] a(N),b(N);
+  real [int] a(N),b(N),c(N);
   A =0;
   for (int i=0;i<N;i++)
     {
@@ -67,7 +67,8 @@ else
       if(i+1 < N)    A(i,i+1)=-i;
       a[i]=i;
     }
-  b=A*b;
+  b=A*a;
+  c=-9;
   cout << "xxxx\n"; 
   matrix sparseA=A;
   cout << sparseA << endl;
@@ -79,6 +80,17 @@ else
   cout << "sparseB = " << sparseB(0,0) << endl;
   cout << " -------- block matrix \n " << endl;
   matrix B = [ [sparseA, 0 , sparseA ], [ 0, sparseA , 0 ] , [0, 0, sparseB' ]];
+  real[int] x([a,b,c]); //  construct the block vector x form a,b,c,
+  //  where the size is  sum of size of a,b,c, 
+  x=[a,b,c]; // set x to to the block vector (the vector x is  resize if it necessary
+  cout << " abc =" << a[2] << " " << b[3] << " "<< c[4] << endl;
+  cout << " xxx =" << x[2] << " " << x[3+N] << " "<< x[4+N*2] << endl;
+  x = x*10;
+  [a,b,c]=x; // set the block vector a,b,c  from concecutive part of  x;
+  cout << " abc*10 == "  << a[2] << " " << b[3] << " "<< c[4] << endl;
+
+
+ // remark  the size of sum of size must be equal to the size of x.  
   cout << " B = " << B << endl; 
   cout << B(8,29) << " ===  " <<  sparseA(8,9) << endl;
   cout << B(28,27)

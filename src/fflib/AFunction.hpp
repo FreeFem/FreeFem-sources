@@ -207,6 +207,8 @@ template<class T>
   C_F0 destroy();
   TableOfIdentifier() : listofvar(0) {};
 };
+
+
 //  for all the type of the language 
 class basicForEachType : public CodeAlloc {
     const type_info  * ktype;  // the real type_info
@@ -308,7 +310,9 @@ class C_LF2;
 class C_LF1;
 
 //  3 types of function/expression  0,1,2 args  
-class E_F0 :public CodeAlloc{ public:
+class E_F0 :public CodeAlloc 
+   {
+   public:
 
   struct kless : binary_function<Expression,Expression, bool>
    { bool operator()(const Expression& x, const Expression& y) const{ 
@@ -338,6 +342,7 @@ class E_F0 :public CodeAlloc{ public:
     
     int find(const MapOfE_F0 & m) ;
     int insert(Expression  opt,deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) ;
+     
  };  
  
 inline ostream & operator<<(ostream & f,const E_F0 &e) { if(&e) e.dump(f); else f << " --0-- " ;return f;}
@@ -545,6 +550,7 @@ class basicAC_F0;
 	  
 	  aType left() const {return r;}
 	  aType right() const {return r->right();}
+  C_F0  RightExp() const { return C_F0(RightValue(),right());} // FH add 07/2005
 	  operator    E_F0 *  () const {return f;}
 	  bool Empty() const {return !f || f->Empty();}
 	  bool NotNull() const {return  f;}
@@ -562,6 +568,9 @@ friend class Block;
 friend class TableOfIdentifier; 
 	  C_F0( Expression ff ): f(ff),r(0) {}
  };
+
+
+
 //  for bison 
 class CListOfInst;
  

@@ -336,8 +336,9 @@ inline  void ShowOn_cerr(const pair<const char * ,const OneOperator *> & i)
 }
 
 
-template<class RR>
-class  InitArrayfromArray : public OneOperator { public:
+template<class RR,bool isinit>
+class  InitArrayfromArray : public OneOperator { 
+public:
     typedef KN<RR> * A;
     typedef KN<RR> * R;
     typedef E_Array B;
@@ -346,30 +347,146 @@ class  InitArrayfromArray : public OneOperator { public:
        Expression a0;
        int N;
        Expression * tab;
+    int * what;//  0  RR, 1 KN<RR>, 
        const  bool mi;
-    CODE(Expression a,const E_Array & tt)  :
-     a0(a),N(tt.size()),mi(tt.MeshIndependent()),tab(new Expression [N]) 
+
+    CODE(Expression a,const E_Array & tt)  
+      : a0(a),N(tt.size()),
+	mi(tt.MeshIndependent()),
+	tab(new Expression [N]),
+	what(new int[N])  
       {
         assert(&tt);
-        
+      int err=0;
         for (int i=0;i<N;i++)
+	if(atype<RR>()->CastingFrom(tt[i].right() ) ) 
+	  {
           tab[i]=atype<RR>()->CastTo(tt[i]);
-      }
-    AnyType operator()(Stack s)  const 
+	    what[i]=0;
+	  }
+	else if(atype<KN_<RR> >()->CastingFrom(tt[i].right() ) ) 
+	  {
+	    tab[i]=atype<KN_<RR> >()->CastTo(tt[i].RightExp());
+	    what[i]=1;
+	  }      
+	else 
+	  CompileError(" we are waiting for scalar or vector of scalar");
+    }
+    
+    AnyType operator()(Stack stack)  const 
     {
-      A  a=GetAny<A>((*a0)(s));
-      a->init(N);
+      A  a=GetAny<A>((*a0)(stack));
+      KN<AnyType> v(N);
+      KN<int>  nn(N+1);
       for (int i=0;i<N;i++)
-        (*a)[i]= GetAny<RR>((*(tab[i]))(s));
-      return SetAny<R>(a);} 
-    bool MeshIndependent() const 
-      {return  mi;} // 
+        v[i]= (*(tab[i]))(stack);
+      
+      int n=0;
+      for (int i=0;i<N;i++)
+	{
+	  if (what[i]==0) nn[i]=1;
+	  else if (what[i]==1) nn[i]=GetAny<KN_<RR> >(v[i]).size();
+          n += nn[i];
+	}
+      if (isinit) 
+        a->init(n);
+      else
+	a->resize(n);
+      
+      for (int i=0,j=0 ;i<N;i++, j += nn[i])
+	
+        if (what[i]==0)
+          (*a)[j]= GetAny<RR>(v[i]);
+        else if (what[i]==1) KN_<RR>(*a+j,nn[i])= GetAny<KN_<RR> >(v[i]);
+      return SetAny<R>(a);
+    } 
+    bool MeshIndependent() const     {return  mi;} // 
+    ~CODE() { delete [] tab; delete[] what;}
     operator aType () const { return atype<R>();}    
-    }; 
+  }; // end sub class CODE
+  
+  
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
      { return  new CODE(t[0]->CastTo(args[0]),*dynamic_cast<const E_Array*>( t[1]->CastTo(args[1]).LeftValue()));} 
     InitArrayfromArray():   OneOperator(atype<R>(),atype<A>(),atype<B>())  {}
+  
+};
+
+template<typename RR>
+class  SetArrayofKNfromKN : public OneOperator { 
+public:
+    typedef KN_<RR>  A; // Warning  B type of  1 parameter 
+    typedef KN_<RR>  R;
+    typedef E_Array B; //   A type of 2 parameter
+    
+    class CODE : public  E_F0 { public:
+       Expression a0;
+       int N;
+       Expression * tab;
+       int * what;//  0  RR, 1 KN<RR>, 
+       const  bool mi;
+
+    CODE(Expression a,const E_Array & tt)  
+      : a0(a),N(tt.size()),
+	mi(tt.MeshIndependent()),
+	tab(new Expression [N]),
+	what(new int[N])  
+      {
+        assert(&tt);
+      int err=0;
+        for (int i=0;i<N;i++)
+	if(atype<RR*>()->CastingFrom(tt[i].left() ) ) 
+	  {
+          tab[i]=atype<RR*>()->CastTo(tt[i]);
+	    what[i]=0;
+	  }
+	else if(atype<KN_<RR> >()->CastingFrom(tt[i].right() ) ) 
+	  {
+	    tab[i]=atype<KN_<RR> >()->CastTo(tt[i].RightExp());
+	    what[i]=1;
+	  }      
+	else 
+	  CompileError(" we are waiting for scalar or vector of scalar");
+    }
+    
+    AnyType operator()(Stack stack)  const 
+    {
+      A  a=GetAny<A>((*a0)(stack));
+      KN<AnyType> v(N);
+      KN<int>  nn(N+1);
+      for (int i=0;i<N;i++)
+        v[i]= (*(tab[i]))(stack);
+      
+      int n=0;
+      for (int i=0;i<N;i++)
+	{
+	  if (what[i]==0) nn[i]=1;
+	  else if (what[i]==1) nn[i]=GetAny<KN_<RR> >(v[i]).size();
+          n += nn[i];
+	}
+      ffassert(n == a.size()); 
+      for (int i=0,j=0 ;i<N;i++, j += nn[i])
+	
+        if (what[i]==0)
+         * GetAny<RR*>(v[i]) = a[j];
+        else if (what[i]==1) { // hack FH 
+           KN_<RR> tab(GetAny<KN_<RR> >(v[i])); 
+           tab  =a(SubArray(nn[i],j));
+           }
+      return SetAny<R>(a);
+    } 
+    bool MeshIndependent() const     {return  mi;} // 
+    ~CODE() { delete [] tab; delete[] what;}
+    operator aType () const { return atype<R>();}    
+  }; // end sub class CODE
+  
+  
+    public: // warning hack  A and B 
+    E_F0 * code(const basicAC_F0 & args) const 
+     { return  new CODE(t[1]->CastTo(args[1]),*dynamic_cast<const E_Array*>( t[0]->CastTo(args[0]).RightValue()));} 
+    SetArrayofKNfromKN():   OneOperator(atype<R>(),atype<B>(),atype<A>())  {} // warning with A and B 
+  
 };
    
 
@@ -561,7 +678,7 @@ void ArrayOperator()
 
      TheOperators->Add("<-", 
        new OneOperator2_<KN<K> *,KN<K> *,long>(&set_init),
-       new InitArrayfromArray<K>
+		       new InitArrayfromArray<K,true>
        );
      TheOperators->Add("<-", 
         new OneOperator3_<KNM<K> *,KNM<K> *,long,long>(&set_init2)
@@ -569,12 +686,17 @@ void ArrayOperator()
        
      Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,long>(&set_init));
      Add<KNM<K> *>("<-","(",new OneOperator3_<KNM<K> *,KNM<K> *,long,long>(&set_init2));
-     Add<KN<K> *>("<-","(",new InitArrayfromArray<K>);
+     Add<KN<K> *>("<-","(",new InitArrayfromArray<K,true>);
      Add<KN<K> *>("n",".",new OneOperator1<long,KN<K> *>(get_n));
      Add<KNM<K> *>("n",".",new OneOperator1<long,KNM<K> *>(get_n));
      Add<KNM<K> *>("m",".",new OneOperator1<long,KNM<K> *>(get_m));
      
 //     AddOpeqarray<set_eqarray,KN,K>("=");
+
+     TheOperators->Add("=", new InitArrayfromArray<K,false>
+       );
+     TheOperators->Add("=", new SetArrayofKNfromKN<K>
+       );
      
      TheOperators->Add("=",
         new OneBinaryOperator<set_eqarray<KN<K> ,K > > ,

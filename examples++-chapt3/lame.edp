@@ -1,0 +1,18 @@
+// file lame.edp
+mesh Th=square(10,10,[10*x,y]);
+fespace Vh(Th,P2);
+Vh u,v,uu,vv;
+macro e11(u) dx(u)//
+macro e22(v) dy(v)//
+macro e12(u,v)(dx(v) + dy(u))/2 //
+
+real E = 21.5, sigma = 0.29, mu= E/(2*(1+sigma));
+real lambda = E*sigma/((1+sigma)*(1-2*sigma)), gravity = -9.81;
+
+solve lame([u,v],[uu,vv])= int2d(Th)( 2*mu*(e11(u)*e11(uu)+e12(u,v)*e12(uu,vv)+e22(v)*e22(vv))
+            + lambda*(e11(u)+e22(v))*(e11(uu)+e22(vv))/2)
+             - int2d(Th)(gravity*vv) + on(4,u=0,v=0);
+plot([u,v],wait=1,ps="lamevect.ps");
+
+mesh th1 = movemesh(Th, [x+u*1e-4, y+v*1e-4]);
+ plot(th1,wait=1,ps="lamedeform.ps");

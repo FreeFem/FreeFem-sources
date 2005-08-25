@@ -865,14 +865,17 @@ class KN :public KN_<R> { public:
 //          { return (const KN<const_R>& ) *this;}
   void init(long nn) {this->n=nn;this->step=1;this->next=-1;this->v=new R[nn];}
   void resize(long nn) {
-    R *vo=this->v;
-    long no=std::min(this->n,nn), so=this->step;
-    ShapeOfArray::init(nn);
-    this->v=new R[this->n];
-    // copy
-    if(this->v && vo) for(long i=0,j=0;j<no;i++,j+=so) 
-      this->v[i]=vo[j]; 
-    delete []vo;}
+    if ( nn != this->n) 
+     {
+       R *vo=this->v;
+       long no=std::min(this->n,nn), so=this->step;
+       ShapeOfArray::init(nn);
+       this->v=new R[this->n];
+       // copy
+       if(this->v && vo) 
+         for(long i=0,j=0;j<no;i++,j+=so) 
+           this->v[i]=vo[j]; 
+        delete [] vo;} }
   void destroy(){delete [] this->v; this->v=0;this->n=0;}
 };
 

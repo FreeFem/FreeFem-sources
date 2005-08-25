@@ -142,6 +142,7 @@ inline AnyTypeWithOutCheck PtrtoAny(void * p,aType )
  CheckSize<T,sizeof(T)<= sizeof(AnyData) >();
  return *static_cast<const T*>(static_cast<const void*>(&x));
 }
+
  template<> inline const double& GetAny<double>(const AnyTypeWithOutCheck & x)
  { return x.r;} 
  template<>  inline const long& GetAny<long>(const AnyTypeWithOutCheck & x)
