@@ -1,0 +1,24 @@
+// file membrane.edp
+real a=4*pi/3, b=2;
+func z=x;
+
+border Gamma1(t=0,a)    { x = b * cos(t); y = sin(t); }
+border Gamma2(t=a,2*pi) { x = b * cos(t); y = sin(t); }
+mesh Th=buildmesh(Gamma1(100)+Gamma2(50));
+
+fespace Vh(Th,P1); // P2 conforming triangular FEM
+Vh phi,w, f=1;
+
+solve Laplace(phi,w)=int2d(Th)(dx(phi)*dx(w) + dy(phi)*dy(w))
+                - int2d(Th)(f*w) + on(Gamma1,phi=z);
+plot(phi,wait=true, ps="membrane.eps"); //Plot Th and v
+plot(Th,wait=true, ps="membraneTh.eps"); //Plot Th and v
+ fespace femp1(Th,P1);
+  femp1 Thx=x,Thy=y;
+   ofstream ff("phi.txt");
+   for (int i=0;i<Th.nt;i++)
+   { for (int j=0; j <3; j++)
+    ff<<Th[i][j].x  << "    "<< Th[i][j].y<< "  "<<phi[][Th[i][j]]<<endl;
+    ff<<Th[i][0].x  << "    "<< Th[i][0].y<< "  "<<phi[][Th[i][0]]<<endl<<endl<<endl;
+   }
+savemesh(Th,"Th.msh");
