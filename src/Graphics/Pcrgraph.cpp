@@ -333,16 +333,16 @@ void SetRGBpen(int n)
     SelectObject(hdc, hpen[n]);
 }
 
-static rgb DefColorWin32( int k,int nb, bool grey,bool hsv,int nbcolors,float *colors)
+static rgb DefColorWin32( int k,int nb, bool hsv,bool grey,int nbcolors,float *colors)
 {
- RGBColor C;
+ rgb C;
  float r,g,b;
 extern void DefColor(float & r, float & g, float & b,
-              int k,int nb, bool grey,bool hsv,int nbcolors,float *colors);
- DefColor(r,g,b,   k,nb,grey,hsv,nbcolors,colors);
- C.red=255*r;
- C.green=255*g;
- C.blue=255*b;
+              int k,int nb, bool hsv,bool grey,int nbcolors,float *colors);
+ DefColor(r,g,b,   k,nb,hsv,grey,nbcolors,colors);
+ C.r=255*r;
+ C.g=255*g;
+ C.b=255*b;
  return C;
 }              
 
@@ -352,132 +352,135 @@ void SetColorTable1(int nb,bool hsv,int nbcolors,float *colors)
   static bool greyo = !grey;
   static float * colorso =0;
   if(!INITGRAPH) return;
-   if (ncolortable == nb && greyo == grey && colorso == colors ) return;// optim
+  if (ncolortable == nb && greyo == grey && colorso == colors ) return;// optim
    greyo = grey;
    colorso=colors;
-     { 
- 	if (hpen) for(int i=0; i<ncolortable;i++)
- 					DeleteObject(hpen[i]);
- 	delete [] hpen;
-  	if (hbr) for(int i=0; i<ncolortable;i++)
-  					DeleteObject(hbr[i]);
-  	delete [] hbr;
-	if (hFont) DeleteObject(hFont);
-        hpen=0;
-	hbr=0;
-	hFont=0;
-
-		    if(colortable) 
-		       delete [] colortable;
-        	colortable = new rgb[nb+1];
-       ncolortable = nb;
-       if(LastColor>1) LastColor=nb-1;
-        for (int i0=0;i0<nb;i0++)
-         {  
-           colortable[i0]=DefColorWin32(i0,nb,hsv,grey,nbcolors,colors);           
-          }
-        
+   { 
+     if (hpen) for(int i=0; i<ncolortable;i++)
+       DeleteObject(hpen[i]);
+     delete [] hpen;
+     if (hbr) for(int i=0; i<ncolortable;i++)
+       DeleteObject(hbr[i]);
+     delete [] hbr;
+     if (hFont) DeleteObject(hFont);
+     hpen=0;
+     hbr=0;
+     hFont=0;
+     
+     if(colortable) 
+       delete [] colortable;
+     colortable = new rgb[nb+1];
+     ncolortable = nb;
+     if(LastColor>1) LastColor=nb-1;
+     for (int i0=0;i0<nb;i0++)
+       {  
+	 colortable[i0]=DefColorWin32(i0,nb,hsv,grey,nbcolors,colors);           
        }
-       
-        if   (	ncolortable  ==2) 
-         {
-
-      	  hpen = new HPEN[ncolortable];
-   	   hbr = new HBRUSH[ncolortable];
-   	
-   	   for(int i=0; i<ncolortable;i++)
-   	    {
-   		hpen[i] = CreatePen(PS_INSIDEFRAME, 1,RGB(colortable[i].r, 
-    					colortable[i].g, colortable[i].b));
-   		hbr[i] = CreateSolidBrush(RGB(colortable[i].r, 
-  						colortable[i].g, colortable[i].b));
-            }
-        }
-
+     
+   }
+   
+   {
+     
+     hpen = new HPEN[ncolortable];
+     hbr = new HBRUSH[ncolortable];
+     
+     for(int i=0; i<ncolortable;i++)
+       {
+	 hpen[i] = CreatePen(PS_INSIDEFRAME, 1,RGB(colortable[i].r, 
+						   colortable[i].g,
+						   colortable[i].b));
+	 hbr[i] = CreateSolidBrush(RGB(colortable[i].r, 
+				       colortable[i].g,
+				       colortable[i].b));
+	 }
+   }
+   
 }
 
 void SetColorTable(int nb)
 {
- 		RECT rc;
- 		GetClientRect(hWnd, &rc);
- 		aspx = (float)(rc.right - rc.left);
- 		aspy = (float)(rc.bottom - rc.top);
-		
-	if (winf_flg & winf_NOCOLOR) return;
-	nb=Max(nb,23);
-  	if(nb<2) nb = 2;
-  	if (ncolortable == nb) return;
-        if(LastColor>1) LastColor=nb-1;
-  	 
- 	if (hpen) for(int i=0; i<ncolortable;i++)
- 					DeleteObject(hpen[i]);
- 	delete [] hpen;
-  	if (hbr) for(int i=0; i<ncolortable;i++)
-  					DeleteObject(hbr[i]);
-  	delete [] hbr;
-	if (hFont) DeleteObject(hFont);
-	hpen=0;
-	hbr=0;
-	hFont=0;
-	
-		    if(colortable) 
-		       delete [] colortable;
-        	colortable = new rgb[nb+1];
- 		    ncolortable = nb;
-        int k=0;
-		    colortable[k].r = 255;
-		    colortable[k].g = 255;
-		    colortable[k++].b = 255;
-		    colortable[k].r = 0;
-		    colortable[k].g = 0;
-		    colortable[k++].b = 0;
-    if (nb>2) 
+  RECT rc;
+  GetClientRect(hWnd, &rc);
+  aspx = (float)(rc.right - rc.left);
+  aspy = (float)(rc.bottom - rc.top);
+  
+  if (winf_flg & winf_NOCOLOR) return;
+  nb=Max(nb,23);
+  if(nb<2) nb = 2;
+  if (ncolortable == nb) return;
+  if(LastColor>1) LastColor=nb-1;
+  
+  if (hpen) for(int i=0; i<ncolortable;i++)
+    DeleteObject(hpen[i]);
+  delete [] hpen;
+  if (hbr) for(int i=0; i<ncolortable;i++)
+    DeleteObject(hbr[i]);
+  delete [] hbr;
+  if (hFont) DeleteObject(hFont);
+  hpen=0;
+  hbr=0;
+  hFont=0;
+  
+  if(colortable) 
+    delete [] colortable;
+  colortable = new rgb[nb+1];
+  ncolortable = nb;
+  int k=0;
+  colortable[k].r = 255;
+  colortable[k].g = 255;
+  colortable[k++].b = 255;
+  colortable[k].r = 0;
+  colortable[k].g = 0;
+  colortable[k++].b = 0;
+  if (nb>2) 
     { 
-       	nb -= 2;
-       	for (long i0=0;i0<nb;i0++,k++)
+      nb -= 2;
+      for (long i0=0;i0<nb;i0++,k++)
         {  
-           long  i6 = i0*6;
-           long  j0 = i6/nb;// in 0..6
-           long  j1 = j0+1;// in 1..6
-           long  k0 = i0 - (nb*j0)/6L;
-           long  k1 = (nb*j1)/6L-i0;
-           long  kk = (k0+k1);
-           
-         if (! grey)
-           {
-           colortable[k].r  = ((cube6[j1][0]*k0+cube6[j0][0]*k1)/kk);
-           colortable[k].g  = ((cube6[j1][1]*k0+cube6[j0][1]*k1)/kk);
-           colortable[k].b  = ((cube6[j1][2]*k0+cube6[j0][2]*k1)/kk);
-           }
+	  long  i6 = i0*6;
+	  long  j0 = i6/nb;// in 0..6
+	  long  j1 = j0+1;// in 1..6
+	  long  k0 = i0 - (nb*j0)/6L;
+	  long  k1 = (nb*j1)/6L-i0;
+	  long  kk = (k0+k1);
+	  
+	  if (! grey)
+	    {
+	      colortable[k].r  = ((cube6[j1][0]*k0+cube6[j0][0]*k1)/kk);
+	      colortable[k].g  = ((cube6[j1][1]*k0+cube6[j0][1]*k1)/kk);
+	      colortable[k].b  = ((cube6[j1][2]*k0+cube6[j0][2]*k1)/kk);
+	    }
           else 
-           {
-           kk=nb-1;
-           k1 =  i0;
-           k0 = nb - i0 -1;
-           colortable[k].r   = ((grey6[0][0]*k0+grey6[1][0]*k1)/kk);
-           colortable[k].g   = ((grey6[0][1]*k0+grey6[1][1]*k1)/kk);
-           colortable[k].b   = ((grey6[0][2]*k0+grey6[1][2]*k1)/kk);
-           }
-           
-           /*
- 		   colortable[k].r = ((cube6[j1][0]*k0+cube6[j0][0]*k1)/kk)%256;
- 		   colortable[k].g = ((cube6[j1][1]*k0+cube6[j0][1]*k1)/kk)%256;
- 		   colortable[k].b = ((cube6[j1][2]*k0+cube6[j0][2]*k1)/kk)%256;
- 		   */
+	    {
+	      kk=nb-1;
+	      k1 =  i0;
+	      k0 = nb - i0 -1;
+	      colortable[k].r   = ((grey6[0][0]*k0+grey6[1][0]*k1)/kk);
+	      colortable[k].g   = ((grey6[0][1]*k0+grey6[1][1]*k1)/kk);
+	      colortable[k].b   = ((grey6[0][2]*k0+grey6[1][2]*k1)/kk);
+	    }
+	  
+	  /*
+	    colortable[k].r = ((cube6[j1][0]*k0+cube6[j0][0]*k1)/kk)%256;
+	    colortable[k].g = ((cube6[j1][1]*k0+cube6[j0][1]*k1)/kk)%256;
+	    colortable[k].b = ((cube6[j1][2]*k0+cube6[j0][2]*k1)/kk)%256;
+	  */
         }         
     }
-     else 
-      {	ncolortable  =2;}
-
-   	hpen = new HPEN[ncolortable];
-   	hbr = new HBRUSH[ncolortable];
-   	
-   	for(int i=0; i<ncolortable;i++)
-   	{
-   		hpen[i] = CreatePen(PS_INSIDEFRAME, 1,RGB(colortable[i].r, 
-    					colortable[i].g, colortable[i].b));
-   		hbr[i] = CreateSolidBrush(RGB(colortable[i].r, 
-  						colortable[i].g, colortable[i].b));
+  else 
+    {	ncolortable  =2;}
+  
+  hpen = new HPEN[ncolortable];
+  hbr = new HBRUSH[ncolortable];
+  
+  for(int i=0; i<ncolortable;i++)
+    {
+      hpen[i] = CreatePen(PS_INSIDEFRAME, 1,RGB(colortable[i].r, 
+						colortable[i].g,
+						colortable[i].b));
+      hbr[i] = CreateSolidBrush(RGB(colortable[i].r, 
+				    colortable[i].g, 
+				    colortable[i].b));
     }
 }
 
