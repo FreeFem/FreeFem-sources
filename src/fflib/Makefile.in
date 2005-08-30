@@ -65,9 +65,10 @@ am_libff_a_OBJECTS = AFunction.$(OBJEXT) AFunction2.$(OBJEXT) \
 	Mesh2.$(OBJEXT) Metric.$(OBJEXT) BamgFreeFem.$(OBJEXT) \
 	MeshDraw.$(OBJEXT) MeshGeom.$(OBJEXT) MeshQuad.$(OBJEXT) \
 	SetOfE4.$(OBJEXT) MeshRead.$(OBJEXT) MeshWrite.$(OBJEXT) \
-	problem.$(OBJEXT) strversionnumber.$(OBJEXT) \
-	InitFunct.$(OBJEXT) lgalgo.$(OBJEXT) Element_P2h.$(OBJEXT) \
-	load.$(OBJEXT) lgfem.$(OBJEXT)
+	problem.$(OBJEXT) DefColor.$(OBJEXT) \
+	strversionnumber.$(OBJEXT) InitFunct.$(OBJEXT) \
+	lgalgo.$(OBJEXT) Element_P2h.$(OBJEXT) load.$(OBJEXT) \
+	lgfem.$(OBJEXT)
 libff_a_OBJECTS = $(am_libff_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -75,8 +76,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/AFunction.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/AFunction2.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/BamgFreeFem.Po ./$(DEPDIR)/CheckPtr.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/CodeAlloc.Po ./$(DEPDIR)/Drawing.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/Element_P2h.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CodeAlloc.Po ./$(DEPDIR)/DefColor.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Drawing.Po ./$(DEPDIR)/Element_P2h.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Element_RT.Po ./$(DEPDIR)/FESpace.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/FQuadTree.Po ./$(DEPDIR)/InitFunct.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Mesh2.Po ./$(DEPDIR)/MeshDraw.Po \
@@ -257,6 +258,7 @@ CodeAlloc.cpp lgmat.cpp global.cpp 					\
 ../bamglib/MeshDraw.cpp ../bamglib/MeshGeom.cpp				\
 ../bamglib/MeshQuad.cpp ../bamglib/SetOfE4.cpp ../bamglib/MeshRead.cpp	\
 ../bamglib/MeshWrite.cpp problem.cpp strversionnumber.hpp		\
+../Graphics/DefColor.cpp \
 strversionnumber.cpp InitFunct.cpp ../Algo/lgalgo.cpp			\
 ../femlib/Element_P2h.cpp load.cpp lgfem.cpp AFunction.hpp AnyType.hpp	\
 error.hpp gmres.hpp InitFunct.hpp lex.hpp lgfem.hpp lgsolver.hpp	\
@@ -328,6 +330,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BamgFreeFem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CheckPtr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CodeAlloc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DefColor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Drawing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Element_P2h.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Element_RT.Po@am__quote@
@@ -711,6 +714,22 @@ MeshWrite.obj: ../bamglib/MeshWrite.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/MeshWrite.Po' tmpdepfile='$(DEPDIR)/MeshWrite.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MeshWrite.obj `if test -f '../bamglib/MeshWrite.cpp'; then $(CYGPATH_W) '../bamglib/MeshWrite.cpp'; else $(CYGPATH_W) '$(srcdir)/../bamglib/MeshWrite.cpp'; fi`
+
+DefColor.o: ../Graphics/DefColor.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DefColor.o -MD -MP -MF "$(DEPDIR)/DefColor.Tpo" -c -o DefColor.o `test -f '../Graphics/DefColor.cpp' || echo '$(srcdir)/'`../Graphics/DefColor.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/DefColor.Tpo" "$(DEPDIR)/DefColor.Po"; else rm -f "$(DEPDIR)/DefColor.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/DefColor.cpp' object='DefColor.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/DefColor.Po' tmpdepfile='$(DEPDIR)/DefColor.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DefColor.o `test -f '../Graphics/DefColor.cpp' || echo '$(srcdir)/'`../Graphics/DefColor.cpp
+
+DefColor.obj: ../Graphics/DefColor.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DefColor.obj -MD -MP -MF "$(DEPDIR)/DefColor.Tpo" -c -o DefColor.obj `if test -f '../Graphics/DefColor.cpp'; then $(CYGPATH_W) '../Graphics/DefColor.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/DefColor.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/DefColor.Tpo" "$(DEPDIR)/DefColor.Po"; else rm -f "$(DEPDIR)/DefColor.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/DefColor.cpp' object='DefColor.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/DefColor.Po' tmpdepfile='$(DEPDIR)/DefColor.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DefColor.obj `if test -f '../Graphics/DefColor.cpp'; then $(CYGPATH_W) '../Graphics/DefColor.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/DefColor.cpp'; fi`
 
 lgalgo.o: ../Algo/lgalgo.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT lgalgo.o -MD -MP -MF "$(DEPDIR)/lgalgo.Tpo" -c -o lgalgo.o `test -f '../Algo/lgalgo.cpp' || echo '$(srcdir)/'`../Algo/lgalgo.cpp; \

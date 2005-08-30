@@ -68,6 +68,7 @@ EXTERNFF(	int ,execute,(const char* s)) ;
 EXTERNFF(	void ,reffecran,()) ;
 EXTERNFF(	void ,fillpoly,(int n, float *poly)) ;
 EXTERNFF(	void ,SetColorTable,(int nb)) ;
+EXTERNFF(	void ,SetColorTable1,(int nb,bool hsv,int nbcolors,float *colors)) ;
 EXTERNFF(	float ,GetHeigthFont,()) ; 
 //  old function for freefem+  
 //EXTERNFF(	void ,compile,(char *fname)) ;
@@ -114,6 +115,7 @@ static int init_ff_graph_ptr_func()
 	reffecran=reffecran_;
 	fillpoly=fillpoly_;
 	SetColorTable=SetColorTable_;
+	SetColorTable1=SetColorTable1_;
 	GetHeigthFont=GetHeigthFont_;
 	//compile=compile_;
 	//compileString=compileString_;
@@ -157,6 +159,7 @@ static int init_ff_graph_ptr_func_call = init_ff_graph_ptr_func();
 #define reffecran reffecran_
 #define fillpoly fillpoly_
 #define SetColorTable SetColorTable_
+#define SetColorTable1 SetColorTable1_
 #define GetHeigthFont GetHeigthFont_
 //#define compile compile_
 //#define compileString compileString_

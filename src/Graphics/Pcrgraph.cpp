@@ -333,6 +333,69 @@ void SetRGBpen(int n)
     SelectObject(hdc, hpen[n]);
 }
 
+static rgb DefColorWin32( int k,int nb, bool grey,bool hsv,int nbcolors,float *colors)
+{
+ RGBColor C;
+ float r,g,b;
+extern void DefColor(float & r, float & g, float & b,
+              int k,int nb, bool grey,bool hsv,int nbcolors,float *colors);
+ DefColor(r,g,b,   k,nb,grey,hsv,nbcolors,colors);
+ C.red=255*r;
+ C.green=255*g;
+ C.blue=255*b;
+ return C;
+}              
+
+
+void SetColorTable1(int nb,bool hsv,int nbcolors,float *colors)
+{
+  static bool greyo = !grey;
+  static float * colorso =0;
+  if(!INITGRAPH) return;
+   if (ncolortable == nb && greyo == grey && colorso == colors ) return;// optim
+   greyo = grey;
+   colorso=colors;
+     { 
+ 	if (hpen) for(int i=0; i<ncolortable;i++)
+ 					DeleteObject(hpen[i]);
+ 	delete [] hpen;
+  	if (hbr) for(int i=0; i<ncolortable;i++)
+  					DeleteObject(hbr[i]);
+  	delete [] hbr;
+	if (hFont) DeleteObject(hFont);
+        hpen=0;
+	hbr=0;
+	hFont=0;
+
+		    if(colortable) 
+		       delete [] colortable;
+        	colortable = new rgb[nb+1];
+       ncolortable = nb;
+       if(LastColor>1) LastColor=nb-1;
+        for (int i0=0;i0<nb;i0++)
+         {  
+           colortable[i0]=DefColorWin32(i0,nb,hsv,grey,nbcolors,colors);           
+          }
+        
+       }
+       
+        if   (	ncolortable  ==2) 
+         {
+
+      	  hpen = new HPEN[ncolortable];
+   	   hbr = new HBRUSH[ncolortable];
+   	
+   	   for(int i=0; i<ncolortable;i++)
+   	    {
+   		hpen[i] = CreatePen(PS_INSIDEFRAME, 1,RGB(colortable[i].r, 
+    					colortable[i].g, colortable[i].b));
+   		hbr[i] = CreateSolidBrush(RGB(colortable[i].r, 
+  						colortable[i].g, colortable[i].b));
+            }
+        }
+
+}
+
 void SetColorTable(int nb)
 {
  		RECT rc;
@@ -353,6 +416,10 @@ void SetColorTable(int nb)
   					DeleteObject(hbr[i]);
   	delete [] hbr;
 	if (hFont) DeleteObject(hFont);
+	hpen=0;
+	hbr=0;
+	hFont=0;
+	
 		    if(colortable) 
 		       delete [] colortable;
         	colortable = new rgb[nb+1];
