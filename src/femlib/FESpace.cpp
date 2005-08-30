@@ -10,7 +10,7 @@ using namespace std;
 #include "RNM.hpp"
 #include "fem.hpp"
 #include "FESpace.hpp"
-
+extern long verbosity ;
 namespace  Fem2D {
 
  int  Make(const TypeOfFE ** t,int k,KN<R2> & P,KN<int> & I)
@@ -885,7 +885,8 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
          Nproduit = ndf;        
        }
    MaxNbNodePerElement=nbne;
-   
+   if(verbosity)
+   {
    cout << " Nb Of Nodes = " << nn << endl;   
    if(NbOfNodeL)        
      cout << " Nb of Lagrange Mul Node = " << NbOfNodeL << endl;        
@@ -894,7 +895,7 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
      cout << " Nb of Lagrange Mul DF = "   << NbOfDFL << endl;  
      cout << " MaxNbDFPerElement     =   " << MaxNbDFPerElement << endl;
    };
-
+   }
 }
 
 FESpace::FESpace(const FESpace & Vh,int k )

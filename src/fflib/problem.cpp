@@ -2181,7 +2181,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
           dataA.master(new MatriceMorse<R>(Vh,Uh,VF));
       }
       MatriceCreuse<R>  & AA(dataA);
-     if(verbosity<1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" << " skyline =" <<typemat->profile << endl;
+     if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" << " skyline =" <<typemat->profile << endl;
     }
   MatriceCreuse<R>  & A(dataA);
   if  (AssembleVarForm( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, op->largs)) 
