@@ -1,4 +1,4 @@
-// ********** DO NOT REMOVE THIS BANNER **********
+/********** DO NOT REMOVE THIS BANNER **********
 //
 // SUMMARY: Bamg: Bidimensional Anisotrope Mesh Generator
 // RELEASE: 0 
@@ -12,6 +12,7 @@
 // E-MAIL :   Frederic.Hecht@Inria.fr   
 //
 // ORIG-DATE:     Dec 97
+******************************************************************/
 #define FF_GRAPH_SET_PTR
 #include <math.h>
 #include <time.h>
@@ -228,6 +229,65 @@ else
   }
 }
 
+
+static XColor DefColorX11( int k,int nb, bool hsv,bool grey,int nbcolors,float *colors)
+{
+ XColor C;
+ float r,g,b;
+extern void DefColor(float & r, float & g, float & b,
+              int k,int nb, bool hsv,bool grey,int nbcolors,float *colors);
+ DefColor(r,g,b,   k,nb,hsv,grey,nbcolors,colors);
+ C.red=65535*r;
+ C.green=65535*g;
+ C.blue=65535*b;
+ C.flags = DoRed | DoGreen | DoBlue;
+ C.pixel=k;
+ // cout << " color : " << k << " " << C.red << " "<< C.green << " " << C.blue << " " << r << endl; 
+ return C;
+} 
+
+void SetColorTable1(int nb,bool hsv,int nbcolors,float *colors)
+{
+  static bool greyo = !grey;
+  static float * colorso =0;
+  if(!INITGRAPH) return;
+   if (ncolortable == nb && greyo == grey && colorso == colors ) return;// optim
+   greyo = grey;
+   colorso=colors;
+   if (fcolor  && nb>2 && nb < 256) 
+     { 
+       if(colortable) delete [] colortable;
+       colortable = new XColor[nb];
+       ncolortable = nb;
+       if(LastColor>1) LastColor=nb-1;
+        for (int i0=0;i0<nb;i0++)
+         {  
+           colortable[i0]=DefColorX11(i0,nb,hsv,grey,nbcolors,colors);           
+          }
+        background=0;
+        foreground=1; 
+       if (visual->c_class != TrueColor)
+	 {
+	   // cout << "XStoreColors( not TrueColor)" << ncolortable << " "  <<
+	     XStoreColors (display, color_map, colortable, ncolortable) ;
+	       //	<< endl;
+	 }
+       else 
+	 {
+	   // cout << "XAllocColor (TrueColor)" << endl; 
+	   for (int i=0;i<ncolortable;i++)
+	     XAllocColor(display, color_map, colortable+i );
+	   background =colortable[background].pixel;
+	   foreground =colortable[foreground].pixel;
+	 }
+       if (win) {
+	 XGCValues gcvalues;
+	 gcvalues.foreground = foreground;
+	 gcvalues.background = background;
+	 gc = XCreateGC(display, win, GCForeground | GCBackground , &gcvalues);
+       }
+       }
+}
 void SetColorTable(int nb)
 {
   int i;

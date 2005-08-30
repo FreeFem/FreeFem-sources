@@ -516,58 +516,36 @@ void initgraphique(void)
 
 }
 
+static RGBColor DefColorMacOs( int k,int nb,bool hsv, bool grey,int nbcolors,float *colors)
+{
+ RGBColor C;
+ float r,g,b;
+ extern void DefColor(float & r, float & g, float & b,
+              int k,int nb,bool hsv, bool grey,int nbcolors,float *colors);
+ DefColor(r,g,b,   k,nb,hsv,grey,nbcolors,colors);
+ C.red=65535*r;
+ C.green=65535*g;
+ C.blue=65535*b;
+ return C;
+}              
 
-void SetColorTable(int nb)
+void SetColorTable1(int nb,bool hsv,int nbcolors,float *colors)
 {
   static bool greyo = !grey;
+  static float * colorso =0;
   if(!INITGRAPH) return;
-   if (ncolortable == nb && greyo == grey) return;// optim
+   if (ncolortable == nb && greyo == grey && colorso == colors ) return;// optim
    greyo = grey;
+   colorso=colors;
    if (nbcolor && nb>2) 
      { 
        if(colortable) delete [] colortable;
        colortable = new RGBColor[nb];
        ncolortable = nb;
        if(LastColor>1) LastColor=nb-1;
-       int k=0;
-       colortable[k].red=65534;
-       colortable[k].green=65534;
-       colortable[k].blue=65534;
-       k++;
-       colortable[k].red=0;
-       colortable[k].green=0;
-       colortable[k].blue=0;
-       k++;
-       nb = nb -2;
-       for (long i0=0;i0<nb;i0++,k++)
+        for (int i0=0;i0<nb;i0++)
          {  
-      //     long  i1 = nb - i0;
-           long  i6 = i0*6;
-           long  j0 = i6/nb;// in 0..6
-           long  j1 = j0+1;// in 1..6
-           long  k0 = i0 - (nb*j0)/6L;
-           long  k1 = (nb*j1)/6L-i0;
-           long  kk = k0+k1;
-           //cout << "\t\t" << i0 << " " << j0 << " " << j1 << " " << k0 << " " << k1  << " "<<kk<<endl;
-         	if(kk<=0) kk=1;
-         // throwassert(kk);
-          if (! grey)
-           {
-           colortable[k].red   = (cube6[j1][0]*k0+cube6[j0][0]*k1)/kk;
-           colortable[k].green = (cube6[j1][1]*k0+cube6[j0][1]*k1)/kk;
-           colortable[k].blue  = (cube6[j1][2]*k0+cube6[j0][2]*k1)/kk;
-           }
-          else 
-           {
-           kk=nb-1;
-           k1 =  i0;
-           k0 = nb - i0 -1;
-           colortable[k].red   = (grey6[0][0]*k0+grey6[1][0]*k1)/kk;
-           colortable[k].green = (grey6[0][1]*k0+grey6[1][1]*k1)/kk;
-           colortable[k].blue  = (grey6[0][2]*k0+grey6[1][2]*k1)/kk;
-           }
-           throwassert(k<ncolortable);
-           
+           colortable[i0]=DefColorMacOs(i0,nb,hsv,grey,nbcolors,colors);           
           }
   /*    for (k=0;k<ncolortable;k++)
            cout << " color"  << k 
@@ -580,6 +558,11 @@ void SetColorTable(int nb)
      else 
       ncolortable  =0;
 }
+void SetColorTable(int nb)
+{
+  SetColorTable1(nb,false,0,0);
+}
+
 void closegraphique(void)
 {
   if(INITGRAPH) 

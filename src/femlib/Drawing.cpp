@@ -13,6 +13,14 @@
 #include "FESpace.hpp" 
 
 namespace Fem2D {
+
+void NewSetColorTable(int nb,float *colors=0,int nbcolors=0,bool hsv=true)
+{
+  if(colors && nbcolors)
+    SetColorTable1(nb,hsv,nbcolors,colors);
+  else
+    SetColorTable(nb);
+}
 int dichotomie(const RN_ &viso,R v) 
 {
   int i=0,j=viso.N(),k;
@@ -124,7 +132,7 @@ void  SetDefaultIsoValue(const RN_& U,RN_ & Viso)
    R x = umn+d/2;
    for (int i = 0;i < N;i++)
      {Viso[i]=x;x +=d; }
-   SetColorTable(N+4) ;  
+   NewSetColorTable(N+4) ;  
  }
 void  SetDefaultIsoValue(const RN_& u,const RN_& v,RN_ & Viso)
  {
@@ -145,7 +153,7 @@ void  SetDefaultIsoValue(const RN_& u,const RN_& v,RN_ & Viso)
    for (int i = 0;i < N;i++)
      {Viso[i]=x;x +=d; }
    Viso[N-1]= umx; 
-   SetColorTable(N+4) ;  
+   NewSetColorTable(N+4) ;  
  }
  
  void Mesh::Draw(int init,bool fill) const
@@ -489,27 +497,27 @@ void TBoundaryEdge<R2>::Draw() const
   MoveTo(*vertices[0]);
   LineTo(*vertices[1]);
 }
-void  FESpace::Draw(const RN_& U,const RN_ & Viso,int j) const 
+void  FESpace::Draw(const RN_& U,const RN_ & Viso,int j,float *colors,int nbcolors,bool hsv) const 
 {
   showgraphic();
-  SetColorTable(Viso.N()+4);
+  NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
   for (int k=0;k<Th.nt;k++) 
     (*this)[k].Draw( U,Viso,j);
-  SetColorTable(2+6);
+  NewSetColorTable(2+6,colors,nbcolors,hsv);
   Th.DrawBoundary();
-  SetColorTable(Viso.N()+4);
+  NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
 
 }
 
-void  FESpace::Drawfill(const RN_& U,const RN_ & Viso,int j,double rapz) const 
+void  FESpace::Drawfill(const RN_& U,const RN_ & Viso,int j,double rapz,float *colors,int nbcolors,bool hsv) const 
 {
   showgraphic();
-  SetColorTable(Viso.N()+4);
+  NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
   for (int k=0;k<Th.nt;k++) 
     (*this)[k].Drawfill( U,Viso,j,rapz);
-  SetColorTable(2+6);
+  NewSetColorTable(2+6,colors,nbcolors,hsv);
   Th.DrawBoundary();
-  SetColorTable(Viso.N()+4);
+  NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
 }
 
 
@@ -538,27 +546,27 @@ R2 FESpace::MinMax(const KN_<R>& U,int j0,bool bb) const
       }
    return Pminmax;
 }
-void  FESpace::Draw(const KN_<R>& U,const RN_ & Viso, R coef,int j0,int j1) const 
+void  FESpace::Draw(const KN_<R>& U,const RN_ & Viso, R coef,int j0,int j1,float *colors,int nbcolors,bool hsv) const 
 { 
   showgraphic();
-  SetColorTable(Viso.N()+5);
+  NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
   for (int k=0;k<Th.nt;k++) 
     (*this)[k].Draw( U,U,Viso,coef,j0,j1);
-  SetColorTable(2+6);
+  NewSetColorTable(2+6,colors,nbcolors,hsv);
   Th.DrawBoundary();
-  SetColorTable(Viso.N()+5);
+  NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
 
 }
 
-void  FESpace::Draw(const KN_<R>& U,const KN_<R>& V,const RN_ & Viso, R coef,int iu,int iv) const 
+void  FESpace::Draw(const KN_<R>& U,const KN_<R>& V,const RN_ & Viso, R coef,int iu,int iv,float *colors,int nbcolors,bool hsv) const 
 { 
   showgraphic();
-  SetColorTable(Viso.N()+5);
+  NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
   for (int k=0;k<Th.nt;k++) 
     (*this)[k].Draw( U,V,Viso,coef,iu,iv);
-  SetColorTable(2+6);
+  NewSetColorTable(2+6,colors,nbcolors,hsv);
   Th.DrawBoundary();
-   SetColorTable(Viso.N()+5);
+   NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
 
 }
 

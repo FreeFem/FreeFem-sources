@@ -2359,7 +2359,7 @@ class Plot :  public E_F0mps { public:
     };
 
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =15;
+   static const int n_name_param =16;
    Expression bb[4];
     vector<Expression2> l;
     Expression nargs[n_name_param];
@@ -2431,8 +2431,8 @@ class Plot :  public E_F0mps { public:
      "viso", &typeid(KN_<double>),       
      "varrow", &typeid(KN_<double>),
      "bw",&typeid(bool),
-     "grey", &typeid(bool)
-     
+     "grey", &typeid(bool),
+     "hsv", &typeid(KN_<double>)
    };
 
 
@@ -2646,7 +2646,9 @@ AnyType Plot::operator()(Stack s) const  {
    if (!withrgraphique) {initgraphique();withrgraphique=true;}
     viderbuff();
     MeshPoint *mps=MeshPointStack(s),mp=*mps ;
-
+    int nbcolors=0;
+    float *colors=0;
+    bool hsv=true; // hsv  type 
     R boundingbox[4];
     double coeff=1;
     bool wait=TheWait;
@@ -2697,6 +2699,16 @@ AnyType Plot::operator()(Stack s) const  {
                  
     if (nargs[13]) bw= GetAny<bool>((*nargs[13])(s));
     if (nargs[14]) grey= GetAny<bool>((*nargs[14])(s));
+    if (nargs[15]) {  
+       KN_<double> cc= GetAny<KN_<double> >((*nargs[15])(s));
+       nbcolors= cc.N()/3;
+       if ( nbcolors > 1&& nbcolors < 100)
+        {
+         colors = new float [nbcolors*3];
+         for (int i=0; i<3*nbcolors; i++) colors[i]=cc[i];
+        }
+        else nbcolors = 0;
+    }
     setgrey(grey);
     if (Viso.unset()) Viso.init(Niso);
     if (Varrow.unset()) Varrow.init(Narrow);
@@ -2866,7 +2878,7 @@ AnyType Plot::operator()(Stack s) const  {
       if (fe1) 
          {
           if (fe->Vh == fe1->Vh)           
-           vecvalue=true,fe->Vh->Draw(*fe->x(),*fe1->x(),Varrow,coeff,cmp0,cmp1);
+           vecvalue=true,fe->Vh->Draw(*fe->x(),*fe1->x(),Varrow,coeff,cmp0,cmp1,colors,nbcolors,hsv);
           else
            cerr << " On ne sait tracer que de vecteur sur un meme interpolation " << endl;
           if (drawmeshes) fe->Vh->Th.Draw(0,fill);
@@ -2874,9 +2886,9 @@ AnyType Plot::operator()(Stack s) const  {
       else 
         
         if (fill)
-         isovalue=true,fe->Vh->Drawfill(*fe->x(),Viso,cmp0);
+         isovalue=true,fe->Vh->Drawfill(*fe->x(),Viso,cmp0,1.,colors,nbcolors,hsv);
         else 
-         isovalue=true,fe->Vh->Draw(*fe->x(),Viso,cmp0);
+         isovalue=true,fe->Vh->Draw(*fe->x(),Viso,cmp0,colors,nbcolors,hsv);
          
         if (drawmeshes) fe->Vh->Th.Draw(0,fill);
 
@@ -3079,6 +3091,7 @@ AnyType Plot::operator()(Stack s) const  {
      } //  end plotting 
      NoirEtBlanc(0)  ;
      setgrey(greyo);
+     if (colors) delete[] colors;
      if (cm) 
        delete cm;
      if (psfile)

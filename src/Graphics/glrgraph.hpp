@@ -629,7 +629,48 @@ void initgraphique(void)
     // cout <<" End Initgraphique\n";
 }
 
+static RGBColor DefColorGL( int k,int nb, bool hsv,bool grey,int nbcolors,float *colors)
+{
+ RGBColor C;
+ float r,g,b;
+extern void DefColor(float & r, float & g, float & b,
+              int k,int nb, bool hsv,bool grey,int nbcolors,float *colors);
+ DefColor(r,g,b,   k,nb,hsv,grey,nbcolors,colors);
+ C.red=65535*r;
+ C.green=65535*g;
+ C.blue=65535*b;
+ return C;
+}              
 
+void SetColorTable1(int nb,bool hsv,int nbcolors,float *colors)
+{
+  static bool greyo = !grey;
+  static float * colorso=0;
+  if(!INITGRAPH) return;
+   if (ncolortable == nb && greyo == grey && colorso == colors ) return;// optim
+   greyo = grey;
+   colorso=colors;
+   if (nbcolor && nb>2) 
+     { 
+       if(colortable) delete [] colortable;
+       colortable = new RGBColor[nb];
+       ncolortable = nb;
+       if(LastColor>1) LastColor=nb-1;
+        for (int i0=0;i0<nb;i0++)
+         {  
+           colortable[i0]=DefColorGL(i0,nb,hsv,grey,nbcolors,colors);           
+          }
+  /*    for (k=0;k<ncolortable;k++)
+           cout << " color"  << k 
+                <<" r = " << colortable[k].red 
+                <<" g = " << colortable[k].green
+                <<" b = " << colortable[k].blue << endl;
+  */    
+         
+       }
+     else 
+      ncolortable  =0;
+}
 void SetColorTable(int nb)
 {
   if(!INITGRAPH) return;
