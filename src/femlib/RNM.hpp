@@ -131,6 +131,8 @@ template<class R> class KNMK_ ;
 template<class R> class KNM_ ;
 template<class R> class KN_ ;
 template<class R> class TKN_ ; // KN_ transpose 
+template<class R> class notKN_ ; // KN_ not 
+template<class R> class notnotKN_ ; // KN_ not not 
 
 template<class R> class KNMK ;
 template<class R> class KNM ;
@@ -145,6 +147,9 @@ template<class R> class Mul_KNM_KN_;
 template<class R> class DotStar_KN_;
 template<class R> class DotSlash_KN_;
 template<class R> class outProduct_KN_;
+template<class R> class if_KN_;
+template<class R> class if_arth_KN_;
+template<class R> class ifnot_KN_;
 template<class R,class I> class KN_ITAB; 
 
 
@@ -349,6 +354,18 @@ public:
    KN_& operator*=(const DotSlash_KN_<R> & u) ;
    KN_& operator/=(const DotSlash_KN_<R> & u) ;
 
+   KN_& operator =(const if_KN_<R> & u) ;
+   KN_& operator+=(const if_KN_<R> & u) ;
+   KN_& operator-=(const if_KN_<R> & u) ;
+   KN_& operator*=(const if_KN_<R> & u) ;
+   KN_& operator/=(const if_KN_<R> & u) ;
+
+   KN_& operator =(const ifnot_KN_<R> & u) ;
+   KN_& operator+=(const ifnot_KN_<R> & u) ;
+   KN_& operator-=(const ifnot_KN_<R> & u) ;
+   KN_& operator*=(const ifnot_KN_<R> & u) ;
+   KN_& operator/=(const ifnot_KN_<R> & u) ;
+
    KN_& operator =(const Add_KN_<R> & u) ;
    KN_& operator+=(const Add_KN_<R> & u) ;
    KN_& operator-=(const Add_KN_<R> & u) ;
@@ -388,6 +405,13 @@ public:
    KN_& operator-=(const Add_Mulc_KN_<R> & u) ;
    KN_& operator*=(const Add_Mulc_KN_<R> & u) ;
    KN_& operator/=(const Add_Mulc_KN_<R> & u) ;
+
+   KN_& operator =(const if_arth_KN_<R> & u) ;
+   KN_& operator+=(const if_arth_KN_<R> & u) ;
+   KN_& operator-=(const if_arth_KN_<R> & u) ;
+   KN_& operator*=(const if_arth_KN_<R> & u) ;
+   KN_& operator/=(const if_arth_KN_<R> & u) ;
+
   
    KN_& operator =(const Mul_KNM_KN_<R> & u) ; 
    KN_& operator+=(const Mul_KNM_KN_<R> & u) ; 
@@ -419,7 +443,9 @@ public:
 
 
   TKN_<R>  t() ; // transpose
-  const  TKN_<R>  t() const ; // transpose
+  const TKN_<R>  t() const ; // transpose
+  notKN_<R>  operator!()  ; //  not
+  const  notKN_<R>  operator!() const ; // not
 
   //  operator KN<R> &();
   // operator const KN<R> &() const;
@@ -569,10 +595,37 @@ struct TKN_:public KN_<R> {
 };
 
 template<class R>
+struct notKN_:public KN_<R> {
+    notKN_(const KN_<R> &x) : KN_<R>(x) {}
+    notnotKN_<R>  operator!()  ; //  not
+    const  notnotKN_<R>  operator!() const ; // not
+};
+
+template<class R>
+struct notnotKN_:public KN_<R> {
+    notnotKN_(const notKN_<R> &x) : KN_<R>(x) {}
+    notKN_<R>  operator!()  ; //  notnot
+    const  notKN_<R>  operator!() const ; // notnot
+};
+
+template<class R>
 TKN_<R>  KN_<R>::t() { return *this;} // transpose
 
 template<class R>
 const TKN_<R>  KN_<R>::t() const { return *this;} // transpose
+
+template<class R>
+notKN_<R>  KN_<R>::operator!() { return *this;} // not
+
+template<class R>
+const notKN_<R>  KN_<R>::operator!() const { return *this;} // not
+
+template<class R>
+notnotKN_<R>  notKN_<R>::operator!() { return *this;} // not
+
+template<class R>
+const notnotKN_<R>  notKN_<R>::operator!() const { return *this;} // not
+
 
 template<class R>
 struct outProduct_KN_ {
@@ -582,9 +635,43 @@ struct outProduct_KN_ {
     outProduct_KN_ operator * (R cc) { return outProduct_KN_(a,b,c*cc);}    
 };
 
+template<class R>
+struct if_KN_ {
+    const KN_<R> & a,&b;
+    R c;
+    if_KN_(const KN_<R> & aa, const KN_<R> &bb,R cc=1.) : a(aa),b(bb),c(cc) {}
+    if_KN_ operator * (R cc) { return if_KN_(a,b,c*cc);}    
+};
+
+template<class R>
+struct ifnot_KN_ {
+    const KN_<R> & a,&b;
+    R c;
+    ifnot_KN_(const KN_<R> & aa, const KN_<R> &bb,R cc=1.) : a(aa),b(bb),c(cc) {}
+    ifnot_KN_ operator * (R cc) { return ifnot_KN_(a,b,c*cc);}    
+};
+
+
 template<class R> 
 outProduct_KN_<R> operator*(const KN_<R> &a,const TKN_<R> &b) 
 { return outProduct_KN_<R>(a,b);}
+
+template<class R> 
+ifnot_KN_<R> operator*(const KN_<R> &a,const notKN_<R> &b) 
+{ return ifnot_KN_<R>(b,a);}
+
+template<class R> 
+ifnot_KN_<R> operator*(const KN_<R> &a,const notnotKN_<R> &b) 
+{ return if_KN_<R>(b,a);}
+
+template<class R> 
+ifnot_KN_<R> operator*(const notKN_<R> &b,const KN_<R> &a) 
+{ return ifnot_KN_<R>(b,a);}
+
+template<class R> 
+ifnot_KN_<R> operator*(const notnotKN_<R> &b,const KN_<R> & a) 
+{ return if_KN_<R>(b,a);}
+
 
 template<class R> 
 R operator*(const TKN_<R> &a,const KN_<R> &b) 
@@ -738,6 +825,10 @@ class KN :public KN_<R> { public:
         { if(this->unset()) set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
    KN& operator =(const DotStar_KN_<R> & u)  
         { if(this->unset()) set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
+   KN& operator =(const if_KN_<R> & u)  
+        { if(this->unset()) set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
+   KN& operator =(const ifnot_KN_<R> & u)  
+        { if(this->unset()) set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
    KN& operator =(const DotSlash_KN_<R> & u)  
         { if(this->unset()) set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
    KN& operator =(const Sub_KN_<R> & u)  
@@ -746,6 +837,10 @@ class KN :public KN_<R> { public:
         { if(this->unset()) set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
    KN& operator =(const Add_Mulc_KN_<R> & u)  
         { if(this->unset()) set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
+   KN& operator =(const if_arth_KN_<R> & u)  
+        { if(this->unset()) set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
+        
+        
    KN& operator =(const Mul_KNM_KN_<R> & u) 
         { if(this->unset()) set(new R[u.b.N()],u.b.N());KN_<R>::operator=(u);return *this;}
 //   KN& operator =(const MatriceCreuseMulKN_<R> & Ax) 
@@ -788,6 +883,8 @@ class KN :public KN_<R> { public:
         { KN_<R>::operator-=(u);return *this;}
    KN& operator -=(const Add_Mulc_KN_<R> & u)  
         { KN_<R>::operator-=(u);return *this;}
+   KN& operator -=(const if_arth_KN_<R> & u)  
+        { KN_<R>::operator-=(u);return *this;}
    KN& operator -=(const Mul_KNM_KN_<R> & u) 
         { KN_<R>::operator-=(u);return *this;}
  
@@ -807,6 +904,8 @@ class KN :public KN_<R> { public:
         { KN_<R>::operator+=(u);return *this;}
    KN& operator +=(const Add_Mulc_KN_<R> & u)  
         { KN_<R>::operator+=(u);return *this;}
+   KN& operator +=(const if_arth_KN_<R> & u)  
+        { KN_<R>::operator+=(u);return *this;}
    KN& operator +=(const Mul_KNM_KN_<R> & u) 
         { KN_<R>::operator+=(u);return *this;}
         
@@ -823,6 +922,9 @@ class KN :public KN_<R> { public:
         { KN_<R>::operator/=(u);return *this;}
    KN& operator /=(const Add_Mulc_KN_<R> & u)  
         { KN_<R>::operator/=(u);return *this;}
+   KN& operator /=(const if_arth_KN_<R> & u)  
+        { KN_<R>::operator/=(u);return *this;}
+        
    KN& operator /=(const Mul_KNM_KN_<R> & u) 
         { KN_<R>::operator/=(u);return *this;}
         
@@ -837,6 +939,8 @@ class KN :public KN_<R> { public:
    KN& operator *=(const Mulc_KN_<R> & u)  
         { KN_<R>::operator*=(u);return *this;}
    KN& operator *=(const Add_Mulc_KN_<R> & u)  
+        { KN_<R>::operator*=(u);return *this;}
+   KN& operator *=(const if_arth_KN_<R> & u)  
         { KN_<R>::operator*=(u);return *this;}
    KN& operator *=(const Mul_KNM_KN_<R> & u) 
         { KN_<R>::operator*=(u);return *this;}
@@ -1081,6 +1185,14 @@ class Add_Mulc_KN_ { public:
         : a(aa),b(bb),ca(caa),cb(cbb) { K_throwassert(SameShape(a,b));}
  };  
 
+template<class R> 
+class if_arth_KN_ { public:
+  const KN_<const_R> a,b,c;
+  if_arth_KN_(const KN_<R> & aa,const KN_<R> & bb,const KN_<R> & cc)  
+        : a(aa),b(bb),c(cc){ K_throwassert(SameShape(a,b)&&SameShape(a,c));}
+ };  
+
+
 
 template<class R> 
 class Mul_KNM_KN_ { public:
@@ -1138,6 +1250,8 @@ template<class R> inline Mul_KNM_KN_<R> operator*(const  KNM_<const_R> & A,const
 
 
 template<class R> inline bool  SameShape(const ShapeOfArray & a,const Add_Mulc_KN_<R> & b) 
+           { return SameShape(a,b.a) ;} 
+template<class R> inline bool  SameShape(const ShapeOfArray & a,const if_arth_KN_<R> & b) 
            { return SameShape(a,b.a) ;} 
 template<class R> inline bool  SameShape(const ShapeOfArray & a,const Add_KN_<R> & b) 
            { return SameShape(a,b.a) ;} 

@@ -2028,6 +2028,76 @@ public:
   {pref = SameType<A,B>::OK ;}
 };
 
+template<typename R>
+class  Operator_Aritm_If : public OneOperator{
+  typedef bool A; 
+  typedef R B; 
+  typedef R C; 
+  class Op : public E_F0 {
+    typedef  R Result;
+    Expression a,b,c;
+  public:
+    AnyType operator()(Stack s)  const 
+         {
+          return  SetAny<R>(static_cast<R>( GetAny<bool>((*a)(s)) ? GetAny<B>((*b)(s))  : GetAny<C>((*c)(s))  ));
+          }
+    Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc){} 
+    bool MeshIndependent() const { return a->MeshIndependent() && b->MeshIndependent() &&b->MeshIndependent() ;}
+    int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
+    {
+      int rr = find(m);
+      if (rr) return rr;          
+      int Opa = a->Optimize(l,m,n);          
+      int Opb =b->Optimize(l,m,n);
+      int Opc =c->Optimize(l,m,n);
+      return insert(new Opt(*this,Opa,Opb,Opc),l,m,n);       
+    } 
+    int compare (const E_F0 *t) const { 
+      int rr;
+      const  Op * tt=dynamic_cast<const Op *>(t);
+      if (tt ) rr =   clexico(a->compare(tt->a),b->compare(tt->b),c->compare(tt->c));
+      else rr = E_F0::compare(t);
+      // cout << "cmp E_F0_Func1 " << rr << endl;
+      return rr;
+    } // to give a order in instuction 
+    // int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const;  // build optimisation
+    
+    virtual ostream & dump(ostream &f) const  { 
+      f << "Op<" << typeid(C).name() 
+	<< ">   \n\t\t\t( a= "<< *a<< ")  \n\t\t\t(b= "<< *b << ") "  ;
+      return f; }
+  };
+    // build optimisation
+  class Opt: public Op  { public :
+    size_t ia,ib,ic;  
+    Opt(const  Op &t,size_t iaa,size_t ibb,size_t icc) 
+      : Op(t) ,
+	ia(iaa),ib(ibb),ic(icc) {}
+    AnyType operator()(Stack s)  const 
+    {
+      // cout <<  "Opt2 ::: " << ia << " "<< ib << " f = " 
+      //      <<  GetAny<double>(SetAny<R>(C::f( *static_cast<A *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
+      //                     *static_cast<B *>(static_cast<void*>(static_cast<char *>(s)+ib))))) << endl;
+      
+      
+      return SetAny<R>(
+               static_cast<R> (
+                              *static_cast<bool *>(static_cast<void*>(static_cast<char *>(s)+ia)) ? 
+			      *static_cast<B    *>(static_cast<void*>(static_cast<char *>(s)+ib))    :
+			      *static_cast<C    *>(static_cast<void*>(static_cast<char *>(s)+ic)) ) );}  
+    
+    
+  };     
+  //   aType r; //  return type 
+public: 
+  E_F0 * code(const basicAC_F0 & args) const 
+  { //cout << "A op B \n" ;
+    return  new Op(t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]));} 
+  Operator_Aritm_If(): 
+    OneOperator(map_type[typeid(R).name()],map_type[typeid(bool).name()],map_type[typeid(B).name()],map_type[typeid(B).name()])
+  {pref = SameType<B,B>::OK ;}
+};
+
 /* essai d'unification des classes 
 
 template<class R,class A,R ff(A),class AA=A> 
