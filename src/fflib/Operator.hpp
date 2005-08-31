@@ -433,6 +433,10 @@ struct Op2_sub_pn: public binary_function<A,B,R*> {
   static R* f(const A & a,const B & b)  { return new R(a - *b);} };   
 
 
+template<class R,class A=R,class B=A,class C=A> 
+struct Op3_p: public ternary_function<A,B,C,R*> { 
+  static R* f(const A & a,const B & b,const  C & c )  { return new R(a,b,c);} };   
+
 
 
 

@@ -44,4 +44,8 @@ cout << " i   = " << i << "\n";
  for (int i=0;i<10;i++)
    x += i*i;
  cout << " x= " << x << endl;
+ // example of if arithmetic expression 
+ real a =  x == 0 ? x : -1;
+ real b =  x != 0 ? x : -1;
+ cout << " a = " << a << " b = " << b << endl; 
  }

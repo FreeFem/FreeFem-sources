@@ -94,3 +94,15 @@ template<class R>
       *l oper *aa*ca + *bb*cb;
     return *this;
   }
+
+template<class R>
+ KN_<R>&  KN_<R>::operator oper (const if_arth_KN_<R> & u) {
+    K_throwassert(u.a.N() == N()  );
+    R zero=R();
+    const long stepa(u.a.step),stepb(u.b.step),stepc(u.c.step);
+    R * l(v);
+    const R *aa(u.a),*bb(u.b),*cc(u.c);    
+    for (long i=0;i<n;i++,l += step, aa +=stepa, bb += stepb ,  cc += stepc)
+      *l oper ( (*aa == zero) ?  *bb : *cc);
+    return *this;
+  }

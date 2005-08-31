@@ -1,18 +1,18 @@
 int n=20,nn=n+10;
 real[int] xx(nn),yy(nn);
-/* from:   http://en.wikipedia.org/wiki/HSV_color_space
-The HSV (Hue, Saturation, Value) model, also called HSB (Hue, Saturation, Brightness),
-   defines a color space in terms of three constituent components:
-
-HSV color space as a color wheel
-Hue, the color type (such as red, blue, or yellow):
-   Ranges from 0-360 (but normalized to 0-100% in some applications Here)
-Saturation, the "vibrancy" of the color: Ranges     from 0-100%
-   The lower the saturation of a color, the more "grayness" is present 
-   and the more faded the color will appear.
-Value, the brightness of the color:
-   Ranges from 0-100%
-*/
+//  \url{from:   http://en.wikipedia.org/wiki/HSV_color_space} 
+//The HSV (Hue, Saturation, Value) model, 
+//   defines a color space in terms of three constituent components:
+//
+//HSV color space as a color wheel
+//Hue, the color type (such as red, blue, or yellow):
+//   Ranges from 0-360 (but normalized to 0-100% h ere)
+// Saturation, the "vibrancy" of the color: Ranges     from 0-100%
+//    The lower the saturation of a color, the more "grayness" is present 
+//    and the more faded the color will appear.
+// Value, the brightness of the color:
+//   Ranges from 0-100%
+// 
 real[int] colorhsv=[  // color hsv model
   4./6., 1 , 0.5, // dark blue
   4./6., 1 , 1, //  blue
@@ -41,6 +41,6 @@ for (int i=0;i<=n;i++)
  for (int i=0;i<viso.n;i++)
    viso[i]=i*0.1;
    
- plot(uh,viso=viso(0:viso.n-1),value=1,fill=1,wait=1,hsv=colorhsv);
+ plot(uh,viso=viso(0:viso.n-1),value=1,fill=1,wait=1,hsv=colorhsv,ps="threehsv.eps");
 
    

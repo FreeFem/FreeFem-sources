@@ -28,7 +28,7 @@
 \title{
 %\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
  {\Blue{ \TitreFont freefem++}} \\ \vglue 3cm  ~ \\
-      \normalsize  { version 1.47-3 }
+      \normalsize  { version 1.47-4 }
  \\ \vglue 0.7cm
  {\large \Blue{\url{http://www.freefem.org}}} \\
 {\small \url{http://www.freefem.org/ff++/index.htm}} \\
@@ -1030,7 +1030,7 @@ The variational formulation for this problem is in the subspace $H^1_0(\Omega)
 Let us assume $C_0$ is a circle of radius 5 centered at the origin, N=2, $C_i$ are
 rectangles, $C_1$ is at temperature $u_1=60$.
 The mesh can be made by
-
+% modif FH   to see ... 
 \begin{example}[heatex.edp]
 \bFF
 // file heatex.edp
@@ -1046,6 +1046,11 @@ The mesh can be made by
 @border C22(t=0,1){ x=-1;   y=3-6*t;  label=C2;}
 @border C23(t=0,1){ x=-1-t; y=-3;     label=C2;}
 @border C24(t=0,1){ x=-2;   y=-3+6*t; label=C2;}
+
+@plot(    C0(50)            // to see the border of the domain 
+        + C11(5)+C12(20)+C13(5)+C14(20)
+        + C21(-5)+C22(-20)+C23(-5)+C24(-20),
+        wait=true, ps="heatexb.eps");
 
 @mesh Th=@buildmesh(    C0(50)
                     + C11(5)+C12(20)+C13(5)+C14(20)
@@ -2360,13 +2365,17 @@ Another useful system command is \x{assert()} to make sure something is true.
 
 \subsection{Arithmetic}
 On integers, $+,\, -,\, *$ express the usual arithmetic summation (plus),
-subtraction (minus) and multiplication (times), respectively.
-The operators $/$ and $\%$ yield the quotient and the remainder from the division of the first expression by the second.
+subtraction (minus) and multiplication (times), respectively,The operators $/$ and $\%$ yield the quotient and the remainder from the division of the first expression by the second.
 If the second number of $/$ or $\%$ is zero the behavior is undefined.
 The \key{maximum} or \key{minimum} of two integers $a,\, b$ are obtained
 by \texttt{max($a$,$b$)} of
 \texttt{min($a$,$b$)}.
 The power $a^b$ of two integers $a,\, b$ is calculated by writing \verb|a^b|.
+The classical \texttt{C++} 
+"arithmetical if"  expression \ttCC{ a ? b : c} is equal to  the value of expression \ttCC{b} if
+the value of expression  \ttCC{a} is true otherwise is equal to value of expression \ttCC{c}.
+\index{?:}
+
 \begin{example} Calculations with the integers
 \label{exm:int}
 \bFF
@@ -2378,6 +2387,8 @@ The power $a^b$ of two integers $a,\, b$ is calculated by writing \verb|a^b|.
 @cout <<a<<" plus -"<<b<<" need bracket:"<<a<<"+(-"<<b<<")="<<a+(-b)<<@endl;
 @cout <<"max and min of "<<a<<" and "<<b<<" is "<<@max(a,b)<<","<<@min(a,b)<< @endl;
 @cout <<b<<"th power of "<<a<<" is "<<a^b<< @endl;
+@cout << " min  == (a < b ? a : b )  is " << (a < b ? a : b) << @endl;
+
 b=0;
 @cout <<a<<"/0"<<" is "<< a/b << @endl;
 @cout <<a<<"\%0"<<" is "<< a\%b << @endl;
@@ -2391,6 +2402,7 @@ the minus of 12 is -12
 12 plus -5 need bracket :12+(-5)=7
 max and min of 12 and 5 is 12,5
 5th power of 12 is 248832
+min == (a < b ? a : b)   is 5
 12/0 : long long long
 Fatal error : ExecError  Div by 0 at exec line  9
 Exec error : exit
@@ -2669,9 +2681,8 @@ cout <<" resize tab: " <<  tab << endl;
 real [string] tt;
 tt["+"]=1.5;
 cout<<tt["a"]<<"  "<<tt["+"]<<endl;
-
-\eFF
-\index{array!resize}\index{resize}\index{max}\index{array!max} \index{min}\index{array!min}\index{sum}\index{array!sum}
+real[int]  a(5),b(5),c(5),d(5);a = 1;b = 2;c = 3;a[2]=0;d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] , cout << " d = ( a ? b : c )  is " << d << endl;\eFF
+\index{array!resize}\index{resize}\index{max}\index{array!max} \index{min}\index{array!min}\index{sum}\index{array!sum}\index{array!?:}%modif FH
 produce the output
 \bFF
 2.15 1.03 size of tab = 10 min: 1.03  max:2.15 sum : 11.42
@@ -2680,6 +2691,9 @@ produce the output
         1.03    1.03    1.03    1.03    1.03
         3.14    3.14
  0  1.5
+ d = ( a ? b : c )  is  5
+          3       3       2       3       3
+
 \eFF
 
 It is also possible to make an array of FE functions, with the same syntax,
@@ -2725,8 +2739,8 @@ tab[1]=2;
 @cout << tab[1] << " " << tab[9] << " size of tab = "
      << tab.n << " " << tab.min << " " << tab.max << " " <<  @endl;
 tab1=tab; tab=tab+tab1; tab=2*tab+tab1*5; tab1=2*tab-tab1*5;
-tab+=tab; @cout << " dot product " << tab'*tab << @endl; //
-${}^{t}{tab}\,{tab} $ @cout << tab << @endl; @cout << tab[1] << " "
+tab+=tab; @cout << " dot product " << tab'*tab << @endl; //${}^{t}{tab}\,{tab} $
+@cout << tab << @endl; @cout << tab[1] << " "
 << tab[9] <<  @endl; @real[string] map;        //  a dynamic array
 @for (i=0;i<10;i=i+1)
   {
@@ -5110,6 +5124,15 @@ The parameters are
     \itemtt[varrow=] \index{plot!varrow=}  sets the array value of color arrows (an array real[int])
     \itemtt[bw=] \index{plot!bw=} (bool)  sets or not the plot in black and white color.
     \itemtt[grey=] \index{plot!grey=} (bool)  sets or not the plot in grey color.
+%modif FH 
+    \itemtt[hsv=] \index{plot!hsv=} (array of float) to defined color of 3*n value  in HSV color model  
+    declare  with for example 
+    \bFF
+      real[int] colors = [h1,s1,v1,... ,  hn,vn,vn];
+    \eFF
+     where \texttt{hi,si,vi} is the ith color to defined the color table. 
+    
+    
 \end{description}
 For example: \index{plot!cut}
 \bFF
@@ -5138,6 +5161,40 @@ vector}
 \plot[height=6cm]{likegnu}{Plots a cut of uh. Note that a refinement of the same can be obtained
 in combination with gnuplot}
 
+% modif FH
+To change the color table and to choose the value of iso line you can do :
+
+\bFF
+// from:   \url{http://en.wikipedia.org/wiki/HSV_color_space}\hfilll
+//The HSV (Hue, Saturation, Value) model, \hfilll
+//   defines a color space in terms of three constituent components:\hfilll
+// \hfilll
+//HSV color space as a color wheel \ref{hsv} \hfilll
+//Hue, the color type (such as red, blue, or yellow):\hfilll
+//   Ranges from 0-360 (but normalized to 0-100% in some applications Here)\hfilll
+//Saturation, the "vibrancy" of the color: Ranges     from 0-100%\hfilll
+//   The lower the saturation of a color, the more "grayness" is present \hfilll
+//   and the more faded the color will appear.\hfilll
+//Value, the brightness of the color:\hfilll
+//   Ranges from 0-100%\hfilll
+// \hfilll
+@real[int] colorhsv=[  // color hsv model
+  4./6., 1 , 0.5, // dark blue
+  4./6., 1 , 1, //  blue
+  5./6., 1 , 1, //  magenta
+  1, 1. , 1, //  red
+  1, 0.5 , 1 // light red 
+   ];
+ @real[int] viso(31);
+ 
+ @for (int i=0;i<viso.n;i++)
+   viso[i]=i*0.1;
+   
+ @plot(uh,viso=viso(0:viso.n-1),value=1,fill=1,wait=1,hsv=colorhsv);
+\eFF
+
+\twoplot[height=6cm]{hsv}{threehsv}{hsv color cylinder}{isovalue with an other color table}
+\newpage
 \subsection{link with gnuplot}\label{sec:gnuplot}
 \index{gnuplot}\index{exec}
 

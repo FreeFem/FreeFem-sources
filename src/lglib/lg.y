@@ -101,6 +101,7 @@ void lgerror (const char* s) ;
 %type <cexp>   no_comma_expr
 %type <cexp>   sub_script_expr
 %type <cexp>   no_set_expr
+%type <cexp>   no_ternary_expr
 %type <cexp>   unary_expr
 %type <cexp>   pow_expr
 %type <cexp>   primary
@@ -426,13 +427,17 @@ unop:
 ;
 
 no_comma_expr:
-      no_set_expr 
-	| no_set_expr '=' no_comma_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr PLUSEQ no_comma_expr {$$=C_F0(TheOperators,"+=",$1,$3)}
-	| no_set_expr MOINSEQ no_comma_expr {$$=C_F0(TheOperators,"-=",$1,$3)}
-	| no_set_expr MULEQ no_comma_expr {$$=C_F0(TheOperators,"*=",$1,$3)}
-	| no_set_expr DIVEQ no_comma_expr {$$=C_F0(TheOperators,"/=",$1,$3)}
+      no_ternary_expr 
+	| no_ternary_expr '=' no_comma_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr PLUSEQ no_comma_expr {$$=C_F0(TheOperators,"+=",$1,$3)}
+	| no_ternary_expr MOINSEQ no_comma_expr {$$=C_F0(TheOperators,"-=",$1,$3)}
+	| no_ternary_expr MULEQ no_comma_expr {$$=C_F0(TheOperators,"*=",$1,$3)}
+	| no_ternary_expr DIVEQ no_comma_expr {$$=C_F0(TheOperators,"/=",$1,$3)}
 ;
+
+no_ternary_expr:
+	no_set_expr
+	| no_set_expr '?' no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,"?:",$1,$3,$5)}
 
 no_set_expr:
 	  unary_expr 
