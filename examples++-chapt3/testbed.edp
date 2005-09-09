@@ -1,3 +1,4 @@
+/*  Ne compile pas FH ?? 
 for (idt = 1; idt < 50; idt++)
  {
    temps += dt;
@@ -14,3 +15,4 @@ for (idt = 1; idt < 50; idt++)
    plot([u1,u2],p,wait=!(idt%10),value= 1,coef=0.1);
  }
  
+*/
