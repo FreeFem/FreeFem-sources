@@ -613,6 +613,8 @@ void ArrayDCL()
      map_type[typeid(KN_<K> ).name()]->AddCast(
        new E_F1_funcT<KN_<K>,KN_<K>*>(UnRef<KN_<K> >),
        new E_F1_funcT<KN_<K>,KN<K>*>(UnRef<KN_<K>,KN<K> >)
+    //   ,new E_F1_funcT<KN_<K>,K>(ValueToKN_<K>),
+    //   new E_F1_funcT<KN_<K>,K*>(PtrToKN_<K>)       
        ); 
     map_type_of_map[make_pair(atype<long>(),atype<K>())]=atype<KN<K>*>(); // vector
     map_pair_of_type[make_pair(atype<long>(),atype<long>())] =atype<pair<long,long> >();   
