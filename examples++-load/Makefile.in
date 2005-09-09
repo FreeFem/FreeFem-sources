@@ -193,7 +193,7 @@ TESTS_ENVIRONMENT = PROGLOC=$(top_srcdir)/src REGEDP=load.edp		\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
 	VISUALCHECK=$(VISUALCHECK)
 
-EXTRA_DIST = load.edp load.link myfunction.cpp  dfft.cpp dfft.edp dfft.link
+EXTRA_DIST = load.edp load.link myfunction.cpp  dfft.cpp dfft.edp dfft.link include.tar.gz
 all: all-am
 
 .SUFFIXES:
@@ -421,8 +421,10 @@ uninstall-am: uninstall-info-am
 
 all-local: @LOAD_COMPILE@
 
-myfunction.so: myfunction.cpp ../src/fflib/AFunction.hpp ../config.h 
+myfunction.so: myfunction.cpp ../src/fflib/AFunction.hpp ../config.h include
 	CXX=$(CXX) ./load.link myfunction
+include: include.tar.gz
+	tar zxvf include.tar.gz
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
