@@ -30,9 +30,9 @@ libff_a_DEPENDENCIES=@EIGENOBJ@
 INCLUDES=-I../lglib -I../bamglib -I../Graphics -I../femlib	\
 -I$(top_srcdir)/arpack/arpack++/include
 
-# Build date changes at every build
+# Build date changes at every change
 EXTRA_DIST=strversionnumber.m4
 BUILT_SOURCES=strversionnumber.cpp
-strversionnumber.cpp: @TAGGINGDEPEND@
+strversionnumber.cpp: $(libff_a_SOURCES) ../../configure
 	m4 -DVersionFreeFemDate="`date`" strversionnumber.m4 > $@
 FORCE:
