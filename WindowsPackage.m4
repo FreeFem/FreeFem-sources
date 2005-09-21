@@ -37,6 +37,7 @@ Source: "examples++-eigen\*.edp"; DestDir: "{app}\examples++-eigen"
 Source: "examples++-tutorial\*.edp"; DestDir: "{app}\examples++-tutorial"
 Source: "examples++-tutorial\aile.msh"; DestDir: "{app}\examples++-tutorial"
 Source: "examples++-tutorial\xyf"; DestDir: "{app}\examples++-tutorial"
+Source: "examples++-chapt3\*.edp"; DestDir: "{app}\examples++-other"
 Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
 
 ; Documentation files may need to be copied from another machine if
