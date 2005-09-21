@@ -393,11 +393,12 @@ public:
       else
 	a->resize(n);
       
-      for (int i=0,j=0 ;i<N;i++, j += nn[i])
+      for (int i=0,j=0 ;i<N; j += nn[i++])
 	
         if (what[i]==0)
           (*a)[j]= GetAny<RR>(v[i]);
-        else if (what[i]==1) KN_<RR>(*a+j,nn[i])= GetAny<KN_<RR> >(v[i]);
+        else if (what[i]==1) 
+          (*a)(SubArray(nn[i],j)) = GetAny<KN_<RR> >(v[i]);
       return SetAny<R>(a);
     } 
     bool MeshIndependent() const     {return  mi;} // 
@@ -466,7 +467,7 @@ public:
           n += nn[i];
 	}
       ffassert(n == a.size()); 
-      for (int i=0,j=0 ;i<N;i++, j += nn[i])
+      for (int i=0,j=0 ;i<N; j += nn[i++])
 	
         if (what[i]==0)
          * GetAny<RR*>(v[i]) = a[j];
@@ -537,9 +538,12 @@ template<class K> long get_n(KN<K> * p){ return p->N();}
 template<class K> long get_n(KNM<K> * p){ return p->N();}
 
 template<class K> long get_m(KNM<K> * p){ return p->M();}
-template<class K> double get_max(KN<K> * p){ return p->max();}
-template<class K> double get_min(KN<K> * p){ return p->min();}
+template<class K> K get_max(KN<K> * p){ return p->max();}
+template<class K> K get_min(KN<K> * p){ return p->min();}
 template<class K> K get_sum(KN<K> * p){ return p->sum();}
+template<class K> K get_sum0(const KN_<K> & p){ return p.sum();}
+template<class K> K get_max0(const KN_<K> &p){ return p.max();}
+template<class K> K get_min0(const KN_<K> &p){ return p.min();}
 
 
 /*
@@ -673,6 +677,11 @@ void ArrayOperator()
      atype<KNM<K>* >()->Add("(","",new OneOperator3_<K*,KNM<K>*,long,long >(get_elementp2_<K,KNM<K>*,long,long>));
 
      Add<KN<K> *>("sum",".",new OneOperator1<K,KN<K> *>(get_sum));
+     Add<KN<K> *>("min",".",new OneOperator1<K,KN<K> *>(get_min));
+     Add<KN<K> *>("max",".",new OneOperator1<K,KN<K> *>(get_max));
+     Add<KN_<K> >("sum",".",new OneOperator1_<K,KN_<K> >(get_sum0));
+     Add<KN_<K> >("min",".",new OneOperator1_<K,KN_<K> >(get_min0));
+     Add<KN_<K> >("max",".",new OneOperator1_<K,KN_<K> >(get_max0));
 
      Add<KN<K> *>("resize",".",new OneOperator1< Resize<KN<K> >,KN<K> *>(to_Resize));
      Add<KNM<K> *>("resize",".",new OneOperator1< Resize<KNM<K> >,KNM<K> *>(to_Resize));
@@ -1229,8 +1238,6 @@ void Init_map_type()
 //     Add<istream**>("<-","(", new OneUnaryOperator<Op1_new_pstring<istream*,ifstream> >);
      Add<ostream**>("<-","(", new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >);
      
-     Add<KN<double> *>("min",".",new OneOperator1<double,KN<double> *>(get_min));
-     Add<KN<double> *>("max",".",new OneOperator1<double,KN<double> *>(get_max));
     // Polymorphic * precis =new Polymorphic();
     //  Add<ostream*>("precision",".",precis);
      Add<ostream**>("precision",".",new OneOperator1<ostream_precis,ostream**>(ostream_precision));
