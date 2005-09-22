@@ -6,8 +6,9 @@
 
 # $Id$
 
-SUBDIRS=download src DOC examples++-tutorial examples++	\
-	examples++-eigen examples++-load examples++-mpi	\
+SUBDIRS=download src DOC examples++-tutorial examples++		\
+	examples++-chapt3 examples++-eigen examples++-load	\
+examples++-mpi							\
 	examples++-bug examples++-other
 
 EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h \
@@ -124,19 +125,21 @@ clean-local::
 # ----------------------
 
 FreeFem++v$(VERSION)_MacOS:documentation	
-	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen
+	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-chapt3 $@/examples++-bug $@/examples++-eigen
 	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++ 
 	cp  COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO  $@ 
 	cp  examples++/*.edp   $@/examples++
+	cp  examples++-chapt3/*.edp   $@/examples++-chapt3
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
 	-cp  examples++-bug/*.edp   $@/examples++-bug
 	cp   DOC/manual-full.pdf $@
 
 FreeFem++v$(VERSION)_MacOsX: all documentation
-	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug $@/examples++-eigen $@/examples++-load
+	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-chapt3 $@/examples++-bug $@/examples++-eigen $@/examples++-load
 	cp COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL-MacOSX  $@
 	cp  examples++/*.edp   $@/examples++
+	cp  examples++-chapt3/*.edp   $@/examples++-chapt3
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf  examples++-tutorial/*.edp   $@/examples++-tutorial
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	-cp  examples++-bug/*.edp   $@/examples++-bug
@@ -165,7 +168,8 @@ linux-package: $(PACKAGE_NAME).tgz
 # procedure on its own.
 
 $(PACKAGE_NAME):
-	-mkdir $@  $@/examples++ $@/examples++-tutorial $@/examples++-bug \
+	-mkdir $@ $@/examples++ $@/examples++-tutorial	\
+		$@/examples++-chapt3 $@/examples++-bug	\
 		$@/examples++-eigen $@/examples++-load
 	cp src/std/FreeFem++ $@
 	./copysharedlibs.sh src/std/FreeFem++ $@
@@ -183,6 +187,7 @@ $(PACKAGE_NAME):
 	-./copysharedlibs.sh src/mpi/FreeFem++-mpi $@
 	cp  COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO  $@ 
 	cp  examples++/*.edp   $@/examples++
+	cp  examples++-chapt3/*.edp   $@/examples++-chapt3
 	cp  examples++-eigen/*.edp   $@/examples++-eigen
 	cp  examples++-tutorial/aile.msh examples++-tutorial/xyf \
 		examples++-tutorial/*.edp   $@/examples++-tutorial

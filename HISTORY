@@ -1,3 +1,86 @@
+2005-09-21 21:04  hecht
+
+	*  correct bug in  set array of array to array of reverse
+	   + add sum, min max of sub array.
+
+2005-09-21 14:52  lehyaric
+
+	* Added new examples++-chapt3 directory to Windows distribution
+
+2005-09-21 13:34  lehyaric
+
+	* server.cpp/runfreefem() updated according to lg.tab.cpp/mymain()
+	  modifications
+
+2005-09-09 15:27  hecht
+
+	* change the reconstruction of strversionnumber.cpp
+
+2005-09-09 15:19  hecht
+
+	*   create ref.edp file (empty today)
+
+2005-09-09 15:17  hecht
+
+	* add examples++-chapt3  stuff
+
+2005-09-09 14:30  hecht
+
+	*   add new include file
+
+2005-09-09 13:45  hecht
+
+	* correct missing .esp file in Makefile.am
+
+2005-09-09 13:27  hecht
+
+	* [no log message]
+
+2005-09-09 13:25  hecht
+
+	* add threehsv.eps file
+
+2005-08-31 15:53  hecht
+
+	*   add new arithmetic if expression   ( (a ? b : c) like in c++
+	    for basic type and for array with integer index (see array.edp)
+
+2005-08-30 16:56  hecht
+
+	* correct unmissing print in case of  verbosity = 0 .
+
+2005-08-30 14:58  hecht
+
+	*     correct color in window version
+
+2005-08-30 13:36  hecht
+
+	*  Add tool to change the color table of plot:
+	   see plot.edp  example:
+
+	  real[int] colorhsv=[	// color hsv model   4./6., 1 , 0.5, //
+	  dark blue   4./6., 1 , 1, //	blue   5./6., 1 , 1, //  magenta
+	  1, 1. , 1, //  red   1, 0.5 , 1 // light red	  ]; .....
+
+
+	  plot(uh,viso=viso(0:viso.n-1),value=1,fill=1,wait=1,hsv=colorhsv);
+
+2005-08-25 14:23  hecht
+
+	* add new freefem++ documentation freefem++doc.pdf ( from O.
+	  Pironneau) add vectorial instruction (int rel, complex or int)
+	  real[int] a(5),b(7),c(3);    ...     real[int] x([a,b,c]); //
+	  build vector size 5+7+3  from concatenation of a,b,c	   or	  x
+	  = [a,b,c,c] ; //  set vector x and resize    from concatenation
+	  of a,b,c,c	 [a,b,c] = x(0:14); // set the vector a,b,c form
+	  corresponding part of      //  the 3 parts are respectively
+	  x(0:4),x(5:11),x(11:13)
+
+2005-07-15 14:11  lehyaric
+
+	* Removed "restricted" option from FreeFem++-cs (the Web service
+	  does not need this option any more)
+
 2005-07-13 13:40  lehyaric
 
 	* Removed references to undefined class "TheSubFMortars" Added

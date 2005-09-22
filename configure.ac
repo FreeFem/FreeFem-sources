@@ -205,7 +205,12 @@ then
 		ff_x11=yes
 		ff_x11prog=FreeFem++-x11${EXEEXT}
 		CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
-		ff_x11_libs="-L/usr/X11R6/lib -lXext -lXpm -lX11 -lm"
+
+		# -lXxf86vm is necessary to define
+		# "XF86VidModeQueryVersion" (called by OpenGL) on
+		# newer X11 systems
+
+		ff_x11_libs="-L/usr/X11R6/lib -lXxf86vm -lXext -lXpm -lX11 -lm"
 		AC_SUBST(X11_LIBS,$ff_x11_libs)
 	fi
 fi
