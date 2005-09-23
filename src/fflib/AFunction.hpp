@@ -2706,7 +2706,9 @@ extern queue<pair<const E_Routine*,int> > debugstack;
 
 extern basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
   
-  
+void initArrayOperators();   
+void  initArrayDCL();
+
  void ClearMem(); 
 #endif
 

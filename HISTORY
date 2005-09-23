@@ -1,3 +1,18 @@
+2005-09-22 12:01  lehyaric
+
+	* FreeFem++ works on Linux (Debian Testing) thanks to the following
+	  modifications:
+
+	  - src/ide/server.cpp is modified to call Compile() from
+	  runfreefem()	 the same way as mymain() (from lg.tab.ccp) does.
+
+	  - A new X11 required default library is added (libXxf86vm)
+
+	  - examples++-load/load.edp is modified back to load
+	  "myfunction.so" rather   than "myfunction". This probably means
+	  that a system-independant way   to specify dynamically-loaded
+	  functions remains to be found.
+
 2005-09-21 21:04  hecht
 
 	*  correct bug in  set array of array to array of reverse

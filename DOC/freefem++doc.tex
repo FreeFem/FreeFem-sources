@@ -50,9 +50,9 @@ K. Ohtsuka  \thanks{\url{ohtsuka@barnard.cs.hkg.ac.jp},
 \begin{document}
 \graphicspath{{./}{plots/}{figures/}}
 \ifpdf
-\DeclareGraphicsExtensions{.pdf ,.jpg , .tif}
+\DeclareGraphicsExtensions{.pdf ,.jpg  ,.tif}
 \else
-\DeclareGraphicsExtensions{.eps ,.ps ,.jpg}
+\DeclareGraphicsExtensions{.eps, .jpg , ,.ps }
 \fi
 
 \maketitle
@@ -431,7 +431,7 @@ space of continuous functions which are affine in $x,y$ on each triangle of $T_h
 linear vector space of finite dimension, basis can be found.
 The canonical basis is made of functions, called the \index{hat function}\emph{hat functions}
 $\phi_k$ which are continuous piecewise affine and are equal to 1 on one vertex and 0 on all others.
-A typical hat function is shown on figure \ref{fig:hatFunction}
+A typical hat function is shown on figure \ref{fig-hatFunction}
 \footnote{
 The easiest way to define $\phi_k$ is by making use of the \index{barycentric coordinates}
 \emph{barycentric coordinates}
@@ -450,7 +450,7 @@ w(x,y)=\sum_{k=1}^{M}w_k\phi_k(x,y),\, w_k\textrm{ are real numbers}\right.\righ
 where $M$ is the dimension of $V_h$, i.e. the number of vertices.
 The $w_k$ are called the \index{degree of freedom}\emph{degree of freedom} of $w$ and $M$ the number of
 the degree of freedom.
-\begin{figure}[htbp]\label{fig:hatFunction}
+\begin{figure}[htbp]\label{fig-hatFunction}
 \begin{minipage}{\textwidth}
 \begin{minipage}{0.3\textwidth}
 \includegraphics[width=\textwidth]{secondT}%
@@ -621,7 +621,7 @@ there are some compound operator:
 Vh f,g;
 f = x*y;
 g = sin(pi*x);
-Vh<complex> ff,gg; // a complex valued finite element function \index{FE function!complex}
+Vh<complex> ff,gg; // a complex valued finite element function \index{FE function!complex}\index{complex}
 ff= x*(y+1i);
 gg = exp(pi*x*i);
 @varf mat(u,v) =
@@ -630,8 +630,7 @@ gg = exp(pi*x*i);
 @varf mati(u,v) =
   int2d(Th)(1*dx(u)*dx(v)+2i*dx(u)*dy(v)+3*dy(u)*dx(v)+4*dy(u)*dy(v))
   + on(1,2,3,4,u=1);
-@matrix A = mat(Vh,Vh); @matrix<complex> AA = mati(Vh,Vh); // a
-complex sparse matrix \index{matrix:complex}
+@matrix A = mat(Vh,Vh); @matrix<complex> AA = mati(Vh,Vh); // a complex sparse matrix \index{matrix!complex}
 
 Vh m0; m0[] = A*f[];
 Vh m01; m01[] = A'*f[];
@@ -648,7 +647,7 @@ Vh m2; m2[] = f[]./g[];
 @cout << "hermitien Product = "<< ff[]'*gg[] << @endl;
 \eFF
 
-On the triangulation of Figure \ref{{fig:hatFunction}} this produce the following:
+On the triangulation of Figure \ref{fig-hatFunction} this produce the following:
 \begin{eqnarray*}
 A&=&\borderarray{[}{]}{1em}{1.2ex}{rrrrrrrr}{
 &1&2&3&4&5&6\\
@@ -1649,7 +1648,8 @@ instance will then converge in one or two iterations.
 
 The right hand side {\tt rhs} is computed by an \x{external C++ function} {\tt MatUpWind0(...)}
 which is programmed as
-{\small\begin{verbatim}
+{\small
+\begin{verbatim}
 // computes matrix a on a triangle for the Dervieux FVM
 int   fvmP1P0(double q[3][2], // the 3 vertices of a triangle T
               double u[2],   // convection velocity on T
@@ -1672,7 +1672,8 @@ int   fvmP1P0(double q[3][2], // the 3 vertices of a triangle T
     }
   return 1;
 }
-\end{verbatim}}
+\end{verbatim}
+}
 It must be inserted into a larger .cpp file, shown in Appendix A,
  which is the load module linked to \freefempp.
 
@@ -1935,7 +1936,7 @@ Results are shown on figure \ref{figstokes}
 
 \subsection{An Example with Complex Numbers}
 
-
+ \index{FE function!complex}\index{complex}\index{Helmholtz}
 In a microwave oven heat comes from molecular excitation by an
 electromagnetic field. For a plane monochromatic wave, amplitude is
 given by Helmholtz's equation:
@@ -2234,7 +2235,7 @@ a text enclosed within double quotes, such as:
 \eFF
 \index{string}
 \item[real] declares the variable to store a number such as ``12.345''. \index{real}
-\item[complex]  Complex numbers, such as
+\item[complex]  Complex numbers, such as\index{Complex}
 $1+2i$, \freefempp understand that $i=\sqrt{-1}$.
 \bFF
 @complex a =  1@i, b = 2 + 3@i;
@@ -2446,7 +2447,7 @@ $a+i~b$ and $a+i\sqrt{2.0}$ as
 @complex z1 = a+b*1i, z2=a+@sqrt(2.0)*1i;
 \eFF
 The imaginary and real parts of complex number \texttt{z} is obtained by
-\ttCC{@imag} and \ttCC{@real}.
+\ttCC{@imag} and \ttCC{@real}. \index{imag}\index{real}\index{complex}
 The conjugate of $a+bi$ ($a,b$ are real) is defined by $a-bi$, which
 is denoted by \ttCC{@conj(a+b*1i)} in \freefempp.
 
@@ -2681,7 +2682,14 @@ cout <<" resize tab: " <<  tab << endl;
 real [string] tt;
 tt["+"]=1.5;
 cout<<tt["a"]<<"  "<<tt["+"]<<endl;
-real[int]  a(5),b(5),c(5),d(5);a = 1;b = 2;c = 3;a[2]=0;d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] , cout << " d = ( a ? b : c )  is " << d << endl;\eFF
+real[int]  a(5),b(5),c(5),d(5);
+a = 1;
+b = 2;
+c = 3;
+a[2]=0;
+d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] , 
+cout << " d = ( a ? b : c )  is " << d << endl;
+\eFF
 \index{array!resize}\index{resize}\index{max}\index{array!max} \index{min}\index{array!min}\index{sum}\index{array!sum}\index{array!?:}%modif FH
 produce the output
 \bFF
@@ -8456,7 +8464,8 @@ We this in mind we proceed to solve a Laplace equation with discontinuous coeffi
 \bFF
 Ph nu=1+5*(region==nlower) + 10*(region==nupper);
 plot(nu,fill=1,wait=1);
-problem lap(u,v) =   int2d(th)( nu*( dx(u)*dx(v)*dy(u)*dy(v) )) + int2d(-1*v) + on(a,b,c,d,e,f,u=0);
+problem lap(u,v) =   int2d(th)( nu*( dx(u)*dx(v)*dy(u)*dy(v) )) 
+                   + int2d(-1*v) + on(a,b,c,d,e,f,u=0);
 plot(u);
 \eFF
 \plot[height=8cm]{region_u}{the isovalue of the solution $u$}
@@ -8970,7 +8979,8 @@ Vhother U=0;
    // send err0  to the other proc, receive in err1
    @processor(1-mpirank)<<err0;   @processor(1-mpirank)>>err1;
    @real err= sqrt(err0+err1);
-   @cout <<" err = " << err << " err0 = " << err0 << ", err1 = " << err1 << endl;
+   @cout <<" err = " << err << " err0 = " << err0 
+         << ", err1 = " << err1 << endl;
    @if(err<1e-3) @break;
 };
 @if (mpirank==0)
@@ -10486,7 +10496,7 @@ For purposes of explanation, we chage mesh size and use $P_1$-element:
 16: @plot(u);
 \eFF
 
-We get the mesh $\mathcal{T}_h=\{T_1,\cdots,T_7\}$ (see Fig. \ref{fig:hatFunction}).
+We get the mesh $\mathcal{T}_h=\{T_1,\cdots,T_7\}$ (see Fig. \ref{fig-hatFunction}).
 \begin{note}
 \label{note:mesh}
 In what follows, we denote the vertices by $q^i,\, i=1,\cdots,8$,
@@ -10507,7 +10517,7 @@ The function $v$ in ``\texttt{Vh}'' is expressed
 v(x)=v_{1}\varphi _{1}(x) +\cdots +v_{n_{v}}\varphi _{n_{v}}(x)
 \end{equation*}%
 using the \key{hat functions} $\varphi _{j},\,j=1,\cdots ,n_{v}$ (see Fig.
-\ref{fig:hatFunction}).
+\ref{fig-hatFunction}).
 Here the $j$-th hat function $\varphi _{j}$ associated with $j$-th
 vertex $q^j$ is defined in the following way:
 \begin{enumerate}
