@@ -39,11 +39,12 @@ Source: "examples++-tutorial\aile.msh"; DestDir: "{app}\examples++-tutorial"
 Source: "examples++-tutorial\xyf"; DestDir: "{app}\examples++-tutorial"
 Source: "examples++-chapt3\*.edp"; DestDir: "{app}\examples++-other"
 Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
+Source: "examples++-load\*.edp"; DestDir: "{app}\examples++-load"
 
 ; Documentation files may need to be copied from another machine if
 ; Cygwin refuses to build them.
 
-Source: "DOC\manual-full.pdf"; DestDir: "{app}"
+Source: "DOC\freefem++doc.pdf"; DestDir: "{app}"
 
 ; Icons for Windows can be created from a 32x32 image with icotool
 ; (Linux Debian unstable), or IrfanView (Windows, not very good
@@ -56,9 +57,9 @@ Source: "logo.ico"; DestDir: "{app}"
 ; Menu
 Name: "{group}\FreeFem++"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
 Name: "{group}\FreeFem++ GUI"; Filename: "{app}\FreeFem++-cs.exe"
-Name: "{group}\PDF manual"; Filename: "{app}\manual-full.pdf"
-Name: "{group}\Postscript manual"; Filename: "{app}\manual-full.ps"
+Name: "{group}\PDF manual"; Filename: "{app}\freefem++doc.pdf"
 Name: "{group}\Examples\Tutorial"; Filename: "{app}\examples++-tutorial"
+Name: "{group}\Examples\chapt3"; Filename: "{app}\examples++-chapt3"
 Name: "{group}\Examples\Main"; Filename: "{app}\examples++"
 Name: "{group}\Examples\Eigenvalues"; Filename: "{app}\examples++-eigen"
 Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
