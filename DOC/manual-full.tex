@@ -734,6 +734,16 @@ Indeed, the following occur errors
 \eT
 \end{note}
 
+%%%  modif FH july 2005----
+\subsection{Block matrix}
+\bFF
+  matrix A=[[A11,0,B1],[0,A11,0,B1],[B1',B2',0]];
+  set(A,solver=UMFPACK); //  by default no solver is defined
+  real[int] b=[b1[],b2[],b3[]];
+  [b1[],b2[],b3[]]= A^-1*b;
+\eFF
+%%%  fin modif FH july 2005
+
 \subsection{\setS{Modeling}--Edit--Run--Visualize--Revise}
 \bigskip
 \freefempp provide many examples and its documentation, so you can easily calculate

@@ -1,14 +1,14 @@
 #!/bin/sh
 # Create a loadable object from a C++ function defined in a .cpp file
 # $Id$
-
+dir=..
 do="yes"
 DEBUG=""
 uu=`uname -s` 
 INC=""
 LIBS=""
 DLL=""
-bin=""
+bin="."
 while true; do
 case "$1" in
  -[h?]*) echo usage $0 "[-n] [-g] [-win32] [-l libfile] [-I includedir]  fileprefixe"
@@ -32,7 +32,7 @@ elif [ "$1" = "-g" ]; then
   DEBUG="-g"
 elif [ "$1" = "-win32" ]; then
   shift
-  bin=../src/bin-win32
+  bin="$dir"
   uu="WIN32"
 elif  [ "$1" = "-I" ]; then
   INC="$INC -I$2"; shift;shift;

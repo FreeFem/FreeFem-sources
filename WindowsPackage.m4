@@ -19,9 +19,10 @@ OutputBaseFilename=FreeFem++-VERSION
 [Files]
 
 ; Programs
-Source: "src\std\FreeFem++.exe"; DestDir: "{app}"
-Source: "src\ide\FreeFem++-cs.exe"; DestDir: "{app}"
-Source: "src\nw\FreeFem++-nw.exe"; DestDir: "{app}"
+Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
+Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
+Source: "src\bin-win32\FreeFem++-nw.exe"; DestDir: "{app}"
+Source: "src\bin-win32\*.dll"; DestDir: "{app}"
 
 ; mingwm10.dll is necessary when "-mthreads" is used as a compilation
 ; flag.
@@ -37,9 +38,14 @@ Source: "examples++-eigen\*.edp"; DestDir: "{app}\examples++-eigen"
 Source: "examples++-tutorial\*.edp"; DestDir: "{app}\examples++-tutorial"
 Source: "examples++-tutorial\aile.msh"; DestDir: "{app}\examples++-tutorial"
 Source: "examples++-tutorial\xyf"; DestDir: "{app}\examples++-tutorial"
-Source: "examples++-chapt3\*.edp"; DestDir: "{app}\examples++-other"
+Source: "examples++-chapt3\*.edp"; DestDir: "{app}\examples++-chapt3"
 Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
 Source: "examples++-load\*.edp"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\*.cpp"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\*.sh"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\include-tmp\*"; DestDir: "{app}\examples++-load\include"
+
+
 
 ; Documentation files may need to be copied from another machine if
 ; Cygwin refuses to build them.
@@ -60,6 +66,7 @@ Name: "{group}\FreeFem++ GUI"; Filename: "{app}\FreeFem++-cs.exe"
 Name: "{group}\PDF manual"; Filename: "{app}\freefem++doc.pdf"
 Name: "{group}\Examples\Tutorial"; Filename: "{app}\examples++-tutorial"
 Name: "{group}\Examples\chapt3"; Filename: "{app}\examples++-chapt3"
+Name: "{group}\Examples\load"; Filename: "{app}\examples++-load"
 Name: "{group}\Examples\Main"; Filename: "{app}\examples++"
 Name: "{group}\Examples\Eigenvalues"; Filename: "{app}\examples++-eigen"
 Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
