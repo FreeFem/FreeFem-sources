@@ -95,7 +95,8 @@ speedtest: all
 # Windows package script (for Inno Setup). We extract version
 # information from the Debian Changelog to get the package release
 # number as well.
-
+win32:WindowsPackage.iss
+	cd examples++-load;tar zxvf include.tar.gz;cp -rL include include-tmp 
 WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
 	m4 -DVERSION=$(VERSION)$(OPTIM_TYPE) \
 		WindowsPackage.m4 > WindowsPackage.iss

@@ -113,17 +113,31 @@ To test all the examples under unix:
 > cd examples++; ../src/std/FreeFem++ all.edp
 > cd examples++-tutorial; ../src/std/FreeFem++ all.edp
 
-To try the  dynamic linking loader example:
-> cd example++-load
-> ./load.link myfunction 
-> g++ -c -I../src/fflib -I../src/femlib -I../src/Graphics myfunction.cpp
-> g++ -shared myfunction.o -o myfunction.so
-> ../src/nw/FreeFem++-nw load.edp
+To try the  dynamic linking loader example: 
+remark: some adaptation must be done with the suffix probleme (.dll, .so, .dylib )
+and directory  to seach dynamic lib  (shell variable LD_LIBRARY_PATH)
+ 
+
+warning under  Window XP,  first install the cygwin environnent (see http://www.cygwin.com)
+> cd example++-load build a dll file with the following shell script:
+> ./mkdll-ff.sh -win32  myfunction 
+or under other achitecture
+> g++  ./mkdll-ff.sh   myfunction
+g++ -c -I../src/fflib -I../src/femlib -I../src/Graphics myfunction.cpp
+
+to execute the examples try  
+  under window xp
+ ../FreeFem++-nw loadwin32.edp 
+  or otherwise 
+ ../src/nw/FreeFem++-nw load.edp
+
+
+
 -- FreeFem++ v1.38 (date Tue Feb 10 12:04:30 CET 2004)
  file : load.edp
  Load: lg_fem  --  no UMFPACK => replace UMFPACK  by LU  
 lg_mesh eigenvalue 
- load "./myfunction.so" lood: myfunction 
+ load "myfunction" lood: myfunction 
 load: dlopen(./myfunction.so) = 0x84be700
 
     1 :  mesh Th=square(5,5);
@@ -153,3 +167,5 @@ Note 2: on MacOSX, link problems occur because of some incompatibility
 between RTTI, templates and the apple c++ version (2.95.2). But this
 is now working with the new g++3 compiler (default compiler in MacOs
 10.2) and also with g++-3.3.
+
+Note 3. Fast fourier exemple ( FFT )  is in dfft.edp  file
