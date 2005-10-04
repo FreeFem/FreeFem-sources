@@ -107,7 +107,7 @@ static void  HeapSort(T *c,long n)
      kerr++;  
   }
   void CodeAlloc::operator delete(void * pp) {
-     return ; // FH 
+    //  return ; // FH 
     if( ! sort  &&  (nb*2 > nbt)  )  Sort_mem();
     int ib=0,ie=nbt-1,im;
     if(pp< mem[ib]) ErrorDel(pp);
