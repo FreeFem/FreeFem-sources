@@ -1357,21 +1357,21 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
    }
   R * al = me.a; 
   R * aij;
-  switch (me.mtype) {
+  switch (me.mtype) { // modif FH overfloat in array mi and mj => trap on win32
   case MatriceElementaire<R>::Full : ffassert(!symetrique);
-    for (i=mi[il=0]; il<me.n; i=mi[++il])  
-      for ( j=mj[jl=0]; jl< me.m ; j=mj[++jl],al++)  {
+    for (i=mi[il=0]; il<me.n; ++il)  { i=mi[il]; 
+      for ( j=mj[jl=0]; jl< me.m ; ++jl,++al)  {j=mj[jl];
         aij = pij(i,j);
         throwassert(aij);
-	*aij += *al;}
+	*aij += *al;}}
     break;
      
   case MatriceElementaire<R>::Symmetric : ffassert(symetrique);   
-    for (i=mi[il=0]; il<me.n; i=mi[++il])  
-      for (j=mj[jl=0];jl< il+1 ; j=mj[++jl]) { 
+    for (i=mi[il=0]; il<me.n; ++il) {  i=mi[il] ;
+      for (j=mj[jl=0];jl< il+1 ; ++jl) { j=mj[jl];
 	 aij =    (j<i) ? pij(i,j) : pij(j,i);
          throwassert(aij);
-         *aij += *al++;}
+         *aij += *al++;}}
     break;
   default:
     cerr << "Big bug type MatriceElementaire unknown" << (int) me.mtype << endl;

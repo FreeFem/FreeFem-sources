@@ -8,7 +8,7 @@ uu=`uname -s`
 INC=""
 LIBS=""
 DLL=""
-bin=""
+bin="."
 while true; do
 case "$1" in
  -[h?]*) echo usage $0 "[-n] [-g] [-win32] [-l libfile] [-I includedir]  fileprefixe"
