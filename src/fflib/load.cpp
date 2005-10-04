@@ -28,7 +28,7 @@ bool load(string ss)
   
   suffix[0]="";
   suffix[1]=".so";
-#ifdef  _APPLE_
+#ifdef  __APPLE__
   suffix[1]=".dylib";
 #endif  
 #ifdef WIN32  
@@ -38,7 +38,7 @@ bool load(string ss)
  for ( i= 0;i< nbprefix;i++)
  for ( j= 0;j< nbsuffix;j++)
   {
-    string s= prefix[i]+ss+suffix[i];
+    string s= prefix[i]+ss+suffix[j];
 #ifdef LOAD  
   handle = dlopen (s.c_str(), RTLD_LAZY ); 
   ret= handle !=0;
