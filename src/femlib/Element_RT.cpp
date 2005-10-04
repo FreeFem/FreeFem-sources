@@ -532,7 +532,7 @@ double TypeOfFE_P0::Pi_h_coef[]={1.0};
   static int Data[];
     static double Pi_h_coef[];
 
-   TypeOfFE_ConsEdge(): TypeOfFE(0,1,0,1,Data,1,1,3,3,Pi_h_coef)
+   TypeOfFE_ConsEdge(): TypeOfFE(0,1,0,1,Data,3,1,3,3,Pi_h_coef)
     {   const R2 Pt[] = { R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0) };
       for (int i=0;i<NbDoF;i++) {
        pij_alpha[i]= IPJ(i,i,0);

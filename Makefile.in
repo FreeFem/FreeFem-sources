@@ -223,10 +223,9 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-SUBDIRS = download src DOC examples++-tutorial examples++		\
-	examples++-chapt3 examples++-eigen examples++-load	\
-examples++-mpi							\
-	examples++-bug examples++-other
+SUBDIRS = download src DOC examples++-tutorial examples++	\
+	examples++-eigen examples++-load examples++-mpi	\
+	examples++-bug examples++-other examples++-chapt3
 
 EXTRA_DIST = regtests.sh config-wrapper.h arpack/arpack++/include/*.h \
 FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
@@ -724,7 +723,8 @@ speedtest: all
 # Windows package script (for Inno Setup). We extract version
 # information from the Debian Changelog to get the package release
 # number as well.
-
+win32:WindowsPackage.iss
+	cd examples++-load;tar zxvf include.tar.gz;cp -rL include include-tmp 
 WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
 	m4 -DVERSION=$(VERSION)$(OPTIM_TYPE) \
 		WindowsPackage.m4 > WindowsPackage.iss
