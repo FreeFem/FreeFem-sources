@@ -42,6 +42,12 @@ bool load(string ss)
 #ifdef LOAD  
   handle = dlopen (s.c_str(), RTLD_LAZY ); 
   ret= handle !=0;
+  if (  ret ) 
+   {
+    cout << "\nload: dlopen(" <<prefix[i] << ss << suffix[j] << ") = " << handle << endl;
+    return handle;
+   }
+
 #elif WIN32
   {
    HINSTANCE mod=  LoadLibrary(s.c_str());
@@ -51,21 +57,20 @@ bool load(string ss)
        cerr  <<   "\n try loadLibary : " <<s << "\n \t fail : " << merr << endl;
      }
   else 
-    cout << "\nload: LoadLibrary (" << s << ") = " << mod << endl;
-   
+    {
+    cout << "\nload: loadLibary(" <<prefix[i] << ss << suffix[j] << ") = " << handle << endl;
+    return mod;
+    }
   }
 #else
   cout << "------------------------------------   \n" ;
   cout << "  load: sorry no dlopen on this system " << s << " \n" ;
   cout << "------------------------------------   \n" ;
-  
+  return 0;
 #endif  
  }
-  if ( ! ret ) 
-    cerr  <<   "load error : [" << prefix[1]<<"]" <<ss <<"[" << suffix[1]<<"]"<< "\n \t fail : "  << endl;
-  else 
-    cout << "\nload: dlopen(" <<prefix[i] << ss << suffix[j] << ") = " << handle << endl;
+  cerr  <<   "load error : [" << prefix[1]<<"]" <<ss <<"[" << suffix[1]<<"]"<< "\n \t fail : "  << endl;
   
-  return handle ;
+  return 0 ;
 }
 
