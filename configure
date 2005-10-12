@@ -311,7 +311,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 FLIBS CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ OPTIM_TYPE X11_LIBS CXXCPP EGREP ff_mpirun MPIPROG ff_wget ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIB G2CLIB DOWNLOAD_ARPACK ARPACKLIB EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK UMFPACKLIB FF_UMFPACK_POSIX ff_libtool STATICTOOL LOAD_TESTS LOAD_COMPILE ff_latex ff_makeindex ff_dvips DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION TAGGINGDEPEND GLXPROG AGLPROG X11PROG IDEPROG LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 FLIBS CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ WIN32DLLTARGET OPTIM_TYPE X11_LIBS CXXCPP EGREP ff_mpirun MPIPROG ff_wget ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIB G2CLIB DOWNLOAD_ARPACK ARPACKLIB EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK UMFPACKLIB FF_UMFPACK_POSIX ff_libtool STATICTOOL LOAD_TESTS LOAD_COMPILE ff_latex ff_makeindex ff_dvips DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION TAGGINGDEPEND GLXPROG AGLPROG X11PROG IDEPROG LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4514,6 +4514,8 @@ CYGWIN*)
 		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -lws2_32"
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        WINDRESOBJ=windres.o
+
+                WIN32DLLTARGET=win32-dll-target
 
 	fi
 
@@ -9525,8 +9527,6 @@ echo "$as_me: using downloaded Arpack" >&6;}
 		# because this lib does not exist yet, and this could make the
 		# following tests fail.
 
-		ARPACKLIB=${curdir}/download/arpack/ARPACK/libarpack_ff++.a
-
 		ff_arpack_ok=yes
 	fi
 fi
@@ -9534,6 +9534,8 @@ LIBS="$ff_arpack_libs $ff_save_libs"
 
 if test "$ff_arpack_ok" = yes;
 then
+        ARPACKLIB=$ff_arpack_libs
+
 	EIGENOBJ='eigenvalue.$(OBJEXT)'
 
 cat >>confdefs.h <<\_ACEOF
@@ -11154,7 +11156,7 @@ IDEPROG=$ff_ideprog
 
 
 # All makefiles
-                                                                                                                                                                                                                                                                                                                      ac_config_files="$ac_config_files Makefile download/Makefile download/blas/Makefile download/arpack/Makefile download/umfpack/Makefile download/fltk/Makefile src/Makefile src/bamglib/Makefile src/iml/Makefile src/Graphics/Makefile src/femlib/Makefile src/Algo/Makefile src/umfpack/Makefile src/lglib/Makefile src/fflib/Makefile src/std/Makefile src/x11/Makefile src/ide/Makefile src/nw/Makefile src/mpi/Makefile src/agl/Makefile src/glx/Makefile examples++/Makefile examples++-eigen/Makefile examples++-tutorial/Makefile examples++-mpi/Makefile examples++-load/Makefile examples++-chapt3/Makefile examples++-bug/Makefile examples++-other/Makefile DOC/Makefile"
+                                                                                                                                                                                                                                                                                                                                ac_config_files="$ac_config_files Makefile download/Makefile download/blas/Makefile download/arpack/Makefile download/umfpack/Makefile download/fltk/Makefile src/Makefile src/bamglib/Makefile src/iml/Makefile src/Graphics/Makefile src/femlib/Makefile src/Algo/Makefile src/umfpack/Makefile src/lglib/Makefile src/fflib/Makefile src/std/Makefile src/x11/Makefile src/bin-win32/Makefile src/ide/Makefile src/nw/Makefile src/mpi/Makefile src/agl/Makefile src/glx/Makefile examples++/Makefile examples++-eigen/Makefile examples++-tutorial/Makefile examples++-mpi/Makefile examples++-load/Makefile examples++-chapt3/Makefile examples++-bug/Makefile examples++-other/Makefile DOC/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -11735,6 +11737,7 @@ do
   "src/fflib/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/fflib/Makefile" ;;
   "src/std/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/std/Makefile" ;;
   "src/x11/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/x11/Makefile" ;;
+  "src/bin-win32/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/bin-win32/Makefile" ;;
   "src/ide/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/ide/Makefile" ;;
   "src/nw/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/nw/Makefile" ;;
   "src/mpi/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/mpi/Makefile" ;;
@@ -11892,6 +11895,7 @@ s,@LEXLIB@,$LEXLIB,;t t
 s,@LEX_OUTPUT_ROOT@,$LEX_OUTPUT_ROOT,;t t
 s,@YACC@,$YACC,;t t
 s,@WINDRESOBJ@,$WINDRESOBJ,;t t
+s,@WIN32DLLTARGET@,$WIN32DLLTARGET,;t t
 s,@OPTIM_TYPE@,$OPTIM_TYPE,;t t
 s,@X11_LIBS@,$X11_LIBS,;t t
 s,@CXXCPP@,$CXXCPP,;t t
