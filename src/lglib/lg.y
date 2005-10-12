@@ -269,11 +269,11 @@ list_of_dcls:    ID                         {$$=currentblock->NewVar<LocalVariab
 
 
 parameters_list:
-	   no_set_expr {$$=$1} 
+	   no_ternary_expr {$$=$1} 
 	|  FESPACE  ID  {$$=Find($1)} 
-	|  ID '=' no_set_expr { $$=make_pair<const char *,const C_F0>($1,$3)} 	
-	| parameters_list ',' no_set_expr { $$ = ($1 += $3) }
-	| parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5))}
+	|  ID '=' no_ternary_expr { $$=make_pair<const char *,const C_F0>($1,$3)} 	
+	| parameters_list ',' no_ternary_expr { $$ = ($1 += $3) }
+	| parameters_list ',' id '=' no_ternary_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5))}
 ; 
 
 type_of_dcl:   TYPE 
@@ -287,15 +287,15 @@ type_of_dcl:   TYPE
 
 ID_space:
     ID                                  { $$ =  NewFEvariable($1,currentblock,fespacetype,fespacecomplex); }
- |  ID '[' no_set_expr ']'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
- |  ID '=' no_set_expr                  { $$ =  NewFEvariable($1,currentblock,fespacetype,$3,fespacecomplex) }
+ |  ID '[' no_ternary_expr ']'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
+ |  ID '=' no_ternary_expr                  { $$ =  NewFEvariable($1,currentblock,fespacetype,$3,fespacecomplex) }
  |  '[' list_of_id1 ']'                 { $$ =  NewFEvariable($2,currentblock,fespacetype,fespacecomplex) }
- |  '[' list_of_id1 ']' '[' no_set_expr ']'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
- |  '[' list_of_id1 ']' '=' no_set_expr { $$ =  NewFEvariable($2,currentblock,fespacetype,$5,fespacecomplex) }
+ |  '[' list_of_id1 ']' '[' no_ternary_expr ']'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
+ |  '[' list_of_id1 ']' '=' no_ternary_expr { $$ =  NewFEvariable($2,currentblock,fespacetype,$5,fespacecomplex) }
 ; 
 ID_array_space:
-    ID '(' no_set_expr ')'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
- |  '[' list_of_id1 ']' '(' no_set_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
+    ID '(' no_ternary_expr ')'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
+ |  '[' list_of_id1 ']' '(' no_ternary_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
 
 ;
 
@@ -434,6 +434,7 @@ no_comma_expr:
 	| no_ternary_expr MULEQ no_comma_expr {$$=C_F0(TheOperators,"*=",$1,$3)}
 	| no_ternary_expr DIVEQ no_comma_expr {$$=C_F0(TheOperators,"/=",$1,$3)}
 ;
+
 
 no_ternary_expr:
 	no_set_expr

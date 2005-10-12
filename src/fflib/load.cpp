@@ -44,7 +44,7 @@ bool load(string ss)
   ret= handle !=0;
   if (  ret ) 
    {
-    cout << "\nload: dlopen(" <<prefix[i] << ss << suffix[j] << ") = " << handle << endl;
+    cout << "\nload: dlopen(" << s << ") = " << handle << endl;
     return handle;
    }
 
@@ -69,7 +69,8 @@ bool load(string ss)
   return 0;
 #endif  
  }
-  cerr  <<   "load error : [" << prefix[1]<<"]" <<ss <<"[" << suffix[1]<<"]"<< "\n \t fail : "  << endl;
+  cerr  <<   "\nload error : [" << prefix[1]<<"]" <<ss <<"[" << suffix[1]<<"]"<< "\n \t fail : "  << endl;
+  CompileError("Error load");
   
   return 0 ;
 }

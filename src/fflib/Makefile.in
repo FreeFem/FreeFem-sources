@@ -65,9 +65,9 @@ am__objects_1 = AFunction.$(OBJEXT) AFunction2.$(OBJEXT) \
 	Mesh2.$(OBJEXT) Metric.$(OBJEXT) BamgFreeFem.$(OBJEXT) \
 	MeshDraw.$(OBJEXT) MeshGeom.$(OBJEXT) MeshQuad.$(OBJEXT) \
 	SetOfE4.$(OBJEXT) MeshRead.$(OBJEXT) MeshWrite.$(OBJEXT) \
-	problem.$(OBJEXT) DefColor.$(OBJEXT) InitFunct.$(OBJEXT) \
-	lgalgo.$(OBJEXT) Element_P2h.$(OBJEXT) load.$(OBJEXT) \
-	lgfem.$(OBJEXT)
+	problem.$(OBJEXT) mt19937ar.$(OBJEXT) DefColor.$(OBJEXT) \
+	InitFunct.$(OBJEXT) lgalgo.$(OBJEXT) Element_P2h.$(OBJEXT) \
+	load.$(OBJEXT) lgfem.$(OBJEXT)
 am_libff_a_OBJECTS = $(am__objects_1) strversionnumber.$(OBJEXT)
 libff_a_OBJECTS = $(am_libff_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -93,7 +93,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/lex.Po ./$(DEPDIR)/lgalgo.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/lgfem.Po ./$(DEPDIR)/lgmat.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/lgmesh.Po ./$(DEPDIR)/load.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/mshptg.Po ./$(DEPDIR)/problem.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/mshptg.Po ./$(DEPDIR)/mt19937ar.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/problem.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/strversionnumber.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -259,7 +260,7 @@ CodeAlloc.cpp lgmat.cpp global.cpp 					\
 ../bamglib/Mesh2.cpp ../bamglib/Metric.cpp ../femlib/BamgFreeFem.cpp	\
 ../bamglib/MeshDraw.cpp ../bamglib/MeshGeom.cpp				\
 ../bamglib/MeshQuad.cpp ../bamglib/SetOfE4.cpp ../bamglib/MeshRead.cpp	\
-../bamglib/MeshWrite.cpp problem.cpp \
+../bamglib/MeshWrite.cpp problem.cpp mt19937ar.cpp \
 ../Graphics/DefColor.cpp \
  InitFunct.cpp ../Algo/lgalgo.cpp			\
 ../femlib/Element_P2h.cpp load.cpp lgfem.cpp AFunction.hpp AnyType.hpp	\
@@ -365,6 +366,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lgmesh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/load.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mshptg.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mt19937ar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/problem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strversionnumber.Po@am__quote@
 

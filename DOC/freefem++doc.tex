@@ -28,7 +28,7 @@
 \title{
 %\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
  {\Blue{ \TitreFont freefem++}} \\ \vglue 3cm  ~ \\
-      \normalsize  { version 1.47-4 }
+      \normalsize  { version 1.48-2 }
  \\ \vglue 0.7cm
  {\large \Blue{\url{http://www.freefem.org}}} \\
 {\small \url{http://www.freefem.org/ff++/index.htm}} \\
@@ -2009,6 +2009,123 @@ Vh vr=@real(v), vi=@imag(v);
 \eFF
 \end{example}
 
+\section{Optimal Control}
+Thanks to the function \texttt{BFGS} it is possible to solve complex
+nonlinear optimization problem within \texttt{freefem++}. For
+example consider the following inverse problem
+\[
+    \min_{b,c,d\in R}J=\int_E(u-u_d)^2~:~
+    -\nabla(\kappa(b,c,d)\cdot\nabla u)=0,~~u|_\Gamma=u_\Gamma
+\]
+where the desired state $u_d$, the boundary data $u_\Gamma$ and the
+observation set $E\subset\Omega$ are all given.  Furthermore let us
+assume that
+\[
+    \kappa(x)=1+bI_B(x)+cI_C(x)+dI_D(x)~~~\forall x\in\Omega
+\]
+where $B,C,D$ are separated subsets of $\Omega$.
+\\\\
+To solve this problem by the quasi-Newton BFGS method we need the
+derivatives of $J$ with respect to $b,c,d$.  We self explanatory
+notations, if $\delta b,\delta c,\delta d$ are variations of
+$b,c,d$ we have
+\[
+    \delta J\approx 2\int_E(u-u_d)\delta u,~~
+    -\nabla(\kappa\cdot\nabla\delta u)\approx\nabla(\delta\kappa\cdot\nabla
+    u)
+    ~~\delta u|_\Gamma=0
+\]
+Obviously $J'_b$ is equal to $\delta J$ when $\delta b=1,\delta
+c=0,\delta d=0$, and so on for $J'_c$ and $J'_d$.
+\\\\
+All this is implemented in the following program
+{\small\begin{verbatim}
+// file optimcontrol.edp
+border aa(t=0, 2*pi) {    x = 5*cos(t);    y = 5*sin(t);  };
+border bb(t=0, 2*pi) {    x = cos(t);    y = sin(t);  };
+border cc(t=0, 2*pi) {    x = -3+cos(t);    y = sin(t);  };
+border dd(t=0, 2*pi) {    x = cos(t);    y = -3+sin(t);  };
+mesh th = buildmesh(aa(70)+bb(35)+cc(35)+dd(35));
+fespace Vh(th,P1);
+Vh Ib=((x^2+y^2)<1.0001),
+   Ic=(((x+3)^2+ y^2)<1.0001),
+   Id=((x^2+(y+3)^2)<1.0001),
+   Ie=(((x-1)^2+ y^2)<=4),
+   ud,u,uh,du;
+real[int] z(3);
+problem A(u,uh) =int2d(th)((1+z[0]*Ib+z[1]*Ic+z[2]*Id)*(dx(u)*dx(uh)
+                    +dy(u)*dy(uh))) + on(aa,u=x^3-y^3);
+z[0]=2; z[1]=3; z[2]=4;
+A; ud=u;
+ofstream f("J.txt");
+func real J(real[int] & Z)
+{
+    for (int i=0;i<z.n;i++)z[i]=Z[i];
+    A; real s= int2d(th)(Ie*(u-ud)^2);
+    f<<s<<"   "; return s;
+}
+
+real[int] dz(3), dJdz(3);
+
+problem B(du,uh)
+  =int2d(th)((1+z[0]*Ib+z[1]*Ic+z[2]*Id)*(dx(du)*dx(uh)+dy(du)*dy(uh)))
+  +int2d(th)((dz[0]*Ib+dz[1]*Ic+dz[2]*Id)*(dx(u)*dx(uh)+dy(u)*dy(uh)))
+  +on(aa,du=0);
+
+func real[int] DJ(real[int] &Z)
+    {
+      for(int i=0;i<z.n;i++)
+        { for(int j=0;j<dz.n;j++) dz[j]=0;
+          dz[i]=1; B;
+          dJdz[i]= 2*int2d(th)(Ie*(u-ud)*du);
+      }
+     return dJdz;
+ }
+
+ real[int] Z(3);
+ for(int j=0;j<z.n;j++) Z[j]=1;
+ BFGS(J,DJ,Z,eps=1.e-6,nbiter=15,nbiterline=20);
+   cout << "BFGS: J(z) = " << J(Z) <<  endl;
+for(int j=0;j<z.n;j++) cout<<z[j]<<endl;
+plot(ud,value=1,ps="u.eps");
+\end{verbatim}}
+In this example the sets $B,C,D,E$ are circles of boundaries $bb,cc,dd,ee$ are the domain
+$\Omega$ is the circle of boundary $aa$.  The desired state $u_d$ is the solution
+of the PDE for $b=2,c=3,d=4$.  The unknowns are packed into array $z$.  Notice that it is
+necessary to recopy $Z$ into $z$ because one is a local variable while the other one is global.
+The program found $b=2.00125,c=3.00109,d=4.00551$.
+Figure \ref{figcontrol} shows $u$ at convergence
+and the successive function evaluations of $J$.
+\begin{figure}\label{figcontrol}
+\begin{center}
+\includegraphics[width=5cm]{u-bfgs}
+\includegraphics[width=5cm]{J-bfgs}
+\caption{On the left the level lines of $u$. On the right the successive evaluations of
+$J$ by BFGS (5 values above 500 have been removed for readability)}
+\end{center}
+\end{figure}
+Note that an \emph{adjoint state} could have been used. Define $p$ by
+\[
+-\nabla\cdot(\kappa\nabla p)=2I_E(u-u_d),~~~p|_Gamma=0
+\]
+Consequently
+\begin{eqnarray}&&
+\delta J = -\int_\Omega (\nabla\cdot(\kappa\nabla p))\delta u
+\cr&&
+= \int_Omega(\kappa\nabla p\cdot\nabla\delta u)
+=-\int_Omega(\delta\kappa\nabla p\cdot\nabla u)
+\end{eqnarray}
+Then the derivatives are found by setting $\delta b=1, \delta c=\delta d=0$ and so on:
+\[
+    J'_b=-\int_B \nabla p\cdot\nabla u,~~J'_c=-\int_C \nabla p\cdot\nabla u,~~
+    J'_d=-\int_D \nabla p\cdot\nabla u
+\]
+\paragraph{Remark} As BFGS stores an $M\times M$ matrix where $M$ is the number of
+unknowns, it is dangerously expensive to use this method when the unknown $x$ is a
+Finite Element Function.  One should use another optimizer such as
+the NonLinear Conjugate Gradient \texttt{NLCG} (also a key word
+of freefem++).  See the file algo.edp in the examples folder.
+
  \subsection{Classification of the equations}
 \paragraph{Summary}\emph{
 It is usually not easy to determine the type of a system.  Yet the approximations
@@ -2573,6 +2690,21 @@ Using \freefempp, we calculated
 -1.77679-2.0572i,& 1.88967 10^{-16}-1.1752i,\\
 9.44833 10^{-17}+1.1752i, & 0.804719+1.10715i.
 \end{eqnarray*}
+
+\itemtt[Random Functions] from Mersenne Twister (see page \url{http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html}
+for full detail). 
+It is A very fast random number generator 
+Of period $2^{219937}-1$, and the functions are:\index{random}\index{rand}\index{randint32}\index{randint31}\index{randinit}
+\begin{itemize}
+\item \ttCC{@randint@3@2()}  generates unsigned 32-bit integers.
+\item \ttCC{@randint@3@1()} generates unsigned 31-bit integers.
+\item \ttCC{@randreal@1()} generates uniform real in $[0,1]$ (32-bit resolution). 
+\item \ttCC{@randreal@2()} generates uniform real in $[0,1)$ (32-bit resolution). 
+\item \ttCC{@randreal@3()} generates uniform real in $(0,1)$ (32-bit resolution).
+\item \ttCC{@randres@5@3()} generates uniform real in $[0,1)$ with 53-bit resolution.
+\item \ttCC{@randinit(seed )} initializes the state vector by using one  32-bit integer "seed", which may be zero.
+\end{itemize}
+
 \end{description}
 
 \subsection{Functions of Two Variables}
@@ -8177,6 +8309,14 @@ plot(u1,u2); // plot
 \eFF
 \end{example}
 
+
+%\subsubsection{mortar.edp}
+% a faire FH 
+%  construction de epsi
+%  un sous domaine
+%  les matrices blocks.
+
+
 \subsection{Fluid/Structures Coupled Problem}
 
 This problem involves the Lam\'{e} system of elasticity
@@ -8989,6 +9129,7 @@ Vhother U=0;
 \eFF
 
 \include{docFFGUI}
+
 
 \section{\setS{Mesh Files}}
  \def\Chars#1{{\tt (C*)}  #1}
@@ -10047,8 +10188,317 @@ primary:
 %%%{\scriptsize
 %%%\inputFF{../HISTORY}
 %%%}
+\section{dynamical link}
 
-\section{Load Module for Dervieux' P0-P1 Finite Volume Method}
+Now, it's possible to add built-in functionnaly in freefem++ under the three
+environnent Linux, Window and MacOS X 10.3 or newer. 
+The way to do that is: 
+First try the example \texttt{load.edp} in directory \texttt{example++-load}.
+
+But unfortunately, you need to install a\texttt{c++} compiler  (generally \texttt{g++/gcc} compiler)
+ to compile your function.
+ 
+
+\begin{description}
+\item[Window] Install the \texttt{cygwin} environnent or the \texttt{mingw} 
+\item[MacOs] Install the developer tools
+\item[Linux/Unix] Install the correct compiler  
+\end{description}
+
+Now, I suppose two think, you are in a shell window (a cygwin window under window)  in the directory 
+\texttt{example++-load}. Remark,  in the sub directory \texttt{include} 
+they are all the freefem++ include file to make the link with \texttt{FreeFem++}.
+ 
+
+To test, if the dynamics load is available your can try the 
+exemple \texttt{load.edp}.
+
+\begin{note}
+  If you try to load dynamically a file with command \texttt{load "xxx"}
+ \begin{itemize} 
+ \item Under unix (Linux or MacOs), the file \texttt{xxx.so}  to be load under must be 
+ first in the search directory of routine \texttt{dlopen}
+  (see the environment variable  \verb.$LD_LIBRARY_PATH. or the
+  the current directory, and the suffix \texttt{".so"} or the prefix \texttt{"./"} is automaticaly add.
+ 
+  \item   Under Window, 
+  the file \texttt{xxx.dll}  to be load under must be 
+  the \texttt{loadLibary} search directory which include the directory of the application,
+ \end{itemize} 
+\end{note}
+
+The compilation of your module:
+The script \texttt{./load.link} compile and make 
+the link with \texttt{freefem++}, but be carfull, the script 
+have no way to known if you try to compile for a 
+pure window environnemnt of for a cygwin environnement
+so to build the load module under cygwin  window you must add 
+\texttt{-cygwin} parameter.
+%}}}}
+
+\subsection{A first example myfunction.cpp}
+
+ Just defined a new function with no parameter, but using the $x,y$ current value.
+ 
+ 
+\bFF
+#include  <iostream>
+#include  <cfloat>
+using namespace std;
+#include "error.hpp"
+#include "AFunction.hpp"
+#include "rgraph.hpp"
+#include "RNM.hpp"
+#include "fem.hpp"
+#include "FESpace.hpp" 
+#include "MeshPoint.hpp"
+
+@using @namespace Fem2D;
+@double myfunction(Stack stack)
+{
+  //  to get FreeFem++  data
+  MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value 
+  @double x= mp.P.x; // get the current x value
+  @double y= mp.P.y; // get the current y value
+  //  cout << "x = " << x << " y=" << y << endl;
+  @return sin(x)*cos(y);
+}
+\eFF 
+Now the Problem is to build the link with \texttt{FreeFem++}, to do that 
+we need two class, one to call the function \texttt{myfunction}
+
+All FreeFem++ evaluable expression must be a struct/class  \texttt{C++}  which
+derive from \texttt{E\_F0}. By default this expression do not depend of the mesh position, 
+but if they   derive from \texttt{E\_F0mps} the expression depend of the mesh position. 
+
+
+
+ 
+\bFF
+//  A class build the link with freefem++ 
+// generaly this class are already in AFunction.hpp
+// but unfortunatly, I have no simple function with no parameter
+// in freefem++ depending of the mesh, 
+@template<class R>
+@class  OneOperator0s : @public OneOperator {
+
+  // the class to defined a evaluated a new function 
+  //  It  must devive from  E\_F0 if it is mesh independent
+  //   or from E\_F0mps if it is mesh dependent 
+  @class E_F0_F :public  E_F0mps { public:   
+    @typedef  R (*func)(Stack stack) ; 
+    func f; // the pointeur to the fnction myfunction 
+    E_F0_F(func ff)  : f(ff) {}
+    // the operator evaluation in freefem++ 
+    AnyType @operator()(Stack stack)  @const {@return SetAny<R>( f(stack)) ;}  
+
+  };
+
+  @typedef  R (*func)(Stack ) ; 
+  func  f; 
+@public: 
+  // the function which build the freefem++ byte code 
+  E_F0 * code(@const basicAC_F0 & ) @const { @return  new E_F0_F(f);} 
+  // the constructor to say ff is a function without parameter
+  // and returning a R
+  OneOperator0s(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
+};
+\eFF
+
+
+ To finish we must add this new function in \texttt{freefem++} table , 
+ to do that in in build a initialize global \texttt{init} of type {Init}
+ to force the call of \verb.Init::Init(). at loading time (takes to \texttt{C++}
+ initialisation process). 
+ 
+\bFF
+@class Init { @public:  Init();  };
+
+Init init;
+
+Init::Init(){
+  Global.Add("myfunction","(",new OneOperator0s<double>(myfunction));
+}
+\eFF 
+
+To compile and link under MacOS, Linux or Window
+\bFF
+Brochet% ./load.link myfunction 
+g++ -c -g -Iinclude myfunction.cpp
+g++ -bundle -undefined dynamic_lookup -g myfunction.o -o ./myfunction.dylib
+\eFF
+To,  try the simple example under Linux or MacOS.
+\bFF
+Brochet% FreeFem++-nw load.edp
+-- FreeFem++ v 1.4800028 (date Tue Oct  4 11:56:46 CEST 2005)
+ file : load.edp
+ Load: lg_fem lg_mesh eigenvalue  UMFPACK 
+    1 : // Example of dynamic function load
+    2 : // --------------------------------
+    3 : // $Id$
+    4 : 
+    5 :  load "myfunction"
+     lood: myfunction 
+
+load: dlopen(./myfunction) = 0xb01cc0
+
+    6 :  mesh Th=square(5,5);
+    7 :  fespace Vh(Th,P1);
+    8 :  Vh uh=myfunction(); // warning  do not forget () 
+    9 :  cout << uh[].min << " " << uh[].max << endl;
+   10 :  sizestack + 1024 =1240  ( 216 )
+
+ -- square mesh : nb vertices  =36 ,  nb triangles = 50 ,  nb boundary edges 20
+   Nb of edges on Mortars  = 0
+   Nb of edges on Boundary = 20, neb = 20
+ Nb Of Nodes = 36
+ Nb of DF = 36
+0 0.841471
+times: compile 0.05s, execution -3.46945e-18s
+ CodeAlloc : nb ptr  1394,  size :71524
+Bien: On a fini Normalement
+\eFF
+
+\subsection{Discrete Fast Fourier Transform } \index{dfft}\index{fft}
+
+I add a FFT to \texttt{freefem++}, it is a link to the library 
+ \url{http://www.fftw.org/}, to download and install under \texttt{download/include}
+ just go in \texttt{download/fftw} and try make.
+ 
+ The 1D dfft (fast discret fourier transform)  for a  simple array  $f$ of size $n$
+ is defining by the following formular 
+ $$
+    \mathtt{dfft}(f,\varepsilon)_{k} = \sum_{j=0}^{n-1} f_i e^{\varepsilon  2\pi i kj/n}
+ $$
+
+ The 2D DFT for an array of size $N=n\times m$ is 
+$$   \mathtt{dfft}(f,m,\varepsilon)_{k+nl} = \sum_{j'=0}^{m-1} \sum_{j=0}^{n-1} f_{i+nj} e^{\varepsilon  2\pi i (kj/n+lj'/m) }
+ $$
+ Remark, the value  $n$ is given  by $ size(f)/m$.
+ 
+   
+ So the classical discrete DFT is get with $\hat{f}=\mathtt{dfft}(f,-1)/\sqrt{n}$ and the
+ reverse dFT in get  $f=\mathtt{dfft}(\hat{f},1)/\sqrt{n}$
+ 
+ Remark: the 2D Laplace operator  let just remarque than 
+ $$ f(x,y) = 1/\sqrt{N}  \sum_{j'=0}^{m-1} \sum_{j=0}^{n-1} \hat{f}_{i+nj} e^{\varepsilon  2\pi i (x j+ yj') } $$
+ and we have
+ $$ f_{k+nl} = f(k/n,l/m)$$
+
+  
+ So we have, 
+ $$ 
+     \widehat{\Delta f_{kl}} = -(  (2\pi)^2 ( (\tilde{k})^2+(\tilde{l})^2)) \widehat{ f_{kl}} \\    
+ $$ 
+ where $ \tilde{k} = k $ if $ k \leq n/2 $ else $ \tilde{k} = k-n$ and
+ $ \tilde{l} = l $ if $ l \leq m/2 $ else $ \tilde{l} = l-m$. 
+ 
+ And to get a real function we need all a symetric number of mode around to zero, so $n$ and $m$
+ must be odd. 
+
+{\bf  To compile and make a new library} 
+
+
+{\scriptsize \begin{verbatim}
+% ./load.link  dfft.cpp ../download/install/lib/libfftw3.a -I../download/install/include
+export MACOSX_DEPLOYMENT_TARGET=10.3
+g++ -c -Iinclude -I../download/install/include dfft.cpp
+g++ -bundle -undefined dynamic_lookup dfft.o -o ./dfft.dylib ../download/install/lib/libfftw3.a
+\end{verbatim} }
+ 
+To test ,
+\bFF
+-- FreeFem++ v 1.4800028 (date Mon Oct 10 16:53:28 EEST 2005)
+ file : dfft.edp
+ Load: lg_fem cadna lg_mesh eigenvalue  UMFPACK 
+    1 : // Example of dynamic function load
+    2 : // --------------------------------
+    3 : // $Id$
+    4 : //   Discret Fast Fourier Transform 
+    5 : // -------------------------------
+    6 :  load "dfft" lood: init dfft 
+
+load: dlopen(dfft.dylib) = 0x2b0c700
+
+    7 :  
+    8 : int nx=32,ny=16,N=nx*ny;
+    9 : // warning the fourier space is not exactly the unite square 
+                      //  due to periodic condition
+   10 : mesh Th=square(nx-1,ny-1,[(nx-1)*x/nx,(ny-1)*y/ny]);
+   11 : // warring  the numbering is of the vertices (x,y) is 
+   12 : // given by $  i = x/nx + nx* y/ny $
+   13 : 
+   14 : fespace Vh(Th,P1); 
+   15 : 
+   16 : func f1 = cos(2*x*2*pi)*cos(3*y*2*pi);
+   17 : Vh<complex> u=f1,v;
+   18 : Vh w=f1;
+   19 : 
+   20 : 
+   21 : Vh  ur,ui;
+   22 : //  in dfft the matrix n,m is in row-major order ann array n,m is 
+   23 : // store j + m* i ( the transpose of the square numbering ) 
+   24 :  v[]=dfft(u[],ny,-1); 
+   25 :  u[]=dfft(v[],ny,+1);
+   26 :  u[] /= complex(N);
+   27 :  v = f1-u;
+   28 : cout << " diff = "<< v[].max << " " <<  v[].min << endl;
+   29 : assert( norm(v[].max) < 1e-10 &&  norm(v[].min) < 1e-10) ;
+   30 :  // -------  a more hard example ----\hfilll
+   31 :  // Lapacien en FFT \hfilll
+   32 :  // $ -\Delta u = f $ with biperiodic condition \hfilll
+   33 : func f = cos(3*2*pi*x)*cos(2*2*pi*y); // 
+   34 : func ue =  +(1./(square(2*pi)*13.))*cos(3*2*pi*x)*cos(2*2*pi*y);  // 
+   35 : Vh<complex> ff = f;
+   36 : Vh<complex> fhat;
+   37 : fhat[] = dfft(ff[],ny,-1);
+   38 : 
+   39 : Vh<complex> wij;
+   40 : // warning in fact we take mode between -nx/2, nx/2 and -ny/2,ny/2
+   41 : //  thank to the operator ?: \label{?:} 
+   42 : wij = square(2.*pi)*(square(( x<0.5?x*nx:(x-1)*nx)) 
+            + square((y<0.5?y*ny:(y-1)*ny)));
+   43 : wij[][0] = 1e-5; // to remove div / 0
+   44 : fhat[] = fhat[]./ wij[];  // 
+   45 : u[]=dfft(fhat[],ny,1);
+   46 : u[] /= complex(N);
+   47 : ur = real(u); // the solution
+   48 : w = real(ue); // the exact solution 
+   49 : plot(w,ur,value=1 ,cmm=" ue   ", wait=1); 
+   50 : w[] -= ur[]; // array sub
+   51 : real err= abs(w[].max)+abs(w[].min) ;
+   52 : cout << " err = " << err << endl;
+   53 : assert( err  < 1e-6);
+   54 :  sizestack + 1024 =3544  ( 2520 )
+----------CheckPtr:-----init execution ------ NbUndelPtr  2815  Alloc: 111320  NbPtr 6368 
+
+ -- square mesh : nb vertices  =512 ,  nb triangles = 930 ,  nb boundary edges 92
+   Nb of edges on Mortars  = 0
+   Nb of edges on Boundary = 92, neb = 92
+ Nb Of Nodes = 512
+ Nb of DF = 512
+0x2d383d8 -1 16 512 n: 16 m:32
+ dfft 0x402bc08 = 0x4028208 n = 16 32 sign = -1
+ --- --- ---0x2d3ae08 1 16 512 n: 16 m:32
+ dfft 0x4028208 = 0x402bc08 n = 16 32 sign = 1
+ --- --- --- diff = (8.88178e-16,3.5651e-16) (-6.66134e-16,-3.38216e-16)
+0x2d3cfb8 -1 16 512 n: 16 m:32
+ dfft 0x402de08 = 0x402bc08 n = 16 32 sign = -1
+ --- --- ---0x2d37ff8 1 16 512 n: 16 m:32
+ dfft 0x4028208 = 0x402de08 n = 16 32 sign = 1
+ --- --- --- err = 3.6104e-12
+times: compile 0.13s, execution 2.05s
+----------CheckPtr:-----end execution -- ------ NbUndelPtr  2815  Alloc: 111320  NbPtr 26950 
+ CodeAlloc : nb ptr  1693,  size :76084
+Bien: On a fini Normalement
+                CheckPtr:Nb of undelete pointer is 2748 last 114
+                CheckPtr:Max Memory used    228.531 kbytes  Memory undelete 105020 
+\eFF
+
+
+\subsection{Load Module for Dervieux' P0-P1 Finite Volume Method}
+
+
 \bFF
 //  Implementation of P1-P0 FVM-FEM
 // ---------------------------------------------------------------------
@@ -10074,21 +10524,22 @@ using namespace std;
 
 //using namespace Fem2D;
 
-class MatrixUpWind0 :  public E_F0 { public:
+class MatrixUpWind0 :  public E_F0mps { public:
   typedef Matrice_Creuse<R> * Result;
   Expression emat,expTh,expc,expu1,expu2;
   MatrixUpWind0(const basicAC_F0 & args)
   {
 
     args.SetNameParam();
-    emat =args[0];
-    expTh= to<pmesh>(args[1]);
-    expc = CastTo<double>(args[2]);
+    emat =args[0]; // the matrix expression 
+    expTh= to<pmesh>(args[1]);  // a the expression to get the mesh 
+    expc = CastTo<double>(args[2]); // the expression to get c  (must be a double)
+    //  a array expression [ a, b] 
     const E_Array * a= dynamic_cast<const E_Array*>((Expression) args[3]);
     if (a->size() != 2) CompileError("syntax:  MatrixUpWind0(Th,rhi,[u1,u2])");
     int err =0;
-    expu1= CastTo<double>((*a)[0]);
-    expu2= CastTo<double>((*a)[1]);
+    expu1= CastTo<double>((*a)[0]); // fist exp of the array (must be a  double)
+    expu2= CastTo<double>((*a)[1]); // second exp of the array (must be a  double)
 
   }
 
@@ -10122,7 +10573,7 @@ int   fvmP1P0(double q[3][2], double u[2],double c[3], double a[3][3], double wh
   return 1;
 }
 
-
+// the evaluation routine 
 AnyType MatrixUpWind0::operator()(Stack stack) const
 {
   Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));

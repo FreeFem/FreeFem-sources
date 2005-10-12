@@ -15,7 +15,7 @@ CodeAlloc.cpp lgmat.cpp global.cpp 					\
 ../bamglib/Mesh2.cpp ../bamglib/Metric.cpp ../femlib/BamgFreeFem.cpp	\
 ../bamglib/MeshDraw.cpp ../bamglib/MeshGeom.cpp				\
 ../bamglib/MeshQuad.cpp ../bamglib/SetOfE4.cpp ../bamglib/MeshRead.cpp	\
-../bamglib/MeshWrite.cpp problem.cpp \
+../bamglib/MeshWrite.cpp problem.cpp mt19937ar.cpp \
 ../Graphics/DefColor.cpp \
  InitFunct.cpp ../Algo/lgalgo.cpp			\
 ../femlib/Element_P2h.cpp load.cpp lgfem.cpp AFunction.hpp AnyType.hpp	\

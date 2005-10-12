@@ -74,7 +74,7 @@ plots/d_u.eps                   plots/nl-elas.eps               plots/twosquare.
 plots/eigen.eps                 plots/nosplitmesh.eps           plots/xyf.eps \
 plots/eigen11.eps               plots/onnewmesh.eps \
 plots/medit2.eps  		plots/threehsv.eps		plots/hsv.eps \
-plots/crimpson.eps 
+plots/crimpson.eps              plots/J-bfgs.eps		plots/u-bfgs.eps
 
 
 EXTRA_DIST= addfe.tex docFFGUI.tex manual-full.tex freefem++doc.tex  manual.tex FF.sty FFF.sty dessin.sty pdfsync.sty styles.sty \

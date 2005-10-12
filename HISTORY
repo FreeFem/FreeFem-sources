@@ -1,3 +1,40 @@
+2005-10-04 20:31  hecht
+
+	*   correct small mistake in load.cpp i -> j
+	    add _APPLE_ -> __APPLE__
+
+2005-10-04 18:17  hecht
+
+	*    change the version number to build new window version.
+
+2005-10-04 17:26  hecht
+
+	*   correct overflow integer array in elementary martix
+	    symptome random trap under win32 version on very long job
+	  (all.edp)
+
+2005-10-04 11:44  hecht
+
+	*   correct small proble in load.cpp
+
+2005-09-27 22:35  hecht
+
+	*  correct load.cpp to change suffix and prefix
+
+2005-09-26 18:03  hecht
+
+	*   small correction for buildng the Window version
+
+2005-09-26 14:42  hecht
+
+	*  add bin-win32 dir to bluid  win32 executable with .dll files
+
+2005-09-23 17:11  hecht
+
+	*   version 1.48-1
+	    split AFonction.cpp in AFonction.cpp and AFonction3.cpp for
+	    compilation uner cygwin and win32 (build dll).
+
 2005-09-22 12:01  lehyaric
 
 	* FreeFem++ works on Linux (Debian Testing) thanks to the following
