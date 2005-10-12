@@ -1029,7 +1029,7 @@ The variational formulation for this problem is in the subspace $H^1_0(\Omega)
 Let us assume $C_0$ is a circle of radius 5 centered at the origin, N=2, $C_i$ are
 rectangles, $C_1$ is at temperature $u_1=60$.
 The mesh can be made by
-% modif FH   to see ... 
+% modif FH   to see ...
 \begin{example}[heatex.edp]
 \bFF
 // file heatex.edp
@@ -1046,7 +1046,7 @@ The mesh can be made by
 @border C23(t=0,1){ x=-1-t; y=-3;     label=C2;}
 @border C24(t=0,1){ x=-2;   y=-3+6*t; label=C2;}
 
-@plot(    C0(50)            // to see the border of the domain 
+@plot(    C0(50)            // to see the border of the domain
         + C11(5)+C12(20)+C13(5)+C14(20)
         + C21(-5)+C22(-20)+C23(-5)+C24(-20),
         wait=true, ps="heatexb.eps");
@@ -2009,10 +2009,10 @@ Vh vr=@real(v), vi=@imag(v);
 \eFF
 \end{example}
 
-\section{Optimal Control}
-Thanks to the function \texttt{BFGS} it is possible to solve complex
-nonlinear optimization problem within \texttt{freefem++}. For
-example consider the following inverse problem
+\subsection{Optimal Control} Thanks to the function \texttt{BFGS} it
+is possible to solve complex nonlinear optimization problem within
+\texttt{freefem++}. For example consider the following inverse
+problem
 \[
     \min_{b,c,d\in R}J=\int_E(u-u_d)^2~:~
     -\nabla(\kappa(b,c,d)\cdot\nabla u)=0,~~u|_\Gamma=u_\Gamma
@@ -2039,47 +2039,47 @@ Obviously $J'_b$ is equal to $\delta J$ when $\delta b=1,\delta
 c=0,\delta d=0$, and so on for $J'_c$ and $J'_d$.
 \\\\
 All this is implemented in the following program
-{\small\begin{verbatim}
+ \bFF
 // file optimcontrol.edp
-border aa(t=0, 2*pi) {    x = 5*cos(t);    y = 5*sin(t);  };
-border bb(t=0, 2*pi) {    x = cos(t);    y = sin(t);  };
-border cc(t=0, 2*pi) {    x = -3+cos(t);    y = sin(t);  };
-border dd(t=0, 2*pi) {    x = cos(t);    y = -3+sin(t);  };
-mesh th = buildmesh(aa(70)+bb(35)+cc(35)+dd(35));
-fespace Vh(th,P1);
+@border aa(t=0, 2*pi) {    x = 5*cos(t);    y = 5*sin(t);  };
+@border bb(t=0, 2*pi) {    x = cos(t);    y = sin(t);  };
+@border cc(t=0, 2*pi) {    x = -3+cos(t);    y = sin(t);  };
+@border dd(t=0, 2*pi) {    x = cos(t);    y = -3+sin(t);  };
+@mesh th = @buildmesh(aa(70)+bb(35)+cc(35)+dd(35));
+@fespace Vh(th,P1);
 Vh Ib=((x^2+y^2)<1.0001),
    Ic=(((x+3)^2+ y^2)<1.0001),
    Id=((x^2+(y+3)^2)<1.0001),
    Ie=(((x-1)^2+ y^2)<=4),
    ud,u,uh,du;
-real[int] z(3);
-problem A(u,uh) =int2d(th)((1+z[0]*Ib+z[1]*Ic+z[2]*Id)*(dx(u)*dx(uh)
+@real[int] z(3);
+@problem A(u,uh) =@int2d(th)((1+z[0]*Ib+z[1]*Ic+z[2]*Id)*(dx(u)*dx(uh)
                     +dy(u)*dy(uh))) + on(aa,u=x^3-y^3);
 z[0]=2; z[1]=3; z[2]=4;
 A; ud=u;
-ofstream f("J.txt");
-func real J(real[int] & Z)
+@ofstream f("J.txt");
+@func @real J(real[int] & Z)
 {
-    for (int i=0;i<z.n;i++)z[i]=Z[i];
-    A; real s= int2d(th)(Ie*(u-ud)^2);
-    f<<s<<"   "; return s;
+    @for (int i=0;i<z.n;i++)z[i]=Z[i];
+    A; @real s= @int2d(th)(Ie*(u-ud)^2);
+    f<<s<<"   "; @return s;
 }
 
-real[int] dz(3), dJdz(3);
+@real[int] dz(3), dJdz(3);
 
-problem B(du,uh)
-  =int2d(th)((1+z[0]*Ib+z[1]*Ic+z[2]*Id)*(dx(du)*dx(uh)+dy(du)*dy(uh)))
-  +int2d(th)((dz[0]*Ib+dz[1]*Ic+dz[2]*Id)*(dx(u)*dx(uh)+dy(u)*dy(uh)))
-  +on(aa,du=0);
+@problem B(du,uh)
+  =@int2d(th)((1+z[0]*Ib+z[1]*Ic+z[2]*Id)*(dx(du)*dx(uh)+dy(du)*dy(uh)))
+  +@int2d(th)((dz[0]*Ib+dz[1]*Ic+dz[2]*Id)*(dx(u)*dx(uh)+dy(u)*dy(uh)))
+  +@on(aa,du=0);
 
-func real[int] DJ(real[int] &Z)
+@func @real[int] DJ(@real[@int] &Z)
     {
-      for(int i=0;i<z.n;i++)
-        { for(int j=0;j<dz.n;j++) dz[j]=0;
+      @for(int i=0;i<z.n;i++)
+        { @for(int j=0;j<dz.n;j++) dz[j]=0;
           dz[i]=1; B;
           dJdz[i]= 2*int2d(th)(Ie*(u-ud)*du);
       }
-     return dJdz;
+     @return dJdz;
  }
 
  real[int] Z(3);
@@ -2088,7 +2088,7 @@ func real[int] DJ(real[int] &Z)
    cout << "BFGS: J(z) = " << J(Z) <<  endl;
 for(int j=0;j<z.n;j++) cout<<z[j]<<endl;
 plot(ud,value=1,ps="u.eps");
-\end{verbatim}}
+\eFF
 In this example the sets $B,C,D,E$ are circles of boundaries $bb,cc,dd,ee$ are the domain
 $\Omega$ is the circle of boundary $aa$.  The desired state $u_d$ is the solution
 of the PDE for $b=2,c=3,d=4$.  The unknowns are packed into array $z$.  Notice that it is
@@ -2489,7 +2489,7 @@ The \key{maximum} or \key{minimum} of two integers $a,\, b$ are obtained
 by \texttt{max($a$,$b$)} of
 \texttt{min($a$,$b$)}.
 The power $a^b$ of two integers $a,\, b$ is calculated by writing \verb|a^b|.
-The classical \texttt{C++} 
+The classical \texttt{C++}
 "arithmetical if"  expression \ttCC{ a ? b : c} is equal to  the value of expression \ttCC{b} if
 the value of expression  \ttCC{a} is true otherwise is equal to value of expression \ttCC{c}.
 \index{?:}
@@ -2692,14 +2692,14 @@ Using \freefempp, we calculated
 \end{eqnarray*}
 
 \itemtt[Random Functions] from Mersenne Twister (see page \url{http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html}
-for full detail). 
-It is A very fast random number generator 
+for full detail).
+It is A very fast random number generator
 Of period $2^{219937}-1$, and the functions are:\index{random}\index{rand}\index{randint32}\index{randint31}\index{randinit}
 \begin{itemize}
 \item \ttCC{@randint@3@2()}  generates unsigned 32-bit integers.
 \item \ttCC{@randint@3@1()} generates unsigned 31-bit integers.
-\item \ttCC{@randreal@1()} generates uniform real in $[0,1]$ (32-bit resolution). 
-\item \ttCC{@randreal@2()} generates uniform real in $[0,1)$ (32-bit resolution). 
+\item \ttCC{@randreal@1()} generates uniform real in $[0,1]$ (32-bit resolution).
+\item \ttCC{@randreal@2()} generates uniform real in $[0,1)$ (32-bit resolution).
 \item \ttCC{@randreal@3()} generates uniform real in $(0,1)$ (32-bit resolution).
 \item \ttCC{@randres@5@3()} generates uniform real in $[0,1)$ with 53-bit resolution.
 \item \ttCC{@randinit(seed )} initializes the state vector by using one  32-bit integer "seed", which may be zero.
@@ -2819,7 +2819,7 @@ a = 1;
 b = 2;
 c = 3;
 a[2]=0;
-d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] , 
+d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] ,
 cout << " d = ( a ? b : c )  is " << d << endl;
 \eFF
 \index{array!resize}\index{resize}\index{max}\index{array!max} \index{min}\index{array!min}\index{sum}\index{array!sum}\index{array!?:}%modif FH
@@ -5264,15 +5264,15 @@ The parameters are
     \itemtt[varrow=] \index{plot!varrow=}  sets the array value of color arrows (an array real[int])
     \itemtt[bw=] \index{plot!bw=} (bool)  sets or not the plot in black and white color.
     \itemtt[grey=] \index{plot!grey=} (bool)  sets or not the plot in grey color.
-%modif FH 
-    \itemtt[hsv=] \index{plot!hsv=} (array of float) to defined color of 3*n value  in HSV color model  
-    declare  with for example 
+%modif FH
+    \itemtt[hsv=] \index{plot!hsv=} (array of float) to defined color of 3*n value  in HSV color model
+    declare  with for example
     \bFF
       real[int] colors = [h1,s1,v1,... ,  hn,vn,vn];
     \eFF
-     where \texttt{hi,si,vi} is the ith color to defined the color table. 
-    
-    
+     where \texttt{hi,si,vi} is the ith color to defined the color table.
+
+
 \end{description}
 For example: \index{plot!cut}
 \bFF
@@ -5323,13 +5323,13 @@ To change the color table and to choose the value of iso line you can do :
   4./6., 1 , 1, //  blue
   5./6., 1 , 1, //  magenta
   1, 1. , 1, //  red
-  1, 0.5 , 1 // light red 
+  1, 0.5 , 1 // light red
    ];
  @real[int] viso(31);
- 
+
  @for (int i=0;i<viso.n;i++)
    viso[i]=i*0.1;
-   
+
  @plot(uh,viso=viso(0:viso.n-1),value=1,fill=1,wait=1,hsv=colorhsv);
 \eFF
 
@@ -8311,7 +8311,7 @@ plot(u1,u2); // plot
 
 
 %\subsubsection{mortar.edp}
-% a faire FH 
+% a faire FH
 %  construction de epsi
 %  un sous domaine
 %  les matrices blocks.
@@ -8604,7 +8604,7 @@ We this in mind we proceed to solve a Laplace equation with discontinuous coeffi
 \bFF
 Ph nu=1+5*(region==nlower) + 10*(region==nupper);
 plot(nu,fill=1,wait=1);
-problem lap(u,v) =   int2d(th)( nu*( dx(u)*dx(v)*dy(u)*dy(v) )) 
+problem lap(u,v) =   int2d(th)( nu*( dx(u)*dx(v)*dy(u)*dy(v) ))
                    + int2d(-1*v) + on(a,b,c,d,e,f,u=0);
 plot(u);
 \eFF
@@ -9119,7 +9119,7 @@ Vhother U=0;
    // send err0  to the other proc, receive in err1
    @processor(1-mpirank)<<err0;   @processor(1-mpirank)>>err1;
    @real err= sqrt(err0+err1);
-   @cout <<" err = " << err << " err0 = " << err0 
+   @cout <<" err = " << err << " err0 = " << err0
          << ", err1 = " << err1 << endl;
    @if(err<1e-3) @break;
 };
@@ -10191,54 +10191,54 @@ primary:
 \section{Dynamical link}
 
 Now, it's possible to add built-in functionnalites in freefem++ under the three
-environnents Linux, Windows and MacOS X 10.3 or newer. 
+environnents Linux, Windows and MacOS X 10.3 or newer.
 It is agood idea to,
 first try the example \texttt{load.edp} in directory \texttt{example++-load}.
 
 But unfortunately, you need to install a \texttt{c++} compiler  (generally \texttt{g++/gcc} compiler)
  to compile your function.
- 
+
 
 \begin{description}
-\item[Windows] Install the \texttt{cygwin} environnent or the \texttt{mingw} 
+\item[Windows] Install the \texttt{cygwin} environnent or the \texttt{mingw}
 \item[MacOs] Install the developer tools xcode on the apple DVD
 \item[Linux/Unix] Install the correct compiler  (gcc for instance)
 \end{description}
 
-Now, assume , you are in a shell window (a cygwin window under Windows)  in the directory 
-\texttt{example++-load}. Remark that  in the sub directory \texttt{include} 
+Now, assume , you are in a shell window (a cygwin window under Windows)  in the directory
+\texttt{example++-load}. Remark that  in the sub directory \texttt{include}
 they are all the freefem++ include file to make the link with \texttt{FreeFem++}.
- 
+
 
 
 \begin{note}
   If you try to load dynamically a file with command \texttt{load "xxx"}
- \begin{itemize} 
+ \begin{itemize}
  \item Under unix (Linux or MacOs), the file \texttt{xxx.so}  to be loaded must be either
  first in the search directory of routine \texttt{dlopen}
-  (see the environment variable  \verb.$LD_LIBRARY_PATH. or in 
+  (see the environment variable  \verb.$LD_LIBRARY_PATH. or in
   the current directory, and the suffix \texttt{".so"} or the prefix \texttt{"./"} is automaticaly added.
- 
-  \item   Under Windows, 
-  the file \texttt{xxx.dll}  to be loaded must be in 
+
+  \item   Under Windows,
+  the file \texttt{xxx.dll}  to be loaded must be in
   the \texttt{loadLibary} search directory which includes the directory of the application,
- \end{itemize} 
+ \end{itemize}
 \end{note}
 
 {\bf The compilation of your module}:
-the script \texttt{./load.link} compiles and makes 
-the link with \texttt{freefem++}, but be careful, the script 
-has no way to known if you try to compile for a 
+the script \texttt{./load.link} compiles and makes
+the link with \texttt{freefem++}, but be careful, the script
+has no way to known if you try to compile for a
 pure Windows environment or for a cygwin environment
-so to build the load module under cygwin  you must add 
+so to build the load module under cygwin  you must add
 the \texttt{-cygwin} parameter.
 %}}}}
 
 \subsection{A first example myfunction.cpp}
 
 The following  defines a new function call \texttt{myfunction} with no parameter, but using the $x,y$ current value.
- 
- 
+
+
 \bFF
 #include  <iostream>
 #include  <cfloat>
@@ -10248,55 +10248,55 @@ using namespace std;
 #include "rgraph.hpp"
 #include "RNM.hpp"
 #include "fem.hpp"
-#include "FESpace.hpp" 
+#include "FESpace.hpp"
 #include "MeshPoint.hpp"
 
 @using @namespace Fem2D;
 @double myfunction(Stack stack)
 {
   //  to get FreeFem++  data
-  MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value 
+  MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value
   @double x= mp.P.x; // get the current x value
   @double y= mp.P.y; // get the current y value
   //  cout << "x = " << x << " y=" << y << endl;
   @return sin(x)*cos(y);
 }
-\eFF 
-Now the Problem is to build the link with \texttt{FreeFem++}, to do that 
+\eFF
+Now the Problem is to build the link with \texttt{FreeFem++}, to do that
 we need two classes, one to call the function \texttt{myfunction}
 
 All FreeFem++ evaluable expression must be a struct/class  \texttt{C++}  which
-derive from \texttt{E\_F0}. By default this expression does not depend of the mesh position, 
-but if they   derive from \texttt{E\_F0mps} the expression depends of the mesh position. 
+derive from \texttt{E\_F0}. By default this expression does not depend of the mesh position,
+but if they   derive from \texttt{E\_F0mps} the expression depends of the mesh position.
 
 
 
- 
+
 \bFF
-//  A class build the link with freefem++ 
+//  A class build the link with freefem++
 // generaly this class are already in AFunction.hpp
 // but unfortunatly, I have no simple function with no parameter
-// in freefem++ depending of the mesh, 
+// in freefem++ depending of the mesh,
 @template<class R>
 @class  OneOperator0s : @public OneOperator {
 
-  // the class to defined a evaluated a new function 
+  // the class to defined a evaluated a new function
   //  It  must devive from  E\_F0 if it is mesh independent
-  //   or from E\_F0mps if it is mesh dependent 
-  @class E_F0_F :public  E_F0mps { public:   
-    @typedef  R (*func)(Stack stack) ; 
-    func f; // the pointeur to the fnction myfunction 
+  //   or from E\_F0mps if it is mesh dependent
+  @class E_F0_F :public  E_F0mps { public:
+    @typedef  R (*func)(Stack stack) ;
+    func f; // the pointeur to the fnction myfunction
     E_F0_F(func ff)  : f(ff) {}
-    // the operator evaluation in freefem++ 
-    AnyType @operator()(Stack stack)  @const {@return SetAny<R>( f(stack)) ;}  
+    // the operator evaluation in freefem++
+    AnyType @operator()(Stack stack)  @const {@return SetAny<R>( f(stack)) ;}
 
   };
 
-  @typedef  R (*func)(Stack ) ; 
-  func  f; 
-@public: 
-  // the function which build the freefem++ byte code 
-  E_F0 * code(@const basicAC_F0 & ) @const { @return  new E_F0_F(f);} 
+  @typedef  R (*func)(Stack ) ;
+  func  f;
+@public:
+  // the function which build the freefem++ byte code
+  E_F0 * code(@const basicAC_F0 & ) @const { @return  new E_F0_F(f);}
   // the constructor to say ff is a function without parameter
   // and returning a R
   OneOperator0s(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
@@ -10304,8 +10304,8 @@ but if they   derive from \texttt{E\_F0mps} the expression depends of the mesh p
 \eFF
 
 
- To finish we must add this new function in \texttt{freefem++} table , 
- to do that include : 
+ To finish we must add this new function in \texttt{freefem++} table ,
+ to do that include :
 \bFF
 @class Init { @public:  Init();  };
 
@@ -10314,14 +10314,14 @@ Init init;
 Init::Init(){
   Global.Add("myfunction","(",new OneOperator0s<double>(myfunction));
 }
-\eFF 
+\eFF
 It will be called automatically at load module time.
 
 \medskip
 
 To compile and link, do
 \bFF
-Brochet% ./load.link myfunction 
+Brochet% ./load.link myfunction
 g++ -c -g -Iinclude myfunction.cpp
 g++ -bundle -undefined dynamic_lookup -g myfunction.o -o ./myfunction.dylib
 \eFF
@@ -10330,19 +10330,19 @@ To,  try the simple example under Linux or MacOS, do
 Brochet% FreeFem++-nw load.edp
 -- FreeFem++ v 1.4800028 (date Tue Oct  4 11:56:46 CEST 2005)
  file : load.edp
- Load: lg_fem lg_mesh eigenvalue  UMFPACK 
+ Load: lg_fem lg_mesh eigenvalue  UMFPACK
     1 : // Example of dynamic function load
     2 : // --------------------------------
     3 : // $Id$
-    4 : 
+    4 :
     5 :  load "myfunction"
-     lood: myfunction 
+     lood: myfunction
 
 load: dlopen(./myfunction) = 0xb01cc0
 
     6 :  mesh Th=square(5,5);
     7 :  fespace Vh(Th,P1);
-    8 :  Vh uh=myfunction(); // warning  do not forget () 
+    8 :  Vh uh=myfunction(); // warning  do not forget ()
     9 :  cout << uh[].min << " " << uh[].max << endl;
    10 :  sizestack + 1024 =1240  ( 216 )
 
@@ -10361,45 +10361,45 @@ Under Windows, launch \texttt{FreeFem++} with the mouse on the example.
 
 \subsection{Example Discrete Fast Fourier Transform } \index{dfft}\index{fft}
 
-This will add FFT to \texttt{FreeFem++},taken from 
+This will add FFT to \texttt{FreeFem++},taken from
  \url{http://www.fftw.org/}. To download and install under \texttt{download/include}
  just go in \texttt{download/fftw} and try\texttt{make}.
- 
- \medskip 
+
+ \medskip
  The 1D dfft (fast discret fourier transform)  for a  simple array  $f$ of size $n$
- is defined by the following formula 
+ is defined by the following formula
  $$
     \mathtt{dfft}(f,\varepsilon)_{k} = \sum_{j=0}^{n-1} f_i e^{\varepsilon  2\pi i kj/n}
  $$
 
- The 2D DFT for an array of size $N=n\times m$ is 
+ The 2D DFT for an array of size $N=n\times m$ is
 $$   \mathtt{dfft}(f,m,\varepsilon)_{k+nl} = \sum_{j'=0}^{m-1} \sum_{j=0}^{n-1} f_{i+nj} e^{\varepsilon  2\pi i (kj/n+lj'/m) }
  $$
  Remark: the value  $n$ is given  by $ size(f)/m$, and the numbering is  row-major order.
- 
-   
+
+
  So the classical discrete DFT is  $\hat{f}=\mathtt{dfft}(f,-1)/\sqrt{n}$ and the
  reverse dFT  $f=\mathtt{dfft}(\hat{f},1)/\sqrt{n}$
- 
+
  \medskip
- 
+
  Remark: the 2D Laplace operator is
  $$ f(x,y) = 1/\sqrt{N}  \sum_{j'=0}^{m-1} \sum_{j=0}^{n-1} \hat{f}_{i+nj} e^{\varepsilon  2\pi i (x j+ yj') } $$
  and we have
  $$ f_{k+nl} = f(k/n,l/m)$$
 
-  
- So 
- $$ 
-     \widehat{\Delta f_{kl}} = -(  (2\pi)^2 ( (\tilde{k})^2+(\tilde{l})^2)) \widehat{ f_{kl}} \\    
- $$ 
- where $ \tilde{k} = k $ if $ k \leq n/2 $ else $ \tilde{k} = k-n$ and
- $ \tilde{l} = l $ if $ l \leq m/2 $ else $ \tilde{l} = l-m$. 
- 
- And to get a real function we need all  symetric modes around to zero, so $n$ and $m$
- must be odd. 
 
-{\bf  To compile and make a new library} 
+ So
+ $$
+     \widehat{\Delta f_{kl}} = -(  (2\pi)^2 ( (\tilde{k})^2+(\tilde{l})^2)) \widehat{ f_{kl}} \\
+ $$
+ where $ \tilde{k} = k $ if $ k \leq n/2 $ else $ \tilde{k} = k-n$ and
+ $ \tilde{l} = l $ if $ l \leq m/2 $ else $ \tilde{l} = l-m$.
+
+ And to get a real function we need all  symetric modes around to zero, so $n$ and $m$
+ must be odd.
+
+{\bf  To compile and make a new library}
 
 
 {\scriptsize \begin{verbatim}
@@ -10408,40 +10408,40 @@ export MACOSX_DEPLOYMENT_TARGET=10.3
 g++ -c -Iinclude -I../download/install/include dfft.cpp
 g++ -bundle -undefined dynamic_lookup dfft.o -o ./dfft.dylib ../download/install/lib/libfftw3.a
 \end{verbatim} }
- 
+
 To test ,
 \bFF
 -- FreeFem++ v 1.4800028 (date Mon Oct 10 16:53:28 EEST 2005)
  file : dfft.edp
- Load: lg_fem cadna lg_mesh eigenvalue  UMFPACK 
+ Load: lg_fem cadna lg_mesh eigenvalue  UMFPACK
     1 : // Example of dynamic function load
     2 : // --------------------------------
     3 : // $Id$
-    4 : //   Discret Fast Fourier Transform 
+    4 : //   Discret Fast Fourier Transform
     5 : // -------------------------------
-    6 :  load "dfft" lood: init dfft 
+    6 :  load "dfft" lood: init dfft
 
 load: dlopen(dfft.dylib) = 0x2b0c700
 
-    7 :  
+    7 :
     8 : int nx=32,ny=16,N=nx*ny;
-    9 : // warning the fourier space is not exactly the unite square 
+    9 : // warning the fourier space is not exactly the unite square
                       //  due to periodic condition
    10 : mesh Th=square(nx-1,ny-1,[(nx-1)*x/nx,(ny-1)*y/ny]);
-   11 : // warring  the numbering is of the vertices (x,y) is 
+   11 : // warring  the numbering is of the vertices (x,y) is
    12 : // given by $  i = x/nx + nx* y/ny $
-   13 : 
-   14 : fespace Vh(Th,P1); 
-   15 : 
+   13 :
+   14 : fespace Vh(Th,P1);
+   15 :
    16 : func f1 = cos(2*x*2*pi)*cos(3*y*2*pi);
    17 : Vh<complex> u=f1,v;
    18 : Vh w=f1;
-   19 : 
-   20 : 
+   19 :
+   20 :
    21 : Vh  ur,ui;
-   22 : //  in dfft the matrix n,m is in row-major order ann array n,m is 
-   23 : // store j + m* i ( the transpose of the square numbering ) 
-   24 :  v[]=dfft(u[],ny,-1); 
+   22 : //  in dfft the matrix n,m is in row-major order ann array n,m is
+   23 : // store j + m* i ( the transpose of the square numbering )
+   24 :  v[]=dfft(u[],ny,-1);
    25 :  u[]=dfft(v[],ny,+1);
    26 :  u[] /= complex(N);
    27 :  v = f1-u;
@@ -10450,30 +10450,30 @@ load: dlopen(dfft.dylib) = 0x2b0c700
    30 :  // -------  a more hard example ----\hfilll
    31 :  // Lapacien en FFT \hfilll
    32 :  // $ -\Delta u = f $ with biperiodic condition \hfilll
-   33 : func f = cos(3*2*pi*x)*cos(2*2*pi*y); // 
-   34 : func ue =  +(1./(square(2*pi)*13.))*cos(3*2*pi*x)*cos(2*2*pi*y);  // 
+   33 : func f = cos(3*2*pi*x)*cos(2*2*pi*y); //
+   34 : func ue =  +(1./(square(2*pi)*13.))*cos(3*2*pi*x)*cos(2*2*pi*y);  //
    35 : Vh<complex> ff = f;
    36 : Vh<complex> fhat;
    37 : fhat[] = dfft(ff[],ny,-1);
-   38 : 
+   38 :
    39 : Vh<complex> wij;
    40 : // warning in fact we take mode between -nx/2, nx/2 and -ny/2,ny/2
-   41 : //  thank to the operator ?: \label{?:} 
-   42 : wij = square(2.*pi)*(square(( x<0.5?x*nx:(x-1)*nx)) 
+   41 : //  thank to the operator ?: \label{?:}
+   42 : wij = square(2.*pi)*(square(( x<0.5?x*nx:(x-1)*nx))
             + square((y<0.5?y*ny:(y-1)*ny)));
    43 : wij[][0] = 1e-5; // to remove div / 0
-   44 : fhat[] = fhat[]./ wij[];  // 
+   44 : fhat[] = fhat[]./ wij[];  //
    45 : u[]=dfft(fhat[],ny,1);
    46 : u[] /= complex(N);
    47 : ur = real(u); // the solution
-   48 : w = real(ue); // the exact solution 
-   49 : plot(w,ur,value=1 ,cmm=" ue   ", wait=1); 
+   48 : w = real(ue); // the exact solution
+   49 : plot(w,ur,value=1 ,cmm=" ue   ", wait=1);
    50 : w[] -= ur[]; // array sub
    51 : real err= abs(w[].max)+abs(w[].min) ;
    52 : cout << " err = " << err << endl;
    53 : assert( err  < 1e-6);
    54 :  sizestack + 1024 =3544  ( 2520 )
-----------CheckPtr:-----init execution ------ NbUndelPtr  2815  Alloc: 111320  NbPtr 6368 
+----------CheckPtr:-----init execution ------ NbUndelPtr  2815  Alloc: 111320  NbPtr 6368
 
  -- square mesh : nb vertices  =512 ,  nb triangles = 930 ,  nb boundary edges 92
    Nb of edges on Mortars  = 0
@@ -10491,11 +10491,11 @@ load: dlopen(dfft.dylib) = 0x2b0c700
  dfft 0x4028208 = 0x402de08 n = 16 32 sign = 1
  --- --- --- err = 3.6104e-12
 times: compile 0.13s, execution 2.05s
-----------CheckPtr:-----end execution -- ------ NbUndelPtr  2815  Alloc: 111320  NbPtr 26950 
+----------CheckPtr:-----end execution -- ------ NbUndelPtr  2815  Alloc: 111320  NbPtr 26950
  CodeAlloc : nb ptr  1693,  size :76084
 Bien: On a fini Normalement
                 CheckPtr:Nb of undelete pointer is 2748 last 114
-                CheckPtr:Max Memory used    228.531 kbytes  Memory undelete 105020 
+                CheckPtr:Max Memory used    228.531 kbytes  Memory undelete 105020
 \eFF
 
 
@@ -10534,10 +10534,10 @@ class MatrixUpWind0 :  public E_F0mps { public:
   {
 
     args.SetNameParam();
-    emat =args[0]; // the matrix expression 
-    expTh= to<pmesh>(args[1]);  // a the expression to get the mesh 
+    emat =args[0]; // the matrix expression
+    expTh= to<pmesh>(args[1]);  // a the expression to get the mesh
     expc = CastTo<double>(args[2]); // the expression to get c  (must be a double)
-    //  a array expression [ a, b] 
+    //  a array expression [ a, b]
     const E_Array * a= dynamic_cast<const E_Array*>((Expression) args[3]);
     if (a->size() != 2) CompileError("syntax:  MatrixUpWind0(Th,rhi,[u1,u2])");
     int err =0;
@@ -10576,7 +10576,7 @@ int   fvmP1P0(double q[3][2], double u[2],double c[3], double a[3][3], double wh
   return 1;
 }
 
-// the evaluation routine 
+// the evaluation routine
 AnyType MatrixUpWind0::operator()(Stack stack) const
 {
   Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
@@ -10737,7 +10737,7 @@ abs, max, min,
 
 \eFF
 \end{twocolumn}
-\onecolumn 
+\onecolumn
 \newpage
 
 \begin{thebibliography}{xx}
