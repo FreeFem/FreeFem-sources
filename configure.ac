@@ -102,6 +102,7 @@ CYGWIN*)
 		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -lws2_32"
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(WINDRESOBJ,windres.o)
+                AC_SUBST(WIN32DLLTARGET,win32-dll-target)
 	fi
 
 
@@ -575,8 +576,6 @@ then
 		# because this lib does not exist yet, and this could make the
 		# following tests fail.
 
-		AC_SUBST(ARPACKLIB,
-			${curdir}/download/arpack/ARPACK/libarpack_ff++.a)
 		ff_arpack_ok=yes
 	fi
 fi
@@ -584,6 +583,7 @@ LIBS="$ff_arpack_libs $ff_save_libs"
 
 if test "$ff_arpack_ok" = yes;
 then
+        AC_SUBST(ARPACKLIB,$ff_arpack_libs)
 	EIGENOBJ='eigenvalue.$(OBJEXT)'
 	AC_DEFINE(HAVE_LIBARPACK,1,Arpack is used for eigenvalue computation)
 
@@ -980,6 +980,7 @@ AC_OUTPUT(Makefile
 	src/fflib/Makefile
 	src/std/Makefile
 	src/x11/Makefile
+	src/bin-win32/Makefile
 	src/ide/Makefile
 	src/nw/Makefile
 	src/mpi/Makefile

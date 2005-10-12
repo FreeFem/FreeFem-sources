@@ -151,6 +151,7 @@ STRIP = @STRIP@
 TAGGINGDEPEND = @TAGGINGDEPEND@
 UMFPACKLIB = @UMFPACKLIB@
 VERSION = @VERSION@
+WIN32DLLTARGET = @WIN32DLLTARGET@
 WINDRESOBJ = @WINDRESOBJ@
 X11PROG = @X11PROG@
 X11_LIBS = @X11_LIBS@
@@ -199,7 +200,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 SUBDIRS = bamglib femlib iml Graphics Algo umfpack lglib fflib std x11	\
-nw mpi agl glx ide
+nw mpi agl glx ide bin-win32
 
 EXTRA_DIST = FreeFem++-CoCoa Carbon.r
 all: all-recursive
