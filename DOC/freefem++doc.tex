@@ -10188,57 +10188,55 @@ primary:
 %%%{\scriptsize
 %%%\inputFF{../HISTORY}
 %%%}
-\section{dynamical link}
+\section{Dynamical link}
 
-Now, it's possible to add built-in functionnaly in freefem++ under the three
-environnent Linux, Window and MacOS X 10.3 or newer. 
-The way to do that is: 
-First try the example \texttt{load.edp} in directory \texttt{example++-load}.
+Now, it's possible to add built-in functionnalites in freefem++ under the three
+environnents Linux, Windows and MacOS X 10.3 or newer. 
+It is agood idea to,
+first try the example \texttt{load.edp} in directory \texttt{example++-load}.
 
-But unfortunately, you need to install a\texttt{c++} compiler  (generally \texttt{g++/gcc} compiler)
+But unfortunately, you need to install a \texttt{c++} compiler  (generally \texttt{g++/gcc} compiler)
  to compile your function.
  
 
 \begin{description}
-\item[Window] Install the \texttt{cygwin} environnent or the \texttt{mingw} 
-\item[MacOs] Install the developer tools
-\item[Linux/Unix] Install the correct compiler  
+\item[Windows] Install the \texttt{cygwin} environnent or the \texttt{mingw} 
+\item[MacOs] Install the developer tools xcode on the apple DVD
+\item[Linux/Unix] Install the correct compiler  (gcc for instance)
 \end{description}
 
-Now, I suppose two think, you are in a shell window (a cygwin window under window)  in the directory 
-\texttt{example++-load}. Remark,  in the sub directory \texttt{include} 
+Now, assume , you are in a shell window (a cygwin window under Windows)  in the directory 
+\texttt{example++-load}. Remark that  in the sub directory \texttt{include} 
 they are all the freefem++ include file to make the link with \texttt{FreeFem++}.
  
 
-To test, if the dynamics load is available your can try the 
-exemple \texttt{load.edp}.
 
 \begin{note}
   If you try to load dynamically a file with command \texttt{load "xxx"}
  \begin{itemize} 
- \item Under unix (Linux or MacOs), the file \texttt{xxx.so}  to be load under must be 
+ \item Under unix (Linux or MacOs), the file \texttt{xxx.so}  to be loaded must be either
  first in the search directory of routine \texttt{dlopen}
-  (see the environment variable  \verb.$LD_LIBRARY_PATH. or the
-  the current directory, and the suffix \texttt{".so"} or the prefix \texttt{"./"} is automaticaly add.
+  (see the environment variable  \verb.$LD_LIBRARY_PATH. or in 
+  the current directory, and the suffix \texttt{".so"} or the prefix \texttt{"./"} is automaticaly added.
  
-  \item   Under Window, 
-  the file \texttt{xxx.dll}  to be load under must be 
-  the \texttt{loadLibary} search directory which include the directory of the application,
+  \item   Under Windows, 
+  the file \texttt{xxx.dll}  to be loaded must be in 
+  the \texttt{loadLibary} search directory which includes the directory of the application,
  \end{itemize} 
 \end{note}
 
-The compilation of your module:
-The script \texttt{./load.link} compile and make 
-the link with \texttt{freefem++}, but be carfull, the script 
-have no way to known if you try to compile for a 
-pure window environnemnt of for a cygwin environnement
-so to build the load module under cygwin  window you must add 
-\texttt{-cygwin} parameter.
+{\bf The compilation of your module}:
+the script \texttt{./load.link} compiles and makes 
+the link with \texttt{freefem++}, but be careful, the script 
+has no way to known if you try to compile for a 
+pure Windows environment or for a cygwin environment
+so to build the load module under cygwin  you must add 
+the \texttt{-cygwin} parameter.
 %}}}}
 
 \subsection{A first example myfunction.cpp}
 
- Just defined a new function with no parameter, but using the $x,y$ current value.
+The following  defines a new function call \texttt{myfunction} with no parameter, but using the $x,y$ current value.
  
  
 \bFF
@@ -10265,11 +10263,11 @@ using namespace std;
 }
 \eFF 
 Now the Problem is to build the link with \texttt{FreeFem++}, to do that 
-we need two class, one to call the function \texttt{myfunction}
+we need two classes, one to call the function \texttt{myfunction}
 
 All FreeFem++ evaluable expression must be a struct/class  \texttt{C++}  which
-derive from \texttt{E\_F0}. By default this expression do not depend of the mesh position, 
-but if they   derive from \texttt{E\_F0mps} the expression depend of the mesh position. 
+derive from \texttt{E\_F0}. By default this expression does not depend of the mesh position, 
+but if they   derive from \texttt{E\_F0mps} the expression depends of the mesh position. 
 
 
 
@@ -10307,10 +10305,7 @@ but if they   derive from \texttt{E\_F0mps} the expression depend of the mesh po
 
 
  To finish we must add this new function in \texttt{freefem++} table , 
- to do that in in build a initialize global \texttt{init} of type {Init}
- to force the call of \verb.Init::Init(). at loading time (takes to \texttt{C++}
- initialisation process). 
- 
+ to do that include : 
 \bFF
 @class Init { @public:  Init();  };
 
@@ -10320,14 +10315,17 @@ Init::Init(){
   Global.Add("myfunction","(",new OneOperator0s<double>(myfunction));
 }
 \eFF 
+It will be called automatically at load module time.
 
-To compile and link under MacOS, Linux or Window
+\medskip
+
+To compile and link, do
 \bFF
 Brochet% ./load.link myfunction 
 g++ -c -g -Iinclude myfunction.cpp
 g++ -bundle -undefined dynamic_lookup -g myfunction.o -o ./myfunction.dylib
 \eFF
-To,  try the simple example under Linux or MacOS.
+To,  try the simple example under Linux or MacOS, do
 \bFF
 Brochet% FreeFem++-nw load.edp
 -- FreeFem++ v 1.4800028 (date Tue Oct  4 11:56:46 CEST 2005)
@@ -10359,14 +10357,17 @@ times: compile 0.05s, execution -3.46945e-18s
 Bien: On a fini Normalement
 \eFF
 
-\subsection{Discrete Fast Fourier Transform } \index{dfft}\index{fft}
+Under Windows, launch \texttt{FreeFem++} with the mouse on the example.
 
-I add a FFT to \texttt{freefem++}, it is a link to the library 
- \url{http://www.fftw.org/}, to download and install under \texttt{download/include}
- just go in \texttt{download/fftw} and try make.
+\subsection{Example Discrete Fast Fourier Transform } \index{dfft}\index{fft}
+
+This will add FFT to \texttt{FreeFem++},taken from 
+ \url{http://www.fftw.org/}. To download and install under \texttt{download/include}
+ just go in \texttt{download/fftw} and try\texttt{make}.
  
+ \medskip 
  The 1D dfft (fast discret fourier transform)  for a  simple array  $f$ of size $n$
- is defining by the following formular 
+ is defined by the following formula 
  $$
     \mathtt{dfft}(f,\varepsilon)_{k} = \sum_{j=0}^{n-1} f_i e^{\varepsilon  2\pi i kj/n}
  $$
@@ -10374,26 +10375,28 @@ I add a FFT to \texttt{freefem++}, it is a link to the library
  The 2D DFT for an array of size $N=n\times m$ is 
 $$   \mathtt{dfft}(f,m,\varepsilon)_{k+nl} = \sum_{j'=0}^{m-1} \sum_{j=0}^{n-1} f_{i+nj} e^{\varepsilon  2\pi i (kj/n+lj'/m) }
  $$
- Remark, the value  $n$ is given  by $ size(f)/m$.
+ Remark: the value  $n$ is given  by $ size(f)/m$, and the numbering is  row-major order.
  
    
- So the classical discrete DFT is get with $\hat{f}=\mathtt{dfft}(f,-1)/\sqrt{n}$ and the
- reverse dFT in get  $f=\mathtt{dfft}(\hat{f},1)/\sqrt{n}$
+ So the classical discrete DFT is  $\hat{f}=\mathtt{dfft}(f,-1)/\sqrt{n}$ and the
+ reverse dFT  $f=\mathtt{dfft}(\hat{f},1)/\sqrt{n}$
  
- Remark: the 2D Laplace operator  let just remarque than 
+ \medskip
+ 
+ Remark: the 2D Laplace operator is
  $$ f(x,y) = 1/\sqrt{N}  \sum_{j'=0}^{m-1} \sum_{j=0}^{n-1} \hat{f}_{i+nj} e^{\varepsilon  2\pi i (x j+ yj') } $$
  and we have
  $$ f_{k+nl} = f(k/n,l/m)$$
 
   
- So we have, 
+ So 
  $$ 
      \widehat{\Delta f_{kl}} = -(  (2\pi)^2 ( (\tilde{k})^2+(\tilde{l})^2)) \widehat{ f_{kl}} \\    
  $$ 
  where $ \tilde{k} = k $ if $ k \leq n/2 $ else $ \tilde{k} = k-n$ and
  $ \tilde{l} = l $ if $ l \leq m/2 $ else $ \tilde{l} = l-m$. 
  
- And to get a real function we need all a symetric number of mode around to zero, so $n$ and $m$
+ And to get a real function we need all  symetric modes around to zero, so $n$ and $m$
  must be odd. 
 
 {\bf  To compile and make a new library} 

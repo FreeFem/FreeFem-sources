@@ -9,6 +9,8 @@ documentation:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 	latex $*
 %.ps:%.dvi
 	dvips -u +psfonts.map -u +pdftex.map -u +Ttbbold.map -z -K $* -o $@
+pdffiles:$(patsubst %.eps,%.pdf,$(FIGS_EPS))
+	echo "done."
 %.pdf:%.tex $(patsubst %.eps,%.pdf,$(FIGS_EPS))
 	-rm $*.pdf $*.aux $*.log \
                 $*.toc $*.ind $*.glo $*.out $*.blg $*ilg $*.idx $*.bbl $*.tmp	
