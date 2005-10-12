@@ -18,7 +18,7 @@ case "$uu" in
   CYGWIN*)
   WIN32="win32-"
   if [ "$bin" = "." -a  -f ../src/bin-win32/libff2.dll  ]; then
-    bin=../src/bin 
+    bin=../src/bin-win32 
   elif [ "$bin" = "." -a  -f ../libff2.dll  ]; then
     bin=..
   elif [ "$bin" = "." -a  -f ../../libff2.dll  ]; then
