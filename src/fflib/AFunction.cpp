@@ -663,6 +663,33 @@ template<class T> T *resize2(const Resize<T> & t,const long &n, const long & m)
 template<class T> Resize<T> to_Resize( T *v){ return Resize<T>(v);}
 
 */
+
+template<class R>
+class  OneOperator_0 : public OneOperator {
+  class E_F0_F :public  E_F0mps { public:
+    typedef  R (*func)( ) ; 
+    func f;
+    E_F0_F(func ff)  : f(ff) {}
+    AnyType operator()(Stack )  const {return SetAny<R>( f()) ;}  
+    operator aType () const { return atype<R>();} 
+
+  };
+
+  typedef  R (*func)() ; 
+  func  f;
+public: 
+  E_F0 * code(const basicAC_F0 & ) const 
+  { return  new E_F0_F(f);} 
+  OneOperator_0(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
+};
+
+
+void init_by_array(unsigned long init_key[], int key_length);
+long genrand_int32(void);
+void init_genrand(unsigned long);
+long genrandint (long  s) { init_genrand( (unsigned long ) s); return 0;}
+long genrandint32 () {return (long)  genrand_int32();}
+
 void Init_map_type()
 {
    TheOperators=new Polymorphic(), 
@@ -1105,6 +1132,22 @@ void Init_map_type()
      Global.Add("exec","(",new OneOperator1<long,string* >(exec));
     
      Global.Add("polar","(",new OneOperator2_<Complex,double,double>(polar));
+ // rand generator ---
+  unsigned long init[4]={0x123, 0x234, 0x345, 0x456}, length=4;                                                            
+  init_by_array(init, length);
+  extern long genrand_int31(void);   
+  extern double genrand_real1(void);
+  extern double genrand_real2(void);
+  extern double genrand_real3(void);
+  extern double  genrand_res53(void) ;
+  
+  Global.Add("randint32","(",new OneOperator_0<long>(genrandint32));
+  Global.Add("randint31","(",new OneOperator_0<long>(genrand_int31));
+  Global.Add("randreal1","(",new OneOperator_0<double>(genrand_real1));
+  Global.Add("randreal2","(",new OneOperator_0<double>(genrand_real2));
+  Global.Add("randreal3","(",new OneOperator_0<double>(genrand_real3));
+  Global.Add("randres53","(",new OneOperator_0<double>(genrand_res53));
+  Global.Add("randinit","(",new OneOperator1<long>(genrandint));
   
      
    //  NEW_TYPE( mapSd  );

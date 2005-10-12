@@ -9,41 +9,54 @@ INC=""
 LIBS=""
 DLL=""
 bin="."
-while true; do
-case "$1" in
- -[h?]*) echo usage $0 "[-n] [-g] [-win32] [-l libfile] [-I includedir]  fileprefixe"
- echo "    -n  :  do nothing just print"
- echo "    -g  :  compile with -g option"
- echo "    -win33: compile for win32 OS (Window XP, ...)"
- echo "    -l files  add files to the ld process (link)"
- echo "    -I dir  add dir in include seach dir for compilation"
- echo "    -dll file  add  dll and copie  in $bin "
- exit 0;
-;;
- -*) ;;
- *) break;
+out=""
+files=""
+fileso=""
+OTHER="";
+WIN32="";
+case "$uu" in
+  CYGWIN*)
+  WIN32="win32-"
+  if [ "$bin" = "." -a  -f ../src/bin-win32/libff2.dll  ]; then
+    bin=../src/bin 
+  elif [ "$bin" = "." -a  -f ../libff2.dll  ]; then
+    bin=..
+  elif [ "$bin" = "." -a  -f ../../libff2.dll  ]; then
+    bin=../..
+  fi;; 
 esac
-  
-if [ "$1" = "-n" ]; then
-  shift
-  do="no"
-elif [ "$1" = "-g" ]; then
-  shift
-  DEBUG="-g"
-elif [ "$1" = "-win32" ]; then
-  shift
-  bin=../src/bin-win32
-  uu="WIN32"
-elif  [ "$1" = "-I" ]; then
-  INC="$INC -I$2"; shift;shift;
-elif  [ "$1" = "-l" ]; then
-  LIBS="$LIBS $2"; shift;shift;
-elif  [ "$1" = "-dll" ]; then
-  DLL="$DLL $2"; shift;shift;
-else
-  break;
-fi  
+
+while [ $# -ne 0 ]  ; do
+    case "$1" in
+	-[h?]*) echo usage $0 "[-n] [-g] [-win32] [-l libfile] [-I includedir]  files"
+	    echo "    -n  :  do nothing just print"
+	    echo "    -g  :  compile with -g option"
+	    echo "    -cygwin: compile for cygwin/win32 OS (Window XP, ...)"
+	    echo "    -win32:  compile for win32 OS (Window XP, ...) default under cygwin"
+	    echo "    -l files  add files to the ld process (link)"
+	    echo "    -I dir  add dir in include seach dir for compilation"
+	    echo "    -b dir  to change the default install  dir " 
+	    echo "    -dll file  add  dll and this file copie in the install dir"
+	    echo "    -o outputfile without suffix"
+	    echo "    file.{cpp,cp,cxx}"
+	    exit 0;
+	    ;;
+	-n)  do="no";;
+	-g)  DEBUG="-g";;
+	-cygwin)   uu="cygwin-version";;
+	-win32)   uu="win32";;
+	-b)     bin=$2  ; shift;;
+	-I*)    INC="$INC $1";;
+	-dll)   DLL="$DLL $2";shift;;
+	-[Ll]*)    LIBS="$LIBS $1"; shift;;
+	*.cpp) files="$files $1";  o=`basename $1 .cpp` ; fileso="$fileso $o.o";; 
+	*.cp) files="$files $1";  o=`basename $1 .cp`   ; fileso="$fileso $o.o";; 
+	*.cxx) files="$files $1";  o=`basename $1 .cxx` ; fileso="$fileso $o.o";; 
+	*) OTHER="$OTHER $1";;
+    esac
+    shift
 done
+if [ -z "$out" ] ; then  out=$o  ; fi;
 # Default compiler
 if [ "$CXX" = "" ];
 then
@@ -52,41 +65,50 @@ fi
 
 INC="-Iinclude $INC"  
 SUF=so
-if [ -f "$1.cpp" ] ; then
-    case "$uu" in
-	Darwin) 
+SHARED="-shared"
+case "$WIN32$uu" in
+    Darwin*) 
+        echo "export MACOSX_DEPLOYMENT_TARGET=10.3"
 	export MACOSX_DEPLOYMENT_TARGET=10.3
 	SUF=dylib
 	SHARED="-bundle -undefined dynamic_lookup"  ;;
-	CYGWIN*|FreeBSD)
-	    SHARED="-shared " ;;
-
-	# 64 bit Linux needs -fPIC (ALH)
-	Linux)
-	    FLAGS='-fPIC'
-	    SHARED="-shared " ;;
-
-        WIN32) 
-        echo " window "
+    win32-CYGWIN*|win32-win32)
+        echo " Window without cygwin "
         b=$bin
-	SHARED="-v -shared --unresolved-symbols=ignore-all"
+        LIBS="$b/libff0.dll $b/libff1.dll $b/libff2.dll $LIBS $DLL"
+        SHARED="-shared --unresolved-symbols=ignore-all"
         FLAGS='  -mno-cygwin '
+        SUF=dll;;
+    win32-cygwin-version)
+        echo " cygwin-version "
+        b=$bin
+        FLAGS=' '
         LIBS="$b/libff0.dll $b/libff1.dll $b/libff2.dll $LIBS $DLL"
         SUF=dll;;
-	*)
+    FreeBSD)
+	SHARED="-shared" 
+	FLAGS='-fPIC';;
+	# 64 bit Linux needs -fPIC (ALH)
+    Linux)
+	FLAGS='-fPIC'
+	SHARED="-shared " ;;
+    *)
 	echo "sorry unknown achitecture "`uname`
-	exit 1
-    esac
-   FLAGS="$FLAGS -g"
-   echo $CXX -c $FLAGS $INC $PIC $1.cpp 
-   test $do = yes &&$CXX -c $INC $FLAGS $PIC  $1.cpp 
-
-   echo $CXX $SHARED $FLAGS $1.o -o $bin/$1.$SUF $LIBS $DLL
-   test $do = yes &&$CXX $SHARED $FLAGS $1.o -o $bin/$1.$SUF $LIBS $DLL
-   if [ -n "$DLL" ] ; then
-     echo cp $DLL $bin
-     test $do = yes &&  cp $DLL $bin
-   fi
-else
-    echo "sorry file $1.cpp does not exist"
+	exit 1;;
+esac
+if [ -n "files" ] ; then
+    if [ "$WIN32" = "yes" -a -f $bin/libff1.dll  ]; then
+	echo " Sorry, no freefem .dll file (libff1.dll)  in $bin dir "
+	echo " try with -b dir-path where the file libff1.dll exist"
+	exit 1;
+    fi
+    echo $CXX -c $FLAGS $INC $PIC $files
+    test $do = yes &&$CXX -c $INC $FLAGS $PIC  $files
+    
+    echo $CXX $SHARED $FLAGS $fileso -o $bin/$out.$SUF $LIBS $DLL $OTHER
+    test $do = yes && $CXX $SHARED $FLAGS $fileso -o $bin/$out.$SUF $LIBS $DLL $OTHER
+    if [ -n "$DLL" ] ; then
+	echo cp $DLL $bin
+	test $do = yes &&  cp $DLL $bin
+    fi
 fi
