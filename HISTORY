@@ -1,3 +1,28 @@
+2005-10-12 21:08  hecht
+
+	*    Add makefile to build automaticaly the FreeFem++ version with
+	  dll
+	     under Windows
+
+2005-10-12 18:20  pironnea
+
+	* [no log message]
+
+2005-10-12 17:50  hecht
+
+	*   coorect freefem++doc.tex
+
+2005-10-12 16:09  hecht
+
+	*   just add mising eps file
+
+2005-10-12 15:42  hecht
+
+	*   do correct in the manual, make big change in the dynamic load,
+	  see the maunal
+	    and add random generator number randind32, randin31, ...
+	    see manual page 62 , section 5.6.
+
 2005-10-04 20:31  hecht
 
 	*   correct small mistake in load.cpp i -> j
