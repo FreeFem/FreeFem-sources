@@ -1,5 +1,6 @@
 \documentclass[a4paper,twoside,12pt]{book}
 \usepackage{styles}
+\usepackage{times}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -24,26 +25,36 @@
 \setbox0\hbox{\raisebox{\dp0}{\box0}\kern-\dimen1\kern-5pt\raisebox{\dp1}{\box1}}
 \vcenter{\box0}
 }
-
+\pagenumbering{roman}
 \title{
 %\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
- {\Blue{ \TitreFont freefem++}} \\ \vglue 3cm  ~ \\
-      \normalsize  { version 1.48-2 }
+ %{ \Blue{ \TitreFont Freefem++}} %
+   \vglue-3.5cm\includegraphics[width=10cm]{titre-ff}
+   %\\ \vglue 3cm  ~ \\
+    \\  \large  \Blue{Version 2.0-0 }
  \\ \vglue 0.7cm
- {\large \Blue{\url{http://www.freefem.org}}} \\
-{\small \url{http://www.freefem.org/ff++/index.htm}} \\
-Laboratoire Jacques-Louis Lions (LJLL), University of Paris VI}
-\author{F. Hecht \thanks{\url{frederic.hecht@upmc.fr}
-{\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}},
- O. Pironneau \thanks{\url{olivier.pironneau@upmc.fr}
- {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}},
- A. Le Hyaric \thanks{\url{antoine.lehyaric@upmc.fr}
- {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}},
-K. Ohtsuka  \thanks{\url{ohtsuka@barnard.cs.hkg.ac.jp},
-{\tiny Hiroshima Kokusai Gakuin University, Hiroshima, Japan }}}
+ {\large \Blue{\url{http://www.freefem.org/ff++}}} \\ ~
+ \\ \vglue 0.7cm
+%Laboratoire Jacques-Louis Lions (LJLL), University of Paris VI
+{
+{\Huge \textBlue F. Hecht, 
+%\thanks{\url{frederic.hecht@upmc.fr} {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}}
+ O. Pironneau}
+ \\ ~ \\
+% \thanks{\url{olivier.pironneau@upmc.fr} {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}},
+{\Large A. Le Hyaric,
+%  \thanks{\url{antoine.lehyaric@upmc.fr}  {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}},
+K. Ohtsuka }
+% \thanks{\url{ohtsuka@barnard.cs.hkg.ac.jp}, {\tiny Hiroshima Kokusai Gakuin University, Hiroshima, Japan }}
+}}
+
+\author{}
 \date{
 \begin{center}
-\includegraphics[width=8cm]{csSnap}
+\includegraphics[width=15cm]{csSnap}
+\\ \vglue0.5cm 
+Laboratoire Jacques-Louis Lions, Université Pierre et Marie Curie, Paris
+\vglue-2cm
 \end{center}
 }
 \makeindex
@@ -55,13 +66,41 @@ K. Ohtsuka  \thanks{\url{ohtsuka@barnard.cs.hkg.ac.jp},
 \DeclareGraphicsExtensions{.eps, .jpg , ,.ps }
 \fi
 
-\maketitle
+%\maketitle
+\thispagestyle{empty}
+\vbox to 20cm {\begin{center}
+   \vglue-0.5cm\includegraphics[width=10cm]{titre-ff}
+    \\  \large  \Blue{Version 2.0-0 }
+ \\ \vglue 0.7cm
+  {\large \Blue{\url{http://www.freefem.org/ff++}}} \\ ~
+ \\~  \\ 
+ %Laboratoire Jacques-Louis Lions (LJLL), University of Paris VI
+ \Blue{{ \sc {\Huge F. Hecht, 
+%\thanks{\url{frederic.hecht@upmc.fr} {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}}
+ O. Pironneau}
+ \\ ~ \\
+% \thanks{\url{olivier.pironneau@upmc.fr} {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}},
+{\Huge A. Le Hyaric,
+%  \thanks{\url{antoine.lehyaric@upmc.fr}  {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}},
+K. Ohtsuka } }}
+% \thanks{\url{ohtsuka@barnard.cs.hkg.ac.jp}, {\tiny Hiroshima Kokusai Gakuin University, Hiroshima, Japan }}
+\vglue 1cm
+\includegraphics[width=15cm]{csSnap}
+\\ \vglue0.5cm 
+Laboratoire Jacques-Louis Lions, Université Pierre et Marie Curie, Paris
+\vglue-2cm
+\end{center}}
+\clearpage\thispagestyle{empty}\cleardoublepage
 
+%\end{document}
+ \setcounter{page}{1}
 \tableofcontents
 \let\subsubsection\subsection
 \let\subsection\section
 \let\section\chapter
-\section{Introduction}
+
+
+\section{Introduction}\pagenumbering{arabic} \setcounter{page}{1}
 A partial differential equation is a relation between a function
 of several variables and its (partial) derivatives.
  Many problems in physics, engineering, mathematics and even banking
@@ -10265,8 +10304,8 @@ we need two classes, one to call the function \texttt{myfunction}
 
 All FreeFem++ evaluable expression must be a struct/class  \texttt{C++}  which
 derive from \texttt{E\_F0}. By default this expression does not depend of the mesh position,
-but if they   derive from \texttt{E\_F0mps} the expression depends of the mesh position.
-
+but if they   derive from \texttt{E\_F0mps} the expression depends of the mesh position,
+and for more details see \cite{FHcpp}.
 
 
 
@@ -10855,6 +10894,10 @@ Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integrati
  A student introduction to mathematical finance, Cambridge University Press (1995).
 \end{thebibliography}
 \printindex
+\cleardoublepage
+{}
+\newpage
+
 \end{document}
 
 
