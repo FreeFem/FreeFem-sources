@@ -165,14 +165,14 @@ color syntax and automatic launch of freefem.  If you don't have one of these
 installed the easiest is to download the freeware \texttt{Crimpson Editor}.
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=15cm]{csSnap}
+\includegraphics[width=15cm]{csSnapOld}
 \caption{ The 3 panels of the integrated environment \texttt{freefem++-cs}:
 to left the program, top right the graphic window, bottom the text messages.}
 \end{center}
 \end{figure}
 
 \begin{description}
-\item[\texttt{Crimpson Editor}]
+\item[\texttt{Crimson Editor}]
 at \url{http://www.crimsoneditor.com/} and adapt it as follows:
 
 \begin{itemize}
@@ -211,8 +211,9 @@ It is also an editor for TeX/LaTeX but it has a "`tool"' menu which can be confi
 \begin{figure}[htbp]
 \begin{center}
 \includegraphics[width=15cm]{crimpson}
-\caption{ The 3 panels of the integrated environment built with the \texttt{Crimpson Editor}
-with \freefempp in action. The Tools menu has an item to launch \freefempp by a Ctrl+1 command.}
+\caption{ The 3 panels of the integrated environment built with the
+\texttt{Crimson Editor} with \freefempp in action. The Tools menu
+has an item to launch \freefempp by a Ctrl+1 command.}
 \end{center}
 \end{figure}
 
@@ -1029,7 +1030,7 @@ The variational formulation for this problem is in the subspace $H^1_0(\Omega)
 Let us assume $C_0$ is a circle of radius 5 centered at the origin, N=2, $C_i$ are
 rectangles, $C_1$ is at temperature $u_1=60$.
 The mesh can be made by
-% modif FH   to see ...
+
 \begin{example}[heatex.edp]
 \bFF
 // file heatex.edp
@@ -1648,32 +1649,30 @@ instance will then converge in one or two iterations.
 
 The right hand side {\tt rhs} is computed by an \x{external C++ function} {\tt MatUpWind0(...)}
 which is programmed as
-{\small
-\begin{verbatim}
+\bFF
 // computes matrix a on a triangle for the Dervieux FVM
-int   fvmP1P0(double q[3][2], // the 3 vertices of a triangle T
-              double u[2],   // convection velocity on T
-              double c[3],   // the P1 function on T
-              double a[3][3],// output matrix
-              double where[3] ) // where>0 means we're on the boundary
+@int   fvmP1P0(@double q[3][2], // the 3 vertices of a triangle T
+              @double u[2],   // convection velocity on T
+              @double c[3],   // the P1 function on T
+              @double a[3][3],// output matrix
+              @double where[3] ) // where>0 means we're on the boundary
 {
-  for(int i=0;i<3;i++) for(int j=0;j<3;j++) a[i][j]=0;
+  @for(@int i=0;i<3;i++) @for(@int j=0;j<3;j++) a[i][j]=0;
 
-    for(int i=0;i<3;i++){
-        int ip = (i+1)%3, ipp =(ip+1)%3;
-        double unL =-((q[ip][1]+q[i][1]-2*q[ipp][1])*u[0]
+    @for(@int i=0;i<3;i++){
+        @int ip = (i+1)%3, ipp =(ip+1)%3;
+        @double unL =-((q[ip][1]+q[i][1]-2*q[ipp][1])*u[0]
                     -(q[ip][0]+q[i][0]-2*q[ipp][0])*u[1])/6;
-        if(unL>0) { a[i][i] += unL; a[ip][i]-=unL;}
-            else{ a[i][ip] += unL; a[ip][ip]-=unL;}
-        if(where[i]&&where[ip]){        // this is a boundary edge
+        @if(unL>0) { a[i][i] += unL; a[ip][i]-=unL;}
+            @else{ a[i][ip] += unL; a[ip][ip]-=unL;}
+        @if(where[i]&&where[ip]){        // this is a boundary edge
             unL=((q[ip][1]-q[i][1])*u[0] -(q[ip][0]-q[i][0])*u[1])/2;
             if(unL>0) { a[i][i]+=unL; a[ip][ip]+=unL;}
         }
     }
   return 1;
 }
-\end{verbatim}
-}
+\eFF
 It must be inserted into a larger .cpp file, shown in Appendix A,
  which is the load module linked to \freefempp.
 
@@ -2082,12 +2081,12 @@ A; ud=u;
      @return dJdz;
  }
 
- real[int] Z(3);
- for(int j=0;j<z.n;j++) Z[j]=1;
+ @real[@int] Z(3);
+ @for(@int j=0;j<z.n;j++) Z[j]=1;
  BFGS(J,DJ,Z,eps=1.e-6,nbiter=15,nbiterline=20);
-   cout << "BFGS: J(z) = " << J(Z) <<  endl;
-for(int j=0;j<z.n;j++) cout<<z[j]<<endl;
-plot(ud,value=1,ps="u.eps");
+ @cout << "BFGS: J(z) = " << J(Z) <<  endl;
+ @for(int j=0;j<z.n;j++) cout<<z[j]<<endl;
+ @plot(ud,value=1,ps="u.eps");
 \eFF
 In this example the sets $B,C,D,E$ are circles of boundaries $bb,cc,dd,ee$ are the domain
 $\Omega$ is the circle of boundary $aa$.  The desired state $u_d$ is the solution
@@ -2810,17 +2809,17 @@ tab[1]=2.15;
 tab.resize(12); //  change the size of array tab
   // to 12 with preserving first value
 tab(10:11)=3.14; //  set unset value
-cout <<" resize tab: " <<  tab << endl;
-real [string] tt;
+@cout <<" resize tab: " <<  tab << endl;
+@real [string] tt;
 tt["+"]=1.5;
-cout<<tt["a"]<<"  "<<tt["+"]<<endl;
-real[int]  a(5),b(5),c(5),d(5);
+@cout<<tt["a"]<<"  "<<tt["+"]<<endl;
+@real[int]  a(5),b(5),c(5),d(5);
 a = 1;
 b = 2;
 c = 3;
 a[2]=0;
 d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] ,
-cout << " d = ( a ? b : c )  is " << d << endl;
+@cout << " d = ( a ? b : c )  is " << d << endl;
 \eFF
 \index{array!resize}\index{resize}\index{max}\index{array!max} \index{min}\index{array!min}\index{sum}\index{array!sum}\index{array!?:}%modif FH
 produce the output
@@ -5264,7 +5263,6 @@ The parameters are
     \itemtt[varrow=] \index{plot!varrow=}  sets the array value of color arrows (an array real[int])
     \itemtt[bw=] \index{plot!bw=} (bool)  sets or not the plot in black and white color.
     \itemtt[grey=] \index{plot!grey=} (bool)  sets or not the plot in grey color.
-%modif FH
     \itemtt[hsv=] \index{plot!hsv=} (array of float) to defined color of 3*n value  in HSV color model
     declare  with for example
     \bFF
@@ -5301,7 +5299,7 @@ vector}
 \plot[height=6cm]{likegnu}{Plots a cut of uh. Note that a refinement of the same can be obtained
 in combination with gnuplot}
 
-% modif FH
+
 To change the color table and to choose the value of iso line you can do :
 
 \bFF
