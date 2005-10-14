@@ -26,44 +26,16 @@
 \vcenter{\box0}
 }
 \pagenumbering{roman}
-\title{
-%\DeclareFixedFont{\TitreFont}{\encodingdefault}{pnc}{r}{\shapedefault}{70pt}
- %{ \Blue{ \TitreFont Freefem++}} %
-   \vglue-3.5cm\includegraphics[width=10cm]{titre-ff}
-   %\\ \vglue 3cm  ~ \\
-    \\  \large  \Blue{Version 2.0-0 }
- \\ \vglue 0.7cm
- {\large \Blue{\url{http://www.freefem.org/ff++}}} \\ ~
- \\ \vglue 0.7cm
-%Laboratoire Jacques-Louis Lions (LJLL), University of Paris VI
-{
-{\Huge \textBlue F. Hecht, 
-%\thanks{\url{frederic.hecht@upmc.fr} {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}}
- O. Pironneau}
- \\ ~ \\
-% \thanks{\url{olivier.pironneau@upmc.fr} {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}},
-{\Large A. Le Hyaric,
-%  \thanks{\url{antoine.lehyaric@upmc.fr}  {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}},
-K. Ohtsuka }
-% \thanks{\url{ohtsuka@barnard.cs.hkg.ac.jp}, {\tiny Hiroshima Kokusai Gakuin University, Hiroshima, Japan }}
-}}
-
+\title{}
 \author{}
-\date{
-\begin{center}
-\includegraphics[width=15cm]{csSnap}
-\\ \vglue0.5cm 
-Laboratoire Jacques-Louis Lions, Université Pierre et Marie Curie, Paris
-\vglue-2cm
-\end{center}
-}
+\date{}
 \makeindex
 \begin{document}
 \graphicspath{{./}{plots/}{figures/}}
 \ifpdf
 \DeclareGraphicsExtensions{.pdf ,.jpg  ,.tif}
 \else
-\DeclareGraphicsExtensions{.eps, .jpg , ,.ps }
+\DeclareGraphicsExtensions{.eps }
 \fi
 
 %\maketitle
@@ -74,16 +46,10 @@ Laboratoire Jacques-Louis Lions, Université Pierre et Marie Curie, Paris
  \\ \vglue 0.7cm
   {\large \Blue{\url{http://www.freefem.org/ff++}}} \\ ~
  \\~  \\ 
- %Laboratoire Jacques-Louis Lions (LJLL), University of Paris VI
- \Blue{{ \sc {\Huge F. Hecht, 
-%\thanks{\url{frederic.hecht@upmc.fr} {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}}
- O. Pironneau}
- \\ ~ \\
-% \thanks{\url{olivier.pironneau@upmc.fr} {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}},
-{\Huge A. Le Hyaric,
-%  \thanks{\url{antoine.lehyaric@upmc.fr}  {\tiny Universit\'{e} Pierre et Marie Curie,  LJLL, 175 rue du Chevaleret , F-75013}},
-K. Ohtsuka } }}
-% \thanks{\url{ohtsuka@barnard.cs.hkg.ac.jp}, {\tiny Hiroshima Kokusai Gakuin University, Hiroshima, Japan }}
+% \Blue{{ \sc {\Huge F. Hecht,  O. Pironneau}
+% \\ ~ \\
+%{\Huge A. Le Hyaric, K. Ohtsuka } }}
+\includegraphics[width=10cm]{ffauteurs4}
 \vglue 1cm
 \includegraphics[width=15cm]{csSnap}
 \\ \vglue0.5cm 
@@ -91,13 +57,92 @@ Laboratoire Jacques-Louis Lions, Université Pierre et Marie Curie, Paris
 \vglue-2cm
 \end{center}}
 \clearpage\thispagestyle{empty}\cleardoublepage
+\thispagestyle{empty}
+\begin{center}
+ {\Blue{ \TitreFont freefem++}} \\ \vglue 1cm  ~ \\
+   Version 2.0-0
+ \\ \vglue 0.7cm
+ {\Large \url{http://www.freefem.org/ff++}} \\
+\vglue 1cm
 
-%\end{document}
+ \
+{\Large Frédéric Hecht${}^{1,4}$ }
+ 
+\url{mailto:frederic.hecht@upmc.fr}
+ 
+\url{http://www.ann.jussieu.fr/~hecht}
+
+\medskip
+
+{\Large Olivier Pironneau${}^{1,3}$}
+ 
+  \url{mailto:olivier.pironneau@upmc.fr}
+  
+\url{http://www.ann.jussieu.fr/pironneau}
+
+
+\bigskip
+
+
+
+{\Large Antoine Le Hyaric${}^{1,2}$ }
+ 
+ \url{mailto:antoine.lehyaric@upmc.fr}
+ 
+\url{http://www.ann.jussieu.fr/~lehyaric/}
+
+
+\bigskip
+
+
+{\Large Kohji Ohtsuka${}^{5}$ }
+ 
+  \url{mailto:ohtsuka@barnard.cs.hkg.ac.jp}
+  
+\url{http://barnard.cs.hkg.ac.jp/}
+\end{center}
+
+%\bigskip
+
+
+\begin{enumerate}
+\item  Laboratoire Jacques-Louis Lions,
+175 rue du Chevaleret , 75013 Paris, France
+
+ Universit\'{e} Pierre et Marie Curie, 
+4 Place  Jussieu,  75252  PARIS cedex 05, France.
+
+
+\item CNRS, UMR 7598,  Laboratoire Jacques-Louis Lions,
+175 rue du Chevaleret , 75013 Paris, France.
+\item Institut de France, Académie des sciences, 23, quai de Conti,  75006 Paris,  France.
+\item INRIA, Projet Gamma, Domaine de Voluceau, Rocquencourt, B.P. 105, 78153 Le Chesnay Cedex, France.
+
+\item Hiroshima Kokusai Gakuin University, Hiroshima, Japan. 
+
+\end{enumerate}
+\hbox to \hsize
+{\hss
+\includegraphics[height=2cm]{LogoLJLL} \hss
+\includegraphics[height=2cm]{LogoUPMC} \hss
+\includegraphics[height=2cm]{LogoCNRS} \hss
+}
+
+
+
+
+\cleardoublepage
+%%%%%%%%%%
  \setcounter{page}{1}
 \tableofcontents
 \let\subsubsection\subsection
 \let\subsection\section
 \let\section\chapter
+\section*{Preface}
+Fruit of a long maturing process freefem, in its last avatar, freefem++, is a high level integrated development environment (IDE)  for partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
+\medskip
+Freefem++ has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK. Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of freefem++. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in freefem++ to prepare research quality reports: color display online with zooming and other features and postscript printouts.\medskip
+This book is ideal for students at Master level, for  researchers at any level and for engineers also in financial mathematics.
 
 
 \section{Introduction}\pagenumbering{arabic} \setcounter{page}{1}
@@ -10439,12 +10484,14 @@ $$   \mathtt{dfft}(f,m,\varepsilon)_{k+nl} = \sum_{j'=0}^{m-1} \sum_{j=0}^{n-1} 
 {\bf  To compile and make a new library}
 
 
-{\scriptsize \begin{verbatim}
+{\scriptsize 
+\begin{verbatim}
 % ./load.link  dfft.cpp ../download/install/lib/libfftw3.a -I../download/install/include
 export MACOSX_DEPLOYMENT_TARGET=10.3
 g++ -c -Iinclude -I../download/install/include dfft.cpp
 g++ -bundle -undefined dynamic_lookup dfft.o -o ./dfft.dylib ../download/install/lib/libfftw3.a
-\end{verbatim} }
+\end{verbatim} 
+}
 
 To test ,
 \bFF
@@ -10895,268 +10942,35 @@ Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integrati
 \end{thebibliography}
 \printindex
 \cleardoublepage
-{}
+\thispagestyle{empty}
+~
 \newpage
+\thispagestyle{empty}
+\normalsize 
+\textbf{Book Description}Fruit of a long maturing process freefem, in its last avatar, freefem++, is a high level integrated development environment (IDE)  for partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
+\medskip
+Freefem++ has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK. Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of freefem++. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in freefem++ to prepare research quality reports: color display online with zooming and other features and postscript printouts.\medskip
+This book is ideal for students at Master level, for  researchers at any level and for engineers also in financial mathematics.
 
+\bigskip
+
+\textbf{Editorial Reviews} \medskip
+"\ldots Impossible to put the book down, suspense right up to the last page\ldots"
+ {\sc Mike Gamon} Bangkok - Siam Chronicle.
+ \medskip
+"\ldots  The chapter on discontinuous fems is so hilarious \ldots."
+ {\sc Boris Galerkin}, the Institute of Mechanics of the Soviet Academy of Sciences.
+
+\bigskip
+\textbf{About the Authors}
+ 
+ \medskip
+ \def\AUTEUR#1#2#3{\hbox to \hsize{
+\begin{minipage}{3cm}\includegraphics[height=2.5cm]{#1}\end{minipage}
+\hss \begin{minipage}{14cm}{\textbf{#2} #3}\end{minipage}}
+ \par\medskip}
+ 
+ 
+\AUTEUR{fig-fh}{Frédéric Hecht}{  is a professor of numerical analysis at the university of Paris VI and does his research at the Laboratoire Jacques-Louis Lions (LJLL).  He is also a member of the project gamma at INRIA.  He is the author of several advanced software tools for automatic triangulations including the public domain EMC2.}  \AUTEUR{fig-op}{Olivier Pironneau}{ is a professor of numerical analysis at the university of Paris VI and at LJLL.  His scientific contributions are in numerical methods for fluids.  He is a member of the Institut Universitaire de France and of the French (and Russian) Academy of Sciences.}\AUTEUR{fig-ko}{Koji Ohtsuka}{ is a professor at the Hiroshima Kokusai Gakuin University, Japan and chairman of the World Scientific and Engineering academy and Society, Japan chapter.  His research is in fracture dynamics, modelling and computing.}\AUTEUR{fig-alh}{Antoine Le Hyaric}{ is a Research Engineer at LJLL / CNRS. He is an expert in numerical methods for electromagnetism but also well versed in computer techniques for numerical analysis all the way to  Web portal design.}
 \end{document}
 
-
-
-For purposes of explanation, we used $\mathcal{T}_h$ (\texttt{Th}),\, $V_h$ (\texttt{Vh}), unknown function $u$ (\texttt{u}), test functions $v$ (\texttt{v}) and the problem \textbf{Poisson}, etc. (the term inside the parentheses are symbols in \freefempp programming), but
-you can use \emph{any name except reserved words and names already used}.
-Reserved words are shown in blue. \texttt{pi, x, y, label, solver} are
-reserved variables. It is allowed (although not advisable) to redefine
-these variables, so they will not be highlighted again in the
-following example programs.\\\\
-
-In each step, the independence in \freefempp programming is very high
-as stated below.
-\begin{itemize}
-  \item
-  For example, by changing 1st and 2nd lines as
-  following, we can solve (\ref{eqn:Poisson}) and (\ref{eqn:Dirichlet})
-  in L-shape domain with $\Gamma=\sum_{j=1}^6\Gamma_j$.
-\bFF
-@border G1(t=0,1){x=t;y=0;@label=1;}  // $\Gamma_1$
-@border G2(t=0,0.5){x=1;y=t;@label=1;}  // $\Gamma_2$
-@border G3(t=0,0.5){x=1-t;y=0.5;@label=1;}  // $\Gamma_3$
-@border G4(t=0.5,1){x=0.5;y=t;@label=1;}  // $\Gamma_4$
-@border G5(t=0.5,1){x=1-t;y=1;@label=1;}  // $\Gamma_5$
-@border G6(t=0,1){x=0;y=1-t;@label=1;}  // $\Gamma_6$
-@mesh Th = @buildmesh ( G1(6)+G2(4)+G3(4)+G4(4)+G5(4)+G6(6));
-\eFF
-  \item
-  In Step 3, you can control where the solution will be approximated.
-  If you write ``\texttt{Vh(Th,P1);}'' in 3rd line, you can get $P_1$-approximation. The machine time by $P_1$-element will be faster than $P_2$-element
-  and the storage is less.
-  \item
-  In Step 4, you can change the equation and boundary conditions easily.
-  For example, if you want solve
-  \begin{eqnarray*}
-  -\textrm{div}(k(x,y)\nabla u(x,y))&=&f(x,y)\quad\textrm{in }\Omega\\
-  u(x,y)&=&0\qquad \textrm{if $(x,y)$ on }\Gamma
-  \end{eqnarray*}
-  you only write as follows
-  \bFF
-  @func f= $\cdots$;
-  @func k= 1+sin(2*pi*x)*cos(2*pi*y);
-  @problem Poisson(u,v) =
-     @int2d(Th)(k*(@dx(u)*@dx(v) + @dy(u)*@dy(v)))
-     - @int2d(Th)( f*v)
-     + @on(1,u=0)  ;
-  \eFF
-  \emph{The user can use FE-function as the given function $f$ } (see \refSec{FE-function}), for example, obtained function \texttt{u} in Example \ref{exm:first}.
-  In \freefempp programming, the easy reuse of the obtained results
-  is important feature.
-  \item
-  The user can easily compare between mathematical modelling and \freefempp program.
-\end{itemize}
-
-\subsection{Projection or Interpolation}
-\index{P1-projection}
-For a finite element space $V_h$, $P_1$-projection $\Pi_h$ is defined by
-\[
-\Pi_h f=f(q^1)\phi_1+f(q^2)\phi_2+\cdots +f(q^{n_v})\phi_{n_v}
-\]
-for all continuous functions $f$. In \freefempp we can easily create the
-projection $f_h(=\texttt{fh})$ by
-\bFF
-Vh fh = $f(x,y)$;
-\eFF
-$\Pi_h$ is also called $P_1$-interpolate.
-
-\subsection{\setS{Matrix and Vector}}
-Here, we show how to get the stiffness matrix using \freefempp
-The first command \texttt{varf} is to define the \key{variational formula}.
-\begin{example}\label{exm:second}
-Here we solve the same problem (\ref{eqn:Poisson}) and (\ref{eqn:Dirichlet})
-using matrix.
-For purposes of explanation, we chage mesh size and use $P_1$-element:
-\bFF
- 1: @border C(t=0,2*pi) { x = cos(t); y = sin(t); }
- 2: @mesh Th = @buildmesh(C(7));  // changed from Example \ref{exm:first}
- 3: @fespace Vh(Th,P1);
- 4: Vh u,v,f,F;
- 5: @varf a(u,v) = @int2d(Th)( @dx(u)*@dx(v) + @dy(u)*@dy(v))
- 6:             + @on(C,u=0) ;
- 7: @varf b([v],[f]) = @int2d(Th)(v*f);
- 8:
- 9: f = x*y;  // interpolate $(x,y) \longleftarrow x*y$ function
-10: @matrix A=a(Vh,Vh);  // stiffness matrix, see (\ref{eqn:Equation})
-11: @matrix B=b(Vh,Vh);
-12: F[]=B*f[];     // load vector, see (\ref{eqn:Equation})
-13: @cout << "F=" << F[] << @endl;
-14: @cout <<"A="<< A << @endl;
-15: u[]=A^-1*F[];  // solve $A\vec{U}_h = \vec{F}$, see (\ref{eqn:Equation})
-16: @plot(u);
-\eFF
-
-We get the mesh $\mathcal{T}_h=\{T_1,\cdots,T_7\}$ (see Fig. \ref{fig-hatFunction}).
-\begin{note}
-\label{note:mesh}
-In what follows, we denote the vertices by $q^i,\, i=1,\cdots,8$,
-the number of vertices by $n_v$, the number of triangles by $n_t$.
-For each triangle $T_k\in \mathcal{T}_h$, we index the vertices by
-$q^{k_1},\, q^{k_2},\, q^{k_3}$ and denote the edges by
-$[q^{k_1}, q^{k_2}]$, $[q^{k_2}, q^{k_3}]$, $[q^{k_3}, q^{k_i}]$, that is,
-$[q^i,q^j]$ is the segment connecting $q^i$ and $q^j$.
-We denote the number of edges $[q^i,q^j]$
-by $n_e$ for all $q^i,\, q^j\p\Omega_h$,
-$\Omega_h=\sum_{k=1}^7T_k$.
-Here $n_v=8$, $n_t=7$, $n_e=7$.
-\end{note}
-
-
-The function $v$ in ``\texttt{Vh}'' is expressed
-\begin{equation*}
-v(x)=v_{1}\varphi _{1}(x) +\cdots +v_{n_{v}}\varphi _{n_{v}}(x)
-\end{equation*}%
-using the \key{hat functions} $\varphi _{j},\,j=1,\cdots ,n_{v}$ (see Fig.
-\ref{fig-hatFunction}).
-Here the $j$-th hat function $\varphi _{j}$ associated with $j$-th
-vertex $q^j$ is defined in the following way:
-\begin{enumerate}
-\item $\varphi _{j}$ is continuous function on $\Omega_h$.
-
-\item $\varphi _{j}$ is linear on each triangle $T_k,\, k=1,\cdots,n_{t}$
- of ``\texttt{Th}''.
-
-\item $\varphi _{j}\left( {q^{i}}\right) =\delta _{ji}$ where $q^{i}$
-denotes the $i$-th vertex, for all $i=1,\cdots ,n_{v}$.
-\end{enumerate}
-Here $\delta_{ij}$ is the Kronecker symbol.
-
-\begin{note}
-Other finite element spaces in \freefempp are explained in \refSec{Finite Elements}.
-\end{note}
-\begin{note}
-\label{note:FE2VEC}
-For an element $v=v_1\phi_1+\cdots+v_M\phi_M$ in
-a finite element space $V_h$, we get the \emph{column vector}
-$\{v\}$
-\[
-\{v\}=\left[
-\begin{array}{c}
-v_1\\
-\vdots\\
-v_M
-\end{array}
-\right]\qquad
-\{v\}=\texttt{v[]}\quad \textrm{in \freefempp}
-\]
-\end{note}
-Theoretically, it is natural to use the finite element space
-\[
-H^1_{0h}=
-\left\{v\in V_h(\mathcal{T}_h,P_1)\left|
-\phi_i(x)=0\quad \textrm{if }q^i\in \p\Omega_h
-\right.\right\}
-\]
-Let $I_{\Omega}$ be the set of indices $i$ of all internal vertices of the mesh
-\texttt{Vh}. In this example, $I_{\Omega}=\{6\}$.
-The stiffness matrix $A$ in 10th line is:
-\begin{eqnarray}
-\label{eqn:StiffnessDirichlet}
-\borderarray{[}{]}{1em}{1.2ex}{rrrrrrrrr}{
-&1&2&3&4&5&6&7&8\\
-1&10^{30}& -0.31& 0& 0&-0.46& -0.51& 0&0\\
-2&-0.31& 10^{30}& -0.23& 0& 0&-0.71& 0&0\\
-3&0&-0.23&10^{30}&-0.31& 0&-0.71& 0&0\\
-4&0& 0&-0.31&10^{30}& 0& -0.51& -0.46&0 \\
-5&-0.46& 0& 0& 0&10^{30}& -0.35& 0&-0.54\\
-6&-0.51& -0.71& -0.71& -0.51& -0.35& 3.47& -0.35& -0.30\\
-7&0& 0& 0&-0.46& &-0.35& 10^{30}& -0.54\\
-8&0& 0& 0& 0&-0.54&-0.30&-0.54& 10^{30}
-}
-\end{eqnarray}
-that is
-\begin{eqnarray}
-A_{ij}&=&\int_{\Omega_h}\nabla u_j\cdot \nabla u_i\quad
-\textrm{if }i\neq j,\, i=j\in I_{\Omega}\\
-A_{ij}&=&E\qquad (E=10^{30})\quad \textrm{if }j\in I_{\Omega}.
-\end{eqnarray}
-The load matrix $F^T$ is:
-\begin{eqnarray*}
-\left(
-\begin{array}{cccccccc}
--0.020& -0.037& 0.037& 0.020&0.064& 0& -0.064&1.\times 10^{-17}
-\end{array}
-\right)
-\end{eqnarray*}
-For $i\not\in I_{\Omega}$,
-\[
-Eu_i+\sum_{i\neq j}A_{ij}u_j=b_i
-\]
-which means that
-\[
-u_i=(b_i-\sum_{i\neq j}A_{ij}u_j)\times E^{-1}\simeq 10^{-30}\simeq 0
-\]
-\end{example}
-
-Mathematical results indicate that the Poisson equation
-with Neaumann boundary condition has not unique solution,
-whose weak form is same to (\ref{eqn:Poisson}) except the boundary condition:
-\[
-\int_{\Omega}\nabla u\cdot \nabla v = \int_{\Omega}fvdx
-\]
-without pernarization $E$. Then the stiffness matrix is created by
-\bFF
-@varf a(u,v) = @int2d(Th)( @dx(u)*@dx(v) + @dy(u)*@dy(v))
-@matrix A=a(Vh,Vh); // stiffness matrix
-\eFF
-and the obtained stiffness matrix is the following
-\[
-\borderarray{[}{]}{1em}{1.2ex}{rrrrrrrrr}{
-&1&2&3&4&5&6&7&8\\
-1&1.29&-0.31&0&0&-0.46&-0.51&0&0\\
-2&-0.31&1.26&-0.23&0&0&-0.71&0&0\\
-3&0&-0.23&1.26&-0.31&0&-0.71&0&0\\
-4&0&0&-0.31&1.29&0&-0.51&-0.46&0\\
-5&-0.46&0&0&0&1.35&-0.35&0&-0.54\\
-6&-0.51&-0.71&-0.71&-0.51&-0.35&3.47&-0.35&-0.30\\
-7&0&0&0&-0.46&0&-0.35&1.35&-0.54\\
-8&0&0&0&0&-0.54&-0.30&-0.54&1.38
-}
-\]
-The determinant of this matrix is $-1.7082274230870981\times 10^{-9}\approx 0$
-(The matrix here differ from original one by omitting from third decimal decimal point).
-
-\subsubsection{Non-homogeneous Dirichlet Condition}
-If we want solve the problem
-\[
--\Delta u=f\quad \textrm{in }\Omega;\qquad
-u=g\quad \textrm{on }\p\Omega
-\]
-We rewrite Example \ref{exm:first} as
-\bFF
- 5: @func f= x*y; @func g = sin(pi*x)*cos(pi*y);
- 6: @problem Poisson(u,v,@solver=LU) =
- 7:    @int2d(Th)(@dx(u)*@dx(v) + @dy(u)*@dy(v))   //  bilinear part
- 8:    - @int2d(Th)( f*v)          // right hand side
- 9:    + @on(1,u=g)  ;  // Non-homogeneous Dirichlet
-\eFF
-This make the following linear system, for $i\not\in I_{\Omega}$,
-\[
-Eu_i+\sum_{i\neq j}A_{ij}u_j=b_i+Eg(q^i)
-\]
-which means that
-\[
-u_i=g(q^i)+(b_i-\sum_{i\neq j}A_{ij}u_j)\times E^{-1}\simeq g(q^i)+O(1/E)
-\]
-\begin{note}
-To solve non-homogeneous Dirichlet, we rewrite Example \ref{exm:second} as
-\bFF
- 4: Vh u,v,f,F,g,bc; g = sin(pi*x)*cos(pi*y);
- 5: @varf a(u,v) = @int2d(Th)( @dx(u)*@dx(v) + @dy(u)*@dy(v))
- 6:             + @on(C,u=1) ;
-10: @matrix A=a(Vh,Vh); bc[]=a(0,Vh);
-12: F[]=B*f[];  F[] += bc[] .* g[];
-\eFF
-Here ``\texttt{bc[]=a(0,Vh)}'' create the vector
-$[bc_1,bc_2,\cdots,bc_M]$, $bc_i=0$ if $i\in I_{\Omega}$ and
-$bc_i=E (=10^{30})$ if $i\not\in I_{\Omega}$.
-If the finite approximation of $g$ is $g\approx g_1\phi_1+\cdots+g_M\phi_M$
-\begin{equation}
-\texttt{bc[] .* g[]}=\sum_{j=0}^{M-1} bc_jg_j
-\end{equation}
-\end{note}
