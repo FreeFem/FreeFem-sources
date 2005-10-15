@@ -237,10 +237,18 @@ plots/eigen.eps                 plots/nosplitmesh.eps           plots/xyf.eps \
 plots/eigen11.eps               plots/onnewmesh.eps \
 plots/medit2.eps  		plots/threehsv.eps		plots/hsv.eps \
 plots/crimpson.eps              plots/J-bfgs.eps		plots/u-bfgs.eps \
-plots/csSnapOld.eps 
+plots/csSnapOld.eps
+
+# files pour la page de garde FH
+OTHER_FIGS = plots/LogoCNRS.eps      plots/LogoLJLL.eps      plots/LogoUPMC.pdf      plots/logo.jpg \
+      plots/LogoLJLL.pdf      plots/logo-g.tiff       plots/logo.pdf \
+plots/LogoCNRS.pdf      plots/LogoUPMC.eps      plots/logo.eps          plots/logo.tiff \
+plots/fig-alh.eps       plots/fig-fh.eps        plots/fig-ko.eps        plots/fig-op.eps \
+plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg \
+plots/ffauteurs4.eps    plots/ffauteurs4.pdf 
 
 EXTRA_DIST = addfe.tex docFFGUI.tex manual-full.tex freefem++doc.tex  manual.tex FF.sty FFF.sty dessin.sty pdfsync.sty styles.sty \
-$(FIGS_EPS)
+$(FIGS_EPS) $(OTHER_FIGS)
 
 all: all-am
 

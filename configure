@@ -9451,7 +9451,7 @@ fi
 	fi
 
    # Trying to "locate" Arpack
-   if test "$ff_arpack_ok" = no;
+   if test "$ff_arpack_ok" = no -a enable_download != yes ;
    then
         echo "$as_me:$LINENO: checking for libarpack with locate" >&5
 echo $ECHO_N "checking for libarpack with locate... $ECHO_C" >&6

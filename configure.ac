@@ -553,7 +553,7 @@ then
 	fi
 
    # Trying to "locate" Arpack
-   if test "$ff_arpack_ok" = no;
+   if test "$ff_arpack_ok" = no -a enable_download != yes ;
    then
         AC_MSG_CHECKING(for libarpack with locate)
         ff_lib_arpack=`locate libarpack|grep  'libarpack.*.a$'|head -1`
