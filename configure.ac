@@ -553,7 +553,7 @@ then
 	fi
 
    # Trying to "locate" Arpack
-   if test "$ff_arpack_ok" = no -a enable_download != yes ;
+   if test "$ff_arpack_ok" = no -a "$enable_download" != yes ;
    then
         AC_MSG_CHECKING(for libarpack with locate)
         ff_lib_arpack=`locate libarpack|grep  'libarpack.*.a$'|head -1`
@@ -575,7 +575,7 @@ then
 		# Do not update $LIBS, but create an extra LIB variable,
 		# because this lib does not exist yet, and this could make the
 		# following tests fail.
-
+                ff_arpack_libs=${curdir}/download/arpack/ARPACK/libarpack_ff++.a 
 		ff_arpack_ok=yes
 	fi
 fi

@@ -42,7 +42,7 @@ Source: "examples++-chapt3\*.edp"; DestDir: "{app}\examples++-chapt3"
 Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
 Source: "examples++-load\*.edp"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\*.cpp"; DestDir: "{app}\examples++-load"
-Source: "examples++-load\*.sh"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\load.link"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\include-tmp\*"; DestDir: "{app}\examples++-load\include"
 
 
