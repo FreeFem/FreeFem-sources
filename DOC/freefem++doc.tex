@@ -45,15 +45,15 @@
     \\  \large  \Blue{Version 2.0-0 }
  \\ \vglue 0.7cm
   {\large \Blue{\url{http://www.freefem.org/ff++}}} \\ ~
- \\~  \\ 
+ \\~  \\
 % \Blue{{ \sc {\Huge F. Hecht,  O. Pironneau}
 % \\ ~ \\
 %{\Huge A. Le Hyaric, K. Ohtsuka } }}
 \includegraphics[width=10cm]{ffauteurs4}
 \vglue 1cm
 \includegraphics[width=15cm]{csSnap}
-\\ \vglue0.5cm 
-Laboratoire Jacques-Louis Lions, Université Pierre et Marie Curie, Paris
+\\ \vglue0.5cm
+Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \vglue-2cm
 \end{center}}
 \clearpage\thispagestyle{empty}\cleardoublepage
@@ -66,18 +66,18 @@ Laboratoire Jacques-Louis Lions, Université Pierre et Marie Curie, Paris
 \vglue 1cm
 
  \
-{\Large Frédéric Hecht${}^{1,4}$ }
- 
+{\Large Fr\'{e}d\'{e}ric Hecht${}^{1,4}$ }
+
 \url{mailto:frederic.hecht@upmc.fr}
- 
+
 \url{http://www.ann.jussieu.fr/~hecht}
 
 \medskip
 
 {\Large Olivier Pironneau${}^{1,3}$}
- 
+
   \url{mailto:olivier.pironneau@upmc.fr}
-  
+
 \url{http://www.ann.jussieu.fr/pironneau}
 
 
@@ -86,9 +86,9 @@ Laboratoire Jacques-Louis Lions, Université Pierre et Marie Curie, Paris
 
 
 {\Large Antoine Le Hyaric${}^{1,2}$ }
- 
+
  \url{mailto:lehyaric@ann.jussieu.fr}
- 
+
 \url{http://www.ann.jussieu.fr/~lehyaric/}
 
 
@@ -96,9 +96,9 @@ Laboratoire Jacques-Louis Lions, Université Pierre et Marie Curie, Paris
 
 
 {\Large Kohji Ohtsuka${}^{5}$ }
- 
+
   \url{mailto:ohtsuka@barnard.cs.hkg.ac.jp}
-  
+
 \url{http://barnard.cs.hkg.ac.jp/}
 \end{center}
 
@@ -109,16 +109,16 @@ Laboratoire Jacques-Louis Lions, Université Pierre et Marie Curie, Paris
 \item  Laboratoire Jacques-Louis Lions,
 175 rue du Chevaleret , 75013 Paris, France
 
- Universit\'{e} Pierre et Marie Curie, 
+ Universit\'{e} Pierre et Marie Curie,
 4 Place  Jussieu,  75252  PARIS cedex 05, France.
 
 
 \item CNRS, UMR 7598,  Laboratoire Jacques-Louis Lions,
 175 rue du Chevaleret , 75013 Paris, France.
-\item Institut de France, Académie des sciences, 23, quai de Conti,  75006 Paris,  France.
+\item Institut de France, Acad\'{e}mie des sciences, 23, quai de Conti,  75006 Paris,  France.
 \item INRIA, Projet Gamma, Domaine de Voluceau, Rocquencourt, B.P. 105, 78153 Le Chesnay Cedex, France.
 
-\item Hiroshima Kokusai Gakuin University, Hiroshima, Japan. 
+\item Hiroshima Kokusai Gakuin University, Hiroshima, Japan.
 
 \end{enumerate}
 \hbox to \hsize
@@ -139,7 +139,10 @@ Laboratoire Jacques-Louis Lions, Université Pierre et Marie Curie, Paris
 \let\subsection\section
 \let\section\chapter
 \section*{Preface}
-Fruit of a long maturing process freefem, in its last avatar, freefem++, is a high level integrated development environment (IDE)  for partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
+\hfill{\includegraphics[height=7cm,angle=90]{sanskrit}}
+\vskip 1cm
+
+Fruit of a long maturing process freefem, in its last avatar, freefem++, is a high level integrated development environment (IDE)  for partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.
 \medskip
 
 Freefem++ has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK. Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of freefem++. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in freefem++ to prepare research quality reports: color display online with zooming and other features and postscript printouts.
@@ -10487,13 +10490,13 @@ $$   \mathtt{dfft}(f,m,\varepsilon)_{k+nl} = \sum_{j'=0}^{m-1} \sum_{j=0}^{n-1} 
 {\bf  To compile and make a new library}
 
 
-{\scriptsize 
+{\scriptsize
 \begin{verbatim}
 % ./load.link  dfft.cpp ../download/install/lib/libfftw3.a -I../download/install/include
 export MACOSX_DEPLOYMENT_TARGET=10.3
 g++ -c -Iinclude -I../download/install/include dfft.cpp
 g++ -bundle -undefined dynamic_lookup dfft.o -o ./dfft.dylib ../download/install/lib/libfftw3.a
-\end{verbatim} 
+\end{verbatim}
 }
 
 To test ,
@@ -10949,12 +10952,12 @@ Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integrati
 ~
 \newpage
 \thispagestyle{empty}
-\normalsize 
+\normalsize
 \fontfamily{pag}
-\normalsize 
+\normalsize
 
 \textbf{Book Description}
-Fruit of a long maturing process freefem, in its last avatar, freefem++, is a high level integrated development environment (IDE)  for partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
+Fruit of a long maturing process freefem, in its last avatar, freefem++, is a high level integrated development environment (IDE)  for partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.
 \medskip
 
 Freefem++ has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK. Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of freefem++. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in freefem++ to prepare research quality reports: color display online with zooming and other features and postscript printouts.
@@ -10968,28 +10971,28 @@ This book is ideal for students at Master level, for  researchers at any level a
  \medskip
 
 "\ldots Impossible to put the book down, suspense right up to the last page\ldots"
- 
-{\sc Mike Gamon} Bangkok - Siam Chronicle.
+
+{\sc A. Tanh} Siam Chronicle.
  \medskip
 
 "\ldots  The chapter on discontinuous fems is so hilarious \ldots."
- 
-{\sc Boris Galerkin}, the Institute of Mechanics of the Soviet Academy of Sciences.
+
+{\sc Boris Galerkin},~~\includegraphics[height=0.3cm,width=5cm]{russe.jpg}
 
 \bigskip
 
 
 \textbf{About the Authors}
- 
+
  \medskip
- 
+
 \def\AUTEUR#1#2#3{\hbox to \hsize{
 \begin{minipage}{3cm}\includegraphics[height=2.5cm]{#1}\end{minipage}
 \hss \begin{minipage}{14cm}{\textbf{#2} #3}\end{minipage}}
  \par\medskip}
- 
- 
-\AUTEUR{fig-fh}{Frédéric Hecht}{  is a professor of numerical analysis at the university of Paris VI and does his research at the Laboratoire Jacques-Louis Lions (LJLL).  He is also a member of the project gamma at INRIA.  He is the author of several advanced software tools for automatic triangulations including the public domain EMC2.}  
+
+
+\AUTEUR{fig-fh}{Fr\'{e}d\'{e}ric Hecht}{  is a professor of numerical analysis at the university of Paris VI and does his research at the Laboratoire Jacques-Louis Lions (LJLL).  He is also a member of the project gamma at INRIA.  He is the author of several advanced software tools for automatic triangulations including the public domain EMC2.}
 
 \AUTEUR{fig-op}{Olivier Pironneau}{ is a professor of numerical analysis at the university of Paris VI and at LJLL.  His scientific contributions are in numerical methods for fluids.  He is a member of the Institut Universitaire de France and of the French  Academy of Sciences}
 
@@ -10997,4 +11000,3 @@ This book is ideal for students at Master level, for  researchers at any level a
 
 \AUTEUR{fig-alh}{Antoine Le Hyaric}{ is a Research Engineer at LJLL / CNRS. He is an expert in numerical methods for electromagnetism but also well versed in computer techniques for numerical analysis all the way to  Web portal design.}
 \end{document}
-
