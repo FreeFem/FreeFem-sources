@@ -34,16 +34,6 @@ template<class T> inline T Abs (const T &a){return a <0 ? -a : a;}
 template<class T> inline T Max (const T &a,const T & b,const T & c){return Max(Max(a,b),c);}
 template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(Min(a,b),c);}
 template<class T> inline T Square (const T &a){return a*a;}
-/*
-struct SubArray2: public binary_function<long,long,SubArray> { 
-  static SubArray f(const long & a,const long & b)  { 
-   // cout << "SubArray: " << a << " " << b << endl;
-    return SubArray(b-a+1,a);} }; 
-struct SubArray3: public ternary_function<long,long,long,SubArray> { 
-  static SubArray f(const long & a,const long & b,const long & c)  {  
-  // cout << "SubArray: " << a << " " << b << " " <<  c << endl;
-   return SubArray((b-a+1)/c,a,c);} }; 
-*/
 
  
 template<class K> 
@@ -59,11 +49,6 @@ struct Op2_dotproduct_: public binary_function<Transpose<KN_<K> >,KN_<K> ,K> {
 template<class A,class B>  A Build(B b) {  return A(b);}
   
   
-
-/*
-long Exit(long i) {throw(ErrorExec("Exit",i));return 0;}
-bool Assert(bool b) {if (!b) throw(ErrorExec("exec assert",1));return true;}
-*/
   
 inline void MyAssert(int i,char * ex,char * file,long line)
 {if (i) {
@@ -71,94 +56,7 @@ inline void MyAssert(int i,char * ex,char * file,long line)
      CompileError();}
  }
 
-/*  
-  C_F0 *pOne=0,*pZero=0,*pminusOne=0;
-// const C_F0 & One(*pOne), &Zero(*pZero);
- 
- Polymorphic * TheOperators=0, //=new Polymorphic(), 
-             * TheRightOperators=0; //=new Polymorphic();
 
-TableOfIdentifier Global;
-
- long E_Border::Count =0;
-
-typedef list<TableOfIdentifier *> ListOfTOfId;
-
-  ListOfTOfId tables_of_identifier;
-
-  const int AC_F0::MaxSize=1024; // maximal number of parameters
-*/  
-/*  
-template<class R>
-class  OneOperator0 : public OneOperator {
- class E_F0_F :public  E_F0 { public:
-  typedef  R (*func)( ) ; 
-  func f;
-  E_F0_F(func ff)  : f(ff) {}
-  AnyType operator()(Stack )  const  {return SetAny<R>( f()) ;}  
-     operator aType () const { return atype<R>();} 
-
-};
-
-  //  aType r; //  return type
-    typedef  R (*func)() ; 
-    func  f;
-    public: 
-    E_F0 * code(const basicAC_F0 & ) const 
-     { return  new E_F0_F(f);} 
-    OneOperator0(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
-};
-*/
-/*
-template<class R>
-class  OneOperatorConst : public OneOperator {
-    E_F0 * e;
-    public: 
-    E_F0 * code(const basicAC_F0 & ) const  { return  e;} 
-    OneOperatorConst(E_F0 * ee):  OneOperator(map_type[typeid(R).name()]),e(ee){}
-};
-
-class  OneOperator_array : public OneOperator {public:
-    E_F0 * code(const basicAC_F0 & a) const 
-     { return  new E_Array(a);} 
-    OneOperator_array(): OneOperator(atype<E_Array>(),true) {}
-};
-class  OneOperator_border : public OneOperator {public:
-    E_F0 * code(const basicAC_F0 & a) const 
-     { if (a.size()==1 && a[0].left()==atype<E_Array>() ) 
-        return new E_Border(dynamic_cast<const E_Array*>(a[0].LeftValue()));
-        else     
-        return  new E_Border(a);} 
-    OneOperator_border(): OneOperator(atype<const E_Border *>(),true) {}
-};
-
-class  OneOperator_border_label : public OneOperator {public:
-  class Op : public E_F0 {public:
-   const  E_Border *b;
-      Op( const  E_Border *bb) : b(bb) {}
-      AnyType operator()(Stack)  const { return SetAny<long>(b->label);}
-   };
-    E_F0 * code(const basicAC_F0 & a) const 
-     {  const  E_Border * b = dynamic_cast<const E_Border *>(a[0].LeftValue());
-        return new Op(b);} 
-    OneOperator_border_label(): OneOperator(atype<long>(),atype<const E_Border *>()) {}
-};
-
-
-
-template<class RR> RR LIncremantation(RR* a){ return ++(*a);}
-template<class RR> RR RIncremantation(RR* a){ return (*a)++;}
-template<class RR> RR LDecremantation(RR* a){ return --(*a);}
-template<class RR> RR RDecremantation(RR* a){ return (*a)--;}
-
-template<class RR,class B>
- RR * New_form_string(string * s) {B * r=  new B(s);delete *s;return r;}
- 
- 
-
-
-typedef MyMap<String,double> mapSd ;
-*/
 template<class K>
 inline   K * get_element( MyMap<String,K> *  const  &  a,string*  const   & b)
  { K * ret=  &((*a)[*b]); // correction FH feb 2004
@@ -212,118 +110,6 @@ RR * get_elementp2_(const A & a,const B & b,const C & c){
            << " array type = " << typeid(A).name() << endl;
      ExecError("Out of bound in operator (,)");}
     return  &((*a)(b,c));}
-/* 
-template<class RR> RR Abs(RR a) { return a<0?-a:a;}
-
-template<class R,class A,class B>
-R *MakePtrWithDel( A  const & a)
-{ R *r= new B(a->c_str());
-  delete a;
-  return r;}
-
-template<class R,class RR> 
-struct Op1_new_pstring: public unary_function<string*,R> { 
-  static R f(string * const & a)  {R r =  new RR(a->c_str()); delete a;return r;} }; 
-
-template<class R,class RR> 
-struct Op2_set_pstring: public binary_function<R,string*,R> { 
-  static R  f(R const & p,string * const & a)  {*p =  new RR(a->c_str());
-   if ( !*p || !**p) { cerr << " Error openning file " << *a << endl; ExecError("Error openning file");}
-   delete a;return p;} }; 
-
-template<class R,class RR> 
-struct Op2_set_pstringiomode: public ternary_function<R,string*,ios::openmode,R> { 
-  static R  f(R const & p,string * const & a,const ios::openmode & mode) 
-   {*p =  new RR(a->c_str(),mode); delete a;return p;} }; 
-
-AnyType FWhile(Stack s ,Expression test,Expression ins)
-{ 
-  AnyType a;
-  while ( GetAny<bool>((*test)(s)))
-     try  { a=(*ins)(s);}
-     catch ( E_exception & e) { 
-       if (e.code == E_exception::e_break) break;
-       else if  (e.code == E_exception::e_continue) continue;
-       }
-  return a;
-}
-    
-AnyType FFor(Stack s ,Expression i0,Expression i1,Expression i2,Expression ins)
-{ 
-  AnyType a;
-  for ( (*i0)(s);GetAny<bool>((*i1)(s));(*i2)(s))
-   {
-     try  {a=(*ins)(s);}
-     catch ( E_exception & e) { 
-        if (verbosity>50)
-        cerr << "FFor " << e.what() << e.code << endl; 
-       if (e.code == E_exception::e_break) break;
-       else if  (e.code == E_exception::e_continue) continue;
-       }
-   }
-  return a;
-}
-
-AnyType FIf(Stack s ,Expression test,Expression i1,Expression i2,Expression )
- {  AnyType a;
-   if (GetAny<bool>((*test)(s))) 
-      a=(*i1)(s);
-   	else if (i2) 
-   	  a=(*i2)(s);   	
-   	return a;
- }
-
-
-
-aType TypeArray(aType b,aType a)
-{ // type of  b[a]
-   aType r=map_type_of_map[make_pair(a->right(),b->right())];
-   if (!r) {
-      cerr << "Sorry is not possible to make a map "<< *b->right() << " [" << *a->right() << "]" << endl;
-      cerr << " list: " << endl;
-      Map_type_of_map::const_iterator i;
-      for(i=map_type_of_map.begin();i!=map_type_of_map.end();i++)
-        cerr << "\t " << *i->first.second << " [" << *i->first.first << "]" << "=" << *i->second << endl;        
-      CompileError();
-   }
-   return r;
-}
-
-aType TypeTemplate(aType b,aType a)
-{ // type of  b[a]
-   aType r=map_type_of_map[make_pair(b,a)];
-   if (!r) {
-      cerr << "Sorry is not possible to make a map "<< *b << "<" << *a << ">" << endl;
-      cerr << " list: " << endl;
-      Map_type_of_map::const_iterator i;
-      for(i=map_type_of_map.begin();i!=map_type_of_map.end();i++)
-        cerr << "\t " << *i->first.second << " <" << *i->first.first << ">" << "=" << *i->second << endl;        
-      CompileError();
-   }
-   return r;
-}
-aType TypeArray(aType c,aType b,aType a)
-{
-   // type of  c[ b, a] 
-   aType ba=map_pair_of_type[make_pair(b->right(),a->right())];
-   if (!ba) {
-      cerr << "Sorry is not possible to make a type of pair  "<< *b->right() << ", " << *c->right() << " " << endl;
-      cerr << " list: " << endl;
-      Map_type_of_map::const_iterator i;
-      for(i=map_pair_of_type.begin();i!=map_pair_of_type.end();i++)
-        cerr << "\t (" << *i->first.second << " , " << *i->first.first << ") " << "=" << *i->second << endl;        
-      CompileError();
-   }
-   return TypeArray(c,ba);
-}
-
-
-inline  void ShowOn_cerr(const pair<const char * ,const OneOperator *> & i)
-{ 
-   cerr << "\t" <<  *i.first << ":" <<  endl;
-   i.second->Show(cerr);
-}
-*/
 
 template<class RR,bool isinit>
 class  InitArrayfromArray : public OneOperator { 
@@ -481,49 +267,6 @@ public:
    
 
 
-
-/*
-void ShowKeyWord(ostream & f ) 
- {
-   zzzfff->dump(f);
- 
- }
-
-ostream* dumptable(ostream* f)
-{
-
-  *f << " the keywords " << endl;
-  ShowKeyWord(*f);
-  *f << " the types " << endl; 
-  ShowType(*f);
-   ListOfTOfId::const_iterator i=tables_of_identifier.begin();
-   for(;i!=tables_of_identifier.end();++i)
-    { 
-      cout << " --------- table of identifier ---------\n";
-      TableOfIdentifier * ti=*i;
-      TableOfIdentifier::const_iterator mc=ti->m.begin();
-      TableOfIdentifier::const_iterator end=ti->m.end();
-      for (;mc != end;mc++)
-       {
-         *f  << "  - " << mc->first << ",  type :" <<  *mc->second.first << endl;
-         const Polymorphic * op =dynamic_cast<const Polymorphic *>(mc->second.second) ;
-         if ( op )  *f << *op << endl;
-       }
-      
-     }
-  
-  return f;
-}
-
-
-long exec(string *s)
-    {
-      int r=execute(s->c_str());
-      delete s;
-      return r;}
-      
-
-*/ 
 template<class K> long get_n(KN<K> * p){ return p->N();}
 template<class K> long get_n(KNM<K> * p){ return p->N();}
 
@@ -531,63 +274,27 @@ template<class K> long get_m(KNM<K> * p){ return p->M();}
 template<class K> K get_max(KN<K> * p){ return p->max();}
 template<class K> K get_min(KN<K> * p){ return p->min();}
 template<class K> K get_sum(KN<K> * p){ return p->sum();}
-template<class K> K get_sum0(const KN_<K> & p){ return p.sum();}
-template<class K> K get_max0(const KN_<K> &p){ return p.max();}
-template<class K> K get_min0(const KN_<K> &p){ return p.min();}
+template<class K,class T > K get_sum0(const T & p){ return p.sum();}
+template<class K,class T > K get_max0(const T &p){ return p.max();}
+template<class K,class T > K get_min0(const T &p){ return p.min();}
 
-
-/*
-template<class F>  class dot1_F0
- { public:
-   typedef typename F::argument_type pA;
-   typedef typename F::Result R;
-   
-   F f;
-   pA k;
-   R operator()() const { return f(*k); }
-   dot1_F0(F ff,pA kk):f(ff),k(kk) {}
- };
- 
- 
-typedef  mem_fun_t<long,ostream> ostream_dot_f;
-
-typedef dot1_F0<mem_fun_t<long,ostream> > ostream_prec;
-
-//template <class S,class T> 
- template<class S,class T,S (T::*f)()>
- dot1_F0<mem_fun_t<S,T> >  Build(T*k) { return dot1_F0(f,k);}
- */
  
  class ostream_precis { public:
  ostream_precis(ostream * ff) :f(ff) {}
   ostream * f;
    operator long () const {return f->precision();}
  };
-/*
- ostream_precis ostream_precision(ostream **f){ return ostream_precis(*f);}
-  ostream_precis ostream_precision(ostream *f){ return ostream_precis(f);}
-long get_precis( ostream_precis  pf) { return pf.f->precision();}
- long set_precis( ostream_precis  pf, long  l) { return pf.f->precision(l);}
 
- class istream_good { public:
-  istream_good(istream * ff) :f(ff) {}
-  istream * f;
-  operator bool () const {return f->good();}
- };
- inline istream_good to_istream_good(istream **f){ return istream_good(*f);}
- inline istream_good to_istream_good(istream *f){ return istream_good(f);}
-  
-  inline long get_good( istream_good  pf) { return pf.f->good();}
-  inline bool get_eof(istream ** p){ return (**p).eof();}
- 
-*/
+template<class A,class B> B castto(const A & a){ return a;}
  
 template<class K>
 void ArrayDCL()
 {
     Dcl_TypeandPtr<KN<K> >(0,0,0,::Destroy<KN<K> >);
   //  Dcl_Type<KN<Complex> *>(0,::Destroy<KN<Complex> >);
-    Dcl_Type<KN<K> *>(0,::Destroy<KN<K> >);
+   // Dcl_Type<KN<K> *>(0,::Destroy<KN<K> >); // Modif 17102005 
+   // attention un exp KN<> * right est un KN<> et non un KN<> *
+
     Dcl_Type<KNM<K> *>(0,::Destroy<KNM<K> >);
     Dcl_Type< Transpose<KN<K> *> > ();
     
@@ -608,7 +315,16 @@ void ArrayDCL()
 
      map_type[typeid(KN_<K> ).name()]->AddCast(
        new E_F1_funcT<KN_<K>,KN_<K>*>(UnRef<KN_<K> >),
-       new E_F1_funcT<KN_<K>,KN<K>*>(UnRef<KN_<K>,KN<K> >)
+     //  new E_F1_funcT<KN_<K>,KN<K>*>(UnRef<KN_<K>,KN<K>* >), inutil cas KN<K> est right expression de KN<K>* 
+       new E_F1_funcT<KN_<K>,KN<K> >(Cast<KN_<K>,KN<K> >)
+       
+       );
+    //   ,new E_F1_funcT<KN_<K>,K>(ValueToKN_<K>),
+    //   new E_F1_funcT<KN_<K>,K*>(PtrToKN_<K>)       
+       
+     // Ajoute FH   
+     map_type[typeid(KN<K> ).name()]->AddCast(
+       new E_F1_funcT<KN<K>,KN<K>*>(UnRef<KN<K> >)
     //   ,new E_F1_funcT<KN_<K>,K>(ValueToKN_<K>),
     //   new E_F1_funcT<KN_<K>,K*>(PtrToKN_<K>)       
        ); 
@@ -654,9 +370,14 @@ void ArrayOperator()
      Add<KN<K> *>("sum",".",new OneOperator1<K,KN<K> *>(get_sum));
      Add<KN<K> *>("min",".",new OneOperator1<K,KN<K> *>(get_min));
      Add<KN<K> *>("max",".",new OneOperator1<K,KN<K> *>(get_max));
-     Add<KN_<K> >("sum",".",new OneOperator1_<K,KN_<K> >(get_sum0));
-     Add<KN_<K> >("min",".",new OneOperator1_<K,KN_<K> >(get_min0));
-     Add<KN_<K> >("max",".",new OneOperator1_<K,KN_<K> >(get_max0));
+     
+     Add<KN_<K> >("sum",".",new OneOperator1_<K,KN_<K> >(get_sum0<K,KN_<K> >));
+     Add<KN_<K> >("min",".",new OneOperator1_<K,KN_<K> >(get_min0<K,KN_<K> >));
+     Add<KN_<K> >("max",".",new OneOperator1_<K,KN_<K> >(get_max0<K,KN_<K> >));
+     
+     Add<KN<K> >("sum",".",new OneOperator1_<K,KN<K> >(get_sum0<K,KN<K> >));
+     Add<KN<K> >("min",".",new OneOperator1_<K,KN<K> >(get_min0<K,KN<K> >));
+     Add<KN<K> >("max",".",new OneOperator1_<K,KN<K> >(get_max0<K,KN<K> >));
 
      Add<KN<K> *>("resize",".",new OneOperator1< Resize<KN<K> >,KN<K> *>(to_Resize));
      Add<KNM<K> *>("resize",".",new OneOperator1< Resize<KNM<K> >,KNM<K> *>(to_Resize));
@@ -795,18 +516,18 @@ void ArrayOperator()
         new OneBinaryOperator<set_eq_array_div<KN<K> ,Sub_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array_div<KN<K> ,Mulc_KN_<K> > > ,
         new OneBinaryOperator<set_eq_array_div<KN<K> ,Mul_KNM_KN_<K> > > ,
-        new OneBinaryOperator<set_eq_arraypd_div<KN_<K> ,Add_Mulc_KN_<K>* > > ,
-        new OneBinaryOperator<set_eq_arrayp_div<KN_<K> ,KN<K>* > >        
+        new OneBinaryOperator<set_eq_arraypd_div<KN<K> ,Add_Mulc_KN_<K>* > > ,
+        new OneBinaryOperator<set_eq_arrayp_div<KN<K> ,KN<K>* > >        
      );
 
      TheOperators->Add("/=",
-        new OneBinaryOperator<set_eqarray_div<KN<K> ,K > > ,
-        new OneBinaryOperator<set_eqarray_div<KN<K> ,Add_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray_div<KN<K> ,Sub_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray_div<KN<K> ,Mulc_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray_div<KN<K> ,Mul_KNM_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarraypd_div<KN<K> ,Add_Mulc_KN_<K>* > > ,
-        new OneBinaryOperator<set_eqarrayp_div<KN<K> ,KN<K>* > >        
+        new OneBinaryOperator<set_eqarray_div<KN_<K> ,K > > ,
+        new OneBinaryOperator<set_eqarray_div<KN_<K> ,Add_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray_div<KN_<K> ,Sub_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray_div<KN_<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray_div<KN_<K> ,Mul_KNM_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarraypd_div<KN_<K> ,Add_Mulc_KN_<K>* > > ,
+        new OneBinaryOperator<set_eqarrayp_div<KN_<K> ,KN<K>* > >        
      );
 
      TheOperators->Add("+",

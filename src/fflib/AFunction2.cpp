@@ -68,10 +68,14 @@ OneOperator* OneOperator::FindSameR(const ArrayOfaType & at)
       OneOperator *w=0,*oo,*r;
       int n=0;
       for (oo=this;oo;oo=oo->next)
+        { 
         //if (oo->WithOutCast(at)) 
         if  (at==*oo)  n++,r=oo;        
         else if (oo->WithOutCast(at)) n++,r=oo;
+      //  if (n) cout << " \t " << oo << " " << *oo  << " <-----> " << at << " n =" << n << endl;
+        }
      // if (n>1) cout << "FindSameR " << n << endl;
+     // if (n)       cout << *r << " <-----> " << at << " n =" << n << endl;
       return n==1 ? r : 0;
 }
       
@@ -150,7 +154,8 @@ C_F0::C_F0(const Polymorphic * poly,const char *op,const basicAC_F0 & p)
         { 
            cerr << " error operator " << op << " " << at << endl;
            poly->Show(op,at,cerr);
-           CompileError();
+         const  OneOperator *  ff=poly->Find(op,at);
+         CompileError();
         }
    }
   else { 

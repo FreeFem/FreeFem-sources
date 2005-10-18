@@ -55,7 +55,7 @@ class lgNRJ : public NRJ<PARAM,VECT,VMAT,REAL> {
 private:
    Stack stack;
    Expression J,dJ,hJ,theparame;
-
+   VECT * gg;
 protected:
   void setparam( const Param<R>& x )
     {
@@ -65,9 +65,9 @@ protected:
     }
 public:
   lgNRJ(Stack s,int n,Expression t,Expression JJ,Expression dJJ,Expression hJJ) 
-   : NRJ<PARAM,VECT,VMAT,REAL>(n), stack(s),theparame(t),J(JJ),dJ(dJJ),hJ(hJJ)  
-    {  }
-  
+   : NRJ<PARAM,VECT,VMAT,REAL>(n), stack(s),theparame(t),J(JJ),dJ(dJJ),hJ(hJJ),gg(0)  
+    { if(dJ) gg=new VECT(n);  }
+   ~lgNRJ() { if(gg) delete gg;}
   REAL Val(const Param<R>& x) {
      setparam(x);
      assert(J);
@@ -75,9 +75,9 @@ public:
      
   VECT* Gradient(const Param<R>& x) {
      setparam(x);
-     
-     return dJ ? GetAny<Kn*>( (*dJ)(stack)) :0;}
-     
+     if ( dJ) { *gg=GetAny<Kn>( (*dJ)(stack));}
+     return gg ; //dJ ? GetAny<Kn*>( (*dJ)(stack)) :0;}
+     }
   VMAT* Hessian(const Param<R>& x) {
      setparam(x);
      if (!hJ) return 0;
@@ -113,7 +113,7 @@ public:
     
       J= to<R>(C_F0(opJ,"(",theparam));
       if(opdJ)
-        dJ= to<Kn*>(C_F0(opdJ,"(",theparam));
+        dJ= to<Kn>(C_F0(opdJ,"(",theparam));// Modif FH 17102005 (a verifier) to<Kn*> ->to<Kn>
       if(ophJ)
        hJ= to< Matrice_Creuse<R> *>(C_F0(ophJ,"(",theparam));
          
