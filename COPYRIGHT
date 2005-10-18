@@ -7,11 +7,11 @@ Antoine Le Hyaric <lehyaric@ann.jussieu.fr>
 
 
 All its programs except files the comming from 
- ARPACK++ software (files  in directory ARPACK/apack++/include )
- COOOL sofware (files in directory src/Algo) 
- and the file mt19937ar.cpp 
+ARPACK++ software (files  in directory ARPACK/apack++/include )
+COOOL sofware (files in directory src/Algo) 
+and the file mt19937ar.cpp 
 which may be redistributed under the terms of the
- GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
+GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
 
 
 		  GNU LESSER GENERAL PUBLIC LICENSE

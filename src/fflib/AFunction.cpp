@@ -59,17 +59,8 @@ complex<T> polar(const T& r, const T& theta)
 
 
 double preal( Complex * const& p){return real(*p);}
- /*
-template<class K> 
-struct Op2_dotproduct: public binary_function<Transpose<KN<K> *>,KN<K> *,K> { 
-  static K f( Transpose<KN<K> *> const & a, KN<K> * const& b)  
-   { return (conj(*a.t),*b);} }; 
 
-template<class K> 
-struct Op2_dotproduct_: public binary_function<Transpose<KN_<K> >,KN_<K> ,K> { 
-  static K f( Transpose<KN_<K> > const & a, KN_<K>  const& b)  
-   { return (conj(a.t),b);} }; 
-*/   
+ 
 template<class A,class B>  A Build(B b) {  return A(b);}
   
   
@@ -84,23 +75,7 @@ inline void MyAssert(int i,char * ex,char * file,long line)
      CompileError();}
  }
 
-/*  
-  C_F0 *pOne=0,*pZero=0,*pminusOne=0;
-// const C_F0 & One(*pOne), &Zero(*pZero);
- 
- Polymorphic * TheOperators=0, //=new Polymorphic(), 
-             * TheRightOperators=0; //=new Polymorphic();
 
-TableOfIdentifier Global;
-
- long E_Border::Count =0;
-
-typedef list<TableOfIdentifier *> ListOfTOfId;
-
-  ListOfTOfId tables_of_identifier;
-
-  const int AC_F0::MaxSize=1024; // maximal number of parameters
-*/  
   
 template<class R>
 class  OneOperator0 : public OneOperator {
@@ -190,41 +165,7 @@ inline   string ** get_elements( MyMap<String,String> *  const  &  a,string*  co
  { String* Sret=  &((*a)[*b]); // correction FH feb 2004
     delete b;
     return Sret->getap();}
-/*
-template<class RR,class A,class B>  
-RR * get_element_(const A & a,const B & b){ 
-  if( b<0 || a.N() <= b) 
-   { cerr << " Out of bound  0 <=" << b << " < "  << a.N() << " array type = " << typeid(A).name() << endl;
-     ExecError("Out of bound in operator []");}
-    return  &((a)[b]);}
-    
 
-template<class RR,class A,class B>  
-RR * get_elementp_(const A & a,const B & b){ 
-  if( b<0 || a->N() <= b) 
-   { cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " array type = " << typeid(A).name() << endl;
-     ExecError("Out of bound in operator []");}
-    return  &((*a)[b]);}
-
-template<class K>  
-KN_<K> fSubArray(const KN_<K> & a,const SubArray & b)
- { return a(b);}
-template<class K>  
-KN_<K> fSubArrayp( KN<K>  * const & a,const SubArray & b)
- { return (*a)(b);}
- 
-template<class A>  
-A fSubArrayc(const A & a,const char & b)
- { return a;}
- 
-template<class RR,class A,class B,class C>  
-RR * get_elementp2_(const A & a,const B & b,const C & c){ 
-  if( b<0 || a->N() <= b || c<0 || a->M() <= c  ) 
-   { cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " " << c << " < "  << a->M() 
-           << " array type = " << typeid(A).name() << endl;
-     ExecError("Out of bound in operator (,)");}
-    return  &((*a)(b,c));}
-*/ 
 template<class RR> RR Abs(RR a) { return a<0?-a:a;}
 
 template<class R,class A,class B>
@@ -336,162 +277,6 @@ inline  void ShowOn_cerr(const pair<const char * ,const OneOperator *> & i)
    i.second->Show(cerr);
 }
 
-/*
-template<class RR,bool isinit>
-class  InitArrayfromArray : public OneOperator { 
-public:
-    typedef KN<RR> * A;
-    typedef KN<RR> * R;
-    typedef E_Array B;
-    
-    class CODE : public  E_F0 { public:
-       Expression a0;
-       int N;
-       Expression * tab;
-    int * what;//  0  RR, 1 KN<RR>, 
-       const  bool mi;
-
-    CODE(Expression a,const E_Array & tt)  
-      : a0(a),N(tt.size()),
-	mi(tt.MeshIndependent()),
-	tab(new Expression [N]),
-	what(new int[N])  
-      {
-        assert(&tt);
-      int err=0;
-        for (int i=0;i<N;i++)
-	if(atype<RR>()->CastingFrom(tt[i].right() ) ) 
-	  {
-          tab[i]=atype<RR>()->CastTo(tt[i]);
-	    what[i]=0;
-	  }
-	else if(atype<KN_<RR> >()->CastingFrom(tt[i].right() ) ) 
-	  {
-	    tab[i]=atype<KN_<RR> >()->CastTo(tt[i].RightExp());
-	    what[i]=1;
-	  }      
-	else 
-	  CompileError(" we are waiting for scalar or vector of scalar");
-    }
-    
-    AnyType operator()(Stack stack)  const 
-    {
-      A  a=GetAny<A>((*a0)(stack));
-      KN<AnyType> v(N);
-      KN<int>  nn(N+1);
-      for (int i=0;i<N;i++)
-        v[i]= (*(tab[i]))(stack);
-      
-      int n=0;
-      for (int i=0;i<N;i++)
-	{
-	  if (what[i]==0) nn[i]=1;
-	  else if (what[i]==1) nn[i]=GetAny<KN_<RR> >(v[i]).size();
-          n += nn[i];
-	}
-      if (isinit) 
-        a->init(n);
-      else
-	a->resize(n);
-      
-      for (int i=0,j=0 ;i<N; j += nn[i++])
-	
-        if (what[i]==0)
-          (*a)[j]= GetAny<RR>(v[i]);
-        else if (what[i]==1) 
-          (*a)(SubArray(nn[i],j)) = GetAny<KN_<RR> >(v[i]);
-      return SetAny<R>(a);
-    } 
-    bool MeshIndependent() const     {return  mi;} // 
-    ~CODE() { delete [] tab; delete[] what;}
-    operator aType () const { return atype<R>();}    
-  }; // end sub class CODE
-  
-  
-    public: 
-    E_F0 * code(const basicAC_F0 & args) const 
-     { return  new CODE(t[0]->CastTo(args[0]),*dynamic_cast<const E_Array*>( t[1]->CastTo(args[1]).LeftValue()));} 
-    InitArrayfromArray():   OneOperator(atype<R>(),atype<A>(),atype<B>())  {}
-  
-};
-
-template<typename RR>
-class  SetArrayofKNfromKN : public OneOperator { 
-public:
-    typedef KN_<RR>  A; // Warning  B type of  1 parameter 
-    typedef KN_<RR>  R;
-    typedef E_Array B; //   A type of 2 parameter
-    
-    class CODE : public  E_F0 { public:
-       Expression a0;
-       int N;
-       Expression * tab;
-       int * what;//  0  RR, 1 KN<RR>, 
-       const  bool mi;
-
-    CODE(Expression a,const E_Array & tt)  
-      : a0(a),N(tt.size()),
-	mi(tt.MeshIndependent()),
-	tab(new Expression [N]),
-	what(new int[N])  
-      {
-        assert(&tt);
-      int err=0;
-        for (int i=0;i<N;i++)
-	if(atype<RR*>()->CastingFrom(tt[i].left() ) ) 
-	  {
-          tab[i]=atype<RR*>()->CastTo(tt[i]);
-	    what[i]=0;
-	  }
-	else if(atype<KN_<RR> >()->CastingFrom(tt[i].right() ) ) 
-	  {
-	    tab[i]=atype<KN_<RR> >()->CastTo(tt[i].RightExp());
-	    what[i]=1;
-	  }      
-	else 
-	  CompileError(" we are waiting for scalar or vector of scalar");
-    }
-    
-    AnyType operator()(Stack stack)  const 
-    {
-      A  a=GetAny<A>((*a0)(stack));
-      KN<AnyType> v(N);
-      KN<int>  nn(N+1);
-      for (int i=0;i<N;i++)
-        v[i]= (*(tab[i]))(stack);
-      
-      int n=0;
-      for (int i=0;i<N;i++)
-	{
-	  if (what[i]==0) nn[i]=1;
-	  else if (what[i]==1) nn[i]=GetAny<KN_<RR> >(v[i]).size();
-          n += nn[i];
-	}
-      ffassert(n == a.size()); 
-      for (int i=0,j=0 ;i<N; j += nn[i++])
-	
-        if (what[i]==0)
-         * GetAny<RR*>(v[i]) = a[j];
-        else if (what[i]==1) { // hack FH 
-           KN_<RR> tab(GetAny<KN_<RR> >(v[i])); 
-           tab  =a(SubArray(nn[i],j));
-           }
-      return SetAny<R>(a);
-    } 
-    bool MeshIndependent() const     {return  mi;} // 
-    ~CODE() { delete [] tab; delete[] what;}
-    operator aType () const { return atype<R>();}    
-  }; // end sub class CODE
-  
-  
-    public: // warning hack  A and B 
-    E_F0 * code(const basicAC_F0 & args) const 
-     { return  new CODE(t[1]->CastTo(args[1]),*dynamic_cast<const E_Array*>( t[0]->CastTo(args[0]).RightValue()));} 
-    SetArrayofKNfromKN():   OneOperator(atype<R>(),atype<B>(),atype<A>())  {} // warning with A and B 
-  
-};
-   
-*/
 
 
 void ShowKeyWord(ostream & f ) 
@@ -534,40 +319,7 @@ long exec(string *s)
       return r;}
       
 
-/* 
-template<class K> long get_n(KN<K> * p){ return p->N();}
-template<class K> long get_n(KNM<K> * p){ return p->N();}
 
-template<class K> long get_m(KNM<K> * p){ return p->M();}
-template<class K> K get_max(KN<K> * p){ return p->max();}
-template<class K> K get_min(KN<K> * p){ return p->min();}
-template<class K> K get_sum(KN<K> * p){ return p->sum();}
-template<class K> K get_sum0(const KN_<K> & p){ return p.sum();}
-template<class K> K get_max0(const KN_<K> &p){ return p.max();}
-template<class K> K get_min0(const KN_<K> &p){ return p.min();}
-
-
-/*
-template<class F>  class dot1_F0
- { public:
-   typedef typename F::argument_type pA;
-   typedef typename F::Result R;
-   
-   F f;
-   pA k;
-   R operator()() const { return f(*k); }
-   dot1_F0(F ff,pA kk):f(ff),k(kk) {}
- };
- 
- 
-typedef  mem_fun_t<long,ostream> ostream_dot_f;
-
-typedef dot1_F0<mem_fun_t<long,ostream> > ostream_prec;
-
-//template <class S,class T> 
- template<class S,class T,S (T::*f)()>
- dot1_F0<mem_fun_t<S,T> >  Build(T*k) { return dot1_F0(f,k);}
- */
  
  class ostream_precis { public:
  ostream_precis(ostream * ff) :f(ff) {}
@@ -590,79 +342,7 @@ long get_precis( ostream_precis  pf) { return pf.f->precision();}
   inline long get_good( istream_good  pf) { return pf.f->good();}
   inline bool get_eof(istream ** p){ return (**p).eof();}
  
-/* 
-template<class K>
-void ArrayDCL()
-{
-    Dcl_TypeandPtr<KN<K> >(0,0,0,::Destroy<KN<K> >);
-  //  Dcl_Type<KN<Complex> *>(0,::Destroy<KN<Complex> >);
-    Dcl_Type<KN<K> *>(0,::Destroy<KN<K> >);
-    Dcl_Type<KNM<K> *>(0,::Destroy<KNM<K> >);
-    Dcl_Type< Transpose<KN<K> *> > ();
-    
-    Dcl_Type< Transpose<KN_<K> > > ();
-    //Dcl_Type< Transpose<KN<Complex> > > ();
-    Dcl_TypeandPtr<KN_<K> >(0,0,0,0);
-    //Dcl_TypeandPtr<KN_<Complex> >(0,0,0,0);
 
-    Dcl_Type<Add_KN_<K> >();
-    Dcl_Type<DotStar_KN_<K> >();
-    Dcl_Type<DotSlash_KN_<K> >();
-    Dcl_Type<Sub_KN_<K> >();
-    Dcl_Type<Mulc_KN_<K> >();
-    Dcl_Type<Mul_KNM_KN_<K> >();
-    Dcl_Type<Add_Mulc_KN_<K> *>();
-    Dcl_Type<if_arth_KN_<K> *>();
-    
-
-     map_type[typeid(KN_<K> ).name()]->AddCast(
-       new E_F1_funcT<KN_<K>,KN_<K>*>(UnRef<KN_<K> >),
-       new E_F1_funcT<KN_<K>,KN<K>*>(UnRef<KN_<K>,KN<K> >)
-    //   ,new E_F1_funcT<KN_<K>,K>(ValueToKN_<K>),
-    //   new E_F1_funcT<KN_<K>,K*>(PtrToKN_<K>)       
-       ); 
-    map_type_of_map[make_pair(atype<long>(),atype<K>())]=atype<KN<K>*>(); // vector
-    map_pair_of_type[make_pair(atype<long>(),atype<long>())] =atype<pair<long,long> >();   
-    map_type_of_map[make_pair(atype<pair<long,long> >(),atype<K>())]=atype<KNM<K>*>(); // matrix                                               
-}
-
-/*
-template<class set_eqarray,class KN,class K>
-void AddOpeqarray(const char op[])
- {
-     typedef  KN<K> Kn;
-     TheOperators->Add(op,
-        new OneBinaryOperator<set_eqarray<KN<K> ,K > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,Add_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,DotStar_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,DotSlash_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,Sub_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray<KN<K> ,Mulc_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarraypd<KN<K> ,Add_Mulc_KN_<K>* > > ,
-        new OneBinaryOperator<set_eqarrayp<KN<K> ,KN<K>* > >       
-      );
-  }
-*/
-/*
-template<class T> struct  Resize{ T *v;
-  Resize( T * vv) : v(vv) {}
- }; 
-
-template<class T> T *resize1(const Resize<T> & t,const long &n)
- {  
-  t.v->resize(n);
-  return  t.v;
- }
- 
-template<class T> T *resize2(const Resize<T> & t,const long &n, const long & m)
- {  
-  t.v->resize(n,m);
-  return  t.v;
- }
-
-template<class T> Resize<T> to_Resize( T *v){ return Resize<T>(v);}
-
-*/
 
 template<class R>
 class  OneOperator_0 : public OneOperator {

@@ -465,7 +465,7 @@ class LinearCG : public OneOperator
    MatF_O(int n,Stack stk,const OneOperator * op) 
      : stack(stk),
        x(n),c_x(CPValue(x)),
-       mat(op->code(basicAC_F0_wa(c_x))) {}
+       mat(op->code(basicAC_F0_wa(c_x))) {ffassert(atype<Kn >() ==(aType) *op);}
    ~MatF_O() { 
      // cout << " del MatF_O mat " << endl;
      delete mat;
@@ -476,7 +476,7 @@ class LinearCG : public OneOperator
    void addMatMul(const  Kn_  & xx, Kn_ & Ax) const { 
       ffassert(xx.N()==Ax.N());
       x =xx;
-      Ax  += *GetAny<Kn*>((*mat)(stack)); } 
+      Ax  += GetAny<Kn>((*mat)(stack)); } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
 };  
  
@@ -592,12 +592,13 @@ class LinearGMRES : public OneOperator
    MatF_O(int n,Stack stk,const OneOperator * op) 
      : stack(stk),
        x(n),c_x(CPValue(x)),
-       mat(op->code(basicAC_F0_wa(c_x))) {}
+       mat(op->code(basicAC_F0_wa(c_x))) {
+       ffassert(atype<Kn >() ==(aType) *op); }
    ~MatF_O() { delete mat;delete c_x.LeftValue();}
    void addMatMul(const  Kn_  & xx, Kn_ & Ax) const { 
       ffassert(xx.N()==Ax.N());
       x =xx;
-      Ax  += *GetAny<Kn*>((*mat)(stack)); } 
+      Ax  += GetAny<Kn>((*mat)(stack)); } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
 };  
  

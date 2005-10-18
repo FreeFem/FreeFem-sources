@@ -128,6 +128,7 @@ ListFiles-natives: .FORCE
 	echo examples++-tutorial/aile.msh examples++-tutorial/xyf >> $@
 	echo examples++-load/load.link >> $@
 	echo ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh >> $@
+	echo ./download/fftw/Makefile ./download/fftw/Makefile.am  >>$@
 	find .  -name '*.edp' -o -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
 .FORCE:
 
