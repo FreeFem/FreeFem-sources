@@ -129,7 +129,7 @@ class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMa
       xx_del=te_xx.second;
       C_F0 e_xx(te_xx); // 1 undelete pointer
       code_del= C->code(basicAC_F0_wa(e_xx));
-      precon =  to<KN<R> *>(C_F0(code_del,*C));// 2 undelete pointer
+      precon =  to<KN_<R> >(C_F0(code_del,*C));// 2 undelete pointer
       
       throwassert(precon);
       R aii;
@@ -151,7 +151,7 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
       
     xx=x;
    // cout << x[0] << "  ";
-    xx=*GetAny<KN<R> *>((*precon)(stack));
+    xx=GetAny<KN_<R> >((*precon)(stack));
   //  cout << (xx)[0] << "  " << endl;
     R dii;
     for (int i=0;i<n;i++) 
@@ -185,7 +185,7 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
 {
       assert(C); 
       C_F0 e_xx(CPValue(xx));
-      precon =  to<KN<R> *>(C_F0(C->code(basicAC_F0_wa(e_xx)),*C));
+      precon =  to<KN_<R> >(C_F0(C->code(basicAC_F0_wa(e_xx)),*C));
       
       throwassert(precon);
       R aii;
@@ -212,7 +212,7 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
       
     xx=x;
    // cout << x[0] << "  ";
-    xx=*GetAny<KN<R> *>((*precon)(stack));
+    xx=GetAny<KN_<R> >((*precon)(stack));
 //    cout << (xx)[0] << "  " << endl;
     R dii;
     for (int i=0;i<n;i++) 
@@ -328,7 +328,7 @@ class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver 
 {
       assert(C); 
       C_F0 e_xx(CPValue(xx));
-      precon =  to<KN<Complex> *>(C_F0(C->code(basicAC_F0_wa(e_xx)),*C));
+      precon =  to<KN_<Complex> >(C_F0(C->code(basicAC_F0_wa(e_xx)),*C));
       
       throwassert(precon);
       Complex aii;
@@ -364,7 +364,7 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
       
     xx=x;
    // cout << x[0] << "  ";
-    xx=*GetAny<KN<Complex> *>((*precon)(stack));
+    xx=GetAny<KN_<Complex> >((*precon)(stack));
 //    cout << (xx)[0] << "  " << endl;
     Complex dii;
     for (int i=0;i<n;i++) 
