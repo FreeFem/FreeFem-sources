@@ -423,7 +423,7 @@ uninstall-am: uninstall-info-am
 all-local: @LOAD_COMPILE@
 
 myfunction.so: myfunction.cpp ../src/fflib/AFunction.hpp ../config.h include
-	CXX=$(CXX) ./load.link myfunction
+	CXX=$(CXX) ./load.link myfunction.cpp
 include: include.tar.gz
 	tar zxvf include.tar.gz
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
