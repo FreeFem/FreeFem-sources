@@ -9,6 +9,6 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=load.edp		\
 EXTRA_DIST=load.edp load.link myfunction.cpp  dfft.cpp dfft.edp dfft.link include.tar.gz
 
 myfunction.so: myfunction.cpp ../src/fflib/AFunction.hpp ../config.h include
-	CXX=$(CXX) ./load.link myfunction
+	CXX=$(CXX) ./load.link myfunction.cpp
 include: include.tar.gz
 	tar zxvf include.tar.gz
