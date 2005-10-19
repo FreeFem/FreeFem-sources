@@ -443,7 +443,7 @@ MatriceCreuse<R>  & MatriceProfile<R>::operator +=(MatriceElementaire<R> & me) {
     for (il=0; il<me.n; ++il) // modif overflow FH win32
       { i=mi[il];
       for (jl=0;jl<= il;++jl)
-       { j=mj[jl])  ;
+       { j=mj[jl]  ;
 	 if      (j<i)  L[ pL[i+1] - (i-j) ] += *al++;
 	 else if (j>i)  U[ pU[j+1] - (j-i) ] += *al++;
 	 else           D[i] += *al++;}}
