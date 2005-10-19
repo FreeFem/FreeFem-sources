@@ -1,3 +1,8 @@
+freefem++ (2.0-0) testing unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 19 Oct 2005 15:09:41 +0200
 freefem++ (1.47-2) testing unstable; urgency=low
 
   * New upstream release
