@@ -74,6 +74,8 @@ Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
 ; Desktop
 Name: "{userdesktop}\FreeFem++ VERSION"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
 Name: "{userdesktop}\FreeFem++ VERSION GUI"; Filename: "{app}\FreeFem++-cs.exe"
+Name: "{userdesktop}\FreeFem++ VERSION Examples"; Filename: "{group}\Examples"
+
 
 [Registry]
 
