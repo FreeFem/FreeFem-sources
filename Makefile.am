@@ -36,6 +36,9 @@ history:
 documentation:
 	cd DOC && make documentation
 
+DOC/freefem++doc.pdf
+	cd doc && make freefem++doc.pdf
+
 clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
 	-rm examples*/*.eps 
@@ -136,11 +139,11 @@ FreeFem++v$(VERSION)_MacOS:documentation ListFiles-natives
 	-mkdir $@ 
 	cat ListFiles-natives|xargs tar cf - | (cd $@ ; tar xf - )  
 	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++ 
-	cp   DOC/manual-full.pdf $@
+	cp   DOC/freefem++-doc.pdf $@
 
 FreeFem++v$(VERSION)_MacOsX: all documentation  ListFiles-natives
 	-mkdir $@ 
-	cp   DOC/manual-full.pdf $@
+	cp   DOC/freefem++doc.pdf $@
 	cat ListFiles-natives|xargs tar cf - | (cd $@ ; tar xf - )  
 	cd  FreeFem++v$(VERSION)_MacOsX ; tar zxf ../src/agl/FreeFem++.app.tgz
 	sed <src/agl/Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
