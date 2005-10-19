@@ -18,6 +18,6 @@ string StrVersionNumber(){
 //  buffer.precision(8);
 //  buffer<<VersionNumber();
   static char buffer[100];
-  sprintf(buffer," %f8 (date VersionFreeFemDate)",VersionNumber());
+  sprintf(buffer," %9f (date VersionFreeFemDate)",VersionNumber());
   return buffer; //.str()+" (date VersionFreeFemDate)" ;
 }

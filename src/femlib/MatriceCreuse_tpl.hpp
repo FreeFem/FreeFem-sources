@@ -430,19 +430,23 @@ MatriceCreuse<R>  & MatriceProfile<R>::operator +=(MatriceElementaire<R> & me) {
   R * al = me.a; 
   switch (me.mtype) {
   case MatriceElementaire<R>::Full : //throwassert(L !=U);
-    for (i=mi[il=0]; il<me.n; i=mi[++il])  
-      for ( j=mj[jl=0]; jl< me.m ; j=mj[++jl],al++)  
-	if      (j<i)  L[ pL[i+1] - (i-j) ] += *al;
-	else if (j>i)  U[ pU[j+1] - (j-i) ] += *al;
-	else           D[i] += *al;
+    for (il=0; il<me.n; ++il) // modif overflow FH win32  oct 2005
+     { i=mi[il];
+      for ( jl=0; jl< me.m ; ++jl,++al)  // modif overflow FH
+        { j=mj[jl] ;
+	  if      (j<i)  L[ pL[i+1] - (i-j) ] += *al;
+	  else if (j>i)  U[ pU[j+1] - (j-i) ] += *al;
+	  else           D[i] += *al;}}
     break;
      
   case MatriceElementaire<R>::Symmetric : //throwassert(L ==U);   
-    for (i=mi[il=0]; il<me.n; i=mi[++il])  
-      for (j=mj[jl=0];jl< il+1 ; j=mj[++jl])  
-	if      (j<i)  L[ pL[i+1] - (i-j) ] += *al++;
-	else if (j>i)  U[ pU[j+1] - (j-i) ] += *al++;
-	else           D[i] += *al++;
+    for (il=0; il<me.n; ++il) // modif overflow FH win32
+      { i=mi[il];
+      for (jl=0;jl<= il;++jl)
+       { j=mj[jl])  ;
+	 if      (j<i)  L[ pL[i+1] - (i-j) ] += *al++;
+	 else if (j>i)  U[ pU[j+1] - (j-i) ] += *al++;
+	 else           D[i] += *al++;}}
     break;
   default:
     cerr << "Big bug type MatriceElementaire unknown" << (int) me.mtype << endl;
@@ -1359,16 +1363,16 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
   R * aij;
   switch (me.mtype) { // modif FH overfloat in array mi and mj => trap on win32
   case MatriceElementaire<R>::Full : ffassert(!symetrique);
-    for (i=mi[il=0]; il<me.n; ++il)  { i=mi[il]; 
-      for ( j=mj[jl=0]; jl< me.m ; ++jl,++al)  {j=mj[jl];
+    for (il=0; il<me.n; ++il)  { i=mi[il]; 
+      for ( jl=0; jl< me.m ; ++jl,++al)  {j=mj[jl];
         aij = pij(i,j);
         throwassert(aij);
 	*aij += *al;}}
     break;
      
   case MatriceElementaire<R>::Symmetric : ffassert(symetrique);   
-    for (i=mi[il=0]; il<me.n; ++il) {  i=mi[il] ;
-      for (j=mj[jl=0];jl< il+1 ; ++jl) { j=mj[jl];
+    for (il=0; il<me.n; ++il) {  i=mi[il] ;
+      for (jl=0;jl< il+1 ; ++jl) { j=mj[jl];
 	 aij =    (j<i) ? pij(i,j) : pij(j,i);
          throwassert(aij);
          *aij += *al++;}}

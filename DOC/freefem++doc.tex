@@ -1,3 +1,5 @@
+%  pour imprimer 2 pages par pages en A5 
+%pstops  ``0L@.7(21cm,0)+0L@.7(21cm,14.85cm)'' 
 \documentclass[a4paper,twoside,12pt]{book}
 \usepackage{styles}
 \usepackage{times}
@@ -267,9 +269,9 @@ to left the program, top right the graphic window, bottom the text messages.}
 at \url{http://www.crimsoneditor.com/} and adapt it as follows:
 
 \begin{itemize}
-\item Go to the Tools/Preferences/File association menu and add the .edp extension set
+\item Go to the \texttt{Tools/Preferences/File} association menu and add the .edp extension set
 
-\item In the same panel go to Filters and add  freefem++(*.edp) item
+\item In the same panel go to Filters and add  \texttt{freefem++(*.edp)} item
 
 \item In the same panel again but under "Syntax Files"
    add two files FREEFEM.SPC and FREEFEM.KEY to define the color syntax.  To build
@@ -281,7 +283,8 @@ to freefem++.exe on the second line and \$(FilePath) and \$(FileDir on third and
 Tick the 8.3 box.
 \end{itemize}
 
-\item[winedt] for Windows : this is the best but it could be tricky to set up.  Download it from \url{http://www.winedt.com} : this is a multipurpose text editor  with advance features
+\item[winedt] for Windows : this is the best but it could be tricky to set up.  Download it from 
+ \url{http://www.winedt.com} : this is a multipurpose text editor  with advance features
 such as syntax coloring; a macro is available on ww.freefem.org to localize winedt to \freefempp
 without disturbing the winedt functional mode for LateX, TeX, C, etc.  However winedt is not free
 after the trial period.
@@ -294,7 +297,8 @@ It is also an editor for TeX/LaTeX but it has a "`tool"' menu which can be confi
 \item Select the Tools/Customize menu will bring a dialog box.
 \item Select the "`Tools"' tab and  create a new item: call it freefem.
 
-\item in the 3 lines below, 1/ search for FreeFem++.exe 2/ select Main file with further option  then Full path and click also on the 8.3 box 3/ select main file full directory path with 8.3
+\item in the 3 lines below, 1/ search for FreeFem++.exe 2/ select Main file with further option 
+ then Full path and click also on the 8.3 box 3/ select main file full directory path with 8.3
 \end{itemize}
 \item[nedit] on the Mac OS, Cygwin/Xfree and linux.
 \end{description}
@@ -2786,12 +2790,12 @@ for full detail).
 It is A very fast random number generator
 Of period $2^{219937}-1$, and the functions are:\index{random}\index{rand}\index{randint32}\index{randint31}\index{randinit}
 \begin{itemize}
-\item \ttCC{@randint@3@2()}  generates unsigned 32-bit integers.
-\item \ttCC{@randint@3@1()} generates unsigned 31-bit integers.
-\item \ttCC{@randreal@1()} generates uniform real in $[0,1]$ (32-bit resolution).
-\item \ttCC{@randreal@2()} generates uniform real in $[0,1)$ (32-bit resolution).
-\item \ttCC{@randreal@3()} generates uniform real in $(0,1)$ (32-bit resolution).
-\item \ttCC{@randres@5@3()} generates uniform real in $[0,1)$ with 53-bit resolution.
+\item \ttCC{@randint32()}  generates unsigned 32-bit integers.
+\item \ttCC{@randint31()} generates unsigned 31-bit integers.
+\item \ttCC{@randreal1()} generates uniform real in $[0,1]$ (32-bit resolution).
+\item \ttCC{@randreal2()} generates uniform real in $[0,1)$ (32-bit resolution).
+\item \ttCC{@randreal3()} generates uniform real in $(0,1)$ (32-bit resolution).
+\item \ttCC{@randres53()} generates uniform real in $[0,1)$ with 53-bit resolution.
 \item \ttCC{@randinit(seed )} initializes the state vector by using one  32-bit integer "seed", which may be zero.
 \end{itemize}
 
