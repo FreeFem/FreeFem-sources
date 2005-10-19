@@ -666,7 +666,7 @@ history:
 documentation:
 	cd DOC && make documentation
 
-DOC/freefem++doc.pdf
+DOC/freefem++doc.pdf:
 	cd doc && make freefem++doc.pdf
 
 clean-local::
@@ -743,11 +743,11 @@ deb:
 # Build all versions
 # ------------------
 
-native:FreeFem++v$(VERSION)_MacOS FreeFem++v$(VERSION)_MacOsX.tgz
+native:FreeFem++v$(VERSION)_MacOS FreeFem++v$(VERSION)_MacOsX.tgz DOC/freefem++doc.pdf
 	echo "done"
 native9:FreeFem++v$(VERSION)_MacOS 
 	echo "done"
-nativeX: FreeFem++v$(VERSION)_MacOsX.tgz
+nativeX: FreeFem++v$(VERSION)_MacOsX.tgz 
 	echo "done"
 
 clean-local::
