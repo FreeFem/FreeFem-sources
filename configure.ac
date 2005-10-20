@@ -82,8 +82,8 @@ AC_MSG_RESULT($ff_mac)
 
 # Checking wether we can produce a Microsoft Windows-specific version
 # -------------------------------------------------------------------
-AC_ARG_ENABLE(cygwin,
-	[  --enable-cygwin	On Microsoft Windows, uses Cygwin instead of Mingw])
+AC_ARG_ENABLE(cygwindll,
+	[  --enable-cygwindll	Forces the use of the Cygwin DLL (not recommended)])
 
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
 ff_uname=`uname`
@@ -93,11 +93,11 @@ case $ff_uname in
 CYGWIN*)
         ff_win32=yes;
 	# We need Mingw to avoid Cygwin's extra DLLs
-	if test "$enable_cygwin" != yes
+	if test "$enable_cygwindll" != yes
 	then
                 ff_mingw=yes
         	ff_win32=yes
-                enable_cygwin=no;
+                enable_cygwindll=no;
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
 		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -lws2_32"
          	# Resources for FreeFem++-cs in Microsoft Windows format
@@ -113,7 +113,7 @@ AC_MSG_RESULT($ff_win32)
 
 if test "$ff_win32" = no
 then
-	enable_cygwin=no
+	enable_cygwindll=no
 fi
 
 # FreeFem++-specific version information
@@ -207,11 +207,17 @@ then
 		ff_x11prog=FreeFem++-x11${EXEEXT}
 		CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
 
-		# -lXxf86vm is necessary to define
+		# When libXxf86vm is present, it is necessary to
+		# include it to define
 		# "XF86VidModeQueryVersion" (called by OpenGL) on
 		# newer X11 systems
 
-		ff_x11_libs="-L/usr/X11R6/lib -lXxf86vm -lXext -lXpm -lX11 -lm"
+		AC_CHECK_LIB(Xxf86vm,
+			XF86VidModeQueryVersion,
+			ff_Xxf86vm="-lXxf86vm",
+			ff_Xxf86vm="")
+
+		ff_x11_libs="-L/usr/X11R6/lib $ff_Xxf86vm -lXext -lXpm -lX11 -lm"
 		AC_SUBST(X11_LIBS,$ff_x11_libs)
 	fi
 fi
@@ -882,7 +888,7 @@ then
 	# successive runs without restart.
         
 	ff_ideprog="FreeFem++-ide${EXEEXT} FreeFem++-cs${EXEEXT} FreeFem++-client${EXEEXT} FreeFem++-server${EXEEXT}"
-	if test "$enable_cygwin" = yes 
+	if test "$enable_cygwindll" = yes 
 	 then
            AC_SUBST(FLTK_CONFIG_PARAM,"--enable-localzlib --enable-cygwin")
         elif test "$ff_mingw" = yes 
