@@ -311,7 +311,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 FLIBS CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ WIN32DLLTARGET OPTIM_TYPE X11_LIBS CXXCPP EGREP ff_mpirun MPIPROG ff_wget ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIB G2CLIB DOWNLOAD_ARPACK ARPACKLIB EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK UMFPACKLIB FF_UMFPACK_POSIX ff_libtool STATICTOOL LOAD_TESTS LOAD_COMPILE ff_latex ff_makeindex ff_dvips DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION TAGGINGDEPEND GLXPROG AGLPROG X11PROG IDEPROG LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 FLIBS CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ WIN32DLLTARGET OPTIM_TYPE X11_LIBS CXXCPP EGREP ff_mpirun MPIPROG ff_wget ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIB G2CLIB DOWNLOAD_ARPACK ARPACKLIB EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK UMFPACKLIB FF_UMFPACK_POSIX ff_libtool STATICTOOL LOAD_TESTS LOAD_COMPILE ff_latex ff_makeindex ff_dvips DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION TAGGINGDEPEND GLXPROG AGLPROG X11PROG IDEPROG LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -871,7 +871,8 @@ Optional Features:
   --enable-dependency-tracking   do not reject slow dependency extractors
   --disable-fortran	No Fortran compiler available (BLAS, ARPACK and UMFPACK need it)
   --disable-c		No C compiler available (C BLAS need it)
-  --enable-cygwin	On Microsoft Windows, uses Cygwin instead of Mingw
+  --disable-default-fltk	Does not use default FLTK
+  --enable-cygwindll	Forces the use of the Cygwin DLL (not recommended)
   --enable-profiling	Turn on profiling
   --enable-debug	Turn on debug versions of FreeFem++
   --enable-optim	Turn on compiler optimization
@@ -880,7 +881,6 @@ Optional Features:
   --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK,FLTK)
   --enable-static	Build binaries with no shared library dependencies
   --disable-pdf	Disable PDF documentation building
-  --disable-default-fltk	Does not use default FLTK
   --disable-tagging	No date and time tag update inside the compiled code (faster recompilations)
 
 Optional Packages:
@@ -1358,7 +1358,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 # Automake 1.4 is too old
-am__api_version="1.8"
+am__api_version="1.9"
 ac_aux_dir=
 for ac_dir in $srcdir $srcdir/.. $srcdir/../..; do
   if test -f $ac_dir/install-sh; then
@@ -1535,13 +1535,21 @@ echo "$as_me: WARNING: \`missing' script is too old or missing" >&2;}
 fi
 
 if mkdir -p --version . >/dev/null 2>&1 && test ! -d ./--version; then
-  # Keeping the `.' argument allows $(mkdir_p) to be used without
-  # argument.  Indeed, we sometimes output rules like
+  # We used to keeping the `.' as first argument, in order to
+  # allow $(mkdir_p) to be used without argument.  As in
   #   $(mkdir_p) $(somedir)
-  # where $(somedir) is conditionally defined.
-  # (`test -n '$(somedir)' && $(mkdir_p) $(somedir)' is a more
-  # expensive solution, as it forces Make to start a sub-shell.)
-  mkdir_p='mkdir -p -- .'
+  # where $(somedir) is conditionally defined.  However this is wrong
+  # for two reasons:
+  #  1. if the package is installed by a user who cannot write `.'
+  #     make install will fail,
+  #  2. the above comment should most certainly read
+  #     $(mkdir_p) $(DESTDIR)$(somedir)
+  #     so it does not work when $(somedir) is undefined and
+  #     $(DESTDIR) is not.
+  #  To support the latter case, we have to write
+  #     test -z "$(somedir)" || $(mkdir_p) $(DESTDIR)$(somedir),
+  #  so the `.' trick is pointless.
+  mkdir_p='mkdir -p --'
 else
   # On NextStep and OpenStep, the `mkdir' command does not
   # recognize any option.  It will interpret all options as
@@ -1685,9 +1693,6 @@ AUTOHEADER=${AUTOHEADER-"${am_missing_run}autoheader"}
 
 MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
 
-
-AMTAR=${AMTAR-"${am_missing_run}tar"}
-
 install_sh=${install_sh-"$am_aux_dir/install-sh"}
 
 # Installed binaries are usually stripped using `strip' when the user
@@ -1780,6 +1785,13 @@ INSTALL_STRIP_PROGRAM="\${SHELL} \$(install_sh) -c -s"
 
 # We need awk for the "check" target.  The system "awk" is bad on
 # some platforms.
+# Always define AMTAR for backward compatibility.
+
+AMTAR=${AMTAR-"${am_missing_run}tar"}
+
+am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
+
+
 
 
 
@@ -2756,7 +2768,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:2759:" \
+echo "$as_me:2771:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -2952,7 +2964,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:2955: \"$ac_link\") >&5
+(eval echo $as_me:2967: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -3030,7 +3042,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:3033: \"$ac_link\") >&5
+(eval echo $as_me:3045: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -3112,7 +3124,7 @@ fi
 
           ;;
           # Ignore these flags.
-        -lang* | -lcrt[01].o | -lcrtbegin.o | -lc | -lgcc | -libmil | -LANG:=*)
+        -lang* | -lcrt*.o | -lc | -lgcc | -libmil | -LANG:=*)
           ;;
         -lkernel32)
           test x"$CYGWIN" != xyes && ac_cv_f77_libs="$ac_cv_f77_libs $ac_arg"
@@ -4490,11 +4502,29 @@ echo "${ECHO_T}$ff_mac" >&6
 
 # Checking wether we can produce a Microsoft Windows-specific version
 # -------------------------------------------------------------------
-# Check whether --enable-cygwin or --disable-cygwin was given.
-if test "${enable_cygwin+set}" = set; then
-  enableval="$enable_cygwin"
+
+# Sometimes (under cygwin for instance) the default version of FLTK
+# does not fit our purpose
+
+# Check whether --enable-default-fltk or --disable-default-fltk was given.
+if test "${enable_default_fltk+set}" = set; then
+  enableval="$enable_default_fltk"
 
 fi;
+
+# Check whether --enable-cygwindll or --disable-cygwindll was given.
+if test "${enable_cygwindll+set}" = set; then
+  enableval="$enable_cygwindll"
+
+fi;
+
+# Default FLTK version under Cygwin does not use threads. So we cannot
+# use it.
+
+if test "$enable_cygwindll" = yes
+then
+	enable_default_fltk=no
+fi
 
 echo "$as_me:$LINENO: checking wether we are on Microsoft Windows" >&5
 echo $ECHO_N "checking wether we are on Microsoft Windows... $ECHO_C" >&6
@@ -4505,11 +4535,11 @@ case $ff_uname in
 CYGWIN*)
         ff_win32=yes;
 	# We need Mingw to avoid Cygwin's extra DLLs
-	if test "$enable_cygwin" != yes
+	if test "$enable_cygwindll" != yes
 	then
                 ff_mingw=yes
         	ff_win32=yes
-                enable_cygwin=no;
+                enable_cygwindll=no;
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
 		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -lws2_32"
          	# Resources for FreeFem++-cs in Microsoft Windows format
@@ -4528,7 +4558,7 @@ echo "${ECHO_T}$ff_win32" >&6
 
 if test "$ff_win32" = no
 then
-	enable_cygwin=no
+	enable_cygwindll=no
 fi
 
 # FreeFem++-specific version information
@@ -5122,7 +5152,7 @@ then
 	echo "$as_me:$LINENO: checking GCC version" >&5
 echo $ECHO_N "checking GCC version... $ECHO_C" >&6
 
-        ff_gcc4=`$CC  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'`
+        ff_gcc4=`gcc  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'`
 	echo "$as_me:$LINENO: result: $ff_gcc4" >&5
 echo "${ECHO_T}$ff_gcc4" >&6
 
@@ -7055,11 +7085,83 @@ then
 		ff_x11prog=FreeFem++-x11${EXEEXT}
 		CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
 
-		# -lXxf86vm is necessary to define
+		# When libXxf86vm is present, it is necessary to
+		# include it to define
 		# "XF86VidModeQueryVersion" (called by OpenGL) on
 		# newer X11 systems
 
-		ff_x11_libs="-L/usr/X11R6/lib -lXxf86vm -lXext -lXpm -lX11 -lm"
+		echo "$as_me:$LINENO: checking for XF86VidModeQueryVersion in -lXxf86vm" >&5
+echo $ECHO_N "checking for XF86VidModeQueryVersion in -lXxf86vm... $ECHO_C" >&6
+if test "${ac_cv_lib_Xxf86vm_XF86VidModeQueryVersion+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lXxf86vm  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char XF86VidModeQueryVersion ();
+int
+main ()
+{
+XF86VidModeQueryVersion ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_Xxf86vm_XF86VidModeQueryVersion=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_Xxf86vm_XF86VidModeQueryVersion=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_Xxf86vm_XF86VidModeQueryVersion" >&5
+echo "${ECHO_T}$ac_cv_lib_Xxf86vm_XF86VidModeQueryVersion" >&6
+if test $ac_cv_lib_Xxf86vm_XF86VidModeQueryVersion = yes; then
+  ff_Xxf86vm="-lXxf86vm"
+else
+  ff_Xxf86vm=""
+fi
+
+
+		ff_x11_libs="-L/usr/X11R6/lib $ff_Xxf86vm -lXext -lXpm -lX11 -lm"
 		X11_LIBS=$ff_x11_libs
 
 	fi
@@ -10916,15 +11018,6 @@ if test "${with_xfltk+set}" = set; then
 
 fi;
 
-# Sometimes (under cygwin for instance) the default version of FLTK
-# does not fit our purpose
-
-# Check whether --enable-default-fltk or --disable-default-fltk was given.
-if test "${enable_default_fltk+set}" = set; then
-  enableval="$enable_default_fltk"
-
-fi;
-
 # under mingw use download fltk version
 if test "$ff_mingw" = yes
 then
@@ -11051,7 +11144,7 @@ then
 	# successive runs without restart.
 
 	ff_ideprog="FreeFem++-ide${EXEEXT} FreeFem++-cs${EXEEXT} FreeFem++-client${EXEEXT} FreeFem++-server${EXEEXT}"
-	if test "$enable_cygwin" = yes
+	if test "$enable_cygwindll" = yes
 	 then
            FLTK_CONFIG_PARAM="--enable-localzlib --enable-cygwin"
 
@@ -11239,9 +11332,10 @@ for ac_i in : $LIBOBJS; do test "x$ac_i" = x: && continue
   # 1. Remove the extension, and $U if already installed.
   ac_i=`echo "$ac_i" |
 	 sed 's/\$U\././;s/\.o$//;s/\.obj$//'`
-  # 2. Add them.
-  ac_libobjs="$ac_libobjs $ac_i\$U.$ac_objext"
-  ac_ltlibobjs="$ac_ltlibobjs $ac_i"'$U.lo'
+  # 2. Prepend LIBOBJDIR.  When used with automake>=1.10 LIBOBJDIR
+  #    will be set to the directory where LIBOBJS objects are built.
+  ac_libobjs="$ac_libobjs \${LIBOBJDIR}$ac_i\$U.$ac_objext"
+  ac_ltlibobjs="$ac_ltlibobjs \${LIBOBJDIR}$ac_i"'$U.lo'
 done
 LIBOBJS=$ac_libobjs
 
@@ -11850,7 +11944,6 @@ s,@AUTOCONF@,$AUTOCONF,;t t
 s,@AUTOMAKE@,$AUTOMAKE,;t t
 s,@AUTOHEADER@,$AUTOHEADER,;t t
 s,@MAKEINFO@,$MAKEINFO,;t t
-s,@AMTAR@,$AMTAR,;t t
 s,@install_sh@,$install_sh,;t t
 s,@STRIP@,$STRIP,;t t
 s,@ac_ct_STRIP@,$ac_ct_STRIP,;t t
@@ -11859,6 +11952,9 @@ s,@mkdir_p@,$mkdir_p,;t t
 s,@AWK@,$AWK,;t t
 s,@SET_MAKE@,$SET_MAKE,;t t
 s,@am__leading_dot@,$am__leading_dot,;t t
+s,@AMTAR@,$AMTAR,;t t
+s,@am__tar@,$am__tar,;t t
+s,@am__untar@,$am__untar,;t t
 s,@RANLIB@,$RANLIB,;t t
 s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t
 s,@MAINTAINER_MODE_TRUE@,$MAINTAINER_MODE_TRUE,;t t
@@ -12571,27 +12667,21 @@ echo X"$mf" |
   else
     continue
   fi
-  grep '^DEP_FILES *= *[^ #]' < "$mf" > /dev/null || continue
-  # Extract the definition of DEP_FILES from the Makefile without
-  # running `make'.
+  # Extract the definition of DEPDIR, am__include, and am__quote
+  # from the Makefile without running `make'.
   DEPDIR=`sed -n 's/^DEPDIR = //p' < "$mf"`
   test -z "$DEPDIR" && continue
+  am__include=`sed -n 's/^am__include = //p' < "$mf"`
+  test -z "am__include" && continue
+  am__quote=`sed -n 's/^am__quote = //p' < "$mf"`
   # When using ansi2knr, U may be empty or an underscore; expand it
   U=`sed -n 's/^U = //p' < "$mf"`
-  test -d "$dirpart/$DEPDIR" || mkdir "$dirpart/$DEPDIR"
-  # We invoke sed twice because it is the simplest approach to
-  # changing $(DEPDIR) to its actual value in the expansion.
-  for file in `sed -n '
-    /^DEP_FILES = .*\\\\$/ {
-      s/^DEP_FILES = //
-      :loop
-	s/\\\\$//
-	p
-	n
-	/\\\\$/ b loop
-      p
-    }
-    /^DEP_FILES = / s/^DEP_FILES = //p' < "$mf" | \
+  # Find all dependency output files, they are included files with
+  # $(DEPDIR) in their names.  We invoke sed twice because it is the
+  # simplest approach to changing $(DEPDIR) to its actual value in the
+  # expansion.
+  for file in `sed -n "
+    s/^$am__include $am__quote\(.*(DEPDIR).*\)$am__quote"'$/\1/p' <"$mf" | \
        sed -e 's/\$(DEPDIR)/'"$DEPDIR"'/g' -e 's/\$U/'"$U"'/g'`; do
     # Make sure the directory exists.
     test -f "$dirpart/$file" && continue
