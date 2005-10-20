@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.0-0,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.0-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -82,8 +82,23 @@ AC_MSG_RESULT($ff_mac)
 
 # Checking wether we can produce a Microsoft Windows-specific version
 # -------------------------------------------------------------------
+
+# Sometimes (under cygwin for instance) the default version of FLTK
+# does not fit our purpose
+
+AC_ARG_ENABLE(default-fltk,
+	[  --disable-default-fltk	Does not use default FLTK])
+
 AC_ARG_ENABLE(cygwindll,
 	[  --enable-cygwindll	Forces the use of the Cygwin DLL (not recommended)])
+
+# Default FLTK version under Cygwin does not use threads. So we cannot
+# use it.
+
+if test "$enable_cygwindll" = yes
+then
+	enable_default_fltk=no
+fi
 
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
 ff_uname=`uname`
@@ -193,6 +208,14 @@ fi
 # Checking wether we can produce a X11 version
 # --------------------------------------------
 
+# When libXxf86vm is present, it is necessary to include it to define
+# "XF86VidModeQueryVersion" (called by OpenGL) on newer X11 systems
+
+AC_CHECK_LIB(Xxf86vm,
+	XF86VidModeQueryVersion,
+	ff_Xxf86vm="-lXxf86vm",
+	ff_Xxf86vm="")
+
 AC_MSG_CHECKING(wether we can compile for X11)
 ff_x11=no
 
@@ -206,16 +229,6 @@ then
 		ff_x11=yes
 		ff_x11prog=FreeFem++-x11${EXEEXT}
 		CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
-
-		# When libXxf86vm is present, it is necessary to
-		# include it to define
-		# "XF86VidModeQueryVersion" (called by OpenGL) on
-		# newer X11 systems
-
-		AC_CHECK_LIB(Xxf86vm,
-			XF86VidModeQueryVersion,
-			ff_Xxf86vm="-lXxf86vm",
-			ff_Xxf86vm="")
 
 		ff_x11_libs="-L/usr/X11R6/lib $ff_Xxf86vm -lXext -lXpm -lX11 -lm"
 		AC_SUBST(X11_LIBS,$ff_x11_libs)
@@ -827,12 +840,6 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 # native libraries (mainly to run the programs remotely)
 
 AC_ARG_WITH(xfltk,[  --with-xfltk	When recompiling FLTK, use X libraries instead of native Win32 or MacOS])
-
-# Sometimes (under cygwin for instance) the default version of FLTK
-# does not fit our purpose
-
-AC_ARG_ENABLE(default-fltk,
-	[  --disable-default-fltk	Does not use default FLTK])
 
 # under mingw use download fltk version
 if test "$ff_mingw" = yes 
