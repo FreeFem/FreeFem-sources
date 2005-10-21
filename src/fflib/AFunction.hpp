@@ -648,20 +648,20 @@ template<class A,class B,A F(const  B &)>
     
 template<class A> 
   AnyType UnRef(Stack,const AnyType &a) { 
-    return   SetAny<A>(*GetAny<A*>(a));}
+    return   SetAny<A>(*PGetAny<A>(a));}
 
 template<class A,class B> 
   AnyType UnRef(Stack,const AnyType &a) { 
-    return   SetAny<A>(*GetAny<B*>(a));}
+    return   SetAny<A>(*PGetAny<B>(a));}
     
     
 template<class A> 
   AnyType UnRefCopyPtr(Stack,const AnyType &a) { 
-    return   SetAny<A*>(new A(**GetAny<A**>(a))) ;} 
+    return   SetAny<A*>(new A(**PGetAny<A*>(a))) ;} 
        
     
 template<class A> AnyType Initialize(Stack,const AnyType &x){
- A * a=GetAny<A*>(x);
+ A * a=PGetAny<A>(x);
  A *b=new A;// 
   memcpy(a,b,sizeof(A));// bitcopy
   ::operator delete(b); // delete with no destruction 
@@ -669,21 +669,21 @@ template<class A> AnyType Initialize(Stack,const AnyType &x){
 }
 
 template<class A> AnyType InitializePtr(Stack stack,const AnyType &x){
-  A * a=GetAny<A*>(x);
+  A * a=PGetAny<A>(x);
 SHOWVERB( cout << " init ptr " << typeid(A*).name() <<  (char *) a  - (char*) stack<< endl);
   *a=0;
   return  x;
 }
 
 template<class A> inline AnyType Delete(Stack,const AnyType &x){
-  A * a=GetAny<A*>(x);
+  A * a=PGetAny<A>(x);
   SHOWVERB(cout << "DESTROY " <<typeid(A).name() << " " << a <<  endl); 
   (*a).~A(); 
   return  Nothing;
 }
 
 template<class A> inline AnyType Destroy(Stack,const AnyType &x){
-  A * a=GetAny<A*>(x);
+  A * a=PGetAny<A>(x);
   SHOWVERB(cout << "DESTROY " <<typeid(A).name() << " " << a <<  endl); 
   a->destroy(); 
   return  Nothing;
@@ -703,7 +703,7 @@ template<class A> inline AnyType InitS(Stack,const AnyType &x){
   return  Nothing;
 }
 template<class A> inline AnyType InitP(Stack,const AnyType &x){
-  A  *a=GetAny<A*>(x);
+  A  *a=PGetAny<A>(x);
   SHOWVERB(cout << "InitP " <<typeid(A).name() << " " << a <<  endl); 
   a->init(); 
   return  Nothing;
@@ -711,7 +711,7 @@ template<class A> inline AnyType InitP(Stack,const AnyType &x){
 
 
 template<class A> inline AnyType DestroyPtr(Stack,const AnyType &x) {
-  const A *  a=GetAny<A*>(x);
+  const A *  a=PGetAny<A>(x);
   SHOWVERB(cout << "DestroyPtr " << typeid(A).name() << *a  << endl);
    (*a)->destroy(); 
    //  delete *a; 
@@ -719,7 +719,7 @@ template<class A> inline AnyType DestroyPtr(Stack,const AnyType &x) {
   return  Nothing; 
 };
 template<class A> inline AnyType DeletePtr(Stack,const AnyType &x) {
-  const A *  a=GetAny<A*>(x);
+  const A *  a=PGetAny<A>(x);
   SHOWVERB(cout << "DeletePtr " << typeid(A).name() << *a  << endl);
   // (*a)->destroy(); 
     delete *a; 
@@ -728,7 +728,7 @@ template<class A> inline AnyType DeletePtr(Stack,const AnyType &x) {
 };
 
 template<> AnyType inline DestroyPtr<string *>(Stack,const AnyType &x) {
-  string **  a=GetAny<string**>(x);
+  string **  a=PGetAny<string*>(x);
  SHOWVERB( cout << "DestroyPtr " << typeid(string*).name() << *a  << endl);
   delete *a; 
   return  Nothing; 
@@ -737,7 +737,7 @@ template<> AnyType inline DestroyPtr<string *>(Stack,const AnyType &x) {
 
 
 template<class A> AnyType Initialize(Stack,const AnyType &x,const AnyType &y){
- A * a=GetAny<A*>(x);
+ A * a=PGetAny<A>(x);
  A *b=new A(GetAny<A>(x));// 
   memcpy(a,b,sizeof(A));// bitcopy
   ::operator delete(b); // delete with no destruction 

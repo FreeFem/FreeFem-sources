@@ -149,8 +149,11 @@ inline AnyTypeWithOutCheck PtrtoAny(void * p,aType )
  { return x.l;} 
  template<>  inline const bool& GetAny<bool>(const AnyTypeWithOutCheck & x)
  { return x.b;} 
+
+ template<class T>  inline T * PGetAny(const AnyTypeWithOutCheck & x)
+ { return static_cast< T*>(x.p);} 
  
-//template<> template<class T>  inline   T * const & GetAny<T*>(const AnyTypeWithOutCheck & x)
-// { return x.p;}
+ //template<class T>  inline   T * const & GetAny<T*>(const AnyTypeWithOutCheck & x)
+ //  { return  x.p;}
 
 
