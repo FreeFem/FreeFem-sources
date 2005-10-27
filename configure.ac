@@ -208,14 +208,6 @@ fi
 # Checking wether we can produce a X11 version
 # --------------------------------------------
 
-# When libXxf86vm is present, it is necessary to include it to define
-# "XF86VidModeQueryVersion" (called by OpenGL) on newer X11 systems
-
-AC_CHECK_LIB(Xxf86vm,
-	XF86VidModeQueryVersion,
-	ff_Xxf86vm="-lXxf86vm",
-	ff_Xxf86vm="")
-
 AC_MSG_CHECKING(wether we can compile for X11)
 ff_x11=no
 
@@ -228,14 +220,29 @@ then
 	then
 		ff_x11=yes
 		ff_x11prog=FreeFem++-x11${EXEEXT}
-		CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
-
-		ff_x11_libs="-L/usr/X11R6/lib $ff_Xxf86vm -lXext -lXpm -lX11 -lm"
-		AC_SUBST(X11_LIBS,$ff_x11_libs)
 	fi
 fi
 
 AC_MSG_RESULT($ff_x11)
+
+if test "$ff_x11" = yes
+then
+	CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
+
+	# When libXxf86vm is present, it is necessary to add it to define
+	# "XF86VidModeQueryVersion" (called by OpenGL) on newer X11 systems
+
+	ff_save_libs="$LIBS"
+	LIBS="$LIBS -L/usr/X11R6/lib"
+	AC_CHECK_LIB(Xxf86vm,
+		XF86VidModeQueryVersion,
+		ff_Xxf86vm="-lXxf86vm",
+		ff_Xxf86vm="")
+	LIBS="$ff_save_libs"
+
+	ff_x11_libs="-L/usr/X11R6/lib $ff_Xxf86vm -lXext -lXpm -lX11 -lm"
+	AC_SUBST(X11_LIBS,$ff_x11_libs)
+fi
 
 # Checking that OpenGL is accessible
 # ----------------------------------

@@ -38,7 +38,6 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-LIBOBJDIR =
 bin_PROGRAMS = FreeFem++-nw$(EXEEXT)
 subdir = src/nw
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
