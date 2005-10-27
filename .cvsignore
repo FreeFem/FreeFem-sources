@@ -15,7 +15,7 @@ configure-stamp
 *.exe
 freefem++-?.??-?
 freefem++-?.??-??
-freefem++-?.??-*.zip
+freefem++-?.*.zip
 FreeFem++v*_linux-*_libc-*
 FreeFem++v*_linux-*_libc-*.tgz
 ListOfUnAllocPtr.bin
