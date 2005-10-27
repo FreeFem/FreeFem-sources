@@ -1,3 +1,29 @@
+2005-10-27 17:51  lehyaric
+
+	* - Improved the way configure finds libXxf86vm.a - Added support
+	  for types like "Vh<complex>[int]" in FreeFem++-cs highlighting
+
+2005-10-21 18:18  hecht
+
+	*   Try to correct problem in win32 version
+	    random trap on very big job (all.edp)
+
+2005-10-21 17:27  hecht
+
+	*  add .edp file in example++-eigen dir
+
+2005-10-20 16:22  lehyaric
+
+	* Compiling with the Cygwin DLL is now OK again
+
+2005-10-20 15:46  lehyaric
+
+	* configure.ac now dynamically checks for libXxf86vm.a
+
+2005-10-20 11:56  lehyaric
+
+	* New manual included in Debian packages
+
 2005-10-19 16:05  hecht
 
 	* [no log message]

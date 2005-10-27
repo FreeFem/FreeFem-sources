@@ -8,7 +8,7 @@
 
 SUBDIRS=download src DOC examples++-tutorial examples++	\
 	examples++-eigen examples++-load examples++-mpi	\
-	examples++-bug examples++-other examples++-chapt3
+	examples++-bug examples++-chapt3 examples++-other
 
 EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h \
 FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
