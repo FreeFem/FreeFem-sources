@@ -12,6 +12,7 @@ OBJIDE1=$(patsubst %.o,../ide/%.o,$(OBJIDE))
 
 
 all-local: $(WIN32DLLTARGET)
+	-for i in $(LDADD2) ; do case $$i in  *.dll) echo cp -p $$i .; cp -p $$i . ;;	  esac ; done
 	echo done
 win32-dll-target:libff0.dll libff1.dll libff2.dll FreeFem++.exe FreeFem++-nw.exe  FreeFem++-cs.exe
 	echo "on a fini"
