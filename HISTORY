@@ -1,3 +1,20 @@
+2005-10-30 17:06  hecht
+
+	*      correct problem in eigen value computation
+	       under Windows (infinite loop ), change
+	       compile optimization option of LAPACK routine
+	       see README_WINDOWS for full detail. ( version 2.0-1)
+
+2005-10-27 19:09  lehyaric
+
+	* Change MPI package name to keep up with Debian Unstable
+
+2005-10-27 18:22  lehyaric
+
+	* Places examples++-other last because it contains speed tests
+	  which take longer to run. There is no need to run these tests
+	  before making sure that the other, faster, tests work.
+
 2005-10-27 17:51  lehyaric
 
 	* - Improved the way configure finds libXxf86vm.a - Added support
