@@ -36,7 +36,10 @@ Vh p,v,pp,vv;
 varf vPp(p,pp) = int2d(Th)( dx(p)*dx(pp)+dy(p)*dy(pp));
 varf vonfree(p,pp) =on(f,p=1);
 Vh onfree,wdpdn;
-onfree[]=vonfree(0,Vh);onfree[]/=onfree[].max; // sauce
+onfree[]=vonfree(0,Vh);
+cout << "pb ?" << endl;
+onfree[]/=onfree[].max; // sauce
+cout << "pb non " << endl;
 matrix A= vPp(Vh,Vh,solver=CG);
 
 

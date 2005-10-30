@@ -40,3 +40,10 @@ Infortunatly, all the .exe version without cygwin under  mingw
 do not run under cygwin shell,  they run under under the 
 command window NT  shell if the mingwm10.dll is in the right place:
 .exe directory or in 'C:\WINDOW\system32. 
+
+In version 2.0
+BUG in LAPACK with -O optim flag
+the file ARPACK/LAPACK/dlamch.f 
+symptome: the code loop.
+correct the Makefile.m4 to
+inforce the compilation flag
