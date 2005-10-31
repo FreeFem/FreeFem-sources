@@ -13,7 +13,7 @@ SUBDIRS=download src DOC examples++-tutorial examples++	\
 EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h \
 FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS \
-logo.ico copysharedlibs.sh COPYRIGHT edp.nedit
+logo.ico copysharedlibs.sh COPYRIGHT edp.nedit INNOVATION
 
 
 # Creates a file named "ChangeLog" containing the chronology of all
@@ -127,7 +127,7 @@ clean-local::
 # Native MacOS packaging
 # ----------------------
 ListFiles-natives: .FORCE 
-	echo COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX >$@
+	echo COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX INNOVATION >$@
 	echo examples++-tutorial/aile.msh examples++-tutorial/xyf >> $@
 	echo examples++-load/load.link >> $@
 	echo ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh >> $@
