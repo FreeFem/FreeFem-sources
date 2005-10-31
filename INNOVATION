@@ -1,0 +1,35 @@
+Add version 2.0-0
+   
+ * if x is an array of type real[int], int[int] , complex[int]
+   or a sub array then
+   x.l2     is the l2 norm <=> sqrt(x'*x)
+   x.l1     is the l1 norm
+   x.linfty is the linfty norm
+   
+ * correct bug when solving complex linear system with UMFPACK
+   before we solve the system when the conjugate matrix
+
+
+Major Change previous version
+-----------------------------
+
+ * add Sparse matrix computation,
+   block matrix construction 
+   interpolation construction
+   see 
+     examples++-tutorial/sparse-cmatrix.edp  
+     examples++-tutorial/sparse-matrix.edp
+     examples++-tutorial/mat_interpol.edp
+   not so well tested, but could be worse. 
+   
+ * add example to solve vartionnal inequation. VI.edp
+
+ * add  possibility to build matrix where the 3 meshes 
+   the integrale mesh, unkwon FE mesh, test FE function 
+   can be different.  You must use varf to build the matrix 
+   is not a standard porblem.
+  
+ * Improvement of  dynamic loading facility under the 3 systems
+   add a fast fourier transform with dynamic loading
+   see examples++-load/dfft.edp
+
