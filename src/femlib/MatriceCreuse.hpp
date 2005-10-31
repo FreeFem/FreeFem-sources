@@ -262,14 +262,21 @@ public:
   virtual ~MatriceCreuse(){}
   virtual R & diag(int i)=0;
   virtual R & operator()(int i,int j)=0;
+  virtual R * pij(int i,int j) const =0; // Add FH   
   virtual MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not 
   virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0)=0;
   // Add FH april 2005
   virtual R pscal(const KN_<R> & x,const KN_<R> & y) =0 ; // produit scalaire  
   virtual double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) =0;
   virtual void setdiag(const KN_<R> & x)=0 ;
-  virtual void getdiag( KN_<R> & x) =0 ;
+  virtual void getdiag( KN_<R> & x) const =0 ;
   // end add
+  virtual int NbCoef() const {};
+  virtual void setcoef(const KN_<R> & x)=0 ;
+  virtual void getcoef( KN_<R> & x) const =0 ;
+  // Add FH oct 2005
+  
+  // end ADD
 
 };
 
@@ -351,8 +358,8 @@ public:
   void crout(double = EPSILON/8.) const ; //
   void LU(double = EPSILON/8.) const ; //
   R & diag(int i) { return D[i];}
-  R & operator()(int i,int j) { ffassert(0); return D[i];} // a faire 
-  
+  R & operator()(int i,int j) { if(i!=j) ffassert(0); return D[i];} // a faire 
+  R * pij(int i,int j) const { if(i!=j) ffassert(0); return &D[i];} // a faire  Modif FH 31102005
   MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
   
   template<class F> void map(const  F & f)
@@ -392,7 +399,12 @@ public:
   R pscal(const KN_<R> & x,const KN_<R> & y); // produit scalaire  
   double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega);
   void setdiag(const KN_<R> & x) ;
-  void getdiag( KN_<R> & x) ;
+  void getdiag( KN_<R> & x) const ;
+    // end add
+  // Add FH oct 2005
+   int NbCoef() const ;
+   void setcoef(const KN_<R> & x);
+   void getcoef( KN_<R> & x) const ;
   // end add
   
   /*----------------------------------------------------------------
@@ -477,8 +489,15 @@ public:
   R pscal(const KN_<R> & x,const KN_<R> & y); // produit scalaire  
   double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega);
   void setdiag(const KN_<R> & x) ;
-  void getdiag( KN_<R> & x) ;
+  void getdiag( KN_<R> & x) const ;
   // end add
+  
+  // Add FH oct 2005
+   int NbCoef() const ;
+   void setcoef(const KN_<R> & x);
+   void getcoef( KN_<R> & x) const ;
+  // end add
+  
 template<class K>
   MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bool sym);
   
@@ -673,10 +692,14 @@ class SolveUMFPack :   public MatriceMorse<R>::VirtualSolver  {
   mutable double  epsr;
   void *Symbolic, *Numeric ;
   int umfpackstrategy;
+  double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
 public:
-  SolveUMFPack(const MatriceMorse<R> &A,int strategy,double ttgv, double epsilon=1e-6) : 
+  SolveUMFPack(const MatriceMorse<R> &A,int strategy,double ttgv, double epsilon=1e-6,
+   double pivot=-1.,double pivot_sym=-1.
+  ) : 
     eps(epsilon),epsr(0),umfpackstrategy(strategy),tgv(ttgv),
-    Symbolic(0),Numeric(0)   { 
+    Symbolic(0),Numeric(0)  ,tol_pivot(pivot),tol_pivot_sym(pivot_sym) 
+     { 
 
     int status;
     throwassert( !A.sym() && Numeric == 0 && Symbolic==0 );
@@ -689,11 +712,20 @@ public:
     
     umfpack_di_defaults (Control) ;
     Control[UMFPACK_PRL]=1;
+   // Control[UMFPACK_PIVOT_TOLERANCE]=1E-10;
+    
     if(verbosity>4) Control[UMFPACK_PRL]=2;
-//    Control[UMFPACK_SYM_PIVOT_TOLERANCE]=1E-10;
-  //  Control[UMFPACK_PIVOT_TOLERANCE]=1E-10;
-  
-    Control[UMFPACK_STRATEGY]=umfpackstrategy;
+    if(tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=pivot_sym;
+    if(tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=pivot;
+    if(umfpackstrategy>=0)   Control[UMFPACK_STRATEGY]=umfpackstrategy;
+    if(verbosity>3) { 
+      cout << "  UMFpack real  Solver Control :" ;
+      cout << "\n\t SYM_PIVOT_TOLERANCE "<< Control[UMFPACK_SYM_PIVOT_TOLERANCE];
+      cout << "\n\t PIVOT_TOLERANCE     "<< Control[UMFPACK_PIVOT_TOLERANCE];
+      cout << "\n\t PRL                 "<< Control[UMFPACK_PRL];
+      cout << "\n";      
+    }
+    
     status = umfpack_di_symbolic (n, n, A.lg, A.cl, A.a, &Symbolic,Control,Info) ;
     if (status < 0)
     {
@@ -730,7 +762,8 @@ public:
     for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
     
      umfpack_di_defaults (Control) ;
-    int status = umfpack_di_solve (UMFPACK_At, A.lg, A.cl, A.a, x, b, Numeric,Control,Info) ;
+     // change UMFPACK_At to UMFPACK_Aat in complex 
+    int status = umfpack_di_solve (UMFPACK_Aat, A.lg, A.cl, A.a, x, b, Numeric,Control,Info) ;
     if (status < 0)
     {
 	umfpack_di_report_info (Control, Info) ;
@@ -787,10 +820,15 @@ class SolveUMFPack<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
   double *ar,*ai;
 
   int umfpackstrategy;
+    double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
+
 public:
-  SolveUMFPack(const MatriceMorse<Complex> &A,int strategy,double ttgv, double epsilon=1e-6) : 
+  SolveUMFPack(const MatriceMorse<Complex> &A,int strategy,double ttgv, double epsilon=1e-6,
+     double pivot=-1.,double pivot_sym=-1.
+) : 
     eps(epsilon),epsr(0),umfpackstrategy(strategy),tgv(ttgv),
-    Symbolic(0),Numeric(0)   { 
+    Symbolic(0),Numeric(0)  ,tol_pivot(pivot),tol_pivot_sym(pivot_sym) 
+   { 
     int status;
     throwassert( !A.sym());
     int n=A.n;
@@ -805,10 +843,18 @@ public:
     umfpack_zi_defaults (Control) ;
     Control[UMFPACK_PRL]=1;
     if(verbosity>4) Control[UMFPACK_PRL]=2;
-//    Control[UMFPACK_SYM_PIVOT_TOLERANCE]=1E-10;
+   //    Control[UMFPACK_SYM_PIVOT_TOLERANCE]=1E-10;
   //  Control[UMFPACK_PIVOT_TOLERANCE]=1E-10;
-  
-    Control[UMFPACK_STRATEGY]=umfpackstrategy;
+    if(tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=pivot_sym;
+    if(tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=pivot;
+    if(umfpackstrategy>=0) Control[UMFPACK_STRATEGY]=umfpackstrategy;
+    if(verbosity>3) { 
+      cout << "  UMFpack complex Solver Control :" ;
+      cout << "\n\t SYM_PIVOT_TOLERANCE "<< Control[UMFPACK_SYM_PIVOT_TOLERANCE];
+      cout << "\n\t PIVOT_TOLERANCE     "<< Control[UMFPACK_PIVOT_TOLERANCE];
+      cout << "\n\t PRL                 "<< Control[UMFPACK_PRL];
+      cout << "\n";      
+    }
     status = umfpack_zi_symbolic (n, n, A.lg, A.cl, ar,ai, &Symbolic,Control,Info) ;
     if (status < 0)
     {
@@ -847,7 +893,8 @@ public:
      int n = b.N();
      KN<double> xr(n),xi(n),br(n),bi(n);
      C2RR(n,b,br,bi);
-    int status = umfpack_zi_solve (UMFPACK_At, A.lg, A.cl, ar,ai, xr, xi, br,bi, Numeric,Control,Info) ;
+     // change UMFPACK_At to UMFPACK_Aat in complex  oct 2005 
+    int status = umfpack_zi_solve (UMFPACK_Aat, A.lg, A.cl, ar,ai, xr, xi, br,bi, Numeric,Control,Info) ;
     if (status < 0)
     {
 	umfpack_zi_report_info (Control, Info) ;

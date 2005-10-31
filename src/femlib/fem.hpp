@@ -148,7 +148,7 @@ inline R2 Maxc(const R3 & A,const R3& B,const R3& C) { return R3(Max(A.x,B.x,C.x
                                    {3,0,1, 0,2,0, 0},
                                    {1,3,0, 0,0,2, 0}};
                                   
-const   R2 TriangleHat[3]= { R2(0.,0.),R2(1.,0.),R2(0.,1.) } ;
+static   R2 TriangleHat[3]= { R2(0.,0.),R2(1.,0.),R2(0.,1.) } ;
 
 
 

@@ -549,6 +549,10 @@ long get_mat_m(Matrice_Creuse<R> * p)
  { ffassert(p ) ;  return p->A ?p->A->m: 0  ;}
 
 template<class R>
+long get_mat_nbcoef(Matrice_Creuse<R> * p)
+ { ffassert(p ) ;  return p->A ?p->A->NbCoef(): 0  ;}
+
+template<class R>
 pair<long,long> get_NM(const list<triplet<R,MatriceCreuse<R> *,bool> > & lM)
 {
       typedef typename list<triplet<R,MatriceCreuse<R> *,bool> >::const_iterator lconst_iterator;
@@ -586,10 +590,14 @@ R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & 
    MatriceCreuse<R> * a= ac ? ac->A:0 ;
   if(  !a || a->n <= b || c<0 || a->m <= c  ) 
    { cerr << " Out of bound  0 <=" << b << " < "  << a->n << ",  0 <= " << c << " < "  << a->m
-           << " array type = " << typeid(ac).name() << endl;
+           << " Matrix type = " << typeid(ac).name() << endl;
      cerr << ac << " " << a << endl;
      ExecError("Out of bound in operator Matrice_Creuse<R> (,)");}
-    return  &((*a)(b,c));}
+   R *  p =a->pij(b,c);
+   if( !p) { cerr << "Error: the coef a(" << b << ","   << c << ")  do'nt exist in sparce matrix "
+           << " Matrix  type = " << typeid(ac).name() << endl;
+       ExecError("Use of unexisting coef in sparce matrix operator a(i,j) ");}
+    return  p;}
 
 
 template<class RR,class AA=RR,class BB=AA> 
@@ -670,9 +678,23 @@ template <class R>
      A->A->setdiag(x);}
  };
  
+ template <class R>
+ struct TheCoefMat {
+  Matrice_Creuse<R> * A; 
+  TheCoefMat(Matrice_Creuse<R> * AA) :A(AA) {ffassert(A);}
+  void   get_mat_coef( KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->NbCoef()  );
+     A->A->getcoef(x);}
+  void   set_mat_coef(const  KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->NbCoef() );
+     A->A->setcoef(x);}
+ };
+ 
 template<class R>
 TheDiagMat<R> thediag(Matrice_Creuse<R> * p)
  {  return  TheDiagMat<R>(p);}
+
+template<class R>
+TheCoefMat<R> thecoef(Matrice_Creuse<R> * p)
+ {  return  TheCoefMat<R>(p);}
  
 template<class R>
 TheDiagMat<R> set_mat_daig(TheDiagMat<R> dm,KN<R> * x)
@@ -684,6 +706,19 @@ template<class R>
 KN<R> * get_mat_daig(KN<R> * x,TheDiagMat<R> dm)
 {
   dm.get_mat_daig(*x);
+  return x;
+}
+
+template<class R>
+TheCoefMat<R> set_mat_coef(TheCoefMat<R> dm,KN<R> * x)
+{
+  dm.set_mat_coef(*x);
+  return dm;
+}
+template<class R>
+KN<R> * get_mat_coef(KN<R> * x,TheCoefMat<R> dm)
+{
+  dm.get_mat_coef(*x);
   return x;
 }
 
@@ -976,6 +1011,7 @@ template <class R>
 void AddSparceMat()
 {
  Dcl_Type<TheDiagMat<R> >();
+ Dcl_Type<TheCoefMat<R> >(); // Add FH oct 2005
 
 TheOperators->Add("*", 
         new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN<R>* > >,
@@ -1026,11 +1062,24 @@ TheOperators->Add("+",
         
  Add<Matrice_Creuse<R> *>("n",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_n<R>) );
  Add<Matrice_Creuse<R> *>("m",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_m<R>) );
+ Add<Matrice_Creuse<R> *>("nbcoef",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
+ 
  
  Add<Matrice_Creuse<R> *>("diag",".",new OneOperator1<TheDiagMat<R> ,Matrice_Creuse<R> *>(thediag<R>) );
+ Add<Matrice_Creuse<R> *>("coef",".",new OneOperator1<TheCoefMat<R> ,Matrice_Creuse<R> *>(thecoef<R>) );
+
 // Add<Matrice_Creuse<R> *>("setdiag",".",new OneOperator2<long,Matrice_Creuse<R> *,KN<R> *>(set_diag<R>) );
  TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(get_mat_daig<R>) );
  TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );
+ 
+// TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(get_mat_daig<R>) );
+// TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );
+// ADD oct 2005
+ TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheCoefMat<R> >(get_mat_coef<R>) );
+ TheOperators->Add("=", new OneOperator2<TheCoefMat<R>,TheCoefMat<R>,KN<R>*>(set_mat_coef<R>) );
+ 
+// TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheCoefMat<R> >(get_mat_coef<R>) );
+// TheOperators->Add("=", new OneOperator2<TheCoefMat<R>,TheCoefMat<R>,KN<R>*>(set_mat_coef<R>) );
  
  Global.Add("set","(",new SetMatrix<R>);
  //Global.Add("psor","(",new  OneOperatorCode<Psor<R> > );

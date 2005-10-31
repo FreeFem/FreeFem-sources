@@ -13,6 +13,15 @@
 //   ou une colonne d'une matrice
 // -----------------------
 
+namespace RNM  {
+
+template <class T> inline double norm(const T & x){return std::norm(x);}
+inline double norm(double x){return x*x;} 
+inline double norm(float x){return x*x;}
+inline long norm(long x){return x*x;}
+inline int norm(int x){return x*x;}
+
+}
 
 template<class R>
 void MatMul(KNM_<R> & ab, KNM_<R> &  a, KNM_<R> & b){
@@ -25,9 +34,9 @@ void MatMul(KNM_<R> & ab, KNM_<R> &  a, KNM_<R> & b){
   K_throwassert(b.v != ab.v);
   K_throwassert(a.v != ab.v);
   KN_<R> ai =a(0);
-  for(long i=1;i<N;i++,++ai){
+  for(long i=0;i<N;i++,++ai){
     KN_<R> bj=b[0];
-    for(long j=1;j<M;j++,++bj)
+    for(long j=0;j<M;j++,++bj)
       ab(i,j) = (ai , bj)  ;}
 }
 
@@ -185,9 +194,44 @@ R  KN_<R>::sum() const {
 template<class R>
 double  KN_<R>::norm() const {
   double s = 0.;
-    for (long i=1;i<n;i++)
-      s +=  std::norm(v[index(i)]);
+    for (long i=0;i<n;i++)
+      s +=  RNM::norm(v[index(i)]);
     return s;
+  }
+
+template<class R>
+double  KN_<R>::l2() const {
+  double s = 0.;
+    for (long i=0;i<n;i++)
+      s +=  RNM::norm(v[index(i)]);
+    return sqrt(s);
+  }
+template<class R>
+double  KN_<R>::l1() const {
+  double s = 0.;
+    for (long i=0;i<n;i++)
+      s +=  std::abs(v[index(i)]);
+    return (s);
+  }
+template<class R>
+double  KN_<R>::linfty() const {
+  double s = 0.;
+    for (long i=0;i<n;i++)
+      s = std::max( (double) std::abs(v[index(i)]),s);
+    return (s);
+  }
+template<class R>
+double  KN_<R>::lp(double p) const {
+  if( p==1.) return l1();
+  else if (p==2.) return l2();
+  else if(p>1.e10) return linfty();
+  else
+  {
+  double s = 0.;
+    for (long i=0;i<n;i++)
+      s = pow(std::max( (double) std::abs(v[index(i)]),s),p);
+    return pow(s,1./p);
+   }
   }
 
 template<class R> template<class T>

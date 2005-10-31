@@ -339,7 +339,7 @@ inline int cestac(const complex<double_st> & z)
 class Problem  : public Polymorphic { 
 //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =10;
+  static const int n_name_param =12; // modi FH oct 2005 add tol_pivot
   int Nitem,Mitem;
 
 public:
@@ -543,7 +543,7 @@ struct OpCall_FormLinear2: public OneOperator {
 template<class T>
 struct OpCall_FormBilinear: public OneOperator {
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =9;
+  static const int n_name_param =11; // 9-> 11 FH 31/10/2005
   
   E_F0 * code(const basicAC_F0 & args) const 
   { Expression * nargs = new Expression[n_name_param];
@@ -565,7 +565,10 @@ basicAC_F0::name_and_type  OpCall_FormBilinear<C_args>::name_param[]= {
      "bmat",&typeid(Matrice_Creuse<R>* ),
      "tgv",&typeid(double ),
      "factorize",&typeid(bool),
-     "strategy",&typeid(long )
+     "strategy",&typeid(long ),
+     "tolpivot", &typeid(double),
+     "tolpivotsym", &typeid(double)
+     
           
 };
 
@@ -917,7 +920,8 @@ AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const
 }
 
 template<class R>
-void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool VF,double eps,int NbSpace,int itmax,const OneOperator * const precon,int umfpackstrategy, double tgv)
+void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool VF,double eps,int NbSpace,int itmax,const OneOperator * const precon,int umfpackstrategy, double tgv,
+double tol_pivot,double tol_pivot_sym)
 { 
   using namespace Fem2D;
   if (typemat->profile)
@@ -959,7 +963,7 @@ void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool
         break;
 #ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::UMFpack :
-            AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv));
+            AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
         break;
            
 #endif         
@@ -992,6 +996,8 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
   double eps=1e-6;
   double tgv = 1e30;
   int umfpackstrategy=0;
+  double tol_pivot=-1;
+  double tol_pivot_sym=-1;
   TypeSolveMat typemat(  & Uh == & Vh  ? TypeSolveMat::GMRES :TypeSolveMat::NONESQUARE);
   bool initmat=true;
   if (b->nargs[0]) initmat= ! GetAny<bool>((*b->nargs[0])(stack));
@@ -1001,6 +1007,9 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
   if (b->nargs[6]) tgv= GetAny<double>((*b->nargs[6])(stack));
   if (b->nargs[7]) factorize= GetAny<bool>((*b->nargs[7])(stack));
   if (b->nargs[8]) umfpackstrategy= GetAny<long>((*b->nargs[8])(stack));
+  if (b->nargs[9]) tol_pivot= GetAny<double>((*b->nargs[8])(stack));
+  if (b->nargs[10]) tol_pivot_sym= GetAny<double>((*b->nargs[9])(stack));
+  
   const OneOperator *precon = 0; //  a changer 
   if ( b->nargs[3])
     {
@@ -1058,7 +1067,7 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
     }
     
   }    
-  SetSolver(stack,*A.A,&typemat,VF,eps,NbSpace,itermax,precon,umfpackstrategy,tgv);
+  SetSolver(stack,*A.A,&typemat,VF,eps,NbSpace,itermax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym);
   
   return SetAny<Matrice_Creuse<R>  *>(&A);
   
@@ -1099,7 +1108,7 @@ template<class R>
        Expression a; 
        
        static  aType btype;
-       static const int n_name_param =9;
+       static const int n_name_param =11;
        static basicAC_F0::name_and_type name_param[] ;
        Expression nargs[n_name_param];
        const OneOperator * precon;
@@ -1148,7 +1157,10 @@ basicAC_F0::name_and_type  SetMatrix_Op<R>::name_param[]= {
      "bmat",&typeid(Matrice_Creuse<R>* ),
      "tgv",&typeid(double ),
      "factorize",&typeid(bool),
-     "strategy",&typeid(long )
+     "strategy",&typeid(long ),
+     "tolpivot",&typeid(double ),
+     "tolpivotsym",&typeid(double )
+
 };
 
 template<class R>
@@ -1165,6 +1177,9 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   double tgv = 1e30;
   bool VF=false;
   bool factorize=false;
+  double tol_pivot=-1;
+  double tol_pivot_sym=-1;
+  
 // type de matrice par default
 #ifdef HAVE_LIBUMFPACK         
      TypeSolveMat tmat(TypeSolveMat::UMFpack); 
@@ -1184,6 +1199,8 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   if (nargs[7]) factorize= GetAny<bool>((*nargs[7])(stack));
   
   if (nargs[8]) umfpackstrategy = GetAny<long>((*nargs[8])(stack)); 
+  if (nargs[9]) tol_pivot = GetAny<double>((*nargs[9])(stack)); 
+  if (nargs[10]) tol_pivot_sym = GetAny<double>((*nargs[10])(stack)); 
    
    if(A->typemat.profile != typemat->profile) 
    {
@@ -1203,7 +1220,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
     }
     
   }    
-  SetSolver<R>(stack,*A->A,typemat,VF,eps,NbSpace,itmax,precon,umfpackstrategy,tgv);
+  SetSolver<R>(stack,*A->A,typemat,VF,eps,NbSpace,itmax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym);
 
   
     

@@ -41,7 +41,9 @@ basicAC_F0::name_and_type  Problem::name_param[]= {
      "tgv",&typeid(double ),
      "strategy",&typeid(long ),
      "save",&typeid(string* ),
-     "cadna",&typeid(KN<double>*)
+     "cadna",&typeid(KN<double>*),
+     "tolpivot", &typeid(double),
+     "tolpivotsym", &typeid(double)
      
 };
 
@@ -1896,7 +1898,8 @@ void DefSolver(Stack stack,
   bool initmat,
   int umfpackstrategy,
   const OneOperator *precon,
-  double tgv
+  double tgv,
+  double tol_pivot, double tol_pivot_sym
 )
 {
     if (typemat->profile)
@@ -1933,7 +1936,7 @@ void DefSolver(Stack stack,
          break;
 #ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::UMFpack :
-            AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps));
+            AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
          break;
            
 #endif         
@@ -1959,7 +1962,9 @@ template<class R>
   bool initmat,
   int umfpackstrategy,
   const OneOperator *precon,
-  double tgv
+  double tgv,
+  double tol_pivot, double tol_pivot_sym
+
 )
 {
    typedef typename CadnaType<R>::Scalaire R_st;
@@ -2050,6 +2055,9 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
    TypeSolveMat    *typemat=&tmat;
   bool initmat=true;
   int umfpackstrategy=0;
+  double tol_pivot=-1.; // defaut UMFPACK value  Add FH 31 oct 2005 
+  double tol_pivot_sym=-1.; // defaut Add FH 31 oct 2005 
+  
   KN<double>* cadna=0; 
   if (nargs[0]) initmat= ! GetAny<bool>((*nargs[0])(stack));
   if (nargs[1]) typemat= GetAny<TypeSolveMat *>((*nargs[1])(stack));
@@ -2060,6 +2068,8 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   if (nargs[7]) umfpackstrategy = GetAny<long>((*nargs[7])(stack));
   if (nargs[8]) save = GetAny<string*>((*nargs[8])(stack));
   if (nargs[9]) cadna= GetAny<KN<double>* >((*nargs[9])(stack));
+  if (nargs[10]) tol_pivot= GetAny<double>((*nargs[10])(stack));
+  if (nargs[11]) tol_pivot_sym= GetAny<double>((*nargs[11])(stack));
   bool sym = typemat->sym;
   
   list<C_F0>::const_iterator ii,ib=op->largs.begin(),
@@ -2198,9 +2208,9 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   MatriceCreuse<R_st>  * ACadna = 0;
   if (initmat)
     if(cadna)
-     ACadna = DefSolverCadna( stack,typemat,A, NbSpace ,  itmax, eps, initmat, umfpackstrategy,precon,tgv);
+     ACadna = DefSolverCadna( stack,typemat,A, NbSpace ,  itmax, eps, initmat, umfpackstrategy,precon,tgv,tol_pivot,tol_pivot_sym);
     else
-     DefSolver( stack,typemat,A, NbSpace ,  itmax, eps, initmat, umfpackstrategy,precon,tgv);
+     DefSolver( stack,typemat,A, NbSpace ,  itmax, eps, initmat, umfpackstrategy,precon,tgv,tol_pivot,tol_pivot_sym);
   
 
 
