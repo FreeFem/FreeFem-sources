@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 if [ -f ./configure.param ]; then 
   echo ./configure `cat ./configure.param`
   echo ./configure `cat ./configure.param`|sh

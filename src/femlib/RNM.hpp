@@ -333,6 +333,11 @@ public:
   R max() const ;
   R sum() const ;
   double norm() const ;
+  double l2() const ;
+  double l1() const ;
+  double linfty() const ;
+  double lp(double p) const ;
+  
   template<class T> long last(const T &) const;
   template<class T> long first(const T &) const;
   

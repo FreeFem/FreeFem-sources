@@ -1686,7 +1686,7 @@ void MatriceProfile<R>::setdiag(const KN_<R> & x)
   d=x;
 }
 template<class R>
-void MatriceProfile<R>::getdiag(KN_<R> & x) 
+void MatriceProfile<R>::getdiag(KN_<R> & x) const 
 {
   ffassert(D);
   ffassert( this->n == x.N());
@@ -1696,18 +1696,22 @@ void MatriceProfile<R>::getdiag(KN_<R> & x)
 template<class R>
 void MatriceMorse<R>::setdiag(const KN_<R> & x) 
 {
- ffassert( this->n == this->m);
- ffassert( this->n == x.N());
+ ffassert( this->n == this->m&& this->n == x.N());
  for (int i=0;i<this->n;++i)
-    diag(i) = x[i];
+    {
+      R * p= pij(i,i);
+      if(p)     *p = x[i];
+      else ffassert( norm(x[i]) < 1e-30);}
 }
 template<class R>
-void MatriceMorse<R>::getdiag(KN_<R> & x) 
+void MatriceMorse<R>::getdiag(KN_<R> & x) const 
 {
- ffassert( this->n == this->m);
- ffassert( this->n == x.N());
+ ffassert( this->n == this->m && this->n == x.N());
  for (int i=0;i<this->n;++i)
-     x[i]= diag(i) ;
+    {
+      R * p= pij(i,i);
+      x[i]=  p ?  *p : R() ;
+    }
   
 }
 template<class R>
@@ -1767,5 +1771,70 @@ R MatriceProfile<R>::pscal(const KN_<R> & x,const KN_<R> & y)
  return sum;
 }
 
+template<class R>
+void MatriceMorse<R>::getcoef(KN_<R> & x) const 
+{
+ ffassert(x.N()==this->nbcoef);
+ x = KN_<R>(this->a,nbcoef);  
+}
+template<class R>
+void MatriceMorse<R>::setcoef(const KN_<R> & x)  
+{
+ ffassert(x.N()==nbcoef);
+  KN_<R>(this->a,nbcoef) = x;
+}
+template<class R>
+int MatriceMorse<R>::NbCoef() const  
+{
+  return this->nbcoef;
+}
+
+template<class R>
+void MatriceProfile<R>::getcoef(KN_<R> & x) const 
+{
+ ffassert(x.N()==this->NbCoef());
+ int k=0,kk;
+ if (D)
+  {  kk=this->n;
+     x(SubArray(kk,k))  = KN_<R>(D,kk);
+     k += kk; }
+ if (L)
+  {  kk= pL[this->n];
+     x(SubArray(kk,k))  = KN_<R>(L,kk);
+     k += kk; }
+  if (U && (U != L)) 
+  {  kk=  pU[this->n];
+     x(SubArray(kk,k))  = KN_<R>(U,kk);
+     k += kk; }
+   
+}
+template<class R>
+void MatriceProfile<R>::setcoef(const KN_<R> & x)  
+{
+ ffassert(x.N()==this->NbCoef());
+   int k=0,kk;
+ if (D)
+  {  kk=this->n;
+     KN_<R>(D,kk)=x(SubArray(kk,k))   ;
+     k += kk; }
+ if (L)
+  {  kk= pL[this->n];
+     KN_<R>(L,kk)=x(SubArray(kk,k))   ;
+     k += kk; }
+  if (U && (U != L)) 
+  {  kk=  pU[this->n];
+     KN_<R>(U,kk)=x(SubArray(kk,k)) ;
+     k += kk; }
+
+}
+template<class R>
+int MatriceProfile<R>::NbCoef() const  
+{
+  int s=0;
+  if (D) s += this->n;
+  if (L) s += pL[this->n];
+  if (U && (U != L)) s += pU[this->n];
+  return s;
+}
 #endif
 
