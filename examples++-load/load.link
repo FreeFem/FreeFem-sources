@@ -17,11 +17,11 @@ WIN32="";
 case "$uu" in
   CYGWIN*)
   WIN32="win32-"
-  if [ "$bin" = "." -a  -f ../src/bin-win32/libff2.dll  ]; then
+  if [ "$bin" = "." -a  -f ../src/bin-win32/libff.dll  ]; then
     bin=../src/bin-win32 
-  elif [ "$bin" = "." -a  -f ../libff2.dll  ]; then
+  elif [ "$bin" = "." -a  -f ../libff.dll  ]; then
     bin=..
-  elif [ "$bin" = "." -a  -f ../../libff2.dll  ]; then
+  elif [ "$bin" = "." -a  -f ../../libff.dll  ]; then
     bin=../..
   fi;; 
 esac
@@ -75,7 +75,7 @@ case "$WIN32$uu" in
     win32-CYGWIN*|win32-win32)
         echo " Window without cygwin "
         b=$bin
-        LIBS="$b/libff0.dll $b/libff1.dll $b/libff2.dll $LIBS $DLL"
+        LIBS="$b/libff0.dll $b/libffAC.dll  $b/libffAL.dll  $b/libffAR.dll $b/libff1.dll $b/libff.dll $LIBS $DLL"
         SHARED="-shared --unresolved-symbols=ignore-all"
         FLAGS='  -mno-cygwin '
         SUF=dll;;
@@ -83,7 +83,7 @@ case "$WIN32$uu" in
         echo " cygwin-version "
         b=$bin
         FLAGS=' '
-        LIBS="$b/libff0.dll $b/libff1.dll $b/libff2.dll $LIBS $DLL"
+        LIBS="$b/libff0.dll $b/libffAC.dll  $b/libffAL.dll  $b/libffAR.dll $b/libff1.dll $b/libff.dll $LIBS $DLL"
         SUF=dll;;
     FreeBSD)
 	SHARED="-shared" 
