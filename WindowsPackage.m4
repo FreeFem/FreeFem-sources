@@ -17,7 +17,15 @@ ChangesAssociations=yes
 OutputBaseFilename=FreeFem++-VERSION
 
 [Files]
-
+; README 
+Source: "README"; DestDir: "{app}"
+Source: "README_WINDOWS"; DestDir: "{app}"
+Source: "INNOVATION"; DestDir: "{app}"
+Source: "AUTHORS"; DestDir: "{app}"
+Source: "BUGS"; DestDir: "{app}"
+Source: "COPYRIGHT"; DestDir: "{app}"
+Source: "COPYING"; DestDir: "{app}"
+Source: "README"; DestDir: "{app}"
 ; Programs
 Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
 Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
