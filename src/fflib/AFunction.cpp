@@ -18,7 +18,7 @@
 #include "InitFunct.hpp"
 #include <queue>
 
-
+#include "array_init.hpp"
 
 extern Map_type_of_map map_type_of_map ; //  to store te type 
 extern Map_type_of_map map_pair_of_type ; //  to store te type 
@@ -405,7 +405,9 @@ void Init_map_type()
     Dcl_Type<SubArray>();
     Dcl_Type<pair<long,long> >();
     
-    initArrayDCL();
+    initArrayDCLlong();
+    initArrayDCLdouble();
+    initArrayDCLComplex();
         
     Dcl_Type<ios::openmode>();
     
@@ -631,7 +633,10 @@ void Init_map_type()
      ArrayOperator<Complex>();
      ArrayOperator<long>();
 */
-      initArrayOperators()   ;  
+//      initArrayOperators()   ;  
+     initArrayOperatorlong();
+     initArrayOperatordouble();
+     initArrayOperatorComplex();
  
 
      TheOperators->Add("+=",
