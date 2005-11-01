@@ -605,16 +605,4 @@ void ArrayOperator()
      atype<MyMap<String,K>*>()->Add("[","",new OneOperator2_<K*,MyMap<String,K>*,string*>(get_element<K>));
 
 }
-void initArrayOperators()
-{
-     ArrayOperator<double>();
-     ArrayOperator<Complex>();
-     ArrayOperator<long>();
 
-}
-void  initArrayDCL()
-{
-    ArrayDCL<double>();
-    ArrayDCL<Complex>();
-    ArrayDCL<long>();
-}

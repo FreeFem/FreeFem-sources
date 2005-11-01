@@ -4,7 +4,8 @@
 
 noinst_LIBRARIES=libff.a
 
-libff_a_SOURCES2=AFunction.cpp AFunction2.cpp AFunction3.cpp \
+libff_a_SOURCES2=AFunction.cpp AFunction2.cpp  \
+ array_long.cpp          array_real.cpp        array_complex.cpp \
 lex.cpp lgmesh.cpp		\
 CodeAlloc.cpp lgmat.cpp global.cpp 					\
 ../femlib/Drawing.cpp ../femlib/gibbs.cpp				\
@@ -22,6 +23,7 @@ CodeAlloc.cpp lgmat.cpp global.cpp 					\
 error.hpp gmres.hpp InitFunct.hpp lex.hpp lgfem.hpp lgsolver.hpp	\
 Operator.hpp problem.hpp Serialize.hpp showverb.hpp String.hpp		\
 throwassert.hpp versionnumber.hpp  CodeAlloc.hpp \
+array_init.hpp  array_tlp.hpp \
 strversionnumber.hpp
 
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp 

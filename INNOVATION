@@ -1,5 +1,4 @@
-Add version 2.0-0
-   
+V2.0-2
  * if x is an array of type real[int], int[int] , complex[int]
    or a sub array then
    x.l2     is the l2 norm <=> sqrt(x'*x)
