@@ -51,6 +51,12 @@ cout << itab2 << endl;
 tab2.resize(10);
 for (int i=4;i<10;i++) tab2[i]=i;
 cout << "tab2 = " << tab2 << endl;
+tab2 /= 2; // bug  before v2.0-3
+cout << "tab2 = " << tab2 << endl;
+tab2 *= 2;
+cout << "tab2 = " << tab2 << endl;
+
+
 real [int,int] mat(10,10);
 mat=0;
 for(int i=0;i<mat.n;i++)
@@ -72,3 +78,67 @@ a[2]=0;
 d = ( a ? b : c ); // i = 0, n-1  d[i] = a[i] ? b[i] : c[i] , 
 cout << d << endl;
 cout << "==   3       3       2       3       3 \n";
+
+// Liste all array operator and method 
+// ok in version 2.0-3 
+// they exist in the 3 type of array
+// real[int] , long[int], complex[int] 
+// ---------------------------------
+int N=5;
+{
+real[int] a(N),b(N),c(N);
+a =1; 
+a(0:4:2) = 2;
+a(3:4) = 4;
+cout <<" a = " << a << endl;
+b = a+ a;
+cout <<" b = a+a : " << b << endl;
+b += a;
+cout <<" b += a : " << b << endl;
+b += 2*a;
+cout <<" b += 2*a : " << b << endl;
+b /= 2;
+cout <<" b /= 2 : " << b << endl;
+b *= a; // same b = b .* a 
+cout << "b*=a; b =" << b << endl;
+b /= a; // same b = b ./ a 
+cout << "b/=a; b =" << b << endl;
+c = a+b;
+cout << " c =a+b : c=" << c << endl;
+c = 2*a+4*b;
+cout << " c =2*a+4b : c= " << c << endl;
+
+c = a+4*b;
+cout << " c =a+4b : c= " << c << endl;
+c = -a+4*b;
+cout << " c =-a+4b : c= " << c << endl;
+c = -a-4*b;
+cout << " c =-a-4b : c= " << c << endl;
+c = -a-b;
+cout << " c =-a-b : c= " << c << endl;
+
+c = a .* b; 
+cout << " c =a.*b  : c= " << c << endl;
+c = a ./ b; 
+cout << " c =a./b  : c= " << c << endl;
+c = 2 * b;
+cout << " c =2*b   : c= " << c << endl;
+c =  b*2 ;
+cout << " c =b*2   : c= " << c << endl;
+
+/*  this operator do not exist 
+c =  b/2 ;
+cout << " c =b/2   : c= " << c << endl;
+*/
+
+// ---- the  methods --
+cout << " ||a||_1     = " <<  a.l1     << endl;
+cout << " ||a||_2     = " <<  a.l2     << endl;
+cout << " ||a||_infty = " <<  a.linfty << endl;
+cout << " sum a_i     = " <<  a.sum    << endl;
+cout << " max a_i     = " <<  a.max    << endl;
+cout << " min a_i     = " <<  a.min    << endl;
+cout << " a'*a        = " <<  (a'*a)   << endl;
+
+
+}

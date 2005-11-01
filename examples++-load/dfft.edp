@@ -21,10 +21,15 @@ Vh w=f1;
 Vh  ur,ui;
 //  in dfft the matrix n,m is in row-major order ann array n,m is 
 // store j + m* i ( the transpose of the square numbering ) 
- v[]=dfft(u[],ny,-1); 
+ v[]=dfft(u[],ny,-1);
  u[]=dfft(v[],ny,+1);
- u[] /= complex(N);
- v = f1-u;
+ cout << " ||u||_\infty " << u[].linfty << endl;
+ u[] *= 1./N; // remark: operator /= bug  before version 2.0-3 (FH)
+ cout << " ||u||_\infty " << u[].linfty <<  endl;
+  ur=real(u); 
+  plot(w,wait=1,value=1,cmm="w");
+  plot(ur,wait=1,value=1,cmm="u");
+ v = w-u;
 cout << " diff = "<< v[].max << " " <<  v[].min << endl;
 assert( norm(v[].max) < 1e-10 &&  norm(v[].min) < 1e-10) ;
  // -------  a more hard example ----\hfilll
