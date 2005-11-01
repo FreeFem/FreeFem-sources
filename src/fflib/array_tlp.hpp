@@ -527,27 +527,27 @@ void ArrayOperator()
         new OneBinaryOperator<set_eq_arraypd_mul<KN_<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eq_arrayp_mul<KN_<K> ,KN<K>* > >       
       );
-
+// FH correction  01 nov 2005 FH  copy paste mistake eq_ exchange  ok  v2.0-3 
      TheOperators->Add("/=",
-        new OneBinaryOperator<set_eq_array_div<KN<K> ,K > > ,
-        new OneBinaryOperator<set_eq_array_div<KN<K> ,Add_KN_<K> > > ,
-        new OneBinaryOperator<set_eq_array_div<KN<K> ,Sub_KN_<K> > > ,
-        new OneBinaryOperator<set_eq_array_div<KN<K> ,Mulc_KN_<K> > > ,
-        new OneBinaryOperator<set_eq_array_div<KN<K> ,Mul_KNM_KN_<K> > > ,
-        new OneBinaryOperator<set_eq_arraypd_div<KN<K> ,Add_Mulc_KN_<K>* > > ,
-        new OneBinaryOperator<set_eq_arrayp_div<KN<K> ,KN<K>* > >        
+        new OneBinaryOperator<set_eqarray_div<KN<K> ,K > > ,
+        new OneBinaryOperator<set_eqarray_div<KN<K> ,Add_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray_div<KN<K> ,Sub_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray_div<KN<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarray_div<KN<K> ,Mul_KNM_KN_<K> > > ,
+        new OneBinaryOperator<set_eqarraypd_div<KN<K> ,Add_Mulc_KN_<K>* > > ,
+        new OneBinaryOperator<set_eqarrayp_div<KN<K> ,KN<K>* > >        
      );
 
      TheOperators->Add("/=",
-        new OneBinaryOperator<set_eqarray_div<KN_<K> ,K > > ,
-        new OneBinaryOperator<set_eqarray_div<KN_<K> ,Add_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray_div<KN_<K> ,Sub_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray_div<KN_<K> ,Mulc_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarray_div<KN_<K> ,Mul_KNM_KN_<K> > > ,
-        new OneBinaryOperator<set_eqarraypd_div<KN_<K> ,Add_Mulc_KN_<K>* > > ,
-        new OneBinaryOperator<set_eqarrayp_div<KN_<K> ,KN<K>* > >        
+        new OneBinaryOperator<set_eq_array_div<KN_<K> ,K > > ,
+        new OneBinaryOperator<set_eq_array_div<KN_<K> ,Add_KN_<K> > > ,
+        new OneBinaryOperator<set_eq_array_div<KN_<K> ,Sub_KN_<K> > > ,
+        new OneBinaryOperator<set_eq_array_div<KN_<K> ,Mulc_KN_<K> > > ,
+        new OneBinaryOperator<set_eq_array_div<KN_<K> ,Mul_KNM_KN_<K> > > ,
+        new OneBinaryOperator<set_eq_arraypd_div<KN_<K> ,Add_Mulc_KN_<K>* > > ,
+        new OneBinaryOperator<set_eq_arrayp_div<KN_<K> ,KN<K>* > >        
      );
-
+// end correction 
      TheOperators->Add("+",
        new OneBinaryOperator<Op2_addp<Add_KN_<K>,KN<K>*,KN<K>*> >,
        new OneBinaryOperator<Op2_add__n<Add_Mulc_KN_<K>,Mulc_KN_<K>,Mulc_KN_<K> > >,
