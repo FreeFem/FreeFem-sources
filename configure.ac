@@ -296,7 +296,19 @@ if test "$ff_glx_ok" = yes
 then
 	ff_glxprog=FreeFem++-glx${EXEEXT}
 fi
-
+AC_ARG_WITH(suffix,[  --with-suffix=[G3/G4/G4,P4,..] or --without-suffix (default no suffix package name)])
+if test "$with_suffix" = yes
+then
+  with_suffix=""
+elif test "$with_suffix" = no
+then
+  with_suffix=""
+else
+  with_suffix="-$with_suffix"
+fi
+  AC_MSG_CHECKING(add suffix $with_suffix )	
+  AC_SUBST(ADD_PACKAGE_NAME,$with_suffix)
+  AC_MSG_RESULT(yes)
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
 
@@ -437,7 +449,7 @@ done
 
 ff_blas_ok=no
 AC_ARG_WITH(blas,
-	--with-blas=library	Use a specific version of the Blas,
+	[  --with-blas=library	Use a specific version of the Blas],
 	ff_blas_ok=yes
 	ff_blas_lib="${withval}")
 
@@ -567,7 +579,7 @@ then
 
 	# User-specified location
 	AC_ARG_WITH(arpack,
-		--with-arpack=library	Use a specific version of Arpack,
+		[  --with-arpack=library	Use a specific version of Arpack],
 		ff_arpack_ok=yes
 		ff_arpack_libs="${withval}")
 
@@ -629,12 +641,12 @@ if test "$ff_blas_ok" = yes;
 then
         # User-specified location
         AC_ARG_WITH(amd,
-                --with-amd=library	Use a specific version of AMD,
+                [  --with-amd=library	Use a specific version of AMD],
                 ff_amd_ok=yes
 		ff_umfpack_lib="${withval}")
 
         AC_ARG_WITH(umfpack,
-                --with-umfpack=library	Use a specific version of Umfpack,
+                [  --with-umfpack=library	Use a specific version of Umfpack],
                 ff_umfpack_ok=yes
                 ff_umfpack_lib="${withval} $ff_umfpack_lib"
 		AC_DEFINE(HAVE_LIBUMFPACK,1,

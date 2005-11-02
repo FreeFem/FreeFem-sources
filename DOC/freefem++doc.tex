@@ -44,7 +44,7 @@
 \thispagestyle{empty}
 \vbox to 20cm {\begin{center}
    \vglue-0.5cm\includegraphics[width=10cm]{titre-ff}
-    \\  \large  \Blue{Version 2.0-0 }
+    \\  \large  \Blue{Version 2.0-3 }
  \\ \vglue 0.7cm
   {\large \Blue{\url{http://www.freefem.org/ff++}}} \\ ~
  \\~  \\
@@ -62,7 +62,7 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \thispagestyle{empty}
 \begin{center}
  {\Blue{ \TitreFont freefem++}} \\ \vglue 1cm  ~ \\
-   Version 2.0-0
+   Version 2.0-3
  \\ \vglue 0.7cm
  {\Large \url{http://www.freefem.org/ff++}} \\
 \vglue 1cm
@@ -719,7 +719,7 @@ f = x*y;
 g = sin(pi*x);
 Vh<complex> ff,gg; // a complex valued finite element function \index{FE function!complex}\index{complex}
 ff= x*(y+1i);
-gg = exp(pi*x*i);
+gg = exp(pi*x*1i);
 @varf mat(u,v) =
   int2d(Th)(1*dx(u)*dx(v)+2*dx(u)*dy(v)+3*dy(u)*dx(v)+4*dy(u)*dy(v))
   + on(1,2,3,4,u=1);
@@ -747,7 +747,7 @@ On the triangulation of Figure \ref{fig-hatFunction} this produce the following:
 \begin{eqnarray*}
 A&=&\borderarray{[}{]}{1em}{1.2ex}{rrrrrrrr}{
 &1&2&3&4&5&6\\
-1&10^{30}& 1 0.5& 0&3 0.& 4 -2.5& 0\\
+1&10^{30}&  0.5& 0&3 0.&  -2.5& 0\\
 2&0.&10^{30}&0.5& 0&0.5&-2.5\\
 3&0&0.&10^{30}& 0& 0&0.5\\
 4&0.5& 0& 0& 10^{30}& 0.& 0\\
@@ -2004,7 +2004,7 @@ element spaces for the LBB conditions to be satisfied:
     \sup_{p\in P_h}\frac{(\vec u,\n p)}{|p|}\geq \beta|\vec u|~~~\forall \vec u\in U_h
 \]
 \bFF
-//file Stokes.edp
+//file stokes.edp
 @int n=3;
 @mesh Th=@square(10*n,10*n);
 @fespace Uh(Th,P1b); Uh u,v,uu,vv;
@@ -2012,7 +2012,7 @@ element spaces for the LBB conditions to be satisfied:
 
 @solve stokes([u,v,p],[uu,vv,pp]) =
     @int2d(Th)(@dx(u)*@dx(uu)+@dy(u)*@dy(uu) + @dx(v)*@dx(vv)+ @dy(v)*@dy(vv)
-            + @dx(p)*uu + @dy(p)*vv + q*(@dx(u)+@dy(v)))
+            + @dx(p)*uu + @dy(p)*vv + pp*(@dx(u)+@dy(v)))
             + @on(1,2,4,u=0,v=0) + @on(3,u=1,v=0);
 @plot([u,v],p,wait=1);
 \eFF
@@ -2915,6 +2915,7 @@ c = 3;
 a[2]=0;
 d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] ,
 @cout << " d = ( a ? b : c )  is " << d << endl;
+
 \eFF
 \index{array!resize}\index{resize}\index{max}\index{array!max} \index{min}\index{array!min}\index{sum}\index{array!sum}\index{array!?:}%modif FH
 produce the output
@@ -2928,6 +2929,133 @@ produce the output
  d = ( a ? b : c )  is  5
           3       3       2       3       3
 
+\eFF
+
+the all integer array operator are  : % modif v2.0-3
+\index{array!\texttt{=  +  -  *  /  .*  ./ += -= /= *=}  }
+
+\bFF
+
+{
+@int N=5;
+@real[int] a(N),b(N),c(N);
+a =1; 
+a(0:4:2) = 2;
+a(3:4) = 4;
+@cout <<" a = " << a << endl;
+b = a+ a;
+@cout <<" b = a+a : " << b << endl;
+b += a;
+@cout <<" b += a : " << b << endl;
+b += 2*a;
+@cout <<" b += 2*a : " << b << endl;
+b /= 2;
+@cout <<" b /= 2 : " << b << endl;
+b *= a; // same b = b .* a 
+@cout << "b*=a; b =" << b << endl;
+b /= a; // same b = b ./ a 
+@cout << "b/=a; b =" << b << endl;
+c = a+b;
+@cout << " c =a+b : c=" << c << endl;
+c = 2*a+4*b;
+@cout << " c =2*a+4b : c= " << c << endl;
+c = a+4*b;
+@cout << " c =a+4b : c= " << c << endl;
+c = -a+4*b;
+@cout << " c =-a+4b : c= " << c << endl;
+c = -a-4*b;
+@cout << " c =-a-4b : c= " << c << endl;
+c = -a-b;
+@cout << " c =-a-b : c= " << c << endl;
+
+c = a .* b; 
+@cout << " c =a.*b  : c= " << c << endl;
+c = a ./ b; 
+@cout << " c =a./b  : c= " << c << endl;
+c = 2 * b;
+@cout << " c =2*b   : c= " << c << endl;
+c =  b*2 ;
+@cout << " c =b*2   : c= " << c << endl;
+
+/*  this operator do not exist 
+c =  b/2 ;
+cout << " c =b/2   : c= " << c << endl;
+*/
+
+// ---- the  methods --
+cout << " ||a||_1     = " <<  a.l1     << endl;//\index{array!.l1}
+cout << " ||a||_2     = " <<  a.l2     << endl;//\index{array!.l2}
+cout << " ||a||_infty = " <<  a.linfty << endl;//\index{array!.linfty}
+cout << " sum a_i     = " <<  a.sum    << endl;//\index{array!.sum}
+cout << " max a_i     = " <<  a.max    << endl;//\index{array!.max}
+cout << " min a_i     = " <<  a.min    << endl;//\index{array!.min}
+cout << " a'*a        = " <<  (a'*a)   << endl;//\index{dot product}
+}
+\eFF
+produce the output
+\bFF
+5
+          3       3       2       3       3
+
+==   3       3       2       3       3 
+ a = 5
+          2       1       2       4       4
+
+ b = a+a : 5
+          4       2       4       8       8
+
+ b += a : 5
+          6       3       6      12      12
+
+ b += 2*a : 5
+         10       5      10      20      20
+
+ b /= 2 : 5
+          5     2.5       5      10      10
+
+b*=a; b =5
+         10     2.5      10      40      40
+
+b/=a; b =5
+          5     2.5       5      10      10
+
+ c =a+b : c=5
+          7     3.5       7      14      14
+
+ c =2*a+4b : c= 5
+         24      12      24      48      48
+
+ c =a+4b : c= 5
+         22      11      22      44      44
+
+ c =-a+4b : c= 5
+         18       9      18      36      36
+
+ c =-a-4b : c= 5
+        -22     -11     -22     -44     -44
+
+ c =-a-b : c= 5
+         -7     -3.5     -7     -14     -14
+
+ c =a.*b  : c= 5
+         10     2.5      10      40      40
+
+ c =a./b  : c= 5
+        0.4     0.4     0.4     0.4     0.4
+
+ c =2*b   : c= 5
+         10       5      10      20      20
+
+ c =b*2   : c= 5
+         10       5      10      20      20
+
+ ||a||_1     = 13
+ ||a||_2     = 6.403124237
+ ||a||_infty = 4
+ sum a_i     = 13
+ max a_i     = 4
+ min a_i     = 1
+ a'*a        = 41
 \eFF
 
 It is also possible to make an array of FE functions, with the same syntax,
@@ -10414,7 +10542,7 @@ It will be called automatically at load module time.
 
 To compile and link, do
 \bFF
-Brochet% ./load.link myfunction
+Brochet% ./load.link myfunction.cpp
 g++ -c -g -Iinclude myfunction.cpp
 g++ -bundle -undefined dynamic_lookup -g myfunction.o -o ./myfunction.dylib
 \eFF
@@ -10595,32 +10723,30 @@ Bien: On a fini Normalement
 
 
 \subsection{Load Module for Dervieux' P0-P1 Finite Volume Method}
-
+the associed edp file is  \texttt{examples++-load/convect\_dervieux.edp}
 
 \bFF
 //  Implementation of P1-P0 FVM-FEM
 // ---------------------------------------------------------------------
 // $Id$
-// compile and link with ./load.link -win32 mat\_dervieux (i.e. the file name without .cpp)
+// compile and link with ./load.link mat\_dervieux.cpp  (i.e. the file name without .cpp)
 #include  <iostream>
 #include  <cfloat>
 #include  <cmath>
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
-using namespace std;
 #include "rgraph.hpp"
 #include "RNM.hpp"
+// remove problem of include 
+#undef  HAVE_LIBUMFPACK
+#undef HAVE_CADNA
 #include "MatriceCreuse_tpl.hpp"
 #include "MeshPoint.hpp"
 #include "lgfem.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
 
-
-#include <cmath>
-
-//using namespace Fem2D;
 
 class MatrixUpWind0 :  public E_F0mps { public:
   typedef Matrice_Creuse<R> * Result;
