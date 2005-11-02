@@ -1,0 +1,23 @@
+load "mat_dervieux";  // external module in C++ must be loaded
+border a(t=0, 2*pi){ x = cos(t); y = sin(t);  }
+mesh th = buildmesh(a(100));
+fespace Vh(th,P1);
+
+Vh vh,vold,u1 = y, u2 = -x;
+Vh v = exp(-10*((x-0.3)^2 +(y-0.3)^2)), vWall=0, rhs =0;
+
+real dt = 0.025;
+// qf1pTlump means mass lumping is used
+problem  FVM(v,vh) = int2d(th,qft=qf1pTlump)(v*vh/dt)
+                  - int2d(th,qft=qf1pTlump)(vold*vh/dt)
+      + int1d(th,a)(((u1*N.x+u2*N.y)<0)*(u1*N.x+u2*N.y)*vWall*vh)
++ rhs[] ;
+
+matrix A;
+MatUpWind0(A,th,vold,[u1,u2]);
+
+for ( int t=0; t< 2*pi ; t+=dt){
+  vold=v;
+  rhs[] = A * vold[] ; FVM;
+  plot(v,wait=0);
+};
