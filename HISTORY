@@ -1,3 +1,41 @@
+2005-11-01 17:52  hecht
+
+	*  correct windows install file and load.link under windows
+
+2005-11-01 17:08  hecht
+
+	*   correct problem in array operator /=
+	    add test the array.edp
+
+2005-11-01 16:55  hecht
+
+	*   correct src/bin-win32 Makefile.am
+
+2005-11-01 14:14  hecht
+
+	*    split AFunction3.cpp in 3 files array_{long,real,double}.cpp
+	     to solve ld trap under cygwin (memory full)
+
+2005-10-31 22:34  hecht
+
+	* [no log message]
+
+2005-10-31 22:29  hecht
+
+	*   add new item in highlight
+
+2005-10-31 17:45  hecht
+
+	*   - Correction de bug UMFPACK resolution complex problem
+	      before we  solve conj(A) x = b and not A x = b;
+	    - add tool to compute classical norm of array l1,l2,linfty
+	    x.l2 , x.l1, x.linfty (see sparse-cmatrix.edp) example
+	   - way of get all the coef of the matrix (no tested)
+
+2005-10-30 17:26  hecht
+
+	* [no log message]
+
 2005-10-30 17:06  hecht
 
 	*      correct problem in eigen value computation

@@ -9,7 +9,10 @@ V2.0-3
 
 Major Change previous version
 -----------------------------
-
+ * add ternary C expression
+     Symbol       Example      Explanation
+       ?:          a?b:c     ternary operation
+ 
  * add 
    sparse matrix computation,
    block matrix construction 

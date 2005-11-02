@@ -15,6 +15,7 @@ FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS \
 logo.ico copysharedlibs.sh COPYRIGHT edp.nedit INNOVATION
 
+FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
 
 # Creates a file named "ChangeLog" containing the chronology of all
 # modifications to the source files. Needs "cvs2cl" to be installed.
@@ -100,7 +101,7 @@ speedtest: all
 win32:WindowsPackage.iss
 	cd examples++-load;tar zxvf include.tar.gz;cp -rL include include-tmp 
 WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
-	m4 -DVERSION=$(VERSION)$(OPTIM_TYPE) \
+	m4 -DVERSION=$(VERSION)$(ADD_PACKAGE_NAME) \
 		WindowsPackage.m4 > WindowsPackage.iss
 
 # Debian package
@@ -113,11 +114,11 @@ deb:
 # Build all versions
 # ------------------
 
-native:FreeFem++v$(VERSION)_MacOS FreeFem++v$(VERSION)_MacOsX.tgz DOC/freefem++doc.pdf
+native:$(FF_MAC_PREFIX)_MacOS $(FF_MAC_PREFIX)_MacOsX.tgz DOC/freefem++doc.pdf
 	echo "done"
-native9:FreeFem++v$(VERSION)_MacOS 
+native9:$(FF_MAC_PREFIX)_MacOS 
 	echo "done"
-nativeX: FreeFem++v$(VERSION)_MacOsX.tgz 
+nativeX: $(FF_MAC_PREFIX)_MacOsX.tgz 
 	echo "done"
 
 clean-local::
@@ -135,27 +136,27 @@ ListFiles-natives: .FORCE
 	find .  -name '*.edp' -o -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
 .FORCE:
 
-FreeFem++v$(VERSION)_MacOS:documentation ListFiles-natives
+$(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives
 	-mkdir $@ 
 	cat ListFiles-natives|xargs tar cf - | (cd $@ ; tar xf - )  
 	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++ 
 	cp   DOC/freefem++-doc.pdf $@
 
-FreeFem++v$(VERSION)_MacOsX: all documentation  ListFiles-natives
+$(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives
 	-mkdir $@ 
 	cp   DOC/freefem++doc.pdf $@
 	cat ListFiles-natives|xargs tar cf - | (cd $@ ; tar xf - )  
-	cd  FreeFem++v$(VERSION)_MacOsX ; tar zxf ../src/agl/FreeFem++.app.tgz
+	cd  $@ ; tar zxf ../src/agl/FreeFem++.app.tgz
 	sed <src/agl/Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
-           -e "s/@VVERSION@/$(VERSION)/g" \
+           -e "s/@VVERSION@/$(VERSION)$(ADD_PACKAGE_NAME)/g" \
            -e "s/@DATE@/`date`/g"  
 	-mkdir -p  $@/FreeFem++.app/Contents/FreeFem++.app/Contents
 	cp $@/FreeFem++.app/Contents/Info.plist $@/FreeFem++.app/Contents/FreeFem++.app/Contents/Info.plist
 	cp src/agl/FreeFem++-agl $@/FreeFem++.app/Contents/FreeFem++.app/FreeFem++
 	cp src/FreeFem++-CoCoa $@
 
-FreeFem++v$(VERSION)_MacOsX.tgz: FreeFem++v$(VERSION)_MacOsX
-	tar zcvf FreeFem++v$(VERSION)_MacOsX.tgz  FreeFem++v$(VERSION)_MacOsX
+$(FF_MAC_PREFIX)_MacOsX.tgz: $(FF_MAC_PREFIX)_MacOsX
+	tar zcvf $(FF_MAC_PREFIX)_MacOsX.tgz  $(FF_MAC_PREFIX)_MacOsX
 
 # Linux binary-only package
 # -------------------------
