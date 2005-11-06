@@ -20,17 +20,26 @@
 // DESCRIPTION:  
 // DESCRIP-END.
 
-// bof bof FH je ne sais pais pourquoi nnnBAMG_LONG_LONG
-#ifdef nnnBAMG_LONG_LONG
+// bof bof FH je ne sais pas pourquoi nnnBAMG_LONG_LONG
+// nov 2005 j'ai corrige les problemes 
+// il y a vait un gros bug de le trie
+// overflow long  car on calculais   x*x + y*y 
+// pour que cela tienne dans un  long long  
+//  x*x + y*y  < 2^63-1 =>  x et y  < 2^31-1 
+// --- 
+#include <iostream> 
+using namespace std;
+
+#ifdef BAMG_LONG_LONG
 #define LONG8 long long
-#define DLONG8LONG8 1e12
-#define MAXCOOR ((double) 1073741823 )
+#define DLONG8LONG8 1.e17
+#define MAXCOOR ((double) 1073741823)// 2^30-1=1073741823. )
 #else
 #define LONG8 long 
 #define DLONG8LONG8 1e9
 #define MAXCOOR ((double) 32767. )
 #endif
-#define DET8(a11,a12,a21,a22) ( (LONG8) a11 * (LONG8) a22 - (LONG8) a21* (LONG8) a12)
+#define DET8(a11,a12,a21,a22) ( (LONG8) (a11) * (LONG8) (a22) - (LONG8) (a21)* (LONG8) (a12))
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -205,14 +214,14 @@ int             mshopt_ (long *c, long *nu, long *t, long a, long *err);
 void            mshvoi_ (long *nu, long *w1, long *w, long *nbt, long *nbs);
 int             msha1p_ (long *t, long *s, long *c, long *nu, long *reft, long *tete, long *nbt,
 			 long *err);
-int             mshtri_ (double *cr, long *c, long *nbs, long *tri, long *nu, double *trfri, long *err);
+int             mshtri_ (double *cr, long *c, long *nbs, long *tri, LONG8 *nu, double *trfri, long *err);
 int             mshcxi_ (long *c, long *nu, long *tri, long *nbs, long *tete, long *err);
 int             mshfrt_ (long *c, long *nu, long *nbs, long *arete, long nba, long *sd,
 			 long nbsd, long *reft, long *w, long *err);
 int             mshgpt_ (long *c, double *cr, long *nu, double *h, long *reft, long *nbs,
     long nbsmx, long *nbt, double coef, double puis, double *trfri, long *err);
 long            mshlcl_ (long *c, long *nu, long *tete, long *s);
-int             mshtr1_ (long *criter, long *record, long *n);
+int             mshtr1_ (LONG8 *criter, long *record, long *n);
 int             mshcvx_ (long direct, long *c, long *nu, long *pfold, long *err);
 int             mshfr1_ (long *c, long *nu, long *it1, long *ita, long *is1, long *s2, long *err);
 int             mshfr2_ (long *c, long *nu, long *lst, long *nbac, long *t, long *ta,
@@ -314,7 +323,7 @@ mshptg8_ (double *cr, double *h, long *c, long *nu, long *nbs, long nbsmx, long 
 /* ------------------------- */
 /* preparation des donnees */
 /* ------------------------- */
-  mshtri_ (&cr[3], &c[3], nbs, &tri[1], &tri[*nbs + 1], trfri, err);
+  mshtri_ (&cr[3], &c[3], nbs, &tri[1], (LONG8*) (void *) &tri[*nbs + 1], trfri, err);
   if (*err != 0)
      {
        return 0;
@@ -633,9 +642,10 @@ L20:
 	    s2 = nu[t * 6 + 2];
 	    s3 = nu[t * 6 + 3];
 /*        calcul de 2 fois l'aire du triangle */
-	    det = (cr[(s2 << 1) + 1] - cr[(s1 << 1) + 1]) * (cr[(s3 << 1) + 2]
-		    - cr[(s1 << 1) + 2]) - (cr[(s2 << 1) + 2] - cr[(s1 << 1)
-			    + 2]) * (cr[(s3 << 1) + 1] - cr[(s1 << 1) + 1]);
+	    det = (cr[(s2 << 1) + 1] - cr[(s1 << 1) + 1]) 
+	        * (cr[(s3 << 1) + 2] - cr[(s1 << 1) + 2]) 
+	        - (cr[(s2 << 1) + 2] - cr[(s1 << 1) + 2]) 
+	        * (cr[(s3 << 1) + 1] - cr[(s1 << 1) + 1]);
 	    aire = det * coef;
 	    if (puis > (double) 0.)
 	       {
@@ -835,8 +845,8 @@ L10:
   pt = nu[pt * 6 + 4];
   if (pt != *tete)
      {
-       det = (LONG8) x * (LONG8) c[(nu[pt * 6 + 1] << 1) + 2] - (LONG8) y * (LONG8) c[(nu[pt * 6 + 1] << 1)
-						      + 1];
+       det = (LONG8) x * (LONG8) c[(nu[pt * 6 + 1] << 1) + 2] 
+           - (LONG8) y * (LONG8) c[(nu[pt * 6 + 1] << 1) + 1];
        if (det < 0)
 	  {
 	    init = 0;
@@ -853,7 +863,7 @@ L10:
 
 /* ********************************************************************** */
 int 
-mshtri_ (double *cr, long *c, long *nbs, long *tri, long *nu, double *trfri, long *err)
+mshtri_ (double *cr, long *c, long *nbs, long *tri, LONG8  *nu, double *trfri, long *err)
 {
   /* System generated locals */
   long            i_1, i_2, i_3;
@@ -924,7 +934,7 @@ mshtri_ (double *cr, long *c, long *nbs, long *tri, long *nu, double *trfri, lon
        i_2 = c[(ic << 1) + 1];
 /* Computing 2nd power */
        i_3 = c[(ic << 1) + 2];
-       nu[ic] = i_2 * i_2 + i_3 * i_3;
+       nu[ic] = (LONG8) i_2 * (LONG8) i_2 + (LONG8) i_3 * (LONG8) i_3;
      }
 /* ---------------------------------------------------------- */
   mshtr1_ (&nu[1], &tri[1], nbs);
@@ -943,6 +953,8 @@ mshtri_ (double *cr, long *c, long *nbs, long *tri, long *nu, double *trfri, lon
 		 if (nu[i] == nu[i + 1])
 		    {
 		      ++ierr;
+	             if (ierr <10) 
+	             printf(" The points %d and %d are too close \n",tri[i],tri[i+1]);
 		    }
 	       }
 	    xx = nu[jc];
@@ -958,6 +970,8 @@ mshtri_ (double *cr, long *c, long *nbs, long *tri, long *nu, double *trfri, lon
      {
        if (nu[i] == nu[i + 1])
 	  {
+	    if (ierr <10) 
+	      printf(" The points %d and %d are to close \n",tri[i],tri[i+1]);
 	    ++ierr;
 	  }
      }
@@ -973,8 +987,8 @@ L50:
   if (k <= *nbs)
      {
        ++k;
-       det = (LONG8) c[(tri[2] << 1) + 1] * (LONG8)  c[(tri[k] << 1) + 2] - (LONG8) c[(tri[2] << 1) +
-						  2] * (LONG8) c[(tri[k] << 1) + 1];
+       det = (LONG8) c[(tri[2] << 1) + 1] * (LONG8) c[(tri[k] << 1) + 2] 
+           - (LONG8) c[(tri[2] << 1) + 2] * (LONG8) c[(tri[k] << 1) + 1];
        if (det == 0)
 	  {
 	    goto L50;
@@ -1004,14 +1018,14 @@ L50:
 
 /* ********************************************************************** */
 int 
-mshtr1_ (long *criter, long *record, long *n)
+mshtr1_ (LONG8 *criter, long *record, long *n)
 {
   /* System generated locals */
   long            i_1;
 
   /* Local variables */
-  static long     crit, i, j, l, r, rec;
-
+  long     i, j, l, r, rec;
+  LONG8 crit;
 /*     trie selon les valeurs de criter croissantes */
 /*     record suit le reordonnancement */
 
@@ -1131,9 +1145,11 @@ L10:
   s1 = nu[ppf * 6 + 1];
   s2 = nu[pf * 6 + 1];
   s3 = nu[psf * 6 + 1];
-  det = (LONG8) (c[(s2 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[(s3 << 1) + 2] - c[(s1 <<
-	     1) + 2]) - (LONG8) (c[(s2 << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(s3 << 1)
-						   + 1] - c[(s1 << 1) + 1]);
+  det =    (LONG8) (c[(s2 << 1) + 1] - c[(s1 << 1) + 1]) 
+         * (LONG8) (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) 
+         - (LONG8) (c[(s2 << 1) + 2] - c[(s1 << 1) + 2]) 
+         * (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]);
+         
   if (!(direct) && det > 0 || direct && det < 0)
      {
 /*       on ajoute un triangle t et on detruit une arete */
@@ -1337,8 +1353,8 @@ mshopt_ (long *c, long *nu, long *t, long a, long *err)
   static double   reel8;
   static long     i, a1, a2, s1, t1, t2, s2, s3, s4, aa, i11, i12, i13,
                   i21, i22, i23, tt;
-  static long     tt1, sgn;
-  LONG8  cos1, cos2, sin1, sin2;
+  static long     tt1;
+  LONG8  cos1, cos2, sin1, sin2, sgn;
 
   /* Parameter adjustments */
   nu -= 7;
@@ -1375,24 +1391,32 @@ L10:
        s2 = nu[i11 + t1 * 6];
        s3 = nu[i12 + t1 * 6];
        s4 = nu[i23 + t2 * 6];
-       sin1 = (LONG8) (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(s2 << 1) + 1] - c[(
-	       s1 << 1) + 1]) - (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[(
-					  s2 << 1) + 2] - c[(s1 << 1) + 2]);
-       cos1 = (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[(s3 << 1) + 1] - c[(
-	       s2 << 1) + 1]) + (LONG8) (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(
-					  s3 << 1) + 2] - c[(s2 << 1) + 2]);
+       sin1 =     (LONG8) (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) 
+                * (LONG8) (c[(s2 << 1) + 1] - c[(s1 << 1) + 1]) 
+              -   (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) 
+                * (LONG8) (c[(s2 << 1) + 2] - c[(s1 << 1) + 2]);
+                
+       cos1 =     (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) 
+                * (LONG8) (c[(s3 << 1) + 1] - c[(s2 << 1) + 1]) 
+              +   (LONG8) (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) 
+                * (LONG8) (c[(s3 << 1) + 2] - c[(s2 << 1) + 2]);
        if (sin1 == 0 && cos1 == 0)
 	  {
 	    *err = 20;
 	    return 0;
 	  }
 /*       b est la cotangente de angle (s1,s3,s2) */
-       sin2 = (LONG8) (c[(s4 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[(s2 << 1) + 2] - c[(
-	       s1 << 1) + 2]) - (LONG8) (c[(s4 << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[(
-					  s2 << 1) + 1] - c[(s1 << 1) + 1]);
-       cos2 = (c[(s4 << 1) + 1] - c[(s2 << 1) + 1]) * (c[(s4 << 1) + 1] - c[(
-	       s1 << 1) + 1]) + (c[(s4 << 1) + 2] - c[(s2 << 1) + 2]) * (c[(
-					  s4 << 1) + 2] - c[(s1 << 1) + 2]);
+
+       sin2 =   (LONG8) (c[(s4 << 1) + 1] - c[(s1 << 1) + 1]) 
+              * (LONG8) (c[(s2 << 1) + 2] - c[(s1 << 1) + 2]) 
+              - (LONG8) (c[(s4 << 1) + 2] - c[(s1 << 1) + 2]) 
+              * (LONG8) (c[(s2 << 1) + 1] - c[(s1 << 1) + 1]);
+     // FH correct 6/11/2005 forgotted cast          
+       cos2 =   (LONG8) (c[(s4 << 1) + 1] - c[(s2 << 1) + 1]) 
+              * (LONG8) (c[(s4 << 1) + 1] - c[(s1 << 1) + 1]) 
+              + (LONG8) (c[(s4 << 1) + 2] - c[(s2 << 1) + 2]) 
+              * (LONG8) (c[(s4 << 1) + 2] - c[(s1 << 1) + 2]);
+              
        reel1 = (double) cos2 *(double) sin1;
        reel2 = (double) cos1 *(double) sin2;
 
@@ -1403,15 +1427,16 @@ L10:
 /* Computing MIN */
 	    d_1 = amax (reel8, -1.);
 	    reel8 = amin (d_1, 1.);
-	    sgn = (long) reel8;
+	    sgn = (LONG8) reel8;
 	  }
        else
 	  {
 	    sgn = cos2 * sin1 + cos1 * sin2;
 	  }
 /* Computing MIN */
-       i_1 = amax (sgn, -1);
-       if (amin (i_1, 1) * sin1 >= 0)
+       i_1 = amin(amax (sgn, -1),1);
+      // cout << sgn << " " << i_1 << endl;
+       if ( i_1 * sin1 >= 0)
 	  {
 	    goto L10;
 	  }
@@ -1448,7 +1473,7 @@ L10:
 	  }
        nu[i12 + 3 + t1 * 6] = i22 + 3 + (t2 << 3);
        nu[i22 + 3 + t2 * 6] = i12 + 3 + (t1 << 3);
-       if (i + 4 > 256)
+       if (i + 4 > 1024)
 	  {
 	    *err = 21;
 	    return 0;
@@ -1645,7 +1670,7 @@ L50:
 			   s3t = nu[p3[p3[is - 1] - 1] + t * 6];
 			   det2 = (LONG8) (c[(s2t << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[( s2 << 1) + 2] - c[(s1 << 1) + 2]) 
 			        - (LONG8) (c[(s2t << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[( s2 << 1) + 1] - c[(s1 << 1) + 1]);
-			   det3 = (LONG8) (c[(s3t << 1) + 1] - c[(s1 << 1) + 1]) *(LONG8)  (c[( s2 << 1) + 2] - c[(s1 << 1) + 2]) 
+			   det3 = (LONG8) (c[(s3t << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) (c[( s2 << 1) + 2] - c[(s1 << 1) + 2]) 
 			        - (LONG8) (c[(s3t << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) (c[( s2 << 1) + 1] - c[(s1 << 1) + 1]);
 			   if (det2 > 0 && det3 < 0)
 			      {
@@ -1990,8 +2015,8 @@ L20:
   s3 = nu[p3[la - 3] + t * 6];
   if (s3 != *s2)
      {
-       det = (LONG8) x * (LONG8) (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) - (LONG8) y * (LONG8) (c[(s3 << 1) +
-						     1] - c[(s1 << 1) + 1]);
+       det =   (LONG8) x * (LONG8) (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) 
+             - (LONG8) y * (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]);
        if (det > 0)
 	  {
 	    la = p3[la - 4] + 3;
@@ -2072,10 +2097,11 @@ L30:
        s4 = nu[i23 + t2 * 6];
        x41 = c[(s4 << 1) + 1] - c[(s1 << 1) + 1];
        y41 = c[(s4 << 1) + 2] - c[(s1 << 1) + 2];
-       det2 = (LONG8) (c[(s2 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) y41 - (LONG8) (c[(s2 << 1) + 2]
-						  - c[(s1 << 1) + 2]) * (LONG8) x41;
-       det3 = (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8)  y41 - (LONG8) (c[(s3 << 1) + 2]
-						  - c[(s1 << 1) + 2]) * (LONG8)  x41;
+       det2 = (LONG8) (c[(s2 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8) y41 
+            - (LONG8) (c[(s2 << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8) x41;
+            
+       det3 = (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]) * (LONG8)  y41 
+            - (LONG8) (c[(s3 << 1) + 2] - c[(s1 << 1) + 2]) * (LONG8)  x41;
        if (det2 > 0 && det3 < 0)
 	  {
 /*         le quadrilataire est convexe on le retourne */
@@ -2123,10 +2149,12 @@ L30:
 	       }
 	    nu[i12 + 3 + t1 * 6] = i22 + 3 + (t2 << 3);
 	    nu[i22 + 3 + t2 * 6] = i12 + 3 + (t1 << 3);
-	    det1 = (LONG8) (c[(s1 << 1) + 1] - c[(*ss1 << 1) + 1]) * (LONG8) y - (LONG8) (c[(s1 << 1)
-					     + 2] - c[(*ss1 << 1) + 2]) * (LONG8) x;
-	    det4 = (LONG8) (c[(s4 << 1) + 1] - c[(*ss1 << 1) + 1]) * (LONG8) y - (LONG8) (c[(s4 << 1)
-					     + 2] - c[(*ss1 << 1) + 2]) *(LONG8)  x;
+	    
+	    det1 = (LONG8) (c[(s1 << 1) + 1] - c[(*ss1 << 1) + 1]) * (LONG8) y 
+	         - (LONG8) (c[(s1 << 1) + 2] - c[(*ss1 << 1) + 2]) * (LONG8) x;
+	         
+	    det4 = (LONG8) (c[(s4 << 1) + 1] - c[(*ss1 << 1) + 1]) * (LONG8) y 
+	         - (LONG8) (c[(s4 << 1) + 2] - c[(*ss1 << 1) + 2]) * (LONG8) x;
 	    if (det1 < 0 && det4 > 0)
 	       {
 /*           le sommets s4 est dans omega */
