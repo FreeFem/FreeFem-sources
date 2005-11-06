@@ -1,3 +1,29 @@
+2005-11-06 20:26  hecht
+
+	*   change the tolerance value un mshptg form  2^-15 to 2^-30 if
+	  the computation in long long
+	    if it's possible.
+	    this correct trouble in trunc, splitmesh, triangulate if the
+	  mesh is to fine
+
+2005-11-02 22:29  hecht
+
+	*  add files
+
+2005-11-02 22:06  hecht
+
+	*   addinf missing files
+
+2005-11-02 22:04  hecht
+
+	*   correct small mistake in the doc
+	    add --with-suffix to build special precompile version under mac
+	  and windows
+
+2005-11-02 10:46  lehyaric
+
+	* New Debian packages
+
 2005-11-01 17:52  hecht
 
 	*  correct windows install file and load.link under windows

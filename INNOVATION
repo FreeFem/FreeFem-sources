@@ -1,3 +1,8 @@
+V2.0-4
+ * change in mshptg the size of the small possible edge from
+   1/32000 to 1/1 000 000 000, this mesher is use in trunc, 
+  splitmesh, and triangulate functions.
+
 V2.0-3
  * correct operator x =/,  it does  nothing before. (v2.0-3)
    see end  examples++-tutorial/array.edp for all array operator
