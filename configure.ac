@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.0-3,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.0-4,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old

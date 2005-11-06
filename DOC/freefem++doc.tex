@@ -1020,7 +1020,7 @@ Next we would like to check the results!
 One simple way is to adjust the parameters so as to know the solutions.  For instance
 on the unit circle (b=1), $\varphi_e=\sin(x^2+y^2-1)$ solves the problem when
 \[
-    z=0,~f=-4(\cos(x^2+y^2)-1)-(x^2+y^2)\sin(x^2+y^2-1)
+    z=0,~f=-4(\cos(x^2+y^2-1)-(x^2+y^2)\sin(x^2+y^2-1))
 \]
 except that on $\Gamma_2$ $\p_n\varphi=2$ instead of zero.  So we will consider
 a non-homogeneous Neumann condition and solve
@@ -2776,7 +2776,7 @@ where an  elementary function is used to build the border of a domain.
 \end{example}
 Taking the principal value, we can define $\log z$ for $z\neq 0$ by
 \[
-\ln z = \ln |z|+\arg z.
+\ln z = \ln |z|+i \arg z.
 \]
 Using \freefempp, we calculated
 \ttCC{@exp(1+4i)}, \ttCC{@sin(pi+1i)}, \ttCC{@cos(pi/2-1i)} and \ttCC{@log(1+2i)}, we then have
@@ -3086,8 +3086,8 @@ Poisson; uu[2] = u;
 
  For the second case, it is just
  a map of the STL\footnote{Standard template Library, now part of standard \Cpp}\cite{cpp}
- so no vector operation except the
- selection of an item is allowed . \index{dot product}\index{transpose}
+ so no  operations on vector are allowed,   except the
+ selection of an item  . \index{dot product}\index{transpose}
 
 The transpose operator is \texttt{\string'} like  Matlab or Scilab, so the way
 to compute the dot product of two array \ttCC{a,b} is  \ttCC{@real\ ab=\ a'*b}\index{product!dot}.
@@ -3541,7 +3541,7 @@ file >> g[] ;
 Vh2 u,v;
 @plot(g);
 //  find $u$ such that \hfilll
-// $ u - \Delta u = g $ in $\Omega $ , \hfilll
+// $ u + \Delta u = g $ in $\Omega $ , \hfilll
 // $ u=0$ on $\Gamma_1$ and $\frac{\p u }{\p n} = g$ on $\Gamma_2$  \hfilll
 @solve pb(u,v) =
     @int2d(th)( u*v - dx(u)*dx(v)-dy(u)*dy(v) )
