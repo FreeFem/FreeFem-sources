@@ -9866,41 +9866,54 @@ unop:     '-'
         | '++'
         | '--'  ;
 
+
 no_comma_expr:
-          no_set_expr
-        | no_set_expr '=' no_comma_expr
-        | no_set_expr '+=' no_comma_expr
-        | no_set_expr '-=' no_comma_expr
-        | no_set_expr '*=' no_comma_expr
-        | no_set_expr '/=' no_comma_expr ;
+       no_set_expr 
+	| no_set_expr '=' no_comma_expr 
+	| no_set_expr '+=' no_comma_expr 
+	| no_set_expr '-=' no_comma_expr 
+	| no_set_expr '*=' no_comma_expr 
+	| no_set_expr '/=' no_comma_expr ;
+
 
 no_set_expr:
-          unary_expr
-        | no_set_expr '*' no_set_expr
-        | no_set_expr '.*' no_set_expr
-        | no_set_expr './' no_set_expr
-        | no_set_expr '/' no_set_expr
-        | no_set_expr '%' no_set_expr
-        | no_set_expr '+' no_set_expr
-        | no_set_expr '-' no_set_expr
-        | no_set_expr '<<' no_set_expr
-        | no_set_expr '>>' no_set_expr
-        | no_set_expr '&' no_set_expr
-        | no_set_expr '&&' no_set_expr
-        | no_set_expr '|' no_set_expr
-        | no_set_expr '||' no_set_expr
-        | no_set_expr '<' no_set_expr
-        | no_set_expr '<=' no_set_expr
-        | no_set_expr '>' no_set_expr
-        | no_set_expr '>=' no_set_expr
-        | no_set_expr '==' no_set_expr
-        | no_set_expr '!=' no_set_expr ;
+	  no_ternary_expr
+	| no_ternary_expr '?' no_set_expr ':' no_set_expr ;
 
+no_ternary_expr:
+          unary_expr
+        | no_ternary_expr '*' no_ternary_expr
+        | no_ternary_expr '.*' no_ternary_expr
+        | no_ternary_expr './' no_ternary_expr
+        | no_ternary_expr '/' no_ternary_expr
+        | no_ternary_expr '%' no_ternary_expr
+        | no_ternary_expr '+' no_ternary_expr
+        | no_ternary_expr '-' no_ternary_expr
+        | no_ternary_expr '<<' no_ternary_expr
+        | no_ternary_expr '>>' no_ternary_expr
+        | no_ternary_expr '&' no_ternary_expr
+        | no_ternary_expr '&&' no_ternary_expr
+        | no_ternary_expr '|' no_ternary_expr
+        | no_ternary_expr '||' no_ternary_expr
+        | no_ternary_expr '<' no_ternary_expr
+        | no_ternary_expr '<=' no_ternary_expr
+        | no_ternary_expr '>' no_ternary_expr
+        | no_ternary_expr '>=' no_ternary_expr
+        | no_ternary_expr '==' no_ternary_expr
+        | no_ternary_expr '!=' no_ternary_expr ;
+
+sub_script_expr:  
+	     no_set_expr  
+	|   ':' 
+	|   no_set_expr ':' no_set_expr 
+	|   no_set_expr ':' no_set_expr ':' no_set_expr ;
+  
 
 parameters:
         |   no_set_expr
         |   @FESPACE
         |   id '=' no_set_expr
+        |   sub_script_expr 
         |   parameters ',' @FESPACE
         |   parameters ',' no_set_expr
         |   parameters ',' id '=' no_set_expr ;

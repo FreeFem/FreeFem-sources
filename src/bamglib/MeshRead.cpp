@@ -66,11 +66,11 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 
 	  Gh.AfterRead();
 	  ifgeom=1;
-	  delete fgeom;
+	  delete [] fgeom;
 	}
       else if (!strcmp(fieldname,"Identifier"))
 	{
-	  if (identity) delete identity;
+	  if (identity) delete [] identity;
 	  f_in >> identity;
 	}
       else if (!strcmp(fieldname,"hVertices"))

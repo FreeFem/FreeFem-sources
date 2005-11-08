@@ -100,8 +100,8 @@ void lgerror (const char* s) ;
 %type <cexp>   Expr
 %type <cexp>   no_comma_expr
 %type <cexp>   sub_script_expr
-%type <cexp>   no_set_expr
 %type <cexp>   no_ternary_expr
+%type <cexp>   no_set_expr
 %type <cexp>   unary_expr
 %type <cexp>   pow_expr
 %type <cexp>   primary
@@ -269,11 +269,11 @@ list_of_dcls:    ID                         {$$=currentblock->NewVar<LocalVariab
 
 
 parameters_list:
-	   no_ternary_expr {$$=$1} 
+	   no_set_expr {$$=$1} 
 	|  FESPACE  ID  {$$=Find($1)} 
-	|  ID '=' no_ternary_expr { $$=make_pair<const char *,const C_F0>($1,$3)} 	
-	| parameters_list ',' no_ternary_expr { $$ = ($1 += $3) }
-	| parameters_list ',' id '=' no_ternary_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5))}
+	|  ID '=' no_set_expr { $$=make_pair<const char *,const C_F0>($1,$3)} 	
+	| parameters_list ',' no_set_expr { $$ = ($1 += $3) }
+	| parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5))}
 ; 
 
 type_of_dcl:   TYPE 
@@ -287,15 +287,15 @@ type_of_dcl:   TYPE
 
 ID_space:
     ID                                  { $$ =  NewFEvariable($1,currentblock,fespacetype,fespacecomplex); }
- |  ID '[' no_ternary_expr ']'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
- |  ID '=' no_ternary_expr                  { $$ =  NewFEvariable($1,currentblock,fespacetype,$3,fespacecomplex) }
+ |  ID '[' no_set_expr ']'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
+ |  ID '=' no_set_expr                  { $$ =  NewFEvariable($1,currentblock,fespacetype,$3,fespacecomplex) }
  |  '[' list_of_id1 ']'                 { $$ =  NewFEvariable($2,currentblock,fespacetype,fespacecomplex) }
- |  '[' list_of_id1 ']' '[' no_ternary_expr ']'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
- |  '[' list_of_id1 ']' '=' no_ternary_expr { $$ =  NewFEvariable($2,currentblock,fespacetype,$5,fespacecomplex) }
+ |  '[' list_of_id1 ']' '[' no_set_expr ']'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
+ |  '[' list_of_id1 ']' '=' no_set_expr { $$ =  NewFEvariable($2,currentblock,fespacetype,$5,fespacecomplex) }
 ; 
 ID_array_space:
-    ID '(' no_ternary_expr ')'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
- |  '[' list_of_id1 ']' '(' no_ternary_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
+    ID '(' no_set_expr ')'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
+ |  '[' list_of_id1 ']' '(' no_set_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
 
 ;
 
@@ -427,40 +427,40 @@ unop:
 ;
 
 no_comma_expr:
-      no_ternary_expr 
-	| no_ternary_expr '=' no_comma_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr PLUSEQ no_comma_expr {$$=C_F0(TheOperators,"+=",$1,$3)}
-	| no_ternary_expr MOINSEQ no_comma_expr {$$=C_F0(TheOperators,"-=",$1,$3)}
-	| no_ternary_expr MULEQ no_comma_expr {$$=C_F0(TheOperators,"*=",$1,$3)}
-	| no_ternary_expr DIVEQ no_comma_expr {$$=C_F0(TheOperators,"/=",$1,$3)}
+      no_set_expr 
+	| no_set_expr '=' no_comma_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_set_expr PLUSEQ no_comma_expr {$$=C_F0(TheOperators,"+=",$1,$3)}
+	| no_set_expr MOINSEQ no_comma_expr {$$=C_F0(TheOperators,"-=",$1,$3)}
+	| no_set_expr MULEQ no_comma_expr {$$=C_F0(TheOperators,"*=",$1,$3)}
+	| no_set_expr DIVEQ no_comma_expr {$$=C_F0(TheOperators,"/=",$1,$3)}
 ;
 
 
-no_ternary_expr:
-	no_set_expr
-	| no_set_expr '?' no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,"?:",$1,$3,$5)}
-
 no_set_expr:
+	no_ternary_expr
+	| no_ternary_expr '?' no_set_expr ':' no_set_expr {$$=C_F0(TheOperators,"?:",$1,$3,$5)}
+
+no_ternary_expr:
 	  unary_expr 
-	| no_set_expr '*' no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr DOTSTAR no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr DOTSLASH no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr '/' no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr '%' no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr '+' no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr '-' no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr LTLT no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr GTGT no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr '&' no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr AND no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr '|' no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr OR no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr '<' no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr LE no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr '>' no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr GE no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr EQ no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr NE no_set_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr '*' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr DOTSTAR no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr DOTSLASH no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr '/' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr '%' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr '+' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr '-' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr LTLT no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr GTGT no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr '&' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr AND no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr '|' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr OR no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr '<' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr LE no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr '>' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr GE no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr EQ no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+	| no_ternary_expr NE no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
 	
 ;
 
