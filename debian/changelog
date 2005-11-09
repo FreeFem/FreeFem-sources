@@ -1,3 +1,9 @@
+freefem++ (2.0-4) testing unstable; urgency=low
+
+  * New upstream release
+  * Changed dependency from libfltk1.1c102 to libfltk1.1
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 09 Nov 2005 15:12:45 +0100
 freefem++ (2.0-3) testing unstable; urgency=low
 
   * New upstream release
