@@ -12,6 +12,9 @@
 //#pragma inline_depth 1
 #endif
 
+#ifdef DRAWING1
+  extern bool withrgraphique ;
+#endif
 
 namespace bamg {
 
@@ -806,6 +809,10 @@ void  Triangles::Read_amdba(MeshIstream &f_in )
 Triangles::Triangles(const char * filename,Real8 cutoffradian) 
 : Gh(*(new Geometry())), BTh(*this)
 { 
+#ifdef DRAWING1
+   if (!withrgraphique) {initgraphique();withrgraphique=true;}   
+#endif
+
   //  Int4 beginquad=0,begintria=0;
   // Int4 endquad=0;endtria=0;
   int type_file=0;

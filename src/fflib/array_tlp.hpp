@@ -440,7 +440,9 @@ void ArrayOperator()
       );
      
      TheOperators->Add("=",
-        new OneBinaryOperator<set_eqarray<KNM<K>  ,K > > 
+        new OneBinaryOperator<set_eqarray<KNM<K>  ,K > > ,
+         new OneBinaryOperator<set_eqarrayp<KNM<K>  , KNM<K> *  > > 
+        
        );
 
      TheOperators->Add("=",

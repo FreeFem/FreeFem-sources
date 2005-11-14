@@ -1058,18 +1058,28 @@ class KNM: public KNM_<R>{ public:
     
   void resize(long nn,long mm) {     
     long kk=nn*mm;
-
+    long n = this->shapei.n;
+    long m = this->shapej.n;
+    
+    if( n !=nn && m != mm) 
+     {
+    KNM_ <R> old(*this); 
+    long no=std::min(n,nn);
+    long mo=std::min(m,mm);
     R *vo=this->v;
-    long no=std::min(this->n,kk), so=this->step;
+    
+    // new mat 
     ShapeOfArray::init(kk);
     this->v=new R[this->n];
-    // copy
-    if(this->v && vo) for(long i=0,j=0;j<no;i++,j+=so)
-      this->v[i]=vo[j]; 
-    delete []vo;
-        
     this->shapei.init(nn,1,nn);
     this->shapej.init(mm,nn,1);
+    
+    if(this->v && vo)  // copy
+        (*this)(SubArray(no),SubArray(mo)) = old(SubArray(no),SubArray(mo));
+      
+    delete []vo;
+    }
+        
    }
     
   void destroy(){delete [] this->v;this->n=0 ;}
