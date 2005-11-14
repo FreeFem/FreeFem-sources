@@ -57,12 +57,24 @@ tab2 *= 2;
 cout << "tab2 = " << tab2 << endl;
 
 
-real [int,int] mat(10,10);
+real [int,int] mat(10,10),mmat(10,10);
 mat=0;
 for(int i=0;i<mat.n;i++)
   for(int j=0;j<mat.m;j++)
     mat(i,j)=i+100*(j+1);
-cout << mat << endl;
+mmat=mat;
+cout << mmat << endl;
+
+mat.resize(15,15);
+for(int i=10;i<mat.n;i++)
+  for(int j=0;j<mat.m;j++)
+    mat(i,j)=i+100*(j+1);
+for(int i=0;i<mat.n;i++)
+  for(int j=10;j<mat.m;j++)
+    mat(i,j)=i+100*(j+1);
+cout << mat << endl; // wrong
+//mat(0:9,0:9)=mmat;  todo 
+//cout << mat << endl; // wrong
 
 // array of mesh 
 mesh[int] aTh(10);
