@@ -1031,6 +1031,7 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
   A.typemat = typemat;
   if ( & Uh != A.Uh || & Vh != A.Vh ) 
     { // reconstruct all the matrix
+      A.A=0; // to delete  old  matrix ADD FH 16112005 
       if (typemat.profile)
         { A.A.master( new MatriceProfile<R>(Vh,VF) ); assert( &Uh == & Vh);}
       else if (typemat.sym )
