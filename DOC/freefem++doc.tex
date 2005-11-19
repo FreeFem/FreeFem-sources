@@ -5448,6 +5448,9 @@ The parameters of the plot command can be , meshes, real FE functions ,
 arrays of 2  real FE functions, arrays of two arrays of double, to plot
 respectively a mesh,
 a function, a vector field, or a curve defined by the two arrays of double.
+\begin{note}
+The length of a arrow is always bound to be in  $[5\tcperthousand, 5\%]$ of the screen size, to see something not a porcupine. % porc-épic 
+\end{note}
 
 The parameters are
 \begin{description}
@@ -5679,7 +5682,7 @@ The return value is  minus  the real stop test (remark: it is useful in loop).
 \begin{example}[algo.edp]
 For a given function $b$, let us find the minimizer $u$ of the functional
 \begin{eqnarray*}
- J(u) &=& \int_{\Omega} f(|\nabla u|^2) - \int_{\Omega}  u b \\
+ J(u) &=& \frac{1}{2}\int_{\Omega} f(|\nabla u|^2) - \int_{\Omega}  u b \\
  f(x) &=& ax + x-\ln(1+x), \quad f'(x) = a+\frac{x}{1+x}, \quad f''(x) =  \frac{1}{(1+x)^2}
 \end{eqnarray*}
 under the boundary condition $u=0$ on $\p\Omega$.
@@ -5719,7 +5722,7 @@ Vh b=1;  // to defined b
 @func @real J(@real[int] & x)
   {
     Vh u;u[]=x;
-    @real r=@int2d(Th)(f( dx(u)*dx(u) + dy(u)*dy(u) ) - b*u) ;
+    @real r=@int2d(Th)(0.5*f( dx(u)*dx(u) + dy(u)*dy(u) ) - b*u) ;
     @cout << "J(x) =" << r << " " << x.min <<  " " << x.max << @endl;
     @return r;
   }
@@ -6914,7 +6917,7 @@ Vh1 fx = ((y>0.001)*(y<0.1))-((y<-0.001)*(y>-0.1)) ;
 
 \subsection{Nonlinear Static Problems}
 We propose how to solve the following non-linear academic  problem of minimization
-of a functional $$J(u) = \int_\Omega f(|\nabla u|^2) - u*b $$
+of a functional $$J(u) = \int_\Omega \frac{1}{2} f(|\nabla u|^2) - u*b $$
 where $u$ is function of $H^1_0(\Omega)$
 and $f$ defined by
 $$
@@ -6923,11 +6926,10 @@ $$
 
 \subsubsection{Newton Ralphson algorithm}
 
-
 Now, we solve the Euler problem $ \nabla J (u) = 0$
 with Newton Ralphson algorithm, that is,
 $$
-u^{n+1} = u^n - ( \nabla^2 J (u^{n}))^{-1}*dJ(u^n)
+u^{n+1} = u^n - ( \nabla^2 J (u^{n}))^{-1}*\nabla J(u^n)
 $$
 
 \index{Newton}
@@ -6948,8 +6950,8 @@ compute respectively $ \nabla J$ and $ \nabla^2 J$
 
 
   // the variational form of evaluate  ddJ   $= \nabla^2 J$ \hfilll
-  // hJ(uh,vh) =  f'()*( dx(uh)*dx(vh) + dy(uh)*dy(vh) \hfilll
-  //            + f''()( dx(u)*dx(uh) + dy(u)*dy(uh) ) * (dx(u)*dx(vh) + dy(u)*dy(vh)) \hfilll
+  // hJ(uh,vh) =    f'()*( dx(uh)*dx(vh) + dy(uh)*dy(vh) \hfilll
+  //            + 2*f''()( dx(u)*dx(uh) + dy(u)*dy(uh) ) * (dx(u)*dx(vh) + dy(u)*dy(vh)) \hfilll
   @varf vhJ(uh,vh) = int2d(Th)( alpha*( dx(uh)*dx(vh) + dy(uh)*dy(vh) )
    +  dalpha*( dx(u)*dx(vh) + dy(u)*dy(vh)  )*( dx(u)*dx(uh) + dy(u)*dy(uh) ) )
    + on(1,2,3,4, uh=0);
@@ -6959,8 +6961,8 @@ compute respectively $ \nabla J$ and $ \nabla^2 J$
   u=0;
   @for (int i=0;i<100;i++)
    {
-    alpha = df( dx(u)*dx(u) + dy(u)*dy(u) ) ; // optimization
-    dalpha = ddf( dx(u)*dx(u) + dy(u)*dy(u) ) ; // optimization
+    alpha =     df( dx(u)*dx(u) + dy(u)*dy(u) ) ; // optimization
+    dalpha = 2*ddf( dx(u)*dx(u) + dy(u)*dy(u) ) ; // optimization
     v[]= vdJ(0,Vh);  // $ v = \nabla J(u) $
     real res= v[]'*v[]; // the dot product
     cout << i <<  " residu^2 = " <<  res  << endl;
@@ -6971,6 +6973,9 @@ compute respectively $ \nabla J$ and $ \nabla^2 J$
    }
    plot (u,wait=1,cmm="solution with Newton Ralphson");
 \eFF
+
+
+Remark: This  example is in \texttt{algo.edp} file of \texttt{examples++-tutorial} directory.
 
 \subsection{Eigenvalue Problems}
 
