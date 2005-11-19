@@ -133,13 +133,14 @@ array of size \texttt{N}.
 This array is:
 \bFF
 @int TypeOfFE_RTortho::Data[]={
-       // for each df 0,1,3 :  \hfilll
-        3,4,5,  // the support of the node of the df   \hfilll
-        0,0,0,  // the number of the df on  the node   \hfilll
-        0,1,2,  // the node of the df  \hfilll
-        0,0,0,  //  the df come from which FE (generally 0) \hfilll
-        0,1,2,  //  which are de df on sub FE \hfilll
-        0,0 };  // for each compontant $j=0,N-1$ it give the sub FE associated
+
+              // for each df 0,1,3 :  \hfilll
+        3,4,5,// the support of the node of the df   \hfilll
+        0,0,0,// the number of the df on  the node   \hfilll
+        0,1,2,// the node of the df  \hfilll
+        0,0,0,// the df come from which FE (generally 0) \hfilll
+        0,1,2,// which are de df on sub FE \hfilll
+        0,0 };// for each component $j=0,N-1$ it give the sub FE associated
 \eFF
 where the support is a number $0,1,2$ for vertex support, $3,4,5$ for edge support,
 and finaly $6$ for element support.
