@@ -85,7 +85,7 @@ real tgv=Cl[].max;     //
 Cl[] = -Cl[];  Cl[] += tgv; Cl[] /=tgv;
 
 Vh b=1;  // to defined b 
-// $ J(u) = \int_\Omega f(|\nabla u|^2) - \int\Omega  u b $
+// $ J(u) = 1/2\int_\Omega f(|\nabla u|^2) - \int\Omega  u b $
 // $ f(x) = a*x + x-ln(1+x), \quad f'(x) = a+\frac{x}{1+x}, \quad f''(x) =  \frac{1}{(1+x)^2}$
 real a=0.001;
 func real f(real u) { return u*a+u-log(1+u); }
@@ -97,7 +97,7 @@ func real ddf(real u) { return 1/((1+u)*(1+u));}
 func real J(real[int] & x)
   {
     Vh u;u[]=x; 
-    real r=int2d(Th)(f( dx(u)*dx(u) + dy(u)*dy(u) ) - b*u) ;
+    real r=int2d(Th)(0.5*f( dx(u)*dx(u) + dy(u)*dy(u) ) - b*u) ;
     cout << "J(x) =" << r << " " << x.min <<  " " << x.max << endl;
     return r;
   }
@@ -149,42 +149,12 @@ func real[int] C(real[int] & x)
      cout << " restart with new preconditionner " << conv << " eps =" << eps << endl;
    }
    plot (u,wait=1,cmm="solution with NLCG");
+   umax = u[].max; 
+
    Vh sss= df( dx(u)*dx(u) + dy(u)*dy(u) ) ;
    plot (sss,wait=0,fill=1,value=1);
 
-//   methode of  Newtow Ralphson to solve dJ(u)=0;
-//    $$ u^{n+1} = u^n - (\frac{\partial dJ}{\partial u_i})^{-1}*dJ(u^n) $$ 
-//   ---------------------------------------------
-  Ph dalpha ; //to store = $f''( |\nabla u|^2) $  optimisation
-  // the variationnal form of evaluate  dJ 
-  // --------------------------------------
-  //  dJ =  f'()*( dx(u)*dx(vh) + dy(u)*dy(vh) 
-  varf vdJ(uh,vh) =  int2d(Th)( alpha*( dx(u)*dx(vh) + dy(u)*dy(vh) ) - b*vh)
-  + on(1,2,3,4, uh=0);
-  // the variationnal form of evaluate  ddJ   
-  // hJ(uh,vh) =  f'()*( dx(uh)*dx(vh) + dy(uh)*dy(vh)
-  //            + f''()( dx(u)*dx(uh) + dy(u)*dy(uh) ) * (dx(u)*dx(vh) + dy(u)*dy(vh)) 
-  varf vhJ(uh,vh) = int2d(Th)( alpha*( dx(uh)*dx(vh) + dy(uh)*dy(vh) )
-   +  dalpha*( dx(u)*dx(vh) + dy(u)*dy(vh)  )*( dx(u)*dx(uh) + dy(u)*dy(uh) ) )
-   + on(1,2,3,4, uh=0);
-   
- // the newtow algorithme  
-  Vh v,w; 
-  u=0;
-  for (int i=0;i<100;i++)
-   {
-    alpha = df( dx(u)*dx(u) + dy(u)*dy(u) ) ; // optimization
-    dalpha = ddf( dx(u)*dx(u) + dy(u)*dy(u) ) ; // optimization
-    v[]= vdJ(0,Vh);
-    real res= v[]'*v[];
-    cout << i <<  " residu^2 = " <<  res  << endl;
-    matrix H;
-    if( res< 1e-12) break;
-    H= vhJ(Vh,Vh,factorize=1,solver=LU);
-    w[]=H^-1*v[];
-    u[] -= w[];
-    umax = u[].max; 
-   }
-   plot (u,wait=1,cmm="solution with Newtow Ralphson");
+// the  methode of  Newtow Ralphson to solve dJ(u)=0;
+//  see Newtow.edp example
 
 }

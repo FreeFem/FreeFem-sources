@@ -3,6 +3,7 @@
 \documentclass[a4paper,twoside,12pt]{book}
 \usepackage{styles}
 \usepackage{times}
+\def\VERSION{2.0-4}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -44,7 +45,7 @@
 \thispagestyle{empty}
 \vbox to 20cm {\begin{center}
    \vglue-0.5cm\includegraphics[width=10cm]{titre-ff}
-    \\  \large  \Blue{Version 2.0-3 }
+    \\  \large  \Blue{Version \VERSION }
  \\ \vglue 0.7cm
   {\large \Blue{\url{http://www.freefem.org/ff++}}} \\ ~
  \\~  \\
@@ -62,7 +63,7 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \thispagestyle{empty}
 \begin{center}
  {\Blue{ \TitreFont freefem++}} \\ \vglue 1cm  ~ \\
-   Version 2.0-3
+   Version \VERSION 
  \\ \vglue 0.7cm
  {\Large \url{http://www.freefem.org/ff++}} \\
 \vglue 1cm
@@ -6939,7 +6940,7 @@ compute respectively $ \nabla J$ and $ \nabla^2 J$
 //   method of  Newton Ralphson to solve dJ(u)=0; \hfilll
 //    $$ u^{n+1} = u^n - (\frac{\p dJ}{\p u_i})^{-1}*dJ(u^n) $$ \hfilll
 //   --------------------------------------------- \hfilll
-  Ph dalpha ; //to store = $f''( |\nabla u|^2) $  optimisation
+  Ph dalpha ; //to store  $2 f''( |\nabla u|^2) $  optimisation
 
 
   // the variational form of evaluate  dJ = $ \nabla J$ \hfilll
@@ -6975,8 +6976,9 @@ compute respectively $ \nabla J$ and $ \nabla^2 J$
 \eFF
 
 
-Remark: This  example is in \texttt{algo.edp} file of \texttt{examples++-tutorial} directory.
+Remark: This  example is in \texttt{Newton.edp} file of \texttt{examples++-tutorial} directory.
 
+\newpage
 \subsection{Eigenvalue Problems}
 
 This section depend on your FreeFem++ compilation process (see \texttt{README\_arpack}),

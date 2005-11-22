@@ -97,7 +97,7 @@ class v_fes : public RefCounter { public:
 class pfes_tef : public v_fes { public:
 
   const TypeOfFE * tef ;  
-  pfes_tef(const pmesh* t,const TypeOfFE * tt,Stack s=0, int n=0,Expression *p=0 ) 
+  pfes_tef(const pmesh* t,const TypeOfFE * tt,Stack s=NullStack, int n=0,Expression *p=0 ) 
     : v_fes(tt->N,t,s,n,p),tef(tt) { operator FESpace * ();} 
    FESpace * buildupdate(int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) 
     { return  new FESpace(**ppTh,*tef,nbdfv,(int *) ndfv,nbdfe,(int*)ndfe);}
@@ -109,7 +109,7 @@ class pfes_tefk : public v_fes { public:
 
   const TypeOfFE ** tef ;
   const int k;  
-  pfes_tefk(const pmesh* t,const TypeOfFE ** tt,int kk,Stack s=0,int n=0,Expression *p=0 ) 
+  pfes_tefk(const pmesh* t,const TypeOfFE ** tt,int kk,Stack s=NullStack,int n=0,Expression *p=0 ) 
     : v_fes(sum(tt,&Fem2D::TypeOfFE::N,kk),t,s,n,p),tef(tt),k(kk)  { 
     // cout << "pfes_tefk const" << tef << " " << this << endl; 
      operator FESpace * ();} 
@@ -130,7 +130,7 @@ class pfes_fes : public v_fes { public:
 
   pfes * Vh;
   int n;
-  pfes_fes( pfes * Vhh, int nn,Stack s=0,int n=0,Expression *p=0) :v_fes((**Vhh).N*nn,static_cast<const v_fes *>(*Vhh),s,n,p),Vh(Vhh),n(nn)  
+  pfes_fes( pfes * Vhh, int nn,Stack s=NullStack,int n=0,Expression *p=0) :v_fes((**Vhh).N*nn,static_cast<const v_fes *>(*Vhh),s,n,p),Vh(Vhh),n(nn)  
     { operator FESpace * ();}; 
   FESpace * buildupdate() {  return  new FESpace(***Vh,n);  }
   FESpace * buildupdate(int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) 
