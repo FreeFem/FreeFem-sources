@@ -28,7 +28,7 @@ $(SRCDIR): $(PACKAGE)
 	tar xvjf $(PACKAGE)
 
 $(PACKAGE):
-	wget -N $(SERVER)/$(PACKAGE)
+	@WGET@ -N $(SERVER)/$(PACKAGE)
 
 clean-local:
 	-rm -r fltk-*

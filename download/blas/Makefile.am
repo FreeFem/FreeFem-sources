@@ -27,7 +27,7 @@ ATLAS/Make.ff++: atlas3.6.0.tar.bz2
 	cd ATLAS && make
 
 atlas3.6.0.tar.bz2:
-	wget -N http://heanet.dl.sourceforge.net/sourceforge/math-atlas/atlas3.6.0.tar.bz2
+	@WGET@ -N http://heanet.dl.sourceforge.net/sourceforge/math-atlas/atlas3.6.0.tar.bz2
 
 clean-local::
 	-rm atlas*.tar.bz2
@@ -39,7 +39,7 @@ $(ATLASBINLIB): atlas321_WinNT_PPRO.zip
 	touch $(ATLASBINLIB)
 
 atlas321_WinNT_PPRO.zip:
-	wget -N http://www.netlib.org/atlas/archives/windows/atlas321_WinNT_PPRO.zip
+	@WGET@ -N http://www.netlib.org/atlas/archives/windows/atlas321_WinNT_PPRO.zip
 
 clean-local::
 	-rm atlas321_WinNT_PPRO.zip
@@ -174,10 +174,10 @@ CBLAS: cblas.tgz
 $(CBLAS_SOURCES): CBLAS
 
 blas.tgz:
-	wget -N http://www.netlib.org/blas/blas.tgz
+	@WGET@ -N http://www.netlib.org/blas/blas.tgz
 
 cblas.tgz:
-	wget -N http://www.netlib.org/blas/blast-forum/cblas.tgz
+	@WGET@ -N http://www.netlib.org/blas/blast-forum/cblas.tgz
 
 
 clean-local::
