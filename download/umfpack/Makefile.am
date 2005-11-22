@@ -34,7 +34,7 @@ $(UMFPACKLIB): UMFPACKv4.3.tar.gz
 		CONFIG="@FF_UMFPACK_POSIX@"
 
 UMFPACKv4.3.tar.gz:
-	wget -N http://www.cise.ufl.edu/research/sparse/umfpack/v4.3/UMFPACKv4.3.tar.gz
+	@WGET@ -N http://www.cise.ufl.edu/research/sparse/umfpack/v4.3/UMFPACKv4.3.tar.gz
 
 clean-local:
 	-rm -r UMFPACKv4.3.tar.gz UMFPACKv4.3

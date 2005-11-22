@@ -32,10 +32,10 @@ ARPACK: arpack96.tar.gz patch.tar.gz ARmake.m4
 	cd ARPACK/LAPACK;
 
 arpack96.tar.gz:
-	wget -N http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz
+	@WGET@ -N http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz
 
 patch.tar.gz:
-	wget -N http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz
+	@WGET@ -N http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz
 
 clean-local:
 	-rm -r arpack++.tar.gz arpack++

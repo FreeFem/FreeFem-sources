@@ -309,6 +309,7 @@ fi
   AC_MSG_CHECKING(add suffix $with_suffix )	
   AC_SUBST(ADD_PACKAGE_NAME,$with_suffix)
   AC_MSG_RESULT(yes)
+
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
 
@@ -370,21 +371,32 @@ fi
 # Looking for useful configuration utilities
 # ------------------------------------------
 
+#getting utility software archives through the internet
 AC_ARG_ENABLE(generic_blas,[  --enable-generic_blas	Download generic blas (implie --enable-download)])
 
 AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK,FLTK)])
+
+#replacing wget with another command
+ff_wget_command=wget
+AC_ARG_WITH(wget,
+	[  --with-wget=command	Replace "wget" with another command. Implies --enable-download],
+	   enable_download=yes
+	   ff_wget_command="${withval}")
+AC_SUBST(WGET,$ff_wget_command)
 
 if test "$enable_generic_blas" = yes
 then
 	enable_download=yes
 fi
 
+#enabling downloads
 if test "$enable_download" = yes
 then
 	AC_CHECK_PROG(ff_wget,wget,yes,no)
 else
 	ff_wget=no
 fi
+
 #  modif FH -----
 #  -- looking for cadna  
 #  the round-off error propagation 
