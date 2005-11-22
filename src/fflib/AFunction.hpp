@@ -38,36 +38,14 @@ extern long verbosity;  // level off printing
 
 extern bool  withrgraphique;
 
-//   in the stack we save all the variable 
-//   a adresse 0 we have the MeshPointStack to defineP,N, ....
-//   a adresse sizeof(void *) 
-// 
-//
-//  Offset in (void *)
-const int MeshPointStackOffset =0;
-const int ParamPtrOffset = 1;
-const int ElemMatPtrOffset = 2;
-
-const int BeginOffset = 3;
-//  0 : MeshPoint pointeur 
-//  1 : ParamPtrOffset
-//  2 : Truc les matrice elementaire
 
 
 using namespace std;
+#include "ffstack.hpp"
 
 #include "AnyType.hpp"
 #include "String.hpp"
 
-
-typedef void *Stack;
-
-template<class T>
-T * Stack_offset (Stack stack,size_t offset)  {return   (T *) (void *) (((char *) stack)+offset);}
-
-template<class T>
-T * & Stack_Ptr (Stack stack,size_t offset)  {return   (T * &)  (((void **) stack)[offset]);}
- void ShowType(ostream & f);
 
 class basicForEachType;
 class E_F1_funcT_Type;
@@ -1138,7 +1116,9 @@ template<class R> class EConstant:public E_F0
   public:
   AnyType operator()(Stack s) const { 
     SHOWVERB( cout << "\n\tget var " << offset << " " <<  t->name() << endl);  
-   return PtrtoAny(static_cast<void *>(static_cast<char *>(s)+offset),t);}
+//   return PtrtoAny(static_cast<void *>(static_cast<char *>(s)+offset),t);}
+   return PtrtoAny(Stack_offset<void>(s,offset),t);}
+
   LocalVariable(size_t o,aType tt):offset(o),t(tt) {throwassert(tt);     
      SHOWVERB(cout << "\n--------new var " << offset << " " <<  t->name() << endl);
     }
@@ -2519,19 +2499,6 @@ inline  void CC_F0::operator=(const AC_F0& a) {  f=new E_Array(a); r= atype<E_Ar
 inline  UnId::UnId(const char * idd,const C_F0 & ee,aType rr=0,bool reff=false) 
   :id(idd),r(rr),e(ee),array(0),re(ee.left()) ,ref(reff){}
 
-inline Stack newStack(size_t l)
- {
-  Stack thestack = new char[l];
-  for (int i = 0;i< l/sizeof(long);i++) ((long*) thestack)[i]=0;
-  ((char **) thestack)[0] = new char [1000]; 
-  return thestack;
-}
-
-inline void deleteStack(Stack s) 
- {
-    delete [] (((char **)  s)[0]);
-    delete [] (char *) s;
- }
 
 class E_exception : public exception { public:
   enum CODE_exception { UNKNOWN,e_break,e_continue,e_return} ;
@@ -2654,10 +2621,12 @@ class E_F0_Optimize : public E_F0 {
       int k= l.size();
       for (int i=0;i<k;i++)
         {  int offset = l[i].second;
-           *static_cast<AnyType *>(static_cast<void *>((char*)s+offset))= (*l[i].first)(s);
+           *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
+           //*static_cast<AnyType *>(static_cast<void *>((char*)s+offset))= (*l[i].first)(s); // FH NEWSTACK
           // cout << " E_F0_Optimize   " << offset << " " <<  *static_cast<double *>(static_cast<void *>((char*)s+offset)) << endl; ;
         }
-      return *static_cast<AnyType *>(static_cast<void *>((char*)s+ret));          
+     // return *static_cast<AnyType *>(static_cast<void *>((char*)s+ret));          
+      return *Stack_offset<AnyType>(s,ret); // FH NEWSTACK       
     }
     virtual bool Empty() const {return l.size(); }
    // virtual E_F0 * destroy(Stack ) const {return 0;}

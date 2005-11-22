@@ -9,7 +9,7 @@ fespace Vh(Th,P1);      // finite element space
 fespace Ph(Th,P1dc);      // make optimization 
 
 Vh b=1;  // to defined b 
-// $ J(u) = \int_\Omega f(|\nabla u|^2) - \int\Omega  u b $
+// $ J(u) = 1/2 \int_\Omega f(|\nabla u|^2) - \int\Omega  u b $
 // $ f(x) = a*x + x-ln(1+x), \quad f'(x) = a+\frac{x}{1+x}, \quad f''(x) =  \frac{1}{(1+x)^2}$
 real a=0.001;
 func real f(real u) { return u*a+u-log(1+u); }
@@ -19,7 +19,7 @@ func real ddf(real u) { return 1/((1+u)*(1+u));}
 Vh u=0; //  the current value of the solution
 Ph alpha; // to store  $ (|\nabla u|^2)$
 Ph dfalpha; // to store  $f' (|\nabla u|^2)$
-Ph ddfalpha ; //to store = $f''( |\nabla u|^2) $  optimisation
+Ph ddfalpha ; //to store = $2 f''( |\nabla u|^2) $  optimisation
 
 int iter=0;
 
@@ -46,7 +46,7 @@ int iter=0;
    {
     alpha = dx(u)*dx(u) + dy(u)*dy(u);// optimization
     dfalpha = df( alpha ) ; // optimization
-    ddfalpha = ddf(alpha ) ; // optimization
+    ddfalpha = 2*ddf(alpha ) ; // optimization
     v[]= vdJ(0,Vh);
     real res= v[]'*v[];
     cout << i <<  " residu^2 = " <<  res  << endl;

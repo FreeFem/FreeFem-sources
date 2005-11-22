@@ -143,24 +143,7 @@ template<class RR,class B>
  
  
 
-/*
-typedef MyMap<String,double> mapSd ;
 
-template<class K>
-inline   K * get_element( MyMap<String,K> *  const  &  a,string*  const   & b)
- { K * ret=  &((*a)[*b]); // correction FH feb 2004
-  //  cout << "get_element " << *b << " : " << ret << " = "<< * ret << endl;
-    delete b;
-    return ret;}
-    
-template<>
-inline   string ** get_element<string*>( MyMap<String,string*> *  const  &  a,string*  const   & b)
- { string** ret=  &((*a)[*b]); // correction FH feb 2004
-    if( *ret ==0) *ret = new string(""); //  string vide ???
-     // cout << "get_element " << *b << " : " << ret << " = "<< * ret << endl;
-    delete b;
-    return ret;}
-*/
 inline   string ** get_elements( MyMap<String,String> *  const  &  a,string*  const   & b)
  { String* Sret=  &((*a)[*b]); // correction FH feb 2004
     delete b;
@@ -748,10 +731,7 @@ void Init_map_type()
      Global.Add("cos","(",new OneOperator1<double>(cos));
 //     Global.Add("square","(",new OneOperator1_<double>(Square));
      Global.Add("square","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
- //    Global.Add("square","(",new OneUnaryOperator<bUnary_Op<F_1<double,const double&,Square,double> >,
- //      bUnary_Op<F_1<double,const double&,Square,double> >
- //     >);
-//   bUnary_Op
+
      Global.Add("sin","(",new OneOperator1<double>(sin));
      Global.Add("tan","(",new OneOperator1<double>(tan));
      Global.Add("atan","(",new OneOperator1<double>(atan));
@@ -835,13 +815,7 @@ void Init_map_type()
   Global.Add("randinit","(",new OneOperator1<long>(genrandint));
   
      
-   //  NEW_TYPE( mapSd  );
-  //   NEW_TYPE_I( mapSd  );
-    // FH aout 2004 : STRING ARRAY OF STRING STRING[STRING] 
-/*     map_type[typeid(MyMap<String,string*>*).name()] = new ForEachType<MyMap<String,string*>*>(Initialize<MyMap<String,string*> >,Delete<MyMap<String,string*> >) ;         
-     map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMap<String,string*>*>();      
-     atype<MyMap<String,string*>*>()->Add("[","",new OneOperator2_<string**,MyMap<String,string*>*,string*>(get_element<string*>));
-*/
+
 typedef MyMap<String,String> MyMapSS;
      map_type[typeid(MyMapSS*).name()] = new ForEachType<MyMapSS*>(Initialize<MyMapSS >,Delete<MyMapSS >) ;         
      map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMapSS*>();      
@@ -855,14 +829,11 @@ int ShowAlloc(char *s,size_t & lg);
 
 
 
-//void clean_lgfem();
 
  void ClearMem()
  {
-     //debugstack->clear(); lg;
      size_t lg;
      ShowAlloc("ClearMem: begin" , lg);
-     //  clean_lgfem();
      delete pZero;
      delete pOne;
      delete pminusOne;
@@ -870,12 +841,7 @@ int ShowAlloc(char *s,size_t & lg);
      tables_of_identifier.clear();
      for (map<const string,basicForEachType *>::iterator i=map_type.begin();i!=map_type.end();++i)
         delete i->second;
-/*        
-     for (Map_type_of_map::iterator i=map_type_of_map.begin();i!=map_type_of_map.end();++i)
-        delete i->second;
-     for (Map_type_of_map::iterator i=map_pair_of_type.begin();i!=map_pair_of_type.end();++i)
-        delete i->second;
-*/        
+        
      map_type.clear();
      map_type_of_map.clear();
      map_pair_of_type.clear();
