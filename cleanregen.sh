@@ -12,6 +12,7 @@ rm configure
 rm examples++-tutorial/all.edp
 rm examples++/all.edp
 rm examples++/regtests.edp
+rm examples++-chapt3/all.edp
 rm src/fflib/strversionnumber.cpp
 rm src/ide/hl_lex.c++
 rm src/ide/hl_yacc.c++
