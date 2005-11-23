@@ -7956,7 +7956,7 @@ reused (keyword
 \subsubsection{\setS{Uzawa} Conjugate Gradient}
 We solve Stokes problem without penalty.
 The classical iterative method of Uzawa is described by the algorithm
-(see e.g.\cite[17.3]{RT93}):
+(see e.g.\cite[17.3]{RT93}, \cite[13]{GP79} or \cite[13]{RG84}  ):
 \begin{description}
   \item[Initialize:] Let $p_h^0$ be an arbitrary chosen element of
   $L^2(\Omega)$.
@@ -8035,7 +8035,7 @@ divup(p[]); // compute the final solution
 
  In this example we solve the Navier-Stokes \index{Navier-Stokes} equation,
  in the driven-cavity,
- with the Uzawa  algorithm preconditioned by the Cahouet-Chabart method.
+ with the Uzawa  algorithm preconditioned by the Cahouet-Chabart method (see \cite{RG03} for all the details).
 
  The idea of the preconditioner is that in a periodic domain, all
  differential operators commute and  the  Uzawa algorithm comes to solving the
@@ -11346,40 +11346,40 @@ abs, max, min,
 
 \begin{thebibliography}{xx}
 
-\bibitem{arpack} R. B. Lehoucq, D. C. Sorensen, and C. Yang
+\bibitem{arpack}{\sc  R. B. Lehoucq, D. C. Sorensen, and C. Yang}
 {\it ARPACK Users' Guide: Solution of Large-Scale Eigenvalue Problems with Implicitly Restarted Arnoldi Methods}
 SIAM,  ISBN 0-89871-407-9 //
  \url{http://www.caam.rice.edu/software/ARPACK/}
 
 \bibitem{Babuska71}
-Babbu\v{s}ka, I: Error bounds for finite element method, Numer. Math. 16, 322-333.
+{\sc Babbu\v{s}ka, I}: Error bounds for finite element method, Numer. Math. 16, 322-333.
 
-\bibitem{achdou} Y. Achdou and O. Pironneau: Computational Methods for Option Pricing.  SIAM monograph (2005).
+\bibitem{achdou} {\sc Y. Achdou and O. Pironneau}: Computational Methods for Option Pricing.  SIAM monograph (2005).
 
-\bibitem{freefemp} D. Bernardi, F.Hecht, K. Ohtsuka, O. Pironneau: {\it
+\bibitem{freefemp} {\sc D. Bernardi, F.Hecht, K. Ohtsuka, O. Pironneau}: {\it
 freefem+ documentation}, on the web at  ftp://www.freefem.org/freefemplus.
 
-\bibitem{freefem} D. Bernardi, F.Hecht, O. Pironneau, C. Prud'homme: {\it
+\bibitem{freefem} {\sc  D. Bernardi, F.Hecht, O. Pironneau, C. Prud'homme}: {\it
 freefem documentation}, on the web at  http://www. freefem.fr/freefem
 
 
 \bibitem{umfpack}
-Davis, T. A:  {Algorithm 8xx: UMFPACK V4.1, an unsymmetric-pattern multifrontal method}
+{\sc Davis, T. A}:  {Algorithm 8xx: UMFPACK V4.1, an unsymmetric-pattern multifrontal method}
 TOMS,
 2003 (under submission)
  \url{ http://www.cise.ufl.edu/research/sparse/umfpack}
 
 \bibitem{George}
-George, P.L: {\it Automatic triangulation}, Wiley 1996.
+{\sc George, P.L}: {\it Automatic triangulation}, Wiley 1996.
 
 \bibitem{bamg}
-Hecht, F: The mesh adapting software: bamg. INRIA report 1998.
+{\sc Hecht, F}: The mesh adapting software: bamg. INRIA report 1998.
 
 \bibitem{modulef}
 Library Modulef , INRIA,
 \url{http://www.inria-rocq/modulef}
 
-\bibitem{ern} A. Ern and J.-L. Guermond, Discontinuous Galerkin methods for Friedrichs' symmetric
+\bibitem{ern} {\sc A. Ern and J.-L. Guermond}, Discontinuous Galerkin methods for Friedrichs' symmetric
 systems and Second-order PDEs, SIAM J. Numer. Anal., (2005). See also: Theory and Practice of Finite Elements, vol. 159 of Applied Mathematical Sciences,
 Springer-Verlag, New York, NY, 2004.
 
@@ -11389,44 +11389,44 @@ Springer-Verlag, New York, NY, 2004.
 \newblock   Vol 36, N°, 2002 pp 809-836,  Mod\'{e}l. math et Anal Num\'{e}r.
 
 \bibitem{Lions}
-J.L. Lions, O. Pironneau:
+{\sc J.L. Lions, O. Pironneau}:
 Parallel Algorithms for boundary value problems, Note CRAS. Dec 1998.
 Also : Superpositions for composite domains (to appear)
 
-\bibitem{Lucquin} B. Lucquin, O. Pironneau: {\it Introduction to Scientific Computing}
+\bibitem{Lucquin} {\sc B. Lucquin, O. Pironneau}: {\it Introduction to Scientific Computing}
 Wiley 1998.
 
 \bibitem{dan-hec-2003}
-I.~Danaila, F.~Hecht, and O.~Pironneau.
+{\sc I.~Danaila, F.~Hecht, and O.~Pironneau}.
 \newblock {\em Simulation num\'erique en C++}.
 \newblock Dunod, Paris, 2003.
 
-\bibitem{Necas} J. Ne\v{c}as and L/ Hlav\'{a}\v{c}ek,
+\bibitem{Necas}{\sc  J. Ne\v{c}as and L/ Hlav\'{a}\v{c}ek},
 Mathematical theory of elastic and elasto-plastic bodies:
 An introduction, Elsevier, 1981.
 
-\bibitem{Ohtsuka} K. Ohtsuka, O. Pironneau and F. Hecht: Theoretical and Numerical analysis of energy release rate in 2D fracture, INFORMATION \textbf{3} (2000), 303--315.
+\bibitem{Ohtsuka}{\sc  K. Ohtsuka, O. Pironneau and F. Hecht}: Theoretical and Numerical analysis of energy release rate in 2D fracture, INFORMATION \textbf{3} (2000), 303--315.
 
-\bibitem{Preparata} F. Preparata, M. Shamos; {\it Computational Geometry}
+\bibitem{Preparata} {\sc  F. Preparata, M. Shamos} {\it Computational Geometry}
 Springer series in Computer sciences, 1984.
 
-\bibitem{Franca}R. Rannacher: On Chorin's projection method for the incompressible
+\bibitem{Franca} {\sc R. Rannacher}: On Chorin's projection method for the incompressible
 Navier-Stokes equations, in "Navier-Stokes Equations: Theory and Numerical Methods" (R.
 Rautmann, et al., eds.), Proc. Oberwolfach Conf., August 19-23, 1991, Springer, 1992
 
 \bibitem{RT93}
-Roberts, J.E. and Thomas J.-M: Mixed and Hybrid Methods, Handbook of Numerical Anaysis, Vol.II, North-Holland, 1993
+{\sc Roberts, J.E. and Thomas J.-M}: Mixed and Hybrid Methods, Handbook of Numerical Anaysis, Vol.II, North-Holland, 1993
 
-\bibitem{Steger} J.L. Steger: The Chimera method of flow simulation,
+\bibitem{Steger} {\sc J.L. Steger}: The Chimera method of flow simulation,
 Workshop on applied CFD, Univ of Tennessee Space Institute, August 1991.
 
 \bibitem{TA94}
-Tabata, M: Numerical solutions of partial differential equations II
+{\sc Tabata, M}: Numerical solutions of partial differential equations II
 (in Japanese),
 Iwanami Applied Math., 1994
 
 \bibitem{Thomasset}
-Thomasset, F: Implementation of finite element methods
+{\sc Thomasset, F}: Implementation of finite element methods
 of Navier-Stokes Equations, Springer-Verlag, 1981
 
 \bibitem{wirth} {\sc N. Wirth:} {\it Algorthims + Data Structures = Programs}, Prentice Hall,  1976
@@ -11442,15 +11442,21 @@ The \Cpp, programming language, Third edition,
 \bibitem{coool} COOOL: a package of tools for writing optimization code and solving optimization problems,
 \url{http://coool.mines.edu}
 
-\bibitem{DGgirault}  B. Riviere, M.   Wheeler, V. Girault,
+\bibitem{DGgirault} {\sc  B. Riviere, M.   Wheeler, V. Girault},
 A priori error estimates for finite element
  methods based on discontinuous approximation spaces
  for elliptic problems.
   SIAM J. Numer. Anal. 39 (2001), no. 3, 902--931 (electronic).
 
+\bibitem{GP79} {\sc R. GLOWINSKI and O.PIRONNEAU}, Numerical methods for the Stokes               problem, Chapter 13 of Energy Methods in Finite Element Analysis,                R.Glowinski, E.Y. Rodin, O.C. Zienkiewicz eds., J.Wiley \& Sons, Chichester,               UK, 1979, pp. 243-264.
+
+\bibitem{RG84}{\sc R. GLOWINSKI}, Numerical Methods for Nonlinear Variational Problems,              Springer-Verlag, New York, NY, 1984.
+\bibitem{RG03}{\sc R. GLOWINSKI}, Finite Element Methods for Incompressible Viscous Flow. In              Handbook of Numerical Analysis, Vol. IX, P.G. Ciarlet and J.L. Lions, eds.,              North-Holland, Amsterdam, 2003, pp.3-1176.
+
 \bibitem{ItoKunisch}{\sc Kazufumi Ito,  and Karl Kunisch},
 Semi smooth newton methods for variational inequalities of the first kind ,
 M2AN, vol 37, N${}^{\circ}$, 2003, pp 41-62.
+
 
 %\bibitem{COOLL} COOL package , 
 
