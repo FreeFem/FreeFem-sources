@@ -308,6 +308,7 @@ class E_F0 :public CodeAlloc
     virtual bool EvaluableWithOutStack() const {return false;} // 
     virtual bool MeshIndependent() const {return true;} // 
     virtual E_F0 * right_E_F0() const { return 0;}
+    virtual bool ReadOnly() const { return true;} // the expression do not change the memory     
     virtual ~E_F0() {}
     virtual int compare (const E_F0 *t) const { int r= (t==this) ? 0 : ( ( this<t) ?-1 : 1);
      //cout << "cmp " <<  typeid(*this).name() << r << endl; 
@@ -765,7 +766,7 @@ template<class R,class A0,class A1>
     {return SetAny<R>(f(GetAny<A0>(a0),GetAny<A1>(a1)));}  
 };
 
-template<class R,class TA0>
+template<class R,class TA0,bool RO=true>
  class E_F_F0 :public  E_F0 { public:
    template <class T> struct remove_reference     {typedef T type;};
 //   template <class T> struct remove_reference<T&> {typedef T type;};
@@ -782,7 +783,7 @@ template<class R,class TA0>
   bool EvaluableWithOutStack() const 
       {return a->EvaluableWithOutStack();} // 
   bool MeshIndependent() const {return a->MeshIndependent();} // 
-      
+  bool ReadOnly() const { return RO  ;}     
   int compare (const E_F0 *t) const { 
      int rr;
     // cout << "cmp " << typeid(*this).name() << " and " << typeid(t).name() << endl;
@@ -798,11 +799,11 @@ template<class R,class TA0>
 };
 
 // modif for xlc++ FH 
-template<class R,class TA0>
-class E_F_F0_Opt: public E_F_F0<R,TA0>  { public :
+template<class R,class TA0,bool RO=true>
+class E_F_F0_Opt: public E_F_F0<R,TA0,RO>  { public :
   size_t ia;  
-  E_F_F0_Opt(const  E_F_F0<R,TA0>  &t,size_t iaa) 
-    : E_F_F0<R,TA0>(t) , ia(iaa) {assert(iaa<2000000 && iaa >0);}
+  E_F_F0_Opt(const  E_F_F0<R,TA0,RO>  &t,size_t iaa) 
+    : E_F_F0<R,TA0,RO>(t) , ia(iaa) {assert(iaa<2000000 && iaa >0);}
   AnyType operator()(Stack s)  const 
   {
     // A0 x =  *static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia));
@@ -811,12 +812,12 @@ class E_F_F0_Opt: public E_F_F0<R,TA0>  { public :
   
 };   
 
-template<class R,class TA0>   
-   int  E_F_F0<R,TA0>::Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
+template<class R,class TA0,bool RO>   
+   int  E_F_F0<R,TA0,RO>::Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
     {
        int rr = find(m);
        if (rr) return rr;
-       return insert(new E_F_F0_Opt<R,TA0>(*this,a->Optimize(l,m,n)),l,m,n);       
+       return insert(new E_F_F0_Opt<R,TA0,RO>(*this,a->Optimize(l,m,n)),l,m,n);       
     } 
 // fin modif xlc++ 
 
@@ -1943,7 +1944,16 @@ class  OneTernaryOperator3 : public OneOperator{
 
 
 
-template<typename C>
+struct OneBinaryOperatorMI {
+  static bool MeshIndependent(Expression a,Expression b)   { return a->MeshIndependent() && b->MeshIndependent();}
+  static bool ReadOnly() { return true;}
+};
+struct OneBinaryOperatorMIWO {
+  static bool MeshIndependent(Expression a,Expression b)   { return a->MeshIndependent() && b->MeshIndependent();}
+  static bool ReadOnly() { return false;}
+};
+
+template<typename C,class MI=OneBinaryOperatorMI>
 class  OneBinaryOperator : public OneOperator{
   typedef  typename C::result_type R;
   typedef typename C::first_argument_type A;
@@ -1956,7 +1966,8 @@ class  OneBinaryOperator : public OneOperator{
     AnyType operator()(Stack s)  const 
     {return  SetAny<R>(static_cast<R>(C::f( GetAny<A>((*a)(s)) , GetAny<B>((*b)(s)))));}
     Op(Expression aa,Expression bb) : a(aa),b(bb) {} 
-    bool MeshIndependent() const { return a->MeshIndependent() && b->MeshIndependent();}
+    bool MeshIndependent() const { return MI::MeshIndependent(a,b);}
+    bool ReadOnly() const { return MI::ReadOnly()  ;} 
     int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
     {
       int rr = find(m);
@@ -2620,7 +2631,7 @@ class E_F0_Optimize : public E_F0 {
     virtual AnyType operator()(Stack s)  const {
       int k= l.size();
       for (int i=0;i<k;i++)
-        {  int offset = l[i].second;
+        {  size_t offset = l[i].second;
            *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
            //*static_cast<AnyType *>(static_cast<void *>((char*)s+offset))= (*l[i].first)(s); // FH NEWSTACK
           // cout << " E_F0_Optimize   " << offset << " " <<  *static_cast<double *>(static_cast<void *>((char*)s+offset)) << endl; ;

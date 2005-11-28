@@ -353,6 +353,41 @@ void init_genrand(unsigned long);
 long genrandint (long  s) { init_genrand( (unsigned long ) s); return 0;}
 long genrandint32 () {return (long)  genrand_int32();}
 
+template<class A,class B,bool RO=true>
+struct  MIMul {
+  static bool MeshIndependent(Expression a,Expression b)   
+   { 
+    bool mia= a->MeshIndependent() ;
+    bool mib= b->MeshIndependent();
+    if ( mia && mib) return true;
+    else
+      {
+        if (mia && a->EvaluableWithOutStack() )
+          {
+            A va = GetAny<A>((*a)(0));
+           // cout << " va = " << va << endl;
+            if ( va == A() )
+             { 
+             //  cout << " va = " << va << endl; 
+               return true;
+             }
+          }
+        if (mib && b->EvaluableWithOutStack() )
+          {
+            B vb = GetAny<B>((*b)(0));
+            // cout << " vb = " << vb << endl;
+            if ( vb == B() ) 
+            { //cout << " vb = " << vb << endl;
+             return true; }
+           }
+         return false;
+        }
+      
+    }
+  static bool ReadOnly() { return RO;}
+    
+};
+
 void Init_map_type()
 {
    TheOperators=new Polymorphic(), 
@@ -503,11 +538,12 @@ void Init_map_type()
        new OneBinaryOperator<Op2_sub<Complex,Complex,long> >,
        new OneBinaryOperator<Op2_sub<Complex,long,Complex> >       
        );
+       
      TheOperators->Add("*",
        new OneBinaryOperator<Op2_mul<long,long,long> >,
-       new OneBinaryOperator<Op2_mul<double,double,double> >,
-       new OneBinaryOperator<Op2_mul<double,double,long> >,
-       new OneBinaryOperator<Op2_mul<double,long,double> >,
+       new OneBinaryOperator<Op2_mul<double,double,double>,MIMul<double,double> >,
+       new OneBinaryOperator<Op2_mul<double,double,long>, MIMul<double,long> >,
+       new OneBinaryOperator<Op2_mul<double,long,double>,MIMul<long,double> >,
        new OneBinaryOperator<Op2_mul<Complex,Complex,Complex> >,
        new OneBinaryOperator<Op2_mul<Complex,Complex,double> >,
        new OneBinaryOperator<Op2_mul<Complex,double,Complex> >,
@@ -597,11 +633,11 @@ void Init_map_type()
       // Unary_Op_Comparaision
      
      TheOperators->Add("=",
-       new OneBinaryOperator<set_eq<bool> >,
-       new OneBinaryOperator<set_eq<long> >,
-       new OneBinaryOperator<set_eq<double> >,
-       new OneBinaryOperator<set_eq<Complex> >,
-       new OneBinaryOperator<set_peq<string*> >
+       new OneBinaryOperator<set_eq<bool> ,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<set_eq<long> ,OneBinaryOperatorMIWO>,
+       new OneBinaryOperator<set_eq<double> ,OneBinaryOperatorMIWO>,
+       new OneBinaryOperator<set_eq<Complex> ,OneBinaryOperatorMIWO>,
+       new OneBinaryOperator<set_peq<string*> ,OneBinaryOperatorMIWO>
        ); 
 
      TheOperators->Add("?:",
@@ -623,31 +659,31 @@ void Init_map_type()
  
 
      TheOperators->Add("+=",
-       new OneBinaryOperator<set_eq_add<long> >,
-       new OneBinaryOperator<set_eq_add<double> >,
-       new OneBinaryOperator<set_eq_add<Complex> >
+       new OneBinaryOperator<set_eq_add<long>,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<set_eq_add<double>,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<set_eq_add<Complex>,OneBinaryOperatorMIWO >
       );
 
 
      TheOperators->Add("-=",
-       new OneBinaryOperator<set_eq_sub<long> >,
-       new OneBinaryOperator<set_eq_sub<double> >,
-       new OneBinaryOperator<set_eq_sub<Complex> >
+       new OneBinaryOperator<set_eq_sub<long>,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<set_eq_sub<double>,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<set_eq_sub<Complex>,OneBinaryOperatorMIWO >
       );
 
 
 
      TheOperators->Add("*=",
-       new OneBinaryOperator<set_eq_mul<long> >,
-       new OneBinaryOperator<set_eq_mul<double> >,
-       new OneBinaryOperator<set_eq_mul<Complex> >     
+       new OneBinaryOperator<set_eq_mul<long> ,OneBinaryOperatorMIWO>,
+       new OneBinaryOperator<set_eq_mul<double>,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<set_eq_mul<Complex>,OneBinaryOperatorMIWO >     
       );
 
 
      TheOperators->Add("/=",
-       new OneBinaryOperator<set_eq_div<long> >,
-       new OneBinaryOperator<set_eq_div<double> >,
-       new OneBinaryOperator<set_eq_div<Complex> >     
+       new OneBinaryOperator<set_eq_div<long>,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<set_eq_div<double>,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<set_eq_div<Complex>,OneBinaryOperatorMIWO >     
      );
 
      TheOperators->Add("+",
@@ -660,10 +696,10 @@ void Init_map_type()
       
 
      TheOperators->Add(">>",
-       new OneBinaryOperator<Op_Read<bool> >,
-       new OneBinaryOperator<Op_Read<long> >,
-       new OneBinaryOperator<Op_Read<double> >,
-       new OneBinaryOperator<Op_Read<Complex> >
+       new OneBinaryOperator<Op_Read<bool>,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<Op_Read<long>,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<Op_Read<double>,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<Op_Read<Complex>,OneBinaryOperatorMIWO >
        );
      
      TheOperators->Add("<<",
@@ -676,13 +712,13 @@ void Init_map_type()
 
      
      TheRightOperators->Add("++",       
-       new OneOperator1<long,long*>(&RIncremantation<long>));
+       new OneOperator1<long,long*, E_F_F0<long,long*,false> >(&RIncremantation<long>));
      TheRightOperators->Add("--",       
-       new OneOperator1<long,long*>(&RDecremantation<long>));
+       new OneOperator1<long,long*, E_F_F0<long,long*,false> >(&RDecremantation<long>));
      TheOperators->Add("++",       
-       new OneOperator1<long,long*>(&LIncremantation<long>));
+       new OneOperator1<long,long*, E_F_F0<long,long*,false> >(&LIncremantation<long>));
      TheOperators->Add("--",       
-       new OneOperator1<long,long*>(&LDecremantation<long>));
+       new OneOperator1<long,long*, E_F_F0<long,long*,false> >(&LDecremantation<long>));
 //   init        
      TheOperators->Add("<-", 
        new OneOperator2_<string**,string**,string*>(&set_copy),
