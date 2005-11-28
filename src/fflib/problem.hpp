@@ -533,7 +533,7 @@ struct OpCall_FormLinear2: public OneOperator {
     Expression p=args[1];
     if ( ! p->EvaluableWithOutStack() ) 
       { CompileError("  a(long,Vh) , The long  must be a constant, and  = 0, sorry");}
-    long pv = GetAny<long>((*p)(0));
+    long pv = GetAny<long>((*p)(NullStack));
     if ( pv ) 
       { CompileError("  a(long,Vh) , The long  must be a constant == 0, sorry");}       
     return  new Call_FormLinear(nargs,to<const C_args*>(args[0]),to<pfes*>(args[2]));} 
