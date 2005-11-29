@@ -627,11 +627,15 @@ then
 		# Do not update $LIBS, but create an extra LIB variable,
 		# because this lib does not exist yet, and this could make the
 		# following tests fail.
-                ff_arpack_libs=${curdir}/download/arpack/ARPACK/libarpack_ff++.a 
+                ff_arpack_libs="-L${curdir}/download/arpack/ARPACK -larpack_ff++"
 		ff_arpack_ok=yes
 	fi
 fi
-LIBS="$ff_arpack_libs $ff_save_libs"
+
+# Do not insert ARPACK libs in $LIBS yet, because they may not exist
+# yet, and this could make the following tests fail.
+
+LIBS="$ff_save_libs"
 
 if test "$ff_arpack_ok" = yes;
 then
@@ -998,6 +1002,14 @@ else
 	ff_taggingdepend=FORCE
 fi
 AC_SUBST(TAGGINGDEPEND,$ff_taggingdepend)
+
+# Addind downloaded libraries
+# ---------------------------
+
+# downloaded libraries are not compiled yet, so they should be
+# specified last, to avoid posing problems for autoconf compilation
+# tests above.
+LIBS="$ff_arpack_libs $LIBS"
 
 # creating all makefiles
 # ----------------------
