@@ -562,7 +562,21 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
 {
   filename=ff;
   l=0;
-  nf=f= new ifstream(ff);     
+  f=0;
+  //  mettre une boucle
+  nf=f= new ifstream(ff); 
+  if (!f || !*f)
+   {
+   if ( f)  delete f; 
+   for (int k=0;k<lex->ffincludedir.size();k++)
+   {
+    nf=f= new ifstream((lex->ffincludedir[k]+ff).c_str()); 
+    if ( f)  {
+      if ( f->good()) break;
+      delete f;
+     }     
+   } 
+   }   
   if (!f || !*f) {
     lex->cout << " Error openning file " <<ff<< endl;
     lgerror("lex: Error input openning file ");};
