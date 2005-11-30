@@ -183,21 +183,29 @@ template<class P,class Q>
 template<class R> 
 struct  VirtualMatrice { public:
 
-  //  y += A x 
+  //  y += A x
   virtual void addMatMul(const KN_<R> &  x, KN_<R> & y) const =0; 
   virtual void addMatTransMul(const KN_<R> &  x, KN_<R> & y) const 
     { InternalError("VirtualMatrice::addMatTransMul not implemented "); }
   virtual bool WithSolver() const {return false;} // by default no solver          
   virtual void Solve( KN_<R> &  x,const KN_<R> & b) const 
     { InternalError("VirtualMatrice::solve not implemented "); } 
+    
+  virtual bool ChecknbLine  (int n) const= 0; 
+  virtual bool ChecknbColumn  (int m) const =0; 
+    
   struct  plusAx { const VirtualMatrice * A; const KN_<R> &  x;
-   plusAx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) {}
+   plusAx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) 
+      { ffassert(B->ChecknbColumn(y.N())); }
     };
    plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
   struct  plusAtx { const VirtualMatrice * A; const KN_<R> &  x;
-   plusAtx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) {} };
+   plusAtx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) 
+    {ffassert(B->ChecknbLine(y.N()));} };
+    
   struct  solveAxeqb { const VirtualMatrice * A; const KN_<R> &  b;
-   solveAxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y) {} };
+   solveAxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y) 
+    {ffassert(B->ChecknbColumn(y.N()));} };
   
 };
 

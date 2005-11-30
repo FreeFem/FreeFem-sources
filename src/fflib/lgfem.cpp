@@ -478,6 +478,9 @@ class LinearCG : public OneOperator
       x =xx;
       Ax  += GetAny<Kn>((*mat)(stack)); } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
+  virtual bool ChecknbLine(int n) const { return true;}  
+  virtual bool ChecknbColumn(int m) const { return true;} 
+    
 };  
  
 
@@ -600,6 +603,9 @@ class LinearGMRES : public OneOperator
       x =xx;
       Ax  += GetAny<Kn>((*mat)(stack)); } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
+  virtual bool ChecknbLine(int n) const { return true;}  
+  virtual bool ChecknbColumn(int m) const { return true;} 
+    
 };  
  
 

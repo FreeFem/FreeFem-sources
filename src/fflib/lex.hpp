@@ -20,6 +20,7 @@ class mylex : public CodeAlloc {
 
   public: 
   int linenumber,charnumber;
+  vector<string> ffincludedir;
   private:
   bool firsttime;
   int level;
@@ -58,7 +59,11 @@ class mylex : public CodeAlloc {
     firsttime(true),
     level(-1),
     listMacroDef(new list<MapMacroDef>),
-    listMacroParam(0) {
+    listMacroParam(0),
+    ffincludedir(1)
+ {
+    ffincludedir[0]="";
+    
     listMacroDef->push_front(MapMacroDef());
    };
   string token() const;

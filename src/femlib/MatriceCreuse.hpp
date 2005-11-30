@@ -275,7 +275,9 @@ public:
   virtual void setcoef(const KN_<R> & x)=0 ;
   virtual void getcoef( KN_<R> & x) const =0 ;
   // Add FH oct 2005
-  
+   bool ChecknbLine(int nn) const { return n==nn;}  
+   bool ChecknbColumn(int mm) const { return m==mm;} 
+
   // end ADD
 
 };
@@ -653,6 +655,9 @@ class MatriceIdentite: VirtualMatrice<R> { public:
      ffassert(x.N()==Ax.N());
    Ax+=x; } 
  plusAx operator*(const KN<R> &  x) const {return plusAx(this,x);} 
+  bool ChecknbLine(int n) const { return true;}  
+  bool ChecknbColumn(int m) const { return true;} 
+
 };  
 
 template<class R>
@@ -681,6 +686,8 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
      for (int i=0;i<n;i++) 
      Ax[i]+= D1[i]*x[i];}
      
+   bool ChecknbLine(int nn) const { return n==nn;}  
+   bool ChecknbColumn(int mm) const { return n==mm;} 
 
 };
 
@@ -760,6 +767,8 @@ public:
     double Info[UMFPACK_INFO];
     for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
     for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
+    int n= b.N(); 
+     ffassert(A.ChecknbLine( n) && n == x.N() && A.ChecknbColumn(n) );
     
      umfpack_di_defaults (Control) ;
      // change UMFPACK_At to UMFPACK_Aat in complex 
@@ -791,7 +800,6 @@ public:
     Ax +=  (const MatriceMorse<R> &) (*this) * x; 
   }
      
-
 }; 
 
 inline void C2RR(int n,Complex *c,double *cr,double *ci)
@@ -891,6 +899,7 @@ public:
     double Info[UMFPACK_INFO];
      umfpack_zi_defaults (Control) ;
      int n = b.N();
+     ffassert(A.ChecknbLine( n) && n == x.N() && A.ChecknbColumn(n) );
      KN<double> xr(n),xi(n),br(n),bi(n);
      C2RR(n,b,br,bi);
      // change UMFPACK_At to UMFPACK_Aat in complex  oct 2005 

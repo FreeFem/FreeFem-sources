@@ -100,6 +100,9 @@ class MatC2R : public VirtualMatrice<double> { public:
   }
 
   plusAx operator*(const KN<double> &  x) const {return plusAx(this,x);}
+  virtual bool ChecknbLine(int n) const { return true;}  
+  virtual bool ChecknbColumn(int m) const { return true;} 
+
 
 };
 
@@ -133,8 +136,9 @@ class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMa
       
       throwassert(precon);
       R aii;
-      for (int i=0;i<n;i++)
-       D1[i] = norm(aii=A(i,i))<1e-20 ? R(1.0) : R(1.)/aii;
+      A.getdiag(D1);
+     for (int i=0;i<n;i++)
+       D1[i] = (norm(aii=D1[i]) < 1e-20 ? R(1.) : R(1.)/aii);
       
 }
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
@@ -164,6 +168,9 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
   delete  code_del;
 // cout << "~SolveGCPrecon " << endl;
  }
+  virtual bool ChecknbLine(int n) const { return true;}  
+  virtual bool ChecknbColumn(int m) const { return true;} 
+
 };     
 
 template<class R>
@@ -189,8 +196,9 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
       
       throwassert(precon);
       R aii;
+      A.getdiag(D1);
       for (int i=0;i<n;i++)
-       D1[i] = norm(aii=A(i,i))<1e-20 ? R(1.0) : R(1.)/aii;
+        D1[i] = (norm(aii=D1[i]) < 1e-20 ? R(1.) : R(1.)/aii);
       
 }
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
@@ -223,6 +231,9 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
   ~SolveGMRESPrecon(){
   // cout << "~SolveGMRESPrecon; " << endl;
  }
+  virtual bool ChecknbLine(int n) const { return true;}  
+  virtual bool ChecknbColumn(int m) const { return true;} 
+ 
 };     
 
 template<class R>
@@ -239,8 +250,9 @@ class SolveGMRESDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualM
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),D1(n),eps(epsilon),epsr(0),
     dKrilov(nbk) { 
     R aii=0;
+    A.getdiag(D1);
     for (int i=0;i<n;i++)
-      D1[i] = (norm(aii=A(i,i)) < 1e-20 ? R(1.) : R(1.)/aii);}
+      D1[i] = (norm(aii=D1[i]) < 1e-20 ? R(1.) : R(1.)/aii);}
 
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
       epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
@@ -261,6 +273,8 @@ plusAx  operator*(const KN_<R> &  x) const {return plusAx(this,x);}
    for (int i=0;i<n;i++) 
      Ax[i]+= D1[i]*x[i];}
      
+  virtual bool ChecknbLine(int n) const { return true;}  
+  virtual bool ChecknbColumn(int m) const { return true;} 
 
 };   
 
@@ -278,8 +292,9 @@ class SolveGMRESDiag<Complex> :   public MatriceMorse<Complex>::VirtualSolver , 
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),D1(n),eps(epsilon),epsr(0),
     dKrilov(nbk) { 
     Complex aii=0;
+    A.getdiag(D1);
     for (int i=0;i<n;i++)
-      D1[i] = (norm(aii=A(i,i)) < 1e-20 ? Complex(1.) : Complex(1.)/aii);}
+      D1[i] = (norm(aii=D1[i]) < 1e-20 ? Complex(1.) : Complex(1.)/aii);}
 
    void Solver(const MatriceMorse<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {
       epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
@@ -306,6 +321,8 @@ plusAx  operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
    for (int i=0;i<n;i++) 
      Ax[i]+= D1[i]*x[i];}
      
+  virtual bool ChecknbLine(int n) const { return true;}  
+  virtual bool ChecknbColumn(int m) const { return true;} 
 
 };   
 
@@ -332,8 +349,9 @@ class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver 
       
       throwassert(precon);
       Complex aii;
+      A.getdiag(D1);
       for (int i=0;i<n;i++)
-       D1[i] = norm(aii=A(i,i))<1e-20 ? Complex(1.0) : Complex(1.)/aii;
+       D1[i] = norm(aii=D1[i])<1e-20 ? Complex(1.0) : Complex(1.)/aii;
       
 }
    void Solver(const MatriceMorse<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {
@@ -375,6 +393,10 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
   ~SolveGMRESPrecon(){
   // cout << "~SolveGMRESPrecon; " << endl;
  }
+   virtual bool ChecknbLine(int n) const { return true;}  
+  virtual bool ChecknbColumn(int m) const { return true;} 
+
+ 
 };     
 
 }

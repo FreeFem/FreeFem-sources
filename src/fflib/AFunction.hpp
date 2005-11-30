@@ -2621,6 +2621,7 @@ class Transpose{ public:
 
 class E_F0_Optimize : public E_F0 { 
  deque<pair<Expression,int> > l;
+// mutable deque<bool> var;
  MapOfE_F0 m;
  int NBbitem;
  int ret;
@@ -2628,6 +2629,29 @@ class E_F0_Optimize : public E_F0 {
   E_F0_Optimize(deque<pair<Expression,int> > &ll,MapOfE_F0 & mm,int rett) :
   l(ll),m(mm),ret(rett),NBbitem(1) {}
   
+     AnyType eval(Stack s,int notinit,vector<bool> & var)  const {
+      int k= l.size();
+       if(notinit ==0)
+        {
+         var.resize(k);
+         for (int i=0;i<k;i++)
+         {  size_t offset = l[i].second;
+             var[i]=true;  
+             *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
+         }          
+        }
+      else
+      for (int i=0;i<k;i++)
+        {  size_t offset = l[i].second;
+           if(var[i]) 
+             *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
+           //*static_cast<AnyType *>(static_cast<void *>((char*)s+offset))= (*l[i].first)(s); // FH NEWSTACK
+          // cout << " E_F0_Optimize   " << offset << " " <<  *static_cast<double *>(static_cast<void *>((char*)s+offset)) << endl; ;
+        }
+     // return *static_cast<AnyType *>(static_cast<void *>((char*)s+ret));          
+      return *Stack_offset<AnyType>(s,ret); // FH NEWSTACK       
+    }
+
     virtual AnyType operator()(Stack s)  const {
       int k= l.size();
       for (int i=0;i<k;i++)
@@ -2644,7 +2668,7 @@ class E_F0_Optimize : public E_F0 {
   //  virtual const E_F0 * Parameter(Stack ) const {return this;}
     virtual size_t nbitem() const {  return NBbitem;}
     virtual bool EvaluableWithOutStack() const {return false;} // 
-    virtual bool MeshIndependent() const {return true;} // 
+    virtual bool MeshIndependent() const {return false;} // 
     virtual E_F0 * right_E_F0() const { return 0;}
     virtual ~E_F0_Optimize() {}
    // virtual int compare (const E_F0 *t) const { return t-this;} // to give a order in instuction 
