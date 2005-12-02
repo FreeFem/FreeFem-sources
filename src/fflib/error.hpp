@@ -52,7 +52,8 @@ protected:
     message = mess.str();
     extern void ShowDebugStack();
     ShowDebugStack();
-    if (c!=NONE) cerr  << message << endl; cerr << " at exec line  " << TheCurrentLine << endl; }
+    if (c!=NONE) cerr  << message << endl; // cerr << " at exec line  " << TheCurrentLine << endl; 
+    }
 public:
   virtual int errcode() const {return code;} 
   virtual const char *  what() const   throw () { return message.c_str(); } 
@@ -70,7 +71,7 @@ class ErrorExec : public Error
 {  
  public:
   ErrorExec(const char * Text,int l) :
-    Error(UNKNOWN,"Exec error : ",Text, ", number :", l)  {}
+    Error(UNKNOWN,"Exec error : ",Text, "\n   -- number :", l)  {}
 };
 
 class ErrorInternal : public Error
