@@ -764,7 +764,7 @@ void  AddMatElem(map<pair<int,int>, R > & A,const Mesh & Th,const BilinearOperat
       }      
     else if (di.kind == CDomainOfIntegration::int2d )
       {
-       cerr << " a faire CDomainOfIntegration::int2d  " << endl;
+       // cerr << " a faire CDomainOfIntegration::int2d  " << endl;
         for (int i=0;i< Th.nt; i++) 
           {
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())  

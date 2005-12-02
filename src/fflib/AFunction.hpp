@@ -2499,8 +2499,8 @@ inline void CompileError(string msg,aType r){
  }
  
  inline void ExecError(string msg){ 
-   cerr << "Fatal error : ExecError " << msg << endl;
-   throw(ErrorExec("exit",1));
+  // cerr << "Fatal ExecError: " << msg << endl;
+   throw(ErrorExec(msg.c_str(),1));
  }
  
 

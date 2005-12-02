@@ -93,6 +93,8 @@ struct TypeSolveMat {
   TypeSolveMat(TSolveMat tt=LU) :t(tt),
                                  sym(t == CROUT || t ==CHOLESKY  ||  t==GC ),
                                  profile(t != GC && t != GMRES && t != NONESQUARE && t != UMFpack ) {}
+  bool operator==(const TypeSolveMat & a) const { return t == a.t;}                               
+  bool operator!=(const TypeSolveMat & a) const { return t != a.t;}                               
 };
 
 inline ostream & operator<<(ostream & f,const  TypeSolveMat & tm)
@@ -987,6 +989,8 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
   pfes  * pVh= GetAny<pfes *>((*b->evh)(stack));
   const FESpace & Uh =  *(FESpace*) **pUh ;
   const FESpace & Vh =  *(FESpace*) **pVh ;
+  bool A_is_square= Uh.NbOfDF == Vh.NbOfDF ;
+
   MatriceProfile<R> *pmatpf=0;
   bool VF=isVF(b->largs);
 //  assert(!VF);
@@ -1009,7 +1013,12 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
   if (b->nargs[8]) umfpackstrategy= GetAny<long>((*b->nargs[8])(stack));
   if (b->nargs[9]) tol_pivot= GetAny<double>((*b->nargs[8])(stack));
   if (b->nargs[10]) tol_pivot_sym= GetAny<double>((*b->nargs[9])(stack));
-  
+  if (! A_is_square && typemat != TypeSolveMat::NONESQUARE) 
+   {
+     cout << " -- Error the solver << "<< typemat <<"  is set  on rectangular matrix  " << endl;
+     ExecError("A solver is set on a none square matrix!");
+    typemat= TypeSolveMat::NONESQUARE;
+   }
   const OneOperator *precon = 0; //  a changer 
   if ( b->nargs[3])
     {
@@ -1033,12 +1042,14 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
     { // reconstruct all the matrix
       A.A=0; // to delete  old  matrix ADD FH 16112005 
       if (typemat.profile)
-        { A.A.master( new MatriceProfile<R>(Vh,VF) ); assert( &Uh == & Vh);}
+        { A.A.master( new MatriceProfile<R>(Vh,VF) ); ffassert( &Uh == & Vh);}
       else if (typemat.sym )
-        { A.A.master( new  MatriceMorse<R>(Vh,typemat.sym,VF) ); 
-        assert( &Uh == & Vh);}
+        {  A.A.master( new  MatriceMorse<R>(Vh,typemat.sym,VF) ); 
+        ffassert( &Uh == & Vh);}
       else 
+       {
         A.A.master( new  MatriceMorse<R>(Vh,Uh,VF) ); // lines corresponding to test functions 
+       }
     }
   *A.A=R(); // reset value of the matrix
   
@@ -1057,7 +1068,7 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
            AssembleBC<R>( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
     
    }
-  if( factorize ) {
+  if( A_is_square && factorize ) {
     MatriceProfile<R> * pf = dynamic_cast<MatriceProfile<R> *>((MatriceCreuse<R> *) A.A);
     assert(pf);
     switch (typemat.t) {
@@ -1068,7 +1079,8 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
     }
     
   }    
-  SetSolver(stack,*A.A,&typemat,VF,eps,NbSpace,itermax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym);
+  if (A_is_square) 
+    SetSolver(stack,*A.A,&typemat,VF,eps,NbSpace,itermax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym);
   
   return SetAny<Matrice_Creuse<R>  *>(&A);
   
