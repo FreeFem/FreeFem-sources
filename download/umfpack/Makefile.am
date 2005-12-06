@@ -25,8 +25,10 @@ UMFPACKv4.4:
 	sed 's/lib:/libb:/' < UMFPACKv4.4/AMD/Makefile \
 		> UMFPACKv4.4/AMD/Makefile2
 UMFPACK_Make.m4: Makefile UMFPACKv4.4
-	m4   -DFF_CC="$(CC)" -DFF_CFLAGS="@CFLAGS@" -DFF_LIB="@LIBS@" \
-		 -DFF_CONFIG="@FF_UMFPACK_CONFIG@" \
+	m4   -DFF_CC="$(CC)" \
+             -DFF_CFLAGS="@CFLAGS@ @BLASINC@" \
+             -DFF_LIB="@LIBS@" \
+	     -DFF_CONFIG="@FF_UMFPACK_CONFIG@" \
               UMFPACK_Make.m4 >UMFPACKv4.4/UMFPACK/Make/Make.include
 	-find . -name '*.[ao]'|xargs rm
 UMFPACKv4.4.tar.gz:

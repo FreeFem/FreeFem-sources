@@ -464,17 +464,21 @@ AC_ARG_WITH(blas,
 	ff_blas_ok=yes
 	ff_blas_lib="${withval}")
 
+ff_blas_inc=""
+
 # Specific BLAS library location for FreeBSD
 ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
 
 # Trying  blas library
 for iblas in \
 "-lblas" "-framework vecLib" "-L/usr/lib/atlas -lblas" \
-"-L${curdir}/download/blas -lcblas -lf77blas" \
-"-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas" \ 
-"-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas" \
 $ff_freebsd_blas
-do 
+do
+#   
+#"-L${curdir}/download/blas -lcblas -lf77blas" \
+#"-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas" \ 
+#"-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas" \
+#
 if test "$ff_blas_ok" = no;
 then
         AC_MSG_CHECKING(for daxpy_ in $iblas)
@@ -509,6 +513,8 @@ then
 	then
 		ff_download_blas=generic
 		ff_blas_lib="-L${curdir}/download/blas -lcblas -lf77blas"
+		ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
+
 		AC_SUBST(GENERIC_BLAS,"libf77blas.a libcblas.a")
 		AC_SUBST(GENERIC_BLAS_BUILT_SOURCES,'BLAS CBLAS  $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
 	else
@@ -525,17 +531,22 @@ then
 		then
 			ff_download_blas=atlas-binary
 			ff_blas_lib="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas"
+			ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
 		else
 			ff_download_blas=atlas-source
 			ff_blas_lib="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas"
+			ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
 		fi
 	fi
 
 	AC_MSG_RESULT($ff_download_blas)
 	AC_SUBST(DOWNLOAD_BLAS,$ff_download_blas)
 	ff_blas_ok=yes
+        ff_cblas_h=yes
 fi
+AC_MSG_RESULT($ff_blas_inc)
 AC_SUBST(BLASLIB,$ff_blas_lib)
+AC_SUBST(BLASINC,$ff_blas_inc)
 #looking for cblas.h  FH 
 if test "$ff_blas_ok" = yes;
 then
@@ -543,7 +554,7 @@ then
        ff_cblas_h=yes,
        ff_cblas_h=no)
   AC_CHECK_HEADERS(vecLib/cblas.h,
-       ff_cblas_h=yes,
+       ff_cblas_h=yes
        ff_cblas_h=no)
 
 fi
