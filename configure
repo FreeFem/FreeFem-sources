@@ -311,7 +311,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 FLIBS CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ WIN32DLLTARGET OPTIM_TYPE X11_LIBS CXXCPP EGREP ADD_PACKAGE_NAME ff_mpirun MPIPROG WGET ff_wget ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIB G2CLIB DOWNLOAD_ARPACK ARPACKLIB EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK FF_UMFPACK_CONFIG UMFPACKLIB ff_libtool STATICTOOL LOAD_TESTS LOAD_COMPILE ff_latex ff_makeindex ff_dvips DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION TAGGINGDEPEND GLXPROG AGLPROG X11PROG IDEPROG LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 FLIBS CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ WIN32DLLTARGET OPTIM_TYPE X11_LIBS CXXCPP EGREP ADD_PACKAGE_NAME ff_mpirun MPIPROG WGET ff_wget ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIB BLASINC G2CLIB DOWNLOAD_ARPACK ARPACKLIB EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK FF_UMFPACK_CONFIG UMFPACKLIB ff_libtool STATICTOOL LOAD_TESTS LOAD_COMPILE ff_latex ff_makeindex ff_dvips DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION TAGGINGDEPEND GLXPROG AGLPROG X11PROG IDEPROG LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3126,7 +3126,7 @@ fi
 
           ;;
           # Ignore these flags.
-        -lang* | -lcrt[01].o | -lcrtbegin.o | -lc | -lgcc | -libmil | -LANG:=*)
+        -lang* | -lcrt*.o | -lc | -lgcc | -libmil | -LANG:=*)
           ;;
         -lkernel32)
           test x"$CYGWIN" != xyes && ac_cv_f77_libs="$ac_cv_f77_libs $ac_arg"
@@ -5155,7 +5155,7 @@ then
 	echo "$as_me:$LINENO: checking GCC version" >&5
 echo $ECHO_N "checking GCC version... $ECHO_C" >&6
 
-        ff_gcc4=`$CC  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'`
+        ff_gcc4=`gcc  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'`
 	echo "$as_me:$LINENO: result: $ff_gcc4" >&5
 echo "${ECHO_T}$ff_gcc4" >&6
 
@@ -8881,17 +8881,21 @@ if test "${with_blas+set}" = set; then
 	ff_blas_lib="${withval}"
 fi;
 
+ff_blas_inc=""
+
 # Specific BLAS library location for FreeBSD
 ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
 
 # Trying  blas library
 for iblas in \
 "-lblas" "-framework vecLib" "-L/usr/lib/atlas -lblas" \
-"-L${curdir}/download/blas -lcblas -lf77blas" \
-"-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas" \
-"-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas" \
 $ff_freebsd_blas
 do
+#
+#"-L${curdir}/download/blas -lcblas -lf77blas" \
+#"-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas" \
+#"-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas" \
+#
 if test "$ff_blas_ok" = no;
 then
         echo "$as_me:$LINENO: checking for daxpy_ in $iblas" >&5
@@ -9013,6 +9017,8 @@ echo $ECHO_N "checking for BLAS version to download... $ECHO_C" >&6
 	then
 		ff_download_blas=generic
 		ff_blas_lib="-L${curdir}/download/blas -lcblas -lf77blas"
+		ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
+
 		GENERIC_BLAS="libf77blas.a libcblas.a"
 
 		GENERIC_BLAS_BUILT_SOURCES='BLAS CBLAS  $(F77BLAS_SOURCES) $(CBLAS_SOURCES)'
@@ -9031,9 +9037,11 @@ echo $ECHO_N "checking for BLAS version to download... $ECHO_C" >&6
 		then
 			ff_download_blas=atlas-binary
 			ff_blas_lib="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas"
+			ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
 		else
 			ff_download_blas=atlas-source
 			ff_blas_lib="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas"
+			ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
 		fi
 	fi
 
@@ -9042,8 +9050,13 @@ echo "${ECHO_T}$ff_download_blas" >&6
 	DOWNLOAD_BLAS=$ff_download_blas
 
 	ff_blas_ok=yes
+        ff_cblas_h=yes
 fi
+echo "$as_me:$LINENO: result: $ff_blas_inc" >&5
+echo "${ECHO_T}$ff_blas_inc" >&6
 BLASLIB=$ff_blas_lib
+
+BLASINC=$ff_blas_inc
 
 #looking for cblas.h  FH
 if test "$ff_blas_ok" = yes;
@@ -9346,8 +9359,7 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
  ff_cblas_h=yes
-else
-  ff_cblas_h=no
+       ff_cblas_h=no
 fi
 
 done
@@ -11391,9 +11403,10 @@ for ac_i in : $LIBOBJS; do test "x$ac_i" = x: && continue
   # 1. Remove the extension, and $U if already installed.
   ac_i=`echo "$ac_i" |
 	 sed 's/\$U\././;s/\.o$//;s/\.obj$//'`
-  # 2. Add them.
-  ac_libobjs="$ac_libobjs $ac_i\$U.$ac_objext"
-  ac_ltlibobjs="$ac_ltlibobjs $ac_i"'$U.lo'
+  # 2. Prepend LIBOBJDIR.  When used with automake>=1.10 LIBOBJDIR
+  #    will be set to the directory where LIBOBJS objects are built.
+  ac_libobjs="$ac_libobjs \${LIBOBJDIR}$ac_i\$U.$ac_objext"
+  ac_ltlibobjs="$ac_ltlibobjs \${LIBOBJDIR}$ac_i"'$U.lo'
 done
 LIBOBJS=$ac_libobjs
 
@@ -12064,6 +12077,7 @@ s,@GENERIC_BLAS@,$GENERIC_BLAS,;t t
 s,@GENERIC_BLAS_BUILT_SOURCES@,$GENERIC_BLAS_BUILT_SOURCES,;t t
 s,@DOWNLOAD_BLAS@,$DOWNLOAD_BLAS,;t t
 s,@BLASLIB@,$BLASLIB,;t t
+s,@BLASINC@,$BLASINC,;t t
 s,@G2CLIB@,$G2CLIB,;t t
 s,@DOWNLOAD_ARPACK@,$DOWNLOAD_ARPACK,;t t
 s,@ARPACKLIB@,$ARPACKLIB,;t t
