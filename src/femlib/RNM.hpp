@@ -730,7 +730,7 @@ class KNMK_: public KN_<R> {
   long ijk(long i,long j,long k) const 
               { return shapei.index(i)+shapej.index(j)+shapek.index(k);}
   long indexijk(long i,long j,long k) const 
-              {return index(shapei.index(i)+shapej.index(j)+shapek.index(k));} 
+              {return this->index(shapei.index(i)+shapej.index(j)+shapek.index(k));} 
                            
   R & operator()(long i,long j,long k)   const   {return this->v[indexijk(i,j,k)];}
   R & operator()(int i,int j,int k)   const   {return this->v[indexijk(i,j,k)];}
