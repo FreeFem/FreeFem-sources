@@ -1,3 +1,87 @@
+2005-12-02 11:01  hecht
+
+	*   Add the generation of an error if you try to set a solver on
+	  none square matrix,
+	    to remove so segmention fault.
+
+2005-11-30 13:18  hecht
+
+	* /tmp/cvsBIs12d
+
+2005-11-29 11:45  lehyaric
+
+	* Now dlopen() works even when ARPACK is downloaded
+
+2005-11-28 16:28  hecht
+
+	*    add optimization of  a*b expression if a ou b is zero.
+	     add new state of expression (read only)  of optimization
+
+2005-11-23 22:02  hecht
+
+	* add roland correction in the doc.
+
+2005-11-23 10:40  lehyaric
+
+	* Added examples++-chapt3/all.edp into cleanregen.sh
+
+2005-11-22 16:34  hecht
+
+	*   correct problem in algo and Newtow exemple (forgot 1/2 and 2)
+	  coef
+	    remove duplicate examples++-tutorial algowithmacro.edp , ...
+	    add lost examples in chap3 dir
+	    try idea for memory management (ffstack.hpp file is added (in
+	  progresse))
+
+2005-11-22 10:10  lehyaric
+
+	* Arbitrary "wget" commands and parameters can be defined through
+	  the configure.ac script with the option "--with-wget=xxx".
+
+2005-11-19 21:53  hecht
+
+	*   I just try autoreconf on my new mac.
+
+2005-11-19 21:46  hecht
+
+	*  remove the wrong BlackShocle.edp example
+	   correct mistake the gradient and hessian computation in algo.edp
+	   (forgotten  1./2 , etc ..), correct also freefem++.doc
+
+2005-11-16 11:56  hecht
+
+	*    correct the following trouble
+	     when we write  A=vNS( ..) where A is ma matrix and vNS is a
+	  varf
+	     old version we build the new matrix and after delete old
+	     new version  we delete  and after we build
+	     Thank to Denis Sipp
+
+2005-11-14 22:00  hecht
+
+	*   correct probleme when resize of full matrix, before the coef of
+	  the matrix
+	      was losed.
+	    correct missing in the freefem++doc.tex  in quadrature
+	  formular.
+
+2005-11-09 15:13  lehyaric
+
+	* New Debian packaging
+
+2005-11-09 15:11  lehyaric
+
+	* Changed Debian dependency from libfltk1.1c102 to libfltk1.1
+
+2005-11-08 11:26  hecht
+
+	*   change  in	grammar lg.y  misplaced  ternary operator
+
+2005-11-06 20:36  hecht
+
+	*   uodate INNOVATION file
+
 2005-11-06 20:26  hecht
 
 	*   change the tolerance value un mshptg form  2^-15 to 2^-30 if

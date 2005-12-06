@@ -4,6 +4,7 @@
 //#define WITHCHECK
 class basicForEachType;
 typedef const  basicForEachType * aType;
+ostream & operator<<(ostream & f,const basicForEachType & e);
 
 //typedef  unsigned char  AnyData[24]; 
 
@@ -128,7 +129,9 @@ inline AnyTypeWithOutCheck PtrtoAny(void * p,aType )
 { 
  CheckSize<T,sizeof(T)<= sizeof(AnyData) >();
  if (x.ktype!=map_type[typeid(T).name()])
-   { cerr<< "GetAny: PB type <"<<typeid(T).name() << "> <=" << *x.ktype << endl;
+   { cerr<< "GetAny: PB type <";
+   cerr <<typeid(T).name();
+   cerr << "> <=" << *(x.ktype) << endl;
    throw(ErrorExec("exit",1));}
  return *static_cast<const T*>(static_cast<const void*>(&x));
 }
