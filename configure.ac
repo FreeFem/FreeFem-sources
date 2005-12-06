@@ -110,9 +110,8 @@ CYGWIN*)
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
 	then
-                ff_mingw=yes
-        	ff_win32=yes
-                enable_cygwindll=no;
+                ff_mingw=yes 
+               enable_cygwindll=no;
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
 		FFLAGS="$FFLAGS -mno-cygwin"
 		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
@@ -412,14 +411,14 @@ ff_cadna_dir="${curdir}/download/cadna"
   AC_CHECK_HEADERS(${ff_cadna_dir}/cadnafree.h,
        ff_cadna_h=yes, ff_cadna_h=no)
 
+   LIBS="$ff_libs_old"
+   LDFLAGS="$ff_ldflags_old"    
+
    if test "$ff_cadna_ok" = yes  -a "$ff_cadna_h" = yes 
     then
       AC_DEFINE(HAVE_CADNA,1, freecadna is use to evalute the round-off error propagation )
       CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
-       LIBS="-lcadnafree $ff_libs_old"
-   else
-       LIBS="$ff_libs_old"
-       LDFLAGS="$ff_ldflags_old"    
+      LIBS=" -L$ff_cadna_dir -lcadnafree $ff_libs_old"
    fi
 
 
@@ -700,9 +699,8 @@ then
 fi
 
 # If all else fails, download!
-if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes \
-   -a "$enable_fortran" != no
-then
+if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes 
+   then
 	AC_MSG_NOTICE(using downloaded Umfpack)
 	AC_SUBST(DOWNLOAD_UMFPACK,umfpack)
 
@@ -710,8 +708,11 @@ then
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
 
-	ff_umfpack_lib="${curdir}/download/umfpack/UMFPACKv4.3/UMFPACK/Lib/libumfpack.a ${curdir}/download/umfpack/UMFPACKv4.3/AMD/Lib/libamd.a"
+	ff_umfpack_lib="${curdir}/download/umfpack/UMFPACKv4.4/UMFPACK/Lib/libumfpack.a ${curdir}/download/umfpack/UMFPACKv4.4/AMD/Lib/libamd.a"
 	AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
+	if test "$ff_win32" = yes; then
+  	AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS)
+	fi
 	ff_umfpack_ok=yes
 fi
 
@@ -731,7 +732,7 @@ then
 			     ff_umfpack_posix_ok=no)
 	if test "$ff_umfpack_posix_ok" = no
 	then
-		AC_SUBST(FF_UMFPACK_POSIX,-DNPOSIX)
+		AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS -DNPOSIX)
 	fi
 fi
 

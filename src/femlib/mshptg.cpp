@@ -22,7 +22,7 @@
 
 // bof bof FH je ne sais pas pourquoi nnnBAMG_LONG_LONG
 // nov 2005 j'ai corrige les problemes 
-// il y a vait un gros bug de le trie
+// il y avait un gros bug de le trie
 // overflow long  car on calculais   x*x + y*y 
 // pour que cela tienne dans un  long long  
 //  x*x + y*y  < 2^63-1 =>  x et y  < 2^31-1 

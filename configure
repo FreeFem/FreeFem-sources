@@ -311,7 +311,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 FLIBS CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ WIN32DLLTARGET OPTIM_TYPE X11_LIBS CXXCPP EGREP ADD_PACKAGE_NAME ff_mpirun MPIPROG WGET ff_wget ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIB G2CLIB DOWNLOAD_ARPACK ARPACKLIB EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK UMFPACKLIB FF_UMFPACK_POSIX ff_libtool STATICTOOL LOAD_TESTS LOAD_COMPILE ff_latex ff_makeindex ff_dvips DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION TAGGINGDEPEND GLXPROG AGLPROG X11PROG IDEPROG LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 FLIBS CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ WIN32DLLTARGET OPTIM_TYPE X11_LIBS CXXCPP EGREP ADD_PACKAGE_NAME ff_mpirun MPIPROG WGET ff_wget ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIB G2CLIB DOWNLOAD_ARPACK ARPACKLIB EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK FF_UMFPACK_CONFIG UMFPACKLIB ff_libtool STATICTOOL LOAD_TESTS LOAD_COMPILE ff_latex ff_makeindex ff_dvips DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION TAGGINGDEPEND GLXPROG AGLPROG X11PROG IDEPROG LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4540,8 +4540,7 @@ CYGWIN*)
 	if test "$enable_cygwindll" != yes
 	then
                 ff_mingw=yes
-        	ff_win32=yes
-                enable_cygwindll=no;
+               enable_cygwindll=no;
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
 		FFLAGS="$FFLAGS -mno-cygwin"
 		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
@@ -8602,6 +8601,9 @@ fi
 done
 
 
+   LIBS="$ff_libs_old"
+   LDFLAGS="$ff_ldflags_old"
+
    if test "$ff_cadna_ok" = yes  -a "$ff_cadna_h" = yes
     then
 
@@ -8610,10 +8612,7 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
       CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
-       LIBS="-lcadnafree $ff_libs_old"
-   else
-       LIBS="$ff_libs_old"
-       LDFLAGS="$ff_ldflags_old"
+      LIBS=" -L$ff_cadna_dir -lcadnafree $ff_libs_old"
    fi
 
 
@@ -10190,9 +10189,8 @@ fi
 fi
 
 # If all else fails, download!
-if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes \
-   -a "$enable_fortran" != no
-then
+if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes
+   then
 	{ echo "$as_me:$LINENO: using downloaded Umfpack" >&5
 echo "$as_me: using downloaded Umfpack" >&6;}
 	DOWNLOAD_UMFPACK=umfpack
@@ -10202,12 +10200,16 @@ echo "$as_me: using downloaded Umfpack" >&6;}
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
 
-	ff_umfpack_lib="${curdir}/download/umfpack/UMFPACKv4.3/UMFPACK/Lib/libumfpack.a ${curdir}/download/umfpack/UMFPACKv4.3/AMD/Lib/libamd.a"
+	ff_umfpack_lib="${curdir}/download/umfpack/UMFPACKv4.4/UMFPACK/Lib/libumfpack.a ${curdir}/download/umfpack/UMFPACKv4.4/AMD/Lib/libamd.a"
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBUMFPACK 1
 _ACEOF
 
+	if test "$ff_win32" = yes; then
+  	FF_UMFPACK_CONFIG=-DCBLAS
+
+	fi
 	ff_umfpack_ok=yes
 fi
 
@@ -10433,7 +10435,7 @@ done
 
 	if test "$ff_umfpack_posix_ok" = no
 	then
-		FF_UMFPACK_POSIX=-DNPOSIX
+		FF_UMFPACK_CONFIG=-DCBLAS -DNPOSIX
 
 	fi
 fi
@@ -12068,8 +12070,8 @@ s,@ARPACKLIB@,$ARPACKLIB,;t t
 s,@EIGENTEST@,$EIGENTEST,;t t
 s,@EIGENOBJ@,$EIGENOBJ,;t t
 s,@DOWNLOAD_UMFPACK@,$DOWNLOAD_UMFPACK,;t t
+s,@FF_UMFPACK_CONFIG@,$FF_UMFPACK_CONFIG,;t t
 s,@UMFPACKLIB@,$UMFPACKLIB,;t t
-s,@FF_UMFPACK_POSIX@,$FF_UMFPACK_POSIX,;t t
 s,@ff_libtool@,$ff_libtool,;t t
 s,@STATICTOOL@,$STATICTOOL,;t t
 s,@LOAD_TESTS@,$LOAD_TESTS,;t t
