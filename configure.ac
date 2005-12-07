@@ -743,7 +743,7 @@ then
 			     ff_umfpack_posix_ok=no)
 	if test "$ff_umfpack_posix_ok" = no
 	then
-		AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS -DNPOSIX)
+		AC_SUBST(FF_UMFPACK_CONFIG,"-DCBLAS -DNPOSIX")
 	fi
 fi
 

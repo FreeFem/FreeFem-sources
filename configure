@@ -10447,7 +10447,7 @@ done
 
 	if test "$ff_umfpack_posix_ok" = no
 	then
-		FF_UMFPACK_CONFIG=-DCBLAS -DNPOSIX
+		FF_UMFPACK_CONFIG="-DCBLAS -DNPOSIX"
 
 	fi
 fi
