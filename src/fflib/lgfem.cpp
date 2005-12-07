@@ -2510,6 +2510,8 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
              SHOWVERB(cout << " int " << endl);
              const vector<Expression>  & what(di->what);
              const Mesh  & Th = * GetAny<pmesh>( (*di->Th)(stack) );
+             const QuadratureFormular1d & FIE = di->FIE(stack);
+             const QuadratureFormular & FIT = di->FIT(stack);
              ffassert(&Th);
              CDomainOfIntegration::typeofkind kind = di->kind;
              set<int> setoflab;
@@ -2533,7 +2535,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                
              if (kind==CDomainOfIntegration::int1d)
                {
-                 const QuadratureFormular1d & FI = QF_GaussLegendre2;
+                 const QuadratureFormular1d & FI = FIE;
                
                  for( int e=0;e<Th.neb;e++)
                   {
@@ -2560,7 +2562,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                  }
              else if (kind==CDomainOfIntegration::int2d) {
              
-             const QuadratureFormular & FI = QuadratureFormular_T_2;
+             const QuadratureFormular & FI =FIT;
              for (int i=0;i< Th.nt; i++) 
               {
                 const Triangle & K(Th[i]);
@@ -2575,7 +2577,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                }
              else   if (kind==CDomainOfIntegration::intalledges)
                {
-                 const QuadratureFormular1d & FI = QF_GaussLegendre2;
+                 const QuadratureFormular1d & FI = FIE;
                  for (int i=0;i< Th.nt; i++) 
                    if (all || setoflab.find(Th[i].lab) != setoflab.end()) 
                     for( int ie=0;ie<3;ie++)
@@ -2601,7 +2603,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                 double untier(1./3.);
                  cerr << " a faire CDomainOfIntegration::intallVFedges " << endl; //%%%%%%%%%
                  ffassert(0);
-                 const QuadratureFormular1d & FI = QF_GaussLegendre2;
+                 const QuadratureFormular1d & FI = FIE;
                  for (int i=0;i< Th.nt; i++) 
                    if (all || setoflab.find(Th[i].lab) != setoflab.end()) 
                     {
