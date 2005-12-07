@@ -4,7 +4,7 @@
 # $Id$
 
 all-local: $(DOWNLOAD_UMFPACK)
-EXTRA_DIST=AMD_Make.include UMFPACK_Make.include
+EXTRA_DIST=UMFPACK_Make.m4
 
 # Downloading and compiling UMFPACK
 # ---------------------------------
@@ -31,12 +31,14 @@ UMFPACK_Make.m4: Makefile UMFPACKv4.4
              -DFF_LIB="@LIBS@ @BLASLIB@" \
 	     -DFF_CONFIG="@FF_UMFPACK_CONFIG@" \
               UMFPACK_Make.m4 >Make.include
-	if  diff Make.include UMFPACKv4.4/UMFPACK/Make/Make.include 2>&1 >/dev/null; then \
-	   echo " recompile umfpack (some flags change)" ;\
+	-if  diff Make.include UMFPACKv4.4/UMFPACK/Make/Make.include 2>&1 >/dev/null; then \
+	    echo " same flags => no recompilation !  " ; \
+	else \
+	   echo "  recompile umfpack (some flags change) => clean umfpack" ;\
 	   cp Make.include  UMFPACKv4.4/UMFPACK/Make/Make.include; \
-	   make clean; \
+	   cd UMFPACKv4.4/UMFPACK && make clean; \
 	   find . -name '*.exe'|xargs rm; \
-	fi
+	fi; 
 UMFPACKv4.4.tar.gz:
 	@WGET@ -N http://www.cise.ufl.edu/research/sparse/umfpack/v4.4/UMFPACKv4.4.tar.gz
 
