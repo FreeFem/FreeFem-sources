@@ -1003,18 +1003,6 @@ then
 fi
 #  def variable pour les makefiles 
 
-# Disable date and time tagging (for faster compilations when debugging)
-# ----------------------------------------------------------------------
-
-AC_ARG_ENABLE(tagging,[  --disable-tagging	No date and time tag update inside the compiled code (faster recompilations)])
-if test "$enable_tagging" = no
-then
-	ff_taggingdepend=strversionnumber.m4
-else
-	ff_taggingdepend=FORCE
-fi
-AC_SUBST(TAGGINGDEPEND,$ff_taggingdepend)
-
 # Addind downloaded libraries
 # ---------------------------
 
