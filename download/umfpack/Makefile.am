@@ -28,7 +28,7 @@ UMFPACKv4.4/AMD/Makefile2 UMFPACKv4.4/UMFPACK/Makefile2: UMFPACKv4.4
 UMFPACK_Make.m4: Makefile UMFPACKv4.4
 	m4   -DFF_CC="$(CC)" \
              -DFF_CFLAGS="@CFLAGS@ @BLASINC@" \
-             -DFF_LIB="@LIBS@ @BLASLIB@" \
+             -DFF_LIB="@BLASLIB@ @LIBS@" \
 	     -DFF_CONFIG="@FF_UMFPACK_CONFIG@" \
               UMFPACK_Make.m4 >Make.include
 	-if  diff Make.include UMFPACKv4.4/UMFPACK/Make/Make.include 2>&1 >/dev/null; then \
