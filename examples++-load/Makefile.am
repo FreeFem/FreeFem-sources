@@ -7,7 +7,8 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=load.edp		\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
 	VISUALCHECK=$(VISUALCHECK)
 EXTRA_DIST=load.edp load.link myfunction.cpp  dfft.cpp dfft.edp dfft.link include.tar.gz \
-mat_dervieux.cpp convect_dervieux.edp 
+mat_dervieux.cpp convect_dervieux.edp funcTemplate.cpp AFunction_ext.hpp funcTemplate.edp
+
 
 myfunction.so: myfunction.cpp ../src/fflib/AFunction.hpp ../config.h include
 	CXX=$(CXX) ./load.link myfunction.cpp

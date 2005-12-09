@@ -1,3 +1,37 @@
+2005-12-08 07:59  hecht
+
+	*   correct LIBRARY problem for umfpack Demo
+
+2005-12-07 21:40  hecht
+
+	*   * correct mistake in quadarture formule in integral computation
+	  (nota
+	     in variationnal computation) we alway use the qf2pE or qf2pT
+	  formula.
+	    * correct mistake in umfpack makefile.
+	    * set version to 2-1_1
+
+2005-12-07 17:43  hecht
+
+	*   correct problem in umfpack with cblas
+
+2005-12-06 22:10  hecht
+
+	*   correct mistake in cblas on configure.ac
+
+2005-12-06 16:56  hecht
+
+	*  add new file
+
+2005-12-06 16:55  hecht
+
+	*  Use umfpack 4.4, and correct some mistake in configure.ac
+
+2005-12-06 12:18  lehyaric
+
+	* Now compiles with gcc (GCC) 4.0.3 20051201 (prerelease) (Debian
+	  4.0.2-5)
+
 2005-12-02 11:01  hecht
 
 	*   Add the generation of an error if you try to set a solver on
