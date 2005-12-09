@@ -350,7 +350,7 @@ class E_FN : public CodeAlloc{ public: virtual AnyType operator()(Stack,size_t N
 class basicAC_F0;
 class  ArrayOfaType : public CodeAlloc{ 
   //  class for the type of parameter
-   aType tt[6]; 
+   aType tt[11]; 
    protected:
    bool ellipse; 
    int n;
@@ -377,6 +377,30 @@ class  ArrayOfaType : public CodeAlloc{
        :n(5),t(tt),ellipse(ell)  {t[0]=a,t[1]=b;t[2]=c;t[3]=d; t[4]=e; }
    explicit ArrayOfaType(const aType & a,const aType & b,const aType & c,const aType & d,const aType & e,const aType & f,bool ell=false) 
        :n(6),t(tt),ellipse(ell)  {t[0]=a,t[1]=b;t[2]=c;t[3]=d; t[4]=e; t[5]=f; }
+
+  explicit ArrayOfaType(const aType & a,const aType & b,const aType & c,const aType & d,const aType & e,
+			const aType & f,const aType & g,
+			bool ell=false) 
+    :n(7),t(tt),ellipse(ell)  {t[0]=a,t[1]=b;t[2]=c;t[3]=d; t[4]=e; t[5]=f; t[6]=g; }  // (6 args) Added by Fabian Dortu
+
+  explicit ArrayOfaType(const aType & a,const aType & b,const aType & c,const aType & d,const aType & e,
+			const aType & f,const aType & g,const aType & h,
+			bool ell=false) 
+    :n(8),t(tt),ellipse(ell)  {t[0]=a,t[1]=b;t[2]=c;t[3]=d; t[4]=e; t[5]=f; t[6]=g; t[7]=h; }  // (7 args) Added by Fabian Dortu
+
+  explicit ArrayOfaType(const aType & a,const aType & b,const aType & c,const aType & d,const aType & e,
+  			const aType & f,const aType & g,const aType & h, const aType & i,
+			bool ell=false) 
+    :n(9),t(tt),ellipse(ell)  {t[0]=a,t[1]=b;t[2]=c;t[3]=d; t[4]=e; t[5]=f; t[6]=g; t[7]=h; t[8]=i; }  // (8 args) Added by Fabian Dortu
+
+  explicit ArrayOfaType(const aType & a,const aType & b,const aType & c,const aType & d, const aType & e,
+  		const aType & f,const aType & g,const aType & h, const aType & i, const aType & j,
+  		bool ell=false) 
+    :n(10),t(tt),ellipse(ell)  {t[0]=a,t[1]=b;t[2]=c;t[3]=d; t[4]=e; t[5]=f; t[6]=g; t[7]=h; t[8]=i;  t[9]=j; }  // (10 args) Added by Fabian Dortu
+  
+   explicit ArrayOfaType(const aType & a,const aType & b,const aType & c,const aType & d,const aType & e,const aType & f,const aType & g,const aType & h, const aType & i, const aType & j, const aType & k,bool ell=false) 
+    :n(11),t(tt),ellipse(ell)  {t[0]=a,t[1]=b;t[2]=c;t[3]=d; t[4]=e; t[5]=f; t[6]=g; t[7]=h; t[8]=i;  t[9]=j; t[10]=k; }  // (10 args) Added by Fabian Dortu
+  
        
    ArrayOfaType(const basicAC_F0 & ) ;
    ArrayOfaType(const ArrayOfaType & ); // 
@@ -413,6 +437,16 @@ class  OneOperator : public ArrayOfaType {
      throwassert(rr && a && b);} 
     OneOperator(aType rr,aType  a,aType  b,aType c) : r(rr),ArrayOfaType(a,b,c,false),next(0),pref(0) {throwassert(rr && a && b && c);} 
     OneOperator(aType rr,aType  a,aType  b,aType c,aType d) : r(rr),ArrayOfaType(a,b,c,d,false),next(0),pref(0) {throwassert(rr && a && b && c);} 
+    
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e) : r(rr),ArrayOfaType(a,b,c,d,e,false),next(0),pref(0) {throwassert(rr && a && b && c && d);} // Added by Fabian Dortu (5 parameters)
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f) : r(rr),ArrayOfaType(a,b,c,d,e,f,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f);} // Added by Fabian Dortu (6 parameters) 
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g) : r(rr),ArrayOfaType(a,b,c,d,e,f,g,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g);} // Added by Fabian Dortu (7 parameters) 
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h) : r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g && h);} // Added by Fabian Dortu (8 parameters) 
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i) : r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,i,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g && h && i);} // Added by Fabian Dortu (9 parameters) 
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i, aType j) : r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,i,j,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g && h && i && j);} // Added by Fabian Dortu (10 parameters) 
+    
+    
+    
     OneOperator(aType rr,const ArrayOfaType &ta) : r(rr),ArrayOfaType(ta),next(0),pref(0) {throwassert(rr);} 
     OneOperator(aType rr,bool ellipse) : r(rr),ArrayOfaType(ellipse),next(0),pref(0) {throwassert(rr );} 
     OneOperator(aType rr,const ListOfId *l) : r(rr),ArrayOfaType(l),next(0),pref(0) {throwassert(rr );} 

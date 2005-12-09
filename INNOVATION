@@ -1,4 +1,5 @@
-V2.1-1
+V2.1-2
+ * add more example of dynamic load example (thank to F. Dortu)
  * correct mistake in simple integral computation (not in variationnal 
    form)  before we alway use a quadrature formula of order 3, 
    now we can change the quadrature formula and the defaut is of order 5. 
