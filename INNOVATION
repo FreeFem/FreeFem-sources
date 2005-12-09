@@ -1,3 +1,7 @@
+V2.1-1
+ * correct mistake in simple integral computation (not in variationnal 
+   form)  before we alway use a quadrature formula of order 3, 
+   now we can change the quadrature formula and the defaut is of order 5. 
 V2.0-4
  * change in mshptg the size of the small possible edge from
    1/32000 to 1/1 000 000 000, this mesher is use in trunc, 

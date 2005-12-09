@@ -84,8 +84,10 @@ OTHER_FIGS= plots/LogoCNRS.eps      plots/LogoLJLL.eps      plots/LogoUPMC.pdf  
 plots/LogoCNRS.pdf      plots/LogoUPMC.eps      plots/logo.eps          plots/logo.tiff \
 plots/fig-alh.eps       plots/fig-fh.eps        plots/fig-ko.eps        plots/fig-op.eps \
 plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg \
-plots/ffauteurs4.eps    plots/ffauteurs4.pdf 
-
+plots/ffauteurs4.eps    plots/ffauteurs4.pdf \
+ plots/titre-ff.pdf  plots/sanskrit.pdf \
+ plots/titre-ff.eps  plots/sanskrit.eps \
+ plots/BG-russe.pdf  plots/BG-russe.eps 
 
 
 EXTRA_DIST= addfe.tex docFFGUI.tex manual-full.tex freefem++doc.tex  manual.tex FF.sty FFF.sty dessin.sty pdfsync.sty styles.sty \
