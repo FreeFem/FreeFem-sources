@@ -206,6 +206,22 @@ else
 	fi
 fi
 
+#whether or not to add a suffix to the package name
+#--------------------------------------------------
+
+AC_ARG_WITH(suffix,[  --with-suffix=[G3/G4/G4,P4,..] or --without-suffix (default no suffix to package name)])
+
+AC_MSG_CHECKING(suffix to add to package name)	
+ff_suffix=
+if test "$with_suffix" = yes -o "$with_suffix" = no -o "$with_suffix" = ""
+then
+  AC_MSG_RESULT(none)
+else
+  ff_suffix="-$with_suffix"
+  AC_MSG_RESULT($ff_suffix)
+fi
+AC_SUBST(ADD_PACKAGE_NAME,$ff_suffix)
+
 # Checking wether we can produce a X11 version
 # --------------------------------------------
 
@@ -295,19 +311,6 @@ if test "$ff_glx_ok" = yes
 then
 	ff_glxprog=FreeFem++-glx${EXEEXT}
 fi
-AC_ARG_WITH(suffix,[  --with-suffix=[G3/G4/G4,P4,..] or --without-suffix (default no suffix package name)])
-if test "$with_suffix" = yes
-then
-  with_suffix=""
-elif test "$with_suffix" = no
-then
-  with_suffix=""
-else
-  with_suffix="-$with_suffix"
-fi
-  AC_MSG_CHECKING(add suffix $with_suffix )	
-  AC_SUBST(ADD_PACKAGE_NAME,$with_suffix)
-  AC_MSG_RESULT(yes)
 
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
