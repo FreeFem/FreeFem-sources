@@ -1,3 +1,39 @@
+2005-12-12 16:46  lehyaric
+
+	* Changed --with-suffix configuration in configure.ac to avoid
+	  adding a single dash when no suffix is needed.
+
+2005-12-09 15:09  hecht
+
+	*    do autoreconf
+
+2005-12-09 15:08  hecht
+
+	*  correct CCFLAGS in umfpack for test
+
+2005-12-09 11:34  hecht
+
+	*   add number of parameter in OneOperator class to 10
+	    for F. Dortu, and set version to 2-1-2
+
+2005-12-09 10:20  lehyaric
+
+	* <cr> symbols still showed in the Cygwin (not Mingw) version. This
+	  is now corrected.
+
+2005-12-09 09:36  hecht
+
+	*  add missing files in DOPC dist
+
+2005-12-08 16:56  lehyaric
+
+	* New Debian package version 2.1-1.
+
+2005-12-08 10:01  lehyaric
+
+	* Removed option --disable-tagging from configure.ac since
+	  @TAGGINGDEPEND@ is not used in src/fflib/Makefile.am any more.
+
 2005-12-08 07:59  hecht
 
 	*   correct LIBRARY problem for umfpack Demo
