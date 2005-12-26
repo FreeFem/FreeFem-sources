@@ -133,14 +133,14 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	j  =  (int) ((-2-st[i])%3);
 	Triangle & tt = * triangles[it].TriangleAdj(j);
 	//cout << it << " c="  << triangles[it].color <<  " " << Number(tt) << " c="  << tt.color << endl;
-	if (triangles[it].color != tt.color) // between 2 sub domai
+	if (triangles[it].color != tt.color|| i < nbeold) // Modif FH 06122055 // between 2 sub domai
 	  k++;
       }
     else if (st[i] >=0) // edge alone 
-      //      if (i >= nbeold) 
-	  kk++;
+       // if (i >= nbeold) 
+	     kk++;
   
-  if(verbosity>4)
+  if(verbosity>4 && (k+kk) )
     cout << "    Nb of  ref edge " << kk+k << " (internal " << k << ")"
 	 << " in file " << nbe  << endl;
   k += kk;
@@ -164,12 +164,13 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
       for (i=0;i<nbedges;i++)
 	{ 
 	  Int4  add= -1;
+	  
 	  if (st[i] <-1) // edge internal
 	    { 
 	      it =  (-2-st[i])/3;
 	      j  =  (int) ((-2-st[i])%3);
 	      Triangle & tt = * triangles[it].TriangleAdj(j);
-	      if (triangles[it].color !=  tt.color)
+	      if (triangles[it].color !=  tt.color || i < nbeold) // Modif FH 06122055
 		  add=k++;
 	    }
 	  else if (st[i] >=0) // edge alone 
@@ -184,8 +185,8 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	      
 		 edges[add].v[0] = &triangles[it][VerticesOfTriangularEdge[j][0]];
 		 edges[add].v[1] = &triangles[it][VerticesOfTriangularEdge[j][1]];
-		 if (add<nbeold) // in file edge
-		    edges[add].ref = edgessave[add].ref;
+		 if (i<nbeold) // in file edge // Modif FH 06122055 
+		    edges[add].ref = edgessave[i].ref; 
 		 else
 		   edges[add].ref = Min(edges[add].v[0]->ref(),edges[add].v[1]->ref()); // no a good choice
 	    }
