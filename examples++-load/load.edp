@@ -3,7 +3,8 @@
 // $Id$
 
  load "myfunction"
+// dumptable(cout);
  mesh Th=square(5,5);
  fespace Vh(Th,P1);
- Vh uh=myfunction(); // warning  do not forget () 
+ Vh uh= myfunction(); // warning  do not forget () 
  cout << uh[].min << " " << uh[].max << endl;

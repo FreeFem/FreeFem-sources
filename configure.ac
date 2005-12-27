@@ -66,7 +66,10 @@ curdir=`pwd`
 # -----------------
 
 echo $ac_configure_args > configure.param
-
+# by default the suffix of the  .so lib file is .so
+#      it is .dll   under windows
+#      it is .dylib under macos X
+ff_suffix_dylib=".so";	
 # Checking wether we can produce a MacIntosh-specific version
 # -----------------------------------------------------------
 
@@ -75,6 +78,7 @@ ff_mac=no
 ff_aglprog=
 if test `uname` = Darwin;
 then
+	ff_suffix_dylib=".dylib"
 	ff_mac=yes
 	ff_aglprog=FreeFem++-agl${EXEEXT}
 fi
@@ -106,6 +110,7 @@ ff_uname=`uname`
 ff_mingw=no
 case $ff_uname in
 CYGWIN*)
+	ff_suffix_dylib=".dll";
         ff_win32=yes;
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
@@ -823,10 +828,10 @@ fi
 if test "$ff_dynload" = yes
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
-
 	# Activate dynamic loading tests (see examples++-load/Makefile.am)
 	AC_SUBST(LOAD_TESTS,../regtests.sh)
-	AC_SUBST(LOAD_COMPILE,myfunction.so)
+	AC_SUBST(LOAD_COMPILE,load_compile)
+        AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
 
 	# gcc on MacOS does not produce an error with "-rdynamic" but
 	# still complains about it.
