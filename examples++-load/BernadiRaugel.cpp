@@ -1,3 +1,19 @@
+// The  P2BR finite element : the Bernadi Raugel Finite Element
+// F. Hecht, decembre 2005
+// -------------
+// See Bernardi, C., Raugel, G.: Analysis of some finite elements for the Stokes problem. Math. Comp. 44, 71-79 (1985).
+//  It is  a 2d coupled FE 
+// the Polynomial space is $ P1^2$ + 3 normals bubbles edges function $(P_2)$
+// the degre of freedom is 6 values at of the 2 componantes at the  3 vertices
+// and the 3 flux on the 3 edges  
+//   So 9 degrees of freedom and  N= 2. 
+
+// -----------------------  related files: 
+//  to check  and validate  :  testFE.edp 
+//  to get a real example   :  NSP2BRP0.edp
+// ------------------------------------------------------------
+
+// -----------------------
 #include "error.hpp"
 #include "AFunction.hpp"
 #include "rgraph.hpp"
@@ -5,10 +21,10 @@ using namespace std;
 #include "RNM.hpp"
 #include "fem.hpp"
 #include "FESpace.hpp"
-// #include "problem.hpp"
+#include "AddNewFE.h"
+
 namespace  Fem2D {
   
-  // ------ P2BR  Hierarchical (just remove P2 node of the P2 finite element)  --------
   class TypeOfFE_P2BRLagrange : public  TypeOfFE { public:  
     static int Data[];
     // double Pi_h_coef[];
@@ -252,33 +268,11 @@ void TypeOfFE_P2BRLagrange::Pi_h_alpha(const baseFElement & K,KN_<double> & v) c
   }
   
 }
-  
-  void init_FE_P2BR() { };
-  
-  extern  ListOfTFE typefem_P2BR;
-  
+//  ----   cooking to add the finite elemet to freefem table --------  
+// a static variable to def the finite element 
   static TypeOfFE_P2BRLagrange P2LagrangeP2BR;
-  //  add the FE in FreeFEm++   
-
-  // hack 
-  class EConstantTypeOfFE :public E_F0
-  { 
-    TypeOfFE * v;
-  public:
-    AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<TypeOfFE*>(v);}
-    EConstantTypeOfFE( TypeOfFE * o):v(o) { /*cout << "New constant " << o << endl;*/}
-    size_t nbitem() const { assert(v);return v->N ;} 
-    operator aType () const { return atype<TypeOfFE*>();} 
-  };
-
-  struct InitFE {  
-    InitFE(char * FEname,TypeOfFE* tfe) 
-    {
-      Global.New(FEname, Type_Expr(atype<TypeOfFE*>() ,new  EConstantTypeOfFE(tfe)));
-    }
-  };
-  
-  InitFE P2RT("P2BR",&P2LagrangeP2BR); 
-  // --- fin -- 
-} // FEM2d namespace 
+  //  now adding   FE in FreeFEm++  table
+  static AddNewFE P2BR("P2BR",&P2LagrangeP2BR); 
+// --- end cooking   
+} // end FEM2d namespace 
   

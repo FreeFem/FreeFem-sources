@@ -1,0 +1,28 @@
+load "Morley"
+
+int n=100,nn=n+10;
+real[int] xx(nn),yy(nn);
+
+mesh Th=square(40,40);  // mesh definition of $\Omega$
+fespace Vh(Th,P2Morley);      // finite element space
+macro bilaplacien(u,v) (dxx(u)*dxx(v)+dyy(u)*dyy(v)) // fin macro 
+real f=1;
+Vh [u,ux,uy],[v,vx,vy];
+
+solve bilap([u,ux,uy],[v,vx,vy]) =
+    int2d(Th)(  bilaplacien(u,v) )
+   - int2d(Th)(f*v)
+   + on(1,2,3,4,u=0,ux=0,uy=0) 
+; 
+   
+plot(u,cmm="u", wait=1,fill=1);
+plot(ux,wait=1,cmm="u_x");
+plot(uy,wait=1,cmm="u_y");
+
+
+for (int i=0;i<=n;i++)
+ {
+   xx[i]=real(i)/n;
+   yy[i]=u(0.5,real(i)/n); // value of uh at point (0.5, i/10.) 
+ }
+ plot([xx(0:n),yy(0:n)],wait=1);

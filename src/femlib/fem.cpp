@@ -599,7 +599,7 @@ void Mesh::ConsAdjacence()
  if (verbosity>1) 
   { 
   cout << "    Number of Edges                 = " << NbOfEdges << endl;
-  cout << "    Number of Boundary Edges        = " << NbOfBEdges << endl;
+  cout << "    Number of Boundary Edges        = " << NbOfBEdges << " neb = " << neb << endl;
   cout << "    Number of Mortars  Edges        = " << NbOfMEdges << endl;
   cout << "    Nb Of Mortars with Paper Def    = " <<  NbMortarsPaper << " Nb Of Mortars = " << NbMortars;             
   cout << "    Euler Number nt- NbOfEdges + nv = " 

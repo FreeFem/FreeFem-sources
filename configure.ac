@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.1-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.1-3,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -311,6 +311,21 @@ if test "$ff_glx_ok" = yes
 then
 	ff_glxprog=FreeFem++-glx${EXEEXT}
 fi
+
+AC_ARG_WITH(suffix,[  --with-suffix=[G3/G4/G4,P4,..] or --without-suffix (default no suffix package name)])
+if test "$with_suffix" = yes
+then
+  with_suffix=""
+elif test "$with_suffix" = no -o -z "$with_suffix" 
+then
+  with_suffix=""
+else
+  with_suffix="-$with_suffix"
+fi
+  AC_MSG_CHECKING(add suffix $with_suffix )	
+  AC_SUBST(ADD_PACKAGE_NAME,$with_suffix)
+  AC_MSG_RESULT(yes)
+
 
 # Checking wether we can produce a parallel version
 # -------------------------------------------------

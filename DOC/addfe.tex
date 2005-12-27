@@ -1,5 +1,5 @@
 \section{Add new finite element}
-
+\label{AddnewFE}
 \subsection{Some notation}
 \def\Fb#1{\boldsymbol{\omega}^{K}_{#1}}
 \def\fbi{\mathbf{\omega}^{K}_{ij}}
@@ -92,6 +92,7 @@ using namespace std;
 #include "RNM.hpp"
 #include "fem.hpp"
 #include "FESpace.hpp"
+#include "AddNewFE.h"
 
 namespace  Fem2D {
 \eFF
@@ -241,10 +242,33 @@ void TypeOfFE_RT::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
 }
 \eFF
 
-Now , we just need to add a new key work in \texttt{FreeFem++}, so
-at the end of the file, we add:
+
+
+
+Now , we just need to add a new key work in \texttt{FreeFem++},
+Two way, with static or dynamic link  so
+at the end of the file, we add :
+
+\medskip
+With dynamic link is very simple (see section \ref{Dynamical link} of appendix), just add
+before the end of \texttt{FEM2d namespace}
+add: 
+\bFF
+
+static TypeOfFE_RTortho The_TypeOfFE_RTortho; //
+static AddNewFE("RT0Ortho", The_TypeOfFE_RTortho); 
+} // FEM2d namespace
+
+\eFF
+Try with  "./load.link" command in \texttt{examples++-load/} and
+see \texttt{BernardiRaugel.cpp} or \texttt{Morley.cpp} new finite element examples.
+
+\medskip 
+
+{\bf Otherwise} with static link  (for expert only), add
 
 \bFF
+
 //  let the 2 globals variables
 static TypeOfFE_RTortho The_TypeOfFE_RTortho; //
 //                         -----  the name in freefem ----
@@ -274,7 +298,8 @@ void init_static_FE()
 \eFF
 
 
-\subsection{How to add}
+and now you have to change the makefile.
+
 
 First, create a file \texttt{FE\_ADD.cpp} contening all this code, like in  file \texttt{src/femlib/Element\_P2h.cpp},
 after modifier the \texttt{Makefile.am}  by  adding the name of your file
@@ -299,7 +324,13 @@ RNM_tpl.hpp   FE_ADD.cpp
 
 \end{verbatim}
 
-and recompile
+and do in the \texttt{freefem++} root directory
+\begin{verbatim}
+  autoreconf
+ ./reconfigure
+ make
+\end{verbatim}
+ 
 
 
 

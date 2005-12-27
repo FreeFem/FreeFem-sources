@@ -1,5 +1,5 @@
 load "BernadiRaugel"
-load "Morley"
+// a macro the compute numerical derivative
 macro DD(f,hx,hy) ( (f(x1+hx,y1+hy)-f(x1-hx,y1-hy))/(2*(hx+hy))) //
 mesh Th=square(1,1,[10*(x+y/3),10*(y-x/3)]);
 
@@ -19,17 +19,17 @@ for (int i=0;i<Vh.ndofK;++i)
   int j=Vh(it1,i);
   a1[][j]=1;
   plot([a1,a2], wait=1); 
-  [b1,b2]=[a1,a2];
+  [b1,b2]=[a1,a2];// do the interpolation
+
 
   c1[] = a1[] - b1[];
-  cout << " int_1 " <<  int1d(Th,1) (a2) << endl;
-  cout << " int_3 " <<  int1d(Th,3) (a2) << endl;
-  cout << " int_2 " <<  int1d(Th,2) (a1) << endl;
-  cout << " int_4 " <<  int1d(Th,4) (a1) << endl;
   cout << " ---------" << i << " " << c1[].max << " " << c1[].min << endl;	
   cout << " a = " << a1[] <<endl;
   cout << " b = " << b1[] <<endl;
-  assert(c1[].max < 1e-9 && c1[].min > -1e-9);
+  assert(c1[].max < 1e-9 && c1[].min > -1e-9); // check if the interpolation is correct
+
+ //  check the derivative and numerical derivative
+ 
 
   cout << " dx(a1)(x1,y1) = " << dx(a1)(x1,y1) << " == " << DD(a1,h,0) << endl; 
   assert( abs(dx(a1)(x1,y1)-DD(a1,h,0) ) < 1e-5);

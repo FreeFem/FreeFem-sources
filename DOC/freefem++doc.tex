@@ -3,7 +3,7 @@
 \documentclass[a4paper,twoside,12pt]{book}
 \usepackage{styles}
 \usepackage{times}
-\def\VERSION{2.0-4}
+\def\VERSION{2.2-0}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -10430,7 +10430,7 @@ primary:
 %%%\inputFF{../HISTORY}
 %%%}
 \section{Dynamical link}
-
+\label{Dynamical link}
 Now, it's possible to add built-in functionnalites in freefem++ under the three
 environnents Linux, Windows and MacOS X 10.3 or newer.
 It is agood idea to,
@@ -10888,6 +10888,178 @@ class Init { public:
      Global.Add("MatUpWind0","(", new OneOperatorCode<MatrixUpWind0 >( ));
    }
 \eFF
+\subsection{Add a new finite element}
+
+First read the section \ref{AddnewFE} of the appendix, we add two 
+news finites elements examples in the directory \texttt{examples++-load}.
+
+\paragraph{Bernardi Raugel}
+ The Bernardi-Raugel finite element is make to solve Navier Stokes equation in 
+ $ u,p$ formulation, and the velocity space $P^{br}_K$ is minimal to prove the inf-sup condition 
+ with piecewise contante pressure by triangle.
+ 
+ the finite element space $V_h$ is 
+ $$V_h= \{u\in H^1(\Omega)^2 ; \quad \forall K \in T_h,  u_{|K} \in P^{br}_K \} $$
+ where 
+ $$ P^{br}_K = span \{ \lambda^K_i e_k \}_{i=1,2,3, k= 1,2} \cup \{  \lambda^K_i\lambda^K_{i+1} n^K_{i+2}\}_{i=1,2,3} $$
+ with notation $4=1, 5=2$ and where 
+ $\lambda^K_i$ are the barycentric coordonnate of the triangle $K$, $(e_k)_{k=1,2}$ the canonical basis  of $\R^2$ 
+ and $n^K_k$ the outer  normal of triangle $K$ opposite to vertex $k$.  
+ 
+ \bFF
+// The  P2BR finite element : the Bernadi Raugel Finite Element\hfilll
+// F. Hecht, decembre 2005\hfilll
+// -------------\hfilll
+// See Bernardi, C., Raugel, G.: Analysis of some finite elements for the Stokes problem. Math. Comp. 44, 71-79 (1985).\hfilll
+//  It is  a 2d coupled FE \hfilll
+// the Polynomial space is $ P1^2$ + 3 normals bubbles edges function $(P_2)$\hfilll
+// the degre of freedom is 6 values at of the 2 componantes at the  3 vertices\hfilll
+// and the 3 flux on the 3 edges  \hfilll
+//   So 9 degrees of freedom and  N= 2. \hfilll
+
+// -----------------------  related files: \hfilll
+//  to check  and validate  :  testFE.edp \hfilll
+//  to get a real example   :  NSP2BRP0.edp\hfilll
+// ------------------------------------------------------------\hfilll
+
+// -----------------------
+#include "error.hpp"
+#include "AFunction.hpp"
+#include "rgraph.hpp"
+using namespace std;  
+#include "RNM.hpp"
+#include "fem.hpp"
+#include "FESpace.hpp"
+#include "AddNewFE.h"
+
+namespace  Fem2D {
+  
+  class TypeOfFE_P2BRLagrange : public  TypeOfFE { public:  
+    static int Data[];
+    
+    TypeOfFE_P2BRLagrange(): TypeOfFE(6+3+0,
+				      2,
+				      Data,
+				      4,
+				      1,
+				      6+3*(2+2), // nb coef to build interpolation
+				      9, // np point to build interpolation
+				      0)
+    {  
+ ....  //  to long see the source
+     }
+    void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+    void TypeOfFE_P2BRLagrange::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const;
+  } ;
+  //                     on what     nu df on node node of df    
+ int TypeOfFE_P2BRLagrange::Data[]={
+   0,0, 1,1, 2,2,  3,4,5,
+   0,1, 0,1, 0,1,  0,0,0,
+   0,0, 1,1, 2,2,  3,4,5,
+   0,0, 0,0, 0,0,  0,0,0,
+   0,1, 2,3, 4,5,  6,7,8, 
+   0,0 
+};
+
+void TypeOfFE_P2BRLagrange::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
+  {
+    const Triangle & T(K.T);
+    int k=0;
+    // coef pour les 3 sommets  fois le 2 composantes 
+    for (int i=0;i<6;i++)
+      v[k++]=1; 
+    //   integration sur les aretes 
+    for (int i=0;i<3;i++)
+      {
+	
+        R2 N(T.Edge(i).perp());
+	N  *= T.EdgeOrientation(i)*0.5 ;
+        v[k++]= N.x; 
+        v[k++]= N.y;
+        v[k++]= N.x;
+        v[k++]= N.y;
+      }
+  }
+  
+  void TypeOfFE_P2BRLagrange::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+  {
+ ....  //  to long see the source  
+  }
+//  ----   cooking to add the finite elemet to freefem table --------  
+// a static variable to def the finite element 
+  static TypeOfFE_P2BRLagrange P2LagrangeP2BR;
+  //  now adding   FE in FreeFEm++  table
+  static AddNewFE P2BR("P2BR",&P2LagrangeP2BR); 
+// --- end cooking   
+} // end FEM2d namespace 
+  
+
+ \eFF
+ 
+ A way to check the finite element
+ 
+ \bFF
+@load "BernadiRaugel"
+// a macro the compute numerical derivative
+macro DD(f,hx,hy) ( (f(x1+hx,y1+hy)-f(x1-hx,y1-hy))/(2*(hx+hy))) //
+@mesh Th=@square(1,1,[10*(x+y/3),10*(y-x/3)]);
+
+@real x1=0.7,y1=0.9, h=1e-7;
+@int it1=Th(x1,y1).nuTriangle; 
+
+@fespace Vh(Th,P2BR);
+
+Vh [a1,a2],[b1,b2],[c1,c2];
+
+
+@for (int i=0;i<Vh.ndofK;++i)
+	cout << i << " " << Vh(0,i) << endl;
+@for (int i=0;i<Vh.ndofK;++i)
+{
+  a1[]=0;	
+  int j=Vh(it1,i);
+  a1[][j]=1; // a bascis functions
+  plot([a1,a2], wait=1); 
+  
+  [b1,b2]=[a1,a2]; // do the interpolation
+
+  c1[] = a1[] - b1[];
+
+  cout << " ---------" << i << " " << c1[].max << " " << c1[].min << endl;	
+  cout << " a = " << a1[] <<endl;
+  cout << " b = " << b1[] <<endl;
+  assert(c1[].max < 1e-9 && c1[].min > -1e-9); // check if the interpolation is correct
+
+ //  check the derivative and numerical derivative
+ 
+  cout << " dx(a1)(x1,y1) = " << dx(a1)(x1,y1) << " == " << DD(a1,h,0) << endl; 
+  assert( abs(dx(a1)(x1,y1)-DD(a1,h,0) ) < 1e-5);
+  assert( abs(dx(a2)(x1,y1)-DD(a2,h,0) ) < 1e-5);
+  assert( abs(dy(a1)(x1,y1)-DD(a1,0,h) ) < 1e-5);
+  assert( abs(dy(a2)(x1,y1)-DD(a2,0,h) ) < 1e-5);
+
+} 
+ \eFF
+ 
+ A real example using this finite element, just a small modification
+ of the \texttt{NSP2P1.edp} examples, just the begenning is change to
+\bFF
+@load "BernadiRaugel"
+
+real s0=clock();
+mesh Th=square(10,10);
+fespace Vh2(Th,P2BR);
+fespace Vh(Th,P0);
+Vh2 [u1,u2],[up1,up2];
+Vh2 [v1,v2]; 
+\eFF
+
+And the plot instruction is also change  because the pressure is constant, and  we cannot  plot isovalues.
+
+\paragraph{Morley}
+See the example. 
+
+
 
 \section*{FreeFem++ LGPL License}
 This is The FreeFem++ software.
@@ -11448,10 +11620,17 @@ A priori error estimates for finite element
  for elliptic problems.
   SIAM J. Numer. Anal. 39 (2001), no. 3, 902--931 (electronic).
 
-\bibitem{GP79} {\sc R. GLOWINSKI and O.PIRONNEAU}, Numerical methods for the Stokes               problem, Chapter 13 of Energy Methods in Finite Element Analysis,                R.Glowinski, E.Y. Rodin, O.C. Zienkiewicz eds., J.Wiley \& Sons, Chichester,               UK, 1979, pp. 243-264.
+\bibitem{GP79} {\sc R. GLOWINSKI and O.PIRONNEAU}, Numerical methods for the Stokes  
+             problem, Chapter 13 of Energy Methods in Finite Element Analysis,   
+             R.Glowinski, E.Y. Rodin, O.C. Zienkiewicz eds., J.Wiley \& Sons, Chichester,  
+             UK, 1979, pp. 243-264.
 
-\bibitem{RG84}{\sc R. GLOWINSKI}, Numerical Methods for Nonlinear Variational Problems,              Springer-Verlag, New York, NY, 1984.
-\bibitem{RG03}{\sc R. GLOWINSKI}, Finite Element Methods for Incompressible Viscous Flow. In              Handbook of Numerical Analysis, Vol. IX, P.G. Ciarlet and J.L. Lions, eds.,              North-Holland, Amsterdam, 2003, pp.3-1176.
+\bibitem{RG84}{\sc R. GLOWINSKI}, Numerical Methods for Nonlinear Variational Problems, 
+             Springer-Verlag, New York, NY, 1984.
+\bibitem{RG03}{\sc R. GLOWINSKI}, Finite Element Methods for Incompressible Viscous Flow. In 
+             Handbook of Numerical Analysis, Vol. IX, P.G. Ciarlet and J.L. Lions, eds., 
+             North-Holland, Amsterdam, 2003, pp.3-1176.
+
 
 \bibitem{ItoKunisch}{\sc Kazufumi Ito,  and Karl Kunisch},
 Semi smooth newton methods for variational inequalities of the first kind ,

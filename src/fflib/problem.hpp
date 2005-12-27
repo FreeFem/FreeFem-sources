@@ -73,17 +73,6 @@ inline void Check(bool  v,const char * mess)
 }           
 
 
-class EConstantTypeOfFE :public E_F0
-{ 
-  TypeOfFE * v;
-public:
-  AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<TypeOfFE*>(v);}
-  EConstantTypeOfFE( TypeOfFE * o):v(o) { /*cout << "New constant " << o << endl;*/}
-  size_t nbitem() const { assert(v);return v->N ;} 
-   operator aType () const { return atype<TypeOfFE*>();} 
-};
-
-
 
 struct TypeSolveMat {
   enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, UMFpack=6 };
