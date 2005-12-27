@@ -31,6 +31,7 @@ while [ $# -ne 0 ]  ; do
 	-[h?]*) echo usage $0 "[-n] [-g] [-win32] [-l libfile] [-I includedir]  files"
 	    echo "    -n  :  do nothing just print"
 	    echo "    -g  :  compile with -g option"
+	    echo "    -O*  :  compile with -O* option"
 	    echo "    -cygwin: compile for cygwin/win32 OS (Window XP, ...)"
 	    echo "    -win32:  compile for win32 OS (Window XP, ...) default under cygwin"
 	    echo "    -l files  add files to the ld process (link)"
@@ -42,9 +43,10 @@ while [ $# -ne 0 ]  ; do
 	    exit 0;
 	    ;;
 	-n)  do="no";;
-	-g)  DEBUG="-g";;
-	-cygwin)   uu="cygwin-version";;
-	-win32)   uu="win32";;
+	-g)  DEBUG="$DEBUG $1";;
+	-O*) DEBUG="$DEBUG $1";;
+	-cygwin)   uu="cygwin-version";; 
+	-win32)   uu="win32";; 
 	-b)     bin=$2  ; shift;;
 	-I*)    INC="$INC $1";;
 	-dll)   DLL="$DLL $2";shift;;
