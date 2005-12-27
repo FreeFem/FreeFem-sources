@@ -189,6 +189,78 @@ public:
   
 };
 
+template<class RR,bool isinit>
+class  InitMatfromAArray : public OneOperator { 
+public:
+    typedef KNM<RR> * A;
+    typedef KNM<RR> * R;
+    typedef E_Array B;
+    
+    class CODE : public  E_F0 { public:
+       Expression a0;
+       int N;
+       int M;
+       Expression ** tab;
+       const  bool mi;
+
+    CODE(Expression a,const E_Array & tt)  
+      : a0(a),N(tt.size()),M(0),
+	mi(tt.MeshIndependent()),
+	tab(new Expression* [N])
+      {
+        assert(&tt);
+       int err=0;
+        for (int i=0;i<N;i++)
+         {
+          const E_Array  *li =  dynamic_cast<const E_Array *>(tt[i].LeftValue());
+          if (li)
+	  {
+	     const E_Array & lli = *li;
+	     // -- check ---
+	     if( i == 0) { 
+	         M = lli.size(); ffassert( M>0 );
+	        for (int i=0;i<N;i++) tab[i] = new Expression [M];
+	       }
+	     else {  
+	        if ( M != li->size() ) { 
+	        cout << " line " << i << " the size of the column change " << M << " to " << li->size() << endl;
+	        CompileError(" Is not a matrix,  M is not constant" ); } } 
+	        
+	    for (int j=0;j<M;j++)
+              tab[i][j]=atype<RR>()->CastTo(  lli[j]);
+	   }
+	 else  // li == 0 
+	  CompileError(" we are waiting for  vector of scalar [  , , ,  ] ");
+	 }
+	 
+    }
+    
+    AnyType operator()(Stack stack)  const 
+    {
+      A  a=GetAny<A>((*a0)(stack));
+      if (isinit) 
+        a->init(N,M);
+      else
+	a->resize(N,M);
+      
+       for (int i =0;i<N;++i)
+       for (int j =0;j<M;++j)
+          (*a)(i,j)=   GetAny< RR >( (*(tab[i][j]))(stack)) ; 
+      return SetAny<R>(a);
+    } 
+    bool MeshIndependent() const     {return  mi;} // 
+    ~CODE() { for (int i=0;i<N;i++) delete [] tab[i]; delete [] tab; }
+    operator aType () const { return atype<R>();}    
+  }; // end sub class CODE
+  
+  
+    public: 
+    E_F0 * code(const basicAC_F0 & args) const 
+     { return  new CODE(t[0]->CastTo(args[0]),*dynamic_cast<const E_Array*>( t[1]->CastTo(args[1]).LeftValue()));} 
+    InitMatfromAArray():   OneOperator(atype<R>(),atype<A>(),atype<B>())  {}
+  
+};
+
 template<typename RR>
 class  SetArrayofKNfromKN : public OneOperator { 
 public:
@@ -408,12 +480,14 @@ void ArrayOperator()
 		       new InitArrayfromArray<K,true>
        );
      TheOperators->Add("<-", 
-        new OneOperator3_<KNM<K> *,KNM<K> *,long,long>(&set_init2)
+        new OneOperator3_<KNM<K> *,KNM<K> *,long,long>(&set_init2),
+        new InitMatfromAArray<K,true>
        );
        
      Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,long>(&set_init));
      Add<KNM<K> *>("<-","(",new OneOperator3_<KNM<K> *,KNM<K> *,long,long>(&set_init2));
      Add<KN<K> *>("<-","(",new InitArrayfromArray<K,true>);
+     Add<KNM<K> *>("<-","(",new InitMatfromAArray<K,true>);
      Add<KN<K> *>("n",".",new OneOperator1<long,KN<K> *>(get_n));
      Add<KNM<K> *>("n",".",new OneOperator1<long,KNM<K> *>(get_n));
      Add<KNM<K> *>("m",".",new OneOperator1<long,KNM<K> *>(get_m));
@@ -421,6 +495,8 @@ void ArrayOperator()
 //     AddOpeqarray<set_eqarray,KN,K>("=");
 
      TheOperators->Add("=", new InitArrayfromArray<K,false>
+       );
+     TheOperators->Add("=", new InitMatfromAArray<K,false>
        );
      TheOperators->Add("=", new SetArrayofKNfromKN<K>
        );

@@ -96,6 +96,7 @@ case "$WIN32$uu" in
 	echo "sorry unknown achitecture "`uname`
 	exit 1;;
 esac
+FLAGS="$FLAGS $DEBUG"
 if [ -n "files" ] ; then
     if [ "$WIN32" = "yes" -a -f $bin/libff1.dll  ]; then
 	echo " Sorry, no freefem .dll file (libff1.dll)  in $bin dir "

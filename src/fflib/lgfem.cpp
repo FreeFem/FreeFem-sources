@@ -25,6 +25,8 @@ using namespace std;
 #include "lgsolver.hpp"
 #include "problem.hpp"
 #include "CGNL.hpp"
+#include "AddNewFE.h"
+
 namespace bamg { class Triangles; }
 namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso); }
 
@@ -3730,7 +3732,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
   for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
     {
      ffassert(i->tfe); // check 
-     Global.New(i->name, Type_Expr(atype<TypeOfFE*>(),new  EConstantTypeOfFE(i->tfe)));
+     AddNewFE(i->name,i->tfe);
+    // Global.New(i->name, Type_Expr(atype<TypeOfFE*>(),new  EConstantTypeOfFE(i->tfe)));
     }
    
 // Global.New("P1",CConstant<TypeOfFE*>(&P1Lagrange));
