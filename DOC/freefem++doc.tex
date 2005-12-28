@@ -34,9 +34,9 @@
 \date{}
 \makeindex
 \begin{document}
-\graphicspath{{./}{plots/}{figures/}}
+\graphicspath{{./}{plots/}{figures/}{cpfigs/}}
 \ifpdf
-\DeclareGraphicsExtensions{.pdf ,.jpg  ,.tif}
+\DeclareGraphicsExtensions{.pdf ,.jpg }
 \else
 \DeclareGraphicsExtensions{.eps }
 \fi
@@ -3252,7 +3252,7 @@ generate a $4\times 5$ grid in the unit squre $[0,1]^2$ whose labels
 are shown in Fig. \ref{fig:square}.
 \begin{figure}[htbp]
 \begin{center}
-  \includegraphics[height=5cm]{figures/square}
+  \includegraphics[height=5cm]{square}
 \end{center}
   \caption{Boundary labels of the mesh by \texttt{square(10,10)}}
   \label{fig:square} \index{label}
@@ -3292,7 +3292,7 @@ The boundaries $\Gamma_j$ can only intersect at their end points.
 
 \begin{figure}[htbp]
 \begin{center}
-  \includegraphics[height=4cm]{figures/border}
+  \includegraphics[height=4cm]{border}
 \end{center}
   \caption{Orientation of the boundary defined by $(\phi_x(t),\phi_y(t))$}
   \label{fig:border} \index{border}
@@ -3356,7 +3356,7 @@ $q^{i_1},\, q^{i_2}$.
 \begin{figure}[htbp]
 \begin{minipage}{\textwidth}
 \begin{minipage}{0.5\textwidth}
-\includegraphics[width=\textwidth]{figures/mesh_sample}%
+\includegraphics[width=\textwidth]{mesh_sample}%
 \caption{mesh by \texttt{buildmesh(C(10))}}
 \label{fig:meshSample}
 \end{minipage}

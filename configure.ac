@@ -847,7 +847,11 @@ fi
 AC_CHECK_PROG(ff_latex,latex,yes,no)
 AC_CHECK_PROG(ff_makeindex,makeindex,yes,no)
 AC_CHECK_PROG(ff_dvips,dvips,yes,no)
-if test "$ff_latex" = yes -a "$ff_makeindex" = yes -a "$ff_dvips" = yes;
+# to translate the figure 
+AC_CHECK_PROG(ff_pdf2ps,pdf2ps,yes,no)
+AC_CHECK_PROG(ff_epstopdf,epstopdf,yes,no)
+AC_CHECK_PROG(ff_convert,convert,yes,no)
+if test "$ff_latex" = yes -a "$ff_makeindex" = yes -a "$ff_dvips" = yes -a $ff_pdf2ps = yes -a $ff_convert = yes;
 then
 	AC_SUBST(DOCPS,"freefem++doc.ps")
 
@@ -862,10 +866,10 @@ fi
 # pdfsync.sty. So we need to be able to disable it.
 enable_pdf=yes
 AC_ARG_ENABLE(pdf,[  --disable-pdf	Disable PDF documentation building])
-if test "$enable_pdf" = yes
+if test "$enable_pdf" = yes 
 then
    AC_CHECK_PROG(ff_pdflatex,pdflatex,yes,no)
-   if test "$ff_pdflatex" = yes;
+   if test "$ff_pdflatex" = yes -a $ff_epstopdf = yes -a $ff_convert = yes;
    then
 	AC_SUBST(DOCPDF,"freefem++doc.pdf")
    fi
