@@ -1,6 +1,9 @@
-documentation:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 
-%.dvi:%.tex $(FIGS_EPS)
+documentation: $(DOCPDF) 
+docps:  $(DOCPS) $(DOCPSGZ) 
+docpdf: $(DOCPDF) 
+
+%.dvi:%.tex cpfigs $(CPFIGS_EPS) 
 	-rm $*.dvi $*.aux $*.log \
                 $*.toc $*.ind $*.glo $*.out $*.blg $*ilg $*.idx $*.bbl $*.tmp	
 	latex $*
@@ -9,22 +12,34 @@ documentation:$(DOCPS) $(DOCPSGZ) $(DOCPDF)
 	latex $*
 %.ps:%.dvi
 	dvips -u +psfonts.map -u +pdftex.map -u +Ttbbold.map -z -K $* -o $@
-pdffiles:$(patsubst %.eps,%.pdf,$(FIGS_EPS))
-	echo "done."
-%.pdf:%.tex $(patsubst %.eps,%.pdf,$(FIGS_EPS))
+
+%.pdf:%.tex  cpfigs $(CPFIGS_PDF) 
 	-rm $*.pdf $*.aux $*.log \
                 $*.toc $*.ind $*.glo $*.out $*.blg $*ilg $*.idx $*.bbl $*.tmp	
 	pdflatex $*
 	pdflatex $*
 	makeindex $*
 	pdflatex $*
+cpfigs: 
+	-mkdir cpfigs
+
 %.gz:%
 	gzip -c  -9 $*  >$*.gz
 clean:
 	-rm *.dvi *.pdf *~ *.aux *.log *.ps *.ps.gz \
 		*.toc *.ind *.glo *.out *.blg *ilg *.idx *.bbl *.tmp
-%.pdf:%.eps
-	epstopdf $*.eps --outfile=$*.pdf
+	-rm -r cpfigs
+
+cpfigs/%.pdf:plots/%.eps
+	epstopdf $^ --outfile=$@
+cpfigs/%.pdf:figures/%.eps
+	epstopdf $^ --outfile=$@
+cpfigs/%.eps:plots/%.jpg
+	convert $^  $@
+cpfigs/%.eps:plots/%.pdf
+	pdf2ps $^  $@
+
+ 
 ## ls */*.eps|column -c 80|sed 's/$/ \\/' 
 FIGS_EPS=  \
 figures/1stCOD.eps              figures/LastCOD.eps             figures/cfunc1.eps \
@@ -77,18 +92,24 @@ plots/eigen.eps                 plots/nosplitmesh.eps           plots/xyf.eps \
 plots/eigen11.eps               plots/onnewmesh.eps \
 plots/medit2.eps  		plots/threehsv.eps		plots/hsv.eps \
 plots/crimpson.eps              plots/J-bfgs.eps		plots/u-bfgs.eps \
-plots/csSnapOld.eps
-# files pour la page de garde FH
-OTHER_FIGS= plots/LogoCNRS.eps      plots/LogoLJLL.eps      plots/LogoUPMC.pdf      plots/logo.jpg \
-      plots/LogoLJLL.pdf      plots/logo-g.tiff       plots/logo.pdf \
-plots/LogoCNRS.pdf      plots/LogoUPMC.eps      plots/logo.eps          plots/logo.tiff \
-plots/fig-alh.eps       plots/fig-fh.eps        plots/fig-ko.eps        plots/fig-op.eps \
-plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg \
-plots/ffauteurs4.eps    plots/ffauteurs4.pdf \
- plots/titre-ff.pdf  plots/sanskrit.pdf \
- plots/titre-ff.eps  plots/sanskrit.eps \
- plots/BG-russe.pdf  plots/BG-russe.eps 
-
+plots/csSnapOld.eps \
+plots/logo.eps  
+#  Pour la page de garde FH
+FIGS_JPG=plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg
+FIGS_PDF= plots/LogoCNRS.pdf    plots/LogoLJLL.pdf    plots/LogoUPMC.pdf plots/ffauteurs4.pdf  \
+plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf
 
 EXTRA_DIST= addfe.tex docFFGUI.tex manual-full.tex freefem++doc.tex  manual.tex FF.sty FFF.sty dessin.sty pdfsync.sty styles.sty \
-$(FIGS_EPS) $(OTHER_FIGS)
+$(FIGS_EPS)    $(FIGS_JPG)    $(FIGS_PDF)  
+
+##  la liste des figures a cree pour la doc (eps on pdf)
+CPFIGS_PDF = $(addprefix cpfigs/,$(notdir $(patsubst %.eps,%.pdf,$(FIGS_EPS)) \
+))
+
+CPFIGS_EPS = $(addprefix cpfigs/,$(notdir $(patsubst %.pdf,%.eps,$(FIGS_PDF))) \
+                                 $(notdir $(patsubst %.jpg,%.eps,$(FIGS_JPG))) \
+)
+
+
+# do not delete the copy figure to long to created 
+.PRECIOUS: $(CPFIGS_PDF) $(CPFIGS_EPS)
