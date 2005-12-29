@@ -106,10 +106,15 @@ if [ -n "files" ] ; then
 	exit 1;
     fi
     echo $CXX -c $FLAGS $INC $PIC $files
-    test $do = yes &&$CXX -c $INC $FLAGS $PIC  $files
-    
+    if [  $do = yes ] ; then 
+	$CXX -c $INC $FLAGS $PIC  $files
+	ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
+	fi
     echo $CXX $SHARED $FLAGS $fileso -o $bin/$out.$SUF $LIBS $DLL $OTHER
-    test $do = yes && $CXX $SHARED $FLAGS $fileso -o $bin/$out.$SUF $LIBS $DLL $OTHER
+    if [  $do = yes ] ; then 
+	$CXX $SHARED $FLAGS $fileso -o $bin/$out.$SUF $LIBS $DLL $OTHER
+	ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
+	fi
     if [ -n "$DLL" ] ; then
 	echo cp $DLL $bin
 	test $do = yes &&  cp $DLL $bin
