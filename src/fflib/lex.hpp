@@ -3,6 +3,7 @@
 // with New version of macro expansion more simple and more stable 
 // FH jan 2005
 #include <stack> 
+#include "environment.hpp"
 extern bool lexdebug;
 extern long mpisize,mpirank;
 
@@ -20,7 +21,10 @@ class mylex : public CodeAlloc {
 
   public: 
   int linenumber,charnumber;
-  vector<string> ffincludedir;
+  list<string> ffincludedir;
+  typedef  list<string>::iterator Iffincludedir;
+  typedef  list<string>::const_iterator ICffincludedir;
+  
   private:
   bool firsttime;
   int level;
@@ -34,7 +38,7 @@ class mylex : public CodeAlloc {
    istream * nf;
    int l;
 
-   const char * filename; 
+   const string * filename; 
    xxxx() : l(0), f(0) , filename(0),nf(0)   {}   
    void  open(mylex *lexx,const char * ff) ;
    void  readin(mylex *lexx,const string & s);
@@ -60,9 +64,9 @@ class mylex : public CodeAlloc {
     level(-1),
     listMacroDef(new list<MapMacroDef>),
     listMacroParam(0),
-    ffincludedir(1)
+    ffincludedir(environment["include"])
  {
-    ffincludedir[0]="";
+   
     
     listMacroDef->push_front(MapMacroDef());
    };
@@ -91,7 +95,7 @@ class mylex : public CodeAlloc {
 
   const char * filename() const { 
     if ( level >=0 ) 
-      return  pilesource[level].filename ? pilesource[level].filename : " -- in macro -- ";
+      return  pilesource[level].filename ? pilesource[level].filename->c_str() : " -- in macro -- ";
     return "-- unkown --";}
     
   void input(const char *  filename) ;

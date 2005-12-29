@@ -1,0 +1,126 @@
+#include "environment.hpp"
+#include "iostream"
+#ifdef HAVE_GETENV
+#include <stdlib.h>
+#endif
+using namespace std;
+
+const char SLACH='/';
+const char BACKSLACH='\\';
+
+string TransDir(string dir)
+{
+#ifdef PURE_WIN32
+  char sep=BACKSLACH, nsep=SLACH;
+#else
+  char nsep=BACKSLACH, sep=SLACH;
+#endif
+  for (int i=0; i<dir.size(); ++i)
+    if(dir[i]==nsep) dir[i]=sep;
+  if(dir.size()>1 && dir[dir.size()-1] != sep) 
+    dir += sep;
+  return  dir;    
+}
+
+
+
+template<typename T> 
+void  show(char * s,const T & l,const char * separateur="\n")
+{
+  cout << s << * separateur;
+  for (typename T::const_iterator i=l.begin(); i != l.end(); i++)
+    cout  << * i << * separateur;
+  //cout << endl; 
+}
+
+
+ EnvironmentData  environment;
+bool  EnvironmentFind(string key,string item)
+ {
+   EnvironmentData::iterator ekey=environment.find(key);
+   if( ekey != environment.end()) 
+    {
+     OneEnvironmentData * pl= &ekey->second;
+     OneEnvironmentData::iterator i=find(pl->begin(),pl->end(),item);
+       return i != pl->end();
+     }
+    
+   return false;
+ }
+ 
+bool EnvironmentInsert(string key,string item,string before)
+{
+   bool ret=true;
+   OneEnvironmentData  & l = environment[key];
+   
+   OneEnvironmentData::iterator i=find(l.begin(),l.end(),item);
+   
+   if(i!=l.end()) {ret=false; l.erase(i);} // if existe remove
+   i=find(l.begin(),l.end(),before);
+   if(verbosity>=100) cout << " insert " << key << " " << item << " " << before << endl;
+   if(i == l.end() && before!="$")
+       l.insert(l.begin(),item); // insert in front 
+   else
+       l.insert(i,item); // insert before i
+    
+  return ret;  
+}
+
+int GetEnvironment(const char * key,string items)
+{
+  if(verbosity>=100)  cout << key << " -> " << items << endl;
+  int d=0;
+  int k=0;
+  for (int i=0;i<items.size();i++)
+   if(  items[i]==';')
+    { 
+      string item=TransDir(items.substr(d,i-d));
+      if(verbosity>=100) cout << " + " << item << endl;
+      if(!EnvironmentFind(key,item)) 
+	{
+	  EnvironmentInsert(key,item,"$");
+	  k++; 
+	}
+      d=i+1;          
+    }
+ return k;   
+}
+
+void GetEnvironment()
+ {
+#ifdef HAVE_GETENV
+ char * ff_verbosity = getenv("FF_VERBOSITY");
+ char * ff_loadpath = getenv("FF_LOADPATH");
+ char * ff_incpath = getenv("FF_INCLUDEPATH");
+ if ( ff_verbosity ) { 
+        verbosity = atoi(ff_verbosity);
+        if(verbosity>2) cout << " --  verbosity is set to " << verbosity << endl;
+  }
+ if(ff_loadpath)
+    GetEnvironment("load",ff_loadpath);
+ if(ff_incpath)
+    GetEnvironment("include",ff_incpath);
+ if( verbosity >2) 
+   {
+    EnvironmentData::iterator load=environment.find("load");
+    EnvironmentData::iterator inc=environment.find("include");    
+    if(  load != environment.end()) {
+      show("\nload path : ",load->second, "\n \t ");
+      cout <<"(.)"<<endl;
+    }
+    if(  inc != environment.end()) {
+      show("\include path : ",inc->second, "\n \t ");
+      cout <<"(.)"<<endl;}
+   }
+#endif
+ }
+ 
+#ifdef TESTMAIN
+long verbosity=50;
+int main()
+{
+  GetEnvironment();
+  return 0; 
+}
+
+#endif

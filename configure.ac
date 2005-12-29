@@ -124,6 +124,7 @@ CYGWIN*)
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(WINDRESOBJ,windres.o)
                 AC_SUBST(WIN32DLLTARGET,win32-dll-target)
+                AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
 	fi
 
 
@@ -756,7 +757,7 @@ AC_SUBST(UMFPACKLIB,$ff_umfpack_lib)
 # ----------------------------------------------------------
 
 # asinh acosh atanh are not in Mingw yet
-AC_CHECK_FUNCS(asinh acosh atanh)
+AC_CHECK_FUNCS(asinh acosh atanh getenv)
 
 # If times() and sysconf() are not here, UMFPACK should know
 if test "$ff_umfpack_ok" = yes

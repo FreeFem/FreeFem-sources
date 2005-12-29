@@ -24,7 +24,8 @@ error.hpp gmres.hpp InitFunct.hpp lex.hpp lgfem.hpp lgsolver.hpp	\
 Operator.hpp problem.hpp Serialize.hpp showverb.hpp String.hpp		\
 throwassert.hpp versionnumber.hpp  CodeAlloc.hpp \
 array_init.hpp  array_tlp.hpp \
-strversionnumber.hpp ffstack.hpp AddNewFE.h 
+strversionnumber.hpp ffstack.hpp AddNewFE.h \
+environment.cpp environment.hpp
 
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp 
 

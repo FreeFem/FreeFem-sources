@@ -4555,6 +4555,11 @@ CYGWIN*)
 
                 WIN32DLLTARGET=win32-dll-target
 
+
+cat >>confdefs.h <<\_ACEOF
+#define PURE_WIN32 1
+_ACEOF
+
 	fi
 
 
@@ -10267,7 +10272,8 @@ UMFPACKLIB=$ff_umfpack_lib
 
 
 
-for ac_func in asinh acosh atanh
+
+for ac_func in asinh acosh atanh getenv
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5
