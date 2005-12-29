@@ -68,7 +68,7 @@ am__objects_1 = AFunction.$(OBJEXT) AFunction2.$(OBJEXT) \
 	SetOfE4.$(OBJEXT) MeshRead.$(OBJEXT) MeshWrite.$(OBJEXT) \
 	problem.$(OBJEXT) mt19937ar.$(OBJEXT) DefColor.$(OBJEXT) \
 	InitFunct.$(OBJEXT) lgalgo.$(OBJEXT) Element_P2h.$(OBJEXT) \
-	load.$(OBJEXT) lgfem.$(OBJEXT)
+	load.$(OBJEXT) lgfem.$(OBJEXT) environment.$(OBJEXT)
 am_libff_a_OBJECTS = $(am__objects_1) strversionnumber.$(OBJEXT)
 libff_a_OBJECTS = $(am_libff_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -256,7 +256,8 @@ error.hpp gmres.hpp InitFunct.hpp lex.hpp lgfem.hpp lgsolver.hpp	\
 Operator.hpp problem.hpp Serialize.hpp showverb.hpp String.hpp		\
 throwassert.hpp versionnumber.hpp  CodeAlloc.hpp \
 array_init.hpp  array_tlp.hpp \
-strversionnumber.hpp ffstack.hpp AddNewFE.h 
+strversionnumber.hpp ffstack.hpp AddNewFE.h \
+environment.cpp environment.hpp
 
 libff_a_SOURCES = $(libff_a_SOURCES2)  strversionnumber.cpp 
 
@@ -347,6 +348,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array_long.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array_real.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eigenvalue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/environment.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gibbs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/global.Po@am__quote@

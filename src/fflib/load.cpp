@@ -3,6 +3,7 @@
 #include  <iostream>
 #include  <map>
 #include "AFunction.hpp"
+#include "environment.hpp"
 using namespace std;
 #include "lex.hpp"
 #define LOAD 1
@@ -20,11 +21,14 @@ bool load(string ss)
   bool ret=false;
   void * handle = 0;
   const int nbprefix=2,nbsuffix=2;
-  string  prefix[nbprefix];
+  list<string> prefix(environment["load"]);
+  if(prefix.empty())
+    {
+      prefix.push_back("");
+      prefix.push_back("./");
+    }
+
   string suffix[nbsuffix] ;
-  
-  prefix[0]="";
-  prefix[1]="./";
   
   suffix[0]="";
   suffix[1]=".so";
@@ -34,42 +38,55 @@ bool load(string ss)
 #ifdef WIN32  
   suffix[1]=".dll";
 #endif 
- int i,j; 
- for ( i= 0;i< nbprefix;i++)
- for ( j= 0;j< nbsuffix;j++)
-  {
-    string s= prefix[i]+ss+suffix[j];
+  int j; 
+  for (list<string>::const_iterator i= prefix.begin();i !=prefix.end();++i)
+    for ( j= 0;j< nbsuffix;++j)
+      {
+	string s= *i+ss+suffix[j];
+	
 #ifdef LOAD  
-  handle = dlopen (s.c_str(), RTLD_LAZY ); 
-  ret= handle !=0;
-  if (  ret ) 
-   {
-    cout << "\nload: dlopen(" << s << ") = " << handle << endl;
-    return handle;
-   }
-
+	handle = dlopen (s.c_str(), RTLD_LAZY ); 
+	if (verbosity>9) cout << " test dlopen(" << s << ")= " << handle <<  endl;
+	ret= handle !=0;
+	if (  ret ) 
+	  {
+	    if(verbosity)
+	      cout << "\nload: dlopen(" << s << ") = " << handle << endl;
+	    return handle;
+	  }
+	
 #elif WIN32
-  {
-   HINSTANCE mod=  LoadLibrary(s.c_str());
-   if(mod==0) 
-     {
-       DWORD merr = GetLastError();
-       cerr  <<   "\n try loadLibary : " <<s << "\n \t fail : " << merr << endl;
-     }
-  else 
-    {
-    cout << "\nload: loadLibary(" <<prefix[i] << ss << suffix[j] << ") = " << handle << endl;
-    return mod;
-    }
-  }
+	{
+	  HINSTANCE mod=  LoadLibrary(s.c_str());
+	  if (verbosity>9) cout << " test LoadLibrary(" << s << ")= " << mod <<  endl;
+	  if(mod==0) 
+	    {
+	      DWORD merr = GetLastError();
+	      if(verbosity>19)
+		cerr  <<   "\n try loadLibary : " <<s << "\n \t fail : " << merr << endl;
+	    }
+	  else 
+	    {
+	      if(verbosity)
+		cout << "\nload: loadLibary(" <<prefix[i] << ss << suffix[j] << ") = " << handle << endl;
+	      return mod;
+	    }
+	}
 #else
-  cout << "------------------------------------   \n" ;
-  cout << "  load: sorry no dlopen on this system " << s << " \n" ;
-  cout << "------------------------------------   \n" ;
-  return 0;
+	cout << "------------------------------------   \n" ;
+	cout << "  load: sorry no dlopen on this system " << s << " \n" ;
+	cout << "------------------------------------   \n" ;
+	CompileError("Error load");
+	return 0;
 #endif  
- }
-  cerr  <<   "\nload error : [" << prefix[1]<<"]" <<ss <<"[" << suffix[1]<<"]"<< "\n \t fail : "  << endl;
+      }
+  cerr  <<   "\nload error : " << ss << "\n \t fail : "  << endl;
+  cerr << "list  prefix: " ;
+  for (list<string>::const_iterator i= prefix.begin();i !=prefix.end();++i)
+    cerr <<"'"<<*i<<"' ";
+  cerr << "list  suffix : '"<< suffix[0] << "' , '"  << suffix[1] << "' "; 
+
+  cerr << endl;
   CompileError("Error load");
   
   return 0 ;

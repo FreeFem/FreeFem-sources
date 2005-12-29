@@ -24,6 +24,7 @@ class Iden;
 #include "FESpace.hpp" 
 #include "lgfem.hpp" 
 #include "lex.hpp"
+#include "environment.hpp"
 
 class Routine;
 bool load(string s);
@@ -439,7 +440,7 @@ no_comma_expr:
 no_set_expr:
 	no_ternary_expr
 	| no_ternary_expr '?' no_set_expr ':' no_set_expr {$$=C_F0(TheOperators,"?:",$1,$3,$5)}
-
+;
 no_ternary_expr:
 	  unary_expr 
 	| no_ternary_expr '*' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
@@ -593,6 +594,7 @@ int Compile()
 
 int mymain (int  argc, char **argv)
 {
+  GetEnvironment();  
   size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;

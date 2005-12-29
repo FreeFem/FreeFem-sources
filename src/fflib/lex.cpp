@@ -11,6 +11,7 @@
 #include "lg.tab.hpp"
 #include "lex.hpp"
 
+
 extern YYSTYPE *plglval;
 
 //  New version of macro expantion more classical
@@ -560,23 +561,31 @@ bool mylex::CallMacro(int &ret)
 
 void  mylex::xxxx::open(mylex *lex,const char * ff) 
 {
-  filename=ff;
+  //filename=ff;
   l=0;
-  f=0;
-  //  mettre une boucle
-  nf=f= new ifstream(ff); 
+  nf=f=0;
+  if(lex->ffincludedir.empty()) // if no liste 
+    nf=f= new ifstream(ff); 
   if (!f || !*f)
    {
    if ( f)  delete f; 
-   for (int k=0;k<lex->ffincludedir.size();k++)
+   for (ICffincludedir k=lex->ffincludedir.begin();
+        k!=lex->ffincludedir.end();
+        ++k)
    {
-    nf=f= new ifstream((lex->ffincludedir[k]+ff).c_str()); 
+    string dif_ff(*k+ff);
+    nf=f= new ifstream(dif_ff.c_str()); 
     if ( f)  {
-      if ( f->good()) break;
+      if ( f->good()) {  
+        filename = new string(dif_ff);
+        break;
+      }
       delete f;
      }     
    } 
-   }   
+   } 
+   else
+      filename=new  string(ff);
   if (!f || !*f) {
     lex->cout << " Error openning file " <<ff<< endl;
     lgerror("lex: Error input openning file ");};
@@ -595,7 +604,7 @@ void  mylex::xxxx::readin(mylex *lex,const string & s)//,int nbparam,int bstackp
 void mylex::xxxx::close() 
 { 
   if( nf)  delete nf;
-  if (filename) delete [] filename;
+  if (filename) delete filename;
   
 }
 void mylex::input(const char *  filename) 
