@@ -34,7 +34,7 @@ void  show(char * s,const T & l,const char * separateur="\n")
 }
 
 
- EnvironmentData  environment;
+
 bool  EnvironmentFind(string key,string item)
  {
    EnvironmentData::iterator ekey=environment.find(key);
@@ -139,6 +139,7 @@ void GetEnvironment()
  
 #ifdef TESTMAIN
 long verbosity=50;
+ EnvironmentData  environment;
 int main()
 {
   GetEnvironment();
