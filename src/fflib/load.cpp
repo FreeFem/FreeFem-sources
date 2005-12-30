@@ -68,7 +68,7 @@ bool load(string ss)
 	  else 
 	    {
 	      if(verbosity)
-		cout << "\nload: loadLibary(" <<prefix[i] << ss << suffix[j] << ") = " << handle << endl;
+		cout << "\nload: loadLibary(" <<  s <<  ") = " << handle << endl;
 	      return mod;
 	    }
 	}
