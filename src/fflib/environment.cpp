@@ -37,8 +37,8 @@ void  show(char * s,const T & l,const char * separateur="\n")
 
 bool  EnvironmentFind(string key,string item)
  {
-   EnvironmentData::iterator ekey=environment.find(key);
-   if( ekey != environment.end()) 
+   EnvironmentData::iterator ekey=ffenvironment.find(key);
+   if( ekey != ffenvironment.end()) 
     {
      OneEnvironmentData * pl= &ekey->second;
      OneEnvironmentData::iterator i=find(pl->begin(),pl->end(),item);
@@ -51,7 +51,7 @@ bool  EnvironmentFind(string key,string item)
 bool EnvironmentInsert(string key,string item,string before)
 {
    bool ret=true;
-   OneEnvironmentData  & l = environment[key];
+   OneEnvironmentData  & l = ffenvironment[key];
    
    OneEnvironmentData::iterator i=find(l.begin(),l.end(),item);
    
@@ -124,13 +124,13 @@ void GetEnvironment()
     GetEnvironment("include",ff_incpath);
  if( verbosity >2) 
    {
-    EnvironmentData::iterator load=environment.find("load");
-    EnvironmentData::iterator inc=environment.find("include");    
-    if(  load != environment.end()) {
+    EnvironmentData::iterator load=ffenvironment.find("load");
+    EnvironmentData::iterator inc=ffenvironment.find("include");    
+    if(  load != ffenvironment.end()) {
       show("\nload path : ",load->second, "\n \t ");
       cout <<"(.)"<<endl;
     }
-    if(  inc != environment.end()) {
+    if(  inc != ffenvironment.end()) {
       show("\ninclude path : ",inc->second, "\n \t ");
       cout <<"(.)"<<endl;}
    }

@@ -21,7 +21,7 @@ bool load(string ss)
   bool ret=false;
   void * handle = 0;
   const int nbprefix=2,nbsuffix=2;
-  list<string> prefix(environment["load"]);
+  list<string> prefix(ffenvironment["load"]);
   if(prefix.empty())
     {
       prefix.push_back("");
