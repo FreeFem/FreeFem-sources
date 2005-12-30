@@ -88,10 +88,31 @@ int GetEnvironment(const char * key,string items)
 
 void GetEnvironment()
  {
+ char  * ff_verbosity=0,* ff_loadpath=0,* ff_incpath=0;
 #ifdef HAVE_GETENV
- char * ff_verbosity = getenv("FF_VERBOSITY");
- char * ff_loadpath = getenv("FF_LOADPATH");
- char * ff_incpath = getenv("FF_INCLUDEPATH");
+  ff_verbosity = getenv("FF_VERBOSITY");
+  ff_loadpath = getenv("FF_LOADPATH");
+  ff_incpath = getenv("FF_INCLUDEPATH");
+#endif
+
+#ifdef PURE_WIN32 
+ 
+  const int LEN = 4096;
+  char envv[LEN];
+  char envl[LEN];
+  char envi[LEN];
+
+  if (GetEnvironmentVariable("FF_VERBOSITY", envv, LEN) > 0) 
+   ff_verbosity=envv;
+   
+  if (GetEnvironmentVariable("FF_LOADPATH", envl, LEN) > 0) 
+   ff_verbosity=envl;
+   
+  if (GetEnvironmentVariable("FF_INCLUDEPATH", envi, LEN) > 0) 
+   ff_verbosity=envi;
+
+#endif 
+
  if ( ff_verbosity ) { 
         verbosity = atoi(ff_verbosity);
         if(verbosity>2) cout << " --  verbosity is set to " << verbosity << endl;
@@ -109,10 +130,10 @@ void GetEnvironment()
       cout <<"(.)"<<endl;
     }
     if(  inc != environment.end()) {
-      show("\include path : ",inc->second, "\n \t ");
+      show("\ninclude path : ",inc->second, "\n \t ");
       cout <<"(.)"<<endl;}
    }
-#endif
+
  }
  
 #ifdef TESTMAIN
