@@ -64,7 +64,7 @@ class mylex : public CodeAlloc {
     level(-1),
     listMacroDef(new list<MapMacroDef>),
     listMacroParam(0),
-    ffincludedir(environment["include"])
+    ffincludedir(ffenvironment["include"])
  {
    
     

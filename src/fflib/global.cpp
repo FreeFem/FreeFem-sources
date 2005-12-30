@@ -59,4 +59,6 @@ bool CodeAlloc::sort=true;
 bool  CodeAlloc::cleanning=false;
 
 //  add F. Hecht 
- EnvironmentData  environment;
+EnvironmentData  ffenvironment;
+
+
