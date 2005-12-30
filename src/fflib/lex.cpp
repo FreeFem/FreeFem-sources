@@ -568,19 +568,20 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
     nf=f= new ifstream(ff); 
   if (!f || !*f)
    {
-   if ( f)  delete f; 
+   if ( f)  { delete f; f=0; }
    for (ICffincludedir k=lex->ffincludedir.begin();
         k!=lex->ffincludedir.end();
         ++k)
    {
     string dif_ff(*k+ff);
+    if (verbosity>=50) lex->cout  << "  --lex open :" << dif_ff << endl;
     nf=f= new ifstream(dif_ff.c_str()); 
     if ( f)  {
       if ( f->good()) {  
         filename = new string(dif_ff);
         break;
       }
-      delete f;
+      delete f; f=0;
      }     
    } 
    } 

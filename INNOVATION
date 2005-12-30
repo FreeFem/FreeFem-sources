@@ -1,3 +1,11 @@
+V2.2-0
+  Add search directory for include, and load  under Unix and Windows
+  Just on the shell sh  set environment variable
+    export FF_VERBOSITY=50 
+    export FF_INCLUDEPATH="dir;;dir2"
+    export FF_LOADPATH="dir;;dir3""
+  remark the separtor of directory  is ";" and not ":" because ":" is use under Windows.
+   
 V2.1-2
  * add more example of dynamic load example (thank to F. Dortu)
  * correct mistake in simple integral computation (not in variationnal 
