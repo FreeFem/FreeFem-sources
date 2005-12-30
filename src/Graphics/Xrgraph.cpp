@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <cassert>
+#include "strversionnumber.hpp"
 using namespace std;
 
 #define MAXSHORT 0xFFFF
@@ -473,7 +474,8 @@ void initgraphique()
 		      CopyFromParent, InputOutput, visual,
 		      CWBackPixel | CWBorderPixel | CWBackingStore | CWColormap,
 		      &attributes);
-  const char * title("FreeFem 1.0");
+   char   title[256];
+  sprintf(title,"%s%s","FreeFrem++ ",StrVersionNumber().c_str());
   XChangeProperty(display, win, XA_WM_NAME, XA_STRING, 8
                   , PropModeReplace,(const unsigned char *)  title , strlen(title)); 
 

@@ -69,9 +69,9 @@ bool EnvironmentInsert(string key,string item,string before)
 int GetEnvironment(const char * key,string items)
 {
   if(verbosity>=100)  cout << key << " -> " << items << endl;
-  int d=0;
-  int k=0;
-  for (int i=0;i<items.size();i++)
+  int d=0, k=0,i;
+  items+=";;";
+  for ( i=0;i<items.size();i++)
    if(  items[i]==';')
     { 
       string item=TransDir(items.substr(d,i-d));
@@ -83,6 +83,7 @@ int GetEnvironment(const char * key,string items)
 	}
       d=i+1;          
     }
+    
  return k;   
 }
 
