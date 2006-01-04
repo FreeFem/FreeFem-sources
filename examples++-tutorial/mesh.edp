@@ -1,3 +1,30 @@
+{
+ // build from bamg geometrie
+
+  { // byild the geom file
+    ofstream ff("g.mesh");
+    int n = 8;
+    real h = 0.1;
+    ff <<"MeshVersionFormatted 0\n";
+    ff <<"AngleOfCornerBound 46\n";
+    ff <<"Dimension 2 \n";
+    ff << "Vertices "<< n <<  endl;
+    for (int i=0;i<n;i++)
+      ff << cos(i*pi*2./n) << " " << sin(i*pi*2./n) << " 1\n"; 
+    
+    ff << "Edges "<< n<< endl;
+    for (int i=0;i<n;i++)
+      ff << i+1 << " " << (i+1)%n +1 << " 1\n";
+    
+    ff << "hVertices"<< endl;
+    for (int i=0;i<n;i++)
+      ff << h << endl;
+  }
+  
+  mesh Th=buildmesh("g.mesh");
+  plot(Th,wait=1);
+}
+
 //    example for mesh work 
 // --------------------------
 { // square 
@@ -199,5 +226,3 @@ plot(rh,ps="lshape.eps");
        << ", region = " << nr0 << " == " << nr00 << endl;
 
 }
-
- 
