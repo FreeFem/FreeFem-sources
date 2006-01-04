@@ -864,7 +864,7 @@ Triangles::Triangles(const char * filename,Real8 cutoffradian)
    
 }
 
-void Geometry::ReadGeometry(char * filename)
+void Geometry::ReadGeometry(const char * filename)
 {
   OnDisk = 1;
   if(verbosity>1)
@@ -875,7 +875,7 @@ void Geometry::ReadGeometry(char * filename)
 
 
 
-void Geometry::ReadGeometry(MeshIstream & f_in,char * filename)  
+void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)  
 {
   if(verbosity>1)
     cout << " -- ReadGeometry " << filename << endl;

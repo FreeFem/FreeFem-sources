@@ -1060,6 +1060,9 @@ class MeshCarre2 :   public E_F0mps { public:
 };
 
 
+
+
+
 class MeshCarre2f :   public E_F0mps { public:
     typedef pmesh  Result;
      Expression nx,ny;
@@ -1418,6 +1421,7 @@ void init_lgmesh() {
    Global.Add("savemesh","(",new OneOperatorCode<SaveMesh>);
    Global.Add("trunc","(", new Op_trunc_mesh);
    Global.Add("readmesh","(",new OneOperator1_<pmesh,string*>(ReadMeshbamg));
+   Global.Add("buildmesh","(",new OneOperator1_<pmesh,string*>(buildmeshbamg));
    Global.Add("emptymesh","(",new OneOperator1_<pmesh,pmesh>(EmptyTheMesh));
    Global.Add("emptymesh","(",new OneOperator2_<pmesh,pmesh,KN<long> *>(EmptyTheMesh));
    Global.Add("triangulate","(",new OneOperator1_<pmesh,string*>(ReadTriangulate));

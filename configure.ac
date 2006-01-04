@@ -69,7 +69,7 @@ echo $ac_configure_args > configure.param
 # by default the suffix of the  .so lib file is .so
 #      it is .dll   under windows
 #      it is .dylib under macos X
-ff_suffix_dylib=".so";	
+ff_suffix_dylib="so";	
 # Checking wether we can produce a MacIntosh-specific version
 # -----------------------------------------------------------
 
@@ -78,7 +78,7 @@ ff_mac=no
 ff_aglprog=
 if test `uname` = Darwin;
 then
-	ff_suffix_dylib=".dylib"
+	ff_suffix_dylib="dylib"
 	ff_mac=yes
 	ff_aglprog=FreeFem++-agl${EXEEXT}
 fi
@@ -110,7 +110,7 @@ ff_uname=`uname`
 ff_mingw=no
 case $ff_uname in
 CYGWIN*)
-	ff_suffix_dylib=".dll";
+	ff_suffix_dylib="dll";
         ff_win32=yes;
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes

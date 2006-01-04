@@ -940,13 +940,13 @@ public:
   
   Real8 MinimalHmin() {return 2.0/coefIcoor;}
   Real8 MaximalHmax() {return Max(pmax.x-pmin.x,pmax.y-pmin.y);}
-  void ReadGeometry(char * ) ;
-  void ReadGeometry(MeshIstream & ,char *)  ;
+  void ReadGeometry(const char * ) ;
+  void ReadGeometry(MeshIstream & ,const char *)  ;
 
   void EmptyGeometry();
   Geometry() {EmptyGeometry();}// empty Geometry
   void AfterRead();
-  Geometry(char * filename) {EmptyGeometry();OnDisk=1;ReadGeometry(filename);AfterRead();}
+  Geometry(const char * filename) {EmptyGeometry();OnDisk=1;ReadGeometry(filename);AfterRead();}
 
   void ReadMetric(const char *,Real8 hmin,Real8 hmax,Real8 coef);
   const GeometricalVertex & operator[]  (Int4 i) const { return vertices[i];};
