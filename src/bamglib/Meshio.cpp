@@ -13,6 +13,7 @@
 //
 // ORIG-DATE:     Dec 97
 
+#include "meshtype.h"
 #include "Meshio.h"
 namespace bamg {
 
@@ -328,8 +329,8 @@ void OFortranUnFormattedFile::Error(int err)
   cerr << " position in the record = " << where() 
        << " length of record = " << l <<endl;
   cerr 	<< " file = " << file_name<< endl ;
-  
-  throw(ErrorMesh("exit",1));
+  MeshError(900);
+  //  throw(ErrorMesh("exit",1));
 }
 void IFortranUnFormattedFile::Error(int err)
 {
@@ -351,8 +352,8 @@ void IFortranUnFormattedFile::Error(int err)
   cerr << " position in the record = " << where() 
        << " length of record = " << l <<endl;
   cerr 	<< " file = " << file_name<< endl ;
-  
-  throw(ErrorMesh("exit",1));
+    MeshError(900);
+    //  throw(ErrorMesh("exit",1));
 }
 
 }// end of namespace bamg 

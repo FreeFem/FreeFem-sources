@@ -84,7 +84,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	if(st[k]==-1)
 	  st[k]=3*i+j;
 	else if(st[k]>=0) {
-	  throwassert( ! triangles[i].TriangleAdj(j) && !triangles[st[k] / 3].TriangleAdj((int) (st[k]%3)));
+	  assert( ! triangles[i].TriangleAdj(j) && !triangles[st[k] / 3].TriangleAdj((int) (st[k]%3)));
 	  
 	  triangles[i].SetAdj2(j,triangles + st[k] / 3,(int) (st[k]%3));
 	  if (invisible)  triangles[i].SetHidden(j);
@@ -191,7 +191,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 		   edges[add].ref = Min(edges[add].v[0]->ref(),edges[add].v[1]->ref()); // no a good choice
 	    }
 	}
-      throwassert(k==nbe);
+      assert(k==nbe);
       if (edgessave) delete [] edgessave;
     }
     
@@ -214,16 +214,16 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	  else if (i0>=0) {// i and i0 edge are adjacent by the vertex v
 	    j0 =  i0%2;
 	    i0 =  i0/2;
-	    throwassert( v ==  edges[i0 ].v[j0]);
+	    assert( v ==  edges[i0 ].v[j0]);
 	    edges[i ].adj[ j ] =edges +i0;
 	    edges[i0].adj[ j0] =edges +i ;
-	    throwassert(edges[i0].v[j0] == v);
+	    assert(edges[i0].v[j0] == v);
 	    //	    if(verbosity>8)
 	    //  cout << " edges adj " << i0 << " "<< j0 << " <-->  "  << i << " " << j << endl;
 	    v->color = -3;}
 	}
     // now reconstruct the sub domain info 
-    throwassert(!NbSubDomains);
+    assert(!NbSubDomains);
   NbSubDomains=0;
   
   { 
@@ -287,7 +287,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	      k++;
 	    }
 	}  
-    throwassert(k== NbSubDomains);
+    assert(k== NbSubDomains);
     
     delete [] colorT;
     
@@ -353,7 +353,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
   Gh.pmax +=  DD05;
   
   Gh.coefIcoor= (MaxICoor)/(Max(Gh.pmax.x-Gh.pmin.x,Gh.pmax.y-Gh.pmin.y));
-  throwassert(Gh.coefIcoor >0);
+  assert(Gh.coefIcoor >0);
   
   Real8 hmin = HUGE_VAL;
   
@@ -400,7 +400,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
       
       k = edge4->addtrie(i0,i1);
       
-      throwassert(k == i);
+      assert(k == i);
       
     }
   
@@ -488,7 +488,7 @@ Geometry::Geometry(const Geometry & Gh)
      
    //    for (i=0;i<nbt;i++)
    //      triangles[i].Set(Gh.triangles[i],Gh,*this);
-   throwassert(!nbt);   
+   assert(!nbt);   
  }
 
 
@@ -501,7 +501,7 @@ GeometricalEdge* Geometry::Contening(const R2 P,  GeometricalEdge * start) const
    while(pon != on)
      {  
        pon = on;
-       throwassert(k++<100);
+       assert(k++<100);
        R2 A= (*on)[0];
        R2 B= (*on)[1];
        R2 AB = B-A;
@@ -524,8 +524,8 @@ GeometricalEdge* Geometry::ProjectOnCurve(const Edge & e,Real8 s,Vertex &V,Verte
 retry:    
     s=save_s;
     GeometricalEdge * on = e.on;
-    throwassert(on);
-    throwassert( e[0].on &&  e[1].on);
+    assert(on);
+    assert( e[0].on &&  e[1].on);
     const Vertex &v0=e[0],&v1=e[1];
     V.m = Metric(1.0-s, v0,s, v1);
 #define MXE__LINE  __LINE__+1
@@ -597,7 +597,7 @@ retry:
 		cout << "bug: --Edge @" <<  Number(tmpge)  << " = "<< Number(eg0) << ":" <<Number(eg0->Adj[0]) << "," <<  
 			 Number(eg0->Adj[1]) <<"," ;
 	ge[--bge] =eg0 = eg0->Adj[sens0];
-	throwassert(bge>=0 && bge <= mxe);
+	assert(bge>=0 && bge <= mxe);
 	sens0 = 1-( sensge[bge] = tmpge->SensAdj[sens0]);
 	if(NbTry)
 		cout << "bug: Edge "  <<  Number(eg0) << " "<< 1-sens0 <<  " S "
@@ -626,7 +626,7 @@ retry:
 		 <<  Number(eg1->Adj[1]) <<"," ;
 	ge[++tge] =eg1 = eg1->Adj[sens1];
 	sensge[tge]= sens1 = 1-tmpge->SensAdj[sens1];
-	throwassert(tge>=0 && tge <= mxe);
+	assert(tge>=0 && tge <= mxe);
          if(NbTry)
 		cout << "  Edge "  <<  Number(eg1) << " " << sens1 << " S "
 		     <<Number((*eg1)[sens1]) <<"%"<< Number(eg1->Adj[0]) << "," <<  Number(eg1->Adj[1]) <<"," 
@@ -661,7 +661,7 @@ retry:
        Real8 ll=0;
        for(i=bge;i<tge;i++) 
 	 {
-	   throwassert( i>=0 && i <= mxe);
+	   assert( i>=0 && i <= mxe);
 	   BB =  (*ge[i])[sensge[i]];
 	   lge[i]=ll += Norme2(AA-BB);
 	   //   cout << " ll " << i << BB << ll << " " <<sensge[i] <<" on = " <<
@@ -671,7 +671,7 @@ retry:
        // cout << " ll " << tge << " " << ll <<  sensge[tge] 
        //	     <<" on = " << Number(ge[tge]) <<  " sens= " << sensge[tge] << endl;
     // search the geometrical edge
-      throwassert(s <= 1.0);
+      assert(s <= 1.0);
       Real8 ls= s*ll;
       on =0;
       s0 = vg0;
@@ -679,7 +679,7 @@ retry:
       Real8 l0=0,l1;
       i=bge;
       while (  (l1=lge[i]) < ls ) {
-	throwassert(i >= 0 && i <= mxe);
+	assert(i >= 0 && i <= mxe);
 	i++,s0=1-(s1=sensge[i]),l0=l1;}
       on=ge[i];
       if (i==tge) 
@@ -690,8 +690,8 @@ retry:
       //	     << s1 << " l0 =" << l0 << " ls= " << ls << " l1= " << l1 << " s= " << s;
        sg =  s0 * (1.0-s) +  s * s1;    
        } 
-    throwassert(on);
-    // throwassert(sg && sg-1);
+    assert(on);
+    // assert(sg && sg-1);
     V.r= on->F(sg);
     //  if (eg0 != eg1) 
     //        cout << "----- sg = "<< sg << " Sens =" << OppositeSens << " Edge = " 
@@ -726,7 +726,7 @@ void Geometry::AfterRead()
 	         // vieille ruse pour recuperer j 
 	         GeometricalVertex * vg = (GeometricalVertex  *) (void *) v;
 	         int j = vg-v0g;
-	         throwassert( v ==  & (Vertex &) vertices[j]);
+	         assert( v ==  & (Vertex &) vertices[j]);
 	         vertices[i].link = vertices + j;
             k++;	      
 	       }
@@ -740,7 +740,8 @@ void Geometry::AfterRead()
 	  for (i=0;i<nbv;i++)
 	    if (!vertices[i].IsThe())
 	      cout << " " << i << " and " << Number(vertices[i].The()) << endl;
-	  throw(ErrorExec("exit",1));    
+	  MeshError(102);
+	  //throw(ErrorExec("exit",1));    
 	}
       }
       
@@ -982,7 +983,7 @@ void Geometry::AfterRead()
 	    }
        
 	  }} 
-	  throwassert(nbgem && nbe);
+	  assert(nbgem && nbe);
 
 	  if(step==0) {
 	    curves = new Curve[NbOfCurves];
@@ -1021,7 +1022,7 @@ void Geometry::AfterRead()
 }
 Geometry::~Geometry() 
 {
-  throwassert(NbRef<=0);
+  assert(NbRef<=0);
   if(verbosity>9)
     cout << "DELETE      ~Geometry "<< this  << endl;
   if(vertices)  delete [] vertices;vertices=0;
@@ -1044,8 +1045,8 @@ Real8 GeometricalEdge::R1tg(Real4 theta,R2 & t) const // 1/R of radius of cuvatu
  // Real8 t1 = 1 -theta;
  // Real8 t1t1 = t1*t1;
  Real8 tt = theta*theta;
- throwassert( theta >=0);
- throwassert( theta <=1);
+ assert( theta >=0);
+ assert( theta <=1);
  if (TgA()) 
   if (TgB()) // interpolation d'hermite
     { //cb =  theta*theta*(3-2*theta);
@@ -1110,8 +1111,8 @@ Real8 GeometricalEdge::R1tg(Real4 theta,R2 & t) const // 1/R of radius of cuvatu
 R2 GeometricalEdge::F(Real4 theta) const // parametrization of the curve edge
 { R2 A=v[0]->r,B=v[1]->r;
  Real4 ca,cb,cta,ctb;
- throwassert( theta >=-1e-12);
- throwassert( theta <=1+1e-12);
+ assert( theta >=-1e-12);
+ assert( theta <=1+1e-12);
  if (TgA()) 
   if (TgB()) // interpolation d'hermite
    { cb =  theta*theta*(3-2*theta);

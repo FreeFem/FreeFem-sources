@@ -82,7 +82,7 @@ public:
     if(! (sb->bc<sb->be)) 
 	sb=new StorageQuadTreeBox(lenStorageQuadTreeBox,sb);
 
-    throwassert(sb && (sb->bc->n == 0));
+    assert(sb && (sb->bc->n == 0));
     NbQuadTreeBox++;
     return sb->bc++;
   }

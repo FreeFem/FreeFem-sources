@@ -64,10 +64,10 @@ void  QuadTree::Draw()
 		  IMoveTo(i2.x+50,i2.y);
 		  ILineTo(i2.x-50,i2.y);
 
-		  throwassert(ii[l] <= i2.x);
-		  throwassert(jj[l] <= i2.y);
-		  throwassert(ii[l] +hb > i2.x);
-		  throwassert(jj[l] +hb > i2.y);
+		  assert(ii[l] <= i2.x);
+		  assert(jj[l] <= i2.y);
+		  assert(ii[l] +hb > i2.x);
+		  assert(jj[l] +hb > i2.y);
 
 		}
 	      break;
@@ -324,7 +324,7 @@ void  QuadTree::Add( Vertex & w)
     if (b->n > 1 &&  b->v[1] == &w) return;
     if (b->n > 0 &&  b->v[0] == &w) return;
   }
-  throwassert(l);
+  assert(l);
   while ((b= *pb) && (b->n == 4)) // the QuadTreeBox is full
     { 
       Vertex *v4[4]; // copy of the QuadTreeBox vertices
@@ -365,7 +365,7 @@ QuadTree::QuadTree(Triangles * t,long nbv) :
   if (nbv == -1) nbv = t->nbv;
   sb =new StorageQuadTreeBox(lenStorageQuadTreeBox);
   root=NewQuadTreeBox();
-  throwassert( MaxISize > MaxICoor);
+  assert( MaxISize > MaxICoor);
   for (Int4 i=0;i<nbv;i++) 
     Add(t->vertices[i]);
 #ifdef DRAWING1
@@ -393,7 +393,7 @@ QuadTree::StorageQuadTreeBox::StorageQuadTreeBox(long ll,StorageQuadTreeBox *nn)
     b[i].n =0,b[i].b[0]=b[i].b[1]=b[i].b[2]=b[i].b[3]=0;
   bc =b;
   be = b +ll;
-  throwassert(b);
+  assert(b);
 }
 
 QuadTree::~QuadTree()

@@ -50,7 +50,7 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
       else if (!strcmp(fieldname,"Dimension"))
          {
            f_in >>   dim ;
-           throwassert(dim ==2);
+           assert(dim ==2);
          }
       else if  (!strcmp(fieldname,"Geometry"))
 	{ 
@@ -85,15 +85,15 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
          }
       else if (!strcmp(fieldname,"Vertices"))
          { 
-           throwassert(dim ==2);
+           assert(dim ==2);
            f_in >>   nbv ;
 	   if(verbosity>3)
 	     cout << "   Nb of Vertices = " << nbv << endl;
 	   nbvx=nbv;
 	   vertices=new Vertex[nbvx];
-	   throwassert(vertices);
+	   assert(vertices);
 	   ordre=new (Vertex* [nbvx]);
-	   throwassert(ordre);
+	   assert(ordre);
 	   
 	   nbiv = nbv;
            for (i=0;i<nbv;i++) {
@@ -106,7 +106,7 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 	     vertices[i].color =0;}
 	   nbtx =  2*nbv-2; // for filling The Holes and quadrilaterals 
 	   triangles =new Triangle[nbtx];
-	   throwassert(triangles);
+	   assert(triangles);
 	   nbt =0;
          }
       else if (!strcmp(fieldname,"Triangles"))
@@ -178,7 +178,7 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 	       if(verbosity>7)
 		 cout << "   VerticesOnGeomVertex = " << VerticesOnGeomVertex << endl
 		      << "   Gh.vertices " << Gh.vertices << endl;
-	       throwassert(VerticesOnGeomVertex);
+	       assert(VerticesOnGeomVertex);
 	       for (Int4 i0=0;i0<NbVerticesOnGeomVertex;i0++)  
 		 { 
 		   Int4  i1,i2;
@@ -196,7 +196,7 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 	   if(NbVerticesOnGeomEdge) 
 	     {
 	       VerticesOnGeomEdge= new  VertexOnGeom[NbVerticesOnGeomEdge] ;
-	       throwassert(VerticesOnGeomEdge);
+	       assert(VerticesOnGeomEdge);
 	       for (Int4 i0=0;i0<NbVerticesOnGeomEdge;i0++)  
 		 { 
 		   Int4  i1,i2;
@@ -214,7 +214,7 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
           edges = new Edge[nbe];
 	  if(verbosity>5)
 	    cout << "     Record Edges: Nb of Edge " << nbe << " edges " <<  edges << endl;
-          throwassert(edges);
+          assert(edges);
 	  Real4 *len =0;
           if (!hvertices) 
 	    {
@@ -226,8 +226,8 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 	    {
 	      f_in  >> i1  >> i2  >> edges[i].ref ;
                  
-	      throwassert(i1 >0 && i2 >0);
-	      throwassert(i1 <= nbv && i2 <= nbv);
+	      assert(i1 >0 && i2 >0);
+	      assert(i1 <= nbv && i2 <= nbv);
 	      i1--;
 	      i2--;
 	      edges[i].v[0]= vertices +i1;
@@ -269,10 +269,10 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 		  else if (i0>=0) {// i and i0 edge are adjacent by the vertex v
 		    j0 =  i0%2;
 		    i0 =  i0/2;
-		    throwassert( v ==  edges[i0 ].v[j0]);
+		    assert( v ==  edges[i0 ].v[j0]);
 		    edges[i ].adj[ j ] =edges +i0;
 		    edges[i0].adj[ j0] =edges +i ;
-		    throwassert(edges[i0].v[j0] == v);
+		    assert(edges[i0].v[j0] == v);
 		    //	    if(verbosity>8)
 		    //  cout << " edges adj " << i0 << " "<< j0 << " <-->  "  << i << " " << j << endl;
 		      v->color = -3;}
@@ -281,7 +281,7 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 	}
       else if (!strcmp(fieldname,"EdgeOnGeometricEdge"))
 	{ 
-	  throwassert(edges);
+	  assert(edges);
 	  int i1,i2,i,j;
 	  f_in >> i2 ;
 	  if(verbosity>3)
@@ -311,9 +311,9 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 	    for (i=0;i< NbSubDomains;i++)
 	      { Int4 i3,head,sens;
 	      f_in  >>  i3 >>	head >> sens  >> subdomains[i].ref ;
-		throwassert (i3==3);
+		assert (i3==3);
 		head --;
-		throwassert(head < nbt && head >=0);
+		assert(head < nbt && head >=0);
 		subdomains[i].head = triangles+head;		
 	      }
 	}
@@ -355,7 +355,7 @@ void Triangles::Read_am_fmt(MeshIstream & f_in)
      nbvx = nbv;
      nbtx =  2*nbv-2; // for filling The Holes and quadrilaterals 
      triangles =new Triangle[nbtx];
-     throwassert(triangles);
+     assert(triangles);
      vertices=new Vertex[nbvx];
      ordre=new (Vertex* [nbvx]);
      
@@ -394,17 +394,17 @@ void  Triangles::Read_am(MeshIstream &ff)
   IFortranUnFormattedFile f_in(ff);
 
   Int4  l=f_in.Record();
-  throwassert(l==2*sizeof(Int4));
+  assert(l==2*sizeof(Int4));
   f_in >> nbv >> nbt ;
   l=f_in.Record();
-  throwassert(l==nbt*sizeof(long)*4 + nbv*(2*sizeof(float)+sizeof(long)));
+  assert(l==nbt*sizeof(long)*4 + nbv*(2*sizeof(float)+sizeof(long)));
   if (verbosity>3)
     cout << "    nbv = " << nbv  << " nbt = " << nbt << endl;
   
   nbvx = nbv;
   nbtx =  2*nbv-2; // for filling The Holes and quadrilaterals 
   triangles =new Triangle[nbtx];
-  throwassert(triangles);
+  assert(triangles);
   vertices=new Vertex[nbvx];
   ordre=new (Vertex* [nbvx]);
   
@@ -447,7 +447,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
  l=f_in.Record(); 
  l=f_in.Record();
  f_in >> i;
- throwassert(i==32);
+ assert(i==32);
  Int4 niveau,netat,ntacm;
 
  char titre[80+1],  date[2*4+1], nomcre[6*4+1], typesd[5];
@@ -476,7 +476,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
 
  f_in.Record();
  f_in >> l;
- throwassert(l == 27);
+ assert(l == 27);
  Int4 nop2[27];
  for (i=0;i<27;i++)
    f_in >> nop2[i];
@@ -503,7 +503,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
   nbvx = nbv;
   nbtx =  2*nbv-2; // for filling The Holes and quadrilaterals 
   triangles =new Triangle[nbtx];
-  throwassert(triangles);
+  assert(triangles);
   vertices=new Vertex[nbvx];
   ordre=new (Vertex* [nbvx]);
 
@@ -513,7 +513,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
   if(verbosity>9)
     cout << " Read cnop4 nb of float  " << l << endl;
   
-  throwassert(l==2*np);
+  assert(l==2*np);
   for (i=0;i<np;i++)
     {  float x,y;
     f_in >>  x>> y;
@@ -628,7 +628,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
      
    }
  // cout << k << " == " << nbt << endl;
- throwassert(k==nbt);
+ assert(k==nbt);
 
  nbe = edge4->nb();
  if (nbe)
@@ -667,7 +667,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
   nbvx = nbv;
   nbtx =  2*nbv-2; // for filling The Holes and quadrilaterals 
   triangles =new Triangle[nbtx];
-  throwassert(triangles);
+  assert(triangles);
   vertices=new Vertex[nbvx];
   ordre=new (Vertex* [nbvx]);
   Int4 k=0;
@@ -700,7 +700,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
 	    MeshError(111);
 	  }
     }
-  throwassert(k==nbt);
+  assert(k==nbt);
   Metric M1(1);
   for ( i=0;i<nbv;i++)
     {
@@ -730,7 +730,7 @@ void  Triangles::Read_msh(MeshIstream &f_in)
      nbvx = nbv;
      nbtx =  2*nbv-2; // for filling The Holes and quadrilaterals 
      triangles =new Triangle[nbtx];
-     throwassert(triangles);
+     assert(triangles);
      vertices=new Vertex[nbvx];
      ordre=new (Vertex* [nbvx]);
       edges = new Edge[nbe];
@@ -775,14 +775,14 @@ void  Triangles::Read_amdba(MeshIstream &f_in )
      nbvx = nbv;
      nbtx =  2*nbv-2; // for filling The Holes and quadrilaterals 
      triangles =new Triangle[nbtx];
-     throwassert(triangles);
+     assert(triangles);
      vertices=new Vertex[nbvx];
      ordre=new (Vertex* [nbvx]);
      Int4 j;
       for ( i=0;i<nbv;i++)
 	{
 	  f_in >> j ;
-	  throwassert( j >0 && j <= nbv);
+	  assert( j >0 && j <= nbv);
 	  j--;
 	  f_in >> vertices[j].r.x >>   vertices[j].r.y >> vertices[j].ReferenceNumber;
 	   vertices[j].m=M1;
@@ -793,7 +793,7 @@ void  Triangles::Read_amdba(MeshIstream &f_in )
        {
 	 Int4 i1,i2,i3,ref;
 	   f_in >> j ;
-	   throwassert( j >0 && j <= nbt);
+	   assert( j >0 && j <= nbt);
 	   j--;
 	   f_in >> i1 >>  i2 >>   i3 >> ref;
 	 triangles[j]  = Triangle(this,i1-1,i2-1,i3-1);
@@ -879,7 +879,7 @@ void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)
 {
   if(verbosity>1)
     cout << " -- ReadGeometry " << filename << endl;
-  throwassert(empty());
+  assert(empty());
   nbiv=nbv=nbvx=0;
   nbe=nbt=nbtx=0;
   NbOfCurves=0;
@@ -915,7 +915,7 @@ void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)
           f_in   >>  dim ;
 	  if(verbosity>5) 
 	    cout << "     Geom Record Dimension dim = " << dim << endl;        
-          throwassert(dim ==2);
+          assert(dim ==2);
          }
        else if (!strcmp(fieldname,"hVertices"))
          { 
@@ -963,7 +963,7 @@ void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)
 	 }
       else if (!strcmp(fieldname,"Vertices"))
         { 
-          throwassert(dim ==2);
+          assert(dim ==2);
           f_in   >>  nbv ;
 	  //          if(LineError) break;
           nbvx = nbv;
@@ -971,7 +971,7 @@ void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)
           vertices = new GeometricalVertex[nbvx];
 	  if(verbosity>5) 
 	    cout << "     Geom Record Vertices nbv = " << nbv << "vertices = " << vertices<<endl;
-          throwassert(nbvx >= nbv);
+          assert(nbvx >= nbv);
           nbiv = nbv;
           for (i=0;i<nbv;i++) {
             f_in  >> vertices[i].r.x  ;
@@ -999,7 +999,7 @@ void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)
 	      pmax +=  DD05;
 	    
 	    coefIcoor= (MaxICoor)/(Max(pmax.x-pmin.x,pmax.y-pmin.y));
-	    throwassert(coefIcoor >0);
+	    assert(coefIcoor >0);
 	    if (verbosity>5) {
 	      cout << "     Geom: min="<< pmin << "max ="<< pmax << " hmin = " << MinimalHmin() <<  endl;}
         }
@@ -1025,8 +1025,8 @@ void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)
 	      edges = new GeometricalEdge[nbe];
 	      if(verbosity>5) 
 		cout << "     Record Edges: Nb of Edge " << nbe <<endl;
-	      throwassert(edges);
-	      throwassert (nbv >0); 
+	      assert(edges);
+	      assert (nbv >0); 
 	      Real4 *len =0;
 	      if (!hvertices) 
 		{
@@ -1088,9 +1088,9 @@ void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)
             {
 	      f_in  >>  i  >> j ;
 	      f_in >> tg.x  >> tg.y ;
-	      throwassert( i <= nbe );
-	      throwassert( i > 0 );
-	      throwassert ( j == 1 || j==2 );
+	      assert( i <= nbe );
+	      assert( i > 0 );
+	      assert ( j == 1 || j==2 );
 	      i--;j--;// for C index
 	      edges[i].tg[j] = tg;
             }
@@ -1104,8 +1104,8 @@ void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)
           
           for (i=0;i<n;i++) {     
             f_in  >>  j ;
-            throwassert( j <= nbv );
-            throwassert( j > 0 );
+            assert( j <= nbv );
+            assert( j > 0 );
             j--;
             vertices[j].SetCorner();
             vertices[j].SetRequired();  }
@@ -1117,10 +1117,22 @@ void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)
 
           for (i=0;i<n;i++) {     
             f_in  >>  j ;
-            throwassert( j <= nbv );
-            throwassert( j > 0 );
+            assert( j <= nbv );
+            assert( j > 0 );
             j--;
             vertices[j].SetRequired();  }
+      }
+      else if (!strcmp(fieldname,"RequiredEdges"))
+        { 
+          int i,j,n;
+          f_in  >> n ;
+
+          for (i=0;i<n;i++) {     
+            f_in  >>  j ;
+            assert( j <= nbe );
+            assert( j > 0 );
+            j--;
+            edges[j].SetRequired();  }
       }
     else if (!strcmp(fieldname,"SubDomain") || !strcmp(fieldname,"SubDomainFromGeom"))
       { 
@@ -1134,8 +1146,8 @@ void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)
 		f_in  >> i0  >>i1 
 		      >> i2  >>i3 ; 
 		
-		throwassert(i0 == 2);
-		throwassert(i1<=nbe && i1>0);
+		assert(i0 == 2);
+		assert(i1<=nbe && i1>0);
 		subdomains[i].edge=edges + (i1-1);
 		subdomains[i].sens = (int) i2;
 		subdomains[i].ref = i3;

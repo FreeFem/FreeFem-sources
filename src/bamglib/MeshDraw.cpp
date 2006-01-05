@@ -280,7 +280,7 @@ void Triangles::inquire()
       if (c=='+') Grafh /= 2.,rd=1,cadreortho(x,y,Grafh);
       if (c=='-') Grafh *= 2.,rd=1,cadreortho(x,y,Grafh);
       if (c=='r') rd =1;
-      if (c=='Q') CurrentTh=0,throw(ErrorExec("exit",1));
+      if (c=='Q') CurrentTh=0,MeshError(1);
       if (c=='q' && quadtree) penthickness(2),
 				couleur(6), 
 				quadtree->Draw(),
@@ -535,7 +535,7 @@ int Triangle::swapDRAW(Int2 a){
   register Vertex  *s2=t2->ns[OppositeVertex[a2]];
 
 #ifdef DEBUG
-  throwassert ( a >= 0 && a < 3 );  
+  assert ( a >= 0 && a < 3 );  
 #endif
   
    Icoor2 det1=t1->det , det2=t2->det ;
