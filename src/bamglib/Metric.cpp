@@ -86,7 +86,7 @@ void ReductionSimultanee( MetricAnIso M1,  MetricAnIso M2,double & l1,double & l
       else
 	s1=sqrt(s1),vp2x=v2/s1,vp2y=-v1/s1;
 #ifdef DEBUG
-      throwassert(Abs(vp1y)+Abs(vp2y)>0);
+      assert(Abs(vp1y)+Abs(vp2y)>0);
 #endif
       V=D2xD2(vp1x,vp2x,vp1y,vp2y);
   }
@@ -214,7 +214,7 @@ void Triangles::IntersectGeomMetric(const Real8 err=1,const int iso=0)
   Real8 hmax = Gh.MaximalHmax();
   Real8 hmin = Gh.MinimalHmin();
   Real8 maxaniso = 1e6;
-  throwassert(hmax>0);
+  assert(hmax>0);
   SetVertexFieldOn();
   if (errC > 1) errC = 1;
   for (Int4  i=0;i<nbe;i++)
@@ -241,7 +241,7 @@ void Triangles::IntersectGeomMetric(const Real8 err=1,const int iso=0)
 	    }
 	  Real8 hn = iso? ht : Min(hmax,ht*maxaniso);
 	  //cerr << ht << " " << hn << "m=" << edges[i][j].m <<  endl;
-	  throwassert(ht>0 && hn>0);
+	  assert(ht>0 && hn>0);
 	  MatVVP2x2 Vp(1/(ht*ht),1/(hn*hn),tg);
 	  //cerr << " : " ;
 	  Metric MVp(Vp);
@@ -576,7 +576,7 @@ void Triangles::IntersectConsMetric(const double * s,const Int4 nbsol,const int 
 		Real8 cCA   =  det3x3(taa[0],bb,taa[2]);
 		Real8 cAB   =  det3x3(taa[0],taa[1],bb);
 		
-		throwassert(det33);
+		assert(det33);
 		//	det33=1;
 		// verif
 		//	cout << " " << (taa[0][0]*cBC +  taa[1][0]*cCA + taa[2][0] * cAB)/det33 << " == " << bb[0] ;
@@ -964,7 +964,7 @@ void Triangles::SmoothMetric(Real8 raisonmax)
       {  //  pour tous les triangles autour du sommet s
 	// 	cout << kk << " i = " << i << " " << ip << endl;
 	register Triangle * t= vertices[i].t;
-	throwassert(t);
+	assert(t);
 	Vertex & vi = vertices[i];
 	TriangleAdjacent ta(t,EdgesVertexTriangle[vertices[i].vint][0]);
 	Vertex *pvj0 = ta.EdgeVertex(0);
@@ -973,11 +973,11 @@ void Triangles::SmoothMetric(Real8 raisonmax)
 	  //      << Number(ta.EdgeVertex(1)) << " ---> " ;
 	  ta=Previous(Adj(ta));
 	  // cout <<  Number(ta.EdgeVertex(0)) << " " << Number(ta.EdgeVertex(1)) << endl;
-	  throwassert(vertices+i == ta.EdgeVertex(1));
+	  assert(vertices+i == ta.EdgeVertex(1));
 	  Vertex & vj = *(ta.EdgeVertex(0));
 	  if ( &vj ) {
 	    j= &vj-vertices;
-	    throwassert(j>=0 && j < nbv);
+	    assert(j>=0 && j < nbv);
 	    R2 Aij = (R2) vj - (R2) vi;
 	    Real8 ll =  Norme2(Aij);
 	    if (0) {  
@@ -1123,7 +1123,7 @@ Real8 LengthInterpole(const MetricAnIso Ma,const  MetricAnIso Mb, R2 AB)
       L[i]= l += s,S[i]=sss+=k,i++;//cout << i << " l = " << l << " sss = " << sss << endl;
   }
   // warning for optimisation S is in [0:0.5] not in [0:1]
-  throwassert(i<512);
+  assert(i<512);
   LastMetricInterpole.lab=l;
   LastMetricInterpole.opt=i;
   if (i>200 && kkk++<10)
@@ -1160,7 +1160,7 @@ Real8 abscisseInterpole(const MetricAnIso Ma,const  MetricAnIso Mb, R2 AB,Real8 
       else
 	r =  2*(S[i]*(L[j]-l)+ S[j]*(l-L[i]))/(L[j]-L[i]);
     }
-  throwassert(r<=1 && r>=0);
+  assert(r<=1 && r>=0);
   return r ;
     
 }

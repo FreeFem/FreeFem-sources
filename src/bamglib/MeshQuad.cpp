@@ -147,12 +147,12 @@ double QuadQuality(const Vertex & a,const Vertex &b,const Vertex &c,const Vertex
      MeshError(-1);
     } 
   Edge * e = &BhAB;
- throwassert( pA && pB && e);
+ assert( pA && pB && e);
  // be carefull the back ground edge e is on same geom edge 
  // of the initiale edge def by the 2 vertex A B;
- throwassert(e>=BTh.edges && e<BTh.edges+BTh.nbe);// Is a background Mesh;   
+ assert(e>=BTh.edges && e<BTh.edges+BTh.nbe);// Is a background Mesh;   
 // walk on BTh edge 
- //throwassert(0 /* not finish ProjectOnCurve with BackGround Mesh*/);
+ //assert(0 /* not finish ProjectOnCurve with BackGround Mesh*/);
 // 1 first find a back ground edge contening the vertex A
 // 2 walk n back gound boundary to find the final vertex B
 
@@ -163,9 +163,9 @@ double QuadQuality(const Vertex & a,const Vertex &b,const Vertex &c,const Vertex
 // a end of curve <=>  !IsRequiredVertex
     if (vA.vint == IsVertexOnEdge)
       if (tA<=0)
-	throwassert(! (*vA.onbe->be)[0].on->IsRequiredVertex());
+	assert(! (*vA.onbe->be)[0].on->IsRequiredVertex());
       else if (tA>=1) 
-      	throwassert(!(*vA.onbe->be)[1].on->IsRequiredVertex());
+      	assert(!(*vA.onbe->be)[1].on->IsRequiredVertex());
 #endif
 
      if( vA.vint == IsVertexOnEdge) 
@@ -186,7 +186,7 @@ double QuadQuality(const Vertex & a,const Vertex &b,const Vertex &c,const Vertex
        } 
      else
        { // do the search by walking 
-	 throwassert(0 /* A FAIRE */);
+	 assert(0 /* A FAIRE */);
        }
 
      // find the direction of walking with sens of edge and pA,PB;
@@ -218,8 +218,8 @@ double QuadQuality(const Vertex & a,const Vertex &b,const Vertex &c,const Vertex
 		//	cout << kkk << " eee = " << BTh.Number(eee) << "  v0=  " 
 		//     << BTh.Number(v0) << " v1 = " << BTh.Number(v1) << endl;
 		
-		throwassert(kkk++<100);
-		throwassert(eee);
+		assert(kkk++<100);
+		assert(eee);
 		Real8 lg0 = lg;
 		Real8 dp = LengthInterpole(v0->m,v1->m,(R2) *v1 - (R2) *v0);
 	     	lg += dp;
@@ -227,7 +227,7 @@ double QuadQuality(const Vertex & a,const Vertex &b,const Vertex &c,const Vertex
 		  { // ok we find the geom edge 
 		    Real8 sss  =   (abscisse-lg0)/dp;
 		    Real8 thetab = te0*(1-sss)+ sss*iii;
-		    throwassert(thetab>=0 && thetab<=1);
+		    assert(thetab>=0 && thetab<=1);
 		    BR = VertexOnEdge(&R,eee,thetab);
 
 		    // cout << Number(R) << " = " <<  thetab << " on  " <<  BTh.Number(eee)
@@ -244,7 +244,7 @@ double QuadQuality(const Vertex & a,const Vertex &b,const Vertex &c,const Vertex
 	      tB = iii;
 	     
 	   Real8 lg0 = lg;
-	   throwassert(eee);
+	   assert(eee);
 	   v1 = pvB;
 	   Real8 dp = LengthInterpole(v0->m,v1->m,(R2) *v1 - (R2) *v0);
 	   lg += dp;	
@@ -253,7 +253,7 @@ double QuadQuality(const Vertex & a,const Vertex &b,const Vertex &c,const Vertex
 	     { // ok we find the geom edge 
 	       Real8 sss  =   (abscisse-lg0)/dp;
 	       Real8 thetab = te0*(1-sss)+ sss*tB;
-	       throwassert(thetab>=0 && thetab<=1);
+	       assert(thetab>=0 && thetab<=1);
 	       BR = VertexOnEdge(&R,eee,thetab);
 	      
 	       //	cout << kkk << " eee = " << BTh.Number(eee) << "  v0=  " 
@@ -439,7 +439,7 @@ int  Triangles::SplitElement(int choice)
 	      //  newVertexOnBThEdge[ibe++] = VertexOnEdge(vertices[k],bedge,absicsseonBedge); 
 	      // a faire -- difficile 
 	      // the first PB is to now a background edge between the 2 vertices
-	      throwassert(edgesGtoB); 
+	      assert(edgesGtoB); 
 	      // cout << " ie = " << ie <<"  v0 = " <<  Number(newedges[ie][0]) << endl;
              ong= ProjectOnCurve(*edgesGtoB[Gh.Number(edges[i].on)],
 			     edges[i][0],edges[i][1],0.5,vertices[k],
@@ -497,13 +497,13 @@ int  Triangles::SplitElement(int choice)
       k++;
     }
 #ifdef DEBUG
-  throwassert(kvb ==  newNbVertexOnBThEdge);
+  assert(kvb ==  newNbVertexOnBThEdge);
   // verif edge 
   { Vertex *v0 = vertices, *v1 = vertices+ k;
     for (Int4  i=0;i<ie;i++)
      {
-       throwassert( &newedges[i][0] >= v0 &&  &newedges[i][0] < v1);
-       throwassert( &newedges[i][1] >= v0 &&  &newedges[i][1] < v1);
+       assert( &newedges[i][0] >= v0 &&  &newedges[i][0] < v1);
+       assert( &newedges[i][1] >= v0 &&  &newedges[i][1] < v1);
      }
   }
 #endif
@@ -530,7 +530,7 @@ int  Triangles::SplitElement(int choice)
    {  
 
      Triangle & t = triangles[i];
-     throwassert(t.link);
+     assert(t.link);
      for(int j=0;j<3;j++)
        {
 	 const TriangleAdjacent ta = t.Adj(j);
@@ -639,7 +639,7 @@ int  Triangles::SplitElement(int choice)
 	    kkk[nbsplitedge++]=j;// previously splited
 	  
 	} 
-      throwassert (nbinvisible<2);
+      assert (nbinvisible<2);
      // cout << " " <<  nbinvisible << " " <<  nbsplitedge << endl;
       switch (nbsplitedge) {
       case 0: ksplit[i]=10; newnbt++; break;   // nosplit
@@ -650,7 +650,7 @@ int  Triangles::SplitElement(int choice)
 	else   ksplit[i]=10*nfortria,newnbt+=nfortria;
 	break;
       } 
-    throwassert(ksplit[i]>=40);
+    assert(ksplit[i]>=40);
     }
   //  now do the element split
   newNbOfQuad = 4*NbOfQuad;
@@ -673,7 +673,7 @@ int  Triangles::SplitElement(int choice)
       mkadj[0]=i;
       Int4 kk=ksplit[i]/10;
       int  ke=(int) (ksplit[i]%10);
-      throwassert(kk<7 && kk >0);
+      assert(kk<7 && kk >0);
       
       // def the numbering   k (edge) i vertex 
       int k0 = ke;
@@ -689,7 +689,7 @@ int  Triangles::SplitElement(int choice)
        Vertex * v2=t0(i2);
 
        // cout << "nbmkadj " << nbmkadj << " it=" << i <<endl;
-       throwassert(nbmkadj< 10);
+       assert(nbmkadj< 10);
        // --------------------------
        TriangleAdjacent ta0(t0.Adj(i0)),ta1(t0.Adj(i1)),ta2(t0.Adj(i2));
        // save the flag Hidden
@@ -705,7 +705,7 @@ int  Triangles::SplitElement(int choice)
 	 {
 	   Triangle &t1=triangles[kkk++];
 	   t1=t0;
-	   throwassert (kedge[3*i+i0]>=0);
+	   assert (kedge[3*i+i0]>=0);
 	   Vertex * v3 = vertices + kedge[3*i+k0];
 	   
 	   t0(i2) = v3;
@@ -719,8 +719,8 @@ int  Triangles::SplitElement(int choice)
 	   Triangle &t1=triangles[kkk++];
             Triangle &t2=triangles[kkk++];
             t2=t1=t0;
-            throwassert (kedge[3*i+k1]>=0);
-            throwassert (kedge[3*i+k2]>=0);
+            assert (kedge[3*i+k1]>=0);
+            assert (kedge[3*i+k2]>=0);
             
             Vertex * v01 = vertices + kedge[3*i+k2];
             Vertex * v02 = vertices + kedge[3*i+k1]; 
@@ -742,7 +742,7 @@ int  Triangles::SplitElement(int choice)
 	   Triangle &t2=triangles[kkk++];
 	   Triangle &t3=triangles[kkk++];
 	   t3=t2=t1=t0;
-	   throwassert(kedge[3*i+k0] >=0 && kedge[3*i+k1] >=0 && kedge[3*i+k2] >=0);
+	   assert(kedge[3*i+k0] >=0 && kedge[3*i+k1] >=0 && kedge[3*i+k2] >=0);
 	   Vertex * v12 = vertices + kedge[3*i+k0];
 	   Vertex * v02 = vertices + kedge[3*i+k1]; 
 	   Vertex * v01 = vertices + kedge[3*i+k2];
@@ -823,7 +823,7 @@ int  Triangles::SplitElement(int choice)
 	     // triangles[jj].SetDet();
 	   }
        // cout << " -- " << i << " " << nbmkadj << endl;
-       throwassert(nbmkadj<=13);// 13 = 6 + 4 + 3
+       assert(nbmkadj<=13);// 13 = 6 + 4 + 3
   
        if (kk==6)  newNbOfQuad+=3;
 	 //	 triangles[i].Draw();       

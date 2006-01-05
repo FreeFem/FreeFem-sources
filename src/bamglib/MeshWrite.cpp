@@ -357,7 +357,7 @@ void Triangles::Write_nopo(ostream &ff) const
 void Triangles::Write_am_fmt(ostream &f) const 
 {
   Int4 i,j;
-  throwassert(this && nbt);
+  assert(this && nbt);
   Int4 * reft = new Int4[nbt];
   Int4 nbInT =    ConsRefTriangle(reft);
   f.precision(12);
@@ -388,7 +388,7 @@ void Triangles::Write_am(ostream &ff) const
 {
   OFortranUnFormattedFile f(ff);  
   Int4 i,j;
-  throwassert(this && nbt);
+  assert(this && nbt);
   Int4 * reft = new Int4[nbt];
   Int4 nbInT =    ConsRefTriangle(reft);
   f.Record();
@@ -419,7 +419,7 @@ void Triangles::Write_ftq(ostream &f) const
 {
 
   Int4 i;
-  throwassert(this && nbt);
+  assert(this && nbt);
   Int4 * reft = new Int4[nbt];
   Int4 nbInT =    ConsRefTriangle(reft);
   f.precision(12);
@@ -453,7 +453,7 @@ void Triangles::Write_ftq(ostream &f) const
 	    << subdomains[reft[i]].ref << endl;
 	}
     }
-  throwassert(k == nele);
+  assert(k == nele);
   
   for (i=0;i<nbv;i++)
     f << vertices[i].r.x << " " << vertices[i].r.y 
@@ -465,7 +465,7 @@ void Triangles::Write_ftq(ostream &f) const
 void Triangles::Write_msh(ostream &f) const 
 {
   Int4 i;
-  throwassert(this && nbt);
+  assert(this && nbt);
   Int4 * reft = new Int4[nbt];
   Int4 nbInT =    ConsRefTriangle(reft);
   f.precision(12);
@@ -493,7 +493,7 @@ void Triangles::Write_msh(ostream &f) const
 
 void Triangles::Write_amdba(ostream &f) const 
 {
-  throwassert(this && nbt);
+  assert(this && nbt);
 
   Int4 i,j;
   Int4 * reft = new Int4[nbt];
@@ -575,7 +575,7 @@ void Triangles::WriteElements(ostream& f,Int4 * reft ,Int4 nbInT) const
 		  reft[Number(ta)] = num;
 	      }
 	 }
-       throwassert(k==0);
+       assert(k==0);
      }
      // warning reft is now the element number 
    }
@@ -624,15 +624,18 @@ ostream& operator <<(ostream& f, const   Triangles & Th)
 	 f << Th.Number(e[0])+1 << " " << Th.Number(e[1])+1;
 	f << " " << e.ref <<endl;
        }
-     f << "\nCrackedEdges\n"<< Th.NbCrackedEdges << endl;
-     for( ie=0;ie<Th.NbCrackedEdges;ie++)
-       { 
-	 Edge & e1 = *Th.CrackedEdges[ie].a.edge;
-	 Edge & e2 = *Th.CrackedEdges[ie].b.edge;
-	 f << Th.Number(e1)+1 << " " << Th.Number(e2)+1 <<endl;;
+     if(Th.NbCrackedEdges)
+       {
+	 f << "\nCrackedEdges\n"<< Th.NbCrackedEdges << endl;
+	 for( ie=0;ie<Th.NbCrackedEdges;ie++)
+	   { 
+	     Edge & e1 = *Th.CrackedEdges[ie].a.edge;
+	     Edge & e2 = *Th.CrackedEdges[ie].b.edge;
+	     f << Th.Number(e1)+1 << " " << Th.Number(e2)+1 <<endl;;
+	   }
        }
-
    }
+
    Th.WriteElements(f,reft,nbInT);
    {
      f << "\nSubDomainFromMesh\n" << Th.NbSubDomains<< endl ;
@@ -655,7 +658,7 @@ ostream& operator <<(ostream& f, const   Triangles & Th)
      for (Int4 i0=0;i0<Th.NbVerticesOnGeomVertex;i0++)
        {
 	 VertexOnGeom & v =Th.VerticesOnGeomVertex[i0];
-	 throwassert(v.OnGeomVertex()) ;
+	 assert(v.OnGeomVertex()) ;
 	 f << " " << Th.Number(( Vertex *)v)+1  
 	   << " " << Th.Gh.Number(( GeometricalVertex * )v)+1 
 	   << endl;
@@ -666,7 +669,7 @@ ostream& operator <<(ostream& f, const   Triangles & Th)
      for (Int4 i0=0;i0<Th.NbVerticesOnGeomEdge;i0++)
        {
 	 const VertexOnGeom & v =Th.VerticesOnGeomEdge[i0];
-	 throwassert(v.OnGeomEdge()) ;   
+	 assert(v.OnGeomEdge()) ;   
 	 f << " " << Th.Number((Vertex * )v)+1  ;
 	 f << " " << Th.Gh.Number((const  GeometricalEdge * )v)+1  ;
 	 f << " " << (Real8 ) v << endl;
@@ -718,7 +721,7 @@ ostream& operator <<(ostream& f, const   Triangles & Th)
        for(i=0;i<Th.NbVertexOnBThEdge;i++) {
 	 const VertexOnEdge & voe = Th.VertexOnBThEdge[i];
 	 Int4 iv = Th.Number(voe.v);
-	 //	 throwassert(mark[iv] == -1]);
+	 //	 assert(mark[iv] == -1]);
 	 mark[iv] = 1;
 	 f << iv+1 << " " << Th.BTh.Number(voe.be)+1 << " " << voe.abcisse <<  endl;}
        
@@ -750,7 +753,7 @@ ostream& operator <<(ostream& f, const   Triangles & Th)
 	       f << i+1 << Th.BTh.Number(tb)+1 << " " << det[1] << " " << det[2] <<endl;
 	     }
 	 }
-       throwassert(!k);
+       assert(!k);
        delete [] mark;
 	 
 
@@ -778,6 +781,7 @@ void Geometry::Write(const char * filename)
        f << *this;
     }
 }
+
 ostream& operator <<(ostream& f, const   Geometry & Gh) 
 {
    Int4  NbCorner=0;
@@ -788,29 +792,37 @@ ostream& operator <<(ostream& f, const   Geometry & Gh)
 //     WriteStr(f,Gh.identity);
 //     f <<endl;
    }
+   int nbreqv=0;
    { 
+     
      f.precision(12);
      f << "\nVertices\n" << Gh.nbv <<endl;
      for (Int4 i=0;i<Gh.nbv;i++)
        {
 	 GeometricalVertex & v =  Gh.vertices[i];
+	 if (v.Required()) nbreqv++;
 	 f << v.r.x << " " << v.r.y << " " << v.ref() << endl;
 	 if (v.Corner()) NbCorner++;
        }
    }
+   
    int nbcracked=0;
+
    {
+     int nbreq=0;
      f << "\nEdges\n"<< Gh.nbe << endl;
      for(Int4 ie=0;ie<Gh.nbe;ie++)
        { 
 	 
 	 GeometricalEdge & e = Gh.edges[ie];
+	 if (e.Required()) nbreq++;
 	 if (e.Cracked()) { 
 	   Int4 ie1 = Gh.Number(e.link);
 	   if (ie <= ie1)  ++nbcracked;}
 	 f << Gh.Number(e[0])+1 << " " << Gh.Number(e[1])+1;
-	f << " " << e.ref <<endl;
+	 f << " " << e.ref <<endl;
        }
+     
      if (nbcracked)
        {
 	 f << "\nCrackedEdges\n"<< nbcracked<< endl;
@@ -823,24 +835,50 @@ ostream& operator <<(ostream& f, const   Geometry & Gh)
 	     }
 	   }
        }
-
-       
+     if(nbreq)
+       {
+	 f << "\nRequiredEdges\n"<< nbreq<< endl;
+         for(Int4 ie=0;ie<Gh.nbe;ie++)
+           {
+             GeometricalEdge & e = Gh.edges[ie];
+             if (e.Required()) 
+	       f << ie+1 << endl;
+	   }
+       }
+     
+     
+     
    }
 
     f << "\nAngleOfCornerBound\n" 
      << Gh.MaximalAngleOfCorner*180/Pi << endl;
     if (NbCorner) 
-     {
-       f << "\nCorners\n" << NbCorner << endl;
-     for (Int4 i=0,j=0;i<Gh.nbv;i++)
-       {
-	 GeometricalVertex & v =  Gh.vertices[i];
-	 if (v.Corner()) 
-	   j++,f << Gh.Number(v)+1 << (j % 5 ? ' ' : '\n');
-       }
+      {
+	f << "\nCorners\n" << NbCorner << endl;
+	for (Int4 i=0,j=0;i<Gh.nbv;i++)
+	  {
+	    GeometricalVertex & v =  Gh.vertices[i];
+	    if (v.Corner()) 
+	      j++,f << Gh.Number(v)+1 << (j % 5 ? ' ' : '\n');
+	  }
         
-     }
-     { 
+      
+      }
+
+    if(nbreqv)
+      {
+	f << "\nRequiredVertices\n"<< nbreqv<< endl;
+	for (Int4 j=0,i=0;i<Gh.nbv;i++)
+	  {
+	    GeometricalVertex & v =  Gh.vertices[i];
+	    
+	    if (v.Required()) 
+	      j++,f << i+1 << (j % 5 ? ' ' : '\n');
+	  }
+	f << endl;
+      }
+    
+    { 
        Int4 i;
        f << "\nSubDomainFromGeom\n" ;
        f << Gh.NbSubDomains<< endl;
