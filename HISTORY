@@ -1,3 +1,105 @@
+2006-01-04 11:37  hecht
+
+	*   add read bamg geometry file with buildmesh function.
+
+2006-01-04 11:27  hecht
+
+	*  add build mesh from bamg geometry
+
+2006-01-04 10:18  lehyaric
+
+	* New Debian package.
+
+2005-12-30 21:13  hecht
+
+	*   add forget file distribution
+
+2005-12-30 15:37  hecht
+
+	*   correct pb under Windows change environment to ffenvironment
+	  (Global variable)
+
+2005-12-30 12:23  hecht
+
+	*   pb global.cpp
+
+2005-12-30 12:02  hecht
+
+	*  correct compile error
+
+2005-12-30 11:53  hecht
+
+	*   correct pb uneder Windows with environment, put the def in
+	  Global.cpp
+
+2005-12-30 10:57  hecht
+
+	*   The search directory of  load and include seems ok.
+	    pass to version 2.2-0
+
+2005-12-30 08:34  hecht
+
+	* correct environment.cpp under Windows (Pure) and add to
+	  bin-win32/Makefile
+
+	  CV
+	  ----------------------------------------------------------------------
+
+2005-12-29 17:30  hecht
+
+	*   add 3 environments varialbe FF_VERBOSITY, FF_INCLUDEPATH,
+	  FF_LOADPATH
+	     remark the separator is the ";" (in  test FH)
+
+2005-12-29 08:00  hecht
+
+	*  reman NSP1BR.edp in NSP2BRP0.edp
+
+2005-12-29 07:59  hecht
+
+	*  correct load.link (return compile compile error).
+
+2005-12-29 07:46  hecht
+
+	*  add missing files
+
+2005-12-28 15:00  hecht
+
+	* [no log message]
+
+2005-12-28 14:49  hecht
+
+	*   I make a huge cleanning in the figure of the DOC
+	    Now, all the missing figure is recreate in subdir cpfigs
+	    The archive is more than 3Mb less than the previous version.
+
+2005-12-27 22:26  hecht
+
+	*  correct the example++-load test
+
+2005-12-27 17:32  hecht
+
+	* Add two new finite element in examples++-load and change the doc
+	  for add new finite element and passe version 2-1.3.
+
+2005-12-27 07:54  hecht
+
+	*   add new Finite Element Bernardi-Raugel for Stokes or
+	  Navier-Stokes
+	    equation with dynamic link in  example++-load
+
+2005-12-26 17:28  hecht
+
+	*   Correct problem in boundary edge (lossing label numbers)  in
+	  adapated mesh, savemesh,
+	    in case of domain with internal unconnected boundary   (Thanks
+	  to O. Pironneau)
+
+2005-12-13 13:44  lehyaric
+
+	* Added first support for Doxygen documentation. Inline comments
+	  still need to be formatted to Doxygen standards.
+
 2005-12-12 16:46  lehyaric
 
 	* Changed --with-suffix configuration in configure.ac to avoid
