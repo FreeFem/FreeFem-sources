@@ -27,6 +27,9 @@
 /* Define to 1 if you have the <fftw3.h> header file. */
 #undef HAVE_FFTW3_H
 
+/* Define to 1 if you have the `getenv' function. */
+#undef HAVE_GETENV
+
 /* Define to 1 if you have the <GL/glx.h> header file. */
 #undef HAVE_GL_GLX_H
 
@@ -104,6 +107,9 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* A pure windows applications no cygwin dll */
+#undef PURE_WIN32
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

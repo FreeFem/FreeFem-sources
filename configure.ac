@@ -1031,14 +1031,6 @@ then
 fi
 #  def variable pour les makefiles 
 
-# Addind downloaded libraries
-# ---------------------------
-
-# downloaded libraries are not compiled yet, so they should be
-# specified last, to avoid posing problems for autoconf compilation
-# tests above.
-LIBS="$ff_arpack_libs $LIBS"
-
 # creating all makefiles
 # ----------------------
 
