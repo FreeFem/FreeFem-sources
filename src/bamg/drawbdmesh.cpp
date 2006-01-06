@@ -12,15 +12,23 @@
 // E-MAIL :   Frederic.Hecht@Inria.fr   
 //
 // ORIG-DATE:     Dec 97
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <string.h>
 #include <setjmp.h>
-#include <new.h>
-#include <assert.h>
+#include <new>
+#include <cassert>
 #include "Meshio.h"
 #include "Mesh2.h"
 #include "QuadTree.h"
+using namespace bamg; 
+long verbosity=2;
+
+#ifdef DRAWING 
+bool withrgraphique=true; 
+#else
+bool withrgraphique=false; 
+#endif
 //#include <fstream.h>
 int initgraph=0;
 void NewHandler();

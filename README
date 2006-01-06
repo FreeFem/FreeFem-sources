@@ -1,4 +1,5 @@
 Compilation of FreeFem++ under unix, MacOs 10 or cygwin (Window)
+and bamg (mesh generator)
 ----------------------------------------------------------------
 
 This file details specific configuration details for FreeFem++. For
@@ -169,3 +170,4 @@ is now working with the new g++3 compiler (default compiler in MacOs
 10.2) and also with g++-3.3.
 
 Note 3. Fast fourier exemple ( FFT )  is in dfft.edp  file
+

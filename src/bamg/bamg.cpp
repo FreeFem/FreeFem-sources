@@ -18,13 +18,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <setjmp.h>
-#include <new.h>
-#include <assert.h>
+#include <new>
+#include <cassert>
 #include "Meshio.h"
-#include <iomanip.h>
+#include <iomanip>
 #include "Mesh2.h"
 #include "QuadTree.h"
-#include <fstream.h>
+using namespace bamg;
+using namespace std;
+#include <fstream>
 #ifdef __MWERKS__
 #define   NBVMAX 10000
 #else
@@ -32,10 +34,10 @@
 #endif 
 //                       0         1         2         3
 //                       0123456789012345678901234567890
-const char whatbamg []= "@(#)INRIA, le 05 Avr 2001,  Bamg v0.68  ";
-const char *bamgversion = whatbamg + 28;
+const char whatbamg []= "@(#)LJLL, le 05 jan 2006,  Bamg v1.00  ";
+const char *bamgversion = whatbamg + 27;
 int initgraph=0;
-
+//long verbosity=2;
 
 #ifdef __MWERKS__
 #define R_OK 0
@@ -72,6 +74,12 @@ void  MeshErrorIO(ios& )
   MeshError(999);
   exit(1);
 }
+
+#ifdef DRAWING 
+bool withrgraphique=true; 
+#else
+bool withrgraphique=false; 
+#endif
 
 void forDebug()
 { 

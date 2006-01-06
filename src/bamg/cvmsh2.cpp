@@ -12,16 +12,23 @@
 // E-MAIL :   Frederic.Hecht@Inria.fr   
 //
 // ORIG-DATE:     Dec 97
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <string.h>
 #include <setjmp.h>
-#include <new.h>
-#include <assert.h>
+#include <new>
+#include <cassert>
 #include "Meshio.h"
 #include "Mesh2.h"
 #include "QuadTree.h"
-
+using namespace std;
+using namespace bamg;
+//long verbosity=2;
+#ifdef DRAWING 
+bool withrgraphique=true; 
+#else
+bool withrgraphique=false; 
+#endif
 #ifdef __MWERKS__
 #define R_OK 0
 #define F_OK 0
@@ -102,7 +109,7 @@ int main(int argc, char **argv)
   //    cout << "open file in " << fin<< endl;
   Triangles Th(fin,cutoffradian);
   if (!fgeom)
-    Th.Write(fout);
+    0; //    Th.Write( (const char *) fout);
   else
     {
       //      cout << " geom " << fgeom << endl;

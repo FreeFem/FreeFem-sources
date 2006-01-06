@@ -1072,6 +1072,7 @@ AC_OUTPUT(Makefile
 	src/mpi/Makefile
 	src/agl/Makefile
 	src/glx/Makefile
+	src/bamg/Makefile
 	examples++/Makefile
 	examples++-eigen/Makefile
 	examples++-tutorial/Makefile
