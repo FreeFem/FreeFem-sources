@@ -19,15 +19,19 @@
 #include <Carbon/Carbon.h>
     
 #include <AGL/agl.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+
 #endif
 #ifdef XGL
 #include <GL/glx.h>
 #include <X11/cursorfont.h>
 #include <X11/keysymdef.h>
 #endif
-
+#ifndef AGL
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 
 #include <sys/stat.h>
 
