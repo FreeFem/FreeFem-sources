@@ -3387,7 +3387,12 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 		  //  cout << " --------------New Curve phase " << phase 
 		  //       << "---------- A0=" << *A0 << ei[k0]  <<endl;
                   assert (A0-vertices>=0 && A0-vertices <nbv);
-                  
+                  if(ongequi->Required() ) 
+                        {
+                         GeometricalVertex *GA1 = *(*peequi)[1-k0equi].on;
+                         A1 = GA1->to;  //
+                        }       
+                  else 
                   for(;;) 
 		    {
 		      //   assert(pe && BTh.Number(pe)>=0 && BTh.Number(pe)<=BTh.nbe);
