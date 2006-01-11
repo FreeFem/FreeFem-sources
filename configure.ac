@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.2-0,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.2-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -554,11 +554,11 @@ then
 		if false
 		then
 			ff_download_blas=atlas-binary
-			ff_blas_lib="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas"
+			ff_blas_lib="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -llapack -lf77blas -latlas"
 			ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
 		else
 			ff_download_blas=atlas-source
-			ff_blas_lib="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas"
+			ff_blas_lib="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
 			ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
 		fi
 	fi
@@ -582,6 +582,9 @@ then
        ff_cblas_h=no)
 
 fi
+
+
+
 # Looking for ARPACK
 # ------------------
 
@@ -614,7 +617,12 @@ fi
 # because UMFPACK compilation will need it.
 
 AC_SUBST(G2CLIB,$ff_g2c_lib)
-
+#looking of  lapack
+ff_lapackdir='$(LAPACKdir)'
+if test `uname` = Darwin;
+then
+ff_lapackdir=
+fi
 # Arpack itself
 
 ff_arpack_ok=no   
@@ -657,7 +665,7 @@ then
 	then
 		AC_MSG_NOTICE(using downloaded Arpack)
 		AC_SUBST(DOWNLOAD_ARPACK,arpack)
-
+		AC_SUBST(FF_LAPACKdir,$ff_lapackdir)
 		# Do not update $LIBS, but create an extra LIB variable,
 		# because this lib does not exist yet, and this could make the
 		# following tests fail.

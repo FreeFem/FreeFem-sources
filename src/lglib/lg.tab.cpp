@@ -2292,7 +2292,7 @@ int Compile()
 
 int mymain (int  argc, char **argv)
 {
-  GetEnvironment();  
+
   size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;
@@ -2313,7 +2313,6 @@ int mymain (int  argc, char **argv)
   if ( ! getprog(cc,argc,argv)>0) 
     return 1; 
   zzzfff = new  mylex(cout);
-  zzzfff->input(cc);
     
   
 /*  
@@ -2355,7 +2354,8 @@ int mymain (int  argc, char **argv)
 #endif
  // callInitsFunct(); Pb opimisation 
    cout << endl;
-   
+  zzzfff->input(cc);
+  GetEnvironment();     
   retvalue= Compile(); 
       
 #ifdef PARALLELE

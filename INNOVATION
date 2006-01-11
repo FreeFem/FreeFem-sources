@@ -1,4 +1,23 @@
-V2.2-0
+V2.2-1
+ * Add init file to set verbosity, includepath  , loadpath and 
+   add preload (dynamic link file)
+   the file are under unix and MacOs
+	 /etc/freefem++.pref
+         /Users/hecht/.freefem++.pref
+         freefem++.pref
+   under windows
+         freefem++.pref
+   and the syntaxe of the files is
+
+     verbosity= 5
+     loadpath += "/Library/FreeFem++/lib"
+     loadpath += "/Users/hecht/Library/FreeFem++/lib"
+     includepath  += "/Library/FreeFem++/edp"
+     includepath  += "/Users/hecht/Library/FreeFem++/edp"
+     #  comment 
+     load += "funcTemplate" 
+     load += "myfunction" 
+
  * Add search directory for include, and load  under Unix and Windows
    Just on the shell sh  set environment variable
     export FF_VERBOSITY=50 
