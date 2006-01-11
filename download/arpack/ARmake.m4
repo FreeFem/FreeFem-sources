@@ -54,7 +54,7 @@ SRCdir       = $(home)/SRC
 # | NOTE: ARPACK assumes the use of LAPACK version 2 codes.           |
 # %-------------------------------------------------------------------%
 #
-DIRS         = $(LAPACKdir) $(UTILdir) $(SRCdir)
+DIRS         = FF_LAPACKdir  $(UTILdir) $(SRCdir)
 #
 # %---------------------------------------------------%
 # | The name of the libraries to be created/linked to |

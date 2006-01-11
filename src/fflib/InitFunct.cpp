@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <deque>
 #include <iostream>
-
 using namespace std;
 typedef void  (* afunc)(); 
 typedef pair<int,afunc> InitFunct;
@@ -36,3 +35,4 @@ void  addInitFunct(int i,void  (* f)())
   getInitFunctlist()->push_back(make_pair(i,f));
 //  cout << " addInitFunct: " << i << " " << f << endl; 
 }
+
