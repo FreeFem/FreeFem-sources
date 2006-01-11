@@ -780,14 +780,31 @@
 		3D90DC81097012B3002A1826 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)";
 				COPY_PHASE_STRIP = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					CHECK_KN,
+					BAMG_LONG_LONG,
+					DRAWING,
+					"$(GCC_PREPROCESSOR_DEFINITIONS)",
+				);
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
+				PRODUCT_NAME = "FreeFem++";
 			};
 			name = Debug;
 		};
 		3D90DC82097012B3002A1826 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)";
 				COPY_PHASE_STRIP = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					BAMG_LONG_LONG,
+					DRAWING,
+					"$(GCC_PREPROCESSOR_DEFINITIONS)",
+				);
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
+				PRODUCT_NAME = "FreeFem++";
 			};
 			name = Release;
 		};
@@ -915,6 +932,8 @@
 					Foundation,
 					"-framework",
 					AppKit,
+					"-framework",
+					Carbon,
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = macglrgaph;
@@ -943,6 +962,8 @@
 					Foundation,
 					"-framework",
 					AppKit,
+					"-framework",
+					Carbon,
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = macglrgaph;

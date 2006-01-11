@@ -255,9 +255,9 @@ static XColor DefColorSansG( int k,int nb, bool hsv,bool grey,int nbcolors,float
 extern void DefColor(float & r, float & g, float & b,
               int k,int nb, bool hsv,bool grey,int nbcolors,float *colors);
  DefColor(r,g,b,   k,nb,hsv,grey,nbcolors,colors);
- C.red=65535*r;
- C.green=65535*g;
- C.blue=65535*b;
+ C.red= (short unsigned int) (65535*r);
+ C.green=(short unsigned int)(65535*g);
+ C.blue= (short unsigned int) (65535*b);
  return C;
 } 
 void SetColorTable1(int nb,bool hsv,int nbcolors,float *colors)
