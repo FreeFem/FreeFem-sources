@@ -28,11 +28,17 @@ AM_MAINTAINER_MODE
 # Necessary compilers
 AC_PROG_CXX
 
-AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available (BLAS, ARPACK and UMFPACK need it)])
+AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPACK need it)])
+     ff_g2c_lib="";	 
 if test "$enable_fortran" != no
 then
 	AC_PROG_F77
-	AC_F77_LIBRARY_LDFLAGS
+#	AC_F77_LIBRARY_LDFLAGS   modif FH
+	AC_ARG_WITH(flib,[  --with-flib= the fortran library ])
+	if test "$with_flib" != no -o -n  "$with_flib"
+	then 
+	  ff_g2c_lib=$with_flib
+	fi
 fi
 
 AC_ARG_ENABLE(c,[  --disable-c		No C compiler available (C BLAS need it)])
@@ -401,11 +407,13 @@ AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARP
 
 #replacing wget with another command
 ff_wget_command=wget
+ff_wget=no
+
 AC_ARG_WITH(wget,
 	[  --with-wget=command	Replace "wget" with another command. Implies --enable-download],
 	   enable_download=yes
+	   ff_wget=yes
 	   ff_wget_command="${withval}")
-AC_SUBST(WGET,$ff_wget_command)
 
 if test "$enable_generic_blas" = yes
 then
@@ -413,12 +421,22 @@ then
 fi
 
 #enabling downloads
-if test "$enable_download" = yes
+if test "$enable_download" = yes -a "$ff_wget" = no 
 then
+	ff_wget=""
 	AC_CHECK_PROG(ff_wget,wget,yes,no)
-else
-	ff_wget=no
 fi
+if test "$enable_download" = yes -a "$ff_wget" = no 
+then
+	ff_wget=""
+	AC_CHECK_PROG(ff_wget,curl,yes,no)
+	if test "$ff_wget" = "yes" 
+	then
+	ff_wget_command="curl -O"
+	fi
+fi
+
+AC_SUBST(WGET,$ff_wget_command)
 
 #  modif FH -----
 #  -- looking for cadna  
@@ -593,6 +611,8 @@ fi
 
 if test "$ff_blas_ok" = yes;
 then
+       if test  -z "$ff_g2c_lib" 
+       then
 	ff_g2c_ok=no
 	AC_CHECK_LIB(g2c,G77_second_0,
 		LIBS="$LIBS -lg2c"
@@ -611,10 +631,11 @@ then
 			LIBS="$ff_save_libs")
 		AC_MSG_RESULT($ff_g2c_ok)
 	fi
+	fi
 fi
 
 # Copy the result of g2c investigations into a separate variable
-# because UMFPACK compilation will need it.
+# because BLAS compilation will need it.
 
 AC_SUBST(G2CLIB,$ff_g2c_lib)
 #looking of  lapack
@@ -923,9 +944,14 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 
 # For development purposes, we may need to use X libraries instead of
 # native libraries (mainly to run the programs remotely)
-
+AC_ARG_WITH(fltk,[  --with-fltk	( default if --enable-download) ])
 AC_ARG_WITH(xfltk,[  --with-xfltk	When recompiling FLTK, use X libraries instead of native Win32 or MacOS])
 
+if test "$with_fltk" = no 
+then 
+     ff_fltk=no
+	AC_MSG_NOTICE(without FLTK)
+else
 # under mingw use download fltk version
 if test "$ff_mingw" = yes 
 then
@@ -1004,6 +1030,7 @@ then
 	then
 		AC_SUBST(FLTK_XONLY,"--with-x")
 	fi
+fi
 fi
 
 # Flex compatibility with Bison
