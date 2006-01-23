@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3D58206F097ABD7800A02509 /* libarpack_G4.dylib in Resources */ = {isa = PBXBuildFile; fileRef = 3DA236E4097A573800B02601 /* libarpack_G4.dylib */; };
 		3D90DCA70970155D002A1826 /* lg.tab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DC9E0970155D002A1826 /* lg.tab.cpp */; };
 		3D90DCA80970155D002A1826 /* lg.tab.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D90DCA00970155D002A1826 /* lg.tab.hpp */; };
 		3D90DD37097015B4002A1826 /* AddNewFE.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D90DCDC097015B4002A1826 /* AddNewFE.h */; };
@@ -50,9 +51,6 @@
 		3D90DD8C097015B5002A1826 /* throwassert.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D90DD35097015B4002A1826 /* throwassert.hpp */; };
 		3D90DD8D097015B5002A1826 /* versionnumber.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D90DD36097015B4002A1826 /* versionnumber.hpp */; };
 		3D90DDE509704FBE002A1826 /* libcadnafree.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D90DDE409704FBE002A1826 /* libcadnafree.a */; };
-		3D90DDE709704FEE002A1826 /* libarpack_ff++.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D90DDE609704FEE002A1826 /* libarpack_ff++.a */; };
-		3D90DDE909705047002A1826 /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D90DDE809705047002A1826 /* libumfpack.a */; };
-		3D90DDEB09705084002A1826 /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D90DDEA09705084002A1826 /* libamd.a */; };
 		3D90DDEE097050AC002A1826 /* vecLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D90DDED097050AC002A1826 /* vecLib.framework */; };
 		3DC6297309723F8E00D487F6 /* Mesh2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC6296009723F8E00D487F6 /* Mesh2.cpp */; };
 		3DC6297409723F8E00D487F6 /* Mesh2.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DC6296109723F8E00D487F6 /* Mesh2.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -97,7 +95,6 @@
 		3DC629E30972430700D487F6 /* gibbs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629D00972430700D487F6 /* gibbs.cpp */; };
 		3DC629E70972430700D487F6 /* mshptg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629D40972430700D487F6 /* mshptg.cpp */; };
 		3DC629E90972430700D487F6 /* QuadratureFormular.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629D60972430700D487F6 /* QuadratureFormular.cpp */; };
-		3DC629F40972453200D487F6 /* libg2c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DC629F30972453200D487F6 /* libg2c.a */; };
 		3DC62A5009726FB400D487F6 /* DefColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62A050972539900D487F6 /* DefColor.cpp */; };
 		3DC62AAD09728E0D00D487F6 /* sansrgraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62A030972538B00D487F6 /* sansrgraph.cpp */; settings = {COMPILER_FLAGS = "-I(SRCROOT)/.."; }; };
 		3DC62ACC0972918200D487F6 /* libff++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D90DC8C097012DB002A1826 /* libff++.dylib */; };
@@ -146,7 +143,7 @@
 		3D90DC8C097012DB002A1826 /* libff++.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = "libff++.dylib"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D90DC9E0970155D002A1826 /* lg.tab.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = lg.tab.cpp; sourceTree = "<group>"; };
 		3D90DCA00970155D002A1826 /* lg.tab.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = lg.tab.hpp; sourceTree = "<group>"; };
-		3D90DCA20970155D002A1826 /* lg.y */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.yacc; path = lg.y; sourceTree = "<group>"; };
+		3D90DCA20970155D002A1826 /* lg.y */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.yacc; path = lg.y; sourceTree = "<group>"; };
 		3D90DCDC097015B4002A1826 /* AddNewFE.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; path = AddNewFE.h; sourceTree = "<group>"; };
 		3D90DCDD097015B4002A1826 /* AFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = AFunction.cpp; sourceTree = "<group>"; };
 		3D90DCDE097015B4002A1826 /* AFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = AFunction.hpp; sourceTree = "<group>"; };
@@ -188,10 +185,10 @@
 		3D90DD35097015B4002A1826 /* throwassert.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = throwassert.hpp; sourceTree = "<group>"; };
 		3D90DD36097015B4002A1826 /* versionnumber.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = versionnumber.hpp; sourceTree = "<group>"; };
 		3D90DDE409704FBE002A1826 /* libcadnafree.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcadnafree.a; path = ../download/cadna/libcadnafree.a; sourceTree = SOURCE_ROOT; };
-		3D90DDE609704FEE002A1826 /* libarpack_ff++.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libarpack_ff++.a"; path = "../download/arpack/ARPACK/libarpack_ff++.a"; sourceTree = SOURCE_ROOT; };
-		3D90DDE809705047002A1826 /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = ../download/umfpack/UMFPACKv4.4/UMFPACK/Lib/libumfpack.a; sourceTree = SOURCE_ROOT; };
-		3D90DDEA09705084002A1826 /* libamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.a; path = ../download/umfpack/UMFPACKv4.4/AMD/Lib/libamd.a; sourceTree = SOURCE_ROOT; };
 		3D90DDED097050AC002A1826 /* vecLib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = vecLib.framework; path = /System/Library/Frameworks/vecLib.framework; sourceTree = "<absolute>"; };
+		3DA236E3097A573800B02601 /* libamd.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libamd.dylib; path = ../../LinearSolver/lib/libamd.dylib; sourceTree = SOURCE_ROOT; };
+		3DA236E4097A573800B02601 /* libarpack_G4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.bundle"; name = libarpack_G4.dylib; path = ../../LinearSolver/lib/libarpack_G4.dylib; sourceTree = SOURCE_ROOT; };
+		3DA236E5097A573800B02601 /* libumfpack.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; name = libumfpack.dylib; path = ../../LinearSolver/lib/libumfpack.dylib; sourceTree = SOURCE_ROOT; };
 		3DC6296009723F8E00D487F6 /* Mesh2.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh2.cpp; path = ../src/bamglib/Mesh2.cpp; sourceTree = SOURCE_ROOT; };
 		3DC6296109723F8E00D487F6 /* Mesh2.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Mesh2.h; path = ../src/bamglib/Mesh2.h; sourceTree = SOURCE_ROOT; };
 		3DC6296209723F8E00D487F6 /* MeshDraw.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MeshDraw.cpp; path = ../src/bamglib/MeshDraw.cpp; sourceTree = SOURCE_ROOT; };
@@ -235,7 +232,6 @@
 		3DC629D00972430700D487F6 /* gibbs.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = gibbs.cpp; path = ../src/femlib/gibbs.cpp; sourceTree = SOURCE_ROOT; };
 		3DC629D40972430700D487F6 /* mshptg.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = mshptg.cpp; path = ../src/femlib/mshptg.cpp; sourceTree = SOURCE_ROOT; };
 		3DC629D60972430700D487F6 /* QuadratureFormular.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = QuadratureFormular.cpp; path = ../src/femlib/QuadratureFormular.cpp; sourceTree = SOURCE_ROOT; };
-		3DC629F30972453200D487F6 /* libg2c.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libg2c.a; path = /sw/lib/libg2c.a; sourceTree = "<absolute>"; };
 		3DC62A030972538B00D487F6 /* sansrgraph.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 5; name = sansrgraph.cpp; path = ../src/Graphics/sansrgraph.cpp; sourceTree = SOURCE_ROOT; };
 		3DC62A050972539900D487F6 /* DefColor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DefColor.cpp; path = ../src/Graphics/DefColor.cpp; sourceTree = SOURCE_ROOT; };
 		3DC62AA509728D7C00D487F6 /* freefem++-nw */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "freefem++-nw"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -254,11 +250,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D90DDE509704FBE002A1826 /* libcadnafree.a in Frameworks */,
-				3D90DDE709704FEE002A1826 /* libarpack_ff++.a in Frameworks */,
-				3D90DDE909705047002A1826 /* libumfpack.a in Frameworks */,
-				3D90DDEB09705084002A1826 /* libamd.a in Frameworks */,
 				3D90DDEE097050AC002A1826 /* vecLib.framework in Frameworks */,
-				3DC629F40972453200D487F6 /* libg2c.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -384,12 +376,11 @@
 		3D90DDE309704FA0002A1826 /* Lib */ = {
 			isa = PBXGroup;
 			children = (
+				3DA236E3097A573800B02601 /* libamd.dylib */,
+				3DA236E4097A573800B02601 /* libarpack_G4.dylib */,
+				3DA236E5097A573800B02601 /* libumfpack.dylib */,
 				3D90DDED097050AC002A1826 /* vecLib.framework */,
-				3D90DDEA09705084002A1826 /* libamd.a */,
-				3D90DDE809705047002A1826 /* libumfpack.a */,
-				3D90DDE609704FEE002A1826 /* libarpack_ff++.a */,
 				3D90DDE409704FBE002A1826 /* libcadnafree.a */,
-				3DC629F30972453200D487F6 /* libg2c.a */,
 			);
 			name = Lib;
 			sourceTree = "<group>";
@@ -673,6 +664,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D58206F097ABD7800A02509 /* libarpack_G4.dylib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -828,13 +820,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_SEARCH_PATHS = (
 					"$(LIBRARY_SEARCH_PATHS)",
-					"$(SRCROOT)/../src/lglib",
-					"$(SRCROOT)/../src/fflib",
 					"$(SRCROOT)/../download/cadna",
-					"$(SRCROOT)/../download/arpack/ARPACK",
-					"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib",
-					"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib",
-					/sw/lib,
 				);
 				PREBINDING = NO;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
@@ -862,13 +848,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_SEARCH_PATHS = (
 					"$(LIBRARY_SEARCH_PATHS)",
-					"$(SRCROOT)/../src/lglib",
-					"$(SRCROOT)/../src/fflib",
 					"$(SRCROOT)/../download/cadna",
-					"$(SRCROOT)/../download/arpack/ARPACK",
-					"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib",
-					"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib",
-					/sw/lib,
 				);
 				PREBINDING = NO;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;

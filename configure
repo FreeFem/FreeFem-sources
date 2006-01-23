@@ -311,7 +311,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 FLIBS CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ WIN32DLLTARGET OPTIM_TYPE ADD_PACKAGE_NAME X11_LIBS CXXCPP EGREP ff_mpirun MPIPROG WGET ff_wget ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIB BLASINC G2CLIB DOWNLOAD_ARPACK FF_LAPACKdir ARPACKLIB EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK FF_UMFPACK_CONFIG UMFPACKLIB ff_libtool STATICTOOL LOAD_TESTS LOAD_COMPILE DYLIB_SUFFIX ff_latex ff_makeindex ff_dvips ff_pdf2ps ff_epstopdf ff_convert DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION GLXPROG AGLPROG X11PROG IDEPROG LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ WIN32DLLTARGET OPTIM_TYPE ADD_PACKAGE_NAME X11_LIBS CXXCPP EGREP ff_mpirun MPIPROG ff_wget WGET ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIB BLASINC G2CLIB DOWNLOAD_ARPACK FF_LAPACKdir ARPACKLIB EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK FF_UMFPACK_CONFIG UMFPACKLIB ff_libtool STATICTOOL LOAD_TESTS LOAD_COMPILE DYLIB_SUFFIX ff_latex ff_makeindex ff_dvips ff_pdf2ps ff_epstopdf ff_convert DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION GLXPROG AGLPROG X11PROG IDEPROG LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -869,7 +869,7 @@ Optional Features:
 			  (and sometimes confusing) to the casual installer
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
-  --disable-fortran	No Fortran compiler available (BLAS, ARPACK and UMFPACK need it)
+  --disable-fortran	No Fortran compiler available ( ARPACK need it)
   --disable-c		No C compiler available (C BLAS need it)
   --disable-default-fltk	Does not use default FLTK
   --enable-cygwindll	Forces the use of the Cygwin DLL (not recommended)
@@ -885,6 +885,7 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-flib= the fortran library
   --with-suffix=G3/G4/G4,P4,.. or --without-suffix (default no suffix to package name)
   --with-suffix=G3/G4/G4,P4,.. or --without-suffix (default no suffix package name)
   --with-mpi=mpich/lam/yes/no	or --without-mpi	Choose MPI implementation (default is mpich)
@@ -893,6 +894,7 @@ Optional Packages:
   --with-arpack=library	Use a specific version of Arpack
   --with-amd=library	Use a specific version of AMD
   --with-umfpack=library	Use a specific version of Umfpack
+  --with-fltk	( default if --enable-download)
   --with-xfltk	When recompiling FLTK, use X libraries instead of native Win32 or MacOS
 
 Some influential environment variables:
@@ -2676,6 +2678,7 @@ if test "${enable_fortran+set}" = set; then
   enableval="$enable_fortran"
 
 fi;
+     ff_g2c_lib="";
 if test "$enable_fortran" != no
 then
 	ac_ext=f
@@ -2770,7 +2773,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:2773:" \
+echo "$as_me:2776:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -2914,308 +2917,17 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+#	AC_F77_LIBRARY_LDFLAGS   modif FH
 
-ac_ext=f
-ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
-ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_f77_compiler_gnu
-echo "$as_me:$LINENO: checking how to get verbose linking output from $F77" >&5
-echo $ECHO_N "checking how to get verbose linking output from $F77... $ECHO_C" >&6
-if test "${ac_cv_prog_f77_v+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-      program main
+# Check whether --with-flib or --without-flib was given.
+if test "${with_flib+set}" = set; then
+  withval="$with_flib"
 
-      end
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_f77_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_prog_f77_v=
-# Try some options frequently used verbose output
-for ac_verb in -v -verbose --verbose -V -\#\#\#; do
-  cat >conftest.$ac_ext <<_ACEOF
-      program main
-
-      end
-_ACEOF
-
-# Compile and link our simple test program by passing a flag (argument
-# 1 to this macro) to the Fortran compiler in order to get
-# "verbose" output that we can then parse for the Fortran linker
-# flags.
-ac_save_FFLAGS=$FFLAGS
-FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:2969: \"$ac_link\") >&5
-ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
-echo "$ac_f77_v_output" >&5
-FFLAGS=$ac_save_FFLAGS
-
-rm -f conftest*
-
-# On HP/UX there is a line like: "LPATH is: /foo:/bar:/baz" where
-# /foo, /bar, and /baz are search directories for the Fortran linker.
-# Here, we change these into -L/foo -L/bar -L/baz (and put it first):
-ac_f77_v_output="`echo $ac_f77_v_output |
-	grep 'LPATH is:' |
-	sed 's,.*LPATH is\(: *[^ ]*\).*,\1,;s,: */, -L/,g'` $ac_f77_v_output"
-
-case $ac_f77_v_output in
-  # If we are using xlf then replace all the commas with spaces.
-  *xlfentry*)
-    ac_f77_v_output=`echo $ac_f77_v_output | sed 's/,/ /g'` ;;
-
-  # With Intel ifc, ignore the quoted -mGLOB_options_string stuff (quoted
-  # $LIBS confuse us, and the libraries appear later in the output anyway).
-  *mGLOB_options_string*)
-    ac_f77_v_output=`echo $ac_f77_v_output | sed 's/\"-mGLOB[^\"]*\"/ /g'` ;;
-
-  # If we are using Cray Fortran then delete quotes.
-  # Use "\"" instead of '"' for font-lock-mode.
-  # FIXME: a more general fix for quoted arguments with spaces?
-  *cft90*)
-    ac_f77_v_output=`echo $ac_f77_v_output | sed "s/\"//g"` ;;
-esac
-
-
-  # look for -l* and *.a constructs in the output
-  for ac_arg in $ac_f77_v_output; do
-     case $ac_arg in
-        [\\/]*.a | ?:[\\/]*.a | -[lLRu]*)
-          ac_cv_prog_f77_v=$ac_verb
-          break 2 ;;
-     esac
-  done
-done
-if test -z "$ac_cv_prog_f77_v"; then
-   { echo "$as_me:$LINENO: WARNING: cannot determine how to obtain linking information from $F77" >&5
-echo "$as_me: WARNING: cannot determine how to obtain linking information from $F77" >&2;}
-fi
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-{ echo "$as_me:$LINENO: WARNING: compilation failed" >&5
-echo "$as_me: WARNING: compilation failed" >&2;}
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-echo "$as_me:$LINENO: result: $ac_cv_prog_f77_v" >&5
-echo "${ECHO_T}$ac_cv_prog_f77_v" >&6
-echo "$as_me:$LINENO: checking for Fortran libraries of $F77" >&5
-echo $ECHO_N "checking for Fortran libraries of $F77... $ECHO_C" >&6
-if test "${ac_cv_f77_libs+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test "x$FLIBS" != "x"; then
-  ac_cv_f77_libs="$FLIBS" # Let the user override the test.
-else
-
-cat >conftest.$ac_ext <<_ACEOF
-      program main
-
-      end
-_ACEOF
-
-# Compile and link our simple test program by passing a flag (argument
-# 1 to this macro) to the Fortran compiler in order to get
-# "verbose" output that we can then parse for the Fortran linker
-# flags.
-ac_save_FFLAGS=$FFLAGS
-FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:3047: \"$ac_link\") >&5
-ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
-echo "$ac_f77_v_output" >&5
-FFLAGS=$ac_save_FFLAGS
-
-rm -f conftest*
-
-# On HP/UX there is a line like: "LPATH is: /foo:/bar:/baz" where
-# /foo, /bar, and /baz are search directories for the Fortran linker.
-# Here, we change these into -L/foo -L/bar -L/baz (and put it first):
-ac_f77_v_output="`echo $ac_f77_v_output |
-	grep 'LPATH is:' |
-	sed 's,.*LPATH is\(: *[^ ]*\).*,\1,;s,: */, -L/,g'` $ac_f77_v_output"
-
-case $ac_f77_v_output in
-  # If we are using xlf then replace all the commas with spaces.
-  *xlfentry*)
-    ac_f77_v_output=`echo $ac_f77_v_output | sed 's/,/ /g'` ;;
-
-  # With Intel ifc, ignore the quoted -mGLOB_options_string stuff (quoted
-  # $LIBS confuse us, and the libraries appear later in the output anyway).
-  *mGLOB_options_string*)
-    ac_f77_v_output=`echo $ac_f77_v_output | sed 's/\"-mGLOB[^\"]*\"/ /g'` ;;
-
-  # If we are using Cray Fortran then delete quotes.
-  # Use "\"" instead of '"' for font-lock-mode.
-  # FIXME: a more general fix for quoted arguments with spaces?
-  *cft90*)
-    ac_f77_v_output=`echo $ac_f77_v_output | sed "s/\"//g"` ;;
-esac
-
-
-
-ac_cv_f77_libs=
-
-# Save positional arguments (if any)
-ac_save_positional="$@"
-
-set X $ac_f77_v_output
-while test $# != 1; do
-  shift
-  ac_arg=$1
-  case $ac_arg in
-        [\\/]*.a | ?:[\\/]*.a)
-            ac_exists=false
-  for ac_i in $ac_cv_f77_libs; do
-    if test x"$ac_arg" = x"$ac_i"; then
-      ac_exists=true
-      break
-    fi
-  done
-
-  if test x"$ac_exists" = xtrue; then
-  :
-else
-  ac_cv_f77_libs="$ac_cv_f77_libs $ac_arg"
-fi
-
-          ;;
-        -bI:*)
-            ac_exists=false
-  for ac_i in $ac_cv_f77_libs; do
-    if test x"$ac_arg" = x"$ac_i"; then
-      ac_exists=true
-      break
-    fi
-  done
-
-  if test x"$ac_exists" = xtrue; then
-  :
-else
-  if test "$ac_compiler_gnu" = yes; then
-  for ac_link_opt in $ac_arg; do
-    ac_cv_f77_libs="$ac_cv_f77_libs -Xlinker $ac_link_opt"
-  done
-else
-  ac_cv_f77_libs="$ac_cv_f77_libs $ac_arg"
-fi
-fi
-
-          ;;
-          # Ignore these flags.
-        -lang* | -lcrt[01].o | -lcrtbegin.o | -lc | -lgcc | -libmil | -LANG:=*)
-          ;;
-        -lkernel32)
-          test x"$CYGWIN" != xyes && ac_cv_f77_libs="$ac_cv_f77_libs $ac_arg"
-          ;;
-        -[LRuY])
-          # These flags, when seen by themselves, take an argument.
-          # We remove the space between option and argument and re-iterate
-          # unless we find an empty arg or a new option (starting with -)
-	  case $2 in
-	     "" | -*);;
-	     *)
-		ac_arg="$ac_arg$2"
-		shift; shift
-		set X $ac_arg "$@"
-		;;
-	  esac
-          ;;
-        -YP,*)
-          for ac_j in `echo $ac_arg | sed -e 's/-YP,/-L/;s/:/ -L/g'`; do
-              ac_exists=false
-  for ac_i in $ac_cv_f77_libs; do
-    if test x"$ac_j" = x"$ac_i"; then
-      ac_exists=true
-      break
-    fi
-  done
-
-  if test x"$ac_exists" = xtrue; then
-  :
-else
-  ac_arg="$ac_arg $ac_j"
-                               ac_cv_f77_libs="$ac_cv_f77_libs $ac_j"
-fi
-
-          done
-          ;;
-        -[lLR]*)
-            ac_exists=false
-  for ac_i in $ac_cv_f77_libs; do
-    if test x"$ac_arg" = x"$ac_i"; then
-      ac_exists=true
-      break
-    fi
-  done
-
-  if test x"$ac_exists" = xtrue; then
-  :
-else
-  ac_cv_f77_libs="$ac_cv_f77_libs $ac_arg"
-fi
-
-          ;;
-          # Ignore everything else.
-  esac
-done
-# restore positional arguments
-set X $ac_save_positional; shift
-
-# We only consider "LD_RUN_PATH" on Solaris systems.  If this is seen,
-# then we insist that the "run path" must be an absolute path (i.e. it
-# must begin with a "/").
-case `(uname -sr) 2>/dev/null` in
-   "SunOS 5"*)
-      ac_ld_run_path=`echo $ac_f77_v_output |
-                        sed -n 's,^.*LD_RUN_PATH *= *\(/[^ ]*\).*$,-R\1,p'`
-      test "x$ac_ld_run_path" != x &&
-        if test "$ac_compiler_gnu" = yes; then
-  for ac_link_opt in $ac_ld_run_path; do
-    ac_cv_f77_libs="$ac_cv_f77_libs -Xlinker $ac_link_opt"
-  done
-else
-  ac_cv_f77_libs="$ac_cv_f77_libs $ac_ld_run_path"
-fi
-      ;;
-esac
-fi # test "x$[]_AC_LANG_PREFIX[]LIBS" = "x"
-
-fi
-echo "$as_me:$LINENO: result: $ac_cv_f77_libs" >&5
-echo "${ECHO_T}$ac_cv_f77_libs" >&6
-FLIBS="$ac_cv_f77_libs"
-
-
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
+fi;
+	if test "$with_flib" != no -o -n  "$with_flib"
+	then
+	  ff_g2c_lib=$with_flib
+	fi
 fi
 
 # Check whether --enable-c or --disable-c was given.
@@ -4849,7 +4561,8 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	echo "$as_me:$LINENO: checking whether the Fortran 77 compiler accepts -O3" >&5
+
+echo "$as_me:$LINENO: checking whether the Fortran 77 compiler accepts -O3" >&5
 echo $ECHO_N "checking whether the Fortran 77 compiler accepts -O3... $ECHO_C" >&6
 	check_save_flags="$FFLAGS"
 	ac_ext=f
@@ -8349,15 +8062,16 @@ fi;
 
 #replacing wget with another command
 ff_wget_command=wget
+ff_wget=no
+
 
 # Check whether --with-wget or --without-wget was given.
 if test "${with_wget+set}" = set; then
   withval="$with_wget"
   enable_download=yes
+	   ff_wget=yes
 	   ff_wget_command="${withval}"
 fi;
-WGET=$ff_wget_command
-
 
 if test "$enable_generic_blas" = yes
 then
@@ -8365,8 +8079,9 @@ then
 fi
 
 #enabling downloads
-if test "$enable_download" = yes
+if test "$enable_download" = yes -a "$ff_wget" = no
 then
+	ff_wget=""
 	# Extract the first word of "wget", so it can be a program name with args.
 set dummy wget; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -8403,9 +8118,54 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-else
-	ff_wget=no
 fi
+if test "$enable_download" = yes -a "$ff_wget" = no
+then
+	ff_wget=""
+	# Extract the first word of "curl", so it can be a program name with args.
+set dummy curl; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_ff_wget+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ff_wget"; then
+  ac_cv_prog_ff_wget="$ff_wget" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_ff_wget="yes"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  test -z "$ac_cv_prog_ff_wget" && ac_cv_prog_ff_wget="no"
+fi
+fi
+ff_wget=$ac_cv_prog_ff_wget
+if test -n "$ff_wget"; then
+  echo "$as_me:$LINENO: result: $ff_wget" >&5
+echo "${ECHO_T}$ff_wget" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+	if test "$ff_wget" = "yes"
+	then
+	ff_wget_command="curl -O"
+	fi
+fi
+
+WGET=$ff_wget_command
+
 
 #  modif FH -----
 #  -- looking for cadna
@@ -9414,6 +9174,8 @@ fi
 
 if test "$ff_blas_ok" = yes;
 then
+       if test  -z "$ff_g2c_lib"
+       then
 	ff_g2c_ok=no
 	echo "$as_me:$LINENO: checking for G77_second_0 in -lg2c" >&5
 echo $ECHO_N "checking for G77_second_0 in -lg2c... $ECHO_C" >&6
@@ -9549,10 +9311,11 @@ rm -f conftest.err conftest.$ac_objext \
 		echo "$as_me:$LINENO: result: $ff_g2c_ok" >&5
 echo "${ECHO_T}$ff_g2c_ok" >&6
 	fi
+	fi
 fi
 
 # Copy the result of g2c investigations into a separate variable
-# because UMFPACK compilation will need it.
+# because BLAS compilation will need it.
 
 G2CLIB=$ff_g2c_lib
 
@@ -11231,6 +10994,11 @@ STD_LIBS=$ff_std_libs
 # For development purposes, we may need to use X libraries instead of
 # native libraries (mainly to run the programs remotely)
 
+# Check whether --with-fltk or --without-fltk was given.
+if test "${with_fltk+set}" = set; then
+  withval="$with_fltk"
+
+fi;
 
 # Check whether --with-xfltk or --without-xfltk was given.
 if test "${with_xfltk+set}" = set; then
@@ -11238,6 +11006,12 @@ if test "${with_xfltk+set}" = set; then
 
 fi;
 
+if test "$with_fltk" = no
+then
+     ff_fltk=no
+	{ echo "$as_me:$LINENO: without FLTK" >&5
+echo "$as_me: without FLTK" >&6;}
+else
 # under mingw use download fltk version
 if test "$ff_mingw" = yes
 then
@@ -11394,6 +11168,7 @@ then
 		FLTK_XONLY="--with-x"
 
 	fi
+fi
 fi
 
 # Flex compatibility with Bison
@@ -12182,7 +11957,6 @@ s,@am__fastdepCXX_FALSE@,$am__fastdepCXX_FALSE,;t t
 s,@F77@,$F77,;t t
 s,@FFLAGS@,$FFLAGS,;t t
 s,@ac_ct_F77@,$ac_ct_F77,;t t
-s,@FLIBS@,$FLIBS,;t t
 s,@CC@,$CC,;t t
 s,@CFLAGS@,$CFLAGS,;t t
 s,@ac_ct_CC@,$ac_ct_CC,;t t
@@ -12202,8 +11976,8 @@ s,@CXXCPP@,$CXXCPP,;t t
 s,@EGREP@,$EGREP,;t t
 s,@ff_mpirun@,$ff_mpirun,;t t
 s,@MPIPROG@,$MPIPROG,;t t
-s,@WGET@,$WGET,;t t
 s,@ff_wget@,$ff_wget,;t t
+s,@WGET@,$WGET,;t t
 s,@ff_unzip@,$ff_unzip,;t t
 s,@GENERIC_BLAS@,$GENERIC_BLAS,;t t
 s,@GENERIC_BLAS_BUILT_SOURCES@,$GENERIC_BLAS_BUILT_SOURCES,;t t
