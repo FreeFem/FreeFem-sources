@@ -9495,7 +9495,13 @@ echo "$as_me: using downloaded Arpack" >&6;}
 		# following tests fail.
                 ff_arpack_libs="-L${curdir}/download/arpack/ARPACK -larpack_ff++"
 		ff_arpack_ok=yes
+
 	fi
+fi
+if test  "$ff_arpack_ok" != yes
+ then
+	    { echo "$as_me:$LINENO: -- NO ARPACK --  wget: $ff_wget" >&5
+echo "$as_me: -- NO ARPACK --  wget: $ff_wget" >&6;}
 fi
 
 # Do not insert ARPACK libs in $LIBS yet, because they may not exist
@@ -10012,8 +10018,8 @@ fi
 # If all else fails, download!
 if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes
    then
-	{ echo "$as_me:$LINENO: using downloaded Umfpack" >&5
-echo "$as_me: using downloaded Umfpack" >&6;}
+	{ echo "$as_me:$LINENO: using downloaded UMFPACK" >&5
+echo "$as_me: using downloaded UMFPACK" >&6;}
 	DOWNLOAD_UMFPACK=umfpack
 
 
@@ -10032,6 +10038,12 @@ _ACEOF
 
 	fi
 	ff_umfpack_ok=yes
+fi
+
+if test "$ff_umfpack_ok" = no
+then
+	 { echo "$as_me:$LINENO: -- NOT  UMFPACK  ff_wget = $ff_wget" >&5
+echo "$as_me: -- NOT  UMFPACK  ff_wget = $ff_wget" >&6;}
 fi
 
 UMFPACKLIB=$ff_umfpack_lib
