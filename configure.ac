@@ -692,7 +692,12 @@ then
 		# following tests fail.
                 ff_arpack_libs="-L${curdir}/download/arpack/ARPACK -larpack_ff++"
 		ff_arpack_ok=yes
+
 	fi
+fi
+if test  "$ff_arpack_ok" != yes 
+ then
+	    AC_MSG_NOTICE(-- NO ARPACK --  wget: $ff_wget)
 fi
 
 # Do not insert ARPACK libs in $LIBS yet, because they may not exist
@@ -765,7 +770,7 @@ fi
 # If all else fails, download!
 if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes 
    then
-	AC_MSG_NOTICE(using downloaded Umfpack)
+	AC_MSG_NOTICE(using downloaded UMFPACK)
 	AC_SUBST(DOWNLOAD_UMFPACK,umfpack)
 
 	# Do not update $LIBS, but create an extra LIB variable,
@@ -778,6 +783,11 @@ if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes
   	AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS)
 	fi
 	ff_umfpack_ok=yes
+fi
+
+if test "$ff_umfpack_ok" = no
+then
+	 AC_MSG_NOTICE( -- NOT  UMFPACK  ff_wget = $ff_wget)
 fi
 
 AC_SUBST(UMFPACKLIB,$ff_umfpack_lib)
