@@ -101,11 +101,11 @@ then
 
 	case $ff_machine  in
 	  ppc7450) # G4
-		ff_fast="$ff_fast -mtune=G4";;
+		ff_fast="$ff_fast -mtune=G4 -mcpu=G4";;
           ppc970) # G5 
 	        # remove -fstrict-aliasing on G5 to much optim the
 	        # code cash in GC
-		ff_fast="`echo $ff_fast -mtune=G5| sed 's/-fstrict-aliasing //g'`";;
+		ff_fast="`echo $ff_fast -mtune=G5 -mcpu=G5| sed 's/-fstrict-aliasing //g'`";;
           ppc*) # G3 ????
 	       ff_fast="-O3";;
 	  i486)
