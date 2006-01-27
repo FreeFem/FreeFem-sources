@@ -4257,7 +4257,7 @@ CYGWIN*)
 	if test "$enable_cygwindll" != yes
 	then
                 ff_mingw=yes
-               enable_cygwindll=no;
+                enable_cygwindll=no;
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
 		FFLAGS="$FFLAGS -mno-cygwin"
 		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
@@ -4869,7 +4869,7 @@ if test "$enable_debug" != yes \
     -a "$enable_generic" != yes
 then
 
-    # MacOS X
+    # MacOS X Darwin
     if test -x /usr/bin/hostinfo
 	then
 
@@ -4886,53 +4886,46 @@ echo "${ECHO_T}$ff_gcc4" >&6
 	# optimizated code on G5.
 	echo "$as_me:$LINENO: checking PowerPC architecture" >&5
 echo $ECHO_N "checking PowerPC architecture... $ECHO_C" >&6
-
-        # CPU detection
-	ff_cpu=unkown
-	ff_optim_type=
-	if test `/usr/bin/hostinfo|grep ppc7450|wc -l` -gt 0
+	ff_machine=`/usr/bin/machine`
+        ff_fast="-O3"
+	if test `uname` = Darwin
 	    then
-	    ff_cpu=G4
-	    ff_optim_type=-G4
-	elif test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
-	    then
-	    ff_cpu=G5
-	    ff_optim_type=-G5
-	fi
-	if test $ff_cpu = unknown;
-	    then
-	    { { echo "$as_me:$LINENO: error: cannot determine PowerPC cpu type" >&5
-echo "$as_me: error: cannot determine PowerPC cpu type" >&2;}
-   { (exit 1); exit 1; }; }
-	fi
-	echo "$as_me:$LINENO: result: $ff_cpu" >&5
-echo "${ECHO_T}$ff_cpu" >&6
-
-
-	if test `/usr/bin/hostinfo|grep Darwin|wc -l` -gt 0 \
-		-a $ff_cpu != G5
-	    then
-
 	    # Optimization flags: -fast option do not work because the
 	    # -malign-natural flags create wrong IO code
             if test  "$ff_gcc4" -eq 4
 	    then
-             ff_fast='-fast '
+               ff_fast='-fPIC  -fast'
             else
-	    ff_fast='-funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
+	      ff_fast='-fPIC -O3 -funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
 	    fi
-	    # Specific PowerPC G5 optimization
-	    if test "$ff_cpu" = G5;
-		then
+	fi
 
+
+        # CPU detection
+
+	case $ff_machine  in
+	  ppc7450) # G4
+		ff_fast="$ff_fast -mtune=G4";;
+          ppc970) # G5
 	        # remove -fstrict-aliasing on G5 to much optim the
 	        # code cash in GC
+		ff_fast="`echo $ff_fast -mtune=G5| sed 's/-fstrict-aliasing //g'`";;
+          ppc*) # G3 ????
+	       ff_fast="-O3";;
+	  i486)
+	    ff_fast="-O3 -march=pentium4";;
+	  *)
+	    { { echo "$as_me:$LINENO: error: cannot determine apple cpu type " >&5
+echo "$as_me: error: cannot determine apple cpu type " >&2;}
+   { (exit 1); exit 1; }; }
+	    ff_fast="-O3";;
+	 esac
 
-		ff_fast="`echo $ff_fast| sed 's/-fstrict-aliasing //g'`"
 
-	    fi
+	echo "$as_me:$LINENO: result: $ff_fast" >&5
+echo "${ECHO_T}$ff_fast" >&6
 
-	    echo "$as_me:$LINENO: checking whether the C compiler accepts $ff_fast" >&5
+        echo "$as_me:$LINENO: checking whether the C compiler accepts $ff_fast" >&5
 echo $ECHO_N "checking whether the C compiler accepts $ff_fast... $ECHO_C" >&6
 	check_save_flags="$CFLAGS"
 	ac_ext=c
@@ -5009,7 +5002,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	    echo "$as_me:$LINENO: checking whether the C++ compiler accepts $ff_fast" >&5
+	echo "$as_me:$LINENO: checking whether the C++ compiler accepts $ff_fast" >&5
 echo $ECHO_N "checking whether the C++ compiler accepts $ff_fast... $ECHO_C" >&6
 	check_save_flags="$CXXFLAGS"
 	ac_ext=cc
@@ -5086,7 +5079,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	    echo "$as_me:$LINENO: checking whether the Fortran 77 compiler accepts $ff_fast" >&5
+	echo "$as_me:$LINENO: checking whether the Fortran 77 compiler accepts $ff_fast" >&5
 echo $ECHO_N "checking whether the Fortran 77 compiler accepts $ff_fast... $ECHO_C" >&6
 	check_save_flags="$FFLAGS"
 	ac_ext=f
@@ -5151,458 +5144,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	fi
 
-	# CPU reference: PowerPC G4
-	if test "$ff_cpu" = G4;
-	    then
-	    echo "$as_me:$LINENO: checking whether the C compiler accepts -mcpu=7450" >&5
-echo $ECHO_N "checking whether the C compiler accepts -mcpu=7450... $ECHO_C" >&6
-	check_save_flags="$CFLAGS"
-	ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-	CFLAGS="$CFLAGS -mcpu=7450"
-
-	# The program needs to contain something for the test source
-	# file to be created by autoconf.
-
-	# Some options really need to be linked (not only compiled) to
-	# check whether they work.
-
-	cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  check_flag_ok=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-check_flag_ok=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	echo "$as_me:$LINENO: result: $check_flag_ok" >&5
-echo "${ECHO_T}$check_flag_ok" >&6
-	if test "$check_flag_ok" = no;
-	then
-		CFLAGS="$check_save_flags"
-	fi
-
-	ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-	    echo "$as_me:$LINENO: checking whether the C++ compiler accepts -mcpu=7450" >&5
-echo $ECHO_N "checking whether the C++ compiler accepts -mcpu=7450... $ECHO_C" >&6
-	check_save_flags="$CXXFLAGS"
-	ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-	CXXFLAGS="$CXXFLAGS -mcpu=7450"
-
-	# The program needs to contain something for the test source
-	# file to be created by autoconf.
-
-	# Some options really need to be linked (not only compiled) to
-	# check whether they work.
-
-	cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  check_flag_ok=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-check_flag_ok=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	echo "$as_me:$LINENO: result: $check_flag_ok" >&5
-echo "${ECHO_T}$check_flag_ok" >&6
-	if test "$check_flag_ok" = no;
-	then
-		CXXFLAGS="$check_save_flags"
-	fi
-
-	ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-	    echo "$as_me:$LINENO: checking whether the Fortran 77 compiler accepts -mcpu=7450" >&5
-echo $ECHO_N "checking whether the Fortran 77 compiler accepts -mcpu=7450... $ECHO_C" >&6
-	check_save_flags="$FFLAGS"
-	ac_ext=f
-ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
-ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_f77_compiler_gnu
-
-	FFLAGS="$FFLAGS -mcpu=7450"
-
-	# The program needs to contain something for the test source
-	# file to be created by autoconf.
-
-	# Some options really need to be linked (not only compiled) to
-	# check whether they work.
-
-	cat >conftest.$ac_ext <<_ACEOF
-       program x
-       end
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_f77_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  check_flag_ok=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-check_flag_ok=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	echo "$as_me:$LINENO: result: $check_flag_ok" >&5
-echo "${ECHO_T}$check_flag_ok" >&6
-	if test "$check_flag_ok" = no;
-	then
-		FFLAGS="$check_save_flags"
-	fi
-
-	ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-
-	# CPU reference: PowerPC G5
-	elif test "$ff_cpu" = G5;
-	    then
-
-	    # but at least this way we can see
-	    # that the automatic detection worked.
-
-	    echo "$as_me:$LINENO: checking whether the C compiler accepts -mcpu=G5" >&5
-echo $ECHO_N "checking whether the C compiler accepts -mcpu=G5... $ECHO_C" >&6
-	check_save_flags="$CFLAGS"
-	ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-	CFLAGS="$CFLAGS -mcpu=G5"
-
-	# The program needs to contain something for the test source
-	# file to be created by autoconf.
-
-	# Some options really need to be linked (not only compiled) to
-	# check whether they work.
-
-	cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  check_flag_ok=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-check_flag_ok=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	echo "$as_me:$LINENO: result: $check_flag_ok" >&5
-echo "${ECHO_T}$check_flag_ok" >&6
-	if test "$check_flag_ok" = no;
-	then
-		CFLAGS="$check_save_flags"
-	fi
-
-	ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-	    echo "$as_me:$LINENO: checking whether the C++ compiler accepts -mcpu=G5" >&5
-echo $ECHO_N "checking whether the C++ compiler accepts -mcpu=G5... $ECHO_C" >&6
-	check_save_flags="$CXXFLAGS"
-	ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-	CXXFLAGS="$CXXFLAGS -mcpu=G5"
-
-	# The program needs to contain something for the test source
-	# file to be created by autoconf.
-
-	# Some options really need to be linked (not only compiled) to
-	# check whether they work.
-
-	cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  check_flag_ok=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-check_flag_ok=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	echo "$as_me:$LINENO: result: $check_flag_ok" >&5
-echo "${ECHO_T}$check_flag_ok" >&6
-	if test "$check_flag_ok" = no;
-	then
-		CXXFLAGS="$check_save_flags"
-	fi
-
-	ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-	    echo "$as_me:$LINENO: checking whether the Fortran 77 compiler accepts -mcpu=G5" >&5
-echo $ECHO_N "checking whether the Fortran 77 compiler accepts -mcpu=G5... $ECHO_C" >&6
-	check_save_flags="$FFLAGS"
-	ac_ext=f
-ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
-ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_f77_compiler_gnu
-
-	FFLAGS="$FFLAGS -mcpu=G5"
-
-	# The program needs to contain something for the test source
-	# file to be created by autoconf.
-
-	# Some options really need to be linked (not only compiled) to
-	# check whether they work.
-
-	cat >conftest.$ac_ext <<_ACEOF
-       program x
-       end
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_f77_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  check_flag_ok=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-check_flag_ok=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	echo "$as_me:$LINENO: result: $check_flag_ok" >&5
-echo "${ECHO_T}$check_flag_ok" >&6
-	if test "$check_flag_ok" = no;
-	then
-		FFLAGS="$check_save_flags"
-	fi
-
-	ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-	fi
 
     # Linux
     elif test -f /proc/cpuinfo
@@ -9174,10 +8716,12 @@ fi
 
 if test "$ff_blas_ok" = yes;
 then
-       if test  -z "$ff_g2c_lib"
+       if test  -n "$ff_g2c_lib"
        then
-	ff_g2c_ok=no
-	echo "$as_me:$LINENO: checking for G77_second_0 in -lg2c" >&5
+           LIBS="$LIBS $ff_g2c_lib"
+       else
+	  ff_g2c_ok=no
+	  echo "$as_me:$LINENO: checking for G77_second_0 in -lg2c" >&5
 echo $ECHO_N "checking for G77_second_0 in -lg2c... $ECHO_C" >&6
 if test "${ac_cv_lib_g2c_G77_second_0+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9248,8 +8792,8 @@ if test $ac_cv_lib_g2c_G77_second_0 = yes; then
 fi
 
 
-	if test "$ff_g2c_ok" = no;
-	then
+	  if test "$ff_g2c_ok" = no;
+	     then
 	        echo "$as_me:$LINENO: checking for G77_second_0 in /sw/lib/libg2c.a" >&5
 echo $ECHO_N "checking for G77_second_0 in /sw/lib/libg2c.a... $ECHO_C" >&6
 		ff_save_libs="$LIBS"
@@ -9310,7 +8854,7 @@ rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 		echo "$as_me:$LINENO: result: $ff_g2c_ok" >&5
 echo "${ECHO_T}$ff_g2c_ok" >&6
-	fi
+	  fi
 	fi
 fi
 
@@ -9468,7 +9012,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   ff_arpack_ok=yes
-                ff_arpack_libs=$ff_lib_arpack
+                ff_arpack_libs="$ff_lib_arpack"
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5

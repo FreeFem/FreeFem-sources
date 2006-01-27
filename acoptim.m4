@@ -68,86 +68,60 @@ if test "$enable_debug" != yes \
     -a "$enable_generic" != yes
 then
 
-    # MacOS X
+    # MacOS X Darwin
     if test -x /usr/bin/hostinfo
 	then
-
+        
 
 	# If we are on MacOS X to choise the optimisaztion 
 	AC_MSG_CHECKING(GCC version)
 
-        ff_gcc4=`gcc  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'` 
+        ff_gcc4=`$CC  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'` 
 	AC_MSG_RESULT($ff_gcc4)
 
 	# At the moment, we do not know how to produce correct
 	# optimizated code on G5.
 	AC_MSG_CHECKING(PowerPC architecture)
-
-        # CPU detection
-	ff_cpu=unkown
-	ff_optim_type=
-	if test `/usr/bin/hostinfo|grep ppc7450|wc -l` -gt 0
+	ff_machine=`/usr/bin/machine`
+        ff_fast="-O3"
+	if test `uname` = Darwin 
 	    then
-	    ff_cpu=G4
-	    ff_optim_type=-G4
-	elif test `/usr/bin/hostinfo|grep ppc970|wc -l` -gt 0
-	    then
-	    ff_cpu=G5
-	    ff_optim_type=-G5
-	fi
-	if test $ff_cpu = unknown;
-	    then
-	    AC_MSG_ERROR(cannot determine PowerPC cpu type)
-	fi
-	AC_MSG_RESULT($ff_cpu)
-
-
-	if test `/usr/bin/hostinfo|grep Darwin|wc -l` -gt 0 \
-		-a $ff_cpu != G5
-	    then
-
 	    # Optimization flags: -fast option do not work because the
 	    # -malign-natural flags create wrong IO code
             if test  "$ff_gcc4" -eq 4 
 	    then
-             ff_fast='-fast '
+               ff_fast='-fPIC  -fast'
             else
-	    ff_fast='-funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
+	      ff_fast='-fPIC -O3 -funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
 	    fi
-	    # Specific PowerPC G5 optimization
-	    if test "$ff_cpu" = G5;
-		then
+	fi        
 
+
+        # CPU detection
+
+	case $ff_machine  in
+	  ppc7450) # G4
+		ff_fast="$ff_fast -mtune=G4";;
+          ppc970) # G5 
 	        # remove -fstrict-aliasing on G5 to much optim the
 	        # code cash in GC
+		ff_fast="`echo $ff_fast -mtune=G5| sed 's/-fstrict-aliasing //g'`";;
+          ppc*) # G3 ????
+	       ff_fast="-O3";;
+	  i486)
+	    ff_fast="-O3 -march=pentium4";;
+	  *)
+	    AC_MSG_ERROR(cannot determine apple cpu type )
+	    ff_fast="-O3";;
+	 esac
 
-		ff_fast="`echo $ff_fast| sed 's/-fstrict-aliasing //g'`"
 
-	    fi
+	AC_MSG_RESULT($ff_fast)
 
-	    CHECK_COMPILE_FLAG(C,$ff_fast,CFLAGS)
-	    CHECK_COMPILE_FLAG(C++,$ff_fast,CXXFLAGS)
-	    CHECK_COMPILE_FLAG(Fortran 77,$ff_fast,FFLAGS)
-	fi
+        CHECK_COMPILE_FLAG(C,$ff_fast,CFLAGS)
+	CHECK_COMPILE_FLAG(C++,$ff_fast,CXXFLAGS)
+	CHECK_COMPILE_FLAG(Fortran 77,$ff_fast,FFLAGS)
 
-	# CPU reference: PowerPC G4
-	if test "$ff_cpu" = G4;
-	    then
-	    CHECK_COMPILE_FLAG(C,-mcpu=7450,CFLAGS)
-	    CHECK_COMPILE_FLAG(C++,-mcpu=7450,CXXFLAGS)
-	    CHECK_COMPILE_FLAG(Fortran 77,-mcpu=7450,FFLAGS)
-
-	# CPU reference: PowerPC G5
-	elif test "$ff_cpu" = G5;
-	    then
-
-	    # but at least this way we can see
-	    # that the automatic detection worked.
-
-	    CHECK_COMPILE_FLAG(C,-mcpu=G5,CFLAGS)
-	    CHECK_COMPILE_FLAG(C++,-mcpu=G5,CXXFLAGS)
-	    CHECK_COMPILE_FLAG(Fortran 77,-mcpu=G5,FFLAGS)
-	fi
 
     # Linux
     elif test -f /proc/cpuinfo
