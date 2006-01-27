@@ -18,7 +18,7 @@ install-exec-local:: INSTALL_APP_$(AGLPROG)
 INSTALL_APP_FreeFem++-agl::
 	echo Install /Applications/FreeFem++.app;
 	rm -rf /Applications/FreeFem++.app;
-	zcat FreeFem++.app.tgz|(cd /Applications;tar xf -) ;
+	gunzip -c  FreeFem++.app.tgz|(cd /Applications;tar xf -) ;
 	sed <Info-plist.am >/Applications/FreeFem++.app/Contents/Info.plist           \
 		-e "s/@VVERSION@/$(VERSION)-$(FREEFEM_PACKAGING)/g" -e "s/@DATE@/`date`/g" ;
 	cp $(AGLPROG) /Applications/FreeFem++.app/Contents/FreeFem++.app/FreeFem++
