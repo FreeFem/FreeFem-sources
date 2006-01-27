@@ -61,7 +61,8 @@ DIRS         = $(LAPACKdir) $(UTILdir) $(SRCdir)
 # %---------------------------------------------------%
 #
 ARPACKLIB  = $(home)/libarpack_$(PLAT).a
-LAPACKLIB = $(home)/liblapack_$(PLAT).a
+# if lapack is compile the we build un archive (more simple)
+LAPACKLIB =  $(ARPACKLIB)
 #BLASLIB = 
 #
 ALIBS =  $(ARPACKLIB) $(LAPACKLIB) $(BLASLIB) 
