@@ -122,7 +122,7 @@ CYGWIN*)
 	if test "$enable_cygwindll" != yes
 	then
                 ff_mingw=yes 
-               enable_cygwindll=no;
+                enable_cygwindll=no;
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
 		FFLAGS="$FFLAGS -mno-cygwin"
 		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
@@ -611,16 +611,18 @@ fi
 
 if test "$ff_blas_ok" = yes;
 then
-       if test  -z "$ff_g2c_lib" 
+       if test  -n "$ff_g2c_lib"
        then
-	ff_g2c_ok=no
-	AC_CHECK_LIB(g2c,G77_second_0,
+           LIBS="$LIBS $ff_g2c_lib"       
+       else 
+	  ff_g2c_ok=no
+	  AC_CHECK_LIB(g2c,G77_second_0,
 		LIBS="$LIBS -lg2c"
 		ff_g2c_lib="-lg2c"
 		ff_g2c_ok=yes)
 
-	if test "$ff_g2c_ok" = no;
-	then
+	  if test "$ff_g2c_ok" = no;
+	     then
 	        AC_MSG_CHECKING(for G77_second_0 in /sw/lib/libg2c.a)
 		ff_save_libs="$LIBS"
 		LIBS="$LIBS -L/sw/lib -lg2c"
@@ -630,7 +632,7 @@ then
 			ff_g2c_ok=yes,
 			LIBS="$ff_save_libs")
 		AC_MSG_RESULT($ff_g2c_ok)
-	fi
+	  fi
 	fi
 fi
 
@@ -676,7 +678,7 @@ then
         AC_LINK_IFELSE(
                 [AC_LANG_CALL(,dsaupd_)],
                 ff_arpack_ok=yes
-                ff_arpack_libs=$ff_lib_arpack)
+                ff_arpack_libs="$ff_lib_arpack")
         AC_MSG_RESULT($ff_arpack_ok)
     fi
 
