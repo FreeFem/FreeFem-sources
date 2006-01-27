@@ -5,7 +5,9 @@
 #include <string>
 #include <algorithm>
 
-
+#ifdef PURE_WIN32
+#include <windows.h>
+#endif
 
 
 #ifdef HAVE_GETENV
