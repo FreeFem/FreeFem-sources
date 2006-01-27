@@ -421,12 +421,12 @@ then
 fi
 
 #enabling downloads
-if test "$enable_download" = yes -a "$ff_wget" = no 
+if test  "$ff_wget" = no 
 then
 	ff_wget=""
 	AC_CHECK_PROG(ff_wget,wget,yes,no)
 fi
-if test "$enable_download" = yes -a "$ff_wget" = no 
+if test  "$ff_wget" = no 
 then
 	ff_wget=""
 	AC_CHECK_PROG(ff_wget,curl,yes,no)
