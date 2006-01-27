@@ -956,7 +956,7 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 
 # For development purposes, we may need to use X libraries instead of
 # native libraries (mainly to run the programs remotely)
-AC_ARG_WITH(fltk,[  --with-fltk	( default if --enable-download) ])
+AC_ARG_WITH(fltk,[  --without-fltk	(to suppress explicity    --enable-download imply --with-fltk ) ])
 AC_ARG_WITH(xfltk,[  --with-xfltk	When recompiling FLTK, use X libraries instead of native Win32 or MacOS])
 
 if test "$with_fltk" = no 
@@ -1018,6 +1018,7 @@ then
 	# successive runs without restart.
         
 	ff_ideprog="FreeFem++-ide${EXEEXT} FreeFem++-cs${EXEEXT} FreeFem++-client${EXEEXT} FreeFem++-server${EXEEXT}"
+	ff_idetest="./testhighlight.sh"
 	if test "$enable_cygwindll" = yes 
 	 then
            AC_SUBST(FLTK_CONFIG_PARAM,"--enable-localzlib --enable-cygwin")
@@ -1086,6 +1087,9 @@ AC_SUBST(GLXPROG,$ff_glxprog)
 AC_SUBST(AGLPROG,$ff_aglprog)
 AC_SUBST(X11PROG,$ff_x11prog)
 AC_SUBST(IDEPROG,$ff_ideprog)
+# The final test program
+AC_SUBST(IDE_TESTS,$ff_idetest)
+
 
 # All makefiles
 AC_OUTPUT(Makefile
