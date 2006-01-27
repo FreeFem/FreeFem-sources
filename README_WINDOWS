@@ -46,6 +46,7 @@ BUG in LAPACK with -O optim flag
 the file ARPACK/LAPACK/dlamch.f 
 symptome: the code loop.
 correct the Makefile.m4 to
+
 inforce the compilation flag
 
 REMARK:
@@ -62,3 +63,10 @@ make documentation
 
 to build the setup file, use  inno setup on file WindowsPackage.iss
 the setup file is in output directory
+
+The compilation flag use to build the version
+
+for a P4 compile on petium-m vaio VGN-S2XP
+./configure '--enable-optim' '--enable-download' '--with-suffix=P4'
+for the generic :
+./configure '--enable-download' '--enable-generic' '--enable-optim' '--with-blas=/home/UNIVERSITE/blas/generic-no-cygwin-blas.dll' 'CPPFLAGS=-I/home/UNIVERSITE/blas/'
