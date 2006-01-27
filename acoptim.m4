@@ -90,9 +90,9 @@ then
 	    # -malign-natural flags create wrong IO code
             if test  "$ff_gcc4" -eq 4 
 	    then
-               ff_fast='-fPIC  -fast'
+               ff_fast='-fast -fPIC'
             else
-	      ff_fast='-fPIC -O3 -funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math -mdynamic-no-pic -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
+	      ff_fast='-fPIC -O3 -funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math  -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
 	    fi
 	fi        
 
