@@ -7621,7 +7621,7 @@ then
 fi
 
 #enabling downloads
-if test "$enable_download" = yes -a "$ff_wget" = no
+if test  "$ff_wget" = no
 then
 	ff_wget=""
 	# Extract the first word of "wget", so it can be a program name with args.
@@ -7661,7 +7661,7 @@ echo "${ECHO_T}no" >&6
 fi
 
 fi
-if test "$enable_download" = yes -a "$ff_wget" = no
+if test  "$ff_wget" = no
 then
 	ff_wget=""
 	# Extract the first word of "curl", so it can be a program name with args.
