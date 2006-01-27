@@ -641,7 +641,8 @@ fi
 
 AC_SUBST(G2CLIB,$ff_g2c_lib)
 #looking of  lapack
-ff_lapackdir='$(LAPACKdir)'
+# warning $$ because the make eat one 
+ff_lapackdir='$$(LAPACKdir)'
 if test `uname` = Darwin;
 then
 ff_lapackdir=

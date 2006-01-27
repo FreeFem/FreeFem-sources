@@ -360,18 +360,18 @@ all-local: $(DOWNLOAD_ARPACK)
 arpack: $(ARPACKLIB)
 
 $(ARPACKLIB): ARPACK 
-	if [ -n "@FF_LAPACKdir@" ] ; then \
+	if [ -n '@FF_LAPACKdir@' ] ; then \
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
 	fi; \
 	cd ARPACK && make lib 
 
 ARPACK: arpack96.tar.gz patch.tar.gz ARmake.m4
-	gunzip -c arpack96.tar.gz | tar xvf -
-	gunzip -c patch.tar.gz | tar xvf -
+	gunzip -c arpack96.tar.gz | tar xf -
+	gunzip -c patch.tar.gz | tar xf -
 	m4 -DFF_BLASLIB="$(BLASLIB)" \
 	   -DFF_FC="@F77@" \
            -DFF_FFLAGS="@FFLAGS@" \
-	   -DFF_LAPACKdir="@FF_LAPACKdir@" \
+	   -DFF_LAPACKdir='@FF_LAPACKdir@' \
            -DFF_LDFLAGS="@LDFLAGS@" \
            -DFF_HOME=`pwd`/ARPACK \
 	    ARmake.m4 >ARPACK/ARmake.inc

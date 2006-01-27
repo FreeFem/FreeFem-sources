@@ -2,7 +2,7 @@ How to compile FreeFem++ on Microsoft Windows
 ---------------------------------------------
 
 1) Download and install Cygwin from http://www.cygwin.com. Make sure
-that the development tools Automake, Autoconf and GNU C++ are
+that the development tools Automake, Autoconf and GNU C++ , C , g77 are
 installed.
 
 2) Download and extract the FreeFem++ source archive from
@@ -47,3 +47,18 @@ the file ARPACK/LAPACK/dlamch.f
 symptome: the code loop.
 correct the Makefile.m4 to
 inforce the compilation flag
+
+REMARK:
+All the exe and .dll are in 
+src/bin-win32 
+
+To build the install program you must get inno Setup 5 sofware
+http://www.jrsoftware.org/isinfo.php
+and the the cygwin package tex, pdflatex, ImageMagick , ghostscript 
+
+
+make WindowsPackage.iss
+make documentation
+
+to build the setup file, use  inno setup on file WindowsPackage.iss
+the setup file is in output directory
