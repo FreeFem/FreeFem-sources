@@ -163,15 +163,21 @@ libcblas_a_CPPFLAGS=-DADD_
 # "xerbla" exists in both BLAS and CBLAS. So we need to rename it to
 # obtain two different object files.
 
-BLAS: blas.tgz
+BLAS:BLAS/fait
+
+BLAS/fait:blas.tgz
 	mkdir -p BLAS
 	cd BLAS && tar xvzf ../blas.tgz
 	cp BLAS/xerbla.f blas_xerbla.f
+	touch BLAS/fait
 $(F77BLAS_SOURCES): BLAS
 
-CBLAS: cblas.tgz
+CBLAS:CCBAS/fait
+
+CBLAS/fait: cblas.tgz
 	tar xvzf cblas.tgz
-$(CBLAS_SOURCES): CBLAS
+	touch CBLAS/fait
+$(CBLAS_SOURCES): CBLAS/fait
 
 blas.tgz:
 	@WGET@ -N http://www.netlib.org/blas/blas.tgz

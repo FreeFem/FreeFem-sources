@@ -517,6 +517,9 @@ void MatriceProfile<R>::cholesky(double eps) const {
   if (L != U) ERREUR(factorise,"Skyline matrix non symmetric");
   U = 0; // 
   typefac = FactorizationCholeski;
+  if ( norm(D[0]) <= 1.0e-60)
+      ERREUR(cholesky,"pivot (" << 0 << ")= " << D[0] )
+  
   D[0] = sqrt(D[0]); 
   ij = L ; // pointeur sur le terme ij de la matrice avec j<i 
   for (i=1;i<this->n;i++) // boucle sur les lignes 
@@ -537,7 +540,8 @@ void MatriceProfile<R>::cholesky(double eps) const {
       *ij =  -s/D[j] ;
       xii -= *ij * *ij ;
       }
-    if ( norm(xii) < eps2*norm(D[i])) 
+    // cout << norm(xii) << " " << Max(eps2*norm(D[i]),1.0e-60) << " " << sqrt(xii) <<endl;
+    if ( norm(xii) <= Max(eps2*norm(D[i]),1.0e-60)) 
       ERREUR(cholesky,"pivot (" << i << ")= " << xii << " < " << eps*abs(D[i]))
     D[i] = sqrt(xii);
     }

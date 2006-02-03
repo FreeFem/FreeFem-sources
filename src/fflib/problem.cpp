@@ -2308,7 +2308,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
       cout  << "          min " << (u_h[i])->x()->min() << "  max " << (u_h[i])->x()->max() << endl ;
     }
     delete [] LL;
-    if (save) delete save; // clean memorie
+    if (save) delete save; // clean memory
     *mps=mp;
     return SetAny<const Problem *>(this);
 }
