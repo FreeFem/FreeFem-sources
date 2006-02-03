@@ -200,6 +200,23 @@ AnyType FFor(Stack s ,Expression i0,Expression i1,Expression i2,Expression ins)
   return a;
 }
 
+AnyType TTry(Stack s ,Expression ins,Expression ccatch,Expression fin,Expression notused)
+{ 
+  assert(notused == 0);
+  AnyType a;
+     try  {a=(*ins)(s);}
+     catch ( E_exception & e) { 
+        throw e; 
+       }
+     catch(...) {
+        if(verbosity> 2) cerr << "Try:: catch (...) exception " << endl;
+        a=(*ccatch)(s);         
+     }
+   
+   a=(*fin)(s);
+  return a;
+}
+
 AnyType FIf(Stack s ,Expression test,Expression i1,Expression i2,Expression )
  {  AnyType a;
    if (GetAny<bool>((*test)(s))) 

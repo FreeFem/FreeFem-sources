@@ -171,3 +171,8 @@ is now working with the new g++3 compiler (default compiler in MacOs
 
 Note 3. Fast fourier exemple ( FFT )  is in dfft.edp  file
 
+Some configure flags to bluid version:
+
+Under MacOs G4
+we use fink f77, texshop install for tex 
+./configure '--enable-download' '--enable-optim' '--with-suffix=G4'

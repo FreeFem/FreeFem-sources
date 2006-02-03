@@ -1270,6 +1270,7 @@ class CListOfInst  {  private:
 AnyType FWhile(Stack ,E_F0 * test,E_F0 * ins);
 AnyType FFor(Stack s ,E_F0 * i0,E_F0 * i1,E_F0 * i2,E_F0 * ins);
 AnyType FIf(Stack s ,E_F0 * test,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
+AnyType TTry(Stack s ,E_F0 * i0,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 
 
 
@@ -1289,6 +1290,7 @@ inline C_F0 toComplex(const C_F0 & a)  {return ATYPE(Complex)->CastTo(a);}
 */
 inline C_F0 While(C_F0 test,C_F0 ins) {return C_F0(new E_F0_CFunc2(FWhile,to<bool>(test),ins),0);}
 inline C_F0 For(C_F0 i0,C_F0 i1,C_F0 i2,C_F0 ins) {return C_F0(new E_F0_CFunc4(FFor,i0,to<bool>(i1),i2,ins),0);}
+inline C_F0 Try(C_F0 i0,C_F0 i1,C_F0 i2)  {return C_F0(new E_F0_CFunc4(TTry,i0,i1,i2,0),0);}
 inline C_F0 FIf(C_F0 i0,C_F0 i1,C_F0 i2) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i1,i2,0),0);}
 inline C_F0 FIf(C_F0 i0,C_F0 i1) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i1,0,0),0);}
 //inline  C_F0 C_F0::PtrValue() const{ 

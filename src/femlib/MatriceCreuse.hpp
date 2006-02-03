@@ -741,7 +741,8 @@ public:
 	umfpack_di_report_info (Control, Info) ;
 	umfpack_di_report_status (Control, status) ;
 	cerr << "umfpack_di_symbolic failed" << endl;
-	ffassert(0);
+	ExecError("umfpack_di_symbolic failed");
+	//ffassert(0);
     }
 
     status = umfpack_di_numeric (A.lg, A.cl, A.a, Symbolic, &Numeric,Control,Info) ;
@@ -750,6 +751,7 @@ public:
 	umfpack_di_report_info (Control, Info) ;
 	umfpack_di_report_status (Control, status) ;
 	cerr << "umfpack_di_numeric failed" << endl;
+	ExecError("umfpack_di_numeric failed");
 	ffassert(0);
     }
 
@@ -778,6 +780,8 @@ public:
 	umfpack_di_report_info (Control, Info) ;
 	umfpack_di_report_status (Control, status) ;
 	cerr << "umfpack_di_solve failed" << endl;
+	ExecError("umfpack_di_solve failed");
+	
 	ffassert(0);
     }
      if(verbosity>2)
@@ -871,6 +875,7 @@ public:
 	umfpack_zi_report_info (Control, Info) ;
 	umfpack_zi_report_status (Control, status) ;
 	cerr << "umfpack_zi_symbolic failed" << endl;
+	ExecError("umfpack_zi_symbolic failed");
 	ffassert(0);
 	exit(2);
     }
@@ -881,6 +886,7 @@ public:
 	umfpack_zi_report_info (Control, Info) ;
 	umfpack_zi_report_status (Control, status) ;
 	cerr << "umfpack_zi_numeric failed" << endl;
+	ExecError("umfpack_zi_numeric failed");
 	ffassert(0);
 	exit(2);
     }
@@ -909,6 +915,7 @@ public:
 	umfpack_zi_report_info (Control, Info) ;
 	umfpack_zi_report_status (Control, status) ;
 	cerr << "umfpack_zi_solve failed" << endl;
+	ExecError("umfpack_zi_numeric failed");
 	ffassert(0);
 	exit(2);
     }

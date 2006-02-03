@@ -1,3 +1,6 @@
+V2.2_2
+ * add three key word for future use try,catch throw 
+   a very first  exception handling (no memory management.) 
 V2.2-1
  * Add init file to set verbosity, includepath  , loadpath and 
    add preload (dynamic link file)

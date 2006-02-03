@@ -13,13 +13,13 @@ ARPACKLIB=ARPACK/libarpack_ff++.a
 
 arpack: $(ARPACKLIB)
 
-$(ARPACKLIB): ARPACK 
+$(ARPACKLIB): ARPACK/fait
 	if [ -n '@FF_LAPACKdir@' ] ; then \
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
 	fi; \
 	cd ARPACK && make lib 
 
-ARPACK: arpack96.tar.gz patch.tar.gz ARmake.m4
+ARPACK/fait: arpack96.tar.gz patch.tar.gz ARmake.m4 Makefile
 	gunzip -c arpack96.tar.gz | tar xf -
 	gunzip -c patch.tar.gz | tar xf -
 	m4 -DFF_BLASLIB="$(BLASLIB)" \
@@ -29,6 +29,7 @@ ARPACK: arpack96.tar.gz patch.tar.gz ARmake.m4
            -DFF_LDFLAGS="@LDFLAGS@" \
            -DFF_HOME=`pwd`/ARPACK \
 	    ARmake.m4 >ARPACK/ARmake.inc
+	touch ARPACK/fait
 	cd ARPACK/LAPACK;
 
 arpack96.tar.gz:

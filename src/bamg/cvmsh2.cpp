@@ -12,6 +12,7 @@
 // E-MAIL :   Frederic.Hecht@Inria.fr   
 //
 // ORIG-DATE:     Dec 97
+#include "config-wrapper.h"
 #include <cstdlib>
 #include <cstdio>
 #include <string.h>
@@ -39,6 +40,13 @@ inline int access( char *fileName, int notUsed )
 	struct stat		statRec;
 	return  stat( fileName, &statRec );
 }
+#endif
+
+#ifdef PURE_WIN32
+#define R_OK 0
+#define F_OK 0
+#define W_OK 0
+#define access(i,j) 1
 #endif
 
 int initgraph=0;

@@ -86,6 +86,7 @@ void lgerror (const char* s) ;
  CListOfInst cinst;
  Block * block; 
  ListOfId *clist_id;
+/* ListCatch * clist_Catchs;*/
 }
 
 /* BISON Declarations */
@@ -93,6 +94,9 @@ void lgerror (const char* s) ;
 %type <cinst>   input
 %type <cinst>   instructions
 %type <cexp>   instruction
+%type  <cexp>  try
+%type  <cexp>  catchs
+/* %type  <cexp>  throw */
 %type <cexp>  declaration 
 %type <cexp>  declaration_for
 %type <cexp>  list_of_dcls
@@ -164,6 +168,9 @@ void lgerror (const char* s) ;
 %token BREAK
 %token CONTINUE
 %token RETURN
+%token TRY
+%token CATCH
+%token THROW
 
 %token <type> TYPE
 %token <type> FUNCTION
@@ -366,9 +373,12 @@ declaration_for:
     type_of_dcl {dcltype=$1;currentblock = new Block(currentblock)}
                list_of_dcls {$$=$3};
 
+try: TRY {currentblock = new Block(currentblock)};
+
 instruction:   ';' {$$=0;} 
          | INCLUDE  STRING  {zzzfff->input($2);$$= 0; }
          | LOAD  STRING  {load($2);$$= 0; }
+         |  try  '{' instructions '}' catchs {$$=Try($3,$5,currentblock->close(currentblock));}
          |  Expr  ';' {$$=$1}  
          |  declaration  {$$=$1} 
          |  for_loop  '(' Expr ';' Expr ';' Expr ')' instruction {inloopcount--; $$=For($3,$5,$7,$9)} 
@@ -400,7 +410,9 @@ instruction:   ';' {$$=0;}
                      else lgerror(" return not in routine ") }
 
 ;
-
+catchs:  
+  CATCH '(' '.' '.' '.'  ')' instruction {$$ =  $7; }
+;
 
 bornes: '(' ID '=' Expr ',' Expr ')' { 
    currentblock = new Block(currentblock);
@@ -639,6 +651,9 @@ int mymain (int  argc, char **argv)
    zzzfff->Add("return",RETURN);
    zzzfff->Add("border",BORDER);
    zzzfff->Add("fespace",FESPACEID);
+   zzzfff->Add("try",TRY);
+   zzzfff->Add("catch",CATCH);
+   zzzfff->Add("throw",THROW);
    Init_map_type();
    cout << " Load: ";
    init_lgfem() ;
