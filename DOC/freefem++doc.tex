@@ -895,6 +895,51 @@ For example
 \end{description}
 \textBlack
 
+\subsection{Environment variable, and init file}
+\index{verbosity},\index{includepath},\index{loadpath},\index{load},\index{include}
+ FreeFem++ read an  user's init file. to can change value 
+  of  verbosity, includepath  , loadpath variable.
+  
+Remark,  the include files are search in the \texttt{includepath} list and the load files 
+are search in  \texttt{loadpath} list.
+
+ The syntaxe of the file  is:
+\begin{verbatim}
+     verbosity= 5
+     loadpath += "/Library/FreeFem++/lib"
+     loadpath += "/Users/hecht/Library/FreeFem++/lib"
+     includepath  += "/Library/FreeFem++/edp"
+     includepath  += "/Users/hecht/Library/FreeFem++/edp"
+     #  comment 
+     load += "funcTemplate" 
+     load += "myfunction" 
+\end{verbatim}
+  
+ The possible path of this file  are  
+ \begin{itemize} 
+   \item under unix and MacOs 
+\begin{verbatim}   
+	 /etc/freefem++.pref
+    $(HOME)/.freefem++.pref
+    freefem++.pref
+\end{verbatim}
+  \item under windows
+\begin{verbatim}   
+     freefem++.pref
+\end{verbatim}  
+\end{itemize}
+ 
+We can also use   shell environment variable to change 
+the search rule. 
+
+\begin{verbatim}     
+    export FF_VERBOSITY=50 
+    export FF_INCLUDEPATH="dir;;dir2"
+    export FF_LOADPATH="dir;;dir3""
+\end{verbatim}     
+ 
+ Remark, the separtor of directory  is ";" and not ":" because ":" is use under Windows.
+
 \section{Learning by Examples}
 This chapter is for those, like us, who don't like manuals. A number of simple examples
 cover a good deal of the capacity of \freefempp and are self-explainatory.  For the modelling part
@@ -1691,7 +1736,7 @@ Now if you think that DG is too slow try this
 @varf bbdual(ccold,w) =  - @int2d(Th)(ccold*w/dt);
 @matrix  AA= aadual(Vh,Vh);
 @matrix BB = bbdual(Vh,Vh);
-@set (AA,init=t,solver=UMFPACK);
+@set (AA,init=t,solver=UMFPACK); 
 Vh rhs=0;
 @for ( t=0; t< 2*pi ; t+=dt)
 {
@@ -1702,7 +1747,8 @@ Vh rhs=0;
 };
 \eFF
 Notice the new keyword \x{set} to specify a solver in this framework; the modifier \x{init} is used
-to tel the solver that the matrix has not changed (init=true).
+to tel the solver that the matrix has not changed (init=true), and the name parameter are the 
+same that in problem definition (see. \ref{def problem}) \index{set}\index{problem}. 
 
 \paragraph{\x{Finite Volume Methods}} can also be handled with \freefempp but it requires programming.
 For instance the $P^0-P^1$ Finite Volume Method of Dervieux et al associates to each $P^1$
@@ -3252,7 +3298,8 @@ Exec error :  Div by 0
    -- number :1
 Try:: catch (...) exception 
 Catch an ExecError 
-\end{verbatim}}
+\end{verbatim}
+}
 
 Add  a more realistic example: 
 \begin{example} A case with  none invertible matrix: 
@@ -5017,7 +5064,7 @@ where \texttt{Th} is a mesh of the domain $\Omega$, and \texttt{gd} and \texttt{
 boundary label of boundary $\Gamma_d$ and $\Gamma_n$.
 
 \subsection{Parameters affecting \texttt{solve} and \texttt{problem}}
-
+\label{def problem}
 The parameters are FE functions real or complex, the number $n$ of parameters is even
 ($n=2*k$), the $k$ first function parameters are unknown, and the $k$
 last are test functions.
@@ -5071,6 +5118,13 @@ The parameters are:
 \eFF
       \item[tgv=]  \index{problem!tgv=}  \index{solve!tgv=}  Huge value ($10^{30}$) used to implement
       Dirichlet boundary conditions.
+      
+      \item[tolpivot=] \index{problem!tolpivot =} \index{solve!tolpivot=} set the tolerence of the pivot in UMFPACK ($10^-1$)  and, LU, Crout, Cholesky
+      factorisation ($10^{-20}$).
+
+      \item[tolpivotsym=] \index{problem!tolpivotsym =} \index{solve!tolpivotsym=} set the tolerence of the pivot sym in UMFPACK      
+      \item[strategy=] \index{problem!strategy =} \index{solve!strategy=} set the integer UMFPACK strategy  ($0$ by default).  
+          
 \end{description}
 
 \subsection{Problem definition}
