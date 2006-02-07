@@ -1907,10 +1907,12 @@ void DefSolver(Stack stack,
         if(verbosity>5) cout << " Matrix skyline type:" << typemat->t <<endl;
         MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
         throwassert(&AA);
+        double tol_pivot1= (tol_pivot>0.) ? tol_pivot : EPSILON/8.;
+       // cout << " tol_pivot1 " <<tol_pivot1 <<  endl; auto_ptr
         switch (typemat->t) {
-        case TypeSolveMat::LU       : AA.LU(); break;
-        case TypeSolveMat::CROUT    : AA.crout(); break;
-        case TypeSolveMat::CHOLESKY : AA.cholesky(); break;
+        case TypeSolveMat::LU       : AA.LU(tol_pivot1); break;
+        case TypeSolveMat::CROUT    : AA.crout(tol_pivot1); break;
+        case TypeSolveMat::CHOLESKY : AA.cholesky(tol_pivot1); break;
         default:
           cerr << " type resolution " << typemat->t << endl;
           CompileError("type resolution profile inconnue"); break;       
@@ -1976,10 +1978,12 @@ template<class R>
         MatriceProfile<R_st> &AA(*new MatriceProfile<R_st>(AAA)); // 
         
         throwassert(&AA);
+        double tol_pivot1= (tol_pivot1>0) ? tol_pivot : EPSILON/8.;
+       // cout << " tol_pivot1 " <<tol_pivot1 <<  endl;
         switch (typemat->t) {
-        case TypeSolveMat::LU       : AA.LU(); break;
-        case TypeSolveMat::CROUT    : AA.crout(); break;
-        case TypeSolveMat::CHOLESKY : AA.cholesky(); break;
+        case TypeSolveMat::LU       : AA.LU(tol_pivot1); break;
+        case TypeSolveMat::CROUT    : AA.crout(tol_pivot1); break;
+        case TypeSolveMat::CHOLESKY : AA.cholesky(tol_pivot1); break;
         default:
           cerr << " type resolution " << typemat->t << endl;
           CompileError("type resolution profile inconnue"); break;       
@@ -2029,6 +2033,48 @@ template<class R>
       }
    return 0;   
   }      
+  
+template<class R>   
+  void   DispatchSolution(const Mesh & Th,int Nb, vector<  FEbase<R> * > & u_h,KN<R> * X,KN<R> * B,const FESpace **  LL,const FESpace &  Uh)
+  {
+  
+   // dispatch the solution 
+  if (Nb==1)  {
+    *(u_h[0])=X;
+    if (X != B ) delete B;  }
+  else {
+    const FElement ** sK= new const FElement * [Nb];
+    
+    KN<R> ** sol= new KN<R> * [Nb];
+    for (int i=0;i<Nb;i++) {
+      sol[i]= new KN<R>( LL[i]->NbOfDF) ;
+      *(u_h[i]) = sol[i];
+    }
+    
+    for (int it=0;it<Th.nt;it++)
+      {
+        const FElement K(Uh[it]);
+        const int nbdf=K.NbDoF();
+        for (int i=0;i<Nb;i++)
+          sK[i]= new FElement( (*LL[i])[it]) ;
+        for (int df=0;df< nbdf;df++)
+          {  int kfe=K.FromFE(df);
+          int kdf=K.FromDF(df);
+          const FElement & SK(*sK[kfe]);
+          (*sol[kfe])[SK(kdf)] = (*X)[K(df)];
+          }
+        for (int i=0;i<Nb;i++)
+          delete sK[i];
+        
+      }
+    
+     delete [] sK;
+     delete [] sol;
+     if (X != B && X ) delete X; 
+     delete B; 
+  }
+  }
+
 
 template<class R>
 AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & dataA, 
@@ -2040,7 +2086,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   long NbSpace = 50; 
   long itmax=0; 
   double eps=1e-6;
-  string * save=0;
+  string save;
 //  bool VF=false;
 //  VF=isVF(op->largs);
  // assert(!VF); 
@@ -2066,7 +2112,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   if (nargs[4]) NbSpace= GetAny<long>((*nargs[4])(stack));
   if (nargs[6]) tgv= GetAny<double>((*nargs[6])(stack));
   if (nargs[7]) umfpackstrategy = GetAny<long>((*nargs[7])(stack));
-  if (nargs[8]) save = GetAny<string*>((*nargs[8])(stack));
+  if (nargs[8]) save = *GetAny<string*>((*nargs[8])(stack));
   if (nargs[9]) cadna= GetAny<KN<double>* >((*nargs[9])(stack));
   if (nargs[10]) tol_pivot= GetAny<double>((*nargs[10])(stack));
   if (nargs[11]) tol_pivot_sym= GetAny<double>((*nargs[11])(stack));
@@ -2106,7 +2152,8 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   const int  Nb2 = kkk, Nb=Nb2/2; // nb of FESpace 
   throwassert(Nb2==2*Nb);
   
-  const FESpace ** LL = new  const FESpace *[var.size()];
+  //const FESpace ** LL = new  const FESpace *[var.size()];
+  KN<const FESpace *> LL(var.size());
   for (int i=0;i<Nb2;i++)
     LL[i]= (*(u_h[i])).newVh();
   SHOWVERB(cout << "Problem  " << Nb << endl);
@@ -2165,12 +2212,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   const  Mesh & Th(Uh.Th);
   bool initx = true; //typemat->t==TypeSolveMat::GC ; //  make x and b different in all case 
   // more safe for the future ( 4 days lose with is optimaze FH )
-/*  
-#ifdef HAVE_LIBUMFPACK         
- // for UMFPACK and B must Be different 
-   initx |= typemat->t==TypeSolveMat::UMFpack ;
-#endif   
-*/  
+
   InitProblem(  Nb,  Uh, Vh, B, X,u_hh,typemat , u_h,  LL,  initx);
 
   if(verbosity>2) cout << "   Problem(): initmat " << initmat << " VF (discontinuous Galerkin) = " << VF << endl;
@@ -2206,6 +2248,10 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   else 
     *B = - *B;
   MatriceCreuse<R_st>  * ACadna = 0;
+  
+  
+  try {  
+  
   if (initmat)
     if(cadna)
      ACadna = DefSolverCadna( stack,typemat,A, NbSpace ,  itmax, eps, initmat, umfpackstrategy,precon,tgv,tol_pivot,tol_pivot_sym);
@@ -2216,10 +2262,10 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
 
       
  // if(verbosity>3) cout << "   B  min " << B->min() << " ,  max = " << B->max() << endl;
-  if( save)
+  if( save.length() )
   {
-      string savem=*save+".matrix";
-      string saveb=*save+".b";
+      string savem=save+".matrix";
+      string saveb=save+".b";
     {
      ofstream outmtx( savem.c_str());
      outmtx << A << endl;
@@ -2235,8 +2281,9 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
     cout << " X= " << *X << endl;
     cout << " B= " << *B << endl;
     }
-  if(ACadna)  
-   {
+    
+   if(ACadna)  
+    {
      KN<R_st> XX(*X);
      KN<R_st> BB(*B);
      ACadna->Solve(XX,BB);
@@ -2256,61 +2303,35 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
          cerr << "Warning: Sorry array is incorrect size to store cestac " 
               << nn << " != " << cadna->N() << endl;
 #endif
-   }
+     }
   else
     A.Solve(*X,*B);
-    
-  if (verbosity>99)
-   {
-    cout << " X= " << *X << endl;
-   }
-  
-  
-  // dispatch the solution 
-  if (Nb==1)  {
-    *(u_h[0])=X;
-    if (X != B ) delete B;  }
-  else {
-    const FElement ** sK= new const FElement * [Nb];
-    
-    KN<R> ** sol= new KN<R> * [Nb];
-    for (int i=0;i<Nb;i++) {
-      sol[i]= new KN<R>( LL[i]->NbOfDF) ;
-      *(u_h[i]) = sol[i];
+   
+    if (verbosity>99)
+    {
+      cout << " X= " << *X << endl;
+     }
     }
-    
-    for (int it=0;it<Th.nt;it++)
-      {
-        const FElement K(Uh[it]);
-        const int nbdf=K.NbDoF();
-        for (int i=0;i<Nb;i++)
-          sK[i]= new FElement( (*LL[i])[it]) ;
-        for (int df=0;df< nbdf;df++)
-          {  int kfe=K.FromFE(df);
-          int kdf=K.FromDF(df);
-          const FElement & SK(*sK[kfe]);
-          (*sol[kfe])[SK(kdf)] = (*X)[K(df)];
-          }
-        for (int i=0;i<Nb;i++)
-          delete sK[i];
-        
-      }
-    
-     delete [] sK;
-     delete [] sol;
-     if (X != B && X ) delete X; 
-     delete B; 
-  }
+   catch (...)
+   {
+     if(verbosity) cout << " catch an erreur in  solve  =>  set  sol = 0 !!!!!!! "   <<  endl;
+     *X=R(); // erreur set the sol of zero ???? 
+     DispatchSolution(Th,Nb,u_h,X,B,LL,Uh);
+     throw ; 
+   }
+   DispatchSolution(Th,Nb,u_h,X,B,LL,Uh);
   
+ 
   if (verbosity) 
     {cout << " -- Solve : " ; 
     for (int i=0;i<Nb;i++) 
       cout  << "          min " << (u_h[i])->x()->min() << "  max " << (u_h[i])->x()->max() << endl ;
     }
-    delete [] LL;
-    if (save) delete save; // clean memory
-    *mps=mp;
-    return SetAny<const Problem *>(this);
+    
+ // delete [] LL;
+ // if (save) delete save; // clean memory
+  *mps=mp;
+  return SetAny<const Problem *>(this);
 }
 
 

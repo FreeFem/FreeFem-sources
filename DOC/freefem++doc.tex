@@ -3,7 +3,7 @@
 \documentclass[a4paper,twoside,12pt]{book}
 \usepackage{styles}
 \usepackage{times}
-\def\VERSION{2.2-0}
+\def\VERSION{2.3-0}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -2387,7 +2387,7 @@ The wave equation  is well posed with
 \section{Syntax}
 \subsection{Data Types}
 In essence \freefempp  is a \index{compiler} compiler:
-  its language is typed, polymorphic and reentrant.
+  its language is typed, polymorphic, with exception and reentrant.
 Every variable must be declared of a certain type,  in a  declarative statement;
 each statement are separated
 from the next by a semicolon `\texttt{;}'.
@@ -3219,6 +3219,100 @@ at the exit of the enclosing block,
   @cout << i << @endl;
 \eFF
 \end{example}
+\subsection{Exception handling}\index{exception}\index{catch}\index{try}
+
+ In the version \texttt{2.3} of \texttt{freefem++}, we add exception handing like in \texttt{C++}.
+ But to day we only catch all the \texttt{C++} exception, and in the \texttt{C++} all the errors like 
+\texttt{ExecError, assert, exit , ...} are exception so you can have some surprise with the
+memory management. 
+ 
+ The exception handle all \texttt{ExecError}:
+ 
+ 
+\begin{example} A simple example  first to catch a  division by zero: 
+\bFF
+@real a;
+@try {
+  a=1./0.;
+}
+@catch  (...) // today only all exceptions are permit 
+{
+  cout << " Catch an ExecError " << endl;
+  a =0;
+}
+\eFF
+\end{example}
+  
+The output is
+{\small
+\begin{verbatim}
+1/0 : d d d
+  current line = 3
+Exec error :  Div by 0
+   -- number :1
+Try:: catch (...) exception 
+Catch an ExecError 
+\end{verbatim}}
+
+Add  a more realistic example: 
+\begin{example} A case with  none invertible matrix: 
+\bFF
+int nn=5        ;
+mesh Th=square(nn,nn);
+verbosity=5;
+fespace Vh(Th,P1);     // P1 FE space
+Vh uh,vh;              // unkown and test function.
+func f=1;                 //  right hand side function
+func g=0;                 //  boundary condition function
+real   cpu=clock();
+problem laplace(uh,vh,solver=Cholesky,tolpivot=1e-6) =                    //  definion of  the problem
+int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  + int2d(Th)( -f*vh )                          //  linear form
+  ;
+
+try {
+  cout << " Try Cholesky \n";
+  laplace; // solve the problem plot(uh); // to see the result
+  cout << "-- lap Cholesky " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
+}
+catch(...) { // catch all 
+  cout << " Catch cholesky PB " << endl;
+}
+\eFF
+\end{example}
+The output is
+{\small  
+\begin{verbatim}
+ -- square mesh : nb vertices  =36 ,  nb triangles = 50 ...
+   Nb of edges on Mortars  = 0
+   Nb of edges on Boundary = 20, neb = 20
+    Nb Mortars 0
+ number of real boundary edges 20
+    Number of Edges                 = 85
+    Number of Boundary Edges        = 20 neb = 20
+    Number of Mortars  Edges        = 0
+    Nb Of Mortars with Paper Def    = 0 Nb Of Mortars = 0 ... 
+ Nb Of Nodes = 36
+ Nb of DF = 36
+ Try Cholesky 
+   -- Change of Mesh 0  0x312e9e8
+   Problem(): initmat 1 VF (discontinuous Galerkin) = 0
+  -- SizeOfSkyline =210
+   -- size of Matrix 196 Bytes skyline =1
+  -- discontinous Galerkin  =0 size of Mat =196 Bytes
+  --  int  in   Optimized = 1,    ...
+ all 
+  -- boundary int   Optimized = 1,  all 
+ERREUR choleskypivot (35)= -1.23124e-13 < 1e-06
+  current line = 28
+Exec error : FATAL ERREUR dans ../femlib/MatriceCreuse_tpl.hpp
+cholesky line: 
+   -- number :545
+ catch an erreur in  solve  =>  set  sol = 0 !!!!!!! 
+Try:: catch (...) exception 
+ Catch cholesky PB 
+\end{verbatim}
+}
 
 \section{\setS{Mesh Generation}}
 \subsection{Commands for Mesh Generation}\label{sec:InitialMesh}
@@ -11439,6 +11533,7 @@ bool
 border
 break
 buildmesh
+catch
 cin
 complex
 continue
@@ -11467,6 +11562,8 @@ return
 savemesh
 solve
 string
+try
+throw
 vertex
 varf
 while
