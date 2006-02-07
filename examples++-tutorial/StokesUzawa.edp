@@ -1,4 +1,4 @@
-//  signe of pressure if correct 
+//  signe of pressure is correct 
 assert(version>1.18); 
 real s0=clock();
 mesh Th=square(10,10);

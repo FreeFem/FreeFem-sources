@@ -734,7 +734,7 @@ public:
     }
     
     status = umfpack_di_symbolic (n, n, A.lg, A.cl, A.a, &Symbolic,Control,Info) ;
-    if (status < 0)
+    if (status !=  0)
     {
       (void) umfpack_di_report_matrix (n, n, A.lg, A.cl, A.a, 1, Control) ;
 
@@ -746,7 +746,7 @@ public:
     }
 
     status = umfpack_di_numeric (A.lg, A.cl, A.a, Symbolic, &Numeric,Control,Info) ;
-    if (status < 0)
+    if (status !=  0)
     {
 	umfpack_di_report_info (Control, Info) ;
 	umfpack_di_report_status (Control, status) ;
@@ -775,7 +775,7 @@ public:
      umfpack_di_defaults (Control) ;
      // change UMFPACK_At to UMFPACK_Aat in complex 
     int status = umfpack_di_solve (UMFPACK_Aat, A.lg, A.cl, A.a, x, b, Numeric,Control,Info) ;
-    if (status < 0)
+    if (status != 0)
     {
 	umfpack_di_report_info (Control, Info) ;
 	umfpack_di_report_status (Control, status) ;

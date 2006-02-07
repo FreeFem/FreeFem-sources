@@ -594,7 +594,7 @@ R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & 
      cerr << ac << " " << a << endl;
      ExecError("Out of bound in operator Matrice_Creuse<R> (,)");}
    R *  p =a->pij(b,c);
-   if( !p) { cerr << "Error: the coef a(" << b << ","   << c << ")  do'nt exist in sparce matrix "
+   if( !p) { if(verbosity) cerr << "Error: the coef a(" << b << ","   << c << ")  do'nt exist in sparce matrix "
            << " Matrix  type = " << typeid(ac).name() << endl;
        ExecError("Use of unexisting coef in sparce matrix operator a(i,j) ");}
     return  p;}
