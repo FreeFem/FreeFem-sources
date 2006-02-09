@@ -2586,11 +2586,14 @@ class E_block :  public E_F0mps { public:
           for (int i=0;i<n;i++) {
             TheCurrentLine=linenumber[i];
             (*code[i])(s); }}
-         catch( E_exception & e) { 
+         catch(/* E_exception & e*/...) { // catch all for cleanning 
            (*clean)(s); 
-            if(verbosity>50)
-             cout << " catch " << e.what() << " clean & throw " << endl;
-           throw(e); }
+           // if(verbosity>50)
+           //  cout << " catch " << e.what() << " clean & throw " << endl;
+          // throw(e);
+            throw; // rethow 
+            }
+         
        (*clean)(s); 
        }
       else  // not catch  exception if no clean (optimization} 

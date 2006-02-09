@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.3-0,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.3-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -420,13 +420,15 @@ then
 	enable_download=yes
 fi
 
-#enabling downloads
-if test  "$ff_wget" = no 
+# if enabling downloads find wget or curl to do download 
+# ------------------------------------------------------
+
+if test  "$ff_wget" = no -a "$enable_download" = yes
 then
 	ff_wget=""
 	AC_CHECK_PROG(ff_wget,wget,yes,no)
 fi
-if test  "$ff_wget" = no 
+if test  "$ff_wget" = no -a "$enable_download" = yes
 then
 	ff_wget=""
 	AC_CHECK_PROG(ff_wget,curl,yes,no)
