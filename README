@@ -5,6 +5,9 @@ and bamg (mesh generator)
 This file details specific configuration details for FreeFem++. For
 a standard installation, please refer to the file named "INSTALL".
 
+annd see the end of this file to have some 
+configure example:
+
 Debugging and optimization
 --------------------------
 
@@ -171,8 +174,29 @@ is now working with the new g++3 compiler (default compiler in MacOs
 
 Note 3. Fast fourier exemple ( FFT )  is in dfft.edp  file
 
-Some configure flags to bluid version:
 
-Under MacOs G4
-we use fink f77, texshop install for tex 
+Some configure flags use to build the current version
+-----------------------------------------------------
+
+*  Under Debian:
+the install package   tetex-base tetex-bin  imagemagick wget g77 g++-4.0 atlas2-base atlas3-base libumfpack4 libumfpack4-dev libarpack2 libarpack2-dev 
+./configure
+
+Under Red Hat Enterprise Linux AS release 3
+the following rpm:
+blas-3.0-20 gcc-3.2.3-53 tetex-1.0.7-67.9 lapack-3.0-20 ImageMagick-5.5.6-15 wget-1.10.2-0.30E curl-7.10.6-7.rhel3
+are install
+./configure  '--enable-download' '--with-blas=-lblas -llapack'
+
+* Under MacOs G4
+we use the  fink f77, texshop and TeXLive-teTeX Current Release in http://www.ctan.org/tex-archive/systems/mac/mactex/
++ ImageMagick Ghostscript 8 form Gerben Wierda's i-Installer       http://www.rna.nl/ii.html
 ./configure '--enable-download' '--enable-optim' '--with-suffix=G4'
+
+* Under MacOC macIntel 
+compile and install  de f2c (no fortran) and install fort77  from  http://www.netlib.org
+./configure '--enable-download' 'F77=fort77' '--without-fltk' '--with-flib=-L/usr/local/lib -lf2c' '--with-wget=curl -O' '--enable-optim' '-with-suffix=MacIntel'
+
+* Under WindowXP 
+see the end of README_WINDOW  files 
+

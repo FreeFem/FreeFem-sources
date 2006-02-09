@@ -64,9 +64,15 @@ make documentation
 to build the setup file, use  inno setup on file WindowsPackage.iss
 the setup file is in output directory
 
-The compilation flag use to build the version
+The configure  flag use to build the version
+-------------------------------------------
 
-for a P4 compile on petium-m vaio VGN-S2XP
+for the P4 version, we  compile on pentium-m vaio VGN-S2XP
+with cygwin install  http://www.cygwin.com/
+with the folwing package
+  gcc, tetex, wget , f77 , imagemagick 
+
 ./configure '--enable-optim' '--enable-download' '--with-suffix=P4'
-for the generic :
+
+for the generic i383 we use 
 ./configure '--enable-download' '--enable-generic' '--enable-optim' '--with-blas=/home/UNIVERSITE/blas/generic-no-cygwin-blas.dll' 'CPPFLAGS=-I/home/UNIVERSITE/blas/'
