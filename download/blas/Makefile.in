@@ -4010,7 +4010,7 @@ BLAS/fait:blas.tgz
 	touch BLAS/fait
 $(F77BLAS_SOURCES): BLAS
 
-CBLAS:CCBAS/fait
+CBLAS:CBLAS/fait
 
 CBLAS/fait: cblas.tgz
 	tar xvzf cblas.tgz

@@ -8214,7 +8214,7 @@ A = at(Xh,Xh,solver=CG);  //  change the matrix \index{matrix!=}\index{matrix!so
 @varf  vfconv1(uu,vv)  = @int2d(Th,qforder=5) (@convect([u1,u2],-dt,u1)*vv*alpha);
 @varf  vfconv2(v2,v1)  = @int2d(Th,qforder=5) (@convect([u1,u2],-dt,u2)*v1*alpha);
 
-@int idt;       // index of of time set
+@int idt;       // index of time set
 @real temps=0;  // current time
 
 Mh pprec,prhs;

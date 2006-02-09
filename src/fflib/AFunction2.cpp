@@ -540,7 +540,14 @@ AnyType E_Routine::operator()(Stack s)  const  {
               ret = e.r;
            else 
               ErrorExec("E_exception: break or contine not in loop ",1);
-        }
+  }
+  catch(...) { // clean and rethrow the exception 
+      delete [] listparam; 
+      memcpy(s,save,lgsave);  // restore register
+      TheCurrentLine=debugstack.front().second;
+      debugstack.pop();
+      throw ;             
+     }
         
    delete [] listparam; 
     memcpy(s,save,lgsave);  // restore register
