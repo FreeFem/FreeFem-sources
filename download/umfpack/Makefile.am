@@ -43,4 +43,4 @@ UMFPACKv4.4.tar.gz:
 	@WGET@ -N http://www.cise.ufl.edu/research/sparse/umfpack/v4.4/UMFPACKv4.4.tar.gz
 
 clean-local:
-	-rm -r UMFPACKv4.4.tar.gz UMFPACKv4.4
+	-rm -r UMFPACKv4.?.tar.gz UMFPACKv4.?
