@@ -33,3 +33,6 @@ makeref.edp: regtests.m4 ../regtests.m4
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
+
+clean-local:
+	-rm myfunction.o myfunction.so myfunction.dll
