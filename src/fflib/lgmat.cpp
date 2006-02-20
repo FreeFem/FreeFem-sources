@@ -143,7 +143,7 @@ struct Op2_ListCMMadd: public binary_function< list<triplet<R,MatriceCreuse<R> *
   static   RR f(const RR & a,const MM & b)  
   { 
     
-    a->push_back(make_triplet<R,MatriceCreuse<R> *>(R(1.),b->A,false));
+    a->push_back(make_triplet<R,MatriceCreuse<R> *,bool>(R(1.),b->A,false));
     return a;
   }
     
@@ -722,101 +722,7 @@ KN<R> * get_mat_coef(KN<R> * x,TheCoefMat<R> dm)
   return x;
 }
 
-/*
 
-template<class R>
-pair<long,long> get_nm_mat(const C_F0 & cmij,stack)
-{
-   long n=0;
-   long m=0;
-   if (cmij.left()==atype<double>());
-   else  if (cmij.left()==atype<long>());
-   else  if (cmij.left()==atype<MatriceCreuse<R> *>())
-    {
-       Matrice_Creuse<R> * mij =GetAny<Matrice_Creuse<R>* >(cmij(stack));
-       n = mij->n;
-       m = mij->m;
-    }
-   
-   ffassert(0);
-   return make_pair(n,m);
-}
-
-template<class R>
-pair<long,long> add_nm_mat(std::map< pair<int,int>, R> Aij,long offseti,long offsetj,C_F0 mij,stack)
-{
-   return make_pair(n,m);
-}
-
-template<class R>
-AnyType MatofMat(Stack stack,Expression emat,Expression mom)
-{
-  using namespace Fem2D;
-  
-  Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-  list<triplet<R,MatriceCreuse<R> *,bool> > *  lcB = GetAny<list<triplet<R,MatriceCreuse<R> *,bool> >*>((*combMat)(stack));
-  
-  const E_Array & MoM= *dynamic_cast<const E_Array*>(mom.LeftValue());
-  ffassert(&MoM);
-  int nl=MoM.size(), nc=0;
-  E_Array ** Mi = new const E_Array *[nl];
-  
-  for (int i=0;i<Mi;i++)
-    Mi[i]= *dynamic_cast<const E_Array*>(MoM[i]);
-    ffassert(Mi[i];
-    if (nc==0) 
-      nc = Mi[i]->size();
-    else
-      ffassert(nc == Mi[i]);
-   KN<long> offseti(nl+1),offsetj(nc+1);
-   offseti=0;
-   offsetj=0;
-   
-   for (int i=0; i < nl; ++i)
-     {
-       
-       for (int j=0; j < nc; ++j)
-         {
-          const E_Array & mis= *Mi[i];
-          C_F0 mij = mis[j];
-          pair<long,long> nm = get_nm_mat(mij,stack);
-          if ( offseti[i]  ==0) offseti[i] = nm.first;
-          else ffassert( offseti[i] == nm.first || nm.first ==0);
-          if ( offsetj[j]  ==0) offseti[j] = nm.second;
-          else ffassert( offsetj[j] == nm.second) || nm.second ==0;
-         }
-     }
-   for (int i=0; i < nl; ++i)
-     offseti[i+1] += offseti[i];
-   for (int j=0; j < nl; ++j)
-     offsetj[j+1] += offseti[j];
-  MatriceCreuse<R> * AA =0;
-      
-  {  std::map< pair<int,int>, R> Aij;
-
-   for (int i=0; i < nl; ++i)
-     {
-       
-       for (int j=0; j < nc; ++j)
-         {
-          const E_Array & mis= *Mi[i];
-          Expression mij = mis[j];
-          add_nm_mat(Aij,offseti[i],offseti[j],mij,stack);
-         }
-     }
-
- }
-   
-  =BuildCombMat<R>(*lcB);
-  sparce_mat->pUh=0;
-  sparce_mat->pVh=0; 
-  sparce_mat->A.master(AA);
-  sparce_mat->typemat=(AA->n == AA->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
-  delete lcB;
-  return sparce_mat;
-}
-
-*/
  template<typename R>
  class BlockMatrix :  public E_F0 { public: 
    typedef Matrice_Creuse<R> * Result;
