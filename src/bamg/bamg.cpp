@@ -34,8 +34,8 @@ using namespace std;
 #endif 
 //                       0         1         2         3
 //                       0123456789012345678901234567890
-const char whatbamg []= "@(#)LJLL, le 05 jan 2006,  Bamg v1.00  ";
-const char *bamgversion = whatbamg + 27;
+const char whatbamg []= "@(#)LJLL, le 20 fevr 2006,  Bamg v1.02  ";
+const char *bamgversion = whatbamg + 28;
 int initgraph=0;
 //long verbosity=2;
 

@@ -2998,7 +2998,7 @@ AnyType Plot::operator()(Stack s) const  {
                 break;
               case 'q' :
                couleur(8);
-#if DRAWING		      
+#ifdef DRAWING		      
                if (cTh) cTh->quadtree->Draw();
 #endif		       
                couleur(1);

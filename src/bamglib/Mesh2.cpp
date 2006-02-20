@@ -2651,7 +2651,8 @@ void Triangles::FindSubDomain(int OutSide=0)
 	    NbSubDomTot --;
 	    //  cout << " triangle infini " << it << triangles[it] << endl;
 	    t=&triangles[it];
-	    while  (t){// cout << Number(t) << " " << endl;
+	     NbOutT--;  // on fait un coup de trop. 
+	    while  (t){ // cout << Number(t) << " " << endl;
 	      NbOutT++;
 	      t1=t;
 	      t=t->link;
@@ -2661,6 +2662,7 @@ void Triangles::FindSubDomain(int OutSide=0)
     it++;} // end while (it<nbt)
    if (nbt == NbOutT ||  !NbSubDomTot) 
      {
+       cout << "\n error : " <<  NbOutT << " " << NbSubDomTot <<" " << nbt << endl;
        cerr << "Error: The boundary is not close => All triangles are outside " << endl;
        MeshError(888);
      }
