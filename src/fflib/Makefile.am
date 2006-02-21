@@ -20,7 +20,7 @@ CodeAlloc.cpp lgmat.cpp global.cpp 					\
 ../Graphics/DefColor.cpp \
  InitFunct.cpp ../Algo/lgalgo.cpp			\
 ../femlib/Element_P2h.cpp load.cpp lgfem.cpp AFunction.hpp AnyType.hpp	\
-error.hpp gmres.hpp InitFunct.hpp lex.hpp lgfem.hpp lgsolver.hpp	\
+error.hpp ../femlib/gmres.hpp InitFunct.hpp lex.hpp lgfem.hpp lgsolver.hpp	\
 Operator.hpp problem.hpp Serialize.hpp showverb.hpp String.hpp		\
 throwassert.hpp versionnumber.hpp  CodeAlloc.hpp \
 array_init.hpp  array_tlp.hpp \

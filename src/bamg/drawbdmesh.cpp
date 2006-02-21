@@ -22,7 +22,7 @@
 #include "Mesh2.h"
 #include "QuadTree.h"
 using namespace bamg; 
-long verbosity=2;
+extern long verbosity;
 
 #ifdef DRAWING 
 bool withrgraphique=true; 
@@ -55,7 +55,7 @@ void  MeshErrorIO(ios& )
   exit(1);
 }
 
-int main(int argc, char **argv)
+int mymain(int argc, char **argv)
 { 
   MeshIstreamErrorHandler = MeshErrorIO;
   //  atexit( forDebug);

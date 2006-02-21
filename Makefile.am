@@ -67,6 +67,11 @@ nw:
 	cd src/fflib && make
 	cd src/nw&& make
 
+bamg:
+	cd src/lglib && make
+	cd src/fflib && make
+	cd src/bamg && make
+
 ide:
 	cd download && make
 	cd src/lglib && make

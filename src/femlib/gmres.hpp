@@ -52,9 +52,9 @@ abs(Real x)
 
 
 template < class Operator, class Vector, class Preconditioner,
-           class Matrix, class Real , class Vector_>
+           class Matrix, class Real >
 int 
-GMRES_(const Operator &A, Vector_ &x, const Vector_ &b,
+GMRES(const Operator &A, Vector &x, const Vector &b,
       const Preconditioner &M, Matrix &H, int &m, int &max_iter,
       Real &tol)
 {
@@ -100,11 +100,14 @@ GMRES_(const Operator &A, Vector_ &x, const Vector_ &b,
       GeneratePlaneRotation(H(i,i), H(i+1,i), cs(i), sn(i));
       ApplyPlaneRotation(H(i,i), H(i+1,i), cs(i), sn(i));
       ApplyPlaneRotation(s(i), s(i+1), cs(i), sn(i));
-      
-      cout << "GMRES: " << j << " " << abs(s(i+1)) << " " <<  normb << " " 
+      if(verbosity>5 || (verbosity>2 && j%100==0) )
+       cout << "GMRES: " << j << " " << abs(s(i+1)) << " " <<  normb << " " 
            <<  abs(s(i+1)) / normb << " < " << tol << endl;
     
       if ((resid = abs(s(i+1)) / normb) < tol) {
+       cout << "GMRES converges: " << j << " " << abs(s(i+1)) << " " <<  normb << " " 
+           <<  abs(s(i+1)) / normb << " < " << tol << endl;
+      
         Update(x, i, H, s, v);
         tol = resid;
         max_iter = j;
@@ -118,6 +121,7 @@ GMRES_(const Operator &A, Vector_ &x, const Vector_ &b,
     
     r = M*(Ax);
     beta = sqrt((r,r));
+    if(verbosity>4)
       cout << "GMRES: restart" << j << " " << beta << " " <<  normb << " " 
            <<  beta / normb << " < " << tol << endl;
     if ((resid = beta / normb) < tol) {
@@ -162,11 +166,4 @@ void ApplyPlaneRotation(Real &dx, Real &dy, Real &cs, Real &sn)
   dy = -sn * dx + cs * dy;
   dx = temp;
 }
-template < class Operator, class Vector, class Preconditioner,
-           class Matrix, class Real >
-int 
-GMRES(const Operator &A, Vector &x, const Vector &b,
-      const Preconditioner &M, Matrix &H, int &m, int &max_iter,
-      Real &tol)
-{ return   GMRES_<Operator,Vector,Preconditioner,Matrix,Real,Vector>(A,x,b,M,H,m,max_iter,tol); }   
 
