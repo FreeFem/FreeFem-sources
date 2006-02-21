@@ -51,6 +51,8 @@ template <class R> class MatriceElementaire;
 template <class R> class MatriceElementaireSymetrique;
 template <class R> class MatriceElementairePleine;
 template <class R> class MatriceMorse;
+template <class R> class MatriceProdTensoriel;
+
 //template <class R> R Square(R x){ return x*x;}
 
 template <class T> T* docpyornot(bool nocpy,T* p,int n)
@@ -524,6 +526,8 @@ template<class K>
 };
 
 
+
+
 template<class R,class M,class P> 
 int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000)
 {
@@ -947,5 +951,5 @@ public:
 
 }; 
 #endif  
-//  endif ---- UMFPACK ----          
+//  endif ---- UMFPACK ----
 #endif
