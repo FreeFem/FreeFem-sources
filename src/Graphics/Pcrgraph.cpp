@@ -1453,42 +1453,55 @@ char * getOp(const char *what)
     else return NULL;
 }
 
+#ifdef   WWWWWWWWWWWWWWWWWWWW
 int execute(const char* what)
 {
-	char szBuffer[MAXPATH + 1];
-    char *option;
-    int r=0; 
-   	option = getOp(what);
-
-	if (*what) {
-		STARTUPINFO si;
-		PROCESS_INFORMATION pi;
-		ZeroMemory( &si, sizeof(STARTUPINFO) );
-		ZeroMemory( &pi, sizeof(PROCESS_INFORMATION) );
-		si.cb=sizeof( STARTUPINFO );
-		si.dwFlags = STARTF_USESHOWWINDOW;
-		si.wShowWindow = SW_SHOWNORMAL;
-
-		CreateProcess(what,option,NULL,NULL,FALSE,CREATE_NEW_CONSOLE,NULL,NULL,&si,&pi );
-		if( pi.hProcess )	{
-			WaitForInputIdle( GetCurrentProcess(), INFINITE );
-			DWORD dwExitCode = STILL_ACTIVE;
-			while(dwExitCode == STILL_ACTIVE)	{
-				WaitForSingleObject( pi.hProcess, 1000 );
-				GetExitCodeProcess( pi.hProcess, &dwExitCode );
-			}
-			CloseHandle(pi.hProcess);
-			CloseHandle(pi.hThread);
-		}
-		else {
-	    	sprintf(szBuffer,"%s: cannot execute",what);
-	    	if (option != NULL) sprintf(szBuffer,"%s  with option %s!",szBuffer, option); 
-			MessageBox(NULL, szBuffer, "Error in FreeFem++", MB_OK | MB_ICONINFORMATION);
-			r=1; 
-		}
-	}
-	else r=2,MessageBox(NULL, "Error in system()", "Error in FreeFem++", MB_OK | MB_ICONINFORMATION);
+  char szBuffer[MAXPATH + 1];
+  char *option;
+  int r=0; 
+  char *vide="";
+  option = getOp(what);
+  if(!option) 
+    option = vide;
+  cout << "excute :: " <<what << "  ## " << option << endl;
+  if (*what) {
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory( &si, sizeof(STARTUPINFO) );
+    ZeroMemory( &pi, sizeof(PROCESS_INFORMATION) );
+    si.cb=sizeof( STARTUPINFO );
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_SHOWNORMAL;
+    
+    CreateProcess(what,option,NULL,NULL,FALSE,CREATE_NEW_CONSOLE,NULL,NULL,&si,&pi );
+    if( pi.hProcess )	{
+      WaitForInputIdle( GetCurrentProcess(), INFINITE );
+      DWORD dwExitCode = STILL_ACTIVE;
+      while(dwExitCode == STILL_ACTIVE)	{
+	WaitForSingleObject( pi.hProcess, 1000 );
+	GetExitCodeProcess( pi.hProcess, &dwExitCode );
+      }
+      CloseHandle(pi.hProcess);
+      CloseHandle(pi.hThread);
+    }
+    else {
+      sprintf(szBuffer,"%s: cannot execute",what);
+      if (option != NULL) sprintf(szBuffer,"%s  with option %s!",szBuffer, option); 
+      MessageBox(NULL, szBuffer, "Error in FreeFem++", MB_OK | MB_ICONINFORMATION);
+      r=1; 
+    }
+  }
+  else r=2,MessageBox(NULL, "Error in system()", "Error in FreeFem++", MB_OK | MB_ICONINFORMATION);
   return r;
 }
-  void setgrey(bool gg ){grey=gg;}
-  int getgrey(){ return grey;}
+#else
+int  execute (const char * str)
+{ 
+ cout << "exec: " << str << endl;
+ return  system(str);
+}
+#endif
+
+
+void setgrey(bool gg ){grey=gg;}
+int getgrey(){ return grey;}
