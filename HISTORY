@@ -1,3 +1,165 @@
+2006-02-22 18:12  hecht
+
+	*   correct exec on PC
+
+2006-02-21 15:08  hecht
+
+	*   tag release_2_3_2
+	    correct print mistake in gmres
+	    add drawbdmesh program in bamg
+	    correct pb in bamg if the subdomain have only one element.
+
+2006-02-20 18:15  hecht
+
+	*   Correct missing sub domain problem when
+	    we have only one triangle per  sub domain in  bammg mesh
+	  generator.
+
+2006-02-10 10:41  lehyaric
+
+	* Improved "make clean", which did not seem to be cleaning
+	  correctly anymore.
+
+2006-02-09 16:32  hecht
+
+	*   add configure examples un README files
+
+2006-02-09 15:11  hecht
+
+	*   correct miss spelling, and error in configure.ac
+	       --enable-download  have be automatic set
+	       but it wrong.
+
+2006-02-07 21:32  hecht
+
+	*   reglage in the doc,
+
+2006-02-07 20:25  hecht
+
+	*  add new example
+
+2006-02-07 20:25  hecht
+
+	*   Correct missing free   memory in case of  exception in problem.
+	  add tolpivot= to set the pivot tolerence in LU,choslesky, crout
+	  factorisation in problem, ... function.    change the test of
+	  return UMFPACK status to be more safe  if the status != 0 then we
+	  get a error, see the UMFPACK doc to the full implication.
+	  Write the  change in documentation, and add the 3 new keywords:
+	  try, catch, throw.
+
+2006-02-03 16:18  hecht
+
+	*   add exception in freefem++ language, the first test is working
+	    syntaxe: try { code ; } catch(...) { code ;}
+	    know bug in memory management .
+
+2006-01-27 22:47  hecht
+
+	*  add conf flag in README_WINDOWS
+
+2006-01-27 22:33  hecht
+
+	*   correct missing bluid of  lapack in ARPACK if no lapack
+	    plus add comment README_WINDOWS
+
+2006-01-27 21:07  hecht
+
+	*  correct missing include and link order under pure win32
+	  architecture.
+
+2006-01-27 18:24  hecht
+
+	*  correct PB optim on G4
+
+2006-01-27 16:43  hecht
+
+	*  correct PB optim on G5
+
+2006-01-27 15:59  hecht
+
+	*  correct pb in configure to find wget or curl for download
+
+2006-01-27 14:42  hecht
+
+	*   build hl_yacc files
+
+2006-01-27 14:39  hecht
+
+	*   correct highlight (diag, p2h)
+
+2006-01-27 13:57  hecht
+
+	*   remove highlight test is no ide
+
+2006-01-27 13:53  hecht
+
+	*   build yacc file
+
+2006-01-27 13:41  hecht
+
+	*  correct highlighting
+
+2006-01-27 13:24  hecht
+
+	*   build  generate files for highlight.
+
+2006-01-27 13:21  hecht
+
+	*  add buildmesh("  ") in hightlight syntex
+
+2006-01-27 11:33  hecht
+
+	*  correct pb in installing apple version (zcat -> gunzip -c)
+
+2006-01-27 10:58  hecht
+
+	*    take account of mac intel
+
+2006-01-26 10:16  hecht
+
+	*  add comment in configure.ac
+
+2006-01-23 22:13  hecht
+
+	*   correct small problem in configure.ac to build freefem on mac
+	  intel
+	    work in progress, we use f2c / fort77 to compile arpack
+
+2006-01-11 22:22  hecht
+
+	*   correct xcode projet + warning
+
+2006-01-11 21:13  hecht
+
+	*   add xcode 2.2 build project for macos (see README_XCODE)
+	    add init file to set paths and do load automaticaly dynamic
+	  library
+	    see INNOVATION for full detail.
+
+2006-01-09 15:42  hecht
+
+	*   small correct to use xcode of macos and to build bamg shell
+	  command
+
+2006-01-06 11:28  lehyaric
+
+	* Changed ARPACK library reference for static compiling
+
+2006-01-06 10:51  lehyaric
+
+	* Changed Debian packages documentation format from PS to PDF to
+	  reflect changes in the DOC directory.
+
+2006-01-06 10:00  hecht
+
+	*  add building of bamg and cvsmsh2 command
+	   so now bamg is a part of freefem++ software
+
+2006-01-05 15:43  hecht
+
+	*   merging the source of bamg and the the bamg freefem++ part
+
 2006-01-04 11:37  hecht
 
 	*   add read bamg geometry file with buildmesh function.
