@@ -1,3 +1,6 @@
+V2.3_3
+ * add out product to set  full matrix
+    A = 2.*a*b'; // where A is a "real[int,int]", b and c a "real[int]". 
 V2.3-0
  * add three key word for future use try,catch throw 
    a exception handling (no memory management.) 

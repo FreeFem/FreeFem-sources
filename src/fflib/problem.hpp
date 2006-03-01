@@ -594,9 +594,9 @@ struct OpArraytoLinearForm: public OneOperator {
       
   };
   E_F0 * code(const basicAC_F0 & args) const 
-  { return  new Op(to<KN<R>*>(args[0]),args[1]);} 
-  OpArraytoLinearForm() : 
-    OneOperator(atype<KN<R>*>(),atype<KN<R>*>(),atype<const Call_FormLinear*>()) {}
+  { return  new Op(to<KN_<R> >(args[0]),args[1]);} 
+  OpArraytoLinearForm(const basicForEachType * tt) : 
+    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()) {}
 };
 
 
@@ -858,13 +858,13 @@ namespace Fem2D {
   }
   
  template<class R,typename MC >  bool AssembleVarForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                       MC  * A,KN<R> * B,const list<C_F0> &largs );
+                       MC  * A,KN_<R> * B,const list<C_F0> &largs );
 
 template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const list<C_F0> &largs , double tgv  );
+                  MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const list<C_F0> &largs , double tgv  );
 
  
-template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN<R> * B,const  FormLinear * const l);
+template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * const l);
 
 template<class R>   void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all);
 template<class R>   void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B);
@@ -875,7 +875,7 @@ template<class R>   void  Element_Op(MatriceElementaireSymetrique<R> & mat,const
                             MatriceCreuse<R>  & A, const  FormBilinear * b  );
 */ // --------- FH 120105                           
 template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const  BC_set * bc , double tgv   );
+                  MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc , double tgv   );
   
 
 //------
@@ -888,7 +888,7 @@ template<class R>
 AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const 
 {
   
-  KN<R> & xx( *GetAny<KN<R> *>((*x)(stack) ));
+  KN_<R>  xx( GetAny<KN_<R> >((*x)(stack) ));
   pfes  &  pp= *GetAny<pfes * >((*l->ppfes)(stack));
   FESpace * pVh = *pp ;
   FESpace & Vh = *pVh ;
@@ -907,7 +907,7 @@ AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const
      else 
      InternalError("OpArraytoLinearForm");
      } */
-  return SetAny<KN<R> *>(&xx);
+  return SetAny<KN_<R> >(xx);
 }
 
 template<class R>

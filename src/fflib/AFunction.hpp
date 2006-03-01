@@ -2652,11 +2652,6 @@ class TypeLineFunction: public ForEachType<C_F0> {
     
 };
 
-template<class T>
-class Transpose{ public:
-  T  t;
-  Transpose( T  v) : t(v) {}
-};
 
 class E_F0_Optimize : public E_F0 { 
  deque<pair<Expression,int> > l;
