@@ -12,7 +12,7 @@ fespace Vh(Th,P2);
 Vh u1,u2;
 
 
-real sigma = 20;  // value of the shift 
+real sigma = 00;  // value of the shift 
 
 varf  a(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) - sigma* u1*u2 )
                     +  on(1,2,3,4,u1=0) ;  // Boundary condition

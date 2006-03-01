@@ -35,11 +35,21 @@ template<class T> inline T Max (const T &a,const T & b,const T & c){return Max(M
 template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(Min(a,b),c);}
 template<class T> inline T Square (const T &a){return a*a;}
 
+template<class T>
+class Transpose{ public:
+  T  t;
+  Transpose( T  v)
+   : t(v) {}
+  template<class TT> Transpose( TT  v) : t(v) {}  
+  template<class TT> Transpose( TT * v) : t(*v) {}  
+  operator const T & () const {return t;}
+};
+
  
 template<class K> 
-struct Op2_dotproduct: public binary_function<Transpose<KN<K> *>,KN<K> *,K> { 
-  static K f( Transpose<KN<K> *> const & a, KN<K> * const& b)  
-   { return (conj(*a.t),*b);} }; 
+struct Op2_dotproduct: public binary_function<Transpose<KN_<K> >,KN<K> *,K> { 
+  static K f( Transpose<KN_<K> > const & a, KN<K> * const& b)  
+   { return (conj(a.t),*b);} }; 
 
 template<class K> 
 struct Op2_dotproduct_: public binary_function<Transpose<KN_<K> >,KN_<K> ,K> { 
@@ -110,6 +120,15 @@ RR * get_elementp2_(const A & a,const B & b,const C & c){
            << " array type = " << typeid(A).name() << endl;
      ExecError("Out of bound in operator (,)");}
     return  &((*a)(b,c));}
+
+template<class RR,class A,class B,class C>  
+RR get_element_is(const A &  a,const B & b,const C & c){ 
+    return  ((*a)(SubArray(1,b),c));}
+
+template<class RR,class A,class B,class C>  
+RR get_element_si(const A &  a,const B & b,const C & c){ 
+    return  ((*a)(b,SubArray(1,c) ));}
+    
 
 template<class RR,bool isinit>
 class  InitArrayfromArray : public OneOperator { 
@@ -375,8 +394,8 @@ void ArrayDCL()
    // attention un exp KN<> * right est un KN<> et non un KN<> *
 
     Dcl_Type<KNM<K> *>(0,::Destroy<KNM<K> >);
-    Dcl_Type< Transpose<KN<K> *> > ();
-    
+   //  Dcl_Type< Transpose<KN<K> *> > ();  remove mars 2006 FH 
+    Dcl_Type< outProduct_KN_<K>* >();
     Dcl_Type< Transpose<KN_<K> > > ();
     //Dcl_Type< Transpose<KN<Complex> > > ();
     Dcl_TypeandPtr<KN_<K> >(0,0,0,0);
@@ -443,6 +462,9 @@ void ArrayOperator()
      atype<KN_<K> >()->Add("(","",new OneOperator2_<KN_<K>,KN_<K>,SubArray>(fSubArray<K> ));
      atype<KN<K>*>()->Add("(","",new OneOperator2_<KN_<K>,KN<K>*,SubArray>(fSubArrayp<K> ));
      atype<KN<K>* >()->Add("(","",new OneOperator2_<KN<K>*,KN<K>*,char >(fSubArrayc<KN<K>* >));
+
+     atype<KNM<K>* >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,long,SubArray >(get_element_is<KN_<K>,KNM<K>*,long,SubArray>));
+     atype<KNM<K>* >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,SubArray,long >(get_element_si<KN_<K>,KNM<K>*,SubArray,long>));
 
      atype<KNM<K>* >()->Add("(","",new OneOperator3_<K*,KNM<K>*,long,long >(get_elementp2_<K,KNM<K>*,long,long>));
 
@@ -645,8 +667,24 @@ void ArrayOperator()
        new OneBinaryOperator<Op2_mulcp<Mulc_KN_<K>,K,KN<K>*> >,
        new OneBinaryOperator<Op2_mulpcp<Mul_KNM_KN_<K>,KNM<K>*,KN<K>*> >,
        new OneBinaryOperator<Op2_dotproduct<K> >,
-       new OneBinaryOperator<Op2_dotproduct_<K> >
+       new OneBinaryOperator<Op2_dotproduct_<K> > 
+       ,new OneBinaryOperator<Op2_pbuild<outProduct_KN_<K>,KN<K>*,Transpose<KN_<K> > > >
+       ,new OneBinaryOperator<Op2_pbuild<outProduct_KN_<K>,KN_<K>,Transpose<KN_<K> > > > 
+       ,new OneBinaryOperator<Op2_pbuild<outProduct_KN_<K>,Mulc_KN_<K>,Transpose<KN_<K> > > > 
+             
+       );
+
+//  nouvel operateur       
+     TheOperators->Add("+=",
+        new OneBinaryOperator<set_eqarraypd_add<KNM<K> ,outProduct_KN_<K>* > > 
+       );
        
+     TheOperators->Add("-=",
+        new OneBinaryOperator<set_eqarraypd_sub<KNM<K> ,outProduct_KN_<K>* > > 
+       );
+       
+     TheOperators->Add("=",
+        new OneBinaryOperator<set_eqarraypd<KNM<K> ,outProduct_KN_<K>* > > 
        );
 
      TheOperators->Add("?:",
@@ -654,16 +692,17 @@ void ArrayOperator()
        );
 
   TheOperators->Add("\'",       
-       new OneOperator1<Transpose<KN<K> *>,KN<K> *>(&Build<Transpose<KN<K> *>,KN<K> *>),
+       new OneOperator1<Transpose<KN_<K> >,KN<K> *>(&Build<Transpose<KN_<K> >,KN<K> *>),
        new OneOperator1<Transpose<KN_<K> >,KN_<K> >(&Build<Transpose<KN_<K> >,KN_<K> >)       
   );
        
      TheOperators->Add(".*",
-       new OneBinaryOperator<Op2_dotstarp<DotStar_KN_<K>,KN<K>*,KN<K>*> >
+       new OneBinaryOperator<Op2_buildp<DotStar_KN_<K>,KN<K>*,KN<K>*> >
       );
+
       
      TheOperators->Add("./",
-       new OneBinaryOperator<Op2_dotstarp<DotSlash_KN_<K>,KN<K>*,KN<K>*> >
+       new OneBinaryOperator<Op2_buildp<DotSlash_KN_<K>,KN<K>*,KN<K>*> >
       );
       
      TheOperators->Add("<<",

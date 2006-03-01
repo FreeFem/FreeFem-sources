@@ -146,6 +146,7 @@ template<class R> class Add_Mulc_KN_;
 template<class R> class Mul_KNM_KN_; 
 template<class R> class DotStar_KN_;
 template<class R> class DotSlash_KN_;
+
 template<class R> class outProduct_KN_;
 template<class R> class if_KN_;
 template<class R> class if_arth_KN_;
@@ -282,8 +283,7 @@ inline long N(const ShapeOfArray & a,const ShapeOfArray & b)
 
 inline SubArray::SubArray(const ShapeOfArray & s) 
            :n(s.n),step(s.step),start(0) {}
-
-
+           
    
 
 template<class R> 
@@ -642,9 +642,12 @@ const notnotKN_<R>  notKN_<R>::operator!() const { return *this;} // not
 
 template<class R>
 struct outProduct_KN_ {
-    const KN_<R> & a,&b;
+    const KN_<R>  a,b;
     R c;
-    outProduct_KN_(const KN_<R> & aa, const KN_<R> &bb,R cc=1.) : a(aa),b(bb),c(cc) {}
+    outProduct_KN_(const KN_<R> & aa, const KN_<R> &bb,R cc=(R)1) : a(aa),b(bb),c(cc) {}
+    outProduct_KN_(const KN_<R> * aa, const KN_<R> &bb,R cc=(R)1) : a(*aa),b(bb),c(cc) {}
+    outProduct_KN_(const KN_<R> * aa, const KN_<R> *bb,R cc=(R)1) : a(*aa),b(*bb),c(cc) {}
+    outProduct_KN_(const Mulc_KN_<R> & aa,const KN_<R> & bb) : a(aa.a),b(bb),c(aa.b) {}    
     outProduct_KN_ operator * (R cc) { return outProduct_KN_(a,b,c*cc);}    
 };
 
@@ -1164,6 +1167,7 @@ class DotStar_KN_{public:
   const KN_<const_R> & a; const KN_<const_R> & b;
   DotStar_KN_(const KN_<const_R> & aa,const KN_<const_R> & bb) : a(aa),b(bb)  {}
  }; 
+
  
 template<class R> 
 class DotSlash_KN_{public: 
@@ -1301,8 +1305,12 @@ template<class R> inline bool  SameShape(const ShapeOfArray & a,const Mul_KNM_KN
            { return true;} 
  inline bool  SameShape(const ShapeOfArray & a,const complex<double>) 
            { return true;} 
-inline bool  SameShape(const ShapeOfArray & a,const complex<float>) 
+ inline bool  SameShape(const ShapeOfArray & a,const complex<float>) 
            { return true;}            
+
+template<class R>
+ inline bool SameShape(KNM<R>& m, const outProduct_KN_<R>& p)
+ { return p.a.N()>=m.N() && m.M()>=p.b.N(); } 
 
 template<class R> inline long SameAdress(const KN_<R> &a, const KN_<R> &b) { return &a[0]==&b[0];}
 // bof -bof 

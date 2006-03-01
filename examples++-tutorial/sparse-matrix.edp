@@ -67,6 +67,8 @@ else
       if(i+1 < N)    A(i,i+1)=-i;
       a[i]=i;
     }
+  A += 2*a*a';  //  produit tensoriel
+  assert(A(9,1) == 2*a[9]*a[1]);  
   b=A*a;
   c=-9;
   cout << "xxxx\n"; 

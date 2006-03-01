@@ -388,8 +388,12 @@ struct Op2_addp: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  { return (*a + *b);} };  
 
 template<class R,class A=R,class B=A> 
-struct Op2_dotstarp: public binary_function<A,B,R> { 
+struct Op2_buildp: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return R(*a,*b);} };  
+template<class R,class A=R,class B=A> 
+
+struct Op2_pbuild: public binary_function<A,B,R*> { 
+  static R *f(const A & a,const B & b)  { return new R(a,b);} };  
   
 template<class R,class A=R,class B=A> 
 struct Op2_add__n: public binary_function<A,B,R*> { 

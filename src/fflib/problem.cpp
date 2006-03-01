@@ -1423,7 +1423,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
 
  template<class R,typename MC >
   bool AssembleVarForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                       MC  * A,KN<R> * B,const list<C_F0> &largs)
+                       MC  * A,KN_<R> * B,const list<C_F0> &largs)
   { // return true if BC 
     bool ret=false; 
     typedef DotStar_KN_<R> DotStar;
@@ -1499,7 +1499,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
   
  template<class R>
   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const list<C_F0> &largs , double tgv  )
+                  MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const list<C_F0> &largs , double tgv  )
   {
     list<C_F0>::const_iterator ii,ib=largs.begin(),
       ie=largs.end();
@@ -1517,7 +1517,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
 
  template<class R>
   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<R>  * A,KN<R> * B,KN<R> * X, const  BC_set * bc, double tgv  )
+                  MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc, double tgv  )
     
   {
     MeshPoint *mps= MeshPointStack(stack),mp=*mps;
@@ -1639,7 +1639,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
   
 
 template<class R>
- void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN<R> * B,const  FormLinear * l )
+ void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * l )
   {
     Check(l->l,Vh.N);
     if ( B && B->N() != Vh.NbOfDF) ExecError("AssembleLinearForm size rhs and nb of DF of Vh");
@@ -2677,13 +2677,13 @@ namespace Fem2D {
 
 // instantiation  des template en double
 template  bool AssembleVarForm<double,MatriceCreuse<double> >(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                       MatriceCreuse<double>  * A,KN<double> * B,const list<C_F0> &largs );
+                       MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
 
 template  bool AssembleVarForm<double,map< pair<int,int>, double> >(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                       map< pair<int,int>, double>  * A,KN<double> * B,const list<C_F0> &largs );
+                       map< pair<int,int>, double>  * A,KN_<double> * B,const list<C_F0> &largs );
 
   
-template  void AssembleLinearForm<double>(Stack stack,const Mesh & Th,const FESpace & Vh,KN<double> * B,const  FormLinear * const l);
+template  void AssembleLinearForm<double>(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<double> * B,const  FormLinear * const l);
 
 template   void AssembleBilinearForm<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                             MatriceCreuse<double>  & A, const  FormBilinear * b  );
@@ -2691,21 +2691,21 @@ template   void AssembleBilinearForm<double>(Stack stack,const Mesh & Th,const F
                             map<pair<int,int>, double >  & A, const  FormBilinear * b  );
 
 template   void AssembleBC<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<double>  * A,KN<double> * B,KN<double> * X, const  BC_set * bc , double tgv   );
+                  MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const  BC_set * bc , double tgv   );
 template   void AssembleBC<double>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<double>  * A,KN<double> * B,KN<double> * X, const list<C_F0> &largs , double tgv  );
+                  MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 // instantiation  des template en Complex
 
 template  bool AssembleVarForm<Complex,MatriceCreuse<Complex> >(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                       MatriceCreuse<Complex>  * A,KN<Complex> * B,const list<C_F0> &largs );
+                       MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
 
 template  bool AssembleVarForm<Complex,map<pair<int,int>, Complex > >(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                        map<pair<int,int>, Complex >  * A,KN<Complex> * B,const list<C_F0> &largs );
+                        map<pair<int,int>, Complex >  * A,KN_<Complex> * B,const list<C_F0> &largs );
 
 //template  bool AssembleVarForm<double,map< pair<int,int>, Complex> >(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
 //                       map< pair<int,int>, Complex>  * A,KN<double> * B,const list<C_F0> &largs );
   
-template  void AssembleLinearForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Vh,KN<Complex> * B,const  FormLinear * const l);
+template  void AssembleLinearForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<Complex> * B,const  FormLinear * const l);
 
 template   void AssembleBilinearForm<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                             MatriceCreuse<Complex>  & A, const  FormBilinear * b  );
@@ -2715,8 +2715,8 @@ template   void AssembleBilinearForm<Complex>(Stack stack,const Mesh & Th,const 
                             
                             
 template   void AssembleBC<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<Complex>  * A,KN<Complex> * B,KN<Complex> * X, const  BC_set * bc , double tgv   );
+                  MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const  BC_set * bc , double tgv   );
 template   void AssembleBC<Complex>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<Complex>  * A,KN<Complex> * B,KN<Complex> * X, const list<C_F0> &largs , double tgv  );
+                  MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv  );
 
 }
