@@ -1,7 +1,8 @@
 /*
    solving   laplace operator with neumam boundary condition
-   with lagrange multiplier
-   the variationnal form is
+   with 1D lagrange multiplier
+   
+   The variationnal form is
    find (u,l) such that
 
    $\forall (v,m)   a(u,v) + b(u,m) + b(v,l) = L(v) $
@@ -44,6 +45,6 @@ set(AA,solver=UMFPACK);
 x = AA^-1*bb; // solve the linear systeme 
 
 [uh[],l] = x;  // set the value 
-cout << " l = " << l(0) << endl;  
+cout << " l = " << l(0) <<  " ,  b(u,1)  =" << B(0:n-1,0)'*uh[]  << endl;  
 plot(uh,wait=1);
 
