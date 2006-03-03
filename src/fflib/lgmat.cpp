@@ -533,6 +533,31 @@ AnyType MatFull2Sparce(Stack stack,Expression emat,Expression eA)
  return sparce_mat;
 }
 
+template<class R>
+AnyType MatMap2Sparce(Stack stack,Expression emat,Expression eA)
+{
+   map< pair<int,int>, R> * A=GetAny< map< pair<int,int>, R> * >((*eA)(stack));
+   int n=0,m=0;
+   // hack:  the last element must exist in the map  to set matrix size 
+
+   typename map< pair<int,int>, R>::const_iterator last= --A->end(); // le last element
+   
+   if( last != A->end() )
+   
+        { 
+                n = last->first.first+1; 
+                m=last->first.second+1;
+        } 
+        
+  Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
+  sparce_mat->pUh=0;
+  sparce_mat->pVh=0;
+  sparce_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)  
+  sparce_mat->A.master(new MatriceMorse<R>(n,m,*A,false));
+  delete A; 
+ return sparce_mat;
+}
+
 template<class RR,class AA=RR,class BB=AA> 
 struct Op2_pair: public binary_function<AA,BB,RR> { 
   static RR f(const AA & a,const BB & b)  
@@ -786,6 +811,11 @@ KN<R> * get_mat_coef(KN<R> * x,TheCoefMat<R> dm)
                   e_Mij[i][j]=eij;
                   t_Mij[i][j]=2;
                } 
+ /*            else if   ( atype<map< pair<int,int>, R> * >()->CastingFrom(rij) ) 
+               {
+                  e_Mij[i][j]= to<map< pair<int,int>, R> *>(C_F0(eij,rij)).LeftValue();
+                  t_Mij[i][j]=10;
+               }*/
            }
            
           }
@@ -812,6 +842,99 @@ KN<R> * get_mat_coef(KN<R> * x,TheCoefMat<R> dm)
     AnyType operator()(Stack s) const ;
     
 };
+
+template<typename R>  
+map< pair<int,int>, R> *Matrixfull2mapIJ (KNM<R>   * const & pa,const KN_<long> & ii,const KN_<long> & jj)
+{
+   const KNM<R> & a(*pa);
+   int N=a.N(),M=a.M();
+   int n = ii(SubArray(N)).max()+1;
+   int m= jj(SubArray(M)).max()+1;
+   cout << "  ### n m " << n << " " << m << endl; 
+   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+   map< pair<int,int>, R> & A(*pA);
+   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
+  
+   for (int i=0;i<N;++i)
+    for (int j=0;j<M;++j)
+     { R aij=a(i,j);
+       cout << i << " " << j << " :: " << ii[i] << " " << jj[j] << " = " << aij << endl;
+       if (norm(aij)>1e-40) 
+         A[make_pair(ii[i],jj[j])] += aij;
+     }
+      
+  return pA;
+}
+
+template<class R>
+AnyType Matrixfull2map (Stack , const AnyType & pp)
+{
+   const KNM<R> & a(*GetAny<KNM<R> *>(pp));
+   int N=a.N(),M=a.M();
+   int n = N;
+   int m= M;
+   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+   map< pair<int,int>, R> & A(*pA);
+   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
+  
+   for (int i=0;i<N;++i)
+    for (int j=0;j<M;++j)
+     { R aij=a(i,j);
+     if (norm(aij)>1e-40) 
+      A[make_pair(i,j)] += aij;
+     }
+      
+  return pA;
+}
+
+
+template<class R>
+map< pair<int,int>, R> *Matrixoutp2mapIJ (outProduct_KN_<R>   * const & pop,const KN_<long> & ii,const KN_<long> & jj)
+{
+
+   const outProduct_KN_<R> & op(*pop);
+   int N=op.a.N(),M=op.b.N();
+   int n = ii(SubArray(N)).max()+1;
+   int m= jj(SubArray(M)).max()+1;
+   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+   map< pair<int,int>, R> & A(*pA);
+   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
+  
+   for (int i=0;i<N;++i)
+    for (int j=0;j<M;++j)
+     { 
+       R aij=op.a[i]*op.b[j];
+       if (norm(aij)>1e-40) 
+          A[make_pair(ii[i],jj[j])] += aij;
+     }   
+  delete pop;
+    
+  return pA;
+}
+
+
+template<class R>
+AnyType Matrixoutp2map (Stack , const AnyType & pp)
+{
+   const outProduct_KN_<R> & op(*GetAny<outProduct_KN_<R> *>(pp));
+   int N=op.a.N(),M=op.b.N();
+   int n = N;
+   int m= M;
+   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+   map< pair<int,int>, R> & A(*pA);
+   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
+  
+   for (int i=0;i<N;++i)
+    for (int j=0;j<M;++j)
+     { 
+      R aij=op.a[i]*op.b[j];
+      if (norm(aij)>1e-40) 
+        A[make_pair(i,j)] += aij;
+     } 
+  delete &op;        
+  return pA;
+}
+
 
 template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 {
@@ -918,6 +1041,7 @@ void AddSparceMat()
 {
  Dcl_Type<TheDiagMat<R> >();
  Dcl_Type<TheCoefMat<R> >(); // Add FH oct 2005
+ Dcl_Type< map< pair<int,int>, R> * >(); // Add FH mars 2005 
 
 TheOperators->Add("*", 
         new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN<R>* > >,
@@ -934,6 +1058,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R>), 
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparce<R>) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparce<R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R>) ,
        new OneOperatorCode<BlockMatrix<R> >()
        
@@ -946,6 +1071,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R>), 
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparce<R>) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparce<R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R>), 
        new OneOperatorCode<BlockMatrix<R> >()
        
@@ -991,6 +1117,19 @@ TheOperators->Add("+",
  //Global.Add("psor","(",new  OneOperatorCode<Psor<R> > );
  
  atype<Matrice_Creuse<R> * >()->Add("(","",new OneOperator3_<R*,Matrice_Creuse<R> *,long,long >(get_elementp2mc<R>));
+ atype<KNM<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,KNM<R>*,KN_<long>,KN_<long> >(Matrixfull2mapIJ<R>));
+ atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,outProduct_KN_<R>*,KN_<long>,KN_<long> >(Matrixoutp2mapIJ<R>));
+
+//map< pair<int,int>, R> * ttt=   (0);
+
+   //   ; 
+ map_type[typeid(map< pair<int,int>, R> *).name()]->AddCast(
+     new E_F1_funcT<map< pair<int,int>, R> *,KNM<R>* >(Matrixfull2map<R>),
+     new E_F1_funcT<map< pair<int,int>, R> *,outProduct_KN_<R>* >(Matrixoutp2map<R>)
+     
+       ); 
+
+ 
 
 
 

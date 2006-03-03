@@ -11,7 +11,7 @@
 
 using namespace std;
 #define const_R   R
-#ifdef CHECK_KN
+
 #include <cstdlib>
 inline void Check_Kn(const char * str,const char * file,int line)
 {
@@ -19,6 +19,11 @@ inline void Check_Kn(const char * str,const char * file,int line)
  assert(0);
  abort();
 }
+
+#define K_bigassert(i)  if (!(i)) Check_Kn(#i,__FILE__,__LINE__);
+
+#ifdef CHECK_KN
+
 #define K_throwassert(i)  if (!(i)) Check_Kn(#i,__FILE__,__LINE__);
 
 #else
@@ -586,14 +591,17 @@ private:
 template<class T,class I> 
 struct KN_ITAB
 {
-  KN_ITAB( T &vv, I &iindex) : v(vv),index(iindex) {}
-  T &v;
-  I & index;
+  KN_ITAB(const T &vv,const I &iindex) : v(vv),index(iindex) {}
+  T  v;
+  I  index;
   KN_ITAB & operator=(const T & t);
   KN_ITAB & operator+=(const T & t);
   KN_ITAB & operator-=(const T & t);
   KN_ITAB & operator*=(const T & t);
   KN_ITAB & operator/=(const T & t);
+  typename T::R & operator[](long i){ return v[index[i]];}
+  const typename T::R &  operator[](long i) const { return v[index[i]];}
+  long N() const { return index.N();}    
 };
 
 template<class R>  KN_ITAB<const KN_<R>,const KN_<int> >  KN_<R>::operator()(const KN_<int>  &itab) const { return KN_ITAB<const KN_<R>,const KN_<int> > (*this,itab);}

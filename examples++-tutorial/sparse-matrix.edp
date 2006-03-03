@@ -23,11 +23,11 @@ cout << "ML="<<ML << endl;
 cout << "B="<<B << endl;
 matrix BML=B*ML;
 matrix tB=B';        // transpose 
-cout << "tB=" << tB << endl;
+//cout << "tB=" << tB << endl;
 matrix MLtB=ML'*B'; // 
 
-cout << "BML="<<BML << endl;
-cout << "MLtB=" << MLtB << endl;
+//cout << "BML="<<BML << endl;
+//cout << "MLtB=" << MLtB << endl;
 
 // WARNING if UMFPACK is not install
 // the UMFPACK solver is replace by LU 
@@ -60,6 +60,13 @@ else
   int N=10;
   real [int,int] A(N,N);
   real [int] a(N),b(N),c(N);
+  int [int] II(N);
+  int [int] JJ(N);
+  for (int i=0;i<N;i++)
+    {
+      II(i)=i*2;
+      JJ(i)=20-i;
+    }	
   A =0;
   for (int i=0;i<N;i++)
     {
@@ -68,17 +75,29 @@ else
       a[i]=i;
     }
   A += 2*a*a';  //  produit tensoriel
+  matrix A1=   A(II,JJ);
+  matrix A0 = (a*a')(II,JJ);
+  cout << " ------------------- " << endl;
+  cout << " II= " << II <<endl;
+  cout << " JJ= " << JJ <<endl;
+ // cout <<  " A  = " << A << endl;
+ // cout <<  " A1 = " << A1 <<endl;
+  cout << " 8,9 -> " <<II[8] << " " <<  JJ[9] <<" " << A(9,8)<< " " << A1(II[9],JJ[8]) << endl;
+  assert(A1(II[8],JJ[9]) == A(8,9));
+  //cout <<  " A0 = " << A0 <<endl;
+  cout << " 9,1 -> " <<II[9] << " " <<  JJ[1] <<endl;
+  assert(A0(II[9],JJ[1]) == a[9]*a[1]);
   assert(A(9,1) == 2*a[9]*a[1]);  
   b=A*a;
   c=-9;
   cout << "xxxx\n"; 
   matrix sparseA=A;
-  cout << sparseA << endl;
+  //cout << sparseA << endl;
   sparseA = 2*sparseA+sparseA;
   sparseA = 4*sparseA+sparseA*5; //  * 27
   matrix sparseB=sparseA+sparseA+sparseA; ;
-  cout << sparseA << endl;
-  cout << sparseB << endl; // *81 
+  //cout << sparseA << endl;
+  //cout << sparseB << endl; // *81 
   cout << "sparseB = " << sparseB(0,0) << endl;
   cout << " -------- block matrix \n " << endl;
   matrix B = [ [sparseA, 0 , sparseA ], [ 0, sparseA , 0 ] , [0, 0, sparseB' ]];
@@ -93,7 +112,7 @@ else
 
 
  // remark  the size of sum of size must be equal to the size of x.  
-  cout << " B = " << B << endl; 
+  //cout << " B = " << B << endl; 
   cout << B(8,29) << " ===  " <<  sparseA(8,9) << endl;
   cout << B(28,27)
 << " ===  " <<  sparseB(7,8) << endl;
@@ -103,7 +122,7 @@ else
 //  build FE  matrice with differente meshes (here 3) 
 varf vM(u,v)=int1d(Th,qforder=1)(u*v);
 matrix MM=vM(Vh,VH);
-cout << MM << endl;
+//cout << MM << endl;
 Vh unVh=0,wVh=0;
 VH unVH=0,wVH=0;
 unVh[]=1;
@@ -111,5 +130,5 @@ unVH[]=1;
 wVh[] = MM' * unVH[] ; 
 wVH[] = MM * unVh[] ; 
 
-cout << "wWh : " << wVh[] << endl;
-cout <<" wVH : " << wVH[] << endl;
+//cout << "wWh : " << wVh[] << endl;
+//cout <<" wVH : " << wVH[] << endl;
