@@ -18,7 +18,7 @@ KNM_<R> & KNM_<R>::operator oper (const outProduct_KN_<R> & u)
         R * mij = li;
         bj = bb;
         for (long j=0;   j<m; j++, bj += stepj, mij += stepij )         
-          *mij oper cc * *bj ; 
+          *mij oper cc * conj(*bj) ; 
        }
     return *this;
  }

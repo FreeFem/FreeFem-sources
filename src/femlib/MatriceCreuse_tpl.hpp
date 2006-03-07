@@ -808,9 +808,9 @@ template <class R>
 ostream& MatriceMorse<R>::dump(ostream & f) const 
 {
   f << "# Sparce Matrix (Morse)  " << endl;
-  f << "# first line: n m is symmetic nbcoef \n";
-  f << "# after for each nonzero coefficient:   i j a_ij \n";  
-  
+  f << "# first line: n m (is symmetic) nbcoef \n";
+  f << "# after for each nonzero coefficient:   i j a_ij where (i,j) \in  {1,...,n}x{1,...,m} \n";  
+ 
   f << this->n << " " << this->m << " " << symetrique << "  " << nbcoef <<endl;
   int k=lg[0];
   int pold= f.precision();

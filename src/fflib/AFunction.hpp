@@ -2244,15 +2244,20 @@ template<class R,class A,class B,class E> class E_F_F0F0_;
 
 template<class R,class A=R,class B=A,class CODE=E_F_F0F0_<R,A,B,E_F0> >
 class  OneOperator2_ : public OneOperator {
-    aType r; //  return type 
+    aType r,t0,t1; //  return type  type de f,  f(t1, t2) 
     typedef typename  CODE::func  func;
     func f;
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new CODE(f,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]));} 
+     { return  new CODE(f,t0->CastTo(args[0]),t1->CastTo(args[1]));} 
     OneOperator2_(func  ff): 
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
-      f(ff){}
+      t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
+      
+    OneOperator2_(func  ff,aType tt0,aType tt1): 
+      OneOperator(map_type[typeid(R).name()],tt0,tt1),
+      t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
+      
 };
 
 template<class R,class A=R,class B=A,class C=B,class CODE=E_F_F0F0F0_<R,A,B,C,E_F0> >
@@ -2741,6 +2746,10 @@ inline    int E_F0::find(const MapOfE_F0 & m)  {  //  exp
      }
 
 extern queue<pair<const E_Routine*,int> > debugstack;
+
+struct NothingType {  // a type to do nothing 
+ NothingType() {};
+};
 
 extern basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
   
