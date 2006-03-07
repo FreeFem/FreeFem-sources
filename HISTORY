@@ -1,3 +1,37 @@
+2006-03-07 20:05  hecht
+
+	*   pass to  to version 2.4.0
+
+2006-03-07 17:49  hecht
+
+	*   same as previous commit (just on the top dir)
+
+2006-03-07 17:48  hecht
+
+	*  add new operator outer product, change the doc, ....
+	    pass to version 2.3-3
+
+2006-03-03 23:29  hecht
+
+	*   add matric operator like in matlab	mat(I,J) where I,J are
+	    integer array
+
+2006-03-03 13:21  hecht
+
+	* [no log message]
+
+2006-03-03 13:15  hecht
+
+	*  add an exemple with 1D lagrange multiplier.
+
+2006-03-01 23:15  hecht
+
+	*  add out product of 2 vectors  to build full matrix
+
+2006-02-28 10:18  lehyaric
+
+	* Debian packaging for version 2.3-2
+
 2006-02-22 18:12  hecht
 
 	*   correct exec on PC
