@@ -1,6 +1,6 @@
 #ifdef __MWERKS__
 #pragma optimization_level 0
-//#pragma inline_depth(0)
+//#pragma inline_depth(0) 
 #endif
 
 #include  <cmath>
@@ -43,6 +43,8 @@ namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso); 
 //  \sum_i a_i*A_i  where a_i is a scalare and A_i is a Sparce matrix
 //
  
+
+
 template<class R> 
 list<triplet<R,MatriceCreuse<R> *, bool > > * to(Matrice_Creuse<R> * M)
 {
@@ -844,23 +846,69 @@ KN<R> * get_mat_coef(KN<R> * x,TheCoefMat<R> dm)
 };
 
 template<typename R>  
-map< pair<int,int>, R> *Matrixfull2mapIJ (KNM<R>   * const & pa,const KN_<long> & ii,const KN_<long> & jj)
+map< pair<int,int>, R> *Matrixfull2mapIJ_inv (KNM<R>   * const & pa,const Inv_KN_long & iii,const Inv_KN_long & jjj)
 {
+   const  KN_<long> &ii(iii), &jj(jjj);
    const KNM<R> & a(*pa);
    int N=a.N(),M=a.M();
-   int n = ii(SubArray(N)).max()+1;
-   int m= jj(SubArray(M)).max()+1;
-   cout << "  ### n m " << n << " " << m << endl; 
+   long n = ii(SubArray(N)).max()+1;
+   long m= jj(SubArray(M)).max()+1;
+   long minn = ii(SubArray(N)).min()+1;
+   long minm= jj(SubArray(M)).min()+1;
+   
+/*
+    if ( !(0 <= minn && 0 <=  minm) ) 
+        {
+            cerr << " Out of Bound  in A(I^-1,J^1) :  "<< minn << " " << minm <<" =>  negative value!! " << endl;
+            ExecError("Out of Bound Error");
+        }
+*/
+   
+  // cout << "  ### n m " << n << " " << m << endl; 
    map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
    map< pair<int,int>, R> & A(*pA);
    A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
   
-   for (int i=0;i<N;++i)
-    for (int j=0;j<M;++j)
+   for (long i=0;i<N;++i)
+    for (long j=0;j<M;++j)
      { R aij=a(i,j);
-       cout << i << " " << j << " :: " << ii[i] << " " << jj[j] << " = " << aij << endl;
-       if (norm(aij)>1e-40) 
+       //cout << i << " " << j << " :: " << ii[i] << " " << jj[j] << " = " << aij << endl;
+       if(ii[i]>=0 && jj[j]>=0 && norm(aij)>1e-40) 
          A[make_pair(ii[i],jj[j])] += aij;
+     }
+      
+  return pA;
+}
+
+template<typename R>  
+map< pair<int,int>, R> *Matrixfull2mapIJ (KNM<R>   * const & pa,const KN_<long> & ii,const  KN_<long> & jj)
+{
+   const KNM<R> & a(*pa);
+   int N=a.N(),M=a.M();
+   long n = ii.N();
+   long m= jj.N();
+  // cout << "  ### n m " << n << " " << m << endl; 
+   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+   map< pair<int,int>, R> & A(*pA);
+   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
+  
+   for (long il=0;il<N;++il)
+    for (long jl=0;jl<M;++jl)
+     { 
+       long i = ii[il];
+       long j = jj[jl];
+       if( i>=0 && j >=0) {
+          if ( !(0 <= i && i < N && 0 <= j && j < M ) )
+            {
+              cerr << " Out of Bound  in A(I,J) : " << i << " " << j << " not in " << "[0,"<<N<<"[x[0," << M << "[ \n";
+              ExecError("Out of Bound Error");
+             }
+       
+          R aij=a(i,j);
+       //cout << i << " " << j << " :: " << ii[i] << " " << jj[j] << " = " << aij << endl;
+         if (norm(aij)>1e-40) 
+           A[make_pair(il,jl)] += aij;
+       }
      }
       
   return pA;
@@ -889,13 +937,22 @@ AnyType Matrixfull2map (Stack , const AnyType & pp)
 
 
 template<class R>
-map< pair<int,int>, R> *Matrixoutp2mapIJ (outProduct_KN_<R>   * const & pop,const KN_<long> & ii,const KN_<long> & jj)
+map< pair<int,int>, R> *Matrixoutp2mapIJ_inv (outProduct_KN_<R>   * const & pop,const Inv_KN_long & iii,const Inv_KN_long & jjj)
 {
-
+   const KN_<long> &ii(iii), &jj(jjj);
    const outProduct_KN_<R> & op(*pop);
-   int N=op.a.N(),M=op.b.N();
-   int n = ii(SubArray(N)).max()+1;
-   int m= jj(SubArray(M)).max()+1;
+   long  N=op.a.N(),M=op.b.N();
+   long  n = ii(SubArray(N)).max()+1;
+   long m= jj(SubArray(M)).max()+1;
+   long minn = ii(SubArray(N)).min()+1;
+   long minm= jj(SubArray(M)).min()+1;
+/*
+     if ( !(0 <= minn && 0 <=  minm) ) 
+        {
+            cerr << " Out of Bound  in A(I^-1,J^1) :  "<< minn << " " << minm <<" =>  negative value!! " << endl;
+            ExecError("Out of Bound Error");
+        }
+ */
    map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
    map< pair<int,int>, R> & A(*pA);
    A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
@@ -903,9 +960,43 @@ map< pair<int,int>, R> *Matrixoutp2mapIJ (outProduct_KN_<R>   * const & pop,cons
    for (int i=0;i<N;++i)
     for (int j=0;j<M;++j)
      { 
-       R aij=op.a[i]*op.b[j];
-       if (norm(aij)>1e-40) 
+       R aij=op.a[i]*conj(op.b[j]);
+       if(ii[i]>=0 && jj[j]>=0 && norm(aij)>1e-40) 
+//       if (norm(aij)>1e-40 &) 
           A[make_pair(ii[i],jj[j])] += aij;
+     }   
+  delete pop;
+    
+  return pA;
+}
+
+template<class R>
+map< pair<int,int>, R> *Matrixoutp2mapIJ (outProduct_KN_<R>   * const & pop,const KN_<long> & ii,const KN_<long>  & jj)
+{
+   const outProduct_KN_<R> & op(*pop);
+   long N=op.a.N(),M=op.b.N();
+   long n=ii.N(),m=jj.N();
+   
+   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+   map< pair<int,int>, R> & A(*pA);
+   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
+   
+   for (long il=0;il<n;++il)
+    for (long jl=0;jl<m;++jl)
+     { 
+       long i = ii[il];
+       long j = jj[jl];
+       if(i>=0 && j >=0)
+        {
+               if ( !( 0 <= i && i < N && 0 <= j && j < M )  )
+                {
+                    cerr << " Out of Bound  in (a*b')(I,J) : " << i << " " << j << " not in " << "[0,"<<N<<"[x[0," << M << "[ \n";
+                    ExecError("Out of Bound Error");
+                }
+               R aij=op.a[i]*conj(op.b[j]);
+               if (norm(aij)>1e-40) 
+                  A[make_pair(il,jl)] += aij;
+               }
      }   
   delete pop;
     
@@ -917,17 +1008,17 @@ template<class R>
 AnyType Matrixoutp2map (Stack , const AnyType & pp)
 {
    const outProduct_KN_<R> & op(*GetAny<outProduct_KN_<R> *>(pp));
-   int N=op.a.N(),M=op.b.N();
-   int n = N;
-   int m= M;
+   long N=op.a.N(),M=op.b.N();
+   long n = N;
+   long m= M;
    map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
    map< pair<int,int>, R> & A(*pA);
    A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
   
-   for (int i=0;i<N;++i)
-    for (int j=0;j<M;++j)
+   for (long i=0;i<N;++i)
+    for (long j=0;j<M;++j)
      { 
-      R aij=op.a[i]*op.b[j];
+      R aij=op.a[i]*conj(op.b[j]);
       if (norm(aij)>1e-40) 
         A[make_pair(i,j)] += aij;
      } 
@@ -1036,6 +1127,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 }
 
 
+
 template <class R>
 void AddSparceMat()
 {
@@ -1117,6 +1209,10 @@ TheOperators->Add("+",
  //Global.Add("psor","(",new  OneOperatorCode<Psor<R> > );
  
  atype<Matrice_Creuse<R> * >()->Add("(","",new OneOperator3_<R*,Matrice_Creuse<R> *,long,long >(get_elementp2mc<R>));
+ 
+ atype<KNM<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,KNM<R>*,Inv_KN_long,Inv_KN_long >(Matrixfull2mapIJ_inv<R>));
+ atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,outProduct_KN_<R>*,Inv_KN_long,Inv_KN_long >(Matrixoutp2mapIJ_inv<R>));
+
  atype<KNM<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,KNM<R>*,KN_<long>,KN_<long> >(Matrixfull2mapIJ<R>));
  atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,outProduct_KN_<R>*,KN_<long>,KN_<long> >(Matrixoutp2mapIJ<R>));
 
@@ -1163,6 +1259,10 @@ class PrintErrorCompileIM :  public E_F0info { public:
 void  init_lgmat() 
 
 {
+  
+//  new OneOperator1<Transpose<KN_<long> >,KN<long> *>(&Build<Transpose<KN_<long> >,KN<long> *>),
+//  new OneOperator1<Transpose<KN_<long> >,KN_<long> >(&Build<Transpose<KN_<long> >,KN_<long> >)       
+
    map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<double*>())]=atype<Matrice_Creuse<double> *>();
    map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<Complex*>())]=atype<Matrice_Creuse<Complex> *>();
     AddSparceMat<double>();

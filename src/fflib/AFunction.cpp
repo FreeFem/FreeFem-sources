@@ -426,6 +426,7 @@ void Init_map_type()
     Dcl_TypeandPtr<istream*>(0,0,::InitializePtr<istream*>,::DeletePtr<istream*>);
     Dcl_Type< ostream_precis > ();
     Dcl_Type< istream_good > ();
+    Dcl_Type< NothingType > ();
     
     Dcl_Type<Polymorphic*>();
     

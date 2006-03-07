@@ -106,6 +106,7 @@ inline void Check_Kn(const char * str,const char * file,int line)
 // ----------------
 inline double  conj(const double & x){return x;}
 inline float  conj(const float &x){return x;}
+inline long  conj(const long &x){return x;}
 inline double  real(const double &x){return x;}
 inline float  real(const float &x){return x;}
 
@@ -1349,6 +1350,16 @@ template<class R>
 KN_<R> diagonal(const KNM<R> & A) { 
   K_throwassert(A.N() == A.M()); 
   return KN_<R>(A,SubArray(A.N(),0,A.N()+1));}
+
+// to def  inv permutation FH mars 2006 
+class Inv_KN_long{ public:
+  KN_<long>  t;
+  Inv_KN_long(const KN_<long> & v)
+   : t(v) {}
+  Inv_KN_long( KN_<long> const  * & v)
+   : t(*v) {}
+  operator const KN_<long> & () const {return t;}
+};
 
 #include "RNM_tpl.hpp"
 #ifdef K_throwassert

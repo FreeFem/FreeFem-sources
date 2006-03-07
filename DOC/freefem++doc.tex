@@ -3,7 +3,7 @@
 \documentclass[a4paper,twoside,12pt]{book}
 \usepackage{styles}
 \usepackage{times}
-\def\VERSION{2.3-0}
+\def\VERSION{2.3-3}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -710,6 +710,7 @@ there are some compound operator:
  \item \verb@^-1@ is for  solving the linear system (example: \verb$ b = A^-1 x$) \index{solve!linear system}
  \item \verb@' *@ is the compound  of transposition and matrix product, so it is the dot product
 (example \verb$real DotProduct=a'*b$) \index{dot product}\index{product!dot}
+ \item \verb@ a*b'@ is the outer product  (example  \verb$matrix B=a'*b$ \index{outer product}\index{product!outer}) 
 \end{itemize}
 \begin{example}~
 \bFF
@@ -742,6 +743,9 @@ Vh m2; m2[] = f[]./g[];
 @cout << "m2 = "<< m2[] << @endl;
 @cout << "dot Product = "<< f[]'*g[] << @endl;
 @cout << "hermitien Product = "<< ff[]'*gg[] << @endl;
+@cout << "outer Product = "<< (A=ff[]*gg[]') << @endl;
+@cout << "hermitien outer Product = "<< (AA=ff[]*gg[]') << @endl;
+
 \eFF
 
 On the triangulation of Figure \ref{fig-hatFunction} this produce the following:
@@ -3105,6 +3109,104 @@ b/=a; b =5
  a'*a        = 41
 \eFF
 
+
+                                                                                                                             
+Example of array with renumbering    (version 2.3 or better) .
+The renumbering is always given by an integer array, and if a value in the array 
+is negative, the mining is not image, so we do not set the value.    
+ \index{renumbering} \index{array!renumbering}
+\bFF                                                                                     
+int[int] I=[2,3,4,-1,0];        // the integer mapping to set the renumbering                                                                                              
+b=c=-3;                                                                                                                      
+b= a(I); // for( i=0;i<b.n;i++) if(I[i] >=0)  b[i]=a[I[i]];                                                                  
+c(I)= a; // for( i=0;i<I.n;i++) if(I[i] >=0)  C(I[i])=a[i];                                                                  
+cout << " b = a(I) : " << b << "\n  c(I) = a " << c << endl;                                                                 
+\eFF         
+The output is 
+\bFF
+ b = a(I) : 5
+          2       4       4      -3       2
+
+  c(I) = a 5
+          4      -3       2       1       2
+\eFF
+
+\subsubsection{Arrays with two integer indices versus matrix}
+
+ Some example  transform full matrices in sparse matrices.
+ \index{outer product} \index{line}\index{column}\index{array!line}\index{array!column}
+\bFF
+
+  int N=3,M=4;
+
+  real[int,int] A(N,M);
+  real[int]  b(N),c(M);
+  b=[1,2,3];
+  c=[4,5,6,7];
+
+  complex[int,int]  C(N,M);
+  complex[int]  cb=[1,2,3],cc=[10i,20i,30i,40i];
+
+
+  b=[1,2,3];
+
+  int [int] I=[2,0,1];
+  int [int] J=[2,0,1,3];
+
+  A=1; // set the all matrix
+  A(2,:) = 4; //  the full line 2
+  A(:,1) = 5; //  the full column 1
+  A(0:N-1,2) = 2; // set the column 2
+  A(1,0:2) = 3; // set the line 1 from 0 to 2
+
+  cout << " A = " << A << endl;
+  // outer product 
+  C  =  cb*cc';
+  C +=  3*cb*cc';
+  C -=  5i*cb*cc';
+  cout << " C = " << C << endl;
+  // the way to transform a array to a sparce matrix
+  matrix B;
+  B = A; 
+  B=A(I,J); // B(i,j)= A(I(i),J(j))
+  B=A(I^-1,J^-1);  // B(I(i),J(j))= A(i,j)  
+
+  A = 2.*b*c'; // outer product  
+  cout << " A = " << A << endl;
+  B = b*c'; // outer product  B(i,j)  = b(i)*c(j) 
+  B = b*c'; // outer product  B(i,j)  = b(i)*c(j) 
+  B = (2*b*c')(I,J); //   outer product  B(i,j)  = b(I(i))*c(J(j)) 
+  B = (3.*b*c')(I^-1,J^-1); // outer product  B(I(i),J(j))  = b(i)*c(j) 
+  cout << "B = (3.*b*c')(I^-1,J^-1) =  " << B << endl;  
+  
+\eFF
+ 
+ the output is
+ \bFF
+ b = a(I) : 5
+          2       4       4      -3       2
+
+  c(I) = a 5
+          4      -3       2       1       2
+
+ A = 3 4
+           1   5   2   1
+           3   3   3   1
+           4   5   2   4
+
+ C = 3 4
+         (-50,-40) (-100,-80) (-150,-120) (-200,-160)
+         (-100,-80) (-200,-160) (-300,-240) (-400,-320)
+         (-150,-120) (-300,-240) (-450,-360) (-600,-480)
+
+ A = 3 4
+           8  10  12  14
+          16  20  24  28
+          24  30  36  42
+\eFF
+ 
+\subsubsection{Other arrays}
+ 
 It is also possible to make an array of FE functions, with the same syntax,
 and we can treat them as \emph{vector valued function} if we need them.
 \index{array}\index{array!FE function}
