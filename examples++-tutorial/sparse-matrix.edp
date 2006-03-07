@@ -62,9 +62,13 @@ else
   real [int] a(N),b(N),c(N);
   int [int] II(N);
   int [int] JJ(N);
+  int [int] III(N);
+  int [int] JJJ(N);
   for (int i=0;i<N;i++)
     {
       II(i)=i*2;
+      III(i)=(i*1023)%N;
+      JJJ(i)=(i*7)%N;
       JJ(i)=20-i;
     }	
   A =0;
@@ -74,20 +78,39 @@ else
       if(i+1 < N)    A(i,i+1)=-i;
       a[i]=i;
     }
+  b=a(III);
+  c(III)=a;
+  cout << " III = " << III << endl;
+  cout << " a(III)     " <<  b << endl;
+  cout << " a(III^1) = " << c  << endl;
+  for (int i=0;i<N;i++)
+    assert( int(c[int(b[i])]) == i);
   A += 2*a*a';  //  produit tensoriel
-  matrix A1=   A(II,JJ);
-  matrix A0 = (a*a')(II,JJ);
+  matrix A1=   A(II^-1,JJ^-1);   //  do A1(II,JJ) = A 
+  matrix A2=   A(III,JJJ);   //  do A = A 
+  matrix A0 = (a*a')(II^-1,JJ^-1);
+  matrix A3 = (a*a')(III,JJJ);
+
   cout << " ------------------- " << endl;
-  cout << " II= " << II <<endl;
-  cout << " JJ= " << JJ <<endl;
  // cout <<  " A  = " << A << endl;
  // cout <<  " A1 = " << A1 <<endl;
   cout << " 8,9 -> " <<II[8] << " " <<  JJ[9] <<" " << A(9,8)<< " " << A1(II[9],JJ[8]) << endl;
-  assert(A1(II[8],JJ[9]) == A(8,9));
-  //cout <<  " A0 = " << A0 <<endl;
-  cout << " 9,1 -> " <<II[9] << " " <<  JJ[1] <<endl;
-  assert(A0(II[9],JJ[1]) == a[9]*a[1]);
   assert(A(9,1) == 2*a[9]*a[1]);  
+
+  for (int i9=0;i9<N;++i9)
+  for (int j9=0;j9<N;++j9)
+   {
+    
+     if( abs(A(j9,i9))> 0.01) 
+	  assert(A1(II[j9],JJ[i9]) == A(j9,i9));
+     if( abs(A(III(j9),JJJ(i9))) > 0.01) 
+        assert(A2(j9,i9) == A(III(j9),JJJ(i9) )) ;
+//     cout << " i9,j9 -> " <<II[i9] << " " <<  JJ[j9] <<endl;
+     if( abs(a[i9]*a[j9])> 0.01) 
+       assert(A0(II[i9],JJ[j9]) == a[i9]*a[j9]);
+     if( abs(a[III[i9]]*a[JJJ[j9]])> 0.01) 
+     assert(A3(i9,j9) == a[III[i9]]*a[JJJ[j9]]);
+   }
   b=A*a;
   c=-9;
   cout << "xxxx\n"; 
