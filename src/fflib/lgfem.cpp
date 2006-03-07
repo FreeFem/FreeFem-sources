@@ -4105,4 +4105,3 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
 
 #include "InitFunct.hpp"
 static addingInitFunct TheaddingInitFunct(-20,init_lgfem);
-
