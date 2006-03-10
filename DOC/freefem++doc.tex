@@ -62,7 +62,7 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \clearpage\thispagestyle{empty}\cleardoublepage
 \thispagestyle{empty}
 \begin{center}
- {\Blue{ \TitreFont freefem++}} \\ \vglue 1cm  ~ \\
+ {\Blue{ \TitreFont FreeFem++}} \\ \vglue 1cm  ~ \\
    Version \VERSION 
  \\ \vglue 0.7cm
  {\Large \url{http://www.freefem.org/ff++}} \\
@@ -146,14 +146,14 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 
 \hbox to \hsize{\hss\includegraphics[width=7cm]{sanskrit}}
 
-Fruit of a long maturing process freefem, in its last avatar, freefem++, is a high level integrated development environment (IDE)  for partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
+Fruit of a long maturing process freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for numerically solvong partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
 
 \medskip
 
-Freefem++ has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK. Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of freefem++. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in freefem++ to prepare research quality reports: color display online with zooming and other features and postscript printouts.
+\texttt{FreeFem++} has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK. Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of \texttt{FreeFem++}. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in \texttt{FreeFem++} to prepare research quality reports: color display online with zooming and other features and postscript printouts.
 \medskip
 
-This book is ideal for students at Master level, for  researchers at any level and for engineers also in financial mathematics.
+This book is ideal for students at Master level, for  researchers at any level, and for engineers, and also in financial mathematics.
 
 \section{Introduction}\pagenumbering{arabic} \setcounter{page}{1}
 A partial differential equation is a relation between a function
@@ -163,13 +163,13 @@ are modeled by one or several partial differential equations.
 \\\\
 \freefempp is a software to solve these equations numerically. As
 its name says, it is a free software (see copyright for full detail)
-based  on the Finite Element Method; it is not a package, it an integrated product with its own
+based  on the Finite Element Method; it is not a package, it is an integrated product with its own
 high level programming language. This software runs on all unix
-OS (with g++ 2.95.2 or better and X11R6) , on Window95, 98, 2000,
-NT, XP,  on MacOS 9 and
-X.  \\\\
+OS (with g++ 2.95.2 or better installed, and X11R6) , on Window95, 98, 2000,
+NT, XP,  and
+MacOS X.  \\\\
 Moreover \freefempp is highly adaptive.  Many phenomena involve
-several  coupled systems: fluid-structure interactions,
+several  coupled system, for example: fluid-structure interactions,
 Lorenz forces for aluminium casting and ocean-atmosphere problems are
 three such systems. These require different finite element approximations
 degrees, possibly on different meshes. Some algorithms like
@@ -180,7 +180,7 @@ unstructured and adapted bidimensional meshes}.  \\\\
 
 The characteristics of \freefempp are:
 \begin{itemize}
-\item Problem description (real or complex) by their variational formulations,
+\item Problem description (real or complex valued) by their variational formulations,
 with access to the internal vectors and matrices if needed.
 %
 \item Multi-variables, multi-equations, bi-dimensional (or 3D
@@ -190,7 +190,7 @@ iterative procedures which reduce the problem to a set of linear
 problems.
 %
 \item Easy geometric input by analytic description of boundaries by pieces;
-however this module is not a CAD system; for instance when two
+however this software is not a CAD system; for instance when two
 boundaries intersect, the user must specify the intersection points.
 %
 \item Automatic mesh generator, based on the Delaunay-Voronoi
@@ -210,10 +210,10 @@ storage of the interpolation matrices.
 %
 \item A large variety of triangular finite elements : linear and quadratic
  Lagrangian elements, discontinuous P1 and Raviart-Thomas elements,
- elements of a non-scalar type, mini-element, ...(no quadrangles).
+ elements of a non-scalar type, mini-element,\dots{} (but no quadrangles).
 %
 \item Tools to define discontinuous Galerkin formulations
-via the keywords: ``jump'', ``mean'', ``intalledges'').
+via finite elements \ttCC{P0},\ttCC{P1dc},\ttCC{P2dc} and keywords: \ttCC{jump}, \ttCC{mean}, \ttCC{intalledges}.
 %
 \item A large variety of linear direct and iterative solvers
 (LU, Cholesky, Crout, CG, GMRES, UMFPACK) and eigenvalue and
@@ -233,38 +233,109 @@ error indicator, ...
 \item An experimental parallel version using \texttt{mpi}
 \end{itemize}
 
-\subsection{Installation on Windows and Mac OS}
+\subsection{Installation }
 
-Binaries are available for Microsoft Windows and Apple
-Mac OS X in the section
-"\texttt{freefem++}" at \url{http://www.freefem.org}.
-\\
- Unix users should download the source code and
-compile it via an install/make command (see below).
+ First open the following web page 
+ \begin{center}
+  \url{http://www.freefem.org/ff++/}
+ \end{center}
+ 
+And choose your architecture files: Linux, Windows, MacOS X,
+or go to the end of the page to get the full list of download.
 
-\subsection{How to use \freefempp}
-The executable \texttt{freefem++.exe} opens a dialog box for
-choosing the input file; then it executes its content and produces
-graphics and output files.
-\\\\
-To write or modify the input file a text editor can be used.
-\\\\
-An integrated environment, written by A. Le Hyaric, is also included
-with the distribution (\freefempp GUI) \texttt{FreeFem++-cs.exe}; note however that
-the graphics display much slower in this mode.
-There are other ways to have an integrated environment. TeX users have
-usually an editor installed; if it is winedt or TeXnicCenter then these can
-be programmed to handle the edit-run-correct cycle of \freefempp with
-color syntax and automatic launch of freefem.  If you don't have one of these
-installed the easiest is to download the freeware \texttt{Crimpson Editor}.
-\begin{figure}[htbp]
+Remark: Binaries are available for Microsoft Windows and Apple
+Mac OS X and linux.
+%"\texttt{FreeFem++}" at \url{http://www.freefem.org}.
+
+
+\subsubsection{Installation from sources}
+
+To compile and install for the source.
+
+First under window we use  \texttt{cygwin} environment from
 \begin{center}
-\includegraphics[width=15cm]{csSnapOld}
-\caption{ The 3 panels of the integrated environment \texttt{freefem++-cs}:
-to left the program, top right the graphic window, bottom the text messages.}
+   \url{http://www.cygwin.com}
 \end{center}
-\end{figure}
 
+ and under MacOS X we use the apple Developer Tools, the Gerben Wierda TeXLive-teTeX ,
+  and some fink package like : g77, wget. 
+
+).
+
+\freefempp must be compiled and
+installed from the source archive. This archive is available from:
+
+ To
+extract files from the compressed archive \texttt{freefem++-(VERSION).tar.gz} 
+a directory called
+\begin{center}
+\texttt{freefem++-(VERSION)} 
+\end{center}
+enter the following commands in a shell window~:
+
+\bFF
+tar zxvf freefem++-(VERSION).tar.gz
+cd freefem++-(VERSION)
+\eFF
+
+
+
+To compile and install \freefempp, just follow the \texttt{INSTALL}
+and \texttt{README} files. The following programs are produced,
+depending on the system you are running (Linux, Windows, MacOS)~:
+
+After installation, The list of application ( depending of the system and the compiling option ) can be~:
+
+\begin{enumerate}
+\item \texttt{FreeFem++}, standard version, with a graphical interface
+based on X11, Win32 
+\item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no windows)
+\item \texttt{FreeFem++-mpi}, parallel version, postscript output only
+\item \texttt{FreeFem++-glx}, graphics using OpenGL and X11
+\item \texttt{FreeFem++-cs}, integrated development environment
+%\item \texttt{FreeFem++-ag}, integrated development environment
+(please see chapter Graphical User Interface \ref{GUI}  for more details).
+\item \texttt{/Applications/FreeFem++.app}, Drag and Drop CoCoa MacOs
+Application
+\item \texttt{FreeFem++-CoCoa}, MacOS Shell script for MacOS OpenGL
+version (MacOS 10.2 or better) (note: it uses
+/Applications/FreeFem++.app)
+\end{enumerate}
+
+As an installation test, under unix is :  go into the directory
+\texttt{examples++-tutorial} and run \freefempp on the example script
+\texttt{LaplaceP1.edp} with the command~:
+
+\bFF
+FreeFem++ LaplaceP1.edp
+\eFF
+
+And if you are using \texttt{nedit} as ours text editor, 
+Do one time \verb!nedit -import edp.nedit! to have coloring syntex for yours \ttCC{.edp}
+files. 
+
+
+
+\subsubsection{Windows binaries install}
+  First download the windows installation file, execute the
+  download file to install \texttt{FreeFem++}, after that you have
+  three new icons on your destop:
+  \begin{itemize}
+   \item \texttt{FreeFem++ (VERSION).exe}  the classical \freefempp application. 
+   \item \texttt{FreeFem++ (VERSION) GUI.exe}  the GUI \freefempp application, see section \ref{GUI} for more information. 
+   \item \texttt{FreeFem++ (VERSION) Examples} a link to the\freefempp  directory examples.
+  \end{itemize}
+  where \texttt{(VERSION)} is the version of the files for example \texttt{2.3-0-P4}.
+ 
+ By default, the installed files are  in 
+  \begin{center}
+  \verb!C:\Programs Files\FreeFem++-(VERSION)!
+  \end{center}
+  In this directory, you have all the \texttt{.dll} files and and 
+    other application \texttt{FreeFem++-nw.exe} the \freefempp application 
+    without graphic windows. 
+    
+\paragraph{Link with other text editor}
 \begin{description}
 \item[\texttt{Crimson Editor}]
 at \url{http://www.crimsoneditor.com/} and adapt it as follows:
@@ -274,34 +345,45 @@ at \url{http://www.crimsoneditor.com/} and adapt it as follows:
 
 \item In the same panel go to Filters and add  \texttt{freefem++(*.edp)} item
 
-\item In the same panel again but under "Syntax Files"
-   add two files FREEFEM.SPC and FREEFEM.KEY to define the color syntax.  To build
+\item In the same panel again but under \texttt{Syntax Files}
+   add two files \texttt{FREEFEM.SPC} and \texttt{FREEFEM.KEY} to define the color syntax.  To build
    the first one simply copy paste the content of JAVA.SPC as for the second
    copy paste the list of keywords in section \ref{keywrds}.
 
-\item In the same panel in Tools/User Tools, add a freefem++ item (1st line) with the path
-to freefem++.exe on the second line and \$(FilePath) and \$(FileDir on third and fourth lines.
+\item In the same panel in \texttt{Tools/User} Tools, add a \texttt{FreeFem++} item (1st line) with the path
+to \texttt{freefem++.exe} on the second line and \texttt{\$(FilePath)} and \texttt{\$(FileDir)} on third and fourth lines.
 Tick the 8.3 box.
 \end{itemize}
 
 \item[winedt] for Windows : this is the best but it could be tricky to set up.  Download it from 
- \url{http://www.winedt.com} : this is a multipurpose text editor  with advance features
+\begin{center}
+ \url{http://www.winedt.com} 
+ \end{center}
+ this is a multipurpose text editor  with advance features
 such as syntax coloring; a macro is available on ww.freefem.org to localize winedt to \freefempp
 without disturbing the winedt functional mode for LateX, TeX, C, etc.  However winedt is not free
 after the trial period.
 
 \item[TeXnicCenter] for Windows: this is the easiest and will be the best once we find a volonteer
-to program the color syntax.  Download it from \url{http://www.texniccenter.org/}
+to program the color syntax.  Download it from 
+\begin{center}\url{http://www.texniccenter.org/}\end{center}
 It is also an editor for TeX/LaTeX but it has a "`tool"' menu which can be configure to launch
 \freefempp programs:  do the following:
 \begin{itemize}
-\item Select the Tools/Customize menu will bring a dialog box.
-\item Select the "`Tools"' tab and  create a new item: call it freefem.
+\item Select the \texttt{Tools/Customize} menu will bring a dialog box.
+\item Select the  \texttt{Tools} tab and  create a new item: call it \texttt{freefem}.
 
-\item in the 3 lines below, 1/ search for FreeFem++.exe 2/ select Main file with further option 
- then Full path and click also on the 8.3 box 3/ select main file full directory path with 8.3
+\item in the 3 lines below, 
+ \begin{enumerate}
+\item  search for \texttt{FreeFem++.exe}
+\item select Main file with further option 
+ then Full path and click also on the \texttt{8.3 box} 
+ \item select main file full directory path with 8.3
+ \end{enumerate}
 \end{itemize}
-\item[nedit] on the Mac OS, Cygwin/Xfree and linux.
+\item[nedit] on the Mac OS, Cygwin/Xfree and linux, to import the color syntax do
+
+\verb!nedit -import edp.nedit!
 \end{description}
 %
 \begin{figure}[htbp]
@@ -312,53 +394,101 @@ It is also an editor for TeX/LaTeX but it has a "`tool"' menu which can be confi
 has an item to launch \freefempp by a Ctrl+1 command.}
 \end{center}
 \end{figure}
+ 
+\subsubsection{MacOS X  binaries install}
 
-\subsection{Installation on Linux/Unix machines}
+  Download the MacOS X binaries version files , extract all the file with a double click on the
+  icon of the file, go the the directory and put the \texttt{FreeFem+.app} application in the 
+  \texttt{/Applications} directory.
+  If you want a terminal acces to \freefempp just copy the file \texttt{FreeFem++-CoCoa} in the
+   directory of your \verb!$PATH! shell environment variable.
+   
+  If you want to automatically launch the \texttt{FreeFem++.app} if you double click on a \texttt{.edp} file icon.
+  Under the finder pick a \texttt{.edp} in directory \texttt{examples++-tutorial} for example, 
+  select menu  \texttt{File -> Get Info} an \texttt{change Open with:} (choose FreeFem++.app) and click on button 
+  \texttt{change All...}. 
 
-For these platforms (including \texttt{cygwin}), \freefempp must be compiled and
-installed from the source archive. This archive is available from:
+\subsection{How to use \freefempp}
 
-\url{http://www.ann.jussieu.fr/~hecht/ftp/freefem/freefem++.tgz}.
+\paragraph{Under Windows with Graphic Interfaces}
 
- To
-extract files from the compressed archive \texttt{freefem++.tgz} into
-a directory called
+The executable \texttt{freefem++.exe} opens a dialog box for
+choosing the input file; then it executes its content and produces
+graphics and output files.
+\\\\
+To write or modify the input file a text editor can be used.
+\\\\
+An integrated environment (\freefempp GUI), written by A. Le Hyaric, is also included
+with the distribution. the application name is\texttt{FreeFem++-cs.exe}; note however that
+the graphics display much slower in this mode.
+There are other ways to have an integrated environment. TeX users have
+usually an editor installed; if it is winedt or TeXnicCenter then these can
+be programmed to handle the edit-run-correct cycle of \freefempp with
+color syntax and automatic launch of freefem.  If you don't have one of these
+installed the easiest is to download the freeware \texttt{Crimson Editor}.
+\begin{figure}[htbp]
 \begin{center}
-\texttt{freefem++-X.XX} (where X.XX is the version number)
+\includegraphics[width=15cm]{csSnapOld}
+\caption{ The 3 panels of the integrated environment \texttt{freefem++-cs}:
+to the top left one sus the program (which can be edited?), on the top right ons the graphic window, and on the bottom window text message are displayed.
+%to left the program, top right the graphic window, bottom the text messages.
+}
 \end{center}
-enter the following commands in a shell window~:
+\end{figure}
+\paragraph{Under MacOS X with Graphic Interfaces}
 
-\bFF
-tar zxvf freefem++.tgz
-cd freefem++-X.XX
-\eFF
+  
+\paragraph{Under terminal}
 
-To compile and install \freefempp, just follow the \texttt{INSTALL}
-and \texttt{README} files. The following programs are produced,
-depending on the system you are running (Linux, Windows, MacOS)~:
+\subsection{Environment variable, and init file}
 
-\begin{enumerate}
-\item \texttt{FreeFem++}, standard version, with a graphical interface
-based on X11, Win32 or MacOS
-\item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no windows)
-\item \texttt{FreeFem++-mpi}, parallel version, postscript output only
-\item \texttt{FreeFem++-glx}, graphics using OpenGL and X11
-\item \texttt{FreeFem++-cs}, integrated development environment
-(please see chapter ``Graphical User Interface'' for more details).
-\item \texttt{/Applications/FreeFem++.app}, Drag and Drop CoCoa MacOs
-Application
-\item \texttt{FreeFem++-CoCoa}, MacOS Shell script for MacOS OpenGL
-version (MacOS 10.2 or better) (note: it uses
-/Applications/FreeFem++.app)
-\end{enumerate}
 
-As an installation test, go into the directory
-\texttt{examples++-tutorial} and run \freefempp on the example script
-\texttt{LaplaceP1.edp} with the command~:
+\index{verbosity}\index{includepath}\index{loadpath}\index{load}\index{include}
+ \texttt{FreeFem++} reads an user's init file named \ttCC{freefem++.pref} 
+ to can change value of global variable: 
+   \texttt{verbosity}, \texttt{includepath}, \texttt{loadpath}.
+  
+Remark: \texttt{verbosity} variable change the level of internal printing ($0$, nothing (except mistake), $1$ fews,  $10$  lots, etc ...),
+the default value is $2$.
+ The include files are search in the \texttt{includepath} list and the load files 
+are search in  \texttt{loadpath} list.
 
-\bFF
-FreeFem++ LaplaceP1.edp
-\eFF
+ The syntaxe of the file  is:
+\begin{verbatim}
+     verbosity= 5
+     loadpath += "/Library/FreeFem++/lib"
+     loadpath += "/Users/hecht/Library/FreeFem++/lib"
+     includepath  += "/Library/FreeFem++/edp"
+     includepath  += "/Users/hecht/Library/FreeFem++/edp"
+     #  comment 
+     load += "funcTemplate" 
+     load += "myfunction" 
+\end{verbatim}
+  
+ The possible paths for this file  are  
+ \begin{itemize} 
+   \item under unix and MacOs 
+\begin{verbatim}   
+	 /etc/freefem++.pref
+    $(HOME)/.freefem++.pref
+    freefem++.pref
+\end{verbatim}
+  \item under windows
+\begin{verbatim}   
+     freefem++.pref
+\end{verbatim}  
+\end{itemize}
+ 
+We can also use  shell environment variable to change , verbosity and 
+the search rule. 
+
+\begin{verbatim}     
+    export FF_VERBOSITY=50 
+    export FF_INCLUDEPATH="dir;;dir2"
+    export FF_LOADPATH="dir;;dir3""
+\end{verbatim}     
+ 
+ Remark, the separtor of directory  is ";" and not ":" because ":" is use under Windows.
 
 \subsection{History}
 
@@ -408,16 +538,19 @@ discontinuous P$^1$ and Raviart-Thomas elements and a few others like bubble ele
 \section{Getting Started}
 \label{sec:example}
 
-Let us explain how \freefempp solves the problem of
-\textbf{Poisson}: \emph{For a given function $f(x,y)$, find a
+To illustrate with an example,
+let us explain how \freefempp solves the 
+\textbf{Poisson}'s equation: \emph{for a given function $f(x,y)$, find a
 function $u(x,y)$ satisfying}
 \begin{eqnarray}
 \label{eqn:Poisson}
--\Delta u(x,y) &=& f(x,y)\quad \mbox{ for all }(x,y)\in\Omega,\mbox{ where }
- \Delta u = \frac{\p^2 u}{\p x^2 } + \frac{\p^2 u}{\p y^2},
+-\Delta u(x,y) &=& f(x,y)\quad \mbox{ for all }(x,y)\in\Omega,
  \\ \label{eqn:Dirichlet}
-  u(x,y) &=& 0\quad \mbox{ for all }(x,y)\mbox{ on }\p\Omega,~~\mbox{ the boundary of }\Omega.
+  u(x,y) &=& 0\quad \mbox{ for all }(x,y)\mbox{ on }\p\Omega,.
 \end{eqnarray}
+Here $\partial\Omega$ is the boundary of the bounded open set $\Omega\subset \R^2$
+and  $ \Delta u = \frac{\p^2 u}{\p x^2 } + \frac{\p^2 u}{\p y^2}$.
+
 
 The following is a \freefempp program which computes $u$ when
 $f(x,y)=xy$  and $\Omega$ is the unit disk. The boundary
@@ -425,20 +558,28 @@ $C=\p\Omega$ is
 $$
 C=\{(x,y)|\; x=\cos(t),\, y=\sin(t),\, 0\le t\le 2\pi\}
 $$
-By definition the domain is on the left side of the boundary
-oriented by the parameter $t$. As illustrated in Fig. \ref{firstU},
+
+Note that in \freefempp the domain $\Omega$ is assumed to described by its boundary 
+that is on the left side of its boundary oriented by the parameter.
+%
+%By definition the domain is on the left side of the boundary
+%oriented by the parameter $t$.
+ As illustrated in Fig. \ref{firstU},
 we can see the isovalue of $u$ by using \ttCC{@plot} (see line 13
 below). \twoplot[height=5cm]{firstTh}{firstU}{mesh \ttCC{Th} by
 \ttCC{build(C(50))}}{isovalue by \ttCC{plot(u)}}
 
 \begin{example}\label{exm:first}~
 \bFF
- 1: @border C(t=0,2*@pi){@x=cos(t); @y=sin(t);}  // the triangulated domain Th
- 2: @mesh Th = @buildmesh (C(50));  // is on the left side of its boundary
- 3; @fespace Vh(Th,@P1); // Finite Element of degree 1 defined here for Vh
+    // defining the bourndary \hfilll
+ 1: @border C(t=0,2*@pi){@x=cos(t); @y=sin(t);}  
+    // the triangulated domain Th is on the left side of its boundary \hfilll
+ 2: @mesh Th = @buildmesh (C(50));  
+    // the finite element space defined over Th is called here Vh 
+ 3; @fespace Vh(Th,@P1);
  4: Vh u,v;  // defines u and v as piecewise-P1 continuous functions
- 5: @func f= x*y;  // definition of an algebraic function
- 6: @real cpu=clock();
+ 5: @func f= x*y;  // definition of a called f function
+ 6: @real cpu=clock(); // get the clock is second 
  7: @solve Poisson(u,v,@solver=LU) =  // defines the PDE
  8:    @int2d(Th)(@dx(u)*@dx(v) + @dy(u)*@dy(v))   //  bilinear part
  9:    - @int2d(Th)( f*v)          // right hand side
@@ -447,10 +588,10 @@ below). \twoplot[height=5cm]{firstTh}{firstU}{mesh \ttCC{Th} by
  12: @cout << " CPU time = " << clock()-cpu << @endl;
 \eFF
 \end{example}
-Note that the qualifier "solver=LU" is not required and by default a
+Note that the qualifier \texttt{solver=LU} is not required and by default a
 multi-frontal LU would have been used. Note also that the lines
 containing \texttt{clock} are equally not required. Finally note how
-close to the mathematics \freefempp input language is. Line 6
+close to the mathematics \freefempp input language is. \ttCC{8} and  \ttCC{9}
 corresponds to the mathematical variational equation
 \[
     \int_{T_h}(\frac{\p u}{\p x}\frac{\p v}{\p x}
@@ -461,7 +602,7 @@ corresponds to the mathematical variational equation
 \]
 for all $v$ which are in the finite element space $V_h$ and zero on
 the boundary $C$.
-\paragraph{Exercise}
+\paragraph{Exercise}:
 Change P1 into P2 and run the program.
 
 
@@ -482,15 +623,15 @@ of boundaries for later use (boundary conditions for instance).
  the same label:
  \bFF
 @border Gamma1(t=0,@pi)   {@x=cos(t); @y=sin(t); @label=C}
-@border Gamma2(t=@pi,2@pi){@x=cos(t); @y=sin(t); @label=C}
+@border Gamma2(t=@pi,2*@pi){@x=cos(t); @y=sin(t); @label=C}
  \eFF
-Boundaries can be referred to  either by name (Gamma1 for example) or by label (C here)
+Boundaries can be referred to  either by name (\ttCC{Gamma1} for example) or by label (\ttCC{C} here)
 or even by its internal number here 1 for the first half circle and 2 for the second
 (more examples are in \refSec{Meshing Examples}).
 \\\\
 \textbf{2nd line:} the triangulation $\mathcal{T}_h$ of $\Omega$ is
-automatically generated  by ``\ttCC{@buildmesh}(C(50))'' using 50
-points on $C$ as in Fig. \ref{firstTh}.
+automatically generated  by \ttCC{@buildmesh(C(50))} using $50$
+points on \ttCC{C} as in Fig. \ref{firstTh}.
 
 The domain is assumed to be on the left side of the boundary which is implicitly
 oriented by the parametrization. So an elliptic hole can be added by
@@ -506,9 +647,9 @@ then the inside of the ellipse would be triangulated as well as the outside.
 Automatic mesh generation is
 based on the Delaunay-Voronoi algorithm. Refinement of the mesh are
 done by increasing the number of points on $\Gamma$, for example,
-\ttCC{@buildmesh}(C(100)), because inner vertices are determined
+\ttCC{@buildmesh(C(100))}, because inner vertices are determined
 by the density of points on the boundary. Mesh adaptation can be performed also
-against a given function f by calling \ttCC{@adaptmesh}(Th,f).
+against a given function \ttCC{f} by calling \ttCC{@adaptmesh(Th,f)}.
 
 Now the name $\mathcal{T}_h$ (\texttt{Th} in \freefempp) refers to
 the family $\{T_k\}_{k=1,\cdots,n_t}$ of triangles shown in figure \ref{firstTh}.
@@ -536,7 +677,7 @@ $\lambda_i(x,y),~i=1,2,3$ of a point $q=(x,y)\in T$, defined by
 \[
     \sum_i\lambda_i=1,~~~\sum_i\lambda_i\vec q^i=\vec q
 \]
-where $q^i,~i=1,2,3$ are the 3 vertices of T.  Then it is easy to see that
+where $q^i,~i=1,2,3$ are the 3 vertices of $T$.  Then it is easy to see that
 the restriction of $\phi_k$ on $T$ is precisely $\lambda_k$.
 }.
 Then
@@ -563,31 +704,33 @@ the degree of freedom.
 It is said also that the \index{nodes}\emph{nodes} of this finite element method
 are the vertices.
 \\
-Currently \freefempp implements the following elements \index{elements}
-\begin{description}
-\item{P0} piecewise constant,
-\item{P1} continuous piecewise linear,
-\item{P2} continuous piecewise quadratic,
-\item{RT0} Raviart-Thomas piecewise constant,
-\item{P1nc} piecewise linear non-conforming,
-\item{P1dc} piecewise linear discontinuous,
-\item{P2dc} piecewise quadratic discontinuous,
-\item{P1b} piecewise linear continuous plus bubble,
-\item{P2b} piecewise quadratic continuous plus bubble.
-\end{description}
+Currently \freefempp implements the following elements \index{elements}, (see section \ref{finite elements} for the full description) 
+{\parskip=0cm
+\par \ttCC{P0} piecewise constant,
+\par \ttCC{P1} continuous piecewise linear,
+\par \ttCC{P2} continuous piecewise quadratic,
+\par \ttCC{RT0} Raviart-Thomas piecewise constant,
+\par \ttCC{P1nc} piecewise linear non-conforming,
+\par \ttCC{P1dc} piecewise linear discontinuous,
+\par \ttCC{P2dc} piecewise quadratic discontinuous,
+\par \ttCC{P1b} piecewise linear continuous plus bubble,
+\par \ttCC{P2b} piecewise quadratic continuous plus bubble.
+\par {...} \par
+}
+
 The user can  add other elements fairly easily if required.
 \\\\
 \textbf{Step3: Setting the problem}
 \\
-\textbf{4th line:} ``\texttt{Vh u}'' declare that $u$ is approximated as above,
-nmely
+\textbf{4th line:} \texttt{Vh u,v} declares that $u$ and $v$ are approximated as above,
+namely
 \begin{equation}\label{defu}
 u(x,y)\simeq u_h(x,y)=\sum_{k=0}^{M-1} u_k\phi_k(x,y)
 \end{equation}
-\textbf{5th line:} the right hand side $f$ is defined analytically using the keyword
+\textbf{5th line:} the right hand side \ttCC{f} is defined analytically using the keyword
 \ttCC{@func}.
 
-\textbf{7th--9th lines:} defines the bilinear form of the (\ref{eqn:Poisson}) and
+\textbf{7th--9th lines:} defines the bilinear form of equation (\ref{eqn:Poisson}) and
 its Dirichlet boundary conditions (\ref{eqn:Dirichlet}).
 \\
 This \emph{variational formulation} is derived by
@@ -602,13 +745,13 @@ such that
 \label{eqn:weakform}
 &&a(u,v) - \ell(f,v) = 0\hbox{ satisfying $v=0$ on }\p\Omega.
 \qquad \textrm{for all }v\\
-&&\hbox{with }a(u,v)=\int_{\Omega}\nabla u\cdot \nabla v \,\d x\d y
+&&\hbox{with }a(u,v)=\int_{\Omega}\nabla u\cdot \nabla v \,\d x\d y ,
 \quad \ell(f,v)=\int_{\Omega}fv\, \d x\d y
 \label{eqn:bilinear}
 \end{eqnarray}
  In \freefempp
-the problem \textbf{Poisson} can be  declared only (see below) or
-declared and solved in which case
+the problem \textbf{Poisson} can be  declared only (see below) for future use or
+declared and solved at the same time in which case
 \begin{center}
 \ttCC{Vh u,v; @solve Poisson(u,v) =}
 \end{center}
@@ -621,14 +764,21 @@ u/\p x$, \ttCC{@dy}(u) $=\p u/\p y$ and
 \ttCC{@int@2d(Th)( f*v )}\qquad
 \textrm{(notice here, $u$ is unused)}\\
 \end{eqnarray*}
-In \freefempp there is no need to differentiate between $a$ and
-$\ell$, as lomng as the terms are inside different integrals, it
-finds which is which by checking where $u$ is present or
-not.
+In \freefempp there is no need to distinguish the bilinear form $a$ from the linear form $\ell$,
+ as long as the terms are inside different integrals, 
+ \freefempp find out which one is the bilinear form by checking where both terms \texttt{u} and \texttt{v} are
+ present. % it finds which is which by checking where $u$ is present or not.
 \\\\
+
+The other way is to defined the problem and after we solve it, write :  
+\bFF
+  Vh u,v; @problem Poisson(u,v) = 
+   ...   
+  Poisson; //   the problem now is solve here 
+\eFF 
 \textbf{Step4: Solution and visualization}\\
 
-\textbf{6th line:} The current time is stored into the real-valued variable \ttCC{cpu}.
+\textbf{6th line:} The current time in second is stored into the real-valued variable \ttCC{cpu}.
 
 \textbf{7th line} The problem is solved
 
@@ -644,18 +794,22 @@ but it helps to guess what is allowed in the language.
 Internally \freefempp will solve a linear system of the type
 \begin{eqnarray}
 \label{eqn:Equation}
-A_{ij}u_j - F_i=0\quad i,j=0,\cdots,M-1;\qquad
+\sum_{j=0}^{M-1} A_{ij}u_j - F_i=0\quad i=0,\cdots,M-1;\qquad
 F_i=\int_{\Omega}f\phi_i\, \d x\d y
 \end{eqnarray}
 which is found by using (\ref{defu}) and replacing $v$ by $\phi_i$
-in (\ref{eqn:weakform}).  The Dirichlet conditions are implemented by penalty
-namely by setting $A_{ii}=tgv$ (very large value) and replacing $F_i$
-by $F_i tgv$ if $q^i$ is a Dirichlet node.
-\\
-The matrix $A=(A_{ij})$ is called
-\emph{stiffness matrix} \index{matrix!stiffness matrix} and is
-modified from
-\\\\
+in (\ref{eqn:weakform}).  
+And the Dirichlet conditions are implemented by penalty
+namely by setting $A_{ii}=10^{30}$  and 
+ $F_i=  10^{30}*0$ if $i$ is a boundary node. Note, that the number $10^30$ is called \ttCC{tgv} 
+ (\emph{tr\`es grande valeur} )
+ and it is generally possible to change this value \index{solve!tgv=}, see the index item \texttt{solve!tgv=}.
+ 
+\medskip
+
+The matrix $A=(A_{ij})$ is called \emph{stiffness matrix} \index{matrix!stiffness matrix}.
+
+
 If the user wants to access $A$ directly he can do so
 by using
 \bFF
@@ -665,152 +819,42 @@ by using
 \eFF
 
 The vector $F$
-in (\ref{eqn:Equation}) can also be constructed manually
+in (\ref{eqn:Equation}) can also be constructed manually 
 \bFF
-@varf b(u,v) = @int2d(Th)(u*v);
-@matrix B=b(Vh,Vh);
-Vh v=f; F[] = B*v[];
+@varf l(unused,v) = @int2d(Th)(f*v)+@on(C,u=0);
+Vh F;  F[] = l(0,V);
 \eFF
 The problem can then be solved at the level of algebra by
 \bFF
  u[]=A^-1*F[];
 \eFF
-The linear system (\ref{eqn:Equation}) is solved by \texttt{UFMPACK}
-unless mentioned specifically like in
+The linear system (\ref{eqn:Equation}) is solved by \texttt{UMFPACK}
+unless another option is mentioned specifically  as in
 \begin{center}
 \ttCC{Vh u,v; @problem Poisson(u,v,@solver=CG) = @int2d(...}
 \end{center}
-meaning that Poisson is declared only here and when it is called (by simply writing \texttt{Poisson}) then
+meaning that \texttt{Poisson} is declared only here and when it is called (by simply writing \texttt{Poisson;} ) then
  (\ref{eqn:Equation}) will be solved by the Conjugate Gradient method.
 
 \subsubsection{Some Features of \freefempp}
 
-The language of \freefempp is typed, polymorphic and reentrant with macro generation (see
+The language of \freefempp is  typed, polymorphic and reentrant with macro generation (see
 \ref{macro}).  Every variable must be typed and declared in a
-statement; each statement separated from the next by a semicolon;
+statement each statement separated from the next by a semicolon ";".
 The syntax is that of C++ by default augmented with something that is more akin
-to \TeX.  For the specialist, one key guideline is that \freefempp hardly generates an internal
-finite element function or array; this was adopted for speed and
+to \TeX.  
+ For the specialist, one key guideline is that \freefempp rarely generates an internal
+ finite element  array;
+ this was adopted for speed and
 consequently \freefempp could be hard to beat in terms of execution speed, except
 for the time lost in the interpretation of the language (which can be reduced by a systematic usage
 of \texttt{varf} and matrices instead of \texttt{problem}.
 
 
-\subsubsection{\setS{Matrix Operations}}
-
-The multiplicative operators *, /, and \% group left to right.
-
-\begin{itemize}
-\item  \verb@'@  is unary right transposition of array, matrix \index{transpose}
- \item \verb@.*@ is the term to term multiply operator. \index{.*} \index{\string'} \index{divide!term to term}
- \item \verb@./@ is the term to term divide operator. \index{./} \index{\string'} \index{product!term to term}
-\end{itemize}
-there are some compound operator:
-\begin{itemize}
- \item \verb@^-1@ is for  solving the linear system (example: \verb$ b = A^-1 x$) \index{solve!linear system}
- \item \verb@' *@ is the compound  of transposition and matrix product, so it is the dot product
-(example \verb$real DotProduct=a'*b$) \index{dot product}\index{product!dot}
- \item \verb@ a*b'@ is the outer product  (example  \verb$matrix B=a'*b$ \index{outer product}\index{product!outer}) 
-\end{itemize}
-\begin{example}~
-\bFF
-@mesh Th = @square(2,1);
-@fespace Vh(Th,P1);
-Vh f,g;
-f = x*y;
-g = sin(pi*x);
-Vh<complex> ff,gg; // a complex valued finite element function \index{FE function!complex}\index{complex}
-ff= x*(y+1i);
-gg = exp(pi*x*1i);
-@varf mat(u,v) =
-  int2d(Th)(1*dx(u)*dx(v)+2*dx(u)*dy(v)+3*dy(u)*dx(v)+4*dy(u)*dy(v))
-  + on(1,2,3,4,u=1);
-@varf mati(u,v) =
-  int2d(Th)(1*dx(u)*dx(v)+2i*dx(u)*dy(v)+3*dy(u)*dx(v)+4*dy(u)*dy(v))
-  + on(1,2,3,4,u=1);
-@matrix A = mat(Vh,Vh); @matrix<complex> AA = mati(Vh,Vh); // a complex sparse matrix \index{matrix!complex}
-
-Vh m0; m0[] = A*f[];
-Vh m01; m01[] = A'*f[];
-Vh m1; m1[] = f[].*g[];
-Vh m2; m2[] = f[]./g[];
-@cout << "f = " << f[] << @endl;
-@cout << "g = " << g[] << @endl;
-@cout << "A = " << A << @endl;
-@cout << "m0 = " << m0[] << @endl;
-@cout << "m01 = " << m01[] << @endl;
-@cout << "m1 = "<< m1[] << @endl;
-@cout << "m2 = "<< m2[] << @endl;
-@cout << "dot Product = "<< f[]'*g[] << @endl;
-@cout << "hermitien Product = "<< ff[]'*gg[] << @endl;
-@cout << "outer Product = "<< (A=ff[]*gg[]') << @endl;
-@cout << "hermitien outer Product = "<< (AA=ff[]*gg[]') << @endl;
-
-\eFF
-
-On the triangulation of Figure \ref{fig-hatFunction} this produce the following:
-\begin{eqnarray*}
-A&=&\borderarray{[}{]}{1em}{1.2ex}{rrrrrrrr}{
-&1&2&3&4&5&6\\
-1&10^{30}&  0.5& 0&3 0.&  -2.5& 0\\
-2&0.&10^{30}&0.5& 0&0.5&-2.5\\
-3&0&0.&10^{30}& 0& 0&0.5\\
-4&0.5& 0& 0& 10^{30}& 0.& 0\\
-5&-2.5&0.5& 0&0.5&10^{30}&0.\\
-6&0&-2.5&0.& 0&0.5& 10^{30}
-}
-\\
-\{v\}=\texttt{f[]}&=&
-\left(
-\begin{array}{rrrrrr}
-0 & 0 & 0 & 0 & 0.5 & 1
-\end{array}
-\right)^T\\
-\{w\}=\texttt{g[]}&=&
-\left(
-\begin{array}{rrrrrr}
-0 &1  &1.2\times 10^{-16}& 0 & 1 & 1.2\times 10^{-16}
-\end{array}
-\right)^T\\
-\texttt{A*f[]}&=&
-\left(
-\begin{array}{rrrrrr}
--1.25 &  -2.25 &  0.5   & 0 & 5\times 10^{29} & 10^{30}
-\end{array}
-\right)^T\quad (=A\{v\})\\
-\texttt{A'*f[]}&=&
-\left(
-\begin{array}{rrrrrr}
--1.25 &  -2.25 &  0  & 0.25 & 5\times 10^{29} & 10^{30}
-\end{array}
-\right)^T\quad (=A^T\{v\})\\
-\texttt{f[].*g[]}&=&
-\left(
-\begin{array}{rrrrrr}
-0 & 0 & 0 & 0 & 0.5 & 1.2\times 10^{-16}
-\end{array}
-\right)^T\quad =(v_1w_1\quad\cdots\quad v_Mw_M)^T\\
-\texttt{f[]./g[]}&=&
-\left(
-\begin{array}{rrrrrr}
--nan & 0  & 0  & -nan  & 0.5 & 8.1\times 10^{15}
-\end{array}
-\right)^T\quad =(v_1/w_1\,\cdots\, v_M/w_M)^T\\
-\texttt{f[]'*g[]}&=&0.5\quad
-(=\{v\}\{w\}^T=\{v\}\cdot\{w\})
-\end{eqnarray*}
-\end{example}
-\begin{note}
-The operators \verb|^-1| cannot be used to create a matrix;
-the following gives an error
-\bFF
-@matrix AAA = A^-1;
-\eFF
-\end{note}
 
 \subsection{The Development Cycle: Edit--Run/Visualize--Revise}
 
-An integrate environment is provided with \freefempp written by A. Le Hyaric;
+An integrated environment is provided with \freefempp written by A. Le Hyaric;
 Many examples and tutorials are also given along with this documentation and it is best
 to study them and learn by example.
 Explanations for some of these examples are given in this book in the next chapter. If you are a
@@ -818,7 +862,7 @@ beginner of FEM, you may want to read also a book on variational formulations.
 
 The development cycle will have the following steps:
 \begin{description}
-\item[Modeling:] From strong forms to weak form, one must know the variational formulations
+\item[Modeling:] From strong forms of PDE  to weak form, one must know the variational formulations
 to use \freefempp; one should also have an eye on the reusability of the variational
 formulation so as to keep the same internal matrices; a typical example is the
 time dependent heat equation with an implicit time scheme: the internal matrix can be factorized
@@ -830,7 +874,9 @@ provided in the integrated environment.
 \item[Run:] Run the code (e.g. written in file mycode.edp).
 If not from the integrated environment it can be done at the console level by
 
-\texttt{\% freefem++ mycode.edp}
+\texttt{\% FreeFem++ mycode.edp}
+
+Note, the name of the command \ttCC{FreeFem++} can be depend of your installation.
 
 \item[Visualization:] Use the keyword \texttt{plot} to display functions while \freefempp is running.
 Use the plot-parameter \texttt{wait=1} to stop the program to have time to see the plot. Use the
@@ -859,16 +905,18 @@ For example, if you forget parenthesis as in
 @mesh Th = @square(10,10;
 @plot(Th);
 \eFF
-then you will get the following message from \texttt{freefem++},
+then you will get the following message from \texttt{FreeFem++},
 \bFF
-mesh Th = square(10,10;
- Error line number 1, in file mycode.edp, before  token ;
+    2 : mesh Th = square(10,10;
+ Error line number 2, in file bb.edp, before  token ;
 parse error
+  current line = 2
 Compile error : parse error
-        line number :1, ;
- at exec line  1
+        line number :2, ;
 error Compile error : parse error
-        line number :1, ;
+        line number :2, ;
+ code = 1
+
 \eFF
 If you use the same symbol twice as in
 \bFF
@@ -877,12 +925,16 @@ If you use the same symbol twice as in
 \eFF
 then you will get the message
 \bFF
-real aaa =1;
-    1 : real aaa; The identifier aaa exist
+    2 : real aaa; The identifier aaa exist 
+          the existing type is <Pd>
+          the new  type is <Pd>
+
 \eFF
-Notice that the line number start from 0.
+%Notice that the line number start from 0.
 If you find that the program isn't doing what you want you may also use \ttCC{@cout}
-to display in text format on the console window what every is needed.  The following works
+to display in text format on the console window the value of variables. 
+
+ The following example works:
 \bFF
 ...;
 @fespace Vh...; Vh u;...
@@ -899,55 +951,11 @@ For example
 \end{description}
 \textBlack
 
-\subsection{Environment variable, and init file}
-\index{verbosity},\index{includepath},\index{loadpath},\index{load},\index{include}
- FreeFem++ read an  user's init file. to can change value 
-  of  verbosity, includepath  , loadpath variable.
-  
-Remark,  the include files are search in the \texttt{includepath} list and the load files 
-are search in  \texttt{loadpath} list.
-
- The syntaxe of the file  is:
-\begin{verbatim}
-     verbosity= 5
-     loadpath += "/Library/FreeFem++/lib"
-     loadpath += "/Users/hecht/Library/FreeFem++/lib"
-     includepath  += "/Library/FreeFem++/edp"
-     includepath  += "/Users/hecht/Library/FreeFem++/edp"
-     #  comment 
-     load += "funcTemplate" 
-     load += "myfunction" 
-\end{verbatim}
-  
- The possible path of this file  are  
- \begin{itemize} 
-   \item under unix and MacOs 
-\begin{verbatim}   
-	 /etc/freefem++.pref
-    $(HOME)/.freefem++.pref
-    freefem++.pref
-\end{verbatim}
-  \item under windows
-\begin{verbatim}   
-     freefem++.pref
-\end{verbatim}  
-\end{itemize}
- 
-We can also use   shell environment variable to change 
-the search rule. 
-
-\begin{verbatim}     
-    export FF_VERBOSITY=50 
-    export FF_INCLUDEPATH="dir;;dir2"
-    export FF_LOADPATH="dir;;dir3""
-\end{verbatim}     
- 
- Remark, the separtor of directory  is ";" and not ":" because ":" is use under Windows.
 
 \section{Learning by Examples}
 This chapter is for those, like us, who don't like manuals. A number of simple examples
-cover a good deal of the capacity of \freefempp and are self-explainatory.  For the modelling part
-this chapter continues at Chapter 9 where the PDes of physics and engineering (and finance) are studied
+cover a good deal of the capacity of \freefempp and are self-explanatory.  For the modelling part
+this chapter continues at Chapter 9 where some PDEes of physics, engineering and finance are studied
 in greater depth.
 \subsection{Membranes}
 \paragraph{Summary} \emph{Here we shall learn how to solve a \x{Dirichlet} and/or
@@ -956,28 +964,29 @@ application to the equilibrium of a \x{membrane} under load.  We shall
 also check
 the \x{accuracy} of the method and interface with other \x{graphics packages}.}\\\\
 
-An elastic membrane $\Omega$ is glued to a planar rigid support
-$\Gamma$, but a force $f(x) dx$ presses on each surface element
+An elastic membrane $\Omega$ is to a planar rigid support
+$\Gamma$, but a force $f(x) dx$ is exerted on each surface element
 $\d{x}=\d{x}_1 \d{x}_2$. The vertical membrane displacement,
 $\varphi(x)$, is  obtained by solving  Laplace's equation:
  $$
      -\Delta \varphi =f ~\hbox{~in~}~ \Omega.
  $$
-As the membrane is glued to its planar support, one has:
+As the membrane is fixed to its planar support, one has:
 $$ \varphi |_{\Gamma }=0.$$
 If the support wasn't planar but at an elevation $z(x_1,x_2)$ then
-the boundary condition would be of \x{non-homogeneous Dirichlet}
+the boundary conditions would be of \x{non-homogeneous Dirichlet}
 type.
 $$ \varphi|_{\Gamma}=z.$$
 
-If a part $\Gamma_2$ of the membrane border $\Gamma$ is not glued to
-the support but left hanging then due to rigidity the angle with the
-nornal vector is zero; thus the boundary conditions are
+If a part $\Gamma_2$ of the membrane border $\Gamma$ is not fixed to
+the support but is left hanging then due to membrane's rigidity the angle with the
+normal vector $n$ is zero; thus the boundary conditions are
 $$
     \varphi|_{\Gamma_1}=z,~~~~\frac{\p\varphi}{\p n}|_{\Gamma_2}=0
 $$
-where $\Gamma_1=\Gamma-\Gamma_2$; recall that $\p\varphi\p
-n=\n\varphi\cdot n$. Let us recall also that the Laplace operator
+where $\Gamma_1=\Gamma-\Gamma_2$; recall that
+ $\frac{\p\varphi}{\p n}=\n\varphi\cdot n$.
+  Let us recall also that the Laplace operator
 $\Delta$ is defined by:
  $$
     \Delta \varphi = {\p ^{2}\varphi \over \p x^{2}_{1} }
@@ -986,23 +995,23 @@ $\Delta$ is defined by:
 With such "mixed boundary conditions" the problem has a unique
 solution (see (1987), Dautray-Lions (1988), Strang (1986) and
 Raviart-Thomas (1983)); the easiest proof is to notice that
-$\varphi$ is the state of least energy, i.e. minimizes
+$\varphi$ is the state of least energy, i.e.
  $$
-    \min_{\varphi-z\in V} E=\int_\Omega(\frac12|\n\varphi|^2-f\varphi)
+    E(\phi) =\min_{\varphi-z\in V} E(v) ,\quad \mbox{with} \quad E(v)=\int_\Omega(\frac12|\n v|^2-fv ) 
  $$
-where  $V$ is the subspace of the Sobolev space $H^1(\Omega)$ of
+and where  $V$ is the subspace of the Sobolev space $H^1(\Omega)$ of
 functions which have zero trace on $\Gamma_1$. Recall that
 ($x\in\R^d,~d=2$ here)
 $$
-    H^1(\Omega)=\{u\in L^2(\Omega)~:~\n u\in L^(\Omega)^d\}
+    H^1(\Omega)=\{u\in L^2(\Omega)~:~\n u\in (L^2(\Omega))^d\}
 $$
 Calculus of variation shows that the minimum must satisfy, what is known as the \x{weak form}
 of the PDE or its
 \x{variational formulation}  (also known here as the theorem of virtual work)
 $$
-    \int_\Omega(\n\varphi\cdot\n w = \int_\Omega f w\quad\forall w\in V
+    \int_\Omega \n\varphi\cdot\n w = \int_\Omega f w\quad\forall w\in V
 $$
-Next an integration by part (Green's formula) will show that this is equivalent to
+Next an integration by parts (Green's formula) will show that this is equivalent to
 the PDE when second derivatives exist.
 
 \paragraph{WARNING}
@@ -1011,32 +1020,36 @@ weak formulations.  It is not possible to go further in using this software if y
 the weak form (i.e. variational formulation) of your problem: either you read a book, or
 ask help form a colleague or drop the matter.  Now if you want to solve a system of PDE
 like $A(u,v)=0,~ B(u,v)=0$ don't close this manual, because in weak form it is
-$$
-    \int_\Omega(A(u,v)w_1+B(u,v)w_2)=0~~\forall w_1,w2...
+$$C
+    \int_\Omega(A(u,v)w_1+B(u,v)w_2)=0~~\forall w_1,w_2...
 $$
 
 \paragraph{Example}
 
-Let an ellipse have principal radius $b=2$, and unitary secondary radius
+Let an ellipse have the length of the se $a=2$, and unitary the semiminor axis
 Let the surface force be $f=1$. Programming this case with
 \freefempp gives:
 %
 \begin{example}[membrane.edp]
 \bFF
 // file membrane.edp
-@real a=4*pi/3, b=2;
+@real theta=4.*pi/3.;
+@real a=2.,b=1.; // the length of the semimajor axis and  semiminor axis
 @func z=x;
 
-@border Gamma1(t=0,a)    { x = b * cos(t); y = sin(t); }
-@border Gamma2(t=a,2*pi) { x = b * cos(t); y = sin(t); }
-@mesh Th=@buildmesh(Gamma1(20)+Gamma2(10));
+@border Gamma1(t=0,theta)    { x = a * cos(t); y = b*sin(t); }
+@border Gamma2(t=theta,2*pi) { x = a * cos(t); y = b*sin(t); }
+@mesh Th=@buildmesh(Gamma1(100)+Gamma2(50));
 
 @fespace Vh(Th,P2); // P2 conforming triangular FEM
 Vh phi,w, f=1;
 
-@solve Laplace(phi,w)=@int2d(Th)(@dx(phi)*@dx(w) + @dy(phi)*@dy(w))
-                - @int2d(Th)(f*w) + @on(Gamma1,phi=z);
-@plot(Th,phi,wait=true,ps="membrane.eps"); //Plot Th and v
+@solve Laplace(phi,w)=int2d(Th)(dx(phi)*dx(w) + dy(phi)*dy(w))
+                - int2d(Th)(f*w) + on(Gamma1,phi=z);
+@plot(phi,wait=true, ps="membrane.eps"); //Plot phi
+@plot(Th,wait=true, ps="membraneTh.eps"); //Plot Th 
+   
+savemesh(Th,"Th.msh");
 \eFF
 \end{example}
 \begin{figure}[htbp]\label{figmembrane}
@@ -1049,26 +1062,32 @@ drawn by \texttt{gnuplot} from a file generated by \freefempp.}
 \end{center}
 \end{figure}
 
-A triangulation is built by the keyword {\it buildmesh}. The keyword
+A triangulation is built by the keyword \ttCC{buildmesh}. The keyword
 calls a triangulation subroutine based on the Delaunay test, which
 first triangulates with only the boundary points, then adds internal
 points by subdividing the edges. How fine  the triangulation becomes is controlled
 by the size of the closest boundary edges.
-\\\\
+
+\medskip
+
 The PDE is then discretized using the triangular second order finite
 element method on the triangulation; as was briefly indicated in the previous chapter,
 a linear system is derived from the discrete formulation whose size is the number of vertices
-plus mid-edges in
+plus number  mid-edges in
 the triangulation. The system is solved by a multi-frontal Gauss LU factorization
 implemented in the package \texttt{UMFPACK}. The keyword plot will display both
 $\T_h$ and $\varphi$ (remove \texttt{Th} if $\varphi$ only is desired) and the
-qualifier \texttt{fill} replaces the default option (colored level lines) by a full color display.
+qualifier \texttt{fill=true} replaces the default option (colored level lines) by a full color display.
 Results are on figure \ref{figmembrane}.
-\\\\
+
+\bFF
+@plot(phi,wait=true,fill=true); //Plot phi with full color display
+\eFF
+
 Next we would like to check the results!
 \\
 One simple way is to adjust the parameters so as to know the solutions.  For instance
-on the unit circle (b=1), $\varphi_e=\sin(x^2+y^2-1)$ solves the problem when
+on the unit circle \texttt{a=1} , $\varphi_e=\sin(x^2+y^2-1)$ solves the problem when
 \[
     z=0,~f=-4(\cos(x^2+y^2-1)-(x^2+y^2)\sin(x^2+y^2-1))
 \]
@@ -1081,43 +1100,62 @@ We will do that with two triangulations, compute the $L^2$ error:
 \[
 \epsilon = \int_\Omega|\varphi-\varphi_e|^2
 \]
-and print the errors in both cases as well as the log of their ration which is by definition
+and print the error in both cases as well as the log of their ratio an indication of
 the rate of convergence.
 \begin{example}[membranerror.edp]\label{membran}
 \bFF
 // file membranerror.edp
-@real a=4*pi/3, b=1;
+verbosity =0; // to remove all default output
+@real theta=4.*pi/3.;
+@real a=1.,b=1.; // the length of the semimajor axis and  semiminor axis
+@border Gamma1(t=0,theta)    { x = a * cos(t); y = b*sin(t); }
+@border Gamma2(t=theta,2*pi) { x = a * cos(t); y = b*sin(t); }
+
 @func f=-4*(cos(x^2+y^2-1) -(x^2+y^2)*sin(x^2+y^2-1));
 @func phiexact=sin(x^2+y^2-1);
-@border Gamma1(t=0,a)    { x = b * cos(t); y = sin(t); }
-@border Gamma2(t=a,2*pi) { x = b * cos(t); y = sin(t); }
-@mesh Th=@buildmesh(Gamma1(20)+Gamma2(10));
-@fespace Vh(Th,P2);  Vh phi,w;
-@solve laplace(phi,w)=@int2d(Th)(@dx(phi)*@dx(w) + @dy(phi)*@dy(w))
-  - @int2d(Th)(f*w) - @int1d(Th,Gamma2)(2*w)+ @on(Gamma1,phi=0);
-@plot(Th,phi,wait=true,ps="membrane.eps"); //Plot Th and v
-@real L2error0 = @int2d(Th)((phi-phiexact)^2);
-////////////// mesh twice finer ////////////
-@int n=2;
-@mesh Th1=@buildmesh(Gamma1(20*n)+Gamma2(10*n));
-@fespace V1h(Th1,P2); // P2 conforming triangular FEM
-V1h phi1,w1;
-@solve lapl(phi1,w1)=@int2d(Th1)(@dx(phi1)*@dx(w1) + @dy(phi1)*@dy(w1))
-  -@int2d(Th1)(f*w1)-@int1d(Th1,Gamma2)(2*w1)+@on(Gamma1,phi1=0);
-@real L2error1 = @int2d(Th1)((phi1-phiexact)^2);
-@cout<<"L2error0= "<<L2error0<<"  L2eeror1= "<<L2error1
-    <<" convergence rate = "<< log(L2error0/L2error1)<<@endl;
+
+@real[int] L2error(2);  // an array two values
+@for(@int n=0;n<2;n++)
+{
+  @mesh Th=buildmesh(Gamma1(20*(n+1))+Gamma2(10*(n+1)));
+  @fespace Vh(Th,P1); 
+   Vh phi,w;
+  
+  @solve laplace(phi,w)=int2d(Th)(dx(phi)*dx(w) + dy(phi)*dy(w))
+    - int2d(Th)(f*w) - int1d(Th,Gamma2)(2*w)+ on(Gamma1,phi=0);
+  @plot(Th,phi,wait=true,ps="membrane.eps"); //Plot Th and phi
+  
+  L2error[n]= sqrt(int2d(Th)((phi-phiexact)^2));
+}  
+
+@for(int n=0;n<2;n++)
+ @cout << " L2error " << n << " = "<<  L2error[n] <<endl;
+  
+@cout <<" convergence rate = "<< log(L2error[0]/L2error[1])/log(2.)  <<endl;
+
 \eFF
 \end{example}
-We find a rate of 2.7, which is close enough to the 3 predicted by the theory.
-\paragraph{Quiz} Why is it not 3? (hint: it is not due to \freefempp, but to the theory itself).
+
+the output is
+\bFF
+
+ L2error 0 = 0.00699498
+ L2error 1 = 0.00182818
+ convergence rate = 1.93591
+times: compile 0.02s, execution 6.94s
+\eFF
+
+We find a rate of $1.93591$, which is not close enough to the $3$ predicted by the theory.
+\paragraph{Quiz} Why is it not 3? (hint: this is not due to \freefempp, but to the theory itself).
 \\\\
-Now you are not satisfied with the .eps plot generated by freefem and you want to use other graphic
-facilities. Then you must store the solution in a file very much like in C++. It will be useless
+Now if you are not satisfied with the \texttt{.eps} plot generated by \freefempp and you want to use other graphic
+facilities. Then you must store the solution in a file very much like in \texttt{C++}. It will be useless
 if you don't save the triangulation as well, consequently you must do
 \bFF
-    @ofstream ff("phi.txt");
-    ff << phi[];
+     {
+       @ofstream ff("phi.txt");
+       ff << phi[]; 
+      }
     @savemesh(Th,"Th.msh");
 \eFF
 For the triangulation the name is important: it is the extension that determines the format.
@@ -1125,21 +1163,26 @@ For the triangulation the name is important: it is the extension that determines
 Still that may not take you where you want. Here is an interface with gnuplot to produce the
 right part of figure \ref{membran}.
 \bFF
-@ofstream ff("phi.txt"); // open a file for output
-@for (@int i=0;i<Th.nt;i++) // loop on triangles
-{ @for (@int j=0; j <3; j++) // loop on vertices
-    ff<<Th[i][j].x <<" "<< Th[i][j].y<<" "<<phi[][Th[i][j]]<<@endl;
-  ff<<Th[i][0].x <<" "<< Th[i][0].y<<" "<<phi[][Th[i][0]]<<@endl
-            <<@endl<<@endl; // 2 blank lines before next triangle
-}}
+// to build a gnuplot data file
+{ @ofstream ff("graph.txt");
+   @for (@int i=0;i<Th.nt;i++)
+   { @for (@int j=0; j <3; j++)
+       ff<<Th[i][j].x  << "    "<< Th[i][j].y<< "  "<<phi[][Vh(i,j)]<<@endl;
+    ff<<Th[i][0].x  << "    "<< Th[i][0].y<< "  "<<phi[][Vh(i,0)]<<"\n\n\n"
+   }
+}
 \eFF
+We use the finite element numbering, where \ttCC{Wh(i,j)} is the global index of 
+$j^{Th}$  degrees of freedom of triangle number $i$.
+
 Then open \texttt{gnuplot} and do
 \bFF
         set palette rgbformulae 30,31,32
-        splot "graph.dat" w l pal
-        splot "phi.txt"w l pal
+        splot "graph.txt" w l pal
 \eFF
-This works with P1 elements, not with P2!
+This works with \ttCC{P2} and \ttCC{P1}, but not with \ttCC{P1nc}
+because the 3 first degrees of freedom  of  \ttCC{P2} or \ttCC{P2} are on vertices
+and not with \ttCC{P1nc}.
 
 \subsection{Heat Exchanger}
 
@@ -2156,7 +2199,7 @@ Vh vr=@real(v), vi=@imag(v);
 
 \subsection{Optimal Control} Thanks to the function \texttt{BFGS} it
 is possible to solve complex nonlinear optimization problem within
-\texttt{freefem++}. For example consider the following inverse
+\texttt{FreeFem++}. For example consider the following inverse
 problem
 \[
     \min_{b,c,d\in R}J=\int_E(u-u_d)^2~:~
@@ -2251,14 +2294,14 @@ $J$ by BFGS (5 values above 500 have been removed for readability)}
 \end{figure}
 Note that an \emph{adjoint state} could have been used. Define $p$ by
 \[
--\nabla\cdot(\kappa\nabla p)=2I_E(u-u_d),~~~p|_Gamma=0
+-\nabla\cdot(\kappa\nabla p)=2I_E(u-u_d),~~~p|_\Gamma=0
 \]
 Consequently
 \begin{eqnarray}&&
-\delta J = -\int_\Omega (\nabla\cdot(\kappa\nabla p))\delta u
+\delta J = -\int_{\Omega} (\nabla\cdot(\kappa\nabla p))\delta u
 \cr&&
-= \int_Omega(\kappa\nabla p\cdot\nabla\delta u)
-=-\int_Omega(\delta\kappa\nabla p\cdot\nabla u)
+= \int_\Omega(\kappa\nabla p\cdot\nabla\delta u)
+=-\int_\Omega(\delta\kappa\nabla p\cdot\nabla u)
 \end{eqnarray}
 Then the derivatives are found by setting $\delta b=1, \delta c=\delta d=0$ and so on:
 \[
@@ -2269,7 +2312,7 @@ Then the derivatives are found by setting $\delta b=1, \delta c=\delta d=0$ and 
 unknowns, it is dangerously expensive to use this method when the unknown $x$ is a
 Finite Element Function.  One should use another optimizer such as
 the NonLinear Conjugate Gradient \texttt{NLCG} (also a key word
-of freefem++).  See the file algo.edp in the examples folder.
+of \texttt{FreeFem++}).  See the file algo.edp in the examples folder.
 
  \subsection{Classification of the equations}
 \paragraph{Summary}\emph{
@@ -2841,13 +2884,13 @@ for full detail).
 It is A very fast random number generator
 Of period $2^{219937}-1$, and the functions are:\index{random}\index{rand}\index{randint32}\index{randint31}\index{randinit}
 \begin{itemize}
-\item \ttCC{@randint32()}  generates unsigned 32-bit integers.
-\item \ttCC{@randint31()} generates unsigned 31-bit integers.
-\item \ttCC{@randreal1()} generates uniform real in $[0,1]$ (32-bit resolution).
-\item \ttCC{@randreal2()} generates uniform real in $[0,1)$ (32-bit resolution).
-\item \ttCC{@randreal3()} generates uniform real in $(0,1)$ (32-bit resolution).
-\item \ttCC{@randres53()} generates uniform real in $[0,1)$ with 53-bit resolution.
-\item \ttCC{@randinit(seed )} initializes the state vector by using one  32-bit integer "seed", which may be zero.
+\item {\verb!randint32()!}  generates unsigned 32-bit integers.
+\item {\verb!randint31()!} generates unsigned 31-bit integers.
+\item {\verb!randreal1()!} generates uniform real in $[0,1]$ (32-bit resolution).
+\item {\verb!randreal2()!} generates uniform real in $[0,1)$ (32-bit resolution).
+\item {\verb!randreal3()!} generates uniform real in $(0,1)$ (32-bit resolution).
+\item {\verb!randres53()!} generates uniform real in $[0,1)$ with 53-bit resolution.
+\item {\verb!randinit(seed )!} initializes the state vector by using one  32-bit integer "seed", which may be zero.
 \end{itemize}
 
 \end{description}
@@ -2901,7 +2944,7 @@ Or to put it another way: \emph{formulas} are the
 mathematical expressions combining its numerical analogs, but
 it is independent of meshes (triangulations).
 
-Also, in \texttt{freefem++}, we can give an arbitrary symbol to FE-function
+Also, in \texttt{FreeFem++}, we can give an arbitrary symbol to FE-function
 combining numerical calculation by FEM.
 The interpolation of a formula-function $f$ in a FE-space is done as in
 \bFF
@@ -3204,6 +3247,119 @@ The output is
           16  20  24  28
           24  30  36  42
 \eFF
+
+\subsubsection{\setS{Matrix Operations}}
+
+The multiplicative operators *, /, and \% group left to right.
+
+\begin{itemize}
+\item  \verb@'@  is unary right transposition of array, matrix \index{transpose}
+ \item \verb@.*@ is the term to term multiply operator. \index{.*} \index{\string'} \index{divide!term to term}
+ \item \verb@./@ is the term to term divide operator. \index{./} \index{\string'} \index{product!term to term}
+\end{itemize}
+there are some compound operator:
+\begin{itemize}
+ \item \verb@^-1@ is for  solving the linear system (example: \verb$ b = A^-1 x$) \index{solve!linear system}
+ \item \verb@' *@ is the compound  of transposition and matrix product, so it is the dot product
+(example \verb$real DotProduct=a'*b$) \index{dot product}\index{product!dot}
+ \item \verb@ a*b'@ is the outer product  (example  \verb$matrix B=a'*b$ \index{outer product}\index{product!outer}) 
+\end{itemize}
+\begin{example}~
+\bFF
+@mesh Th = @square(2,1);
+@fespace Vh(Th,P1);
+Vh f,g;
+f = x*y;
+g = sin(pi*x);
+Vh<complex> ff,gg; // a complex valued finite element function \index{FE function!complex}\index{complex}
+ff= x*(y+1i);
+gg = exp(pi*x*1i);
+@varf mat(u,v) =
+  int2d(Th)(1*dx(u)*dx(v)+2*dx(u)*dy(v)+3*dy(u)*dx(v)+4*dy(u)*dy(v))
+  + on(1,2,3,4,u=1);
+@varf mati(u,v) =
+  int2d(Th)(1*dx(u)*dx(v)+2i*dx(u)*dy(v)+3*dy(u)*dx(v)+4*dy(u)*dy(v))
+  + on(1,2,3,4,u=1);
+@matrix A = mat(Vh,Vh); @matrix<complex> AA = mati(Vh,Vh); // a complex sparse matrix \index{matrix!complex}
+
+Vh m0; m0[] = A*f[];
+Vh m01; m01[] = A'*f[];
+Vh m1; m1[] = f[].*g[];
+Vh m2; m2[] = f[]./g[];
+@cout << "f = " << f[] << @endl;
+@cout << "g = " << g[] << @endl;
+@cout << "A = " << A << @endl;
+@cout << "m0 = " << m0[] << @endl;
+@cout << "m01 = " << m01[] << @endl;
+@cout << "m1 = "<< m1[] << @endl;
+@cout << "m2 = "<< m2[] << @endl;
+@cout << "dot Product = "<< f[]'*g[] << @endl;
+@cout << "hermitien Product = "<< ff[]'*gg[] << @endl;
+@cout << "outer Product = "<< (A=ff[]*gg[]') << @endl;
+@cout << "hermitien outer Product = "<< (AA=ff[]*gg[]') << @endl;
+
+\eFF
+
+On the triangulation of Figure \ref{fig-hatFunction} this produce the following:
+\begin{eqnarray*}
+A&=&\borderarray{[}{]}{1em}{1.2ex}{rrrrrrrr}{
+&1&2&3&4&5&6\\
+1&10^{30}&  0.5& 0&3 0.&  -2.5& 0\\
+2&0.&10^{30}&0.5& 0&0.5&-2.5\\
+3&0&0.&10^{30}& 0& 0&0.5\\
+4&0.5& 0& 0& 10^{30}& 0.& 0\\
+5&-2.5&0.5& 0&0.5&10^{30}&0.\\
+6&0&-2.5&0.& 0&0.5& 10^{30}
+}
+\\
+\{v\}=\texttt{f[]}&=&
+\left(
+\begin{array}{rrrrrr}
+0 & 0 & 0 & 0 & 0.5 & 1
+\end{array}
+\right)^T\\
+\{w\}=\texttt{g[]}&=&
+\left(
+\begin{array}{rrrrrr}
+0 &1  &1.2\times 10^{-16}& 0 & 1 & 1.2\times 10^{-16}
+\end{array}
+\right)^T\\
+\texttt{A*f[]}&=&
+\left(
+\begin{array}{rrrrrr}
+-1.25 &  -2.25 &  0.5   & 0 & 5\times 10^{29} & 10^{30}
+\end{array}
+\right)^T\quad (=A\{v\})\\
+\texttt{A'*f[]}&=&
+\left(
+\begin{array}{rrrrrr}
+-1.25 &  -2.25 &  0  & 0.25 & 5\times 10^{29} & 10^{30}
+\end{array}
+\right)^T\quad (=A^T\{v\})\\
+\texttt{f[].*g[]}&=&
+\left(
+\begin{array}{rrrrrr}
+0 & 0 & 0 & 0 & 0.5 & 1.2\times 10^{-16}
+\end{array}
+\right)^T\quad =(v_1w_1\quad\cdots\quad v_Mw_M)^T\\
+\texttt{f[]./g[]}&=&
+\left(
+\begin{array}{rrrrrr}
+-\mathtt{NaN} & 0  & 0  & -\mathtt{NaN}  & 0.5 & 8.1\times 10^{15}
+\end{array}
+\right)^T\quad =(v_1/w_1\,\cdots\, v_M/w_M)^T\\
+\texttt{f[]'*g[]}&=&0.5\quad
+(=\{v\}\{w\}^T=\{v\}\cdot\{w\})
+\end{eqnarray*}
+\end{example}
+\begin{note}
+The operators \verb|^-1| cannot be used to create a matrix;
+the following gives an error
+\bFF
+@matrix AAA = A^-1;
+\eFF
+\end{note}
+
  
 \subsubsection{Other arrays}
  
@@ -3369,7 +3525,7 @@ at the exit of the enclosing block,
 \end{example}
 \subsection{Exception handling}\index{exception}\index{catch}\index{try}
 
- In the version \texttt{2.3} of \texttt{freefem++}, we add exception handing like in \texttt{C++}.
+ In the version \texttt{2.3} of \texttt{FreeFem++}, we add exception handing like in \texttt{C++}.
  But to day we only catch all the \texttt{C++} exception, and in the \texttt{C++} all the errors like 
 \texttt{ExecError, assert, exit , ...} are exception so you can have some surprise with the
 memory management. 
@@ -4535,7 +4691,7 @@ plot(Th,ps="ThreePoint.eps",bw=1); // Fig. \ref{ThreePoint}
 \end{figure}
 
 
-\section{\setS{Finite Elements}} \index{finite element space}
+\section{\setS{Finite Elements}} \index{finite element space}\label{finite elements}
 As stated in Section \ref{sec:example}.
 FEM approximates all functions $w$ as
 \[
@@ -7231,7 +7387,7 @@ Remark: This  example is in \texttt{Newton.edp} file of \texttt{examples++-tutor
 \newpage
 \subsection{Eigenvalue Problems}
 
-This section depend on your FreeFem++ compilation process (see \texttt{README\_arpack}),
+This section depend on your \texttt{FreeFem++} compilation process (see \texttt{README\_arpack}),
 of this tools.
 This tools is available in \texttt{FreeFem++}  if the word ``eigenvalue'' appear in line ``Load:'', like:
 \bFF
@@ -9060,7 +9216,7 @@ plot(reg,fill=1,wait=1,value=1);
 \eFF
 \twoplot[height=8cm]{region}{region_nu}{the function \texttt{reg}}{the function \texttt{nu} }
 
-\index{region} \texttt{region}  is a keyword of freefem++ which is in fact a variable depending of
+\index{region} \texttt{region}  is a keyword of \texttt{FreeFem++} which is in fact a variable depending of
 the current position (is not a function today, use \texttt{Ph reg=region;} to  set  a function).  This variable value returned is the number of the
 subdomain of the current position.  This number is defined by "buildmesh" which scans while building the mesh all
 its connected component.  So to get the number of a region containing a particular point
@@ -10681,7 +10837,7 @@ primary:
 %%%}
 \section{Dynamical link}
 \label{Dynamical link}
-Now, it's possible to add built-in functionnalites in freefem++ under the three
+Now, it's possible to add built-in functionnalites in \texttt{FreeFem++} under the three
 environnents Linux, Windows and MacOS X 10.3 or newer.
 It is agood idea to,
 first try the example \texttt{load.edp} in directory \texttt{example++-load}.
@@ -10698,7 +10854,7 @@ But unfortunately, you need to install a \texttt{c++} compiler  (generally \text
 
 Now, assume , you are in a shell window (a cygwin window under Windows)  in the directory
 \texttt{example++-load}. Remark that  in the sub directory \texttt{include}
-they are all the freefem++ include file to make the link with \texttt{FreeFem++}.
+they are all the \texttt{FreeFem++} include file to make the link with \texttt{FreeFem++}.
 
 
 
@@ -10718,7 +10874,7 @@ they are all the freefem++ include file to make the link with \texttt{FreeFem++}
 
 {\bf The compilation of your module}:
 the script \texttt{./load.link} compiles and makes
-the link with \texttt{freefem++}, but be careful, the script
+the link with \texttt{FreeFem++}, but be careful, the script
 has no way to known if you try to compile for a
 pure Windows environment or for a cygwin environment
 so to build the load module under cygwin  you must add
@@ -10756,7 +10912,7 @@ using namespace std;
 Now the Problem is to build the link with \texttt{FreeFem++}, to do that
 we need two classes, one to call the function \texttt{myfunction}
 
-All FreeFem++ evaluable expression must be a struct/class  \texttt{C++}  which
+All \texttt{FreeFem++} evaluable expression must be a struct/class  \texttt{C++}  which
 derive from \texttt{E\_F0}. By default this expression does not depend of the mesh position,
 but if they   derive from \texttt{E\_F0mps} the expression depends of the mesh position,
 and for more details see \cite{FHcpp}.
@@ -10764,10 +10920,10 @@ and for more details see \cite{FHcpp}.
 
 
 \bFF
-//  A class build the link with freefem++
+//  A class build the link with \texttt{FreeFem++}
 // generaly this class are already in AFunction.hpp
 // but unfortunatly, I have no simple function with no parameter
-// in freefem++ depending of the mesh,
+// in \texttt{FreeFem++} depending of the mesh,
 @template<class R>
 @class  OneOperator0s : @public OneOperator {
 
@@ -10778,7 +10934,7 @@ and for more details see \cite{FHcpp}.
     @typedef  R (*func)(Stack stack) ;
     func f; // the pointeur to the fnction myfunction
     E_F0_F(func ff)  : f(ff) {}
-    // the operator evaluation in freefem++
+    // the operator evaluation in \texttt{FreeFem++}
     AnyType @operator()(Stack stack)  @const {@return SetAny<R>( f(stack)) ;}
 
   };
@@ -10786,7 +10942,7 @@ and for more details see \cite{FHcpp}.
   @typedef  R (*func)(Stack ) ;
   func  f;
 @public:
-  // the function which build the freefem++ byte code
+  // the function which build the \texttt{FreeFem++} byte code
   E_F0 * code(@const basicAC_F0 & ) @const { @return  new E_F0_F(f);}
   // the constructor to say ff is a function without parameter
   // and returning a R
@@ -10795,7 +10951,7 @@ and for more details see \cite{FHcpp}.
 \eFF
 
 
- To finish we must add this new function in \texttt{freefem++} table ,
+ To finish we must add this new function in \texttt{FreeFem++} table ,
  to do that include :
 \bFF
 @class Init { @public:  Init();  };
@@ -11312,7 +11468,7 @@ See the example.
 
 
 \section*{FreeFem++ LGPL License}
-This is The FreeFem++ software.
+This is The \texttt{FreeFem++} software.
 Programs in it were maintained by
 \begin{itemize}
 \item \texttt{Frédéric hecht <Frederic.Hecht@upmc.fr>} 
@@ -11913,10 +12069,10 @@ Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integrati
 \textbf{Book Description}
 \medskip
 
-Fruit of a long maturing process freefem, in its last avatar, freefem++, is a high level integrated development environment (IDE)  for partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
+Fruit of a long maturing process freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
 \medskip
 
-Freefem++ has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK. Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of freefem++. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in freefem++ to prepare research quality reports: color display online with zooming and other features and postscript printouts.
+\texttt{FreeFem++} has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK. Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of \texttt{FreeFem++}. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in \texttt{FreeFem++} to prepare research quality reports: color display online with zooming and other features and postscript printouts.
 
 \medskip
 This book is ideal for students at Master level, for  researchers at any level and for engineers also in financial mathematics.

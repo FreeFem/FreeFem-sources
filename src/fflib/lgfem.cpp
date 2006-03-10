@@ -3030,23 +3030,28 @@ AnyType Plot::operator()(Stack s) const  {
               case '?':
                 int i=2;
                  reffecran();               
-              	Show("enter a keyboard character in graphic window to do",i++);
+              	//Show("Enter a keyboard character in graphic window to do :",i++);
+              	Show("Enter a keyboard character in the FreeFem Graphics window in order to:",i++);
+
               	i+=2;
-              	Show("+:  zoom around mouse point factor 1.5 ",i++);
-              	Show("-:  unzoom around mouse point factor 1.5  ",i++);
-              	Show("=:  reset zooming and unzoomin ",i++);
-              	Show("r:  refrech plot ",i++);
-              	Show("ac: decrease the arrow coef  ",i++);
-              	Show("AC: indecrease the arrow coef  ",i++);
-              	Show("b:  toggle black and white / color plotting ",i++);
-              	Show("g:  toggle grey / color plotting ",i++);
-              	Show("f:  toggle filling beetween iso or not  ",i++);
-              	Show("v:  toggle show the numerical value of iso",i++);
-              	Show("p:  save pe plot in postscrit file",i++);
-              	Show("m:  show  meshes ",i++);
-              	Show("t:  find  Triangles ",i++);
-              	Show("?:  show this",i++);
-              	Show(" otherwise continue ",i+1);
+              	//Show("+)  zomm around the cursor 3/2 times ",i++);
+              	Show("+)  zoom in around the cursor 3/2 times ",i++);
+              	Show("-)  zoom out around the cursor 3/2 times  ",i++);
+              	//Show("-)  unzomm around the cursor 3/2 times  ",i++)	;
+              	Show("=)  reset zooming  ",i++);
+              	Show("r)  refresh plot ",i++);
+              	Show("ac) increase   the size arrow ",i++);
+              	Show("AC) decrease the size arrow  ",i++);
+              	Show("b)  switch between black and white or color plotting ",i++);
+              	Show("g)  switch between grey or color plotting ",i++);
+              	Show("f)  switch between filling iso or not  ",i++);
+              	Show("v)  switch between show  the numerical value of iso or not",i++);
+              	Show("p)   save  plot in a Postscprit file",i++);
+              	Show("m)  switch between show  meshes or not",i++);
+              	Show("p)  switch between show  quadtree or not (for debuging)",i++);
+              	Show("t)  find  Triangle ",i++);
+              	Show("?)  show this help window",i++);
+              	Show("any other key : continue ",++i);
                 goto next;
            }   
          if (!pViso || !pVarrow)
@@ -3365,6 +3370,12 @@ void init_mesh_array()
   map_type_of_map[make_pair(atype<long>(),atype<pmesh>())]=atype<KN<pmesh>*>(); // vector
 
  }
+template<class RR,class A,class B>  
+RR  get_elementp(const A & a,const B & b){ 
+  if( b<0 || a->N() <= b) 
+   { cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " array type = " << typeid(A).name() << endl;
+     ExecError("Out of bound in operator []");}
+    return  ((*a)[b]);}
  
 template <class R>
 void DclTypeMatrix()
@@ -3380,6 +3391,16 @@ void DclTypeMatrix()
   SetMatrix_Op<R>::btype = Dcl_Type<const  SetMatrix_Op<R> * >();
   Dcl_Type<Matrix_Prod<R,R> >();
   Dcl_Type<list<triplet<R,MatriceCreuse<R> *,bool> >*>();
+  
+  Dcl_Type<KN<MatriceCreuse<R> *> *>(0,::DestroyKN<MatriceCreuse<R> *> );  
+  
+    atype<KN<MatriceCreuse<R> *>* >()->Add("[","",new OneOperator2_<MatriceCreuse<R> **,KN<MatriceCreuse<R> *>*,long >(get_elementp_<MatriceCreuse<R> *,KN<MatriceCreuse<R> *>*,long>));
+    TheOperators->Add("<-", 
+       new OneOperator2_<KN<MatriceCreuse<R> *> *,KN<MatriceCreuse<R> *> *,long>(&set_initinit));
+
+  atype<KN<MatriceCreuse<R> *>* >()->Add("[","",new OneOperator2_<MatriceCreuse<R> *,KN<MatriceCreuse<R> *>*,long >(get_elementp<MatriceCreuse<R> *,KN<MatriceCreuse<R> *>*,long>));
+  
+  map_type_of_map[make_pair(atype<long>(),atype<MatriceCreuse<R> *>())]=atype<KN<MatriceCreuse<R> *>*>(); 
 }
 
 

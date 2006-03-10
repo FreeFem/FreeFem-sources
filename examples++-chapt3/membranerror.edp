@@ -1,30 +1,29 @@
 // file membranerror.edp
-real a=4*pi/3, b=1;
+verbosity=0;
+
+real theta=4.*pi/3.;
+real a=1.,b=1.; // the length of the semimajor axis and  semiminor axis
+border Gamma1(t=0,theta)    { x = a * cos(t); y = b*sin(t); }
+border Gamma2(t=theta,2*pi) { x = a * cos(t); y = b*sin(t); }
+
+
 func f=-4*(cos(x^2+y^2-1) -(x^2+y^2)*sin(x^2+y^2-1));
 func phiexact=sin(x^2+y^2-1);
 
-border Gamma1(t=0,a)    { x = b * cos(t); y = sin(t); }
-border Gamma2(t=a,2*pi) { x = b * cos(t); y = sin(t); }
-mesh Th=buildmesh(Gamma1(20)+Gamma2(10));
-
-fespace Vh(Th,P2);  Vh phi,w;
-
-solve laplace(phi,w)=int2d(Th)(dx(phi)*dx(w) + dy(phi)*dy(w))
-        - int2d(Th)(f*w) - int1d(Th,Gamma2)(2*w)+ on(Gamma1,phi=0);
-plot(Th,phi,wait=true,ps="membrane.eps"); //Plot Th and v
-
-real L2error0 = int2d(Th)((phi-phiexact)^2);
-
-////////////// mesh twice finer ////////////
-int n=2;
-mesh Th1=buildmesh(Gamma1(20*n)+Gamma2(10*n));
-
-fespace V1h(Th1,P2); // P2 conforming triangular FEM
-V1h phi1,w1;
-
-solve laplace1(phi1,w1)=int2d(Th1)(dx(phi1)*dx(w1) + dy(phi1)*dy(w1))
-        - int2d(Th1)(f*w1)- int1d(Th1,Gamma2)(2*w1) + on(Gamma1,phi1=0);
-real L2error1 = int2d(Th1)((phi1-phiexact)^2);
-
-cout<<"L2error0= "<<L2error0<<"  L2eeror1= "<<L2error1
-    <<" convergence rate = "<< log(L2error0/L2error1)<<endl;
+real[int] L2error(2);
+for(int n=0;n<2;n++)
+{
+  mesh Th=buildmesh(Gamma1(40*(n+1))+Gamma2(20*(n+1)));
+  fespace Vh(Th,P1); 
+   Vh phi,w;
+  
+  solve laplace(phi,w)=int2d(Th)(dx(phi)*dx(w) + dy(phi)*dy(w))
+    - int2d(Th)(f*w) - int1d(Th,Gamma2)(2*w)+ on(Gamma1,phi=0);
+  plot(Th,phi,wait=true,ps="membrane.eps"); //Plot Th and phi
+  
+  L2error[n]= sqrt(int2d(Th)((phi-phiexact)^2));
+}  
+for(int n=0;n<2;n++)
+  cout << " L2error " << n << " = "<<  L2error[n] <<endl;
+  
+cout <<" convergence rate = "<< log(L2error[0]/L2error[1])/log(2.)  <<endl;
