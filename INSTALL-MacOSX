@@ -1,11 +1,13 @@
-Version en cours de developpement.
-This run only on MacOs 10.2 version.
-This version use OpenGL graphics.
 
-This version can by by in 2 mode
-like a Mac application with drap and drop, ...
-This application open a terminal window to make console IO.
+This runs only on MacOs 10.3 version or higher.
+This version uses OpenGL graphics.
 
-This application must by in the /Applications directory if 
-you want to use this application in a terminal. You have jsut to put to 
-script FreeFem++-CoCoa in a directory of of shell PATH.
+This version can be used in 2 modes
+
+	- like a Mac application with drap and drop, ...
+	This application open a terminal window to make console IO.
+
+	-  Terminal mode: in this case the application FreeFem++.app must be in the /Applications 
+	directory and you have just to put the script FreeFem++-CoCoa in a directory of shell 
+	$PATH by putting it in the directory /usr/local/bin (for instance);
+	

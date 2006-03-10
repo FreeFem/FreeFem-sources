@@ -455,6 +455,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
          }
     */   
   } // to delete quadtree
+  if (verbosity>1) 
   cout << " Nb of common points " << nbvprev-nbv <<endl;
   
   Gh->nbvx = nbv;
