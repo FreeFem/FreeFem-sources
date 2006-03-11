@@ -3361,6 +3361,21 @@ template<class R>  R * set_initinit( R* const & a,const long & n){
   for (int i=0;i<n;i++)
     (*a)[i]=0;
    return a;}
+
+template<class A> inline AnyType DestroyKNmat(Stack,const AnyType &x){
+  KN<A> * a=GetAny<KN<A>*>(x);
+  for (int i=0;i<a->N(); i++)
+    (*a)[i].destroy();
+  a->destroy(); 
+  return  Nothing;
+}
+
+template<class R>  R * set_initmat( R* const & a,const long & n){ 
+ SHOWVERB( cout << " set_init " << typeid(R).name() << " " << n << endl);
+  a->init(n);
+  for (int i=0;i<n;i++)
+    (*a)[i].init();
+   return a;}
     
 void init_mesh_array()
  {
@@ -3370,6 +3385,12 @@ void init_mesh_array()
        new OneOperator2_<KN<pmesh> *,KN<pmesh> *,long>(&set_initinit));
   map_type_of_map[make_pair(atype<long>(),atype<pmesh>())]=atype<KN<pmesh>*>(); // vector
 
+  // resize mars 2006 v2.4-1
+  Dcl_Type< Resize<KN<pmesh> > > ();
+  Add<KN<pmesh>*>("resize",".",new OneOperator1< Resize<KN<pmesh> >,KN<pmesh>*>(to_Resize));
+  Add<Resize<KN<pmesh> > >("(","",new OneOperator2_<KN<pmesh> *,Resize<KN<pmesh> > , long   >(resizeandclean1));
+   
+
  }
 template<class RR,class A,class B>  
 RR  get_elementp(const A & a,const B & b){ 
@@ -3377,12 +3398,22 @@ RR  get_elementp(const A & a,const B & b){
    { cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " array type = " << typeid(A).name() << endl;
      ExecError("Out of bound in operator []");}
     return  ((*a)[b]);}
+
+template<class T> T *resizeandclean2(const Resize<T> & t,const long &n)
+ {  // resizeandclean1
+  int nn= t.v->N(); // old size 
+  
+  for (int i=n;i<nn;i++)  {(*t.v)[i].destroy();;} // clean
+  t.v->resize(n);
+  for (int i=nn;i<n;i++)  {(*t.v)[i].init();}  
+  return  t.v;
+ }
  
 template <class R>
 void DclTypeMatrix()
 {
  
- Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >);
+  Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >);
   Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')                             
   Dcl_Type<Matrice_Creuse_inv<R> >();      // matrice^-1   A^{-1}                          
   Dcl_Type<typename VirtualMatrice<R>::plusAx >();       // A*x (A'*x)
@@ -3393,25 +3424,27 @@ void DclTypeMatrix()
   Dcl_Type<Matrix_Prod<R,R> >();
   Dcl_Type<list<triplet<R,MatriceCreuse<R> *,bool> >*>();
   
-  
+   // resize mars 2006 v2.4-1
+ 
   // array of matrix   matrix[int] A(n);
-  typedef  Matrice_Creuse<R> * PMat;
-  typedef  KN<PMat> APMat;
-  Dcl_Type<APMat>(0,::DestroyKN<PMat> );  
+  typedef  Matrice_Creuse<R> Mat;
+  typedef  Mat * PMat;
+  typedef  KN<Mat> AMat;
+  Dcl_Type<AMat *>(0,::DestroyKNmat<Mat> );  
   
   // init array
     TheOperators->Add("<-", 
-       new OneOperator2_<APMat *,APMat *,long>(&set_initinit));
+       new OneOperator2_<AMat *,AMat *,long>(&set_initmat));
   //  A[i] 
-  atype<APMat* >()->Add("[","",new OneOperator2_<PMat,APMat*,long >(get_elementp<PMat,APMat*,long>));
+  atype<AMat* >()->Add("[","",new OneOperator2_<PMat,AMat*,long >(get_elementp_<Mat,AMat*,long>));
   
   // resize
-  Dcl_Type< Resize<APMat> > ();
-  Add<APMat*>("resize",".",new OneOperator1< Resize<APMat >,APMat*>(to_Resize));
-  Add<Resize<APMat> >("(","",new OneOperator2_<APMat *,Resize<APMat> , long   >(resize1));
+  Dcl_Type< Resize<AMat> > ();
+  Add<AMat*>("resize",".",new OneOperator1< Resize<AMat >,AMat*>(to_Resize));
+  Add<Resize<AMat> >("(","",new OneOperator2_<AMat *,Resize<AMat> , long   >(resizeandclean2));
    
   // to declare matrix[int]     
-  map_type_of_map[make_pair(atype<long>(),atype<PMat>())]=atype<APMat*>(); 
+  map_type_of_map[make_pair(atype<long>(),atype<PMat>())]=atype<AMat*>(); 
   
 }
 
