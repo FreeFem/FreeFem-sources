@@ -760,6 +760,7 @@ template<class K> class Matrice_Creuse  { public:
   void init() {
     A.init(),Uh.init();Vh.init();
     typemat=TypeSolveMat(TypeSolveMat::NONESQUARE);}
+  Matrice_Creuse() { init();}
   void destroy() {
     A.destroy();
     Uh.destroy();

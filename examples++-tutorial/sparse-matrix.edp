@@ -155,3 +155,12 @@ wVH[] = MM * unVh[] ;
 
 //cout << "wWh : " << wVh[] << endl;
 //cout <<" wVH : " << wVH[] << endl;
+// array of matrix v2.4-1 
+cout << " array of matrix   \n" ;
+ matrix[int]  aM(10);
+ aM[0]= MM;
+ aM[3]= MM;
+ aM[9]= MM;
+ aM.resize(4);
+ aM.resize(10);
+ 
