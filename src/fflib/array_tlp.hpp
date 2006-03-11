@@ -17,7 +17,7 @@
 #include "rgraph.hpp"
 #include "InitFunct.hpp"
 #include <queue>
-
+#include "array_resize.hpp"
 
 template <class T>
 struct affectation: binary_function<T, T, T>
@@ -462,23 +462,6 @@ void ArrayDCL()
 }
 
 
-template<class T> struct  Resize{ T *v;
-  Resize( T * vv) : v(vv) {}
- }; 
-
-template<class T> T *resize1(const Resize<T> & t,const long &n)
- {  
-  t.v->resize(n);
-  return  t.v;
- }
- 
-template<class T> T *resize2(const Resize<T> & t,const long &n, const long & m)
- {  
-  t.v->resize(n,m);
-  return  t.v;
- }
-
-template<class T> Resize<T> to_Resize( T *v){ return Resize<T>(v);}
 
 template<class A,class B> pair<A,B> * pBuild(const A & a,const B & b)
   { return new pair<A,B>(a,b);}
