@@ -26,6 +26,7 @@ using namespace std;
 #include "problem.hpp"
 #include "CGNL.hpp"
 #include "AddNewFE.h"
+#include "array_resize.hpp"
 
 namespace bamg { class Triangles; }
 namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso); }
@@ -3391,17 +3392,27 @@ void DclTypeMatrix()
   SetMatrix_Op<R>::btype = Dcl_Type<const  SetMatrix_Op<R> * >();
   Dcl_Type<Matrix_Prod<R,R> >();
   Dcl_Type<list<triplet<R,MatriceCreuse<R> *,bool> >*>();
- /* 
-  Dcl_Type<KN<MatriceCreuse<R> *> *>(0,::DestroyKN<MatriceCreuse<R> *> );  
   
+  
+  // array of matrix   matrix[int] A(n);
+  typedef  Matrice_Creuse<R> * PMat;
+  typedef  KN<PMat> APMat;
+  Dcl_Type<APMat>(0,::DestroyKN<PMat> );  
+  
+  // init array
     TheOperators->Add("<-", 
-       new OneOperator2_<KN<MatriceCreuse<R> *> *,KN<MatriceCreuse<R> *> *,long>(&set_initinit));
-
-  atype<KN<MatriceCreuse<R> *>* >()->Add("[","",new OneOperator2_<MatriceCreuse<R> *,KN<MatriceCreuse<R> *>*,long >(get_elementp<MatriceCreuse<R> *,KN<MatriceCreuse<R> *>*,long>));
-//  atype<KN<MatriceCreuse<R> *>* >()->Add("[","",new OneOperator2_<MatriceCreuse<R> *,KN<MatriceCreuse<R> *>*,long >(get_elementp_<MatriceCreuse<R> *,KN<MatriceCreuse<R> *>*,long>));
+       new OneOperator2_<APMat *,APMat *,long>(&set_initinit));
+  //  A[i] 
+  atype<APMat* >()->Add("[","",new OneOperator2_<PMat,APMat*,long >(get_elementp<PMat,APMat*,long>));
+  
+  // resize
+  Dcl_Type< Resize<APMat> > ();
+  Add<APMat*>("resize",".",new OneOperator1< Resize<APMat >,APMat*>(to_Resize));
+  Add<Resize<APMat> >("(","",new OneOperator2_<APMat *,Resize<APMat> , long   >(resize1));
    
-  map_type_of_map[make_pair(atype<long>(),atype<MatriceCreuse<R> *>())]=atype<KN<MatriceCreuse<R> *>*>(); 
-  */
+  // to declare matrix[int]     
+  map_type_of_map[make_pair(atype<long>(),atype<PMat>())]=atype<APMat*>(); 
+  
 }
 
 
