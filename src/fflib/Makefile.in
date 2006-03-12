@@ -256,7 +256,7 @@ CodeAlloc.cpp lgmat.cpp global.cpp 					\
 error.hpp ../femlib/gmres.hpp InitFunct.hpp lex.hpp lgfem.hpp lgsolver.hpp	\
 Operator.hpp problem.hpp Serialize.hpp showverb.hpp String.hpp		\
 throwassert.hpp versionnumber.hpp  CodeAlloc.hpp \
-array_init.hpp  array_tlp.hpp \
+array_init.hpp  array_tlp.hpp array_resize.hpp \
 strversionnumber.hpp ffstack.hpp AddNewFE.h \
 environment.cpp environment.hpp
 
