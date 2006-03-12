@@ -459,7 +459,7 @@ class aSubFMortar { public:
       
       const R2 &C=K[c];
       const R2 &D=K[d];
-      // $ [AB] \include [CD] $
+      // $ [AB] include in  [CD] $
       R2 CD(C,D);
       R  CD2=(CD,CD);
       R la= (CD,A-C)/CD2;

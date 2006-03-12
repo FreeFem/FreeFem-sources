@@ -625,7 +625,7 @@ void Triangles::IntersectConsMetric(const double * s,const Int4 nbsol,const int 
 		if ( ! tAB || ! tAB->link ) nAB = O;
 	    
 		// remark we forgot a 1/2 because
-		//       \int_{edge} w_i = 1/2 if i is in edge 
+		//       $\\int_{edge} w_i = 1/2 $ if $i$ is in edge 
 		//                          0  if not
 		// if we don't take the  boundary 
 		// dxdx[iA] += ( nCA.x + nAB.x ) *Grads.x;
