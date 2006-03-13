@@ -199,6 +199,7 @@ cout << " b = a(I) : " << b << "\n  c(I) = a " << c << endl;
 
   A = 2.*b*c'; // outer product  
   cout << " A = " << A << endl;
+  cout << " A(1,2) " << A(1,2)  << endl;
   B = b*c'; // outer product  B(i,j)  = b(i)*c(j) 
   B = b*c'; // outer product  B(i,j)  = b(i)*c(j) 
   B = (2*b*c')(I,J); //   outer product  B(i,j)  = b(I(i))*c(J(j)) 
