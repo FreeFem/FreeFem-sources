@@ -3419,8 +3419,6 @@ void DclTypeMatrix()
   Dcl_Type<typename VirtualMatrice<R>::plusAx >();       // A*x (A'*x)
   Dcl_Type<typename VirtualMatrice<R>::plusAtx >();       // A^t*x (A'*x)
   Dcl_Type<typename VirtualMatrice<R>::solveAxeqb >();       // A^t*x (A'*x)
-  Dcl_Type<const typename MatrixInterpolation::Op *>(); 
-  SetMatrix_Op<R>::btype = Dcl_Type<const  SetMatrix_Op<R> * >();
   Dcl_Type<Matrix_Prod<R,R> >();
   Dcl_Type<list<triplet<R,MatriceCreuse<R> *,bool> >*>();
   

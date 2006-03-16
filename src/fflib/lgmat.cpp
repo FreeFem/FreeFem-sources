@@ -174,7 +174,188 @@ struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
 
 // Fin Add FH Houston --------
 
+class MatrixInterpolation : public OneOperator { public:  
 
+    class Op : public E_F0info { public:
+       typedef pfes * A;
+       Expression a,b,c; 
+       // if c = 0 => a,b FESpace
+       // if c != a FESpace et b,c KN_<double> 
+       static const int n_name_param =4;
+       static basicAC_F0::name_and_type name_param[] ;
+        Expression nargs[n_name_param];
+     bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
+     long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+
+       public:
+       Op(const basicAC_F0 &  args,Expression aa,Expression bb) : a(aa),b(bb),c(0) {
+         args.SetNameParam(n_name_param,name_param,nargs);  }
+       Op(const basicAC_F0 &  args,Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {
+         args.SetNameParam(n_name_param,name_param,nargs); } 
+    };
+    // interpolation(Vh,Vh)
+   MatrixInterpolation() : OneOperator(atype<const MatrixInterpolation::Op *>(),
+                                       atype<pfes *>(),
+                                       atype<pfes *>()) {}
+   // interpolation(Vh,xx,yy)
+   MatrixInterpolation(int bidon) : OneOperator(atype<const MatrixInterpolation::Op *>(),
+                                                atype<pfes *>(),atype<KN_<double> >(),
+                                                atype<KN_<double> >()) {}
+   
+  
+    E_F0 * code(const basicAC_F0 & args) const 
+     { 
+       if(args.size()==2)
+       return  new Op(args,t[0]->CastTo(args[0]),
+                           t[1]->CastTo(args[1]));
+       else if(args.size()==3)
+       return  new Op(args,t[0]->CastTo(args[0]),
+                           t[1]->CastTo(args[1]),
+                           t[2]->CastTo(args[2]));
+       else CompileError("Bug in MatrixInterpolation code nb != 2 or 3 ????? bizarre" );
+       
+     }
+};
+
+basicAC_F0::name_and_type  MatrixInterpolation::Op::name_param[]= {
+     "t", &typeid(bool), 
+     "op", &typeid(long),
+     "inside",&typeid(bool),
+     "composante",&typeid(long)
+};
+
+
+
+
+
+template<class R>
+   class SetMatrix_Op : public E_F0mps { public:
+       Expression a; 
+       
+       static  aType btype;
+       static const int n_name_param =11;
+       static basicAC_F0::name_and_type name_param[] ;
+       Expression nargs[n_name_param];
+       const OneOperator * precon;
+       bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
+       long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+
+       public:
+       SetMatrix_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
+         args.SetNameParam(n_name_param,name_param,nargs);
+         precon = 0; //  a changer 
+         if ( nargs[3])
+          {
+           const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[3]);
+           assert(op);
+           precon = op->Find("(",ArrayOfaType(atype<KN<R>* >(),false)); // strange bug in g++ is R become a double
+          }
+         
+       } 
+       AnyType operator()(Stack stack)  const ;
+    };
+
+
+template<class R>
+class SetMatrix : public OneOperator { public:  
+
+ 
+  // SetMatrix() : OneOperator(atype<const typename SetMatrix<R>::Op *>(),atype<Matrice_Creuse<R> *>() ) {}
+   SetMatrix() : OneOperator(SetMatrix_Op<R>::btype,atype<Matrice_Creuse<R> *>() ) {}
+  
+    E_F0 * code(const basicAC_F0 & args) const 
+     { 
+       return  new SetMatrix_Op<R>(args,t[0]->CastTo(args[0])); 
+     }
+};
+
+template<class R>
+       aType  SetMatrix_Op<R>::btype=0;
+
+template <class R> 
+basicAC_F0::name_and_type  SetMatrix_Op<R>::name_param[]= {
+     "init", &typeid(bool),
+     "solver", &typeid(TypeSolveMat*),
+     "eps", &typeid(double)  ,
+     "precon",&typeid(Polymorphic*), 
+     "dimKrylov",&typeid(long),
+     "bmat",&typeid(Matrice_Creuse<R>* ),
+     "tgv",&typeid(double ),
+     "factorize",&typeid(bool),
+     "strategy",&typeid(long ),
+     "tolpivot",&typeid(double ),
+     "tolpivotsym",&typeid(double )
+
+};
+
+template<class R>
+AnyType SetMatrix_Op<R>::operator()(Stack stack)  const 
+{
+   Matrice_Creuse<R> *  A= GetAny<Matrice_Creuse<R> *>((*a)(stack));
+   assert(A && A->A);
+  long NbSpace = 50; 
+  long itmax=0; 
+  double eps=1e-6;
+//  bool VF=false;
+//  VF=isVF(op->largs);
+ // assert(!VF); 
+  double tgv = 1e30;
+  bool VF=false;
+  bool factorize=false;
+  double tol_pivot=-1;
+  double tol_pivot_sym=-1;
+  
+// type de matrice par default
+#ifdef HAVE_LIBUMFPACK         
+     TypeSolveMat tmat(TypeSolveMat::UMFpack); 
+#else            
+    TypeSolveMat tmat(TypeSolveMat::GMRES);
+#endif    
+     
+  TypeSolveMat    *typemat=&tmat;
+  bool initmat=true;
+  int umfpackstrategy=0; 
+  if (nargs[0]) initmat= ! GetAny<bool>((*nargs[0])(stack));
+  if (nargs[1]) typemat= GetAny<TypeSolveMat *>((*nargs[1])(stack));
+  if (nargs[2]) eps= GetAny<double>((*nargs[2])(stack));
+  // 3 precon 
+  if (nargs[4]) NbSpace= GetAny<long>((*nargs[4])(stack));
+  if (nargs[6]) tgv= GetAny<double>((*nargs[6])(stack));
+  if (nargs[7]) factorize= GetAny<bool>((*nargs[7])(stack));
+  
+  if (nargs[8]) umfpackstrategy = GetAny<long>((*nargs[8])(stack)); 
+  if (nargs[9]) tol_pivot = GetAny<double>((*nargs[9])(stack)); 
+  if (nargs[10]) tol_pivot_sym = GetAny<double>((*nargs[10])(stack)); 
+   
+   if(A->typemat.profile != typemat->profile) 
+   {
+     cerr << " type of matrix " << A->typemat<<endl;
+     cerr << " type of matrix for solver " <<*typemat<<endl;
+     
+     ExecError(" Set incompatibility between solver and type of matrix");
+   }
+  if( factorize ) {
+    MatriceProfile<R> * pf = dynamic_cast<MatriceProfile<R> *>((MatriceCreuse<R> *) A->A);
+    assert(pf);
+    switch (typemat->t) {
+    case TypeSolveMat::LU: pf->LU(Abs(eps));break;
+    case TypeSolveMat::CROUT: pf->crout(Abs(eps));break;
+    case TypeSolveMat::CHOLESKY: pf->cholesky(Abs(eps));break;
+    default: ExecError("Sorry no factorization for this type for matrix"); 
+    }
+    
+  }    
+  SetSolver<R>(stack,*A->A,typemat,VF,eps,NbSpace,itmax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym);
+
+  
+    
+   
+}
+
+
+AnyType SetMatrixInterpolation(Stack,Expression ,Expression);
+
+//------
 void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpace & Vh,void *data)
 {  //  Uh = Vh 
 
@@ -385,6 +566,89 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
   //assert(0); // a faire to do
 }
 
+MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double> & xx,const KN_<double> & yy ,int *data)
+{  //  Uh = Vh 
+
+  int op=op_id; //  value of the function
+  int icomp=0;
+  bool transpose=false;
+  bool inside=false;
+  if (data)
+   {
+     transpose=data[0];
+     op=data[1];
+     inside=data[2];
+     icomp = data[3];
+     ffassert(op>=0 && op < 4);
+     
+   }
+  if(verbosity>2) 
+    {
+      cout << " -- buildInterpolationMatrix   transpose =" << transpose << endl
+           << "              value, dx , dy          op = " << op << endl
+           << "              composante                 = " << icomp << endl
+           << "                            just  inside = " << inside << endl;
+    }
+  using namespace Fem2D;
+  int n=Uh.NbOfDF;
+  int mm=xx.N();
+  int nbxx= mm;
+  if(transpose) Exchange(n,mm);
+  const  Mesh & ThU =Uh.Th; // line 
+  
+   
+  FElement Uh0 = Uh[0];
+  
+   
+   
+ int nbdfUK= Uh0.NbDoF();
+ int NUh= Uh0.N;
+ 
+ ffassert(icomp < NUh && icomp >=0); 
+    
+
+   const int sfb1=Uh0.N*last_operatortype*Uh0.NbDoF();
+   KN<R> kv(sfb1);
+   R * v = kv;
+   const R eps = 1.0e-10;
+
+   bool whatd[last_operatortype];
+   for (int i=0;i<last_operatortype;i++) 
+     whatd[i]=false;
+   whatd[op]=true; // the value of function
+   KN<bool> fait(Uh.NbOfDF);
+   fait=false;
+   map< pair<int,int> , double > sij; 
+   R2 Phat;
+   bool outside;
+   
+   for(int ii=0;ii<nbxx;ii++)
+   {
+     const Triangle *ts=ThU.Find(R2(xx[ii],yy[ii]),Phat,outside); 
+     if(outside && !inside) continue;
+     int it = ThU(ts); 
+     FElement KU(Uh[it]);
+     KNMK_<R> fb(v,nbdfUK,NUh,last_operatortype);
+     Uh0.tfe->FB(whatd,ThU,ThU[it],Phat,fb);  
+     KN_<R> Fwi(fb('.',icomp,op));
+     for (int idfu=0;idfu<nbdfUK;idfu++) 
+       {
+        int  j = ii;
+        int  i = KU(idfu);
+        if(transpose) Exchange(i,j);
+        R c = Fwi(idfu);
+	if(Abs(c)>eps)
+	  sij[make_pair(i,j)] = c;
+      }
+      }
+  
+   MatriceMorse<R> * m = new MatriceMorse<R>(n,mm,sij,false);
+    sij.clear();
+   return m;
+  //assert(0); // a faire to do
+}
+
+
 AnyType SetMatrixInterpolation(Stack stack,Expression emat,Expression einter)
 {
   using namespace Fem2D;
@@ -392,23 +656,39 @@ AnyType SetMatrixInterpolation(Stack stack,Expression emat,Expression einter)
   Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
   const MatrixInterpolation::Op * mi(dynamic_cast<const MatrixInterpolation::Op *>(einter));
   ffassert(einter);
-
+  int data[ MatrixInterpolation::Op::n_name_param];
+  data[0]=mi->arg(0,stack,false); // transpose not
+  data[1]=mi->arg(1,stack,(long) op_id); ; // get just value
+  data[2]=mi->arg(2,stack,false); ; // get just value
+  data[3]=mi->arg(3,stack,0L); ; // get just value
+  if( mi->c==0)
+  { // old cas 
   pfes * pUh = GetAny< pfes * >((* mi->a)(stack));
   pfes * pVh = GetAny<  pfes * >((* mi->b)(stack));
   FESpace * Uh = **pUh;
   FESpace * Vh = **pVh;
   ffassert(Vh);
   ffassert(Uh);
-  int data[ MatrixInterpolation::Op::n_name_param];
-  data[0]=mi->arg(0,stack,false); // transpose not
-  data[1]=mi->arg(1,stack,(long) op_id); ; // get just value
-  data[2]=mi->arg(2,stack,false); ; // get just value
   
   sparce_mat->pUh=pUh;
   sparce_mat->pVh=pVh;
   sparce_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparce_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
-
+  }
+  else 
+  {  // new cas mars 2006
+  pfes * pUh = GetAny< pfes * >((* mi->a)(stack));
+  KN_<double>  xx = GetAny<  KN_<double>  >((* mi->b)(stack));
+  KN_<double>  yy = GetAny<  KN_<double>  >((* mi->c)(stack));
+  ffassert( xx.N() == yy.N()); 
+  FESpace * Uh = **pUh;
+  ffassert(Uh);
+  
+  sparce_mat->pUh=0;
+  sparce_mat->pVh=0;
+  sparce_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+  sparce_mat->A.master(buildInterpolationMatrix1(*Uh,xx,yy,data));
+  }
   return sparce_mat;
 }
 
@@ -1131,6 +1411,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 template <class R>
 void AddSparceMat()
 {
+ SetMatrix_Op<R>::btype = Dcl_Type<const  SetMatrix_Op<R> * >();
  Dcl_Type<TheDiagMat<R> >();
  Dcl_Type<TheCoefMat<R> >(); // Add FH oct 2005
  Dcl_Type< map< pair<int,int>, R> * >(); // Add FH mars 2005 
@@ -1262,6 +1543,7 @@ void  init_lgmat()
   
 //  new OneOperator1<Transpose<KN_<long> >,KN<long> *>(&Build<Transpose<KN_<long> >,KN<long> *>),
 //  new OneOperator1<Transpose<KN_<long> >,KN_<long> >(&Build<Transpose<KN_<long> >,KN_<long> >)       
+  Dcl_Type<const  MatrixInterpolation::Op *>(); 
 
    map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<double*>())]=atype<Matrice_Creuse<double> *>();
    map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<Complex*>())]=atype<Matrice_Creuse<Complex> *>();
@@ -1269,7 +1551,9 @@ void  init_lgmat()
     AddSparceMat<Complex>();
  
  Add<const MatrixInterpolation::Op *>("<-","(", new MatrixInterpolation);
+ Add<const MatrixInterpolation::Op *>("<-","(", new MatrixInterpolation(1));
  Global.Add("interpolate","(",new MatrixInterpolation);
+ Global.Add("interpolate","(",new MatrixInterpolation(1));
  Global.Add("interplotematrix","(",new  OneOperatorCode<PrintErrorCompileIM>);
        
 
