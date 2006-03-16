@@ -76,9 +76,22 @@
   \catcode`\>=\other
   \catcode`\<=\other
 }
-
-\def\ttCC{\bgroup\catcode`\@=\active\ttCCC}
-\def\ttCCC#1{{\sizeFF\texttt{#1}}\egroup} 
+\def\chiffreislettre{
+\catcode`\0=11
+\catcode`\1 = 11
+\catcode`\2 = 11
+\catcode`\3 = 11
+\catcode`\4 = 11
+\catcode`\5 = 11
+\catcode`\6 = 11
+\catcode`\7 = 11
+\catcode`\8 = 11
+\catcode`\9 = 11
+\catcode`\_ = 11
+}
+\def\ttCC{\bgroup%
+\chiffreislettre\catcode`\@=\active\ttCCC}
+\def\ttCCC#1{{\texttt{#1}}\egroup} 
 {
  \catcode`\<=\active
   \catcode`\>=\active

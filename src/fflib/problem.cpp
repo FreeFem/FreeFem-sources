@@ -13,11 +13,6 @@ using namespace std;
 #include "problem.hpp"
 #include <set>
 
-basicAC_F0::name_and_type  MatrixInterpolation::Op::name_param[]= {
-     "t", &typeid(bool), 
-     "op", &typeid(long),
-     "inside",&typeid(bool)
-};
 
 
 basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {

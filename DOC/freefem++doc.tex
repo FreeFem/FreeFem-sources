@@ -2,8 +2,8 @@
 %pstops  ``0L@.7(21cm,0)+0L@.7(21cm,14.85cm)'' 
 \documentclass[a4paper,twoside,12pt]{book}
 \usepackage{styles}
-\usepackage{times}
 \usepackage{txfonts}
+\usepackage{times}
 \def\VERSION{2.4-0}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
@@ -420,7 +420,7 @@ graphics and output files.
 To write or modify the input file a text editor can be used.
 \\\\
 An integrated environment (\freefempp GUI), written by A. Le Hyaric, is also included
-with the distribution. the application name is\texttt{FreeFem++-cs.exe}; note however that
+with the distribution. the application name is \texttt{FreeFem++-cs}; note however that
 the graphics display much slower in this mode.
 There are other ways to have an integrated environment. TeX users have
 usually an editor installed; if it is winedt or TeXnicCenter then these can
@@ -438,8 +438,18 @@ to the top left one sus the program (which can be edited?), on the top right ons
 \end{figure}
 \paragraph{Under MacOS X with Graphic Interfaces}
 
+For testing or running  a \texttt{.edp} file,  and juste drag and drop 
+the  file icon  on The MacOS application \texttt{FreeFem++.app} icon,
+but your can also use the menu:  $\mathtt{File} \rightarrow \mathtt{Open}$
+after launching the application.
+
   
 \paragraph{Under terminal}
+
+First choose the type of application \texttt{FreeFem++}, \texttt{FreeFem++-nw}, \dots  depen\-ding on your pleasure, system, etc\dots.  So for example your can enter
+\bFF
+ FreeFem++ your-edp-file-path
+\eFF 
 
 \subsection{Environment variable, and init file}
 
@@ -489,7 +499,7 @@ the search rule.
     export FF_LOADPATH="dir;;dir3""
 \end{verbatim}     
  
- Remark, the separtor of directory  is ";" and not ":" because ":" is use under Windows.
+ Remark: the separtor of directory  is ";" and not ":" because ":" is used under Windows.
 
 \subsection{History}
 
@@ -531,9 +541,9 @@ versatile software in which any new finite element can be included
 in a few hours; but a recompilation is then necessary.  Therefore
 the library of finite elements available in \freefempp will grow
 with the version number and with the number of users who program
-more new elements. So far we have discontinuous P$^0$
-elements,linear P$^1$ and quadratic P$^2$ Lagrangian elements,
-discontinuous P$^1$ and Raviart-Thomas elements and a few others like bubble elements.
+more new elements. So far we have discontinuous $P_0$
+elements,linear $P_1$ and quadratic $P_2$ Lagrangian elements,
+discontinuous $P_1$ and Raviart-Thomas elements and a few others like bubble elements.
 
 
 \section{Getting Started}
@@ -567,8 +577,8 @@ that is on the left side of its boundary oriented by the parameter.
 %oriented by the parameter $t$.
  As illustrated in Fig. \ref{firstU},
 we can see the isovalue of $u$ by using \ttCC{@plot} (see line 13
-below). \twoplot[height=5cm]{firstTh}{firstU}{mesh \ttCC{Th} by
-\ttCC{build(C(50))}}{isovalue by \ttCC{plot(u)}}
+below). \twoplot[height=5cm]{firstTh}{firstU}{mesh \texttt{Th} by
+\texttt{build(C(50))}}{isovalue by \texttt{plot(u)}}
 
 \begin{example}\label{exm:first}~
 \bFF
@@ -685,7 +695,7 @@ Then
 \begin{equation}
 V_h(\mathcal{T}_h,P_1)=\left\{w(x,y)\left|\;
 w(x,y)=\sum_{k=1}^{M}w_k\phi_k(x,y),\, w_k\textrm{ are real numbers}\right.\right\}
-\end{equation}
+\label{eq 2.3}\end{equation}
 where $M$ is the dimension of $V_h$, i.e. the number of vertices.
 The $w_k$ are called the \index{degree of freedom}\emph{degree of freedom} of $w$ and $M$ the number of
 the degree of freedom.
@@ -749,8 +759,8 @@ Then, by Green's formula, the problem  is converted into finding $u$
 such that
 \begin{eqnarray}
 \label{eqn:weakform}
-&&a(u,v) - \ell(f,v) = 0\hbox{ satisfying $v=0$ on }\p\Omega.
-\qquad \textrm{for all }v\\
+&&a(u,v) - \ell(f,v) = 0
+\qquad \forall v \hbox{ satisfying $v=0$ on }\p\Omega.\\
 &&\hbox{with }a(u,v)=\int_{\Omega}\nabla u\cdot \nabla v \,\d x\d y ,
 \quad \ell(f,v)=\int_{\Omega}fv\, \d x\d y
 \label{eqn:bilinear}
@@ -765,7 +775,7 @@ and (\ref{eqn:weakform}) is written with \ttCC{@dx}(u) $=\p
 u/\p x$, \ttCC{@dy}(u) $=\p u/\p y$ and
 \begin{eqnarray*}
 &&\int_{\Omega}\nabla u\cdot \nabla v\, \d x\d y \longrightarrow
-\ttCC{@int@2d(Th)( @dx(u)*@dx(v) + @dy(u)*@dy(v) )}\\
+\ttCC{@int2d(Th)( @dx(u)*@dx(v) + @dy(u)*@dy(v) )}\\
 &&\int_{\Omega}fv\, \d x\d y \longrightarrow
 \ttCC{@int@2d(Th)( f*v )}\qquad
 \textrm{(notice here, $u$ is unused)}\\
@@ -800,18 +810,18 @@ but it helps to guess what is allowed in the language.
 Internally \freefempp will solve a linear system of the type
 \begin{eqnarray}
 \label{eqn:Equation}
-\sum_{j=0}^{M-1} A_{ij}u_j - F_i=0\quad i=0,\cdots,M-1;\qquad
+\sum_{j=0}^{M-1} A_{ij}u_j - F_i=0 ,\quad i=0,\cdots,M-1;\qquad
 F_i=\int_{\Omega}f\phi_i\, \d x\d y
 \end{eqnarray}
 which is found by using (\ref{defu}) and replacing $v$ by $\phi_i$
 in (\ref{eqn:weakform}).  
 And the Dirichlet conditions are implemented by penalty
 namely by setting $A_{ii}=10^{30}$  and 
- $F_i=  10^{30}*0$ if $i$ is a boundary node. Note, that the number $10^30$ is called \ttCC{tgv} 
+ $F_i=  10^{30}*0$ if $i$ is a boundary degree of freedom. Note, that the number $10^{30}$ is called \ttCC{tgv} 
  (\emph{tr\`es grande valeur} )
  and it is generally possible to change this value \index{solve!tgv=}, see the index item \texttt{solve!tgv=}.
  
-\medskip
+\medskip\index{matrix}\index{varf}
 
 The matrix $A=(A_{ij})$ is called \emph{stiffness matrix} \index{matrix!stiffness matrix}.
 
@@ -824,22 +834,34 @@ by using
 @matrix A=a(Vh,Vh);  // stiffness matrix,
 \eFF
 
-The vector $F$
+The vector $F$ \index{[]@\verb=[]=}
 in (\ref{eqn:Equation}) can also be constructed manually 
 \bFF
 @varf l(unused,v) = @int2d(Th)(f*v)+@on(C,u=0);
-Vh F;  F[] = l(0,V);
+Vh F;  F[] = l(0,V); //  F[] is the vector associated to the function \texttt{F}
 \eFF
 The problem can then be solved at the level of algebra by
 \bFF
- u[]=A^-1*F[];
+ u[]=A^-1*F[]; // u[] is the vector associated to the function u
 \eFF
+\begin{note}
+  Here \ttCC{u} and \ttCC{F} are finite element function, and  \ttCC{u[]} and 
+  \ttCC{F[]} give  the array of value associated ( \ttCC{u[]}$\equiv (u_i)_{i=0,\dots,M-1}$ and 
+  \ttCC{F[]}$\equiv (F_i)_{i=0,\dots,M-1}$). So we have
+   $$ 
+   \mathtt{u}(x,y) = \sum_{i=0}^{M-1} \mathtt{u[][}i\mathtt{]} \phi_i(x,y) , 
+   \qquad \mathtt{F}(x,y) = \sum_{i=0}^{M-1} \mathtt{F[][}i\mathtt{]} \phi_i(x,y) 
+   $$
+   where $\phi_i, i=0...,,M-1$ are the basis functions of  \texttt{Vh} like in equation 
+   (\ref{eq 2.3}), and $M = \mathtt{Vh.ndof}$ is  the number of degree of freedom (i.e. the dimension of the space \texttt{Vh}).
+
+\end{note}
 The linear system (\ref{eqn:Equation}) is solved by \texttt{UMFPACK}
 unless another option is mentioned specifically  as in
 \begin{center}
 \ttCC{Vh u,v; @problem Poisson(u,v,@solver=CG) = @int2d(...}
 \end{center}
-meaning that \texttt{Poisson} is declared only here and when it is called (by simply writing \texttt{Poisson;} ) then
+meaning that \texttt{Poisson} is declared only here and when it is called (by simply writing \texttt{Poisson;}~) then
  (\ref{eqn:Equation}) will be solved by the Conjugate Gradient method.
 
 \subsubsection{Some Features of \freefempp}
@@ -1741,7 +1763,7 @@ in rare cases when $|u|$ is too small due to quadrature error.
 \paragraph{Solution by Discontinuous-Galerkin FEM}
 
 Discontinuous Galerkin methods take advantage of the discontinuities of $c$ at the edges to build
-upwinding.  There are may formulations possible. We shall implement here the so-called dual-$P^1_{DC}$
+upwinding.  There are may formulations possible. We shall implement here the so-called dual-$P_1^{DC}$
 formulation (see Ern\cite{ern}):
 \[
     \int_\Omega(\frac{c^{n+1}-c^n}{\delta t} +u\cdot\n c)w
@@ -1793,7 +1815,7 @@ N.x,N.y} is the \x{normal} to the edge.
 \includegraphics[width=8cm]{convectDG}
 
 \caption{ The rotated hill after one revolution, left with Characteristics-Galerkin,
-on the right with Discontinuous $P^1$ Galerkin FEM.}
+on the right with Discontinuous $P_1$ Galerkin FEM.}
 \end{center}
 \end{figure}
 
@@ -1821,8 +1843,8 @@ to tel the solver that the matrix has not changed (init=true), and the name para
 same that in problem definition (see. \ref{def problem}) \index{set}\index{problem}. 
 
 \paragraph{\x{Finite Volume Methods}} can also be handled with \freefempp but it requires programming.
-For instance the $P^0-P^1$ Finite Volume Method of Dervieux et al associates to each $P^1$
-function $c^1$ a $P^0$ function $c^0$ with constant value around each vertex $q^i$ equal to $c^1(q^i)$
+For instance the $P_0-P_0$ Finite Volume Method of Dervieux et al associates to each $P_0$
+function $c^1$ a $P_0$ function $c^0$ with constant value around each vertex $q^i$ equal to $c^1(q^i)$
 on the cell $\sigma_i$ made by all the medians of all triangles having $q^i$ as vertex.
 Then upwinding is done by taking left or right values at the median:
 \[
@@ -2623,7 +2645,7 @@ defines a new type of finite element space, see Section \refSec{Finite Elements}
 \end{description}
 
 \subsection{Global Variables}\label{sec:Global}
- The names \ttCC{x,y,z,label,region,P,N,nu\_triangle} are reserved words used to link
+ The names \ttCC{x,y,z,label,region,P,N,nu_triangle} are reserved words used to link
 the language to the finite element tools:
 \begin{description}
     \itemtt[x]  is the $x$ coordinate of the current point (real value) \index{x}
@@ -3276,7 +3298,8 @@ The output is
 The multiplicative operators *, /, and \% group left to right.
 
 \begin{itemize}
-\item  \verb@'@  is unary right transposition of array, matrix \index{transpose}
+\item  \verb@'@  is unary right transposition of array, matrix \index{transpose} in real case 
+or Hermitian conjugation in  complex case.
  \item \verb@.*@ is the term to term multiply operator. \index{.*} \index{\string'} \index{divide!term to term}
  \item \verb@./@ is the term to term divide operator. \index{./} \index{\string'} \index{product!term to term}
 \end{itemize}
@@ -3284,7 +3307,8 @@ there are some compound operator:
 \begin{itemize}
  \item \verb@^-1@ is for  solving the linear system (example: \verb$ b = A^-1 x$) \index{solve!linear system}
  \item \verb@' *@ is the compound  of transposition and matrix product, so it is the dot product
-(example \verb$real DotProduct=a'*b$) \index{dot product}\index{product!dot}
+(example \verb$real DotProduct=a'*b$) \index{dot product}\index{product!dot}, in complex case you get the Hermitian
+product, so mathematically we have  \verb!a'*b!$ =  \overline{a}^T b $ \index{product! Hermitian dot}. 
  \item \verb@ a*b'@ is the outer product  (example  \verb$matrix B=a'*b$ \index{outer product}\index{product!outer}) 
 \end{itemize}
 \begin{example}~
@@ -3325,15 +3349,15 @@ Vh m2; m2[] = f[]./g[];
 
 On the triangulation of Figure \ref{fig-hatFunction} this produce the following:
 \begin{eqnarray*}
-A&=&\borderarray{[}{]}{1em}{1.2ex}{rrrrrrrr}{
-&1&2&3&4&5&6\\
-1&10^{30}&  0.5& 0&3 0.&  -2.5& 0\\
-2&0.&10^{30}&0.5& 0&0.5&-2.5\\
-3&0&0.&10^{30}& 0& 0&0.5\\
-4&0.5& 0& 0& 10^{30}& 0.& 0\\
-5&-2.5&0.5& 0&0.5&10^{30}&0.\\
-6&0&-2.5&0.& 0&0.5& 10^{30}
-}
+A&=&\left[\begin{array}{cccccc}
+%&1&2&3&4&5&6\\
+10^{30}&  0.5  & 0.    &3 0.    &  -2.5  & 0.     \\
+0.     &10^{30}&0.5    & 0.     &0.5     &-2.5    \\
+0.     &0.     &10^{30}& 0.     & 0.     &0.5     \\
+0.5    & 0.    & 0.    & 10^{30}& 0.     & 0.     \\
+-2.5   &0.5    & 0.    &0.5     &10^{30} &0.      \\
+0.     &-2.5   &0.     & 0.     &0.5     & 10^{30}
+\end{array}\right]
 \\
 \{v\}=\texttt{f[]}&=&
 \left(
@@ -3346,7 +3370,7 @@ A&=&\borderarray{[}{]}{1em}{1.2ex}{rrrrrrrr}{
 \begin{array}{rrrrrr}
 0 &1  &1.2\times 10^{-16}& 0 & 1 & 1.2\times 10^{-16}
 \end{array}
-\right)^T\\
+\right)\\
 \texttt{A*f[]}&=&
 \left(
 \begin{array}{rrrrrr}
@@ -3372,7 +3396,7 @@ A&=&\borderarray{[}{]}{1em}{1.2ex}{rrrrrrrr}{
 \end{array}
 \right)^T\quad =(v_1/w_1\,\cdots\, v_M/w_M)^T\\
 \texttt{f[]'*g[]}&=&0.5\quad
-(=\{v\}\{w\}^T=\{v\}\cdot\{w\})
+(=\{v\}^T\{w\}=\{v\}\cdot\{w\})
 \end{eqnarray*}
 \end{example}
 \begin{note}
@@ -3417,13 +3441,13 @@ Poisson; uu[2] = u;
  so no  operations on vector are allowed,   except the
  selection of an item  . \index{dot product}\index{transpose}
 
-The transpose operator is \texttt{\string'} like  Matlab or Scilab, so the way
+The transpose or Hermitian conjugation operator is \texttt{\string'} like  Matlab or Scilab, so the way
 to compute the dot product of two array \ttCC{a,b} is  \ttCC{@real\ ab=\ a'*b}\index{product!dot}.
 \index{min}\index{array!min}
 \bFF
 @int i;
 @real [int] tab(10), tab1(10); // 2 array of 10 real
-  \it  real [int] tab2;    //  bug array with no size
+  \it  real [int] tab2;    //  Error: array with no size
 tab = 1;                //  set all the array to 1
 tab[1]=2;
 @cout << tab[1] << " " << tab[9] << " size of tab = "
@@ -3550,7 +3574,7 @@ at the exit of the enclosing block,
 
  In the version \texttt{2.3} of \texttt{FreeFem++}, we add exception handing like in \texttt{C++}.
  But to day we only catch all the \texttt{C++} exception, and in the \texttt{C++} all the errors like 
-\texttt{ExecError, assert, exit , ...} are exception so you can have some surprise with the
+\texttt{ExecError, assert, exit, ...} are exception so you can have some surprise with the
 memory management. 
  
  The exception handle all \texttt{ExecError}:
@@ -3585,26 +3609,27 @@ Catch an ExecError
 Add  a more realistic example: 
 \begin{example} A case with  none invertible matrix: 
 \bFF
-int nn=5        ;
-mesh Th=square(nn,nn);
-verbosity=5;
-fespace Vh(Th,P1);     // P1 FE space
+@int nn=5        ;
+@mesh Th=square(nn,nn);
+@verbosity=5;
+@fespace Vh(Th,P1);     // P1 FE space
 Vh uh,vh;              // unkown and test function.
-func f=1;                 //  right hand side function
-func g=0;                 //  boundary condition function
-real   cpu=clock();
-problem laplace(uh,vh,solver=Cholesky,tolpivot=1e-6) =                    //  definion of  the problem
-int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
-  + int2d(Th)( -f*vh )                          //  linear form
+@func f=1;                 //  right hand side function
+@func g=0;                 //  boundary condition function
+@real   cpu=clock();
+@problem laplace(uh,vh,solver=Cholesky,tolpivot=1e-6) =                    //  definion of  the problem
+            int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+          + int2d(Th)( -f*vh )                          //  linear form
   ;
 
-try {
+@try {
   cout << " Try Cholesky \n";
   laplace; // solve the problem plot(uh); // to see the result
-  cout << "-- lap Cholesky " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
+  cout << "-- lap Cholesky " << nn << "x" << nn << "  : " <<  -cpu+clock() 
+       << " s,  max =" << uh[].max << endl;
 }
-catch(...) { // catch all 
-  cout << " Catch cholesky PB " << endl;
+@catch(...) { // catch all 
+  @cout << " Catch cholesky PB " << endl;
 }
 \eFF
 \end{example}
@@ -3720,9 +3745,9 @@ The boundaries $\Gamma_j$ can only intersect at their end points.
   \label{fig:border} \index{border}
 \end{figure}
 The general expression to define a triangulation with \texttt{buildmesh} is
-\[
-\ttCC{@mesh  ~~Mesh\_Name = @buildmesh$\left(\Gamma_1(m_1)+\cdots+\Gamma_J(m_j)\right)$;}
-\]
+\begin{center}
+\ttCC{@mesh  ~~Mesh_Name = @buildmesh}$\left(\Gamma_1(m_1)+\cdots+\Gamma_J(m_j)\right)$;
+\end{center}
 where $m_j$ are positive or negative numbers to indicate how may point should be put on $\Gamma_j,\,
 \Gamma=\cup_{j=1}^J \Gamma_J$.
 We can change the orientation of boundaries by changing the sign of $m_j$.
@@ -4208,8 +4233,8 @@ Ph h = @hTriangle;
 \label{sec:Adaptmesh}
 The function
 \[
-f(x,y) = 10.0x^3+y^3+\tan^{-1}[\epsilon/(\sin(5.0y)-2.0x)]
-\qquad \epsilon =  0.0001
+f(x,y) = 10.0x^3+y^3+\tan^{-1}[\varepsilon/(\sin(5.0y)-2.0x)]
+\qquad \varepsilon =  0.0001
 \]
 sharply varies in value.
 However, the initial mesh given by the command in Section \ref{sec:InitialMesh}
@@ -4314,7 +4339,7 @@ default parameters which can be modified~:
     It defaults to the diameter of the domain to be
     meshed) \index{adaptmesh!hmax=}
 
-    \item[\texttt{err=}] $P^1$ interpolation error level (0.01 is the
+    \item[\texttt{err=}] $P_1$ interpolation error level (0.01 is the
     default).  \index{adaptmesh!err=}
 
     \item[\texttt{errg=}] Relative geometrical error. By default this
@@ -4649,8 +4674,8 @@ pc[0] = 0; pc[1] = 0;
 @plot(Th,@ps="V-shape.eps",@bw=1);  // Fig. \ref{V-shape}
 \eFF
 \end{example}
-\twoplot[height=5cm]{U-shape}{V-shape}{Domain with U-shape channel changed by \ttCC{d}}
-{Domain with V-shape cut changed by \ttCC{dAg}}
+\twoplot[height=5cm]{U-shape}{V-shape}{Domain with U-shape channel changed by \texttt{d}}
+{Domain with V-shape cut changed by \texttt{dAg}}
 
 \begin{example}[Smiling face]~
 \index{mesh!Smiling face}
@@ -4781,7 +4806,7 @@ types of finite element are: \index{type of finite element}
      \index{P1b|textbf}\index{fespace!P1b}
      \begin{equation}
      P1b_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
-        \quad v_{|K} \in P_{1} \oplus Span\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right.\right\} \label{eq:P1b}
+        \quad v_{|K} \in P_{1} \oplus \mathit{Span}\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right.\right\} \label{eq:P1b}
      \end{equation}
      where $\lambda ^{K}_{i}, i=0,1,2$ are the 3 area coordinate functions of the triangle $K$
 
@@ -4797,7 +4822,7 @@ types of finite element are: \index{type of finite element}
      \index{P2|textbf}\index{fespace!P2}
      \begin{equation}
      P2_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
-        \quad v_{|K} \in P_{2} \oplus Span\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right.\right\}
+        \quad v_{|K} \in P_{2} \oplus \mathit{Span}\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right.\right\}
      \end{equation}
 
      \item[P2dc] piecewise $P_{2}$  discontinuous finite element,
@@ -5143,10 +5168,10 @@ vh Iso on mesh $5\times 5$}
    @int size = uh.n; // the number of degree of freedom
    @real[int] array(uh.n)= uh[]; //  copy the array of the function uh
 \eFF
-Warning for no scalar finite element function   \texttt{[Uxh,Uyh]}
+\begin{note} For a none scalar finite element function   \texttt{[Uxh,Uyh]}
  the two array \texttt{Uxh[]} and  \texttt{Uyh[]} are the same array, because
  the degree of freedom can touch more than one component.
-
+\end{note}
 
 %%Changed the place (OT 04/02/2005)
 \subsection{A \setS{Fast Finite Element Interpolator}}
@@ -5161,7 +5186,7 @@ to the best of our knowledge.
 Let ${\cal T}_{h}^0=\cup_k T^0_k,{\cal T}_{h}^1=\cup_k T^1_k$ be two triangulations of a domain $\Omega$.
 Let
 $$
-V({\hbox{${\cal T}$}_{h}^i}) =\{ C^0(\Omega_h^i)~:~f|_{T^i_k}\in P^1\},~~~i=0,1
+V({\hbox{${\cal T}$}_{h}^i}) =\{ C^0(\Omega_h^i)~:~f|_{T^i_k}\in P_0\},~~~i=0,1
 $$
 be the spaces of continuous piecewise affine functions on each triangulation.
 
@@ -5512,7 +5537,7 @@ where * stands for the name of the quadrature formula or the precision (order) o
 \begin{tabular}{|c|c|c|c|c|c|}
     \hline
     $L$ & (\texttt{qfe=}) & \texttt{qforder=} &
-    point in $[q^iq^j](=t)$ & $\omega_\ell$~~~  & exact on $P^k, k=$ \\
+    point in $[q^iq^j](=t)$ & $\omega_\ell$~~~  & exact on $P_k, k=$ \\
     \hline
     \hline
     1 & qf1pE&2&$0$ & $|q^iq^j|$ & 1 \\
@@ -5524,7 +5549,7 @@ where * stands for the name of the quadrature formula or the precision (order) o
     & & & $1/2$ & $(8/18)|q^iq^j|$ & \\
     & & & $(1+\sqrt{3/5})/2$ & $(5/18)|q^iq^j|$ &\\
     \hline
-    2 &qf1pElump E&2& $-1$ & $|q^iq^j|/2$ & 1 \\
+    2 &qf1pElump&2& $-1$ & $|q^iq^j|/2$ & 1 \\
     & &&$+1$ & $|q^iq^j|/2$ &  \\
     \hline
 
@@ -6926,7 +6951,7 @@ If the method is correct, we expect to look the graphics by an almost constant f
 \label{fig:rhoP2}
 \includegraphics[height=8cm]{rhoP2} \includegraphics[height=8cm]{ThrhoP2}
 \end{center}
-\caption{Density of the error indicator  with isotropic $P^{2}$ metric }
+\caption{Density of the error indicator  with isotropic $P_{2}$ metric }
 \end{figure}
 \end{example}
 
@@ -8616,10 +8641,10 @@ You can find all the mathematic  about this algorithm in \cite{ItoKunisch}.
 Now how to do that in \texttt{FreeFem++}
 
 The full example is:
-\begin{example}[VI.edp]
+\begin{example}[VI.edp]{}{}~
 \index{tutotial!VI.edp}
-\bFF
 
+\bFF
 @mesh Th=square(20,20);
 @real eps=1e-5;
 @fespace Vh(Th,P1);     // P1 FE space
@@ -11320,7 +11345,7 @@ class Init { public:
 \subsection{Add a new finite element}
 
 First read the section \ref{AddnewFE} of the appendix, we add two 
-news finites elements examples in the directory \texttt{examples++-load}.
+new finite elements examples in the directory \texttt{examples++-load}.
 
 \paragraph{Bernardi Raugel}
  The Bernardi-Raugel finite element is make to solve Navier Stokes equation in 
