@@ -3798,6 +3798,11 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OneBinaryOperator<set_eqarray<KN<double> ,VirtualMatrice<R>::plusAx > > ,       
        new OneBinaryOperator<set_eqarray<KN<double> ,VirtualMatrice<R>::plusAtx > >  ,      
        new OneBinaryOperator<set_eqarray<KN<double> ,VirtualMatrice<R>::solveAxeqb > >  ,      
+
+       new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::plusAx > > ,       
+       new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::plusAtx > >  ,      
+       new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::solveAxeqb > >  ,      
+
        new OpArraytoLinearForm<double>(atype< KN<double>* >())  ,
        new OpArraytoLinearForm<double>(atype< KN_<double> >())  ,
        new OpMatrixtoBilinearForm<double >);
@@ -3805,19 +3810,32 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  TheOperators->Add("=",
        new OneBinaryOperator<set_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
        new OneBinaryOperator<set_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,      
-       new OneBinaryOperator<set_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >  ,      
+       new OneBinaryOperator<set_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >  ,  
+       
+       new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
+       new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,      
+       new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >  ,      
+           
        new OpArraytoLinearForm<Complex>(atype< KN<Complex>* >())  ,
        new OpArraytoLinearForm<Complex>(atype< KN_<Complex> >())   ,
        new OpMatrixtoBilinearForm<Complex >);
      
  TheOperators->Add("+=",
        new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAx > > ,       
-       new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAtx > >        
+       new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAtx > > ,
+       
+       new OneBinaryOperator<set_eq_array_add<KN_<double> ,VirtualMatrice<double>::plusAx > > ,       
+       new OneBinaryOperator<set_eq_array_add<KN_<double> ,VirtualMatrice<double>::plusAtx > >        
+              
        );
 
  TheOperators->Add("+=",
        new OneBinaryOperator<set_eqarray_add<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
-       new OneBinaryOperator<set_eqarray_add<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > >        
+       new OneBinaryOperator<set_eqarray_add<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > > ,       
+
+       new OneBinaryOperator<set_eq_array_add<KN_<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
+       new OneBinaryOperator<set_eq_array_add<KN_<Complex> ,VirtualMatrice<Complex>::plusAtx > >        
+              
        );
 
 

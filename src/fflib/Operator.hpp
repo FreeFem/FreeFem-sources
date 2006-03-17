@@ -159,6 +159,16 @@ struct set_eq: public binary_function<A*,A,A*> {
   static A* f(A* const  & a,const A & b)  { *a = b; return a;}
 };
 
+template<class A,class B>
+struct set_eqq: public binary_function<A,B,A> {
+  static A f(const A & a,const B & b)  {A aa(a); aa = b; return aa;}
+};
+
+template<class A,class B>
+struct set_eqq_add: public binary_function<A,B,A> {
+  static A f(const A & a,const B & b)  {A aa(a); aa += b; return aa;}
+};
+
 template<class A>
 struct set_eq_add: public binary_function<A*,A,A*> {
   static A* f(A* const  & a,const A & b)  { *a += b; return a;}
@@ -384,12 +394,12 @@ template<class R,class A>  R * set_init( R* const & a,const A & b){
   a->init(b); return a;}
 
 template<class R,class A=R,class B=A> 
-struct Op2_addp: public binary_function<A,B,R> { 
-  static R f(const A & a,const B & b)  { return (*a + *b);} };  
+struct Op2_add0: public binary_function<A,B,R> { 
+  static R f(const A & a,const B & b)  { return (a + b);} };  
 
 template<class R,class A=R,class B=A> 
-struct Op2_buildp: public binary_function<A,B,R> { 
-  static R f(const A & a,const B & b)  { return R(*a,*b);} };  
+struct Op2_build: public binary_function<A,B,R> { 
+  static R f(const A & a,const B & b)  { return R(a,b);} };  
 template<class R,class A=R,class B=A> 
 
 struct Op2_pbuild: public binary_function<A,B,R*> { 
@@ -407,8 +417,8 @@ struct Op2_add_pn: public binary_function<A,B,R*> {
 
 
 template<class R,class A=R,class B=A> 
-struct Op2_subp: public binary_function<A,B,R> { 
-  static R f(const A & a,const B & b)  { return (*a - *b);} }; 
+struct Op2_sub0: public binary_function<A,B,R> { 
+  static R f(const A & a,const B & b)  { return (a - b);} }; 
   
 template<class R,class A=R> 
 struct Op1_subp: public unary_function<A,R> { 
@@ -417,6 +427,10 @@ struct Op1_subp: public unary_function<A,R> {
 template<class R,class A=R,class B=A> 
 struct Op2_mulcp: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return (a * *b);} }; 
+
+template<class R,class A=R,class B=A> 
+struct Op2_mulc: public binary_function<A,B,R> { 
+  static R f(const A & a,const B & b)  { return (a * b);} }; 
   
 template<class R,class A=R,class B=A> 
 struct Op2_mulpc: public binary_function<A,B,R> { 

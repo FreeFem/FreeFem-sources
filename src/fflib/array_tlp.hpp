@@ -530,7 +530,9 @@ void ArrayOperator()
 {
      Dcl_Type< Resize<KN<K> > > ();
      Dcl_Type< Resize<KNM<K> > > ();
-
+     aType knrp = atype<KN<K> *>();
+     aType knr_ = atype<KN_<K> >();
+     
      atype<KN<K>* >()->Add("[","",new OneOperator2_<K*,KN<K>*,long >(get_elementp_<K,KN<K>*,long>));
      atype<KN<K>* >()->Add("(","",new OneOperator2_<K*,KN<K>*,long >(get_elementp_<K,KN<K>*,long>));
      atype<KN_<K> >()->Add("(","",new OneOperator2_<KN_<K>,KN_<K>,char >(fSubArrayc<KN_<K> >));
@@ -729,14 +731,16 @@ void ArrayOperator()
      );
 // end correction 
      TheOperators->Add("+",
-       new OneBinaryOperator<Op2_addp<Add_KN_<K>,KN<K>*,KN<K>*> >,
+       new OneBinaryOperator<Op2_add0<Add_KN_<K>,KN_<K>,KN_<K> > >,
+       new OneBinaryOperator<Op2_add0<Add_KN_<K>,KN_<K>,KN_<K> > >(knrp,knrp),
        new OneBinaryOperator<Op2_add__n<Add_Mulc_KN_<K>,Mulc_KN_<K>,Mulc_KN_<K> > >,
        new OneBinaryOperator<Op2_addp_n<Add_Mulc_KN_<K>,KN<K>*,Mulc_KN_<K> > >,
        new OneBinaryOperator<Op2_add_pn<Add_Mulc_KN_<K>,Mulc_KN_<K> ,KN<K>* > >
        );
 
      TheOperators->Add("-",
-       new OneBinaryOperator<Op2_subp<Sub_KN_<K>,KN<K>*,KN<K>*> >,
+       new OneBinaryOperator<Op2_sub0<Sub_KN_<K>,KN_<K> ,KN_<K> > >,
+       new OneBinaryOperator<Op2_sub0<Sub_KN_<K>,KN_<K> ,KN_<K> > >(knrp,knrp),
        new OneUnaryOperator<Op1_subp<Mulc_KN_<K>,KN<K>*> >,
        new OneBinaryOperator<Op2_sub__n<Add_Mulc_KN_<K>,Mulc_KN_<K>,Mulc_KN_<K> > >,
        new OneBinaryOperator<Op2_subp_n<Add_Mulc_KN_<K>,KN<K>*,Mulc_KN_<K> > >,
@@ -745,6 +749,8 @@ void ArrayOperator()
      TheOperators->Add("*",
        new OneBinaryOperator<Op2_mulpc<Mulc_KN_<K>,KN<K>*,K> >,
        new OneBinaryOperator<Op2_mulcp<Mulc_KN_<K>,K,KN<K>*> >,
+       new OneBinaryOperator<Op2_mulc<Mulc_KN_<K>,KN_<K>,K> >,
+       new OneBinaryOperator<Op2_mulc<Mulc_KN_<K>,K,KN_<K> > >,
        new OneBinaryOperator<Op2_mulpcp<Mul_KNM_KN_<K>,KNM<K>*,KN<K>*> >,
        new OneBinaryOperator<Op2_dotproduct<K> >,
        new OneBinaryOperator<Op2_dotproduct_<K> > 
@@ -799,12 +805,19 @@ void ArrayOperator()
   );
        
      TheOperators->Add(".*",
-       new OneBinaryOperator<Op2_buildp<DotStar_KN_<K>,KN<K>*,KN<K>*> >
+       new OneBinaryOperator<Op2_build<DotStar_KN_<K>,KN_<K>,KN_<K> > >,
+       new OneBinaryOperator<Op2_build<DotStar_KN_<K>,KN_<K>,KN_<K> > >(knrp,knrp),
+       new OneBinaryOperator<Op2_build<DotStar_KN_<K>,KN_<K>,KN_<K> > >(knr_,knrp),
+       new OneBinaryOperator<Op2_build<DotStar_KN_<K>,KN_<K>,KN_<K> > >(knrp,knr_)
+       
       );
 
       
      TheOperators->Add("./",
-       new OneBinaryOperator<Op2_buildp<DotSlash_KN_<K>,KN<K>*,KN<K>*> >
+       new OneBinaryOperator<Op2_build<DotSlash_KN_<K>,KN_<K>,KN_<K> > >,
+      new OneBinaryOperator<Op2_build<DotSlash_KN_<K>,KN_<K>,KN_<K> > >(knrp,knrp),
+       new OneBinaryOperator<Op2_build<DotSlash_KN_<K>,KN_<K>,KN_<K> > >(knr_,knrp),
+       new OneBinaryOperator<Op2_build<DotSlash_KN_<K>,KN_<K>,KN_<K> > >(knrp,knr_)
       );
       
      TheOperators->Add("<<",

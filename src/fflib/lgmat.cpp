@@ -916,7 +916,7 @@ struct Op2_mulAv: public binary_function<AA,BB,RR> {
 template<class RR,class AA=RR,class BB=AA> 
 struct Op2_mulvirtAv: public binary_function<AA,BB,RR> { 
   static RR f(const AA & a,const BB & b)  
-  { return RR( (*a).A, *b );} 
+  { return RR( (*a).A, b );} 
 };
  
  
@@ -1411,16 +1411,24 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 template <class R>
 void AddSparceMat()
 {
+ aType tkrp = atype<KN<R> *>(); 
  SetMatrix_Op<R>::btype = Dcl_Type<const  SetMatrix_Op<R> * >();
  Dcl_Type<TheDiagMat<R> >();
  Dcl_Type<TheCoefMat<R> >(); // Add FH oct 2005
  Dcl_Type< map< pair<int,int>, R> * >(); // Add FH mars 2005 
 
 TheOperators->Add("*", 
-        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN<R>* > >,
-        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN<R>* > >,
-        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN<R>* > >     
+        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN_<R> > >,
+        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN_<R> > >,
+        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<R> > >     
         );
+
+TheOperators->Add("*", 
+        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN_<R> > >( 0  ,tkrp),
+        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN_<R> > >( 0 ,tkrp),
+        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<R> > >( 0 ,tkrp)     
+        );
+        
 TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
   
 // matrix new code   FH (Houston 2004)        
