@@ -644,7 +644,9 @@ void ArrayOperator()
         new OneBinaryOperator<set_eqarray_add<KN<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eqarraypd_add<KN<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eqarraypd_add<KN<K> ,if_arth_KN_<K>* > > ,
-        new OneBinaryOperator<set_eqarrayp_add<KN<K> ,KN<K>* > >        
+        new OneBinaryOperator<set_eqarray_add<KN<K> ,KN_<K> > > , // Add FH juin 2005         
+        new OneBinaryOperator<set_eqarrayp_add<KN<K> ,KN<K>* > >  
+              
       );
      TheOperators->Add("+=",
         new OneBinaryOperator<set_eq_array_add<KN_<K> ,K > > ,
@@ -669,6 +671,7 @@ void ArrayOperator()
         new OneBinaryOperator<set_eqarray_sub<KN<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eqarraypd_sub<KN<K> ,Add_Mulc_KN_<K>* > > ,
         new OneBinaryOperator<set_eqarraypd_sub<KN<K> ,if_arth_KN_<K>* > > ,
+        new OneBinaryOperator<set_eqarray_sub<KN<K> ,KN_<K> > > , // Add FH juin 2005                 
         new OneBinaryOperator<set_eqarrayp_sub<KN<K> ,KN<K>* > >        
       );
       
@@ -857,12 +860,12 @@ void ArrayOperatorF()
      Global.Add("log","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(log));
      Global.Add("log10","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(log10));
      Global.Add("sqrt","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(sqrt));
-   //  Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(square));
      Global.Add("sin","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(sin));
      Global.Add("cos","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(cos));
      Global.Add("tan","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(tan));
      Global.Add("cosh","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(cosh));
      Global.Add("sinh","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(sinh));
+     Global.Add("tanh","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(tanh));
     // Global.Add("acos","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(acos));
     // Global.Add("asin","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(asin));
     // Global.Add("atan","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(atan));

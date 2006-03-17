@@ -786,6 +786,9 @@ void Init_map_type()
 //     Global.Add("square","(",new OneOperator1_<double>(Square));
      Global.Add("square","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
 
+     Global.Add("floor","(",new OneOperator1<double>(floor)); // add march 2006
+     Global.Add("ciel","(",new OneOperator1<double>(ceil));  // add march 2006
+     
      Global.Add("sin","(",new OneOperator1<double>(sin));
      Global.Add("tan","(",new OneOperator1<double>(tan));
      Global.Add("atan","(",new OneOperator1<double>(atan));
