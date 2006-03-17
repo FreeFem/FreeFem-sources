@@ -208,5 +208,12 @@ cout << " b = a(I) : " << b << "\n  c(I) = a " << c << endl;
   cout << " b =" <<  b << endl;
   b = exp(b) ;
   cout << " exp(b) =" <<  b << endl;
+  cb += cc(0:2);
+  cout << " cb =" <<  cb << endl;
+  cb = exp(cb) ;
+  cout << " exp(cb) =" <<  cb << endl;
+  cout << " exp(cb).re =" <<  cb.re << endl;
+  cout << " exp(cb).im =" <<  cb.im << endl;
+  
 
 }

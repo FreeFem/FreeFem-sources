@@ -1868,29 +1868,42 @@ template<class T>
 
 template<class R,class A=R,class CODE=E_F_F0<R,A> >
 class  OneOperator1 : public OneOperator {
-    aType r; //  return type
+    aType r,t0; //  return type
     typedef typename CODE::func func; // R (*func)(A) ; 
     func  f;
     public: 
+
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new CODE(f,t[0]->CastTo(args[0]));} 
+     { return  new CODE(f,t0->CastTo(args[0]));} 
+     
     OneOperator1(func  ff): 
-      OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),f(ff){}
+      OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),
+      t0( map_type[typeid(A).name()] ), f(ff) {}
+      
+    OneOperator1(func  ff,aType tt0): 
+      OneOperator(map_type[typeid(R).name()],tt0),
+      t0( map_type[typeid(A).name()] ), f(ff) {}
 };
 
 
 template<class R,class A=R,class B=A,class CODE=E_F_F0F0<R,A,B> >
 class  OneOperator2 : public OneOperator {
-    aType r; //  return type 
+    aType r,t0,t1; //  return type 
     typedef typename CODE::func func;
-    //typedef  R (*func)(A,B) ;
     func f;
     public: 
+
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new CODE(f,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]));} 
+     { return  new CODE(f,t0->CastTo(args[0]),t1->CastTo(args[1]));} 
+
     OneOperator2(func  ff): 
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
-      f(ff){}
+      t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
+      
+    OneOperator2(func  ff,aType tt0,aType tt1): 
+      OneOperator(map_type[typeid(R).name()],tt0,tt1),
+      t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
+      
 };
 
 /*template<typename C>
