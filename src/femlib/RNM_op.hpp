@@ -23,6 +23,16 @@ KNM_<R> & KNM_<R>::operator oper (const outProduct_KN_<R> & u)
     return *this;
  }
 
+
+template<class R>
+template<class  A,class B,class C>
+ KN_<R>& KN_<R>::operator oper (const F_KN_<A,B,C> & u)  {
+    K_throwassert ( u.check(this->N()) );
+    R * l(v);  //  first line   
+    for (long i=0;i<n;i++,l += step)  
+      *l oper  u[i]; 
+    return *this;}
+
   
 template<class R>
  KN_<R>& KN_<R>::operator oper (const Mul_KNM_KN_<R> & u)  {

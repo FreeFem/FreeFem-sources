@@ -25,4 +25,6 @@ void initArrayDCLComplex()
 void initArrayOperatorComplex()
 {
      ArrayOperator<Complex>();
+     ArrayOperatorF<Complex,const Complex&>();
+
 }
