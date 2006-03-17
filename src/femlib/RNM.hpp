@@ -202,16 +202,18 @@ struct  VirtualMatrice { public:
   virtual bool ChecknbLine  (int n) const= 0; 
   virtual bool ChecknbColumn  (int m) const =0; 
     
-  struct  plusAx { const VirtualMatrice * A; const KN_<R> &  x;
+  struct  plusAx { const VirtualMatrice * A; const KN_<R>   x;
    plusAx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) 
       { ffassert(B->ChecknbColumn(y.N())); }
     };
+    
    plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
-  struct  plusAtx { const VirtualMatrice * A; const KN_<R> &  x;
+   
+  struct  plusAtx { const VirtualMatrice * A; const KN_<R>   x;
    plusAtx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) 
     {ffassert(B->ChecknbLine(y.N()));} };
     
-  struct  solveAxeqb { const VirtualMatrice * A; const KN_<R> &  b;
+  struct  solveAxeqb { const VirtualMatrice * A; const KN_<R>   b;
    solveAxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y) 
     {ffassert(B->ChecknbColumn(y.N()));} };
   
@@ -1182,34 +1184,34 @@ template<class R> conj_KN_<R> conj(const KN_<R> &a){ return a;}
 
 template<class R> 
 class DotStar_KN_{public: 
-  const KN_<const_R> & a; const KN_<const_R> & b;
+  const KN_<const_R>  a; const KN_<const_R>  b;
   DotStar_KN_(const KN_<const_R> & aa,const KN_<const_R> & bb) : a(aa),b(bb)  {}
  }; 
 
  
 template<class R> 
 class DotSlash_KN_{public: 
-  const KN_<const_R> & a; const KN_<const_R> & b;
+  const KN_<const_R>  a; const KN_<const_R>  b;
   DotSlash_KN_(const KN_<const_R> & aa,const KN_<const_R> & bb) : a(aa),b(bb)  {}
  }; 
 
 template<class R> 
 class Add_KN_{public: 
-  const KN_<const_R> & a; const KN_<const_R> & b;
+  const KN_<const_R>  a; const KN_<const_R>  b;
   Add_KN_(const KN_<const_R> & aa,const KN_<const_R> & bb) 
      : a(aa),b(bb)  { K_throwassert(SameShape(a,b));}
  };  
  
 template<class R> 
 class Sub_KN_{public: 
-  const KN_<const_R> & a; const KN_<const_R> & b;
+  const KN_<const_R>  a; const KN_<const_R>  b;
   Sub_KN_(const KN_<const_R> & aa,const KN_<const_R> & bb) 
     : a(aa),b(bb) { K_throwassert(SameShape(a,b));}
  };
  
 template<class R> 
 class Mulc_KN_ { public: 
-  const KN_<const_R> & a;  const_R  b;
+  const KN_<const_R>  a;  const_R  b;
   Mulc_KN_(const KN_<const_R> & aa,const_R  bb) : a(aa),b(bb) {}
   Mulc_KN_(const Mulc_KN_<R> & aa,const_R  bb) : a(aa.a),b(aa.b*bb) {}
   Mulc_KN_ operator-() const {return Mulc_KN_(a,-b);}

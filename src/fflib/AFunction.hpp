@@ -2007,7 +2007,7 @@ class  OneBinaryOperator : public OneOperator{
   typedef  typename C::result_type R;
   typedef typename C::first_argument_type A;
   typedef typename C::second_argument_type B;
-  
+  aType t0,t1; // type of template modif FH mars 2006 
   class Op : public E_F0 {
     typedef  typename C::result_type Result;
     Expression a,b;
@@ -2062,10 +2062,21 @@ class  OneBinaryOperator : public OneOperator{
 public: 
   E_F0 * code(const basicAC_F0 & args) const 
   { //cout << "A op B \n" ;
-    return  new Op(t[0]->CastTo(args[0]),t[1]->CastTo(args[1]));} 
+    return  new Op(t0->CastTo(args[0]),t1->CastTo(args[1]));} 
   OneBinaryOperator(): 
-    OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()])
+    OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]), 
+    t0(t[0]),
+    t1(t[1]) 
   {pref = SameType<A,B>::OK ;}
+  
+  OneBinaryOperator(aType tt0,aType tt1):  
+    OneOperator(map_type[typeid(R).name()],
+                tt0 ? tt0  : map_type[typeid(A).name()] ,
+                tt1 ? tt1  : map_type[typeid(B).name()]), 
+    t0(map_type[typeid(A).name()]),
+    t1(map_type[typeid(B).name()])
+   {pref = SameType<A,B>::OK ;}
+
 };
 
 template<typename R>
