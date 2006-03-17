@@ -205,4 +205,8 @@ cout << " b = a(I) : " << b << "\n  c(I) = a " << c << endl;
   B = (2*b*c')(I,J); //   outer product  B(i,j)  = b(I(i))*c(J(j)) 
   B = (3.*b*c')(I^-1,J^-1); // outer product  B(I(i),J(j))  = b(i)*c(j) 
   cout << "B = (3.*b*c')(I^-1,J^-1) =  " << B << endl;  
+  cout << " b =" <<  b << endl;
+  b = exp(b) ;
+  cout << " exp(b) =" <<  b << endl;
+
 }

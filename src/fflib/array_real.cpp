@@ -25,5 +25,6 @@ void initArrayDCLdouble()
 void initArrayOperatordouble()
 {
      ArrayOperator<double>();
+    ArrayOperatorF<double,double>();
 //     ArrayDCL<long>();
 }

@@ -429,6 +429,7 @@ void ArrayDCL()
     //Dcl_TypeandPtr<KN_<Complex> >(0,0,0,0);
 
     Dcl_Type<Add_KN_<K> >();
+    
     Dcl_Type<DotStar_KN_<K> >();
     Dcl_Type<DotSlash_KN_<K> >();
     Dcl_Type<Sub_KN_<K> >();
@@ -522,6 +523,7 @@ struct set_AI_B: public binary_function<pair<KN_<K>, KN_<long> > * ,KN_<K>, Noth
   
   }
 };  
+
   
 template<class K>
 void ArrayOperator()
@@ -820,3 +822,55 @@ void ArrayOperator()
 
 }
 
+template<class R,class A,class B=A,class BB=B>
+class  OneOperator1F_KN_ : public OneOperator {
+    aType r; //  return type
+    typedef  A (*func)( B ) ; 
+    func  f;
+    public: 
+    E_F0 * code(const basicAC_F0 & args) const 
+     { return  new Op(f,t[0]->CastTo(args[0]));} 
+    OneOperator1F_KN_(func  ff): 
+      OneOperator(map_type[typeid(R).name()],map_type[typeid(BB).name()]),f(ff){}
+
+ class Op :public  E_F0 { public:
+  typedef  A (*func)(B ) ; 
+  func f;
+  Expression a;
+  Op(func ff,Expression aa) : f(ff),a(aa) {}
+  AnyType operator()(Stack s)  const  {return SetAny<R>( R(f, GetAny<BB>( (*a)(s)) ) );}  
+   bool EvaluableWithOutStack() const 
+      {return a->EvaluableWithOutStack() ;} // 
+   bool MeshIndependent() const 
+      {return a->MeshIndependent();} // 
+    
+};      
+      
+};
+template<class K,class KK>
+void ArrayOperatorF()
+{
+     Dcl_Type<F_KN_<K,K,KK> >();
+
+
+     Global.Add("exp","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(exp));
+     Global.Add("log","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(log));
+     Global.Add("log10","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(log10));
+     Global.Add("sqrt","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(sqrt));
+   //  Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(square));
+     Global.Add("sin","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(sin));
+     Global.Add("cos","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(cos));
+     Global.Add("tan","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(tan));
+     Global.Add("cosh","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(cosh));
+     Global.Add("sinh","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(sinh));
+    // Global.Add("acos","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(acos));
+    // Global.Add("asin","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(asin));
+    // Global.Add("atan","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(atan));
+
+     TheOperators->Add("=",new OneBinaryOperator<set_eq_array<KN_<K> ,F_KN_<K,K,KK> > > ); // add FH juin 2005
+     TheOperators->Add("+=",new OneBinaryOperator<set_eq_array_add<KN_<K> ,F_KN_<K,K,KK> > > ); // add FH juin 2005
+     TheOperators->Add("-=",new OneBinaryOperator<set_eq_array_sub<KN_<K> ,F_KN_<K,K,KK> > > ); // add FH juin 2005
+     TheOperators->Add("/=",new OneBinaryOperator<set_eq_array_div<KN_<K> ,F_KN_<K,K,KK> > > ); // add FH juin 2005
+     TheOperators->Add("*=",new OneBinaryOperator<set_eq_array_mul<KN_<K> ,F_KN_<K,K,KK> > > ); // add FH juin 2005
+  
+}
