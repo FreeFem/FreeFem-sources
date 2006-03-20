@@ -3803,9 +3803,12 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::plusAtx > >  ,      
        new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::solveAxeqb > >  ,      
 
-       new OpArraytoLinearForm<double>(atype< KN<double>* >())  ,
-       new OpArraytoLinearForm<double>(atype< KN_<double> >())  ,
+       new OpArraytoLinearForm<double>(atype< KN<double>* >(),false)  ,
+       new OpArraytoLinearForm<double>(atype< KN_<double> >(),false)  ,
        new OpMatrixtoBilinearForm<double >);
+ TheOperators->Add("<-",
+        new OpArraytoLinearForm<double>(atype< KN<double>* >(),true) );
+
 
  TheOperators->Add("=",
        new OneBinaryOperator<set_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       

@@ -265,7 +265,7 @@ template<class R>
                 :  make_pair<int,int>(i+ii00,j+jj00) ; }
  
 template<class R>
-bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00)
+bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj)
 {
    double eps0=numeric_limits<double>::min();
  if( norm(coef)<eps0) return  L == U ;
@@ -273,7 +273,7 @@ bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool tr
   if(D)
    for( i=0;i<this->n;i++)
     if( norm(D[i])>eps0)
-     mij[ij_mat(trans,ii00,jj00,i,i)] += coef*D[i];
+     mij[ij_mat(trans,ii00,jj00,i,i)] += coef*(cnj? conj(D[i]) : D[i]);
    else
    for(int i=0;i<this->n;i++) // no dia => identity dai
      mij[ij_mat(trans,ii00,jj00,i,i)] += coef;
@@ -282,12 +282,12 @@ bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool tr
    for (kf=pL[0],i=0;  i<this->n;   i++  )  
      for ( k=kf,kf=pL[i+1], j=i-kf+k;   k<kf; j++,  k++  )
         if(norm(L[k])>eps0)
-        mij[ij_mat(trans,ii00,jj00,i,j)]=L[k]*coef;
+        mij[ij_mat(trans,ii00,jj00,i,j)]= coef*(cnj? conj(L[k]) : L[k]);
  if (U && pU)     
    for (kf=pU[0],j=0;  j<this->m;  j++)  
      for (k=kf,kf=pU[j+1], i=j-kf+k;   k<kf; i++,  k++  )
       if(norm(U[k])>eps0)
-        mij[ij_mat(trans,ii00,jj00,i,j)]=U[k]*coef;
+        mij[ij_mat(trans,ii00,jj00,i,j)]= coef*(cnj? conj(U[k]) : U[k]);
  return L == U ; // symetrique               
 }
 template<class R>
@@ -1026,7 +1026,7 @@ template<class R>
  }
 
 template<class R>
- triplet<int,int,bool> BuildCombMat(std::map< pair<int,int>, R> & mij,const list<triplet<R,MatriceCreuse<R> *,bool> >  &lM,bool trans,int ii00,int jj00)
+ triplet<int,int,bool> BuildCombMat(std::map< pair<int,int>, R> & mij,const list<triplet<R,MatriceCreuse<R> *,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
   {
     typedef typename list<triplet<R,MatriceCreuse<R> *,bool> >::const_iterator lconst_iterator;
     
@@ -1048,7 +1048,7 @@ template<class R>
        cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  i->third << endl;
        if (n==0) { n=M.n; m=M.m;}
        else { if(transpose)  ffassert(n== M.m && m==M.n); else ffassert(n== M.n && m==M.m);}
-       sym = M.addMatTo(coef,mij,transpose,ii00,jj00) && sym;              
+       sym = M.addMatTo(coef,mij,transpose,ii00,jj00,cnj) && sym;              
      } 
     int nbcoef=mij.size();
     if(sym) nbcoef = (nbcoef+n)/2;
@@ -1068,7 +1068,7 @@ template<class R>
      
   }
 template<class R>
-bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00)
+bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj)
 {
   double eps0=numeric_limits<double>::min();
   int i,j,k;
@@ -1078,11 +1078,12 @@ bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool tran
        for ( k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
-           if(norm(coef*a[k])>eps0)
+           R cij =  coef* ( cnj ? conj(a[k]) : a[k]);
+           if(norm(cij)>eps0)
            {
-           mij[ij_mat(trans,ii00,jj00,i,j)] += coef*a[k];
+            mij[ij_mat(trans,ii00,jj00,i,j)] += cij ;
            if (i!=j)
-             mij[ij_mat(trans,ii00,jj00,j,i)] += coef*a[k];
+             mij[ij_mat(trans,ii00,jj00,j,i)] += cij;
            }
          }
            
@@ -1093,8 +1094,10 @@ bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool tran
        for ( k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
-           if(norm(coef*a[k])>eps0)
-           mij[ij_mat(trans,ii00,jj00,i,j)] += coef*a[k];
+           R cij =  coef* ( cnj ? conj(a[k]) : a[k]);
+
+           if(norm(cij)>eps0)
+           mij[ij_mat(trans,ii00,jj00,i,j)] += cij;
          }
    }
 
