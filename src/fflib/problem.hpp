@@ -321,6 +321,8 @@ template<> struct CadnaType<complex<double> >{
 template<> struct CadnaType<double> {
    typedef double_st Scalaire;
  };
+inline double_st conj(const double_st &x){ return x;};
+inline complex<double_st> conj(const complex<double_st> &x){ return complex<double_st>(x.real(),-x.imag());}
  
  inline double norm(complex<double_st> x){return x.real()*x.real()+x.imag()*x.imag();} 
  inline double norm(double_st x){return x*x;} 
@@ -582,21 +584,31 @@ template<>  struct IsComplexType<Complex> { static const bool value=true;};
 template<class R>  //  to make   x=linearform(x)
 struct OpArraytoLinearForm: public OneOperator {
   typedef Call_FormLinear::const_iterator const_iterator;
-  
+  const bool init;
   class Op : public E_F0mps { public:
+    const  bool init; 
     Call_FormLinear *l;
     Expression x;
     AnyType operator()(Stack s)  const ;// {ExecError("Internal Error:to do");} 
-    Op(Expression xx,Expression  ll) 
-      : l(new Call_FormLinear(*dynamic_cast<const Call_FormLinear *>(ll))),x(xx) 
-       {assert(l);FieldOfForm(l->largs,IsComplexType<R>::value); }
+    Op(Expression xx,Expression  ll,bool initt) 
+      : l(new Call_FormLinear(*dynamic_cast<const Call_FormLinear *>(ll))),
+        x(xx),
+        init(initt)
+        {assert(l);FieldOfForm(l->largs,IsComplexType<R>::value); }
      operator aType () const { return atype<KN<R> *>();} 
       
   };
   E_F0 * code(const basicAC_F0 & args) const 
-  { return  new Op(to<KN_<R> >(args[0]),args[1]);} 
+  { if(init) return new Op(to<KN<R> *>(args[0]),args[1],init);
+    else     return new Op(to<KN_<R> >(args[0]),args[1],init);}
+   
+  
   OpArraytoLinearForm(const basicForEachType * tt) : 
-    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()) {}
+    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),init(false) {}
+    
+   OpArraytoLinearForm(const basicForEachType * tt,bool initt) : 
+    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),init(initt) {}
+   
 };
 
 
@@ -888,13 +900,19 @@ template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & 
 template<class R>
 AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const 
 {
-  
-  KN_<R>  xx( GetAny<KN_<R> >((*x)(stack) ));
   pfes  &  pp= *GetAny<pfes * >((*l->ppfes)(stack));
   FESpace * pVh = *pp ;
   FESpace & Vh = *pVh ;
   double tgv= 1e30;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));  
+
+  KN<R> *px=0;
+  if(init) 
+   {  px = GetAny<KN<R> * >((*x)(stack) );
+      px->init(Vh.NbOfDF); 
+   }
+  KN_<R>  xx( px ? *px : GetAny<KN_<R> >((*x)(stack) ));
+
   xx=R(); 
   if ( AssembleVarForm<R,MatriceCreuse<R> >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
     AssembleBC<R>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);

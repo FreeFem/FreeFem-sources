@@ -54,15 +54,6 @@ template<class T> inline T Max (const T &a,const T & b,const T & c){return Max(M
 template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(Min(a,b),c);}
 template<class T> inline T Square (const T &a){return a*a;}
 
-template<class T>
-class Transpose{ public:
-  T  t;
-  Transpose( T  v)
-   : t(v) {}
-  template<class TT> Transpose( TT  v) : t(v) {}  
-  template<class TT> Transpose( TT * v) : t(*v) {}  
-  operator const T & () const {return t;}
-};
 
  
 template<class K> 
@@ -424,6 +415,7 @@ void ArrayDCL()
    //  Dcl_Type< Transpose<KN<K> *> > ();  remove mars 2006 FH 
     Dcl_Type< outProduct_KN_<K>* >();
     Dcl_Type< Transpose<KN_<K> > > ();
+    Dcl_Type< Transpose< KNM<K> *> >();
     //Dcl_Type< Transpose<KN<Complex> > > ();
     Dcl_TypeandPtr<KN_<K> >(0,0,0,0);
     //Dcl_TypeandPtr<KN_<Complex> >(0,0,0,0);
@@ -801,7 +793,8 @@ void ArrayOperator()
 // fin 
   TheOperators->Add("\'",       
        new OneOperator1<Transpose<KN_<K> >,KN<K> *>(&Build<Transpose<KN_<K> >,KN<K> *>),
-       new OneOperator1<Transpose<KN_<K> >,KN_<K> >(&Build<Transpose<KN_<K> >,KN_<K> >)       
+       new OneOperator1<Transpose<KN_<K> >,KN_<K> >(&Build<Transpose<KN_<K> >,KN_<K> >),
+       new OneOperator1<Transpose<KNM<K> * >, KNM<K> * >(&Build<Transpose<KNM<K> * >,KNM<K> * >)            
   );
        
      TheOperators->Add(".*",

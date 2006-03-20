@@ -356,6 +356,25 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
 AnyType SetMatrixInterpolation(Stack,Expression ,Expression);
 
 //------
+
+template<class R>
+void BuildCombMat(map< pair<int,int>, R> & mij,const KNM_<R> & A, int ii00=0,int jj00=0,R coef=R(1.),bool cnj=false)
+{
+  double eps0=numeric_limits<double>::min();
+  int i,j,k;
+  int n = A.N(),m=A.M();
+  for ( i=0;i<n;i++)
+   for ( j=0;j<m;j++)
+          {
+           R cij=coef*A(i,j);
+           if (cnj)  cij = conj(cij); 
+           if(norm(cij) >eps0)
+             mij[ij_mat(false,ii00,jj00,i,j)] += cij;
+         
+   }
+
+}
+
 void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpace & Vh,void *data)
 {  //  Uh = Vh 
 
@@ -1093,6 +1112,34 @@ KN<R> * get_mat_coef(KN<R> * x,TheCoefMat<R> dm)
                   e_Mij[i][j]=eij;
                   t_Mij[i][j]=2;
                } 
+              else if ( atype<KN_<R> >()->CastingFrom(rij) )
+              {  
+                  e_Mij[i][j]=to<KN_<R> >(c_Mij);
+                  t_Mij[i][j]=3;
+              
+              } 
+              else if ( atype<Transpose<KN_<R> > >()->CastingFrom(rij) )
+              {  
+              
+                  e_Mij[i][j]=to<Transpose<KN_<R> > >(c_Mij);
+                  t_Mij[i][j]=4;
+              } 
+              else if ( atype<KNM<R> *  >()->CastingFrom(rij) )
+              {  
+              
+                  e_Mij[i][j]=to<KNM<R> * >(c_Mij);
+                  t_Mij[i][j]=5;
+              }
+              else if ( atype<Transpose< KNM<R> * > >()->CastingFrom(rij) )
+              {  
+              
+                  e_Mij[i][j]=to<Transpose<KNM<R> *> >(c_Mij);
+                  t_Mij[i][j]=6;
+              }
+              else {  
+                  
+                  CompileError(" Block matrix ,  bad type in block matrix");
+              }
  /*            else if   ( atype<map< pair<int,int>, R> * >()->CastingFrom(rij) ) 
                {
                   e_Mij[i][j]= to<map< pair<int,int>, R> *>(C_F0(eij,rij)).LeftValue();
@@ -1311,6 +1358,9 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 {
   typedef list<triplet<R,MatriceCreuse<R> *,bool> > * L;
    KNM<L> Bij(N,M);
+   KNM<KNM_<R> * > Fij(N,M); 
+   KNM<bool> cnjij(N,M); 
+   cnjij = false; 
    KN<long> Oi(N+1), Oj(M+1);
    if(verbosity>3) { cout << " Build Block Matrix : " << N << " x " << M << endl;}
    Bij = (L) 0;
@@ -1319,29 +1369,43 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
   for (int i=0;i<N;++i)
    for (int j=0;j<M;++j)
     {
+      Fij(i,j)=0;
       Expression eij = e_Mij[i][j];
       int tij=t_Mij[i][j];
       if (eij) 
       {
-         AnyType e=(*eij)(s);
+        cnjij(i,j) = tij%2 == 0; 
+        AnyType e=(*eij)(s);
         if (tij==1) Bij(i,j) = to( GetAny< Matrice_Creuse<R>* >( e)) ;
         else if  (tij==2) Bij(i,j) = to( GetAny<Matrice_Creuse_Transpose<R> >(e));
+        else if (tij==3)  { KN_<R> x=GetAny< KN_<R>  >( e);  Fij(i,j) = new KNM_<R>(x,x.N(),1);}
+        else if (tij==4)  { KN_<R> x=GetAny< Transpose< KN_<R> >   >( e).t ;  Fij(i,j) = new KNM_<R>(x,1,x.N());}
+        else if (tij==5)  { KNM<R> * m= GetAny< KNM<R>*  >( e);  Fij(i,j) = new KNM_<R>(*m);}
+        else if (tij==6)  { KNM<R> * m= GetAny< Transpose< KNM<R>* >  >( e).t;  Fij(i,j) = new KNM_<R>(m->t()); }
+        
+   //     else if  (tij==3) {}
         else {
          cout << " Bug " << tij << endl;
          ExecError(" Type sub matrix block unknown ");
         }
       }
      }
-     //  xompute size of matrix
+     //  compute size of matrix
      int err=0;
     for (int i=0;i<N;++i)
      for (int j=0;j<M;++j) 
+       {
+        pair<long,long> nm(0,0);
+        
        if (Bij(i,j)) 
-        {
+         nm = get_NM( *Bij(i,j));
+       else if(Fij(i,j)) 
+         nm = make_pair<long,long>(Fij(i,j)->N(), Fij(i,j)->M());
           
-          pair<long,long> nm = get_NM( *Bij(i,j));
-          if(verbosity>3)
-          cout << " Block " << i << "," << j << " = " << nm.first << " x " << nm.second << endl;
+        if (( nm.first || nm.second)  && verbosity>3)
+          cout << " Block [ " << i << "," << j << " ]      =     " << nm.first << " x " << nm.second << " cnj = " << cnjij(i,j) << endl;
+        if (nm.first)
+          {
           if ( Oi(i+1) ==0 )  Oi(i+1)=nm.first;
           else  if(Oi(i+1) != nm.first)
             { 
@@ -1350,13 +1414,16 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
                        << " n (new) " << nm.first << endl;
 
             }
-            
+          }
+          if(nm.second) 
+          {  
           if   ( Oj(j+1) ==0) Oj(j+1)=nm.second;
           else   if(Oj(j+1) != nm.second) 
             { 
               cerr <<"Error Block Matrix,  size sub matrix" << i << ","<< j << " m (old) "  << Oj(j+1) 
                    << " m (new) " << nm.second << endl;
               err++;}
+          }
         }
     if (err)    ExecError("Error Block Matrix,  size sub matrix");
 //  cout << "Oi = " <<  Oi << endl;
@@ -1380,9 +1447,16 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
        if (Bij(i,j)) 
          {
            if(verbosity>3)
-             cout << "  Add  Block " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << endl;
-           BuildCombMat(Aij,*Bij(i,j),false,Oi(i),Oj(j));
+             cout << "  Add  Block S " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << " conj = " << cnjij(i,j) << endl;
+           BuildCombMat(Aij,*Bij(i,j),false,Oi(i),Oj(j),cnjij(i,j));
          }
+       else if (Fij(i,j))
+        {
+           if(verbosity>3)
+             cout << "  Add  Block F " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << endl;
+           BuildCombMat(Aij,*Fij(i,j),Oi(i),Oj(j),R(1.),cnjij(i,j));// BuildCombMat
+        }
+        
            
   amorse=  new MatriceMorse<R>(n,m,Aij,false); 
   }
@@ -1399,7 +1473,8 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
   // cleanning    
   for (int i=0;i<N;++i)
    for (int j=0;j<M;++j)
-    if(Bij(i,j)) delete Bij(i,j);  
+    if(Bij(i,j)) delete Bij(i,j);
+    else if(Fij(i,j))  delete Fij(i,j);  
    if(verbosity>3) { cout << "  End Build Blok Matrix : " << endl;}
    
  return sparce_mat;  

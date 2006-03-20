@@ -462,6 +462,15 @@ struct Op2_p: public binary_function<A,B,R*> {
 
 
 
+template<class T>
+class Transpose{ public:
+  T  t;
+  Transpose( T  v)
+   : t(v) {}
+  template<class TT> Transpose( TT  v) : t(v) {}  
+  template<class TT> Transpose( TT * v) : t(*v) {}  
+  operator const T & () const {return t;}
+};
 
 
 
