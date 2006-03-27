@@ -1,3 +1,10 @@
+V2.4-2
+  * add lot missing vectorial operation with sub array 
+  * if u is a complex array (i.e. complex[int u] ..;) 
+     then  u.re (resp u.im) are  the real array of the real (resp. imag ) 
+     part of the vector u
+  * in block matrix add utilisation of array to build the block matrix
+    see new Laplace-lagrange-mult.edp file to have an example
 V2.3-3
  * add outer  product to set matrix or full real or complex 2D array
     A = 2*a*b'; // where A is a "real[int,int]", b and c a "real[int]".
