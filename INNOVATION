@@ -1,3 +1,8 @@
+  *  add freefem++  mode for mi editor on macos http://www.mimikaki.net/en/
+    store in  mode-mi-edp.zip archive (unzip and put in the Folder  openned with the 
+    mi "Option->Open Mode Folder" menu and set "mi" is the Default application 
+    for all the .edp file). 
+    
 V2.4-2
   * add lot missing vectorial operation with sub array 
   * if u is a complex array (i.e. complex[int u] ..;) 

@@ -4,7 +4,7 @@
 \usepackage{styles}
 \usepackage{txfonts}
 \usepackage{times}
-\def\VERSION{2.4-0}
+\def\VERSION{2.4-2}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -301,6 +301,12 @@ Application
 \item \texttt{FreeFem++-CoCoa}, MacOS Shell script for MacOS OpenGL
 version (MacOS 10.2 or better) (note: it uses
 /Applications/FreeFem++.app)
+\item \texttt{bamg} , the bamg mesh generator
+\item \texttt{cvmsh2} , a mesh file convertor
+\item \texttt{drawbdmesh} , a mesh file viewer
+
+
+
 \end{enumerate}
 
 As an installation test, under unix is :  go into the directory
@@ -398,6 +404,7 @@ has an item to launch \freefempp by a Ctrl+1 command.}
  
 \subsubsection{MacOS X  binaries install}
 
+
   Download the MacOS X binaries version files , extract all the file with a double click on the
   icon of the file, go the the directory and put the \texttt{FreeFem+.app} application in the 
   \texttt{/Applications} directory.
@@ -409,6 +416,7 @@ has an item to launch \freefempp by a Ctrl+1 command.}
   select menu  \texttt{File -> Get Info} an \texttt{change Open with:} (choose FreeFem++.app) and click on button 
   \texttt{change All...}. 
 
+  
 \subsection{How to use \freefempp}
 
 \paragraph{Under Windows with Graphic Interfaces}
@@ -443,7 +451,20 @@ the  file icon  on The MacOS application \texttt{FreeFem++.app} icon,
 but your can also use the menu:  $\mathtt{File} \rightarrow \mathtt{Open}$
 after launching the application.
 
-  
+Oe and one of  the best way on MacOS is using the text editor \texttt{mi.app} 
+\begin{center}
+\url{http://www.mimikaki.net/en/}
+\end{center}
+and using the  \texttt{edp} mode store in \texttt{mode-mi-edp.zip}. So just download the \texttt{mi} editor
+install it, unzip the file and put crated Folder in  the Folder  openned with the 
+   \texttt{mi.app}  menu  \texttt{Option->Open Mode Folder } menu and set \texttt{mi}  is the Default application.
+    for all the \texttt{.edp} files.
+\begin{figure}[htbp] %  figure placement: here, top, bottom, or page
+   \centering
+   \includegraphics[width=10cm]{mi.jpg} 
+   \caption{Screen of edp with \texttt{mi} text editor}
+   \label{fig:mi}
+\end{figure}    
 \paragraph{Under terminal}
 
 First choose the type of application \texttt{FreeFem++}, \texttt{FreeFem++-nw}, \dots  depen\-ding on your pleasure, system, etc\dots.  So for example your can enter
