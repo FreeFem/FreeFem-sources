@@ -61,7 +61,7 @@ for(int iter=0;iter<100;++iter)
   Ah = ( lh + cc*( umax- uh)) < 0.; 
   
   // plot(Ah, wait=1,cmm=" lock ",value=1 );
-  plot(uh,wait=0,cmm="uh");
+  plot(uh,wait=1,cmm="uh");
   real[int] d(n),Md(n);
   d= uh[]-uhp[];    
   Md = M*d;
