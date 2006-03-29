@@ -16,3 +16,7 @@ plot([u,v],wait=1,ps="lamevect.ps");
 
 mesh th1 = movemesh(Th, [x+u*1e-4, y+v*1e-4]);
  plot(th1,wait=1,ps="lamedeform.ps");
+real dxmin  = u[].min; 
+real dymin  = v[].min; 
+
+cout << " - dep.  max   x ="<< dxmin<< " y=" << dymin << endl; 

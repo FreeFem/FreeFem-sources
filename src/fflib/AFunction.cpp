@@ -182,9 +182,14 @@ struct Op2_set_pstringiomode: public ternary_function<R,string*,ios::openmode,R>
 AnyType FWhile(Stack s ,Expression test,Expression ins)
 { 
   AnyType a;
+  StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
   while ( GetAny<bool>((*test)(s)))
-     try  { a=(*ins)(s);}
+     try  { 
+        a=(*ins)(s);
+        sptr->clean(); // modif FH mars 2006  clean Ptr
+       }
      catch ( E_exception & e) { 
+        sptr->clean(); // modif FH mars 2006  clean Ptr
        if (e.code == E_exception::e_break) break;
        else if  (e.code == E_exception::e_continue) continue;
        }
@@ -194,12 +199,17 @@ AnyType FWhile(Stack s ,Expression test,Expression ins)
 AnyType FFor(Stack s ,Expression i0,Expression i1,Expression i2,Expression ins)
 { 
   AnyType a;
+     StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
   for ( (*i0)(s);GetAny<bool>((*i1)(s));(*i2)(s))
    {
-     try  {a=(*ins)(s);}
+     try  {
+        a=(*ins)(s);
+        sptr->clean(); // modif FH mars 2006  clean Ptr
+       }
      catch ( E_exception & e) { 
         if (verbosity>50)
         cerr << "FFor " << e.what() << e.code << endl; 
+        sptr->clean(); // modif FH mars 2006  clean Ptr
        if (e.code == E_exception::e_break) break;
        else if  (e.code == E_exception::e_continue) continue;
        }
