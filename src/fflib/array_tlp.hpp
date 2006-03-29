@@ -81,7 +81,7 @@ template<class K>
 inline   K * get_element( MyMap<String,K> *  const  &  a,string*  const   & b)
  { K * ret=  &((*a)[*b]); // correction FH feb 2004
   //  cout << "get_element " << *b << " : " << ret << " = "<< * ret << endl;
-    delete b;
+   // delete b;  modif mars 2006 auto del ptr
     return ret;}
     
 template<>
@@ -89,12 +89,12 @@ inline   string ** get_element<string*>( MyMap<String,string*> *  const  &  a,st
  { string** ret=  &((*a)[*b]); // correction FH feb 2004
     if( *ret ==0) *ret = new string(""); //  string vide ???
      // cout << "get_element " << *b << " : " << ret << " = "<< * ret << endl;
-    delete b;
+    // delete b;  modif mars 2006 auto del ptr
     return ret;}
 
 inline   string ** get_elements( MyMap<String,String> *  const  &  a,string*  const   & b)
  { String* Sret=  &((*a)[*b]); // correction FH feb 2004
-    delete b;
+   //  delete b;  modif mars 2006 auto del ptr
     return Sret->getap();}
 
 template<class RR,class A,class B>  

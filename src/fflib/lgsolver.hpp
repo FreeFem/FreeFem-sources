@@ -127,6 +127,8 @@ class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMa
     D1(n),xx(n)
 {
       assert(C); 
+
+      WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
       throwassert(A.sym());
       Type_Expr te_xx(CPValue(xx));
       xx_del=te_xx.second;
@@ -156,6 +158,7 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
     xx=x;
    // cout << x[0] << "  ";
     xx=GetAny<KN_<R> >((*precon)(stack));
+    WhereStackOfPtr2Free(stack)->clean(); 
   //  cout << (xx)[0] << "  " << endl;
     R dii;
     for (int i=0;i<n;i++) 
@@ -164,6 +167,8 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 
     
   ~SolveGCPrecon(){
+
+  WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005    
   delete  xx_del;
   delete  code_del;
 // cout << "~SolveGCPrecon " << endl;
@@ -181,7 +186,8 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
   mutable double  epsr;
   const E_F0 * precon;
   KN<R> D1;  
-  mutable KN<R> xx;  
+  mutable KN<R> xx; 
+  Expression xx_del, code_del;    
   Stack stack;
   int dKrylov; 
   typedef typename VirtualMatrice<R>::plusAx plusAx;
@@ -191,8 +197,14 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
     D1(n),xx(n)
 {
       assert(C); 
-      C_F0 e_xx(CPValue(xx));
-      precon =  to<KN_<R> >(C_F0(C->code(basicAC_F0_wa(e_xx)),*C));
+      WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
+      // C_F0 e_xx(CPValue(xx));
+      //precon =  to<KN_<R> >(C_F0(C->code(basicAC_F0_wa(e_xx)),*C));
+      Type_Expr te_xx(CPValue(xx));
+      xx_del=te_xx.second;
+      C_F0 e_xx(te_xx); // 1 undelete pointer
+      code_del= C->code(basicAC_F0_wa(e_xx));
+      precon =  to<KN_<R> >(C_F0(code_del,*C));// 2 undelete pointer
       
       throwassert(precon);
       R aii;
@@ -221,6 +233,8 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
     xx=x;
    // cout << x[0] << "  ";
     xx=GetAny<KN_<R> >((*precon)(stack));
+    WhereStackOfPtr2Free(stack)->clean(); 
+
 //    cout << (xx)[0] << "  " << endl;
     R dii;
     for (int i=0;i<n;i++) 
@@ -229,6 +243,9 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 
     
   ~SolveGMRESPrecon(){
+  delete  xx_del;
+  delete  code_del;
+   WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005    
   // cout << "~SolveGMRESPrecon; " << endl;
  }
   virtual bool ChecknbLine(int n) const { return true;}  
@@ -335,6 +352,7 @@ class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver 
   const E_F0 * precon;
   KN<Complex> D1;  
   mutable KN<Complex> xx;  
+  Expression xx_del, code_del; 
   Stack stack;
   int dKrylov; 
   typedef  VirtualMatrice<Complex>::plusAx plusAx;
@@ -344,8 +362,14 @@ class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver 
     D1(n),xx(n)
 {
       assert(C); 
-      C_F0 e_xx(CPValue(xx));
-      precon =  to<KN_<Complex> >(C_F0(C->code(basicAC_F0_wa(e_xx)),*C));
+      WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
+      Type_Expr te_xx(CPValue(xx));
+      xx_del=te_xx.second;
+      C_F0 e_xx(te_xx); // 1 undelete pointer
+      code_del= C->code(basicAC_F0_wa(e_xx));
+      precon =  to<KN_<R> >(C_F0(code_del,*C));// 2 undelete pointer
+      //C_F0 e_xx(CPValue(xx));
+      //precon =  to<KN_<Complex> >(C_F0(C->code(basicAC_F0_wa(e_xx)),*C));
       
       throwassert(precon);
       Complex aii;
@@ -383,6 +407,8 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
     xx=x;
    // cout << x[0] << "  ";
     xx=GetAny<KN_<Complex> >((*precon)(stack));
+       WhereStackOfPtr2Free(stack)->clean(); 
+
 //    cout << (xx)[0] << "  " << endl;
     Complex dii;
     for (int i=0;i<n;i++) 
@@ -391,6 +417,10 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
 
     
   ~SolveGMRESPrecon(){
+    WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005    
+    delete  xx_del;
+    delete  code_del;
+  
   // cout << "~SolveGMRESPrecon; " << endl;
  }
    virtual bool ChecknbLine(int n) const { return true;}  

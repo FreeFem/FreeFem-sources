@@ -656,8 +656,8 @@ template<class A,class B>
     return   SetAny<A>(static_cast<A>(GetAny<B>(b)));}
     
 template<class A,class B,A F(const  B &)> 
-  AnyType FCast(Stack,const AnyType &b) { 
-    return   SetAny<A>(F(GetAny<B>(b)));}
+  AnyType FCast(Stack s,const AnyType &b) { 
+    return   SetAny<A>(Add2StackOfPtr2Free(s,F(GetAny<B>(b))));}
     
 template<class A> 
   AnyType UnRef(Stack,const AnyType &a) { 
@@ -669,8 +669,8 @@ template<class A,class B>
     
     
 template<class A> 
-  AnyType UnRefCopyPtr(Stack,const AnyType &a) { 
-    return   SetAny<A*>(new A(**PGetAny<A*>(a))) ;} 
+  AnyType UnRefCopyPtr(Stack s,const AnyType &a) { 
+    return   SetAny<A*>(Add2StackOfPtr2Free(s,new A(**PGetAny<A*>(a)))) ;} 
        
     
 template<class A> AnyType Initialize(Stack,const AnyType &x){
@@ -1768,10 +1768,13 @@ inline    void ListOfInst::Add(const C_F0 & ins) {
 inline   AnyType ListOfInst::operator()(Stack s) const {     
       AnyType r; 
       double s0=CPUtime(),s1=s0,ss0=s0;
+      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
+
       for (int i=0;i<n;i++) 
        {
         TheCurrentLine=linenumber[i];
         r=(*list[i])(s);
+        sptr->clean(); // modif FH mars 2006  clean Ptr
         s1=CPUtime();
         if (showCPU)  
           cout << " CPU: "<< i << " " << s1-s0 << "s" << " " << s1-ss0 << "s" << endl;
@@ -2001,7 +2004,85 @@ struct OneBinaryOperatorMIWO {
   static bool MeshIndependent(Expression a,Expression b)   { return a->MeshIndependent() && b->MeshIndependent();}
   static bool ReadOnly() { return false;}
 };
+// ----------  operator with stack ??? for auto delete
+template<typename C,class MI=OneBinaryOperatorMI>
+class  OneBinaryOperator_st : public OneOperator{
+  typedef  typename C::result_type R;
+  typedef typename C::first_argument_type A;
+  typedef typename C::second_argument_type B;
+  aType t0,t1; // type of template modif FH mars 2006 
+  class Op : public E_F0 {
+    typedef  typename C::result_type Result;
+    Expression a,b;
+  public:
+    AnyType operator()(Stack s)  const 
+    {return  SetAny<R>(static_cast<R>(C::f(s, GetAny<A>((*a)(s)) , GetAny<B>((*b)(s)))));}
+    Op(Expression aa,Expression bb) : a(aa),b(bb) {} 
+    bool MeshIndependent() const { return MI::MeshIndependent(a,b);}
+    bool ReadOnly() const { return MI::ReadOnly()  ;} 
+    int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
+    {
+      int rr = find(m);
+      if (rr) return rr;          
+      int Opa = a->Optimize(l,m,n);          
+      int Opb =b->Optimize(l,m,n);
+      return insert(new Opt(*this,Opa,Opb),l,m,n);       
+    } 
+    int compare (const E_F0 *t) const { 
+      int rr;
+      const  Op * tt=dynamic_cast<const Op *>(t);
+      if (tt ) rr =   clexico(a->compare(tt->a),b->compare(tt->b));
+      else rr = E_F0::compare(t);
+      // cout << "cmp E_F0_Func1 " << rr << endl;
+      return rr;
+    } // to give a order in instuction 
+    // int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const;  // build optimisation
+    
+    virtual ostream & dump(ostream &f) const  { 
+      f << "Op<" << typeid(C).name() 
+	<< ">   \n\t\t\t( a= "<< *a<< ")  \n\t\t\t(b= "<< *b << ") "  ;
+      return f; }
+  };
+    // build optimisation
+  class Opt: public Op  { public :
+    size_t ia,ib;  
+    Opt(const  Op &t,size_t iaa,size_t ibb) 
+      : Op(t) ,
+	ia(iaa),ib(ibb) {}
+    AnyType operator()(Stack s)  const 
+    {
+      // cout <<  "Opt2 ::: " << ia << " "<< ib << " f = " 
+      //      <<  GetAny<double>(SetAny<R>(C::f( *static_cast<A *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
+      //                     *static_cast<B *>(static_cast<void*>(static_cast<char *>(s)+ib))))) << endl;
+      
+      
+      return SetAny<R>( C::f(s, *static_cast<A *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
+			        *static_cast<B *>(static_cast<void*>(static_cast<char *>(s)+ib)) ) );}  
+    
+    
+  };     
+  //   aType r; //  return type 
+public: 
+  E_F0 * code(const basicAC_F0 & args) const 
+  { //cout << "A op B \n" ;
+    return  new Op(t0->CastTo(args[0]),t1->CastTo(args[1]));} 
+  OneBinaryOperator_st(): 
+    OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]), 
+    t0(t[0]),
+    t1(t[1]) 
+  {pref = SameType<A,B>::OK ;}
+  
+  OneBinaryOperator_st(aType tt0,aType tt1):  
+    OneOperator(map_type[typeid(R).name()],
+                tt0 ? tt0  : map_type[typeid(A).name()] ,
+                tt1 ? tt1  : map_type[typeid(B).name()]), 
+    t0(map_type[typeid(A).name()]),
+    t1(map_type[typeid(B).name()])
+   {pref = SameType<A,B>::OK ;}
 
+};
+
+//
 template<typename C,class MI=OneBinaryOperatorMI>
 class  OneBinaryOperator : public OneOperator{
   typedef  typename C::result_type R;
@@ -2078,7 +2159,7 @@ public:
    {pref = SameType<A,B>::OK ;}
 
 };
-
+//-------------
 template<typename R>
 class  Operator_Aritm_If : public OneOperator{
   typedef bool A; 
@@ -2609,12 +2690,16 @@ class E_block :  public E_F0mps { public:
    E_block( C_F0  l,C_F0  c)
      : n(1),code(new Expression),clean(c) { code[0]=l;}
    AnyType operator()(Stack s)  const {
+      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
       if (clean) 
        {
          try { 
           for (int i=0;i<n;i++) {
             TheCurrentLine=linenumber[i];
-            (*code[i])(s); }}
+            (*code[i])(s); 
+            sptr->clean();
+
+            }}
          catch(/* E_exception & e*/...) { // catch all for cleanning 
            (*clean)(s); 
            // if(verbosity>50)
@@ -2624,10 +2709,15 @@ class E_block :  public E_F0mps { public:
             }
          
        (*clean)(s); 
+       sptr->clean();
+
        }
       else  // not catch  exception if no clean (optimization} 
        for (int i=0;i<n;i++) 
+          {
           (*code[i])(s); 
+          sptr->clean(); // mars 2006 FH clean Ptr
+          }
       return Nothing;
    }
     operator aType () const { return atype<void>();}         

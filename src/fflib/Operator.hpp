@@ -80,34 +80,49 @@ struct Op2_or: public binary_function<bool,bool,bool> {
   
 template<class R,class A,class B> 
 struct Op2_padd: public binary_function<A,B,R*> { 
-  static R * f(const A & a,const B & b)  { R* r= new R (*a  + *b);delete a,delete b;return r;} }; 
+  static R * f(Stack s,const A & a,const B & b)  { 
+   R* r= Add2StackOfPtr2Free(s,new R (*a  + *b));
+  // delete a,delete b;
+  return r;} }; 
 
 
 template<class A,class B=A> 
 struct Op2_plt: public binary_function<A,B,bool> { 
-  static bool f(const A & a,const B & b)  { bool r= *a  < *b;delete a,delete b;return r;} }; 
+  static bool f(const A & a,const B & b)  { bool r= *a  < *b;
+  //delete a,delete b;
+  return r;} }; 
 
 template<class A,class B=A> 
 struct Op2_ple: public binary_function<A,B,bool> { 
-  static bool f(const A & a,const B & b)  { bool r= *a  <= *b;delete a,delete b;return r;} }; 
+  static bool f(const A & a,const B & b)  { bool r= *a  <= *b;
+  // delete a,delete b;
+  return r;} }; 
 
 
 template<class A,class B=A> 
 struct Op2_pgt: public binary_function<A,B,bool> { 
-  static bool f(const A & a,const B & b)  { bool r= *a  > *b;delete a,delete b;return r;} }; 
+  static bool f(const A & a,const B & b)  { bool r= *a  > *b;
+ // delete a,delete b;
+  return r;} }; 
 
 
 template<class A,class B=A> 
 struct Op2_pge: public binary_function<A,B,bool> { 
-  static bool f(const A & a,const B & b)  { bool r= *a  >= *b;delete a,delete b;return r;} }; 
+  static bool f(const A & a,const B & b)  { bool r= *a  >= *b;
+  // delete a,delete b;
+  return r;} }; 
 
 template<class A,class B=A> 
 struct Op2_peq: public binary_function<A,B,bool> { 
-  static bool f(const A & a,const B & b)  { bool r= *a  == *b;delete a,delete b;return r;} }; 
+  static bool f(const A & a,const B & b)  { bool r= *a  == *b;
+ //  delete a,delete b;
+  return r;} }; 
 
 template<class A,class B=A> 
 struct Op2_pne: public binary_function<A,B,bool> { 
-  static bool f(const A & a,const B & b)  {  bool r=*a  != *b;delete a,delete b;return r;} }; 
+  static bool f(const A & a,const B & b)  {  bool r=*a  != *b;
+  // delete a,delete b;
+  return r;} }; 
 
 
 template<class R,class A=R,class B=A>
@@ -190,8 +205,11 @@ struct set_eq_div: public binary_function<A*,A,A*> {
 };
 
 template<class A>
-struct set_peq: public binary_function<A*,A,A*> {
-  static A* f(A* const  & a,const A & b)  { delete *a; *a = b; return a;}
+struct set_peq: public binary_function<A**,A*,A**> {
+  static A** f(A** const  & a, A * const & b)  { 
+    delete *a; 
+    *a = new A(*b); //(stack ptr) FH mars 2006
+     return a;}
 };
 
 //  ---------------------------------------------
@@ -224,27 +242,37 @@ struct set_eqarrayp_div: public binary_function<A*,B,A*> {
 //  ---------------------------------------------
 template<class A,class B>
 struct set_eqarraypd: public binary_function<A*,B,A*> {
-  static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a = *b; delete b;return a;}
+  static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a = *b;
+   delete b;
+   return a;}
 };
 
 template<class A,class B>
 struct set_eqarraypd_add: public binary_function<A*,B,A*> {
-  static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a += *b; delete b;return a;}
+  static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a += *b; 
+  delete b;
+  return a;}
 };
 
 template<class A,class B>
 struct set_eqarraypd_sub: public binary_function<A*,B,A*> {
-  static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a -= *b; delete b;return a;}
+  static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a -= *b; 
+  delete b;
+  return a;}
 };
 
 template<class A,class B>
 struct set_eqarraypd_mul: public binary_function<A*,B,A*> {
-  static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a *= *b; delete b;return a;}
+  static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a *= *b;
+   delete b;
+   return a;}
 };
 
 template<class A,class B>
 struct set_eqarraypd_div: public binary_function<A*,B,A*> {
-  static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a /= *b; delete b;return a;}
+  static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a /= *b;
+   delete b;
+   return a;}
 };
 
 //  ---------------------------------------------
@@ -309,7 +337,9 @@ struct set_eq_arrayp: public binary_function<A,B,A> {
 //  ---------------------------------------------
 template<class A,class B>
 struct set_eq_arraypd: public binary_function<A,B,A> {
-  static A f(A const  & a, B const & b)  {assert(SameShape(a,*b));A aa(a);  aa = *b; delete b;return a;}
+  static A f(A const  & a, B const & b)  {assert(SameShape(a,*b));A aa(a);  aa = *b;
+  delete b;
+  return a;}
 };
 
 template<class A,class B>
@@ -333,26 +363,36 @@ struct set_eq_arrayp_add: public binary_function<A,B,A> {
 };
 template<class A,class B>
 struct set_eq_arraypd_add: public binary_function<A,B,A> {
-  static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa += *b; delete b;return a;}
+  static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa += *b;
+   delete b;
+   return a;}
 };
 template<class A,class B>
 struct set_eq_arraypd_sub: public binary_function<A,B,A> {
-  static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa -= *b; delete b;return a;}
+  static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa -= *b;
+   delete b;
+   return a;}
 };
 
 template<class A,class B>
 struct set_eq_arraypd_mul: public binary_function<A,B,A> {
-  static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa *= *b; delete b;return a;}
+  static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa *= *b;
+   delete b;
+   return a;}
 };
 
 template<class A,class B>
 struct set_eq_arraypd_div: public binary_function<A,B,A> {
-  static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa /= *b; delete b;return a;}
+  static A f(A const  & a, B const & b)  {assert(SameShape(a,*b)); A aa(a);  aa /= *b;
+   delete b;
+   return a;}
 };
 
 template<class A>
 struct PrintP: public binary_function<ostream*,A,ostream*> {
-  static ostream* f(ostream* const  & a,const A & b)  {  *a << *b;delete b; return a;}
+  static ostream* f(ostream* const  & a,const A & b)  {  *a << *b;
+  //delete b; mars 2006 FH 
+   return a;}
 };
 template<class A>
 struct PrintPnd: public binary_function<ostream*,A,ostream*> {
@@ -380,6 +420,19 @@ template<class R,class A>  R * set_eqdestroy_incr(R* a,A b){
 template<class R>  R * set_copy( R* const & a,const R & b){ 
  SHOWVERB( cout << " set_copy " << typeid(R).name() << " " << &b << endl);
   memcpy(a,&b,sizeof(R)); return a;}
+
+template<class R>  R * set_copyp( R* const & a,const R & b){ 
+ SHOWVERB( cout << " set_copy " << typeid(R).name() << " " << &b << endl);
+  // memcpy(a,&b,sizeof(R));
+   *a = b;
+   return a;}
+
+template<class R>  R ** set_copyp_new( R**  a,R*  b){ 
+ SHOWVERB( cout << " set_copy " << typeid(R).name() << " " << &b << endl);
+  //memcpy(a,&b,sizeof(R)); return a;
+  *a = new R(*b);
+  return a;
+  }
 
 template<class R>  R ** set_copy_incr( R** const & a, R * const & b){ 
    *a=b;

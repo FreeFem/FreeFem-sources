@@ -265,7 +265,7 @@ inline pmesh  ReadMesh( string * const & s) {
   R2 Pn,Px;
   m->BoundingBox(Pn,Px);
   m->quadtree=new FQuadTree(m,Pn,Px,m->nv);
-  delete s;
+ //  delete s; modif FH 2006 (stack ptr)
   return m;
  }
  
@@ -468,18 +468,27 @@ class LinearCG : public OneOperator
    MatF_O(int n,Stack stk,const OneOperator * op) 
      : stack(stk),
        x(n),c_x(CPValue(x)),
-       mat(op->code(basicAC_F0_wa(c_x))) {ffassert(atype<Kn >() ==(aType) *op);}
+       mat(op->code(basicAC_F0_wa(c_x))) {
+         ffassert(atype<Kn >() ==(aType) *op);
+         // WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
+         
+         }
    ~MatF_O() { 
      // cout << " del MatF_O mat " << endl;
      delete mat;
      // cout << " del MatF_Ocx ..." <<  endl;
       Expression zzz = c_x;
      // cout << " zzz "<< zzz << endl;
-     delete zzz;}
+     delete zzz;
+    // WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
+     
+     }
    void addMatMul(const  Kn_  & xx, Kn_ & Ax) const { 
       ffassert(xx.N()==Ax.N());
       x =xx;
-      Ax  += GetAny<Kn>((*mat)(stack)); } 
+      Ax  += GetAny<Kn>((*mat)(stack));
+      WhereStackOfPtr2Free(stack)->clean();
+       } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
   virtual bool ChecknbLine(int n) const { return true;}  
   virtual bool ChecknbColumn(int m) const { return true;} 
@@ -518,6 +527,10 @@ class LinearCG : public OneOperator
    }
      
      virtual AnyType operator()(Stack stack)  const {
+       int ret=-1;
+
+      // WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
+      try {
       Kn &x = *GetAny<Kn *>((*X)(stack));
       int n=x.N();
       MatF_O AA(n,stack,A);
@@ -539,7 +552,6 @@ class LinearCG : public OneOperator
           }
          bb = &b;
       }
-      int ret;
       if (cas<0) {
        if (C) 
          { MatF_O CC(n,stack,C);
@@ -554,6 +566,14 @@ class LinearCG : public OneOperator
       else 
          ret = ConjuguedGradient2(AA,MatriceIdentite<R>(),x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
       if( nargs[3]) *GetAny<double*>((*nargs[3])(stack)) = -(eps);
+      }
+      catch(...)
+      {
+       // WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
+        throw;
+      }
+     // WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
+      
       return SetAny<long>(ret);
        
      }  
@@ -1878,6 +1898,7 @@ template<class R>
 AnyType set_fe (Stack s,Expression ppfe, Expression e)
   { 
    long kkff = Mesh::kfind,  kkth = Mesh::kthrough;
+      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
 
    
     MeshPoint *mps=MeshPointStack(s),mp=*mps;  
@@ -1923,6 +1944,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
          assert(il>=0);
          mps->set(Th,v,TriangleHat[il],K,v.lab);
          yy[iv] = GetAny<R>( ff(s) );
+          sptr->clean(); // modif FH mars 2006  clean Ptr
        }
       
     }
@@ -1952,6 +1974,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
 #endif          
          for (int df=0;df<nbdf;df++)         
             (*y)[K(df)] =  gg[df] ;
+           sptr->clean(); // modif FH mars 2006  clean Ptr
                        
       }
     *mps=mp;
@@ -1967,6 +1990,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
 AnyType set_feoX_1 (Stack s,Expression ppfeX_1, Expression e)
   { // inutile 
     // même chose que  v(X1,X2);
+      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
     typedef const interpolate_f_X_1<R>::CODE * code;
     MeshPoint mp= *MeshPointStack(s); 
     code ipp = dynamic_cast<code>(ppfeX_1);
@@ -1994,6 +2018,7 @@ AnyType set_feoX_1 (Stack s,Expression ppfeX_1, Expression e)
          K.Pi_h(gg,FoX_1_Pi_h,F,&tabexp);
          for (int df=0;df<nbdf;df++)
           (*y)[K(df)] =  gg[df] ;
+          sptr->clean(); // modif FH mars 2006  clean Ptr          
       }
     *MeshPointStack(s)=mp;
     fe=y;
@@ -2073,7 +2098,8 @@ E_set_fev<K>::E_set_fev(const E_Array * a,Expression pp)
   
 template<class K>   
 AnyType E_set_fev<K>::operator()(Stack s)  const
-{   
+{  
+    StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);     
     MeshPoint *mps=MeshPointStack(s), mp=*mps;   
     FEbase<K> ** pp=GetAny< FEbase<K> **>((*ppfe)(s));
     FEbase<K> & fe(**pp);
@@ -2143,6 +2169,7 @@ AnyType E_set_fev<K>::operator()(Stack s)  const
           }
           else 
            yy[iv] = GetAny<K>( ff(s) );
+            sptr->clean(); // modif FH mars 2006  clean Ptr
        }
       
     }
@@ -2176,13 +2203,15 @@ AnyType E_set_fev<K>::operator()(Stack s)  const
              if (tabexp[j]) 
                Vpp[j]=GetAny<K>( (*tabexp[j])(s) );
               else Vpp[j]=0;
+              
            }
            
          for (int i=0;i<Aipj.N();i++)
           { 
            const FElement::IPJ &ipj_i(ipj[i]);
          //  gg[ipj_i.i] += Aipj[i]*Vp(ipj_i.j,ipj_i.p);           
-             gg[ipj_i.i] += Aipj[i]*Vp1(ipj_i.j+ipj_i.p*dim); // index a la main            
+             gg[ipj_i.i] += Aipj[i]*Vp1(ipj_i.j+ipj_i.p*dim); // index a la main  
+            sptr->clean(); // modif FH mars 2006  clean Ptr          
           } 
 #endif          
 
@@ -3111,10 +3140,9 @@ AnyType Plot::operator()(Stack s) const  {
      NoirEtBlanc(0)  ;
      setgrey(greyo);
      if (colors) delete[] colors;
-     if (cm) 
-       delete cm;
-     if (psfile)
-       delete psfile;
+     // modif mars 2006  auto stack ptr
+     // if (cm)        delete cm;
+     // if (psfile)        delete psfile;
      viderbuff();
      
      return 0L;}     
