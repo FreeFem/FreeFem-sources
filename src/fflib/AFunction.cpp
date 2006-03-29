@@ -159,18 +159,25 @@ R *MakePtrWithDel( A  const & a)
 
 template<class R,class RR> 
 struct Op1_new_pstring: public unary_function<string*,R> { 
-  static R f(string * const & a)  {R r =  new RR(a->c_str()); delete a;return r;} }; 
+  static R f(string * const & a)  {R r =  new RR(a->c_str());
+    // delete a;  (stack ptr) FH mars 2006
+    return r;} }; 
 
 template<class R,class RR> 
 struct Op2_set_pstring: public binary_function<R,string*,R> { 
   static R  f(R const & p,string * const & a)  {*p =  new RR(a->c_str());
-   if ( !*p || !**p) { cerr << " Error openning file " << *a << endl; ExecError("Error openning file");}
-   delete a;return p;} }; 
+   if ( !*p || !**p) { 
+       cerr << " Error openning file " << *a << endl; 
+       ExecError("Error openning file");}
+  //  delete a; modif mars 2006 FH
+   return p;} }; 
 
 template<class R,class RR> 
 struct Op2_set_pstringiomode: public ternary_function<R,string*,ios::openmode,R> { 
   static R  f(R const & p,string * const & a,const ios::openmode & mode) 
-   {*p =  new RR(a->c_str(),mode); delete a;return p;} }; 
+   {*p =  new RR(a->c_str(),mode);
+     // delete a;   modif mars 2006 FH
+    return p;} }; 
 
 AnyType FWhile(Stack s ,Expression test,Expression ins)
 { 
@@ -315,7 +322,7 @@ ostream* dumptable(ostream* f)
 long exec(string *s)
     {
       int r=execute(s->c_str());
-      delete s;
+    //  delete s;    modif mars 2006 FH
       return r;}
       
 
@@ -542,7 +549,7 @@ void Init_map_type()
        new OneBinaryOperator<Op2_add<Complex,double,Complex> >,
        new OneBinaryOperator<Op2_add<Complex,Complex,long> >,
        new OneBinaryOperator<Op2_add<Complex,long,Complex> > ,      
-       new OneBinaryOperator<Op2_padd<string,string*,string*> >       
+       new OneBinaryOperator_st<Op2_padd<string,string*,string*> >  // a changer to do FH string * mars 2006    
        );
      TheOperators->Add("-",
        new OneBinaryOperator<Op2_sub<long,long,long> >,
@@ -608,35 +615,35 @@ void Init_map_type()
      TheOperators->Add("<",
        new OneBinaryOperator<Op2_lt<long,long> >,
        new OneBinaryOperator<Op2_lt<double,double> >,
-       new OneBinaryOperator<Op2_plt<string*,string*> >
+       new OneBinaryOperator<Op2_plt<string*,string*> >  //  FH string * mars 2006 
      );
      TheOperators->Add("<=",
        new OneBinaryOperator<Op2_le<long,long> >,
        new OneBinaryOperator<Op2_le<double,double> >,
-       new OneBinaryOperator<Op2_ple<string*,string*> >
+       new OneBinaryOperator<Op2_ple<string*,string*> >  //  FH string * mars 2006 
      );
      TheOperators->Add(">",
        new OneBinaryOperator<Op2_gt<long,long> >,
        new OneBinaryOperator<Op2_gt<double,double> >,
-       new OneBinaryOperator<Op2_pgt<string*,string*> >
+       new OneBinaryOperator<Op2_pgt<string*,string*> >  //  string * mars 2006 
      );
      TheOperators->Add(">=",
        new OneBinaryOperator<Op2_ge<long,long> >,
        new OneBinaryOperator<Op2_ge<double,double> >,
-       new OneBinaryOperator<Op2_pge<string*,string*> >
+       new OneBinaryOperator<Op2_pge<string*,string*> >  //  FH string * mars 2006 
      );
      TheOperators->Add("==",
        new OneBinaryOperator<Op2_eq<long,long> >,
        new OneBinaryOperator<Op2_eq<double,double> >,
        new OneBinaryOperator<Op2_eq<Complex,Complex> >,
-       new OneBinaryOperator<Op2_peq<string*,string*> >
+       new OneBinaryOperator<Op2_peq<string*,string*> >  //   FH string * mars 2006 
      );
 
      TheOperators->Add("!=",
        new OneBinaryOperator<Op2_ne<long,long> >,
        new OneBinaryOperator<Op2_ne<double,double> >,
        new OneBinaryOperator<Op2_ne<Complex,Complex> >,
-       new OneBinaryOperator<Op2_pne<string*,string*> >
+       new OneBinaryOperator<Op2_pne<string*,string*> >  //  FH string * mars 2006 
      );
      
      TheOperators->Add("!",
@@ -655,14 +662,14 @@ void Init_map_type()
        new OneBinaryOperator<set_eq<long> ,OneBinaryOperatorMIWO>,
        new OneBinaryOperator<set_eq<double> ,OneBinaryOperatorMIWO>,
        new OneBinaryOperator<set_eq<Complex> ,OneBinaryOperatorMIWO>,
-       new OneBinaryOperator<set_peq<string*> ,OneBinaryOperatorMIWO>
+       new OneBinaryOperator<set_peq<string> ,OneBinaryOperatorMIWO>  // FH string * mars 2006 
        ); 
 
      TheOperators->Add("?:",
        new Operator_Aritm_If<long >,
        new Operator_Aritm_If<double >,
        new Operator_Aritm_If<Complex >,
-       new Operator_Aritm_If<string* >
+       new Operator_Aritm_If<string* >  // (OK???)  to do FH string * mars 2006 
        ); 
        
 /*
@@ -725,7 +732,7 @@ void Init_map_type()
        new OneBinaryOperator<Print<long> >,
        new OneBinaryOperator<Print<double> >,
        new OneBinaryOperator<Print<Complex> >,
-       new OneBinaryOperator<PrintP<string*> >
+       new OneBinaryOperator<PrintP<string*> >  //  FH string * mars 2006 
        );
 
      
@@ -739,25 +746,25 @@ void Init_map_type()
        new OneOperator1<long,long*, E_F_F0<long,long*,false> >(&LDecremantation<long>));
 //   init        
      TheOperators->Add("<-", 
-       new OneOperator2_<string**,string**,string*>(&set_copy),
-       new OneOperator2_<double*,double*,double>(&set_copy),
-       new OneOperator2_<long*,long*,long>(&set_copy),
-       new OneOperator2_<bool*,bool*,bool>(&set_copy),
+       new OneOperator2<string**,string**,string*>(&set_copyp_new<string>),  //  FH string * mars 2006 
+       new OneOperator2_<double*,double*,double>(&set_copyp),  // 
+       new OneOperator2_<long*,long*,long>(&set_copyp),
+       new OneOperator2_<bool*,bool*,bool>(&set_copyp), //  mars 2006
        new OneOperator2_<Complex*,Complex*,Complex>(&set_copy),
        new OneOperator2_<istream**,istream**,istream*>(&set_copy),
        new OneOperator2_<ostream**,ostream**,ostream*>(&set_copy),
 //       new OneUnaryOperator<Op1_new_pstring<istream*,ifstream> >,
 //       new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >,
-       new OneBinaryOperator<Op2_set_pstring<istream**,ifstream> >,
-       new OneBinaryOperator<Op2_set_pstring<ostream**,ofstream> >,
-       new OneTernaryOperator3<Op2_set_pstringiomode<ostream**,ofstream> >       
+       new OneBinaryOperator<Op2_set_pstring<istream**,ifstream> >,  //  FH string * mars 2006 
+       new OneBinaryOperator<Op2_set_pstring<ostream**,ofstream> >,  //  FH string * mars 2006 
+       new OneTernaryOperator3<Op2_set_pstringiomode<ostream**,ofstream> >      //  FH string * mars 2006   
        );  
        
      atype<istream* >()->AddCast( new E_F1_funcT<istream*,istream**>(UnRef<istream* >)); 
      atype<ostream* >()->AddCast( new E_F1_funcT<ostream*,ostream**>(UnRef<ostream* >)); 
    
 //     Add<istream**>("<-","(", new OneUnaryOperator<Op1_new_pstring<istream*,ifstream> >);
-     Add<ostream**>("<-","(", new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >);
+     Add<ostream**>("<-","(", new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >);  //  FH string * mars 2006 
      
     // Polymorphic * precis =new Polymorphic();
     //  Add<ostream*>("precision",".",precis);
@@ -851,7 +858,7 @@ void Init_map_type()
      
      Global.Add("clock","(",new OneOperator0<double>(CPUtime));
      Global.Add("dumptable","(",new OneOperator1<ostream*,ostream*>(dumptable));
-     Global.Add("exec","(",new OneOperator1<long,string* >(exec));
+     Global.Add("exec","(",new OneOperator1<long,string* >(exec));  //FH string * mars 2006 
     
      Global.Add("polar","(",new OneOperator2_<Complex,double,double>(polar));
  // rand generator ---

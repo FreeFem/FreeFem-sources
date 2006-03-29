@@ -440,7 +440,7 @@ AnyType SaveMesh::operator()(Stack stack) const
    *mp= mps;   
      
    }
-   delete fn;
+  //  delete fn;   modif mars 2006 auto del ptr
    return SetAny<pmesh>(Thh);
 }
 AnyType MoveMesh::operator()(Stack stack) const 
@@ -1329,7 +1329,7 @@ inline pmesh *  initMesh(pmesh * const & p, string * const & s) {
   Mesh * m;
   *p= m =new Mesh(*s); 
   m->MakeQuadTree();
-  delete s;  
+ //  delete s;  modif mars 2006 auto del ptr 
   return p;
  }
 

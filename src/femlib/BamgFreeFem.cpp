@@ -710,7 +710,7 @@ Fem2D::Mesh *  ReadTriangulate( string  * const & s) {
   Mesh * m=new Mesh(nv,xy); 
   m->MakeQuadTree();
   m->decrement();
-  delete s;
+ //  delete s;  modif mars 2006 auto del ptr
   return m;
   
 }
@@ -720,12 +720,7 @@ Fem2D::Mesh *  ReadMeshbamg( string * const & s) {
   // bTh->inquire();
   Fem2D::Mesh * m=bamg2msh(bTh,false);// no renum
   delete bTh;
-  /*  deja fait 
-      Fem2D::R2 Pn,Px;
-      m->BoundingBox(Pn,Px);
-      m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv); 
-  */
-  delete s;
+  // delete s; modif mars 2006 auto del ptr
   m->decrement();
   return m;
 }
@@ -742,12 +737,7 @@ Fem2D::Mesh *  buildmeshbamg( string * const & s) {
   // bTh->inquire();
   Fem2D::Mesh * m=bamg2msh(bTh,false);// no renum
   delete bTh;
-  /*  deja fait 
-      Fem2D::R2 Pn,Px;
-      m->BoundingBox(Pn,Px);
-      m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv); 
-  */
-  delete s;
+ //  delete s; modif mars 2006 auto del ptr
   m->decrement();
   return m;
 }

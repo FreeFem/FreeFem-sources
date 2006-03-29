@@ -505,13 +505,9 @@ Expression NewExpression(Function2 f,Expression a,Expression b)
         }
    }
  
-//size_t CodeAlloc::nb=0;
-//size_t CodeAlloc::lg=0;
-/*
-FuncForEachType::FuncForEachType(const basicForEachType * t)
-: rtype(t),basicForEachType(t->,sizeof((void*)()),
-         0,0,0,0){ ffassert(t);}
-*/
+
+
+
 
 E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)
  : rt(routine->tret),code(routine->ins),clean(routine->clean),
@@ -529,9 +525,13 @@ AnyType E_Routine::operator()(Stack s)  const  {
    AnyType ret=Nothing;
    memcpy(save,s,lgsave); // save register 
    AnyType *listparam=new AnyType[nbparam];
+   
    for (int i=0;i<nbparam;i++)
      listparam[i]= (*param[i])(s); // set of the parameter 
-   Stack_Ptr<AnyType>(s,ParamPtrOffset) = listparam; 
+   Stack_Ptr<AnyType>(s,ParamPtrOffset) = listparam;
+   
+   WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH mars 2005 
+ 
    try {  (*code)(s);  }
    catch( E_exception & e) { 
            (*clean)(s); 
@@ -543,6 +543,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
   }
   catch(...) { // clean and rethrow the exception 
       delete [] listparam; 
+      WhereStackOfPtr2Free(s)->clean(); // FH mars 2005 
       memcpy(s,save,lgsave);  // restore register
       TheCurrentLine=debugstack.front().second;
       debugstack.pop();
@@ -553,7 +554,11 @@ AnyType E_Routine::operator()(Stack s)  const  {
     memcpy(s,save,lgsave);  // restore register
     TheCurrentLine=debugstack.front().second;
     debugstack.pop();
- 
+   // il faudrait que les variable locale soit detruire apres le return 
+   // cf routine clean, pour le cas ou l'on retourne un tableau local.
+   // plus safe ?????  FH. 
+   // mais pb si   a = f()+g() 
+   // ou alors changer le return ???? qui doit copie le resultat.. (voir)
    return ret;
 }
 
