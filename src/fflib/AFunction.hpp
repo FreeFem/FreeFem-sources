@@ -2702,6 +2702,7 @@ class E_block :  public E_F0mps { public:
             }}
          catch(/* E_exception & e*/...) { // catch all for cleanning 
            (*clean)(s); 
+           sptr->clean();
            // if(verbosity>50)
            //  cout << " catch " << e.what() << " clean & throw " << endl;
           // throw(e);

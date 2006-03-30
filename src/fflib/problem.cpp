@@ -290,6 +290,7 @@ void Check(const Opera &Op,int N,int  M)
     
   {
       StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
+     bool sptrclean=true;
      //     sptr->clean(); // modif FH mars 2006  clean Ptr
   
    //  cout <<  " b->b " <<  b->b << " " <<  b->b <<  " " << b->b->isoptimize <<endl;  endl;                
@@ -411,7 +412,7 @@ void Check(const Opera &Op,int N,int  M)
               {                  
                 int ie,i =Th.BoundaryTriangle(e,ie);
                 A += mate(i,ie,Th.bedges[e].lab,stack);  
-                sptr->clean(); // modif FH mars 2006  clean Ptr
+                if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 
               }
           }
@@ -423,7 +424,7 @@ void Check(const Opera &Op,int N,int  M)
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
              for (int ie=0;ie<3;ie++)   
               A += mate(i,ie,Th[i].lab,paramate); 
-             sptr->clean(); // modif FH mars 2006  clean Ptr
+             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
   
           }
          
@@ -437,7 +438,7 @@ void Check(const Opera &Op,int N,int  M)
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
              for (int ie=0;ie<3;ie++)   
               A += mate(i,ie,Th[i].lab,paramate);  
-             sptr->clean(); // modif FH mars 2006  clean Ptr
+             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
  
           }
          
@@ -448,7 +449,7 @@ void Check(const Opera &Op,int N,int  M)
           {
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())  
               A += mate(i,-1,Th[i].lab,stack);   
-            sptr->clean(); // modif FH mars 2006  clean Ptr
+            if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 
             // AA += mate;
           }
@@ -651,6 +652,7 @@ void  AddMatElem(map<pair<int,int>, R > & A,const Mesh & Th,const BilinearOperat
   {
   
       StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
+     bool sptrclean=true;
      //     sptr->clean(); // modif FH mars 2006  clean Ptr
 
     const CDomainOfIntegration & di= *b->di;
@@ -748,7 +750,7 @@ void  AddMatElem(map<pair<int,int>, R > & A,const Mesh & Th,const BilinearOperat
               {                  
                 int ie,i =Th.BoundaryTriangle(e,ie);
                 AddMatElem(A,Th,*b->b,sym,i,ie,Th.bedges[e].lab,Uh,Vh,FIT,FIE,p,stack);  
-                sptr->clean(); // modif FH mars 2006  clean Ptr
+                if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
               }
           }
       }
@@ -760,7 +762,7 @@ void  AddMatElem(map<pair<int,int>, R > & A,const Mesh & Th,const BilinearOperat
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
              for (int ie=0;ie<3;ie++)   
                 AddMatElem(A,Th,*b->b,sym,i,ie,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);  
-             sptr->clean(); // modif FH mars 2006  clean Ptr   
+             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr   
                 
                 
           }
@@ -780,7 +782,7 @@ void  AddMatElem(map<pair<int,int>, R > & A,const Mesh & Th,const BilinearOperat
           {
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())  
                AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack); 
-            sptr->clean(); // modif FH mars 2006  clean Ptr    
+            if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr    
           }
 
       } 
@@ -1534,6 +1536,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
   {
     MeshPoint *mps= MeshPointStack(stack),mp=*mps;
      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
+     bool sptrclean=true;
      //     sptr->clean(); // modif FH mars 2006  clean Ptr
     
     int ktbc=0, nbon =0;
@@ -1641,7 +1644,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                       if (B) (*B)[ddf]=tgv*gg[df]; 
                       if (X) (*X)[ddf]=gg[df];
                     }
-              sptr->clean(); // modif FH mars 2006  clean Ptr
+              if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
                }
           }
       }
@@ -1657,6 +1660,7 @@ template<class R>
  void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * l )
   {
      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
+     bool sptrclean=true;
      //     sptr->clean(); // modif FH mars 2006  clean Ptr
     Check(l->l,Vh.N);
     if ( B && B->N() != Vh.NbOfDF) ExecError("AssembleLinearForm size rhs and nb of DF of Vh");
@@ -1740,7 +1744,7 @@ template<class R>
                   Element_rhs<R>(Vh[i],ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false); 
                 else 
                   Element_rhs<R>(ThI,ThI[i],Vh,ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false); 
-               sptr->clean(); // modif FH mars 2006  clean Ptr   
+               if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr   
               }
           }
       }
@@ -1754,7 +1758,7 @@ template<class R>
                 Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIE,true); 
              else 
                 InternalError("To Do") ;
-          sptr->clean(); // modif FH mars 2006  clean Ptr
+          if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
           }
      }
     else if (kind==CDomainOfIntegration::intallVFedges)
@@ -1769,7 +1773,7 @@ template<class R>
                 Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIE,true); 
              else 
                 InternalError("To Do") ;
-           sptr->clean(); // modif FH mars 2006  clean Ptr
+           if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
         }
      }
      
@@ -1782,7 +1786,7 @@ template<class R>
             Element_rhs<R>(Vh[i],*l->l,buf,stack,*B,FIT); 
           else 
             Element_rhs<R>(ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIT);
-            sptr->clean(); // modif FH mars 2006  clean Ptr
+            if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
          }
     }  
     

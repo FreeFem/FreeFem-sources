@@ -164,16 +164,18 @@ public:
 			if(prev) Add2StackOfPtr2Free(s,this);
 	       }
 	
-	void clean() 
-	 { 
-	    if(!stackptr.empty())
+	bool clean() 
+	 { bool ret= !stackptr.empty();
+	    if(ret)
 	      { 
 	        if(stackptr.size()>=20 && verbosity>2) 
 	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n ";
 		for (iterator i=stackptr.end(); i != stackptr.begin();)
 			delete  (* (--i) ); 
 		stackptr.resize(0);// clean the
+		
 	     }
+	   return ret;
 	}
 	
 	~StackOfPtr2Free() {clean(); *where=prev;} // restore the previous stack
