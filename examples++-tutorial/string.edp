@@ -1,0 +1,41 @@
+//  bug string macro parameter   version < 1.41
+// bug in string parameter version before <2.5
+// -----------------
+ macro tyty(uu) uu//  
+cout << tyty("toto") << endl;
+
+func string   write(string  fn,real[int] & u)
+{
+  cout <<"write :   " <<  fn << " u = "<<  u << endl;  //  delete 2 times before version 2.5 
+  return fn; 
+}
+
+func string   write1(string  fn,real[int] & u)
+{
+  cout << "write 1 " << fn << " u = " << u << endl;   
+  string toto=fn; ;
+  return toto+"dfsdf"; 
+}
+
+real[int] u(3);
+u=1;
+
+string tt=tyty("toto1"+1+" -- 77");
+
+string t1="0123456789";// write(tt,u);
+
+string t2=  write1(t1,u)+write1(tt,u);
+
+cout << " t2 = " << t2 << endl;
+// new operator
+t2 ="12340005678";
+t2(4:3) = "abcdefghijk-"; 
+//t2 = "12340abcdefghijk-005678";
+cout << t2 << endl;
+cout << "  find abc " << t2.find("abc") << endl;
+cout << "r find abc " << t2.rfind("abc") << endl;
+cout << " find abc from 10  " << t2.find("abc",10) << endl;
+cout << " ffind abc from 10 " <<t2.rfind("abc",10) << endl;
+cout << "   " << string("abcc").length << endl; 
+
+ 
