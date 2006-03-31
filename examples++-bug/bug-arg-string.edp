@@ -1,4 +1,5 @@
 //  bug string macro parameter   version < 1.41
+// bug in string parameter version before <2.5
 // -----------------
  macro tyty(uu) uu//  
 cout << tyty("toto") << endl;
@@ -11,18 +12,20 @@ cout << tyty("toto") << endl;
       return fn; 
     }
 
-  func string   write1(string &  fn,real[int] & u)
+  func string   write1(string  fn,real[int] & u)
     {
       cout << "write 1 " << fn << " u = " << u << endl;   
-      return fn; 
+      string toto=fn; ;
+      return toto+"dfsdf"; 
     }
 
  real[int] u(3);
  u=1;
+
 string tt=tyty("toto1"+1+" -- 77");
 
-string t1= write(tt,u);
+string t1="0123456789";// write(tt,u);
 
-string t2=  write1(t1,u);
+string t2=  write1(t1,u)+write1(tt,u);
 
 cout << " t2 = " << t2 << endl;

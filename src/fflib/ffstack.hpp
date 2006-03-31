@@ -194,11 +194,16 @@ private:// no copy ....
 template<class T>
 struct NewInStack: public BaseNewInStack   {	
    T * p;
-  ~NewInStack() { if(p) delete p;}  
+   bool array;
+  ~NewInStack() { if(p) 
+     if(array) delete [] p;
+     else   delete p;}  
 private: 
-   NewInStack(T * pp) : p(pp) {} 
+   NewInStack(T * pp,bool aa=false) : p(pp),array(aa) {} 
    
    
+ template<class TT> 
+ friend  TT * Add2StackOfPtr2FreeA(Stack s,TT * p);
  template<class TT> 
  friend  TT * Add2StackOfPtr2Free(Stack s,TT * p);
    
@@ -209,7 +214,14 @@ template<class T>
 T * Add2StackOfPtr2Free(Stack s,T * p)
 {
    if(p)	
-     WhereStackOfPtr2Free(s)->add(new NewInStack<T>(p));
+     WhereStackOfPtr2Free(s)->add(new NewInStack<T>(p,false));
+   return p;
+}	
+template<class T>
+T * Add2StackOfPtr2FreeA(Stack s,T * p)
+{
+   if(p)	
+     WhereStackOfPtr2Free(s)->add(new NewInStack<T>(p,true));
    return p;
 }	
 //  fin modif gestion of allocation of Ptr in Language 

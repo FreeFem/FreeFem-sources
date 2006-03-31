@@ -1,4 +1,4 @@
-//#define NCHECKPTR
+//#undef NCHECKPTR
 #ifndef NCHECKPTR
 #define DEBUGUNALLOC 1 
 
