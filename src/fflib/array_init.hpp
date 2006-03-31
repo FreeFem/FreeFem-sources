@@ -6,3 +6,5 @@ void initArrayOperatordouble();
 //
 void initArrayDCLlong();
 void initArrayOperatorlong();
+//
+void     initStringOperator();

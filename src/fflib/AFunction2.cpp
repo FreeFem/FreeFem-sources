@@ -20,6 +20,27 @@
 queue<pair<const E_Routine*,int> > debugstack;
 
 
+class vectorOfInst : public  E_F0mps { public:
+    int n;
+    Expression * v;
+    vectorOfInst(int k): n(k),v(new Expression[k]) {ffassert(v);
+      for(int i=0;i<n;++i) v[i]=0; }
+    ~vectorOfInst(){ delete [] v;}
+    bool empty() const {return n;}
+
+   AnyType operator()(Stack s)  const {
+     for (int i=0;i<n;++i)
+      {
+       ffassert(v[i]);
+       (*(v[i]))(s);
+      }
+      return Nothing;
+   }
+  private: 
+  vectorOfInst(const vectorOfInst &);
+  void operator=(const vectorOfInst &);  
+};
+
 double  VersionNumber(); 
 
 OneOperator::pair_find OneOperator::Find(const ArrayOfaType & at)const
@@ -299,11 +320,19 @@ C_F0 TableOfIdentifier::destroy()
      if (i->second.del && i->second.first->ExistDestroy() ) k++;
    }
 // cout << endl;
+/*  old code 
  ListOfInst *l=new ListOfInst(k);
  for (pKV * i=listofvar;i;i=i->second.next)
      if (i->second.del && i->second.first->ExistDestroy()) 
        l->Add(i->second.first->Destroy(i->second) );
-   
+*/
+// new code 
+  vectorOfInst * l= new vectorOfInst(k);
+  int j=0;
+ for (pKV * i=listofvar;i;i=i->second.next)
+     if (i->second.del && i->second.first->ExistDestroy()) 
+       l->v[j++]=i->second.first->Destroy(i->second) ;
+  ffassert(j==k);
  return C_F0(l);     
 }
 
@@ -524,7 +553,9 @@ AnyType E_Routine::operator()(Stack s)  const  {
    char  save[lgsave];
    AnyType ret=Nothing;
    memcpy(save,s,lgsave); // save register 
-   AnyType *listparam=new AnyType[nbparam];
+   AnyType *listparam=Add2StackOfPtr2FreeA(s,new AnyType[nbparam]);
+   // 
+ //  WhereStackOfPtr2Free(s)->Add2StackOfPtr2Free(s,listparam);
    
    for (int i=0;i<nbparam;i++)
      listparam[i]= (*param[i])(s); // set of the parameter 
@@ -532,7 +563,8 @@ AnyType E_Routine::operator()(Stack s)  const  {
    
    WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH mars 2005 
  
-   try {  (*code)(s);  }
+   try {  
+      (*code)(s);  }
    catch( E_exception & e) { 
            (*clean)(s); 
           // cout << " catch " << e.what() << " clean & throw " << endl;
@@ -550,7 +582,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
       throw ;             
      }
         
-   delete [] listparam; 
+   //  delete [] listparam; after return 
     memcpy(s,save,lgsave);  // restore register
     TheCurrentLine=debugstack.front().second;
     debugstack.pop();
@@ -562,6 +594,80 @@ AnyType E_Routine::operator()(Stack s)  const  {
    return ret;
 }
 
+void ListOfInst::Add(const C_F0 & ins) { 
+       if( (!ins.Empty()) ) {
+      if (n%nx==0){ 
+                Expression   *  l = new Expression [n+nx];
+                int * ln =  new int [n+nx];
+      			for (int i=0;i<n;i++) {
+      			  l[i]=list[i];
+      			  ln[i]=linenumber[i];}
+      			delete [] list;
+      			delete [] linenumber;
+      			list =l;
+      			linenumber=ln;
+      		    }
+      throwassert(list);
+      linenumber[n]= TheCurrentLine;		    
+      list[n++] = ins;
+      }}
+      
+      
+AnyType ListOfInst::operator()(Stack s) const {     
+      AnyType r; 
+      double s0=CPUtime(),s1=s0,ss0=s0;
+      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
+
+      for (int i=0;i<n;i++) 
+       {
+        TheCurrentLine=linenumber[i];
+        r=(*list[i])(s);
+        sptr->clean(); // modif FH mars 2006  clean Ptr
+        s1=CPUtime();
+        if (showCPU)  
+          cout << " CPU: "<< i << " " << s1-s0 << "s" << " " << s1-ss0 << "s" << endl;
+        s0=CPUtime();
+       }
+      return r;}
+      
+AnyType E_block::operator()(Stack s)  const {
+      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
+      if (clean) 
+       {
+         try { 
+          for (int i=0;i<n;i++) {
+            TheCurrentLine=linenumber[i];
+            (*code[i])(s); 
+            sptr->clean();
+
+            }}
+          catch( E_exception & e) { 
+           (*clean)(s); 
+             if (e.type() != E_exception::e_return)  
+               sptr->clean();
+             throw; // rethow  
+            }
+         catch(/* E_exception & e*/...) { // catch all for cleanning 
+           (*clean)(s); 
+           sptr->clean();
+           // if(verbosity>50)
+           //  cout << " catch " << e.what() << " clean & throw " << endl;
+          // throw(e);
+            throw; // rethow 
+            }
+         
+       (*clean)(s); 
+       sptr->clean();
+
+       }
+      else  // not catch  exception if no clean (optimization} 
+       for (int i=0;i<n;i++) 
+          {
+          (*code[i])(s); 
+          sptr->clean(); // mars 2006 FH clean Ptr
+          }
+      return Nothing;
+   }
 void ShowDebugStack()
  {
    if (mpisize)

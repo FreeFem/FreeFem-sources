@@ -31,6 +31,8 @@ extern long mpisize,mpirank;
 double  VersionNumber(); 
 double Imag(const  complex<double> & z){ return imag(z);}
 double Real(const  complex<double> & z){ return real(z);}
+
+
 // FH
 
 template<class T> inline T Max (const T &a,const T & b){return a > b ? a : b;}
@@ -693,7 +695,8 @@ void Init_map_type()
      initArrayOperatorlong();
      initArrayOperatordouble();
      initArrayOperatorComplex();
- 
+     initStringOperator();
+
 
      TheOperators->Add("+=",
        new OneBinaryOperator<set_eq_add<long>,OneBinaryOperatorMIWO >,
@@ -890,7 +893,7 @@ void Init_map_type()
   Global.Add("randres53","(",new OneOperator_0<double>(genrand_res53));
   Global.Add("randinit","(",new OneOperator1<long>(genrandint));
   
-     
+       
 
 typedef MyMap<String,String> MyMapSS;
      map_type[typeid(MyMapSS*).name()] = new ForEachType<MyMapSS*>(Initialize<MyMapSS >,Delete<MyMapSS >) ;         

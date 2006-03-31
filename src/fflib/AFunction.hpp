@@ -670,7 +670,9 @@ template<class A,class B>
     
 template<class A> 
   AnyType UnRefCopyPtr(Stack s,const AnyType &a) { 
-    return   SetAny<A*>(Add2StackOfPtr2Free(s,new A(**PGetAny<A*>(a)))) ;} 
+    A ** ppa=PGetAny<A*>(a);
+    A * pc = new A(**ppa);
+    return   SetAny<A*>(Add2StackOfPtr2Free(s,pc)) ;} 
        
     
 template<class A> AnyType Initialize(Stack,const AnyType &x){
@@ -1746,41 +1748,7 @@ inline  E_F0 * C_F0::LeftValue() const {
     return r->SetParam(*this,l,top);
 }*/
 
-inline    void ListOfInst::Add(const C_F0 & ins) { 
-       if( (!ins.Empty()) ) {
-      if (n%nx==0){ 
-                Expression   *  l = new Expression [n+nx];
-                int * ln =  new int [n+nx];
-      			for (int i=0;i<n;i++) {
-      			  l[i]=list[i];
-      			  ln[i]=linenumber[i];}
-      			delete [] list;
-      			delete [] linenumber;
-      			list =l;
-      			linenumber=ln;
-      		    }
-      throwassert(list);
-      linenumber[n]= TheCurrentLine;		    
-      list[n++] = ins;
-      }}
-      
-      
-inline   AnyType ListOfInst::operator()(Stack s) const {     
-      AnyType r; 
-      double s0=CPUtime(),s1=s0,ss0=s0;
-      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
 
-      for (int i=0;i<n;i++) 
-       {
-        TheCurrentLine=linenumber[i];
-        r=(*list[i])(s);
-        sptr->clean(); // modif FH mars 2006  clean Ptr
-        s1=CPUtime();
-        if (showCPU)  
-          cout << " CPU: "<< i << " " << s1-s0 << "s" << " " << s1-ss0 << "s" << endl;
-        s0=CPUtime();
-       }
-      return r;}
       
 aType TypeArray(aType,aType);
 aType TypeTemplate(aType,aType);
@@ -2689,41 +2657,11 @@ class E_block :  public E_F0mps { public:
      : n(l.size()),code(l.ptr()),linenumber(l.nlines()),clean(c) {}
    E_block( C_F0  l,C_F0  c)
      : n(1),code(new Expression),clean(c) { code[0]=l;}
-   AnyType operator()(Stack s)  const {
-      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
-      if (clean) 
-       {
-         try { 
-          for (int i=0;i<n;i++) {
-            TheCurrentLine=linenumber[i];
-            (*code[i])(s); 
-            sptr->clean();
-
-            }}
-         catch(/* E_exception & e*/...) { // catch all for cleanning 
-           (*clean)(s); 
-           sptr->clean();
-           // if(verbosity>50)
-           //  cout << " catch " << e.what() << " clean & throw " << endl;
-          // throw(e);
-            throw; // rethow 
-            }
-         
-       (*clean)(s); 
-       sptr->clean();
-
-       }
-      else  // not catch  exception if no clean (optimization} 
-       for (int i=0;i<n;i++) 
-          {
-          (*code[i])(s); 
-          sptr->clean(); // mars 2006 FH clean Ptr
-          }
-      return Nothing;
-   }
+   AnyType operator()(Stack s)  const ;
     operator aType () const { return atype<void>();}         
    
 };
+
 class Routine;
 class E_Routine :  public E_F0mps { public:
   Expression code;

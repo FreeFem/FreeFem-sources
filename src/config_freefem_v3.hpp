@@ -43,6 +43,6 @@
 #endif
 // to remove CHECKPTR checking 
 #ifndef NCHECKPTR
-#define NCHECKPTR
+//#define NCHECKPTR
 #endif
 #endif
