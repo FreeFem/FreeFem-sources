@@ -30,7 +30,7 @@ problem Probem1(u,v,solver=CG,eps=1.0e-6) =
 
 varf indicator2(uu,chiK) = 
      intalledges(Th)(chiK*lenEdge*square(jump(N.x*dx(u)+N.y*dy(u))))
-    +int2d(Th)(chiK*square(hTriangle*(f-dxx(u)-dyy(u))) );
+    +int2d(Th)(chiK*square(hTriangle*(f+dxx(u)+dyy(u))) );
 for (int i=0;i< 4;i++)
 {   
   Probem1; 
