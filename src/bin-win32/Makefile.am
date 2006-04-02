@@ -2,11 +2,11 @@
 LDADD2 = $(ARPACKLIB) $(UMFPACKLIB)  $(BLASLIB) $(G2CLIB)
 # remark the libff.dll  is split in 6 because  ld trap
 #  to much routine => memory fault 
-FF_OBJ0 = CodeAlloc.o AFunction2.o  CheckPtr.o lex.o  global.o environment.o load.o
+FF_OBJ0 = CodeAlloc.o AFunction2.o  CheckPtr.o lex.o  global.o environment.o load.o 
 FF_OBJ_AC = array_complex.o
 FF_OBJ_AR = array_real.o
 FF_OBJ_AL = array_long.o
-FF_OBJ1 = AFunction.o   InitFunct.o strversionnumber.o  mt19937ar.o
+FF_OBJ1 = AFunction.o   InitFunct.o strversionnumber.o  mt19937ar.o string_def.o
 FF_OBJ2 = BamgFreeFem.o  Drawing.o Element_P2h.o Element_RT.o FESpace.o FQuadTree.o InitFunct.o Mesh2.o MeshDraw.o MeshGeom.o MeshQuad.o MeshRead.o MeshWrite.o Meshio.o Metric.o QuadTree.o QuadratureFormular.o R2.o SetOfE4.o eigenvalue.o fem.o gibbs.o  lgalgo.o lgfem.o lgmat.o lgmesh.o  mshptg.o problem.o DefColor.o 
 FF_OBJIDE = FreeFem___cs-cs.o FreeFem___cs-commands.o FreeFem___cs-draw.o FreeFem___cs-strversionnumber.o FreeFem___cs-socket.o FreeFem___cs-threads.o FreeFem___cs-hl_yacc.o FreeFem___cs-hl_lex.o FreeFem___cs-highlight.o FreeFem___cs-spawn.o FreeFem___cs-editor.o FreeFem___cs-server.o    windres.o
 FFD_OBJ0 = $(patsubst %.o,../fflib/%.o,$(FF_OBJ0))
@@ -44,4 +44,10 @@ FreeFem++.exe: ../std/Pcrgraph.o libff0.dll libffAR.dll libffAC.dll libffAL.dll 
 FreeFem++-nw.exe: ../nw/sansrgraph.o  libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
 	g++   -mno-cygwin libff.dll $^ -o $@ 
 FreeFem++-cs.exe:$(FFD_OBJIDE) libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
-	g++  $^  `$(FLTK_CONFIG) --ldflags` -mno-cygwin    -o $@
+	g++  $^  `$(FLTK_CONFIG) --ldflagxs` -mno-cygwin    -o $@
+bamg.exe:  libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
+	g++   -mno-cygwin ../bamg/bamg.o  $^ -o $@ 
+cvmsh2.exe:  libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
+	g++   -mno-cygwin ../bamg/cvmsh2.o  $^ -o $@ 
+drawbdmesh.exe:../std/Pcrgraph.o  libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
+	g++   -mno-cygwin -mwindows ../bamg/bamg.o  $^ -o $@ 
