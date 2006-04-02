@@ -30,6 +30,9 @@ Source: "README"; DestDir: "{app}"
 Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
 Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
 Source: "src\bin-win32\FreeFem++-nw.exe"; DestDir: "{app}"
+Source: "src\bin-win32\bamg.exe"; DestDir: "{app}"
+Source: "src\bin-win32\cvmsh2.exe"; DestDir: "{app}"
+Source: "src\bin-win32\drawbdmesh.exe"; DestDir: "{app}"
 Source: "src\bin-win32\*.dll"; DestDir: "{app}"
 
 ; mingwm10.dll is necessary when "-mthreads" is used as a compilation
