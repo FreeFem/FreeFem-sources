@@ -111,7 +111,7 @@ class EigenValueC : public OneOperator
 
 basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
     "tol", &typeid(double)  ,
-    "nbev",&typeid(long) ,
+    "nev",&typeid(long) ,
     "sym",&typeid(bool),
     "sigma",&typeid(double),
     "value",&typeid(KN<double> *),
@@ -123,7 +123,7 @@ basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
 
 basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
     "tol", &typeid(double)  ,
-    "nbev",&typeid(long) ,
+    "nev",&typeid(long) ,
     "sigma",&typeid(K),
     "value",&typeid(KN<Complex> *),
     "vector",&typeid(pfecarray) , 

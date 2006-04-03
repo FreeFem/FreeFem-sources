@@ -97,10 +97,10 @@ inline AnyTypeWithCheck PtrtoAny(void * p,aType r)
   { 
    AnyTypeWithOutCheck any;
    CheckSize<T,sizeof(T)<= sizeof(AnyData) >();
-
-  // memcpy(&any,&x,sizeof(x));
-   any = *(  (AnyTypeWithOutCheck *) (void *) &x); 
-//  toto.x=x;
+   // plus stable ???  F avril 2006 FH. 
+   memcpy(&any,&x,sizeof(x));
+   // plante  de temps en temps sous wind32 .  FH 
+    //any = *(  (AnyTypeWithOutCheck *) (void *) &x); 
    return any;
   }
   

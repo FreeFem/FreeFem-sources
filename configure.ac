@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.5-0,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.5-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -1112,13 +1112,13 @@ AC_OUTPUT(Makefile
 	src/fflib/Makefile
 	src/std/Makefile
 	src/x11/Makefile
-	src/bin-win32/Makefile
 	src/ide/Makefile
 	src/nw/Makefile
 	src/mpi/Makefile
 	src/agl/Makefile
 	src/glx/Makefile
 	src/bamg/Makefile
+	src/bin-win32/Makefile
 	examples++/Makefile
 	examples++-eigen/Makefile
 	examples++-tutorial/Makefile
