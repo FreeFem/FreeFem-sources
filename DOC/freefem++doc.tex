@@ -4,7 +4,7 @@
 \usepackage{styles}
 \usepackage{txfonts}
 \usepackage{times}
-\def\VERSION{2.4-2}
+\def\VERSION{2.5-1}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -6980,40 +6980,139 @@ If the method is correct, we expect to look the graphics by an almost constant f
 \subsubsection{Adaptation using  residual error indicator}
 
 
-In the previous example we compute the error indicator, now 
-we want to use it to adapt the mesh.
+In the previous example we compute the error indicator,  now 
+we use it, to adapt the mesh.
 
 
-The new mesh size is almost given by the following formulae:
+The new mesh size is  given by the following formulae:
 $$h_{n+1}(x)= \frac{h_{n}(x)}{f_{n}(\eta_K(x))} $$
 where $\eta_n(x)$ is the level of error at point $x$ given by the local 
 error indicator, $h_n$ is the previous ``mesh size'' field, and $f_n$ is a user 
 function define by
-$f_n = min(3,max(1/3,\eta_n / eta_n^* ))$
- where $ eta_n^* = mean(\eta_n) c $, and $c$ is an user 
+$f_n = min(3,max(1/3,\eta_n / \eta_n^* ))$
+ where $ \eta_n^* =mean(\eta_n) c $, and $c$ is an user 
  coefficient generally close to one. 
-  
+ 
+ 
 \begin{example}[AdaptResidualErrorIndicator.edp]~
 \index{tutorial!AdaptResidualErrorIndicator.edp}
+
+First a macro \texttt{MeshSizecomputation} to get a $P_1$  mesh size as the average of edge lenght.
 \bFF
-// macro the get the current mesh size \hfilll// parameter \hfilll//  in:  Th the mesh\hfilll//       Vh  P1 fespace on Th\hfilll//  out : \hfilll// h: the Vh finite element finite set to the current mesh size \hfilll@macro  MeshSizecomputation(Th,Vh,h){  /* Th mesh \	 Vh  P1 finite element space 	 h   the P1 mesh size value */	@real[int]  count(Th.nv);	/* mesh size  (lenEdge =  integral(e) 1 ds)  */	@varf vmeshsizen(u,v)=intalledges(Th,qfnbpE=1)(v); 	/* number of edge / par vertex */ 	@varf vedgecount(u,v)=intalledges(Th,qfnbpE=1)(v/lenEdge);    /*	  computation of the mesh size	  ----------------------------- */ 	count=vedgecount(0,Vh);	h[]=0.;	h[]=vmeshsizen(0,Vh);	@cout << " count min = "<< count.min << " " << count.max << endl;	h[]=h[]./count;    @cout << " -- bound meshsize = " <<h[].min << " " << h[].max << endl;} // end of macro MeshSizecomputation\hfilll
+// macro the get the current mesh size \hfilll
+// parameter \hfilll
+//  in:  Th the mesh\hfilll
+//       Vh  P1 fespace on Th\hfilll
+//  out : \hfilll
+// h: the Vh finite element finite set to the current mesh size \hfilll
+@macro  MeshSizecomputation(Th,Vh,h)
+{  /* Th mesh \
+	 Vh  P1 finite element space 
+	 h   the P1 mesh size value */
+	@real[int]  count(Th.nv);
+	/* mesh size  (lenEdge =  integral(e) 1 ds)  */
+	@varf vmeshsizen(u,v)=intalledges(Th,qfnbpE=1)(v); 
+	/* number of edge / par vertex */ 
+	@varf vedgecount(u,v)=intalledges(Th,qfnbpE=1)(v/lenEdge); 
+   /*
+	  computation of the mesh size
+	  ----------------------------- */ 
+	count=vedgecount(0,Vh);
+	h[]=0.;
+	h[]=vmeshsizen(0,Vh);
+	@cout << " count min = "<< count.min << " " << count.max << endl;
+	h[]=h[]./count;
+    @cout << " -- bound meshsize = " <<h[].min << " " << h[].max << endl;
+} // end of macro MeshSizecomputation\hfilll
 \eFF
 
+A second  macro to remesh  according to the new mesh size. 
 \bFF
-// macro to remesh according the de residual indicator \hfilll// in: \hfilll//     Th the mesh\hfilll//     Ph  P0 fespace on Th\hfilll//     Vh  P1 fespace on Th\hfilll//     vindicator the varf of to evaluate the indicator to ${}^2$ \hfilll//     coef on etameam ..\hfilll// ------\hfilll
+// macro to remesh according the de residual indicator \hfilll
+// in: \hfilll
+//     Th the mesh\hfilll
+//     Ph  P0 fespace on Th\hfilll
+//     Vh  P1 fespace on Th\hfilll
+//     vindicator the varf of to evaluate the indicator to ${}^2$ \hfilll
+//     coef on etameam ..\hfilll
+// ------\hfilll
 
-macro  ReMeshIndicator(Th,Ph,Vh,vindicator,coef){	Vh h=0;	/*evalutate the mesh size  */	MeshSizecomputation(Th,Vh,h); 	Ph etak;  	etak[]=vindicator(0,Ph);	etak[]=sqrt(etak[]); 	real etastar= coef*(etak[].sum/etak[].n);	cout << " etastar = " << etastar << " sum=" << etak[].sum << " " << endl;	/* here etaK is discontinous 	   we use the P1 L2 projection with mass lumping . */		Vh fn,sigma;	@varf veta(unused,v)=int2d(Th)(etak*v);	@varf vun(unused,v)=int2d(Th)(1*v);	fn[]  = veta(0,Vh);	sigma[]= vun(0,Vh);	fn[]= fn[]./ sigma[];	fn =  max(min(fn/etastar,3.),0.3333) ; 		/* new mesh size */ 	h = h / fn ; 	/* plot(h,wait=1); */	@Th=adaptmesh(Th,IsMetric=1,h,splitpbedge=1,nbvx=10000);}
+macro  ReMeshIndicator(Th,Ph,Vh,vindicator,coef)
+{
+	Vh h=0;
+	/*evalutate the mesh size  */
+	MeshSizecomputation(Th,Vh,h); 
+	Ph etak;  
+	etak[]=vindicator(0,Ph);
+	etak[]=sqrt(etak[]); 
+	real etastar= coef*(etak[].sum/etak[].n);
+	cout << " etastar = " << etastar << " sum=" << etak[].sum << " " << endl;
+
+	/* here etaK is discontinous 
+	   we use the P1 L2 projection with mass lumping . */
+	
+	Vh fn,sigma;
+	@varf veta(unused,v)=int2d(Th)(etak*v);
+	@varf vun(unused,v)=int2d(Th)(1*v);
+	fn[]  = veta(0,Vh);
+	sigma[]= vun(0,Vh);
+	fn[]= fn[]./ sigma[];
+	fn =  max(min(fn/etastar,3.),0.3333) ; 
+	
+	/* new mesh size */ 
+	h = h / fn ; 
+	/* plot(h,wait=1); */
+	/*  build  the new mesh */
+	@Th=adaptmesh(Th,IsMetric=1,h,splitpbedge=1,nbvx=10000);
+}
 \eFF
 
-We skip the mesh construction, see the previous example. 
+We skip the mesh construction, see the previous example, 
 
 \bFF
-// FE space definition ---fespace Vh(Th,P1); // for the mesh size fespace Ph(Th,P0); // for the indicator   real hinit=0.2; //  initial mesh size Vh   h=hinit; // the FE fonction  for the mesh size // to build a mesh with a given mesh size  : meshsizeTh=adaptmesh(Th,h,IsMetric=1,splitpbedge=1,nbvx=10000);plot(Th,wait=1,ps="RRI-Th-init.eps");
-@Vh u,v; @func f=(x-y);@problem Poisson(u,v) =    int2d(Th,qforder=5)( u*v*1.0e-10+  dx(u)*dx(v) + dy(u)*dy(v))   - int2d(Th,qforder=5)( f*v); @varf indicator2(unused,chiK) =      intalledges(Th)(chiK*lenEdge*square(jump(N.x*dx(u)+N.y*dy(u))))    +int2d(Th)(chiK*square(hTriangle*(f+dxx(u)+dyy(u))) );@for (int i=0;i< 10;i++){	u=u;	Poisson;	plot(Th,u,wait=1);	real cc=0.8;	if(i>5) cc=1;	ReMeshIndicator(Th,Ph,Vh,indicator2,cc);	plot(Th,wait=1);}
+// FE space definition ---
+fespace Vh(Th,P1); // for the mesh size and solution 
+fespace Ph(Th,P0); // for the error  indicator   
+
+real hinit=0.2; //  initial mesh size 
+Vh   h=hinit; // the FE function  for the mesh size 
+// to build a mesh with a given mesh size  : meshsize
+Th=adaptmesh(Th,h,IsMetric=1,splitpbedge=1,nbvx=10000);
+plot(Th,wait=1,ps="RRI-Th-init.eps");
+@Vh u,v; 
+
+@func f=(x-y);
+
+@problem Poisson(u,v) =
+    int2d(Th,qforder=5)( u*v*1.0e-10+  dx(u)*dx(v) + dy(u)*dy(v)) 
+  - int2d(Th,qforder=5)( f*v);
+
+ @varf indicator2(unused,chiK) = 
+     intalledges(Th)(chiK*lenEdge*square(jump(N.x*dx(u)+N.y*dy(u))))
+    +int2d(Th)(chiK*square(hTriangle*(f+dxx(u)+dyy(u))) );
+
+@for (int i=0;i< 10;i++)
+{
+	u=u;
+	Poisson;
+	plot(Th,u,wait=1);
+	real cc=0.8;
+	if(i>5) cc=1;
+	ReMeshIndicator(Th,Ph,Vh,indicator2,cc);
+	plot(Th,wait=1);
+}
 \eFF
 
-
+\begin{figure}[hbt]
+\begin{center}
+\label{fig:rhoP2}
+\includegraphics[height=8cm]{arei-etak} \includegraphics[height=8cm]{arei-Thu}
+\end{center}
+\caption{the error indicator  with isotropic $P_{1}$ ,  the mesh and isovalue of the solution  }
+\end{figure}
 \end{example}
+
+
 
 \subsection{Elasticity}
 

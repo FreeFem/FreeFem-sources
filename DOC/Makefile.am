@@ -93,7 +93,7 @@ plots/eigen11.eps               plots/onnewmesh.eps \
 plots/medit2.eps  		plots/threehsv.eps		plots/hsv.eps \
 plots/crimpson.eps              plots/J-bfgs.eps		plots/u-bfgs.eps \
 plots/csSnapOld.eps \
-plots/logo.eps  
+plots/logo.eps  plots/arei-Thu.eps      plots/arei-etak.eps
 #  Pour la page de garde FH
 FIGS_JPG=plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg
 FIGS_PDF= plots/LogoCNRS.pdf    plots/LogoLJLL.pdf    plots/LogoUPMC.pdf plots/ffauteurs4.pdf  \

@@ -154,7 +154,7 @@ func real[int] C(real[int] & x)
    Vh sss= df( dx(u)*dx(u) + dy(u)*dy(u) ) ;
    plot (sss,wait=0,fill=1,value=1);
 
-// the  methode of  Newtow Ralphson to solve dJ(u)=0;
-//  see Newtow.edp example
+// the  methode of  Newton Ralphson to solve dJ(u)=0;
+//  see Newton.edp example
 
 }

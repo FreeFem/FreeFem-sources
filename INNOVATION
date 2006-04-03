@@ -1,3 +1,9 @@
+V2.5.1
+ *  change nbve= to nev= in EigenValue function  (to be compatible with the doc)
+ *  newtow to newton    (to correct misspelling)
+ *  change in AnyType to remove da randow bug on windows.
+ *  vim color syntax from Richard MICHEL (vim_highlighting_for_FF++.tar.gz)
+
 V2.5-0 
   *  add C++ string operator :  int i; string s = "....";
        i=s.length ; i=s.size; 

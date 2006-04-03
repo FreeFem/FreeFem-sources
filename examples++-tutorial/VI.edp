@@ -2,7 +2,7 @@
 // --------------------------
 //  Probleme:
 //  $ - \Delta u = f , \quad u=gd \on \Gamma, \quad u < g $
-//  algo of   Primal-Dual Active set strategy as a semi smoth Newtow Method
+//  algo of   Primal-Dual Active set strategy as a semi smoth Newton Method
 //   HinterMuller , K. Ito, K. Kunisch 
 //  to appeared in SIAM Option
 // Thank to O. Pironneau 
