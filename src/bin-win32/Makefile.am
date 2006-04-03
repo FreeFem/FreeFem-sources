@@ -44,7 +44,7 @@ FreeFem++.exe: ../std/Pcrgraph.o libff0.dll libffAR.dll libffAC.dll libffAL.dll 
 FreeFem++-nw.exe: ../nw/sansrgraph.o  libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
 	g++   -mno-cygwin libff.dll $^ -o $@ 
 FreeFem++-cs.exe:$(FFD_OBJIDE) libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
-	g++  $^  `$(FLTK_CONFIG) --ldflagxs` -mno-cygwin    -o $@
+	g++  $^  `$(FLTK_CONFIG) --ldflags` -mno-cygwin    -o $@
 bamg.exe:  libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
 	g++   -mno-cygwin ../bamg/bamg.o  $^ -o $@ 
 cvmsh2.exe:  libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
