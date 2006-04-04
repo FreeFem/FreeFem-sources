@@ -74,6 +74,7 @@ while(errv>1e-6)
   
   if (mint<mintcc ||  j%10==0) {  
     Th=adaptmesh(Th,p,err=erradap ) ;
+    u=u;
      mintcc = checkmovemesh(Th,[x,y])/5.;     
      wdpdn=0; 	
      onfree=0;

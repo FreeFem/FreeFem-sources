@@ -627,6 +627,7 @@ void Mesh::read(const char * filename)
     dim=2;
     ne=0;
     ntet=0;
+    volume=0;
     TriangleConteningVertex =0;
     BoundaryAdjacencesHead=0;
     BoundaryAdjacencesLink=0;
@@ -689,6 +690,7 @@ Mesh::Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b)
     mortars=0;
   dim=2;
   tet=0;
+  volume=0;
   edges=0;
   ntet=0;
   ne=0;    
@@ -1111,6 +1113,7 @@ inline int NbOfSubInternalVertices(int k)
   edges=0;
   ntet=0;
   ne=0;
+  volume=0;
 
     quadtree =0;
     NbMortars=0;
@@ -1219,6 +1222,7 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
  { //  routine complique 
    //  count the number of elements
     area=Th.area;
+    volume=0;
     BoundaryAdjacencesHead=0;
     BoundaryAdjacencesLink=0;
     BoundaryEdgeHeadLink=0;
@@ -1571,6 +1575,7 @@ Mesh::Mesh(const  Serialize &serialized)
   BoundaryAdjacencesLink=0;
   BoundaryEdgeHeadLink=0;
   quadtree =0;
+  volume=0;
   NbMortars=0;
   dim=0;
     tet=0;
@@ -1596,7 +1601,7 @@ Mesh::Mesh(const  Serialize &serialized)
   serialized.get( pp,nv);
   serialized.get( pp,neb);
   if (verbosity>2) 
-    cout << " mesh desialized : " << l << " " << nt << " " << nv << " " << neb << endl;
+    cout << " mesh serialized : " << l << " " << nt << " " << nv << " " << neb << endl;
   assert ( nt > 0 && nv >0 && neb >=0);
     triangles = new Triangle [nt];
     vertices  = new Vertex[nv];

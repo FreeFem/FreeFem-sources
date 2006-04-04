@@ -1871,15 +1871,17 @@ void InitProblem( int Nb, const FESpace & Uh,
       if ( u_Vh==0  || &(*(u_h[0])).Vh->Th != &Th )
         {
           *X=R();
-          if(verbosity>1)
+          if(verbosity>0)
             cout << "   -- Change of Mesh " << (u_Vh ? & (*(u_h[0])).Vh->Th: 0 ) 
                  << "  " << &Th <<  endl;
         }
       else
         { //  copy the previous soluton to initialize CG, GMRES, etc ...
           if (Nb==1) 
-	    {  // modif  FH 0701/2005
-	    if (u_h[0]->x())
+	    {  // modif  FH 0701/2005 + april 2006 
+	    if(u_h[0]->x()->N() != X->N() )
+	      cout << " bug ???? " << endl;
+	    if (u_h[0]->x() && u_h[0]->x()->N() == X->N() )
 	      *X= * u_h[0]->x();
 	    else
 	      *X=R();
@@ -2241,7 +2243,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   KN<R> *X=B; //
   const  Mesh & Th(Uh.Th);
   bool initx = true; //typemat->t==TypeSolveMat::GC ; //  make x and b different in all case 
-  // more safe for the future ( 4 days lose with is optimaze FH )
+  // more safe for the future ( 4 days lose with is optimization FH )
 
   InitProblem(  Nb,  Uh, Vh, B, X,u_hh,typemat , u_h,  LL,  initx);
 
