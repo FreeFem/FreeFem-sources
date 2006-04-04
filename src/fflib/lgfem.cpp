@@ -1819,6 +1819,7 @@ AnyType pfer2R(Stack s,const AnyType &a)
    
   const FESpace & Vh(*fe.Vh);
   const Mesh & Th(Vh.Th);
+  assert(Th.ntet==0 && Th.volume==0 && Th.triangles != 0);
   MeshPoint & mp = *MeshPointStack(s);
   const Triangle *K;
   R2 PHat;
