@@ -1,4 +1,8 @@
 NoUseOfWait=true;int verbosityy=verbosity;
+ cout << "--------- file : AdaptResidualErrorIndicator.edp --------------------------------------------------------" << endl;
+verbosity=verbosityy;
+{ include "AdaptResidualErrorIndicator.edp";};
+ cout << "------------------------------------------------------------------------------ " << endl;
  cout << "--------- file : FE.edp --------------------------------------------------------" << endl;
 verbosity=verbosityy;
 { include "FE.edp";};
