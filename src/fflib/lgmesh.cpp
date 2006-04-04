@@ -865,7 +865,8 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
     {
       int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
       R a= Area2(v[i0],v[i1],v[i2])/2;
-      if ( a < Th[i].area/100 ) 
+      if ( a < Th[i].area*1.e-6
+       ) 
        { nberr++;
         if (verbosity>1) 
          {
