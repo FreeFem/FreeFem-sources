@@ -864,120 +864,173 @@ int Walk(const Mesh & Th,int& it, R *l,
 
 const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * tstart) const
 {
-    int it,j;
-    if ( tstart )
-      it =  (*this)(tstart);
-    else  {  
+  int it,j;
+  if ( tstart )
+    it =  (*this)(tstart);
+  else  
+    {  
       const Vertex * v=quadtree->NearestVertexWithNormal(P);
-      if (!v) { v=quadtree->NearestVertex(P);
-       assert(v); }
-        
-   /*   if (verbosity>100) 
-       cout << endl << (*this)(v) << *v << " " << Norme2(P-*v) << endl; */
-     it=Contening(v); }
+      if (!v) 
+	{ 
+	  v=quadtree->NearestVertex(P);
+	  assert(v);
+	}
+      
+      /*   if (verbosity>100) 
+	   cout << endl << (*this)(v) << *v << " " << Norme2(P-*v) << endl; */
+      it=Contening(v);
+    }
+  
+  //     int itdeb=it;     
+  //     int count=0;
+  //     L1: 
+  outside=true; 
+  int its=it;
+  int iib=-1,iit=-1;
+  R dP=DBL_MAX;
+  R2 PPhat;
+  const Triangle * tt;
+  int k=0,kout=0;    
+  kfind++;
+  while (1)
+    { 
+      loop:
+      kthrough++;
+      if (k++>=1000) 
+	{
+	  /* cout << P << endl;
+	     reffecran();
+	     Draw(0);
+	     triangles[its].Fill(2);
+	     DrawMark(P,0.01);
+	     rattente(1);  */
+	  ffassert(k++<1000);
+	}
+      int kk,n=0,nl[3];
+      
+      const Triangle & K(triangles[it]);
+      
+      R2 & A(K[0]), & B(K[1]), & C(K[2]);
+      R l[3]={0,0,0};
+      R area2= K.area*2;
+      R eps =  -area2*1e-6;
+      l[0] = Area2(P,B,C);
+      l[1] = Area2(A,P,C);
+      l[2] = area2-l[0]-l[1];
+      if (l[0] < eps) nl[n++]=0;
+      if (l[1] < eps) nl[n++]=1;
+      if (l[2] < eps) nl[n++]=2;
      
-//     int itdeb=it;     
-//     int count=0;
-//     L1: 
-    outside=true; 
-    int its=it;
-    int iib=-1,iit=-1;
-    R delta=-1;
-    R2 Phatt;
-    int k=0;    
-    kfind++;
-    while (1)
-        { 
-         loop:
-          kthrough++;
-          if (k++>=1000) 
-           {
-/*            cout << P << endl;
-            reffecran();
-            Draw(0);
-            triangles[its].Fill(2);
-            DrawMark(P,0.01);
-            rattente(1);*/
-            ffassert(k++<1000);
-            }
-          int kk,n=0,nl[3];
-           
-          const Triangle & K(triangles[it]);
-          
-          R2 & A(K[0]), & B(K[1]), & C(K[2]);
-          R l[3]={0,0,0};
-          R area2= K.area*2;
-          R eps =  -area2*1e-6;
-          l[0] = Area2(P,B,C);
-          l[1] = Area2(A,P,C);
-          l[2] = area2-l[0]-l[1];
-          if (l[0] < eps) nl[n++]=0;
-          if (l[1] < eps) nl[n++]=1;
-          if (l[2] < eps) nl[n++]=2;
-          if (n==0) {   outside=false; 
-                        Phat=R2(l[1]/area2,l[2]/area2);
-                        return &K;
-                    }
-          else if (n==1) 
-            j=nl[0];
-          else  
-            { kk=BinaryRand() ? 1 : 0; 
-              j= nl[ kk ];}
-          
-            int jj  = j;
-            int itt =  TriangleAdj(it,j);
-            
-            if(itt==it || itt <0)  
-              {
-                if ( n==2 ) 
-                  { jj=j= nl[ 1-kk ];
-                   itt =  TriangleAdj(it,j);                  
-                   if (itt && itt != it) {it=itt;continue;}
-                  }
-                 // projection du point sur la frontiere 
-                l[nl[0]]=0;
-                if(n==2) l[nl[1]]=0;
-                R ll=l[0]+l[1]+l[2];
-                Phat=R2(l[1]/ll,l[2]/ll);
-                R2 PQ(K(Phat),P);
-                R dd=(PQ,PQ);
-                if (dd>delta && iit>=0)          
-                  {Phat=Phatt;return triangles+iit;}
-                
-                int j0=(j+1)%3,i0= &K[j0]-vertices;
-                int j1=(j+2)%3,i1= &K[j1]-vertices;
-                int ii=-1,jj;
-                if ( l[j0]> ll/2 ) ii=i0,jj=i1;
-                if ( l[j1]> ll/2 ) ii=i1,jj=i0;
-               // cout << ii << " " << jj << " it = " << it << " " << delta << " " << dd <<  endl;
+      if (n==0) {  // interior => return
+	outside=false; 
+	Phat=R2(l[1]/area2,l[2]/area2);
+	return &K;
+      }
+      else if (n==1) 
+	kk=0;
+      else  
+	kk=BinaryRand() ? 1 : 0;
+      
+      j= nl[ kk ];
+      
+      int itt =  TriangleAdj(it,j);
+      if(itt!=it && itt >=0)  
+	{
+	   dP=DBL_MAX;
+	  it=itt;
+	  continue;
+	}  
+      
+      //  edge j on border
+      l[j]=0;
 
-                if (ii>0 && iib != ii ) 
-                   for (int p=BoundaryAdjacencesHead[ii];p>=0;p=BoundaryAdjacencesLink[p])
-                     { int e=p/2, ie=p%2, je=2-ie;
-                      // cout << number(bedges[e][0]) << " " << number(bedges[e][1]) << endl;
-                     if (! bedges[e].in( vertices+jj)) 
-                      {  
-                        iib = ii;
-                        iit=it;
-                        delta=dd; 
-                        Phatt=Phat;
-                        it= BoundaryTriangle(e,ie);                       
-                       // cout << "  ------ " << it << " " << Phatt <<  endl;
-                        goto loop;
-                      }
-                     }
-                     
-                    
-                
-                outside=true; 
-                if (dd>delta && iit>=0)          
-                  {Phat=Phatt;return triangles+iit;}
-                else
-                  return triangles+it;
-              }
-            it=itt;
-        }
-        
+      if ( n==2 ) 
+	{
+	  kk = 1-kk;
+	  j= nl[ kk ];
+	  itt =  TriangleAdj(it,j);                  
+	  if (itt && itt != it)
+	    {
+	      dP=DBL_MAX;
+	      it=itt;
+	      continue;
+	    }
+	  //  on a corner of the mesh 
+	  l[j]=0;
+	  l[3-nl[0]+nl[1]]=1;
+	  Phat=R2(l[1],l[2]);
+	  return & K;
+	}
+      //   on the border 
+      //   projection Ortho
+       
+       kout++;
+      
+      int j0=(j+1)%3,i0= &K[j0]-vertices;
+      int j1=(j+2)%3,i1= &K[j1]-vertices;
+      int ii,jj,iii;
+      bool ret=false;
+      
+      R2 AB=R2(K[j0],K[j1]),  AP(K[j0],P), BP(K[j1],P);
+      R la=  (AB,AP);
+      R lb= -(AB,BP);
+      if(la<0)     
+	ii= i0, jj = j0,iii=i1;
+      else if ( lb <0)
+	ii= i1, jj = j1,iii=i0;
+      else // PROJECTION between A,B
+        ret = true;
+      if( ! ret)
+        { //  VERIF THE DISTANCE**2 Dicrease
+          R2 Pjj(P,K[jj]);
+          R dd = (Pjj,Pjj);
+          if (dd >= dP ) {
+               Phat=PPhat;
+               if(kout>1) cout << "        @ " << tt-triangles  << " " << Phat << " " << outside << endl; 
+               
+               return tt;
+             }
+          else
+            { 
+              l[0]=l[1]=l[2]=0;
+              l[jj]=1;
+              PPhat.x=l[1];
+              PPhat.y=l[2];                
+              dP=dd;
+              tt = &K;
+            }
+        }  
+      if(kout>1)
+          cout << "Find --- "<< P << " :  k=" << k << "  la lb " << la << " " << lb 
+                      << " ii =" << ii << " iii= " << iii << " " << it << " dP= " 
+                      << dP << " ret = " << ret <<endl;
+       
+      if (ret || ii == iib) 
+	{  
+	  l[j]=0;
+	  l[j0]= +lb/(la+lb);
+	  l[j1]= 1-l[j0];
+          Phat=R2(l[1],l[2]);
+          if(kout>1) cout << "        # " << it << " " << Phat << " " << outside << endl; 
+          return & K;
+	}
+
+      // next edge on true boundary 
+      for (int p=BoundaryAdjacencesHead[ii];p>=0;p=BoundaryAdjacencesLink[p])
+	  { int e=p/2, ie=p%2, je=2-ie;
+	  // cout << number(bedges[e][0]) << " " << number(bedges[e][1]) << endl;
+	  if (!bedges[e].in( vertices+iii)) //  edge not equal  to i0 i1 
+	    {  
+	      iib = ii;
+	      it= BoundaryTriangle(e,ie);  //  next triangle                      
+	      // cout << "  ------ " << it << " " << Phatt <<  endl;
+	      goto loop;
+	    }
+	  }
+       ffassert(0); 
+    }
+
+  
 }
 
 
