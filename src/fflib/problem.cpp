@@ -1871,7 +1871,7 @@ void InitProblem( int Nb, const FESpace & Uh,
       if ( u_Vh==0  || &(*(u_h[0])).Vh->Th != &Th )
         {
           *X=R();
-          if(verbosity>0)
+          if(verbosity>1)
             cout << "   -- Change of Mesh " << (u_Vh ? & (*(u_h[0])).Vh->Th: 0 ) 
                  << "  " << &Th <<  endl;
         }
@@ -2337,6 +2337,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
 #endif
      }
   else
+    
     A.Solve(*X,*B);
    
     if (verbosity>99)
