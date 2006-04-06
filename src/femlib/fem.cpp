@@ -987,7 +987,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
           R dd = (Pjj,Pjj);
           if (dd >= dP ) {
                Phat=PPhat;
-               if(kout>1) cout << "        @ " << tt-triangles  << " " << Phat << " " << outside << endl; 
+              // if(kout>1) cout << "        @ " << tt-triangles  << " " << Phat << " " << outside << endl; 
                
                return tt;
              }
@@ -1001,10 +1001,10 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
               tt = &K;
             }
         }  
-      if(kout>1)
-          cout << "Find --- "<< P << " :  k=" << k << "  la lb " << la << " " << lb 
-                      << " ii =" << ii << " iii= " << iii << " " << it << " dP= " 
-                      << dP << " ret = " << ret <<endl;
+     // if(kout>1)
+       //   cout << "Find --- "<< P << " :  k=" << k << "  la lb " << la << " " << lb 
+       //               << " ii =" << ii << " iii= " << iii << " " << it << " dP= " 
+       //               << dP << " ret = " << ret <<endl;
        
       if (ret || ii == iib) 
 	{  
@@ -1012,7 +1012,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	  l[j0]= +lb/(la+lb);
 	  l[j1]= 1-l[j0];
           Phat=R2(l[1],l[2]);
-          if(kout>1) cout << "        # " << it << " " << Phat << " " << outside << endl; 
+        //  if(kout>1) cout << "        # " << it << " " << Phat << " " << outside << endl; 
           return & K;
 	}
 
