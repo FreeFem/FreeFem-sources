@@ -3,6 +3,7 @@
 
 extern long verbosity ;
 #include <cmath>
+#include <climits>
 #include <cstdlib>
 #include "error.hpp"
 #include <iostream>
