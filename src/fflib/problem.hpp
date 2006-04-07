@@ -584,30 +584,33 @@ template<>  struct IsComplexType<Complex> { static const bool value=true;};
 template<class R>  //  to make   x=linearform(x)
 struct OpArraytoLinearForm: public OneOperator {
   typedef Call_FormLinear::const_iterator const_iterator;
+  const bool isptr;
   const bool init;
   class Op : public E_F0mps { public:
+    const  bool isptr; 
     const  bool init; 
     Call_FormLinear *l;
     Expression x;
-    AnyType operator()(Stack s)  const ;// {ExecError("Internal Error:to do");} 
-    Op(Expression xx,Expression  ll,bool initt) 
+    AnyType operator()(Stack s)  const ;
+    Op(Expression xx,Expression  ll,bool isptrr,bool initt) 
       : l(new Call_FormLinear(*dynamic_cast<const Call_FormLinear *>(ll))),
         x(xx),
-        init(initt)
+        isptr(isptrr),init(initt)
         {assert(l);FieldOfForm(l->largs,IsComplexType<R>::value); }
      operator aType () const { return atype<KN<R> *>();} 
       
   };
   E_F0 * code(const basicAC_F0 & args) const 
-  { if(init) return new Op(to<KN<R> *>(args[0]),args[1],init);
-    else     return new Op(to<KN_<R> >(args[0]),args[1],init);}
+  { if(isptr) return new Op(to<KN<R> *>(args[0]),args[1],isptr,init);
+    else      return new Op(to<KN_<R> >(args[0]),args[1],isptr,init);}
    
   
-  OpArraytoLinearForm(const basicForEachType * tt) : 
-    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),init(false) {}
+//  OpArraytoLinearForm(const basicForEachType * tt) : 
+//    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),init(false),isptr(false) {}
     
-   OpArraytoLinearForm(const basicForEachType * tt,bool initt) : 
-    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),init(initt) {}
+   OpArraytoLinearForm(const basicForEachType * tt,bool isptrr, bool initt) : 
+    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),
+    isptr(isptrr), init(initt) {}
    
 };
 
@@ -907,9 +910,12 @@ AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));  
 
   KN<R> *px=0;
-  if(init) 
-   {  px = GetAny<KN<R> * >((*x)(stack) );
-      px->init(Vh.NbOfDF); 
+  if(isptr)
+    {
+     px = GetAny<KN<R> * >((*x)(stack) );
+     if(init ) 
+       px->init(Vh.NbOfDF); 
+     ffassert(px->N() == Vh.NbOfDF); 
    }
   KN_<R>  xx( px ? *px : GetAny<KN_<R> >((*x)(stack) ));
 

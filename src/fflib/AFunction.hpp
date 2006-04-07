@@ -725,7 +725,7 @@ template<class A> inline AnyType InitP(Stack,const AnyType &x){
 }
 
 
-template<class A> inline AnyType DestroyPtr(Stack,const AnyType &x) {
+template<class A> inline AnyType  DestroyPtr(Stack,const AnyType &x) {
   const A *  a=PGetAny<A>(x);
   SHOWVERB(cout << "DestroyPtr " << typeid(A).name() << *a  << endl);
    (*a)->destroy(); 
