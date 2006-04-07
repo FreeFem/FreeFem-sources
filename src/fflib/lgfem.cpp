@@ -3832,11 +3832,14 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::plusAtx > >  ,      
        new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::solveAxeqb > >  ,      
 
-       new OpArraytoLinearForm<double>(atype< KN<double>* >(),true)  ,
-       new OpArraytoLinearForm<double>(atype< KN_<double> >(),false)  ,
+       new OpArraytoLinearForm<double>(atype< KN<double>* >(),true,false)  ,
+       new OpArraytoLinearForm<double>(atype< KN_<double> >(),false,false)  ,
        new OpMatrixtoBilinearForm<double >);
  TheOperators->Add("<-",
-        new OpArraytoLinearForm<double>(atype< KN<double>* >(),true) );
+        new OpArraytoLinearForm<double>(atype< KN<double>* >(),true,true) ,
+        new OpArraytoLinearForm<double>(atype< KN<Complex>* >(),true,true) 
+        
+        );
 
 
  TheOperators->Add("=",
@@ -3848,8 +3851,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,      
        new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >  ,      
            
-       new OpArraytoLinearForm<Complex>(atype< KN<Complex>* >())  ,
-       new OpArraytoLinearForm<Complex>(atype< KN_<Complex> >())   ,
+       new OpArraytoLinearForm<Complex>(atype< KN<Complex>* >(),true,false)  ,
+       new OpArraytoLinearForm<Complex>(atype< KN_<Complex> >(),false,false)   ,
        new OpMatrixtoBilinearForm<Complex >);
      
  TheOperators->Add("+=",
