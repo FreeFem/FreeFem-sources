@@ -657,3 +657,17 @@ bool mylex::close() {
       strdata.pop();
    }
 }
+
+ mylex::mylex(ostream & out):
+    charnumber(0),
+    linenumber(1),
+    cout(out),
+    echo(mpirank == 0),
+    firsttime(true),
+    level(-1),
+    listMacroDef(new list<MapMacroDef>),
+    listMacroParam(0),
+    ffincludedir(ffenvironment["include"])
+ {    
+    listMacroDef->push_front(MapMacroDef());
+   };

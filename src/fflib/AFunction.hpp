@@ -225,7 +225,7 @@ class basicForEachType : public CodeAlloc {
      // { return make_pair<aType,const E_F0  *>(this,c.left());}
 
    protected: 
-    inline basicForEachType(const type_info  & k ,const size_t ,
+     basicForEachType(const type_info  & k ,const size_t ,
                             const E_F1_funcT_Type * p=0,basicForEachType *rr=0,
                             Function1 iv=0,Function1 id=0) ;
 /*    inline basicForEachType(const type_info  & k ,const type_info  & kf ,const size_t ,
@@ -431,25 +431,36 @@ class  OneOperator : public ArrayOfaType {
     //  10 for bool, 20 for int , 30 for long , 40, for float, 50 double, 60 for complex, 70 string
     //  string+ 1 => string 
     // 1+string => string 
-    OneOperator(aType rr) : r(rr),ArrayOfaType(),next(0),pref(0) {throwassert(r);}
-    OneOperator(aType rr,aType  a) : r(rr),ArrayOfaType(a,false),next(0),pref(0) {throwassert(rr && a );}
-    OneOperator(aType rr,aType  a,aType  b) : r(rr),ArrayOfaType(a,b,false),next(0),pref(0) {
-     throwassert(rr && a && b);} 
-    OneOperator(aType rr,aType  a,aType  b,aType c) : r(rr),ArrayOfaType(a,b,c,false),next(0),pref(0) {throwassert(rr && a && b && c);} 
-    OneOperator(aType rr,aType  a,aType  b,aType c,aType d) : r(rr),ArrayOfaType(a,b,c,d,false),next(0),pref(0) {throwassert(rr && a && b && c);} 
+    OneOperator(aType rr) ;// : r(rr),ArrayOfaType(),next(0),pref(0) {throwassert(r);}
+    OneOperator(aType rr,aType  a) ;//: r(rr),ArrayOfaType(a,false),next(0),pref(0) {throwassert(rr && a );}
+    OneOperator(aType rr,aType  a,aType  b);// : r(rr),ArrayOfaType(a,b,false),next(0),pref(0) {
+    // throwassert(rr && a && b);} 
+    OneOperator(aType rr,aType  a,aType  b,aType c) ;
+    //: r(rr),ArrayOfaType(a,b,c,false),next(0),pref(0) {throwassert(rr && a && b && c);} 
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d) ;
+    //: r(rr),ArrayOfaType(a,b,c,d,false),next(0),pref(0) {throwassert(rr && a && b && c);} 
     
-    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e) : r(rr),ArrayOfaType(a,b,c,d,e,false),next(0),pref(0) {throwassert(rr && a && b && c && d);} // Added by Fabian Dortu (5 parameters)
-    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f) : r(rr),ArrayOfaType(a,b,c,d,e,f,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f);} // Added by Fabian Dortu (6 parameters) 
-    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g) : r(rr),ArrayOfaType(a,b,c,d,e,f,g,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g);} // Added by Fabian Dortu (7 parameters) 
-    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h) : r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g && h);} // Added by Fabian Dortu (8 parameters) 
-    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i) : r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,i,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g && h && i);} // Added by Fabian Dortu (9 parameters) 
-    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i, aType j) : r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,i,j,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g && h && i && j);} // Added by Fabian Dortu (10 parameters) 
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e) ;
+     //: r(rr),ArrayOfaType(a,b,c,d,e,false),next(0),pref(0) {throwassert(rr && a && b && c && d);} // Added by Fabian Dortu (5 parameters)
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f) ;
+     //: r(rr),ArrayOfaType(a,b,c,d,e,f,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f);} // Added by Fabian Dortu (6 parameters) 
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g);
+     // : r(rr),ArrayOfaType(a,b,c,d,e,f,g,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g);} // Added by Fabian Dortu (7 parameters) 
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h);
+     // : r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g && h);} // Added by Fabian Dortu (8 parameters) 
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i) ;
+     //: r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,i,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g && h && i);} // Added by Fabian Dortu (9 parameters) 
+    OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i, aType j);
+      // : r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,i,j,false),next(0),pref(0) {throwassert(rr && a && b && c && d && e && f && g && h && i && j);} // Added by Fabian Dortu (10 parameters) 
     
     
     
-    OneOperator(aType rr,const ArrayOfaType &ta) : r(rr),ArrayOfaType(ta),next(0),pref(0) {throwassert(rr);} 
-    OneOperator(aType rr,bool ellipse) : r(rr),ArrayOfaType(ellipse),next(0),pref(0) {throwassert(rr );} 
-    OneOperator(aType rr,const ListOfId *l) : r(rr),ArrayOfaType(l),next(0),pref(0) {throwassert(rr );} 
+    OneOperator(aType rr,const ArrayOfaType &ta) ;
+      //: r(rr),ArrayOfaType(ta),next(0),pref(0) {throwassert(rr);} 
+    OneOperator(aType rr,bool ellipse) ;
+    //: r(rr),ArrayOfaType(ellipse),next(0),pref(0) {throwassert(rr );} 
+    OneOperator(aType rr,const ListOfId *l) ;
+    //: r(rr),ArrayOfaType(l),next(0),pref(0) {throwassert(rr );} 
     
     typedef pair<const OneOperator *,int> pair_find;
     void operator+=(OneOperator &a){throwassert(a.next==0);a.next=next;next=&a;} 
@@ -2428,19 +2439,7 @@ template<class T>
 */
   
 
-inline basicForEachType::basicForEachType(const type_info  & k,
-                                          const size_t s,
-                                          const E_F1_funcT_Type * p,
-                                          basicForEachType *rr,
-                                          Function1 iv,Function1 id) 
-      : ktype(&k),//ktypefunc(0),
-        size(s),
-        un_ptr(p),
-        un_ptr_type(rr?rr:this), 
-        InitExp(iv),
-        casting(0), // no casting to 
-        //funct_type(0),
-        destroy(id) {} 
+
 /*
 inline basicForEachType::basicForEachType(const type_info  & k, const type_info  & kf,
                                           const size_t s,
@@ -2672,7 +2671,7 @@ class E_Routine :  public E_F0mps { public:
   const char * name;
   E_Routine(const Routine * routine,const basicAC_F0 & args);
    AnyType operator()(Stack s)  const;
-  ~E_Routine() { delete [] param;}
+  ~E_Routine() ;//{ delete [] param;}  modif del for windows
   private:
   E_Routine(const E_Routine &);
   void operator=(const E_Routine &);
