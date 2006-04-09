@@ -429,6 +429,17 @@ Block::Block(Block * f):fatherblock(f),top(f?f->top:BeginOffset*sizeof(void*)),t
       itabl=tables_of_identifier.insert(tables_of_identifier.begin(),&table);
     }
 Block::~Block(){} 
+
+ CC_F0  Block::close(Block *& c) {
+     tables_of_identifier.erase(itabl);      
+     c=fatherblock;
+     if (fatherblock) {fatherblock->topmax=topmax;
+                       fatherblock->top=top;}
+        
+     CC_F0 r;
+     r = table.destroy();
+     delete this;
+     return r;}
     
 const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
  {

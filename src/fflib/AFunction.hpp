@@ -1832,7 +1832,7 @@ template<class T>
       topmax=Max(topmax,top);
       return r;}
 
-   CC_F0  close(Block *& c) {
+   CC_F0  close(Block *& c); /* {
      tables_of_identifier.erase(itabl);      
      c=fatherblock;
      if (fatherblock) {fatherblock->topmax=topmax;
@@ -1841,7 +1841,7 @@ template<class T>
      CC_F0 r;
      r = table.destroy();
      delete this;
-     return r;}
+     return r;}*/
    C_F0 Find(const char * k) const  {return table.Find(k);}
    
    ~Block(); //{} 
