@@ -419,6 +419,17 @@ basicForEachType::basicForEachType(const type_info  & k,
 { SHOWVERB(cout << "SetArgs::\n ") ;ffassert(lid==0 || lid->size()==0);}
 
 
+
+ TableOfIdentifier::TableOfIdentifier() : listofvar(0) {}
+ TableOfIdentifier:: ~TableOfIdentifier() {}
+
+
+Block::Block(Block * f):fatherblock(f),top(f?f->top:BeginOffset*sizeof(void*)),topmax(top)
+    {     
+      itabl=tables_of_identifier.insert(tables_of_identifier.begin(),&table);
+    }
+Block::~Block(){} 
+    
 const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
  {
     pair<iterator,bool>  p=m.insert(pKV(k,Value(v,listofvar,del)));
