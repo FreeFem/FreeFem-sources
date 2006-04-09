@@ -112,7 +112,7 @@ class OptimAlgo : public OneOperator
       cas(cc)
     {
       int nbj= args.size()-1;
-      currentblock = new Block(currentblock); // make a new block to 
+      Block::open(currentblock); // make a new block to 
       X = to<Kn*>(args[nbj]);
       C_F0 X_n(args[nbj],"n");
       //  the expression to init the theparam of all 

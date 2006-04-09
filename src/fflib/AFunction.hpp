@@ -1832,6 +1832,7 @@ template<class T>
       topmax=Max(topmax,top);
       return r;}
 
+ static   Block * open(Block *& c); 
    CC_F0  close(Block *& c); /* {
      tables_of_identifier.erase(itabl);      
      c=fatherblock;
