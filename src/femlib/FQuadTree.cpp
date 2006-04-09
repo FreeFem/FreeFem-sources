@@ -387,6 +387,12 @@ FQuadTree::StorageQuadTreeBox::StorageQuadTreeBox(long ll,StorageQuadTreeBox *nn
   throwassert(b);
 }
 
+ FQuadTree::StorageQuadTreeBox::~StorageQuadTreeBox()
+    { //cout <<  "~StorageQuadTreeBox " << this << " n " << n << " b " << b << endl;
+      if(n) delete n;
+      delete [] b;
+    }
+
 FQuadTree::~FQuadTree()
 {
   delete sb; 

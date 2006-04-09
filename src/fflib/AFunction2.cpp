@@ -237,6 +237,51 @@ C_F0::C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & 
         }
   }
 
+    OneOperator::OneOperator(aType rr) 
+      : r(rr),ArrayOfaType(),next(0),pref(0) {throwassert(r);}
+    OneOperator::OneOperator(aType rr,aType  a) 
+      : r(rr),ArrayOfaType(a,false),next(0),pref(0) {throwassert(rr && a );}
+    OneOperator::OneOperator(aType rr,aType  a,aType  b)
+      : r(rr),ArrayOfaType(a,b,false),next(0),pref(0) {
+     throwassert(rr && a && b);} 
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c) 
+      : r(rr),ArrayOfaType(a,b,c,false),next(0),pref(0)
+        {throwassert(rr && a && b && c);} 
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d)
+      : r(rr),ArrayOfaType(a,b,c,d,false),next(0),pref(0) 
+      {throwassert(rr && a && b && c);} 
+    
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e) 
+      : r(rr),ArrayOfaType(a,b,c,d,e,false),next(0),pref(0)
+       {throwassert(rr && a && b && c && d);} // Added by Fabian Dortu (5 parameters)
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f) 
+      : r(rr),ArrayOfaType(a,b,c,d,e,f,false),next(0),pref(0) 
+      {throwassert(rr && a && b && c && d && e && f);} // Added by Fabian Dortu (6 parameters) 
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g) 
+      : r(rr),ArrayOfaType(a,b,c,d,e,f,g,false),next(0),pref(0) 
+       {throwassert(rr && a && b && c && d && e && f && g);} // Added by Fabian Dortu (7 parameters) 
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h) 
+     : r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,false),next(0),pref(0) 
+       {throwassert(rr && a && b && c && d && e && f && g && h);} // Added by Fabian Dortu (8 parameters) 
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i) 
+      : r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,i,false),next(0),pref(0) 
+      {throwassert(rr && a && b && c && d && e && f && g && h && i);} // Added by Fabian Dortu (9 parameters) 
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i, aType j) 
+      : r(rr),ArrayOfaType(a,b,c,d,e,f,g,h,i,j,false),next(0),pref(0) 
+     {throwassert(rr && a && b && c && d && e && f && g && h && i && j);} // Added by Fabian Dortu (10 parameters) 
+    
+    
+    
+    OneOperator::OneOperator(aType rr,const ArrayOfaType &ta) 
+      : r(rr),ArrayOfaType(ta),next(0),pref(0) 
+       {throwassert(rr);} 
+    OneOperator::OneOperator(aType rr,bool ellipse) 
+      : r(rr),ArrayOfaType(ellipse),next(0),pref(0) 
+        {throwassert(rr );} 
+    OneOperator::OneOperator(aType rr,const ListOfId *l) 
+      : r(rr),ArrayOfaType(l),next(0),pref(0) 
+      {throwassert(rr );} 
+
 void Polymorphic::Addp(const char * op,Value pp,...) const 
 {
   pair<iterator,bool>  p=m.insert(make_pair<const Key,Value>(op,pp));
@@ -357,6 +402,19 @@ basicForEachType::~basicForEachType()
    ti.clear();
   }
 
+basicForEachType::basicForEachType(const type_info  & k,
+                                          const size_t s,
+                                          const E_F1_funcT_Type * p,
+                                          basicForEachType *rr,
+                                          Function1 iv,Function1 id) 
+      : ktype(&k),//ktypefunc(0),
+        size(s),
+        un_ptr(p),
+        un_ptr_type(rr?rr:this), 
+        InitExp(iv),
+        casting(0), // no casting to 
+        //funct_type(0),
+        destroy(id) {} 
  void basicForEachType::SetArgs(const ListOfId *lid) const
 { SHOWVERB(cout << "SetArgs::\n ") ;ffassert(lid==0 || lid->size()==0);}
 
@@ -546,6 +604,8 @@ E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)
    for (int i=0;i<args.size();i++)
         param[i]=routine->param[i].r->CastTo(args[i]);
 };
+
+E_Routine::~E_Routine() { delete [] param;}
 
 AnyType E_Routine::operator()(Stack s)  const  {
    debugstack.push(make_pair<const E_Routine*,int>(this,TheCurrentLine));

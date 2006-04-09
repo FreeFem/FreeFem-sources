@@ -55,21 +55,8 @@ class mylex : public CodeAlloc {
   list<MapMacroDef> *listMacroDef;
   list<MapMacroParam> *listMacroParam;
   public:
-   mylex(ostream & out):
-    charnumber(0),
-    linenumber(1),
-    cout(out),
-    echo(mpirank == 0),
-    firsttime(true),
-    level(-1),
-    listMacroDef(new list<MapMacroDef>),
-    listMacroParam(0),
-    ffincludedir(ffenvironment["include"])
- {
-   
-    
-    listMacroDef->push_front(MapMacroDef());
-   };
+  
+  mylex(ostream & out);
   string token() const;
   void print(ostream &f) const; 
   int scan(int lvl=0);
