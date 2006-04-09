@@ -626,7 +626,7 @@ int mymain (int  argc, char **argv)
   istream * ccin=0;
   if ( ! getprog(cc,argc,argv)>0) 
     return 1; 
-  zzzfff = new  mylex(cout);
+  zzzfff = Newlex(cout);
     
   
 /*  
@@ -680,7 +680,7 @@ int mymain (int  argc, char **argv)
 #endif
   //  currentblock->close(currentblock).eval(thestack);
   fingraphique();
-  delete zzzfff;
+  Destroylex( zzzfff);
   
    // ClearMem();
   return retvalue;

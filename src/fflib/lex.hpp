@@ -110,5 +110,9 @@ private:
   
   
 } ;
+
+ mylex * Newlex(  ostream & out);
+ void Destroylex(mylex * m);
+
 extern mylex *zzzfff;
 #endif
