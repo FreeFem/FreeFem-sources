@@ -671,3 +671,12 @@ bool mylex::close() {
  {    
     listMacroDef->push_front(MapMacroDef());
    };
+   
+ mylex * Newlex(  ostream & out)
+  {
+    return mylex(out);
+  }
+void Destroylex(mylex * m)
+ {
+   delete m;
+ }
