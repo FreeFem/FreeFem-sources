@@ -440,6 +440,12 @@ Block::~Block(){}
      r = table.destroy();
      delete this;
      return r;}
+ 
+   Block * Block::open(Block *& cb)
+   {
+     return  cb = new Block(cb); 
+   }
+  
     
 const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
  {

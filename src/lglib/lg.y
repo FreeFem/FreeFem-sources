@@ -352,7 +352,7 @@ declaration:   type_of_dcl {dcltype=$1} list_of_dcls ';' {$$=$3}
                     
                         }
              | FUNCTION ID '(' list_of_id_args ')' 
-                      {currentblock = new Block(currentblock); $1->SetArgs($4);}
+                      {Block::open(currentblock); $1->SetArgs($4);}
                    '='   no_comma_expr  ';' 
                       {  $<cinst>$=currentblock->close(currentblock);
                          $$=currentblock->NewID($1,$2,$8,*$4);
@@ -360,7 +360,7 @@ declaration:   type_of_dcl {dcltype=$1} list_of_dcls ';' {$$=$3}
                          } 
 ;              
 
-begin: '{'  {  currentblock = new Block(currentblock)};
+begin: '{'  {  Block::open(currentblock)};
 end:   '}'  {  $$=currentblock->close(currentblock)};
 
 for_loop:  FOR {ffassert(inloopcount<sizeStackOfLoop);  // modif FH july 2005
@@ -370,10 +370,10 @@ while_loop:  WHILE {ffassert(inloopcount<sizeStackOfLoop);
                 
 
 declaration_for: 
-    type_of_dcl {dcltype=$1;currentblock = new Block(currentblock)}
+    type_of_dcl {dcltype=$1; Block::open(currentblock);  }
                list_of_dcls {$$=$3};
 
-try: TRY {currentblock = new Block(currentblock)};
+try: TRY { Block::open(currentblock) };
 
 instruction:   ';' {$$=0;} 
          | INCLUDE  STRING  {zzzfff->input($2);$$= 0; }
@@ -415,7 +415,7 @@ catchs:
 ;
 
 bornes: '(' ID '=' Expr ',' Expr ')' { 
-   currentblock = new Block(currentblock);
+   Block::open(currentblock);
    $$ = currentblock->NewVar<LocalVariable>($2,atype<double*>());
    $$+= $4;
    $$+= $6 }
@@ -567,7 +567,7 @@ int Compile()
   int ok;
   
   currentblock=0;
-  currentblock = new Block(currentblock);  
+  Block::open(currentblock);  
   try {
     retvalue=yyparse(); //  compile
     if(retvalue==0)  

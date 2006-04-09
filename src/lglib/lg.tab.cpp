@@ -1645,7 +1645,7 @@ case 62:
     break;}
 case 63:
 #line 355 "lg.y"
-{currentblock = new Block(currentblock); yyvsp[-4].type->SetArgs(yyvsp[-1].clist_id);;
+{Block::open(currentblock); yyvsp[-4].type->SetArgs(yyvsp[-1].clist_id);;
     break;}
 case 64:
 #line 357 "lg.y"
@@ -1656,7 +1656,7 @@ case 64:
     break;}
 case 65:
 #line 363 "lg.y"
-{  currentblock = new Block(currentblock);
+{  Block::open(currentblock);
     break;}
 case 66:
 #line 364 "lg.y"
@@ -1674,7 +1674,7 @@ case 68:
     break;}
 case 69:
 #line 373 "lg.y"
-{dcltype=yyvsp[0].type;currentblock = new Block(currentblock);
+{dcltype=yyvsp[0].type; Block::open(currentblock);  ;
     break;}
 case 70:
 #line 374 "lg.y"
@@ -1682,7 +1682,7 @@ case 70:
     break;}
 case 71:
 #line 376 "lg.y"
-{currentblock = new Block(currentblock);
+{ Block::open(currentblock) ;
     break;}
 case 72:
 #line 378 "lg.y"
@@ -1772,7 +1772,7 @@ case 89:
 case 90:
 #line 417 "lg.y"
 { 
-   currentblock = new Block(currentblock);
+   Block::open(currentblock);
    yyval.args = currentblock->NewVar<LocalVariable>(yyvsp[-5].str,atype<double*>());
    yyval.args+= yyvsp[-3].cexp;
    yyval.args+= yyvsp[-1].cexp ;
@@ -2294,7 +2294,7 @@ int Compile()
   int ok;
   
   currentblock=0;
-  currentblock = new Block(currentblock);  
+  Block::open(currentblock);  
   try {
     retvalue=yyparse(); //  compile
     if(retvalue==0)  
