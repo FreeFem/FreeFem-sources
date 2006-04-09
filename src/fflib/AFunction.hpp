@@ -183,7 +183,8 @@ template<class T>
   C_F0 NewFESpace(Key k,aType t,size_t & top,const basicAC_F0 &args);
   friend   ostream & operator<<(ostream & f,const TableOfIdentifier & );
   C_F0 destroy();
-  TableOfIdentifier() : listofvar(0) {};
+  TableOfIdentifier() ; //: listofvar(0) {};
+  ~TableOfIdentifier(); //
 };
 
 
@@ -1780,10 +1781,11 @@ class Block { //
       top=align8(top);
      size_t r=top;  top+=size ;topmax=Max(topmax,top);
      return r;}
-   Block(Block * f=0):fatherblock(f),top(f?f->top:BeginOffset*sizeof(void*)),topmax(top)
+   Block(Block * f=0);
+/*   :fatherblock(f),top(f?f->top:BeginOffset*sizeof(void*)),topmax(top)
     {     
       itabl=tables_of_identifier.insert(tables_of_identifier.begin(),&table);
-    }
+    }*/ 
    size_t size() const { return Max(topmax,top);}
   void Add(Key k,Key op,OneOperator *p0)  
     { table.Add(k,op,p0);}
@@ -1842,7 +1844,7 @@ template<class T>
      return r;}
    C_F0 Find(const char * k) const  {return table.Find(k);}
    
-   ~Block(){} 
+   ~Block(); //{} 
 }; 
 
 
