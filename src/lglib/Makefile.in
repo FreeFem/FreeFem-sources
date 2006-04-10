@@ -56,7 +56,7 @@ AR = ar
 ARFLAGS = cru
 liblg_a_AR = $(AR) $(ARFLAGS)
 liblg_a_LIBADD =
-am_liblg_a_OBJECTS = lg.tab.$(OBJEXT)
+am_liblg_a_OBJECTS = lg.tab.$(OBJEXT) mymain.$(OBJEXT)
 liblg_a_OBJECTS = $(am_liblg_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -224,7 +224,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 noinst_LIBRARIES = liblg.a
-liblg_a_SOURCES = lg.tab.hpp lg.tab.cpp 
+liblg_a_SOURCES = lg.tab.hpp lg.tab.cpp  mymain.cpp
 INCLUDES = -I../fflib -I../bamglib -I../Graphics -I../femlib
 BUILT_SOURCES = lg.tab.hpp lg.tab.cpp
 EXTRA_DIST = lg.y
@@ -277,6 +277,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lg.tab.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mymain.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

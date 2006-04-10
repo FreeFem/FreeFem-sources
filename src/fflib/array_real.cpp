@@ -11,7 +11,8 @@ void initArrayDCLdouble()
 }
 void initArrayOperatordouble()
 {
-     ArrayOperator<double>();
+
+    ArrayOperator<double,long>();
     ArrayOperatorF<double,double>();
     typedef double K;
     typedef double KK;

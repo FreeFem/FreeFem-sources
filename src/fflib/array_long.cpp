@@ -17,11 +17,13 @@ void  initArrayDCL()
 }
 */
 
+ aType aaaa_knlp;
 void initArrayDCLlong()
 {
 //     ArrayOperator<long>();
      Dcl_Type<Inv_KN_long>(); // Add FH mars 2005
      ArrayDCL<long>();
+     aaaa_knlp = atype<KN<long>*>();
 
 }
 
@@ -48,7 +50,7 @@ class OneBinaryOperatorInv_KN_long : public OneOperator { public:
 void initArrayOperatorlong()
 {
      
-     ArrayOperator<long>();
+     ArrayOperator<long,long>();
      // to def inverse permutation // Add FH mars 2005
      TheOperators->Add("^", new OneBinaryOperatorInv_KN_long(atype<KN_<long> >() ));
      TheOperators->Add("^", new OneBinaryOperatorInv_KN_long(atype<KN<long> *>() )) ;

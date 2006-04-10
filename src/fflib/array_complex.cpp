@@ -31,7 +31,7 @@ void initArrayOperatorComplex()
 {
     typedef Complex K;
     typedef const K & KK;
-    ArrayOperator<Complex>();
+    ArrayOperator<Complex,long>();
     ArrayOperatorF<Complex,const Complex&>();
      // take the real or imag part of complex array
     Add<KN<Complex> *>("im",".",new OneOperator1<KN_<double>,KN_<Complex> >(Get_C2R_<1>,atype<KN<Complex> * >()));

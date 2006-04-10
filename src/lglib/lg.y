@@ -604,7 +604,7 @@ int Compile()
   return retvalue; 
 }
 
-int mymain (int  argc, char **argv)
+int mainff (int  argc, char **argv)
 {
 
   size_t lg000;

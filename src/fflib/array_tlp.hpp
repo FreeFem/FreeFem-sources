@@ -460,18 +460,18 @@ template<class A,class B> pair<A,B> * pBuild(const A & a,const B & b)
   { return new pair<A,B>(a,b);}
 
 // add mars 2006
-template<class K,class OP>
-struct set_A_BI: public binary_function<KN_<K>,pair<KN_<K>, KN_<long> > *,KN_<K> > {
-  static KN_<K> f(const KN_<K>   & a, pair<KN_<K>, KN_<long> > * const & b)  {
+template<class K,class L,class OP>
+struct set_A_BI: public binary_function<KN_<K>,pair<KN_<K>, KN_<L> > *,KN_<K> > {
+  static KN_<K> f(const KN_<K>   & a, pair<KN_<K>, KN_<L> > * const & b)  {
     KN_<K> x(a);
     OP op;
      const KN_<K> & y(b->first);
-    const KN_<long> & I(b->second);
-    long  N = x.N();
-    long n = y.N();
+    const KN_<L> & I(b->second);
+    L  N = x.N();
+    L n = y.N();
     
-    long maxI=I(SubArray(N)).max() ;
-    long minI=I(SubArray(N)).min() ;
+    L maxI=I(SubArray(N)).max() ;
+    L minI=I(SubArray(N)).min() ;
     
     if( maxI >= n || I.N()  < N) 
        { cerr << " Out of Bound x=y(I)  :  0 <= " << minI << " < "<< maxI << "< " << n  << endl;
@@ -488,18 +488,18 @@ struct set_A_BI: public binary_function<KN_<K>,pair<KN_<K>, KN_<long> > *,KN_<K>
   }
 };  
 
-template<class K,class OP>
-struct set_AI_B: public binary_function<pair<KN_<K>, KN_<long> > * ,KN_<K>, NothingType > {
-  static NothingType  f( pair<KN_<K>, KN_<long> > * const & b,const KN_<K>   & a)  {
+template<class K,class L,class OP>
+struct set_AI_B: public binary_function<pair<KN_<K>, KN_<L> > * ,KN_<K>, NothingType > {
+  static NothingType  f( pair<KN_<K>, KN_<L> > * const & b,const KN_<K>   & a)  {
     KN_<K> x(a);
     OP op;
      const KN_<K> & y(b->first);
-    const KN_<long> & I(b->second);
-    long  N = I.N();
-    long n = y.N();
+    const KN_<L> & I(b->second);
+    L  N = I.N();
+    L n = y.N();
     
-    long maxI=I(SubArray(N)).max() ;
-    long minI=I(SubArray(N)).min() ;
+    L maxI=I(SubArray(N)).max() ;
+    L minI=I(SubArray(N)).min() ;
     
     if(  maxI >= n || x.N()  < N ) 
        { cerr << " Out of Bound x(I)=y  :  0 <= " << minI << " < "<< maxI << "< " << n  << endl;
@@ -517,27 +517,33 @@ struct set_AI_B: public binary_function<pair<KN_<K>, KN_<long> > * ,KN_<K>, Noth
 };  
 
   
-template<class K>
+extern aType aaaa_knlp;
+template<class K,class Z>
 void ArrayOperator()
 {
      Dcl_Type< Resize<KN<K> > > ();
      Dcl_Type< Resize<KNM<K> > > ();
      aType knrp = atype<KN<K> *>();
      aType knr_ = atype<KN_<K> >();
-     
-     atype<KN<K>* >()->Add("[","",new OneOperator2_<K*,KN<K>*,long >(get_elementp_<K,KN<K>*,long>));
-     atype<KN<K>* >()->Add("(","",new OneOperator2_<K*,KN<K>*,long >(get_elementp_<K,KN<K>*,long>));
+     typedef KN<Z> ZN;
+      
+     aType knlp=  aaaa_knlp ;
+     //atype<KN<Z> *>();
+     aType knl_ = atype<KN_<Z> >();
+    
+     atype<KN<K>* >()->Add("[","",new OneOperator2_<K*,KN<K>*,Z >(get_elementp_<K,KN<K>*,Z>));
+     atype<KN<K>* >()->Add("(","",new OneOperator2_<K*,KN<K>*,Z >(get_elementp_<K,KN<K>*,Z>));
      atype<KN_<K> >()->Add("(","",new OneOperator2_<KN_<K>,KN_<K>,char >(fSubArrayc<KN_<K> >));
      atype<KN_<K> >()->Add("(","",new OneOperator2_<KN_<K>,KN_<K>,SubArray>(fSubArray<K> ));
      atype<KN<K>*>()->Add("(","",new OneOperator2_<KN_<K>,KN<K>*,SubArray>(fSubArrayp<K> ));
      atype<KN<K>* >()->Add("(","",new OneOperator2_<KN<K>*,KN<K>*,char >(fSubArrayc<KN<K>* >));
 
-     atype<KNM<K>* >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,long,SubArray >(get_element_is<KN_<K>,KNM<K>*,long,SubArray>));
-     atype<KNM<K>* >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,SubArray,long >(get_element_si<KN_<K>,KNM<K>*,SubArray,long>));
-     atype<KNM<K>* >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,long,char >(get_element_lineorcol<KN_<K>,KNM<K>*,long,char>));
-     atype<KNM<K>* >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,char,long >(get_element_lineorcol<KN_<K>,KNM<K>*,char,long>));
+     atype<KNM<K>* >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,Z,SubArray >(get_element_is<KN_<K>,KNM<K>*,Z,SubArray>));
+     atype<KNM<K>* >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,SubArray,Z >(get_element_si<KN_<K>,KNM<K>*,SubArray,Z>));
+     atype<KNM<K>* >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,Z,char >(get_element_lineorcol<KN_<K>,KNM<K>*,Z,char>));
+     atype<KNM<K>* >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,char,Z >(get_element_lineorcol<KN_<K>,KNM<K>*,char,Z>));
 
-     atype<KNM<K>* >()->Add("(","",new OneOperator3_<K*,KNM<K>*,long,long >(get_elementp2_<K,KNM<K>*,long,long>));
+     atype<KNM<K>* >()->Add("(","",new OneOperator3_<K*,KNM<K>*,Z,Z >(get_elementp2_<K,KNM<K>*,Z,Z>));
 
      Add<KN<K> *>("sum",".",new OneOperator1<K,KN<K> *>(get_sum));
      Add<KN<K> *>("min",".",new OneOperator1<K,KN<K> *>(get_min));
@@ -565,25 +571,25 @@ void ArrayOperator()
      Add<KN<K> *>("resize",".",new OneOperator1< Resize<KN<K> >,KN<K> *>(to_Resize));
      Add<KNM<K> *>("resize",".",new OneOperator1< Resize<KNM<K> >,KNM<K> *>(to_Resize));
      
-     Add<Resize<KN<K> > >("(","",new OneOperator2_<KN<K> *,Resize<KN<K> > , long   >(resize1));
-     Add<Resize<KNM<K> > >("(","",new OneOperator3_<KNM<K> *,Resize<KNM<K> > , long, long  >(resize2));
+     Add<Resize<KN<K> > >("(","",new OneOperator2_<KN<K> *,Resize<KN<K> > , Z   >(resize1));
+     Add<Resize<KNM<K> > >("(","",new OneOperator3_<KNM<K> *,Resize<KNM<K> > , Z, Z  >(resize2));
 
      TheOperators->Add("<-", 
-       new OneOperator2_<KN<K> *,KN<K> *,long>(&set_init),
+       new OneOperator2_<KN<K> *,KN<K> *,Z>(&set_init),
 		       new InitArrayfromArray<K,true>
        );
      TheOperators->Add("<-", 
-        new OneOperator3_<KNM<K> *,KNM<K> *,long,long>(&set_init2),
+        new OneOperator3_<KNM<K> *,KNM<K> *,Z,Z>(&set_init2),
         new InitMatfromAArray<K,true>
        );
        
-     Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,long>(&set_init));
-     Add<KNM<K> *>("<-","(",new OneOperator3_<KNM<K> *,KNM<K> *,long,long>(&set_init2));
+     Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,Z>(&set_init));
+     Add<KNM<K> *>("<-","(",new OneOperator3_<KNM<K> *,KNM<K> *,Z,Z>(&set_init2));
      Add<KN<K> *>("<-","(",new InitArrayfromArray<K,true>);
      Add<KNM<K> *>("<-","(",new InitMatfromAArray<K,true>);
-     Add<KN<K> *>("n",".",new OneOperator1<long,KN<K> *>(get_n));
-     Add<KNM<K> *>("n",".",new OneOperator1<long,KNM<K> *>(get_n));
-     Add<KNM<K> *>("m",".",new OneOperator1<long,KNM<K> *>(get_m));
+     Add<KN<K> *>("n",".",new OneOperator1<Z,KN<K> *>(get_n));
+     Add<KNM<K> *>("n",".",new OneOperator1<Z,KNM<K> *>(get_n));
+     Add<KNM<K> *>("m",".",new OneOperator1<Z,KNM<K> *>(get_m));
      
 //     AddOpeqarray<set_eqarray,KN,K>("=");
 
@@ -775,20 +781,20 @@ void ArrayOperator()
 // atype<KN_<K> >()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >));
  atype<KN_<K> >()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >,atype<KN_<K>  >(), atype<KN_<long> >() ));
  atype<KN<K> *>()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >,atype<KN<K> * >(), atype<KN_<long> >() ));
- atype<KN_<K> >()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >,atype<KN_<K>  >(), atype<KN<long> *>() ));
- atype<KN<K> *>()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >,atype<KN<K> * >(), atype<KN<long> *>() ));
+ atype<KN_<K> >()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >,atype<KN_<K>  >(), knlp ));
+ atype<KN<K> *>()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >,atype<KN<K> * >(), knlp ));
  
  TheOperators->Add("=",
-        new OneBinaryOperator<set_A_BI< K,affectation<K>  > > ,
-        new OneBinaryOperator<set_AI_B< K,affectation<K>  > > 
+        new OneBinaryOperator<set_A_BI< K,Z,affectation<K>  > > ,
+        new OneBinaryOperator<set_AI_B< K,Z,affectation<K>  > > 
  );
  TheOperators->Add("+=",
-        new OneBinaryOperator<set_A_BI< K,affectation_add<K>  > > ,
-        new OneBinaryOperator<set_AI_B< K,affectation_add<K>  > > 
+        new OneBinaryOperator<set_A_BI< K,Z,affectation_add<K>  > > ,
+        new OneBinaryOperator<set_AI_B< K,Z,affectation_add<K>  > > 
  );
  TheOperators->Add("-=",
-        new OneBinaryOperator<set_A_BI< K,affectation_sub<K>  > > ,
-        new OneBinaryOperator<set_AI_B< K,affectation_sub<K>  > > 
+        new OneBinaryOperator<set_A_BI< K,Z,affectation_sub<K>  > > ,
+        new OneBinaryOperator<set_AI_B< K,Z,affectation_sub<K>  > > 
  );
 // fin 
   TheOperators->Add("\'",       
