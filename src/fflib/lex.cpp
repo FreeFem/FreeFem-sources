@@ -674,7 +674,7 @@ bool mylex::close() {
    
  mylex * Newlex(  ostream & out)
   {
-    return mylex(out);
+    return new mylex(out);
   }
 void Destroylex(mylex * m)
  {
