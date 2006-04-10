@@ -3,7 +3,7 @@
 # $Id$
 
 noinst_LIBRARIES=liblg.a
-liblg_a_SOURCES=lg.tab.hpp lg.tab.cpp 
+liblg_a_SOURCES=lg.tab.hpp lg.tab.cpp  mymain.cpp
 INCLUDES=-I../fflib -I../bamglib -I../Graphics -I../femlib
 
 BUILT_SOURCES=lg.tab.hpp lg.tab.cpp
