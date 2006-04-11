@@ -47,8 +47,10 @@ long get_sizep(string ** p)  { ffassert(p && *p) ;  return (*p)->size() ;}
 string ** get_replace(string ** pp,long i,long j, string *rr) 
     {
      ffassert(pp && *pp ) ; 
-      string & s=**pp;
-      s.replace(i,j,*rr);
+      string  s=**pp; // copy modif for windows pb free 
+      s.replace(i,j,*rr); 
+      delete *pp;
+      *pp = new string(s);
       return pp;
     } 
 // a( : ) = "sqsd";
@@ -57,7 +59,9 @@ struct set_substring: public binary_function<SubString,string *,SubString> {
 
   static SubString f(SubString const  & a, string  *const  & b)  
   {  
-     a.s->replace(a.i,a.j,*b);
+     string s=*a.s;
+     s.replace(a.i,a.j,*b);
+     * a.s = s; // bofbof pour windows
      return a;}
 };    
 
