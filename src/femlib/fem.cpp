@@ -876,9 +876,10 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	  v=quadtree->NearestVertex(P);
 	  assert(v);
 	}
-      
-      /*   if (verbosity>100) 
-	   cout << endl << (*this)(v) << *v << " " << Norme2(P-*v) << endl; */
+      /*
+      if (verbosity>100) 
+	cout << endl << (*this)(v) << *v << " " << Norme2(P-*v) << endl; 
+      */
       it=Contening(v);
     }
   
@@ -895,7 +896,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
   kfind++;
   while (1)
     { 
-      loop:
+      const Triangle & K(triangles[it]);
       kthrough++;
       if (k++>=1000) 
 	{
@@ -909,7 +910,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	}
       int kk,n=0,nl[3];
       
-      const Triangle & K(triangles[it]);
+      
       
       R2 & A(K[0]), & B(K[1]), & C(K[2]);
       R l[3]={0,0,0};
@@ -921,12 +922,13 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
       if (l[0] < eps) nl[n++]=0;
       if (l[1] < eps) nl[n++]=1;
       if (l[2] < eps) nl[n++]=2;
-     
-      if (n==0) {  // interior => return
-	outside=false; 
-	Phat=R2(l[1]/area2,l[2]/area2);
-	return &K;
-      }
+      
+      if (n==0)
+	{  // interior => return
+	  outside=false; 
+	  Phat=R2(l[1]/area2,l[2]/area2);
+	  return &K;
+	}
       else if (n==1) 
 	kk=0;
       else  
@@ -937,14 +939,14 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
       int itt =  TriangleAdj(it,j);
       if(itt!=it && itt >=0)  
 	{
-	   dP=DBL_MAX;
+	  dP=DBL_MAX;
 	  it=itt;
 	  continue;
 	}  
       
       //  edge j on border
       l[j]=0;
-
+      
       if ( n==2 ) 
 	{
 	  kk = 1-kk;
@@ -960,12 +962,12 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	  l[j]=0;
 	  l[3-nl[0]+nl[1]]=1;
 	  Phat=R2(l[1],l[2]);
-	  return & K;
+	  return triangles +it;
 	}
       //   on the border 
       //   projection Ortho
-       
-       kout++;
+      
+      kout++;
       
       int j0=(j+1)%3,i0= &K[j0]-vertices;
       int j1=(j+2)%3,i1= &K[j1]-vertices;
@@ -986,11 +988,11 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
           R2 Pjj(P,K[jj]);
           R dd = (Pjj,Pjj);
           if (dd >= dP ) {
-               Phat=PPhat;
-              // if(kout>1) cout << "        @ " << tt-triangles  << " " << Phat << " " << outside << endl; 
-               
-               return tt;
-             }
+	    Phat=PPhat;
+	    // if(kout>1) cout << "        @ " << tt-triangles  << " " << Phat << " " << outside << endl; 
+            
+	    return tt;
+	  }
           else
             { 
               l[0]=l[1]=l[2]=0;
@@ -998,39 +1000,42 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
               PPhat.x=l[1];
               PPhat.y=l[2];                
               dP=dd;
-              tt = &K;
+              tt = triangles + it ;
             }
         }  
-     // if(kout>1)
-       //   cout << "Find --- "<< P << " :  k=" << k << "  la lb " << la << " " << lb 
-       //               << " ii =" << ii << " iii= " << iii << " " << it << " dP= " 
-       //               << dP << " ret = " << ret <<endl;
-       
+      /*
+       if(kout>1)
+         cout << "Find --- "<< P << " :  k=" << k << "  la lb " << la << " " << lb 
+	      << " ii =" << ii << " iii= " << iii << " " << it << " dP= " 
+	      << dP << " ret = " << ret <<endl;
+      */
       if (ret || ii == iib) 
 	{  
 	  l[j]=0;
-	  l[j0]= +lb/(la+lb);
+	  
+	  l[j0]= Max(0.,Min(+lb/(la+lb),1.));
 	  l[j1]= 1-l[j0];
-          Phat=R2(l[1],l[2]);
-        //  if(kout>1) cout << "        # " << it << " " << Phat << " " << outside << endl; 
-          return & K;
+	  Phat=R2(l[1],l[2]);
+          //if(kout>1) cout << "        # " << it << " " << Phat << " " << outside << endl; 
+          return triangles +it;
 	}
-
+      bool ok=false;
       // next edge on true boundary 
       for (int p=BoundaryAdjacencesHead[ii];p>=0;p=BoundaryAdjacencesLink[p])
-	  { int e=p/2, ie=p%2, je=2-ie;
+	{ int e=p/2, ie=p%2, je=2-ie;
 	  // cout << number(bedges[e][0]) << " " << number(bedges[e][1]) << endl;
 	  if (!bedges[e].in( vertices+iii)) //  edge not equal  to i0 i1 
 	    {  
+	      ok=true;
 	      iib = ii;
 	      it= BoundaryTriangle(e,ie);  //  next triangle                      
 	      // cout << "  ------ " << it << " " << Phatt <<  endl;
-	      goto loop;
+              break;
 	    }
-	  }
-       ffassert(0); 
+	}
+      ffassert(ok); 
     }
-
+  
   
 }
 
