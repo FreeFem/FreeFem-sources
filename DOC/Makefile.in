@@ -250,7 +250,9 @@ plots/csSnapOld.eps \
 plots/logo.eps  plots/arei-Thu.eps      plots/arei-etak.eps
 
 #  Pour la page de garde FH
-FIGS_JPG = plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg
+FIGS_JPG = plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg  \
+figures/mi.jpg
+
 FIGS_PDF = plots/LogoCNRS.pdf    plots/LogoLJLL.pdf    plots/LogoUPMC.pdf plots/ffauteurs4.pdf  \
 plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf
 
