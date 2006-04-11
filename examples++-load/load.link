@@ -83,7 +83,7 @@ case "$WIN32$uu" in
     win32-CYGWIN*|win32-win32)
         echo " Window without cygwin "
         b=$bin
-        LIBS="$b/libff0.dll $b/libffAC.dll  $b/libffAL.dll  $b/libffAR.dll $b/libff1.dll $b/libff.dll $LIBS $DLL"
+        LIBS=" $b/libff.dll $LIBS $DLL"
         SHARED="-shared --unresolved-symbols=ignore-all"
         FLAGS='  -mno-cygwin '
         SUF=dll;;
