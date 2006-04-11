@@ -196,8 +196,15 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 LDADD2 = $(ARPACKLIB) $(UMFPACKLIB)  $(BLASLIB) $(G2CLIB)
-# remark the libff.dll  is split in 6 because  ld trap
-#  to much routine => memory fault 
+# remark the libff.dll  was  splited in 6 because  ld trap
+#  to much routine => memory fault in ld
+#  but now I see thant the couple allocation/delete
+#  must be make in same .dll file under windows
+#  is impossible to manage with the template generation
+#  so one .dll (this work with gcc version 3.4.4 (cygming special) (gdc 0.12, using dmd 0.125))
+#   change the entry points mymain to mainff 
+# to be compatibile with bamg. 
+# 
 FF_OBJ0 = CodeAlloc.o AFunction2.o  CheckPtr.o lex.o  global.o environment.o load.o 
 FF_OBJ_AC = array_complex.o
 FF_OBJ_AR = array_real.o
@@ -212,6 +219,7 @@ FFD_OBJ_AR = $(patsubst %.o,../fflib/%.o,$(FF_OBJ_AR))
 FFD_OBJ1 = $(patsubst %.o,../fflib/%.o,$(FF_OBJ1))
 FFD_OBJ2 = $(patsubst %.o,../fflib/%.o,$(FF_OBJ2))
 FFD_OBJIDE = $(patsubst %.o,../ide/%.o,$(FF_OBJIDE))
+LIBS_FF = libff.dll  
 all: all-am
 
 .SUFFIXES:
@@ -366,33 +374,24 @@ uninstall-am: uninstall-info-am
 all-local: $(WIN32DLLTARGET)
 	-for i in $(LDADD2) ; do case $$i in  *.dll) echo cp -p $$i .; cp -p $$i . ;;	  esac ; done
 	echo done
-win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  FreeFem++-cs.exe
+win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  FreeFem++-cs.exe bamg.exe cvmsh2.exe drawbdmesh.exe
 	echo "on a fini"
 
-libff0.dll: $(FFD_OBJ0)
-	g++ -mno-cygwin -shared $^  -o $@
-libffAR.dll: $(FFD_OBJ_AR) libff0.dll
-	g++ -mno-cygwin -shared $^  -o $@
-libffAC.dll: $(FFD_OBJ_AC) libff0.dll
-	g++ -mno-cygwin -shared $^  -o $@
-libffAL.dll: $(FFD_OBJ_AL) libff0.dll
-	g++ -mno-cygwin -shared $^  -o $@
-libff1.dll: $(FFD_OBJ1) libff0.dll libffAR.dll libffAC.dll libffAL.dll
-	g++ -mno-cygwin -shared $^  -o $@
-libff.dll: $(FFD_OBJ2)  ../lglib/liblg.a libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll
-	g++  -shared  -mno-cygwin -mwindows -mthreads  $^  $(LDADD2) -o $@ 
-FreeFem++.exe: ../std/Pcrgraph.o libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll  libff.dll 
+libff.dll: $(FFD_OBJ0)  $(FFD_OBJ_AR)  $(FFD_OBJ_AC)  $(FFD_OBJ_AL)  $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o
+	g++ -mno-cygwin  -shared $^  -o $@ $(LDADD2)
+
+FreeFem++.exe: ../std/Pcrgraph.o ../lglib/mymain.o $(LIBS_FF)
 	g++   -mno-cygwin -mwindows -mthreads  $^  -o $@
-FreeFem++-nw.exe: ../nw/sansrgraph.o  libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
+FreeFem++-nw.exe: ../nw/sansrgraph.o   ../lglib/mymain.o $(LIBS_FF)
 	g++   -mno-cygwin libff.dll $^ -o $@ 
-FreeFem++-cs.exe:$(FFD_OBJIDE) libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
+FreeFem++-cs.exe:$(FFD_OBJIDE)  ../lglib/lg.tab.o $(LIBS_FF)
 	g++  $^  `$(FLTK_CONFIG) --ldflags` -mno-cygwin    -o $@
-bamg.exe:  libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
+bamg.exe:  libff.dll $(LIBS_FF)
 	g++   -mno-cygwin ../bamg/bamg.o  $^ -o $@ 
-cvmsh2.exe:  libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
+cvmsh2.exe:  $(LIBS_FF)
 	g++   -mno-cygwin ../bamg/cvmsh2.o  $^ -o $@ 
-drawbdmesh.exe:../std/Pcrgraph.o  libff0.dll libffAR.dll libffAC.dll libffAL.dll  libff1.dll libff.dll
-	g++   -mno-cygwin -mwindows ../bamg/bamg.o  $^ -o $@ 
+drawbdmesh.exe:../std/Pcrgraph.o  ../bamg/drawbdmesh.o $(LIBS_FF)
+	g++   -mno-cygwin -mwindows  $^ -o $@ 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
