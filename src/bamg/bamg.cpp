@@ -76,7 +76,7 @@ void  MeshErrorIO(ios& )
 }
 
 #ifdef DRAWING 
-bool withrgraphique=true; 
+bool withrgraphique= initgraphique; 
 #else
 bool withrgraphique=false; 
 #endif
@@ -431,8 +431,12 @@ int main(int argc, char **argv)
     rBBeqMBB = !strcmp(rBB,fMBB);
 
 #ifdef DRAWING 
-  initgraphique();
-  initgraph=1;
+  if(initgraphique)
+    {
+      initgraphique();
+      initgraph=1;
+      withrgraphique=0; 
+    }
 #endif
   
      if (verbosity) 
@@ -497,9 +501,12 @@ int main(int argc, char **argv)
 	  if(NbSmooth>0) Th.SmoothingVertex(NbSmooth,omega);
 	  if(verbosity>3 && NbSmooth>0) Th.ShowHistogram();
 #ifdef DRAWING
-	  Th.InitDraw();
-	  Th.Draw();
-	  Th.inquire();
+	  if(initgraph)
+	    {
+	      Th.InitDraw();
+	      Th.Draw();
+	      Th.inquire();
+	    }
 #endif
 	 time3 = CPUtime();
 	 if(verbosity> 1)
@@ -515,10 +522,14 @@ int main(int argc, char **argv)
 	 if (fmsh)     Th.Write(fmsh      ,Triangles::mshMesh);
 	 if (fnopo)    Th.Write(fnopo     ,Triangles::NOPOMesh);
 #ifdef DRAWING 
-	 reffecran();
-	 Th.InitDraw();
-	 Th.Draw();
-	 Th.inquire();
+	  if(initgraph)
+	    {
+	      
+	      reffecran();
+	      Th.InitDraw();
+	      Th.Draw();
+	      Th.inquire();
+	    }
 #endif
 
 	 time3 = CPUtime();
@@ -639,9 +650,12 @@ int main(int argc, char **argv)
 	     if(NbSmooth>0) Th.SmoothingVertex(NbSmooth,omega);
 	     if(verbosity>3 && NbSmooth>0) Th.ShowHistogram();
 #ifdef DRAWING
-	     Th.InitDraw();
-	     Th.Draw();
-	     Th.inquire();
+	  if(initgraph)
+	    {
+	      Th.InitDraw();
+	      Th.Draw();
+	      Th.inquire();
+	    }
 #endif
 	 Th.BTh.ReMakeTriangleContainingTheVertex();
 
@@ -774,11 +788,14 @@ int main(int argc, char **argv)
 		     cout   << endl;
 	       }
 	     
-#ifdef DRAWING 
-	     reffecran();
-	     Th.InitDraw();
-	     Th.Draw();
-	     Th.inquire();
+#ifdef DRAWING
+	     if(initgraph)
+	       {
+		 reffecran();
+		 Th.InitDraw();
+		 Th.Draw();
+		 Th.inquire();
+	       }
 #endif
 	     
 	     // cout << "delete &Th " ;

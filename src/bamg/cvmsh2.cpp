@@ -26,7 +26,7 @@ using namespace std;
 using namespace bamg;
 //long verbosity=2;
 #ifdef DRAWING 
-bool withrgraphique=true; 
+bool withrgraphique=  initgraphique;
 #else
 bool withrgraphique=false; 
 #endif
@@ -110,9 +110,12 @@ int main(int argc, char **argv)
     }
   MeshIstreamErrorHandler = MeshErrorIO;
   set_new_handler( &NewHandler);
-#ifdef DRAWING 
-  initgraphique(); 
-  initgraph=1;
+#ifdef DRAWING
+  if(initgraphique)
+    { 
+      initgraphique(); 
+      initgraph=1;
+    }
 #endif
   //    cout << "open file in " << fin<< endl;
   Triangles Th(fin,cutoffradian);
