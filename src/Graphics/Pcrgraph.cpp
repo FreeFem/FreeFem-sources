@@ -921,13 +921,14 @@ int StoreFname(char Line[], int len)
   else check.close();
  	   
   ext = strrchr(fullName,'.'); ext++;
+  /*
   if (toupper(*ext) != 'E'
       || toupper(*(ext+1)) != 'D'
       || toupper(*(ext+2)) != 'P') {
     sprintf(msg,"\"%s\" is not a FreeFem++ script!",fullName);
     FatalErr(msg,-1);
   }
-	
+*/	
   GetFileName(fullName,shortName);
   return i;
 }
