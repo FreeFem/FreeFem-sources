@@ -1,3 +1,245 @@
+2006-04-11 23:26  hecht
+
+	*   correct load.link script (change list of ff++ dll)
+
+2006-04-11 22:06  hecht
+
+	*   Now the all.edp of tutorial run under winder (very hard word).
+	  FH
+
+2006-04-11 21:57  hecht
+
+	*   correct bug under window in Mesh:Find (very rare)
+
+2006-04-11 13:52  hecht
+
+	*  change for window free/delete pair
+
+2006-04-11 10:46  hecht
+
+	*   the new version of the dll file begin to work on windows (no
+	  trap in alloction)
+
+2006-04-10 22:53  hecht
+
+	*   next.
+
+2006-04-10 22:51  hecht
+
+	*   dur dur Windows, 
+
+2006-04-10 06:59  hecht
+
+	*  continuing malloc/free for window
+
+2006-04-09 22:19  hecht
+
+	*   suite??
+
+2006-04-09 21:50  hecht
+
+	*   suite, ..
+
+2006-04-09 20:56  hecht
+
+	*  in progress malloc/free ??
+
+2006-04-09 20:38  hecht
+
+	*   try find pair of malloc /free for windows .dll
+
+2006-04-09 18:13  hecht
+
+	*   make change for  windows dll because the pair malloc and free
+	     must be in same .dll (file); in progress (very hard).
+
+2006-04-07 08:38  hecht
+
+	*   correct missing delete pointeur in a=vmass(0,Vh); where vmass
+	  in a varf
+	    and a real[int].
+
+2006-04-07 08:35  hecht
+
+	*   CheckPtr add flag when deleting  after cleanning
+
+2006-04-06 18:19  hecht
+
+	*   remove impression
+
+2006-04-06 16:59  hecht
+
+	*  add cfloat include
+
+2006-04-06 16:53  hecht
+
+	* add missing include climits in src/femlib/fem.cpp
+
+2006-04-06 16:49  hecht
+
+	*   correct mistake in interpolation procedure, (in Mesh::Find
+	  methode)
+	    complete writting (more clean ??)
+
+2006-04-04 23:31  hecht
+
+	*  correct bug in freeboundary;edp (trap on  windows some time )
+
+2006-04-04 11:25  hecht
+
+	*  coorect consistance beetween movmesh and checkmovemesh
+
+2006-04-04 09:11  hecht
+
+	*  add CR  at end of file src/fflib/ffstack.hpp
+
+2006-04-03 22:39  hecht
+
+	*  correct misspelling
+
+2006-04-03 22:18  hecht
+
+	*  correct misspeling
+
+2006-04-03 22:11  hecht
+
+	*   pass to 2.5-1
+	    add vim color syntaxe file
+
+2006-04-03 22:09  hecht
+
+	*   correct randon error on window
+	    change newtow in newton
+	    nbev= in nev=
+	    add key work in ide hightlighting
+
+2006-04-02 21:59  hecht
+
+	* add bamg.exe, cvmsh2.exe and drawbdmesh.exe in  Inno setup
+	  package for windows
+
+2006-04-02 21:53  hecht
+
+	*   and bamg and string_def.o files
+
+2006-04-01 17:41  hecht
+
+	*  add new example  AdaptResidualErrorIndicator in the doc
+
+2006-03-31 23:15  hecht
+
+	*  add ResidualErrorIndicor example
+
+2006-03-31 20:41  hecht
+
+	*  add 2 files
+
+2006-03-31 18:26  hecht
+
+	*  add string method and correct bug une string parameter.
+
+2006-03-30 08:50  hecht
+
+	*   some optimization on new auto free ptr.
+
+2006-03-29 19:29  hecht
+
+	*  add missing clear language ptr in while and for loops.
+
+2006-03-29 14:49  hecht
+
+	*   pass to version 2.5-0
+
+2006-03-29 14:47  hecht
+
+	*  *  add automatic gestion of free language pointeur to correct
+	    to correct bug with string argument in routine.
+	    Very fist version, in progress,
+	    to day the job is do just for the string type.
+	    Now the examples++-bug/bug-arg-string.edp work find.
+
+2006-03-27 23:21  hecht
+
+	*   add mode for mo text editor on MacOs see the freefem++-doc.pdf
+	  for full detail
+
+2006-03-27 22:34  hecht
+
+	*   add freefem++  mode for mi editor on macos
+	  http://www.mimikaki.net/en/
+	    in mode-mi-edp.zip archive
+
+2006-03-27 21:25  hecht
+
+	*   * add lot missing vectorial operation with sub array
+	    * if u is a complex array (i.e. complex[int u] ..;)
+	       then  u.re (resp u.im) are  the real array of the real
+	  (resp. imag )
+	       part of the vector u
+	    * in block matrix add utilisation of array to build the block
+	  matrix
+	      see new Laplace-lagrange-mult.edp file to have an example
+
+2006-03-20 18:10  hecht
+
+	*   add init of array with a linear form.
+	    add vector and matrix term in block matrix
+	    correct missing  conj() in complex block matrix with operator '
+
+2006-03-17 23:18  hecht
+
+	*   add missing operator on sub array (type KN_<R>)
+
+2006-03-17 10:45  hecht
+
+	*   add new operator on complex array to get real or imag part
+	    complex[int] c(10);
+	    real[int] r(10);
+	    r = c.im ; // imag part of complex array
+	    r = c.re ; // real part of complex array
+	    add florr and ceil function.
+
+2006-03-17 07:36  hecht
+
+	*  add	 x=exp(y);  when x,y are array	for exp;log,sin,tan , ....
+
+2006-03-16 11:40  hecht
+
+	*   add new kind on interplate matrix
+
+2006-03-13 14:40  hecht
+
+	*  correct freefem-doc.tex until page 29 example 6.
+
+2006-03-12 12:10  hecht
+
+	*   do autoreconf
+
+2006-03-12 10:47  hecht
+
+	*  change version number
+
+2006-03-11 18:47  hecht
+
+	*  array of matrix work now.
+
+2006-03-11 09:45  hecht
+
+	*   correct error in build array of sparce matrix.
+
+2006-03-10 18:35  hecht
+
+	*   pl with matrix arry -> remove
+
+2006-03-10 17:46  hecht
+
+	*   make big change in the DOC with O. Kavian
+	    Add array of matrix.
+
+2006-03-07 20:10  hecht
+
+	*   tag release_2_4
+
 2006-03-07 20:05  hecht
 
 	*   pass to  to version 2.4.0

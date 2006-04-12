@@ -565,8 +565,8 @@ AnyType Adaptation::operator()(Stack stack) const
   // gestion des arguments 
   hmin              = Max(hmin, arg(0,stack,hmin));
   hmax              = Min(hmax,arg(1,stack,hmax));
-  if (inq) 
-   if (!withrgraphique) {initgraphique();withrgraphique=true;}
+  if (inq && initgraphique) 
+   if (!withrgraphique ) {initgraphique();withrgraphique=true;}
   
     if (iso)  anisomax=1;
   if (verbosity>2) 
@@ -648,7 +648,7 @@ AnyType Adaptation::operator()(Stack stack) const
   else
   Th.IntersectConsMetric(lessol,nbsol,typesol,hmin,hmax,sqrt(err)*coef,anisomax,AbsError?0.0:CutOff,nbjacobi,rescaling,powerM,0);
 #ifdef DRAWING1
-  if ( (inq!=0) ) {
+  if ( (inq!=0) && initgraphique ) {
     if (!withrgraphique) {initgraphique();withrgraphique=true;}
     reffecran();
     Th.InitDraw();
@@ -689,8 +689,8 @@ AnyType Adaptation::operator()(Stack stack) const
     nTh->ShowHistogram();
    
 #ifdef DRAWING
-  if ((inq!=0)) {
-    if (!withrgraphique) {initgraphique();withrgraphique=true;}
+  if ((inq!=0) && initgraphique) {
+    if (!withrgraphique ) {initgraphique();withrgraphique=true;}
     
     reffecran();
     nTh->InitDraw();

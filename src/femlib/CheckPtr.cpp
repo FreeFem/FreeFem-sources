@@ -233,7 +233,7 @@ void * AllocExtern::MyNewOperator(size_t ll,bool is_array)
 
 void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
 {
-  if(after_end) { free(pp); return;}
+  if(after_end) { /*free(pp)*/; return;}
   init();
   if (AllocHead)
     {
