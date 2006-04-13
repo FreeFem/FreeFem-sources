@@ -1,3 +1,38 @@
+2006-04-13 10:27  hecht
+
+	*   coorect misstake in rc/femlib/FESpace.cpp
+
+2006-04-13 08:37  hecht
+
+	*   correct trouble  in Boundary condition  when we mixte some
+	    composite FE et atomic FE.	Example:
+	      fespace Xh(Th,[P2,P2]);
+	      fespace Mh(Th,P1);
+	      Xh [u1,u2], [w1,w2];
+	      Mh p, r;
+	      solve stokes([u1,u2,p],[w1,w2,r]) =
+	     This imply change in FEspace.hpp so all tke .dll must bee
+	  recompiled
+	     Thanks To stefano.micheletti@polimi.it
+
+2006-04-12 14:03  hecht
+
+	*   remove check suffix .edp to be compatible with drawbdmesh.exe
+
+2006-04-12 12:59  hecht
+
+	*   add line un INNOTAVION
+
+2006-04-12 11:31  hecht
+
+	*   add bamg example an correct problem beetween bamg and freefem
+	  graphic
+	    set the version to 2.6-1
+
+2006-04-12 07:38  hecht
+
+	*  correct load.link under windows with new list of .dll files.
+
 2006-04-11 23:26  hecht
 
 	*   correct load.link script (change list of ff++ dll)

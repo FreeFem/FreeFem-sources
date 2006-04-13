@@ -11,7 +11,7 @@ CXXLD=$(STATICTOOL) $(CXX)
 bin_PROGRAMS=$(MPIPROG)
 EXTRA_PROGRAMS=FreeFem++-mpi
 
-FreeFem___mpi_SOURCES=../Graphics/sansrgraph.cpp parallelempi.cpp	\
+FreeFem___mpi_SOURCES=../Graphics/sansrgraph.cpp ../lglib/mymain.cpp   parallelempi.cpp	\
 ../lglib/lg.tab.cpp
 FreeFem___mpi_DEPENDENCIES=../fflib/libff.a
 LDADD=../fflib/libff.a @UMFPACKLIB@ @ARPACKLIB@ @BLASLIB@
