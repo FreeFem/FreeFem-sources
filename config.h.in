@@ -54,6 +54,12 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* mpicxx.h have include file */
+#undef HAVE_MPICXX_H
+
+/* Define to 1 if you have the `second_' function. */
+#undef HAVE_SECOND_
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 

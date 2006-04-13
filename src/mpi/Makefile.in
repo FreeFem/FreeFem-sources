@@ -14,10 +14,6 @@
 
 @SET_MAKE@
 
-# Makefile using Automake + Autoconf
-# ----------------------------------
-# $Id$
-
 SOURCES = $(FreeFem___mpi_SOURCES)
 
 srcdir = @srcdir@
@@ -90,7 +86,12 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
-CXX = mpiCC -CC=@CXX@
+
+# Makefile using Automake + Autoconf
+# ----------------------------------
+# $Id$
+# change FH 
+CXX = @MPICXX@
 CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
@@ -115,6 +116,7 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 FF_LAPACKdir = @FF_LAPACKdir@
+FF_SECOND = @FF_SECOND@
 FF_UMFPACK_CONFIG = @FF_UMFPACK_CONFIG@
 FLTK_CONFIG = @FLTK_CONFIG@
 FLTK_CONFIG_PARAM = @FLTK_CONFIG_PARAM@
@@ -147,6 +149,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+MPICXX = @MPICXX@
 MPIPROG = @MPIPROG@
 OBJEXT = @OBJEXT@
 OPTIM_TYPE = @OPTIM_TYPE@

@@ -343,19 +343,25 @@ fi
 # -------------------------------------------------
 
 # We need to choose between mpich and lam for the Debian package
-AC_ARG_WITH(mpi,[  --with-mpi=[mpich/lam/yes/no]	or --without-mpi	Choose MPI implementation (default is mpich)])
+AC_ARG_WITH(mpi,[  --with-mpi=[yes/no/mpiCC /mpic++/... ]	or --without-mpi	Choose MPI implementation (default is mpich)])
 
 # Default is mpich
 if test "$with_mpi" = yes
 then
-	with_mpi=mpich
+   ff_mpicxx=mpiCC
+else 
+  case "$with_mpi" in
+ lam|mpich)   ff_mpicxx=mpiCC.$with_mpi;;
+ *)  ff_mpicxx="$with_mpi" ;;
+ esac
 fi
 
 if test "$with_mpi" != no
 then
-	AC_MSG_CHECKING(for mpiCC.$with_mpi)
+
+	AC_MSG_CHECKING(for $ff_mpicxx)
 	ff_save_cxx="$CXX"
-	CXX=mpiCC.$with_mpi
+	CXX=$ff_mpicxx
 	AC_LINK_IFELSE(
 [#include <stdio.h>
 #include <mpi.h>
@@ -392,8 +398,13 @@ ff_mpi=no)
 		# We do not AC_DEFINE any special flag for parallel
 		# computation here, because it must only be set when the
 		# parallel program is compiled (see src/mpi/Makfile.am)
+                AC_CHECK_HEADER(mpicxx.h,
+                        AC_DEFINE(HAVE_MPICXX_H,1, mpicxx.h  have include file))
 
 		AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
+                AC_SUBST(MPICXX,$ff_mpicxx)
+	else
+	        AC_SUBST(MPICXX,$ff_save_cxx)
 	fi
 fi
 
@@ -536,6 +547,8 @@ then
         AC_MSG_RESULT($ff_blas_ok)
 fi
 done
+
+
 
 
 # If all else fails, download!
@@ -802,6 +815,9 @@ AC_SUBST(UMFPACKLIB,$ff_umfpack_lib)
 
 # asinh acosh atanh are not in Mingw yet
 AC_CHECK_FUNCS(asinh acosh atanh getenv)
+
+AC_CHECK_FUNCS(second_,ff_second="",ff_second=second.o)
+AC_SUBST(FF_SECOND,"$ff_second")
 
 # If times() and sysconf() are not here, UMFPACK should know
 if test "$ff_umfpack_ok" = yes
