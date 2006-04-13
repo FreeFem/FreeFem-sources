@@ -227,7 +227,7 @@ FEProduitConstruct::FEProduitConstruct(int kk,const TypeOfFE &t)
   int n= m*kk;
   int N= teb.N*kk;
   data = new int [n*(5+2)+N];
-  data1 = data1 + n*(5)+N; // april 2006  add 2 array ????
+  data1 = data + n*(5)+N; // april 2006  add 2 array ????
   int c=0;
   
   for (int i=0;i<m;i++)
