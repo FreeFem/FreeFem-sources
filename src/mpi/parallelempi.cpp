@@ -5,8 +5,11 @@
 #include "Operator.hpp"
 #include "fem.hpp"
 
+#ifdef HAVE_MPICXX_H
+#include <mpicxx.h>
+#else
 #include <mpi++.h>
-
+#endif 
   void initparallele(int &, char **&);
   void init_lgparallele();  
   
