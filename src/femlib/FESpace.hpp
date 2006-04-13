@@ -175,15 +175,19 @@ class TypeOfFE { public:
    int const * const NodeOfDF; // 
    int const * const fromFE;   //  the df  come from df of FE
    int const * const fromDF;   //  the df  come from with FE
-   int const * const dim_which_sub_fem;
+   int const * const dim_which_sub_fem; // from atomic sub FE for CL
    KN<IPJ > pij_alpha ;
    KN<R2 > P_Pi_h ;
   double *coef_Pi_h_alpha;
+   KN<TypeOfFE *> Sub_ToFE; //  List of atomic sub TFE avril 2006 
+    //  form Atomic Sub FE 
+   int const * const fromASubFE; //  avril 2006 for CL
+   int const * const fromASubDF; //  avril 2006 for CL
    
   // if 0  no plot 
   public: 
   
-    TypeOfFE(const TypeOfFE & t,int k,const int * data) 
+    TypeOfFE(const TypeOfFE & t,int k,const int * data,const int * data1) 
     : 
       NbDoF(t.NbDoF*k),
       NbNodeOnVertex(t.NbNodeOnVertex),NbNodeOnEdge(t.NbNodeOnEdge),NbNodeOnElement(t.NbNodeOnElement),
@@ -198,9 +202,16 @@ class TypeOfFE { public:
     fromDF(data+4*NbDoF),
     dim_which_sub_fem(data+5*NbDoF),
     pij_alpha(t.pij_alpha.N()*k),P_Pi_h(t.P_Pi_h),
-    coef_Pi_h_alpha(0)
-    
-    { throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);
+    coef_Pi_h_alpha(0),
+    Sub_ToFE(nb_sub_fem),
+    fromASubFE(data1+0*NbDoF),
+    fromASubDF(data1+1*NbDoF)
+    { 
+       for(int i=0,kk=0;i<k;i++)
+        for (int j=0;j<t.nb_sub_fem;j++)
+          Sub_ToFE[kk++]=t.Sub_ToFE[j];
+      
+      throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);
      // Warning the componant is moving first 
         for (int j=0,l=0;j<t.pij_alpha.N();j++) // for all sub DF
           for(int i=0,i0=0; i<k; i++,l++) // for componate
@@ -211,7 +222,7 @@ class TypeOfFE { public:
           }                         
     } 
        
-    TypeOfFE(const TypeOfFE ** t,int k,const int * data) 
+    TypeOfFE(const TypeOfFE ** t,int k,const int * data,const int * data1) 
     : 
       NbDoF(sum(t,&TypeOfFE::NbDoF,k)),
       NbNodeOnVertex(NbNodebyWhat(data,NbDoF,0)),
@@ -232,10 +243,18 @@ class TypeOfFE { public:
     dim_which_sub_fem(data+5*NbDoF),
     pij_alpha(Makepij_alpha(t,k)),
     P_Pi_h(MakeP_Pi_h(t,k)),
-    coef_Pi_h_alpha(0)
-
+    coef_Pi_h_alpha(0),
+    Sub_ToFE(nb_sub_fem),
+    fromASubFE(data1+0*NbDoF),
+    fromASubDF(data1+1*NbDoF)
     
-   { throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);} 
+   {
+     for(int i=0,kk=0;i<k;i++)
+       for (int j=0;j<t[i]->nb_sub_fem;j++)
+          Sub_ToFE[kk++]=t[i]->Sub_ToFE[j];
+      
+     Sub_ToFE= this;
+     throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);} 
 
   TypeOfFE(const int i,const int j,const int k,const int NN,const  int  *   data,int nsub,int nbsubfem,
     int kPi,int npPi,double * coef_Pi_h_a=0) 
@@ -257,9 +276,14 @@ class TypeOfFE { public:
     fromDF(data+4*NbDoF),
     dim_which_sub_fem(data+5*NbDoF),
     pij_alpha(kPi),P_Pi_h(npPi),
-    coef_Pi_h_alpha(coef_Pi_h_a)
+    coef_Pi_h_alpha(coef_Pi_h_a),
+    Sub_ToFE(nb_sub_fem),
+    fromASubFE(data+3*NbDoF),
+    fromASubDF(data+4*NbDoF)
     
      { 
+      Sub_ToFE= this;
+
      // cout << "TypeOfFE " <<NbDoF << " : " << NbDfOnVertex << " " << NbDfOnEdge << " " << NbDfOnElement << 
      // " : " << NbNodeOnVertex << " " << NbNodeOnEdge << " " << NbNodeOnElement << endl;
       assert(NbDfOnVertex==Count(data,NbDoF,0));
@@ -293,9 +317,12 @@ class TypeOfFE { public:
     fromDF(data+4*NbDoF),
     dim_which_sub_fem(data+5*NbDoF),
     pij_alpha(kPi),P_Pi_h(npPi),
-    coef_Pi_h_alpha(coef_Pi_h_a)
-    
+    coef_Pi_h_alpha(coef_Pi_h_a),
+    Sub_ToFE(nb_sub_fem) ,   
+    fromASubFE(data+3*NbDoF),
+    fromASubDF(data+4*NbDoF)
      { 
+      Sub_ToFE= this;
       assert(NbDfOnVertex==Count(data,NbDoF,0));
       assert(NbDfOnVertex==Count(data,NbDoF,1));
       assert(NbDfOnVertex==Count(data,NbDoF,2));
@@ -420,7 +447,9 @@ class FElement : public baseFElement { public:
   int FromFE(int i) const { return tfe->fromFE[i];}
  // df is the df in element 
   int NodeOfDF(int df) const { return tfe->NodeOfDF[df];} // a node
-  int DFOfNode(int df) const { return tfe->DFOfNode[df];} // the df number on the node 
+  int FromASubFE(int i) const { return tfe->fromASubFE[i];}
+  int FromASubDF(int i) const { return tfe->fromASubDF[i];}
+   int DFOfNode(int df) const { return tfe->DFOfNode[df];} // the df number on the node 
  
   R operator()(const R2 & PHat,const KN_<R> & u,int i,int op)  const ;
   complex<R> operator()(const R2 & PHat,const KN_<complex<R> > & u,int i,int op)  const ;

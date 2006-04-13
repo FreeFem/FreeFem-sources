@@ -1606,6 +1606,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                                    " all componant, in the right order");
                     
                   }
+                 // cout << " k "<< k << " " << comp << " " << " Nbcomp=" << Nbcomp << " " << Uh.dim_which_sub_fem[comp] << " " << Uh.dim_which_sub_fem[comp+1] <<  endl; 
 #ifdef OLDPih                    
                 K.Pi_h(gg,F_Pi_h,buf,&tabexp);
                 
@@ -1635,7 +1636,9 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                 int nbdf = K.NbDoF();
                 for (int df=0;df<nbdf;df++)
                   // if (K.FromFE(df)==which_uh[xx.first] && onWhatIsEdge[ie][K.DFOnWhat(df)] ) 
-                  if (K.FromFE(df)==Uh.dim_which_sub_fem[xx.first] && onWhatIsEdge[ie][K.DFOnWhat(df)] ) 
+                  {
+                  //  cout << df << " from = " << K.FromFE(df) << "   dim .. " << Uh.dim_which_sub_fem[xx.first] << "  first " << xx.first << " " << onWhatIsEdge[ie][K.DFOnWhat(df)] << endl;
+                  if (K.FromASubFE(df)==Uh.dim_which_sub_fem[xx.first] && onWhatIsEdge[ie][K.DFOnWhat(df)] ) 
                     {
                       // cout << k << " df=" << df <<  " g= " << gg[df] <<" " << gg(FromTo(0,2)) << endl;
                       int ddf=K(df);
@@ -1644,6 +1647,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
                       if (B) (*B)[ddf]=tgv*gg[df]; 
                       if (X) (*X)[ddf]=gg[df];
                     }
+                   }
               if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
                }
           }

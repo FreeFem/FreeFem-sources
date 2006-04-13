@@ -130,6 +130,7 @@ class FESumConstruct { protected:
    const int k;
    int nbn; // nb of node 
    int  *  data;
+   int  * data1;
    int  * const NN; //  NN[ i:i+1[ dimension de l'element i
    int  * const DF; // DF[i:i+1[  df associe a l'element i
    int  * const comp; //  
@@ -166,9 +167,9 @@ class FESumConstruct { protected:
 
 class TypeOfFESum: public FESumConstruct, public  TypeOfFE { public:
    TypeOfFESum(const FESpace **t,int kk): 
-     FESumConstruct(kk,Make(t,kk)),TypeOfFE(teb,kk,data) {}
+     FESumConstruct(kk,Make(t,kk)),TypeOfFE(teb,kk,data,data1) {}
        TypeOfFESum(const TypeOfFE **t,int kk): 
-     FESumConstruct(kk,Make(t,kk)),TypeOfFE(teb,kk,data) {}
+     FESumConstruct(kk,Make(t,kk)),TypeOfFE(teb,kk,data,data1) {}
 
   // void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
    void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
@@ -189,13 +190,14 @@ class FEProduitConstruct { protected:
    const TypeOfFE & teb;
    int k;
    int * data;
+   int * data1;
    FEProduitConstruct(int kk,const TypeOfFE &t)  ;   
    ~FEProduitConstruct(){delete [] data;}   
 };
 
 class TypeOfFEProduit: protected FEProduitConstruct, public  TypeOfFE { public:  
    TypeOfFEProduit(int kk,const TypeOfFE &t): 
-     FEProduitConstruct(kk,t),TypeOfFE(t,kk,data)  {}
+     FEProduitConstruct(kk,t),TypeOfFE(t,kk,data,data1)  {}
      
   // void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
    void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
@@ -224,7 +226,8 @@ FEProduitConstruct::FEProduitConstruct(int kk,const TypeOfFE &t)
     
   int n= m*kk;
   int N= teb.N*kk;
-  data = new int [n*5+N];
+  data = new int [n*(5+2)+N];
+  data1 = data1 + n*(5)+N; // april 2006  add 2 array ????
   int c=0;
   
   for (int i=0;i<m;i++)
@@ -250,6 +253,21 @@ FEProduitConstruct::FEProduitConstruct(int kk,const TypeOfFE &t)
    for (int j=0;j<kk;j++) 
     for (int i=0;i<teb.N;i++) 
       data[c++]= teb.dim_which_sub_fem[i] + teb.nb_sub_fem*j ;
+ 
+   int ci=n;
+   int cj=0;
+
+  //  ou dans la partie miminal element finite atomic 
+  for (int i=0;i<m;i++)
+   for (int j=0;j<kk;j++) 
+    {
+      int il= teb.fromASubDF[i];
+      int jl= teb.fromASubFE[i];
+      data1[ci++]=il;
+      data1[cj++]=j*teb.nb_sub_fem+jl;      
+    }
+     
+      
 }
 
 FESumConstruct::FESumConstruct(int kk,const TypeOfFE **t)
@@ -277,7 +295,9 @@ FESumConstruct::FESumConstruct(int kk,const TypeOfFE **t)
 //  n = nb de DF total   
 //  N the fem is in R^N 
    
-  data = new int [n*5 + N];
+  data = new int [n*(5+2) + N];
+  data1 = data + n*5+N; // april 2006  add 2 array ????
+  
   int c=0;
   int ki= 0; 
 // recherche des noeuds
@@ -326,7 +346,10 @@ FESumConstruct::FESumConstruct(int kk,const TypeOfFE **t)
    for ( j=0;j<kk;j++)
      for ( i=0;i<teb[j]->NbDoF;i++)
        data[c++] = i; //  node from of df in FE
-       
+  // error -- here 
+  //in case of [P2,P2],P1  
+   // we expect 0,0,1   and we get 0 1 2 
+   // => wrong BC ???? 
    int xx=0;
    for (j=0;j<kk;j++)
      { 
@@ -339,6 +362,22 @@ FESumConstruct::FESumConstruct(int kk,const TypeOfFE **t)
        }
        xx=xxx;
      }
+    
+
+  //  ou dans la partie miminal element finite atomic 
+ 
+   int ci=n;
+   int cj=0;
+   int ccc=0;
+   for ( j=0;j<kk;ccc+=teb[j++]->nb_sub_fem)
+     for ( i=0;i<teb[j]->NbDoF;i++)
+      {
+      int il= teb[j]->fromASubDF[i];
+      int jl= teb[j]->fromASubFE[i];
+      data1[ci++]=il;
+      data1[cj++]=ccc+jl;      
+     }
+     
   
   ffassert(c== 5*n+N);      
 /*  int cc=0;
