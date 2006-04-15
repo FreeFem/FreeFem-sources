@@ -917,7 +917,7 @@ AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const
        px->init(Vh.NbOfDF); 
      ffassert(px->N() == Vh.NbOfDF); 
    }
-  KN_<R>  xx( px ? *px : GetAny<KN_<R> >((*x)(stack) ));
+  KN_<R>  xx( px ? *(KN<R> *) px : GetAny<KN_<R> >((*x)(stack) ));
 
   xx=R(); 
   if ( AssembleVarForm<R,MatriceCreuse<R> >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
