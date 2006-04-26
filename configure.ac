@@ -32,8 +32,15 @@ AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPAC
      ff_g2c_lib="";	 
 if test "$enable_fortran" != no
 then
-	AC_PROG_F77
-#	AC_F77_LIBRARY_LDFLAGS   modif FH
+	AC_PROG_F77(gfortran g77 f77 xlf f90 fort77 xlf90)
+        # modif FH		
+	AC_F77_LIBRARY_LDFLAGS  
+	# correct pb of double def under macos 
+	case $F77 in 
+	 *g77)  FLIBS=`echo "$FLIBS"|sed 's,-lcrt2.o ,,g'`
+	 AC_MSG_WARN([  remove -lcrt2.o from \$FLIBS : $FLIBS ])
+	 ;;
+	esac
 	AC_ARG_WITH(flib,[  --with-flib= the fortran library ])
 	if test "$with_flib" != no -o -n  "$with_flib"
 	then 
@@ -441,12 +448,10 @@ then
 fi
 if test  "$ff_wget" = no -a "$enable_download" = yes
 then
-	ff_wget=""
-	AC_CHECK_PROG(ff_wget,curl,yes,no)
-	if test "$ff_wget" = "yes" 
-	then
-	ff_wget_command="curl -O"
-	fi
+        ff_wget_command="curl -O"
+  	ff_curl=""
+	AC_CHECK_PROG(ff_curl,curl -O,yes,no)
+	ff_wget="$ff_curl"
 fi
 
 AC_SUBST(WGET,$ff_wget_command)
@@ -626,6 +631,7 @@ fi
 
 if test "$ff_blas_ok" = yes;
 then
+  ff_g2c_lib="$FLIBS"
        if test  -n "$ff_g2c_lib"
        then
            LIBS="$LIBS $ff_g2c_lib"       

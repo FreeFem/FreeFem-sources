@@ -1,0 +1,14 @@
+the list of tools to build freefem++ on MacOS are:
+
+Apple's Developer Tools
+
+X11 
+
+To compile ARPACK for eigen value computation 
+ we need   fortran  compiler
+  see  http://hpc.sourceforge.net/    and get g77 or gfortran 
+  or install g77 from fink installer  
+  or you can use f2c and fort77 wrapper
+
+latex en pdflatex 
+ http://tug.ctan.org/cgi-bin/getFile.py?fn=/systems/mac/mactex/MacTeX-20060314.dmg
