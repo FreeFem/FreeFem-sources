@@ -839,7 +839,7 @@ fi
 
 # Enable static linking (no shared libraries)
 # -------------------------------------------
-
+AC_CHECK_PROG(ff_libtool,libtool,yes,no)	
 AC_ARG_ENABLE(static,
 	[  --enable-static	Build binaries with no shared library dependencies])
 if test "$enable_static" = yes

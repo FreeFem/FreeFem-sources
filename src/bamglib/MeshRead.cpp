@@ -279,6 +279,21 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 		}
 
 	}
+	
+/*   ne peut pas marche car il n'y a pas de flag dans les aretes du maillages
+       else if (!strcmp(fieldname,"RequiredEdges"))
+        { 
+          int i,j,n;
+          f_in  >> n ;
+
+          for (i=0;i<n;i++) {     
+            f_in  >>  j ;
+            assert( j <= nbe );
+            assert( j > 0 );
+            j--;
+            edges[j].SetRequired();  }
+      }
+*/	
       else if (!strcmp(fieldname,"EdgeOnGeometricEdge"))
 	{ 
 	  assert(edges);

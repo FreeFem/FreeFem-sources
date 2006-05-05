@@ -185,8 +185,12 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	      
 		 edges[add].v[0] = &triangles[it][VerticesOfTriangularEdge[j][0]];
 		 edges[add].v[1] = &triangles[it][VerticesOfTriangularEdge[j][1]];
+		  edges[add].on=0; 
 		 if (i<nbeold) // in file edge // Modif FH 06122055 
-		    edges[add].ref = edgessave[i].ref; 
+		 {
+		    edges[add].ref = edgessave[i].ref; 		      
+		    edges[add].on = edgessave[i].on; //  HACK pour recuperer les aretes requise midf FH avril 2006 ???? 
+		    }
 		 else
 		   edges[add].ref = Min(edges[add].v[0]->ref(),edges[add].v[1]->ref()); // no a good choice
 	    }
@@ -369,6 +373,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
       Gh.edges[i].flag = 0;
       Gh.edges[i].tg[0]=R2();
       Gh.edges[i].tg[1]=R2();
+      bool requis= edges[i].on; 
       edges[i].on =  Gh.edges + i;
       if(equiedges && i < nbeold ) {
         int j=equiedges[i]/2;
@@ -384,7 +389,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
            //assert(sens==0);//  meme sens pour l'instant
         }
       }
-       
+      if(requis)   Gh.edges[i].Required(); // fin modif ... 
       R2 x12 = Gh.vertices[j0].r-Gh.vertices[j1].r;
       Real8 l12=Norme2(x12);        
       hmin = Min(hmin,l12);
@@ -854,11 +859,12 @@ void Geometry::AfterRead()
 	    cout << "     The vertex " << i << " is a corner (angle) " 
 		 << 180*(da12)/ Pi<< " " << 180*MaximalAngleOfCorner/Pi << endl;}
 	// if the ref a changing then is     SetRequired();
-	if (edges[i1].flag != edges[i2].flag) 
+	
+	if (edges[i1].flag != edges[i2].flag || edges[i1].Required()) 
 	 {
 	  vertices[i].SetRequired();
 	  if(verbosity>7)
-	    cout << "     The vertex " << i << " is Required the flag change (crack or equi)" << endl;}
+	    cout << "     The vertex " << i << " is Required the flag change (crack or equi, or require)" << endl;}
 	  
 	if (edges[i1].ref != edges[i2].ref) {
 	  vertices[i].SetRequired();

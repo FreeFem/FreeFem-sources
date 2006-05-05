@@ -858,7 +858,7 @@ int DoMouseDown (int windowPart, WindowPtr whichWindow, EventRecord *myEvent)
 					SetPortWindowPort(whichWindow);
 				        GetPort(&grafPort0);
 
-		//			DragWindow(whichWindow, myEvent->where, &dragRect);
+					DragWindow(whichWindow, myEvent->where, 0);
 				}
 			break;
 
