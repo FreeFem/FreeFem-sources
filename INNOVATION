@@ -1,3 +1,5 @@
+V2.7-1
+  * change size of data in 64 bits architecture (in file AnyType.hpp)
 V2.7
   * correct mpi Makefile
   * correct bug in construction of recursive composite finite element (see HISTORY)
