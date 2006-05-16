@@ -8271,7 +8271,7 @@ fi
 
 	LIBS="$ff_save_libs"
 
-	ff_x11_libs="$X_LIBS $ff_Xxf86vm -lXext -lXpm -lX11 -lm"pwd
+	ff_x11_libs="$X_LIBS $ff_Xxf86vm -lXext -lXpm -lX11 -lm"
 	echo "$as_me:$LINENO: checking for X11_LIBS" >&5
 echo $ECHO_N "checking for X11_LIBS... $ECHO_C" >&6
 	echo "$as_me:$LINENO: result: \"$ff_x11_libs\"" >&5
