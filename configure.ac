@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.7-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.7-2,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -263,20 +263,24 @@ AC_MSG_RESULT($ff_x11)
 
 if test "$ff_x11" = yes
 then
-	CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
+	ff_save_libs="$LIBS"
+        AC_PATH_X
+	AC_PATH_XTRA
+	CPPFLAGS="$CPPFLAGS $X_CFLAGS"
 
 	# When libXxf86vm is present, it is necessary to add it to define
 	# "XF86VidModeQueryVersion" (called by OpenGL) on newer X11 systems
-
-	ff_save_libs="$LIBS"
-	LIBS="$LIBS -L/usr/X11R6/lib"
+	LIBS="$LIBS $X_LIBS"
 	AC_CHECK_LIB(Xxf86vm,
 		XF86VidModeQueryVersion,
 		ff_Xxf86vm="-lXxf86vm",
 		ff_Xxf86vm="")
 	LIBS="$ff_save_libs"
 
-	ff_x11_libs="-L/usr/X11R6/lib $ff_Xxf86vm -lXext -lXpm -lX11 -lm"
+	ff_x11_libs="$X_LIBS $ff_Xxf86vm -lXext -lXpm -lX11 -lm"pwd
+	AC_MSG_CHECKING(for X11_LIBS)
+	AC_MSG_RESULT(["$ff_x11_libs"])	
+#	ff_x11_libs="-L/usr/X11R6/lib $ff_Xxf86vm -lXext -lXpm -lX11 -lm"
 	AC_SUBST(X11_LIBS,$ff_x11_libs)
 fi
 
