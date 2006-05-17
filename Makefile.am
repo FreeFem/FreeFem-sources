@@ -14,7 +14,7 @@ EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h \
 FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS \
 logo.ico copysharedlibs.sh COPYRIGHT edp.nedit INNOVATION reconfigure \
-mode-mi-edp.zip \
+mode-mi-edp.zip clocal.m4              acmacros.m4             acoptim.m4    \
 examples-bamg/square/*_g.* examples-bamg/square/do*  \
 examples-bamg/NACA012/[adp]* examples-bamg/NACA012/naca.awk \
  examples-bamg/quadloop/dotest.pl examples-bamg/test/dotest*.pl
@@ -138,6 +138,7 @@ clean-local::
 # ----------------------
 ListFiles-natives: .FORCE 
 	echo COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX INNOVATION >$@
+	echo mode-mi-edp.zip >> $@
 	echo examples++-tutorial/aile.msh examples++-tutorial/xyf >> $@
 	echo examples++-load/load.link >> $@
 	echo ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh >> $@
