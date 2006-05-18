@@ -69,13 +69,13 @@ template<class R> istream & operator>>(istream & f, KN_<R> & v)
  {
      int n;char c;
      f >> n;
-     assert(f.good());
-     assert(n==v.N());
+     ffassert(f.good());
+     ffassert(n==v.N());
      while (f.get(c) &&  (c!='\n' && c!='\r' ) ) 0; // eat until control (new line
 
      for (int i=0;i<n;i++)
-       f >> v[i] ;
-     assert(f.good());
+      {  f >> v[i] ;
+       ffassert(f.good());} // modif FH  main 2006
      return f;
 }
 
@@ -85,11 +85,13 @@ template<class R> istream & operator>>(istream & f, KN<R> & v)
      f >> n;
      if (v.unset()) v.init(n);
      cout << n << " == " << v.N() << endl;
-     assert(n==v.N());
+     ffassert(n==v.N());
      while (f.get(c) &&  (c!='\n' && c!='\r' ) ) 0; // eat until control (new line
 
      for (int i=0;i<n;i++)
+       {
        f >> v[i] ;
+       ffassert(f.good());}// modif FH  main 2006
      return f;
 }
 

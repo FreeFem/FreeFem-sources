@@ -14,7 +14,7 @@ EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h \
 FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS \
 logo.ico copysharedlibs.sh COPYRIGHT edp.nedit INNOVATION reconfigure \
-mode-mi-edp.zip clocal.m4              acmacros.m4             acoptim.m4    \
+mode-mi-edp.zip aclocal.m4              acmacros.m4             acoptim.m4    \
 examples-bamg/square/*_g.* examples-bamg/square/do*  \
 examples-bamg/NACA012/[adp]* examples-bamg/NACA012/naca.awk \
  examples-bamg/quadloop/dotest.pl examples-bamg/test/dotest*.pl
@@ -164,6 +164,8 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives
 	cp $@/FreeFem++.app/Contents/Info.plist $@/FreeFem++.app/Contents/FreeFem++.app/Contents/Info.plist
 	cp src/agl/FreeFem++-agl $@/FreeFem++.app/Contents/FreeFem++.app/FreeFem++
 	cp src/FreeFem++-CoCoa $@
+	tar zcvf $@/OtherMacOsLib.tgz `otool -L src/agl/FreeFem++-agl|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $1}'`
+	cp -p Install-MacOS.command $@
 
 $(FF_MAC_PREFIX)_MacOsX.tgz: $(FF_MAC_PREFIX)_MacOsX
 	tar zcvf $(FF_MAC_PREFIX)_MacOsX.tgz  $(FF_MAC_PREFIX)_MacOsX

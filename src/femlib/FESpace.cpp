@@ -563,7 +563,7 @@ ConstructDataFElement::~ConstructDataFElement()
     delete []  FirstNodeOfElement;
     delete [] FirstDfOfNode;
   }
- else counter--;
+ (*counter)--; // correction mai 2006 bug in counter incrementation 
 }
 
  ConstructDataFElement::ConstructDataFElement(const ConstructDataFElement * t,int k)
@@ -580,7 +580,8 @@ ConstructDataFElement::~ConstructDataFElement()
    Nproduit(t->Nproduit*k)
  {
    throwassert(t==0 || t->FirstDfOfNode==0);
-   *counter++;
+   (*counter)++;      // correction mai 2006 bug in counter incrementation  
+
  }
 
 ConstructDataFElement::ConstructDataFElement (const Mesh &Th,/*int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement*/
@@ -958,7 +959,12 @@ FESpace::FESpace(const FESpace & Vh,int k )
      FirstDfOfNodeData(cdef?cdef->FirstDfOfNode:0),
      FirstNodeOfElement(Vh.FirstNodeOfElement),
      tom(0) {
-     if(cdef) renum();}
+      // correction mai 2006 no renumbering of existing cdef 
+     if(cdef && (Vh.cdef && Vh.cdef->counter != cdef->counter)) {
+       // cout << " remum " << cdef->counter << " != " << Vh.cdef->counter  <<endl; 
+       renum(); // correction mai 2006 no renumbering of existing cdef 
+       }
+     }
  
 FESpace::FESpace(const FESpace ** Vh,int k )
  :

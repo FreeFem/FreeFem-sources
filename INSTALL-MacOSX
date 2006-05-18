@@ -2,6 +2,10 @@
 This runs only on MacOs 10.3 version or higher.
 This version uses OpenGL graphics.
 
+to install run the shell script Install-MacOS.command
+this script install the FreeFem++-CoCoa, the missing libraries and
+and the FreeFem.app in /Applications directory. 
+
 This version can be used in 2 modes
 
 	- like a Mac application with drap and drop, ...
@@ -10,4 +14,6 @@ This version can be used in 2 modes
 	-  Terminal mode: in this case the application FreeFem++.app must be in the /Applications 
 	directory and you have just to put the script FreeFem++-CoCoa in a directory of shell 
 	$PATH by putting it in the directory /usr/local/bin (for instance);
+
+Some external library are the archive file OtherMacOsLib.tgz
 	
