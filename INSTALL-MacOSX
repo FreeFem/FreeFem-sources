@@ -16,4 +16,5 @@ This version can be used in 2 modes
 	$PATH by putting it in the directory /usr/local/bin (for instance);
 
 Some external library are the archive file OtherMacOsLib.tgz
+you need to install this libray in the systeme 
 	
