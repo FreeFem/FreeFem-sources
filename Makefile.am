@@ -164,7 +164,7 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives
 	cp $@/FreeFem++.app/Contents/Info.plist $@/FreeFem++.app/Contents/FreeFem++.app/Contents/Info.plist
 	cp src/agl/FreeFem++-agl $@/FreeFem++.app/Contents/FreeFem++.app/FreeFem++
 	cp src/FreeFem++-CoCoa $@
-	tar zcvf $@/OtherMacOsLib.tgz `otool -L src/agl/FreeFem++-agl|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $1}'`
+	tar zcvf $@/OtherMacOsLib.tgz `otool -L src/agl/FreeFem++-agl|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}'`
 	cp -p Install-MacOS.command $@
 
 $(FF_MAC_PREFIX)_MacOsX.tgz: $(FF_MAC_PREFIX)_MacOsX
