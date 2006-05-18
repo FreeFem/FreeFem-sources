@@ -69,11 +69,16 @@ fi
 
 if test "${MPIPROG}" != ""
     then
+    mpich=`mpirun -h 2>&1 |grep mpich  |wc  -l`
     host=`hostname`
     echo $host>machinefile
     echo $host>>machinefile
-
+    if [ $mpich -ne 0 ] ; then
     dotest "mpirun -np $nprocs -machinefile machinefile ${PROGLOC}/mpi/FreeFem++-mpi${EXEEXT}" mpi $script
+    else
+    lamboot 
+     dotest "mpirun -np $nprocs ${PROGLOC}/mpi/FreeFem++-mpi${EXEEXT}" mpi $script
+    fi
 fi
 
 if test "${IDEPROG}" != "" -a "${VISUALCHECK}" = "yes"
