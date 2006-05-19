@@ -37,8 +37,8 @@ then
 	AC_F77_LIBRARY_LDFLAGS  
 	# correct pb of double def under macos 
 	case $F77 in 
-	 *g77)  FLIBS=`echo "$FLIBS"|sed 's,-lcrt2.o ,,g'`
-	 AC_MSG_WARN([  remove -lcrt2.o from \$FLIBS : $FLIBS ])
+	 *g77)  FLIBS=[`echo "$FLIBS"|sed -e 's,-lcrt2.o ,,g' -e 's,-L[^ ]* ,,' -e 's,-lgcc_s,,' -e 's,-lSystem,,'`]
+	 AC_MSG_WARN([  clean FLIBS  remove -lcrt2.o , ... :  $FLIBS ])
 	 ;;
 	esac
 	AC_ARG_WITH(flib,[  --with-flib= the fortran library ])

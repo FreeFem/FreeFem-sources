@@ -3144,9 +3144,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 	# correct pb of double def under macos
 	case $F77 in
-	 *g77)  FLIBS=`echo "$FLIBS"|sed 's,-lcrt2.o ,,g'`
-	 { echo "$as_me:$LINENO: WARNING:   remove -lcrt2.o from \$FLIBS : $FLIBS " >&5
-echo "$as_me: WARNING:   remove -lcrt2.o from \$FLIBS : $FLIBS " >&2;}
+	 *g77)  FLIBS=`echo "$FLIBS"|sed -e 's,-lcrt2.o ,,g' -e 's,-L[^ ]* ,,' -e 's,-lgcc_s,,' -e 's,-lSystem,,'`
+	 { echo "$as_me:$LINENO: WARNING:   clean FLIBS  remove -lcrt2.o , ... :  $FLIBS " >&5
+echo "$as_me: WARNING:   clean FLIBS  remove -lcrt2.o , ... :  $FLIBS " >&2;}
 	 ;;
 	esac
 

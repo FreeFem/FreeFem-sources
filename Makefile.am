@@ -144,6 +144,8 @@ ListFiles-natives: .FORCE
 	echo ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh >> $@
 	echo ./download/fftw/Makefile ./download/fftw/Makefile.am  >>$@
 	find .  -name '*.edp' -o -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
+List-agl-dylib: src/agl/FreeFem++-agl
+	otool -L src/agl/FreeFem++-agl|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}' >$@
 .FORCE:
 
 $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives
@@ -152,7 +154,7 @@ $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives
 	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++ 
 	cp   DOC/freefem++-doc.pdf $@
 
-$(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives
+$(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	-mkdir $@ 
 	cp   DOC/freefem++doc.pdf $@
 	cat ListFiles-natives|xargs tar cf - | (cd $@ ; tar xf - )  
@@ -164,7 +166,7 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives
 	cp $@/FreeFem++.app/Contents/Info.plist $@/FreeFem++.app/Contents/FreeFem++.app/Contents/Info.plist
 	cp src/agl/FreeFem++-agl $@/FreeFem++.app/Contents/FreeFem++.app/FreeFem++
 	cp src/FreeFem++-CoCoa $@
-	tar zcvf $@/OtherMacOsLib.tgz `otool -L src/agl/FreeFem++-agl|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}'`
+	-if [ -s List-agl-dylib ]; then tar zcvf $@/OtherMacOsLib.tgz `cat List-agl-dylib`; fi; 
 	cp -p Install-MacOS.command $@
 
 $(FF_MAC_PREFIX)_MacOsX.tgz: $(FF_MAC_PREFIX)_MacOsX

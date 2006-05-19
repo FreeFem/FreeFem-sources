@@ -10,7 +10,7 @@ for i in `tar ztf OtherMacOsLib.tgz`; do
   echo " the Libary '/$i'  exist "
  fi
 done 
-fi
+#  verif .... 
 for i in `tar ztf OtherMacOsLib.tgz`; do
   if [ ! -f "/$i" ]; then
     echo " the Libary '/$i' don't exist FreeFEM cannot run (call you adminisator sorry)"
@@ -18,6 +18,7 @@ for i in `tar ztf OtherMacOsLib.tgz`; do
     exit 1;
  fi
 done
+fi
 
 if [ -f  FreeFem++-CoCoa ] ;then
 echo "  install FreeFem++-CoCoa script in /usr/local/bin (need of admin password)"
