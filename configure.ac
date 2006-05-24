@@ -37,8 +37,14 @@ then
 	AC_F77_LIBRARY_LDFLAGS  
 	# correct pb of double def under macos 
 	case $F77 in 
-	 *g77)  FLIBS=[`echo "$FLIBS"|sed -e 's,-lcrt2.o ,,g' -e 's,-L[^ ]* ,,' -e 's,-lgcc_s,,' -e 's,-lSystem,,'`]
-	 AC_MSG_WARN([  clean FLIBS  remove -lcrt2.o , ... :  $FLIBS ])
+	 *g77)  
+	 for i in $FLIBS; do
+          case $i in 
+	   -L*)    FLIBS="$i -lg2c"; break;;
+          esac
+	 done 
+	 #FLIBS=[`echo "$FLIBS"|sed -e 's,-lcrt2.o ,,g' -e 's,-L[^ ]* ,,' -e 's,-lgcc_s,,' -e 's,-lSystem,,'`]
+	 AC_MSG_WARN([  get dir of -lg2c  FLIBS :  $FLIBS ])
 	 ;;
 	esac
 	AC_ARG_WITH(flib,[  --with-flib= the fortran library ])
@@ -134,6 +140,7 @@ CYGWIN*)
 		FFLAGS="$FFLAGS -mno-cygwin"
 		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
 		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -lws2_32"
+		FLIBS="-mno-cygwin -lg2c"
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(WINDRESOBJ,windres.o)
                 AC_SUBST(WIN32DLLTARGET,win32-dll-target)
