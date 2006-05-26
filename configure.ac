@@ -40,7 +40,8 @@ then
 	 *g77)  
 	 for i in $FLIBS; do
           case $i in 
-	   -L*)    FLIBS="$i -lg2c"; break;;
+	   -L*)    FLIBS="$i -lg2c";; 
+	   # break;;
           esac
 	 done 
 	 #FLIBS=[`echo "$FLIBS"|sed -e 's,-lcrt2.o ,,g' -e 's,-L[^ ]* ,,' -e 's,-lgcc_s,,' -e 's,-lSystem,,'`]
