@@ -303,11 +303,20 @@ ff_agl_ok=no
 if test "$enable_static" != yes
 then
 	# If we cannot find gl.h, no OpenGL version can be produced
+        AC_CHECK_HEADERS(OpenGL/gl.h,
+                ff_gl_ok=yes
+                ff_agl_ok=yes,
+                ff_gl_ok=no
+                ff_agl_ok=no)
+
+	if test "$ff_gl_ok" = no 
+	then
 	AC_CHECK_HEADERS(GL/gl.h,
 		ff_gl_ok=yes
 		ff_agl_ok=yes,
 		ff_gl_ok=no
 		ff_agl_ok=no)
+	fi
 	if test "$ff_gl_ok" = yes
 	then
 		AC_CHECK_HEADERS(GL/glx.h,
@@ -334,6 +343,7 @@ fi
 # If we cannot find GL, we cannot compile FreeFem++-agl
 if test "$ff_agl_ok" = no
 then
+
 	ff_aglprog=
 fi
 
