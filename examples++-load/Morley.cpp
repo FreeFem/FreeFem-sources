@@ -70,7 +70,7 @@ namespace  Fem2D {
 
      }
     void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-    void TypeOfFE_P2Morley::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const;
+    void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const;
   } ;
   //                     on what     nu df on node node of df    
  int TypeOfFE_P2Morley::Data[]={

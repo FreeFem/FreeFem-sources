@@ -24,8 +24,8 @@ if [ -f  FreeFem++-CoCoa ] ;then
 echo "  install FreeFem++-CoCoa script in /usr/local/bin (need of admin password)"
 sudo cp FreeFem++-CoCoa /usr/local/bin
 fi
-echo " copy FreeFem++.app in /Apllications "
+echo " copy FreeFem++.app in /Applications "
 if [ -d FreeFem++.app ] ; then
-  rsync -av  FreeFem++.app/  /Applications/FreeFem++.app
+  rsync -avuH  FreeFem++.app/  /Applications/FreeFem++.app
 fi
 echo "++  FreeFem++ is correctly install in /Application directory."

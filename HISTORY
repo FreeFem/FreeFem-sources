@@ -1,3 +1,91 @@
+2006-06-01 09:28  hecht
+
+	*  add h flag to: Don't write symlinks as symlinks; write the data
+	  of the files
+	    they name in OtherMacOsLib.tgz archive
+
+2006-05-30 15:37  hecht
+
+	*  correct OpenGL flag under MacOS configure.ac
+
+2006-05-26 16:57  hecht
+
+	*   correct FLIBS in configure.ac
+
+2006-05-24 22:25  hecht
+
+	*  correct configure.ac
+	     setting FLIBS variable with g77 compiler to
+	      -Ldir -lg2c
+
+2006-05-19 19:53  hecht
+
+	*   cleanning FLIBS configure variable in case of g77
+
+2006-05-18 16:48  hecht
+
+	* correct small error for New macOS install
+
+2006-05-18 14:04  hecht
+
+	*  correct for lam mpi
+
+2006-05-18 13:59  hecht
+
+	* add missing file
+
+2006-05-18 13:57  hecht
+
+	*   correct INNOVATION
+
+2006-05-18 13:51  hecht
+
+	*   Correct bug in case of vectorial problem with same FE space.
+	    Some time freefem++ do  renumbering of the original space.
+	    Thank to Carolina C. Manica
+
+2006-05-17 15:35  hecht
+
+	*  add missing file in distribution
+
+2006-05-16 15:09  hecht
+
+	*   remove missing speel in configure.ac
+
+2006-05-16 15:00  hecht
+
+	*   try to correct X11 link problem on Linux 64bits architecture
+
+2006-05-15 20:01  hecht
+
+	*  correct pb on 64bits achitecture in file src/fflib/AnyType.hpp
+
+2006-05-05 22:55  hecht
+
+	*   do correction geometric data base with RequiredEdge.
+
+2006-04-26 14:15  hecht
+
+	*   correct configure.ac :
+		  if "wget" do not exist then try "curl -O"  work now
+		  use FLIBS to add fortran library and not just -lf2c
+
+2006-04-15 18:05  hecht
+
+	*  correct missing spellibg  line 920
+
+2006-04-15 12:00  hecht
+
+	*   correct probele when compioling with g++ 3.2
+
+2006-04-13 18:36  hecht
+
+	*   correct the mpi version for macos lam mpi
+
+2006-04-13 13:39  hecht
+
+	*  pass to version 2.7 and correct missing file in mpi Makefile.am
+
 2006-04-13 10:27  hecht
 
 	*   coorect misstake in rc/femlib/FESpace.cpp

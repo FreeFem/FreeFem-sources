@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.8,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.8-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -640,6 +640,9 @@ then
   AC_CHECK_HEADERS(vecLib/cblas.h,
        ff_cblas_h=yes
        ff_cblas_h=no)
+  AC_CHECK_HEADERS(atlas/cblas.h,
+       ff_cblas_h=yes
+       ff_cblas_h=no)
 
 fi
 
@@ -784,7 +787,7 @@ then
 
 	# Trying default locations
 
-	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h,ff_umfpack_header=yes)
+	AC_CHECK_HEADERS(umfpack.h ufsparse/umfpack.h,ff_umfpack_header=yes)
 
 	# Somes systems like FreeBSD hide umfpack.h in a directory
 	# called UMFPACK (all capitals). This breaks the standard

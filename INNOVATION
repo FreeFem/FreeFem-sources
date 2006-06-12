@@ -1,4 +1,5 @@
 V2.8
+   Correct mistake in OtherMacOsLib.tgz store file and not link (after 1 june)
  * Correct bug in vectorial problem with same approximation, some time
    we do a renumbering of the previous  approximation space (a pointer mistake).
 V2.7-1
