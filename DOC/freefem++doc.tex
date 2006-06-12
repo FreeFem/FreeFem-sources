@@ -2040,22 +2040,23 @@ number of 400 where mesh adaptation is done after 50 iterations on the first mes
 
 Solid objects deform under the action of applied forces:
 a point in the solid, originally at $(x,y,z)$ will come to $(X,Y,Z)$
-after some time; the vector $U=(u,v,w) = (X-x, Y-y, Z-z)$ is called
+after some time; the vector $\mathbf{u}=(u_1,u_2,u_3) = (X-x, Y-y, Z-z)$ is called
 the displacement. When the displacement is small and the solid is
 elastic, Hooke's law gives a relationship between the stress tensor
 $\sigma$ and the strain tensor $\epsilon$
 $$
-\sigma_{ij} = \lambda \delta_{ij} \nabla.U + \mu\epsilon_{ij},
+\sigma_{ij} = \lambda \delta_{ij} \nabla.\mathbf{u}+ 2\mu\epsilon_{ij},
 $$
 where $\delta_{ij} = 1$ if $i=j$, $0$ otherwise, with
-$$\epsilon_{ij} = {1\over 2}({\p U_i\over\p x_j} +
-{\p U_j\over\p x_i} ),
+$$\epsilon_{ij} = {1\over 2}({\p u_i\over\p x_j} +
+{\p u_j\over\p x_i} ),
 $$
 and where $\lambda, \mu$ are two constants that describe the
 mechanical properties of the solid, and are themselves related to the
 better known constants $E$, Young's modulus, and $\nu$, Poisson's ratio:
-$$ \mu = {E\over 1+\nu}, \quad \lambda = {E\nu\over (1+\nu)(1-2\nu)}.
+$$ \mu = {E\over 2( 1+\nu)}, \quad \lambda = {E\nu\over (1+\nu)(1-2\nu)}.
 $$
+
 
  \paragraph{Lam\'e's system}
 
@@ -2064,10 +2065,19 @@ $\Omega$. The components along $x$ and $y$ of the strain ${\bf u}(x)$
 in a section $\Omega$ subject to forces ${\bf f}$ perpendicular to the
 axis are governed by \\
 $$
-  -\lambda \Delta {\bf u} -\mu \nabla (\nabla .{\bf u})={\bf f}~~\hbox{in}~~\Omega,
+  -\mu \Delta {\bf u} - (\mu+\lambda)  \nabla (\nabla .{\bf u})={\bf f}~~\hbox{in}~~\Omega,
 $$
  where $\lambda ,\mu  $ are the Lam\'{e} coefficients introduced above.
-\\
+
+Remark, we do not used this equation because the associated  variationnal 
+form do not gives the right boundary condition, we simply use 
+$$
+  - div( \sigma ) = \mathbf{f}  \quad  \mbox{in} \Omega
+$$
+where the corresponding variationnal form is:
+$$
+ \int_{\Omega} \sigma : e(\mathbf{v}) - \int_{\Omega}  \mathbf{v} f  =0;
+$$
 
  \paragraph{Example}
  Let us illustrate this by a
@@ -2075,12 +2085,11 @@ $$
  subjected to a vertical traction along its horizontal edges. The
  vertical edges are free. We only solve the equations in one quarter
  of the domain thanks to symmetries. We denote respectively by
- $\Gamma_1,\Gamma_2, \Gamma_3,\Gamma_4,\Gamma_5$ the fracture, the
+ $\Gamma_1,\Gamma_2, \Gamma_3,\Gamma_4$ the fracture, the
  remainder of the lower edge, the right vertical edge, the upper
  vertical edge and the left vertical edge. The boundary conditions are
 \begin{eqnarray}&&
-     \lambda{\p {\bf u}\over\p n} + \mu(\nabla\cdot{\bf u}){\bf n} = 0
- ~~\hbox{on}~~\Gamma_1, \cr&&
+     \sigma . {\bf n}  &=& 0    ~~\hbox{on}~~\Gamma_1, \Gamma_3cr&&
      v =0,~~\lambda{\p u\over\p n} + \mu\nabla\cdot{\bf u} = 0
  ~~\hbox{on}~~\Gamma_2 \cr&&
      u =0,~~\lambda{\p v\over\p n} + \mu\nabla\cdot{\bf u} = 0
@@ -2117,7 +2126,7 @@ Vh u,v,uu,vv;
 @macro e11(u) @dx(u)//
 @macro e22(v) @dy(v)//
 @macro e12(u,v)(@dx(v) + @dy(u))/2 //
-
+                               
 @real E = 21.5, sigma = 0.29, mu= E/(2*(1+sigma));
 @real lambda = E*sigma/((1+sigma)*(1-2*sigma)), gravity = -9.81;
 
