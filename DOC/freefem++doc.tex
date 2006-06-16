@@ -4,7 +4,7 @@
 \usepackage{styles}
 \usepackage{txfonts}
 \usepackage{times}
-\def\VERSION{2.5-1}
+\def\VERSION{2.8-1}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -2043,12 +2043,12 @@ a point in the solid, originally at $(x,y,z)$ will come to $(X,Y,Z)$
 after some time; the vector $\mathbf{u}=(u_1,u_2,u_3) = (X-x, Y-y, Z-z)$ is called
 the displacement. When the displacement is small and the solid is
 elastic, Hooke's law gives a relationship between the stress tensor
-$\sigma$ and the strain tensor $\epsilon$
+$\sigma(u)=(\sigma_{ij}(u) )$ and the strain tensor $\epsilon(u)=\epsilon_{ij}(u)$
 $$
-\sigma_{ij} = \lambda \delta_{ij} \nabla.\mathbf{u}+ 2\mu\epsilon_{ij},
+\sigma_{ij}(u) = \lambda \delta_{ij} \nabla.\mathbf{u}+ 2\mu\epsilon_{ij}(u),
 $$
-where $\delta_{ij} = 1$ if $i=j$, $0$ otherwise, with
-$$\epsilon_{ij} = {1\over 2}({\p u_i\over\p x_j} +
+where the Kronecker symbol $\delta_{ij} = 1$ if $i=j$, $0$ otherwise, with
+$$\epsilon_{ij}(u) = {1\over 2}({\p u_i\over\p x_j} +
 {\p u_j\over\p x_i} ),
 $$
 and where $\lambda, \mu$ are two constants that describe the
@@ -2076,40 +2076,26 @@ $$
 $$
 where the corresponding variationnal form is:
 $$
- \int_{\Omega} \sigma : e(\mathbf{v}) - \int_{\Omega}  \mathbf{v} f  =0;
+ \int_{\Omega} \sigma(u) : \epsilon(\mathbf{v})\;dx - \int_{\Omega}  \mathbf{v} f \;dx =0;
 $$
+where $:$  denote the tensor scalar product,   i.e. $ a: b = \sum_{i,j}  a_{ij}b_{ij}$.
 
- \paragraph{Example}
- Let us illustrate this by a
- beam with rectangular section that has a fracture at its center and
- subjected to a vertical traction along its horizontal edges. The
- vertical edges are free. We only solve the equations in one quarter
- of the domain thanks to symmetries. We denote respectively by
- $\Gamma_1,\Gamma_2, \Gamma_3,\Gamma_4$ the fracture, the
- remainder of the lower edge, the right vertical edge, the upper
- vertical edge and the left vertical edge. The boundary conditions are
-\begin{eqnarray}&&
-     \sigma . {\bf n}  &=& 0    ~~\hbox{on}~~\Gamma_1, \Gamma_3cr&&
-     v =0,~~\lambda{\p u\over\p n} + \mu\nabla\cdot{\bf u} = 0
- ~~\hbox{on}~~\Gamma_2 \cr&&
-     u =0,~~\lambda{\p v\over\p n} + \mu\nabla\cdot{\bf u} = 0
- ~~\hbox{on}~~ \Gamma_3, \Gamma_5 \cr&&
-     u =0 \hbox{~~on the left vertical edge}\cr&&
-     \lambda{\p {\bf u}\over\p n} + \mu(\nabla\cdot{\bf u}){\bf n} = (0,1)^T
- ~~\hbox{on}~~\Gamma_4
- \end{eqnarray}
+So the variationnal form can be written as :
+$$
+ \int_{\Omega} \lambda \nabla.u   \nabla.v  + 2 \mu \epsilon(\mathbf{u}):\epsilon(\mathbf{v}) \; dx - \int_{\Omega}  \mathbf{v} f  \;dx  =0;
+$$
+ \paragraph{Example}  Consider  elastic plate with the undeformed rectangle shape
+$[0,10]\times [0,2]$.
+The body force is the gravity force $\vec f$ and the
+boundary force $\vec g$ is zero on lower and upper side.
+On the two vertical sides of the beam are fixed.
+ The boundary conditions are
+\begin{eqnarray*}
+     \sigma . {\bf n}  &=& 0    ~~\hbox{on}~~\Gamma_1, \Gamma_4, \Gamma_3, \\
+      {\bf u} &=& 0 ~~\hbox{on}~~\Gamma_2
+ \end{eqnarray*}
 Here ${\bf u}=(u,v) $ has two components. Lam\'{e}'s equations are:
 
- \begin{eqnarray}&&
- -\lambda \Delta u-\mu  {\p ^{2}u\over \p x^{2} }
- - \mu  {\p ^{2}v\over \p x\p y }
- = f_{1},\cr&&
- -\lambda \Delta v-\mu  {\p ^{2}v\over \p y^{2} }
- - \mu  {\p ^{2}u\over \p x\p y }
- = f_{2}.
-\end{eqnarray}
-%$$\crackb $$
-Figure {I.13}{~: \it displacements in a quarter of a beam with a fracture}
 \bigskip
 
 The above two equations are strongly coupled by their mixed
@@ -2119,40 +2105,67 @@ approach and write:
 
 \begin{example}[lame.edp]
 \bFF
-// file lame.edp
-@mesh Th=@square(10,10,[10*x,y]);
+/// file lame.edp
+@mesh Th=square(10,10,[20*x,2*y-1]);
 @fespace Vh(Th,P2);
 Vh u,v,uu,vv;
-@macro e11(u) @dx(u)//
-@macro e22(v) @dy(v)//
-@macro e12(u,v)(@dx(v) + @dy(u))/2 //
-                               
-@real E = 21.5, sigma = 0.29, mu= E/(2*(1+sigma));
-@real lambda = E*sigma/((1+sigma)*(1-2*sigma)), gravity = -9.81;
+@macro e11(u,v) dx(u)//
+@macro e22(u,v) dy(v)//
+@macro e12(u,v) ( (dx(v) + dy(u))*.5) //
+@macro div(u,v) ( dx(u)+dy(v) ) //
 
-@solve lame([u,v],[uu,vv])
-    = @int2d(Th)( 2*mu*(e11(u)*e11(uu)+e12(u,v)*e12(uu,vv)+e22(v)*e22(vv))
-            + lambda*(e11(u)+e22(v))*(e11(uu)+e22(vv))/2)
-             - @int2d(Th)(gravity*vv) + @on(4,u=0,v=0);
-@plot([u,v],wait=1,ps="lamevect.ps");
 
-@mesh th1 = movemesh(Th, [x+u*1e-4, y+v*1e-4]);
-@plot(th1,wait=1,ps="lamedeform.ps");
+@real E = 21e5, nu = 0.28, mu= E/(2*(1+nu)); 
+@real lambda = E*nu/((1+nu)*(1-2*nu)), f = -1; //  
+
+@solve lame([u,v],[uu,vv])= int2d(Th)( 
+	  lambda*div(u,v)*div(uu,vv)
+        + mu*2.*(  e11(u,v)*e11(uu,vv) 
+                 + e22(u,v)*e22(uu,vv) 
+                 + e12(u,v)*e12(uu,vv)*.2 ) )	
+        - int2d(Th)(f*vv) 
+        + on(4,u=0,v=0);
+@real coef=100;
+@plot([u,v],wait=1,ps="lamevect.ps",coef=coef);
+
+@mesh th1 = movemesh(Th, [x+u*coef, y+v*coef]);
+ @plot(th1,wait=1,ps="lamedeform.ps");
+@real dxmin  = u[].min; 
+@real dymin  = v[].min; 
+
+@cout << " - dep.  max   x = "<< dxmin<< " y=" << dymin << endl; 
+@cout << "   dep.  (20,0)  = " << u(20,0) << " " << v(20,0) << endl; 
 \eFF
 \end{example}
 
-The numerical results are shown on figure \ref{figlame}.
+The numerical results are shown on figure \ref{figlame} and the output is:
+\bFF
+ -- square mesh : nb vertices  =121 ,  nb triangles = 200 ,  nb boundary edges 40
+   Nb of edges on Mortars  = 0
+   Nb of edges on Boundary = 40, neb = 40
+ Nb Of Nodes = 441
+ Nb of DF = 441
+ -- Solve :           min -0.00174503  max 0.00174478
+          min -0.0289276  max 2.66787e-29
+   Nb of edges on Mortars  = 0
+   Nb of edges on Boundary = 40, neb = 40
+ - dep.  max   x = -0.00174503 y=-0.0289276
+   dep.  (20,0)  = -1.15898e-07 -0.0289275
+times: compile 0.02s, execution 1.27s
+\eFF
 
-\begin{figure}
+
+
+\begin{figure}[hbtp]
 \begin{center}\label{figlame}
 \includegraphics[width=15cm]{lamevect}\\
 \includegraphics[width=15cm]{lamedeform}
 
 \caption{ Solution of Lam\'e's equation for elasticity for a board deflected by its
-own weight and clamped by its left vertical side.}
+own weight and clamped by its left vertical side with a amplification factor equal to  100.
+{\em Remark: the size of the arrow  is automatically bound, but the color gives the real length}}
 \end{center}
 \end{figure}
-
 
 \subsection{The System of Stokes for Fluids}
 
