@@ -1,23 +1,30 @@
 // file lame.edp
-mesh Th=square(10,10,[10*x,y]);
+mesh Th=square(10,10,[20*x,2*y-1]);
 fespace Vh(Th,P2);
 Vh u,v,uu,vv;
-macro e11(u,v) dx(u)//
+macro e11(u,v) dx(u)//  
 macro e22(u,v) dy(v)//
 macro e12(u,v) ( (dx(v) + dy(u))*.5) //
+macro div(u,v) ( dx(u)+dy(v) ) //
 
-real E = 21.5e5, nu = 0.29e5, mu= E/(2*(1+nu));
-real lambda = E*nu/((1+nu)*(1-2*nu)), gravity = -9.81;
+
+real E = 21e5, nu = 0.28, mu= E/(2*(1+nu)); 
+real lambda = E*nu/((1+nu)*(1-2*nu)), f = -1; //  
 
 solve lame([u,v],[uu,vv])= int2d(Th)( 
-          2.*mu*( e11(u,v)*e11(uu,vv)+e12(u,v)*e12(uu,vv)+e22(u,v)*e22(uu,vv))
-        + lambda*(e11(u,v)+e22(u,v))*(e11(uu,uu)+e22(vv,vv)) )
-             - int2d(Th)(gravity*vv) + on(4,u=0,v=0);
-plot([u,v],wait=1,ps="lamevect.ps");
+	  lambda*div(u,v)*div(uu,vv)
+        + mu*2.*(  e11(u,v)*e11(uu,vv) 
+                 + e22(u,v)*e22(uu,vv) 
+                 + e12(u,v)*e12(uu,vv)*.2 ) )	
+        - int2d(Th)(f*vv) 
+        + on(4,u=0,v=0);
+real coef=100;
+plot([u,v],wait=1,ps="lamevect.eps",coef=coef);
 
-mesh th1 = movemesh(Th, [x+u, y+v]);
- plot(th1,wait=1,ps="lamedeform.ps");
+mesh th1 = movemesh(Th, [x+u*coef, y+v*coef]);
+ plot(th1,wait=1,ps="lamedeform.eps");
 real dxmin  = u[].min; 
 real dymin  = v[].min; 
 
-cout << " - dep.  max   x ="<< dxmin<< " y=" << dymin << endl; 
+cout << " - dep.  max   x = "<< dxmin<< " y=" << dymin << endl; 
+cout << "   dep.  (20,0)  = " << u(20,0) << " " << v(20,0) << endl; 
