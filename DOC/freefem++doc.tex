@@ -2070,7 +2070,7 @@ $$
  where $\lambda ,\mu  $ are the Lam\'{e} coefficients introduced above.
 
 Remark, we do not used this equation because the associated  variationnal 
-form do not gives the right boundary condition, we simply use 
+form does not give the right boundary condition, we simply use 
 $$
   - div( \sigma ) = \mathbf{f}  \quad  \mbox{in} \Omega
 $$
@@ -2085,14 +2085,14 @@ $$
  \int_{\Omega} \lambda \nabla.u   \nabla.v  + 2 \mu \epsilon(\mathbf{u}):\epsilon(\mathbf{v}) \; dx - \int_{\Omega}  \mathbf{v} f  \;dx  =0;
 $$
  \paragraph{Example}  Consider  elastic plate with the undeformed rectangle shape
-$[0,10]\times [0,2]$.
+$[0,20]\times [-1,1]$.
 The body force is the gravity force $\vec f$ and the
-boundary force $\vec g$ is zero on lower and upper side.
-On the two vertical sides of the beam are fixed.
+boundary force $\vec g$ is zero on lower, upper and right sides.
+ The left vertical sides of the beam is fixed.
  The boundary conditions are
 \begin{eqnarray*}
-     \sigma . {\bf n}  &=& 0    ~~\hbox{on}~~\Gamma_1, \Gamma_4, \Gamma_3, \\
-      {\bf u} &=& 0 ~~\hbox{on}~~\Gamma_2
+     \sigma . {\bf n}  &=& g = 0    ~~\hbox{on}~~\Gamma_1, \Gamma_4, \Gamma_3, \\
+      {\bf u} &=& \mathbf{0} ~~\hbox{on}~~\Gamma_2
  \end{eqnarray*}
 Here ${\bf u}=(u,v) $ has two components. Lam\'{e}'s equations are:
 
@@ -2161,8 +2161,8 @@ times: compile 0.02s, execution 1.27s
 \includegraphics[width=15cm]{lamevect}\\
 \includegraphics[width=15cm]{lamedeform}
 
-\caption{ Solution of Lam\'e's equation for elasticity for a board deflected by its
-own weight and clamped by its left vertical side with a amplification factor equal to  100.
+\caption{ Solution of Lam\'e's equations for elasticity for a 2D beam deflected by its
+own weight and clamped by its left vertical side; result are shown with a amplification factor equal to  100.
 {\em Remark: the size of the arrow  is automatically bound, but the color gives the real length}}
 \end{center}
 \end{figure}
