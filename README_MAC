@@ -12,3 +12,7 @@ To compile ARPACK for eigen value computation
 
 latex en pdflatex 
  http://tug.ctan.org/cgi-bin/getFile.py?fn=/systems/mac/mactex/MacTeX-20060314.dmg
+
+mpi:
+
+http://www.lam-mpi.org/7.1/download.php

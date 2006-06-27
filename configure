@@ -895,6 +895,7 @@ Optional Packages:
   --with-suffix=G3/G4/G4,P4,.. or --without-suffix (default no suffix package name)
   --with-mpi=yes/no/mpiCC /mpic++/... 	or --without-mpi	Choose MPI implementation (default is mpich)
   --with-wget=command	Replace "wget" with another command. Implies --enable-download
+  --with-cadna= cadna library --without-cadna
   --with-blas=library	Use a specific version of the Blas
   --with-arpack=library	Use a specific version of Arpack
   --with-amd=library	Use a specific version of AMD
@@ -2695,7 +2696,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:2698:" \
+echo "$as_me:2699:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -2892,7 +2893,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:2895: \"$ac_link\") >&5
+(eval echo $as_me:2896: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -2970,7 +2971,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:2973: \"$ac_link\") >&5
+(eval echo $as_me:2974: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9620,10 +9621,22 @@ WGET=$ff_wget_command
 #  the round-off error propagation
 # the web site http://www-anp.lip6.fr/cadna/
 #  --------------------
+
+# Check whether --with-cadna or --without-cadna was given.
+if test "${with_cadna+set}" = set; then
+  withval="$with_cadna"
+
+fi;
+if test "$with_cadna" != no -o -n  "$with_cadna"
+   then
+     ff_cadna=$with_cadna
+   fi
 ff_cadna_ok=no
-ff_libs_old="$LIBS"
-ff_ldflags_old="$LDFLAGS"
-ff_cadna_dir="${curdir}/download/cadna"
+if "$with_cadna" != no
+  then
+  ff_libs_old="$LIBS"
+  ff_ldflags_old="$LDFLAGS"
+  ff_cadna_dir="${curdir}/download/cadna"
   LDFLAGS="$LDFLAGS -L$ff_cadna_dir"
   echo "$as_me:$LINENO: checking for arit_zero in -lcadnafree" >&5
 echo $ECHO_N "checking for arit_zero in -lcadnafree... $ECHO_C" >&6
@@ -9859,7 +9872,7 @@ _ACEOF
       CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
       LIBS=" -L$ff_cadna_dir -lcadnafree $ff_libs_old"
    fi
-
+fi
 
 # Looking for the FFTW3
 # --------------------
