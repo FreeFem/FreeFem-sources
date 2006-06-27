@@ -406,7 +406,7 @@ int main(int argc,char **argv){
 }],
 ff_mpi=yes,
 ff_mpi=no)
-	CXX="$ff_save_cxx"
+
 	AC_MSG_RESULT($ff_mpi)
 
 	# Also check that mpirun is there. If it isn't, then MPI is
@@ -429,12 +429,18 @@ ff_mpi=no)
 		# parallel program is compiled (see src/mpi/Makfile.am)
                 AC_CHECK_HEADER(mpicxx.h,
                         AC_DEFINE(HAVE_MPICXX_H,1, mpicxx.h  have include file))
-
+                AC_CHECK_HEADER(mpi/cxx/mpicxx.h,
+                        AC_DEFINE(HAVE_MPI_CXX_MPICXX_H,1, mpi/cxx/mpicxx.h  have include file))
+                AC_CHECK_HEADER(ompi/mpi/cxx/mpicxx.h,
+                        AC_DEFINE(HAVE_OMPI_MPI_CXX_MPICXX_H,1, ompi/mpi/cxx/mpicxx.h  have include file))
+                AC_CHECK_HEADER(mpic++.h,
+                        AC_DEFINE(HAVE_MPICPP_H,1, mpic++.h  have include file))
 		AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
                 AC_SUBST(MPICXX,$ff_mpicxx)
 	else
 	        AC_SUBST(MPICXX,$ff_save_cxx)
 	fi
+	CXX="$ff_save_cxx"
 fi
 
 # Looking for useful configuration utilities
