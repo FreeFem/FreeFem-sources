@@ -9,6 +9,9 @@
 /* Define to 1 if you have the `atanh' function. */
 #undef HAVE_ATANH
 
+/* Define to 1 if you have the <atlas/cblas.h> header file. */
+#undef HAVE_ATLAS_CBLAS_H
+
 /* If umfpack.h is located in UMFPACK subdir */
 #undef HAVE_BIG_UMFPACK_UMFPACK_H
 
@@ -54,8 +57,20 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* mpic++.h have include file */
+#undef HAVE_MPICPP_H
+
 /* mpicxx.h have include file */
 #undef HAVE_MPICXX_H
+
+/* mpi/cxx/mpicxx.h have include file */
+#undef HAVE_MPI_CXX_MPICXX_H
+
+/* ompi/mpi/cxx/mpicxx.h have include file */
+#undef HAVE_OMPI_MPI_CXX_MPICXX_H
+
+/* Define to 1 if you have the <OpenGL/gl.h> header file. */
+#undef HAVE_OPENGL_GL_H
 
 /* Define to 1 if you have the `second_' function. */
 #undef HAVE_SECOND_
@@ -84,11 +99,11 @@
 /* Define to 1 if you have the `times' function. */
 #undef HAVE_TIMES
 
+/* Define to 1 if you have the <ufsparse/umfpack.h> header file. */
+#undef HAVE_UFSPARSE_UMFPACK_H
+
 /* Define to 1 if you have the <umfpack.h> header file. */
 #undef HAVE_UMFPACK_H
-
-/* Define to 1 if you have the <umfpack/umfpack.h> header file. */
-#undef HAVE_UMFPACK_UMFPACK_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H

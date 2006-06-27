@@ -2,6 +2,8 @@ the list of tools to build freefem++ on MacOS are:
 
 Apple's Developer Tools
 
+
+
 X11 
 
 To compile ARPACK for eigen value computation 
@@ -11,8 +13,18 @@ To compile ARPACK for eigen value computation
   or you can use f2c and fort77 wrapper
 
 latex en pdflatex 
+
  http://tug.ctan.org/cgi-bin/getFile.py?fn=/systems/mac/mactex/MacTeX-20060314.dmg
 
-mpi:
+MPI:
+from http://www.lam-mpi.org/7.1/download.php
 
+If you use the mpi version install lam-7.1.2.dmg and use xcode-2.2.1 
+We try  lam-7.1.2.dmg and xcode-2.2.3 and we get linking problem with mpic++
+I also try openmpi 1.0.2 and 1.1b3  but the send message  is synchronous and so some mpi examples
+have dead lock.  
+
+mpi:
 http://www.lam-mpi.org/7.1/download.php
+
+

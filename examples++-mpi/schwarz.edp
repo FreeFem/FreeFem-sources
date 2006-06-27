@@ -51,15 +51,15 @@ for ( i=0 ;i< 10; i++)
   cout << mpirank << " looP " << i << endl;
   if (mpirank == 0)
   {   
-   PB; 
+   PB;
    processor(1) << U[];
    processor(1) >> u[];
   }
   else 
   {
    pb;
-   processor(0) << u[];
    processor(0) >> U[];
+   processor(0) << u[];
   }
   //  if (mpirank==0)  
   // plot(U,u,wait=true,ps="Uu"+i+".eps");
