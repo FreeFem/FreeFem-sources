@@ -483,10 +483,17 @@ AC_SUBST(WGET,$ff_wget_command)
 #  the round-off error propagation 
 # the web site http://www-anp.lip6.fr/cadna/
 #  --------------------
+AC_ARG_WITH(cadna,[  --with-cadna= cadna library --without-cadna  ])
+if test "$with_cadna" != no -o -n  "$with_cadna"
+   then 
+     ff_cadna=$with_cadna
+   fi
 ff_cadna_ok=no
-ff_libs_old="$LIBS"
-ff_ldflags_old="$LDFLAGS"
-ff_cadna_dir="${curdir}/download/cadna"
+if "$with_cadna" != no 
+  then 
+  ff_libs_old="$LIBS"
+  ff_ldflags_old="$LDFLAGS"
+  ff_cadna_dir="${curdir}/download/cadna"
   LDFLAGS="$LDFLAGS -L$ff_cadna_dir"
   AC_CHECK_LIB(cadnafree,arit_zero,
                 ff_cadna_ok=yes)
@@ -502,7 +509,7 @@ ff_cadna_dir="${curdir}/download/cadna"
       CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
       LIBS=" -L$ff_cadna_dir -lcadnafree $ff_libs_old"
    fi
-
+fi
 
 # Looking for the FFTW3
 # --------------------
