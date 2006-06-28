@@ -10067,7 +10067,7 @@ if test "${with_cadna+set}" = set; then
 fi;
 if test "$with_cadna" != no -o -n  "$with_cadna"
    then
-     ff_cadna=$with_cadna
+     ff_cadna="$with_cadna"
    fi
 ff_cadna_ok=no
 if "$with_cadna" != no
@@ -10310,6 +10310,9 @@ _ACEOF
       CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
       LIBS=" -L$ff_cadna_dir -lcadnafree $ff_libs_old"
    fi
+else
+   { echo "$as_me:$LINENO:  without cadna *** " >&5
+echo "$as_me:  without cadna *** " >&6;}
 fi
 
 # Looking for the FFTW3
