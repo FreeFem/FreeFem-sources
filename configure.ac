@@ -492,7 +492,7 @@ AC_SUBST(WGET,$ff_wget_command)
 AC_ARG_WITH(cadna,[  --with-cadna= cadna library --without-cadna  ])
 if test "$with_cadna" != no -o -n  "$with_cadna"
    then 
-     ff_cadna=$with_cadna
+     ff_cadna="$with_cadna"
    fi
 ff_cadna_ok=no
 if "$with_cadna" != no 
@@ -515,6 +515,8 @@ if "$with_cadna" != no
       CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
       LIBS=" -L$ff_cadna_dir -lcadnafree $ff_libs_old"
    fi
+else
+   AC_MSG_NOTICE([ without cadna *** ])
 fi
 
 # Looking for the FFTW3
