@@ -488,8 +488,9 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
 		 
 		 
 	       }
-	   } catch (ArpackError) 
+	   } catch (ArpackError & e) 
 	     {
+               cout << " catch arpack erreur number " << e.Status() << endl;
 	       ExecError("ArpackError");
 	     }
 	   
@@ -677,10 +678,11 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
 		 
 	       
 
-	   } catch (ArpackError) 
+	   } catch (ArpackError & e) 
 	     {
-	       ExecError("ArpackError");
-	     }
+               cout << " catch arpack erreur number " << e.Status() << endl;
+	       ExecError("ArpackError");}
+	   
 	   
 	   return (long) nconv;
  }

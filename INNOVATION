@@ -1,3 +1,6 @@
+V 2.8-2 (june 2006)
+   add nint, and correct mistake in ceil function
+   add configure flag to remove cadna --without-cadna
 V2.8
    Correct mistake in OtherMacOsLib.tgz store file and not link (after 1 june)
  * Correct bug in vectorial problem with same approximation, some time
