@@ -195,7 +195,8 @@ we use the  fink f77, texshop and TeXLive-teTeX Current Release in http://www.ct
 
 * Under MacOC macIntel 
 compile and install  de f2c (no fortran) and install fort77  from  http://www.netlib.org
-./configure '-with-suffix' 'MacIntel' '-without-fltk' '--enable-download' '-with-mpi=mpic++'
+./configure '-with-suffix' 'MacIntel' '-without-fltk' '--enable-download' '-with-mpi=mpic++' '-enable-download' 'F77=fort77' '--with-flib=-L/usr/local/lib -lf2c'
+
 see de README_MAC file of the required soft.
 
 
