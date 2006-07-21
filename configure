@@ -3165,7 +3165,8 @@ if test "${with_flib+set}" = set; then
 fi;
 	if test "$with_flib" != no -o -n  "$with_flib"
 	then
-	  ff_g2c_lib=$with_flib
+	  ff_g2c_lib="$with_flib"
+	  FLIBS="$with_flib"
 	fi
 fi
 

@@ -51,7 +51,8 @@ then
 	AC_ARG_WITH(flib,[  --with-flib= the fortran library ])
 	if test "$with_flib" != no -o -n  "$with_flib"
 	then 
-	  ff_g2c_lib=$with_flib
+	  ff_g2c_lib="$with_flib"
+	  FLIBS="$with_flib"
 	fi
 fi
 
@@ -392,8 +393,9 @@ then
 	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
 	AC_LINK_IFELSE(
-[#include <stdio.h>
+[
 #include <mpi.h>
+#include <stdio.h>
 int main(int argc,char **argv){
   char name[[BUFSIZ]];
   int length;
