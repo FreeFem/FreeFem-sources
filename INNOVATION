@@ -1,4 +1,9 @@
-V 2.8-2 (june 2006)
+
+V 2.8-2 
+   (july)
+   use f2c as a fortran compiler on  MacIntel architecture,
+    correct mistake in mpi. 
+   (june 2006)
    add nint, and correct mistake in ceil function
    add configure flag to remove cadna --without-cadna
 V2.8
