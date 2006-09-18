@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.8-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.8-3,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -497,7 +497,7 @@ if test "$with_cadna" != no -o -n  "$with_cadna"
      ff_cadna="$with_cadna"
    fi
 ff_cadna_ok=no
-if "$with_cadna" != no 
+if test "$with_cadna" != no  
   then 
   ff_libs_old="$LIBS"
   ff_ldflags_old="$LDFLAGS"
@@ -516,9 +516,13 @@ if "$with_cadna" != no
       AC_DEFINE(HAVE_CADNA,1, freecadna is use to evalute the round-off error propagation )
       CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
       LIBS=" -L$ff_cadna_dir -lcadnafree $ff_libs_old"
+    else
+     AC_MSG_NOTICE([ without cadna ***** ])
+    fi
+
    fi
 else
-   AC_MSG_NOTICE([ without cadna *** ])
+   AC_MSG_NOTICE([ without cadna ***** ])
 fi
 
 # Looking for the FFTW3

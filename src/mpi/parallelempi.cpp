@@ -4,6 +4,13 @@
 #include "RNM.hpp"
 #include "Operator.hpp"
 #include "fem.hpp"
+//  pas terrible .... 
+
+#undef MPICH_SKIP_MPICXX
+#define  MPICH_SKIP_MPICXX
+#undef MPICH_IGNORE_CXX_SEEK
+#define MPICH_IGNORE_CXX_SEEK
+#include "mpi.h"
 
 #ifdef HAVE_MPICXX_H
 #include <mpicxx.h>
