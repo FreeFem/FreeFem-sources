@@ -9,8 +9,8 @@
 [Setup]
 AppName=FreeFem++-VERSION
 AppVerName=FreeFem++ version VERSION
-DefaultDirName={pf}\FreeFem++-VERSION
-DefaultGroupName=FreeFem++-VERSION
+DefaultDirName={pf}\FreeFem++
+DefaultGroupName=FreeFem++
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -28,7 +28,9 @@ Source: "COPYING"; DestDir: "{app}"
 Source: "README"; DestDir: "{app}"
 ; Programs
 Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
-Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
+;  to day the dll version do not works so we use the static one (FH)
+;Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
+Source: "src\ide\FreeFem++-cs.exe"; DestDir: "{app}"
 Source: "src\bin-win32\FreeFem++-nw.exe"; DestDir: "{app}"
 Source: "src\bin-win32\bamg.exe"; DestDir: "{app}"
 Source: "src\bin-win32\cvmsh2.exe"; DestDir: "{app}"

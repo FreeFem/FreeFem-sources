@@ -30,23 +30,6 @@
 		3DC62AFD09729A7400D487F6 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DC62AFC09729A7400D487F6 /* AGL.framework */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXBuildStyle section */
-		3DC6292409723EBD00D487F6 /* Development */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-			};
-			name = Development;
-		};
-		3DC6292509723EBD00D487F6 /* Deployment */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-			};
-			name = Deployment;
-		};
-/* End PBXBuildStyle section */
-
 /* Begin PBXFileReference section */
 		3D77F03E0A5D6AE000259456 /* libamd-i386.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.bundle"; name = "libamd-i386.dylib"; path = "../../LinearSolver/lib/libamd-i386.dylib"; sourceTree = SOURCE_ROOT; };
 		3D77F0400A5D6B0900259456 /* libarpack-i386.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.bundle"; name = "libarpack-i386.dylib"; path = "../../LinearSolver/lib/libarpack-i386.dylib"; sourceTree = SOURCE_ROOT; };
@@ -371,14 +354,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				INSTALL_PATH = "$(HOME)/bin";
-				PREBINDING = NO;
-				PRODUCT_NAME = sansrgraph;
-				ZERO_LINK = YES;
-			};
 			dependencies = (
 			);
 			name = sansrgraph;
@@ -396,54 +371,11 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "macglrgaph-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = macglrgaph;
-				WRAPPER_EXTENSION = app;
-				ZERO_LINK = YES;
-			};
 			dependencies = (
 			);
 			name = macglrgaph;
 			productName = macglrgaph;
 			productReference = 3DC62AE20972990B00D487F6 /* macglrgaph.app */;
-			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>${EXECUTABLE_NAME}</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.yourcompany.macglrgaph</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>1.0</string>
-	<key>NSMainNibFile</key>
-	<string>MainMenu</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
-</dict>
-</plist>
-";
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -452,12 +384,6 @@
 		3D90DC7F097012B3002A1826 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 3D90DC80097012B3002A1826 /* Build configuration list for PBXProject "ff" */;
-			buildSettings = {
-			};
-			buildStyles = (
-				3DC6292409723EBD00D487F6 /* Development */,
-				3DC6292509723EBD00D487F6 /* Deployment */,
-			);
 			hasScannedForEncodings = 0;
 			mainGroup = 3D90DC7D097012B3002A1826;
 			productRefGroup = 3D90DC8D097012DB002A1826 /* Products */;
