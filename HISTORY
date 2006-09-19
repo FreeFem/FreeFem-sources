@@ -1,3 +1,89 @@
+2006-09-19 21:36  hecht
+
+	*   correct openmpi trouble (async communication)
+	    set version to 2.9
+
+2006-09-19 17:07  hecht
+
+	*   update INNIVATION
+
+2006-09-19 16:24  hecht
+
+	*   change include.tar.gz file
+
+2006-09-19 16:02  hecht
+
+	*   add format output routine
+	      see calculus.edp for examples
+	      scientific, fixed, showpos, ....
+
+2006-09-19 11:47  hecht
+
+	*   correct configure.ac
+	     problem with FLIBS flags with gfortan on macos
+	    correct example++-load/install.tar.gz files
+
+2006-09-18 17:41  hecht
+
+	* change under	windows OS  the installed files   take the static
+	  freefem++-cs because bug in dll version   put by default programm
+	  in \Program Files\FreeFem++ folder   to remove automaticaly new
+	  installation (For O. Pironneau) set the current version to 2.8-3
+
+2006-07-21 18:35  hecht
+
+	*   passe to version  2.8-2
+
+2006-07-21 17:02  hecht
+
+	*  correct bug with mpi (MPICH-2)
+	   change the fortran in MacIntel (bug in complex eigenvalue) to
+	  f2c.
+
+2006-06-30 11:16  hecht
+
+	*  add print in arpack error
+	   correct missing speeling ciel in ceil function
+	   add rint function
+
+2006-06-28 18:01  hecht
+
+	*  add missing file in make dist process
+
+2006-06-28 17:50  hecht
+
+	* [no log message]
+
+2006-06-28 17:49  hecht
+
+	* add missing file
+
+2006-06-28 17:46  hecht
+
+	*  add tool to remove cadna in ./configure -without-cadna
+
+2006-06-27 23:24  hecht
+
+	*   do	correction for	openmpi but the
+	  openmpi is not asyncromous so some examples++-mpi do not work.
+
+2006-06-27 23:14  hecht
+
+	*   version 2.6-1
+
+2006-06-16 16:04  hecht
+
+	*   correct doc netx step.
+
+2006-06-16 13:49  hecht
+
+	*    coorect lame.edp in chap 3 of the doc.
+
+2006-06-12 21:15  hecht
+
+	*  add correction from	christophe.trophime@grenoble.cnrs.fr
+	   to  complie on FC5 with gcc 4.1
+
 2006-06-01 09:28  hecht
 
 	*  add h flag to: Don't write symlinks as symlinks; write the data
