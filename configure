@@ -2596,6 +2596,7 @@ CXXDEPMODE=depmode=$am_cv_CXX_dependencies_compiler_type
 
 
 
+# dur dur car sous MacOsX le fortran n'est pas standard.
 # Check whether --enable-fortran or --disable-fortran was given.
 if test "${enable_fortran+set}" = set; then
   enableval="$enable_fortran"
@@ -2696,7 +2697,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:2699:" \
+echo "$as_me:2700:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -2840,6 +2841,7 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+        ff_flibs=""
         # modif FH
 
 ac_ext=f
@@ -2893,7 +2895,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:2896: \"$ac_link\") >&5
+(eval echo $as_me:2898: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -2971,7 +2973,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:2974: \"$ac_link\") >&5
+(eval echo $as_me:2976: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -3148,14 +3150,25 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 	 *g77)
 	 for i in $FLIBS; do
           case $i in
-	   -L*)    FLIBS="$i -lg2c";;
-	   # break;;
+# save last directory of the list
+	   -L*)    ff_libs="$i";;
           esac
 	 done
-	 #FLIBS=[`echo "$FLIBS"|sed -e 's,-lcrt2.o ,,g' -e 's,-L[^ ]* ,,' -e 's,-lgcc_s,,' -e 's,-lSystem,,'`]
+	 FLIBS="$ff_flibs -lg2c"
 	 { echo "$as_me:$LINENO: WARNING:   get dir of -lg2c  FLIBS :  $FLIBS " >&5
 echo "$as_me: WARNING:   get dir of -lg2c  FLIBS :  $FLIBS " >&2;}
 	 ;;
+# add FH sep 2006
+         *gfortran)
+         for i in $FLIBS; do
+          case $i in
+           -L*)    ff_flibs="$i";;
+          esac
+         done
+         FLIBS="$ff_flibs -lgfortran"
+         { echo "$as_me:$LINENO: WARNING:   get dir of -lgfortran  FLIBS :  $FLIBS " >&5
+echo "$as_me: WARNING:   get dir of -lgfortran  FLIBS :  $FLIBS " >&2;}
+         ;;
 	esac
 
 # Check whether --with-flib or --without-flib was given.
@@ -3163,7 +3176,8 @@ if test "${with_flib+set}" = set; then
   withval="$with_flib"
 
 fi;
-	if test "$with_flib" != no -o -n  "$with_flib"
+#  correct FH sep 2006 -o -> -a
+	if test "$with_flib" != no -a -n  "$with_flib"
 	then
 	  ff_g2c_lib="$with_flib"
 	  FLIBS="$with_flib"
@@ -9970,7 +9984,7 @@ fi
 # if enabling downloads find wget or curl to do download
 # ------------------------------------------------------
 
-if test  "$ff_wget" = no -a "$enable_download" = yes
+if test  "$ff_wget" =  no -a "$enable_download" = yes
 then
 	ff_wget=""
 	# Extract the first word of "wget", so it can be a program name with args.
@@ -10068,17 +10082,17 @@ if test "${with_cadna+set}" = set; then
 
 fi;
 if test "$with_cadna" != no -o -n  "$with_cadna"
-   then
-     ff_cadna="$with_cadna"
-   fi
+    then
+    ff_cadna="$with_cadna"
+fi
 ff_cadna_ok=no
 if test "$with_cadna" != no
-  then
-  ff_libs_old="$LIBS"
-  ff_ldflags_old="$LDFLAGS"
-  ff_cadna_dir="${curdir}/download/cadna"
-  LDFLAGS="$LDFLAGS -L$ff_cadna_dir"
-  echo "$as_me:$LINENO: checking for arit_zero in -lcadnafree" >&5
+    then
+    ff_libs_old="$LIBS"
+    ff_ldflags_old="$LDFLAGS"
+    ff_cadna_dir="${curdir}/download/cadna"
+    LDFLAGS="$LDFLAGS -L$ff_cadna_dir"
+    echo "$as_me:$LINENO: checking for arit_zero in -lcadnafree" >&5
 echo $ECHO_N "checking for arit_zero in -lcadnafree... $ECHO_C" >&6
 if test "${ac_cv_lib_cadnafree_arit_zero+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -10299,26 +10313,24 @@ fi
 done
 
 
-   LIBS="$ff_libs_old"
-   LDFLAGS="$ff_ldflags_old"
+    LIBS="$ff_libs_old"
+    LDFLAGS="$ff_ldflags_old"
 
-   if test "$ff_cadna_ok" = yes  -a "$ff_cadna_h" = yes
-    then
+    if test "$ff_cadna_ok" = yes  -a "$ff_cadna_h" = yes
+	then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_CADNA 1
 _ACEOF
 
-      CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
-      LIBS=" -L$ff_cadna_dir -lcadnafree $ff_libs_old"
+	CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
+	LIBS=" -L$ff_cadna_dir -lcadnafree $ff_libs_old"
     else
-     { echo "$as_me:$LINENO:  without cadna ***** " >&5
+	{ echo "$as_me:$LINENO:  without cadna ***** " >&5
 echo "$as_me:  without cadna ***** " >&6;}
     fi
-
-   fi
 else
-   { echo "$as_me:$LINENO:  without cadna ***** " >&5
+    { echo "$as_me:$LINENO:  without cadna ***** " >&5
 echo "$as_me:  without cadna ***** " >&6;}
 fi
 

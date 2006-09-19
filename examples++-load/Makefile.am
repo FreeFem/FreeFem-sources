@@ -24,6 +24,7 @@ load_compile:include  $(LIST_COMPILE)
 
 include: include.tar.gz
 	tar zxvf include.tar.gz
+	-rm include/._*
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
 
