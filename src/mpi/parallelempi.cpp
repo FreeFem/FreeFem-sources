@@ -40,7 +40,7 @@ struct MPIrank {
    MPIrank(int i=0) : who(i) {ffassert(i>=0 && i < mpisize);} 
    
    const MPIrank & operator<<(double a)const  {
-     MPI::COMM_WORLD.Send(&a, 1, MPI::DOUBLE, who, 4);
+     MPI::COMM_WORLD.Isend(&a, 1, MPI::DOUBLE, who, 4);
       return *this;
    }
    const MPIrank & Bcast(double & a) const {
@@ -48,11 +48,11 @@ struct MPIrank {
       return *this;
    }
    const MPIrank & operator>>(double & a) const {
-      MPI::COMM_WORLD.Recv(&a, 1, MPI::DOUBLE, who, 4);
+      MPI::COMM_WORLD.Irecv(&a, 1, MPI::DOUBLE, who, 4);
       return *this;
    }
    const MPIrank & operator<<(long a) const {
-     MPI::COMM_WORLD.Send(&a, 1, MPI::LONG, who, 5);
+     MPI::COMM_WORLD.Isend(&a, 1, MPI::LONG, who, 5);
       return *this;
    }
    const MPIrank & Bcast(long & a) const {
@@ -60,14 +60,14 @@ struct MPIrank {
       return *this;
    }
    const MPIrank & operator>>(long & a) const {
-      MPI::COMM_WORLD.Recv(&a, 1, MPI::LONG, who, 5);
+      MPI::COMM_WORLD.Irecv(&a, 1, MPI::LONG, who, 5);
       return *this;
    }
    
    const MPIrank & operator>>(KN<double> & a) const {
        assert(&a);
       int n= a.N();
-      MPI::COMM_WORLD.Recv((double *) a, n, MPI::DOUBLE, who, 10);
+      MPI::COMM_WORLD.Irecv((double *) a, n, MPI::DOUBLE, who, 10);
       ffassert(a.N()==n);
       return *this;
    }
@@ -83,7 +83,7 @@ struct MPIrank {
      const KN<double> & a=*aa;
       ffassert(a); 
       int n= a.N();
-      MPI::COMM_WORLD.Send((double *) a, n, MPI::DOUBLE, who, 10);
+      MPI::COMM_WORLD.Isend((double *) a, n, MPI::DOUBLE, who, 10);
       return *this;
    }
    
@@ -161,10 +161,10 @@ void Serialize::mpisend(const MPIrank & rank,long tag)
          cout << " -- send from  " << mpirank << " to " << rank << " serialized " << what 
               <<   ", l=" << l << ", tag=" << tag << endl;
       if (l <=sizempibuf)
-        MPI::COMM_WORLD.Send(pp,l, MPI::BYTE, rank, tag);
+        MPI::COMM_WORLD.Isend(pp,l, MPI::BYTE, rank, tag);
       else {
-         MPI::COMM_WORLD.Send(pp,sizempibuf, MPI::BYTE, rank, tag);
-         MPI::COMM_WORLD.Send(pp+sizempibuf,l-sizempibuf, MPI::BYTE, rank, tag+1);
+         MPI::COMM_WORLD.Isend(pp,sizempibuf, MPI::BYTE, rank, tag);
+         MPI::COMM_WORLD.Isend(pp+sizempibuf,l-sizempibuf, MPI::BYTE, rank, tag+1);
       }
       if(verbosity>1) 
          cout << "    ok send is arrived " << endl;      
@@ -178,7 +178,7 @@ Serialize::Serialize(const MPIrank & rank,const char * wht,long tag)
          cout << " -- waiting " << mpirank << " from  " << rank << " serialized " << what 
               << " tag = " << tag <<  endl;
    char * buf= new char [sizempibuf];
-   MPI::COMM_WORLD.Recv(buf, sizempibuf, MPI::BYTE, rank, tag);
+   MPI::COMM_WORLD.Irecv(buf, sizempibuf, MPI::BYTE, rank, tag);
    lg = * (long *) (void *) buf;
    int l=lg+sizeof(long);
    char * pp= new char[l]  ;
@@ -187,7 +187,7 @@ Serialize::Serialize(const MPIrank & rank,const char * wht,long tag)
    else 
       {
         memcpy(pp,buf,sizempibuf);
-        MPI::COMM_WORLD.Recv(pp+sizempibuf,l-sizempibuf, MPI::BYTE, rank, tag+1)  ;       
+        MPI::COMM_WORLD.Irecv(pp+sizempibuf,l-sizempibuf, MPI::BYTE, rank, tag+1)  ;       
       }
     
    if(verbosity>1) 
@@ -281,5 +281,5 @@ void init_lgparallele()
    {
     MPI::Finalize();
    }
-//   MPI::COMM_WORLD.Recv(&msg, 1, MPI::INT, from, MPI::ANY_TAG);
-//    MPI::COMM_WORLD.Send(&msg, 1, MPI::INT, to, 4);
+//   MPI::COMM_WORLD.Irecv(&msg, 1, MPI::INT, from, MPI::ANY_TAG);
+//    MPI::COMM_WORLD.Isend(&msg, 1, MPI::INT, to, 4);
