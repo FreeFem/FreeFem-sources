@@ -1,13 +1,10 @@
+v 2.9 (sept 19, 2006 FH) 
+  change Send and Recv in mpi  to Isend and Irecv to make async communication
+  so now freefem++-mpi work with openmpi.
+
 V 2.8-3
    correct freefem++-cs trap under windows (install the static version)
-   add tools to format ostream  ( file or cout)  f :
-    f.scientific   //  floting notatio   d.dddEdd
-    f.fixed        //     dddd.dd
-    f.showbase     //  
-    f.noshowbase   //
-    f.showpos     //  explict +
-    f.noshowpos   
-    f.default    // reset all  fmtflags to default 
+   add tools to format ostream  ( file or cout)  
 
 V 2.8-2 
    (july)
