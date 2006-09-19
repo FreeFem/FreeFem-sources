@@ -47,23 +47,27 @@ inline ostream & operator<<(ostream & f,const ShapeOfArray & s)
      const int i10=10; 
      int prec=f.precision();
      if(prec<i10) f.precision(i10);
-    if(s.step != 1)
-      f << ":" << s.step ;
-    if (s.step*s.n  !=  s.next ) 
-      f << " n: " << setw(3) << s.next ;
-    f << ",";
+     if(s.step != 1)
+       f << ":" << s.step ;
+     if (s.step*s.n  !=  s.next ) 
+       f << " n: " << setw(3) << s.next ;
+     f << ",";
      if(prec<i10) f.precision(prec);
      return f;
-   };
+  };
 
 
 template<class R> ostream & operator<<(ostream & f,const KN_<const_R> & v)
   { //f <<  " KN_ : " << (ShapeOfArray) v << " "   <<  (const_R *) v << " :\n\t"  ;
-    f << v.N() << "\t\n\t" ; f.precision(10);
+    f << v.N() << "\t\n\t" ; 
+    const int i10=10; 
+    int prec=f.precision();
+    if(prec<i10) f.precision(i10);    
     for (long i=0;i<v.N();i++)
       f   << setw(3) << v[i] << ((i % 5) == 4 ? "\n\t" : "\t");
-     return f;
-   };
+    if(prec<i10) f.precision(prec); 
+    return f;
+  };
 
 template<class R> istream & operator>>(istream & f, KN_<R> & v)
  {
@@ -101,12 +105,15 @@ template<class R> ostream & operator<<(ostream & f,const KNM_<const_R> & v)
      //<< " i "  << v.shapei
      // << " j "  << v.shapej
      // << " " << &v(0,0) << " :\n\t";
-      f.precision(10);
+    const int i10=10; 
+    int prec=f.precision();
+    if(prec<i10) f.precision(i10);    
      f << v.N()<<' '<<v.M() /*<< "  n" << v.next<<" :"<< v.shapei.next << "," << v.shapej.next */<< "\t\n\t" ;
     for (long i=0;i<v.N();i++) {
       for (long j=0;j<v.M();j++) 
         f << " " << setw(3) << v(i,j);
        f << "\n\t";}
+    if(prec<i10) f.precision(prec);
   return f;
     
    };
@@ -117,16 +124,20 @@ template<class R> ostream & operator<<(ostream & f,const KNMK_<const_R> & v)
     // << " j "  << v.shapej
     // << " k "  << v.shapek << endl;
     // << " " << (void *) & v(0,0,0) << "\n\t" ;
-   f << v.N()<< 'x' <<v.M()<< 'x'<<v.K() << "\t:\n\t" ;    
-  for (long i=0;i<v.shapei.n;i++){
-    for (long j=0;j<v.shapej.n;j++){
-      for (long k=0;k<v.shapek.n;k++)
-	f << " " << setw(3) << v(i,j,k);
+    f << v.N()<< 'x' <<v.M()<< 'x'<<v.K() << "\t:\n\t" ;    
+    const int i10=10; 
+    int prec=f.precision();
+    if(prec<i10) f.precision(i10);    
+    for (long i=0;i<v.shapei.n;i++){
+      for (long j=0;j<v.shapej.n;j++){
+	for (long k=0;k<v.shapek.n;k++)
+	  f << " " << setw(3) << v(i,j,k);
+	f << "\n\t";}
       f << "\n\t";}
-    f << "\n\t";}
-  return f;
+    if(prec<i10) f.precision(prec);
+    return f;
     
-   };
+  };
 
 template<class R>
  R  KN_<R>::operator,(const KN_<const_R> & u) const {

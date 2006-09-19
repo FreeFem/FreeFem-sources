@@ -28,11 +28,13 @@ AM_MAINTAINER_MODE
 # Necessary compilers
 AC_PROG_CXX
 
+# dur dur car sous MacOsX le fortran n'est pas standard. 
 AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPACK need it)])
      ff_g2c_lib="";	 
 if test "$enable_fortran" != no
 then
 	AC_PROG_F77(gfortran g77 f77 xlf f90 fort77 xlf90)
+        ff_flibs=""
         # modif FH		
 	AC_F77_LIBRARY_LDFLAGS  
 	# correct pb of double def under macos 
@@ -40,16 +42,27 @@ then
 	 *g77)  
 	 for i in $FLIBS; do
           case $i in 
-	   -L*)    FLIBS="$i -lg2c";; 
-	   # break;;
+# save last directory of the list 
+	   -L*)    ff_libs="$i";; 
           esac
 	 done 
-	 #FLIBS=[`echo "$FLIBS"|sed -e 's,-lcrt2.o ,,g' -e 's,-L[^ ]* ,,' -e 's,-lgcc_s,,' -e 's,-lSystem,,'`]
+	 FLIBS="$ff_flibs -lg2c"
 	 AC_MSG_WARN([  get dir of -lg2c  FLIBS :  $FLIBS ])
 	 ;;
+# add FH sep 2006
+         *gfortran)
+         for i in $FLIBS; do
+          case $i in
+           -L*)    ff_flibs="$i";;
+          esac
+         done
+         FLIBS="$ff_flibs -lgfortran"
+         AC_MSG_WARN([  get dir of -lgfortran  FLIBS :  $FLIBS ])
+         ;;
 	esac
 	AC_ARG_WITH(flib,[  --with-flib= the fortran library ])
-	if test "$with_flib" != no -o -n  "$with_flib"
+#  correct FH sep 2006 -o -> -a 
+	if test "$with_flib" != no -a -n  "$with_flib"
 	then 
 	  ff_g2c_lib="$with_flib"
 	  FLIBS="$with_flib"
@@ -471,7 +484,7 @@ fi
 # if enabling downloads find wget or curl to do download 
 # ------------------------------------------------------
 
-if test  "$ff_wget" = no -a "$enable_download" = yes
+if test  "$ff_wget" =  no -a "$enable_download" = yes
 then
 	ff_wget=""
 	AC_CHECK_PROG(ff_wget,wget,yes,no)
@@ -493,36 +506,34 @@ AC_SUBST(WGET,$ff_wget_command)
 #  --------------------
 AC_ARG_WITH(cadna,[  --with-cadna= cadna library --without-cadna  ])
 if test "$with_cadna" != no -o -n  "$with_cadna"
-   then 
-     ff_cadna="$with_cadna"
-   fi
+    then 
+    ff_cadna="$with_cadna"
+fi
 ff_cadna_ok=no
 if test "$with_cadna" != no  
-  then 
-  ff_libs_old="$LIBS"
-  ff_ldflags_old="$LDFLAGS"
-  ff_cadna_dir="${curdir}/download/cadna"
-  LDFLAGS="$LDFLAGS -L$ff_cadna_dir"
-  AC_CHECK_LIB(cadnafree,arit_zero,
-                ff_cadna_ok=yes)
-  AC_CHECK_HEADERS(${ff_cadna_dir}/cadnafree.h,
-       ff_cadna_h=yes, ff_cadna_h=no)
-
-   LIBS="$ff_libs_old"
-   LDFLAGS="$ff_ldflags_old"    
-
-   if test "$ff_cadna_ok" = yes  -a "$ff_cadna_h" = yes 
-    then
-      AC_DEFINE(HAVE_CADNA,1, freecadna is use to evalute the round-off error propagation )
-      CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
-      LIBS=" -L$ff_cadna_dir -lcadnafree $ff_libs_old"
+    then 
+    ff_libs_old="$LIBS"
+    ff_ldflags_old="$LDFLAGS"
+    ff_cadna_dir="${curdir}/download/cadna"
+    LDFLAGS="$LDFLAGS -L$ff_cadna_dir"
+    AC_CHECK_LIB(cadnafree,arit_zero,
+	ff_cadna_ok=yes)
+    AC_CHECK_HEADERS(${ff_cadna_dir}/cadnafree.h,
+	ff_cadna_h=yes, ff_cadna_h=no)
+    
+    LIBS="$ff_libs_old"
+    LDFLAGS="$ff_ldflags_old"    
+    
+    if test "$ff_cadna_ok" = yes  -a "$ff_cadna_h" = yes 
+	then
+	AC_DEFINE(HAVE_CADNA,1, freecadna is use to evalute the round-off error propagation )
+	CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
+	LIBS=" -L$ff_cadna_dir -lcadnafree $ff_libs_old"
     else
-     AC_MSG_NOTICE([ without cadna ***** ])
+	AC_MSG_NOTICE([ without cadna ***** ])
     fi
-
-   fi
 else
-   AC_MSG_NOTICE([ without cadna ***** ])
+    AC_MSG_NOTICE([ without cadna ***** ])
 fi
 
 # Looking for the FFTW3

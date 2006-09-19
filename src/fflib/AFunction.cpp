@@ -363,6 +363,13 @@ long get_precis( ostream_precis  pf) { return pf.f->precision();}
   inline long get_good( istream_good  pf) { return pf.f->good();}
   inline bool get_eof(istream ** p){ return (**p).eof();}
  
+typedef ios_base& ( * ostream_manipulateur )(ios_base&);
+
+template< ostream_manipulateur pf> 
+inline ostream **set_os(ostream **f)
+{ 
+    **f << pf  ; return f;
+}
 
 
 template<class R>
@@ -796,7 +803,14 @@ void Init_map_type()
      Add<istream_good>("(","",new OneOperator1<long,istream_good>(get_good));
 
      Add<istream**>("eof",".",new OneOperator1<bool,istream**>(get_eof));
-   
+// add v 2.8 
+     Add<ostream**>("scientific",".",new OneOperator1<ostream**,ostream**>(set_os<scientific>));
+     Add<ostream**>("fixed",".",new OneOperator1<ostream**,ostream**>(set_os<fixed>));
+     Add<ostream**>("showbase",".",new OneOperator1<ostream**,ostream**>(set_os<showbase>));
+     Add<ostream**>("noshowbase",".",new OneOperator1<ostream**,ostream**>(set_os<noshowbase>));
+     Add<ostream**>("showpos",".",new OneOperator1<ostream**,ostream**>(set_os<showpos>));
+     Add<ostream**>("noshowpos",".",new OneOperator1<ostream**,ostream**>(set_os<noshowpos>));
+     
                                
                                 
       
