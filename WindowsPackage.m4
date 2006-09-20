@@ -26,6 +26,8 @@ Source: "BUGS"; DestDir: "{app}"
 Source: "COPYRIGHT"; DestDir: "{app}"
 Source: "COPYING"; DestDir: "{app}"
 Source: "README"; DestDir: "{app}"
+Source: "crimon-freefem++.zip"; DestDir: "{app}"
+
 ; Programs
 Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
 ;  to day the dll version do not works so we use the static one (FH)
