@@ -347,19 +347,16 @@ files.
 \item[\texttt{Crimson Editor}]
 at \url{http://www.crimsoneditor.com/} and adapt it as follows:
 
+
+
 \begin{itemize}
 \item Go to the \texttt{Tools/Preferences/File} association menu and add the .edp extension set
-
-\item In the same panel go to Filters and add  \texttt{freefem++(*.edp)} item
-
-\item In the same panel again but under \texttt{Syntax Files}
-   add two files \texttt{FREEFEM.SPC} and \texttt{FREEFEM.KEY} to define the color syntax.  To build
-   the first one simply copy paste the content of JAVA.SPC as for the second
-   copy paste the list of keywords in section \ref{keywrds}.
 
 \item In the same panel in \texttt{Tools/User} Tools, add a \texttt{FreeFem++} item (1st line) with the path
 to \texttt{freefem++.exe} on the second line and \texttt{\$(FilePath)} and \texttt{\$(FileDir)} on third and fourth lines.
 Tick the 8.3 box.
+\item for color syntax, extract file from \texttt{crimson-freefem.zip} and put files in the corresponding sub-folder of 
+ Crimson folder (\verb.C:\Program Files\Crimson Editor. ).
 \end{itemize}
 
 \item[winedt] for Windows : this is the best but it could be tricky to set up.  Download it from 
