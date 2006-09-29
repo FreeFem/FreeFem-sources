@@ -171,7 +171,7 @@ mode-mi-edp.zip aclocal.m4              acmacros.m4             acoptim.m4    \
 examples-bamg/square/*_g.* examples-bamg/square/do*  \
 examples-bamg/NACA012/[adp]* examples-bamg/NACA012/naca.awk \
  examples-bamg/quadloop/dotest.pl examples-bamg/test/dotest*.pl \
-freefem++.spec
+freefem++.spec crimon-freefem++.zip
 
 
 FF_MAC_PREFIX = FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)

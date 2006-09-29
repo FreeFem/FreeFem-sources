@@ -336,7 +336,7 @@ files.
  
  By default, the installed files are  in 
   \begin{center}
-  \verb!C:\Programs Files\FreeFem++-(VERSION)!
+  \verb!C:\Programs Files\FreeFem++!
   \end{center}
   In this directory, you have all the \texttt{.dll} files and and 
     other application \texttt{FreeFem++-nw.exe} the \freefempp application 
@@ -2904,25 +2904,38 @@ conjugate of (2.45+1.41421i) is (2.45-1.41421i)
 \subsection{\setS{One Variable Functions}}
 \index{functions}
 \begin{description}
-  \item[Fundamental functions] are built into \freefempp.
-The \emph{power function} \ttCC{x\^}$\alpha (=x^\alpha)$;
+  \item[Fundamental functions] \index{cos}\index{sin}\index{exp}\index{log}\index{tan}
+ \index{log10}\index{asin}\index{acos}\index{atan}\index{sinh}\index{cosh}\index{acosh}\index{atanh}
+ \index{asinh}
+  are built into \freefempp.
+
+The \emph{power function} \ttCC{x\^\ y = }\ttCC{@pow(x,y)}$=x^y$;\index{pow}
 the \emph{exponent function} \ttCC{@exp(x)} ($=e^x$);
 the \emph{logarithmic function} \ttCC{@log(x)}($=\ln x$) or
 \ttCC{@log10(x)} ($=\log_{10}x$);
 the \emph{trigonometric functions} \ttCC{@sin(x), @cos(x), @tan(x)}
 depending on angles measured by \emph{radian};
-the inverse of $\sin x,\, \cos x,\, \tan x$ called \emph{circular function} or \emph{inverse trigonometric function} \ttCC{@asin(x)}(=$\arcsin x$), \ttCC{@acos(x)}(=$\arccos x$), \ttCC{@atan(x)}(=$\arctan x$);
+the inverse of $\sin x,\, \cos x,\, \tan x$ called \emph{circular function} or also call \emph{inverse trigonometric function} 
+\ttCC{@asin(x)}(=$\arcsin x$), \ttCC{@acos(x)}(=$\arccos x$), \ttCC{@atan(x)}(=$\arctan x$);
+the \ttCC{@atan2(x,y)} function computes the principal value of the arc tangent of
+     $y/x$, using the signs of both arguments to determine the quadrant of the
+     return value;
+     
 the \emph{hyperbolic function},
 \[
 \sinh x=\left( e^x-e^{-x}\right)/2,\qquad
 \cosh x=\left( e^x+e^{-x}\right)/2.
 \]
 and $\tanh x=\sinh x/\cosh x$ written
-by \ttCC{@sinh(x)}, \ttCC{@cosh(x)}, \ttCC{@asinh(x)} and \ttCC{@acosh(x)}.
+by \ttCC{@sinh(x)}, \ttCC{@cosh(x)}, \ttCC{@tanh(x)}, \ttCC{@asinh(x)},
+\ttCC{@acosh(x)} and \ttCC{@atanh(x)}.
 \[
 \sinh^{-1}x=\ln \left[x+\sqrt{x^2+1}\right],\qquad
 \cosh^{-1}x=\ln \left[x+\sqrt{x^2-1}\right].
 \]
+The  real function to round  to integer   are \ttCC{@floor}$(x)$  round to largest integral value not greater than x, \ttCC{@ceil}$(x)$  round to smallest integral value not less than x, \ttCC{@rint}$(x)$ 
+functions return the integral value nearest to x (according to
+     the prevailing rounding mode) in floating-point format).\index{floor}\index{rint}\index{ceil}
 \itemtt[Elementary Functions]
 is the class of functions consisting of the functions in this section
 (polynomials, exponential, logarithmic, trigonometric, circular) and

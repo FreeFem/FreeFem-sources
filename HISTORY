@@ -1,3 +1,19 @@
+2006-09-21 14:58  hecht
+
+	*   update ide highighting
+
+2006-09-20 10:23  hecht
+
+	*   correct tool with crimson editor under Windows
+
+2006-09-20 10:19  hecht
+
+	*   coorect comment on crimson editor
+
+2006-09-19 22:08  hecht
+
+	*   bluid HISTORY files
+
 2006-09-19 21:36  hecht
 
 	*   correct openmpi trouble (async communication)
