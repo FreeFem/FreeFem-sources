@@ -58,7 +58,7 @@ http://www.jrsoftware.org/isinfo.php
 and the the cygwin package tex, pdflatex, ImageMagick , ghostscript 
 
 
-make WindowsPackage.iss
+make win32
 make documentation
 
 to build the setup file, use  inno setup on file WindowsPackage.iss

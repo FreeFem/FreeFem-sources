@@ -160,7 +160,7 @@ install_sh = @install_sh@
 
 # FLTK information
 SRCDIR = fltk-$(FLTK_VERSION)
-SERVER = http://ovh.dl.sourceforge.net/sourceforge/fltk
+SERVER = http://switch.dl.sourceforge.net/sourceforge/fltk
 subdir = download/fltk
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h

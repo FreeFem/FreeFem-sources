@@ -11,7 +11,7 @@ all-local: $(DOWNLOAD_FLTK)
 # FLTK information
 SRCDIR=fltk-$(FLTK_VERSION)
 PACKAGE=fltk-$(FLTK_VERSION)-source.tar.bz2
-SERVER=http://ovh.dl.sourceforge.net/sourceforge/fltk
+SERVER=http://switch.dl.sourceforge.net/sourceforge/fltk
 INSTALL=install
 
 fltk: $(SRCDIR)/$(INSTALL)

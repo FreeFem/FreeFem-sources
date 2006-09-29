@@ -306,7 +306,7 @@ public:
        Rd B=*(vertices[1]=v0+i1);
        Rd C=*(vertices[2]=v0+i2); 
        area = a ==0 ? (( B-A)^(C-A))*0.5 : a;
-       throwassert(area>0);}
+       ffassert(area>0);}
        
   Rd Edge(int i) const // opposite edge vertex i
      {return (Rd) *vertices[(i+2)%3]-(Rd) *vertices[(i+1)%3];}

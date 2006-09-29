@@ -7,9 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3D77F03F0A5D6AE000259456 /* libamd-i386.dylib in Resources */ = {isa = PBXBuildFile; fileRef = 3D77F03E0A5D6AE000259456 /* libamd-i386.dylib */; };
-		3D77F0420A5D6B0900259456 /* libarpack-i386.dylib in Resources */ = {isa = PBXBuildFile; fileRef = 3D77F0400A5D6B0900259456 /* libarpack-i386.dylib */; };
-		3D77F0430A5D6B0900259456 /* libumfpack-i386.dylib in Resources */ = {isa = PBXBuildFile; fileRef = 3D77F0410A5D6B0900259456 /* libumfpack-i386.dylib */; };
+		3D01563E0ACD81580063AF6A /* libarpack_ff++.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D01563D0ACD81580063AF6A /* libarpack_ff++.a */; };
+		3D01563F0ACD81580063AF6A /* libarpack_ff++.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D01563D0ACD81580063AF6A /* libarpack_ff++.a */; };
+		3D0156430ACD818F0063AF6A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156420ACD818F0063AF6A /* libumfpack.a */; };
+		3D0156440ACD818F0063AF6A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156420ACD818F0063AF6A /* libumfpack.a */; };
+		3D0156460ACD81A90063AF6A /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156450ACD81A90063AF6A /* libamd.a */; };
+		3D0156470ACD81A90063AF6A /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156450ACD81A90063AF6A /* libamd.a */; };
 		3D77F0D10A5D6E4C00259456 /* BamgFreeFem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629C40972430700D487F6 /* BamgFreeFem.cpp */; };
 		3D77F0D20A5D6E4C00259456 /* CheckPtr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629C50972430700D487F6 /* CheckPtr.cpp */; };
 		3D77F0D30A5D6E4C00259456 /* Element_P2h.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629C80972430700D487F6 /* Element_P2h.cpp */; };
@@ -31,9 +34,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3D77F03E0A5D6AE000259456 /* libamd-i386.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.bundle"; name = "libamd-i386.dylib"; path = "../../LinearSolver/lib/libamd-i386.dylib"; sourceTree = SOURCE_ROOT; };
-		3D77F0400A5D6B0900259456 /* libarpack-i386.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.bundle"; name = "libarpack-i386.dylib"; path = "../../LinearSolver/lib/libarpack-i386.dylib"; sourceTree = SOURCE_ROOT; };
-		3D77F0410A5D6B0900259456 /* libumfpack-i386.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.bundle"; name = "libumfpack-i386.dylib"; path = "../../LinearSolver/lib/libumfpack-i386.dylib"; sourceTree = SOURCE_ROOT; };
+		3D01563D0ACD81580063AF6A /* libarpack_ff++.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libarpack_ff++.a"; path = "../download/arpack/ARPACK/libarpack_ff++.a"; sourceTree = SOURCE_ROOT; };
+		3D0156420ACD818F0063AF6A /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = ../download/umfpack/UMFPACKv4.4/UMFPACK/Lib/libumfpack.a; sourceTree = SOURCE_ROOT; };
+		3D0156450ACD81A90063AF6A /* libamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.a; path = ../download/umfpack/UMFPACKv4.4/AMD/Lib/libamd.a; sourceTree = SOURCE_ROOT; };
 		3D90DC9E0970155D002A1826 /* lg.tab.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = lg.tab.cpp; sourceTree = "<group>"; };
 		3D90DCA00970155D002A1826 /* lg.tab.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = lg.tab.hpp; sourceTree = "<group>"; };
 		3D90DCA20970155D002A1826 /* lg.y */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.yacc; path = lg.y; sourceTree = "<group>"; };
@@ -138,6 +141,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D01563E0ACD81580063AF6A /* libarpack_ff++.a in Frameworks */,
+				3D0156430ACD818F0063AF6A /* libumfpack.a in Frameworks */,
+				3D0156460ACD81A90063AF6A /* libamd.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -148,6 +154,9 @@
 				3DC62AEE0972999000D487F6 /* Cocoa.framework in Frameworks */,
 				3DC62AF7097299F400D487F6 /* OpenGL.framework in Frameworks */,
 				3DC62AFD09729A7400D487F6 /* AGL.framework in Frameworks */,
+				3D01563F0ACD81580063AF6A /* libarpack_ff++.a in Frameworks */,
+				3D0156440ACD818F0063AF6A /* libumfpack.a in Frameworks */,
+				3D0156470ACD81A90063AF6A /* libamd.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,9 +262,9 @@
 		3D90DDE309704FA0002A1826 /* Lib */ = {
 			isa = PBXGroup;
 			children = (
-				3D77F0400A5D6B0900259456 /* libarpack-i386.dylib */,
-				3D77F0410A5D6B0900259456 /* libumfpack-i386.dylib */,
-				3D77F03E0A5D6AE000259456 /* libamd-i386.dylib */,
+				3D0156420ACD818F0063AF6A /* libumfpack.a */,
+				3D0156450ACD81A90063AF6A /* libamd.a */,
+				3D01563D0ACD81580063AF6A /* libarpack_ff++.a */,
 				3D90DDED097050AC002A1826 /* vecLib.framework */,
 			);
 			name = Lib;
@@ -400,9 +409,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D77F03F0A5D6AE000259456 /* libamd-i386.dylib in Resources */,
-				3D77F0420A5D6B0900259456 /* libarpack-i386.dylib in Resources */,
-				3D77F0430A5D6B0900259456 /* libumfpack-i386.dylib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -482,9 +488,18 @@
 				GCC_MODEL_TUNING = G4;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = "$(HOME)/bin";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = "freefem++-nw";
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/.. $(USER_HEADER_SEARCH_PATHS)";
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../arpack/arpack++/include $(SRCROOT)/.. $(USER_HEADER_SEARCH_PATHS)";
 				ZERO_LINK = YES;
 			};
 			name = Debug;
@@ -497,9 +512,18 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G4;
 				INSTALL_PATH = "$(HOME)/bin";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = "freefem++-nw";
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/.. $(USER_HEADER_SEARCH_PATHS)";
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../arpack/arpack++/include $(SRCROOT)/.. $(USER_HEADER_SEARCH_PATHS)";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -521,6 +545,15 @@
 				);
 				INFOPLIST_FILE = "macglrgaph-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -551,6 +584,15 @@
 				);
 				INFOPLIST_FILE = "macglrgaph-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
