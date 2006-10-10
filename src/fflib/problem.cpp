@@ -2730,6 +2730,8 @@ const Fem2D::QuadratureFormular1d & CDomainOfIntegration::FIE(Stack stack) const
   if( 1 >= exact ) return QF_GaussLegendre1;
   if( 3 >= exact ) return QF_GaussLegendre2;
   if( 5 >= exact ) return QF_GaussLegendre3;
+  if( 7 >= exact ) return QF_GaussLegendre4;
+  if( 9 >= exact ) return QF_GaussLegendre5;
   cerr << " Ordre of the Integration Formular on Edge, order = " << exact+1 << " exact = " << exact << endl;
   ExecError(" We find  no Integration Formular on Edge  for this  order to hight");
   return QF_GaussLegendre1;
