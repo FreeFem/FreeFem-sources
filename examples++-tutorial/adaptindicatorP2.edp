@@ -18,7 +18,7 @@ real error=0.01;
 func f=(x-y);
 problem Probem1(u,v,solver=CG,eps=1.0e-6) =
     int2d(Th,qforder=5)( u*v*1.0e-10+  dx(u)*dx(v) + dy(u)*dy(v)) 
-  + int2d(Th,qforder=5)( -f*v);
+  + int2d(Th,qforder=10)( -f*v);
 /*
 
   $$\eta_{K} =\left(  h_{K}^{2} || f -\Delta u_{{h}} ||_{L^{2}(K)}^{2} +\sum_{e\in \AK} h_{e} \,||\, [ \frac{\partial u_{h}}{\partial n_{k}}] \,||^{2}_{L^{2}(e)} \right)^{\frac{1}{2}}
