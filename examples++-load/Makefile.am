@@ -12,10 +12,10 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
  mat_dervieux.cpp convect_dervieux.edp funcTemplate.cpp AFunction_ext.hpp funcTemplate.edp \
  NSP2BRP0.edp bilapMorley.edp convect_dervieux.edp convectchacon.edp \
  dfft.edp  funcTemplate.edp load.edp testFE.edp testFEMorley.edp \
-  regtests.edp    regtests.m4  makeref.edp ref.edp
+  regtests.edp    regtests.m4  makeref.edp ref.edp myType.edp addNewType.cpp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
-         Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX)
+         Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX)
 
 load_compile:include  $(LIST_COMPILE)
 

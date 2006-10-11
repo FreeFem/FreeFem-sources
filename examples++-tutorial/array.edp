@@ -89,7 +89,7 @@ c = 3;
 a[2]=0;
 d = ( a ? b : c ); // i = 0, n-1  d[i] = a[i] ? b[i] : c[i] , 
 cout << d << endl;
-cout << "==   3       3       2       3       3 \n";
+cout << "==   2       2       3       2       2 \n";
 
 // Liste all array operator and method 
 // ok in version 2.0-3 
