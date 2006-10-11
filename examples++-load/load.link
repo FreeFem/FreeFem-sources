@@ -54,7 +54,7 @@ while [ $# -ne 0 ]  ; do
 	-b)     bin=$2  ; shift;;
 	-I*)    INC="$INC $1";;
 	-dll)   DLL="$DLL $2";shift;;
-	-[Ll]*)    LIBS="$LIBS $1"; shift;;
+	-[Ll]*)    LIBS="$LIBS $1" ;;
 	*.cpp) files="$files $1";  o=`basename $1 .cpp` ; fileso="$fileso $o.o";; 
 	*.cp) files="$files $1";  o=`basename $1 .cp`   ; fileso="$fileso $o.o";; 
 	*.cxx) files="$files $1";  o=`basename $1 .cxx` ; fileso="$fileso $o.o";; 

@@ -113,6 +113,6 @@ template<class R>
     R * l(v);
     const R *aa(u.a),*bb(u.b),*cc(u.c);    
     for (long i=0;i<n;i++,l += step, aa +=stepa, bb += stepb ,  cc += stepc)
-      *l oper ( (*aa == zero) ?  *bb : *cc);
+      *l oper ( (*aa != zero) ?  *bb : *cc);
     return *this;
   }
