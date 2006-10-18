@@ -24,7 +24,7 @@ load_compile:include  $(LIST_COMPILE)
 
 include: include.tar.gz
 	tar zxvf include.tar.gz
-	-rm include/._*
+	-rm -f include/._*
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
 
@@ -37,3 +37,4 @@ regtests.edp: regtests.m4 ../regtests.m4
 
 clean-local:
 	-rm myfunction.o myfunction.so myfunction.dll
+.PHONY:include
