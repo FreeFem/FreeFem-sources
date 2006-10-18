@@ -26,6 +26,6 @@ sudo cp FreeFem++-CoCoa /usr/local/bin
 fi
 echo " copy FreeFem++.app in /Applications "
 if [ -d FreeFem++.app ] ; then
-  rsync -avuH  FreeFem++.app/  /Applications/FreeFem++.app
+  rsync -avHE --delete   FreeFem++.app/  /Applications/FreeFem++.app
 fi
 echo "++  FreeFem++ is correctly install in /Application directory."

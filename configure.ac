@@ -585,7 +585,7 @@ ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
 
 # Trying  blas library
 for iblas in \
-"-lblas" "-framework vecLib" "-L/usr/lib/atlas -lblas" \
+"-framework vecLib" "-lblas"  "-L/usr/lib/atlas -lblas" \
 $ff_freebsd_blas
 do
 #   
