@@ -204,8 +204,8 @@ const R gauss1_n4_b=  sqrt( 525. + 70.* sqrt(30.))/35.;
 const R pgauss1_n5_0 = 128./225.;
 const R pgauss1_n5_a= (322+13.*sqrt(70.))/900.;
 const R pgauss1_n5_b= (322-13.*sqrt(70.))/900.;
-const R gauss1_n5_a=  sqrt(245.-14.*sqrt(70))/21.;
-const R gauss1_n5_b=  sqrt(245.+14.*sqrt(70))/21.;
+const R gauss1_n5_a=  sqrt(245.-14.*sqrt(70.))/21.;
+const R gauss1_n5_b=  sqrt(245.+14.*sqrt(70.))/21.;
 
 
 
