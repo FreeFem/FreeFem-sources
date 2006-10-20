@@ -225,7 +225,7 @@ inline void neupp(bool rvec, char HowMny, double dr[],
   F77NAME(dneupd)(&irvec, &HowMny, iselect, dr, di, iZ, &ldz, &sigmar,
                   &sigmai, &workv[1], &bmat, &n, which, &nev, &tol,
                   resid, &ncv, &V[1], &ldv, &iparam[1], &ipntr[1],
-                  &workd[1], &workl[1], &lworkl, &info);
+                  &workd[1], &workl[1], &lworkl, &info HIDDEN_112);  
 
   delete[] iselect;
 
@@ -259,7 +259,7 @@ inline void neupp(bool rvec, char HowMny, float dr[],
   F77NAME(sneupd)(&irvec, &HowMny, iselect, dr, di, iZ, &ldz, &sigmar,
                   &sigmai, &workv[1], &bmat, &n, which, &nev, &tol,
                   resid, &ncv, &V[1], &ldv, &iparam[1], &ipntr[1],
-                  &workd[1], &workl[1], &lworkl, &info );
+                  &workd[1], &workl[1], &lworkl, &info HIDDEN_112);
 
   delete[] iselect;
 

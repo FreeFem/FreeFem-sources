@@ -19,6 +19,13 @@
 
 #include "arch.h"
 
+
+#define HIDDEN_HBW ,int,int,int
+#define HIDDEN_BW ,int,int
+#define HIDDEN_12 ,1,2
+#define HIDDEN_112 ,1,1,2
+
+
 extern "C"
 {
 
@@ -49,7 +56,7 @@ extern "C"
                        integer *nev, double *tol, double *resid,
                        integer *ncv, double *V, integer *ldv,
                        integer *iparam, integer *ipntr, double *workd,
-                       double *workl, integer *lworkl, integer *info);
+                       double *workl, integer *lworkl, integer *info HIDDEN_BW);
 
   void F77NAME(dseupd)(logical *rvec, char *HowMny, logical *select,
                        double *d, double *Z, integer *ldz,
@@ -58,7 +65,7 @@ extern "C"
                        double *resid, integer *ncv, double *V,
                        integer *ldv, integer *iparam, integer *ipntr,
                        double *workd, double *workl,
-                       integer *lworkl, integer *info);
+                       integer *lworkl, integer *info HIDDEN_HBW );
 
 // double precision nonsymmetric routines.
 
@@ -66,7 +73,7 @@ extern "C"
                        integer *nev, double *tol, double *resid,
                        integer *ncv, double *V, integer *ldv,
                        integer *iparam, integer *ipntr, double *workd,
-                       double *workl, integer *lworkl, integer *info);
+                       double *workl, integer *lworkl, integer *info HIDDEN_BW);
 
   void F77NAME(dneupd)(logical *rvec, char *HowMny, logical *select,
                        double *dr, double *di, double *Z,
@@ -77,7 +84,7 @@ extern "C"
                        integer *ncv, double *V, integer *ldv,
                        integer *iparam, integer *ipntr,
                        double *workd, double *workl,
-                       integer *lworkl, integer *info);
+                       integer *lworkl, integer *info HIDDEN_HBW);
 
 // single precision symmetric routines.
 
@@ -85,7 +92,7 @@ extern "C"
                        integer *nev, float *tol, float *resid,
                        integer *ncv, float *V, integer *ldv,
                        integer *iparam, integer *ipntr, float *workd,
-                       float *workl, integer *lworkl, integer *info);
+                       float *workl, integer *lworkl, integer *info HIDDEN_BW);
 
   void F77NAME(sseupd)(logical *rvec, char *HowMny, logical *select,
                        float *d, float *Z, integer *ldz,
@@ -94,7 +101,7 @@ extern "C"
                        float *resid, integer *ncv, float *V,
                        integer *ldv, integer *iparam, integer *ipntr,
                        float *workd, float *workl,
-                       integer *lworkl, integer *info);
+                       integer *lworkl, integer *info HIDDEN_HBW);
 
 // single precision nonsymmetric routines.
 
@@ -102,7 +109,7 @@ extern "C"
                        integer *nev, float *tol, float *resid,
                        integer *ncv, float *V, integer *ldv,
                        integer *iparam, integer *ipntr, float *workd,
-                       float *workl, integer *lworkl, integer *info);
+                       float *workl, integer *lworkl, integer *info HIDDEN_BW);
 
   void F77NAME(sneupd)(logical *rvec, char *HowMny, logical *select,
                        float *dr, float *di, float *Z,
@@ -112,7 +119,7 @@ extern "C"
                        float *tol, float *resid, integer *ncv,
                        float *V, integer *ldv, integer *iparam,
                        integer *ipntr, float *workd, float *workl,
-                       integer *lworkl, integer *info);
+                       integer *lworkl, integer *info HIDDEN_HBW);
 
 #ifdef ARCOMP_H
 
@@ -123,7 +130,7 @@ extern "C"
                        integer *ncv, arcomplex<float> *V, integer *ldv,
                        integer *iparam, integer *ipntr, arcomplex<float> *workd,
                        arcomplex<float> *workl, integer *lworkl,
-                       float *rwork, integer *info);
+                       float *rwork, integer *info HIDDEN_BW);
 
   void F77NAME(cneupd)(logical *rvec, char *HowMny, logical *select,
                        arcomplex<float> *d, arcomplex<float> *Z, integer *ldz,
@@ -133,7 +140,7 @@ extern "C"
                        arcomplex<float> *V, integer *ldv, integer *iparam,
                        integer *ipntr, arcomplex<float> *workd,
                        arcomplex<float> *workl, integer *lworkl,
-                       float *rwork, integer *info);
+                       float *rwork, integer *info HIDDEN_HBW);
 
 // double precision complex routines.
 
@@ -142,7 +149,7 @@ extern "C"
                        integer *ncv, arcomplex<double> *V, integer *ldv,
                        integer *iparam, integer *ipntr, arcomplex<double> *workd,
                        arcomplex<double> *workl, integer *lworkl,
-                       double *rwork, integer *info);
+                       double *rwork, integer *info HIDDEN_BW);
 
   void F77NAME(zneupd)(logical *rvec, char *HowMny, logical *select,
                        arcomplex<double> *d, arcomplex<double> *Z, integer *ldz,
@@ -152,7 +159,7 @@ extern "C"
                        arcomplex<double> *V, integer *ldv, integer *iparam,
                        integer *ipntr, arcomplex<double> *workd,
                        arcomplex<double> *workl, integer *lworkl,
-                       double *rwork, integer *info);
+                       double *rwork, integer *info HIDDEN_HBW);
 
 }
 

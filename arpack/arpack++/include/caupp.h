@@ -286,7 +286,7 @@ inline void caupp(int& ido, char bmat, int n, char* which, int nev,
 
   F77NAME(znaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
                   &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1],
-                  &workl[1], &lworkl, &rwork[1], &info);
+                  &workl[1], &lworkl, &rwork[1], &info HIDDEN_12 );
 
 } // caupp (arcomplex<double>).
 
@@ -307,7 +307,7 @@ inline void caupp(int& ido, char bmat, int n, char* which, int nev,
 
   F77NAME(cnaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
                   &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1],
-                  &workl[1], &lworkl, &rwork[1], &info);
+                  &workl[1], &lworkl, &rwork[1], &info HIDDEN_12);
 
 } // caupp (arcomplex<float>).
 

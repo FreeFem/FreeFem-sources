@@ -178,7 +178,7 @@ inline void ceupp(bool rvec, char HowMny, arcomplex<double> d[],
   F77NAME(zneupd)(&irvec, &HowMny, iselect, d, iZ, &ldz, &sigma,
                   &workev[1], &bmat, &n, which, &nev, &tol, resid,
                   &ncv, &V[1], &ldv, &iparam[1], &ipntr[1],
-                  &workd[1], &workl[1], &lworkl, &rwork[1], &info);
+                  &workd[1], &workl[1], &lworkl, &rwork[1], &info HIDDEN_112);
 
   delete[] iselect;
 
@@ -212,7 +212,7 @@ inline void ceupp(bool rvec, char HowMny, arcomplex<float> d[],
   F77NAME(cneupd)(&irvec, &HowMny, iselect, d, iZ, &ldz, &sigma,
                   &workev[1], &bmat, &n, which, &nev, &tol, resid,
                   &ncv, &V[1], &ldv, &iparam[1], &ipntr[1],
-                  &workd[1], &workl[1], &lworkl, &rwork[1], &info);
+                  &workd[1], &workl[1], &lworkl, &rwork[1], &info HIDDEN_112);
 
   delete[] iselect;
 

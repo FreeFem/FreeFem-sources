@@ -304,7 +304,7 @@ inline void naupp(int& ido, char bmat, int n, char* which, int nev,
 
   F77NAME(dnaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
                   &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
-                  &lworkl, &info);
+                  &lworkl, &info HIDDEN_12);
 
 } // naupp (double).
 
@@ -324,7 +324,7 @@ inline void naupp(int& ido, char bmat, int n, char* which, int nev,
 
   F77NAME(snaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
                   &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
-                  &lworkl, &info);
+                  &lworkl, &info HIDDEN_12 );
 
 } // naupp (float).
 
