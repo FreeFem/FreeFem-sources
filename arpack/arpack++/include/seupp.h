@@ -147,7 +147,7 @@ inline void seupp(bool rvec, char HowMny, double d[], double Z[],
 
   F77NAME(dseupd)(&irvec, &HowMny, iselect, d, iZ, &ldz, &sigma, &bmat,
                   &n, which, &nev, &tol, resid, &ncv, &V[1], &ldv, &iparam[1],
-                  &ipntr[1], &workd[1], &workl[1], &lworkl, &info );
+                  &ipntr[1], &workd[1], &workl[1], &lworkl, &info HIDDEN_112);
 
   delete[] iselect;
 
@@ -179,7 +179,7 @@ inline void seupp(bool rvec, char HowMny, float d[], float Z[],
 
   F77NAME(sseupd)(&irvec, &HowMny, iselect, d, iZ, &ldz, &sigma, &bmat,
                   &n, which, &nev, &tol, resid, &ncv, &V[1], &ldv, &iparam[1],
-                  &ipntr[1], &workd[1], &workl[1], &lworkl, &info );
+                  &ipntr[1], &workd[1], &workl[1], &lworkl, &info HIDDEN_112 );
 
   delete[] iselect;
 

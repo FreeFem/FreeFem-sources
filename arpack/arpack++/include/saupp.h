@@ -292,7 +292,7 @@ inline void saupp(int& ido, char bmat, int n, char* which, int nev,
 
   F77NAME(dsaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
                   &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
-                  &lworkl, &info);
+                  &lworkl, &info HIDDEN_12);
 
 } // saupp (double).
 
@@ -312,7 +312,7 @@ inline void saupp(int& ido, char bmat, int n, char* which, int nev,
 
   F77NAME(ssaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
                   &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
-                  &lworkl, &info);
+                  &lworkl, &info HIDDEN_12);
 
 } // saupp (float).
 
