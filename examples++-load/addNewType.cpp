@@ -48,9 +48,11 @@ double get_myType_uv_x(const myType_uv & muv)
   return muv.mt->x(muv.u,muv.v);
 }
 
-R3  get_myType_uv_N(const myType_uv & muv)
+R3 * get_myType_uv_N(const myType_uv & muv)
 {
-  return R3(muv.mt->x(muv.u,muv.v),0.,0.);
+  static R3 r;
+  r=R3(muv.mt->x(muv.u,muv.v),0.,0.);
+  return &r;
 }
 //   Add the function name to the freefem++ table 
 class Init { public:
@@ -61,6 +63,7 @@ Init::Init(){
 
   Dcl_Type<myType*>(InitP<myType >,Destroy<myType>); // declare deux nouveau type pour freefem++  un pointeur et 
   Dcl_Type<myType_uv>();
+  //  Dcl_Type<R3>();
   //  cast d'un ** en * 
   //  atype<myType**>()->AddCast( new E_F1_funcT<myType*,myType **>(UnRef<myType*>)); 
 
@@ -81,7 +84,7 @@ Init::Init(){
   atype< myType * >()->Add("(","",new OneOperator3_<myType_uv,myType *,double,double  >(set_myType_uv));  
 
    Add<myType_uv>("x",".",new OneOperator1_<double,myType_uv>(get_myType_uv_x) );
-   Add<myType_uv>("N",".",new OneOperator1_<R3,myType_uv>(get_myType_uv_N) );
+   Add<myType_uv>("N",".",new OneOperator1_<R3*,myType_uv>(get_myType_uv_N) );
 }
 
 
