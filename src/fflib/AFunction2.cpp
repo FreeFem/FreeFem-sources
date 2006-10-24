@@ -729,60 +729,68 @@ void ListOfInst::Add(const C_F0 & ins) {
       
       
 AnyType ListOfInst::operator()(Stack s) const {     
-      AnyType r; 
-      double s0=CPUtime(),s1=s0,ss0=s0;
-      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
+    AnyType r; 
+    double s0=CPUtime(),s1=s0,ss0=s0;
+    StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
+    try { // modif FH oct 2006 
+	for (int i=0;i<n;i++) 
+	{
+	    TheCurrentLine=linenumber[i];
+	    r=(*list[i])(s);
+	    sptr->clean(); // modif FH mars 2006  clean Ptr
+	    s1=CPUtime();
+	    if (showCPU)  
+		cout << " CPU: "<< i << " " << s1-s0 << "s" << " " << s1-ss0 << "s" << endl;
+	    s0=CPUtime();
+	}
+    }
+    catch(...)
+    {
+	sptr->clean();
+	throw; 
+    }
+    return r;}
 
-      for (int i=0;i<n;i++) 
-       {
-        TheCurrentLine=linenumber[i];
-        r=(*list[i])(s);
-        sptr->clean(); // modif FH mars 2006  clean Ptr
-        s1=CPUtime();
-        if (showCPU)  
-          cout << " CPU: "<< i << " " << s1-s0 << "s" << " " << s1-ss0 << "s" << endl;
-        s0=CPUtime();
-       }
-      return r;}
-      
 AnyType E_block::operator()(Stack s)  const {
-      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
-      if (clean) 
-       {
-         try { 
-          for (int i=0;i<n;i++) {
-            TheCurrentLine=linenumber[i];
-            (*code[i])(s); 
-            sptr->clean();
-
+    StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
+    if (clean) 
+    {
+	try { 
+	    for (int i=0;i<n;i++) {
+		TheCurrentLine=linenumber[i];
+		(*code[i])(s); 
+		sptr->clean();
+		
             }}
-          catch( E_exception & e) { 
-           (*clean)(s); 
-             if (e.type() != E_exception::e_return)  
-               sptr->clean();
-             throw; // rethow  
-            }
-         catch(/* E_exception & e*/...) { // catch all for cleanning 
-           (*clean)(s); 
-           sptr->clean();
-           // if(verbosity>50)
-           //  cout << " catch " << e.what() << " clean & throw " << endl;
-          // throw(e);
+	catch( E_exception & e) { 
+	    (*clean)(s); 
+	    if (e.type() != E_exception::e_return)  
+		sptr->clean();
+	    throw; // rethow  
+	}
+	catch(/* E_exception & e*/...) { // catch all for cleanning 
+	    (*clean)(s); 
+	    sptr->clean();
+	    // if(verbosity>50)
+	    //  cout << " catch " << e.what() << " clean & throw " << endl;
+	    // throw(e);
             throw; // rethow 
-            }
-         
-       (*clean)(s); 
-       sptr->clean();
-
-       }
-      else  // not catch  exception if no clean (optimization} 
-       for (int i=0;i<n;i++) 
-          {
-          (*code[i])(s); 
-          sptr->clean(); // mars 2006 FH clean Ptr
-          }
-      return Nothing;
+	}
+	
+	(*clean)(s); 
+	sptr->clean();
+	
+    }
+    else  // not catch  exception if no clean (optimization} 
+	for (int i=0;i<n;i++) 
+	{
+	    (*code[i])(s); 
+	    sptr->clean(); // mars 2006 FH clean Ptr
+	}
+	    return Nothing;
    }
+
+
 void ShowDebugStack()
  {
    if (mpisize)

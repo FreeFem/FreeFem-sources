@@ -247,6 +247,7 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
 		     // and PutVector a pointer to the output vector, w.
 		     work = B*v;
 		     OP1.Solve(w,work);
+		     cout << " kkk" << kkk << " " << w.max() << " " << w.min() << endl;
 		     //    P.B.MultMv(prob.GetVector(), temp);
 		     //    P.MultOPv(temp, prob.PutVector());
 		     break;
@@ -260,6 +261,7 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
 		     // 1. GetProd supplies a pointer to the previously calculated
 		     // product Bv and PutVector a pointer to the output vector w.
 		     OP1.Solve(w,v);
+		     cout << " kkk" << kkk << " " << w.max() << " " << w.min() << endl;
 		     //P.MultOPv(prob.GetProd(), prob.PutVector());
 		     break; }
 		     
@@ -270,6 +272,7 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
 		     // Performing w <- B*v.
 		     //P.B.MultMv(prob.GetVector(), prob.PutVector());
 		     w = B*v; 
+		     cout << " kkk" << kkk << " " << w.max() << " " << w.min() << endl;
 		   }
 		   }
 		   // cout<< " GetIdo = " << kkk << endl;

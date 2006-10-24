@@ -897,6 +897,7 @@ Optional Packages:
   --with-wget=command	Replace "wget" with another command. Implies --enable-download
   --with-cadna= cadna library --without-cadna
   --with-blas=library	Use a specific version of the Blas
+  --with-lapack=library	Use a specific version of the Lapack
   --with-arpack=library	Use a specific version of Arpack
   --with-amd=library	Use a specific version of AMD
   --with-umfpack=library	Use a specific version of Umfpack
@@ -2697,7 +2698,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:2700:" \
+echo "$as_me:2701:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -2895,7 +2896,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:2898: \"$ac_link\") >&5
+(eval echo $as_me:2899: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -2973,7 +2974,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:2976: \"$ac_link\") >&5
+(eval echo $as_me:2977: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -10603,7 +10604,7 @@ ff_blas_inc=""
 
 # Specific BLAS library location for FreeBSD
 ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
-
+#  zmach is in lapack
 # Trying  blas library
 for iblas in \
 "-framework vecLib" "-lblas"  "-L/usr/lib/atlas -lblas" \
@@ -10758,10 +10759,12 @@ echo $ECHO_N "checking for BLAS version to download... $ECHO_C" >&6
 			ff_download_blas=atlas-binary
 			ff_blas_lib="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -llapack -lf77blas -latlas"
 			ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
+			ff_lapack_ok=ok
 		else
 			ff_download_blas=atlas-source
 			ff_blas_lib="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
 			ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
+			ff_lapack_ok=ok
 		fi
 	fi
 
@@ -11396,11 +11399,85 @@ fi
 
 G2CLIB=$ff_g2c_lib
 
-#looking of  lapack
+#looking of  lapack if no compile the arpack lapack
 # warning $$ because the make eat one
+ff_lapack_ok=no;
+ff_lapack_lib=
+echo "$as_me:$LINENO: checking for lapack in LIBS  " >&5
+echo $ECHO_N "checking for lapack in LIBS  ... $ECHO_C" >&6
+  if test "$ff_blas_ok" = yes ; then
+           cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char dgeqr2_ ();
+int
+main ()
+{
+dgeqr2_ ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ff_lapack_ok=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+  fi
 ff_lapackdir='$$(LAPACKdir)'
-if test `uname` = Darwin;
-then
+
+echo "$as_me:$LINENO: result: $ff_lapack_ok" >&5
+echo "${ECHO_T}$ff_lapack_ok" >&6
+
+if test "$ff_lapack_ok" = no; then
+
+# Check whether --with-lapack or --without-lapack was given.
+if test "${with_lapack+set}" = set; then
+  withval="$with_lapack"
+  ff_lapack_ok=yes
+	ff_lapack_lib="${withval}"
+	LIBS="$ff_lapack_lib $LIBS"
+
+fi;
+fi
+
+if  test "$ff_lapack_ok" = yes ; then
+# no compilation of lapack in  arpack
 ff_lapackdir=
 fi
 # Arpack itself
