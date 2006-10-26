@@ -1,3 +1,7 @@
+v 2.10 (oct 26,  2006)
+  correct problem with eigen value on window and some linux distrubition (Fedora)
+  add a patch of two functions in lapack  see  arpack/arpack-patch-lapack.tar.gz
+
 v 2.9 (sept 19, 2006 FH) 
   change Send and Recv in mpi  to Isend and Irecv to make async communication
   so now freefem++-mpi work with openmpi.

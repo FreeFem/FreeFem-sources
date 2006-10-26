@@ -11,6 +11,7 @@ SUBDIRS=download src DOC examples++-tutorial examples++	\
 	examples++-bug examples++-chapt3 examples++-other
 
 EXTRA_DIST=regtests.sh config-wrapper.h arpack/arpack++/include/*.h \
+arpack/arpack-patch-lapack.tar.gz \
 FreeFem++.*mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS \
 logo.ico copysharedlibs.sh COPYRIGHT edp.nedit INNOVATION reconfigure \
