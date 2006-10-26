@@ -22,6 +22,7 @@ $(ARPACKLIB): ARPACK/fait
 ARPACK/fait: arpack96.tar.gz patch.tar.gz ARmake.m4 Makefile
 	gunzip -c arpack96.tar.gz | tar xf -
 	gunzip -c patch.tar.gz | tar xf -
+	gunzip -c ../../arpack/arpack-patch-lapack.tar.gz | tar xf -
 	m4 -DFF_BLASLIB="$(BLASLIB)" \
 	   -DFF_FC="@F77@" \
            -DFF_FFLAGS="@FFLAGS@" \
