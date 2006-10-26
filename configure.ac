@@ -791,7 +791,7 @@ then
 		# Do not update $LIBS, but create an extra LIB variable,
 		# because this lib does not exist yet, and this could make the
 		# following tests fail.
-                ff_arpack_libs="-L${curdir}/download/arpack/ARPACK -larpack_ff++"
+                ff_arpack_libs="-L${curdir}/download/arpack/ARPACK -larpack_ff++ $ff_lapack_lib"
 		ff_arpack_ok=yes
 
 	fi
