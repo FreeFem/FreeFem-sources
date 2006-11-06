@@ -601,7 +601,7 @@ void MatriceProfile<R>::LU(double eps) const  {
 	  s = blas_sdot(j-k0,Lik,1,Ukj,1);
 	  Lik += j-k0;
 #else
-          for (k=k0;k<j;k++) // k < j < i ;
+          for (int k=k0;k<j;k++) // k < j < i ;
 	    s += *Lik++ * *Ukj++ ;     // a(i,k)*a(k,j);
 #endif
 	  *Lik -= s;
@@ -619,7 +619,7 @@ void MatriceProfile<R>::LU(double eps) const  {
 	  s = blas_sdot(j-k0,Ljk,1,Uki,1);
           Uki += j-k0;
 #else
-	  for (k=k0  ;k<j;k++)    // 
+	  for (int k=k0  ;k<j;k++)    // 
 	    s +=  *Ljk++ * *Uki++ ;
 #endif
 	  *Uki -= s;  // k = j here 
@@ -632,7 +632,7 @@ void MatriceProfile<R>::LU(double eps) const  {
 #ifdef WITHBLAS
        s = blas_sdot(i-k0,Lik,1,Uki,1);
 #else
-      for (k=k0;k<i;k++) // k < i < i ;
+      for (int k=k0;k<i;k++) // k < i < i ;
 	s += *Lik++ * *Uki++ ;     // a(i,k)*a(k,i);
 #endif
       // cout << " k0 " << k0 << " i = " << i << " " <<  s << endl;

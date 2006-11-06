@@ -6,7 +6,7 @@
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
-
+ 
 /*
  
  This file is part of Freefem++
@@ -53,7 +53,7 @@ string TransDir(string dir)
 #else
   char nsep=BACKSLACH, sep=SLACH;
 #endif
-  for (int i=0; i<dir.size(); ++i)
+  for (size_t i=0; i<dir.size(); ++i)
     if(dir[i]==nsep) dir[i]=sep;
   if(dir.size()>1 && dir[dir.size()-1] != sep) 
     dir += sep;
@@ -124,10 +124,10 @@ int GetEnvironment(const string & key, string items)
 {
   if(verbosity>=100)  cout << key << " -> " << items << endl;
   bool path=key.find("path")!= string::npos;
-  int d=0, k=0,i;
+  int d=0, k=0;
   if(path)
     items+=";;";
-  for ( i=0;i<items.size();i++)
+  for (size_t  i=0;i<items.size();i++)
    if(  items[i]==';')
     { 
 

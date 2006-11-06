@@ -28,7 +28,7 @@
 //  
 // ----- 
 #ifdef FF_GRAPH_SET_PTR
-#define EXTERNFF(t,f,arg) t f##_ arg;  extern t (*f) arg ;
+#define EXTERNFF(t,f,arg) t f##_ arg;  extern t (*f) arg 
 #else
 #ifdef FF_GRAPH_PTR_DCL
 #define EXTERNFF(t,f,arg)  t (*f) arg

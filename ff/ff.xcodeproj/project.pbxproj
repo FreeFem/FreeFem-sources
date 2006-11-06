@@ -11,9 +11,7 @@
 		3D01563F0ACD81580063AF6A /* libarpack_ff++.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D01563D0ACD81580063AF6A /* libarpack_ff++.a */; };
 		3D0156430ACD818F0063AF6A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156420ACD818F0063AF6A /* libumfpack.a */; };
 		3D0156440ACD818F0063AF6A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156420ACD818F0063AF6A /* libumfpack.a */; };
-		3D0156460ACD81A90063AF6A /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156450ACD81A90063AF6A /* libamd.a */; };
 		3D0156470ACD81A90063AF6A /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156450ACD81A90063AF6A /* libamd.a */; };
-		3D77F0D10A5D6E4C00259456 /* BamgFreeFem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629C40972430700D487F6 /* BamgFreeFem.cpp */; };
 		3D77F0D20A5D6E4C00259456 /* CheckPtr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629C50972430700D487F6 /* CheckPtr.cpp */; };
 		3D77F0D30A5D6E4C00259456 /* Element_P2h.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629C80972430700D487F6 /* Element_P2h.cpp */; };
 		3D77F0D40A5D6E4C00259456 /* Element_RT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629CA0972430700D487F6 /* Element_RT.cpp */; };
@@ -26,6 +24,8 @@
 		3D77F0DB0A5D6E4C00259456 /* mshptg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629D40972430700D487F6 /* mshptg.cpp */; };
 		3D77F0DC0A5D6E4C00259456 /* QuadratureFormular.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629D60972430700D487F6 /* QuadratureFormular.cpp */; };
 		3D77F0DE0A5D6E5D00259456 /* eigenvalue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629A70972401F00D487F6 /* eigenvalue.cpp */; };
+		3D9A3A4F0AFF47D400CE0C5D /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156450ACD81A90063AF6A /* libamd.a */; };
+		3D9A3B050AFF633300CE0C5D /* BamgFreeFem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC629C40972430700D487F6 /* BamgFreeFem.cpp */; };
 		3DC62AAD09728E0D00D487F6 /* sansrgraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62A030972538B00D487F6 /* sansrgraph.cpp */; settings = {COMPILER_FLAGS = "-I(SRCROOT)/.."; }; };
 		3DC62AE90972994000D487F6 /* macglrgraf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62AE80972994000D487F6 /* macglrgraf.cpp */; };
 		3DC62AEE0972999000D487F6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DC62AED0972999000D487F6 /* Cocoa.framework */; };
@@ -127,7 +127,7 @@
 		3DC62A030972538B00D487F6 /* sansrgraph.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 5; name = sansrgraph.cpp; path = ../src/Graphics/sansrgraph.cpp; sourceTree = SOURCE_ROOT; };
 		3DC62A050972539900D487F6 /* DefColor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DefColor.cpp; path = ../src/Graphics/DefColor.cpp; sourceTree = SOURCE_ROOT; };
 		3DC62AA509728D7C00D487F6 /* freefem++-nw */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "freefem++-nw"; sourceTree = BUILT_PRODUCTS_DIR; };
-		3DC62AE20972990B00D487F6 /* macglrgaph.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = macglrgaph.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DC62AE20972990B00D487F6 /* macglrgaph.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = macglrgaph.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DC62AE40972990B00D487F6 /* macglrgaph-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "macglrgaph-Info.plist"; sourceTree = "<group>"; };
 		3DC62AE80972994000D487F6 /* macglrgraf.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = macglrgraf.cpp; path = ../src/Graphics/macglrgraf.cpp; sourceTree = SOURCE_ROOT; };
 		3DC62AED0972999000D487F6 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -143,7 +143,7 @@
 			files = (
 				3D01563E0ACD81580063AF6A /* libarpack_ff++.a in Frameworks */,
 				3D0156430ACD818F0063AF6A /* libumfpack.a in Frameworks */,
-				3D0156460ACD81A90063AF6A /* libamd.a in Frameworks */,
+				3D9A3A4F0AFF47D400CE0C5D /* libamd.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -421,7 +421,6 @@
 			files = (
 				3DC62AAD09728E0D00D487F6 /* sansrgraph.cpp in Sources */,
 				3D77F0DE0A5D6E5D00259456 /* eigenvalue.cpp in Sources */,
-				3D77F0D10A5D6E4C00259456 /* BamgFreeFem.cpp in Sources */,
 				3D77F0D20A5D6E4C00259456 /* CheckPtr.cpp in Sources */,
 				3D77F0D30A5D6E4C00259456 /* Element_P2h.cpp in Sources */,
 				3D77F0D40A5D6E4C00259456 /* Element_RT.cpp in Sources */,
@@ -433,6 +432,7 @@
 				3D77F0DA0A5D6E4C00259456 /* gibbs.cpp in Sources */,
 				3D77F0DB0A5D6E4C00259456 /* mshptg.cpp in Sources */,
 				3D77F0DC0A5D6E4C00259456 /* QuadratureFormular.cpp in Sources */,
+				3D9A3B050AFF633300CE0C5D /* BamgFreeFem.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -485,18 +485,42 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = G4;
+				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_TREAT_NONCONFORMANT_CODE_ERRORS_AS_WARNINGS = NO;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
+				GCC_WARN_EFFECTIVE_CPLUSPLUS_VIOLATIONS = NO;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
+				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = NO;
+				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				GCC_WARN_MISSING_PARENTHESES = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_PEDANTIC = NO;
+				GCC_WARN_SHADOW = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_PARAMETER = YES;
+				GCC_WARN_UNUSED_VALUE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_4)",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_4 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = "freefem++-nw";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../arpack/arpack++/include $(SRCROOT)/.. $(USER_HEADER_SEARCH_PATHS)";
@@ -517,10 +541,12 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_4)",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_4 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = "freefem++-nw";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../arpack/arpack++/include $(SRCROOT)/.. $(USER_HEADER_SEARCH_PATHS)";

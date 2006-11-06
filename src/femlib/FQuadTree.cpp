@@ -356,12 +356,12 @@ void  FQuadTree::Add( Vertex & w)
 }
 
 FQuadTree::FQuadTree(Mesh * t,R2 Pmin,R2 Pmax,long nbv) : 
+ lenStorageQuadTreeBox(t->nv/8+100),
   th(t),
-  lenStorageQuadTreeBox(t->nv/8+100),
-  NbQuadTreeBox(0),
-  NbVertices(0),
   NbQuadTreeBoxSearch(0),
   NbVerticesSearch(0),
+  NbQuadTreeBox(0),
+  NbVertices(0),
   cMin(Pmin-(Pmax-Pmin)/2),
   cMax(Pmax+(Pmax-Pmin)/2),
   coef( MaxISize/Norme_infty(cMax-cMin))
@@ -380,13 +380,13 @@ FQuadTree::FQuadTree(Mesh * t,R2 Pmin,R2 Pmax,long nbv) :
 }
 
 FQuadTree::FQuadTree() : 
-  th(0),
   lenStorageQuadTreeBox(100),
-  NbQuadTreeBox(0),
-  NbVertices(0),
+  th(0),
   NbQuadTreeBoxSearch(0),
   NbVerticesSearch(0),
-  coef(0),cMin(0,0),cMax(0,0)
+  NbQuadTreeBox(0),
+  NbVertices(0),
+  cMin(0,0),cMax(0,0),coef(0)
 {
   sb =new StorageQuadTreeBox(lenStorageQuadTreeBox);
   root=NewQuadTreeBox();

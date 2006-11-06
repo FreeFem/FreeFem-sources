@@ -99,8 +99,8 @@ void myfree(char *p,size_t l=0,int nordre=0)
    }
   }
 }
-void *operator new(size_t);
-void operator delete(void * pp );
+void *operator new(size_t) throw (std::bad_alloc);
+void operator delete(void * pp )throw () ;
 
 
 
@@ -148,6 +148,9 @@ class OneAlloc {public:
     AllocData * next;
     AllocData();
     ~AllocData();
+private:
+    AllocData(const AllocData&);
+    void operator=(const AllocData&);
   };
 
 private:
@@ -397,20 +400,20 @@ AllocExtern::~AllocExtern()
 // ------------------
 
 
-void *operator new(size_t ll )
+void *operator new(size_t ll ) throw (std::bad_alloc)
 { void * p =  AllocExternData.MyNewOperator(ll,false);
  if (ll && !p) { printf("EXIT BECAUSE MEMORY FULL \n");
  throw(ErrorExec("exit",-1));};
  return p;}
-void *operator new[](size_t ll )
+void *operator new[](size_t ll ) throw (std::bad_alloc)
 { void * p =  AllocExternData.MyNewOperator(ll,true);
  if (ll && !p) { printf("EXIT BECAUSE MEMORY FULL \n");
  throw(ErrorExec("exit",-1));};
  return p;}
   
-void operator delete(void * pp)
+void operator delete(void * pp)throw ()
 {  AllocExternData.MyDeleteOperator(pp,false);}
-void operator delete[](void * pp)
+void operator delete[](void * pp)throw ()
 {  AllocExternData.MyDeleteOperator(pp,true);}
 
 int AllocExtern::ShowAlloc(char *s,size_t & lg) {

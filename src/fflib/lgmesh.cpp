@@ -86,7 +86,7 @@ class classBuildMesh :  public E_F0mps { public:
 };
 
 basicAC_F0::name_and_type  classBuildMesh::name_param[]= {
-     "nbvx", &typeid(long) 
+  {  "nbvx", &typeid(long) }
 };
 
 
@@ -1127,10 +1127,10 @@ class MeshCarre2f :   public E_F0mps { public:
 };
 
 basicAC_F0::name_and_type  MeshCarre2::name_param[]= {
-     "flags", &typeid(long) 
+  {   "flags", &typeid(long) }
 };
 basicAC_F0::name_and_type  MeshCarre2f::name_param[]= {
-     "flags", &typeid(long) 
+  {   "flags", &typeid(long) }
 };
 
 
@@ -1431,6 +1431,7 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
       int i0=Th(t,0),i1=Th(t,1),i2=Th(t,2);
       minarea=Min(minarea,Area2(R2(u[i0],v[i0]), R2(u[i1],v[i1]),R2(u[i2],v[i2])));
      }
+    *mp=mps;
     return SetAny<double>(minarea/2.);
 
 }
