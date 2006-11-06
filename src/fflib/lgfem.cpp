@@ -272,7 +272,7 @@ bool In(long *viso,int n,long v)
   while (i<j-1)    
    if ( viso[k=(i+j)/2]> v) j=k;
    else i=k;
-  return viso[i]=v;
+  return (viso[i]=v);
 }
 
 
@@ -299,16 +299,16 @@ inline pmesh  ReadMesh( string * const & s) {
  
 
 template<class Result,class A>
- class E_F_A_Ptr_o_R :public  E_F0 { public:
-    typedef Result A::* ptr;
-  ptr p; 
+class E_F_A_Ptr_o_R :public  E_F0 { public:
+  typedef Result A::* ptr;
   Expression a0;
+  ptr p; 
   E_F_A_Ptr_o_R(Expression aa0,ptr pp) 
     : a0(aa0),p(pp) {}
   AnyType operator()(Stack s)  const {
     return SetAny<Result*>(&(GetAny<A*>((*a0)(s))->*p));}
   bool MeshIndependent() const {return a0->MeshIndependent();} // 
-    
+  
 };
 //  ----
 //  remarque pas de template, cela ne marche pas encore ......
@@ -488,8 +488,8 @@ class LinearCG : public OneOperator
 
  class MatF_O: VirtualMatrice<R> { public:
    Stack stack;
-   C_F0 c_x;
    mutable  Kn x;
+   C_F0 c_x;
    Expression  mat;
    typedef  typename VirtualMatrice<R>::plusAx plusAx;
    MatF_O(int n,Stack stk,const OneOperator * op) 
@@ -622,10 +622,10 @@ class LinearCG : public OneOperator
 
 template<class R>
 basicAC_F0::name_and_type  LinearCG<R>::E_LCG::name_param[]= {
-     "eps", &typeid(double)  ,
-     "nbiter",&typeid(long) ,
-     "precon",&typeid(Polymorphic*),
-     "veps" ,  &typeid(double*) 
+  {   "eps", &typeid(double)  },
+  {   "nbiter",&typeid(long) },
+  {   "precon",&typeid(Polymorphic*)},
+  {   "veps" ,  &typeid(double*) }
 };
 
 
@@ -638,8 +638,8 @@ class LinearGMRES : public OneOperator
 
  class MatF_O: VirtualMatrice<R> { public:
    Stack stack;
-   C_F0 c_x;
    mutable  Kn x;
+   C_F0 c_x;
    Expression  mat;
    typedef  typename VirtualMatrice<R>::plusAx plusAx;
    MatF_O(int n,Stack stk,const OneOperator * op) 
@@ -706,7 +706,7 @@ class LinearGMRES : public OneOperator
         cout << "  ..GMRES: eps= " << eps << " max iter " << nbitermax 
              << " dim of Krylov space " << dKrylov << endl;
         KNM<R> H(dKrylov+1,dKrylov+1);
-       int k=dKrylov,nn=n;
+	int k=dKrylov;//,nn=n;
        double epsr=eps;
       // int res=GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
       if (cas<0) {
@@ -756,11 +756,11 @@ class LinearGMRES : public OneOperator
 
 template<class R>
 basicAC_F0::name_and_type  LinearGMRES<R>::E_LGMRES::name_param[]= {
-     "eps", &typeid(double)  ,
-     "nbiter",&typeid(long) ,
-     "precon",&typeid(Polymorphic*),
-     "veps" ,  &typeid(double*) ,
-     "dimKrylov", &typeid(long) 
+  {   "eps", &typeid(double)  },
+  {   "nbiter",&typeid(long) },
+  {   "precon",&typeid(Polymorphic*)},
+  {   "veps" ,  &typeid(double*) },
+  {   "dimKrylov", &typeid(long) }
 };
 
 template<typename int2>
@@ -1946,7 +1946,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
     KN<R> * y=new  KN<R>(Vh.NbOfDF);
     KN<R> & yy(*y);
     KN<R> Viso(100);
-    R2 Ptt[3];
+    // R2 Ptt[3];
     for (int i=0;i<Viso.N();i++)
       Viso[i]=0.01*i; 
       
@@ -2140,7 +2140,7 @@ AnyType E_set_fev<K>::operator()(Stack s)  const
     K ** copt=0;
     if (optimize)   copt= new K *[dim];
     if(copt) {
-      assert(dim== where_in_stack_opt.size());
+      assert((size_t) dim== where_in_stack_opt.size());
       for (int i=0;i<dim;i++)
        {
         int offset=where_in_stack_opt[i];
@@ -2437,7 +2437,7 @@ class Plot :  public E_F0mps { public:
        if ( nargs[8] )
          Box2x2( nargs[8] , bb);   
          
-      for (int i=0;i<l.size();i++)
+      for (size_t i=0;i<l.size();i++)
        
          if (args[i].left()==atype<E_Array>())
           {
@@ -2484,22 +2484,22 @@ class Plot :  public E_F0mps { public:
 
 
  basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
-     "coef", &typeid(double),
-     "cmm", &typeid(string*),
-     "ps", &typeid(string*)  ,
-     "wait", &typeid(bool) ,
-     "fill", &typeid(bool) ,
-     "value", &typeid(bool) ,
-     "clean", &typeid(bool) ,     
-     "aspectratio", &typeid(bool),  
-     "bb",&typeid(E_Array) ,
-     "nbiso", &typeid(long), 
-     "nbarrow", &typeid(long), 
-     "viso", &typeid(KN_<double>),       
-     "varrow", &typeid(KN_<double>),
-     "bw",&typeid(bool),
-     "grey", &typeid(bool),
-     "hsv", &typeid(KN_<double>)
+  {   "coef", &typeid(double)},
+  {   "cmm", &typeid(string*)},
+  {   "ps", &typeid(string*)  },
+  {   "wait", &typeid(bool) },
+  {   "fill", &typeid(bool) },
+  {   "value", &typeid(bool) },
+  {   "clean", &typeid(bool) },     
+  {   "aspectratio", &typeid(bool)},  
+  {   "bb",&typeid(E_Array) },
+  {   "nbiso", &typeid(long)}, 
+  {   "nbarrow", &typeid(long)}, 
+  {   "viso", &typeid(KN_<double>)},       
+  {   "varrow", &typeid(KN_<double>)},
+  {   "bw",&typeid(bool)},
+  {   "grey", &typeid(bool)},
+  {   "hsv", &typeid(KN_<double>)}
    };
 
 
@@ -2581,7 +2581,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                else if (kind==CDomainOfIntegration::intalledges) cout << "  -- boundary int all edges " ;
                else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all VF  edges " ;
                else cout << "  -- boundary int  " ;
-             for (int i=0;i<what.size();i++)
+             for (size_t i=0;i<what.size();i++)
                {long  lab  = GetAny<long>( (*what[i])(stack));
                 setoflab.insert(lab);
                 if ( verbosity>3) cout << lab << " ";
@@ -2801,7 +2801,7 @@ AnyType Plot::operator()(Stack s) const  {
     R2 uminmax(1e100,-1e100);
     R2 Vminmax(1e100,-1e100);
     bool first=true;
-     for (int i=0;i<l.size();i++)
+     for (size_t i=0;i<l.size();i++)
       { R2  P1,P2;
       if (l[i].what==1 || l[i].what==2) 
       {
@@ -2813,7 +2813,7 @@ AnyType Plot::operator()(Stack s) const  {
          
          if (!fe->x()) continue; 
          
-         int nb=fe->x()->N();
+         //int nb=fe->x()->N();
 
          fe->Vh->cmesh->BoundingBox(P1,P2);
           cTh=fe->Vh->cmesh;
@@ -2928,7 +2928,7 @@ AnyType Plot::operator()(Stack s) const  {
    {
     if(verbosity>99) cout << "plot::operator() Drawing part \n";
     plotting = false; 
-    for (int i=0;i<l.size();i++)
+    for (size_t i=0;i<l.size();i++)
     if (l[i].what==0) 
      if (fill)
        l[i].evalm(0,s).Draw(0,fill);
@@ -3116,56 +3116,56 @@ AnyType Plot::operator()(Stack s) const  {
           { //  recompute the iso bound
              R2 uminmax(1e100,-1e100);
              R2 Vminmax(1e100,-1e100);
-			 for (int i=0;i<l.size();i++)
-			  { R2  P1,P2;
-			  if (l[i].what==1 || l[i].what==2) 
-			  {
-			     fe   = l[i].eval(0,s,cmp0);
-			     fe1  = l[i].eval(1,s,cmp1);
-			     
-			     if (!fe->x()) continue; 
-			     
-			     int nb=fe->x()->N();
-
-			     
-			     if (fe1==0)
-			        uminmax = minmax(uminmax,fe->Vh->MinMax(*fe->x(),cmp0,false));
-			     else
-			      {
-			     if (fe1) 
-			      if (fe->Vh == fe1->Vh) 
-			        {  
-			          KN_<R> u( *fe->x()),v(*fe1->x());     
-			          Vminmax = minmax(uminmax,fe->Vh->MinMax(u,v,cmp0,cmp1,false));
-			         }  
-			    }
-			  }
-			  else continue;
-			  
-			   
-			  }
-           if (verbosity>5)   cout << " u bound " <<  uminmax << endl;
-	        R umx=uminmax.y,umn=uminmax.x;
-	        int N=Viso.N();
-	        int Na=Varrow.N();
-	        R d = fill ? (umx-umn)/(N-1)  : (umx-umn)/(N);       
-	        R x = fill ? umn-d/2 :umn+d/2;
-	       if (!pViso) 
-	        for (int i = 0;i < N;i++)
+	     for (size_t i=0;i<l.size();i++)
+	       { R2  P1,P2;
+	       if (l[i].what==1 || l[i].what==2) 
+		 {
+		   fe   = l[i].eval(0,s,cmp0);
+		   fe1  = l[i].eval(1,s,cmp1);
+		   
+		   if (!fe->x()) continue; 
+		   
+		   // int nb=fe->x()->N();
+		   
+		   
+		   if (fe1==0)
+		     uminmax = minmax(uminmax,fe->Vh->MinMax(*fe->x(),cmp0,false));
+		   else
+		     {
+		       if (fe1) 
+			 if (fe->Vh == fe1->Vh) 
+			   {  
+			     KN_<R> u( *fe->x()),v(*fe1->x());     
+			     Vminmax = minmax(uminmax,fe->Vh->MinMax(u,v,cmp0,cmp1,false));
+			   }  
+		     }
+		 }
+	       else continue;
+	       
+	       
+	       }
+	     if (verbosity>5)   cout << " u bound " <<  uminmax << endl;
+	     R umx=uminmax.y,umn=uminmax.x;
+	     int N=Viso.N();
+	     int Na=Varrow.N();
+	     R d = fill ? (umx-umn)/(N-1)  : (umx-umn)/(N);       
+	     R x = fill ? umn-d/2 :umn+d/2;
+	     if (!pViso) 
+	       for (int i = 0;i < N;i++)
 	         {Viso[i]=x;x +=d; }
-	        if (fill && !pViso) {Viso[0]=umn-d;Viso[N-1]=umx+d;}
-	        x=0; d= sqrt(Vminmax.y)/Na;
-	        if (!pVarrow)
-	        for (int i = 0;i < Na;i++)
-	          {Varrow[i]=x;x +=d; }
-          
-          
-          
+	     if (fill && !pViso) {Viso[0]=umn-d;Viso[N-1]=umx+d;}
+	     x=0; d= sqrt(Vminmax.y)/Na;
+	     if (!pVarrow)
+	       for (int i = 0;i < Na;i++)
+		 {Varrow[i]=x;x +=d; }
+	     
+	     
+	     
           }
        }  
       *mps=mp;
-     } //  end plotting 
-     NoirEtBlanc(0)  ;
+   } //  end plotting 
+   NoirEtBlanc(0)  ;
      setgrey(greyo);
      if (colors) delete[] colors;
      // modif mars 2006  auto stack ptr
@@ -3205,7 +3205,7 @@ AnyType Convect::operator()(Stack s) const
             while ( (j=WalkInTriangle(Th,it,l,GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),ddt))>=0) 
                 { 
                     ffassert( l[j] == 0);
-                    int jj  = j;            
+                    //int jj  = j;            
                     R a= l[(j+1)%3], b= l[(j+2)%3];
                     int itt =  Th.TriangleAdj(it,j);
                     if(itt==it || itt <0)  break; // le bord 
@@ -4142,7 +4142,7 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
     
     const int n=ids.size();
      ffassert(n>0);
-   if ( fes->nbitem() != n) {
+   if ( fes->nbitem() != (size_t) n) {
       cerr << " the array size must be " << fes->nbitem()  << " not " <<  n << endl;
       CompileError("Invalide array size  for  vectorial fespace function");
    }
@@ -4224,7 +4224,7 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
     
     const int n=ids.size();
      ffassert(n>0);
-   if ( fes->nbitem() != n) {
+   if ( fes->nbitem() != (size_t) n) {
       cerr << " the array size must be " << fes->nbitem()  << " not " <<  n << endl;
       CompileError("Invalide array size  for  vectorial fespace function");
    }

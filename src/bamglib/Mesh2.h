@@ -118,7 +118,7 @@ Int4 AGoodNumberPrimeWith(Int4 n);
 
 
 class Geometry;
-static Geometry *NULLGeometry=0;
+//static Geometry *NULLGeometry=0;
 class Triangles;
 class Triangle;
 class QuadTree;
@@ -509,29 +509,29 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////
 class SegInterpolation {
  public:
- GeometricalEdge * e;
- Real8 sBegin,sEnd; // abscisse of the seg on edge parameter
- Real8 lBegin,lEnd; // length abscisse  set in ListofIntersectionTriangles::Length
- int last;// last index  in ListofIntersectionTriangles for this Sub seg of edge
- R2 F(Real8 s){ 
-   Real8 c01=lEnd-lBegin, c0=(lEnd-s)/c01, c1=(s-lBegin)/c01;
-   assert(lBegin<= s && s <=lEnd);
-   return e->F(sBegin*c0+sEnd*c1);}
+  GeometricalEdge * e;
+  Real8 sBegin,sEnd; // abscisse of the seg on edge parameter
+  Real8 lBegin,lEnd; // length abscisse  set in ListofIntersectionTriangles::Length
+  int last;// last index  in ListofIntersectionTriangles for this Sub seg of edge
+  R2 F(Real8 s){ 
+    Real8 c01=lEnd-lBegin, c0=(lEnd-s)/c01, c1=(s-lBegin)/c01;
+    assert(lBegin<= s && s <=lEnd);
+    return e->F(sBegin*c0+sEnd*c1);}
 };
-
-  int MaxSize; // 
-  int Size; //
-  Real8 len; //
-  int state;
-  IntersectionTriangles * lIntTria;
-  int MaxNbSeg;
-  int NbSeg;
-  SegInterpolation * lSegsI;
-public:
-  IntersectionTriangles & operator[](int i) {return lIntTria[i];}
-  operator int&() {return Size;}
-  ListofIntersectionTriangles(int n=256,int m=16)
-    :state(-1),MaxSize(n), Size(0), lIntTria(new IntersectionTriangles[n]) ,
+ 
+ int MaxSize; // 
+ int Size; //
+ Real8 len; //
+ int state;
+ IntersectionTriangles * lIntTria;
+ int NbSeg;
+ int MaxNbSeg;
+ SegInterpolation * lSegsI;
+ public:
+ IntersectionTriangles & operator[](int i) {return lIntTria[i];}
+ operator int&() {return Size;}
+ ListofIntersectionTriangles(int n=256,int m=16)
+   :   MaxSize(n), Size(0), len(-1),state(-1),lIntTria(new IntersectionTriangles[n]) ,
     NbSeg(0), MaxNbSeg(m), lSegsI(new SegInterpolation[m])  
   { if (verbosity>9) 
     cout << "      construct ListofIntersectionTriangles"
@@ -612,8 +612,8 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////
 class VertexOnGeom {  public:
 
-  Real8 abscisse;  
   Vertex * mv;
+  Real8 abscisse;  
   union{ 
     GeometricalVertex * gv; // if abscisse <0; 
     GeometricalEdge * ge;  // if abscisse in [0..1]
@@ -994,7 +994,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
-inline Triangles::Triangles(Int4 i) :BTh(*this),Gh(*new Geometry()){PreInit(i);}
+inline Triangles::Triangles(Int4 i) :Gh(*new Geometry()),BTh(*this){PreInit(i);}
 
 extern Triangles * CurrentTh;
 

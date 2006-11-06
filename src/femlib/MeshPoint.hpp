@@ -18,7 +18,7 @@ class MeshPointBase { public:
      P.z=0;
      PHat.x=P_Hat.x;
      PHat.y=P_Hat.y;
-     PHat.z;
+     PHat.z=0.;
      T=&K.T;
      Th=&K.Vh.Th; 
      region = T->lab;
@@ -39,7 +39,7 @@ class MeshPointBase { public:
      P.z=0;
      PHat.x=P_Hat.x;
      PHat.y=P_Hat.y;
-     PHat.z;
+     PHat.z=0.;
      T=&aK;
      Th=&aTh; 
      region = T->lab;
@@ -61,7 +61,7 @@ class MeshPointBase { public:
      P.z=0;
      PHat.x=P_Hat.x;
      PHat.y=P_Hat.y;
-     PHat.z;
+     PHat.z=0.;
      T=&K.T;
      Th=&K.Vh.Th; 
      region = T->lab;
@@ -82,7 +82,7 @@ class MeshPointBase { public:
      P.z=0;
      PHat.x=P_Hat.x;
      PHat.y=P_Hat.y;
-     PHat.z;
+     PHat.z=0.;
      T=&K.T;
      Th=&K.Vh.Th; 
      region = T->lab;
@@ -126,7 +126,7 @@ class MeshPointBase { public:
      P.z=0;
      PHat.x=P_Hat.x;
      PHat.y=P_Hat.y;
-     PHat.z;
+     PHat.z=0.;
      T=&aK;
      Th=&aTh; 
      region = T->lab;
@@ -236,7 +236,7 @@ class MeshPoint : public MeshPointBase { public:
      e=ie;
      if ( t == to && t >= 0 ) return false;
      int io0=VerticesOfTriangularEdge[ieo][0];
-     int io1=VerticesOfTriangularEdge[ieo][1];
+     //     int io1=VerticesOfTriangularEdge[ieo][1];
      int i0=VerticesOfTriangularEdge[e][0];
      int i1=VerticesOfTriangularEdge[e][1];
      T= &(*Th)[t];

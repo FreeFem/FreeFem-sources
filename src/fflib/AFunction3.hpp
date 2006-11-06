@@ -231,10 +231,11 @@ public:
        const  bool mi;
 
     CODE(Expression a,const E_Array & tt)  
-      : a0(a),N(tt.size()),
-	mi(tt.MeshIndependent()),
+      : a0(a),
+	N(tt.size()),
 	tab(new Expression [N]),
 	what(new int[N])  
+	mi(tt.MeshIndependent()),
       {
         assert(&tt);
       int err=0;

@@ -131,8 +131,8 @@ class ErrorExit : public Error
 {
   int codeexit;
 public:
-  ErrorExit(const char * ,int l) :codeexit(l) ,
-    Error(NONE,"exit","(","",l,")")  {}
+  ErrorExit(const char * ,int l) :
+    Error(NONE,"exit","(","",l,")"), codeexit(l)   {}
     // the exit code fo freefem++ is given by l 
   int errcode() const{return codeexit;}
 };

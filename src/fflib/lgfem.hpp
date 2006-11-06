@@ -91,11 +91,12 @@ bool BuildPeriodic(
 class v_fes : public RefCounter { public:
   const int N;
   const pmesh* ppTh; // adr du maillage
+
   CountPointer<FESpace>  pVh;
+  Stack stack; // the stack is use whith periodique expression
   
   int nbcperiodic;
   Expression *periodic;
-  Stack stack; // the stack is use whith periodique expression
 
   
   operator FESpace * ()  { 
@@ -181,27 +182,32 @@ template<class K> class FEcomp { public:
 template<class K>
 class FEbase { public:
   v_fes *const*pVh; // pointeur sur la variable stockant FESpace;
-  CountPointer<FESpace> Vh; // espace courant 
   KN<K> * xx; // value
+  CountPointer<FESpace> Vh; // espace courant 
+  
   KN<K> *x() {return xx;}
+  
   FEbase(const pfes  *ppVh) :pVh(ppVh), xx(0),Vh(0) {}
   
- ~FEbase() { delete xx;}  
+  ~FEbase() { delete xx;}  
   void destroy() { // cout << "~FEbase  destroy " << this << endl; 
-   delete this;}
-    void operator=( KN<K> *y) { Vh=**pVh; 
-       throwassert((bool) Vh);
-       if (xx) delete xx;xx=y;
-       throwassert( y->N() == Vh->NbOfDF);}
-    FESpace * newVh() { 
-      throwassert(pVh  );
-      const pfes pp= *pVh;
-     // cout << pVh << " " << *pVh << endl;
-      return *pp;}  
+    delete this;}
+  
+  void operator=( KN<K> *y) { Vh=**pVh; 
+  throwassert((bool) Vh);
+  if (xx) delete xx;xx=y;
+  throwassert( y->N() == Vh->NbOfDF);}
+  FESpace * newVh() { 
+    throwassert(pVh  );
+    const pfes pp= *pVh;
+    // cout << pVh << " " << *pVh << endl;
+    return *pp;}  
+  
   operator  FESpace &() { throwassert(Vh); return *Vh;}
-  private: // rule of programming 
-     FEbase(const FEbase &);
-     void operator= (const FEbase &); 
+
+private: // rule of programming 
+  FEbase(const FEbase &);
+  void operator= (const FEbase &); 
 };
 
 
@@ -293,12 +299,13 @@ inline C_F0 NewFEvariable(ListOfId * ids,Block *currentblock,C_F0 & fespacetype,
 
 template<class K,class FE=FEbase<K> >
 class E_FEcomp : public E_F0mps { public:
-    typedef pair< FE * ,int> Result;
-    const int comp, N;
-    Expression a0;
-    AnyType operator()(Stack s)  const {
-       return SetAny<Result>( Result( *GetAny<FE **>((*a0)(s)),comp) );}  
-    E_FEcomp(const C_F0 & x,const int cc,int NN) : a0(x.LeftValue()),comp(cc),N(NN)
+  typedef pair< FE * ,int> Result;
+  Expression a0;
+  const int comp, N;
+
+  AnyType operator()(Stack s)  const {
+    return SetAny<Result>( Result( *GetAny<FE **>((*a0)(s)),comp) );}  
+  E_FEcomp(const C_F0 & x,const int cc,int NN) : a0(x.LeftValue()),comp(cc),N(NN)
       {if(x.left()!=atype<FE **>() ) 
         cout << "E_FEcomp: Bug " << *x.left() << " != " << *atype<FE **>() << "  case " <<typeid(K).name() << endl;
         //CompileError("E_FEcomp: Bug ?");

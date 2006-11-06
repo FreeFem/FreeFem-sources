@@ -29,6 +29,6 @@
 #ifdef VERBOSE
 #define SHOWVERB(i) i
 #else
-#define SHOWVERB(i) 0
+#define SHOWVERB(i) ( (void)0)
 #endif
 #endif

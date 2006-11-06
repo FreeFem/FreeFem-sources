@@ -91,7 +91,7 @@ class OptimAlgo : public OneOperator
     class lgNRJ : public NRJ<PARAM,VECT,VMAT,REAL> {
     private:
       Stack stack;
-   Expression J,dJ,hJ,theparame;
+      Expression J,dJ,hJ,theparame;
       VECT * gg;
     protected:
       void setparam( const Param<R>& x )
@@ -103,7 +103,9 @@ class OptimAlgo : public OneOperator
     public:
 
       lgNRJ(Stack s,int n,Expression t,Expression JJ,Expression dJJ,Expression hJJ) 
-	: NRJ<PARAM,VECT,VMAT,REAL>(n), stack(s),theparame(t),J(JJ),dJ(dJJ),hJ(hJJ),gg(0)  
+	: NRJ<PARAM,VECT,VMAT,REAL>(n), stack(s),
+	  J(JJ),dJ(dJJ),hJ(hJJ),theparame(t),
+	  gg(0)  
       { 
 	if(dJ) gg=new VECT(n); 
       }
@@ -191,7 +193,8 @@ class OptimAlgo : public OneOperator
 	Kn &x = *GetAny<Kn *>((*X)(stack));
 	
 	const int n=x.N();
-	Kn * para = GetAny<KN<double>*>( inittheparam.eval(stack) ) ; // do allocation 
+	//Kn * para =
+	GetAny<KN<double>*>( inittheparam.eval(stack) ) ; // do allocation 
 	
 	Param<R> param(x);
 	lgNRJ nrj1(stack,n,theparam,J,dJ,hJ);
@@ -280,9 +283,9 @@ class OptimAlgo : public OneOperator
 //template<class R>
 
 basicAC_F0::name_and_type  OptimAlgo::E_LCG::name_param[]= {
-  "eps", &typeid(double)  ,
-  "nbiter",&typeid(long) ,
-  "nbiterline",&typeid(long)
+ {  "eps", &typeid(double)  },
+ { "nbiter",&typeid(long) },
+   { "nbiterline",&typeid(long)}
 };
 
 void init_algo()

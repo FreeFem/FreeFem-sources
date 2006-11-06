@@ -380,9 +380,10 @@ class  ArrayOfaType : public CodeAlloc{
   //  class for the type of parameter
    aType tt[11]; 
    protected:
-   bool ellipse; 
+
    int n;
    aType * t; // array of type  
+   bool ellipse; 
    void operator=(const ArrayOfaType &); // no set  operator
    public:
  //  ArrayOfaType() :n(0),t(0),ellipse(false) {}
@@ -568,25 +569,25 @@ class basicAC_F0;
   aType r;   // the expression type
   
  public: 
-	   //  the constructeur 
-	  C_F0() :f(0),r(0) {}
-	  C_F0(const C_F0 & c):f(c.f),r(c.r) {}
-	  C_F0(const C_F0 & a,const C_F0 & b); // concatenation 
-	  C_F0(const Type_Expr & a):r(a.first),f(a.second) {}
-	  C_F0(const Polymorphic *,const char *,const basicAC_F0 & );
-	  C_F0(const Polymorphic *,const char *, AC_F0 & );
-	  //  function, array ..  
-	  C_F0(const C_F0 & e,const char *op,const basicAC_F0 & p)  ;
-      C_F0(const C_F0 & e,const char *op, AC_F0 & p) ;	  
-	  C_F0(const C_F0 & e,const char *op,const C_F0 & ee)  ; 
-      C_F0(const C_F0 & e,const char *op,const C_F0 & a,const C_F0 & b) ; 	  
-	  C_F0(const C_F0 & e,const char *nm) ; 
-      //  without parameter ex f()   
-      C_F0(const Polymorphic * pop,const char *op); 
-      // unary operator  
-      C_F0(const Polymorphic * pop,const char *op,const C_F0 & a); 
-      // binary operator  
-      C_F0(const Polymorphic * pop,const char *op,const C_F0 & a,const  C_F0  & b); 
+   //  the constructeur 
+   C_F0() :f(0),r(0) {}
+   C_F0(const C_F0 & c):f(c.f),r(c.r)   {}
+   C_F0(const C_F0 & a,const C_F0 & b); // concatenation 
+   C_F0(const Type_Expr & a):f(a.second),r(a.first)   {}
+   C_F0(const Polymorphic *,const char *,const basicAC_F0 & );
+   C_F0(const Polymorphic *,const char *, AC_F0 & );
+   //  function, array ..  
+   C_F0(const C_F0 & e,const char *op,const basicAC_F0 & p)  ;
+   C_F0(const C_F0 & e,const char *op, AC_F0 & p) ;	  
+   C_F0(const C_F0 & e,const char *op,const C_F0 & ee)  ; 
+   C_F0(const C_F0 & e,const char *op,const C_F0 & a,const C_F0 & b) ; 	  
+   C_F0(const C_F0 & e,const char *nm) ; 
+   //  without parameter ex f()   
+   C_F0(const Polymorphic * pop,const char *op); 
+   // unary operator  
+   C_F0(const Polymorphic * pop,const char *op,const C_F0 & a); 
+   // binary operator  
+   C_F0(const Polymorphic * pop,const char *op,const C_F0 & a,const  C_F0  & b); 
       // ternary operator  
       C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & b,const  C_F0 & c); 
 	  
@@ -644,7 +645,7 @@ class ForEachType:  public basicForEachType{public:
       {
         cout << " Sorry the " <<typeid(T).name() << " is too large  ( " << sizeof(T) 
              << " > " << sizeof(AnyTypeWithOutCheck) << " ) " << endl;
-       throwassert(sizeof(T) <= sizeof(AnyTypeWithOutCheck) );
+	throwassert(sizeof(T) <= sizeof(AnyTypeWithOutCheck) );
       }
     }
 };
@@ -715,8 +716,8 @@ template<class A>
        
     
 template<class A> AnyType Initialize(Stack,const AnyType &x){
- A * a=PGetAny<A>(x);
- A *b=new A;// 
+  A * a=PGetAny<A>(x);
+  A *b=new A;// 
   memcpy(a,b,sizeof(A));// bitcopy
   ::operator delete(b); // delete with no destruction 
   return  SetAny<A*>(a);
@@ -724,7 +725,7 @@ template<class A> AnyType Initialize(Stack,const AnyType &x){
 
 template<class A> AnyType InitializePtr(Stack stack,const AnyType &x){
   A * a=PGetAny<A>(x);
-SHOWVERB( cout << " init ptr " << typeid(A*).name() <<  (char *) a  - (char*) stack<< endl);
+  SHOWVERB( cout << " init ptr " << typeid(A*).name() <<  (char *) a  - (char*) stack<< endl);
   *a=0;
   return  x;
 }
@@ -1523,29 +1524,31 @@ class  OneOperator_borderN : public OneOperator {public:
 };
 
 class E_Border  :public Polymorphic  {  public: 
-   static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =0;
+  static basicAC_F0::name_and_type name_param[] ;
+  static const int n_name_param =0;
   static long Count;
   Expression xvar,xfrom,xto,xcode;
   basicAC_F0_wa * tab;
   long label;
-  E_Border(const E_Array * a) : tab(a? a->v:0) , xvar(0),xfrom(0),xto(0),xcode(0),label(++Count) 
-   {
-       assert(tab); 
-       Add("(",new OneOperator_borderN(this));
-   }
+  E_Border(const E_Array * a) : 
+    xvar(0),xfrom(0),xto(0),xcode(0), tab(a? a->v:0) ,label(++Count) 
+  {
+    assert(tab); 
+    Add("(",new OneOperator_borderN(this));
+  }
+  
   E_Border(const basicAC_F0 & aa) :    
-      xvar(to<double*>(aa[0])),
-      xfrom(to<double>(aa[1])),
-      xto(to<double>(aa[2])),
-      xcode(aa[3].LeftValue()),
-      tab(0),
-      label(++Count)
- {
-      Add("(",new OneOperator_borderN(this));}
-      AnyType operator()(Stack)  const {
-        return  SetAny<const  E_Border *>(this);}
-     double length(Stack stack) const { ffassert(0);return 0.0; /* a faire */ }
+    xvar(to<double*>(aa[0])),
+    xfrom(to<double>(aa[1])),
+    xto(to<double>(aa[2])),
+    xcode(aa[3].LeftValue()),
+    tab(0),
+    label(++Count)
+  {    Add("(",new OneOperator_borderN(this));}
+
+  AnyType operator()(Stack)  const {
+    return  SetAny<const  E_Border *>(this);}
+  double length(Stack stack) const { ffassert(0);return 0.0; /* a faire */ }
 };
   
 inline  E_BorderN::E_BorderN(const E_Border *bb, C_F0  nn,const E_BorderN * nx)  
@@ -2741,59 +2744,59 @@ class TypeLineFunction: public ForEachType<C_F0> {
 
 
 class E_F0_Optimize : public E_F0 { 
- deque<pair<Expression,int> > l;
-// mutable deque<bool> var;
- MapOfE_F0 m;
- int NBbitem;
- int ret;
- public:
+  deque<pair<Expression,int> > l;
+  // mutable deque<bool> var;
+  MapOfE_F0 m;
+  int NBbitem;
+  int ret;
+public:
   E_F0_Optimize(deque<pair<Expression,int> > &ll,MapOfE_F0 & mm,int rett) :
-  l(ll),m(mm),ret(rett),NBbitem(1) {}
+    l(ll),m(mm),NBbitem(1),ret(rett)  {}
   
-     AnyType eval(Stack s,int notinit,vector<bool> & var)  const {
-      int k= l.size();
-       if(notinit ==0)
-        {
-         var.resize(k);
-         for (int i=0;i<k;i++)
-         {  size_t offset = l[i].second;
-             var[i]=true;  
-             *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
-         }          
-        }
-      else
+  AnyType eval(Stack s,int notinit,vector<bool> & var)  const {
+    int k= l.size();
+    if(notinit ==0)
+      {
+	var.resize(k);
+	for (int i=0;i<k;i++)
+	  {  size_t offset = l[i].second;
+	  var[i]=true;  
+	  *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
+	  }          
+      }
+    else
       for (int i=0;i<k;i++)
         {  size_t offset = l[i].second;
-           if(var[i]) 
-             *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
-           //*static_cast<AnyType *>(static_cast<void *>((char*)s+offset))= (*l[i].first)(s); // FH NEWSTACK
-          // cout << " E_F0_Optimize   " << offset << " " <<  *static_cast<double *>(static_cast<void *>((char*)s+offset)) << endl; ;
+	if(var[i]) 
+	  *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
+	//*static_cast<AnyType *>(static_cast<void *>((char*)s+offset))= (*l[i].first)(s); // FH NEWSTACK
+	// cout << " E_F0_Optimize   " << offset << " " <<  *static_cast<double *>(static_cast<void *>((char*)s+offset)) << endl; ;
         }
-     // return *static_cast<AnyType *>(static_cast<void *>((char*)s+ret));          
-      return *Stack_offset<AnyType>(s,ret); // FH NEWSTACK       
-    }
-
-    virtual AnyType operator()(Stack s)  const {
-      int k= l.size();
-      for (int i=0;i<k;i++)
-        {  size_t offset = l[i].second;
-           *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
-           //*static_cast<AnyType *>(static_cast<void *>((char*)s+offset))= (*l[i].first)(s); // FH NEWSTACK
-          // cout << " E_F0_Optimize   " << offset << " " <<  *static_cast<double *>(static_cast<void *>((char*)s+offset)) << endl; ;
-        }
-     // return *static_cast<AnyType *>(static_cast<void *>((char*)s+ret));          
-      return *Stack_offset<AnyType>(s,ret); // FH NEWSTACK       
-    }
-    virtual bool Empty() const {return l.size(); }
-   // virtual E_F0 * destroy(Stack ) const {return 0;}
+    // return *static_cast<AnyType *>(static_cast<void *>((char*)s+ret));          
+    return *Stack_offset<AnyType>(s,ret); // FH NEWSTACK       
+  }
+  
+  virtual AnyType operator()(Stack s)  const {
+    int k= l.size();
+    for (int i=0;i<k;i++)
+      {  size_t offset = l[i].second;
+      *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
+      //*static_cast<AnyType *>(static_cast<void *>((char*)s+offset))= (*l[i].first)(s); // FH NEWSTACK
+      // cout << " E_F0_Optimize   " << offset << " " <<  *static_cast<double *>(static_cast<void *>((char*)s+offset)) << endl; ;
+      }
+    // return *static_cast<AnyType *>(static_cast<void *>((char*)s+ret));          
+    return *Stack_offset<AnyType>(s,ret); // FH NEWSTACK       
+  }
+  virtual bool Empty() const {return l.size(); }
+  // virtual E_F0 * destroy(Stack ) const {return 0;}
   //  virtual const E_F0 * Parameter(Stack ) const {return this;}
-    virtual size_t nbitem() const {  return NBbitem;}
-    virtual bool EvaluableWithOutStack() const {return false;} // 
-    virtual bool MeshIndependent() const {return false;} // 
-    virtual E_F0 * right_E_F0() const { return 0;}
-    virtual ~E_F0_Optimize() {}
-   // virtual int compare (const E_F0 *t) const { return t-this;} // to give a order in instuction 
-    virtual  operator aType ()  const { return  *(l.back().first);}   // the type of the expression  
+  virtual size_t nbitem() const {  return NBbitem;}
+  virtual bool EvaluableWithOutStack() const {return false;} // 
+  virtual bool MeshIndependent() const {return false;} // 
+  virtual E_F0 * right_E_F0() const { return 0;}
+  virtual ~E_F0_Optimize() {}
+  // virtual int compare (const E_F0 *t) const { return t-this;} // to give a order in instuction 
+  virtual  operator aType ()  const { return  *(l.back().first);}   // the type of the expression  
 }; 
  
  
@@ -2817,7 +2820,7 @@ inline    int E_F0::find(const MapOfE_F0 & m)  {  //  exp
     }
  inline   int E_F0::insert(Expression  opt,deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) 
     {
-     int rr=rr=align8(n);
+     int rr=align8(n);
      pair<Expression,int> p(this,rr);
      if( (verbosity / 100)% 10 == 1) 
        cout << " --  insert opt " << n << " " << *this << endl;     

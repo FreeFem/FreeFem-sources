@@ -109,7 +109,7 @@ Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
         if ( tt->link ) { // if good triangles store the value 
           int it = th.Number(tt);
           throwassert(it < nt);
-          int iiv=vv-vb;
+          //int iiv=vv-vb;
           t[it](kv) = vv;
           /*
           cout << it << " " << kv << " "<< iiv  << endl;
@@ -157,7 +157,8 @@ Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
       b_e[i]=Fem2D::BoundaryEdge(v,i0,i1,tTh->edges[i].ref);
     }      
   Int4 *reft = new Int4[tTh->nbt];
-  Int4 nbref = tTh->ConsRefTriangle(reft);
+  //Int4 nbref =
+  tTh->ConsRefTriangle(reft);
   for( i=0,k=0;i<tTh->nbt;i++)
     if(tTh->triangles[i].link)
       { 
@@ -375,7 +376,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   Real8 Hmin = HUGE_VAL;// the infinie value 
   Int4 hvertices =0;
   Int4 i,nn,n;
-  Int4 dim=0;
+  //Int4 dim=0;
   Gh->MaximalAngleOfCorner =30.00*Pi/180.0;
   Gh->nbv = 0;
   Gh->nbvx = nbvx;
@@ -478,7 +479,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   Gh->vertices = new GeometricalVertex[nbv];
   throwassert(Gh->nbvx >= Gh->nbv);
   Gh->nbiv = Gh->nbv;
-  Int4 k=0;
+  // Int4 k=0;
   const Direction NoDirOfSearch;
   //  compression of points    
   int kkk;     
@@ -714,7 +715,7 @@ Fem2D::Mesh *  ReadTriangulate( string  * const & s) {
           if (!f.good()) break;
           if (step) xy[nv]=P;
           nv++;
-          while (f.get(c) &&  (c!='\n' && c!='\r' ) ) 0; // eat until control (new line
+          while (f.get(c) &&  (c!='\n' && c!='\r' ) ) (void) 0; // eat until control (new line
         } 
       if (!step && nv ) xy.init(nv); // alloc the array        
     }

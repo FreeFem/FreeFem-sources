@@ -58,16 +58,20 @@ union Char4orLong {  char c[4];    long l;} ;
 class  MeshIstream {
 public:
   istream  & in ;
+  const char * CurrentFile;
   //  ifstream  fin;
   int LineNumber,LineError,opened;
-  const char * CurrentFile;
+
 
   istream & cm ()//  mange les blancs et les commentaire 
   { 
     char c;
     int cmm=0;
     while ( in.get(c) &&  
-	   ( isspace(c) ? (( ( c=='\n'|| c==char(12) || c==char(15)) && (LineNumber++,cmm=0)),1) : (cmm || (c=='#' && (cmm=1) )) ) ) 0;
+	    ( isspace(c) ?
+	      (( ( c=='\n'|| c==char(12) || c==char(15)) && (LineNumber++,cmm=0)),1) 
+	      : (cmm || (c=='#' && (cmm=1) )) ) 
+	    ) ((void ) 0);
 	   if (in.good()) in.putback(c);
     return in;
   }
@@ -77,7 +81,7 @@ public:
   void eol()// go to end of line
   { 
     char c;
-    while ( in.get(c) &&  ( c!='\n') && ( c!='\r')) 0;
+    while ( in.get(c) &&  ( c!='\n') && ( c!='\r')) (void) 0;
   }
   void ShowIoErr(int );
   MeshIstream  & err () 
@@ -114,10 +118,10 @@ public:
 
 class IFortranUnFormattedFile {
 //  template<class T> friend IFortranUnFormattedFile & operator>>(IFortranUnFormattedFile &f,T & l);
-  long i,l,n,j,nb_rec;
   istream * f;
-  int to_close;
+  long i,l,n,j,nb_rec;
   const char * file_name;
+  int to_close;
  public:
   IFortranUnFormattedFile(char *name)
     : f(new ifstream(name)),i(0),l(0),n((long)-sizeof(long)),
@@ -139,11 +143,11 @@ class IFortranUnFormattedFile {
 
 class OFortranUnFormattedFile {
 //  template<class T> friend OFortranUnFormattedFile & operator<<(OFortranUnFormattedFile &f,const T & l);
-  long i,l,n,j,nb_rec;
   ostream * f;
+  long i,l,n,j,nb_rec;
   const static char * unkown;
-  int to_close;
   const char * file_name;
+  int to_close;
  public:
   
   OFortranUnFormattedFile(const char *name,IOS_OPENMODE  mm=ios::trunc)

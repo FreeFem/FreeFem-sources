@@ -181,7 +181,7 @@ struct Op_ReadKN : public binary_function<istream*,KN<A>*,istream*> {
         ExecError("Fatal Error: incompatible length in read array (Op_ReadKN)");
        assert(n==a->N());
        }
-     while (f->get(c) &&  (c!='\n' && c!='\r' ) ) 0; // eat until control (new line
+     while (f->get(c) &&  (c!='\n' && c!='\r' ) ) ((void) 0); // eat until control (new line
 
      for (int i=0;i<n;i++)
        *f >> (*a)[i] ;

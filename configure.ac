@@ -9,7 +9,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.10-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.11,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -33,7 +33,7 @@ AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPAC
      ff_g2c_lib="";	 
 if test "$enable_fortran" != no
 then
-	AC_PROG_F77(gfortran g77 f77 xlf f90 fort77 xlf90)
+	AC_PROG_F77(g77 f77 gfortran g77 f90 fort77 xlf xlf90)
         ff_flibs=""
         # modif FH		
 	AC_F77_LIBRARY_LDFLAGS  
@@ -231,7 +231,7 @@ m4_include(acoptim.m4)
 #  -DEIGENVALUE  to compile the eigen value part
 #  ------------------------------------------------
 
-# FreeFrem++-specific optimizations -fpascal-strings
+# FreeFrem++-specific optimizations -fpascal-strings 
 if test "$enable_debug" = yes;
 then
 	CXXFLAGS="$CXXFLAGS -DDRAWING -DBAMG_LONG_LONG -DCHECK_KN"

@@ -80,7 +80,7 @@ void  FQuadTree::Draw()
   QuadTreeBox * b;
   IntQuad hb =  MaxISize;
   if (!root) return ;
-  long kkk =0;
+  // long kkk =0;
   pb[0]=  root;
   pi[0]= root->n>0 ?(int)  root->n : 4  ;;
   pp[0].x=pp[0].y=0;//ii[0]=jj[0]=0;
@@ -192,7 +192,7 @@ Vertex *  FQuadTree::NearestVertex(long xi,long yj)
 	  { 
 	    NbVerticesSearch++;
 	    I2 i2 =  R2ToI2(b->v[k]);
-	    h0 = h0 = I2(i2,plus).norm();//  NORM(iplus,i2.x,jplus,i2.y);
+	    h0 = I2(i2,plus).norm();//  NORM(iplus,i2.x,jplus,i2.y);
 	    if (h0 <h) 
 	      {
 		h = h0;

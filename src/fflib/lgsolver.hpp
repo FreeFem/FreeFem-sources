@@ -150,8 +150,8 @@ class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMa
  
   public:
   SolveGCPrecon(const MatriceMorse<R> &A,const OneOperator * C,Stack stk,double epsilon=1e-6) : 
-    n(A.n),nbitermax(Max(n,100)),precon(0),stack(stk),eps(epsilon),epsr(0),
-    D1(n),xx(n)
+    n(A.n),nbitermax(Max(n,100)),eps(epsilon),epsr(0),precon(0),
+    D1(n),xx(n),stack(stk)
 {
       assert(C); 
 
@@ -220,8 +220,10 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
   typedef typename VirtualMatrice<R>::plusAx plusAx;
   public:
   SolveGMRESPrecon(const MatriceMorse<R> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6) : 
-    n(A.n),nbitermax(itmax?itmax: Max(100,n)),precon(0),stack(stk),eps(epsilon),epsr(0),dKrylov(dk),
-    D1(n),xx(n)
+    n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),precon(0),
+    D1(n),xx(n),
+    stack(stk),dKrylov(dk)
+
 {
       assert(C); 
       WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
@@ -247,7 +249,8 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
       KNM<R> H(dKrylov+1,dKrylov+1);
       int k=dKrylov,nn=nbitermax;
 
-      int res=GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
+      //int res=
+      GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
 
    }
 plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
@@ -291,8 +294,9 @@ class SolveGMRESDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualM
   public:
   typedef typename VirtualMatrice<R>::plusAx plusAx;
   SolveGMRESDiag(const MatriceMorse<R> &A,int nbk=50,int itmax=0,double epsilon=1e-6) : 
-    n(A.n),nbitermax(itmax?itmax: Max(100,n)),D1(n),eps(epsilon),epsr(0),
-    dKrilov(nbk) { 
+    n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),
+    dKrilov(nbk) ,D1(n)
+  { 
     R aii=0;
     A.getdiag(D1);
     for (int i=0;i<n;i++)
@@ -304,7 +308,8 @@ class SolveGMRESDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualM
    //  ConjuguedGradient<R,MatriceMorse<R>,SolveGCDiag<R> >(a,*this,b,x,nbitermax,epsr);
          KNM<R> H(dKrilov+1,dKrilov+1);
       int k=dKrilov,nn=nbitermax;
-      int res=GMRES(a,(KN<R> &)x,(const KN<R> &)b,*this,H,k,nn,epsr);
+      //int res=
+      GMRES(a,(KN<R> &)x,(const KN<R> &)b,*this,H,k,nn,epsr);
 
  }
 
@@ -326,15 +331,16 @@ template<>
 class SolveGMRESDiag<Complex> :   public MatriceMorse<Complex>::VirtualSolver , public VirtualMatrice<Complex>{
   int n;
   int nbitermax;
+  KN<Complex> D1;
   double eps;
   mutable double  epsr;
   int dKrilov;
-  KN<Complex> D1;
   public:
   typedef  VirtualMatrice<Complex>::plusAx plusAx;
   SolveGMRESDiag(const MatriceMorse<Complex> &A,int nbk=50,int itmax=0,double epsilon=1e-6) : 
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),D1(n),eps(epsilon),epsr(0),
-    dKrilov(nbk) { 
+    dKrilov(nbk) 
+  { 
     Complex aii=0;
     A.getdiag(D1);
     for (int i=0;i<n;i++)
@@ -352,7 +358,8 @@ class SolveGMRESDiag<Complex> :   public MatriceMorse<Complex>::VirtualSolver , 
       typedef MatC2R<SolveGMRESDiag<Complex> > VC;
       VA AR(a);
       VC CR(*this);
-      int res=GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr);
+      //int res=
+      GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr);
 
  }
 
@@ -374,18 +381,20 @@ template<>
 class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver , public VirtualMatrice<Complex>{
   int n;
   int nbitermax;
+  Expression xx_del, code_del; 
+  const E_F0 * precon;
+  Stack stack;
   double eps;
   mutable double  epsr;
-  const E_F0 * precon;
+  int dKrylov; 
   KN<Complex> D1;  
   mutable KN<Complex> xx;  
-  Expression xx_del, code_del; 
-  Stack stack;
-  int dKrylov; 
   typedef  VirtualMatrice<Complex>::plusAx plusAx;
   public:
   SolveGMRESPrecon(const MatriceMorse<Complex> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6) : 
-    n(A.n),nbitermax(itmax?itmax: Max(100,n)),precon(0),stack(stk),eps(epsilon),epsr(0),dKrylov(dk),
+    n(A.n),nbitermax(itmax?itmax: Max(100,n)),
+    xx_del(0),code_del(0),
+    precon(0),stack(stk),eps(epsilon),epsr(0),dKrylov(dk),
     D1(n),xx(n)
 {
       assert(C); 
@@ -418,7 +427,8 @@ class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver 
       typedef MatC2R<SolveGMRESPrecon<Complex> > VC;
       VA AR(a);
       VC CR(*this);
-      int res=GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr);
+      //int res=
+	GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr);
       
       // assert(0); // a faire 
       //int res=GMRES(a,(KN<double> &)x, (const KN<double> &)b,*this,H,k,nn,epsr);

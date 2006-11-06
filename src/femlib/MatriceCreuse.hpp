@@ -83,9 +83,28 @@ public:
   CountPointer<const FESpace> cUh,cVh;
   const FESpace &Uh;
   const FESpace &Vh;
+
+
+       
+  int lga;  // size of array a    
+  R* a;          // array  coef --
+  int *ni,*nj;   //  list of df   
+  // to build matrice on face or edge -----
+
+  
+  int n,m;       // n,m number of df
+  const TypeOfMatriceElementaire mtype;
+  KN<double> data; // to store value of basic function 
   const QuadratureFormular & FIT;
   const QuadratureFormular1d & FIE;
-  KN<double> data; // to store value of basic function 
+
+  const bool onFace ; //  true if do int on face or edge with jump (VF or GD : Galerkin Discontinus)
+  // in with case  add ... 
+  const int lnk; // size of the 4 next array
+  int *nik,*nikk;  //  number of df in element   k,kk for VF and GD methode 
+  int *njk,*njkk;  //  number of df in element   k,kk  for VF and GD methode
+
+
   MatriceElementaire(const FESpace & UUh,const FESpace & VVh,int llga
                      ,int *nnj,int * nni,TypeOfMatriceElementaire t=Full,
                                const QuadratureFormular & fit=QuadratureFormular_T_5,
@@ -125,19 +144,7 @@ public:
        njk(nik),
        njkk(nik+lk)
        { ffassert(lk>=0);}
-       
-  int lga;  // size of array a    
-  R* a;          // array  coef --
-  int *ni,*nj;   //  list of df   
-  // to build matrice on face or edge -----
-  const bool onFace ; //  true if do int on face or edge with jump (VF or GD : Galerkin Discontinus)
-  // in with case  add ... 
-  const int lnk; // size of the 4 next array
-  int *nik,*nikk;  //  number of df in element   k,kk for VF and GD methode 
-  int *njk,*njkk;  //  number of df in element   k,kk  for VF and GD methode
-  
-  int n,m;       // n,m number of df
-  const TypeOfMatriceElementaire mtype; 
+ 
   virtual ~MatriceElementaire() {
     if(ni != nj) 
       delete [] nj;
@@ -273,7 +280,7 @@ public:
   virtual void setdiag(const KN_<R> & x)=0 ;
   virtual void getdiag( KN_<R> & x) const =0 ;
   // end add
-  virtual int NbCoef() const {};
+  virtual int NbCoef() const {return 0;};
   virtual void setcoef(const KN_<R> & x)=0 ;
   virtual void getcoef( KN_<R> & x) const =0 ;
   // Add FH oct 2005
@@ -315,8 +322,8 @@ public:
 		 R* u, int * pu,
 		 R* l, int * pl,
 		 FactorizationType tf=FactorizationNO) 
-    : D(d),U(u),L(l),pL(pl),pU(pu),
-      MatriceCreuse<R>(NbOfDF),typefac(tf),typesolver(FactorizationNO){}
+    : MatriceCreuse<R>(NbOfDF),L(l),U(u),D(d),pL(pl),pU(pu),
+      typefac(tf),typesolver(FactorizationNO){}
 
   const MatriceProfile t() const   
      {return MatriceProfile(this->n,D,L,pL,U,pU,typefac);}
@@ -340,13 +347,15 @@ public:
     
     
     {return MatriceProfile(this->n,0,0,0,U,pU);}
+
   void Solve(KN_<R> &x,const KN_<R> &b) const {
-     if (typefac==0)
-       switch(typefac) {
-         FactorizationCholeski: cholesky() ; break;
-          FactorizationCrout:   crout(); break;
-          FactorizationLU:      LU(); break; 
-       }
+    /*if (typefac==0)  code faux // FH   nov 2006
+      switch(typefac) 
+	{
+	FactorizationCholeski: cholesky() ; break;
+	FactorizationCrout:   crout(); break;
+	FactorizationLU:      LU(); break; 
+	}*/ 
     if (&x != &b) x=b;x/=*this;} 
   
   int size() const ;
@@ -449,29 +458,31 @@ public:
    virtual void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  =0;
 };
 
-  MatriceMorse():MatriceCreuse<R>(0),a(0),lg(0),cl(0),nbcoef(0),solver(0) {};
+  MatriceMorse():MatriceCreuse<R>(0),nbcoef(0),symetrique(true),a(0),lg(0),cl(0),solver(0) {};
   MatriceMorse(KNM_<R> & A, double tol) ;
   MatriceMorse(const int  n,const R *a);
 //    :MatriceCreuse<R>(n),solver(0) {}
   
   MatriceMorse(const FESpace & Uh,bool sym,bool VF=false)
-      :MatriceCreuse<R>(Uh.NbOfDF),solver(0) {Build(Uh,Uh,sym,VF);}
+    :MatriceCreuse<R>(Uh.NbOfDF),solver(0) {Build(Uh,Uh,sym,VF);}
   MatriceMorse(const FESpace & Uh,const FESpace & Vh,bool VF=false)
-      :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
-        {Build(Uh,Vh,false,VF);}
+    :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
+  {Build(Uh,Vh,false,VF);}
   MatriceMorse(const FESpace & Uh,const FESpace & Vh,
                void (*build)(MatriceMorse *,const FESpace & Uh,const FESpace & Vh,void *data),void *data=0
-                )
-          :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
-           {build(this,Uh,Vh,data);           
-           }
+	       )
+    :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
+  {build(this,Uh,Vh,data);           
+  }
   MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa,int *ll,int *cc,bool dd, const VirtualSolver * s=0,bool transpose=false )
-    :MatriceCreuse<R>(nn,mm,dd && !transpose),nbcoef(nbc),symetrique(sym), // transpose = true => dummy false (new matrix)
+    :MatriceCreuse<R>(nn,mm,dd && !transpose),
+     nbcoef(nbc),
+     symetrique(sym), // transpose = true => dummy false (new matrix)
      a(docpyornot(this->dummy,aa,nbc)),
      lg(docpyornot(this->dummy,ll,nn+1)),
      cl(docpyornot(this->dummy,cc,nbc)),
      solver(s)
-   { if(transpose) dotransposition(); };
+  { if(transpose) dotransposition(); };
   void Solve(KN_<R> &x,const KN_<R> &b) const;
   int size() const ;
   void addMatMul(const KN_<R> &x,KN_<R> &ax) const;
@@ -518,11 +529,11 @@ template<class K>
 
   private:
   void dotransposition ()  ;  // do the transposition 
-    CountPointer<const VirtualSolver> solver;
-    
-    void operator=(const MatriceMorse & );
+  CountPointer<const VirtualSolver> solver;
+  
+  void operator=(const MatriceMorse & );
   void  Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool VF=false);
-
+  
 };
 
 
@@ -674,7 +685,8 @@ class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatr
   public:
   typedef typename VirtualMatrice<R>::plusAx plusAx;
   SolveGCDiag(const MatriceMorse<R> &A,double epsilon=1e-6) : 
-    n(A.n),nbitermax(Max(n,100)),D1(n),eps(epsilon),epsr(0) { throwassert(A.sym());
+    n(A.n),nbitermax(Max(n,100)),eps(epsilon),epsr(0),D1(n)
+  { throwassert(A.sym());
     for (int i=0;i<n;i++)
       D1[i] = 1./A(i,i);}
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
@@ -699,19 +711,21 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 template<class R>
 class SolveUMFPack :   public MatriceMorse<R>::VirtualSolver  {
   double eps;
-  double tgv;
   mutable double  epsr;
+  double tgv;
   void *Symbolic, *Numeric ;
   int umfpackstrategy;
   double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
 public:
   SolveUMFPack(const MatriceMorse<R> &A,int strategy,double ttgv, double epsilon=1e-6,
-   double pivot=-1.,double pivot_sym=-1.
-  ) : 
-    eps(epsilon),epsr(0),umfpackstrategy(strategy),tgv(ttgv),
-    Symbolic(0),Numeric(0)  ,tol_pivot(pivot),tol_pivot_sym(pivot_sym) 
-     { 
-
+	       double pivot=-1.,double pivot_sym=-1.  ) : 
+    eps(epsilon),epsr(0),
+    tgv(ttgv),
+    Symbolic(0),Numeric(0)  ,
+    umfpackstrategy(strategy),
+    tol_pivot_sym(pivot_sym),tol_pivot(pivot)
+  { 
+    
     int status;
     throwassert( !A.sym() && Numeric == 0 && Symbolic==0 );
     int n=A.n;
@@ -830,12 +844,13 @@ inline void RR2C(int n,double *cr,double *ci,Complex *c)
 template<>
 class SolveUMFPack<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
   double eps;
-  double tgv;
   mutable double  epsr;
+  int umfpackstrategy;
+  double tgv;
   void *Symbolic, *Numeric ;
   double *ar,*ai;
 
-  int umfpackstrategy;
+
     double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
 
 public:
@@ -843,7 +858,10 @@ public:
      double pivot=-1.,double pivot_sym=-1.
 ) : 
     eps(epsilon),epsr(0),umfpackstrategy(strategy),tgv(ttgv),
-    Symbolic(0),Numeric(0)  ,tol_pivot(pivot),tol_pivot_sym(pivot_sym) 
+    Symbolic(0),Numeric(0),
+    ar(0),ai(0),
+    tol_pivot_sym(pivot_sym), 
+    tol_pivot(pivot)
    { 
     int status;
     throwassert( !A.sym());

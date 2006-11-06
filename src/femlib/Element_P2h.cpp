@@ -57,7 +57,7 @@ namespace  Fem2D {
 {
   R2 A(K[0]), B(K[1]),C(K[2]);
   R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
-  R l4_0=(4*l0-1),l4_1=(4*l1-1),l4_2=(4*l2-1); 
+  //  R l4_0=(4*l0-1),l4_1=(4*l1-1),l4_2=(4*l2-1); 
   
   throwassert( val.N()>=3);
   throwassert(val.M()==1);

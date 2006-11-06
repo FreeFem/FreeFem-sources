@@ -60,18 +60,19 @@ class mylex : public CodeAlloc {
   int typetoken;
   bool echo;
   stack<char *> strdata;
+
   struct xxxx { 
-   istream * f;
-   istream * nf;
-   int l;
+    int l;
+    istream * f;
+    const string * filename; 
+    istream * nf;
 
-   const string * filename; 
-   xxxx() : l(0), f(0) , filename(0),nf(0)   {}   
-   void  open(mylex *lexx,const char * ff) ;
-   void  readin(mylex *lexx,const string & s);
-   void close() ;
-   };
-
+    xxxx() : l(0), f(0) , filename(0),nf(0)   {}   
+    void  open(mylex *lexx,const char * ff) ;
+    void  readin(mylex *lexx,const string & s);
+    void close() ;
+  };
+  
   friend struct mylex::xxxx;
   
   xxxx pilesource[100];

@@ -379,7 +379,7 @@ int  Triangles::SplitElement(int choice)
   Draw();
  inquire();
 #endif
- int nswap =0;
+ //int nswap =0;
   const Int4 nfortria( choice ? 4 : 6);
     if(withBackground) 
     {
@@ -442,7 +442,7 @@ int  Triangles::SplitElement(int choice)
   Edge ** edgesGtoB=0;
   if (withBackground)
    edgesGtoB= BTh.MakeGeometricalEdgeToEdge();
- Int4 kerr=0,ferr=0;
+  Int4 ferr=0;
   for (i=0;i<nbe;i++)
      newedges[ie].on=0;
 
@@ -694,7 +694,7 @@ int  Triangles::SplitElement(int choice)
     {
       //     cout << "Triangle " << i << " " << ksplit[i] << ":" << triangles[i]
       //	   << " ----------------------------------------------- " <<endl;
-      Triangle * tc=0;
+      // Triangle * tc=0;
       int  nbmkadj=0;
       Int4 mkadj [100];
       mkadj[0]=i;

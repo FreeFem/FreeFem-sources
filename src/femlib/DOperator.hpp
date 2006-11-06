@@ -65,34 +65,40 @@ template<class I,class R>
    Expression optiexp0,optiexpK;
    bool isoptimize;
    
-   LinearComb(): v(),optiexp0(),optiexpK(),
-          where_in_stack_opt(),mesh_indep_stack_opt(),isoptimize(false) {}
-   LinearComb(const I& i,const R& r) :v(1),optiexp0(),optiexpK(),
-          where_in_stack_opt(),mesh_indep_stack_opt(),isoptimize(false) {
-    v[0]=make_pair<I,R>(i,r);}
-    
+   LinearComb(): v(),
+		 where_in_stack_opt(),mesh_indep_stack_opt(),
+		 optiexp0(),optiexpK(),isoptimize(false) {}
+   
+   LinearComb(const I& i,const R& r) :v(1),
+				      where_in_stack_opt(),mesh_indep_stack_opt(),
+				      optiexp0(),optiexpK(),isoptimize(false) 
+   {
+     v[0]=make_pair<I,R>(i,r);
+   }
+   
    LinearComb(const LinearComb &l) 
-      :v(l.v),optiexp0(l.optiexp0),optiexpK(l.optiexpK),
+      :v(l.v),
         where_in_stack_opt(l.where_in_stack_opt),
         mesh_indep_stack_opt(l.mesh_indep_stack_opt),
-        isoptimize(false){}  
+        optiexp0(l.optiexp0),optiexpK(l.optiexpK),isoptimize(false){}  
         
    int nbtrue(bool *ok) const 
      { 
         int k=0; 
-        for (int i=0;i<v.size();i++) 
+        for (size_t i=0;i<v.size();i++) 
           if (ok[i]) k++;
          return k;
      }
      
    //  copy just les parties ok   
    LinearComb(const LinearComb &l,bool * ok) 
-      :v(l.nbtrue(ok) ),optiexp0(l.optiexp0),optiexpK(l.optiexpK),
-        where_in_stack_opt(v.size()),
-        mesh_indep_stack_opt(v.size()),
-        isoptimize(l.isoptimize) 
+     :v(l.nbtrue(ok) ),
+      where_in_stack_opt(v.size()),
+      mesh_indep_stack_opt(v.size()),
+      optiexp0(l.optiexp0),optiexpK(l.optiexpK),
+      isoptimize(l.isoptimize) 
       {
-        int k=0;
+	// int k=0;
         const_iterator lll= l.v.begin();
         iterator ll=v.begin(); 
         for (int i=0,k=0;lll!= l.v.end();++lll,++i) 

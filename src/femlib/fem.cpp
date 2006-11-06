@@ -381,7 +381,7 @@ void Mesh::ConsAdjacence()
                     { 
                       int j = EdgesVertexTriangle[i][jj];                     
                       int s0,s1;
-                      VerticesNumberOfEdge(triangles[k],j,s0,s1);
+                      VerticesNumberOfEdge(T,j,s0,s1);
                       throwassert (s0  == is || s1 == is);
                       if ( TonBoundary[k] & AddMortar[j])
                         {
@@ -429,8 +429,8 @@ void Mesh::ConsAdjacence()
                       AM = AM/Norme2(AM);
                       int ig(im),id(jm);
                       if ( bmortars[im].sens <0) ig=jm,id=im;
-                      SubMortar & mg(bmortars[ig]);
-                      SubMortar & md(bmortars[id]);
+                      //SubMortar & mg(bmortars[ig]);
+                      //SubMortar & md(bmortars[id]);
                       //  loop sur droite gauche
                       //  meme sommet
                       //   0 = gauche 1=droite 
@@ -560,10 +560,10 @@ void Mesh::ConsAdjacence()
 	                        mortars[NbMortars].nright = nm[1];
 	                      
 	                        //  check
-	                        for (int i=0;i++;i<mortars[NbMortars].nleft)
-	                           if ( mortars[NbMortars].left[i] <0 ||  mortars[NbMortars].left[i] < 3*nt)
-	                             ffassert(0);
-	                        for (int i=0;i++;i<mortars[NbMortars].nright)
+	                        for (int i=0;i<mortars[NbMortars].nleft;++i)
+				  if ( mortars[NbMortars].left[i] <0 ||  mortars[NbMortars].left[i] < 3*nt)
+				    ffassert(0);
+	                        for (int i=0;i<mortars[NbMortars].nright;++i)
 	                           if ( mortars[NbMortars].right[i] <0 ||  mortars[NbMortars].right[i] < 3*nt)
 	                             ffassert(0);                             
 	                        ffassert(datag <= datamortars + kdmgo + kdmdo); 
@@ -874,7 +874,7 @@ int Walk(const Mesh & Th,int& it, R *l,
     int j; 
     while ( (j=WalkInTriangle(Th,it,l,U,V,dt))>=0) 
         { 
-            int jj  = j;
+	  //int jj  = j;
             throwassert( l[j] == 0);
             R a= l[(j+1)%3], b= l[(j+2)%3];
             int itt =  Th.TriangleAdj(it,j);
@@ -912,8 +912,8 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
   //     int count=0;
   //     L1: 
   outside=true; 
-  int its=it;
-  int iib=-1,iit=-1;
+  //int its=it;
+  int iib=-1;//,iit=-1;
   R dP=DBL_MAX;
   R2 PPhat;
   const Triangle * tt;
@@ -1047,7 +1047,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
       bool ok=false;
       // next edge on true boundary 
       for (int p=BoundaryAdjacencesHead[ii];p>=0;p=BoundaryAdjacencesLink[p])
-	{ int e=p/2, ie=p%2, je=2-ie;
+	{ int e=p/2, ie=p%2;// je=2-ie;
 	  // cout << number(bedges[e][0]) << " " << number(bedges[e][1]) << endl;
 	  if (!bedges[e].in( vertices+iii)) //  edge not equal  to i0 i1 
 	    {  
@@ -1070,9 +1070,9 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
 {
     const Triangle & T(Th[it]);
     const R2 Q[3]={(const R2) T[0],(const R2) T[1],(const R2) T[2]};
-    int i0=Th.number(T[0]);
-    int i1=Th.number(T[1]);
-    int i2=Th.number(T[2]);
+    // int i0=Th.number(T[0]);
+    // int i1=Th.number(T[1]);
+    // int i2=Th.number(T[2]);
    
     R2 P  = lambda[0]*Q[0]  + lambda[1]*Q[1]  + lambda[2]*Q[2];
 
@@ -1240,7 +1240,7 @@ void Mesh::BuilTriangles(bool empty,bool removeouside)
        
       long nbs=nv;
       long nbsmax=nv;
-      long            err = 0, nbsold = nbs;       
+      long            err = 0;//, nbsold = nbs;       
       long           *c = 0;
       long           *tri = 0;
       long           *nu = 0;
@@ -1447,7 +1447,7 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
           int n=split[kold];
           if( itt>=0) n = max(n,split[itt]); //  pour les aretes internes (FH juillet 2005)
           if (!n) continue; 
-          int n1=n+1;
+          // int n1=n+1;
          // BoundaryEdge & be(Th.bedges[ieb]);
          // cout << " v : " << ie0 << " " << ie1 << " -- " ; ;
           if (pbe ) {
@@ -1490,63 +1490,64 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
     assert(neb==nebmax);
     
 //   create the new vertices and the new triangle 
-   int kerr=0,kt=0;
-   for (int K=0;K<Th.nt;K++)
-    { // cout << K << endl;
-      Triangle &T(Th[K]);
-      R2 A(T[0]);
-      R2 B(T[1]);
-      R2 C(T[2]);
-      long N=split[K];
-      if (!N) continue;
-      long N2=N*N;
-      int vt[3];
-      for (int n=0;n<N2;n++,kt++) //  loop on all sub triangle
-        {
-          //(Label&) triangles[kt] = (Label&) T; 
-          for(int j=0;j<3;j++) //  Loop on the 3 vertices
-           { R2 PTj=SubTriangle(N,n,j);
-             R la=1-PTj.x-PTj.y,lb=PTj.x,lc=PTj.y;
-             R2 Pj= A*la+B*lb+C*lc; 
-             Vertex *pV;
-             pV=quadtree->ToClose(Pj,seuil);
-             if(!pV)
-             { // new vertex
-               //  cout << "    -- " << nv << "  New Vertices " << Pj << " n=" << n << " j=" << j << " " << PTj << endl;
-                 assert(nv<nvmax);
-                 vertices[nv]=Pj;
-                 (Label&) vertices[nv]=0; //  Internal vertices 
-                 pV = vertices + nv;
-                 quadtree->Add(*pV);
-                 nv++;                  
-               }  //  end of new vertex
-               
-               //cout << j <<  "  " << *pV << " " << Pj << " " << number(pV) << " " << Norme2(Pj-*pV) << " " << nv << endl;
-               vt[j]=number(pV); 
-           //  triangles[kt].SetVertex(j,pV);
-           } // for(int j=0;j<3;j++)
-          // cout << kt << " " << n << endl;
-           R2 A=vertices[vt[0]];
-           R2 B=vertices[vt[1]];
-           R2 C=vertices[vt[2]]; 
-           R a = (( B-A)^(C-A))*0.5;
-           if (a>0) 
-             triangles[kt].set(vertices,vt[0],vt[1],vt[2],T.lab);
-           else 
-             triangles[kt].set(vertices,vt[0],vt[2],vt[1],T.lab);
-           
-        }   // end loop on all sub triangle
-   
-     } //  end 
-   if (verbosity>1) 
-    { 
-   cout << " -- Nb of vertices       " << nv << endl; 
-   cout << " -- Nb of triangle       " << nt << endl; 
-   cout << " -- Nb of boundary edges " << neb << endl; 
-   }
-//  
-   if (!WithMortar )   
-    { // 
+    int   kt=0;
+    for (int K=0;K<Th.nt;K++)
+      { // cout << K << endl;
+	Triangle &T(Th[K]);
+	R2 A(T[0]);
+	R2 B(T[1]);
+	R2 C(T[2]);
+	long N=split[K];
+	if (!N) continue;
+	long N2=N*N;
+	int vt[3];
+	for (int n=0;n<N2;n++,kt++) //  loop on all sub triangle
+	  {
+	    //(Label&) triangles[kt] = (Label&) T; 
+	    for(int j=0;j<3;j++) //  Loop on the 3 vertices
+	      { 
+		R2 PTj=SubTriangle(N,n,j);
+		R la=1-PTj.x-PTj.y,lb=PTj.x,lc=PTj.y;
+		R2 Pj= A*la+B*lb+C*lc; 
+		Vertex *pV;
+		pV=quadtree->ToClose(Pj,seuil);
+		if(!pV)
+		  { // new vertex
+		    //  cout << "    -- " << nv << "  New Vertices " << Pj << " n=" << n << " j=" << j << " " << PTj << endl;
+		    assert(nv<nvmax);
+		    vertices[nv]=Pj;
+		    (Label&) vertices[nv]=0; //  Internal vertices 
+		    pV = vertices + nv;
+		    quadtree->Add(*pV);
+		    nv++;                  
+		  }  //  end of new vertex
+		
+		//cout << j <<  "  " << *pV << " " << Pj << " " << number(pV) << " " << Norme2(Pj-*pV) << " " << nv << endl;
+		vt[j]=number(pV); 
+		//  triangles[kt].SetVertex(j,pV);
+	      } // for(int j=0;j<3;j++)
+	    // cout << kt << " " << n << endl;
+	    R2 A=vertices[vt[0]];
+	    R2 B=vertices[vt[1]];
+	    R2 C=vertices[vt[2]]; 
+	    R a = (( B-A)^(C-A))*0.5;
+	    if (a>0) 
+	      triangles[kt].set(vertices,vt[0],vt[1],vt[2],T.lab);
+	    else 
+	      triangles[kt].set(vertices,vt[0],vt[2],vt[1],T.lab);
+	    
+	  }   // end loop on all sub triangle
+	
+      } //  end 
+    if (verbosity>1) 
+      { 
+	cout << " -- Nb of vertices       " << nv << endl; 
+	cout << " -- Nb of triangle       " << nt << endl; 
+	cout << " -- Nb of boundary edges " << neb << endl; 
+      }
+    //  
+    if (!WithMortar )   
+      { // 
       long nba = neb;
      // 
      long nbsd = 0; // bofbof 
@@ -1558,7 +1559,7 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
        
       long nbs=nv;
       long nbsmax=nv;
-      long            err = 0, nbsold = nbs;       
+      long            err = 0;//, nbsold = nbs;       
       long           *c = 0;
       long           *tri = 0;
       long           *nu = 0;
@@ -1606,7 +1607,7 @@ mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *t
       int kt=0;
        for(int i=0,k=0;i<nbt;i++,k+=3)
       {
-         int ir = reft[i]; 
+	//int ir = reft[i]; 
           reft[i]=-1;
           R2 A=vertices[nu[k]-1],B=vertices[nu[k+1]-1],C=vertices[nu[k+2]-1];
           R2 G=(A+B+C)/3.,PHat;

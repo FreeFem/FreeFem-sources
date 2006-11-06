@@ -90,7 +90,7 @@ void    Edge::Draw(Int4  i) const
     Move(M);
     char VertexDraw_i10[10];
     if (i<0)
-      sprintf(VertexDraw_i10,"%lx",this);
+      sprintf(VertexDraw_i10,"%p",this);
     else 
       sprintf(VertexDraw_i10,"%ld",i);
     if (i>=0)
@@ -109,7 +109,7 @@ void    Vertex::Draw(Int4 i) const
   if (InPtScreen(r.x,r.y)) {
    char VertexDraw_i10[10];
    if (i<0)
-     sprintf(VertexDraw_i10,"%lx",this);
+     sprintf(VertexDraw_i10,"%p",this);
    else 
      sprintf(VertexDraw_i10,"%ld",i);
   
@@ -143,7 +143,7 @@ void  Triangle::Draw(Int4 i ) const
 	i = CurrentTh->Number(this);
     }	
   char i10[10];
-  if (i<0)   sprintf(i10,"%lx",this);
+  if (i<0)   sprintf(i10,"%p",this);
   else  sprintf(i10,"%ld",i);
   showgraphic();
 
@@ -358,7 +358,7 @@ void Triangles::inquire()
 	    TriangleAdjacent ta=CloseBoundaryEdgeV2(I,tb,a,b);
 	    R2 A = *ta.EdgeVertex(0);
 	    R2 B = *ta.EdgeVertex(1);
-	    Triangle * tt  = ta;
+	    //Triangle * tt  = ta;
 	    //    tt->Draw(Number(tt));
 	    penthickness(5);
 	    //   ta.EdgeVertex(0)->MoveTo();
@@ -746,7 +746,7 @@ void GeometricalEdge::Draw(Int4  i)
       char VertexDraw_i10[10];
       if( k50) {
 	if (i<0)
-	  sprintf(VertexDraw_i10,"Eg%lx",this);
+	  sprintf(VertexDraw_i10,"Eg%p",this);
 	else 
 	  sprintf(VertexDraw_i10,"Eg%ld",i);
 	rmoveto(x50.x,x50.y);
@@ -795,7 +795,7 @@ void   Geometry::Draw() const {
   for (i=0;i<nbv;i++)
     if (vertices[i].Required()) {
       char i10[20];
-      sprintf(i10,"%d:%d",i,vertices[i].Required());
+      sprintf(i10,"%ld:%d",i,vertices[i].Required());
       Move(vertices[i].r);
       if(vertices[i].Corner()) couleur(2);
       plotstring(i10);  
