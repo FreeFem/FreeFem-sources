@@ -217,6 +217,7 @@ struct  VirtualMatrice { public:
    solveAxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y) 
     {ffassert(B->ChecknbColumn(y.N()));} };
   
+  virtual ~VirtualMatrice(){} 
 };
 
     
@@ -1382,7 +1383,7 @@ template<class R,typename A,typename B=R> class  F_KN_
   F_KN_( A (*ff)(B),const KN_<R> & aa): f(ff),a(aa) {}
   A operator[](long i) const { return f(a[i]);}
   bool check(long n)  const { return  n <= a.N() || a.constant(); }
-  bool constant() const {a.constant();}
+  bool constant() const {return a.constant();}
 }; 
 
 template<class R,typename A,typename B>

@@ -54,7 +54,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
   if (nbt<=0 || nbv <=0 ) { MeshError(101);}
 
   // construction of the edges 
-  Triangles * OldCurrentTh =CurrentTh;
+  //  Triangles * OldCurrentTh =CurrentTh;
   CurrentTh=this;
   //  Int4 NbTold = nbt;
   // generation of the integer coor
@@ -846,13 +846,15 @@ void Geometry::AfterRead()
       } // end while (exch)
       
       if (ord >= 1 ) 
-	{ Int4 n = hv[i];
-        while ( n >=0) 
-          { Int4 i1 = n/2,j1 = n%2;
-	  float a = 180*(j1 ? OppositeAngle(eangle[i1]): eangle[i1])/Pi;
-	  n = ev[n];
-          }
-      } 
+	{ /*
+	  Int4 n = hv[i];
+	  while ( n >=0) 
+	    { Int4 i1 = n/2,j1 = n%2;
+	    //float a = 180*(j1 ? OppositeAngle(eangle[i1]): eangle[i1])/Pi;
+	    n = ev[n];
+	    }
+	  */
+	} 
       if(ord == 2) { // angulare test to find a corner 
         Int4 n1 = hv[i];
         Int4 n2 = ev[n1];
@@ -1011,7 +1013,7 @@ void Geometry::AfterRead()
     for(int i=0;i<NbOfCurves ;i++)
      {
        GeometricalEdge * be=curves[i].be, *eqbe=be->link;
-       GeometricalEdge * ee=curves[i].ee, *eqee=be->link;
+       //GeometricalEdge * ee=curves[i].ee, *eqee=be->link;
        curves[i].master=true;
        if(be->Equi() || be->ReverseEqui() ) 
         {

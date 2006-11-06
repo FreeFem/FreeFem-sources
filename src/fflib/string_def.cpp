@@ -119,8 +119,8 @@ void     initStringOperator()
 {
 
   Dcl_Type<SubString>();
-  aType  tstringp =atype<string*>();
-  aType  tstringpp =atype<string**>();
+  // aType  tstringp =atype<string*>();
+  //aType  tstringpp =atype<string**>();
   
    Dcl_Type< String_find<true> > ();
    Dcl_Type< String_find<false> > ();

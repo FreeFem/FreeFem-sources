@@ -154,8 +154,8 @@ bool Same(const FESpace **l,int k)
 }   
 
 class FESumConstruct { protected:
-   const TypeOfFE ** teb;
    const int k;
+   const TypeOfFE ** teb;
    int nbn; // nb of node 
    int  *  data;
    int  * data1;
@@ -215,8 +215,8 @@ class TypeOfFESum: public FESumConstruct, public  TypeOfFE { public:
 } ;
 
 class FEProduitConstruct { protected:
-   const TypeOfFE & teb;
    int k;
+   const TypeOfFE & teb;
    int * data;
    int * data1;
    FEProduitConstruct(int kk,const TypeOfFE &t)  ;   
@@ -224,23 +224,21 @@ class FEProduitConstruct { protected:
 };
 
 class TypeOfFEProduit: protected FEProduitConstruct, public  TypeOfFE { public:  
-   TypeOfFEProduit(int kk,const TypeOfFE &t): 
-     FEProduitConstruct(kk,t),TypeOfFE(t,kk,data,data1)  {}
-     
-  // void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-//   void D2_FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-//   void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void * arg ) const;  
-   virtual void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
-    { int nbof=teb.NbDoF;
-      for (int i=0,k0=0;i<k;i++,k0+=nbof)
-        {          
-          KN_<R> sv(v(SubArray(nbof,k0)));
-          teb.Pi_h_alpha(K,sv);
-        }
+  TypeOfFEProduit(int kk,const TypeOfFE &t): 
+    FEProduitConstruct(kk,t),TypeOfFE(t,kk,data,data1)  {}
+  
+  
+  void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+  virtual void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
+  { int nbof=teb.NbDoF;
+  for (int i=0,k0=0;i<k;i++,k0+=nbof)
+    {          
+      KN_<R> sv(v(SubArray(nbof,k0)));
+      teb.Pi_h_alpha(K,sv);
     }
- 
-   ~TypeOfFEProduit(){}
+  }
+  
+  ~TypeOfFEProduit(){}
 } ;
 
 FEProduitConstruct::FEProduitConstruct(int kk,const TypeOfFE &t)
@@ -327,7 +325,7 @@ FESumConstruct::FESumConstruct(int kk,const TypeOfFE **t)
   data1 = data + n*5+N; // april 2006  add 2 array ????
   
   int c=0;
-  int ki= 0; 
+  //  int ki= 0; 
 // recherche des noeuds
    KN<int> w(7),nn(7);
    w=0;
@@ -615,7 +613,7 @@ ConstructDataFElement::~ConstructDataFElement()
 ConstructDataFElement::ConstructDataFElement (const Mesh &Th,/*int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement*/
 const  KN<const TypeOfFE *> & TFEs,const TypeOfMortar *tm,
 int nbdfv,const int *ndfv,int nbdfe,const int *ndfe)
-: counter(&thecounter),thecounter(0) 
+: thecounter(0) ,counter(&thecounter)
 { 
  Make(Th,TFEs,/*NbDfOnSommet,NbDfOnEdge,NbDfOnElement,*/ tm,nbdfv,ndfv,nbdfe,ndfe);
 }
@@ -830,7 +828,7 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
         }
        for (int k=0;k<Th.nt;k++)
         {
-          int iold=i;
+          // int iold=i;
           if(ks) {
             for (int j=0;j<3;j++)
              for (int jj=0;jj<NbNodeonVertex;jj++)
@@ -866,7 +864,7 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
              
            for (int im=0;im<Th.NbMortars;im++)
             {   
-             int iold=i;         
+	      //int iold=i;         
              thecolor++; // get a new color
              // tm->ConstructionOfNode(Th,im,NodesOfElement,FirstNodeOfElement,nn);  
              Mortar & M(Th.mortars[im]);
@@ -934,7 +932,7 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
               FirstDfOfNode[nodemul+1]= ndlmul;
               NbOfDFL += ndlmul;
               int nbdle=0;
-              int nbnm=lk-fk;
+              //int nbnm=lk-fk;
               for (int j=fk;j<lk;j++)
                nbdle+=FirstDfOfNode[NodesOfElement[j]+1];
               MaxNbDFPerElement = Max(MaxNbDFPerElement,nbdle);
@@ -968,25 +966,25 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
 
 FESpace::FESpace(const FESpace & Vh,int k )
  :
+     Th(Vh.Th),
      ptrTFE(new TypeOfFEProduit(k,*Vh.TFE[0])),
      TFE(1,0,ptrTFE),
-     cmesh(Vh.Th),
      cdef(Vh.cdef?new ConstructDataFElement(Vh.cdef,k):0),
+     cmesh(Vh.Th),
      N(Vh.N*k),
-     Nproduit(Vh.Nproduit*k),
-     nb_sub_fem(TFE[0]->nb_sub_fem),
-     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
-     
-     Th(Vh.Th),
+     Nproduit(Vh.Nproduit*k),     
      NbOfDF(Vh.NbOfDF*k),
      NbOfElements(Vh.NbOfElements),
      NbOfNodes(Vh.NbOfNodes),
-     MaxNbNodePerElement(Vh.MaxNbNodePerElement),
-     MaxNbDFPerElement(Vh.MaxNbDFPerElement*k),
+     nb_sub_fem(TFE[0]->nb_sub_fem),
+     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
      NodesOfElement(Vh.NodesOfElement),
-     FirstDfOfNodeData(cdef?cdef->FirstDfOfNode:0),
      FirstNodeOfElement(Vh.FirstNodeOfElement),
-     tom(0) {
+     FirstDfOfNodeData(cdef?cdef->FirstDfOfNode:0),
+     tom(0),
+     MaxNbNodePerElement(Vh.MaxNbNodePerElement),
+     MaxNbDFPerElement(Vh.MaxNbDFPerElement*k)
+{
       // correction mai 2006 no renumbering of existing cdef 
      if(cdef && (Vh.cdef && Vh.cdef->counter != cdef->counter)) {
        // cout << " remum " << cdef->counter << " != " << Vh.cdef->counter  <<endl; 
@@ -996,77 +994,79 @@ FESpace::FESpace(const FESpace & Vh,int k )
  
 FESpace::FESpace(const FESpace ** Vh,int k )
  :
+     Th((**Vh).Th),
      ptrTFE(new TypeOfFESum(Vh,k)),
      TFE(1,0,ptrTFE),
-     cmesh((**Vh).Th),
      cdef(new ConstructDataFElement(Vh,k,TFE)),
+     cmesh((**Vh).Th),
      N(sum(Vh,&FESpace::N,k)),
      Nproduit(cdef->Nproduit),     
-     nb_sub_fem(TFE[0]->nb_sub_fem),
-     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
-
-     Th((**Vh).Th),
      NbOfDF(cdef->NbOfDF),
      NbOfElements(cdef->NbOfElements),
      NbOfNodes(cdef->NbOfNode),
-     MaxNbNodePerElement(cdef->MaxNbNodePerElement),
-     MaxNbDFPerElement(cdef->MaxNbDFPerElement),
+     nb_sub_fem(TFE[0]->nb_sub_fem),
+     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
      NodesOfElement(cdef->NodesOfElement),
-     FirstDfOfNodeData(cdef->FirstDfOfNode),
      FirstNodeOfElement(cdef->FirstNodeOfElement),
-     tom(0) {
+     FirstDfOfNodeData(cdef->FirstDfOfNode),
+     tom(0) ,
+     MaxNbNodePerElement(cdef->MaxNbNodePerElement),
+     MaxNbDFPerElement(cdef->MaxNbDFPerElement) 
+{
      if(cdef) renum(); }
      
 FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const int *ndfv,int nbdfe,const int *ndfe )
  :
+     Th(TTh),
      ptrTFE(new TypeOfFESum(tef,k)),
      TFE(1,0,ptrTFE),
-     cmesh(TTh),
      cdef(new ConstructDataFElement(TTh,TFE,//sum(tef,&TypeOfFE::NbDfOnVertex,k),
                                        // sum(tef,&TypeOfFE::NbDfOnEdge,k),
                                         //sum(tef,&TypeOfFE::NbDfOnElement,k),
                                         0,nbdfv,ndfv,nbdfe,ndfe)),
+     cmesh(TTh),
      N(sum(tef,&TypeOfFE::N,k)),
      Nproduit(cdef->Nproduit),     
-     nb_sub_fem(TFE[0]->nb_sub_fem),
-     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
 
-     Th(TTh),
      NbOfDF(cdef->NbOfDF),
      NbOfElements(cdef->NbOfElements),
      NbOfNodes(cdef->NbOfNode),
-     MaxNbNodePerElement(cdef->MaxNbNodePerElement),
-     MaxNbDFPerElement(cdef->MaxNbDFPerElement),
+     nb_sub_fem(TFE[0]->nb_sub_fem),
+     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
      NodesOfElement(cdef->NodesOfElement),
-     FirstDfOfNodeData(cdef->FirstDfOfNode),
      FirstNodeOfElement(cdef->FirstNodeOfElement),
-     tom(0) {
-     if(cdef) renum(); }
+     FirstDfOfNodeData(cdef->FirstDfOfNode),
+     tom(0) ,
+     MaxNbNodePerElement(cdef->MaxNbNodePerElement),
+     MaxNbDFPerElement(cdef->MaxNbDFPerElement)
+{
+  if(cdef) renum(); }
 
 
  FESpace::FESpace(const Mesh & TTh,const TypeOfFE & tef,int nbdfv,const int *ndfv,int nbdfe,const int *ndfe)
    :  
+     Th(TTh),
      ptrTFE(0),
      TFE(1,0,&tef),
-     cmesh(TTh),
      cdef(new ConstructDataFElement(TTh,TFE,0,nbdfv,ndfv,nbdfe,ndfe)),
+     cmesh(TTh),
      //tef.NbDfOnVertex,tef.NbDfOnEdge,tef.NbDfOnElement,0,nbdfv,ndfv,nbdfe,ndfe)),
      N(tef.N),
      Nproduit(cdef->Nproduit),
-     nb_sub_fem(TFE[0]->nb_sub_fem),
-     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
-     Th(TTh),
      NbOfDF(cdef->NbOfDF),
      NbOfElements(cdef->NbOfElements),
      NbOfNodes(cdef->NbOfNode),
-     MaxNbNodePerElement(cdef->MaxNbNodePerElement),
-     MaxNbDFPerElement(cdef->MaxNbDFPerElement),
+     nb_sub_fem(TFE[0]->nb_sub_fem),
+     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
      NodesOfElement(cdef->NodesOfElement),
-     FirstDfOfNodeData(cdef->FirstDfOfNode),
      FirstNodeOfElement(cdef->FirstNodeOfElement),
-     tom(0) {
-     if(tef.NbDfOnVertex || tef.NbDfOnEdge) renum();
-     }
+     FirstDfOfNodeData(cdef->FirstDfOfNode),
+     tom(0),
+     MaxNbNodePerElement(cdef->MaxNbNodePerElement),
+     MaxNbDFPerElement(cdef->MaxNbDFPerElement)
+{
+  if(tef.NbDfOnVertex || tef.NbDfOnEdge) renum();
+}
      
  FESpace::~FESpace()
    {
@@ -1078,24 +1078,25 @@ FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const in
 
  FESpace::FESpace(const Mesh & TTh,const TypeOfFE & tef,const TypeOfMortar & tm)
    :  
+     Th(TTh),
      ptrTFE(0),
      TFE(1,0,&tef),
-     cmesh(TTh),
      cdef(new ConstructDataFElement(TTh,TFE,&tm)),//tef.NbDfOnVertex,tef.NbDfOnEdge,tef.NbDfOnElement,&tm)),
+     cmesh(TTh),
      N(tef.N),
      Nproduit(1),
-     nb_sub_fem(TFE[0]->nb_sub_fem),
-     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),     
-     Th(TTh),
      NbOfDF(cdef->NbOfDF),
      NbOfElements(cdef->NbOfElements),
      NbOfNodes(cdef->NbOfNode),
-     MaxNbNodePerElement(cdef->MaxNbNodePerElement),
-     MaxNbDFPerElement(cdef->MaxNbDFPerElement),
+     nb_sub_fem(TFE[0]->nb_sub_fem),
+     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),     
      NodesOfElement(cdef->NodesOfElement),
-     FirstDfOfNodeData(cdef->FirstDfOfNode),
      FirstNodeOfElement(cdef->FirstNodeOfElement),
-     tom(&tm) { 
+     FirstDfOfNodeData(cdef->FirstDfOfNode),
+     tom(&tm),
+     MaxNbNodePerElement(cdef->MaxNbNodePerElement),
+     MaxNbDFPerElement(cdef->MaxNbDFPerElement)
+{ 
      // cout << "avant renum ="<< *this <<endl;
        renum();
      // cout << "apres renum ="<< *this <<endl;
@@ -1164,59 +1165,6 @@ void ConstructDataFElement::renum(const long *r,int l)
      val(SubArray(n,i,k),SubArray(m,m*i),t)=v; 
  }
  
-/* 
- void TypeOfFEProduit::Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int j, void * arg) const
- {
-   const baseFElement  KK(K,teb);
-   int m=teb.N;   
-    for(int i=0;i<k;i++)
-     { RN_  vv(val(SubArray(m,m*i)));
-     teb.Pi_h(KK,vv,f,v,j+i*m,arg);}
- }
- 
-/* 
- void TypeOfFESum::D2_FB(const Mesh & Th,const Triangle & K,const R2 & P,RNMK_ & val) const
- {
-   val=0.0;
-   SubArray t(3);
-   for (int i=0;i<k;i++)
-    {
-     int j=comp[i];
-     int ni=NN[i];
-     int di=DF[i];  
-     int i1=i+1; 
-     int nii=NN[i1];
-     int dii=DF[i1];
-     throwassert(ni<nii && di < dii);
-     RNMK_ v(val(SubArray(dii-di,di),SubArray(nii-ni,ni),t));     
-     if (j<=i)
-       teb[i]->D2_FB(Th,K,P,v);       
-     else
-       v=val(SubArray(DF[j+1]-DF[j],DF[j]),SubArray(NN[j+1]-NN[j],NN[j]),t);     
-    } }
-*/    
-/*
- void TypeOfFESum::FB(const Mesh & Th,const Triangle & K,const R2 & P,RNMK_ & val) const
- {
-   val=0.0;
-   SubArray t(3);
-   for (int i=0;i<k;i++)
-    {
-     int j=comp[i];
-     int ni=NN[i];
-     int di=DF[i];  
-     int i1=i+1; 
-     int nii=NN[i1];
-     int dii=DF[i1];
-     throwassert(ni<nii && di < dii);
-     RNMK_ v(val(SubArray(dii-di,di),SubArray(nii-ni,ni),t));     
-     if (j<=i)
-       teb[i]->FB(Th,K,P,v);       
-     else
-       v=val(SubArray(DF[j+1]-DF[j],DF[j]),SubArray(NN[j+1]-NN[j],NN[j]),t);     
-    }
- }
-*/ 
   void TypeOfFESum::FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 & P,RNMK_ & val) const
  {
    val=0.0;
@@ -1237,66 +1185,6 @@ void ConstructDataFElement::renum(const long *r,int l)
        v=val(SubArray(DF[j+1]-DF[j],DF[j]),SubArray(NN[j+1]-NN[j],NN[j]),t);     
     }
  }
-/* 
- void TypeOfFESum::Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int jjj, void * arg) const
- {
-    for(int i=0;i<k;i++)
-     { 
-       const baseFElement  KK(K,*teb[i]);
-       int dfii=DF[i+1],dfi=DF[i];
-       RN_  vv(val(SubArray(dfii-dfi,dfi)));
-       teb[i]->Pi_h(KK,vv,f,v,jjj+NN[i],arg);
-     }
-    // cout << val(SubArray(NbDoF)) << endl;
-     
- }
- /*
- void TypeOfFE_P1Lagrange::D2_FB(const Mesh & ,const Triangle & ,const R2 & ,RNMK_ & val) const
-{ //  
-  val=0;
-}
-*/
-/*
- void TypeOfFE_P2Lagrange::D2_FB(const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
-{ // 2 times derivatives  for error indicator
-//  const Triangle & K(FE.T);
-  R2 A(K[0]), B(K[1]),C(K[2]);
-  R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
-  R2 Dl0(K.H(0)), Dl1(K.H(1)), Dl2(K.H(2));
-  R l4_0=(4*l0-1),l4_1=(4*l1-1),l4_2=(4*l2-1); 
-  
-  throwassert(val.N() >=6);
-  throwassert(val.M()==1 );
-  throwassert(val.K()==3 );
-  
-  val=0; 
-  RN_ fxx(val('.',0,0)); 
-  RN_ fxy(val('.',0,1)); 
-  RN_ fyy(val('.',0,2)); 
-  
-  fxx[0] = 4*Dl0.x*Dl0.x;
-  fxx[1] = 4*Dl1.x*Dl1.x;
-  fxx[2] = 4*Dl2.x*Dl2.x;
-  fxx[3] =  8*Dl1.x*Dl2.x;
-  fxx[4] =  8*Dl0.x*Dl2.x;
-  fxx[5] =  8*Dl0.x*Dl1.x;
-
-  fyy[0] = 4*Dl0.y*Dl0.y;
-  fyy[1] = 4*Dl1.y*Dl1.y;
-  fyy[2] = 4*Dl2.y*Dl2.y;
-  fyy[3] =  8*Dl1.y*Dl2.y;
-  fyy[4] =  8*Dl0.y*Dl2.y;
-  fyy[5] =  8*Dl0.y*Dl1.y;
-
-  fxy[0] = 4*Dl0.y*Dl0.y;
-  fxy[1] = 4*Dl1.y*Dl1.y;
-  fxy[2] = 4*Dl2.y*Dl2.y;
-  fxy[3] =  4*(Dl1.x*Dl2.y + Dl1.y*Dl2.x);
-  fxy[4] =  4*(Dl0.x*Dl2.y + Dl0.y*Dl2.x);
-  fxy[5] =  4*(Dl0.x*Dl1.y + Dl0.y*Dl1.x);
-
-}
-*/
  R TypeOfFE_P1Lagrange::operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const 
 { 
    R u0(u(K(0))), u1(u(K(1))), u2(u(K(2)));
@@ -1363,24 +1251,7 @@ void TypeOfFE_P1Lagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// NEW /////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-/*
-void TypeOfFE_P1Bubble::FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const
-{
-  assert(0);
-}
 
-
-void TypeOfFE_P1Bubble::Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const
-{
-  assert(0);
-}
-
-/*
-R TypeOfFE_P1Bubble::operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const
-{
-  assert(0);
-}
-*/
 
 void TypeOfFE_P1Bubble::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
 {
@@ -1795,7 +1666,7 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
 {  
   // im   mortar number 
  // trop complique on change 
-             const Mortar &M(Th.mortars[im]);
+  //  const Mortar &M(Th.mortars[im]);
              int k = Th.nt+im;
              int  kk=FirstNodeOfElement[k]; //  begin   
              // lagrange  multiplicator one new node 
@@ -1863,7 +1734,7 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
 
    */
    //  typedef
-     const Mesh &Th(sm.Vh.Th);
+     //     const Mesh &Th(sm.Vh.Th);
      const Mortar & M(sm.M);
      int nl=M.NbLeft();
      int nr=M.NbRight();
@@ -1882,7 +1753,7 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
    //  int * data1=data0+ldata;
      
      //  now the construction 
-     int l=0,g=0;
+     // int l=0,g=0;
      R2 A(M.VLeft(0));
      R2 B(M.VLeft(nl));
      ffassert(&M.VLeft(0) == &M.VRight(0));
@@ -2043,9 +1914,9 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
   : 
     Vh(*VVh),
     M(Vh.Th.mortars[k-Vh.Th.nt]),
-    N(VVh->N),
     p(Vh.PtrFirstNodeOfElement(k)),
     nbn(Vh.NbOfNodesInElement(k)),
+    N(VVh->N),
     tom(Vh.tom)
     
  { ffassert(k>=Vh.Th.nt && k <Vh.Th.nt + Vh.Th.NbMortars);

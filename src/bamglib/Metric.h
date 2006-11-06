@@ -82,7 +82,7 @@ public:
 class MetricAnIso{ public:
   friend class MatVVP2x2;
   Real8 a11,a21,a22;
-  MetricAnIso(Real8 a): a11(1/(a*a)),a22(1/(a*a)),a21(0){}
+  MetricAnIso(Real8 a): a11(1/(a*a)),a21(0),a22(1/(a*a)){}
   MetricAnIso(Real8 a,Real8 b,Real8 c) :a11(a),a21(b),a22(c){}
   MetricAnIso()  {}; // 
   MetricAnIso(const Real8  a[3],const  MetricAnIso m0,

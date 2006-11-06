@@ -67,7 +67,7 @@ class OneBinaryOperatorInv_KN_long : public OneOperator { public:
        long pv = GetAny<long>((*p)(0));
         if (pv !=-1)   
          { char buf[100];
-           sprintf(buf,"Inverse:  int[int] I,  array, I^%d, The pow must be  == -1, sorry",pv);
+           sprintf(buf,"Inverse:  int[int] I,  array, I^%ld, The pow must be  == -1, sorry",pv);
            CompileError(buf);}     
        return  new E_F_F0<Inv_KN_long,KN_<long> >(Build<Inv_KN_long,KN_<long> >,to< KN_<long> >(args[0])); 
     }

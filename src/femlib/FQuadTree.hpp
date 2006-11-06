@@ -74,17 +74,21 @@ class FQuadTree {
 public:
   QuadTreeBox * root;
   Mesh *th;
+
+  long NbQuadTreeBoxSearch,NbVerticesSearch;
+  long NbQuadTreeBox,NbVertices;
   
   R2 cMin,cMax; //  box of QuadTree
   R coef; //	
+
+
   long XtoI(R x) { return  (long) ((Max(Min(x,cMax.x),cMin.x)-cMin.x)*coef);}
   long YtoJ(R y) { return  (long) ((Max(Min(y,cMax.y),cMin.y)-cMin.y)*coef);}
   R ItoX(long i){ return double(i)*coef+cMin.x ;}
   R ItoY(long j){ return double(j)*coef+cMin.y ;}
   I2  R2ToI2(const R2 &P) { return I2(XtoI(P.x),YtoJ(P.y));}
   I2  R2ToI2(const R2 *P) { return I2(XtoI(P->x),YtoJ(P->y));}
-  long NbQuadTreeBoxSearch,NbVerticesSearch;
-  long NbQuadTreeBox,NbVertices;
+
   
   Vertex * NearestVertex(const R2 & P) { return NearestVertex(XtoI(P.x),YtoJ(P.y));}
   Vertex * NearestVertexWithNormal(const R2 & P);

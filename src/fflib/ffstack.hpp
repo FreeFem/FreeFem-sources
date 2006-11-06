@@ -54,7 +54,7 @@ const int BeginOffset = 6;
 typedef void *Stack;
 
 
-static Stack  NullStack=0;
+ const Stack  NullStack=0;
 //typedef StackType& Stack;
 
 
@@ -258,7 +258,7 @@ T * Add2StackOfPtr2FreeA(Stack s,T * p)
 inline Stack newStack(size_t l)
  {
   Stack thestack = new char[l];
-  for (int i = 0;i< l/sizeof(long);i++) ((long*) thestack)[i]=0;
+  for (size_t i = 0;i< l/sizeof(long);i++) ((long*) thestack)[i]=0;
   ((char **) thestack)[MeshPointStackOffset] = new char [1000]; 
   WhereStackOfPtr2Free(thestack)=new StackOfPtr2Free(thestack); 
   

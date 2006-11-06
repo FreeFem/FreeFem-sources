@@ -171,7 +171,7 @@ int mylex::EatCommentAndSpace(string *data)
 }
 int mylex::basescan()
 {
-  extern long mpirank;
+  //  extern long mpirank;
    
   int c;
   buf[0]=0;
@@ -354,16 +354,16 @@ int mylex::basescan()
 int mylex::scan1()
 {
 
-  extern long mpirank;
+  // extern long mpirank;
  // bool echo = mpirank == 0; 
 
   int ret= basescan();
 
   if ( ret == ID)
-    while ((SetMacro(ret)))0;
+    while ((SetMacro(ret))) ((void) 0);
 
   if ( ret == ID)
-    while ((CallMacro(ret)))0;
+    while ((CallMacro(ret))) ((void) 0);
   return ret;
 }    
 
@@ -484,11 +484,11 @@ bool mylex::SetMacro(int &ret)
       } while(1);
       macroparm.push_back(def);
       cout << "macro " << macroname  ;
-      for (int i=0;i<macroparm.size()-1;i++)
+      for (size_t i=0;i<macroparm.size()-1;i++)
 	cout << ( (i == 0) ? '(' : ',') << macroparm[i];
       if (nbparam)
 	cout << " )  " ;
-      for (int i=0;i<def.size();i++)
+      for (size_t i=0;i<def.size();i++)
 	if (def[i] == 10 || (def[i] == 13 ) ) 
 	  {
 	    def[i]='\n';         
@@ -686,15 +686,15 @@ bool mylex::close() {
 }
 
  mylex::mylex(ostream & out):
-    charnumber(0),
     linenumber(1),
-    cout(out),
-    echo(mpirank == 0),
+    charnumber(0),
+    ffincludedir(ffenvironment["include"]),
     firsttime(true),
     level(-1),
+    echo(mpirank == 0),
+    cout(out),
     listMacroDef(new list<MapMacroDef>),
-    listMacroParam(0),
-    ffincludedir(ffenvironment["include"])
+    listMacroParam(0)
  {    
     listMacroDef->push_front(MapMacroDef());
    };

@@ -43,30 +43,30 @@ using namespace std;
 
 
 basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
-     "qft", &typeid(const Fem2D::QuadratureFormular *),
-     "qfe", &typeid(const Fem2D::QuadratureFormular1d *),
-     "qforder",&typeid(long),
-     "qfnbpT",&typeid(long),
-     "qfnbpE",&typeid(long),
-     "optimize",&typeid(bool),
-     "binside",&typeid(double)
+    { "qft", &typeid(const Fem2D::QuadratureFormular *)},
+    { "qfe", &typeid(const Fem2D::QuadratureFormular1d *)},
+    { "qforder",&typeid(long)},
+    { "qfnbpT",&typeid(long)},
+    { "qfnbpE",&typeid(long)},
+    { "optimize",&typeid(bool)},
+    { "binside",&typeid(double)}
 };
 
 
 basicAC_F0::name_and_type  Problem::name_param[]= {
-     "init", &typeid(bool),
-     "solver", &typeid(TypeSolveMat*),
-     "eps", &typeid(double)  ,
-     "precon",&typeid(Polymorphic*), 
-     "dimKrylov",&typeid(long),
-     "bmat",&typeid(Matrice_Creuse<R>* ),
-     "tgv",&typeid(double ),
-     "strategy",&typeid(long ),
-     "save",&typeid(string* ),
-     "cadna",&typeid(KN<double>*),
-     "tolpivot", &typeid(double),
-     "tolpivotsym", &typeid(double)
-     
+  {  "init", &typeid(bool)},
+  {  "solver", &typeid(TypeSolveMat*)},
+  {  "eps", &typeid(double) },
+  {  "precon",&typeid(Polymorphic*)}, 
+  {  "dimKrylov",&typeid(long)},
+  {  "bmat",&typeid(Matrice_Creuse<R>* )},
+  {  "tgv",&typeid(double )},
+  {  "strategy",&typeid(long )},
+  {  "save",&typeid(string* )},
+  {  "cadna",&typeid(KN<double>*)},
+  {  "tolpivot", &typeid(double)},
+  {  "tolpivotsym", &typeid(double)}
+  
 };
 
 
@@ -159,7 +159,7 @@ void Check(const Opera &Op,int N,int  M)
   double cmean = 1./nTonEdge;
 
   throwassert(&T == &Kv.T);  
-  const QuadratureFormular & FI = mat.FIT;
+  // const QuadratureFormular & FI = mat.FIT;
   const QuadratureFormular1d & FIb = mat.FIE;
   long npi;
   R *a=mat.a;
@@ -347,7 +347,7 @@ void Check(const Opera &Op,int N,int  M)
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges, "   ;
       else cout << "  --  int  in  " ;
-    for (int i=0;i<what.size();i++)
+    for (size_t i=0;i<what.size();i++)
       {long  lab  = GetAny<long>( (*what[i])(stack));
       setoflab.insert(lab);
       if ( verbosity>3) cout << lab << " ";
@@ -355,14 +355,14 @@ void Check(const Opera &Op,int N,int  M)
       }
      if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
   const E_F0 & optiexp0=*b->b->optiexp0;
-  const E_F0 & optiexpK=*b->b->optiexpK;
+  //const E_F0 & optiexpK=*b->b->optiexpK;
   int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
   R** where_in_stack =0;
   if (n_where_in_stack_opt && useopt)
     where_in_stack = new R * [n_where_in_stack_opt];
   if (where_in_stack)
    {
-    assert(b->b->v.size()==n_where_in_stack_opt);
+    assert(b->b->v.size()==(size_t) n_where_in_stack_opt);
     for (int i=0;i<n_where_in_stack_opt;i++)
     {
       int offset=b->b->where_in_stack_opt[i];
@@ -376,7 +376,7 @@ void Check(const Opera &Op,int N,int  M)
       optiexp0(stack); 
     KN<bool> ok(b->b->v.size());
      {  //   remove the zero coef in the liste 
-      R zero=R();  
+       // R zero=R();  
       int il=0;
       for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
         ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( norm(*(where_in_stack[il])) < 1e-100 ) );
@@ -685,10 +685,10 @@ void  AddMatElem(map<pair<int,int>, R > & A,const Mesh & Th,const BilinearOperat
     const CDomainOfIntegration & di= *b->di;
     const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
     SHOWVERB(cout << " FormBilinear () " << endl);
-    MatriceElementaireSymetrique<R> *mates =0;
-    MatriceElementairePleine<R> *matep =0;
+    //MatriceElementaireSymetrique<R> *mates =0;
+    // MatriceElementairePleine<R> *matep =0;
     const bool useopt=di.UseOpt(stack);    
-    double binside=di.binside(stack);
+    //double binside=di.binside(stack);
     
     if ( verbosity >1)
      {
@@ -710,7 +710,7 @@ void  AddMatElem(map<pair<int,int>, R > & A,const Mesh & Th,const BilinearOperat
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges, "   ;
       else cout << "  --  int  in  " ;
-    for (int i=0;i<what.size();i++)
+    for (size_t i=0;i<what.size();i++)
       {long  lab  = GetAny<long>( (*what[i])(stack));
       setoflab.insert(lab);
       if ( verbosity>3) cout << lab << " ";
@@ -718,14 +718,14 @@ void  AddMatElem(map<pair<int,int>, R > & A,const Mesh & Th,const BilinearOperat
       }
      if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
   const E_F0 & optiexp0=*b->b->optiexp0;
-  const E_F0 & optiexpK=*b->b->optiexpK;
+  // const E_F0 & optiexpK=*b->b->optiexpK;
   int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
   R** where_in_stack =0;
   if (n_where_in_stack_opt && useopt)
     where_in_stack = new R * [n_where_in_stack_opt];
   if (where_in_stack)
    {
-    assert(b->b->v.size()==n_where_in_stack_opt);
+    assert(b->b->v.size()==(size_t) n_where_in_stack_opt);
     for (int i=0;i<n_where_in_stack_opt;i++)
     {
       int offset=b->b->where_in_stack_opt[i];
@@ -739,7 +739,7 @@ void  AddMatElem(map<pair<int,int>, R > & A,const Mesh & Th,const BilinearOperat
       optiexp0(stack); 
     KN<bool> ok(b->b->v.size());
      {  //   remove the zero coef in the liste 
-      R zero=R();  
+       // R zero=R();  
       int il=0;
       for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
         ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( norm(*(where_in_stack[il])) < 1e-100 ) );
@@ -996,11 +996,11 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     long i,j;
     long n= mat.n,m=mat.m,nx=n*(m+1)/2;
     long N= Ku.N;
-    long M=N;
-    bool show = Ku.Vh.Th(T)==0;
-    char * xxx[] ={" u"," v"," p"," q"," r"};
-    char * xxxx[] ={" u'"," v'"," p'"," q'"," r'"};
-    char * yyy[] ={" ","_x ","_y "};
+    //long M=N;
+    // bool show = Ku.Vh.Th(T)==0;
+    //    char * xxx[] ={" u"," v"," p"," q"," r"};
+    //char * xxxx[] ={" u'"," v'"," p'"," q'"," r'"};
+    //char * yyy[] ={" ","_x ","_y "};
     
     
     throwassert(mat.bilinearform);
@@ -1313,9 +1313,9 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     long i,n=Kv.NbDoF(),N=Kv.N;
     
     //  bool show = Kv.Vh.Th(T)==0;
-    char * xxx[] ={" u"," v,"," p"," q"," r"};
-    char * xxxx[] ={" u'"," v',"," p'"," q'"," r'"};
-    char * yyy[] ={" ","_x ","_y "};
+    // char * xxx[] ={" u"," v,"," p"," q"," r"};
+    // char * xxxx[] ={" u'"," v',"," p'"," q'"," r'"};
+    // char * yyy[] ={" ","_x ","_y "};
 
     bool classoptm = copt && Op.optiexpK;
    // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
@@ -1719,43 +1719,43 @@ template<class R>
       else if (kind==CDomainOfIntegration::intalledges) cout << "  -- boundary int all edges " ;
       else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all edges " ;
       else cout << "  -- boundary int  " ;
-    for (int i=0;i<what.size();i++)
+    for (size_t i=0;i<what.size();i++)
       {long  lab  = GetAny<long>( (*what[i])(stack));
       setoflab.insert(lab);
       if ( verbosity>3) cout << lab << " ";
       all=false;
       }
-     if (verbosity>3) cout << " Optimized = "<< useopt << ", ";
-      
-  const E_F0 & optiexp0=*l->l->optiexp0;
-  const E_F0 & optiexpK=*l->l->optiexpK;
-  int n_where_in_stack_opt=l->l->where_in_stack_opt.size();
-  R** where_in_stack =0;
-  if (n_where_in_stack_opt && useopt)
-    where_in_stack = new R * [n_where_in_stack_opt];
-  if (where_in_stack)
-   {
-    assert(l->l->v.size()==n_where_in_stack_opt);
-    for (int i=0;i<n_where_in_stack_opt;i++)
-    {
-      int offset=l->l->where_in_stack_opt[i];
-      assert(offset>10);
-      where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
-      *(where_in_stack[i])=0;
-     }
-     if(&optiexp0) optiexp0(stack);
+    if (verbosity>3) cout << " Optimized = "<< useopt << ", ";
     
-    if( (verbosity/100) && verbosity % 10 == 2)
-    {
-        int il=0;
+    const E_F0 & optiexp0=*l->l->optiexp0;
+    // const E_F0 & optiexpK=*l->l->optiexpK;
+    int n_where_in_stack_opt=l->l->where_in_stack_opt.size();
+    R** where_in_stack =0;
+    if (n_where_in_stack_opt && useopt)
+      where_in_stack = new R * [n_where_in_stack_opt];
+    if (where_in_stack)
+      {
+	assert(l->l->v.size()==(size_t) n_where_in_stack_opt);
+	for (int i=0;i<n_where_in_stack_opt;i++)
+	  {
+	    int offset=l->l->where_in_stack_opt[i];
+	    assert(offset>10);
+	    where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
+	    *(where_in_stack[i])=0;
+	  }
+	if(&optiexp0) optiexp0(stack);
+	
+	if( (verbosity/100) && verbosity % 10 == 2)
+	  {
+	    int il=0;
 
-        for (LinearOperatorD::const_iterator ll=l->l->v.begin();ll!=l->l->v.end();ll++,il++)
-         cout << il << " coef (" << ll->first << ") = " << *(where_in_stack[il]) << " offset=" << l->l->where_in_stack_opt[il] <<endl;
-    
-        for (int i=0;i<n_where_in_stack_opt;i++)
-         cout << "const coef " << i << " = " << *(where_in_stack[i]) << endl;
-       }
-    }
+	    for (LinearOperatorD::const_iterator ll=l->l->v.begin();ll!=l->l->v.end();ll++,il++)
+	      cout << il << " coef (" << ll->first << ") = " << *(where_in_stack[il]) << " offset=" << l->l->where_in_stack_opt[il] <<endl;
+	    
+	    for (int i=0;i<n_where_in_stack_opt;i++)
+	      cout << "const coef " << i << " = " << *(where_in_stack[i]) << endl;
+	  }
+      }
     Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
     
     
@@ -1857,7 +1857,7 @@ bool isSameMesh(const list<C_F0> & largs,const Mesh * Thu,const Mesh * Thv,Stack
   list<C_F0>::const_iterator ii,ib=largs.begin(),
     ie=largs.end();
     
-  bool VVF =false;   
+  // bool VVF =false;   
   for (ii=ib;ii != ie;ii++)
     {
       Expression e=ii->LeftValue();
@@ -2192,9 +2192,9 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   TabFuncArg tabexp(stack,Nbcomp);
   typedef pair< FEbase<R> *,int> pfer;
   vector< pair< FEbase<R> *,int> > u_hh(Nbcomp2); 
-  for (int i=0;i<var.size();i++)
+  for (size_t i=0;i<var.size();i++)
     u_hh[i] = GetAny< pfer  >( (*(var[i]))(stack));
-  for (int i=0;i<var.size();i++)
+  for (size_t i=0;i<var.size();i++)
     u_hh[i].first->newVh(); 
   //   compression pour les cas vectoriel
   int kkk=0;
@@ -2351,22 +2351,22 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
      KN<R_st> BB(*B);
      ACadna->Solve(XX,BB);
      *X=XX;
-     R_st xxmin = XX.min();
-     R_st xxmax = XX.max();
      *cadna =-1.;            
 
 #ifdef HAVE_CADNA     
-      cout  << "    cadna:      min " <<  xxmin << "/ nd " << cestac(xxmin) 
-            << " ,   max " << xxmax << " / nd " << cestac(xxmax)   << endl ;
-      int nn= XX.N();
-      if ( cadna->N() == nn )
-        for (int i=0;i<nn;++i)
+     R_st xxmin = XX.min();
+     R_st xxmax = XX.max();
+     cout  << "    cadna:      min " <<  xxmin << "/ nd " << cestac(xxmin) 
+	   << " ,   max " << xxmax << " / nd " << cestac(xxmax)   << endl ;
+     int nn= XX.N();
+     if ( cadna->N() == nn )
+       for (int i=0;i<nn;++i)
          (*cadna)[i] = cestac(XX[i]);
-       else
-         cerr << "Warning: Sorry array is incorrect size to store cestac " 
-              << nn << " != " << cadna->N() << endl;
+     else
+       cerr << "Warning: Sorry array is incorrect size to store cestac " 
+	    << nn << " != " << cadna->N() << endl;
 #endif
-     }
+    }
   else
     
     A.Solve(*X,*B);
@@ -2442,8 +2442,8 @@ bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,in
       N = array[0]->size();
       M = array[1]->size();
       var.resize(N+M);
-      for (int k=0,j=0;k<2;k++)
-        for  (int i=0;i<array[k]->size();i++)
+      for (size_t k=0,j=0;k<2;k++)
+        for  (size_t i=0;i<array[k]->size();i++)
           { 
             const UnId & idi((*array[k])[i]);
             if (idi.r == 0 && idi.re  == 0 && idi.array==0 ) 
@@ -2466,7 +2466,7 @@ bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,in
       N=n/2;
       M=N; 
       var.resize(N+M);
-      for  (int i=0,j=0;i<l.size();i++)
+      for  (size_t i=0,j=0;i<l.size();i++)
         if (l[i].r == 0 && l[i].re  == 0 && l[i].array==0 ) 
           {
             C_F0 c=::Find(l[i].id);
@@ -2547,7 +2547,10 @@ bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex prob
 
 
 Problem::Problem(const C_args * ca,const ListOfId &l,size_t & top) :
-  op(new C_args(*ca)),var(l.size()),offset(align8(top)),VF(false) 
+  op(new C_args(*ca)),
+  var(l.size()),
+  VF(false), 
+  offset(align8(top))
 {
   SHOWVERB(cout << "Problem : -----------------------------" << top << endl);
   top = offset + sizeof(Data);
@@ -2579,11 +2582,11 @@ Expression IsFebaseArray(Expression f)
   if ( ! vvi) return 0;
    E_Array & vi(*vvi);
   Expression febase=0;
-  for (int i=0;i<N;i++)
+  for (size_t i=0;i<N;i++)
     { 
       assert(vi[i].left() == atype<pfer>() );
       const E_FEcomp<R> * comp=dynamic_cast<const E_FEcomp<R> *>( vi[i].LeftValue()) ;   
-      if (!(comp && comp->comp == i  && comp->N == N)) return 0; 
+      if (!(comp && comp->comp == (int) i  && comp->N == (int) N)) return 0; 
       if (!febase) febase = comp->a0;
       else if(comp->a0 != febase) return 0;        
     }   
@@ -2602,7 +2605,7 @@ Call_FormBilinear::Call_FormBilinear(Expression * na,Expression  BB,Expression f
 }
 
 Call_FormLinear::Call_FormLinear(Expression *na,Expression  LL, Expression ft)
-  : nargs(na),largs(),N(ft->nbitem()),
+  : largs(),nargs(na),N(ft->nbitem()),
   ppfes(ft)//IsFebaseArray(ft)) 
 {
   const C_args * LLL=dynamic_cast<const C_args *>(LL);
@@ -2610,35 +2613,42 @@ Call_FormLinear::Call_FormLinear(Expression *na,Expression  LL, Expression ft)
   largs=LLL->largs;
 }
 bool C_args::IsLinearOperator() const {
-  int n=largs.size();
+  //  int n=largs.size();
   aType tRn =atype<KN<R>* >();
   aType tCn =atype<KN<Complex>* >();
   for (const_iterator i=largs.begin(); i != largs.end();i++) 
-    {  C_F0  c= *i;Expression e=c; aType r=c.left();
-    if (     ( r != atype<const  FormLinear *>() )
-             &&  ( r != atype<const  BC_set *>() )
-             &&  ( r != atype<VirtualMatrice<R>::plusAx >() )
-             &&  ( r != atype<VirtualMatrice<R>::plusAtx >() )
-             &&  ( r != atype<VirtualMatrice<Complex>::plusAx >() )
-             &&  ( r != atype<VirtualMatrice<Complex>::plusAtx >() )
-             &&  ( r != tRn) 
-             &&  ( r != tCn) 
-             ) return false;
+    { 
+      C_F0  c= *i; 
+      // Expression e=c; 
+      aType r=c.left();
+      if (     ( r != atype<const  FormLinear *>() )
+	       &&  ( r != atype<const  BC_set *>() )
+	       &&  ( r != atype<VirtualMatrice<R>::plusAx >() )
+	       &&  ( r != atype<VirtualMatrice<R>::plusAtx >() )
+	       &&  ( r != atype<VirtualMatrice<Complex>::plusAx >() )
+	       &&  ( r != atype<VirtualMatrice<Complex>::plusAtx >() )
+	       &&  ( r != tRn) 
+	       &&  ( r != tCn) 
+	       ) return false;
     }
   return true;}
+
 bool C_args::IsBilinearOperator() const {
-      int n=largs.size();
-      aType tRn =atype<Matrice_Creuse<R>* >();
-      aType tCn =atype<Matrice_Creuse<Complex>* >();
-      for (const_iterator i=largs.begin(); i != largs.end();i++) 
-        {  C_F0  c= *i;Expression e=c; aType r=c.left();
-        if (     ( r!= atype<const  FormBilinear *>() )
-                 &&  ( r != atype<const  BC_set *>() )
-                 &&  ( r != tRn) 
-                 &&  ( r != tCn)
-                 ) return false;
-        }
-      return true;}
+  //int n=largs.size();
+  aType tRn =atype<Matrice_Creuse<R>* >();
+  aType tCn =atype<Matrice_Creuse<Complex>* >();
+  for (const_iterator i=largs.begin(); i != largs.end();i++) 
+    {  
+      C_F0  c= *i;
+      //Expression e=c;
+      aType r=c.left();
+      if (     ( r!= atype<const  FormBilinear *>() )
+	       &&  ( r != atype<const  BC_set *>() )
+	       &&  ( r != tRn) 
+	       &&  ( r != tCn)
+	       ) return false;
+    }
+  return true;}
 
 
 void SetArgsFormLinear(const ListOfId *lid,int ordre)
@@ -2667,7 +2677,7 @@ void SetArgsFormLinear(const ListOfId *lid,int ordre)
         { cerr << " form " << ordre << " == " << nbarray << " Nb of Array "<<endl;
         CompileError(" Must have 1 or 2 array, one for unknow functions, one for test functions");
         }
-      for (int k=0,j=0;k<ordre;k++)
+      for (int k=0;k<ordre;k++)
         for  (int i=0,iend=array[k]->size();i<iend;i++)
           { 
             const UnId & idi((*array[k])[i].id);
@@ -2686,7 +2696,9 @@ void SetArgsFormLinear(const ListOfId *lid,int ordre)
     {    // a supprimer  to remove   in case of bilinear    
       
       SHOWVERB(cout << "SetArgs:: form  set parameter " << endl);
-      throwassert( ordre==1 || n%2==0);
+      if( ! ( ordre==1 || n%2==0) )
+       CompileError(" Error in test or unkwon function (odd number of function) ");
+      ffassert( ordre==1 || n%2==0);
       int nn=ordre==1 ? 0 : n/2; // ordre == 1 => no unknown function just test function
       
       for (int i=0,j=0;i<nb;i++)

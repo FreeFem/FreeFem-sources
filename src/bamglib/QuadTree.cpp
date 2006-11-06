@@ -58,7 +58,7 @@ void  QuadTree::Draw()
   register QuadTreeBox * b;
   IntQuad hb =  MaxISize;
   if(!root) return;
-  Int4 kkk =0;
+  //  Int4 kkk =0;
   pb[0]=  root;
   pi[0]= root->n>0 ?(int)  root->n : 4  ;
   ii[0]=jj[0]=0;
@@ -368,8 +368,8 @@ void  QuadTree::Add( Vertex & w)
 }
 
 QuadTree::QuadTree(Triangles * t,long nbv) : 
-  th(t),
   lenStorageQuadTreeBox(t->nbvx/8+10),
+  th(t),
   NbQuadTreeBox(0),
   NbVertices(0),
   NbQuadTreeBoxSearch(0),
@@ -387,8 +387,8 @@ QuadTree::QuadTree(Triangles * t,long nbv) :
 }
 
 QuadTree::QuadTree() : 
-  th(0),
   lenStorageQuadTreeBox(100),
+  th(0),
   NbQuadTreeBox(0),
   NbVertices(0),
   NbQuadTreeBoxSearch(0),

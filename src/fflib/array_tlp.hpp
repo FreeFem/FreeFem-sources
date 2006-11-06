@@ -191,12 +191,13 @@ public:
 
     CODE(Expression a,const E_Array & tt)  
       : a0(a),N(tt.size()),
-	mi(tt.MeshIndependent()),
 	tab(new Expression [N]),
-	what(new int[N])  
+	what(new int[N])  ,
+	mi(tt.MeshIndependent())
+
       {
         assert(&tt);
-      int err=0;
+	//      int err=0;
         for (int i=0;i<N;i++)
 	if(atype<RR>()->CastingFrom(tt[i].right() ) ) 
 	  {
@@ -269,11 +270,12 @@ public:
 
     CODE(Expression a,const E_Array & tt)  
       : a0(a),N(tt.size()),M(0),
-	mi(tt.MeshIndependent()),
-	tab(new Expression* [N])
+	tab(new Expression* [N]),
+	mi(tt.MeshIndependent())
+
       {
         assert(&tt);
-       int err=0;
+	//       int err=0;
         for (int i=0;i<N;i++)
          {
           const E_Array  *li =  dynamic_cast<const E_Array *>(tt[i].LeftValue());
@@ -341,12 +343,12 @@ public:
 
     CODE(Expression a,const E_Array & tt)  
       : a0(a),N(tt.size()),
-	mi(tt.MeshIndependent()),
 	tab(new Expression [N]),
-	what(new int[N])  
+	what(new int[N])  ,
+	mi(tt.MeshIndependent())
       {
         assert(&tt);
-      int err=0;
+	//      int err=0;
         for (int i=0;i<N;i++)
 	if(atype<RR*>()->CastingFrom(tt[i].left() ) ) 
 	  {
@@ -556,7 +558,7 @@ void ArrayOperator()
       
      aType knlp=  aaaa_knlp ;
      //atype<KN<Z> *>();
-     aType knl_ = atype<KN_<Z> >();
+     // aType knl_ = atype<KN_<Z> >();
     
      atype<KN<K>* >()->Add("[","",new OneOperator2_<K*,KN<K>*,Z >(get_elementp_<K,KN<K>*,Z>));
      atype<KN<K>* >()->Add("(","",new OneOperator2_<K*,KN<K>*,Z >(get_elementp_<K,KN<K>*,Z>));

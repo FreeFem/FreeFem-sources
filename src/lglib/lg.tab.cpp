@@ -2121,7 +2121,7 @@ int Compile()
   extern   YYSTYPE *plglval;  // modif FH 
   plglval = &lglval;
   int retvalue=0;
-  int ok;
+  //  int ok;
   
   currentblock=0;
   Block::open(currentblock);  
@@ -2164,7 +2164,7 @@ int Compile()
 int mainff (int  argc, char **argv)
 {
 
-  size_t lg000;
+  //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;
 #ifdef PARALLELE
@@ -2180,7 +2180,7 @@ int mainff (int  argc, char **argv)
 
   cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
   char *  cc= new char [1024];
-  istream * ccin=0;
+  //  istream * ccin=0;
   if ( ! getprog(cc,argc,argv)>0) 
     return 1; 
   zzzfff = Newlex(cout);

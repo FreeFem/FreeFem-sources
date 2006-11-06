@@ -52,8 +52,8 @@ void ReductionSimultanee( MetricAnIso M1,  MetricAnIso M2,double & l1,double & l
   // det (M1 - l M2) = a l^2 + b l + c;
   // = (a11 - l * b11) * (a22 - l * b22) - (a21 - l * b21 ) ^2
   //  const double eps = 1.e-5;
-  const double c11 = a11*a11, c21= a21*a21;
-  const double d11 = b11*b11, d21= b21*b21;
+  const double /*c11 = a11*a11,*/ c21= a21*a21;
+  const double /*d11 = b11*b11,*/ d21= b21*b21;
   const double a=b11*b22 - d21;
   const double b=-a11*b22-a22*b11+2*a21*b21;
   const double c=-c21+a11*a22;
@@ -389,7 +389,7 @@ void Triangles::IntersectConsMetric(const double * s,const Int4 nbsol,const int 
       else
 	cout << " Absolute Err" <<endl;
     }
-  double *ss=(double*)s, *ssiii = ss;
+  double *ss=(double*)s;//, *ssiii = ss;
 
   double sA,sB,sC;
 
@@ -562,8 +562,8 @@ void Triangles::IntersectConsMetric(const double * s,const Int4 nbsol,const int 
 			taa[0][j] =  lB*lC;
 			taa[1][j] =  lC*lA;
 			taa[2][j] =  lA*lB;
-			Real8 xx = V.x-V.y;
-			Real8 yy = V.x + V.y;
+			//Real8 xx = V.x-V.y;
+			//Real8 yy = V.x + V.y;
 			//cout << " iv " << ss[iV*n] << " == " << (8*xx*xx+yy*yy)
 			//     << " l = " << lA << " " << lB << " " << lC 
 			//     << " = " << lA+lB+lC << " " <<  V << " == " << A*lA+B*lB+C*lC << endl;

@@ -86,7 +86,7 @@ double * ReadBBFile(const char * file,long & nbsol,long & lsol,int *& typesols,
   long i,n=0;
   double *sol =0;
   int sizeoftype[] = { 1, dim ,dim * (dim+1) / 2, dim * dim } ;
-  char * charoftype[] = {  "Scalar" , "dim Vector" ,"dim x dim Sym-Matric","dim x dim Full-Matric" } ;
+  // char * charoftype[] = {  "Scalar" , "dim Vector" ,"dim x dim Sym-Matric","dim x dim Full-Matric" } ;
   frbb >>    dimlu >> nbsol ;
   typesols = new int [nbsol] ;
   for (i=0;i<nbsol;i++)

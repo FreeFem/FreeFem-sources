@@ -119,7 +119,7 @@ int getprog(char* fn,int argc, char **argv)
      else if   (strcmp(argv[i],"-v")==0 )
        {
 	 verbosity = atoi(argv[i+1]);
-	 printf(" verbosity : %d\n",verbosity);
+	 printf(" verbosity : %ld\n",verbosity);
        }
 
     if(ret==0) 
@@ -163,7 +163,7 @@ const float fMaxPixel = +32000;
 static XColor *colortable;
 static int ncolortable,fcolor;
 static reel echx,echy,rxmin,rxmax,rymin,rymax;
-static int  lacouleur,screen, width, height, currx, curry;
+static int  lacouleur, width, height, currx, curry;
 #define call(i) i
 static int INITGRAPH=0;
 void myend()
@@ -481,7 +481,7 @@ void cadreortho(reel centrex, reel centrey, reel rayon)
 }
 
 void plotstring (const char *  string)
-{ int l = strlen(string);
+{ //int l = strlen(string);
  if(psfile) fprintf(psfile,"(%s) %d %d  S\n",string,currx,height-curry);
 }
 
@@ -524,7 +524,7 @@ void viderbuff()
 
 void cercle(reel centrex, reel centrey, reel rayon)
 {
-  int r = (int) (rayon * echx);
+  //int r = (int) (rayon * echx);
 }
 void reffecran()
 {

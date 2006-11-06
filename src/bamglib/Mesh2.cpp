@@ -136,10 +136,10 @@ void  swap(Triangle *t1,Int1 a1,
   // Int1 a2=aa[a];// les 2 numero de l arete dans les 2 triangles
   //                               
   //               sb                     sb    
-  //             / | \                   /   \     
-  //         as1/  |  \                 /a2   \    
-  //           /   |   \               /    t2 \   
-  //       s1 /t1  | t2 \s2  -->   s1 /___as2___\s2
+  //             / | \                   /   \                      !
+  //         as1/  |  \                 /a2   \                     !
+  //           /   |   \               /    t2 \                    !
+  //       s1 /t1  | t2 \s2  -->   s1 /___as2___\s2                 !
   //          \  a1|a2  /             \   as1   /  
   //           \   |   /               \ t1    /   
   //            \  |  / as2             \   a1/    
@@ -282,7 +282,9 @@ TriangleAdjacent CloseBoundaryEdge(I2 A,Triangle *t, double &a,double &b) {
 TriangleAdjacent Triangle::FindBoundaryEdge(int i) const
 {
   // turn around  the vertex ns[i] also call  s
+#ifdef DEBUG
   register Vertex * s  =  ns[i];
+#endif
   Triangle   *t = (Triangle *) this , *ttc;
   int k=0,j = EdgesVertexTriangle[i][0],jc;
   int exterieur  = !link  ;
@@ -315,7 +317,7 @@ TriangleAdjacent CloseBoundaryEdgeV2(I2 C,Triangle *t, double &a,double &b)
   //int bug=1;
   //  Triangle *torigine = t;
   // restart:
-   int dir=0;
+  //   int dir=0;
   assert(t->link == 0);
   // to have a starting edges 
   // try the 3 edge bourna-- in case of internal hole 
@@ -817,7 +819,7 @@ Real8  ListofIntersectionTriangles::Length()
       Mx = lIntTria[ii].m;
       My = lIntTria[jj].m;
       //      Real8 &sx=  lIntTria[ii].sp; // previous seg
-      Real8 &sy=  lIntTria[jj].sn; // next seg
+      //  Real8 &sy=  lIntTria[jj].sn; // next seg
       //      sx = Mx(xy);
       //      sy = My(xy);
       //   sxy = (Mx(xy)+ My(xy))/2.0;
@@ -869,13 +871,14 @@ Int4 ListofIntersectionTriangles::NewPoints(Vertex * vertices,Int4 & nbv,Int4  n
       x  =lIntTria[ii1].x;
       sx =lIntTria[ii1].s;
       Metric Mx=lIntTria[ii1].m;
-
+#ifdef DEBUG    
       double lx = lIntTria[ii-1].sn;
+#endif
       y  =lIntTria[ii].x;
       sy =lIntTria[ii].s;
       Metric My=lIntTria[ii].m;
-      double ly =lIntTria[ii].sp;  
 #ifdef DEBUG    
+      double ly =lIntTria[ii].sp;  
       assert( sx <= si);
       assert( si <= sy);
       assert( sy != sx);
@@ -926,7 +929,6 @@ int SwapForForcingEdge(Vertex   *  & pva ,Vertex  * &   pvb ,
   assert ( a1 >= 0 && a1 < 3 );
    
   Vertex & sa= (* t1)[VerticesOfTriangularEdge[a1][0]];
-  Vertex & sb= (*t1)[VerticesOfTriangularEdge[a1][1]];
   Vertex & s1= (*t1)[OppositeVertex[a1]];
   Vertex & s2= (*t2)[OppositeVertex[a2]];
   
@@ -934,6 +936,7 @@ int SwapForForcingEdge(Vertex   *  & pva ,Vertex  * &   pvb ,
   Icoor2 dets2 = det(*pva,*pvb,s2);
 
 #ifdef DEBUG
+  Vertex & sb= (*t1)[VerticesOfTriangularEdge[a1][1]];
   Icoor2 wdets1 = det(*pva,*pvb,s1);  
   Icoor2 wdetsa = det(*pva,*pvb,sa);
   Icoor2 wdetsb = det(*pva,*pvb,sb);
@@ -1054,8 +1057,9 @@ int SwapForForcingEdge(Vertex   *  & pva ,Vertex  * &   pvb ,
 
 int ForceEdge(Vertex &a, Vertex & b,TriangleAdjacent & taret)  
 { 
-
+#ifdef DEBUG
  restart: // for debug 
+#endif
   int NbSwap =0;
   assert(a.t && b.t); // the 2 vertex is in a mesh 
   int k=0;
@@ -1309,8 +1313,9 @@ int Triangle::swap(Int2 a,int koption){
 
 Real8  Vertex::Smoothing(Triangles & Th,const Triangles & BTh,Triangle  * & tstart ,Real8 omega)
 {
-  
+#ifdef DEBUG  
   register  Int4 NbSwap =0;
+#endif
   register Vertex * s  = this;
   Vertex &vP = *s,vPsave=vP;
   //  if (vP.on) return 0;// Don't move boundary vertex  
@@ -1427,16 +1432,16 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
 {
   // -------------------------------------------
   //             s2
-  //
-  //             /|\
-  //            / | \
-  //           /  |  \
-  //    tt1   /   |   \ tt0
-  //         /    |s   \
-  //        /     .     \
-  //       /  .      `   \
-  //      / .           ` \
-  //      ----------------
+  //                                            !
+  //             /|\                            !
+  //            / | \                           !
+  //           /  |  \                          !
+  //    tt1   /   |   \ tt0                     !
+  //         /    |s   \                        !
+  //        /     .     \                       !
+  //       /  .      `   \                      !
+  //      / .           ` \                     !
+  //      ----------------                      !
   //   s0       tt2       s1
   //-------------------------------------------- 
   
@@ -1920,7 +1925,7 @@ void  Triangles::NewPoints(Triangles & Bh,int KeepBackVertex)
 	  if(first_np_or_next_t[k]==iter)  // this edge is done before 
 	    continue; // next edge of the triangle 
 	  
-	  const Int4 NbvOld = nbv;
+	  //const Int4 NbvOld = nbv;
 	  lIntTria.SplitEdge(Bh,A,B);
 	  lIntTria.NewPoints(vertices,nbv,nbvx);
 	} // end loop for each edge 
@@ -1997,7 +2002,9 @@ void  Triangles::NewPointsOld(Triangles & Bh)
   int j;
   Int4 BeginNewPoint[3];
   Int4 EndNewPoint[3];
+#ifdef TRACETRIANGLE
   Int4 trace=0;
+#endif
   int step[3];
   Int4 *first_np_or_next_t = new Int4[nbtx];
   Int4 ColorEdge[3];
@@ -2108,7 +2115,8 @@ void  Triangles::NewPointsOld(Triangles & Bh)
 #endif
 	  const Int4 NbvOld = nbv;
 	  lIntTria.SplitEdge(Bh,A,B);
-	  Int4 NbvNp = lIntTria.NewPoints(vertices,nbv,nbvx);
+	  // Int4 NbvNp =
+	  lIntTria.NewPoints(vertices,nbv,nbvx);
 	  Int4 nbvNew=nbv;
 	  nbv = NbvOld;
 	  for (Int4 iv=NbvOld;iv<nbvNew;iv++) {
@@ -2346,7 +2354,7 @@ void  Triangles::NewPointsOld(Triangles & Bh)
       //     Vertex * nv =  quadtree->NearestVertex(vi->i.x,vi->i.y);
       //      cout << " Neart Vertex of "  << Number(vi)<< vi->i << " is " 
       //   << Number(nv) << nv->i  << endl;
-      Int4  kt = Number(tcvi);
+      // Int4  kt = Number(tcvi);
       // 
       
       quadtree->Add(*vi); //
@@ -3382,7 +3390,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 
                   int k0=jedge,k1;
                   Edge * pe=  BTh.edges+iedge;
-		  GeometricalEdge *ong = ei.on;
+		  //GeometricalEdge *ong = ei.on;
                    int iedgeequi=bcurve[icurveequi]/2;
                    int jedgeequi=bcurve[icurveequi]%2;
 
@@ -4268,7 +4276,7 @@ void Triangles::FillHoleInMesh()
 	inquire();
 #endif
 	
-	Int4 nbtfillhole = nbt;
+	//Int4 nbtfillhole = nbt;
 	 // inforce the boundary 
 	 TriangleAdjacent ta(0,0);
 	 Int4 nbloss = 0,knbe=0;
@@ -4530,8 +4538,10 @@ Int4  Triangle::Optim(Int2 i,int koption)
 Int4  Triangle::Optim(Int2 i,int koption)
 {
   // turne around in positif sens
-   Int4 NbSwap =0;
+  Int4 NbSwap =0;
+#ifdef DEBUG
    Vertex * s  = ns[i];
+#endif
    Triangle  *t = this;
    int k=0,j =OppositeEdge[i];
    int jp = PreviousEdge[j];
@@ -4790,7 +4800,7 @@ int Triangles::CrackMesh()
   //  set the ref 
   cout << " set the ref " <<  endl ;
   NbCrackedVertices =   nbcrakev;
-  int nbvo = nbv;
+  // int nbvo = nbv;
   nbv = vlast - vertices;
   int nbnewv =  nbv - nbv; // nb of new vrtices 
   if (nbcrakev && verbosity > 1 )
@@ -4864,7 +4874,7 @@ Triangles::Triangles(const Triangles & Tho,const int *flag ,const int *bb)
   for (i=0;i<Tho.nbv;i++)
     refv[i]=0;
   int nbNewBedge =0;
-  int nbOldBedge =0;  
+  //  int nbOldBedge =0;  
   for (i=0;i<Tho.nbt;i++)
     if(  reft[i] >=0 && flag[i]) 
       {

@@ -1349,7 +1349,7 @@ viderbuff();
             case XK_Meta_L :
               alt=1;
               break;
-            case X<K_Meta_R :
+            case XK_Meta_R :
               alt=1;
               break;
             case XK_Alt_L :

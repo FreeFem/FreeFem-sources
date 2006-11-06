@@ -87,13 +87,13 @@ void myfree(char *p,size_t l=0,int nordre=0)
 	if (p[i] != 'a' +i)     k++;
 	if(l && (p[i+l+8] != 'z' -i)) k++;       
       }
-    for (int i=0;i<l;i++)
+    for (size_t i=0;i<l;i++)
       p[i+8]=127;
     if(!k) free(p);
    else {
      debugalloc();
      if (kerr++<20) 
-       printf("@@@@@@@@@@@@@@@@@ Erreur myfree p= %lx   l=%d n=%d\n",p,l,nordre);
+       printf("@@@@@@@@@@@@@@@@@ Erreur myfree p= %p   l=%d n=%d\n",p,(int) l,nordre);
      
      //throw(ErrorExec("exit",1));
    }
@@ -250,7 +250,7 @@ void * AllocExtern::MyNewOperator(size_t ll,bool is_array)
   MaxUsedSize = AllocSize < MaxUsedSize ? MaxUsedSize :  AllocSize;
   if( !ll &&  !a->p)
     {
-      printf("\t\tCheckPtrMem Full Exit(10) New Alloc %ld %lx when %ld\n ", ll, a->p, a->n);
+      printf("\t\tCheckPtrMem Full Exit(10) New Alloc %ld %p when %ld\n ",(long) ll, a->p, a->n);
       printf ("\t\tCheckPtr:Max Memory used %10.3f kbytes " ,  MaxUsedSize/1024. );
       printf (" Memory undelete %ld \n" , AllocSize);
       throw(ErrorExec("exit",10));
@@ -274,7 +274,7 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
 		printf("\t%d\tCheckPtr: delete  Alloc %ld %lx when %ld \n",p->a[i].n,p->a[i].l-1,  p->a[i].p, p->a[i].n);
 #endif
 		size_t ll = p->a[i].l-1;
-		for (int kkk=0;kkk<ll;kkk++) 
+		for (size_t kkk=0;kkk<ll;kkk++) 
 		  ((char *) pp)[kkk]=18;
 		
 		myfree((char*)pp,ll,p->a[i].n);
@@ -293,7 +293,7 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
 	  p = p->next;
 	}
       if(pp) 
-	printf( "\t\tCheckPtr: delete of bad pointer %lx -----------\n",pp);
+	printf( "\t\tCheckPtr: delete of bad pointer %p -----------\n",pp);
       
     } else 
       myfree((char*)pp); 
@@ -352,7 +352,7 @@ AllocExtern::~AllocExtern()
 	       list[kk++]=p->a+i;
 	 }
      // myfree((char*)p->a);
-     AllocData * pold = p;
+     //     AllocData * pold = p;
       p = p->next;
       //   myfree((char*)pold);
      }
@@ -361,7 +361,7 @@ AllocExtern::~AllocExtern()
     HeapSort(list,kk);
     for (int i= kk-10<0 ? 0 : kk-10 ;i<kk;i++)
       {
-        printf ("\t\tCheckPtr:Undelete pointer  %lx size %ld  when %ld\n", list[i]->p,list[i]->l,list[i]->n);        
+        printf ("\t\tCheckPtr:Undelete pointer  %p size %ld  when %ld\n", list[i]->p,list[i]->l,list[i]->n);        
       }
     if (kk)
       {
@@ -384,12 +384,13 @@ AllocExtern::~AllocExtern()
     
     //   clean store pointer      
     p=AllocHead;    
-    while (p) {int i=N100;
-    myfree((char*)p->a);
-    AllocData * pold = p;
-    p = p->next;
-    myfree((char*)pold);
-    }     
+    while (p) 
+      {//int i=N100;
+      myfree((char*)p->a);
+      AllocData * pold = p;
+      p = p->next;
+      myfree((char*)pold);
+      }     
     AllocHead=0;
     after_end=true; 
 }
@@ -413,10 +414,10 @@ void operator delete[](void * pp)
 {  AllocExternData.MyDeleteOperator(pp,true);}
 
 int AllocExtern::ShowAlloc(char *s,size_t & lg) {
-  AllocExtern::AllocData * p=AllocExtern::AllocHead;
+  // AllocExtern::AllocData * p=AllocExtern::AllocHead;
   if (!NbAllocShow) NbAllocShow=NbAlloc;
-  int i=N100-1;
-  printf ("----------CheckPtr:-----%s------ NbUndelPtr  %d  Alloc: %d  NbPtr %d \n",s,NbPtr,AllocSize,NbAlloc);
+  //int i=N100-1;
+  printf ("----------CheckPtr:-----%s------ NbUndelPtr  %ld  Alloc: %ld  NbPtr %ld \n",s,NbPtr,AllocSize,NbAlloc);
   lg = AllocSize;
   return NbPtr;
 }

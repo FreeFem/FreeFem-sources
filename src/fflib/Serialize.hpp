@@ -52,7 +52,12 @@ struct MPIrank;
   operator void *() { return p;} 
   operator char *() { return p;} 
   bool samewhat(const char * w) const { return strncmp(what,w,8)==0; }
-  Serialize(const Serialize & s) :lg(s.lg),p(s.p),what(s.what) { count()++; } 
+
+  Serialize(const Serialize & s) :
+    lg(s.lg),
+    what(s.what) ,  
+    p(s.p)
+   { count()++; } 
   
  template<typename T>  inline void get(size_t & k,T & x) const
    { 

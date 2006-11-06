@@ -9,8 +9,8 @@ class QuadraturePoint : public R2{
 public:
 const R a;
 //const R2 c;
-  QuadraturePoint(R aa,R2 xx): a(aa),R2(xx) {}
-  QuadraturePoint(R aa,R xx,R yy): a(aa),R2(xx,yy) {}
+  QuadraturePoint(R aa,R2 xx): R2(xx),a(aa) {}
+  QuadraturePoint(R aa,R xx,R yy): R2(xx,yy),a(aa) {}
   operator R() const {return a;}
 //  operator R2()   const {return c;}
 };
@@ -20,9 +20,9 @@ class QuadratureFormular {
  friend  ostream& operator <<(ostream& , const QuadratureFormular & ) ;
 
 public:
-  const int n;                // nombre de point d'integration
-  const int exact;            // exact
   const int on;               // on = 3 => triangle, on=4 => quad
+  const int exact;            // exact
+  const int n;                // nombre de point d'integration
   const QuadraturePoint *p;  // les point d'integration 
 // -- les fonctions ------------------
   void Verification(); // for verification 
@@ -36,13 +36,11 @@ const QuadraturePoint & operator ()(int i) const {return p[i];}
 
 private:
  QuadratureFormular(const QuadratureFormular &)
-   :n(0),exact(0),on(0),p(0){throwassert(0);}
+   :on(0),exact(0),n(0),p(0){throwassert(0);}
  void operator=(const QuadratureFormular &)
    {throwassert(0);}
  QuadratureFormular()
-   :n(0),exact(0),on(0),p(0){throwassert(0);}
- 
-
+   :on(0),exact(0),n(0),p(0){throwassert(0);}
 };
 
 ostream& operator <<(ostream& , const QuadratureFormular & ) ;
@@ -50,8 +48,8 @@ ostream& operator <<(ostream& , QuadraturePoint & );
 
 
 class QuadratureFormular1d {public:
+  const int exact;
   const int n;
-    const int exact;
   class Point { public: R a,x ; Point(R aa=0,R xx=0): a(aa),x(xx) {} } *p;
   
   QuadratureFormular1d(int ex,Point p0,Point p1,Point p2,Point p3,Point p4) : exact(ex),n(5),p(new Point[5]) { p[0]=p0;p[1]=p1;p[2]=p2;p[3]=p3;p[4]=p4;Check();}

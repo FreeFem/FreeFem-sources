@@ -49,7 +49,7 @@ using namespace std;
 extern Block *currentblock;
 
 typedef double R;
-
+const bool dddd=false;
 
 class EigenValue : public OneOperator
 { public:
@@ -70,7 +70,7 @@ class EigenValue : public OneOperator
              cas(cc)
         {
               // OP1 = (A-sigma*B)        
-                int nbj= args.size()-1;
+	  //                int nbj= args.size()-1;
                 args.SetNameParam(n_name_param,name_param,nargs);
                 expOP1=to< Matrice_Creuse<K> *>(args[0]);
                 expB=to< Matrice_Creuse<K> *>(args[1]);
@@ -113,7 +113,7 @@ class EigenValueC : public OneOperator
              cas(cc)
         {
               // OP1 = (A-sigma*B)        
-                int nbj= args.size()-1;
+	  //                int nbj= args.size()-1;
                 args.SetNameParam(n_name_param,name_param,nargs);
                 expOP1=to< Matrice_Creuse<K> *>(args[0]);
                 expB=to< Matrice_Creuse<K> *>(args[1]);
@@ -137,25 +137,25 @@ class EigenValueC : public OneOperator
 };
 
 basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
-    "tol", &typeid(double)  ,
-    "nev",&typeid(long) ,
-    "sym",&typeid(bool),
-    "sigma",&typeid(double),
-    "value",&typeid(KN<double> *),
-    "vector",&typeid(pferarray) , 
-    "ncv",&typeid(long) , // the number of Arnoldi vectors generated 
-    "maxit",&typeid(long), // the maximum number of Arnoldi iterations 
-    "ivalue",&typeid(KN<double> *),
+ {   "tol", &typeid(double)  },
+ {   "nev",&typeid(long) },
+ {   "sym",&typeid(bool)},
+ {   "sigma",&typeid(double)},
+ {   "value",&typeid(KN<double> *)},
+ {   "vector",&typeid(pferarray) }, 
+ {   "ncv",&typeid(long) }, // the number of Arnoldi vectors generated 
+ {   "maxit",&typeid(long)}, // the maximum number of Arnoldi iterations 
+ {   "ivalue",&typeid(KN<double> *)},
 };
 
 basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
-    "tol", &typeid(double)  ,
-    "nev",&typeid(long) ,
-    "sigma",&typeid(K),
-    "value",&typeid(KN<Complex> *),
-    "vector",&typeid(pfecarray) , 
-    "ncv",&typeid(long) , // the number of Arnoldi vectors generated 
-    "maxit",&typeid(long), // the maximum number of Arnoldi iterations 
+  {  "tol", &typeid(double)  },
+  {  "nev",&typeid(long) },
+  {  "sigma",&typeid(K)},
+  {  "value",&typeid(KN<Complex> *)},
+  {  "vector",&typeid(pfecarray) }, 
+  {  "ncv",&typeid(long) }, // the number of Arnoldi vectors generated 
+  {  "maxit",&typeid(long)}, // the maximum number of Arnoldi iterations 
 };
 
         
@@ -169,7 +169,7 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
            double sigma=0;
            KN<double> * evalue=0;
            KN<double> * evaluei=0;
-           
+	   double ws,vs;           // for debugging FH ++++++++++
            pferarray  evector2;
            pferbasearray   evector=0;
            tol=arg<double>(0,stack,0);
@@ -245,9 +245,29 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
 		     // This product must be performed only if GetIdo is equal to
 		     // -1. GetVector supplies a pointer to the input vector, v,
 		     // and PutVector a pointer to the output vector, w.
+		     if(dddd)
+		       {
+			 ws=w.sum();
+			 vs=v.sum();
+			 cout << " ?kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" 
+			      << ws << " s v " << vs  << endl;}
 		     work = B*v;
+		     assert(v.min() >= -2. && v.max() < 2.);	
+		     if(dddd)
+		       {
+			 ws=w.sum();
+			 vs=v.sum();
+			 cout << " -kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" << ws 
+			      << " s v " << vs  << endl;}
 		     OP1.Solve(w,work);
-		     //cout << " kkk" << kkk << " " << w.max() << " " << w.min() << endl;
+		     if(dddd)
+		       {
+			 ws=w.sum();
+			 vs=v.sum();
+			 cout << " +kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" 
+			  << ws << " s v " << vs  << endl;
+		       }
+
 		     //    P.B.MultMv(prob.GetVector(), temp);
 		     //    P.MultOPv(temp, prob.PutVector());
 		     break;
@@ -260,7 +280,21 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
 		     // This product must be performed whenever GetIdo is equal to
 		     // 1. GetProd supplies a pointer to the previously calculated
 		     // product Bv and PutVector a pointer to the output vector w.
+		     if(dddd)
+		       {
+			 ws=w.sum();
+			 vs=v.sum();
+			 cout << " -kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" 
+			      << ws << " s v " << vs  << endl;
+		       }
 		     OP1.Solve(w,v);
+		     if(dddd)
+		       {		     
+			 ws=w.sum();
+			 vs=v.sum();
+			 cout << " +kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" 
+			      << ws << " s v " << vs  << endl;
+		       }
 		     // cout << " kkk" << kkk << " " << w.max() << " " << w.min() << endl;
 		     //P.MultOPv(prob.GetProd(), prob.PutVector());
 		     break; }
@@ -271,8 +305,23 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
 		     
 		     // Performing w <- B*v.
 		     //P.B.MultMv(prob.GetVector(), prob.PutVector());
-		     w = B*v; 
-		     //cout << " kkk" << kkk << " " << w.max() << " " << w.min() << endl;
+		     if(dddd)
+		       {
+			 ws=w.sum();
+			 vs=v.sum();
+			 cout << " -kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" 
+			      << ws << " s v " << vs  << endl;
+		       }
+		     w = B*v;
+		     // w=v;
+		     if(dddd)
+		       {
+			 ws=w.sum();
+			 vs=v.sum();
+			 cout << " +kkk " << kkk << " " << w.max() << " " << w.min() << " s w ="
+			      << ws << " s v " << vs  << endl;
+		       }
+		     break;
 		   }
 		   }
 		   // cout<< " GetIdo = " << kkk << endl;
@@ -502,7 +551,8 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
 		     int m = Min(nconv,(long) ev.N);
 		     for(int i=0;i<m;i++)
 		       {
-			 K ev_i=prob.EigenvalueImag(i);
+			 // K ev_i=
+			   prob.EigenvalueImag(i);
 			 FEbase<K> & xx= **(ev[i]);
 			 // if (xx.pVh != pOP1->pUh) 
 			 //    ExecError("Wrong Type of FEspace to store the eigen vector ");

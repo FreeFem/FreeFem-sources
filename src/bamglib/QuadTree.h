@@ -75,8 +75,8 @@ class QuadTree {
 public:
   QuadTreeBox * root;
   Triangles *th;
-  long NbQuadTreeBoxSearch,NbVerticesSearch;
   long NbQuadTreeBox,NbVertices;
+  long NbQuadTreeBoxSearch,NbVerticesSearch;
   Vertex * NearestVertex(Icoor1 i,Icoor1 j);
   Vertex *  NearestVertexWithNormal(Icoor1 i,Icoor1 j); // new version  
   Vertex * ToClose(Vertex & ,Real8 ,Icoor1,Icoor1);

@@ -240,15 +240,15 @@ class MatrixInterpolation : public OneOperator { public:
                            t[1]->CastTo(args[1]),
                            t[2]->CastTo(args[2]));
        else CompileError("Bug in MatrixInterpolation code nb != 2 or 3 ????? bizarre" );
-       
+       return 0;
      }
 };
 
 basicAC_F0::name_and_type  MatrixInterpolation::Op::name_param[]= {
-     "t", &typeid(bool), 
-     "op", &typeid(long),
-     "inside",&typeid(bool),
-     "composante",&typeid(long)
+   {  "t", &typeid(bool)}, 
+   {  "op", &typeid(long)},
+   {  "inside",&typeid(bool)},
+   {  "composante",&typeid(long)}
 };
 
 
@@ -301,17 +301,17 @@ template<class R>
 
 template <class R> 
 basicAC_F0::name_and_type  SetMatrix_Op<R>::name_param[]= {
-     "init", &typeid(bool),
-     "solver", &typeid(TypeSolveMat*),
-     "eps", &typeid(double)  ,
-     "precon",&typeid(Polymorphic*), 
-     "dimKrylov",&typeid(long),
-     "bmat",&typeid(Matrice_Creuse<R>* ),
-     "tgv",&typeid(double ),
-     "factorize",&typeid(bool),
-     "strategy",&typeid(long ),
-     "tolpivot",&typeid(double ),
-     "tolpivotsym",&typeid(double )
+   {  "init", &typeid(bool)},
+   {  "solver", &typeid(TypeSolveMat*)},
+   {  "eps", &typeid(double)  },
+   {  "precon",&typeid(Polymorphic*)}, 
+   {  "dimKrylov",&typeid(long)},
+   {  "bmat",&typeid(Matrice_Creuse<R>* )},
+   {  "tgv",&typeid(double )},
+   {  "factorize",&typeid(bool)},
+   {  "strategy",&typeid(long )},
+   {  "tolpivot",&typeid(double )},
+   {  "tolpivotsym",&typeid(double )}
 
 };
 
@@ -374,9 +374,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   }    
   SetSolver<R>(stack,*A->A,typemat,VF,eps,NbSpace,itmax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym);
 
-  
-    
-   
+  return Nothing; 
 }
 
 
@@ -388,7 +386,7 @@ template<class R>
 void BuildCombMat(map< pair<int,int>, R> & mij,const KNM_<R> & A, int ii00=0,int jj00=0,R coef=R(1.),bool cnj=false)
 {
   double eps0=numeric_limits<double>::min();
-  int i,j,k;
+  int i,j;
   int n = A.N(),m=A.M();
   for ( i=0;i<n;i++)
    for ( j=0;j<m;j++)
@@ -439,8 +437,8 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
   const  Mesh & ThV =Vh.Th; // colunm
   bool samemesh =  &Uh.Th == &Vh.Th;  // same Mesh
   int thecolor =0;
-  int nbn_u = Uh.NbOfNodes;
-  int nbn_v = Vh.NbOfNodes;
+  //  int nbn_u = Uh.NbOfNodes;
+  //int nbn_v = Vh.NbOfNodes;
   
   int nbcoef =0;
   
@@ -459,11 +457,11 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
   FElement::aIPJ ipjU(Uh0.Pi_h_ipj()); 
   FElement::aR2  PtHatU(Uh0.Pi_h_R2()); 
   
-  FElement::aIPJ ipjV(Vh0.Pi_h_ipj()); 
-  FElement::aR2  PtHatV(Vh0.Pi_h_R2()); 
+  //  FElement::aIPJ ipjV(Vh0.Pi_h_ipj()); 
+  // FElement::aR2  PtHatV(Vh0.Pi_h_R2()); 
   
   int nbdfVK= Vh0.NbDoF();
-  int nbdfUK= Uh0.NbDoF();
+  //  int nbdfUK= Uh0.NbDoF();
   int NVh= Vh0.N;
   int NUh= Uh0.N;
   
@@ -471,7 +469,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
   
   
   int nbp= PtHatU.N(); // 
-  int nbc= ipjU.N(); // 
+  //  int nbc= ipjU.N(); // 
   KN<R2> PV(nbp);   //  the PtHat in ThV mesh
   KN<int> itV(nbp); // the Triangle number
   KN<bool> intV(nbp); // ouside or not 
@@ -979,7 +977,7 @@ class OneBinaryOperatorA_inv : public OneOperator { public:
        long pv = GetAny<long>((*p)(0));
         if (pv !=-1)   
          { char buf[100];
-           sprintf(buf," A^%d, The pow must be  == -1, sorry",pv);
+           sprintf(buf," A^%ld, The pow must be  == -1, sorry",pv);
            CompileError(buf);}     
        return  new E_F_F0<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>(Build<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>,t[0]->CastTo(args[0])); 
     }
@@ -1207,15 +1205,15 @@ map< pair<int,int>, R> *Matrixfull2mapIJ_inv (KNM<R>   * const & pa,const Inv_KN
    int N=a.N(),M=a.M();
    long n = ii(SubArray(N)).max()+1;
    long m= jj(SubArray(M)).max()+1;
-   long minn = ii(SubArray(N)).min()+1;
-   long minm= jj(SubArray(M)).min()+1;
    
 /*
-    if ( !(0 <= minn && 0 <=  minm) ) 
-        {
-            cerr << " Out of Bound  in A(I^-1,J^1) :  "<< minn << " " << minm <<" =>  negative value!! " << endl;
-            ExecError("Out of Bound Error");
-        }
+  long minn = ii(SubArray(N)).min()+1;
+  long minm= jj(SubArray(M)).min()+1;
+  if ( !(0 <= minn && 0 <=  minm) ) 
+  {
+  cerr << " Out of Bound  in A(I^-1,J^1) :  "<< minn << " " << minm <<" =>  negative value!! " << endl;
+  ExecError("Out of Bound Error");
+  }
 */
    
   // cout << "  ### n m " << n << " " << m << endl; 
@@ -1298,9 +1296,9 @@ map< pair<int,int>, R> *Matrixoutp2mapIJ_inv (outProduct_KN_<R>   * const & pop,
    long  N=op.a.N(),M=op.b.N();
    long  n = ii(SubArray(N)).max()+1;
    long m= jj(SubArray(M)).max()+1;
+/*
    long minn = ii(SubArray(N)).min()+1;
    long minm= jj(SubArray(M)).min()+1;
-/*
      if ( !(0 <= minn && 0 <=  minm) ) 
         {
             cerr << " Out of Bound  in A(I^-1,J^1) :  "<< minn << " " << minm <<" =>  negative value!! " << endl;

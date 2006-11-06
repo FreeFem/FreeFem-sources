@@ -130,12 +130,13 @@ void Triangles::Write_nop5(OFortranUnFormattedFile * f,
 {
   ndsr =0;
   Int4 * reft = new Int4[nbt];
-  Int4 nbInT =    ConsRefTriangle(reft);
+  //Int4 nbInT = ;
+  ConsRefTriangle(reft);
   Int4 no5l[20];
 
   Int4 i5 = 0;
   Int4 i,j,k=0,l5;
-  Int4 ining=0;
+  //  Int4 ining=0;
   Int4 imax,imin;
 
   lgpdn = 0;
@@ -342,7 +343,7 @@ void Triangles::Write_nopo(ostream &ff) const
 
  f << Int4(32) ;
  
- char *c=identity;
+ //char *c=identity;
  time_t timer =time(0);
  char buf[10];
  strftime(buf ,10,"%y/%m/%d",localtime(&timer));

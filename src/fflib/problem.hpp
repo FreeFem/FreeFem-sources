@@ -123,7 +123,7 @@ inline ostream & operator<<(ostream & f,const  TypeSolveMat & tm)
    case TypeSolveMat::GC:  f << "CG (Sparse Morse)"; break;
    case TypeSolveMat::GMRES:  f << "GMRES (Sparse Morse)"; break;
    case TypeSolveMat::UMFpack:  f << "UMFpack (Sparse Morse)"; break;
-   other: f << "Unknown  bug???";
+   default: f << "Unknown  bug???";
    }
   return f;
 }
@@ -356,8 +356,9 @@ inline complex<double_st> conj(const complex<double_st> &x){ return complex<doub
 inline int cestac(const complex<double_st> & z) 
 {return min(cestac(z.real()),cestac(z.imag()));}
 #endif
+
 class Problem  : public Polymorphic { 
-//  typedef double R;
+  //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
   static const int n_name_param =12; // modi FH oct 2005 add tol_pivot
   int Nitem,Mitem;
@@ -388,9 +389,10 @@ public:
   } ;
   const OneOperator *precon;
   
+  C_args *op; // the list of all operator 
   mutable vector<Expression> var; // list des var pour les solutions et test 
   bool complextype,VF;
-  C_args *op; // the list of all operator 
+
   //   Expression noinit,type,epsilon;
   Expression nargs[n_name_param];
   
@@ -497,10 +499,10 @@ class FormLinear : public E_F0mps { public:
 
 class Call_FormLinear: public E_F0mps { public:
   list<C_F0> largs;
+  Expression *nargs;
   typedef list<C_F0>::const_iterator const_iterator;
   const int N;
   Expression ppfes; 
-  Expression *nargs;
   
   Call_FormLinear(Expression * na,Expression  LL, Expression ft) ;
   AnyType operator()(Stack stack) const 
@@ -510,11 +512,11 @@ class Call_FormLinear: public E_F0mps { public:
 };
 
 class Call_FormBilinear: public E_F0mps { public:
+  Expression *nargs;
   list<C_F0> largs;
   typedef list<C_F0>::const_iterator const_iterator;
   
   const int N,M;
-  Expression *nargs;
   Expression euh,evh; 
   Call_FormBilinear(Expression * na,Expression  LL, Expression fi,Expression fj) ;
   AnyType operator()(Stack stack) const  
@@ -577,17 +579,17 @@ struct OpCall_FormBilinear: public OneOperator {
 
 template <class C_args> 
 basicAC_F0::name_and_type  OpCall_FormBilinear<C_args>::name_param[]= {
-     "init", &typeid(bool),
-     "solver", &typeid(TypeSolveMat*),
-     "eps", &typeid(double)  ,
-     "precon",&typeid(Polymorphic*), 
-     "dimKrylov",&typeid(long),
-     "bmat",&typeid(Matrice_Creuse<R>* ),
-     "tgv",&typeid(double ),
-     "factorize",&typeid(bool),
-     "strategy",&typeid(long ),
-     "tolpivot", &typeid(double),
-     "tolpivotsym", &typeid(double)
+  {   "init", &typeid(bool)},
+  {   "solver", &typeid(TypeSolveMat*)},
+  {   "eps", &typeid(double) } ,
+  {   "precon",&typeid(Polymorphic*)}, 
+  {   "dimKrylov",&typeid(long)},
+  {   "bmat",&typeid(Matrice_Creuse<R>* )},
+  {   "tgv",&typeid(double )},
+  {   "factorize",&typeid(bool)},
+  {   "strategy",&typeid(long )},
+  {   "tolpivot", &typeid(double)},
+  {   "tolpivotsym", &typeid(double) }
      
           
 };
@@ -614,10 +616,10 @@ struct OpArraytoLinearForm: public OneOperator {
   const bool isptr;
   const bool init;
   class Op : public E_F0mps { public:
-    const  bool isptr; 
-    const  bool init; 
     Call_FormLinear *l;
     Expression x;
+    const  bool isptr; 
+    const  bool init; 
     AnyType operator()(Stack s)  const ;
     Op(Expression xx,Expression  ll,bool isptrr,bool initt) 
       : l(new Call_FormLinear(*dynamic_cast<const Call_FormLinear *>(ll))),
@@ -809,8 +811,8 @@ template<class K> class Matrice_Creuse  { public:
     Vh.destroy();}   
   Matrice_Creuse( MatriceCreuse<K> * aa,const pfes  *ppUh,const pfes  *ppVh)
     :A(aa),pUh(ppUh),pVh(ppVh),Uh(*ppUh),Vh(*ppVh) {}
-  long N() const { A ? A->n : 0;}
-  long M() const { A ? A->m : 0;}
+  long N() const {return  A ? A->n : 0;}
+  long M() const { return A ? A->m : 0;}
   
 };
 
@@ -883,7 +885,7 @@ namespace Fem2D {
   inline void F_Pi_h(R* v, const R2 & P,const baseFElement & K,int i,const R2 & Phat,void * arg)
   {
     TabFuncArg &tabe(*(TabFuncArg*)arg);
-    MeshPoint & mp = *MeshPointStack(tabe.s);
+    //MeshPoint & mp = *MeshPointStack(tabe.s);
     MeshPointStack(tabe.s)->set(P,Phat,K);
     tabe.eval(v);
     // if (Norme2_2(P-mp.P) > 1e-10) 
@@ -1032,7 +1034,7 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
   const FESpace & Vh =  *(FESpace*) **pVh ;
   bool A_is_square= Uh.NbOfDF == Vh.NbOfDF ;
 
-  MatriceProfile<R> *pmatpf=0;
+  // MatriceProfile<R> *pmatpf=0;
   bool VF=isVF(b->largs);
 //  assert(!VF);
   bool factorize=false;

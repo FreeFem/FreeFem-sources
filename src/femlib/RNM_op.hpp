@@ -6,7 +6,7 @@ KNM_<R> & KNM_<R>::operator oper (const outProduct_KN_<R> & u)
     K_throwassert (shapei.SameShape(u.a) && shapej.SameShape(u.b) );
     long n= N(), m= M();
     
-    R * ai(u.a),*aai=ai,cc, c= u.c;
+    R * ai(u.a),cc, c= u.c;
     long stepi=u.a.step;
     R * bj, *bb(u.b);
     long stepj=u.b.step;

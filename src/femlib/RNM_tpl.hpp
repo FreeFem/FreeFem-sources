@@ -75,7 +75,7 @@ template<class R> istream & operator>>(istream & f, KN_<R> & v)
      f >> n;
      ffassert(f.good());
      ffassert(n==v.N());
-     while (f.get(c) &&  (c!='\n' && c!='\r' ) ) 0; // eat until control (new line
+     while (f.get(c) &&  (c!='\n' && c!='\r' ) ) ; // eat until control (new line
 
      for (int i=0;i<n;i++)
       {  f >> v[i] ;
@@ -90,7 +90,7 @@ template<class R> istream & operator>>(istream & f, KN<R> & v)
      if (v.unset()) v.init(n);
      cout << n << " == " << v.N() << endl;
      ffassert(n==v.N());
-     while (f.get(c) &&  (c!='\n' && c!='\r' ) ) 0; // eat until control (new line
+     while (f.get(c) &&  (c!='\n' && c!='\r' ) ) ; // eat until control (new line
 
      for (int i=0;i<n;i++)
        {
@@ -201,6 +201,7 @@ R  KN_<R>::sum() const {
     R s = v[index(0)];
     for (long i=1;i<n;i++)
       s +=  v[index(i)];
+    //    cout << " sum = " << s << endl;
     return s;
   }
 

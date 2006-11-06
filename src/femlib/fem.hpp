@@ -397,7 +397,7 @@ class TMortar {
    Mesh * Th;
    int nleft,nright;
    int *left,*right;
-   TMortar(): Th(0),left(0),right(0),nleft(0),nright(0){}
+   TMortar(): Th(0),nleft(0),nright(0),left(0),right(0){}
    void Draw() const;
    public:
      int NbLeft() const{return nleft;} 

@@ -581,7 +581,7 @@ template<class R>
 void MatriceProfile<R>::LU(double eps) const  {
   R s,uii;
   double eps2=eps*eps;
-  int i,j,k;
+  int i,j;
   if (L == U && ( pL[this->n]  || pU[this->n] ) ) ERREUR(LU,"matrix LU  symmetric");
   if(verbosity>3)
   cout << " -- LU " << endl;
@@ -780,21 +780,22 @@ lg[this->n]=this->n;
 template<class R>
 template<class K>
  MatriceMorse<R>::MatriceMorse(const MatriceMorse<K> & A)
-     : MatriceCreuse<R>(A.n,A.m,A.dummy),solver(0),nbcoef(A.nbcoef),
-      a(new R[nbcoef]),
-      lg(new int [this->n+1]),
-      cl(new int[nbcoef]),
-      symetrique(A.symetrique)
+   : MatriceCreuse<R>(A.n,A.m,A.dummy),nbcoef(A.nbcoef),      
+     symetrique(A.symetrique),       
+     a(new R[nbcoef]),
+     lg(new int [this->n+1]),
+     cl(new int[nbcoef]),
+     solver(0)
 {
   ffassert(a && lg &&  cl);
   for (int i=0;i<=this->n;i++)
     lg[i]=A.lg[i];
   for (int k=0;k<nbcoef;k++)
-   {
-    cl[k]=A.cl[k];
-    a[k]=A.a[k];
+    {
+      cl[k]=A.cl[k];
+      a[k]=A.a[k];
     }
-    
+  
 }
 
 
@@ -857,12 +858,12 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
   a=0;
   lg=0;
   cl=0;
-  bool same  = &Uh == & Vh;
+  //  bool same  = &Uh == & Vh;
   ffassert( &Uh.Th == &Vh.Th);  // same Mesh
   const Fem2D::Mesh & Th(Uh.Th);
-  int nbt = Th.nt;
-  int nbv = Th.nv;
-  int nbm = Th.NbMortars;
+  //int nbt = Th.nt;
+  //int nbv = Th.nv;
+  //int nbm = Th.NbMortars;
   int nbe = Uh.NbOfElements;
   int nbn_u = Uh.NbOfNodes;
   int nbn_v = Vh.NbOfNodes;
@@ -1106,13 +1107,15 @@ return symetrique;
 
  
 template<class R> 
- template<class K>
-  MatriceMorse<R>::MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bool sym):
-   MatriceCreuse<R>(nn,mm,0),solver(0),nbcoef(m.size()),symetrique(sym),  
-   a(new R[nbcoef]),
-   lg(new int[nn+1]),
-   cl(new int[nbcoef])     
-  {
+template<class K>
+MatriceMorse<R>::MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bool sym):
+  MatriceCreuse<R>(nn,mm,0),
+  nbcoef(m.size()),symetrique(sym),
+  a(new R[nbcoef]),
+  lg(new int[nn+1]),
+  cl(new int[nbcoef]),     
+  solver(0)
+{
      int k=0;
      bool nosym=!sym;
      typename std::map< pair<int,int>, R>::iterator iter=m.begin(), mend=m.end();
@@ -1221,12 +1224,12 @@ template<class RA>
     for (set<pair<int,int> >::iterator iter=sij.begin();iter!=sij.end();++iter)
       { 
         int i=iter->first;
-        int j=iter->second;
+	// int j=iter->second;
         llg[i]++;
        }
      for (int i=1;i<=nn;i++)
        llg[i]+=llg[i-1];
-     ffassert(llg[this->n]==sij.size());
+     ffassert(llg[this->n]==(long) sij.size());
      for (set<pair<int,int> >::iterator iter=sij.begin();iter!=sij.end();++iter)
       { 
         int i=iter->first;
@@ -1400,241 +1403,7 @@ template<class R>
   {  cerr << "No Solver defined  for this Morse matrix " << endl;
     throw(ErrorExec("exit",1));}
   }
-/*
-void  Element_Op(MatriceElementairePleine & mat,const int k)
-{
-  
-  //  T_RN_ DWi(dWi),DWj(dWi);
-  const FESpace & Uh = mat.Uh;
-  const FESpace & Vh = mat.Vh;
-  const int N = Uh.N;
-  const int M = Vh.n;
-  const Triangle & T  = Vh.Th[k];
-  throwassert(&t == &Uh.Th[k]);  
-  const int n = TVhk.NbOfNodes;
-  const TypeElement &ke = TVhk;// type de element 
-  const QuadratureFormular & FI = QuadratureFormular_T_5;
-  int npi;
-  R *a=mat.a;
-  R *pa=a;
-  int i,j;
-  throwassert(mat.n==nn);
-  throwassert(mat.m==mm);
-  throwassert(mat.Op);
 
-  const Opera &Op(*mat.Op);
-  if(k==0) cout << " Operator Non symmetric: " << Op;
-  for (i=0;i< nx;i++) 
-    *pa++ = 0.;    
-  for (npi=0;npi<FI.n;npi++) // loop on the integration point
-    {
-      Coor P = FI[npi].c;
-      CoorxCoor J;
-      R coef;
-      
-      //      cout << " k = " << k ;
-      TVhk.vDFb(P,Vh,k,dWi,J,coef);
-      coef *= FI[npi].a;
-      pa =a;
-      
-      for ( i=0;  i<nn;   i++ )  
-	{ 
-	  T_RNM_ dWii(dWi(i));
-	  T_RN_ Wii(Wi(i));
-	  for ( j=0;  j<nn;  j++,pa++ ) // 
-	    {
-	      T_RNM_ dWjj(dWi(j));
-	      T_RN_ Wjj(Wj(j));
-	      for (int l=0;l<Op.k;l++) // for all the terms of the bilinear form 
-		{
-		  int id = Op.i[l]%3; // 0: func : 1 dx 2: dy
-		  int jd = Op.j[l]%3;
-		  int ii =  Op.i[l]/3; // 
-		  int jj = Op.j[l]/3;
-		  throwassert(ii < N && jj < N); 
-		  R wi = id ? dWii(id-1,ii) : Wii[ii];
-		  R wj = jd ? dWjj(jd-1,jj) : Wjj[jj];
-		  // cout << l << " " << wi << " " << wj << " "  <<  Op.v[l] << endl;
-		  *pa += coef * Op.v[l] * wi * wj;
-
-		}
-	    }
-	}
-
-    }   
- }
-/*
-void  Element_Op(MatriceElementaireSymetrique & mat,const int k,T_RNM & W,T_RNMK & dW)
-{
-  //  T_RN_ DW(dW);
-  const Interpolation & Vh = mat.Vh;
-  int N(Vh.N),N2(2*N);
-  const Element & e = Vh.Th[k]; // l'element 
-  const TypeInterpolation & TVhk = Vh(k); // type Interpolation de element 
-  const int n = TVhk.NbOfNodes;
-  const TypeElement &ke = TVhk;// type de element 
-  const QuadratureFormular & FI = QuadratureFormular_T_5;
-  int npi;
-  int i,j;
-  R *a=mat.a;
-  R *pa=a;
-  int nn = N*n;
-  int nx = nn*(nn+1)/2;
-  throwassert(mat.Op);
-  const Opera &Op(*mat.Op);
-  if(k==0) cout << " Operator symmetric: " << Op;
-
-  for (i=0;i< nx ;i++) 
-    *pa++ = 0.;  
-  for (npi=0;npi<FI.n;npi++) // loop on the integration point
-    {
-      Coor P = FI[npi].c;
-      TVhk.vFb(P,Vh,k,W);
-      CoorxCoor J;
-      R coef;
-      TVhk.vDFb(P,Vh,k,dW,J,coef);
-      coef *= FI[npi].a;
-      //   cout << "DW = " << DW << endl;
-      pa =a;
-      for ( i=0;  i<nn;   i++ )  
-	{ 
-	  T_RNM_ dWi(dW(i));
-	  T_RN_ Wi(W(i));
-	  for ( j=0;  j<=i;  j++,pa++ ) // 
-	    {
-	      T_RNM_ dWj(dW(j));
-	      T_RN_ Wj(W(j));
-	      for (int l=0;l<Op.k;l++) // for all the terms of the bilinear form 
-		{
-		  int id = Op.i[l]%3; // 0: func : 1 dx 2: dy
-		  int jd = Op.j[l]%3;
-		  int ii =  Op.i[l]/3; // 
-		  int jj = Op.j[l]/3;
-		  throwassert(ii < N && jj < N); 
-		  R wi = id ? dWi(id-1,ii) : Wi[ii];
-		  R wj = jd ? dWj(jd-1,jj) : Wj[jj];
-		  // cout << l << " " << wi << " " << wj << " "  <<  Op.v[l] << endl;
-		  *pa += coef * Op.v[l] * wi * wj;
-
-		}
-	    }
-	}
-
-      
-    }    	   	
-}
-
-
-
-void Int_L(const Interpolation &Uh,Vecteur &f,const Interpolation &Vh, Vecteur &b, const LOpera & LU,const LOpera & LV)
-{  
-  int k, i,ii,iii,ii1,j,jj,jjj,jj1;
-  throwassert(f.N == Uh.NbOfDF);
-  throwassert(b.N == Vh.NbOfDF);
-  throwassert(&Vh.Th == &Uh.Th);
-  //  throwassert(Uh.N == Vh.N);
-  int NU = LU.imax();
-  int NV = LV.imax();
-  // to stock the value of the basic function
-  T_RNM   U(Uh.N,Uh.MaxNbOfDFByElement);
-  T_RNMK dU(2,Uh.N,Uh.MaxNbOfDFByElement);
-  T_RNM V(Vh.N,Vh.MaxNbOfDFByElement);
-  T_RNMK dV(2,Vh.N,Vh.MaxNbOfDFByElement);
- 
-  T_RN Lu(NV);
-  
-
-  for( k=0;k<Uh.NbOfElements;k++)
-    { 
-      const ElementFini & eu = Uh[k]; 
-      const ElementFini & ev = Vh[k]; 
-      const  TypeInterpolation & ku = eu; // type Interpolation de element 
-      const TypeInterpolation & kv = ev; // type Interpolation de element 
-      const QuadratureFormular & FI = QuadratureFormular_T_5;
-      const TypeElement &ke = ku;// type de element 
-      int n = Uh[k];
-      int m = Vh[k];
-      const Element & e = Uh.Th[k]; // l'element 
-      for ( int npi=0; npi<FI.n; npi++ ) // loop on the integration point
-	{
-	  Coor P = FI[npi];
-	  CoorxCoor J;
-	  Lu =0;
-	  kv.vFb(P,Vh,k,V);
-	  ku.vFb(P,Uh,k,U);
-	  R coef;
-	  ku.vDFb(P,Uh,k,dU,J,coef); // coef = area of e
-	  ku.vDFb(P,Vh,k,dV,J,coef); // coef = area of e
-	  coef *=  FI[npi].a;
-	  // calcule de LU * f * coef = Lu
-	  int nn;
-	  for ( i=nn=0; i<n; i++ )
-	    for (iii=eu[i],ii=Uh.FirstDFOfNode(iii),ii1=Uh.LastDFOfNode(iii);ii<ii1;ii++,nn++)
-	      { 
-		T_RN_ Unn(U(nn));
-		T_RNM_ dUnn(dU(nn));
-		R fii = f[ii];
-		for (int l=0;l<LU.k;l++) // for all the linear form 
-		  {
-		    int ii= LU.i[l];
-		    int jj= LU.j[l]; 
-		    throwassert(jj==0); 
-		    const DOpera &f = LU.v[l];
-		    // for all the term of the linear form f
-		    for (int ll=0;ll<f.k;ll++)
-		      {
-			R  v = f.v[ll]*coef*fii;
-			int iii = f.i[ll];
-			int jjj = f.j[ll];
-			if(ii<NV) //all the term  ii>= NV are not used 
-			  {
-			    if (jjj==0)
-			      Lu[ii] += Unn [iii]*v;
-			    else
-			      Lu[ii] += dUnn(jjj-1,iii)*v;
-			  }
-		      }
-		  }
-	      }
-	  //  cout << Lu << endl;
-	  for (nn=j=0;j<m;j++)
-	    for (jjj=ev[j], jj=Vh.FirstDFOfNode(jjj),jj1=Vh.LastDFOfNode(jjj);jj<jj1;jj++,nn++)
-	      {
-		T_RN_ Vnn(V(nn));
-		T_RNM_ dVnn(dV(nn));
-		R bb=0;
-		//  bb = Lu . Lv 
-		for (int l=0;l<LV.k;l++) // for all the term of LV
-		  {
-		    int ii= LV.i[l];
-		    int jj= LV.j[l];
-		    throwassert(jj==0);
-		    const DOpera &f =LV.v[l];
-		     // for all the term of the linear form f
-		    for (int ll=0;ll<f.k;ll++)
-		      {
-			R  v = f.v[ll]*Lu[ii];
-			int iii = f.i[ll];
-			int jjj = f.j[ll];
-			if(ii<NV) //all the term  ii>= NV are not used 
-			  {
-			    if (jjj==0)
-			      bb += Vnn [iii]*v;
-			    else
-			      bb += dVnn(jjj-1,iii)*v;
-			  }
-			
-		      }
-		  }
-		b[nn] += bb;
-	      }
-	}
-    }
-  
-}
-
-
-*/
 
 template<class R>
 double MatriceMorse<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) 

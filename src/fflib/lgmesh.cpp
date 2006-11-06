@@ -182,28 +182,28 @@ class SaveMesh :  public E_F0 { public:
 
 
 class Adaptation :   public E_F0mps { public:
-    typedef pmesh  Result;
-
-   static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =26;
-   
-   int nbsol;    
-    Expression nargs[n_name_param];
-    Expression getmesh;
-    Expression em11,em22,em12;
-    int  typesol[100];
-    vector<Expression> sol;
-    int nbcperiodic;
-    Expression *periodic;
-    
-    
-    double arg(int i,Stack stack,double a) const { return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
-    long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
-    bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
-   int arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny<int>( (*nargs[i])(stack) ): a;}
-    
-    Adaptation(const basicAC_F0 & args) :nbsol(args.size()-1),sol(args.size()-1)
-    {   
+  typedef pmesh  Result;
+  
+  static basicAC_F0::name_and_type name_param[] ;
+  static const int n_name_param =26;
+  
+  int nbsol;    
+  Expression nargs[n_name_param];
+  Expression getmesh;
+  Expression em11,em22,em12;
+  int  typesol[100];
+  vector<Expression> sol;
+  int nbcperiodic;
+  Expression *periodic;
+  
+  
+  double arg(int i,Stack stack,double a) const { return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
+  long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+  bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
+  int arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny<int>( (*nargs[i])(stack) ): a;}
+  
+  Adaptation(const basicAC_F0 & args) :nbsol(args.size()-1),sol(args.size()-1)
+  {   
       em11=0;
       em22=0;
       em12=0;
@@ -277,32 +277,32 @@ class Adaptation :   public E_F0mps { public:
 
 
  basicAC_F0::name_and_type Adaptation::name_param[Adaptation::n_name_param] = {
-          "hmin",             &typeid(double),
-          "hmax",             &typeid(double),
-          "err",              &typeid(double), 
-          "errg",             &typeid(double), 
-          "nbvx",             &typeid(long),        // 4
-          "nbsmooth",         &typeid(long),
-          "nbjacoby",         &typeid(long),
-          "ratio",            &typeid(double), 
-          "omega",            &typeid(double),        
-          "iso",              &typeid(bool),         // 9
-          "abserror",         &typeid(bool), 
-          "cutoff",           &typeid(double),  
-          "verbosity",        &typeid(long),
-          "inquire",          &typeid(bool),         
-          "splitpbedge",      &typeid(bool), // 14
-          "maxsubdiv",        &typeid(double),
-          "anisomax",         &typeid(double),
-          "rescaling",        &typeid(bool),
-          "keepbackvertices", &typeid(bool),
-          "IsMetric",         &typeid(bool),    // 19
-          "power",            &typeid(double),    // 20 
-          "thetamax",         &typeid(double), 
-          "splitin2",         &typeid(bool) ,
-          "nomeshgeneration", &typeid(bool) ,
-          "metric"          ,  &typeid(E_Array),  // 24
-          "periodic"        ,  &typeid(E_Array) // 25 
+       {   "hmin",             &typeid(double)},
+       {   "hmax",             &typeid(double)},
+       {   "err",              &typeid(double)}, 
+       {   "errg",             &typeid(double)}, 
+       {   "nbvx",             &typeid(long)},        // 4
+       {   "nbsmooth",         &typeid(long)},
+       {   "nbjacoby",         &typeid(long)},
+       {   "ratio",            &typeid(double)}, 
+       {   "omega",            &typeid(double)},        
+       {   "iso",              &typeid(bool)},         // 9
+       {   "abserror",         &typeid(bool)}, 
+       {   "cutoff",           &typeid(double)},  
+       {   "verbosity",        &typeid(long)},
+       {   "inquire",          &typeid(bool)},         
+       {   "splitpbedge",      &typeid(bool)}, // 14
+       {   "maxsubdiv",        &typeid(double)},
+       {   "anisomax",         &typeid(double)},
+       {   "rescaling",        &typeid(bool)},
+       {   "keepbackvertices", &typeid(bool)},
+       {   "IsMetric",         &typeid(bool)},    // 19
+       {   "power",            &typeid(double)},    // 20 
+       {   "thetamax",         &typeid(double)}, 
+       {   "splitin2",         &typeid(bool) },
+       {  "nomeshgeneration", &typeid(bool) },
+       {   "metric"          ,  &typeid(E_Array)},  // 24
+       {   "periodic"        ,  &typeid(E_Array) }// 25 
     };
 
 struct Op_trunc_mesh : public OneOperator {
@@ -326,8 +326,8 @@ struct Op_trunc_mesh : public OneOperator {
 
 basicAC_F0::name_and_type Op_trunc_mesh::Op::name_param[Op_trunc_mesh::Op::n_name_param] =
  {
-     "split",             &typeid(long),
-     "label",             &typeid(long),
+   {  "split",             &typeid(long)},
+   {  "label",             &typeid(long)}
  
  };
 
@@ -387,7 +387,7 @@ AnyType SplitMesh::operator()(Stack stack) const
    ffassert(Thh);
    int label=1;
    Mesh & Th(*Thh);
-   long nbv=Thh->nv;
+   //   long nbv=Thh->nv;
    long nbt=Thh->nt;
    KN<int> split(nbt);
    R2 B(1./3.,1./3.);
@@ -501,7 +501,7 @@ AnyType MoveMesh::operator()(Stack stack) const
     
    Mesh * pth= MoveTheMesh(*Thh,u,v);
    if (pth)
-     for (int i=0;i<sol.size();i++)
+     for (size_t i=0;i<sol.size();i++)
        { //  ale 
           pair<FEbase<R>,int> * s = GetAny<pair<FEbase<R>,int>*>( (*sol[i])(stack));
           ffassert(s->first.Vh);
@@ -545,7 +545,8 @@ AnyType Adaptation::operator()(Stack stack) const
   double cutoffradian          = arg(21,stack,-1.0)* bamg::Pi/180. ;
   bool split                    = arg(22,stack,false) ;
   bool nomeshgeneration         = arg(23,stack,false) ;
-  const E_Array * expmetrix = dynamic_cast<const E_Array *>(nargs[24]);
+  //   the 24th param is metrix  and is store at compilation time
+  //  const E_Array * expmetrix = dynamic_cast<const E_Array *>(nargs[24]);
   //   the 25th param is periodic and it store at compilation time
   // in nbcperiodic,periodic  variable 
   
@@ -629,7 +630,7 @@ AnyType Adaptation::operator()(Stack stack) const
     for (Int4  jt = 0; jt < 3; jt++)
       { 
         bamg::Vertex & v= Th(it)[jt];
-        const Fem2D::Vertex & vf = (*Thh)[it][jt];
+	//   const Fem2D::Vertex & vf = (*Thh)[it][jt];
         if (&v && v.color)
           {
             v.color =0; // uncolor
@@ -795,9 +796,9 @@ Fem2D::Mesh  * EmptyTheMesh( Fem2D::Mesh *  const & pTh,long *ssd=0)
      renum[i]= nbvnew++;
       
   Vertex * v= new Vertex[nbvnew];
-  Triangle *t= 0;
+  //  Triangle *t= 0;
   BoundaryEdge *b= new BoundaryEdge[neb];
-  Vertex *vv=v;
+  //Vertex *vv=v;
   Vertex *vo=Th.vertices;
   BoundaryEdge * bb=b;
 
@@ -993,7 +994,7 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
        {
        case unionjack:
           cas =  (i+ j) %2 ; break;
-       otherwise:
+       default:
           cas = true;
        }   
       if (cas)
@@ -1011,7 +1012,7 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
   BoundaryEdge * bb=b;
   for (int i=0;i<nx;i++)
     {  // bottom 
-      int j=0;
+      //      int j=0;
       int i1=i,i2=i1+1;
       *bb++ = BoundaryEdge(v,i1,i2,1);
       v[i1].lab=v[i2].lab=1;
