@@ -62,8 +62,8 @@ private:
 protected:
   Error(CODE_ERROR c,const char * t1,const char * t2,const char * t3=0,
 	int n=0,const char * t4=0,const char * t5=0,const char * t6=0,
-	const char * t7=0,const char * t8=0,const char * t9=0) 
-    :code(c)
+	const char * t7=0,const char * t8=0,const char * t9=0)     
+    : message(),code(c)
   {
     using namespace std;
     ostringstream mess;

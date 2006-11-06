@@ -261,13 +261,13 @@ void couleur(int c)
   
 }
 
-static XColor DefColorSansG( int k,int nb, bool hsv,bool grey,int nbcolors,float *colors)
+static XColor DefColorSansG( int k,int nb, bool hsv,bool ggrey,int nbcolors,float *colors)
 {
  XColor C;
  float r,g,b;
 extern void DefColor(float & r, float & g, float & b,
-              int k,int nb, bool hsv,bool grey,int nbcolors,float *colors);
- DefColor(r,g,b,   k,nb,hsv,grey,nbcolors,colors);
+              int k,int nb, bool hsv,bool ggrey,int nbcolors,float *colors);
+ DefColor(r,g,b,   k,nb,hsv,ggrey,nbcolors,colors);
  C.red= (short unsigned int) (65535*r);
  C.green=(short unsigned int)(65535*g);
  C.blue= (short unsigned int) (65535*b);
@@ -441,7 +441,7 @@ int scaly(reel y)
   return (int)Min(fMaxPixel,Max(fMinPixel,((rymax - y) * echy)));
 }
 
-void pointe(reel x, reel y)
+void pointe(reel , reel )
 {
 }
 
@@ -510,7 +510,7 @@ void penthickness(int pepais)
 }
 
 
-void x11linsrn(int * x1,int * x2,int * y1,int * y2)
+void x11linsrn(int * ,int * ,int * ,int * )
   //int *x1,*x2,*y1,*y2;
 {   
 }
@@ -522,7 +522,7 @@ void viderbuff()
 
 
 
-void cercle(reel centrex, reel centrey, reel rayon)
+void cercle(reel , reel , reel )
 {
   //int r = (int) (rayon * echx);
 }
@@ -572,7 +572,7 @@ char Getxyc(float &x,float &y)
 
   return c;
 }
-void rattente(int waitm)
+void rattente(int )
 {
 }
  void GetScreenSize(int &ix,int &iy)
@@ -636,7 +636,7 @@ void closePS(void)
   psfile_save=0;
   psfile=0;
 }
- void coutmode(short i)  {}
+ void coutmode(short )  {}
 // bof bof --- 
  float  GetHeigthFont()
 { 
@@ -647,7 +647,7 @@ void closePS(void)
   if(psfile)   {
     fprintf(psfile,"%% %s\n",c);
    }
-  };
+  }
   void NoirEtBlanc(int NB)
   {
     if(NB) LastColor=1;
@@ -709,7 +709,7 @@ int PutLevel(int lineno, float xf, int col)
 
 class Grid;
 
-void SaveMesh(Grid &t){}
-void SavePlot(int D, Grid& t, double *f){}
-void SavePlot(int D, Grid& t, float *f){}
+void SaveMesh(Grid &){}
+void SavePlot(int , Grid& , double *){}
+void SavePlot(int , Grid& , float *){}
 

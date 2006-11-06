@@ -90,7 +90,7 @@ static void  HeapSort(T *c,long n)
      
    void CodeAlloc::Sort_mem()
   { 
-    int i,j;
+    size_t i,j;
     if(nbt ==0) return;
     nbsort++; 
     HeapSort(mem,nbt);
@@ -109,7 +109,7 @@ static void  HeapSort(T *c,long n)
     cleanning=true;
     Sort_mem();
     cout << " Clear Alloc Mem: "<< nb << endl; ;
-    for(int i=0;i<nbt;i++)
+    for(size_t i=0;i<nbt;i++)
       {
         if( ! isdel(i)) 
 	  delete mem[i];	

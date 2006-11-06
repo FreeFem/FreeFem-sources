@@ -362,7 +362,7 @@ class E_F0info : public E_F0 { public:
   // not a real expression just to pass information 
     virtual bool EvaluableWithOutStack() const {return true;} // 
     virtual bool MeshIndependent() const {return true;} // 
-    AnyType operator()(Stack s)  const {  
+    virtual AnyType operator()(Stack )  const {  
     return SetAny<const E_F0 *>(this);}
     operator aType () const { return atype<Expression>();} 
 
@@ -870,7 +870,7 @@ template<class R,class TA0,bool RO=true>
      } // to give a order in instuction 
 
    int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) ;
-   virtual ostream & dump(ostream &f) const  { f << typeid(*this).name() <<" f= " << f << " a= "<< *a << ' '  ;return f; }
+   virtual ostream & dump(ostream &ff) const  { ff << typeid(*this).name() <<" f= " << ff << " a= "<< *a << ' '  ;return ff; }
 
 };
 
@@ -1120,7 +1120,7 @@ class E_F0_Func1 :public  E_F0 { public:
      } // to give a order in instuction 
   // int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const;  // build optimisation
 
-    virtual ostream & dump(ostream &f) const  { f << "E_F0_Func1 f= " << f << " a= "<< *a << ' '  ;return f; }
+    virtual ostream & dump(ostream &ff) const  { ff << "E_F0_Func1 f= " << f << " a= "<< *a << ' '  ;return ff; }
 
 };
 class E_F0_Func2 :public  E_F0 { public:
@@ -1548,7 +1548,7 @@ class E_Border  :public Polymorphic  {  public:
 
   AnyType operator()(Stack)  const {
     return  SetAny<const  E_Border *>(this);}
-  double length(Stack stack) const { ffassert(0);return 0.0; /* a faire */ }
+  double length(Stack ) const { ffassert(0);return 0.0; /* a faire */ }
 };
   
 inline  E_BorderN::E_BorderN(const E_Border *bb, C_F0  nn,const E_BorderN * nx)  
@@ -1807,9 +1807,9 @@ class Block { //
    ListOfTOfId::iterator itabl;    
    public:
    //  list of variable
-   size_t OffSet(size_t size) {
+   size_t OffSet(size_t ssize) {
       top=align8(top);
-     size_t r=top;  top+=size ;topmax=Max(topmax,top);
+     size_t r=top;  top+=ssize ;topmax=Max(topmax,top);
      return r;}
    Block(Block * f=0);
 /*   :fatherblock(f),top(f?f->top:BeginOffset*sizeof(void*)),topmax(top)

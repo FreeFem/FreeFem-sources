@@ -313,7 +313,7 @@ UMFPACKv4.4.tar.gz:
 	@WGET@ -N http://www.cise.ufl.edu/research/sparse/umfpack/v4.4/UMFPACKv4.4.tar.gz
 
 clean-local:
-	-rm -r UMFPACKv4.?.tar.gz UMFPACKv4.?
+	-rm -rf UMFPACKv4.?.tar.gz UMFPACKv4.?
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
