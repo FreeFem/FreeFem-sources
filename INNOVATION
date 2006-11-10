@@ -1,3 +1,13 @@
+v 2.11 (nov 10,2006)
+ Correction of  the problem in arpack (eigenvalue computation) under i383 processor.
+ After 2 week of hard work, a found the bug.
+ In new version of LAPACK second is a real function
+ and in ARPACK second is a subroutine  (Thank the fortran).  
+ So I change the Makefile to change the name of function second into secnd2. 
+ How to find the bug, in this case the stack of the floatting register (info float under gdb) 
+ are growing. So after any real function can return a NaN (one time) due to stack float register 
+ overflow.  A big Thank to D. Bernardi of the help (Merci au fortran et Merci au i383).
+
 v 2.10 (oct 26,  2006)
   correct problem with eigen value on window and some linux distrubition (Fedora)
   add a patch of two functions in lapack  see  arpack/arpack-patch-lapack.tar.gz
