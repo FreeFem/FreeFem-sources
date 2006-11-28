@@ -204,12 +204,15 @@ class TypeOfFESum: public FESumConstruct, public  TypeOfFE { public:
 //   void D2_FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
 //  void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void * arg ) const; 
    virtual void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
-    { 
-      for (int i=0,k0=0;i<k;i++) {
-          int n=teb[i]->NbDoF;
+    {
+      int k0=0;
+      for (int i=0;i<k;i++) {
+         //  int n=teb[i]->NbDoF; // ici BUG 28/11/2006 FH 
+          int n=teb[i]->pij_alpha.N(); // ici BUG 
           KN_<R> sv(v(SubArray(n,k0)));
           teb[i]->Pi_h_alpha(K,sv);
           k0+= n;}
+      assert(pij_alpha.N()==k0);
     }
    ~TypeOfFESum(){  delete []  teb;}
 } ;
