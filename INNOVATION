@@ -1,3 +1,5 @@
+v 2.11-1 (nov 28,2006)
+  Correct bug in interpolation, we building fespace Wf(Th,[RT0,P0]); 
 v 2.11 (nov 10,2006)
  Correction of  the problem in arpack (eigenvalue computation) under i383 processor.
  After 2 week of hard work, a found the bug.

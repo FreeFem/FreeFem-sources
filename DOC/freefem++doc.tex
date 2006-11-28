@@ -4,7 +4,7 @@
 \usepackage{styles}
 \usepackage{txfonts}
 \usepackage{times}
-\def\VERSION{2.9}
+\def\VERSION{2.11}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -3397,7 +3397,9 @@ Vh m2; m2[] = f[]./g[];
 @cout << "hermitien Product = "<< ff[]'*gg[] << @endl;
 @cout << "outer Product = "<< (A=ff[]*gg[]') << @endl;
 @cout << "hermitien outer Product = "<< (AA=ff[]*gg[]') << @endl;
-
+@real[] diagofA(A.n);
+  diagofA = A.diag; // get the diagonal of the matrix
+  A.diag = diagofA ;  // set the diagonal of the matrix \index{diag}\index{matrix!diag}
 \eFF
 
 On the triangulation of Figure \ref{fig-hatFunction} this produce the following:
@@ -3459,6 +3461,8 @@ the following gives an error
 @matrix AAA = A^-1;
 \eFF
 \end{note}
+
+
 
  
 \subsubsection{Other arrays}
@@ -6955,6 +6959,76 @@ In last 2 lines, the relative errors are calculated, that is,
 where $u^0_h$ is the numerical solution in \ttCC{T0h} and
 $u^a_h$ is \ttCC{u} in this program.
 \end{example}
+\subsubsection{Poisson with mixte finite element}
+
+Here we consider the   Poisson equation with mixed boundary value
+problems: 
+For given functions $f$ , $g_d$, $g_n$, find $p$ such that
+\begin{eqnarray}
+\label{eqn:mixBoundary}
+-\Delta p &=& 1 \qquad \textrm{in }\Omega\nonumber\\
+p&=&g_d\quad \textrm{on }\Gamma_D,\quad
+\p p/\p n=g_n\quad \textrm{on }\Gamma_N
+\end{eqnarray}
+where $\Gamma_D$ is a part of the boundary $\Gamma$ and
+$\Gamma_N=\Gamma\setminus \overline{\Gamma_D}$.
+
+The mixte formulation is: find $p$ and $\mathbf{u}$ such that  
+\begin{eqnarray}
+\label{eqn:fmixte1}
+\nabla p +  \mathbf{u}  &=& \mathbf{0} \qquad \textrm{in }\Omega\nonumber\\
+\nabla. \mathbf{u} &=& f \qquad \textrm{in }\Omega\nonumber\\
+p&=&g_d\quad \textrm{on }\Gamma_D,\quad
+\p u. n= \mathbf{g}_n.n \quad \textrm{on }\Gamma_N
+\end{eqnarray}
+where $\mathbf{g}_n$ is a vector such that $\mathbf{g}_n.n = g_n$.
+
+The variationnal formulation is,
+\begin{eqnarray}\label{eqn:fmixte2}
+  \forall \mathbf{v} \in \mathbb{V}_0 ,  \quad  &\int_\Omega  p \nabla.v +  \mathbf{v} \mathbf{v}  &= \int_{\Gamma_d} g_d \mathbf{v}.n \nonumber\\
+   \forall {q} \in  \mathbb{P}   \quad  &  \int_\Omega  q \nabla.u &= \int_\Omega  q f \nonumber\\ 
+   & \p u. n &= \mathbf{g}_n.n \quad \textrm{on }\Gamma_N
+\end{eqnarray}
+where the functionnal space are:
+$$\mathbb{P}= L^2(\Omega),\qquad \mathbb{V}= H(div)=\{ \mathbf{v} \in L^2(\Omega)^2, \nabla. \mathbf{v} \in  L^2(\Omega) \}$$
+ and 
+$$\mathbb{V}_0 = \{  \mathbf{v}\in \mathbb{V} ; \quad  \mathbf{v}. n = 0 \quad \mathrm{on }\;\; \Gamma_N \}.$$
+
+To write, the \freefempp example, we have just to choose the finites elements spaces.
+here $\mathbb{V}$ space  is discretize  with Raviart-Thomas finite element  \texttt{RT0} and $\mathbb{P}$ is discretize by 
+constant  finite element \texttt{P0}. 
+
+
+\begin{example}[LaplaceRT.edp]~
+\index{tutorial! LaplaceRT.edp}
+\bFF
+@mesh Th=square(10,10);
+@fespace Vh(Th,RT0);
+@fespace Ph(Th,P0);
+@func gd = 1.;
+@func g1n = 1.;
+@func g2n = 1.; 
+
+Vh [u1,u2],[v1,v2];
+Ph p,q; 
+
+@problem laplaceMixte([u1,u2,p],[v1,v2,q],
+                      solver=GMRES,eps=1.0e-10,
+                      tgv=1e30,dimKrylov=150) 
+      =
+     @int2d(Th)( p*q*1e-15 // this term is here to be sur
+      //  that all sub matrix are inversible (LU requirement)
+              + u1*v1 + u2*v2 + p*(dx(v1)+dy(v2)) + (dx(u1)+dy(u2))*q )
+  + @int2d(Th) ( q)
+  - @int1d(Th,1,2,3)( gd*(v1*N.x +v2*N.y))   //  on  $\Gamma_D$
+  + @on(4,u1=g1n,u2=g2n);  // on $\Gamma_N$
+                           
+ laplaceMixte;
+      
+ plot([u1,u2],coef=0.1,wait=1,ps="lapRTuv.eps",value=true); 
+ plot(p,fill=1,wait=1,ps="laRTp.eps",value=true);  
+\eFF
+\end{example} 
 
 \subsubsection{Metric Adaptation and residual error indicator}
 
@@ -8534,7 +8608,7 @@ The FE spaces and functions  are constructed by
 @fespace Mh(Th,@P1);  //  definition of the pressure space
 Xh u2,v2;
 Xh u1,v1;
-Xh p,q;
+Mh p,q;
 \eFF
 
 The Stokes operator is implemented as a system-solve for the velocity
@@ -8894,7 +8968,7 @@ Vh g=0.05;  // the discret function g
 @varf vM(uh,vh) = int2d(Th)(uh*vh);
 @matrix M=vM(Vh,Vh); // to do a fast computing of $L^2$ norm : sqrt( u'*(w=M*u))
 
-Aii=A.diag; // get the diagonal of the matrix (appear in version 1.46-1)
+Aii=A.diag; // get the diagonal of the matrix (appear in version 1.46-1)\index{diag}\index{matrix!diag}
 
 rhs = a(0,Vh,tgv=tgv);
 Ik =0;
