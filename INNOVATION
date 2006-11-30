@@ -1,3 +1,8 @@
+v 2.11-2 (nov 29,2009)
+  correct integration problem on none classical mesh (mesh of curve of mortar technique)
+  the mesh::Find methode is boggus of the kind on meshes, i make an optimisation to remove 
+  this call in case build matrix with varf int..(Th)( u*v) , in case of Th, u or v is def.
+  on same meshes.  
 v 2.11-1 (nov 28,2006)
   Correct bug in interpolation, we building fespace Wf(Th,[RT0,P0]); 
 v 2.11 (nov 10,2006)
