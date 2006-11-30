@@ -19,10 +19,11 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 
 load_compile:include  $(LIST_COMPILE)
 
-.cpp.$(DYLIB_SUFFIX): include
+.cpp.$(DYLIB_SUFFIX): 
 	./load.link $< 
 
 include: include.tar.gz
+	rm -rf include 
 	tar zxvf include.tar.gz
 	-rm -f include/._*
 Ref: makeref.edp
@@ -35,6 +36,8 @@ makeref.edp: regtests.m4 ../regtests.m4
 regtests.edp: regtests.m4 ../regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
 
+$(LIST_COMPILE):include Makefile
+
 clean-local:
-	-rm myfunction.o myfunction.so myfunction.dll
-.PHONY:include
+	-rm *.o  $(LIST_COMPILE)  regtests.edp makeref.edp
+	-rm -rf include
