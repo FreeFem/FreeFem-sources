@@ -1,4 +1,4 @@
-g# Configuration script using Automake + Autoconf for FreeFem++
+# Configuration script using Automake + Autoconf for FreeFem++
 # ------------------------------------------------------------
 
 # Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
@@ -9,7 +9,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.11-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.11-3,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
