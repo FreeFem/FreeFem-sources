@@ -204,9 +204,9 @@ void Check(const Opera &Op,int N,int  M)
            PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]),
            PC(TriangleHat[OppositeVertex[ie]]);
   // warning the to edge are in opposite sens         
-  R2 PPA(TriangleHat[VerticesOfTriangularEdge[iie][1]]),
-     PPB(TriangleHat[VerticesOfTriangularEdge[iie][0]]),
-     PPC(TriangleHat[OppositeVertex[ie]]);
+  R2 PP_A(TriangleHat[VerticesOfTriangularEdge[iie][1]]),
+     PP_B(TriangleHat[VerticesOfTriangularEdge[iie][0]]),
+     PP_C(TriangleHat[OppositeVertex[ie]]);
   R2 Normal(E.perp()/-le); 
   for (npi=0;npi<FIb.n;npi++) // loop on the integration point
       {
@@ -215,13 +215,13 @@ void Check(const Opera &Op,int N,int  M)
         double coef = le*pi.a;
         double sa=pi.x,sb=1-sa;
         R2 Pt(PA*sa+PB*sb ); //
-        R2 PPt(PPA*sa+PPB*sb ); //  
+        R2 PP_t(PP_A*sa+PP_B*sb ); //  
         if (binside) {
             Pt   = (1-binside)*Pt + binside*PC; 
-            PPt  = (1-binside)*PPt + binside*PPC; }
+            PP_t  = (1-binside)*PP_t + binside*PP_C; }
         Ku.BF(Dop,Pt,fu);
-        KKu.BF(Dop,PPt,ffu);
-        if (!same) { Kv.BF(Dop,Pt,fv); KKv.BF(Dop,PPt,ffv); }     
+        KKu.BF(Dop,PP_t,ffu);
+        if (!same) { Kv.BF(Dop,Pt,fv); KKv.BF(Dop,PP_t,ffv); }     
         // int label=-999999; // a passer en argument 
         MeshPointStack(stack)->set(T(Pt),Pt,Kv,label, Normal,ie);
         if (classoptm) (*Op.optiexpK)(stack); // call optim version 
