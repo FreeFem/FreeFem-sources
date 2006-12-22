@@ -43,7 +43,7 @@ then
 	 for i in $FLIBS; do
           case $i in 
 # save last directory of the list 
-	   -L*)    ff_libs="$i";; 
+	   -L*)    ff_flibs="$i";; 
           esac
 	 done 
 	 FLIBS="$ff_flibs -lg2c"
