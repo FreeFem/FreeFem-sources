@@ -1456,7 +1456,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 
     for (int i=0;i<N;++i)
       Oi(i+1) += Oi(i);
-    for (int j=0;j<M;++j)
+    for (int j=0;j<M;++j) // correct 10/01/2007 FH 
       Oj(j+1) += Oi(j);
   long n=Oi(N),m=Oj(M);
   if(verbosity>3)
