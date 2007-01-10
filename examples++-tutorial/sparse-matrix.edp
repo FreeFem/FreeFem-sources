@@ -122,8 +122,21 @@ else
   //cout << sparseA << endl;
   //cout << sparseB << endl; // *81 
   cout << "sparseB = " << sparseB(0,0) << endl;
+
   cout << " -------- block matrix \n " << endl;
-  matrix B = [ [sparseA, 0 , sparseA ], [ 0, sparseA , 0 ] , [0, 0, sparseB' ]];
+  matrix B = [ [sparseA, 0 , sparseA ], 
+               [ 0, sparseA , 0 ] ,
+               [0, 0, sparseB' ]];
+  matrix B2 = [ [sparseA], [sparseA]];
+
+  assert( B2.n == sparseA.n*2);
+  assert( B2.m == sparseA.m);
+
+  matrix B1 = [ [sparseA, sparseA] ];
+  assert( B1.m == sparseA.m*2); // FH. bug before version  2.11-4 (10/01/2007)
+  assert( B1.n == sparseA.n);
+
+
   real[int] x([a,b,c]); //  construct the block vector x form a,b,c,
   //  where the size is  sum of size of a,b,c, 
   x=[a,b,c]; // set x to to the block vector (the vector x is  resize if it necessary

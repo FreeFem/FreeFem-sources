@@ -36,7 +36,7 @@
 #define EXTERNFF(t,f,arg) extern t (*f) arg
 #endif
 #endif
-#define EXTERN 
+//#define EXTERN 
 #ifdef __cplusplus
 
 #include "config-wrapper.h"

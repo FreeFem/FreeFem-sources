@@ -1,4 +1,6 @@
-v 2.11-2 (nov 29,2009)
+v 2.12   ( jan 10,2007)
+  correct mistake in none square block matrix 
+v 2.11-2 (nov 29,2006)
   correct integration problem on none classical mesh (mesh of curve of mortar technique)
   the mesh::Find methode is boggus of the kind on meshes, i make an optimisation to remove 
   this call in case build matrix with varf int..(Th)( u*v) , in case of Th, u or v is def.
