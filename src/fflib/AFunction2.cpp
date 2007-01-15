@@ -680,8 +680,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
    for (int i=0;i<nbparam;i++)
      listparam[i]= (*param[i])(s); // set of the parameter 
    Stack_Ptr<AnyType>(s,ParamPtrOffset) = listparam;
-   
-   WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH mars 2005 
+   WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH mars 2006 
  
    try {  
       (*code)(s);  }
@@ -709,8 +708,9 @@ AnyType E_Routine::operator()(Stack s)  const  {
    // il faudrait que les variable locale soit detruire apres le return 
    // cf routine clean, pour le cas ou l'on retourne un tableau local.
    // plus safe ?????  FH. 
-   // mais pb si   a = f()+g() 
-   // ou alors changer le return ???? qui doit copie le resultat.. (voir)
+   // mais pb si   a = f()+g()   OK les pointeurs des instruction sont detruit
+    //  en fin d'instruction programme de l'appelant  FH 2007 
+   // ... ou alors changer le return ???? qui doit copie le resultat.. (voir)
    return ret;
 }
 
@@ -748,6 +748,12 @@ AnyType ListOfInst::operator()(Stack s) const {
 		cout << " CPU: "<< i << " " << s1-s0 << "s" << " " << s1-ss0 << "s" << endl;
 	    s0=CPUtime();
 	}
+    }
+    catch( E_exception & e) 	
+    {
+	if (e.type() != E_exception::e_return)  
+	    sptr->clean(); // pour ne pas detruire la valeur retourne  ...  FH  jan 2007
+	throw; // rethow  
     }
     catch(...)
     {
