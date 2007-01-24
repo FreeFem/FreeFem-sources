@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.12,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.12-2,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -863,7 +863,7 @@ then
 	then
 		AC_CHECK_LIB(umfpack,umf_i_malloc,
 			AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)	
-			ff_umfpack_lib="$ff_umfpack_lib -lumfpack"
+			ff_umfpack_lib=" -lumfpack $ff_umfpack_lib"
 			ff_umfpack_ok=yes,,$ff_umfpack_lib)
 	fi
 fi

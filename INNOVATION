@@ -1,3 +1,11 @@
+v 2.12-2
+  correct problem in splitmesh and trunc
+  trunc build always a part of a subdivision mesh
+  splitmesh given more pretty mesh, before if we split 2 adjacent
+  triangle resp in 3 and 4, before we put 2+3 points on the common edge
+  now the put 3 points. 
+v 2.12-1 (jan 15,2007)
+  correct early delete of return pointeur in freefem++ function (trap in string.epd under windows )
 v 2.12   ( jan 10,2007)
   correct mistake in none square block matrix 
 v 2.11-2 (nov 29,2006)

@@ -1890,6 +1890,7 @@ L136:
 			 }
 		      else
 			 {
+			    cout << " Err sous domaine " << isd << "ref par  d'arete +/-  = " << a  << " n'est dans aucun triangle " << endl;
 			   *err = 11;
 			 }
 		      jsd = isd + isd;
@@ -1905,6 +1906,7 @@ L136:
      {
        if (w[isd + isd - 1] == 0)
 	  {
+	   cout << " Err sous domaine " << isd << "ref par  d'arete +/-  = " << sd[(isd << 1) + 1]  << " n'est dans aucun triangle " << endl;
 	    *err = 11;
 	  }
        else
@@ -1948,6 +1950,9 @@ L200:
 	  }
        else
 	  {
+	    ta = w[i-1] ; 
+	    if( nu[ta * 6 + 1]>=0)    nu[ta * 6 + 1]= -nu[ta * 6 + 1]; // pour etre sur que le traingle est bien marque 
+
 	    i += -2;
 	  }
        goto L200;

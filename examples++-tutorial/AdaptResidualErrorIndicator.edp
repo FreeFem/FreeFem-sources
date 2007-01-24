@@ -39,6 +39,7 @@ macro  ReMeshIndicator(Th,Ph,Vh,vindicator,coef)
 	MeshSizecomputation(Th,Vh,h); 
 	Ph etak;  
 	etak[]=vindicator(0,Ph);
+	cout << " global  Eta  : " << sqrt(etak[].sum) << "  ......... " << endl;
 	etak[]=sqrt(etak[]); 
         plot(etak,ps="arei-etak.eps",fill=1,value=1);
 	real etastar= coef*(etak[].sum/etak[].n);
