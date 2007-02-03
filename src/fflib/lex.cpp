@@ -433,7 +433,7 @@ int mylex::scan(int lvl)
   } 
 
 char * mylex::match(int i) 
-{ if ( i != basescan() ) {
+{ if ( i != basescan() ) {// basescan -> scan1 change 2/2/2007  (non pas des substitution de parametres FH)
   cerr << " we waiting for a '" << char(i) <<"'" << endl;
   ErrorScan(" err macro ");};
  return buf; }
@@ -522,6 +522,10 @@ bool mylex::CallMacro(int &ret)
       
       if (j != i->end()) {
 	// int inmacroold=withmacropara;
+	  if(debugmacro) cout <<"call macro : " << buf << endl;
+	  string * macronn= new string(" macro: ");
+	  *macronn+= buf;
+	  
 	const deque<string>  & macroparm= j->second;
 	int nbparam= macroparm.size()-1;
 	MapMacroParam  lp;
@@ -533,7 +537,7 @@ bool mylex::CallMacro(int &ret)
 	      int kend= ( k+1 == nbparam) ? ')' : ',';
 	      int lvl=0;
 	      while (1) {
-		int rr = basescan();
+		int rr = basescan();// basescan -> scan1 change 2/2/2007  ( not change to pass macro name as a parameter)
 		if(lvl && rr==')') lvl--; //   if ( then  we eat next ) 
 		else if (rr=='(') lvl++ ;  //  eat next 		
 		else if (lvl<=0) {
@@ -578,7 +582,8 @@ bool mylex::CallMacro(int &ret)
 	    expandtxt+=token();
 	}
 	echo=echosave;
-	input(expandtxt);
+	if(debugmacro) cout <<" (macro) eadin : " << expandtxt << endl;
+	input(expandtxt,macronn);
 	ret =  scan1(); // Correction FH 6/06/2004 of string parameter
 	return true;        
       }
@@ -618,9 +623,9 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
     lex->cout << " Error openning file " <<ff<< endl;
     lgerror("lex: Error input openning file ");};
 }
-void  mylex::xxxx::readin(mylex *lex,const string & s)//,int nbparam,int bstackparam) 
+void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name)//,int nbparam,int bstackparam) 
 {
-  filename=0;
+  filename=name;
   l=0;
   nf=f= new istringstream(s.c_str()); 
   
@@ -648,7 +653,7 @@ void mylex::input(const char *  filename)
   level++;      
 }
 
-void mylex::input(const string & str) 
+void mylex::input(const string & str,const string * name) 
 {
   
   ffassert(level<99 && level >= -1);
@@ -656,7 +661,7 @@ void mylex::input(const string & str)
     { pilesource[level].l =linenumber;
     }
   
-  pilesource[level+1].readin(this,str);
+  pilesource[level+1].readin(this,str,name);
   linenumber = 0;     
   level++;
   
@@ -707,3 +712,8 @@ void Destroylex(mylex * m)
  {
    delete m;
  }
+ostream & mylex::ShowStack(ostream & f){
+    for (int i=0;i<level;++i)
+	if(  pilesource[i].filename ) f << " \t"<<i<<"\t"<<" in " << *pilesource[i].filename<< " line : " <<  pilesource[i].l << endl;
+    return f;     
+}

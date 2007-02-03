@@ -360,7 +360,7 @@ inline int cestac(const complex<double_st> & z)
 class Problem  : public Polymorphic { 
   //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =12; // modi FH oct 2005 add tol_pivot
+  static const int n_name_param =13; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter   
   int Nitem,Mitem;
 
 public:
@@ -565,7 +565,7 @@ struct OpCall_FormLinear2: public OneOperator {
 template<class T>
 struct OpCall_FormBilinear: public OneOperator {
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =11; // 9-> 11 FH 31/10/2005
+  static const int n_name_param =12; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007
   
   E_F0 * code(const basicAC_F0 & args) const 
   { Expression * nargs = new Expression[n_name_param];
@@ -589,7 +589,9 @@ basicAC_F0::name_and_type  OpCall_FormBilinear<C_args>::name_param[]= {
   {   "factorize",&typeid(bool)},
   {   "strategy",&typeid(long )},
   {   "tolpivot", &typeid(double)},
-  {   "tolpivotsym", &typeid(double) }
+  {   "tolpivotsym", &typeid(double) },
+  {   "nbiter", &typeid(long)} // 12 
+
      
           
 };
@@ -1054,8 +1056,10 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
   if (b->nargs[6]) tgv= GetAny<double>((*b->nargs[6])(stack));
   if (b->nargs[7]) factorize= GetAny<bool>((*b->nargs[7])(stack));
   if (b->nargs[8]) umfpackstrategy= GetAny<long>((*b->nargs[8])(stack));
-  if (b->nargs[9]) tol_pivot= GetAny<double>((*b->nargs[8])(stack));
-  if (b->nargs[10]) tol_pivot_sym= GetAny<double>((*b->nargs[9])(stack));
+  if (b->nargs[9]) tol_pivot= GetAny<double>((*b->nargs[9])(stack));
+  if (b->nargs[10]) tol_pivot_sym= GetAny<double>((*b->nargs[10])(stack));
+  if (b->nargs[11]) itermax= GetAny<long>((*b->nargs[11])(stack));
+  
   if (! A_is_square && typemat != TypeSolveMat::NONESQUARE) 
    {
      cout << " -- Error the solver << "<< typemat <<"  is set  on rectangular matrix  " << endl;

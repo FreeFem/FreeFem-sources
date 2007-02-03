@@ -1,3 +1,9 @@
+v 2.13
+   Add formal operator * and ' (to day just transpose) 
+   on vector [ .. ]  and matrix [ [],...,  []]
+   so we can write  
+    macro grad(u) [ dx(u),dy(u)] // EOM
+    int2d(Th)( grad(u)'*grad(v) )   
 v 2.12-2
   correct problem in splitmesh and trunc
   trunc build always a part of a subdivision mesh

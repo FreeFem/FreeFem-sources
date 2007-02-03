@@ -503,6 +503,7 @@ class  OneOperator : public ArrayOfaType {
     void Show(ostream &f=cerr) const;
     operator aType () const { return r;}
     virtual E_F0 * code(const basicAC_F0 &) const =0; 
+    virtual C_F0  code2(const basicAC_F0 &a) const ; // {return code(code(a),r);}	
     const OneOperator * Simple() const { return next||n?0:this;}
     friend ostream & operator<<(ostream & f,const OneOperator & a);
     
@@ -2842,6 +2843,9 @@ void initArrayOperators();
 void  initArrayDCL();
 
  void ClearMem(); 
+
+inline C_F0  OneOperator::code2(const basicAC_F0 &a) const  {return C_F0(code(a),r);}	
+
 #endif
 
 

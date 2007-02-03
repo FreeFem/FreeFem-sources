@@ -65,7 +65,8 @@ basicAC_F0::name_and_type  Problem::name_param[]= {
   {  "save",&typeid(string* )},
   {  "cadna",&typeid(KN<double>*)},
   {  "tolpivot", &typeid(double)},
-  {  "tolpivotsym", &typeid(double)}
+  {  "tolpivotsym", &typeid(double)},
+  {  "nbiter", &typeid(long)} // 12 
   
 };
 
@@ -2204,7 +2205,6 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   int umfpackstrategy=0;
   double tol_pivot=-1.; // defaut UMFPACK value  Add FH 31 oct 2005 
   double tol_pivot_sym=-1.; // defaut Add FH 31 oct 2005 
-  
   KN<double>* cadna=0; 
   if (nargs[0]) initmat= ! GetAny<bool>((*nargs[0])(stack));
   if (nargs[1]) typemat= GetAny<TypeSolveMat *>((*nargs[1])(stack));
@@ -2217,6 +2217,8 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   if (nargs[9]) cadna= GetAny<KN<double>* >((*nargs[9])(stack));
   if (nargs[10]) tol_pivot= GetAny<double>((*nargs[10])(stack));
   if (nargs[11]) tol_pivot_sym= GetAny<double>((*nargs[11])(stack));
+  if (nargs[12]) itmax = GetAny<long>((*nargs[12])(stack)); //  fevr 2007
+  
   bool sym = typemat->sym;
   
   list<C_F0>::const_iterator ii,ib=op->largs.begin(),

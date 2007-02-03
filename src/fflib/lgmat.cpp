@@ -260,7 +260,7 @@ template<class R>
        Expression a; 
        
        static  aType btype;
-       static const int n_name_param =11;
+       static const int n_name_param =12; //  add nbiter FH 30/01/2007 11 -> 12 
        static basicAC_F0::name_and_type name_param[] ;
        Expression nargs[n_name_param];
        const OneOperator * precon;
@@ -311,7 +311,9 @@ basicAC_F0::name_and_type  SetMatrix_Op<R>::name_param[]= {
    {  "factorize",&typeid(bool)},
    {  "strategy",&typeid(long )},
    {  "tolpivot",&typeid(double )},
-   {  "tolpivotsym",&typeid(double )}
+   {  "tolpivotsym",&typeid(double )},
+   {  "nbiter", &typeid(long)} // 11
+
 
 };
 
@@ -331,7 +333,6 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   bool factorize=false;
   double tol_pivot=-1;
   double tol_pivot_sym=-1;
-  
 // type de matrice par default
 #ifdef HAVE_LIBUMFPACK         
      TypeSolveMat tmat(TypeSolveMat::UMFpack); 
@@ -353,6 +354,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   if (nargs[8]) umfpackstrategy = GetAny<long>((*nargs[8])(stack)); 
   if (nargs[9]) tol_pivot = GetAny<double>((*nargs[9])(stack)); 
   if (nargs[10]) tol_pivot_sym = GetAny<double>((*nargs[10])(stack)); 
+  if (nargs[11]) itmax = GetAny<long>((*nargs[11])(stack)); //  frev 2007 OK
    
    if(A->typemat.profile != typemat->profile) 
    {

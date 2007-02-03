@@ -470,7 +470,47 @@ struct  MIMul {
   static bool ReadOnly() { return RO;}
     
 };
+// add frev 2007
+class TransE_Array:  public E_F0 {  public:  
+     const E_Array * v;
+    int size() const {return v->size();}
+    size_t nbitem() const {return v->size();}
+    bool MeshIndependent(){return v->MeshIndependent();}
+    TransE_Array(const E_Array * e): v(e) {ffassert(e);}
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+};
 
+
+// add frev 2006 
+class opTrans : public OneOperator{
+public:
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    opTrans():   OneOperator(atype<TransE_Array>(),atype<E_Array>()  ) {}
+    E_F0 * code(const basicAC_F0 & args) const {
+	  return new TransE_Array(dynamic_cast<const E_Array*>((Expression) args[0])); } 
+};
+
+/*
+class opTTrans : public OneOperator{
+public:
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    opTTrans():   OneOperator(atype<E_Array>(),atype<TransE_Array>()  ) {}
+    E_F0 * code(const basicAC_F0 & args) const {
+	return dynamic_cast<const TransE_Array*>((Expression) args[0])->v; } 
+};
+*/ 
+class opDot : public OneOperator{
+public:
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    bool MeshIndependent() const { return false;}
+    
+    opDot(aType A, aType B): OneOperator(atype<C_F0>(),A,B) {}
+    opDot(): OneOperator(atype<C_F0>(),atype<TransE_Array >(),atype<E_Array>()  ) {}
+    
+    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+    C_F0  code2(const basicAC_F0 &args) const;       
+};
+// fin frev 2006 
 void Init_map_type()
 {
    TheOperators=new Polymorphic(), 
@@ -499,6 +539,7 @@ void Init_map_type()
 //    Dcl_Type<C_F0>();
     map_type[typeid(C_F0).name()] =  new TypeLineFunction; 
     Dcl_Type<E_Array>();
+    Dcl_Type<TransE_Array >();// add
     Dcl_Type<const E_Border *>();
     Dcl_Type<const E_BorderN *>();
 
@@ -776,10 +817,16 @@ void Init_map_type()
        new AddBorderOperator
        );
 
-      
-
-      
-
+      // add frev 2007
+      TheOperators->Add("\'", new opTrans); 
+     // TheOperators->Add("\'", new opTTrans); 
+      TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("*",new opDot(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("*",new opDot(atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+     // car le type de retour depent des objets du tableau 
+     // il faut refechir  .....  FH 
+     // il faut definir le type d'un tableau bof, bof (atype<C_F0>())
      TheOperators->Add(">>",
        new OneBinaryOperator<Op_Read<bool>,OneBinaryOperatorMIWO >,
        new OneBinaryOperator<Op_Read<long>,OneBinaryOperatorMIWO >,
@@ -998,4 +1045,151 @@ int ShowAlloc(char *s,size_t & lg);
  } 
 static addingInitFunct TheaddingInitFunct(-10000,Init_map_type); 
 
+C_F0  opDot::code2(const basicAC_F0 &args) const      
+{
+    bool ta =args[0].left()==atype<TransE_Array>();
+    bool tb = args[1].left()==atype<TransE_Array>();
+    const TransE_Array * tea=0;
+    const TransE_Array * teb=0;
+    const E_Array * ea=0;
+    const E_Array * eb=0;// E_F0
+	if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
+    else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
+    if( tb)  teb = dynamic_cast<const TransE_Array*>((Expression) args[1]);
+    else eb = dynamic_cast<const E_Array*>((Expression) args[1]);
+    assert( ea || tea );
+    assert( eb || teb );
+    const E_Array & a=  ta ? *tea->v : *ea;
+    const E_Array & b=  tb ? *teb->v : *eb;
+    int ma =1;
+    int mb =1;
+    int na=a.size();
+    int nb=b.size();
+    if(na <1 && nb < 1) CompileError(" empty array  [ ...]'*[ ...  ]  ");
+    bool mab= b[0].left()==atype<E_Array>();
+    bool maa= a[0].left()==atype<E_Array>();
+    if(maa) {
+	ma= a[0].LeftValue()->nbitem();
+	for (int i=1;i<na;i++)
+	    if( ma != a[i].LeftValue()->nbitem()) 
+		CompileError(" first matrix with variable number of columm");
+        
+    }
+    if(mab) {
+	mb= b[1].LeftValue()->nbitem();
+	for (int i=1;i<nb;i++)
+	    if( mb != b[i].LeftValue()->nbitem()) 
+		CompileError(" second matrix with variable number of columm");
+    }
+    int na1=na,ma1=ma,nb1=nb,mb1=mb;
+    if(ta) RNM::Exchange(na1,ma1);
+    if(tb) RNM::Exchange(nb1,mb1);
+    
+    KNM<CC_F0> A(na1,ma1), B(nb1,mb1);
+    if ( A.M() != B.N())
+    {
+	cout << "   formal prod array or matrix : [ .. ] * [ .. ]   " << endl;
+	cout << " first  array :  matrix " << maa << " trans " << ta << " " << na << "x" << ma <<endl;
+	cout << " second array :  matrix " << mab << " trans " << tb << " " << nb << "x" << mb <<endl;	
+	CompileError(" no same size  [ ...]'*[ ...  ] sorry ");
+    }
+    
+    if(maa)
+	for (int i=0;i<na;++i)
+	{
+	    const E_Array * li=  dynamic_cast<const E_Array *>(a[i].LeftValue());
+	    ffassert(li);
+	    for (int j=0; j<ma;++j)
+		if(!ta)  A(i,j) = (*li)[j];
+		else     A(j,i) = (*li)[j];
+	} 
+    else
+	for (int i=0;i<na;++i)
+	    if(!ta)  A(i,0) = a[i];
+	    else     A(0,i) = a[i];
+	 
+    if(mab)
+	for (int i=0;i<nb;++i)
+	{
+	    const E_Array * li=  dynamic_cast<const E_Array *>(b[i].LeftValue());
+	    ffassert(li);
+	    for (int j=0; j<mb;++j)
+		if(!tb)  B(i,j) = (*li)[j];
+		else     B(j,i) = (*li)[j];
+	} 
+    else
+	for (int i=0;i<nb;++i)
+	    if(!tb)  B(i,0) = b[i];
+	    else     B(0,i) = b[i];
+    
+    KNM<CC_F0> C(na1,mb1);
+    CC_F0 s,abi;
+    for (int i=0;i<na1;++i)
+	for (int j=0;j<mb1;++j)
+	{
+	    s= C_F0(TheOperators,"*",A(i,0),B(0,j));
+	    for (int k=1;k<ma1;++k) {
+		abi = C_F0(TheOperators,"*",A(i,k),B(k,j));
+		s = C_F0(TheOperators,"+",s,abi);}
+	    C(i,j)=s;
+	};
+    if( na1==1 && mb1 ==1)
+	return C(0,0);
+    else if (( mb1 ==1) || (na1==1))
+    {
+	AC_F0  v;
+	v=C(0,0);
+	int i0=na1!=1,j0=mb1!=1, nn= mb1*na1;
+	for (int i=1;i<nn;++i)
+	    v+=C(i0*i,j0*i);
+	C_F0  r(TheOperators,"[]",v);
+	if(mb1==1) return r;
+	else return C_F0(TheOperators,"\'",r);
+    }
+    else
+    {
+	AC_F0  v,cc;
+	v=C(0,0);
+	for (int i=0;i<na1;++i)	
+	{  cc = C(i,0);
+	    for (int j=1;j<mb1;++j)
+		cc+= C(i,j);
+	    C_F0  vi(TheOperators,"[]",cc);
+	    if(i==0) v=vi;
+	    else v+= vi;
+	}
+	return C_F0(TheOperators,"[]",v);
+    }
+/*	  
+    if ( !mab && ! maa)
+    {
+	
+	if( na != nb)
+	    CompileError(" no same size  [ ...]'*[ ...  ] sorry ");
+	
+	if( ta && ! tb)
+	{
+	    s= C_F0(TheOperators,"*",a[0],b[0]);
+	    for (int i=1;i<na;++i)
+	    {
+		abi = C_F0(TheOperators,"*",a[i],b[i]);
+		s = C_F0(TheOperators,"+",s,abi);
+	    }
+	    return s;//Type_Expr(s); //new C_F0(s);   ATTENTION le type est variable ici   FH
+	}
+	
+	if(!ma && mb)
+	{  
+	}
+	
+    }*/
+    
+    cout << "   formal prod array or matrix : [ .. ] * [ .. ]   " << na << "x" << nb << endl;
+    cout << "   formal prod array or matrix : [ .. ] * [ .. ]   " <<  endl;
+    cout << " first  array :  matrix " << maa << " trans " << ta << " " << na << "x" << ma <<endl;
+    cout << " second array :  matrix " << mab << " trans " << tb << " " << nb << "x" << mb <<endl;
+    CompileError("  not implemented sorry ..... (FH) to do ???? ");	
+    return C_F0();
+
+}
 
