@@ -69,7 +69,7 @@ class mylex : public CodeAlloc {
 
     xxxx() : l(0), f(0) , filename(0),nf(0)   {}   
     void  open(mylex *lexx,const char * ff) ;
-    void  readin(mylex *lexx,const string & s);
+    void  readin(mylex *lexx,const string & s,const string *name=0);
     void close() ;
   };
   
@@ -114,7 +114,7 @@ class mylex : public CodeAlloc {
     return "-- unkown --";}
     
   void input(const char *  filename) ;
-  void input(const string &str);
+  void input(const string &str,const string *name=0);
   bool close() ;
 
   char * newcopy(const char * s)
@@ -124,7 +124,7 @@ class mylex : public CodeAlloc {
     strdata.push(r);
     return r;
   }
-  
+ ostream & ShowStack(ostream & f); 
 ~mylex();
 private: 
   int basescan();  
@@ -134,6 +134,8 @@ private:
   bool CallMacro(int &ret);
   char * match(int i);
   void ErrorScan(char * s) {
+      cerr  << "\n" ;
+      ShowStack(cerr);
     throw(ErrorCompile(s,lineno(),YYText() ) );}    
   
   

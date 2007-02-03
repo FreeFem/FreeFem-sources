@@ -196,8 +196,8 @@ C_F0::C_F0(const Polymorphic * poly,const char *op,const basicAC_F0 & p)
         /* cout << endl;
          poly->Show(op,at,cout);
          cout << op << ": (in " << at << ") => " << " " << *ff<< "\n\n";*/
-         f=ff->code(p);
-         r=*ff;}
+	 *this= ff->code2(p);
+	 }
       else
         { 
            cerr << " error operator " << op << " " << at << endl;
