@@ -4,6 +4,7 @@ v 2.13
    so we can write  
     macro grad(u) [ dx(u),dy(u)] // EOM
     int2d(Th)( grad(u)'*grad(v) )   
+    add scalar term in block matrix as 1x1 matrix.
 v 2.12-2
   correct problem in splitmesh and trunc
   trunc build always a part of a subdivision mesh
