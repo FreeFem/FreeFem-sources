@@ -1083,115 +1083,8 @@ KN<R> * get_mat_coef(KN<R> * x,TheCoefMat<R> dm)
    Expression emat; 
    Expression ** e_Mij;
    int ** t_Mij;
-   BlockMatrix(const basicAC_F0 & args) 
-    {   
-      N=0;
-      M=0;
-      args.SetNameParam();
-      emat = args[0];
-      const E_Array & eMij= *dynamic_cast<const E_Array*>((Expression) args[1]);
-      N=eMij.size();
-      int err =0;
-      for (int i=0;i<N;i++)
-       {
-        const E_Array* emi= dynamic_cast<const E_Array*>((Expression)  eMij[i]);
-        if (!emi) err++;
-        else
-        { 
-        if ( i==0) 
-         M = emi->size();
-        else
-         if(M != emi->size()) err++;
-        }
-        }
-        if (err) {
-          CompileError(" Block matric : [[ a, b, c], [ a, b,c ]]");
-        }
-       assert(N && M);
-       e_Mij = new Expression * [N];
-       t_Mij = new int * [N];
-       for (int i=0;i<N;i++)
-        {
-         const E_Array li= *dynamic_cast<const E_Array*>((Expression)  eMij[i]);
-         
-          e_Mij[i] =  new Expression [M];
-          t_Mij[i] = new int [M]; 
-           for (int j=0; j<M;j++)  
-            {
-              C_F0 c_Mij(li[j]);
-              Expression eij=c_Mij.LeftValue();
-              aType rij = c_Mij.left();
-              if ( rij == atype<long>() &&  eij->EvaluableWithOutStack() )
-               {
-                  long contm = GetAny<long>((*eij)(0));
-                  if(contm !=0) 
-                  CompileError(" Block matrix , Just 0 matrix");
-                  e_Mij[i][j]=0;
-                  t_Mij[i][j]=0;
-               }
-              else if ( rij ==  atype<Matrice_Creuse<R> *>()) 
-               {
-                  e_Mij[i][j]=eij;
-                  t_Mij[i][j]=1;
-               } 
-              else if ( rij ==  atype<Matrice_Creuse_Transpose<R> >()) 
-               {
-                  e_Mij[i][j]=eij;
-                  t_Mij[i][j]=2;
-               } 
-              else if ( atype<KN_<R> >()->CastingFrom(rij) )
-              {  
-                  e_Mij[i][j]=to<KN_<R> >(c_Mij);
-                  t_Mij[i][j]=3;
-              
-              } 
-              else if ( atype<Transpose<KN_<R> > >()->CastingFrom(rij) )
-              {  
-              
-                  e_Mij[i][j]=to<Transpose<KN_<R> > >(c_Mij);
-                  t_Mij[i][j]=4;
-              } 
-              else if ( atype<KNM<R> *  >()->CastingFrom(rij) )
-              {  
-              
-                  e_Mij[i][j]=to<KNM<R> * >(c_Mij);
-                  t_Mij[i][j]=5;
-              }
-              else if ( atype<Transpose< KNM<R> * > >()->CastingFrom(rij) )
-              {  
-              
-                  e_Mij[i][j]=to<Transpose<KNM<R> *> >(c_Mij);
-                  t_Mij[i][j]=6;
-              }
-              else {  
-                  
-                  CompileError(" Block matrix ,  bad type in block matrix");
-              }
- /*            else if   ( atype<map< pair<int,int>, R> * >()->CastingFrom(rij) ) 
-               {
-                  e_Mij[i][j]= to<map< pair<int,int>, R> *>(C_F0(eij,rij)).LeftValue();
-                  t_Mij[i][j]=10;
-               }*/
-           }
-           
-          }
-        }
-        
-    ~BlockMatrix() 
-     {  
-       if (e_Mij)
-         {  cout << " del Block matrix "<< this << " " << e_Mij <<" N = " << N << " M = " << M << endl;
-          for (int i=0;i<N;i++)
-            { delete [] e_Mij[i];
-              delete [] t_Mij[i];
-            }
-          delete [] e_Mij;
-          delete [] t_Mij;
-          N=0;
-          M=0;
-          e_Mij=0;
-          t_Mij=0; }
-     }     
+   BlockMatrix(const basicAC_F0 & args) ;
+   ~BlockMatrix() ;
       
     static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<Matrice_Creuse<R>*>(),atype<E_Array>());}
     static  E_F0 * f(const basicAC_F0 & args){ return new BlockMatrix(args);} 
@@ -1381,12 +1274,143 @@ AnyType Matrixoutp2map (Stack , const AnyType & pp)
 }
 
 
+template<typename R>  BlockMatrix<R>::~BlockMatrix() 
+{  
+    if (e_Mij)
+    {  cout << " del Block matrix "<< this << " " << e_Mij <<" N = " << N << " M = " << M << endl;
+	for (int i=0;i<N;i++)
+	{ delete [] e_Mij[i];
+	    delete [] t_Mij[i];
+	}
+	delete [] e_Mij;
+	delete [] t_Mij;
+	N=0;
+	M=0;
+	e_Mij=0;
+	t_Mij=0; }
+}     
+
+template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args) 
+{   
+    N=0;
+    M=0;
+    args.SetNameParam();
+    emat = args[0];
+    const E_Array & eMij= *dynamic_cast<const E_Array*>((Expression) args[1]);
+    N=eMij.size();
+    int err =0;
+    for (int i=0;i<N;i++)
+    {
+        const E_Array* emi= dynamic_cast<const E_Array*>((Expression)  eMij[i]);
+        if (!emi) err++;
+        else
+        { 
+	    if ( i==0) 
+		M = emi->size();
+	    else
+		if(M != emi->size()) err++;
+        }
+    }
+    if (err) {
+	CompileError(" Block matric : [[ a, b, c], [ a, b,c ]]");
+    }
+    assert(N && M);
+    e_Mij = new Expression * [N];
+    t_Mij = new int * [N];
+    for (int i=0;i<N;i++)
+    {
+	const E_Array li= *dynamic_cast<const E_Array*>((Expression)  eMij[i]);
+	
+	e_Mij[i] =  new Expression [M];
+	t_Mij[i] = new int [M]; 
+	for (int j=0; j<M;j++)  
+	{
+	    C_F0 c_Mij(li[j]);
+	    Expression eij=c_Mij.LeftValue();
+	    aType rij = c_Mij.left();
+	    if ( rij == atype<long>() &&  eij->EvaluableWithOutStack() )
+	    {
+		long contm = GetAny<long>((*eij)(0));
+		/*  prev  version
+		if(contm !=0) 
+		CompileError(" Block matrix , Just 0 matrix");
+		e_Mij[i][j]=0;
+		t_Mij[i][j]=0;*/
+		if(contm==0)
+		{
+		    e_Mij[i][j]=0;
+		    t_Mij[i][j]=0;
+		}
+		else if ( atype<R >()->CastingFrom(rij) )
+		{  		  // frev 2007 
+		    e_Mij[i][j]=to<R>(c_Mij);
+		    t_Mij[i][j]=7; //  just un scalaire 
+		}
+		else CompileError(" Block matrix , Just 0 matrix");
+	    }
+	    else if ( rij ==  atype<Matrice_Creuse<R> *>()) 
+	    {
+		e_Mij[i][j]=eij;
+		t_Mij[i][j]=1;
+	    } 
+	    else if ( rij ==  atype<Matrice_Creuse_Transpose<R> >()) 
+	    {
+		e_Mij[i][j]=eij;
+		t_Mij[i][j]=2;
+	    } 
+	    else if ( atype<KN_<R> >()->CastingFrom(rij) )
+	    {  
+		e_Mij[i][j]=to<KN_<R> >(c_Mij);
+		t_Mij[i][j]=3;
+		
+	    } 
+	    else if ( atype<Transpose<KN_<R> > >()->CastingFrom(rij) )
+	    {  
+		
+		e_Mij[i][j]=to<Transpose<KN_<R> > >(c_Mij);
+		t_Mij[i][j]=4;
+	    } 
+	    else if ( atype<KNM<R> *  >()->CastingFrom(rij) )
+	    {  
+		
+		e_Mij[i][j]=to<KNM<R> * >(c_Mij);
+		t_Mij[i][j]=5;
+	    }
+	    else if ( atype<Transpose< KNM<R> * > >()->CastingFrom(rij) )
+	    {  
+		
+		e_Mij[i][j]=to<Transpose<KNM<R> *> >(c_Mij);
+		t_Mij[i][j]=6;
+	    }
+	    else if ( atype<R >()->CastingFrom(rij) )
+	    {  		  // frev 2007 
+		e_Mij[i][j]=to<R>(c_Mij);
+		t_Mij[i][j]=7; //  just un scalaire 
+	    }
+	    
+	    else {  
+		
+		CompileError(" Block matrix ,  bad type in block matrix");
+	    }
+	    /*            else if   ( atype<map< pair<int,int>, R> * >()->CastingFrom(rij) ) 
+	    {
+		e_Mij[i][j]= to<map< pair<int,int>, R> *>(C_F0(eij,rij)).LeftValue();
+		t_Mij[i][j]=10;
+	    }*/
+	}
+	
+    }
+}
+
+
 template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 {
   typedef list<triplet<R,MatriceCreuse<R> *,bool> > * L;
    KNM<L> Bij(N,M);
    KNM<KNM_<R> * > Fij(N,M); 
    KNM<bool> cnjij(N,M); 
+   KNM<R> Rij(N,M); //  to sto
+  
    cnjij = false; 
    KN<long> Oi(N+1), Oj(M+1);
    if(verbosity>3) { cout << " Build Block Matrix : " << N << " x " << M << endl;}
@@ -1409,6 +1433,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
         else if (tij==4)  { KN_<R> x=GetAny< Transpose< KN_<R> >   >( e).t ;  Fij(i,j) = new KNM_<R>(x,1,x.N());}
         else if (tij==5)  { KNM<R> * m= GetAny< KNM<R>*  >( e);  Fij(i,j) = new KNM_<R>(*m);}
         else if (tij==6)  { KNM<R> * m= GetAny< Transpose< KNM<R>* >  >( e).t;  Fij(i,j) = new KNM_<R>(m->t()); }
+	else if (tij==7)   { Rij(i,j)=GetAny< R  >( e);  Fij(i,j) = new KNM_<R>(&(Rij(i,j)),1,1);}
         
    //     else if  (tij==3) {}
         else {
