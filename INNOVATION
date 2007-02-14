@@ -1,3 +1,4 @@
+   correct mistake when we build matrix from varf with 3  meshes (FH).
 v 2.13
    Add formal operator * and ' (to day just transpose) 
    on vector [ .. ]  and matrix [ [],...,  []]
