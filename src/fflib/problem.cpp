@@ -545,7 +545,6 @@ void Check(const Opera &Op,int N,int  M)
 		    tv=tu;
 		    outsidev=outsideu;
 		    Ptv=Ptu;
-		    iut = Thu(tu);
 		}
 		else
 		{
@@ -561,9 +560,10 @@ void Check(const Opera &Op,int N,int  M)
 			    if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl;
 			    continue;
 			}}
-		    ivt = Thv(tv);
 		} 
-		
+		iut = Thu(tu);
+		ivt = Thv(tv);
+		if( verbosity>1000) cout << " T " << it  << "  iut " << iut << " ivt " << ivt  <<  endl ; 
 		FElement Ku(Uh[iut]);
 		FElement Kv(Vh[ivt]);
 		long n= Kv.NbDoF() ,m=Ku.NbDoF();
