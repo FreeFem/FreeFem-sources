@@ -97,6 +97,10 @@ case "$WIN32$uu" in
 	SHARED="-shared" 
 	FLAGS='-fPIC';;
 	# 64 bit Linux needs -fPIC (ALH)
+    SunOS)
+        SHARED="-shared"
+        FLAGS='-fPIC';;
+        # 64 bit Linux needs -fPIC (ALH)
     Linux)
 	FLAGS='-fPIC'
 	SHARED="-shared " ;;

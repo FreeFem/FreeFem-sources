@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.13,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.14,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -117,6 +117,14 @@ then
 	ff_aglprog=FreeFem++-agl${EXEEXT}
 fi
 AC_MSG_RESULT($ff_mac)
+
+AC_MSG_CHECKING(wether we are on  SunOS)
+ff_sunos=no
+if test `uname -s` = SunOS;
+then
+	ff_sunos=yes
+fi
+AC_MSG_RESULT($ff_sunos)
 
 # Checking wether we can produce a Microsoft Windows-specific version
 # -------------------------------------------------------------------
@@ -968,7 +976,7 @@ int main(int argc,char **argv){
 	AC_MSG_RESULT($ff_dynload)
 fi
 
-#  the -rdynamic don't exist on macos 
+#  the -rdynamic don't exist on macos and sunOS
 if test "$ff_dynload" = yes
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
@@ -979,7 +987,7 @@ then
 
 	# gcc on MacOS does not produce an error with "-rdynamic" but
 	# still complains about it.
-	if test "$ff_mac" = "no" -a "$ff_win32"  = "no" ;
+	if test "$ff_mac" = "no" -a "$ff_win32"  = "no" -a "$ff_sunos"  = "no" ;
 	then
 		CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
 	fi

@@ -6,15 +6,30 @@
 #include <sstream>
 #include <cassert>
 
+struct R2 {
+  double x,y;
+};
+
 typedef int  Tab[1000];
 typedef Tab TTab[100];
+typedef  R2 TR2[1000];
 
 using namespace std;
+
 int dump(int l,int *t, ostream & cc=cout) 
 {
+  cc.precision(20);
   cc << " { " ;
   for (int i=0;i<l;i++)
     cc << t[i] <<  " " << ( i < l-1 ? ',' : '}' ) ;
+}
+
+int dump2(int l,Tab lx,Tab ly,int k, ostream & cc=cout) 
+{
+  cc << " { " ;
+  for (int i=0;i<l;i++)
+    cc << " \t R2( " <<  lx[i] <<"/" << k <<  ". , " <<  ly[i] <<"/" << k <<  ". ) " 
+       << ( i < l-1 ? ',' : '}' ) << " \n ";
 }
 
 int dump(int l,int ll,TTab t, ostream & cc=cout) 
@@ -49,7 +64,7 @@ int main(int argc,char ** argv)
   int i=0;
   Tab  num,num1,cc,ff;
   Tab il,jl,kl;
-
+  TR2 Pt;
   //  fonction_i =  $\Pi_{j=0,k-1} (\Lambda_{nn[i][j]} - aa[i][j])  $
   TTab aa,nn;
 
@@ -89,6 +104,9 @@ int main(int argc,char ** argv)
 	  il[l]=ii;
 	  jl[l]=jj;
 	  kl[l]=kk;
+	  Pt[l].x= (double) jj/k;
+	  Pt[l].y= (double) kk/k;
+
 
           s[l]=si.str()+sj.str()+sk.str();
 	  sj << "*(L1-"<<  jj << ")";
@@ -140,6 +158,9 @@ int main(int argc,char ** argv)
   *cf << ";\n";
   *cf << prefix <<"kl[" << i << "] = " ;
   dump(i,kl,*cf);
+  *cf << ";\n";
+  *cf << prefix <<"R2 Pt[" << i << "] = " ;
+  dump2(i,jl,kl,k,*cf);
   *cf << ";\n";
 
 

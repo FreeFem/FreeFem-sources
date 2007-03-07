@@ -1,3 +1,7 @@
+v 2.14  (7 mars 2007)
+   make correction for solaris bluid
+   add P3,P4 and new quadrature formular on triangle up degree 25 
+   with dynamics load. See examples++-load/*P[43]*.edp
    correct mistake when we build matrix from varf with 3  meshes (FH).
 v 2.13
    Add formal operator * and ' (to day just transpose) 

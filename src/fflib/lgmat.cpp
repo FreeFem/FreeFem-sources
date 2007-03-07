@@ -87,6 +87,17 @@ list<triplet<R,MatriceCreuse<R> *, bool > > * to(Matrice_Creuse_Transpose<R>  M)
   return  l;
 }
 
+template<class R>
+AnyType M2L3 (Stack , const AnyType & pp)
+{
+    return to(GetAny<Matrice_Creuse<R> *>(pp));
+}
+template<class R>
+AnyType tM2L3 (Stack , const AnyType & pp)
+{
+    return to(GetAny<Matrice_Creuse_Transpose<R> >(pp));
+}
+
 
 template<class R> 
 struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<triplet<R,MatriceCreuse<R> *,bool> > *> 
@@ -119,7 +130,40 @@ struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<triplet<R,M
     r ->push_back(make_triplet<R,MatriceCreuse<R> *>(a,b->A,false));
     return r;}
 };
+//  ADD FH 16/02/2007
 
+template<class R> 
+struct Op2_ListCMt: public binary_function<R,Matrice_Creuse_Transpose<R> ,list<triplet<R,MatriceCreuse<R> *,bool> > *> 
+{ 
+    typedef triplet<R,MatriceCreuse<R> *,bool>  P;
+    typedef list<P> L;
+    typedef L * RR;
+    typedef R  AA;
+    typedef Matrice_Creuse_Transpose<R>  BB;
+    
+    static  RR f(const   AA & a,const   BB & b)  
+    {
+	RR r=  new list<P> ;
+	r ->push_back(make_triplet<R,MatriceCreuse<R> *>(a,b.A->A,true));
+	return r;}
+};
+
+template<class R> 
+struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<triplet<R,MatriceCreuse<R> *,bool> > *> 
+{ 
+    typedef triplet<R,MatriceCreuse<R> *,bool>  P;
+    typedef list<P> L;
+    typedef L * RR;
+    typedef R  AA;
+    typedef Matrice_Creuse_Transpose<R> BB;
+    
+    static  RR f(const   BB & b,const   AA & a)  
+    {
+	RR r=  new list<P> ;
+	r ->push_back(make_triplet<R,MatriceCreuse<R> *>(a,b.A->A,true));
+	return r;}
+};
+// FIN ADD 16/02/2007
 
 template<class R> 
 struct Op2_ListCMCMadd: public binary_function<list<triplet<R,MatriceCreuse<R> *,bool> > *,
@@ -133,6 +177,7 @@ struct Op2_ListCMCMadd: public binary_function<list<triplet<R,MatriceCreuse<R> *
   static   RR f(const RR & a,const RR & b)  
   { 
     a->insert(a->end(),b->begin(),b->end());
+      
     delete b;
     return a;
   }    
@@ -1183,6 +1228,7 @@ AnyType Matrixfull2map (Stack , const AnyType & pp)
 }
 
 
+
 template<class R>
 map< pair<int,int>, R> *Matrixoutp2mapIJ_inv (outProduct_KN_<R>   * const & pop,const Inv_KN_long & iii,const Inv_KN_long & jjj)
 {
@@ -1590,7 +1636,10 @@ TheOperators->Add("*",
         new OneBinaryOperator<Op2_pair<Matrix_Prod<R,R>,Matrice_Creuse_Transpose<R>,Matrice_Creuse_Transpose<R> > >,
         new OneBinaryOperator<Op2_pair<Matrix_Prod<R,R>,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R> > > ,
         new OneBinaryOperator<Op2_ListCM<R> >  , 
-        new OneBinaryOperator<Op2_ListMC<R> >   
+        new OneBinaryOperator<Op2_ListMC<R> >  ,
+	new OneBinaryOperator<Op2_ListCMt<R> >  , 
+        new OneBinaryOperator<Op2_ListMtC<R> >  
+		  
         );
 TheOperators->Add("+", 
         new OneBinaryOperator<Op2_ListCMCMadd<R> >,
@@ -1637,10 +1686,13 @@ TheOperators->Add("+",
    //   ; 
  map_type[typeid(map< pair<int,int>, R> *).name()]->AddCast(
      new E_F1_funcT<map< pair<int,int>, R> *,KNM<R>* >(Matrixfull2map<R>),
-     new E_F1_funcT<map< pair<int,int>, R> *,outProduct_KN_<R>* >(Matrixoutp2map<R>)
-     
+     new E_F1_funcT<map< pair<int,int>, R> *,outProduct_KN_<R>* >(Matrixoutp2map<R>)							         
        ); 
 
+ map_type[typeid(list<triplet<R,MatriceCreuse<R> *,bool> > *).name()]->AddCast(
+     new E_F1_funcT<list<triplet<R,MatriceCreuse<R> *,bool> > *,Matrice_Creuse<R>* >(M2L3<R>),
+     new E_F1_funcT<list<triplet<R,MatriceCreuse<R> *,bool> > *,Matrice_Creuse_Transpose<R> >(tM2L3<R>)
+			);
  
 
 
@@ -1648,6 +1700,7 @@ TheOperators->Add("+",
       
 //  --- end  
 }
+
 
 //extern Map_type_of_map map_type_of_map ; //  to store te type 
 //extern Map_type_of_map map_pair_of_type ; //  to store te type 
@@ -1706,3 +1759,5 @@ void  init_lgmat()
  TheOperators->Add("<-", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,E_F_StackF0F0>(CopyMat<R,Complex>)
                  );
 }
+
+
