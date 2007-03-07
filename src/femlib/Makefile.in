@@ -159,7 +159,7 @@ install_sh = @install_sh@
 
 EXTRA_DIST = BamgFreeFem.cpp BamgFreeFem.hpp CGNL.hpp CheckPtr.cpp	\
 ConjuguedGradrientNL.cpp DOperator.hpp Drawing.cpp Element_P2h.cpp	\
-Element_P3.cpp Element_RT.cpp fem3.hpp fem.cpp fem.hpp FESpace.cpp	\
+Element_RT.cpp fem3.hpp fem.cpp fem.hpp FESpace.cpp	\
 FESpace.hpp FESpace-v0.cpp FQuadTree.cpp FQuadTree.hpp gibbs.cpp	\
 glutdraw.cpp gmres.hpp MatriceCreuse.hpp MatriceCreuse_tpl.hpp		\
 MeshPoint.hpp mortar.cpp mshptg.cpp QuadratureFormular.cpp		\
