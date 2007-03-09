@@ -1734,13 +1734,13 @@ template<class R>
      //     sptr->clean(); // modif FH mars 2006  clean Ptr
     Check(l->l,Vh.N);
     if ( B && B->N() != Vh.NbOfDF) ExecError("AssembleLinearForm size rhs and nb of DF of Vh");
-    if ( & Th != &Vh.Th ) ExecError("AssembleLinearForm on different meshes  ( not implemented FH).");
+   // if ( & Th != &Vh.Th ) ExecError("AssembleLinearForm on different meshes  ( not implemented FH).");
     KN<double> buf(Vh.MaximalNbOfDF()*last_operatortype*Vh.N);
     
     //            const  FormLinear * l=dynamic_cast<const  FormLinear *>(e);
     const CDomainOfIntegration & di= *l->di;
-    const Mesh & ThI = * GetAny<pmesh>( (* di.Th)(stack));
-    bool sameMesh = &ThI == &Th;
+    const Mesh & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
+    bool sameMesh = &ThI == &Vh.Th;
     
     SHOWVERB(cout << " FormLinear " << endl);
     const vector<Expression>  & what(di.what);

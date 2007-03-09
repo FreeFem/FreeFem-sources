@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.14,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.14-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -456,8 +456,8 @@ ff_mpi=no)
                         AC_DEFINE(HAVE_MPI_CXX_MPICXX_H,1, mpi/cxx/mpicxx.h  have include file))
                 AC_CHECK_HEADER(ompi/mpi/cxx/mpicxx.h,
                         AC_DEFINE(HAVE_OMPI_MPI_CXX_MPICXX_H,1, ompi/mpi/cxx/mpicxx.h  have include file))
-                AC_CHECK_HEADER(mpic++.h,
-                        AC_DEFINE(HAVE_MPICPP_H,1, mpic++.h  have include file))
+                AC_CHECK_HEADER(mpi++.h,
+                        AC_DEFINE(HAVE_MPICPP_H,1, mpi++.h  have include file))
 		AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
                 AC_SUBST(MPICXX,$ff_mpicxx)
 	else

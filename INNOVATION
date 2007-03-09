@@ -1,3 +1,6 @@
+v 2.14-1 (0 mars 2007)
+   correct missing speeling in  configure.ac  mpi++.h -> mpi++.h for mpich.1.2
+   add computing linear form of 2 meshes  (ex. v on mesh Th1, and  compute int2d(Th1)(v) )
 v 2.14  (7 mars 2007)
    make correction for solaris bluid
    add P3,P4 and new quadrature formular on triangle up degree 25 
