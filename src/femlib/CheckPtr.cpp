@@ -37,17 +37,6 @@ void debugalloc()
 { static long count=0;
  count++;}
 
-
-// ********** DO NOT REMOVE THIS BANNER **********
-//
-// SUMMARY: Bamg: Bidimensional Anisotrope Mesh Generator
-// 
-// RELEASE: 1
-// USAGE  : You may copy freely these files and use it for    
-//          teaching or research. These or part of these may   
-//          not be sold or used for a commercial purpose with- 
-//          out our consent : fax (33) 1 44 27 44 11     
-//
 // AUTHOR:   F. Hecht,    
 // ORG    :  UPMC  
 // E-MAIL :   Frederic.Hecht@Inria.fr   

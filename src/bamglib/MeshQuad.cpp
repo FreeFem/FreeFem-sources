@@ -6,7 +6,7 @@
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
-
+// ********** DO NOT REMOVE THIS BANNER **********
 /*
  
  This file is part of Freefem++
@@ -25,17 +25,12 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-// ********** DO NOT REMOVE THIS BANNER **********
+
 //
 // SUMMARY: Bamg: Bidimensional Anisotrope Mesh Generator
 // RELEASE: 0 
-// USAGE  : You may copy freely these files and use it for    
-//          teaching or research. These or part of these may   
-//          not be sold or used for a commercial purpose with- 
-//          out our consent : fax (33) 1 39 63 55 14       
-// --------------------------------------------------------
 // AUTHOR:   F. Hecht,    
-// ORG    :  INRIA
+// ORG    :  UMPC
 // E-MAIL :   Frederic.Hecht@Inria.fr   
 //
 // ORIG-DATE:     frev 98

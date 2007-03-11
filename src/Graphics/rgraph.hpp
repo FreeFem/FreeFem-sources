@@ -1,21 +1,33 @@
-/**************DO NOR REMOVE THIS BANNER***************/
-/*  FreeFEM++ : Language for a Finite Element Method  */
-/*  -------    Release 1.46:  June 2005.              */
-/* -------------------------------------------------- */
-/*  Authors: D. Bernardi, Y. Darmaillac F. Hecht,     */
-/*           O. Pironneau                             */
-/*  You may copy freely these files and use it for    */
-/* teaching or research. These or part of these may   */
-/* not be sold or used for a commercial purpose with- */
-/* out our consent : fax (33)1 44 27 44 11            */
-/*  modified for bamg by F Hecht  dec 1997            */
-/*  modified for dynamic DLL  F. hecht 2005           */
-/* add of  InPtScreen   and   InRecScreen             */
+// SUMMARY  :      
+// USAGE    :        
+// ORG      : 
+// AUTHOR   : Frederic Hecht
+// E-MAIL   : hecht@ann.jussieu.fr
 /* -------------------                                */
 /* (e-mail)    Olivier.Pironneau@ann.jussieu.fr       */
 /* (e-mail)    hecht@ann.jussieu.fr                   */
 /******************************************************/
-
+/*
+ 
+ This file is part of Freefem++
+ 
+ Freefem++ is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 2.1 of the License, or
+ (at your option) any later version.
+ 
+ Freefem++  is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public License
+ along with Freefem++; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+// E-MAIL :   Frederic.Hecht@Inria.fr   
+//
+// ORIG-DATE:     Dec 97
 #ifndef RGRAPH_H_
 
 #define RGRAPH_H_
