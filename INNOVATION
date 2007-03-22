@@ -1,3 +1,8 @@
+v 2.14-2 (22 mars 2007)
+  correct integration problem on none classical mesh (mesh of curve of mortar technique)
+  the mesh::Find methode is boggus of the kind on meshes, i make an optimisation to remove
+  this call in case build matrix with varf int1d(Th)( u*v) , in case of Th, u or v is def.
+  on same meshes.	
 v 2.14-1 (0 mars 2007)
    correct missing speeling in  configure.ac  mpi++.h -> mpi++.h for mpich.1.2
    add computing linear form of 2 meshes  (ex. v on mesh Th1, and  compute int2d(Th1)(v) )

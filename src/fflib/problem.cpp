@@ -643,6 +643,7 @@ void Check(const Opera &Op,int N,int  M)
 			    tv=tu;
 			    outsidev=outsideu;
 			    Ptv=Ptu;
+			    ivt=iut;
 			}
 			else
 			{
