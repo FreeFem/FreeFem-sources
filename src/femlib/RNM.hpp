@@ -103,6 +103,8 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //   -- de fonction dans le cas real                                                                                                                 
 // modif for g++ 4.0 and xlc++   mai 2005
 //  adding some this-> 
+//   mars 2007
+// correction in operator operation:b -1*c 
 // ----------------
 inline double  conj(const double & x){return x;}
 inline float  conj(const float &x){return x;}
@@ -161,18 +163,20 @@ template<class R,class I> class KN_ITAB;
 
 template<class R,typename A,typename B> class F_KN_;
 
-
+#ifndef VersionFreeFempp
+#define ffassert assert
+#endif
 
 // gestion des erreur interne --
 #ifndef InternalError
 typedef void (* TypeofInternalErrorRoutine)(const char *) ;
-inline TypeofInternalErrorRoutine &InternalErrorRoutinePtr()
+static TypeofInternalErrorRoutine &InternalErrorRoutinePtr()
 { 
   static TypeofInternalErrorRoutine routine=0;
   return routine;
 }
 
-inline void InternalError(const char * str) {
+static void InternalError(const char * str) {
   if (InternalErrorRoutinePtr() ) (*InternalErrorRoutinePtr())(str);
   cerr << str; 
   exit(1);
@@ -198,10 +202,14 @@ struct  VirtualMatrice { public:
   virtual bool WithSolver() const {return false;} // by default no solver          
   virtual void Solve( KN_<R> &  x,const KN_<R> & b) const 
     { InternalError("VirtualMatrice::solve not implemented "); } 
-    
+
+#ifdef VersionFreeFempp
   virtual bool ChecknbLine  (int n) const= 0; 
   virtual bool ChecknbColumn  (int m) const =0; 
-    
+#else
+  virtual bool ChecknbLine  (int n) const {return true;} 
+  virtual bool ChecknbColumn  (int m) const {return true;}
+#endif
   struct  plusAx { const VirtualMatrice * A; const KN_<R>   x;
    plusAx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) 
       { ffassert(B->ChecknbColumn(y.N())); }
@@ -1291,8 +1299,11 @@ template<class R> inline Add_Mulc_KN_<R> operator-(const  Mulc_KN_<R>& a,const K
 
 template<class R> inline Add_Mulc_KN_<R> operator+(const KN_<const_R> & b,const  Mulc_KN_<R>& a) 
    { return Add_Mulc_KN_<R>(a,b,R(1));}
-template<class R> inline Add_Mulc_KN_<R> operator-(const KN_<const_R> & b,const  Mulc_KN_<R>& a) 
-   { return Add_Mulc_KN_<R>(a,b,R(-1));}
+
+// modif FH mars 2007 
+template<class R> inline Add_Mulc_KN_<R> operator-(const KN_<const_R> & a,const  Mulc_KN_<R>& b) 
+   { return Add_Mulc_KN_<R>(a,R(1),b.a,-b.b);}// modif FH mars 2007  
+
 template<class R> inline Mul_KNM_KN_<R> operator*(const  KNM_<const_R> & A,const  KN_<const_R> & b) 
     { return Mul_KNM_KN_<R>(A,b);}
 

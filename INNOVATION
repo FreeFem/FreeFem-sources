@@ -1,3 +1,5 @@
+v 2.14-3 (24 mars 2007)
+  Correct bug in vectorial operation of type  (b - 3.14*d) (Thanks to F. Dortu)
 v 2.14-2 (22 mars 2007)
   correct integration problem on none classical mesh (mesh of curve of mortar technique)
   the mesh::Find methode is boggus of the kind on meshes, i make an optimisation to remove
