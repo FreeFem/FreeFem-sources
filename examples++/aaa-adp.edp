@@ -2,7 +2,7 @@
 real eps =  0.0001;
 real h=1;
 real hmin=0.000005;
-real val=10; 
+real val=2; 
 real coef=50; // err = 1/100
 int nbiter=6,firstplot=3;
 func f = y*x*x+y*y*y+h*tanh(val*(sin(5.0*y)-2.0*x));
