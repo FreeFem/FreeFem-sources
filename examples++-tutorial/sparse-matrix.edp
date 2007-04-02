@@ -89,8 +89,8 @@ else
   matrix sA=A;
   matrix tAA=sA+sA';
   matrix ttAA=sA'+sA;
-  matrix tttAA=sA'-sA;
-  matrix ttAA=sA'-sA;
+ // matrix tttAA=sA'-sA;
+ // matrix ttAA=sA'-sA;
   A += 2*a*a';  //  produit tensoriel
   matrix A1=   A(II^-1,JJ^-1);   //  do A1(II,JJ) = A 
   matrix A2=   A(III,JJJ);   //  do A = A 
