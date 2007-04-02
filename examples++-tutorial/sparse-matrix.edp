@@ -85,9 +85,18 @@ else
   cout << " a(III^1) = " << c  << endl;
   for (int i=0;i<N;i++)
     assert( int(c[int(b[i])]) == i);
-    A += 2*a*a';  //  produit tensoriel
+
+  matrix sA=A;
+  matrix tAA=sA+sA';
+  matrix ttAA=sA'+sA;
+  matrix tttAA=sA'-sA;
+  matrix ttAA=sA'-sA;
+  A += 2*a*a';  //  produit tensoriel
   matrix A1=   A(II^-1,JJ^-1);   //  do A1(II,JJ) = A 
   matrix A2=   A(III,JJJ);   //  do A = A 
+  matrix sA1=   sA(II^-1,JJ^-1);   //  do A1(II,JJ) = A 
+  matrix sA2=   sA(III,JJJ);   //  do A = A 
+
   matrix A0 = (a*a')(II^-1,JJ^-1);
   matrix A3 = (a*a')(III,JJJ);
 

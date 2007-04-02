@@ -2323,11 +2323,13 @@ class  OneUnaryOperator : public OneOperator{
   typedef typename C::result_type R;
   typedef typename C::argument_type A; 
    // aType r; //  return type 
+    aType tA;
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new Op(t[0]->CastTo(args[0]));} 
-    OneUnaryOperator(): 
-      OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()])
+     { return  new Op(tA->CastTo(args[0]));} 
+    OneUnaryOperator(aType tt0=map_type[typeid(A).name()]): 
+      OneOperator(map_type[typeid(R).name()],tt0), 
+      tA(map_type[typeid(A).name()])
       {}
 };
 
@@ -2380,14 +2382,21 @@ class  OneOperator2_ : public OneOperator {
 
 template<class R,class A=R,class B=A,class C=B,class CODE=E_F_F0F0F0_<R,A,B,C,E_F0> >
 class  OneOperator3_ : public OneOperator {
-    aType r; //  return type 
+   // aType r; //  return type 
+    aType tA,tB,tC; // type of template modif FH mars 2007 
     typedef typename  CODE::func  func;
     func f;
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new CODE(f,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]));} 
-    OneOperator3_(func  ff): 
-      OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()],map_type[typeid(C).name()]),
+     { return  new CODE(f,tA->CastTo(args[0]),tB->CastTo(args[1]),tC->CastTo(args[2]));} 
+    OneOperator3_(func  ff,
+		  aType tt0=map_type[typeid(A).name()],
+		  aType tt1=map_type[typeid(B).name()],
+		  aType tt2=map_type[typeid(C).name()])
+	: OneOperator(map_type[typeid(R).name()],tt0,tt1,tt2),
+      tA(map_type[typeid(A).name()]),
+      tB(map_type[typeid(B).name()]),
+      tC(map_type[typeid(C).name()]),
       f(ff){}
 };
 

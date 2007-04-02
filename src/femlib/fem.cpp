@@ -1354,9 +1354,9 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		for (int j=0;j<3;j++)
 		{
 		    int jt=j,it=Th.TriangleAdj(i,jt);
-		    if(it==i || it <0) neb += split[i];
-		    else if  (!split[it]) neb += split[i];
-		    else 
+		    if(it==i || it <0) neb += split[i];  //on est sur la frontiere
+		    else if  (!split[it]) neb += split[i];//le voisin ne doit pas etre decoupe
+		    else  //on est dans le domaine et le voisin doit etre decoupe
 		    {
 			int ie0,ie1;
 			Th.VerticesNumberOfEdge(Th[i],j,ie0,ie1);
@@ -1364,7 +1364,10 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			if(pbe && &(*pbe)[0] == &Th(ie0))   
 			    neb += max(split[i],split[it]); // aretes frontiere (FH juillet 2005)
 			if (!pbe && (ie0 < ie1))
+			{
 			    nebi += max(split[i],split[it]); // arete interne a force ...  (FH jan 2007) 
+			   // cout << nebi << " zzzz  t" << i << " a=" << j << " taj=" << it << " sa =" <<    ie0 << " " << ie1 << " + = " << max(split[i],split[it]) << endl;
+			}
 		    }
 		}
 		for (int j=0;j<3;j++)
@@ -1462,7 +1465,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    int &  nneb = bbe ? neb : nebi;
 		    int nnebmax = bbe ? nebmax : nebimax;
 		    int offset= bbe ? 0 : nebmax;
-		    if (bbe || ie0 < ie1) // arete interne ou frontiere 
+		    if (bbe ||  (!pbe && (ie0 < ie1) ) ) // arete interne ou frontiere 
 		    {
 			int kold = it;   //Th.BoundaryTriangle(ieb,jj);
 			int n=split[kold];
@@ -1498,6 +1501,9 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			    
 			    pv0=pv1;
 			}
+			//if (bbe)
+			 //   cout << nneb+1 << " yyyy  t" << it << " a=" << jt << " taj=" << itt << " sa =" <<    ie0 << " " << ie1 << " + = " << n << endl;
+
 			assert(nneb<nnebmax);
 			bbedges[nneb].vertices[0]=pv0;
 			bbedges[nneb].vertices[1]=pvb;

@@ -1,3 +1,6 @@
+v 2.15  (27 mars 2007)
+  The blas.tgz file change on http://www.netlib.org/blas/blas.tgz
+  correct the makefile  (remove BLAS dir) 
 v 2.14-3 (24 mars 2007)
   Correct bug in vectorial operation of type  (b - 3.14*d) (Thanks to F. Dortu)
 v 2.14-2 (22 mars 2007)
