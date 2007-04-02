@@ -163,7 +163,8 @@ template<class R,class I> class KN_ITAB;
 
 template<class R,typename A,typename B> class F_KN_;
 
-#ifndef VersionFreeFempp
+
+#ifndef ffassert
 #define ffassert assert
 #endif
 

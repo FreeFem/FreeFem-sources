@@ -166,8 +166,11 @@ libcblas_a_CFLAGS=-DADD_
 BLAS:BLAS/fait
 
 BLAS/fait:blas.tgz
-	mkdir -p BLAS
-	cd BLAS && tar xvzf ../blas.tgz
+	-if tar xvzf blas.tgz BLAS/xerbla.f 2>&1 1>/dev/null ; then \
+	tar xvzf blas.tgz ; \
+	else \
+	mkdir -p BLAS;cd BLAS && tar xvzf ../blas.tgz;\
+	fi
 	cp BLAS/xerbla.f blas_xerbla.f
 	touch BLAS/fait
 $(F77BLAS_SOURCES): BLAS
