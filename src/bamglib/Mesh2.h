@@ -816,6 +816,7 @@ public:
   void FindSubDomain(int );
   Int4  ConsRefTriangle(Int4 *) const;
   void ShowHistogram() const;
+  void  ShowRegulaty() const; // Add FH avril 2007 
 //  void ConsLinkTriangle();
 
   void ReMakeTriangleContainingTheVertex();

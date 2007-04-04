@@ -708,13 +708,14 @@ AnyType Adaptation::operator()(Stack stack) const
  
   if(SplitEdgeWith2Boundary)
     nTh->SplitInternalEdgeWithBorderVertices();
-  
-  if(verbosity>2) 
+  if(verbosity>3) 
     nTh->ShowHistogram();
   if (nbsmooth)
     nTh->SmoothingVertex(nbsmooth,omega);
   if(verbosity>2 && nbsmooth) 
     nTh->ShowHistogram();
+  if(verbosity>0)  
+      nTh->ShowRegulaty()  ;
    
 #ifdef DRAWING
   if ((inq!=0) && initgraphique) {
@@ -739,6 +740,10 @@ AnyType Adaptation::operator()(Stack stack) const
   return SetAny<pmesh>(g);
   }
  else {
+    
+     if(verbosity>1)  
+     {  cout << " regularty Old mesh / New metrix ";
+	 oTh->ShowRegulaty()  ;}     
    delete oTh;
    return SetAny<pmesh>(Thh);
  }

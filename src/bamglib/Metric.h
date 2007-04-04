@@ -30,6 +30,7 @@
 #define TYPEMETRIX MetricAnIso
 #endif
 
+//#include "R2.h"
 namespace bamg {
 
 typedef P2<double,double> D2;
@@ -67,8 +68,9 @@ public:
   Real8 operator()(R2 x,R2 y) const { return ((x,y))/(h*h);};
   int  IntersectWith(MetricIso M) {int r=0;if (M.h<h) r=1,h=M.h;return r;}
   MetricIso operator*(Real8 c) const {return  MetricIso(h/c);} 
-  MetricIso operator/(Real8 c) const {return  MetricIso(h*c);} 
-
+  MetricIso operator/(Real8 c) const {return  MetricIso(h*c);}
+  Real8 det() const {return 1./(h*h*h*h);}    
+  operator D2xD2(){ return D2xD2(1/(h*h),0.,0.,1/(h*h));}
   void     Box(Real4 & hx,Real4 & hy) { hx=h,hy=h;}
   friend ostream& operator <<(ostream& f, const  MetricIso & M)
   {f << " h=" << M.h<< ";" ;   return f;}
@@ -88,6 +90,7 @@ class MetricAnIso{ public:
   MetricAnIso(const Real8  a[3],const  MetricAnIso m0,
 	      const  MetricAnIso m1,const  MetricAnIso m2 );
   R2 mul(const R2 x)const {return R2(a11*x.x+a21*x.y,a21*x.x+a22*x.y);}
+  Real8 det() const {return a11*a22-a21*a21;}  
   R2 Orthogonal(const R2 x){return R2(-(a21*x.x+a22*x.y),a11*x.x+a21*x.y);}
   R2 Orthogonal(const I2 x){return R2(-(a21*x.x+a22*x.y),a11*x.x+a21*x.y);}
 //  D2 Orthogonal(const D2 x){return D2(-(a21*x.x+a22*x.y),a11*x.x+a21*x.y);}
@@ -96,6 +99,7 @@ class MetricAnIso{ public:
   int  IntersectWith(const MetricAnIso M);
   MetricAnIso operator*(Real8 c) const {Real8 c2=c*c;return  MetricAnIso(a11*c2,a21*c2,a22*c2);} 
   MetricAnIso operator/(Real8 c) const {Real8 c2=1/(c*c);return  MetricAnIso(a11*c2,a21*c2,a22*c2);} 
+  operator D2xD2(){ return D2xD2(a11,a21,a21,a22);}
 
   Real8 operator()(R2 x) const { return sqrt(x.x*x.x*a11+2*x.x*x.y*a21+x.y*x.y*a22);};
 //  Real8 operator()(D2 x) const { return sqrt(x.x*x.x*a11+2*x.x*x.y*a21+x.y*x.y*a22);};
