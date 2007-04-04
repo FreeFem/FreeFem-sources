@@ -4636,41 +4636,100 @@ void Triangles::MakeQuadTree()
 #endif
   
 }
+void  Triangles::ShowRegulaty() const// Add FH avril 2007 
+{
+   const  Real8  sqrt32=sqrt(3.)*0.5; 
+   const Real8  aireKh=sqrt32*0.5;
+    D2xD2 Br(D2(1.,0.),D2(0.5,sqrt32));
+    D2xD2 B1r(Br.inv());
+    D2xD2 BB = Br.t()*Br;
+    cout << " BB = " << BB << " " << Br*B1r <<  endl; 
+    MetricAnIso MMM(BB.x.x,BB.x.y,BB.y.y);
+    MatVVP2x2 VMM(MMM);
+    cout << " " << VMM.lambda1 << " " << VMM.lambda2 <<  endl; 
+    double gammamn=1e100,hmin=1e100;
+    double gammamx=0,hmax=0;
+    double beta=1e100;
+    double beta0=0;
+   // Real8 cf= Real8(coefIcoor);
+   // Real8 cf2= 6.*cf*cf;
+    for (int it=0;it<nbt;it++)
+	if ( triangles[it].link) 
+	{
+	    Triangle &K=triangles[it];
+	    Real8  area3= Area2((R2) K[0],(R2) K[1],(R2) K[2])/6.;
+	    D2xD2 B_K(D2(K[0],K[1]),D2(K[0],K[2]));
+	    D2xD2 B1K = Br*B_K.inv();
+	    D2xD2 BK =  B_K*B1r;
+	   // cout << B_K << " * " << B1r << " == " << BK << " " << B_K*B_K.inv() << endl;
+	    Real8 betaK=0;
+	
+	    for (int j=0;j<3;j++)
+	    {
+		Real8 he= Norme2(R2(K[j],K[(j+1)%3]));
+                hmin=Min(hmin,he);
+                hmax=Max(hmax,he);
+		Vertex & v=K[j];
+		D2xD2 M((MetricAnIso)v);
+		betaK += sqrt(M.det());
+		
+		D2xD2 BMB = BK.t()*M*BK;
+		MetricAnIso M1(BMB.x.x,BMB.x.y,BMB.y.y);
+		MatVVP2x2 VM1(M1);
+		//cout << B_K <<" " <<  M << " " <<  he << " " << BMB << " " << VM1.lambda1 << " " << VM1.lambda2<<   endl; 
+		gammamn=Min3(gammamn,VM1.lambda1,VM1.lambda2);
+		gammamx=Max3(gammamx,VM1.lambda1,VM1.lambda2);		
+	    }
+	    betaK *= area3;//  1/2 (somme sqrt(det))* area(K)
+	   // cout << betaK << " " << area3 << " " << beta << " " << beta0 << " " << area3*3*3*3 <<endl;
+	    beta=min(beta,betaK);
+	    beta0=max(beta0,betaK);
+	}   
+    gammamn=sqrt(gammamn);
+    gammamx=sqrt(gammamx);    
+    cout << " h :  min " << hmin  << "  max " << hmax << endl;  
+    cout << " infiny-regulaty:  min " << gammamn << "  max " << gammamx << endl;  
+    cout << " beta min = " << 1./sqrt(beta/aireKh) << " max  "<<  1./sqrt(beta0/aireKh)  << endl;
+}
 void  Triangles::ShowHistogram() const
  {
+
     const Int4 kmax=10;
     const Real8 llmin = 0.5,llmax=2;
-    const Real8 lmin=log(llmin),lmax=log(llmax),delta= kmax/(lmax-lmin);
+     const Real8 lmin=log(llmin),lmax=log(llmax),delta= kmax/(lmax-lmin);
     Int4 histo[kmax+1];
     Int4 i,it,k, nbedges =0;
     for (i=0;i<=kmax;i++) histo[i]=0;
     for (it=0;it<nbt;it++)
-      if ( triangles[it].link) 
-       for (int j=0;j<3;j++)
-       {
-         Triangle *ta = triangles[it].TriangleAdj(j);
-         if ( !ta || !ta->link || Number(ta) >= it) 
-           { 
-             Vertex & vP = triangles[it][VerticesOfTriangularEdge[j][0]];
-             Vertex & vQ = triangles[it][VerticesOfTriangularEdge[j][1]];
-             if ( !& vP || !&vQ) continue;
-             R2 PQ = vQ.r - vP.r;
-             Real8 l = log(LengthInterpole(vP,vQ,PQ));
+	if ( triangles[it].link) 
+	{
+	     
+	    for (int j=0;j<3;j++)
+	    {
+		Triangle *ta = triangles[it].TriangleAdj(j);
+		if ( !ta || !ta->link || Number(ta) >= it) 
+		{ 
+		    Vertex & vP = triangles[it][VerticesOfTriangularEdge[j][0]];
+		    Vertex & vQ = triangles[it][VerticesOfTriangularEdge[j][1]];
+		    if ( !& vP || !&vQ) continue;
+		    R2 PQ = vQ.r - vP.r;
+		    Real8 l = log(LengthInterpole(vP,vQ,PQ));
 #ifdef DRAWING2             
-             if (l>1.4)  {
-               penthickness(3);
-               vP.MoveTo(),vQ.LineTo();
-               penthickness(1);
-               cout << "   l = " << l << Number(vP) << " edge = " << Number(vQ) << endl;
-             }
+		    if (l>1.4)  {
+			penthickness(3);
+			vP.MoveTo(),vQ.LineTo();
+			penthickness(1);
+			cout << "   l = " << l << Number(vP) << " edge = " << Number(vQ) << endl;
+		    }
 #endif             
-             nbedges++;
-             k = (int) ((l - lmin)*delta);
-             k = Min(Max(k,0L),kmax);
-             histo[k]++;
-           }
-       }
-    cout << " -- Histogram of the unit mesh,  nb of edges" << nbedges << endl <<endl;
+		    nbedges++;
+		    k = (int) ((l - lmin)*delta);
+		    k = Min(Max(k,0L),kmax);
+		    histo[k]++;
+		}
+	    }
+	}  
+	    cout << " -- Histogram of the unit mesh,  nb of edges" << nbedges << endl <<endl;
  
     cout << "        length of edge in   | % of edge  | Nb of edges " << endl;
     cout << "        ------------------- | ---------- | ----------- " << endl;
@@ -4694,7 +4753,7 @@ void  Triangles::ShowHistogram() const
        cout <<  "   |   " << histo[i] <<endl;
       }
     cout << "        ------------------- | ---------- | ----------- " << endl <<endl;
-
+    
  }
 
 int  Triangles::Crack()

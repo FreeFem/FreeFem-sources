@@ -53,7 +53,7 @@ public:
  };
 
 template <class R,class RR>
-class P2xP2 { // x ligne 1 y ligne2 
+class P2xP2 { // x col1  y col2 
 
   friend ostream& operator <<(ostream& f, const P2xP2<R,RR> & c) 
      { f << '[' << c.x << ',' << c.y << ']' <<flush ; return f; }
@@ -69,11 +69,9 @@ class P2xP2 { // x ligne 1 y ligne2
   P2xP2 (P2<R,RR> a,P2<R,RR> b,P2<R,RR> c ): x(b-a),y(c-a) {}
   P2xP2 (R xx,R xy,R yx,R yy) :x(xx,xy),y(yx,yy) {}
   P2<R,RR> operator*(const P2<R,RR> c) const {return P2<R,RR>(x.x*c.x + x.y*c.y, y.x*c.x + y.y*c.y);}
-  P2xP2<R,RR>  operator*(P2xP2<R,RR> c) const 
-    { return  P2xP2<R,RR>(x.x*c.x.x + x.y*c.y.x,
-			  x.x*c.x.y + x.y*c.y.y,
-			  y.x*c.x.x + y.y*c.y.x,
-			  y.x*c.x.y + y.y*c.y.y);}
+  P2xP2<R,RR>  operator*(P2xP2<R,RR> c) const //  
+  { P2<R,RR> l1(x.x,y.x), l2(x.y,y.y); 
+      return  P2xP2<R,RR>( (l1,c.x), ( l2,c.x),(l1,c.y), ( l2,c.y));}
   RR det() const {return (RR) x.x* (RR) y.y - (RR) x.y * (RR) y.x;}
   P2xP2<R,RR> inv()  const
      { RR d = (*this).det(); 

@@ -1,3 +1,6 @@
+v 2.15-1
+  Correct mistake in cas of splitmesh with internal boundary (assert)
+  Add dump  of the mesh regulary (pesonnal work, FH)
 v 2.15  (27 mars 2007)
   The blas.tgz file change on http://www.netlib.org/blas/blas.tgz
   correct the makefile  (remove BLAS dir) 
