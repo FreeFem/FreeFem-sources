@@ -4652,7 +4652,7 @@ void  Triangles::ShowRegulaty() const// Add FH avril 2007
     double gammamx=0,hmax=0;
     double beta=1e100;
     double beta0=0;
-    double  alpha=0;
+    double  alpha2=0;
     double area=0,Marea=0;
    // Real8 cf= Real8(coefIcoor);
    // Real8 cf2= 6.*cf*cf;
@@ -4670,7 +4670,7 @@ void  Triangles::ShowRegulaty() const// Add FH avril 2007
 	  D2xD2 B1B1 = B1K.t()*B1K;
 	  MetricAnIso MK(B1B1.x.x,B1B1.x.y,B1B1.y.y);
 	  MatVVP2x2 VMK(MK);
-	  alpha = Max(alpha,Max(VMK.lambda1/VMK.lambda2,VMK.lambda2/VMK.lambda1));
+	  alpha2 = Max(alpha2,Max(VMK.lambda1/VMK.lambda2,VMK.lambda2/VMK.lambda1));
 	  // cout << B_K << " * " << B1r << " == " << BK << " " << B_K*B_K.inv() << endl;
 	  Real8 betaK=0;
 	  
@@ -4701,7 +4701,8 @@ void  Triangles::ShowRegulaty() const// Add FH avril 2007
     cout << "  -- adaptmesh Regulary:  Nb triangles " << nt <<  " , h  min " << hmin  << " , h max " << hmax << endl;  
     cout << "     area =  " << area << " , M area = " << Marea << " , M area/( |Khat| nt) " << Marea/(aireKh*nt) << endl; 
     cout << "     infiny-regulaty:  min " << gammamn << "  max " << gammamx << endl;  
-    cout << "     anisomax  "<< alpha << ", beta min = " << 1./sqrt(beta/aireKh) << " max  "<<  1./sqrt(beta0/aireKh)  << endl;
+    cout << "     anisomax  "<< sqrt(alpha2) << ", beta max = " << 1./sqrt(beta/aireKh) 
+	 << " min  "<<  1./sqrt(beta0/aireKh)  << endl;
 }
 void  Triangles::ShowHistogram() const
  {
