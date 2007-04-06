@@ -4696,6 +4696,7 @@ void  Triangles::ShowRegulaty() const// Add FH avril 2007
 	  beta=min(beta,betaK);
 	  beta0=max(beta0,betaK);
 	}   
+    area*=3; 
     gammamn=sqrt(gammamn);
     gammamx=sqrt(gammamx);    
     cout << "  -- adaptmesh Regulary:  Nb triangles " << nt <<  " , h  min " << hmin  << " , h max " << hmax << endl;  
