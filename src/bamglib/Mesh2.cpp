@@ -4640,56 +4640,68 @@ void  Triangles::ShowRegulaty() const// Add FH avril 2007
 {
    const  Real8  sqrt32=sqrt(3.)*0.5; 
    const Real8  aireKh=sqrt32*0.5;
-    D2xD2 Br(D2(1.,0.),D2(0.5,sqrt32));
-    D2xD2 B1r(Br.inv());
-    D2xD2 BB = Br.t()*Br;
+   D2xD2 Br(D2xD2(D2(1.,0.),D2(0.5,sqrt32)).t());
+   D2xD2 B1r(Br.inv());
+   /*   D2xD2 BB = Br.t()*Br;
     cout << " BB = " << BB << " " << Br*B1r <<  endl; 
     MetricAnIso MMM(BB.x.x,BB.x.y,BB.y.y);
     MatVVP2x2 VMM(MMM);
     cout << " " << VMM.lambda1 << " " << VMM.lambda2 <<  endl; 
+   */
     double gammamn=1e100,hmin=1e100;
     double gammamx=0,hmax=0;
     double beta=1e100;
     double beta0=0;
+    double  alpha=0;
+    double area=0,Marea=0;
    // Real8 cf= Real8(coefIcoor);
    // Real8 cf2= 6.*cf*cf;
+    int nt=0;
     for (int it=0;it<nbt;it++)
-	if ( triangles[it].link) 
+      if ( triangles[it].link) 
 	{
-	    Triangle &K=triangles[it];
-	    Real8  area3= Area2((R2) K[0],(R2) K[1],(R2) K[2])/6.;
-	    D2xD2 B_K(D2(K[0],K[1]),D2(K[0],K[2]));
-	    D2xD2 B1K = Br*B_K.inv();
-	    D2xD2 BK =  B_K*B1r;
-	   // cout << B_K << " * " << B1r << " == " << BK << " " << B_K*B_K.inv() << endl;
-	    Real8 betaK=0;
-	
-	    for (int j=0;j<3;j++)
+	  nt++;
+	  Triangle &K=triangles[it];
+	  Real8  area3= Area2((R2) K[0],(R2) K[1],(R2) K[2])/6.;
+	  area+= area3;
+	  D2xD2 B_K(D2xD2(K[0],K[1],K[2]).t());
+	  D2xD2 B1K = Br*B_K.inv();
+	  D2xD2 BK =  B_K*B1r;
+	  D2xD2 B1B1 = B1K.t()*B1K;
+	  MetricAnIso MK(B1B1.x.x,B1B1.x.y,B1B1.y.y);
+	  MatVVP2x2 VMK(MK);
+	  alpha = Max(alpha,Max(VMK.lambda1/VMK.lambda2,VMK.lambda2/VMK.lambda1));
+	  // cout << B_K << " * " << B1r << " == " << BK << " " << B_K*B_K.inv() << endl;
+	  Real8 betaK=0;
+	  
+	  for (int j=0;j<3;j++)
 	    {
-		Real8 he= Norme2(R2(K[j],K[(j+1)%3]));
-                hmin=Min(hmin,he);
-                hmax=Max(hmax,he);
-		Vertex & v=K[j];
-		D2xD2 M((MetricAnIso)v);
-		betaK += sqrt(M.det());
-		
-		D2xD2 BMB = BK.t()*M*BK;
-		MetricAnIso M1(BMB.x.x,BMB.x.y,BMB.y.y);
-		MatVVP2x2 VM1(M1);
-		//cout << B_K <<" " <<  M << " " <<  he << " " << BMB << " " << VM1.lambda1 << " " << VM1.lambda2<<   endl; 
-		gammamn=Min3(gammamn,VM1.lambda1,VM1.lambda2);
-		gammamx=Max3(gammamx,VM1.lambda1,VM1.lambda2);		
+	      Real8 he= Norme2(R2(K[j],K[(j+1)%3]));
+	      hmin=Min(hmin,he);
+	      hmax=Max(hmax,he);
+	      Vertex & v=K[j];
+	      D2xD2 M((MetricAnIso)v);
+	      betaK += sqrt(M.det());
+	      
+	      D2xD2 BMB = BK.t()*M*BK;
+	      MetricAnIso M1(BMB.x.x,BMB.x.y,BMB.y.y);
+	      MatVVP2x2 VM1(M1);
+	      //cout << B_K <<" " <<  M << " " <<  he << " " << BMB << " " << VM1.lambda1 << " " << VM1.lambda2<<   endl; 
+	      gammamn=Min3(gammamn,VM1.lambda1,VM1.lambda2);
+	      gammamx=Max3(gammamx,VM1.lambda1,VM1.lambda2);		
 	    }
-	    betaK *= area3;//  1/2 (somme sqrt(det))* area(K)
-	   // cout << betaK << " " << area3 << " " << beta << " " << beta0 << " " << area3*3*3*3 <<endl;
-	    beta=min(beta,betaK);
-	    beta0=max(beta0,betaK);
+	  betaK *= area3;//  1/2 (somme sqrt(det))* area(K)
+	  Marea+= betaK;
+	  // cout << betaK << " " << area3 << " " << beta << " " << beta0 << " " << area3*3*3*3 <<endl;
+	  beta=min(beta,betaK);
+	  beta0=max(beta0,betaK);
 	}   
     gammamn=sqrt(gammamn);
     gammamx=sqrt(gammamx);    
-    cout << " h :  min " << hmin  << "  max " << hmax << endl;  
-    cout << " infiny-regulaty:  min " << gammamn << "  max " << gammamx << endl;  
-    cout << " beta min = " << 1./sqrt(beta/aireKh) << " max  "<<  1./sqrt(beta0/aireKh)  << endl;
+    cout << "  -- adaptmesh Regulary:  Nb triangles " << nt <<  " , h  min " << hmin  << " , h max " << hmax << endl;  
+    cout << "     area =  " << area << " , M area = " << Marea << " , M area/( |Khat| nt) " << Marea/(aireKh*nt) << endl; 
+    cout << "     infiny-regulaty:  min " << gammamn << "  max " << gammamx << endl;  
+    cout << "     anisomax  "<< alpha << ", beta min = " << 1./sqrt(beta/aireKh) << " max  "<<  1./sqrt(beta0/aireKh)  << endl;
 }
 void  Triangles::ShowHistogram() const
  {
