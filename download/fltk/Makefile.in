@@ -67,7 +67,7 @@ POST_UNINSTALL = :
 EXEEXT = @EXEEXT@
 OBJEXT = @OBJEXT@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-INSTALL = install
+INSTALL = ../..
 ADD_PACKAGE_NAME = @ADD_PACKAGE_NAME@
 AGLPROG = @AGLPROG@
 AMTAR = @AMTAR@
@@ -283,16 +283,16 @@ uninstall-am: uninstall-info-am
 
 all-local: $(DOWNLOAD_FLTK)
 
-fltk: $(SRCDIR)/$(INSTALL)
+fltk: $(SRCDIR)/FF
 
 # Using system JPEG and PNG lib is a problem under Cygwin
-$(SRCDIR)/$(INSTALL): $(SRCDIR)
+$(SRCDIR)/FF: $(SRCDIR)
 	cd $(SRCDIR) && ./configure --enable-threads --enable-localjpeg	\
 		--enable-localpng $(FLTK_CONFIG_PARAM) --disable-gl	\
 		@FLTK_XONLY@ --prefix=`pwd`/$(INSTALL) CXX=$(CXX) CC=$(CC)
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
-
+	touch FF
 $(SRCDIR): $(PACKAGE)
 	tar xvjf $(PACKAGE)
 

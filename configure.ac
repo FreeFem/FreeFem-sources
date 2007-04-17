@@ -1117,7 +1117,7 @@ then
 	AC_SUBST(DOWNLOAD_FLTK,fltk)
 	ff_fltk_version=1.1.6
 	AC_SUBST(FLTK_VERSION,$ff_fltk_version)
-	ff_fltk_config="$curdir/download/fltk/fltk-$ff_fltk_version/install/bin/fltk-config"
+	ff_fltk_config="$curdir/download//bin/fltk-config"
 	ff_fltk=yes
 fi
 

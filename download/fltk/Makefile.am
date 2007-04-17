@@ -12,18 +12,18 @@ all-local: $(DOWNLOAD_FLTK)
 SRCDIR=fltk-$(FLTK_VERSION)
 PACKAGE=fltk-$(FLTK_VERSION)-source.tar.bz2
 SERVER=http://switch.dl.sourceforge.net/sourceforge/fltk
-INSTALL=install
+INSTALL=../..
 
-fltk: $(SRCDIR)/$(INSTALL)
+fltk: $(SRCDIR)/FF
 
 # Using system JPEG and PNG lib is a problem under Cygwin
-$(SRCDIR)/$(INSTALL): $(SRCDIR)
+$(SRCDIR)/FF: $(SRCDIR)
 	cd $(SRCDIR) && ./configure --enable-threads --enable-localjpeg	\
 		--enable-localpng $(FLTK_CONFIG_PARAM) --disable-gl	\
 		@FLTK_XONLY@ --prefix=`pwd`/$(INSTALL) CXX=$(CXX) CC=$(CC)
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
-
+	touch FF
 $(SRCDIR): $(PACKAGE)
 	tar xvjf $(PACKAGE)
 

@@ -13446,7 +13446,7 @@ echo "$as_me: using downloaded FLTK" >&6;}
 	ff_fltk_version=1.1.6
 	FLTK_VERSION=$ff_fltk_version
 
-	ff_fltk_config="$curdir/download/fltk/fltk-$ff_fltk_version/install/bin/fltk-config"
+	ff_fltk_config="$curdir/download//bin/fltk-config"
 	ff_fltk=yes
 fi
 

@@ -1030,7 +1030,10 @@ void Init_map_type()
      Add<ostream*>("noshowpos",".",new OneOperator1<ostream*,ostream*>(set_os1<noshowpos>));
      Add<ostream*>("default",".",new OneOperator1<ostream*,ostream*>(set_os1<default1>));
      
-                               
+// add 2.16
+     TheOperators->Add("trace",new opFormal(atype<E_Array>(),formalMatTrace ));
+     TheOperators->Add("det",new opFormal(atype<E_Array>(),formalMatDet ));
+// end add     
                                 
       
      TheOperators->Add("[]",new OneOperator_array );
