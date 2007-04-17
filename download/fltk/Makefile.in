@@ -295,9 +295,9 @@ $(SRCDIR)/FFF: $(SRCDIR)
 	if grep '#define'  config.h|egrep -q "U32|U64" ; then  \
 	 echo " fltk conf OK ??? FH ";  \
 	else \
-	 echo " fltk configure  bug (on windows) ????  add #define U32 unsigned long (bofbof) "\
-	 echo "#define U32 unsigned long" >> config.h \
-	 echo "stop the make process ; just redo make to continue "\
+	 echo " fltk configure  bug (on windows) ????  add #define U32 unsigned long (bofbof) " ;\
+	 echo "#define U32 unsigned long" >> config.h ; \
+	 echo "stop the make process ; just redo make to continue " ; \
 	 exit 1; \
 	 fi
 
