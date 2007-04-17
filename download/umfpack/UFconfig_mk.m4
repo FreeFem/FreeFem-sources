@@ -31,8 +31,8 @@
 # C compiler and compiler flags:  These will normally not give you optimal
 # performance.  You should select the optimization parameters that are best
 # for your system.  On Linux, use "CFLAGS = -O3 -fexceptions" for example.
-CC = gcc
-CFLAGS =   -I/usr/X11R6/include -g  
+CC = FF_CC
+CFLAGS = FF_CFLAGS
 
 
 # ranlib, and ar, for generating libraries
@@ -49,7 +49,7 @@ F77FLAGS =FF_F77FLAGS
 F77LIB = #FF_F77LIB
 
 # C and Fortran libraries
-LIB = -framework vecLib -lpthread  -framework vecLib -lf2c
+LIB = FF_LIB
 
 # For compiling MATLAB mexFunctions
 MEX = mex -O
@@ -127,7 +127,7 @@ METIS = ../../metis-4.0/libmetis.a
 # -DNRECIPROCAL	do not multiply by the reciprocal
 # -DNO_DIVIDE_BY_ZERO	do not divide by zero
 
-UMFPACK_CONFIG = 
+UMFPACK_CONFIG = FF_CONFIG
 
 #------------------------------------------------------------------------------
 # CHOLMOD configuration
