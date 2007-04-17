@@ -168,6 +168,17 @@ struct Op_Read : public binary_function<istream*,A*,istream*> {
 };
 
 template<class A>
+struct Op_ReadP : public binary_function<istream*,A**,istream*> {
+  static istream *  f(istream  * const  & f,A  ** const  &  a)  
+   {
+     assert(a);
+     if( ! *a)  *a= new A ; 
+     *f >> **a;
+     return f;
+   }
+};
+
+template<class A>
 struct Op_ReadKN : public binary_function<istream*,KN<A>*,istream*> {
   static istream *  f(istream  * const  & f,KN<A>* const  &  a)  
    { 

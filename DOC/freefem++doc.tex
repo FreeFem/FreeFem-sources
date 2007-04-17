@@ -4,7 +4,7 @@
 \usepackage{styles}
 \usepackage{txfonts}
 \usepackage{times}
-\def\VERSION{2.11}
+\def\VERSION{2.16}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -3257,7 +3257,7 @@ The renumbering is always given by an integer array, and if a value in the array
 is negative, the mining is not image, so we do not set the value.    
  \index{renumbering} \index{array!renumbering}
 \bFF                                                                                     
-int[int] I=[2,3,4,-1,0];        // the integer mapping to set the renumbering                                                                                              
+int[int] I=[2,3,4,-1,0];// the integer mapping to set the renumbering                                                                                              
 b=c=-3;                                                                                                                      
 b= a(I); // for( i=0;i<b.n;i++) if(I[i] >=0)  b[i]=a[I[i]];                                                                  
 c(I)= a; // for( i=0;i<I.n;i++) if(I[i] >=0)  C(I[i])=a[i];                                                                  
@@ -10005,6 +10005,366 @@ Sh u1,v1;
 @plot(th1,wait=1); //  see figure \ref{fig nl-elas}
 \eFF
 
+\subsection{Compressible Neo-Hookean Materials: Computational Solutions}
+
+Author : Alex Sadovsky \texttt{mailsashas@gmail.com}
+
+%% Macros
+\def\bR{{\bf R}}
+\def\bP{{\bf P}}
+\def\bZ{{\bf Z}}
+\def\bC{{\bf C}}
+%% \def\bR3{{\bf R}^3}
+\def\VS{\bR^2}
+\def\SVS{\underline V}
+\def\SO{{\bf SO}}
+\def\Sym{{\bf Sym}}
+\def\qi{{\bf i}}
+\def\qj{{\bf j}}
+\def\qk{{\bf k}}
+\def\ec{\hat{\bf e}}
+\def\xc{\hat{\bf x}}
+\def\bdr{\partial}
+\def\PD{\partial_}
+\def\strain{\underline \epsilon}
+\def\stress{\underline \sigma}
+\def\strainrate{\underline \epsilon^.}
+\def\stressrate{\underline \sigma^.}
+\def\stiff{\; \underline{\underline C}\;}
+\def\comply{\underline{\underline \kappa}\;}
+\def\Id{{\bf I}}
+\def\Div{\nabla \cdot}
+\def\Grad{\vec{\nabla}}
+\def\rot{\nabla \times}
+\def\lap{\triangle}
+\def\tr{{\bf tr}\;}
+\def\udH{\underline H}
+\def\refX{\vec X}
+\def\Jac{\overline{J}}
+\def\spatx{\vec x}
+\def\ani{\overline a}
+\def\mat{\left[\begin{array}}
+\def\tam{\end{array}\right]}
+\def\arr{\left.\begin{array}}
+\def\rra{\end{array}\right\}}
+\def\arl{\left\{\begin{array}}
+\def\lra{\end{array}\right.}
+\def\ar{\begin{array}}
+\def\ra{\end{array}}
+\def\const{\mbox{ const.}}
+\def\eps{\; \epsilon}
+\def\sig{\; \sigma}
+\def\th{\theta}
+\def\sgn{\mbox{sgn}}
+\def\qed{\; Q.E.D.\\}
+
+\def\eqn{\begin{equation}}
+\def\nqe{\end{equation}}
+ 
+\def\eqnar{\begin{eqnarray}}
+\def\ranqe{\end{eqnarray}}
+
+\def\ol{\overline}
+\def\ul{\underline}
+
+\def\bB{{\bf B}}
+\def\bC{{\bf C}}
+\def\bD{{\bf D}}
+\def\bE{{\bf E}}
+\def\bF{{\bf F}}
+\def\bK{{\bf K}}
+\def\bP{{\bf P}}
+\def\bS{{\bf S}}
+\def\bT{{\bf T}}
+\def\bsig{{\bf \sigma}}
+
+\subsubsection{Notation}
+In what follows, the symbols $\vec{u}, \bF, \bB, \bC, \stress$
+denote, respectively, the displacement field, the deformation
+gradient, the left Cauchy-Green strain tensor $\bB = \bF \bF^T$, the
+right Cauchy-Green strain tensor $\bC =\bF^T \bF$, and the Cauchy stress
+tensor.  We also introduce the symbols $I_1 := \tr \bC$ and $J := \det
+\bF$.  Use will be made of the identity
+\eqn
+{\PD{}J \over \PD{}\bC} = J \bC^{-1}
+\nqe
+The symbol $\Id$ denotes the identity tensor.  The symbol $\Omega_{0}$
+denotes the reference configuration of the body to be deformed.  The
+unit volume in the reference (resp., deformed) configuration is
+denoted $dV$ (resp., $dV_{0}$); these two are related by
+$$
+dV = J dV_{0},
+$$
+which allows an integral over $\Omega$ involving the Cauchy stress
+$\bT$ to be rewritten as an integral of the Kirchhoff stress $\kappa =
+J \bT$ over $\Omega_{0}$.
+\subsubsection*{Recommended References}
+
+For an exposition of nonlinear elasticity and of the underlying
+linear- and tensor algebra, see \cite{Ogden}.  For an advanced 
+mathematical analysis of the Finite Element Method, see
+\cite{Raviart-Thomas}.  An explanation of the Finite Element
+formulation of a nonlinear elastostatic boundary value problem, see
+\href{http://www.engin.brown.edu/courses/en222/Notes/FEMfinitestrain/FEMfinitestrain.htm}.
+
+\subsubsection{A Neo-Hookean Compressible Material}
+
+\paragraph{Constitutive Theory and Tangent Stress Measures}
+
+The strain energy density function is given by
+\eqn
+W = {\mu \over 2}(I_1 - \tr \Id - 2 \ln J)
+%% + \mu_1 (J - 1)^2
+\nqe
+(see \cite{Horgan-Saccomandi}, formula (12)).
+
+The corresponding 2nd Piola-Kirchoff stress tensor is given by
+\eqn
+\bS_{n} := {\PD{} W \over \PD{}\bE} (\bF_{n}) 
+=
+\mu (\Id - \bC^{-1})
+\nqe
+The Kirchhoff stress, then, is
+\eqn
+\kappa 
+= \bF \bS \bF^{T}
+= \mu (\bB  - \Id)
+\nqe
+The tangent Kirchhoff stress tensor at $\bF_{n}$ acting on
+$
+\delta \bF_{n+1}
+$ is, consequently,
+\eqn
+{\PD{} \kappa \over \PD{} \bF} (\bF_{n}) \delta \bF_{n+1}
+=
+\mu 
+\left[
+\bF_{n} (\delta \bF_{n+1})^T
++
+\delta \bF_{n+1} (\bF_{n})^T
+\right]
+\nqe
+
+\paragraph{The Weak Form of the BVP in the Absence of Body (External) Forces}
+
+The $\Omega_0$ we are considering is an elliptical annulus, whose
+boundary consists of two concentric ellipses (each allowed to be a
+circle as a special case), with the major axes parallel.  Let $P$ denote the dead stress load (traction) on a portion 
+$\partial \Omega_0^{t}$ (= the inner ellipse) of the boundary
+$\partial \Omega_0$.  On the rest of the boundary, we prescribe zero displacement.
+
+The weak formulation of the boundary value 
+problem is
+$$
+\arr{lll}
+0 
+& = & 
+\int_{\Omega_0}
+\kappa[\bF]
+\:
+:
+\:
+\left\{
+(\Grad \otimes \vec{w}) (\bF)^{-1}
+\right\}\\
+& - & \int_{\PD{} \Omega_0^{t}} P \cdot \hat{N}_0\\
+\rra
+$$
+{\em
+For brevity, in the rest of this section we assume $P = 0$.  The provided
+FreeFem++ code, however, does not rely on this assumption and allows
+for a general value and direction of $P$.}
+
+Given a Newton approximation $\vec{u}_n$ of the displacement field
+$\vec{u}$ satisfying the BVP, we seek the  correction $\delta \vec{u}_{n+1}$ to
+obtain a better approximation
+$$
+\vec{u}_{n+1} = \vec{u}_{n} + \delta \vec{u}_{n+1}
+$$
+by solving the weak formulation
+\eqn
+\arr{lll}
+0 
+& = & 
+\int_{\Omega_0}
+\kappa[\bF_{n} + \delta \bF_{n+1}]
+\:
+:
+\:
+\left\{
+(\Grad \otimes \vec{w}) (\bF_{n} + \delta \bF_{n+1})^{-1}
+\right\}
+- \int_{\PD{} \Omega_0} P \cdot \hat{N}_0
+\\
+& = & 
+\int_{\Omega_0}
+\left\{
+\kappa[\bF_{n}] + 
+{\PD{} \kappa \over \PD{} \bF}[\bF_{n}] 
+\delta \bF_{n+1}
+\right\}
+\:
+:
+\:
+\left\{
+(\Grad \otimes \vec{w}) 
+(\bF_{n} + \delta \bF_{n+1})^{-1}
+\right\}
+\\
+& = & 
+\int_{\Omega_0}
+\left\{
+\kappa[\bF_{n}] + 
+{\PD{} \kappa \over \PD{} \bF}[\bF_{n}] 
+\delta \bF_{n+1}
+\right\}
+\:
+:
+\:
+\left\{
+(\Grad \otimes \vec{w}) (\bF_{n}^{-1} + \bF_{n}^{-2} \delta \bF_{n+1})
+\right\}
+\\
+\\
+& = & 
+\int_{\Omega_0}
+\kappa[\bF_{n}] 
+\:
+:
+\:
+\left\{
+(\Grad \otimes \vec{w}) 
+\bF_{n}^{-1} 
+\right\}\\
+&-&
+\int_{\Omega_0}
+\kappa[\bF_{n}] 
+\:
+:
+\:
+\left\{
+(\Grad \otimes \vec{w}) 
+(\bF_{n}^{-2} \delta \bF_{n+1})
+\right\}\\
+&+&
+\int_{\Omega_0}
+\left\{
+{\PD{} \kappa \over \PD{} \bF}[\bF_{n}] 
+\delta \bF_{n+1}
+\right\}
+\:
+:
+\:
+\left\{
+(
+\Grad \otimes \vec{w}) 
+\bF_{n}^{-1} 
+\right\}
+\\
+\rra
+\quad
+\mbox{for all test functions $\vec{w}$,}
+\nqe
+where we have taken
+$$
+\delta \bF_{n+1} = \Grad \otimes \delta \vec{u}_{n+1}
+$$
+
+{\bf Note:}  Contrary to standard notational use, the symbol $\delta$
+here bears no variational context.  By $\delta$ we mean simply an
+increment in the sense of Newton's Method.  The role of a variational virtual displacement here
+is played by $\vec{w}$.
+
+\subsubsection{An Approach to Implementation in {\tt FreeFem++}}
+
+The associated file is  \texttt{examples++-tutorial/nl-elast-neo-Hookean.edp}.
+
+Introducing the code-like notation, where a string in $< >$'s is to be
+read as one symbol, the individual components of the tensor
+\eqn
+<TanK>
+ := 
+{\PD{} \kappa \over \PD{} \bF}[\bF_{n}] 
+\delta \bF_{n+1}
+\nqe
+will be implemented as the macros $<TanK11>, <TanK12>, \ldots$.
+
+The individual components of the tensor quantities 
+$$
+\bD_{1} := 
+\bF_{n} (\delta \bF_{n+1})^T
++
+\delta \bF_{n+1} (\bF_{n})^T,
+$$
+$$
+\bD_{2} := 
+\bF_{n}^{-T} \delta \bF_{n+1},
+$$
+$$
+\bD_{3} := 
+(\Grad \otimes \vec{w})  
+\bF_{n}^{-2} \delta \bF_{n+1},
+$$
+and
+$$
+\bD_{4} := 
+(\Grad \otimes \vec{w})  
+\bF_{n}^{-1},
+$$
+will be implemented as the macros
+\eqn
+\label{equation:aux-macros}
+\arr{l}
+<d1Aux11>, <d1Aux12>, \quad \ldots \quad, <d1Aux22>,\\
+<d2Aux11>, <d2Aux12>, \quad \ldots \quad, <d2Aux22>\\
+<d3Aux11>, <d3Aux12>, \quad \ldots \quad, <d3Aux22>\\
+<d4Aux11>, <d4Aux12>, \quad \ldots \quad, <d4Aux22>\\
+\rra,
+\nqe
+respectively.
+
+In the above notation, the tangent Kirchhoff stress term becomes
+\eqn
+{\PD{} \kappa \over \PD{} \bF} (\bF_{n}) 
+\: \delta \bF_{n+1}
+=
+\mu 
+\: \bD_{1}
+\nqe
+while the weak BVP formulation acquires the form
+\eqn
+\arr{lll}
+0 & = & 
+\int_{\Omega_0}
+\kappa[\bF_{n}] 
+\:
+:
+\:
+\bD_{4}
+\\
+&-&
+\int_{\Omega_0}
+\kappa[\bF_{n}] 
+\:
+:
+\:
+\bD_{3}
+\\
+&+&
+\int_{\Omega_0}
+\left\{
+{\PD{} \kappa \over \PD{} \bF}[\bF_{n}] 
+\delta \bF_{n+1}
+\right\}
+\:
+:
+\:
+\bD_{4}
+\\
+\rra
+\quad
+\mbox{for all test functions $\vec{w}$}
+\nqe
 
 
 
@@ -12379,12 +12739,22 @@ A priori error estimates for finite element
 \bibitem{RG03}{\sc R. GLOWINSKI}, Finite Element Methods for Incompressible Viscous Flow. In 
              Handbook of Numerical Analysis, Vol. IX, P.G. Ciarlet and J.L. Lions, eds., 
              North-Holland, Amsterdam, 2003, pp.3-1176.
+ 
+\bibitem{Horgan-Saccomandi}
+Horgan, C; Saccomandi, G;
+``Constitutive Models for Compressible Nonlinearly Elastic Materials with Limiting Chain Extensibility,'' Journal of Elasticity, Volume 77, Number 2, November 2004, pp. 123-138(16).
 
 
 \bibitem{ItoKunisch}{\sc Kazufumi Ito,  and Karl Kunisch},
 Semi smooth newton methods for variational inequalities of the first kind ,
 M2AN, vol 37, N${}^{\circ}$, 2003, pp 41-62.
 
+\bibitem{Ogden}
+Ogden, RW; Non-Linear Elastic Deformations, Dover, 1984.
+
+\bibitem{Raviart-Thomas}
+Raviart, P; Thomas J; Introduction \`{a} l'analyse num\'{e}rique des
+\'{e}quations aux d\'{e}riv\'{e}es partielles, Masson, 1983.
 
 %\bibitem{COOLL} COOL package , 
 
@@ -12394,6 +12764,10 @@ Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integrati
 
  \bibitem{wilmott} Wilmott, Paul and Howison, Sam and Dewynne, Jeff :
  A student introduction to mathematical finance, Cambridge University Press (1995).
+ 
+
+
+
 \end{thebibliography}
 \printindex
 \cleardoublepage
