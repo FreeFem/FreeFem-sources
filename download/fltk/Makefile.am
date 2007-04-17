@@ -17,10 +17,21 @@ INSTALL=../..
 fltk: $(SRCDIR)/FF
 
 # Using system JPEG and PNG lib is a problem under Cygwin
-$(SRCDIR)/FF: $(SRCDIR)
+$(SRCDIR)/FFF: $(SRCDIR)
 	cd $(SRCDIR) && ./configure --enable-threads --enable-localjpeg	\
 		--enable-localpng $(FLTK_CONFIG_PARAM) --disable-gl	\
 		@FLTK_XONLY@ --prefix=`pwd`/$(INSTALL) CXX=$(CXX) CC=$(CC)
+	touch FFF	
+	if grep '#define" config.h|egrep -q "U32|U64" ; then  \
+	 echo " fltk conf OK ??? FH ";  \
+	else \
+	 echo " fltk configure  bug (on windows) ????  add #define U32 unsigned long (bofbof) "\
+	 echo "#define U32 unsigned long" >> config.h \
+	 echo "stop the make process ; just redo make to continue "\
+	 exit 1; \
+	; fi
+
+$(SRCDIR)/FF: $(SRCDIR)/FFF
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 	touch FF
