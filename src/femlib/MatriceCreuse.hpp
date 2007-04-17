@@ -17,7 +17,7 @@ extern "C" {
 #else
 
   // Defaults to a local version of the UMFPACK headers
-#include "../umfpack/umfpack.h"
+#include "../../download/include/umfpack.h"
 
 #endif // HAVE_BIG_UMFPACK_UMFPACK_H
 #endif // HAVE_UMFPACK_UMFPACK_H

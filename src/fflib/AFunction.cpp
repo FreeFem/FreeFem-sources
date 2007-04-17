@@ -481,7 +481,7 @@ class TransE_Array:  public E_F0 {  public:
 };
 
 
-// add frev 2006 
+// add frev 2007 
 class opTrans : public OneOperator{
 public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
@@ -499,6 +499,7 @@ public:
 	return dynamic_cast<const TransE_Array*>((Expression) args[0])->v; } 
 };
 */ 
+
 class opDot : public OneOperator{
 public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
@@ -510,7 +511,129 @@ public:
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
     C_F0  code2(const basicAC_F0 &args) const;       
 };
-// fin frev 2006 
+
+class opFormal : public OneOperator{
+public:
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    bool MeshIndependent() const { return false;}
+    C_F0  (*thecode2)(const basicAC_F0 &args);     
+    opFormal(aType A,C_F0  (c2)(const basicAC_F0 &args) ): OneOperator(atype<C_F0>(),A),thecode2(c2) {}       
+    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+    C_F0  code2(const basicAC_F0 &args) const { return (*thecode2)(args);}    
+};
+// fin frev 2007
+// avril 2007
+
+C_F0  formalMatTrace(const basicAC_F0 &args)       
+{
+    bool ta =args[0].left()==atype<TransE_Array>();
+    const TransE_Array * tea=0;
+    const E_Array * ea=0;
+	if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
+    else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
+    assert( ea || tea );
+    const E_Array & a=  ta ? *tea->v : *ea;
+    int ma =1;
+    int na=a.size();
+    if(na <1 ) CompileError(" trace  [ ...]  ");
+    bool maa= a[0].left()==atype<E_Array>();
+    if(maa) {
+	ma= a[0].LeftValue()->nbitem();
+	for (int i=1;i<na;i++)
+	    if( ma != a[i].LeftValue()->nbitem()) 
+		CompileError(" first matrix with variable number of columm");
+        
+    }
+
+    int na1=na,ma1=ma;
+    if(ta) RNM::Exchange(na1,ma1);
+    if(na1 != ma1) CompileError(" trace:  no square matrix ");
+    KNM<CC_F0> A(na1,ma1);
+    
+    if(maa)
+	for (int i=0;i<na;++i)
+	{
+	    const E_Array * li=  dynamic_cast<const E_Array *>(a[i].LeftValue());
+	    ffassert(li);
+	    for (int j=0; j<ma;++j)
+		if(!ta)  A(i,j) = (*li)[j];
+		else     A(j,i) = (*li)[j];
+	} 
+	    else
+		for (int i=0;i<na;++i)
+		    if(!ta)  A(i,0) = a[i];
+		    else     A(0,i) = a[i];
+    
+    
+    CC_F0 s;
+    s= A(0,0);
+    for (int i=0;i<na1;++i)
+	s = C_F0(TheOperators,"+",s,A(i,i));
+    return  s;
+     
+}
+
+C_F0  formalMatDet(const basicAC_F0 &args)       
+{
+    bool ta =args[0].left()==atype<TransE_Array>();
+    const TransE_Array * tea=0;
+    const E_Array * ea=0;
+    if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
+    else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
+    assert( ea || tea );
+    const E_Array & a=  ta ? *tea->v : *ea;
+    int ma =1;
+    int na=a.size();
+    if(na <1 ) CompileError(" trace  [ ...]  ");
+    bool maa= a[0].left()==atype<E_Array>();
+    if(maa) {
+	ma= a[0].LeftValue()->nbitem();
+	for (int i=1;i<na;i++)
+	    if( ma != a[i].LeftValue()->nbitem()) 
+		CompileError("  matrix with variable number of columm");
+        
+    }
+    
+    int na1=na,ma1=ma;
+    if(ta) RNM::Exchange(na1,ma1);
+    if(na1 != ma1) CompileError(" trace:  no square matrix ");
+    KNM<CC_F0> A(na1,ma1);
+    
+    if(maa)
+	for (int i=0;i<na;++i)
+	{
+	    const E_Array * li=  dynamic_cast<const E_Array *>(a[i].LeftValue());
+	    ffassert(li);
+	    for (int j=0; j<ma;++j)
+		if(!ta)  A(i,j) = (*li)[j];
+		else     A(j,i) = (*li)[j];
+	} 
+	    else
+		for (int i=0;i<na;++i)
+		    if(!ta)  A(i,0) = a[i];
+		    else     A(0,i) = a[i];
+    
+    
+    if(na1==1)
+      return  A(0,0);
+    else if( na1==2 )
+    {
+	C_F0 s1(TheOperators,"*",A(0,0),A(1,1));
+	C_F0 s2(TheOperators,"*",A(0,1),A(1,0));
+	return C_F0(TheOperators,"-",s1,s2);
+    }
+    else
+    {
+	CompileError("FH: sorry only det of 1x1 and 2x2 matrix ");
+    }
+    return  C_F0(); 
+    
+}
+
+
+
+
+// fiun avril 2007
 void Init_map_type()
 {
    TheOperators=new Polymorphic(), 
@@ -819,6 +942,7 @@ void Init_map_type()
 
       // add frev 2007
       TheOperators->Add("\'", new opTrans); 
+      
      // TheOperators->Add("\'", new opTTrans); 
       TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
@@ -831,7 +955,8 @@ void Init_map_type()
        new OneBinaryOperator<Op_Read<bool>,OneBinaryOperatorMIWO >,
        new OneBinaryOperator<Op_Read<long>,OneBinaryOperatorMIWO >,
        new OneBinaryOperator<Op_Read<double>,OneBinaryOperatorMIWO >,
-       new OneBinaryOperator<Op_Read<Complex>,OneBinaryOperatorMIWO >
+       new OneBinaryOperator<Op_Read<Complex>,OneBinaryOperatorMIWO >,
+       new OneBinaryOperator<Op_ReadP<string>,OneBinaryOperatorMIWO >
        );
      
      TheOperators->Add("<<",

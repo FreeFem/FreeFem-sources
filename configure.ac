@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.15-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.16,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -886,7 +886,7 @@ if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
 
-	ff_umfpack_lib="${curdir}/download/umfpack/UMFPACKv4.4/UMFPACK/Lib/libumfpack.a ${curdir}/download/umfpack/UMFPACKv4.4/AMD/Lib/libamd.a"
+	ff_umfpack_lib="${curdir}/download/lib/libumfpack.a ${curdir}/download/lib/libamd.a"
 	AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
 	if test "$ff_win32" = yes; then
   	AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS)
@@ -1210,11 +1210,9 @@ AC_OUTPUT(Makefile
 	download/fltk/Makefile
 	src/Makefile
 	src/bamglib/Makefile
-	src/iml/Makefile
 	src/Graphics/Makefile
 	src/femlib/Makefile
 	src/Algo/Makefile
-	src/umfpack/Makefile
 	src/lglib/Makefile
 	src/fflib/Makefile
 	src/std/Makefile
