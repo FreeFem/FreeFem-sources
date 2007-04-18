@@ -390,8 +390,8 @@ public:
 					    { ss=s1;sens=1;}
 					    else
 					    { ss=s0;sens=-1;}
-					    const Vertex & SS( vertices[ss]);
-					    bmortars[km++] = SubMortar(S,SS,k,i,sens);
+					    const Vertex & vss( vertices[ss]);
+					    bmortars[km++] = SubMortar(S,vss,k,i,sens);
 					    throwassert(km<k100);
 					} 
 				    }
