@@ -38,7 +38,7 @@ $(SRCDIR)/FF: $(SRCDIR)/FFF
 	touch FF
 $(SRCDIR): $(PACKAGE)
 	tar xvjf $(PACKAGE)
-
+	touch $(SRCDIR)
 $(PACKAGE):
 	@WGET@ -N $(SERVER)/$(PACKAGE)
 
