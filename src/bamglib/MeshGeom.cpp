@@ -247,7 +247,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
     Int4 it;
     // find all the sub domain
     Int4 *colorT = new Int4[nbt];
-    Triangle *tt;
+    Triangle *tt,*t;
     Int4 k;
     for ( it=0;it<nbt;it++)
       colorT[it]=-1;
@@ -263,9 +263,10 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	    while (level>0)
 	      if( ( j=st[level]++) <3)
 		{ 
-		  tt=triangles[st[level-1]].TriangleAdj((int)j);
+		  t = &triangles[st[level-1]];
+		  tt=t->TriangleAdj((int)j);
 		  
-		  if (tt && (colorT[jt = Number(tt)] == -1) && ( tt->color==kolor))
+		  if ( ! t->Locked(j) && tt && (colorT[jt = Number(tt)] == -1) && ( tt->color==kolor))
 		    {
 		      colorT[jt]=NbSubDomains;
 		      st[++level]=jt;
