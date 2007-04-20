@@ -15,10 +15,14 @@ extern "C" {
 #ifdef HAVE_BIG_UMFPACK_UMFPACK_H
 #include <UMFPACK/umfpack.h>
 #else
+#ifdef HAVE_UFSPARSE_UMFPACK_H
+#include <ufsparse/umfpack.h>
+#else
 
   // Defaults to a local version of the UMFPACK headers
 #include "../../download/include/umfpack.h"
 
+#endif // HAVE_UFSPARSE_UMFPACK_H
 #endif // HAVE_BIG_UMFPACK_UMFPACK_H
 #endif // HAVE_UMFPACK_UMFPACK_H
 #endif // HAVE_UMFPACK_H

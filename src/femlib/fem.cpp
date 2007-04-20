@@ -1401,7 +1401,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	    if (split[it]) 
 		hm=Min(hm,Th[it].h_min()/(R) split[it]);
 	}
-	R seuil=hm/4.0;
+	R seuil=hm/400.0;
 	if(verbosity>2)   
 	    cout << " seuil = " <<  seuil << " hmin = " << hm <<  endl; 
 	assert(seuil>1e-15);
@@ -1550,7 +1550,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    if(!noregenereration && pV==0) addv = lmin > 1e-5;
 		    if ( addv )			
 		    { // new vertex
-			cout << "    -- " << nv << "  New Vertices " << Pj << " n=" << n << " j=" << j << " " << PTj << endl;
+		      // cout << "    -- " << nv << "  New Vertices " << Pj << " n=" << n << " j=" << j << " " << PTj << endl;
 			assert(nv<nvmax);
 			vertices[nv]=Pj;
 			(Label&) vertices[nv]=0; //  Internal vertices 
@@ -1690,12 +1690,21 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		delete [] triangles;
 		// Correction FH bug  trunc  mesh with hole 25032005 +july 2005 
 		int kt=0;
+		R dmin=1e100;
 		for(int i=0,k=0;i<nbt;i++,k+=3)
 		{
 		    //int ir = reft[i]; 
 		    reft[i]=-1;
 		    R2 A=vertices[nu[k]-1],B=vertices[nu[k+1]-1],C=vertices[nu[k+2]-1];
 		    R2 G=(A+B+C)/3.,PHat;
+		    double d=Area2(A,B,C);
+		    dmin=min(d,dmin);
+		    cout << A << "\n" << B << "\n" << C << "\n" << A << "\n\n";
+		    if(d<=1e-5 && 0)
+		    {
+			cout<< " T = "<<  i << " det= " << d << "  ::  " << A << " " << B << " " << C  << endl;
+			
+		    }
 		    bool outside;
 		    const Triangle * t=Th.Find(G,PHat,outside,0);
 		    if(!outside ) { 
@@ -1708,6 +1717,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    }
 		}
 		nt=kt;
+		cout << " " << dmin << endl;
 		if(verbosity>1)      
 		    cout << " Nb Triangles = " << nt <<  " remove triangle in hole :" <<  nbt - nt 
 			<<endl;

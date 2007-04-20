@@ -622,7 +622,16 @@ mshgpt_ (long *c, double *cr, long *nu, double *h, long *reft, long *nbs,
   pui = puis;
   *nbt = (*nbs << 1) - 2;
   if (*nbs >= nbsmx)
-     {
+     { /*  ADD FH  avril 2007 */
+      i_1 = *nbt;
+      for (t = 1; t <= i_1; ++t)
+        if (nu[t * 6 + 6] != 0)
+        { 
+	  mshopt_ (&c[3], &nu[7], &t, 4L, err);
+	  mshopt_ (&c[3], &nu[7], &t, 5L, err);
+	  mshopt_ (&c[3], &nu[7], &t, 6L, err);
+        }	
+	/* FIN  ADD FH  vril 2007 */    
        return 0;
      }
   tete = 0;
