@@ -1129,6 +1129,7 @@ then
         
 	ff_ideprog="FreeFem++-ide${EXEEXT} FreeFem++-cs${EXEEXT} FreeFem++-client${EXEEXT} FreeFem++-server${EXEEXT}"
 	ff_idetest="./testhighlight.sh"
+	ff_testideprog=testhighlight
 	if test "$enable_cygwindll" = yes 
 	 then
            AC_SUBST(FLTK_CONFIG_PARAM,"--enable-localzlib --enable-cygwin")
@@ -1197,6 +1198,7 @@ AC_SUBST(GLXPROG,$ff_glxprog)
 AC_SUBST(AGLPROG,$ff_aglprog)
 AC_SUBST(X11PROG,$ff_x11prog)
 AC_SUBST(IDEPROG,$ff_ideprog)
+AC_SUBST(TESTIDEPROG,$ff_testideprog)
 # The final test program
 AC_SUBST(IDE_TESTS,$ff_idetest)
 
