@@ -1699,7 +1699,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    R2 G=(A+B+C)/3.,PHat;
 		    double d=Area2(A,B,C);
 		    dmin=min(d,dmin);
-		    cout << A << "\n" << B << "\n" << C << "\n" << A << "\n\n";
+		    //cout << A << "\n" << B << "\n" << C << "\n" << A << "\n\n";
 		    if(d<=1e-5 && 0)
 		    {
 			cout<< " T = "<<  i << " det= " << d << "  ::  " << A << " " << B << " " << C  << endl;

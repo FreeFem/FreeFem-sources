@@ -4640,7 +4640,8 @@ void  Triangles::ShowRegulaty() const// Add FH avril 2007
 {
    const  Real8  sqrt32=sqrt(3.)*0.5; 
    const Real8  aireKh=sqrt32*0.5;
-   D2xD2 Br(D2xD2(D2(1.,0.),D2(0.5,sqrt32)).t());
+   D2  Beq(1,0),Heq(0.5,sqrt32);
+   D2xD2 Br(D2xD2(Beq,Heq).t());
    D2xD2 B1r(Br.inv());
    /*   D2xD2 BB = Br.t()*Br;
     cout << " BB = " << BB << " " << Br*B1r <<  endl; 
@@ -4664,7 +4665,8 @@ void  Triangles::ShowRegulaty() const// Add FH avril 2007
 	  Triangle &K=triangles[it];
 	  Real8  area3= Area2((R2) K[0],(R2) K[1],(R2) K[2])/6.;
 	  area+= area3;
-	  D2xD2 B_K(D2xD2(K[0],K[1],K[2]).t());
+	  D2xD2 B_Kt(K[0],K[1],K[2]);
+	  D2xD2 B_K(B_Kt.t());
 	  D2xD2 B1K = Br*B_K.inv();
 	  D2xD2 BK =  B_K*B1r;
 	  D2xD2 B1B1 = B1K.t()*B1K;

@@ -78,8 +78,8 @@ else
       if(i+1 < N)    A(i,i+1)=-i;
       a[i]=i;
     }
-  b=a(III);
-  c(III)=a;
+  b=a(III);  //  b(i)=a(iii(i))
+  c(III)=a;  //  c(III(i)) = a(i)
   cout << " III = " << III << endl;
   cout << " a(III)     " <<  b << endl;
   cout << " a(III^1) = " << c  << endl;
@@ -92,9 +92,9 @@ else
  // matrix tttAA=sA'-sA;
  // matrix ttAA=sA'-sA;
   A += 2*a*a';  //  produit tensoriel
-  matrix A1=   A(II^-1,JJ^-1);   //  do A1(II,JJ) = A 
-  matrix A2=   A(III,JJJ);   //  do A = A 
-  matrix sA1=   sA(II^-1,JJ^-1);   //  do A1(II,JJ) = A 
+  matrix A1=   A(II^-1,JJ^-1);   //  do A1(II(i),JJ(j)) = A(i),j) $
+  matrix A2=   A(III,JJJ);   //  do   $A2(i,j) = A(III(i),JJJ(i)) $
+  matrix sA1=   sA(II^-1,JJ^-1); //  do A1(II(i),JJ(i)) = A( 
   matrix sA2=   sA(III,JJJ);   //  do A = A 
 
   matrix A0 = (a*a')(II^-1,JJ^-1);
