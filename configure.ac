@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.16-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.16-2,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -1129,7 +1129,7 @@ then
         
 	ff_ideprog="FreeFem++-ide${EXEEXT} FreeFem++-cs${EXEEXT} FreeFem++-client${EXEEXT} FreeFem++-server${EXEEXT}"
 	ff_idetest="./testhighlight.sh"
-	ff_testideprog=testhighlight
+	ff_testideprog="testhighlight${EXEEXT}"
 	if test "$enable_cygwindll" = yes 
 	 then
            AC_SUBST(FLTK_CONFIG_PARAM,"--enable-localzlib --enable-cygwin")
