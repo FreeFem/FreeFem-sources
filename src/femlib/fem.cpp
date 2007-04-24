@@ -244,9 +244,15 @@ public:
 				else { NbOfBEdges++; }
 		    }
 		}
-		    if (verbosity) {
-			cout << "   Nb of edges on Mortars  = " << NbOfMEdges << endl;
-			cout << "   Nb of edges on Boundary = " << NbOfBEdges << ", neb = " << neb <<  endl; }
+		    
+		    if (verbosity>1 ) {
+			cout << "    Nb of Vertices " << nv <<  " ,  Nb of Triangles " 
+			<< nt << endl ;
+			cout << "    Nb of edge on user boundary  " << neb 
+			<< " ,  Nb of edges on true boundary  " << NbOfBEdges << endl;
+			if(NbOfMEdges) cout << "    Nb of edges on Mortars  = " << NbOfMEdges << endl;
+
+		    }
 		    delete [] Head; // cleanning memory
 		    NbMortars =0;
 		    NbMortarsPaper=0;
@@ -576,7 +582,7 @@ public:
 				    } // same angle 
 				}//  for all break of vertex                  
 			    } // for all extremity of mortars 
-				if (verbosity>1) 
+				if (verbosity>1 && NbMortars) 
 				    cout << "    Nb Mortars " << NbMortars << /*" " << kdmg << " "<<  kdmd <<*/ endl;
 			if (mortars) 
 			{
@@ -622,7 +628,7 @@ public:
 			TriangleConteningVertex[(*this)(it,j)]=it;
 		
 		Buildbnormalv();
-		if (verbosity>1) 
+		if (verbosity>4) 
 		{ 
 		    cout << "    Number of Edges                 = " << NbOfEdges << endl;
 		    cout << "    Number of Boundary Edges        = " << NbOfBEdges << " neb = " << neb << endl;
@@ -674,10 +680,10 @@ public:
 		    throw(ErrorExec("exit",1));}
 		// ffassert(f);
 		if(verbosity)
-		    cout << " Read On file \"" <<filename<<"\""<<  endl;
+		    cout << " -- Mesh::read On file \"" <<filename<<"\""<<  endl;
 		f >> nv >> nt >> neb ;
-		if(verbosity)
-		    cout << "   Nb of Vertex " << nv << " " << " Nb of Triangles " 
+		if(verbosity>10)
+		    cout << "    Nb of Vertex " << nv << " " << " Nb of Triangles " 
 			<< nt << " Nb of boundary edge " << neb <<  endl;
 		ffassert(f.good() && nt && nv) ;
 		triangles = new Triangle [nt];
@@ -1336,8 +1342,15 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	    splitmax=Max(splitmax, split[i]);	    
 	    nt += NbOfSubTriangle(split[i]);
 	}
+    
     bool constsplit=splitmin==splitmax;
     bool noregenereration = constsplit || WithMortar;
+
+    if(verbosity>2) 
+	cout << "  -  Mesh construct : from " << &Th << " split min " << splitmin 
+	    << "  max " << splitmax << ", recreate " << !noregenereration 
+	    << " label =" << label << endl;
+    
     triangles = new Triangle[nt];
     assert(triangles);
     //  computation of thee numbers of vertices
@@ -1379,8 +1392,8 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			nvmax++; 
 		    }
 	    }
-		if(verbosity>2)
-		    cout << " -- nv old " << nvmax << endl;
+		if(verbosity>4)
+		    cout << "  - nv old " << nvmax << endl;
     }
 		
 	int nebmax=neb;
@@ -1402,7 +1415,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		hm=Min(hm,Th[it].h_min()/(R) split[it]);
 	}
 	R seuil=hm/400.0;
-	if(verbosity>2)   
+	if(verbosity>5)   
 	    cout << " seuil = " <<  seuil << " hmin = " << hm <<  endl; 
 	assert(seuil>1e-15);
 	vertices = new Vertex[nvmax];
@@ -1425,7 +1438,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			nv++;}
 		}
 		    // nv = Th.nv;
-		    if(verbosity>2) 
+		    if(verbosity>3) 
 		    {
 			cout << "  -- number of old vertices use: " << nv << endl;      
 			cout << "  -- number of  neb : " << nebmax << endl;
@@ -1449,7 +1462,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	for (int it=0;it<Th.nt;it++)
 	    if (  split[it] ) 
 	    {
-		sdd[it]=-1;
+		// sdd[it]=-1;
 		for (int jt=0;jt<3;jt++)
 		{
 		    int jtt=jt,itt=Th.TriangleAdj(it,jtt);
@@ -1467,12 +1480,15 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    int offset= bbe ? 0 : nebmax;
 		    if (bbe ||  (!pbe && (ie0 < ie1) ) ) // arete interne ou frontiere 
 		    {
+			int sens = 1; // par defaul le bon sens 
 			int kold = it;   //Th.BoundaryTriangle(ieb,jj);
 			int n=split[kold];
 			if( itt>=0) n = max(n,split[itt]); //  pour les aretes internes (FH juillet 2005)
 			if (!n) continue; 
 			if (pbe ) {
 			    re = *pbe;
+			    if( & (*pbe)[0] == &Th(ie1) ) sens = -sens; // pour les aretes non decoupe avril 2007
+			   // cout << " ### " << ie0 << " " << ie1 << " " <<  sens << endl;
 			}
 			// cout << " lab = " <<  re.lab << endl;
 			Vertex *pva= quadtree->NearestVertex(Th(ie0));
@@ -1483,6 +1499,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			
 			for (int j=1;j<n;j++) 
 			{ 
+			    sens = 1; //  arete decoupe => le sens change avril 2007
 			    la-=delta;
 			    lb+=delta;
 			    assert(nv<nvmax);
@@ -1508,8 +1525,10 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			bbedges[nneb].vertices[0]=pv0;
 			bbedges[nneb].vertices[1]=pvb;
 			(Label &) bbedges[nneb]= re ;		         			    
-			sdd[it]= 1+ (nneb++ + offset); // numero de la derniere arete toujours dans le bon sens
-			if( ! ( itt == it || itt <0) ) // interne 
+			sdd[it]= (1+ (nneb++ + offset))*sens; // numero de la derniere arete attention au sens si pas decoupe avril 2007
+			//cout << " ### " << pv0 - vertices << " " << pvb - vertices << " " <<  sens << " it = " << it << " " <<  sdd[it] << " itt " << itt  << " -- " << sdd[406] << endl;
+
+			if(  ( itt >it || itt <0) ) // interne 
 			   sdd[itt]= -sdd[it]; 
 		    }
 		} 
@@ -1584,12 +1603,12 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	    }   // end loop on all sub triangle
 	    
 	} //  end 
-	if (verbosity>1 ) 
+	if (verbosity>3 ) 
 	{ 
-	    cout << " -- regeneration = " << ! noregenereration <<endl; 
-	    cout << " -- Nb of vertices       " << nv << endl; 
-	    cout << " -- Nb of triangle       " << nt << endl; 
-	    cout << " -- Nb of boundary edges " << neb << endl; 
+	    cout << "  - regeneration = " << ! noregenereration <<endl; 
+	    cout << "  - Nb of vertices       " << nv << endl; 
+	    cout << "  - Nb of triangle       " << nt << endl; 
+	    cout << "  - Nb of boundary edges " << neb << endl; 
 	
 	}
 	//  
@@ -1661,7 +1680,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			      long nbsd, long *reft, long *nbt, Rmesh coef, Rmesh puis, long *err);
 		
 		long nbt=0;
-		if(verbosity>5)
+		if(verbosity>10)
 		{
 		    cout << " mshptg8_ " << endl;
 		    cout << "    nbs =" << nbs << endl;
@@ -1717,9 +1736,9 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    }
 		}
 		nt=kt;
-		cout << " " << dmin << endl;
-		if(verbosity>1)      
-		    cout << " Nb Triangles = " << nt <<  " remove triangle in hole :" <<  nbt - nt 
+		// cout << " " << dmin << endl;
+		if(verbosity>3)      
+		    cout << "  - Nb Triangles = " << nt <<  " remove triangle in hole :" <<  nbt - nt 
 			<<endl;
 		triangles = new Triangle[nt];
 		kt=0;

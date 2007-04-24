@@ -361,7 +361,7 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
        else  split[k]=0  ;    
      }
      *mp=mps;
-     if (verbosity>2) 
+     if (verbosity>1) 
      cout << " -- Trunc mesh: Nb of Triangle = " << kk << " label=" <<label <<endl;
   pmesh pmsh = new Mesh(Th,split,false,label);
   pmsh->renum();
@@ -391,13 +391,17 @@ AnyType SplitMesh::operator()(Stack stack) const
    long nbt=Thh->nt;
    KN<int> split(nbt);
    R2 B(1./3.,1./3.);
+   int smax=0;
+   int smin=100000;
    for (int it=0;it<nbt;it++)
     {
       Triangle & K(Th[it]);      
       mp->set(Th,K(B),B,K,K.lab);
       split[it]=GetAny<long>((*U)(stack));
+      smin=min(smin,split[it]);
+      smax=max(smax,split[it]);
     }
-    
+   if(verbosity) cout << " -- Splitmesh " << Thh << " split  min: " << smin << " max: " << smax << endl; 
    Mesh * pth= new Mesh(*Thh,split,false,label);
    R2 Pn,Px;
    pth->BoundingBox(Pn,Px);
