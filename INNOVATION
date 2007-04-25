@@ -1,3 +1,6 @@
+v 2.16-2
+  correct configure.ac for windows ide compile
+  correct meshsplit, trunc  function 
 v 2.16 april 17 2007
   Change umfpack download version to the last one
   add string input from file or cin
