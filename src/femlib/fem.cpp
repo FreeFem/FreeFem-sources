@@ -1528,7 +1528,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			sdd[it]= (1+ (nneb++ + offset))*sens; // numero de la derniere arete attention au sens si pas decoupe avril 2007
 			//cout << " ### " << pv0 - vertices << " " << pvb - vertices << " " <<  sens << " it = " << it << " " <<  sdd[it] << " itt " << itt  << " -- " << sdd[406] << endl;
 
-			if(  ( itt >it || itt <0) ) // interne 
+			if(  ( itt !=it || itt <0)  ) // interne 
 			   sdd[itt]= -sdd[it]; 
 		    }
 		} 
