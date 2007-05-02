@@ -1141,7 +1141,7 @@ typedef MyMap<String,String> MyMapSS;
      tables_of_identifier.push_back(&Global);
 
 }
-int ShowAlloc(char *s,size_t & lg); 
+int ShowAlloc(const char *s,size_t & lg); 
 
 
 

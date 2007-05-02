@@ -146,7 +146,7 @@ double CPUcompileInit =0;
 C_F0  fespacetype;
 bool fespacecomplex;
 
-int ShowAlloc(char *s,size_t &);
+int ShowAlloc(const char *s,size_t &);
 inline int yylex()  {return zzzfff->scan();}
 inline int lineno() {return zzzfff->lineno();}
 

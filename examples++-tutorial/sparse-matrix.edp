@@ -87,6 +87,20 @@ else
     assert( int(c[int(b[i])]) == i);
 
   matrix sA=A;
+  {
+    {
+      ofstream ff("A.matrix");
+      ff  << sA; 
+    }
+    matrix ssA;
+    {
+    ifstream ff("A.matrix");
+    ff >> ssA;
+    ssA = (1.)*sA+ (-1.)*ssA;
+    cout  << ssA << endl; 
+    }
+  }
+
   matrix tAA=sA+sA';
   matrix ttAA=sA'+sA;
  // matrix tttAA=sA'-sA;

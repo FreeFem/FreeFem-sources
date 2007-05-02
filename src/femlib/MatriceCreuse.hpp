@@ -466,7 +466,7 @@ public:
   MatriceMorse(KNM_<R> & A, double tol) ;
   MatriceMorse(const int  n,const R *a);
 //    :MatriceCreuse<R>(n),solver(0) {}
-  
+  MatriceMorse(istream & f);                    
   MatriceMorse(const FESpace & Uh,bool sym,bool VF=false)
     :MatriceCreuse<R>(Uh.NbOfDF),solver(0) {Build(Uh,Uh,sym,VF);}
   MatriceMorse(const FESpace & Uh,const FESpace & Vh,bool VF=false)

@@ -274,6 +274,14 @@ class BC_set : public E_F0mps { public:
     for (int i=0;i<n;i++)
       on[i]=CastTo<long>(args[i]);
   }
+
+  /*
+  // ajout modif FH  mai 2007 XXXXXXXXXXXXX
+  void mapping(C_F0 (*f)(const C_F0 &)) {
+      for ( vector<pair<int,Expression> >::iterator k=bc.begin();k!=bc.end();k++)
+	  k->second=(*f)(k->second) ;}
+  // fin ajout
+   */ 
   static ArrayOfaType  typeargs() { return ArrayOfaType(atype<long>(),true);}
   AnyType operator()(Stack ) const  { return SetAny<Result>(this);}
   operator aType () const { return atype<Result>();}         
@@ -834,6 +842,22 @@ template<class K>  ostream & operator << (ostream & f,const Matrice_Creuse<K> & 
 { if ( !A.A) f << " unset sparse matrix " << endl;
  else f << *A.A ;
  return f;  }
+
+template<class K>  istream & operator >> (istream & f,Matrice_Creuse<K> & A) 
+{ 
+    if ( WhichMatrix(f)== 2   )
+    {
+	A.pUh=0;
+	A.pVh=0; 
+	A.A.master(new MatriceMorse<K>(f));
+	A.typemat=(A.A->n == A.A->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+	
+    }
+    else {  
+	cerr << " unkwon type of matrix " << endl;
+	ExecError("Erreur read matrix ");	
+	A.A =0; }
+    return f;  }
 
 template<class K> class Matrice_Creuse_Transpose  { public:
   Matrice_Creuse<K> * A;

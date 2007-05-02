@@ -3967,6 +3967,13 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OneBinaryOperator<PrintPnd<Matrice_Creuse<Complex>*> >
 
        );   
+
+ TheOperators->Add(">>",
+		   new OneBinaryOperator<Op_Read<Matrice_Creuse<R> > >,
+		   new OneBinaryOperator<Op_Read<Matrice_Creuse<Complex> > >
+		   
+		   );   
+ 
  
  Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegration>);
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationBorder>);
