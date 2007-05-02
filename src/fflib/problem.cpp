@@ -1615,7 +1615,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     KN<double> buf(Vh.MaximalNbOfDF()*last_operatortype*Vh.N);
     KN<R> gg(buf);
     if ( B && B->N() != Vh.NbOfDF) ExecError("AssembleBC size rhs and nb of DF of Vh");
-    if(verbosity>99) cout << " Problem : BC_set " ;
+    if(verbosity>99) cout << " Problem : BC_set "<< typeid(R).name() << " " ;
     nbon =bc->on.size();
     set<long> on;
     for (int i=0;i<nbon;i++)
@@ -1690,7 +1690,12 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
             KN_<R> Vpp(Vp('.',p));
             for (int j=0;j<dim;j++)
              if (tabexp[j]) 
-               Vpp[j]=GetAny<R>( (*tabexp[j])(stack) );
+	       {
+		 if(bc->complextype) // FH may 2007  
+                   Vpp[j]=GetAny<R>( (*tabexp[j])(stack) );
+		 else 
+		   Vpp[j]=GetAny<double>( (*tabexp[j])(stack) );
+	        }       
               else Vpp[j]=0;
            }
            
@@ -2573,7 +2578,7 @@ bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex prob
         }
       else if (r==atype<const  FormLinear *>())
         {
-            FormLinear * ll=new FormLinear(*dynamic_cast<const  FormLinear *>(e));
+	  FormLinear * ll=new FormLinear(*dynamic_cast<const  FormLinear *>(e));
           Ftest * l= const_cast<Ftest *>(ll->l);
           if (complextype)  l->mapping(&CCastToC) ;
           else l->mapping(&CCastToR) ; 
@@ -2582,6 +2587,16 @@ bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex prob
            *ii=C_F0(ll,r);    
           //cout << l <<   " ll->l " <<  ll->l << " " << ll->l->isoptimize <<endl;                
         }
+      else if (r==atype<const  BC_set *>())
+      {// modif FH  mai 2007  A FAIRE il y a un bug ici XXXXXXXXXXXXX
+	  /*
+	BC_set * bc= new BC_set(*dynamic_cast<const  BC_set *>(e));
+	if (complextype)  bc->mapping(&CCastToC) ;
+	else bc->mapping(&CCastToR) ; 
+          //cout << l <<   " ll->l " <<  ll->l << " " << ll->l->isoptimize <<endl;    
+	   */
+      }
+      
     } 
   return complextype;
 }  

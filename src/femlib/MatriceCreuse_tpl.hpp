@@ -805,6 +805,91 @@ int MatriceMorse<R>::size() const
 {
   return nbcoef*(sizeof(int)+sizeof(R))+ sizeof(int)*(this->n+1);
 }
+
+inline int WhichMatrix(istream & f)
+{
+    string line;
+    while ( isspace(f.peek()))
+	f.get(); 
+    if  ( f.peek() =='#' )
+    {
+	line="";
+	while ( f.good()  )
+	{
+	    char c=f.get();
+	    if(c=='\n' || c=='\r') { break;}
+	    line += c;
+	}
+	if( line.find("(Morse)")) 
+	    return 2; // morse 
+	else 
+	    return 0; 
+    }
+  return 0;   
+}
+template <class R>
+  MatriceMorse<R>::MatriceMorse(istream & f)
+:  MatriceCreuse<R>(0,0,0),nbcoef(0),
+a(0),
+lg(0),
+cl(0),
+
+solver(0)
+{
+      string line;
+      int k=0;
+      while ( isspace(f.peek()))
+	      f.get(); 
+      while ( f.peek() =='#' )
+      {
+	line="";
+	while ( f.good()  )
+	{
+	    char c=f.get();
+	    if(c=='\n' || c=='\r') { break;}
+	    line += c;
+	}
+	if( f.peek()=='\n' || f.peek()=='\r') f.get();
+	if(verbosity>9)
+	 cout << "Read matrice: "<< k << " :"   << line << endl;
+	k++;    
+      }
+      
+      f >> this->n >> this->m >> symetrique >>nbcoef;
+      if(verbosity>3)
+      cout << " read mat: " <<  this->n << " " <<  this->m << " " << symetrique << " " << nbcoef <<endl;
+      lg= new int [this->n+1];
+      cl= new int[nbcoef];
+      a= new R[nbcoef];
+      ffassert(f.good() && lg && a && cl );
+      int i,j,i0,j0;
+      i0=-1;j0=2000000000;
+      R aij;
+      int imx=-2000000000, jmx=-2000000000;
+      int imn= 2000000000, jmn= 2000000000;
+      
+      for (int k =0;k<nbcoef; ++k)
+      {
+	  f >> i >> j >> aij;
+	  ffassert(f.good() );
+	  i--;j--;
+	  imx=max(imx,i);
+	  imx=max(jmx,j);
+	  imn=min(imn,i);
+	  imn=min(jmn,j);
+	  //cout << i << " " << j << " " << aij << endl;
+	  if(i0!=i) {j0=-1;lg[i]=k;}
+	  ffassert(i0<=i && j0<j);
+	  lg[i+1]=k+1;
+	  cl[k]=j;
+	  a[k]=aij;
+	  j0=j;i0=i;
+      }
+      ffassert( imx < this->n && jmx < this->m );
+      ffassert( imn >=0 && jmn >=0);
+      
+}
+
 template <class R> 
 ostream& MatriceMorse<R>::dump(ostream & f) const 
 {
