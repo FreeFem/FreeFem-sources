@@ -1691,10 +1691,10 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
             for (int j=0;j<dim;j++)
              if (tabexp[j]) 
 	       {
-		 if(bc->complextype) // FH may 2007  
+		 //if(bc->complextype) // FH may 2007  
                    Vpp[j]=GetAny<R>( (*tabexp[j])(stack) );
-		 else 
-		   Vpp[j]=GetAny<double>( (*tabexp[j])(stack) );
+		   //else 
+		   //Vpp[j]=GetAny<double>( (*tabexp[j])(stack) );
 	        }       
               else Vpp[j]=0;
            }

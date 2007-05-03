@@ -57,7 +57,7 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* mpic++.h have include file */
+/* mpi++.h have include file */
 #undef HAVE_MPICPP_H
 
 /* mpicxx.h have include file */
