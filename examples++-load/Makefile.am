@@ -34,6 +34,17 @@ Ref: makeref.edp
 makeref.edp: regtests.m4 ../regtests.m4
 	m4 regtests.m4 > makeref.edp
 
+all-local: all.edp regtests.edp load_compile
+
+all.edp: 
+	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
+	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
+		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
+		echo "verbosity=verbosityy;" ; \
+		echo \{ include \"$$i\"\;\}\; ;\
+		echo ' cout << "------------------------------------------------------------------------------ " << endl;' ;\
+	done) > $@
+
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
