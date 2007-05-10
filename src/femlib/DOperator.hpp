@@ -348,7 +348,7 @@ inline ostream & operator<<(ostream & f,const  BilinearOperator & a)
   for (BilinearOperator::const_iterator i=a.v.begin();i!=a.v.end();i++)
     {
       const BilinearOperator::K  vi(*i);
-      char * www[]={" ","_x ","_y "};
+      const char * www[]={" ","_x ","_y "};
       const  pair<pair<int,int>,pair<int,int> > i1(vi.first);
       const  pair<int,int> ii(i1.first),jj(i1.second);
       f << *(const E_F0 *) vi.second <<  char('u'+ii.first) << www[ii.second] << " " << char('u'+jj.first)<<"'" << www[jj.second] ;

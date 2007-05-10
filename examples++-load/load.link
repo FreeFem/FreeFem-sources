@@ -45,6 +45,7 @@ while [ $# -ne 0 ]  ; do
 	    echo "    file.{cpp,cp,cxx}"
 	    exit 0;
 	    ;;
+	CXX=*) eval "$1" ;;
 	-n)  do="no";;
 	-g)  DEBUG="$DEBUG $1";;
 	-c)  CONLY=yes;;

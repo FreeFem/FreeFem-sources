@@ -22,7 +22,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 load_compile:include  $(LIST_COMPILE)
 
 .cpp.$(DYLIB_SUFFIX): 
-	./load.link $< 
+	 ./load.link CXX="$(CXX)" $< 
 
 include: include.tar.gz
 	rm -rf include 

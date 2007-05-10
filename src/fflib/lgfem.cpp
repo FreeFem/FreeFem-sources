@@ -2504,6 +2504,34 @@ class Plot :  public E_F0mps { public:
 
 
 
+template<class K>
+class pb2mat : public E_F0 { public:
+  typedef Matrice_Creuse<K> *  Result;
+  const Problem * pb;
+  pb2mat(const basicAC_F0 & args) : pb(dynamic_cast<const Problem *>(args[0].left()))  
+  {ffassert(pb);}
+  static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<const Problem *>());}
+  
+  static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);} 
+  
+  AnyType operator()(Stack s) const 
+  {
+    Problem::Data *data= pb->dataptr(this->stack); 
+    if ( SameType<K,double>::OK )
+      {
+	ffassert( !!data->AR);  
+	return  SetAny<Matrice_Creuse<K> * >(&data->AR) ;
+      }
+    else 
+      {
+	ffassert( !!data->AC);  
+	return SetAny<Matrice_Creuse<K> * >(&data->AC) ;
+      }
+  }
+  
+  
+};  
+
 
 //template<class RR,class A>  void PrintP(RR* a, A  b){  *a <<*b;}
 LinkToInterpreter::LinkToInterpreter()

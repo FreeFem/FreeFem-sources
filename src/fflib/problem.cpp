@@ -1696,7 +1696,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
 		   //else 
 		   //Vpp[j]=GetAny<double>( (*tabexp[j])(stack) );
 	        }       
-              else Vpp[j]=0;
+              else Vpp[j]=0.;
            }
            
          for (int i=0;i<Aipj.N();i++)

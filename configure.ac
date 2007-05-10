@@ -847,7 +847,7 @@ then
 
 	# Trying default locations
 
-	AC_CHECK_HEADERS(umfpack.h ufsparse/umfpack.h,ff_umfpack_header=yes)
+	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h,ff_umfpack_header=yes)
 
 	# Somes systems like FreeBSD hide umfpack.h in a directory
 	# called UMFPACK (all capitals). This breaks the standard
@@ -856,10 +856,11 @@ then
 	if test "$ff_umfpack_header" != yes;
 	then
 		AC_CHECK_HEADER(UMFPACK/umfpack.h,
+			ff_umfpack_header=yes
 			AC_DEFINE(HAVE_BIG_UMFPACK_UMFPACK_H,1,
 				If umfpack.h is located in UMFPACK subdir))
 	fi
-
+	
 	if test "$ff_amd_ok" = no;
 	then
 		AC_CHECK_LIB(amd,amd_info,
@@ -874,6 +875,11 @@ then
 			ff_umfpack_lib=" -lumfpack $ff_umfpack_lib"
 			ff_umfpack_ok=yes,,$ff_umfpack_lib)
 	fi
+        if  test "$ff_umfpack_header" != yes -a "$ff_umfpack_ok" != no
+           then
+	    AC_MSG_WARN([		Sorry we find UMFPACK lib but not the include umfpack.h file])
+            ff_umfpack_ok=no
+         fi
 fi
 
 # If all else fails, download!
@@ -1235,3 +1241,8 @@ AC_OUTPUT(Makefile
 	examples++-bug/Makefile
 	examples++-other/Makefile
 	DOC/Makefile)
+        AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
+        AC_MSG_NOTICE([		 --  ARPACK $ff_arpack_ok ])
+        AC_MSG_NOTICE([		 --  UMFPACK $ff_umfpack_ok ])
+        AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
+        AC_MSG_NOTICE([		 --  FLTK (ide package) $ff_fltk ])

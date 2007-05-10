@@ -1116,12 +1116,12 @@ int ForceEdge(Vertex &a, Vertex & b,TriangleAdjacent & taret)
 	
 #endif 
       while ((ks=SwapForForcingEdge(  va,  vb, tc, detss, det1,det2,NbSwap)))
-	if(l++ > 1000000) {
+	if(l++ > 10000000) {
 	  cerr << " Loop in forcing Egde AB" 
                <<"\n vertex A " << a 
                <<"\n vertex B " <<  b 
                <<"\n nb de swap " << NbSwap 
-               <<"\n nb of try  swap too big = " <<  l << " gearter than " <<  100000 << endl;
+               <<"\n nb of try  swap too big = " <<  l << " gearter than " <<  1000000 << endl;
    
          if ( CurrentTh ) 
             cerr << " vertex number " << CurrentTh->Number(a) << " " <<  CurrentTh->Number(b) << endl;
