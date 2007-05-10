@@ -58,7 +58,7 @@ compilation step ("make") will try to download the missing libraries
 
 Remark, under linux or window the simplest way to get
 a not to bad version is
-./configure --enable download --enable-generic_blas
+./configure --enable-download --enable-generic_blas
 
 Here are the different versions of FreeFem++ produced by one
 compilation (some versions may be missing if your system does not

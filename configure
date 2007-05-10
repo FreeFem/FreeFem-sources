@@ -11724,7 +11724,8 @@ fi;
 
 
 
-for ac_header in umfpack.h ufsparse/umfpack.h
+
+for ac_header in umfpack.h umfpack/umfpack.h ufsparse/umfpack.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -12018,6 +12019,7 @@ echo "${ECHO_T}$ac_cv_header_UMFPACK_umfpack_h" >&6
 
 fi
 if test $ac_cv_header_UMFPACK_umfpack_h = yes; then
+  ff_umfpack_header=yes
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_BIG_UMFPACK_UMFPACK_H 1
@@ -12178,6 +12180,12 @@ _ACEOF
 fi
 
 	fi
+        if  test "$ff_umfpack_header" != yes -a "$ff_umfpack_ok" != no
+           then
+	    { echo "$as_me:$LINENO: WARNING: 		Sorry we find UMFPACK lib but not the include umfpack.h file" >&5
+echo "$as_me: WARNING: 		Sorry we find UMFPACK lib but not the include umfpack.h file" >&2;}
+            ff_umfpack_ok=no
+         fi
 fi
 
 # If all else fails, download!
@@ -15046,3 +15054,13 @@ if test "$no_create" != yes; then
   $ac_cs_success || { (exit 1); exit 1; }
 fi
 
+        { echo "$as_me:$LINENO:   freefem++ used  download : $enable_download " >&5
+echo "$as_me:   freefem++ used  download : $enable_download " >&6;}
+        { echo "$as_me:$LINENO: 		 --  ARPACK $ff_arpack_ok " >&5
+echo "$as_me: 		 --  ARPACK $ff_arpack_ok " >&6;}
+        { echo "$as_me:$LINENO: 		 --  UMFPACK $ff_umfpack_ok " >&5
+echo "$as_me: 		 --  UMFPACK $ff_umfpack_ok " >&6;}
+        { echo "$as_me:$LINENO: 		 --  BLAS $ff_blas_ok " >&5
+echo "$as_me: 		 --  BLAS $ff_blas_ok " >&6;}
+        { echo "$as_me:$LINENO: 		 --  FLTK (ide package) $ff_fltk " >&5
+echo "$as_me: 		 --  FLTK (ide package) $ff_fltk " >&6;}

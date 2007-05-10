@@ -1698,7 +1698,7 @@ L50:
 				   }
 				goto L100;
 			      }
-			   else if (det2 == 0 && reft[s2t] == 0)
+			   else if (det2 == 0 && det3 < 0 && reft[s2t] == 0)
 			      {
 				err1 = 10;
 				printf(" det = %ld %ld %ld %ld %ld == %ld \n ",
@@ -1711,7 +1711,7 @@ L50:
 				 
 				printf("bug 2, mshptg: point %ld is on boundary edge %ld %ld  \n",s2t,i_2,i_3);
 			      }
-			   else if (det3 == 0 && reft[s3t] == 0)
+			   else if (det2 > 0 && det3 == 0 && reft[s3t] == 0)
 			      {
 				err1 = 10;
 				printf(" det = %ld %ld %ld %ld  %ld %ld \n ",

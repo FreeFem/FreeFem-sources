@@ -133,7 +133,7 @@ private:
   bool SetMacro(int &ret);
   bool CallMacro(int &ret);
   char * match(int i);
-  void ErrorScan(char * s) {
+  void ErrorScan(const char * s) {
       cerr  << "\n" ;
       ShowStack(cerr);
     throw(ErrorCompile(s,lineno(),YYText() ) );}    
