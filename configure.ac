@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.16-3,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.16-4,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -616,7 +616,21 @@ fi
 done
 
 
+#cblas_zdotu_sub
+ff_cblas_lib=no
+if test "$ff_blas_ok" = yes 
+then
+       AC_MSG_CHECKING(for blas_zdotu_sub in $ff_blas_lib)
+        ff_save_libs="$LIBS"
+        LIBS="$LIBS $ff_blas_lib"
+        AC_LINK_IFELSE(
+                [AC_LANG_CALL(,cblas_zdotu_sub)],
+                ff_cblas_lib=yes
+                LIBS="$ff_save_libs")
+        AC_MSG_RESULT($ff_cblas_lib)
 
+ 
+fi
 
 # If all else fails, download!
 if test "$ff_blas_ok" = no -a "$ff_wget" = yes \
@@ -669,12 +683,13 @@ then
 	AC_SUBST(DOWNLOAD_BLAS,$ff_download_blas)
 	ff_blas_ok=yes
         ff_cblas_h=yes
+	ff_cblas_lib=yes
 fi
 AC_MSG_RESULT($ff_blas_inc)
 AC_SUBST(BLASLIB,$ff_blas_lib)
 AC_SUBST(BLASINC,$ff_blas_inc)
 #looking for cblas.h  FH 
-if test "$ff_blas_ok" = yes;
+if test "$ff_blas_ok" = yes -a "$ff_cblas_lib" = yes ;
 then
   AC_CHECK_HEADERS(cblas.h,
        ff_cblas_h=yes,

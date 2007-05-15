@@ -10691,7 +10691,72 @@ fi
 done
 
 
+#cblas_zdotu_sub
+ff_cblas_lib=no
+if test "$ff_blas_ok" = yes
+then
+       echo "$as_me:$LINENO: checking for blas_zdotu_sub in $ff_blas_lib" >&5
+echo $ECHO_N "checking for blas_zdotu_sub in $ff_blas_lib... $ECHO_C" >&6
+        ff_save_libs="$LIBS"
+        LIBS="$LIBS $ff_blas_lib"
+        cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
 
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char cblas_zdotu_sub ();
+int
+main ()
+{
+cblas_zdotu_sub ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ff_cblas_lib=yes
+                LIBS="$ff_save_libs"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+        echo "$as_me:$LINENO: result: $ff_cblas_lib" >&5
+echo "${ECHO_T}$ff_cblas_lib" >&6
+
+
+fi
 
 # If all else fails, download!
 if test "$ff_blas_ok" = no -a "$ff_wget" = yes \
@@ -10784,6 +10849,7 @@ echo "${ECHO_T}$ff_download_blas" >&6
 
 	ff_blas_ok=yes
         ff_cblas_h=yes
+	ff_cblas_lib=yes
 fi
 echo "$as_me:$LINENO: result: $ff_blas_inc" >&5
 echo "${ECHO_T}$ff_blas_inc" >&6
@@ -10792,7 +10858,7 @@ BLASLIB=$ff_blas_lib
 BLASINC=$ff_blas_inc
 
 #looking for cblas.h  FH
-if test "$ff_blas_ok" = yes;
+if test "$ff_blas_ok" = yes -a "$ff_cblas_lib" = yes ;
 then
 
 for ac_header in cblas.h
