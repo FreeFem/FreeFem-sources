@@ -152,14 +152,14 @@ List-agl-dylib: src/agl/FreeFem++-agl
 
 $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives
 	-mkdir $@ 
-	cat ListFiles-natives|xargs tar cf - | (cd $@ ; tar xf - )  
+	cat ListFiles-natives|xargs tar chf - | (cd $@ ; tar xf - )  
 	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++ 
 	cp   DOC/freefem++-doc.pdf $@
 
 $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	-mkdir $@ 
 	cp   DOC/freefem++doc.pdf $@
-	cat ListFiles-natives|xargs tar cf - | (cd $@ ; tar xf - )  
+	cat ListFiles-natives|xargs tar chf - | (cd $@ ; tar xf - )  
 	cd  $@ ; tar zxf ../src/agl/FreeFem++.app.tgz
 	sed <src/agl/Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
            -e "s/@VVERSION@/$(VERSION)$(ADD_PACKAGE_NAME)/g" \
@@ -186,7 +186,7 @@ linux-package: $(PACKAGE_NAME).tgz
 # procedure on its own.
 
 $(PACKAGE_NAME):  ListFiles-natives
-	cat ListFiles-natives|xargs tar cf - | (cd $@ ; tar xf - )  
+	cat ListFiles-natives|xargs tar cfh - | (cd $@ ; tar xf - )  
 	-mkdir $@ 
 	cp src/std/FreeFem++ $@
 	./copysharedlibs.sh src/std/FreeFem++ $@
