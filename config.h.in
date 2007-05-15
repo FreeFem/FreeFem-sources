@@ -105,6 +105,9 @@
 /* Define to 1 if you have the <umfpack.h> header file. */
 #undef HAVE_UMFPACK_H
 
+/* Define to 1 if you have the <umfpack/umfpack.h> header file. */
+#undef HAVE_UMFPACK_UMFPACK_H
+
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
