@@ -38,8 +38,52 @@ using namespace std;
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "QuadratureFormular.hpp"
-namespace Fem2D {
 
+namespace Fem2D {
+  
+  template<class QF,int ON> 
+  QF  * QF_exact(int exact,QF * p=0)
+  {
+    exact=max(0,exact);
+    const int N=100;
+    ffassert(exact<N&& exact>=0);
+    static QF ** a=0;
+    if(a==0)
+      { //    
+	a = new  QF*[N];
+	ffassert(a);
+	for(int i=0;i<N;++i)
+	  a[i]=0;
+      }
+    ffassert(a && exact >=0 && exact < N);
+    if ( p  )
+      {
+	//cout << endl << " QF " << exact << " " << p->exact << " " << p->n << endl;;
+	for( int i=0;i<=exact;++i)
+	  {
+	  if( a[i]== 0 || a[i]->n > p->n)
+	    a[i]= p;
+	  //  cout << " QF: on " << ON << " exact P_" << i << " : "<< a[i]->n << endl;
+	  }
+      }
+    else
+      p=a[exact];
+    return p;
+  }
+
+ QuadratureFormular1d * QF_1d_exact(int exact)
+ {
+   return  QF_exact<QuadratureFormular1d,2>(exact);
+ }
+ QuadratureFormular * QF_Tria_exact(int exact)
+ {
+   return  QF_exact<QuadratureFormular,3>(exact);
+ }
+
+
+
+
+   
 ostream& operator <<(ostream& f,const  QuadraturePoint & p) 
       { f << '{' << (const R) p << '\t' << (const R2) p << '}' ; 
         return f;}
@@ -294,6 +338,10 @@ const QuadratureFormular QuadratureFormular_Q_7(4,7,25,P_QuadratureFormular_Q_7)
 
 void QuadratureFormular::Verification()
 {
+  if(on==3)
+    QF_exact<QuadratureFormular,3>(exact,this);
+  else 
+    QF_exact<QuadratureFormular,4>(exact,this);
   const double tol=1.e-12;
   R err=0;
   // on triangle or Quad 
@@ -351,8 +399,48 @@ void QuadratureFormular::Verification()
     
 }
 
+  // Computation of nodes and weights for a Gauss-Legendre quadrature formula
+  // on  [0,1] seg.
+  QuadratureFormular1d::QuadratureFormular1d(int nn)
+    : exact(nn*2-1),n(nn),p(new Point[nn])
+  {
+    int n=nn;
+    double r, r1, p1, p2, p3, dp3;
+    double eps=1e-16;
+    const double pi=M_PI;
+    
+    for(int i = 0,ii=n; i <= (n+1)/2-1; i++)
+      { 
+	ii-=1;
+	r = cos(pi*(4*i+3)/(4*n+2));
+        do
+	  {
+            p2 = 0;
+            p3 = 1;
+            for(int j = 0; j <= n-1; j++)
+	      {
+                p1 = p2;
+                p2 = p3;
+                p3 = ((2*j+1)*r*p2-j*p1)/(j+1);
+	      }
+	    
+            dp3 = n*(r*p3-p2)/(r*r-1);
+            r1 = r;
+            r = r-p3/dp3;
+	  }
+        while(fabs(r-r1)>=eps*(1+fabs(r))*100);
+        p[i].x = 0.5 +r/2;
+        p[ii].x =0.5  -r/2;
+        p[i].a=p[ii].a= 1./((1.-r*r)*dp3*dp3);
+	
+      }
+    
+    Check();
+  }
+
 void QuadratureFormular1d::Check()
 {
+    QF_exact<QuadratureFormular1d,2>(exact,this);
     int err=0;
     for(int m=0;m<=exact;++m)
     {
@@ -391,12 +479,12 @@ const QuadratureFormular1d QF_GaussLegendre4(7,
 					     QuadratureFormular1d::Point(pgauss1_n4_b/2.,(1.-gauss1_n4_b)/2.)
 					     ); 
 
-const QuadratureFormular1d QF_GaussLegendre5(9,
-					     QuadratureFormular1d::Point(pgauss1_n5_0/2.,0.5),
-					     QuadratureFormular1d::Point(pgauss1_n5_a/2.,(1.+gauss1_n5_a)/2),
-					     QuadratureFormular1d::Point(pgauss1_n5_a/2.,(1.-gauss1_n5_a)/2.),
-					     QuadratureFormular1d::Point(pgauss1_n5_b/2.,(1.+gauss1_n5_b)/2.),
-					     QuadratureFormular1d::Point(pgauss1_n5_b/2.,(1.-gauss1_n5_b)/2.)
-					     ); 
+const QuadratureFormular1d QF_GaussLegendre5(5);
+const QuadratureFormular1d QF_GaussLegendre6(6);
+const QuadratureFormular1d QF_GaussLegendre7(7);
+const QuadratureFormular1d QF_GaussLegendre8(8);
+const QuadratureFormular1d QF_GaussLegendre9(9);
+const QuadratureFormular1d QF_GaussLegendre10(10);
+
 
 }

@@ -52,12 +52,17 @@ class QuadratureFormular1d {public:
   const int n;
   class Point { public: R a,x ; Point(R aa=0,R xx=0): a(aa),x(xx) {} } *p;
   
-  QuadratureFormular1d(int ex,Point p0,Point p1,Point p2,Point p3,Point p4) : exact(ex),n(5),p(new Point[5]) { p[0]=p0;p[1]=p1;p[2]=p2;p[3]=p3;p[4]=p4;Check();}
-  QuadratureFormular1d(int ex,Point p0,Point p1,Point p2,Point p3) : exact(ex),n(4),p(new Point[4]) { p[0]=p0,p[1]=p1,p[2]=p2;p[3]=p3;Check();}
-  QuadratureFormular1d(int ex,Point p0,Point p1,Point p2) : exact(ex),n(3),p(new Point[3]) { p[0]=p0,p[1]=p1,p[2]=p2;Check();}
-  QuadratureFormular1d(int ex,Point p0,Point p1) : exact(ex),n(2),p(new Point[2]) { p[0]=p0,p[1]=p1;Check();}
-  QuadratureFormular1d(int ex,Point p0) : exact(ex),n(1),p(new Point[1]) { p[0]=p0;Check();}
-
+  QuadratureFormular1d(int ex,Point p0,Point p1,Point p2,Point p3,Point p4) 
+    : exact(ex),n(5),p(new Point[5]) { p[0]=p0;p[1]=p1;p[2]=p2;p[3]=p3;p[4]=p4;Check();}
+  QuadratureFormular1d(int ex,Point p0,Point p1,Point p2,Point p3) 
+    : exact(ex),n(4),p(new Point[4]) { p[0]=p0,p[1]=p1,p[2]=p2;p[3]=p3;Check();}
+  QuadratureFormular1d(int ex,Point p0,Point p1,Point p2) 
+    : exact(ex),n(3),p(new Point[3]) { p[0]=p0,p[1]=p1,p[2]=p2;Check();}
+  QuadratureFormular1d(int ex,Point p0,Point p1) 
+    : exact(ex),n(2),p(new Point[2]) { p[0]=p0,p[1]=p1;Check();}
+  QuadratureFormular1d(int ex,Point p0) 
+    : exact(ex),n(1),p(new Point[1]) { p[0]=p0;Check();}
+  QuadratureFormular1d(int ex);
   ~QuadratureFormular1d(){ delete [] p;}
  Point operator[](int i) const { return p[i];}  
  private:
@@ -95,6 +100,11 @@ extern const QuadratureFormular QuadratureFormular_Q_7;
 
 ostream& operator <<(ostream& f,const  QuadraturePoint & p) ;
 ostream& operator <<(ostream& f, const QuadratureFormular & fi) ;
+
+  QuadratureFormular * QF_Tria_exact(int exact);
+  QuadratureFormular1d * QF_1d_exact(int exact);
+
+
       
 }
 

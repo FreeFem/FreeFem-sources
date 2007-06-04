@@ -4,7 +4,7 @@
 \usepackage{styles}
 \usepackage{txfonts}
 \usepackage{times}
-\def\VERSION{2.16-1}
+\def\VERSION{2.16-4}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -2119,7 +2119,7 @@ Vh u,v,uu,vv;
 	  lambda*div(u,v)*div(uu,vv)
         + mu*2.*(  e11(u,v)*e11(uu,vv) 
                  + e22(u,v)*e22(uu,vv) 
-                 + e12(u,v)*e12(uu,vv)*.2 ) )	
+                 + e12(u,v)*e12(uu,vv)*2. ) )	
         - int2d(Th)(f*vv) 
         + on(4,u=0,v=0);
 @real coef=100;
@@ -4512,7 +4512,7 @@ default parameters which can be modified~:
 
     For example, if the partial derivatives
     \texttt{fxx} ($=\p^2 f/\p x^2$),
-    \texttt{fxx} ($=\p^2 f/\p x\p y$),
+    \texttt{fxy} ($=\p^2 f/\p x\p y$),
     \texttt{fyy} ($=\p^2 f/\p y^2$) are given, we can set
     $$
     \ttCC{Th=@adaptmesh(Th,fxx,fxy,fyy,IsMetric=1,nbvx=10000,hmin=hmin);}

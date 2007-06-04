@@ -795,5 +795,9 @@ grep QuadratureFormular QF.cpp|grep ^const|awk -F"[_(]" '{print "Global.New(@qf"
 	     Global.New("qf21pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_21));
 	     Global.New("qf23pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_23));
 	     Global.New("qf25pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_25));
+	     Global.New("qf11pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(11)));
+	     Global.New("qf12pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(12)));
+	     Global.New("qf13pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(13)));
 }
 
+ 

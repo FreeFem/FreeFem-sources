@@ -344,10 +344,10 @@ void Check(const Opera &Op,int N,int  M)
     bool VF=b->VF();  // finite Volume or discontinous Galerkin
     if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
     if (verbosity>3) 
-      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border  " ;
-      else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
-      else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges, "   ;
-      else cout << "  --  int  in  " ;
+      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
+      else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
+      else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
+      else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
     for (size_t i=0;i<what.size();i++)
       {long  lab  = GetAny<long>( (*what[i])(stack));
       setoflab.insert(lab);
@@ -746,10 +746,16 @@ void Check(const Opera &Op,int N,int  M)
     bool VF=b->VF();  // finite Volume or discontinous Galerkin
     if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
     if (verbosity>3) 
+      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
+      else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
+      else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
+      else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+    /*
+    if (verbosity>3) 
       if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border  " ;
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges, "   ;
-      else cout << "  --  int  in  " ;
+      else cout << "  --  int  in  " ; */
     for (size_t i=0;i<what.size();i++)
       {long  lab  = GetAny<long>( (*what[i])(stack));
       setoflab.insert(lab);
@@ -1759,11 +1765,19 @@ template<class R>
   //  cout << "AssembleLinearForm " << l->l->v.size() << endl; 
     set<int> setoflab;
     bool all=true; 
+
+    if (verbosity>3) 
+      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
+      else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
+      else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
+      else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+    /*
     if ( verbosity>3) 
       if (kind==CDomainOfIntegration::int1d) cout << "  -- boundary int border " ;
       else if (kind==CDomainOfIntegration::intalledges) cout << "  -- boundary int all edges " ;
       else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all edges " ;
       else cout << "  -- boundary int  " ;
+    */
     for (size_t i=0;i<what.size();i++)
       {long  lab  = GetAny<long>( (*what[i])(stack));
       setoflab.insert(lab);
@@ -2780,11 +2794,16 @@ const Fem2D::QuadratureFormular & CDomainOfIntegration::FIT(Stack stack) const
   if (nargs[0]) return  *GetAny<const Fem2D::QuadratureFormular *>((*nargs[0])(stack));
   int exact = 5;
   if (nargs[2]) exact=  GetAny<long>((*nargs[2])(stack))-1;
+  QuadratureFormular *qf=QF_Tria_exact(exact);
+  if(verbosity>99 && qf ) cout << "   QF Tria  n:" << qf->n << " exact = " << exact <<  endl;
+  if(qf) return *qf;
+  /*
   if( QuadratureFormular_T_1.exact >= exact ) return QuadratureFormular_T_1;
   if( QuadratureFormular_T_2.exact >= exact ) return QuadratureFormular_T_2;
   if( QuadratureFormular_T_5.exact >= exact ) return QuadratureFormular_T_5;
   if( QuadratureFormular_T_7.exact >= exact ) return QuadratureFormular_T_7;
   if( QuadratureFormular_T_9.exact >= exact ) return QuadratureFormular_T_9;
+  */
   cerr << " Ordre of the Integration Formular ordre " << exact+1 << " exact = " << exact << endl;
   ExecError(" We find  no Integration Formular on Triangle for this  order to hight");
   return QuadratureFormular_T_1;
@@ -2795,11 +2814,16 @@ const Fem2D::QuadratureFormular1d & CDomainOfIntegration::FIE(Stack stack) const
   if (nargs[1]) return  *GetAny<const Fem2D::QuadratureFormular1d *>((*nargs[1])(stack));
   int exact = 5;
   if (nargs[2]) exact=  GetAny<long>((*nargs[2])(stack))-1;
+  QuadratureFormular1d *qf=QF_1d_exact(exact);
+  if(verbosity>99 && qf ) cout << "   QF 1d  n:" << qf->n << " exact = " << exact <<  endl;
+  if(qf) return *qf; 
+  /*
   if( 1 >= exact ) return QF_GaussLegendre1;
   if( 3 >= exact ) return QF_GaussLegendre2;
   if( 5 >= exact ) return QF_GaussLegendre3;
   if( 7 >= exact ) return QF_GaussLegendre4;
   if( 9 >= exact ) return QF_GaussLegendre5;
+  */
   cerr << " Ordre of the Integration Formular on Edge, order = " << exact+1 << " exact = " << exact << endl;
   ExecError(" We find  no Integration Formular on Edge  for this  order to hight");
   return QF_GaussLegendre1;
