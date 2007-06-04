@@ -15,7 +15,7 @@ solve lame([u,v],[uu,vv])= int2d(Th)(
 	  lambda*div(u,v)*div(uu,vv)
         + mu*2.*(  e11(u,v)*e11(uu,vv) 
                  + e22(u,v)*e22(uu,vv) 
-                 + e12(u,v)*e12(uu,vv)*.2 ) )	
+                 + e12(u,v)*e12(uu,vv)*2. ) )	
         - int2d(Th)(f*vv) 
         + on(4,u=0,v=0);
 real coef=100;

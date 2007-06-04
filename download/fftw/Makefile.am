@@ -17,7 +17,7 @@ INSTALL=install
 fltk: $(SRCDIR)/$(INSTALL)
 
 $(SRCDIR)/$(INSTALL): $(SRCDIR)
-	cd $(SRCDIR) && ./configure  --prefix=`pwd`/../$(INSTALL) CXX=$(CXX) CC=$(CC)
+	cd $(SRCDIR) && ./configure  --prefix=`pwd`/../.. CXX=$(CXX) CC=$(CC)
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 

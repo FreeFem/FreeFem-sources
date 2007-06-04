@@ -2,7 +2,24 @@ load "Element_P4"
 load "Element_P3"
 load "qf11to25"
 
- mesh Th=square(10,10);
+  
+mesh Th=square(10,10);
+verbosity=4;
+
+for (int i=1;i<=26;i++)
+{
+  cout <<" int1d order= "<< i ;
+  int1d(Th,qforder=i)(1.);
+}
+
+for (int i=1;i<=26;i++)
+{
+ cout <<" int2d order= "<< i ;	
+  int2d(Th,qforder=i)(1.);
+}
+
+verbosity=1;
+
  fespace Vh(Th,P4);     // P1 FE space
  Vh uh,vh;              // unkown and test function. 
  func f=1;                 //  right hand side function 

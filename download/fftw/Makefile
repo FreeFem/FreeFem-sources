@@ -14,8 +14,8 @@ all-local:fftw
 SRCDIR=fftw-$(FFTW_VERSION)
 PACKAGE=fftw-$(FFTW_VERSION).tar.gz
 SERVER=http://www.fftw.org
-INSTALL=../../install
-FFTW_VERSION=3.0.1
+INSTALL=../..
+FFTW_VERSION=3.1.2
 
 fftw: $(SRCDIR)/$(INSTALL)
 
@@ -28,7 +28,7 @@ $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
 
 $(PACKAGE):
-	wget  $(SERVER)/$(PACKAGE)
+	curl -O  $(SERVER)/$(PACKAGE)
 
 clean-local:
 	-rm -rf fftw-*

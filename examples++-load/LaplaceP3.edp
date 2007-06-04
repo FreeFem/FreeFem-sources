@@ -1,6 +1,4 @@
-load "Element_P4"
 load "Element_P3"
-load "qf11to25"
 
  mesh Th=square(10,10);
  fespace Vh(Th,P3);     // P1 FE space
@@ -9,8 +7,8 @@ load "qf11to25"
  func g=0;                 //  boundary condition function
  
  problem laplace(uh,vh) =                    //  Definion of  the problem 
-    int2d(Th,qft=qf11pT)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
-  - int2d(Th,qft=qf25pT)( f*vh )                          //  linear form
+    int2d(Th,qft=qf7pT)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  - int2d(Th,qft=qf7pT)( f*vh )                          //  linear form
   + on(1,2,3,4,uh=g) ;                      //  boundary condition form
 
   laplace; // solve the problem plot(uh); // to see the result

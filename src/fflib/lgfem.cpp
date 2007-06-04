@@ -2595,32 +2595,39 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
   MeshPoint mp=* MeshPointStack(stack);
  R r=0;
  
-             SHOWVERB(cout << " int " << endl);
-             const vector<Expression>  & what(di->what);
-             const Mesh  & Th = * GetAny<pmesh>( (*di->Th)(stack) );
-             const QuadratureFormular1d & FIE = di->FIE(stack);
-             const QuadratureFormular & FIT = di->FIT(stack);
-             ffassert(&Th);
-             CDomainOfIntegration::typeofkind kind = di->kind;
-             set<int> setoflab;
-             bool all=true; 
-             if ( verbosity>3) 
-               if (kind==CDomainOfIntegration::int1d) cout << "  -- boundary int border " ;
-               else if (kind==CDomainOfIntegration::intalledges) cout << "  -- boundary int all edges " ;
-               else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all VF  edges " ;
-               else cout << "  -- boundary int  " ;
-             for (size_t i=0;i<what.size();i++)
-               {long  lab  = GetAny<long>( (*what[i])(stack));
-                setoflab.insert(lab);
-                if ( verbosity>3) cout << lab << " ";
-                all=false;
-               }
-               
-             
-             if (verbosity >3) 
-               if (all) cout << " all " << endl ;
-               else cout << endl;
-               
+ SHOWVERB(cout << " int " << endl);
+ const vector<Expression>  & what(di->what);
+ const Mesh  & Th = * GetAny<pmesh>( (*di->Th)(stack) );
+ const QuadratureFormular1d & FIE = di->FIE(stack);
+ const QuadratureFormular & FIT = di->FIT(stack);
+ ffassert(&Th);
+ CDomainOfIntegration::typeofkind kind = di->kind;
+ set<int> setoflab;
+ bool all=true; 
+ if (verbosity>3) 
+   if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
+   else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
+   else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
+   else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+ /*
+   if ( verbosity>3) 
+   if (kind==CDomainOfIntegration::int1d) cout << "  -- boundary int border " ;
+   else if (kind==CDomainOfIntegration::intalledges) cout << "  -- boundary int all edges " ;
+   else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all VF  edges " ;
+   else cout << "  -- boundary int  " ;*/
+ for (size_t i=0;i<what.size();i++)
+   {
+     long  lab  = GetAny<long>( (*what[i])(stack));
+     setoflab.insert(lab);
+     if ( verbosity>3) cout << lab << " ";
+     all=false;
+   }
+ 
+ 
+ if (verbosity >3) 
+   if (all) cout << " all " << endl ;
+   else cout << endl;
+ 
              if (kind==CDomainOfIntegration::int1d)
                {
                  const QuadratureFormular1d & FI = FIE;
