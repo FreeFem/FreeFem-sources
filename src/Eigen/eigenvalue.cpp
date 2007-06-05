@@ -620,6 +620,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const {
     long maxit=0;  // the maximum number of Arnoldi iterations 
     K sigma=0;
     KN<K> * evalue=0;
+   KNM<K> * rawvector=0;
     
     pfecarray  evector2;
     pfecbasearray   evector=0;
@@ -630,6 +631,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const {
     evector2 =arg<pfecarray>(4,stack,make_pair<pfecbasearray,int>(0,0)); 
     ncv= arg<long>(5,stack,0);
     maxit= arg<long>(6,stack,0);
+    rawvector=arg<KNM<K> *>(7,stack,0);
     
     evector=evector2.first;
     
@@ -788,6 +790,19 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const {
 		       xx= new KN<K>(vi);
 		       
 		   }
+		   if(rawvector)
+		   {
+		       int m = Min(nconv,rawvector->M());
+		       ffassert(rawvector->N()==n);
+		       for(int i=0;i<m;i++)
+		       {
+			   KN_<K> vi(prob.RawEigenvector(i),n) ;
+			   //   cout << " ------ EV--raw " << vi.min() << " " << vi.max() << endl;
+			   (*rawvector)(':',i)=vi;
+		       }
+		       
+		   }
+		   
 	       }
 	       
 	       
