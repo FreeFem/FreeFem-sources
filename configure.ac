@@ -926,7 +926,7 @@ AC_SUBST(UMFPACKLIB,$ff_umfpack_lib)
 # ----------------------------------------------------------
 
 # asinh acosh atanh are not in Mingw yet
-AC_CHECK_FUNCS(asinh acosh atanh getenv)
+AC_CHECK_FUNCS(asinh acosh atanh getenv jn erfc tgamma)
 
 AC_CHECK_FUNCS(second_,ff_second="",ff_second=second.o)
 AC_SUBST(FF_SECOND,"$ff_second")

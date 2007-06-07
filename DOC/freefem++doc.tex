@@ -4,7 +4,7 @@
 \usepackage{styles}
 \usepackage{txfonts}
 \usepackage{times}
-\def\VERSION{2.16-4}
+\def\VERSION{2.17}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -3363,6 +3363,20 @@ there are some compound operator:
 (example \verb$real DotProduct=a'*b$) \index{dot product}\index{product!dot}, in complex case you get the Hermitian
 product, so mathematically we have  \verb!a'*b!$ =  \overline{a}^T b $ \index{product! Hermitian dot}. 
  \item \verb@ a*b'@ is the outer product  (example  \verb$matrix B=a'*b$ \index{outer product}\index{product!outer}) 
+ 
+ To set or get all the indices and coef of the sparce matrix $A$, let \verb!I,J,C! respectively
+  two \verb!int[int]! array and a  \verb!real[int]! array. The three array defined
+  the matrix  as follow
+  $$
+    A = \sum_k \mathtt{C[k]} M_{\mathtt{I[k],J[k]}} \qquad \mbox{where }\quad M_{ab} = ( \delta_{ia}\delta_{jb} )_{ij}
+  $$
+  and you have:  $ M_{ab}$ is a basic matrix with the only  non zero term $m_{ab}=1$.
+  
+  You can write 
+  \verb! [I,J,C]=A ;! to get all the term of the matrix \verb!A! (the arrays are automaticaly resize), and
+   \verb! A=[I,J,C] ;! to change all the term matrix. remark the size of 
+   the matrix is with \verb! n= I.max! and \verb!m=J.max!. Remark you forget \verb! I,J ! when the build a
+   diagonal matrix, and  $n,m$ of the matrix is 
 \end{itemize}
 \begin{example}~
 \bFF
@@ -3397,9 +3411,18 @@ Vh m2; m2[] = f[]./g[];
 @cout << "hermitien Product = "<< ff[]'*gg[] << @endl;
 @cout << "outer Product = "<< (A=ff[]*gg[]') << @endl;
 @cout << "hermitien outer Product = "<< (AA=ff[]*gg[]') << @endl;
-@real[] diagofA(A.n);
+@real[@int] diagofA(A.n);
   diagofA = A.diag; // get the diagonal of the matrix
   A.diag = diagofA ;  // set the diagonal of the matrix \index{diag}\index{matrix!diag}
+//  version 2.17 or better ---
+@int[@int] I(1),J(1); @real[int] C(1); 
+[I,J,C]=A; // get of the sparce term of the matrix A (the array are resized) 
+cout << " I= " << I << endl;
+cout << " J= " << J << endl;
+cout << " C= " << C << endl;
+A=[I,J,C]; // set a new matrix 
+matrix D=[diagofA] ; // set a diagonal D from the array diagofA. 
+cout << " D = " << D << endl;
 \eFF
 
 On the triangulation of Figure \ref{fig-hatFunction} this produce the following:
@@ -3453,6 +3476,41 @@ A&=&\left[\begin{array}{cccccc}
 \texttt{f[]'*g[]}&=&0.5\quad
 (=\{v\}^T\{w\}=\{v\}\cdot\{w\})
 \end{eqnarray*}
+The output of the $I,J,C$ array: 
+\bFF
+ I= 18
+          0       0       0       1       1
+          1       1       2       2       3
+          3       4       4       4       4
+          5       5       5
+ J= 18
+          0       1       4       1       2
+          4       5       2       5       0
+          3       0       1       3       4
+          1       4       5
+ C= 18
+        1e+30   0.5     -2.5    1e+30   0.5
+        0.5     -2.5    1e+30   0.5     0.5
+        1e+30   -2.5    0.5     0.5     1e+30
+        -2.5    0.5     1e+30
+\eFF
+
+The output of a diagonal sparce matrix $D$ \index{$<<$!matrix} (Warning du to fortran interface 
+the indices start on the output at one, but in \freefempp in index as in \texttt{C} begin
+at zero);
+
+\scriptsize\begin{verbatim}
+ D = # Sparce Matrix (Morse)  
+# first line: n m (is symmetic) nbcoef 
+# after for each nonzero coefficient:   i j a_ij where (i,j) \in  {1,...,n}x{1,...,m} 
+6 6 1  6
+        1         1 1.0000000000000000199e+30
+        2         2 1.0000000000000000199e+30
+        3         3 1.0000000000000000199e+30
+        4         4 1.0000000000000000199e+30
+        5         5 1.0000000000000000199e+30
+        6         6 1.0000000000000000199e+30
+\end{verbatim}\normal
 \end{example}
 \begin{note}
 The operators \verb|^-1| cannot be used to create a matrix;
@@ -6206,7 +6264,7 @@ we can use the stopping test
 The  parameters of these three functions are:
 \begin{description}  \index{linearCG!nbiter=} \index{linearCG!precon=} \index{linearCG!eps=}\index{linearCG!veps=}
 \index{NLCG!nbiter=}  \index{NLCG!eps=}\index{NLCG!veps=}
-\index{LinearGMRES!nbiter=} \index{LinearGMRES!precon=} \index{LinearCMRES!eps=}\index{LinearGMRES!veps=}
+\index{LinearGMRES!nbiter=} \index{LinearGMRES!precon=} \index{LinearGMRES!eps=}\index{LinearGMRES!veps=}
 
 \itemtt[nbiter=] set the number of iteration (by default $100$)
 \itemtt[precon=] set the preconditioner function (\texttt{P} for example)   by default it is the identity, remark the prototype
@@ -7749,17 +7807,26 @@ where the matrix $OP=  A - \sigma B $ with a solver and boundary condition,
 and the matrix $B$.
 
 \begin{description}
-          \item[\texttt{sym=}]    the problem is symmetric (all the eigen value are real)
-          \item[\texttt{nev=}]    the number desired eigenvalues (nev)  close to the shift.
-        \item[\texttt{value=}]    the array to store the real part of the eigenvalues
-         \item[\texttt{ivalue=}]     the array to store the imag. part of the eigenvalues
-         \item[\texttt{vector=}]    the array to store the eigenvectors.
+          \item[\texttt{sym=}] \index{EigenValue!sym=}   
+          the problem is symmetric (all the eigen value are real)
+          \item[\texttt{nev=}] \index{EigenValue!nev=}   
+          the number desired eigenvalues (nev)  close to the shift.
+        \item[\texttt{value=}]  \index{EigenValue!value=}  
+        the array to store the real part of the eigenvalues
+         \item[\texttt{ivalue=}]   \index{EigenValue!ivalue=}  
+         the array to store the imag. part of the eigenvalues
+         \item[\texttt{vector=}]   \index{EigenValue!vector=} 
+         the  FE function array to store the eigenvectors 
+         \item[\texttt{rawvector=}]  \index{EigenValue!rawvector=} 
+          a \texttt{real[int,int] } to store eigenvectors by column. (up to version 2-17).
+         
  For real nonsymmetric problems, complex eigenvectors are given as two consecutive vectors, so if eigenvalue $k$ and $k+1$ are complex conjugate eigenvalues, the $k$th vector will contain the real part and the $k+1$th vector the imaginary part of the corresponding complex conjugate eigenvectors.
 
-         \item[\texttt{tol=}]        the relative accuracy to which eigenvalues are to be determined;
-         \item[\texttt{sigma=}]    the shift value;
-         \item[\texttt{maxit=}]    the maximum number of iterations allowed;
-          \item[\texttt{ncv=}]     the number of Arnoldi vectors generated at each iteration of ARPACK.
+         \item[\texttt{tol=}]  \index{EigenValue!tol=}      
+         the relative accuracy to which eigenvalues are to be determined;
+         \item[\texttt{sigma=}]  \index{EigenValue!sigma=}  the shift value;
+         \item[\texttt{maxit=}]  \index{EigenValue!maxit=}  the maximum number of iterations allowed;
+          \item[\texttt{ncv=}]  \index{EigenValue!ncv=}   the number of Arnoldi vectors generated at each iteration of ARPACK.
  \end{description}
 
 

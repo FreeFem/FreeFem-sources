@@ -1162,6 +1162,43 @@ KN<R> * get_mat_coef(KN<R> * x,TheCoefMat<R> dm)
   return x;
 }
 
+template<class R> 
+bool IsRawMat(const basicAC_F0 & args) 
+{   
+    
+    const E_Array & ee= *dynamic_cast<const E_Array*>((Expression) args[1]);
+    if (!&ee) return 0;
+    
+    int N=ee.size();
+    if (N==1)
+    {
+	C_F0 c0(ee[0]);
+	return 
+	    atype<KN_<R> >()->CastingFrom(ee[0].left());
+	    
+    }
+    else if (N==3)
+    {
+	C_F0 c0(ee[0]),c1(ee[1]),c2(ee[2]);
+	return 
+	    atype<KN_<long> >()->CastingFrom(ee[0].left())
+	    && 	    atype<KN_<long> >()->CastingFrom(ee[1].left())
+	    &&      atype<KN_<R> >()->CastingFrom(ee[2].left());
+	    
+    }
+    return 0;
+}
+
+
+template<typename R>
+class RawMatrix :  public E_F0 { public: 
+    typedef Matrice_Creuse<R> * Result;
+    Expression emat; 
+    Expression coef,col,lig;
+    RawMatrix(const basicAC_F0 & args) ;
+    static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<Matrice_Creuse<R>*>(),atype<E_Array>());}
+    AnyType operator()(Stack s) const ;    
+};
 
  template<typename R>
  class BlockMatrix :  public E_F0 { public: 
@@ -1174,7 +1211,10 @@ KN<R> * get_mat_coef(KN<R> * x,TheCoefMat<R> dm)
    ~BlockMatrix() ;
       
     static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<Matrice_Creuse<R>*>(),atype<E_Array>());}
-    static  E_F0 * f(const basicAC_F0 & args){ return new BlockMatrix(args);} 
+    static  E_F0 * f(const basicAC_F0 & args){
+	if(IsRawMat<R>(args)) return new RawMatrix<R>(args);
+	else return new BlockMatrix(args);
+    }  
     AnyType operator()(Stack s) const ;
     
 };
@@ -1268,7 +1308,6 @@ AnyType Matrixfull2map (Stack , const AnyType & pp)
       
   return pA;
 }
-
 
 
 template<class R>
@@ -1466,8 +1505,35 @@ template<typename R>  BlockMatrix<R>::~BlockMatrix()
 	M=0;
 	e_Mij=0;
 	t_Mij=0; }
-}     
+}   
 
+template<typename R>  RawMatrix<R>::RawMatrix(const basicAC_F0 & args) 
+{
+    args.SetNameParam();
+    emat = args[0];
+    
+    const E_Array & ee= *dynamic_cast<const E_Array*>((Expression) args[1]);
+    
+    int N=ee.size();
+    if (N==1)
+    {
+	C_F0 c0(ee[0]);
+	coef=to<KN_<R> >(ee[0]);
+	lig=0;
+	col=0;
+    }
+    
+    else if (N==3)
+    {
+	C_F0 c0(ee[0]),c1(ee[1]),c2(ee[2]);
+	coef=to<KN_<R> >(ee[2]);
+	lig=to<KN_<long> >(ee[0]);
+	col=to<KN_<long> >(ee[1]);
+	
+    }
+    
+    
+}
 template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args) 
 {   
     N=0;
@@ -1490,7 +1556,7 @@ template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args)
         }
     }
     if (err) {
-	CompileError(" Block matric : [[ a, b, c], [ a, b,c ]]");
+	CompileError(" Block matrix : [[ a, b, c], [ a,b,c ]] or Raw Matrix [a] or [ l, c, a ] ");
     }
     assert(N && M);
     e_Mij = new Expression * [N];
@@ -1580,7 +1646,126 @@ template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args)
     }
 }
 
+template<typename RR>
+class  SetRawMatformMat : public OneOperator { 
+public:
+    typedef Matrice_Creuse<RR> *  A; // Warning  B type of  2 parameter 
+    typedef Matrice_Creuse<RR> *  R;
+    typedef E_Array B; //   A type of 1 parameter
+    
+    class CODE : public  E_F0 { public:
+	Expression Mat;
+	Expression lig;
+	Expression col;
+	Expression coef;
+	bool mi;    
+	    CODE(Expression a,const E_Array & tt)  
+		: Mat(a),
+		 mi(tt.MeshIndependent())
+	    {
+		    assert(&tt);
+		    if(tt.size()!=3) 
+			CompileError("Set raw matrix:  [ lg,col, a] = A (size !=3) ");
+		    if (    atype<KN<long>* >()->CastingFrom(tt[0].left() )
+			&&  atype<KN<long>* >()->CastingFrom(tt[1].left() )
+			&&  atype<KN<RR>* >()->CastingFrom(tt[2].left() ) )
+			    {
+			      lig = atype<KN<long>* >()->CastTo(tt[0]);
+			      col = atype<KN<long>* >()->CastTo(tt[1]);
+			      coef = atype<KN<RR>* >()->CastTo(tt[2]);
+			    }      
+			    else 
+				CompileError(" we are waiting for [ lg,col,a] = A");
+	    }
+	    
+	    AnyType operator()(Stack stack)  const 
+	    {
+		A  a=GetAny<A>((*Mat)(stack));
+		KN<long> *lg,*cl;
+		KN<RR> *cc;
+		lg = GetAny<KN<long>*>((*lig)(stack));
+		cl = GetAny<KN<long>*>((*col)(stack));
+		cc = GetAny<KN<RR>*>((*coef)(stack));
+		int n=a->N(),m=a->M();
+		map<pair<int,int>,RR> *M=new map<pair<int,int>,RR>;
+		if (n >0 && m>0 && a->A) 
+		{
+		    a->A->addMatTo(RR(1.),*M);
+		    // hack 
+		    (*M)[make_pair(n-1,m-1)]+=RR();
+		}
+		int kk = M->size();
+		lg->resize(kk);
+		cc->resize(kk);
+		cl->resize(kk);
+		int k=0;
+		typename map<pair<int,int>,RR>::const_iterator i;
+		//if (!a->sym)
+		 for (i=M->begin(); i != M->end();++i,++k)
+		  {  
+		    (*lg)[k]= i->first.first;
+		    (*cl)[k]= i->first.second;
+		    (*cc)[k]= i->second;
+		  }
+		    
+		delete M;
+		return SetAny<R>(a);
+	    } 
+	    bool MeshIndependent() const     {return  mi;} // 
+	    ~CODE() {}
+	    operator aType () const { return atype<R>();}    
+    }; // end sub class CODE
+    
+    
+public: // warning hack  A and B 
+	E_F0 * code(const basicAC_F0 & args) const 
+    { return  new CODE(t[1]->CastTo(args[1]),*dynamic_cast<const E_Array*>( t[0]->CastTo(args[0]).RightValue()));} 
+    SetRawMatformMat():   OneOperator(atype<R>(),atype<B>(),atype<A>())  {} // warning with A and B 
+    
+};
 
+
+template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
+{
+    MatriceMorse<R> * amorse =0; 
+    KN_<R> cc(GetAny< KN_<R>  >((*coef)(stack)));
+    int k= cc.N();
+    int n= k;
+    int m=n;
+    map< pair<int,int>, R> Aij;
+    bool sym=false;
+    if( lig && col)
+    {
+	KN_<long> lg(GetAny< KN_<long>  >((*lig)(stack)));
+	KN_<long> cl=(GetAny< KN_<long>  >((*col)(stack)));
+	n = lg.max()+1;
+	m = cl.max()+1;
+	ffassert( lg.N()==k && cl.N()==k && lg.min()>=0 && lg.max()>=0);
+	sym=false;
+	for(int i=0;i<k;++i)
+	    Aij[make_pair<int,int>(lg[i],cl[i])]+=cc[i];	
+    }
+    else
+    {
+	sym=true;
+	for(int i=0;i<n;++i)
+	    Aij[make_pair(i,i)]=cc[i];
+    }
+    //cout <<  " nxm  =" <<n<< "x" << m <<endl; 
+    amorse=  new MatriceMorse<R>(n,m,Aij,sym); 
+    if(verbosity)
+	cout << " -- Raw Matrix    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
+    
+    Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));       
+    sparce_mat->pUh=0;
+    sparce_mat->pVh=0; 
+    sparce_mat->A.master(amorse);
+    sparce_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+    
+    if(verbosity>3) { cout << "  End Raw Matrix : " << endl;}
+    
+    return sparce_mat;   
+}
 template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 {
   typedef list<triplet<R,MatriceCreuse<R> *,bool> > * L;
@@ -1737,7 +1922,7 @@ AnyType mmM2L3 (Stack , const AnyType & pp)
     delete  p.l;
     return mpp.l;
 }
-/*
+
 template<class R>
 AnyType mmM2L3c (Stack , const AnyType & pp)
 {
@@ -1758,9 +1943,9 @@ void AddSparceMat()
  Dcl_Type<  minusMat<R>  >(); // Add FJH mars 2007
  
  basicForEachType * t_MC=atype<  Matrice_Creuse<R>* >();
- basicForEachType * t_MCt=atype<  Matrice_Creuse_Transpose<R> >();
- basicForEachType * t_lM=atype< list<triplet<R,MatriceCreuse<R> *,bool> > * >();
- basicForEachType * t_nM=atype<  minusMat<R> >();
+// basicForEachType * t_MCt=atype<  Matrice_Creuse_Transpose<R> >();
+// basicForEachType * t_lM=atype< list<triplet<R,MatriceCreuse<R> *,bool> > * >();
+// basicForEachType * t_nM=atype<  minusMat<R> >();
  
  basicForEachType * t_MM=atype<map< pair<int,int>, R> * >();
  
@@ -1860,6 +2045,7 @@ TheOperators->Add("+",
  atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,outProduct_KN_<R>*,KN_<long>,KN_<long> >(Matrixoutp2mapIJ<R>));
 
 
+ TheOperators->Add("=", new SetRawMatformMat<R>);
 
 
 
