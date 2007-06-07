@@ -2991,6 +2991,32 @@ Of period $2^{219937}-1$, and the functions are:\index{random}\index{rand}\index
 \item {\verb!randinit(seed )!} initializes the state vector by using one  32-bit integer "seed", which may be zero.
 \end{itemize}
 
+\itemtt[Library Functions]\index{gamma}\index{bessel}\index{erf}\index{erfc}
+  form the mathematical library (version 2.17).
+\begin{itemize}
+\item the functions \texttt{j0(x), j1(x), jn(n,x), y0(x), y1(x), yn(n,x)} are the Bessel functions of first and second kind.
+
+    The functions \texttt{j0(x)} and \texttt{j1(x)} compute the Bessel function of the first
+     kind of the order $0$ and the order $1$, respectively; the function \texttt{jn(n, x)}
+     computes the Bessel function of the first kind of the integer order $n$.
+
+     The functions \texttt{y0(x)} and \texttt{y1(x)} compute the linearly independent Bessel
+     function of the second kind of the order 0 and the order 1, respectively,
+     for the positive integer value $x$ (expressed as a real); the function
+     \texttt{yn(n, x)} computes the Bessel function of the second kind for the integer
+     order $n$ for the positive integer value $x$ (expressed as a real).
+
+\item   the function  \texttt{tgamma(x)} calculates the $\Gamma$ function of x.  \texttt{lgamma(x)} calculates the
+     natural logorithm of the absolute value of the $\Gamma$ function of x.
+\item       The \texttt{erf(x)} function calculates the error function,  where
+      $     \mathtt{erf}(x) = {2\over \sqrt(pi)}\int_0^x   exp(-t^2) dt$.
+     The \texttt{erfc(x)} = function calculates the complementary error function of x, i.e. 
+     $ \mathtt{erfc}(x)= 1- \mathtt{erf}(x) $.
+
+
+
+\end{itemize}
+
 \end{description}
 
 \subsection{Functions of Two Variables}
@@ -6047,7 +6073,7 @@ arrays of 2  real FE functions, arrays of two arrays of double, to plot
 respectively a mesh,
 a function, a vector field, or a curve defined by the two arrays of double.
 \begin{note}
-The length of a arrow is always bound to be in  $[5\tcperthousand, 5\%]$ of the screen size, to see something not a porcupine. % porc-épic 
+The length of a arrow is always   bound to be in  $[5\tcperthousand, 5\%]$ of the screen size, to see something not a porcupine. % porc-épic 
 \end{note}
 
 The parameters are

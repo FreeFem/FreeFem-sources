@@ -1,5 +1,21 @@
 v 2.17
-  correct the quadrature formular automatic choose with the qforder= field
+  - add bessel function   j0, j1, jn, y0, y1, yn -- bessel
+        functions of first and second kind
+  - add  erf, erfc -- error function operators
+  - add   tgamma, lgamma  -- gamma and log of gamma
+  - add   tool set and get   line,colunm and value of a sparce matrix
+             [I,J,C]=A; // resizing  array I,J,C
+             A=[I,J,C] ;
+            where
+             int[int] I(k),J(k); real[int] C(k);
+  - add   in tools to get eigen vector of None FE problem
+   like:
+     int nev=5;  // number of computed eigen valeu close to sigma
+     real[int] ev(nev); // to store nev eigein value
+     real[int,int] eV(AA.n,nev);   // to store nev eigen vector
+     int k=EigenValue(AA,BB,sym=true,11value=ev,rawvector=eV);
+
+  - correct the quadrature formular automatic choose with the qforder= field
   by default the order is correct until  order 10 (so exact for P9 polynomals)
   to add new Quadrature formalur up two  order 26 add  dynamic load qf11to25
 v 2.16-2
