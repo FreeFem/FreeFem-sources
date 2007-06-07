@@ -1073,8 +1073,8 @@ void Init_map_type()
      Global.Add("erfc","(",new OneOperator1<double>(erfc));
 #endif
 #ifdef HAVE_TGAMMA
-     Global.Add("tgamma","(",new OneOperator1<double>(gamma));
-     Global.Add("lgamma","(",new OneOperator1<double>(gamma));
+     Global.Add("tgamma","(",new OneOperator1<double>(tgamma));
+     Global.Add("lgamma","(",new OneOperator1<double>(lgamma));
 #endif
      //  function de bessel j0, j1, jn, y0, y1, yn -- bessel functions of first and second kind     
 #ifdef HAVE_JN

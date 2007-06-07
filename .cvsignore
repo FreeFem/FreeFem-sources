@@ -4,7 +4,6 @@ build-arch-stamp
 build-indep-stamp
 c-*
 config.h
-config.h.in
 config.log
 config.status
 config-version.h
