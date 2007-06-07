@@ -1,3 +1,372 @@
+2007-06-07 10:53  hecht
+
+	* correct mistake in tgamma call
+
+2007-06-07 10:37  hecht
+
+	*   correct missing update
+
+2007-06-07 08:17  hecht
+
+	*   add bessel function   j0, j1, jn, y0, y1, yn -- bessel
+	  functions of first and second kind
+	    add  erf, erfc -- error function operators
+	    add   tgamma, lgamma  -- gamma and log of gamma
+	    add   set and get	line,colunm and value of a sparce matrix
+	     [I,J,C]=A; // resizing  array I,J,C
+	     A=[I,J,C] ;
+	    where
+	     int[int] I(k),J(k); real[int] C(k);
+
+2007-06-05 18:02  hecht
+
+	*   same for complex eigen value
+
+2007-06-05 17:44  hecht
+
+	*   add rawvector= in eigenvector
+
+2007-06-04 23:03  hecht
+
+	*  correct qforder= automatic choose in quadature formular in
+	  computation of integrale
+
+2007-05-16 00:21  hecht
+
+	* just add missing files
+
+2007-05-16 00:09  hecht
+
+	*   correct  Makefile.am for  examples++-load/include  missing file
+
+2007-05-15 23:48  hecht
+
+	*   do autoreconf
+
+2007-05-15 22:01  hecht
+
+	* coorect mistake with libcblas
+
+2007-05-10 12:05  hecht
+
+	*   correct very old bug in meshptg in case aligne point
+	    correct configure.ac for umfpack in debian
+	    correct exemple+-load/load.link use variable CXX
+
+2007-05-03 10:36  hecht
+
+	* correct   Makefile.am dans examples++-load
+
+2007-05-02 17:29  hecht
+
+	*   - Add read sparce matrix form a file
+	    -  Correct mistake in boundary condition in complex case.
+	    if the boundary condition is real in a complex  problem
+	    then the imaginary part is unset.
+
+2007-04-25 09:28  hecht
+
+	*   coorect splitmesh next step
+
+2007-04-24 22:20  hecht
+
+	*   coorect meshsplit function
+
+2007-04-24 17:18  hecht
+
+	*   correct  the variable ff_testideprog="testhighlight${EXEEXT}"
+	    is imply error is when building   src/ide on windows computer1
+
+2007-04-23 17:28  hecht
+
+	*   remove  dump for debbuging in fem.cpp ( mesh() constructor
+	  call splitmesh function)
+
+2007-04-21 11:31  hecht
+
+	*   correct miss speeling and fig ref/label
+
+2007-04-20 17:18  hecht
+
+	*   remove  all compilation in ide dir if --without-fltk  configure
+	  flags is set.
+
+2007-04-20 16:01  hecht
+
+	*   correct error when writing mesh, in case of different region
+	  (sub-domain)
+	     with the same number, we write just one region not the full
+	  mesh.
+
+2007-04-20 14:56  hecht
+
+	*   do autoreconf
+
+2007-04-20 14:54  hecht
+
+	*   - correct mshptg.cpp  (add swap) , this is used in case of
+	    splitmesh.	The error appear when the difference of two
+	  adjacent
+	    are splited by a ratio greater than 5. We can get very flat
+	  traingle.
+	    - add cpp flags for ufsparce/umfpach.h include
+
+2007-04-18 12:01  hecht
+
+	*   correct ligne pof Sun  SS -S vss in fem.cpp
+
+2007-04-17 22:34  hecht
+
+	*  same next
+
+2007-04-17 22:27  hecht
+
+	*     same continuing
+
+2007-04-17 22:12  hecht
+
+	*   correct fltk configure process on windows
+
+2007-04-17 21:47  hecht
+
+	*  coorect mistake on  window akefile+ change fltk dowload install
+	  dir
+
+2007-04-17 12:52  hecht
+
+	* [no log message]
+
+2007-04-17 12:51  hecht
+
+	*  add file
+
+2007-04-17 12:08  hecht
+
+	*   remove umfpack directory  form src
+	    use the SuiteSparse for Univ of Foriad (CISE) for UMFPACK
+	    add  read of string in file
+
+2007-04-06 17:42  hecht
+
+	*   correct regularity, suite.
+
+2007-04-06 14:53  hecht
+
+	*    regularity mistake, suite.
+
+2007-04-06 13:18  hecht
+
+	*   correct impressin of mesh regularity
+
+2007-04-04 21:20  hecht
+
+	*   go to version 2.15-1, see innovation file
+
+2007-04-02 11:45  hecht
+
+	* correct examples++-tutorial/sparse-matrix.edp
+
+2007-04-02 11:36  hecht
+
+	*   correct splitmesh with intenals bourdary
+	    add sparce matrix fonctionnality	a(I,J) a(I^-1,J^-1)
+
+	  Cvs:
+	  ----------------------------------------------------------------------
+
+2007-03-25 11:41  hecht
+
+	*   correct bug in vectorial operation	 (a+3.14*b)
+	    add merge RNM package and freefem++ RNM sources.
+
+2007-03-22 12:01  hecht
+
+	*   Correct  integration problem in varf of int1d(Th) .. u_Th1 ..
+	  v_Th2 ..
+
+2007-03-11 21:22  hecht
+
+	* correct licence hearder.
+
+2007-03-09 23:10  hecht
+
+	*    correct missing speeling in  configure.ac	mpi++.h -> mpi++.h
+	  for mpich.1.2
+	     add computing linear form of 2 meshes  (ex. v on mesh Th1, and
+	   compute int2d(Th1)(v) )
+
+2007-03-07 13:51  hecht
+
+	*     see INNOVATION for detail.
+	      and converstion of matrix.
+
+2007-02-14 21:00  hecht
+
+	*   correct mistake in bluid matrice from  varf with  3 meshes
+
+2007-02-04 12:19  hecht
+
+	*   add scalar term in block matrix as 1x1 sub matrix.
+
+2007-02-03 15:17  hecht
+
+	*  do autoreconf
+
+2007-02-03 14:25  hecht
+
+	*   pass to version 2.13  and
+	     Add formal operator * and ' (to day just transpose)
+	     on vector [ .. ]  and matrix [ [],...,  []]
+	     so we can write
+	      macro grad(u) [ dx(u),dy(u)] // EOM
+	      int2d(Th)( grad(u)'*grad(v) )
+
+2007-01-24 14:01  hecht
+
+	*     correct  mistake in function
+		   Mesh::Mesh(const Mesh & Th,int * split,bool
+	  WithMortar,int label)
+		and coorect mshptg_ in case of sub-domain with 1 element
+
+2007-01-15 14:13  hecht
+
+	*  correct when return a local new pointeur in freefem++ function
+	    like in string.edp
+	    return toto+"dfsdf";
+	    do not remove the pointer when catching return exeption is
+	  block
+	    see method ListOfInst::operator()
+
+2007-01-10 13:12  hecht
+
+	* add comment
+
+2007-01-10 11:59  hecht
+
+	*   pass to 2-12 et correct mistake in no square block matrix
+
+2006-12-22 13:33  hecht
+
+	*  coorect missing spell in configure.ac  (ff_libs => ff_flibs)
+	  (fortran libs)
+
+2006-12-17 09:36  hecht
+
+	*    change PPC in PP_C in problem.cpp, because PPC macro is
+	  defined
+	     on some linux.
+	     Set   version  to 2.11-3
+
+2006-12-01 21:03  hecht
+
+	*   coorect LaplaceRT.edp
+
+2006-11-30 14:48  hecht
+
+	*   correct dependance in  examples++-load/Makefile.am
+
+2006-11-30 14:45  hecht
+
+	*   correct build matrices from varf with different mesh in case
+	  for mortar mesh.
+	    See INNOVATION for full detail.
+
+2006-11-28 13:53  hecht
+
+	*  correct bug in interpolation  fespace Wf(Th,[RT0,P0]) function
+	   passe to version 2.11-1
+
+2006-11-10 22:09  hecht
+
+	*  I correct the problem in arpack (computation of eigen value)
+	  under i383 processor.
+	   After 2 weeks of hard work, a found the bug.
+	   In new version of LAPACK second is a real function
+	   and in ARPACK second is a subroutine (Thank the fortran).
+	   So I change the Makefile to change the name of function second
+	  into secnd2.
+
+2006-11-06 13:55  hecht
+
+	*   correct -Wall continuing
+
+2006-11-06 09:55  hecht
+
+	*   correct all -Wall warning,	to try to solve probleme in eigen
+	  value computation
+	    before add tag release_2_10_2_before_Wall
+	    add change the version to 2.11.
+	    remark:   all the dynamic library  must be recompiled
+
+2006-10-26 15:36  hecht
+
+	*   remove debug  dump
+
+2006-10-26 14:17  hecht
+
+	*   correct mistake in configure
+
+2006-10-26 14:13  hecht
+
+	*  remove Makefile~
+
+2006-10-26 14:09  hecht
+
+	*   correct error in lapack of arpack  (remove div  by 0)
+	    the patch files  is in  arpack/arpack-patch-lapack.tar.gz
+	    set version to 10-2
+
+2006-10-24 21:22  hecht
+
+	*   add flags -with-lapack in configure
+
+2006-10-20 11:26  hecht
+
+	*  add HIDDEN PARAMETER to fortran route with character parameters
+
+2006-10-19 15:53  hecht
+
+	*  coorect 70 in 70.
+
+2006-10-19 15:13  hecht
+
+	* misa a jour de README_CVS
+
+2006-10-18 21:39  hecht
+
+	*   ATTENTION le serveur CVS a change
+	    :ext:hecht@melis:/Users/hecht/FreeFem++-cvs
+	    + correct trouble on configure.ac with blas on macos
+	    because libblas now exist in /usr/lib
+
+2006-10-18 21:28  hecht
+
+	* correct configure.ac for MacOs compile
+
+2006-10-11 18:23  hecht
+
+	*   change version 2.10-1
+	    correct a ? b : c; operator in case of array
+	    correct load.link
+	    add new example of dynamic load
+
+2006-10-10 20:48  hecht
+
+	*   add modif in the doc
+
+2006-10-10 17:42  hecht
+
+	*  QF continuing
+
+2006-10-10 17:35  hecht
+
+	*  add QF gauss Legendre  4 and 5 points
+	   to coorect Problem when using qforder=9.
+
+2006-09-29 22:30  hecht
+
+	*  change in all source file the LGPL flags. (FH)
+
 2006-09-21 14:58  hecht
 
 	*   update ide highighting
