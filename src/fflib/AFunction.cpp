@@ -540,7 +540,7 @@ C_F0  formalMatTrace(const basicAC_F0 &args)
     if(maa) {
 	ma= a[0].LeftValue()->nbitem();
 	for (int i=1;i<na;i++)
-	    if( ma != a[i].LeftValue()->nbitem()) 
+	    if( ma != (int) a[i].LeftValue()->nbitem()) 
 		CompileError(" first matrix with variable number of columm");
         
     }
@@ -589,7 +589,7 @@ C_F0  formalMatDet(const basicAC_F0 &args)
     if(maa) {
 	ma= a[0].LeftValue()->nbitem();
 	for (int i=1;i<na;i++)
-	    if( ma != a[i].LeftValue()->nbitem()) 
+	    if( ma != (int) a[i].LeftValue()->nbitem()) 
 		CompileError("  matrix with variable number of columm");
         
     }
@@ -630,7 +630,10 @@ C_F0  formalMatDet(const basicAC_F0 &args)
     
 }
 
-
+#ifdef HAVE_JN
+double myyn(long n, double x){ return yn((int)n,x);}
+double myjn(long n, double x){ return jn((int) n,x);}
+#endif
 
 
 // fiun avril 2007
@@ -1065,6 +1068,23 @@ void Init_map_type()
 #ifdef HAVE_ACOSH
      Global.Add("acosh","(",new OneOperator1<double>(acosh));
 #endif
+#ifdef HAVE_ERFC
+     Global.Add("erf","(",new OneOperator1<double>(erf));
+     Global.Add("erfc","(",new OneOperator1<double>(erfc));
+#endif
+#ifdef HAVE_TGAMMA
+     Global.Add("tgamma","(",new OneOperator1<double>(gamma));
+     Global.Add("lgamma","(",new OneOperator1<double>(gamma));
+#endif
+     //  function de bessel j0, j1, jn, y0, y1, yn -- bessel functions of first and second kind     
+#ifdef HAVE_JN
+      Global.Add("j0","(",new OneOperator1<double>(j0));
+      Global.Add("j1","(",new OneOperator1<double>(j1));
+      Global.Add("jn","(",new OneOperator2<double,long,double>(myjn));
+      Global.Add("y0","(",new OneOperator1<double>(y0));
+      Global.Add("y1","(",new OneOperator1<double>(y1));
+      Global.Add("yn","(",new OneOperator2<double,long,double>(myyn));      
+#endif
      Global.Add("exp","(",new OneOperator1<double>(exp));
      Global.Add("log","(",new OneOperator1<double>(log));
      Global.Add("log10","(",new OneOperator1<double>(log10));
@@ -1199,14 +1219,14 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
     if(maa) {
 	ma= a[0].LeftValue()->nbitem();
 	for (int i=1;i<na;i++)
-	    if( ma != a[i].LeftValue()->nbitem()) 
+	    if( ma != (int) a[i].LeftValue()->nbitem()) 
 		CompileError(" first matrix with variable number of columm");
         
     }
     if(mab) {
 	mb= b[1].LeftValue()->nbitem();
 	for (int i=1;i<nb;i++)
-	    if( mb != b[i].LeftValue()->nbitem()) 
+	    if( mb != (int) b[i].LeftValue()->nbitem()) 
 		CompileError(" second matrix with variable number of columm");
     }
     int na1=na,ma1=ma,nb1=nb,mb1=mb;
