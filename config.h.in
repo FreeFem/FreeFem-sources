@@ -24,6 +24,9 @@
 /* Dynamic loading - not mandatory */
 #undef HAVE_DLFCN_H
 
+/* Define to 1 if you have the `erfc' function. */
+#undef HAVE_ERFC
+
 /* fftw is compute fft */
 #undef HAVE_FFTW
 
@@ -41,6 +44,9 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `jn' function. */
+#undef HAVE_JN
 
 /* Arpack is used for eigenvalue computation */
 #undef HAVE_LIBARPACK
@@ -95,6 +101,9 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the `tgamma' function. */
+#undef HAVE_TGAMMA
 
 /* Define to 1 if you have the `times' function. */
 #undef HAVE_TIMES
