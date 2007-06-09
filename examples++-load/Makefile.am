@@ -9,15 +9,24 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 EXTRA_DIST=load.link dfft.link  include.tar.gz \
  BernadiRaugel.cpp Morley.cpp dfft.cpp  \
  funcTemplate.cpp mat_dervieux.cpp mat_psi.cpp myfunction.cpp \
- mat_dervieux.cpp convect_dervieux.edp funcTemplate.cpp AFunction_ext.hpp funcTemplate.edp \
- NSP2BRP0.edp bilapMorley.edp convect_dervieux.edp convectchacon.edp \
- dfft.edp  funcTemplate.edp load.edp testFE.edp testFEMorley.edp \
-  regtests.edp    regtests.m4  makeref.edp ref.edp myType.edp addNewType.cpp \
+ mat_dervieux.cpp convect_dervieux.edp funcTemplate.cpp AFunction_ext.hpp \
+ regtests.m4  makeref.edp ref.edp myType.edp addNewType.cpp \
   qf11to25.cpp  Element_P3.cpp  Element_P3.hpp  Element_P4.cpp  Element_P4.hpp \
-  plot-fb-P3.edp  plot-fb-P4.edp  LaplaceP3.edp   LaplaceP4.edp 
+  plot-fb-P3.edp  plot-fb-P4.edp  LaplaceP3.edp   LaplaceP4.edp \
+  Element_P3dc.cpp  Element_P3dc.hpp Element_P4dc.cpp  Element_P4dc.hpp \
+  LapDG3.edp              convectchacon.edp       plot-fb-P3dc.edp \
+  LapDG4.edp              dfft.edp                plot-fb-P4.edp \
+  LaplaceP3.edp           ff-mt19937ar.edp        ref.edp \
+  LaplaceP4.edp           funcTemplate.edp        regtests.edp \
+  NSP2BRP0.edp            load.edp                testFE-P3.edp \
+  all.edp                 makeref.edp             testFE-P3dc.edp \
+  bilapMorley.edp         myType.edp              testFE.edp \
+  convect_dervieux.edp    plot-fb-P3.edp          testFEMorley.edp 
+
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
          qf11to25.$(DYLIB_SUFFIX)  Element_P3.$(DYLIB_SUFFIX)    Element_P4.$(DYLIB_SUFFIX) 
+
 
 load_compile:include  $(LIST_COMPILE)
 

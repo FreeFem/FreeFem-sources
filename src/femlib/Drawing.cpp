@@ -524,26 +524,26 @@ void TBoundaryEdge<R2>::Draw() const
   MoveTo(*vertices[0]);
   LineTo(*vertices[1]);
 }
-void  FESpace::Draw(const RN_& U,const RN_ & Viso,int j,float *colors,int nbcolors,bool hsv) const 
+void  FESpace::Draw(const RN_& U,const RN_ & Viso,int j,float *colors,int nbcolors,bool hsv,bool drawborder) const 
 {
   showgraphic();
   NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
   for (int k=0;k<Th.nt;k++) 
     (*this)[k].Draw( U,Viso,j);
   NewSetColorTable(2+6,colors,nbcolors,hsv);
-  Th.DrawBoundary();
+  if(drawborder) Th.DrawBoundary();
   NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
 
 }
 
-void  FESpace::Drawfill(const RN_& U,const RN_ & Viso,int j,double rapz,float *colors,int nbcolors,bool hsv) const 
+void  FESpace::Drawfill(const RN_& U,const RN_ & Viso,int j,double rapz,float *colors,int nbcolors,bool hsv,bool drawborder) const 
 {
   showgraphic();
   NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
   for (int k=0;k<Th.nt;k++) 
     (*this)[k].Drawfill( U,Viso,j,rapz);
   NewSetColorTable(2+6,colors,nbcolors,hsv);
-  Th.DrawBoundary();
+  if(drawborder) Th.DrawBoundary();
   NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
 }
 
@@ -573,26 +573,26 @@ R2 FESpace::MinMax(const KN_<R>& U,int j0,bool bb) const
       }
    return Pminmax;
 }
-void  FESpace::Draw(const KN_<R>& U,const RN_ & Viso, R coef,int j0,int j1,float *colors,int nbcolors,bool hsv) const 
+void  FESpace::Draw(const KN_<R>& U,const RN_ & Viso, R coef,int j0,int j1,float *colors,int nbcolors,bool hsv,bool drawborder) const 
 { 
   showgraphic();
   NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
   for (int k=0;k<Th.nt;k++) 
     (*this)[k].Draw( U,U,Viso,coef,j0,j1);
   NewSetColorTable(2+6,colors,nbcolors,hsv);
-  Th.DrawBoundary();
+  if(drawborder) Th.DrawBoundary();
   NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
 
 }
 
-void  FESpace::Draw(const KN_<R>& U,const KN_<R>& V,const RN_ & Viso, R coef,int iu,int iv,float *colors,int nbcolors,bool hsv) const 
+void  FESpace::Draw(const KN_<R>& U,const KN_<R>& V,const RN_ & Viso, R coef,int iu,int iv,float *colors,int nbcolors,bool hsv,bool drawborder) const 
 { 
   showgraphic();
   NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
   for (int k=0;k<Th.nt;k++) 
     (*this)[k].Draw( U,V,Viso,coef,iu,iv);
   NewSetColorTable(2+6,colors,nbcolors,hsv);
-  Th.DrawBoundary();
+  if(drawborder) Th.DrawBoundary();
    NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
 
 }
