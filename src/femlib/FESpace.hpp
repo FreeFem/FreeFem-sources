@@ -685,11 +685,11 @@ class FESpace : public RefCounter {
   int  operator()(int k,int i) const { //  the node i of element k
      return NodesOfElement ?  *(PtrFirstNodeOfElement(k) + i)  : Th(k,i)  ;}
   
-  void Draw(const KN_<R>& U,const KN_<R>& Viso,int j=0,float *colors=0,int nbcolors=0,bool hsv=true) const ; // Draw iso line
-  void Drawfill(const KN_<R>& U,const KN_<R>& Viso,int j=0,double rapz=1,float *colors=0,int nbcolors=0,bool hsv=true) const ; // Draw iso line
+  void Draw(const KN_<R>& U,const KN_<R>& Viso,int j=0,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const ; // Draw iso line
+  void Drawfill(const KN_<R>& U,const KN_<R>& Viso,int j=0,double rapz=1,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const ; // Draw iso line
  
-  void Draw(const KN_<R>& U,const KN_<R> & Viso, R coef,int j0=0,int j1=1,float *colors=0,int nbcolors=0,bool hsv=true) const  ; // Arrow
-  void Draw(const KN_<R>& U,const KN_<R>& V,const KN_<R> & Viso, R coef,int iu=0,int iv=0,float *colors=0,int nbcolors=0,bool hsv=true) const  ; // Arrow
+  void Draw(const KN_<R>& U,const KN_<R> & Viso, R coef,int j0=0,int j1=1,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const  ; // Arrow
+  void Draw(const KN_<R>& U,const KN_<R>& V,const KN_<R> & Viso, R coef,int iu=0,int iv=0,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const  ; // Arrow
   R2 MinMax(const KN_<R>& U,const KN_<R>& V,int j0,int j1,bool bb=true) const ;
   R2 MinMax(const KN_<R>& U,int j0, bool bb=true) const ;
  // void destroy() {RefCounter::destroy();}

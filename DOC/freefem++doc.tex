@@ -26,7 +26,7 @@
 \setlength{\dimen1}{\wd0}\addtolength{\dimen1}{-#3}\addtolength{\dimen1}{-\arraycolsep}
 \setlength{\dimen2}{\ht0}\addtolength{\dimen2}{-#4}
 \setbox1\hbox{$\left#1\rule{\dimen1}{0pt}\rule{0pt}{\dimen2}\right#2$}
-\setbox0\hbox{\raisebox{\dp0}{\box0}\kern-\dimen1\kern-5pt\raisebox{\dp1}{\box1}}
+\setbox0\hbox{\raisebox{\dp0}{\box0}\kern-\dimen1\kern-5pt\raisebox{\dp1}{\ox1}}
 \vcenter{\box0}
 }
 \pagenumbering{roman}
@@ -5417,6 +5417,28 @@ Two problems need to be solved:
  of the triangulation.
 \end{note}
 
+\begin{note} The operator \texttt{=} is the interpolation operator of \freefempp,  The continuous finite functions are extended by continuity to the outside of the domain.
+\index{=}\index{interpolation}
+Try the following example
+\bFF
+mesh Ths= square(10,10);
+ mesh Thg= square(30,30,[x*3-1,y*3-1]); 
+ plot(Ths,Thg,ps="overlapTh.eps",wait=1);
+fespace Ch(Ths,P2); fespace Dh(Ths,P2dc);
+fespace Fh(Thg,P2dc); 
+Ch us= (x-0.5)*(y-0.5);
+Dh vs= (x-0.5)*(y-0.5);
+Fh ug=us,vg=vs;
+plot(us,ug,wait=1,ps="us-ug.eps"); // see figure \ref{fig:us-ug}
+plot(vs,vg,wait=1,ps="vs-vg.eps"); // see figure \ref{fig:vs-vg}
+\eFF
+
+\twoplot[height=6cm]{us-ug}{vs-vg}{Extension of a continuous FE-function
+ \label{fig:us-ug}}%
+{Extention of discontinuous FE-function\label{fig:vs-vg} }
+
+\end{note}
+
 \subsection{Keywords: Problem and Solve}
 
  For \freefempp  a problem must be given in variational form, %\cite{blop},
@@ -6119,7 +6141,7 @@ The parameters are
       real[int] colors = [h1,s1,v1,... ,  hn,vn,vn];
     \eFF
      where \texttt{hi,si,vi} is the ith color to defined the color table.
-
+    \itemtt[boundary=] \index{plot!boundary =} (bool) to plot or not the boundary of the domain (true by default).
 
 \end{description}
 For example: \index{plot!cut}

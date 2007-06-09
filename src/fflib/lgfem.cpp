@@ -2426,7 +2426,7 @@ class Plot :  public E_F0mps { public:
     };
 
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =16;
+   static const int n_name_param =17;
    Expression bb[4];
     vector<Expression2> l;
     Expression nargs[n_name_param];
@@ -2499,7 +2499,9 @@ class Plot :  public E_F0mps { public:
   {   "varrow", &typeid(KN_<double>)},
   {   "bw",&typeid(bool)},
   {   "grey", &typeid(bool)},
-  {   "hsv", &typeid(KN_<double>)}
+  {   "hsv", &typeid(KN_<double>)},
+  {   "boundary", &typeid(bool)}
+
    };
 
 
@@ -2773,6 +2775,7 @@ AnyType Plot::operator()(Stack s) const  {
     int cmp0,cmp1;
     bool grey=getgrey();
     bool greyo=grey;
+    bool drawborder=true;
     if (nargs[0]) coeff= GetAny<double>((*nargs[0])(s));
     if (nargs[1]) cm = GetAny<string *>((*nargs[1])(s));
     if (nargs[2]) psfile= GetAny<string*>((*nargs[2])(s));
@@ -2813,6 +2816,8 @@ AnyType Plot::operator()(Stack s) const  {
         }
         else nbcolors = 0;
     }
+    if (nargs[16]) drawborder= GetAny<bool>((*nargs[16])(s));
+    
     setgrey(grey);
     if (Viso.unset()) Viso.init(Niso);
     if (Varrow.unset()) Varrow.init(Narrow);
@@ -2982,7 +2987,7 @@ AnyType Plot::operator()(Stack s) const  {
       if (fe1) 
          {
           if (fe->Vh == fe1->Vh)           
-           vecvalue=true,fe->Vh->Draw(*fe->x(),*fe1->x(),Varrow,coeff,cmp0,cmp1,colors,nbcolors,hsv);
+           vecvalue=true,fe->Vh->Draw(*fe->x(),*fe1->x(),Varrow,coeff,cmp0,cmp1,colors,nbcolors,hsv,drawborder);
           else
            cerr << " On ne sait tracer que de vecteur sur un meme interpolation " << endl;
           if (drawmeshes) fe->Vh->Th.Draw(0,fill);
@@ -2990,9 +2995,9 @@ AnyType Plot::operator()(Stack s) const  {
       else 
         
         if (fill)
-         isovalue=true,fe->Vh->Drawfill(*fe->x(),Viso,cmp0,1.,colors,nbcolors,hsv);
+         isovalue=true,fe->Vh->Drawfill(*fe->x(),Viso,cmp0,1.,colors,nbcolors,hsv,drawborder);
         else 
-         isovalue=true,fe->Vh->Draw(*fe->x(),Viso,cmp0,colors,nbcolors,hsv);
+         isovalue=true,fe->Vh->Draw(*fe->x(),Viso,cmp0,colors,nbcolors,hsv,drawborder);
          
         if (drawmeshes) fe->Vh->Th.Draw(0,fill);
 
