@@ -297,7 +297,7 @@ then
         AC_PATH_X
 	AC_PATH_XTRA
 	CPPFLAGS="$CPPFLAGS $X_CFLAGS"
-
+#     echo "X11 --   $X_LIBS ext  --   $X_EXTRA_LIBS -- $X_PRE_LIBS "
 	# When libXxf86vm is present, it is necessary to add it to define
 	# "XF86VidModeQueryVersion" (called by OpenGL) on newer X11 systems
 	LIBS="$LIBS $X_LIBS"
@@ -307,7 +307,7 @@ then
 		ff_Xxf86vm="")
 	LIBS="$ff_save_libs"
 
-	ff_x11_libs="$X_LIBS $ff_Xxf86vm -lXext -lXpm -lX11 -lm"
+	ff_x11_libs="$X_LIBS $ff_Xxf86vm -lXext  -lX11 -lm"
 	AC_MSG_CHECKING(for X11_LIBS)
 	AC_MSG_RESULT(["$ff_x11_libs"])	
 #	ff_x11_libs="-L/usr/X11R6/lib $ff_Xxf86vm -lXext -lXpm -lX11 -lm"
@@ -592,6 +592,7 @@ ff_blas_inc=""
 ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
 #  zmach is in lapack 
 # Trying  blas library
+#echo "LIBS = " $LIBS
 for iblas in \
 "-framework vecLib" "-lblas"  "-L/usr/lib/atlas -lblas" \
 $ff_freebsd_blas
@@ -609,14 +610,15 @@ then
         AC_LINK_IFELSE(
                 [AC_LANG_CALL(,daxpy_)],
                 ff_blas_ok=yes
-		ff_blas_lib="$iblas",
-                LIBS="$ff_save_libs")
+		ff_blas_lib="$iblas",)
+                LIBS="$ff_save_libs"
         AC_MSG_RESULT($ff_blas_ok)
 fi
 done
 
 
 #cblas_zdotu_sub
+#echo "LIBS = " $LIBS
 ff_cblas_lib=no
 if test "$ff_blas_ok" = yes 
 then
@@ -631,7 +633,7 @@ then
 
  
 fi
-
+#echo "LIBS = " $LIBS
 # If all else fails, download!
 if test "$ff_blas_ok" = no -a "$ff_wget" = yes \
    -a "$enable_fortran" != no -a "$enable_c" != no

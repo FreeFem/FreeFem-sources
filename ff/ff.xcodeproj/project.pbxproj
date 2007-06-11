@@ -189,7 +189,7 @@
 		3DC62A030972538B00D487F6 /* sansrgraph.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 5; name = sansrgraph.cpp; path = ../src/Graphics/sansrgraph.cpp; sourceTree = SOURCE_ROOT; };
 		3DC62A050972539900D487F6 /* DefColor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DefColor.cpp; path = ../src/Graphics/DefColor.cpp; sourceTree = SOURCE_ROOT; };
 		3DC62AA509728D7C00D487F6 /* freefem++-nw */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "freefem++-nw"; sourceTree = BUILT_PRODUCTS_DIR; };
-		3DC62AE20972990B00D487F6 /* macglrgaph.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = macglrgaph.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DC62AE20972990B00D487F6 /* macglrgaph.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = macglrgaph.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DC62AE40972990B00D487F6 /* macglrgaph-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "macglrgaph-Info.plist"; sourceTree = "<group>"; };
 		3DC62AE80972994000D487F6 /* macglrgraf.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = macglrgraf.cpp; path = ../src/Graphics/macglrgraf.cpp; sourceTree = SOURCE_ROOT; };
 		3DC62AED0972999000D487F6 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };

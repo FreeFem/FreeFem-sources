@@ -2866,7 +2866,7 @@ AnyType Plot::operator()(Stack s) const  {
           if (fe->Vh == fe1->Vh) 
             {  
               KN_<R> u( *fe->x()),v(*fe1->x());     
-              Vminmax = minmax(uminmax,fe->Vh->MinMax(u,v,cmp0,cmp1));
+              Vminmax = minmax(Vminmax,fe->Vh->MinMax(u,v,cmp0,cmp1));
              }  
           else
            cerr << " On ne sait tracer que de vecteur sur un meme interpolation " << endl;
@@ -2913,8 +2913,8 @@ AnyType Plot::operator()(Stack s) const  {
       
       {
         R umx=uminmax.y,umn=uminmax.x;
-        if (verbosity>5)
-        cout << " u bound " <<  uminmax << endl;
+        if (verbosity>5) 
+        cout << " u bound " <<  uminmax << "  V : " << Vminmax <<endl;
 
         if (verbosity>1)
          cout << "Plot bound [x,y] " <<  Pmin << " max [x,y] " << Pmax << endl;  
@@ -2938,7 +2938,7 @@ AnyType Plot::operator()(Stack s) const  {
         for (int i = 0;i < N;i++)
          {Viso[i]=x;x +=d; }
        if (fill && !pViso) {Viso[0]=umn-d;Viso[N-1]=umx+d;}
-        x=0; d= sqrt(Vminmax.y)/Na;
+        x=0; d= sqrt(Vminmax.y)/(Na-1.001);
        if (!pVarrow)
         for (int i = 0;i < Na;i++)
           {Varrow[i]=x;x +=d; }

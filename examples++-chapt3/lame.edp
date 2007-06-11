@@ -3,23 +3,16 @@ mesh Th=square(10,10,[20*x,2*y-1]);
 fespace Vh(Th,P2);
 Vh u,v,uu,vv;
 
-macro Epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))*0.5] // EOM
-macro Sigma(lamdba,mu,u1,u2)  
-[((lamdba)+2.*(mu))* dx(u1),
- ((lamdba)+2.*(mu))* dy(u2),
-(dy(u1)+dx(u2))*(mu)] // EOM
-
-macro div(u,v) ( dx(u)+dy(v) ) //
+macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))*0.5] // EOM
+macro div(u,v) ( dx(u)+dy(v) ) // EOM
 
 
 real E = 21e5, nu = 0.28, mu= E/(2*(1+nu)); 
 real lambda = E*nu/((1+nu)*(1-2*nu)), f = -1; //  
 
-solve lame([u,v],[uu,vv])= int2d(Th)( 
-	  lambda*div(u,v)*div(uu,vv)
-        + mu*2.*(  e11(u,v)*e11(uu,vv) 
-                 + e22(u,v)*e22(uu,vv) 
-                 + e12(u,v)*e12(uu,vv)*2. ) )	
+solve lame([u,v],[uu,vv])= int2d(Th)(  
+        lambda*div(u,v)*div(uu,vv)
+        +2.*mu*( epsilon(u,v)'*epsilon(uu,vv) ) )	
         - int2d(Th)(f*vv) 
         + on(4,u=0,v=0);
 real coef=100;
