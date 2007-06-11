@@ -2091,9 +2091,7 @@ boundary force $\vec g$ is zero on lower, upper and right sides.
      \sigma . {\bf n}  &=& g = 0    ~~\hbox{on}~~\Gamma_1, \Gamma_4, \Gamma_3, \\
       {\bf u} &=& \mathbf{0} ~~\hbox{on}~~\Gamma_2
  \end{eqnarray*}
-Here ${\bf u}=(u,v) $ has two components. Lam\'{e}'s equations are:
-
-\bigskip
+Here ${\bf u}=(u,v) $ has two components.\bigskip
 
 The above two equations are strongly coupled by their mixed
 derivatives, and thus any iterative solution on each of the
@@ -2102,31 +2100,28 @@ approach and write:
 
 \begin{example}[lame.edp]
 \bFF
-/// file lame.edp
-@mesh Th=square(10,10,[20*x,2*y-1]);
+// file lame.edp
+@mesh Th=@square(10,10,[20*x,2*y-1]);
 @fespace Vh(Th,P2);
 Vh u,v,uu,vv;
-@macro e11(u,v) dx(u)//
-@macro e22(u,v) dy(v)//
-@macro e12(u,v) ( (dx(v) + dy(u))*.5) //
-@macro div(u,v) ( dx(u)+dy(v) ) //
+
+@macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))*0.5] // EOM
+@macro div(u,v) ( dx(u)+dy(v) ) // EOM
 
 
 @real E = 21e5, nu = 0.28, mu= E/(2*(1+nu)); 
 @real lambda = E*nu/((1+nu)*(1-2*nu)), f = -1; //  
 
-@solve lame([u,v],[uu,vv])= int2d(Th)( 
-	  lambda*div(u,v)*div(uu,vv)
-        + mu*2.*(  e11(u,v)*e11(uu,vv) 
-                 + e22(u,v)*e22(uu,vv) 
-                 + e12(u,v)*e12(uu,vv)*2. ) )	
+@solve lame([u,v],[uu,vv])= int2d(Th)(  
+        lambda*@div(u,v)*@div(uu,vv)
+        +2.*mu*( @epsilon(u,v)'*@epsilon(uu,vv) ) )	
         - int2d(Th)(f*vv) 
         + on(4,u=0,v=0);
 @real coef=100;
-@plot([u,v],wait=1,ps="lamevect.ps",coef=coef);
+@plot([u,v],wait=1,ps="lamevect.eps",coef=coef);
 
 @mesh th1 = movemesh(Th, [x+u*coef, y+v*coef]);
- @plot(th1,wait=1,ps="lamedeform.ps");
+@plot(th1,wait=1,ps="lamedeform.eps");
 @real dxmin  = u[].min; 
 @real dymin  = v[].min; 
 

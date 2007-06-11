@@ -1,3 +1,6 @@
+v 2.17-1
+  - correct double of  $(BLASLIB) in configure.ac
+  - correct  automatique choose of  color in plot of arrow. 
 v 2.17
   - add bessel function   j0, j1, jn, y0, y1, yn -- bessel
         functions of first and second kind
