@@ -649,11 +649,11 @@ GetEnvironment();
   lexdebug = false;
   lgdebug = false;
 
-  if(verbosity) cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
   char *  cc= new char [1024];
   //  istream * ccin=0;
   if ( ! (getprog(cc,argc,argv)>0) ) 
     return 1; 
+  if(verbosity) cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
   zzzfff = Newlex(cout);
     
   
