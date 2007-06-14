@@ -742,30 +742,42 @@ void fillpoly(int n, float *poly)
     }
 }
 
+extern long verbosity;
+
 int getprog(char* fn,int argc, char **argv)
 {
- if (argc > 2) 
-  {
-    for (int i=1; i<argc-1;i++)
-     if  (strcmp(argv[i],"-f")==0)
-       {
-          strcpy(fn,argv[i+1]);
-          printf(" file : %s\n",fn);
-          return 1;
-       }
-    printf(" if more than 1 argument then  use -f filename");
-    return 0; 
-  }
- else if (argc > 1) 
-  { 
-    strcpy(fn,argv[1]);
-    printf(" file : %s\n",fn);
-  }
- else {
-   cout << " no argument " << endl;
-   return 0;
- }
- return argc;
+    int ret=0;
+    for (int i=1; i<argc;i++)
+	if  (ret ==0 && strcmp(argv[i],"-f")==0 && i+1 < argc  ) 
+	{
+	    strcpy(fn,argv[i+1]);
+	    i++;	
+	    ret=1;
+	}
+	    else if  (strcmp(argv[i],"-v")==0 && i+1 < argc) 
+	    {
+		verbosity = atoi(argv[i+1]);
+		i++;	
+		if(verbosity) 
+		    printf(" verbosity : %ld\n",verbosity);
+	    }
+	    else if(ret==0)
+	    {
+		strcpy(fn,argv[i]);
+		ret=1;
+	    }
+	    if(ret==0) 
+	    {
+		if(argc>0)
+		    cerr << " Syntaxe : " << argv[0] << "  -f filename  [-v verbosity] " << endl;
+		else 
+		    cerr << " Syntaxe : FreeFem++-x11  -f filename  [-v verbosity] " << endl;
+		
+		return ret; 
+	    }
+	    if(verbosity) 
+		cout << " file : " << fn << endl ; 
+    return 1;
 }
 
 

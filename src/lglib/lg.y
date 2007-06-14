@@ -231,7 +231,7 @@ start:   input ENDOFFILE {
 	            
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
                         $1+=currentblock->close(currentblock);
-                        cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
+                        if(verbosity) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
                         size_t lg0,lg1;                       
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
                         cout << endl;  
@@ -252,7 +252,7 @@ start:   input ENDOFFILE {
                           return 1; 
                          }
 
-                        cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " <<  CPUtime()-CPUcompile << "s\n";
+                        if(verbosity)  cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " <<  CPUtime()-CPUcompile << "s\n";
                         deleteStack(stack);
                         //debugstack.clear() 
                         } 
@@ -601,8 +601,9 @@ int Compile()
       if(currentblock) 
 	retvalue=1,cerr <<  "Error:a block is not close" << endl;   
       else {
-        cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg << endl;
-	cerr <<  "Bien: On a fini Normalement" << endl; 
+	  if( verbosity) {
+	      cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg << endl;
+	      cerr <<  "Bien: On a fini Normalement" << endl; }
 	}
   }
 
@@ -633,7 +634,7 @@ int Compile()
 
 int mainff (int  argc, char **argv)
 {
-
+GetEnvironment();     
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;
@@ -648,10 +649,10 @@ int mainff (int  argc, char **argv)
   lexdebug = false;
   lgdebug = false;
 
-  cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
+  if(verbosity) cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
   char *  cc= new char [1024];
   //  istream * ccin=0;
-  if ( ! getprog(cc,argc,argv)>0) 
+  if ( ! (getprog(cc,argc,argv)>0) ) 
     return 1; 
   zzzfff = Newlex(cout);
     
@@ -682,7 +683,7 @@ int mainff (int  argc, char **argv)
    zzzfff->Add("catch",CATCH);
    zzzfff->Add("throw",THROW);
    Init_map_type();
-   cout << " Load: ";
+   if(verbosity) cout << " Load: ";
    init_lgfem() ;
    init_lgmesh() ;
    init_algo();
@@ -694,12 +695,12 @@ int mainff (int  argc, char **argv)
    init_lgparallele(); 
 #endif 
 #ifdef HAVE_LIBUMFPACK   
-  cout << " UMFPACK ";  
+  if(verbosity)  cout << " UMFPACK ";  
 #endif
  // callInitsFunct(); Pb opimisation 
-   cout << endl;
+  if(verbosity)  cout << endl;
   zzzfff->input(cc);
-  GetEnvironment();     
+  EnvironmentLoad(); // just before compile     
   retvalue= Compile(); 
       
 #ifdef PARALLELE

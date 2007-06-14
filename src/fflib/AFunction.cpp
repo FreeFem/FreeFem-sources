@@ -634,8 +634,25 @@ C_F0  formalMatDet(const basicAC_F0 &args)
 double myyn(long n, double x){ return yn((int)n,x);}
 double myjn(long n, double x){ return jn((int) n,x);}
 #endif
-
-
+//  Add juin  2007 
+template<class A,class B=A,class R=A>
+struct evalE_mul {
+    static AnyType eval(Stack s,const E_F0 * ab,const E_F0 * a,const E_F0 * b, bool & meshidenp) 
+    {
+	A aa = GetAny<A>((*a)(s)) ;
+	B bb = GetAny<B>((*b)(s)) ;
+	R rr(aa*bb);
+	bool mia=a->MeshIndependent();
+	bool mib=b->MeshIndependent();
+	
+	if (( aa == A()) && mia ) meshidenp=true;
+	else if(( bb == B()) && mib ) meshidenp=true;
+        else meshidenp = mib && mia;
+	cout << " meshidenp ??? " << meshidenp << " " << rr << endl;
+	return SetAny<R>(static_cast<R>(rr)); 
+    }
+};
+// Fin Add ne marche pas ....
 // fiun avril 2007
 void Init_map_type()
 {
@@ -791,10 +808,10 @@ void Init_map_type()
        );
        
      TheOperators->Add("*",
-       new OneBinaryOperator<Op2_mul<long,long,long> >,
-       new OneBinaryOperator<Op2_mul<double,double,double>,MIMul<double,double> >,
-       new OneBinaryOperator<Op2_mul<double,double,long>, MIMul<double,long> >,
-       new OneBinaryOperator<Op2_mul<double,long,double>,MIMul<long,double> >,
+       new OneBinaryOperator<Op2_mul<long,long,long>,OneBinaryOperatorMI,evalE_mul<long> >,
+       new OneBinaryOperator<Op2_mul<double,double,double>,MIMul<double,double>,evalE_mul<double> >,
+       new OneBinaryOperator<Op2_mul<double,double,long>, MIMul<double,long>,evalE_mul<double,long,double> >,
+       new OneBinaryOperator<Op2_mul<double,long,double>,MIMul<long,double>,evalE_mul<long,double,double>  >,
        new OneBinaryOperator<Op2_mul<Complex,Complex,Complex> >,
        new OneBinaryOperator<Op2_mul<Complex,Complex,double> >,
        new OneBinaryOperator<Op2_mul<Complex,double,Complex> >,

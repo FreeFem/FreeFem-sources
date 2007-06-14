@@ -62,12 +62,12 @@ template<class I,class R>
    array v;
    vector<size_type> where_in_stack_opt;
    vector<bool> mesh_indep_stack_opt;
-   Expression optiexp0,optiexpK;
+   const E_F0_Optimize * optiexp0,*optiexpK;
    bool isoptimize;
    
    LinearComb(): v(),
 		 where_in_stack_opt(),mesh_indep_stack_opt(),
-		 optiexp0(),optiexpK(),isoptimize(false) {}
+		 optiexp0(0),optiexpK(0),isoptimize(false) {}
    
    LinearComb(const I& i,const R& r) :v(1),
 				      where_in_stack_opt(),mesh_indep_stack_opt(),
@@ -380,9 +380,9 @@ template<class L>
       {   operatortype & dd=i->first.second;
           
          if (dd != op_id)
-           { throwassert(0); i->first.second = op_id;  } // a faire          
+           { ffassert(0); i->first.second = op_id;  } // a faire          
          else {
-           throwassert(i->second.EvaluableWithOutStack());// a faire derivation des fonctions
+           ffassert(i->second.EvaluableWithOutStack());// a faire derivation des fonctions
            dd = d ; }
     }
     return r;}

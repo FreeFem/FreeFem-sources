@@ -2566,7 +2566,7 @@ void Triangles::ForceBoundary()
     if (!triangles[t].det)
       k++,cerr << " det T" << t << " = " << 0 << endl;
   if (k!=0) {
-    cerr << " the is  " << k << " 0 triangles " << endl;
+    cerr << " ther is  " << k << "  triangles of mes = 0 " << endl;
     MeshError(11);}
   
   TriangleAdjacent ta(0,0);
@@ -2577,15 +2577,16 @@ void Triangles::ForceBoundary()
       if ( nbswp < 0) 	k++;
       else Nbswap += nbswp;
       if (nbswp) nbfe++;
-      //   cerr << " Edge " << i << " v0 =  " << Number(edges[i][0]) 
-      //	   <<" v1= " << Number(edges[i][1]) << " " << edges[i].on->Cracked() << " " << (Triangle *) ta << endl;
+      if ( nbswp < 0 && k < 5)
+         cerr << " Missing  Edge " << i << " v0 =  " << Number(edges[i][0]) << edges[i][0]
+      	   <<" v1= " << Number(edges[i][1]) << edges[i][1] << " " << edges[i].on->Cracked() << " " << (Triangle *) ta << endl;
       if ( nbswp >=0 && edges[i].on->Cracked())
 	  ta.SetCracked();
     }
 		  
   
   if (k!=0) {
-    cerr << " the is " << k << " lost edges " << endl;
+    cerr << " they is " << k << " lost edges " << endl;
     cerr << " The boundary is crossing may be!" << endl;
     MeshError(10);
   }

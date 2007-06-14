@@ -38,3 +38,4 @@ extern long verbosity;
 bool EnvironmentInsert(std::string key,std::string item,std::string before);
 
 void GetEnvironment();
+void EnvironmentLoad();  

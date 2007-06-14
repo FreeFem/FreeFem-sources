@@ -349,6 +349,11 @@ class E_F0 :public CodeAlloc
     
     int find(const MapOfE_F0 & m) ;
     int insert(Expression  opt,deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) ;
+    // ajoute for optimisation to say if a expression in meshindep a exec time
+    // to solve   0*x // question 
+    // juin 2007 FH
+    virtual AnyType eval(Stack stack, bool & meshindep ) const  
+    { meshindep=MeshIndependent();return operator()(stack);}
      
  };  
  
@@ -2095,19 +2100,32 @@ public:
 
 };
 
+struct evalE_F2 {
+   static AnyType eval(Stack s,const E_F0 * ab,const E_F0 * a,const E_F0 * b, bool & meshidenp) 
+   {
+       return ab->E_F0::eval(s,meshidenp); 
+   }
+};
+
 //
-template<typename C,class MI=OneBinaryOperatorMI>
+template<typename C,class MI=OneBinaryOperatorMI,class MIx=evalE_F2 >
 class  OneBinaryOperator : public OneOperator{
   typedef  typename C::result_type R;
   typedef typename C::first_argument_type A;
   typedef typename C::second_argument_type B;
   aType t0,t1; // type of template modif FH mars 2006 
   class Op : public E_F0 {
-    typedef  typename C::result_type Result;
+      typedef typename C::first_argument_type A;
+      typedef typename C::second_argument_type B;
+      typedef  typename C::result_type Result;
     Expression a,b;
   public:
     AnyType operator()(Stack s)  const 
     {return  SetAny<R>(static_cast<R>(C::f( GetAny<A>((*a)(s)) , GetAny<B>((*b)(s)))));}
+    //   optim  eval MI ...  juin 2007 FH ...
+    AnyType eval(Stack s, bool & meshidenp)  const 
+    {return  MIx::eval(s,this,a,b,meshidenp);}
+    // fi optime 
     Op(Expression aa,Expression bb) : a(aa),b(bb) {} 
     bool MeshIndependent() const { return MI::MeshIndependent(a,b);}
     bool ReadOnly() const { return MI::ReadOnly()  ;} 
@@ -2762,22 +2780,25 @@ class E_F0_Optimize : public E_F0 {
 public:
   E_F0_Optimize(deque<pair<Expression,int> > &ll,MapOfE_F0 & mm,int rett) :
     l(ll),m(mm),NBbitem(1),ret(rett)  {}
-  
-  AnyType eval(Stack s,int notinit,vector<bool> & var)  const {
-    int k= l.size();
+  int sizevar() const {return l.size();}
+  AnyType eval(Stack s,int notinit,bool * unvar)  const {
+    int k= l.size(),kk=0;
     if(notinit ==0)
       {
-	var.resize(k);
+	//var.resize(k);
 	for (int i=0;i<k;i++)
 	  {  size_t offset = l[i].second;
-	  var[i]=true;  
-	  *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
+	  unvar[i]=true;  
+	  *Stack_offset<AnyType>(s,offset) = l[i].first->eval(s, unvar[i]);
+	  if( unvar[i]) kk++;
 	  }          
+	if (verbosity/100 && verbosity % 10 == 2) 
+	     cout << "E_F0_Optimize  nb MI exp: " << kk << " /  " << k << endl;
       }
     else
       for (int i=0;i<k;i++)
         {  size_t offset = l[i].second;
-	if(var[i]) 
+	if(!unvar[i]) 
 	  *Stack_offset<AnyType>(s,offset) = (*l[i].first)(s);
 	//*static_cast<AnyType *>(static_cast<void *>((char*)s+offset))= (*l[i].first)(s); // FH NEWSTACK
 	// cout << " E_F0_Optimize   " << offset << " " <<  *static_cast<double *>(static_cast<void *>((char*)s+offset)) << endl; ;
