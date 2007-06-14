@@ -152,7 +152,8 @@ ff_wget = @ff_wget@
 install_sh = @install_sh@
 EXTRA_DIST = glrgraph.hpp glutrgraf-essai.cpp-zz.cpp macglrgraf.cpp	\
 macrgraf.cpp Pcrgraph.cpp  rgraph.hpp		\
-sansrgraph.cpp xglrgraf.cpp Xrgraph.cpp DefColor.cpp   
+sansrgraph.cpp xglrgraf.cpp Xrgraph.cpp DefColor.cpp   \
+getprog-unix.hpp
 
 subdir = src/Graphics
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs

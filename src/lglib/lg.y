@@ -234,7 +234,7 @@ start:   input ENDOFFILE {
                         if(verbosity) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
                         size_t lg0,lg1;                       
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
-                        cout << endl;  
+                        if(verbosity) cout << endl;  
                         { Stack stack = newStack(sizestack);
                         double CPUcompile= CPUtime();
                         try {                  
@@ -653,7 +653,11 @@ GetEnvironment();
   //  istream * ccin=0;
   if ( ! (getprog(cc,argc,argv)>0) ) 
     return 1; 
-  if(verbosity) cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
+  if(verbosity) { 
+      cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
+      if(verbosity>1) cout << "   file :" << cc << " " << " verbosity= " << verbosity << endl;
+  }
+  
   zzzfff = Newlex(cout);
     
   
