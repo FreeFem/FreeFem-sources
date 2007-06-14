@@ -37,7 +37,7 @@
 #include <math.h>
 #include <string.h>
 #include <setjmp.h>
-
+#include <ctype.h>
 #include <new>
 #include <iostream>
 #include <fstream>
@@ -968,6 +968,14 @@ DWORD GetOption(char lpszCmdLine[])
       	i += StoreFname(&lpszCmdLine[i],CmdLen-i);
 	winf_flg |= winf_VFFEM;
       	break;
+      case 'v':
+      {  string vv;
+	  char c;
+	  i++;
+	  while (isspace(c=lpszCmdLine[i++])|| isdigit(c) )
+	      vv+= c;
+	  verbosity=atoi(vv.c_str());	  
+      }
       case 's':  // not wait at end of execution
 	winf_flg |= winf_NOWAIT; ++i;
 	break;
