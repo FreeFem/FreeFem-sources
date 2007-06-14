@@ -226,6 +226,7 @@ class InitilisationMac {
 
 static InitilisationMac Initmac; // to call InitMac
 
+
 int getprog(char* fn,int  argc, char** argv)
 { 
  if (argc > 1) 
@@ -242,8 +243,6 @@ int getprog(char* fn,int  argc, char** argv)
 	     {
 		 verbosity = atoi(argv[i+1]);
 		 i++;	
-		 if(verbosity) 
-		     printf(" verbosity : %ld\n",verbosity);
 	     }
 	     else if(ret==0)
 	     {
@@ -259,8 +258,6 @@ int getprog(char* fn,int  argc, char** argv)
 		 
 		 return ret; 
 	     }
-	     if(verbosity) 
-		 cout << " file : " << fn << endl ; 
      return 1;
      
   }
@@ -357,42 +354,8 @@ GLuint BuildFontGL (AGLContext ctx, GLint fontID, Style face, GLint size)
 	}
 }
 #else
-int getprog(char* fn,int argc, char **argv)
-{
-    int ret=0;
-    for (int i=1; i<argc;i++)
-	if  (ret ==0 && strcmp(argv[i],"-f")==0 && i+1 < argc  ) 
-	{
-	    strcpy(fn,argv[i+1]);
-	    i++;	
-	    ret=1;
-	}
-	    else if  (strcmp(argv[i],"-v")==0 && i+1 < argc) 
-	    {
-		verbosity = atoi(argv[i+1]);
-		i++;	
-		if(verbosity) 
-		    printf(" verbosity : %ld\n",verbosity);
-	    }
-	    else if(ret==0)
-	    {
-		strcpy(fn,argv[i]);
-		ret=1;
-	    }
-	    if(ret==0) 
-	    {
-		if(argc>0)
-		    cerr << " Syntaxe : " << argv[0] << "  -f filename  [-v verbosity] " << endl;
-		else 
-		    cerr << " Syntaxe : FreeFem++-gl  -f filename  [-v verbosity] " << endl;
-		
-		return ret; 
-	    }
-	    if(verbosity) 
-		cout << " file : " << fn << endl ; 
-    return 1;
-    
-}
+#include "getprog-unix.hpp"
+
 
 #endif
 
