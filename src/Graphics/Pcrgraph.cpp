@@ -972,7 +972,7 @@ DWORD GetOption(char lpszCmdLine[])
       {  string vv;
 	  char c;
 	  while  ( (isspace(c=lpszCmdLine[i++])&& vv.length()>0 ) || isdigit(c) )
-	      if(isdigit(c) vv+= c;
+	    if(isdigit(c)) vv+= c;
 	  verbosity=atoi(vv.c_str());	  
       }
       case 's':  // not wait at end of execution
