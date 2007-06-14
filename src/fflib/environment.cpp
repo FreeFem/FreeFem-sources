@@ -325,18 +325,21 @@ void GetEnvironment()
       show("\ninclude path : ",inc->second, "\n \t ");
       cout <<"(.)"<<endl;}
    }
- {
-   EnvironmentData::iterator toload=ffenvironment.find("load");
-   if(  toload != ffenvironment.end()) 
-     
-     for (OneEnvironmentData::iterator i=toload->second.begin(); i != toload->second.end(); ++i)
-       {
-	 if(verbosity) cout << " load "<< *i << endl;
-	 load(*i);
-       }
-   
+
  }
- }
+void EnvironmentLoad()
+{
+    EnvironmentData::iterator toload=ffenvironment.find("load");
+    if(  toload != ffenvironment.end()) 
+	
+	for (OneEnvironmentData::iterator i=toload->second.begin(); i != toload->second.end(); ++i)
+	{
+	    if(verbosity) cout << "PreEnv load :"<< *i << endl;
+	    load(*i);
+	}
+	    
+}
+
  
 #ifdef TESTMAIN
 long verbosity=50;

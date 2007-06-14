@@ -3545,7 +3545,7 @@ void DclTypeMatrix()
 
 void  init_lgfem() 
 {
-  cout <<"lg_fem ";
+  if(verbosity) cout <<"lg_fem ";
 #ifdef HAVE_CADNA
   cout << "cadna ";
   cadna_init(-1); // pas de fichier 

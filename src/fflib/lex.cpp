@@ -182,8 +182,10 @@ int mylex::basescan()
   TheCurrentLine=linenumber;
   // modif FH 
   if (firsttime) 
-    firsttime=false,cout << setw(5) <<linenumber << " : " ; 
-
+  {
+      firsttime=false;
+    if(echo) cout << setw(5) <<linenumber << " : " ; 
+  }
   EatCommentAndSpace(); 
   c =source().get(); // the current char 
   char nc = source().peek(); // next char
@@ -463,7 +465,7 @@ bool mylex::SetMacro(int &ret)
 	      
 	      //cout << " \t\t " << ID << " " << rr << " " << buf << endl;
 	      if (rr != ID) {
-		cout <<" Erreur waiting of an ID: " << buf << " " << rr <<  endl;
+		cerr <<" Erreur waiting of an ID: " << buf << " " << rr <<  endl;
 		erreur("in macro def: waiting for a ID"); }
 	      macroparm.push_back(buf);
 	      rr =  basescan(); 
@@ -483,19 +485,19 @@ bool mylex::SetMacro(int &ret)
 	def +=char(i);        
       } while(1);
       macroparm.push_back(def);
-      cout << "macro " << macroname  ;
+      if(echo) cout << "macro " << macroname  ;
       for (size_t i=0;i<macroparm.size()-1;i++)
-	cout << ( (i == 0) ? '(' : ',') << macroparm[i];
+	if(echo) cout << ( (i == 0) ? '(' : ',') << macroparm[i];
       if (nbparam)
-	cout << " )  " ;
+	if(echo) cout << " )  " ;
       for (size_t i=0;i<def.size();i++)
 	if (def[i] == 10 || (def[i] == 13 ) ) 
 	  {
 	    def[i]='\n';         
-	    linenumber++; cout << '\n' << setw(5) <<linenumber << " : " ;
+	    linenumber++; if(echo) cout << '\n' << setw(5) <<linenumber << " : " ;
 	  }                  
 	else 
-	  cout << def[i]   ;
+	  if(echo) cout << def[i]   ;
          // cout << macroparm.back() ;
       MapMacroDef & MacroDef =listMacroDef->back();
       MapMacroDef::const_iterator i=MacroDef.find(macroname);
@@ -696,7 +698,7 @@ bool mylex::close() {
     ffincludedir(ffenvironment["include"]),
     firsttime(true),
     level(-1),
-    echo(mpirank == 0),
+    echo(mpirank == 0 && verbosity),
     cout(out),
     listMacroDef(new list<MapMacroDef>),
     listMacroParam(0)

@@ -819,7 +819,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const {
 
 void init_eigenvalue()
 {
-    cout << "eigenvalue ";
+    if(verbosity) cout << "eigenvalue ";
     Global.Add("EigenValue","(",new EigenValue(1));  //  j + dJ
     Global.Add("EigenValue","(",new EigenValueC(1));  //  j + dJ
     

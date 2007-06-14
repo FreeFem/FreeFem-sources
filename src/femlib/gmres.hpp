@@ -105,7 +105,8 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
            <<  abs(s(i+1)) / normb << " < " << tol << endl;
     
       if ((resid = abs(s(i+1)) / normb) < tol) {
-       cout << "GMRES converges: " << j << " " << abs(s(i+1)) << " " <<  normb << " " 
+	if(verbosity)
+	  cout << "GMRES converges: " << j << " " << abs(s(i+1)) << " " <<  normb << " " 
            <<  abs(s(i+1)) / normb << " < " << tol << endl;
       
         Update(x, i, H, s, v);

@@ -244,7 +244,7 @@ MPIrank mpiwho(long i) { return MPIrank(i);}
      
 void init_lgparallele()
   {
-    cout << "parallelempi ";
+    if(verbosity) cout << "parallelempi ";
      using namespace Fem2D;
      Dcl_TypeandPtr<MPIrank>(0);
      map_type[typeid(MPIrank).name()]->AddCast(

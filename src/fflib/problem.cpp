@@ -893,6 +893,9 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
   
   const Opera &Op(*mat.bilinearform);
   bool classoptm = copt && Op.optiexpK;
+  bool oldopt=1;  // juin 2007 FH ???? a voir 
+  int  iloop=0;
+  KN<bool> unvarexp(classoptm ? Op.optiexpK->sizevar() : 1);
   if (Ku.number<1 && verbosity/100 && verbosity % 10 == 2) 
      cout << "Element_Op P: copt = " << copt << " " << classoptm << endl;
     assert(Op.MaxOp() <last_operatortype);
@@ -903,10 +906,8 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
   Op.DiffOp(Dop);  
   int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
  //assert(lastop<=3);
-
   RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
   RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
-  
   for (i=0;i< nx;i++) 
     *pa++ = 0.; 
   if (ie<0)    
@@ -918,8 +919,10 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
         pa =a;
         Ku.BF(Dop,Pt,fu);
         MeshPointStack(stack)->set(T(Pt),Pt,Kv);
-        if (classoptm) (*Op.optiexpK)(stack); // call optim version 
-        
+        if (classoptm) {
+	    if( oldopt) (*Op.optiexpK)(stack); // call old optim version 
+	    else Op.optiexpK->eval(stack,iloop++,unvarexp); // new optim version 
+	}
         if (!same) Kv.BF(Dop,Pt,fv);      
         for ( i=0;  i<n;   i++ )  
           { 
