@@ -4,7 +4,7 @@
 \usepackage{styles}
 \usepackage{txfonts}
 \usepackage{times}
-\def\VERSION{2.17}
+\def\VERSION{2.17-1}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -309,6 +309,9 @@ version (MacOS 10.2 or better) (note: it uses
 
 \end{enumerate}
 
+Remark, in most of the case you can set the level of the output (verbosity\index{verbosity}) to value \texttt{nn} with adding the parameters
+\texttt{-v nn} at the command line.
+
 As an installation test, under unix:  go into the directory
 \texttt{examples++-tutorial} and run \freefempp on the example script
 \texttt{LaplaceP1.edp} with the command~:
@@ -341,7 +344,28 @@ files.
   In this directory, you have all the \texttt{.dll} files and and 
     other application \texttt{FreeFem++-nw.exe} the \freefempp application 
     without graphic windows. 
+\medskip
     
+ Remark: if you add to the environment variable \texttt{PATH} 
+\verb!C:\Program Files\FreeFem++! you can use all the programs  in 
+the window Command-line shell. (Use System in Control Panel, On the Advanced tab, click Environment Variables, then add the correct string).
+
+The systaxe of tools  in  command-line  are
+{ \small
+\begin{itemize}
+\item  \verb!FreeFem++.exe [-vnn] [-b] [-s] [-n] [-h] [-f]  [ filepath ]! where the 
+ \begin{description}
+\item \verb!-b!  no color (black and white plot)
+\item \verb!-n!  no edit ????
+\item \verb!-s!  not wait at end of execution
+\item \verb!-vnn!  set the level of verbosity to \texttt{nn} before execution of the  script.
+\item  if no file path then you get a dialog box to choose the edp file. 
+\end{description}
+\item  \verb!FreeFem++-nw.exe [-v nn]   [[-f] filepath]!
+\end{itemize}}
+\medskip
+ where the part in \texttt{[]} is facultative.
+ 
 \paragraph{Link with other text editor}
 \begin{description}
 \item[\texttt{Crimson Editor}]

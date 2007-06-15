@@ -1,4 +1,7 @@
 v 2.17-1
+  - add the command line parameter [-v nn] in all freefem++ program to set 
+    the level of verbosity to nn  before all, and if nn == 0 then theoriticaly no more
+    spurious output.
   - correct double of  $(BLASLIB) in configure.ac
   - correct  automatique choose of  color in plot of arrow. 
 v 2.17
