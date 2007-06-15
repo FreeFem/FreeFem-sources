@@ -29,14 +29,8 @@ real[int] b(n);
 b = vL(0,Vh);
 
 real[int]  B = vb(0,Vh); 	
-//real[int,int]  B(n,1); 
-
-//B(0:n-1,0)= vb(0,Vh); 	
-
-// matrix BB=B; // because block with sparce matrix not with array
-
 // the block matrix
-verbosity=4;
+
 matrix AA = [ [ A ,  B ] ,
               [ B', 0 ] ] ;
 
@@ -48,7 +42,6 @@ set(AA,solver=UMFPACK);
 x = AA^-1*bb; // solve the linear systeme 
 
 [uh[],l] = x;  // set the value 
-//cout << " l = " << l(0) <<  " ,  b(u,1)  =" << B(0:n-1,0)'*uh[]  << endl;  
 cout << " l = " << l(0) <<  " ,  b(u,1)  =" << B'*uh[]  << endl;  
 plot(uh,wait=1);
 
