@@ -10700,7 +10700,7 @@ then
        echo "$as_me:$LINENO: checking for blas_zdotu_sub in $ff_blas_lib" >&5
 echo $ECHO_N "checking for blas_zdotu_sub in $ff_blas_lib... $ECHO_C" >&6
         ff_save_libs="$LIBS"
-        LIBS="$LIBS $ff_blas_lib"
+        LIBS="$LIBS $ff_blas_lib $FLIBS"
         cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -10746,7 +10746,6 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   ff_cblas_lib=yes
-                LIBS="$ff_save_libs"
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
@@ -10756,8 +10755,7 @@ rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
         echo "$as_me:$LINENO: result: $ff_cblas_lib" >&5
 echo "${ECHO_T}$ff_cblas_lib" >&6
-
-
+	LIBS="$ff_save_libs"
 fi
 #echo "LIBS = " $LIBS
 # If all else fails, download!

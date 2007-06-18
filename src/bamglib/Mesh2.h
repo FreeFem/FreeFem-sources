@@ -130,6 +130,16 @@ const int IsVertexOnGeom = 8;
 const int IsVertexOnVertex = 16;
 const int IsVertexOnEdge = 32;
 /////////////////////////////////////////////////////////////////////////////////////
+#ifndef  NOTFREEFEM
+class ErrorMesh : public Error
+{  
+public:
+    Triangles *Th;
+    ErrorMesh(const char * Text,int l,Triangles * TTh=0, const char *t2="") :
+	Error(MESH_ERROR,"Meshing error: ",Text,"\n number : ",l,", ",t2),Th(TTh)  {}
+};
+#endif
+
 class Direction { //   
   private:
   Icoor1 dir;
@@ -784,9 +794,14 @@ public:
   Triangles(const char * ,Real8=-1) ;
   
   Triangles(Int4 nbvx,Triangles & BT,int keepBackVertices=1)
-         :Gh(BT.Gh),BTh(BT) {GeomToTriangles1(nbvx,keepBackVertices);}
+         :Gh(BT.Gh),BTh(BT) {
+	     try {GeomToTriangles1(nbvx,keepBackVertices);}
+	      catch(...) { this->~Triangles(); throw; } }
+  
   Triangles(Int4 nbvx,Geometry & G)
-         :Gh(G),BTh(*this){GeomToTriangles0(nbvx);}
+         :Gh(G),BTh(*this){
+	     try { GeomToTriangles0(nbvx);}
+	     catch(...) { this->~Triangles(); throw; } }
   Triangles(Triangles &,Geometry * pGh=0,Triangles* pBTh=0,Int4 nbvxx=0 ); // COPY OPERATEUR
   //  Triangles(Triangles &){ cerr << " BUG call copy opretor of Triangles" << endl;MeshError(111);}
   Triangles(const Triangles &,const int *flag,const int *bb); // truncature

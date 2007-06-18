@@ -114,12 +114,6 @@ class ErrorAssert : public Error
     Error(ASSERT_ERROR,"Assertion fail : (",Text, ")\n\tline :", line,", in file ",file)  {}
 };
 
-class ErrorMesh : public Error
-{  
- public:
-  ErrorMesh(const char * Text,int l,const char *t2="") :
-    Error(MESH_ERROR,"Meshing error: ",Text,"\n number : ",l,", ",t2)  {}
-};
 
 class ErrorMemory : public Error
 { public:
