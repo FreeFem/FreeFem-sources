@@ -1,3 +1,74 @@
+2007-06-18 22:42  hecht
+
+	*   add mesh example
+
+2007-06-18 22:20  hecht
+
+	*   correct old bug in bamg, in case of bogus boundary (auto
+	  crossing)
+	    add to to hand this error correctly with exception handling.
+
+2007-06-15 13:39  hecht
+
+	*   clean the example
+
+2007-06-15 11:02  hecht
+
+	* correct FreeFem++-Cocoa to add option  -v 0
+
+2007-06-15 10:01  hecht
+
+	* add missing files
+
+2007-06-15 09:33  hecht
+
+	*   end of 2.17-1  modif
+
+2007-06-14 23:03  hecht
+
+	* [no log message]
+
+2007-06-14 22:35  hecht
+
+	* next
+
+2007-06-14 21:49  hecht
+
+	* add -v xx on pc version
+
+2007-06-14 11:54  hecht
+
+	*    suite
+
+2007-06-14 10:27  hecht
+
+	* [no log message]
+
+2007-06-14 09:51  hecht
+
+	*   clear output when verbosity = 0
+	    launching FreeFem++ toto.edp -v 0
+	    of setting environment variable FF_VERBOSITY=0  to remove all
+	  spurious
+	    output.
+
+2007-06-11 15:37  hecht
+
+	* correct automatique choose of color in plot of arrow correct
+	  double use of $(BLASLIB) flag in configure.ac
+
+2007-06-09 12:15  hecht
+
+	*  add boundary= ...  flag in plot fonction.
+
+2007-06-07 12:15  hecht
+
+	* [no log message]
+
+2007-06-07 11:52  hecht
+
+	* [no log message]
+
 2007-06-07 10:53  hecht
 
 	* correct mistake in tgamma call
