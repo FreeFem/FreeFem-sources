@@ -624,14 +624,12 @@ if test "$ff_blas_ok" = yes
 then
        AC_MSG_CHECKING(for blas_zdotu_sub in $ff_blas_lib)
         ff_save_libs="$LIBS"
-        LIBS="$LIBS $ff_blas_lib"
+        LIBS="$LIBS $ff_blas_lib $FLIBS"
         AC_LINK_IFELSE(
                 [AC_LANG_CALL(,cblas_zdotu_sub)],
-                ff_cblas_lib=yes
-                LIBS="$ff_save_libs")
+                ff_cblas_lib=yes)
         AC_MSG_RESULT($ff_cblas_lib)
-
- 
+	LIBS="$ff_save_libs"	
 fi
 #echo "LIBS = " $LIBS
 # If all else fails, download!

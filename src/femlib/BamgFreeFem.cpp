@@ -593,13 +593,25 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   if (justboundary)
     m=bamg2msh(*Gh);
   else 
-    {
+  {
       Gh->AfterRead();  
       int nbtx= nbvmax ? nbvmax :  (Gh->nbv*Gh->nbv)/9 +1000;
-      Triangles *Th = new Triangles( nbtx ,*Gh);
+      
+      Triangles *Th = 0;
+      try { 
+	  Th =new Triangles( nbtx ,*Gh);
+      }
+      catch(...)
+      {
+	  Gh->NbRef=0; 
+	  delete Gh;
+	  cout << " catch Err bamg "  << endl;
+	  throw ;
+     }
       m=bamg2msh(Th,true);      
       delete Th;
-    }
+  }
+  
   delete Gh;
   /* deja fait  dans bamg2msh
      Fem2D::R2 Pn,Px;
