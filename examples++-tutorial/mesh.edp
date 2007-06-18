@@ -226,3 +226,30 @@ plot(rh,ps="lshape.eps");
        << ", region = " << nr0 << " == " << nr00 << endl;
 
 }
+//   test to catch bogus boundary
+{
+int err;
+real c0,c1;
+c0=0;
+c1=0;
+mesh Th;
+for( int i=0;i<=4;i++)
+{
+    c1=sin(i*pi/8);
+try 
+{
+err=0; 
+border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+border b(t=0,2*pi){ x=c0+0.3*cos(t); y=c1+0.3*sin(t);label=2;}
+plot(a(50)+b(30),wait=1);
+Th   = buildmesh(a(50)+b(30));
+}
+catch(...)
+{
+  err=1;
+  plot(a(50)+b(30),wait=1,cmm="bogus border ",ps="bogusborder.eps");  
+}
+if(err==0)
+  plot(Th,wait=1,cmm="mesh ok");
+}
+}
