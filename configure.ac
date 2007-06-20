@@ -305,9 +305,14 @@ then
 		XF86VidModeQueryVersion,
 		ff_Xxf86vm="-lXxf86vm",
 		ff_Xxf86vm="")
+        AC_CHECK_LIB(Xpm,
+                XpmReadFileToImage,
+                ff_Xpm="-lXpm",
+                ff_Xpm86vm="")
 	LIBS="$ff_save_libs"
 
-	ff_x11_libs="$X_LIBS $ff_Xxf86vm -lXext  -lX11 -lm"
+
+	ff_x11_libs="$X_LIBS $ff_Xxf86vm -lXext  -lX11 $ff_Xpm  -lm"
 	AC_MSG_CHECKING(for X11_LIBS)
 	AC_MSG_RESULT(["$ff_x11_libs"])	
 #	ff_x11_libs="-L/usr/X11R6/lib $ff_Xxf86vm -lXext -lXpm -lX11 -lm"

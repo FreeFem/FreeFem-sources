@@ -7,6 +7,13 @@ mesh Th=square(1,1,[10*(x+y/3),10*(y-x/3)]);
 real x1=0.7,y1=0.9, h=1e-6;
 int it1=Th(x1,y1).nuTriangle; 
 
+func ff =  2*x*x + 3*y*y + 4.5*y*x + 5*x + 6*y + 7;
+func ffx = 4*x + 4.5*y + 5;
+func ffy = 6*y + 4.5*x + 6;
+func ffxx = 4.;
+func ffyy = 6.;
+func ffxy =4.5;
+
 fespace Vh(Th,P2Morley);
 fespace Eh(Th,P0edge);
 
@@ -14,6 +21,25 @@ Eh  edges;
 
 Vh [a1,a2,a3],[b1,b2,b3],[c1,c2,c3];
  
+[a1,a2,a3] = [ ff,ffx,ffy];
+
+ cout << a1(0.6,0.2) << " == " << ff(0.6,0.2) << endl;
+ cout << a2(0.6,0.2) << " == " << ffx(0.6,0.2) << endl;
+  cout << a3(0.6,0.2) << " == " << ffy(0.6,0.2) << endl;
+  cout << dxx(a1)(0.6,0.2) << " xx== " << ffxx(0.6,0.2) << endl;
+  cout << dyy(a1)(0.6,0.2) << " yy== " << ffyy(0.6,0.2) << endl;
+  cout << dxy(a1)(0.6,0.2) << " xy== " << ffxy(0.6,0.2) << endl;
+  cout << dyx(a1)(0.6,0.2) << " yx== " << ffxy(0.6,0.2) << endl;
+ cout << a1(0.2,0.6) << " == " << ff(0.2,0.6) << endl;
+ cout << a2(0.2,0.6) << " == " << ffx(0.2,0.6) << endl;
+  cout << a3(0.2,0.6) << " == " << ffy(0.2,0.6) << endl;
+ cout << " 00 = " << int2d(Th)(square(a1-ff)) << endl;
+ cout << " 00 = " << int2d(Th)(square(a2-ffx)) << endl;
+ cout << " 00 = " << int2d(Th)(square(a3-ffy)) << endl;
+plot(a1,wait=1);
+
+Th=square(1,1,[10*(x+y/3),10*(y-x/3)]);
+
 varf vFlux([a],[e]) = intalledges(Th)( dn(a1)*e*(jump(real(nuTriangle))<= 0));
 varf vMean([a],[e]) = intalledges(Th)( (a1)*e*(jump(real(nuTriangle))<= 0)/lenEdge);
 

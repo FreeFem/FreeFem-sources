@@ -5,7 +5,8 @@ real[int] xx(nn),yy(nn);
 
 mesh Th=square(40,40);  // mesh definition of $\Omega$
 fespace Vh(Th,P2Morley);      // finite element space
-macro bilaplacien(u,v) (dxx(u)*dxx(v)+dyy(u)*dyy(v)) // fin macro 
+// correct june 21 2007 (Thank to  Hui Zhang hzhang@mailst.xjtu.edu.cn who find the error)
+macro bilaplacien(u,v) ( dxx(u)*dxx(v)+dyy(u)*dyy(v)+2.*dxy(u)*dxy(v)) // fin macro 
 real f=1;
 Vh [u,ux,uy],[v,vx,vy];
 
