@@ -27,7 +27,7 @@
  */
 #include "array_tlp.hpp"
 #include "array_init.hpp"
-
+const basicForEachType *aatypeknlongp;
 /*
 void initArrayOperators()
 {
@@ -81,6 +81,7 @@ void initArrayOperatorlong()
      // to def inverse permutation // Add FH mars 2005
      TheOperators->Add("^", new OneBinaryOperatorInv_KN_long(atype<KN_<long> >() ));
      TheOperators->Add("^", new OneBinaryOperatorInv_KN_long(atype<KN<long> *>() )) ;
+     aatypeknlongp= atype<KN<long>*>(); // for  compilation error with g++ 3.2.2
 
      
      
