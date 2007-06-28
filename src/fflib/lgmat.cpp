@@ -55,6 +55,7 @@ using namespace std;
 namespace bamg { class Triangles; }
 namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso); }
 
+extern const basicForEachType *aatypeknlongp; //// for  compilation error with g++ 3.2.2
 #include "BamgFreeFem.hpp"
 
 
@@ -1663,20 +1664,21 @@ public:
 		: Mat(a),
 		 mi(tt.MeshIndependent())
 	    {
+
 		    assert(&tt);
 		    if(tt.size()!=3) 
 			CompileError("Set raw matrix:  [ lg,col, a] = A (size !=3) ");
-		    if (    atype<KN<long>* >()->CastingFrom(tt[0].left() )
-			&&  atype<KN<long>* >()->CastingFrom(tt[1].left() )
+		    if (    aatypeknlongp->CastingFrom(tt[0].left() ) //// for  compilation error with g++ 3.2.2 (4 times)
+			&&  aatypeknlongp->CastingFrom(tt[1].left() )
 			&&  atype<KN<RR>* >()->CastingFrom(tt[2].left() ) )
 			    {
-			      lig = atype<KN<long>* >()->CastTo(tt[0]);
-			      col = atype<KN<long>* >()->CastTo(tt[1]);
+			      lig = aatypeknlongp->CastTo(tt[0]);
+			      col = aatypeknlongp->CastTo(tt[1]);
 			      coef = atype<KN<RR>* >()->CastTo(tt[2]);
 			    }      
 			    else 
 				CompileError(" we are waiting for [ lg,col,a] = A");
-	    }
+    }
 	    
 	    AnyType operator()(Stack stack)  const 
 	    {
