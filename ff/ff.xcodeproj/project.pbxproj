@@ -7,11 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3D01563E0ACD81580063AF6A /* libarpack_ff++.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D01563D0ACD81580063AF6A /* libarpack_ff++.a */; };
-		3D01563F0ACD81580063AF6A /* libarpack_ff++.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D01563D0ACD81580063AF6A /* libarpack_ff++.a */; };
-		3D0156430ACD818F0063AF6A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156420ACD818F0063AF6A /* libumfpack.a */; };
-		3D0156440ACD818F0063AF6A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156420ACD818F0063AF6A /* libumfpack.a */; };
-		3D0156470ACD81A90063AF6A /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156450ACD81A90063AF6A /* libamd.a */; };
 		3D15D46D0BD3A65E00CEB4C6 /* sansrgraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62A030972538B00D487F6 /* sansrgraph.cpp */; };
 		3D15D46E0BD3A67700CEB4C6 /* lg.tab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DC9E0970155D002A1826 /* lg.tab.cpp */; };
 		3D15D46F0BD3A68500CEB4C6 /* DefColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62A050972539900D487F6 /* DefColor.cpp */; };
@@ -86,18 +81,33 @@
 		3D15D4B50BD3A6E000CEB4C6 /* strversionnumber.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD32097015B4002A1826 /* strversionnumber.hpp */; };
 		3D15D4B60BD3A6E000CEB4C6 /* throwassert.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD35097015B4002A1826 /* throwassert.hpp */; };
 		3D15D4B70BD3A6E000CEB4C6 /* versionnumber.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD36097015B4002A1826 /* versionnumber.hpp */; };
-		3D9A3A4F0AFF47D400CE0C5D /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0156450ACD81A90063AF6A /* libamd.a */; };
-		3DAA7DB80BBFF3260054E435 /* vecLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D90DDED097050AC002A1826 /* vecLib.framework */; };
+		3DBBD59D0C356C5B007E5F45 /* vecLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D90DDED097050AC002A1826 /* vecLib.framework */; };
+		3DBBD5A10C356CC5007E5F45 /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBBD5A00C356CC5007E5F45 /* libamd.a */; };
+		3DBBD5A60C356D7A007E5F45 /* libf2c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBBD5A50C356D7A007E5F45 /* libf2c.a */; };
+		3DBBD5A80C356DB6007E5F45 /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBBD59F0C356CBD007E5F45 /* libumfpack.a */; };
+		3DBBD5AF0C356E99007E5F45 /* lgalgo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC6299409723FE000D487F6 /* lgalgo.cpp */; };
+		3DBBD5BC0C356EEE007E5F45 /* string_def.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */; };
+		3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */; };
+		3DBBD5D30C3570AB007E5F45 /* libfflib.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */; };
+		3DBBD5E60C3573DA007E5F45 /* mymain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5E50C3573DA007E5F45 /* mymain.cpp */; };
 		3DC62AE90972994000D487F6 /* macglrgraf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62AE80972994000D487F6 /* macglrgraf.cpp */; };
 		3DC62AEE0972999000D487F6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DC62AED0972999000D487F6 /* Cocoa.framework */; };
 		3DC62AF7097299F400D487F6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DC62AF6097299F400D487F6 /* OpenGL.framework */; };
 		3DC62AFD09729A7400D487F6 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DC62AFC09729A7400D487F6 /* AGL.framework */; };
+		3DF12AE20C359F750074D2D8 /* libarpack_ff++.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DF12AE10C359F750074D2D8 /* libarpack_ff++.a */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		3DBBD5D00C357087007E5F45 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3D90DC7F097012B3002A1826 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DAA7DBD0BBFF3930054E435;
+			remoteInfo = fflib;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
-		3D01563D0ACD81580063AF6A /* libarpack_ff++.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libarpack_ff++.a"; path = "../download/arpack/ARPACK/libarpack_ff++.a"; sourceTree = SOURCE_ROOT; };
-		3D0156420ACD818F0063AF6A /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = ../download/umfpack/UMFPACKv4.4/UMFPACK/Lib/libumfpack.a; sourceTree = SOURCE_ROOT; };
-		3D0156450ACD81A90063AF6A /* libamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.a; path = ../download/umfpack/UMFPACKv4.4/AMD/Lib/libamd.a; sourceTree = SOURCE_ROOT; };
 		3D90DC9E0970155D002A1826 /* lg.tab.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = lg.tab.cpp; sourceTree = "<group>"; };
 		3D90DCA00970155D002A1826 /* lg.tab.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = lg.tab.hpp; sourceTree = "<group>"; };
 		3D90DCA20970155D002A1826 /* lg.y */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.yacc; path = lg.y; sourceTree = "<group>"; };
@@ -143,6 +153,11 @@
 		3D90DD36097015B4002A1826 /* versionnumber.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = versionnumber.hpp; sourceTree = "<group>"; };
 		3D90DDED097050AC002A1826 /* vecLib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = vecLib.framework; path = /System/Library/Frameworks/vecLib.framework; sourceTree = "<absolute>"; };
 		3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libfflib.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DBBD59F0C356CBD007E5F45 /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = ../download/lib/libumfpack.a; sourceTree = SOURCE_ROOT; };
+		3DBBD5A00C356CC5007E5F45 /* libamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.a; path = ../download/lib/libamd.a; sourceTree = SOURCE_ROOT; };
+		3DBBD5A50C356D7A007E5F45 /* libf2c.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libf2c.a; path = /usr/local/lib/libf2c.a; sourceTree = "<absolute>"; };
+		3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = string_def.cpp; sourceTree = "<group>"; };
+		3DBBD5E50C3573DA007E5F45 /* mymain.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = mymain.cpp; sourceTree = "<group>"; };
 		3DC6296009723F8E00D487F6 /* Mesh2.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh2.cpp; path = ../src/bamglib/Mesh2.cpp; sourceTree = SOURCE_ROOT; };
 		3DC6296109723F8E00D487F6 /* Mesh2.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Mesh2.h; path = ../src/bamglib/Mesh2.h; sourceTree = SOURCE_ROOT; };
 		3DC6296209723F8E00D487F6 /* MeshDraw.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MeshDraw.cpp; path = ../src/bamglib/MeshDraw.cpp; sourceTree = SOURCE_ROOT; };
@@ -189,13 +204,14 @@
 		3DC62A030972538B00D487F6 /* sansrgraph.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 5; name = sansrgraph.cpp; path = ../src/Graphics/sansrgraph.cpp; sourceTree = SOURCE_ROOT; };
 		3DC62A050972539900D487F6 /* DefColor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DefColor.cpp; path = ../src/Graphics/DefColor.cpp; sourceTree = SOURCE_ROOT; };
 		3DC62AA509728D7C00D487F6 /* freefem++-nw */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "freefem++-nw"; sourceTree = BUILT_PRODUCTS_DIR; };
-		3DC62AE20972990B00D487F6 /* macglrgaph.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = macglrgaph.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DC62AE20972990B00D487F6 /* macglrgaph.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = macglrgaph.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DC62AE40972990B00D487F6 /* macglrgaph-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "macglrgaph-Info.plist"; sourceTree = "<group>"; };
 		3DC62AE80972994000D487F6 /* macglrgraf.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = macglrgraf.cpp; path = ../src/Graphics/macglrgraf.cpp; sourceTree = SOURCE_ROOT; };
 		3DC62AED0972999000D487F6 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		3DC62AF2097299D800D487F6 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
 		3DC62AF6097299F400D487F6 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		3DC62AFC09729A7400D487F6 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = /System/Library/Frameworks/AGL.framework; sourceTree = "<absolute>"; };
+		3DF12AE10C359F750074D2D8 /* libarpack_ff++.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libarpack_ff++.a"; path = "../download/lib/libarpack_ff++.a"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -203,6 +219,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DBBD59D0C356C5B007E5F45 /* vecLib.framework in Frameworks */,
+				3DBBD5A80C356DB6007E5F45 /* libumfpack.a in Frameworks */,
+				3DBBD5A10C356CC5007E5F45 /* libamd.a in Frameworks */,
+				3DBBD5A60C356D7A007E5F45 /* libf2c.a in Frameworks */,
+				3DF12AE20C359F750074D2D8 /* libarpack_ff++.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,10 +231,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D01563E0ACD81580063AF6A /* libarpack_ff++.a in Frameworks */,
-				3D0156430ACD818F0063AF6A /* libumfpack.a in Frameworks */,
-				3D9A3A4F0AFF47D400CE0C5D /* libamd.a in Frameworks */,
-				3DAA7DB80BBFF3260054E435 /* vecLib.framework in Frameworks */,
+				3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,12 +239,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DBBD5D30C3570AB007E5F45 /* libfflib.dylib in Frameworks */,
 				3DC62AEE0972999000D487F6 /* Cocoa.framework in Frameworks */,
 				3DC62AF7097299F400D487F6 /* OpenGL.framework in Frameworks */,
 				3DC62AFD09729A7400D487F6 /* AGL.framework in Frameworks */,
-				3D01563F0ACD81580063AF6A /* libarpack_ff++.a in Frameworks */,
-				3D0156440ACD818F0063AF6A /* libumfpack.a in Frameworks */,
-				3D0156470ACD81A90063AF6A /* libamd.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,6 +291,7 @@
 			isa = PBXGroup;
 			children = (
 				3D90DC9E0970155D002A1826 /* lg.tab.cpp */,
+				3DBBD5E50C3573DA007E5F45 /* mymain.cpp */,
 				3D90DCA00970155D002A1826 /* lg.tab.hpp */,
 				3D90DCA20970155D002A1826 /* lg.y */,
 			);
@@ -321,6 +338,7 @@
 				3D90DD2C097015B4002A1826 /* Serialize.hpp */,
 				3D90DD2F097015B4002A1826 /* showverb.hpp */,
 				3D90DD30097015B4002A1826 /* String.hpp */,
+				3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */,
 				3D90DD31097015B4002A1826 /* strversionnumber.cpp */,
 				3D90DD32097015B4002A1826 /* strversionnumber.hpp */,
 				3D90DD35097015B4002A1826 /* throwassert.hpp */,
@@ -333,9 +351,10 @@
 		3D90DDE309704FA0002A1826 /* Lib */ = {
 			isa = PBXGroup;
 			children = (
-				3D0156420ACD818F0063AF6A /* libumfpack.a */,
-				3D0156450ACD81A90063AF6A /* libamd.a */,
-				3D01563D0ACD81580063AF6A /* libarpack_ff++.a */,
+				3DF12AE10C359F750074D2D8 /* libarpack_ff++.a */,
+				3DBBD5A00C356CC5007E5F45 /* libamd.a */,
+				3DBBD59F0C356CBD007E5F45 /* libumfpack.a */,
+				3DBBD5A50C356D7A007E5F45 /* libf2c.a */,
 				3D90DDED097050AC002A1826 /* vecLib.framework */,
 			);
 			name = Lib;
@@ -462,6 +481,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				3DBBD5D10C357087007E5F45 /* PBXTargetDependency */,
 			);
 			name = sansrgraph;
 			productName = sansrgraph;
@@ -518,6 +538,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D15D46E0BD3A67700CEB4C6 /* lg.tab.cpp in Sources */,
+				3DBBD5AF0C356E99007E5F45 /* lgalgo.cpp in Sources */,
 				3D15D4900BD3A6E000CEB4C6 /* AddNewFE.h in Sources */,
 				3D15D4910BD3A6E000CEB4C6 /* AFunction.cpp in Sources */,
 				3D15D4920BD3A6E000CEB4C6 /* AFunction.hpp in Sources */,
@@ -557,7 +579,6 @@
 				3D15D4B50BD3A6E000CEB4C6 /* strversionnumber.hpp in Sources */,
 				3D15D4B60BD3A6E000CEB4C6 /* throwassert.hpp in Sources */,
 				3D15D4B70BD3A6E000CEB4C6 /* versionnumber.hpp in Sources */,
-				3D15D46E0BD3A67700CEB4C6 /* lg.tab.cpp in Sources */,
 				3D15D47E0BD3A6D500CEB4C6 /* Mesh2.cpp in Sources */,
 				3D15D47F0BD3A6D500CEB4C6 /* Mesh2.h in Sources */,
 				3D15D4800BD3A6D500CEB4C6 /* MeshDraw.cpp in Sources */,
@@ -589,6 +610,8 @@
 				3D15D47A0BD3A6AE00CEB4C6 /* gibbs.cpp in Sources */,
 				3D15D47B0BD3A6AE00CEB4C6 /* mshptg.cpp in Sources */,
 				3D15D47C0BD3A6AE00CEB4C6 /* QuadratureFormular.cpp in Sources */,
+				3DBBD5BC0C356EEE007E5F45 /* string_def.cpp in Sources */,
+				3DBBD5E60C3573DA007E5F45 /* mymain.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -612,6 +635,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		3DBBD5D10C357087007E5F45 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3DAA7DBD0BBFF3930054E435 /* fflib */;
+			targetProxy = 3DBBD5D00C357087007E5F45 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		3D90DC81097012B3002A1826 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -626,6 +657,7 @@
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "FreeFem++";
+				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited)";
 			};
 			name = Debug;
 		};
@@ -641,6 +673,7 @@
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "FreeFem++";
+				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited)";
 			};
 			name = Release;
 		};
@@ -655,6 +688,15 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/lib\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = fflib;
 				ZERO_LINK = YES;
@@ -673,6 +715,15 @@
 				HEADER_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../src/fflib\"";
 				HEADER_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/..\"";
 				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/lib\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = fflib;
 				USER_HEADER_SEARCH_PATHS = "/Users/hecht/work/freefem++/src/fflib /Users/hecht/work/freefem++ $(inherited)";
@@ -712,13 +763,7 @@
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INSTALL_PATH = "$(HOME)/bin";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_4)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
@@ -738,13 +783,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G4;
 				INSTALL_PATH = "$(HOME)/bin";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_4)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
@@ -773,12 +812,7 @@
 				);
 				INFOPLIST_FILE = "macglrgaph-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
@@ -812,12 +846,7 @@
 				);
 				INFOPLIST_FILE = "macglrgaph-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";

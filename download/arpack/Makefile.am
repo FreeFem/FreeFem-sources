@@ -26,7 +26,7 @@ ARPACK/fait: arpack96.tar.gz patch.tar.gz ARmake.m4 Makefile
 	for i in ARPACK/SRC/*.f ; do \
 	    mv  $$i $$i.cpy; sed 's/call *second/call secnd2/' <$$i.cpy >$$i;rm $$i.cpy; done 
 	for i in  ARPACK/UTIL/second.f;  do  \
-	   mv  $$i $$i.cpy; sed 's/ SECOND *(/secnd2(/' <$$i.cpy >$$i;rm $$i.cpy; done 
+	   mv  $$i $$i.cpy; cat $$i.cpy| sed 's/ SECOND *(/ secnd2(/'|grep -v EXTERNAL  >$$i;rm $$i.cpy; done 
 	m4 -DFF_BLASLIB="$(BLASLIB)" \
 	   -DFF_FC="@F77@" \
            -DFF_FFLAGS="@FFLAGS@" \

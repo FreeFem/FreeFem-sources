@@ -60,8 +60,8 @@ DIRS         = FF_LAPACKdir  $(UTILdir) $(SRCdir)
 # | The name of the libraries to be created/linked to |
 # %---------------------------------------------------%
 #
-ARPACKLIB  = $(home)/libarpack_$(PLAT).a
-LAPACKLIB = $(home)/liblapack_$(PLAT).a
+ARPACKLIB  = $(home)/../../lib/libarpack_$(PLAT).a
+LAPACKLIB = $(home)/../../liblapack_$(PLAT).a
 BLASLIB = FF_BLASLIB 
 #
 ALIBS =  $(ARPACKLIB) $(LAPACKLIB) $(BLASLIB) 
