@@ -94,8 +94,46 @@ struct Op2_dotproduct_: public binary_function<Transpose<KN_<K> >,KN_<K> ,K> {
    { return (conj(a.t),b);} }; 
    
 template<class A,class B>  A Build(B b) {  return A(b);}
-  
-  
+
+template<class T>
+void  HeapSort(T *c,long n,long o)
+{ // trie un tableau c de n valeur avec un decalage de o.
+   //  le tableau: c[i*o] , pour i = 0 a n-1  
+    long l,j,r,i;
+    T crit;
+    c-=o; // on decale de o pour que le tableau commence a o
+    if( n <= 1) return;
+    l = (n/2 + 1)*o;
+    r = n*o;
+    while (1) { // label 2
+	if(l <= o ) { // label 20
+	    crit = c[r];
+	    c[r] = c[o];
+	    r-=o;
+	    if ( r == o ) { c[o]=crit; return;}
+	} else  crit = c[l-=o]; 
+	j=l;
+	while (1) {// label 4
+	    i=j;
+	    j=2*j;
+	    if  (j>r) {c[i]=crit;break;} // L8 -> G2
+	    if ((j<r) && (c[j] < c[j+o])) j+=o; // L5
+	    if (crit < c[j]) c[i]=c[j]; // L6+1 G4
+	    else {c[i]=crit;break;} //L8 -> G2
+	}
+    }
+}
+
+template<class R,class A> A  SortKn(const A  & ca){ 
+    A a(ca);
+    HeapSort<R>(&a[0],a.n,a.step);
+    return a;}
+
+template<class R> KN<R> *  SortpKn( KN<R> * const & pa){ 
+    KN<R> &a(*pa);
+    HeapSort<R>(&a[0],a.n,a.step);
+    return pa;}
+
   
 inline void MyAssert(int i,char * ex,char * file,long line)
 {if (i) {
@@ -605,7 +643,10 @@ void ArrayOperator()
 
      TheOperators->Add("<-", 
        new OneOperator2_<KN<K> *,KN<K> *,Z>(&set_init),
-		       new InitArrayfromArray<K,true>
+       new InitArrayfromArray<K,true>,
+       new OneOperator2_<KN<K> *,KN<K> *,KN<K> >(&set_init),
+       new OneOperator2_<KN<K> *,KN<K> *,KN_<K> >(&set_init)
+     //  new OneOperator2_<KN<K> *,KN<K> *,KN<K> * >(&set_initp)
        );
      TheOperators->Add("<-", 
         new OneOperator3_<KNM<K> *,KNM<K> *,Z,Z>(&set_init2),
@@ -613,6 +654,9 @@ void ArrayOperator()
        );
        
      Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,Z>(&set_init));
+   //  Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,KN<K> >(&set_init));
+     //Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,KN_<K> >(&set_init));
+    // Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,KN<K> * >(&set_initp));
      Add<KNM<K> *>("<-","(",new OneOperator3_<KNM<K> *,KNM<K> *,Z,Z>(&set_init2));
      Add<KN<K> *>("<-","(",new InitArrayfromArray<K,true>);
      Add<KNM<K> *>("<-","(",new InitMatfromAArray<K,true>);
@@ -853,6 +897,7 @@ void ArrayOperator()
        new OneBinaryOperator<PrintPnd<KNM<K>*> >,
        new OneBinaryOperator<Print<KN_<K> > >
        ); 
+     
        
      TheOperators->Add(">>",
         new OneBinaryOperator<Op_ReadKN<K> >

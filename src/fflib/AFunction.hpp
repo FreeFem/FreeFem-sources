@@ -2365,14 +2365,18 @@ class  OneOperator1s_ : public OneOperator {
 
 template<class R,class A=R>
 class  OneOperator1_ : public OneOperator {
-    aType r; //  return type
+    aType r,t0; //  return type
     typedef  R (*func)(const A &) ; 
     func  f;
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
      { return  new E_F_F0_<R,A>(f,t[0]->CastTo(args[0]));} 
     OneOperator1_(func  ff): 
-      OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),f(ff){}
+      OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),t0( map_type[typeid(A).name()] ),f(ff){}
+    OneOperator1_(func  ff,aType tt0): 
+	OneOperator(map_type[typeid(R).name()],tt0),
+	t0( map_type[typeid(A).name()]), f(ff) {}
+    
 };
 
 template<class R,class A,class B,class E> class E_F_F0F0_;
