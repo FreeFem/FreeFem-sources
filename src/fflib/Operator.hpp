@@ -483,6 +483,9 @@ template<class R,class A>  R * set_init2( R* const & a,const A & b,const A & c){
 template<class R,class A>  R * set_init( R* const & a,const A & b){ 
  SHOWVERB( cout << " set_init " << typeid(R).name() << " " << &b << endl);
   a->init(b); return a;}
+template<class R,class A>  R * set_initp( R* const & a,const A & b){ 
+    SHOWVERB( cout << " set_init " << typeid(R).name() << " " << &b << endl);
+    a->init(*b); return a;}
 
 template<class R,class A=R,class B=A> 
 struct Op2_add0: public binary_function<A,B,R> { 

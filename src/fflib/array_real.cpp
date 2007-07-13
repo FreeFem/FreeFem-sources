@@ -52,6 +52,9 @@ void initArrayOperatordouble()
      Global.Add("ceil","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(ceil));
 
     Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(square));
+    Add<KN_<double> >("sort",".",new OneOperator1_<KN_<K>,KN_<K> >(SortKn<K, KN_<K> >));
+    Add<KN<double> >("sort",".",new OneOperator1_<KN<K>,KN<K> >(SortKn<K, KN<K> >));
+    Add<KN<double> *>("sort",".",new OneOperator1_<KN<K>*,KN<K>* >(SortpKn<K>));
     
 //     ArrayDCL<long>();
 }
