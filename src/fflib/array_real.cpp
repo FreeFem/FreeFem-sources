@@ -36,6 +36,8 @@ void initArrayDCLdouble()
 //     ArrayOperator<long>();
      ArrayDCL<double>();
 }
+
+//template<class A,class B>  A Build(B b) {  return A(b);}
 void initArrayOperatordouble()
 {
 
@@ -43,7 +45,7 @@ void initArrayOperatordouble()
     ArrayOperatorF<double,double>();
     typedef double K;
     typedef double KK;
-    
+     Dcl_Type< QuantileKN<K> > (); 
      Global.Add("abs","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(fabs));
      Global.Add("acos","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(acos));
      Global.Add("asin","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(asin));
@@ -55,6 +57,13 @@ void initArrayOperatordouble()
     Add<KN_<double> >("sort",".",new OneOperator1_<KN_<K>,KN_<K> >(SortKn<K, KN_<K> >));
     Add<KN<double> >("sort",".",new OneOperator1_<KN<K>,KN<K> >(SortKn<K, KN<K> >));
     Add<KN<double> *>("sort",".",new OneOperator1_<KN<K>*,KN<K>* >(SortpKn<K>));
+
+    Add<KN_<double> >("quantile",".",new OneOperator1<QuantileKN<K>,KN_<K> >(Build<QuantileKN<K>,KN_<K> >));
+    Add<KN<double> >("quantile",".",new OneOperator1<QuantileKN<K>,KN_<K> >(Build<QuantileKN<K>,KN_<K> >, atype<KN<K> >()));
+   // Add<KN_<double> * >("quantile",".",new OneOperator1<QuantileKN<K>,KN_<K> >(Build<QuantileKN<K>,KN_<K> >, atype<KN<K> >()));
+    Add<KN<double> * >("quantile",".",new OneOperator1<QuantileKN<K>,KN_<K> >(Build<QuantileKN<K>,KN_<K> >, atype<KN<K> *>() ));
+    Add<QuantileKN<K> >("(","",new OneOperator2_<K,QuantileKN<K>,double>(Quantile<K>));
+
     
 //     ArrayDCL<long>();
 }
