@@ -134,6 +134,25 @@ template<class R> KN<R> *  SortpKn( KN<R> * const & pa){
     HeapSort<R>(&a[0],a.n,a.step);
     return pa;}
 
+template<class R>
+class QuantileKN:  public KN_<R> { public:
+    QuantileKN(const KN_<R> &a): KN_<R>(a) {}
+    QuantileKN(KN<R>  * p): KN_<R>(*p) {}
+    operator R *() const {return this->KN_<R>::operator R *() ;}    
+};
+
+
+template<class R> R   Quantile(QuantileKN<R>  const & a,const double & q){ 
+    KN<R> b(a); 
+    HeapSort<R>(b,b.n,b.step);
+    long m=b.n*q;
+    if( m >= b.n) m=b.n-1;
+    if( m < 0) m=0;   
+    R qq=b[m];
+   // cout <<  "Quantile: m = " << m << " " << b <<endl;
+    return qq;}
+
+
   
 inline void MyAssert(int i,char * ex,char * file,long line)
 {if (i) {
@@ -410,7 +429,7 @@ public:
       for (int i=0;i<N;i++)
         v[i]= (*(tab[i]))(stack);
       
-      int n=0;
+      int n=0; 
       for (int i=0;i<N;i++)
 	{
 	  if (what[i]==0) nn[i]=1;

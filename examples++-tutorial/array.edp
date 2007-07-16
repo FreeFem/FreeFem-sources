@@ -232,4 +232,5 @@ b=a;
 b(0:5:2).sort;
 cout << b << endl; 
 cout << b(0:5:2)  << endl; 
+cout << " quantile(0.2)  = " <<  b.quantile(0.2) << endl; 
 }
