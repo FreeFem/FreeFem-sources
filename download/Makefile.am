@@ -5,7 +5,7 @@
 
 SUBDIRS=blas arpack umfpack fltk
 
-all-local: lib include
+all-recursive: lib include
 
 lib: 
 	mkdir lib
