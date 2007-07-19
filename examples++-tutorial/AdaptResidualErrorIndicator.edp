@@ -42,7 +42,7 @@ macro  ReMeshIndicator(Th,Ph,Vh,vindicator,coef)
 	cout << " global  Eta  : " << sqrt(etak[].sum) << "  ......... " << endl;
 	etak[]=sqrt(etak[]); 
         plot(etak,ps="arei-etak.eps",fill=1,value=1);
-	real etastar =  etak[].quantile(coef) ; /*coef*(etak[].sum/etak[].n);*/
+	real etastar =  etak[].quantile(coef) ; /* coef*(etak[].sum/etak[].n);*/
 	cout << " etastar = " << etastar << " min max " << etak[].min << " " <<etak[].max <<  endl;
 
 	/* here etaK is discontinous 
@@ -103,8 +103,8 @@ for (int i=0;i< 10;i++)
 	u=u;
 	Poisson;
 	plot(Th,u,wait=1);
-	real cc=0.7;
-	if(i>5) cc=0.5;
+	real cc=0.2;
+	if(i>5) cc=0.2;
     if(i<9) ReMeshIndicator(Th,Ph,Vh,indicator2,cc);
 	plot(u,Th,wait=1,ps="arei-Thu.eps",value=1);
 }

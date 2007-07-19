@@ -131,7 +131,36 @@ inline R2 Maxc(const R3 & A,const R3& B,const R3& C) { return R3(Max(A.x,B.x,C.x
 
 // def de numerotation dans un triangles direct sens (trigo)
 // the edge is oposite of the vertex
-//  [3] is a edge
+////  [3] is a edge
+#include <algorithm>
+//#include <Functional>
+struct SortedTriplet {
+    static const int  empty = -1;
+    int i1,i2,i3;
+    SortedTriplet(int j1,int j2=empty, int j3=empty) : i1(j1), i2(j2),i3(j3) {
+	if(i1<i2) Exchange(i1,i2);
+	if(i2<i3) Exchange(i2,i3);
+	if(i1<i2) Exchange(i1,i2);
+    }
+    bool operator < (const SortedTriplet & t)  const
+    {  return  i1==t.i1 ? (  i2== t.i2 ? i3 <t.i3 : i2 < t.i2 ) : i1 < t.i1; }
+    bool operator == (const SortedTriplet & t)  const
+    {  return  i1==t.i1  &&   i2== t.i2 &&  i3 == t.i3;}
+    bool operator != (const SortedTriplet & t)  const
+    {  return  i1!=t.i1  ||   i2!= t.i2 ||  i3 != t.i3; }
+    
+    size_t hash() const {
+	size_t res=0, i=1;
+	res += i1*i;
+	if( i2 !=empty)
+	    res += i2*(i<<8);
+	if( i3 !=empty)
+	    res += i3*( i <<16) ;
+	return res;
+    }
+};
+
+
  const short VerticesOfTriangularEdge[3][2] = {{1,2},{2,0},{0,1}};
  //  [3] is a vertices 
  const short EdgesVertexTriangle[3][2] = {{1,2},{2,0},{0,1}};
@@ -216,6 +245,11 @@ class Tetraedre: public Label {
 public:
   R volume;
   Tetraedre(){};              // constructor empty for array
+  static const int NbWhat = 15; // 4+6+4+1 
+  static const int NbV =4;
+  static const int NbE =6;
+  static const int NbF =4;
+  
   Vertex & operator[](int i) const// to see triangle as a array of vertex
        {return *vertices[i];} 
        
@@ -233,8 +267,8 @@ public:
        volume = a ==0 ? det(R3(A,B),R3(A,C),R3(A,D))/6. : a;
        throwassert(volume>0);}
             
-  Vertex & Face(int j,int i) const // Vertex j of edge i
-     {throwassert(j==0 || j==1 );return  *vertices[(i+j+1)%3];}
+  Vertex & Face(int j,int i) const // Vertex j of ace i
+     {assert(j<=0   && j < 3 && i <=0 && i < 4) ;return  *vertices[v_tet_face[i][j] ];}
   
   R3 N2areaInternal(int i) const { return R3(*vertices[v_tet_face[i][0]],*vertices[v_tet_face[i][1]]) 
                                  ^R3(*vertices[v_tet_face[i][0]],*vertices[v_tet_face[i][2]]) ; }
@@ -244,11 +278,11 @@ public:
   R3 H(int i)  const  // heigth ($\nabla \lambda_i$ 
      {R3 Ni=N2areaInternal(i);return Ni/(3.*volume);} 
      
-  R3 Edge(int i) const // opposite edge vertex i
-     {return (R3) *vertices[v_tet_edge[i][1]]-(R3) *vertices[v_tet_edge[i][0]];}
+  R3 Edge(int i) const //  edge  i
+     { return (R3) *vertices[v_tet_edge[i][1]]-(R3) *vertices[v_tet_edge[i][0]];}
      
   Vertex & Edge(int j,int i) const // Vertex j of edge i
-     {throwassert(j==0 || j==1 );return  *vertices[v_tet_edge[i][j]];}
+     {assert(j<=0   && j < 2 && i <=0 && i < 4) ;return  *vertices[v_tet_edge[i][j]];}
   R lenEdge(int i) const {R3 E=Edge(i);return sqrt((E,E));}
   R h() const { return Max( Max(lenEdge(0),lenEdge(1),lenEdge(2)),
                             Max(lenEdge(3),lenEdge(4),lenEdge(5)) );}
@@ -259,7 +293,7 @@ public:
       
   Vertex & VerticeOfEdge(int i,int j) const  // vertex j of edge i 
     {return  *vertices[v_tet_edge[i][j]];}  // vertex j of edge i 
-
+ 
     R EdgeOrientation(int i) const { // return +1 or -1 
      R Orient[2]={-1.,1.};
     return  Orient[vertices[v_tet_edge[i][0]] < vertices[v_tet_edge[i][1]] ] ;}
@@ -271,6 +305,15 @@ public:
              +  (const R3 &) *vertices[1] * (P.x) 
              +  (const R3 &) *vertices[2] * (P.y) ;
              +  (const R3 &) *vertices[3] * (P.z) ;}
+  
+  SortedTriplet what(int i,Vertex *v0,Tetraedre * t0) { 
+      if (i<0) ffassert(i>=0);
+      else if  (i<4) return SortedTriplet(vertices[i]-v0);
+      else if( (i-=4)<6) return SortedTriplet( &Edge(0,i)-v0, &Edge(1,i)-v0);
+      else if( (i-=6)<4) return SortedTriplet( &Face(0,i)-v0, &Face(1,i)-v0, &Face(2,i)-v0) ;
+      else if(i==0) return SortedTriplet(vertices[0]-v0,this-t0,-2);
+      else ffassert(0);
+  }
 private:
   Tetraedre(const Tetraedre &);  //  no copy of triangle
   void operator=(const Tetraedre &);             
@@ -285,6 +328,9 @@ class TTriangle: public Label {
  private:
   Vertex *vertices[3]; // an array of 3 pointer to vertex
 public:
+  static const int NbWhat = 7; // 3+3+1 
+  static const int NbV = 3; // 3+3+1 
+  static const int NbE = 3; //
   R area;
   TTriangle(){};              // constructor empty for array
   Vertex & operator[](int i) const// to see triangle as a array of vertex
@@ -325,6 +371,14 @@ public:
   R lenEdge2(int i) const {Rd E=Edge(i);return ((E,E));}
   R h() const { return sqrt(Max(lenEdge2(0),lenEdge2(1),lenEdge2(2)));}
   R h_min() const { return sqrt(Min(lenEdge2(0),lenEdge2(1),lenEdge2(2)));}
+
+  SortedTriplet what(int i,Vertex *v0,TTriangle * t0) { 
+      if (i<0) ffassert(i>=0);
+      else if  (i<3) return SortedTriplet(vertices[i]-v0);
+      else if( (i-=3)<3) return SortedTriplet( &Edge(i,0)-v0, &Edge(i,1)-v0);
+      else if( (i==0) ) return SortedTriplet( vertices[0]-v0, vertices[1]-v0, vertices[2]-v0) ;
+      else ffassert(0);
+  }
   
   void Renum(Vertex   *v0, long * r)  { 
     for (int i=0;i<3;i++) 
@@ -369,6 +423,10 @@ template<class Rd>
 class TBoundaryEdge: public Label {
 public:
  typedef TVertex<Rd> Vertex;
+    static const int NbWhat = 3; // 3+3+1 
+    static const int NbV = 2; // 3+3+1 
+    static const int NbE = 1; //
+    
   Vertex *vertices[2];
   TBoundaryEdge(Vertex * v0,int i0,int i1,int r): Label(r) 
   { vertices[0]=v0+i0; vertices[1]=v0+i1; }
@@ -382,6 +440,14 @@ public:
   void Renum(Vertex   *v0, long * r) { 
     for (int i=0;i<2;i++) 
       vertices[i]=v0+r[vertices[i]-v0];}
+  
+  SortedTriplet what(int i,Vertex *v0,TBoundaryEdge * t0) { 
+      if (i<0) ffassert(i>=0);
+      else if  (i<2) return SortedTriplet(vertices[i]-v0);
+      else if( (i==0) ) return SortedTriplet( vertices[0]-v0, vertices[1]-v0) ;
+      else ffassert(0);
+  }
+  
 };
 
 typedef TBoundaryEdge<R2> BoundaryEdge;

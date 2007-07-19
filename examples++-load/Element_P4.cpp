@@ -102,7 +102,7 @@ namespace  Fem2D {
     0,0,0,0,1,2,0,1,2,0,1,2,0,1,2,     // the number of the df on  the node  
     0,1,2,3,3,3,4,4,4,5,5,5,6,6,6,    // the node of the df 
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,     //  the df come from which FE (generaly 0)
-    0,1,2,3,4,5,6,7,8,9,10,11,12,13,    //  which are de df on sub FE
+    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,    //  which are de df on sub FE
     0,0,                      // for each compontant $j=0,N-1$ it give the sub FE associated 
     
     0,1,2,       0};
