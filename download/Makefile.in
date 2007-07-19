@@ -315,7 +315,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-recursive
-all-am: Makefile all-local
+all-am: Makefile
 installdirs: installdirs-recursive
 installdirs-am:
 
@@ -381,8 +381,8 @@ uninstall-am: uninstall-info-am
 
 uninstall-info: uninstall-info-recursive
 
-.PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am all-local check check-am \
-	clean clean-generic clean-local clean-recursive distclean \
+.PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-am clean \
+	clean-generic clean-local clean-recursive distclean \
 	distclean-generic distclean-recursive distclean-tags distdir \
 	dvi dvi-am dvi-recursive info info-am info-recursive install \
 	install-am install-data install-data-am install-data-recursive \
@@ -397,7 +397,7 @@ uninstall-info: uninstall-info-recursive
 	uninstall-recursive
 
 
-all-local: lib include
+all-recursive: lib include
 
 lib: 
 	mkdir lib
