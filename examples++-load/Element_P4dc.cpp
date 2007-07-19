@@ -29,7 +29,7 @@ namespace  Fem2D {
    static const int kl[15];
     
    
-   TypeOfFE_P4dcLagrange(): TypeOfFE(3+3*3+3,1,Data,4,1,15+6,15,0)
+   TypeOfFE_P4dcLagrange(): TypeOfFE(3+3*3+3,1,Data,4,1,15,15,Pi_h_coef)
    {  
      static const  R2 Pt[15] =  {
        R2( 0/4. , 0/4. ) , 
@@ -49,24 +49,14 @@ namespace  Fem2D {
        R2( 1/4. , 1/4. ) } 
      ;
      
-                       //    3,4,5, 6,7,8, 9,10,11, 
-     int other[15]= { 0,1,2, 5,4,3, 8,7,6, 11,10,9,12,13,14}; 
-     
-     int kk=0;
-     for (int i=0;i<NbDoF;i++) 
-       {
-	 pij_alpha[kk++]= IPJ(i,i,0);
-	 if(other[i]!=i)
-	   pij_alpha[kk++]= IPJ(i,other[i],0);
-	 P_Pi_h[i]=Pt[i]; 
-       }
-
-      assert(P_Pi_h.N()==NbDoF);
-      assert(pij_alpha.N()==kk);
+       for (int i=0;i<NbDoF;i++) {
+	   pij_alpha[i]= IPJ(i,i,0);
+	   P_Pi_h[i]=Pt[i]; }
+       //    3,4,5, 6,7,8, 9,10,11, 
    }
   
    void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-   void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
+ /*  void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
    {
      for (int i=0;i<15+6;++i)
        v[i]=1;
@@ -74,17 +64,7 @@ namespace  Fem2D {
      int e1=K.EdgeOrientation(1);
      int e2=K.EdgeOrientation(2);
      int ooo[6]={e0,e0,e1,e1,e2,e2};
-     /*   3,4
-	  5,
-	  6,7
-	  8,9,
-	  10,
-	  11,12,
-	  13,14,
-	  15
-	  16,17
-     */     
-     int iii[6]={3,6,8,11,13,16}; 
+    int iii[6]={3,6,8,11,13,16}; 
      int jjj[6];
      for(int i=0;i<6;++i)
        { 
@@ -95,25 +75,27 @@ namespace  Fem2D {
        else v[iii[i]]=0;
           
    }
+   */
  } ;
   //                     on what     nu df on node node of df    
   int TypeOfFE_P4dcLagrange::Data[]={
-    6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,    //  the support number  of the node of the df 
-    0,1,2,3,4,5,6,7,8,9,10,11,12,13,  // the number of the df on  the node  
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // the node of the df 
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,     //  the df come from which FE (generaly 0)
-    0,1,2,3,4,5,6,7,8,9,10,11,12,13,    //  which are de df on sub FE
-    0,0,                      // for each compontant $j=0,N-1$ it give the sub FE associated 
+    6,6,6,6,6, 6,6,6,6,6 ,6,6,6,6,6,    //  the support number  of the node of the df 
+    0,1,2,3,4, 5,6,7,8,9 ,10,11,12,13,14,  // the number of the df on  the node  
+    0,0,0,0,0, 0,0,0,0,0 ,0,0,0,0,0,    // the node of the df 
+    0,0,0,0,0, 0,0,0,0,0 ,0,0,0,0,0,     //  the df come from which FE (generaly 0)
+    0,1,2,3,4, 5,6,7,8,9 ,10,11,12,13,14,    //  which are de df on sub FE
+    0,                      // for each compontant $j=0,N-1$ it give the sub FE associated 
     
     0,1,2,       0};
-  
+  double TypeOfFE_P4dcLagrange::Pi_h_coef[]={ 1.,1.,1.,1.,1. ,1.,1.,1.,1.,1. ,1.,1.,1.,1.,1.};
+ 
   void TypeOfFE_P4dcLagrange::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
   {
  
     R2 A(K[0]), B(K[1]),C(K[2]);
     R l0=1.-P.x-P.y,l1=P.x,l2=P.y; 
     R L[3]={l0*k,l1*k,l2*k};
-    throwassert( val.N()>=10);
+    throwassert( val.N()>=14);
     throwassert(val.M()==1);
     // Attention il faut renumeroter les fonction de bases
     //   car dans freefem++, il y a un node par sommet, arete or element
@@ -124,9 +106,9 @@ namespace  Fem2D {
     for(int i=0;i<15;++i)
       p[i]=i;
     
-    if(K.EdgeOrientation(0) <0) Exchange(p[3],p[5]);// 3,4
-    if(K.EdgeOrientation(1) <0) Exchange(p[6],p[8]);// 5,6 
-    if(K.EdgeOrientation(2) <0) Exchange(p[9],p[11]);// 7,8
+  //  if(K.EdgeOrientation(0) <0) Exchange(p[3],p[5]);// 3,4
+  // if(K.EdgeOrientation(1) <0) Exchange(p[6],p[8]);// 5,6 
+  //  if(K.EdgeOrientation(2) <0) Exchange(p[9],p[11]);// 7,8
     //cout << KN_<int>(p,10) <<endl;
     val=0; 
     /*
@@ -206,6 +188,7 @@ namespace  Fem2D {
 	
       }
   }
+
 #include "Element_P4dc.hpp"
   
 
