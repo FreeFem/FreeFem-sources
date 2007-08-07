@@ -1,3 +1,5 @@
+v 2.18-1 (august, 2007)
+  - correct old bug under Windows: the std input stream  now works (cin) 
 v 2.18  (july, 19, 2007)
   - add sort of real array or int array, syntaxe: 
       a.sort, and we have : a[i-1] <= a[i] for i =0 to a.n-1

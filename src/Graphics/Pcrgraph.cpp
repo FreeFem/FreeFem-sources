@@ -794,7 +794,7 @@ void myexit(int err)
 // initialize the console
 BOOL inittext(VOID)
 {
-  FILE *fp;
+  FILE *fp=NULL,*fin=NULL;
   OSVERSIONINFO osVer; // for GetVersionEx()
 
   osVer.dwOSVersionInfoSize = sizeof(osVer);
@@ -816,6 +816,10 @@ BOOL inittext(VOID)
       return FALSE;
    }
    *stdout = *fp;
+   // get the standard output
+   fin = GetConsoleHandle(STD_INPUT_HANDLE);   
+   if(fin!=NULL)
+    *stdin = *fin;
 
    ios::sync_with_stdio();
 

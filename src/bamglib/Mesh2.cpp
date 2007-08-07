@@ -2621,317 +2621,325 @@ void Triangles::ForceBoundary()
 
 void Triangles::FindSubDomain(int OutSide=0)
 {
-//#define DRAWING1
-
-  if (verbosity >2)
-    {
-      if (OutSide)
-	cout << " -- Find all external sub-domain ";	
-       else
-	cout << " -- Find all internal sub-domain ";
-      
-    }
-  // if (verbosity > 4) cout << " OutSide=" << OutSide << endl;
-  short * HeapArete = new short[nbt];
-  Triangle  **  HeapTriangle = new Triangle*  [nbt];
-  Triangle *t,*t1;
-  Int4 k,it;
+    //#define DRAWING1
     
-  for (Int4 itt=0;itt<nbt;itt++) 
-    triangles[itt].link=0; // par defaut pas de couleur
-#ifdef DRAWING1
-  reffecran();
-#endif
-
- Int4  NbSubDomTot =0;
-  for ( it=0;it<nbt;it++)  { 
-    if ( ! triangles[it].link  ) {
-      t = triangles + it;
-      NbSubDomTot++;; // new composante connexe
-      Int4 i = 0; // niveau de la pile 
-      t->link = t ; // sd forme d'un triangle cicular link
-#ifdef DRAWING1
-      t->Draw(NbSubDomTot-1);
-#endif
-
-      
-      HeapTriangle[i] =t ; 
-      HeapArete[i] = 3;
-
-      while (i >= 0) // boucle sur la pile
-	{ while ( HeapArete[i]--) // boucle sur les 3 aretes 
-	  { 
-	    int na =  HeapArete[i];
-	    Triangle * tc =  HeapTriangle[i]; // triangle courant
-	    if( ! tc->Locked(na)) // arete non frontiere
-	      {
-		Triangle * ta = tc->TriangleAdj(na) ; // næ triangle adjacent
-		if (ta->link == 0 ) // non deja chainer => on enpile
-		  { 
-		    i++;
-#ifdef DRAWING1
-		    ta->Draw(NbSubDomTot-1);
-#endif
-		    ta->link = t->link ;  // on chaine les triangles
-		    t->link = ta ;  // d'un meme sous domaine          
-		    HeapArete[i] = 3; // pour les 3 triangles adjacents
-		    HeapTriangle[i] = ta;
-		  }}
-	  } // deplie fin de boucle sur les 3 adjacences
-	i--;
-        }          
-    }      
-  }
-  
-  // supression de tous les sous domaine infini <=>  contient le sommet NULL
-  it =0;
-  NbOutT = 0;
-  while (it<nbt) {
-    if (triangles[it].link) 
-      { 
-	if (!( triangles[it](0) &&  triangles[it](1) &&  triangles[it](2) )) 
-	  {
-	    // infini triangle 
-	    NbSubDomTot --;
-	    //  cout << " triangle infini " << it << triangles[it] << endl;
-	    t=&triangles[it];
-	     NbOutT--;  // on fait un coup de trop. 
-	    while  (t){ // cout << Number(t) << " " << endl;
-	      NbOutT++;
-	      t1=t;
-	      t=t->link;
-	      t1->link=0;}//while (t)
-	  }
-      }   
-    it++;} // end while (it<nbt)
-   if (nbt == NbOutT ||  !NbSubDomTot) 
-     {
-       cout << "\n error : " <<  NbOutT << " " << NbSubDomTot <<" " << nbt << endl;
-       cerr << "Error: The boundary is not close => All triangles are outside " << endl;
-       MeshError(888,this);
-     }
-
-  delete [] HeapArete;
-  delete [] HeapTriangle;
-  
-  
-  if (OutSide|| !Gh.subdomains || !Gh.NbSubDomains ) 
-    { // No geom sub domain
-      Int4 i;
-      if (subdomains) delete [] subdomains;
-      subdomains = new SubDomain[ NbSubDomTot];
-      NbSubDomains=  NbSubDomTot;
-      for ( i=0;i<NbSubDomains;i++) {
-	subdomains[i].head=NULL;
-        subdomains[i].ref=i+1;
-	}
-      Int4 * mark = new Int4[nbt];
-      for (it=0;it<nbt;it++)
-	mark[it]=triangles[it].link ? -1 : -2;
-      
-      it =0;
-      k = 0;
-      while (it<nbt) {
-	if (mark[it] == -1) {
-	  t1 = & triangles[it];
-	  t = t1->link;
-	  mark[it]=k;
-#ifdef DRAWING1  
-	  t1->Draw(k);
-#endif
-	  subdomains[k].head = t1;
-	  // cout << " New -- " << Number(t1) << " " << it << endl;
-	  do {// cout << " k " << k << " " << Number(t) << endl;
-	    mark[Number(t)]=k;
-#ifdef DRAWING1  
-	    t->Draw(k);
-#endif
-	    t=t->link;
-	  } while (t!=t1);
-#ifdef DRAWING1  
-	  t1->Draw(k);
-#endif
-	  mark[it]=k++;}
-	//    else if(mark[it] == -2 ) triangles[it].Draw(999);
-	it++;} // end white (it<nbt)
-      assert(k== NbSubDomains);
-      if(OutSide) 
-	{
-	  //  to remove all the sub domain by parity adjacents
-	  //  because in this case we have only the true boundary edge
-	  // so teh boundary is manifold
-	  Int4 nbk = NbSubDomains;
-	  while (nbk)
-	    for (it=0;it<nbt && nbk ;it++)
-	      for (int na=0;na<3 && nbk ;na++)
-		{
-		  Triangle *ta = triangles[it].TriangleAdj(na);
-		  Int4 kl = ta ? mark[Number(ta)] : -2;
-		  Int4 kr = mark[it];
-		  if(kr !=kl) {
-		    //cout << kl << " " << kr << " rl "  << subdomains[kl].ref
-		    // << " rr " << subdomains[kr].ref ;
-		    if (kl >=0 && subdomains[kl].ref <0 && kr >=0 && subdomains[kr].ref>=0)
-		      nbk--,subdomains[kr].ref=subdomains[kl].ref-1;
-		    if (kr >=0 && subdomains[kr].ref <0 && kl >=0 && subdomains[kl].ref>=0)
-		      nbk--,subdomains[kl].ref=subdomains[kr].ref-1;
-		    if(kr<0 && kl >=0 && subdomains[kl].ref>=0)
-		      nbk--,subdomains[kl].ref=-1;
-		    if(kl<0 && kr >=0 && subdomains[kr].ref>=0)
-		      nbk--,subdomains[kr].ref=-1;
-		    //   cout << " after \t "   
-		    //	 << kl << subdomains[kl].ref << " rr " << kr 
-		    // << subdomains[kr].ref << endl;
-		  }
-		}
-	  //  cout << subdomains[0].ref << subdomains[1].ref << endl;
-	  Int4  j=0;
-	  for ( i=0;i<NbSubDomains;i++)
-	    if((-subdomains[i].ref) %2) { // good 
-	      //cout << " sudom ok  = " << i << " " << subdomains[i].ref
-	      // << " " << (-subdomains[i].ref) %2 << endl;
-	      if(i != j) 
-		Exchange(subdomains[i],subdomains[j]);
-	      j++;}
-	    else
-	      { //cout << " remove sub domain " << i << endl;
-		t= subdomains[i].head;
-		while  (t){// cout << Number(t) << " " << endl;
-		  NbOutT++;
-		  t1=t;
-		  t=t->link;
-		  t1->link=0;}//while (t)
-	      }
-	  
-	  if(verbosity>4)
-	    cout << " Number of remove sub domain (OutSideMesh) =" << NbSubDomains-j << endl;
-	  NbSubDomains=j;
-	}
-
-      delete []  mark; 
-      
+    if (verbosity >2)
+    {
+	if (OutSide)
+	    cout << " -- Find all external sub-domain ";	
+	else
+	    cout << " -- Find all internal sub-domain ";
+	
     }
-  else
-    { // find the head for all sub domaine
-      if (Gh.NbSubDomains != NbSubDomains && subdomains)
-	delete [] subdomains, subdomains=0;
-      if (! subdomains  ) 
-	subdomains = new SubDomain[ Gh.NbSubDomains];
-      NbSubDomains =Gh.NbSubDomains;
-      if(verbosity>4)
-      cout << "     find the " << NbSubDomains << " sub domain " << endl;
-      Int4 err=0;
-       ReMakeTriangleContainingTheVertex();
-      Int4 * mark = new Int4[nbt];
-      Edge **GeometricalEdgetoEdge = MakeGeometricalEdgeToEdge();
-        
-      for (it=0;it<nbt;it++)
-        mark[it]=triangles[it].link ? -1 : -2;
-      Int4 inew =0;
-      for (Int4 i=0;i<NbSubDomains;i++) {
-        GeometricalEdge &eg = *Gh.subdomains[i].edge;
-	subdomains[i].ref = Gh.subdomains[i].ref;
-        // by carefull is not easy to find a edge create from a GeometricalEdge 
-        // see routine MakeGeometricalEdgeToEdge
-        Edge &e = *GeometricalEdgetoEdge[Gh.Number(eg)];
-        assert(&e);
-        Vertex * v0 =  e(0),*v1 = e(1);
-	Triangle *t  = v0->t;
-	int sens = Gh.subdomains[i].sens;
-	// test if ge and e is in the same sens 
-	//	cout << " geom edge = " <<  Gh.Number(eg) <<" @" << &eg << " ref = " << subdomains[i].ref 
-	//     << " ref edge =" << eg.ref << " sens " << sens ;
-	if (((eg[0].r-eg[1].r),(e[0].r-e[1].r))<0)
-	  sens = -sens ;
-	subdomains[i].sens = sens;
-	subdomains[i].edge = &e;
-	//	cout << " sens " << sens << " in geom " << eg[0].r << eg[1].r << " in mesh  " << e[0].r << e[1].r << endl;
-	//	cout << "  v0 , v1 = " << Number(v0) << " "  << Number(v1) << endl;
-        assert(t && sens);
-
-	TriangleAdjacent  ta(t,EdgesVertexTriangle[v0->vint][0]);// previous edges
-	while (1) {
-         assert( v0 == ta.EdgeVertex(1) );
-	 //	 cout << " recherche " << Number( ta.EdgeVertex(0)) << endl;
-         if (ta.EdgeVertex(0) == v1) { // ok we find the edge
-           if (sens>0)  
-             subdomains[i].head=t=Adj(ta);
-           else 
-             subdomains[i].head=t=ta;
-	   //cout << "      triangle  =" << Number(t) << " = " << (*t)[0].r <<  (*t)[1].r <<  (*t)[2].r << endl;
-           if(t<triangles || t >= triangles+nbt || t->det < 0) {
-              cerr << " Error in the def of sub domain : Bad sens " << i << " " << "Edge " << Gh.Number(eg) 
-                   <<" "<< sens << endl;  
-              err++;
-              break;}
-           Int4 it = Number(t);
-           if (mark[it] >=0) {
-            if(verbosity>10)
-	     cerr << "     Warning: the sub domain " << i << " ref = " << subdomains[i].ref 
-		  << " is previouly defined with "  <<mark[it] << " ref = " << subdomains[mark[it]].ref
-		  << " skip this def " << endl;
-           	break;}
-           if(i != inew) 
-             Exchange(subdomains[i],subdomains[inew]);
-           inew++;
-           Triangle *tt=t;
-	   Int4 kkk=0;
-           do {
-	     kkk++;
-	     assert(mark[Number(tt)]<0);
+    // if (verbosity > 4) cout << " OutSide=" << OutSide << endl;
+    short * HeapArete = new short[nbt];
+    Triangle  **  HeapTriangle = new Triangle*  [nbt];
+    Triangle *t,*t1;
+    Int4 k,it;
+    
+    for (Int4 itt=0;itt<nbt;itt++) 
+	triangles[itt].link=0; // par defaut pas de couleur
 #ifdef DRAWING1
-	     tt->Draw(i);
+    reffecran();
 #endif
-             mark[Number(tt)]=i;
-	     tt=tt->link;
-           } while (tt!=t);
-	   if(verbosity>7)
-	   cout << "     Nb de triangles dans le sous domaine " << i << " de ref " << subdomains[i].ref << " = " << kkk << endl;
-           break;}
-         ta = Previous(Adj(ta));         
-         if(t == (Triangle *) ta) {
-           err++;
-         	cerr << " Error in the def of sub domain " << i 
-         	     << " edge=" << Gh.Number(eg) << " " << sens << endl;
-           break;}
-	 //         cout << " NB of remove subdomain " << NbSubDomTot-NbSubDomains<< endl;
-         
+    
+    Int4  NbSubDomTot =0;
+    for ( it=0;it<nbt;it++)  { 
+	if ( ! triangles[it].link  ) {
+	    t = triangles + it;
+	    NbSubDomTot++;; // new composante connexe
+	    Int4 i = 0; // niveau de la pile 
+	    t->link = t ; // sd forme d'un triangle cicular link
+#ifdef DRAWING1
+	    t->Draw(NbSubDomTot-1);
+#endif
+	    
+	    
+	    HeapTriangle[i] =t ; 
+	    HeapArete[i] = 3;
+	    
+	    while (i >= 0) // boucle sur la pile
+	    { while ( HeapArete[i]--) // boucle sur les 3 aretes 
+	    { 
+		int na =  HeapArete[i];
+		Triangle * tc =  HeapTriangle[i]; // triangle courant
+		if( ! tc->Locked(na)) // arete non frontiere
+		{
+		    Triangle * ta = tc->TriangleAdj(na) ; // næ triangle adjacent
+		    if (ta->link == 0 ) // non deja chainer => on enpile
+		    { 
+			i++;
+#ifdef DRAWING1
+			ta->Draw(NbSubDomTot-1);
+#endif
+			ta->link = t->link ;  // on chaine les triangles
+			t->link = ta ;  // d'un meme sous domaine          
+			HeapArete[i] = 3; // pour les 3 triangles adjacents
+			HeapTriangle[i] = ta;
+		    }}
+	    } // deplie fin de boucle sur les 3 adjacences
+		i--;
+	    }          
+	}      
+    }
+    
+    // supression de tous les sous domaine infini <=>  contient le sommet NULL
+    it =0;
+    NbOutT = 0;
+    while (it<nbt) {
+	if (triangles[it].link) 
+	{ 
+	    if (!( triangles[it](0) &&  triangles[it](1) &&  triangles[it](2) )) 
+	    {
+		// infini triangle 
+		NbSubDomTot --;
+		//  cout << " triangle infini " << it << triangles[it] << endl;
+		t=&triangles[it];
+		NbOutT--;  // on fait un coup de trop. 
+		while  (t){ // cout << Number(t) << " " << endl;
+		    NbOutT++;
+		    t1=t;
+		    t=t->link;
+		    t1->link=0;}//while (t)
+	    }
+	}   
+	it++;} // end while (it<nbt)
+    if (nbt == NbOutT ||  !NbSubDomTot) 
+    {
+	cout << "\n error : " <<  NbOutT << " " << NbSubDomTot <<" " << nbt << endl;
+	cerr << "Error: The boundary is not close => All triangles are outside " << endl;
+	MeshError(888,this);
+    }
+    
+    delete [] HeapArete;
+    delete [] HeapTriangle;
+    
+    
+    if (OutSide|| !Gh.subdomains || !Gh.NbSubDomains ) 
+    { // No geom sub domain
+	Int4 i;
+	if (subdomains) delete [] subdomains;
+	subdomains = new SubDomain[ NbSubDomTot];
+	NbSubDomains=  NbSubDomTot;
+	for ( i=0;i<NbSubDomains;i++) {
+	    subdomains[i].head=NULL;
+	    subdomains[i].ref=i+1;
+	}
+	Int4 * mark = new Int4[nbt];
+	for (it=0;it<nbt;it++)
+	    mark[it]=triangles[it].link ? -1 : -2;
+	
+	it =0;
+	k = 0;
+	while (it<nbt) {
+	    if (mark[it] == -1) {
+		t1 = & triangles[it];
+		t = t1->link;
+		mark[it]=k;
+#ifdef DRAWING1  
+		t1->Draw(k);
+#endif
+		subdomains[k].head = t1;
+		// cout << " New -- " << Number(t1) << " " << it << endl;
+		do {// cout << " k " << k << " " << Number(t) << endl;
+		    mark[Number(t)]=k;
+#ifdef DRAWING1  
+		    t->Draw(k);
+#endif
+		    t=t->link;
+		} while (t!=t1);
+#ifdef DRAWING1  
+		t1->Draw(k);
+#endif
+		mark[it]=k++;}
+	    //    else if(mark[it] == -2 ) triangles[it].Draw(999);
+	    it++;} // end white (it<nbt)
+	assert(k== NbSubDomains);
+	if(OutSide) 
+	{
+	    //  to remove all the sub domain by parity adjacents
+	    //  because in this case we have only the true boundary edge
+	    // so teh boundary is manifold
+	    Int4 nbk = NbSubDomains;
+	    while (nbk)
+		for (it=0;it<nbt && nbk ;it++)
+		    for (int na=0;na<3 && nbk ;na++)
+		    {
+			Triangle *ta = triangles[it].TriangleAdj(na);
+			Int4 kl = ta ? mark[Number(ta)] : -2;
+			Int4 kr = mark[it];
+			if(kr !=kl) {
+			    //cout << kl << " " << kr << " rl "  << subdomains[kl].ref
+			    // << " rr " << subdomains[kr].ref ;
+			    if (kl >=0 && subdomains[kl].ref <0 && kr >=0 && subdomains[kr].ref>=0)
+				nbk--,subdomains[kr].ref=subdomains[kl].ref-1;
+			    if (kr >=0 && subdomains[kr].ref <0 && kl >=0 && subdomains[kl].ref>=0)
+				nbk--,subdomains[kl].ref=subdomains[kr].ref-1;
+			    if(kr<0 && kl >=0 && subdomains[kl].ref>=0)
+				nbk--,subdomains[kl].ref=-1;
+			    if(kl<0 && kr >=0 && subdomains[kr].ref>=0)
+				nbk--,subdomains[kr].ref=-1;
+			    //   cout << " after \t "   
+			    //	 << kl << subdomains[kl].ref << " rr " << kr 
+			    // << subdomains[kr].ref << endl;
+			}
+		    }
+			//  cout << subdomains[0].ref << subdomains[1].ref << endl;
+			Int4  j=0;
+	    for ( i=0;i<NbSubDomains;i++)
+		if((-subdomains[i].ref) %2) { // good 
+					      //cout << " sudom ok  = " << i << " " << subdomains[i].ref
+					      // << " " << (-subdomains[i].ref) %2 << endl;
+		    if(i != j) 
+			Exchange(subdomains[i],subdomains[j]);
+		    j++;}
+		    else
+		    { //cout << " remove sub domain " << i << endl;
+			t= subdomains[i].head;
+			while  (t){// cout << Number(t) << " " << endl;
+			    NbOutT++;
+			    t1=t;
+			    t=t->link;
+			    t1->link=0;}//while (t)
+		    }
+		    
+		    if(verbosity>4)
+			cout << " Number of remove sub domain (OutSideMesh) =" << NbSubDomains-j << endl;
+	    NbSubDomains=j;
 	}
 	
-      }
-      if (err) MeshError(777,this);
-      
-      if (inew < NbSubDomains) {
-	if (verbosity>5) 
-        cout << "     Warning: We remove " << NbSubDomains-inew << " SubDomains " << endl;
-        NbSubDomains=inew;}
-      
-
-      for (it=0;it<nbt;it++)
-        if ( mark[it] ==-1 ) 
-          NbOutT++,triangles[it].link =0;
-      delete [] GeometricalEdgetoEdge;
-      delete [] mark;
-
-     }
+	delete []  mark; 
+	
+    }
+    else
+    { // find the head for all sub domaine
+	if (Gh.NbSubDomains != NbSubDomains && subdomains)
+	    delete [] subdomains, subdomains=0;
+	if (! subdomains  ) 
+	    subdomains = new SubDomain[ Gh.NbSubDomains];
+	NbSubDomains =Gh.NbSubDomains;
+	if(verbosity>4)
+	    cout << "     find the " << NbSubDomains << " sub domain " << endl;
+	Int4 err=0;
+	ReMakeTriangleContainingTheVertex();
+	Int4 * mark = new Int4[nbt];
+	Edge **GeometricalEdgetoEdge = MakeGeometricalEdgeToEdge();
+        
+	for (it=0;it<nbt;it++)
+	    mark[it]=triangles[it].link ? -1 : -2;
+	Int4 inew =0;
+	for (Int4 i=0;i<NbSubDomains;i++) 
+	{
+	    GeometricalEdge &eg = *Gh.subdomains[i].edge;
+	    subdomains[i].ref = Gh.subdomains[i].ref;
+	    int ssdlab = subdomains[i].ref;
+	    // by carefull is not easy to find a edge create from a GeometricalEdge 
+	    // see routine MakeGeometricalEdgeToEdge
+	    Edge &e = *GeometricalEdgetoEdge[Gh.Number(eg)];
+	    assert(&e);
+	    Vertex * v0 =  e(0),*v1 = e(1);
+	    Triangle *t  = v0->t;
+	    int sens = Gh.subdomains[i].sens;
+	    // test if ge and e is in the same sens 
+	    //	cout << " geom edge = " <<  Gh.Number(eg) <<" @" << &eg << " ref = " << subdomains[i].ref 
+	    //     << " ref edge =" << eg.ref << " sens " << sens ;
+	    if (((eg[0].r-eg[1].r),(e[0].r-e[1].r))<0)
+		sens = -sens ;
+	    subdomains[i].sens = sens;
+	    subdomains[i].edge = &e;
+	    //	cout << " sens " << sens << " in geom " << eg[0].r << eg[1].r << " in mesh  " << e[0].r << e[1].r << endl;
+	    //	cout << "  v0 , v1 = " << Number(v0) << " "  << Number(v1) << endl;
+	    assert(t && sens);
+	    
+	    TriangleAdjacent  ta(t,EdgesVertexTriangle[v0->vint][0]);// previous edges
+		
+	    while (1) 
+	    {
+		assert( v0 == ta.EdgeVertex(1) );
+		//	 cout << " recherche " << Number( ta.EdgeVertex(0)) << endl;
+		if (ta.EdgeVertex(0) == v1) { // ok we find the edge
+		    if (sens>0)  
+			subdomains[i].head=t=Adj(ta);
+		    else 
+			subdomains[i].head=t=ta;
+		    //cout << "      triangle  =" << Number(t) << " = " << (*t)[0].r <<  (*t)[1].r <<  (*t)[2].r << endl;
+		    if(t<triangles || t >= triangles+nbt || t->det < 0 
+		        || t->link == 0) // Ajoute aout 200 
+		     {
+			cerr << " Error in the def of sub domain "<<i
+			     << " form border " << NbSubDomains - i  << "/" << NbSubDomains
+			     << ": Bad sens  " << Gh.Number(eg) <<" "<< sens <<  endl;  
+			err++;
+			break;}
+		    Int4 it = Number(t);
+		    if (mark[it] >=0) {
+			if(verbosity>10)
+			    cerr << "     Warning: the sub domain " << i << " ref = " << subdomains[i].ref 
+				<< " is previouly defined with "  <<mark[it] << " ref = " << subdomains[mark[it]].ref
+				<< " skip this def " << endl;
+			break;}
+		    if(i != inew) 
+			Exchange(subdomains[i],subdomains[inew]);
+		    inew++;
+		    Triangle *tt=t;
+		    Int4 kkk=0;
+		    do 
+		    {
+			kkk++;
+			assert(mark[Number(tt)]<0);
+#ifdef DRAWING1
+			tt->Draw(i);
+#endif
+			mark[Number(tt)]=i;
+			tt=tt->link;
+		    } while (tt!=t);
+		    if(verbosity>7)
+			cout << "     Nb de triangles dans le sous domaine " << i << " de ref " << subdomains[i].ref << " = " << kkk << endl;
+		    break;}
+		ta = Previous(Adj(ta));         
+		if(t == (Triangle *) ta) {
+		    err++;
+		    cerr << " Error in the def of sub domain " << i 
+			<< " edge=" << Gh.Number(eg) << " " << sens << endl;
+		    break;}
+		//         cout << " NB of remove subdomain " << NbSubDomTot-NbSubDomains<< endl;
+		
+	    }
+		
+	}
+	if (err) MeshError(777,this);
+	
+	if (inew < NbSubDomains) {
+	    if (verbosity>5) 
+		cout << "     Warning: We remove " << NbSubDomains-inew << " SubDomains " << endl;
+	    NbSubDomains=inew;}
+	
+	
+	for (it=0;it<nbt;it++)
+	    if ( mark[it] ==-1 ) 
+		NbOutT++,triangles[it].link =0;
+	delete [] GeometricalEdgetoEdge;
+	delete [] mark;
+	
+    }
     
 #ifdef DRAWING1
-  inquire();
+    inquire();
 #endif
-  NbOutT=0;
-  for (it=0;it<nbt;it++) 
-    if(!triangles[it].link)  NbOutT++;
-  if (verbosity> 4)
-    cout << "    " ;
-  if (verbosity> 2)
-    cout << " Nb of Sub borned Domain  = " <<  NbSubDomTot << " NbOutTriangles = " << NbOutT <<endl;
+    NbOutT=0;
+    for (it=0;it<nbt;it++) 
+	if(!triangles[it].link)  NbOutT++;
+    if (verbosity> 4)
+	cout << "    " ;
+    if (verbosity> 2)
+	cout << " Nb of Sub borned Domain  = " <<  NbSubDomTot << " NbOutTriangles = " << NbOutT <<endl;
 #ifdef DRAWING1
-  inquire();
+    inquire();
 #endif
-
-//#undef DRAWING1
-  
-  
+    
+    //#undef DRAWING1
+    
+    
 }
 void Triangles::ReNumberingVertex(Int4 * renu)
 {
