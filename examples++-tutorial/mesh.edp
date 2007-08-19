@@ -1,7 +1,7 @@
 {
  // build from bamg geometrie
 
-  { // byild the geom file
+  { // build the geom file
     ofstream ff("g.mesh");
     int n = 8;
     real h = 0.1;
@@ -21,7 +21,7 @@
       ff << h << endl;
   }
   
-  mesh Th=buildmesh("g.mesh");
+  mesh Th=buildmesh("g.mesh",nbvx=100000);
   plot(Th,wait=1);
 }
 
@@ -192,22 +192,29 @@ plot(rh,ps="lshape.eps");
       cout << i << " " << j << " Th[i][j] = "
 	   << Th[i][j] << "  x = "<< Th[i][j].x  << " , y= "<< Th[i][j].y 
 	   << ",  label=" << Th[i][j].label << endl;
-   int nbvertices=Th.nv;
-//  FH: comment: 
-//   Th(i)  will be return in a futur version the vextex i of Th
-
-// To Day:   this hack works: to get x,y of vertex i
-// remark: i can be set with i= Th[it][j] 
-// the idea is to build de interpolation of x and y function
-// with 2 array now given i-> x and i-> y.
+	    
+//   Th(i)   return   the vextex i of Th
+//   Th[k]   return   the triangle k of Th.
 
   fespace femp1(Th,P1);
   femp1 Thx=x,Thy=y; 
+  // get vertices information : 
+  int nbvertices=Th.nv;
   cout << " nb of vertices = " << nbvertices << endl;
   for (int i=0;i<nbvertices;i++)
-	cout << i  << " : " << Thx[][i] << " " << Thy[][i] << endl;	 
+	cout << "Th(" <<i  << ") : "   // << endl;	
+	     << Th(i).x << " " << Th(i).y  << " " << Th(i).label // version 2.19 
+	     << "       old method: " << Thx[][i] << " " << Thy[][i] << endl;
 
-  //Hack  to get a triangle contening point x,y
+// method to find information of point (0.55,0.6) 
+  int it00 = Th(0.55,0.6).nuTriangle;// then triangle numbe 
+  int nr00 = Th(0.55,0.6).region;
+  
+  real area00 = Th[it00].area; // new in version 2.19 
+  real nrr00 = Th[it00].region; // new in version 2.19 
+  real nll00 = Th[it00].label; // same as region in this case.
+      
+ //Hack  to get a triangle contening point x,y
   //     or   region number
   // -----------------------------------------
   fespace femp0(Th,P0);
@@ -218,15 +225,13 @@ plot(rh,ps="lshape.eps");
   //  inquire 
   int it0=nuT(0.55,0.6); //  number of triangle Th's contening point (0.55,0,6);
   int nr0=nuReg(0.55,0.6); //  number of region of Th mesh contening point (0.55,0,6);
-  // new methode if   version > 1.450007
-  int it00 = Th(0.55,0.6).nuTriangle;
-  int nr00 = Th(0.55,0.6).region;
   // dump  
-  cout << "  point (0.55,0,6) :triangle number " << it0 << " " << it00 
-       << ", region = " << nr0 << " == " << nr00 << endl;
+  cout << "  point (0.55,0,6) :triangle number " << it00 << " " << it00 
+       << ", region = " << nr0 << " == " << nr00 << ",  area K " << area00 << endl;
 
+  // new method if   version > 1.450007  
 }
-//   test to catch bogus boundary
+//   test to catch bogus boundary ( just a test)
 {
 int err;
 real c0,c1;

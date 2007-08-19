@@ -3390,6 +3390,7 @@ pfer get_element(pferarray const & a, long const & n)
 {
   return pfer( *(*a.first)[n],a.second);
 }
+
 //  complex case 
 pfecbase* get_element(pfecbasearray *const & a, long const & n)
 {
@@ -3408,6 +3409,16 @@ lgElement get_element(pmesh const & a, long const & n)
 lgElement get_element(pmesh *const & a, long const & n)
 {
   return lgElement(*a,n);
+}
+
+
+lgVertex get_vertex(pmesh const & a, long const & n)
+{
+    return lgVertex(a,n);
+}
+lgVertex get_vertex(pmesh *const & a, long const & n)
+{
+    return lgVertex(*a,n);
 }
 lgVertex get_element(lgElement const & a, long const & n)
 {
@@ -3430,6 +3441,11 @@ long getlab(lgElement const & a)
 {
   return a.lab();
 }
+double getarea(lgElement const & a)
+{
+    return a.area();
+}
+
 /*
 pmesh* get_element(pmesharray *const & a, long const & n)
 {
@@ -3742,12 +3758,16 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  
  Add<pmesh>("[","",new OneOperator2_<lgElement,pmesh,long>(get_element));
  Add<pmesh*>("[","",new OneOperator2_<lgElement,pmesh*,long>(get_element));
+ Add<pmesh>("(","",new OneOperator2_<lgVertex,pmesh,long>(get_vertex));
+ Add<pmesh*>("(","",new OneOperator2_<lgVertex,pmesh*,long>(get_vertex));
 
  Add<lgElement>("[","",new OneOperator2_<lgVertex,lgElement,long>(get_element));
  Add<lgVertex>("x",".",new OneOperator1_<R,lgVertex>(getx));
  Add<lgVertex>("y",".",new OneOperator1_<R,lgVertex>(gety));
  Add<lgVertex>("label",".",new OneOperator1_<long,lgVertex>(getlab));
  Add<lgElement>("label",".",new OneOperator1_<long,lgElement>(getlab));
+ Add<lgElement>("region",".",new OneOperator1_<long,lgElement>(getlab));
+ Add<lgElement>("area",".",new OneOperator1_<double,lgElement>(getarea));
  
  
 //  new type  
