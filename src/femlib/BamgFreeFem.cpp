@@ -752,14 +752,14 @@ Fem2D::Mesh *  ReadMeshbamg( string * const & s) {
   return m;
 }
 
-Fem2D::Mesh *  buildmeshbamg( string * const & s) {
+Fem2D::Mesh *  buildmeshbamg( string * const & s, int nbvxin) {
 
   using bamg::Triangles;
   using bamg::Geometry;
   Geometry Gh(s->c_str());
   double	 hmin = Max(hmin,Gh.MinimalHmin());
   double	 hmax = Min(hmax,Gh.MaximalHmax());
-  int nbvx = 5000; 
+  int nbvx = nbvxin ? nbvxin : ((Gh.nbv*Gh.nbv)/9 +1000); 
   Triangles * bTh=  new Triangles(nbvx,Gh);
   // bTh->inquire();
   Fem2D::Mesh * m=bamg2msh(bTh,false);// no renum

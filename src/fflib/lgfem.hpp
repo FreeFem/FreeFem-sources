@@ -74,6 +74,7 @@ class lgElement { public:
   operator int() const { Check(); return (* pTh)(k);} 
   lgVertex operator [](const long & i) const { Check(); return lgVertex(pTh,&(*k)[i]);}   
   long lab() const {Check() ; return k ? k->lab : 0;}
+  double area() const {Check() ; return k->area ;}
   long n() const { return k ? 3: 0 ;}
 
 };

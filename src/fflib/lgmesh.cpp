@@ -88,8 +88,37 @@ class classBuildMesh :  public E_F0mps { public:
 basicAC_F0::name_and_type  classBuildMesh::name_param[]= {
   {  "nbvx", &typeid(long) }
 };
+// modif aout 2007
+class BuildMeshFile :  public E_F0mps { public:  
+    
+    typedef pmesh  Result;
+    
+    static basicAC_F0::name_and_type name_param[] ;
+    static const int n_name_param =1;
+    
+    Expression nargs[n_name_param];
+    
+    Expression getfilename;
+    
+    long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+    
+    BuildMeshFile(const basicAC_F0 & args) 
+    {   
+	args.SetNameParam(n_name_param,name_param,nargs);
+	getfilename=to<string* >(args[0]); 
+    }   
+    
+    static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<string *>());}
+    static  E_F0 * f(const basicAC_F0 & args){ return new BuildMeshFile(args);} 
+    AnyType operator()(Stack s) const ;
+    operator aType () const { return atype<Result>();} 
+    
+};
 
-
+basicAC_F0::name_and_type  BuildMeshFile::name_param[]= {
+    {  "nbvx", &typeid(long) }
+};
+// fin modif 2007 
 
 class MoveMesh :  public E_F0mps { public:  
  
@@ -337,10 +366,18 @@ extern Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool ju
 
 AnyType classBuildMesh::operator()(Stack stack)  const { 
     const E_BorderN * borders = GetAny<const E_BorderN *>((*getborders)(stack));
-   long  nbtx         = arg(0,stack,0); 
-   ffassert(   nbtx >= 0);
-   return SetAny<pmesh>(BuildMesh(stack,borders,false,nbtx));
+   long  nbvx         = arg(0,stack,0); 
+   ffassert(   nbvx >= 0);
+   return SetAny<pmesh>(BuildMesh(stack,borders,false,nbvx));
 
+}
+
+AnyType BuildMeshFile::operator()(Stack stack)  const { 
+     string*  filename = GetAny<string* >((*getfilename)(stack));
+    long  nbvx         = arg(0,stack,0); 
+    ffassert(   nbvx >= 0);
+    return SetAny<pmesh>(buildmeshbamg( filename,nbvx));
+    
 }
 
 AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const { 
@@ -1449,6 +1486,9 @@ void init_lgmesh() {
     bamg::MeshIstreamErrorHandler = MeshErrorIO;
 //   Global.Add("buildmesh","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMesh));
    Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh>);
+   Global.Add("buildmesh","(",new OneOperatorCode<BuildMeshFile>);
+//   Global.Add("buildmesh","(",new OneOperator1_<pmesh,string*>(buildmeshbamg));
+   
    Global.Add("buildmeshborder","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMeshBorder));    
    Global.Add("adaptmesh","(",new OneOperatorCode<Adaptation>);
    Global.Add("movemesh","(",new OneOperatorCode<MoveMesh>);
@@ -1459,7 +1499,6 @@ void init_lgmesh() {
    Global.Add("savemesh","(",new OneOperatorCode<SaveMesh>);
    Global.Add("trunc","(", new Op_trunc_mesh);
    Global.Add("readmesh","(",new OneOperator1_<pmesh,string*>(ReadMeshbamg));
-   Global.Add("buildmesh","(",new OneOperator1_<pmesh,string*>(buildmeshbamg));
    Global.Add("emptymesh","(",new OneOperator1_<pmesh,pmesh>(EmptyTheMesh));
    Global.Add("emptymesh","(",new OneOperator2_<pmesh,pmesh,KN<long> *>(EmptyTheMesh));
    Global.Add("triangulate","(",new OneOperator1_<pmesh,string*>(ReadTriangulate));

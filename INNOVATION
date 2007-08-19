@@ -1,3 +1,9 @@
+v 2.19   (august, 19  2007)
+  - correct buildmesh from geometry file and add nbvx= named parameter
+    to infore the maximal number of verter in a mesh.
+  - add  Th[k].area to get the area of the k-th triangle of Th.
+  - add  Th[k].region to get the region number (label)  of the k-th triangle of Th.
+
 v 2.18-1 (august, 2007)
   - correct old bug under Windows: the std input stream  now works (cin) 
 v 2.18  (july, 19, 2007)
