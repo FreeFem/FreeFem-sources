@@ -1069,6 +1069,8 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
       ffassert(op);
       precon = op->Find("(",ArrayOfaType(atype<KN<double>* >(),false));
     }
+  //  for the gestion of the PTR. 
+  WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007 
   
   Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
   if  ( (pUh != A.pUh ) || (pVh != A.pVh  || A.typemat.t != typemat.t) )

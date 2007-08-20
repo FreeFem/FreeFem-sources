@@ -2241,7 +2241,9 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   if (nargs[10]) tol_pivot= GetAny<double>((*nargs[10])(stack));
   if (nargs[11]) tol_pivot_sym= GetAny<double>((*nargs[11])(stack));
   if (nargs[12]) itmax = GetAny<long>((*nargs[12])(stack)); //  fevr 2007
-  
+  //  for the gestion of the PTR. 
+  WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007 
+
   bool sym = typemat->sym;
   
   list<C_F0>::const_iterator ii,ib=op->largs.begin(),
