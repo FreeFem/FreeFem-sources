@@ -91,28 +91,28 @@ class MeshPointBase { public:
      N.y=0;   
      N.z=0;   
      VF=0;  
-     int l0(0),l1(0),l2(0),ke(-1),kk(0);
-     if ( P_Hat.x<1.e-6) l1=1,ke=1,kk++;
-     if ( P_Hat.y<1.e-6) l2=1,ke=2,kk++;
-     if ( P_Hat.y+P_Hat.x>0.999999) l0=1,ke=0,kk++;     
+     int ll[3],kk(0);
+     if ( P_Hat.x<1.e-6) ll[kk++]=1;
+     if ( P_Hat.y<1.e-6) ll[kk++]=2;
+     if ( P_Hat.y+P_Hat.x>0.999999) ll[kk++]=0;    
      if (kk==0) label=0;
      else if (kk==2)
       { 
-      if (!l0) label=(*T)[0].lab;
-      else if (!l1) label=(*T)[1].lab;
-      else if (!l2) label=(*T)[2].lab;
+	 v = 3-ll[0]-ll[1];// 3 = 0+1+2 sommet oppose
+        label=(*T)[v].lab;
       } 
      else  {
+       e = ll[0]; 
        int i1,i2;
-       Th->VerticesNumberOfEdge(K.T,ke,i1,i2);
+       Th->VerticesNumberOfEdge(K.T,e,i1,i2);
        const BoundaryEdge * be=Th->TheBoundaryEdge(i1,i2);
        label= be ? be->lab : 0;
       // R2 E(K.T.Edge(ke));
       // (R2 &) N = E.perp()/Norme2(E);
        
    
-      //cout << "lab =" <<  label << " " << ke << " " <<  kk << " " << P_Hat 
-        //   << ": " <<  K.number << " , " << (R2) P << " " << N << endl;
+      //cout << "lab =" <<  label << " " << e << " " <<  kk << " " << P_Hat 
+       //    << ": " <<  K.number << " , " << (R2) P << " " << N << endl;
       }
    
      t=(*Th)(T);
@@ -227,7 +227,7 @@ class MeshPoint : public MeshPointBase { public:
       return T == mp.T &&  P.x == mp.P.x && P.y == mp.P.y 
           && P.z == mp.P.z ;}
   bool  SetAdj() {
-     assert(Th && T && t >=0 && e>=0);
+     if (!(Th && T && t >=0 && e>=0)) return false;//  modif 
      if(VF==0)
      {
      int ieo=e,to=t,ie=e;

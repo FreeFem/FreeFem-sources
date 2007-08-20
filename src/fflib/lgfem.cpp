@@ -3378,7 +3378,7 @@ class MeanOp : public E_F0mps  { public:
            if ( mp->SetAdj() )
              rd = GetAny<A>((*a)(stack));  
            *mp=smp;         
-           return  SetAny<R>(rg-rd);
+           return  SetAny<R>((rg+rd)*0.5);
         }
        MeanOp(Expression aa) : a(aa) {} 
     };
