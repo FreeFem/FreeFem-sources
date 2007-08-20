@@ -2817,6 +2817,7 @@ AnyType Plot::operator()(Stack s) const  {
         else nbcolors = 0;
     }
     if (nargs[16]) drawborder= GetAny<bool>((*nargs[16])(s));
+    //  for the gestion of the PTR. 
     WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH aout 2007 
 	
     setgrey(grey);
