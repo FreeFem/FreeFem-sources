@@ -104,6 +104,26 @@
 \end{multicols}
 \end{figure}
 }% end twoplot macro
+\def\threeplot[#1]#2#3#4#5#6#7{
+\begin{figure}[hbt]
+\begin{multicols}{3}
+\begin{center}
+    \includegraphics*[#1]{#2}
+    \caption{\label{#2}#3}
+\end{center}
+
+\begin{center}
+    \includegraphics*[#1]{#4}
+    \caption{\label{#4}#5}
+\end{center}
+
+\begin{center}
+    \includegraphics*[#1]{#6}
+    \caption{\label{#6}#7}
+\end{center}
+\end{multicols}
+\end{figure}
+}% end threeplot macro
 
 \newtheorem{note}{\textbf{Note}}
 \newtheorem{bug}{\textbf{Bug:}}

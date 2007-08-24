@@ -39,7 +39,6 @@ cpfigs/%.eps:plots/%.jpg
 cpfigs/%.eps:plots/%.pdf
 	pdf2ps $^  $@
 
- 
 ## ls */*.eps|column -c 80|sed 's/$/ \\/' 
 FIGS_EPS=  \
 figures/1stCOD.eps              figures/LastCOD.eps             figures/cfunc1.eps \
@@ -94,7 +93,8 @@ plots/medit2.eps  		plots/threehsv.eps		plots/hsv.eps \
 plots/crimpson.eps              plots/J-bfgs.eps		plots/u-bfgs.eps \
 plots/csSnapOld.eps \
 plots/logo.eps  plots/arei-Thu.eps      plots/arei-etak.eps \
-plots/overlapTh.eps plots/us-ug.eps plots/vs-vg.eps 
+plots/overlapTh.eps plots/us-ug.eps plots/vs-vg.eps  \
+plots/square-0.eps      plots/square-1.eps      plots/square-2.eps 
 #  Pour la page de garde FH
 FIGS_JPG=plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg  \
 figures/mi.jpg

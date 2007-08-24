@@ -4,7 +4,7 @@
 \usepackage{styles}
 \usepackage{txfonts}
 \usepackage{times}
-\def\VERSION{2.17-1}
+\def\VERSION{2.19}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -263,7 +263,7 @@ First under window we use  \texttt{cygwin} environment from
 
 ).
 
-\freefempp must be compiled and
+\freefempp must be compiled and<
 installed from the source archive. This archive is available from:
 
  To
@@ -1479,7 +1479,7 @@ Right:  first eigen state ($\lambda=(k/c)^2=19.4256$) close to $20$ of eigenvalu
 \end{figure}
 
 \subsection{Thermal Conduction}
-
+\label{ss Thermal Conduction}
 \paragraph{Summary}\emph{ Here we shall learn how to deal with a \x{
 time dependent} \x{parabolic} problem. We shall also show how to treat an
 \x{axisymmetric} problem  and show also how to deal with a \x{nonlinear problem}.}
@@ -2727,26 +2727,25 @@ Also \texttt{P.z} is reserved.
 
     \itemtt[hTriangle] gives the size of the current triangle \index{hTriangle}
 
-    \itemtt[nuTriangle] gives the index of the current triangle (integer).
+    \itemtt[nuTriangle] gives the index of the current triangle (int value).
     \index{nuTriangle}
 
-    \itemtt[nuEdge]  gives the index of the current edge in the triangle (integer).
+    \itemtt[nuEdge]  gives the index of the current edge in the triangle (int value).
     \index{nuEdge}
 
     \itemtt[nTonEdge] gives the number of adjacent triangle of the current
     edge (integer ).\index{nTonEdge}
 
-    \itemtt[area] give the area of the current triangle (real). \index{area}
+    \itemtt[area] give the area of the current triangle (real value). \index{area}
 
 \itemtt[cout]  is the standard output device (default is console).
 On MS-Windows, the standard output is only to console, in this time.
-  \Ostream
-\itemtt[cin]  is the standard input device (default is keyboard). (\Istream).
-On MS-Windows, this doesn't work).
+  \Ostream \index{cout}
+\itemtt[cin]  is the standard input device (default is keyboard). (\Istream value). \index{cin}
 \itemtt[endl] give the end of line in the input/output devices.
-\itemtt[true]   means ``true'' in  \Bool\  value.
-\itemtt[false]  means ``false'' in  \Bool\ value.
-\itemtt[pi]   is the \Real ~approximation value of $\pi$.
+\itemtt[true]   means ``true'' in  \Bool\  value. \index{true}
+\itemtt[false]  means ``false'' in  \Bool\ value. \index{false}
+\itemtt[pi]   is the \Real value  ~approximation value of $\pi$.\index{pi}
 \end{description}
 
 \subsection{System Commands}
@@ -3152,9 +3151,11 @@ c = 3;
 a[2]=0;
 d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] ,
 @cout << " d = ( a ? b : c )  is " << d << endl;
+tab2.sort; //  sort the array tab2  (version 2.18) 
 
 \eFF
 \index{array!resize}\index{resize}\index{max}\index{array!max} \index{min}\index{array!min}\index{sum}\index{array!sum}\index{array!?:}%modif FH
+\index{array!sort}
 produce the output
 \bFF
 2.15 1.03 size of tab = 10 min: 1.03  max:2.15 sum : 11.42
@@ -3226,7 +3227,8 @@ cout << " ||a||_infty = " <<  a.linfty << endl;//\index{array!.linfty}
 cout << " sum a_i     = " <<  a.sum    << endl;//\index{array!.sum}
 cout << " max a_i     = " <<  a.max    << endl;//\index{array!.max}
 cout << " min a_i     = " <<  a.min    << endl;//\index{array!.min}
-cout << " a'*a        = " <<  (a'*a)   << endl;//\index{dot product}
+cout << " a'*a        = " <<  (a'*a)   << endl;//\index{array!dot product}
+cout << " a quantile 0.2 = " <<  a.quantile(0.2) << endl; //\index{array!quantile}
 }
 \eFF
 produce the output
@@ -3293,9 +3295,19 @@ b/=a; b =5
  max a_i     = 4
  min a_i     = 1
  a'*a        = 41
+ a quantile 0.2 = 2
+
 \eFF
 
-
+\begin{note}
+ Quantiles are points taken at regular intervals from the cumulative distribution function of a random variable. Here the random is the array value. \index{quantile} 
+  
+ This  statisticial function \ttCC{a.quantile(q)} and commute $v$ of an array $a$ of size $n$ for a 
+ given number $q\in ]0,1[$  such than 
+     $$ \#\{ i / a[i] < v \} \sim q*n   $$
+     which is equivalent to 
+     $  v = a[q*n]$   when the array $a$ is sorted. 
+\end{note}
                                                                                                                              
 Example of array with renumbering    (version 2.3 or better) .
 The renumbering is always given by an integer array, and if a value in the array 
@@ -3689,7 +3701,7 @@ The \ttCC{@continue} statement will pass the part from
 \end{example}
 
 \subsection{\setS{Input/Output}}
-\index{cout}\index{cint}\index{ifstream}\index{ofstream}\index{endl}
+\index{cout}\index{cin}\index{ifstream}\index{ofstream}\index{endl}
 
 The syntax of input/output statements is similar  to \Cpp syntax. It
 uses \ttCC{@cout}, \ttCC{@cin}, \ttCC{@endl}, \ttCC{<<,>>}.
@@ -4063,57 +4075,73 @@ The following example explains methods to obtain mesh information.
 \index{triangle![]}\index{triangle!label}\index{triangle!label}
 \index{vertex!x}\index{vertex!y}\index{vertex!label}
 \bFF
-{  // get mesh information (version 1.37)
-  @mesh Th=square(2,2);
-  // get data of the mesh
-  @int nbtriangles=Th.nt;
-  @for (@int i=0;i<nbtriangles;i++)
-    @for (@int j=0; j <3; j++)
-      @cout << i << " " << j << " Th[i][j] = "
-           << Th[i][j] << "  x = "<< Th[i][j].x  << " , y= "<< Th[i][j].y
+{ // get mesh information (version 1.37)
+  mesh Th=square(2,2);
+  // get data of the mesh 
+  int nbtriangles=Th.nt;
+  cout << " nb of Triangles = " << nbtriangles << endl;
+  for (int i=0;i<nbtriangles;i++)
+    for (int j=0; j <3; j++)
+      cout << i << " " << j << " Th[i][j] = "
+           << Th[i][j] << "  x = "<< Th[i][j].x  << " , y= "<< Th[i][j].y 
            << ",  label=" << Th[i][j].label << endl;
+            
+//  \index{mesh!()}  Th(i)   return   the vextex i of Th\hfilll
+//  \index{mesh![]} Th[k]   return   the triangle k of Th\hfilll
 
-  // To this day:   this Hack works: to get x,y of vertex i \hfilll
-  // remark: i can be set with i= Th[it][j] \hfilll
-  // the idea is to build de interpolation of x and y function \hfilll
-  // with 2 array now given i -> x and i-> y. \hfilll
+  fespace femp1(Th,P1);
+  femp1 Thx=x,Thy=y; //  hack of get vertex coordinates
+  // get vertices information : 
+  int nbvertices=Th.nv;
+  cout << " nb of vertices = " << nbvertices << endl;
+  for (int i=0;i<nbvertices;i++)
+        cout << "Th(" <<i  << ") : "   // << endl;      
+             << Th(i).x << " " << Th(i).y  << " " << Th(i).label //v 2.19 
+             << "       old method: " << Thx[][i] << " " << Thy[][i] << endl;
 
-  @fespace femp1(Th,P1);
-  femp1 Thx=x,Thy=y;
-  @cout << " nb of vertices = " << nbvertices << endl;
-  @for (@int i=0;i<nbvertices;i++)
-        @cout << i  << " : " << Thx[][i] << " " << Thy[][i] << endl;
+// method to find information of point (0.55,0.6) 
 
-  //Hack  to get a triangle number of mesh containing point x,y \hfilll
-  //     or  region number \hfilll
-  // ----------------------------------------- \hfilll
-  @fespace femp0(Th,P0);
+  int it00 = Th(0.55,0.6).nuTriangle;// \index{point!triange}then triangle number
+  int nr00 = Th(0.55,0.6).region; // \index{region}\index{point!region}
+
+//  info of a triangle  
+  real area00 = Th[it00].area; // new in version 2.19  \index{triangle!area}
+  real nrr00 = Th[it00].region; // new in version 2.19   \index{triangle!region}
+  real nll00 = Th[it00].label; // same as region in this case.  \index{triangle!label}
+      
+
+//Hack  to get a triangle contening point x,y\hfilll
+//     or   region number (old method) \hfilll
+// ------------------------------------------------------- \hfilll
+  fespace femp0(Th,P0);
   femp0 nuT; // a P0 function  to get triangle numbering
-    @for (@int i=0;i<Th.nt;i++)
-     nuT[][i]=i;
+    for (int i=0;i<Th.nt;i++)
+     nuT[][i]=i; 
   femp0 nuReg=region; // a P0 function to get the region number
-  //  inquire
-  @int it0=nuT(0.55,0.6); //  number of triangle containing point (0.55,0,6);
-  @int nr0=nuReg(0.55,0.6); //  number of region of mesh containing point (0.55,0,6);
-  // new method if   version > 1.450007
-  @int it00 = Th(0.55,0.6).nuTriangle; // get the number of Th's triangle containing (0.55,0.6)
-  @int nr00 = Th(0.55,0.6).region;; // get the region  number of Th's triangle
-    // dump
-  @cout << "  point (0.55,0,6) :triangle number " << it0 << " " << it00
-       << ", region = " << nr0 << " == " << nr00 << endl;
-}
+  //  inquire 
+  int it0=nuT(0.55,0.6);//number of triangle Th's contening (0.55,0,6);
+  int nr0=nuReg(0.55,0.6);//number of region of Th's contening (0.55,0,6);
 
+
+ // dump  \hfilll
+ // ------------------------------------------------------- \hfilll
+ 
+  cout << "  point (0.55,0,6) :triangle number " << it00 << " " << it00 
+       << ", region = " << nr0 << " == " << nr00 << ",  area K " << area00 << endl;
+  
+}
 \eFF
 the output is:
 \bFF
+ -- square mesh : nb vertices  =9 ,  nb triangles = 8 ,  nb boundary edges 8
+    Nb of Vertices 9 ,  Nb of Triangles 8
+    Nb of edge on user boundary  8 ,  Nb of edges on true boundary  8
+ number of real boundary edges 8
+ nb of Triangles = 8
 0 0 Th[i][j] = 0  x = 0 , y= 0,  label=4
 0 1 Th[i][j] = 1  x = 0.5 , y= 0,  label=1
 0 2 Th[i][j] = 4  x = 0.5 , y= 0.5,  label=0
-1 0 Th[i][j] = 0  x = 0 , y= 0,  label=4
-1 1 Th[i][j] = 4  x = 0.5 , y= 0.5,  label=0
-1 2 Th[i][j] = 3  x = 0 , y= 0.5,  label=4
-.......
-5 2 Th[i][j] = 6  x = 0 , y= 1,  label=4
+...
 6 0 Th[i][j] = 4  x = 0.5 , y= 0.5,  label=0
 6 1 Th[i][j] = 5  x = 1 , y= 0.5,  label=2
 6 2 Th[i][j] = 8  x = 1 , y= 1,  label=3
@@ -4122,22 +4150,16 @@ the output is:
 7 2 Th[i][j] = 7  x = 0.5 , y= 1,  label=3
  Nb Of Nodes = 9
  Nb of DF = 9
- -- vector function's bound  -0 1
- -- vector function's bound  -0 1
+ -- vector function's bound  0 1
+ -- vector function's bound  0 1
  nb of vertices = 9
-0 : -0 -0
-1 : 0.5 -0
-2 : 1 -0
-3 : -0 0.5
-4 : 0.5 0.5
-5 : 1 0.5
-6 : -0 1
-7 : 0.5 1
-8 : 1 1
+Th(0) : 0 0 4       old method: 0 0
+Th(1) : 0.5 0 1       old method: 0.5 0
+...
+Th(7) : 0.5 1 3       old method: 0.5 1
+Th(8) : 1 1 3       old method: 1 1
  Nb Of Nodes = 8
  Nb of DF = 8
- -- vector function's bound  -0 -0
-  point (0.55,0,6) :triangle number 7 7, region = 0 == 0
 \eFF
 \begin{example}[Readmesh.edp]
 \index{tutorial!readmesh.edp}
@@ -4651,6 +4673,29 @@ default parameters which can be modified~:
 \end{description}
 
 %%%alh proofreading ok up to here
+
+
+\begin{example}{uniformmesh.edp}
+
+ We can use the command \ttCC{adaptmesh} to build uniform mesh with a 
+ contant mesh size. \index{mesh!uniform}\index{adaptmesh!uniform}
+ 
+ So to buid a mesh with a constant mesh size equal to $\frac{1}{30}$ do 
+\bFF
+@mesh Th=square(2,2); // to have initial mesh
+plot(Th,wait=1,ps="square-0.eps");
+Th= @adaptmesh(Th,1./30.,IsMetric=1,nbvx=10000);// \index{mesh!uniform}
+plot(Th,wait=1,ps="square-1.eps");
+Th= @adaptmesh(Th,1./30.,IsMetric=1,nbvx=10000);//  more the one time du to
+Th= @adaptmesh(Th,1./30.,IsMetric=1,nbvx=10000);//  adaptation  bound \texttt{maxsubdiv=}
+plot(Th,wait=1,ps="square-2.eps");
+\eFF
+
+\threeplot[width=5cm]%
+{square-0}{Initial mesh}%
+{square-1}{first iteration}%
+{square-2}{last iteration}%
+\end{example}
 
 \subsection{Trunc}\index{trunc}
 
@@ -5676,7 +5721,13 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
     \item  The boundary condition terms :
     \begin{itemize}
         \item  An "on" form (for Dirichlet ) :\index{on}
-     \texttt{ on(1, u = g )}\index{on}
+         \texttt{ on(1, u = g )}\index{on}
+         
+        The meaning is 
+        for all node $i$ the this associated boundary,  the diagonal 
+        term  of the matrix $a_{ii}= tgv$  with the   {\em terrible geant value} \ttCC{tgv} (=$10^{30}$ by default)
+          and   the right hand side $b[i] = "g[i]" \times tgv $,
+                where the $"g[i]"$ is the boundary node value given by  the interpolation of $g$.
         \item  a linear form on $\Gamma$  (for Neumann ) \index{Neumann}
          \texttt{ -int1d(Th))( f*w) } or \texttt{ -int1d(Th,3))( f*w) }
         \item   a bilinear form on $\Gamma$  or $\Gamma_{2}$ (for  Robin )\index{Robin}
@@ -5883,7 +5934,124 @@ where * stands for the name of quadrature formula or the order of the Gauss form
 
 \subsection{Variational Form, Sparse Matrix, PDE Data Vector}
   \index{varf}\index{array}
-  It is possible to define variational forms:
+  It is possible to define variational forms, and use this forms to build matrix 
+  and vector to make very fast script (4 times faster here).
+  
+  For example solve the Thermal Conduction problem of section \ref{ss Thermal Conduction}.
+  
+ The variational formulation is  in $L^2(0,T;H^1(\Omega))$;
+  we shall seek $u^n$ satisfying for all $w\in H^1(\Omega), w_{|\Gamma_{24}}=0$
+\[
+    \int_\Omega(\frac{u^n-u^{n-1}}{\delta t} w + \kappa\n u^n\n w) +\int_\Gamma\alpha(u^n-u_{ue})w=0
+\]
+
+So the to code the method with matrix,
+\def\tgv{\tau_\infty}
+$$ u^n = A^{-1} b^n, \quad
+  \quad b' = b_0 + M u^{n-1}, 
+  \quad b"=  \tgv \; b_{cl} , 
+  \quad  b^n_i = \left\{\begin{array}{cc} i \in \Gamma_{24}  & b"_i \\  i \not\in \Gamma_{24}& b'_i \end{array}\right.  $$ 
+Where: 
+$$ \tgv = \mathtt{tgv} = 10^{30}$$
+$$ A_{ij} = \left\{\begin{array}{cc} i  \in \Gamma_{24}, \mbox{and}  j=i &  \tgv \\  
+ i  \not\in \Gamma_{24}, \mbox{or}  j\ne i & \displaystyle 
+ \int_{\Omega} w_j w_i / dt + k (\nabla w_j. \nabla w_i ) + \int_{\Gamma_{13}} \alpha w_j w_i
+ \end{array}\right.  $$ 
+
+$$ M_{ij} = \left\{\begin{array}{cc} i  \in \Gamma_{24}, \mbox{and}  j=i &  \tgv \\  
+ i  \not\in \Gamma_{24}, \mbox{or}  j\ne i & \displaystyle 
+ \int_{\Omega} w_j w_i / dt
+ \end{array}\right.  $$ 
+
+$$ b_{0,i} = \int_{\Gamma_{13}} \alpha u_{ue} w_i  $$ 
+$$ b_{cl} = u^{0}  \quad \mbox{the initial data} $$
+
+ \bFF
+// file thermal-fast.edp  in examples++-tutorial
+
+func fu0 =10+90*x/6;
+func k = 1.8*(y<0.5)+0.2;
+real ue = 25. , alpha=0.25, T=5, dt=0.1 ;
+
+mesh Th=square(30,5,[6*x,y]);
+fespace Vh(Th,P1);
+
+Vh u0=fu0,u=u0;
+\eFF
+
+Create three variational formulation, and build the matrices $A$,$M$.
+\bFF
+varf vthermic (u,v)= int2d(Th)(u*v/dt + k*(dx(u) * dx(v) + dy(u) * dy(v)))  
+  +  int1d(Th,1,3)(alpha*u*v)
+  + on(2,4,u=1); 
+
+varf vthermic0(u,v) =   int1d(Th,1,3)(alpha*ue*v);
+
+varf vMass (u,v)= int2d(Th)( u*v/dt)  + on(2,4,u=1);
+
+real tgv = 1e30;
+matrix A= vthermic(Vh,Vh,tgv=tgv,solver=CG);
+matrix M= vMass(Vh,Vh);
+\eFF
+
+Now, to build the right hand size we need 4 vectors.
+
+\bFF
+real[int] bcn(Vh.ndof), b(Vh.ndof), b0(Vh.ndof), bcl(Vh.ndof);
+b0 = vthermic0(0,Vh); // constant part of the RHS 
+bcn = vthermic(0,Vh); //  tgv on Dirichlet boundary  node  ( !=0 ) 
+// we have for the node $i$ : $i\in \Gamma_d  \quad \Leftrightarrow \quad bcn[i] \ne 0 $
+bcl=tgv*u0[]; //  the Dirichlet boundary condition part 
+\eFF
+
+And the new version of the algorithm: 
+\bFF
+ofstream ff("thermic.dat");
+for(real t=0;t<T;t+=dt){
+    b = b0 ; //  the constant part of RHS
+    b += M*u[]; //  add the the dependant part
+    b = bcn ? bcl  : b ; // do: b[i] =  bcn[i] ? bcl[i] ? b[i]  ;    
+    u[] = A^-1*b;    
+    ff<<t<<" "<<u(3,0.5)<<endl;
+    plot(u);
+}
+for(int i=0;i<20;i++) cout<<dy(u)(6.0*i/20.0,0.9)<<endl;
+plot(u,fill=true,wait=1,ps="thermic.eps");
+\eFF 
+  
+  
+  
+  
+
+\begin{note}
+ The functions appearing in the variational form are formal; they must be declared but not
+ necessarily defined, the only important think in the order in the parameter list, like in
+\bFF
+ @varf vb1([u1,u2],q) = @int2d(Th)( (dy(u1)+dy(u2)) *q) + int2d(Th)(1*q); 
+ @varf vb2([v1,v2],p) = @int2d(Th)( (dy(v1)+dy(v2)) *p) + int2d(Th)(1*p);  //  same formulation 
+\eFF
+\end{note}
+\index{varf!array}\index{varf!matrix} 
+
+To build matrix $A$ from the bilinear part the the variational form $a$ do simply
+\bFF
+matrix  A = a(Vh,Wh);
+ // where  Vh is "unkown  fespace"  with a correct number of component
+ // where  Wh is "test  fespace"  with a correct number of component
+\eFF
+\begin{note}
+The line of the matrix corresponding to the space \ttCC{Wh} and the
+column of the matrix corresponding to the space \ttCC{Vh}.
+\end{note}
+
+To build the dual vector b (of type real[int])  from the linear part of the variational form $a$ do simply
+\bFF
+ real b(Vh.ndof); 
+ b = a(0,Wh); 
+\eFF
+
+  
+  
 \bFF
 @mesh Th=@square(10,10);
 @fespace Xh(Th,@P2),Mh(Th,@P1);
@@ -5900,10 +6068,8 @@ $$ by(u_{1},q)= \int_{\Omega_{h}} \frac{\p u_{1}}{\p y} q $$
 @varf a(u1,u2)= @int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
                     +  @on(1,2,4,u1=0)  +  @on(3,u1=1) ;
 \eFF
-\begin{note}
- The functions appearing in the variational form are formal; they must be declared but not
- necessarily defined.
-\end{note}
+
+
 
 $$ a(u_{1},v_{2}) = \int_{\Omega_{h}}  \nabla u_{1}.\nabla u_{2}; \quad
              \quad u_{1} = 1*g \mbox{ on } \Gamma_{3}, u_{1} =0 \mbox{ on } \Gamma_{1}\cup \Gamma_{2}\cup \Gamma_{4} $$
@@ -5998,6 +6164,8 @@ available for example \bFF
   matrix sparseB=sparseA+sparseA+sparseA; ;
   @cout << "sparseB = " << sparseB(0,0) << endl;
 \eFF
+
+
 \subsection{Interpolation matrix}
 
  This becomes possible to store the matrix of a linear interpolation operator from
