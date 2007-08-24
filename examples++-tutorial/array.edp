@@ -151,6 +151,7 @@ cout << " sum a_i     = " <<  a.sum    << endl;
 cout << " max a_i     = " <<  a.max    << endl;
 cout << " min a_i     = " <<  a.min    << endl;
 cout << " a'*a        = " <<  (a'*a)   << endl;
+cout << " a quantile 0.2 =  " <<  a.quantile(0.2) << endl;
 
 // array mapping  after version 2.3
 int[int] I=[2,3,4,-1,0];
