@@ -5940,7 +5940,7 @@ where * stands for the name of quadrature formula or the order of the Gauss form
   For example solve the Thermal Conduction problem of section \ref{ss Thermal Conduction}.
   
  The variational formulation is  in $L^2(0,T;H^1(\Omega))$;
-  we shall seek $u^n$ satisfying for all $w\in H^1(\Omega), w_{|\Gamma_{24}}=0$
+  we shall seek $u^n$ satisfying for all $w\in H^1(\Omega) such that w_{|\Gamma_{24}}=0$
 \[
     \int_\Omega(\frac{u^n-u^{n-1}}{\delta t} w + \kappa\n u^n\n w) +\int_\Gamma\alpha(u^n-u_{ue})w=0
 \]
@@ -5950,18 +5950,20 @@ So the to code the method with matrix,
 $$ u^n = A^{-1} b^n, \quad
   \quad b' = b_0 + M u^{n-1}, 
   \quad b"=  \tgv \; b_{cl} , 
-  \quad  b^n_i = \left\{\begin{array}{cc} i \in \Gamma_{24}  & b"_i \\  i \not\in \Gamma_{24}& b'_i \end{array}\right.  $$ 
+  \quad  b^n_i = \left\{
+  \begin{array}{cl}   b"_i  & \mbox{if }\ i \in \Gamma_{24} \\
+                       b'_i & \mbox{else if } \not\in \Gamma_{24} \end{array}\right.  $$ 
 Where: 
 $$ \tgv = \mathtt{tgv} = 10^{30}$$
-$$ A_{ij} = \left\{\begin{array}{cc} i  \in \Gamma_{24}, \mbox{and}  j=i &  \tgv \\  
- i  \not\in \Gamma_{24}, \mbox{or}  j\ne i & \displaystyle 
- \int_{\Omega} w_j w_i / dt + k (\nabla w_j. \nabla w_i ) + \int_{\Gamma_{13}} \alpha w_j w_i
+$$ A_{ij} = \left\{\begin{array}{cl}   \tgv  & \mbox{if } i  \in \Gamma_{24}, \mbox{and}  j=i \\  
+\displaystyle 
+ \int_{\Omega} w_j w_i / dt + k (\nabla w_j. \nabla w_i ) + \int_{\Gamma_{13}} \alpha w_j w_i & \mbox{else if }  i  \not\in \Gamma_{24}, \mbox{or}  j\ne i 
  \end{array}\right.  $$ 
 
-$$ M_{ij} = \left\{\begin{array}{cc} i  \in \Gamma_{24}, \mbox{and}  j=i &  \tgv \\  
- i  \not\in \Gamma_{24}, \mbox{or}  j\ne i & \displaystyle 
+$$ M_{ij} = \left\{\begin{array}{cl}   \tgv & \mbox{if } i  \in \Gamma_{24}, \mbox{and}  j=i  \\  
+\displaystyle 
  \int_{\Omega} w_j w_i / dt
- \end{array}\right.  $$ 
+ & \mbox{else if }i  \not\in \Gamma_{24}, \mbox{or}  j\ne i   \end{array}\right.  $$ 
 
 $$ b_{0,i} = \int_{\Gamma_{13}} \alpha u_{ue} w_i  $$ 
 $$ b_{cl} = u^{0}  \quad \mbox{the initial data} $$
