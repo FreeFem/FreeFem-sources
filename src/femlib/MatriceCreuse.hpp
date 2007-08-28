@@ -258,9 +258,9 @@ template <class R>
 class MatriceCreuse : public RefCounter,public VirtualMatrice<R> {
 public:
   MatriceCreuse(int NbOfDF,int mm,int ddummy)
-         : n(NbOfDF),m(mm),dummy(ddummy){}
+         : VirtualMatrice<R>(NbOfDF,mm),n(NbOfDF),m(mm),dummy(ddummy){}
   MatriceCreuse(int NbOfDF)
-         : n(NbOfDF),m(NbOfDF),dummy(1){}
+         : VirtualMatrice<R>(NbOfDF),n(NbOfDF),m(NbOfDF),dummy(1){}
   int n,m,dummy;
   virtual int size() const =0;
   
@@ -669,7 +669,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
 template <class R> 
 class MatriceIdentite: VirtualMatrice<R> { public:
  typedef typename VirtualMatrice<R>::plusAx plusAx;
- MatriceIdentite() {}; 
+    MatriceIdentite() :VirtualMatrice<R>(0) {}; 
  void addMatMul(const  KN_<R>  & x, KN_<R> & Ax) const { 
      ffassert(x.N()==Ax.N());
    Ax+=x; } 
@@ -689,6 +689,7 @@ class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatr
   public:
   typedef typename VirtualMatrice<R>::plusAx plusAx;
   SolveGCDiag(const MatriceMorse<R> &A,double epsilon=1e-6) : 
+    VirtualMatrice<R>(A.n),
     n(A.n),nbitermax(Max(n,100)),eps(epsilon),epsr(0),D1(n)
   { throwassert(A.sym());
     for (int i=0;i<n;i++)

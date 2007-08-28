@@ -108,17 +108,17 @@ inline const KN_<complex<double> > R2C(const KN_<double>  & vr)
 
 // -----------------------------------------------------------------
 
-template <class M>
-
+template <class MM>
 class MatC2R : public VirtualMatrice<double> { public:
 
   typedef typename VirtualMatrice<double>::plusAx plusAx;
 
   //  typedef  VirtualMatrice<complex<double> > M;
 
-  const M &m;
+  const MM &m;
 
-  MatC2R(const M &mm):m(mm) {}
+  MatC2R(const MM &mm):
+      VirtualMatrice<double>(mm.N,mm.M),m(mm) {}
 
   void addMatMul(const  KN_<double>  & x, KN_<double> & Ax) const {
 
@@ -150,6 +150,7 @@ class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMa
  
   public:
   SolveGCPrecon(const MatriceMorse<R> &A,const OneOperator * C,Stack stk,double epsilon=1e-6) : 
+    VirtualMatrice<R>(A.n),
     n(A.n),nbitermax(Max(n,100)),eps(epsilon),epsr(0),precon(0),
     D1(n),xx(n),stack(stk)
 {
@@ -220,6 +221,7 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
   typedef typename VirtualMatrice<R>::plusAx plusAx;
   public:
   SolveGMRESPrecon(const MatriceMorse<R> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6) : 
+    VirtualMatrice<R>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),precon(0),
     D1(n),xx(n),
     stack(stk),dKrylov(dk)
@@ -294,6 +296,7 @@ class SolveGMRESDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualM
   public:
   typedef typename VirtualMatrice<R>::plusAx plusAx;
   SolveGMRESDiag(const MatriceMorse<R> &A,int nbk=50,int itmax=0,double epsilon=1e-6) : 
+     VirtualMatrice<R>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),
     dKrilov(nbk) ,D1(n)
   { 
@@ -329,7 +332,7 @@ plusAx  operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 
 template<>
 class SolveGMRESDiag<Complex> :   public MatriceMorse<Complex>::VirtualSolver , public VirtualMatrice<Complex>{
-  int n;
+   int n;
   int nbitermax;
   KN<Complex> D1;
   double eps;
@@ -338,6 +341,7 @@ class SolveGMRESDiag<Complex> :   public MatriceMorse<Complex>::VirtualSolver , 
   public:
   typedef  VirtualMatrice<Complex>::plusAx plusAx;
   SolveGMRESDiag(const MatriceMorse<Complex> &A,int nbk=50,int itmax=0,double epsilon=1e-6) : 
+    VirtualMatrice<Complex>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),D1(n),eps(epsilon),epsr(0),
     dKrilov(nbk) 
   { 
@@ -379,6 +383,7 @@ plusAx  operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
 
 template<>
 class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver , public VirtualMatrice<Complex>{
+  public:
   int n;
   int nbitermax;
   Expression xx_del, code_del; 
@@ -392,6 +397,7 @@ class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver 
   typedef  VirtualMatrice<Complex>::plusAx plusAx;
   public:
   SolveGMRESPrecon(const MatriceMorse<Complex> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6) : 
+    VirtualMatrice<Complex>(A.n),   
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),
     xx_del(0),code_del(0),
     precon(0),stack(stk),eps(epsilon),epsr(0),dKrylov(dk),
