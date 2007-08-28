@@ -705,6 +705,20 @@ void ArrayOperator()
         new OneBinaryOperator<set_eqarraypd<KN<K> ,if_arth_KN_<K>* > > ,
         new OneBinaryOperator<set_eqarrayp<KN<K> ,KN<K>* > >       
       );
+  // add august 2007 
+     TheOperators->Add("<-",
+		      // new OneBinaryOperator<set_eqarray<KN<K> ,K > > ,
+		       new OneBinaryOperator<init_eqarray<KN<K> ,Add_KN_<K> > > ,
+		       new OneBinaryOperator<init_eqarray<KN<K> ,DotStar_KN_<K> > > ,
+		       new OneBinaryOperator<init_eqarray<KN<K> ,DotSlash_KN_<K> > > ,
+		       new OneBinaryOperator<init_eqarray<KN<K> ,Sub_KN_<K> > > ,
+		       new OneBinaryOperator<init_eqarray<KN<K> ,Mulc_KN_<K> > > ,
+		       new OneBinaryOperator<init_eqarray<KN<K> ,Mul_KNM_KN_<K> > > ,
+		       new OneBinaryOperator<init_eqarray<KN<K> ,KN_<K> > > , // Add FH juin 2005         
+		       new OneBinaryOperator<init_eqarraypd<KN<K> ,Add_Mulc_KN_<K>* > > , // Add FH aug 2005     
+		       new OneBinaryOperator<init_eqarraypd<KN<K> ,if_arth_KN_<K>* > > 
+		      // new OneBinaryOperator<init_eqarrayp<KN<K> ,KN<K>* > >       
+		       );
      
      TheOperators->Add("=",
         new OneBinaryOperator<set_eqarray<KNM<K>  ,K > > ,

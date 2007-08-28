@@ -285,6 +285,7 @@ struct set_eqarraypd: public binary_function<A*,B,A*> {
    return a;}
 };
 
+
 template<class A,class B>
 struct set_eqarraypd_add: public binary_function<A*,B,A*> {
   static A* f(A* const  & a, B const & b)  {assert(SameShape(*a,*b));  *a += *b; 
@@ -321,7 +322,28 @@ struct set_eqarray: public binary_function<A*,B,A*> {
      return a;}
 };
 
+//  --------------------------------------------- august 2007 FH 
+template<class A,class B>
+struct init_eqarray: public binary_function<A*,B,A*> {
+    static A* f(A* const  & a, B const & b)  
+    {  a->init(); *a = b;
+	return a;}
+};
+//  ---------------------------------------------
+template<class A,class B>
+struct init_eqarraypd: public binary_function<A*,B,A*> {
+    static A* f(A* const  & a, B const & b)  {a->init();  *a = *b;
+    delete b;
+    return a;}
+};
 
+//  ---------------------------------------------
+template<class A,class B>
+struct init_eqarrayp: public binary_function<A*,B,A*> {
+    static A* f(A* const  & a, B const & b)  {  a->init(); *a = *b; return a;}
+};
+
+// ----------------------------------------  fin modif august 2007
 
 template<class A,class B>
 struct set_eqarray_add: public binary_function<A*,B,A*> {

@@ -3926,9 +3926,10 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OpArraytoLinearForm<double>(atype< KN<double>* >(),true,false)  ,
        new OpArraytoLinearForm<double>(atype< KN_<double> >(),false,false)  ,
        new OpMatrixtoBilinearForm<double >);
+ 
  TheOperators->Add("<-",
         new OpArraytoLinearForm<double>(atype< KN<double>* >(),true,true) ,
-        new OpArraytoLinearForm<double>(atype< KN<Complex>* >(),true,true) 
+        new OpArraytoLinearForm<Complex>(atype< KN<Complex>* >(),true,true) 
         
         );
 
@@ -3945,14 +3946,30 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OpArraytoLinearForm<Complex>(atype< KN<Complex>* >(),true,false)  ,
        new OpArraytoLinearForm<Complex>(atype< KN_<Complex> >(),false,false)   ,
        new OpMatrixtoBilinearForm<Complex >);
+
+ // add august 2007 
+ TheOperators->Add("<-",
+		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::plusAx > > ,       
+		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::plusAtx > >  ,      
+		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::solveAxeqb > >  ,  
+		   
+		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
+		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,      
+		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >    
+		   
+		);
+ 
      
  TheOperators->Add("+=",
        new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAx > > ,       
        new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAtx > > ,
        
        new OneBinaryOperator<set_eq_array_add<KN_<double> ,VirtualMatrice<double>::plusAx > > ,       
-       new OneBinaryOperator<set_eq_array_add<KN_<double> ,VirtualMatrice<double>::plusAtx > >        
-              
+       new OneBinaryOperator<set_eq_array_add<KN_<double> ,VirtualMatrice<double>::plusAtx > >,        
+
+       new OpArraytoLinearForm<Complex>(atype< KN<double>* >(),true,false,false)  ,
+       new OpArraytoLinearForm<Complex>(atype< KN_<double> >(),false,false,false)   
+		   
        );
 
  TheOperators->Add("+=",
@@ -3960,7 +3977,10 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OneBinaryOperator<set_eqarray_add<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > > ,       
 
        new OneBinaryOperator<set_eq_array_add<KN_<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
-       new OneBinaryOperator<set_eq_array_add<KN_<Complex> ,VirtualMatrice<Complex>::plusAtx > >        
+       new OneBinaryOperator<set_eq_array_add<KN_<Complex> ,VirtualMatrice<Complex>::plusAtx > >,
+		   
+       new OpArraytoLinearForm<Complex>(atype< KN<Complex>* >(),true,false,false)  ,
+       new OpArraytoLinearForm<Complex>(atype< KN_<Complex> >(),false,false,false)   
               
        );
 
@@ -3978,7 +3998,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 //  correction du bug morale 
 //  Attention il y a moralement un bug
 //  les initialisation   x = y   ( passe par l'operateur binaire <-  dans TheOperators
-//   les initialisation   x(y)   ( passe par l'operateur unaire <-  de typedebase de x
+//   les initialisation   x(y)   ( passe par l'operateur unaire <-  de typedebase de x (inutile 2007).
 //  x(y1,..,yn) est un operator n+1   (x,y1,..,yn)
 // on passe toujours par x(y) maintenant.
 //   -------

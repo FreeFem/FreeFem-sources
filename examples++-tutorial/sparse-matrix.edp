@@ -14,6 +14,9 @@ matrix B= interpolate(VH,Vh);  // build interpolation matrix Vh->Vh
 matrix BB= interpolate(Wh,Vh);  // build interpolation matrix
 varf vA(u,v) = int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v))+ int1d(Th)(u*v); 
 matrix A=vA(Wh,Wh);
+
+
+
 Vh ml=0;
 varf vML(u,v) = int2d(th)(1*v);
 ml[]=vML(0,Vh); // build the P1 mass lump of P1
@@ -216,4 +219,5 @@ cout << " B = " << B << endl;
 cout<< " lg    : "  << lg << endl;
 cout << " cl   : " << cl << endl;
 cout << " coef = "<< coef << endl;
+
 }
