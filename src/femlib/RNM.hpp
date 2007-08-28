@@ -1014,6 +1014,7 @@ class KN :public KN_<R> { public:
 //    operator KN<const_R> const & ()  const 
 //          { return (const KN<const_R>& ) *this;}
   void init(long nn) {this->n=nn;this->step=1;this->next=-1;this->v=new R[nn];}
+  void init() {this->n=0;this->step=1;this->next=-1;this->v=0;}
   void init(const KN_<R> & a){init(a.N()); operator=(a);}
   void resize(long nn) {
     if ( nn != this->n) 

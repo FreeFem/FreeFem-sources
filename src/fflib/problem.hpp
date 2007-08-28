@@ -625,31 +625,33 @@ struct OpArraytoLinearForm: public OneOperator {
   typedef Call_FormLinear::const_iterator const_iterator;
   const bool isptr;
   const bool init;
+  const bool zero;
   class Op : public E_F0mps { public:
     Call_FormLinear *l;
     Expression x;
     const  bool isptr; 
     const  bool init; 
+    const  bool zero;
     AnyType operator()(Stack s)  const ;
-    Op(Expression xx,Expression  ll,bool isptrr,bool initt) 
+    Op(Expression xx,Expression  ll,bool isptrr,bool initt,bool zzero) 
       : l(new Call_FormLinear(*dynamic_cast<const Call_FormLinear *>(ll))),
         x(xx),
-        isptr(isptrr),init(initt)
+        isptr(isptrr),init(initt),zero(zzero)
         {assert(l);FieldOfForm(l->largs,IsComplexType<R>::value); }
      operator aType () const { return atype<KN<R> *>();} 
       
   };
   E_F0 * code(const basicAC_F0 & args) const 
-  { if(isptr) return new Op(to<KN<R> *>(args[0]),args[1],isptr,init);
-    else      return new Op(to<KN_<R> >(args[0]),args[1],isptr,init);}
+  { if(isptr) return new Op(to<KN<R> *>(args[0]),args[1],isptr,init,zero);
+    else      return new Op(to<KN_<R> >(args[0]),args[1],isptr,init,zero);}
    
   
 //  OpArraytoLinearForm(const basicForEachType * tt) : 
 //    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),init(false),isptr(false) {}
     
-   OpArraytoLinearForm(const basicForEachType * tt,bool isptrr, bool initt) : 
+  OpArraytoLinearForm(const basicForEachType * tt,bool isptrr, bool initt,bool zzero=1) : 
     OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),
-    isptr(isptrr), init(initt) {}
+    isptr(isptrr), init(initt),zero(zzero) {}
    
 };
 
@@ -945,7 +947,7 @@ AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const
      ffassert(px->N() == Vh.NbOfDF); 
    }
   KN_<R>  xx( px ? *(KN_<R> *) px : GetAny<KN_<R> >((*x)(stack) ));
-
+  if(zero)
   xx=R(); 
   if ( AssembleVarForm<R,MatriceCreuse<R> >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
     AssembleBC<R>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);

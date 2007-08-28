@@ -65,8 +65,6 @@
 \def\hon{\hbox{ on }}
 \def\Cpp{\texttt{C++~}}
 \def\R{\mathrm{I\!R}}
-\newtheorem{example}{\textbf{Example}}
-%\def\example{\textbf{Example:}}
 \def\eq#1{\Blue{\[#1\]}}
 \def\R{\mathbb{R}}
 \def\Z{\mathbb{Z}}
@@ -125,10 +123,12 @@
 \end{figure}
 }% end threeplot macro
 
-\newtheorem{note}{\textbf{Note}}
+\newtheorem{note}{\textbf{Note}}[chapter]
 \newtheorem{bug}{\textbf{Bug:}}
 \newtheorem{proposition}{\textbf{Proposition}}
-\newtheorem{algorithm}{\textbf{Algorithm}}
+\newtheorem{algorithm}{\textbf{Algorithm}}[chapter]
+\newtheorem{example}{\textbf{Example}}[chapter]
+%\def\example{\textbf{Example:}}
 
 \newenvironment{ttlist}
    {\begin{list}{}{\renewcommand{\makelabel}[1]{\texttt{##1}\hfil}%

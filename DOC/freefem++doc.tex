@@ -1452,7 +1452,7 @@ To find all the $u_e$ one can do the following
 @real sigma = 20;  // value of the shift
 // OP = A - sigma B ;  //  the shifted matrix
 @varf  op(u1,u2)= @int2d(Th)(  @dx(u1)*@dx(u2) + @dy(u1)*@dy(u2) - sigma* u1*u2 );
-@varf b([u1],[u2]) = @int2d(Th)(  u1*u2 ) ; // no  Boundary condition
+@varf b([u1],[u2]) = @int2d(Th)( u1*u2 ) ;//no Boundary condition see note \ref{note BC EV}
 
 @matrix OP= op(Vh,Vh,solver=Crout,factorize=1);
 @matrix B= b(Vh,Vh,solver=CG,eps=1e-20);
@@ -5690,7 +5690,11 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
 
 \begin{itemize}
     \item identifier(s); this is the name given earlier to the
-     variational form(s) (type \texttt{varf} \index{varf}) for possible reuse.
+     variational form(s) (type \texttt{varf} \index{varf}) for possible reuse. 
+     
+      Remark, that the 
+     name in the "varf" of the unknow of  test function is forgotten, we just used the order in argument
+     list to recall name as in a \Cpp function, see  note \ref{varf param}, 
     \item  the terms of the bilinear form itself: if $K$ is a  given function,
     \begin{itemize}
        \item[-)]   \texttt{ int2d(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T } K\,v\,w  $
@@ -5934,39 +5938,43 @@ where * stands for the name of quadrature formula or the order of the Gauss form
 
 \subsection{Variational Form, Sparse Matrix, PDE Data Vector}
   \index{varf}\index{array}
-  It is possible to define variational forms, and use this forms to build matrix 
+ First, it is possible to define variational forms, and use this forms to build matrix 
   and vector to make very fast script (4 times faster here).
   
   For example solve the Thermal Conduction problem of section \ref{ss Thermal Conduction}.
   
  The variational formulation is  in $L^2(0,T;H^1(\Omega))$;
-  we shall seek $u^n$ satisfying for all $w\in H^1(\Omega) such that w_{|\Gamma_{24}}=0$
+  we shall seek $u^n$ satisfying
 \[
-    \int_\Omega(\frac{u^n-u^{n-1}}{\delta t} w + \kappa\n u^n\n w) +\int_\Gamma\alpha(u^n-u_{ue})w=0
+\forall w \in V_{0}; \qquad   \int_\Omega \frac{u^n-u^{n-1}}{\delta t} w + \kappa\n u^n\n w) +\int_\Gamma\alpha(u^n-u_{ue})w=0
 \]
+where $ V_0 = \{w\in H^1(\Omega)/ w_{|\Gamma_{24}}=0\}$.
 
-So the to code the method with matrix,
-\def\tgv{\tau_\infty}
-$$ u^n = A^{-1} b^n, \quad
+So the to code the method with the matrices $A=(A_{ij})$, $M=(M_{ij})$, and  the vectors 
+$ u^n, b^n, b',b", b_{cl}$ 
+( notation if $w$ is a vector then $w_i$ is a component of the vector).
+\def\tgv{{\nu}_\infty}
+\begin{equation} u^n = A^{-1} b^n, \quad
   \quad b' = b_0 + M u^{n-1}, 
   \quad b"=  \tgv \; b_{cl} , 
   \quad  b^n_i = \left\{
   \begin{array}{cl}   b"_i  & \mbox{if }\ i \in \Gamma_{24} \\
-                       b'_i & \mbox{else if } \not\in \Gamma_{24} \end{array}\right.  $$ 
-Where: 
-$$ \tgv = \mathtt{tgv} = 10^{30}$$
-$$ A_{ij} = \left\{\begin{array}{cl}   \tgv  & \mbox{if } i  \in \Gamma_{24}, \mbox{and}  j=i \\  
+                       b'_i & \mbox{else if } \not\in \Gamma_{24} \end{array}\right.
+                       \label{eq tgv}  \end{equation} 
+Where with $ \tgv = \mathtt{tgv} = 10^{30}$ :
+\begin{eqnarray}
+ A_{ij} &=& \left\{\begin{array}{cl}   \tgv  & \mbox{if } i  \in \Gamma_{24}, \mbox{and}  j=i \\  
 \displaystyle 
  \int_{\Omega} w_j w_i / dt + k (\nabla w_j. \nabla w_i ) + \int_{\Gamma_{13}} \alpha w_j w_i & \mbox{else if }  i  \not\in \Gamma_{24}, \mbox{or}  j\ne i 
- \end{array}\right.  $$ 
-
-$$ M_{ij} = \left\{\begin{array}{cl}   \tgv & \mbox{if } i  \in \Gamma_{24}, \mbox{and}  j=i  \\  
+ \end{array}\right.  \\ 
+ M_{ij} &=& \left\{\begin{array}{cl}   \tgv & \mbox{if } i  \in \Gamma_{24}, \mbox{and}  j=i  \\  
 \displaystyle 
  \int_{\Omega} w_j w_i / dt
- & \mbox{else if }i  \not\in \Gamma_{24}, \mbox{or}  j\ne i   \end{array}\right.  $$ 
+ & \mbox{else if }i  \not\in \Gamma_{24}, \mbox{or}  j\ne i   \end{array}\right. \\ 
+ b_{0,i} &=& \int_{\Gamma_{13}} \alpha u_{ue} w_i  \\
+ b_{cl} &=& u^{0}  \quad \mbox{the initial data} 
+\end{eqnarray}
 
-$$ b_{0,i} = \int_{\Gamma_{13}} \alpha u_{ue} w_i  $$ 
-$$ b_{cl} = u^{0}  \quad \mbox{the initial data} $$
 
  \bFF
 // file thermal-fast.edp  in examples++-tutorial
@@ -5999,132 +6007,238 @@ matrix M= vMass(Vh,Vh);
 Now, to build the right hand size we need 4 vectors.
 
 \bFF
-real[int] bcn(Vh.ndof), b(Vh.ndof), b0(Vh.ndof), bcl(Vh.ndof);
-b0 = vthermic0(0,Vh); // constant part of the RHS 
-bcn = vthermic(0,Vh); //  tgv on Dirichlet boundary  node  ( !=0 ) 
-// we have for the node $i$ : $i\in \Gamma_d  \quad \Leftrightarrow \quad bcn[i] \ne 0 $
-bcl=tgv*u0[]; //  the Dirichlet boundary condition part 
+
+real[int]  b0  = vthermic0(0,Vh); // constant part of the RHS 
+real[int]  bcn = vthermic(0,Vh); //  tgv on Dirichlet boundary  node  ( !=0 ) 
+// we have for the node $i$ : $i\in \Gamma_{24}  \quad \Leftrightarrow \quad bcn[i] \ne 0 $
+real[int]  bcl=tgv*u0[]; //  the Dirichlet boundary condition part 
+
+
 \eFF
 
+\begin{note} The boundary condition \index{boundary condition} is implemented
+ by penalization and vector \texttt{bcn} contains
+ the contribution of the boundary condition $u_=1$ ,
+so to change the boundary condition,
+we have just to multiply the vector $bc[]$ by the current value $f$
+ of the new boundary condition term by term
+with the operator \texttt{.*}.\index{.*@\verb=.*=}
+\refSec{Uzawa} \texttt{Examples++-tutorial/StokesUzawa.edp}  gives
+ a real example of using all this features.
+\end{note} 
+
+ 
 And the new version of the algorithm: 
 \bFF
 ofstream ff("thermic.dat");
 for(real t=0;t<T;t+=dt){
-    b = b0 ; //  the constant part of RHS
-    b += M*u[]; //  add the the dependant part
-    b = bcn ? bcl  : b ; // do: b[i] =  bcn[i] ? bcl[i] ? b[i]  ;    
+    real[int] b = b0 ; // for the  RHS
+    b += M*u[]; //  add the the time dependant part
+    // lock boundary part:
+    b = bcn ? bcl  : b ; // do $\forall i$:  b[i] =  bcn[i] ? bcl[i] : b[i]  ;    
     u[] = A^-1*b;    
-    ff<<t<<" "<<u(3,0.5)<<endl;
+    ff << t <<" "<<u(3,0.5)<<endl;
     plot(u);
 }
-for(int i=0;i<20;i++) cout<<dy(u)(6.0*i/20.0,0.9)<<endl;
+for(int i=0;i<20;i++) 
+  cout<<dy(u)(6.0*i/20.0,0.9)<<endl;
 plot(u,fill=true,wait=1,ps="thermic.eps");
 \eFF 
   
-  
+
+
   
   
 
-\begin{note}
+\begin{note} \label{varf param}
  The functions appearing in the variational form are formal; they must be declared but not
  necessarily defined, the only important think in the order in the parameter list, like in
 \bFF
  @varf vb1([u1,u2],q) = @int2d(Th)( (dy(u1)+dy(u2)) *q) + int2d(Th)(1*q); 
- @varf vb2([v1,v2],p) = @int2d(Th)( (dy(v1)+dy(v2)) *p) + int2d(Th)(1*p);  //  same formulation 
+ @varf vb2([v1,v2],p) = @int2d(Th)( (dy(v1)+dy(v2)) *p) + int2d(Th)(1*p); 
 \eFF
 \end{note}
 \index{varf!array}\index{varf!matrix} 
 
-To build matrix $A$ from the bilinear part the the variational form $a$ do simply
+
+To build matrix $A$ from the bilinear part the the variational form $a$ of type \ttCC{@varf}  do simply
+\index{matrix!varf}
 \bFF
-matrix  A = a(Vh,Wh);
+  A = a(Vh,Wh [, ...] );
  // where  Vh is "unkown  fespace"  with a correct number of component
  // where  Wh is "test  fespace"  with a correct number of component
 \eFF
+
+The possible named parameter \texttt{" [, ... ] "} of the construction are 
+\begin{description}
+    \item[solver=]   \texttt{LU}, \texttt{CG},\index{matrix!varf!solver=}
+    \texttt{Crout},\texttt{Cholesky},\texttt{GMRES},\texttt{UMFPACK} ...
+
+    The default solver is \texttt{GMRES}.
+    The storage mode of the matrix of the underlying linear system
+    depends on
+    the type of solver chosen; for \texttt{LU}  the matrix is sky-line non
+    symmetric, for \texttt{Crout} the matrix is sky-line symmetric, for
+    \texttt{Cholesky} the matrix is sky-line symmetric positive
+    definite,  for \texttt{CG}   the matrix is sparse symmetric positive,
+    and for \texttt{GMRES} or \texttt{UMFPACK} the matrix is just  sparse.
+
+    \item[factorize =] \index{matrix!varf!solver=factorize} if true then do the matrix factorization for 
+    \texttt{LU}, \texttt{Cholesky} or \texttt{Crout}, the default value is $false$. 
+
+    \item[eps=]  \index{matrix!varf!eps=}   a real expression. $\varepsilon$  sets the stopping test for
+    the iterative methods like \texttt{CG}. Note that if $\varepsilon$
+    is negative  then the stopping test is:
+    $$  || A x - b || < |\varepsilon| $$
+    if it is positive then the stopping test is 
+        $$  || A x - b || < \frac{|\varepsilon|}{|| A x_{0} - b ||} $$
+
+ 
+    \item[precon=]  \index{matrix!varf!precon=} name of a function (for example \texttt{P}) to set the precondioner. \index{precon=}
+    The prototype for the function \texttt{P} must be
+\bFF
+    @func @real[@int]  P(@real[@int] & xx) ;
+\eFF
+      \item[tgv=]  \index{matrix!varf!tgv=}    Huge value ($10^{30}$) used to implement
+      Dirichlet boundary conditions.
+      
+      \item[tolpivot=] \index{matrix!varf!tolpivot =}  set the tolerence of the pivot in UMFPACK ($10^-1$)  and, LU, Crout, Cholesky
+      factorisation ($10^{-20}$).
+
+      \item[tolpivotsym=] \index{problem!tolpivotsym =} \index{solve!tolpivotsym=} set the tolerence of the pivot sym in UMFPACK      
+      \item[strategy=] \index{problem!strategy =} \index{solve!strategy=} set the integer UMFPACK strategy  ($0$ by default).  
+          
+\end{description}
+
+
 \begin{note}
 The line of the matrix corresponding to the space \ttCC{Wh} and the
 column of the matrix corresponding to the space \ttCC{Vh}.
 \end{note}
 
 To build the dual vector b (of type real[int])  from the linear part of the variational form $a$ do simply
+\index{array!varf}
 \bFF
- real b(Vh.ndof); 
- b = a(0,Wh); 
+  real b(Vh.ndof); 
+  b = a(0,Vh); 
 \eFF
 
-  
-  
-\bFF
-@mesh Th=@square(10,10);
-@fespace Xh(Th,@P2),Mh(Th,@P1);
-
-@varf bx(u1,q) = @int2d(Th)( (dx(u1)*q));
-\eFF
-$$ bx(u_{1},q)= \int_{\Omega_{h}} \frac{\p u_{1}}{\p x} q $$
+A first example to compute the area of each triangle $K$ of mesh $Th$,  just do:
 
 \bFF
-@varf by(u1,q) = @int2d(Th)( (dy(u1)*q));
+   fespace Nh(Th,P0); // the  space function contant / triangle 
+   Nh areaK;  
+   varf varea(unused,chiK) =  int2d(Th)(chiK);	
+   etaK[]= varea(0,Ph);  
 \eFF
-$$ by(u_{1},q)= \int_{\Omega_{h}} \frac{\p u_{1}}{\p y} q $$
+Effectively, the basic functions of space $Nh$, are the characteristic function 
+of the element of Th, and the numbering is the numeration of the element, 
+so by construction:
+$$ 
+ \mathtt{etaK}[i] = \int {1}_{|K_i} = \int_{K_i} 1;
+ $$
+
+Now, we can use this to compute error indicator like in examples 
+\texttt{AdaptResidualErrorIndi\-cator.edp} in directory \texttt{examples++-tutorial}.
+
+First to compute a continuous approximation to the function $h$ "density mesh size"  of the mesh $Th$.
+
 \bFF
-@varf a(u1,u2)= @int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
-                    +  @on(1,2,4,u1=0)  +  @on(3,u1=1) ;
+   fespace Vh(Th,P1); 
+   Vh h ; 
+   real[int]  count(Th.nv); 	varf vmeshsizen(u,v)=intalledges(Th,qfnbpE=1)(v); 
+   varf vedgecount(u,v)=intalledges(Th,qfnbpE=1)(v/lenEdge); 
+   //	  computation of the mesh size
+   //   ----------------------------- 
+   count=vedgecount(0,Vh); // number of edge / vertex 
+   h[]=vmeshsizen(0,Vh); //  sum length edge / vertex 
+   h[]=h[]./count; // mean lenght edge / vertex 	
 \eFF
 
 
-
-$$ a(u_{1},v_{2}) = \int_{\Omega_{h}}  \nabla u_{1}.\nabla u_{2}; \quad
-             \quad u_{1} = 1*g \mbox{ on } \Gamma_{3}, u_{1} =0 \mbox{ on } \Gamma_{1}\cup \Gamma_{2}\cup \Gamma_{4} $$
- where $f$ is defined later.
- \\
- Later in the program, variational forms can be used to construct right hand side vectors,
-matrices associated to them, or to define a new problem;\index{matrix}
+To compute error indicator for Poisson equation : 
+$$
+{ \eta_K =   \int_K h_K^2 |( f + \Delta u_h)|^2  + \int_{\partial K} h_e |[ \frac{\partial u_h}{\partial n} ]|^2  }
+$$
+where $ h_K$ is size of the longest edge (\ttCC{hTriangle}), $h_e$ is the size of the current edge (\ttCC{lenEdge}), $n$ the
+normal. 
+ 
 \bFF
-Xh u1,u2,v1,v2;
-Mh p,q,ppp;
-
-Xh bc1; bc1[] = a(0,Xh);  //  right hand side for boundary condition
-Xh b;
-
-@matrix A= a(Xh,Xh,solver=CG);   // the Laplace matrix \index{matrix!solver} \index{GC}
-@matrix<complex> CA= a(Xh,Xh,solver=CG);   // the complex Laplace matrix \index{matrix!complex} \index{GC}
-
-@matrix Bx= bx(Xh,Mh);    // $ Bx = (Bx_{ij})$ and $ Bx_{ij}= bx(b^x_j,b^m_j)$
-//  where $b^x_j$ is a basis of Xh, and $b^m_j$ is a basis of Mh.
-@matrix By= by(Xh,Mh);    // $ By= (By_{ij})$ and $ By_{ij}= by(b^x_j,b^m_j)$
+   fespace Nh(Th,P0); // the  space function contant / triangle 
+   Nh etak;  
+   varf vetaK(unused,chiK) = 
+       intalledges(Th)(chiK*lenEdge*square(jump(N.x*dx(u)+N.y*dy(u))))
+      +int2d(Th)(chiK*square(hTriangle*(f+dxx(u)+dyy(u))) );
+	
+   etak[]= vetaK(0,Ph);  
 \eFF
-\begin{note}
-The line of the matrix corresponding to test function on the bilinear form.
-\end{note}
 
-\begin{note}
-The vector $bc1[]$ contains the contribution of the boundary condition $u_{1}=1$.
-\end{note}
-Here we have three matrices $A,Bx,By$, and we can solve the problem:\\
-find $ u_{1} \in X_{h}$ such that
-$$ a(v_{1},u_{1})= by(v_{1},f), \forall v_{1}\in X_{0h}, $$
-$$ u_{1} = g , \quad \mbox{on~} \Gamma_{1}, \mbox{and}\quad u_{1}=0 \quad \mbox{on~}  \Gamma_{1}\cup \Gamma_{2}\cup \Gamma_{4}$$
-with the following line (where $f=x$, and $ g=\sin(x)$)\index{[]@\verb=[]=}
-\bFF
-Mh f=x;
-Xh g=sin(x);
-b[]  = Bx'*f[]; //
-b[] += bc1[] .*bcx[]; // u1= g on $\Gamma_{3}$ boundary see following remark
-u1[] = A^-1*b[]; // solve the linear system \index{solve!linear system}\index{\string^-1}
-\eFF
-\begin{note} The boundary condition \index{boundary condition} is implemented
- by penalization and vector \texttt{bc1[]} contains
- the contribution of the boundary condition $u_{1}=1$ ,
-so to change the boundary condition,
-we have just to multiply the vector $bc1[]$ by the value $f$
- of the new boundary condition term by term
-with the operator \texttt{.*}.\index{.*@\verb=.*=}
-\refSec{Uzawa} \texttt{StokesUzawa.edp}  gives
- a real example of using all this features.
-\end{note}
+ 
+%  
+%  
+%\bFF
+%@mesh Th=@square(10,10);
+%@fespace Xh(Th,@P2),Mh(Th,@P1);
+
+%@varf bx(u1,q) = @int2d(Th)( (dx(u1)*q));
+%\eFF
+%$$ bx(u_{1},q)= \int_{\Omega_{h}} \frac{\p u_{1}}{\p x} q $$
+
+%\bFF
+%@varf by(u1,q) = @int2d(Th)( (dy(u1)*q));
+%\eFF
+%$$ by(u_{1},q)= \int_{\Omega_{h}} \frac{\p u_{1}}{\p y} q $$
+%\bFF
+%@varf a(u1,u2)= @int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
+%                    +  @on(1,2,4,u1=0)  +  @on(3,u1=1) ;
+%\eFF
+
+%
+
+%$$ a(u_{1},v_{2}) = \int_{\Omega_{h}}  \nabla u_{1}.\nabla u_{2}; \quad
+%             \quad u_{1} = 1*g \mbox{ on } \Gamma_{3}, u_{1} =0 \mbox{ on } \Gamma_{1}\cup \Gamma_{2}\cup \Gamma_{4} $$
+% where $f$ is defined later.
+% \\
+% Later in the program, variational forms can be used to construct right hand side vectors,
+%matrices associated to them, or to define a new problem;\index{matrix}
+%\bFF
+%Xh u1,u2,v1,v2;
+%Mh p,q,ppp;
+
+%Xh bc1; bc1[] = a(0,Xh);  //  right hand side for boundary condition
+%Xh b;
+
+%@matrix A= a(Xh,Xh,solver=CG);   // the Laplace matrix \index{matrix!solver} \index{GC}
+%@matrix<complex> CA= a(Xh,Xh,solver=CG);   // the complex Laplace matrix \index{matrix!complex} \index{GC}
+
+%@matrix Bx= bx(Xh,Mh);    // $ Bx = (Bx_{ij})$ and $ Bx_{ij}= bx(b^x_j,b^m_j)$
+%//  where $b^x_j$ is a basis of Xh, and $b^m_j$ is a basis of Mh.
+%@matrix By= by(Xh,Mh);    // $ By= (By_{ij})$ and $ By_{ij}= by(b^x_j,b^m_j)$
+%\eFF
+%\begin{note}
+%The line of the matrix corresponding to test function on the bilinear form.
+%\end{note}
+
+%\begin{note}
+%The vector $bc1[]$ contains the contribution of the boundary condition $u_{1}=1$.
+%\end{note}
+%Here we have three matrices $A,Bx,By$, and we can solve the problem:\\
+%find $ u_{1} \in X_{h}$ such that
+%$$ a(v_{1},u_{1})= by(v_{1},f), \forall v_{1}\in X_{0h}, $$
+%$$ u_{1} = g , \quad \mbox{on~} \Gamma_{1}, \mbox{and}\quad u_{1}=0 \quad \mbox{on~}  \Gamma_{1}\cup \Gamma_{2}\cup \Gamma_{4}$$
+%with the following line (where $f=x$, and $ g=\sin(x)$)\index{[]@\verb=[]=}
+%\bFF
+%Mh f=x;
+%Xh g=sin(x);
+%b[]  = Bx'*f[]; //
+%b[] += bc1[] .*bcx[]; // u1= g on $\Gamma_{3}$ boundary see following remark
+%u1[] = A^-1*b[]; // solve the linear system \index{solve!linear system}\index{\string^-1}
+%\eFF
+
 
 We add automatic \x{expression optimization} by default, if this optimization creates problems,
 it can be removed with the keyword \texttt{{optimize}} as in the following example : \index{optimize=}
+\index{varf!optimize=}
 \bFF
 @varf a(u1,u2)= @int2d(Th,optimize=false)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
                     +  @on(1,2,4,u1=0)  +  @on(3,u1=1) ;
@@ -8043,6 +8157,22 @@ The return value is the number of converged eigenvalue (can be greater than the 
 where the matrix $OP=  A - \sigma B $ with a solver and boundary condition,
 and the matrix $B$.
 
+
+\begin{note}{Boundary condition and Eigenvalue Problems\label{note BC EV}}\label{pp BC EV}
+
+ The lock (Dirichlet ) boundary condition is make with exact penalization 
+ so   we put 1e30=tgv  on the diagonal term of the lock degree of freedom (see equation  (\ref{eq tgv})).
+  So take Dirichlet boundary condition just on $A$ 
+  and not on  $B$.
+  because we solve $ w=OP^-1*B*v$. 
+  
+  If you put  lock  (Dirichlet )  boundary condition on $B$ matrix  (with key work \ttCC{@on})
+you get small spurious modes $(10^{-30})$, du to boundary condition, but if you forget the lock boundary condition on $B$ matrix  (no  key work "on")
+you get huge spurious $(10^{30})$  modes associated to boundary conditon.
+We compute only small mode, so we get the good  one in this case.
+
+\end{note}
+
 \begin{description}
           \item[\texttt{sym=}] \index{EigenValue!sym=}   
           the problem is symmetric (all the eigen value are real)
@@ -8055,7 +8185,7 @@ and the matrix $B$.
          \item[\texttt{vector=}]   \index{EigenValue!vector=} 
          the  FE function array to store the eigenvectors 
          \item[\texttt{rawvector=}]  \index{EigenValue!rawvector=} 
-          a \texttt{real[int,int] } to store eigenvectors by column. (up to version 2-17).
+          an array of type \texttt{real[int,int] } to store eigenvectors by column. (up to version 2-17).
          
  For real nonsymmetric problems, complex eigenvectors are given as two consecutive vectors, so if eigenvalue $k$ and $k+1$ are complex conjugate eigenvalues, the $k$th vector will contain the real part and the $k+1$th vector the imaginary part of the corresponding complex conjugate eigenvectors.
 
@@ -8105,8 +8235,7 @@ Vh u1,u2;
 @varf  op(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) - sigma* u1*u2 )
                     +  on(1,2,3,4,u1=0) ;  // Boundary condition
 
-@varf b([u1],[u2]) = int2d(Th)(  u1*u2 ) ; // no  Boundary condition
-
+@varf b([u1],[u2]) = int2d(Th)(  u1*u2 );//no Boundary condition see note \ref{note BC EV} 
 @matrix OP= op(Vh,Vh,solver=Crout,factorize=1);  // crout solver because the matrix in not positive
 @matrix B= b(Vh,Vh,solver=CG,eps=1e-20);
 
