@@ -493,7 +493,7 @@ class LinearCG : public OneOperator
    Expression  mat;
    typedef  typename VirtualMatrice<R>::plusAx plusAx;
    MatF_O(int n,Stack stk,const OneOperator * op) 
-     : stack(stk),
+     : VirtualMatrice<R>(n),stack(stk),
        x(n),c_x(CPValue(x)),
        mat(op->code(basicAC_F0_wa(c_x))) {
          ffassert(atype<Kn >() ==(aType) *op);
@@ -643,7 +643,8 @@ class LinearGMRES : public OneOperator
    Expression  mat;
    typedef  typename VirtualMatrice<R>::plusAx plusAx;
    MatF_O(int n,Stack stk,const OneOperator * op) 
-     : stack(stk),
+     : VirtualMatrice<R>(n),
+       stack(stk),
        x(n),c_x(CPValue(x)),
        mat(op->code(basicAC_F0_wa(c_x))) {
        ffassert(atype<Kn >() ==(aType) *op); }

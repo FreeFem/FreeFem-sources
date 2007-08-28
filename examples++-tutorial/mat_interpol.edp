@@ -13,10 +13,10 @@ matrix IV= interpolate(Vh,Vh4); //  here the function is
 // exended by continuity
 
 cout << " IV Vh<-Vh4 " << IV << endl;
-Vh v, vv;          Vh4 v4=x*y;
-v=v4;              vv[]= IV*v4[];
-// here   v  == vv    =>  
-real[int]  diff= vv[] - v[]; 
+Vh v;          Vh4 v4=x*y;
+v=v4;           real[int]   vv= IV*v4[];
+// here   v[]  == vv    =>  
+real[int]  diff= vv - v[]; 
 cout << " || v - vv || = " <<  diff.linfty << endl;
 assert( diff.linfty<= 1e-6); // 
 

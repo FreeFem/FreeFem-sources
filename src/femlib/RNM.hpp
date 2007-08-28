@@ -195,7 +195,9 @@ template<class P,class Q>
 
 template<class R> 
 struct  VirtualMatrice { public:
-
+    int N,M;
+    VirtualMatrice(int nn,int mm): N(nn),M(mm) {}
+    VirtualMatrice(int nn): N(nn),M(nn) {}
   //  y += A x
   virtual void addMatMul(const KN_<R> &  x, KN_<R> & y) const =0; 
   virtual void addMatTransMul(const KN_<R> &  x, KN_<R> & y) const 
@@ -896,15 +898,15 @@ class KN :public KN_<R> { public:
 //   KN& operator =(const MatriceCreuseDivKN_<R> & A1x)  
 //       { if(this->unset()) set(new R[A1x.v.N()],A1x.v.N());KN_<R>::operator=(A1x);return *this;}
    KN& operator =(const typename VirtualMatrice<R>::plusAx & Ax)  
-        { if(this->unset()) set(new R[Ax.x.N()],Ax.x.N());KN_<R>::operator=(Ax);return *this;}
+        { if(this->unset() && Ax.A->N ) set(new R[Ax.A->N],Ax.A->N);KN_<R>::operator=(Ax);return *this;}
    KN& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
         { if(this->unset()) set(new R[Ab.b.N()],Ab.b.N());KN_<R>::operator=(Ab);return *this;}
    KN& operator +=(const typename  VirtualMatrice<R>::plusAx & Ax)  
-        { if(this->unset()) set(new R[Ax.x.N()],Ax.x.N());KN_<R>::operator+=(Ax);return *this;}
+        { if(this->unset()  && Ax.A->N) set(new R[Ax.A->N],Ax.A->N);KN_<R>::operator+=(Ax);return *this;}
    KN& operator =(const typename VirtualMatrice<R>::plusAtx & Ax)  
-        { if(this->unset()) set(new R[Ax.x.N()],Ax.x.N());KN_<R>::operator=(Ax);return *this;}
+        { if(this->unset()&&Ax.A->M) set(new R[Ax.A->M],Ax.A->M);KN_<R>::operator=(Ax);return *this;}
    KN& operator +=(const typename VirtualMatrice<R>::plusAtx & Ax)  
-        { if(this->unset()) set(new R[Ax.x.N()],Ax.x.N());KN_<R>::operator+=(Ax);return *this;}
+        { if(this->unset()&&Ax.A->M) set(new R[Ax.A->M],Ax.A->M);KN_<R>::operator+=(Ax);return *this;}
 
    template<class P,class Q> 
      KN& operator =(const  PplusQ<P,Q> & PQ)  
