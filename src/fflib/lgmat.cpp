@@ -447,6 +447,22 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   return Nothing; 
 }
 
+bool SetSuperUMFPACK()
+{
+    if(verbosity>1)
+	cout << " SetDefault sparse solver to SuperLU" << endl;
+    DefSparceSolver<double>::solver  =BuildSolverUMFPack;
+    DefSparceSolver<Complex>::solver =BuildSolverUMFPack;    
+}
+
+bool SetSuperGMRES()
+{
+    if(verbosity>1)
+	cout << " SetDefault sparse solver to SuperLU" << endl;
+    DefSparceSolver<double>::solver  =BuildSolverGMRES<double>;
+    DefSparceSolver<Complex>::solver =BuildSolverGMRES<Complex>;    
+}
+
 
 AnyType SetMatrixInterpolation(Stack,Expression ,Expression);
 
@@ -2135,7 +2151,11 @@ void  init_lgmat()
  Global.Add("interplotematrix","(",new  OneOperatorCode<PrintErrorCompileIM>);
  zzzfff->Add("mapmatrix",atype<map< pair<int,int>, double> *>());
  zzzfff->Add("Cmapmatrix",atype<map< pair<int,int>, Complex> *>()); // a voir
-       
+
+ Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
+#ifdef HAVE_LIBUMFPACK
+ Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));
+#endif
 
  // pour compatibiliter 
 

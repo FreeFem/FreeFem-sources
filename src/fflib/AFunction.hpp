@@ -2880,6 +2880,26 @@ void  initArrayDCL();
 
 inline C_F0  OneOperator::code2(const basicAC_F0 &a) const  {return C_F0(code(a),r);}	
 
+template<class R>
+class  OneOperator0 : public OneOperator {
+    class E_F0_F :public  E_F0 { public:
+	typedef  R (*func)( ) ; 
+	func f;
+	E_F0_F(func ff)  : f(ff) {}
+	AnyType operator()(Stack )  const  {return SetAny<R>( f()) ;}  
+	operator aType () const { return atype<R>();} 
+	
+    };
+    
+    //  aType r; //  return type
+    typedef  R (*func)() ; 
+    func  f;
+public: 
+	E_F0 * code(const basicAC_F0 & ) const 
+    { return  new E_F0_F(f);} 
+    OneOperator0(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
+};
+
 #endif
 
 

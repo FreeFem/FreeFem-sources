@@ -105,7 +105,7 @@ inline void MyAssert(int i,char * ex,char * file,long line)
  }
 
 
-  
+/*  
 template<class R>
 class  OneOperator0 : public OneOperator {
  class E_F0_F :public  E_F0 { public:
@@ -125,7 +125,7 @@ class  OneOperator0 : public OneOperator {
      { return  new E_F0_F(f);} 
     OneOperator0(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
 };
-
+*/
 template<class R>
 class  OneOperatorConst : public OneOperator {
     E_F0 * e;

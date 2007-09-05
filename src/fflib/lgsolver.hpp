@@ -118,7 +118,7 @@ class MatC2R : public VirtualMatrice<double> { public:
   const MM &m;
 
   MatC2R(const MM &mm):
-      VirtualMatrice<double>(mm.N,mm.M),m(mm) {}
+      VirtualMatrice<double>(mm.N*2,mm.M*2),m(mm) {}
 
   void addMatMul(const  KN_<double>  & x, KN_<double> & Ax) const {
 
@@ -127,8 +127,8 @@ class MatC2R : public VirtualMatrice<double> { public:
   }
 
   plusAx operator*(const KN<double> &  x) const {return plusAx(this,x);}
-  virtual bool ChecknbLine(int n) const { return true;}  
-  virtual bool ChecknbColumn(int m) const { return true;} 
+  virtual bool ChecknbLine(int n) const { return !N ||n==N;}  
+  virtual bool ChecknbColumn(int m) const { return !M ||m==M;} 
 
 
 };
@@ -471,6 +471,22 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
 
  
 };     
+
+
+template<class R>
+typename MatriceMorse<R>::VirtualSolver *
+BuildSolverGMRES(const MatriceMorse<R> *A,int strategy,
+		 double tgv, double eps, double tol_pivot,double tol_pivot_sym,
+		 int NbSpace,int itmax , const void * precon, void * stack )
+{
+    typename MatriceMorse<R>::VirtualSolver * ret=0;
+    if (precon)
+	ret=new SolveGMRESPrecon<R>(*A,(const OneOperator *)precon,stack,NbSpace,itmax,eps);
+    else 
+	ret=new SolveGMRESDiag<R>(*A,NbSpace,itmax,eps);
+    
+    return ret;
+}
 
 }
 
