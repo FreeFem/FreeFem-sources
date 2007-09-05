@@ -1,6 +1,7 @@
 #ifndef KNM_H_
 #define KNM_H_
-
+// version aout 2007 FH.
+// ----------------------
 // une tentative qui ne marche pas 
 // de tableau constant 
 #include <complex>
@@ -95,7 +96,7 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //   w=u(i(:))  //  
 //   version mars 2004 make small correction
 //   in  ITAB operator problem if non type R a defi 
- //   -------------------
+//   -------------------
 //   Modif pour version avec les Complex   mai 2004                                                                                                 
 //   (u,v)  donne le produit complex utiliser dans le produit matrice vecteur
 //   (u,conj(v))  donne le produit hermitiene pour le gradient conjugue
@@ -105,6 +106,10 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //  adding some this-> 
 //   mars 2007
 // correction in operator operation:b -1*c 
+// aout 2007
+//  correct y = A*x ; when y is unset 
+//  correct y += A*x ; when y is unset 
+//  add size of the matrix in VirtualMatrix class.
 // ----------------
 inline double  conj(const double & x){return x;}
 inline float  conj(const float &x){return x;}
@@ -897,17 +902,18 @@ class KN :public KN_<R> { public:
 //       {if(this->unset()) set(new R[Ax.v.N()],Ax.v.N()); KN_<R>::operator+=(Ax);return *this;}
 //   KN& operator =(const MatriceCreuseDivKN_<R> & A1x)  
 //       { if(this->unset()) set(new R[A1x.v.N()],A1x.v.N());KN_<R>::operator=(A1x);return *this;}
+  // correcton aout 2007 FH  add N,M flied in VirtualMatrice
    KN& operator =(const typename VirtualMatrice<R>::plusAx & Ax)  
         { if(this->unset() && Ax.A->N ) set(new R[Ax.A->N],Ax.A->N);KN_<R>::operator=(Ax);return *this;}
    KN& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
         { if(this->unset()) set(new R[Ab.b.N()],Ab.b.N());KN_<R>::operator=(Ab);return *this;}
    KN& operator +=(const typename  VirtualMatrice<R>::plusAx & Ax)  
-        { if(this->unset()  && Ax.A->N) set(new R[Ax.A->N],Ax.A->N);KN_<R>::operator+=(Ax);return *this;}
+        { if(this->unset()  && Ax.A->N) set(new R[Ax.A->N],Ax.A->N);KN_<R>::operator=(Ax);return *this;}
    KN& operator =(const typename VirtualMatrice<R>::plusAtx & Ax)  
         { if(this->unset()&&Ax.A->M) set(new R[Ax.A->M],Ax.A->M);KN_<R>::operator=(Ax);return *this;}
    KN& operator +=(const typename VirtualMatrice<R>::plusAtx & Ax)  
-        { if(this->unset()&&Ax.A->M) set(new R[Ax.A->M],Ax.A->M);KN_<R>::operator+=(Ax);return *this;}
-
+        { if(this->unset()&&Ax.A->M) set(new R[Ax.A->M],Ax.A->M);KN_<R>::operator=(Ax);return *this;}
+// end correcton FH
    template<class P,class Q> 
      KN& operator =(const  PplusQ<P,Q> & PQ)  
       { *this=PQ.p; *this+=PQ.q;return *this; } 

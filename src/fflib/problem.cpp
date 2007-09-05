@@ -2063,7 +2063,8 @@ void DefSolver(Stack stack,
          break;
 #ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::UMFpack :
-            AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
+            AA.SetSolverMaster(DefSparceSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
+ //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
          break;
            
 #endif         
@@ -2075,7 +2076,28 @@ void DefSolver(Stack stack,
       }
   }  
 
+#ifdef HAVE_LIBUMFPACK
 
+template <>
+DefSparceSolver<double>::SparceMatSolver  DefSparceSolver<double>::solver =BuildSolverUMFPack;
+template <>
+DefSparceSolver<Complex>::SparceMatSolver  DefSparceSolver<Complex>::solver =BuildSolverUMFPack;
+
+//DefSparceSolver<Complex>::SparceMatSolver  DefSparceSolver<Complex>::solver =BuildSolverUMFPack;
+
+//SparceRMatSolve TheSparceRMatSolve=BuildSolverUMFPack;// no defaut solver
+//SparceCMatSolve TheSparceCMatSolve=BuildSolverUMFPack;// no defaut solver
+
+#else
+template <>
+DefSparceSolver<double>::SparceMatSolver  DefSparceSolver<double>::solver =0;
+template <>
+DefSparceSolver<Complex>::SparceMatSolver  DefSparceSolver<Complex>::solver =0;
+//SparceRMatSolve TheSparceRMatSolve=0;// no defaut solver
+ //SparceCMatSolve TheSparceCMatSolve=0;// no defaut solver
+//DefSparceSolver<double>::SparceMatSolver  DefSparceSolver<double>::soler =0;
+//DefSparceSolver<Complex>::SparceMatSolver  DefSparceSolver<Complex>::soler =0;
+#endif
   
 
  

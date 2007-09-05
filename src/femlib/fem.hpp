@@ -313,6 +313,7 @@ public:
       else if( (i-=6)<4) return SortedTriplet( &Face(0,i)-v0, &Face(1,i)-v0, &Face(2,i)-v0) ;
       else if(i==0) return SortedTriplet(vertices[0]-v0,this-t0,-2);
       else ffassert(0);
+      return 0;
   }
 private:
   Tetraedre(const Tetraedre &);  //  no copy of triangle

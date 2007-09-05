@@ -100,7 +100,6 @@ inline void Check(bool  v,const char * mess)
 }           
 
 
-
 struct TypeSolveMat {
   enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, UMFpack=6 };
   TSolveMat t;
