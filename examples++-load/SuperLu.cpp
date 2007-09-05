@@ -18,6 +18,7 @@ template <class R> struct SuperLUDriver
 template <> struct SuperLUDriver<double>
 {
     /* Driver routines */
+    static  Dtype_t R_SLU_T() { return SLU_D;} 
     static void
     gssv(superlu_options_t * p1, SuperMatrix * p2, int * p3, int * p4, SuperMatrix * p5,
 	  SuperMatrix * p6, SuperMatrix * p7 , SuperLUStat_t * p8, int * p9)
@@ -75,7 +76,7 @@ template <> struct SuperLUDriver<double>
 template <> struct SuperLUDriver<Complex>
 {
     /* Driver routines */
-    
+        static  Dtype_t R_SLU_T() { return SLU_Z;} 
     static doublecomplex *dc(Complex *p)  { return (doublecomplex *) (void *) p;}
     
     static void
@@ -209,13 +210,13 @@ public:
     set_default_options(&options);
     options.Trans = TRANS;
 
-    
-    Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
+    Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
+    Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);
 
     printf("Dimension %dx%d; # nonzeros %d\n", A.nrow, A.ncol, nnz);
     
-    Create_Dense_Matrix(&B, m, 0, (R*) 0, m, SLU_DN, SLU_D, SLU_GE);
-    Create_Dense_Matrix(&X, m, 0, (R*) 0, m, SLU_DN, SLU_D, SLU_GE);
+    Create_Dense_Matrix(&B, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
+    Create_Dense_Matrix(&X, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
     
     if ( !(etree  = new int[n]) ) ABORT("Malloc fails for etree[].");
     if ( !(perm_r = new int[n]) ) ABORT("Malloc fails for perm_r[].");
@@ -283,9 +284,10 @@ public:
     X.Store=0;
     ffassert ( &x[0] != &b[0]);
     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+    Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
 
-    Create_Dense_Matrix(&B, m, 1, b, m, SLU_DN, SLU_D, SLU_GE);
-    Create_Dense_Matrix(&X, m, 1, x, m, SLU_DN, SLU_D, SLU_GE);
+    Create_Dense_Matrix(&B, m, 1, b, m, SLU_DN, R_SLU, SLU_GE);
+    Create_Dense_Matrix(&X, m, 1, x, m, SLU_DN, R_SLU, SLU_GE);
     
     B.ncol = nrhs;  /* Set the number of right-hand side */
     
