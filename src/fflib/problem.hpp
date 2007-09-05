@@ -1005,12 +1005,13 @@ double tol_pivot,double tol_pivot_sym)
         else 
           AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,NbSpace,itmax,eps));
         break;
-#ifdef HAVE_LIBUMFPACK         
+//#ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::UMFpack :
-            AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
+	    AA.SetSolverMaster(DefSparceSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,(void *)precon,stack )); 
+         //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
         break;
            
-#endif         
+//#endif         
         
       
       default:
@@ -1134,8 +1135,10 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
 
 
 
-
-
+bool SetGMRES();
+#ifdef HAVE_LIBUMFPACK
+bool SetUMFPACK();
+#endif
 /*
 template<class R>
 AnyType ProdMat(Stack,Expression ,Expression);

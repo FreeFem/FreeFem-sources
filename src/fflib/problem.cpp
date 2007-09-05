@@ -2061,13 +2061,13 @@ void DefSolver(Stack stack,
           else 
             AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,NbSpace,itmax,eps));
          break;
-#ifdef HAVE_LIBUMFPACK         
+//#ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::UMFpack :
-            AA.SetSolverMaster(DefSparceSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
- //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
+            AA.SetSolverMaster(DefSparceSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,(const void *) precon,stack));
+//           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
          break;
            
-#endif         
+//#endif         
         default:
           cerr << " type resolution " << typemat->t << endl;
           CompileError("type resolution inconnue"); break;       
@@ -2076,7 +2076,24 @@ void DefSolver(Stack stack,
       }
   }  
 
+bool SetGMRES()
+{
+    if(verbosity>1)
+	cout << " SetDefault sparse solver to UMFPack" << endl;
+    DefSparceSolver<double>::solver  =BuildSolverGMRES;
+    DefSparceSolver<Complex>::solver =BuildSolverGMRES; 
+    return true;
+}
+
 #ifdef HAVE_LIBUMFPACK
+bool SetUMFPACK()
+{
+    if(verbosity>1)
+	cout << " SetDefault sparse solver to UMFPack" << endl;
+    DefSparceSolver<double>::solver  =BuildSolverUMFPack;
+    DefSparceSolver<Complex>::solver =BuildSolverUMFPack;  
+    return true;
+}
 
 template <>
 DefSparceSolver<double>::SparceMatSolver  DefSparceSolver<double>::solver =BuildSolverUMFPack;
@@ -2090,13 +2107,17 @@ DefSparceSolver<Complex>::SparceMatSolver  DefSparceSolver<Complex>::solver =Bui
 
 #else
 template <>
-DefSparceSolver<double>::SparceMatSolver  DefSparceSolver<double>::solver =0;
+DefSparceSolver<double>::SparceMatSolver  DefSparceSolver<double>::solver =BuildSolverGMRES;
 template <>
-DefSparceSolver<Complex>::SparceMatSolver  DefSparceSolver<Complex>::solver =0;
-//SparceRMatSolve TheSparceRMatSolve=0;// no defaut solver
- //SparceCMatSolve TheSparceCMatSolve=0;// no defaut solver
-//DefSparceSolver<double>::SparceMatSolver  DefSparceSolver<double>::soler =0;
-//DefSparceSolver<Complex>::SparceMatSolver  DefSparceSolver<Complex>::soler =0;
+DefSparceSolver<Complex>::SparceMatSolver  DefSparceSolver<Complex>::solver =BuildSolverGMRES;
+
+bool SetUMFPACK()
+{
+    if(verbosity>1)
+	cout << " Sorry no UMFPack" << endl;
+    return false;
+}
+
 #endif
   
 

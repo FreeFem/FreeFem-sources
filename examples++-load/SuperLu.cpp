@@ -212,7 +212,7 @@ public:
 
     Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
     Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);
-
+    if(verbosity>4)
     printf("Dimension %dx%d; # nonzeros %d\n", A.nrow, A.ncol, nnz);
     
     Create_Dense_Matrix(&B, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
@@ -228,12 +228,6 @@ public:
         ABORT("SUPERLU_MALLOC fails for C[].");
     ferr=0;
     berr=0;
-    /*
-    if ( !(ferr = (double *) SUPERLU_MALLOC(nrhs * sizeof(double))) )
-        ABORT("SUPERLU_MALLOC fails for ferr[].");
-    if ( !(berr = (double *) SUPERLU_MALLOC(nrhs * sizeof(double))) ) 
-        ABORT("SUPERLU_MALLOC fails for berr[].");
-*/
     /* Initialize the statistics variables. */
     StatInit(&stat);
     
@@ -242,9 +236,10 @@ public:
     SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
            &L, &U, work, lwork, &B, &X, &rpg, &rcond, &ferr, &berr,
            &mem_usage, &stat, &info);
-    
+    if(verbosity>2)
     printf("LU factorization: dgssvx() returns info %d\n", info);
-    
+    if(verbosity>3)
+    {
     if ( info == 0 || info == n+1 ) {
 	
 	if ( options.PivotGrowth ) printf("Recip. pivot growth = %e\n", rpg);
@@ -263,7 +258,8 @@ public:
     } else if ( info > 0 && lwork == -1 ) {
         printf("** Estimated memory: %d bytes\n", info - n);
     }
-    if ( options.PrintStat ) StatPrint(&stat);
+    }
+    if ( verbosity>5 ) StatPrint(&stat);
     StatFree(&stat);
     if( B.Store)  Destroy_SuperMatrix_Store(&B);
     if( X.Store)  Destroy_SuperMatrix_Store(&X);
@@ -297,13 +293,15 @@ public:
     SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
            &L, &U, work, lwork, &B, &X, &rpg, &rcond, &ferr, &berr,
            &mem_usage, &stat, &info);
-    
+    if(verbosity>2)
     printf("Triangular solve: dgssvx() returns info %d\n", info);
     
+    if(verbosity>3)
+    {
     if ( info == 0 || info == n+1 ) {
 	
         /* This is how you could access the solution matrix. */
-        double *sol = (double*) ((DNformat*) X.Store)->nzval; 
+        R *sol = (R*) ((DNformat*) X.Store)->nzval; 
 	
 	if ( options.IterRefine ) {
             printf("Iterative Refinement:\n");
@@ -314,7 +312,7 @@ public:
     } else if ( info > 0 && lwork == -1 ) {
         printf("** Estimated memory: %d bytes\n", info - n);
     }
-    
+    }
     if(verbosity>1) cout << "   x min max " << x.min() << " " <<x.max() << endl;
     if( B.Store)  Destroy_SuperMatrix_Store(&B);
     if( X.Store)  Destroy_SuperMatrix_Store(&X);
@@ -344,17 +342,21 @@ public:
 
 
 
-inline MatriceMorse<double>::VirtualSolver *
-BuildSolverSuperLU(const MatriceMorse<double> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym )
+ MatriceMorse<double>::VirtualSolver *
+BuildSolverSuperLU(const MatriceMorse<double> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
+		   int NbSpace,int itmax ,const  void * precon, void * stack)
 {
+    if(verbosity>9)
     cout << " BuildSolverSuperLU<double>" << endl;
     return new SolveSuperLU<double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
 
 
-inline MatriceMorse<Complex>::VirtualSolver *
-BuildSolverSuperLU(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym )
+ MatriceMorse<Complex>::VirtualSolver *
+BuildSolverSuperLU(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
+		   int NbSpace,int itmax ,const  void * precon, void * stack)
 {
+    if(verbosity>9)
     cout << " BuildSolverSuperLU<Complex>" << endl;
     return new SolveSuperLU<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
@@ -363,10 +365,41 @@ BuildSolverSuperLU(const MatriceMorse<Complex> *A,int strategy,double tgv, doubl
 class Init { public:
     Init();
 };
+
+DefSparceSolver<double>::SparceMatSolver SparceMatSolver_R ; ;
+DefSparceSolver<Complex>::SparceMatSolver SparceMatSolver_C;
+
+
+bool SetDefault()
+{
+    if(verbosity>1)
+	cout << " SetDefault sparse to default" << endl;
+    DefSparceSolver<double>::solver =SparceMatSolver_R;
+    DefSparceSolver<Complex>::solver =SparceMatSolver_C;
+
+}
+
+bool SetSuperLU()
+{
+    if(verbosity>1)
+	cout << " SetDefault sparse solver to SuperLU" << endl;
+    DefSparceSolver<double>::solver  =BuildSolverSuperLU;
+    DefSparceSolver<Complex>::solver =BuildSolverSuperLU;    
+}
+
+
+
 Init init;
-Init::Init(){    
- DefSparceSolver<double>::solver =BuildSolverSuperLU;
- DefSparceSolver<Complex>::solver =BuildSolverSuperLU;
+Init::Init(){ 
+    
+    SparceMatSolver_R= DefSparceSolver<double>::solver;
+    SparceMatSolver_C= DefSparceSolver<Complex>::solver;
+    if(verbosity>1)
+	cout << "\n Add: SuperLU,  defaultsolver defaultsolverSuperLU" << endl;
+    DefSparceSolver<double>::solver =BuildSolverSuperLU;
+    DefSparceSolver<Complex>::solver =BuildSolverSuperLU;
+    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
+    Global.Add("defaulttoSuperLU","(",new OneOperator0<bool>(SetSuperLU));
 }
 
 

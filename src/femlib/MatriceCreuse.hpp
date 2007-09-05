@@ -714,21 +714,32 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 
 // add Sep 2007 for generic Space solver
 typedef MatriceMorse<double>::VirtualSolver *
-(*SparceRMatSolve)(const MatriceMorse<double> *A,int strategy,double ttgv, double epsilon, double pivot,double pivot_sym );
+   (*SparceRMatSolve)(const MatriceMorse<double> *A,int strategy,
+		   double ttgv, double epsilon, double pivot,double pivot_sym,
+		   int NbSpace,int itmax , const void * precon, void * stack);
 typedef MatriceMorse<Complex>::VirtualSolver *
-(*SparceCMatSolve)(const MatriceMorse<Complex> *A,int strategy,double ttgv, double epsilon, double pivot,double pivot_sym );
+   (*SparceCMatSolve)(const MatriceMorse<Complex> *A,int strategy,
+		   double ttgv, double epsilon, double pivot,double pivot_sym,
+		   int NbSpace,int itmax , const void * precon, void * stack);
+
 //extern SparceRMatSolve TheSparceRMatSolve;
 //extern SparceCMatSolve TheSparceCMatSolve;
 
 template<class R> struct DefSparceSolver {
-    typedef typename MatriceMorse<R>::VirtualSolver * (*SparceMatSolver)(const MatriceMorse<R> *A,int strategy,double ttgv, double epsilon, double pivot,double pivot_sym );
+    typedef typename MatriceMorse<R>::VirtualSolver * 
+            (*SparceMatSolver)(const MatriceMorse<R> *A,int strategy,
+			       double ttgv, double epsilon, double pivot,double pivot_sym ,
+			       int NbSpace,int itmax , const void * precon, void * stack);
     static SparceMatSolver solver;
-  static  typename MatriceMorse<R>::VirtualSolver * Build(const MatriceMorse<R> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym )
+    
+  static  typename MatriceMorse<R>::VirtualSolver * 
+      Build(const MatriceMorse<R> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
+	    int NbSpace,int itmax ,const  void * precon, void * stack)
 
     {
       typename MatriceMorse<R>::VirtualSolver *ret=0;
 	if(solver)
-	    ret =(solver)(A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
+	    ret =(solver)(A,strategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,(const void *) precon,stack);
 	return ret;	
     }
 };
@@ -999,16 +1010,21 @@ public:
 
 
 inline MatriceMorse<double>::VirtualSolver *
-BuildSolverUMFPack(const MatriceMorse<double> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym )
+BuildSolverUMFPack(const MatriceMorse<double> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
+		   int NbSpace,int itmax , const void * precon, void * stack )
 {
     return new SolveUMFPack<double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
 
 inline MatriceMorse<Complex>::VirtualSolver *
-BuildSolverUMFPack(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym )
+BuildSolverUMFPack(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
+		   int NbSpace,int itmax , const void * precon, void * stack )
 {
     return new SolveUMFPack<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
+
+
+
 
 #endif  
 //  endif ---- UMFPACK ----

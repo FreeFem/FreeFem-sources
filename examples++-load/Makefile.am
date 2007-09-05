@@ -14,6 +14,8 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
   qf11to25.cpp  Element_P3.cpp  Element_P3.hpp  Element_P4.cpp  Element_P4.hpp \
   plot-fb-P3.edp  plot-fb-P4.edp  LaplaceP3.edp   LaplaceP4.edp \
   Element_P3dc.cpp  Element_P3dc.hpp Element_P4dc.cpp  Element_P4dc.hpp \
+  SuperLu.cpp SuperLu.edp \
+  NewSolver.cpp \
   LapDG3.edp              convectchacon.edp       plot-fb-P3dc.edp \
   LapDG4.edp              dfft.edp                plot-fb-P4.edp \
   LaplaceP3.edp           ff-mt19937ar.edp        ref.edp \
