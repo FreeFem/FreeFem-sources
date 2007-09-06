@@ -393,7 +393,8 @@ bool SetSuperLU()
 
 
 Init init;
-Init::Init(){ 
+Init::Init()NotNull
+{ 
   
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
@@ -403,9 +404,8 @@ Init::Init(){
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   DefSparseSolver<double>::solver =BuildSolverSuperLU;
   DefSparseSolver<Complex>::solver =BuildSolverSuperLU;
-  if(Global.Find("defaultsolver").Empty() )
+  if(! Global.Find("defaultsolver").NotNull() )
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   Global.Add("defaulttoSuperLU","(",new OneOperator0<bool>(SetSuperLU));
 }
-
 
