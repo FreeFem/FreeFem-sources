@@ -311,10 +311,11 @@ Init::Init(){
   
   DefSparseSolver<double>::solver =BuildSolverUMFPack;
   DefSparseSolver<Complex>::solver =BuildSolverUMFPack;
-  if(Global.Find("defaultsolver").Empty() )
-    Global.New("defaultsolver", CVariable<bool>(SetDefault));
-  Global.New("defaulttoUMFPACK", CVariable<bool>(SetUMFPACK));
-  
+  if(! Global.Find("defaultsolver").NotNull() )
+    {    cout << "\n add defaultsolver" << endl;
+    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
+  }
+  Global.Add("defaulttoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));  
 }
 
 
