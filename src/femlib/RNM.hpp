@@ -106,9 +106,10 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //  adding some this-> 
 //   mars 2007
 // correction in operator operation:b -1*c 
-// aout 2007
+// aout 2007, 
 //  correct y = A*x ; when y is unset 
 //  correct y += A*x ; when y is unset 
+//  re-correct += sep 2007
 //  add size of the matrix in VirtualMatrix class.
 // ----------------
 inline double  conj(const double & x){return x;}
@@ -908,11 +909,19 @@ class KN :public KN_<R> { public:
    KN& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
         { if(this->unset()) set(new R[Ab.b.N()],Ab.b.N());KN_<R>::operator=(Ab);return *this;}
    KN& operator +=(const typename  VirtualMatrice<R>::plusAx & Ax)  
-        { if(this->unset()  && Ax.A->N) set(new R[Ax.A->N],Ax.A->N);KN_<R>::operator=(Ax);return *this;}
+  { if(this->unset()  && Ax.A->N) {
+        set(new R[Ax.A->N],Ax.A->N);
+        KN_<R>::operator=(R());}
+    KN_<R>::operator+=(Ax);
+    return *this;}
    KN& operator =(const typename VirtualMatrice<R>::plusAtx & Ax)  
         { if(this->unset()&&Ax.A->M) set(new R[Ax.A->M],Ax.A->M);KN_<R>::operator=(Ax);return *this;}
    KN& operator +=(const typename VirtualMatrice<R>::plusAtx & Ax)  
-        { if(this->unset()&&Ax.A->M) set(new R[Ax.A->M],Ax.A->M);KN_<R>::operator=(Ax);return *this;}
+  { if(this->unset()&&Ax.A->M) {
+       set(new R[Ax.A->M],Ax.A->M);
+      KN_<R>::operator=(R());}
+      KN_<R>::operator+=(Ax);
+     return *this;}
 // end correcton FH
    template<class P,class Q> 
      KN& operator =(const  PplusQ<P,Q> & PQ)  
