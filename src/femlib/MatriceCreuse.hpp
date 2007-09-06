@@ -688,9 +688,9 @@ class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatr
   KN<R> D1;
   public:
   typedef typename VirtualMatrice<R>::plusAx plusAx;
-  SolveGCDiag(const MatriceMorse<R> &A,double epsilon=1e-6) : 
+  SolveGCDiag(const MatriceMorse<R> &A,int itmax,double epsilon=1e-6) : 
     VirtualMatrice<R>(A.n),
-    n(A.n),nbitermax(Max(n,100)),eps(epsilon),epsr(0),D1(n)
+    n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),D1(n)
   { throwassert(A.sym());
     for (int i=0;i<n;i++)
       D1[i] = 1./A(i,i);}
@@ -714,23 +714,21 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 
 // add Sep 2007 for generic Space solver
 typedef MatriceMorse<double>::VirtualSolver *
-   (*SparceRMatSolve)(const MatriceMorse<double> *A,int strategy,
+   (*SparseRMatSolve)(const MatriceMorse<double> *A,int strategy,
 		   double ttgv, double epsilon, double pivot,double pivot_sym,
 		   int NbSpace,int itmax , const void * precon, void * stack);
 typedef MatriceMorse<Complex>::VirtualSolver *
-   (*SparceCMatSolve)(const MatriceMorse<Complex> *A,int strategy,
+   (*SparseCMatSolve)(const MatriceMorse<Complex> *A,int strategy,
 		   double ttgv, double epsilon, double pivot,double pivot_sym,
 		   int NbSpace,int itmax , const void * precon, void * stack);
 
-//extern SparceRMatSolve TheSparceRMatSolve;
-//extern SparceCMatSolve TheSparceCMatSolve;
 
-template<class R> struct DefSparceSolver {
+template<class R> struct DefSparseSolver {
     typedef typename MatriceMorse<R>::VirtualSolver * 
-            (*SparceMatSolver)(const MatriceMorse<R> *A,int strategy,
+            (*SparseMatSolver)(const MatriceMorse<R> *A,int strategy,
 			       double ttgv, double epsilon, double pivot,double pivot_sym ,
 			       int NbSpace,int itmax , const void * precon, void * stack);
-    static SparceMatSolver solver;
+    static SparseMatSolver solver;
     
   static  typename MatriceMorse<R>::VirtualSolver * 
       Build(const MatriceMorse<R> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
@@ -745,6 +743,20 @@ template<class R> struct DefSparceSolver {
 };
 
 // End Sep 2007 for generic Space solver
+
+struct TypeSolveMat {
+    enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6 };
+    TSolveMat t;
+    bool sym;
+    bool profile;
+    TypeSolveMat(TSolveMat tt=LU) :t(tt),
+	sym(t == CROUT || t ==CHOLESKY  ||  t==GC ),
+	profile(t != GC && t != GMRES && t != NONESQUARE && t != SparseSolver ) {}
+    bool operator==(const TypeSolveMat & a) const { return t == a.t;}                               
+    bool operator!=(const TypeSolveMat & a) const { return t != a.t;}
+    static TSolveMat defaultvalue;
+};
+
 
 #ifdef HAVE_LIBUMFPACK
 template<class R>

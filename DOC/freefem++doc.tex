@@ -3363,7 +3363,7 @@ The output is
   C +=  3*cb*cc';
   C -=  5i*cb*cc';
   cout << " C = " << C << endl;
-  // the way to transform a array to a sparce matrix
+  // the way to transform a array to a sparse matrix
   matrix B;
   B = A; 
   B=A(I,J); // B(i,j)= A(I(i),J(j))
@@ -3421,7 +3421,7 @@ there are some compound operator:
 product, so mathematically we have  \verb!a'*b!$ =  \overline{a}^T b $ \index{product! Hermitian dot}. 
  \item \verb@ a*b'@ is the outer product  (example  \verb$matrix B=a'*b$ \index{outer product}\index{product!outer}) 
  
- To set or get all the indices and coef of the sparce matrix $A$, let \verb!I,J,C! respectively
+ To set or get all the indices and coef of the sparse matrix $A$, let \verb!I,J,C! respectively
   two \verb!int[int]! array and a  \verb!real[int]! array. The three array defined
   the matrix  as follow
   $$
@@ -3473,7 +3473,7 @@ Vh m2; m2[] = f[]./g[];
   A.diag = diagofA ;  // set the diagonal of the matrix \index{diag}\index{matrix!diag}
 //  version 2.17 or better ---
 @int[@int] I(1),J(1); @real[int] C(1); 
-[I,J,C]=A; // get of the sparce term of the matrix A (the array are resized) 
+[I,J,C]=A; // get of the sparse term of the matrix A (the array are resized) 
 cout << " I= " << I << endl;
 cout << " J= " << J << endl;
 cout << " C= " << C << endl;
@@ -3552,7 +3552,7 @@ The output of the $I,J,C$ array:
         -2.5    0.5     1e+30
 \eFF
 
-The output of a diagonal sparce matrix $D$ \index{$<<$!matrix} (Warning du to fortran interface 
+The output of a diagonal sparse matrix $D$ \index{$<<$!matrix} (Warning du to fortran interface 
 the indices start on the output at one, but in \freefempp in index as in \texttt{C} begin
 at zero);
 
@@ -12364,7 +12364,7 @@ int   fvmP1P0(double q[3][2], double u[2],double c[3], double a[3][3], double wh
 // the evaluation routine
 AnyType MatrixUpWind0::operator()(Stack stack) const
 {
-  Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
+  Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
   MatriceMorse<R> * amorse =0;
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
   Mesh * pTh = GetAny<pmesh>((*expTh)(stack));
@@ -12410,15 +12410,15 @@ AnyType MatrixUpWind0::operator()(Stack stack) const
       }
     amorse=  new MatriceMorse<R>(Th.nv,Th.nv,Aij,false);
   }
-  sparce_mat->pUh=0;
-  sparce_mat->pVh=0;
-  sparce_mat->A.master(amorse);
-  sparce_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+  sparse_mat->pUh=0;
+  sparse_mat->pVh=0;
+  sparse_mat->A.master(amorse);
+  sparse_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   *mp=mps;
 
   if(verbosity>3) { cout << "  End Build MatrixUpWind : " << endl;}
 
-  return sparce_mat;
+  return sparse_mat;
 }
 
 

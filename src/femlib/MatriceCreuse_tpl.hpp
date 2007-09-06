@@ -893,7 +893,7 @@ solver(0)
 template <class R> 
 ostream& MatriceMorse<R>::dump(ostream & f) const 
 {
-  f << "# Sparce Matrix (Morse)  " << endl;
+  f << "# Sparse Matrix (Morse)  " << endl;
   f << "# first line: n m (is symmetic) nbcoef \n";
   f << "# after for each nonzero coefficient:   i j a_ij where (i,j) \\in  {1,...,n}x{1,...,m} \n";  
  

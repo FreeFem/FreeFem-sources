@@ -100,17 +100,6 @@ inline void Check(bool  v,const char * mess)
 }           
 
 
-struct TypeSolveMat {
-  enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, UMFpack=6 };
-  TSolveMat t;
-  bool sym;
-  bool profile;
-  TypeSolveMat(TSolveMat tt=LU) :t(tt),
-                                 sym(t == CROUT || t ==CHOLESKY  ||  t==GC ),
-                                 profile(t != GC && t != GMRES && t != NONESQUARE && t != UMFpack ) {}
-  bool operator==(const TypeSolveMat & a) const { return t == a.t;}                               
-  bool operator!=(const TypeSolveMat & a) const { return t != a.t;}                               
-};
 
 inline ostream & operator<<(ostream & f,const  TypeSolveMat & tm)
 {
@@ -121,7 +110,7 @@ inline ostream & operator<<(ostream & f,const  TypeSolveMat & tm)
    case TypeSolveMat::CHOLESKY:  f << "CHOLESKY (Skyline)"; break;
    case TypeSolveMat::GC:  f << "CG (Sparse Morse)"; break;
    case TypeSolveMat::GMRES:  f << "GMRES (Sparse Morse)"; break;
-   case TypeSolveMat::UMFpack:  f << "UMFpack (Sparse Morse)"; break;
+   case TypeSolveMat::SparseSolver:  f << "SparseSolver (Sparse Morse)"; break;
    default: f << "Unknown  bug???";
    }
   return f;
@@ -1006,8 +995,8 @@ double tol_pivot,double tol_pivot_sym)
           AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,NbSpace,itmax,eps));
         break;
 //#ifdef HAVE_LIBUMFPACK         
-        case TypeSolveMat::UMFpack :
-	    AA.SetSolverMaster(DefSparceSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,(void *)precon,stack )); 
+        case TypeSolveMat::SparseSolver :
+	    AA.SetSolverMaster(DefSparseSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,(void *)precon,stack )); 
          //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
         break;
            
@@ -1136,6 +1125,7 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
 
 
 bool SetGMRES();
+bool SetCG();
 #ifdef HAVE_LIBUMFPACK
 bool SetUMFPACK();
 #endif
@@ -1146,7 +1136,7 @@ template<class R> AnyType DiagMat(Stack,Expression ,Expression);
 template<class R> AnyType CopyTrans(Stack stack,Expression emat,Expression eA);
 template<class R> AnyType CopyMat(Stack stack,Expression emat,Expression eA);
 template<class R> AnyType CombMat(Stack stack,Expression emat,Expression combMat);
-template<class R> AnyType MatFull2Sparce(Stack stack,Expression emat,Expression eA);
+template<class R> AnyType MatFull2Sparse(Stack stack,Expression emat,Expression eA);
 */
 namespace FreeFempp {
 

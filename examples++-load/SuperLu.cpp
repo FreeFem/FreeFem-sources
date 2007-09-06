@@ -366,40 +366,46 @@ class Init { public:
     Init();
 };
 
-DefSparceSolver<double>::SparceMatSolver SparceMatSolver_R ; ;
-DefSparceSolver<Complex>::SparceMatSolver SparceMatSolver_C;
-
+//  the 2 default sparse solver double and complex
+DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
+DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
+// the default probleme solver 
+TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
 bool SetDefault()
 {
     if(verbosity>1)
 	cout << " SetDefault sparse to default" << endl;
-    DefSparceSolver<double>::solver =SparceMatSolver_R;
-    DefSparceSolver<Complex>::solver =SparceMatSolver_C;
-
+    DefSparseSolver<double>::solver =SparseMatSolver_R;
+    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
+    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
 }
 
 bool SetSuperLU()
 {
     if(verbosity>1)
 	cout << " SetDefault sparse solver to SuperLU" << endl;
-    DefSparceSolver<double>::solver  =BuildSolverSuperLU;
-    DefSparceSolver<Complex>::solver =BuildSolverSuperLU;    
+    DefSparseSolver<double>::solver  =BuildSolverSuperLU;
+    DefSparseSolver<Complex>::solver =BuildSolverSuperLU;    
+    TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
 }
 
 
 
 Init init;
 Init::Init(){ 
-    
-    SparceMatSolver_R= DefSparceSolver<double>::solver;
-    SparceMatSolver_C= DefSparceSolver<Complex>::solver;
-    if(verbosity>1)
-	cout << "\n Add: SuperLU,  defaultsolver defaultsolverSuperLU" << endl;
-    DefSparceSolver<double>::solver =BuildSolverSuperLU;
-    DefSparceSolver<Complex>::solver =BuildSolverSuperLU;
+  
+  SparseMatSolver_R= DefSparseSolver<double>::solver;
+  SparseMatSolver_C= DefSparseSolver<Complex>::solver;
+  
+  if(verbosity>1)
+    cout << "\n Add: SuperLU,  defaultsolver defaultsolverSuperLU" << endl;
+  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
+  DefSparseSolver<double>::solver =BuildSolverSuperLU;
+  DefSparseSolver<Complex>::solver =BuildSolverSuperLU;
+  if(Global.Find("defaultsolver").Empty() )
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-    Global.Add("defaulttoSuperLU","(",new OneOperator0<bool>(SetSuperLU));
+  Global.Add("defaulttoSuperLU","(",new OneOperator0<bool>(SetSuperLU));
 }
 
 
