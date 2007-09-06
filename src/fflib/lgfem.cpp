@@ -3523,7 +3523,8 @@ template<class T> T *resizeandclean2(const Resize<T> & t,const long &n)
   for (int i=nn;i<n;i++)  {(*t.v)[i].init();}  
   return  t.v;
  }
- 
+
+
 template <class R>
 void DclTypeMatrix()
 {
@@ -3561,10 +3562,6 @@ void DclTypeMatrix()
   
 }
 
-bool SparseDefault()
-{
-    return TypeSolveMat::SparseSolver== TypeSolveMat::defaultvalue;
-}
 
 void  init_lgfem() 
 {
@@ -3724,16 +3721,6 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("GMRES",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::GMRES)));
  Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
  Global.New("sparsesolver",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
-// Global.New("HaveUMFPACK",CConstant<bool>(true));
- Global.New("HaveUMFPACK",CVariable<bool>(SparseDefault));
- Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
- Global.New("defaulttoCG", CVariable<bool>(SetCG));
- Global.New("defaulttoGMRES", CVariable<bool>(SetGMRES));
- 
-// Global.New("havesparsesolver",new OneOperator0<bool>(SparseDefault));
-
-// Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::defaultvalue)));
-// Global.New("HaveUMFPACK",CConstant<bool>(false));
 
  ffassert(kTypeSolveMat<nTypeSolveMat);
 
