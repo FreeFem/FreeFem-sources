@@ -2133,6 +2133,12 @@ class PrintErrorCompileIM :  public E_F0info { public:
     operator aType () const { return atype<double>();} 
 
 };
+
+bool SparseDefault()
+{
+    return TypeSolveMat::SparseSolver== TypeSolveMat::defaultvalue;
+}
+
 void  init_lgmat() 
 
 {
@@ -2156,8 +2162,14 @@ void  init_lgmat()
 
  Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
  Global.Add("defaulttoCG","(",new OneOperator0<bool>(SetCG));
+ Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
+
 #ifdef HAVE_LIBUMFPACK
  Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));
+ Global.New("HaveUMFPACK",CConstant<bool>(true)); 
+#else
+ Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetGMRES));
+ Global.New("HaveUMFPACK",CConstant<bool>(false)); 
 #endif
 
  // pour compatibiliter 
