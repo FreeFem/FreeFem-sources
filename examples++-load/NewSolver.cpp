@@ -1,3 +1,4 @@
+//  file to add UMFPACK solver with dynamic load.
 #include  <iostream>
 using namespace std;
 
@@ -5,11 +6,16 @@ using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
 
-//#include "lex.hpp"
+
 #include "MatriceCreuse_tpl.hpp"
 
+#ifndef HAVE_LIBUMFPACK
+extern "C"  {
+#include <umfpack.h>
+}
+#endif
 template<class R>
-class SolveSuperLU :   public MatriceMorse<R>::VirtualSolver  {
+class SolveUMFPACK :   public MatriceMorse<R>::VirtualSolver  {
   double eps;
   mutable double  epsr;
   double tgv;
@@ -17,7 +23,7 @@ class SolveSuperLU :   public MatriceMorse<R>::VirtualSolver  {
   int umfpackstrategy;
   double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
 public:
-  SolveSuperLU(const MatriceMorse<R> &A,int strategy,double ttgv, double epsilon=1e-6,
+  SolveUMFPACK(const MatriceMorse<R> &A,int strategy,double ttgv, double epsilon=1e-6,
 	       double pivot=-1.,double pivot_sym=-1.  ) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),
@@ -44,7 +50,7 @@ public:
     if(tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=pivot;
     if(umfpackstrategy>=0)   Control[UMFPACK_STRATEGY]=umfpackstrategy;
     if(verbosity>3) { 
-      cout << "  UMFpack real  Solver Control :" ;
+      cout << "  UMFPACK real  Solver Control :" ;
       cout << "\n\t SYM_PIVOT_TOLERANCE "<< Control[UMFPACK_SYM_PIVOT_TOLERANCE];
       cout << "\n\t PIVOT_TOLERANCE     "<< Control[UMFPACK_PIVOT_TOLERANCE];
       cout << "\n\t PRL                 "<< Control[UMFPACK_PRL];
@@ -110,9 +116,9 @@ public:
      if(verbosity>1) cout << "   x min max " << x.min() << " " <<x.max() << endl;
   }
 
-  ~SolveSuperLU() { 
+  ~SolveUMFPACK() { 
    if(verbosity>3)
-    cout << "~SolveSuperLU S:" << Symbolic << " N:" << Numeric <<endl;
+    cout << "~SolveUMFPACK S:" << Symbolic << " N:" << Numeric <<endl;
     if (Symbolic)   umfpack_di_free_symbolic  (&Symbolic),Symbolic=0; 
     if (Numeric)    umfpack_di_free_numeric (&Numeric),Numeric=0;
   }
@@ -126,7 +132,7 @@ public:
 
 
 template<>
-class SolveSuperLU<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
+class SolveUMFPACK<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
   double eps;
   mutable double  epsr;
   int umfpackstrategy;
@@ -138,7 +144,7 @@ class SolveSuperLU<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
     double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
 
 public:
-  SolveSuperLU(const MatriceMorse<Complex> &A,int strategy,double ttgv, double epsilon=1e-6,
+  SolveUMFPACK(const MatriceMorse<Complex> &A,int strategy,double ttgv, double epsilon=1e-6,
      double pivot=-1.,double pivot_sym=-1.
 ) : 
     eps(epsilon),epsr(0),umfpackstrategy(strategy),tgv(ttgv),
@@ -167,7 +173,7 @@ public:
     if(tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=pivot;
     if(umfpackstrategy>=0) Control[UMFPACK_STRATEGY]=umfpackstrategy;
     if(verbosity>3) { 
-      cout << "  UMFpack complex Solver Control :" ;
+      cout << "  UMFPACK complex Solver Control :" ;
       cout << "\n\t SYM_PIVOT_TOLERANCE "<< Control[UMFPACK_SYM_PIVOT_TOLERANCE];
       cout << "\n\t PIVOT_TOLERANCE     "<< Control[UMFPACK_PIVOT_TOLERANCE];
       cout << "\n\t PRL                 "<< Control[UMFPACK_PRL];
@@ -236,9 +242,9 @@ public:
     }
   }
 
-  ~SolveSuperLU() { 
+  ~SolveUMFPACK() { 
     if(verbosity>5)
-    cout << "~SolveSuperLU " << endl;
+    cout << "~SolveUMFPACK " << endl;
     if (Symbolic)   umfpack_zi_free_symbolic  (&Symbolic),Symbolic=0; 
     if (Numeric)    umfpack_zi_free_numeric (&Numeric),Numeric=0;
     delete [] ar;
@@ -254,27 +260,61 @@ public:
 }; 
 
 inline MatriceMorse<double>::VirtualSolver *
-BuildSolverSuperLU(const MatriceMorse<double> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym )
+BuildSolverUMFPack(const MatriceMorse<double> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym )
 {
-    cout << " BuildSolverSuperLU<double>" << endl;
-    return new SolveSuperLU<double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
+    cout << " BuildSolverUMFPack<double>" << endl;
+    return new SolveUMFPACK<double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
 
 inline MatriceMorse<Complex>::VirtualSolver *
-BuildSolverSuperLU(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym )
+BuildSolverUMFPack(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym )
 {
-    cout << " BuildSolverSuperLU<Complex>" << endl;
-    return new SolveSuperLU<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
+    cout << " BuildSolverUMFPack<Complex>" << endl;
+    return new SolveUMFPACK<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
 
+
+//  the 2 default sparse solver double and complex
+DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
+DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
+// the default probleme solver 
+TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
+
+bool SetDefault()
+{
+    if(verbosity>1)
+	cout << " SetDefault sparse to default" << endl;
+    DefSparseSolver<double>::solver =SparseMatSolver_R;
+    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
+    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
+}
+
+bool SetUMFPACK()
+{
+    if(verbosity>1)
+	cout << " SetDefault sparse solver to UMFPack" << endl;
+    DefSparseSolver<double>::solver  =BuildSolverUMFPack;
+    DefSparseSolver<Complex>::solver =BuildSolverUMFPack;    
+    TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+}
 
 class Init { public:
     Init();
 };
 Init init;
 Init::Init(){    
- DefSparceSolver<double>::solver =BuildSolverSuperLU;
- DefSparceSolver<Complex>::solver =BuildSolverSuperLU;
+  SparseMatSolver_R= DefSparseSolver<double>::solver;
+  SparseMatSolver_C= DefSparseSolver<Complex>::solver;
+  if(verbosity>1)
+    cout << "\n Add: UMFPACK:  defaultsolver defaultsolverUMFPACK" << endl;
+  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
+  
+  DefSparseSolver<double>::solver =BuildSolverUMFPack;
+  DefSparseSolver<Complex>::solver =BuildSolverUMFPack;
+  if(Global.Find("defaultsolver").Empty() )
+    Global.New("defaultsolver", CVariable<bool>(SetDefault));
+  Global.New("defaulttoUMFPACK", CVariable<bool>(SetUMFPACK));
+  
 }
 
 

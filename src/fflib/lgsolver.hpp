@@ -149,9 +149,9 @@ class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMa
   typedef typename VirtualMatrice<R>::plusAx plusAx;
  
   public:
-  SolveGCPrecon(const MatriceMorse<R> &A,const OneOperator * C,Stack stk,double epsilon=1e-6) : 
+  SolveGCPrecon(const MatriceMorse<R> &A,const OneOperator * C,Stack stk,int itmax, double epsilon=1e-6) : 
     VirtualMatrice<R>(A.n),
-    n(A.n),nbitermax(Max(n,100)),eps(epsilon),epsr(0),precon(0),
+    n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),precon(0),
     D1(n),xx(n),stack(stk)
 {
       assert(C); 
@@ -487,6 +487,22 @@ BuildSolverGMRES(const MatriceMorse<R> *A,int strategy,
     
     return ret;
 }
+
+template<class R>
+typename MatriceMorse<R>::VirtualSolver *
+BuildSolverCG(const MatriceMorse<R> *A,int strategy,
+		 double tgv, double eps, double tol_pivot,double tol_pivot_sym,
+		 int NbSpace,int itmax , const void * precon, void * stack )
+{
+    typename MatriceMorse<R>::VirtualSolver * ret=0;
+    if (precon)
+	ret=new SolveGCPrecon<R>(*A,(const OneOperator *)precon,stack,itmax,eps);
+    else 
+	ret=new SolveGCDiag<R>(*A,itmax,eps);
+    
+    return ret;
+}
+
 
 }
 

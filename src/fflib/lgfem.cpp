@@ -3561,6 +3561,10 @@ void DclTypeMatrix()
   
 }
 
+bool SparseDefault()
+{
+    return TypeSolveMat::SparseSolver== TypeSolveMat::defaultvalue;
+}
 
 void  init_lgfem() 
 {
@@ -3718,14 +3722,19 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("Crout",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::CROUT)));
  Global.New("Cholesky",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::CHOLESKY)));
  Global.New("GMRES",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::GMRES)));
-#ifdef HAVE_LIBUMFPACK
- Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::UMFpack)));
- Global.New("HaveUMFPACK",CConstant<bool>(true));
-#else 
- cout << " ( no UMFPACK => replace UMFPACK  by LU ) " ;
- Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::LU)));
- Global.New("HaveUMFPACK",CConstant<bool>(false));
-#endif 
+ Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
+ Global.New("sparsesolver",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
+// Global.New("HaveUMFPACK",CConstant<bool>(true));
+ Global.New("HaveUMFPACK",CVariable<bool>(SparseDefault));
+ Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
+ Global.New("defaulttoCG", CVariable<bool>(SetCG));
+ Global.New("defaulttoGMRES", CVariable<bool>(SetGMRES));
+ 
+// Global.New("havesparsesolver",new OneOperator0<bool>(SparseDefault));
+
+// Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::defaultvalue)));
+// Global.New("HaveUMFPACK",CConstant<bool>(false));
+
  ffassert(kTypeSolveMat<nTypeSolveMat);
 
 //  init pmesh  

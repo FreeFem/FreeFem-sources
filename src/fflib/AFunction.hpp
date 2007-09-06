@@ -1260,6 +1260,7 @@ Type_Expr CConstant(const R & v)
  }
 
 
+
 class CC_F0 {
   Expression f;
   aType r;
@@ -2881,7 +2882,7 @@ void  initArrayDCL();
 inline C_F0  OneOperator::code2(const basicAC_F0 &a) const  {return C_F0(code(a),r);}	
 
 template<class R>
-class  OneOperator0 : public OneOperator {
+class  OneOperator0 : public OneOperator {public:
     class E_F0_F :public  E_F0 { public:
 	typedef  R (*func)( ) ; 
 	func f;
@@ -2899,6 +2900,13 @@ public:
     { return  new E_F0_F(f);} 
     OneOperator0(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
 };
+
+template<class R >
+Type_Expr CVariable(R  (*ff)() )
+{
+    throwassert(map_type[typeid(R).name()]);
+    return make_pair(map_type[typeid(R).name()],new  typename OneOperator0<R>::E_F0_F(ff));
+}
 
 #endif
 

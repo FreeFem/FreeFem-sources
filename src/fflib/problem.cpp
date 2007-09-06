@@ -1539,7 +1539,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
         else if (r==tvf->tMat)
           {
             if (A)
-              InternalError(" Add sparce matrice; to do, sorry");
+              InternalError(" Add sparse matrice; to do, sorry");
           }
         else if (r==tvf->tFL)
           {
@@ -2062,8 +2062,8 @@ void DefSolver(Stack stack,
             AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,NbSpace,itmax,eps));
          break;
 //#ifdef HAVE_LIBUMFPACK         
-        case TypeSolveMat::UMFpack :
-            AA.SetSolverMaster(DefSparceSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,(const void *) precon,stack));
+        case TypeSolveMat::SparseSolver :
+            AA.SetSolverMaster(DefSparseSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,(const void *) precon,stack));
 //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
          break;
            
@@ -2079,9 +2079,18 @@ void DefSolver(Stack stack,
 bool SetGMRES()
 {
     if(verbosity>1)
-	cout << " SetDefault sparse solver to UMFPack" << endl;
-    DefSparceSolver<double>::solver  =BuildSolverGMRES;
-    DefSparceSolver<Complex>::solver =BuildSolverGMRES; 
+	cout << " SetDefault sparse (morse) solver to GMRES" << endl;
+    DefSparseSolver<double>::solver  =BuildSolverGMRES;
+    DefSparseSolver<Complex>::solver =BuildSolverGMRES; 
+    return true;
+}
+
+bool SetCG()
+{
+    if(verbosity>1)
+	cout << " SetDefault sparse (morse) solver to CG" << endl;
+    DefSparseSolver<double>::solver  =BuildSolverCG;
+    DefSparseSolver<Complex>::solver =BuildSolverCG; 
     return true;
 }
 
@@ -2090,26 +2099,21 @@ bool SetUMFPACK()
 {
     if(verbosity>1)
 	cout << " SetDefault sparse solver to UMFPack" << endl;
-    DefSparceSolver<double>::solver  =BuildSolverUMFPack;
-    DefSparceSolver<Complex>::solver =BuildSolverUMFPack;  
+    DefSparseSolver<double>::solver  =BuildSolverUMFPack;
+    DefSparseSolver<Complex>::solver =BuildSolverUMFPack;  
     return true;
 }
 
 template <>
-DefSparceSolver<double>::SparceMatSolver  DefSparceSolver<double>::solver =BuildSolverUMFPack;
+DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverUMFPack;
 template <>
-DefSparceSolver<Complex>::SparceMatSolver  DefSparceSolver<Complex>::solver =BuildSolverUMFPack;
-
-//DefSparceSolver<Complex>::SparceMatSolver  DefSparceSolver<Complex>::solver =BuildSolverUMFPack;
-
-//SparceRMatSolve TheSparceRMatSolve=BuildSolverUMFPack;// no defaut solver
-//SparceCMatSolve TheSparceCMatSolve=BuildSolverUMFPack;// no defaut solver
+DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverUMFPack;
 
 #else
 template <>
-DefSparceSolver<double>::SparceMatSolver  DefSparceSolver<double>::solver =BuildSolverGMRES;
+DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverGMRES;
 template <>
-DefSparceSolver<Complex>::SparceMatSolver  DefSparceSolver<Complex>::solver =BuildSolverGMRES;
+DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverGMRES;
 
 bool SetUMFPACK()
 {
@@ -2243,6 +2247,12 @@ template<class R>
   }
   }
 
+#ifdef HAVE_LIBUMFPACK   
+TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
+#else
+TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::LU;
+#endif
+
 
 template<class R>
 AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & dataA, 
@@ -2260,11 +2270,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
  // assert(!VF); 
   double tgv = 1e30;
 // type de matrice par default
-#ifdef HAVE_LIBUMFPACK        
-     TypeSolveMat tmat(TypeSolveMat::UMFpack); 
-#else            
-    TypeSolveMat tmat(TypeSolveMat::LU);
-#endif    
+    TypeSolveMat tmat(TypeSolveMat::defaultvalue); 
      
    TypeSolveMat    *typemat=&tmat;
   bool initmat=true;

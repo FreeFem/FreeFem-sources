@@ -61,14 +61,14 @@ extern const basicForEachType *aatypeknlongp; //// for  compilation error with g
 
 
 // Debut FH Houston -------- avril 2004 ---------
-//  class for operator on sparce matrix 
+//  class for operator on sparse matrix 
 //   ------------------------------------
 //  pour le addition de matrice ----matrice creuse in french)
-//  MatriceCreuse    real class for matrix sparce
-//  Matrice_Creuse   class for matrix sparce +  poiteur on FE space def 
+//  MatriceCreuse    real class for matrix sparse
+//  Matrice_Creuse   class for matrix sparse +  poiteur on FE space def 
 //         to recompute matrice in case of mesh change
 //  list<triplet<R,MatriceCreuse<R> *,bool> > * is liste of 
-//  \sum_i a_i*A_i  where a_i is a scalare and A_i is a Sparce matrix
+//  \sum_i a_i*A_i  where a_i is a scalare and A_i is a sparse matrix
 //
  
 
@@ -401,12 +401,11 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   bool factorize=false;
   double tol_pivot=-1;
   double tol_pivot_sym=-1;
-// type de matrice par default
-#ifdef HAVE_LIBUMFPACK         
-     TypeSolveMat tmat(TypeSolveMat::UMFpack); 
-#else            
-    TypeSolveMat tmat(TypeSolveMat::GMRES);
-#endif    
+// type de matrice par default 
+  TypeSolveMat tmat( TypeSolveMat::defaultvalue); 
+  if(   tmat !=  TypeSolveMat::SparseSolver  )    
+      tmat=TypeSolveMat::GMRES;
+   
      
   TypeSolveMat    *typemat=&tmat;
   bool initmat=true;
@@ -451,16 +450,19 @@ bool SetSuperUMFPACK()
 {
     if(verbosity>1)
 	cout << " SetDefault sparse solver to SuperLU" << endl;
-    DefSparceSolver<double>::solver  =BuildSolverUMFPack;
-    DefSparceSolver<Complex>::solver =BuildSolverUMFPack;    
+    DefSparseSolver<double>::solver  =BuildSolverUMFPack;
+    DefSparseSolver<Complex>::solver =BuildSolverUMFPack;    
+    return true;
+
 }
 
 bool SetSuperGMRES()
 {
     if(verbosity>1)
 	cout << " SetDefault sparse solver to SuperLU" << endl;
-    DefSparceSolver<double>::solver  =BuildSolverGMRES<double>;
-    DefSparceSolver<Complex>::solver =BuildSolverGMRES<Complex>;    
+    DefSparseSolver<double>::solver  =BuildSolverGMRES<double>;
+    DefSparseSolver<Complex>::solver =BuildSolverGMRES<Complex>;    
+    return true;
 }
 
 
@@ -783,7 +785,7 @@ AnyType SetMatrixInterpolation(Stack stack,Expression emat,Expression einter)
 {
   using namespace Fem2D;
   
-  Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
+  Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
   const MatrixInterpolation::Op * mi(dynamic_cast<const MatrixInterpolation::Op *>(einter));
   ffassert(einter);
   int data[ MatrixInterpolation::Op::n_name_param];
@@ -800,10 +802,10 @@ AnyType SetMatrixInterpolation(Stack stack,Expression emat,Expression einter)
   ffassert(Vh);
   ffassert(Uh);
   
-  sparce_mat->pUh=pUh;
-  sparce_mat->pVh=pVh;
-  sparce_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
-  sparce_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
+  sparse_mat->pUh=pUh;
+  sparse_mat->pVh=pVh;
+  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
   }
   else 
   {  // new cas mars 2006
@@ -814,12 +816,12 @@ AnyType SetMatrixInterpolation(Stack stack,Expression emat,Expression einter)
   FESpace * Uh = **pUh;
   ffassert(Uh);
   
-  sparce_mat->pUh=0;
-  sparce_mat->pVh=0;
-  sparce_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
-  sparce_mat->A.master(buildInterpolationMatrix1(*Uh,xx,yy,data));
+  sparse_mat->pUh=0;
+  sparse_mat->pVh=0;
+  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+  sparse_mat->A.master(buildInterpolationMatrix1(*Uh,xx,yy,data));
   }
-  return sparce_mat;
+  return sparse_mat;
 }
 
 template<class RA,class RB,class RAB>
@@ -827,10 +829,10 @@ AnyType ProdMat(Stack stack,Expression emat,Expression prodmat)
 {
   using namespace Fem2D;
   
-  Matrice_Creuse<RAB> * sparce_mat =GetAny<Matrice_Creuse<RA>* >((*emat)(stack));
+  Matrice_Creuse<RAB> * sparse_mat =GetAny<Matrice_Creuse<RA>* >((*emat)(stack));
   const Matrix_Prod<RA,RB>  AB = GetAny<Matrix_Prod<RA,RB> >((*prodmat)(stack));
-  sparce_mat->pUh=AB.A->pUh;
-  sparce_mat->pVh=AB.B->pVh;
+  sparse_mat->pUh=AB.A->pUh;
+  sparse_mat->pVh=AB.B->pVh;
   MatriceMorse<RA> *mA= AB.A->A->toMatriceMorse(AB.ta);
   MatriceMorse<RB> *mB= AB.B->A->toMatriceMorse(AB.tb);
   if( !mA && ! mB) ExecError(" Sorry error: in MatProd,  pb trans in MorseMat");
@@ -842,11 +844,11 @@ AnyType ProdMat(Stack stack,Expression emat,Expression prodmat)
   MatriceMorse<RAB> *mAB=new MatriceMorse<RA>();
   mA->prod(*mB,*mAB);
   
-  sparce_mat->typemat=(mA->n == mB->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
-  sparce_mat->A.master(mAB);
+  sparse_mat->typemat=(mA->n == mB->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+  sparse_mat->A.master(mAB);
   delete mA;
   delete mB;
-  return sparce_mat;
+  return sparse_mat;
 }
 
 template<class R>
@@ -854,15 +856,15 @@ AnyType CombMat(Stack stack,Expression emat,Expression combMat)
 {
   using namespace Fem2D;
   
-  Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
+  Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
   list<triplet<R,MatriceCreuse<R> *,bool> > *  lcB = GetAny<list<triplet<R,MatriceCreuse<R> *,bool> >*>((*combMat)(stack));
-  sparce_mat->pUh=0;
-  sparce_mat->pVh=0; 
+  sparse_mat->pUh=0;
+  sparse_mat->pVh=0; 
    MatriceCreuse<R> * AA=BuildCombMat<R>(*lcB,false,0,0);
-  sparce_mat->A.master(AA);
-  sparce_mat->typemat=(AA->n == AA->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+  sparse_mat->A.master(AA);
+  sparse_mat->typemat=(AA->n == AA->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   delete lcB;
-  return sparce_mat;
+  return sparse_mat;
 }
 
 
@@ -872,13 +874,13 @@ AnyType MatriceCreuse2map(Stack , const AnyType & mat)
 
   using namespace Fem2D;
 
-  Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >(mat);
-  ffassert(sparce_mat);
-  int n=sparce_mat->N(),m=sparce_mat->M();
+  Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >(mat);
+  ffassert(sparse_mat);
+  int n=sparse_mat->N(),m=sparse_mat->M();
   map<pair<int,int>,R> *M=new map<pair<int,int>,R>;
-  if (n >0 && m>0 && sparce_mat->A) 
+  if (n >0 && m>0 && sparse_mat->A) 
     {
-      sparce_mat->A->addMatTo(R(1.),*M);
+      sparse_mat->A->addMatTo(R(1.),*M);
       // hack 
       (*M)[make_pair(n-1,m-1)]+=R();
     }
@@ -891,12 +893,12 @@ AnyType DiagMat(Stack stack,Expression emat,Expression edia)
 {
   using namespace Fem2D;
   KN<R> * diag=GetAny<KN<R>* >((*edia)(stack));
-  Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-  sparce_mat->pUh=0;
-  sparce_mat->pVh=0;
-  sparce_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
-  sparce_mat->A.master(new MatriceMorse<R>(diag->N(),*diag));
-  return sparce_mat;
+  Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
+  sparse_mat->pUh=0;
+  sparse_mat->pVh=0;
+  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
+  sparse_mat->A.master(new MatriceMorse<R>(diag->N(),*diag));
+  return sparse_mat;
 }
 
 
@@ -933,12 +935,12 @@ AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
   MatriceMorse<R> * mr=Mat->A->toMatriceMorse(transp,false);
   MatriceMorse<RR> * mrr = ChangeMatriceMorse<R,RR>::f(mr);
   
-  Matrice_Creuse<RR> * sparce_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
-  sparce_mat->pUh=Mat->pUh;
-  sparce_mat->pVh=Mat->pUh;;
-  sparce_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
-  sparce_mat->A.master(mrr);
-  return sparce_mat;
+  Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
+  sparse_mat->pUh=Mat->pUh;
+  sparse_mat->pVh=Mat->pUh;;
+  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
+  sparse_mat->A.master(mrr);
+  return sparse_mat;
 }
 
 template<class R,class RR>
@@ -953,20 +955,20 @@ AnyType CopyMat(Stack stack,Expression emat,Expression eA)
 }
 
 template<class R>
-AnyType MatFull2Sparce(Stack stack,Expression emat,Expression eA)
+AnyType MatFull2Sparse(Stack stack,Expression emat,Expression eA)
 {
   KNM<R> * A=GetAny<KNM<R>* >((*eA)(stack));
-  Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-  sparce_mat->pUh=0;
-  sparce_mat->pVh=0;
-  sparce_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)
-  sparce_mat->A.master(new MatriceMorse<R>(*A,0.0));
+  Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
+  sparse_mat->pUh=0;
+  sparse_mat->pVh=0;
+  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)
+  sparse_mat->A.master(new MatriceMorse<R>(*A,0.0));
   
- return sparce_mat;
+ return sparse_mat;
 }
 
 template<class R>
-AnyType MatMap2Sparce(Stack stack,Expression emat,Expression eA)
+AnyType MatMap2Sparse(Stack stack,Expression emat,Expression eA)
 {
    map< pair<int,int>, R> * A=GetAny< map< pair<int,int>, R> * >((*eA)(stack));
    int n=0,m=0;
@@ -981,13 +983,13 @@ AnyType MatMap2Sparce(Stack stack,Expression emat,Expression eA)
                 m=last->first.second+1;
         } 
         
-  Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-  sparce_mat->pUh=0;
-  sparce_mat->pVh=0;
-  sparce_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)  
-  sparce_mat->A.master(new MatriceMorse<R>(n,m,*A,false));
+  Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
+  sparse_mat->pUh=0;
+  sparse_mat->pVh=0;
+  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)  
+  sparse_mat->A.master(new MatriceMorse<R>(n,m,*A,false));
   delete A; 
- return sparce_mat;
+ return sparse_mat;
 }
 
 template<class RR,class AA=RR,class BB=AA> 
@@ -1051,9 +1053,9 @@ R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & 
      cerr << ac << " " << a << endl;
      ExecError("Out of bound in operator Matrice_Creuse<R> (,)");}
    R *  p =a->pij(b,c);
-   if( !p) { if(verbosity) cerr << "Error: the coef a(" << b << ","   << c << ")  do'nt exist in sparce matrix "
+   if( !p) { if(verbosity) cerr << "Error: the coef a(" << b << ","   << c << ")  do'nt exist in sparse matrix "
            << " Matrix  type = " << typeid(ac).name() << endl;
-       ExecError("Use of unexisting coef in sparce matrix operator a(i,j) ");}
+       ExecError("Use of unexisting coef in sparse matrix operator a(i,j) ");}
     return  p;}
 
 
@@ -1774,15 +1776,15 @@ template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
     if(verbosity)
 	cout << " -- Raw Matrix    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
     
-    Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));       
-    sparce_mat->pUh=0;
-    sparce_mat->pVh=0; 
-    sparce_mat->A.master(amorse);
-    sparce_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+    Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));       
+    sparse_mat->pUh=0;
+    sparse_mat->pVh=0; 
+    sparse_mat->A.master(amorse);
+    sparse_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
     
     if(verbosity>3) { cout << "  End Raw Matrix : " << endl;}
     
-    return sparce_mat;   
+    return sparse_mat;   
 }
 template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 {
@@ -1896,11 +1898,11 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
   if(verbosity)
      cout << " -- Block Matrix NxM = " << N << "x" << M << "    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
   
-  Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(s));       
-  sparce_mat->pUh=0;
-  sparce_mat->pVh=0; 
-  sparce_mat->A.master(amorse);
-  sparce_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+  Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(s));       
+  sparse_mat->pUh=0;
+  sparse_mat->pVh=0; 
+  sparse_mat->A.master(amorse);
+  sparse_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
                 
      
   // cleanning    
@@ -1910,7 +1912,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
     else if(Fij(i,j))  delete Fij(i,j);  
    if(verbosity>3) { cout << "  End Build Blok Matrix : " << endl;}
    
- return sparce_mat;  
+ return sparse_mat;  
 
 }
 
@@ -1951,7 +1953,7 @@ AnyType mmM2L3c (Stack , const AnyType & pp)
 }
 */
 template <class R>
-void AddSparceMat()
+void AddSparseMat()
 {
  aType tkrp = atype<KN<R> *>(); 
  SetMatrix_Op<R>::btype = Dcl_Type<const  SetMatrix_Op<R> * >();
@@ -1988,8 +1990,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat<R>),       
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R>), 
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R>) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparce<R>) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparce<R>) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R>) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparse<R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R>) ,
        new OneOperatorCode<BlockMatrix<R> >()
        
@@ -2001,8 +2003,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat<R>)  ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R>), 
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R>) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparce<R>) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparce<R>) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R>) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparse<R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R>), 
        new OneOperatorCode<BlockMatrix<R> >()
        
@@ -2141,8 +2143,8 @@ void  init_lgmat()
 
    map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<double*>())]=atype<Matrice_Creuse<double> *>();
    map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<Complex*>())]=atype<Matrice_Creuse<Complex> *>();
-   AddSparceMat<double>();
-   AddSparceMat<Complex>();
+   AddSparseMat<double>();
+   AddSparseMat<Complex>();
  
  Add<const MatrixInterpolation::Op *>("<-","(", new MatrixInterpolation);
  Add<const MatrixInterpolation::Op *>("<-","(", new MatrixInterpolation(1));
@@ -2153,6 +2155,7 @@ void  init_lgmat()
  zzzfff->Add("Cmapmatrix",atype<map< pair<int,int>, Complex> *>()); // a voir
 
  Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
+ Global.Add("defaulttoCG","(",new OneOperator0<bool>(SetCG));
 #ifdef HAVE_LIBUMFPACK
  Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));
 #endif
