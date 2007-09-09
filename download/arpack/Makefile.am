@@ -17,7 +17,7 @@ $(ARPACKLIB): ARPACK/fait
 	if [ -n '@FF_LAPACKdir@' ] ; then \
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
 	fi; \
-	export PATH=$PATH:`pwd`/../bin; cd ARPACK && make lib 
+	cd ARPACK && make lib 
 
 ARPACK/fait: arpack96.tar.gz patch.tar.gz ARmake.m4 Makefile
 	gunzip -c arpack96.tar.gz | tar xf -

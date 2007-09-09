@@ -29,16 +29,18 @@ AM_MAINTAINER_MODE
 AC_PROG_CXX
 
 # dur dur car sous MacOsX le fortran n'est pas standard. 
+
 AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPACK need it)])
      ff_g2c_lib="";	 
 if test "$enable_fortran" != no
 then
-	AC_PROG_F77(g77 f77 gfortran g77 f90 fort77 xlf xlf90)
+	AC_PROG_F77(g77 f77 gfortran g77 f90 xlf xlf90 `pwd`/download/bin/fort77)
         ff_flibs=""
         # modif FH		
 	AC_F77_LIBRARY_LDFLAGS  
 	# correct pb of double def under macos 
 	case $F77 in 
+	*/download/bin/fort77)  FLIBS="-L`pwd`/download/lib -lf2c";;
 	 *g77)  
 	 for i in $FLIBS; do
           case $i in 
