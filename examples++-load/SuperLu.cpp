@@ -393,7 +393,7 @@ bool SetSuperLU()
 
 
 Init init;
-Init::Init()NotNull
+Init::Init()
 { 
   
   SparseMatSolver_R= DefSparseSolver<double>::solver;

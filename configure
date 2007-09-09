@@ -2598,6 +2598,7 @@ CXXDEPMODE=depmode=$am_cv_CXX_dependencies_compiler_type
 
 
 # dur dur car sous MacOsX le fortran n'est pas standard.
+
 # Check whether --enable-fortran or --disable-fortran was given.
 if test "${enable_fortran+set}" = set; then
   enableval="$enable_fortran"
@@ -2611,7 +2612,7 @@ ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
 if test -n "$ac_tool_prefix"; then
-  for ac_prog in g77 f77 gfortran g77 f90 fort77 xlf xlf90
+  for ac_prog in g77 f77 gfortran g77 f90 xlf xlf90 `pwd`/download/bin/fort77
   do
     # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
 set dummy $ac_tool_prefix$ac_prog; ac_word=$2
@@ -2653,7 +2654,7 @@ fi
 fi
 if test -z "$F77"; then
   ac_ct_F77=$F77
-  for ac_prog in g77 f77 gfortran g77 f90 fort77 xlf xlf90
+  for ac_prog in g77 f77 gfortran g77 f90 xlf xlf90 `pwd`/download/bin/fort77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2698,7 +2699,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:2701:" \
+echo "$as_me:2702:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -2896,7 +2897,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:2899: \"$ac_link\") >&5
+(eval echo $as_me:2900: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -2974,7 +2975,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:2977: \"$ac_link\") >&5
+(eval echo $as_me:2978: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -3148,6 +3149,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 	# correct pb of double def under macos
 	case $F77 in
+	*/download/bin/fort77)  FLIBS="-L`pwd`/download/lib -lf2c";;
 	 *g77)
 	 for i in $FLIBS; do
           case $i in

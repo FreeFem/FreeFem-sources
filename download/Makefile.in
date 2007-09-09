@@ -157,6 +157,7 @@ ff_wget = @ff_wget@
 install_sh = @install_sh@
 
 SUBDIRS = blas arpack umfpack fltk
+EXTRA_DIST = f2c/Makefile  f2c/fort77.sed  f2c/tt.f
 subdir = download
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -280,6 +281,7 @@ top_distdir = ..
 distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 
 distdir: $(DISTFILES)
+	$(mkinstalldirs) $(distdir)/f2c
 	@list='$(DISTFILES)'; for file in $$list; do \
 	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
 	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
@@ -395,7 +397,6 @@ uninstall-info: uninstall-info-recursive
 	mostlyclean-recursive tags tags-recursive uninstall \
 	uninstall-am uninstall-info-am uninstall-info-recursive \
 	uninstall-recursive
-
 
 all-recursive: lib include
 
