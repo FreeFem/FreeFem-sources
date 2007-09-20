@@ -1,0 +1,25 @@
+To compile superlu.cpp 
+
+1) download the SuperLu 3.0 package form
+
+curl   http://crd.lbl.gov/~xiaoye/SuperLU/superlu_3.0.tar.gz  -o superlu_3.0.tar.gz
+tar xvfz superlu_3.0.tar.gz
+go SuperLU_3.0 directory
+edite make.inc
+make 
+
+2) in directoy include do
+tar xvfz ../SuperLU_3.0-include-ff.tar.gz
+due to a mistake un SuperLu header, I will give a correct one
+to compile with freefm++
+
+to compile  the freefem++ load file  of SuperLu with freefem do:
+some find like : 
+./load.link SuperLU.cpp  -L$HOME/work/LinearSolver/SuperLU_3.0/ -lsuperlu_3.0
+to test 
+FreeFem++ SuperLu.edp
+
+Gook Luck. F. Hecht
+
+
+
