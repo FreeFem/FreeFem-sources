@@ -9,7 +9,7 @@ f2c:f2c.tar
 	gunzip -rf f2c/*
 	gunzip -rf f2c/*/*
 	cd f2c;unzip libf2c.zip
-f2c/libf2c/makefile: makefile
+f2c/libf2c/makefile: Makefile
 	egrep -v 'ld -r|mv [$$]' <f2c/libf2c/makefile.u >f2c/libf2c/makefile
 
 compile:f2c f2c/libf2c/makefile

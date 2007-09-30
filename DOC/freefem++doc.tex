@@ -12603,6 +12603,253 @@ And the plot instruction is also change  because the pressure is constant, and  
 \paragraph{Morley}
 See the example. 
 
+\subsection{Add a new sparse solver}
+
+I will show the sketch of the code, see the full code 
+from \texttt{SuperLU.cpp} or \texttt{NewSolve.cpp}.
+
+First the include files:
+\bFF
+#@include  <iostream>
+@using @namespace std;
+
+#@include "rgraph.hpp"
+#@include "error.hpp"
+#@include "AFunction.hpp"
+
+//#include "lex.hpp"
+#@include "MatriceCreuse_tpl.hpp"
+#@include "slu_ddefs.h"
+#@include "slu_zdefs.h"
+\eFF
+
+
+A small template driver 
+to unified the \texttt{double} and \texttt{Complex} version.
+\bFF
+@template <class R> @struct SuperLUDriver
+{
+    
+};
+
+
+@template <> @struct SuperLUDriver<@double>
+{
+  ....  double version   
+};
+
+@template <> @struct SuperLUDriver<@Complex>
+{
+....  Complex version  
+};
+ 
+\eFF
+
+To get  Matrix value, we have just to remark that  the Morse Matrice the storage, 
+is  the   \texttt{SLU\_NR} format is the compressed row storage, this is 
+the transpose of the compressed column storage.
+
+So if \texttt{AA} is a MatriceMorse you have with SuperLU notatiopn.
+\bFF
+     n=AA.n;
+     m=AA.m;
+     nnz=AA.nbcoef;
+     a=AA.a;
+     asub=AA.cl;
+     xa=AA.lg;
+     options.Trans = TRANS;
+
+     Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T();
+     Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);     
+\eFF
+
+To get vector infomation, to solver the linear solver 
+$ x = A^{-1} b $	 
+\bFF
+   @void Solver(@const MatriceMorse<R> &AA,KN_<R> &x,@const KN_<R> &b) @const 
+ {
+ .... 
+    Create_Dense_Matrix(&B, m, 1, b, m, SLU_DN, R_SLU, SLU_GE);
+    Create_Dense_Matrix(&X, m, 1, x, m, SLU_DN, R_SLU, SLU_GE);
+ ....
+ }
+\eFF
+     
+The two \texttt{BuildSolverSuperLU} function, to change the default
+sparse solver variable 
+
+\ttCC{DefSparseSolver<@double>::solver }
+        
+\bFF 
+
+MatriceMorse<@double>::VirtualSolver *
+BuildSolverSuperLU(@const MatriceMorse<@double> *A,@int strategy,@double tgv, @double eps, 
+                   @double  tol_pivot,@double tol_pivot_sym,
+		            @int NbSpace,@int @itmax ,@const  @void * precon, @?void * stack)
+{
+    if(verbosity>9)
+       cout << " BuildSolverSuperLU<double>" << endl;
+    @return @new SolveSuperLU<@double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
+}
+
+
+MatriceMorse<Complex>::VirtualSolver *
+BuildSolverSuperLU(@const MatriceMorse<Complex> *A,@int strategy,@double tgv, @double eps,
+           @double tol_pivot,@double tol_pivot_sym,
+		    @int NbSpace,@int itmax ,@const  @void * @precon, @void * stack)
+{
+    if(verbosity>9)
+    cout << " BuildSolverSuperLU<Complex>" << endl;
+    @return@ new SolveSuperLU<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
+}
+\eFF
+
+The link to \texttt{FreeFem++}
+
+
+\bFF
+@class Init { @public:
+    Init();
+};
+\bFF
+  To set the  2 default sparse solver double and complex:
+\eFF
+DefSparseSolver<@double>::SparseMatSolver SparseMatSolver_R ; ;
+DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
+\eFF
+
+To save  the default solver type 
+
+\bFF
+TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
+\eFF
+
+To reset to the default solver, call this function:
+\bFF
+@bool SetDefault()
+{
+    if(verbosity>1)
+	  cout << " SetDefault sparse to default" << endl;
+    DefSparseSolver<@double>::solver =SparseMatSolver_R;
+    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
+    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
+}
+\eFF
+
+To set the default solver to superLU, call this function:
+\bFF
+@bool SetSuperLU()
+{
+    if(verbosity>1)
+	  cout << " SetDefault sparse solver to SuperLU" << endl;
+    DefSparseSolver<@double>::solver  =BuildSolverSuperLU;
+    DefSparseSolver<Complex>::solver =BuildSolverSuperLU;    
+    TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+}
+\eFF
+
+To add new function/name \texttt{defaultsolver,defaulttoSuperLU}in \texttt{freefem++},
+and set the default  solver to the new solver., just do: 
+
+\bFF
+Init init;
+Init::Init()
+{ 
+  
+  SparseMatSolver_R= DefSparseSolver<@double>::solver;
+  SparseMatSolver_C= DefSparseSolver<@Complex>::solver;
+  
+  if(verbosity>1)
+    cout << "\n Add: SuperLU,  defaultsolver defaultsolverSuperLU" << endl;
+  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
+  DefSparseSolver<@double>::solver =BuildSolverSuperLU;
+  DefSparseSolver<@Complex>::solver =BuildSolverSuperLU;
+  //  test if the name "defaultsolver" exist in freefem++
+  if(! Global.Find("defaultsolver").NotNull() )
+    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
+  Global.Add("defaulttoSuperLU","(",new OneOperator0<bool>(SetSuperLU));
+}
+
+\eFF
+
+To compile superlu.cpp, just do:
+
+\begin{enumerate}
+\item download the SuperLu 3.0 package and do
+\begin{verbatim}
+curl   http://crd.lbl.gov/~xiaoye/SuperLU/superlu_3.0.tar.gz  -o superlu_3.0.tar.gz
+tar xvfz superlu_3.0.tar.gz
+go SuperLU_3.0 directory
+$EDITOR  make.inc   
+make 
+\end{verbatim}
+
+\item  In directoy include do
+to have a correct version of \texttt{SuperLu} header due to mistake
+in case of inclusion of \ttCC{double} and \ttCC{Complex} version in the same file.
+\begin{verbatim}
+tar xvfz ../SuperLU_3.0-include-ff.tar.gz
+\end{verbatim}
+I will give a correct one
+to compile with freefm++.
+
+To compile  the freefem++ load file  of SuperLu with freefem do:
+some find like : 
+\begin{verbatim}
+./load.link SuperLU.cpp  -L$HOME/work/LinearSolver/SuperLU_3.0/ -lsuperlu_3.0
+\end{verbatim}
+
+And to test the simple example:
+
+A example:  
+\bFF
+load "SuperLU"                                                                                                               
+verbosity=2;                                                                                                                 
+for(int i=0;i<3;++i)                                                                                                         
+{ 
+// if i == 0 then SuperLu  solver \hfilll
+//    i == 1 then GMRES    solver \hfilll                                                                                                                          
+//    i == 2 then Default  solver \hfilll                                                                                                                          
+  {                                                                                                                          
+    matrix A =                                                                                                               
+      [[ 0, 1, 0, 10],                                                                                                       
+       [ 0,  0,  2, 0],                                                                                                      
+       [ 0, 0, 0,  3],                                                                                                       
+       [ 4,0 , 0, 0]];                                                                                                       
+    real[int] xx = [ 4,1,2,3], x(4), b(4);                                                                                   
+    b = A*xx;                                                                                                                
+    cout << b << " " << xx << endl;                                                                                          
+    set(A,solver=sparsesolver);                                                                                              
+    x = A^-1*b;                                                                                                              
+    cout << x << endl;                                                                                                       
+  }                                                                                                                          
+                                                                                                                             
+  {                                                                                                                          
+    matrix<complex> A =                                                                                                      
+      [[ 0, 1i, 0, 10],                                                                                                      
+       [ 0 ,  0,  2i, 0],                                                                                                    
+       [ 0, 0, 0,  3i],                                                                                                      
+       [ 4i,0 , 0, 0]];                                                                                                      
+    complex[int] xx = [ 4i,1i,2i,3i], x(4), b(4);                                                                            
+    b = A*xx;                                                                                                                
+    cout << b << " " << xx << endl;                                                                                          
+    set(A,solver=sparsesolver);                                                                                              
+    x = A^-1*b;                                                                                                              
+    cout << x << endl;                                                                                                       
+  }                                                                                                                          
+  if(i==0)defaulttoGMRES();                                                                                                  
+  if(i==1)defaultsolver();                                                                                                   
+}        
+\eFF
+
+To Test do for exemple:
+\begin{verbatim} 
+FreeFem++ SuperLu.edp
+\end{verbatim}
+
+
+\end{enumerate}
+
 
 
 \section*{FreeFem++ LGPL License}
