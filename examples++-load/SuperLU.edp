@@ -2,33 +2,33 @@ load "SuperLU"
 verbosity=2;
 for(int i=0;i<3;++i)
 {
-{
-matrix A = 
-[[ 0, 1, 0, 10],
-[ 0,  0,  2, 0],
-[ 0, 0, 0,  3],
-[ 4,0 , 0, 0]];
-real[int] xx = [ 4,1,2,3], x(4), b(4);
-b = A*xx;
-cout << b << " " << xx << endl;
-set(A,solver=UMFPACK);
-x = A^-1*b;
-cout << x << endl;
-}
-
-{
-matrix<complex> A = 
-[[ 0, 1i, 0, 10],
-[ 0 ,  0,  2i, 0],
-[ 0, 0, 0,  3i],
-[ 4i,0 , 0, 0]];
-complex[int] xx = [ 4i,1i,2i,3i], x(4), b(4);
-b = A*xx;
-cout << b << " " << xx << endl;
-set(A,solver=UMFPACK);
-x = A^-1*b;
-cout << x << endl;
-}
-if(i==1)defaulttoGMRES();
-if(i==2)defaultsolver();
+  {
+    matrix A = 
+      [[ 0, 1, 0, 10],
+       [ 0,  0,  2, 0],
+       [ 0, 0, 0,  3],
+       [ 4,0 , 0, 0]];
+    real[int] xx = [ 4,1,2,3], x(4), b(4);
+    b = A*xx;
+    cout << b << " " << xx << endl;
+    set(A,solver=sparsesolver);
+    x = A^-1*b;
+    cout << x << endl;
+  }
+  
+  {
+    matrix<complex> A = 
+      [[ 0, 1i, 0, 10],
+       [ 0 ,  0,  2i, 0],
+       [ 0, 0, 0,  3i],
+       [ 4i,0 , 0, 0]];
+    complex[int] xx = [ 4i,1i,2i,3i], x(4), b(4);
+    b = A*xx;
+    cout << b << " " << xx << endl;
+    set(A,solver=sparsesolver);
+    x = A^-1*b;
+    cout << x << endl;
+  }
+  if(i==1)defaulttoGMRES();
+  if(i==2)defaultsolver();
 }
