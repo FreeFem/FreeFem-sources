@@ -982,10 +982,10 @@ double tol_pivot,double tol_pivot_sym)
       case    TypeSolveMat::GC:   
         if (precon)
           AA.SetSolverMaster(static_cast<const VirtualSolver *>(
-                                                                new Fem2D::SolveGCPrecon<R>(AA,precon,stack,eps)));
+                                                                new Fem2D::SolveGCPrecon<R>(AA,precon,stack,itmax,eps)));
         else 
           AA.SetSolverMaster(static_cast<const VirtualSolver *>(
-                                                                new SolveGCDiag<R>(AA,eps)));
+                                                                new SolveGCDiag<R>(AA,itmax,eps)));
         break; 
       case TypeSolveMat::GMRES :
         //        InternalError("GMRES solveur to do");

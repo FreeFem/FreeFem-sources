@@ -2051,9 +2051,9 @@ void DefSolver(Stack stack,
         switch (typemat->t) {
         case    TypeSolveMat::GC:   
           if (precon)
-            AA.SetSolverMaster(new SolveGCPrecon<R>(AA,precon,stack,eps));
+            AA.SetSolverMaster(new SolveGCPrecon<R>(AA,precon,stack,itmax,eps));
           else 
-            AA.SetSolverMaster(new SolveGCDiag<R>(AA,eps));
+            AA.SetSolverMaster(new SolveGCDiag<R>(AA,itmax,eps));
           break; 
         case TypeSolveMat::GMRES :
           if (precon)
@@ -2174,9 +2174,9 @@ template<class R>
         switch (typemat->t) {
         case    TypeSolveMat::GC:   
           if (precon)
-            AA.SetSolverMaster(new SolveGCPrecon<R>(AA,precon,stack,eps));
+            AA.SetSolverMaster(new SolveGCPrecon<R>(AA,precon,stack,itmax,eps));
           else 
-            AA.SetSolverMaster(new SolveGCDiag<R>(AA,eps));
+            AA.SetSolverMaster(new SolveGCDiag<R>(AA,itmax,eps));
           break; 
         case TypeSolveMat::GMRES :
           if (precon)
