@@ -1,3 +1,10 @@
+v 2.20  (october, 2, 2007)
+  -  add in download automatic generation of f2c and fort77 to get a free  fortran compiler
+	just  go in 
+	(download/f2d;make install)
+  -  add automatic find of libf2c in case of F77=fort77 (driver of f2c) in configure 
+  -  add tools to change the sparse linear solver with load dynamic, see doc and SuperLu example
+     in examles++-load
 v 2.19   (august, 19  2007)
   - correct buildmesh from geometry file and add nbvx= named parameter
     to infore the maximal number of verter in a mesh.
