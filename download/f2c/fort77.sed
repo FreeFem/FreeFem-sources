@@ -345,7 +345,7 @@ sub mysystem
 	system($args[0]);
     }
     else {
-	print STDERR "$0: Running \"",join('" "',@args),"\"\n" if $verbose;
+	print STDERR "$0: Running \"",join(' ',@args),"\"\n" if $verbose;
 	system(@args);
     }
 }

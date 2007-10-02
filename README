@@ -58,7 +58,22 @@ compilation step ("make") will try to download the missing libraries
 
 Remark, under linux or window the simplest way to get
 a not to bad version is
-./configure --enable-download --enable-generic_blas
+./configure --enable-generic_blas
+or without ide 
+./configure --enable-generic_blas --without-fltk 
+
+remark, if you have not fortran compiler use f2c  
+by the way just do
+ 
+cd  download/f2c
+make
+make install
+cd ../..
+
+and reconfigure for example: 
+./configure --enable-generic_blas --without-fltk 
+
+
 
 Here are the different versions of FreeFem++ produced by one
 compilation (some versions may be missing if your system does not
@@ -196,6 +211,8 @@ we use the  fink f77, texshop and TeXLive-teTeX Current Release in http://www.ct
 * Under MacOC macIntel 
 compile and install  de f2c (no fortran) and install fort77  from  http://www.netlib.org
 ./configure '-with-suffix' 'MacIntel' '-without-fltk' '--enable-download' '-with-mpi=mpic++' '-enable-download' 'F77=fort77' '--with-flib=-L/usr/local/lib -lf2c'
+or if you have compile the download/f2c   with : (cd download/f2c;make install)
+./configure '-with-suffix' 'MacIntel' '-without-fltk' '--enable-download' '-with-mpi=mpic++' '-enable-download' 
 
 see de README_MAC file of the required soft.
 

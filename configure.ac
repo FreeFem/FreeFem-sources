@@ -34,13 +34,20 @@ AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPAC
      ff_g2c_lib="";	 
 if test "$enable_fortran" != no
 then
-	AC_PROG_F77(g77 f77 gfortran g77 f90 xlf xlf90 `pwd`/download/bin/fort77)
+	AC_PROG_F77(g77 f77 gfortran g77 f90 xlf xlf90 fort77)
+#	if test -n "$F77" 
+#	then
         ff_flibs=""
         # modif FH		
 	AC_F77_LIBRARY_LDFLAGS  
 	# correct pb of double def under macos 
-	case $F77 in 
-	*/download/bin/fort77)  FLIBS="-L`pwd`/download/lib -lf2c";;
+	case $F77 in
+	 *fort77)
+	   if test -z "$FLIBS" ; then
+             FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print $(NF-2),$(NF-1)}'`
+             AC_MSG_WARN([  fort77   FLIBS :  $FLIBS ])	     
+	   fi
+	   ;;
 	 *g77)  
 	 for i in $FLIBS; do
           case $i in 
@@ -68,6 +75,22 @@ then
 	then 
 	  ff_g2c_lib="$with_flib"
 	  FLIBS="$with_flib"
+	fi
+# add FH oct 2007 for download f2c
+	if test -z "$F77"  ; then 
+	  ff_f77=`pwd`/download/bin/fort77
+	  ff_flibs=`pwd`/download/lib/libf2c.a
+	  if test -f $ff_f77  -a -f $ff_flibs ; then
+	    AC_MSG_WARN([ no fortran, but find download f2c/fort]);
+	    F77=fort77
+	    FLIBS=$ff_flibs
+	   else
+	     AC_MSG_NOTICE( [ fatal error : no fortran ] );
+	     AC_MSG_NOTICE( [add ---without-fortran  ] );
+	     AC_MSG_NOTICE( [or try to compile f2c in directory download/f2c  ] );
+	     AC_MSG_NOTICE( [  just do:  make install ] );
+	    AC_MSG_ERROR([ Fatal error No Fortran compiler . ],1);  
+	  fi
 	fi
 fi
 
