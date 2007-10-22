@@ -22,7 +22,7 @@ solve NS (u1,u2,p,v1,v2,q,solver=Crout,init=i) =
              alpha*( u1*v1 + u2*v2) 
             + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
             +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
-            + (dx(p)*dx(q)+dy(p)*dy(q))*(0.00001) // sabilasation term
+            + (dx(p)*dx(q)+dy(p)*dy(q))*(0.00001) // stabilization term
             - p*dx(v1) - p*dy(v2)
             - dx(u1)*q - dy(u2)*q
            )

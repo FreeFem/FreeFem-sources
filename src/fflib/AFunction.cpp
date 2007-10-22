@@ -511,6 +511,17 @@ public:
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
     C_F0  code2(const basicAC_F0 &args) const;       
 };
+class opSum : public OneOperator{
+public:
+    const char * op;
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    bool MeshIndependent() const { return false;}
+    
+    opSum(const char *opp,aType A, aType B): op(opp), OneOperator(atype<C_F0>(),A,B) {}
+    
+    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+    C_F0  code2(const basicAC_F0 &args) const;       
+};
 
 class opFormal : public OneOperator{
 public:
@@ -522,6 +533,18 @@ public:
     C_F0  code2(const basicAC_F0 &args) const { return (*thecode2)(args);}    
 };
 // fin frev 2007
+// nov 2007   v[i]
+class opVI : public OneOperator{
+public:
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    bool MeshIndependent() const { return false;}
+    
+    opVI(aType A): OneOperator(atype<C_F0>(),A,atype<long>()) {}
+    
+    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+    C_F0  code2(const basicAC_F0 &args) const;       
+};
+// fin nov 2007
 // avril 2007
 
 C_F0  formalMatTrace(const basicAC_F0 &args)       
@@ -969,6 +992,18 @@ void Init_map_type()
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
       TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
      // car le type de retour depent des objets du tableau 
+      atype<E_Array >()->Add("[","",new opVI(atype<E_Array >())   );  
+      atype<TransE_Array >()->Add("[","",new opVI(atype<TransE_Array >())   );  
+      TheOperators->Add("+",new opSum("+",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("+",new opSum("+",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("+",new opSum("+",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("+",new opSum("+",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("-",new opSum("-",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("-",new opSum("-",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("-",new opSum("-",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("-",new opSum("-",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+      
+      
      // il faut refechir  .....  FH 
      // il faut definir le type d'un tableau bof, bof (atype<C_F0>())
      TheOperators->Add(">>",
@@ -1051,8 +1086,8 @@ void Init_map_type()
      Add<ostream*>("default",".",new OneOperator1<ostream*,ostream*>(set_os1<default1>));
      
 // add 2.16
-     TheOperators->Add("trace",new opFormal(atype<E_Array>(),formalMatTrace ));
-     TheOperators->Add("det",new opFormal(atype<E_Array>(),formalMatDet ));
+     Global.Add("trace","(",new opFormal(atype<E_Array>(),formalMatTrace ));
+     Global.Add("det","(",new opFormal(atype<E_Array>(),formalMatDet ));
 // end add     
                                 
       
@@ -1212,6 +1247,27 @@ int ShowAlloc(const char *s,size_t & lg);
  } 
 static addingInitFunct TheaddingInitFunct(-10000,Init_map_type); 
 
+C_F0  opVI::code2(const basicAC_F0 &args) const      
+{
+    Expression p=args[1];
+    if ( ! p->EvaluableWithOutStack() ) 
+    { 
+	bool bb=p->EvaluableWithOutStack();
+	cout << bb << " " <<  * p <<  endl;
+	CompileError(" [...][p], The p must be a constant , sorry");}
+        long pv = GetAny<long>((*p)(0));
+    bool ta =args[0].left()==atype<TransE_Array>();
+    const TransE_Array * tea=0;
+    const E_Array * ea=0;
+	if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
+    else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
+    assert( ea || tea );
+    const E_Array & a=  ta ? *tea->v : *ea;
+    cout << " pv =" << pv << " size = "<< a.size() << endl;
+    ffassert(pv >=0 && pv <a.size());
+    return a[pv];
+}
+
 C_F0  opDot::code2(const basicAC_F0 &args) const      
 {
     bool ta =args[0].left()==atype<TransE_Array>();
@@ -1359,4 +1415,34 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
     return C_F0();
 
 }
+
+C_F0  opSum::code2(const basicAC_F0 &args) const      
+{
+    bool ta =args[0].left()==atype<TransE_Array>();
+    bool tb = args[1].left()==atype<TransE_Array>();
+    const TransE_Array * tea=0;
+    const TransE_Array * teb=0;
+    const E_Array * ea=0;
+    const E_Array * eb=0;// E_F0
+	if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
+    else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
+    if( tb)  teb = dynamic_cast<const TransE_Array*>((Expression) args[1]);
+    else eb = dynamic_cast<const E_Array*>((Expression) args[1]);
+    assert( ea || tea );
+    assert( eb || teb );
+    const E_Array & a=  ta ? *tea->v : *ea;
+    const E_Array & b=  tb ? *teb->v : *eb;
+    int na=a.size();
+    int nb=b.size();
+    if(na != nb) CompileError(" formal sum  [ ...] + [ ...  ]  ");
+    
+
+    AC_F0  v;
+    v = 0; // empty
+	for (int i=0;i<na;++i)	
+	    v += C_F0(TheOperators,op,a[i],b[i]);
+	return C_F0(TheOperators,"[]",v);
+    
+}
+
 
