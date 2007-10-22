@@ -234,4 +234,9 @@ b(0:5:2).sort;
 cout << b << endl; 
 cout << b(0:5:2)  << endl; 
 cout << " quantile(0.2)  = " <<  b.quantile(0.2) << endl; 
+
+macro AA [ [1,2],[3,4]] //
+macro BB [ [1,2],[5,10]] //
+ cout << AA[1][0] << " 3  " << endl;
+ cout << trace( AA * BB' + AA ) <<endl;
 }
