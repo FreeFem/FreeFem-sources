@@ -446,23 +446,22 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   return Nothing; 
 }
 
-bool SetSuperUMFPACK()
+
+bool SetDefaultSolver()
 {
+#ifdef HAVE_LIBUMFPACK
     if(verbosity>1)
-	cout << " SetDefault sparse solver to SuperLU" << endl;
+	cout << " SetDefault sparse solver to UMFPACK" << endl;
     DefSparseSolver<double>::solver  =BuildSolverUMFPack;
     DefSparseSolver<Complex>::solver =BuildSolverUMFPack;    
-    return true;
-
-}
-
-bool SetSuperGMRES()
-{
+#else
     if(verbosity>1)
-	cout << " SetDefault sparse solver to SuperLU" << endl;
+	cout << " SetDefault sparse solver to GMRES (no UMFPACK)" << endl;
     DefSparseSolver<double>::solver  =BuildSolverGMRES<double>;
     DefSparseSolver<Complex>::solver =BuildSolverGMRES<Complex>;    
+#endif
     return true;
+
 }
 
 
@@ -2143,27 +2142,27 @@ void  init_lgmat()
 
 {
   
-//  new OneOperator1<Transpose<KN_<long> >,KN<long> *>(&Build<Transpose<KN_<long> >,KN<long> *>),
-//  new OneOperator1<Transpose<KN_<long> >,KN_<long> >(&Build<Transpose<KN_<long> >,KN_<long> >)       
+  //  new OneOperator1<Transpose<KN_<long> >,KN<long> *>(&Build<Transpose<KN_<long> >,KN<long> *>),
+  //  new OneOperator1<Transpose<KN_<long> >,KN_<long> >(&Build<Transpose<KN_<long> >,KN_<long> >)       
   Dcl_Type<const  MatrixInterpolation::Op *>(); 
-
-   map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<double*>())]=atype<Matrice_Creuse<double> *>();
-   map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<Complex*>())]=atype<Matrice_Creuse<Complex> *>();
-   AddSparseMat<double>();
-   AddSparseMat<Complex>();
- 
- Add<const MatrixInterpolation::Op *>("<-","(", new MatrixInterpolation);
- Add<const MatrixInterpolation::Op *>("<-","(", new MatrixInterpolation(1));
- Global.Add("interpolate","(",new MatrixInterpolation);
- Global.Add("interpolate","(",new MatrixInterpolation(1));
- Global.Add("interplotematrix","(",new  OneOperatorCode<PrintErrorCompileIM>);
+  
+  map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<double*>())]=atype<Matrice_Creuse<double> *>();
+  map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<Complex*>())]=atype<Matrice_Creuse<Complex> *>();
+  AddSparseMat<double>();
+  AddSparseMat<Complex>();
+  
+  Add<const MatrixInterpolation::Op *>("<-","(", new MatrixInterpolation);
+  Add<const MatrixInterpolation::Op *>("<-","(", new MatrixInterpolation(1));
+  Global.Add("interpolate","(",new MatrixInterpolation);
+  Global.Add("interpolate","(",new MatrixInterpolation(1));
+  Global.Add("interplotematrix","(",new  OneOperatorCode<PrintErrorCompileIM>);
  zzzfff->Add("mapmatrix",atype<map< pair<int,int>, double> *>());
  zzzfff->Add("Cmapmatrix",atype<map< pair<int,int>, Complex> *>()); // a voir
 
  Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
  Global.Add("defaulttoCG","(",new OneOperator0<bool>(SetCG));
  Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
-
+ 
 #ifdef HAVE_LIBUMFPACK
  Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));
  Global.New("HaveUMFPACK",CConstant<bool>(true)); 
@@ -2171,20 +2170,21 @@ void  init_lgmat()
  Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetGMRES));
  Global.New("HaveUMFPACK",CConstant<bool>(false)); 
 #endif
-
+ Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefaultSolver));
+ 
  // pour compatibiliter 
-
-  TheOperators->Add("=",
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation));
-       
+ 
+ TheOperators->Add("=",
+		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation));
+ 
  TheOperators->Add("<-",
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation));
+		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation));
  // construction of complex matrix form a double matrix
  TheOperators->Add("=", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,E_F_StackF0F0>(CopyMat<R,Complex>)
-                 );
-                    
+		   );
+ 
  TheOperators->Add("<-", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,E_F_StackF0F0>(CopyMat<R,Complex>)
-                 );
+		   );
 }
 
 
