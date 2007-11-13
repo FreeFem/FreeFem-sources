@@ -517,7 +517,7 @@ public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     bool MeshIndependent() const { return false;}
     
-    opSum(const char *opp,aType A, aType B): op(opp), OneOperator(atype<C_F0>(),A,B) {}
+    opSum(const char *opp,aType A, aType B): OneOperator(atype<C_F0>(),A,B),op(opp) {}
     
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
     C_F0  code2(const basicAC_F0 &args) const;       
@@ -784,7 +784,7 @@ void Init_map_type()
      Global.New("cout",CConstant<ostream*>(&cout));
      Global.New("cin",CConstant<istream*>(&cin));
      Global.New("append",CConstant<ios::openmode>(ios::app));
-     Global.New("endl",CConstant<char*>("\n"));
+     Global.New("endl",CConstant<const char*>("\n"));
      Global.New("true",CConstant<bool>(true));
      Global.New("false",CConstant<bool>(false));
      Global.New("pi",CConstant<double>(3.14159265358979323846264338328));
@@ -1265,7 +1265,7 @@ C_F0  opVI::code2(const basicAC_F0 &args) const
     const E_Array & a=  ta ? *tea->v : *ea;
     cout << " pv =" << pv << " size = "<< a.size() << endl;
     ffassert(pv >=0 && pv <a.size());
-    return a[pv];
+    return (* a.v)[pv];
 }
 
 C_F0  opDot::code2(const basicAC_F0 &args) const      

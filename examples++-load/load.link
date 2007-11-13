@@ -1,7 +1,18 @@
 #!/bin/sh
 # Create a loadable object from a C++ function defined in a .cpp file
 # $Id$
-
+if [ -z "$INCFF" ] ; then
+if [ -d "@INCFF@" ] ; then
+INCFF="-I@INCFF@"
+elif [ -d include ]; then
+INCFF="-Iinclude"
+elif [ -f /usr/include/ff++ ] ; then 
+ INCFF="-I/usr/include/ff++"
+else
+   echo " erreur PB include freefem++ directory " ;
+   exit 1;
+fi
+fi
 do="yes"
 DEBUG=""
 CONLY="false"
@@ -72,7 +83,7 @@ then
     CXX=g++
 fi
 
-INC="-Iinclude $INC"  
+INC="$INCFF $INC"  
 SUF=so
 SHARED="-shared"
 case "$WIN32$uu" in

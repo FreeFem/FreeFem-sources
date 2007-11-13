@@ -1126,15 +1126,18 @@ template<class R>
     bool sym=true;
     for(i=begin;i!=end;i++++)
      {
-       MatriceCreuse<R> & M=*i->second;
-       bool transpose = i->third !=  trans;
-       ffassert( &M);
-       R coef=i->first;
-       if(verbosity>3)
-       cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  i->third << endl;
-       if (n==0) { if(transpose) {m=M.n; n=M.m;} else{n=M.n; m=M.m;}}// Modif mars 2007 FH
-       else { if(transpose)  ffassert(n== M.m && m==M.n); else ffassert(n== M.n && m==M.m);}
-       sym = M.addMatTo(coef,mij,transpose,ii00,jj00,cnj) && sym;              
+	if(i->second) // M == 0 => zero matrix 
+	{
+	    MatriceCreuse<R> & M=*i->second;
+	    bool transpose = i->third !=  trans;
+	    ffassert( &M);
+	    R coef=i->first;
+	    if(verbosity>3)
+		cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  i->third << endl;
+	    if (n==0) { if(transpose) {m=M.n; n=M.m;} else{n=M.n; m=M.m;}}// Modif mars 2007 FH
+	    else { if(transpose)  ffassert(n== M.m && m==M.n); else ffassert(n== M.n && m==M.m);}
+	    sym = M.addMatTo(coef,mij,transpose,ii00,jj00,cnj) && sym;  
+	}
      } 
     int nbcoef=mij.size();
     if(sym) nbcoef = (nbcoef+n)/2;
