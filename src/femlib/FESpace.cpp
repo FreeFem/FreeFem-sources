@@ -954,16 +954,17 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
          Nproduit = ndf;        
        }
    MaxNbNodePerElement=nbne;
-   if(verbosity)
+   if(verbosity>2)
    {
-   cout << " Nb Of Nodes = " << nn << endl;   
-   if(NbOfNodeL)        
-     cout << " Nb of Lagrange Mul Node = " << NbOfNodeL << endl;        
-   cout << " Nb of DF = " << NbOfDF << endl;   
-   if(NbOfDFL) {  
-     cout << " Nb of Lagrange Mul DF = "   << NbOfDFL << endl;  
-     cout << " MaxNbDFPerElement     =   " << MaxNbDFPerElement << endl;
-   };
+     cout << "  FESpace: Nb Of Nodes = " << nn ;   
+     if(NbOfNodeL)        
+       cout << " Nb of Lagrange Mul Node = " << NbOfNodeL  ;        
+     cout << " Nb of DF = " << NbOfDF << endl;   
+     if(NbOfDFL) {  
+       cout << " Nb of Lagrange Mul DF = "   << NbOfDFL ;  
+       cout << " MaxNbDFPerElement     =   " << MaxNbDFPerElement ;
+     };
+       cout << endl;
    }
 }
 

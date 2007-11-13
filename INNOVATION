@@ -1,7 +1,9 @@
 v 2.20-1 (october, 24, 2007)
   -  correct compilation problem without umfpack
-  -  add to formal +, -  on  [  ]  array
-  -  add formal trace operator  matrix like [ [ ... ], .., [... ] ] 
+  -  add  formal operator  for vectorial operator in variationnal form
+        +, -  on  [  ]  array
+        trace operator  matrix like [ [ ... ], .., [... ] ] 
+        take element of an array [ ...][2] 
 v 2.20  (october, 2, 2007)
   -  add in download automatic generation of f2c and fort77 to get a free  fortran compiler
 	just  go in 

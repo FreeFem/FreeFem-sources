@@ -579,10 +579,12 @@
 		3D90DC7F097012B3002A1826 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 3D90DC80097012B3002A1826 /* Build configuration list for PBXProject "ff" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 0;
 			mainGroup = 3D90DC7D097012B3002A1826;
 			productRefGroup = 3D90DC8D097012DB002A1826 /* Products */;
 			projectDirPath = "";
+			projectRoot = ..;
 			targets = (
 				3DC62AA409728D7C00D487F6 /* sansrgraph */,
 				3DC62AE10972990B00D487F6 /* macglrgaph */,
