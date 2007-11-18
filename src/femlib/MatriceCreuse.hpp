@@ -18,10 +18,14 @@ extern "C" {
 #ifdef HAVE_UFSPARSE_UMFPACK_H
 #include <ufsparse/umfpack.h>
 #else
+#ifdef HAVE_SUITESPARSE_UMFPACK_H
+#include <suitesparse/umfpack.h>
+#else
 
   // Defaults to a local version of the UMFPACK headers
 #include "../../download/include/umfpack.h"
 
+#endif // HAVE_SUITESPARSE_UMFPACK_H
 #endif // HAVE_UFSPARSE_UMFPACK_H
 #endif // HAVE_BIG_UMFPACK_UMFPACK_H
 #endif // HAVE_UMFPACK_UMFPACK_H
@@ -546,7 +550,7 @@ template<class K>
 template<class R,class M,class P> 
 int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000)
 {
-//  ConjuguedGradient lineare   A*x est appelŽ avec des conditions au limites 
+//  ConjuguedGradient lineare   A*x est appele avec des conditions au limites 
 //  non-homogene puis homogene  pour calculer le gradient  
    if (verbosity>50) 
      kprint=2;

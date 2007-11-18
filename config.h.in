@@ -93,6 +93,9 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
+/* Define to 1 if you have the <suitesparse//umfpack.h> header file. */
+#undef HAVE_SUITESPARSE__UMFPACK_H
+
 /* Define to 1 if you have the `sysconf' function. */
 #undef HAVE_SYSCONF
 

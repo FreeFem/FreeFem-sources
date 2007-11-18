@@ -5,7 +5,8 @@
 # To create statically linked executables (see configure.ac)
 CXXLD=$(STATICTOOL) $(CXX)
 
-bin_PROGRAMS=FreeFem++
+bin_PROGRAMS=$(STDPROG)
+EXTRA_PROGRAMS=FreeFem++
 FreeFem___SOURCES=
 EXTRA_FreeFem___SOURCES=../Graphics/Xrgraph.cpp ../Graphics/Pcrgraph.cpp
 FreeFem___DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a @STD_GRAPH_OBJ@

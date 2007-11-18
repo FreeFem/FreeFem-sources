@@ -1,3 +1,6 @@
+v 2.21   (november, 18, 2007)
+  -  correct documentation for new edition
+  -  correct configure for no X11 and UMFPACK in sparsesuite
 v 2.20-1 (october, 24, 2007)
   -  correct compilation problem without umfpack
   -  add  formal operator  for vectorial operator in variationnal form
