@@ -493,7 +493,8 @@ ff_mpi=no)
                         AC_DEFINE(HAVE_OMPI_MPI_CXX_MPICXX_H,1, ompi/mpi/cxx/mpicxx.h  have include file))
                 AC_CHECK_HEADER(mpi++.h,
                         AC_DEFINE(HAVE_MPICPP_H,1, mpi++.h  have include file))
-		AC_SUBST(MPIPROG,FreeFem++-mpi${EXEEXT})
+		ff_mpiprog=FreeFem++-mpi${EXEEXT}
+		AC_SUBST(MPIPROG,$ff_mpiprog)
                 AC_SUBST(MPICXX,$ff_mpicxx)
 	else
 	        AC_SUBST(MPICXX,$ff_save_cxx)
@@ -1264,7 +1265,7 @@ AC_SUBST(IDEPROG,$ff_ideprog)
 AC_SUBST(TESTIDEPROG,$ff_testideprog)
 # The final test program
 AC_SUBST(IDE_TESTS,$ff_idetest)
-ff_progs="FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_testideprog $ff_idetest"
+ff_progs="FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_testideprog $ff_idetest ff_mpiprog"
 
 # All makefiles
 AC_OUTPUT(Makefile
