@@ -13871,7 +13871,7 @@ TESTIDEPROG=$ff_testideprog
 # The final test program
 IDE_TESTS=$ff_idetest
 
-ff_progs="FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_testideprog $ff_idetest ff_mpiprog"
+ff_progs="FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_testideprog $ff_idetest $ff_mpiprog"
 
 # All makefiles
                                                                                                                                                                                                                                                                                                                       ac_config_files="$ac_config_files Makefile download/Makefile download/blas/Makefile download/arpack/Makefile download/umfpack/Makefile download/fltk/Makefile src/Makefile src/bamglib/Makefile src/Graphics/Makefile src/femlib/Makefile src/Algo/Makefile src/lglib/Makefile src/fflib/Makefile src/std/Makefile src/x11/Makefile src/ide/Makefile src/nw/Makefile src/mpi/Makefile src/agl/Makefile src/glx/Makefile src/bamg/Makefile src/bin-win32/Makefile examples++/Makefile examples++-eigen/Makefile examples++-tutorial/Makefile examples++-mpi/Makefile examples++-load/Makefile examples++-chapt3/Makefile examples++-bug/Makefile examples++-other/Makefile DOC/Makefile"

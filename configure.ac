@@ -1265,7 +1265,7 @@ AC_SUBST(IDEPROG,$ff_ideprog)
 AC_SUBST(TESTIDEPROG,$ff_testideprog)
 # The final test program
 AC_SUBST(IDE_TESTS,$ff_idetest)
-ff_progs="FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_testideprog $ff_idetest ff_mpiprog"
+ff_progs="FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_testideprog $ff_idetest $ff_mpiprog"
 
 # All makefiles
 AC_OUTPUT(Makefile
