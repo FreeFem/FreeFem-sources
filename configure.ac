@@ -429,10 +429,10 @@ fi
 # -------------------------------------------------
 
 # We need to choose between mpich and lam for the Debian package
-AC_ARG_WITH(mpi,[  --with-mpi=[yes/no/mpiCC /mpic++/... ]	or --without-mpi	Choose MPI implementation (default is mpich)])
+AC_ARG_WITH(mpi,[  --with-mpi=[yes/no/mpiCC/mpic++/... ]	or --without-mpi	Choose MPI implementation (default is mpich)])
 
 # Default is mpich
-if test "$with_mpi" = yes
+if test "$with_mpi" = yes -o -z "$with_mpi" 
 then
    ff_mpicxx=mpiCC
 else 
@@ -1305,4 +1305,5 @@ AC_OUTPUT(Makefile
         AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
         AC_MSG_NOTICE([		 --  FLTK (ide package) $ff_fltk ])
         AC_MSG_NOTICE([		 --  with X11             $ff_x11])
+        AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
 	AC_MSG_NOTICE([    progs: $ff_progs ])

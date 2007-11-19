@@ -893,7 +893,7 @@ Optional Packages:
   --with-suffix=G3/G4/G4,P4,.. or --without-suffix (default no suffix to package name)
   --with-x                use the X Window System
   --with-suffix=G3/G4/G4,P4,.. or --without-suffix (default no suffix package name)
-  --with-mpi=yes/no/mpiCC /mpic++/... 	or --without-mpi	Choose MPI implementation (default is mpich)
+  --with-mpi=yes/no/mpiCC/mpic++/... 	or --without-mpi	Choose MPI implementation (default is mpich)
   --with-wget=command	Replace "wget" with another command. Implies --enable-download
   --with-cadna= cadna library --without-cadna
   --with-blas=library	Use a specific version of the Blas
@@ -9475,7 +9475,7 @@ if test "${with_mpi+set}" = set; then
 fi;
 
 # Default is mpich
-if test "$with_mpi" = yes
+if test "$with_mpi" = yes -o -z "$with_mpi"
 then
    ff_mpicxx=mpiCC
 else
@@ -15413,5 +15413,7 @@ echo "$as_me: 		 --  BLAS $ff_blas_ok " >&6;}
 echo "$as_me: 		 --  FLTK (ide package) $ff_fltk " >&6;}
         { echo "$as_me:$LINENO: 		 --  with X11             $ff_x11" >&5
 echo "$as_me: 		 --  with X11             $ff_x11" >&6;}
+        { echo "$as_me:$LINENO: 		 --  with MPI             $ff_mpi" >&5
+echo "$as_me: 		 --  with MPI             $ff_mpi" >&6;}
 	{ echo "$as_me:$LINENO:     progs: $ff_progs " >&5
 echo "$as_me:     progs: $ff_progs " >&6;}
