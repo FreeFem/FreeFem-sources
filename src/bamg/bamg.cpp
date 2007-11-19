@@ -145,7 +145,7 @@ int main(int argc, char **argv)
   double omega=1.8;
   int NbSmooth=3;
   double *solMbb =0,*solMBB=0;
-  int  typesolsbb =0,*typesolsBB =0;
+  int  *typesolsBB =0;
   Int4 nbsolbb=0,lsolbb=0;
   Int4 nbsolBB=0,lsolBB=0;
   int SplitEdgeWith2Boundary=0;

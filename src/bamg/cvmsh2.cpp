@@ -136,7 +136,7 @@ int main(int argc, char **argv)
   //    cout << "open file in " << fin<< endl;
   Triangles Th(fin,cutoffradian);
   if (!fgeom)
-    0; //    Th.Write( (const char *) fout);
+    ((void )  0); //    Th.Write( (const char *) fout);
   else
     {
       //      cout << " geom " << fgeom << endl;

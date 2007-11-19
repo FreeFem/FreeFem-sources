@@ -3,8 +3,8 @@
 # $Id$
 CXXLD=$(STATICTOOL) $(CXX)
 
-bin_PROGRAMS=bamg  cvmsh2 drawbdmesh
-
+bin_PROGRAMS=$(BAMGPROG)
+EXTRA_PROGRAMS=bamg  cvmsh2 drawbdmesh
 bamg_SOURCES=bamg.cpp 
 bamg_DEPENDENCIES=../fflib/libff.a 
 
