@@ -484,18 +484,28 @@ ff_mpi=no)
 
 		# We do not AC_DEFINE any special flag for parallel
 		# computation here, because it must only be set when the
-		# parallel program is compiled (see src/mpi/Makfile.am)
-                AC_CHECK_HEADER(mpicxx.h,
-                        AC_DEFINE(HAVE_MPICXX_H,1, mpicxx.h  have include file))
-                AC_CHECK_HEADER(mpi/cxx/mpicxx.h,
-                        AC_DEFINE(HAVE_MPI_CXX_MPICXX_H,1, mpi/cxx/mpicxx.h  have include file))
-                AC_CHECK_HEADER(ompi/mpi/cxx/mpicxx.h,
-                        AC_DEFINE(HAVE_OMPI_MPI_CXX_MPICXX_H,1, ompi/mpi/cxx/mpicxx.h  have include file))
-                AC_CHECK_HEADER(mpi++.h,
-                        AC_DEFINE(HAVE_MPICPP_H,1, mpi++.h  have include file))
+ 		# parallel program is compiled (see src/mpi/Makfile.am)
+        AC_CHECK_HEADERS(mpicxx.h mpi/cxx/mpicxx.h ompi/mpi/cxx/mpicxx.h openmpi/ompi/mpi/cxx/mpicxx.h mpi++.h, ff_mpicxx_include=yes)
+#
+#                AC_CHECK_HEADER(mpicxx.h,
+#                        AC_DEFINE(HAVE_MPICXX_H,1, mpicxx.h  have include file))
+#                AC_CHECK_HEADER(mpi/cxx/mpicxx.h,
+#                        AC_DEFINE(HAVE_MPI_CXX_MPICXX_H,1, mpi/cxx/mpicxx.h  have include file))
+#                AC_CHECK_HEADER(ompi/mpi/cxx/mpicxx.h,
+#                        AC_DEFINE(HAVE_OMPI_MPI_CXX_MPICXX_H,1, ompi/mpi/cxx/mpicxx.h  have include file))
+#                AC_CHECK_HEADER(openmpi/ompi/mpi/cxx/mpicxx.h,
+#                        AC_DEFINE(HAVE_OPENMPI_OMPI_MPI_CXX_MPICXX_H,1, ompi/mpi/cxx/mpicxx.h  have include file))
+#
+#                AC_CHECK_HEADER(mpi++.h,
+#                        AC_DEFINE(HAVE_MPICPP_H,1, mpi++.h  have include file))
 		ff_mpiprog=FreeFem++-mpi${EXEEXT}
-		AC_SUBST(MPIPROG,$ff_mpiprog)
-                AC_SUBST(MPICXX,$ff_mpicxx)
+		if test "$ff_mpicxx_include" = yes ; then
+   		  AC_SUBST(MPIPROG,$ff_mpiprog)
+                  AC_SUBST(MPICXX,$ff_mpicxx)
+		else
+		  ff_mpi=no
+	          AC_SUBST(MPICXX,$ff_save_cxx)
+		fi
 	else
 	        AC_SUBST(MPICXX,$ff_save_cxx)
 	fi

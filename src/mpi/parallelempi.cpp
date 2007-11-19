@@ -18,7 +18,11 @@
 #include <mpi/cxx/mpicxx.h>
 #elif HAVE_OMPI_MPI_CXX_MPICXX_H
 #include <ompi/mpi/cxx/mpicxx.h>
-#elif  HAVE_MPICPP_H
+#elif HAVE_OPENMPI_OMPI_MPI_CXX_MPICXX_H
+#include <openmpi/ompi/mpi/cxx/mpicxx.h>
+#elif  
+#include <ompi/mpi/cxx/mpicxx.h
+#elif  HAVE_MPIC___H
 #include <mpi++.h>
 #else
 #error "no mpixx.h or mpi++.h file" 

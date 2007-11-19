@@ -1,4 +1,3 @@
-#undef NCHECKPTR
 #ifndef NCHECKPTR
 #define DEBUGUNALLOC 1 
 // -*- Mode : c++ -*-
@@ -418,6 +417,6 @@ int ShowAlloc(const char *s,size_t & lg)
 {  return  AllocExternData.ShowAlloc(s,lg);}
 #else
 #include <stdlib.h>
-int ShowAlloc(char *s,size_t & lg)
+int ShowAlloc(const char *s,size_t & lg)
 {lg=0; return 0;}
 #endif
