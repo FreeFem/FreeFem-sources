@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.21,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.21-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -1249,8 +1249,13 @@ fi
 
 # creating all makefiles
 # ----------------------
+ff_bamgprog="bamg  cvmsh2"
+if test "$ff_x11" = yes  ; then
+ff_bamgprog="$ff_bamgprog drawbdmesh"
+fi
 
 # The final list of executable programs
+AC_SUBST(BAMGPROG,$ff_bamgprog)
 AC_SUBST(GLXPROG,$ff_glxprog)
 AC_SUBST(STDPROG,$ff_stdprog)
 AC_SUBST(AGLPROG,$ff_aglprog)
@@ -1259,7 +1264,7 @@ AC_SUBST(IDEPROG,$ff_ideprog)
 AC_SUBST(TESTIDEPROG,$ff_testideprog)
 # The final test program
 AC_SUBST(IDE_TESTS,$ff_idetest)
-
+ff_progs="FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_testideprog $ff_idetest"
 
 # All makefiles
 AC_OUTPUT(Makefile
@@ -1299,3 +1304,4 @@ AC_OUTPUT(Makefile
         AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
         AC_MSG_NOTICE([		 --  FLTK (ide package) $ff_fltk ])
         AC_MSG_NOTICE([		 --  with X11             $ff_x11])
+	AC_MSG_NOTICE([    progs: $ff_progs ])
