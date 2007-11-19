@@ -9594,19 +9594,27 @@ fi
 
 		# We do not AC_DEFINE any special flag for parallel
 		# computation here, because it must only be set when the
-		# parallel program is compiled (see src/mpi/Makfile.am)
-                if test "${ac_cv_header_mpicxx_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for mpicxx.h" >&5
-echo $ECHO_N "checking for mpicxx.h... $ECHO_C" >&6
-if test "${ac_cv_header_mpicxx_h+set}" = set; then
+ 		# parallel program is compiled (see src/mpi/Makfile.am)
+
+
+
+
+
+for ac_header in mpicxx.h mpi/cxx/mpicxx.h ompi/mpi/cxx/mpicxx.h openmpi/ompi/mpi/cxx/mpicxx.h mpi++.h
+do
+as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 fi
-echo "$as_me:$LINENO: result: $ac_cv_header_mpicxx_h" >&5
-echo "${ECHO_T}$ac_cv_header_mpicxx_h" >&6
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
 else
   # Is the header compilable?
-echo "$as_me:$LINENO: checking mpicxx.h usability" >&5
-echo $ECHO_N "checking mpicxx.h usability... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking $ac_header usability" >&5
+echo $ECHO_N "checking $ac_header usability... $ECHO_C" >&6
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -9614,7 +9622,7 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 $ac_includes_default
-#include <mpicxx.h>
+#include <$ac_header>
 _ACEOF
 rm -f conftest.$ac_objext
 if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -9650,15 +9658,15 @@ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
 echo "${ECHO_T}$ac_header_compiler" >&6
 
 # Is the header present?
-echo "$as_me:$LINENO: checking mpicxx.h presence" >&5
-echo $ECHO_N "checking mpicxx.h presence... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking $ac_header presence" >&5
+echo $ECHO_N "checking $ac_header presence... $ECHO_C" >&6
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <mpicxx.h>
+#include <$ac_header>
 _ACEOF
 if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
   (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
@@ -9692,25 +9700,25 @@ echo "${ECHO_T}$ac_header_preproc" >&6
 # So?  What about this header?
 case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
   yes:no: )
-    { echo "$as_me:$LINENO: WARNING: mpicxx.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: mpicxx.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpicxx.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: mpicxx.h: proceeding with the compiler's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: $ac_header: proceeding with the compiler's result" >&2;}
     ac_header_preproc=yes
     ;;
   no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: mpicxx.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: mpicxx.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpicxx.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: mpicxx.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpicxx.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: mpicxx.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpicxx.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: mpicxx.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpicxx.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: mpicxx.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpicxx.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: mpicxx.h: in the future, the compiler will take precedence" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: present but cannot be compiled" >&5
+echo "$as_me: WARNING: $ac_header: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: $ac_header:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: $ac_header: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: $ac_header: in the future, the compiler will take precedence" >&2;}
     (
       cat <<\_ASBOX
 ## ----------------------------------- ##
@@ -9721,469 +9729,49 @@ _ASBOX
       sed "s/^/$as_me: WARNING:     /" >&2
     ;;
 esac
-echo "$as_me:$LINENO: checking for mpicxx.h" >&5
-echo $ECHO_N "checking for mpicxx.h... $ECHO_C" >&6
-if test "${ac_cv_header_mpicxx_h+set}" = set; then
+echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  ac_cv_header_mpicxx_h=$ac_header_preproc
+  eval "$as_ac_Header=\$ac_header_preproc"
 fi
-echo "$as_me:$LINENO: result: $ac_cv_header_mpicxx_h" >&5
-echo "${ECHO_T}$ac_cv_header_mpicxx_h" >&6
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
 
 fi
-if test $ac_cv_header_mpicxx_h = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_MPICXX_H 1
+if test `eval echo '${'$as_ac_Header'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
-
+ ff_mpicxx_include=yes
 fi
 
+done
 
-                if test "${ac_cv_header_mpi_cxx_mpicxx_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for mpi/cxx/mpicxx.h" >&5
-echo $ECHO_N "checking for mpi/cxx/mpicxx.h... $ECHO_C" >&6
-if test "${ac_cv_header_mpi_cxx_mpicxx_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_mpi_cxx_mpicxx_h" >&5
-echo "${ECHO_T}$ac_cv_header_mpi_cxx_mpicxx_h" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking mpi/cxx/mpicxx.h usability" >&5
-echo $ECHO_N "checking mpi/cxx/mpicxx.h usability... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <mpi/cxx/mpicxx.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_header_compiler=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6
-
-# Is the header present?
-echo "$as_me:$LINENO: checking mpi/cxx/mpicxx.h presence" >&5
-echo $ECHO_N "checking mpi/cxx/mpicxx.h presence... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <mpi/cxx/mpicxx.h>
-_ACEOF
-if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
-  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null; then
-  if test -s conftest.err; then
-    ac_cpp_err=$ac_cxx_preproc_warn_flag
-    ac_cpp_err=$ac_cpp_err$ac_cxx_werror_flag
-  else
-    ac_cpp_err=
-  fi
-else
-  ac_cpp_err=yes
-fi
-if test -z "$ac_cpp_err"; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: mpi/cxx/mpicxx.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: mpi/cxx/mpicxx.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi/cxx/mpicxx.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: mpi/cxx/mpicxx.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: mpi/cxx/mpicxx.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: mpi/cxx/mpicxx.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi/cxx/mpicxx.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: mpi/cxx/mpicxx.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi/cxx/mpicxx.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: mpi/cxx/mpicxx.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi/cxx/mpicxx.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: mpi/cxx/mpicxx.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi/cxx/mpicxx.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: mpi/cxx/mpicxx.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi/cxx/mpicxx.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: mpi/cxx/mpicxx.h: in the future, the compiler will take precedence" >&2;}
-    (
-      cat <<\_ASBOX
-## ----------------------------------- ##
-## Report this to hecht@ann.jussieu.fr ##
-## ----------------------------------- ##
-_ASBOX
-    ) |
-      sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-echo "$as_me:$LINENO: checking for mpi/cxx/mpicxx.h" >&5
-echo $ECHO_N "checking for mpi/cxx/mpicxx.h... $ECHO_C" >&6
-if test "${ac_cv_header_mpi_cxx_mpicxx_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_header_mpi_cxx_mpicxx_h=$ac_header_preproc
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_mpi_cxx_mpicxx_h" >&5
-echo "${ECHO_T}$ac_cv_header_mpi_cxx_mpicxx_h" >&6
-
-fi
-if test $ac_cv_header_mpi_cxx_mpicxx_h = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_MPI_CXX_MPICXX_H 1
-_ACEOF
-
-fi
-
-
-                if test "${ac_cv_header_ompi_mpi_cxx_mpicxx_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for ompi/mpi/cxx/mpicxx.h" >&5
-echo $ECHO_N "checking for ompi/mpi/cxx/mpicxx.h... $ECHO_C" >&6
-if test "${ac_cv_header_ompi_mpi_cxx_mpicxx_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_ompi_mpi_cxx_mpicxx_h" >&5
-echo "${ECHO_T}$ac_cv_header_ompi_mpi_cxx_mpicxx_h" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking ompi/mpi/cxx/mpicxx.h usability" >&5
-echo $ECHO_N "checking ompi/mpi/cxx/mpicxx.h usability... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <ompi/mpi/cxx/mpicxx.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_header_compiler=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6
-
-# Is the header present?
-echo "$as_me:$LINENO: checking ompi/mpi/cxx/mpicxx.h presence" >&5
-echo $ECHO_N "checking ompi/mpi/cxx/mpicxx.h presence... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <ompi/mpi/cxx/mpicxx.h>
-_ACEOF
-if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
-  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null; then
-  if test -s conftest.err; then
-    ac_cpp_err=$ac_cxx_preproc_warn_flag
-    ac_cpp_err=$ac_cpp_err$ac_cxx_werror_flag
-  else
-    ac_cpp_err=
-  fi
-else
-  ac_cpp_err=yes
-fi
-if test -z "$ac_cpp_err"; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: ompi/mpi/cxx/mpicxx.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: ompi/mpi/cxx/mpicxx.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: ompi/mpi/cxx/mpicxx.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: ompi/mpi/cxx/mpicxx.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: ompi/mpi/cxx/mpicxx.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: ompi/mpi/cxx/mpicxx.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: ompi/mpi/cxx/mpicxx.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: ompi/mpi/cxx/mpicxx.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: ompi/mpi/cxx/mpicxx.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: ompi/mpi/cxx/mpicxx.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: ompi/mpi/cxx/mpicxx.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: ompi/mpi/cxx/mpicxx.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: ompi/mpi/cxx/mpicxx.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: ompi/mpi/cxx/mpicxx.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: ompi/mpi/cxx/mpicxx.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: ompi/mpi/cxx/mpicxx.h: in the future, the compiler will take precedence" >&2;}
-    (
-      cat <<\_ASBOX
-## ----------------------------------- ##
-## Report this to hecht@ann.jussieu.fr ##
-## ----------------------------------- ##
-_ASBOX
-    ) |
-      sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-echo "$as_me:$LINENO: checking for ompi/mpi/cxx/mpicxx.h" >&5
-echo $ECHO_N "checking for ompi/mpi/cxx/mpicxx.h... $ECHO_C" >&6
-if test "${ac_cv_header_ompi_mpi_cxx_mpicxx_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_header_ompi_mpi_cxx_mpicxx_h=$ac_header_preproc
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_ompi_mpi_cxx_mpicxx_h" >&5
-echo "${ECHO_T}$ac_cv_header_ompi_mpi_cxx_mpicxx_h" >&6
-
-fi
-if test $ac_cv_header_ompi_mpi_cxx_mpicxx_h = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_OMPI_MPI_CXX_MPICXX_H 1
-_ACEOF
-
-fi
-
-
-                if test "${ac_cv_header_mpipp_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for mpi++.h" >&5
-echo $ECHO_N "checking for mpi++.h... $ECHO_C" >&6
-if test "${ac_cv_header_mpipp_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_mpipp_h" >&5
-echo "${ECHO_T}$ac_cv_header_mpipp_h" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking mpi++.h usability" >&5
-echo $ECHO_N "checking mpi++.h usability... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <mpi++.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_header_compiler=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6
-
-# Is the header present?
-echo "$as_me:$LINENO: checking mpi++.h presence" >&5
-echo $ECHO_N "checking mpi++.h presence... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <mpi++.h>
-_ACEOF
-if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
-  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null; then
-  if test -s conftest.err; then
-    ac_cpp_err=$ac_cxx_preproc_warn_flag
-    ac_cpp_err=$ac_cpp_err$ac_cxx_werror_flag
-  else
-    ac_cpp_err=
-  fi
-else
-  ac_cpp_err=yes
-fi
-if test -z "$ac_cpp_err"; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: mpi++.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: mpi++.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi++.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: mpi++.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: mpi++.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: mpi++.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi++.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: mpi++.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi++.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: mpi++.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi++.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: mpi++.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi++.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: mpi++.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mpi++.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: mpi++.h: in the future, the compiler will take precedence" >&2;}
-    (
-      cat <<\_ASBOX
-## ----------------------------------- ##
-## Report this to hecht@ann.jussieu.fr ##
-## ----------------------------------- ##
-_ASBOX
-    ) |
-      sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-echo "$as_me:$LINENO: checking for mpi++.h" >&5
-echo $ECHO_N "checking for mpi++.h... $ECHO_C" >&6
-if test "${ac_cv_header_mpipp_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_header_mpipp_h=$ac_header_preproc
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_mpipp_h" >&5
-echo "${ECHO_T}$ac_cv_header_mpipp_h" >&6
-
-fi
-if test $ac_cv_header_mpipp_h = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_MPICPP_H 1
-_ACEOF
-
-fi
-
-
+#
+#                AC_CHECK_HEADER(mpicxx.h,
+#                        AC_DEFINE(HAVE_MPICXX_H,1, mpicxx.h  have include file))
+#                AC_CHECK_HEADER(mpi/cxx/mpicxx.h,
+#                        AC_DEFINE(HAVE_MPI_CXX_MPICXX_H,1, mpi/cxx/mpicxx.h  have include file))
+#                AC_CHECK_HEADER(ompi/mpi/cxx/mpicxx.h,
+#                        AC_DEFINE(HAVE_OMPI_MPI_CXX_MPICXX_H,1, ompi/mpi/cxx/mpicxx.h  have include file))
+#                AC_CHECK_HEADER(openmpi/ompi/mpi/cxx/mpicxx.h,
+#                        AC_DEFINE(HAVE_OPENMPI_OMPI_MPI_CXX_MPICXX_H,1, ompi/mpi/cxx/mpicxx.h  have include file))
+#
+#                AC_CHECK_HEADER(mpi++.h,
+#                        AC_DEFINE(HAVE_MPICPP_H,1, mpi++.h  have include file))
 		ff_mpiprog=FreeFem++-mpi${EXEEXT}
-		MPIPROG=$ff_mpiprog
+		if test "$ff_mpicxx_include" = yes ; then
+   		  MPIPROG=$ff_mpiprog
 
-                MPICXX=$ff_mpicxx
+                  MPICXX=$ff_mpicxx
 
+		else
+		  ff_mpi=no
+	          MPICXX=$ff_save_cxx
+
+		fi
 	else
 	        MPICXX=$ff_save_cxx
 
