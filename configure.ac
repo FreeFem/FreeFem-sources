@@ -1261,7 +1261,7 @@ fi
 # creating all makefiles
 # ----------------------
 ff_bamgprog="bamg${EXEEXT}  cvmsh2${EXEEXT}"
-if test "$ff_x11" = yes -o test "$ff_win32" = yes   ; then
+if test "$ff_x11" = yes -o  "$ff_win32" = yes   ; then
 ff_bamgprog="$ff_bamgprog drawbdmesh${EXEEXT}"
 fi
 
