@@ -498,7 +498,7 @@ ff_mpi=no)
 #
 #                AC_CHECK_HEADER(mpi++.h,
 #                        AC_DEFINE(HAVE_MPICPP_H,1, mpi++.h  have include file))
-		ff_mpiprog=FreeFem++-mpi${EXEEXT}
+		ff_mpiprog="FreeFem++-mpi${EXEEXT}"
 		if test "$ff_mpicxx_include" = yes ; then
    		  AC_SUBST(MPIPROG,$ff_mpiprog)
                   AC_SUBST(MPICXX,$ff_mpicxx)
@@ -1111,7 +1111,7 @@ fi
 
 if test "$ff_mingw" = yes 
 then
-	ff_stdprog=FreeFem++
+	ff_stdprog="FreeFem++${EXEEXT}"
 	ff_std_graph_obj=Pcrgraph.$OBJEXT
 	ff_std_ldflags=-mwindows
 	ff_std_libs=
@@ -1121,7 +1121,7 @@ elif test "$ff_x11" = yes ; then
 	ff_std_libs=$ff_x11_libs
 	# If the standard version already uses x11, we do not need to
 	# make the contents of the src/x11 directory.
-	ff_stdprog=FreeFem++
+	ff_stdprog="FreeFem++${EXEEXT}"
 	ff_x11prog=
 fi
 AC_SUBST(STD_GRAPH_OBJ,$ff_std_graph_obj)
@@ -1260,9 +1260,9 @@ fi
 
 # creating all makefiles
 # ----------------------
-ff_bamgprog="bamg  cvmsh2"
+ff_bamgprog="bamg${EXEEXT}  cvmsh2${EXEEXT}"
 if test "$ff_x11" = yes  ; then
-ff_bamgprog="$ff_bamgprog drawbdmesh"
+ff_bamgprog="$ff_bamgprog drawbdmesh${EXEEXT}"
 fi
 
 # The final list of executable programs
