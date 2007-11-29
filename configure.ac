@@ -908,7 +908,7 @@ then
 
 	# Trying default locations
 
-	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse//umfpack.h,ff_umfpack_header=yes)
+	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h,ff_umfpack_header=yes)
 
 	# Somes systems like FreeBSD hide umfpack.h in a directory
 	# called UMFPACK (all capitals). This breaks the standard
@@ -925,7 +925,7 @@ then
 	if test "$ff_amd_ok" = no;
 	then
 		AC_CHECK_LIB(amd,amd_info,
-			ff_umfpack_lib="-lamd"
+			ff_umfpack_lib="$ff_umfpack_lib -lamd"
 			ff_amd_ok=yes)
 	fi
 

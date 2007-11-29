@@ -1,9 +1,9 @@
 //  
-//   calcul d'une zone saturation en eau (nappe phréatique)
+//   calcul d'une zone saturation en eau (nappe phrÃ©atique)
 //
 real L=10;        // longueur du domaine					   	
 real q=0.02;      // flux entrant
-real K=0.5;	      //permeabilité	
+real K=0.5;	      //permeabilitÃ©	
 
 real  erradap=0.001;
 real  coef=1;

@@ -11613,7 +11613,7 @@ fi;
 
 
 
-for ac_header in umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse//umfpack.h
+for ac_header in umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -11985,7 +11985,7 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_lib_amd_amd_info" >&5
 echo "${ECHO_T}$ac_cv_lib_amd_amd_info" >&6
 if test $ac_cv_lib_amd_amd_info = yes; then
-  ff_umfpack_lib="-lamd"
+  ff_umfpack_lib="$ff_umfpack_lib -lamd"
 			ff_amd_ok=yes
 fi
 
