@@ -20,8 +20,6 @@
 #include <ompi/mpi/cxx/mpicxx.h>
 #elif HAVE_OPENMPI_OMPI_MPI_CXX_MPICXX_H
 #include <openmpi/ompi/mpi/cxx/mpicxx.h>
-#elif HAVE_OMPI_MPI_CXX_MPICXX_H  
-#include <ompi/mpi/cxx/mpicxx.h>
 #elif  HAVE_MPI___H
 #include <mpi++.h>
 #else
