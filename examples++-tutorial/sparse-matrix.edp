@@ -200,8 +200,8 @@ cout << " array of matrix   \n" ;
  aM[0]= MM;
  aM[3]= MM;
  aM[9]= MM;
- aM.resize(4);
- aM.resize(10);
+// aM.resize(4);
+//  aM.resize(10);  bug on debian ? FH 
  
 //  add version 2.17 --- 
 {
