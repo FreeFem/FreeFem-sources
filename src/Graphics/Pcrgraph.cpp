@@ -26,6 +26,7 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#define PCRGRAPH_CPP
 #define FF_GRAPH_SET_PTR
 #include <config-wrapper.h>
 
@@ -975,7 +976,7 @@ DWORD GetOption(char lpszCmdLine[])
       case 'v':
       {  string vv;
 	  char c;
-	  while  ( (isspace(c=lpszCmdLine[i++])&& vv.length()>0 ) || isdigit(c) )
+	  while  (i < CmdLen &&( (isspace(c=lpszCmdLine[i++])&& vv.length()>0 )||isdigit(c) ))
 	    if(isdigit(c)) vv+= c;
 	  verbosity=atoi(vv.c_str());	  
       }

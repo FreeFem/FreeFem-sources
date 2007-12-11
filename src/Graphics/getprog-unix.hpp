@@ -3,7 +3,9 @@ extern long verbosity;
 
 int getprog(char* fn,int argc, char **argv)
 {
+    
     int ret=0;
+    *fn='\0';
     for (int i=1; i<argc;i++)
 	if  (ret ==0 && strcmp(argv[i],"-f")==0 && i+1 < argc  ) 
 	{
@@ -24,11 +26,12 @@ int getprog(char* fn,int argc, char **argv)
 	    }
 	    if(ret==0) 
 	    {
+#ifudef PCRGRAPH_CPP
 		if(argc>0)
 		    cerr << " Syntaxe : " << argv[0] << "  -f filename  [-v verbosity] " << endl;
 		else 
 		    cerr << " Syntaxe : FreeFem++  -f filename  [-v verbosity] " << endl;
-
+#endif
 		return ret; 
 	    }
 	    if(verbosity>10) 
