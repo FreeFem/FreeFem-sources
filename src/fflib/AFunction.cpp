@@ -693,7 +693,7 @@ void Init_map_type()
     Dcl_Type<char*>();
     Dcl_Type<const char *>();
     Dcl_Type<char>();
-    Dcl_TypeandPtr<string*>(0,::Delete<string>,::InitializePtr<string*>,::DeletePtr<string*>);
+    Dcl_TypeandPtr<string*>(0,0/* ::Delete<string>*/,::InitializePtr<string*>,::DeletePtr<string*>);
     Dcl_TypeandPtr<ostream*>(0,0,::InitializePtr<ostream*>,::DeletePtr<ostream*>);
     Dcl_TypeandPtr<istream*>(0,0,::InitializePtr<istream*>,::DeletePtr<istream*>);
     Dcl_Type< ostream_precis > ();

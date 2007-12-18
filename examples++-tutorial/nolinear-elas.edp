@@ -1,129 +1,42 @@
 //  non linear elasticity model 
 //   
 //  -------------------------------
-//  with huge utilisation of  macro
+//  with huge utilisation of  macro  new version
+// more simple 
 // ---------------------------
 //   optimize version 
 // ------------
 //  problem is  find $(uu,vn)$  minimizing  $J$
-//  $ min J(un,vn) = int f(F2) -  int Pa * un $
-//    dJ(u,u,uu,vv) = int dF2(u,v,uu,vv) df(F2(u,v)) 
-//   where $F2 =  (^t {E}  A {E} ) ,
-//   E(U) =  1/2 (\nabla U + \nabla U^t + \nabla U^t  \nabla U) 
+//  $ min J(un,vn) = \int f(F2) -  int Pa * un $
+//   $ dJ(u,u,uu,vv) = int dF2(u,v,uu,vv) df(F2(u,v)) $
+//   where $F2 =  (^t {E}  A {E} ) $,
+//   $E(U) =  1/2 (\nabla U + \nabla U^t + \nabla U^t  \nabla U) $
 //         ($u_1$)
 //  with U=(   )
 //         ($u_2$)
 // so: 
 //$$ E_ij = 0.5 ( d_i u_j + d_j u_i ) + \sum_k d_i u_k * d_j*u_k  \leqno(1)$$
+//  the symetric tensor $t_{ij}$ are a vector  [t11,2*t12,t22] 
+macro EL(u,v) [dx(u),(dx(v)+dy(u)),dy(v)] // is $[\epsilon_{11},2\epsilon_{12},\epsilon_{22}]$
 
-//  $E1(u1,u2) =    E_11 $
-//  $E2(u1,u2) =    E_12 = E_21 $
-//  $E3(u1,u2) =    E_22  $
-// remark : we can parametrize E1,E2,E3 with:
-//  EE(da,db,a,b,u1,u2) 
-//   where $da,db$ correspond to $d_i, d_j$ in (1)
-//   where  $a,b$  correspond to $u_i, u_j$ in (1)
-//   where $u1,u2$  correspond to $u_1, u_2$ in (1)
-//  ----------------------------------------------
+macro ENL(u,v) [ 
+(dx(u)*dx(u)+dx(v)*dx(v))*0.5,
+(dx(u)*dy(u)+dx(v)*dy(v))    ,
+(dy(u)*dy(u)+dy(v)*dy(v))*0.5 ] // EOM ENL 
 
-//  first the linear part of EE linear elasticite
-// remark a macro end with a // comment
-macro EEL(di,dj,ui,uj) ( (di(uj)+dj(ui))*0.5 )    // 11
-
-// non linear par of EE (bilinear)  simple to differential
-macro bEENL(di,dj,u1,u2,v1,v2) (di(u1)*dj(v1)*.5+di(u2)*dj(v2)*0.5) // 
-macro EENL(di,dj,u1,u2) bEENL(di,dj,u1,u2,u1,u2) // 
-macro dEENL(di,dj,u1,u2,du1,du2) ( bEENL(di,dj,du1,du2,u1,u2) +  bEENL(di,dj,u1,u2,du1,du2) )  // 
-//   ------------
-macro EE(di,dj,ui,uj,u1,u2) (EEL(di,dj,u1,uj) + EENL(di,dj,u1,u2)) //
-macro dEE(di,dj,dui,duj,u1,u2,du1,du2) (EEL(di,dj,du1,duj) + dEENL(di,dj,u1,u2,du1,du2)) //
-macro ddEE(di,dj,du1,du2,ddu1,ddu2) ( dEENL(di,dj,du1,du2,ddu1,ddu2)) //
-// remark  :
-// $ dEE(di,dj,dui,duj,u1,u2,du1,du2)$  is "the formal differential of EE" 
-// where $du1=\delta u1$ ,$du2=\delta u2$ 
-// $ ddEE(di,dj,dui,duj,u1,u2,du1,du2)$  is "the formal differential of dEE" 
-// where $ddu1=\delta^2 u1$ ,$ddu2=\delta^2 u2$ 
-// ---
-
-//  the macro corresponding to the 3 componante of E 
-macro E1(u,v)  /*E11*/EE(dx,dx,u,u,u,v) 
- //
-macro E2(u,v)  /*E12*/EE(dx,dy,u,v,u,v) 
- //
-macro E3(u,v)  /*E22*/EE(dy,dy,v,v,u,v) 
- //
-
-macro dE1(u,v,uu,vv) /*dE11*/dEE(dx,dx,uu,uu,u,v,uu,vv) 
-// 
-macro dE2(u,v,uu,vv) /*dE12*/dEE(dx,dy,uu,vv,u,v,uu,vv) 
-//
-macro dE3(u,v,uu,vv) /*dE22*/dEE(dy,dy,vv,vv,u,v,uu,vv) 
-//
-macro ddE1(u,v,uu,vv,uuu,vvv) /*ddE11*/ddEE(dx,dx,uu,vv,uuu,vvv) 
-//
-macro ddE2(u,v,uu,vv,uuu,vvv) /*ddE12*/ddEE(dx,dy,uu,vv,uuu,vvv) 
-//
-macro ddE3(u,v,uu,vv,uuu,vvv) /*ddE22*/ddEE(dy,dy,uu,vv,uuu,vvv) 
-//
-//  a formal bilinear term 
-macro PP(A,B,u,v) (A(u,v)*B(u,v)) 
-// 
-// a formal diff  bilinear term 
-macro dPP(A,B,dA,dB,u,v,uu,vv) (dA(u,v,uu,vv)*B(u,v) + A(u,v)*dB(u,v,uu,vv)) 
-//
-// a formal $diff^2$ bilinear term 
-macro ddPP(A,B,dA,dB,ddA,ddB,u,v,uu,vv,uuu,vvv) (
-  dA(u,v,uu,vv)*dB(u,v,uuu,vvv) + dA(u,v,uuu,vvv)*dB(u,v,uu,vv) 
-  +  ddA(u,v,uu,vv,uuu,vvv)*B(u,v) + A(u,v)*ddB(u,v,uu,vv,uuu,vvv) 
-  ) 
-//
-// so the matrix A is 6 coef
-//      
-//     a11 a12 a13
-//     a12 a22 a23
-//     a13 a23 a33
-//  a shell script to remove error
-//  : for i in 1 2 3 ; do for j in 1 2 3; do echo "     + a$i$j*PP(E$i,E$j,u,v)";done;done
-macro F2(u,v)  /* F2 */  (
-     a11*PP(E1,E1,u,v)
-  +  a22*PP(E2,E2,u,v)
-  +  a33*PP(E3,E3,u,v)
-  +  a13*PP(E1,E3,u,v)
-  +  a13*PP(E3,E1,u,v)
-  +  a12*PP(E1,E2,u,v)
-  +  a12*PP(E2,E1,u,v)
-  +  a23*PP(E2,E3,u,v)
-  +  a23*PP(E3,E2,u,v)
-) //
-
-//  a shell script to remove error
-//  for i in 1 2 3 ; do for j in 1 2 3; do echo "     + a$i$j*dPP(E$i,E$j,dE$i,dE$j,u,v,uu,vv)";done;done
-macro dF2(u,v,uu,vv)  /* dF2 */  (
-       a11*dPP(E1,E1,dE1,dE1,u,v,uu,vv)
-     + a12*dPP(E1,E2,dE1,dE2,u,v,uu,vv)
-     + a13*dPP(E1,E3,dE1,dE3,u,v,uu,vv)
-     + a21*dPP(E2,E1,dE2,dE1,u,v,uu,vv)
-     + a22*dPP(E2,E2,dE2,dE2,u,v,uu,vv)
-     + a23*dPP(E2,E3,dE2,dE3,u,v,uu,vv)
-     + a31*dPP(E3,E1,dE3,dE1,u,v,uu,vv)
-     + a32*dPP(E3,E2,dE3,dE2,u,v,uu,vv)
-     + a33*dPP(E3,E3,dE3,dE3,u,v,uu,vv)
-) //
-//  a shell script to remove error
-//  for i in 1 2 3 ; do for j in 1 2 3; do echo "     + a$i$j*ddPP(E$i,E$j,dE$i,dE$j,ddE$i,ddE$j,u,v,uu,vv,uuu,vvv)";done;done
-macro ddF2(u,v,uu,vv,uuu,vvv)  /* ddF2 */  (
-       a11*ddPP(E1,E1,dE1,dE1,ddE1,ddE1,u,v,uu,vv,uuu,vvv)
-     + a12*ddPP(E1,E2,dE1,dE2,ddE1,ddE2,u,v,uu,vv,uuu,vvv)
-     + a13*ddPP(E1,E3,dE1,dE3,ddE1,ddE3,u,v,uu,vv,uuu,vvv)
-     + a21*ddPP(E2,E1,dE2,dE1,ddE2,ddE1,u,v,uu,vv,uuu,vvv)
-     + a22*ddPP(E2,E2,dE2,dE2,ddE2,ddE2,u,v,uu,vv,uuu,vvv)
-     + a23*ddPP(E2,E3,dE2,dE3,ddE2,ddE3,u,v,uu,vv,uuu,vvv)
-     + a31*ddPP(E3,E1,dE3,dE1,ddE3,ddE1,u,v,uu,vv,uuu,vvv)
-     + a32*ddPP(E3,E2,dE3,dE2,ddE3,ddE2,u,v,uu,vv,uuu,vvv)
-     + a33*ddPP(E3,E3,dE3,dE3,ddE3,ddE3,u,v,uu,vv,uuu,vvv)
-)//
-
-//  differential of J:
+macro dENL(u,v,uu,vv) [(dx(u)*dx(uu)+dx(v)*dx(vv)),
+ (dx(u)*dy(uu)+dx(v)*dy(vv)+dx(uu)*dy(u)+dx(vv)*dy(v)),
+ (dy(u)*dy(uu)+dy(v)*dy(vv)) ] // 
+ 
+ 
+macro E(u,v) (EL(u,v)+ENL(u,v)) // is $[\E{11},\sqrt2\E{12},\E{22}]
+macro dE(u,v,uu,vv) (EL(uu,vv)+dENL(u,v,uu,vv)) //
+macro ddE(u,v,uu,vv,uuu,vvv) dENL(uuu,vvv,uu,vv) //
+macro F2(u,v) (E(u,v)'*A*E(u,v)) // 
+macro dF2(u,v,uu,vv)  (E(u,v)'*A*dE(u,v,uu,vv)*2. ) //
+macro ddF2(u,v,uu,vv,uuu,vvv) (
+            (dE(u,v,uu,vv)'*A*dE(u,v,uuu,vvv))*2. 
+          + (E(u,v)'*A*ddE(u,v,uu,vv,uuu,vvv))*2.  )// EOM
 
 //  for hyper elasticity problem 
 //  -----------------------------
@@ -137,6 +50,7 @@ real mu = 0.012e5; //  kg/cm^2
 real lambda =  0.4e5; //  kg/cm^2
 //  
 //   $  \sigma = 2 \mu E + \lambda tr(E) Id $
+//   $   A(u,v)= \sigma(u):\E(v) $
 //   
 //   ( a b )
 //   ( b c )
@@ -148,7 +62,7 @@ real lambda =  0.4e5; //  kg/cm^2
 //   ( 1 0 1 ) 
 // ------------------
 real a11= 2*mu +  lambda  ;
-real a22= 2*mu ;
+real a22= mu ; //  because [0,2*t12,0]' A [0,2*s12,0]  = 2*mu*(t12*s12+t21*s21) = 4*mu*t12*s12
 real a33= 2*mu +   lambda ;
 real a12= 0 ;
 real a13= lambda ;
@@ -157,6 +71,8 @@ real a23= 0 ;
 real a21= a12 ;
 real a31= a13 ;
 real a32= a23 ;
+func A = [ [ a11,a12,a13],[ a21,a22,a23],[ a31,a32,a33] ];  
+
 real Pa=1e2; //  a pressure of 100 Pa
 // ----------------
 
@@ -185,15 +101,14 @@ Vh [uu,vv], [w,s],[un,vn];
 
 varf vmass([uu,vv],[w,s],solver=CG) =  int2d(Th)( uu*w + vv*s );
 matrix M=vmass(Vh,Vh);
-
 problem NonLin([uu,vv],[w,s],solver=LU)=
  int2d(Th,qforder=1)( // (D^2 J(un)) part
-               ddF2(un,vn,uu,vv,w,s)* dfe2 
-	     + dF2(un,vn,uu,vv)*dF2(un,vn,w,s)*ddfe2        
-	      )
-   -int2d(Th,qforder=1)( // (D J(un)) part
-           dF2(un,vn,w,s) * dfe2  )
+                       dF2(un,vn,uu,vv)*dF2(un,vn,w,s)*ddfe2
+                    +  ddF2(un,vn,w,s,uu,vv)*dfe2        
+	            )
    - int1d(Th,3)(Pa*s) 
+   - int2d(Th,qforder=1)( // (D J(un)) part
+           dF2(un,vn,w,s)*dfe2   ) 
    + on(right,left,uu=0,vv=0);
 ;
 // Newton's method

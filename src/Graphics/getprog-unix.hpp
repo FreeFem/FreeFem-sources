@@ -26,7 +26,7 @@ int getprog(char* fn,int argc, char **argv)
 	    }
 	    if(ret==0) 
 	    {
-#ifudef PCRGRAPH_CPP
+#ifndef PCRGRAPH_CPP
 		if(argc>0)
 		    cerr << " Syntaxe : " << argv[0] << "  -f filename  [-v verbosity] " << endl;
 		else 

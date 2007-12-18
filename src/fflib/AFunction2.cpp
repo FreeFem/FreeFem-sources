@@ -661,8 +661,11 @@ E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)
        name(routine->name)
 {    
    assert(routine->ins); 
-   for (int i=0;i<args.size();i++)
+   for (int i=0;i<args.size();i++)  //  bug pb copie des string   dec 2007  FH  ???????????????
+   {
+       cout << "E_Routine " << *routine->param[i].r << " <- " << *args[i].left() << endl;
         param[i]=routine->param[i].r->CastTo(args[i]);
+   }
 };
 
 E_Routine::~E_Routine() { delete [] param;}
@@ -683,7 +686,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
    WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH mars 2006 
  
    try {  
-      (*code)(s);  }
+      ret=(*code)(s);  }
    catch( E_exception & e) { 
            (*clean)(s); 
           // cout << " catch " << e.what() << " clean & throw " << endl;
@@ -846,8 +849,15 @@ Routine::Routine(aType tf,aType tr,const char * iden,  ListOfId *l,Block * & cb)
      {
        delete l;  // add  FH 24032005 (trap ) 
        cb = currentblock; 
+	 cout <<"Routine: tf = " << *tf << "  " <<  *tr << endl;
        for (size_t i=0;i<param.size();i++)
-           currentblock->NewID(param[i].r,param[i].id,C_F0(new E_F0para(i),param[i].r),!param[i].ref);
+       {
+	   cout << "Routine " << i << " ref=  " << param[i].ref << " " << *param[i].r << " " << *param[i].r->right() << endl;
+           currentblock->NewID(param[i].r,param[i].id,C_F0(new E_F0para(i),// modif FH 2007 
+							   param[i].r), 
+							  // (param[i].ref ? param[i].r :  param[i].r->right() ),
+							   !param[i].ref);
+       }
      }
    Block * Routine::Set(C_F0 instrs) 
        { 

@@ -1134,8 +1134,9 @@ template<class R>
 	    R coef=i->first;
 	    if(verbosity>3)
 		cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  i->third << endl;
-	    if (n==0) { if(transpose) {m=M.n; n=M.m;} else{n=M.n; m=M.m;}}// Modif mars 2007 FH
-	    else { if(transpose)  ffassert(n== M.m && m==M.n); else ffassert(n== M.n && m==M.m);}
+	    //  change to max FH dec 2007 to hard to satisfy
+	   /* if (n==0)*/ { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}// Modif mars 2007 FH
+	   /* else { if(transpose)  ffassert(n== M.m && m==M.n); else ffassert(n== M.n && m==M.m);}*/
 	    sym = M.addMatTo(coef,mij,transpose,ii00,jj00,cnj) && sym;  
 	}
      } 

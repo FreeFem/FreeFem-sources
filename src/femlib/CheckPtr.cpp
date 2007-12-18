@@ -1,3 +1,4 @@
+//#define NCHECKPTR
 #ifndef NCHECKPTR
 #define DEBUGUNALLOC 1 
 // -*- Mode : c++ -*-

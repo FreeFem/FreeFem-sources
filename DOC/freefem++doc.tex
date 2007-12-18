@@ -3,8 +3,13 @@
 \documentclass[a4paper,twoside,12pt]{book}
 \usepackage{styles}
 \usepackage{txfonts}
+\usepackage{bm}
+
+
+
+
 \usepackage{times}
-\def\VERSION{2.21}
+\def\VERSION{2.22}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -17,7 +22,6 @@
 \def\p{\partial}
 \def\n{\nabla}
 \def\Rel{{\mathcal R}}
-
 \def\setS#1{#1\label{sec:#1}}
 \def\refSec#1{Section \ref{sec:#1}}
 \def\refChap#1{Chapter \ref{sec:#1}}
@@ -46,7 +50,7 @@
 \thispagestyle{empty}
 \vbox to 20cm {\begin{center}
    \vglue-0.5cm\includegraphics[width=10cm]{titre-ff}
-    \\  \large  \Blue{Version \VERSION }
+    \\  \large  \Blue{Second Edition,   Version \VERSION }
  \\ \vglue 0.7cm
   {\large \Blue{\url{http://www.freefem.org/ff++}}} \\ ~
  \\~  \\
@@ -64,7 +68,7 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \thispagestyle{empty}
 \begin{center}
  {\Blue{ \TitreFont FreeFem++}} \\ \vglue 1cm  ~ \\
-   Version \VERSION 
+   Second Edition, Version \VERSION 
  \\ \vglue 0.7cm
  {\Large \url{http://www.freefem.org/ff++}} \\
 \vglue 1cm
@@ -131,9 +135,12 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \includegraphics[height=2cm]{LogoUPMC} \hss
 \includegraphics[height=2cm]{LogoCNRS} \hss
 }
+\bigskip
 
-
-
+{\small {\bf Acknowledgments} 
+We are very grateful  to  l'\'Ecole Polytechnique  (Palaiseau, France)  for  printing the second edition of this manual (\url{http://www.polytechnique.fr} ),
+and to l'Agence Nationale de la Recherche (Paris, France)
+ for funding of the extension  of\ \freefempp to a parallel tridimensional version (\url{http://www.agence-nationale-recherche.fr}).}
 
 \cleardoublepage
 %\end{document}
@@ -2118,14 +2125,15 @@ derivatives, and thus any iterative solution on each of the
 components is risky. One should rather use \freefempp's system
 approach and write:
 
-\begin{example}[lame.edp]
+\begin{example}[lame.edp]\label{lame.edp}
 \bFF
 // file lame.edp
 @mesh Th=@square(10,10,[20*x,2*y-1]);
 @fespace Vh(Th,P2);
 Vh u,v,uu,vv;
-
-@macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))*0.5] // EOM
+@real sqrt2=sqrt(2.);
+@macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
+//the sqrt2 is because we want: epsilon(u1,u2)'* epsilon(v1,v2) $==  \epsilon(\bm{u}): \epsilon(\bm{v})$
 @macro div(u,v) ( dx(u)+dy(v) ) // EOM
 
 
@@ -2153,17 +2161,11 @@ Vh u,v,uu,vv;
 The numerical results are shown on figure \ref{figlame} and the output is:
 \bFF
  -- square mesh : nb vertices  =121 ,  nb triangles = 200 ,  nb boundary edges 40
-   Nb of edges on Mortars  = 0
-   Nb of edges on Boundary = 40, neb = 40
- Nb Of Nodes = 441
- Nb of DF = 441
- -- Solve :           min -0.00174503  max 0.00174478
-          min -0.0289276  max 2.66787e-29
-   Nb of edges on Mortars  = 0
-   Nb of edges on Boundary = 40, neb = 40
- - dep.  max   x = -0.00174503 y=-0.0289276
-   dep.  (20,0)  = -1.15898e-07 -0.0289275
-times: compile 0.02s, execution 1.27s
+ -- Solve :           min -0.00174137  max 0.00174105
+          min -0.0263154  max 1.47016e-29
+ - dep.  max   x = -0.00174137 y=-0.0263154
+   dep.  (20,0)  = -1.8096e-07 -0.0263154
+times: compile 0.010219s, execution 1.5827s
 \eFF
 
 
@@ -4850,7 +4852,7 @@ default parameters which can be modified~:
 \begin{equation}
   \mathcal{M} = \left({1\over \mathtt{err}\,\,\mathtt{coef}^2} \quad
   {|{\mathcal{H}|} \over
-  {\mathit{sup}(\eta)-\mathit{inf}(\eta)}}\right)^p.\label{eq err abs}
+  {\sup(\eta)-\inf(\eta)}}\right)^p.\label{eq err abs}
 \end{equation}
 
     \item[\texttt{cutoff=}] lower limit for the relative error
@@ -5286,7 +5288,7 @@ types of finite element are: \index{type of finite element}
      \index{P1b|textbf}\index{fespace!P1b}
      \begin{equation}
      P1b_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
-        \quad v_{|K} \in P_{1} \oplus \mathit{Span}\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right.\right\} \label{eq:P1b}
+        \quad v_{|K} \in P_{1} \oplus \mathrm{Span}\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right.\right\} \label{eq:P1b}
      \end{equation}
      where $\lambda ^{K}_{i}, i=0,1,2$ are the 3 area coordinate functions of the triangle $K$
 
@@ -5302,7 +5304,7 @@ types of finite element are: \index{type of finite element}
      \index{P2|textbf}\index{fespace!P2}
      \begin{equation}
      P2_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
-        \quad v_{|K} \in P_{2} \oplus \mathit{Span}\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right.\right\}
+        \quad v_{|K} \in P_{2} \oplus \mathrm{Span}\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right.\right\}
      \end{equation}
 
      \item[P2dc] piecewise $P_{2}$  discontinuous finite element,
@@ -8067,11 +8069,15 @@ int bottombeam = 2;
 Vh [uu,vv], [w,s];
 @cout << "lambda,mu,gravity ="<<lambda<< " " << mu << " " << gravity << endl;
 // deformation of a beam under its own weight
-@solve  bb([uu,vv],[w,s])  =
-    @int2d(th)(
-          2*mu*(dx(uu)*dx(w)+dy(vv)*dy(s)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/2 )
-          + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))
-    )
+real sqrt2=sqrt(2.);// see lame.edp example \ref{lame.edp}
+@macro @epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
+@macro @div(u,v) ( dx(u)+dy(v) ) // EOM
+
+@solve bb([uu,vv],[w,s])=
+        @int2d(th)(
+                  lambda*@div(w,s)*@div(uu,vv)
+                  +2.*mu*( @epsilon(w,s)'*@epsilon(uu,vv) )
+                 )
   + @int2d(th) (-gravity*s)
   + @on(1,uu=0,vv=0)
  ;
@@ -10064,8 +10070,8 @@ Vh uu,w,vv,s,fluidforce=0;
 // deformation of a beam under its own weight
 @solve  bb([uu,vv],[w,s])  =
     @int2d(th)(
-                 2*mu*(dx(uu)*dx(w)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/4 )
-               + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))/2
+                  lambda*@div(w,s)*@div(uu,vv)
+                  +2.*mu*( @epsilon(w,s)'*@epsilon(uu,vv) )
              )
   + @int2d(th) (-gravity*s)
   + @on(1,uu=0,vv=0)
@@ -10145,8 +10151,8 @@ which comes as a boundary condition to the PDE of the beam:
 @varf fluidf([uu,vv],[w,s]) fluidforce =
 @solve  bbst([uu,vv],[w,s],init=i)  =
     @int2d(th)(
-                 2*mu*(dx(uu)*dx(w)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/4 )
-               + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))/2
+                  lambda*@div(w,s)*@div(uu,vv)
+                  +2.*mu*( @epsilon(w,s)'*@epsilon(uu,vv) )
              )
   + @int2d(th) (-gravity*s)
   + @int1d(th,bottombeam)( -coef*(   sigma11*N.x*w + sigma22*N.y*s
@@ -10438,22 +10444,48 @@ where  $F2(u_{1},u_{2}) =  A(E[u_{1},u_{2}],E[u_{1},u_{2}])$ and $A(X,Y)$ is bil
 where $f$ is a given $\mathcal{C}^2$  function, and $E[u_{1},u_{2}] = (E_{ij})_{i=1,2,\,j=1,2}$ is the Green-Saint Venant deformation tensor defined  with:
 $$  E_{ij} = 0.5 ( \p_i u_j + \p_j u_i ) + \sum_k \p_i u_k {\times} \p_j u_k  $$
 
+denote $\mathbf{u}=(u_{1},u_{2})$, $\mathbf{v}=(v_{1},v_{2})$, $\mathbf{w}=(w_{1},w_{2})$.
+
+So, the differential of $J$ is
+  $$ DJ(\bm{u})(\bm{v}) =  \int  DF2(\bm{u})(\bm{v}) \;f'(F2(\bm{u}))) -  \int_{\Gamma_{p}} P_{a}  v_{2}  $$
+  where  $ DF2(\bm{u})(\bm{v}) = 2 \; A(\;DE[\mathbf{u}](\mathbf{v})\;,\;E[\mathbf{u}]\;) $ and  $DE$ is the first  differential of $E$.
 
 
-The differential of $J$ is
-  $$ DJ(u_{1},u_{2})(v_{1},v_{2}) = \int 2 A(E[u_{1},u_{2}],DE[u_{1},u_{2}](v_{1},v_{2})) f'(F2(u_{1},u_{2}))) -  \int_{\Gamma_{p}} P_{a}  u_{2}  $$
-
-denote $\mathbf{u}=u_{1},u_{2}$, $\mathbf{v}=v_{1},v_{2}$, $\mathbf{w}=(w_{1},w_{2})$ and
-the second order differential is
+The second order differential is
  {\begin{eqnarray*}
- D^2 J(\mathbf{u})((\mathbf{v}),(\mathbf{w}))  &= & A(E[\mathbf{u}],DE[\mathbf{u}](\mathbf{v})) A(E[\mathbf{u}],DE[\mathbf{u}](\mathbf{w})) f''(F2(\mathbf{u}))) \\
- & + &  A(DE[\mathbf{u}](\mathbf{v}),DE[\mathbf{u}](\mathbf{w})) f'(F2(\mathbf{u}))) \\
- &+&  A(DE[\mathbf{u}],D^{2}E[\mathbf{u}]((\mathbf{v}),(\mathbf{w}))) f'(F2(\mathbf{u})))
+ D^2 J(\mathbf{u})((\mathbf{v}),(\mathbf{w}))  &=& \displaystyle\int  DF2(\bm{u})(\bm{v}) \; DF2(\bm{u})(\bm{w}) \; f''(F2(\mathbf{u}))) \\
+ & +&  \displaystyle\int \; D^2F2(\bm{u})(\bm{v},\bm{w}) \; f'(F2(\mathbf{u}))) 
 \end{eqnarray*}}
- where $DE$ and $D^{2}E$ are the first and second differential of $E$.
-
+ where 
+  $$ 
+  D^2F2(\bm{u})(\bm{v},\bm{w}) = 2 \; A(\;D^2E[\mathbf{u}](\bm{v},\bm{w})\;,\;E[\bm{u}]\;) + 2 \; A(\;DE[\bm{u}](\bm{v})\;,DE[\bm{u}](\bm{w})\;) .$$
+ and $D^{2}E$ is the  second differential of $E$.
  \medskip
+ 
+So all notation  can be define with \texttt{macro} like:
 
+\bFF
+macro EL(u,v) [dx(u),(dx(v)+dy(u)),dy(v)] // is $[\epsilon_{11},2\epsilon_{12},\epsilon_{22}]$
+
+macro ENL(u,v) [ 
+(dx(u)*dx(u)+dx(v)*dx(v))*0.5,
+(dx(u)*dy(u)+dx(v)*dy(v))    ,
+(dy(u)*dy(u)+dy(v)*dy(v))*0.5 ] // EOM ENL 
+
+macro dENL(u,v,uu,vv) [(dx(u)*dx(uu)+dx(v)*dx(vv)),
+ (dx(u)*dy(uu)+dx(v)*dy(vv)+dx(uu)*dy(u)+dx(vv)*dy(v)),
+ (dy(u)*dy(uu)+dy(v)*dy(vv)) ] // 
+ 
+ 
+macro E(u,v) (EL(u,v)+ENL(u,v)) // is $[E_{11},2E_{12},E_{22}]$
+macro dE(u,v,uu,vv) (EL(uu,vv)+dENL(u,v,uu,vv)) //
+macro ddE(u,v,uu,vv,uuu,vvv) dENL(uuu,vvv,uu,vv) //
+macro F2(u,v) (E(u,v)'*A*E(u,v)) // 
+macro dF2(u,v,uu,vv)  (E(u,v)'*A*dE(u,v,uu,vv)*2. ) //
+macro ddF2(u,v,uu,vv,uuu,vvv) (
+            (dE(u,v,uu,vv)'*A*dE(u,v,uuu,vvv))*2. 
+          + (E(u,v)'*A*ddE(u,v,uu,vv,uuu,vvv))*2.  )// EOM
+\eFF
 
 The Newton Method is
 
@@ -10479,221 +10511,113 @@ And  it is easy to make automatic differentiation.
 \end{figure}
 
 \bFF
-//  non linear elasticity model \hfilll
+//  non linear elasticity model 
+
+//  for hyper elasticity problem 
+//  -----------------------------
+macro f(u) (u) // end of macro
+macro df(u) (1) // end of macro
+macro ddf(u) (0) // end of macro
+
+//  -- du caouchouc --- CF cours de Herve Le Dret.
+// -------------------------------
+real mu = 0.012e5; //  $kg/cm^2$
+real lambda =  0.4e5; //  $kg/cm^2$
 //   \hfilll
-//  -------------------------------\hfilll
-//  with huge utilization of  macro\hfilll
-// ---------------------------\hfilll
-//   optimize version \hfilll
-// ------------\hfilll
-//  @problem is  find $(uu,vn)$  minimizing  $J$\hfilll
-//  $ min J(un,vn) = @int f(F2) -  @int Pa * un $\hfilll
-//   $ dJ(u,u,uu,vv) = @int dF2(u,v,uu,vv) df(F2(u,v))$ \hfilll
-//   where $F2 =  (^t {E}  A {E} )$ , \hfilll
-//   $E(U) =  1/2 (\nabla U + \nabla U^t + \nabla U^t  \nabla U) $ \hfilll
-//         ($u_1$) \hfilll
-//  with U=(   )\hfilll
-//         ($u_2$)\hfilll
-// so: \hfilll
-// \hfilll$$ E_{ij} = 0.5 ( d_i u_j + d_j u_i ) + \sum_k d_i u_k * d_j*u_k  \leqno(1)$$
-//  the 3 components of the Green Saint-Venant deformation tensor: \hfilll
-//  $E1(u1,u2) =    E_{11} $\hfilll
-//  $E2(u1,u2) =    E_{12} = E_21 $\hfilll
-//  $E3(u1,u2) =    E_{22}  $\textBlack\hfilll
-\eFF
-~
-\bFF
-// remark : we can parametrize E1,E2,E3 with:\hfilll
-//  EE(da,db,a,b,u1,u2) \hfilll
-//   where $da,db$ correspond to $d_i, d_j$ in (1)\hfilll
-//   where  $a,b$  correspond to $u_i, u_j$ in (1)\hfilll
-//   where $u1,u2$  correspond to $u_1, u_2$ in (1)\hfilll
-//  ----------------------------------------------
-
-//  first the linear part of EE linear elasticite\hfilll
-// remark a macro end with a // comment \hfilll
-@macro EEL(di,dj,ui,uj) ( (di(uj)+dj(ui))*0.5 )    // 11
-
-// non linear par of EE (bilinear)  simple to differential \hfilll
-@macro bEENL(di,dj,u1,u2,v1,v2) (di(u1)*dj(v1)*.5+di(u2)*dj(v2)*0.5)
-//
-@macro EENL(di,dj,u1,u2) bEENL(di,dj,u1,u2,u1,u2) //
-@macro dEENL(di,dj,u1,u2,du1,du2) ( bEENL(di,dj,du1,du2,u1,u2)
-                                  + bEENL(di,dj,u1,u2,du1,du2) )
-//   ------------ \hfilll
-@macro EE(di,dj,ui,uj,u1,u2) (EEL(di,dj,u1,uj) + EENL(di,dj,u1,u2)) //
-@macro dEE(di,dj,dui,duj,u1,u2,du1,du2) (EEL(di,dj,du1,duj)
-                                         + dEENL(di,dj,u1,u2,du1,du2)) //
-@macro ddEE(di,dj,du1,du2,ddu1,ddu2) ( dEENL(di,dj,du1,du2,ddu1,ddu2))
-//
-// remark  : \hfilll
-// $ dEE(di,dj,dui,duj,u1,u2,du1,du2)$  is "the formal differential of EE" \hfilll
-// where $du1=\delta u1$ ,$du2=\delta u2$ \hfilll
-// $ ddEE(di,dj,dui,duj,u1,u2,du1,du2)$  is "the formal differential of dEE" \hfilll
-// where $ddu1=\delta^2 u1$ ,$ddu2=\delta^2 u2$ \hfilll
-// --- \hfilll
-
-//  the macro corresponding to the 3 componante of E \hfilll
-@macro E1(u,v)  /*E11*/EE(dx,dx,u,u,u,v)  //
-@macro E2(u,v)  /*E12*/EE(dx,dy,u,v,u,v)  //
-@macro E3(u,v)  /*E22*/EE(dy,dy,v,v,u,v)  //
-
-@macro dE1(u,v,uu,vv) /*dE11*/dEE(dx,dx,uu,uu,u,v,uu,vv) //
-@macro dE2(u,v,uu,vv) /*dE12*/dEE(dx,dy,uu,vv,u,v,uu,vv) //
-@macro dE3(u,v,uu,vv) /*dE22*/dEE(dy,dy,vv,vv,u,v,uu,vv) //
-@macro ddE1(u,v,uu,vv,uuu,vvv) /*ddE11*/ddEE(dx,dx,uu,vv,uuu,vvv) //
-@macro ddE2(u,v,uu,vv,uuu,vvv) /*ddE12*/ddEE(dx,dy,uu,vv,uuu,vvv) //
-@macro ddE3(u,v,uu,vv,uuu,vvv) /*ddE22*/ddEE(dy,dy,uu,vv,uuu,vvv)
-//
-//  a formal bilinear term \hfilll
-@macro PP(A,B,u,v) (A(u,v)*B(u,v))
-//
-// a formal diff  bilinear term \hfilll
-@macro dPP(A,B,dA,dB,u,v,uu,vv) (dA(u,v,uu,vv)*B(u,v) + A(u,v)*dB(u,v,uu,vv))
-//
-// a formal $diff^2$ bilinear term \hfilll
-@macro ddPP(A,B,dA,dB,ddA,ddB,u,v,uu,vv,uuu,vvv) (
-  dA(u,v,uu,vv)*dB(u,v,uuu,vvv) + dA(u,v,uuu,vvv)*dB(u,v,uu,vv)
-  +  ddA(u,v,uu,vv,uuu,vvv)*B(u,v) + A(u,v)*ddB(u,v,uu,vv,uuu,vvv)
-  ) //
-// so the @matrix A is 6 coef \hfilll
-//
-//     a11 a12 a13 \hfilll
-//     a12 a22 a23 \hfilll
-//     a13 a23 a33 \hfilll
-@macro F2(u,v)  /* F2 */  (
-     a11*PP(E1,E1,u,v)
-  +  a22*PP(E2,E2,u,v)
-  +  a33*PP(E3,E3,u,v)
-  +  a13*PP(E1,E3,u,v)
-  +  a13*PP(E3,E1,u,v)
-  +  a12*PP(E1,E2,u,v)
-  +  a12*PP(E2,E1,u,v)
-  +  a23*PP(E2,E3,u,v)
-  +  a23*PP(E3,E2,u,v)
-)  // end macro F2
-
-@macro dF2(u,v,uu,vv)  /* dF2 */  (
-       a11*dPP(E1,E1,dE1,dE1,u,v,uu,vv)
-     + a12*dPP(E1,E2,dE1,dE2,u,v,uu,vv)
-     + a13*dPP(E1,E3,dE1,dE3,u,v,uu,vv)
-     + a21*dPP(E2,E1,dE2,dE1,u,v,uu,vv)
-     + a22*dPP(E2,E2,dE2,dE2,u,v,uu,vv)
-     + a23*dPP(E2,E3,dE2,dE3,u,v,uu,vv)
-     + a31*dPP(E3,E1,dE3,dE1,u,v,uu,vv)
-     + a32*dPP(E3,E2,dE3,dE2,u,v,uu,vv)
-     + a33*dPP(E3,E3,dE3,dE3,u,v,uu,vv)
-) // end macro dF2 ($D F2$)
-
-@macro ddF2(u,v,uu,vv,uuu,vvv)  /* ddF2 */  (
-       a11*ddPP(E1,E1,dE1,dE1,ddE1,ddE1,u,v,uu,vv,uuu,vvv)
-     + a12*ddPP(E1,E2,dE1,dE2,ddE1,ddE2,u,v,uu,vv,uuu,vvv)
-     + a13*ddPP(E1,E3,dE1,dE3,ddE1,ddE3,u,v,uu,vv,uuu,vvv)
-     + a21*ddPP(E2,E1,dE2,dE1,ddE2,ddE1,u,v,uu,vv,uuu,vvv)
-     + a22*ddPP(E2,E2,dE2,dE2,ddE2,ddE2,u,v,uu,vv,uuu,vvv)
-     + a23*ddPP(E2,E3,dE2,dE3,ddE2,ddE3,u,v,uu,vv,uuu,vvv)
-     + a31*ddPP(E3,E1,dE3,dE1,ddE3,ddE1,u,v,uu,vv,uuu,vvv)
-     + a32*ddPP(E3,E2,dE3,dE2,ddE3,ddE2,u,v,uu,vv,uuu,vvv)
-     + a33*ddPP(E3,E3,dE3,dE3,ddE3,ddE3,u,v,uu,vv,uuu,vvv)
-) // end macro ddF2  ($D^{2}  F2$)
-
-//  differential of J: \hfilll
-
-//  @for hyper elasticity @problem  \hfilll
-//  ------------------------------ \hfilll
-
-@macro f(u) (u) // end of macro
-@macro df(u) (1) // end of macro  $df=f'$
-@macro ddf(u) (0) // end of macro $ddf=f''$
-
-//  -- du caoutchouc --- CF cours de Herve Le Dret. \hfilll
-// ------------------------------- \hfilll
-@real mu = 0.012e5; //  $kg/cm^2$
-@real lambda =  0.4e5; //  $kg/cm^2$
-//  \hfilll
-//   $  \sigma = 2 \mu E + \lambda tr(E) Id $  \hfilll
-//    \hfilll
-//   ( a b )  \hfilll
-//   ( b c )  \hfilll
-//  \hfilll
-//  tr*Id : (a,b,c) -> (a+c,0,a+c)  \hfilll
-// so the associed @matrix is:  \hfilll
-//   ( 1 0 1 )  \hfilll
-//   ( 0 0 0 )  \hfilll
-//   ( 1 0 1 )  \hfilll
-// ------------------ the coef \hfilll
-@real a11= 2*mu +  lambda  ;
-@real a22= 2*mu ;
-@real a33= 2*mu +   lambda ;
-@real a12= 0 ;
-@real a13= lambda ;
-@real a23= 0 ;
+//   $  \sigma = 2 \mu E + \lambda tr(E) Id $\hfilll
+//   $   A(u,v)= \sigma(u):E(v) $\hfilll
+//   \hfilll
+//   ( a b )\hfilll
+//   ( b c )\hfilll
+//\hfilll
+//  tr*Id : (a,b,c) -> (a+c,0,a+c) \hfilll
+// so the associed matrix is:\hfilll
+//   ( 1 0 1 )\hfilll
+//   ( 0 0 0 )\hfilll
+//   ( 1 0 1 ) \hfilll
+// ------------------v
+real a11= 2*mu +  lambda  ;
+real a22= mu ; //  because $[0,2*t12,0]' A [0,2*s12,0]  =$ 
+// $= 2*mu*(t12*s12+t21*s21) = 4*mu*t12*s12$
+real a33= 2*mu +   lambda ;
+real a12= 0 ;
+real a13= lambda ;
+real a23= 0 ;
 //  symetric part
-@real a21= a12 ;
-@real a31= a13 ;
-@real a32= a23 ;
-@real Pa=1e2; //  a pressure of 100 Pa
-// ----------------
+real a21= a12 ;
+real a31= a13 ;
+real a32= a23 ;
 
-@int n=30,m=10;
-@mesh Th= square(n,m,[x,.3*y]); // label: 1 bottom, 2 right, 3 up, 4 left;
-@int bottom=1, right=2,upper=3,left=4;
+// the matrix A.
+func A = [ [ a11,a12,a13],[ a21,a22,a23],[ a31,a32,a33] ];  
 
-@plot(Th);
+real Pa=1e2; //  a pressure of 100 Pa
+// ----------------\hfilll
 
-@fespace Wh(Th,P1dc);
-@fespace Vh(Th,[P1,P1]);
-@fespace Sh(Th,P1);
+int n=30,m=10;
+mesh Th= square(n,m,[x,.3*y]); // label: 1 bottom, 2 right, 3 up, 4 left;
+int bottom=1, right=2,upper=3,left=4;
 
-Wh e2,fe2,dfe2,ddfe2; // optimisation
-Wh ett,ezz,err,erz; // optimisation
+plot(Th);
+
+
+ 
+fespace Wh(Th,P1dc);
+fespace Vh(Th,[P1,P1]);
+fespace Sh(Th,P1);
+
+
+
+
+
+Wh e2,fe2,dfe2,ddfe2; // optimisation 
+Wh ett,ezz,err,erz; // optimisation 
 
 Vh [uu,vv], [w,s],[un,vn];
-[un,vn]=[0,0];//  intialisation
+[un,vn]=[0,0];//  intialisation 
 [uu,vv]=[0,0];
 
-@varf vmass([uu,vv],[w,s],solver=CG) =  @int2d(Th)( uu*w + vv*s );
-@matrix M=vmass(Vh,Vh);
-
-@problem NonLin([uu,vv],[w,s],solver=LU)=
- @int2d(Th,qforder=1)( // $(D^2 J(un))$ part
-               ddF2(un,vn,uu,vv,w,s)* dfe2
-       + dF2(un,vn,uu,vv)*dF2(un,vn,w,s)*ddfe2
-        )
-   -@int2d(Th,<1)( // $(D J(un))$ part
-           dF2(un,vn,w,s) * dfe2  )
-   - @int1d(Th,3)(Pa*s)
-   + @on(right,left,uu=0,vv=0);
+varf vmass([uu,vv],[w,s],solver=CG) =  int2d(Th)( uu*w + vv*s );
+matrix M=vmass(Vh,Vh);
+problem NonLin([uu,vv],[w,s],solver=LU)=
+ int2d(Th,qforder=1)( // $(D^2 J(un))$ part
+                       dF2(un,vn,uu,vv)*dF2(un,vn,w,s)*ddfe2
+                    +  ddF2(un,vn,w,s,uu,vv)*dfe2        
+	            )
+   - int1d(Th,3)(Pa*s) 
+   - int2d(Th,qforder=1)( // $(D J(un))$ part
+           dF2(un,vn,w,s)*dfe2   ) 
+   + on(right,left,uu=0,vv=0);
 ;
 // Newton's method
 // ---------------
 Sh u1,v1;
-@for (@int i=0;i<10;i++)
+for (int i=0;i<10;i++)
 {
-  @cout << "Loop " << i << @endl;
+  cout << "Loop " << i << endl;
   e2 = F2(un,vn);
   dfe2 = df(e2) ;
   ddfe2 = ddf(e2);
-  @cout << "  e2 max " <<e2[].max << " , min" << e2[].min << @endl;
-  @cout << " de2 max "<< dfe2[].max << " , min" << dfe2[].min << @endl;
-  @cout << "dde2 max "<< ddfe2[].max << " , min" << ddfe2[].min << @endl;
+  cout << "  e2 max " <<e2[].max << " , min" << e2[].min << endl;
+  cout << " de2 max "<< dfe2[].max << " , min" << dfe2[].min << endl;
+  cout << "dde2 max "<< ddfe2[].max << " , min" << ddfe2[].min << endl;
   NonLin; //  compute $[uu,vv] = (D^2 J(un))^{-1}(D J(un))$
-
+  
   w[]   = M*uu[];
-  @real res = sqrt(w[]' * uu[]); //  norme $ L^2 of [uu,vv]$
+  real res = sqrt(w[]' * uu[]); //  norme  $L^2 of [uu,vv]$
   u1 = uu;
   v1 = vv;
-  @cout << " L^2 residual = " << res << @endl;
-  @cout << " u1 min =" <<u1[].min << ", u1 max= " << u1[].max << @endl;
-  @cout << " v1 min =" <<v1[].min << ", v2 max= " << v1[].max << @endl;
-  @plot([uu,vv],wait=1,cmm=" uu, vv " );
-  un[] -= uu[];
-  @plot([un,vn],wait=1,cmm=" deplacement " );
-  @if (res<1e-5) @break;
+  cout << " L^2 residual = " << res << endl;
+  cout << " u1 min =" <<u1[].min << ", u1 max= " << u1[].max << endl;
+  cout << " v1 min =" <<v1[].min << ", v2 max= " << v1[].max << endl;
+  plot([uu,vv],wait=1,cmm=" uu, vv " );
+  un[] -= uu[]; 
+  plot([un,vn],wait=1,cmm=" deplacement " );
+  if (res<1e-5) break;
 }
 
-@plot([un,vn],wait=1);
-@mesh th1 = @movemesh(Th, [x+un, y+vn]);
+plot([un,vn],wait=1);
+mesh th1 = movemesh(Th, [x+un, y+vn]);
 @plot(th1,wait=1); //  see figure \ref{fig nl-elas}
 \eFF
 

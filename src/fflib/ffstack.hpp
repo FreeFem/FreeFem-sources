@@ -198,7 +198,11 @@ public:
 	        if(stackptr.size()>=20 && verbosity>2) 
 	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n ";
 		for (iterator i=stackptr.end(); i != stackptr.begin();)
+		{
+		   
 			delete  (* (--i) ); 
+		     //cout << "StackOfPtr2Free: clean " << (* (i) ) << endl;
+		}
 		stackptr.resize(0);// clean the
 		
 	     }
@@ -222,11 +226,15 @@ template<class T>
 struct NewInStack: public BaseNewInStack   {	
    T * p;
    bool array;
-  ~NewInStack() { if(p) 
+  ~NewInStack() { 
+     // cout << "~NewInStack " << typeid(T).name() << " " << p << "  array " << array << " " << this << "\n";
+      if(p) 
      if(array) delete [] p;
      else   delete p;}  
 private: 
-   NewInStack(T * pp,bool aa=false) : p(pp),array(aa) {} 
+   NewInStack(T * pp,bool aa=false) : p(pp),array(aa) {
+      //  cout << "NewInStack " << typeid(T).name() << " "  << p << "  array " << aa << " " << this << "\n";
+   } 
    
    
  template<class TT> 

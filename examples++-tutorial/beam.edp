@@ -16,12 +16,16 @@ fespace Vh(th,[P1,P1]);
 Vh [uu,vv], [w,s];
 cout << "lambda,mu,gravity ="<<lambda<< " " << mu << " " << gravity << endl;
 // deformation of a beam under its own weight 
+// definition of 2 macro :
+real sqrt2=sqrt(2.);
+macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
+macro div(u,v) ( dx(u)+dy(v) ) // EOM
 
 solve bb([uu,vv],[w,s],solver=Crout)=
 	int2d(th)(  
-		2*mu*(dx(uu)*dx(w)+dy(vv)*dy(s)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/2 )
-               + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))
-             )
+		  lambda*div(w,s)*div(uu,vv)	
+                  +2.*mu*( epsilon(w,s)'*epsilon(uu,vv) ) 
+                 )
   - int2d(th) (gravity*s)
   + on(1,uu=0,vv=0)
   ;

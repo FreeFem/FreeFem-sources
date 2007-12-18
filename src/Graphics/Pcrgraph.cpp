@@ -812,15 +812,16 @@ BOOL inittext(VOID)
    AllocConsole();         // Use the console API
 
    // get the standard output
+   fin = GetConsoleHandle(STD_INPUT_HANDLE);   
+   if(fin!=NULL)
+    *stdin = *fin;
+
+   // get the standard output
    if((fp = GetConsoleHandle(STD_OUTPUT_HANDLE)) == NULL){
       FreeConsole();
       return FALSE;
    }
    *stdout = *fp;
-   // get the standard output
-   fin = GetConsoleHandle(STD_INPUT_HANDLE);   
-   if(fin!=NULL)
-    *stdin = *fin;
 
    ios::sync_with_stdio();
 
@@ -959,8 +960,9 @@ DWORD GetOption(char lpszCmdLine[])
   int i = 0;
   int CmdLen = strlen(lpszCmdLine);
   DWORD dwStyle = WS_OVERLAPPEDWINDOW;
-
+  cout << "getOp: " ;
   while (i < CmdLen) { 
+    cout << lpszCmdLine[i] ;
     while (lpszCmdLine[i] == ' ')
       i++;
     if (lpszCmdLine[i] == '-') {
@@ -1002,6 +1004,7 @@ DWORD GetOption(char lpszCmdLine[])
       break;
     }
   }
+  cout << " v = " << verbosity << endl;
   return 0;
 }
 
