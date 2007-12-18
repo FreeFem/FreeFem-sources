@@ -1,9 +1,12 @@
-// file lame.edp
+// file lame.edd
 mesh Th=square(10,10,[20*x,2*y-1]);
 fespace Vh(Th,P2);
 Vh u,v,uu,vv;
-
-macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))*0.5] // EOM
+real sqrt2=sqrt(2.);
+macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
+// remark the $1/\sqrt2$ in term (dy(u1)+dx(u2)) is because 
+// we want: 
+//  epsilon(u1,u2)'* epsilon(v1,v2) == $ \varepsilon(\bm{u}): varepsilon(\bm{v})$
 macro div(u,v) ( dx(u)+dy(v) ) // EOM
 
 

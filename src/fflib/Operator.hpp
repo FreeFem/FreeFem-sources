@@ -245,8 +245,14 @@ struct set_eq_div: public binary_function<A*,A,A*> {
 template<class A>
 struct set_peq: public binary_function<A**,A*,A**> {
   static A** f(A** const  & a, A * const & b)  { 
-    delete *a; 
-    *a = new A(*b); //(stack ptr) FH mars 2006
+    if(*a != b )
+    { 
+	//cerr << " set_peq " << *a << endl;
+	delete *a;
+	//cerr << " set_peq " << *a << " " << " = " << b << " " <<  endl;
+	*a = new A(*b); //(stack ptr) FH mars 2006
+	//cerr << " set_peq " << *a << " " << **a << " = " << *b << " " << b <<  endl;
+    }
      return a;}
 };
 
@@ -489,8 +495,11 @@ template<class R>  R * set_copyp( R* const & a,const R & b){
 
 template<class R>  R ** set_copyp_new( R**  a,R*  b){ 
  SHOWVERB( cout << " set_copy " << typeid(R).name() << " " << &b << endl);
-  //memcpy(a,&b,sizeof(R)); return a;
+  //memcpy(a,&b,sizeof(R)); return a;  FH 2007
+   // cerr << " set_copyp_new " << typeid(R).name() << " " << b <<  " " << *b ;
   *a = new R(*b);
+
+  //  cerr << "  -> " << *a << endl; 
   return a;
   }
 

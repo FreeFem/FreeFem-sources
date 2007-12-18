@@ -62,7 +62,7 @@ inline string * toString(const bool& a)
 inline string * toString(const complex<double> & a)
 {
   char buf[60];
-  sprintf(buf,"%g+%gi",a.real(),a.imag());
+  sprintf(buf,"%g%+gi",a.real(),a.imag());
   return new string(buf);
 }
 
@@ -112,7 +112,7 @@ class String {
   String(const double * c) : p(PtoString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
   String & operator=(const String & s){delete p;p=new string(s);return *this;}
   String  operator+(const String & s)const {return String(new string(*p+*s.p));} 
-  ~String(){/* cout << "~String" << p << *p << endl;*/delete p; p=0;}
+  ~String(){/* cout << "~String" << p << *p << endl;*/ delete p; p=0;}
    operator const string & () const {return *p;}
    operator  string & ()  {return *p;}
    string **  getap()  {return &p;}

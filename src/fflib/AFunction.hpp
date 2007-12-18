@@ -599,6 +599,7 @@ class basicAC_F0;
 	  
 	  	  
 	  C_F0( Expression ff,aType rr ): f(ff),r(rr) { 
+	   //   cout << "C_F0: " <<  * rr << endl;//  dec 2007 FH
 	  // if (!rr && ff)  cerr << "Type Null" << endl;
 	    }
 	 // operator Expression() const {return f;}
@@ -739,6 +740,7 @@ template<class A> AnyType InitializePtr(Stack stack,const AnyType &x){
 template<class A> inline AnyType Delete(Stack,const AnyType &x){
   A * a=PGetAny<A>(x);
   SHOWVERB(cout << "DESTROY " <<typeid(A).name() << " " << a <<  endl); 
+    cout << "Delete DESTROY " <<typeid(A).name() << " " << a <<  endl;
   (*a).~A(); 
   return  Nothing;
 }
@@ -2697,7 +2699,8 @@ class E_exception : public exception { public:
   public:
   E_exception(CODE_exception c,AnyType rr=Nothing) : code(c),r(rr)  {}
   const int type() {return code;}
-  virtual const char *  what() const throw() { return "E_exception (break,continue or return) "; }           
+  virtual const char *  what() const throw() { return "E_exception (break,continue or return) "; }
+  ~E_exception() throw() {}
 };
 
 

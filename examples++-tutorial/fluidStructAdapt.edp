@@ -83,9 +83,9 @@ if(method1==1)
 
 solve  bbst([uu,vv],[w,s],init=i)  = 
     int2d(th)(
-                 2*mu*(dx(uu)*dx(w)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/4 )
-               + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))/2 
-             )
+		  lambda*div(w,s)*div(uu,vv)	
+                  +2.*mu*( epsilon(w,s)'*epsilon(uu,vv) ) 
+              )
   + int2d(th) (-gravity*s)
   + int1d(th,bottombeam)( coef*(sigma11*N.x*w + sigma22*N.y*s + sigma12*(N.y*w+N.x*s) )  )
   + on(1,uu=0,vv=0) 
@@ -105,9 +105,9 @@ solve  bbst([uu,vv],[w,s],init=i)  =
  plot([FS,FS1],wait=iwait,value=1);
  solve  bbst2([uu,vv],[w,s],init=i)  = 
     int2d(th)(
-                 2*mu*(dx(uu)*dx(w)+ ((dx(vv)+dy(uu))*(dx(s)+dy(w)))/4 )
-               + lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))/2 
-             )
+		  lambda*div(w,s)*div(uu,vv)	
+                  +2.*mu*( epsilon(w,s)'*epsilon(uu,vv) ) 
+              )
   + int2d(th) (-gravity*s)
   + FS[] // + int1d(th,bottombeam)( coef*(sigma11*N.x*w + sigma22*N.y*s + sigma12*(N.y*w+N.x*s) )  )
   + on(1,uu=0,vv=0) 
