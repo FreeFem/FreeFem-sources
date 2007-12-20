@@ -468,6 +468,8 @@ void initgraphique()
 	   }
 	 } 
   font_info = XLoadQueryFont(display, "6x9");
+  if (!font_info) font_info = XLoadQueryFont(display, "6x10");
+  if( !font_info) {cout << " erreur font 6x10 and 6x9 not found !\n";exit(2);};
   XSetErrorHandler((XErrorHandler)xerror);
   XSetIOErrorHandler((XIOErrorHandler)xerrorio);
   screen = DefaultScreen(display);

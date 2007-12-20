@@ -32,7 +32,7 @@
 # performance.  You should select the optimization parameters that are best
 # for your system.  On Linux, use "CFLAGS = -O3 -fexceptions" for example.
 CC = FF_CC
-CFLAGS = FF_CFLAGS
+CFLAGS = -I../../AMD/Include -I../../UFconfig FF_CFLAGS
 
 
 # ranlib, and ar, for generating libraries
