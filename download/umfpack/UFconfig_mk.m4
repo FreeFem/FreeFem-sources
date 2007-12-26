@@ -36,8 +36,8 @@ CFLAGS = -I../../AMD/Include -I../../UFconfig FF_CFLAGS
 
 
 # ranlib, and ar, for generating libraries
-RANLIB = ranlib
-AR = ar cr
+RANLIB = FF_RANLIB
+AR = FF_AR FF_ARFLAGS
 
 # delete and rename a file
 RM = rm -f
