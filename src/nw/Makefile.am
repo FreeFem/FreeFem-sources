@@ -8,5 +8,5 @@ CXXLD=$(STATICTOOL) $(CXX)
 bin_PROGRAMS=FreeFem++-nw
 FreeFem___nw_SOURCES=../Graphics/sansrgraph.cpp
 FreeFem___nw_DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
-LDADD=../lglib/liblg.a ../fflib/libff.a @UMFPACKLIB@ @ARPACKLIB@ @BLASLIB@
+LDADD=../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
 INCLUDES=-I../fflib -I../Graphics

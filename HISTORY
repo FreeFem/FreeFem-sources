@@ -1,3 +1,278 @@
+2007-12-20 13:11  hecht
+
+	* correct freefem++-doc  and add default font 6x10 in case of no
+	  6x9 font in Xrgraph.cpp
+
+2007-12-18 18:35  hecht
+
+	*   missing file
+
+2007-12-18 18:19  hecht
+
+	* change ref value  correct elastycity.
+
+2007-12-18 18:04  hecht
+
+	* just change in UFconfig_mk.m4 for freebsd for comment
+
+2007-12-18 16:43  hecht
+
+	*   see innovation correct bug in function with string argument
+	    correct mistake in elacticity problem.
+
+2007-12-11 21:18  hecht
+
+	* type correct Pcrgraph
+
+2007-11-30 13:54  hecht
+
+	*   correct   error on mpi version
+
+2007-11-29 12:20  hecht
+
+	*   suite
+
+2007-11-29 12:18  hecht
+
+	* [no log message]
+
+2007-11-29 12:15  hecht
+
+	*   next
+
+2007-11-29 12:11  hecht
+
+	* correct missing preprocessing  variable
+
+2007-11-29 07:42  hecht
+
+	*   correct configure.ac for umfpack (sometime missng a library)
+
+2007-11-20 16:49  hecht
+
+	*   correct missing tapping error in test build drawbdmesh on
+	  windows.
+
+2007-11-20 16:13  hecht
+
+	*  correct bamg on windows missing drawbdmesh.exe
+
+2007-11-20 15:38  hecht
+
+	*   coorect   missing exe extension on bamg program in confure.ac
+
+2007-11-19 21:40  hecht
+
+	*    correct mpi for macos leopard,
+	     remove CHECKPTR in case of optimize
+
+2007-11-19 18:13  hecht
+
+	* correct MPI configure.ac
+
+2007-11-19 14:41  hecht
+
+	*    continuing
+
+2007-11-19 14:39  hecht
+
+	*   missing mpiprog
+
+2007-11-19 14:25  hecht
+
+	*   correct configure.ac missing FreeFem++ with X11
+
+2007-11-19 14:17  hecht
+
+	*    correct configure.ac without x11
+
+2007-11-18 13:20  hecht
+
+	*   correct  documentation for new edition
+	    add better check of  X11 and UMFPACK
+
+2007-11-13 16:40  hecht
+
+	*  correct doc,
+
+2007-10-24 22:17  hecht
+
+	*   see INNOVATION file
+	     pass to version 2.20-1
+
+2007-10-22 18:17  hecht
+
+	*   add format + - , trace and det of array
+
+2007-10-02 17:55  hecht
+
+	*   correct missing parameter SolveGCPrecon and SolveGCDiag
+
+2007-10-02 16:49  hecht
+
+	* correct miss-spelling  CVS:
+	  ----------------------------------------------------------------------
+
+2007-10-02 16:07  hecht
+
+	*   -  add in download automatic generation of f2c and fort77 to
+	  get a free  fortran compiler
+		  just	go in
+		  (download/f2d;make install)
+	    -  add automatic find of libf2c in case of F77=fort77 (driver
+	  of f2c) in configure
+
+2007-09-30 17:45  hecht
+
+	*  Add	sparse solver in documentation
+
+2007-09-20 21:53  hecht
+
+	*   add SuperSolevr
+
+2007-09-09 21:16  hecht
+
+	*   add f2d in case of no fortran
+
+2007-09-07 17:09  hecht
+
+	* add f2c download
+
+2007-09-07 00:13  hecht
+
+	*   recorrect operator += Virtual matrix operator (introduction in
+	  august)
+	    symptome : Sous CG no not converge. (tank to the test)
+
+2007-09-06 16:23  hecht
+
+	*   correct SuperLU and UMFPACK driver + add comparaison
+
+2007-09-06 16:02  hecht
+
+	* add missing files
+
+2007-09-06 15:58  hecht
+
+	*   correct 2 def defaulttoGMRES
+
+2007-09-06 15:14  hecht
+
+	*  correct tool to add other sparse (morse) linear solver with
+	  dynamic load
+	   two examples NewSolver.cpp  SuperLU.cpp
+
+2007-09-05 23:27  hecht
+
+	*   add set sparce solver (morse)
+	    set version to 2.20
+
+2007-09-05 20:15  hecht
+
+	*   correct complex part of superLU
+
+2007-09-05 18:03  hecht
+
+	*  Add tools to change Sparce Linear Solver
+	   add SuperLU driver in example++-load
+
+2007-08-28 21:57  hecht
+
+	*  add N,M in class VirtualMatrix, to correct probleme in RNM class
+	   when unset array.
+
+2007-08-28 17:16  hecht
+
+	*   add missing oiperator in array:
+	       build array form all operation may be.
+	    improve the doc of vartionnal form part section 6.10.
+
+2007-08-24 09:12  hecht
+
+	*   update doc comtinuing
+
+2007-08-24 08:27  hecht
+
+	*  update the doc.
+	   improve varf example.
+
+2007-08-20 21:29  hecht
+
+	* add missing file
+
+2007-08-20 21:28  hecht
+
+	*   correct mean and jump operator in interpolation
+	    change SetAdj  in MeshPoint.hpp
+	    add missing file in examples++-load/Makefile.am
+
+2007-08-20 20:07  hecht
+
+	*  upgrade INNOVATION
+
+2007-08-20 18:07  hecht
+
+	*  correct,  problem of automatic ptr managenemt in
+	  plot::operator()
+
+2007-08-19 22:05  hecht
+
+	*   pass to version 2.19.
+	    add tools to get mesh infomation.
+	    correct builmesh form bamg geometric file.
+
+2007-08-07 22:05  hecht
+
+	*   correct cin on windows and and type on bogus buildmesh.
+
+2007-07-19 19:22  hecht
+
+	*   correct AdaptResidualErrorIndicator and download/Makefile.am to
+	     create dir lib and include
+
+2007-07-19 13:19  hecht
+
+	*   add missing compile file in example++-load
+
+2007-07-19 11:41  hecht
+
+	*   see INNOVATION file, past version 2.18
+
+2007-07-16 14:47  hecht
+
+	*  add quantile
+
+2007-07-13 17:33  hecht
+
+	*  add code  to sort  array
+
+2007-06-29 22:21  hecht
+
+	*    xcode projet
+
+2007-06-28 22:12  hecht
+
+	*  correct compile error with gcc 3.2.2  lgmat.cpp
+	    the meassage is
+	  ../femlib/MatriceCreuse_tpl.hpp:1486: excess elements in
+	  aggregate initializer  or with gcc 3.3.6 ../femlib/RNM.hpp:223:
+	  error: too many initializers for `const
+	  __class_type_info_pseudo'
+
+2007-06-21 07:58  hecht
+
+	* correct ../fflib/environment.hpp:41:24: warning: no newline at
+	  end of file
+
+2007-06-20 22:42  hecht
+
+	*  correct bilapMorley.edp add missing term in var. formulation.
+	    add test in configure to add on not -lXpm  in X11
+
+2007-06-18 22:58  hecht
+
+	*   set 2.17-2
+
 2007-06-18 22:42  hecht
 
 	*   add mesh example
