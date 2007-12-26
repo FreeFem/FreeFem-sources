@@ -46,6 +46,9 @@ SuiteSparse/FF:SuiteSparse/DATE  SuiteSparse/UFconfig/UFconfig.mk
 SuiteSparse/UFconfig/UFconfig.mk:SuiteSparse/DATE Makefile UFconfig_mk.m4
 	m4   -DFF_CC="$(CC)" \
              -DFF_CFLAGS="@CPPFLAGS@ @CFLAGS@ @BLASINC@" \
+  	     -DFF_AR="@AR@" \
+	     -DFF_ARFLAGS="@ARFLAGS@" \
+	     -DFF_RANLIB="@RANLIB@" \
              -DFF_LIB="@BLASLIB@ @LIBS@" \
 	     -DFF_CONFIG="@FF_UMFPACK_CONFIG@" \
               UFconfig_mk.m4 > UFconfig.mk
