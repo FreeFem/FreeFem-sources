@@ -58,17 +58,17 @@ AGLPROG = @AGLPROG@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
-
-# Downloading and compiling ARPACK
-# --------------------------------
-ARPACKLIB = ARPACK/libarpack_ff++.a
+AR = @AR@
+ARFLAGS = @ARFLAGS@
+ARPACKLIB = @ARPACKLIB@
+ARPACKLIBS = @ARPACKLIBS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BAMGPROG = @BAMGPROG@
 BLASINC = @BLASINC@
-BLASLIB = @BLASLIB@
+BLASLIBS = @BLASLIBS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -118,6 +118,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 KERNEL_VERSION = @KERNEL_VERSION@
+LAPACKLIB = @LAPACKLIB@
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
@@ -144,6 +145,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
+RANLIN = @RANLIN@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STATICTOOL = @STATICTOOL@
@@ -153,7 +155,7 @@ STD_LDFLAGS = @STD_LDFLAGS@
 STD_LIBS = @STD_LIBS@
 STRIP = @STRIP@
 TESTIDEPROG = @TESTIDEPROG@
-UMFPACKLIB = @UMFPACKLIB@
+UMFPACKLIBS = @UMFPACKLIBS@
 VERSION = @VERSION@
 WGET = @WGET@
 WIN32DLLTARGET = @WIN32DLLTARGET@
@@ -368,6 +370,12 @@ uninstall-am: uninstall-info-am
 
 all-local: $(DOWNLOAD_ARPACK)
 
+# Downloading and compiling ARPACK
+# --------------------------------
+
+# set in configure 
+#ARPACKLIB=ARPACK/libarpack_ff++.a
+
 arpack: $(ARPACKLIB)
 
 $(ARPACKLIB): ARPACK/fait
@@ -375,8 +383,11 @@ $(ARPACKLIB): ARPACK/fait
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
 	fi; \
 	cd ARPACK && make lib 
+	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o
+	-if test -n "FF_LAPACKdir" ; then 	$(AR) $(ARFLAGS) $(LAPACKLIB)  ARPACK/LAPACK/*.o ; fi
 
 ARPACK/fait: arpack96.tar.gz patch.tar.gz ARmake.m4 Makefile
+	-rm -rf ARPACK
 	gunzip -c arpack96.tar.gz | tar xf -
 	gunzip -c patch.tar.gz | tar xf -
 	gunzip -c ../../arpack/arpack-patch-lapack.tar.gz | tar xf -
@@ -384,15 +395,21 @@ ARPACK/fait: arpack96.tar.gz patch.tar.gz ARmake.m4 Makefile
 	    mv  $$i $$i.cpy; sed 's/call *second/call secnd2/' <$$i.cpy >$$i;rm $$i.cpy; done 
 	for i in  ARPACK/UTIL/second.f;  do  \
 	   mv  $$i $$i.cpy; cat $$i.cpy| sed 's/ SECOND *(/ secnd2(/'|grep -v EXTERNAL  >$$i;rm $$i.cpy; done 
-	m4 -DFF_BLASLIB="$(BLASLIB)" \
-	   -DFF_FC="@F77@" \
-           -DFF_FFLAGS="@FFLAGS@" \
-	   -DFF_LAPACKdir='@FF_LAPACKdir@' \
-           -DFF_LDFLAGS="@LDFLAGS@" \
-           -DFF_HOME=`pwd`/ARPACK \
-	   -DFF_SECOND="@FF_SECOND@" \
+	m4  -DFF_BLASLIB="$(BLASLIB)" \
+	    -DFF_ARPACKLIB="$(ARPACKLIB)" \
+            -DFF_LAPACKLIB="$(LAPACKLIB)" \
+	    -DFF_FC="@F77@" \
+            -DFF_FFLAGS="@FFLAGS@" \
+	    -DFF_LAPACKdir='@FF_LAPACKdir@' \
+            -DFF_LDFLAGS="@LDFLAGS@" \
+            -DFF_HOME=`pwd`/ARPACK \
+	    -DFF_SECOND="@FF_SECOND@" \
+	    -DFF_AR="@AR@" \
+	    -DFF_ARFLAGS="@ARFLAGS@" \
+	    -DFF_RANLIB="@RANLIB@" \
 	    ARmake.m4 >ARPACK/ARmake.inc
-	cp ARPACK/UTIL/Makefile ARPACK/Makefile_UTIL
+#
+#	cp ARPACK/UTIL/Makefile ARPACK/Makefile_UTIL
 #	sed  -e '1,$$s/second.o/$$(SECOND_O)/' <ARPACK/Makefile_UTIL  >ARPACK/UTIL/Makefile  
 	touch ARPACK/fait
 	cd ARPACK/LAPACK;

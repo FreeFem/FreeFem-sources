@@ -129,7 +129,7 @@ SHELL   = /bin/sh
 #  | ranlib, set RANLIB = touch.                                    |
 #  %----------------------------------------------------------------%
 #
-AR = ar 
+AR = libtool -o 
 ARFLAGS = rv
 #RANLIB  = touch
 RANLIB   = ranlib

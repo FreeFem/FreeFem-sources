@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.22,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.22-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -27,8 +27,13 @@ AM_MAINTAINER_MODE
 
 # Necessary compilers
 AC_PROG_CXX
-
+if test -z "$CXX"; then
+  AC_MSG_ERROR(" Sorry no c++ compiler !")
+fi
 # dur dur car sous MacOsX le fortran n'est pas standard. 
+ff_AR="ar"
+ff_ARFLAGS="rv"
+ff_RANLIB="ranlib" 
 
 AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPACK need it)])
      ff_g2c_lib="";	 
@@ -80,9 +85,9 @@ then
 	if test -z "$F77"  ; then 
 	  ff_f77=`pwd`/download/bin/fort77
 	  ff_flibs=`pwd`/download/lib/libf2c.a
-	  if test -f $ff_f77  -a -f $ff_flibs ; then
+	  if test -x $ff_f77  -a -f $ff_flibs ; then
 	    AC_MSG_WARN([ no fortran, but find download f2c/fort]);
-	    F77=fort77
+	    F77=$ff_f77
 	    FLIBS=$ff_flibs
 	   else
 	     AC_MSG_NOTICE( [ fatal error : no fortran ] );
@@ -630,7 +635,7 @@ ff_blas_ok=no
 AC_ARG_WITH(blas,
 	[  --with-blas=library	Use a specific version of the Blas],
 	ff_blas_ok=yes
-	ff_blas_lib="${withval}")
+	ff_blas_libs="${withval}")
 
 ff_blas_inc=""
 
@@ -656,7 +661,7 @@ then
         AC_LINK_IFELSE(
                 [AC_LANG_CALL(,daxpy_)],
                 ff_blas_ok=yes
-		ff_blas_lib="$iblas",)
+		ff_blas_libs="$iblas",)
                 LIBS="$ff_save_libs"
         AC_MSG_RESULT($ff_blas_ok)
 fi
@@ -665,16 +670,16 @@ done
 
 #cblas_zdotu_sub
 #echo "LIBS = " $LIBS
-ff_cblas_lib=no
+ff_cblas_libs=no
 if test "$ff_blas_ok" = yes 
 then
-       AC_MSG_CHECKING(for blas_zdotu_sub in $ff_blas_lib)
+       AC_MSG_CHECKING(for blas_zdotu_sub in $ff_blas_libs)
         ff_save_libs="$LIBS"
-        LIBS="$LIBS $ff_blas_lib $FLIBS"
+        LIBS="$LIBS $ff_blas_libs $FLIBS"
         AC_LINK_IFELSE(
                 [AC_LANG_CALL(,cblas_zdotu_sub)],
-                ff_cblas_lib=yes)
-        AC_MSG_RESULT($ff_cblas_lib)
+                ff_cblas_libs=yes)
+        AC_MSG_RESULT($ff_cblas_libs)
 	LIBS="$ff_save_libs"	
 fi
 #echo "LIBS = " $LIBS
@@ -696,7 +701,7 @@ then
 	if test "$enable_generic" = yes -o "$enable_generic_blas" = yes 
 	then
 		ff_download_blas=generic
-		ff_blas_lib="-L${curdir}/download/blas -lcblas -lf77blas"
+		ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
 		ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
 		AC_SUBST(GENERIC_BLAS,"libf77blas.a libcblas.a")
@@ -714,12 +719,12 @@ then
 		if false
 		then
 			ff_download_blas=atlas-binary
-			ff_blas_lib="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -llapack -lf77blas -latlas"
+			ff_blas_libs="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -llapack -lf77blas -latlas"
 			ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
 			ff_lapack_ok=ok
 		else
 			ff_download_blas=atlas-source
-			ff_blas_lib="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
+			ff_blas_libs="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
 			ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
 			ff_lapack_ok=ok
 		fi
@@ -729,13 +734,13 @@ then
 	AC_SUBST(DOWNLOAD_BLAS,$ff_download_blas)
 	ff_blas_ok=yes
         ff_cblas_h=yes
-	ff_cblas_lib=yes
+	ff_cblas_libs=yes
 fi
 AC_MSG_RESULT($ff_blas_inc)
-AC_SUBST(BLASLIB,$ff_blas_lib)
+AC_SUBST(BLASLIBS,$ff_blas_libs)
 AC_SUBST(BLASINC,$ff_blas_inc)
 #looking for cblas.h  FH 
-if test "$ff_blas_ok" = yes -a "$ff_cblas_lib" = yes ;
+if test "$ff_blas_ok" = yes -a "$ff_cblas_libs" = yes ;
 then
   AC_CHECK_HEADERS(cblas.h,
        ff_cblas_h=yes,
@@ -804,15 +809,17 @@ if test "$ff_lapack_ok" = no; then
 AC_ARG_WITH(lapack,
 	[  --with-lapack=library	Use a specific version of the Lapack],
 	ff_lapack_ok=yes
-	ff_lapack_lib="${withval}"
-	LIBS="$ff_lapack_lib $LIBS"
+	ff_lapack_libs="${withval}"
+	LIBS="$ff_lapack_libs $LIBS"
 )
 fi
 
 ff_lapackdir='$$(LAPACKdir)'
 if  test "$ff_lapack_ok" = yes ; then
-# no compilation of lapack in  arpack 
-ff_lapackdir=
+  # no compilation of lapack in  arpack 
+  ff_lapackdir=
+else
+  ff_lapack_libs=-llapack
 fi
 # Arpack itself
 
@@ -857,12 +864,13 @@ then
 		AC_MSG_NOTICE(using downloaded Arpack)
 		AC_SUBST(DOWNLOAD_ARPACK,arpack)
 		AC_SUBST(FF_LAPACKdir,$ff_lapackdir)
+		AC_SUBST(ARPACKLIB,${curdir}/download/lib/libarpack.a)
+		AC_SUBST(LAPACKLIB,${curdir}/download/lib/liblapack.a)
 		# Do not update $LIBS, but create an extra LIB variable,
 		# because this lib does not exist yet, and this could make the
 		# following tests fail.
-                ff_arpack_libs="-L${curdir}/download/lib -larpack_ff++ $ff_lapack_lib"
+                ff_arpack_libs="-L${curdir}/download/lib -larpack  $ff_lapack_lib"
 		ff_arpack_ok=yes
-
 	fi
 fi
 if test  "$ff_arpack_ok" != yes 
@@ -877,7 +885,7 @@ LIBS="$ff_save_libs"
 
 if test "$ff_arpack_ok" = yes;
 then
-        AC_SUBST(ARPACKLIB,$ff_arpack_libs)
+        AC_SUBST(ARPACKLIBS,$ff_arpack_libs)
 	EIGENOBJ='eigenvalue.$(OBJEXT)'
 	AC_DEFINE(HAVE_LIBARPACK,1,Arpack is used for eigenvalue computation)
 
@@ -897,12 +905,12 @@ then
         AC_ARG_WITH(amd,
                 [  --with-amd=library	Use a specific version of AMD],
                 ff_amd_ok=yes
-		ff_umfpack_lib="${withval}")
+		ff_umfpack_libs="${withval}")
 
         AC_ARG_WITH(umfpack,
                 [  --with-umfpack=library	Use a specific version of Umfpack],
                 ff_umfpack_ok=yes
-                ff_umfpack_lib="${withval} $ff_umfpack_lib"
+                ff_umfpack_libs="${withval} $ff_umfpack_libs"
 		AC_DEFINE(HAVE_LIBUMFPACK,1,
 			Umfpack is used for sparse matrices computations))
 
@@ -925,7 +933,7 @@ then
 	if test "$ff_amd_ok" = no;
 	then
 		AC_CHECK_LIB(amd,amd_info,
-			ff_umfpack_lib="$ff_umfpack_lib -lamd"
+			ff_umfpack_libs="$ff_umfpack_libs -lamd"
 			ff_amd_ok=yes)
 	fi
 
@@ -933,8 +941,8 @@ then
 	then
 		AC_CHECK_LIB(umfpack,umf_i_malloc,
 			AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)	
-			ff_umfpack_lib=" -lumfpack $ff_umfpack_lib"
-			ff_umfpack_ok=yes,,$ff_umfpack_lib)
+			ff_umfpack_libs=" -lumfpack $ff_umfpack_libs"
+			ff_umfpack_ok=yes,,$ff_umfpack_libs)
 	fi
         if  test "$ff_umfpack_header" != yes -a "$ff_umfpack_ok" != no
            then
@@ -953,7 +961,7 @@ if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
 
-	ff_umfpack_lib="${curdir}/download/lib/libumfpack.a ${curdir}/download/lib/libamd.a"
+	ff_umfpack_libs="${curdir}/download/lib/libumfpack.a ${curdir}/download/lib/libamd.a"
 	AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
 	if test "$ff_win32" = yes; then
   	AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS)
@@ -966,7 +974,7 @@ then
 	 AC_MSG_NOTICE( -- NOT  UMFPACK  ff_wget = $ff_wget)
 fi
 
-AC_SUBST(UMFPACKLIB,$ff_umfpack_lib)
+AC_SUBST(UMFPACKLIBS,$ff_umfpack_libs)
 
 # Checking for some functions that may not appear everywhere
 # ----------------------------------------------------------
@@ -992,6 +1000,12 @@ fi
 # Enable static linking (no shared libraries)
 # -------------------------------------------
 AC_CHECK_PROG(ff_libtool,libtool,yes,no)	
+if test "$ff_libtool" = "yes" ; then
+  ff_AR="libtool"
+  ff_ARFLAGS="-static -o"
+  ff_RANLIB="echo" 
+fi
+
 AC_ARG_ENABLE(static,
 	[  --enable-static	Build binaries with no shared library dependencies])
 if test "$enable_static" = yes
@@ -1005,6 +1019,11 @@ then
 		AC_MSG_ERROR(libtool not found)
 	fi
 fi
+#  for compiation of  arpack  use libtool to bluid universal library on MacOs. 
+AC_SUBST(AR,$ff_AR)
+AC_SUBST(ARFLAGS,$ff_ARFLAGS)
+AC_SUBST(RANLIN,$ff_RANLIB)
+
 
 # Dynamic loading of compiled functions
 # -------------------------------------

@@ -53,14 +53,17 @@ AGLPROG = @AGLPROG@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
+AR = @AR@
+ARFLAGS = @ARFLAGS@
 ARPACKLIB = @ARPACKLIB@
+ARPACKLIBS = @ARPACKLIBS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BAMGPROG = @BAMGPROG@
 BLASINC = @BLASINC@
-BLASLIB = @BLASLIB@
+BLASLIBS = @BLASLIBS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -110,6 +113,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 KERNEL_VERSION = @KERNEL_VERSION@
+LAPACKLIB = @LAPACKLIB@
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
@@ -136,6 +140,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
+RANLIN = @RANLIN@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STATICTOOL = @STATICTOOL@
@@ -145,7 +150,7 @@ STD_LDFLAGS = @STD_LDFLAGS@
 STD_LIBS = @STD_LIBS@
 STRIP = @STRIP@
 TESTIDEPROG = @TESTIDEPROG@
-UMFPACKLIB = @UMFPACKLIB@
+UMFPACKLIBS = @UMFPACKLIBS@
 VERSION = @VERSION@
 WGET = @WGET@
 WIN32DLLTARGET = @WIN32DLLTARGET@
@@ -266,7 +271,7 @@ plots/square-0.eps      plots/square-1.eps      plots/square-2.eps
 FIGS_JPG = plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg  \
 figures/mi.jpg plots/LogoUPMC.jpg
 
-FIGS_PDF = plots/LogoCNRS.pdf    plots/LogoLJLL.pdf   plots/ffauteurs4.pdf  \
+FIGS_PDF = plots/LogoCNRS.pdf    plots/LogoLJLL.pdf  plots/ffauteurs4.pdf  \
 plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf
 
 EXTRA_DIST = addfe.tex docFFGUI.tex manual-full.tex freefem++doc.tex  manual.tex FF.sty FFF.sty dessin.sty pdfsync.sty styles.sty \

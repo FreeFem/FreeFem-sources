@@ -194,8 +194,23 @@ Some configure flags use to build the current version
 -----------------------------------------------------
 
 *  Under Debian:
-the install package   tetex-base tetex-bin  imagemagick wget g77 g++-4.0 atlas2-base atlas3-base libumfpack4 libumfpack4-dev libarpack2 libarpack2-dev 
-./configure
+  the install package   
+   tetex-base tetex-bin
+   imagemagick wget 
+   g77 g++ 
+   libumfpack4 libumfpack4-dev
+   libarpack2 libarpack2-dev
+   libX11 libxt6 libxt-dev 
+   tetex-base 
+   
+*  Under Ubuntu 
+   tetex-base tetex-bin 
+   imagemagick wget g77 g++ 
+   libumfpack4 libumfpack4-dev
+   libarpack2 libarpack2-dev
+   libX11 libxt6 libxt-dev 
+  ./configure 
+
 
 Under Red Hat Enterprise Linux AS release 3
 the following rpm:
@@ -203,16 +218,22 @@ blas-3.0-20 gcc-3.2.3-53 tetex-1.0.7-67.9 lapack-3.0-20 ImageMagick-5.5.6-15 wge
 are install
 ./configure  '--enable-download' '--with-blas=-lblas -llapack'
 
-* Under MacOs G4
-we use the  fink f77, texshop and TeXLive-teTeX Current Release in http://www.ctan.org/tex-archive/systems/mac/mactex/
-+ ImageMagick Ghostscript 8 form Gerben Wierda's i-Installer       http://www.rna.nl/ii.html
-./configure '--enable-download' '--enable-optim' '--with-suffix=G4'
+* Under MacOs
+ 
+ 1) intall Apple's Developer Tools from de Apple DVD
+ 2) TeXLive-teTeX Current Release in http://www.ctan.org/tex-archive/systems/mac/mactex/
+ 3) find a fortran 77, a simple way is to:
+	cd download/f2c
+	make install-universal
+
+ ./configure '--enable-download' '--enable-optim' '--with-suffix=G4'
 
 * Under MacOC macIntel 
-compile and install  de f2c (no fortran) and install fort77  from  http://www.netlib.org
+
 ./configure '-with-suffix' 'MacIntel' '-without-fltk' '--enable-download' '-with-mpi=mpic++' '-enable-download' 'F77=fort77' '--with-flib=-L/usr/local/lib -lf2c'
 or if you have compile the download/f2c   with : (cd download/f2c;make install)
 ./configure '-with-suffix' 'MacIntel' '-without-fltk' '--enable-download' '-with-mpi=mpic++' '-enable-download' 
+# to build universal 
 
 see de README_MAC file of the required soft.
 

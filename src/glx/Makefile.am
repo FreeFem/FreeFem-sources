@@ -9,6 +9,6 @@ bin_PROGRAMS=$(GLXPROG)
 EXTRA_PROGRAMS=FreeFem++-glx
 FreeFem___glx_SOURCES=../Graphics/xglrgraf.cpp
 FreeFem___glx_DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
-LDADD=../lglib/liblg.a ../fflib/libff.a @UMFPACKLIB@ @ARPACKLIB@	\
-	@BLASLIB@ -lGLU -lGL @X11_LIBS@
+LDADD=../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@	\
+	@BLASLIBS@ -lGLU -lGL @X11_LIBS@
 INCLUDES=-I../fflib

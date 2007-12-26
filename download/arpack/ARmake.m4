@@ -60,8 +60,8 @@ DIRS         = FF_LAPACKdir  $(UTILdir) $(SRCdir)
 # | The name of the libraries to be created/linked to |
 # %---------------------------------------------------%
 #
-ARPACKLIB  = $(home)/../../lib/libarpack_$(PLAT).a
-LAPACKLIB = $(home)/../../liblapack_$(PLAT).a
+ARPACKLIB  = FF_ARPACKLIB
+LAPACKLIB  = FF_LAPACKLIB
 BLASLIB = FF_BLASLIB 
 #
 ALIBS =  $(ARPACKLIB) $(LAPACKLIB) $(BLASLIB) 
@@ -128,10 +128,9 @@ SHELL   = /bin/sh
 #  | ranlib, set RANLIB = touch.                                    |
 #  %----------------------------------------------------------------%
 #
-AR = ar 
-ARFLAGS = rv
-#RANLIB  = touch
-RANLIB   = ranlib
+AR = FF_AR 
+ARFLAGS = FF_ARFLAGS
+RANLIB   = FF_RANLIB
 #
 # %----------------------------------%
 # | This is the general help target. |
