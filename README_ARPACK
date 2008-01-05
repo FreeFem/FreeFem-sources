@@ -3,7 +3,7 @@ How to adapt ARPACK for compilation with FreeFem++
 the simplest  way is just 
 configure --enable-download 
 --------------------------------------------------
-Or to compile arpack by hard  hard to explain:
+Or to compile arpack by hand  hard to explain:
 
 just to remark:
 Pass the patch  to compile on g++ 3.x 

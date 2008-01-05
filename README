@@ -1,6 +1,8 @@
 Compilation of FreeFem++ under unix, MacOs 10 or cygwin (Windows)
 and bamg (mesh generator)
 ----------------------------------------------------------------
+remark: for debian, ubuntu, MacOS, Windows  see the the prerequisite
+installed packages before configuration and compilatation.
 
 This file details specific configuration details for FreeFem++. For
 a standard installation, please refer to the file named "INSTALL".
@@ -31,12 +33,14 @@ Other useful configuration variables include:
 - LIBS libraries for the linking stage
 - LDFLAGS linking flags
 - LDADD extra options for the linking stage
+- F77  the fortran compile (if not fortran is installed  see section NOFORTRAN)
+- CC  the cc compiler
+- CXX the c++ compiler
+
 
 Linear algebra libraries and eigen value problem
 -----------------------------------------------
-
-
-By default, "./configure" looks for the BLAS, ARPACK and UMFPACK
+By default, "./configure" looks for the X11, BLAS, ARPACK and UMFPACK
 libraries on the local system.
 ARPACK is use to compute eigenvalue.
 and UMFPACK is a new fast sparce linear solver.
@@ -62,13 +66,6 @@ a not to bad version is
 or without ide 
 ./configure --enable-generic_blas --without-fltk 
 
-remark, if you have not fortran compiler use f2c  
-by the way just do
- 
-cd  download/f2c
-make
-make install
-cd ../..
 
 and reconfigure for example: 
 ./configure --enable-generic_blas --without-fltk 
@@ -194,31 +191,40 @@ Some configure flags use to build the current version
 -----------------------------------------------------
 
 *  Under Debian:
-  the install package   
-   tetex-base tetex-bin
+----------------
+  the installed packages + dependance are:   
+   gcc g++ g77
+   libumfpack4 libumfpack4-dev
+   libarpack2 libarpack2-dev
+   libx11-dev libx11  libxt6 libxt-dev 
    imagemagick wget 
-   g77 g++ 
-   libumfpack4 libumfpack4-dev
-   libarpack2 libarpack2-dev
-   libX11 libxt6 libxt-dev 
-   tetex-base 
+   tetex-base   tetex-bin  tetex-extra 
+
+ ./configure 
    
-*  Under Ubuntu 
-   tetex-base tetex-bin 
-   imagemagick wget g77 g++ 
+*  Under Ubuntu
+---------------
+  the installed packages + dependance are:   
+   gcc g++  g77
+   wget 
+   libx11-dev  libxt-dev  libxt6 
    libumfpack4 libumfpack4-dev
    libarpack2 libarpack2-dev
-   libX11 libxt6 libxt-dev 
+   tetex-base   tetex-bin  tetex-extra texlive-latex-extra
+   imagemagick 
+
   ./configure 
 
 
-Under Red Hat Enterprise Linux AS release 3
+* Under Red Hat Enterprise Linux AS release 3:
+----------------------------------------------
 the following rpm:
 blas-3.0-20 gcc-3.2.3-53 tetex-1.0.7-67.9 lapack-3.0-20 ImageMagick-5.5.6-15 wget-1.10.2-0.30E curl-7.10.6-7.rhel3
 are install
 ./configure  '--enable-download' '--with-blas=-lblas -llapack'
 
-* Under MacOs
+* Under MacOs:
+-------------
  
  1) intall Apple's Developer Tools from de Apple DVD
  2) TeXLive-teTeX Current Release in http://www.ctan.org/tex-archive/systems/mac/mactex/
@@ -229,15 +235,36 @@ are install
  ./configure '--enable-download' '--enable-optim' '--with-suffix=G4'
 
 * Under MacOC macIntel 
+----------------------
+  1) install Apple's Developer Tools
+  2) install do the NOFORTRAN section. 
+  3) install the TexMac for the documentation:
+ http://ctan.org/get/systems/mac/mactex/MacTeX-20071201.dmg
 
-./configure '-with-suffix' 'MacIntel' '-without-fltk' '--enable-download' '-with-mpi=mpic++' '-enable-download' 'F77=fort77' '--with-flib=-L/usr/local/lib -lf2c'
+# to build a good freefem for your Mac:
+
+./configure -without-fltk' '--enable-download' '-with-mpi=mpic++' '-enable-download' 'F77=fort77' '--with-flib=-L/usr/local/lib -lf2c'
+
 or if you have compile the download/f2c   with : (cd download/f2c;make install)
+
 ./configure '-with-suffix' 'MacIntel' '-without-fltk' '--enable-download' '-with-mpi=mpic++' '-enable-download' 
-# to build universal 
 
-see de README_MAC file of the required soft.
+# to build universal FreeFem++ of 10.4 macOS (ppc , i386):
+
+/configure '-with-suffix=Universal' '-without-fltk' '--enable-download' '-with-mpi=mpic++' 'F77=/usr/local/bin/fort77' '--with-flib=-L/usr/local/lib -lf2c' 'CXX=g++ -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386 -mmacosx-version-min=10.4' 'CC=gcc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386 -mmacosx-version-min=10.4' 'FFLAGS=-Wc,-isysroot,/Developer/SDKs/MacOSX10.4u.sdk,-arch,ppc,-arch,i386,-mmacosx-version-min=10.4' 'CXXCPP=g++ -E'
 
 
-* Under WindowXP 
+* Under Windows: 
+----------------
 see the end of README_WINDOW  files 
+
+* NOFORTRAN:
+------------
+You have not fortran compiler use f2c and the use the  script fort77
+by the way just do:
+cd  download/f2c
+# to build and install fort77,  linf2c.a in download/bin  download/lib
+make install
+# to build and universal f2c library on MacOS 10.4 and install in /usr/local/bin  /usr/loaal/lib
+make -n install-universal
 

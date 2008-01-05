@@ -1,3 +1,6 @@
+v 2.22-1
+  - make change in Makefile to build universal binary on MacOS
+  - change the README file for compilation on ubuntu Linux.
 v 2.22   (december, 18, 2007)
   -  correct problem of string argument in function
   -  correct all elasticity problem (missing sqrt(2) )
