@@ -2,13 +2,10 @@ add the sup of a function on a mesh
 real uinfty=sup(Th,abs(f));
 real uhinfty=sup(uh); 
 
-  Inforce periodic on  adpated  mesh  today
-by adding periodic=[[2,y],[4,y],[1,x],[3,x]].
 
 Newton algorithm.
 Non Linear Conjugued Gradient.
 
-computation of eigenvalue and eigenvector
 automatique scheme for time depend problem:
 dt(u) or u_t
 

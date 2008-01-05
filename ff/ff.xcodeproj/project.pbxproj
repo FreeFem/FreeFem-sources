@@ -99,9 +99,6 @@
 		3D9B0EC40C8495C0008A8F03 /* RNM_tpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB30C8495C0008A8F03 /* RNM_tpl.hpp */; };
 		3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB40C8495C0008A8F03 /* RNM.hpp */; };
 		3DBBD59D0C356C5B007E5F45 /* vecLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D90DDED097050AC002A1826 /* vecLib.framework */; };
-		3DBBD5A10C356CC5007E5F45 /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBBD5A00C356CC5007E5F45 /* libamd.a */; };
-		3DBBD5A60C356D7A007E5F45 /* libf2c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBBD5A50C356D7A007E5F45 /* libf2c.a */; };
-		3DBBD5A80C356DB6007E5F45 /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBBD59F0C356CBD007E5F45 /* libumfpack.a */; };
 		3DBBD5AF0C356E99007E5F45 /* lgalgo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC6299409723FE000D487F6 /* lgalgo.cpp */; };
 		3DBBD5BC0C356EEE007E5F45 /* string_def.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */; };
 		3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */; };
@@ -111,7 +108,10 @@
 		3DC62AEE0972999000D487F6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DC62AED0972999000D487F6 /* Cocoa.framework */; };
 		3DC62AF7097299F400D487F6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DC62AF6097299F400D487F6 /* OpenGL.framework */; };
 		3DC62AFD09729A7400D487F6 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DC62AFC09729A7400D487F6 /* AGL.framework */; };
-		3DF12AE20C359F750074D2D8 /* libarpack_ff++.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DF12AE10C359F750074D2D8 /* libarpack_ff++.a */; };
+		3DED22BD0D22C9B700200751 /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DED22B90D22C9B700200751 /* libumfpack.a */; };
+		3DED22BE0D22C9B700200751 /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DED22BA0D22C9B700200751 /* libamd.a */; };
+		3DED22BF0D22C9B700200751 /* libf2c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DED22BB0D22C9B700200751 /* libf2c.a */; };
+		3DED22C00D22C9B700200751 /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DED22BC0D22C9B700200751 /* libarpack.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -187,9 +187,6 @@
 		3D9B0EB30C8495C0008A8F03 /* RNM_tpl.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = RNM_tpl.hpp; path = ../src/femlib/RNM_tpl.hpp; sourceTree = SOURCE_ROOT; };
 		3D9B0EB40C8495C0008A8F03 /* RNM.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = RNM.hpp; path = ../src/femlib/RNM.hpp; sourceTree = SOURCE_ROOT; };
 		3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libfflib.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		3DBBD59F0C356CBD007E5F45 /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = ../download/lib/libumfpack.a; sourceTree = SOURCE_ROOT; };
-		3DBBD5A00C356CC5007E5F45 /* libamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.a; path = ../download/lib/libamd.a; sourceTree = SOURCE_ROOT; };
-		3DBBD5A50C356D7A007E5F45 /* libf2c.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libf2c.a; path = /usr/local/lib/libf2c.a; sourceTree = "<absolute>"; };
 		3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = string_def.cpp; sourceTree = "<group>"; };
 		3DBBD5E50C3573DA007E5F45 /* mymain.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = mymain.cpp; sourceTree = "<group>"; };
 		3DC6296009723F8E00D487F6 /* Mesh2.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh2.cpp; path = ../src/bamglib/Mesh2.cpp; sourceTree = SOURCE_ROOT; };
@@ -245,7 +242,10 @@
 		3DC62AF2097299D800D487F6 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
 		3DC62AF6097299F400D487F6 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		3DC62AFC09729A7400D487F6 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = /System/Library/Frameworks/AGL.framework; sourceTree = "<absolute>"; };
-		3DF12AE10C359F750074D2D8 /* libarpack_ff++.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libarpack_ff++.a"; path = "../download/lib/libarpack_ff++.a"; sourceTree = SOURCE_ROOT; };
+		3DED22B90D22C9B700200751 /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = /usr/local/lib/libumfpack.a; sourceTree = "<absolute>"; };
+		3DED22BA0D22C9B700200751 /* libamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.a; path = /usr/local/lib/libamd.a; sourceTree = "<absolute>"; };
+		3DED22BB0D22C9B700200751 /* libf2c.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libf2c.a; path = /usr/local/lib/libf2c.a; sourceTree = "<absolute>"; };
+		3DED22BC0D22C9B700200751 /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = /usr/local/lib/libarpack.a; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -254,10 +254,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				3DBBD59D0C356C5B007E5F45 /* vecLib.framework in Frameworks */,
-				3DBBD5A80C356DB6007E5F45 /* libumfpack.a in Frameworks */,
-				3DBBD5A10C356CC5007E5F45 /* libamd.a in Frameworks */,
-				3DBBD5A60C356D7A007E5F45 /* libf2c.a in Frameworks */,
-				3DF12AE20C359F750074D2D8 /* libarpack_ff++.a in Frameworks */,
+				3DED22BD0D22C9B700200751 /* libumfpack.a in Frameworks */,
+				3DED22BE0D22C9B700200751 /* libamd.a in Frameworks */,
+				3DED22BF0D22C9B700200751 /* libf2c.a in Frameworks */,
+				3DED22C00D22C9B700200751 /* libarpack.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -385,10 +385,10 @@
 		3D90DDE309704FA0002A1826 /* Lib */ = {
 			isa = PBXGroup;
 			children = (
-				3DF12AE10C359F750074D2D8 /* libarpack_ff++.a */,
-				3DBBD5A00C356CC5007E5F45 /* libamd.a */,
-				3DBBD59F0C356CBD007E5F45 /* libumfpack.a */,
-				3DBBD5A50C356D7A007E5F45 /* libf2c.a */,
+				3DED22B90D22C9B700200751 /* libumfpack.a */,
+				3DED22BA0D22C9B700200751 /* libamd.a */,
+				3DED22BB0D22C9B700200751 /* libf2c.a */,
+				3DED22BC0D22C9B700200751 /* libarpack.a */,
 				3D90DDED097050AC002A1826 /* vecLib.framework */,
 			);
 			name = Lib;

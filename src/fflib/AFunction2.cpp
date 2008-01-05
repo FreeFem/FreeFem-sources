@@ -663,7 +663,7 @@ E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)
    assert(routine->ins); 
    for (int i=0;i<args.size();i++)  //  bug pb copie des string   dec 2007  FH  ???????????????
    {
-       cout << "E_Routine " << *routine->param[i].r << " <- " << *args[i].left() << endl;
+      // cout << "E_Routine " << *routine->param[i].r << " <- " << *args[i].left() << endl;
         param[i]=routine->param[i].r->CastTo(args[i]);
    }
 };
