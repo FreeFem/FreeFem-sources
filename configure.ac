@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.22-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.22-2,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -899,6 +899,7 @@ AC_SUBST([EIGENOBJ])
 
 ff_amd_ok=no
 ff_umfpack_ok=no
+ff_save_libs="$LIBS"
 if test "$ff_blas_ok" = yes;
 then
         # User-specified location
@@ -929,7 +930,7 @@ then
 			AC_DEFINE(HAVE_BIG_UMFPACK_UMFPACK_H,1,
 				If umfpack.h is located in UMFPACK subdir))
 	fi
-	
+	LIBS="$ff_blas_libs $LIBS"
 	if test "$ff_amd_ok" = no;
 	then
 		AC_CHECK_LIB(amd,amd_info,
@@ -939,6 +940,7 @@ then
 
 	if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
 	then
+        
 		AC_CHECK_LIB(umfpack,umf_i_malloc,
 			AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)	
 			ff_umfpack_libs=" -lumfpack $ff_umfpack_libs"
@@ -950,6 +952,7 @@ then
             ff_umfpack_ok=no
          fi
 fi
+LIBS="$ff_save_libs"
 
 # If all else fails, download!
 if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes 

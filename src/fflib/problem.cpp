@@ -2340,7 +2340,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   //  const FESpace * Uhh , *Vhh;
   const Mesh * pTh= &LL[0]->Th;
   for (int i=0;i<Nb2;i++)
-    if ( &LL[0]->Th != pTh)
+    if ( &LL[i]->Th != pTh)
       ExecError("all the finites elements spaces must be defined on the same mesh in solve");
   if ( pTh != data->pTh ) 
     {
