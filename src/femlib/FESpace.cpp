@@ -523,7 +523,7 @@ class TypeOfFE_P1Bubble : public  TypeOfFE { public:
   // void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
    void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
    
-//   void D2_FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+//   void D2_FB(const Me¶SeriaÄÄÄÄÄsh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
  //  void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const;
   //virtual R operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const ;
    
@@ -633,8 +633,8 @@ ConstructDataFElement::ConstructDataFElement(const FESpace ** l,int k,const KN<c
      NbDfOnSommet += l[i]->TFE[0]->NbDfOnVertex;
      NbDfOnEdge += l[i]->TFE[0]->NbDfOnEdge;
      NbDfOnElement += l[i]->TFE[0]->NbDfOnElement;
-     throwassert( &Th== &l[i]->Th); 
-     throwassert( l[i]->TFE.constant());
+     ffassert( &Th== &l[i]->Th); 
+     ffassert( l[i]->TFE.constant());
    }
    
  Make(Th,TFEs);//NbDfOnSommet,NbDfOnEdge,NbDfOnElement,0);   

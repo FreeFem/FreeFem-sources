@@ -190,19 +190,24 @@ Note 3. Fast fourier exemple ( FFT )  is in dfft.edp  file
 Some configure flags use to build the current version
 -----------------------------------------------------
 
-*  Under Debian:
+*  Under Debian: ( 2008)
 ----------------
   the installed packages + dependance are:   
-   gcc g++ g77
-   libumfpack4 libumfpack4-dev
-   libarpack2 libarpack2-dev
-   libx11-dev libx11  libxt6 libxt-dev 
-   imagemagick wget 
-   tetex-base   tetex-bin  tetex-extra 
+
+  gcc g++ g77
+  libsuitesparse-dev
+  libarpack2-dev
+  libx11-dev libxt-dev
+ - to rebuild de documentation:  
+  imagemagick 
+  tetex-base   tetex-bin  tetex-extra 
 
  ./configure 
+  make 
+  make check    (to test de version)
+  make install  (under root)
    
-*  Under Ubuntu
+*  Under Ubuntu (2008)
 ---------------
   the installed packages + dependance are:   
    gcc g++  g77
@@ -210,10 +215,16 @@ Some configure flags use to build the current version
    libx11-dev  libxt-dev  libxt6 
    libumfpack4 libumfpack4-dev
    libarpack2 libarpack2-dev
-   tetex-base   tetex-bin  tetex-extra texlive-latex-extra
-   imagemagick 
+ - to rebuild de documentation:  
+  imagemagick 
+  tetex-base   tetex-bin  tetex-extra 
 
-  ./configure 
+
+ ./configure 
+  make 
+  make check    (to test de version)
+  make install  (under root)
+  
 
 
 * Under Red Hat Enterprise Linux AS release 3:
@@ -223,7 +234,7 @@ blas-3.0-20 gcc-3.2.3-53 tetex-1.0.7-67.9 lapack-3.0-20 ImageMagick-5.5.6-15 wge
 are install
 ./configure  '--enable-download' '--with-blas=-lblas -llapack'
 
-* Under MacOs:
+* Under MacOs: (2008)
 -------------
  
  1) intall Apple's Developer Tools from de Apple DVD
