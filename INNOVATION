@@ -1,3 +1,6 @@
+v 2.22-2
+  - small change in configure.ac of find linumfpack on debain systeme
+  - correct checking code in probleme to same the mesh must be unique in problem of solve definition.
 v 2.22-1
   - make change in Makefile to build universal binary on MacOS
   - change the README file for compilation on ubuntu Linux.

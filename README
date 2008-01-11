@@ -254,7 +254,7 @@ are install
 
 # to build a good freefem for your Mac:
 
-./configure -without-fltk' '--enable-download' '-with-mpi=mpic++' '-enable-download' 'F77=fort77' '--with-flib=-L/usr/local/lib -lf2c'
+./configure -without-fltk' '--enable-download' '-with-mpi=mpic++' 'F77=fort77' '--with-flib=-L/usr/local/lib -lf2c'
 
 or if you have compile the download/f2c   with : (cd download/f2c;make install)
 
