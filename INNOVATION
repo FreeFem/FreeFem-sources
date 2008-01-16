@@ -1,3 +1,6 @@
+v 2.23
+  - correct probleme in mpi recive message
+  - coorect load dynamic on MacOs (bug in fort find library) in configure.ac
 v 2.22-2
   - small change in configure.ac of find linumfpack on debain systeme
   - correct checking code in probleme to same the mesh must be unique in problem of solve definition.

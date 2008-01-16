@@ -9,7 +9,7 @@
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
-AC_INIT(FreeFem++,2.22-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.23,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -49,7 +49,10 @@ then
 	case $F77 in
 	 *fort77)
 	   if test -z "$FLIBS" ; then
-             FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print $(NF-2),$(NF-1)}'`
+#             FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print $(NF-2),$(NF-1)}'`
+#  FH to remove " "  
+	     FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print "echo",$(NF-2),$(NF-1)}'|sh`
+
              AC_MSG_WARN([  fort77   FLIBS :  $FLIBS ])	     
 	   fi
 	   ;;
@@ -1332,8 +1335,9 @@ AC_OUTPUT(Makefile
 	examples++-other/Makefile
 	DOC/Makefile)
         AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
-        AC_MSG_NOTICE([		 --  ARPACK $ff_arpack_ok ])
-        AC_MSG_NOTICE([		 --  UMFPACK $ff_umfpack_ok ])
+	AC_MSG_NOTICE([	 	 --  Dynamic load facility: $ff_dynload ])
+        AC_MSG_NOTICE([		 --  ARPACK (eigen value): $ff_arpack_ok ])
+        AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
         AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
         AC_MSG_NOTICE([		 --  FLTK (ide package) $ff_fltk ])
         AC_MSG_NOTICE([		 --  with X11             $ff_x11])

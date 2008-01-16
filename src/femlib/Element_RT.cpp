@@ -368,7 +368,7 @@ class TypeOfFE_ConsEdge : public  TypeOfFE { public:
     static double Pi_h_coef[];
 
    TypeOfFE_ConsEdge(): TypeOfFE(0,1,0,1,Data,3,1,3,3,Pi_h_coef)
-    {   const R2 Pt[] = { R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0) };
+    { const R2 Pt[] = { R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0) };
       for (int i=0;i<NbDoF;i++) {
        pij_alpha[i]= IPJ(i,i,0);
        P_Pi_h[i]=Pt[i]; }
@@ -402,7 +402,62 @@ void TypeOfFE_ConsEdge::FB(const bool * whatd,const Mesh & ,const Triangle & K,c
   }
 
 }
-
+/*    
+class TypeOfFE_P1Edge : public  TypeOfFE { public:  
+  static int Data[];
+  static double Pi_h_coef[];
+	
+  TypeOfFE_P1Edge(): TypeOfFE(0,2,0,1,Data,3,1,12,6,Pi_h_coef)
+    {  R2 Pt[6] ;
+	
+	int kk=0;
+	for(int i=0;i<3;++i)
+	  for(int j=0;i<QF_GaussLegendre2.n;++j)
+	  { R2 A(TriangleHat[VerticesOfTriangularEdge[i][0]]);
+	    R2 B(TriangleHat[VerticesOfTriangularEdge[i][1]]);
+	     Pt[k++]=A*(QF_GaussLegendre2[j].x)+ B*(1-QF_GaussLegendre2[j].x)
+	  }
+	      
+        int other[6]= { 1,0, 3,2,5,4 };
+	k=0;
+	  for (int i=0;i<NbDoF;i++) {
+	    pij_alpha[i]= IPJ(i,i,0);
+	    if(other[i]>=0)
+		pij_alpha[kk++]= IPJ(i,other[i],0);
+	       P_Pi_h[i]=Pt[i]; }
+	}
+	
+	void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+	
+    } ;
+    //                     on what     nu df on node node of df    
+    int TypeOfFE_ConsEdge::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
+    double TypeOfFE_ConsEdge::Pi_h_coef[]={1.,1.,1.};
+    void TypeOfFE_ConsEdge::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+    {
+	//  const Triangle & K(FE.T);
+	R2 A(K[0]), B(K[1]),C(K[2]);
+	R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
+	
+	if (val.N() <3) 
+	    throwassert(val.N() >=3);
+	throwassert(val.M()==1 );
+	
+	val=0; 
+	if (whatd[op_id])
+	{
+	    
+	    RN_ f0(val('.',0,0)); 
+	    //      
+	    f0[0] =  double(l0 <= min(l1,l2) ); // arete  
+	    f0[1] =  double(l1 <= min(l0,l2) );
+	    f0[2] =  double(l2 <= min(l0,l1) );
+	}
+	
+    }
+    
+*/
+    
 void TypeOfFE_P1ncLagrange::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
 {
   //  const Triangle & K(FE.T);

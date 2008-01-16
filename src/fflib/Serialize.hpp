@@ -40,7 +40,7 @@ struct MPIrank;
   public: 
   Serialize(size_t lgg,const char * wht): 
     lg(lgg), what(wht) , p((new char[lg+sizeof(long)])+sizeof(long)) 
-   { cout << " begin count()=0 " << endl;
+   { //cout << " begin count()=0 " << endl;
     count()=0; }
   
   ~Serialize(){ if(count()--==0) delete [] (p-sizeof(long));}

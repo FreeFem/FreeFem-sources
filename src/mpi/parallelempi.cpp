@@ -26,6 +26,35 @@
 #error "no mpixx.h or mpi++.h file" 
 #endif 
 
+/*
+ MPI::INT, MPI::LONG, MPI::SHORT, 
+ MPI::UNSIGNED SHORT, MPI::UNSIGNED, 
+ MPI::UNSIGNED LONG, MPI::SIGNED CHAR, 
+ MPI::UNSIGNED CHAR 
+ Fortran integer: MPI::INTEGER 
+ Floating point: MPI::FLOAT, MPI::DOUBLE, MPI::REAL, 
+ MPI::DOUBLE PRECISION, 
+ MPI::LONG DOUBLE 
+ Logical: MPI::LOGICAL, MPI::BOOL 
+ Complex: MPI::F COMPLEX, MPI::COMPLEX, 
+ MPI::F DOUBLE COMPLEX, 
+ MPI::DOUBLE COMPLEX, 
+ MPI::LONG DOUBLE COMPLEX 
+ Byte: MPI::BYTE 
+ 
+ */
+template<class T> struct MPI_TYPE {};
+template<> struct MPI_TYPE<long>      {static const MPI::Datatype TYPE(){return MPI::LONG;}};
+template<> struct MPI_TYPE<double>    {static const MPI::Datatype TYPE(){return MPI::DOUBLE;}};
+template<> struct MPI_TYPE<Complex>   {static const MPI::Datatype TYPE(){return MPI::DOUBLE_COMPLEX;}};
+
+template<class T> struct MPI_WHAT {};
+template<> struct MPI_WHAT<long>      {static const int WHAT=101;};
+template<> struct MPI_WHAT<double>    {static const int WHAT=102;};
+template<> struct MPI_WHAT<Complex>   {static const int WHAT=103;};
+template<> struct MPI_WHAT<KN<long> >   {static const int WHAT=104;};
+template<> struct MPI_WHAT<KN<double> >   {static const int WHAT=105;};
+template<> struct MPI_WHAT<KN<Complex> >   {static const int WHAT=106;};
 
   void initparallele(int &, char **&);
   void init_lgparallele();  
@@ -50,7 +79,7 @@ struct MPIrank {
       return *this;
    }
    const MPIrank & operator>>(double & a) const {
-      MPI::COMM_WORLD.Irecv(&a, 1, MPI::DOUBLE, who, 4);
+      MPI::COMM_WORLD.Recv(&a, 1, MPI::DOUBLE, who, 4);
       return *this;
    }
    const MPIrank & operator<<(long a) const {
@@ -62,17 +91,33 @@ struct MPIrank {
       return *this;
    }
    const MPIrank & operator>>(long & a) const {
-      MPI::COMM_WORLD.Irecv(&a, 1, MPI::LONG, who, 5);
+      MPI::COMM_WORLD.Recv(&a, 1, MPI::LONG, who, 5);
       return *this;
    }
    
    const MPIrank & operator>>(KN<double> & a) const {
        assert(&a);
       int n= a.N();
-      MPI::COMM_WORLD.Irecv((double *) a, n, MPI::DOUBLE, who, 10);
+      MPI::COMM_WORLD.Recv((double *) a, n, MPI::DOUBLE, who, 10);
       ffassert(a.N()==n);
       return *this;
    }
+    const MPIrank & operator>>(KN<long> & a) const {
+	assert(&a);
+	int n= a.N();
+	MPI::COMM_WORLD.Recv((long *) a, n, MPI::LONG, who, 11);
+	ffassert(a.N()==n);
+	return *this;
+    }
+
+    const MPIrank & operator>>(KN<Complex> & a) const {
+	assert(&a);
+	int n= a.N();
+	MPI::COMM_WORLD.Recv((Complex *) a, n, MPI::DOUBLE_COMPLEX, who, 12);
+	ffassert(a.N()==n);
+	return *this;
+    }
+    
    const MPIrank & Bcast(KN<double> & a) const {
        assert(&a);
       int n= a.N();
@@ -80,7 +125,23 @@ struct MPIrank {
      ffassert(a.N()==n);
       return *this;
    }
-   
+
+    const MPIrank & Bcast(KN<Complex> & a) const {
+	assert(&a);
+	int n= a.N();
+	(void)  MPI::COMM_WORLD.Bcast((Complex *) a, n, MPI::DOUBLE_COMPLEX, who);
+	ffassert(a.N()==n);
+	return *this;
+    }
+
+    const MPIrank & Bcast(KN<long> & a) const {
+	assert(&a);
+	int n= a.N();
+	(void)  MPI::COMM_WORLD.Bcast((long *) a, n, MPI::LONG, who);
+	ffassert(a.N()==n);
+	return *this;
+    }
+    
    const MPIrank & operator<<(const KN<double> *aa)const  {
      const KN<double> & a=*aa;
       ffassert(a); 
@@ -88,7 +149,24 @@ struct MPIrank {
       MPI::COMM_WORLD.Isend((double *) a, n, MPI::DOUBLE, who, 10);
       return *this;
    }
-   
+ 
+    const MPIrank & operator<<(const KN<long> *aa)const  {
+	const KN<long> & a=*aa;
+	ffassert(a); 
+	int n= a.N();
+	MPI::COMM_WORLD.Isend((long *) a, n, MPI::LONG, who, 11);
+	return *this;
+    }
+ 
+    const MPIrank & operator<<(const KN<Complex> *aa)const  {
+	const KN<Complex> & a=*aa;
+	ffassert(a); 
+	int n= a.N();
+	MPI::COMM_WORLD.Isend((Complex *) a, n, MPI::DOUBLE_COMPLEX, who, 12);
+	return *this;
+    }
+    
+    
    const MPIrank & Bcast(const KN<double> *aa)const  {
       const KN<double> & a=*aa;
       assert(a); 
@@ -97,7 +175,25 @@ struct MPIrank {
       ffassert(a.N()==n);
       return *this;
    }
-   
+
+    const MPIrank & Bcast(const KN<long> *aa)const  {
+	const KN<long> & a=*aa;
+	assert(a); 
+	int n= a.N();
+	(void) MPI::COMM_WORLD.Bcast((long *) a, n, MPI::LONG, who);
+	ffassert(a.N()==n);
+	return *this;
+    }
+
+    const MPIrank & Bcast(const KN<Complex> *aa)const  {
+	const KN<Complex> & a=*aa;
+	assert(a); 
+	int n= a.N();
+	(void) MPI::COMM_WORLD.Bcast((Complex *) a, n, MPI::DOUBLE_COMPLEX, who);
+	ffassert(a.N()==n);
+	return *this;
+    }
+    
    const MPIrank & Bcast(Fem2D::Mesh *&  a) const {
      if(verbosity>1) 
        cout << " MPI Bcast  (mesh *) " << a << endl;
@@ -180,7 +276,7 @@ Serialize::Serialize(const MPIrank & rank,const char * wht,long tag)
          cout << " -- waiting " << mpirank << " from  " << rank << " serialized " << what 
               << " tag = " << tag <<  endl;
    char * buf= new char [sizempibuf];
-   MPI::COMM_WORLD.Irecv(buf, sizempibuf, MPI::BYTE, rank, tag);
+   MPI::COMM_WORLD.Recv(buf, sizempibuf, MPI::BYTE, rank, tag);
    lg = * (long *) (void *) buf;
    int l=lg+sizeof(long);
    char * pp= new char[l]  ;
@@ -189,7 +285,7 @@ Serialize::Serialize(const MPIrank & rank,const char * wht,long tag)
    else 
       {
         memcpy(pp,buf,sizempibuf);
-        MPI::COMM_WORLD.Irecv(pp+sizempibuf,l-sizempibuf, MPI::BYTE, rank, tag+1)  ;       
+        MPI::COMM_WORLD.Recv(pp+sizempibuf,l-sizempibuf, MPI::BYTE, rank, tag+1)  ;       
       }
     
    if(verbosity>1) 
@@ -260,18 +356,24 @@ void init_lgparallele()
 		       new OneBinaryOperator<Op_Readmpi<double> >,
 		       new OneBinaryOperator<Op_Readmpi<long> > ,
 		       new OneBinaryOperator<Op_Readmpi<KN<double> > > ,
+		       new OneBinaryOperator<Op_Readmpi<KN<long> > > ,
+		       new OneBinaryOperator<Op_Readmpi<KN<Complex> > > ,
 		       new OneBinaryOperator<Op_Readmpi<Mesh *> > 
        );
      TheOperators->Add("<<",
        new OneBinaryOperator<Op_Writempi<double> >,
        new OneBinaryOperator<Op_Writempi<long> > ,
        new OneBinaryOperator<Op_Writempi<KN<double> * > > ,
+       new OneBinaryOperator<Op_Writempi<KN<long> * > > ,
+       new OneBinaryOperator<Op_Writempi<KN<Complex> * > > ,
        new OneBinaryOperator<Op_Writempi<Mesh *> > 
        );
        
     Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<double> >);
     Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<long> >);
     Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<double> > >);
+    Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<long> > >);
+    Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<Complex> > >);
     Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<Mesh *> >);
     
  
@@ -283,5 +385,5 @@ void init_lgparallele()
    {
     MPI::Finalize();
    }
-//   MPI::COMM_WORLD.Irecv(&msg, 1, MPI::INT, from, MPI::ANY_TAG);
+//   MPI::COMM_WORLD.Recv(&msg, 1, MPI::INT, from, MPI::ANY_TAG);
 //    MPI::COMM_WORLD.Isend(&msg, 1, MPI::INT, to, 4);
