@@ -1,4 +1,6 @@
 v 2.23
+  - add vectorial  operator  d=  a ? b : c  where d,a is a array, and b,c can be array or scalar 
+    usefull for boundary condition
   - correct probleme in mpi recive message
   - coorect load dynamic on MacOs (bug in fort find library) in configure.ac
 v 2.22-2

@@ -227,6 +227,7 @@ EXTRA_DIST = load.link dfft.link  include.tar.gz \
   qf11to25.cpp  Element_P3.cpp  Element_P3.hpp  Element_P4.cpp  Element_P4.hpp \
   plot-fb-P3.edp  plot-fb-P4.edp  LaplaceP3.edp   LaplaceP4.edp \
   Element_P3dc.cpp  Element_P3dc.hpp Element_P4dc.cpp  Element_P4dc.hpp \
+  Element_PkEdge.cpp \
   SuperLu.cpp SuperLu.edp \
   NewSolver.cpp \
   LapDG3.edp              convectchacon.edp       plot-fb-P3dc.edp \
@@ -237,13 +238,14 @@ EXTRA_DIST = load.link dfft.link  include.tar.gz \
   all.edp                 makeref.edp             testFE-P3dc.edp \
   bilapMorley.edp         myType.edp              testFE.edp \
   convect_dervieux.edp    plot-fb-P3.edp          testFEMorley.edp \
+  testFE-PkEdge.edp \
   splitmesh3.cpp  splitmesh3.edp  splitmesh6.cpp  splitmesh6.edp \
   SuperLU_3.0-include-ff.tar.gz REAME_SuperLU
 
 LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
          qf11to25.$(DYLIB_SUFFIX)  Element_P3.$(DYLIB_SUFFIX)    Element_P4.$(DYLIB_SUFFIX)  \
-	 Element_P3dc.$(DYLIB_SUFFIX)    Element_P4dc.$(DYLIB_SUFFIX) 	
+	 Element_P3dc.$(DYLIB_SUFFIX)    Element_P4dc.$(DYLIB_SUFFIX) 	 Element_PkEdge.$(DYLIB_SUFFIX)   
 
 all: all-am
 
@@ -476,7 +478,7 @@ all-local: @LOAD_COMPILE@
 load_compile:include  $(LIST_COMPILE)
 
 .cpp.$(DYLIB_SUFFIX): 
-	 ./load.link CXX="$(CXX)" $< 
+	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"  $< 
 
 include: include.tar.gz
 	rm -rf include 

@@ -90,6 +90,13 @@ a[2]=0;
 d = ( a ? b : c ); // i = 0, n-1  d[i] = a[i] ? b[i] : c[i] , 
 cout << d << endl;
 cout << "==   2       2       3       2       2 \n";
+d = (a ? 1 : 10);
+cout << " (a ? 1 : 10) "<< d << endl;
+d = (a ? b : -1);
+cout << " (a ? b : -1 ) "<< d << endl;
+d = (a ? -2 : c);
+cout << " (a ? -2 : c) " <<  d << endl;
+
 
 // Liste all array operator and method 
 // ok in version 2.0-3 

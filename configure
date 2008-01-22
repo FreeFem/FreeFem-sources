@@ -15028,12 +15028,12 @@ fi
 
         { echo "$as_me:$LINENO:   freefem++ used  download : $enable_download " >&5
 echo "$as_me:   freefem++ used  download : $enable_download " >&6;}
-	{ echo "$as_me:$LINENO: 	 	 --  Dynamic loact facility: $ff_dynload " >&5
-echo "$as_me: 	 	 --  Dynamic loact facility: $ff_dynload " >&6;}
-        { echo "$as_me:$LINENO: 		 --  ARPACK $ff_arpack_ok " >&5
-echo "$as_me: 		 --  ARPACK $ff_arpack_ok " >&6;}
-        { echo "$as_me:$LINENO: 		 --  UMFPACK $ff_umfpack_ok " >&5
-echo "$as_me: 		 --  UMFPACK $ff_umfpack_ok " >&6;}
+	{ echo "$as_me:$LINENO: 	 	 --  Dynamic load facility: $ff_dynload " >&5
+echo "$as_me: 	 	 --  Dynamic load facility: $ff_dynload " >&6;}
+        { echo "$as_me:$LINENO: 		 --  ARPACK (eigen value): $ff_arpack_ok " >&5
+echo "$as_me: 		 --  ARPACK (eigen value): $ff_arpack_ok " >&6;}
+        { echo "$as_me:$LINENO: 		 --  UMFPACK (sparse solver) $ff_umfpack_ok " >&5
+echo "$as_me: 		 --  UMFPACK (sparse solver) $ff_umfpack_ok " >&6;}
         { echo "$as_me:$LINENO: 		 --  BLAS $ff_blas_ok " >&5
 echo "$as_me: 		 --  BLAS $ff_blas_ok " >&6;}
         { echo "$as_me:$LINENO: 		 --  FLTK (ide package) $ff_fltk " >&5

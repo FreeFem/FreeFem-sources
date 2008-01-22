@@ -7,6 +7,7 @@ using namespace std;
 #include "FESpace.hpp"
 #include "QuadratureFormular.hpp"
 #include "AddNewFE.h"
+
 // Attention probleme de numerotation des inconnues
 // -------------------------------------------------
 // dans freefem, il y a un noeud par objets  sommet, arete, element.
@@ -27,18 +28,19 @@ namespace  Fem2D {
       :k(KK),npe(k+1),ndf(3*npe),X(npe),Data( 5*ndf+2)
     {
       //Pi_h_coef=1.;
-      const QuadratureFormular1d QF(k+1);
-      for (int i=0;i<k;++i)
+      const QuadratureFormular1d QF(npe);
+      for (int i=0;i<npe;++i)
 	X[i]=QF[i].x;
+      HeapSort((R *) X,npe);
       int j=0;
-      int o[6];;
+      int o[6];
       o[0]=0;
       for(int i=1;i<6;++i)
 	o[i]=o[i-1]+ndf;
       for(int df=0;df<ndf;++df)
 	{
-	  int e= df/3;
-	  int n=df%3;
+	  int e= df/npe;
+	  int n= df%npe;
           Data[o[0]+df]=3+e;
           Data[o[1]+df]=n;
           Data[o[2]+df]=e;
@@ -46,7 +48,7 @@ namespace  Fem2D {
           Data[o[4]+df]=df;
 	}
       Data[o[5]] =0;
-      Data[o[5]=1] =0;
+      Data[o[5]+1] =0;
     }
   };
 
@@ -57,21 +59,23 @@ namespace  Fem2D {
     
     TypeOfFE_PkEdge(int KK)
       :  InitTypeOfFE_PkEdge(KK),
-	 TypeOfFE(ndf,1,Data,2+k,1,ndf*2,ndf,0)
+	 TypeOfFE(ndf,1,Data,-k,1,ndf*2,ndf,0)
     {  
-      ffassert(k<2);
+      //      cout << " Pk = " << k << endl;
       int kkk=0;
       for (int i=0;i<NbDoF;i++) 
 	{
 	  int e= i/npe;
 	  int j= i%npe;
 	  int ii= e*npe+npe-j-1;
-	  R2 A(TriangleHat[VerticesOfTriangularEdge[i][0]]);
-	  R2 B(TriangleHat[VerticesOfTriangularEdge[i][1]]);	 
+	  R2 A(TriangleHat[VerticesOfTriangularEdge[e][0]]);
+	  R2 B(TriangleHat[VerticesOfTriangularEdge[e][1]]);	 
 	  pij_alpha[kkk++]= IPJ(i,i,0);
 	  pij_alpha[kkk++]= IPJ(i,ii,0);
-	  P_Pi_h[i]= A*(1.-X[i])+ B*(X[i]);// X=0 => A  X=1 => B;       
+	  P_Pi_h[i]= A*(1.-X[j])+ B*(X[j]);// X=0 => A  X=1 => B;       
+	  //  cout << P_Pi_h[i]<< endl;;
 	}
+
     }
 
    void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
@@ -79,8 +83,8 @@ namespace  Fem2D {
      int kkk=0;
      for (int e=0;e<3;++e)
        {
-	 int i0=1;
-	 if( !K.EdgeOrientation(e))
+	 int i0=0;
+	 if( K.EdgeOrientation(e)<0.)
 	   i0=1-i0;
 	 int i1=1-i0;
 	 for(int p=0;p<npe;++p)
@@ -89,7 +93,8 @@ namespace  Fem2D {
 	     v[kkk+i1]=1;
 	     kkk+=2;
 	   }
-       }          
+       }  
+     //cout << " v :" << v << endl;
    }
     
     void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
@@ -101,18 +106,20 @@ namespace  Fem2D {
       
       R2 A(K[0]), B(K[1]),C(K[2]);
       R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
-      R L[3]={l0*k,l1*k,l2*k};
-      throwassert( val.N()>=10);
-      throwassert(val.M()==1);
+      R L[3]={l0,l1,l2};
+      assert( val.N()>=ndf);
+      assert(val.M()==1);
       int ee=0;
       if (L[0] <= min(L[1],L[2]) ) ee=0; // arete  
       else if  (L[1] <= min(L[0],L[2]) ) ee=1;
       else ee=2;
       int e3=ee*npe;
-      int s=1-L[ee];
+      double s=1.-L[ee];
       R xe = L[VerticesOfTriangularEdge[ee][0]]/s;//  go from 0 to 1 on edge 
-      if(K.EdgeOrientation(ee) <0) 
+      if(K.EdgeOrientation(ee) <0.) 
 	xe = 1-xe;
+      //cout << P << " ee = " << ee << " xe " << xe << " " << L[ee]<< " s=" <<s  << " orient: " << K.EdgeOrientation(ee) <<endl;
+      assert(s);
       val=0; 
       if (whatd[op_id])
 	{
@@ -126,8 +133,9 @@ namespace  Fem2D {
 		  f *= (xe-X[i])/(X[l]-X[i]);
 	      f0[df] = f;
 	    }
+	  //cout << " f0 = " << f0 << " X= "<< X << endl;
 	}
-      
+
       
       if(  whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] ||  whatd[op_dxy])
 	{
@@ -146,9 +154,9 @@ namespace  Fem2D {
   // a static variable to add the finite element to freefem++
   static AddNewFE  P1Edge("P1edge",&PkEdgeP1); 
   static AddNewFE  P2Edge("P2edge",&PkEdgeP2); 
-  static AddNewFE  P3Edge("P2edge",&PkEdgeP3); 
-  static AddNewFE  P4Edge("P2edge",&PkEdgeP4); 
-  static AddNewFE  P5Edge("P2edge",&PkEdgeP5); 
+  static AddNewFE  P3Edge("P3edge",&PkEdgeP3); 
+  static AddNewFE  P4Edge("P4edge",&PkEdgeP4); 
+  static AddNewFE  P5Edge("P5edge",&PkEdgeP5); 
 } // FEM2d namespace 
 
 

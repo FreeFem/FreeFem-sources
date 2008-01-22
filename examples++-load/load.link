@@ -56,7 +56,8 @@ while [ $# -ne 0 ]  ; do
 	    echo "    file.{cpp,cp,cxx}"
 	    exit 0;
 	    ;;
-	CXX=*) eval "$1" ;;
+	CXX=*) CXX=`echo $1|sed 's/.*=//'` ;;
+	CXXFLAGS=*) CXXFLAGS=`echo $1|sed 's/.*=//'` ;;
 	-n)  do="no";;
 	-g)  DEBUG="$DEBUG $1";;
 	-c)  CONLY=yes;;
@@ -135,9 +136,9 @@ if [ -n "$files$fileso" ] ; then
 	fi
     fi
     if [ "$CONLY" != yes ]; then
-	echo $CXX $SHARED $FLAGS $fileso -o $bin/$out.$SUF $LIBS $DLL $OTHER
+	echo $CXX $SHARED $FLAGS $CXXFLAGS $fileso -o $bin/$out.$SUF $LIBS $DLL $OTHER
 	if [  $do = yes ] ; then 
-	    $CXX $SHARED $FLAGS $fileso -o $bin/$out.$SUF $LIBS $DLL $OTHER
+	    $CXX $SHARED $FLAGS $CXXFLAGS $fileso -o $bin/$out.$SUF $LIBS $DLL $OTHER
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
 	if [ -n "$DLL" ] ; then

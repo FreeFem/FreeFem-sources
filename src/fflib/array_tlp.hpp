@@ -602,6 +602,29 @@ struct set_AI_B: public binary_function<pair<KN_<K>, KN_<L> > * ,KN_<K>, Nothing
   }
 };  
 
+template<class K> 
+struct Op3_paac: public ternary_function<KN_<K>,KN_<K>,K,if_arth_KN_<K>*> { 
+static if_arth_KN_<K>* f(const KN_<K> & a,const KN_<K> & b,const  K & c )  {
+    K cc(c);
+    KN_<K> kc(&cc,1,0);
+  return new if_arth_KN_<K>(a,b,kc);}
+};   
+template<class K> 
+struct Op3_paca: public ternary_function<KN_<K>,K,KN_<K>,if_arth_KN_<K>*> { 
+    static if_arth_KN_<K>* f(const KN_<K> & a,const  K & b,const KN_<K> & c )  {
+	K bb(b);
+	KN_<K> kb(&bb,1,0);
+    return new if_arth_KN_<K>(a,kb,c);}
+};   
+
+template<class K> 
+struct Op3_pacc: public ternary_function<KN_<K>,K,K,if_arth_KN_<K>*> { 
+    static if_arth_KN_<K>* f(const KN_<K> & a,const K & b,const  K & c )  {
+	K cc(c),bb(b);
+	KN_<K> kc(&cc,1,0), kb(&bb,1,0);
+    return new if_arth_KN_<K>(a,kb,kc);}
+};   
+
   
 extern aType aaaa_knlp;
 template<class K,class Z>
@@ -879,7 +902,11 @@ void ArrayOperator()
        );
 // not tested
      TheOperators->Add("?:",
-       new OneTernaryOperator3<Op3_p<if_arth_KN_<K>, KN_<K> > >       
+       new OneTernaryOperator3<Op3_p<if_arth_KN_<K>, KN_<K> > > ,
+       new OneTernaryOperator3<Op3_paac<K > > ,      
+       new OneTernaryOperator3<Op3_pacc<K > > ,      
+       new OneTernaryOperator3<Op3_paca<K > >   
+
        );
 // end ...
 

@@ -859,6 +859,20 @@ R2 SubTriangle(const int N,const int n,const int l)
     // N number of sub division
     // n number of the sub triangle
     // l vertex of the sub triangle
+    if(N<0)
+    {
+	R eps = 1e-08;
+	R2 p[3][3]= { 
+	    { R2(1-eps,+eps),R2(eps,1-eps),R2(1./3.+eps,1./3.+eps) },
+	    { R2(0,1-eps)  ,R2(0,+eps),R2(1./3.-eps,1./3.) },
+	    { R2(eps,0),R2(1-eps,0),R2(1./3.,1./3.-eps) } };
+	    
+	int j=n%3;
+	R2 P=SubTriangle(-N,n/3,l);
+	R l0=1.-P.x-P.y,l1=P.x,l2=P.y;
+	return p[j][0]*l0+ p[j][1]*l1+ p[j][2]*l2;
+
+    }
     throwassert(n < N*N);
     int i = n % N;
     int j = n / N;
@@ -1176,15 +1190,19 @@ Mesh::~Mesh()
 //  for the  mortar elements
 inline int NbOfSubTriangle(int k)
 {  
-    assert(k>=0);
-    return  k*k;
+    if(k>0) return  k*k;
+    else if(k<0) return 3*(k*k);
+    ffassert(0);
+    return 0;
 }
-inline int NbOfSubInternalVertices(int k)
+inline int NbOfSubInternalVertices(int kk)
 { 
-    assert(k>0);
+    assert(kk);
+    int k=Abs(kk);
     int  r= (k+2)*(k+1)/2;
     assert(r>=0);
-    return r;
+    
+    return kk<0 ? 3*r : r;
 }
 
 
