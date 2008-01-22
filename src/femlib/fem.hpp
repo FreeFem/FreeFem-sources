@@ -669,7 +669,7 @@ void  HeapSort(T *c,T1 *c1,T2 *c2,long n)
 }
           
  R2 SubTriangle(const int N,const int n,const int l);
- 
+ int  NbOfSubTriangle(const int N);
       //  warning  i is in [0, nleft]
 template<class Rd>
  inline     TVertex<Rd> & TMortar<Rd>::VLeft(int i) const 

@@ -239,7 +239,7 @@ void  SetDefaultIsoValue(const RN_& u,const RN_& v,RN_ & Viso)
 void FElement::Draw(const RN_& U,const RN_ & Viso,int composante) const
 {   
   int nsb = nbsubdivision();
-  int nsb2 = nsb*nsb;
+  int nsb2 = NbOfSubTriangle(nsb);
   int nbdf=NbDoF();
   RN fk(nbdf);
   for (int i=0;i<nbdf;i++) // get the local value
@@ -267,7 +267,7 @@ void FElement::Draw(const RN_& U,const RN_ & Viso,int composante) const
 void FElement::Drawfill(const RN_& U,const RN_ & Viso,int composante, double rapz) const
 {   
   int nsb = nbsubdivision();
-  int nsb2 = nsb*nsb;
+  int nsb2 =  NbOfSubTriangle(nsb);
   int nbdf=NbDoF();
   RN fk(nbdf);
   for (int i=0;i<nbdf;i++) // get the local value
@@ -297,7 +297,7 @@ R2 FElement::MinMax(const RN_& U,const RN_& V,int i0,int i1) const
 {
   R2 minmax(1e100,-1e100);
   int nsb = nbsubdivision();
-  int nsb2 = nsb*nsb;
+  int nsb2 =  NbOfSubTriangle(nsb);
   int nbdf=NbDoF();
   RN fk(nbdf);
   RN gk(nbdf);
@@ -335,7 +335,7 @@ R2 FElement::MinMax(const RN_& U,int i0) const
 {
   R2 minmax(1e100,-1e100);
   int nsb = nbsubdivision();
-  int nsb2 = nsb*nsb;
+  int nsb2 =  NbOfSubTriangle(nsb);
   int nbdf=NbDoF();
   RN fk(nbdf);
   RNMK fb(nbdf,N,3); //  the value for basic fonction
@@ -373,7 +373,7 @@ void FElement::Draw(const RN_& U,const RN_& V,const RN_ & Viso,R coef,int i0,int
   R kk = d*0.005;
   R cc = d*0.05;
   int nsb = nbsubdivision();
-  int nsb2 = nsb*nsb;
+  int nsb2 = NbOfSubTriangle(nsb);
   int nbdf=NbDoF();
   RN fk(nbdf);
   RN gk(nbdf);
