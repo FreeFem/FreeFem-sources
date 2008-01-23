@@ -46,8 +46,9 @@
 template<class T> struct MPI_TYPE {};
 template<> struct MPI_TYPE<long>      {static const MPI::Datatype TYPE(){return MPI::LONG;}};
 template<> struct MPI_TYPE<double>    {static const MPI::Datatype TYPE(){return MPI::DOUBLE;}};
+#ifdef MPI_DOUBLE_COMPLEX_
 template<> struct MPI_TYPE<Complex>   {static const MPI::Datatype TYPE(){return MPI::DOUBLE_COMPLEX;}};
-
+#endif
 template<class T> struct MPI_WHAT {};
 template<> struct MPI_WHAT<long>      {static const int WHAT=101;};
 template<> struct MPI_WHAT<double>    {static const int WHAT=102;};
@@ -113,7 +114,13 @@ struct MPIrank {
     const MPIrank & operator>>(KN<Complex> & a) const {
 	assert(&a);
 	int n= a.N();
+#ifdef MPI_DOUBLE_COMPLEX_
 	MPI::COMM_WORLD.Recv((Complex *) a, n, MPI::DOUBLE_COMPLEX, who, 12);
+#else
+	n*=2;
+	MPI::COMM_WORLD.Recv((Complex *) a, n, MPI::DOUBLE , who, 12);
+	n /= 2;
+#endif
 	ffassert(a.N()==n);
 	return *this;
     }
@@ -129,7 +136,13 @@ struct MPIrank {
     const MPIrank & Bcast(KN<Complex> & a) const {
 	assert(&a);
 	int n= a.N();
+#ifdef MPI_DOUBLE_COMPLEX_
 	(void)  MPI::COMM_WORLD.Bcast((Complex *) a, n, MPI::DOUBLE_COMPLEX, who);
+#else
+	n*=2;
+	(void)  MPI::COMM_WORLD.Bcast((Complex *) a, n, MPI::DOUBLE, who);
+	n /= 2;
+#endif
 	ffassert(a.N()==n);
 	return *this;
     }
@@ -162,7 +175,13 @@ struct MPIrank {
 	const KN<Complex> & a=*aa;
 	ffassert(a); 
 	int n= a.N();
+#ifdef MPI_DOUBLE_COMPLEX_
 	MPI::COMM_WORLD.Isend((Complex *) a, n, MPI::DOUBLE_COMPLEX, who, 12);
+#else
+	n *=2;
+	MPI::COMM_WORLD.Isend((Complex *) a, n, MPI::DOUBLE, who, 12);
+	n /= 2;
+#endif
 	return *this;
     }
     
@@ -189,7 +208,13 @@ struct MPIrank {
 	const KN<Complex> & a=*aa;
 	assert(a); 
 	int n= a.N();
+#ifdef MPI_DOUBLE_COMPLEX_
 	(void) MPI::COMM_WORLD.Bcast((Complex *) a, n, MPI::DOUBLE_COMPLEX, who);
+#else
+	n *=2;
+	(void) MPI::COMM_WORLD.Bcast((Complex *) a, n, MPI::DOUBLE, who);
+	n /= 2;
+#endif
 	ffassert(a.N()==n);
 	return *this;
     }
