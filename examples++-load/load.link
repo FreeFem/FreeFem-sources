@@ -56,8 +56,8 @@ while [ $# -ne 0 ]  ; do
 	    echo "    file.{cpp,cp,cxx}"
 	    exit 0;
 	    ;;
-	CXX=*) CXX=`echo $1|sed 's/.*=//'` ;;
-	CXXFLAGS=*) CXXFLAGS=`echo $1|sed 's/.*=//'` ;;
+	CXX=*) CXX=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	CXXFLAGS=*) CXXFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	-n)  do="no";;
 	-g)  DEBUG="$DEBUG $1";;
 	-c)  CONLY=yes;;

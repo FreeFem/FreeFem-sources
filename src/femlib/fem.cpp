@@ -1188,14 +1188,14 @@ Mesh::~Mesh()
     delete [] edges;
 }
 //  for the  mortar elements
-inline int NbOfSubTriangle(int k)
+ int NbOfSubTriangle(int k)
 {  
     if(k>0) return  k*k;
     else if(k<0) return 3*(k*k);
     ffassert(0);
     return 0;
 }
-inline int NbOfSubInternalVertices(int kk)
+ int NbOfSubInternalVertices(int kk)
 { 
     assert(kk);
     int k=Abs(kk);
