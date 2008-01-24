@@ -1,4 +1,8 @@
+v 2.23-1
+  - correct assert fail in check in case of no UMFPACK
 v 2.23
+  - add new edge finite element (P1 to P5) 
+   in examples++-load/Element_PkEdge.cpp examples++-load/testFE-PkEdge.edp  
   - preconditionned  mortar example Neuman -> Dirichet in scalar and parallele
     see examples++-mpi/mortar-DN-4-mpi.edp examples++-tutorial/mortar-DN-4.edp
   - add vectorial  operator  d=  a ? b : c  where d,a is a array, and b,c can be array or scalar 

@@ -1331,6 +1331,9 @@ template<class RA>
        
      AB.n=nn;
      AB.m=mm;
+     AB.N=nn;  // add missing jan 2008 FH
+     AB.M=mm;  // add missing jan 2008 FH
+
      AB.lg=llg;
      AB.cl=lcl;
      AB.a=aa;        
@@ -1381,8 +1384,13 @@ template<class R>
   void  MatriceMorse<R>::addMatMul(const KN_<R> &  x, KN_<R> & ax) const   
 {
   int i,j,k;
-  ffassert(this->n==ax.N());
-  ffassert(this->m==x.N());  
+  if( ! (this->n==ax.N() && this->m==x.N()))
+    {cerr << " Err MatriceMorse<R>:  ax += A x" <<endl;
+      cerr << " A.n " << this->n<< " !=  "<< ax.N() << " ax.n \n";
+      cerr << " A.m " << this->m<< " != " <<x.N() << " x.n \n" ;
+      ffassert(0); 
+      abort();
+    }
   if (symetrique)
    {
      for (i=0;i<this->n;i++)

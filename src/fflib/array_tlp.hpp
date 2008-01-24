@@ -145,7 +145,7 @@ class QuantileKN:  public KN_<R> { public:
 template<class R> R   Quantile(QuantileKN<R>  const & a,const double & q){ 
     KN<R> b(a); 
     HeapSort<R>(b,b.n,b.step);
-    long m=b.n*q;
+    long m=lrint(b.n*q);
     if( m >= b.n) m=b.n-1;
     if( m < 0) m=0;   
     R qq=b[m];

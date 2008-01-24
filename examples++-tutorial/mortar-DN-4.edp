@@ -12,20 +12,22 @@ int nbsd=4;
 
 macro Psd(U) U[0],U[1],U[2],U[3] //
 int labext= nbsd+1;
-real meshsize=0.05; 
+real meshsize=0.025; 
 real meshsizem=meshsize*1.5; 
 bool noconforme=0;
 include "mortar-msh.hdp"
 cout << "mortar : " << endl;
 mesh Thm=Tha;
-Thm=adaptmesh(Thm,meshsizem,IsMetric=1,thetamax=60);
-//Thm=adaptmesh(Thm,meshsizem,IsMetric=1,thetamax=60);
+Thm=adaptmesh(Thm,meshsizem,IsMetric=1,thetamax=60,nbvx=100000);
+Thm=adaptmesh(Thm,meshsizem,IsMetric=1,thetamax=60,nbvx=1000000);
 
 Thm=emptymesh(Thm);
 mesh Thmm=Thm;
-Thmm=trunc(Thm,split=4,1); // for fine integration
-Thmm=emptymesh(Thmm);
-
+if(noconforme)
+  {  //  need a find mesh to integrate on Thm. 
+    Thmm=trunc(Thm,split=4,1); // for fine integration
+    Thmm=emptymesh(Thmm);
+  }
 plot(Thm,wait=0);
 
 verbosity=1;
@@ -39,7 +41,7 @@ for(int sd=0;sd<nbsd;++sd)
 if(noconforme)
 {
 for(int sd=0;sd<nbsd;++sd)
- Thsd[sd]=adaptmesh(Thsd[sd],meshsize*1,IsMetric=1,nbvx=100000,thetamax=60);// les sous domaines
+ Thsd[sd]=adaptmesh(Thsd[sd],meshsize*(1+sd*0.05),IsMetric=1,nbvx=100000,thetamax=60);// les sous domaines
 
 }
 plot(Psd(Thsd),Thm);
@@ -206,7 +208,7 @@ func real[int] PSkPb(real[int] &l)
 
 verbosity=100;
 lh[]=0;
-LinearCG(SkPb,lh[],eps=1.e-5,nbiter=100,precon=PSkPb);
+LinearCG(SkPb,lh[],eps=1.e-7,nbiter=100,precon=PSkPb);
 plot(Psd(usd),wait=1,cmm="CG");
 
 
