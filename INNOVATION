@@ -2,6 +2,14 @@ v 2.23-2
   - correct trap in adapdmesh (in mortar-DN-4.edp) in very rare case 
     du to  intialized   adj  of edges on geometry (very old bug) 
     in case of multi points.
+  with vebosity=10; you get this message: 
+ -- Begin of insertion process 
+ bug  2
+ Bug double points in 
+....
+ Fatal error in the meshgenerator 5
+....
+
 v 2.23-1
   - correct assert fail in check in case of no UMFPACK
 v 2.23
