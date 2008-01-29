@@ -226,6 +226,8 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	{ 
 	  Vertex *v=edges[i].v[j];
 	  Int4 i0=v->color,j0;
+	  if(i0<0)
+	     edges[i ].adj[ j ]=0;  // Add FH Jan 2008   
 	  if(i0==-1)
 	    v->color=i*2+j;
 	  else if (i0>=0) {// i and i0 edge are adjacent by the vertex v
@@ -980,7 +982,9 @@ void Geometry::AfterRead()
 	      curves[NbOfCurves].be=e;
 	      curves[NbOfCurves].kb=k0;
 	    }
+	    int nee=0;
 	    for(;;) { 
+		nee++;
 	      k1 = 1-k0; // next vertex of the edge 
 	      e->SetMark();
 	      nbgem++;
@@ -996,6 +1000,7 @@ void Geometry::AfterRead()
 	      e = e->Adj[k1]; // next edge
 	      
 	    }// for(;;)
+	      if(verbosity>10 && curves==0) cout << NbOfCurves <<" curve :  nb edges=  "<< nee<<  endl; 
 	    NbOfCurves++;
 	    if(level) {
 	      if(verbosity>4)

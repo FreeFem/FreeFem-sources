@@ -3271,6 +3271,8 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
   
   *************************************************************************/
   assert(&BTh.Gh == &Gh);
+
+ // if(verbosity==100) Gh.Write("/tmp/gg.gmsh");
   BTh.NbRef++; // add a ref to BackGround Mesh
   PreInit(inbvx);
   BTh.SetVertexFieldOn();
@@ -3488,10 +3490,6 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 			  //((k1==1) != (k1==k1equi))
 			  se = k1 ? se : 1. - se;
 			  se = k1==k1equi ? se : 1. - se;
-			  
-			  // cout << i << "+ New P "<< nbv-1 << " "  <<sNew<< " L0=" << L0 
-			  //	     << " AB=" << LAB << " s=" << (sNew-L0)/LAB << " se= "  
-			  //           << se <<" B edge " << BTh.Number(ee) << " signe = " << k1 <<endl;
 			  VertexOnBThEdge[NbVerticesOnGeomEdge++] = VertexOnEdge(A1,&eeequi,se); // save 
 			  ongequi = Gh.ProjectOnCurve(eeequi,se,*A1,*GA1); 
 			  A1->ReferenceNumber = eeequi.ref;
@@ -3500,6 +3498,11 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 			  e->on = ongequi;
 			  e->v[0]=  A0;
 			  e->v[1]=  A1;
+			  if(verbosity>99)
+				cout << i << "+ New P "<< nbv-1 << " "  <<sNew<< " L0=" << L0 
+				<< " AB=" << LAB << " s=" << (sNew-L0)/LAB << " se= "  
+				<< se <<" B edge " << BTh.Number(ee) << " signe = " << k1 <<" " << A1->r <<endl;
+			    
 #ifdef DEBUG
 			  // code \label(xxx)
 			    R2  A1A0 = A1->r - A0->r;
@@ -3534,7 +3537,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 			
 		      }               
 		      assert(ee.on->CurveNumber==ei.on->CurveNumber);
-		      
+		      if(verbosity>98) cout <<  BTh.Number(ee) << " " << " on=" << *ee[k1].on << " "<< ee[k1].on->IsRequiredVertex() <<  endl;
 		      if ( ee[k1].on->IsRequiredVertex()) {
 		         assert(eeequi[k1equi].on->IsRequiredVertex());
 			register GeometricalVertex * GA1 = *eeequi[k1equi].on;
@@ -3596,7 +3599,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 		       NbOfNewPoints += NbCreatePointOnCurve;
 		     }
 		    if(verbosity>5)
-		      cout << " NbSegOnCurve = " <<  NbSegOnCurve << " Lstep=" 
+		      cout << icurve << " NbSegOnCurve = " <<  NbSegOnCurve << " Lstep=" 
 			   << Lstep <<" " << NbOfNewPoints<< " NBPC= " << NbCreatePointOnCurve <<endl;
 		    // do'nt 
 		    //  if(NbCreatePointOnCurve<1) break;
