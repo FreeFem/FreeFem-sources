@@ -9,6 +9,7 @@ class Triangles;
 
   Fem2D::Mesh *  ReadMeshbamg( string * const & s) ;
   Fem2D::Mesh *  ReadTriangulate( string * const & s) ;
+  Fem2D::Mesh *  Triangulate( const  KN_<double> & xx,const  KN_<double> & yy) ;
   Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering=false); 
   bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th, double cutoffradian=-1.0 ) ;
   bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,  int  nbdfv, int * ndfv,int  nbdfe, int * ndfe);
