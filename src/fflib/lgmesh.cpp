@@ -1502,6 +1502,7 @@ void init_lgmesh() {
    Global.Add("emptymesh","(",new OneOperator1_<pmesh,pmesh>(EmptyTheMesh));
    Global.Add("emptymesh","(",new OneOperator2_<pmesh,pmesh,KN<long> *>(EmptyTheMesh));
    Global.Add("triangulate","(",new OneOperator1_<pmesh,string*>(ReadTriangulate));
+   Global.Add("triangulate","(",new OneOperator2_<pmesh,KN_<double>,KN_<double> >(Triangulate));
    TheOperators->Add("<-",
        new OneOperator2_<pmesh*,pmesh*,string* >(&initMesh));
        

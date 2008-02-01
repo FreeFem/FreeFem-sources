@@ -741,6 +741,21 @@ Fem2D::Mesh *  ReadTriangulate( string  * const & s) {
   return m;
   
 }
+Fem2D::Mesh *  Triangulate( const  KN_<double> & xx,const  KN_<double> & yy) 
+{
+    using namespace Fem2D;
+    ffassert(xx.N()==yy.N());
+    int nv=xx.N();
+    KN<R2> xy(nv);
+    for(int i=0;i<nv;++i)
+       xy[i]= R2(xx[i],yy[i]);
+    Mesh * m=new Mesh(nv,xy); 
+    m->MakeQuadTree();
+    m->decrement();
+    //  delete s;  modif mars 2006 auto del ptr
+    return m;
+    
+}
 Fem2D::Mesh *  ReadMeshbamg( string * const & s) {
   using bamg::Triangles;
   Triangles * bTh= new Triangles(s->c_str());

@@ -11,3 +11,9 @@ Vhxy fxy;
 }
 
 plot(fxy,wait=1,ps="xyf.ps");
+
+// new way to bluid a mesh   version 2.23-2
+Vhxy xx=x,yy=y;
+
+mesh Th=triangulate(xx[],yy[]);
+plot(Th,wait=1); 
