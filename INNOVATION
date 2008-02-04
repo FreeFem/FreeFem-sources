@@ -20,9 +20,9 @@ v 2.23
   - add vectorial  operator  d=  a ? b : c  where d,a is a array, and b,c can be array or scalar 
     usefull for boundary condition
   - correct probleme in mpi recive message
-  - coorect load dynamic on MacOs (bug in fort find library) in configure.ac
+  - correct load dynamic on MacOs (bug in fortran find library) in configure.ac
 v 2.22-2
-  - small change in configure.ac of find linumfpack on debain systeme
+  - small change in configure.ac of find libumfpack on debain systeme
   - correct checking code in probleme to same the mesh must be unique in problem of solve definition.
 v 2.22-1
   - make change in Makefile to build universal binary on MacOS

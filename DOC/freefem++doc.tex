@@ -9,7 +9,7 @@
 
 
 \usepackage{times}
-\def\VERSION{2.22}
+\def\VERSION{2.23-2}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -3570,6 +3570,9 @@ c = 3;
 a[2]=0;
 d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] ,
 @cout << " d = ( a ? b : c )  is " << d << endl;
+d = ( a ? 1 : c );// for i = 0, n-1: d[i] = a[i] ? 1 : c[i] ,   (v2.23-1)
+d = ( a ? b : 0 );// for i = 0, n-1: d[i] = a[i] ? b[i] : 0 ,   (v2.23-1)
+d = ( a ? 1 : 0 );// for i = 0, n-1: d[i] = a[i] ? 0 : 1 ,     \hfill (v2.23-1)
 tab2.sort; //  sort the array tab2  (version 2.18) 
 
 \eFF
@@ -4490,7 +4493,53 @@ this number is forced by the keyword "label".  Here are some examples:
 
 \eFF
 
+\begin{example}[Readmesh.edp]
+\index{tutorial!readmesh.edp}
+\index{read files}
+\index{write files}
+\bFF
+
+@border floor(t=0,1){ x=t; y=0; label=1;}; // the unit square
+@border right(t=0,1){ x=1; y=t; label=5;};
+@border ceiling(t=1,0){ x=t; y=1; label=5;};
+@border left(t=1,0){ x=0; y=t; label=5;};
+@int n=10;
+@mesh th= buildmesh(floor(n)+right(n)+ceiling(n)+left(n));
+@savemesh(th,"toto.am_fmt");  // format "formated Marrocco" \index{file!am\_fmt}
+@savemesh(th,"toto.Th");      // format database  db mesh "bamg"   \index{file!bamg}
+@savemesh(th,"toto.msh");     // format freefem \index{file!mesh}
+@savemesh(th,"toto.nopo");     // modulef format \index{file!nopo} see \cite{modulef}
+@mesh th2 = readmesh("toto.msh");
+@fespace femp1(th,@P1);
+femp1 f = sin(x)*cos(y),g;
+{ // save solution
+@ofstream file("f.txt");
+file << f[] << endl;
+}  // close the file (end block)
+{  // read
+@ifstream file("f.txt");
+file >> g[] ;
+} // close reading file (end block)
+@fespace Vh2(th2,P1);
+Vh2 u,v;
+@plot(g);
+//  find $u$ such that \hfilll
+// $ u + \Delta u = g $ in $\Omega $ , \hfilll
+// $ u=0$ on $\Gamma_1$ and $\frac{\p u }{\p n} = g$ on $\Gamma_2$  \hfilll
+@solve pb(u,v) =
+    @int2d(th)( u*v - dx(u)*dx(v)-dy(u)*dy(v) )
+  + @int2d(th)(-g*v)
+  + @int1d(th,5)( g*v) //  $\frac{\p u }{\p n} = g$ on $\Gamma_2$
+  + @on(1,u=0) ;
+@plot (th2,u);
+\eFF
+\end{example}
+
+\subsubsection{Mesh Connectivity}
+
 The following example explains methods to obtain mesh information.
+
+\index{mesh!connectivity}
 \index{triangle![]}\index{triangle!label}\index{triangle!label}
 \index{vertex!x}\index{vertex!y}\index{vertex!label}
 \bFF
@@ -4580,47 +4629,6 @@ Th(8) : 1 1 3       old method: 1 1
  Nb Of Nodes = 8
  Nb of DF = 8
 \eFF
-\begin{example}[Readmesh.edp]
-\index{tutorial!readmesh.edp}
-\index{read files}
-\index{write files}
-\bFF
-
-@border floor(t=0,1){ x=t; y=0; label=1;}; // the unit square
-@border right(t=0,1){ x=1; y=t; label=5;};
-@border ceiling(t=1,0){ x=t; y=1; label=5;};
-@border left(t=1,0){ x=0; y=t; label=5;};
-@int n=10;
-@mesh th= buildmesh(floor(n)+right(n)+ceiling(n)+left(n));
-@savemesh(th,"toto.am_fmt");  // format "formated Marrocco" \index{file!am\_fmt}
-@savemesh(th,"toto.Th");      // format database  db mesh "bamg"   \index{file!bamg}
-@savemesh(th,"toto.msh");     // format freefem \index{file!mesh}
-@savemesh(th,"toto.nopo");     // modulef format \index{file!nopo} see \cite{modulef}
-@mesh th2 = readmesh("toto.msh");
-@fespace femp1(th,@P1);
-femp1 f = sin(x)*cos(y),g;
-{ // save solution
-@ofstream file("f.txt");
-file << f[] << endl;
-}  // close the file (end block)
-{  // read
-@ifstream file("f.txt");
-file >> g[] ;
-} // close reading file (end block)
-@fespace Vh2(th2,P1);
-Vh2 u,v;
-@plot(g);
-//  find $u$ such that \hfilll
-// $ u + \Delta u = g $ in $\Omega $ , \hfilll
-// $ u=0$ on $\Gamma_1$ and $\frac{\p u }{\p n} = g$ on $\Gamma_2$  \hfilll
-@solve pb(u,v) =
-    @int2d(th)( u*v - dx(u)*dx(v)-dy(u)*dy(v) )
-  + @int2d(th)(-g*v)
-  + @int1d(th,5)( g*v) //  $\frac{\p u }{\p n} = g$ on $\Gamma_2$
-  + @on(1,u=0) ;
-@plot (th2,u);
-\eFF
-\end{example}
 
 \subsubsection{The keyword "triangulate"}\index{triangulate}
 
@@ -4673,6 +4681,12 @@ Vhxy fxy; // the function
    // xx and yy are just skipped
 }
 @plot(fxu,ps="xyf.eps"); // plot the function (see figure  \ref{xyf})
+\eFF
+
+On  new way to bluid a mesh from two array  one  the $x$ values and the other for the $y$ values (version 2.23-2):
+\bFF
+Vhxy xx=x,yy=y;// to set two arrays for the x's and y's
+@mesh Th=@triangulate(xx[],yy[]); 
 \eFF
 
 \subsection{Boundary FEM Spaces Built as Empty Meshes}\index{emptymesh}
