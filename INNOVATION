@@ -1,5 +1,13 @@
 v 2.24
-  - correct bug in periodic Boundary Condition:
+  - bug with border and func
+     this kind of code now works
+       func abc=  a(6) + b(4) + c(4)  ;
+       func def = d(4) + e(4) + f(6);
+       func bbb= abc  + def;
+      plot(bbb); mesh Th=buildmesh(bbb);
+     whare : a,c,b,c,d,e,d are  border. 
+
+  - correct bug in periodic Boundary Condition( find by Alexandre Masserey <masserey at ycoorsystems.com>)
        mistake in abscisse choose.
        sometime assert fail (loop).
      add option to the buildmesh that the boundary is fixe (fixeborder=true)

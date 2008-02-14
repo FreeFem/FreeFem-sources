@@ -1501,19 +1501,20 @@ class E_BorderN :public E_F0mps { public:
 	      while (*pnext)
 	       {
 		 kk++;
-		pp = new E_BorderN(**pnext); // copy 
-		*pnext = pp;
-		pnext = & pp->next;
+		 pp = new E_BorderN(**pnext); // copy 
+		 *pnext = pp;
+		 pnext = & pp->next;
 	       }
-	      *pnext= nx;  // copy de nx
+	      if(step==0)
+	       *pnext= nx;  // copy de nx
 	    }
-	    cout << "  BorderN : nb item : " << kk << endl;  
+	   // cout << "  BorderN : nb item : " << kk << " == " << size()<< endl;  
 	}
     }   
     AnyType operator()(Stack)  const {
      return  SetAny<const  E_BorderN *>(this);}  
   operator aType () const { return atype<const  E_BorderN *>();}         
-     
+    int size() const { int k=0;for(const E_BorderN  *pp=this;pp; pp=pp->next) k++; return k;}  
    E_BorderN * operator+( const E_BorderN & bb)  const 
    { throwassert(bb.next==0);
      return new E_BorderN(bb,this);}

@@ -369,7 +369,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   Geometry * Gh =  new Geometry;
   
   if(verbosity>2)
-    cout <<"\t\t"  << "  Begin: ConstGeometry from Border"  << endl;
+    cout <<"\t\t"  << "  Begin: ConstGeometry from nb Border  "  << nbsd <<endl;
   //throwassert(empty());
   const char * filename = "FREEFEM.gh";
   Gh->name=new char [strlen(filename)+1];
@@ -659,9 +659,10 @@ void E_BorderN::Plot(Stack stack) const
   float x0,x1,y0,y1;
   getcadre(x0,x1,y0,y1);
   float h= (x1-x0)*0.01;
-  
+  int nbd=0;
   for (E_BorderN const * k=this;k;k=k->next)
     {
+      nbd++;
       assert(k->b->xfrom); // a faire 
       double & t = *  k->var(stack);
       double a(k->from(stack)),b(k->to(stack));
@@ -700,7 +701,7 @@ void E_BorderN::Plot(Stack stack) const
       DrawMark(mp.P.p2(),0.01);
       MoveTo(mp.P.p2());
     }
-  
+  if(verbosity>9) cout << " -- Plot size : " << nbd << " Border \n";
   mp=mps; 
 }
 

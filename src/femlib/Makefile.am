@@ -12,4 +12,4 @@ FESpace.hpp FESpace-v0.cpp FQuadTree.cpp FQuadTree.hpp gibbs.cpp	\
 glutdraw.cpp gmres.hpp MatriceCreuse.hpp MatriceCreuse_tpl.hpp		\
 MeshPoint.hpp mortar.cpp mshptg.cpp QuadratureFormular.cpp		\
 QuadratureFormular.hpp RefCounter.hpp RNM.hpp RNM_opc.hpp RNM_op.hpp	\
-RNM_tpl.hpp
+RNM_tpl.hpp R1.hpp R2.hpp R3.hpp
