@@ -64,14 +64,15 @@ class classBuildMesh :  public E_F0mps { public:
    typedef pmesh  Result;
 
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =1;
+   static const int n_name_param =2;
    
     Expression nargs[n_name_param];
    
    Expression getborders;
    
    long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
-   
+   bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
+    
     classBuildMesh(const basicAC_F0 & args) 
     {   
       args.SetNameParam(n_name_param,name_param,nargs);
@@ -86,7 +87,8 @@ class classBuildMesh :  public E_F0mps { public:
 };
 
 basicAC_F0::name_and_type  classBuildMesh::name_param[]= {
-  {  "nbvx", &typeid(long) }
+    {  "nbvx", &typeid(long)} ,
+    {"fixeborder", &typeid(bool)}  
 };
 // modif aout 2007
 class BuildMeshFile :  public E_F0mps { public:  
@@ -361,14 +363,15 @@ basicAC_F0::name_and_type Op_trunc_mesh::Op::name_param[Op_trunc_mesh::Op::n_nam
  };
 
 
-extern Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax) ;
+//extern Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,) ;
 
 
 AnyType classBuildMesh::operator()(Stack stack)  const { 
     const E_BorderN * borders = GetAny<const E_BorderN *>((*getborders)(stack));
-   long  nbvx         = arg(0,stack,0); 
+   long  nbvx         = arg(0,stack,0L); 
+   bool  requireborder=  arg(1,stack,false);
    ffassert(   nbvx >= 0);
-   return SetAny<pmesh>(BuildMesh(stack,borders,false,nbvx));
+   return SetAny<pmesh>(BuildMesh(stack,borders,false,nbvx,requireborder));
 
 }
 

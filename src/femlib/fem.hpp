@@ -24,6 +24,7 @@ inline float norm(float x){return x*x;}
 // definition R
 typedef double R;
 namespace Fem2D {
+#ifdef NNNNNNN
 
 // The class R2
 class R2 {
@@ -106,7 +107,16 @@ inline R det(R3 A,R3 B, R3 C) {
    }
   else return 0.   ;
 };
+
 inline R det(R3 A,R3 B, R3 C, R3 D) { return det(R3(A,B),R3(A,C),R3(A,D));}
+
+#else
+
+#include "R1.hpp"
+#include "R2.hpp"
+#include "R3.hpp"
+
+#endif
 
 inline void MoveTo(R2 P) { rmoveto((float) P.x,(float)P.y);}
 inline void LineTo(R2 P) { rlineto((float)P.x,(float)P.y);}
@@ -116,18 +126,18 @@ inline R Norme2_2(const R2 & A){ return (A,A);}
 inline R Norme2(const R2 & A){ return sqrt((A,A));}
 inline R Norme2_2(const R3 & A){ return (A,A);}
 inline R Norme2(const R3 & A){ return sqrt((A,A));}
-inline R Norme_infty(const R2 & A){return Max(Abs(A.x),Abs(A.y));}
-inline R Norme_infty(const R3 & A){return Max(Abs(A.x),Abs(A.y),Abs(A.z));}
+  inline R Norme_infty(const R2 & A){return ::Max(Abs(A.x),Abs(A.y));}
+  inline R Norme_infty(const R3 & A){return ::Max(Abs(A.x),Abs(A.y),Abs(A.z));}
 inline R Theta(R2 P){ return atan2(P.y,P.x);}
 
 inline R2 Minc(const R2 & A,const R2& B) { return R2(Min(A.x,B.x),Min(A.y,B.y));}
 inline R2 Maxc(const R2 & A,const R2& B) { return R2(Max(A.x,B.x),Max(A.y,B.y));}
-inline R2 Minc(const R3 & A,const R3& B) { return R3(Min(A.x,B.x),Min(A.y,B.y),Min(A.z,B.z));}
-inline R2 Maxc(const R3 & A,const R3& B) { return R3(Max(A.x,B.x),Max(A.y,B.y),Max(A.z,B.z));}
+inline R3 Minc(const R3 & A,const R3& B) { return R3(Min(A.x,B.x),Min(A.y,B.y),Min(A.z,B.z));}
+inline R3 Maxc(const R3 & A,const R3& B) { return R3(Max(A.x,B.x),Max(A.y,B.y),Max(A.z,B.z));}
 inline R2 Minc(const R2 & A,const R2& B,const R2& C) { return R2(Min(A.x,B.x,C.x),Min(A.y,B.y,C.y));}
 inline R2 Maxc(const R2 & A,const R2& B,const R2& C) { return R2(Max(A.x,B.x,C.x),Max(A.y,B.y,C.y));}
-inline R2 Minc(const R3 & A,const R3& B,const R3& C) { return R3(Min(A.x,B.x,C.x),Min(A.y,B.y,C.y),Min(A.z,B.z,C.z));}
-inline R2 Maxc(const R3 & A,const R3& B,const R3& C) { return R3(Max(A.x,B.x,C.x),Max(A.y,B.y,C.y),Max(A.z,B.z,C.z));}
+inline R3 Minc(const R3 & A,const R3& B,const R3& C) { return R3(Min(A.x,B.x,C.x),Min(A.y,B.y,C.y),Min(A.z,B.z,C.z));}
+inline R3 Maxc(const R3 & A,const R3& B,const R3& C) { return R3(Max(A.x,B.x,C.x),Max(A.y,B.y,C.y),Max(A.z,B.z,C.z));}
 
 // def de numerotation dans un triangles direct sens (trigo)
 // the edge is oposite of the vertex

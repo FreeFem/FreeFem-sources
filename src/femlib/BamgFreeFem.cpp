@@ -224,7 +224,6 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian)
 {
   using namespace bamg;
   Triangles *Tn=new Triangles(Th.nv);
-  
   Tn->nbv = Th.nv;
   Tn->nbt = Th.nt;
   Tn->nbe = Th.neb;
@@ -348,8 +347,10 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,
 
 
 
-Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax=0) 
+Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary) 
 {
+  
+
   using namespace bamg;
   using bamg::Abs;
   using bamg::Max;
@@ -496,7 +497,8 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
           Gh->vertices[i].color =0;
           Gh->vertices[i].Set();
           //  vertices[i].SetCorner();
-          //  vertices[i].SetRequired();
+	    if(Requiredboundary)
+           Gh->vertices[i].SetRequired();
           i++;
         }
     }
@@ -541,6 +543,8 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
           Gh->edges[i].Adj[0] = Gh->edges[i].Adj[1] = 0;
           Gh->edges[i].flag = 0;
           Gh->edges[i].link=0;
+	  if(Requiredboundary)
+	  Gh->edges[i].SetRequired();
           if (!hvertices) 
             {
               Gh->vertices[i1].color++;
@@ -671,7 +675,7 @@ void E_BorderN::Plot(Stack stack) const
           mp.label = k->label();
           mp.P.z=0;
           k->code(stack); // compute x,y, label
-          P=mp.P;
+          P=mp.P.p2();
           couleur(2+mp.label);
           if(nn!=0) { LineTo(P);
           R2 uv(Po,P);
@@ -684,8 +688,8 @@ void E_BorderN::Plot(Stack stack) const
           MoveTo(P+dd-dn);
           LineTo(P);}
           else {
-            DrawMark(mp.P,0.01);
-            MoveTo(mp.P);
+            DrawMark(mp.P.p2(),0.01);
+            MoveTo(mp.P.p2());
             
           }
           
@@ -693,8 +697,8 @@ void E_BorderN::Plot(Stack stack) const
           //  cout << k->label()<< " " << nn << ", x,y = " << mp.P.x  << " , " << mp.P.y << endl;
           Po=P;
         }
-      DrawMark(mp.P,0.01);
-      MoveTo(mp.P);
+      DrawMark(mp.P.p2(),0.01);
+      MoveTo(mp.P.p2());
     }
   
   mp=mps; 
@@ -702,11 +706,11 @@ void E_BorderN::Plot(Stack stack) const
 
 Fem2D::Mesh *  BuildMeshBorder(Stack stack, E_BorderN const * const & b) 
 {
-  return BuildMesh(stack,b,true);
+  return BuildMesh(stack,b,true,0,true);
 }
-Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b) 
+Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool Requiredboundary) 
 {
-  return BuildMesh(stack,b,false);
+  return BuildMesh(stack,b,false,0,Requiredboundary);
 }
 
 Fem2D::Mesh *  ReadTriangulate( string  * const & s) {

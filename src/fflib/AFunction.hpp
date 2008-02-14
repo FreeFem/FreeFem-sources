@@ -1487,9 +1487,30 @@ class E_BorderN :public E_F0mps { public:
    Expression  n;
    const E_BorderN * next;
    E_BorderN(const E_Border *  bb, C_F0  nn,const E_BorderN * nx=0) ; 
-   E_BorderN(const E_BorderN & bb,const E_BorderN * nx)
-     : b(bb.b),n(bb.n),next(nx) { }   
-  AnyType operator()(Stack)  const {
+    E_BorderN(const E_BorderN & bb,const E_BorderN * nx)
+    : b(bb.b),n(bb.n),next(nx)
+    {
+      int kk=1;
+	if(bb.next) {// modif FH. 13/02/2008
+	       
+	    const E_BorderN ** pnext = &next;
+	    E_BorderN  *pp;
+	    next = bb.next;  // copy bb;       
+	    for(int step=0;step<2;++step)
+	    {
+	      while (*pnext)
+	       {
+		 kk++;
+		pp = new E_BorderN(**pnext); // copy 
+		*pnext = pp;
+		pnext = & pp->next;
+	       }
+	      *pnext= nx;  // copy de nx
+	    }
+	    cout << "  BorderN : nb item : " << kk << endl;  
+	}
+    }   
+    AnyType operator()(Stack)  const {
      return  SetAny<const  E_BorderN *>(this);}  
   operator aType () const { return atype<const  E_BorderN *>();}         
      
@@ -1513,8 +1534,8 @@ class AddBorderOperator: public  OneOperator{
      {
        A a0=dynamic_cast<A>((Expression) args[0]);
        A a1=dynamic_cast<A>((Expression) args[1]);
-       assert( a0 && a1);
-       assert(a1->next==0);
+       ffassert( a0 && a1);
+       //ffassert(a1->next==0);  // change FH 13/02/2008
        return  new E_BorderN(*a1,a0);} 
     AddBorderOperator(): 
       OneOperator(map_type[typeid(A).name()],map_type[typeid(A).name()],map_type[typeid(A).name()])
