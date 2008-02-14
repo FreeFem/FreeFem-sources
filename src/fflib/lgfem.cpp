@@ -781,8 +781,14 @@ template<class T,int N>
 class Smallvect { public: 
  T v[N];
  T & operator[](int i){return v[i];}
+ const T & operator[](int i) const {return v[i];}
 };
-
+template<class T,int N>
+ostream & operator<<(ostream & f,const Smallvect<T,N> & v)
+{
+    for(int i=0;i<N;++i)  f << v[i] << ' ';
+    return f;
+}
 
 template<class T> 
 int numeroteclink(KN_<T> & ndfv) 
@@ -795,7 +801,8 @@ int numeroteclink(KN_<T> & ndfv)
              
              do {
                ii=ndfv[j];
-               ffassert(kkk++<10);
+		 ffassert(kkk++<10);
+	       assert(nbdfv <= j);
              //  assert(ii>=nbdfv);
                ndfv[j]=nbdfv ;
                j=ii;
@@ -808,6 +815,17 @@ int numeroteclink(KN_<T> & ndfv)
        return nbdfv;
 }
 
+bool  InCircularList(const int *p,int i,int k)
+//  find k in circular list:  i , p[i], p[p[i]], ... 
+{ 
+    int j=i,l=0;    
+    do {
+	if (j==k) return true;
+	ffassert(l++<10);
+        j=p[j];
+    } while (j!=i);    
+    return false;
+}
 
 bool BuildPeriodic( 
   int nbcperiodic,
@@ -913,7 +931,10 @@ bool BuildPeriodic(
                  double x0=GetAny<double>((*periodic[k+kk1])(stack));
                  mp->set(e[1].x,e[1].y);
                  double x1=GetAny<double>((*periodic[k+kk1])(stack));
-                 xmn=Min(x1,x0,xmn);
+		 if(verbosity>5)
+			cout << "lab1:  e[" << pke1[i1] << "]  v0:   " <<  e[0].x << " " << e[0].y << "  s = " << x0
+			<< "\t v1 " <<  e[0].x << " " << e[0].y << "  s = " << x1 << endl;
+		    xmn=Min(x1,x0,xmn);
                  xmx=Max(x1,x0,xmx); 
                  hmn=Min(hmn,Abs(x1-x0));
                }                                
@@ -943,7 +964,7 @@ bool BuildPeriodic(
                    if (im==m.end())
                     {
                      if (verbosity >50)
-                     cout << xx << " " << i0 << " " << ie << endl;
+                      cout << xx << " " << i0 << " " << ie << endl;
                      im=m.insert(make_pair<int,int2>(i0,i2)).first;
                     }
                    else {
@@ -961,18 +982,26 @@ bool BuildPeriodic(
               const BoundaryEdge & e =Th.bedges[ie2];
               if (e.lab==label2)
                 {
+		    
                  if (verbosity >50)
-                 cout << Th(e[0]) << " " << Th(e[1]) << ":: ";
+                    cout << i2 << " : " <<Th(e[0]) << " " << Th(e[1]) << ":: ";
                  mp->set(e[0].x,e[0].y);
                  double xx0=GetAny<double>((*periodic[k+kk2])(stack));
                  mp->set(e[1].x,e[1].y);
                  double xx1=GetAny<double>((*periodic[k+kk2])(stack));
+		  if(verbosity>5 && !(verbosity >50))
+		      cout << "lab2:  e[" << pke2[i2] << "]  v0:   " <<  e[0].x << " " << e[0].y << "  s = " << xx0
+		      << "\t v1 " <<  e[0].x << " " << e[0].y << "  s = " << xx1 << endl;
+		    
                  int i0= int((xx0-x0)*coef);
                  int i1= int((xx1-x0)*coef);
                  map<int,int2>::iterator im0=closeto(m,i0);
                  map<int,int2>::iterator im1=closeto(m,i1);
                  if(im0 == m.end() || im1 == m.end() )
-                 	{  ExecError("periodic: Sorry one vertex of edge is losted "); }
+                 	{ 
+			
+			  cout << "Abscisse: s0 = "<< xx0 << " <==> s1 " << xx1  <<endl; 
+			  ExecError("periodic: Sorry one vertex of edge is losted "); }
                   int ie1=-1;
                  if      ((ie1=im0->second[0])==im1->second[1]) ;
                  else if ((ie1=im0->second[0])==im1->second[1]) ;
@@ -984,15 +1013,20 @@ bool BuildPeriodic(
                    cout << ie2 << " ~ " << im0->second[0] << " " << im0->second[1] << ", " 
                                         << im1->second[0] << " " << im1->second[1] << endl;
                    ExecError("periodic: Sorry one egde is losted "); }
+		 if(verbosity>50)
+		 cout << " ( " << im0->second << " , " << im1->second << " ) .. ";
                  const BoundaryEdge & ep =Th.bedges[ie1];
                  mp->set(ep[0].x,ep[0].y);
-                 double yy0=GetAny<double>((*periodic[k+kk2])(stack));
+                 double yy0=GetAny<double>((*periodic[k+kk1])(stack));
                  mp->set(ep[1].x,ep[1].y);
-                 double yy1=GetAny<double>((*periodic[k+kk2])(stack));
+                 double yy1=GetAny<double>((*periodic[k+kk1])(stack));
+		if(verbosity>50)
+			cout << " e0: s  "<< xx0 << " " << xx1 << "e1 s "<< yy0 << " " << yy1  ; 
                  
                  pke1[i2]=ie1*2+ ( ( (yy1-yy0) < 0)  == ( (xx1-xx0) < 0) ) ;
+		    
                  if (verbosity >50)
-                 cout << "  edge " << ie1 << " <=> " << ie2 << " " 
+                 cout << " \t  edge " << ie1 << " <=> " << ie2 << " " 
                       << ( ( (yy1-yy0) < 0)  == ( (xx1-xx0) < 0) ) << "; "
                       << xx0 << " " <<xx1<<" <=> "  << yy0 << " " <<yy1<< 
                       "  ::  " <<  Th(ep[0]) << " " << Th(ep[1]) << endl ;
@@ -1014,44 +1048,24 @@ bool BuildPeriodic(
            int sens = link1[i]%2;
            int ie2=link2[i];
            assert(ie1!=ie2);
-           {
-             int k=ie2,kk;
-            do  
-                  k=ndfe[kk=k];
-            while  ( (k!=ie1) && (k!=ie2) );
-            
-            if (k != ie1) {  // merge of two list 
-                  int iee1= ndfe[ie1];
-                  ndfe[k] =iee1;
-                  ndfe[ie1]=kk;  
-              }                  
-           }
-           for (int ke2=0;ke2<2;ke2++)
+	   if(!InCircularList(ndfe,ie1,ie2))   // merge of two list 
+	      Exchange(ndfe[ie1],ndfe[ie2]);
+	   for (int ke2=0;ke2<2;ke2++)
              {
                 int ke1=ke2;
                 if(!sens) ke1=1-ke1; 
-               int iv1=Th(Th.bedges[ie1][ke1]);
-               int iv2=Th(Th.bedges[ie2][ke2]);
-               if (verbosity >50)
-               cout << "  vertex:" << iv1 << ": " << Th(iv1) << ", <=> " << iv2 << ": " <<  Th(iv2) << endl;
-               if (iv1 > iv2) Exchange(iv1,iv2);
-               int j=0;
-               int k=iv2,kk;
-                do  {
-                  k=ndfv[kk=k];
-                  if(verbosity>60) cout << k << " " << kk << " " << iv1 << " " << iv2 <<endl;
-                  assert(j++<nblink1*4);
-                  assert( k != kk || (k==iv2) || (k==iv1)  );
-                   }
-                 while  ( (k!=iv2) && (k!=iv1) );
-
-               if (k != iv1) {  // merge of two list 
-                  int ivv1= ndfv[iv1];
-                  ndfv[k] =ivv1;
-                  ndfv[iv1]=kk;  
-                  if (verbosity >50)
-                  cout << "  vertex " << k << " <=> " << iv1 <<  " " << ivv1 << " " << kk << endl;
-                 }                  
+                int iv1=Th(Th.bedges[ie1][ke1]);
+                int iv2=Th(Th.bedges[ie2][ke2]);
+                if (!InCircularList(ndfv,iv1,iv2)) {  // merge of two list 
+		   Exchange(ndfv[iv2],ndfv[iv1]);
+                   if (verbosity >50)
+		   { 
+		     cout << "  vertex " << iv1 <<  "<==> " << iv2 << " list : " << iv1;
+		     int i=iv1,k=0;
+		     while ( (i=ndfv[i]) != iv1 && k++<10)
+			 cout << ", "<< i ; 
+		       cout << endl;
+		   }}                  
              }
             
          } 
@@ -1742,7 +1756,7 @@ inline pfes* MakePtr2(pfes * const &p,pfes * const &  a,long const & n){
      MeshPoint & mp = *MeshPointStack(s);  
    const Mesh * pTh= *ppTh;
    if(pTh == 0) return 0;  
-   const Triangle * K=pTh->Find(mp.P,PHat,outside);
+   const Triangle * K=pTh->Find(mp.P.p2(),PHat,outside);
    if (!outside)
      mp.set(*pTh,P,PHat,*K,K->lab);
    else return 0;
@@ -1857,18 +1871,18 @@ AnyType pfer2R(Stack s,const AnyType &a)
    {
     qnu=false;
     K=mp.T;
-    PHat=mp.PHat;
+    PHat=mp.PHat.p2();
    }
   else if ( mp.other.Th == & Th && mp.other.P.x == mp.P.x && mp.other.P.y == mp.P.y )
    {
     K=mp.other.T;
-    PHat=mp.other.PHat;
+    PHat=mp.other.PHat.p2();
     outside = mp.other.outside;
    } 
   else {
     if (mp.isUnset()) ExecError("Try to get unset x,y, ...");
-    K=Th.Find(mp.P,PHat,outside);
-    mp.other.set(Th,(R2) mp.P,PHat,*K,0,outside);
+    K=Th.Find(mp.P.p2(),PHat,outside);
+    mp.other.set(Th,mp.P.p2(),PHat,*K,0,outside);
     }
   // cout << "  ---  " << qnu << "  " << mp.P << " " << mp.outside <<  " " << outside << endl;
   const FElement KK(Vh[Th(K)]);
@@ -3331,8 +3345,8 @@ class Op3_Mesh2mp : public ternary_function<pmesh*,R,R,MeshPoint *> { public:
            mp->set(xx,yy,0.0);
            R2 PHat;
            bool outside;
-           const Triangle * K=pTh->Find(mp->P,PHat,outside);
-           mp->set(*pTh,(R2) mp->P,PHat,*K,0,outside);
+           const Triangle * K=pTh->Find(mp->P.p2(),PHat,outside);
+           mp->set(*pTh,(R2) mp->P.p2(),PHat,*K,0,outside);
            return mp;}
    
   };

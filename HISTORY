@@ -1,3 +1,68 @@
+2008-02-04 15:07  hecht
+
+	*    add lazst modification in the doc.
+
+2008-02-01 22:09  hecht
+
+	*   add Th=triangule(xx,yy);
+	    pass to version 2.23-2
+
+2008-01-29 23:29  hecht
+
+	*   add info   INNOVATION file
+
+2008-01-29 23:20  hecht
+
+	*   correct rare bug in bamg (missing initialisation variable
+	  edges[].adj
+
+2008-01-24 09:26  hecht
+
+	*   correct assert fail in case of no UMFPACK in make check
+
+2008-01-23 11:04  hecht
+
+	*  add mortar (Neuman to Dirichlet )  example in scalar and
+	  parallel version
+	     with preconditionner
+
+2008-01-22 17:23  hecht
+
+	*    add vectorial operator ( a ? b : c)  on array where b and c
+	  can be scalar
+
+2008-01-16 12:37  hecht
+
+	* correct mpi (receive	is now synchrone  and send is asychrone)
+	  correct configure.ac pb in FLIBS with fort
+
+2008-01-11 10:59  hecht
+
+	*   nothing
+
+2008-01-09 22:33  hecht
+
+	*   correct README of debian and cnfigure.ac of checking umfpack
+	  lib.
+	    correct a check message in problem specification ( only on mesh
+	  par
+	    problem or solve).
+
+2008-01-05 16:50  hecht
+
+	*  correct Makefile to build universal executable file	on MacOS
+	   coorect  readme file
+
+2007-12-26 17:30  hecht
+
+	*  cvs ranlib and ar  in umfpack compilation process of universal
+	  file on apple.
+
+2007-12-26 16:44  hecht
+
+	*   Make big change un configure.ac and makefiel.am to build
+	  universal binarie file on apple (ppc and i386)
+
 2007-12-20 13:11  hecht
 
 	* correct freefem++-doc  and add default font 6x10 in case of no

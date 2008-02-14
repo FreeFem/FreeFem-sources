@@ -1,3 +1,10 @@
+v 2.24
+  - correct bug in periodic Boundary Condition:
+       mistake in abscisse choose.
+       sometime assert fail (loop).
+     add option to the buildmesh that the boundary is fixe (fixeborder=true)
+     see : examples++-tutorial/periodic4bis.edp   
+  -  and  R1.hpp, R2.hpp, R3.hpp files for the 3d version.  
 v 2.23-2
   - correct trap in adapdmesh (in mortar-DN-4.edp) in very rare case 
     du to  intialized   adj  of edges on geometry (very old bug) 
