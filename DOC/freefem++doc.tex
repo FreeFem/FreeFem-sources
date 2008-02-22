@@ -9,7 +9,7 @@
 
 
 \usepackage{times}
-\def\VERSION{2.23-2}
+\def\VERSION{2.24}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -105,9 +105,9 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 
 {\Large Kohji Ohtsuka${}^{5}$ }
 
-  \url{mailto:ohtsuka@barnard.cs.hkg.ac.jp}
+  \url{mailto:ohtsuka@hkg.ac.jp}
 
-\url{http://barnard.cs.hkg.ac.jp/}
+\url{http://http://www.comfos.org/}
 \end{center}
 
 %\bigskip
@@ -154,7 +154,8 @@ and to l'Agence Nationale de la Recherche (Paris, France)
 
 \hbox to \hsize{\hss\includegraphics[width=7cm]{sanskrit}}
 
-Fruit of a long maturing process freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for numerically solvong partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
+Fruit of a long maturing process freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for numerically solving partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
+
 
 \medskip
 
@@ -172,7 +173,7 @@ are modeled by one or several partial differential equations.
 \freefempp is a software to solve these equations numerically. As
 its name says, it is a free software (see copyright for full detail)
 based  on the Finite Element Method; it is not a package, it is an integrated product with its own
-high level programming language. This software runs on all unix
+high level programming language. This software runs on all UNIX
 OS (with g++ 2.95.2 or later, and X11R6) , on Window95, 98, 2000,
 NT, XP,  and
 MacOS X.  \\\\
@@ -184,7 +185,7 @@ degrees, possibly on different meshes. Some algorithms like
 Schwarz' domain decomposition method also require data interpolation
 on multiple meshes within one program. \freefempp can handle these
 difficulties, i.e. {\it arbitrary finite element spaces on arbitrary
-unstructured and adapted bidimensional meshes}.  \\\\
+unstructured and adapted bi-dimensional meshes}.  \\\\
 
 The characteristics of \freefempp are:
 \begin{itemize}
@@ -248,7 +249,7 @@ error indicator, ...
   \url{http://www.freefem.org/ff++/}
  \end{center}
  
-And choose your architecture files: Linux, Windows, MacOS X,
+And choose your platform: Linux, Windows, MacOS X,
 or go to the end of the page to get the full list of download.
 
 Remark: Binaries are available for Microsoft Windows and Apple
@@ -293,7 +294,7 @@ After installation, The list of application ( depending of the system and the co
 \begin{enumerate}
 \item \texttt{FreeFem++}, standard version, with a graphical interface
 based on X11, Win32 
-\item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no windows)
+\item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no graphics windows)
 \item \texttt{FreeFem++-mpi}, parallel version, postscript output only
 \item \texttt{FreeFem++-glx}, graphics using OpenGL and X11
 \item \texttt{FreeFem++-cs}, integrated development environment
@@ -307,9 +308,6 @@ version (MacOS 10.2 or better) (note: it uses
 \item \texttt{bamg} , the bamg mesh generator
 \item \texttt{cvmsh2} , a mesh file convertor
 \item \texttt{drawbdmesh} , a mesh file viewer
-
-
-
 \end{enumerate}
 
 Remark, in most of the case you can set the level of the output (verbosity\index{verbosity}) to value \texttt{nn} with adding the parameters
@@ -323,7 +321,7 @@ As an installation test, under unix:  go into the directory
 FreeFem++ LaplaceP1.edp
 \eFF
 
-And if you are using \texttt{nedit} as your text editor, 
+If you are using \texttt{nedit} as your text editor,
 Do one time \verb!nedit -import edp.nedit! to have coloring syntax for yours \ttCC{.edp}
 files. 
 
@@ -332,7 +330,7 @@ files.
 \subsubsection{Windows binaries install}
   First download the windows installation file, execute the
   download file to install \texttt{FreeFem++}, after that you have
-  three new icons on your destop:
+  three new icons on your desktop:
   \begin{itemize}
    \item \texttt{FreeFem++ (VERSION).exe}  the classical \freefempp application. 
    \item \texttt{FreeFem++ (VERSION) GUI.exe}  the GUI \freefempp application, see section \ref{GUI} for more information. 
@@ -349,8 +347,9 @@ files.
     without graphic windows. 
 \medskip
     
- Remark: if you add to the environment variable \texttt{PATH} 
-\verb!C:\Program Files\FreeFem++! you can use all the programs  in 
+ Remark: If you specify the path to \verb!C:\Program Files\FreeFem++!
+ by adding this directory to the environment variable \texttt{PATH}, 
+you can use all the programs in 
 the window Command-line shell. (Use System in Control Panel, On the Advanced tab, click Environment Variables, then add the correct string).
 
 The systaxe of tools  in  command-line  are
@@ -359,7 +358,7 @@ The systaxe of tools  in  command-line  are
 \item  \verb!FreeFem++.exe [-vnn] [-b] [-s] [-n] [-h] [-f]  [ filepath ]! where the 
  \begin{description}
 \item \verb!-b!  no color (black and white plot)
-\item \verb!-n!  no edit ????
+\item \verb!-n!  no edit 
 \item \verb!-s!  not wait at end of execution
 \item \verb!-vnn!  set the level of verbosity to \texttt{nn} before execution of the  script.
 \item  if no file path then you get a dialog box to choose the edp file. 
@@ -391,7 +390,7 @@ Tick the 8.3 box.
  \url{http://www.winedt.com} 
  \end{center}
  this is a multipurpose text editor  with advance features
-such as syntax coloring; a macro is available on ww.freefem.org to localize winedt to \freefempp
+such as syntax coloring; a macro is available on \url{www.freefem.org} to localize winedt to \freefempp
 without disturbing the winedt functional mode for LateX, TeX, C, etc.  However winedt is not free
 after the trial period.
 
@@ -399,7 +398,7 @@ after the trial period.
 to program the color syntax.  Download it from 
 \begin{center}\url{http://www.texniccenter.org/}\end{center}
 It is also an editor for TeX/LaTeX but it has a "`tool"' menu which can be configure to launch
-\freefempp programs:  do the following:
+\freefempp programs as in:
 \begin{itemize}
 \item Select the \texttt{Tools/Customize} menu will bring a dialog box.
 \item Select the  \texttt{Tools} tab and  create a new item: call it \texttt{freefem}.
@@ -449,7 +448,7 @@ The executable \texttt{freefem++.exe} opens a dialog box for
 choosing the input file; then it executes its content and produces
 graphics and output files.
 \\\\
-To write or modify the input file a text editor can be used.
+We can create and modify \freefempp programs by your favorite text editor.
 \\\\
 An integrated environment (\freefempp GUI), written by A. Le Hyaric, is also included
 with the distribution. the application name is \texttt{FreeFem++-cs}; note however that
@@ -470,19 +469,19 @@ to the top left one sus the program (which can be edited?), on the top right ons
 \end{figure}
 \paragraph{Under MacOS X with Graphic Interfaces}
 
-For testing or running  a \texttt{.edp} file,  and juste drag and drop 
-the  file icon  on The MacOS application \texttt{FreeFem++.app} icon,
-but your can also use the menu:  $\mathtt{File} \rightarrow \mathtt{Open}$
+For testing or running  a \texttt{.edp} file,  you just drag and drop 
+the file icon  on the MacOS application \texttt{FreeFem++.app} icon,
+and your can also use the menu:  $\mathtt{File} \rightarrow \mathtt{Open}$
 after launching the application.
 
-Oe and one of  the best way on MacOS is using the text editor \texttt{mi.app} 
+One of the best way on MacOS is to use the text editor \texttt{mi.app} 
 \begin{center}
 \url{http://www.mimikaki.net/en/}
 \end{center}
-and using the  \texttt{edp} mode store in \texttt{mode-mi-edp.zip}. So just download the \texttt{mi} editor
-install it, unzip the file and put crated Folder in  the Folder  openned with the 
-   \texttt{mi.app}  menu  \texttt{Option->Open Mode Folder } menu and set \texttt{mi}  is the Default application.
-    for all the \texttt{.edp} files.
+and to use the  \texttt{edp} mode stored in \texttt{mode-mi-edp.zip}. 
+After download the \texttt{mi} editor and 
+installation, unzip \texttt{mode-mi-edp.zip} and put created folder in  the folder opened with the 
+   \texttt{mi.app}  menu  \texttt{Option->Open Mode Folder } menu and set \texttt{mi} as the default application for all the \texttt{.edp} files.
 \begin{figure}[htbp] %  figure placement: here, top, bottom, or page
    \centering
    \includegraphics[width=10cm]{mi.jpg} 
@@ -491,7 +490,7 @@ install it, unzip the file and put crated Folder in  the Folder  openned with th
 \end{figure}    
 \paragraph{Under terminal}
 
-First choose the type of application \texttt{FreeFem++}, \texttt{FreeFem++-nw}, \dots  depen\-ding on your pleasure, system, etc\dots.  So for example your can enter
+First choose the type of application from \texttt{FreeFem++}, \texttt{FreeFem++-nw}, \dots  depending on your pleasure, system, etc\dots.  Next you enter, for example 
 \bFF
  FreeFem++ your-edp-file-path
 \eFF 
@@ -500,16 +499,16 @@ First choose the type of application \texttt{FreeFem++}, \texttt{FreeFem++-nw}, 
 
 
 \index{verbosity}\index{includepath}\index{loadpath}\index{load}\index{include}
- \texttt{FreeFem++} reads an user's init file named \ttCC{freefem++.pref} 
- to can change value of global variable: 
+ \texttt{FreeFem++} reads an user's file named \ttCC{freefem++.pref} 
+ to initialize global variables: 
    \texttt{verbosity}, \texttt{includepath}, \texttt{loadpath}.
   
-Remark: \texttt{verbosity} variable change the level of internal printing ($0$, nothing (except mistake), $1$ fews,  $10$  lots, etc ...),
+Remark: the variable \texttt{verbosity} changes the level of internal printing ($0$, nothing (except mistake), $1$ few,  $10$  lots, etc. ...),
 the default value is $2$.
- The include files are search in the \texttt{includepath} list and the load files 
-are search in  \texttt{loadpath} list.
+ The include files are searched from the \texttt{includepath} list and the load files 
+are searched from  \texttt{loadpath} list.
 
- The syntaxe of the file  is:
+ The syntax of the file  is:
 \begin{verbatim}
      verbosity= 5
      loadpath += "/Library/FreeFem++/lib"
@@ -535,7 +534,7 @@ are search in  \texttt{loadpath} list.
 \end{verbatim}  
 \end{itemize}
  
-We can also use  shell environment variable to change , verbosity and 
+We can also use shell environment variable to change verbosity and 
 the search rule. 
 
 \begin{verbatim}     
@@ -544,7 +543,7 @@ the search rule.
     export FF_LOADPATH="dir;;dir3""
 \end{verbatim}     
  
- Remark: the separtor of directory  is ";" and not ":" because ":" is used under Windows.
+ Remark: the separator of directory must be ";" and not ":" because ":" is used under Windows.
 
 \subsection{History}
 
@@ -959,7 +958,11 @@ plot-parameter \texttt{ps="toto.eps"} to generate a postscript file to archive t
  \ttCC{@wait=@true} to \ttCC{@wait=@false}.
 \bFF
 @bool debug = true;
-mesh Th = @square(10,10,[-1+2*x,-1+2*y]); // $]-1,1[^2$ with 10x10 mesh
+@border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+@border b(t=0,2*pi){ x=0.8+0.3*cos(t); y=0.3*sin(t);label=2;}
+@plot(a(50)+b(-30),wait=debug); // plot the borders  to see the intersection
+//  (so change (0.8 in 0.3 in b) then needs a mouse click
+@mesh Th = buildmesh(a(50)+b(-30));
 @plot(Th,wait=debug);  // plot Th then needs a mouse click
 @fespace Vh(Th,P2);
 Vh f = @sin(pi*x)*@cos(pi*y);
@@ -4361,10 +4364,17 @@ The boundaries $\Gamma_j$ can only intersect at their end points.
 \end{figure}
 The general expression to define a triangulation with \texttt{buildmesh} is
 \begin{center}
-\ttCC{@mesh  ~~Mesh_Name = @buildmesh}$\left(\Gamma_1(m_1)+\cdots+\Gamma_J(m_j)\right)$;
+\ttCC{@mesh  ~~Mesh_Name = @buildmesh}$\left(\Gamma_1(m_1)+\cdots+\Gamma_J(m_j) \mathrm{~OptionalParameter} \right)$;
 \end{center}
 where $m_j$ are positive or negative numbers to indicate how may point should be put on $\Gamma_j,\,
-\Gamma=\cup_{j=1}^J \Gamma_J$.
+\Gamma=\cup_{j=1}^J \Gamma_J$, an the optional parameter (separed with comma) can be
+\begin{description}
+\item[\texttt{nbvx=<int value>}] ,  to set the maximal number of  vertices in the mesh.\index{buildmesh!nbvx=}
+\item[\texttt{fixeborder=<bool value>}] , to say if the mesh generator can change the boundary mesh
+or not (by default the boundary mesh can change and in case of periodic boundary problem 
+(see. \ref{periodic BC}), it can be dangerous .\label{buildmesh fixeborder}\index{buildmesh!fixeborder}
+\end{description}
+
 We can change the orientation of boundaries by changing the sign of $m_j$.
 The following example shows how to change the orientation.
 The example generates the unit disk
@@ -4387,6 +4397,18 @@ identification that is shown on screen.
 \end{note}
 
 \twoplot[height=6cm]{Thwithouthole}{Thwithhole}{mesh without hole}{mesh with hole}
+
+\begin{note}
+ The border is evaluated only at the time \texttt{plot} or \texttt{buildmesh} is called  so 
+the global variable are defined  at this time and the following code can not work:
+\bFF
+   @real r=1;    @border a(t=0,2*pi){ x=r*cos(t); y=r*sin(t);label=1;}
+   r=0.3    ;   @border b(t=0,2*pi){ x=r*cos(t); y=r*sin(t);label=1;}
+   @mesh Thwithhole   = @buildmesh(a(50)+b(-30)); // bug (a trap) because 
+   // the two circle have the same radius = $0.3$
+\eFF
+\end{note}
+
 
 \subsubsection{Data Structure and Read/Write Statements for a Mesh}
 
@@ -5436,6 +5458,10 @@ If \ttCC{[la$_i$,sa$_i$],[lb$_i$,sb$_i$]} is a pair of \texttt{real},
 then \ttCC{sa$_i$} and \ttCC{sb$_i$}
 give two common abscissa on the two boundary curve, and two points are identified as one
 if the two abscissa are equal.
+
+Remark, the mesh of the two identified border must be the same, so
+to be sure,  used  the parameter  \texttt{fixeborder=true} in \texttt{buildmesh} command (see \ref{buildmesh fixeborder})
+like in example \texttt{periodic2bis.edp} (see \ref{periodic2bis.edp}).
 
 
 \medskip
@@ -7700,7 +7726,6 @@ parallel to the axis. Example \ref{exm:periodic4}
  @real intf = @int2d(Th)(f);
  @real mTh = @int2d(Th)(1);
  @real k =  intf/mTh;
- @cout << k << @endl;
  @problem laplace(uh,vh) =
     @int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) + @int2d(Th)( (k-f)*vh ) ;
  laplace;
@@ -7709,6 +7734,59 @@ parallel to the axis. Example \ref{exm:periodic4}
 \end{example}
 \plot[height=6cm]{perio4}{The isovalue of solution $u$ for
 $ \Delta u = ((y+x)^{2}+1)((y-x)^{2}+1) - k$, in $\Omega$ and $\p_{n} u =0 $ on hole,and with two periodic boundary condition on external border}
+
+
+A other example with no equal border, just to see if the code works. 
+\begin{example}[periodic4bis.edp]~
+\label{exm:periodic4bis}
+\index{tutorial!periodic4bis.edp}
+\bFF
+// irregular boundary condition. 
+//  to build border  AB  
+@macro  LINEBORDER(A,B,lab) border A#B(t=0,1){real t1=1.-t;
+   x=A#x*t1+B#x*t;y=A#y*t1+B#y*t;label=lab;}//EOM
+// compute  ||AB||  a=(ax,ay) et B =(bx,by)
+@macro dist(ax,ay,bx,by) sqrt(square((ax)-(bx))+ square((ay)-(by)))  // EOM  
+@macro Grad(u) [dx(u),dy(u)]//EOM
+
+
+@real Ax=0.9,Ay=1;              @real Bx=2,By=1;
+@real Cx=2.5,Cy=2.5;            @real Dx=1,Dy=2;
+@real gx = (Ax+Bx+Cx+Dx)/4.;    @real gy = (Ay+By+Cy+Dy)/4.;
+
+
+LINEBORDER(A,B,1)
+LINEBORDER(B,C,2)
+LINEBORDER(C,D,3)
+LINEBORDER(D,A,4)
+
+@int n=10;
+
+@real l1=dist(Ax,Ay,Bx,By);
+@real l2=dist(Bx,By,Cx,Cy);
+@real l3=dist(Cx,Cy,Dx,Dy);
+@real l4=dist(Dx,Dy,Ax,Ay);
+@func s1=dist(Ax,Ay,x,y)/l1;  // absisse on  AB  = ||AX||/||AB||
+@func s2=dist(Bx,By,x,y)/l2;  // absisse on  BC  = ||BX||/||BC||
+@func s3=dist(Cx,Cy,x,y)/l3;  // absisse on  CD  = ||CX||/||CD||
+@func s4=dist(Dx,Dy,x,y)/l4;  // absisse on  DA  = ||DX||/||DA||
+
+@mesh Th=buildmesh(AB(n)+BC(n)+CD(n)+DA(n),fixeborder=1);//\index{buildmesh!fixeborder=1}
+
+@verbosity=6;// to see the abscisse value pour the periodic condition.
+@fespace Vh(Th,P1,periodic=[[1,s1],[3,s3],[2,s2],[4,s4]]);
+@verbosity=1;
+@Vh u,v;
+@real cc=0;
+cc= @int2d(Th)((x-gx)*(y-gy)-cc)/Th.area;
+@cout << " compatibility =" << int2d(Th)((x-gx)*(y-gy)-cc) <<endl;
+
+@solve Poission(u,v)=int2d(Th)(Grad(u)'*Grad(v)+ 1e-10*u*v)
+  -int2d(Th)(10*v*((x-gx)*(y-gy)-cc));
+@plot(u,wait=1,value=1);
+\eFF
+\end{example}
+
 
 
 \subsubsection{Poisson with mixed boundary condition}
@@ -7806,6 +7884,8 @@ In last 2 lines, the relative errors are calculated, that is,
 where $u^0_h$ is the numerical solution in \ttCC{T0h} and
 $u^a_h$ is \ttCC{u} in this program.
 \end{example}
+
+
 \subsubsection{Poisson with mixte finite element}
 
 Here we consider the   Poisson equation with mixed boundary value

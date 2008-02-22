@@ -1,3 +1,7 @@
+  - correct buildmesh trap when degenerate border is create  by error.
+v 2.24-1
+  - correct periodic condition  in case of one edge 
+  - correct doc file
 v 2.24
   - bug with border and func
      this kind of code now works

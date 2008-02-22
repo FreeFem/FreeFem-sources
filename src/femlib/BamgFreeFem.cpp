@@ -425,9 +425,15 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
       Gh->pmax.x = Max(Gh->pmax.x,vertices[i].r.x);
       Gh->pmax.y = Max(Gh->pmax.y,vertices[i].r.y);
     }
-  Gh->coefIcoor= (MaxICoor)/(Max(Gh->pmax.x-Gh->pmin.x,Gh->pmax.y-Gh->pmin.y));
+    
+  double diameter=Max(Gh->pmax.x-Gh->pmin.x,Gh->pmax.y-Gh->pmin.y);
+  Gh->coefIcoor= (MaxICoor)/diameter;
   Icoor1 epsI = (Icoor1) (Gh->coefIcoor*eps);
-  throwassert(Gh->coefIcoor >0);
+  ffassert(Gh->coefIcoor >0);
+
+ if(lmin<diameter*1e-7) {
+    ExecError(" Error points  border points to close < diameter*1e-7 ");}
+  
   if (verbosity>2) 
     {
       cout <<"\t\t"  << "     Geom: min="<< Gh->pmin << "max ="<< Gh->pmax 
