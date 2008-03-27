@@ -197,7 +197,7 @@ Some configure flags use to build the current version
   gcc g++ g77
   libsuitesparse-dev
   libarpack2-dev
-  libx11-dev libxt-dev
+  libx11-dev libxt-dev libxext-dev
  - to rebuild de documentation:  
   imagemagick 
   tetex-base   tetex-bin  tetex-extra 
@@ -212,7 +212,7 @@ Some configure flags use to build the current version
   the installed packages + dependance are:   
    gcc g++  g77
    wget 
-   libx11-dev  libxt-dev  libxt6 
+   libx11-dev  libxt-dev  libxext-dev 
    libumfpack4 libumfpack4-dev
    libarpack2 libarpack2-dev
  - to rebuild de documentation:  

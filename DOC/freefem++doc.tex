@@ -1,5 +1,8 @@
 %  pour imprimer 2 pages par pages en A5 
 %pstops  ``0L@.7(21cm,0)+0L@.7(21cm,14.85cm)'' 
+%  ----
+% correction convect function definition FH . 27 mars 2008
+
 \documentclass[a4paper,twoside,12pt]{book}
 \usepackage{styles}
 \usepackage{txfonts}
@@ -9,7 +12,7 @@
 
 
 \usepackage{times}
-\def\VERSION{2.24}
+\def\VERSION{2.24-2}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -159,7 +162,7 @@ Fruit of a long maturing process freefem, in its last avatar, \texttt{FreeFem++}
 
 \medskip
 
-\texttt{FreeFem++} has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK. Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of \texttt{FreeFem++}. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in \texttt{FreeFem++} to prepare research quality reports: color display online with zooming and other features and postscript printouts.
+\texttt{FreeFem++} has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK, SuperLU . Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of \texttt{FreeFem++}. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in \texttt{FreeFem++} to prepare research quality reports: color display online with zooming and other features and postscript printouts.
 \medskip
 
 This book is ideal for students at Master level, for  researchers at any level, and for engineers, and also in financial mathematics.
@@ -871,7 +874,7 @@ The matrix $A=(A_{ij})$ is called \emph{stiffness matrix} \index{matrix!stiffnes
 
 
 If the user wants to access $A$ directly he can do so
-by using
+by using (see section \ref{matrix-varf} page \pageref{matrix-varf} for details)
 \bFF
 @varf a(u,v) = @int2d(Th)( @dx(u)*@dx(v) + @dy(u)*@dy(v))
                + @on(C,u=0) ;
@@ -1758,33 +1761,44 @@ convection problem.  We will learn about \x{Characteristics-Galerkin}
 and \x{Discontinuous-Galerkin} Finite Element Methods.}
 
 Let $\Omega$ be the unit disk centered at 0; consider the rotation vector field
-$$ u_1 = y,\quad u_2 = -x.$$
+$$ \bm{u} = [u1,u2], \qquad u_1 = y,\quad u_2 = -x.$$
 Pure convection by $u$ is
 $$
-    \p_t c  + u.\nabla c  = 0~\hbox{~in~}~~\Omega\times(0,T)
+    \p_t c  + \bm{u}.\nabla c  = 0~\hbox{~in~}~~\Omega\times(0,T)
     ~~~ c (t=0) =  c ^0~\hbox{~in~}~~\Omega.
 $$
-The exact solution is  $ c (x,y,t) =  c ^0(X(0),Y(0))$ where $\vec X:=(X,Y)$
-are solutions of ($\vec u =(u_1,u_2$)
+The exact solution $c(x_t,t)$ at time $t$ en point $x_t$ is given by 
+$$
+ c(x_t,t)=c^0(x,0) 
+$$
+where $x_t$ is the particle path in the flow starting at point $x$ at time $0$.
+So $x_t$ are solutions of 
 \[
-    \frac{\d\vec X}{\d\tau} = u(\vec X,\tau),~~~\vec X(t)=(x,y).
+    \dot{x_t} = u(x_t),~~~\vec  , \quad\ x_{t=0} =x , \quad\mbox{where}\quad  \dot{x_t} = \frac{\d ( t \mapsto x_t)}{\d t}
 \]
-
+The ODE are reversible and we want the solution at point $x$ at time $t$ ( not at point $x_t$)
+the initial point is $x_{-t}$, and we have
+$$
+ c(x,t)=c^0(x_{-t},0) 
+$$
 The game consists in solving the equation until $T=2\pi$, that is for
 a full revolution and to compare the final solution with the initial one;
 they should be equal.
 
-\paragraph{Solution by a Characteristics-Galerkin Method}
-In \freefempp there is an operator called {\tt convect([u1,u2],dt,c)} which solves
-exactly the equation for ${\vec X}^m:=(X(t),Y(t))$ at $t=m\delta t$:
+\paragraph{Solution by a Characteristics-Galerkin Method} % modif FH 2008 
+In \freefempp there is an operator called {\tt convect([u1,u2],dt,c)} which compute  \index{convect}
+$ c\circ X$ with $X$ is the convect field defined by
+$ X(x)= x_{dt}$ and where  $x_\tau$ is particule path in the steady state velocity field $\bm{u}=[u1,u2]$
+starting at point $x$ at time $\tau=0$, so $x_\tau$ is solution of the following ODE:   
+%exactly the equation for ${\vec \chi}:=(X(\tau),Y(\tau))$
 \[
-    \frac\d{\d\vec X}{\tau}(X,Y) = u(\vec X,\tau),~~~\vec X(t-\d t)=(x,y).
+    \dot{x}_\tau = u(x_\tau),~~~\vec x_{\tau=0}=x.
 \]
 
-When $u$ is piecewise constant; this is possible because
-$(X,Y)$ is then a polygonal curve which can be computed exactly and the solution exists always when
-$u$ is divergence free; convect returns  $c(\vec X^m,t-\d t)$.
-
+When $\bm{u}$ is piecewise constant; this is possible because
+$x_\tau$ is then a polygonal curve which can be computed exactly and the solution exists always when
+$u$ is divergence free; convect returns  $c(x_{df})=C\circ X$.
+ % modif FH 2008 
 \begin{example}[convects.edp]
 \bFF
 // file convects.edp
@@ -1876,7 +1890,7 @@ Now if you think that DG is too slow try this
 @varf bbdual(ccold,w) =  - @int2d(Th)(ccold*w/dt);
 @matrix  AA= aadual(Vh,Vh);
 @matrix BB = bbdual(Vh,Vh);
-@set (AA,init=t,solver=UMFPACK); 
+@set (AA,init=t,solver=sparsesolver); 
 Vh rhs=0;
 @for ( t=0; t< 2*pi ; t+=dt)
 {
@@ -3828,6 +3842,65 @@ The output is
           24  30  36  42
 \eFF
 
+\subsubsection{\setS{Matrix  construction and setting}}
+
+
+\begin{itemize}
+\item  To change the solver associated to a matrix do \index{matrix!set}\index{set!matrix}
+\bFF
+     set(M,solver=sparsesolver);  
+\eFF
+The default solver is \texttt{GMRES}.
+\item  from a variationnal form:\index{matrix!varf} (see  section \ref{matrix-varf}  page \pageref{matrix-varf} for details)
+\bFF
+@varf  vDD(u,v) = int2d(Thm)(u*v*1e-10);
+@matrix DD=vDD(Lh,Lh);
+\eFF
+\item  To set  from  a constant matrix\index{matrix!constant}
+\bFF
+    @matrix A = 
+                [[ 0, 1, 0, 10],
+                 [ 0,  0,  2, 0],
+                 [ 0, 0, 0,  3],
+                 [ 4,0 , 0, 0]];
+
+\eFF
+\item  To set from a block matrix \index{matrix!block} \index{block matrix}
+\bFF
+    @matrix M=[ 
+               [ Asd[0] ,0      ,0      ,0      ,Csd[0] ],
+               [ 0      ,Asd[1] ,0      ,0      ,Csd[1] ],
+               [ 0      ,0      ,Asd[2] ,0      ,Csd[2] ],
+               [ 0      ,0      ,0      ,Asd[3] ,Csd[3] ],
+               [ Csd[0]',Csd[1]',Csd[2]',Csd[3]',DD     ] 
+ ];
+ 
+   //  to now  to pack the right hand side
+     @real[int] bb =[rhssd[0][], rhssd[1][],rhssd[2][],rhssd[3][],rhsl[] ];
+     @set(M,solver=@sparsesolver);  
+     xx = M^-1 * bb; 
+     [usd[0][],usd[1][],usd[2][],usd[3][],lh[]] = xx; // to dispatch 
+     // the solution on each part.
+
+\eFF
+ where here \texttt{Asd} and \texttt{Csd} are array of matrix (from example \verb!mortar-DN-4.edp! of \texttt{examples++-tuturial}).
+
+\item  To set or get all the indices and coef of the sparse matrix $A$, let \verb!I,J,C! respectively
+  two \verb!int[int]! array and a  \verb!real[int]! array. The three array defined
+  the matrix  as follow
+  $$
+    A = \sum_k \mathtt{C[k]} M_{\mathtt{I[k],J[k]}} \qquad \mbox{where }\quad M_{ab} = ( \delta_{ia}\delta_{jb} )_{ij}
+  $$
+  and you have:  $ M_{ab}$ is a basic matrix with the only  non zero term $m_{ab}=1$.
+  
+  You can write 
+  \verb! [I,J,C]=A ;! to get all the term of the matrix \verb!A! (the arrays are automaticaly resize), and
+   \verb! A=[I,J,C] ;! to change all the term matrix. remark the size of 
+   the matrix is with \verb! n= I.max! and \verb!m=J.max!. Remark you forget \verb! I,J ! when the build a
+   diagonal matrix, and  $n,m$ of the matrix.
+
+\end{itemize}
+
 \subsubsection{\setS{Matrix Operations}}
 
 The multiplicative operators *, /, and \% group left to right.
@@ -3845,21 +3918,12 @@ there are some compound operator:
 (example \verb$real DotProduct=a'*b$) \index{dot product}\index{product!dot}, in complex case you get the Hermitian
 product, so mathematically we have  \verb!a'*b!$ =  \overline{a}^T b $ \index{product! Hermitian dot}. 
  \item \verb@ a*b'@ is the outer product  (example  \verb$matrix B=a'*b$ \index{outer product}\index{product!outer}) 
- 
- To set or get all the indices and coef of the sparse matrix $A$, let \verb!I,J,C! respectively
-  two \verb!int[int]! array and a  \verb!real[int]! array. The three array defined
-  the matrix  as follow
-  $$
-    A = \sum_k \mathtt{C[k]} M_{\mathtt{I[k],J[k]}} \qquad \mbox{where }\quad M_{ab} = ( \delta_{ia}\delta_{jb} )_{ij}
-  $$
-  and you have:  $ M_{ab}$ is a basic matrix with the only  non zero term $m_{ab}=1$.
-  
-  You can write 
-  \verb! [I,J,C]=A ;! to get all the term of the matrix \verb!A! (the arrays are automaticaly resize), and
-   \verb! A=[I,J,C] ;! to change all the term matrix. remark the size of 
-   the matrix is with \verb! n= I.max! and \verb!m=J.max!. Remark you forget \verb! I,J ! when the build a
-   diagonal matrix, and  $n,m$ of the matrix is 
 \end{itemize}
+
+ 
+
+
+ 
 \begin{example}~
 \bFF
 @mesh Th = @square(2,1);
@@ -6097,22 +6161,24 @@ No clean message is given and the result is
 impredictible, Sorry.\index{periodic}\index{fespace!periodic=}
 \end{bug}
 
-\index{solver=!LU}\index{solver=!CG}\index{solver=!Crout}\index{solver=!GMRES}\index{solver=!Cholesky}\index{solver=!UMFPACK}
-\index{LU}\index{CG}\index{Crout}\index{GMRES}\index{Cholesky}\index{UMFPACK}
+\index{solver=!LU}\index{solver=!CG}\index{solver=!Crout}\index{solver=!GMRES}\index{solver=!Cholesky}\index{solver=!UMFPACK}\index{solver=!sparsesolver}
+\index{LU}\index{CG}\index{Crout}\index{GMRES}\index{Cholesky}\index{UMFPACK}\index{sparsesolver}
 
 The parameters are:
 \begin{description}
     \item[solver=]   \texttt{LU}, \texttt{CG},\index{solve!solver=}\index{problem!solver=}
-    \texttt{Crout},\texttt{Cholesky},\texttt{GMRES},\texttt{UMFPACK} ...
-
-    The default solver is \texttt{UMFPACK}.
+    \texttt{Crout},\texttt{Cholesky},\texttt{GMRES},\texttt{sparsesolver}, \texttt{UMFPACK} ...
+    
+    
+    The default solver is \texttt{sparsesolver} ( it is equal to  \texttt{UMFPACK}  if not other sparce solver is defined) or is set to
+    \texttt{LU} if no direct sparse solver is available.
     The storage mode of the matrix of the underlying linear system
     depends on
     the type of solver chosen; for \texttt{LU}  the matrix is sky-line non
     symmetric, for \texttt{Crout} the matrix is sky-line symmetric, for
     \texttt{Cholesky} the matrix is sky-line symmetric positive
     definite,  for \texttt{CG}   the matrix is sparse symmetric positive,
-    and for \texttt{GMRES} or \texttt{UMFPACK} the matrix is just  sparse.
+    and for \texttt{GMRES}, \texttt{sparsesolver} or \texttt{UMFPACK} the matrix is just  sparse.
 
     \item[eps=]  \index{problem!eps=}  \index{solve!eps=} a real expression. $\varepsilon$  sets the stopping test for
     the iterative methods like \texttt{CG}. Note that if $\varepsilon$
@@ -6448,7 +6514,7 @@ fespace Vh(Th,P1);
 Vh u0=fu0,u=u0;
 \eFF
 
-Create three variational formulation, and build the matrices $A$,$M$.
+Create three variational formulation, and build the matrices $A$,$M$.\label{matrix-varf}
 \bFF
 varf vthermic (u,v)= int2d(Th)(u*v/dt + k*(dx(u) * dx(v) + dy(u) * dy(v)))  
   +  int1d(Th,1,3)(alpha*u*v)
@@ -6530,8 +6596,8 @@ To build matrix $A$ from the bilinear part the the variational form $a$ of type 
 
 The possible named parameter \texttt{" [, ... ] "} of the construction are 
 \begin{description}
-    \item[solver=]   \texttt{LU}, \texttt{CG},\index{matrix!varf!solver=}
-    \texttt{Crout},\texttt{Cholesky},\texttt{GMRES},\texttt{UMFPACK} ...
+    \item[solver=]   \texttt{LU}, \texttt{CG}, \index{matrix!varf!solver=}
+    \texttt{Crout}, \texttt{Cholesky}, \texttt{GMRES}, \texttt{sparsesolver}, \texttt{UMFPACK} ...
 
     The default solver is \texttt{GMRES}.
     The storage mode of the matrix of the underlying linear system
@@ -6540,7 +6606,7 @@ The possible named parameter \texttt{" [, ... ] "} of the construction are
     symmetric, for \texttt{Crout} the matrix is sky-line symmetric, for
     \texttt{Cholesky} the matrix is sky-line symmetric positive
     definite,  for \texttt{CG}   the matrix is sparse symmetric positive,
-    and for \texttt{GMRES} or \texttt{UMFPACK} the matrix is just  sparse.
+    and for \texttt{GMRES}, \texttt{sparsesolver} or \texttt{UMFPACK} the matrix is just  sparse.
 
     \item[factorize =] \index{matrix!varf!solver=factorize} if true then do the matrix factorization for 
     \texttt{LU}, \texttt{Cholesky} or \texttt{Crout}, the default value is $false$. 
@@ -9087,7 +9153,7 @@ We can see in Fig. \ref{fig:err02} that $u_h^n(\theta)$ become unstable at $\the
 The hyperbolic equation
 \begin{eqnarray}
 \label{eqn:conv}
-\p_t u-\vec{\alpha} \cdot \nabla u=f;~~
+\p_t u +\vec{\alpha} \cdot \nabla u=f;~~ %% FH   pb sign 2008  
 \textrm{for a vector-valued function }\vec{\alpha},~
 \p_t=\frac{\p}{\p t},
 \end{eqnarray}
@@ -9107,7 +9173,7 @@ One begins the ordinary differential equation
 (with convention which $\alpha$
 is prolonged by zero apart from $(0,L)\times (0,T)$):
 \[
-\dot{X}(\tau )=-\alpha(X(\tau ),\tau ),~~~\tau \in (0,t)\quad X(t)=x
+\dot{X}(\tau )=+\alpha(X(\tau ),\tau ),~~~\tau \in (0,t)\quad X(t)=x%% FH   pb sign 2008 
 \]%
 In this equation $\tau$ is the variable and $x,t$ is parameters,
 and we denote the solution by $X_{x,t}(\tau )$.
@@ -9117,7 +9183,7 @@ $\tau=t$ satisfy the equation
 \p _{t}v+\alpha\p _{x}v=\p _{t}X\dot{v}+a\p _{x}X\dot{v}%
 =0
 \]%
-and by the definition $\p _{t}X=\dot{X}=-\alpha$ and
+and by the definition $\p _{t}X=\dot{X}=+\alpha$ and %% FH   pb sign 2008
 $\p_{x}X=\p _{x}x$ in $\tau=t$, because
 if $\tau =t$ we have $X(\tau )=x$.
 The general solution of (\ref{eqn:conv0}) is thus the value of the boundary condition in $X_{x, t}(0)$,
@@ -9173,14 +9239,14 @@ u^m(x-\vec{\alpha}\tau )=u^m(x)-\tau \vec{\alpha}^m(x)\cdot \nabla u^m(x)+o(\tau
 \]
 Putting
 \[
-\ttCC{@convect}\left( {\vec{\alpha},\tau ,u^m } \right)
-= u^m \left(x - \vec{\alpha}^m\tau  \right),
+\ttCC{@convect}\left( {\vec{\alpha},-\tau ,u^m } \right)
+\approx u^m \left(x - \vec{\alpha}^m\tau  \right),%% FH 2008 sign
 \]
 we can get the approximation
 \[
 u^m \left( {X^m( x )} \right) \approx
-{\ttCC{@convect}}\left( {[a_1^m ,a_2^m],\tau ,u^m } \right)\;\;
-\textrm{by }x = X((m + 1)\tau ).
+{\ttCC{@convect}}\left( {[a_1^m ,a_2^m],-\tau ,u^m } \right)\;\;
+\textrm{by }X^m \approx x \mapsto x- \tau [a_1^m(x) ,a_2^m(x)]  ).%% FH 2008 sign
 \]
 
 A classical convection problem is that of the ``rotating bell''
@@ -9191,7 +9257,7 @@ $\alpha_1 = y,\, \alpha_2 = -x$
 We consider the problem (\ref{eqn:conv}) with $f=0$ and the initial condition
 $u(x,0)=u^0(x)$, that is, from (\ref{eqn:Charac})
 \begin{eqnarray*}
-u^{m + 1}(x) = u^m(X^m(x))\approx \texttt{convect}(\vec{\alpha},\tau ,u^m).
+u^{m + 1}(x) = u^m(X^m(x))\approx \texttt{convect}(\vec{\alpha},-\tau ,u^m).%% FH 2008 sign
 \end{eqnarray*}
 The exact solution is $u(x, t) = u(\vec{X}(t))$
 where $\vec{X}$ equals $x$
@@ -9215,7 +9281,7 @@ Vh a1 = -y, a2 = x;                   // rotation velocity
 Vh u; // $u^{m+1}$
 @for (@int m=0; m<2*pi/dt ; m++) {
     t += dt;
-    u=@convect([a1,a2],dt,u0);  // $u^{m+1}=u^m(X^m(x))$
+    u=@convect([a1,a2],-dt,u0);  // $u^{m+1}=u^m(X^m(x))$
     u0=u;                      // m++
     @plot(u,cmm=" t="+t + ", min=" + u[].min + ", max=" +  u[].max,wait=0);
 };
