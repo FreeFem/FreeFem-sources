@@ -8,8 +8,9 @@
 # the same FreeFem++ version is packaged several times). For
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
+# add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,2.24-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,2.24-2,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -58,9 +59,13 @@ then
 	   ;;
 	 *g77)  
 	 for i in $FLIBS; do
-          case $i in 
+          case $i in 	  
 # save last directory of the list 
-	   -L*)    ff_flibs="$i";; 
+	   -L*) 
+	   d=`expr $i : -L\(.*\)`; 
+	   if test  -e $d/libg2c.so -o	-e $d/libg2c.a ; then   
+	      ff_flibs="$i" 
+	   fi;;
           esac
 	 done 
 	 FLIBS="$ff_flibs -lg2c"
@@ -70,7 +75,11 @@ then
          *gfortran)
          for i in $FLIBS; do
           case $i in
-           -L*)    ff_flibs="$i";;
+           -L*)  
+	   d=`expr $i : -L\(.*\)`; 
+	   if test -e $d/libgfortran.so -o -e $d/libgfortran.a ; then   
+	      ff_flibs="$i" 
+	   fi;;
           esac
          done
          FLIBS="$ff_flibs -lgfortran"
@@ -100,6 +109,12 @@ then
 	    AC_MSG_ERROR([ Fatal error No Fortran compiler . ],1);  
 	  fi
 	fi
+#  check if the FLIBS is correct
+  ff_libs="$LIBS"
+  LIBS="$ff_libs $FLIBS"
+  AC_TRY_LINK_FUNC(exit,ff_err=,ff_err=ok);
+  if test "$ff_err" = "ok" ; then  AC_MSG_ERROR([ Fatal FLIBS: $FLIBS is incorrect. ],1); fi
+  LIBS="$ff_libs"
 fi
 
 AC_ARG_ENABLE(c,[  --disable-c		No C compiler available (C BLAS need it)])
@@ -354,8 +369,18 @@ then
 	AC_SUBST(X11_LIBS,$ff_x11_libs)
 	ff_x11prog=FreeFem++-x11${EXEEXT}
 
-  fi
+#    check if the X11_LIBS is correct
+     ff_libs="$LIBS"
+     LIBS="$ff_libs $X11_LIBS"
+     AC_TRY_LINK_FUNC(XOpenDisplay,ff_err=,ff_err=ok);
+# ?????
+     if test "$ff_err" = "ok" ; then  AC_MSG_ERROR([ Fatal X11_LIBS: $X11_LIBS is incorrect (missing package libX11-dev,libxext-dev or libxt-dev) . ],1); fi
+      LIBS="$ff_libs"
+  
+   fi
+
 fi
+
 
 # Checking that OpenGL is accessible
 # ----------------------------------

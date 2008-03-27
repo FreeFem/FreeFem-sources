@@ -239,6 +239,9 @@ public:
 			if(NbAdj==1)
 			    if (! (TonBoundary[i]& MaskEdge[j])) 
 			    { NbOfMEdges++;
+				if(verbosity>99) 
+				    cout << " Edge (" << j0 << " "<< j1 << ") : "  << j  << " of Triangle " << &T-triangles << " on mortar \n"
+				    <<" --- > " << number(T[0]) << " " << number(T[1]) << " " << number(T[2]) << " /" << int(TonBoundary[i])<< "\n" ;
 				TonBoundary[i]+= AddMortar[j];
 			    }
 				else { NbOfBEdges++; }
@@ -370,7 +373,11 @@ public:
 			for (int is=0;is<nv;is++)
 			    if (linkg[is] == -2) 
 			    { // for all extremity of mortars 
-				throwassert(linkd[is] == -2);
+				if(linkd[is] != -2)
+				{
+				  cout <<" Bug in mortar constrution : close to vertex "<< is << endl; 
+				  ffassert(linkd[is] == -2);
+				}
 				const Vertex & S = vertices[is];
 				R2  A(S);
 				int km=0;
