@@ -1,3 +1,6 @@
+v 2.24-2
+  - coorect convect explain in documentation. 
+  - correct configure.ac build FLIBS and add check of FLIBS, X11_LIBS value
   - correct buildmesh trap when degenerate border is create  by error.
 v 2.24-1
   - correct periodic condition  in case of one edge 
