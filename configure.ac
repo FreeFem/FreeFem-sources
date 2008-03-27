@@ -63,6 +63,7 @@ then
 # save last directory of the list 
 	   -L*) 
 	   d=`expr $i : -L\(.*\)`; 
+	   echo " try $d "
 	   if test  -e $d/libg2c.so -o	-e $d/libg2c.a ; then   
 	      ff_flibs="$i" 
 	   fi;;
