@@ -687,7 +687,7 @@ void ArrayOperator()
        new OneOperator2_<KN<K> *,KN<K> *,Z>(&set_init),
        new InitArrayfromArray<K,true>,
        new OneOperator2_<KN<K> *,KN<K> *,KN<K> >(&set_init),
-       new OneOperator2_<KN<K> *,KN<K> *,KN_<K> >(&set_init)
+       new OneOperator2_<KN<K> *,KN<K> *,KN_<K> >(&set_init)		       
      //  new OneOperator2_<KN<K> *,KN<K> *,KN<K> * >(&set_initp)
        );
      TheOperators->Add("<-", 

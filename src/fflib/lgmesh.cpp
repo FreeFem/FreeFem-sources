@@ -1030,7 +1030,13 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
        } 
    }
   Triangle *tt= t;   
+  // 
+  bool direct = det(v[0],v[1],v[nx1+1]) > 0; //  signe  triangle 0
   
+    if(verbosity>1&& !direct) cout << " -- square : all triangles are reversed" <<   endl;
+
+    int p[2]={1,0};
+    if(direct) {p[0]=0,p[1]=1;} 
   for (int j=0;j<ny;j++)
    for (int i=0;i<nx;i++)
      { 
@@ -1045,20 +1051,38 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
           cas =  (i+ j) %2 ; break;
        default:
           cas = true;
-       }   
-      if (cas)
-       {     // diag 1     
-       (tt++)->set(v,i0,i1,i2,0,0.0);
-       (tt++)->set(v,i0,i2,i3,0,0.0);
-       }
-      else
-       {    // diag 2       
-       (tt++)->set(v,i0,i1,i3,0,0.0);
-       (tt++)->set(v,i3,i1,i2,0,0.0);
-       }
-      
+       } ;
+	 
+	 if (cas) 
+	   {
+	       if(direct)
+		 {     // diag 1 
+		     (tt++)->set(v,i0,i1,i2,0,0.0);
+		     (tt++)->set(v,i0,i2,i3,0,0.0);	       
+		 }
+	       else
+		 {     // diag 1 
+		     (tt++)->set(v,i1,i0,i2,0,0.0);
+		     (tt++)->set(v,i2,i0,i3,0,0.0);	       
+		 }
+	   } 
+	 else 
+	   {
+	       if(direct)
+		 {    // diag 2  		     
+		     (tt++)->set(v,i0,i1,i3,0,0.0);
+		     (tt++)->set(v,i3,i1,i2,0,0.0);		     
+		 }
+	       else 
+		 {    // diag 2  		     
+		     (tt++)->set(v,i1,i0,i3,0,0.0);
+		     (tt++)->set(v,i1,i3,i2,0,0.0);
+		     
+		 }
+	   }
+	 
      }  
-  BoundaryEdge * bb=b;
+    BoundaryEdge * bb=b;
   for (int i=0;i<nx;i++)
     {  // bottom 
       //      int j=0;
