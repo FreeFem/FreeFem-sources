@@ -61,7 +61,7 @@ class EigenValue : public OneOperator
         const int cas;
         
         static basicAC_F0::name_and_type name_param[] ;
-        static const int n_name_param =10;
+        static const int n_name_param =11;
         Expression nargs[n_name_param];
         Expression expOP1,expB;
         template<class T>
@@ -104,7 +104,7 @@ class EigenValueC : public OneOperator
         const int cas;
         
         static basicAC_F0::name_and_type name_param[] ;
-        static const int n_name_param =8;
+        static const int n_name_param =9;
         Expression nargs[n_name_param];
         Expression expOP1,expB;
         template<class T>
@@ -146,7 +146,9 @@ basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
     {   "ncv",&typeid(long) }, // the number of Arnoldi vectors generated 
     {   "maxit",&typeid(long)}, // the maximum number of Arnoldi iterations 
     {   "ivalue",&typeid(KN<double> *)},
-    {   "rawvector",&typeid(KNM<double> *) }, 
+    {   "rawvector",&typeid(KNM<double> *) },
+    {   "resid",&typeid(KN<double> *)}
+    
     
 };
 
@@ -159,6 +161,7 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
     {  "ncv",&typeid(long) }, // the number of Arnoldi vectors generated 
     {  "maxit",&typeid(long)}, // the maximum number of Arnoldi iterations 
     {   "rawvector",&typeid(KNM<Complex> *) }, 
+    {  "resid",&typeid(KN<Complex> *)}
     
     
 };
@@ -174,6 +177,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
     double sigma=0;
     KN<double> * evalue=0;
     KN<double> * evaluei=0;
+    KN<double> * resid=0;
 	   KNM<double> * rawvector=0;
 	   double ws,vs;           // for debugging FH ++++++++++
            pferarray  evector2;
@@ -188,10 +192,11 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
            maxit= arg<long>(7,stack,0);
            evaluei=arg<KN<double> *>(8,stack,0);
 	   rawvector=arg<KNM<double> *>(9,stack,0);
-           evector=evector2.first;
+           resid=arg<KN<double> *>(10,stack,0);
 	   
            Matrice_Creuse<K> *pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
            Matrice_Creuse<K> *pB =  GetAny<Matrice_Creuse<K> *>((*expB)(stack));
+           double * residptr=resid? (double*) *resid : 0;
 	   
            if(evalue) nbev=Max( (long)evalue->N(),nbev);
            
@@ -223,7 +228,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	   try {
 	       if(sym)
 	       {
-		   ARrcSymGenEig<K> prob('S', n, nbev, sigma,"LM",ncv,tol,maxit);
+		   ARrcSymGenEig<K> prob('S', n, nbev, sigma,"LM",ncv,tol,maxit,residptr);
 		   
 		   // ARrcNonSymGenEig<K> prob(n, nbev, sigma);
 		   
@@ -620,6 +625,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const {
     long maxit=0;  // the maximum number of Arnoldi iterations 
     K sigma=0;
     KN<K> * evalue=0;
+    KN<K> * resid=0;
    KNM<K> * rawvector=0;
     
     pfecarray  evector2;
@@ -632,7 +638,9 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const {
     ncv= arg<long>(5,stack,0);
     maxit= arg<long>(6,stack,0);
     rawvector=arg<KNM<K> *>(7,stack,0);
+    resid=arg<KN<K> *>(8,stack,0);
     
+    K * residptr= resid ? (K*) *resid : 0;
     evector=evector2.first;
     
     Matrice_Creuse<K> *pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
@@ -663,7 +671,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const {
 	   // OP = inv(OP) 
 	   try {
 	       
-	       ARrcCompGenEig<R> prob( n, nbev, sigma,"LM",ncv,tol,maxit);
+	       ARrcCompGenEig<R> prob( n, nbev, sigma,"LM",ncv,tol,maxit,residptr);
 	       
 	       
 	       // OP = inv[A - sigma*I]
