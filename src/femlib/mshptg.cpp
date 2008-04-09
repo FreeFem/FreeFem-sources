@@ -1371,7 +1371,7 @@ mshopt_ (long *c, long *nu, long *t, long a, long *err)
                   i21, i22, i23, tt;
   static long     tt1;
   LONG8  cos1, cos2, sin1, sin2, sgn;
-
+  int kerr21=0;
   /* Parameter adjustments */
   nu -= 7;
   c -= 3;
@@ -1491,7 +1491,10 @@ L10:
        nu[i22 + 3 + t2 * 6] = i12 + 3 + (t1 << 3);
        if (i + 4 > 1024)
 	  {
-	   //  goto L10; 
+	    if(kerr21)
+	      cout << " Bizarre mshptg err 21 pile too small (continue)  "<< endl;
+	    if(kerr21++<10000)
+		    goto L10; 
 	    *err = 21;
 	    return 0;
 	  }
