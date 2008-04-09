@@ -54,7 +54,7 @@ for (int kk=0;kk<k;kk++)
     if (j>=k) break; 
     u2 = eV[j];
   }
-
+  cout << " ||u1|| " << u1[].linfty << " || u2|| = " << u2[].linfty << endl;
   Bu1=B*u1[];
   Bu2=B*u2[];
   Au1=A*u1[];
