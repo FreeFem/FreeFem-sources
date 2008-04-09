@@ -160,7 +160,7 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
     {  "vector",&typeid(pfecarray) }, 
     {  "ncv",&typeid(long) }, // the number of Arnoldi vectors generated 
     {  "maxit",&typeid(long)}, // the maximum number of Arnoldi iterations 
-    {   "rawvector",&typeid(KNM<Complex> *) }, 
+    {  "rawvector",&typeid(KNM<Complex> *) }, 
     {  "resid",&typeid(KN<Complex> *)}
     
     
@@ -194,10 +194,12 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	   rawvector=arg<KNM<double> *>(9,stack,0);
            resid=arg<KN<double> *>(10,stack,0);
 	   
+	   evector=evector2.first;
            Matrice_Creuse<K> *pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
            Matrice_Creuse<K> *pB =  GetAny<Matrice_Creuse<K> *>((*expB)(stack));
            double * residptr=resid? (double*) *resid : 0;
-	   
+           cout << " residptr = " << residptr <<endl;
+
            if(evalue) nbev=Max( (long)evalue->N(),nbev);
            
            
@@ -428,7 +430,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	       else 
 	       {  // cas non symetrique ,
 		  //nTraceOn(10, 1,1, 1,1,1, 1,1,1); 
-		   ARrcNonSymGenEig<K> prob( n, nbev, sigma,"LM",ncv,tol,maxit);
+		   ARrcNonSymGenEig<K> prob( n, nbev, sigma,"LM",ncv,tol,maxit,residptr);
 		   
 		   
 		   // Finding an Arnoldi basis.
