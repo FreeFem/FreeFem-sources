@@ -22,6 +22,8 @@ fi
 
 if [ -f  FreeFem++-CoCoa ] ;then
 echo "  install FreeFem++-CoCoa script in /usr/local/bin (need of admin password)"
+
+sudo mkdir -p  /usr/local/bin
 sudo cp FreeFem++-CoCoa /usr/local/bin
 fi
 echo " copy FreeFem++.app in /Applications "

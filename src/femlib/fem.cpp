@@ -1309,8 +1309,16 @@ void Mesh::BuilTriangles(bool empty,bool removeouside)
 	mshptg8_ (cr, h, c, nu, &nbs, nbs, tri, arete, nba, (long *) sd, nbsd, reft, &nbt, .25, .75, &err);
 	if(err) {
 	    cerr << " Sorry Error build delaunay triangle   error = " << err << endl;
-	    
-	}
+	    delete [] arete;
+	    delete [] nu;
+	    delete [] c;
+	    delete [] tri;
+	    delete [] reft;
+	    delete [] cr;
+	    delete [] h;
+	    delete [] sd;	   
+	    throw(ErrorExec("Error mshptg8_",1));
+	   	}
 	assert(err==0 && nbt !=0);
 	delete [] triangles;
 	nt = nbt;
