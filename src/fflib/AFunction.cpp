@@ -1002,7 +1002,15 @@ void Init_map_type()
       TheOperators->Add("-",new opSum("-",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
       TheOperators->Add("-",new opSum("-",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
       TheOperators->Add("-",new opSum("-",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-      
+      TheOperators->Add(".*",new opSum("*",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add(".*",new opSum("*",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add(".*",new opSum("*",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+      TheOperators->Add(".*",new opSum("*",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("./",new opSum("/",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("./",new opSum("/",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("./",new opSum("/",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+      TheOperators->Add(".",new opSum("/",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+    
       
      // il faut refechir  .....  FH 
      // il faut definir le type d'un tableau bof, bof (atype<C_F0>())
@@ -1012,6 +1020,7 @@ void Init_map_type()
        new OneBinaryOperator<Op_Read<double>,OneBinaryOperatorMIWO >,
        new OneBinaryOperator<Op_Read<Complex>,OneBinaryOperatorMIWO >,
        new OneBinaryOperator<Op_ReadP<string>,OneBinaryOperatorMIWO >
+		       
        );
      
      TheOperators->Add("<<",
@@ -1253,7 +1262,7 @@ C_F0  opVI::code2(const basicAC_F0 &args) const
     if ( ! p->EvaluableWithOutStack() ) 
     { 
 	bool bb=p->EvaluableWithOutStack();
-	cout << bb << " " <<  * p <<  endl;
+	//cout << bb << " " <<  * p <<  endl;
 	CompileError(" [...][p], The p must be a constant , sorry");}
         long pv = GetAny<long>((*p)(0));
     bool ta =args[0].left()==atype<TransE_Array>();
@@ -1263,7 +1272,7 @@ C_F0  opVI::code2(const basicAC_F0 &args) const
     else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
     assert( ea || tea );
     const E_Array & a=  ta ? *tea->v : *ea;
-    cout << " pv =" << pv << " size = "<< a.size() << endl;
+   // cout << " pv =" << pv << " size = "<< a.size() << endl;
     ffassert(pv >=0 && pv <a.size());
     return (* a.v)[pv];
 }
