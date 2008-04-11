@@ -541,7 +541,9 @@ bool mylex::CallMacro(int &ret)
 	      while (1) {
 		int rr = basescan();// basescan -> scan1 change 2/2/2007  ( not change to pass macro name as a parameter)
 		if(lvl && rr==')') lvl--; //   if ( then  we eat next ) 
+		else if(lvl && rr==']') lvl--; //   if ( then  we eat next ) 
 		else if (rr=='(') lvl++ ;  //  eat next 		
+		else if (rr=='[') lvl++ ;  //  eat next 		
 		else if (lvl<=0) {
 		  if (rr==kend ) break;
 		  else if  (rr==')' || rr==',')  {// Correction FH 2/06/2004
