@@ -3,8 +3,8 @@
 %  ----
 % 2.24-2  correction convect function definition FH . 27 mars 2008
 % 2.24-2-1 correction bobgus@rcn.com  1 april 2008 (doc-patch1.patch)
+% 2.24-2-2 correction bobgus@rcn.com  17 april 2008 (doc-patch2.patch)
 % ---
-%
 \documentclass[a4paper,twoside,12pt]{book}
 \usepackage{styles}
 \usepackage{txfonts}
@@ -14,7 +14,7 @@
 
 
 \usepackage{times}
-\def\VERSION{2.24-2-1}
+\def\VERSION{2.24-2-2}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -159,7 +159,7 @@ and to l'Agence Nationale de la Recherche (Paris, France)
 
 \hbox to \hsize{\hss\includegraphics[width=7cm]{sanskrit}}
 
-Fruit of a long maturing process freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for numerically solving partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
+Fruit of a long maturing process, freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for numerically solving partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.  
 
 
 \medskip
@@ -255,7 +255,7 @@ error indicator, ...
  \end{center}
  
 And choose your platform: Linux, Windows, MacOS X,
-or go to the end of the page to get the full list of download.
+or go to the end of the page to get the full list of downloads.
 
 Remark: Binaries are available for Microsoft Windows and Apple
 Mac OS X and Linux.
@@ -274,10 +274,12 @@ To compile the documentation and the application under MS-Windows we have used t
 
 \freefempp must be compiled and
 installed from the source archive. This archive is available from:
-
- To
+\begin{center}
+   \url{http://www.freefem.org/ff++/index.htm}
+\end{center}
+To
 extract files from the compressed archive \texttt{freefem++-(VERSION).tar.gz} 
-a directory called
+to a directory called
 \begin{center}
 \texttt{freefem++-(VERSION)} 
 \end{center}
@@ -315,8 +317,8 @@ version (MacOS 10.2 or better) (note: it uses
 \item \texttt{drawbdmesh} , a mesh file viewer
 \end{enumerate}
 
-Remark, in most of the case you can set the level of the output (verbosity\index{verbosity}) to value \texttt{nn} with adding the parameters
-\texttt{-v nn} at the command line.
+Remark, in most cases you can set the level of output (verbosity\index{verbosity}) to value \texttt{nn} by adding the parameters
+\texttt{-v nn} on the command line.
 
 As an installation test, under unix:  go into the directory
 \texttt{examples++-tutorial} and run \freefempp on the example script
@@ -327,37 +329,37 @@ FreeFem++ LaplaceP1.edp
 \eFF
 
 If you are using \texttt{nedit} as your text editor,
-Do one time \verb!nedit -import edp.nedit! to have coloring syntax for yours \ttCC{.edp}
+do one time \verb!nedit -import edp.nedit! to have coloring syntax for your \ttCC{.edp}
 files. 
 
 
 
 \subsubsection{Windows binaries install}
-  First download the windows installation file, execute the
-  download file to install \texttt{FreeFem++}, after that you have
+  First download the windows installation file, then execute the
+  download file to install \texttt{FreeFem++}. After that you have
   three new icons on your desktop:
   \begin{itemize}
    \item \texttt{FreeFem++ (VERSION).exe}  the classical \freefempp application. 
    \item \texttt{FreeFem++ (VERSION) GUI.exe}  the GUI \freefempp application, see section \ref{GUI} for more information. 
-   \item \texttt{FreeFem++ (VERSION) Examples} a link to the\freefempp  directory examples.
+   \item \texttt{FreeFem++ (VERSION) Examples} a link to the \freefempp  directory examples.
   \end{itemize}
-  where \texttt{(VERSION)} is the version of the files for example \texttt{2.3-0-P4}.
+  where \texttt{(VERSION)} is the version of the files (for example \texttt{2.3-0-P4}).
  
  By default, the installed files are  in 
   \begin{center}
   \verb!C:\Programs Files\FreeFem++!
   \end{center}
   In this directory, you have all the \texttt{.dll} files and and 
-    other application \texttt{FreeFem++-nw.exe} the \freefempp application 
+    other applications: \texttt{FreeFem++-nw.exe} the \freefempp application 
     without graphic windows. 
 \medskip
     
  Remark: If you specify the path to \verb!C:\Program Files\FreeFem++!
- by adding this directory to the environment variable \texttt{PATH}, 
+ by adding this directory to the environment variables \texttt{PATH}, 
 you can use all the programs in 
 the window Command-line shell. (Use System in Control Panel, On the Advanced tab, click Environment Variables, then add the correct string).
 
-The systaxe of tools  in  command-line  are
+The syntax of tools on the command-line  are
 { \small
 \begin{itemize}
 \item  \verb!FreeFem++.exe [-vnn] [-b] [-s] [-n] [-h] [-f]  [ filepath ]! where the 
@@ -371,7 +373,7 @@ The systaxe of tools  in  command-line  are
 \item  \verb!FreeFem++-nw.exe [-v nn]   [[-f] filepath]!
 \end{itemize}}
 \medskip
- where the part in \texttt{[]} is facultative.
+ where the part in \texttt{[]} is optional.
  
 \paragraph{Link with other text editor}
 \begin{description}
@@ -394,18 +396,18 @@ Tick the 8.3 box.
 \begin{center}
  \url{http://www.winedt.com} 
  \end{center}
- this is a multipurpose text editor  with advance features
+ this is a multipurpose text editor  with advanced features
 such as syntax coloring; a macro is available on \url{www.freefem.org} to localize winedt to \freefempp
 without disturbing the winedt functional mode for LateX, TeX, C, etc.  However winedt is not free
 after the trial period.
 
-\item[TeXnicCenter] for Windows: this is the easiest and will be the best once we find a volonteer
+\item[TeXnicCenter] for Windows: this is the easiest and will be the best once we find a volunteer
 to program the color syntax.  Download it from 
 \begin{center}\url{http://www.texniccenter.org/}\end{center}
-It is also an editor for TeX/LaTeX but it has a "`tool"' menu which can be configure to launch
+It is also an editor for TeX/LaTeX. It has a "`tool"' menu which can be configured to launch
 \freefempp programs as in:
 \begin{itemize}
-\item Select the \texttt{Tools/Customize} menu will bring a dialog box.
+\item Select the \texttt{Tools/Customize} item which will bring up a dialog box.
 \item Select the  \texttt{Tools} tab and  create a new item: call it \texttt{freefem}.
 
 \item in the 3 lines below, 
@@ -433,13 +435,13 @@ has an item to launch \freefempp by a Ctrl+1 command.}
 \subsubsection{MacOS X  binaries install}
 
 
-  Download the MacOS X binaries version files , extract all the file with a double click on the
+  Download the MacOS X binary version file, extract all the files with a double click on the
   icon of the file, go the the directory and put the \texttt{FreeFem+.app} application in the 
   \texttt{/Applications} directory.
-  If you want a terminal acces to \freefempp just copy the file \texttt{FreeFem++-CoCoa} in the
+  If you want a terminal access to \freefempp just copy the file \texttt{FreeFem++-CoCoa} in a
    directory of your \verb!$PATH! shell environment variable.
    
-  If you want to automatically launch the \texttt{FreeFem++.app} if you double click on a \texttt{.edp} file icon.
+  If you want to automatically launch the \texttt{FreeFem++.app}, double click on a \texttt{.edp} file icon.
   Under the finder pick a \texttt{.edp} in directory \texttt{examples++-tutorial} for example, 
   select menu  \texttt{File -> Get Info} an \texttt{change Open with:} (choose FreeFem++.app) and click on button 
   \texttt{change All...}. 
@@ -450,16 +452,16 @@ has an item to launch \freefempp by a Ctrl+1 command.}
 \paragraph{Under Windows with Graphic Interfaces}
 
 The executable \texttt{freefem++.exe} opens a dialog box for
-choosing the input file; then it executes its content and produces
+choosing the input file, then it executes the input file content and produces
 graphics and output files.
 \\\\
-We can create and modify \freefempp programs by your favorite text editor.
+You can create and modify \freefempp programs with your favorite text editor.
 \\\\
 An integrated environment (\freefempp GUI), written by A. Le Hyaric, is also included
 with the distribution. the application name is \texttt{FreeFem++-cs}; note however that
-the graphics display much slower in this mode.
-There are other ways to have an integrated environment. TeX users have
-usually an editor installed; if it is winedt or TeXnicCenter then these can
+the graphics display is much slower in this mode.
+There are other ways to have an integrated environment. TeX users usually have
+an editor installed; if it is winedt or TeXnicCenter then these can
 be programmed to handle the edit-run-correct cycle of \freefempp with
 color syntax and automatic launch of freefem.  If you don't have one of these
 installed the easiest is to download the freeware \texttt{Crimson Editor}.
@@ -467,25 +469,24 @@ installed the easiest is to download the freeware \texttt{Crimson Editor}.
 \begin{center}
 \includegraphics[width=15cm]{csSnapOld}
 \caption{ The 3 panels of the integrated environment \texttt{freefem++-cs}:
-to the top left one sus the program (which can be edited?), on the top right ons the graphic window, and on the bottom window text message are displayed.
-%to left the program, top right the graphic window, bottom the text messages.
+to the top left one has the program (which can be edited?), on the top right the graphic output window, and the bottom pane displays text messages.
 }
 \end{center}
 \end{figure}
 \paragraph{Under MacOS X with Graphic Interfaces}
 
-For testing or running  a \texttt{.edp} file,  you just drag and drop 
-the file icon  on the MacOS application \texttt{FreeFem++.app} icon,
-and your can also use the menu:  $\mathtt{File} \rightarrow \mathtt{Open}$
+For testing or running  an \texttt{.edp} file, just drag and drop 
+the file icon  on the MacOS application \texttt{FreeFem++.app} icon.
+You can also use the menu:  $\mathtt{File} \rightarrow \mathtt{Open}$
 after launching the application.
 
-One of the best way on MacOS is to use the text editor \texttt{mi.app} 
+One of the best ways on MacOS is to use the text editor \texttt{mi.app} 
 \begin{center}
 \url{http://www.mimikaki.net/en/}
 \end{center}
 and to use the  \texttt{edp} mode stored in \texttt{mode-mi-edp.zip}. 
-After download the \texttt{mi} editor and 
-installation, unzip \texttt{mode-mi-edp.zip} and put created folder in  the folder opened with the 
+After downloading and installing the \texttt{mi} editor, 
+unzip \texttt{mode-mi-edp.zip} and put the created folder in the folder opened with the 
    \texttt{mi.app}  menu  \texttt{Option->Open Mode Folder } menu and set \texttt{mi} as the default application for all the \texttt{.edp} files.
 \begin{figure}[htbp] %  figure placement: here, top, bottom, or page
    \centering
@@ -500,11 +501,11 @@ First choose the type of application from \texttt{FreeFem++}, \texttt{FreeFem++-
  FreeFem++ your-edp-file-path
 \eFF 
 
-\subsection{Environment variable, and init file}
+\subsection{Environment variables, and the init file}
 
 
 \index{verbosity}\index{includepath}\index{loadpath}\index{load}\index{include}
- \texttt{FreeFem++} reads an user's file named \ttCC{freefem++.pref} 
+ \texttt{FreeFem++} reads a user's init file named \ttCC{freefem++.pref} 
  to initialize global variables: 
    \texttt{verbosity}, \texttt{includepath}, \texttt{loadpath}.
   
@@ -548,7 +549,7 @@ the search rule.
     export FF_LOADPATH="dir;;dir3""
 \end{verbatim}     
  
- Remark: the separator of directory must be ";" and not ":" because ":" is used under Windows.
+ Remark: the separator between directories must be ";" and not ":" because ":" is used under Windows.
 
 \subsection{History}
 
@@ -561,7 +562,7 @@ A thorough rewriting in C++ led to \texttt{freefem+}
 interpolation over multiple meshes (functions defined on one mesh
 can be used on any other mesh); this software is no longer
 maintained but still in use because it handles a problem description
-using the strong forms of the PDEs. Implementing the interpolation
+using the strong form of the PDEs. Implementing the interpolation
 from one unstructured mesh to another was not easy because it had to
 be fast and non-diffusive; for each point, one had to find the
 containing triangle. This is one of the basic problems of

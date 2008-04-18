@@ -1371,9 +1371,10 @@ class basicAC_F0 {
  int size() const {return nb;}
  C_F0 * ptr() const  {return a;}
  C_F0  find(const char * k) const  { 
+    assert(k);  
    if (named_parameter) { const_iterator i=named_parameter->find(k) ;
     if (i == named_parameter->end() ) return C_F0();
-    else return i->second;}
+    else  return i->second;}
    else return C_F0();} 
    
  struct name_and_type{ 
