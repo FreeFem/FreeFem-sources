@@ -522,6 +522,19 @@ public:
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
     C_F0  code2(const basicAC_F0 &args) const;       
 };
+/*
+class opArray : public OneOperator{
+public:
+    const char * op;
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    bool MeshIndependent() const { return false;}
+    
+    opSum(const char *opp,aType A, aType B): OneOperator(atype<C_F0>(),A,B),op(opp) {}
+    
+    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+    C_F0  code2(const basicAC_F0 &args) const;       
+};
+*/
 
 class opFormal : public OneOperator{
 public:
@@ -1453,5 +1466,7 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
 	return C_F0(TheOperators,"[]",v);
     
 }
+
+
 
 

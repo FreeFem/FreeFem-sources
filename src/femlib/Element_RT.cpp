@@ -346,7 +346,6 @@ void TypeOfFE_P0::FB(const bool* whatd,const Mesh & ,const Triangle & K,const R2
 class TypeOfFE_P1ncLagrange : public  TypeOfFE { public:  
   static int Data[];
   static double Pi_h_coef[];
-  
   TypeOfFE_P1ncLagrange(): TypeOfFE(0,1,0,1,Data,1,1,3,3,Pi_h_coef)
   {
     const R2 Pt[] = { R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0) };
@@ -358,6 +357,7 @@ class TypeOfFE_P1ncLagrange : public  TypeOfFE { public:
    void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
 
 } ;
+    
 //                     on what     nu df on node node of df    
 int TypeOfFE_P1ncLagrange::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
 double TypeOfFE_P1ncLagrange::Pi_h_coef[]={1.,1.,1.};
@@ -462,6 +462,7 @@ void TypeOfFE_P1ncLagrange::FB(const bool * whatd,const Mesh & ,const Triangle &
 {
   //  const Triangle & K(FE.T);
   R2 A(K[0]), B(K[1]),C(K[2]);
+  //  l1(  cshrink1*(cshrink*((1,0)-G)+G)-G)+G  = 1
   R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
   
   if (val.N() <3) 
@@ -585,11 +586,22 @@ void TypeOfFE_RTortho::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
 class TypeOfFE_P1ttdc : public  TypeOfFE { public:  
   static int Data[];
   static double Pi_h_coef[];
+    static const R2 G;
+    static const R cshrink;
+    static const R cshrink1;
+    //  (1 -1/3)*
+    
+    static R2 Shrink(const R2& P){ return (P-G)*cshrink+G;}
+    static R2 Shrink1(const R2& P){ return (P-G)*cshrink1+G;}
+    
    TypeOfFE_P1ttdc(): TypeOfFE(0,0,3,1,Data,1,1,3,3,Pi_h_coef)
-    { const R2 Pt[] = { R2(0,0), R2(1,0), R2(0,1) }; 
+    { const R2 Pt[] = { Shrink(R2(0,0)), Shrink(R2(1,0)), Shrink(R2(0,1)) }; 
       for (int i=0;i<NbDoF;i++) {
        pij_alpha[i]= IPJ(i,i,0);
-       P_Pi_h[i]=Pt[i]; }
+       P_Pi_h[i]=Pt[i];
+      cout << Pt[i] << " " ;
+      }
+	cout <<" cshrink: " << cshrink << " cshrink1 : "<< cshrink1 <<endl;
      }
 
    void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
@@ -598,13 +610,23 @@ class TypeOfFE_P1ttdc : public  TypeOfFE { public:
   virtual R operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const ;
    
 } ;
-
+    const R2 TypeOfFE_P1ttdc::G(1./3.,1./3.);   
+    const R TypeOfFE_P1ttdc::cshrink=1-1e-2;   
+    const R TypeOfFE_P1ttdc::cshrink1=1./TypeOfFE_P1ttdc::cshrink;   
+    
 class TypeOfFE_P2ttdc : public  TypeOfFE { public:  
   static int Data[];
   static double Pi_h_coef[];
-  
+    static const R2 G;
+    static const R cshrink;
+    static const R cshrink1;
+    
+    static R2 Shrink(const R2& P){ return (P-G)*cshrink+G;}
+    static R2 Shrink1(const R2& P){ return (P-G)*cshrink1+G;}
+    
    TypeOfFE_P2ttdc(): TypeOfFE(0,0,6,1,Data,3,1,6,6,Pi_h_coef)
-    { const R2 Pt[] = { R2(0,0), R2(1,0), R2(0,1),R2(0.5,0.5),R2(0,0.5),R2(0.5,0) };
+    { const R2 Pt[] = { Shrink(R2(0,0)), Shrink(R2(1,0)), Shrink(R2(0,1)),
+	                Shrink(R2(0.5,0.5)),Shrink(R2(0,0.5)),Shrink(R2(0.5,0)) };
       for (int i=0;i<NbDoF;i++) {
        pij_alpha[i]= IPJ(i,i,0);
        P_Pi_h[i]=Pt[i]; }
@@ -620,9 +642,16 @@ int TypeOfFE_P1ttdc::Data[]={6,6,6,       0,1,2,       0,0,0,       0,0,0,      
 int TypeOfFE_P2ttdc::Data[]={6,6,6,6,6,6, 0,1,2,3,4,5, 0,0,0,0,0,0,  0,0,0,0,0,0,  0,1,2,3,4,5, 0};
 double TypeOfFE_P1ttdc::Pi_h_coef[]={1.,1.,1.};
 double TypeOfFE_P2ttdc::Pi_h_coef[]={1.,1.,1.,1.,1.,1.};
+    
+const R2 TypeOfFE_P2ttdc::G(1./3.,1./3.);   
+const R TypeOfFE_P2ttdc::cshrink=1-1e-2;   
+const R TypeOfFE_P2ttdc::cshrink1=1./TypeOfFE_P2ttdc::cshrink;   
+    
  
-R TypeOfFE_P1ttdc::operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const 
+R TypeOfFE_P1ttdc::operator()(const FElement & K,const  R2 & P1Hat,const KN_<R> & u,int componante,int op) const 
 { 
+
+  R2 PHat=Shrink1(P1Hat);  
   R u0(u(K(0))), u1(u(K(1))), u2(u(K(2)));
   R r=0;
   if (op==0)
@@ -633,7 +662,7 @@ R TypeOfFE_P1ttdc::operator()(const FElement & K,const  R2 & PHat,const KN_<R> &
    else
     { 
        const Triangle & T=K.T;
-       R2 D0 = T.H(0) , D1 = T.H(1)  , D2 = T.H(2) ;
+       R2 D0 = T.H(0)*cshrink1 , D1 = T.H(1)*cshrink1  , D2 = T.H(2)*cshrink1 ;
        if (op==1)
          r =  D0.x*u0 + D1.x*u1 + D2.x*u2 ;
         else 
@@ -643,8 +672,10 @@ R TypeOfFE_P1ttdc::operator()(const FElement & K,const  R2 & PHat,const KN_<R> &
    return r;
 }
 
-void TypeOfFE_P1ttdc::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+void TypeOfFE_P1ttdc::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P1,RNMK_ & val) const
 {
+  R2 P=Shrink1(P1);  
+   
   //  const Triangle & K(FE.T);
   R2 A(K[0]), B(K[1]),C(K[2]);
   R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
@@ -664,7 +695,7 @@ void TypeOfFE_P1ttdc::FB(const bool *whatd,const Mesh & ,const Triangle & K,cons
     f0[2] = l2;}
  if (whatd[op_dx] || whatd[op_dy])
   {
-  R2 Dl0(K.H(0)), Dl1(K.H(1)), Dl2(K.H(2));
+  R2 Dl0(K.H(0)*cshrink1), Dl1(K.H(1)*cshrink1), Dl2(K.H(2)*cshrink1);
   
   if (whatd[op_dx]) 
    {
@@ -685,8 +716,10 @@ void TypeOfFE_P1ttdc::FB(const bool *whatd,const Mesh & ,const Triangle & K,cons
 
 
 
- void TypeOfFE_P2ttdc::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+ void TypeOfFE_P2ttdc::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P1,RNMK_ & val) const
 {
+    R2 P=Shrink1(P1);  
+   
 //  const Triangle & K(FE.T);
   R2 A(K[0]), B(K[1]),C(K[2]);
   R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
@@ -711,7 +744,7 @@ void TypeOfFE_P1ttdc::FB(const bool *whatd,const Mesh & ,const Triangle & K,cons
   }
  if(  whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] ||  whatd[op_dxy])
  {
-   R2 Dl0(K.H(0)), Dl1(K.H(1)), Dl2(K.H(2));
+   R2 Dl0(K.H(0)*cshrink1), Dl1(K.H(1)*cshrink1), Dl2(K.H(2)*cshrink1);
   if (whatd[op_dx])
   {
     RN_ f0x(val('.',0,op_dx)); 

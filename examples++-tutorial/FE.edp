@@ -22,10 +22,17 @@ for (int i=0;i<kdf;i++)
 //*/
 cout << " P1nc " << endl;
 fespace Vnch(Th,P1nc);
+Vnch u1nc=x+10*y;
+cout << " Interpola P1nc : " << int2d(Th)(square(u1nc-(x+10*y))) << endl;
+
 cout << " P2dc " << endl;
 fespace Wdch(Th,P2dc);
+
 cout << " P1dc " << endl;
 fespace Vdch(Th,P1dc);
+Vdch u1dc=x+10*y;
+cout << " Interpola P1dc : " << int2d(Th)(square(u1dc-(x+10*y))) << endl;
+
 Wh w=x*x*y,dxw=2*x*y;
 
 Vdch vdc = dx(w);

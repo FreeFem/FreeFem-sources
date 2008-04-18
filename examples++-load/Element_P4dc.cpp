@@ -28,6 +28,13 @@ namespace  Fem2D {
    static const int jl[15];
    static const int kl[15];
     
+   static const R2 G;
+   static const R cshrink;
+   static const R cshrink1;
+   //  (1 -1/3)*
+    
+   static R2 Shrink(const R2& P){ return (P-G)*cshrink+G;}
+   static R2 Shrink1(const R2& P){ return (P-G)*cshrink1+G;}
    
    TypeOfFE_P4dcLagrange(): TypeOfFE(3+3*3+3,1,Data,4,1,15,15,Pi_h_coef)
    {  
@@ -51,7 +58,7 @@ namespace  Fem2D {
      
        for (int i=0;i<NbDoF;i++) {
 	   pij_alpha[i]= IPJ(i,i,0);
-	   P_Pi_h[i]=Pt[i]; }
+	   P_Pi_h[i]=Shrink(Pt[i]); }
        //    3,4,5, 6,7,8, 9,10,11, 
    }
   
@@ -77,6 +84,11 @@ namespace  Fem2D {
    }
    */
  } ;
+
+  const R2 TypeOfFE_P4dcLagrange::G(1./3.,1./3.);   
+  const R TypeOfFE_P4dcLagrange::cshrink=1-1e-2;   
+  const R TypeOfFE_P4dcLagrange::cshrink1=1./TypeOfFE_P4dcLagrange::cshrink;   
+
   //                     on what     nu df on node node of df    
   int TypeOfFE_P4dcLagrange::Data[]={
     6,6,6,6,6, 6,6,6,6,6 ,6,6,6,6,6,    //  the support number  of the node of the df 
@@ -89,9 +101,9 @@ namespace  Fem2D {
     0,1,2,       0};
   double TypeOfFE_P4dcLagrange::Pi_h_coef[]={ 1.,1.,1.,1.,1. ,1.,1.,1.,1.,1. ,1.,1.,1.,1.,1.};
  
-  void TypeOfFE_P4dcLagrange::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+  void TypeOfFE_P4dcLagrange::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P1,RNMK_ & val) const
   {
- 
+    R2 P=Shrink1(P1);
     R2 A(K[0]), B(K[1]),C(K[2]);
     R l0=1.-P.x-P.y,l1=P.x,l2=P.y; 
     R L[3]={l0*k,l1*k,l2*k};
@@ -142,7 +154,8 @@ namespace  Fem2D {
     
     if(  whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] ||  whatd[op_dxy])
       {
-	R2 D[]={K.H(0)*k, K.H(1)*k,K.H(2)*k };
+	R ks=k*cshrink1;
+	R2 D[]={K.H(0)*ks, K.H(1)*ks,K.H(2)*ks };
 	if (whatd[op_dx] || whatd[op_dy] )
 	  {
 	    for (int df=0;df<ndf;df++)

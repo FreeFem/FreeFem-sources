@@ -1,5 +1,10 @@
-V 2.24-3
+v 2.24-4
+  - add tools to glu meshes (not well test) see glumesh.edp in load examples.
+  - change definition pour interpolation point for P1dc and P2dc  (P-G)*c+G
+    now all interpolation point are fully inside the triangle 
+v 2.24-3
   - add option resid= in eigenvalue function (see arpack doc)
+  - add  formal operator  ./  .*  between two  [ a , b , c ] array
 v 2.24-2
   - correct convect explain in documentation. 
   - correct configure.ac build FLIBS and add check of FLIBS, X11_LIBS value
