@@ -4,7 +4,7 @@ mesh Th2=square(20,10,[x+1,y]);
 verbosity=3;
 int[int] r1=[2,0];
 int[int] r2=[4,0];
-//Th1=change(Th1,refe=r2);
+Th1=change(Th1,refe=r2);
 //Th2=change(Th2,refe=r1);
 mesh Th=Th1+Th2;
 
