@@ -1,4 +1,6 @@
 v 2.24-4
+  - add missing code in case of DG (jump or average) of test function in
+    linear form
   - add tools to glu meshes (not well test) see glumesh.edp in load examples.
   - change definition pour interpolation point for P1dc and P2dc  (P-G)*c+G
     now all interpolation point are fully inside the triangle 
