@@ -1,4 +1,4 @@
-load "Morley"
+load "Element_P4dc"
 macro DD(f,hx,hy) ( (f(x1+hx,y1+hy)-f(x1-hx,y1-hy))/(2*(hx+hy))) //
 macro dn(f) ( N.x*dx(f)+N.y*dy(f)) //
 macro dnn(f) ( N.x*f#2+N.y*f#3) //
@@ -7,12 +7,12 @@ mesh Th=square(1,1,[10*(x+y/3),10*(y-x/3)]);
 real x1=0.7,y1=0.9, h=1e-6;
 int it1=Th(x1,y1).nuTriangle; 
 
-fespace Vh(Th,P3);
+fespace Vh(Th,P4dc);
 fespace Eh(Th,P0edge);
 
 Eh  edges;
 
-Vh [a1,a2,a3],[b1,b2,b3],[c1,c2,c3];
+Vh a1,a2,a3,b1,b2,b3,c1,c2,c3;
  
 varf vFlux([a],[e]) = intalledges(Th)( dn(a1)*e*(jump(real(nuTriangle))<= 0));
 varf vMean([a],[e]) = intalledges(Th)( (a1)*e*(jump(real(nuTriangle))<= 0)/lenEdge);

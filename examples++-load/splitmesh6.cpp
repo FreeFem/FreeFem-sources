@@ -128,6 +128,7 @@ Mesh * SplitMesh6(Fem2D::Mesh * const & pTh)
     R2 Pn,Px;
     m->BoundingBox(Pn,Px);
     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
+    m->decrement();
     return m;
   }
 }

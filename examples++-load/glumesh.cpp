@@ -119,6 +119,7 @@ Mesh * GluMesh(listMesh const & lst)
     R2 Pn,Px;
     m->BoundingBox(Pn,Px);
     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
+    m->decrement();
     return m;
   }
   
@@ -145,23 +146,14 @@ class SetMesh_Op : public E_F0mps
 public:
   Expression a; 
   
-  static const int n_name_param =1; //  add nbiter FH 30/01/2007 11 -> 12 
+  static const int n_name_param =2; //  add nbiter FH 30/01/2007 11 -> 12 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
   
 public:
   SetMesh_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
-    cout << "SetMesh_Op" << args <<endl;
-    for(int i=0;i<args.size();++i)
-      cout << i << " :: " << *args[i].left() << endl;
-    if(args.named_parameter)
-      for(basicAC_F0::const_iterator i=args.named_parameter->begin() ; i != args.named_parameter->end();++i)	
-	{
-	  cout  << i->first << " -> " << endl <<  i->second.left() << " ; " << endl;
-	}
      args.SetNameParam(n_name_param,name_param,nargs);
-    cout << "SetMesh_Op2" <<endl;
   } 
   
   AnyType operator()(Stack stack)  const ;
@@ -253,6 +245,7 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   R2 Pn,Px;                                                                                                                               
   m->BoundingBox(Pn,Px);
   m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);   
+  m->decrement();
   return m;
 }
 /*
