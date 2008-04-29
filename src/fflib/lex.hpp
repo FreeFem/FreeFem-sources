@@ -92,7 +92,7 @@ class mylex : public CodeAlloc {
   char * YYText() { return buf;}
   void dump(ostream & f ) ;
   
-  void erreur(char * s) {
+  void erreur(const char * s) {
     cerr << " Error line number" <<linenumber << ": " << s << endl;
     throw(ErrorCompile("lex:",linenumber)); }
   

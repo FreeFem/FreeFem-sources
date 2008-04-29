@@ -883,6 +883,13 @@ void basicAC_F0::SetNameParam(int n,name_and_type *l , Expression * e) const
      if (ce.LeftValue()==0)
        e[i]=0;
      else  {
+       if(!map_type[l[i].type->name()] )
+	 {
+	   cerr << " missing ff type: '" <<l[i].type->name() << "'   "<< map_type.size()  <<  "\n";
+	  
+	   InternalError(" missing type ");
+	   assert(map_type[l[i].type->name()]);
+	 }
        e[i]= map_type[l[i].type->name()]->CastTo(ce);
        k++;
        }
