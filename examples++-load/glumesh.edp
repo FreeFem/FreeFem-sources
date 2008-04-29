@@ -2,12 +2,12 @@ load "glumesh"
 mesh Th1=square(10,10);
 mesh Th2=square(20,10,[x+1,y]);
 verbosity=3;
-int[int] r1=[2,0];
-int[int] r2=[4,0];
-Th1=change(Th1,refe=r2);
-Th2=change(Th2,refe=r1);
+int[int] r1=[2,0],  r2=[4,0];
+Th1=change(Th1,refe=r1);
+Th2=change(Th2,refe=r2);
 mesh Th=Th1+Th2;
-
+cout << " nb ref = " << int1d(Th1,1,3,4)(1./lenEdge)+int1d(Th2,1,2,3)(1./lenEdge) 
+     << " == " << int1d(Th,1,2,3,4)(1./lenEdge) <<" == " << ((10+20)+10)*2 << endl; 
 plot(Th,wait=1);
 fespace Vh(Th,P1);
 macro Grad(u) [dx(u),dy(u)]//

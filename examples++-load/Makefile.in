@@ -248,7 +248,9 @@ LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          qf11to25.$(DYLIB_SUFFIX)  Element_P3.$(DYLIB_SUFFIX)    Element_P4.$(DYLIB_SUFFIX)  \
 	 Element_P3dc.$(DYLIB_SUFFIX)    Element_P4dc.$(DYLIB_SUFFIX) 	\
 	 Element_PkEdge.$(DYLIB_SUFFIX)   \
-	glumesh..$(DYLIB_SUFFIX)   
+	glumesh.$(DYLIB_SUFFIX)   \
+	splitmesh3.$(DYLIB_SUFFIX)  splitmesh6.$(DYLIB_SUFFIX)
+
 
 all: all-am
 
