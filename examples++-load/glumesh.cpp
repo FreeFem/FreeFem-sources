@@ -148,7 +148,7 @@ public:
   static const int n_name_param =1; //  add nbiter FH 30/01/2007 11 -> 12 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  KN_<int>  arg(int i,Stack stack,KN<int> a ) const{ return nargs[i] ? GetAny<KN<int> >( (*nargs[i])(stack) ): a;}
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
   
 public:
   SetMesh_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
@@ -157,7 +157,9 @@ public:
       cout << i << " :: " << *args[i].left() << endl;
     if(args.named_parameter)
       for(basicAC_F0::const_iterator i=args.named_parameter->begin() ; i != args.named_parameter->end();++i)	
-	cout  << i->first << " -> " << endl <<  i->second.left() << " ; " << endl;
+	{
+	  cout  << i->first << " -> " << endl <<  i->second.left() << " ; " << endl;
+	}
      args.SetNameParam(n_name_param,name_param,nargs);
     cout << "SetMesh_Op2" <<endl;
   } 
@@ -166,21 +168,91 @@ public:
 };
 
 basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
-  {  "refe", &typeid(KN<int>)}
+  {  "refe", &typeid(KN_<long> )},
+  {  "reft", &typeid(KN_<long> )}
 };
+int  ChangeLab(const map<int,int> & m,int lab)
+{
+  map<int,int>::const_iterator i=m.find(lab);
+  if(i != m.end())
+    lab=i->second;
+  return lab;
+}
+
 AnyType SetMesh_Op::operator()(Stack stack)  const 
 {
   Mesh * pTh= GetAny<Mesh *>((*a)(stack));
   Mesh & Th=*pTh;
-  Mesh *m=pTh;
+  Mesh *m= pTh;
   int nbv=Th.nv; // nombre de sommet 
   int nbt=Th.nt; // nombre de triangles
   int neb=Th.neb; // nombre d'aretes fontiere
   cout << " " << nbv<< " "<< nbv << " nbe "<< neb << endl;  
-  KN<int> zz;
-  KN<int> nr (arg(0,stack,zz));  
-  if(nr.N() <=0) return m;
-    
+  KN<long> zz;
+  KN<long> nre (arg(0,stack,zz));  
+  KN<long> nrt (arg(1,stack,zz));  
+
+  if(nre.N() <=0 && nrt.N() ) return m;
+  ffassert( nre.N() %2 ==0);
+  ffassert( nrt.N() %2 ==0);
+  map<int,int> mape,mapt;
+  int z00 = false;
+  for(int i=0;i<nre.N();i+=2)
+    { z00 = z00 || ( nre[i]==0 && nre[i+1]==0);
+      if(nre[i] != nre[i+1])
+	mape[nre[i]]=nre[i+1];
+    }
+  for(int i=0;i<nrt.N();i+=2)
+    mapt[nrt[i]]=nrt[i+1];
+  int nebn =0;
+    for(int i=0;i<neb;++i)
+      {
+	int l0,l1=ChangeLab(mape,l0=m->bedges[i].lab) ;
+	 nebn++;
+      }
+	  
+
+  Vertex * v= new Vertex[nbv];
+  Triangle *t= new Triangle[nbt];
+  BoundaryEdge *b= new BoundaryEdge[nebn];
+  // generation des nouveaux sommets 
+  Vertex *vv=v;
+  // copie des anciens sommets (remarque il n'y a pas operateur de copy des sommets)
+  for (int i=0;i<nbv;i++)
+    {
+     Vertex & V=Th(i);
+     vv->x=V.x;
+     vv->y=V.y;
+     vv->lab = V.lab;
+     vv++;      
+   }
+
+  //  generation des triangles 
+  Triangle *tt= t; 
+  int nberr=0;
+   
+  for (int i=0;i<nbt;i++)
+    {
+      int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
+      // les 3 triangles par triangles origines 
+      (*tt++).set(v,i0,i1,i2,ChangeLab(mapt,Th[i].lab));
+    }  
+  
+  // les arete frontieres qui n'ont pas change
+  BoundaryEdge * bb=b;
+  for (int i=0;i<neb;i++)
+    {        
+      int i1=Th(Th.bedges[i][0]);
+      int i2=Th(Th.bedges[i][1]);
+      int l0,l1=ChangeLab(mape,l0=m->bedges[i].lab) ;
+      *bb++ = BoundaryEdge(v,i1,i2,l1);   
+    }
+  assert(nebn==bb-b);
+  m =  new Mesh(nbv,nbt,nebn,v,t,b);
+
+  R2 Pn,Px;                                                                                                                               
+  m->BoundingBox(Pn,Px);
+  m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);   
   return m;
 }
 /*

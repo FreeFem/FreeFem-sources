@@ -27,13 +27,16 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
   convect_dervieux.edp    plot-fb-P3.edp          testFEMorley.edp \
   testFE-PkEdge.edp \
   splitmesh3.cpp  splitmesh3.edp  splitmesh6.cpp  splitmesh6.edp \
-  SuperLU_3.0-include-ff.tar.gz REAME_SuperLU
+  SuperLU_3.0-include-ff.tar.gz REAME_SuperLU \
+  glumesh.cpp glumesh.edp
 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
          qf11to25.$(DYLIB_SUFFIX)  Element_P3.$(DYLIB_SUFFIX)    Element_P4.$(DYLIB_SUFFIX)  \
-	 Element_P3dc.$(DYLIB_SUFFIX)    Element_P4dc.$(DYLIB_SUFFIX) 	 Element_PkEdge.$(DYLIB_SUFFIX)   
+	 Element_P3dc.$(DYLIB_SUFFIX)    Element_P4dc.$(DYLIB_SUFFIX) 	\
+	 Element_PkEdge.$(DYLIB_SUFFIX)   \
+	glumesh..$(DYLIB_SUFFIX)   
 
 
 load_compile:include  $(LIST_COMPILE)
