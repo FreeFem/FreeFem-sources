@@ -56,8 +56,8 @@ using Fem2D::onWhatIsEdge;
 
 template <class R> class MatriceCreuse; 
 template <class R> class MatriceElementaire; 
-template <class R> class MatriceElementaireSymetrique;
-template <class R> class MatriceElementairePleine;
+template <class R,class FESpace> class MatriceElementaireSymetrique;
+template <class R,class FESpace> class MatriceElementairePleine;
 template <class R> class MatriceMorse;
 template <class R> class MatriceProdTensoriel;
 
@@ -84,13 +84,13 @@ template <class T> T* docpyornot(bool nocpy,T* p,int n)
    return r;
  }
 
+
+
 template <class R> 
 class MatriceElementaire {
+
 public:
   enum TypeOfMatriceElementaire {Full=1,Symmetric=2};
-  CountPointer<const FESpace> cUh,cVh;
-  const FESpace &Uh;
-  const FESpace &Vh;
 
 
        
@@ -103,8 +103,6 @@ public:
   int n,m;       // n,m number of df
   const TypeOfMatriceElementaire mtype;
   KN<double> data; // to store value of basic function 
-  const QuadratureFormular & FIT;
-  const QuadratureFormular1d & FIE;
 
   const bool onFace ; //  true if do int on face or edge with jump (VF or GD : Galerkin Discontinus)
   // in with case  add ... 
@@ -113,38 +111,23 @@ public:
   int *njk,*njkk;  //  number of df in element   k,kk  for VF and GD methode
 
 
-  MatriceElementaire(const FESpace & UUh,const FESpace & VVh,int llga
-                     ,int *nnj,int * nni,TypeOfMatriceElementaire t=Full,
-                               const QuadratureFormular & fit=QuadratureFormular_T_5,
-                               const QuadratureFormular1d & fie =QF_GaussLegendre3) 
-                     
-       :cUh(UUh),cVh(VVh),Uh(UUh),Vh(VVh),
-        lga(llga),a(new R[lga]),
-        ni(nni),nj(nnj),n(0),m(0),mtype(t),data(UUh.esize()+VVh.esize()),
-        FIT(fit),FIE(fie),
+  MatriceElementaire(int datasize,int llga
+                     ,int *nnj,int * nni,TypeOfMatriceElementaire t=Full)
+    
+    :   lga(llga),a(new R[lga]),
+        ni(nni),nj(nnj),n(0),m(0),mtype(t),data(datasize),
         onFace(false),lnk(0),nik(0),nikk(0),njk(0),njkk(0) 
         {}
        
-  MatriceElementaire(const FESpace & UUh,int llga,int *nni,
-                     TypeOfMatriceElementaire t=Symmetric,
-                     const QuadratureFormular & fit=QuadratureFormular_T_5,
-                     const QuadratureFormular1d & fie =QF_GaussLegendre3) 
-      :cUh(UUh),cVh(UUh),Uh(UUh),Vh(UUh),
-       lga(llga),a(new R[lga]),
-       ni(nni),nj(nni),n(0),m(0),mtype(t),data((UUh.esize())) ,
-       FIT(fit),FIE(fie),
-       onFace(false),lnk(0),nik(0),nikk(0),njk(0),njkk(0){}
 
  //  for discontinous Galerkine method
-  MatriceElementaire(const FESpace & UUh,int llga,int *nni,
+  MatriceElementaire(int datasize,int llga,int *nni,
                      int lk,
-                     TypeOfMatriceElementaire t=Symmetric,
-                     const QuadratureFormular & fit=QuadratureFormular_T_5,
-                     const QuadratureFormular1d & fie =QF_GaussLegendre3) 
-      :cUh(UUh),cVh(UUh),Uh(UUh),Vh(UUh),
-        lga(llga),a(new R[lga]),
-        ni(nni),nj(nni),n(0),m(0),mtype(t),data(UUh.esize()*(lk?2:1)) ,
-       FIT(fit),FIE(fie),
+                     TypeOfMatriceElementaire t=Symmetric
+                     ) 
+    :
+    lga(llga),a(new R[lga]),
+    ni(nni),nj(nni),n(0),m(0),mtype(t),data(datasize*(lk?2:1)) ,
        onFace(lk!=0),
        lnk(lk),
        nik(lk? new int[lk*2]:0),
@@ -167,13 +150,81 @@ public:
   const LinearComb<pair<MGauche,MDroit>,C_F0> * bilinearform;
   
   MatriceElementaire & operator()(int k,int ie,int label,void * s=0) {
-      call(k,ie,label,s);
-      return *this;}
+    call(k,ie,label,s);
+    return *this;}
 };
 
+template <class FES> 
+class MatDataFES { 
+public:
+  typedef FES FESpace;
+  typedef typename  FESpace::QFElement QFElement; 
+  typedef typename  FESpace::QFBorderElement QFBorderElement; 
+  CountPointer<const FESpace> cUh,cVh;
+  const FESpace &Uh;
+  const FESpace &Vh;
+  const QFElement & FIT;
+  const QFBorderElement & FIE;
+  MatDataFES(const FESpace & UUh,const QFElement & fit, const QFBorderElement & fie)
+    :Uh(UUh),Vh(UUh),FIT(fit),FIE(fie) {}
+  MatDataFES(const FESpace & UUh,const FESpace & VVh,const QFElement & fit, const QFBorderElement & fie)
+    :Uh(UUh),Vh(VVh),FIT(fit),FIE(fie) {}
+    
 
-template <class R> 
-class MatriceElementairePleine:public MatriceElementaire<R> {
+};
+
+template <class R,class FES> 
+class MatriceElementaireFES :   public MatDataFES<FES> ,   public MatriceElementaire<R> 
+{  
+public:
+  typedef MatriceElementaire<R> MElm ;
+  using MElm::Full;
+  using MElm::Symmetric;
+
+  typedef typename MElm::TypeOfMatriceElementaire TypeOfMatriceElementaire;
+  typedef FES FESpace;
+  typedef typename  FESpace::QFElement QFElement; 
+  typedef typename  FESpace::QFBorderElement QFBorderElement; 
+
+  MatriceElementaireFES(const FESpace & UUh,const FESpace & VVh,int llga
+			,int *nnj,int * nni,TypeOfMatriceElementaire t=Full,
+			const QFElement & fit=*QFElement::Default,
+			const QFBorderElement & fie =*QFBorderElement::Default) 
+                     
+    :
+    MatDataFES<FES>(UUh,VVh,fit,fie),
+    MatriceElementaire<R>(UUh.esize()+VVh.esize(),nni,nnj,t)
+  {}
+       
+  MatriceElementaireFES(const FESpace & UUh,int llga,int *nni,
+			TypeOfMatriceElementaire t=Symmetric,
+			const QFElement & fit=*QFElement::Default,
+			const QFBorderElement & fie =*QFBorderElement::Default)
+    :
+    MatDataFES<FES>(UUh,UUh,fit,fie),
+    MatriceElementaire<R>(UUh.esize(),llga,nni,nni,t)
+  {}
+
+  //  for discontinous Galerkine method
+  MatriceElementaireFES(const FESpace & UUh,int llga,int *nni,
+			int lk,
+			TypeOfMatriceElementaire t=Symmetric,
+			const QFElement & fit=*QFElement::Default,
+			const QFBorderElement & fie =*QFBorderElement::Default) 
+    :
+    MatDataFES<FES>(UUh,UUh,fit,fie),
+    MatriceElementaire<R>(UUh.esize(),llga,nni,lk,t)
+  {}
+  ~MatriceElementaireFES() {}
+  const LinearComb<pair<MGauche,MDroit>,C_F0> * bilinearform;
+  
+  MatriceElementaireFES & operator()(int k,int ie,int label,void * s=0) {
+    this->call(k,ie,label,s);
+    return *this;}
+};
+
+template <class R,class FES=FESpace> 
+class MatriceElementairePleine:public MatriceElementaireFES<R,FES> {
 
   /* --- stockage --
      //  n = 4 m = 5
@@ -184,6 +235,10 @@ class MatriceElementairePleine:public MatriceElementaire<R> {
      ------------------*/
 
 public:
+  typedef FES FESpace;
+  typedef typename  FESpace::QFElement QFElement;
+  typedef typename  FESpace::QFBorderElement QFBorderElement;
+
   R & operator() (int i,int j) {return this->a[i*this->m+j];}
   // MatPleineElementFunc element;
   void  (* element)(MatriceElementairePleine &,const FElement &,const FElement &, double*,int ie,int label,void *) ; 
@@ -193,18 +248,18 @@ public:
   MatriceElementairePleine & operator()(int k,int ie,int label,void * stack=0)
   {call(k,ie,label,stack);return *this;}
   MatriceElementairePleine(const FESpace & VVh,
-                           const QuadratureFormular & fit=QuadratureFormular_T_5,
-                           const QuadratureFormular1d & fie =QF_GaussLegendre3)  
-    :MatriceElementaire<R>(VVh,
+                           const QFElement & fit=*QFElement::Default,
+                           const QFBorderElement & fie =*QFBorderElement::Default)  
+    :MatriceElementaireFES<R,FES>(VVh,
 			Square(VVh.MaximalNbOfDF()),
 			new int[VVh.MaximalNbOfDF()],this->Full,fit,fie),
     element(0),faceelement(0) {}
  
    //  matrice for VF or Galerkin Discontinus
    MatriceElementairePleine(const FESpace & VVh,bool VF,
-                           const QuadratureFormular & fit=QuadratureFormular_T_5,
-                           const QuadratureFormular1d & fie =QF_GaussLegendre3)  
-    :MatriceElementaire<R>(VVh,
+                           const QFElement & fit=*QFElement::Default,
+                           const QFBorderElement & fie =*QFBorderElement::Default)  
+     :MatriceElementaireFES<R,FES>(VVh,
 			Square(VVh.MaximalNbOfDF()*2),
 			new int[VVh.MaximalNbOfDF()*2],
 			VF?VVh.MaximalNbOfDF()*2:0,
@@ -212,9 +267,9 @@ public:
     element(0),faceelement(0) {}
 
   MatriceElementairePleine(const FESpace & UUh,const FESpace & VVh,
-                               const QuadratureFormular & fit=QuadratureFormular_T_5,
-                               const QuadratureFormular1d & fie =QF_GaussLegendre3) 
-    :MatriceElementaire<R>(UUh,VVh,
+                               const QFElement & fit=*QFElement::Default,
+                               const QFBorderElement & fie =*QFBorderElement::Default) 
+    :MatriceElementaireFES<R,FES>(UUh,VVh,
 			UUh.MaximalNbOfDF()*VVh.MaximalNbOfDF(),
 			new int[UUh.MaximalNbOfDF()],
 			new int[VVh.MaximalNbOfDF()],this->Full,fit,fie),
@@ -222,8 +277,10 @@ public:
 
 }; 
 
-template <class R> 
-class MatriceElementaireSymetrique:public MatriceElementaire<R> {
+template <class R,class FES=FESpace> 
+class MatriceElementaireSymetrique:public MatriceElementaireFES<R,FES> {
+
+
 
   // --- stockage --
   //   0
@@ -234,27 +291,30 @@ class MatriceElementaireSymetrique:public MatriceElementaire<R> {
   //
 
 public:
+  typedef FES FESpace;
+  typedef typename  FESpace::QFElement QFElement;
+  typedef typename  FESpace::QFBorderElement QFBorderElement;
+
   R & operator()(int i,int j) 
   {return j < i ? this->a[(i*(i+1))/2 + j] : this->a[(j*(j+1))/2 + i] ;}
   void (* element)(MatriceElementaireSymetrique &,const FElement &, double*,int ie,int label,void *) ; 
   void (* mortar)(MatriceElementaireSymetrique &,const FMortar &,void *) ; 
   void call(int k,int ie,int label,void * stack);
   MatriceElementaireSymetrique(const FESpace & VVh,
-                               const QuadratureFormular & fit=QuadratureFormular_T_5,
-                               const QuadratureFormular1d & fie =QF_GaussLegendre3) 
-    :MatriceElementaire<R>(
+                               const QFElement & fit=*QFElement::Default,
+                               const QFBorderElement & fie =*QFBorderElement::Default) 
+    :MatriceElementaireFES<R,FES>(
            VVh,
 	   int(VVh.MaximalNbOfDF()*(VVh.MaximalNbOfDF()+1)/2),
 	   new int[VVh.MaximalNbOfDF()],this->Symmetric,
        fit,fie),
        element(0),mortar(0) {}
   MatriceElementaireSymetrique & operator()(int k,int ie,int label,void * stack=0) 
-  {call(k,ie,label,stack);return *this;};
+  {this->call(k,ie,label,stack);return *this;};
 };
 
 
-template <class R> 
-class MatriceProfile;
+template <class R>  class MatriceProfile;
 
 //  classe modele pour matrice creuse
 //  ---------------------------------
@@ -267,7 +327,7 @@ public:
          : VirtualMatrice<R>(NbOfDF),n(NbOfDF),m(NbOfDF),dummy(1){}
   int n,m,dummy;
   virtual int size() const =0;
-  
+
   virtual MatriceCreuse & operator +=(MatriceElementaire<R> & )=0;
   virtual void operator=(const R & v) =0; // Mise a zero 
   KN_<R> & MatMul(KN_<R> &ax,const KN_<R> &x) const { 
@@ -372,7 +432,6 @@ public:
   void addMatMul(const KN_<R> &x,KN_<R> &ax) const;
   void addMatTransMul(const KN_<R> &x,KN_<R> &ax) const 
     { this->t().addMatMul(x,ax);}
-  
   MatriceCreuse<R> & operator +=(MatriceElementaire<R> &);
   void operator=(const R & v); // Mise a zero 
   void cholesky(double = EPSILON/8.) const ; //
@@ -470,12 +529,18 @@ public:
   MatriceMorse(KNM_<R> & A, double tol) ;
   MatriceMorse(const int  n,const R *a);
 //    :MatriceCreuse<R>(n),solver(0) {}
-  MatriceMorse(istream & f);                    
+  MatriceMorse(istream & f);
+
+  template<class FESpace>   explicit 
   MatriceMorse(const FESpace & Uh,bool sym,bool VF=false)
     :MatriceCreuse<R>(Uh.NbOfDF),solver(0) {Build(Uh,Uh,sym,VF);}
+
+  template<class FESpace>   explicit 
   MatriceMorse(const FESpace & Uh,const FESpace & Vh,bool VF=false)
     :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
   {Build(Uh,Vh,false,VF);}
+
+  template<class FESpace>   explicit 
   MatriceMorse(const FESpace & Uh,const FESpace & Vh,
                void (*build)(MatriceMorse *,const FESpace & Uh,const FESpace & Vh,void *data),void *data=0
 	       )
@@ -540,6 +605,8 @@ template<class K>
   CountPointer<const VirtualSolver> solver;
   
   void operator=(const MatriceMorse & );
+
+  template<class FESpace>
   void  Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool VF=false);
   
 };

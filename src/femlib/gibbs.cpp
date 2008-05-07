@@ -33,6 +33,7 @@
 #include "rgraph.hpp"
 #include "fem.hpp"
 using namespace Fem2D;
+#include "FESpacen.hpp"
 #include "FESpace.hpp"
 
 #define mmax(a,b)(a>b?a:b)

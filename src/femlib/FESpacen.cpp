@@ -1,0 +1,421 @@
+/*
+ *  FEspace.cpp
+ *  EF23n
+ *
+ *  Created by Frédéric Hecht on 04/12/07.
+ *  Copyright 2007 __MyCompanyName__. All rights reserved.
+ *
+ */
+#include <map>
+
+#include "ufunction.hpp"
+
+#include "error.hpp"
+#include "RNM.hpp"
+
+#include "Mesh3dn.hpp"
+#include "Mesh2dn.hpp"
+
+#include "FEspacen.hpp"
+
+
+ namespace Fem2D {
+
+//template<class Element>
+int nbdf_d(const int ndfitem[4],const  int nd[4])
+{
+  const int ndf = ndfitem[0]*nd[0] + ndfitem[1]*nd[1]+  ndfitem[2]*nd[2]  + ndfitem[3]*nd[3];	
+  return ndf;
+}
+
+//template<class Element>
+int nbnode_d(const int ndfitem[4],const  int nd[4])
+{
+  //  const  int nd[]= {Element::nv, Element::ne,Element::nf,Element::nt};
+    const int ndf = nd[0]*(ndfitem[0]!=0) + nd[1]*(ndfitem[1]!=0)+  nd[2]*(ndfitem[2]!=0)  + nd[3]*(ndfitem[3]!=0);	
+    return ndf;
+}
+
+//template<class Element>
+int *builddata_d(const int ndfitem[4],const int nd[4])
+{
+  //    const int d=Element::Rd::d;
+  //    const int nwhat=Element::nitem;
+  //    const  int nd[]= {Element::nv, Element::ne,Element::nf,Element::nt};
+  //    const int nitem=nd[0]+nd[1]+nd[2]+nd[3];
+  //    cout << " nitem="<< nitem<< endl;
+  const int ndf = nbdf_d(ndfitem,nd);
+  const int nnode=nbnode_d(ndfitem,nd);
+  int lgdata= ndf*5+2;
+  int * data = new int[lgdata];
+  int p=0;
+  for(int i=0,nw=0;i<=3;++i)
+    for(int j=0;j<nd[i];++j,nw++)// pour les what (support de node)
+      for(int k=0;k<ndfitem[i];++k)// 	    
+	data[p++] = nw;
+  cout << p << " " <<ndfitem[0]<< ndfitem[1]<<ndfitem[2]<<ndfitem[3]<< " " << ndf  << endl;
+  assert(p==ndf);
+  for(int i=0,nw=0;i<=3;++i)
+    for(int j=0;j<nd[i];++j,nw++)// pour les what (support de node)
+      for(int k=0;k<ndfitem[i];++k)// 	    
+	data[p++] = k;
+  // cout << p << " " << 2*ndf << " " << nitem << endl;
+  int nn=0;
+  for(int i=0;i<=3;++i)
+    {
+      int in=ndfitem[i]?1:0;
+      for(int j=0;j<nd[i];++j,nn+=in )// pour les what (support de node)
+	for(int k=0;k<ndfitem[i];++k)// 	    
+	  data[p++] = nn;
+    }
+  // cout << p << " " << 3*ndf << " " << nitem << endl;
+  for(int i=0;i<ndf*2;++i)	    
+    data[p++] = 0;
+  
+  data[p++] = 0;
+  data[p++] = 0;
+  //cout << p << " == " << lgdata << endl;
+  assert(p== lgdata);
+  //cout << nn << " " << nnode << endl;
+  p =0;
+  
+  /*  
+      for(int j=0;j<4;j++)
+      {
+      for (int i=0;i<ndf;i++)
+      cout << data[p++] << " ";
+      cout << endl;
+      } 
+  */
+  assert(nn==nnode); 
+  return data;  
+}
+
+dataTypeOfFE::dataTypeOfFE(const int nitemdim[4],const int dfon[4],int NN,int nbsubdivisionn,int nb_sub_femm)
+  : data(builddata_d(dfon,nitemdim)),  
+  dataalloc(data),
+  ndfonVertex(dfon[0]),
+  ndfonEdge(dfon[1]),
+  ndfonFace(dfon[2]),
+  ndfonVolume(dfon[3]),
+  NbDoF(nbdf_d(dfon,nitemdim)),
+  NbNode(nbnode_d(dfon,nitemdim)),
+  N(NN),
+  nb_sub_fem(nb_sub_femm),
+  nbsubdivision(nbsubdivisionn),
+  DFOnWhat(data+0*NbDoF),
+  DFOfNode(data+1*NbDoF),
+  NodeOfDF(data+2*NbDoF),
+  fromFE(data+3*NbDoF),
+  fromDF(data+4*NbDoF),
+  fromASubFE(data+3*NbDoF),
+  fromASubDF(data+4*NbDoF) ,
+  dim_which_sub_fem(data+5*NbDoF)
+{}
+
+
+int *builddata_d(const int nitemdim[4],const KN< dataTypeOfFE const  *> &teb)
+{
+    const int k = teb.N(); 
+    KN<int> NN(k+1), DF(k+1) , comp(k+1);
+    map< dataTypeOfFE const  *,int> m;
+    int i=k,j;    
+    while(i--) // on va a l'envert pour avoir comp[i] <=i 
+	m[teb[i]]=i;
+    // l'ordre comp est important comp est croissant  mais pas de pb. 
+    i=k;    
+    while(i--) 
+	comp[i]=m[teb[i]]; //  comp[i] <=i
+    int n=0,N=0;
+    for ( j=0;j<k;j++)
+      {NN[j]=N;N+=teb[j]->N;}
+    NN[k] = N;
+    //  reservation des interval en df   
+    n=0;
+    for ( j=0;j<k;j++)
+      { DF[j]=n;n+=teb[j]->NbDoF;}
+    DF[k] = n;
+    
+    int NbDoF=0;
+    int dfon[4]={0,0,0,0};
+    int nbsubdivision=0;
+    for (int i=0;i<k;++i)
+      {
+	NbDoF += teb[i]->NbDoF;
+	  dfon[0] += teb[i]->ndfonVertex;
+	dfon[1] += teb[i]->ndfonEdge;
+	dfon[2] += teb[i]->ndfonFace;
+	dfon[3] += teb[i]->ndfonVolume;
+	nbsubdivision = max(nbsubdivision,teb[i]->nbsubdivision);
+      }
+    
+    int * data0=new int[9+7*NbDoF+N];
+    int * data=data0+9;
+    int * data1=data+5*NbDoF;
+   
+      int c=0;
+    
+    KN<int> w(10),nn(10);
+    
+    w=0;
+    nn=0; 
+
+    
+    for ( j=0;j<k;j++)
+	for ( i=0;i<teb[j]->NbDoF;i++)
+	    nn[teb[j]->DFOnWhat[i]]++;
+    int nbn=0;      
+    for( j=0;j<10;j++)
+	if (nn[j]) nn[j]=nbn++;
+	else nn[j]=-1;
+    KN<int> dln(10);
+    dln=0;
+    // nn donne numero de noeud sur what            
+    for ( j=0;j<k;j++)
+	for ( i=0;i<teb[j]->NbDoF;i++)
+	    data[c++] = teb[j]->DFOnWhat[i];
+    
+    for ( j=0;j<k;j++)
+      {
+	  int  cc=c;
+	  for ( i=0;i<teb[j]->NbDoF;i++)
+	      data[c++] = teb[j]->DFOfNode[i]+dln[teb[j]->DFOnWhat[i]];
+	  for ( i=0;i<teb[j]->NbDoF;i++)
+	      dln[teb[j]->DFOnWhat[i]]=Max(dln[teb[j]->DFOnWhat[i]],data[cc++]+1);      
+      }
+    
+    
+    for ( j=0;j<k;j++)
+      { 
+	  //  w renumerotation des noeuds 
+	  //  Ok si un noeud par what 
+	  for ( i=0;i<teb[j]->NbDoF;i++)
+	      data[c++] = nn[teb[j]->DFOnWhat[i]];
+      }
+    
+    for ( j=0;j<k;j++)
+	for ( i=0;i<teb[j]->NbDoF;i++)
+	    data[c++] = j; //  node from of FE
+    
+    
+    for ( j=0;j<k;j++)
+	for ( i=0;i<teb[j]->NbDoF;i++)
+	    data[c++] = i; //  node from of df in FE
+    // error -- here 
+    //in case of [P2,P2],P1  
+    // we expect 0,0,1   and we get 0 1 2 
+    // => wrong BC ???? 
+    c+=2*n; // on saute le deux tableau en plus (cf data1.)
+    
+    
+    int xx=0;
+    for (j=0;j<k;j++)
+      { 
+	  int xxx=xx;
+	  for (i=0;i<teb[j]->N;i++)
+	    { 
+		data[c] = teb[j]->dim_which_sub_fem[i]+xx;
+		xxx=Max(xxx,data[c]+1);
+		c++;
+	    }
+	  xx=xxx;
+      }
+    
+    
+    //  ou dans la partie miminal element finite atomic 
+    
+    int ci=n;
+    int cj=0;
+    int ccc=0;
+    for ( j=0;j<k;ccc+=teb[j++]->nb_sub_fem)
+	
+	for ( i=0;i<teb[j]->NbDoF;i++)
+	  {
+	      int il= teb[j]->fromASubDF[i];
+	      int jl= teb[j]->fromASubFE[i];
+	      data1[ci++]=il;
+	      data1[cj++]=ccc+jl;      
+	  }
+    
+    int nb_sub_fem=ccc;
+    
+    ffassert(c== 7*n+N);      
+    /*  int cc=0;
+     cout << " Data : " << endl;
+     for ( i=0;i<5;i++)    {
+     for (j=0;j<n;j++)
+     cout << " " << data[cc++];
+     cout << endl;}
+     cout << " which " ;
+     for (i=0;i<N;i++)
+     cout << " " << data[cc++];
+     cout << endl;*/
+    
+    
+    for(int i=0;i<4;++i)
+	data0[i]=dfon[i];
+    
+    data0[4]=NbDoF;
+    data0[5]=nbn;// NbNode
+    data0[6]=N;
+    data0[7]=nb_sub_fem;
+    data0[8]=nbsubdivision;
+    return data0;
+}
+
+  
+dataTypeOfFE::dataTypeOfFE(const int nitemdim[4],const KN< dataTypeOfFE const *>  &  tef)
+: 
+data(builddata_d(nitemdim,tef)),  
+dataalloc(data),
+ndfonVertex(data[0]),
+ndfonEdge(data[1]),
+ndfonFace(data[2]),
+ndfonVolume(data[3]),
+NbDoF(data[4]),
+NbNode(data[5]),
+N(data[6]),
+nb_sub_fem(data[7]),
+nbsubdivision(data[8]),
+DFOnWhat(data+9+0*NbDoF),
+DFOfNode(data+9+1*NbDoF),
+NodeOfDF(data+9+2*NbDoF),
+fromFE(data+9+3*NbDoF),
+fromDF(data+9+4*NbDoF),
+fromASubFE(data+9+5*NbDoF),
+fromASubDF(data+9+6*NbDoF) ,
+dim_which_sub_fem(data+9+7*NbDoF)
+{}
+
+template<class Mesh>
+void GTypeOfFESum<Mesh>::init(InterpolationMatrix<RdHat> & M,FElement * pK,int odf,int ocomp,int *pp) const
+{
+  // a faire ..... cas matrix invariante 
+  assert(0);
+}
+
+template<class Mesh>
+GTypeOfFESum<Mesh>::GTypeOfFESum(const KN< GTypeOfFE<Mesh> const *> & t)
+    : 
+    GTypeOfFE<Mesh>(t),
+    k(t.N()),
+    teb(t),
+    NN(k+1),
+    DF(k+1) ,
+    comp(k+1)
+    
+{
+  bool debug=true;
+  {
+    map<const GTypeOfFE<Mesh> *,int> m;
+    int i=k,j;    
+    while(i--) // on va a l'envert pour avoir comp[i] <=i 
+      m[teb[i]]=i;
+    // l'ordre comp est important comp est croissant  mais pas de pb. 
+    i=k;    
+    while(i--) 
+      comp[i]=m[teb[i]]; //  comp[i] <=i
+    
+    // reservatition des intervalles en espaces
+    int n=0,N=0;
+    for ( j=0;j<k;j++)
+      {NN[j]=N;N+=teb[j]->N;}
+    NN[k] = N;
+    //  reservation des interval en df   
+    n=0;
+    for ( j=0;j<k;j++)
+      { DF[j]=n;n+=teb[j]->NbDoF;}
+    DF[k] = n;
+  }
+  int ii=0;
+  for (int i=0;i<k;++i)
+    {
+      for (int j=0;j<t[i]->nb_sub_fem;++j)
+	this->Sub_ToFE[ii++]=t[i]->Sub_ToFE[j];
+    }
+  assert(ii==this->nb_sub_fem );
+  
+  int c=0,c0=0;
+  for (int i=0;i<this->nb_sub_fem;i++) 
+    { 
+      int ndofi=this->Sub_ToFE[i]->NbDoF;
+      for(int j=0;j<this->Sub_ToFE[i]->N;++j)
+	{
+	  this->begin_dfcomp[c] = c0 + this->Sub_ToFE[i]->begin_dfcomp[j] ; 
+	  this->end_dfcomp[c]   = c0 + this->Sub_ToFE[i]->end_dfcomp[j] ;
+	  c++;
+	}
+      c0+=ndofi;
+      
+    }
+  if(debug)
+    {
+      cout <<" NbDoF : " << this->NbDoF <<endl;
+      for(int i=0;i<this->N;++i)
+	cout << "      comp " << i << " ["<<this->begin_dfcomp[i]<<", "<< this->end_dfcomp[i]<< "[\n";
+    }
+  
+  // construction de l'interpolation .
+  
+  int npi=0;
+  int nci=0;
+  bool var=true;
+  for (int i=0;i<this->nb_sub_fem;i++)
+    {
+      npi +=this->Sub_ToFE[i]->NbPtforInterpolation;
+      nci +=this->Sub_ToFE[i]->NbcoefforInterpolation;
+      var = var && this->Sub_ToFE[i]->invariantinterpolationMatrix;
+    }
+  assert(this->NbcoefforInterpolation== nci);
+  this->invariantinterpolationMatrix=var;
+  // this->pInterpolation.init(nci);
+  // this->cInterpolation.init(nci);
+  // this->dofInterpolation.iniy(nci);
+  {
+    map<RdHat,int,lessRd> mpt;
+    numPtInterpolation.init(npi);
+    int npp=0,kkk=0;
+    KN<RdHat> Ptt(npi);
+    for (int i=0;i<this->nb_sub_fem;i++)
+      {
+	const GTypeOfFE<Mesh> &ti=*this->Sub_ToFE[i];
+	
+	for(int p=0;p<ti.NbPtforInterpolation;++p,++kkk)
+	  {
+	    Ptt[kkk]=ti.PtInterpolation[p];
+	    cout << "    p= "<< p << " [ " << Ptt[kkk]<< "] ,  "<< kkk<< " "<< npp<<endl;;
+	    if( mpt.find(Ptt[kkk]) == mpt.end())
+	      mpt[Ptt[kkk]]=npp++;
+	    numPtInterpolation[kkk]=mpt[Ptt[kkk]];
+	  }
+      }
+    assert(this->NbPtforInterpolation==0);
+    cout << npp;
+    this->NbPtforInterpolation=npp;
+    this->PtInterpolation.init(npp);
+    for(int i=0;i<npp;++i)
+      this->PtInterpolation[numPtInterpolation[i]]=Ptt[i];
+  }
+  
+  int oc=0,odof=0;
+  for (int i=0,k=0;i<this->nb_sub_fem;i++)
+    {
+      const GTypeOfFE<Mesh> &ti=*this->Sub_ToFE[i];
+      for(int j=0;j<ti.NbcoefforInterpolation; ++j,++k)
+	{
+	  this->pInterpolation[k]   = numPtInterpolation[ti.pInterpolation[j]];
+	  this->cInterpolation[k]   = ti.cInterpolation[j]+oc;
+	  this->dofInterpolation[k] = ti.dofInterpolation[j]+odof;
+	  this->coefInterpolation[k]=ti.coefInterpolation[j];
+	}
+      oc += ti.N;
+      odof += ti.NbDoF; 
+    }
+  
+  assert(c==this->N);
+}
+
+// explicite instance..
+template class GTypeOfFESum<Mesh2>;
+template class GTypeOfFESum<Mesh3>;
+}

@@ -34,7 +34,11 @@ using namespace std;
 
 #include "RNM.hpp"
 #include "fem.hpp"
+
+
+#include "FESpacen.hpp"
 #include "FESpace.hpp" 
+
 
 //#include "fem3.hpp"
 #include "MeshPoint.hpp"
@@ -53,9 +57,11 @@ using namespace std;
 #include "lgfem.hpp"
 using Fem2D::Mesh;
 using Fem2D::MeshPoint;
+
 extern bool NoWait; 
 
 typedef Mesh * pmesh;
+
 
 
 
@@ -547,7 +553,7 @@ AnyType MoveMesh::operator()(Stack stack) const
    if (pth)
      for (size_t i=0;i<sol.size();i++)
        { //  ale 
-          pair<FEbase<R>,int> * s = GetAny<pair<FEbase<R>,int>*>( (*sol[i])(stack));
+          pair<FEbase<double>,int> * s = GetAny<pair<FEbase<double>,int>*>( (*sol[i])(stack));
           ffassert(s->first.Vh);
           ffassert( &s->first.Vh->Th == Thh); // same old mesh
           ffassert(0); // a faire ????
@@ -818,7 +824,7 @@ Fem2D::Mesh  * EmptyTheMesh( Fem2D::Mesh *  const & pTh,long *ssd=0)
     int nebb=0;
     for (int i=0;i<Th.nt;i++)
      for (int e=0;e<3;e++)
-      { int ee=e,ii=Th.TriangleAdj(i,ee);
+      { int ee=e,ii=Th.ElementAdj(i,ee);
         if ( (ii>= 0 && ii != i) && (i<ii && ssd[ii] != ssd[i]) ) 
           {
            nebb++;
@@ -856,7 +862,7 @@ Fem2D::Mesh  * EmptyTheMesh( Fem2D::Mesh *  const & pTh,long *ssd=0)
     int nebb=0;
     for (int i=0;i<Th.nt;i++)
      for (int e=0;e<3;e++)
-      { int ee=e,ii=Th.TriangleAdj(i,ee);
+      { int ee=e,ii=Th.ElementAdj(i,ee);
         if ( (ii>= 0 && ii != i) && (i<ii && ssd[ii] != ssd[i]) ) 
          {
            nebb++;
@@ -941,7 +947,7 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
   for (int i=0;i<nbt;i++)
     {
       int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
-      R a= Area2(v[i0],v[i1],v[i2])/2;
+      double a= Area2(v[i0],v[i1],v[i2])/2;
       if ( a < Th[i].area*1.e-6   ) 
        { nberr++;
         if (verbosity>1) 
@@ -996,6 +1002,7 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
   using  Fem2D::R2;
   using  Fem2D::BoundaryEdge;
   using  Fem2D::Mesh;
+  using  Fem2D::R;
  // using  Fem2D::R;
   using  Fem2D::MeshPointStack;
   int nx1=nx+1,ny1=ny+1;

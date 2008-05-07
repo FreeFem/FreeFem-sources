@@ -37,6 +37,7 @@
 
 #include "RNM.hpp"
 #include "fem.hpp"
+#include "FESpacen.hpp" 
 #include "FESpace.hpp" 
 
 namespace Fem2D {

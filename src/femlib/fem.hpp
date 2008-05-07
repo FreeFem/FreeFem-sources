@@ -5,11 +5,13 @@
 #include "Serialize.hpp"
 // some usefull function 
 
+typedef double R;
+
 
 template<class K> class KN_;
 
 const  double Pi =  3.14159265358979323846264338328;
-
+/*
 template<class T> inline T Min (const T &a,const T &b){return a < b ? a : b;}
 template<class T> inline T Max (const T &a,const T & b){return a > b ? a : b;}
 template<class T> inline T Abs (const T &a){return a <0 ? -a : a;}
@@ -17,119 +19,29 @@ template<class T> inline T Abs (const T &a){return a <0 ? -a : a;}
 template<class T> inline void Exchange (T& a,T& b) {T c=a;a=b;b=c;}
 template<class T> inline T Max (const T &a,const T & b,const T & c){return Max(Max(a,b),c);}
 template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(Min(a,b),c);}
+*/
 
+//#include "ufunction.hpp" 
+#include "ufunction.hpp" 
 inline double norm(double x){return x*x;} 
 inline float norm(float x){return x*x;}
 
 // definition R
-typedef double R;
-namespace Fem2D {
-#ifdef NNNNNNN
+namespace Fem2D 
+{
 
-// The class R2
-class R2 {
-  friend ostream& operator <<(ostream& f, const R2 & P )
-  { f << P.x << ' ' << P.y   ; return f; }
-  friend istream& operator >>(istream& f,  R2 & P)
-  { f >>  P.x >>  P.y  ; return f; }
-
-public:  
-  static const int d=2;
-  typedef R Rcross; 
-  R x,y;
-  R2 () :x(0),y(0) {};
-  R2 (R a,R b):x(a),y(b)  {}
-  R2 (R2 A,R2 B) :x(B.x-A.x),y(B.y-A.y)  {}
-  R2   operator+(R2 P)const   {return R2(x+P.x,y+P.y);}
-  R2   operator+=(R2 P)  {x += P.x;y += P.y;return *this;}
-  R2   operator-(R2 P)const   {return R2(x-P.x,y-P.y);}
-  R2   operator-=(R2 P) {x -= P.x;y -= P.y;return *this;}
-  R2   operator-()const  {return R2(-x,-y);}
-  R2   operator+()const  {return *this;}
-  R   operator,(R2 P)const  {return  x*P.x+y*P.y;} // produit scalaire
-  Rcross   operator^(R2 P)const {return  x*P.y-y*P.x;} // produit mixte
-  R2   operator*(R c)const {return R2(x*c,y*c);}
-  R2   operator/(R c)const {return R2(x/c,y/c);}
-  R2    operator*=(R c)  {x *= c;y *= c;return *this;}
-  R2    operator/=(R c)  {x /= c;y /= c;return *this;}
-  R  &  operator[](int i){ return (&x)[i];}
-  R2   perp() {return R2(-y,x);} // the perpendicular
-  friend R2 operator*(R c,R2 P) {return P*c;}
-  friend R2 operator/(R c,R2 P) {return P/c;}
-};
-
-// The class R3
-class R3: public R2 {
-  friend ostream& operator <<(ostream& f, const R3 & P )
-  { f << P.x << ' ' << P.y << ' ' << P.z   ; return f; }
-  friend istream& operator >>(istream& f,  R3 & P)
-  { f >>  P.x >>  P.y >>  P.z  ; return f; }
-
-public:  
-
-  static const int d=3;
-  
-  typedef R3 Rcross; 
-  R z;
- 
-  R3 () :z(0) {};
-  R3 (R a,R b,R c):R2(a,b),z(c)  {}
-  R3 (R2 P2):R2(P2),z(0)  {}
-  R3 (const R3 & A,const R3 & B) :R2(B.x-A.x,B.y-A.y),z(B.z-A.z)  {}
-  R3 & operator=(R2 P2) {x=P2.x;y=P2.y;z=0;return *this;}
-  R3   operator+(R3 P)const   {return R3(x+P.x,y+P.y,z+P.z);}
-  R3 & operator+=(R3 P)  {x += P.x;y += P.y;z += P.z;return *this;}
-  R3   operator-(R3 P)const   {return R3(x-P.x,y-P.y,z-P.z);}
-  R3 & operator-=(R3 P) {x -= P.x;y -= P.y;z -= P.z;return *this;}
-  R3   operator-()const  {return R3(-x,-y,-z);}
-  R3   operator+()const  {return *this;}
-  R    operator,(R3 P)const  {return  x*P.x+y*P.y+z*P.z;} // produit scalaire
-  Rcross  operator^(R3 P)const {return R3(y*P.z-z*P.y ,P.x*z-x*P.z, x*P.y-y*P.x);} // produit mixte
-  R3   operator*(R c)const {return R3(x*c,y*c,z*c);}
-  R3   operator/(R c)const {return R3(x/c,y/c,z/c);}
-  R  &  operator[](int i){ return (&x)[i];}
-  friend R3 operator*(R c,R3 P) {return P*c;}
-  friend R3 operator/(R c,R3 P) {return P/c;}
-};
-
-inline R det(R3 A,R3 B, R3 C) {
-  // version optimize bofbof ..... FH a tester
-  R s=1.;
-  if(abs(A.x)<abs(B.x)) Exchange(A,B),s = -s;
-  if(abs(A.x)<abs(C.x)) Exchange(A,C),s = -s;
-  if(abs(A.x)>1e-50)
-   {
-      s *= A.x;
-      A.y /= A.x; A.z /= A.x;
-      B.y  -=  A.y*B.x  ;   B.z  -=  A.z*B.x ;
-      C.y  -=  A.y*C.x  ;   C.z  -=  A.z*C.x ;
-      return s* ( B.y*C.z - B.z*C.y) ;
-   }
-  else return 0.   ;
-};
-
-inline R det(R3 A,R3 B, R3 C, R3 D) { return det(R3(A,B),R3(A,C),R3(A,D));}
-
-#else
 
 #include "R1.hpp"
 #include "R2.hpp"
 #include "R3.hpp"
 
-#endif
 
 inline void MoveTo(R2 P) { rmoveto((float) P.x,(float)P.y);}
 inline void LineTo(R2 P) { rlineto((float)P.x,(float)P.y);}
 
 inline R Area2(const R2 A,const R2 B,const R2 C){return (B-A)^(C-A);} 
-inline R Norme2_2(const R2 & A){ return (A,A);}
-inline R Norme2(const R2 & A){ return sqrt((A,A));}
-inline R Norme2_2(const R3 & A){ return (A,A);}
-inline R Norme2(const R3 & A){ return sqrt((A,A));}
-  inline R Norme_infty(const R2 & A){return ::Max(Abs(A.x),Abs(A.y));}
-  inline R Norme_infty(const R3 & A){return ::Max(Abs(A.x),Abs(A.y),Abs(A.z));}
 inline R Theta(R2 P){ return atan2(P.y,P.x);}
-
+  /*
 inline R2 Minc(const R2 & A,const R2& B) { return R2(Min(A.x,B.x),Min(A.y,B.y));}
 inline R2 Maxc(const R2 & A,const R2& B) { return R2(Max(A.x,B.x),Max(A.y,B.y));}
 inline R3 Minc(const R3 & A,const R3& B) { return R3(Min(A.x,B.x),Min(A.y,B.y),Min(A.z,B.z));}
@@ -138,7 +50,7 @@ inline R2 Minc(const R2 & A,const R2& B,const R2& C) { return R2(Min(A.x,B.x,C.x
 inline R2 Maxc(const R2 & A,const R2& B,const R2& C) { return R2(Max(A.x,B.x,C.x),Max(A.y,B.y,C.y));}
 inline R3 Minc(const R3 & A,const R3& B,const R3& C) { return R3(Min(A.x,B.x,C.x),Min(A.y,B.y,C.y),Min(A.z,B.z,C.z));}
 inline R3 Maxc(const R3 & A,const R3& B,const R3& C) { return R3(Max(A.x,B.x,C.x),Max(A.y,B.y,C.y),Max(A.z,B.z,C.z));}
-
+  */
 // def de numerotation dans un triangles direct sens (trigo)
 // the edge is oposite of the vertex
 ////  [3] is a edge
@@ -203,19 +115,8 @@ const   R3 TetHat[4]= { R3(0.,0.,0.),R3(1.,0.,0.),R3(0.,1.,0.),R3(0.,0.,1.) } ;
 
  class Mesh;                                  
 // --------
-class Label {  // reference number for the physics
-public: 
-  int lab;
-  Label(int r=0):lab(r){}
-  int operator!() const{return !lab;} 
-  bool operator<(const Label & r) const {return lab < r.lab;} 
-  bool operator==(const Label & r) const {return lab == r.lab;} 
-  bool operator>(const Label & r) const { return lab > r.lab;} 
-};
-inline ostream& operator <<(ostream& f,const Label & r  )
-  { f <<  r.lab ; return f; }
-inline istream& operator >>(istream& f, Label & r  )
-  { f >>  r.lab ; return f; }
+#include "Label.hpp"
+
   
 template<class Rd>
 class TVertex : public Rd,public Label {
@@ -463,7 +364,7 @@ public:
 
 typedef TBoundaryEdge<R2> BoundaryEdge;
 typedef BoundaryEdge Edge;
-typedef Tetraedre Tet;  // just to play
+  // typedef Tetraedre Tet;  // just to play
 
 template<class Rd>
 class TMortar { 
@@ -502,22 +403,32 @@ typedef TMortar<R2> Mortar;
  
 class FQuadTree;
 
-class Mesh: public RefCounter { public:
-
-typedef TTriangle<R2> Triangle;
+class Mesh: public RefCounter { 
+public:
+  
+  typedef TTriangle<R2> Triangle;
+  typedef TTriangle<R2> Element;
+  typedef BoundaryEdge  BorderElement; 
+  typedef TVertex<R2>  Vertex;
+  typedef  R2 Rd;
+  typedef R2  RdHat;// for parametrization 
+  typedef Rd::R R;
+  typedef FQuadTree GTree;
+  
 
    static const char magicmesh[8]  ;
   int dim; 
   int nt,nv,neb,ne,ntet;
   R area;
   R volume;
+  R lenbord;
   static int kthrough,kfind;
   FQuadTree *quadtree; 
   Vertex *vertices;
   Triangle *triangles;
   BoundaryEdge  *bedges;
   Edge  *edges;  // edge element 
-  Tet * tet; // 
+  Tetraedre * tet; // 
   
     
   int NbMortars,NbMortarsPaper;
@@ -532,6 +443,9 @@ typedef TTriangle<R2> Triangle;
   Mesh(const string s) {read(s.c_str());}
   Mesh( const Serialize & ) ;
   Mesh(int nbv,R2 * P);
+
+  R mesure(){ return area;}
+  R bordermesure(){ return lenbord;}
   
   Serialize serialize() const;
   Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b);  
@@ -546,6 +460,10 @@ typedef TTriangle<R2> Triangle;
   int operator()(const Vertex & v)   const {return &v - vertices;}
   int operator()(const Vertex * v)   const {return v  - vertices;}
   int operator()(int it,int j) const {return number(triangles[it][j]);}
+  BoundaryEdge &  be(int i) const { return bedges[i];}
+  Element &  t(int i) const { return triangles[i];}
+  Vertex &  v(int i) const { return vertices[i];}
+
         // Nu vertex j of triangle it
   void BoundingBox(R2 & Pmin,R2 &Pmax) const;
   void InitDraw() const ;
@@ -554,7 +472,7 @@ typedef TTriangle<R2> Triangle;
   int Contening(const Vertex * v) const{ return TriangleConteningVertex[ v  - vertices];}
   int renum();
   int gibbsv (long* ptvoi,long* vois,long* lvois,long* w,long* v);
-  int TriangleAdj(int it,int &j) const 
+  int ElementAdj(int it,int &j) const 
       {int i=TheAdjacencesLink[3*it+j];j=i%3;return i/3;}
   int nTonEdge(int it,int e) const { int k=3*it+e;return k==TheAdjacencesLink[k] ? 1 : 2;}
       
@@ -563,7 +481,7 @@ typedef TTriangle<R2> Triangle;
   bool SensOfEdge(const Triangle & T,int j) const 
       { return  number(T[(j+1)%3]) <number(T[(j+ 2)%3]);}
       
-  int GetAllTriangleAdj(int it,int *tabk) const
+  int GetAllElementAdj(int it,int *tabk) const
    { //  get the tab of all adj triangle to a traingle (max 3)
      //  and return the size of the tab 
       int i=0;
@@ -576,9 +494,10 @@ typedef TTriangle<R2> Triangle;
       return i;
    }
       
-  int BoundaryTriangle(int be,int & edgeInT) const {
+  int BoundaryElement(int be,int & edgeInT) const {
      int i= BoundaryEdgeHeadLink[be]; edgeInT = i%3; 
      return i/3;}
+
      
   Triangle * Find(const R2 & P) const ;
   const Triangle * Find(R2 P, R2 & Phat,bool & outside,const Triangle * tstart=0) const  ;

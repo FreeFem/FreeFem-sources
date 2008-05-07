@@ -57,7 +57,7 @@ inline int NbOfSubInternalVertices(int k)
    int nvmax=Th.nv;
 //  attention il faut supprime les aretes frontiere  interne    
    for (int ieb=0,jj;ieb<Th.neb;ieb++)
-       neb += split[Th.BoundaryTriangle(ieb,jj)];
+       neb += split[Th.BoundaryElement(ieb,jj)];
    int nebmax=neb;
    
    for (int i=0;i<Th.nt;i++)
@@ -91,7 +91,7 @@ inline int NbOfSubInternalVertices(int k)
    neb =0;
    for (int ieb=0,jj;ieb<Th.neb;ieb++)
        {  
-          int kold = Th.BoundaryTriangle(ieb,jj);
+          int kold = Th.BoundaryElement(ieb,jj);
           int n=split[kold];
           
           int n1=n+1;

@@ -30,22 +30,25 @@
 //#pragma inline_depth(0) 
 #endif
 
+#include "error.hpp"
+#include "RNM.hpp"
+#include <set>
+#include <vector>
+#include <cstdio>
+#include <complex>
+
 #include  <cmath>
 #include  <iostream>
 using namespace std;
-#include "error.hpp"
+#include "FESpacen.hpp"
+
 #include "AFunction.hpp"
 #include "rgraph.hpp"
-#include <cstdio>
 #include "MatriceCreuse_tpl.hpp"
 
 //#include "fem3.hpp"
 #include "MeshPoint.hpp"
-#include <complex>
 #include "Operator.hpp" 
-
-#include <set>
-#include <vector>
 
 #include "lex.hpp"
 #include "lgfem.hpp"
@@ -896,7 +899,7 @@ AnyType DiagMat(Stack stack,Expression emat,Expression edia)
   sparse_mat->pUh=0;
   sparse_mat->pVh=0;
   sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
-  sparse_mat->A.master(new MatriceMorse<R>(diag->N(),*diag));
+  sparse_mat->A.master(new MatriceMorse<R>((int) diag->N(),(const R*) *diag));
   return sparse_mat;
 }
 
@@ -961,7 +964,7 @@ AnyType MatFull2Sparse(Stack stack,Expression emat,Expression eA)
   sparse_mat->pUh=0;
   sparse_mat->pVh=0;
   sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)
-  sparse_mat->A.master(new MatriceMorse<R>(*A,0.0));
+  sparse_mat->A.master(new MatriceMorse<R>((KNM_<R> &)*A,0.0));
   
  return sparse_mat;
 }

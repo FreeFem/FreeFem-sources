@@ -10,7 +10,6 @@
 // definition R (les nombres reals)
 // remarque la fonction abort est defini dans 
 // #include <cstdlib> 
-//typedef double R;
 
 // The class R2
 class R2 {
@@ -22,7 +21,11 @@ public:
   // les 3 constructeurs ---
   R2 () :x(0.),y(0.) {} // rappel : x(0), y(0)  sont initialiser via le constructeur de double 
   R2 (R a,R b):x(a),y(b)  {}
+  R2 (const R * a):x(a[0]),y(a[1])  {}
+  R2 ( R * a):x(a[0]),y(a[1])  {}
+
   R2 (const R2 & a,const R2 & b):x(b.x-a.x),y(b.y-a.y)  {}
+  static  R2 diag(R a){ return R2(a,a);}
   // le constucteur par defaut est inutile
   //R2 (const R2 & a) :x(a.x),y(a.y) {} 
 
@@ -35,8 +38,8 @@ public:
   // les autre operoteur affectations
   R2 &  operator+=(const R2 & P)  {x += P.x;y += P.y;return *this;}
   R2 &  operator-=(const R2 & P) {x -= P.x;y -= P.y;return *this;}
-  R2 &  operator*=(const R & a) {x *=a;y *=a;return *this;}
-  R2 &  operator/=(const R & a) {x /=a;y /=a;return *this;}
+  R2 &  operator*=(R a) {x *= a;y *= a;return *this;}
+  R2 &  operator/=(R a) {x /= a;y /= a;return *this;}
 
   // operateur binaire + - * , ^ /
   R2   operator+(const R2 & P)const   {return R2(x+P.x,y+P.y);}
@@ -57,6 +60,9 @@ public:
   R  &  operator[](int i){ return (&x)[i];}
   const R  &  operator[](int i) const { return (&x)[i];}
 
+  R  X() const {return x;}
+  R  Y() const {return y;}
+  R  Z() const {return 0.;}
 
   R norme() const { return std::sqrt(x*x+y*y);}
   R norme2() const { return (x*x+y*y);}
@@ -74,8 +80,11 @@ friend  std::istream& operator >>(std::istream& f,  R2 & P)
   static const R2 KHat[d+1];
 };
 
-//inline R2 Min(const R2 & A,const R2 &B){ return R2(min(A.x,B.x),min(A.y,B.y));}
-//inline R2 Max(const R2 & A,const R2 &B){ return R2(max(A.x,B.x),max(A.y,B.y));}
+inline R2 Minc(const R2 & A,const R2 &B){ return R2(min(A.x,B.x),min(A.y,B.y));}
+inline R2 Maxc(const R2 & A,const R2 &B){ return R2(max(A.x,B.x),max(A.y,B.y));}
+inline double Norme_infty(const R2 & A){return max(std::fabs(A.x),std::fabs(A.y));}
+inline double Norme2_2(const R2 & A){ return (A,A);}
+inline double  Norme2(const R2 & A){ return sqrt((A,A));}
 
 #endif
 

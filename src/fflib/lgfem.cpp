@@ -37,9 +37,13 @@ using namespace std;
 #include "AFunction.hpp"
 #include "rgraph.hpp"
 #include <cstdio>
+#include "fem.hpp"
+#include "Mesh3dn.hpp"
+
+
 #include "MatriceCreuse_tpl.hpp"
 
-//#include "fem3.hpp"
+
 #include "MeshPoint.hpp"
 #include <complex>
 #include "Operator.hpp" 
@@ -286,7 +290,8 @@ LinkToInterpreter * l2interpreter;
 
 
   using namespace Fem2D;
-
+  using namespace EF23;
+/*
 inline pmesh  ReadMesh( string * const & s) {
   Mesh * m=new Mesh(*s);
   R2 Pn,Px;
@@ -295,7 +300,16 @@ inline pmesh  ReadMesh( string * const & s) {
  //  delete s; modif FH 2006 (stack ptr)
   return m;
  }
- 
+
+inline pmesh3  ReadMesh3( string * const & s) {
+  Mesh3 * m=new Mesh3(s->c_str());
+  R3 Pn,Px;
+  // m->BoundingBox(Pn,Px);
+  m->gtree=new Mesh3::GTree(m->vertices,m->Pmin,m->Pmax,m->nv);
+ //  delete s; modif FH 2006 (stack ptr)
+  return m;
+ }
+*/
  
 
 template<class Result,class A>
@@ -2170,7 +2184,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                      if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
                        {     
                                  
-                        int ie,i =Th.BoundaryTriangle(e,ie);
+                        int ie,i =Th.BoundaryElement(e,ie);
                         const Triangle & K(Th[i]);   
                         R2 E=K.Edge(ie);
                         double le = sqrt((E,E)); 
@@ -2179,7 +2193,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                         
                         for (int npi=0;npi<FI.n;npi++) // loop on the integration point
                           {
-                            QuadratureFormular1d::Point pi( FI[npi]);
+                            QuadratureFormular1dPoint pi( FI[npi]);
                             double sa=pi.x,sb=1.-sa;
                             R2 Pt(PA*sa+PB*sb ); //  
                             MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th.bedges[e].lab,R2(E.y,-E.x)/le,ie);
@@ -2218,7 +2232,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                         
                         for (int npi=0;npi<FI.n;npi++) // loop on the integration point
                           {
-                            QuadratureFormular1d::Point pi( FI[npi]);
+                            QuadratureFormular1dPoint pi( FI[npi]);
                             double sa=pi.x,sb=1-sa;
                             R2 Pt(PA*sa+PB*sb ); //  
                             MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th[ie].lab,R2(E.y,-E.x)/le,ie);
@@ -2249,7 +2263,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                                                
                         for (int npi=0;npi<FI.n;npi++) // loop on the integration point
                           {
-                            QuadratureFormular1d::Point pi( FI[npi]);
+                            QuadratureFormular1dPoint pi( FI[npi]);
                             double sa=pi.x,sb=1-sa;
                             R2 Pt(GH*sa+MH*sb ); //  
                             MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th[ie].lab,R2(E.y,-E.x)/le,ie,1);
@@ -2780,7 +2794,7 @@ AnyType Convect::operator()(Stack s) const
                     ffassert( l[j] == 0);
                     //int jj  = j;            
                     R a= l[(j+1)%3], b= l[(j+2)%3];
-                    int itt =  Th.TriangleAdj(it,j);
+                    int itt =  Th.ElementAdj(it,j);
                     if(itt==it || itt <0)  break; // le bord 
                     it = itt;
                     l[j]=0;
@@ -3108,6 +3122,7 @@ void  init_lgfem()
 
  map_type[typeid(R3*).name()] = new ForEachType<R3*>(Initialize<R3>);   
   Dcl_TypeandPtr<pmesh>(); 
+  Dcl_TypeandPtr<pmesh3>(); 
   Dcl_Type<lgVertex>(); 
   Dcl_Type<lgElement>( ); 
 
@@ -3193,6 +3208,7 @@ void  init_lgfem()
  
 
  atype<pmesh >()->AddCast( new E_F1_funcT<pmesh,pmesh*>(UnRef<pmesh >)); 
+ atype<pmesh3>()->AddCast( new E_F1_funcT<pmesh3,pmesh3*>(UnRef<pmesh3 >)); 
  atype<pfes >()->AddCast(  new E_F1_funcT<pfes,pfes*>(UnRef<pfes>));
  
  atype<pferbase>()->AddCast(  new E_F1_funcT<pferbase,pferbase>(UnRef<pferbase>));
@@ -3255,13 +3271,19 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  ffassert(kTypeSolveMat<nTypeSolveMat);
 
 //  init pmesh  
+/*
+
  Add<pmesh*>("<-","(",
              new OneOperator1_<pmesh,string*>(ReadMesh),
              new OneOperator3_<long,pmesh*,double,double,
                       E_F_stackF0F0F0_<long,pmesh*,double,double> >(& FindTxy )
 
  );
- 
+
+ Add<pmesh3*>("<-","(",
+             new OneOperator1_<pmesh3,string*>(ReadMesh3)
+ );
+*/
 /*TheOperators->Add("<-",);
 
  );*/
@@ -3302,6 +3324,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 //  new type  
  zzzfff->Add("R3",atype<R3*>());
  zzzfff->Add("mesh",atype<pmesh*>());
+ zzzfff->Add("mesh3",atype<pmesh3*>());
  zzzfff->Add("element",atype<lgElement>());
  zzzfff->Add("vertex",atype<lgVertex>());
 // zzzfff->Add("fespace",atype<pfes*>());

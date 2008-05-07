@@ -53,6 +53,7 @@ using namespace std;
 #include "BamgFreeFem.hpp"
 #include "RNM.hpp"
 #include "FESpace.hpp"
+#include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
 
 

@@ -2,6 +2,7 @@
 #define REFCOUNTER_HPP
 
 #include "showverb.hpp" 
+#include "error.hpp" 
 
 class RefCounter; 
 class baseCountPointer;

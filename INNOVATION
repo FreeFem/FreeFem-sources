@@ -1,3 +1,8 @@
+v 3.00
+  - add 3D FINITE ELEMENT P0,P1,P2 RT0
+     mesh3 Th("toto.mesh")
+     int3d(Th)
+    
 v 2.25
   - add tool to change lab in mesh see  glumesh.edp examples++-load 
 v 2.24-4

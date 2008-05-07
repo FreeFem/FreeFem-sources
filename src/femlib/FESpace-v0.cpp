@@ -569,9 +569,9 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
        if (ke && ndfe) { 
         for (int be=0;be<Th.neb;be++)
          {
-          int j,k=Th.BoundaryTriangle(be,j);
+          int j,k=Th.BoundaryElement(be,j);
           int jj=j;
-          int kk=Th.TriangleAdj(k,jj);
+          int kk=Th.ElementAdj(k,jj);
           if ( kk >=0 && jj>=0)   
             NodesOfElement[kk*nbne+oe+jj] = nn + ndfe[be]   ; // adj
           NodesOfElement[k*nbne+oe+j]   = nn + ndfe[be]   ; // new         
@@ -589,7 +589,7 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
             for (int j=0;j<3;j++)
              if (NodesOfElement[i]<0) {
                int jj=j;
-               int kk=Th.TriangleAdj(k,jj);
+               int kk=Th.ElementAdj(k,jj);
                
                NodesOfElement[kk*nbne+oe+jj] = nn   ; // adj   
                NodesOfElement[i++]           = nn++ ; // new

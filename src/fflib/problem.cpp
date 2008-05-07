@@ -34,6 +34,7 @@ using namespace std;
 
 //#include "lex.hpp"
 #include "MatriceCreuse_tpl.hpp"
+#include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
 #include "lgfem.hpp"
 #include "lgsolver.hpp"
@@ -212,7 +213,7 @@ void Check(const Opera &Op,int N,int  M)
   for (npi=0;npi<FIb.n;npi++) // loop on the integration point
       {
         pa =a;
-        QuadratureFormular1d::Point pi( FIb[npi]);        
+        QuadratureFormular1dPoint pi( FIb[npi]);        
         double coef = le*pi.a;
         double sa=pi.x,sb=1-sa;
         R2 Pt(PA*sa+PB*sb ); //
@@ -330,8 +331,8 @@ void Check(const Opera &Op,int N,int  M)
                 "  test  or unkown function  defined on an other mesh! sorry to hard.   ");
     }
     SHOWVERB(cout << " FormBilinear " << endl);
-    MatriceElementaireSymetrique<R> *mates =0;
-    MatriceElementairePleine<R> *matep =0;
+    MatriceElementaireSymetrique<R,FESpace> *mates =0;
+    MatriceElementairePleine<R,FESpace> *matep =0;
     const bool useopt=di.UseOpt(stack);    
     double binside=di.binside(stack);
 
@@ -413,19 +414,19 @@ void Check(const Opera &Op,int N,int  M)
                 "  and the matrix is not symmetric. \n" 
                 " To do other case in a future (F. Hecht) dec. 2003 ");
       
-      matep= new MatriceElementairePleine<R>(Uh,VF,FIT,FIE);
+      matep= new MatriceElementairePleine<R,FESpace>(Uh,VF,FIT,FIE);
       matep->faceelement = Element_OpVF;   
       paramate= &parammatElement_OpVF;            
     }
     else if (sym) {
-      mates= new MatriceElementaireSymetrique<R>(Uh,FIT,FIE);
+      mates= new MatriceElementaireSymetrique<R,FESpace>(Uh,FIT,FIE);
       mates->element = Element_Op<R>;               
     }
     else {
-      matep= new MatriceElementairePleine<R>(Uh,Vh,FIT,FIE);
+      matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,FIT,FIE);
       matep->element = Element_Op<R>;               
     }
-    MatriceElementaire<R> & mate(*( sym? (MatriceElementaire<R> *)mates : (MatriceElementaire<R> *) matep));
+    MatriceElementaireFES<R,FESpace> & mate(*( sym? (MatriceElementaireFES<R,FESpace> *)mates : (MatriceElementaireFES<R,FESpace> *) matep));
     
     
     mate.bilinearform=b->b;
@@ -438,7 +439,7 @@ void Check(const Opera &Op,int N,int  M)
           {
             if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
               {                  
-                int ie,i =Th.BoundaryTriangle(e,ie);
+                int ie,i =Th.BoundaryElement(e,ie);
                 A += mate(i,ie,Th.bedges[e].lab,stack);  
                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 
@@ -609,7 +610,7 @@ void Check(const Opera &Op,int N,int  M)
 		else // int on edge ie 
 		    for (npi=0;npi<FIb.n;npi++) // loop on the integration point
 		    {
-			QuadratureFormular1d::Point pi( FIb[npi]);
+			QuadratureFormular1dPoint pi( FIb[npi]);
 			R2 E=T.Edge(ie);
 			double le = sqrt((E,E));
 			double coef = le*pi.a;
@@ -821,7 +822,7 @@ void Check(const Opera &Op,int N,int  M)
           {
             if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
               {                  
-                int ie,i =Th.BoundaryTriangle(e,ie);
+                int ie,i =Th.BoundaryElement(e,ie);
                 AddMatElem(A,Th,*b->b,sym,i,ie,Th.bedges[e].lab,Uh,Vh,FIT,FIE,p,stack);  
                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
               }
@@ -963,7 +964,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     for (npi=0;npi<FIb.n;npi++) // loop on the integration point
       {
         pa =a;
-        QuadratureFormular1d::Point pi( FIb[npi]);
+        QuadratureFormular1dPoint pi( FIb[npi]);
         R2 E=T.Edge(ie);
         double le = sqrt((E,E));
         double coef = le*pi.a;
@@ -1127,7 +1128,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
         {
           
           pa =a;
-          QuadratureFormular1d::Point pi( FIb[npi]);
+          QuadratureFormular1dPoint pi( FIb[npi]);
           R2 E=T.Edge(ie);
           double le = sqrt((E,E));
           double coef = le*pi.a;
@@ -1380,7 +1381,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     
     for (npi=0;npi<FI.n;npi++) // loop on the integration point
       {
-        QuadratureFormular1d::Point pi( FI[npi]);
+        QuadratureFormular1dPoint pi( FI[npi]);
         R2 E=T.Edge(ie);
         double le = sqrt((E,E));
         double coef = le*pi.a;
@@ -1476,7 +1477,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
         double cmean = onborder ? 1. : 0.5;
 	for (npi=0;npi<FI.n;npi++) // loop on the integration point
 	  {
-	      QuadratureFormular1d::Point pi( FI[npi]);
+	      QuadratureFormular1dPoint pi( FI[npi]);
 	      R2 E=T.Edge(ie);
 	      double le = sqrt((E,E));
 	      double coef = le*pi.a;
@@ -1574,7 +1575,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     
     for (npi=0;npi<FI.n;npi++) // loop on the integration point
       {
-        QuadratureFormular1d::Point pi( FI[npi]);
+        QuadratureFormular1dPoint pi( FI[npi]);
 
         
         
@@ -1771,7 +1772,7 @@ void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FEl
     for (int ib=0;ib<Th.neb;ib++)
       {
         int ie;
-        int it = Th.BoundaryTriangle(ib,ie);
+        int it = Th.BoundaryElement(ib,ie);
         int r =Th.bedges[ib].lab;
         if (on.find(r) != on.end() ) 
           {
@@ -1957,7 +1958,7 @@ template<class R>
           {
             if (all || setoflab.find(ThI.bedges[e].lab) != setoflab.end())   
               {                  
-                int ie,i =ThI.BoundaryTriangle(e,ie);
+                int ie,i =ThI.BoundaryElement(e,ie);
                 if ( sameMesh) 
                   Element_rhs<R>(Vh[i],ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false); 
                 else 
@@ -1983,7 +1984,7 @@ template<class R>
 		      for (int ie=0;ie<3;ie++)
 			  if ( sameMesh) 
 			    {
-			      int iie=ie,ii=Th.TriangleAdj(i,iie);	
+			      int iie=ie,ii=Th.ElementAdj(i,iie);	
 			       if(ii<0) ii=i;//  sur le bord	
 			      Element_rhsVF<R>(Vh[i],Vh[ii],ie,iie,Th[i].lab,*l->l,buf,ip,&bstack,*B,FIE); 
 			    }
@@ -3002,7 +3003,7 @@ const Fem2D::QuadratureFormular & CDomainOfIntegration::FIT(Stack stack) const
   if (nargs[0]) return  *GetAny<const Fem2D::QuadratureFormular *>((*nargs[0])(stack));
   int exact = 5;
   if (nargs[2]) exact=  GetAny<long>((*nargs[2])(stack))-1;
-  QuadratureFormular *qf=QF_Tria_exact(exact);
+  QuadratureFormular *qf=QF_Simplex<R2>(exact);//QF_Tria_exact(exact);
   if(verbosity>99 && qf ) cout << "   QF Tria  n:" << qf->n << " exact = " << exact <<  endl;
   if(qf) return *qf;
   /*
@@ -3022,7 +3023,7 @@ const Fem2D::QuadratureFormular1d & CDomainOfIntegration::FIE(Stack stack) const
   if (nargs[1]) return  *GetAny<const Fem2D::QuadratureFormular1d *>((*nargs[1])(stack));
   int exact = 5;
   if (nargs[2]) exact=  GetAny<long>((*nargs[2])(stack))-1;
-  QuadratureFormular1d *qf=QF_1d_exact(exact);
+  QuadratureFormular1d *qf=QF_Simplex<R1>(exact);//QF_1d_exact(exact);
   if(verbosity>99 && qf ) cout << "   QF 1d  n:" << qf->n << " exact = " << exact <<  endl;
   if(qf) return *qf; 
   /*

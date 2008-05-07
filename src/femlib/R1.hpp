@@ -3,6 +3,8 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+typedef double R;
+
 //  R1, R2 , R3 to be uniforme. 
 // The class R1
 class R1 {
@@ -15,7 +17,7 @@ public:
   R1 () :x(0.){} // rappel : x(0)  sont initialiser via le constructeur de double 
   R1 (R a):x(a)  {}
   R1 (const R1 & a,const R1 & b):x(b.x-a.x)  {}
-
+  static  R1 diag(R a){ return R1(a);}
 
   // rappel les operator definis dans une class on un parametre
   // cache qui est la classe elle meme (*this)
@@ -25,9 +27,8 @@ public:
   // les autre operoteur affectations
   R1 &  operator+=(const R1 & P)  {x += P.x;return *this;}
   R1 &  operator-=(const R1 & P) {x -= P.x;return *this;}
-  R1 &  operator*=(const R & a) {x *=a;return *this;}
-  R1 &  operator/=(const R & a) {x /=a;return *this;}
-
+  R1 &  operator*=(R a) {x *= a;return *this;}
+  R1 &  operator/=(R a) {x /= a;return *this;}
   // operateur binaire + - * , ^ /
   R1   operator+(const R1 & P)const   {return R1(x+P.x);}
   R1   operator-(const R1 & P)const   {return R1(x-P.x);}
@@ -59,7 +60,11 @@ friend  std::istream& operator >>(std::istream& f,  R1 & P)
   static const R1 KHat[d+1];
 };
 
-//inline R1 Min(const R1 & A,const R1 &B){ return R1(min(A.x,B.x));}
-//inline R1 Max(const R1 & A,const R1 &B){ return R1(max(A.x,B.x));}
+inline R1 Minc(const R1 & A,const R1 &B){ return R1(min(A.x,B.x));}
+inline R1 Maxc(const R1 & A,const R1 &B){ return R1(max(A.x,B.x));}
+inline double Norme_infty(const R1 & A){return std::fabs(A.x);}
+inline double Norme2_2(const R1 & A){ return A.x*A.x;}
+inline double Norme2(const R1 & A){ return std::fabs(A.x);}
+
 
 #endif

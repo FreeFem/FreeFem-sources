@@ -599,9 +599,9 @@ class TypeOfFE_P1ttdc : public  TypeOfFE { public:
       for (int i=0;i<NbDoF;i++) {
        pij_alpha[i]= IPJ(i,i,0);
        P_Pi_h[i]=Pt[i];
-      cout << Pt[i] << " " ;
+       // cout << Pt[i] << " " ;
       }
-	cout <<" cshrink: " << cshrink << " cshrink1 : "<< cshrink1 <<endl;
+      //	cout <<" cshrink: " << cshrink << " cshrink1 : "<< cshrink1 <<endl;
      }
 
    void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;

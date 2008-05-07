@@ -31,40 +31,52 @@
 //  l'espace change 
 //   cf la fonction set qui reconstruit FESpace
 
+
 void init_lgmat(); // initialisation for sparse mat functionnallity
 
 class v_fes; 
 typedef v_fes *pfes;
 
+namespace  Fem2D {
+  class Mesh3;
+
+}
 using Fem2D::Mesh;
+using Fem2D::Mesh3;
+
 typedef Mesh * pmesh;
+typedef Mesh3 * pmesh3;
+
 using  Fem2D::FESpace;
 using  Fem2D::TypeOfFE;
-
+using  Fem2D::R;
+//  typedef double R;
 namespace {
   using namespace Fem2D;
-using  Fem2D::Vertex;
-
-class lgVertex { public:
-
-  CountPointer<Mesh> pTh;
-  Vertex *v;
-  void Check() const {   if (!v || !pTh) { ExecError("Too bad! Unset Vertex!"); } }
-  void init() { v=0;pTh.init();}
-  lgVertex(Mesh * Th,long kk): pTh(Th),v( &(*pTh)(kk)) {}
-  lgVertex(Mesh * Th,Vertex * kk): pTh(Th),v(kk) {}
-  operator int() const { Check(); return (* pTh)(v);} 
-  operator R2*(){ Check(); return v;} 
-  R x() const {Check() ; return v->x;}
-  R y() const {Check() ; return v->y;}
-  long lab() const {Check() ; return v->lab;}
-  void destroy()  {pTh.destroy();}
-};
-
-class lgElement { public:
-  CountPointer<Mesh> pTh;
-  Triangle *k;
+  using  Fem2D::Vertex;
   
+  class lgVertex {
+  public:
+    typedef double R;
+    CountPointer<Mesh> pTh;
+    Vertex *v;
+    void Check() const {   if (!v || !pTh) { ExecError("Too bad! Unset Vertex!"); } }
+    void init() { v=0;pTh.init();}
+    lgVertex(Mesh * Th,long kk): pTh(Th),v( &(*pTh)(kk)) {}
+    lgVertex(Mesh * Th,Vertex * kk): pTh(Th),v(kk) {}
+    operator int() const { Check(); return (* pTh)(v);} 
+    operator R2*(){ Check(); return v;} 
+    R x() const {Check() ; return v->x;}
+    R y() const {Check() ; return v->y;}
+    //  R z() const {Check() ; return v->z;}
+    long lab() const {Check() ; return v->lab;}
+    void destroy()  {pTh.destroy();}
+  };
+  
+  class lgElement { public:
+      CountPointer<Mesh> pTh;
+    Triangle *k;
+    
   lgElement():  k(0) {}
   void  Check() const  {   if (!k || !pTh) { ExecError("Unset Triangle,Sorry!"); } }
   void init() { k=0;pTh.init();}
@@ -79,7 +91,7 @@ class lgElement { public:
 
 };
 
-} // end namespace blanc
+ } // end namespace blanc
 
 void GetPeriodic(Expression perio,    int & nbcperiodic ,    Expression * &periodic);
 
@@ -90,9 +102,9 @@ bool BuildPeriodic(
   int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe);
   
 class v_fes : public RefCounter { public:
+    const int d;
   const int N;
   const pmesh* ppTh; // adr du maillage
-
   CountPointer<FESpace>  pVh;
   Stack stack; // the stack is use whith periodique expression
   
@@ -110,9 +122,9 @@ class v_fes : public RefCounter { public:
   
   
   v_fes(int NN,const pmesh* t,Stack s, int n,Expression *p)
-   : N(NN), ppTh(t),pVh(0),stack(s), nbcperiodic(n),periodic(p) {}
-  v_fes(int NN,const v_fes *f,Stack s,int n,Expression *p) :
-   N(NN),ppTh(f->ppTh),pVh(0),stack(s), nbcperiodic(n),periodic(p)
+    : d(2),N(NN), ppTh(t),pVh(0),stack(s), nbcperiodic(n),periodic(p) {}
+  v_fes(int NN,const v_fes *f,Stack s,int n,Expression *p) 
+    :  d(2),N(NN),ppTh(f->ppTh),pVh(0),stack(s), nbcperiodic(n),periodic(p)
     {}
   void destroy(){ ppTh=0;pVh=0; delete this;}
   virtual ~v_fes() {}
@@ -315,9 +327,9 @@ class E_FEcomp : public E_F0mps { public:
          
 };
 
-
-typedef  pair< FEbase<R> * ,int> aFEvarR;   
-typedef  pair< FEbaseArray<R> * ,int> aFEArrayR;   
+//typedef double R;
+typedef  pair< FEbase<double> * ,int> aFEvarR;   
+typedef  pair< FEbaseArray<double> * ,int> aFEArrayR;   
 typedef  pair< FEbase<Complex> * ,int> aFEvarC;   
 
 template<class K>

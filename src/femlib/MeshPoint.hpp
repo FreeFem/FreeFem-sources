@@ -4,13 +4,20 @@ namespace  Fem2D {
 class MeshPointBase { public:
  R3 P;
   R3 PHat;
+  union {
   const Mesh * Th;  
+  const Mesh3 * Th3;  
+  };
+  union{
   const Triangle * T;
+  const Tet * T3;
+  };
   long region, t,v,f,e,gsens; // triangle,vertex, face or edge
   long  label;  
   R3 N; //  if on boundary 
   bool outside;
   int VF; 
+  int d;
   void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K,int ll,const R2 &NN,int iedge)
    { 
      P.x=P2.x;
@@ -30,7 +37,8 @@ class MeshPointBase { public:
      N.x=NN.x;   
      N.y=NN.y;   
      N.z=0; 
-     VF=0;  
+     VF=0;
+     d=2;
    }
   void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge,int VFF=0)
    { 
@@ -52,6 +60,7 @@ class MeshPointBase { public:
      N.y=NN.y;   
      N.z=0;   
      VF=VFF;
+     d=2;
    }
    
   void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K,int ll)
@@ -72,7 +81,7 @@ class MeshPointBase { public:
      N.y=0;   
      N.z=0;   
      VF=0;  
-     
+     d=2;
    }
    
      void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K)
@@ -116,7 +125,7 @@ class MeshPointBase { public:
       }
    
      t=(*Th)(T);
-     
+     d=2;
    }
 
   void set(const  Mesh &aTh, const R2 &P2,const R2 & P_Hat,const  Triangle & aK,const int ll,bool coutside=false)
@@ -137,7 +146,7 @@ class MeshPointBase { public:
      N.z=0;   
      outside=coutside;
      VF=0;  
-     
+     d=2;
    }
    
   void setP(Mesh * pTh,int tt,int ss)
@@ -153,7 +162,8 @@ class MeshPointBase { public:
      label = V.lab;
      t=v=f=e=0;
      v=ss;
-     VF=0;  
+     VF=0;
+     d=2;  
    }
    
   void change(const R2 & PH,Triangle & tt,int ll)
@@ -164,7 +174,8 @@ class MeshPointBase { public:
      region = T->lab;
      label = ll;
      t=v=f=e=0;
-     VF=0;  
+     VF=0;
+     d=2;  
      
    }
    void unset() 
@@ -176,7 +187,7 @@ class MeshPointBase { public:
      Th=0;
       label =0;
      VF=0;  
-     
+      d=0;
    }
    bool isUnset() const { return P.x == -1e30;} // BofBof   
    void set(R x=0.0,R y=0.0,R z=0.0) 
@@ -189,8 +200,135 @@ class MeshPointBase { public:
       label =0;
       t=f=e=v=-1; 
       VF=0;  
-     
-   }  
+      d=0;
+   }
+
+
+
+  // ------- 3D
+  void set(const R3 &P2,const R3 & P_Hat,const  baseFElement3 & K,int ll,const R3 &NN,int iedge)
+   { 
+     P=P2;
+     PHat=P_Hat;
+     T3=&K.T;
+     Th3=&K.Vh.Th; 
+     region = T->lab;
+     label = ll;
+     v=f=-1; 
+     e=iedge;
+     t=(*Th)(T); 
+     assert( Abs( (NN,NN) -1.0) < 1e-5 );
+     N=NN;   
+     VF=0;
+     d=3;
+   }
+  void set(const Mesh3 & aTh,const R3 &P2,const R3 & P_Hat,const  Tet & aK,int ll,const R3 &NN,int iedge,int VFF=0)
+   { 
+     P=P2;
+     PHat=P_Hat;
+     T3=&aK;
+     Th3=&aTh; 
+     region = T->lab;
+     label = ll;
+     v=f=-1;
+     t=(*Th)(T); 
+     e=iedge; 
+     assert( Abs( (NN,NN) -1.0) < 1e-5 );
+     N=NN;   
+     VF=VFF;
+     d=3;
+   }
+   
+  void set(const R3 &P2,const R3 & P_Hat,const  baseFElement3 & K,int ll)
+   { 
+     P=P2;
+     PHat=P_Hat;
+     T3=&K.T;
+     Th3=&K.Vh.Th; 
+     region = T->lab;
+     label = ll;
+     t=(*Th)(T);
+     v=f=e=-1;  
+     N.x=0;   
+     N.y=0;   
+     N.z=0;   
+     VF=0;  
+     d=3;
+   }
+   
+     void set(const R3 &P2,const R3 & P_Hat,const  baseFElement3 & K)
+   { 
+     P=P2;
+     PHat=P_Hat;
+     T3=&K.T;
+     Th3=&K.Vh.Th; 
+     region = T->lab;
+     v=f=e=-1;  
+     N.x=0;   
+     N.y=0;   
+     N.z=0;   
+     VF=0;  
+     int ll[4],kk(0);
+     if ( P_Hat.x<1.e-6) ll[kk++]=1;
+     if ( P_Hat.y<1.e-6) ll[kk++]=2;
+     if ( P_Hat.z<1.e-6) ll[kk++]=3;
+     if ( P_Hat.x+P_Hat.y+P_Hat.z>0.999999) ll[kk++]=0;    
+     if (kk==0) label=0;
+     else if (kk==3)
+      { 
+	 v = 6-ll[0]-ll[1]-ll[2];// 3 = 0+1+2 sommet oppose
+	 label=(*T)[v].lab;
+      } 
+     else  {
+       ffassert(0); // a faire 
+       
+       e = ll[0]; 
+       int i1,i2,I3;
+       /*
+       Th3->VerticesNumberOfEdge(K.T,e,i1,i2);
+       const BoundaryEdge * be=Th3->TheBoundaryEdge(i1,i2);
+       label= be ? be->lab : 0;
+       */
+      }
+   
+     t=(*Th)(T);
+     d=3;
+   }
+
+  void set(const  Mesh3 &aTh, const R3 &P2,const R3 & P_Hat,const  Tet & aK,const int ll,bool coutside=false)
+   { 
+     P=P2;
+     PHat=P_Hat;
+     T3=&aK;
+     Th3=&aTh; 
+     region = T->lab;
+     label = ll;
+     t=v=f=e=-1;  
+     N.x=0;   
+     N.y=0;   
+     N.z=0;   
+     outside=coutside;
+     VF=0;  
+     d=3;
+   }
+   
+  void setP(Mesh3 * pTh,int tt,int ss)
+   { 
+     T3=&(*pTh)[tt];
+     const Mesh3::Vertex & V=(*T3)[ss];
+      P= V ;
+      PHat = TetHat[ss];
+     Th3=pTh; 
+     region = T->lab;
+     label = V.lab;
+     t=v=f=e=0;
+     v=ss;
+     VF=0;
+     d=3;  
+   }
+   
+
+  // --------  
 };
 class MeshPoint : public MeshPointBase { public:
   MeshPointBase other;
@@ -232,7 +370,7 @@ class MeshPoint : public MeshPointBase { public:
      {
      int ieo=e,to=t,ie=e;
      
-     t=Th->TriangleAdj(t,ie);
+     t=Th->ElementAdj(t,ie);
      e=ie;
      if ( t == to && t >= 0 ) return false;
      int io0=VerticesOfTriangularEdge[ieo][0];
