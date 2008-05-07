@@ -904,7 +904,7 @@ int Walk(const Mesh & Th,int& it, R *l,
 	//int jj  = j;
 	throwassert( l[j] == 0);
 	R a= l[(j+1)%3], b= l[(j+2)%3];
-	int itt =  Th.TriangleAdj(it,j);
+	int itt =  Th.ElementAdj(it,j);
 	if(itt==it || itt <0)  return -1;
 	it = itt;
 	l[j]=0;
@@ -988,7 +988,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	    
 	    j= nl[ kk ];
 	    
-	    int itt =  TriangleAdj(it,j);
+	    int itt =  ElementAdj(it,j);
 	    if(itt!=it && itt >=0)  
 	    {
 		dP=DBL_MAX;
@@ -1003,7 +1003,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	    {
 		kk = 1-kk;
 		j= nl[ kk ];
-		itt =  TriangleAdj(it,j);                  
+		itt =  ElementAdj(it,j);                  
 		if (itt && itt != it)
 		{
 		    dP=DBL_MAX;
@@ -1080,7 +1080,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 		{  
 		    ok=true;
 		    iib = ii;
-		    it= BoundaryTriangle(e,ie);  //  next triangle                      
+		    it= BoundaryElement(e,ie);  //  next triangle                      
 						 // cout << "  ------ " << it << " " << Phatt <<  endl;
 		    break;
 		}
@@ -1399,7 +1399,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	    {   nbsdd++;
 		for (int j=0;j<3;j++)
 		{
-		    int jt=j,it=Th.TriangleAdj(i,jt);
+		    int jt=j,it=Th.ElementAdj(i,jt);
 		    if(it==i || it <0) neb += split[i];  //on est sur la frontiere
 		    else if  (!split[it]) neb += split[i];//le voisin ne doit pas etre decoupe
 		    else  //on est dans le domaine et le voisin doit etre decoupe
@@ -1498,7 +1498,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		// sdd[it]=-1;
 		for (int jt=0;jt<3;jt++)
 		{
-		    int jtt=jt,itt=Th.TriangleAdj(it,jtt);
+		    int jtt=jt,itt=Th.ElementAdj(it,jtt);
 		    //  cout << it <<  " " << jt << " " << jt << " " << itt << !split[itt] << endl;
 		    int ie0,ie1;
 		    Label  re(label); 
@@ -1514,7 +1514,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    if (bbe ||  (!pbe && (ie0 < ie1) ) ) // arete interne ou frontiere 
 		    {
 			int sens = 1; // par defaul le bon sens 
-			int kold = it;   //Th.BoundaryTriangle(ieb,jj);
+			int kold = it;   //Th.BoundaryElement(ieb,jj);
 			int n=split[kold];
 			if( itt>=0) n = max(n,split[itt]); //  pour les aretes internes (FH juillet 2005)
 			if (!n) continue; 
@@ -1934,7 +1934,7 @@ void Mesh::Buildbnormalv()
 	for (int i=0;i<3;i++)
 	{  
 	    int ii(i),kk;
-	    kk=TriangleAdj(k,ii);
+	    kk=ElementAdj(k,ii);
 	    if (kk<0 || kk==k) nb++;
 	}
 	    if(verbosity>2)
@@ -1945,7 +1945,7 @@ void Mesh::Buildbnormalv()
 	for (int i=0;i<3;i++)
 	{  
 	    int ii(i),kk;
-	    kk=TriangleAdj(k,ii);
+	    kk=ElementAdj(k,ii);
 	    if (kk<0 || kk==k) {
 		Triangle & K(triangles[k]);
 		R2 N=K.n(i);

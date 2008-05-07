@@ -37,6 +37,7 @@ using namespace std;
 
 #include "RNM.hpp"
 #include "fem.hpp"
+#include "FESpacen.hpp"
 #include "FESpace.hpp"
 extern long verbosity ;
 namespace  Fem2D {
@@ -811,9 +812,9 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
        if (ke && ndfe) { // il y a des aretes avec cl de periodicite. 
         for (int be=0;be<Th.neb;be++)
          {
-          int j,k=Th.BoundaryTriangle(be,j);
+          int j,k=Th.BoundaryElement(be,j);
           int jj=j;
-          int kk=Th.TriangleAdj(k,jj);
+          int kk=Th.ElementAdj(k,jj);
           for (int kkk=0;kkk<NbNodeonEdge;kkk++)
            {
              int kj=kkk,kjj=-1;
@@ -842,7 +843,7 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
              for (int ll=0;ll<NbNodeonEdge;ll++)
              if (NodesOfElement[i]<0) {
                int jj=j;
-               int kk=Th.TriangleAdj(k,jj);
+               int kk=Th.ElementAdj(k,jj);
                int jjj=jj*NbNodeonEdge+NbNodeonEdge-ll-1; // autre sens  
                assert(kk>=k && jjj == jj); 
                NodesOfElement[kk*nbne+oe+jjj] = nn   ; // adj   

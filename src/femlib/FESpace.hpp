@@ -28,12 +28,14 @@
 
 #ifndef FESpace_h_
 #define FESpace_h_
+#include "FESpacen.hpp"
+
 #include <cstdarg>
 
 namespace  Fem2D {
   class FESpace; 
 class TypeOfFE;
-
+  /*
 // numbering of derivative 
 enum operatortype { op_id=0,
    op_dx=1,op_dy=2,
@@ -46,7 +48,7 @@ enum operatortype { op_id=0,
    }; 
     
 const int last_operatortype=10;
-
+ 
 
 inline void initwhatd(bool *whatd,int k)
 {
@@ -54,7 +56,7 @@ inline void initwhatd(bool *whatd,int k)
     whatd[i]=false;    
   whatd[k]=true;
 }
-
+  */
 typedef KN_<R> RN_;
 typedef KN<R>  RN;
 typedef KNM_<R> RNM_;
@@ -585,8 +587,18 @@ extern TypeOfFE & RTLagrangeOrtho;
 extern TypeOfFE & P0Lagrange;
 extern TypeOfFE & P1ncLagrange;
 
-class FESpace : public RefCounter {
+class FESpace : public RefCounter 
+{
   public:
+  typedef Fem2D::Mesh Mesh;
+  typedef Fem2D::FElement FElement;
+  typedef Mesh::Element  Element;
+  typedef Mesh::Rd  Rd;
+  typedef Fem2D::TypeOfFE TypeOfFE;
+  typedef Fem2D::QuadratureFormular QFElement;
+  typedef Fem2D::QuadratureFormular1d QFBorderElement;
+
+
   const Mesh &Th;
   TypeOfFE const * const ptrTFE;
   KN<const TypeOfFE *>  TFE; 

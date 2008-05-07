@@ -106,8 +106,8 @@ inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE
    return ndf;
 } //  BuildMEK_KK
 
-template<class R>
-void MatriceElementairePleine<R>::call(int k,int ie,int label,void * stack) {
+template<class R,class FES>
+void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack) {
   for (int i=0;i<this->lga;i++) 
      this->a[i]=0;
   if(this->onFace)
@@ -115,7 +115,7 @@ void MatriceElementairePleine<R>::call(int k,int ie,int label,void * stack) {
      throwassert(faceelement);
      const Mesh &Th(this->Vh.Th);
      
-     int iie=ie,kk=Th.TriangleAdj(k,iie);
+     int iie=ie,kk=Th.ElementAdj(k,iie);
      if(kk==k|| kk<0) kk=-1;
      if ( &this->Vh == &this->Uh)
       {
@@ -172,8 +172,8 @@ void MatriceElementairePleine<R>::call(int k,int ie,int label,void * stack) {
   }  
 }
 
-template<class R>
-void MatriceElementaireSymetrique<R>::call(int k,int ie,int label,void * stack) {
+template<class R,class FES>
+void MatriceElementaireSymetrique<R,FES>::call(int k,int ie,int label,void * stack) {
   // mise a zero de la matrice elementaire, plus sur
   for (int i=0;i<this->lga;i++) 
      this->a[i]=0;
@@ -335,7 +335,7 @@ MatriceProfile<R>::MatriceProfile(const FESpace & Vh,bool VF)
     { 
       itab=0;
       tabk[itab++]=ke;
-      if(VF) itab += Vh.Th.GetAllTriangleAdj(ke,tabk+itab);
+      if(VF) itab += Vh.Th.GetAllElementAdj(ke,tabk+itab);
       tabk[itab]=-1;    
       mn = this->n;
       for( k=tabk[ie=0]; ie <itab; k=tabk[++ie])
@@ -930,14 +930,17 @@ inline R*  MatriceMorse<R>::pij(int i,int j) const
     }
    return 0;     
  }
-template <class R> 
+template <class R>
+template <class FESpace> 
 void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool VF)
 {
-   // for galerkine discontinue ....
-   // VF : true=> Finite Volume matrices (change the stencil) 
-   // VF = false => Finite element 
-   // F. Hecht nov 2003
-   // -----
+  typedef typename FESpace::Mesh Mesh;
+  
+  // for galerkine discontinue ....
+  // VF : true=> Finite Volume matrices (change the stencil) 
+  // VF = false => Finite element 
+  // F. Hecht nov 2003
+  // -----
   symetrique = sym;
   this->dummy=false;
   a=0;
@@ -945,21 +948,21 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
   cl=0;
   //  bool same  = &Uh == & Vh;
   ffassert( &Uh.Th == &Vh.Th);  // same Mesh
-  const Fem2D::Mesh & Th(Uh.Th);
+  const Mesh & Th(Uh.Th);
   //int nbt = Th.nt;
   //int nbv = Th.nv;
   //int nbm = Th.NbMortars;
   int nbe = Uh.NbOfElements;
   int nbn_u = Uh.NbOfNodes;
   int nbn_v = Vh.NbOfNodes;
-
+  
   KN<int> mark(nbn_v);
   KN<int> pe_u(nbn_u+1+Uh.SizeToStoreAllNodeofElement());
   //  les element du node i 
   // sont dans pe_u[k] pour k \in [ pe_u[i] , pe_u[i+1] [
   pe_u=0;
   for (int k=0;k<nbe;k++)
-   { 
+    { 
       int nbne=Uh(k);
       for (int in=0;in<nbne;in++)
         pe_u[(Uh(k,in)+1)]++;
@@ -967,100 +970,100 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
   int kk= nbn_u+1,kkk=kk;
   pe_u[0]=kk;
   for (int in1=1;in1<=nbn_u;in1++)
-   { // in1 = in + 1
+    { // in1 = in + 1
       kk += pe_u[in1];
       pe_u[in1] = kkk; // store the last of in 
       kkk=kk;
-   } 
+    } 
   if(verbosity>4) 
-  cout <<" -- MatriceMorse<R>::Build " << kk << " " << nbn_u << " " << Uh.SizeToStoreAllNodeofElement() 
-       << " " <<  nbn_u+1+Uh.SizeToStoreAllNodeofElement() << endl;
+    cout <<" -- MatriceMorse<R>::Build " << kk << " " << nbn_u << " " << Uh.SizeToStoreAllNodeofElement() 
+	 << " " <<  nbn_u+1+Uh.SizeToStoreAllNodeofElement() << endl;
   ffassert(kk== nbn_u+1+Uh.SizeToStoreAllNodeofElement());
   for (int k=0;k<nbe;k++)
-   { 
+    { 
       int nbne=Uh(k);
       for (int in=0;in<nbne;in++)
         pe_u[pe_u[(Uh(k,in)+1)]++] = k;
-   }
-    
+    }
+  
   
   int color=0;
   mark=color++;
   lg = new int [this->n+1];
   ffassert(lg);
   for (int step=0;step<2;step++) 
-   { 
-    int ilg=0;
-    lg[0]=ilg;
-    int kij=0;
+    { 
+      int ilg=0;
+      lg[0]=ilg;
+      int kij=0;
     for (int in=0;in<nbn_u;in++)
-     {
-     int nbj=0; // number of j
-     int kijs=kij;
-     // for all triangle contening node in
-     for (int kk= pe_u[in];kk<pe_u[in+1];kk++)
       {
-         int ke=pe_u[kk];// element of 
-         int tabk[5];
-         int ltab=0;
-         tabk[ltab++]=ke;
-         if( VF) // if Finite volume then add Triangle adj in stencil ...
-           ltab+= Th.GetAllTriangleAdj(ke,tabk+ltab);
-         tabk[ltab]=-1;
-         for(int ik=0,k=tabk[ik];ik<ltab;k=tabk[++ik])
-          {
-            throwassert(k>=0 && k < nbe);
-            int njloc = Vh(k);
-            for (int jloc=0;jloc<njloc;jloc++)
-             { 
-             int  jn = Vh(k,jloc);
-             if (mark[jn] != color && (!sym ||  jn < in) ) 
-                {
-                 mark[jn] = color;
-                 int fdf=Vh.FirstDFOfNode(jn);
-                 int ldf=Vh.LastDFOfNode(jn);
-                 if (step)
-                  for (int j=fdf;j<ldf;j++)
-                    cl[kij++] = j;
-                  nbj += ldf-fdf;
-                }            
-           }} 
-       }
-      int fdf=Uh.FirstDFOfNode(in);
-      int ldf=Uh.LastDFOfNode(in);
-      int kijl=kij;
-      if (step)
-       {
-       HeapSort(cl+kijs,kij-kijs);
-       for (int i=fdf;i<ldf;i++)
-        { 
-         if (i!=fdf) //  copy the ligne if not the first 
-           for (int k=kijs;k<kijl;k++)
-            cl[kij++]=cl[k]; 
-         if (sym) // add block diag
-           for(int j=fdf;j<=i;j++)
-            cl[kij++]=j;            
-         throwassert(kij==lg[i+1]);// verif           
-        }
-        }
-      else
-       for (int i=fdf;i<ldf;i++)
-        { 
-         if (sym) ilg += ++nbj; // for the diag block
-         else ilg += nbj;             
-         lg[i+1]=ilg;
-        }
-       color++; // change the color
-    }
+	int nbj=0; // number of j
+	int kijs=kij;
+	// for all triangle contening node in
+	for (int kk= pe_u[in];kk<pe_u[in+1];kk++)
+	  {
+	    int ke=pe_u[kk];// element of 
+	    int tabk[10];
+	    int ltab=0;
+	    tabk[ltab++]=ke;
+	    if( VF) // if Finite volume then add Triangle adj in stencil ...
+	      ltab+= Th.GetAllElementAdj(ke,tabk+ltab);
+	    tabk[ltab]=-1;
+	    for(int ik=0,k=tabk[ik];ik<ltab;k=tabk[++ik])
+	      {
+		throwassert(k>=0 && k < nbe);
+		int njloc = Vh(k);
+		for (int jloc=0;jloc<njloc;jloc++)
+		  { 
+		    int  jn = Vh(k,jloc);
+		    if (mark[jn] != color && (!sym ||  jn < in) ) 
+		      {
+			mark[jn] = color;
+			int fdf=Vh.FirstDFOfNode(jn);
+			int ldf=Vh.LastDFOfNode(jn);
+			if (step)
+			  for (int j=fdf;j<ldf;j++)
+			    cl[kij++] = j;
+			nbj += ldf-fdf;
+		      }            
+		  }} 
+	  }
+	int fdf=Uh.FirstDFOfNode(in);
+	int ldf=Uh.LastDFOfNode(in);
+	int kijl=kij;
+	if (step)
+	  {
+	    HeapSort(cl+kijs,kij-kijs);
+	    for (int i=fdf;i<ldf;i++)
+	      { 
+		if (i!=fdf) //  copy the ligne if not the first 
+		  for (int k=kijs;k<kijl;k++)
+		    cl[kij++]=cl[k]; 
+		if (sym) // add block diag
+		  for(int j=fdf;j<=i;j++)
+		    cl[kij++]=j;            
+		throwassert(kij==lg[i+1]);// verif           
+	      }
+	  }
+	else
+	  for (int i=fdf;i<ldf;i++)
+	    { 
+	      if (sym) ilg += ++nbj; // for the diag block
+	      else ilg += nbj;             
+	      lg[i+1]=ilg;
+	    }
+	color++; // change the color
+      }
     if (step==0) { // do allocation 
       nbcoef=ilg;
       if (verbosity >3)
         cout << "  -- MorseMatrix: Nb coef !=0 " << nbcoef << endl;
       a = new R[nbcoef];
       cl = new int [nbcoef];}
-      ffassert( a && cl);
-      for (int i=0;i<nbcoef;i++) 
-        a[i]=0;
+    ffassert( a && cl);
+    for (int i=0;i<nbcoef;i++) 
+      a[i]=0;
     
    }
   
@@ -1443,6 +1446,7 @@ template<class R>
    }
 }
 
+
 template<class R>
 MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
   int il,jl,i,j;
@@ -1450,21 +1454,24 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
   if ((this->n==0) && (this->m==0))
    {
    
+    //    if(verbosity>3)
+    cout << " -- Morse Matrice is empt: let's build it" << endl;
+    ffassert(0); 
+    /*
     this->n=me.Uh.NbOfDF;
     this->m=me.Vh.NbOfDF;
-    if(verbosity>3)
-    cout << " -- Morse Matrice is empt: let's build it" << endl;
     switch (me.mtype) {
-     case MatriceElementaire<R>::Full : 
+    case MatriceElementaire<R>::Full : 
       Build(me.Uh,me.Vh,false);    
       break;
-     case MatriceElementaire<R>::Symmetric :     
+    case MatriceElementaire<R>::Symmetric :     
       Build(me.Uh,me.Vh,true);    
       break;
      default:
       cerr << "Big bug type MatriceElementaire is unknown" << (int) me.mtype << endl;
       throw(ErrorExec("exit",1));
       break; }     
+    */
    }
   R * al = me.a; 
   R * aij;

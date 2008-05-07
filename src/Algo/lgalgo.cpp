@@ -33,6 +33,7 @@ using namespace std;
 #include "rgraph.hpp"
 #include "RNM.hpp"
 #include "MatriceCreuse_tpl.hpp"
+#include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
 #include "lgfem.hpp"
 #include "lgsolver.hpp"

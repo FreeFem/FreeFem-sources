@@ -6,7 +6,7 @@ noinst_LIBRARIES=libff.a
 
 libff_a_SOURCES2=AFunction.cpp AFunction2.cpp  \
  array_long.cpp          array_real.cpp        array_complex.cpp \
-lex.cpp lgmesh.cpp		\
+lex.cpp lgmesh.cpp	lgmesh3.cpp 	\
 CodeAlloc.cpp lgmat.cpp global.cpp 					\
 ../femlib/Drawing.cpp ../femlib/gibbs.cpp				\
 ../femlib/CheckPtr.cpp ../femlib/fem.cpp				\
@@ -25,7 +25,17 @@ Operator.hpp problem.hpp Serialize.hpp showverb.hpp String.hpp		\
 throwassert.hpp versionnumber.hpp  CodeAlloc.hpp \
 array_init.hpp  array_tlp.hpp array_resize.hpp \
 strversionnumber.hpp ffstack.hpp AddNewFE.h \
-environment.cpp environment.hpp string_def.cpp
+environment.cpp environment.hpp string_def.cpp \
+../femlib/FESpacen.cpp \
+../femlib/P012_1d.cpp \
+../femlib/P012_2d.cpp \
+../femlib/P012_3d.cpp \
+../femlib/Mesh1dn.cpp \
+../femlib/Mesh2dn.cpp \
+../femlib/Mesh3dn.cpp \
+../femlib/GQuadTree.cpp \
+../femlib/libmesh5.c 
+
 
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp 
 

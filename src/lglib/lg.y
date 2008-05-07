@@ -48,6 +48,7 @@ class Iden;
 #include "rgraph.hpp"
 #include "RNM.hpp"
 #include "fem.hpp"
+#include "FESpacen.hpp" 
 #include "FESpace.hpp" 
 #include "lgfem.hpp" 
 #include "lex.hpp"
@@ -582,6 +583,7 @@ void ForDebug()
 //extern void ShowNbAlloc(const char *s);
 void init_lgfem() ;
 void init_lgmesh() ;
+void init_lgmesh3() ;
 void init_algo();
 bool withrgraphique = false;
 //string  StrVersionNumber();
@@ -690,6 +692,7 @@ GetEnvironment();
    if(verbosity) cout << " Load: ";
    init_lgfem() ;
    init_lgmesh() ;
+   init_lgmesh3() ;
    init_algo();
    
 #ifdef HAVE_LIBARPACK

@@ -108,7 +108,7 @@ QuadraturePoint(0.1881601469167/2,0.1927920403641,0.4036039798179),
 const QuadratureFormular QuadratureFormular_T_9(3,9 ,21,P_QuadratureFormular_T_9);
 */
 
-static const QuadraturePoint P_QuadratureFormular_T_11[] = {
+static  QuadraturePoint P_QuadratureFormular_T_11[] = {
 QuadraturePoint(0.0114082494033/2,0.0000000000000,0.9451704450174),
 QuadraturePoint(0.0114082494033/2,0.9451704450173,0.0000000000000),
 QuadraturePoint(0.0132691285720/2,0.9289002405719,0.0685505797224),
@@ -138,10 +138,10 @@ QuadraturePoint(0.1394422334178/2,0.3348066587327,0.1529619437161),
 QuadraturePoint(0.1394422334178/2,0.1529619437161,0.3348066587327),
 QuadraturePoint(0.1744377829182/2,0.3430183498147,0.3430183498147),
 };
-const QuadratureFormular QuadratureFormular_T_11(3,11 ,28,P_QuadratureFormular_T_11);
+const QuadratureFormular QuadratureFormular_T_11(11 ,28,P_QuadratureFormular_T_11);
 
 
-static const QuadraturePoint P_QuadratureFormular_T_13[] = {
+static  QuadraturePoint P_QuadratureFormular_T_13[] = {
 QuadraturePoint(0.0166240998757/2,0.0242935351590,0.9493059293846),
 QuadraturePoint(0.0166811699778/2,0.0265193427722,0.0242695130640),
 QuadraturePoint(0.0166830569067/2,0.9492126023551,0.0265067966437),
@@ -179,10 +179,10 @@ QuadraturePoint(0.1025573374896/2,0.4281437991828,0.2362005969817),
 QuadraturePoint(0.1033159661413/2,0.3356995783730,0.4311026308588),
 QuadraturePoint(0.1035854367193/2,0.2305424298836,0.3456013949376),
 };
-const QuadratureFormular QuadratureFormular_T_13(3,13 ,36,P_QuadratureFormular_T_13);
+const QuadratureFormular QuadratureFormular_T_13(13 ,36,P_QuadratureFormular_T_13);
 
 
-static const QuadraturePoint P_QuadratureFormular_T_14[] = {
+static  QuadraturePoint P_QuadratureFormular_T_14[] = {
 QuadraturePoint(0.0010616711990/2,0.0000000000000,1.0000000000000),
 QuadraturePoint(0.0010616711990/2,1.0000000000000,0.0000000000000),
 QuadraturePoint(0.0010616711990/2,0.0000000000000,0.0000000000000),
@@ -229,10 +229,10 @@ QuadraturePoint(0.1034544533617/2,0.3860471669296,0.2279056661408),
 QuadraturePoint(0.1034544533617/2,0.2279056661408,0.3860471669296),
 QuadraturePoint(0.1034544533617/2,0.3860471669296,0.3860471669296),
 };
-const QuadratureFormular QuadratureFormular_T_14(3,14 ,45,P_QuadratureFormular_T_14);
+const QuadratureFormular QuadratureFormular_T_14(14 ,45,P_QuadratureFormular_T_14);
 
 
-static const QuadraturePoint P_QuadratureFormular_T_16[] = {
+static  QuadraturePoint P_QuadratureFormular_T_16[] = {
 QuadraturePoint(0.0006202599851/2,1.0000000000000,0.0000000000000),
 QuadraturePoint(0.0006315174712/2,0.0000000000000,1.0000000000000),
 QuadraturePoint(0.0007086601559/2,0.0000000000000,0.0000000000000),
@@ -289,10 +289,10 @@ QuadraturePoint(0.0815164664939/2,0.1928805312867,0.3161015807261),
 QuadraturePoint(0.0816931059623/2,0.3360041453816,0.1894892801290),
 QuadraturePoint(0.0923218334531/2,0.3337280550848,0.3343571021811),
 };
-const QuadratureFormular QuadratureFormular_T_16(3,16 ,55,P_QuadratureFormular_T_16);
+const QuadratureFormular QuadratureFormular_T_16(16 ,55,P_QuadratureFormular_T_16);
 
 
-static const QuadraturePoint P_QuadratureFormular_T_18[] = {
+static QuadraturePoint P_QuadratureFormular_T_18[] = {
 QuadraturePoint(0.0025165756986/2,0.0116731059668,0.9812565951289),
 QuadraturePoint(0.0025273452007/2,0.9810030858388,0.0071462504863),
 QuadraturePoint(0.0033269295333/2,0.0106966317092,0.0115153933376),
@@ -360,10 +360,10 @@ QuadraturePoint(0.0585393781623/2,0.4224188334674,0.1453238443303),
 QuadraturePoint(0.0609039250680/2,0.3719001833052,0.3780122703567),
 QuadraturePoint(0.0637273964449/2,0.2413645006928,0.3847563284940),
 };
-const QuadratureFormular QuadratureFormular_T_18(3,18 ,66,P_QuadratureFormular_T_18);
+const QuadratureFormular QuadratureFormular_T_18(18 ,66,P_QuadratureFormular_T_18);
 
 
-static const QuadraturePoint P_QuadratureFormular_T_20[] = {
+static  QuadraturePoint P_QuadratureFormular_T_20[] = {
 QuadraturePoint(0.0021744545399/2,0.0089411337112,0.0086983293702),
 QuadraturePoint(0.0028987135265/2,0.9792622629807,0.0102644133744),
 QuadraturePoint(0.0030846029337/2,0.0105475382112,0.9785514202515),
@@ -443,10 +443,10 @@ QuadraturePoint(0.0634133183449/2,0.2526038315178,0.3700319555094),
 QuadraturePoint(0.0635311861108/2,0.3759895652851,0.2505406611631),
 QuadraturePoint(0.0637206605672/2,0.3729077987144,0.3753750277549),
 };
-const QuadratureFormular QuadratureFormular_T_20(3,20 ,78,P_QuadratureFormular_T_20);
+const QuadratureFormular QuadratureFormular_T_20(20 ,78,P_QuadratureFormular_T_20);
 
 
-static const QuadraturePoint P_QuadratureFormular_T_21[] = {
+static  QuadraturePoint P_QuadratureFormular_T_21[] = {
 QuadraturePoint(0.0006704436439/2,0.0035524391922,0.0035524391922),
 QuadraturePoint(0.0006704436439/2,0.0035524391922,0.9928951216156),
 QuadraturePoint(0.0006704436439/2,0.9928951216156,0.0035524391922),
@@ -539,10 +539,10 @@ QuadraturePoint(0.0469152468624/2,0.4376579903849,0.1246840192303),
 QuadraturePoint(0.0469152468624/2,0.1246840192303,0.4376579903849),
 QuadraturePoint(0.0551199980347/2,0.3333333333333,0.3333333333333),
 };
-const QuadratureFormular QuadratureFormular_T_21(3,21 ,91,P_QuadratureFormular_T_21);
+const QuadratureFormular QuadratureFormular_T_21(21 ,91,P_QuadratureFormular_T_21);
 
 
-static const QuadraturePoint P_QuadratureFormular_T_23[] = {
+static  QuadraturePoint P_QuadratureFormular_T_23[] = {
 QuadraturePoint(0.0006438298261/2,0.0087809303836,0.9903676436772),
 QuadraturePoint(0.0006438413076/2,0.9903675314220,0.0087809216232),
 QuadraturePoint(0.0010134735710/2,0.0027029276450,0.0335914404439),
@@ -649,10 +649,10 @@ QuadraturePoint(0.0392705643548/2,0.5159205739625,0.2982719005229),
 QuadraturePoint(0.0392705802517/2,0.2982718935750,0.5159205534362),
 QuadraturePoint(0.0398766879831/2,0.4098894602340,0.4098894317792),
 };
-const QuadratureFormular QuadratureFormular_T_23(3,23 ,105,P_QuadratureFormular_T_23);
+const QuadratureFormular QuadratureFormular_T_23(23 ,105,P_QuadratureFormular_T_23);
 
 
-static const QuadraturePoint P_QuadratureFormular_T_25[] = {
+static  QuadraturePoint P_QuadratureFormular_T_25[] = {
 QuadraturePoint(0.0014873417859/2,0.0082881595033,0.9848202768869),
 QuadraturePoint(0.0014889035262/2,0.4618422030241,0.5381577969759),
 QuadraturePoint(0.0015005944380/2,0.0071066441239,0.0080842361390),
@@ -774,7 +774,7 @@ QuadraturePoint(0.0364656225016/2,0.3900920779501,0.3323152819300),
 QuadraturePoint(0.0365172708706/2,0.2805847774120,0.3898041176680),
 QuadraturePoint(0.0371924811018/2,0.3361523347440,0.2778500044356),
 };
-const QuadratureFormular QuadratureFormular_T_25(3,25 ,120,P_QuadratureFormular_T_25);
+const QuadratureFormular QuadratureFormular_T_25(25 ,120,P_QuadratureFormular_T_25);
 
 //  Hack to do something at initialisation time
 //   to add the name myfunction to the freefem++ table 
@@ -795,9 +795,9 @@ grep QuadratureFormular QF.cpp|grep ^const|awk -F"[_(]" '{print "Global.New(@qf"
 	     Global.New("qf21pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_21));
 	     Global.New("qf23pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_23));
 	     Global.New("qf25pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_25));
-	     Global.New("qf11pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(11)));
-	     Global.New("qf12pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(12)));
-	     Global.New("qf13pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(13)));
+	     Global.New("qf11pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(-1+2*11,11,GaussLegendre(11),true)));
+	     Global.New("qf12pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(-1+2*12,12,GaussLegendre(12),true)));
+	     Global.New("qf13pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(-1+2*13,13,GaussLegendre(13),true)));
 }
 
  

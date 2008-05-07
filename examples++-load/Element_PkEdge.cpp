@@ -28,7 +28,7 @@ namespace  Fem2D {
       :k(KK),npe(k+1),ndf(3*npe),X(npe),Data( 5*ndf+2)
     {
       //Pi_h_coef=1.;
-      const QuadratureFormular1d QF(npe);
+      const QuadratureFormular1d QF(-1+2*npe,npe,GaussLegendre(npe),true);
       for (int i=0;i<npe;++i)
 	X[i]=QF[i].x;
       HeapSort((R *) X,npe);

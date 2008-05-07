@@ -251,7 +251,6 @@ LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	glumesh.$(DYLIB_SUFFIX)   \
 	splitmesh3.$(DYLIB_SUFFIX)  splitmesh6.$(DYLIB_SUFFIX)
 
-
 all: all-am
 
 .SUFFIXES:
