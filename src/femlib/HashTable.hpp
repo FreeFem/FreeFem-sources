@@ -116,7 +116,7 @@ public:
   nKV *add(const K & key,const V & v)
   {
     size_t k =key.hash()%nk;
-    assert(n+1<nx);
+    assert(n<nx);
     t[n].v = v;
     t[n].k = key;
     t[n].next=head[k];

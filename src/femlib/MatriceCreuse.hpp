@@ -158,6 +158,8 @@ template <class FES>
 class MatDataFES { 
 public:
   typedef FES FESpace;
+  typedef typename FESpace::FElement FElement;
+
   typedef typename  FESpace::QFElement QFElement; 
   typedef typename  FESpace::QFBorderElement QFBorderElement; 
   CountPointer<const FESpace> cUh,cVh;
@@ -183,6 +185,8 @@ public:
 
   typedef typename MElm::TypeOfMatriceElementaire TypeOfMatriceElementaire;
   typedef FES FESpace;
+
+  typedef typename  FESpace::FElement FElement; 
   typedef typename  FESpace::QFElement QFElement; 
   typedef typename  FESpace::QFBorderElement QFBorderElement; 
 
@@ -193,7 +197,7 @@ public:
                      
     :
     MatDataFES<FES>(UUh,VVh,fit,fie),
-    MatriceElementaire<R>(UUh.esize()+VVh.esize(),nni,nnj,t)
+    MatriceElementaire<R>(UUh.esize()+VVh.esize(),llga,nni,nnj,t)
   {}
        
   MatriceElementaireFES(const FESpace & UUh,int llga,int *nni,
@@ -236,8 +240,10 @@ class MatriceElementairePleine:public MatriceElementaireFES<R,FES> {
 
 public:
   typedef FES FESpace;
+  typedef typename  FESpace::Mesh Mesh;
   typedef typename  FESpace::QFElement QFElement;
   typedef typename  FESpace::QFBorderElement QFBorderElement;
+  typedef typename  FESpace::FElement FElement; 
 
   R & operator() (int i,int j) {return this->a[i*this->m+j];}
   // MatPleineElementFunc element;
@@ -270,10 +276,10 @@ public:
                                const QFElement & fit=*QFElement::Default,
                                const QFBorderElement & fie =*QFBorderElement::Default) 
     :MatriceElementaireFES<R,FES>(UUh,VVh,
-			UUh.MaximalNbOfDF()*VVh.MaximalNbOfDF(),
-			new int[UUh.MaximalNbOfDF()],
-			new int[VVh.MaximalNbOfDF()],this->Full,fit,fie),
-    element(0),faceelement(0) {}
+				  UUh.MaximalNbOfDF()*VVh.MaximalNbOfDF(),
+				  new int[UUh.MaximalNbOfDF()],
+				  new int[VVh.MaximalNbOfDF()],this->Full,fit,fie),
+     element(0),faceelement(0) {}
 
 }; 
 
@@ -292,8 +298,10 @@ class MatriceElementaireSymetrique:public MatriceElementaireFES<R,FES> {
 
 public:
   typedef FES FESpace;
+  typedef typename  FESpace::Mesh Mesh;
   typedef typename  FESpace::QFElement QFElement;
   typedef typename  FESpace::QFBorderElement QFBorderElement;
+  typedef typename  FESpace::FElement FElement; 
 
   R & operator()(int i,int j) 
   {return j < i ? this->a[(i*(i+1))/2 + j] : this->a[(j*(j+1))/2 + i] ;}

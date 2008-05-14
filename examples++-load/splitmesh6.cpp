@@ -32,7 +32,7 @@ Mesh * SplitMesh6(Fem2D::Mesh * const & pTh)
     for (int e = 0; e<3;++e)
     {
 	int ee=e;
-	int kk = Th.TriangleAdj(k,ee);
+	int kk = Th.ElementAdj(k,ee);
 	if( kk<=k) nbe++;
     }
   Vertex * v= new Vertex[nbv+nbt+nbe];
@@ -66,7 +66,7 @@ Mesh * SplitMesh6(Fem2D::Mesh * const & pTh)
       for (int e = 0; e<3;++e)
       {
 	  int ee=e;
-	  int kk = Th.TriangleAdj(k,ee);
+	  int kk = Th.ElementAdj(k,ee);
 	  if( (kk>=k) || (kk <0) ) { 
 	      int v0=Th(k,EdgesVertexTriangle[e][0]);
 	      int v1=Th(k,EdgesVertexTriangle[e][1]);
@@ -114,7 +114,7 @@ Mesh * SplitMesh6(Fem2D::Mesh * const & pTh)
   for (int i=0;i<neb;i++)
     {        
       int ki;
-      int k=Th.BoundaryTriangle(i,ki);
+      int k=Th.BoundaryElement(i,ki);
       int i1=Th(Th.bedges[i][0]);
       int i2=Th(Th.bedges[i][1]);
       int ii = mm[3*k+ki]; 

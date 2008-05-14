@@ -681,7 +681,7 @@ class ForEachTypePtr<T*>:  public basicForEachType { public:
 };
 
 
-template<class T,int RTYPE=1> 
+template<class T,int RTYPE> 
 class ForEachTypePtrfspace:  public ForEachTypePtr<T> { public:
     ForEachTypePtrfspace():ForEachTypePtr<T>() {} 
     int TYPEOFID() const {return RTYPE;} 
@@ -1977,6 +1977,16 @@ struct ternary_function
 	typedef Result result_type;
 };
 
+template <typename Arg1, typename Arg2,typename Arg3,typename Arg4 , class Result>
+struct quad_function
+{
+	typedef Arg1   first_argument_type;
+	typedef Arg2   second_argument_type;
+	typedef Arg3   third_argument_type;
+	typedef Arg4   fourth_argument_type;
+	typedef Result result_type;
+};
+
 template<typename T,class CODE >
 class  OneTernaryOperator : public OneOperator{
   typedef typename T::result_type R;
@@ -2006,6 +2016,42 @@ class  OneTernaryOperator : public OneOperator{
                   map_type[typeid(B).name()],
                   map_type[typeid(C).name()]) {}
 };
+
+template<typename T,class CODE >
+class  OneQuadOperator : public OneOperator{
+  typedef typename T::result_type R;
+  typedef typename T::first_argument_type A;
+  typedef typename T::second_argument_type B;
+  typedef typename T::third_argument_type C;
+  typedef typename T::fourth_argument_type D;
+
+  class Op : public E_F0 {
+    typedef  typename C::result_type Result;
+    Expression a,b,c,d;
+  public:
+    AnyType operator()(Stack s)  const 
+    {return  SetAny<R>(static_cast<R>(T::f( GetAny<A>((*a)(s)) ,
+					    GetAny<B>((*b)(s)) ,
+					    GetAny<C>((*c)(s)),
+					    GetAny<D>((*d)(s))
+					    )));}
+    Op(Expression aa,Expression bb,Expression cc,Expression dd) : a(aa),b(bb),c(cc),d(dd) {} 
+    bool MeshIndependent() const {
+      return a->MeshIndependent() && b->MeshIndependent() && c->MeshIndependent()  && d->MeshIndependent();}
+  };
+  
+public: 
+  E_F0 * code(const basicAC_F0 & args) const 
+  { return  new CODE(t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]),t[3]->CastTo(args[3]));} 
+  OneQuadOperator(): 
+    OneOperator(map_type[typeid(R).name()],
+		map_type[typeid(A).name()],
+		map_type[typeid(B).name()],
+		map_type[typeid(C).name()],
+		map_type[typeid(D).name()]
+		) {}
+};
+
 
 template<typename T >
 class  OneTernaryOperator3 : public OneOperator{

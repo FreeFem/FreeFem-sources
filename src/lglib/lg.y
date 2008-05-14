@@ -50,6 +50,8 @@ class Iden;
 #include "fem.hpp"
 #include "FESpacen.hpp" 
 #include "FESpace.hpp" 
+#include "MeshPoint.hpp"
+
 #include "lgfem.hpp" 
 #include "lex.hpp"
 #include "environment.hpp"
@@ -57,8 +59,9 @@ class Iden;
 class Routine;
 bool load(string s);
 
-template <class R> class FE;
-template <class R,int i> class FE_;
+ template <class R,int d> class FE;
+ template <class R,int d,int i> class FE_;
+
 extern mylex *zzzfff;
 #ifdef PARALLELE
   void initparallele(int &, char **&);
@@ -85,6 +88,7 @@ double CPUcompileInit =0;
 //class pfes;
 C_F0  fespacetype;
 bool fespacecomplex;
+int fespacedim;
 
 int ShowAlloc(const char *s,size_t &);
 inline int yylex()  {return zzzfff->scan();}
@@ -155,6 +159,8 @@ void lgerror (const char* s) ;
 %type <args>   border_expr;
 %type <type>   type_of_dcl;
 %type <str> id;
+%type <str> fespace123;
+
 /* Add precedence rules to solve dangling else s/r conflict */
 
 %nonassoc IF
@@ -203,6 +209,9 @@ void lgerror (const char* s) ;
 %token <type> TYPE
 %token <type> FUNCTION
 %token <str> FESPACE
+%token <str> FESPACE1
+%token <str> FESPACE3
+
 
 %token DOTSTAR
 %token DOTSLASH
@@ -274,16 +283,20 @@ instructions:  instruction   {$$=$1;;;}
 list_of_id_args:   { $$=new ListOfId();}
             | id                      { $$ = new ListOfId(); $$->push_back(UnId($1))}
             | id '=' no_comma_expr    { $$ = new ListOfId(); $$->push_back(UnId($1,$3)) }
-            | FESPACE id              { $$ = new ListOfId(); $$->push_back(UnId($2,Find($1),atype<FE<double> **>()))}
-            | FESPACE '&' id              { $$ = new ListOfId(); $$->push_back(UnId($3,Find($1),atype<FE<double> **>(),true))}
+            | FESPACE id              { $$ = new ListOfId(); $$->push_back(UnId($2,Find($1),atype<FE<double,2> **>()))}
+            | FESPACE '&' id              { $$ = new ListOfId(); $$->push_back(UnId($3,Find($1),atype<FE<double,2> **>(),true))}
+            | FESPACE3 id              { $$ = new ListOfId(); $$->push_back(UnId($2,Find($1),atype<FE<double,3> **>()))}
+            | FESPACE3 '&' id              { $$ = new ListOfId(); $$->push_back(UnId($3,Find($1),atype<FE<double,3> **>(),true))}
             | type_of_dcl id          { $$ = new ListOfId(); $$->push_back(UnId($2,C_F0(),$1->right())) }
             | type_of_dcl '&' id      { $$ = new ListOfId(); $$->push_back(UnId($3,C_F0(),$1,true)) }
             | '[' list_of_id_args ']' { $$ = new ListOfId(); $$->push_back(UnId($2)) }
             | list_of_id_args ',' id                     { $$ = $1; $$->push_back(UnId($3)) }
             | list_of_id_args ',''[' list_of_id_args ']' { $$ = $1; $$->push_back(UnId($4)) }
             | list_of_id_args ',' id '=' no_comma_expr   { $$ = $1; $$->push_back(UnId($3,$5)) }
-            | list_of_id_args ',' FESPACE id             { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double> **>())) }
-            | list_of_id_args ',' FESPACE '&' id             { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double> **>(),true)) }
+            | list_of_id_args ',' FESPACE id             { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,2> **>())) }
+            | list_of_id_args ',' FESPACE '&' id             { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,2> **>(),true)) }
+            | list_of_id_args ',' FESPACE3 id             { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,3> **>())) }
+            | list_of_id_args ',' FESPACE3 '&' id             { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,3> **>(),true)) }
             | list_of_id_args ',' type_of_dcl id         { $$ = $1; $$->push_back(UnId($4,C_F0(),$3->right())) }
             | list_of_id_args ',' type_of_dcl '&' id     { $$ = $1; $$->push_back(UnId($5,C_F0(),$3,true)) }
 ;
@@ -292,7 +305,7 @@ list_of_id1:  id                      { $$ = new ListOfId(); $$->push_back(UnId(
             | list_of_id1 ',' id      { $$=$1  ; $$->push_back(UnId($3)); }
 ;
          
-id: ID | FESPACE; 
+id: ID | FESPACE|FESPACE3|FESPACE1; 
 
 list_of_dcls:    ID                         {$$=currentblock->NewVar<LocalVariable>($1,dcltype)}   
               |  ID '='   no_comma_expr     {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3)}
@@ -307,6 +320,8 @@ list_of_dcls:    ID                         {$$=currentblock->NewVar<LocalVariab
 parameters_list:
 	   no_set_expr {$$=$1} 
 	|  FESPACE  ID  {$$=Find($1)} 
+	|  FESPACE1  ID  {$$=Find($1)} 
+	|  FESPACE3  ID  {$$=Find($1)} 
 	|  ID '=' no_set_expr { $$=make_pair<const char *,const C_F0>($1,$3)} 	
 	| parameters_list ',' no_set_expr { $$ = ($1 += $3) }
 	| parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5))}
@@ -322,21 +337,22 @@ type_of_dcl:   TYPE
 
 
 ID_space:
-    ID                                  { $$ =  NewFEvariable($1,currentblock,fespacetype,fespacecomplex); }
- |  ID '[' no_set_expr ']'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
- |  ID '=' no_set_expr                  { $$ =  NewFEvariable($1,currentblock,fespacetype,$3,fespacecomplex) }
- |  '[' list_of_id1 ']'                 { $$ =  NewFEvariable($2,currentblock,fespacetype,fespacecomplex) }
- |  '[' list_of_id1 ']' '[' no_set_expr ']'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
- |  '[' list_of_id1 ']' '=' no_set_expr { $$ =  NewFEvariable($2,currentblock,fespacetype,$5,fespacecomplex) }
+ID                                  { $$ =  NewFEvariable($1,currentblock,fespacetype,fespacecomplex,fespacedim); }
+  |  ID '[' no_set_expr ']'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex,fespacedim); }
+  |  ID '=' no_set_expr                  { $$ =  NewFEvariable($1,currentblock,fespacetype,$3,fespacecomplex,fespacedim) }
+  |  '[' list_of_id1 ']'                 { $$ =  NewFEvariable($2,currentblock,fespacetype,fespacecomplex,fespacedim) }
+  |  '[' list_of_id1 ']' '[' no_set_expr ']'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex,fespacedim) }
+  |  '[' list_of_id1 ']' '=' no_set_expr { $$ =  NewFEvariable($2,currentblock,fespacetype,$5,fespacecomplex,fespacedim) }
 ; 
 ID_array_space:
-    ID '(' no_set_expr ')'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex); }
- |  '[' list_of_id1 ']' '(' no_set_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex) }
+ ID '(' no_set_expr ')'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex,fespacedim); }
+  |  '[' list_of_id1 ']' '(' no_set_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex,fespacedim) }
 
 ;
 
-fespace:  FESPACE {fespacecomplex=false;  fespacetype = Find($1);}
-        | FESPACE '<' TYPE '>' {
+fespace123: FESPACE { fespacedim=2} |FESPACE1 { fespacedim=1} | FESPACE3 { fespacedim=3};
+fespace:  fespace123 {fespacecomplex=false;  fespacetype = Find($1);}
+        | fespace123 '<' TYPE '>' {
              if ($3 != typevarreal && $3 != typevarcomplex) yyerror(" type of finite element <real> or <complex>");
              fespacecomplex=($3==typevarcomplex);
              fespacetype = Find($1);}
@@ -352,8 +368,7 @@ spaceIDs :    fespace               spaceIDb    { $$=0;  $$ = $2}
 ;
 
 fespace_def:
-   ID '(' parameters_list ')' 
-     {$$=currentblock->NewVar<LocalVariableFES,size_t>($1,atype<pfes*>(),$3,dimFESpaceImage($3));
+   ID '(' parameters_list ')'  {$$=currentblock->NewVar<LocalVariableFES,size_t>($1,typeFESpace($3),$3,dimFESpaceImage($3));
      $3.destroy(); };
      
 fespace_def_list:  fespace_def
@@ -514,9 +529,13 @@ sub_script_expr:
   
 parameters:  {$$=0} 
 	|   FESPACE {$$=Find($1)} 
+	|   FESPACE1 {$$=Find($1)} 
+	|   FESPACE3 {$$=Find($1)} 
 	|  id '=' no_set_expr { $$=make_pair<const char *,const C_F0>($1,$3)} 	
 	|   sub_script_expr {$$=$1} 
 	| parameters ',' FESPACE { $$ = ($1 += Find($3)) }
+	| parameters ',' FESPACE1 { $$ = ($1 += Find($3)) }
+	| parameters ',' FESPACE3 { $$ = ($1 += Find($3)) }
 	| parameters ',' sub_script_expr { $$ = ($1 += $3) }
 	| parameters ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5)) } 
 ; 
@@ -549,6 +568,10 @@ primary:
   |        primary '.'  ID       { $$=C_F0($1,$3) ;}
   |        FESPACE '.'  ID       { $$=C_F0(Find($1),$3) ;}
   |        FESPACE '(' parameters ')'     { $$=C_F0(Find($1),$2,$3) ;}
+  |        FESPACE1 '.'  ID       { $$=C_F0(Find($1),$3) ;}
+  |        FESPACE1 '(' parameters ')'     { $$=C_F0(Find($1),$2,$3) ;}
+  |        FESPACE3 '.'  ID       { $$=C_F0(Find($1),$3) ;}
+  |        FESPACE3 '(' parameters ')'     { $$=C_F0(Find($1),$2,$3) ;}
   |        primary PLUSPLUS      {$$=C_F0(TheRightOperators,$2,$1)} 
   |        primary MOINSMOINS    {$$=C_F0(TheRightOperators,$2,$1)} 
   |        TYPE '('  Expr ')' {

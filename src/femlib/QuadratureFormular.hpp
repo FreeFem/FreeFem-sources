@@ -83,24 +83,25 @@ ostream& operator <<(ostream& , GQuadraturePoint<Rd> & );
 typedef GQuadratureFormular<R1> QuadratureFormular1d;
 
 
-extern const QuadratureFormular1d QF_GaussLegendre1; 
-extern const QuadratureFormular1d QF_GaussLegendre2; 
-extern const QuadratureFormular1d QF_GaussLegendre3; 
-extern const QuadratureFormular1d QF_GaussLegendre4; 
-extern const QuadratureFormular1d QF_GaussLegendre5; 
-extern const QuadratureFormular1d QF_LumpP1_1D; 
+  extern const QuadratureFormular1d QF_GaussLegendre1; 
+  extern const QuadratureFormular1d QF_GaussLegendre2; 
+  extern const QuadratureFormular1d QF_GaussLegendre3; 
+  extern const QuadratureFormular1d QF_GaussLegendre4; 
+  extern const QuadratureFormular1d QF_GaussLegendre5; 
+  extern const QuadratureFormular1d QF_LumpP1_1D; 
+  
+  
+  extern const GQuadratureFormular<R2> QuadratureFormular_T_1;
+  extern const GQuadratureFormular<R2> QuadratureFormular_T_1lump;
+  extern const GQuadratureFormular<R2> QuadratureFormular_T_2;
+  extern const GQuadratureFormular<R2> QuadratureFormular_T_5;
+  extern const GQuadratureFormular<R2> QuadratureFormular_T_2_4P1;
+  extern const GQuadratureFormular<R2> QuadratureFormular_T_7;
+  extern const GQuadratureFormular<R2>  QuadratureFormular_T_9;
 
-
-extern const GQuadratureFormular<R2> QuadratureFormular_T_1;
-extern const GQuadratureFormular<R2> QuadratureFormular_T_1lump;
-extern const GQuadratureFormular<R2> QuadratureFormular_T_2;
-extern const GQuadratureFormular<R2> QuadratureFormular_T_5;
-extern const GQuadratureFormular<R2> QuadratureFormular_T_2_4P1;
-extern const GQuadratureFormular<R2> QuadratureFormular_T_7;
-extern const GQuadratureFormular<R2>  QuadratureFormular_T_9;
-
-
-
+  extern const GQuadratureFormular<R3> QuadratureFormular_Tet_2;
+  extern const GQuadratureFormular<R3> QuadratureFormular_Tet_5;
+  
 
 
 template<class Rd>

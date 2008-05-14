@@ -377,15 +377,18 @@ int mylex::scan(int lvl)
       
   if ( ret == ID) {
     if (! InMotClef(plglval->type,ret))  {
-      if (  FindType(buf) == 1)  
-         ret =  FESPACE;
-     plglval->str = newcopy(buf);
-      }}
+      int ft = FindType(buf);
+      //      if( ft) cout << "(  ft == " << ft << " ) "<< endl;
+      int feid3[4]  ={ ID,FESPACE1,FESPACE,FESPACE3};
+      assert ( ft >= 0 && ft <= 3)  ;
+      ret =  feid3[ft];      
+      plglval->str = newcopy(buf);
+    }}
   
   if ( ret =='{') { //cout << " listMacroDef->push_back"<< endl; 
-      listMacroDef->push_back( MapMacroDef() );}
+    listMacroDef->push_back( MapMacroDef() );}
   else if (ret == '}') {//cout << " listMacroDef->pop_back"<< endl;
-       listMacroDef->pop_back( );}
+    listMacroDef->pop_back( );}
   
   if (! lexdebug && echo && lvl==0 ) print(cout);
   
@@ -478,7 +481,7 @@ bool mylex::SetMacro(int &ret)
       
       do {
 	int i = source().get();
-	if (i == ENDOFFILE) {  cerr << "in macro " <<macroname <<  endl;
+	if (i == EOF) {  cerr << "in macro " <<macroname <<  endl;
 	ErrorScan(" ENDOFFILE in macro definition. remark:a macro end with // ");}
 	int ii = source().peek();
 	if (i == '/' && ii == '/') { source().putback('/'); break;} 

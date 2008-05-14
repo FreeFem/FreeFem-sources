@@ -431,7 +431,12 @@ class TypeOfMortar {
 
 class FElement; 
 
-class baseFElement { public:
+  class baseFElement { public:
+      typedef Fem2D::FESpace FESpace;
+    typedef Fem2D::Mesh Mesh;
+    typedef Fem2D::Triangle Element;
+    typedef Fem2D::TypeOfFE  TypeOfFE;
+
   const FESpace &Vh;  
   const Triangle &T;
   const TypeOfFE * tfe; 
@@ -450,7 +455,7 @@ class FElement : public baseFElement { public:
   typedef const KN<R2> &  aR2;
   
   
-   friend class FESpace;
+  friend class Fem2D::FESpace;
   const int *p;
   const int nb;
   FElement(const FESpace * VVh,int k) ;

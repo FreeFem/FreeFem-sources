@@ -91,27 +91,29 @@ int *builddata_d(const int ndfitem[4],const int nd[4])
   return data;  
 }
 
-dataTypeOfFE::dataTypeOfFE(const int nitemdim[4],const int dfon[4],int NN,int nbsubdivisionn,int nb_sub_femm)
-  : data(builddata_d(dfon,nitemdim)),  
-  dataalloc(data),
-  ndfonVertex(dfon[0]),
-  ndfonEdge(dfon[1]),
-  ndfonFace(dfon[2]),
-  ndfonVolume(dfon[3]),
-  NbDoF(nbdf_d(dfon,nitemdim)),
-  NbNode(nbnode_d(dfon,nitemdim)),
-  N(NN),
-  nb_sub_fem(nb_sub_femm),
-  nbsubdivision(nbsubdivisionn),
-  DFOnWhat(data+0*NbDoF),
-  DFOfNode(data+1*NbDoF),
-  NodeOfDF(data+2*NbDoF),
-  fromFE(data+3*NbDoF),
-  fromDF(data+4*NbDoF),
-  fromASubFE(data+3*NbDoF),
-  fromASubDF(data+4*NbDoF) ,
-  dim_which_sub_fem(data+5*NbDoF)
-{}
+   dataTypeOfFE::dataTypeOfFE(const int nitemdim[4],const int dfon[4],int NN,int nbsubdivisionn,int nb_sub_femm,bool discon)
+     :
+     data(builddata_d(dfon,nitemdim)),  
+     dataalloc(data),
+     ndfonVertex(dfon[0]),
+     ndfonEdge(dfon[1]),
+     ndfonFace(dfon[2]),
+     ndfonVolume(dfon[3]),
+     NbDoF(nbdf_d(dfon,nitemdim)),
+     NbNode(nbnode_d(dfon,nitemdim)),
+     N(NN),
+     nb_sub_fem(nb_sub_femm),
+     nbsubdivision(nbsubdivisionn),
+     discontinue(discon),
+     DFOnWhat(data+0*NbDoF),
+     DFOfNode(data+1*NbDoF),
+     NodeOfDF(data+2*NbDoF),
+     fromFE(data+3*NbDoF),
+     fromDF(data+4*NbDoF),
+     fromASubFE(data+3*NbDoF),
+     fromASubDF(data+4*NbDoF) ,
+     dim_which_sub_fem(data+5*NbDoF)
+   {}
 
 
 int *builddata_d(const int nitemdim[4],const KN< dataTypeOfFE const  *> &teb)
@@ -139,6 +141,7 @@ int *builddata_d(const int nitemdim[4],const KN< dataTypeOfFE const  *> &teb)
     int NbDoF=0;
     int dfon[4]={0,0,0,0};
     int nbsubdivision=0;
+    int discon=0; 
     for (int i=0;i<k;++i)
       {
 	NbDoF += teb[i]->NbDoF;
@@ -147,10 +150,11 @@ int *builddata_d(const int nitemdim[4],const KN< dataTypeOfFE const  *> &teb)
 	dfon[2] += teb[i]->ndfonFace;
 	dfon[3] += teb[i]->ndfonVolume;
 	nbsubdivision = max(nbsubdivision,teb[i]->nbsubdivision);
+	discon = discon || teb[i]->discontinue; // bof bof 1 FE discontinue => discontinue
       }
-    
-    int * data0=new int[9+7*NbDoF+N];
-    int * data=data0+9;
+    int ostart=10;
+    int * data0=new int[ostart+7*NbDoF+N];
+    int * data=data0+ostart;
     int * data1=data+5*NbDoF;
    
       int c=0;
@@ -260,6 +264,8 @@ int *builddata_d(const int nitemdim[4],const KN< dataTypeOfFE const  *> &teb)
     data0[6]=N;
     data0[7]=nb_sub_fem;
     data0[8]=nbsubdivision;
+    data0[9]=discon;
+    
     return data0;
 }
 
@@ -277,14 +283,15 @@ NbNode(data[5]),
 N(data[6]),
 nb_sub_fem(data[7]),
 nbsubdivision(data[8]),
-DFOnWhat(data+9+0*NbDoF),
-DFOfNode(data+9+1*NbDoF),
-NodeOfDF(data+9+2*NbDoF),
-fromFE(data+9+3*NbDoF),
-fromDF(data+9+4*NbDoF),
-fromASubFE(data+9+5*NbDoF),
-fromASubDF(data+9+6*NbDoF) ,
-dim_which_sub_fem(data+9+7*NbDoF)
+discontinue(data[9]),
+DFOnWhat(data+10+0*NbDoF),
+DFOfNode(data+10+1*NbDoF),
+NodeOfDF(data+10+2*NbDoF),
+fromFE(data+10+3*NbDoF),
+fromDF(data+10+4*NbDoF),
+fromASubFE(data+10+5*NbDoF),
+fromASubDF(data+10+6*NbDoF) ,
+dim_which_sub_fem(data+10+7*NbDoF)
 {}
 
 template<class Mesh>

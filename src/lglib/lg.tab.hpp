@@ -67,14 +67,16 @@
      TYPE = 293,
      FUNCTION = 294,
      FESPACE = 295,
-     PLUSEQ = 296,
-     MOINSEQ = 297,
-     MULEQ = 298,
-     DIVEQ = 299,
-     ARROW = 300,
-     BORDER = 301,
-     CURVE = 302,
-     SOLVE = 303
+     FESPACE1 = 296,
+     FESPACE3 = 297,
+     PLUSEQ = 298,
+     MOINSEQ = 299,
+     MULEQ = 300,
+     DIVEQ = 301,
+     ARROW = 302,
+     BORDER = 303,
+     CURVE = 304,
+     SOLVE = 305
    };
 #endif
 #define IF 258
@@ -115,20 +117,22 @@
 #define TYPE 293
 #define FUNCTION 294
 #define FESPACE 295
-#define PLUSEQ 296
-#define MOINSEQ 297
-#define MULEQ 298
-#define DIVEQ 299
-#define ARROW 300
-#define BORDER 301
-#define CURVE 302
-#define SOLVE 303
+#define FESPACE1 296
+#define FESPACE3 297
+#define PLUSEQ 298
+#define MOINSEQ 299
+#define MULEQ 300
+#define DIVEQ 301
+#define ARROW 302
+#define BORDER 303
+#define CURVE 304
+#define SOLVE 305
 
 
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 105 "lg.y"
+#line 109 "lg.y"
 typedef union YYSTYPE { 
  double dnum;
  long lnum;
@@ -144,7 +148,7 @@ typedef union YYSTYPE {
 /* ListCatch * clist_Catchs;*/
 } YYSTYPE;
 /* Line 1318 of yacc.c.  */
-#line 148 "lg.tab.hpp"
+#line 152 "lg.tab.hpp"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

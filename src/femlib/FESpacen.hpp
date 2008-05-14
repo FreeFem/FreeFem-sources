@@ -112,6 +112,8 @@ public:
     const int NbNode;
     int  N,nb_sub_fem;  
     const int nbsubdivision; // nb of subdivision for plot    
+    const bool discontinue;
+
     int const * const DFOnWhat; 
     int const * const DFOfNode; // nu  du df on Node
     int const * const NodeOfDF; // nu du node du df
@@ -122,7 +124,7 @@ public:
     int const * const dim_which_sub_fem; // from atomic sub FE for CL
     const  int * ndfOn() const { return & ndfonVertex;}
     
-    dataTypeOfFE(const int *nnitemdim,const int dfon[4],int NN,int nbsubdivisionn,int nb_sub_femm=1);
+  dataTypeOfFE(const int *nnitemdim,const int dfon[4],int NN,int nbsubdivisionn,int nb_sub_femm=1,bool discon=true);
     // pour evite un template 
     // nitemdim : nbitem : si d==2   3,3,1,0 , si d=3: 4,6,4,1 , si d==1 = 2,1,0,0 
     // dfon : nombre de df par item 
@@ -304,9 +306,9 @@ public:
 
   
   // the full constructor ..
-  GTypeOfFE(const int dfon[4],const int NN,int  nsub,int kPi,int npPi,bool invar) 
+  GTypeOfFE(const int dfon[4],const int NN,int  nsub,int kPi,int npPi,bool invar,bool discon) 
     : 
-    dataTypeOfFE(Element::nitemdim,dfon, NN, nsub,1),
+    dataTypeOfFE(Element::nitemdim,dfon, NN, nsub,1,discon),
     invariantinterpolationMatrix(invar),
     NbPtforInterpolation(npPi),
     NbcoefforInterpolation(kPi),
@@ -326,9 +328,9 @@ public:
     } 
 
     //  simple constructeur of lagrange type Finite element   1 point par Node for interpolation
-  GTypeOfFE(const int dfon[4],const int NN,int  nsub,bool invar)
+  GTypeOfFE(const int dfon[4],const int NN,int  nsub,bool invar,bool discon)
     : 
-    dataTypeOfFE(Element::nitemdim,dfon, NN, nsub,1),
+    dataTypeOfFE(Element::nitemdim,dfon, NN, nsub,1,discon),
     
     invariantinterpolationMatrix(invar),
     NbPtforInterpolation(this->NbDoF),
@@ -427,25 +429,28 @@ private:
   
 } ; 
 
-template<class mesh>
-struct DataFE
-{
-  static GTypeOfFE<mesh> & P0; 
-  static GTypeOfFE<mesh> & P1; 
-  static GTypeOfFE<mesh> & P2; 
-};
-
+  template<class mesh>
+  struct DataFE
+  {
+    static GTypeOfFE<mesh> & P0; 
+    static GTypeOfFE<mesh> & P1; 
+    static GTypeOfFE<mesh> & P2; 
+  };
+  
 
  
-template<class Mesh>
-class GbaseFElement {
-public:
-  typedef typename Mesh::Element Element;
-  typedef  Element E;
-  typedef typename E::Rd Rd;
-  typedef typename E::RdHat RdHat;
-  typedef Fem2D::GQuadratureFormular<RdHat>  QF;
-  
+  template<class MMesh>
+  class GbaseFElement
+  {
+  public:
+    typedef MMesh  Mesh;
+    typedef GFESpace<Mesh>  FESpace;
+    typedef typename Mesh::Element Element;
+    typedef  Element E;
+    typedef typename E::Rd Rd;
+    typedef typename E::RdHat RdHat;
+    typedef Fem2D::GQuadratureFormular<RdHat>  QF;
+    
   const GFESpace<Mesh> &Vh;  
   const Element &T;
   const GTypeOfFE<Mesh> * tfe; 
@@ -458,8 +463,11 @@ public:
 };
 
 template<class Mesh>
-class GFElement : public GbaseFElement<Mesh> { public:
-    typedef typename Mesh::Element Element;
+class GFElement : public GbaseFElement<Mesh> 
+{
+public:
+    
+  typedef typename Mesh::Element Element;
   typedef  Element E;
   typedef typename E::Rd Rd;
   typedef typename E::RdHat RdHat;
@@ -490,8 +498,7 @@ class GFElement : public GbaseFElement<Mesh> { public:
   int dfcend(int ic) const { return this->tfe->end_dfcomp[ic];}
   
   template<class RR>
-  KN_<RR> & Pi_h(KNM_<RR> vpt,KN_<RR> & vdf,InterpolationMatrix<RdHat> &M)
-    
+  KN_<RR> & Pi_h(KNM_<RR> vpt,KN_<RR> & vdf,InterpolationMatrix<RdHat> &M)    const 
   { 
     // compute  the interpolation  
     // in : vpt  value of componant j at point p : vpt(p,j) 

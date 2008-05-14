@@ -505,8 +505,8 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 
 
 
-  static int kfind=0;
-  static int kthrough=0;
+  //  static int kfind=0;
+  // static int kthrough=0;
   
   inline void CoorBary(const Triangle2 & K,const  R2  & P, R *l)
   {
@@ -554,7 +554,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   const typename  Mesh::Element * Find(const Mesh & Th,
 				       GTree<typename Mesh::Vertex> *quadtree,
 				       typename Mesh::Rd P,
-				       typename Mesh::Rd & Phat,
+				       typename Mesh::RdHat & Phat,
 				       bool & outside,
 				       const typename  Mesh::Element * tstart)
   {
@@ -573,10 +573,10 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
       {  
 	const Vertex * v=quadtree->NearestVertexWithNormal(P);
 	if (!v) 
-	{ 
+	  { 
 	  v=quadtree->NearestVertex(P);
 	  assert(v);
-	}
+	  }
 	it=Th.Contening(v);
       }
     
@@ -589,12 +589,12 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   R dP=DBL_MAX;
   Rd PPhat;
   int k=0;    
-  kfind++;
+  Mesh::kfind++;
   while (1)
     { 
       // cout << "it " << it <<endl;
       const Element & K(Th[it]);
-      kthrough++;
+      Mesh::kthrough++;
       assert(k++<1000);
       int kk,n=0,nl[nkv];
       R l[nkv+1];
@@ -668,20 +668,21 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 
   template class GTree<Vertex2>;
   template class GTree<Vertex3>;
-  
+  typedef Mesh3::GMesh GMesh3;
+  typedef Mesh2::GMesh GMesh2;
   template
-  const   Mesh3::Element * Find<Mesh3>(const Mesh3 & Th,
-				       GTree< Mesh3::Vertex> *quadtree,
-				       Mesh3::Rd P,
-				       Mesh3::Rd & Phat,
+  const   GMesh3::Element * Find<GMesh3>(const GMesh3 & Th,
+				       GTree< GMesh3::Vertex> *quadtree,
+				       GMesh3::Rd P,
+				       GMesh3::RdHat & Phat,
 				       bool & outside,
-				       const   Mesh3::Element * tstart);
+				       const   GMesh3::Element * tstart);
   template
-  const   Mesh2::Element * Find<Mesh2>(const Mesh2 & Th,
-				       GTree< Mesh2::Vertex> *quadtree,
-				       Mesh2::Rd P,
-				       Mesh2::Rd & Phat,
+  const   GMesh2::Element * Find<GMesh2>(const GMesh2 & Th,
+				       GTree< GMesh2::Vertex> *quadtree,
+				       GMesh2::Rd P,
+				       GMesh2::RdHat & Phat,
 				       bool & outside,
-				       const   Mesh2::Element * tstart);
+				       const   GMesh2::Element * tstart);
   
 }

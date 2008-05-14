@@ -9,12 +9,14 @@ static void SetPtPk(Rd *Pt,const int *dfon,int nn)
     int k=0;
     
     if(dfon[0])
+      {
 	for(int i=0;i<=d;++i)
-	    Pt[k++]=Rd();
-    
-    for(int i=0;i<d;++i)
-	Pt[i+1][i]=1.;
-    
+	  Pt[k++]=Rd();
+	
+	for(int i=0;i<d;++i)
+	  Pt[i+1][i]=1.;
+      }
+
     if(dfon[1])
 	for(int i=0;i<E::ne;++i)
 	    Pt[k++] = (Pt[E::nvedge[i][0]]+Pt[E::nvedge[i][1]])*0.5;
@@ -61,7 +63,7 @@ public:
   
   RdHat *Pt;
   TypeOfFE_Lagrange(int k):
-    GTypeOfFE<Mesh>(A4(k),1,k,k<=2)
+    GTypeOfFE<Mesh>(A4(k),1,Max(k,1),k<=2,k==0)
   {
     int n=this->NbDoF;
     
@@ -76,7 +78,7 @@ public:
 	this->coefInterpolation[i]=1.;
       }
   }
-  
+  ~TypeOfFE_Lagrange(){ } //cout << "TypeOfFE_Lagrange"<< this->NbDoF<<endl;}
 private:
   TypeOfFE_Lagrange( const TypeOfFE_Lagrange &) ;
   void operator=( const TypeOfFE_Lagrange &) ;

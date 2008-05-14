@@ -52,6 +52,7 @@ using namespace std;
 
 #include "lex.hpp"
 #include "lgfem.hpp"
+#include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
 #include "CGNL.hpp"

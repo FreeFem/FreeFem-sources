@@ -8,63 +8,66 @@
 #include "Mesh3dn.hpp"
 
 
- namespace Fem2D {
-
-/*
- const short int v_tet_face[4][3]=  {{3,2,1},{0,2,3},{ 3,1,0},{ 0,1,2}};
- const short int a_tet_face[4][3]=  {{ 0,1,0},{ 0,2,0},{ 0,3,1},{ 1,2,1}};
- const bool  sig_tet_face[4][3]=  {{ 0,1,0},{ 1,0,1},{ 0,1,0},{ 1,0,1}};
- const short int v_tet_edge[6][2]= {{ 1,2},{1,3},{1,4},{2,3},{2,4},{3,4}}; 
- const short int fadj_tet_edge[6][2]= {{4,3},{2,4},{3,2},{4,1},{1,3},{2,1}};
- const short int op_tet_edge[6]={ 6, 5, 4, 3, 2, 1};  
- */
-static const int  nvfaceTet[4][3]  ={{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}  ;//{ {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
-static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{1,2},{1,3},{2,3} };
-
-static const int  nvfaceTria[1][3]  = { {0,1,2} };
-static const int  nvedgeTria[3][2] = { {1,2},{2,0},{0,1}}; 
-
-static const int   nvfaceSeg[1][3]  = {{-1,-1,1}};
-static const int  nvedgeSeg[1][2] = { {0,1} };
- 
-
-template<>
-const int (* const GenericElement<DataTriangle3>::nvface)[3] = nvfaceTria ;
-template<>
-const int (* const GenericElement<DataTriangle3>::nvedge)[2] = nvedgeTria ;
-template<>
-const int (* const GenericElement<DataTriangle3>::nvadj)[2] = nvedgeTria ;
-template<> const int  GenericElement<DataTriangle3>::nitemdim[4] = {3,3,1,0 }  ;
-static const int onWhatIsEdge[3][7] = {
+namespace Fem2D {
+  
+  /*
+    const short int v_tet_face[4][3]=  {{3,2,1},{0,2,3},{ 3,1,0},{ 0,1,2}};
+    const short int a_tet_face[4][3]=  {{ 0,1,0},{ 0,2,0},{ 0,3,1},{ 1,2,1}};
+    const bool  sig_tet_face[4][3]=  {{ 0,1,0},{ 1,0,1},{ 0,1,0},{ 1,0,1}};
+    const short int v_tet_edge[6][2]= {{ 1,2},{1,3},{1,4},{2,3},{2,4},{3,4}}; 
+    const short int fadj_tet_edge[6][2]= {{4,3},{2,4},{3,2},{4,1},{1,3},{2,1}};
+    const short int op_tet_edge[6]={ 6, 5, 4, 3, 2, 1};  
+  */
+  static const int  nvfaceTet[4][3]  ={{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}  ;//{ {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
+  static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{1,2},{1,3},{2,3} };
+  
+  static const int  nvfaceTria[1][3]  = { {0,1,2} };
+  static const int  nvedgeTria[3][2] = { {1,2},{2,0},{0,1}}; 
+  
+  static const int   nvfaceSeg[1][3]  = {{-1,-1,1}};
+  static const int  nvedgeSeg[1][2] = { {0,1} };
+  
+  
+  template<>
+  const int (* const GenericElement<DataTriangle3>::nvface)[3] = nvfaceTria ;
+  template<>
+  const int (* const GenericElement<DataTriangle3>::nvedge)[2] = nvedgeTria ;
+  template<>
+  const int (* const GenericElement<DataTriangle3>::nvadj)[2] = nvedgeTria ;
+  template<> const int  GenericElement<DataTriangle3>::nitemdim[4] = {3,3,1,0 }  ;
+  static const int onWhatIsEdge[3][7] = {
     {0,1,3, 2,0,0, 0}, // edge 0 
     {3,0,1, 0,2,0, 0},
     {1,3,0, 0,0,2, 0} };
+  
+  template<>
+  const int (* const GenericElement<DataTriangle3>::onWhatBorder)[7] = onWhatIsEdge ;
+  
+  
+  template<>
+  const int (* const GenericElement<DataTet>::nvface)[3] = nvfaceTet ;
+  template<>
+  const int (* const GenericElement<DataTet>::nvedge)[2] = nvedgeTet ;
+  template<>
+  const int (* const GenericElement<DataTet>::nvadj)[3] = nvfaceTet ;
+  template<> const int  GenericElement<DataTet>::nitemdim[4] = {4,6,4,1 }  ;
+  
+  int onWhatIsFace[4][15] ; 
+  
+  static const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15];
+  
+  template<>
+  const int (* const GenericElement<DataTet>::onWhatBorder)[15] = SetonWhatIsFace(onWhatIsFace,nvfaceTet,nvedgeTet) ;
+  
+  template<> int   GenericMesh<Tet,Triangle3,Vertex3>::kfind=0;
+  template<> int   GenericMesh<Tet,Triangle3,Vertex3>::kthrough=0;
 
-template<>
-const int (* const GenericElement<DataTriangle3>::onWhatBorder)[7] = onWhatIsEdge ;
-
-
-template<>
-const int (* const GenericElement<DataTet>::nvface)[3] = nvfaceTet ;
-template<>
-const int (* const GenericElement<DataTet>::nvedge)[2] = nvedgeTet ;
-template<>
-const int (* const GenericElement<DataTet>::nvadj)[3] = nvfaceTet ;
-template<> const int  GenericElement<DataTet>::nitemdim[4] = {4,6,4,1 }  ;
-
-int onWhatIsFace[4][15] ; 
-
-static const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15];
-
-template<>
-const int (* const GenericElement<DataTet>::onWhatBorder)[15] = SetonWhatIsFace(onWhatIsFace,nvfaceTet,nvedgeTet) ;
-
-
-const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15]
-{
-   for(int i=0;i<15;++i)
+  
+  const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15]
+  {
+    for(int i=0;i<15;++i)
      for(int j=0;j<4;++j)
-	onWhatIsFace[j][i]=0;
+       onWhatIsFace[j][i]=0;
    for(int j=0;j<4;++j)
     for(int i=0;i<3;++i)
 	onWhatIsFace[j][nvfaceTet[j][i]]=1;

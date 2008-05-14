@@ -45,6 +45,7 @@ using namespace std;
 #include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
 #include "lgfem.hpp"
+#include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
 extern Block *currentblock;
@@ -413,11 +414,11 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 		   
 		   if (evector)
 		   {
-		       FEbaseArray<K> & ev(*evector);
+		       FEbaseArray<K,v_fes> & ev(*evector);
 		       int m = Min(nconv,(long) ev.N);
 		       for(int i=0;i<m;i++)
 		       {
-			   FEbase<K> & xx= **(ev[i]);
+			   FEbase<K,v_fes> & xx= **(ev[i]);
 			   // if (xx.pVh != pOP1->pUh) 
 			   //    ExecError("Wrong Type of FEspace to store the eigen vector ");
 			   xx.Vh = pOP1->Uh;
@@ -589,13 +590,13 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 		       //  iev < 0 =>  complex  
 		       //      start real :  rawev + n*(k-1) 
 		       //      -start imag :  ramev +n*(k)
-		       FEbaseArray<K> & ev(*evector);
+		       FEbaseArray<K,v_fes> & ev(*evector);
 		       int m = Min(nconv,(long) ev.N);
 		       for(int i=0;i<m;i++)
 		       {
 			   // K ev_i=
 			   prob.EigenvalueImag(i);
-			   FEbase<K> & xx= **(ev[i]);
+			   FEbase<K,v_fes> & xx= **(ev[i]);
 			   // if (xx.pVh != pOP1->pUh) 
 			   //    ExecError("Wrong Type of FEspace to store the eigen vector ");
 			   xx.Vh = pOP1->Uh;
@@ -789,11 +790,11 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const {
 	       }
 	       if (evector)
 	       {
-		   FEbaseArray<K> & ev(*evector);
+		   FEbaseArray<K,v_fes> & ev(*evector);
 		   int m = Min(nconv,(long) ev.N);
 		   for(int i=0;i<m;i++)
 		   {
-		       FEbase<K> & xx= **(ev[i]);
+		       FEbase<K,v_fes> & xx= **(ev[i]);
 		       // if (xx.pVh != pOP1->pUh) 
 		       //    ExecError("Wrong Type of FEspace to store the eigen vector ");
 		       xx.Vh = pOP1->Uh;

@@ -33,14 +33,14 @@
 #include <cstdio>
 #include <new>
 
+void debugalloc()
+{ }
 
 void debugunalloc()
 { static long count=0;
+  //  debugalloc();
  count++;}
 
-void debugalloc()
-{ static long count=0;
- count++;}
 
 void exitalloc(int i)
 { static long count=0;
@@ -283,14 +283,16 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
 		p->a[i].n =0;
 		if (p->a[i].is_array != is_array)
 		  printf("\t\tCheckPtr:  erreur delete [] ");
-		if( p->a[i].n < NbAllocShow )
-		  debugalloc();      
+		//if( p->a[i].n < NbAllocShow )		  debugalloc();      
 		NextFree = & p->a[i].p;
 		return;}
 	  p = p->next;
 	}
       if(pp) 
-	printf( "\t\tCheckPtr: delete of bad pointer %p  -----------\n",pp);
+	{
+	  printf( "\t\tCheckPtr: delete of bad pointer %p  -----------\n",pp);
+	  debugalloc(); 
+	}
       
     } else 
       myfree((char*)pp); 
