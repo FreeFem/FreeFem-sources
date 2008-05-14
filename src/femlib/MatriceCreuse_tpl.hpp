@@ -58,6 +58,7 @@ template<> inline  complex<float> blas_sdot(const int n,const  complex<float> *s
 using Fem2D::HeapSort;
 
 //  -----------
+template<class FElement>
 inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE,const FElement*pKKE)
 {
   // routine  build  les array p, pk,pkk 
@@ -122,7 +123,7 @@ void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack) 
        FElement Kv(this->Vh[k]);
        if(kk<0)
         { // return ; // on saute ????  bof bof 
-         this->n=this->m=BuildMEK_KK(this->lnk,this->ni,this->nik,this->nikk,&Kv,0);
+	  this->n=this->m=BuildMEK_KK<FElement>(this->lnk,this->ni,this->nik,this->nikk,&Kv,0);
          int n2 =this->m*this->n; 
          for (int i=0;i<n2;i++) this->a[i]=0;
          faceelement(*this,Kv,Kv,Kv,Kv,this->data,ie,iie,label,stack);
@@ -130,7 +131,7 @@ void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack) 
         else
         {
          FElement KKv(this->Vh[kk]);
-         this->n=this->m=BuildMEK_KK(this->lnk,this->ni,this->nik,this->nikk,&Kv,&KKv);
+         this->n=this->m=BuildMEK_KK<FElement>(this->lnk,this->ni,this->nik,this->nikk,&Kv,&KKv);
         
          
          faceelement(*this,Kv,KKv,Kv,KKv,this->data,ie,iie,label,stack);
@@ -176,40 +177,43 @@ template<class R,class FES>
 void MatriceElementaireSymetrique<R,FES>::call(int k,int ie,int label,void * stack) {
   // mise a zero de la matrice elementaire, plus sur
   for (int i=0;i<this->lga;i++) 
-     this->a[i]=0;
+    this->a[i]=0;
   if(this->onFace)
     { 
-       ffassert(0); // a faire 
+      ffassert(0); // a faire 
     }
   else {
-
- if (k< this->Uh.Th.nt)
-  {
-  throwassert(element);
-  const FElement K(this->Uh[k]);
-  int nbdf =K.NbDoF();
-  for (int i=0;i<nbdf;i++)
-     this->ni[i] = K(i); // copy the numbering 
-  this->m=this->n = nbdf; 
-
-  element(*this,K,this->data,ie,label,stack); 
-  }// call the elementary mat 
-  else
-  {
-  throwassert(mortar);
-  {
-  const FMortar K(&(this->Uh),k);
-  int nbdf = K.NbDoF();
-  for (int i=0;i<nbdf;i++)
-     this->ni[i] = K(i); // copy the numbering 
-  this->m=this->n = nbdf; 
-  // mise a zero de la matrice elementaire, plus sur
-  
-   mortar(*this,K,stack);}
-  }
+    
+    if (k< this->Uh.Th.nt)
+      {
+	throwassert(element);
+	const FElement K(this->Uh[k]);
+	int nbdf =K.NbDoF();
+	for (int i=0;i<nbdf;i++)
+	  this->ni[i] = K(i); // copy the numbering 
+	this->m=this->n = nbdf; 
+	
+	element(*this,K,this->data,ie,label,stack); 
+      }// call the elementary mat 
+    else
+      {
+	ffassert(0); // remove code for the 3d 
+	/*
+	throwassert(mortar);
+	{
+	  const FMortar K(&(this->Uh),k);
+	  int nbdf = K.NbDoF();
+	  for (int i=0;i<nbdf;i++)
+	    this->ni[i] = K(i); // copy the numbering 
+	  this->m=this->n = nbdf; 
+	  // mise a zero de la matrice elementaire, plus sur
+	  
+	  mortar(*this,K,stack);}
+	*/
+      }
   }
 }
-
+  
 template<class R>
 MatriceProfile<R>::~MatriceProfile() {
   if(!this->dummy) 

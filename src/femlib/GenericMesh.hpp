@@ -117,6 +117,47 @@ private:
 	
 };
 
+template<typename Rn>
+class GenericVertex : public Rn,public Label
+{
+    
+  template<typename T,typename B,typename V>
+        friend class GenericMesh;
+  friend inline ostream& operator <<(ostream& f, const GenericVertex & v )
+  { f << (const Rn &) v << ' ' << (const Label &) v   ; return f; }
+  friend inline istream& operator >> (istream& f,  GenericVertex & v )
+        { f >> (Rn &) v >> (Label &) v ; return f; }
+    
+  Rn *normal; // pointeur sur la normal exterieur pour filtre des points de departs
+   
+public:
+  typedef Rn Rd;
+  static const int d=Rd::d;  
+  GenericVertex() : Rd(),Label(),normal(0) {};
+  GenericVertex(const Rd & P,int r=0): Rd(P),Label(r),normal(0){}
+    
+  void SetNormal(Rd *&n,const Rd & N)
+  { if (normal) { 
+      Rd NN=*normal+N; 
+      *normal= NN/NN.norme(); }
+    else *(normal=n++)=N;}
+    
+  Rd Ne() const {return normal ? *normal: Rd();}
+  bool ninside(const Rd & P) const
+  {
+    return normal? (Rd(*this,P),*normal)<=0: true;
+  }
+    
+private: // pas de copie pour ne pas prendre l'adresse
+  GenericVertex(const GenericVertex &);
+  void operator=(const GenericVertex &); 
+  
+};
+  inline  R1 ExtNormal( GenericVertex<R1> *const v[2],int const f[1])  {   return f[0]==0 ? R1(-1):R1(0);  }
+  inline  R2 ExtNormal( GenericVertex<R2> *const v[3],int const f[2])  {   return R2(*v[f[0]],*v[f[1]]).perp();  }
+  inline  R3 ExtNormal( GenericVertex<R3> *const v[4],int const f[3])  {   return R3(*v[f[0]],*v[f[1]])^R3(*v[f[0]],*v[f[2]]) ;  }
+
+
 template<typename Data>  
 class GenericElement: public Label {
 public:
@@ -193,16 +234,26 @@ public:
   Rd Edge(int i) const {ASSERTION(i>=0 && i <ne);
     return Rd(at(nvedge[i][0]),at(nvedge[i][1]));}// opposite edge vertex i
 
- 
-  Rd operator()(const RdHat & Phat) const {
-    Rd r= (1.-Phat.sum())*(*(Rd*) vertices[0]);
+  Rd N(int i) const  { return ExtNormal(vertices,nvadj[i]);}
     
+
+  Rd operator()(const RdHat & Phat) const {
+    Rd r= (1.-Phat.sum())*(*(Rd*) vertices[0]);    
     for (int i=1;i<nv;++i)
       r+=  Phat[i-1]*(*(Rd*) vertices[i]);
-    // cout << "r=" <<r << endl;
     return r;
   }
 
+
+  int faceOrientation(int i) const 
+  {// def the permutatution of orient the face
+    int fo =0;
+    Vertex * f[3]={&at(nvface[i][0]), &at(nvface[i][1]), &at(nvface[i][2])}; 
+    if(f[0]>f[1]) fo+=1,Exchange(f[0],f[1]); 
+    if(f[1]>f[2]) { fo+=2,Exchange(f[1],f[2]); 
+      if(f[0]>f[1]) fo+=4,Exchange(f[0],f[1]); }
+    return fo;
+  }
 
   bool   EdgeOrientation(int i) const 
     { return &at(nvedge[i][0]) < &at(nvedge[i][1]);}
@@ -245,48 +296,13 @@ private:
 };
 
 
-template<typename Rn>
-class GenericVertex : public Rn,public Label
-{
-    
-  template<typename T,typename B,typename V>
-        friend class GenericMesh;
-  friend inline ostream& operator <<(ostream& f, const GenericVertex & v )
-  { f << (const Rn &) v << ' ' << (const Label &) v   ; return f; }
-  friend inline istream& operator >> (istream& f,  GenericVertex & v )
-        { f >> (Rn &) v >> (Label &) v ; return f; }
-    
-  Rn *normal; // pointeur sur la normal exterieur pour filtre des points de departs
-   
-public:
-  typedef Rn Rd;
-  static const int d=Rd::d;  
-  GenericVertex() : Rd(),Label(),normal(0) {};
-  GenericVertex(const Rd & P,int r=0): Rd(P),Label(r),normal(0){}
-    
-  void SetNormal(Rd *&n,const Rd & N)
-    { if (normal) { 
-	Rd NN=*normal+N; 
-    *normal= NN/NN.norme(); }
-    else *(normal=n++)=N;}
-    
-  Rd Ne() const {return normal ? *normal: Rd();}
-  bool ninside(const Rd & P) const
-  {
-    return normal? (Rd(*this,P),*normal)<=0: true;
-  }
-    
-private: // pas de copie pour ne pas prendre l'adresse
-  GenericVertex(const GenericVertex &);
-  void operator=(const GenericVertex &); 
-  
-};
 
 
 template<typename T,typename B,typename V>
 class GenericMesh : public RefCounter
 { 
 public:
+  typedef GenericMesh GMesh;
   typedef T Element;   
   typedef typename V::Rd Rd;
   typedef typename Rd::R R;
@@ -305,6 +321,7 @@ public:
   Rd Pmin,Pmax; // // the bound  of the domain  see BuildBound 
   static const int nea=T::nea; //  numbering of adj (4 in Tet,  3 in Tria, 2 in seg) 
   static const int nva=T::nva; //  numbering of vertex in Adj element 
+  static int kfind,kthrough; //  number of search and number of throught element. 
   int *TheAdjacencesLink; // to store the adj link  k*nea+i -> k'*nea+i' 
   int *BoundaryElementHeadLink; //
   int *ElementConteningVertex;  
@@ -320,7 +337,7 @@ public:
   
   GenericMesh()
     : nt(0),nv(0),nbe(0),  mes(0.),mesb(0.) ,
-      vertices(0),elements(0),borderelements(0),
+      vertices(0),elements(0),borderelements(0),bnormalv(0),
       TheAdjacencesLink(0),BoundaryElementHeadLink(0),
       ElementConteningVertex(0), gtree(0)
   {} 
@@ -413,7 +430,7 @@ public:
 
   //  const Element * Find(const Rd & P) const ;
   const Element * Find(Rd P, RdHat & Phat,bool & outside,const Element * tstart=0) const  
-  {return EF23::Find(*this,this->gtree,P,Phat,outside,tstart);}
+  {return EF23::Find<GMesh>(*this,this->gtree,P,Phat,outside,tstart);}
   
   R mesure(){ return mes;}
   R bordermesure(){ return mesb;}
@@ -658,7 +675,7 @@ void GenericMesh<T,B,V>::Buildbnormalv()
    // const int nkt= T::nt;
     
     if (bnormalv) 
-    {assert(0);return;}
+      {assert(0);return;}
     int nb=0;
     for (int k=0;k<nt;k++)
 	for (int i=0;i<nkv;i++)

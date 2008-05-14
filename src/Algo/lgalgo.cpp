@@ -36,6 +36,7 @@ using namespace std;
 #include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
 #include "lgfem.hpp"
+#include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
 #include "NRJ.hpp"

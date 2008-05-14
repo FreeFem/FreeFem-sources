@@ -149,7 +149,7 @@ class MeshPointBase { public:
      d=2;
    }
    
-  void setP(Mesh * pTh,int tt,int ss)
+  void setP(const Mesh * pTh,int tt,int ss)
    { 
      T=&(*pTh)[tt];
      Vertex & V=(*T)[ss];
@@ -312,7 +312,7 @@ class MeshPointBase { public:
      d=3;
    }
    
-  void setP(Mesh3 * pTh,int tt,int ss)
+  void setP(const Mesh3 * pTh,int tt,int ss)
    { 
      T3=&(*pTh)[tt];
      const Mesh3::Vertex & V=(*T3)[ss];
@@ -351,16 +351,40 @@ class MeshPoint : public MeshPointBase { public:
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,coutside);
       other.unset();
            }
-    
+
+  // 3d
+  void set(const R3 &P2,const R3 & P_Hat,const  baseFElement3 & K,int ll,const R3 &NN,int iedge) {
+     MeshPointBase::set(P2,P_Hat,K,ll,NN,iedge);
+     other.unset();}   
+  void set(const Mesh3 & aTh,const R3 &P2,const R3 & P_Hat,const  Tet & aK,int ll,const R3 &NN,int iedge) {
+    MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge);
+    other.unset();}
+  void set(const Mesh3 & aTh,const R3 &P2,const R3 & P_Hat,const  Tet & aK,int ll,const R3 &NN,int iedge,int VFF) {
+    MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge,VFF);
+    other.unset();}
+  void set(const R3 &P2,const R3 & P_Hat,const  baseFElement3 & K) {
+     MeshPointBase::set(P2,P_Hat,K);
+     other.unset();
+    }
+  void set(const  Mesh3 &aTh, const R3 &P2,const R3 & P_Hat,const  Tet & aK,
+           const int ll,bool coutside=false) {
+    MeshPointBase::set(aTh,P2,P_Hat,aK,ll,coutside);
+    other.unset();
+  }
+  // fin 3d
   void set(R x=0.0,R y=0.0,R z=0.0) {  
      MeshPointBase::set(x,y,z);
      other.unset();} 
   void change(const R2 & PH,Triangle & tt,int ll) {
      MeshPointBase::change(PH,tt,ll);
      other.unset(); }
-   void setP(Mesh * pTh,int tt,int ss) { 
+   void setP(const Mesh * pTh,int tt,int ss) { 
       MeshPointBase::setP(pTh,tt,ss); 
       other.unset(); } 
+  void setP(const Mesh3 * pTh,int tt,int ss) {  // 3d
+      MeshPointBase::setP(pTh,tt,ss); 
+      other.unset(); } 
+
    bool operator==(const MeshPoint & mp) const {
       return T == mp.T &&  P.x == mp.P.x && P.y == mp.P.y 
           && P.z == mp.P.z ;}

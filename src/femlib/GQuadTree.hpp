@@ -207,7 +207,7 @@ namespace EF23 {
   const typename  Mesh::Element * Find(const Mesh & Th,
 				       GTree<typename Mesh::Vertex> *quadtree,
 				       typename Mesh::Rd P,
-				       typename Mesh::Rd & Phat,
+				       typename Mesh::RdHat & Phat,
 				       bool & outside,
 				       const typename  Mesh::Element * tstart);
   

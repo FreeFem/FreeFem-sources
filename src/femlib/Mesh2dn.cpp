@@ -8,39 +8,42 @@
 
 #include "Mesh2dn.hpp"
 
- namespace Fem2D {
-long verbosity=1;
-
-const R1 R1::KHat[2]={R1(0),R1(1)};
-const R2 R2::KHat[3]={R2(0,0),R2(1,0),R2(0,1)};
-const  R3 R3::KHat[4]={R3(0,0,0),R3(1,0,0),R3(0,1,0),R3(0,0,1)};
-
-static const int  nvfaceTet[4][3]  = { {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
-static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{0,1},{1,2},{2,3} };
-
-static const int  nvfaceTria[1][3]  = { {0,1,2} };
-static const int  nvedgeTria[3][2] = { {1,2},{2,0},{0,1}}; 
-
-static const int   nvfaceSeg[1][3]  = {{-1,-1,1}};
-static const int  nvedgeSeg[1][2] = { {0,1} };
-
-
-template<>
-const int (* const GenericElement<DataTriangle2>::nvface)[3] = nvfaceTria ;
-template<>
-const int (* const GenericElement<DataTriangle2>::nvedge)[2] = nvedgeTria ;
-template<>
-const int (* const GenericElement<DataTriangle2>::nvadj)[2] = nvedgeTria ;
-template<> const int  GenericElement<DataTriangle2>::nitemdim[4] = {3,3,1,0 }  ;
-
-
-static const int onWhatIsEdge[3][7] = {  {0,1,3, 2,0,0, 0}, // edge 0 
-    {3,0,1, 0,2,0, 0},
-    {1,3,0, 0,0,2, 0}};
-
-template<>
-const int (* const GenericElement<DataTriangle2>::onWhatBorder)[7] = onWhatIsEdge ;
-
+namespace Fem2D {
+  long verbosity=1;
+  
+  const R1 R1::KHat[2]={R1(0),R1(1)};
+  const R2 R2::KHat[3]={R2(0,0),R2(1,0),R2(0,1)};
+  const  R3 R3::KHat[4]={R3(0,0,0),R3(1,0,0),R3(0,1,0),R3(0,0,1)};
+  
+  static const int  nvfaceTet[4][3]  = { {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
+  static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{0,1},{1,2},{2,3} };
+  
+  static const int  nvfaceTria[1][3]  = { {0,1,2} };
+  static const int  nvedgeTria[3][2] = { {1,2},{2,0},{0,1}}; 
+  
+  static const int   nvfaceSeg[1][3]  = {{-1,-1,1}};
+  static const int  nvedgeSeg[1][2] = { {0,1} };
+  
+  
+  template<>
+  const int (* const GenericElement<DataTriangle2>::nvface)[3] = nvfaceTria ;
+  template<>
+  const int (* const GenericElement<DataTriangle2>::nvedge)[2] = nvedgeTria ;
+  template<>
+  const int (* const GenericElement<DataTriangle2>::nvadj)[2] = nvedgeTria ;
+  template<> const int  GenericElement<DataTriangle2>::nitemdim[4] = {3,3,1,0 }  ;
+  
+  
+  static const int onWhatIsEdge[3][7] = {  {0,1,3, 2,0,0, 0}, // edge 0 
+					   {3,0,1, 0,2,0, 0},
+					   {1,3,0, 0,0,2, 0}};
+  
+  template<>
+  const int (* const GenericElement<DataTriangle2>::onWhatBorder)[7] = onWhatIsEdge ;
+  
+  template<> int   GenericMesh<Triangle2,BoundaryEdge2,Vertex2>::kfind=0;
+  template<> int   GenericMesh<Triangle2,BoundaryEdge2,Vertex2>::kthrough=0;
+  
 
 Mesh2::Mesh2(const char * filename)
 { // read the mesh  

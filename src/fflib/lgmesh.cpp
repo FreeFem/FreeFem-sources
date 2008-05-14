@@ -553,10 +553,10 @@ AnyType MoveMesh::operator()(Stack stack) const
    if (pth)
      for (size_t i=0;i<sol.size();i++)
        { //  ale 
-          pair<FEbase<double>,int> * s = GetAny<pair<FEbase<double>,int>*>( (*sol[i])(stack));
-          ffassert(s->first.Vh);
-          ffassert( &s->first.Vh->Th == Thh); // same old mesh
-          ffassert(0); // a faire ????
+	 pair<FEbase<double,v_fes>,int> * s = GetAny<pair<FEbase<double,v_fes>,int>*>( (*sol[i])(stack));
+	 ffassert(s->first.Vh);
+	 ffassert( &s->first.Vh->Th == Thh); // same old mesh
+	 ffassert(0); // a faire ????
        }
    *mp=mps;
     pth->decrement();   

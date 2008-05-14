@@ -41,15 +41,16 @@ template<class K> class SolveGCDiag;
 class Plot;
 class v_fes;
 
-typedef FEbase<double> * pferbase ;
-typedef FEbaseArray<double> * pferbasearray ;
+typedef FEbase<double,v_fes> * pferbase ;
+typedef FEbaseArray<double,v_fes> * pferbasearray ;
 typedef pair<pferbase,int> pfer ;
 typedef pair<pferbasearray,int> pferarray ;
 
-typedef FEbase<Complex> * pfecbase ;
-typedef FEbaseArray<Complex> * pfecbasearray ;
+typedef FEbase<Complex,v_fes> * pfecbase ;
+typedef FEbaseArray<Complex,v_fes> * pfecbasearray ;
 typedef pair<pfecbase,int> pfec ;
 typedef pair<pfecbasearray,int> pfecarray ;
+
 
 //typedef pair<pmesh *,int> pmesharray ;
 
@@ -75,30 +76,6 @@ typedef  const Foperator foperator;
 Expression IsFebaseArray(Expression f);
 
 void SetArgsFormLinear(const ListOfId *lid,int ordre);
-bool isSameMesh(const list<C_F0> & largs,const Mesh * Thu,const Mesh * Thv,Stack stack)  ;
-
-
-inline C_F0 CCastToR(const C_F0 & f){ return C_F0(atype<double>()->CastTo(f),atype<double>());}
-inline bool BCastToR(const C_F0 & f){ return atype<double>()->CastingFrom(f.left());}
-
-
-
-inline C_F0 CCastToC(const C_F0 & f){ return C_F0(atype<Complex>()->CastTo(f),atype<Complex>());}
-inline bool BCastToC(const C_F0 & f){ return atype<Complex>()->CastingFrom(f.left());}
-
-template<class Result>
-inline Expression CastTo(const C_F0 & f) { return atype<Result>()->CastTo(f);}
-
-template<class Result>
-inline bool BCastTo(const C_F0 & f) { return atype<Result>()->CastingFrom(f.left());}
-
-inline void Check(bool  v,const char * mess)
-{
-  if (!v) { cerr << " Error " << mess ;
-  throw(ErrorExec(mess,1));
-  }
-}           
-
 
 
 inline ostream & operator<<(ostream & f,const  TypeSolveMat & tm)
@@ -115,41 +92,6 @@ inline ostream & operator<<(ostream & f,const  TypeSolveMat & tm)
    }
   return f;
 }
-class TabFuncArg { public:
-  typedef double R;  
-  typedef  Fem2D::R2 R2;
-  Stack s;
-  int nb;
-  Expression * e;
-  void  eval(R *v) const 
-  { for (int i=0;i<nb;i++)
-    if (e[i])
-      { 
-        v[i] = GetAny<R>( (*e[i])(s));
-        //    cout <<" (" << i << " " << *v << ") ";
-      }
-    else 
-      v[i] = 0;
-  }
-  R2 eval_X() const {
-    return R2(GetAny<R>( (*e[nb-2])(s)),GetAny<R>( (*e[nb-1])(s)));
-  }
-  void  eval_2(R *v) const 
-  { 
-    for (int i=0;i<nb-2;i++)
-      if (e[i])
-        v[i] = GetAny<R>( (*e[i])(s));
-      else 
-        v[i] = 0;
-  }
-  TabFuncArg(Stack ss,int n) : s(ss),nb(n),e(new Expression[n]) {}
-  void operator=(int j) { ffassert(j==0); for (int i=0;i<nb;i++) e[i]=0;} // resert
-  Expression  & operator[](int i){return e[i];}
-  ~TabFuncArg() {delete [] e;}
-private: // no copy 
-  TabFuncArg(const TabFuncArg & );
-  void operator=(const TabFuncArg & );  
-};
 
 
 class C_args: public E_F0mps  {public:
@@ -278,32 +220,42 @@ class BC_set : public E_F0mps { public:
   //    void init(Stack stack) const {}
   
 };
+
 class CDomainOfIntegration: public E_F0mps { 
 public:
   static const int n_name_param =7;
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3 } ; 
+  enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5 } ; //3d
   typeofkind  kind; //  0 
+  int d; // 3d
   typedef const CDomainOfIntegration* Result;
   Expression Th; 
   vector<Expression> what;
-  CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d) :kind(b), what(args.size()-1)
+  CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2) // 3d
+    :kind(b),d(ddim), what(args.size()-1)
+     
   {
     args.SetNameParam(n_name_param,name_param,nargs);
-    Th=CastTo<pmesh>(args[0]);
+    if(d==2) // 3d
+      Th=CastTo<pmesh>(args[0]);
+    else if(d==3)
+      Th=CastTo<pmesh3>(args[0]);
+    else ffassert(0); // a faire 
     int n=args.size();
+
     for (int i=1;i<n;i++)
       what[i-1]=CastTo<long>(args[i]); 
-   // cout << " CDomainOfIntegration " << this << endl;       
+    // cout << " CDomainOfIntegration " << this << endl;       
   }
-  static ArrayOfaType  typeargs() { return ArrayOfaType(atype<pmesh>(), true);}// all type
+  static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmesh>(), true);} // all type
   AnyType operator()(Stack ) const  { return SetAny<const CDomainOfIntegration *>(this);}
-       operator aType () const { return atype<const CDomainOfIntegration *>();}         
-
+  operator aType () const { return atype<const CDomainOfIntegration *>();}         
+  
   static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args);} 
   const Fem2D::QuadratureFormular & FIT(Stack) const ;   
   const Fem2D::QuadratureFormular1d & FIE(Stack) const ;  
+  const Fem2D::GQuadratureFormular<R3> & FIV(Stack) const ;  // 3d
   bool UseOpt(Stack s) const  {  return nargs[5] ? GetAny<bool>( (*(nargs[5]))(s) )  : 1;}
   double  binside(Stack s) const { return nargs[6] ? GetAny<double>( (*(nargs[6]))(s) )  : 0;} // truc pour FH
 };  
@@ -325,7 +277,29 @@ public:
   CDomainOfIntegrationVFEdges( const basicAC_F0 & args) :CDomainOfIntegration(args,intallVFedges) {}
   static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,intallVFedges);}    
 };
+// add for the 3d case .. // 3d 
+class CDomainOfIntegration3d: public CDomainOfIntegration { 
+public:
+  CDomainOfIntegration3d( const basicAC_F0 & args) :CDomainOfIntegration(args,int3d,3) {}
+  static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int3d,3);}
+  static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmesh3>(), true);} // all type    
+};
 
+class CDomainOfIntegrationBorder3d: public CDomainOfIntegration { 
+public:
+  CDomainOfIntegrationBorder3d( const basicAC_F0 & args) :CDomainOfIntegration(args,int1d,3) {}
+  static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int1d,3);}    
+  static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmesh3>(), true);} // all type
+};
+
+class CDomainOfIntegrationAllFaces: public CDomainOfIntegration { 
+public:
+  CDomainOfIntegrationAllFaces( const basicAC_F0 & args) :CDomainOfIntegration(args,intallfaces,3) {}
+  static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,intallfaces,3);}    
+  static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmesh3>(), true);} // all type
+};
+
+// end add
 
 
 
@@ -453,7 +427,7 @@ class FormBilinear : public E_F0mps { public:
   {ffassert(b);}   
   FormBilinear operator-() const { return  FormBilinear(di,C_F0(TheOperators,"-",C_F0(b,atype<B>())));}
   bool VF() const { return MaxOp(b) >= last_operatortype;}
-
+  int dim() const {return di->d;}
   FormBilinear(const FormBilinear & fb) : di(fb.di),b(new Foperator(*fb.b) ) {}
   //  void init(Stack stack) const {}
 };
@@ -484,7 +458,7 @@ class FormLinear : public E_F0mps { public:
   static ArrayOfaType  typeargs() { return ArrayOfaType(atype<A>(),atype<B>());}// all type
   AnyType operator()(Stack ) const  { return SetAny<Result>(this);}
    operator aType () const { return atype<Result>();}         
-  
+  int dim() const {return di->d;}
   static  E_F0 * f(const basicAC_F0 & args) { return new FormLinear(args);}    
   FormLinear(A a,Expression bb) : di(a),l(new Ftest(*dynamic_cast<B>(bb))/*->Optimize(currentblock) FH1004 */) {ffassert(l);}   
   FormLinear operator-() const { return  FormLinear(di,C_F0(TheOperators,"-",C_F0(l,atype<B>())));}
@@ -493,60 +467,82 @@ class FormLinear : public E_F0mps { public:
   
 };
 
-class Call_FormLinear: public E_F0mps { public:
+template<class VFES>
+class Call_FormLinear: public E_F0mps 
+{ 
+public:
+  const int d;
   list<C_F0> largs;
   Expression *nargs;
   typedef list<C_F0>::const_iterator const_iterator;
   const int N;
   Expression ppfes; 
   
-  Call_FormLinear(Expression * na,Expression  LL, Expression ft) ;
+  Call_FormLinear(int dd,Expression * na,Expression  LL, Expression ft) ;
   AnyType operator()(Stack stack) const 
   { InternalError(" bug: no eval of Call_FormLinear ");} 
    operator aType () const { return atype<void>();}         
   
 };
 
-class Call_FormBilinear: public E_F0mps { public:
+template<class VFES>
+class Call_FormBilinear: public E_F0mps 
+{
+public:
+  const int d;
   Expression *nargs;
   list<C_F0> largs;
   typedef list<C_F0>::const_iterator const_iterator;
   
   const int N,M;
   Expression euh,evh; 
-  Call_FormBilinear(Expression * na,Expression  LL, Expression fi,Expression fj) ;
+  Call_FormBilinear(int dd,Expression * na,Expression  LL, Expression fi,Expression fj) ;
   AnyType operator()(Stack stack) const  
   { InternalError(" bug: no eval of Call_FormBilinear ");} 
    operator aType () const { return atype<void>();}         
     
 };
 
-template<class T>
-struct OpCall_FormLinear: public OneOperator {
+
+struct OpCall_FormLinear_np {
   static basicAC_F0::name_and_type name_param[] ;
   static const int n_name_param =1;
+  
+};
 
+struct OpCall_FormBilinear_np {
+  static basicAC_F0::name_and_type name_param[] ;
+  static const int n_name_param =12; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007
+};
+
+template<class T,class v_fes>
+struct OpCall_FormLinear
+  : public OneOperator,
+    public OpCall_FormLinear_np
+{
+  typedef v_fes *pfes;
   E_F0 * code(const basicAC_F0 & args) const 
   { 
- Expression * nargs = new Expression[n_name_param];
-  args.SetNameParam(n_name_param,name_param,nargs);
-  
-  return  new Call_FormLinear(nargs,to<const C_args*>(args[0]),to<pfes*>(args[1]));} 
+    Expression * nargs = new Expression[n_name_param];
+    args.SetNameParam(n_name_param,name_param,nargs);
+    
+    return  new Call_FormLinear<v_fes>(v_fes::d,nargs,to<const C_args*>(args[0]),to<pfes*>(args[1]));} 
   OpCall_FormLinear() : 
-    OneOperator(atype<const Call_FormLinear*>(),atype<const T*>(),atype<pfes*>()) {}
+    OneOperator(atype<const Call_FormLinear<v_fes>*>(),atype<const T*>(),atype<pfes*>()) {}
 };
 
 
-template<class T>
-struct OpCall_FormLinear2: public OneOperator {
-  static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =1;
-
+template<class T,class v_fes>
+struct OpCall_FormLinear2
+  : public OneOperator,
+    public OpCall_FormLinear_np
+{
+  static const int d=v_fes::d;
+  typedef v_fes *pfes;
   E_F0 * code(const basicAC_F0 & args) const 
-  {
-  
- Expression * nargs = new Expression[n_name_param];
-  args.SetNameParam(n_name_param,name_param,nargs);
+  {    
+    Expression * nargs = new Expression[this->n_name_param];
+    args.SetNameParam(this->n_name_param,this->name_param,nargs);
     
     Expression p=args[1];
     if ( ! p->EvaluableWithOutStack() ) 
@@ -554,75 +550,55 @@ struct OpCall_FormLinear2: public OneOperator {
     long pv = GetAny<long>((*p)(NullStack));
     if ( pv ) 
       { CompileError("  a(long,Vh) , The long  must be a constant == 0, sorry");}       
-    return  new Call_FormLinear(nargs,to<const C_args*>(args[0]),to<pfes*>(args[2]));} 
+    return  new Call_FormLinear<v_fes>(v_fes::d,nargs,to<const C_args*>(args[0]),to<pfes*>(args[2]));} 
   OpCall_FormLinear2() : 
-    OneOperator(atype<const Call_FormLinear*>(),atype<const T*>(),atype<long>(),atype<pfes*>()) {}
+    OneOperator(atype<const Call_FormLinear<v_fes>*>(),atype<const T*>(),atype<long>(),atype<pfes*>()) {}
 };
-template<class T>
-struct OpCall_FormBilinear: public OneOperator {
-  static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =12; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007
+
+template<class T,class v_fes>
+struct OpCall_FormBilinear
+  : public OneOperator ,
+  OpCall_FormBilinear_np
+{
+  typedef v_fes *pfes;
+  static const int d=v_fes::d;
   
   E_F0 * code(const basicAC_F0 & args) const 
   { Expression * nargs = new Expression[n_name_param];
-  args.SetNameParam(n_name_param,name_param,nargs);
-  // cout << " OpCall_FormBilinear " << *args[0].left() << " " << args[0].LeftValue() << endl;
-  return  new Call_FormBilinear(nargs,to<const C_args*>(args[0]),to<pfes*>(args[1]),to<pfes*>(args[2]));} 
+    args.SetNameParam(n_name_param,name_param,nargs);
+    // cout << " OpCall_FormBilinear " << *args[0].left() << " " << args[0].LeftValue() << endl;
+    return  new Call_FormBilinear<v_fes>(v_fes::d,nargs,to<const C_args*>(args[0]),to<pfes*>(args[1]),to<pfes*>(args[2]));} 
   OpCall_FormBilinear() : 
-    OneOperator(atype<const Call_FormBilinear*>(),atype<const T *>(),atype<pfes*>(),atype<pfes*>()) {}
+    OneOperator(atype<const Call_FormBilinear<v_fes>*>(),atype<const T *>(),atype<pfes*>(),atype<pfes*>()) {}
 };
 
 
-template <class C_args> 
-basicAC_F0::name_and_type  OpCall_FormBilinear<C_args>::name_param[]= {
-  {   "init", &typeid(bool)},
-  {   "solver", &typeid(TypeSolveMat*)},
-  {   "eps", &typeid(double) } ,
-  {   "precon",&typeid(Polymorphic*)}, 
-  {   "dimKrylov",&typeid(long)},
-  {   "bmat",&typeid(Matrice_Creuse<R>* )},
-  {   "tgv",&typeid(double )},
-  {   "factorize",&typeid(bool)},
-  {   "strategy",&typeid(long )},
-  {   "tolpivot", &typeid(double)},
-  {   "tolpivotsym", &typeid(double) },
-  {   "nbiter", &typeid(long)} // 12 
 
-     
-          
-};
-
-
-template <class T> 
-basicAC_F0::name_and_type  OpCall_FormLinear<T>::name_param[]= {
-     "tgv",&typeid(double )
-};
-
-template <class FormBilinear> 
-basicAC_F0::name_and_type  OpCall_FormLinear2<FormBilinear>::name_param[]= {
-     "tgv",&typeid(double )
-};
 
 
 bool FieldOfForm( list<C_F0> & largs ,bool complextype);
 template<class A>  struct IsComplexType { static const bool value=false;};
 template<>  struct IsComplexType<Complex> { static const bool value=true;};
 
-template<class R>  //  to make   x=linearform(x)
-struct OpArraytoLinearForm: public OneOperator {
-  typedef Call_FormLinear::const_iterator const_iterator;
+template<class R,class v_fes>  //  to make   x=linearform(x)
+struct OpArraytoLinearForm
+  : public OneOperator
+{
+  typedef typename Call_FormLinear<v_fes>::const_iterator const_iterator;
   const bool isptr;
   const bool init;
   const bool zero;
-  class Op : public E_F0mps { public:
-    Call_FormLinear *l;
+  class Op : public E_F0mps 
+  {
+  public:
+    Call_FormLinear<v_fes> *l;
     Expression x;
     const  bool isptr; 
     const  bool init; 
     const  bool zero;
     AnyType operator()(Stack s)  const ;
     Op(Expression xx,Expression  ll,bool isptrr,bool initt,bool zzero) 
-      : l(new Call_FormLinear(*dynamic_cast<const Call_FormLinear *>(ll))),
+      : l(new Call_FormLinear<v_fes>(*dynamic_cast<const Call_FormLinear<v_fes> *>(ll))),
         x(xx),
         isptr(isptrr),init(initt),zero(zzero)
         {assert(l);FieldOfForm(l->largs,IsComplexType<R>::value); }
@@ -634,34 +610,37 @@ struct OpArraytoLinearForm: public OneOperator {
     else      return new Op(to<KN_<R> >(args[0]),args[1],isptr,init,zero);}
    
   
-//  OpArraytoLinearForm(const basicForEachType * tt) : 
-//    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),init(false),isptr(false) {}
-    
+  //  OpArraytoLinearForm(const basicForEachType * tt) : 
+  //    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),init(false),isptr(false) {}
+  
   OpArraytoLinearForm(const basicForEachType * tt,bool isptrr, bool initt,bool zzero=1) : 
-    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),
+    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear<v_fes>*>()),
     isptr(isptrr), init(initt),zero(zzero) {}
-   
+  
 };
 
 
-template<class R>  //  to make   A=linearform(x)
-struct OpMatrixtoBilinearForm: public OneOperator {
-  typedef Call_FormBilinear::const_iterator const_iterator;
+template<class R,class v_fes>  //  to make   A=linearform(x)
+struct OpMatrixtoBilinearForm
+  : public OneOperator
+{
+  typedef typename Call_FormBilinear<v_fes>::const_iterator const_iterator;
   
   class Op : public E_F0mps { public:
-     Call_FormBilinear *b;
+      Call_FormBilinear<v_fes> *b;
     Expression a;
-    AnyType operator()(Stack s)  const ;
-    Op(Expression aa,Expression  bb) 
-      : b(new Call_FormBilinear(* dynamic_cast<const Call_FormBilinear *>(bb))),a(aa) 
-    {assert(b && b->nargs);FieldOfForm(b->largs,IsComplexType<R>::value)  ;}
-     operator aType () const { return atype<Matrice_Creuse<R>  *>();} 
+    AnyType operator()(Stack s)  const ;    
 
+    Op(Expression aa,Expression  bb) 
+      : b(new Call_FormBilinear<v_fes>(* dynamic_cast<const Call_FormBilinear<v_fes> *>(bb))),a(aa) 
+    {assert(b && b->nargs);FieldOfForm(b->largs,IsComplexType<R>::value)  ;}
+    operator aType () const { return atype<Matrice_Creuse<R>  *>();} 
+    
   };
   E_F0 * code(const basicAC_F0 & args) const 
   { return  new Op(to<Matrice_Creuse<R>*>(args[0]),args[1]);} 
   OpMatrixtoBilinearForm() : 
-    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear*>()) {}
+    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<v_fes>*>()) {}
 };
 
 template<class R>
@@ -890,36 +869,69 @@ namespace Fem2D {
     tabe.eval_2(v);
   }
   
- template<class R,typename MC >  bool AssembleVarForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                       MC  * A,KN_<R> * B,const list<C_F0> &largs );
+  template<class R,typename MC,class FESpace >  bool AssembleVarForm(Stack stack,const typename FESpace::Mesh & Th,
+								     const FESpace & Uh,const FESpace & Vh,bool sym,
+								     MC  * A,KN_<R> * B,const list<C_F0> &largs );
 
-template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+  template<class R,class FESpace>   void AssembleBC(Stack stack,const typename FESpace::Mesh & Th,
+						    const FESpace & Uh,const FESpace & Vh,bool sym,
+						    MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X,
+						    const list<C_F0> &largs , double tgv  );
+  
+  
+  template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * const l);
+  
+  //  template<class R>   void AssembleBC(Stack stack,const Mesh3 & Th,const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
+  //			      MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const list<C_F0> &largs , double tgv  );
+  
+  
+  template<class R>   void AssembleLinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * const l);
+  template<class R>   void AssembleBC(Stack stack,const Mesh & Th3,const FESpace & Uh3,const FESpace & Vh3,bool sym,
+				      MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc , double tgv   );
+  
+  template<class R>   void  Element_rhs(const FElement3 & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all);
+  template<class R>   void  Element_rhs(const FElement3 & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B);
+  template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpace3> & mat,const FElement3 & Ku,const FElement3 & Kv,double * p,int ie,int label, void *stack);
+  template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpace3> & mat,const FElement3 & Ku,double * p,int ie,int label, void * stack);
+  
+  template<class R,class FESpace>
+  void AssembleBC(Stack stack,const typename FESpace::Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                   MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const list<C_F0> &largs , double tgv  );
-
- 
-template<class R>   void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * const l);
-
-template<class R>   void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all);
-template<class R>   void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B);
-template<class R>   void  Element_Op(MatriceElementairePleine<R> & mat,const FElement & Ku,const FElement & Kv,double * p,int ie,int label, void *stack);
-template<class R>   void  Element_Op(MatriceElementaireSymetrique<R> & mat,const FElement & Ku,double * p,int ie,int label, void * stack);
-
+  
+  // fin 3d 
+  
+  template<class R>   void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all);
+  template<class R>   void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B);
+  template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,const FElement & Ku,const FElement & Kv,double * p,int ie,int label, void *stack);
+  template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpace> & mat,const FElement & Ku,double * p,int ie,int label, void * stack);
+  
 /*template<class R>   void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                             MatriceCreuse<R>  & A, const  FormBilinear * b  );
 */ // --------- FH 120105                           
-template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc , double tgv   );
-  
 
-//------
+  //template<class R>   void AssembleBC(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+  //                MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc , double tgv   );
+  
+  
+  //------
 
 
 
 }
 
-template<class R>
-AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const 
+
+template<class R,class v_fes>
+AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const 
 {
+  typedef v_fes *pfes;
+  typedef typename  v_fes::FESpace FESpace;
+  typedef typename  FESpace::Mesh Mesh;
+  typedef typename  FESpace::FElement FElement;
+  typedef typename  Mesh::Element Element;
+  typedef typename  Mesh::Vertex Vertex;  
+  typedef typename  Mesh::RdHat RdHat;  
+  typedef typename  Mesh::Rd Rd;  
+
   pfes  &  pp= *GetAny<pfes * >((*l->ppfes)(stack));
   FESpace * pVh = *pp ;
   FESpace & Vh = *pVh ;
@@ -937,18 +949,8 @@ AnyType OpArraytoLinearForm<R>::Op::operator()(Stack stack)  const
   KN_<R>  xx( px ? *(KN_<R> *) px : GetAny<KN_<R> >((*x)(stack) ));
   if(zero)
   xx=R(); 
-  if ( AssembleVarForm<R,MatriceCreuse<R> >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
-    AssembleBC<R>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
-  // cout << xx.min() << " " << xx.max() << endl;
-  /* for (const_iterator i=l->largs.begin();i!=l->largs.end();i++)
-     {
-     Expression e=i->LeftValue();
-     aType r = i->left();
-     if (r==atype<const  FormLinear *>()) 
-     AssembleLinearForm(s,Vh.Th,Vh,&xx,dynamic_cast<const  FormLinear *>(e));
-     else 
-     InternalError("OpArraytoLinearForm");
-     } */
+  if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
+    AssembleBC<R,FESpace>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   return SetAny<KN_<R> >(xx);
 }
 
@@ -1013,9 +1015,19 @@ double tol_pivot,double tol_pivot_sym)
       
     }
 }
-template<class R>
-AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const 
+
+template<class R,class v_fes>
+AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const 
 {
+  typedef typename  v_fes::pfes pfes;
+  typedef typename  v_fes::FESpace FESpace;
+  typedef typename  FESpace::Mesh Mesh;
+  typedef typename  FESpace::FElement FElement;
+  typedef typename  Mesh::Element Element;
+  typedef typename  Mesh::Vertex Vertex;  
+  typedef typename  Mesh::RdHat RdHat;  
+  typedef typename  Mesh::Rd Rd;  
+
   assert(b && b->nargs);// *GetAny<pfes * >
   pfes  * pUh= GetAny<pfes *>((*b->euh)(stack));
   pfes  * pVh= GetAny<pfes *>((*b->evh)(stack));
@@ -1089,13 +1101,13 @@ AnyType OpMatrixtoBilinearForm<R>::Op::operator()(Stack stack)  const
     }
   *A.A=R(); // reset value of the matrix
   
-  if ( AssembleVarForm<R,MatriceCreuse<R> >( stack,Th,Uh,Vh,typemat.sym,A.A,0,b->largs) )
-    AssembleBC<R>( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
+  if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >( stack,Th,Uh,Vh,typemat.sym,A.A,0,b->largs) )
+    AssembleBC<R,FESpace>( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
    }
    else
    { // add FH 17 06 2005  int on different meshes. 
      map<pair<int,int>, R >   AAA;
-     bool bc=AssembleVarForm<R,map<pair<int,int>, R >  >( stack,Th,Uh,Vh,typemat.sym,&AAA,0,b->largs);
+     bool bc=AssembleVarForm<R,map<pair<int,int>, R >,FESpace  >( stack,Th,Uh,Vh,typemat.sym,&AAA,0,b->largs);
      if (typemat.profile)
         { ExecError(" Sorry, construction of Skyline matrix with different meshes is not implemented! ");}
       else 
