@@ -321,6 +321,7 @@ MatriceProfile<R>::MatriceProfile(const int nn,const R *a)
 }
 
 template<class R>
+template<class FESpace>
 MatriceProfile<R>::MatriceProfile(const FESpace & Vh,bool VF) 
   :MatriceCreuse<R>(Vh.NbOfDF,Vh.NbOfDF,0),typefac(FactorizationNO)
 {

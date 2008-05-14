@@ -177,6 +177,16 @@ template<class I,class R>
        SetOp(d,k->first);
        
    
+ }  
+  int DiffOp( unsigned int &d) const {
+    d=0;
+    unsigned int lastop=0;
+    for (const_iterator k=v.begin();k!=v.end();k++)
+      { unsigned int  op=GetOp(k->first);
+	lastop=max(op,lastop);  
+	d |= (1<<(op));
+      }
+    return (int) lastop+1;
   }  
   
   ostream & dump(ostream &f) const {

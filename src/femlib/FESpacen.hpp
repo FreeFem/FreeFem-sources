@@ -537,7 +537,7 @@ private:
 
 
 template<class MMesh> 
-class GFESpace : public RefCounter,  public DataFENodeDF {
+class GFESpace : public RefCounter,  public DataFENodeDF, public UniqueId  {
 public:
   typedef MMesh Mesh;
   typedef GFElement<Mesh> FElement;

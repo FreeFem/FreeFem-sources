@@ -58,5 +58,15 @@ static A * copy(A a[4],B * const b)
   return a;
 }};
 
+struct UniqueId {
+private:
+  static int count ;
+  int id;
+public:
+  UniqueId() : id(++count) {}
+  bool operator==(UniqueId u) const {return id==u.id;}
+  bool operator!=(UniqueId u) const {return id!=u.id;}
+  void init(){id=++count;}
+};
 
 #endif

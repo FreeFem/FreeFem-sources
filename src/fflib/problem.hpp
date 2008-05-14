@@ -68,6 +68,9 @@ inline void SetOp(KN_<bool> & d,const MDroit &i)
           { d[(int) i.second % last_operatortype]=true;}
 inline void SetOp(KN_<bool> & d,const pair<MGauche,MDroit> & p) 
           {SetOp(d,p.first);SetOp(d,p.second);}
+inline unsigned int GetOp(const MGauche &i) { return (1<< (i.second% last_operatortype));}
+inline unsigned int GetOp(const MDroit &i) { return (1<< (i.second% last_operatortype));}
+inline unsigned int GetOp(const  pair<MGauche,MDroit> &p) { return GetOp(p.first)|GetOp(p.second);}
 
 typedef  const Finconnue  finconnue;
 typedef  const Ftest ftest;
@@ -433,6 +436,7 @@ class FormBilinear : public E_F0mps { public:
 };
 
 
+//template<class v_fes>
 class FormLinear : public E_F0mps { public:
   typedef const FormLinear* Result;
   typedef const CDomainOfIntegration * A;
@@ -625,22 +629,26 @@ struct OpMatrixtoBilinearForm
   : public OneOperator
 {
   typedef typename Call_FormBilinear<v_fes>::const_iterator const_iterator;
-  
-  class Op : public E_F0mps { public:
-      Call_FormBilinear<v_fes> *b;
+  int init; 
+  class Op : public E_F0mps {
+  public:
+    Call_FormBilinear<v_fes> *b;
     Expression a;
+    int init;
     AnyType operator()(Stack s)  const ;    
 
-    Op(Expression aa,Expression  bb) 
-      : b(new Call_FormBilinear<v_fes>(* dynamic_cast<const Call_FormBilinear<v_fes> *>(bb))),a(aa) 
-    {assert(b && b->nargs);FieldOfForm(b->largs,IsComplexType<R>::value)  ;}
-    operator aType () const { return atype<Matrice_Creuse<R>  *>();} 
+    Op(Expression aa,Expression  bb,int initt) 
+      : b(new Call_FormBilinear<v_fes>(* dynamic_cast<const Call_FormBilinear<v_fes> *>(bb))),a(aa),init(initt) 
+  {assert(b && b->nargs);FieldOfForm(b->largs,IsComplexType<R>::value)  ;}
+  operator aType () const { return atype<Matrice_Creuse<R>  *>();} 
     
   };
   E_F0 * code(const basicAC_F0 & args) const 
-  { return  new Op(to<Matrice_Creuse<R>*>(args[0]),args[1]);} 
-  OpMatrixtoBilinearForm() : 
-    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<v_fes>*>()) {}
+  { return  new Op(to<Matrice_Creuse<R>*>(args[0]),args[1],init);} 
+  OpMatrixtoBilinearForm(int initt=0) : 
+    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<v_fes>*>()),
+    init(initt)
+ {}
 };
 
 template<class R>
@@ -775,21 +783,27 @@ public:
 
 
 
-template<class K> class Matrice_Creuse  { public:
-  CountPointer<FESpace> Uh,Vh;
-  pfes  *pUh,*pVh; // pointeur sur la variable stockant FESpace;  
+template<class K> class Matrice_Creuse  { 
+  //  CountPointer<FESpace> Uh,Vh;
+  //pfes  *pUh,*pVh; // pointeur sur la variable stockant FESpace;  
+public:
+  UniqueId Uh,Vh; // pour la reconstruction 
+  //  const void * pUh,pVh; //  pointeur pour la reconstruction 
   CountPointer<MatriceCreuse<K> > A;  
   TypeSolveMat typemat;
   void init() {
-    A.init(),Uh.init();Vh.init();
+    A.init();Uh.init();Vh.init();
     typemat=TypeSolveMat(TypeSolveMat::NONESQUARE);}
   Matrice_Creuse() { init();}
   void destroy() {
     A.destroy();
-    Uh.destroy();
-    Vh.destroy();}   
-  Matrice_Creuse( MatriceCreuse<K> * aa,const pfes  *ppUh,const pfes  *ppVh)
-    :A(aa),pUh(ppUh),pVh(ppVh),Uh(*ppUh),Vh(*ppVh) {}
+    //    Uh.destroy();
+    //Vh.destroy();
+  }   
+  Matrice_Creuse( MatriceCreuse<K> * aa)//,const pfes  *ppUh,const pfes  *ppVh)
+    :A(aa){}//,pUh(ppUh),pVh(ppVh),Uh(*ppUh),Vh(*ppVh) {}
+  Matrice_Creuse( MatriceCreuse<K> * aa,const UniqueId *pUh,const UniqueId *pVh)//,const pfes  *ppUh,const pfes  *ppVh)
+    :A(aa),Uh(*pUh),Vh(*pVh) {}//,pUh(ppUh),pVh(ppVh),Uh(*ppUh),Vh(*ppVh) {}
   long N() const {return  A ? A->n : 0;}
   long M() const { return A ? A->m : 0;}
   
@@ -816,8 +830,8 @@ template<class K>  istream & operator >> (istream & f,Matrice_Creuse<K> & A)
 { 
     if ( WhichMatrix(f)== 2   )
     {
-	A.pUh=0;
-	A.pVh=0; 
+      //	A.pUh=0;
+      //A.pVh=0; 
 	A.A.master(new MatriceMorse<K>(f));
 	A.typemat=(A.A->n == A.A->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
 	
@@ -1076,35 +1090,38 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007 
   
   Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
-  if  ( (pUh != A.pUh ) || (pVh != A.pVh  || A.typemat.t != typemat.t) )
+  if(init) A.init(); //  
+  /*  if  ( (pUh != A.pUh ) || (pVh != A.pVh  || A.typemat.t != typemat.t) )
     { 
       A.Uh.destroy();
       A.Vh.destroy();
-    }
+      }*/
   const Mesh & Th = Uh.Th;
   bool same=isSameMesh(b->largs,&Uh.Th,&Vh.Th,stack);     
   if ( same)
    {
-  A.typemat = typemat;
-  if ( & Uh != A.Uh || & Vh != A.Vh ) 
-    { // reconstruct all the matrix
-      A.A=0; // to delete  old  matrix ADD FH 16112005 
-      if (typemat.profile)
-        { A.A.master( new MatriceProfile<R>(Vh,VF) ); ffassert( &Uh == & Vh);}
-      else if (typemat.sym )
-        {  A.A.master( new  MatriceMorse<R>(Vh,typemat.sym,VF) ); 
-        ffassert( &Uh == & Vh);}
-      else 
-       {
-        A.A.master( new  MatriceMorse<R>(Vh,Uh,VF) ); // lines corresponding to test functions 
+     A.typemat = typemat;
+     if ( A.Uh != Uh  || A.Vh != Vh ) 
+       { // reconstruct all the matrix
+	 A.A=0; // to delete  old  matrix ADD FH 16112005 
+	 A.Uh=Uh;
+	 A.Vh=Vh;
+	 if (typemat.profile)
+	   { A.A.master( new MatriceProfile<R>(Vh,VF) ); ffassert( &Uh == & Vh);}
+	 else if (typemat.sym )
+	   {  A.A.master( new  MatriceMorse<R>(Vh,typemat.sym,VF) ); 
+	     ffassert( &Uh == & Vh);}
+	 else 
+	   {
+	     A.A.master( new  MatriceMorse<R>(Vh,Uh,VF) ); // lines corresponding to test functions 
+	   }
        }
-    }
-  *A.A=R(); // reset value of the matrix
-  
-  if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >( stack,Th,Uh,Vh,typemat.sym,A.A,0,b->largs) )
-    AssembleBC<R,FESpace>( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
+     *A.A=R(); // reset value of the matrix
+     
+     if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >( stack,Th,Uh,Vh,typemat.sym,A.A,0,b->largs) )
+       AssembleBC<R,FESpace>( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
    }
-   else
+  else
    { // add FH 17 06 2005  int on different meshes. 
      map<pair<int,int>, R >   AAA;
      bool bc=AssembleVarForm<R,map<pair<int,int>, R >,FESpace  >( stack,Th,Uh,Vh,typemat.sym,&AAA,0,b->largs);
@@ -1155,24 +1172,30 @@ namespace FreeFempp {
 template<class R>
 class TypeVarForm { public:
     aType tFB;                       
+  //    aType tFB3;                       
     aType tMat;                       
+    aType tMat3;                       
     aType tFL;                       
+  //aType tFL3;                       
     aType tTab;                       
     aType tMatX;  
     aType tMatTX;  
     aType tDotStar;
     aType tBC ;                    
+  // aType tBC3 ;                    
 TypeVarForm() :
-     tFB( atype<const  FormBilinear *>() ),                      
-     tMat( atype<Matrice_Creuse<R>*>() ),                       
-     tFL( atype<const  FormLinear *>() ),                       
-     tTab( atype<KN<R> *>() ),                       
-     tMatX( atype<typename VirtualMatrice<R>::plusAx >() ),  
-     tMatTX( atype<typename VirtualMatrice<R>::plusAtx >() ),  
-     tDotStar(atype< DotStar_KN_<R> >() ),
-     tBC( atype<const  BC_set  *>())                     
-     {
-     }
+  tFB( atype<const  FormBilinear *>() ),                      
+  //tFB3( atype<const  FormBilinear<v_fes3> *>() ),                      
+  tMat( atype<Matrice_Creuse<R>*>() ),                       
+  //  tMat3( atype<Matrice_Creuse<R,v_fes3>*>() ),                       
+  tFL( atype<const  FormLinear *>() ),                       
+  //tFL3( atype<const  FormLinear<v_fes3> *>() ),                       
+  tTab( atype<KN<R> *>() ),                       
+  tMatX( atype<typename VirtualMatrice<R>::plusAx >() ),  
+  tMatTX( atype<typename VirtualMatrice<R>::plusAtx >() ),  
+  tDotStar(atype< DotStar_KN_<R> >() ),
+  tBC( atype<const  BC_set  *>())                     
+  {  }
 
 
  static TypeVarForm *Global;
