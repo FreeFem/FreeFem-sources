@@ -20,7 +20,7 @@
 
 
  namespace Fem2D {
-
+   int UniqueId::count=0;
 //template<class Element>
 int nbdf_d(const int ndfitem[4],const  int nd[4])
 {

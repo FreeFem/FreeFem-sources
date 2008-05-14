@@ -310,7 +310,7 @@ public:
   void operator=( KN<K> *y) { Vh=**pVh; 
   throwassert((bool) Vh);
   if (xx) delete xx;xx=y;
-  throwassert( y->N() == Vh->NbOfDF);}
+  ffassert( y->N() == Vh->NbOfDF);}
   FESpace * newVh() { 
     throwassert(pVh  );
     const pfes pp= *pVh;
@@ -416,8 +416,11 @@ inline C_F0 NewFEvariable(ListOfId * ids,Block *currentblock,C_F0 & fespacetype,
 size_t dimFESpaceImage(const basicAC_F0 &args) ;
 aType  typeFESpace(const basicAC_F0 &args) ;
 
-template<class K,class v_fes,class FE=FEbase<K,v_fes> >
-class E_FEcomp : public E_F0mps { public:
+template<class K,class vv_fes,class FE=FEbase<K,vv_fes> >
+class E_FEcomp : public E_F0mps { 
+public:
+  //  typedef FEbase<K,vv_fes> FE;
+  typedef vv_fes v_fes;
   typedef pair< FE * ,int> Result;
   Expression a0;
   const int comp, N;

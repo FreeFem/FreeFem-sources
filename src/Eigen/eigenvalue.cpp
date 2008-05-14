@@ -419,9 +419,11 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 		       for(int i=0;i<m;i++)
 		       {
 			   FEbase<K,v_fes> & xx= **(ev[i]);
+			   //if(xx.pVh->NbDoF != n)
+			   //ExecError("Wrong Type size of FEspace to store the eigen vector ");
 			   // if (xx.pVh != pOP1->pUh) 
 			   //    ExecError("Wrong Type of FEspace to store the eigen vector ");
-			   xx.Vh = pOP1->Uh;
+			   //xx.Vh = pOP1->Uh;
 			   KN_<K> vi(prob.RawEigenvector(i),n) ;
 			   xx= new KN<K>(vi);
 			   
@@ -599,7 +601,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 			   FEbase<K,v_fes> & xx= **(ev[i]);
 			   // if (xx.pVh != pOP1->pUh) 
 			   //    ExecError("Wrong Type of FEspace to store the eigen vector ");
-			   xx.Vh = pOP1->Uh;
+			   // xx.Vh = pOP1->Uh;
 			   // int  k=(ev_i < 0) ? i-1 : i;
 			   int k=i;
 			   KN_<K> vi(rawev+n*k,n) ;
@@ -795,9 +797,11 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const {
 		   for(int i=0;i<m;i++)
 		   {
 		       FEbase<K,v_fes> & xx= **(ev[i]);
+		       //if(xx.pVh->NbDoF != n)
+		       // ExecError("Wrong Type size of FEspace to store the eigen vector ");
 		       // if (xx.pVh != pOP1->pUh) 
-		       //    ExecError("Wrong Type of FEspace to store the eigen vector ");
-		       xx.Vh = pOP1->Uh;
+		       //    ExecError("Wrong Type of FEspace to store the eigen vector ");11
+		       // xx.Vh = pOP1->Uh;
 		       KN_<K> vi(prob.RawEigenvector(i),n) ;
 		       xx= new KN<K>(vi);
 		       

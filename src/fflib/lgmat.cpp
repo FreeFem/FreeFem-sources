@@ -805,10 +805,11 @@ AnyType SetMatrixInterpolation(Stack stack,Expression emat,Expression einter)
   ffassert(Vh);
   ffassert(Uh);
   
-  sparse_mat->pUh=pUh;
-  sparse_mat->pVh=pVh;
+  //  sparse_mat->pUh=pUh;
+  //sparse_mat->pVh=pVh;
   sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
+  //  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
   }
   else 
   {  // new cas mars 2006
@@ -819,8 +820,8 @@ AnyType SetMatrixInterpolation(Stack stack,Expression emat,Expression einter)
   FESpace * Uh = **pUh;
   ffassert(Uh);
   
-  sparse_mat->pUh=0;
-  sparse_mat->pVh=0;
+  //  sparse_mat->pUh=0;
+  //  sparse_mat->pVh=0;
   sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparse_mat->A.master(buildInterpolationMatrix1(*Uh,xx,yy,data));
   }
@@ -834,8 +835,8 @@ AnyType ProdMat(Stack stack,Expression emat,Expression prodmat)
   
   Matrice_Creuse<RAB> * sparse_mat =GetAny<Matrice_Creuse<RA>* >((*emat)(stack));
   const Matrix_Prod<RA,RB>  AB = GetAny<Matrix_Prod<RA,RB> >((*prodmat)(stack));
-  sparse_mat->pUh=AB.A->pUh;
-  sparse_mat->pVh=AB.B->pVh;
+  //  sparse_mat->pUh=AB.A->pUh;
+  //sparse_mat->pVh=AB.B->pVh;
   MatriceMorse<RA> *mA= AB.A->A->toMatriceMorse(AB.ta);
   MatriceMorse<RB> *mB= AB.B->A->toMatriceMorse(AB.tb);
   if( !mA && ! mB) ExecError(" Sorry error: in MatProd,  pb trans in MorseMat");
@@ -861,8 +862,8 @@ AnyType CombMat(Stack stack,Expression emat,Expression combMat)
   
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
   list<triplet<R,MatriceCreuse<R> *,bool> > *  lcB = GetAny<list<triplet<R,MatriceCreuse<R> *,bool> >*>((*combMat)(stack));
-  sparse_mat->pUh=0;
-  sparse_mat->pVh=0; 
+  //  sparse_mat->pUh=0;
+  // sparse_mat->pVh=0; 
    MatriceCreuse<R> * AA=BuildCombMat<R>(*lcB,false,0,0);
   sparse_mat->A.master(AA);
   sparse_mat->typemat=(AA->n == AA->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
@@ -897,8 +898,8 @@ AnyType DiagMat(Stack stack,Expression emat,Expression edia)
   using namespace Fem2D;
   KN<R> * diag=GetAny<KN<R>* >((*edia)(stack));
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-  sparse_mat->pUh=0;
-  sparse_mat->pVh=0;
+  //  sparse_mat->pUh=0;
+  // sparse_mat->pVh=0;
   sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
   sparse_mat->A.master(new MatriceMorse<R>((int) diag->N(),(const R*) *diag));
   return sparse_mat;
@@ -939,8 +940,8 @@ AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
   MatriceMorse<RR> * mrr = ChangeMatriceMorse<R,RR>::f(mr);
   
   Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
-  sparse_mat->pUh=Mat->pUh;
-  sparse_mat->pVh=Mat->pUh;;
+  //  sparse_mat->pUh=Mat->pUh;
+  // sparse_mat->pVh=Mat->pUh;;
   sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
   sparse_mat->A.master(mrr);
   return sparse_mat;
@@ -962,8 +963,8 @@ AnyType MatFull2Sparse(Stack stack,Expression emat,Expression eA)
 {
   KNM<R> * A=GetAny<KNM<R>* >((*eA)(stack));
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-  sparse_mat->pUh=0;
-  sparse_mat->pVh=0;
+  //  sparse_mat->pUh=0;
+  // sparse_mat->pVh=0;
   sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)
   sparse_mat->A.master(new MatriceMorse<R>((KNM_<R> &)*A,0.0));
   
@@ -987,8 +988,8 @@ AnyType MatMap2Sparse(Stack stack,Expression emat,Expression eA)
         } 
         
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-  sparse_mat->pUh=0;
-  sparse_mat->pVh=0;
+  //  sparse_mat->pUh=0;
+  // sparse_mat->pVh=0;
   sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)  
   sparse_mat->A.master(new MatriceMorse<R>(n,m,*A,false));
   delete A; 
@@ -1780,8 +1781,8 @@ template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
 	cout << " -- Raw Matrix    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
     
     Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));       
-    sparse_mat->pUh=0;
-    sparse_mat->pVh=0; 
+    // sparse_mat->pUh=0;
+    // sparse_mat->pVh=0; 
     sparse_mat->A.master(amorse);
     sparse_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
     
@@ -1902,8 +1903,8 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
      cout << " -- Block Matrix NxM = " << N << "x" << M << "    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
   
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(s));       
-  sparse_mat->pUh=0;
-  sparse_mat->pVh=0; 
+  //sparse_mat->pUh=0;
+  // sparse_mat->pVh=0; 
   sparse_mat->A.master(amorse);
   sparse_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
                 

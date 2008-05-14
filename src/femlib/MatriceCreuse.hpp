@@ -393,6 +393,8 @@ public:
   FactorizationType typesolver; 
   ostream& dump (ostream&) const ;
   MatriceProfile(const int  n,const R *a);
+  
+  template<class FESpace>
   MatriceProfile(const FESpace &,bool VF=false);
   MatriceProfile(int NbOfDF,R* d,
 		 R* u, int * pu,
