@@ -31,7 +31,7 @@
 #include <iostream>
 #include <fstream>
 using namespace std;
-
+#include "error.hpp"
 
 #include "ufunction.hpp"
 
