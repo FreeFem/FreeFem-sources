@@ -633,6 +633,24 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
 }
 
 
+template<class K>
+inline FEbase<K,v_fes> * MakePtrFE3_(pfes3 * const &  a){ 
+  FEbase<K,v_fes3> * p=new FEbase<K,v_fes3>(a);
+  //cout << "MakePtrFE " << p<< endl; 
+  return p ;}
+  
+template<class K>
+inline FEbase<K,v_fes3> ** MakePtrFE3_2(FEbase<K,v_fes3> * * const &  p,pfes3 * const &  a){ 
+  *p=new FEbase<K,v_fes3>(a);
+  //cout << "MakePtrFE2 " << *p<< endl; 
+  return p ;}
+
+template<class K>  
+inline FEbaseArray<K,v_fes3> ** MakePtrFE3_3(FEbaseArray<K,v_fes3> * * const &  p,pfes3 * const &  a,const long & N){ 
+  *p=new FEbaseArray<K,v_fes3>(a,N);
+  //cout << "MakePtrFE2 " << *p<< endl; 
+  return p ;}
+
 template<class K,class v_fes>
 class  OneOperatorMakePtrFE3 : public OneOperator 
 {
@@ -899,19 +917,32 @@ void init_lgmesh3() {
    Add<GlgVertex<Mesh3> >("label",".",new OneOperator1_<long,GlgVertex<Mesh3> >(getlab));
    Add<GlgElement<Mesh3> >("label",".",new OneOperator1_<long,GlgElement<Mesh3> >(getlab));
    Add<GlgElement<Mesh3> >("region",".",new OneOperator1_<long,GlgElement<Mesh3> >(getlab));
-   Add<GlgElement<Mesh3> >("mes",".",new OneOperator1_<double,GlgElement<Mesh3> >(getmes));
-   Add<pmesh3*>("mes",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
-   Add<pmesh3*>("bordermes",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
+   Add<GlgElement<Mesh3> >("mesure",".",new OneOperator1_<double,GlgElement<Mesh3> >(getmes));
+   Add<pmesh3*>("mesure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
+   Add<pmesh3*>("bordermesure",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
    Add<pmesh3*>("nt",".",new OneOperator1<long,pmesh3*>(pmesh_nt));
    Add<pmesh3*>("nv",".",new OneOperator1<long,pmesh3*>(pmesh_nv));
    Add<pmesh3*>("nbe",".",new OneOperator1<long,pmesh3*>(pmesh_nbe));
 
+ TheOperators->Add("<-",
+       new OneOperator2_<pf3rbase*,pf3rbase*,pfes3* >(MakePtrFE3_2),
+       new OneOperator3_<pf3rbasearray*,pf3rbasearray*,pfes3*,long >(MakePtrFE3_3),  
+
+
+       new OneOperator2_<pf3cbase*,pf3cbase*,pfes3* >(MakePtrFE3_2),
+       new OneOperator3_<pf3cbasearray*,pf3cbasearray*,pfes3*,long >(MakePtrFE3_3) //,
+     //  new OneOperator2_<pmesharray*,pmesharray*,long >(MakePtr)
+       
+       
+       );
  TheOperators->Add("<-",
 		   new OneOperatorMakePtrFE3<double,v_fes3>(atype<double>()),  //  scalar case
 		   new OneOperatorMakePtrFE3<double,v_fes3>(atype<E_Array>()),  //  vect case
 		   new OneOperatorMakePtrFE3<Complex,v_fes3>(atype<Complex>()),  //  scalar complex  case
 		   new OneOperatorMakePtrFE3<Complex,v_fes3>(atype<E_Array>())  //  vect complex case
        );
+ TheOperators->Add("<-",
+       new OneOperator2_<pfes3*,pfes3*,pfes3>(&set_copy_incr));
 
  TheOperators->Add("=",
        new OneOperator2_<pf3r,pf3r,double,E_F_StackF0F0opt2<double> >(set_fe3<double>) ,

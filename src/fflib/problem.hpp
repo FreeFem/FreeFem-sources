@@ -68,9 +68,17 @@ inline void SetOp(KN_<bool> & d,const MDroit &i)
           { d[(int) i.second % last_operatortype]=true;}
 inline void SetOp(KN_<bool> & d,const pair<MGauche,MDroit> & p) 
           {SetOp(d,p.first);SetOp(d,p.second);}
-inline unsigned int GetOp(const MGauche &i) { return (1<< (i.second% last_operatortype));}
-inline unsigned int GetOp(const MDroit &i) { return (1<< (i.second% last_operatortype));}
-inline unsigned int GetOp(const  pair<MGauche,MDroit> &p) { return GetOp(p.first)|GetOp(p.second);}
+
+inline unsigned int GetDiffOp(const MGauche &i, int& lastop) 
+   {int op=(i.second% last_operatortype);
+     lastop=max(lastop,op) ;
+      return 1<<op;}
+inline unsigned int GetDiffOp(const MDroit &i, int& lastop)
+   {int op=(i.second% last_operatortype);
+     lastop=max(lastop,op) ;
+      return 1<<op;}
+inline unsigned int GetDiffOp(const  pair<MGauche,MDroit> &p, int& lastop) 
+{ return GetDiffOp(p.first,lastop)|GetDiffOp(p.second,lastop);}
 
 typedef  const Finconnue  finconnue;
 typedef  const Ftest ftest;

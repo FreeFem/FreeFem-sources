@@ -178,15 +178,15 @@ template<class I,class R>
        
    
  }  
-  int DiffOp( unsigned int &d) const {
-    d=0;
-    unsigned int lastop=0;
+  unsigned int DiffOp(int & lastop) const
+ {
+     unsigned int d=0;
+    lastop=0;
     for (const_iterator k=v.begin();k!=v.end();k++)
-      { unsigned int  op=GetOp(k->first);
-	lastop=max(op,lastop);  
-	d |= (1<<(op));
-      }
-    return (int) lastop+1;
+       d |=GetDiffOp(k->first,lastop);
+    assert(lastop<last_operatortype);
+    lastop++;
+    return d;
   }  
   
   ostream & dump(ostream &f) const {
