@@ -941,8 +941,9 @@ then
                 [  --with-umfpack=library	Use a specific version of Umfpack],
                 ff_umfpack_ok=yes
                 ff_umfpack_libs="${withval} $ff_umfpack_libs"
-		AC_DEFINE(HAVE_LIBUMFPACK,1,
-			Umfpack is used for sparse matrices computations))
+               )
+#		AC_DEFINE(HAVE_LIBUMFPACK,1,
+#			Umfpack is used for sparse matrices computations))
 
 	# Trying default locations
 
@@ -968,18 +969,20 @@ then
 	fi
 
 	if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
-	then
-        
+	then        
 		AC_CHECK_LIB(umfpack,umf_i_malloc,
-			AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)	
 			ff_umfpack_libs=" -lumfpack $ff_umfpack_libs"
 			ff_umfpack_ok=yes,,$ff_umfpack_libs)
-	fi
-        if  test "$ff_umfpack_header" != yes -a "$ff_umfpack_ok" != no
-           then
-	    AC_MSG_WARN([		Sorry we find UMFPACK lib but not the include umfpack.h file])
+		if test "$ff_umfpack_ok" != yes -o "$ff_umfpack_header" = yes ; then
+			AC_MSG_WARN([		Sorry we find UMFPACK lib but not the include umfpack.h file])
+		fi
+	fi	
+        if  test	 "$ff_umfpack_header" != yes -a "$ff_umfpack_ok" != no; then
             ff_umfpack_ok=no
          fi
+	 if test "$ff_umfpack_ok" = yes -a "$ff_amd_ok" = yes; then
+		AC_DEFINE(HAVE_LIBUMFPACK,1, Umfpack is used for sparse matrices computations )			
+	 fi
 fi
 LIBS="$ff_save_libs"
 

@@ -12588,11 +12588,9 @@ if test "${with_umfpack+set}" = set; then
   ff_umfpack_ok=yes
                 ff_umfpack_libs="${withval} $ff_umfpack_libs"
 
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_LIBUMFPACK 1
-_ACEOF
-
 fi;
+#		AC_DEFINE(HAVE_LIBUMFPACK,1,
+#			Umfpack is used for sparse matrices computations))
 
 	# Trying default locations
 
@@ -12980,7 +12978,6 @@ fi
 
 	if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
 	then
-
 		echo "$as_me:$LINENO: checking for umf_i_malloc in -lumfpack" >&5
 echo $ECHO_N "checking for umf_i_malloc in -lumfpack... $ECHO_C" >&6
 if test "${ac_cv_lib_umfpack_umf_i_malloc+set}" = set; then
@@ -13046,22 +13043,25 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_lib_umfpack_umf_i_malloc" >&5
 echo "${ECHO_T}$ac_cv_lib_umfpack_umf_i_malloc" >&6
 if test $ac_cv_lib_umfpack_umf_i_malloc = yes; then
+  ff_umfpack_libs=" -lumfpack $ff_umfpack_libs"
+			ff_umfpack_ok=yes
+fi
+
+		if test "$ff_umfpack_ok" != yes -o "$ff_umfpack_header" = yes ; then
+			{ echo "$as_me:$LINENO: WARNING: 		Sorry we find UMFPACK lib but not the include umfpack.h file" >&5
+echo "$as_me: WARNING: 		Sorry we find UMFPACK lib but not the include umfpack.h file" >&2;}
+		fi
+	fi
+        if  test	 "$ff_umfpack_header" != yes -a "$ff_umfpack_ok" != no; then
+            ff_umfpack_ok=no
+         fi
+	 if test "$ff_umfpack_ok" = yes -a "$ff_amd_ok" = yes; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBUMFPACK 1
 _ACEOF
 
-			ff_umfpack_libs=" -lumfpack $ff_umfpack_libs"
-			ff_umfpack_ok=yes
-fi
-
-	fi
-        if  test "$ff_umfpack_header" != yes -a "$ff_umfpack_ok" != no
-           then
-	    { echo "$as_me:$LINENO: WARNING: 		Sorry we find UMFPACK lib but not the include umfpack.h file" >&5
-echo "$as_me: WARNING: 		Sorry we find UMFPACK lib but not the include umfpack.h file" >&2;}
-            ff_umfpack_ok=no
-         fi
+	 fi
 fi
 LIBS="$ff_save_libs"
 
