@@ -5,8 +5,15 @@
 #include <iostream>
 typedef double R;
 
-//  R1, R2 , R3 to be uniforme. 
+//  R0 R1, R2 , R3 to be uniforme. 
 // The class R1
+class R0 {
+public:  
+  typedef double R;
+  static const int d=0;
+  R0(){}
+};
+
 class R1 {
 public:  
   typedef double R;

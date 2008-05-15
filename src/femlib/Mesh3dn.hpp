@@ -26,6 +26,10 @@ struct DataTriangle3  {
   static const int NbOfVertexOnHyperFace =NbOfVertices-1;
   typedef Vertex3 V;
   typedef  V::Rd Rd ;
+  typedef R2 RdHat;
+  typedef R1 RdHatBord;
+  RdHat PBord(int * nvb,const RdHatBord &P)  { return RdHat::KHat[nvb[0]]*(1-P.x)+R2::KHat[nvb[1]]*(P.x) ;}  
+
   static R mesure(  V *  pv[NbOfVertices]) {    
     return (R3(*pv[0],*pv[1])^R3(*pv[0],*pv[2])).norme()*0.5;
   }
@@ -49,6 +53,10 @@ struct DataTet  {
   }
   static const int (* const nvface)[3];// = nvfaceTet;
   static const int (* const nvedge)[2];//  = nvedgeTet;
+  typedef R3 RdHat;
+  typedef R2 RdHatBord;
+  RdHat PBord(int * nvb,const RdHatBord& P)  { return RdHat::KHat[nvb[0]]*(1-P.x-P.y)+R2::KHat[nvb[1]]*(P.x)+R2::KHat[nvb[2]]*(P.y) ;}  
+
 };
 
 class Tet: public GenericElement<DataTet>  {

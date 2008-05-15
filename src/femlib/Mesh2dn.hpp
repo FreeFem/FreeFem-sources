@@ -27,6 +27,10 @@ struct DataTriangle2  {
   static R mesure(  V *  pv[NbOfVertices]) {    
     return det(*pv[0],*pv[1],*pv[2])*0.5;
   } 
+  typedef R2 RdHat;
+  typedef R1 RdHatBord;
+  RdHat PBord(int * nvb,const RdHatBord & P)  { return RdHat::KHat[nvb[0]]*(1-P.x)+R2::KHat[nvb[1]]*(P.x) ;}  
+
   //  static const int (* const nvface)[3];// = nvfaceTria  ;
   //static const int (* const nvedge)[2];// = nvedgeTrai;
 
@@ -45,6 +49,10 @@ struct DataSeg2  {
   static R mesure(  V *  pv[NbOfVertices]) {    
     return R2(*pv[0],*pv[1]).norme();
   }
+  typedef R1 RdHat;
+  typedef R0 RdHatBord;
+  RdHat PBord(int * nvb,const RdHatBord &P)  { return RdHat(*nvb) ;}  
+
   //static const int (* const nvface)[3];// = nvfaceSeg ;
   //static const int (* const nvedge)[2];//  = nvedgeSeg;
 

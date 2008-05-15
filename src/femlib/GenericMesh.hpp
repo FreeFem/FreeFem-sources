@@ -30,7 +30,7 @@ namespace Fem2D  {
 
 
 
-struct R0 {}; 
+  // struct R {}; 
 template<int d> struct typeRd {typedef R0 Rd;};
 template<> struct typeRd<1> {typedef R1 Rd;};
 template<> struct typeRd<2> {typedef R2 Rd;};
@@ -163,8 +163,8 @@ class GenericElement: public Label {
 public:
   typedef typename Data::V Vertex;
   typedef typename Data::V::Rd Rd;
-  typedef typename typeRd<Data::NbOfVertices-1>::Rd RdHat;// for parametrization 
-  // typedef typename Data::RdHatBord BordRdHat;// for parametrization 
+  typedef typename Data::RdHat RdHat;// for parametrization 
+  typedef typename Data::RdHatBord RdHatBord;// for parametrization 
 
   typedef typename Rd::R R;
 
@@ -236,7 +236,7 @@ public:
     return Rd(at(nvedge[i][0]),at(nvedge[i][1]));}// opposite edge vertex i
 
   Rd N(int i) const  { return ExtNormal(vertices,nvadj[i]);}
-  // Rd PBord(int i,BordRdHat P)  { return Data::PBord(nvadj[i],P);}  
+  Rd PBord(int i,RdHatBord P)  { return Data::PBord(nvadj[i],P);}  
 
   Rd operator()(const RdHat & Phat) const {
     Rd r= (1.-Phat.sum())*(*(Rd*) vertices[0]);    
