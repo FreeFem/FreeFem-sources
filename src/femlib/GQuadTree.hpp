@@ -37,7 +37,7 @@ namespace EF23 {
       static bool INTER_SEG1d(int a,int b,int x,int y) { return (((y) > (a)) && ((x) <(b)));}
     int x;
     Z1():x(0){}
-    Z1(R2 P) : x(P.x) {}
+    Z1(R1 P) : x((int)P.x) {}
     Z1( int i) : x(i){}
     Z1(const Z1 &pp,int k,int l): x(pp.x+(( k&1) ? l : 0)) {}
     void Add(int k,int l) { x+= (( k&1) ? l : 0) ;}
@@ -61,7 +61,7 @@ namespace EF23 {
       static bool INTER_SEG1d(int a,int b,int x,int y) { return (((y) > (a)) && ((x) <(b)));}
     int x,y;
     Z2():x(0),y(0) {}
-    Z2(R2 P) : x(P.x),y(P.y) {}
+    Z2(R2 P) : x((int)P.x),y((int)P.y) {}
     Z2( int i) : x(i),y(i){}
     //Z2( int i,int j) : x(i),y(j) {}
     Z2(const Z2 &pp,int k,int l): x(pp.x+(( k&1) ? l : 0)),y(pp.y+(( k&2) ? l : 0)) {}
@@ -86,7 +86,7 @@ namespace EF23 {
     int x,y,z;
     Z3():x(0),y(0),z(0) {}
     
-    Z3(R3 P) : x(P.x),y(P.y) {}
+    Z3(R3 P) : x((int)P.x),y((int)P.y),z((int) P.z) {}
     Z3( int i) : x(i),y(i),z(i){}
     
     Z3(const Z3 &pp,int k,int l): x(pp.x+(( k&1) ? l : 0)),y(pp.y+(( k&2) ? l : 0)),z(pp.z+(( k&4) ? l : 0)) {}
