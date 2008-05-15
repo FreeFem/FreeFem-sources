@@ -41,6 +41,7 @@ using namespace std;
 
 
 #include "GenericMesh.hpp"
+#include "Mesh1dn.hpp"
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
 
@@ -668,8 +669,10 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 
   template class GTree<Vertex2>;
   template class GTree<Vertex3>;
+  template class GTree<Vertex1>;
   typedef Mesh3::GMesh GMesh3;
   typedef Mesh2::GMesh GMesh2;
+  typedef Mesh1::GMesh GMesh1;
   template
   const   GMesh3::Element * Find<GMesh3>(const GMesh3 & Th,
 				       GTree< GMesh3::Vertex> *quadtree,
@@ -684,5 +687,14 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 				       GMesh2::RdHat & Phat,
 				       bool & outside,
 				       const   GMesh2::Element * tstart);
-  
+
+/*
+  template
+  const   GMesh1::Element * Find<GMesh1>(const GMesh1 & Th,
+				       GTree< GMesh1::Vertex> *quadtree,
+				       GMesh1::Rd P,
+				       GMesh1::RdHat & Phat,
+				       bool & outside,
+				       const   GMesh1::Element * tstart);
+*/
 }
