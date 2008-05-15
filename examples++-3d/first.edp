@@ -1,0 +1,48 @@
+verbosity=10;
+mesh3 Th("dodecaedre01");
+border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}
+mesh Th2=buildmesh(cc(50));
+fespace Vh2(Th2,P1);
+int nbtets=Th.nt;
+cout << " Th mes " << Th.mesure << " border mes " << Th.bordermesure << endl;
+cout << " nb of Tets = " << nbtets << endl;
+if(1) {
+  nbtets=2;
+  for (int i=0;i<nbtets;i++)
+    for (int j=0; j <4; j++)
+      cout << i << " " << j << " Th[i][j] = "
+	   << Th[i][j] << "  x = "<< Th[i][j].x  << " , y= "<< Th[i][j].y 
+	   << ",  label=" << Th[i][j].label << endl;
+	    
+//   Th(i)   return   the vextex i of Th
+//   Th[k]   return   the tet k of Th.
+
+  // get vertices information : 
+  int nbvertices=Th.nv;
+  nbvertices=2;
+  cout << " nb of vertices = " << nbvertices << endl;
+  for (int i=0;i<nbvertices;i++)
+	cout << "Th(" <<i  << ") : "   // << endl;	
+	     << Th(i).x << " " << Th(i).y  << " " << Th(i).z << " " << Th(i).label // version 2.19 
+	  << endl;
+savemesh(Th,"dd.mesh");
+ }
+fespace Vh(Th,P13d);
+func f=x+2*y+10*z;
+Vh u=f,b;
+cout << u(0.1,0.2,0.3)<< "  == " << f(0.1,0.2,0.3) << endl; ;
+macro Grad3(u) [dx(u),dy(u),dz(u)]  // EOM
+varf vlap(u,v) = int3d(Th)(Grad3(v)' *Grad3(u)) + int3d(Th)(f*v) + on(1,u=0);
+matrix A=vlap(Vh,Vh);
+b[]=vlap(0,Vh);
+u[]=A^-1*b[];
+cout << u[]. min << " " << u[].max << endl;
+Vh2 u2=u;
+plot(u2,wait=1);
+plot(u2,wait=1);
+	{ ofstream file("dd.bb"); 
+	file << "3 1 1 "<< u[].n << " 2 \n";
+	int j;
+	for (j=0;j<u[].n ; j++)  
+	  file << u[][j] << endl; 
+    }  
