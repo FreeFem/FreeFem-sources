@@ -25,6 +25,9 @@ struct DataSeg1  {
   static R mesure(  V *  pv[NbOfVertices]) {    
     return pv[1]->x-pv[0]->x;
   } 
+  typedef R0 RdHatBord;
+  typedef R1 RdHat;
+  RdHat PBord(int * nvb,const RdHatBord & P)  { return R1(*nvb) ;}  
   //  static const int (* const nvface)[3];// = nvfaceTria  ;
   //static const int (* const nvedge)[2];// = nvedgeTrai;
 
@@ -43,6 +46,9 @@ struct DataPoint1  {
   static R mesure(  V * pv[NbOfVertices]  ) {    
     return 1.;
   }
+  typedef R0 RdHatBord;
+  typedef R0 RdHat;
+  RdHat PBord(int * nvb,const RdHatBord & P)  { return R0() ;}  
 
 };
 
