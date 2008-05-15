@@ -32,7 +32,7 @@ func f=x+2*y+10*z;
 Vh u=f,b;
 cout << u(0.1,0.2,0.3)<< "  == " << f(0.1,0.2,0.3) << endl; ;
 macro Grad3(u) [dx(u),dy(u),dz(u)]  // EOM
-varf vlap(u,v) = int3d(Th)(Grad3(v)' *Grad3(u)) + int3d(Th)(f*v) + on(1,u=0);
+varf vlap(u,v) = int3d(Th)(Grad3(v)' *Grad3(u)) + int3d(Th)(f*v) + on(0,u=0);
 matrix A=vlap(Vh,Vh);
 b[]=vlap(0,Vh);
 u[]=A^-1*b[];

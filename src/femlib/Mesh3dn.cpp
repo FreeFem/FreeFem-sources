@@ -301,7 +301,7 @@ int Mesh3::Save(const string & filename)
     int i2=this->operator()(K[2])+1;
     int i3=this->operator()(K[3])+1;
     int lab=K.lab;
-    GmfSetLin(outm,GmfTriangles,i0,i1,i2,i3,lab);
+    GmfSetLin(outm,GmfTetrahedra,i0,i1,i2,i3,lab);
   }
 
   GmfSetKwd(outm,GmfTriangles,nbe);
