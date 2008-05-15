@@ -2434,13 +2434,14 @@ template<class R>
     KNM<R>   Vp(npPh,dim);
     KN<R>  Vdf(Vh.MaxNbDFPerElement);
     
-    
+    map<int,int> lll;
     for (int ib=0;ib<Th.nbe;ib++)
       {
         int ie;
         int it = Th.BoundaryElement(ib,ie);
 	const BorderElement &be=Th.be(ib);
         int r =Th.be(ib).lab;
+	lll[r]++;
         if (on.find(r) != on.end() ) 
           {
 	    ipmat.set(it);
@@ -2477,6 +2478,7 @@ template<class R>
 		ipmat.set(it);
 		PtonB = 0;
 		Rd NN=K.T.N(ie);
+		NN /= NN.norme();
 		for (int i=0;i<ipmat.ncoef;i++)
 		  PtonB[ipmat.p[i]] +=  Element::onWhatBorder[ie][K.DFOnWhat(ipmat.dofe[i])] ;
 		
@@ -2510,6 +2512,8 @@ template<class R>
     if (! ktbc  && nbon && verbosity ) 
       {
         cout << " Warning: -- Your set of boundary condition is incompatible with the mesh label." << endl;
+	for (map<int,int>::const_iterator i=lll.begin();i!=lll.end();i++)
+	  cout << " lab " << i-> first << "  nb " << i->second  << endl;
       }
     *mps =mp;            
   }
