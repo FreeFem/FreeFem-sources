@@ -27,7 +27,7 @@ struct DataSeg1  {
   } 
   typedef R0 RdHatBord;
   typedef R1 RdHat;
-  RdHat PBord(int * nvb,const RdHatBord & P)  { return R1(*nvb) ;}  
+  static RdHat PBord(const int * nvb,const RdHatBord & P)  { return R1(*nvb) ;}  
   //  static const int (* const nvface)[3];// = nvfaceTria  ;
   //static const int (* const nvedge)[2];// = nvedgeTrai;
 
@@ -48,7 +48,7 @@ struct DataPoint1  {
   }
   typedef R0 RdHatBord;
   typedef R0 RdHat;
-  RdHat PBord(int * nvb,const RdHatBord & P)  { return R0() ;}  
+  static RdHat PBord(const int * nvb,const RdHatBord & P)  { return R0() ;}  
 
 };
 
