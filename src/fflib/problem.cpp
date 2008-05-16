@@ -1790,28 +1790,22 @@ void Check(const Opera &Op,int N,int  M)
   void  Element_rhs(const FElement3 & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
                     const QuadratureFormular & FI ,bool alledges=false)
   {
-    AFAIRE("Element_rhs on border");
-/*
+    //   AFAIRE("Element_rhs on border");
+
     typedef  FElement3::Element Element;
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     const Element & T  = Kv.T;
-    // const QuadratureFormular1d & FI = QF_GaussLegendre2;
     long npi;
     long i,n=Kv.NbDoF(),N=Kv.N;
     
-    //  bool show = Kv.Vh.Th(T)==0;
-    // char * xxx[] ={" u"," v,"," p"," q"," r"};
-    // char * xxxx[] ={" u'"," v',"," p'"," q'"," r'"};
-    // char * yyy[] ={" ","_x ","_y "};
-
     bool classoptm = copt && Op.optiexpK;
    // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2) 
-     cout << "Element_rhs S: copt = " << copt << " " << classoptm << endl;
-    KN<bool> Dop(last_operatortype);
-    Op.DiffOp(Dop);  
-    int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+     cout << "Element_rhs 3d S: copt = " << copt << " " << classoptm << endl;
+    int lastop;
+    What_d Dop = Op.DiffOp(lastop);
+
     assert(Op.MaxOp() <last_operatortype);
    // assert(lastop<=3);
 
@@ -1823,14 +1817,11 @@ void Check(const Opera &Op,int N,int  M)
 	R3 NN=T.N(ie);
 	double le= NN.norme();
 	NN /= le;
-        // R2 E=T.Edge(ie);
-        //double le = sqrt((E,E));
         double coef = le*pi.a;
-        double sa=pi.x,sb=1-sa;
-        R3 Pt(T.barybord(ie,pi));
+        R3 Pt(T.PBord(ie,pi));
       //  
         Kv.BF(Dop,Pt,fu);
-        MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,R2(E.y,-E.x)/le,ie);
+        MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,NN,ie);
         if (classoptm) (*Op.optiexpK)(stack); // call optim version         
         
         for ( i=0;  i<n;   i++ )  
@@ -1862,7 +1853,7 @@ void Check(const Opera &Op,int N,int  M)
         
       }  
     *MeshPointStack(stack) = mp;
-    */
+    
   }  
   // find 3d
  template<class R>
@@ -2613,20 +2604,20 @@ template<class R>
       else cout << endl;
     
     if (kind==CDomainOfIntegration::int2d)
-      { AFAIRE("3D Elment RHS CDomainOfIntegration::int2d");/*
+      { //AFAIRE("3D Elment RHS CDomainOfIntegration::int2d");
 	if(VF) InternalError(" no jump or average in int1d of RHS");
-        for( int e=0;e<ThI.neb;e++)
+        for( int e=0;e<ThI.nbe;e++)
           {
-            if (all || setoflab.find(ThI.bedges[e].lab) != setoflab.end())   
+            if (all || setoflab.find(ThI.be(e).lab) != setoflab.end())   
               {                  
                 int ie,i =ThI.BoundaryElement(e,ie);
                 if ( sameMesh) 
-                  Element_rhs<R>(Vh[i],ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false); 
+                  Element_rhs<R>(Vh[i],ie,Th.be(e).lab,*l->l,buf,stack,*B,FIT,false); 
                 else 
-                  Element_rhs<R>(ThI,ThI[i],Vh,ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false); 
+                  Element_rhs<R>(ThI,ThI[i],Vh,ie,Th.be(e).lab,*l->l,buf,stack,*B,FIT,false); 
                if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr   
               }
-	      } */
+	      } 
       }
     else if (kind==CDomainOfIntegration::intalledges)
       {	 AFAIRE("3D Elment RHS CDomainOfIntegration::intalledges");

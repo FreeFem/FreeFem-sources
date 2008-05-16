@@ -236,7 +236,7 @@ public:
     return Rd(at(nvedge[i][0]),at(nvedge[i][1]));}// opposite edge vertex i
 
   Rd N(int i) const  { return ExtNormal(vertices,nvadj[i]);}
-  Rd PBord(int i,RdHatBord P)  { return Data::PBord(nvadj[i],P);}  
+  Rd PBord(int i,RdHatBord P) const   { return Data::PBord(nvadj[i],P);}  
 
   Rd operator()(const RdHat & Phat) const {
     Rd r= (1.-Phat.sum())*(*(Rd*) vertices[0]);    
