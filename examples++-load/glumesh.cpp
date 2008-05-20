@@ -2,14 +2,35 @@
 
 #include  <iostream>
 #include  <cfloat>
+#include <cmath>
+#include <complex>
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
 using namespace std;  
 #include "rgraph.hpp"
 #include "RNM.hpp"
-#include <fem.hpp>
-#include <cmath>
+#include "fem.hpp"
+
+
+#include "FESpacen.hpp" 
+#include "FESpace.hpp" 
+
+#include "MatriceCreuse_tpl.hpp"
+#include "MeshPoint.hpp"
+#include "Operator.hpp" 
+#include "lex.hpp"
+
+#include "lgfem.hpp"
+#include "lgmesh3.hpp"
+#include "lgsolver.hpp"
+#include "problem.hpp"
+#include "LayerMesh.hpp"
+
+#include <set>
+#include <vector>
+#include <fstream>
+
 
   using namespace  Fem2D;
 
@@ -141,6 +162,63 @@ struct Op2_setmesh: public binary_function<AA,BB,RR> {
   } 
 };
 
+class BuildLayeMesh_Op : public E_F0mps 
+{
+public:
+  Expression eTh;
+  Expression enmax,ezmin,ezmax,xx,yy,zz;
+  static const int n_name_param =5; // 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  
+public:
+  BuildLayeMesh_Op(const basicAC_F0 &  args,Expression tth,Expression nmaxx) 
+    : eTh(tth),enmax(nmaxx) 
+  {
+    args.SetNameParam(n_name_param,name_param,nargs);
+    const E_Array * a2 =0, *a1=0 ;
+    if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
+    if(nargs[1])  a2  = dynamic_cast<const E_Array *>(nargs[1]);
+    int err =0;
+    if(a1) {
+      if(a1->size() !=2) 
+	CompileError("LayerMesh (Th,n, zbound=[zmin,zmax],) ");
+      ezmin=to<double>( (*a1)[0]);
+      ezmax=to<double>( (*a2)[1]);
+    }
+    if(a2) {
+      if(a2->size() !=3) 
+	CompileError("LayerMesh (Th,n, transfo=[X,Y,Z],) ");
+      xx=to<double>( (*a2)[0]);
+      yy=to<double>( (*a2)[1]);
+      zz=to<double>( (*a2)[2]);
+    }    
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
+
+basicAC_F0::name_and_type BuildLayeMesh_Op::name_param[]= {
+  {  "zbound", &typeid(E_Array)},
+  {  "transfo", &typeid(E_Array)},
+  {  "coef", &typeid(double)},
+  {  "reft", &typeid(KN_<long> )},
+  {  "refe", &typeid(KN_<long> )}
+};
+
+
+class  BuildLayerMesh : public OneOperator { public:  
+    BuildLayerMesh() : OneOperator(atype<pmesh3>(),atype<pmesh>(),atype<long>()) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  { 
+    return  new BuildLayeMesh_Op(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1])); 
+  }
+};
+
 class SetMesh_Op : public E_F0mps 
 {
 public:
@@ -150,10 +228,11 @@ public:
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+
   
 public:
   SetMesh_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
-     args.SetNameParam(n_name_param,name_param,nargs);
+    args.SetNameParam(n_name_param,name_param,nargs);
   } 
   
   AnyType operator()(Stack stack)  const ;
@@ -163,12 +242,78 @@ basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
   {  "refe", &typeid(KN_<long> )},
   {  "reft", &typeid(KN_<long> )}
 };
+
 int  ChangeLab(const map<int,int> & m,int lab)
 {
   map<int,int>::const_iterator i=m.find(lab);
   if(i != m.end())
     lab=i->second;
   return lab;
+}
+
+AnyType BuildLayeMesh_Op::operator()(Stack stack)  const 
+{
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
+  int nlayer = (int) GetAny<long>((*enmax)(stack));
+  ffassert(pTh && nlayer>0);
+  Mesh & Th=*pTh;
+  Mesh *m= pTh;
+  int nbv=Th.nv; // nombre de sommet 
+  int nbt=Th.nt; // nombre de triangles
+  int neb=Th.neb; // nombre d'aretes fontiere
+  cout << " " << nbv<< " "<< nbv << " nbe "<< neb << endl; 
+  KN<double> zmin(nbv),zmax(nbv);
+  KN<double> clayer(nbv);
+  //  nombre de layer est nlayer*clayer
+  clayer=-1;
+  zmin=0.;
+  zmax=1.;
+  for (int it=0;it<nbt;++it)
+    for(int iv;iv<3;++iv)      
+    {
+      int i=Th(it,iv);
+      if(clayer[i]<0)
+	{
+	  mp->setP(&Th,it,iv);
+	  if(ezmin)  zmin[i]=GetAny<double>((*ezmin)(stack)); 
+	  if(ezmax)  zmax[i]=GetAny<double>((*ezmax)(stack)); 
+	  clayer[i]=Max( 0. , Min( 1. , arg(2,stack,1.) ) ); 
+	}
+			     
+    }
+  KN<long> zzempty;
+  KN<long> nre (arg(3,stack,zzempty));  
+  KN<long> nrt (arg(4,stack,zzempty));  
+
+  if(nre.N() <=0 && nrt.N() ) return m;
+  ffassert( nre.N() %2 ==0);
+  ffassert( nrt.N() %2 ==0);
+  map<int,int> mape,mapt;
+  int z00 = false;
+  for(int i=0;i<nre.N();i+=2)
+    { z00 = z00 || ( nre[i]==0 && nre[i+1]==0);
+      if(nre[i] != nre[i+1])
+	mape[nre[i]]=nre[i+1];
+    }
+  for(int i=0;i<nrt.N();i+=2)
+    mapt[nrt[i]]=nrt[i+1];
+  int nebn =0;
+  KN<int> ni(nbv);
+  for(int i=0;i<nbv;++i)
+    ni[i]=Max(0,Min(nlayer,(int) lrint(nlayer*clayer[i])));
+  
+  
+  Mesh3 *Th3= build_layer(Th, nlayer,ni,zmin, zmax);
+
+  Th3->BuildBound();
+  Th3->BuildAdj();
+  Th3->Buildbnormalv();  
+  Th3->BuildjElementConteningVertex();
+  Th3->BuildGTree();
+  Th3->decrement();  
+  *mp=mps;
+  return Th3;
 }
 
 AnyType SetMesh_Op::operator()(Stack stack)  const 
@@ -248,80 +393,6 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   m->decrement();
   return m;
 }
-/*
-Mesh * SplitMesh3(Fem2D::Mesh * const & pTh)
-{
-  assert(pTh);
-  const Mesh & Th(*pTh);  // le maillage d'origne a decoupe
-  using  Fem2D::Triangle;
-  using  Fem2D::Vertex;
-  using  Fem2D::R2;
-  using  Fem2D::BoundaryEdge;
-  using  Fem2D::Mesh;
- // using  Fem2D::R;
-  int nbv=Th.nv; // nombre de sommet 
-  int nbt=Th.nt; // nombre de triangles
-  int neb=Th.neb; // nombre d'aretes fontiere
-  // allocation des nouveaux items du maillage  
-  Vertex * v= new Vertex[nbv+nbt];
-  Triangle *t= new Triangle[nbt*3];
-  BoundaryEdge *b= new BoundaryEdge[neb];
-  // generation des nouveaus sommets 
-  Vertex *vv=v;
-  // copie des anciens sommets (remarque il n'y a pas operateur de copy des sommets)
-  for (int i=0;i<nbv;i++)
-   {
-     Vertex & V=Th(i);
-     vv->x=V.x;
-     vv->y=V.y;
-     vv->lab = V.lab;
-     vv++;      
-   }
-  // generation des points barycentre de trianngles 
-  for (int k=0;k<nbt;k++)
-    {
-      Triangle & K=Th[k];
-      R2 G= ( (R2) K[0] + K[1] + K[2] )  / 3.;
-      vv->x=G.x;
-      vv->y=G.y;
-      vv->lab = 0;
-      vv++;
-    }   
-
-  //  generation des triangles 
-  Triangle *tt= t; 
-  int nberr=0;
-   
-  for (int i=0;i<nbt;i++)
-    {
-      int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
-      int ii = nbv + i; // numero du 
-      // les 3 triangles par triangles origines 
-      (*tt++).set(v,ii,i1,i2,Th[i].lab);
-      (*tt++).set(v,i0,ii,i2,Th[i].lab);
-      (*tt++).set(v,i0,i1,ii,Th[i].lab);
-    }  
-
-  // les arete frontieres qui n'ont pas change
-  BoundaryEdge * bb=b;
-  for (int i=0;i<neb;i++)
-    {        
-      int i1=Th(Th.bedges[i][0]);
-      int i2=Th(Th.bedges[i][1]);
-      int lab=Th.bedges[i].lab;     
-      *bb++ = BoundaryEdge(v,i1,i2,lab);   
-    }
-  //  generation de la class Mesh a partir des 3 tableaux : v,t,b
-  {
-    Mesh * m = new Mesh(nbv+nbt,nbt*3,neb,v,t,b);
-    R2 Pn,Px;
-    m->BoundingBox(Pn,Px);
-    m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-    return m;
-  }
-}
-
- */
 
 
 class SetMesh : public OneOperator { public:  
@@ -354,4 +425,5 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   TheOperators->Add("=",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
   TheOperators->Add("<-",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
   Global.Add("change","(",new SetMesh);
+  Global.Add("buildlayers","(",new  BuildLayerMesh);
 }
