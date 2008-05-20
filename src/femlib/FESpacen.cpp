@@ -16,7 +16,7 @@
 #include "Mesh3dn.hpp"
 #include "Mesh2dn.hpp"
 
-#include "FEspacen.hpp"
+#include "FESpacen.hpp"
 
 
  namespace Fem2D {
