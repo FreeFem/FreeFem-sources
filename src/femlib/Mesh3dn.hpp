@@ -114,6 +114,7 @@ public:
 
 class Mesh3 : public GenericMesh<Tet,Triangle3,Vertex3> { 
 public:
+  Mesh3(){}
   Mesh3(const string); // 
   int Save(const string & filename);
 private:

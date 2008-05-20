@@ -28,6 +28,7 @@ namespace Fem2D  {
 #include "HashTable.hpp"
 #include "Serialize.hpp"
 
+  const double UnSetMesure=-1e-300;
 
 
   // struct R {}; 
@@ -200,13 +201,13 @@ public:
 
   Vertex& at(int i)    { return *vertices[i];} // to see triangle as a array of vert
 
-  void set(Vertex * v0,int * iv,int r) 
+  void set(Vertex * v0,int * iv,int r,double mss=UnSetMesure) 
   { 
     for(int i=0;i<nv;++i)	
       vertices[i]=v0+iv[i];
-    mes=Data::mesure(vertices);
+    mes=mss? mss : Data::mesure(vertices);
     lab=r;
-    ASSERTION(mes>0);
+    ASSERTION(mss==UnSetMesure && mes>0);
   }
   
   istream & Read1(istream & f,Vertex * v0,int n)
