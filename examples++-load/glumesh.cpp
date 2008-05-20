@@ -205,8 +205,8 @@ basicAC_F0::name_and_type BuildLayeMesh_Op::name_param[]= {
   {  "zbound", &typeid(E_Array)},
   {  "transfo", &typeid(E_Array)},
   {  "coef", &typeid(double)},
-  {  "reft", &typeid(KN_<long> )},
-  {  "refe", &typeid(KN_<long> )}
+  {  "reftet", &typeid(KN_<long> )},
+  {  "refface", &typeid(KN_<long> )}
 };
 
 
@@ -270,7 +270,7 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   zmin=0.;
   zmax=1.;
   for (int it=0;it<nbt;++it)
-    for(int iv;iv<3;++iv)      
+    for(int iv=0;iv<3;++iv)      
     {
       int i=Th(it,iv);
       if(clayer[i]<0)
@@ -282,6 +282,7 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
 	}
 			     
     }
+  ffassert(clayer.min() >=0);
   KN<long> zzempty;
   KN<long> nre (arg(3,stack,zzempty));  
   KN<long> nrt (arg(4,stack,zzempty));  
