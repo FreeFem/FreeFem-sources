@@ -55,7 +55,7 @@ namespace EF23 {
     operator R1 () const { return R1(x);} 
   };
   
-
+ 
   
   class Z2 { public:
       static bool INTER_SEG1d(int a,int b,int x,int y) { return (((y) > (a)) && ((x) <(b)));}
@@ -96,8 +96,8 @@ namespace EF23 {
       y = max(min(y,MaxISize1),0);
       z = max(min(z,MaxISize1),0);}
     
-    int Case(int l) const  { // cout << "case= "<< int((x&l)!=0)+(int((y&1)!=0)<<1) + (int((z&1)!=0)<<2) << endl;
-      return int((x&l)!=0)+(int((y&1)!=0)<<1) + (int((z&1)!=0)<<2) ;}
+    int Case(int l) const  { //cout << "case= "<< int((x&l)!=0)+(int((y&l)!=0)<<1) + (int((z&l)!=0)<<2) << endl;
+      return int((x&l)!=0)+(int((y&l)!=0)<<1) + (int((z&l)!=0)<<2) ;}
     int norm() const { return Max(abs(x),abs(y),abs(z));}
     bool less(Z3 h) const  { return abs(x) <h.x && abs(y) <h.y && abs(z) < h.z ;}
     bool interseg(Z3 pp,int hb,int h) const { 
@@ -107,6 +107,10 @@ namespace EF23 {
     operator R3 () const { return R3(x,y,z);} 
     
   }; 
+
+  inline  ostream& operator <<(ostream& f, const Z3 & P )   { f << P.x << ' ' << P.y << ' ' << P.z   ; return f; }
+  inline  ostream& operator <<(ostream& f, const Z2 & P )   { f << P.x << ' ' << P.y   ; return f; }
+  inline  ostream& operator <<(ostream& f, const Z1 & P )   { f << P.x    ; return f; }
   
   template<class Rd>    struct Traits_Zd {  typedef void Zd;};
   template<>    struct Traits_Zd<R1> {  typedef Z1 Zd;};
