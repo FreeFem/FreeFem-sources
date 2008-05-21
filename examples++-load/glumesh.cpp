@@ -176,18 +176,23 @@ public:
   
 public:
   BuildLayeMesh_Op(const basicAC_F0 &  args,Expression tth,Expression nmaxx) 
-    : eTh(tth),enmax(nmaxx) 
+    : eTh(tth),enmax(nmaxx), ezmin(0),ezmax(0),xx(0),yy(0),zz(0)
   {
+    cout << "construction par BuilLayeMesh_Op" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
     const E_Array * a2 =0, *a1=0 ;
     if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
     if(nargs[1])  a2  = dynamic_cast<const E_Array *>(nargs[1]);
     int err =0;
+    cout << nargs[0] << " "<< a1 << endl;
+    cout << nargs[1] << " "<< a2 << endl;
     if(a1) {
       if(a1->size() !=2) 
 	CompileError("LayerMesh (Th,n, zbound=[zmin,zmax],) ");
+	  cout << "lecture de ezmin , ezmax" << endl; 
       ezmin=to<double>( (*a1)[0]);
       ezmax=to<double>( (*a2)[1]);
+      cout << *ezmin << *ezmax << endl;
     }
     if(a2) {
       if(a2->size() !=3) 
@@ -214,8 +219,10 @@ class  BuildLayerMesh : public OneOperator { public:
     BuildLayerMesh() : OneOperator(atype<pmesh3>(),atype<pmesh>(),atype<long>()) {}
   
   E_F0 * code(const basicAC_F0 & args) const 
-  { 
-    return  new BuildLayeMesh_Op(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1])); 
+  {
+	cout << " je suis dans code(const basicAC_F0 & args) const" << endl; 
+	cout << "args: " << args << endl;   
+	return  new BuildLayeMesh_Op(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1])); 
   }
 };
 
@@ -269,19 +276,26 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   clayer=-1;
   zmin=0.;
   zmax=1.;
-  for (int it=0;it<nbt;++it)
+  for (int it=0;it<nbt;++it){
+  cout << it << endl;
     for(int iv=0;iv<3;++iv)      
     {
       int i=Th(it,iv);
-      if(clayer[i]<0)
+     cout << "iv, it, i, " << iv <<" "<<it <<" "<< i << endl;
+     cout << clayer[i] << endl;
+       if(clayer[i]<0)
 	{
 	  mp->setP(&Th,it,iv);
-	  if(ezmin)  zmin[i]=GetAny<double>((*ezmin)(stack)); 
-	  if(ezmax)  zmax[i]=GetAny<double>((*ezmax)(stack)); 
+	  cout << "mp: fait " << endl;
+	  if(ezmin){ cout << "ezmin " << &zmin[0] <<" " <<zmin[0] << endl;  zmin[i]=GetAny<double>((*ezmin)(stack)); cout << "ezmin" <<endl;}
+	  if(ezmax){ cout << "ezmin" <<endl;  zmax[i]=GetAny<double>((*ezmax)(stack)); cout << "ezmin" <<endl;}
+	  cout << "double if " << endl;
 	  clayer[i]=Max( 0. , Min( 1. , arg(2,stack,1.) ) ); 
+	  cout << "clayer " << endl;
 	}
-			     
+	cout << i << clayer[i] << endl;		     
     }
+  }
   ffassert(clayer.min() >=0);
   KN<long> zzempty;
   KN<long> nre (arg(3,stack,zzempty));  
@@ -422,6 +436,7 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   typedef Mesh *pmesh;
   if (verbosity)
     cout << " lood: glumesh  " << endl;
+  //cout << " je suis dans Init " << endl; 
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );
   TheOperators->Add("=",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
   TheOperators->Add("<-",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
