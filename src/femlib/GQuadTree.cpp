@@ -267,7 +267,7 @@ namespace EF23 {
     Zd p(VtoZd(w));
     long l=MaxISize;
     pb = &root;
-    // cout << "add : "<< w << " : "<<p.x << " "<< p.y << ", " << pb << " " << &root << endl;
+    //cout << "add : "<< w << " : "<< p  << ", " << pb << " " << &root << endl;
     while( (b=*pb) && (b->n<0))
       { 
 	b->n--;
@@ -281,6 +281,7 @@ namespace EF23 {
     assert(l);
     while ((b= *pb) && (b->n == N)) // the QuadTreeBox is full
       { 
+	//cout << " b = " << b << b->n << "  " << l << endl;
 	Vertex *v4[N]; // copy of the QuadTreeBox vertices      
 	for(int i=0;i<N;++i)
 	  { v4[i]= b->v[i];
@@ -289,20 +290,23 @@ namespace EF23 {
 	b->n = -b->n; // mark is pointer QuadTreeBox
 	
 	l >>= 1;    // div the size by 2
+	ffassert(l);
 	for (int k=0;k<N;k++) // for the 4 vertices find the sub QuadTreeBox ij
 	  { 
 	    int ij;
 	    QuadTreeBox * bb =  b->b[ij=VtoZd(v4[k]).Case(l)];
-	    //cout << "ij= "<< ij << endl;
+	    //cout << "ij= "<< ij <<  " " << VtoZd(v4[k])<< endl;
 	    if (!bb) 
 	      bb=b->b[ij]=NewQuadTreeBox(); // alloc the QuadTreeBox 
-	    // cout << bb << " " << k << " "  << ij <<  endl;
-	    bb->v[bb->n++] = v4[k];
+	    //cout << bb << " " << k << " "  << ij <<  endl;
+	     bb->v[bb->n++] = v4[k];
 	  }
 	pb = &b->b[p.Case(l)];
       }
     if (!(b = *pb))
-      b=*pb= NewQuadTreeBox(); //  alloc the QuadTreeBox 
+      { //cout << "Qbox \n";
+	b=*pb= NewQuadTreeBox(); //  alloc the QuadTreeBox 
+      }
     //   cout << b << " " << b->n << endl;
     b->v[b->n++]=&w; // we add the vertex 
     NbVertices++;    
@@ -322,7 +326,8 @@ GTree<Vertex>::GTree(Vertex * v,Rd Pmin,Rd Pmax,int nbv) :
  coef( MaxISize/Norme_infty(cMax-cMin))
  
 { 
-  cout << "box: "<<  Pmin << " " << Pmax << endl;
+  if(verbosity>5)
+    cout << "box: "<<  Pmin << " " << Pmax << " " << cMin << " "<< cMax << " nbv : " << nbv <<endl;
   sb =new StorageQuadTreeBox(lenStorageQuadTreeBox);
   root=NewQuadTreeBox();
   //  throwassert( MaxISize > MaxICoor);
