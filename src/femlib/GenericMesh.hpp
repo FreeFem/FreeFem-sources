@@ -28,7 +28,7 @@ namespace Fem2D  {
 #include "HashTable.hpp"
 #include "Serialize.hpp"
 
-  const double UnSetMesure=-1e-300;
+  const double UnSetMesure=-1e+200;
 
 
   // struct R {}; 
@@ -205,7 +205,7 @@ public:
   { 
     for(int i=0;i<nv;++i)	
       vertices[i]=v0+iv[i];
-    mes=mss? mss : Data::mesure(vertices);
+    mes=(mss!=UnSetMesure) ? mss : Data::mesure(vertices);
     lab=r;
     ASSERTION(mss==UnSetMesure && mes>0);
   }

@@ -1385,7 +1385,172 @@ void Check(const Opera &Op,int N,int  M)
  template<class R>
  void  Element_Op(MatriceElementaireSymetrique<R,FESpace3> & mat,const FElement3 & Ku,double * p,int ie,int label, void * stack)
   {
-    ffassert(0);
+   typedef FESpace3 FESpace;
+   typedef typename FESpace3::Mesh Mesh;
+   typedef Mesh *pmesh ;
+   typedef typename Mesh::Element Element;
+    MeshPoint mp= *MeshPointStack(stack);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+    const Element & T  = Ku.T;
+
+    const GQuadratureFormular<R3> & FI = mat.FIT;
+    const GQuadratureFormular<R2> & FIb = mat.FIE;
+
+    long npi;
+    R *a=mat.a;
+    R *pa=a;
+    long i,j;
+    long n= mat.n,m=mat.m,nx=n*(m+1)/2;
+    long N= Ku.N;
+    
+    assert(mat.bilinearform);
+    
+    const Opera &Op(*mat.bilinearform);
+    bool classoptm = copt && Op.optiexpK;
+    // assert(  (copt !=0) ||  (Op.where_in_stack_opt.size() !=0) );
+    int lastop;
+    What_d Dop = Op.DiffOp(lastop);
+
+    if (Ku.number<1  && verbosity/100 && verbosity % 10 == 2 ) 
+      cout << "Element_Op S 3d: copt = " << copt << " " << classoptm << " lastop = "<< lastop << " Dop " << Dop << endl;
+    assert(Op.MaxOp() <last_operatortype);
+    
+    RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
+    
+    pa =a;
+    for (i=0;i< nx;i++) 
+      *pa++ = 0.; 
+    
+    if (ie<0)   
+      for (npi=0;npi<FI.n;npi++) // loop on the integration point
+        {
+          GQuadraturePoint<R3> pi(FI[npi]);
+          double coef = T.mesure()*pi.a;
+	  //R3 Pt(pi);
+          pa =a;
+          Ku.BF(Dop,pi,fu);
+          MeshPointStack(stack)->set(T(pi),pi,Ku);
+          if (classoptm) (*Op.optiexpK)(stack); // call optim version 
+          for ( i=0;  i<n;   i++ )  
+            { 
+              RNM_ wi(fu(i,'.','.'));
+	      //if (Ku.Vh.Th(T) < 1) cout << i <<" " <<Pt<< "wi =" << wi ;
+              for ( j=0;  j<=i;  j++,pa++ ) // 
+                {
+		  
+                  RNM_ wj(fu(j,'.','.'));
+                  //   if (Ku.Vh.Th(T) < 1) cout << j <<" " <<Pt<< "wj =" << wj ;
+                  int il=0;
+                  for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                    {       
+                      const  BilinearOperator::K & ll(*l);
+                      pair<int,int> ii(ll.first.first),jj(ll.first.second);
+                      double w_i =  wi(ii.first,ii.second);
+                      double w_j =  wj(jj.first,jj.second);
+                      
+                      R c = copt ? *(copt[il]): GetAny<R>(ll.second.eval(stack));
+		      if ( copt && Ku.number <1)
+			{
+			  R cc  =  GetAny<R>(ll.second.eval(stack));
+			  // cout << *(copt[il]) << " == " <<  cc << endl;
+			  if ( c != cc) { 
+			    cerr << c << " != " << cc << " => ";
+			    cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+			    ExecError("In Optimized version "); }
+			}
+		
+		      *pa += coef * c * w_i*w_j;
+		      /*
+			if (Ku.Vh.Th(T) < 1 && npi < 1 && i < 1 && j < 1 ) 
+			cout <<" + " << c << " (" <<coef << " " << w_i << " " << w_j << " " << jj.first << " " << jj.second << ") " ;
+		      */
+		    }
+		}
+              
+            }
+          
+        } 
+    else // int on edge ie 
+      for (npi=0;npi<FIb.n;npi++) // loop on the integration point
+        {
+          
+          pa =a;
+          GQuadraturePoint<R2> pi( FIb[npi]);
+	  /*          R2 E=T.Edge(ie);
+		      double le = sqrt((E,E));
+          double coef = le*pi.a;
+          double sa=pi.x,sb=1-sa;
+          R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
+            PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
+          R2 Pt(PA*sa+PB*sb ); //  
+	  */
+	  R3 NN= T.N(ie);
+	  double mes=NN.norme();
+	  NN/=mes;
+	  double coef = mes*pi.a; 
+	  R3 Pt(T.PBord(ie,pi));
+          Ku.BF(Dop,Pt,fu);
+          // int label=-999999; // a passer en argument 
+          MeshPointStack(stack)->set(T(Pt),Pt,Ku,label,NN,ie);
+          if (classoptm) (*Op.optiexpK)(stack); // call optim version 
+          
+          
+          for ( i=0;  i<n;   i++ )  
+           // if ( onWhatIsEdge[ie][Ku.DFOnWhat(i)]) // generaly wrong FH dec 2003
+              { 
+                RNM_ wi(fu(i,'.','.'));     
+                for ( j=0;  j<=i;   j++,pa++ ) 
+                  { 
+                    RNM_ wj(fu(j,'.','.'));
+                    int il=0;
+                    for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+		      // if (onWhatIsEdge[ie][Ku.DFOnWhat(j)]) // generaly wrong FH dec 2003
+		      {       
+			BilinearOperator::K ll(*l);
+			pair<int,int> ii(ll.first.first),jj(ll.first.second);
+			double w_i =  wi(ii.first,ii.second); 
+			double w_j =  wj(jj.first,jj.second);
+			// R ccc = GetAny<R>(ll.second.eval(stack));
+			R ccc = copt ? *(copt[il]): GetAny<R>(ll.second.eval(stack));
+			if ( copt && Ku.number <1)
+			  {
+			    R cc  =  GetAny<R>(ll.second.eval(stack));
+			    if ( ccc != cc) { 
+			      cerr << ccc << " != " << cc << ", xy = "<< T(Pt) << " => ";
+			      cerr << "Sorry error in Optimization (d)  add:  int2d(Th,optimize=0)(...)" << endl;
+			      ExecError("In Optimized version "); }
+			  }
+			
+			*pa += coef * ccc * w_i*w_j;
+		      }
+                  }
+              } //else pa+= i+1;
+        }
+    
+    /*    
+    pa=a;
+    if (Ku.Vh.Th(T) <=0 ) {
+      cout <<endl  << " Tet " << Ku.Vh.Th(T) << " =  "<<  T << "  nx= " << nx << endl;
+      for (int i=0;i<n;i++)
+	{
+	  cout << setw(2) << i << setw(4) << mat.ni[i] << " :";
+	  for (int j=0;j<=i;j++)
+	    cout << setw(5)  << (*pa++) << " ";
+	  cout << endl;
+	} } 
+    /*
+    pa=a;
+    for (int i=0;i<n;i++)
+      cout << mat.ni[i] << " " ;
+    for (int i=0;i<n;i++)
+      for (int j=0;j<n;j++,pa++)
+	if ( mat.ni[i]==150 && mat.nj[j] == 150)
+	  cout << "a_150,150 = "<< *pa ;
+    cout << endl; 
+    */
+    
+    *MeshPointStack(stack) = mp;
+
   }  
  template<class R>
  void  Element_Op(MatriceElementaireSymetrique<R,FESpace> & mat,const FElement & Ku,double * p,int ie,int label, void * stack)
@@ -2527,6 +2692,9 @@ template<class R>
     
     //            const  FormLinear * l=dynamic_cast<const  FormLinear *>(e);
     const CDomainOfIntegration & di= *l->di;
+    ffassert(di.d==3);
+    const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
+
     const Mesh & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
     bool sameMesh = &ThI == &Vh.Th;
     
