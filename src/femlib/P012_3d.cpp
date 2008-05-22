@@ -109,6 +109,8 @@ void TypeOfFE_P1Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
     {
       R3 Dl[4];
       K.Gradlambda(Dl);
+      //for(int i=0;i<4;++i)
+	//      cout << Dl[i] << endl;
       if (whatd & Fop_dx) 
 	{
 	  RN_ f0x(val('.',0,op_dx)); 
@@ -135,6 +137,7 @@ void TypeOfFE_P1Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	f0z[3] = Dl[3].z;
       }
     }
+  //  cout << val << endl;
 }
 
 

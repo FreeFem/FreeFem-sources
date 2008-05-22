@@ -327,7 +327,7 @@ GTree<Vertex>::GTree(Vertex * v,Rd Pmin,Rd Pmax,int nbv) :
  
 { 
   if(verbosity>5)
-    cout << "box: "<<  Pmin << " " << Pmax << " " << cMin << " "<< cMax << " nbv : " << nbv <<endl;
+    cout << "  GTree: box: "<<  Pmin << " " << Pmax << " " << cMin << " "<< cMax << " nbv : " << nbv <<endl;
   sb =new StorageQuadTreeBox(lenStorageQuadTreeBox);
   root=NewQuadTreeBox();
   //  throwassert( MaxISize > MaxICoor);
@@ -634,7 +634,8 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  kbord[nbord++]=it;
 	  if(nbord>=5)  HeapSort(kbord,nbord);
 	}
-      cout << " bord "<< it<< "   nbf < 0 : " <<n << " (inb) " << inkbord << " nfb" << nbord<<endl;
+      if(verbosity>100)
+	cout << " bord "<< it<< "   nbf < 0 : " <<n << " (inb) " << inkbord << " nfb" << nbord<<endl;
       if ( n!=1 )  // on est sur le bord, mais plusieurs face <0 => on test les autre
 	{  // 1) existe t'il un adj interne
 	  int nn=0,ii;
@@ -642,7 +643,8 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  for(int i=0;i<nkv;++i)
 	    if (l[i] < eps && (itt=Th.ElementAdj(it,ii=i)) != it && itt && find5(itt,kbord,nbord) < -1 ) 
 	      ni[nn++]=i,nadj[i]=itt;
-	  cout << " nn : "<< nn << endl;
+	  if(verbosity>100)
+	    cout << " nn : "<< nn << endl;
 	  if (nn>0)
 	    {
 	      j=nadj[nRand(nn)];
@@ -658,7 +660,8 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
       //  barycentrique 
       { // a ridge on border  (to hard to do the correct stuff) 
 	//  or a corner    just do the projection on lambda  
-	cout << " sortie on bord "<<endl;
+	if(verbosity>100)
+	  cout << " sortie on bord "<<endl;
 	R s=0;
 	for(int i=0;i<=nkv;++i)
 	  s += (l[i]<0.) ?  (l[i]=0) : l[i];
