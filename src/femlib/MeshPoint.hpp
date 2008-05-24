@@ -280,8 +280,9 @@ class MeshPointBase { public:
 	 label=(*T)[v].lab;
       } 
      else  {
-       ffassert(0); // a faire 
-       
+       //  on edge
+       //ffassert(0); // a faire 
+       /*
        e = ll[0]; 
        int i1,i2,I3;
        /*
@@ -289,6 +290,7 @@ class MeshPointBase { public:
        const BoundaryEdge * be=Th3->TheBoundaryEdge(i1,i2);
        label= be ? be->lab : 0;
        */
+       label=-1;// to say 
       }
    
      t=(*Th)(T);

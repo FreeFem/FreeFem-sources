@@ -592,7 +592,7 @@ extern TypeOfFE & RTLagrangeOrtho;
 extern TypeOfFE & P0Lagrange;
 extern TypeOfFE & P1ncLagrange;
 
-  class FESpace : public RefCounter , public UniqueId
+  class FESpace : public RefCounter , public UniqueffId
 {
   public:
   typedef Fem2D::Mesh Mesh;

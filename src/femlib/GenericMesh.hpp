@@ -512,13 +512,19 @@ void GenericMesh<T,B,V>::BuildAdj()
 	SortArray<int,nva> a(itembe(k));
 	 typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
 	 if(!p) { err++;
-	    if(err==1) cerr << "Err  Border elementt not in mesh \n";
+	   if(err==1) cerr << "Err  Border element not in mesh \n";
 	    if (err<10)  cerr << " \t " << k << " " << a << endl;
-	    }
-	 else
-	 {
-	     BoundaryElementHeadLink[k] = p->v <0 ? -p->v-1 : p->v;
 	 }
+	 else
+	   {
+	     BoundaryElementHeadLink[k] = p->v <0 ? -p->v-1 : p->v;
+#ifndef NDEBUG
+	     int t=BoundaryElementHeadLink[k]/nea;
+	     int e=BoundaryElementHeadLink[k]%nea;
+	     // cout << k << " ### "   << a << " = " << itemadj(t,e) << " t " << t << " e " << e << endl;
+	     assert(itemadj(t,e)==a);
+#endif
+	   }
      }
 
     

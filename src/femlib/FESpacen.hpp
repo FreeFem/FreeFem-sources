@@ -537,7 +537,7 @@ private:
 
 
 template<class MMesh> 
-class GFESpace : public RefCounter,  public DataFENodeDF, public UniqueId  {
+class GFESpace : public RefCounter,  public DataFENodeDF, public UniqueffId  {
 public:
   typedef MMesh Mesh;
   typedef GFElement<Mesh> FElement;
@@ -642,7 +642,7 @@ public:
     Rd MinMax(const KN_<R>& U,int j0, bool bb=true) const ;
     // void destroy() {RefCounter::destroy();}
     */
-    bool isFEMesh() const { return !FirstNodeOfElement && ( N==1) ;} // to make optim
+    bool isFEMesh() const { return ! NodesOfElement  && ( N==1) ;} // to make optim
 private: // for gibbs  
   int gibbsv (long* ptvoi,long* vois,long* lvois,long* w,long* v);
 };

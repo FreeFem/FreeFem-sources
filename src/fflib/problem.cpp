@@ -633,7 +633,6 @@ void Check(const Opera &Op,int N,int  M)
               }
           }
       }
-    /*
     else if (di.kind == CDomainOfIntegration::intalledges)
       {
         for (int i=0;i< Th.nt; i++) 
@@ -659,7 +658,7 @@ void Check(const Opera &Op,int N,int  M)
 	    
           }
 	
-	  }*/      
+      }      
     else if (di.kind == CDomainOfIntegration::int3d )
       {
         for (int i=0;i< Th.nt; i++) 
@@ -1097,7 +1096,7 @@ void Check(const Opera &Op,int N,int  M)
     int  iloop=0;
     KN<bool> unvarexp(classoptm ? Op.optiexpK->sizevar() : 1);
     if (Ku.number<1 && verbosity/100 && verbosity % 10 == 2) 
-      cout << "Element_Op P: copt = " << copt << " " << classoptm << endl;
+      cout << "Element_Op 3d P: copt = " << copt << " " << classoptm << endl;
     assert(Op.MaxOp() <last_operatortype);
     //
     int lastop;
@@ -1217,7 +1216,19 @@ void Check(const Opera &Op,int N,int  M)
          // else pa += m;  FH dec 2003
   }
     */
-  
+    
+    if (Ku.Vh.Th(T) <1 && verbosity>100) {
+      pa=mat.a;
+      cout <<endl  << " Tet " << Ku.Vh.Th(T) << " =  " << T  << " " << nx << endl;
+      for (int i=0;i<n;i++)
+	{
+	  cout << setw(2) << i << setw(4) << mat.ni[i] << " :";
+	  for (int j=0;j<m;j++)
+	    cout << setw(5)  << (*pa++) << " ";
+	  cout << endl;
+	} } 
+    
+
   } 
 
   template<class R> 
@@ -1527,9 +1538,9 @@ void Check(const Opera &Op,int N,int  M)
               } //else pa+= i+1;
         }
     
-    /*    
+    
     pa=a;
-    if (Ku.Vh.Th(T) <=0 ) {
+    if (Ku.Vh.Th(T) <0 & verbosity>100) {
       cout <<endl  << " Tet " << Ku.Vh.Th(T) << " =  "<<  T << "  nx= " << nx << endl;
       for (int i=0;i<n;i++)
 	{
@@ -2532,7 +2543,7 @@ void Check(const Opera &Op,int N,int  M)
                     }
                    }
               if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-               }
+	      }
           }
       }
     if (! ktbc  && nbon && verbosity ) 
@@ -2595,6 +2606,7 @@ template<class R>
       {
         int ie;
         int it = Th.BoundaryElement(ib,ie);
+	
 	const BorderElement &be=Th.be(ib);
         int r =Th.be(ib).lab;
 	lll[r]++;
@@ -2653,9 +2665,10 @@ template<class R>
 		K.Pi_h(Vp,Vdf,ipmat);  
                 for (int df=0;df<nbdf;df++)
                   {
-		    if (K.FromASubFE(df)==Uh.dim_which_sub_fem[xx.first] && onWhatIsEdge[ie][K.DFOnWhat(df)] ) 
+		    if (K.FromASubFE(df)==Uh.dim_which_sub_fem[xx.first] && Element::onWhatBorder[ie][K.DFOnWhat(df)] ) 
 		      {
 			int ddf=K(df);
+			// cout << ddf << " " << df << " " << Vdf[df] << " " << it << " ib = " << ib  << " == " << Th(Th[it][df]) <<  endl;
 			if (Aii)  A->diag(ddf)=tgv;
 			if (B) (*B)[ddf]=tgv*Vdf[df]; 
 			if (X) (*X)[ddf]=Vdf[df];

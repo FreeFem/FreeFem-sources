@@ -615,6 +615,16 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  outside=false; 
 	  Phat=Rd(l +1);
 	  // cout << Phat <<endl;
+#ifndef NDEBUG
+	  Rd pp=K(Phat)-P;
+	  if( pp.norme()>1e-5)
+	    {
+	      cout << " Bug find P " << P << " ==" << K(Phat)  << endl;
+	      cout << "Phat== " << Phat << " diff= " << pp << endl;
+	      assert(0);
+	    }
+
+#endif	  
 	  return &K;
 	}
       

@@ -41,7 +41,7 @@ public:
   void destroy() { delete lth;}
   listMesh(Stack s,Mesh *th) : lth(Add2StackOfPtr2Free(s,new list<Mesh*>)) { lth->push_back(th);}
   listMesh(Stack s,Mesh *tha,Mesh *thb) : lth(Add2StackOfPtr2Free(s,new list<Mesh*>)) { lth->push_back(tha);lth->push_back(thb);}
-  listMesh(Stack s,listMesh &l,Mesh *th) : lth(Add2StackOfPtr2Free(s,new list<Mesh*>(*l.lth))) { lth->push_back(th);}
+  listMesh(Stack s,const listMesh &l,Mesh *th) : lth(Add2StackOfPtr2Free(s,new list<Mesh*>(*l.lth))) { lth->push_back(th);}
 
 };
 
@@ -93,6 +93,7 @@ Mesh * GluMesh(listMesh const & lst)
   for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
     {
       const Mesh &Th(**i);
+      if(!*i) continue;
       if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
       int nbv0 = nbv;
       for (int i=0;i<Th.nv;i++)
@@ -121,7 +122,7 @@ Mesh * GluMesh(listMesh const & lst)
 	  const BoundaryEdge & be(Th.bedges[k]);
 	  int i0=quadtree->NearestVertex(be[0])-v;
 	  int i1=quadtree->NearestVertex(be[1])-v;
-	  if(i1<nbv0 && i0 < nbv) continue;
+	  if(i1<nbv0 && i0 < nbv0) continue;
 	  (*bb++).set(v,i0,i1,be.lab);
 	  neb++;
 	}
@@ -438,6 +439,7 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
     cout << " lood: glumesh  " << endl;
   //cout << " je suis dans Init " << endl; 
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );
+  TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,listMesh,pmesh>  >      );
   TheOperators->Add("=",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
   TheOperators->Add("<-",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
   Global.Add("change","(",new SetMesh);

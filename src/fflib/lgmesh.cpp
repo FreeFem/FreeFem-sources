@@ -943,11 +943,19 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
     }   
   Triangle *tt= t; 
   int nberr=0;
-   
+  double atotal=0;
   for (int i=0;i<nbt;i++)
     {
       int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
-      double a= Area2(v[i0],v[i1],v[i2])/2;
+      atotal +=  Area2(v[i0],v[i1],v[i2])/2;
+    }   
+  bool rev=(atotal<0);
+  if(verbosity>2 && rev) cout <<  "  -- movemesh negatif tranfomation => reverse all triangle " << endl; 
+  for (int i=0;i<nbt;i++)
+    {
+      int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
+      if(rev) swap(i1,i2);
+      R a= Area2(v[i0],v[i1],v[i2])/2;
       if ( a < Th[i].area*1.e-6   ) 
        { nberr++;
         if (verbosity>1) 
@@ -981,6 +989,7 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
      int i1=Th(Th.bedges[i][0]);
      int i2=Th(Th.bedges[i][1]);
      int lab=Th.bedges[i].lab;     
+     if(rev) swap(i1,i2);     
      *bb++ = BoundaryEdge(v,i1,i2,lab);   
     }
  {
