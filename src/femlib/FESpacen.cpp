@@ -342,11 +342,16 @@ GTypeOfFESum<Mesh>::GTypeOfFESum(const KN< GTypeOfFE<Mesh> const *> & t)
     }
   assert(ii==this->nb_sub_fem );
   
-  int c=0,c0=0;
+  int c=0,c0=0, fcom=0;
   for (int i=0;i<this->nb_sub_fem;i++) 
     { 
+      int N=this->Sub_ToFE[i]->N;
       int ndofi=this->Sub_ToFE[i]->NbDoF;
-      for(int j=0;j<this->Sub_ToFE[i]->N;++j)
+      this->first_comp[i]= fcom;
+      this->last_comp[i]= fcom+N;
+      fcom += N;
+
+      for(int j=0;j<N;++j)
 	{
 	  this->begin_dfcomp[c] = c0 + this->Sub_ToFE[i]->begin_dfcomp[j] ; 
 	  this->end_dfcomp[c]   = c0 + this->Sub_ToFE[i]->end_dfcomp[j] ;

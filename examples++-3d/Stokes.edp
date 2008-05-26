@@ -11,13 +11,17 @@ macro Grad(u) [dx(u),dy(u),dz(u)]// EOM
 macro div(u1,u2,u3) (dx(u1)+dy(u2)+dz(u3)) //EOM
   
   varf vStokes([u1,u2,u3,p],[v1,v2,v3,q]) = 
-  int3d(Th)( Grad(u1)'*Grad(v1) +  Grad(u2)'*Grad(v2) +  Grad(u3)'*Grad(v3)
+  int3d(Th,qforder=3)( Grad(u1)'*Grad(v1) +  Grad(u2)'*Grad(v2) +  Grad(u3)'*Grad(v3)
              - div(u1,u2,u3)*q - div(v1,v2,v3)*p + 1e-10*q*p ) 
  + on(1,2,3,4,6,u1=0,u2=0,u3=0)
  +  on(5,u1=4*(1-x)*(x)*(y)*(1-y),u2=0,u3=0);
 
+cout << "b  mat " << endl;
+
 matrix A=vStokes(VVh,VVh);
+cout << "e  mat " << endl;
 set(A,solver=UMFPACK);
+cout << "e fac  mat " << endl;
 real[int] b= vStokes(0,VVh);
 
 VVh [u1,u2,u3,p];
