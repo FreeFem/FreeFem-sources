@@ -999,3 +999,5 @@ void init_lgmesh3() {
 }
 //#include "InitFunct.hpp"
 //static addingInitFunct TheaddingInitFunct(-10,init_lgmesh);
+template E_set_fev3<double,v_fes3>::E_set_fev3(const E_Array * a,Expression pp) ;
+template E_set_fev3<Complex,v_fes3>::E_set_fev3(const E_Array * a,Expression pp) ;
