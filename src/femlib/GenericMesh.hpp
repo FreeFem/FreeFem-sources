@@ -641,7 +641,7 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement]) 
       cout << " nb of DoF   " << NbOfDF << endl ;
       if( ! constndfpernode) 
 	{ 
-	  pp=new int[nbNodes];
+	  pp=new int[nbNodes+1];
 	  int kk=0,nn=0;
 	  for(int k=0;k<nt;++k)
 	    for(int i=0;i<nnodeK;i++)
@@ -652,6 +652,7 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement]) 
 	      pp[n]=kk;
 	      kk+=ndfn;
 	    }
+	  pp[nbNodes]=NbOfDF;//  add last 
 	  assert(kk==NbOfDF);
 	}
     }

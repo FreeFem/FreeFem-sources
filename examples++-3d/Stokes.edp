@@ -1,0 +1,40 @@
+load "../examples++-load/glumesh"
+int nn=10;
+mesh Th2=square(nn,nn);
+fespace Vh2(Th2,P2);
+Vh2 ux,uz,p2;
+mesh3 Th=buildlayers(Th2,nn);
+savemesh(Th,"c10x10x10.mesh");
+fespace VVh(Th,[P23d,P23d,P23d,P13d]);
+fespace Vh(Th,P23d);
+macro Grad(u) [dx(u),dy(u),dz(u)]// EOM
+macro div(u1,u2,u3) (dx(u1)+dy(u2)+dz(u3)) //EOM
+  
+  varf vStokes([u1,u2,u3,p],[v1,v2,v3,q]) = 
+  int3d(Th)( Grad(u1)'*Grad(v1) +  Grad(u2)'*Grad(v2) +  Grad(u3)'*Grad(v3)
+             - div(u1,u2,u3)*q - div(v1,v2,v3)*p + 1e-10*q*p ) 
+ + on(1,2,3,4,6,u1=0,u2=0,u3=0)
+ +  on(5,u1=4*(1-x)*(x)*(y)*(1-y),u2=0,u3=0);
+
+matrix A=vStokes(VVh,VVh);
+set(A,solver=UMFPACK);
+real[int] b= vStokes(0,VVh);
+
+VVh [u1,u2,u3,p];
+VVh [v1,v2,v3,q];
+[v1,v2,v3,q]=[x,y,z,z];
+
+ux= v1(x,0.5,y);
+uz= v3(x,0.5,y);
+p2= q(x,0.5,y);
+plot([ux,uz],p2,cmm=" cut y = 0.5",wait=1);
+
+
+
+u1[]= A^-1 * b;
+
+ux= u1(x,0.5,y);
+uz= u3(x,0.5,y);
+p2= p(x,0.5,y);
+plot([ux,uz],p2,cmm=" cut y = 0.5",wait=1);
+

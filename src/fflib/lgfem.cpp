@@ -1635,168 +1635,168 @@ AnyType set_feoX_1 (Stack s,Expression ppfeX_1, Expression e)
     cout << " -- interpole f= g*X^-1, function's bound:  " << y->min() << " " << y->max() << endl; 
     return SetAny<FEbase<R,v_fes>*>(&fe); 
   }
-template<class K>
-class E_set_fev: public E_F0mps {public:
-  E_Array  aa;
-  Expression   ppfe;
-  bool optimize;
-       vector<size_t>  where_in_stack_opt;
-       Expression optiexp0,optiexpK;
-
-  E_set_fev(const E_Array * a,Expression pp) ;
-  
-  AnyType operator()(Stack)  const ;
-  operator aType () const { return atype<void>();} 
-             
-};
 
 template<class K>
-E_set_fev<K>::E_set_fev(const E_Array * a,Expression pp) 
-  :aa(*a),ppfe(pp),optimize(true),
+E_set_fev<K>::E_set_fev(const E_Array * a,Expression pp,int ddim) 
+  :dim(ddim), aa(*a),ppfe(pp),optimize(true),
    where_in_stack_opt(),optiexp0(),optiexpK() 
-   { 
-    aa.map(to<K>) ;
-    bool kdump=false;
-    if(optimize)
-			{ // new code Optimized  -------
-			     int n=aa.size();
-			    deque<pair<Expression,int> > ll;
-			    MapOfE_F0 m;
-			    where_in_stack_opt.resize(n);
-			    size_t top = currentblock->OffSet(0), topbb=top; // FH. bofbof ??? 
-			    for (int i=0; i<n; i++)
-			      {
-			       Expression ee= aa[i].LeftValue();
-			       if (kdump)
-			       cout << "Optimize OneOperatorMakePtrFE:  type exp: " << typeid(*ee).name() << " "<<endl;
-			       where_in_stack_opt[i]=ee->Optimize(ll, m, top);
-			       if (kdump)
-			       cout  << "\n\t\t"<< i  << ": " << where_in_stack_opt[i] << endl;
-			      }
-			      
-			    currentblock->OffSet(top-topbb);
-			    //  
-			    int k=ll.size(),k0=0,k1=0;
-			    for (int i=0;i<k;i++)
-			        if (ll[i].first->MeshIndependent()) k0++;
-			    deque<pair<Expression,int> > l0(k0),l1(k-k0);
-			    k0=0,k1=0;
-			    for (int i=0;i<k;i++)
-			       if (ll[i].first->MeshIndependent()) 
-			         {
-			          if (kdump)
-			          cout << " mi " << ll[i].second << " " << *(ll[i].first) << endl;
-			          l0[k0++]=ll[i];
-			         }
-			        else 
-			         {
-			          if (kdump)
-			          cout << " md " << ll[i].second << " " << *(ll[i].first) << endl;
-			          l1[k1++]=ll[i];
-			         }
-			    if (k0)      
-			      optiexp0 = new E_F0_Optimize(l0,m,0);  // constant part
-			    if (k1) 
-			      optiexpK = new E_F0_Optimize(l1,m,0);  // none constant part
-			            
-			 }
-   
-   
-   }
-   
+{ 
+  aa.map(to<K>) ;
+  bool kdump=false;
+  if(optimize)
+    { // new code Optimized  -------
+      int n=aa.size();
+      deque<pair<Expression,int> > ll;
+      MapOfE_F0 m;
+      where_in_stack_opt.resize(n);
+      size_t top = currentblock->OffSet(0), topbb=top; // FH. bofbof ??? 
+      for (int i=0; i<n; i++)
+	{
+	  Expression ee= aa[i].LeftValue();
+	  if (kdump)
+	    cout << "Optimize OneOperatorMakePtrFE:  type exp: " << typeid(*ee).name() << " "<<endl;
+	  where_in_stack_opt[i]=ee->Optimize(ll, m, top);
+	  if (kdump)
+	    cout  << "\n\t\t"<< i  << ": " << where_in_stack_opt[i] << endl;
+	}
+      
+      currentblock->OffSet(top-topbb);
+      //  
+      int k=ll.size(),k0=0,k1=0;
+      for (int i=0;i<k;i++)
+	if (ll[i].first->MeshIndependent()) k0++;
+      deque<pair<Expression,int> > l0(k0),l1(k-k0);
+      k0=0,k1=0;
+      for (int i=0;i<k;i++)
+	if (ll[i].first->MeshIndependent()) 
+	  {
+	    if (kdump)
+	      cout << " mi " << ll[i].second << " " << *(ll[i].first) << endl;
+	    l0[k0++]=ll[i];
+	  }
+	else 
+	  {
+	    if (kdump)
+	      cout << " md " << ll[i].second << " " << *(ll[i].first) << endl;
+	    l1[k1++]=ll[i];
+	  }
+      if (k0)      
+	optiexp0 = new E_F0_Optimize(l0,m,0);  // constant part
+      if (k1) 
+	optiexpK = new E_F0_Optimize(l1,m,0);  // none constant part
+      
+    }
   
+  
+}
+
+
 template<class K>   
 AnyType E_set_fev<K>::operator()(Stack s)  const
+{
+  if(dim== 2)  return  Op2d(s);
+  else if(dim == 3)  return Op3d(s);
+}
+
+
+template<class K>   
+AnyType E_set_fev<K>::Op3d(Stack s)  const
+{
+  //  voir E_set_fev3  ( pb de consitance a revoir FH) 
+  ffassert(0); // a faire   
+}
+template<class K>   
+AnyType E_set_fev<K>::Op2d(Stack s)  const
 {  
-    StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);     
-    MeshPoint *mps=MeshPointStack(s), mp=*mps;   
-    FEbase<K,v_fes> ** pp=GetAny< FEbase<K,v_fes> **>((*ppfe)(s));
-    FEbase<K,v_fes> & fe(**pp);
-    const  FESpace & Vh(*fe.newVh());
-    KN<K> gg(Vh.MaximalNbOfDF()); 
-    
-    
-    const  Mesh & Th(Vh.Th);
-    const int dim=Vh.N;
-    K ** copt=0;
-    if (optimize)   copt= new K *[dim];
-    if(copt) {
-      assert((size_t) dim== where_in_stack_opt.size());
-      for (int i=0;i<dim;i++)
-       {
+  StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);     
+  MeshPoint *mps=MeshPointStack(s), mp=*mps;   
+  FEbase<K,v_fes> ** pp=GetAny< FEbase<K,v_fes> **>((*ppfe)(s));
+  FEbase<K,v_fes> & fe(**pp);
+  const  FESpace & Vh(*fe.newVh());
+  KN<K> gg(Vh.MaximalNbOfDF()); 
+  
+  
+  const  Mesh & Th(Vh.Th);
+  const int dim=Vh.N;
+  K ** copt=0;
+  if (optimize)   copt= new K *[dim];
+  if(copt) {
+    assert((size_t) dim== where_in_stack_opt.size());
+    for (int i=0;i<dim;i++)
+      {
         int offset=where_in_stack_opt[i];
         assert(offset>10);
         copt[i]= static_cast<K *>(static_cast<void *>((char*)s+offset));
         *(copt[i])=0;
        }
     if (optiexp0) (*optiexp0)(s); // init 
-    }
-
-    ffassert(dim<100);
- //   R F[100]; // buffer 
-
-    TabFuncArg tabexp(s,Vh.N);
-//   const E_Array * aa = dynamic_cast<const E_Array *>(e);
-   ffassert( aa.size() == Vh.N);
-   for (int i=0;i<dim;i++)
-     tabexp[i]=aa[i]; 
+  }
   
-   KN<K> * y=new  KN<K>(Vh.NbOfDF);
-   KN<K> & yy(*y);
- 
-    FElement::aIPJ ipj(Vh[0].Pi_h_ipj()); 
-    FElement::aR2  PtHat(Vh[0].Pi_h_R2()); 
- 
-    KN<double>   Aipj(ipj.N());
-
-
-//   KNM<K>  Vp(dim,PtHat.N());// bug 
-// g++ error: too many initializers for `const __class_type_info_pseudo
-
-   KN<K>  Vp1(dim*PtHat.N());
-   
-   
-   if (Vh.isFEMesh() )
+  ffassert(dim<100);
+  //   R F[100]; // buffer 
+  
+  TabFuncArg tabexp(s,Vh.N);
+  //   const E_Array * aa = dynamic_cast<const E_Array *>(e);
+  ffassert( aa.size() == Vh.N);
+  for (int i=0;i<dim;i++)
+    tabexp[i]=aa[i]; 
+  
+  KN<K> * y=new  KN<K>(Vh.NbOfDF);
+  KN<K> & yy(*y);
+  
+  FElement::aIPJ ipj(Vh[0].Pi_h_ipj()); 
+  FElement::aR2  PtHat(Vh[0].Pi_h_R2()); 
+  
+  KN<double>   Aipj(ipj.N());
+  
+  
+  //   KNM<K>  Vp(dim,PtHat.N());// bug 
+  // g++ error: too many initializers for `const __class_type_info_pseudo
+  
+  KN<K>  Vp1(dim*PtHat.N());
+  
+  
+  if (Vh.isFEMesh() )
     {
       
       ffassert(Vh.NbOfDF == Th.nv && dim == 1 );
       for (int iv=0;iv<Th.nv;iv++)
-       {
-         const E_F0 & ff(* (const  E_F0 *) aa[0]  ) ;
-         const Vertex & v(Th(iv));
-         int ik=Th.Contening(&v);
-         const Triangle & Kt(Th[ik]);
-         int il=-1;
-         if  ( &Kt[0] == &v) il=0;
-         if  ( &Kt[1] == &v) il=1;
-         if  ( &Kt[2] == &v) il=2;
-         assert(il>=0);
-         mps->set(Th,v,TriangleHat[il],Kt,v.lab);
-         if (copt) {
-           if (optiexpK) (*optiexpK)(s); 
+	{
+	  const E_F0 & ff(* (const  E_F0 *) aa[0]  ) ;
+	  const Vertex & v(Th(iv));
+	  int ik=Th.Contening(&v);
+	  const Triangle & Kt(Th[ik]);
+	  int il=-1;
+	  if  ( &Kt[0] == &v) il=0;
+	  if  ( &Kt[1] == &v) il=1;
+	  if  ( &Kt[2] == &v) il=2;
+	  assert(il>=0);
+	  mps->set(Th,v,TriangleHat[il],Kt,v.lab);
+	  if (copt) {
+	    if (optiexpK) (*optiexpK)(s); 
             yy[iv] =  *(copt[0]);
           }
           else 
-           yy[iv] = GetAny<K>( ff(s) );
-            sptr->clean(); // modif FH mars 2006  clean Ptr
-       }
+	    yy[iv] = GetAny<K>( ff(s) );
+	  sptr->clean(); // modif FH mars 2006  clean Ptr
+	}
       
     }
-   else
-     for (int t=0;t<Th.nt;t++)
+  else
+    for (int t=0;t<Th.nt;t++)
       {
-         FElement Kt(Vh[t]);
-         int nbdf=Kt.NbDoF();
+	FElement Kt(Vh[t]);
+	int nbdf=Kt.NbDoF();
         
-         gg=K();
-         
+	gg=K();
+        
 #ifdef OLDPih    
-// old method          
-         Kt.Pi_h(gg,F_Pi_h,F,&tabexp);
+	// old method          
+	Kt.Pi_h(gg,F_Pi_h,F,&tabexp);
 #else               
-         Kt.Pi_h(Aipj);
-         
-         for (int p=0;p<PtHat.N();p++)
+	Kt.Pi_h(Aipj);
+	
+	for (int p=0;p<PtHat.N();p++)
           { 
             mps->set(Kt.T(PtHat[p]),PtHat[p],Kt);
 
@@ -1893,7 +1893,7 @@ public:
 	ErrorCompile(" We wait  a double/complex expression or a array expression",1);
       }
       //v->map(to<K>);
-      e_set_fev=  new   E_set_fev<K>(v,fer);
+      e_set_fev=  new   E_set_fev<K>(v,fer,v_fes::d);
       
     }
     
@@ -3849,7 +3849,7 @@ void clean_lgfem()
   delete  FreeFempp::TypeVarForm<double>::Global;
   delete  FreeFempp::TypeVarForm<Complex>::Global;
 }
-template<class K>
+template<class K,class v_fes>
 Expression IsFEcomp(const C_F0 &c,int i)
 {
 //  typedef double K;
@@ -3878,6 +3878,7 @@ Expression IsCFEcomp(const C_F0 &c,int i)
 }
 */
 
+ 
  E_F0 * Op_CopyArray::code(const basicAC_F0 & args) const  {
        E_F0 * ret=0;
       const E_Array & a= *dynamic_cast<const E_Array*>(args[0].LeftValue());
@@ -3889,24 +3890,44 @@ Expression IsCFEcomp(const C_F0 &c,int i)
         
        Expression rr=0;
        //  try real voctor value FE interpolation 
-       rr=IsFEcomp<double>(a[0],0) ;
+       rr=IsFEcomp<double,v_fes>(a[0],0) ;
        if (rr !=0) 
         {
           for (int i=1;i<nb;i++)
-              if (rr!= IsFEcomp<double>(a[i],i))  
+	    if (rr!= IsFEcomp<double,v_fes>(a[i],i))  
                 CompileError("Copy of Array with incompatible real vector value FE function () !");;           
-           return  new E_set_fev<double>(&b,rr);
+	  return  new E_set_fev<double>(&b,rr,2);
          }
        //  try complex vector value FE interpolation 
 
-       rr=IsFEcomp<Complex>(a[0],0) ;
+       rr=IsFEcomp<Complex,v_fes>(a[0],0) ;
        if (rr !=0) 
         {
           for (int i=1;i<nb;i++)
-              if (rr!= IsFEcomp<Complex>(a[i],i))  
-                CompileError("Copy of Array with incompatible complex vector value FE function () !");;           
-           return  new E_set_fev<Complex>(&b,rr);
+	    if (rr!= IsFEcomp<Complex,v_fes>(a[i],i))  
+	      CompileError("Copy of Array with incompatible complex vector value FE function () !");;           
+	  return  new E_set_fev<Complex>(&b,rr,2);
+	}
+       
+       rr=IsFEcomp<double,v_fes3>(a[0],0) ;
+       if (rr !=0) 
+        {
+          for (int i=1;i<nb;i++)
+	    if (rr!= IsFEcomp<double,v_fes3>(a[i],i))  
+                CompileError("Copy of Array with incompatible real vector value FE function () !");;           
+	  return  new E_set_fev3<double,v_fes3>(&b,rr);
          }
+       //  try complex vector value FE interpolation 
+
+       rr=IsFEcomp<Complex,v_fes3>(a[0],0) ;
+       if (rr !=0) 
+        {
+          for (int i=1;i<nb;i++)
+	    if (rr!= IsFEcomp<Complex,v_fes3>(a[i],i))  
+                CompileError("Copy of Array with incompatible complex vector value FE function () !");;           
+	  return  new E_set_fev3<Complex,v_fes3>(&b,rr);
+         }
+
         CompileError("Internal Error: General Copy of Array : to do ");
       return ret;}
 
