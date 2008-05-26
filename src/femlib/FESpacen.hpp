@@ -291,6 +291,7 @@ public:
 
   KN<GTypeOfFE<Mesh> *> Sub_ToFE; 
   KN<int> begin_dfcomp, end_dfcomp;
+  KN<int> first_comp,last_comp; // for each SubFE 
     
   virtual void init(InterpolationMatrix<RdHat> & M,FElement * pK,int odf,int ocomp,int *pp) const
   {
@@ -320,8 +321,10 @@ public:
 
     Sub_ToFE(this->nb_sub_fem),
     begin_dfcomp(N,0),
-    end_dfcomp(N,this->NbDoF)
-    
+    end_dfcomp(N,this->NbDoF),
+    first_comp(this->nb_sub_fem,0),
+    last_comp(this->nb_sub_fem,N)
+
     { 
       Sub_ToFE=this;
       assert(this->dim_which_sub_fem[this->N-1]>=0 && this->dim_which_sub_fem[this->N-1]< this->nb_sub_fem);
@@ -343,8 +346,9 @@ public:
     
     Sub_ToFE(this->nb_sub_fem),
     begin_dfcomp(N,0),
-    end_dfcomp(N,this->NbDoF)
-    
+    end_dfcomp(N,this->NbDoF),
+    first_comp(this->nb_sub_fem,0),
+    last_comp(this->nb_sub_fem,N)    
   { 
     Sub_ToFE=this;
     assert(this->dim_which_sub_fem[this->N-1]>=0 && this->dim_which_sub_fem[this->N-1]< this->nb_sub_fem);
@@ -367,8 +371,9 @@ public:
 
     Sub_ToFE(this->nb_sub_fem),
     begin_dfcomp(this->N,0),
-    end_dfcomp(this->N,this->NbDoF)
-    
+    end_dfcomp(this->N,this->NbDoF),
+    first_comp(this->nb_sub_fem,0),
+    last_comp(this->nb_sub_fem,N)        
   { 
     Sub_ToFE=this;
     assert(this->dim_which_sub_fem[this->N-1]>=0 && this->dim_which_sub_fem[this->N-1]< this->nb_sub_fem);
@@ -496,7 +501,11 @@ public:
   // add april 08   begin end number for df of the componante ic 
   int dfcbegin(int ic) const { return this->tfe->begin_dfcomp[ic];}
   int dfcend(int ic) const { return this->tfe->end_dfcomp[ic];}
-  
+  // the fist and last composant of a sub finite element
+  int firstcomp(int isfe) const {return this->tfe->first_comp[isfe];}
+  int lastcomp(int isfe)  const {return this->tfe->last_comp[isfe];}
+  int subFE(int df)       const {return this->tfe->fromASubFE[df] ;}
+
   template<class RR>
   KN_<RR> & Pi_h(KNM_<RR> vpt,KN_<RR> & vdf,InterpolationMatrix<RdHat> &M)    const 
   { 
