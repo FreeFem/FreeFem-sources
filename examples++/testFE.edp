@@ -3,7 +3,7 @@
 // This exemple is buggus before version 1.26
 { 
 // test of product of same FE
-verbosity = 2;
+  verbosity = 2;
  mesh Th=square(2,2);
  fespace Vh(Th,P2);
  

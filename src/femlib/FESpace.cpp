@@ -255,7 +255,8 @@ FEProduitConstruct::FEProduitConstruct(int kk,const TypeOfFE &t)
     nn[teb.NodeOfDF[i]]++;   
     
   int n= m*kk;
-  int N= teb.N*kk;
+  int No=teb.N;
+  int N= No*kk;
   data = new int [n*(5+2)+3*N];
   data1 = data + n*(5)+N; // april 2006  add 2 array ????
   int c=0;
@@ -296,12 +297,17 @@ FEProduitConstruct::FEProduitConstruct(int kk,const TypeOfFE &t)
       data1[ci++]=il;
       data1[cj++]=j*teb.nb_sub_fem+jl;      
     }
-  for(int i=0;i<N;++i)
-    data1[ci++]=i*N;
-  for(int i=0;i<N;++i)
-    data1[ci++]=(i+1)*N;
-
-      
+  //  warning the numbering of  
+  for(int j=0;j<kk;++j)
+    for(int i=0;i<No;++i)
+      data1[ci++]=0;//j*m+teb.begin_dfcomp[i];
+  for(int j=0;j<kk;++j)
+    for(int i=0;i<No;++i)      
+      data1[ci++]=m*kk;//j*m+teb.end_dfcomp[i];
+  cout << " kk "<< kk << " " << m << " : ";
+  //  for(int i=0;i< N*2;++i)
+  //  cout << data1[2*n+i] << " " ;
+  // cout << endl;    
 }
 
 FESumConstruct::FESumConstruct(int kk,const TypeOfFE **t)
