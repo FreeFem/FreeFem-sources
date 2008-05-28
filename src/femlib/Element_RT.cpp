@@ -56,7 +56,7 @@ class TypeOfFE_RT : public  TypeOfFE { public:
    void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const ;
 } ; 
 //                     on what     nu df on node node of df    
-int TypeOfFE_RT::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,   0,0};
+  int TypeOfFE_RT::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,   0,0, 0,0,3,3};
 
 /* void TypeOfFE_RT::D2_FB(const Mesh & ,const Triangle & ,const R2 & ,RNMK_ & val) const
 { //  
@@ -217,7 +217,7 @@ class TypeOfFE_RTmodif : public  TypeOfFE { public:
    void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const ;
 } ; 
 //                     on what     nu df on node node of df    
-int TypeOfFE_RTmodif::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,   0,0};
+  int TypeOfFE_RTmodif::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,   0,0,  0,0, 3,3};
 
 
  void TypeOfFE_RTmodif::FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 & PHat,RNMK_ & val) const
@@ -323,7 +323,7 @@ class TypeOfFE_P0 : public  TypeOfFE { public:
 };
 
 //                     on what     nu df on node node of df    
-int TypeOfFE_P0::Data[]={6, 0, 0, 0 , 0 ,0 };
+  int TypeOfFE_P0::Data[]={6, 0, 0, 0 , 0 ,0, 0, 1 };
 double TypeOfFE_P0::Pi_h_coef[]={1.0};
 
 
@@ -359,7 +359,7 @@ class TypeOfFE_P1ncLagrange : public  TypeOfFE { public:
 } ;
     
 //                     on what     nu df on node node of df    
-int TypeOfFE_P1ncLagrange::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
+  int TypeOfFE_P1ncLagrange::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0, 0,3};
 double TypeOfFE_P1ncLagrange::Pi_h_coef[]={1.,1.,1.};
 
 
@@ -378,7 +378,7 @@ class TypeOfFE_ConsEdge : public  TypeOfFE { public:
   
 } ;
 //                     on what     nu df on node node of df    
-int TypeOfFE_ConsEdge::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
+  int TypeOfFE_ConsEdge::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0, 0,3};
 double TypeOfFE_ConsEdge::Pi_h_coef[]={1.,1.,1.};
 void TypeOfFE_ConsEdge::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
 {
@@ -431,7 +431,7 @@ class TypeOfFE_P1Edge : public  TypeOfFE { public:
 	
     } ;
     //                     on what     nu df on node node of df    
-    int TypeOfFE_ConsEdge::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
+    int TypeOfFE_ConsEdge::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0, 0,3};
     double TypeOfFE_ConsEdge::Pi_h_coef[]={1.,1.,1.};
     void TypeOfFE_ConsEdge::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
     {
@@ -514,7 +514,7 @@ class TypeOfFE_RTortho : public  TypeOfFE { public:
    void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const ;
 } ; 
 //                     on what     nu df on node node of df    
-int TypeOfFE_RTortho::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,   0,0};
+  int TypeOfFE_RTortho::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,   0,0, 0,0, 3,3};
 
 
 
@@ -638,8 +638,8 @@ class TypeOfFE_P2ttdc : public  TypeOfFE { public:
  
 } ;
 //                          on what   nu df on node  node of df    
-int TypeOfFE_P1ttdc::Data[]={6,6,6,       0,1,2,       0,0,0,       0,0,0,         0,1,2,       0};
-int TypeOfFE_P2ttdc::Data[]={6,6,6,6,6,6, 0,1,2,3,4,5, 0,0,0,0,0,0,  0,0,0,0,0,0,  0,1,2,3,4,5, 0};
+  int TypeOfFE_P1ttdc::Data[]={6,6,6,       0,1,2,       0,0,0,       0,0,0,         0,1,2,       0, 0,3};
+  int TypeOfFE_P2ttdc::Data[]={6,6,6,6,6,6, 0,1,2,3,4,5, 0,0,0,0,0,0,  0,0,0,0,0,0,  0,1,2,3,4,5, 0, 0,6};
 double TypeOfFE_P1ttdc::Pi_h_coef[]={1.,1.,1.};
 double TypeOfFE_P2ttdc::Pi_h_coef[]={1.,1.,1.,1.,1.,1.};
     

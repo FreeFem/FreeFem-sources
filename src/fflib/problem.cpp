@@ -1130,8 +1130,8 @@ void Check(const Opera &Op,int N,int  M)
 	      //  et la fonction test est en second      
 	      BilinearOperator::K ll(*l);
 	      //	      pair<int,int> jj(ll.first.first),ii(ll.first.second);
-	      long icomp= ll.first.first.first,iop=ll.first.first.second;
-	      long jcomp= ll.first.second.first,jop=ll.first.second.second;
+	      long jcomp= ll.first.first.first,jop=ll.first.first.second;
+	      long icomp= ll.first.second.first,iop=ll.first.second.second;
 	      
 	      R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
 	      if ( copt && Kv.number <1)
@@ -1234,7 +1234,7 @@ void Check(const Opera &Op,int N,int  M)
     
 
   } 
-
+  // xxxxxxxxxxxxxxxxx  modif a faire 
   template<class R> 
   void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,const FElement & Ku,const FElement & Kv,double * p,int ie,int label,void *stack)
   {
@@ -1292,6 +1292,49 @@ void Check(const Opera &Op,int N,int  M)
 	    else Op.optiexpK->eval(stack,iloop++,unvarexp); // new optim version 
 	}
         if (!same) Kv.BF(Dop,Pt,fv);      
+	  int il=0;
+	  for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+	    {  // attention la fonction test donne la ligne 
+	      //  et la fonction test est en second      
+	      BilinearOperator::K ll(*l);
+	      //	      pair<int,int> jj(ll.first.first),ii(ll.first.second);
+	      long jcomp= ll.first.first.first,jop=ll.first.first.second;
+	      long icomp= ll.first.second.first,iop=ll.first.second.second;
+	      
+	      R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+	      if ( copt && Kv.number <1)
+		{
+		  R cc  =  GetAny<R>(ll.second.eval(stack));
+		  //cout << *(copt[il]) << " == " <<  cc << endl;
+		  if ( ccc != cc) { 
+		    cerr << cc << " != " << ccc << " => ";
+		    cerr << "Sorry error in Optimization (a) add:  int2d(Th,optimize=0)(...)" << endl;
+		    ExecError("In Optimized version "); }
+		}
+	      int fi=Kv.dfcbegin(icomp);
+	      int li=Kv.dfcend(icomp);
+	      int fj=Ku.dfcbegin(jcomp);
+	      int lj=Ku.dfcend(jcomp);
+	      fi=0,fj=0;
+	      li=n,lj=m;
+	      ccc *= coef;
+	      
+	      // attention la fonction test donne la ligne 
+	      //  et la fonction test est en second      
+	      if(  Kv.number <1 && npi==0)
+		cout << "fi---  "<< fi << " "<< li << "  " << fj << " " << lj << " " << ccc << endl;
+	      for ( i=fi;  i<li;   i++ )  
+		{ 
+		  for ( j=fj;  j<lj;   j++ ) 
+		    { 		      
+		      R w_i =  fv(i,icomp,iop); 
+		      R w_j =  fu(j,jcomp,jop);		      
+		      mat(i,j) += ccc * w_i*w_j;
+		    }
+		}
+	    }
+
+	/*
         for ( i=0;  i<n;   i++ )  
           { 
             
@@ -1326,6 +1369,7 @@ void Check(const Opera &Op,int N,int  M)
                   }
               }
           }
+	*/
       }
   else // int on edge ie 
     for (npi=0;npi<FIb.n;npi++) // loop on the integration point
@@ -1344,8 +1388,47 @@ void Check(const Opera &Op,int N,int  M)
         // int label=-999999; // a passer en argument 
         MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,R2(E.y,-E.x)/le,ie);
         if (classoptm) (*Op.optiexpK)(stack); // call optim version 
-        
-        
+	int il=0;
+	for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+	  {  // attention la fonction test donne la ligne 
+	    //  et la fonction test est en second      
+	    BilinearOperator::K ll(*l);
+	    //	      pair<int,int> jj(ll.first.first),ii(ll.first.second);
+	    long jcomp= ll.first.first.first,jop=ll.first.first.second;
+	    long icomp= ll.first.second.first,iop=ll.first.second.second;
+
+	    
+	    R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+	    if ( copt && Kv.number <1)
+	      {
+		R cc  =  GetAny<R>(ll.second.eval(stack));
+		//cout << *(copt[il]) << " == " <<  cc << endl;
+		if ( ccc != cc) { 
+		  cerr << cc << " != " << ccc << " => ";
+		  cerr << "Sorry error in Optimization (a) add:  int2d(Th,optimize=0)(...)" << endl;
+		  ExecError("In Optimized version "); }
+	      }
+	    int fi=Kv.dfcbegin(icomp);
+	    int li=Kv.dfcend(icomp);
+	    int fj=Ku.dfcbegin(jcomp);
+	    int lj=Ku.dfcend(jcomp);
+	    ccc *= coef;
+	    
+	    // attention la fonction test donne la ligne 
+	    //  et la fonction test est en second      
+	    
+	    for ( i=fi;  i<li;   i++ )  
+	      { 
+		  for ( j=fj;  j<lj;   j++ ) 
+		    { 		      
+		      R w_i =  fv(i,icomp,iop); 
+		      R w_j =  fu(j,jcomp,jop);		      
+		      mat(i,j) += ccc * w_i*w_j;
+		    }
+	      }
+	  }
+	  
+	/*        
         for ( i=0;  i<n;   i++ )  
          // if (onWhatIsEdge[ie][Kv.DFOnWhat(i)]) // juste the df on edge bofbof generaly wrong FH dec 2003
             { 
@@ -1378,6 +1461,7 @@ void Check(const Opera &Op,int N,int  M)
                 }
             } 
          // else pa += m;  FH dec 2003
+	 */
       }
   
   
@@ -1452,8 +1536,9 @@ void Check(const Opera &Op,int N,int  M)
 	      //  et la fonction test est en second      
 	      BilinearOperator::K ll(*l);
 	      //	      pair<int,int> jj(ll.first.first),ii(ll.first.second);
-	      long icomp= ll.first.first.first,iop=ll.first.first.second;
-	      long jcomp= ll.first.second.first,jop=ll.first.second.second;
+	      long jcomp= ll.first.first.first,jop=ll.first.first.second;
+	      long icomp= ll.first.second.first,iop=ll.first.second.second;
+
               
 	      R c = copt ? *(copt[il]): GetAny<R>(ll.second.eval(stack));
 	      if ( copt && Ku.number <1)
@@ -1472,12 +1557,13 @@ void Check(const Opera &Op,int N,int  M)
 	      long lj=Ku.dfcend(jcomp);
 
 	      for ( i=fi;  i<li;   i++ )  
-		for ( j=fj;  j<=min(lj,j);  j++,pa++ ) // 
+		for ( j=fj;  j<min(lj,i+1);  j++,pa++ ) // 
 		  {
 		    R w_i =  fu(i,icomp,iop); 
 		    R w_j =  fu(j,jcomp,jop);		      
 		    
 		    mat(i,j)  +=  c * w_i*w_j;
+
 		    /*
 		      if (Ku.Vh.Th(T) < 1 && npi < 1 && i < 1 && j < 1 ) 
 		      cout <<" + " << c << " (" <<coef << " " << w_i << " " << w_j << " " << jj.first << " " << jj.second << ") " ;
@@ -1508,8 +1594,8 @@ void Check(const Opera &Op,int N,int  M)
 	      //  et la fonction test est en second      
 	      BilinearOperator::K ll(*l);
 	      //	      pair<int,int> jj(ll.first.first),ii(ll.first.second);
-	      long icomp= ll.first.first.first,iop=ll.first.first.second;
-	      long jcomp= ll.first.second.first,jop=ll.first.second.second;
+	      long jcomp= ll.first.first.first,jop=ll.first.first.second;
+	      long icomp= ll.first.second.first,iop=ll.first.second.second;
               
 	      R c = copt ? *(copt[il]): GetAny<R>(ll.second.eval(stack));
 	      if ( copt && Ku.number <1)
@@ -1528,12 +1614,13 @@ void Check(const Opera &Op,int N,int  M)
 	      long  lj=Ku.dfcend(jcomp);
 
 	      for ( i=fi;  i<li;   i++ )  
-		for ( j=fj;  j<=min(lj,j);  j++,pa++ ) // 
+		for ( j=fj;  j<min(lj,i+1);  j++,pa++ ) // 
 		  {
 		    R w_i =  fu(i,icomp,iop); 
 		    R w_j =  fu(j,jcomp,jop);		      
 		    
 		    mat(i,j)  +=  c * w_i*w_j;
+		    
 		    /*
 		      if (Ku.Vh.Th(T) < 1 && npi < 1 && i < 1 && j < 1 ) 
 		      cout <<" + " << c << " (" <<coef << " " << w_i << " " << w_j << " " << jj.first << " " << jj.second << ") " ;
@@ -1569,7 +1656,9 @@ void Check(const Opera &Op,int N,int  M)
     
     *MeshPointStack(stack) = mp;
 
-  }  
+  }
+
+  // xxxxxxxxxxxxxxxxx  modif a faire   
  template<class R>
  void  Element_Op(MatriceElementaireSymetrique<R,FESpace> & mat,const FElement & Ku,double * p,int ie,int label, void * stack)
   {
@@ -1624,6 +1713,48 @@ void Check(const Opera &Op,int N,int  M)
           Ku.BF(Dop,Pt,fu);
           MeshPointStack(stack)->set(T(pi),pi,Ku);
           if (classoptm) (*Op.optiexpK)(stack); // call optim version 
+	  int il=0;
+	  for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+	    {  // attention la fonction test donne la ligne 
+	      //  et la fonction test est en second      
+	      BilinearOperator::K ll(*l);
+	      //	      pair<int,int> jj(ll.first.first),ii(ll.first.second);
+	      long jcomp= ll.first.first.first,jop=ll.first.first.second;
+	      long icomp= ll.first.second.first,iop=ll.first.second.second;
+              
+	      R c = copt ? *(copt[il]): GetAny<R>(ll.second.eval(stack));
+	      if ( copt && Ku.number <1)
+		{
+		  R cc  =  GetAny<R>(ll.second.eval(stack));
+		  // cout << *(copt[il]) << " == " <<  cc << endl;
+		  if ( c != cc) { 
+		    cerr << c << " != " << cc << " => ";
+			    cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+			    ExecError("In Optimized version "); }
+		}
+	      c *= coef ;
+	      long fi=Ku.dfcbegin(icomp);
+	      long li=Ku.dfcend(icomp);
+	      long fj=Ku.dfcbegin(jcomp);
+	      long lj=Ku.dfcend(jcomp);
+
+	      for ( i=fi;  i<li;   i++ )  
+		for ( j=fj;  j<min(lj,i+1);  j++,pa++ ) // 
+		  {
+		    R w_i =  fu(i,icomp,iop); 
+		    R w_j =  fu(j,jcomp,jop);		      
+		    
+		    mat(i,j)  +=  c * w_i*w_j;
+
+		    /*
+		      if (Ku.Vh.Th(T) < 1 && npi < 1 && i < 1 && j < 1 ) 
+		      cout <<" + " << c << " (" <<coef << " " << w_i << " " << w_j << " " << jj.first << " " << jj.second << ") " ;
+		    */
+		  }
+              
+            }
+          
+	  /*
           for ( i=0;  i<n;   i++ )  
             { 
               RNM_ wi(fu(i,'.','.'));
@@ -1640,7 +1771,7 @@ void Check(const Opera &Op,int N,int  M)
                       pair<int,int> ii(ll.first.first),jj(ll.first.second);
                       double w_i =  wi(ii.first,ii.second);
                       double w_j =  wj(jj.first,jj.second);
-                      
+		      
                       R c = copt ? *(copt[il]): GetAny<R>(ll.second.eval(stack));
                 if ( copt && Ku.number <1)
                  {
@@ -1653,14 +1784,10 @@ void Check(const Opera &Op,int N,int  M)
                  }
                       
                       *pa += coef * c * w_i*w_j;
-                      /*    if (Ku.Vh.Th(T) < 1 && npi < 1 && i < 1 && j < 1 ) 
-                            cout <<" + " << c << " (" <<coef << " " << w_i << " " << w_j << " " << jj.first << " " << jj.second << ") " 
-                            << xxx[ii.first]  << yyy[ii.second] << " "
-                            << xxxx[jj.first] << yyy[jj.second] << " " ;*/
-                    }
-                }
-              
-            }
+		      }
+		      }
+		      
+		      }*/
           
         } 
     else // int on edge ie 
@@ -1680,8 +1807,48 @@ void Check(const Opera &Op,int N,int  M)
           // int label=-999999; // a passer en argument 
           MeshPointStack(stack)->set(T(Pt),Pt,Ku,label,R2(E.y,-E.x)/le,ie);
           if (classoptm) (*Op.optiexpK)(stack); // call optim version 
-          
-          
+
+	  int il=0;
+	  for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+	    {  // attention la fonction test donne la ligne 
+	      //  et la fonction test est en second      
+	      BilinearOperator::K ll(*l);
+	      //	      pair<int,int> jj(ll.first.first),ii(ll.first.second);
+	      long jcomp= ll.first.first.first,jop=ll.first.first.second;
+	      long icomp= ll.first.second.first,iop=ll.first.second.second;
+              
+	      R c = copt ? *(copt[il]): GetAny<R>(ll.second.eval(stack));
+	      if ( copt && Ku.number <1)
+		{
+		  R cc  =  GetAny<R>(ll.second.eval(stack));
+		  // cout << *(copt[il]) << " == " <<  cc << endl;
+		  if ( c != cc) { 
+		    cerr << c << " != " << cc << " => ";
+			    cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+			    ExecError("In Optimized version "); }
+		}
+	      c *= coef ;
+	      long fi=Ku.dfcbegin(icomp);
+	      long li=Ku.dfcend(icomp);
+	      long fj=Ku.dfcbegin(jcomp);
+	      long lj=Ku.dfcend(jcomp);
+
+	      for ( i=fi;  i<li;   i++ )  
+		for ( j=fj;  j<min(lj,i+1);  j++,pa++ ) // 
+		  {
+		    R w_i =  fu(i,icomp,iop); 
+		    R w_j =  fu(j,jcomp,jop);		      
+		    
+		    mat(i,j)  +=  c * w_i*w_j;
+		    /*
+		      if (Ku.Vh.Th(T) < 1 && npi < 1 && i < 1 && j < 1 ) 
+		      cout <<" + " << c << " (" <<coef << " " << w_i << " " << w_j << " " << jj.first << " " << jj.second << ") " ;
+		    */
+		  }
+              
+            }
+                    
+          /*
           for ( i=0;  i<n;   i++ )  
            // if ( onWhatIsEdge[ie][Ku.DFOnWhat(i)]) // generaly wrong FH dec 2003
               { 
@@ -1712,6 +1879,7 @@ void Check(const Opera &Op,int N,int  M)
                         }
                   }
               } //else pa+= i+1;
+	  */
         }
     
     /*   
@@ -2137,7 +2305,7 @@ void Check(const Opera &Op,int N,int  M)
 	
 	bool classoptm = copt && Op.optiexpK;
 	// assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
-	if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2) 
+       	if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2) 
 	    cout << "Element_rhs S: copt = " << copt << " " << classoptm << endl;
 	KN<bool> Dop(last_operatortype);
 	Op.DiffOp(Dop);  
@@ -2734,7 +2902,7 @@ template<class R>
     if (verbosity>2) cout << "  -- AssembleLinearForm discontinous Galerkin  =" << VF << " binside = "<< binside <<"\n";
 
     if (verbosity>3) 
-      if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
+      if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") , samemesh: " << sameMesh << " "   ;
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
       else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
@@ -2917,7 +3085,7 @@ template<class R>
     if (verbosity>2) cout << "  -- AssembleLinearForm discontinous Galerkin  =" << VF << " binside = "<< binside <<"\n";
 
     if (verbosity>3) 
-      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
+      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") , samemesh :"<< sameMesh<< " "  ;
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
       else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
@@ -4070,8 +4238,8 @@ const Fem2D::GQuadratureFormular<R3> & CDomainOfIntegration::FIV(Stack stack) co
   if( QuadratureFormular_T_9.exact >= exact ) return QuadratureFormular_T_9;
   */
   cerr << " Ordre of the Integration Formular ordre " << exact+1 << " exact = " << exact << endl;
-  ExecError(" We find  no Integration Formular on Tet for this  order to hight");
-  return QuadratureFormular_Tet_2;
+  //  ExecError(" We find  no Integration Formular on Tet for this  order to hight");
+  return QuadratureFormular_Tet_5;
 }
 
 const Fem2D::QuadratureFormular & CDomainOfIntegration::FIT(Stack stack) const 

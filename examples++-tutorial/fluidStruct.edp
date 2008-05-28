@@ -87,6 +87,7 @@ solve  bbst([uu,vv],[w,s],init=i)  =
   + int1d(th,bottombeam)( coef*(sigma11*N.x*w + sigma22*N.y*s + sigma12*(N.y*w+N.x*s) )  )
   + on(1,uu=0,vv=0) 
   ;
+cout << " max deplacement " << uu[].linfty << endl;
  plot([uu,vv],wait=1);
  real  err = sqrt(int2d(th)( (uu-uu1)^2 + (vv-vv1)^2 )); 
  cout << " ----- Iteration = " << i <<  " Erreur L2 = " << err << "----------\n";
@@ -102,3 +103,4 @@ solve  bbst([uu,vv],[w,s],init=i)  =
  bc1=0;  // for resize
  bc1[] = Lap(0,Xh);
 }
+cout << " max deplacement " << uu[].linfty << endl;

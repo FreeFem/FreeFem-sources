@@ -83,7 +83,9 @@ namespace  Fem2D {
    0,0, 1,1, 2,2,  3,4,5,
    0,0, 0,0, 0,0,  0,0,0,
    0,1, 2,3, 4,5,  6,7,8, 
-   0,0 
+   0,0, 
+   0,0,
+   0,9 
 };
 
 void TypeOfFE_P2BRLagrange::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const

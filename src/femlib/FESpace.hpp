@@ -205,7 +205,7 @@ class TypeOfFE { public:
    int const * const NodeOfDF; // 
    int const * const fromFE;   //  the df  come from df of FE
    int const * const fromDF;   //  the df  come from with FE
-   int const * const dim_which_sub_fem; // from atomic sub FE for CL
+   int const * const dim_which_sub_fem; // from atomic sub FE for CL (size N)
    KN<IPJ > pij_alpha ;
    KN<R2 > P_Pi_h ;
   double *coef_Pi_h_alpha;
@@ -213,6 +213,8 @@ class TypeOfFE { public:
     //  form Atomic Sub FE 
    int const * const fromASubFE; //  avril 2006 for CL
    int const * const fromASubDF; //  avril 2006 for CL
+  int const * const  begin_dfcomp; //  mai 2008 for optimiation 
+  int const  * const end_dfcomp; // mai 2008 
    
   // if 0  no plot 
   public: 
@@ -235,12 +237,16 @@ class TypeOfFE { public:
     coef_Pi_h_alpha(0),
     Sub_ToFE(nb_sub_fem),
     fromASubFE(data1+0*NbDoF),
-    fromASubDF(data1+1*NbDoF)
+      fromASubDF(data1+1*NbDoF),
+      begin_dfcomp(data1+2*NbDoF),
+      end_dfcomp(data1+2*NbDoF+N)
+
     { 
        for(int i=0,kk=0;i<k;i++)
         for (int j=0;j<t.nb_sub_fem;j++)
           Sub_ToFE[kk++]=t.Sub_ToFE[j];
-      
+       assert(begin_dfcomp[0]==0 && end_dfcomp[N-1]==NbDoF);
+       
       throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);
      // Warning the componant is moving first 
         for (int j=0,l=0;j<t.pij_alpha.N();j++) // for all sub DF
@@ -276,15 +282,17 @@ class TypeOfFE { public:
     coef_Pi_h_alpha(0),
     Sub_ToFE(nb_sub_fem),
     fromASubFE(data1+0*NbDoF),
-    fromASubDF(data1+1*NbDoF)
-    
-   {
-     for(int i=0,kk=0;i<k;i++)
-       for (int j=0;j<t[i]->nb_sub_fem;j++)
-          Sub_ToFE[kk++]=t[i]->Sub_ToFE[j];
-      
-     Sub_ToFE= this;
-     throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);} 
+      fromASubDF(data1+1*NbDoF),
+      begin_dfcomp(data1+2*NbDoF),
+      end_dfcomp(data1+2*NbDoF+N)    
+  {
+    for(int i=0,kk=0;i<k;i++)
+      for (int j=0;j<t[i]->nb_sub_fem;j++)
+	Sub_ToFE[kk++]=t[i]->Sub_ToFE[j];
+    assert(begin_dfcomp[0]==0 && end_dfcomp[N-1]==NbDoF);
+       
+    Sub_ToFE= this;
+    throwassert(dim_which_sub_fem[N-1]>=0 && dim_which_sub_fem[N-1]< nb_sub_fem);} 
 
   TypeOfFE(const int i,const int j,const int k,const int NN,const  int  *   data,int nsub,int nbsubfem,
     int kPi,int npPi,double * coef_Pi_h_a=0) 
@@ -308,12 +316,13 @@ class TypeOfFE { public:
     pij_alpha(kPi),P_Pi_h(npPi),
     coef_Pi_h_alpha(coef_Pi_h_a),
     Sub_ToFE(nb_sub_fem),
-    fromASubFE(data+3*NbDoF),
-    fromASubDF(data+4*NbDoF)
-    
+     fromASubFE(data+3*NbDoF),
+     fromASubDF(data+4*NbDoF),
+     begin_dfcomp(data+5*NbDoF+N),
+     end_dfcomp(data+5*NbDoF+2*N)    
      { 
       Sub_ToFE= this;
-
+      assert(begin_dfcomp[0]==0 && end_dfcomp[N-1]==NbDoF);
      // cout << "TypeOfFE " <<NbDoF << " : " << NbDfOnVertex << " " << NbDfOnEdge << " " << NbDfOnElement << 
      // " : " << NbNodeOnVertex << " " << NbNodeOnEdge << " " << NbNodeOnElement << endl;
       assert(NbDfOnVertex==Count(data,NbDoF,0));
@@ -350,9 +359,13 @@ class TypeOfFE { public:
     coef_Pi_h_alpha(coef_Pi_h_a),
     Sub_ToFE(nb_sub_fem) ,   
     fromASubFE(data+3*NbDoF),
-    fromASubDF(data+4*NbDoF)
+     fromASubDF(data+4*NbDoF),
+     begin_dfcomp(data+5*NbDoF+N),
+     end_dfcomp(data+5*NbDoF+2*N)    
+
      { 
       Sub_ToFE= this;
+      assert(begin_dfcomp[0]==0 && end_dfcomp[N-1]==NbDoF);
       assert(NbDfOnVertex==Count(data,NbDoF,0));
       assert(NbDfOnVertex==Count(data,NbDoF,1));
       assert(NbDfOnVertex==Count(data,NbDoF,2));
@@ -487,6 +500,10 @@ class FElement : public baseFElement { public:
   int FromASubFE(int i) const { return tfe->fromASubFE[i];}
   int FromASubDF(int i) const { return tfe->fromASubDF[i];}
    int DFOfNode(int df) const { return tfe->DFOfNode[df];} // the df number on the node 
+
+  //  add Mai 2008 for optimization 
+  int dfcbegin(int ic) const { return this->tfe->begin_dfcomp[ic];}
+  int dfcend(int ic) const { return this->tfe->end_dfcomp[ic];}
  
   R operator()(const R2 & PHat,const KN_<R> & u,int i,int op)  const ;
   complex<R> operator()(const R2 & PHat,const KN_<complex<R> > & u,int i,int op)  const ;

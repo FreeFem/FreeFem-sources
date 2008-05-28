@@ -35,3 +35,4 @@ plot([uu,vv],wait=1);
 plot([uu,vv],wait=1,bb=[[-0.5,2.5],[2.5,-0.5]]);
 mesh th1 = movemesh(th, [x+uu, y+vv]);
 plot(th1,wait=1);
+cout << " max deplacement = " << uu[].linfty << endl;

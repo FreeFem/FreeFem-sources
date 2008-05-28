@@ -256,7 +256,7 @@ FEProduitConstruct::FEProduitConstruct(int kk,const TypeOfFE &t)
     
   int n= m*kk;
   int N= teb.N*kk;
-  data = new int [n*(5+2)+N];
+  data = new int [n*(5+2)+3*N];
   data1 = data + n*(5)+N; // april 2006  add 2 array ????
   int c=0;
   
@@ -296,7 +296,11 @@ FEProduitConstruct::FEProduitConstruct(int kk,const TypeOfFE &t)
       data1[ci++]=il;
       data1[cj++]=j*teb.nb_sub_fem+jl;      
     }
-     
+  for(int i=0;i<N;++i)
+    data1[ci++]=i*N;
+  for(int i=0;i<N;++i)
+    data1[ci++]=(i+1)*N;
+
       
 }
 
@@ -325,7 +329,7 @@ FESumConstruct::FESumConstruct(int kk,const TypeOfFE **t)
 //  n = nb de DF total   
 //  N the fem is in R^N 
    
-  data = new int [n*(5+2) + N];
+  data = new int [n*(5+2) + 3*N];
   data1 = data + n*5+N; // april 2006  add 2 array ????
   
   int c=0;
@@ -397,17 +401,26 @@ FESumConstruct::FESumConstruct(int kk,const TypeOfFE **t)
   //  ou dans la partie miminal element finite atomic 
  
    int ci=n;
+   int cf=2*n;
+   int cl=cf+N;;
    int cj=0;
    int ccc=0;
    for ( j=0;j<kk;ccc+=teb[j++]->nb_sub_fem)
      for ( i=0;i<teb[j]->NbDoF;i++)
-      {
-      int il= teb[j]->fromASubDF[i];
-      int jl= teb[j]->fromASubFE[i];
-      data1[ci++]=il;
-      data1[cj++]=ccc+jl;      
-     }
-     
+       {
+	 int il= teb[j]->fromASubDF[i];
+	 int jl= teb[j]->fromASubFE[i];
+	 data1[ci++]=il;
+	 data1[cj++]=ccc+jl;      
+       }
+
+   for (int  j=0,ccn=0 ; j<kk ; ccn += teb[j++]->NbDoF)     
+     for(int k=0;k<teb[j]->N;++k)
+       {
+	 data1[cf++] = ccn + teb[j]->begin_dfcomp[k];
+	 data1[cl++] = ccn + teb[j]->end_dfcomp[k];
+       }
+   ffassert(cl==2*n+2*N);    
   
   ffassert(c== 5*n+N);      
 /*  int cc=0;
@@ -457,7 +470,7 @@ class TypeOfFE_P0VF : public  TypeOfFE { public:
    virtual R operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const ;
    
 } ;
-int TypeOfFE_P0VF::Data[]={0,1,2,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
+int TypeOfFE_P0VF::Data[]={0,1,2,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0, 0,3};
 double TypeOfFE_P0VF::Pi_h_coef[]={1.,1.,1.}; //  bofbof a verifier ...
 
  R TypeOfFE_P0VF::operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const 
@@ -567,10 +580,10 @@ class TypeOfFE_P2bLagrange : public  TypeOfFE { public:
   // void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const;
 } ;
 
-int TypeOfFE_P1Lagrange::Data[]={0,1,2,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
-int TypeOfFE_P1Bubble::Data[]={0,1,2,6,     0,0,0,0,     0,1,2,3,     0,0,0,0,        0,1,2,3,     0};
-int TypeOfFE_P2Lagrange::Data[]={0,1,2,3,4,5, 0,0,0,0,0,0, 0,1,2,3,4,5, 0,0,0,0,0,0,  0,1,2,3,4,5, 0};
-int TypeOfFE_P2bLagrange::Data[]={0,1,2,3,4,5,6, 0,0,0,0,0,0,0, 0,1,2,3,4,5,6, 0,0,0,0,0,0,0,  0,1,2,3,4,5,6, 0};
+int TypeOfFE_P1Lagrange::Data[]={0,1,2,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0, 0,3};
+int TypeOfFE_P1Bubble::Data[]={0,1,2,6,     0,0,0,0,     0,1,2,3,     0,0,0,0,        0,1,2,3,     0, 0,4};
+int TypeOfFE_P2Lagrange::Data[]={0,1,2,3,4,5, 0,0,0,0,0,0, 0,1,2,3,4,5, 0,0,0,0,0,0,  0,1,2,3,4,5, 0 ,0,6};
+int TypeOfFE_P2bLagrange::Data[]={0,1,2,3,4,5,6, 0,0,0,0,0,0,0, 0,1,2,3,4,5,6, 0,0,0,0,0,0,0,  0,1,2,3,4,5,6, 0,0,7};
 double TypeOfFE_P1Lagrange::Pi_h_coef[]={1.,1.,1.};
 double TypeOfFE_P1Bubble::Pi_h_coef[]={1.,1.,1.,1.};
 double TypeOfFE_P2Lagrange::Pi_h_coef[]={1.,1.,1.,1.,1.,1.};
