@@ -197,7 +197,7 @@ public:
                      
     :
     MatDataFES<FES>(UUh,VVh,fit,fie),
-    MatriceElementaire<R>(UUh.esize()+VVh.esize(),llga,nni,nnj,t)
+    MatriceElementaire<R>(UUh.esize()+VVh.esize(),llga,nnj,nni,t)
   {}
        
   MatriceElementaireFES(const FESpace & UUh,int llga,int *nni,

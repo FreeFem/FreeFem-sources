@@ -98,7 +98,7 @@ namespace  Fem2D {
     0,1,2,3,4, 5,6,7,8,9 ,10,11,12,13,14,    //  which are de df on sub FE
     0,                      // for each compontant $j=0,N-1$ it give the sub FE associated 
     
-    0,1,2,       0};
+    0, 15};
   double TypeOfFE_P4dcLagrange::Pi_h_coef[]={ 1.,1.,1.,1.,1. ,1.,1.,1.,1.,1. ,1.,1.,1.,1.,1.};
  
   void TypeOfFE_P4dcLagrange::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P1,RNMK_ & val) const

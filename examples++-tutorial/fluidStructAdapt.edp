@@ -117,6 +117,7 @@ solve  bbst([uu,vv],[w,s],init=i)  =
  //plot([uu,vv],wait=1);
   err = sqrt(int2d(th)( (uu-uu1)^2 + (vv-vv1)^2 )); 
  cout << " ----- Iteration = " << i <<  " Erreur L2 = " << err << "----------\n";
+ cout << " max deplacement " << uu[].linfty << endl;
  bool iadapt=err>0.05;
  if(iadapt)
  th = adaptmesh(th,[uu,vv],err=1.e-2);
@@ -166,3 +167,4 @@ solve  bbst([uu,vv],[w,s],init=i)  =
  bc1=0;  // for resize
  bc1[] = Lap(0,Xh);
 }
+cout << " max deplacement " << uu[].linfty << endl;

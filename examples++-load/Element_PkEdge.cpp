@@ -25,7 +25,7 @@ namespace  Fem2D {
     //    KN<R> Pi_h_coef; // 1
     KN<int> Data; // data of TypeOfFE
     InitTypeOfFE_PkEdge(int KK) 
-      :k(KK),npe(k+1),ndf(3*npe),X(npe),Data( 5*ndf+2)
+      :k(KK),npe(k+1),ndf(3*npe),X(npe),Data( 5*ndf+3)
     {
       //Pi_h_coef=1.;
       const QuadratureFormular1d QF(-1+2*npe,npe,GaussLegendre(npe),true);
@@ -48,7 +48,9 @@ namespace  Fem2D {
           Data[o[4]+df]=df;
 	}
       Data[o[5]] =0;
-      Data[o[5]+1] =0;
+      Data[o[5]+1] =0 ;
+      Data[o[5]+2] =ndf;// end_dfcomp 
+
     }
   };
 

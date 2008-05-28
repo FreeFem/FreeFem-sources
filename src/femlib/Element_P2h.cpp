@@ -50,7 +50,7 @@ namespace  Fem2D {
    void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
 } ;
 //                     on what     nu df on node node of df    
- int TypeOfFE_P2hLagrange::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0};
+  int TypeOfFE_P2hLagrange::Data[]={3,4,5,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0, 0,3 };
   double TypeOfFE_P2hLagrange::Pi_h_coef[]={1.,1.,1.};
 
  void TypeOfFE_P2hLagrange::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const

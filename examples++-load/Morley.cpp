@@ -79,7 +79,9 @@ namespace  Fem2D {
    0,1,2,  3,4,5,
    0,0,0,  0,0,0,
    0,1,2,  3,4,5,
-   0,0,0
+   0,0,0,
+   0,0,0, 
+   6,6,6 
 };
 
 void TypeOfFE_P2Morley::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const

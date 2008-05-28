@@ -502,8 +502,8 @@ public:
   int dfcbegin(int ic) const { return this->tfe->begin_dfcomp[ic];}
   int dfcend(int ic) const { return this->tfe->end_dfcomp[ic];}
   // the fist and last composant of a sub finite element
-  int firstcomp(int isfe) const {return this->tfe->first_comp[isfe];}
-  int lastcomp(int isfe)  const {return this->tfe->last_comp[isfe];}
+  //  int firstcomp(int isfe) const {return this->tfe->first_comp[isfe];}
+  // int lastcomp(int isfe)  const {return this->tfe->last_comp[isfe];}
   int subFE(int df)       const {return this->tfe->fromASubFE[df] ;}
 
   template<class RR>
