@@ -1321,8 +1321,6 @@ void Check(const Opera &Op,int N,int  M)
 	      
 	      // attention la fonction test donne la ligne 
 	      //  et la fonction test est en second      
-	      if(  Kv.number <1 && npi==0)
-		cout << "fi---  "<< fi << " "<< li << "  " << fj << " " << lj << " " << ccc << endl;
 	      for ( i=fi;  i<li;   i++ )  
 		{ 
 		  for ( j=fj;  j<lj;   j++ ) 
