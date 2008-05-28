@@ -1735,19 +1735,16 @@ void Check(const Opera &Op,int N,int  M)
 	      long li=Ku.dfcend(icomp);
 	      long fj=Ku.dfcbegin(jcomp);
 	      long lj=Ku.dfcend(jcomp);
-
+	      if (Ku.Vh.Th(T) < 1 && npi < 1)
+		cout << " ic "<< icomp << fi<< " "<< lj << " "<< " c "<< jcomp << " " <<fj << " "<< lj << endl; 
 	      for ( i=fi;  i<li;   i++ )  
-		for ( j=fj;  j<min(lj,i+1);  j++,pa++ ) // 
+		for ( j=fj;  j<min(lj,i+1);  j++ ) // 
 		  {
 		    R w_i =  fu(i,icomp,iop); 
 		    R w_j =  fu(j,jcomp,jop);		      
 		    
 		    mat(i,j)  +=  c * w_i*w_j;
 
-		    /*
-		      if (Ku.Vh.Th(T) < 1 && npi < 1 && i < 1 && j < 1 ) 
-		      cout <<" + " << c << " (" <<coef << " " << w_i << " " << w_j << " " << jj.first << " " << jj.second << ") " ;
-		    */
 		  }
               
             }
@@ -1880,22 +1877,22 @@ void Check(const Opera &Op,int N,int  M)
 	  */
         }
     
-    /*   
-         pa=a;
-         if (Ku.Vh.Th(T) <=0 ) {
-         cout <<endl  << " Triangle " << Ku.Vh.Th(T) << " =  "<<  T[0] << ", " << T[1] << ", " << T[2] << " " << nx << endl;
-         for (int i=0;i<n;i++)
-         {
-         cout << setw(2) << i << setw(4) << mat.ni[i] << " :";
-         for (int j=0;j<=i;j++)
-         cout << setw(5)  << (*pa++) << " ";
-         cout << endl;
-         } } 
-         pa=a;
-         for (int i=0;i<n;i++)
-         cout << mat.ni[i] << " " ;
-         for (int i=0;i<n;i++)
-         for (int j=0;j<n;j++,pa++)
+    /*  
+    pa=a;
+    if (Ku.Vh.Th(T) <=0 ) {
+      cout <<endl  << " Triangle " << Ku.Vh.Th(T) << " =  "<<  T[0] << ", " << T[1] << ", " << T[2] << " " << nx << endl;
+      for (int i=0;i<n;i++)
+	{
+	  cout << setw(2) << i << setw(4) << mat.ni[i] << " :";
+	  for (int j=0;j<=i;j++)
+	    cout << setw(5)  << (*pa++) << " ";
+	  cout << endl;
+	} } 
+    pa=a;
+        for (int i=0;i<n;i++)
+      cout << mat.ni[i] << " " ;
+    for (int i=0;i<n;i++)
+      for (int j=0;j<n;j++,pa++)
          if ( mat.ni[i]==150 && mat.nj[j] == 150)
          cout << "a_150,150 = "<< *pa ;
          cout << endl; 
