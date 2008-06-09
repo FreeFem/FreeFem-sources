@@ -63,7 +63,7 @@ string TransDir(string dir)
 
 
 template<typename T> 
-void  show(char * s,const T & l,const char * separateur="\n")
+void  show(const char * s,const T & l,const char * separateur="\n")
 {
   cout << s << * separateur;
   for (typename T::const_iterator i=l.begin(); i != l.end(); i++)

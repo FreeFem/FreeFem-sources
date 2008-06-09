@@ -4353,9 +4353,9 @@ template   void AssembleBilinearForm<Complex>(Stack stack,const Mesh & Th,const 
 
   template   void AssembleBC<double,FESpace3>(Stack stack,const Mesh3 & Th,const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
 					     MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
-
+}
   template class Call_FormLinear<v_fes>;
   template class Call_FormLinear<v_fes3>;
   template class Call_FormBilinear<v_fes>;
   template class Call_FormBilinear<v_fes3>;
-}
+
