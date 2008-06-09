@@ -4007,29 +4007,31 @@ C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 
   return NewFEvariable(lid,currentblock,fespacetype,init,cplx,dim);
 }
 
- size_t dimFESpaceImage(const basicAC_F0 &args) 
+
+size_t dimFESpaceImage(const basicAC_F0 &args) 
 {
   aType t_m2= atype<pmesh*>();
   aType t_m3= atype<pmesh3*>();
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
   aType t_a= atype<E_Array>();
-  size_t dim=0;
+  size_t dim23=0; 
+  
   for (int i=0;i<args.size();i++)
     if (args[i].left() == t_tfe || args[i].left() == t_tfe3 )
-      dim += args[i].LeftValue()->nbitem();
+      dim23 += args[i].LeftValue()->nbitem();
     else if (args[i].left() == t_a)
       {
 	const E_Array & ea= *dynamic_cast<const E_Array *>(args[i].LeftValue());
 	ffassert(&ea);
 	for (int i=0;i<ea.size();i++)
 	  if (ea[i].left() == t_tfe || ea[i].left() == t_tfe3)
-            dim += ea[i].nbitem();
+            dim23 += ea[i].nbitem();
 	  else ffassert(0); // bug 
       }
-  dim = dim ? dim : 1;
+  dim23 = dim23 ? dim23 : 1;
   // cout << "dimFESpaceImage:  FESpace in R^"<< dim << endl;
-  return dim;
+  return dim23;
 }
 
 aType  typeFESpace(const basicAC_F0 &args) 

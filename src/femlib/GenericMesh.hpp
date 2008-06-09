@@ -209,6 +209,7 @@ public:
     lab=r;
     ASSERTION(mss==UnSetMesure && mes>0);
   }
+
   
   istream & Read1(istream & f,Vertex * v0,int n)
   {
@@ -353,10 +354,32 @@ public:
     vertices=new V[nv];
     elements= new T[nt];
     borderelements = new B[nbe]; 
-    assert( nt >0 && elements);
+    assert( nt >=0 && elements);
     assert( nv >0 && vertices);
     
   }
+  /*
+   void set(int mv,int mt,int mbe, V *vv, T *tt, B *bb) 
+  {
+    assert(nt==0 && nv==0 && nbe ==0); 
+    nt=mt;
+    nv=mv;
+    nbe=mbe;
+    vertices= new V[nv];
+    elements= new T[nt];
+    borderelements = new B[nbe]; 
+    
+    vertices=vv;
+    elements=tt;
+    borderelements=bb;
+    
+    assert( nt >0 && elements);
+    assert( nv >0 && vertices);
+    assert( nbe > 0 && borderelements);
+    
+  }
+  */
+ 
   
   int operator()(const T & t) const {return CheckT(&t - elements);}
   int operator()(const T * t) const {return CheckT(t - elements);}

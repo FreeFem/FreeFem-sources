@@ -318,4 +318,35 @@ int Mesh3::Save(const string & filename)
   return (0);
 
 }
+
+Mesh3::Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb)
+{
+	
+	nv = nnv;
+	nt = nnt;
+	nbe =nnbe;
+	
+	vertices = vv;
+	elements = tt;
+	borderelements = bb;
+	
+	mes=0.;
+	mesb=0.;
+	
+	for (int i=0;i<nt;i++)  
+		mes += this->elements[i].mesure();
+	
+	for (int i=0;i<nbe;i++)  
+		mesb += this->be(i).mesure();  
+	
+	
+  BuildBound();
+  BuildAdj();
+  Buildbnormalv();  
+  BuildjElementConteningVertex();  
+    
+  if(verbosity>1)
+  cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
+	
+} 
 }

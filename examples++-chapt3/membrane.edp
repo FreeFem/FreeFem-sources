@@ -5,13 +5,13 @@ func z=x;
 
 border Gamma1(t=0,theta)    { x = a * cos(t); y = b*sin(t); }
 border Gamma2(t=theta,2*pi) { x = a * cos(t); y = b*sin(t); }
-mesh Th=buildmesh(Gamma1(100)+Gamma2(50));
+mesh Th=buildmesh(Gamma1(100)+Gamma2(50));   // construction of mesh
 
 fespace Vh(Th,P2); // P2 conforming triangular FEM
 Vh phi,w, f=1;
 
 solve Laplace(phi,w)=int2d(Th)(dx(phi)*dx(w) + dy(phi)*dy(w))
-                - int2d(Th)(f*w) + on(Gamma1,phi=z);
+                - int2d(Th)(f*w) + on(Gamma1,phi=z);  // resolution of laplace equation
 plot(phi,wait=true, ps="membrane.eps"); //Plot Th and v
 plot(Th,wait=true, ps="membraneTh.eps"); //Plot Th and v
 

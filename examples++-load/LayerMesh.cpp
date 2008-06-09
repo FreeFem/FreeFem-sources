@@ -166,8 +166,7 @@ void NbSom3D_NbElem3D_NbBord2D_mesh_product_mesh_tab(const int Nmax, const int *
   
   MajSom = 0;  
   for(int ii=0; ii < Th2.nv;ii++){  
-    MajSom = MajSom + (tab_Ni[ii]+1);   
-      
+    MajSom = MajSom + (tab_Ni[ii]+1);        
   	assert(tab_Ni[ii]<=Nmax);
   }
 
@@ -281,24 +280,44 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	  ijj[kk] = Th2.operator()(K[kk]);  
       ijj[kk] = tab_NumSommet[ijj[kk]+1]-1;
 	}
-        
+    
+	/*
+	for(int kk=0; kk <3; kk++){
+		if(ijj[kk] == 289 ){
+			for(int kk1=0; kk1 <3 ;kk1++){
+				if(ijj[kk1] == 359){
+			 		cout << "289--359" << "ijj=" << ijj[0] << " "<< ijj[1] << " " << ijj[2] <<endl;
+			 		
+		 		}
+			} 
+		}
+	}	
+	*/
+	   
     Th3.be(ElemBord).set(Th3.vertices,ijj,lab);
     
     ElemBord = ElemBord+1;
   }
 
+  cout << "bord en zmin" << endl;
   // bord definis en zmin
 
   for(int ii=0; ii < Th2.nt; ii++){
-    int ijj[3];
+    int ijj[3],bjj[3];
     const Mesh::Element & K(Th2.t(ii));
     int lab=5;
     
     for(int kk=0; kk < 3; kk++){
-	  ijj[2-kk] = Th2.operator()(K[kk]); 
+	  ijj[2-kk] = Th2.operator()(K[kk]);
+	  bjj[2-kk] = ijj[2-kk] ;	  
       ijj[2-kk] = tab_NumSommet[ijj[2-kk]];
 	}
-	
+	/*
+	for(int kk=0; kk < 3; kk++){
+		if(ijj[kk] == 220) cout << "220: ijj: " << ijj[0] << " " << ijj[1] << " " << ijj[2] << endl;
+		if(ijj[kk] == 280) cout << "280: ijj: " << ijj[0] << " " << ijj[1] << " " << ijj[2] << endl;
+	}
+	*/	
     Th3.be(ElemBord).set(Th3.vertices,ijj,lab);
 
     ElemBord = ElemBord+1;
@@ -306,7 +325,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
   
   cout << "bord sur le cote" << endl;
 
-  for(int ii=0; ii < Th2.neb; ii++){
+  for(int ii=0; ii < Th2.neb; ii++){ // Th2.neb ??
     int ijj[3];
 	
     const Mesh::BorderElement & K(Th2.be(ii));
@@ -528,7 +547,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	somv[2] = SommetPrisme[2]; 
 	somv[3] = SommetPrisme[3];
 
-	Th3.t(NumElement).set(Th3.vertices, somv, lab);	
+	Th3.elements[NumElement].set(Th3.vertices, somv, lab);	
 	
 	NumElement = NumElement+1;
 	break;
@@ -540,7 +559,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	somv[2] = SommetPrisme[2]; 
 	somv[3] = SommetPrisme[4];
 
-	Th3.t(NumElement).set(Th3.vertices, somv, lab);	
+	Th3.elements[NumElement].set(Th3.vertices, somv, lab);	
 	
 	NumElement = NumElement+1;
 	break;
@@ -552,7 +571,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	somv[2] = SommetPrisme[2]; 
 	somv[3] = SommetPrisme[5];
 
-	Th3.t(NumElement).set(Th3.vertices, somv, lab);	
+	Th3.elements[NumElement].set(Th3.vertices, somv, lab);	
 	
 	NumElement = NumElement+1;
 	break;
@@ -575,7 +594,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	  somv[2] = SommetPrisme[2];
 	  somv[3] = SommetPrisme[4]; 
 	  
-	  Th3.t(NumElement).set(Th3.vertices, somv, lab);	
+	  Th3.elements[NumElement].set(Th3.vertices, somv, lab);	
 	  // deuxieme tetraedre
 	  somv[0] = SommetPrisme[5];
 	  somv[1] = SommetPrisme[4];	
@@ -592,7 +611,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	  somv[2] = SommetPrisme[2];
 	  somv[3] = SommetPrisme[3];
 	  
-	  Th3.t(NumElement).set(Th3.vertices, somv, lab);	 
+	  Th3.elements[NumElement].set(Th3.vertices, somv, lab);	 
 	  // deuxieme tetraedre
 	  somv[0] = SommetPrisme[5];
 	  somv[1] = SommetPrisme[4];	
@@ -620,7 +639,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	  somv[2] = SommetPrisme[2];
 	  somv[3] = SommetPrisme[5];
 	  
-	  Th3.t(NumElement).set(Th3.vertices, somv, lab);	 
+	  Th3.elements[NumElement].set(Th3.vertices, somv, lab);	 
 	  // deuxieme tetraedre
 	  somv[0] = SommetPrisme[5];
 	  somv[1] = SommetPrisme[4];	
@@ -637,7 +656,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	  somv[2] = SommetPrisme[2];
 	  somv[3] = SommetPrisme[3];
 	  
-	  Th3.t(NumElement).set(Th3.vertices, somv, lab);	 
+	  Th3.elements[NumElement].set(Th3.vertices, somv, lab);	 
 	  // deuxieme tetraedre
 	  somv[0] = SommetPrisme[5];
 	  somv[1] = SommetPrisme[4];	
@@ -665,7 +684,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	  somv[2] = SommetPrisme[2];
 	  somv[3] = SommetPrisme[5];
 	  
-	  Th3.t(NumElement).set(Th3.vertices, somv, lab);	 
+	  Th3.elements[NumElement].set(Th3.vertices, somv, lab);	 
 	  // deuxieme tetraedre
 	  somv[0] = SommetPrisme[5];
 	  somv[1] = SommetPrisme[4];	
@@ -682,7 +701,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	  somv[2] = SommetPrisme[2];
 	  somv[3] = SommetPrisme[4];
 	  
-	  Th3.t(NumElement).set(Th3.vertices, somv, lab);	 
+	  Th3.elements[NumElement].set(Th3.vertices, somv, lab);	 
 	  // deuxieme tetraedre
 	  somv[0] = SommetPrisme[5];
 	  somv[1] = SommetPrisme[4];	
@@ -752,21 +771,21 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	somv[2] = SommetPrisme[nu[2]];	
 	somv[3] = SommetPrisme[nu[3]];
 	
-	Th3.t(NumElement).set(Th3.vertices, somv, lab);		
+	Th3.elements[NumElement].set(Th3.vertices, somv, lab);		
 	// deuxieme tetraedre
 	somv[0] = SommetPrisme[nu[4]]; 
 	somv[1] = SommetPrisme[nu[5]]; 
 	somv[2] = SommetPrisme[nu[6]]; 
 	somv[3] = SommetPrisme[nu[7]];
 	
-	Th3.t(NumElement+1).set(Th3.vertices, somv, lab);	 	
+	Th3.elements[NumElement+1].set(Th3.vertices, somv, lab);	 	
 	// troisieme tetraedre
 	somv[0] = SommetPrisme[nu[8]]; 
 	somv[1] = SommetPrisme[nu[9]]; 
 	somv[2] = SommetPrisme[nu[10]]; 
 	somv[3] = SommetPrisme[nu[11]]; 
 	
-	Th3.t(NumElement+2).set(Th3.vertices, somv, lab);	
+	Th3.elements[NumElement+2].set(Th3.vertices, somv, lab);	
 	
 	NumElement = NumElement+3;
 	break;
@@ -873,98 +892,3 @@ void dpent1_mesh(int idl[3],int nu[12],int &nbe,int &option){
 //----------------------------------------------------------------------- 
 
 
-/*
-void dpent1_mesh(int idl[3],int nu[12],int &nbe,int &option){
-  // intent(inout)  :: idl
-  // intent(out)    :: nu,nbe,option
-  // option ne sert à rien
-
-  //-----------------------------------------------------------------------
-  //      subroutine dpent1 (idl,nu,nbe,option)
-  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  //                s.p. dpent1
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  //  but : decoupe un pentaedre en 3 tetreadres suivant la decoupe des 3
-  // ---   faces frontieres a 4 cotes
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  //  parametres en entre :
-  //   idl : parametre de decoupe de face calculer comme ceci :
-  //       si idl(i) = 0 alors la face n'est pas  decoupee
-  //       idl(1)= 1 si la face 1463 est decoupe par l'arete 16 ,sinon 2
-  //       idl(2)= 1 si la face 1254 est decoupe par l'arete 15 ,sinon 2
-  //       idl(3)= 1 si la face 2365 est decoupe par l'arete 26 ,sinon 2
-  //          id = i1 + i2 * 2 + i3 * 4
-  //  parametres en sortie :
-  //   nbe : nbe de tetraedre de la decoupe
-  //         nbe = 0 => decoup impossible
-  //         nbe = 3 => decoup possible le tableau nu est genere
-  //   nu(1:4,1:nbe) : tableau de numero des sommet 3 tetraedres dans le
-  //                   pentaedre
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  //  programmation : f77 ->c++ subroutine de f. hecht upmc 
-
-  int idp[8];
-  int i1,i2,i3,i,j,nbdp,idf,idecou;
-  const int pdd[8] = {1,0,2,3,4,5,0,6};
-
-  int mu[6][12];
-  const int mu0[12] = {1,6,2,3, 1,5,2,6, 1,6,4,5};
-  const int mu1[12] = {1,6,2,3, 1,4,2,6, 2,6,4,5};
-  const int mu2[12] = {1,4,2,3, 2,6,3,4, 2,6,4,5};
-  const int mu3[12] = {1,5,2,3, 1,5,3,6, 1,6,4,5};
-  const int mu4[12] = {1,5,2,3, 1,5,3,4, 3,6,4,5};
-  const int mu5[12] = {1,4,2,3, 2,5,3,4, 3,6,4,5};
-
-  for(int jj=0; jj<12; jj++){
-    mu[0][jj] = mu0[jj];
-    mu[1][jj] = mu1[jj];
-    mu[2][jj] = mu2[jj];
-    mu[3][jj] = mu3[jj];
-    mu[4][jj] = mu4[jj];
-    mu[5][jj] = mu5[jj];
-  }
-
-  // calcul des descoupes possible du pentaedre
-  idf  = -1;
-  nbdp =  0;
-
-  for(i3=1; i3<=2; i3++){
-    for(i2=1; i2<=2; i2++){
-      for(i1=1; i1<=2; i1++){
-	idf=idf+1;
-	if( (pdd[idf] != 0) 
-	    && (  idl[0]==0  || idl[0]==i1 )
-	    && (  idl[1]==0  || idl[1]==i2 )
-	    && (  idl[2]==0  || idl[2]==i3 ) ){
-	  //nbdp=nbdp+1;
-	  idp[nbdp]=idf;
-	  nbdp=nbdp+1;
-	}
-      }
-    }
-  }
-  
-  if(nbdp == 0){
-    nbe=0;
-  }
-  else{
-    nbe=3;
-    idf=idp[0];
-    idecou=pdd[idf];
-    i=idf;  
-    j=i/4;
-    i=i-4*j;
-    idl[2]=j+1;
-    j=i/2;
-    idl[1]=j+1;
-    idl[0]=i-2*j+1;
-    //cout << "idecou= " << idecou << endl;
-    for(i=0; i<12;i++){
-      nu[i]=mu[idecou-1][i]-1;
-      //cout << "i, nu[i] "<< i <<" " << nu[i] << endl;
-    }
-  }
-
-  }
-//----------------------------------------------------------------------- 
-*/

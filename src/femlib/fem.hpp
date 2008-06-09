@@ -416,7 +416,7 @@ public:
   typedef FQuadTree GTree;
   
 
-   static const char magicmesh[8]  ;
+  static const char magicmesh[8]  ;
   int dim; 
   int nt,nv,neb,ne,ntet;
   R area;
