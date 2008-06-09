@@ -18,13 +18,13 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
   SuperLu.cpp SuperLu.edp \
   NewSolver.cpp \
   LapDG3.edp              convectchacon.edp       plot-fb-P3dc.edp \
-  LapDG4.edp              dfft.edp                plot-fb-P4.edp \
+  LapDG4.edp              dfft.edp                plot-fb-P4dc.edp \
   LaplaceP3.edp           ff-mt19937ar.edp        ref.edp \
   LaplaceP4.edp           funcTemplate.edp        regtests.edp \
   NSP2BRP0.edp            load.edp                testFE-P3.edp \
   all.edp                 makeref.edp             testFE-P3dc.edp \
   bilapMorley.edp         myType.edp              testFE.edp \
-  convect_dervieux.edp    plot-fb-P3.edp          testFEMorley.edp \
+  convect_dervieux.edp    testFEMorley.edp \
   testFE-PkEdge.edp \
   splitmesh3.cpp  splitmesh3.edp  splitmesh6.cpp  splitmesh6.edp \
   SuperLU_3.0-include-ff.tar.gz REAME_SuperLU \

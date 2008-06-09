@@ -131,13 +131,13 @@ class ArpackError {
 
  public:
 
-  static void Set(ErrorCode error, char* where="AREigenProblem");
+  static void Set(ErrorCode error,const  char* where="AREigenProblem");
   // Set error code and write error messages.
 
   static int Status() { return (int) code; }
   // Returns current value of error code.
 
-  ArpackError(ErrorCode error, char* where="AREigenProblem") {
+  ArpackError(ErrorCode error,const  char* where="AREigenProblem") {
     Set(error,where);
   }
   // Constructor that set error code.
@@ -157,7 +157,7 @@ inline void ArpackError::Print(const char* where, const char* message)
 
 } // Print
 
-void ArpackError::Set(ErrorCode error, char* where)
+void ArpackError::Set(ErrorCode error,const  char* where)
 {
 
   code = error;

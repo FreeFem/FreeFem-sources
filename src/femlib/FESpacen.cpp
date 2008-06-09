@@ -19,8 +19,9 @@
 #include "FESpacen.hpp"
 
 
+ int UniqueffId::count=0;
  namespace Fem2D {
-   int UniqueffId::count=0;
+
 //template<class Element>
 int nbdf_d(const int ndfitem[4],const  int nd[4])
 {
