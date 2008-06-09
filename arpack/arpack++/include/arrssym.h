@@ -50,7 +50,7 @@ class ARrcSymStdEig: public virtual ARrcStdEig<FLOAT, FLOAT> {
 
  // a.3) Functions that check user defined parameters.
 
-  char* CheckWhich(char* whichp);
+  const char* CheckWhich(const char* whichp);
   // Determines if the value of variable "this->which" is valid.
 
 
@@ -186,7 +186,7 @@ inline void ARrcSymStdEig<FLOAT>::Eupp()
 
 
 template<class FLOAT>
-char* ARrcSymStdEig<FLOAT>::CheckWhich(char* whichp)
+const char* ARrcSymStdEig<FLOAT>::CheckWhich(const char* whichp)
 {
 
   switch (whichp[0]) {

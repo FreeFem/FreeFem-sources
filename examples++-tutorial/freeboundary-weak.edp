@@ -25,6 +25,7 @@ border d(t=h,0){x=0;y=t;};      // gauche
 
 int n=10;
 mesh Th=buildmesh (a(L*n)+b(h1*n)+f(sqrt(L^2+(h-h1)^2)*n)+d(h*n));
+
 plot(Th,ps="dTh.eps");
 
 fespace Vh(Th,P1);
