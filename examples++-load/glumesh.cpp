@@ -26,13 +26,15 @@ using namespace std;
 #include "lgsolver.hpp"
 #include "problem.hpp"
 #include "LayerMesh.hpp"
+#include "TransfoMesh_v2.hpp"
+//#include "GQuadTree.hpp"
 
 #include <set>
 #include <vector>
 #include <fstream>
 
 
-  using namespace  Fem2D;
+using namespace  Fem2D;
 
 class listMesh { 
 public:
@@ -44,6 +46,7 @@ public:
   listMesh(Stack s,const listMesh &l,Mesh *th) : lth(Add2StackOfPtr2Free(s,new list<Mesh*>(*l.lth))) { lth->push_back(th);}
 
 };
+
 
 Mesh * GluMesh(listMesh const & lst)
 {
@@ -163,6 +166,157 @@ struct Op2_setmesh: public binary_function<AA,BB,RR> {
   } 
 };
 
+// glumesh3D
+
+class listMesh3 { 
+public:
+  list<Mesh3 *> *lth;
+  void init()  { lth=new list<Mesh3 *>;}
+  void destroy() { delete lth;}
+  listMesh3(Stack s,Mesh3 *th) : lth(Add2StackOfPtr2Free(s,new list<Mesh3*>)) { lth->push_back(th);}
+  listMesh3(Stack s,Mesh3 *tha,Mesh3 *thb) : lth(Add2StackOfPtr2Free(s,new list<Mesh3*>)) { lth->push_back(tha);lth->push_back(thb);}
+  listMesh3(Stack s,const listMesh3 &l,Mesh3 *th) : lth(Add2StackOfPtr2Free(s,new list<Mesh3*>(*l.lth))) { lth->push_back(th);}
+
+};
+
+Mesh3 * GluMesh3(listMesh3 const & lst)
+{
+  int nbt=0;
+  int nbe=0;
+  int nbex=0;
+  int nbv=0;
+  int nbvx=0;
+  
+  double hmin=1e100;
+  R3 Pn(1e100,1e100,1e100),Px(-1e100,-1e100,-1e100);
+  const list<Mesh3 *> lth(*lst.lth);
+  Mesh3 * th0=0;
+  
+  for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();++i)
+    {
+	    Mesh3 &Th3(**i);  // definis ???
+	    th0=&Th3;
+      	if(verbosity>1)  cout << " GluMesh3 + "<< Th3.nv << " " << Th3.nt << " "<< Th3.nbe << endl;
+      	
+      	nbt+= Th3.nt;
+      	nbvx += Th3.nv;
+      	nbex += Th3.nbe;
+      	
+      	for (int k=0;k<Th3.nt;k++){
+			for (int e=0;e<6;e++){
+	  			hmin=min(hmin,Th3[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+  			}
+	}
+      	for (int i=0;i<Th3.nv;i++){ 	  
+	  		R3 P(Th3(i));
+	  		Pn=Minc(P,Pn);
+	  		Px=Maxc(P,Px);     
+		}
+    } 
+  cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn << " "<< Px << endl;
+
+  
+  Vertex3  *v= new Vertex3[nbvx];
+  Tet      *t= new Tet[nbt];
+  Tet      *tt=t;
+  Triangle3 *b= new Triangle3[nbex];
+  Triangle3 *bb= b;
+     
+  ffassert(hmin>Norme2(Pn-Px)/1e9);
+  double hseuil =hmin/10.; 
+  
+  cout << " creation of : BuildGTree" << endl;
+  //th0->BuildBound();
+  //th0->BuildGTree();   
+ 
+  EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pn,Px,0);
+    
+  cout << " creation of : Mesh3 th3_tmp" << endl;
+  /*Mesh3 th3_tmp;
+  th3_tmp.set(nbvx,nbt,nbex);*/
+  
+  
+  for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();++i){
+      const Mesh3 &Th3(**i);
+      if(!*i) continue;
+      if(verbosity>1)  cout << " loop over mesh for create new mesh "<< endl;
+      if(verbosity>1)  cout << " GluMesh + "<< Th3.nv << " " << Th3.nt <<" " << Th3.nbe << endl;
+      int nbv0 = nbv;
+      
+      for (int i=0;i<Th3.nv;i++){
+	      const Vertex3 &vi(Th3.vertices[i]);
+	      Vertex3 * pvi=gtree->ToClose(vi,hseuil);
+	      if(!pvi){
+		      v[nbv].x = vi.x;
+		      v[nbv].y = vi.y;
+		      v[nbv].z = vi.z;
+		      v[nbv].lab = vi.lab;
+		      gtree->Add( v[nbv++] );
+		  }
+	  }
+      
+      for (int k=0;k<Th3.nt;k++){
+	  	const Tet  &K(Th3[k]);
+	  	int iv[4];
+	  	iv[0]=gtree->NearestVertex(K[0])-v;
+	  	iv[1]=gtree->NearestVertex(K[1])-v;
+	  	iv[2]=gtree->NearestVertex(K[2])-v;  //-v;
+	  	iv[3]=gtree->NearestVertex(K[3])-v;  //-v;
+	  	(tt++)->set(v,iv,K.lab);
+	  }
+      
+      for (int k=0;k<Th3.nbe;k++)
+	{
+	  const Triangle3 & K(Th3.be(k));//bedges[k]);
+	  int iv[3];
+	  iv[0]=gtree->NearestVertex(K[0])-v; //-v;
+	  iv[1]=gtree->NearestVertex(K[1])-v; //-v;
+	  iv[2]=gtree->NearestVertex(K[2])-v; //-v;
+	  
+	  if( iv[2]<nbv0 && iv[1]<nbv0 && iv[0] < nbv0 ) continue;
+	  (bb++)->set(v,iv,K.lab);
+	  nbe++;
+	}
+      
+  }   
+  //delete th0;
+ 
+  if(verbosity>1)
+    {
+      cout << "     Nb of glu3D  point " << nbvx-nbv;
+      cout << "     Nb of glu3D  Boundary edge " << nbex-nbe << endl;
+    }
+	
+    Mesh3 *mpq= new Mesh3(nbv,nbt,nbe,v,t,b);  
+	/*       
+	mpq->BuildBound();
+	mpq->BuildAdj();
+	mpq->Buildbnormalv();  
+	mpq->BuildjElementConteningVertex();
+	*/
+	mpq->BuildGTree();
+	mpq->decrement();  
+    return mpq;
+  
+}
+
+template<class RR,class AA=RR,class BB=AA> 
+struct Op3_addmesh: public binary_function<AA,BB,RR> { 
+  static RR f(Stack s,const AA & a,const BB & b)  
+  { return RR(s, a, b );} 
+};
+
+template<class RR,class AA=RR,class BB=AA> 
+struct Op3_setmesh: public binary_function<AA,BB,RR> { 
+  static RR f(const AA & a,const BB & b)  
+  {
+    ffassert(a );
+    if(*a) delete *a;
+    return (*a=GluMesh3(b),a); 
+  } 
+};
+
+
 class BuildLayeMesh_Op : public E_F0mps 
 {
 public:
@@ -185,15 +339,14 @@ public:
     if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
     if(nargs[1])  a2  = dynamic_cast<const E_Array *>(nargs[1]);
     int err =0;
-    cout << nargs[0] << " "<< a1 << endl;
-    cout << nargs[1] << " "<< a2 << endl;
+    //cout << nargs[0] << " "<< a1 << endl;
+    //cout << nargs[1] << " "<< a2 << endl;
     if(a1) {
       if(a1->size() !=2) 
 	CompileError("LayerMesh (Th,n, zbound=[zmin,zmax],) ");
-	  cout << "lecture de ezmin , ezmax" << endl; 
+	  //cout << "lecture de ezmin , ezmax" << endl; 
       ezmin=to<double>( (*a1)[0]);
-      ezmax=to<double>( (*a2)[1]);
-      cout << *ezmin << *ezmax << endl;
+      ezmax=to<double>( (*a1)[1]); 
     }
     if(a2) {
       if(a2->size() !=3) 
@@ -265,39 +418,36 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
   int nlayer = (int) GetAny<long>((*enmax)(stack));
   ffassert(pTh && nlayer>0);
-  Mesh & Th=*pTh;
-  Mesh *m= pTh;
+  Mesh &Th=*pTh;
+  Mesh *m= pTh;   // question a quoi sert *m ??
   int nbv=Th.nv; // nombre de sommet 
   int nbt=Th.nt; // nombre de triangles
   int neb=Th.neb; // nombre d'aretes fontiere
   cout << " " << nbv<< " "<< nbv << " nbe "<< neb << endl; 
   KN<double> zmin(nbv),zmax(nbv);
-  KN<double> clayer(nbv);
-  //  nombre de layer est nlayer*clayer
+  KN<double> clayer(nbv); //  nombre de layer est nlayer*clayer
+  
   clayer=-1;
   zmin=0.;
   zmax=1.;
   for (int it=0;it<nbt;++it){
-  cout << it << endl;
     for(int iv=0;iv<3;++iv)      
     {
       int i=Th(it,iv);
-     cout << "iv, it, i, " << iv <<" "<<it <<" "<< i << endl;
-     cout << clayer[i] << endl;
        if(clayer[i]<0)
 	{
 	  mp->setP(&Th,it,iv);
-	  cout << "mp: fait " << endl;
-	  if(ezmin){ cout << "ezmin " << &zmin[0] <<" " <<zmin[0] << endl;  zmin[i]=GetAny<double>((*ezmin)(stack)); cout << "ezmin" <<endl;}
-	  if(ezmax){ cout << "ezmin" <<endl;  zmax[i]=GetAny<double>((*ezmax)(stack)); cout << "ezmin" <<endl;}
-	  cout << "double if " << endl;
+	  //cout << "mp: fait " << endl;
+	  if(ezmin){ zmin[i]=GetAny<double>((*ezmin)(stack));}
+	  if(ezmax){ zmax[i]=GetAny<double>((*ezmax)(stack));}
+
 	  clayer[i]=Max( 0. , Min( 1. , arg(2,stack,1.) ) ); 
-	  cout << "clayer " << endl;
-	}
-	cout << i << clayer[i] << endl;		     
+	
+	}	     
     }
   }
   ffassert(clayer.min() >=0);
+
   KN<long> zzempty;
   KN<long> nre (arg(3,stack,zzempty));  
   KN<long> nrt (arg(4,stack,zzempty));  
@@ -316,20 +466,73 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
     mapt[nrt[i]]=nrt[i+1];
   int nebn =0;
   KN<int> ni(nbv);
-  for(int i=0;i<nbv;++i)
+  for(int i=0;i<nbv;i++)
     ni[i]=Max(0,Min(nlayer,(int) lrint(nlayer*clayer[i])));
   
+  Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
   
-  Mesh3 *Th3= build_layer(Th, nlayer,ni,zmin, zmax);
-
-  Th3->BuildBound();
-  Th3->BuildAdj();
-  Th3->Buildbnormalv();  
-  Th3->BuildjElementConteningVertex();
-  Th3->BuildGTree();
-  Th3->decrement();  
-  *mp=mps;
-  return Th3;
+  if( !(xx) && !(yy) && !(zz) ){
+  
+	  Th3->BuildBound();
+	  Th3->BuildAdj();
+	  Th3->Buildbnormalv();  
+	  Th3->BuildjElementConteningVertex();
+	  Th3->BuildGTree();
+	  Th3->decrement();  
+  
+  	*mp=mps;
+  	return Th3;
+  }
+  else{
+	  KN<double> txx(Th3->nv), tyy(Th3->nv), tzz(Th3->nv);
+	  KN<int> takemesh(Th3->nv);
+	  MeshPoint *mp3(MeshPointStack(stack)); 
+  	
+	  takemesh=0;  
+	  Mesh3 &rTh3 = *Th3;
+  
+	  for (int it=0;it<Th3->nt;++it){
+		  for( int iv=0; iv<4; ++iv){
+	 		   int i=(*Th3)(it,iv);	  
+	    		if(takemesh[i]==0){
+					mp3->setP(Th3,it,iv);
+ 					if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
+					if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
+					if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
+	
+			
+					/*
+					if(i==9)   cout << "i="<< i << " " << txx[i] << " "<< tyy[i] << " "<< tzz[i] << endl;
+  					if(i==139) cout << "i="<< i << " " << txx[i] << " "<< tyy[i] << " "<< tzz[i] << endl;
+  					if(i==410) cout << "i="<< i << " " << txx[i] << " "<< tyy[i] << " "<< tzz[i] << endl;
+  					*/
+  			
+					takemesh[i] = takemesh[i]+1;
+				}
+	 		}
+  		}
+  		
+  		int border_only = 0;
+  		Mesh3 *T_Th3=Transfo_Mesh3( rTh3, txx, tyy, tzz, border_only);
+  
+  
+  		const Triangle3 & K((*T_Th3).be(24));
+		int iv[3];
+		for(int jj=0; jj <3; jj++){
+			iv[jj] = (*T_Th3).operator()(K[jj]) ;
+		}
+	
+ 		T_Th3->BuildBound();
+  		T_Th3->BuildAdj();
+  		T_Th3->Buildbnormalv();  
+  		T_Th3->BuildjElementConteningVertex();
+  		T_Th3->BuildGTree();
+  		T_Th3->decrement();  
+  
+ 	 	*mp=mps;
+  		return T_Th3;
+	}
+ 
 }
 
 AnyType SetMesh_Op::operator()(Stack stack)  const 
@@ -435,13 +638,23 @@ static Init init;  //  une variable globale qui serat construite  au chargement 
 Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   Dcl_Type<listMesh>();
   typedef Mesh *pmesh;
+  
+  Dcl_Type<listMesh3>();
+  typedef Mesh3 *pmesh3;
+  
   if (verbosity)
-    cout << " lood: glumesh  " << endl;
+    cout << " load: glumesh  " << endl;
   //cout << " je suis dans Init " << endl; 
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,listMesh,pmesh>  >      );
   TheOperators->Add("=",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
   TheOperators->Add("<-",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
+  
+  TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,pmesh3,pmesh3>  >      );
+  TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,listMesh3,pmesh3>  >      );
+  TheOperators->Add("=",new OneBinaryOperator< Op3_setmesh<pmesh3*,pmesh3*,listMesh3>  >     );
+  TheOperators->Add("<-",new OneBinaryOperator< Op3_setmesh<pmesh3*,pmesh3*,listMesh3>  >     );
+  
   Global.Add("change","(",new SetMesh);
   Global.Add("buildlayers","(",new  BuildLayerMesh);
 }

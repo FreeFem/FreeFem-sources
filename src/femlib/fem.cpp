@@ -43,7 +43,7 @@ extern long verbosity ;
 namespace Fem2D {
     
     
-    class SubMortar { 
+class SubMortar { 
 	friend class Mesh;
 	friend ostream & operator<<(ostream & f,const SubMortar & m);
 	R  alpha; // angle in radian 
