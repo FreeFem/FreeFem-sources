@@ -3,13 +3,12 @@ How to adapt ARPACK for compilation with FreeFem++
 the simplest  way is just 
 configure --enable-download 
 --------------------------------------------------
-Or to compile arpack by hand  hard to explain:
+Or to compile arpack no problem
 
-just to remark:
-Pass the patch  to compile on g++ 3.x 
-http://www.gdv.uni-hannover.de/~reuter/software.php
+   Remark, in arpack++ a lot  of incoherance this moderne c++ (g++3 or better)
+so I write the driver by hand (from version 3.) no arpack++ in	    
+include in freefem++ now. 
 
-Remark, they are in arpack and arpack++ a lot  of incoherance.
 The last one is in lapack lib second.f in an function not a procedure like in arpack.
 Two weeks work to find this mistake.
 
