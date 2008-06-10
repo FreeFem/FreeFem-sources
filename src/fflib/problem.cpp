@@ -1735,8 +1735,8 @@ void Check(const Opera &Op,int N,int  M)
 	      long li=Ku.dfcend(icomp);
 	      long fj=Ku.dfcbegin(jcomp);
 	      long lj=Ku.dfcend(jcomp);
-	      if (Ku.Vh.Th(T) < 1 && npi < 1)
-		cout << " ic "<< icomp << fi<< " "<< lj << " "<< " c "<< jcomp << " " <<fj << " "<< lj << endl; 
+	      if (verbosity>=100 && Ku.Vh.Th(T) < 1 && npi < 1)
+		cout << "##ic "<< icomp << fi<< " "<< lj << " "<< " c "<< jcomp << " " <<fj << " "<< lj << endl; 
 	      for ( i=fi;  i<li;   i++ )  
 		for ( j=fj;  j<min(lj,i+1);  j++ ) // 
 		  {
