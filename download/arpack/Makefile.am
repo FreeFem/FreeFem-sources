@@ -4,7 +4,7 @@
 # $Id$
 
 all-local: $(DOWNLOAD_ARPACK)
-EXTRA_DIST=ARmake.m4
+EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz 
 
 # Downloading and compiling ARPACK
 # --------------------------------
@@ -27,7 +27,7 @@ ARPACK/fait: arpack96.tar.gz patch.tar.gz ARmake.m4 Makefile
 	-rm -rf ARPACK
 	gunzip -c arpack96.tar.gz | tar xf -
 	gunzip -c patch.tar.gz | tar xf -
-	gunzip -c ../../arpack/arpack-patch-lapack.tar.gz | tar xf -
+	gunzip -c arpack-patch-lapack.tar.gz | tar xf -
 	for i in ARPACK/SRC/*.f ; do \
 	    mv  $$i $$i.cpy; sed 's/call *second/call secnd2/' <$$i.cpy >$$i;rm $$i.cpy; done 
 	for i in  ARPACK/UTIL/second.f;  do  \
