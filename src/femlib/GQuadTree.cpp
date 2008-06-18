@@ -598,12 +598,12 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   Mesh::kfind++;
   while (1)
     { 
-      // cout << "it " << it <<endl;
+      //if(verbosity>199) cout << "it " << it <<endl;
       const Element & K(Th[it]);
       Mesh::kthrough++;
       assert(k++<1000);
       int kk,n=0,nl[nkv];
-      R l[nkv+1];
+      R l[nkv];
       CoorBary(K,P,l);
       
       R eps =  -K.mesure() *1e-10;
@@ -645,7 +645,15 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  if(nbord>=5)  HeapSort(kbord,nbord);
 	}
       if(verbosity>100)
+	{
 	cout << " bord "<< it<< "   nbf < 0 : " <<n << " (inb) " << inkbord << " nfb" << nbord<<endl;
+	    R ss=0; 
+	    for(int i=0;i<nkv;++i)
+	      {  ss += l[i];
+	      cout << l[i] << " ";}
+	    cout << " s=" << ss << endl;;
+	    
+	}
       if ( n!=1 )  // on est sur le bord, mais plusieurs face <0 => on test les autre
 	{  // 1) existe t'il un adj interne
 	  int nn=0,ii;
@@ -670,14 +678,21 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
       //  barycentrique 
       { // a ridge on border  (to hard to do the correct stuff) 
 	//  or a corner    just do the projection on lambda  
-	if(verbosity>100)
-	  cout << " sortie on bord "<<endl;
-	R s=0;
-	for(int i=0;i<=nkv;++i)
-	  s += (l[i]<0.) ?  (l[i]=0) : l[i];
-	for(int i=0;i<=nkv;++i)
+	R s=0.;
+	for(int i=0;i<nkv;++i)
+	  s += (l[i]= max(l[i],0.));
+	for(int i=0;i<nkv;++i)
 	  l[i]/=s;
 	Phat=Rd(l +1);
+	if(verbosity>100)
+	  {
+	    cout << P << " " << n << " l: ";
+	      R ss=0; 
+	  for(int i=0;i<nkv;++i)
+	    {  ss += l[i];
+	    cout << l[i] << " ";}
+	  cout << " s=" << ss <<" " << s <<" exit by bord " << it << " "  << Phat << endl;;
+          }
 	outside=true;
 	return &Th[it] ;
       }		    

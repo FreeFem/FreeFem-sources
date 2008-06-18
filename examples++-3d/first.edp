@@ -25,7 +25,7 @@ if(1) {
 	cout << "Th(" <<i  << ") : "   // << endl;	
 	     << Th(i).x << " " << Th(i).y  << " " << Th(i).z << " " << Th(i).label // version 2.19 
 	  << endl;
-savemesh(Th,"dd.mesh");
+savemesh(Th,"dd.meshb");
  }
 fespace Vh(Th,P23d);
 Vh xx=x;
@@ -61,7 +61,7 @@ cout << u[]. min << " " << u[].max << endl;
 real err= int3d(Th)( square(u-ue) );
 d= ue-u;
 cout <<  " err = " << err <<  " " << d[].linfty << endl;
-Vh2 u2=u;
+Vh2 u2=u(x,y,0.);
 plot(u2,wait=1);
 plot(u2,wait=1);
 	{ ofstream file("dd.bb"); 
