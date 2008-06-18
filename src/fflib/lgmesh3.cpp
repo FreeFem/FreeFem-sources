@@ -753,16 +753,16 @@ AnyType pf3r2R(Stack s,const AnyType &a)
      K=mp.T3;
      PHat=mp.PHat;
    }
-  else if ( mp.other.Th3 == & Th && mp.other.P.x == mp.P.x && mp.other.P.y == mp.P.y )
+  else if ( mp.other.Th3 == & Th && mp.other.P.x == mp.P.x && mp.other.P.y == mp.P.y && mp.other.P.z == mp.P.z   )
     {
       K=mp.other.T3;
-      PHat=mp.other.PHat.p2();
+      PHat=mp.other.PHat;
       outside = mp.other.outside;
     } 
   else {
     if (mp.isUnset()) ExecError("Try to get unset x,y, ...");
     K=Th.Find(mp.P,PHat,outside);
-    mp.other.set(Th,mp.P.p2(),PHat,*K,0,outside);
+    mp.other.set(Th,mp.P,PHat,*K,0,outside);
   }
   // cout << "  ---  " << qnu << "  " << mp.P << " " << mp.outside <<  " " << outside << endl;
   const FElement KK(Vh[Th(K)]);
@@ -801,6 +801,8 @@ AnyType pf3r2R(Stack s,const AnyType &a)
      } */
 //  if ( qnu )   
  //  cout << " f()  triangle       " << Th(K) << " " << mp.P << " " << PHat << " =  " << r <<  endl;
+  if(verbosity>=10000)
+      cout << componante<< " "<< dd << " f()  Tet:  " << Th(K) << " " << mp.P << " " << PHat << " =  " << rr <<  endl; 
   return SetAny<R>(rr);
 }
 
