@@ -375,7 +375,7 @@ class  BuildLayerMesh : public OneOperator { public:
   E_F0 * code(const basicAC_F0 & args) const 
   {
 	cout << " je suis dans code(const basicAC_F0 & args) const" << endl; 
-	cout << "args: " << args << endl;   
+	//cout << "args: " << args << endl;   
 	return  new BuildLayeMesh_Op(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1])); 
   }
 };
