@@ -29,7 +29,8 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
   splitmesh3.cpp  splitmesh3.edp  splitmesh6.cpp  splitmesh6.edp \
   SuperLU_3.0-include-ff.tar.gz REAME_SuperLU \
   glumesh.cpp glumesh.edp \
-  ffrandom.cpp ffrandom.edp 
+  LayerMesh.hpp TransfoMesh_v2.hpp LayerMesh.cpp \
+  ffrandom.cpp ffrandom.edp  
 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
