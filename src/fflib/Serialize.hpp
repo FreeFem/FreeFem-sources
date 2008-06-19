@@ -27,7 +27,7 @@
  */
 #ifndef SERIALEZE_HPP_
 #define SERIALEZE_HPP_
-
+#include <cstring>
 struct MPIrank;
  class Serialize {  
    // we store a refcounter in the pointer p a adresse p-sizeof(long)

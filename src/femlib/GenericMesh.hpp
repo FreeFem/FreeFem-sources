@@ -19,6 +19,7 @@ using namespace ::std;
 
 
 
+#include "Serialize.hpp"
 
 #include "GQuadTree.hpp"
 // definition R
@@ -26,7 +27,6 @@ namespace Fem2D  {
 #include "R3.hpp"
 #include "Label.hpp"
 #include "HashTable.hpp"
-#include "Serialize.hpp"
 
   const double UnSetMesure=-1e+200;
 

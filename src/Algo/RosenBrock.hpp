@@ -7,7 +7,7 @@
 //#include "mvblas.h"
 
 template <class Real,class Mat>
-class RosenBrock : public NRJ<Param<Real>,KN<Real>,Mat,Real> {
+class RosenBrock : public tNRJ<Param<Real>,KN<Real>,Mat,Real> {
 private:
 protected:
   
@@ -25,7 +25,7 @@ public:
 
 template <class Real,class Mat>
 RosenBrock<Real,Mat>::RosenBrock(int n)
-  :NRJ<Param<Real>,KN<Real>,Mat,Real>(n)
+  :tNRJ<Param<Real>,KN<Real>,Mat,Real>(n)
 {  // On initialise le gradient
   this->grad= new KN<Real>(n);
   // On initialise le hessien

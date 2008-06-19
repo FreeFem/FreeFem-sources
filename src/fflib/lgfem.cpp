@@ -2104,7 +2104,7 @@ class pb2mat : public E_F0 { public:
   
   AnyType operator()(Stack s) const 
   {
-    Problem::Data *data= pb->dataptr(this->stack); 
+    Problem::Data<FESpace> *data= pb->dataptr(this->stack); 
     if ( SameType<K,double>::OK )
       {
 	ffassert( !!data->AR);  

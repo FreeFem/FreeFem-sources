@@ -303,18 +303,55 @@ void GTypeOfFESum<Mesh>::init(InterpolationMatrix<RdHat> & M,FElement * pK,int o
 }
 
 template<class Mesh>
-GTypeOfFESum<Mesh>::GTypeOfFESum(const KN< GTypeOfFE<Mesh> const *> & t)
-    : 
-    GTypeOfFE<Mesh>(t),
-    k(t.N()),
-    teb(t),
-    NN(k+1),
-    DF(k+1) ,
-    comp(k+1)
-    
+     GTypeOfFESum<Mesh>::GTypeOfFESum(const KN< GTypeOfFE<Mesh> const *> & t)
+     : 
+     GTypeOfFE<Mesh>(t),
+     k(t.N()),
+     teb(t),
+     NN(k+1),
+     DF(k+1) ,
+     comp(k+1) {Build();}
+     
+template<class Mesh> 
+static  KN< GTypeOfFE<Mesh> const *> kn(const GFESpace<Mesh> ** tt,int kk)
+     {
+	 KN< GTypeOfFE<Mesh> const *> r(kk);
+	 for(int i=0;i<kk;++i)
+	   { r[i]=tt[i]->TFE[0];ffassert(tt[i]->TFE.constant());}
+	 return r;
+     }
+template<class Mesh> 
+static     KN< GTypeOfFE<Mesh> const *> kn(const GFESpace<Mesh> & tt,int kk)
+     {
+	 return  KN< GTypeOfFE<Mesh> const *> (kk,tt.TFE[0]);
+     }
+     
+template<class Mesh>
+     GTypeOfFESum<Mesh>::GTypeOfFESum(const GFESpace<Mesh> ** tt,int kk)
+     :	
+     GTypeOfFE<Mesh>(kn(tt,kk)),
+     k(kk),
+     teb(kn(tt,kk)),
+     NN(k+1),
+     DF(k+1) ,
+     comp(k+1) {Build();}
+     
+template<class Mesh>
+     GTypeOfFESum<Mesh>::GTypeOfFESum(const GFESpace<Mesh> & tt,int kk)
+     :	
+     GTypeOfFE<Mesh>(kn(tt,kk)),
+     k(kk),
+     teb(kn(tt,kk)),
+     NN(k+1),
+     DF(k+1) ,
+     comp(k+1) {Build();}
+     
+template<class Mesh>
+void GTypeOfFESum<Mesh>::Build()
 {
   bool debug=true;
   {
+    const KN< GTypeOfFE<Mesh> const *> & t=teb;
     map<const GTypeOfFE<Mesh> *,int> m;
     int i=k,j;    
     while(i--) // on va a l'envert pour avoir comp[i] <=i 
@@ -338,8 +375,8 @@ GTypeOfFESum<Mesh>::GTypeOfFESum(const KN< GTypeOfFE<Mesh> const *> & t)
   int ii=0;
   for (int i=0;i<k;++i)
     {
-      for (int j=0;j<t[i]->nb_sub_fem;++j)
-	this->Sub_ToFE[ii++]=t[i]->Sub_ToFE[j];
+      for (int j=0;j<teb[i]->nb_sub_fem;++j)
+	this->Sub_ToFE[ii++]=teb[i]->Sub_ToFE[j];
     }
   assert(ii==this->nb_sub_fem );
   
@@ -428,7 +465,49 @@ GTypeOfFESum<Mesh>::GTypeOfFESum(const KN< GTypeOfFE<Mesh> const *> & t)
   assert(c==this->N);
 }
 
+template<class MMesh> 
+GFESpace<MMesh>::GFESpace(const GFESpace & Vh,int kk)
+     :
+     GFESpacePtrTFE<MMesh>(new GTypeOfFESum<MMesh>(Vh,kk)),
+     DataFENodeDF(Vh.Th.BuildDFNumbering(this->ptrTFE->ndfonVertex,this->ptrTFE->ndfonEdge,this->ptrTFE->ndfonFace,this->ptrTFE->ndfonVolume)),
+     Th(Vh.Th),
+     TFE(1,0,this->ptrTFE), 
+     cmesh(Th),
+     N(TFE[0]->N),
+     Nproduit(TFE[0]->N),
+     nb_sub_fem(TFE[0]->nb_sub_fem),
+     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
+     maxNbPtforInterpolation(TFE[0]->NbPtforInterpolation),
+     maxNbcoefforInterpolation(TFE[0]->NbcoefforInterpolation)
+     
+     {
+     }
+    
+template<class MMesh> 
+     GFESpace<MMesh>::GFESpace(const GFESpace ** pVh,int kk)
+     :
+     GFESpacePtrTFE<MMesh>(new GTypeOfFESum<MMesh>(pVh,kk)),
+     DataFENodeDF((**pVh).Th.BuildDFNumbering(this->ptrTFE->ndfonVertex,this->ptrTFE->ndfonEdge,this->ptrTFE->ndfonFace,this->ptrTFE->ndfonVolume)),
+     Th((**pVh).Th),
+     TFE(1,0,this->ptrTFE), 
+     cmesh(Th),
+     N(TFE[0]->N),
+     Nproduit(TFE[0]->N),
+     nb_sub_fem(TFE[0]->nb_sub_fem),
+     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
+     maxNbPtforInterpolation(TFE[0]->NbPtforInterpolation),
+     maxNbcoefforInterpolation(TFE[0]->NbcoefforInterpolation)
+     
+     {
+	 for(int i=0;i<kk;++i)
+	     ffassert(&Th==&pVh[i]->Th);
+     }
+     
 // explicite instance..
 template class GTypeOfFESum<Mesh2>;
 template class GTypeOfFESum<Mesh3>;
+template class GFESpace<Mesh1>;
+template class GFESpace<Mesh2>;
+template class GFESpace<Mesh3>;
+    
 }

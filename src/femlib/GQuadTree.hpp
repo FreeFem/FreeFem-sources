@@ -168,7 +168,7 @@ namespace EF23 {
     R coef; //	
     
     
-    Zd  RdtoZd(const Rd &P)  const { return Zd((Minc(Maxc(P,cMin),cMax)-cMin)*coef);} 
+    Zd  RdtoZd(const Rd &P)  const { return Zd((Minc(Maxc(P,cMin),cMax))*coef);} 
     Zd  VtoZd(const Vertex * v) const {return RdtoZd( (const Rd&) *v);} 
     Zd  VtoZd(const Vertex & v) const {return RdtoZd( (const Rd&) v);} 
     

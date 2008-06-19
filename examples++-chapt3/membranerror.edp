@@ -14,7 +14,7 @@ real[int] L2error(2);
 for(int n=0;n<2;n++)
 {
   mesh Th=buildmesh(Gamma1(40*(n+1))+Gamma2(20*(n+1)));
-  fespace Vh(Th,P1); 
+  fespace Vh(Th,P2); 
    Vh phi,w;
   
   solve laplace(phi,w)=int2d(Th)(dx(phi)*dx(w) + dy(phi)*dy(w))

@@ -343,9 +343,11 @@ class Problem  : public Polymorphic {
   static basicAC_F0::name_and_type name_param[] ;
   static const int n_name_param =13; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter   
   int Nitem,Mitem;
-
+  const int dim; 
 public:
+ template<class FESpace>   
   struct Data {
+    typedef typename FESpace::Mesh Mesh;
     const Mesh * pTh; 
     CountPointer<const FESpace> Uh;
     CountPointer<const FESpace> Vh;
@@ -381,25 +383,47 @@ public:
   Problem(const C_args * ca,const ListOfId &l,size_t & top) ;
   static ArrayOfaType  typeargs() { return ArrayOfaType(true);}// all type
   
-  Data * dataptr (Stack stack) const {return   (Data *) (void *) (((char *) stack)+offset);}
+  Data<FESpace> * dataptr (Stack stack) const {return   (Data<FESpace> *) (void *) (((char *) stack)+offset);}
+  Data<FESpace3> * dataptr3 (Stack stack) const {return   (Data<FESpace3> *) (void *) (((char *) stack)+offset);}
   void init(Stack stack) const  {
     // cout << " init  " << (char *) dataptr(stack) - (char*) stack  << " " << offset <<  endl; 
-    dataptr(stack)->init();}
-  void destroy(Stack stack)  const  {dataptr(stack)->destroy();}
+    if(dim==2)
+	dataptr(stack)->init();
+    else 
+	dataptr3(stack)->init();
+      }
+  void destroy(Stack stack)  const  {
+      if(dim==2) dataptr(stack)->destroy();
+      else dataptr3(stack)->destroy();
+  }
 
-  template <class R>
-  AnyType eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & dataA,
+  template<class R,class FESpace,class v_fes>
+  AnyType eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
   MatriceCreuse< typename CadnaType<R>::Scalaire >  * & dataCadna) const;
 
   AnyType operator()(Stack stack) const
   {
-     Data *data= dataptr(stack);
+   if(dim==2)
+      {
+     Data<FESpace> *data= dataptr(stack);
     if (complextype) 
-     return eval<Complex>(stack,data,data->AC,data->AcadnaC);
+	return eval<Complex,FESpace,v_fes>(stack,data,data->AC,data->AcadnaC);
     else
-     return eval<double>(stack,data,data->AR,data->AcadnaR);
-
+     return eval<double,FESpace,v_fes>(stack,data,data->AR,data->AcadnaR);
+      }
+    
+    else if(dim==3)
+      {
+	Data<FESpace3> *data= dataptr3(stack);
+      if (complextype) 
+	  return eval<Complex,FESpace3,v_fes3>(stack,data,data->AC,data->AcadnaC);
+      else
+	  return eval<double,FESpace3,v_fes3>(stack,data,data->AR,data->AcadnaR);
+      }
+    else ffassert(0);
   }
+    
+  
   
   bool Empty() const {return false;}     
   size_t nbitem() const { return Nitem;}     

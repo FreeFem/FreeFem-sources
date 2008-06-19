@@ -6,11 +6,13 @@ Olivier Pironneau <Olivier.Pironneau@upmc.fr> and by
 Antoine Le Hyaric <lehyaric@ann.jussieu.fr>
 
 
-All its programs except files the comming from 
-   COOOL sofware (files in directory src/Algo) 
-   and the file mt19937ar.cpp 
-which may be redistributed under the terms of the
+All its programs which may be redistributed under the terms of the
 GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
+ Except files :
+   Comming form COOOL sofware (all files in directory src/Algo,
+    mailto:coool@coool.mines.edu),  no license.
+  and the file mt19937ar.cpp ( mailto:m-mat@math.sci.hiroshima-u.ac.jp )
+  with they own like license.
 
 
 		  GNU LESSER GENERAL PUBLIC LICENSE

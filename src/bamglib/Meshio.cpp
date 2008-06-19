@@ -163,10 +163,11 @@ void MeshIstream::ShowIoErr(int s) {
     in.clear(ios::failbit);
    }
 }
-int  MeshIstream::IsString(char* s)
+int  MeshIstream::IsString(const char* s)
 { 
   int n=0;
-  char c,* ss = s;
+  char c;
+  const char * ss = s;
   while (in.get(c) && c ==' ') n++; // eat whitespace 
   if (in.good())
     while ( *ss && c == *ss && in.get(c) )

@@ -32,4 +32,6 @@ GenericMesh.hpp \
 GQuadTree.hpp \
 GQuadTree.cpp \
 HeapSort.hpp \
-libmesh5.c	libmesh5.h 
+libmesh5.c \
+libmesh5.h  \
+ufunction.hpp 

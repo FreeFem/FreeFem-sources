@@ -544,9 +544,20 @@ private:
 };
 
 
-
 template<class MMesh> 
-class GFESpace : public RefCounter,  public DataFENodeDF, public UniqueffId  {
+    class BuildTFE { protected:
+	GTypeOfFE<MMesh> const * const tfe;
+    };
+
+template<class MMesh>
+struct GFESpacePtrTFE {
+    GTypeOfFE<MMesh> const * const ptrTFE;
+    GFESpacePtrTFE(GTypeOfFE<MMesh> const * const pptrTFE=0) : ptrTFE(pptrTFE) {}
+    virtual  ~GFESpacePtrTFE() { if(ptrTFE) delete ptrTFE;}
+};
+    
+template<class MMesh> 
+class GFESpace :  public RefCounter,protected GFESpacePtrTFE<MMesh>,  public DataFENodeDF, public UniqueffId  {
 public:
   typedef MMesh Mesh;
   typedef GFElement<Mesh> FElement;
@@ -558,7 +569,7 @@ public:
   typedef GQuadratureFormular<typename BorderElement::RdHat>  QFBorderElement;
 
   const Mesh &Th;
-  GTypeOfFE<Mesh> const * const ptrTFE;
+
   KN<const GTypeOfFE<Mesh> *>  TFE; 
 private:
   
@@ -587,11 +598,11 @@ public:
   
   //  par defaut P1                
   
-  GFESpace(const Mesh & TTh,const GTypeOfFE<Mesh> & tfe=DataFE<Mesh>::P1)
+    GFESpace(const Mesh & TTh,const GTypeOfFE<Mesh> & tfe=DataFE<Mesh>::P1)
     :
-  DataFENodeDF(TTh.BuildDFNumbering(tfe.ndfonVertex,tfe.ndfonEdge,tfe.ndfonFace,tfe.ndfonVolume)),
+    GFESpacePtrTFE<MMesh>(0),
+    DataFENodeDF(TTh.BuildDFNumbering(tfe.ndfonVertex,tfe.ndfonEdge,tfe.ndfonFace,tfe.ndfonVolume)),
     Th(TTh),
-    ptrTFE(0),
     TFE(1,0,&tfe), 
     cmesh(TTh),
     N(TFE[0]->N),
@@ -600,13 +611,15 @@ public:
     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
     maxNbPtforInterpolation(TFE[0]->NbPtforInterpolation),
     maxNbcoefforInterpolation(TFE[0]->NbcoefforInterpolation)
-
-  {
-      if(verbosity) cout << "  -- FESpace: Nb of Nodes " << NbOfNodes 
-			   << " Nb of DoF " << NbOfDF << endl;
+    
+    {
+	if(verbosity) cout << "  -- FESpace: Nb of Nodes " << NbOfNodes 
+	    << " Nb of DoF " << NbOfDF << endl;
     }
-  
-  
+    
+  GFESpace(const GFESpace & Vh,int kk);
+  GFESpace(const GFESpace ** Vh,int kk);
+    
   int FirstDFOfNode(int i) const {return FirstDfOfNodeData ? FirstDfOfNodeData[i] : i*Nproduit;}
   int LastDFOfNode(int i)  const {return FirstDfOfNodeData ? FirstDfOfNodeData[i+1] : (i+1)*Nproduit;}
   int NbDFOfNode(int i)  const {return FirstDfOfNodeData ? FirstDfOfNodeData[i+1]-FirstDfOfNodeData[i] : Nproduit;}
@@ -747,7 +760,11 @@ public:
   KN<int> NN,DF,comp,numPtInterpolation;
  
   GTypeOfFESum(const KN< GTypeOfFE<Mesh> const *> & t);
-
+  GTypeOfFESum(const GFESpace<Mesh> **,int kk);
+  GTypeOfFESum(const GFESpace<Mesh> &,int kk);
+    
+  void Build();  // the true constructor 
+    
   void init(InterpolationMatrix<RdHat> & M,FElement * pK=0,int odf=0,int ocomp=0,int *pp=0) const;
    
   void FB(const What_d whatd,const Mesh & Th,const Element & K,const Rd &P, KNMK_<R> & val) const ;

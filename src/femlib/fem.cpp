@@ -950,7 +950,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	{ 
 	    const Triangle & K(triangles[it]);
 	    kthrough++;
-	    if (k++>=1000) 
+	    if (k++>=10000) 
 	    {
 		/* cout << P << endl;
 		reffecran();
@@ -958,7 +958,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 		triangles[its].Fill(2);
 		DrawMark(P,0.01);
 		rattente(1);  */
-		ffassert(k++<1000);
+		ffassert(k++<10000);
 	    }
 	    int kk,n=0,nl[3];
 	    

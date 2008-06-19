@@ -216,7 +216,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-EXTRA_DIST = ARmake.m4
+EXTRA_DIST = ARmake.m4 arpack-patch-lapack.tar.gz 
 all: all-am
 
 .SUFFIXES:

@@ -90,7 +90,7 @@ class OptimAlgo : public OneOperator
     long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
     R arg(int i,Stack stack,R a) const{ return nargs[i] ? GetAny<R>( (*nargs[i])(stack) ): a;}
     
-    class lgNRJ : public NRJ<PARAM,VECT,VMAT,REAL> {
+    class lgNRJ : public tNRJ<PARAM,VECT,VMAT,REAL> {
     private:
       Stack stack;
       Expression J,dJ,hJ,theparame;
@@ -105,7 +105,7 @@ class OptimAlgo : public OneOperator
     public:
 
       lgNRJ(Stack s,int n,Expression t,Expression JJ,Expression dJJ,Expression hJJ) 
-	: NRJ<PARAM,VECT,VMAT,REAL>(n), stack(s),
+	: tNRJ<PARAM,VECT,VMAT,REAL>(n), stack(s),
 	  J(JJ),dJ(dJJ),hJ(hJJ),theparame(t),
 	  gg(0)  
       { 

@@ -88,6 +88,10 @@ namespace EF23 {
   template<class Vertex>    
   Vertex *  GTree<Vertex>::NearestVertex(Zd xyi)//long xi,long yj)
   {
+    // warning this function return the NearestVertex in the first
+    // none empty box contening the point xyi.
+    //   They do not return the true nearest point in classical norm.
+      
     QuadTreeBox * pb[ MaxDeep ];
     int  pi[ MaxDeep  ];
     Zd pp[  MaxDeep ];
@@ -533,7 +537,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   
   
   inline    int nRand(int n) {
-    return  (rand()*n)/(RAND_MAX+1);
+    return  random()%n;
   }
   
   inline int find5(int i,int *k,int l)
