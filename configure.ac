@@ -1362,6 +1362,7 @@ AC_OUTPUT(Makefile
 	examples++-chapt3/Makefile
 	examples++-bug/Makefile
 	examples++-other/Makefile
+	examples++-3d/Makefile
 	DOC/Makefile)
         AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
 	AC_MSG_NOTICE([	 	 --  Dynamic load facility: $ff_dynload ])

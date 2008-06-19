@@ -26,15 +26,16 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #define FF_GRAPH_SET_PTR
-#include <time.h>
-#include <stdlib.h>
-#include <stdio.h>
+using namespace std;
+#include <ctime>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <cassert>
 #include "rgraph.hpp"
 
 #include "error.hpp"
-using namespace std;
 #ifdef macintoshxx
 #include <ConditionalMacros.h>
 #include <unix.h>

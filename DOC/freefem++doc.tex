@@ -1200,7 +1200,7 @@ verbosity =0; // to remove all default output
 @for(@int n=0;n<2;n++)
 {
   @mesh Th=buildmesh(Gamma1(20*(n+1))+Gamma2(10*(n+1)));
-  @fespace Vh(Th,P1); 
+  @fespace Vh(Th,P2); 
    Vh phi,w;
   
   @solve laplace(phi,w)=int2d(Th)(dx(phi)*dx(w) + dy(phi)*dy(w))
@@ -1221,9 +1221,9 @@ verbosity =0; // to remove all default output
 the output is
 \bFF
 
- L2error 0 = 0.00699498
- L2error 1 = 0.00182818
- convergence rate = 1.93591
+ L2error 0 = 0.00462991
+ L2error 1 = 0.00117128
+ convergence rate = 1.9829
 times: compile 0.02s, execution 6.94s
 \eFF
 

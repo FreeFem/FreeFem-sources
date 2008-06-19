@@ -1735,8 +1735,8 @@ void Check(const Opera &Op,int N,int  M)
 	      long li=Ku.dfcend(icomp);
 	      long fj=Ku.dfcbegin(jcomp);
 	      long lj=Ku.dfcend(jcomp);
-	      if (verbosity>=100 && Ku.Vh.Th(T) < 1 && npi < 1)
-		cout << "##ic "<< icomp << fi<< " "<< lj << " "<< " c "<< jcomp << " " <<fj << " "<< lj << endl; 
+	      if (Ku.Vh.Th(T) < 1 && npi < 1)
+		cout << " ic "<< icomp << fi<< " "<< lj << " "<< " c "<< jcomp << " " <<fj << " "<< lj << endl; 
 	      for ( i=fi;  i<li;   i++ )  
 		for ( j=fj;  j<min(lj,i+1);  j++ ) // 
 		  {
@@ -3282,14 +3282,20 @@ bool isSameMesh(const list<C_F0> & largs,const void * Thu,const void * Thv,Stack
   return true;
 } 
 
-template<class R>
+template<class R,class FESpace,class v_fes>
 void InitProblem( int Nb, const FESpace & Uh,
                                const FESpace & Vh,
 		  KN<R> *&B,KN<R> *&X,vector<  pair< FEbase<R,v_fes> * ,int> > &u_hh,
                  TypeSolveMat    *typemat ,
 		  vector<  FEbase<R,v_fes> *  > & u_h,const FESpace ** LL, bool initx )
 {
-
+    typedef typename  FESpace::Mesh Mesh;
+    typedef typename  FESpace::FElement FElement;
+    typedef typename  Mesh::Element Element;
+    typedef typename  Mesh::Vertex Vertex;  
+    typedef typename  Mesh::RdHat RdHat;  
+    typedef typename  Mesh::Rd Rd;  
+    
   *B=R();
   
 //  bool initx = typemat->t==TypeSolveMat::GC;
@@ -3548,10 +3554,16 @@ template<class R>
    return 0;   
   }      
   
-template<class R>   
-void   DispatchSolution(const Mesh & Th,int Nb, vector<  FEbase<R,v_fes> * > & u_h,KN<R> * X,KN<R> * B,const FESpace **  LL,const FESpace &  Uh)
+template<class R,class FESpace,class v_fes>   
+void   DispatchSolution(const typename FESpace::Mesh & Th,int Nb, vector<  FEbase<R,v_fes> * > & u_h,KN<R> * X,KN<R> * B,const FESpace **  LL,const FESpace &  Uh)
   {
-  
+      typedef typename  FESpace::Mesh Mesh;
+      typedef typename  FESpace::FElement FElement;
+      typedef typename  Mesh::Element Element;
+      typedef typename  Mesh::Vertex Vertex;  
+      typedef typename  Mesh::RdHat RdHat;  
+      typedef typename  Mesh::Rd Rd;  
+      
    // dispatch the solution 
   if (Nb==1)  {
     *(u_h[0])=X;
@@ -3596,10 +3608,17 @@ TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::LU;
 #endif
 
 
-template<class R>
-AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & dataA, 
+template<class R,class FESpace,class v_fes>
+AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA, 
       MatriceCreuse< typename CadnaType<R>::Scalaire >   * & cadnamat ) const
 {  
+    typedef typename  FESpace::Mesh Mesh;
+    typedef typename  FESpace::FElement FElement;
+    typedef typename  Mesh::Element Element;
+    typedef typename  Mesh::Vertex Vertex;  
+    typedef typename  Mesh::RdHat RdHat;  
+    typedef typename  Mesh::Rd Rd;  
+    
   using namespace Fem2D;
   typedef typename CadnaType<R>::Scalaire R_st;
   MeshPoint *mps= MeshPointStack(stack),mp=*mps;
@@ -3732,7 +3751,7 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
   bool initx = true; //typemat->t==TypeSolveMat::GC ; //  make x and b different in all case 
   // more safe for the future ( 4 days lose with is optimization FH )
 
-  InitProblem(  Nb,  Uh, Vh, B, X,u_hh,typemat , u_h,  LL,  initx);
+  InitProblem<R,FESpace,v_fes>(  Nb,  Uh, Vh, B, X,u_hh,typemat , u_h,  LL,  initx);
 
   if(verbosity>2) cout << "   Problem(): initmat " << initmat << " VF (discontinuous Galerkin) = " << VF << endl;
   
@@ -3836,10 +3855,10 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
    {
      if(verbosity) cout << " catch an erreur in  solve  =>  set  sol = 0 !!!!!!! "   <<  endl;
      *X=R(); // erreur set the sol of zero ???? 
-     DispatchSolution(Th,Nb,u_h,X,B,LL,Uh);
+     DispatchSolution<R,FESpace,v_fes>(Th,Nb,u_h,X,B,LL,Uh);
      throw ; 
    }
-   DispatchSolution(Th,Nb,u_h,X,B,LL,Uh);
+   DispatchSolution<R,FESpace,v_fes>(Th,Nb,u_h,X,B,LL,Uh);
   
  
   if (verbosity) 
@@ -3856,8 +3875,39 @@ AnyType Problem::eval(Stack stack,Data * data,CountPointer<MatriceCreuse<R> > & 
 
 
 
-
-
+int dimProblem(const ListOfId &l)
+{
+    int dim=2;
+    int nb=l.size(),n=0,nbarray=0;
+    const UnId *p1;
+    if(nb>0) 
+      {
+	  if (l[0].array) 
+	    {
+		ListOfId * array=l[0].array;
+		if(array->size()>0)
+		  {
+		      const UnId & idi( (*array)[0]);
+		      if (idi.r == 0 && idi.re  == 0 && idi.array==0 ) 
+			{
+			    C_F0 c=::Find( idi.id);
+			    if(BCastTo<pf3c>(c) ) dim=3;
+			    if(BCastTo<pf3r>(c) ) dim=3;	
+			}
+		  }
+	    }
+	  else 
+	    {
+		C_F0 c=::Find(l[0].id);
+		if(BCastTo<pf3c>(c) ) dim=3;
+		if(BCastTo<pf3r>(c) ) dim=3;	  
+	    }
+	  
+      }
+    return dim;
+    
+}
+template<class pfer,class pfec>
 bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,int n_name_param,
                       Expression *nargs,int & N,int & M,  vector<Expression> & var )
 {
@@ -4048,12 +4098,18 @@ Problem::Problem(const C_args * ca,const ListOfId &l,size_t & top) :
   op(new C_args(*ca)),
   var(l.size()),
   VF(false), 
-  offset(align8(top))
+  offset(align8(top)),
+  dim(dimProblem(l))
 {
-  SHOWVERB(cout << "Problem : -----------------------------" << top << endl);
-  top = offset + sizeof(Data);
-  bool iscomplex=GetBilinearParam(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
-  
+  // cout << "Problem : -----------------------------" << top << " dim = " << dim<< endl;
+  top = offset + max(sizeof(Data<FESpace>),sizeof(Data<FESpace>));
+    
+    bool iscomplex;
+    if(dim==2)
+	iscomplex=GetBilinearParam<pfer,pfec>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
+    else if (dim==3) 
+ 	iscomplex=GetBilinearParam<pf3r,pf3c>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
+    else ffassert(0); // bug 
         
   precon = 0; //  a changer 
   if ( nargs[3])

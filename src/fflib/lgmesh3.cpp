@@ -501,7 +501,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
   FEbase<K,v_fes> ** pp=GetAny< FEbase<K,v_fes> **>((*ppfe)(s));
   FEbase<K,v_fes> & fe(**pp);
   const  FESpace & Vh(*fe.newVh());
-  KN<K> gg(Vh.MaximalNbOfDF()); 
+ // KN<K> gg(Vh.MaximalNbOfDF()); 
   
   
   const  Mesh & Th(Vh.Th);
@@ -573,7 +573,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
 	   FElement Kt(Vh[t]);
 	   int nbdf=Kt.NbDoF();
 	   
-	   gg=K();
+	   //gg=K();
 	   
 	   for (int p=0;p<ipmat.np;p++)
 	     {
@@ -594,7 +594,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
            
 	   Kt.Pi_h(Vp,Vdf,ipmat);  
 	   for (int df=0;df<nbdf;df++)         
-	     yy[Kt(df)] =  gg[df] ;
+	     yy[Kt(df)] =  Vdf[df] ;
 	   
 	   sptr->clean(); // modif FH mars 2006  clean Ptr          
 	 } 

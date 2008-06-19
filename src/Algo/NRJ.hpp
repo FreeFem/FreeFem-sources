@@ -8,7 +8,7 @@
 // pas d'opérateur =
 
 template <class Param, class Vect, class Mat,class Real>
-class NRJ{
+class tNRJ{
 protected:
 
   int				nappel_val;
@@ -22,13 +22,13 @@ protected:
   
 public:
 
-  // Attention : dans le constructeur de l'NRJ, il faut vraiment
+  // Attention : dans le constructeur de l'tNRJ, il faut vraiment
   // initialiser grad ou hess, si on les utilise... Ce n'est pas
   // fait ici (parce que l'initialisation dépend trop du type)
-  NRJ(int);
-  virtual ~NRJ();
+  tNRJ(int);
+  virtual ~tNRJ();
   
-  // à preciser pour chaque fonction NRJ
+  // à preciser pour chaque fonction tNRJ
   virtual Real Val(const Param&) = 0;
   
   Real getVal(const Param&);
@@ -52,14 +52,14 @@ public:
 };
 
 template <class Param, class Vect, class Mat,class Real>
-NRJ<Param,Vect, Mat, Real>::~NRJ()
+tNRJ<Param,Vect, Mat, Real>::~tNRJ()
 {
   if (grad!=NULL) delete grad;
   if (hess!=NULL) delete hess;
 }
 
 template <class Param, class Vect, class Mat,class Real>
-NRJ<Param,Vect, Mat, Real>::NRJ(int n)
+tNRJ<Param,Vect, Mat, Real>::tNRJ(int n)
 {
   nparam=n;
   nappel_val=0;
@@ -71,34 +71,34 @@ NRJ<Param,Vect, Mat, Real>::NRJ(int n)
 }
 
 template <class Param, class Vect, class Mat,class Real>
-Real NRJ<Param,Vect, Mat, Real>::getVal(const Param& p)
+Real tNRJ<Param,Vect, Mat, Real>::getVal(const Param& p)
 {
 	nappel_val++;
 	return Val(p);
 }
 
 template <class Param, class Vect, class Mat,class Real>
-Vect* NRJ<Param,Vect, Mat, Real>::getGradient(const Param& p)
+Vect* tNRJ<Param,Vect, Mat, Real>::getGradient(const Param& p)
 {
 	nappel_grad++;
 	return Gradient(p);
 }
 
 template <class Param, class Vect, class Mat,class Real>
-Vect* NRJ<Param,Vect, Mat, Real>::Gradient(const Param&)
+Vect* tNRJ<Param,Vect, Mat, Real>::Gradient(const Param&)
 {
   return NULL;
 }
 
 template <class Param, class Vect, class Mat,class Real>
-Mat* NRJ<Param,Vect, Mat, Real>::getHessian(const Param& p)
+Mat* tNRJ<Param,Vect, Mat, Real>::getHessian(const Param& p)
 {
 	nappel_hess++;
 	return Hessian(p);
 }
 
 template <class Param, class Vect, class Mat,class Real>
-Mat* NRJ<Param,Vect, Mat, Real>::Hessian(const Param&)
+Mat* tNRJ<Param,Vect, Mat, Real>::Hessian(const Param&)
 {
   return NULL;
 }

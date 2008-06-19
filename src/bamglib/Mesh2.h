@@ -807,7 +807,7 @@ public:
   Triangles(const Triangles &,const int *flag,const int *bb); // truncature
   
 
-  void SetIntCoor(char * from =0);
+  void SetIntCoor(const char * from =0);
 
  // void  RandomInit();
  // void  CubeInit(int ,int);

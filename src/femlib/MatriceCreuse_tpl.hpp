@@ -1,6 +1,7 @@
 #ifndef  MatriceCreuse_tpl_
 #ifndef  MatriceCreuse_h_
 #include "MatriceCreuse.hpp"
+#include <limits>
 #include <set>
 #include <list>
 #include <map>
@@ -56,6 +57,7 @@ template<> inline  complex<float> blas_sdot(const int n,const  complex<float> *s
 #endif
 //  end modif FH
 using Fem2D::HeapSort;
+using std::numeric_limits;
 
 //  -----------
 template<class FElement>

@@ -35,6 +35,7 @@
 #include <set>
 #include <vector>
 #include <cstdio>
+#include <cstring>
 #include <complex>
 
 #include  <cmath>

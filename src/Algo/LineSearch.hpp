@@ -30,7 +30,7 @@ public:
 	typedef M Mat;
 	typedef P Param;
 	typedef V Vect;
-	typedef  NRJ<Param,Vect,VMat,Real> NRJ;
+	typedef  tNRJ<Param,Vect,VMat,Real> NRJ;
 
 private:
   //ne sert que si on calcule le gradient de manière numérique

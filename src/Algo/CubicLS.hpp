@@ -31,7 +31,7 @@ class CubicLineSearch : public LS
   typedef typename LS::Vect Vect;
   typedef typename LS::VMat VMat;
   typedef LS  LineSearch;
-  typedef NRJ<Param,Vect,VMat,Real> NRJ;
+  typedef tNRJ<Param,Vect,VMat,Real> NRJ;
 public:
   //a constructor with the default delta
   CubicLineSearch(NRJ* f, int iter);

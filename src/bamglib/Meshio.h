@@ -104,7 +104,7 @@ public:
   } */
   int eof(){return in.eof();}
   ~MeshIstream(){delete &in;}
-  int IsString(char* s);
+  int IsString(const char* s);
   char * ReadStr();
   MeshIstream&   operator>>(short& i)   { cm() >> i ;return err();}
   MeshIstream&   operator>>(long& i)   { cm() >> i ;return err();}

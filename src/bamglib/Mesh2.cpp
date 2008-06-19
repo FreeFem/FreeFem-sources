@@ -4045,7 +4045,7 @@ Triangles::~Triangles()
   
 }
 
-void Triangles::SetIntCoor(char * strfrom)
+void Triangles::SetIntCoor(const char * strfrom)
 {
     pmin =  vertices[0].r;
     pmax =  vertices[0].r;

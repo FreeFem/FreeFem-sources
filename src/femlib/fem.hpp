@@ -1,11 +1,12 @@
 #ifndef FEM2_H_
 #define FEM2_H_
 #include <string> 
+#include <cstring> 
 #include "RefCounter.hpp"
 #include "Serialize.hpp"
 // some usefull function 
 
-typedef double R;
+//typedef double R;
 
 
 template<class K> class KN_;
@@ -25,6 +26,8 @@ template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(M
 #include "ufunction.hpp" 
 inline double norm(double x){return x*x;} 
 inline float norm(float x){return x*x;}
+#include <utility>
+#include <algorithm>
 
 // definition R
 namespace Fem2D 
@@ -54,7 +57,6 @@ inline R3 Maxc(const R3 & A,const R3& B,const R3& C) { return R3(Max(A.x,B.x,C.x
 // def de numerotation dans un triangles direct sens (trigo)
 // the edge is oposite of the vertex
 ////  [3] is a edge
-#include <algorithm>
 //#include <Functional>
 struct SortedTriplet {
     static const int  empty = -1;
@@ -619,7 +621,7 @@ inline R2 minmax(const R2 & a,const R2 & b)
 
 }
 
-
+using Fem2D::R; 
 
 #include "FQuadTree.hpp"
 
