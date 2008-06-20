@@ -1,13 +1,13 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
+#include <map>
 #include "libmesh5.h"
 #include "ufunction.hpp"
 #include "error.hpp"
 #include "RNM.hpp"
-#include<stdlib.h>
+#include <stdlib.h>
 #include "ufunction.hpp"
-#include "Mesh2dn.hpp"
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
 #include "rgraph.hpp"
@@ -16,8 +16,6 @@
 using namespace std;
 using namespace Fem2D;
 #include "LayerMesh.hpp"
-
-
 
 // valeur absolue
 // chercher inferieure ou egale + pi
@@ -105,7 +103,7 @@ void discretisation_max_mesh(const int choix,  const Mesh & Th2, int & Nmax){
   }
   Nmax=4;*/
   for(int ii=0; ii < Th2.nv; ii++){
-     const  Vertex2 & P = Th2.vertices[ii];
+     const  Mesh::Vertex & P = Th2.vertices[ii];
      Ni   = Ni_func_mesh( choix, P.x, P.y); 
   	 Nmax = max(Ni,Nmax);
   }
@@ -114,7 +112,7 @@ void discretisation_max_mesh(const int choix,  const Mesh & Th2, int & Nmax){
 void tab_zmin_zmax_Ni_mesh(const int choix, const Mesh & Th2, int & Nmax,double *tab_zmin, double *tab_zmax,int *tab_Ni){
    Nmax = 0;	
    for(int ii=0; ii < Th2.nv; ii++){
-	 const  Vertex2 & P = Th2.vertices[ii];
+	 const  Mesh::Vertex & P = Th2.vertices[ii];
      tab_Ni[ii] = Ni_func_mesh( choix, P.x, P.y);
 	 tab_zmin[ii] = zmin_func_mesh( choix, P.x, P.y );
      tab_zmax[ii] = zmax_func_mesh( choix, P.x, P.y );    
@@ -141,13 +139,141 @@ void Tet_mesh3_mes_neg(Mesh3 & Th3){
     R3 D(Th3.vertices[iv[3]]);
     double mes=det(A,B,C,D)/6.;
     Th3.t(ii).set(Th3.vertices, iv, lab,mes);	
-	}	
+	}
 }
 
+//=======================================================================//
+//   Rajout pour s'assurer un unique label pour les vertices
+//=======================================================================//
 
+	void build_layer_map_tetrahedra(const Mesh &Th2, map<int, int> &maptet ){
+		
+		int numero_label=0;
+		//cout << "in: buil_layer_map_tetrahedra" << endl;
+		for(int ii=0; ii< Th2.nt; ii++){
+			//cout << "ii= " << ii  << "Th2.nt=" << Th2.nt <<endl; 
+			const  Mesh::Triangle & K(Th2.t(ii));
+			map<int,int>::const_iterator imap=maptet.find(K.lab);
+			//cout << "K.lab= " << K.lab << endl; 
+			if(imap == maptet.end()){
+				maptet[ K.lab ] = numero_label;
+				numero_label = numero_label+1;
+			}
+		}
+		cout << "number of tetraedra label=" << numero_label << endl;
+	}
+	void build_layer_map_triangle(const Mesh &Th2, map<int, int> &maptrimil, map<int, int> &maptrizmax, map<int, int> &maptrizmin ){
+		
+		int numero_label=0;
+		//cout << "in: buil_layer_map_triangle" << endl;
+		for(int ii=0; ii< Th2.nt; ii++){
+			const Mesh::Triangle & K(Th2.t(ii));
+			map<int,int>::const_iterator imap=maptrizmax.find(K.lab);
+			
+			if(imap == maptrizmax.end()){
+				maptrizmax[ K.lab ] = numero_label;
+				numero_label = numero_label+1;
+			}
+		}
+		
+		for(int ii=0; ii< Th2.nt; ii++){
+			const Mesh::Triangle & K(Th2.t(ii));
+			map<int,int>::const_iterator imap=maptrizmin.find(K.lab);
+			
+			if(imap == maptrizmin.end()){
+				maptrizmin[ K.lab ] = numero_label;
+				numero_label = numero_label+1;
+			}
+		}
+		
+		for(int ii=0; ii< Th2.neb; ii++){
+			const Mesh::BorderElement & K(Th2.be(ii));
+			map<int,int>::const_iterator imap=maptrimil.find(K.lab);
+			
+			if(imap == maptrimil.end()){
+				maptrimil[ K.lab ] = numero_label;
+				numero_label = numero_label+1;
+			}
+		}
+		
+		map< int, int> :: iterator ip;
+		cout << "maptrizmax." << endl;
+		for( ip=maptrizmax.begin() ; ip != maptrizmax.end(); ip++){
+			  cout << ip-> first << "<->" << ip ->second << endl;
+		}
+		 
+		//map< int, int> :: iterator ip;
+		cout << "maptrizmin." << endl;
+		for( ip=maptrizmin.begin() ; ip != maptrizmin.end(); ip++){
+			  cout << ip-> first << "<->" << ip ->second << endl;
+		}
+		
+		
+		cout << "number of triangle label =" << numero_label << endl;
+	}
+	
+	void build_layer_map_edge(const Mesh &Th2, map<int, int> &mapemil, map<int, int> &mapezmax, map<int, int> &mapezmin ){
+		
+		int numero_label=0;
+		
+		for(int ii=0; ii< Th2.neb; ii++){
+			const Mesh::BorderElement & K(Th2.be(ii));
+			map<int,int>::const_iterator imap1=mapezmax.find(K.lab);
+			map<int,int>::const_iterator imap2=mapemil.find(K.lab);
+			map<int,int>::const_iterator imap3=mapezmin.find(K.lab);
+			
+			if(imap1 == mapezmax.end()){
+				mapezmax[ K.lab ] = numero_label;
+				numero_label = numero_label+1;
+			}
+			
+			if(imap2 == mapemil.end()){
+				mapemil[ K.lab ] = numero_label;
+				numero_label = numero_label+1;
+			}
+			
+			if(imap3 == mapezmin.end()){
+				mapezmin[ K.lab ] = numero_label;
+				numero_label = numero_label+1;
+			}
+			
+		}
+		/*
+		for(int ii=0; ii< Th2.neb; ii++){
+			const Mesh::BorderElement & K(Th2.be(ii));
+			map<int,int>::const_iterator imap=mapezmin.find(K.lab);
+			if(imap == mapezmin.end()){
+				mapezmin[ K.lab ] = numero_label;
+				numero_label = numero_label+1;
+			}
+		}
+		
+		for(int ii=0; ii< Th2.neb; ii++){
+			const Mesh::BorderElement & K(Th2.be(ii));
+			map<int,int>::const_iterator imap=mapemil.find(K.lab);
+			
+			if(imap == mapemil.end()){
+				mapemil[ K.lab ] = numero_label;
+				numero_label = numero_label+1;
+			}
+		}
+		
+		cout << "number of Edge label =" << numero_label << endl;
+		map< int, int> :: iterator ip;
+		cout << "mapezmin." << endl;
+		for( ip=mapezmin.begin() ; ip != mapezmin.end(); ip++){
+		cout << ip-> first << "<->" <<ip ->second << endl;
+		}
+		*/
+		
+	}
+	
+	
+Mesh3 * build_layer (const Mesh & Th2, const int Nmax, const int *tab_Ni, 
+		const double *tab_zmin, const double *tab_zmax, 
+		const map<int, int> &maptet, const map<int, int> &maptrimil, const map<int, int> &maptrizmax, const map<int, int> &maptrizmin, 
+		const map<int, int> &mapemil, const map<int, int> &mapezmax, const map<int, int> &mapezmin ){
 
-Mesh3 * build_layer (const Mesh & Th2, const int Nmax, const int *tab_Ni,
-		     const double *tab_zmin, const double *tab_zmax){
   int MajSom, MajElem, MajBord2D;     
   Mesh3 *Th3=new Mesh3;
   NbSom3D_NbElem3D_NbBord2D_mesh_product_mesh_tab( Nmax, tab_Ni, Th2, MajSom, MajElem, MajBord2D);   
@@ -157,7 +283,8 @@ Mesh3 * build_layer (const Mesh & Th2, const int Nmax, const int *tab_Ni,
   Th3->set(MajSom,MajElem,MajBord2D);
   
   cout << "debut :   Som3D_mesh_product_Version_Sommet_mesh_tab( Nmax, tab_Ni, tab_zmin, tab_zmax, Th2, Th3);   "<< endl;
-  Som3D_mesh_product_Version_Sommet_mesh_tab( Nmax, tab_Ni, tab_zmin, tab_zmax, Th2, *Th3);    
+  Som3D_mesh_product_Version_Sommet_mesh_tab( Nmax, tab_Ni, tab_zmin, tab_zmax, Th2, 
+			maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin, *Th3);    
   return Th3;
 }
 
@@ -185,18 +312,22 @@ void NbSom3D_NbElem3D_NbBord2D_mesh_product_mesh_tab(const int Nmax, const int *
  
   for(int ii=0; ii < Th2.neb;ii++)
     {
-      const Mesh::BorderElement  & K(Th2.be(ii));
-      for(int jj=0; jj < 2; jj++)
-	{  
-	  // i  = A2D.ElemBord1D[ii][jj];
-	  i=Th2(K[jj]); 
-	  MajBord2D = MajBord2D + tab_Ni[i];
-	  assert( tab_Ni[i] <= Nmax);	
-	}
+	    const Mesh::BorderElement  & K(Th2.be(ii));
+	    for(int jj=0; jj < 2; jj++)
+		{  
+			// i  = A2D.ElemBord1D[ii][jj];
+			i=Th2(K[jj]); 
+			MajBord2D = MajBord2D + tab_Ni[i];
+			assert( tab_Ni[i] <= Nmax);	
+		}
     }
 }
 
-void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_Ni, const double *tab_zmin, const double *tab_zmax, const Mesh &Th2, Mesh3 & Th3){
+void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, 
+			const int *tab_Ni, const double *tab_zmin, const double *tab_zmax, const Mesh &Th2, 
+			const map<int, int> &maptet, const map<int, int> &maptrimil, const map<int, int> &maptrizmax, const map<int, int> &maptrizmin, 
+			const map<int, int> &mapemil, const map<int, int> &mapezmax, const map<int, int> &mapezmin, 
+			Mesh3 & Th3){
   // intent(in)  Nmax,Mesh &A2D
   // intent(out) Mesh3 &A3D
   
@@ -224,38 +355,84 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
   int Ni_elem[3]; 
   int DiagMax1,DiagMax2;
 
- 
+  // determination of maximum label for vertices 
   NumSommet = 0;
 
   for( int ii=0; ii < Th2.nv; ii++){
-    const  Vertex2 & P = Th2.vertices[ii];
+    const  Mesh::Vertex & P = Th2.vertices[ii];
 
     val_zmin = tab_zmin[ii];
     val_zmax = tab_zmax[ii];    
     Ni       = tab_Ni[ii];
 
    
-    val_dz = (val_zmax - val_zmin)/Ni;
-    if( Ni == 0) val_dz = 0.;
+    //val_dz = (val_zmax - val_zmin)/Ni;
+    if( Ni == 0){
+	     val_dz = 0.;
+	 }
+     else{
+	     val_dz = (val_zmax - val_zmin)/Ni;
+	 }
+     
 
     tab_NumSommet[ii] = NumSommet; // Numero du premier sommet 3D associé au sommet 2D ii.
-	//cout << "ii, tab_NumSommet[ii]= "<< ii <<" "<< tab_NumSommet[ii] << endl;
+    //cout << "ii, tab_NumSommet[ii]= "<< ii <<" "<< tab_NumSommet[ii] << endl;
+    
     for(int j=0; j <= Ni; j++){ //changer
       Th3.vertices[NumSommet].x = P.x; 
       Th3.vertices[NumSommet].y = P.y; 
       Th3.vertices[NumSommet].z = val_zmin + val_dz*j;
 
       Th3.vertices[NumSommet].lab = P.lab; 
-      if(j==0)  Th3.vertices[NumSommet].lab = 5;
-      if(j==Ni) Th3.vertices[NumSommet].lab = 6;      
-    
+      // cas maillage du bas et du haut, on un nouveau label
+      if(j==0)  Th3.vertices[NumSommet].lab = P.lab ;
+      if(j==Ni) Th3.vertices[NumSommet].lab = P.lab ;      
       NumSommet = NumSommet+1;
     }
-   	
+  
   }
   tab_NumSommet[Th2.nv] = NumSommet;
 
   assert( NumSommet == Th3.nv );
+  
+  /*********************************/
+  /*  new label for edges of cube  */
+  /*********************************/ 
+  /*
+  cout << " new label for edges of cubes  " << endl;
+  for(int ii=0; ii < Th2.neb; ii++){ 
+	const Mesh::BorderElement & K(Th2.be(ii));
+	int ib[2];
+	ib[0] = Th2.operator()(K[0]);
+    ib[1] = Th2.operator()(K[1]);  
+    //map<int,int>:: const_iterator imap;
+    
+    for(int kk=0; kk<2;kk++){
+	    // label zmin
+	    map<int,int>:: const_iterator imap1;
+	    imap1=mapezmin.find( K.lab );
+
+	    assert( imap1!=mapezmin.end() );
+	    Th3.vertices[ tab_NumSommet[ib[kk]] ].lab = imap1->second;  
+	       
+	    // label zmax
+	    map<int,int>:: const_iterator imap2;
+	    imap2=mapezmax.find( K.lab );
+	    assert( imap2!=mapezmax.end() );
+	       
+	    Th3.vertices[ tab_NumSommet[ ib[kk] ] + tab_Ni[ib[kk]] ].lab = imap2->second; 
+	       
+	       // label côté
+	     map<int,int>:: const_iterator imap3;
+	     imap3=mapemil.find ( K.lab );
+	     assert( imap3!=mapemil.end() );
+	       
+	     for(int jj=1; jj < tab_Ni[ib[kk]]; jj++){
+		       Th3.vertices[ tab_NumSommet[ ib[kk] ] + jj ].lab = imap3->second;
+		 }
+		 }
+  }
+  */
   
   
   //=======================================================================
@@ -274,50 +451,38 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
   for(int ii=0; ii < Th2.nt; ii++){
     int ijj[3];
     const Mesh::Element & K(Th2.t(ii));
-    int lab=6;
-    
+    int lab;
+    map<int,int>::const_iterator imap=maptrizmax.find(K.lab);
+	assert( imap!=maptrizmax.end() );
+	lab=imap->second;
+   
     for(int kk=0; kk < 3; kk++){
-	  ijj[kk] = Th2.operator()(K[kk]);  
-      ijj[kk] = tab_NumSommet[ijj[kk]+1]-1;
-	}
-    
-	/*
-	for(int kk=0; kk <3; kk++){
-		if(ijj[kk] == 289 ){
-			for(int kk1=0; kk1 <3 ;kk1++){
-				if(ijj[kk1] == 359){
-			 		cout << "289--359" << "ijj=" << ijj[0] << " "<< ijj[1] << " " << ijj[2] <<endl;
-			 		
-		 		}
-			} 
-		}
-	}	
-	*/
-	   
+	  ijj[kk] = Th2.operator()(K[kk]);
+	  ijj[kk] = tab_NumSommet[ijj[kk]+1]-1;
+    }
+     
     Th3.be(ElemBord).set(Th3.vertices,ijj,lab);
     
     ElemBord = ElemBord+1;
   }
 
   cout << "bord en zmin" << endl;
-  // bord definis en zmin
-
+ 
   for(int ii=0; ii < Th2.nt; ii++){
     int ijj[3],bjj[3];
     const Mesh::Element & K(Th2.t(ii));
-    int lab=5;
+    int lab; 
+    map<int,int>::const_iterator imap=maptrizmin.find(K.lab);
+	assert( imap!=maptrizmin.end() );
+	lab = imap->second; 
     
+  
     for(int kk=0; kk < 3; kk++){
 	  ijj[2-kk] = Th2.operator()(K[kk]);
-	  bjj[2-kk] = ijj[2-kk] ;	  
-      ijj[2-kk] = tab_NumSommet[ijj[2-kk]];
-	}
-	/*
-	for(int kk=0; kk < 3; kk++){
-		if(ijj[kk] == 220) cout << "220: ijj: " << ijj[0] << " " << ijj[1] << " " << ijj[2] << endl;
-		if(ijj[kk] == 280) cout << "280: ijj: " << ijj[0] << " " << ijj[1] << " " << ijj[2] << endl;
-	}
-	*/	
+	  bjj[2-kk] = ijj[2-kk] ;
+	  ijj[2-kk] = tab_NumSommet[ijj[2-kk]];
+	  }
+
     Th3.be(ElemBord).set(Th3.vertices,ijj,lab);
 
     ElemBord = ElemBord+1;
@@ -329,9 +494,11 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
     int ijj[3];
 	
     const Mesh::BorderElement & K(Th2.be(ii));
-	int lab = K.lab;
+	int lab;
 	
-	/*int lab = 0;*/
+	map<int,int>::const_iterator imap=maptrimil.find(K.lab);
+	assert( imap!=maptrimil.end() );
+	lab=imap->second;
 
     i_ind1  = Th2.operator()(K[0]);
     i_ind2  = Th2.operator()(K[1]);
@@ -498,10 +665,14 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
 	  == voir hecht routine
 
       */
-    const Mesh::Element & K(Th2.t(ii));
+      const Mesh::Element & K(Th2.t(ii));
       int somv[4];
-      int K_jj[3]; 
-      int lab=0;
+      int K_jj[3];
+      int lab;
+      
+      map<int,int>::const_iterator imap=maptet.find(K.lab); 
+      assert( imap != maptet.end() );
+      lab=imap->second;
      
       // valeur de Nombre de points
       for(int jj=0; jj <3; jj++){
@@ -509,23 +680,20 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, const int *tab_N
         Ni_elem[jj] = tab_Ni[ K_jj[jj] ];    
       }
      
-    for(int jNmax=Nmax-1; jNmax >=0; jNmax--){
-      // determination des sommets + cas decoupage
-      cas_decoupage = 0;
-      for(int jj=0; jj<3; jj++){
+      for(int jNmax=Nmax-1; jNmax >=0; jNmax--){
+	      // determination des sommets + cas decoupage
+	      cas_decoupage = 0;
+	      for(int jj=0; jj<3; jj++){
 	
-	i_recoll_jMax   = int( (jNmax)*Ni_elem[jj]/Nmax );
-	i_recoll_jMaxpp = int( (jNmax+1)*Ni_elem[jj]/Nmax );
-
-	SommetPrisme[jj+3]   = tab_NumSommet[ K_jj[jj] ] + i_recoll_jMaxpp;
-	SommetPrisme[jj] = tab_NumSommet[ K_jj[jj] ] + i_recoll_jMax;
+		      i_recoll_jMax   = int( (jNmax)*Ni_elem[jj]/Nmax );
+		      i_recoll_jMaxpp = int( (jNmax+1)*Ni_elem[jj]/Nmax );
+		      
+		      SommetPrisme[jj+3]   = tab_NumSommet[ K_jj[jj] ] + i_recoll_jMaxpp;
+		      SommetPrisme[jj] = tab_NumSommet[ K_jj[jj] ] + i_recoll_jMax;
    
-	assert( SommetPrisme[jj]   <= Th3.nv);	
-   	assert( SommetPrisme[jj+3] <= Th3.nv);
-   	
-   	//cout << "Sommet du prisme jj=" << jj << " " << "jj  "<< SommetPrisme[jj] << "  jj+3  " << SommetPrisme[jj+3] << endl;
-       
-	if( i_recoll_jMax != i_recoll_jMaxpp) cas_decoupage = cas_decoupage + int_decoup[jj];
+		      assert( SommetPrisme[jj]   <= Th3.nv);
+		      assert( SommetPrisme[jj+3] <= Th3.nv);
+		      if( i_recoll_jMax != i_recoll_jMaxpp) cas_decoupage = cas_decoupage + int_decoup[jj];
       }
 
       //cout << "cas du decoupage= " << cas_decoupage << endl;

@@ -99,8 +99,9 @@ namespace EF23 {
     QuadTreeBox * b;
     IntQuad  h=MaxISize,h0;
     IntQuad hb =  MaxISize;
-    Zd   p0;
+    Zd   p0(0,0,0);
     Zd  plus(xyi) ; plus.Bound();
+    
     // xi<MaxISize?(xi<0?0:xi):MaxISize-1,yj<MaxISize?(yj<0?0:yj):MaxISize-1);
     
     Vertex *vn=0;
@@ -113,34 +114,40 @@ namespace EF23 {
     
     while( (n0 = b->n) < 0) 
       {
-	// search the non empty 
-	// QuadTreeBox containing  the point (i,j)
-      long hb2 = hb >> 1 ;
-      int k = plus.Case(hb2);//(iplus,jplus,hb2);// QuadTreeBox number of size hb2 contening i;j
-      QuadTreeBox * b0= b->b[k];
-      if ( ( b0 == 0) || (b0->n == 0) ) 
-	break; // null box or empty   => break 	    
-      NbQuadTreeBoxSearch++;
-      b=b0;
-      p0.Add(k,hb2);	
-      hb = hb2; 
+		// search the non empty 
+		// QuadTreeBox containing  the point (i,j)
+		long hb2 = hb >> 1 ;
+		int k = plus.Case(hb2);//(iplus,jplus,hb2);// QuadTreeBox number of size hb2 contening i;j
+		QuadTreeBox * b0= b->b[k];
+		if ( ( b0 == 0) || (b0->n == 0) ){
+			 break; // null box or empty box   => break 
+		}   
+		NbQuadTreeBoxSearch++;
+		b=b0;
+		p0.Add(k,hb2);
+		hb = hb2; 
       }
+      // n0 number of boxes of in b ("b0")
     
+    //cout << "n0=" << n0 << endl;
     
-  if ( n0 > 0) 
+    if ( n0 > 0) 
     {  
       for( int k=0;k<n0;k++)
-	{
-	  Zd i2 =  VtoZd(b->v[k]);
-	  h0 = Zd(i2,plus).norm();//NORM(iplus,i2.x,jplus,i2.y);
-	  if (h0 <h) {
-	    h = h0;
-	    vn = b->v[k];}
-	  NbVerticesSearch++;
-	}
-      return vn;
+		{
+			Zd i2 =  VtoZd(b->v[k]);
+			h0 = Zd(i2,plus).norm();  //NORM(iplus,i2.x,jplus,i2.y);
+			if (h0 <h) {
+				h = h0;
+				vn = b->v[k];
+			}
+			NbVerticesSearch++;
+		}
+		
+		return vn;
     }
-  // general case -----
+    
+    // general case -----
   pb[0]= b;
   pi[0]=b->n>0 ?(int)  b->n : N  ;
   pp[0]=p0;
@@ -175,7 +182,7 @@ namespace EF23 {
 		  {
 		    pb[++l]=  b;
 		    pi[l]= b->n>0 ?(int)  b->n : N  ;
-		    pp[l]=ppp;		    
+		    pp[l]=ppp;
 		  }
 		else
 		  b=b0, hb <<=1 ;
@@ -537,7 +544,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   
   
   inline    int nRand(int n) {
-    return  random()%n;
+    return  rand()%n; //avant random()%n;
   }
   
   inline int find5(int i,int *k,int l)
