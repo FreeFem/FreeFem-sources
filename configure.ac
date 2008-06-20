@@ -655,6 +655,40 @@ do
    fi
 fi
 done
+
+# Modif: morice 2008
+# Looking for the tetgen
+# --------------------
+ff_tetgen_ok=no
+ff_tetgen_dir="${curdir}/download"
+ff_libs_old="$LIBS"
+ff_ldflags_old="$LDFLAGS"
+ff_cppflags_old="$CPPFLAGS"
+#for ff_tetgendir in "" "${curdir}/download";
+#do
+if test "$ff_tetgen_ok" = no
+	then
+	  if test -n "$ff_tetgen_dir"
+	  then
+           LDFLAGS="$LDFLAGS -L${ff_tetgen_dir}/lib"
+           CPPFLAGS="$CPPFLAGS -I${ff_tetgen_dir}/include"
+      fi
+
+  AC_CHECK_LIB(tet,tetrahedralize,
+                ff_tetgen_ok=yes)
+  AC_CHECK_HEADERS(tetgen.h,
+             ff_tetgen_h=yes, ff_tetgen_h=no)
+
+   if test "$ff_tetgen_ok" = yes  -a "$ff_tetgen_h" = yes 
+    then
+      AC_DEFINE(HAVE_TETGEN,1, tetgen is compute tetrahedralize volume of an enclosed surface)
+   else
+       LIBS="$ff_libs_old"
+       LDFLAGS="$ff_ldflags_old"
+       CPPFLAGS="$ff_cppflags_old"    
+   fi
+fi
+#done
 # Looking for the BLAS
 # --------------------
 

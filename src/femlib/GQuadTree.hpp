@@ -68,7 +68,7 @@ namespace EF23 {
     void Add(int k,int l) { x+= (( k&1) ? l : 0) ; y+= (( k&2) ? l : 0);}
     Z2(const Z2 &A,const Z2 &B) : x(B.x-A.x),y(B.y-A.y) {}
 	
-    int Case(int l) const  { return ( ( y & l) ? (( x & l) ? 3 : 2 ) :( ( x & l)? 1 : 0 ));}
+    int Case(int l) const  { return ( ( y & l) ? (( x & l) ? 3 : 2 ) : ( ( x & l)? 1 : 0 )  ) ;}
     int norm() const { return Max(abs(x),abs(y));}
     void Bound() {   x = max(min(x,MaxISize1),0);
       y = max(min(y,MaxISize1),0);}
@@ -96,14 +96,16 @@ namespace EF23 {
       y = max(min(y,MaxISize1),0);
       z = max(min(z,MaxISize1),0);}
     
-    int Case(int l) const  { //cout << "case= "<< int((x&l)!=0)+(int((y&l)!=0)<<1) + (int((z&l)!=0)<<2) << endl;
-      return int((x&l)!=0)+(int((y&l)!=0)<<1) + (int((z&l)!=0)<<2) ;}
+    int Case(int l) const  {// cout << " case = "<< int((x&l)!=0)+(int((y&l)!=0)<<1) + (int((z&l)!=0)<<2);
+      return int( (x&l)!=0) + ( int((y&l)!=0)<<1 ) + ( int( (z&l)!=0) <<2 ) ;}
     int norm() const { return Max(abs(x),abs(y),abs(z));}
     bool less(Z3 h) const  { return abs(x) <h.x && abs(y) <h.y && abs(z) < h.z ;}
     bool interseg(Z3 pp,int hb,int h) const { 
-      return INTER_SEG1d(x,x+hb,pp.x-h,pp.x+h) && INTER_SEG1d(y,y+hb,pp.y-h,pp.y+h) && INTER_SEG1d(z,z+hb,pp.z-h,pp.z+h) ;}
+      return INTER_SEG1d(x,x+hb,pp.x-h,pp.x+h) && INTER_SEG1d(y,y+hb,pp.y-h,pp.y+h) && INTER_SEG1d(z,z+hb,pp.z-h,pp.z+h) ;
+      }
     bool interseg(const Z3 &pp,int hb,const Z3 &h) const { 
-      return INTER_SEG1d(x,x+hb,pp.x-h.x,pp.x+h.x) && INTER_SEG1d(y,y+hb,pp.y-h.y,pp.y+h.y) && INTER_SEG1d(z,z+hb,pp.z-h.z,pp.z+h.z);}
+      return INTER_SEG1d(x,x+hb,pp.x-h.x,pp.x+h.x) && INTER_SEG1d(y,y+hb,pp.y-h.y,pp.y+h.y) && INTER_SEG1d(z,z+hb,pp.z-h.z,pp.z+h.z);
+      }
     operator R3 () const { return R3(x,y,z);} 
     
   }; 
@@ -124,6 +126,7 @@ namespace EF23 {
     
     
   public:
+  
     static  const int d =Rd::d;
     static const int N = 1 << d;  
     
