@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* FreeFem prefix dir */
+#undef FF_PREFIX_DIR
+
 /* Define to 1 if you have the `acosh' function. */
 #undef HAVE_ACOSH
 

@@ -1,4 +1,14 @@
 // ********** DO NOT REMOVE THIS BANNER **********
+// ORIG-DATE:     Jan 2008
+// -*- Mode : c++ -*-
+//
+// SUMMARY  : Generic Tree header  (binairy, Quad, Oct)   
+// USAGE    : LGPL      
+// ORG      : LJLL Universite Pierre et Marie Curi, Paris,  FRANCE 
+// AUTHOR   : Frederic Hecht
+// E-MAIL   : frederic.hecht@ann.jussieu.fr
+//
+
 /*
  
  This file is part of Freefem++
@@ -16,12 +26,11 @@
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ Thank to the ARN ()  FF2A3 grant
+ ref:ANR-07-CIS7-002-01 
  */
-// AUTHOR:   F. Hecht,    
-// ORG    :  UMPC
-// E-MAIL :   Frederic.Hecht@Inria.fr   
-//
-// ORIG-DATE:     Frev 2008
+
 namespace Fem2D {
 #include "R3.hpp"
 }

@@ -24,7 +24,38 @@
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ Thank to the ARN   FF2A3 grant
+ ref:ANR-07-CIS7-002-01 
+ 
+For 2d hight order formula: 
+ Thanks to http://xyz.lanl.gov/format/math.NA/0501496
+  Mathematics, abstract
+  math.NA/0501496
+  From: Mark Taylor [view email]
+  Date: Thu, 27 Jan 2005 19:17:37 GMT   (27kb)
+
+    Several new quadrature formulas for polynomial integration in the  triangle
+    Authors:  Mark A. Taylor,  Beth A. Wingate,  Len P. Bos
+    Comments: 14 pages, 14 figures, 5 pages of tabulated quadrature points
+    Report-no: SAND2005-0034J
+
+For 3d  order formula:
+
+  from: http://www.cs.kuleuven.be/~nines/research/ecf/mtables.html
+
+---------------------------------------------------------------------------
+| Name   : Ronald  Cools               |                                  |
+|          Prof. Dr. ir.               |        Address:                  |
+| Email  : Ronald.Cools@cs.kuleuven.be | Katholieke Universiteit Leuven   |
+|                                      | Department of Computer Science   |
+| http://www.cs.kuleuven.be/~ronald/   | Celestijnenlaan 200 A            |
+| Fax    : +(32) 16 32 79 96           | B-3001 HEVERLEE                  |
+| Phone  : +(32) 16 32 75 62           | BELGIUM                          |
+---------------------------------------------------------------------------
  */
+
+
 
 #include <cstdlib>
 #include <cmath>

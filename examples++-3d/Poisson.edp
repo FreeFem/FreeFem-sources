@@ -14,19 +14,18 @@ fespace Vh2(Th2,P2);
 
 Vh u,v;
 
-//uhe = ue;
 macro Grad3(u) [dx(u),dy(u),dz(u)]  // EOM
 
-problem Lap3d(u,v,solver=CG)=int3d(Th)(Grad3(v)' *Grad3(u)) - int3d(Th)(f*v) + - int3d(Th)(f*v) + on(0,1,u=ue);
+problem Lap3d(u,v,solver=CG)=int3d(Th)(Grad3(v)' *Grad3(u)) - int3d(Th)(f*v) + on(0,1,u=ue);
 Lap3d;
 cout << " u min::   " << u[]. min << "  max: " << u[].max << endl;
 real err= int3d(Th)( square(u-ue) );
 cout << int3d(Th)(1.) << " = " << Th.mesure << endl;
 Vh d= ue-u;
 cout <<  " err = " << err <<  " diff l^\intfy = " << d[].linfty << endl;
-Vh2 u2=u;
+Vh2 u2=u,u2e=ue;
 plot(u2,wait=1);
-plot(u2,wait=1);
+plot(u2,u2e,wait=1);
 	{ ofstream file("dd.bb"); 
 	file << "3 1 1 "<< u[].n << " 2 \n";
 	int j;

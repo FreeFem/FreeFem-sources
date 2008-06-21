@@ -40,12 +40,18 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	 Element_PkEdge.$(DYLIB_SUFFIX)   \
 	glumesh.$(DYLIB_SUFFIX)   \
 	splitmesh3.$(DYLIB_SUFFIX)  splitmesh6.$(DYLIB_SUFFIX) \
-	ffrandom.$(DYLIB_SUFFIX) 
+	ffrandom.$(DYLIB_SUFFIX)  \
+	$(DYLIB_OTHER_COMPILE)
 
 load_compile:include  $(LIST_COMPILE)
 
 .cpp.$(DYLIB_SUFFIX): 
 	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"  $< 
+
+glumesh.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh.cpp 
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LayerMesh.cpp  glumesh.cpp
+tetgen.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  glumesh.cpp $(TETGEN_LOADLINK)
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" -I../download/include -L../download/lib -ltet TransfoMesh_v2.cpp  LayerMesh.cpp tetgen.cpp
 
 include: include.tar.gz
 	rm -rf include 
@@ -77,3 +83,20 @@ $(LIST_COMPILE):include Makefile
 clean-local:
 	-rm *.o  $(LIST_COMPILE)  regtests.edp makeref.edp
 	-rm -rf include
+ff-c++:load.link
+	sed <load.link >ff-c++ -e 's;INC=";INC="-I$(ff_prefix_dir)/include;'
+	chmod a+x ff-c++
+
+install-exec-local:: load_compile
+	mkdir -p $(ff_prefix_dir)/lib
+	mkdir -p $(ff_prefix_dir)/include
+	mkdir -p $(ff_prefix_dir)/etc
+	mkdir -p $(ff_prefix_dir)/edp
+	$(INSTALL_DATA) include/* $(ff_prefix_dir)/include
+	$(INSTALL) -m 555 $(LIST_COMPILE) $(ff_prefix_dir)/lib
+	echo loadpath += \"$(ff_prefix_dir)/lib\"  >$(ff_prefix_dir)/etc/freefem++.pref
+	echo includepath += \"$(ff_prefix_dir)/edp\"  >>$(ff_prefix_dir)/etc/freefem++.pref
+	$(INSTALL_SCRIPT) ff-c++  ${bindir}
+
+
+

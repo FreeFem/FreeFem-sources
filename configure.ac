@@ -241,7 +241,10 @@ AC_DEFINE_UNQUOTED(VersionFreeFempp,$ff_numver,FreeFem++ version as a float)
 # date is only useful for config-version.h
 
 FF_DATE=`date`
+ff_prefix_dir=${ac_default_prefix}/ff++-$VERSION
 AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
+AC_DEFINE_UNQUOTED(FF_PREFIX_DIR,"${ff_prefix_dir}",FreeFem prefix  dir)
+AC_SUBST(ff_prefix_dir,$ff_prefix_dir)
 
 # Separate configuration header file for version information, included
 # in config-macos9.h
