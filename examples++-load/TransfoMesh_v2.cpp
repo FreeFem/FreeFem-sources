@@ -35,8 +35,9 @@ using namespace std;
 using namespace Fem2D;
 //#include "TransfoMesh_v2.hpp"
 //#include "tetgen.h"
-#include "tetgen.h"
+//#include "tetgen.h"
 #include "TransfoMesh_v2.hpp"
+
 
 
 Mesh3 * Transfo_Mesh3(const Mesh3 & Th3, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
@@ -443,116 +444,6 @@ void Transfo_Mesh2_map_face(const Mesh &Th2, map<int, int> &maptri ){
 		}
 }
 
-Mesh3 * Transfo_Mesh2_tetgen(const Mesh & Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
-	int &border_only, int &recollement_border, int &point_confondus_ok, 
-	const int &label_tet, const map<int, int> &maptri ){
-	Mesh3 *T_Th3= new Mesh3;
-	int nv_t,nt_t,nbe_t;
-	int* Numero_Som;
-	
-	int* ind_nv_t;
-	int* ind_nt_t;
-	int* ind_nbe_t;
-	
-	int* label_nbe_t;
-	
-	//int i_som;
-	Numero_Som = new int[Th2.nv];
-	ind_nv_t   = new int[Th2.nv];
-	ind_nbe_t  = new int[Th2.nt];
-	     
-	label_nbe_t = new int[Th2.nt];
-	
-    cout << "2D: Mesh::Vertex  triangle2  border " << Th2.nv << " "<<Th2.nt<< " " << Th2.neb<< endl;
-	
-	for(int ii=0; ii<Th2.nv; ii++){ 
-		Numero_Som[ii]=ii;
-	}
-	cout <<" debut: SamePointElement " <<endl;
-	
-	SamePointElement_Mesh2( tab_XX, tab_YY, tab_ZZ, Th2, recollement_border, point_confondus_ok, 
-		Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nbe_t, nv_t, nt_t, nbe_t);
-	
-	cout <<" fin: SamePointElement " <<endl;
-	
-	cout << "2D transfo: Mesh::Vertex  triangle2  border " << nv_t << " "<< nt_t << " " << nbe_t<< endl;
-	// Creation des tableau de tetgen
-	
-	
-	tetgenio in,out;
-	//tetgenio::facet *f;
-	//tetgenio::polygon *p;
-	
-	cout << " tetgenio: vertex " << endl;
-	int itet,jtet;
-// All indices start from 1.
-	in.firstnumber = 1;
-	in.numberofpoints = nv_t;
-	in.pointlist = new REAL[in.numberofpoints*3];
-	in.pointmarkerlist = new int[in.numberofpoints];
-	itet=0;
-	jtet=0;
-	for(int nnv=0; nnv < nv_t; nnv++)
-	{
-		int & ii = ind_nv_t[nnv];
-		//cout << "nnv ,  ii  =" << nnv << "  " << ii << endl;
-		//cout << "tab_XX[ii], tab_YY[ii], tab_ZZ[ii]=" <<  tab_XX[ii] << " "<< tab_YY[ii] << " "<< tab_ZZ[ii] << endl;
-		assert( Numero_Som[ii] == nnv );
-		const Mesh::Vertex & K = Th2.vertices[ii];//const Mesh::Vertex & K(Th2.vertices[ii]); //Version Mesh2   
-		in.pointlist[itet]   = tab_XX[ii];
-		in.pointlist[itet+1] = tab_YY[ii];
-		in.pointlist[itet+2] = tab_ZZ[ii];       
-		in.pointmarkerlist[nnv] =  K.lab;   
-		itet=itet+3;
-	}
-	assert(itet==in.numberofpoints*3);
-	
-	cout << " tetgenio: facet " << endl;
-	// Version avec des facettes
-	in.numberoffacets = nbe_t;
-	in.facetlist = new tetgenio::facet[in.numberoffacets];
-	in.facetmarkerlist = new int[in.numberoffacets];
-	  
-	for(int ibe=0; ibe < nbe_t; ibe++){
-		tetgenio::facet *f;
-		tetgenio::polygon *p;
-		f = &in.facetlist[ibe];
-		f->numberofpolygons = 1;
-		f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
-		f->numberofholes = 0;
-		f->holelist = NULL;
-		
-		p = &f->polygonlist[0];
-		p->numberofvertices = 3;
-		p->vertexlist = new int[3];
-		
-		int & ii=ind_nbe_t[ibe];
-		// creation of elements
-		const Mesh::Triangle & K(Th2.t(ii)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
-		p->vertexlist[0] = Numero_Som[ Th2.operator()(K[0]) ]+1;
-		p->vertexlist[1] = Numero_Som[ Th2.operator()(K[1]) ]+1;
-		p->vertexlist[2] = Numero_Som[ Th2.operator()(K[2]) ]+1;
-		
-		for( int kkk=0; kkk<3; kkk++){ 
-			assert( p->vertexlist[kkk]<= in.numberofpoints && p->vertexlist[kkk]> 0);
-		}
-		map< int, int>:: const_iterator imap;
-		imap = maptri.find(K.lab); // imap= maptri.find( label_nbe_t[ibe] );
-		assert( imap != maptri.end());
-		in.facetmarkerlist[ibe] = imap->second; // K.lab; // before 
-		
-	}  
-	cout << "debut de tetrahedralize( , &in, &out);" << endl;
-	
-	tetrahedralize("pqCVV", &in, &out);
-	 
-	cout << "fin de tetrahedralize( , &in, &out);" << endl;
-	mesh3_tetgenio_out( out, label_tet, *T_Th3);
-	
-	cout <<" Finish Mesh3 :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
-	
-	return T_Th3;
-}
 
 
 void SamePointElement_Mesh2( const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh & Th2, 
@@ -666,61 +557,6 @@ void SamePointElement_Mesh2( const double *tab_XX, const double *tab_YY, const d
 		}
 }
 
-// Fonction pour tetgen
-
-void mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, Mesh3 & Th3)
-{ 
-  int i;
-
-// All indices start from 1.
-  if(out.firstnumber != 1){
-    cout << " probleme ???" << endl;
-    exit(1);
-  }   
-  
-  if(out.numberoffacets !=0){
-    cout << "tetgen: faces non triangulaire" << endl;
-    exit(1);
-  }
-  
-  if(out.numberofcorners !=4){
-    cout << "tetgen: element subparametric of order 2" <<endl;
-    exit(1);
-  }
-  
-  cout << "Th3 :: Vertex Element Border :: " << out.numberofpoints << " " <<out.numberoftetrahedra  << " " << out.numberoftrifaces << endl;
-  Th3.set(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces);
-   
-  i=0;
-  for(int nnv=0; nnv < Th3.nv; nnv++){
-    Th3.vertices[nnv].x=out.pointlist[i];
-    Th3.vertices[nnv].y=out.pointlist[i+1];
-    Th3.vertices[nnv].z=out.pointlist[i+2];       
-    Th3.vertices[nnv].lab=out.pointmarkerlist[nnv];
-    i=i+3;    
-  }
-    
-  i=0;
-  for(int nnt=0; nnt < Th3.nt; nnt++){
-    int iv[4],lab;
-    iv[0] = out.tetrahedronlist[i]-1;
-    iv[1] = out.tetrahedronlist[i+1]-1;
-    iv[2] = out.tetrahedronlist[i+2]-1;
-    iv[3] = out.tetrahedronlist[i+3]-1;
-    lab   = label_tet;
-    //lab = out.tetrahedronmarkerlist[nnt];
-    Th3.elements[nnt].set( Th3.vertices, iv, lab);
-    i=i+4;
-  }
-
-  for(int ibe=0; ibe < Th3.nbe; ibe++){
-    int iv[3];
-    iv[0] = out.trifacelist[3*ibe]-1;
-    iv[1] = out.trifacelist[3*ibe+1]-1;
-    iv[2] = out.trifacelist[3*ibe+2]-1;  
-    Th3.be(ibe).set( Th3.vertices, iv, out.trifacemarkerlist[ibe]);
-  }
-}  
 
 
 //======================

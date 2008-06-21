@@ -168,6 +168,10 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	-mkdir -p  $@/FreeFem++.app/Contents/FreeFem++.app/Contents
 	cp $@/FreeFem++.app/Contents/Info.plist $@/FreeFem++.app/Contents/FreeFem++.app/Contents/Info.plist
 	cp src/agl/FreeFem++-agl $@/FreeFem++.app/Contents/FreeFem++.app/FreeFem++
+	mkdir $@/FreeFem++.app/Contents/include 
+	cp examples++-load/include/* $@/FreeFem++.app/Contents/include
+	mkdir $@/FreeFem++.app/Contents/MacOS/lib
+	cp examples++-load/*.dylib  $@/FreeFem++.app/MacOs/lib
 	cp src/FreeFem++-CoCoa $@
 	-if [ -s List-agl-dylib ]; then tar zchvf $@/OtherMacOsLib.tgz `cat List-agl-dylib`; fi; 
 	cp -p Install-MacOS.command $@

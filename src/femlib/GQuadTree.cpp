@@ -1,10 +1,11 @@
+// ORIG-DATE:     Jan 2008
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  : Generic Tree (binairy, Quad, Oct)   
+// USAGE    : LGPL      
+// ORG      : LJLL Universite Pierre et Marie Curi, Paris,  FRANCE 
 // AUTHOR   : Frederic Hecht
-// E-MAIL   : hecht@ann.jussieu.fr
+// E-MAIL   : frederic.hecht@ann.jussieu.fr
 //
 
 /*
@@ -24,10 +25,12 @@
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ Thank to the ARN ()  FF2A3 grant
+ ref:ANR-07-CIS7-002-01 
  */
-// E-MAIL :   Frederic.Hecht@upmc.fr   
-//
-// ORIG-DATE:    jan 2008
+
+
 #include <cmath>
 #include <cstdlib>
 #include "error.hpp"

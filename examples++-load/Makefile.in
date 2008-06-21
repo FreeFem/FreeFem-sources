@@ -195,6 +195,7 @@ ff_makeindex = @ff_makeindex@
 ff_mpirun = @ff_mpirun@
 ff_pdf2ps = @ff_pdf2ps@
 ff_pdflatex = @ff_pdflatex@
+ff_prefix_dir = @ff_prefix_dir@
 ff_unzip = @ff_unzip@
 ff_wget = @ff_wget@
 host_alias = @host_alias@
@@ -243,7 +244,7 @@ EXTRA_DIST = load.link dfft.link  include.tar.gz \
   SuperLU_3.0-include-ff.tar.gz REAME_SuperLU \
   glumesh.cpp glumesh.edp \
   LayerMesh.hpp TransfoMesh_v2.hpp LayerMesh.cpp \
-  ffrandom.cpp ffrandom.edp 
+  ffrandom.cpp ffrandom.edp  
 
 LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -252,7 +253,8 @@ LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	 Element_PkEdge.$(DYLIB_SUFFIX)   \
 	glumesh.$(DYLIB_SUFFIX)   \
 	splitmesh3.$(DYLIB_SUFFIX)  splitmesh6.$(DYLIB_SUFFIX) \
-	ffrandom.$(DYLIB_SUFFIX) 
+	ffrandom.$(DYLIB_SUFFIX)  \
+	$(DYLIB_OTHER_COMPILE)
 
 all: all-am
 
@@ -444,7 +446,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am:
+install-exec-am: install-exec-local
 
 install-info: install-info-am
 
@@ -474,10 +476,11 @@ uninstall-am: uninstall-info-am
 	clean-generic clean-local distclean distclean-generic distdir \
 	dvi dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am uninstall uninstall-am uninstall-info-am
+	install-exec-local install-info install-info-am install-man \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am \
+	uninstall-info-am
 
 
 all-local: @LOAD_COMPILE@
@@ -486,8 +489,11 @@ load_compile:include  $(LIST_COMPILE)
 
 .cpp.$(DYLIB_SUFFIX): 
 	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"  $< 
-glumesh.$(DYLIB_SUFFIX): LayerMesh.cpp glumesh.cpp 
-	./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LayerMesh.cpp  glumesh.cpp
+
+glumesh.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh.cpp 
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LayerMesh.cpp  glumesh.cpp
+tetgen.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  glumesh.cpp $(TETGEN_LOADLINK)
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" -I../download/include -L../download/lib -ltet TransfoMesh_v2.cpp  LayerMesh.cpp tetgen.cpp
 
 include: include.tar.gz
 	rm -rf include 
@@ -519,6 +525,20 @@ $(LIST_COMPILE):include Makefile
 clean-local:
 	-rm *.o  $(LIST_COMPILE)  regtests.edp makeref.edp
 	-rm -rf include
+ff-c++:load.link
+	sed <load.link >ff-c++ -e 's;INC=";INC="-I$(ff_prefix_dir)/include;'
+	chmod a+x ff-c++
+
+install-exec-local:: load_compile
+	mkdir -p $(ff_prefix_dir)/lib
+	mkdir -p $(ff_prefix_dir)/include
+	mkdir -p $(ff_prefix_dir)/etc
+	mkdir -p $(ff_prefix_dir)/edp
+	$(INSTALL_DATA) include/* $(ff_prefix_dir)/include
+	$(INSTALL) -m 555 $(LIST_COMPILE) $(ff_prefix_dir)/lib
+	echo loadpath += \"$(ff_prefix_dir)/lib\"  >$(ff_prefix_dir)/etc/freefem++.pref
+	echo includepath += \"$(ff_prefix_dir)/edp\"  >>$(ff_prefix_dir)/etc/freefem++.pref
+	$(INSTALL_SCRIPT) ff-c++  ${bindir}
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

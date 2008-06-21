@@ -276,56 +276,60 @@ void GetEnvironment()
    ff_verbosity=envv;
    
   if (GetEnvironmentVariable("FF_LOADPATH", envl, LEN) > 0) 
-   ff_verbosity=envl;
+   ff_loadpath=envl;
    
   if (GetEnvironmentVariable("FF_INCLUDEPATH", envi, LEN) > 0) 
-   ff_verbosity=envi;
+   ff_incpath=envi;
   
   if (GetEnvironmentVariable("HOMEPATH", envh, LEN) > 0) 
-	  home=envh;
+    home=envh;
 #endif 
 
 #ifdef PURE_WIN32 
 #else
   EnvironmentInsert("init-files","/etc/"+ffpref,"$");
 #endif
+#ifdef FF_PREFIX_DIR
+  EnvironmentInsert("init-files",string(FF_PREFIX_DIR) + "/etc/" + ffpref  ,"$");
+#endif
   if(home) 
 	EnvironmentInsert("init-files",TransDir(home)+"."+ffpref,"$");
+
   EnvironmentInsert("init-files",ffpref,"$");
 	
   { 
-  OneEnvironmentData  & l = ffenvironment["init-files"];
-  OneEnvironmentData::iterator i=l.begin();	
-  while( i != l.end())
-    {
-      if(verbosity>2) cout << " try initfile : " <<*i << endl; 
-      readinitfile(*i++);	   
-    }
+    OneEnvironmentData  & l = ffenvironment["init-files"];
+    OneEnvironmentData::iterator i=l.begin();	
+    while( i != l.end())
+      {
+	if(verbosity>2) cout << " try initfile : " <<*i << endl; 
+	readinitfile(*i++);	   
+      }
   }
-	 
-	 
-
- if ( ff_verbosity ) { 
-        verbosity = atoi(ff_verbosity);
-        if(verbosity>2) cout << " --  verbosity is set to " << verbosity << endl;
+  
+  
+  
+  if ( ff_verbosity ) { 
+    verbosity = atoi(ff_verbosity);
+    if(verbosity>2) cout << " --  verbosity is set to " << verbosity << endl;
   }
- if(ff_loadpath)
+  if(ff_loadpath)
     GetEnvironment("loadpath",ff_loadpath);
- if(ff_incpath)
+  if(ff_incpath)
     GetEnvironment("includepaths",ff_incpath);
- if( verbosity >2) 
-   {
-    EnvironmentData::iterator loadpath=ffenvironment.find("loadpath");
-    EnvironmentData::iterator inc=ffenvironment.find("includepath");    
-    if(  loadpath != ffenvironment.end()) {
-      show("\nload path : ",loadpath->second, "\n \t ");
-      cout <<"(.)"<<endl;
+  if( verbosity >2) 
+    {
+      EnvironmentData::iterator loadpath=ffenvironment.find("loadpath");
+      EnvironmentData::iterator inc=ffenvironment.find("includepath");    
+      if(  loadpath != ffenvironment.end()) {
+	show("\nload path : ",loadpath->second, "\n \t ");
+	cout <<"(.)"<<endl;
+      }
+      if(  inc != ffenvironment.end()) {
+	show("\ninclude path : ",inc->second, "\n \t ");
+	cout <<"(.)"<<endl;}
     }
-    if(  inc != ffenvironment.end()) {
-      show("\ninclude path : ",inc->second, "\n \t ");
-      cout <<"(.)"<<endl;}
-   }
-
+  
  }
 void EnvironmentLoad()
 {

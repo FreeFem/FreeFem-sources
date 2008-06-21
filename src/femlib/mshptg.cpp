@@ -1,10 +1,13 @@
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// -*- Mode : c++ -*-
+//
+// SUMMARY  : mshptg mesh generator ( form mshptg.f / inria / emc2 software) 
+// USAGE    : LGPL      
+// ORG      : LJLL Universite Pierre et Marie Curi, Paris,  FRANCE 
 // AUTHOR   : Frederic Hecht
-// E-MAIL   : hecht@ann.jussieu.fr
+// E-MAIL   : frederic.hecht@ann.jussieu.fr
+//
 //
 
 /*

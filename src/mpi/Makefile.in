@@ -220,6 +220,7 @@ ff_makeindex = @ff_makeindex@
 ff_mpirun = @ff_mpirun@
 ff_pdf2ps = @ff_pdf2ps@
 ff_pdflatex = @ff_pdflatex@
+ff_prefix_dir = @ff_prefix_dir@
 ff_unzip = @ff_unzip@
 ff_wget = @ff_wget@
 host_alias = @host_alias@

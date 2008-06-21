@@ -8,7 +8,7 @@
 //#include "R3.hpp"
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
-#include "tetgen.h"
+
 
 using namespace std;
 
@@ -51,7 +51,6 @@ Mesh3 * Transfo_Mesh2_tetgen(const Mesh & Th2, const double *tab_XX, const doubl
 		int &border_only, int &recollement_border, int &point_confondus_ok, 
 		const int &label_tet,const map<int, int> &maptri );
 
-void mesh3_tetgenio_out(const tetgenio &out, const int &label_tet, Mesh3 & Th3);
 
 #endif
 
