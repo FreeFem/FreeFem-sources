@@ -58,6 +58,7 @@ static void SetPtPk(Rd *Pt,const int *dfon,int nn)
 	Pt[k++]=Rd::diag(1./(d+1));
     
     assert(nn==k);   
+    if(verbosity>9)
     cout << " Pk = " << KN_<Rd>(Pt,nn)<<"\n";
     
 }
@@ -88,7 +89,7 @@ public:
 	  dfon[1]=max(k-1,0);
 	  dfon[2]=d>1?max(k-2,0):0;
 	  dfon[3]=d>2?max(k-3,0):0;}
-      
+    if(verbosity>9)      
       cout << "A4 "<<   k<< " "   <<dfon[0]<< dfon[1]<<dfon[2]<<dfon[3]<<endl;
     }
     operator const  int  * () const {return dfon;}
@@ -99,10 +100,10 @@ public:
     GTypeOfFE<Mesh>(A4(k),1,Max(k,1),k<=2,k==0)
   {
     int n=this->NbDoF;
-    
+    if(verbosity>9)    
     cout << "\n +++ P"<<k<<" : ndof : "<< n <<endl;
     SetPtPk<RdHat,Element> (this->PtInterpolation,this->ndfOn(),this->NbDoF);
-    cout << this->PtInterpolation<< endl;
+    if(verbosity>9)    cout << this->PtInterpolation<< endl;
     for (int i=0;i<n;i++) 
       {
 	this->pInterpolation[i]=i;
