@@ -28,7 +28,8 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
   testFE-PkEdge.edp \
   splitmesh3.cpp  splitmesh3.edp  splitmesh6.cpp  splitmesh6.edp \
   SuperLU_3.0-include-ff.tar.gz REAME_SuperLU \
-  glumesh.cpp glumesh.edp \
+  glumesh2D.cpp glumesh2D.edp \
+  glumesh3D.cpp glumesh3D.edp buildlayer.cpp tetgen.cpp\
   LayerMesh.hpp TransfoMesh_v2.hpp LayerMesh.cpp \
   ffrandom.cpp ffrandom.edp  
 
@@ -38,7 +39,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          qf11to25.$(DYLIB_SUFFIX)  Element_P3.$(DYLIB_SUFFIX)    Element_P4.$(DYLIB_SUFFIX)  \
 	 Element_P3dc.$(DYLIB_SUFFIX)    Element_P4dc.$(DYLIB_SUFFIX) 	\
 	 Element_PkEdge.$(DYLIB_SUFFIX)   \
-	glumesh.$(DYLIB_SUFFIX)   \
+	glumesh2D.$(DYLIB_SUFFIX)  glumesh3D.$(DYLIB_SUFFIX) buildlayer.$(DYLIB_SUFFIX) tetgen.$(DYLIB_SUFFIX)\
 	splitmesh3.$(DYLIB_SUFFIX)  splitmesh6.$(DYLIB_SUFFIX) \
 	ffrandom.$(DYLIB_SUFFIX)  \
 	$(DYLIB_OTHER_COMPILE)
@@ -48,9 +49,13 @@ load_compile:include  $(LIST_COMPILE)
 .cpp.$(DYLIB_SUFFIX): 
 	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"  $< 
 
-glumesh.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LayerMesh.cpp  glumesh.cpp
-tetgen.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  glumesh.cpp $(TETGEN_LOADLINK)
+glumesh2D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh2D.cpp 
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LayerMesh.cpp  glumesh2D.cpp
+glumesh3D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh3D.cpp 
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LayerMesh.cpp  glumesh3D.cpp
+buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
+tetgen.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp LayerMesh.cpp $(TETGEN_LOADLINK)
 	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" -I../download/include -L../download/lib -ltet TransfoMesh_v2.cpp  LayerMesh.cpp tetgen.cpp
 
 include: include.tar.gz
