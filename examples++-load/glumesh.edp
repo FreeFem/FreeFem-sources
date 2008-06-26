@@ -1,4 +1,4 @@
-load "glumesh"
+load "glumesh2D"
 mesh Th1=square(10,10);
 mesh Th2=square(20,10,[x+1,y]);
 verbosity=3;

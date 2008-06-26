@@ -1,7 +1,7 @@
 // $Id$
 
-#include  <iostream>
-#include  <cfloat>
+#include <iostream>
+#include <cfloat>
 #include <cmath>
 #include <complex>
 using namespace std;
@@ -61,8 +61,7 @@ Mesh * GluMesh(listMesh const & lst)
    Mesh * th0=0;
   for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
     {
-      assert( *i );
-      Mesh &Th(**i);
+       Mesh &Th(**i);
       th0=&Th;
       if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
       nbt+= Th.nt;
@@ -79,7 +78,7 @@ Mesh * GluMesh(listMesh const & lst)
 	  Px=Maxc(P,Px);     
 	}
     } 
-  
+
   cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn << " "<< Px << endl;
   
   Vertex * v= new Vertex[nbvx];
@@ -100,40 +99,88 @@ Mesh * GluMesh(listMesh const & lst)
       if(!*i) continue;
       if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
       int nbv0 = nbv;
-      for (int i=0;i<Th.nv;i++)
-	{
-	  const Vertex &vi(Th(i));
-	  Vertex * pvi=quadtree->ToClose(vi,hseuil);
-	  if(!pvi) { 
-	    v[nbv].x = vi.x;
-	    v[nbv].y = vi.y;
-	    v[nbv].lab = vi.lab;
-	    quadtree->Add(v[nbv++]);
-	  }
-	}
+      
+      for (int ii=0;ii<Th.nv;ii++)
+		{
+	  	const Vertex &vi(Th(ii));
+	  	Vertex * pvi=quadtree->ToClose(vi,hseuil);
+	  	if(!pvi) { 
+	    	v[nbv].x = vi.x;
+	    	v[nbv].y = vi.y;
+	    	v[nbv].lab = vi.lab;
+	    	quadtree->Add(v[nbv++]);
+	  	}
+		}
       
       for (int k=0;k<Th.nt;k++)
-	{
+		{
 	  const Triangle  &K(Th[k]);
 	  int i0=quadtree->NearestVertex(K[0])-v;
 	  int i1=quadtree->NearestVertex(K[1])-v;
 	  int i2=quadtree->NearestVertex(K[2])-v;	  
 	  (*tt++).set(v,i0,i1,i2,K.lab);
-	}
-      
+		}
+		
+	// bug glumesh
       for (int k=0;k<Th.neb;k++)
 	{
 	  const BoundaryEdge & be(Th.bedges[k]);
 	  int i0=quadtree->NearestVertex(be[0])-v;
 	  int i1=quadtree->NearestVertex(be[1])-v;
-	  if(i1<nbv0 && i0 < nbv0) continue;
+	  
+	  if( i0 < nbv0 && i1 < nbv0) continue;
 	  (*bb++).set(v,i0,i1,be.lab);
 	  neb++;
+		
 	}
-      
+	
+   /*} 
+	Mesh * th0_be;
+	Mesh::Vertex *becog = new Vertex[nebx];
+	cout << "creation quadtree" << endl;
+	FQuadTree *quadtree_be=new Fem2D::FQuadTree(th0_be,Pn,Px,0);
+	cout << "fin creation quadtree" << endl;
+	double hseuil_border = hseuil/2.;
+	
+	for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
+    {
+      const Mesh &Th(**i);
+      if(!*i) continue;
+	  
+      if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
+      for (int k=0;k<Th.neb;k++)
+	{
+	  cout << "k=" << k << endl;
+	  const BoundaryEdge & be(Th.bedges[k]);
+	  int i0 = Th.operator()(be[0]); //quadtree->NearestVertex(be[0])-v;
+	  int i1 = Th.operator()(be[1]); //quadtree->NearestVertex(be[1])-v;
+	  
+	  R cdgx,cdgy;
+	  
+	  cdgx = (Th.vertices[i0].x+Th.vertices[i1].x)/2.;
+	  cdgy = (Th.vertices[i0].y+Th.vertices[i1].y)/2.;
+	  
+	  const R2 r2vi( cdgx, cdgy);
+	  const Mesh::Vertex & vi(r2vi);
+	  
+	  Vertex * pvi=quadtree_be->ToClose(vi,hseuil_border);
+	  if(!pvi){
+		  becog[neb].x = vi.x;
+		  becog[neb].y = vi.y;
+		  becog[neb].lab = vi.lab;
+		  quadtree_be->Add( becog[neb++] );
+		       
+		  int iglu0=quadtree->NearestVertex(be[0])-v;
+		  int iglu1=quadtree->NearestVertex(be[1])-v;
+		  
+		  (bb++)->set(v,iglu0,iglu1,vi.lab);
+		  }
+	}
+     */ 
     } //  
   delete quadtree;
- 
+  //delete quadtree_be;
+  
   if(verbosity>1)
     {
       cout << "     Nb of glu point " << nbvx -nbv;
@@ -145,7 +192,7 @@ Mesh * GluMesh(listMesh const & lst)
     R2 Pn,Px;
     m->BoundingBox(Pn,Px);
     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-    //    m->decrement();
+    m->decrement();
     return m;
   }
   
@@ -179,7 +226,7 @@ public:
   listMesh3(Stack s,const listMesh3 &l,Mesh3 *th) : lth(Add2StackOfPtr2Free(s,new list<Mesh3*>(*l.lth))) { lth->push_back(th);}
 
 };
-
+/*
 Mesh3 * GluMesh3(listMesh3 const & lst)
 {
   int nbt=0;
@@ -199,7 +246,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 	    th0=&Th3;
       	if(verbosity>1)  cout << " GluMesh3 + "<< Th3.nv << " " << Th3.nt << " "<< Th3.nbe << endl;
       	
-      	nbt+= Th3.nt;
+      	nbt  += Th3.nt;
       	nbvx += Th3.nv;
       	nbex += Th3.nbe;
       	
@@ -208,12 +255,20 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 				hmin=min(hmin,Th3[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
 			}
 		}
+		
+		for (int k=0;k<Th3.nbe;k++){
+			for (int e=0;e<3;e++){
+				hmin=min(hmin,Th3.be(k).lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+			}
+		}
+		
 		for (int i=0;i<Th3.nv;i++){ 	  
 			R3 P(Th3(i));
 			Pn=Minc(P,Pn);
 			Px=Maxc(P,Px);     
 		}
     } 
+    
   cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn << " "<< Px << endl;
 
   
@@ -233,9 +288,6 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pn,Px,0);
     
   cout << " creation of : Mesh3 th3_tmp" << endl;
-  /*Mesh3 th3_tmp;
-  th3_tmp.set(nbvx,nbt,nbex);*/
-  
   
   for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();++i){
       const Mesh3 &Th3(**i);
@@ -256,7 +308,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 		  }
 	  }
       
-      for (int k=0;k<Th3.nt;k++){
+	  for (int k=0;k<Th3.nt;k++){
 	  	const Tet  &K(Th3[k]);
 	  	int iv[4];
 	  	iv[0]=gtree->NearestVertex(K[0])-v;
@@ -274,7 +326,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 	  iv[1]=gtree->NearestVertex(K[1])-v; //-v;
 	  iv[2]=gtree->NearestVertex(K[2])-v; //-v;
 	  
-	  if( iv[2]<nbv0 && iv[1]<nbv0 && iv[0] < nbv0 ) continue;
+	  if( iv[2]<nbv0 && iv[1]<nbv0 && iv[0] < nbv0 ) continue;  // Faux
 	  (bb++)->set(v,iv,K.lab);
 	  nbe++;
 	}
@@ -289,17 +341,204 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
     }
 	
     Mesh3 *mpq= new Mesh3(nbv,nbt,nbe,v,t,b);  
-	/*       
-	mpq->BuildBound();
-	mpq->BuildAdj();
-	mpq->Buildbnormalv();  
-	mpq->BuildjElementConteningVertex();
-	*/
+    
 	mpq->BuildGTree();
 	mpq->decrement();  
     return mpq;
   
 }
+*/
+
+Mesh3 * GluMesh3(listMesh3 const & lst)
+{
+  int nbt=0;
+  int nbe=0;
+  int nbex=0;
+  int nbv=0;
+  int nbvx=0;
+  
+  double hmin=1e100;
+  R3 Pn(1e100,1e100,1e100),Px(-1e100,-1e100,-1e100);
+  const list<Mesh3 *> lth(*lst.lth);
+  Mesh3 * th0=0;
+  
+  for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();++i)
+    {
+	    Mesh3 &Th3(**i);  // definis ???
+	    th0=&Th3;
+	    if(verbosity>1)  cout << " GluMesh3 + "<< Th3.nv << " " << Th3.nt << " "<< Th3.nbe << endl;
+
+      	nbt  += Th3.nt;
+      	nbvx += Th3.nv;
+      	nbex += Th3.nbe;
+        
+		for (int k=0;k<Th3.nt;k++){
+			for (int e=0;e<6;e++){
+				hmin=min(hmin,Th3[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+			}
+		}
+		
+		for (int k=0;k<Th3.nbe;k++){
+			for (int e=0;e<3;e++){
+				hmin=min(hmin,Th3.be(k).lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+			}
+		}
+		
+		for (int ii=0;ii<Th3.nv;ii++){ 	  
+			R3 P(Th3(ii));
+			Pn=Minc(P,Pn);
+			Px=Maxc(P,Px);     
+		}
+    } 
+    
+  cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn << " "<< Px << endl;
+
+  
+  Vertex3  *v= new Vertex3[nbvx];
+  Tet      *t= new Tet[nbt];
+  Tet      *tt=t;
+  Triangle3 *b= new Triangle3[nbex];
+  Triangle3 *bb= b;
+     
+  ffassert(hmin>Norme2(Pn-Px)/1e9);
+  double hseuil =hmin/10.; 
+  
+  cout << " creation of : BuildGTree" << endl;
+  //th0->BuildBound();
+  //th0->BuildGTree();   
+ 
+  EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pn,Px,0);
+  
+  cout << " creation of : BuildGTree for border elements" << endl;
+  Vertex3  *becog= new Vertex3[nbex];  
+  EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog,Pn,Px,0);
+  
+  cout << " creation of : Mesh3 th3_tmp" << endl;
+  /*Mesh3 th3_tmp;
+  th3_tmp.set(nbvx,nbt,nbex);*/
+  
+  
+  for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();++i)
+    {
+      const Mesh3 &Th3(**i);
+      if(!*i) continue;
+      if(verbosity>1)  cout << " loop over mesh for create new mesh "<< endl;
+      if(verbosity>1)  cout << " GluMesh + "<< Th3.nv << " " << Th3.nt <<" " << Th3.nbe << endl;
+      int nbv0 = nbv;
+      
+      for (int ii=0;ii<Th3.nv;ii++){
+	      const Vertex3 &vi(Th3.vertices[ii]);
+	      Vertex3 * pvi=gtree->ToClose(vi,hseuil);
+	      if(!pvi){
+		      v[nbv].x = vi.x;
+		      v[nbv].y = vi.y;
+		      v[nbv].z = vi.z;
+		      v[nbv].lab = vi.lab;
+		      gtree->Add( v[nbv++] );
+		  }
+	  }
+	  
+	  for (int k=0;k<Th3.nt;k++){
+	  	const Tet  &K(Th3[k]);
+	  	int iv[4];
+	  	iv[0]=gtree->NearestVertex(K[0])-v;
+	  	iv[1]=gtree->NearestVertex(K[1])-v;
+	  	iv[2]=gtree->NearestVertex(K[2])-v;  //-v;
+	  	iv[3]=gtree->NearestVertex(K[3])-v;  //-v;
+	  	(tt++)->set(v,iv,K.lab);
+	  }
+	 /* 
+	  for (int k=0;k<Th3.nbe;k++)
+	{
+	  const Triangle3 & K(Th3.be(k));//bedges[k]);
+	  int iv[3];
+	  iv[0]=gtree->NearestVertex(K[0])-v; //-v;
+	  iv[1]=gtree->NearestVertex(K[1])-v; //-v;
+	  iv[2]=gtree->NearestVertex(K[2])-v; //-v;
+	  
+	  if( iv[2]<nbv0 && iv[1]<nbv0 && iv[0] < nbv0 ) continue;  // Faux
+	  (bb++)->set(v,iv,K.lab);
+	  nbe++;
+	  
+	}   
+	    
+	// Remarque on a besoin 
+	*/
+	}
+	double hseuil_border = hseuil/3.;
+	
+	for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();++i){
+      const Mesh3 &Th3(**i);
+      if(!*i) continue;  
+      for (int k=0;k<Th3.nbe;k++)
+	{
+	  const Triangle3 & K(Th3.be(k));//bedges[k]);
+	  int iv[3];
+	  iv[0]=Th3.operator()(K[0]); //gtree->NearestVertex(K[0])-v; //-v;
+	  iv[1]=Th3.operator()(K[1]); //gtree->NearestVertex(K[1])-v; //-v;
+	  iv[2]=Th3.operator()(K[2]); //gtree->NearestVertex(K[2])-v; //-v;
+	
+	  //assert( iv[2]<nbv && iv[1]<nbv && iv[0] < nbv );  
+	  
+	  R cdgx,cdgy,cdgz;
+	  
+	  cdgx = (Th3.vertices[iv[0]].x+ Th3.vertices[iv[1]].x+ Th3.vertices[iv[2]].x)/3.;
+	  cdgy = (Th3.vertices[iv[0]].y+ Th3.vertices[iv[1]].y+ Th3.vertices[iv[2]].y)/3.;
+	  cdgz = (Th3.vertices[iv[0]].z+ Th3.vertices[iv[1]].z+ Th3.vertices[iv[2]].z)/3.;
+	 
+	  cout << "cdg=" << cdgx << " " << cdgy << " " << cdgz << " "<<endl; 
+	  const R3 r3vi( cdgx, cdgy, cdgz ); 
+	  const Vertex3 &vi( r3vi);
+	    
+	  Vertex3 * pvi=gtree_be->ToClose(vi,hseuil_border);
+	  if(!pvi){
+		  becog[nbe].x = vi.x;
+		  becog[nbe].y = vi.y;
+		  becog[nbe].z = vi.z;
+		  becog[nbe].lab = vi.lab;
+		  gtree_be->Add( becog[nbe++]);
+		  
+		  int igluv[3];
+		  igluv[0]=gtree->NearestVertex(K[0])-v; //-v;
+		  igluv[1]=gtree->NearestVertex(K[1])-v; //-v;
+		  igluv[2]=gtree->NearestVertex(K[2])-v; //-v;
+		  
+		  (bb++)->set(v,igluv,vi.lab);
+		  }
+	}
+    
+  }
+  //delete th0;
+ 
+  
+  if(verbosity>1)
+    {
+      cout << "     Nb of glu3D  point " << nbvx-nbv;
+      cout << "     Nb of glu3D  Boundary edge " << nbex-nbe << endl;
+    }
+    cout << " nbv="  << nbv  << endl;
+    cout << " nbvx=" << nbvx << endl;
+        
+    cout << " nbe="  << nbe  << endl;
+    cout << " nbex=" << nbex << endl;
+    
+	cout << "     Nb of glu3D  point " << nbvx-nbv;
+    cout << "     Nb of glu3D  Boundary edge " << nbex-nbe << endl;
+    
+    
+    Mesh3 *mpq= new Mesh3(nbv,nbt,nbe,v,t,b);  
+	/*       
+	mpq->BuildBound();
+	mpq->BuildAdj();
+	mpq->Buildbnormalv();  
+	mpq->BuildjElementConteningVertex();
+	mpq->BuildGTree();
+	mpq->decrement();  
+	*/
+    return mpq;
+  
+}
+
 
 template<class RR,class AA=RR,class BB=AA> 
 struct Op3_addmesh: public binary_function<AA,BB,RR> { 
@@ -383,8 +622,675 @@ class  BuildLayerMesh : public OneOperator { public:
   }
 };
 
+class Build2D3D_Op : public E_F0mps 
+{
+public:
+  Expression eTh;
+  Expression xx,yy,zz;
+  static const int n_name_param =3; // 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  
+public:
+  Build2D3D_Op(const basicAC_F0 &  args,Expression tth) 
+    : eTh(tth),xx(0),yy(0),zz(0)
+  {
+    cout << "construction par Build2D_3D_Op" << endl;
+    args.SetNameParam(n_name_param,name_param,nargs);
+    const E_Array * a1=0 ;
+    if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
+    int err =0;
+   
+    if(a1) {
+      if(a1->size() !=3) 
+      CompileError("Build2D3D (Th,transfo=[X,Y,Z],) ");
+      xx=to<double>( (*a1)[0]);
+      yy=to<double>( (*a1)[1]);
+      zz=to<double>( (*a1)[2]);
+    }    
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
 
 
+basicAC_F0::name_and_type Build2D3D_Op::name_param[]= {
+  {  "transfo", &typeid(E_Array)},
+  {  "reftet", &typeid(KN_<long>)}, 
+  {  "refface", &typeid(KN_<long> )}
+};
+
+class  Build2D3D : public OneOperator { public:  
+    Build2D3D() : OneOperator(atype<pmesh3>(),atype<pmesh>()) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  { 
+	return  new Build2D3D_Op( args,t[0]->CastTo(args[0]) ); 
+  }
+};
+
+// class SetMesh_Op : public E_F0mps 
+// {
+// public:
+//   Expression a; 
+//   
+//   static const int n_name_param =2; //  add nbiter FH 30/01/2007 11 -> 12 
+//   static basicAC_F0::name_and_type name_param[] ;
+//   Expression nargs[n_name_param];
+//   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+
+//   
+// public:
+//   SetMesh_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
+//     args.SetNameParam(n_name_param,name_param,nargs);
+//   } 
+//   
+//   AnyType operator()(Stack stack)  const ;
+// };
+
+// basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
+//   {  "refe", &typeid(KN_<long> )},
+//   {  "reft", &typeid(KN_<long> )}
+// };
+
+// int  ChangeLab(const map<int,int> & m,int lab)
+// {
+//   map<int,int>::const_iterator i=m.find(lab);
+//   if(i != m.end())
+//     lab=i->second;
+//   return lab;
+// }
+
+AnyType Build2D3D_Op::operator()(Stack stack)  const 
+{
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
+  ffassert( pTh );
+  Mesh &Th=*pTh;
+  Mesh *m= pTh;   // question a quoi sert *m ??
+  int nbv=Th.nv; // nombre de sommet 
+  int nbt=Th.nt; // nombre de triangles
+  int neb=Th.neb; // nombre d'aretes fontiere
+  cout << " Vertex Triangle Border " << nbv<< "  "<< nbt << " nbe "<< neb << endl; 
+ 
+  KN<long> zzempty;
+  KN<long> nrt (arg(1,stack,zzempty));  
+  KN<long> nrf (arg(2,stack,zzempty));
+  
+  int label_tet;
+  
+  if( nrt.N() < 0 || nrt.N() > 1){
+	  cout << "tetgen allow one label for tetrahedra " << endl;
+	  assert(  nrt.N() < 0 || nrt.N() > 1 );
+  } 
+   
+  if( nrt.N() == 1 ){
+	  label_tet=nrt[0];
+  }
+  else{
+	  label_tet=0;
+  }  
+  
+  ffassert( nrf.N() %2 ==0);
+  
+  map<int,int> mapf;
+  for(int i=0;i<nrf.N();i+=2)
+  {
+	  if(nrf[i] != nrf[i+1]){
+		mapf[nrf[i]]=nrf[i+1];
+		}
+  }
+  
+  map<int, int> mapfme;  
+  
+  Transfo_Mesh2_map_face( Th, mapfme );  
+  
+  // Map utilisateur
+  map< int, int > :: iterator imap;
+  for( int ii=0; ii < nrf.N(); ii+=2){
+	imap = mapfme.find(nrf[ii]);
+	if( imap != mapfme.end()){
+		imap -> second = nrf[ii+1];
+	}
+  }  
+  
+	KN<double> txx(nbv), tyy(nbv), tzz(nbv);
+	KN<int> takemesh(nbv);
+	MeshPoint *mp3(MeshPointStack(stack)); 
+	
+	takemesh=0;  
+	Mesh &rTh = Th;
+	for (int it=0; it<nbt; ++it){
+		  for( int iv=0; iv<3; ++iv){
+				int i=Th(it,iv);
+				if(takemesh[i]==0){
+					mp3->setP(&Th,it,iv);
+					if(xx){ 
+						txx[i]=GetAny<double>((*xx)(stack));
+					}
+					if(yy){ 
+						tyy[i]=GetAny<double>((*yy)(stack));
+					}
+					if(zz){ 
+						tzz[i]=GetAny<double>((*zz)(stack));
+					}
+					takemesh[i] = takemesh[i]+1;
+				}
+	 		}
+		}
+		int border_only = 0;
+		int recollement_border=1, point_confondus_ok=1;
+		Mesh3 *Th3=Transfo_Mesh2_tetgen( Th, txx, tyy, tzz, border_only, 
+			recollement_border, point_confondus_ok, label_tet, mapfme);  
+		
+		Th3->BuildBound();
+		Th3->BuildAdj();
+		Th3->Buildbnormalv();  
+		Th3->BuildjElementConteningVertex();
+		Th3->BuildGTree();
+		Th3->decrement();    
+		
+		*mp=mps;
+		return Th3;
+}
+
+AnyType BuildLayeMesh_Op::operator()(Stack stack)  const 
+{
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
+  int nlayer = (int) GetAny<long>((*enmax)(stack));
+  ffassert(pTh && nlayer>0);
+  Mesh &Th=*pTh;
+  Mesh *m= pTh;   // question a quoi sert *m ??
+  int nbv=Th.nv; // nombre de sommet 
+  int nbt=Th.nt; // nombre de triangles
+  int neb=Th.neb; // nombre d'aretes fontiere
+  cout << " " << nbv<< " "<< nbv << " nbe "<< neb << endl; 
+  KN<double> zmin(nbv),zmax(nbv);
+  KN<double> clayer(nbv); //  nombre de layer est nlayer*clayer
+  
+  clayer=-1;
+  zmin=0.;
+  zmax=1.;
+  for (int it=0;it<nbt;++it){
+    for(int iv=0;iv<3;++iv)      
+    {
+      int i=Th(it,iv);
+       if(clayer[i]<0)
+	{
+	  mp->setP(&Th,it,iv);
+	  //cout << "mp: fait " << endl;
+	  if(ezmin){ zmin[i]=GetAny<double>((*ezmin)(stack));}
+	  if(ezmax){ zmax[i]=GetAny<double>((*ezmax)(stack));}
+
+	  clayer[i]=Max( 0. , Min( 1. , arg(2,stack,1.) ) ); 
+	
+	}	     
+    }
+  }
+  ffassert(clayer.min() >=0);
+
+  cout << "lecture valeur des references " << endl;
+  
+  KN<long> zzempty;
+  KN<long> nrtet  (arg(3,stack,zzempty));  
+  KN<long> nrfmid (arg(4,stack,zzempty));  
+  KN<long> nrfup  (arg(5,stack,zzempty));  
+  KN<long> nrfdown (arg(6,stack,zzempty));  
+
+  cout << nrtet.N() <<  nrfmid.N() << nrfup.N() << nrfdown.N() << endl;
+  
+  //if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
+  ffassert( nrtet.N() %2 ==0);
+  ffassert( nrfmid.N() %2 ==0);
+  ffassert( nrfup.N() %2 ==0);
+  ffassert( nrfdown.N() %2 ==0);
+  
+  // realisation de la map par default
+  
+  map< int, int > maptet; 
+  map< int, int > maptrimil, maptrizmax, maptrizmin;
+  map< int, int > mapemil, mapezmax, mapezmin;
+  
+  build_layer_map_tetrahedra( Th, maptet );
+  build_layer_map_triangle( Th, maptrimil, maptrizmax, maptrizmin );
+  build_layer_map_edge( Th, mapemil, mapezmax, mapezmin );
+    
+  // Map utilisateur
+  map< int, int > :: iterator imap;
+  for( int ii=0; ii < nrtet.N(); ii+=2){
+	imap = maptet.find(nrtet[ii]);
+	if( imap != maptet.end()){
+		imap -> second = nrtet[ii+1];
+	}
+  }  
+
+  for( int ii=0; ii < nrfmid.N(); ii+=2){
+	imap = maptrimil.find(nrfmid[ii]);
+	if( imap != maptrimil.end()){
+		imap -> second = nrfmid[ii+1];
+	}
+  }  
+  
+  for( int ii=0; ii < nrfup.N(); ii+=2){
+	imap = maptrizmax.find(nrfup[ii]);
+	if( imap != maptrizmax.end()){
+		imap -> second = nrfup[ii+1];
+	}
+  }  
+  
+  for( int ii=0; ii < nrfdown.N(); ii+=2){
+	imap = maptrizmin.find(nrfdown[ii]);
+	if( imap != maptrizmin.end()){
+		imap -> second = nrfdown[ii+1];
+	}
+  }  
+    
+  int nebn =0;
+  KN<int> ni(nbv);
+  for(int i=0;i<nbv;i++)
+    ni[i]=Max(0,Min(nlayer,(int) lrint(nlayer*clayer[i])));
+    
+//    map< int, int > maptet; 
+// 	  map< int, int > maptrimil, maptrizmax, maptrizmin;
+// 	  map< int, int > mapemil, mapezmax, mapezmin;
+// 	   
+// 	  build_layer_map_tetrahedra( Th, maptet );
+// 	  build_layer_map_triangle( Th, maptrimil, maptrizmax, maptrizmin );
+// 	  build_layer_map_edge( Th, mapemil, mapezmax, mapezmin );
+// 	  
+
+	  Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
+    
+  
+  if( !(xx) && !(yy) && !(zz) ){
+	 /*
+	  map< int, int > maptet; 
+	  map< int, int > maptrimil, maptrizmax, maptrizmin;
+	  map< int, int > mapemil, mapezmax, mapezmin;
+	   
+	  build_layer_map_tetrahedra( Th, maptet );
+	  build_layer_map_triangle( Th, maptrimil, maptrizmax, maptrizmin );
+	  build_layer_map_edge( Th, mapemil, mapezmax, mapezmin );
+	  
+	  Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
+	  */
+	  Th3->BuildBound();
+	  Th3->BuildAdj();
+	  Th3->Buildbnormalv();  
+	  Th3->BuildjElementConteningVertex();
+	  Th3->BuildGTree();
+	  Th3->decrement();  
+  
+  	*mp=mps;
+  	return Th3;
+  }
+  else{
+	  
+	  //Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
+	  
+	  KN<double> txx(Th3->nv), tyy(Th3->nv), tzz(Th3->nv);
+	  KN<int> takemesh(Th3->nv);
+	  MeshPoint *mp3(MeshPointStack(stack)); 
+	  
+	  takemesh=0;  
+	  Mesh3 &rTh3 = *Th3;
+	  for (int it=0;it<Th3->nt;++it){
+		  for( int iv=0; iv<4; ++iv){
+			   int i=(*Th3)(it,iv);  
+				if(takemesh[i]==0){
+					mp3->setP(Th3,it,iv);
+					if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
+					if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
+					if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
+
+					takemesh[i] = takemesh[i]+1;
+				}
+	 		}
+		}
+		
+		int border_only = 0;
+		int recollement_elem=0, recollement_border=1, point_confondus_ok=0;
+		Mesh3 *T_Th3=Transfo_Mesh3( rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok);
+		  
+		
+ 		T_Th3->BuildBound();
+  		T_Th3->BuildAdj();
+  		T_Th3->Buildbnormalv();  
+  		T_Th3->BuildjElementConteningVertex();
+  		T_Th3->BuildGTree();
+  		T_Th3->decrement();  
+  
+	 	*mp=mps;
+		return T_Th3;
+	}
+}
+
+// Movemesh3D
+
+class Movemesh3D_Op : public E_F0mps 
+{
+public:
+  Expression eTh;
+  Expression xx,yy,zz;
+  static const int n_name_param =3; // 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  
+public:
+  Movemesh3D_Op(const basicAC_F0 &  args,Expression tth) 
+    : eTh(tth), xx(0) , yy(0) , zz(0)
+  {
+    args.SetNameParam(n_name_param,name_param,nargs);
+    const E_Array * a1=0 ;
+    if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
+    int err =0;
+ 
+    if(a1) {
+      if(a1->size() !=3) 
+      CompileError("Build2D3D (Th,transfo=[X,Y,Z],) ");
+      xx=to<double>( (*a1)[0]);
+      yy=to<double>( (*a1)[1]);
+      zz=to<double>( (*a1)[2]);
+    }    
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
+
+basicAC_F0::name_and_type Movemesh3D_Op::name_param[]= {
+  {  "transfo", &typeid(E_Array)},
+  {  "reftet", &typeid(KN_<long> )},
+  {  "refface", &typeid(KN_<long> )}
+  
+};
+
+
+class  Movemesh3D : public OneOperator { public:  
+    Movemesh3D() : OneOperator(atype<pmesh3>(),atype<pmesh3>()) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  {
+	cout << " je suis dans code(const basicAC_F0 & args) const" << endl;
+	return  new Movemesh3D_Op(args,t[0]->CastTo(args[0])); 
+  }
+};
+
+AnyType Movemesh3D_Op::operator()(Stack stack)  const 
+{
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+  Mesh3 * pTh= GetAny<Mesh3 *>((*eTh)(stack));
+  
+  ffassert(pTh);
+  Mesh3 &Th=*pTh;
+  Mesh3 *m= pTh;   // question a quoi sert *m ??
+  int nbv=Th.nv; // nombre de sommet 
+  int nbt=Th.nt; // nombre de triangles
+  int nbe=Th.nbe; // nombre d'aretes fontiere
+  cout << " " << nbv<< " "<< nbv << " nbe "<< nbe << endl; 
+ 
+ // lecture des references
+   
+  KN<long> zzempty;
+  KN<long> nrtet  (arg(1,stack,zzempty));  
+  KN<long> nrf (arg(2,stack,zzempty)); 
+
+  cout << nrtet.N() << nrf.N() << endl;
+  
+  //if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
+  ffassert( nrtet.N() %2 ==0);
+  ffassert( nrf.N() %2 ==0);
+  
+
+  // realisation de la map par default
+  
+    assert((xx) && (yy) && (zz) );
+  
+	KN<double> txx(Th.nv), tyy(Th.nv), tzz(Th.nv);
+	Mesh3 &rTh3 = Th;
+	{
+	KN<int> takemesh(Th.nv);
+	MeshPoint *mp3(MeshPointStack(stack)); 
+	  
+	takemesh=0;
+	for (int it=0;it<Th.nt;++it){
+		  for( int iv=0; iv<4; ++iv){
+			   int i=Th(it,iv);  
+				if(takemesh[i]==0){
+					mp3->setP(&rTh3,it,iv);
+					if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
+					if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
+					if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
+					takemesh[i] = takemesh[i]+1;
+				}
+			}
+		}
+	}
+	
+	int border_only = 0;
+	int recollement_elem=0, recollement_border=1, point_confondus_ok=0;
+	Mesh3 *T_Th3=Transfo_Mesh3( rTh3, txx, tyy, tzz, border_only, 
+		recollement_elem, recollement_border, point_confondus_ok);
+	  
+	/*  changement de label   */
+	
+	
+	T_Th3->BuildBound();
+	T_Th3->BuildAdj();
+	T_Th3->Buildbnormalv();  
+	T_Th3->BuildjElementConteningVertex();
+	T_Th3->BuildGTree();
+	T_Th3->decrement();  
+  
+	*mp=mps;
+	return T_Th3;
+}
+
+
+
+// Appel remplissage du trou 
+
+class Remplissage_Op : public E_F0mps 
+{
+public:
+  Expression eTh;
+  static const int n_name_param =3; // 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  
+public:
+  Remplissage_Op(const basicAC_F0 &  args,Expression tth) 
+    : eTh(tth)
+  {
+    cout << "Remplissage du bord" << endl;
+    args.SetNameParam(n_name_param,name_param,nargs);
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
+
+
+basicAC_F0::name_and_type Remplissage_Op::name_param[]= {
+  {  "methode",&typeid(KN_<long>)},
+  {  "reftet", &typeid(KN_<long>)}, 
+  {  "refface", &typeid(KN_<long> )}
+};
+
+class  Remplissage : public OneOperator { public:  
+    Remplissage() : OneOperator(atype<pmesh3>(),atype<pmesh3>()) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  { 
+	return  new Remplissage_Op( args,t[0]->CastTo(args[0]) ); 
+  }
+};
+
+AnyType Remplissage_Op::operator()(Stack stack)  const 
+{
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+  Mesh3 * pTh= GetAny<Mesh3 *>((*eTh)(stack));
+  ffassert( pTh );
+  Mesh3 &Th=*pTh;
+  Mesh3 *m= pTh;   // question a quoi sert *m ??
+  int nbv=Th.nv; // nombre de sommet 
+  int nbt=Th.nt; // nombre de triangles
+  int nbe=Th.nbe; // nombre d'aretes fontiere
+  cout << " Vertex Triangle Border " << nbv<< "  "<< nbt << " nbe "<< nbe << endl; 
+ 
+  KN<long> zzempty;
+  KN<long> num_methode(arg(0,stack,zzempty));
+  KN<long> nrt (arg(1,stack,zzempty));  
+  KN<long> nrf (arg(2,stack,zzempty));
+  
+  int label_tet;
+  
+  if( nrt.N() < 0 || nrt.N() > 1){
+	  cout << "tetgen allow one label for tetrahedra " << endl;
+	  assert(  nrt.N() < 0 || nrt.N() > 1 );
+  } 
+   
+  if( nrt.N() == 1 ){
+	  label_tet=nrt[0];
+  }
+  else{
+	  label_tet=0;
+  }  
+  
+  ffassert( nrf.N() %2 ==0);
+  
+  
+  map<int,int> mapf;
+  for(int i=0;i<nrf.N();i+=2)
+  {
+	  if(nrf[i] != nrf[i+1]){
+		mapf[nrf[i]]=nrf[i+1];
+		}
+  }
+	Mesh3 *Th3 =new Mesh3;
+	if(num_methode[0]==1) 
+		Th3 = RemplissageSurf3D_tetgen( Th, label_tet);
+	
+	// changement de label 
+	if( nrf.N() > 0){
+		for(int ii=0; ii< Th3->nbe; ii++){
+			const Triangle3 & K(Th3->be(ii));
+			int lab;
+			int iv[3];
+			
+			iv[0] = Th3->operator()(K[0]);
+			iv[1] = Th3->operator()(K[1]);
+			iv[2] = Th3->operator()(K[2]);
+			
+			map< int, int> :: const_iterator imap;
+			imap = mapf.find(K.lab);
+			if( imap != mapf.end() ){
+				lab = imap -> second;
+			}
+			else{
+				lab = K.lab;
+			}
+			Th3->be(ii).set(Th3->vertices,iv,lab);
+		}
+	}
+	
+	Th3->BuildBound();
+	Th3->BuildAdj();
+	Th3->Buildbnormalv();  
+	Th3->BuildjElementConteningVertex();
+	Th3->BuildGTree();
+	Th3->decrement();    
+	
+	*mp=mps;
+	return Th3;
+}
+
+
+// AnyType SetMesh_Op::operator()(Stack stack)  const 
+// {
+//   Mesh * pTh= GetAny<Mesh *>((*a)(stack));
+//   Mesh & Th=*pTh;
+//   Mesh *m= pTh;
+//   int nbv=Th.nv; // nombre de sommet 
+//   int nbt=Th.nt; // nombre de triangles
+//   int neb=Th.neb; // nombre d'aretes fontiere
+//   cout << " " << nbv<< " "<< nbv << " nbe "<< neb << endl;  
+//   KN<long> zz;
+//   KN<long> nre (arg(0,stack,zz));  
+//   KN<long> nrt (arg(1,stack,zz));  
+
+//   if(nre.N() <=0 && nrt.N() ) return m;
+//   ffassert( nre.N() %2 ==0);
+//   ffassert( nrt.N() %2 ==0);
+//   map<int,int> mape,mapt;
+//   int z00 = false;
+//   for(int i=0;i<nre.N();i+=2)
+//     { z00 = z00 || ( nre[i]==0 && nre[i+1]==0);
+//       if(nre[i] != nre[i+1])
+// 	mape[nre[i]]=nre[i+1];
+//     }
+//   for(int i=0;i<nrt.N();i+=2)
+//     mapt[nrt[i]]=nrt[i+1];
+//   int nebn =0;
+//     for(int i=0;i<neb;++i)
+//       {
+// 	int l0,l1=ChangeLab(mape,l0=m->bedges[i].lab) ;
+// 	 nebn++;
+//       }
+// 	  
+
+//   Vertex * v= new Vertex[nbv];
+//   Triangle *t= new Triangle[nbt];
+//   BoundaryEdge *b= new BoundaryEdge[nebn];
+//   // generation des nouveaux sommets 
+//   Vertex *vv=v;
+//   // copie des anciens sommets (remarque il n'y a pas operateur de copy des sommets)
+//   for (int i=0;i<nbv;i++)
+//     {
+//      Vertex & V=Th(i);
+//      vv->x=V.x;
+//      vv->y=V.y;
+//      vv->lab = V.lab;
+//      vv++;      
+//    }
+
+//   //  generation des triangles 
+//   Triangle *tt= t; 
+//   int nberr=0;
+//    
+//   for (int i=0;i<nbt;i++)
+//     {
+//       int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
+//       // les 3 triangles par triangles origines 
+//       (*tt++).set(v,i0,i1,i2,ChangeLab(mapt,Th[i].lab));
+//     }  
+//   
+//   // les arete frontieres qui n'ont pas change
+//   BoundaryEdge * bb=b;
+//   for (int i=0;i<neb;i++)
+//     {        
+//       int i1=Th(Th.bedges[i][0]);
+//       int i2=Th(Th.bedges[i][1]);
+//       int l0,l1=ChangeLab(mape,l0=m->bedges[i].lab) ;
+//       *bb++ = BoundaryEdge(v,i1,i2,l1);   
+//     }
+//   assert(nebn==bb-b);
+//   m =  new Mesh(nbv,nbt,nebn,v,t,b);
+
+//   R2 Pn,Px;                                                                                                                               
+//   m->BoundingBox(Pn,Px);
+//   m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);   
+//   m->decrement();
+//   return m;
+// }
 
 class SetMesh_Op : public E_F0mps 
 {
@@ -614,7 +1520,7 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
       iv[3]= Th.operator()(K[3]);
       // les 3 triangles par triangles origines 
       int lab=K.lab;
-      if(lab==41) cout << "i triangle "<< i << "lab= " << lab << "changelab " <<ChangeLab(maptet,lab) << endl;
+      
       (*tt++).set( v, iv, ChangeLab(maptet,lab));
     }  
   
@@ -645,7 +1551,7 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
 
 
 class SetMesh3D : public OneOperator { public:  
-typedef Mesh *pmesh;
+typedef Mesh3 *pmesh3;
     SetMesh3D() : OneOperator(atype<pmesh3>(),atype<pmesh3>() ) {}
   
   E_F0 * code(const basicAC_F0 & args) const 
@@ -654,179 +1560,230 @@ typedef Mesh *pmesh;
   }
 };
 
+// ---------------------------------
+// Movemesh2d_3D_surf
 
-AnyType BuildLayeMesh_Op::operator()(Stack stack)  const 
+
+class Movemesh2D_3D_surf_Op : public E_F0mps 
 {
-  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
-  int nlayer = (int) GetAny<long>((*enmax)(stack));
-  ffassert(pTh && nlayer>0);
-  Mesh &Th=*pTh;
-  Mesh *m= pTh;   // question a quoi sert *m ??
-  int nbv=Th.nv; // nombre de sommet 
-  int nbt=Th.nt; // nombre de triangles
-  int neb=Th.neb; // nombre d'aretes fontiere
-  cout << " " << nbv<< " "<< nbv << " nbe "<< neb << endl; 
-  KN<double> zmin(nbv),zmax(nbv);
-  KN<double> clayer(nbv); //  nombre de layer est nlayer*clayer
+public:
+  Expression eTh;
+  Expression xx,yy,zz; 
+  static const int n_name_param =3; //  add nbiter FH 30/01/2007 11 -> 12 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+
   
-  clayer=-1;
-  zmin=0.;
-  zmax=1.;
-  for (int it=0;it<nbt;++it){
-    for(int iv=0;iv<3;++iv)      
-    {
-      int i=Th(it,iv);
-       if(clayer[i]<0)
-	{
-	  mp->setP(&Th,it,iv);
-	  //cout << "mp: fait " << endl;
-	  if(ezmin){ zmin[i]=GetAny<double>((*ezmin)(stack));}
-	  if(ezmax){ zmax[i]=GetAny<double>((*ezmax)(stack));}
+public:
+  Movemesh2D_3D_surf_Op(const basicAC_F0 &  args,Expression tth) : 
+  eTh(tth),xx(0),yy(0),zz(0) 
+  {
+  
+	 args.SetNameParam(n_name_param,name_param,nargs);
+    
+    const E_Array * a1=0 ;
+    if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
+    int err =0;
+   
+    if(a1) {
+      if(a1->size() !=3) 
+      CompileError("Movemesh2D_3D_surf (Th,transfo=[X,Y,Z],) ");
+      xx=to<double>( (*a1)[0]);
+      yy=to<double>( (*a1)[1]);
+      zz=to<double>( (*a1)[2]);
+    }    
+    
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
 
-	  clayer[i]=Max( 0. , Min( 1. , arg(2,stack,1.) ) ); 
-	
-	}	     
-    }
-  }
-  ffassert(clayer.min() >=0);
+basicAC_F0::name_and_type Movemesh2D_3D_surf_Op::name_param[]= {
+  {  "transfo", &typeid(E_Array )},
+  {  "refface", &typeid(KN_<long>)},
+  {  "mesuremesh", &typeid(KN_<long>)}
+};
 
-  cout << "lecture valeur des references " << endl;
+AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const 
+{
+  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
+  Mesh & Th=*pTh;
+  Mesh *m= pTh;
+  int nbv=Th.nv;  // nombre de sommet 
+  int nbt=Th.nt;  // nombre de triangles
+  int nbe=Th.neb; // nombre d'aretes fontiere
+  
+  cout << "Vertex Triangle Edge"<< nbv << nbt << nbe << endl;  
   
   KN<long> zzempty;
-  KN<long> nrtet  (arg(3,stack,zzempty));  
-  KN<long> nrfmid (arg(4,stack,zzempty));  
-  KN<long> nrfup  (arg(5,stack,zzempty));  
-  KN<long> nrfdown (arg(6,stack,zzempty));  
+  KN<long> nrface (arg(1,stack,zzempty));
+  KN<long> mesuremesh (arg(2,stack,zzempty));
+  
+  
+  if(nrface.N()<0 ) return m;
+  ffassert( nrface.N() %2 ==0);
+  
+  map<int,int> mapface;
+  
+  int z00 = false;
+  for(int i=0;i<nrface.N();i+=2)
+    { z00 = z00 || ( nrface[i]==0 && nrface[i+1]==0);
 
-  cout << nrtet.N() <<  nrfmid.N() << nrfup.N() << nrfdown.N() << endl;
+      if( nrface[i] != nrface[i+1] ){	
+      mapface[nrface[i]] = nrface[i+1];
+      }      
+    }
   
-  //if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
-  ffassert( nrtet.N() %2 ==0);
-  ffassert( nrfmid.N() %2 ==0);
-  ffassert( nrfup.N() %2 ==0);
-  ffassert( nrfdown.N() %2 ==0);
-  
-  // realisation de la map par default
-  
-  map< int, int > maptet; 
-  map< int, int > maptrimil, maptrizmax, maptrizmin;
-  map< int, int > mapemil, mapezmax, mapezmin;
-  
-  build_layer_map_tetrahedra( Th, maptet );
-  build_layer_map_triangle( Th, maptrimil, maptrizmax, maptrizmin );
-  build_layer_map_edge( Th, mapemil, mapezmax, mapezmin );
-    
-  // Map utilisateur
-  map< int, int > :: iterator imap;
-  for( int ii=0; ii < nrtet.N(); ii+=2){
-	imap = maptet.find(nrtet[ii]);
-	if( imap != maptet.end()){
-		imap -> second = nrtet[ii+1];
-	}
-  }  
-
-  for( int ii=0; ii < nrfmid.N(); ii+=2){
-	imap = maptrimil.find(nrfmid[ii]);
-	if( imap != maptrimil.end()){
-		imap -> second = nrfmid[ii+1];
-	}
-  }  
-  
-  for( int ii=0; ii < nrfup.N(); ii+=2){
-	imap = maptrizmax.find(nrfup[ii]);
-	if( imap != maptrizmax.end()){
-		imap -> second = nrfup[ii+1];
-	}
-  }  
-  
-  for( int ii=0; ii < nrfdown.N(); ii+=2){
-	imap = maptrizmin.find(nrfdown[ii]);
-	if( imap != maptrizmin.end()){
-		imap -> second = nrfdown[ii+1];
-	}
-  }  
-    
-  int nebn =0;
-  KN<int> ni(nbv);
-  for(int i=0;i<nbv;i++)
-    ni[i]=Max(0,Min(nlayer,(int) lrint(nlayer*clayer[i])));
-    
-//    map< int, int > maptet; 
-// 	  map< int, int > maptrimil, maptrizmax, maptrizmin;
-// 	  map< int, int > mapemil, mapezmax, mapezmin;
-// 	   
-// 	  build_layer_map_tetrahedra( Th, maptet );
-// 	  build_layer_map_triangle( Th, maptrimil, maptrizmax, maptrizmin );
-// 	  build_layer_map_edge( Th, mapemil, mapezmax, mapezmin );
-// 	  
-
-	  Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
-    
-  
-  if( !(xx) && !(yy) && !(zz) ){
-	 /*
-	  map< int, int > maptet; 
-	  map< int, int > maptrimil, maptrizmax, maptrizmin;
-	  map< int, int > mapemil, mapezmax, mapezmin;
-	   
-	  build_layer_map_tetrahedra( Th, maptet );
-	  build_layer_map_triangle( Th, maptrimil, maptrizmax, maptrizmin );
-	  build_layer_map_edge( Th, mapemil, mapezmax, mapezmin );
-	  
-	  Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
-	  */
-	  Th3->BuildBound();
-	  Th3->BuildAdj();
-	  Th3->Buildbnormalv();  
-	  Th3->BuildjElementConteningVertex();
-	  Th3->BuildGTree();
-	  Th3->decrement();  
-  
-  	*mp=mps;
-  	return Th3;
+  int surface_orientation=1; 
+  if( mesuremesh.N() >0  && mesuremesh[0] > 0){
+	  surface_orientation=-1;
   }
-  else{
-	  
-	  //Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
-	  
-	  KN<double> txx(Th3->nv), tyy(Th3->nv), tzz(Th3->nv);
-	  KN<int> takemesh(Th3->nv);
-	  MeshPoint *mp3(MeshPointStack(stack)); 
-	  
-	  takemesh=0;  
-	  Mesh3 &rTh3 = *Th3;
-	  for (int it=0;it<Th3->nt;++it){
-		  for( int iv=0; iv<4; ++iv){
-			   int i=(*Th3)(it,iv);  
-				if(takemesh[i]==0){
-					mp3->setP(Th3,it,iv);
-					if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
-					if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
-					if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
+        
 
+  KN<double> txx(nbv), tyy(nbv), tzz(nbv);
+  MeshPoint *mp3(MeshPointStack(stack)); 
+  
+  {
+	KN<int> takemesh(nbv);  
+	takemesh=0;  
+	Mesh &rTh = Th;
+	for (int it=0; it<nbt; ++it){
+		  for( int iv=0; iv<3; ++iv){
+				int i=Th(it,iv);
+				if(takemesh[i]==0){
+					mp3->setP(&Th,it,iv);
+					if(xx){ 
+						txx[i]=GetAny<double>((*xx)(stack));
+					}
+					if(yy){ 
+						tyy[i]=GetAny<double>((*yy)(stack));
+					}
+					if(zz){ 
+						tzz[i]=GetAny<double>((*zz)(stack));
+					}
 					takemesh[i] = takemesh[i]+1;
 				}
-	 		}
+			}
+		}
+  }
+  
+  Mesh3 *Th3= new Mesh3;
+  
+  int vertex_out=1;
+  
+  if( vertex_out == 1){
+	/* determinate the same vertex */ 
+	int border_only = 0;
+	int recollement_border=1, point_confondus_ok=0;
+
+	// faire version de Transfo_Mesh2_tetgen pour ce cas précis.
+	Th3= MoveMesh2_func( Th, txx, tyy, tzz, 
+		border_only, recollement_border, point_confondus_ok);
+	
+	// Rajouter fonction flip a l interieure
+	
+	for(int ii=0; ii < Th3->nbe; ii++){
+		
+		const Triangle3 & K(Th3->be(ii)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
+		int iv[3];
+		int lab;
+		double mes_triangle3;
+		
+		iv[0] = Th3->operator()(K[0]);
+		iv[1] = Th3->operator()(K[1]);
+		iv[2] = Th3->operator()(K[2]);
+		
+		map< int, int>:: const_iterator imap;
+		imap = mapface.find(K.lab); 
+		
+		if(imap!= mapface.end()){
+			 lab=imap->second;
+		} 
+		else{
+			lab=K.lab;
 		}
 		
-		int border_only = 0;
-		int recollement_elem=0, recollement_border=1, point_confondus_ok=0;
-		Mesh3 *T_Th3=Transfo_Mesh3( rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok);
-		  
+		Th3->be(ii).set( Th3->vertices, iv, lab ) ;
+		mes_triangle3 = Th3->be(ii).mesure();
 		
- 		T_Th3->BuildBound();
-  		T_Th3->BuildAdj();
-  		T_Th3->Buildbnormalv();  
-  		T_Th3->BuildjElementConteningVertex();
-  		T_Th3->BuildGTree();
-  		T_Th3->decrement();  
-  
-	 	*mp=mps;
-		return T_Th3;
+		if( surface_orientation*mes_triangle3 < 0){
+			int iv_temp=iv[1];
+			iv[1]=iv[2];
+			iv[2]=iv_temp;
+			Th3->be(ii).set( Th3->vertices, iv, lab ) ;
+		}
+		
+		/* autre methode a tester */
+		/*
+		Triangle3 Kmes;
+		Kmes.set( Th3->vertices, iv, lab ) ;
+		mes_triangle3 = Kmes.mesure();
+		if( surface_orientation*mes_triangle3) < 0){
+			int iv_temp=iv[1];
+			iv[1]=iv[2];
+			iv[2]=iv_temp;
+		}
+		Th3->be(ii).set( Th3->vertices, iv, lab ) ;
+		*/
 	}
+  }
+  
+  if( vertex_out == 0){
+	  
+	  Tet       *t;
+	  Vertex3   *v = new Vertex3[nbv];
+	  Triangle3 *b = new Triangle3[nbe];
+	  // generation des nouveaux sommets 
+	  Vertex3 *vv=v;
+	 // copie des anciens sommets (remarque il n'y a pas operateur de copy des sommets)
+	  for (int i=0;i<nbv;i++)
+	  {
+		  const Mesh::Vertex & V( Th.vertices[i]);
+		  vv->x = txx[i];
+		  vv->y = tyy[i];
+		  vv->z = tzz[i];
+		  vv->lab = V.lab;
+		  vv++;      
+	  }
+ 
+	// les arete frontieres qui n'ont pas change
+  
+	  Triangle3 * bb=b;
+	  for (int i=0;i<nbt;i++)
+	  { 
+      	const Mesh::Triangle &K( Th.t(i) );
+      	int iv[3];       
+    
+      	iv[0] = Th.operator()(K[0]);
+      	iv[1] = Th.operator()(K[1]);
+      	iv[2] = Th.operator()(K[2]);
+      	
+      /* calcul de la mesure */
+    
+      /*  inversement si on a besoin  */  
+      
+      	(*bb++).set( v, iv, K.lab);
+      }
+      
+      Th3 = new Mesh3(nbv,0,nbt,v,t,b);  
+      
+  }
+  
+  return Th3;
 }
 
+
+class Movemesh2D_3D_surf : public OneOperator { public:  
+typedef Mesh *pmesh;
+typedef Mesh3 *pmesh3;
+    
+  Movemesh2D_3D_surf() : OneOperator(atype<pmesh3>(),atype<pmesh>() ) {}
+    E_F0 * code(const basicAC_F0 & args) const 
+  { 
+    return  new Movemesh2D_3D_surf_Op(args,t[0]->CastTo(args[0]));  // CastTo(args[]); // plus tard
+  }
+};
 
 //  truc pour que la fonction 
 // Init::Init() soit appele a moment du chargement dynamique
@@ -861,5 +1818,8 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Global.Add("change","(",new SetMesh);
   Global.Add("change3D","(",new SetMesh3D);
   Global.Add("buildlayers","(",new  BuildLayerMesh);
-  //  Global.Add("build2D3D","(",new Build2D3D);
+  Global.Add("tetgtransfo","(",new Build2D3D);
+  Global.Add("movemesh2D3Dsurf","(",new Movemesh2D_3D_surf);
+  Global.Add("movemesh3D","(",new Movemesh3D);
+  Global.Add("tetg","(",new Remplissage);
 }

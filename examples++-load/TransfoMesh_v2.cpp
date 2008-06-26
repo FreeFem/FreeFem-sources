@@ -35,7 +35,7 @@ using namespace std;
 using namespace Fem2D;
 //#include "TransfoMesh_v2.hpp"
 //#include "tetgen.h"
-//#include "tetgen.h"
+#include "tetgen.h"
 #include "TransfoMesh_v2.hpp"
 
 
@@ -346,7 +346,211 @@ void SamePointElement( const double *tab_XX, const double *tab_YY, const double 
 		}
 }
 
+// 3D surface
 
+Mesh3 * Transfo_Mesh3_surf(const Mesh3 & Th3, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
+	int &recollement_border, int &point_confondus_ok){
+	// cas besoin memoire important
+	
+	Mesh3 *T_Th3=new Mesh3;
+	int nv_t,nbe_t;
+	int nt_t=0;
+	
+	int* Numero_Som;
+	int* ind_nv_t;
+	int* ind_nbe_t;
+	int* label_nbe_t;
+	
+	int i_som, i_elem, i_border;
+	
+	assert( Th3.nt == 0);
+	
+	Numero_Som = new int[Th3.nv];
+	ind_nv_t   = new int[Th3.nv];
+	ind_nbe_t  = new int[Th3.nbe];
+	label_nbe_t  = new int[Th3.nbe];
+	
+    
+    cout << "Vertex, Tetrahedra, Border : "<<Th3.nv << ", "<<Th3.nt<< ", " << Th3.nbe<< endl;
+    
+	for(int ii=0; ii<Th3.nv; ii++){
+		Numero_Som[ii]=ii;
+	}
+	
+	cout <<" debut: SamePointElement " <<endl;
+	
+	SamePointElement_surf( tab_XX, tab_YY, tab_ZZ, Th3, 
+		recollement_border, point_confondus_ok, Numero_Som, 
+		ind_nv_t, ind_nbe_t, label_nbe_t, nv_t, nbe_t);
+	
+	cout <<" fin: SamePointElement " <<endl;
+	
+	// set size of Mesh T_Th3 
+	T_Th3->set(nv_t,nt_t,nbe_t);
+
+	cout << "Transfo TH3 : Vertex, Tetrahedra, Border : "<< "nv_t="<< nv_t << " nt_t=" << nt_t << " nbe_t=" << nbe_t << endl;
+		
+	// determination of vertex		
+	i_som = 0;
+	for(int i=0; i<nv_t; i++){
+		
+		int & ii = ind_nv_t[i];
+		assert( Numero_Som[ii] == i_som );
+		
+		const Vertex3 & K(Th3.vertices[ii]);
+			 
+		T_Th3->vertices[i_som].x = tab_XX[ii];
+		T_Th3->vertices[i_som].y = tab_YY[ii];
+		T_Th3->vertices[i_som].z = tab_ZZ[ii];
+		T_Th3->vertices[i_som].lab = K.lab; 
+			
+		i_som = i_som + 1;		
+	}	
+	cout << "i_som, nv_t=" <<i_som << " "<<nv_t << endl;
+	assert( i_som == nv_t);
+	
+	cout << " Transfo border elements " << endl;
+	// determination of border elements
+	i_border= 0;
+	for( int i=0; i< nbe_t; i++){
+		int & ii=ind_nbe_t[i];
+	
+		// creation of elements
+		const Triangle3 & K(Th3.be(ii));
+		int iv[3];
+		int lab;
+		
+		//lab = K.lab; 
+		lab = label_nbe_t[i];
+		
+		for(int jj=0; jj <3; jj++){
+			iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
+			assert( iv[jj] >= 0 && iv[jj] <= nv_t);
+		}
+		T_Th3->be(i_border).set(T_Th3->vertices, iv, lab);
+		i_border=i_border+1;
+	} 
+	assert( i_border == nbe_t);
+	
+	return T_Th3;
+}
+
+void SamePointElement_surf( const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 & Th3, 
+	int &recollement_border, int &point_confondus_ok, int *Numero_Som, 
+	int *ind_nv_t, int *ind_nbe_t, int *label_nbe_t, int & nv_t,int & nbe_t ){
+		
+		int Elem_ok, Border_ok;
+		double hmin,hmin_elem,hmin_border;
+		R3 bmin,bmax;
+		//int recollement_element=1,recollement_border=1;
+		
+		cout << "  OrderVertexTransfo_hcode gtree " <<endl;
+		BuildBoundMinDist_th3( tab_XX, tab_YY, tab_ZZ, Th3, bmin, bmax, hmin);
+		cout << " =============================== " << endl;
+		
+		double bmin3[3], bmax3[3];
+		bmin3[0] = bmin.x;
+		bmin3[1] = bmin.y;
+		bmin3[2] = bmin.z;
+		
+		bmax3[0] = bmax.x;
+		bmax3[1] = bmax.y;
+		bmax3[2] = bmax.z;
+		
+		/*
+		cout << "  OrderVertexTransfo_hcode " << endl;
+		OrderVertexTransfo_hcode_nv( Th3.nv, tab_XX, tab_YY, tab_ZZ, bmin3, bmax3, hmin, Numero_Som, ind_nv_t, nv_t );
+		cout << "fin order vertex: nv_t=" << nv_t << endl;
+		*/
+		cout << "  OrderVertexTransfo_hcode gtree " << endl;
+		OrderVertexTransfo_hcode_nv_gtree( Th3.nv, bmin, bmax, hmin, tab_XX, tab_YY, tab_ZZ, Numero_Som, ind_nv_t, nv_t );
+		cout << "fin order vertex gtree: nv_t=" << nv_t << endl;
+		
+		cout << " =============================== " << endl;
+		
+		/* determination de nt_t et de nbe_t*/ 
+		int i_border;
+		
+		// determination of border elements
+		i_border= 0;
+		for( int ii=0; ii< Th3.nbe; ii++){
+			Border_ok=1;
+		
+			const Triangle3 & K(Th3.be(ii));
+			int iv[3];
+			
+			for(int jj=0; jj <3; jj++){
+				iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
+			}
+			
+			for(int jj=0; jj<3; jj++){
+				for(int kk=jj+1; kk<3; kk++){
+					if( iv[jj]==iv[kk] ) Border_ok=0;
+				}
+			}
+			if(Border_ok==1){
+				ind_nbe_t[i_border]   = ii;
+				label_nbe_t[i_border] = K.lab;
+				i_border=i_border+1;
+			}
+		}
+		nbe_t = i_border;
+		
+		if( recollement_border == 1){
+			//int point_confondus_ok = 1;
+			cout << "debut recollement : nbe_t= "<< nbe_t << endl; 
+			
+			int np,dim=3;
+			int *ind_np = new int [nbe_t];
+			double **Cdg_be=new double *[nbe_t];
+			int *label_be = new int [nbe_t];
+			for(int i=0; i<nbe_t; i++) Cdg_be[i] = new double[dim];
+			
+			for( int i_border=0; i_border< nbe_t; i_border++){
+				
+				int & ii=ind_nbe_t[i_border];
+				const Triangle3 & K(Th3.be(ii));
+				int iv[3];
+				
+				for(int jj=0; jj <3; jj++){
+					iv[jj] = Th3.operator()(K[jj]);
+				}
+				Cdg_be[i_border][0] = ( tab_XX[iv[0]] + tab_XX[iv[1]] + tab_XX[iv[2]] )/3.; //( Th3.vertices[iv[0]].x + Th3.vertices[iv[1]].x + Th3.vertices[iv[2]].x )/3.;
+				Cdg_be[i_border][1] = ( tab_YY[iv[0]] + tab_YY[iv[1]] + tab_YY[iv[2]] )/3.; //( Th3.vertices[iv[0]].y + Th3.vertices[iv[1]].y + Th3.vertices[iv[2]].y )/3.;
+				Cdg_be[i_border][2] = ( tab_ZZ[iv[0]] + tab_ZZ[iv[1]] + tab_ZZ[iv[2]] )/3.; //( Th3.vertices[iv[0]].z + Th3.vertices[iv[1]].z + Th3.vertices[iv[2]].z )/3.;		
+				
+				label_be[i_border] = K.lab;
+			}
+			hmin_border=hmin/3.;
+			cout << "hmin_border=" << hmin_border << endl;
+			
+			cout << "appele de PointCommun_hcode := " << point_confondus_ok<< endl;
+			//PointCommun_hcode( dim, nbe_t, point_confondus_ok, Cdg_be, bmin3, bmax3, hmin_border, ind_np, np);
+			PointCommun_hcode_gtree( dim, nbe_t, point_confondus_ok, Cdg_be, label_be, 
+		    	bmin, bmax, hmin_border, ind_np, label_nbe_t, np); 
+			cout << "fin appele de PointCommun_hcode" << endl;
+			
+			assert( np <= nbe_t );
+			
+			int *ind_nbe_t_tmp= new int [np];
+		
+			for( int i_border=0; i_border<np; i_border++){
+				ind_nbe_t_tmp[ i_border ] = ind_nbe_t[ ind_np[i_border] ]; 
+			}
+		
+			for( int i_border=0; i_border< np; i_border++){
+				ind_nbe_t[ i_border ] = ind_nbe_t_tmp[ i_border ]; 
+			}
+			nbe_t = np;
+			
+			//delete [] ind_nbe_t_tmp;
+			//delete [] ind_np;
+			cout << "fin recollement : nbe_t= "<< nbe_t << endl; 
+			
+			// Affectation de la nouvelle valeur du label
+			
+		}
+}
 
 //  CAS 2D :
 
@@ -445,6 +649,266 @@ void Transfo_Mesh2_map_face(const Mesh &Th2, map<int, int> &maptri ){
 }
 
 
+Mesh3 * MoveMesh2_func(const Mesh & Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
+	int &border_only, int &recollement_border, int &point_confondus_ok){
+	
+	Mesh3 *T_Th3= new Mesh3;
+	int nv_t,nt_t,nbe_t;
+	int* Numero_Som;
+	
+	int* ind_nv_t;
+	int* ind_nt_t;
+	int* ind_nbe_t;
+	int* label_nbe_t;
+	
+	//int i_som;
+	Numero_Som = new int[Th2.nv];
+	ind_nv_t   = new int[Th2.nv];
+	ind_nbe_t  = new int[Th2.nt];   
+	label_nbe_t = new int[Th2.nt];
+	
+    cout << "2D: Mesh::Vertex  triangle2  border " << Th2.nv << " "<<Th2.nt<< " " << Th2.neb<< endl;
+	
+	for(int ii=0; ii<Th2.nv; ii++){ 
+		Numero_Som[ii]=ii;
+	}
+	
+	cout <<" debut: SamePointElement " <<endl;
+	
+	SamePointElement_Mesh2( tab_XX, tab_YY, tab_ZZ, Th2, recollement_border, point_confondus_ok, 
+		Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nbe_t, nv_t, nt_t, nbe_t);
+	
+	cout <<" fin: SamePointElement " <<endl;
+	
+	cout << "2D transfo: Mesh::Vertex  triangle2  border " << nv_t << " "<< nt_t << " " << nbe_t<< endl;
+	
+	T_Th3->set(nv_t,0,nbe_t);
+	
+	for(int nnv=0; nnv < nv_t; nnv++)
+	{
+		int & ii = ind_nv_t[nnv];
+		assert( Numero_Som[ii] == nnv );
+		const Mesh::Vertex & K = Th2.vertices[ii];//const Vertex3 & K(Th2.vertices[ii]); //Version Mesh2   
+		T_Th3->vertices[ii].x = tab_XX[ii];
+		T_Th3->vertices[ii].y = tab_YY[ii];
+		T_Th3->vertices[ii].z = tab_ZZ[ii];       
+		T_Th3->vertices[ii].lab =  K.lab;   
+		
+	}
+	  
+	for(int ibe=0; ibe < nbe_t; ibe++){
+		int lab;
+		int iv[3];
+		int & ii=ind_nbe_t[ibe];
+		// creation of elements
+		const Mesh::Triangle & K(Th2.t(ii)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
+		iv[0] = Numero_Som[ Th2.operator()(K[0]) ];
+		iv[1] = Numero_Som[ Th2.operator()(K[1]) ];
+		iv[2] = Numero_Som[ Th2.operator()(K[2]) ];
+		
+		/*
+		map< int, int>:: const_iterator imap;
+		imap = maptri.find(K.lab); // imap= maptri.find( label_nbe_t[ibe] );
+		assert( imap != maptri.end());
+		lab = imap->second; // K.lab; // before 
+		*/
+		T_Th3->be(ibe).set(T_Th3->vertices,iv,K.lab);
+	}  
+	return T_Th3;
+}
+/*
+Mesh3 * RemplissageSurf3D_tetgen(const Mesh3 & Th3, const int & label_tet){
+	
+	Mesh3 *T_Th3= new Mesh3;
+	
+	assert(Th3.nt == 0 );
+	int nv_t = Th3.nv;
+	int nt_t = Th3.nt;
+	int nbe_t = Th3.nbe;
+	
+	cout << "3D RemplissageSurf3D:: Vertex  triangle2  border " 
+	<< nv_t << " "<< nt_t << " " << nbe_t<< endl;
+	// Creation des tableau de tetgen
+	
+	tetgenio in,out;
+	//tetgenio::facet *f;
+	//tetgenio::polygon *p;
+	
+	cout << " tetgenio: vertex " << endl;
+	int itet,jtet;
+// All indices start from 1.
+	in.firstnumber = 1;
+	in.numberofpoints = nv_t;
+	in.pointlist = new REAL[in.numberofpoints*3];
+	in.pointmarkerlist = new int[in.numberofpoints];
+	itet=0;
+	jtet=0;
+	for(int nnv=0; nnv < nv_t; nnv++)
+	{
+		in.pointlist[itet]   = Th3.vertices[nnv].x;
+		in.pointlist[itet+1] = Th3.vertices[nnv].y;
+		in.pointlist[itet+2] = Th3.vertices[nnv].z;       
+		in.pointmarkerlist[nnv] =  Th3.vertices[nnv].lab;   
+		itet=itet+3;
+	}
+	assert(itet==in.numberofpoints*3);
+	
+	cout << " tetgenio: facet " << endl;
+	// Version avec des facettes
+	in.numberoffacets = nbe_t;
+	in.facetlist = new tetgenio::facet[in.numberoffacets];
+	in.facetmarkerlist = new int[in.numberoffacets];
+	  
+	for(int ibe=0; ibe < nbe_t; ibe++){
+		tetgenio::facet *f;
+		tetgenio::polygon *p;
+		f = &in.facetlist[ibe];
+		f->numberofpolygons = 1;
+		f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
+		f->numberofholes = 0;
+		f->holelist = NULL;
+		
+		p = &f->polygonlist[0];
+		p->numberofvertices = 3;
+		p->vertexlist = new int[3];
+		
+		// creation of elements
+		const Triangle3 & K(Th3.be(ibe)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
+		p->vertexlist[0] = Th3.operator()(K[0])+1;
+		p->vertexlist[1] = Th3.operator()(K[1])+1;
+		p->vertexlist[2] = Th3.operator()(K[2])+1;
+		
+		for( int kkk=0; kkk<3; kkk++){ 
+			assert( p->vertexlist[kkk]<= in.numberofpoints && p->vertexlist[kkk]>0);
+		}
+		
+		in.facetmarkerlist[ibe] = K.lab; 
+		
+	}  
+	cout << "debut de tetrahedralize( , &in, &out);" << endl;
+	
+	tetrahedralize("pqCVV", &in, &out);
+	 
+	cout << "fin de tetrahedralize( , &in, &out);" << endl;
+	mesh3_tetgenio_out( out, label_tet, *T_Th3);
+	
+	cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
+	
+	return T_Th3;
+}
+
+
+Mesh3 * Transfo_Mesh2_tetgen(const Mesh & Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
+	int &border_only, int &recollement_border, int &point_confondus_ok, 
+	const int &label_tet, const map<int, int> &maptri ){
+	Mesh3 *T_Th3= new Mesh3;
+	int nv_t,nt_t,nbe_t;
+	int* Numero_Som;
+	
+	int* ind_nv_t;
+	int* ind_nt_t;
+	int* ind_nbe_t;
+	
+	int* label_nbe_t;
+	
+	//int i_som;
+	Numero_Som = new int[Th2.nv];
+	ind_nv_t   = new int[Th2.nv];
+	ind_nbe_t  = new int[Th2.nt];
+	     
+	label_nbe_t = new int[Th2.nt];
+	
+    cout << "2D: Mesh::Vertex  triangle2  border " << Th2.nv << " "<<Th2.nt<< " " << Th2.neb<< endl;
+	
+	for(int ii=0; ii<Th2.nv; ii++){ 
+		Numero_Som[ii]=ii;
+	}
+	cout <<" debut: SamePointElement " <<endl;
+	
+	SamePointElement_Mesh2( tab_XX, tab_YY, tab_ZZ, Th2, recollement_border, point_confondus_ok, 
+		Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nbe_t, nv_t, nt_t, nbe_t);
+	
+	cout <<" fin: SamePointElement " <<endl;
+	
+	cout << "2D transfo: Mesh::Vertex  triangle2  border " << nv_t << " "<< nt_t << " " << nbe_t<< endl;
+	// Creation des tableau de tetgen
+	
+	
+	tetgenio in,out;
+	//tetgenio::facet *f;
+	//tetgenio::polygon *p;
+	
+	cout << " tetgenio: vertex " << endl;
+	int itet,jtet;
+// All indices start from 1.
+	in.firstnumber = 1;
+	in.numberofpoints = nv_t;
+	in.pointlist = new REAL[in.numberofpoints*3];
+	in.pointmarkerlist = new int[in.numberofpoints];
+	itet=0;
+	jtet=0;
+	for(int nnv=0; nnv < nv_t; nnv++)
+	{
+		int & ii = ind_nv_t[nnv];
+		//cout << "nnv ,  ii  =" << nnv << "  " << ii << endl;
+		//cout << "tab_XX[ii], tab_YY[ii], tab_ZZ[ii]=" <<  tab_XX[ii] << " "<< tab_YY[ii] << " "<< tab_ZZ[ii] << endl;
+		assert( Numero_Som[ii] == nnv );
+		const Mesh::Vertex & K = Th2.vertices[ii];//const Mesh::Vertex & K(Th2.vertices[ii]); //Version Mesh2   
+		in.pointlist[itet]   = tab_XX[ii];
+		in.pointlist[itet+1] = tab_YY[ii];
+		in.pointlist[itet+2] = tab_ZZ[ii];       
+		in.pointmarkerlist[nnv] =  K.lab;   
+		itet=itet+3;
+	}
+	assert(itet==in.numberofpoints*3);
+	
+	cout << " tetgenio: facet " << endl;
+	// Version avec des facettes
+	in.numberoffacets = nbe_t;
+	in.facetlist = new tetgenio::facet[in.numberoffacets];
+	in.facetmarkerlist = new int[in.numberoffacets];
+	  
+	for(int ibe=0; ibe < nbe_t; ibe++){
+		tetgenio::facet *f;
+		tetgenio::polygon *p;
+		f = &in.facetlist[ibe];
+		f->numberofpolygons = 1;
+		f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
+		f->numberofholes = 0;
+		f->holelist = NULL;
+		
+		p = &f->polygonlist[0];
+		p->numberofvertices = 3;
+		p->vertexlist = new int[3];
+		
+		int & ii=ind_nbe_t[ibe];
+		// creation of elements
+		const Mesh::Triangle & K(Th2.t(ii)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
+		p->vertexlist[0] = Numero_Som[ Th2.operator()(K[0]) ]+1;
+		p->vertexlist[1] = Numero_Som[ Th2.operator()(K[1]) ]+1;
+		p->vertexlist[2] = Numero_Som[ Th2.operator()(K[2]) ]+1;
+		
+		for( int kkk=0; kkk<3; kkk++){ 
+			assert( p->vertexlist[kkk]<= in.numberofpoints && p->vertexlist[kkk]> 0);
+		}
+		map< int, int>:: const_iterator imap;
+		imap = maptri.find(K.lab); // imap= maptri.find( label_nbe_t[ibe] );
+		assert( imap != maptri.end());
+		in.facetmarkerlist[ibe] = imap->second; // K.lab; // before 
+		
+	}  
+	cout << "debut de tetrahedralize( , &in, &out);" << endl;
+	
+	tetrahedralize("pqCVV", &in, &out);
+	 
+	cout << "fin de tetrahedralize( , &in, &out);" << endl;
+	mesh3_tetgenio_out( out, label_tet, *T_Th3);
+	
+	cout <<" Finish Mesh3 :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
+	
+	return T_Th3;
+}
+*/
 
 void SamePointElement_Mesh2( const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh & Th2, 
 	int &recollement_border, int &point_confondus_ok, int *Numero_Som, 
@@ -536,9 +1000,9 @@ void SamePointElement_Mesh2( const double *tab_XX, const double *tab_YY, const d
 			
 			hmin_border=hmin/3.;
 			cout << "points commun " << endl;
-			PointCommun_hcode( dim, nbe_t, point_confondus_ok, Cdg_be, bmin3, bmax3, hmin_border, ind_np, np); // ancien
-			//PointCommun_hcode_gtree( dim, nbe_t, point_confondus_ok, Cdg_be, label_be, bmin, bmax, hmin_border, 
-			//ind_np, label_nbe_t,np); // new
+			//PointCommun_hcode( dim, nbe_t, point_confondus_ok, Cdg_be, bmin3, bmax3, hmin_border, ind_np, np); // ancien
+			PointCommun_hcode_gtree( dim, nbe_t, point_confondus_ok, Cdg_be, label_be, bmin, bmax, hmin_border, 
+			  ind_np, label_nbe_t,np); // new
 			cout << "points commun finis " <<endl;
 			assert( np <= nbe_t );
 		
@@ -546,8 +1010,8 @@ void SamePointElement_Mesh2( const double *tab_XX, const double *tab_YY, const d
 		
 			for( int i_border=0; i_border<np; i_border++){
 				ind_nbe_t_tmp[ i_border ] = ind_nbe_t[ ind_np[i_border] ]; 
-			}	
-					
+			}
+			
 			for( int i_border=0; i_border< np; i_border++){
 				ind_nbe_t[ i_border ] = ind_nbe_t_tmp[ i_border ]; 
 			}	
@@ -557,6 +1021,63 @@ void SamePointElement_Mesh2( const double *tab_XX, const double *tab_YY, const d
 		}
 }
 
+/*
+// Fonction pour tetgen
+
+void mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, Mesh3 & Th3)
+{ 
+  int i;
+
+// All indices start from 1.
+  if(out.firstnumber != 1){
+    cout << " probleme ???" << endl;
+    exit(1);
+  }   
+  
+  if(out.numberoffacets !=0){
+    cout << "tetgen: faces non triangulaire" << endl;
+    exit(1);
+  }
+  
+  if(out.numberofcorners !=4){
+    cout << "tetgen: element subparametric of order 2" <<endl;
+    exit(1);
+  }
+  
+  cout << "Th3 :: Vertex Element Border :: " << out.numberofpoints << " " <<out.numberoftetrahedra  << " " << out.numberoftrifaces << endl;
+  Th3.set(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces);
+   
+  i=0;
+  for(int nnv=0; nnv < Th3.nv; nnv++){
+    Th3.vertices[nnv].x=out.pointlist[i];
+    Th3.vertices[nnv].y=out.pointlist[i+1];
+    Th3.vertices[nnv].z=out.pointlist[i+2];       
+    Th3.vertices[nnv].lab=out.pointmarkerlist[nnv];
+    i=i+3;    
+  }
+    
+  i=0;
+  for(int nnt=0; nnt < Th3.nt; nnt++){
+    int iv[4],lab;
+    iv[0] = out.tetrahedronlist[i]-1;
+    iv[1] = out.tetrahedronlist[i+1]-1;
+    iv[2] = out.tetrahedronlist[i+2]-1;
+    iv[3] = out.tetrahedronlist[i+3]-1;
+    lab   = label_tet;
+    //lab = out.tetrahedronmarkerlist[nnt];
+    Th3.elements[nnt].set( Th3.vertices, iv, lab);
+    i=i+4;
+  }
+
+  for(int ibe=0; ibe < Th3.nbe; ibe++){
+    int iv[3];
+    iv[0] = out.trifacelist[3*ibe]-1;
+    iv[1] = out.trifacelist[3*ibe+1]-1;
+    iv[2] = out.trifacelist[3*ibe+2]-1;  
+    Th3.be(ibe).set( Th3.vertices, iv, out.trifacemarkerlist[ibe]);
+  }
+}  
+*/
 
 
 //======================
@@ -590,8 +1111,8 @@ void BuildBoundMinDist_th2(  const double *tab_XX, const double *tab_YY, const d
 		}
 		double longmini_box=1e10;
 		
-		longmini_box = min(abs(bmax.x-bmin.x), abs(bmax.y-bmin.y) );
-		longmini_box = min(longmini_box, abs(bmax.z-bmin.z));
+		longmini_box = pow(bmax.x-bmin.x,2)+pow(bmax.y-bmin.y,2)+ pow(bmax.z-bmin.z,2);
+		longmini_box = sqrt(longmini_box);
 		
 		// determination de hmin 
 		
@@ -613,7 +1134,7 @@ void BuildBoundMinDist_th2(  const double *tab_XX, const double *tab_YY, const d
 							+ pow(tab_ZZ[i1]-tab_ZZ[i2],2);
 					longedge = sqrt(longedge);
 					//cout << "longedge=" << longedge << endl; 
-					if( longedge > longmini_box*1e-9 ) hmin = min( hmin, longedge);
+					if( longedge > longmini_box*1e-10 ) hmin = min( hmin, longedge);
 				}
 			}
 		}
@@ -655,8 +1176,11 @@ void BuildBoundMinDist_th3(  const double *tab_XX, const double *tab_YY, const d
 		
 		double longmini_box;
 		
-		longmini_box = min(bmax.x-bmin.x, bmax.y-bmin.y);
-		longmini_box = min(longmini_box, bmax.z-bmin.z);
+		//longmini_box = min(bmax.x-bmin.x, bmax.y-bmin.y);
+		//longmini_box = min(longmini_box, bmax.z-bmin.z);
+		
+		longmini_box = pow(bmax.x-bmin.x,2)+pow(bmax.y-bmin.y,2)+ pow(bmax.z-bmin.z,2);
+		longmini_box = sqrt(longmini_box);
 		
 		
 		cout << " bmin := " << bmin.x << " " << bmin.y << " " << bmin.z << endl;
@@ -682,7 +1206,7 @@ void BuildBoundMinDist_th3(  const double *tab_XX, const double *tab_YY, const d
 								+ pow(tab_YY[i1]-tab_YY[i2],2) 
 								+ pow(tab_ZZ[i1]-tab_ZZ[i2],2);
 					longedge = sqrt(longedge);
-					if(longedge > max(longmini_box*1e-9,1e-14) ) hmin = min( hmin, longedge);
+					if(longedge > longmini_box*1e-9 ) hmin = min( hmin, longedge);
 				}
 			}
 		}
@@ -748,7 +1272,7 @@ void OrderVertexTransfo_hcode_nv( const int &tab_nv, const double *tab_XX, const
 		for(int jj=ii+1; jj<tab_nv; jj++){
 			double dist = 0.;
 			dist = pow(tab_XX[jj]-tab_XX[ii],2)+pow(tab_YY[jj]-tab_YY[ii],2)+pow(tab_ZZ[jj]-tab_ZZ[ii],2); //pow(Coord_Point[jj][kk]-Coord_Point[ii][kk],2);
-			if( dist < 1e-10){
+			if( sqrt(dist) < epsilon ){
 				numberofpointsdiff=1;
 			} 
 		}
@@ -765,8 +1289,10 @@ void OrderVertexTransfo_hcode_nv( const int &tab_nv, const double *tab_XX, const
 		cout << "k[" << ii << "]= " << k[ii]<<endl;
 	}
 	
-	NbCode = min( 10*(k[0]), NbCode );
-	tcode = new int[NbCode];	
+	NbCode = min( 4*(k[0]+k[1]+k[2]), NbCode );
+	tcode = new int[NbCode];
+	
+	
 	/* initialisation des codes */
 	for(int ii=0; ii< NbCode; ii++){
 		 tcode[ii] = -1;
@@ -783,7 +1309,7 @@ void OrderVertexTransfo_hcode_nv( const int &tab_nv, const double *tab_XX, const
 		assert( j[0] <=k[0] && j[0]>=0);
 		assert( j[1] <=k[1] && j[1]>=0);
 		assert( j[2] <=k[2] && j[2]>=0);
-		i = (j[2]*(k[1]+1)+j[1]*(k[0]+1)+j[0])%NbCode;	
+		i = (j[2]*(k[1]+1)+j[1]*(k[0]+1)+j[0]);
 		//cout << i << endl;	
 		i = i%NbCode;    
 		assert( i < NbCode );
@@ -818,12 +1344,12 @@ void OrderVertexTransfo_hcode_nv( const int &tab_nv, const double *tab_XX, const
 				}
 				
 			}
-			ind_nv_t[nv_t] = ii;	// Remarque on donne a nv_t le plus grand
+			ind_nv_t[nv_t] = ii; // Remarque on donne a nv_t le plus grand
 			nv_t++; //nv_t = nvt+1;
 		}
 	}
 	cout << "nv_t = " << nv_t << " / " << "nv_t(anc)" << tab_nv <<endl;   
-	
+	assert( nv_t == numberofpoints);
 }
 
 void PointCommun_hcode( const int &dim, const int &NbPoints, const int &point_confondus_ok, double **Coord_Point, 
@@ -878,7 +1404,8 @@ void PointCommun_hcode( const int &dim, const int &NbPoints, const int &point_co
 	
 	cout << "numberofpoints " << numberofpoints << endl;
 	
-	NbCode = min( 100*(k[0]), NbCode);
+	NbCode = min( 4*(k[0]+k[1]+k[2]), NbCode);
+	cout << "NbCode=" << NbCode << endl;
 	tcode = new int[NbCode];
 	/* initialisation des codes */
 	for(int ii=0; ii< NbCode; ii++){
@@ -938,7 +1465,7 @@ void PointCommun_hcode( const int &dim, const int &NbPoints, const int &point_co
 						dist = dist +  pow(Coord_Point[jj][kk]-Coord_Point[ii][kk],2);
 					}
 							
-					if( dist < epsilon ){
+					if( sqrt(dist) < epsilon ){
 						// point semblable
 						Numero_Som[jj] = Numero_Som[ii];
 						//minimum_np = min( jj, minimum_np);
@@ -974,7 +1501,7 @@ void PointCommun_hcode( const int &dim, const int &NbPoints, const int &point_co
 						dist = dist +  pow(Coord_Point[jj][kk]-Coord_Point[ii][kk],2);
 					}
 							
-					if( dist < epsilon ){
+					if( sqrt(dist) < epsilon ){
 						// point semblable
 						Numero_Som[jj] = Numero_Som[ii];
 						point_multiple = 1; 
