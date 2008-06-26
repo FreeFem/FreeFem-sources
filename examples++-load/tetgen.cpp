@@ -37,6 +37,16 @@ using namespace std;
 
 using namespace  Fem2D;
 
+// subroutine use for tetegen call
+
+void mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, Mesh3 & Th3);
+
+Mesh3 * RemplissageSurf3D_tetgen(const Mesh3 & Th3, const int & label_tet);
+	
+Mesh3 * Transfo_Mesh2_tetgen(const Mesh & Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
+		int &border_only, int &recollement_border, int &point_confondus_ok, 
+		const int &label_tet,const map<int, int> &maptri );
+
 
 
 class Build2D3D_Op : public E_F0mps 
@@ -88,38 +98,6 @@ class  Build2D3D : public OneOperator { public:
 	return  new Build2D3D_Op( args,t[0]->CastTo(args[0]) ); 
   }
 };
-
-// class SetMesh_Op : public E_F0mps 
-// {
-// public:
-//   Expression a; 
-//   
-//   static const int n_name_param =2; //  add nbiter FH 30/01/2007 11 -> 12 
-//   static basicAC_F0::name_and_type name_param[] ;
-//   Expression nargs[n_name_param];
-//   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
-
-//   
-// public:
-//   SetMesh_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
-//     args.SetNameParam(n_name_param,name_param,nargs);
-//   } 
-//   
-//   AnyType operator()(Stack stack)  const ;
-// };
-
-// basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
-//   {  "refe", &typeid(KN_<long> )},
-//   {  "reft", &typeid(KN_<long> )}
-// };
-
-// int  ChangeLab(const map<int,int> & m,int lab)
-// {
-//   map<int,int>::const_iterator i=m.find(lab);
-//   if(i != m.end())
-//     lab=i->second;
-//   return lab;
-// }
 
 AnyType Build2D3D_Op::operator()(Stack stack)  const 
 {
@@ -213,6 +191,7 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
 		*mp=mps;
 		return Th3;
 }
+
 // Fonction pour tetgen
 
 void mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, Mesh3 & Th3)
@@ -268,6 +247,86 @@ void mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, Mesh3 & Th3)
     Th3.be(ibe).set( Th3.vertices, iv, out.trifacemarkerlist[ibe]);
   }
 }  
+
+Mesh3 * RemplissageSurf3D_tetgen(const Mesh3 & Th3, const int & label_tet){
+	
+	Mesh3 *T_Th3= new Mesh3;
+	
+	assert(Th3.nt == 0 );
+	int nv_t = Th3.nv;
+	int nt_t = Th3.nt;
+	int nbe_t = Th3.nbe;
+	
+	cout << "3D RemplissageSurf3D:: Vertex  triangle2  border " 
+	<< nv_t << " "<< nt_t << " " << nbe_t<< endl;
+	// Creation des tableau de tetgen
+	
+	tetgenio in,out;
+	//tetgenio::facet *f;
+	//tetgenio::polygon *p;
+	
+	cout << " tetgenio: vertex " << endl;
+	int itet,jtet;
+// All indices start from 1.
+	in.firstnumber = 1;
+	in.numberofpoints = nv_t;
+	in.pointlist = new REAL[in.numberofpoints*3];
+	in.pointmarkerlist = new int[in.numberofpoints];
+	itet=0;
+	jtet=0;
+	for(int nnv=0; nnv < nv_t; nnv++)
+	{
+		in.pointlist[itet]   = Th3.vertices[nnv].x;
+		in.pointlist[itet+1] = Th3.vertices[nnv].y;
+		in.pointlist[itet+2] = Th3.vertices[nnv].z;       
+		in.pointmarkerlist[nnv] =  Th3.vertices[nnv].lab;   
+		itet=itet+3;
+	}
+	assert(itet==in.numberofpoints*3);
+	
+	cout << " tetgenio: facet " << endl;
+	// Version avec des facettes
+	in.numberoffacets = nbe_t;
+	in.facetlist = new tetgenio::facet[in.numberoffacets];
+	in.facetmarkerlist = new int[in.numberoffacets];
+	  
+	for(int ibe=0; ibe < nbe_t; ibe++){
+		tetgenio::facet *f;
+		tetgenio::polygon *p;
+		f = &in.facetlist[ibe];
+		f->numberofpolygons = 1;
+		f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
+		f->numberofholes = 0;
+		f->holelist = NULL;
+		
+		p = &f->polygonlist[0];
+		p->numberofvertices = 3;
+		p->vertexlist = new int[3];
+		
+		// creation of elements
+		const Triangle3 & K(Th3.be(ibe)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
+		p->vertexlist[0] = Th3.operator()(K[0])+1;
+		p->vertexlist[1] = Th3.operator()(K[1])+1;
+		p->vertexlist[2] = Th3.operator()(K[2])+1;
+		
+		for( int kkk=0; kkk<3; kkk++){ 
+			assert( p->vertexlist[kkk]<= in.numberofpoints && p->vertexlist[kkk]>0);
+		}
+		
+		in.facetmarkerlist[ibe] = K.lab; 
+		
+	}  
+	cout << "debut de tetrahedralize( , &in, &out);" << endl;
+	
+	tetrahedralize("pqCVV", &in, &out);
+	 
+	cout << "fin de tetrahedralize( , &in, &out);" << endl;
+	mesh3_tetgenio_out( out, label_tet, *T_Th3);
+	
+	cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
+	
+	return T_Th3;
+}
 
 Mesh3 * Transfo_Mesh2_tetgen(const Mesh & Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
 	int &border_only, int &recollement_border, int &point_confondus_ok, 
@@ -370,7 +429,7 @@ Mesh3 * Transfo_Mesh2_tetgen(const Mesh & Th2, const double *tab_XX, const doubl
 	}  
 	cout << "debut de tetrahedralize( , &in, &out);" << endl;
 	
-	tetrahedralize("pqCVV", &in, &out);
+	tetrahedralize("pqCV", &in, &out);
 	 
 	cout << "fin de tetrahedralize( , &in, &out);" << endl;
 	mesh3_tetgenio_out( out, label_tet, *T_Th3);
@@ -380,6 +439,123 @@ Mesh3 * Transfo_Mesh2_tetgen(const Mesh & Th2, const double *tab_XX, const doubl
 	return T_Th3;
 }
 
+
+class Remplissage_Op : public E_F0mps 
+{
+public:
+  Expression eTh;
+  static const int n_name_param =3; // 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  
+public:
+  Remplissage_Op(const basicAC_F0 &  args,Expression tth) 
+    : eTh(tth)
+  {
+    cout << "Remplissage du bord" << endl;
+    args.SetNameParam(n_name_param,name_param,nargs);
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
+
+
+basicAC_F0::name_and_type Remplissage_Op::name_param[]= {
+  {  "methode",&typeid(KN_<long>)},
+  {  "reftet", &typeid(KN_<long>)}, 
+  {  "refface", &typeid(KN_<long> )}
+};
+
+class  Remplissage : public OneOperator { public:  
+    Remplissage() : OneOperator(atype<pmesh3>(),atype<pmesh3>()) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  { 
+	return  new Remplissage_Op( args,t[0]->CastTo(args[0]) ); 
+  }
+};
+
+AnyType Remplissage_Op::operator()(Stack stack)  const 
+{
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+  Mesh3 * pTh= GetAny<Mesh3 *>((*eTh)(stack));
+  ffassert( pTh );
+  Mesh3 &Th=*pTh;
+  Mesh3 *m= pTh;   // question a quoi sert *m ??
+  int nbv=Th.nv; // nombre de sommet 
+  int nbt=Th.nt; // nombre de triangles
+  int nbe=Th.nbe; // nombre d'aretes fontiere
+  cout << " Vertex Triangle Border " << nbv<< "  "<< nbt << " nbe "<< nbe << endl; 
+ 
+  KN<long> zzempty;
+  KN<long> num_methode(arg(0,stack,zzempty));
+  KN<long> nrt (arg(1,stack,zzempty));  
+  KN<long> nrf (arg(2,stack,zzempty));
+  
+  int label_tet;
+  
+  if( nrt.N() < 0 || nrt.N() > 1){
+	  cout << "tetgen allow one label for tetrahedra " << endl;
+	  assert(  nrt.N() < 0 || nrt.N() > 1 );
+  } 
+   
+  if( nrt.N() == 1 ){
+	  label_tet=nrt[0];
+  }
+  else{
+	  label_tet=0;
+  }  
+  
+  ffassert( nrf.N() %2 ==0);
+  
+  
+  map<int,int> mapf;
+  for(int i=0;i<nrf.N();i+=2)
+  {
+	  if(nrf[i] != nrf[i+1]){
+		mapf[nrf[i]]=nrf[i+1];
+		}
+  }
+	Mesh3 *Th3 =new Mesh3;
+	if(num_methode[0]==1) 
+		Th3 = RemplissageSurf3D_tetgen( Th, label_tet);
+	
+	// changement de label 
+	if( nrf.N() > 0){
+		for(int ii=0; ii< Th3->nbe; ii++){
+			const Triangle3 & K(Th3->be(ii));
+			int lab;
+			int iv[3];
+			
+			iv[0] = Th3->operator()(K[0]);
+			iv[1] = Th3->operator()(K[1]);
+			iv[2] = Th3->operator()(K[2]);
+			
+			map< int, int> :: const_iterator imap;
+			imap = mapf.find(K.lab);
+			if( imap != mapf.end() ){
+				lab = imap -> second;
+			}
+			else{
+				lab = K.lab;
+			}
+			Th3->be(ii).set(Th3->vertices,iv,lab);
+		}
+	}
+	
+	Th3->BuildBound();
+	Th3->BuildAdj();
+	Th3->Buildbnormalv();  
+	Th3->BuildjElementConteningVertex();
+	Th3->BuildGTree();
+	Th3->decrement();    
+	
+	*mp=mps;
+	return Th3;
+}
 
 class Init { public:
   Init();
@@ -391,6 +567,7 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   
   if (verbosity)
     cout << " load: tetgen  " << endl;
-
-  Global.Add("tetg","(",new Build2D3D);
+   
+  Global.Add("tetgtransfo","(",new Build2D3D);
+  Global.Add("tetg","(",new Remplissage);
 }
