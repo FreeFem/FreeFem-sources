@@ -318,7 +318,8 @@ Mesh3 * RemplissageSurf3D_tetgen(const Mesh3 & Th3, const int & label_tet){
 	}  
 	cout << "debut de tetrahedralize( , &in, &out);" << endl;
 	
-	tetrahedralize("pqCVV", &in, &out);
+	char pqCVV[] ="pqCVV"; 
+	tetrahedralize(pqCVV, &in, &out);
 	 
 	cout << "fin de tetrahedralize( , &in, &out);" << endl;
 	mesh3_tetgenio_out( out, label_tet, *T_Th3);
@@ -428,8 +429,8 @@ Mesh3 * Transfo_Mesh2_tetgen(const Mesh & Th2, const double *tab_XX, const doubl
 		
 	}  
 	cout << "debut de tetrahedralize( , &in, &out);" << endl;
-	
-	tetrahedralize("pqCV", &in, &out);
+	char  pqCV[] ="pqCV";
+	tetrahedralize(pqCV, &in, &out);
 	 
 	cout << "fin de tetrahedralize( , &in, &out);" << endl;
 	mesh3_tetgenio_out( out, label_tet, *T_Th3);
