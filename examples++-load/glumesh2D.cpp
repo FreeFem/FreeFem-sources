@@ -136,10 +136,9 @@ Mesh * GluMesh(listMesh const & lst)
 	}
 	*/
    } 
-	Mesh * th0_be;
 	Mesh::Vertex *becog = new Vertex[nebx];
 	cout << "creation quadtree" << endl;
-	FQuadTree *quadtree_be=new Fem2D::FQuadTree(th0_be,0,Pn,Px,0);
+	FQuadTree *quadtree_be=new Fem2D::FQuadTree(becog,Pn,Px,-nebx);
 	cout << "fin creation quadtree" << endl;
 	double hseuil_border = hseuil/2.;
 	
