@@ -622,55 +622,6 @@ class  BuildLayerMesh : public OneOperator { public:
   }
 };
 
-class Build2D3D_Op : public E_F0mps 
-{
-public:
-  Expression eTh;
-  Expression xx,yy,zz;
-  static const int n_name_param =3; // 
-  static basicAC_F0::name_and_type name_param[] ;
-  Expression nargs[n_name_param];
-  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
-  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
-  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  
-public:
-  Build2D3D_Op(const basicAC_F0 &  args,Expression tth) 
-    : eTh(tth),xx(0),yy(0),zz(0)
-  {
-    cout << "construction par Build2D_3D_Op" << endl;
-    args.SetNameParam(n_name_param,name_param,nargs);
-    const E_Array * a1=0 ;
-    if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
-    int err =0;
-   
-    if(a1) {
-      if(a1->size() !=3) 
-      CompileError("Build2D3D (Th,transfo=[X,Y,Z],) ");
-      xx=to<double>( (*a1)[0]);
-      yy=to<double>( (*a1)[1]);
-      zz=to<double>( (*a1)[2]);
-    }    
-  } 
-  
-  AnyType operator()(Stack stack)  const ;
-};
-
-
-basicAC_F0::name_and_type Build2D3D_Op::name_param[]= {
-  {  "transfo", &typeid(E_Array)},
-  {  "reftet", &typeid(KN_<long>)}, 
-  {  "refface", &typeid(KN_<long> )}
-};
-
-class  Build2D3D : public OneOperator { public:  
-    Build2D3D() : OneOperator(atype<pmesh3>(),atype<pmesh>()) {}
-  
-  E_F0 * code(const basicAC_F0 & args) const 
-  { 
-	return  new Build2D3D_Op( args,t[0]->CastTo(args[0]) ); 
-  }
-};
 
 // class SetMesh_Op : public E_F0mps 
 // {
@@ -703,99 +654,6 @@ class  Build2D3D : public OneOperator { public:
 //     lab=i->second;
 //   return lab;
 // }
-
-AnyType Build2D3D_Op::operator()(Stack stack)  const 
-{
-  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
-  ffassert( pTh );
-  Mesh &Th=*pTh;
-  Mesh *m= pTh;   // question a quoi sert *m ??
-  int nbv=Th.nv; // nombre de sommet 
-  int nbt=Th.nt; // nombre de triangles
-  int neb=Th.neb; // nombre d'aretes fontiere
-  cout << " Vertex Triangle Border " << nbv<< "  "<< nbt << " nbe "<< neb << endl; 
- 
-  KN<long> zzempty;
-  KN<long> nrt (arg(1,stack,zzempty));  
-  KN<long> nrf (arg(2,stack,zzempty));
-  
-  int label_tet;
-  
-  if( nrt.N() < 0 || nrt.N() > 1){
-	  cout << "tetgen allow one label for tetrahedra " << endl;
-	  assert(  nrt.N() < 0 || nrt.N() > 1 );
-  } 
-   
-  if( nrt.N() == 1 ){
-	  label_tet=nrt[0];
-  }
-  else{
-	  label_tet=0;
-  }  
-  
-  ffassert( nrf.N() %2 ==0);
-  
-  map<int,int> mapf;
-  for(int i=0;i<nrf.N();i+=2)
-  {
-	  if(nrf[i] != nrf[i+1]){
-		mapf[nrf[i]]=nrf[i+1];
-		}
-  }
-  
-  map<int, int> mapfme;  
-  
-  Transfo_Mesh2_map_face( Th, mapfme );  
-  
-  // Map utilisateur
-  map< int, int > :: iterator imap;
-  for( int ii=0; ii < nrf.N(); ii+=2){
-	imap = mapfme.find(nrf[ii]);
-	if( imap != mapfme.end()){
-		imap -> second = nrf[ii+1];
-	}
-  }  
-  
-	KN<double> txx(nbv), tyy(nbv), tzz(nbv);
-	KN<int> takemesh(nbv);
-	MeshPoint *mp3(MeshPointStack(stack)); 
-	
-	takemesh=0;  
-	Mesh &rTh = Th;
-	for (int it=0; it<nbt; ++it){
-		  for( int iv=0; iv<3; ++iv){
-				int i=Th(it,iv);
-				if(takemesh[i]==0){
-					mp3->setP(&Th,it,iv);
-					if(xx){ 
-						txx[i]=GetAny<double>((*xx)(stack));
-					}
-					if(yy){ 
-						tyy[i]=GetAny<double>((*yy)(stack));
-					}
-					if(zz){ 
-						tzz[i]=GetAny<double>((*zz)(stack));
-					}
-					takemesh[i] = takemesh[i]+1;
-				}
-	 		}
-		}
-		int border_only = 0;
-		int recollement_border=1, point_confondus_ok=1;
-		Mesh3 *Th3=Transfo_Mesh2_tetgen( Th, txx, tyy, tzz, border_only, 
-			recollement_border, point_confondus_ok, label_tet, mapfme);  
-		
-		Th3->BuildBound();
-		Th3->BuildAdj();
-		Th3->Buildbnormalv();  
-		Th3->BuildjElementConteningVertex();
-		Th3->BuildGTree();
-		Th3->decrement();    
-		
-		*mp=mps;
-		return Th3;
-}
 
 AnyType BuildLayeMesh_Op::operator()(Stack stack)  const 
 {
@@ -1095,123 +953,6 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
 
 
 // Appel remplissage du trou 
-
-class Remplissage_Op : public E_F0mps 
-{
-public:
-  Expression eTh;
-  static const int n_name_param =3; // 
-  static basicAC_F0::name_and_type name_param[] ;
-  Expression nargs[n_name_param];
-  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
-  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
-  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  
-public:
-  Remplissage_Op(const basicAC_F0 &  args,Expression tth) 
-    : eTh(tth)
-  {
-    cout << "Remplissage du bord" << endl;
-    args.SetNameParam(n_name_param,name_param,nargs);
-  } 
-  
-  AnyType operator()(Stack stack)  const ;
-};
-
-
-basicAC_F0::name_and_type Remplissage_Op::name_param[]= {
-  {  "methode",&typeid(KN_<long>)},
-  {  "reftet", &typeid(KN_<long>)}, 
-  {  "refface", &typeid(KN_<long> )}
-};
-
-class  Remplissage : public OneOperator { public:  
-    Remplissage() : OneOperator(atype<pmesh3>(),atype<pmesh3>()) {}
-  
-  E_F0 * code(const basicAC_F0 & args) const 
-  { 
-	return  new Remplissage_Op( args,t[0]->CastTo(args[0]) ); 
-  }
-};
-
-AnyType Remplissage_Op::operator()(Stack stack)  const 
-{
-  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-  Mesh3 * pTh= GetAny<Mesh3 *>((*eTh)(stack));
-  ffassert( pTh );
-  Mesh3 &Th=*pTh;
-  Mesh3 *m= pTh;   // question a quoi sert *m ??
-  int nbv=Th.nv; // nombre de sommet 
-  int nbt=Th.nt; // nombre de triangles
-  int nbe=Th.nbe; // nombre d'aretes fontiere
-  cout << " Vertex Triangle Border " << nbv<< "  "<< nbt << " nbe "<< nbe << endl; 
- 
-  KN<long> zzempty;
-  KN<long> num_methode(arg(0,stack,zzempty));
-  KN<long> nrt (arg(1,stack,zzempty));  
-  KN<long> nrf (arg(2,stack,zzempty));
-  
-  int label_tet;
-  
-  if( nrt.N() < 0 || nrt.N() > 1){
-	  cout << "tetgen allow one label for tetrahedra " << endl;
-	  assert(  nrt.N() < 0 || nrt.N() > 1 );
-  } 
-   
-  if( nrt.N() == 1 ){
-	  label_tet=nrt[0];
-  }
-  else{
-	  label_tet=0;
-  }  
-  
-  ffassert( nrf.N() %2 ==0);
-  
-  
-  map<int,int> mapf;
-  for(int i=0;i<nrf.N();i+=2)
-  {
-	  if(nrf[i] != nrf[i+1]){
-		mapf[nrf[i]]=nrf[i+1];
-		}
-  }
-	Mesh3 *Th3 =new Mesh3;
-	if(num_methode[0]==1) 
-		Th3 = RemplissageSurf3D_tetgen( Th, label_tet);
-	
-	// changement de label 
-	if( nrf.N() > 0){
-		for(int ii=0; ii< Th3->nbe; ii++){
-			const Triangle3 & K(Th3->be(ii));
-			int lab;
-			int iv[3];
-			
-			iv[0] = Th3->operator()(K[0]);
-			iv[1] = Th3->operator()(K[1]);
-			iv[2] = Th3->operator()(K[2]);
-			
-			map< int, int> :: const_iterator imap;
-			imap = mapf.find(K.lab);
-			if( imap != mapf.end() ){
-				lab = imap -> second;
-			}
-			else{
-				lab = K.lab;
-			}
-			Th3->be(ii).set(Th3->vertices,iv,lab);
-		}
-	}
-	
-	Th3->BuildBound();
-	Th3->BuildAdj();
-	Th3->Buildbnormalv();  
-	Th3->BuildjElementConteningVertex();
-	Th3->BuildGTree();
-	Th3->decrement();    
-	
-	*mp=mps;
-	return Th3;
-}
 
 
 // AnyType SetMesh_Op::operator()(Stack stack)  const 
@@ -1816,10 +1557,9 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   TheOperators->Add("<-",new OneBinaryOperator< Op3_setmesh<pmesh3*,pmesh3*,listMesh3>  >     );
   
   Global.Add("change","(",new SetMesh);
-  Global.Add("change3D","(",new SetMesh3D);
+  Global.Add("change","(",new SetMesh3D);
   Global.Add("buildlayers","(",new  BuildLayerMesh);
-  Global.Add("tetgtransfo","(",new Build2D3D);
   Global.Add("movemesh2D3Dsurf","(",new Movemesh2D_3D_surf);
-  Global.Add("movemesh3D","(",new Movemesh3D);
-  Global.Add("tetg","(",new Remplissage);
+  Global.Add("movemesh","(",new Movemesh3D);
+
 }
