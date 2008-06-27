@@ -372,11 +372,17 @@ Mesh3::Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb)
 	for (int i=0;i<nbe;i++)  
 		mesb += this->be(i).mesure();  
 	
+
+//if(nnt !=0){
 	
-  BuildBound();
-  BuildAdj();
-  Buildbnormalv();  
-  BuildjElementConteningVertex();  
+cout << "action  sur le maillage" << endl;
+  //BuildBound();
+  //BuildAdj();
+  //Buildbnormalv();  
+  //BuildjElementConteningVertex();
+  //BuildGTree();
+  //decrement();    
+//}
     
   if(verbosity>1)
   cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
