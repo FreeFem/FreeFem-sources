@@ -16,4 +16,5 @@ plot(fxy,wait=1,ps="xyf.ps");
 Vhxy xx=x,yy=y;
 
 mesh Th=triangulate(xx[],yy[]);
+cout << " region = " <<  triangulate(xx[],yy[])[1].region  <<endl; 
 plot(Th,wait=1); 

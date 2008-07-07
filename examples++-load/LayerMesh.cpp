@@ -335,7 +335,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
   int    Ni;
   int    NumSommet;
   int    NumElement;
-  int *  tab_NumSommet= new int[Th2.nv+1];
+  KN<int>  tab_NumSommet(Th2.nv+1);
 
   // variable tet
   int    SommetPrisme[6];
@@ -963,6 +963,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
   // Au final : les sommers des tetraedres et la conectivité des tetraedres finaux
   assert(NumElement <= Th3.nt);
   }
+
 }
 
 void dpent1_mesh(int idl[3],int nu[12],int &nbe,int &option){

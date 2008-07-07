@@ -16,7 +16,8 @@ using namespace std;
 #include <fstream>
 #include <iostream>
 #include <cstring>
-#include <cassert>
+//#include "tetgen.h"
+//#include <cassert>
 #include <map>
 #include "libmesh5.h"
 #include "ufunction.hpp"
@@ -35,7 +36,7 @@ using namespace std;
 using namespace Fem2D;
 //#include "TransfoMesh_v2.hpp"
 //#include "tetgen.h"
-#include "tetgen.h"
+
 #include "TransfoMesh_v2.hpp"
 
 
@@ -1134,7 +1135,7 @@ void BuildBoundMinDist_th2(  const double *tab_XX, const double *tab_YY, const d
 							+ pow(tab_ZZ[i1]-tab_ZZ[i2],2);
 					longedge = sqrt(longedge);
 					//cout << "longedge=" << longedge << endl; 
-					if( longedge > longmini_box*1e-10 ) hmin = min( hmin, longedge);
+					if( longedge > longmini_box*1e-7 ) hmin = min( hmin, longedge);
 				}
 			}
 		}

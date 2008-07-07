@@ -14,7 +14,7 @@
 
 
 \usepackage{times}
-\def\VERSION{2.24-2-2}
+\def\VERSION{3.0.$\alpha$}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -136,16 +136,17 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \end{enumerate}
 \hbox to \hsize
 {\hss
-\includegraphics[height=2cm]{LogoLJLL} \hss
-\includegraphics[height=2cm]{LogoUPMC} \hss
-\includegraphics[height=2cm]{LogoCNRS} \hss
+\includegraphics[height=1.7cm]{LogoLJLL} \hss
+\includegraphics[height=1.7cm]{LogoUPMC} \hss
+\includegraphics[height=1.7cm]{LogoCNRS} \hss
+\includegraphics[height=1.7cm]{logo-finance-par-anr} \hss
 }
 \bigskip
 
 {\small {\bf Acknowledgments} 
 We are very grateful  to  l'\'Ecole Polytechnique  (Palaiseau, France)  for  printing the second edition of this manual (\url{http://www.polytechnique.fr} ),
 and to l'Agence Nationale de la Recherche (Paris, France)
- for funding of the extension  of\ \freefempp to a parallel tridimensional version (\url{http://www.agence-nationale-recherche.fr}).}
+ for funding of the extension  of\ \freefempp to a parallel tridimensional version (\url{http://www.agence-nationale-recherche.fr}) Référence : ANR-07-CIS7-002-01.}
 
 \cleardoublepage
 %\end{document}
@@ -459,7 +460,7 @@ You can create and modify \freefempp programs with your favorite text editor.
 \\\\
 An integrated environment (\freefempp GUI), written by A. Le Hyaric, is also included
 with the distribution. the application name is \texttt{FreeFem++-cs}; note however that
-the graphics display is much slower in this mode.
+the graphics display is slower in this mode.
 There are other ways to have an integrated environment. TeX users usually have
 an editor installed; if it is winedt or TeXnicCenter then these can
 be programmed to handle the edit-run-correct cycle of \freefempp with
@@ -632,7 +633,7 @@ below). \twoplot[height=5cm]{firstTh}{firstU}{mesh \texttt{Th} by
 
 \begin{example}\label{exm:first}~
 \bFF
-    // defining the bourndary \hfilll
+    // defining the boundary \hfilll
  1: @border C(t=0,2*@pi){@x=cos(t); @y=sin(t);}  
     // the triangulated domain Th is on the left side of its boundary \hfilll
  2: @mesh Th = @buildmesh (C(50));  
@@ -640,7 +641,7 @@ below). \twoplot[height=5cm]{firstTh}{firstU}{mesh \texttt{Th} by
  3; @fespace Vh(Th,@P1);
  4: Vh u,v;  // defines u and v as piecewise-P1 continuous functions
  5: @func f= x*y;  // definition of a called f function
- 6: @real cpu=clock(); // get the clock is second 
+ 6: @real cpu=clock(); // get the clock in second 
  7: @solve Poisson(u,v,@solver=LU) =  // defines the PDE
  8:    @int2d(Th)(@dx(u)*@dx(v) + @dy(u)*@dy(v))   //  bilinear part
  9:    - @int2d(Th)( f*v)          // right hand side
@@ -652,8 +653,8 @@ below). \twoplot[height=5cm]{firstTh}{firstU}{mesh \texttt{Th} by
 Note that the qualifier \texttt{solver=LU} is not required and by default a
 multi-frontal LU would have been used. Note also that the lines
 containing \texttt{clock} are equally not required. Finally note how
-close to the mathematics \freefempp input language is. \ttCC{8} and  \ttCC{9}
-corresponds to the mathematical variational equation
+close to the mathematics \freefempp input language is. Line \texttt{8} and  \texttt{9}
+correspond to the mathematical variational equation
 \[
     \int_{T_h}(\frac{\p u}{\p x}\frac{\p v}{\p x}
     +\frac{\p u}{\p y}\frac{\p v}{\p
@@ -836,17 +837,17 @@ In \freefempp there is no need to distinguish the bilinear form $a$ from the lin
  present. % it finds which is which by checking where $u$ is present or not.
 \\\\
 
-The other way is to defined the problem and after we solve it, write :  
+The other way is to define the problem and then we solve it, write :  
 \bFF
   Vh u,v; @problem Poisson(u,v) = 
    ...   
-  Poisson; //   the problem now is solve here 
+  Poisson; //   the problem now is solved here 
 \eFF 
 \textbf{Step4: Solution and visualization}\\
 
-\textbf{6th line:} The current time in second is stored into the real-valued variable \ttCC{cpu}.
+\textbf{6th line:} The current time in seconds is stored into the real-valued variable \ttCC{cpu}.
 
-\textbf{7th line} The problem is solved
+\textbf{7th line} The problem is solved.
 
 \textbf{11th line:} The visualization is done as illustrated in Fig. \ref{firstU}
 (see \refSec{Plot} for zoom, postscript and other commands).
@@ -865,10 +866,10 @@ F_i=\int_{\Omega}f\phi_i\, \d x\d y
 \end{eqnarray}
 which is found by using (\ref{defu}) and replacing $v$ by $\phi_i$
 in (\ref{eqn:weakform}).  
-And the Dirichlet conditions are implemented by penalty
+And the Dirichlet conditions are implemented by penalty,
 namely by setting $A_{ii}=10^{30}$  and 
  $F_i=  10^{30}*0$ if $i$ is a boundary degree of freedom. Note, that the number $10^{30}$ is called \ttCC{tgv} 
- (\emph{tr\`es grande valeur} )
+ (\emph{tr\`es grande valeur})
  and it is generally possible to change this value \index{solve!tgv=}, see the index item \texttt{solve!tgv=}.
  
 \medskip\index{matrix}\index{varf}
@@ -888,7 +889,7 @@ The vector $F$ \index{[]@\verb=[]=}
 in (\ref{eqn:Equation}) can also be constructed manually 
 \bFF
 @varf l(unused,v) = @int2d(Th)(f*v)+@on(C,u=0);
-Vh F;  F[] = l(0,V); //  F[] is the vector associated to the function \texttt{F}
+Vh F;  F[] = l(0,Vh); //  F[] is the vector associated to the function \texttt{F}
 \eFF
 The problem can then be solved at the level of algebra by
 \bFF
@@ -1007,7 +1008,7 @@ If you use the same symbol twice as in
 \eFF
 then you will get the message
 \bFF
-    2 : real aaa; The identifier aaa exist 
+    2 : real aaa; The identifier aaa exists 
           the existing type is <Pd>
           the new  type is <Pd>
 
@@ -1100,7 +1101,7 @@ the PDE when second derivatives exist.
 Unlike \texttt{freefem+} which had both weak and strong forms, \freefempp implements only
 weak formulations.  It is not possible to go further in using this software if you don't know
 the weak form (i.e. variational formulation) of your problem: either you read a book, or
-ask help from a colleague or drop the matter.  Now if you want to solve a system of PDE
+ask help form a colleague or drop the matter.  Now if you want to solve a system of PDE
 like $A(u,v)=0,~ B(u,v)=0$ don't close this manual, because in weak form it is
 $$
     \int_\Omega(A(u,v)w_1+B(u,v)w_2)=0~~\forall w_1,w_2...
@@ -1732,7 +1733,7 @@ term $u\cdot\n v$ above.  Consider the following, to be plugged at the end of th
 @int steel=Sh(0.5,0).region, air=Sh(-1,0).region;
 @fespace W0(Sh,P0);
 W0 k=0.01*(@region==air)+0.1*(@region==steel);
-W0 u1=dy(psi)*(@region==air), u2=-@dx(psi)*(@region==air);
+W0 u1=@dy(psi)*(@region==air), u2=-@dx(psi)*(@region==air);
 Wh vold = 120*(@region==steel);
 @real dt=0.05, nbT=50;
 @int i;
@@ -6193,7 +6194,7 @@ The parameters are:
     \item[init=]   \index{problem!init=}  \index{solve!init=}boolean expression, if it is false or 0 \index{init=}
     the matrix is reconstructed. Note that if the mesh changes the matrix is
     reconstructed too.
-    \item[precon=]  \index{problem!precon=}  \index{solve!precon=}name of a function (for example \texttt{P}) to set the precondioner. \index{precon=}
+    \item[precon=]  \index{problem!precon=}  \index{solve!precon=}name of a function (for example \texttt{P}) to set the preconditioner. \index{precon=}
     The prototype for the function \texttt{P} must be
 \bFF
     @func @real[@int]  P(@real[@int] & xx) ;
@@ -6201,7 +6202,7 @@ The parameters are:
       \item[tgv=]  \index{problem!tgv=}  \index{solve!tgv=}  Huge value ($10^{30}$) used to implement
       Dirichlet boundary conditions.
       
-      \item[tolpivot=] \index{problem!tolpivot =} \index{solve!tolpivot=} set the tolerence of the pivot in UMFPACK ($10^-1$)  and, LU, Crout, Cholesky
+      \item[tolpivot=] \index{problem!tolpivot =} \index{solve!tolpivot=} set the tolerence of the pivot in UMFPACK ($10^{-1}$)  and, LU, Crout, Cholesky
       factorisation ($10^{-20}$).
 
       \item[tolpivotsym=] \index{problem!tolpivotsym =} \index{solve!tolpivotsym=} set the tolerence of the pivot sym in UMFPACK      
@@ -6239,7 +6240,7 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
     \item  the right handside of the PDE, volumic terms of the linear form: for given functions $K,\, f$:
          \begin{itemize}
        \item[-)]
-         \texttt{ int1d(Th)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T
+         \texttt{ int2d(Th)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T
           } K\,w  $
 
       \item[-)] \texttt{ int1d(Th,2,5)( K*w) }   $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5})
@@ -6256,7 +6257,7 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
          \texttt{ on(1, u = g )}\index{on}
          
         The meaning is 
-        for all node $i$ the this associated boundary,  the diagonal 
+        for all degree of freedom $i$ of this associated boundary,  the diagonal 
         term  of the matrix $a_{ii}= tgv$  with the   {\em terrible geant value} \ttCC{tgv} (=$10^{30}$ by default)
           and   the right hand side $b[i] = "g[i]" \times tgv $,
                 where the $"g[i]"$ is the boundary node value given by  the interpolation of $g$.
@@ -6968,7 +6969,8 @@ The parameters are
 
     \itemtt[nbiso=]  \index{plot! nbiso =}(int) sets the number of isovalues (20 by default)
     \itemtt[nbarrow=] \index{plot!nbarraw=} (int) sets the number of colors of arrow values (20 by default)
-    \itemtt[viso=]  \index{plot!viso=}sets the array  value of isovalues (an array real[int])
+    \itemtt[viso=]  \index{plot!viso=}sets the array  value of
+    isovalues (an array real[int] of increasing values)
     \itemtt[varrow=] \index{plot!varrow=}  sets the array value of color arrows (an array real[int])
     \itemtt[bw=] \index{plot!bw=} (bool)  sets or not the plot in black and white color.
     \itemtt[grey=] \index{plot!grey=} (bool)  sets or not the plot in grey color.
@@ -10839,10 +10841,10 @@ $$ D^2J(u_n,v_n)((w,s),(du,dv)) =  DJ(u_n,v_n)(w,s) , \quad \forall w,s $$
 \color{black}The way to implement this algorithm in \freefempp is
 use a macro tool to implement  $A$ and $F2$, $f$, $f'$,$f''$.
 
-A macro\label{macro}\index{macro} is like is \texttt{ccp} preprocessor of \Cpp, but this begin by
-\texttt{macro} and the end of the macro definition is the begin of the comment $//$.
+A macro\label{macro}\index{macro} is like in \texttt{ccp} preprocessor of \Cpp, but this begin by
+\texttt{macro} and the end of the macro definition is before  the comment $//$.
 In this case the macro is very useful because the type of parameter can be change.
-And  it is easy to make automatic differentiation.
+And it is easy to make automatic differentiation.
 \begin{figure}[hbt]
 \begin{center}\includegraphics[width=10cm]{nl-elas}\end{center}
 \caption{\label{fig nl-elas} The deformed domain}

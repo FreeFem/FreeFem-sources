@@ -630,7 +630,10 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
      m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
   ---------- */
   mp=mps;   
-  m->decrement();
+ // m->decrement();
+ //   Add2StackOfPtr2FreeRC(stack,m);// fait au niveau d'apres  07/2008 FH 
+    
+   
   return m;   
 }
 
@@ -748,7 +751,7 @@ Fem2D::Mesh *  ReadTriangulate( string  * const & s) {
   
   Mesh * m=new Mesh(nv,xy); 
   m->MakeQuadTree();
-  m->decrement();
+//  m->decrement(); //  07/2008 FH  auto del ptr
  //  delete s;  modif mars 2006 auto del ptr
   return m;
   
@@ -763,7 +766,7 @@ Fem2D::Mesh *  Triangulate( const  KN_<double> & xx,const  KN_<double> & yy)
        xy[i]= R2(xx[i],yy[i]);
     Mesh * m=new Mesh(nv,xy); 
     m->MakeQuadTree();
-    m->decrement();
+   // m->decrement();  07/2008 FH  auto del ptr
     //  delete s;  modif mars 2006 auto del ptr
     return m;
     
@@ -775,7 +778,7 @@ Fem2D::Mesh *  ReadMeshbamg( string * const & s) {
   Fem2D::Mesh * m=bamg2msh(bTh,false);// no renum
   delete bTh;
   // delete s; modif mars 2006 auto del ptr
-  m->decrement();
+ //  m->decrement();  07/2008 FH  auto del ptr
   return m;
 }
 
@@ -792,6 +795,6 @@ Fem2D::Mesh *  buildmeshbamg( string * const & s, int nbvxin) {
   Fem2D::Mesh * m=bamg2msh(bTh,false);// no renum
   delete bTh;
  //  delete s; modif mars 2006 auto del ptr
-  m->decrement();
+ // m->decrement();
   return m;
 }

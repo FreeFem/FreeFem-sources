@@ -129,9 +129,9 @@ if [ -n "$files$fileso" ] ; then
 	exit 1;
     fi
     if [ "$files" ] ;then 
-	echo $CXX -c $FLAGS $INC $PIC $files
+	echo $CXX -c $FLAGS $CXXFLAGS $INC $PIC $files
 	if [  $do = yes ] ; then 
-	    $CXX -c $INC $FLAGS $PIC  $files
+	    $CXX -c $INC $FLAGS $CXXFLAGS $PIC  $files
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
     fi
