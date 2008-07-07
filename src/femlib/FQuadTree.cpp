@@ -355,6 +355,29 @@ void  FQuadTree::Add( Vertex & w)
   NbVertices++;    
 }
 
+
+FQuadTree::FQuadTree(Vertex * v,R2 Pmin,R2 Pmax,long nbv)
+  :
+  th(0),
+  lenStorageQuadTreeBox(Max(abs(nbv),1000L)),
+  NbQuadTreeBox(0),
+  NbVertices(0),
+  NbQuadTreeBoxSearch(0),
+  NbVerticesSearch(0),
+  cMin(Pmin-(Pmax-Pmin)/2),
+  cMax(Pmax+(Pmax-Pmin)/2),
+  coef( MaxISize/Norme_infty(cMax-cMin))
+  
+{ 
+  sb =new StorageQuadTreeBox(lenStorageQuadTreeBox);
+  root=NewQuadTreeBox();
+  for (long i=0;i<nbv;i++) 
+    Add(v[i]);
+#ifdef DRAWING1
+  Draw();
+#endif
+}
+
 FQuadTree::FQuadTree(Mesh * t,R2 Pmin,R2 Pmax,long nbv) : 
  lenStorageQuadTreeBox(t->nv/8+100),
   th(t),
@@ -877,27 +900,6 @@ void  FQuadTree::Add( Vertex & w)
   //   cout << b << " " << b->n << endl;
   b->v[b->n++]=&w; // we add the vertex 
   NbVertices++;    
-}
-
-FQuadTree::FQuadTree(Vertex * v,R2 Pmin,R2 Pmax,long nbv)
-  th(0),
-  lenStorageQuadTreeBox(max(abs(nbv),1000)),
-  NbQuadTreeBox(0),
-  NbVertices(0),
-  NbQuadTreeBoxSearch(0),
-  NbVerticesSearch(0),
-  cMin(Pmin-(Pmax-Pmin)/2),
-  cMax(Pmax+(Pmax-Pmin)/2),
-  coef( MaxISize/Norme_infty(cMax-cMin))
-  
-{ 
-  sb =new StorageQuadTreeBox(lenStorageQuadTreeBox);
-  root=NewQuadTreeBox();
-  for (long i=0;i<nbv;i++) 
-    Add(v[i]);
-#ifdef DRAWING1
-  Draw();
-#endif
 }
 
 FQuadTree::FQuadTree(Mesh * t,R2 Pmin,R2 Pmax,long nbv) : 

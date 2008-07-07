@@ -25,9 +25,6 @@ using namespace std;
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
-//#include "LayerMesh.hpp"
-//#include "TransfoMesh_v2.hpp"
-//#include "GQuadTree.hpp"
 
 #include <set>
 #include <vector>
@@ -92,61 +89,69 @@ Mesh * GluMesh(listMesh const & lst)
   
   
   FQuadTree *quadtree=new Fem2D::FQuadTree(th0,Pn,Px,0);
-  
-  for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
-    {
-      const Mesh &Th(**i);
-      if(!*i) continue;
-      if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
-      int nbv0 = nbv;
-      
-      for (int ii=0;ii<Th.nv;ii++)
-		{
-	  	const Vertex &vi(Th(ii));
-	  	Vertex * pvi=quadtree->ToClose(vi,hseuil);
-	  	if(!pvi) { 
-	    	v[nbv].x = vi.x;
-	    	v[nbv].y = vi.y;
-	    	v[nbv].lab = vi.lab;
-	    	quadtree->Add(v[nbv++]);
-	  	}
-		}
-      
-      for (int k=0;k<Th.nt;k++)
-		{
-	  const Triangle  &K(Th[k]);
-	  int i0=quadtree->NearestVertex(K[0])-v;
-	  int i1=quadtree->NearestVertex(K[1])-v;
-	  int i2=quadtree->NearestVertex(K[2])-v;
-	  (*tt++).set(v,i0,i1,i2,K.lab);
-		}
-		
-    /*
-	// bug glumesh
-      for (int k=0;k<Th.neb;k++)
+  {
+    map<pair<int,int>,int> bbe;
+    for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
+      {
+	const Mesh &Th(**i);
+	if(!*i) continue;
+	if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
+	int nbv0 = nbv;
+	
+	for (int ii=0;ii<Th.nv;ii++)
 	{
-	  const BoundaryEdge & be(Th.bedges[k]);
-	  int i0=quadtree->NearestVertex(be[0])-v;
-	  int i1=quadtree->NearestVertex(be[1])-v;
-	  
-	  if( i0 < nbv0 && i1 < nbv0) continue;
-	  (*bb++).set(v,i0,i1,be.lab);
-	  neb++;
-	
+	  const Vertex &vi(Th(ii));
+	  Vertex * pvi=quadtree->ToClose(vi,hseuil);
+	  if(!pvi) { 
+	    v[nbv].x = vi.x;
+	    v[nbv].y = vi.y;
+	    v[nbv].lab = vi.lab;
+	    quadtree->Add(v[nbv++]);
+	  }
 	}
-	*/
-   } 
-	Mesh::Vertex *becog = new Vertex[nebx];
-	cout << "creation quadtree" << endl;
-	FQuadTree *quadtree_be=new Fem2D::FQuadTree(becog,Pn,Px,-nebx);
-	cout << "fin creation quadtree" << endl;
-	double hseuil_border = hseuil/2.;
+      
+	for (int k=0;k<Th.nt;k++)
+	  {
+	    const Triangle  &K(Th[k]);
+	    int i0=quadtree->NearestVertex(K[0])-v;
+	    int i1=quadtree->NearestVertex(K[1])-v;
+	    int i2=quadtree->NearestVertex(K[2])-v;
+	    (*tt++).set(v,i0,i1,i2,K.lab);
+	  }
 	
-	for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
-    {
+	// bug glumesh done after 
+      
+	for (int k=0;k<Th.neb;k++)
+	  {
+	    const BoundaryEdge & be(Th.bedges[k]);
+	    int i0=quadtree->NearestVertex(be[0])-v;
+	    int i1=quadtree->NearestVertex(be[1])-v;
+	    int ii0=i0,ii1=i1;
+	    if(ii1<ii0) Exchange(ii0,ii1);
+	    pair<int,int> i01(ii0,ii1);
+	    if( bbe.find(i01) == bbe.end())
+	    {	    
+	      (*bb++).set(v,i0,i1,be.lab);
+	      bbe[i01]=	  neb++;
+	    }
+	    
+	  }
+	
+      } 
+  }
+  /*
+  Mesh::Vertex *becog = new Vertex[nebx];
+  cout << "creation quadtree" << endl;
+  FQuadTree *quadtree_be=new Fem2D::FQuadTree(becog,Pn,Px,-nebx);
+  cout << "fin creation quadtree" << endl;
+  double hseuil_border = hseuil/2.;
+  // to remove common egde wrong code .... FH
+  if(0) 
+    for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
+      {
       const Mesh &Th(**i);
       if(!*i) continue;
-	  
+      
       if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
       for (int k=0;k<Th.neb;k++)
 	{
@@ -155,34 +160,33 @@ Mesh * GluMesh(listMesh const & lst)
 	  int i0 = Th.operator()(be[0]); //quadtree->NearestVertex(be[0])-v;
 	  int i1 = Th.operator()(be[1]); //quadtree->NearestVertex(be[1])-v;
 	  
-	  R cdgx,cdgy;
+	  R2 r2vi= ((R2) be[0] + be[1])/2.;
 	  
-	  cdgx = (Th.vertices[i0].x+Th.vertices[i1].x)/2.;
-	  cdgy = (Th.vertices[i0].y+Th.vertices[i1].y)/2.;
-	  
-	  const R2 r2vi( cdgx, cdgy);
+	  //const R2 r2vi( cdgx, cdgy);
 	  const Mesh::Vertex & vi(r2vi);
 	  
 	  Vertex * pvi=quadtree_be->ToClose(vi,hseuil_border);
 	  if(!pvi){
-		  becog[neb].x = vi.x;
-		  becog[neb].y = vi.y;
-		  becog[neb].lab = vi.lab;
-		  quadtree_be->Add( becog[neb++] );
-		       
-		  int iglu0=quadtree->NearestVertex(be[0])-v;
-		  int iglu1=quadtree->NearestVertex(be[1])-v;
-		  
-		  (bb++)->set(v,iglu0,iglu1,vi.lab);
-		  }
+	    becog[neb].x = vi.x;
+	    becog[neb].y = vi.y;
+	    becog[neb].lab = vi.lab;
+	    quadtree_be->Add( becog[neb++] );
+	    
+	    int iglu0=quadtree->NearestVertex(be[0])-v;
+	    int iglu1=quadtree->NearestVertex(be[1])-v;
+	    
+	    (bb++)->set(v,iglu0,iglu1,vi.lab);
+	  }
 	}
     
     } //  
+  */
   delete quadtree;
   //delete quadtree_be;
-  
+   
   if(verbosity>1)
     {
+      cout << "     Nb points : "<< nbv << " , nb edges : " << neb << endl;
       cout << "     Nb of glu point " << nbvx -nbv;
       cout << "     Nb of glu  Boundary edge " << nebx-neb;
     }
@@ -192,7 +196,7 @@ Mesh * GluMesh(listMesh const & lst)
     R2 Pn,Px;
     m->BoundingBox(Pn,Px);
     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-    m->decrement();
+    //    m->decrement();
     return m;
   }
   
@@ -204,13 +208,16 @@ struct Op2_addmesh: public binary_function<AA,BB,RR> {
   { return RR(s, a, b );} 
 };
 
-template<class RR,class AA=RR,class BB=AA> 
+template<bool INIT,class RR,class AA=RR,class BB=AA> 
 struct Op2_setmesh: public binary_function<AA,BB,RR> { 
-  static RR f(const AA & a,const BB & b)  
-  {
+  static RR f(Stack stack, const AA & a,const BB & b)  
+  {    
     ffassert(a );
-    if(*a) delete *a;
-    return (*a=GluMesh(b),a); 
+    pmesh  p=GluMesh(b);
+    
+    if(!INIT &&  *a) delete *a;
+    //  Add2StackOfPtr2FreeRC(stack,p); //  the pointer is use to set variable so no remove. 
+    return *a=p,a;
   } 
 };
 
@@ -320,7 +327,8 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   R2 Pn,Px;                                                                                                                               
   m->BoundingBox(Pn,Px);
   m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);   
-  m->decrement();
+  //  m->decrement();
+  Add2StackOfPtr2FreeRC(stack,m);
   return m;
 }
 
@@ -358,19 +366,9 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   //cout << " je suis dans Init " << endl; 
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,listMesh,pmesh>  >      );
-  TheOperators->Add("=",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
-  TheOperators->Add("<-",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
-  
-  //TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,pmesh3,pmesh3>  >      );
-  //TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,listMesh3,pmesh3>  >      );
-  //TheOperators->Add("=",new OneBinaryOperator< Op3_setmesh<pmesh3*,pmesh3*,listMesh3>  >     );
-  //TheOperators->Add("<-",new OneBinaryOperator< Op3_setmesh<pmesh3*,pmesh3*,listMesh3>  >     );
+  TheOperators->Add("=",new OneBinaryOperator_st< Op2_setmesh<false,pmesh*,pmesh*,listMesh>  >     );
+  TheOperators->Add("<-",new OneBinaryOperator_st< Op2_setmesh<true,pmesh*,pmesh*,listMesh>  >     );
   
   Global.Add("change","(",new SetMesh);
-  //Global.Add("change3D","(",new SetMesh3D);
-  //Global.Add("buildlayers","(",new  BuildLayerMesh);
-  //Global.Add("build2D3D","(",new Build2D3D);
-  //Global.Add("movemesh2D3Dsurf","(",new Movemesh2D_3D_surf);
-  //Global.Add("movemesh3D","(",new Movemesh3D);
-  //Global.Add("remplissage","(",new Remplissage);
+
 }

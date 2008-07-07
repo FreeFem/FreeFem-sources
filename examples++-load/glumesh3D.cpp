@@ -63,33 +63,33 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   
   for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++)
     {
-	    Mesh3 &Th3(**i);  // definis ???
-	    th0=&Th3;
-	    if(verbosity>1)  cout << " determination of hmin : GluMesh3D + "<< Th3.nv << " " << Th3.nt << " "<< Th3.nbe << endl;
-
-      	nbt  += Th3.nt;
-      	nbvx += Th3.nv;
-      	nbex += Th3.nbe;
-        
-		for (int k=0;k<Th3.nt;k++){
-			for (int e=0;e<6;e++){
-				hmin=min(hmin,Th3[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
-			}
-		}
-		
-		for (int k=0;k<Th3.nbe;k++){
-			for (int e=0;e<3;e++){
-				hmin=min(hmin,Th3.be(k).lenEdge(e));   // calcul de .lenEdge pour un Mesh3
-			}
-		}
-		
-		for (int ii=0;ii<Th3.nv;ii++){ 
-			R3 P( Th3.vertices[ii].x, Th3.vertices[ii].y, Th3.vertices[ii].z);
-			Pn=Minc(P,Pn);
-			Px=Maxc(P,Px);     
-		}
+      Mesh3 &Th3(**i);  // definis ???
+      th0=&Th3;
+      if(verbosity>1)  cout << " determination of hmin : GluMesh3D + "<< Th3.nv << " " << Th3.nt << " "<< Th3.nbe << endl;
+      
+      nbt  += Th3.nt;
+      nbvx += Th3.nv;
+      nbex += Th3.nbe;
+      
+      for (int k=0;k<Th3.nt;k++){
+	for (int e=0;e<6;e++){
+	  hmin=min(hmin,Th3[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+	}
+      }
+      
+      for (int k=0;k<Th3.nbe;k++){
+	for (int e=0;e<3;e++){
+	  hmin=min(hmin,Th3.be(k).lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+	}
+      }
+      
+      for (int ii=0;ii<Th3.nv;ii++){ 
+	R3 P( Th3.vertices[ii].x, Th3.vertices[ii].y, Th3.vertices[ii].z);
+	Pn=Minc(P,Pn);
+	Px=Maxc(P,Px);     
+      }
     } 
-    
+  
   cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn << " "<< Px << endl;
   
   
@@ -105,8 +105,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   cout << " creation of : BuildGTree" << endl;
   //th0->BuildBound();
   //th0->BuildGTree();   
- 
-  EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pn,Px,0);
+  
   
   //cout << " creation of : BuildGTree for border elements" << endl;
   //Vertex3  *becog= new Vertex3[nbex];  
@@ -114,147 +113,157 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   
   cout << " creation of : Mesh3 th3_tmp" << endl;
   /*Mesh3 th3_tmp;
-  th3_tmp.set(nbvx,nbt,nbex);*/
-  
-  
-  for(list<Mesh3 *>::const_iterator i=lth.begin(); i!=lth.end();i++)
-    {
-      const Mesh3 &Th3(**i);
-      if(verbosity>1)  cout << " loop over mesh for create new mesh "<< endl;
-      if(verbosity>1)  cout << " GluMesh3D + "<< Th3.nv << " " << Th3.nt <<" " << Th3.nbe << endl;
-      int nbv0 = nbv;
-      
-      for (int ii=0;ii<Th3.nv;ii++){
-	      const Vertex3 &vi(Th3.vertices[ii]);
-	      Vertex3 * pvi=gtree->ToClose(vi,hseuil);
-	      if( abs(vi.x) <1e-6 || abs(vi.x-1) <1e-6 || abs(vi.x+1) <1e-6 ){
-			      cout << ii << *i << "avant test" << vi << endl;
-		  }
-	   
-	      if(!pvi){
-		      if(abs(vi.x) <1e-6 || abs(vi.x-1) <1e-6 || abs(vi.x+1) <1e-6){
-			      cout << "nbv=" << nbv << " vi=" << vi << endl;
-		      }
-		      v[nbv].x = vi.x;
-		      v[nbv].y = vi.y;
-		      v[nbv].z = vi.z;
-		      v[nbv].lab = vi.lab;
-		      gtree->Add( v[nbv++] );
-		  }
+    th3_tmp.set(nbvx,nbt,nbex);*/
+  {  
+    EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pn,Px,0);  
+    typedef SortArray<int,3>  SortFace;
+    HashTable<SortFace,int> bbe(nbex,nbvx);
+    typedef HashTable<SortArray<int,3>,int>::iterator HT_iterator;
+    for(list<Mesh3 *>::const_iterator i=lth.begin(); i!=lth.end();i++)
+      {
+	const Mesh3 &Th3(**i);
+	if(verbosity>1)  cout << " loop over mesh for create new mesh "<< endl;
+	if(verbosity>1)  cout << " GluMesh3D + "<< Th3.nv << " " << Th3.nt <<" " << Th3.nbe << endl;
+	int nbv0 = nbv;
+	
+	for (int ii=0;ii<Th3.nv;ii++)
+	  {
+	    const Vertex3 &vi(Th3.vertices[ii]);
+	    Vertex3 * pvi=gtree->ToClose(vi,hseuil);
+       
+	    //  if( abs(vi.x) <1e-6 || abs(vi.x-1) <1e-6 || abs(vi.x+1) <1e-6 ){
+	    //   cout << ii << *i << "avant test" << vi << endl;	   }
+	    
+	    if(!pvi)
+	      {
+		if(abs(vi.x) <1e-6 || abs(vi.x-1) <1e-6 || abs(vi.x+1) <1e-6){
+		  cout << "nbv=" << nbv << " vi=" << vi << endl;
+		}
+		v[nbv].x = vi.x;
+		v[nbv].y = vi.y;
+		v[nbv].z = vi.z;
+		v[nbv].lab = vi.lab;
+		gtree->Add( v[nbv++] );
+	      }
 	  }
-	  
-	  for (int k=0;k<Th3.nt;k++){
-	  	const Tet  &K(Th3.elements[k]);
-	  	int iv[4];
-	  	iv[0]=gtree->NearestVertex(K[0])-v;
-	  	iv[1]=gtree->NearestVertex(K[1])-v;
-	  	iv[2]=gtree->NearestVertex(K[2])-v;  //-v;
-	  	iv[3]=gtree->NearestVertex(K[3])-v;  //-v;
-	  	(tt++)->set(v,iv,K.lab);
+	
+	for (int k=0;k<Th3.nt;k++)
+	  {
+	    const Tet  &K(Th3.elements[k]);
+	    int iv[4];
+	    iv[0]=gtree->NearestVertex(K[0])-v;
+	    iv[1]=gtree->NearestVertex(K[1])-v;
+	    iv[2]=gtree->NearestVertex(K[2])-v;  //-v;
+	    iv[3]=gtree->NearestVertex(K[3])-v;  //-v;
+	    (tt++)->set(v,iv,K.lab);
 	  }
-	/*
-	  for (int k=0;k<Th3.nbe;k++)
-	{
-	  const Triangle3 & K(Th3.be(k));//bedges[k]);
-	  int iv[3];
-	  iv[0]=gtree->NearestVertex(K[0])-v; //-v;
-	  iv[1]=gtree->NearestVertex(K[1])-v; //-v;
-	  iv[2]=gtree->NearestVertex(K[2])-v; //-v;
-	  
-	  if( iv[2]<nbv0 && iv[1]<nbv0 && iv[0] < nbv0 ) continue;  // Faux
-	  (bb++)->set(v,iv,K.lab);
-	  nbe++;
-	  
-	}   
+	
+	for (int k=0;k<Th3.nbe;k++)
+	  {
+	    const Triangle3 & K(Th3.be(k));//bedges[k]);
+	    int iv[3];
+	    iv[0]=gtree->NearestVertex(K[0])-v; //-v;
+	    iv[1]=gtree->NearestVertex(K[1])-v; //-v;
+	    iv[2]=gtree->NearestVertex(K[2])-v; //-v;
+	    SortFace sbe(iv);
+	    if(bbe.find(sbe)) continue;
+	    //if( iv[2]<nbv0 && iv[1]<nbv0 && iv[0] < nbv0 ) continue;  // Faux
+	    (bb++)->set(v,iv,K.lab);
+	      nbe++;
+	      
+	  }   
 	cout << "nbe="<<nbe<<endl;   
 	// Remarque on a besoin 
-	*/
-  }
-  
-	cout << " creation of : BuildGTree for border elements" << endl;
-	Vertex3  *becog= new Vertex3[nbex];  
-	EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog,Pn,Px,0);
-  
-	double hseuil_border = hseuil/3.;
 	
-	for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++){
-      const Mesh3 &Th3(**i);
+      }
+      delete gtree;
+  }
+   /* 
+  if(0) 
+    {// old code  ..
+      cout << " creation of : BuildGTree for border elements" << endl;
+      Vertex3  *becog= new Vertex3[nbex];  
+      EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog,Pn,Px,0);
       
-      for (int k=0;k<Th3.nbe;k++)
-	{
-	  const Triangle3 & K(Th3.be(k));//bedges[k]);
-	  int iv[3];
-	  iv[0]=Th3.operator()(K[0]); //gtree->NearestVertex(K[0])-v; //-v;
-	  iv[1]=Th3.operator()(K[1]); //gtree->NearestVertex(K[1])-v; //-v;
-	  iv[2]=Th3.operator()(K[2]); //gtree->NearestVertex(K[2])-v; //-v;
+      double hseuil_border = hseuil/3.;
+      
+      for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++){
+	const Mesh3 &Th3(**i);
 	
-	  //assert( iv[2]<nbv && iv[1]<nbv && iv[0] < nbv );  
-	  
-	  R cdgx,cdgy,cdgz;
-	  
-	  cdgx = (Th3.vertices[iv[0]].x+ Th3.vertices[iv[1]].x+ Th3.vertices[iv[2]].x)/3.;
-	  cdgy = (Th3.vertices[iv[0]].y+ Th3.vertices[iv[1]].y+ Th3.vertices[iv[2]].y)/3.;
-	  cdgz = (Th3.vertices[iv[0]].z+ Th3.vertices[iv[1]].z+ Th3.vertices[iv[2]].z)/3.;
-	 
-	  //cout << "cdg=" << cdgx << " " << cdgy << " " << cdgz << " "<<endl; 
-	  const R3 r3vi( cdgx, cdgy, cdgz ); 
-	  const Vertex3 &vi( r3vi);
+	for (int k=0;k<Th3.nbe;k++)
+	  {
+	    const Triangle3 & K(Th3.be(k));//bedges[k]);
+	    int iv[3];
+	    iv[0]=Th3.operator()(K[0]); //gtree->NearestVertex(K[0])-v; //-v;
+	    iv[1]=Th3.operator()(K[1]); //gtree->NearestVertex(K[1])-v; //-v;
+	    iv[2]=Th3.operator()(K[2]); //gtree->NearestVertex(K[2])-v; //-v;
 	    
-	  Vertex3 * pvi=gtree_be->ToClose(vi,hseuil_border);
-	  if(!pvi){
-		  becog[nbe].x = vi.x;
-		  becog[nbe].y = vi.y;
-		  becog[nbe].z = vi.z;
-		  becog[nbe].lab = vi.lab;
-		  gtree_be->Add( becog[nbe++]);
-		  
-		  int igluv[3];
-		  igluv[0]=gtree->NearestVertex(K[0])-v; //-v;
-		  igluv[1]=gtree->NearestVertex(K[1])-v; //-v;
-		  igluv[2]=gtree->NearestVertex(K[2])-v; //-v;
-		  
-		  (bb++)->set(v,igluv,K.lab);
-		  }
-	}
-    
-  }
-  //delete th0;
- 
+	    //assert( iv[2]<nbv && iv[1]<nbv && iv[0] < nbv );  
+	    
+	    R cdgx,cdgy,cdgz;
+	    
+	    cdgx = (Th3.vertices[iv[0]].x+ Th3.vertices[iv[1]].x+ Th3.vertices[iv[2]].x)/3.;
+	    cdgy = (Th3.vertices[iv[0]].y+ Th3.vertices[iv[1]].y+ Th3.vertices[iv[2]].y)/3.;
+	    cdgz = (Th3.vertices[iv[0]].z+ Th3.vertices[iv[1]].z+ Th3.vertices[iv[2]].z)/3.;
+	    
+	    //cout << "cdg=" << cdgx << " " << cdgy << " " << cdgz << " "<<endl; 
+	    const R3 r3vi( cdgx, cdgy, cdgz ); 
+	    const Vertex3 &vi( r3vi);
+	    
+	    Vertex3 * pvi=gtree_be->ToClose(vi,hseuil_border);
+	    if(!pvi){
+	      becog[nbe].x = vi.x;
+	      becog[nbe].y = vi.y;
+	      becog[nbe].z = vi.z;
+	      becog[nbe].lab = vi.lab;
+	      gtree_be->Add( becog[nbe++]);
+	      
+	      int igluv[3];
+	      igluv[0]=gtree->NearestVertex(K[0])-v; //-v;
+	      igluv[1]=gtree->NearestVertex(K[1])-v; //-v;
+	      igluv[2]=gtree->NearestVertex(K[2])-v; //-v;
+	      
+	      (bb++)->set(v,igluv,K.lab);
+	    }
+	  }
+	
+      }
+      //delete th0;
+    }
+  */
   
   if(verbosity>1)
     {
       cout << "     Nb of glu3D  point " << nbvx-nbv;
-      cout << "     Nb of glu3D  Boundary edge " << nbex-nbe << endl;
+      cout << "     Nb of glu3D  Boundary faces " << nbex-nbe << endl;
     }
-    cout << " nbv="  << nbv  << endl;
-    cout << " nbvx=" << nbvx << endl;
-    cout << " nbt="  << nbt  << endl;
-    cout << " nbe="  << nbe  << endl;
-    cout << " nbex=" << nbex << endl;
-    
-	cout << "     Nb of glu3D  point " << nbvx-nbv;
-    cout << "     Nb of glu3D  Boundary edge " << nbex-nbe << endl;
-    
-    
-    
-    Mesh3 *mpq= new Mesh3(nbv,nbt,nbe,v,t,b);  
-    cout << "fin de la definition de mpq" << endl;
-
-	if(nbt !=0){     
-	mpq->BuildBound();
-	cout << "fin de BuildBound" << endl;
-	mpq->BuildAdj();
-	cout << "fin de BuildAdj" << endl;
-	mpq->Buildbnormalv();  
-	cout << "fin de Buildnormalv()" << endl;
-	mpq->BuildjElementConteningVertex();
-	cout << "fin de ConteningVertex()" << endl;
-	mpq->BuildGTree();
-	cout << "fin de BuildGTree()" << endl;
-	mpq->decrement();  
-	cout << "fin de decrement()" << endl;
-	}
-    return mpq;
+  cout << " nbv="  << nbv  << endl;
+  cout << " nbvx=" << nbvx << endl;
+  cout << " nbt="  << nbt  << endl;
+  cout << " nbe="  << nbe  << endl;
+  cout << " nbex=" << nbex << endl;
+  
+  cout << "     Nb of glu3D  point " << nbvx-nbv;
+  cout << "     Nb of glu3D  Boundary edge " << nbex-nbe << endl;
+  
+  
+  
+  Mesh3 *mpq= new Mesh3(nbv,nbt,nbe,v,t,b);  
+  cout << "fin de la definition de mpq" << endl;
+  
+  if(nbt !=0){     
+    mpq->BuildBound();
+    cout << "fin de BuildBound" << endl;
+    mpq->BuildAdj();
+    cout << "fin de BuildAdj" << endl;
+    mpq->Buildbnormalv();  
+    cout << "fin de Buildnormalv()" << endl;
+    mpq->BuildjElementConteningVertex();
+    cout << "fin de ConteningVertex()" << endl;
+    mpq->BuildGTree();
+    cout << "fin de BuildGTree()" << endl;
+  }
+  return mpq;
   
 }
 
@@ -265,13 +274,16 @@ struct Op3_addmesh: public binary_function<AA,BB,RR> {
   { return RR(s, a, b );} 
 };
 
-template<class RR,class AA=RR,class BB=AA> 
+template<bool INIT,class RR,class AA=RR,class BB=AA> 
 struct Op3_setmesh: public binary_function<AA,BB,RR> { 
   static RR f(const AA & a,const BB & b)  
   {
     ffassert(a );
-    if(*a) delete *a;
-    return (*a=GluMesh3(b),a); 
+    pmesh3  p=GluMesh3(b);
+    
+    if(!INIT &&  *a) delete *a;
+    //  Add2StackOfPtr2FreeRC(stack,p); //  the pointer is use to set variable so no remove. 
+    return *a=p,a;
   } 
 };
 
@@ -392,7 +404,8 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
 	T_Th3->Buildbnormalv();  
 	T_Th3->BuildjElementConteningVertex();
 	T_Th3->BuildGTree();
-	T_Th3->decrement();  
+	//	T_Th3->decrement();  
+	Add2StackOfPtr2FreeRC(stack,T_Th3);
   
 	*mp=mps;
 	return T_Th3;
@@ -534,7 +547,9 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
   mpq->Buildbnormalv();  
   mpq->BuildjElementConteningVertex(); 
   mpq->BuildGTree();
-  mpq->decrement();
+  //mpq->decrement();
+  Add2StackOfPtr2FreeRC(stack,mpq);
+
   
   return mpq;
 }
@@ -570,15 +585,15 @@ public:
   eTh(tth),xx(0),yy(0),zz(0) 
   {
   
-	 args.SetNameParam(n_name_param,name_param,nargs);
+    args.SetNameParam(n_name_param,name_param,nargs);
     
     const E_Array * a1=0 ;
     if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
     int err =0;
-   
+    
     if(a1) {
       if(a1->size() !=3) 
-      CompileError("Movemesh2D_3D_surf (Th,transfo=[X,Y,Z],) ");
+	CompileError("Movemesh2D_3D_surf (Th,transfo=[X,Y,Z],) ");
       xx=to<double>( (*a1)[0]);
       yy=to<double>( (*a1)[1]);
       zz=to<double>( (*a1)[2]);
@@ -792,10 +807,10 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   
   TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,pmesh3,pmesh3>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,listMesh3,pmesh3>  >      );
-  TheOperators->Add("=",new OneBinaryOperator< Op3_setmesh<pmesh3*,pmesh3*,listMesh3>  >     );
-  TheOperators->Add("<-",new OneBinaryOperator< Op3_setmesh<pmesh3*,pmesh3*,listMesh3>  >     );
+  TheOperators->Add("=",new OneBinaryOperator< Op3_setmesh<false,pmesh3*,pmesh3*,listMesh3>  >     );
+  TheOperators->Add("<-",new OneBinaryOperator< Op3_setmesh<true,pmesh3*,pmesh3*,listMesh3>  >     );
   
-  Global.Add("change3D","(",new SetMesh3D);
+  Global.Add("change","(",new SetMesh3D);
   Global.Add("movemesh2D3Dsurf","(",new Movemesh2D_3D_surf);
   Global.Add("movemesh3D","(",new Movemesh3D);
   

@@ -508,7 +508,7 @@ bool mylex::SetMacro(int &ret)
 	MacroDef[macroname]=macroparm;
       else { 
 	cerr << "ERREUR in macro name:" <<macroname << endl;
-	ErrorScan(" The macro already exist, sorry");}
+	ErrorScan(" The macro already exists, sorry");}
       rt=true;
       ret= basescan();
     }

@@ -377,7 +377,7 @@ AnyType classBuildMesh::operator()(Stack stack)  const {
    long  nbvx         = arg(0,stack,0L); 
    bool  requireborder=  arg(1,stack,false);
    ffassert(   nbvx >= 0);
-   return SetAny<pmesh>(BuildMesh(stack,borders,false,nbvx,requireborder));
+   return SetAny<pmesh>(Add2StackOfPtr2FreeRC(stack,BuildMesh(stack,borders,false,nbvx,requireborder)));
 
 }
 
@@ -385,7 +385,9 @@ AnyType BuildMeshFile::operator()(Stack stack)  const {
      string*  filename = GetAny<string* >((*getfilename)(stack));
     long  nbvx         = arg(0,stack,0); 
     ffassert(   nbvx >= 0);
-    return SetAny<pmesh>(buildmeshbamg( filename,nbvx));
+    pmesh pmsh=buildmeshbamg( filename,nbvx);
+    Add2StackOfPtr2FreeRC(stack,pmsh);//  07/2008 FH     
+    return SetAny<pmesh>(pmsh);
     
 }
 
@@ -415,7 +417,9 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
   Fem2D::R2 Pn,Px;
   m->BoundingBox(Pn,Px);
   m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);*/
-  pmsh->decrement();  
+ // pmsh->decrement();  
+  Add2StackOfPtr2FreeRC(stack,pmsh);//  07/2008 FH 
+
   return SetAny<pmesh>(pmsh); 
  };
  
@@ -455,7 +459,9 @@ AnyType SplitMesh::operator()(Stack stack) const
    pth->quadtree=new Fem2D::FQuadTree(pth,Pn,Px,pth->nv);
 
    *mp=mps;
-    pth->decrement();   
+   // pth->decrement();   
+    Add2StackOfPtr2FreeRC(stack,pth);//  07/2008 FH
+
     return SetAny<pmesh>(pth);
 }
 AnyType SaveMesh::operator()(Stack stack) const 
@@ -559,7 +565,8 @@ AnyType MoveMesh::operator()(Stack stack) const
 	 ffassert(0); // a faire ????
        }
    *mp=mps;
-    pth->decrement();   
+    //pth->decrement();   
+    Add2StackOfPtr2FreeRC(stack,pth);// 07/2008 FH
     return SetAny<pmesh>(pth);
 
 }
@@ -786,7 +793,9 @@ AnyType Adaptation::operator()(Stack stack) const
 
   delete nTh;
   delete oTh;
-  g->decrement();
+  //g->decrement();
+  Add2StackOfPtr2FreeRC(stack,g);// 07/2008  FH
+     
   return SetAny<pmesh>(g);
   }
  else {
@@ -902,7 +911,7 @@ Fem2D::Mesh  * EmptyTheMesh( Fem2D::Mesh *  const & pTh,long *ssd=0)
   R2 Pn,Px;
   m->BoundingBox(Pn,Px);
   m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-  m->decrement();  
+//  m->decrement();  
   return m;
       
 }
@@ -997,7 +1006,7 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
   R2 Pn,Px;
   m->BoundingBox(Pn,Px);
   m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
- //m->decrement();  
+ //m->decrement();  //  delete done external
   return m;
       
 }
@@ -1140,7 +1149,9 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
 /*  initgraphique();
   m->Draw();
   rattente(1);*/
-  m->decrement();
+ // m->decrement();
+     Add2StackOfPtr2FreeRC(stack,m);// 07/2008 FH
+
   return m;
   }
 
@@ -1541,11 +1552,11 @@ void init_lgmesh() {
    Global.Add("square","(",new OneOperatorCode<MeshCarre2f>);
    Global.Add("savemesh","(",new OneOperatorCode<SaveMesh>);
    Global.Add("trunc","(", new Op_trunc_mesh);
-   Global.Add("readmesh","(",new OneOperator1_<pmesh,string*>(ReadMeshbamg));
-   Global.Add("emptymesh","(",new OneOperator1_<pmesh,pmesh>(EmptyTheMesh));
-   Global.Add("emptymesh","(",new OneOperator2_<pmesh,pmesh,KN<long> *>(EmptyTheMesh));
-   Global.Add("triangulate","(",new OneOperator1_<pmesh,string*>(ReadTriangulate));
-   Global.Add("triangulate","(",new OneOperator2_<pmesh,KN_<double>,KN_<double> >(Triangulate));
+   Global.Add("readmesh","(",new OneOperator1_<pmesh,string*, E_F_F0_Add2RC<pmesh,string*> >(ReadMeshbamg));
+   Global.Add("emptymesh","(",new OneOperator1_<pmesh,pmesh, E_F_F0_Add2RC<pmesh,pmesh> >(EmptyTheMesh));
+   Global.Add("emptymesh","(",new OneOperator2_<pmesh,pmesh,KN<long> *, E_F_F0F0_Add2RC<pmesh,pmesh,KN<long>*> >(EmptyTheMesh));
+   Global.Add("triangulate","(",new OneOperator1_<pmesh,string*, E_F_F0_Add2RC<pmesh,string*> >(ReadTriangulate));
+   Global.Add("triangulate","(",new OneOperator2_<pmesh,KN_<double>,KN_<double>,E_F_F0F0_Add2RC<pmesh,KN_<double>,KN_<double>,E_F0> >(Triangulate));
    TheOperators->Add("<-",
        new OneOperator2_<pmesh*,pmesh*,string* >(&initMesh));
        

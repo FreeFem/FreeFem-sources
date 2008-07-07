@@ -229,8 +229,7 @@ struct NewInStack: public BaseNewInStack   {
   ~NewInStack() { 
      // cout << "~NewInStack " << typeid(T).name() << " " << p << "  array " << array << " " << this << "\n";
       if(p) 
-     if(array) delete [] p;
-     else   delete p;}  
+        delete p;}  
 private: 
    NewInStack(T * pp,bool aa=false) : p(pp),array(aa) {
       //  cout << "NewInStack " << typeid(T).name() << " "  << p << "  array " << aa << " " << this << "\n";
@@ -243,20 +242,67 @@ private:
  friend  TT * Add2StackOfPtr2Free(Stack s,TT * p);
    
 };
+// ajout of 2 class NewRefCountInStack and NewArrayInStack
+//  for clean of meshes 
 
+template<class T>
+struct NewRefCountInStack: public BaseNewInStack   {	
+    T * p;
+    bool array;
+    ~NewRefCountInStack() { 
+	// cout << "~NewInStack " << typeid(T).name() << " " << p << "  array " << array << " " << this << "\n";
+	if(p) p->destroy();}  
+private: 
+    NewRefCountInStack(T * pp,bool aa=false) : p(pp),array(aa) {
+	//  cout << "NewInStack " << typeid(T).name() << " "  << p << "  array " << aa << " " << this << "\n";
+    } 
+    
+    template<class TT> 
+    friend  TT * Add2StackOfPtr2FreeRC(Stack s,TT * p);
+    
+};
+
+template<class T>
+struct NewArrayInStack: public BaseNewInStack   {	
+    T * p;
+    bool array;
+    ~NewArrayInStack() { 
+	// cout << "~NewInStack " << typeid(T).name() << " " << p << "  array " << array << " " << this << "\n";
+	if(p)  delete [] p;
+   }  
+private: 
+    NewArrayInStack(T * pp,bool aa=false) : p(pp),array(aa) {
+	//  cout << "NewInStack " << typeid(T).name() << " "  << p << "  array " << aa << " " << this << "\n";
+    } 
+    
+    
+    template<class TT> 
+    friend  TT * Add2StackOfPtr2FreeA(Stack s,TT * p);
+    template<class TT> 
+    friend  TT * Add2StackOfPtr2Free(Stack s,TT * p);
+    
+};
+
+template<class T>
+T * Add2StackOfPtr2FreeRC(Stack s,T * p)
+{
+    if(p)	
+	WhereStackOfPtr2Free(s)->add(new NewRefCountInStack<T>(p));
+    return p;
+}	
 
 template<class T>
 T * Add2StackOfPtr2Free(Stack s,T * p)
 {
    if(p)	
-     WhereStackOfPtr2Free(s)->add(new NewInStack<T>(p,false));
+     WhereStackOfPtr2Free(s)->add(new NewInStack<T>(p));
    return p;
 }	
 template<class T>
 T * Add2StackOfPtr2FreeA(Stack s,T * p)
 {
    if(p)	
-     WhereStackOfPtr2Free(s)->add(new NewInStack<T>(p,true));
+     WhereStackOfPtr2Free(s)->add(new NewArrayInStack<T>(p));
    return p;
 }	
 //  fin modif gestion of allocation of Ptr in Language 

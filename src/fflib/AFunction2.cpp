@@ -481,7 +481,7 @@ const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
     listofvar = &*m.find(k);
     if (!p.second) 
      {
-       cerr << " The identifier " << k << " exist \n";
+       cerr << " The identifier " << k << " exists \n";
        cerr << " \t  the existing type is " << *p.first->second.first << endl;
        cerr << " \t  the new  type is " << *v.first << endl;
        CompileError();
@@ -550,7 +550,7 @@ void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
       ffassert(this == *ff[i] );
       if (casting->FindSameR(*ff[i]))
        {
-         cerr << " The casting to " << *ff[i] << " exist " << endl;
+         cerr << " The casting to " << *ff[i] << " exists " << endl;
          cerr << " List of cast " << endl;
          casting->Show(cerr);
          CompileError();
@@ -560,7 +560,7 @@ void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
 /*      
    if( ! mapofcast.insert(make_pair<const aType,CastFunc>(ff[i]->a,ff[i])).second) 
      {
-        cerr << " The casting to "<< *this << " from " << ff[i]->a << " exist " << endl;
+        cerr << " The casting to "<< *this << " from " << ff[i]->a << " exists " << endl;
         cerr << " List of cast " << endl;
         for_each(mapofcast.begin(),mapofcast.end(),CerrCast);
         CompileError();

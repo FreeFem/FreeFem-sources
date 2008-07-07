@@ -999,7 +999,22 @@ template<class R,class A0>
       {return a->MeshIndependent();} // 
     
 };
-
+// add FH 07/2008  for pmesh clean 
+template<class R,class A0>
+class E_F_F0_Add2RC :public  E_F0 { public:
+    typedef  R (*func)(const   A0& ) ; 
+    func f;
+    Expression a;
+    E_F_F0_Add2RC(func ff,Expression aa) : f(ff),a(aa) {}
+    AnyType operator()(Stack s)  const 
+    {return SetAny<R>(Add2StackOfPtr2FreeRC(s,f(GetAny<A0>( (*a)(s) ))));}  
+    bool EvaluableWithOutStack() const 
+    {return a->EvaluableWithOutStack() ;} // 
+    bool MeshIndependent() const 
+    {return a->MeshIndependent();} // 
+    
+};
+// end add. 
 template<class R,class A0>
  class E_F_F0s_ :public  E_F0mps { public:
   typedef  R (*func)(Stack stack,const   A0& ) ; 
@@ -1028,7 +1043,22 @@ template<class R,class A0,class A1,class E=E_F0>
       {return a0->MeshIndependent() && a1->MeshIndependent();} // 
  
 };
+// FH Add 07/2008 
+//   class with add 1 to the refcounter  for  mesh . 
+template<class R,class A0,class A1,class E=E_F0>
+class E_F_F0F0_Add2RC :public  E { public:
+typedef  R (*func)(const  A0 &,const  A1 & ) ; 
+func f;
+Expression a0,a1;
+E_F_F0F0_Add2RC(func ff,Expression aa0,Expression aa1) 
+: f(ff),a0(aa0),a1(aa1) {}
+AnyType operator()(Stack s)  const 
+{return SetAny<R>(Add2StackOfPtr2FreeRC(s, f( GetAny<A0>((*a0)(s)) , GetAny<A1>((*a1)(s)) ) ));} 
+bool MeshIndependent() const 
+{return a0->MeshIndependent() && a1->MeshIndependent();} // 
 
+};
+// FH end 07/2008 
 template<class R,class A0,class A1,class A2,class E=E_F0>
  class E_F_F0F0F0_ :public  E { public:
   typedef  R (*func)(const  A0 &,const  A1 & , const A2 &) ; 
@@ -2435,14 +2465,14 @@ class  OneOperator1s_ : public OneOperator {
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),f(ff){}
 };
 
-template<class R,class A=R>
+template<class R,class A=R,class CODE=E_F_F0_<R,A> >
 class  OneOperator1_ : public OneOperator {
     aType r,t0; //  return type
     typedef  R (*func)(const A &) ; 
     func  f;
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new E_F_F0_<R,A>(f,t[0]->CastTo(args[0]));} 
+     { return  new CODE(f,t[0]->CastTo(args[0]));} 
     OneOperator1_(func  ff): 
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),t0( map_type[typeid(A).name()] ),f(ff){}
     OneOperator1_(func  ff,aType tt0): 

@@ -48,7 +48,7 @@ public:
 };
 
 
-Mesh * GluMesh(listMesh const & lst)
+Mesh * GluMesh(Stack stack,listMesh const & lst)
 {
   int nbt=0;
   int neb=0;
@@ -192,7 +192,8 @@ Mesh * GluMesh(listMesh const & lst)
     R2 Pn,Px;
     m->BoundingBox(Pn,Px);
     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-    m->decrement();
+    //m->decrement();
+    Add2StackOfPtr2FreeRC(stack,m);
     return m;
   }
   
@@ -206,11 +207,11 @@ struct Op2_addmesh: public binary_function<AA,BB,RR> {
 
 template<class RR,class AA=RR,class BB=AA> 
 struct Op2_setmesh: public binary_function<AA,BB,RR> { 
-  static RR f(const AA & a,const BB & b)  
+  static RR f(Stack stack,const AA & a,const BB & b)  
   {
     ffassert(a );
     if(*a) delete *a;
-    return (*a=GluMesh(b),a); 
+    return (*a=GluMesh(stack,b),a); 
   } 
 };
 
@@ -343,13 +344,14 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
     Mesh3 *mpq= new Mesh3(nbv,nbt,nbe,v,t,b);  
     
 	mpq->BuildGTree();
-	mpq->decrement();  
+	Add2StackOfPtr2FreeRC(stack,mpq);
+	//mpq->decrement();  
     return mpq;
   
 }
 */
 
-Mesh3 * GluMesh3(listMesh3 const & lst)
+Mesh3 * GluMesh3(Stack stack,listMesh3 const & lst)
 {
   int nbt=0;
   int nbe=0;
@@ -535,6 +537,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 	mpq->BuildGTree();
 	mpq->decrement();  
 	*/
+    Add2StackOfPtr2FreeRC(stack,mpq);
     return mpq;
   
 }
@@ -548,11 +551,11 @@ struct Op3_addmesh: public binary_function<AA,BB,RR> {
 
 template<class RR,class AA=RR,class BB=AA> 
 struct Op3_setmesh: public binary_function<AA,BB,RR> { 
-  static RR f(const AA & a,const BB & b)  
+  static RR f(Stack stack,const AA & a,const BB & b)  
   {
     ffassert(a );
     if(*a) delete *a;
-    return (*a=GluMesh3(b),a); 
+    return (*a=GluMesh3(stack,b),a); 
   } 
 };
 
@@ -781,9 +784,10 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
 	  Th3->Buildbnormalv();  
 	  Th3->BuildjElementConteningVertex();
 	  Th3->BuildGTree();
-	  Th3->decrement();  
+	  //Th3->decrement();  
   
   	*mp=mps;
+	Add2StackOfPtr2FreeRC(stack,Th3);
   	return Th3;
   }
   else{
@@ -820,8 +824,8 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   		T_Th3->Buildbnormalv();  
   		T_Th3->BuildjElementConteningVertex();
   		T_Th3->BuildGTree();
-  		T_Th3->decrement();  
-  
+  		//T_Th3->decrement();  
+		Add2StackOfPtr2FreeRC(stack,T_Th3);
 	 	*mp=mps;
 		return T_Th3;
 	}
@@ -944,8 +948,8 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
 	T_Th3->Buildbnormalv();  
 	T_Th3->BuildjElementConteningVertex();
 	T_Th3->BuildGTree();
-	T_Th3->decrement();  
-  
+	//T_Th3->decrement();  
+	Add2StackOfPtr2FreeRC(stack,T_Th3);
 	*mp=mps;
 	return T_Th3;
 }
@@ -1139,7 +1143,8 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   R2 Pn,Px;                                                                                                                               
   m->BoundingBox(Pn,Px);
   m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);   
-  m->decrement();
+  Add2StackOfPtr2FreeRC(stack,m);
+  //m->decrement();
   return m;
 }
 
@@ -1285,7 +1290,9 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
   
   Mesh3 *mpq = new Mesh3(nbv,nbt,nbe,v,t,b);
   mpq->BuildGTree();
-  mpq->decrement();  
+
+  Add2StackOfPtr2FreeRC(stack,mpq);
+  // mpq->decrement();  
 
   return mpq;
 }
@@ -1548,13 +1555,13 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   //cout << " je suis dans Init " << endl; 
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,listMesh,pmesh>  >      );
-  TheOperators->Add("=",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
-  TheOperators->Add("<-",new OneBinaryOperator< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
+  TheOperators->Add("=",new OneBinaryOperator_st< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
+  TheOperators->Add("<-",new OneBinaryOperator_st< Op2_setmesh<pmesh*,pmesh*,listMesh>  >     );
   
   TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,pmesh3,pmesh3>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,listMesh3,pmesh3>  >      );
-  TheOperators->Add("=",new OneBinaryOperator< Op3_setmesh<pmesh3*,pmesh3*,listMesh3>  >     );
-  TheOperators->Add("<-",new OneBinaryOperator< Op3_setmesh<pmesh3*,pmesh3*,listMesh3>  >     );
+  TheOperators->Add("=",new OneBinaryOperator_st< Op3_setmesh<pmesh3*,pmesh3*,listMesh3>  >     );
+  TheOperators->Add("<-",new OneBinaryOperator_st< Op3_setmesh<pmesh3*,pmesh3*,listMesh3>  >     );
   
   Global.Add("change","(",new SetMesh);
   Global.Add("change","(",new SetMesh3D);

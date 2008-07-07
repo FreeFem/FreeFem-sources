@@ -1143,8 +1143,8 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
       for (int i=1;i<atef.size();i++)
 	same &= atef[i].LeftValue() == atef[1].LeftValue();
       *ppfes = new pfes_tefk(ppTh,tef,atef.size(),s    ,nbcperiodic,periodic);
-      (**ppfes).decrement();
-      
+      (**ppfes).decrement();  //07/2008 FH
+	// Add2StackOfPtr2FreeRC(s,*ppfes);  //  bug????  a verifier 06/07/2008
       //  delete [] tef;
       return r;}
   } ;
@@ -1954,7 +1954,7 @@ class fCLD { public:
     Label r(lab);
     Key k(make_pair(pn->first,r));
     iterator i=l->find(k);
-    Check( i != l->end() ,"Def CL Dirichet already exist");
+    Check( i != l->end() ,"Def CL Dirichet already exists");
     l->insert(make_pair(k,CastTo<double>(f)));        
   }
 };
@@ -2654,11 +2654,12 @@ AnyType Plot::operator()(Stack s) const  {
       fe=  l[i].eval(0,s,cmp0);
       fe1= l[i].eval(1,s,cmp1);;
      if (!fe->x()) continue;
-      
-   SHOWVERB(   cout << "   Min = " << fe->x->min() << " max = " << fe->x->max() ;
+#ifdef VVVVVVV      
+       cout << "   Min = " << fe->x->min() << " max = " << fe->x->max() ;
       if(fe1 && verbosity > 1)
         cout << " Min = " << fe1->x->min() << " max = " << fe1->x->max() ;   
-      cout << endl;    );
+      cout << endl;   
+#endif
       if (fe1) 
          {
           if (fe->Vh == fe1->Vh)           
