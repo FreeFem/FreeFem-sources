@@ -217,6 +217,7 @@ CYGWIN*)
 	        AC_SUBST(WINDRESOBJ,windres.o)
                 AC_SUBST(WIN32DLLTARGET,win32-dll-target)
                 AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
+		ff_dynload=yes
 	fi
 
 
@@ -1053,6 +1054,7 @@ AC_SUBST(UMFPACKLIBS,$ff_umfpack_libs)
 
 # asinh acosh atanh are not in Mingw yet
 AC_CHECK_FUNCS(asinh acosh atanh getenv jn erfc tgamma)
+AC_CHECK_FUNCS(srandomdev)
 
 AC_CHECK_FUNCS(second_,ff_second="",ff_second=second.o)
 AC_SUBST(FF_SECOND,"$ff_second")

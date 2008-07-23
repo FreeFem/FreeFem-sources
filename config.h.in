@@ -87,6 +87,9 @@
 /* Define to 1 if you have the `second_' function. */
 #undef HAVE_SECOND_
 
+/* Define to 1 if you have the `srandomdev' function. */
+#undef HAVE_SRANDOMDEV
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 

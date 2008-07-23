@@ -3,8 +3,8 @@
 
 # $Id$
 
-SUBDIRS=blas arpack umfpack fltk
-EXTRA_DIST=f2c/Makefile  f2c/fort77.sed  f2c/tt.f
+SUBDIRS=blas arpack umfpack fltk 
+EXTRA_DIST=f2c/Makefile  f2c/fort77.sed	f2c/Makefile-MacOs tetgen/Makefile
 all-recursive: lib include
 
 lib: 
