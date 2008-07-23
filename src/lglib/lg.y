@@ -32,6 +32,13 @@
 #include <iostream>
 #include  <complex>
 #include <string>
+  // for reset cout,cin  in windows  dll
+#ifdef _WIN32
+#include <ext/stdio_filebuf.h>
+#include <iostream>
+#include <cstdio>
+#endif
+
 #include "error.hpp"
 class Iden;
 #include "strversionnumber.hpp"
@@ -656,9 +663,28 @@ int Compile()
     }
   return retvalue; 
 }
+static void SetcppIo()
+{
+#ifdef _WIN32
+  freopen("conin$", "r", stdin);
+  freopen("conout$", "w", stdout);
+  using namespace __gnu_cxx;
+  //  stdio_filebuf<char> * ccout = new stdio_filebuf<char>(stdout, std::ios_base::out);
+  static  stdio_filebuf<char> ccout(stdout, std::ios_base::out);
+  static  stdio_filebuf<char> ccin(stdin, std::ios_base::in);
+   //stdio_filebuf<char> *ccin= new stdio_filebuf<char>(stdin, std::ios_base::in);
+   
+   cout.rdbuf(&ccout);
+   cin.rdbuf(&ccin);
+   cerr.rdbuf(&ccout);
+   cout << " -- SetcppIo --" << endl; 
+#endif
+   ios::sync_with_stdio();
+}
 
 int mainff (int  argc, char **argv)
 {
+  SetcppIo();
 GetEnvironment();     
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
