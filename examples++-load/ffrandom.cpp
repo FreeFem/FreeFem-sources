@@ -2,6 +2,7 @@
 // ---------------------------------------------------------------------                                                     
 // $Id$                                                              
 
+#include "config.h"
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
@@ -9,6 +10,7 @@ using namespace std;
 #include "AFunction.hpp"
 #include <cstdlib>
 
+#ifdef HAVE_SRANDOMDEV
 template<class R>
 class  OneOperator_0 : public OneOperator {
   class E_F0_F :public  E_F0mps { public:
@@ -45,4 +47,4 @@ Init::Init(){
 }
  
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
-
+#endif

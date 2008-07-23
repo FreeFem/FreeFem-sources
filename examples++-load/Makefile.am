@@ -51,8 +51,12 @@ load_compile:include  $(LIST_COMPILE)
 	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)"  $< 
 
 glumesh2D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh2D.cpp 
+#	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" LayerMesh.cpp  glumesh2D.cpp
+#	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" TransfoMesh_v2.cpp glumesh2D.cpp
 	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp glumesh2D.cpp
 glumesh3D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh3D.cpp 
+#	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" LayerMesh.cpp  glumesh3D.cpp
+#	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" TransfoMesh_v2.cpp glumesh3D.cpp
 	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp glumesh3D.cpp
 buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
 	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
