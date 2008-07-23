@@ -32,13 +32,13 @@
 
 #define TOSTRING1(i) #i
 #define TOSTRING(i) TOSTRING1(i)
-
-#include <stdlib.h>
+#include <ext/stdio_filebuf.h>
+#include <cstdlib>
 ///#include <unistd.h>
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <string>
 #include <setjmp.h>
-#include <ctype.h>
+#include <cctype>
 #include <new>
 #include <iostream>
 #include <fstream>
@@ -793,9 +793,34 @@ void myexit(int err)
 }
 
 // initialize the console
-BOOL inittext(VOID)
+void SetcppIo()
 {
   FILE *fp=NULL,*fin=NULL;
+  // Get the standard output
+   fin = GetConsoleHandle(STD_INPUT_HANDLE);   
+   if(fin!=NULL)
+     *stdin = *fin;
+   
+   // get the standard output
+   if((fp = GetConsoleHandle(STD_OUTPUT_HANDLE)) == NULL)
+     *stdout = *fp;
+   freopen("conin$", "r", stdin);
+   freopen("conout$", "w", stdout);
+   // freopen("conout$", "w", stderr);
+   
+   using namespace __gnu_cxx;
+   stdio_filebuf<char> * ccout = new stdio_filebuf<char>(stdout, std::ios_base::out);
+   //static  stdio_filebuf<char> ccerr(stderr, std::ios_base::out);
+   stdio_filebuf<char> *ccin= new stdio_filebuf<char>(stdin, std::ios_base::in);
+   
+   cout.rdbuf(ccout);
+   cin.rdbuf(ccin);
+   cerr.rdbuf(ccout);
+   ios::sync_with_stdio();
+}
+BOOL inittext(VOID)
+{
+
   OSVERSIONINFO osVer; // for GetVersionEx()
 
   osVer.dwOSVersionInfoSize = sizeof(osVer);
@@ -808,22 +833,15 @@ BOOL inittext(VOID)
         return FALSE;       // Console API is not able in Windows 3.1 
     }
 
-   FreeConsole();          // If the console is already used
+  // FreeConsole();          // If the console is already used
    AllocConsole();         // Use the console API
+   SetcppIo();
 
-   // get the standard output
-   fin = GetConsoleHandle(STD_INPUT_HANDLE);   
-   if(fin!=NULL)
-    *stdin = *fin;
-
-   // get the standard output
-   if((fp = GetConsoleHandle(STD_OUTPUT_HANDLE)) == NULL){
-      FreeConsole();
-      return FALSE;
-   }
-   *stdout = *fp;
-
-   ios::sync_with_stdio();
+   /*
+   freopen("conin$", "r", stdin);
+   freopen("conout$", "w", stdout);
+   freopen("conout$", "w", stderr);
+   */
 
    SetConsoleTitle(PACKAGE_STRING  " console");
    return TRUE;
