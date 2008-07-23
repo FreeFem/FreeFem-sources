@@ -46,17 +46,18 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 
 load_compile:include  $(LIST_COMPILE)
 
+
 .cpp.$(DYLIB_SUFFIX): 
-	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"  $< 
+	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)"  $< 
 
 glumesh2D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh2D.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" TransfoMesh_v2.cpp glumesh2D.cpp
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp glumesh2D.cpp
 glumesh3D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh3D.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" TransfoMesh_v2.cpp glumesh3D.cpp
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp glumesh3D.cpp
 buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
 tetgen.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp LayerMesh.cpp $(TETGEN_LOADLINK)
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" -I../download/include -L../download/lib -ltet TransfoMesh_v2.cpp  LayerMesh.cpp tetgen.cpp
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" -I../download/include -L../download/lib -ltet TransfoMesh_v2.cpp  LayerMesh.cpp tetgen.cpp
 
 include: include.tar.gz
 	rm -rf include 
