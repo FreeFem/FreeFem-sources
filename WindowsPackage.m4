@@ -60,6 +60,8 @@ Source: "examples++-load\*.edp"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\*.cpp"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\load.link"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\include-tmp\*"; DestDir: "{app}\examples++-load\include"
+Source: "examples++-3d\*.edp"; DestDir: "{app}\examples++-3d"
+Source: "examples++-3d\*.mesh"; DestDir: "{app}\examples++-3d"
 
 
 
@@ -85,6 +87,7 @@ Name: "{group}\Examples\chapt3"; Filename: "{app}\examples++-chapt3"
 Name: "{group}\Examples\load"; Filename: "{app}\examples++-load"
 Name: "{group}\Examples\Main"; Filename: "{app}\examples++"
 Name: "{group}\Examples\Eigenvalues"; Filename: "{app}\examples++-eigen"
+Name: "{group}\Examples\3d"; Filename: "{app}\examples++-3d"
 Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
 
 ; Desktop
