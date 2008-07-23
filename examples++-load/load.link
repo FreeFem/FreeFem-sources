@@ -97,7 +97,7 @@ case "$WIN32$uu" in
         echo " Window without cygwin "
         b=$bin
         LIBS=" $b/libff.dll $LIBS $DLL"
-        SHARED="-shared --unresolved-symbols=ignore-all"
+        SHARED="-shared --unresolved-symbols=ignore-all -Wl,--enable-auto-import"
         FLAGS='  -mno-cygwin '
         SUF=dll;;
     win32-cygwin-version)
