@@ -132,7 +132,7 @@
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 109 "lg.y"
+#line 116 "lg.y"
 typedef union YYSTYPE { 
  double dnum;
  long lnum;
