@@ -30,7 +30,7 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
   SuperLU_3.0-include-ff.tar.gz REAME_SuperLU \
   glumesh2D.cpp glumesh2D.edp \
   glumesh3D.cpp glumesh3D.edp buildlayer.cpp tetgen.cpp\
-  LayerMesh.hpp TransfoMesh_v2.hpp LayerMesh.cpp \
+  LayerMesh.hpp TransfoMesh_v2.hpp LayerMesh.cpp  TransfoMesh_v2.cpp\
   ffrandom.cpp ffrandom.edp  
 
 
@@ -50,9 +50,9 @@ load_compile:include  $(LIST_COMPILE)
 	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"  $< 
 
 glumesh2D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh2D.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LayerMesh.cpp  glumesh2D.cpp
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" TransfoMesh_v2.cpp glumesh2D.cpp
 glumesh3D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh3D.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LayerMesh.cpp  glumesh3D.cpp
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" TransfoMesh_v2.cpp glumesh3D.cpp
 buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
 	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
 tetgen.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp LayerMesh.cpp $(TETGEN_LOADLINK)

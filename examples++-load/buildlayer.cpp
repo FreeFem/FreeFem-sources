@@ -39,13 +39,14 @@ class BuildLayeMesh_Op : public E_F0mps
 public:
   Expression eTh;
   Expression enmax,ezmin,ezmax,xx,yy,zz;
-  static const int n_name_param =7; // 
+  static const int n_name_param =9; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
   { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  
+  //long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  int    arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
 public:
   BuildLayeMesh_Op(const basicAC_F0 &  args,Expression tth,Expression nmaxx) 
     : eTh(tth),enmax(nmaxx), ezmin(0),ezmax(0),xx(0),yy(0),zz(0)
@@ -81,10 +82,13 @@ basicAC_F0::name_and_type BuildLayeMesh_Op::name_param[]= {
   {  "zbound", &typeid(E_Array)},
   {  "transfo", &typeid(E_Array)},
   {  "coef", &typeid(double)},
-  {  "reftet", &typeid(KN_<long> )},
+  {  "reftet", &typeid(KN_<long>)},
   {  "reffacemid", &typeid(KN_<long> )},
   {  "reffaceup", &typeid(KN_<long> )},
-  {  "reffacedown", &typeid(KN_<long> )}
+  {  "reffacelow", &typeid(KN_<long> )},
+  {  "facemerge", &typeid(long)},
+  {  "ptmerge",&typeid(double)}
+
 };
 
 
@@ -142,6 +146,8 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   KN<long> nrfmid (arg(4,stack,zzempty));  
   KN<long> nrfup  (arg(5,stack,zzempty));  
   KN<long> nrfdown (arg(6,stack,zzempty));  
+  int point_confondus_ok (arg(7,stack,0));
+  double precis_mesh (arg(8,stack,-1));
 
   cout << nrtet.N() <<  nrfmid.N() << nrfup.N() << nrfdown.N() << endl;
   
@@ -194,21 +200,17 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   int nebn =0;
   KN<int> ni(nbv);
   for(int i=0;i<nbv;i++)
-    ni[i]=Max(0,Min(nlayer,(int) lrint(nlayer*clayer[i])));
-    
-//    map< int, int > maptet; 
-// 	  map< int, int > maptrimil, maptrizmax, maptrizmin;
-// 	  map< int, int > mapemil, mapezmax, mapezmin;
-// 	   
-// 	  build_layer_map_tetrahedra( Th, maptet );
-// 	  build_layer_map_triangle( Th, maptrimil, maptrizmax, maptrizmin );
-// 	  build_layer_map_edge( Th, mapemil, mapezmax, mapezmin );
-// 	  
+    {
+      ni[i]=Max(0,Min(nlayer,(int) lrint(nlayer*clayer[i])));
+    }
+ 
 
-	  Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
+  Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
+
     
   
-  if( !(xx) && !(yy) && !(zz) ){
+  if( !(xx) && !(yy) && !(zz) )
+    {
 	 /*
 	  map< int, int > maptet; 
 	  map< int, int > maptrimil, maptrizmax, maptrizmin;
@@ -229,46 +231,46 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   
   	*mp=mps;
   	return Th3;
-  }
-  else{
+    }
+  else
+    {  
+      //Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
 	  
-	  //Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
+      KN<double> txx(Th3->nv), tyy(Th3->nv), tzz(Th3->nv);
+      KN<int> takemesh(Th3->nv);
+      MeshPoint *mp3(MeshPointStack(stack)); 
 	  
-	  KN<double> txx(Th3->nv), tyy(Th3->nv), tzz(Th3->nv);
-	  KN<int> takemesh(Th3->nv);
-	  MeshPoint *mp3(MeshPointStack(stack)); 
-	  
-	  takemesh=0;  
-	  Mesh3 &rTh3 = *Th3;
-	  for (int it=0;it<Th3->nt;++it){
-		  for( int iv=0; iv<4; ++iv){
-			   int i=(*Th3)(it,iv);  
-				if(takemesh[i]==0){
-					mp3->setP(Th3,it,iv);
-					if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
-					if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
-					if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
+      takemesh=0;  
+      Mesh3 &rTh3 = *Th3;
+      for (int it=0;it<Th3->nt;++it){
+	for( int iv=0; iv<4; ++iv){
+	  int i=(*Th3)(it,iv);  
+	  if(takemesh[i]==0){
+	    mp3->setP(Th3,it,iv);
+	    if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
+	    if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
+	    if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
 
-					takemesh[i] = takemesh[i]+1;
-				}
-	 		}
-		}
+	    takemesh[i] = takemesh[i]+1;
+	  }
+	}
+      }
 		
-		int border_only = 0;
-		int recollement_elem=0, recollement_border=1, point_confondus_ok=0;
-		Mesh3 *T_Th3=Transfo_Mesh3( rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok);
+      int border_only = 0;
+      int recollement_elem=0, recollement_border=1;
+      Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh, rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok);
 		  
 		
- 		T_Th3->BuildBound();
-  		T_Th3->BuildAdj();
-  		T_Th3->Buildbnormalv();  
-  		T_Th3->BuildjElementConteningVertex();
-  		T_Th3->BuildGTree();
-  		T_Th3->decrement();  
+      T_Th3->BuildBound();
+      T_Th3->BuildAdj();
+      T_Th3->Buildbnormalv();  
+      T_Th3->BuildjElementConteningVertex();
+      T_Th3->BuildGTree();
+      T_Th3->decrement();  
   
-	 	*mp=mps;
-		return T_Th3;
-	}
+      *mp=mps;
+      return T_Th3;
+    }
 }
 
 class Init1 { public:
