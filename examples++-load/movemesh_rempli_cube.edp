@@ -1,8 +1,6 @@
 // file movemesh_rempli.edp
-load "glumesh2D"
 load "glumesh3D"
 load "tetgen"
-//load "glumesh"
 
 int C1=99; // could be anything
 
@@ -11,45 +9,31 @@ border C12(t=0,1){   x=1.;      y=t;  label=C1;}
 border C13(t=0,1){ x=1.-t;     y=1.;  label=C1;}
 border C14(t=0,1){   x=0.;    y=1-t;  label=C1;}
 
-mesh Th1 = buildmesh( C11(5)+C12(5)+C13(5)+C14(5) );
-
-savemesh(Th1,"first_th1.mesh");
+mesh Th1 = buildmesh( C11(5)+C12(5)+C13(5)+C14(5) ); 
 
 func ZZ1min = 0;
 func ZZ1max = 1;
-
 func XX1 = x;
 func YY1 = y;
 
-int[int] rmesneg = [-1];
+// build the differents face of cube
 
-cout << "Th31h" << endl;
-mesh3 Th31h = movemesh2D3Dsurf(Th1,transfo=[XX1,YY1,ZZ1max], mesuremesh= rmesneg);
-savemesh(Th31h,"first_th31.mesh");
+mesh3 Th31h = movemesh2D3Dsurf(Th1,transfo=[XX1,YY1,ZZ1max]);
 
-cout << "Th31b" << endl;
-mesh3 Th31b = movemesh2D3Dsurf(Th1,transfo=[XX1,YY1,ZZ1min]); //, mesuremesh= rmespos);
+mesh3 Th31b = movemesh2D3Dsurf(Th1,transfo=[XX1,YY1,ZZ1min]);
 
-cout << "Th32h" << endl;
-mesh3 Th32h = movemesh2D3Dsurf(Th1,transfo=[XX1,ZZ1max,YY1]);  //, mesuremesh= rmesneg);
-cout << "Th32b" << endl;
-mesh3 Th32b = movemesh2D3Dsurf(Th1,transfo=[XX1,ZZ1min,YY1]); //, mesuremesh= rmespos);
+mesh3 Th32h = movemesh2D3Dsurf(Th1,transfo=[XX1,ZZ1max,YY1]);  
 
-cout << "Th33h" << endl;
-mesh3 Th33h = movemesh2D3Dsurf(Th1,transfo=[ZZ1max,XX1,YY1]);  //, mesuremesh= rmesneg);
-cout << "Th33b" << endl;
-mesh3 Th33b = movemesh2D3Dsurf(Th1,transfo=[ZZ1min,XX1,YY1]); //, mesuremesh= rmespos);
+mesh3 Th32b = movemesh2D3Dsurf(Th1,transfo=[XX1,ZZ1min,YY1]);
 
-cout << "glumesh3D" << endl;
-mesh3 Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b;
+mesh3 Th33h = movemesh2D3Dsurf(Th1,transfo=[ZZ1max,XX1,YY1]);  
 
+mesh3 Th33b = movemesh2D3Dsurf(Th1,transfo=[ZZ1min,XX1,YY1]); 
 
-int[int] methodetet=[1];
+mesh3 Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
 
-cout << "Thfinal" << endl;
-savemesh( Th33,"glumesh_cube_final.mesh");
-mesh3 Thfinal = tetg(Th33,methode=methodetet);
-savemesh( Thfinal,"remplissage_cube_final.mesh");
+mesh3 Thfinal = tetg(Th33,switch="pCQV");    // Tetrahelize the interior of the cube with tetgen
+
 
 func XXm =2*x;
 func YYm =y-1;

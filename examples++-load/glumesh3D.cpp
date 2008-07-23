@@ -63,6 +63,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   
   for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++)
     {
+
       Mesh3 &Th3(**i);  // definis ???
       th0=&Th3;
       if(verbosity>1)  cout << " determination of hmin : GluMesh3D + "<< Th3.nv << " " << Th3.nt << " "<< Th3.nbe << endl;
@@ -101,19 +102,107 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
      
   ffassert(hmin>Norme2(Pn-Px)/1e9);
   double hseuil =hmin/10.; 
+
+  // VERSION morice
+  cout << " creation of : BuildGTree" << endl;   
+  EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pn,Px,0);  
   
-  cout << " creation of : BuildGTree" << endl;
-  //th0->BuildBound();
-  //th0->BuildGTree();   
+  for(list<Mesh3 *>::const_iterator i=lth.begin(); i!=lth.end();i++)
+    {
+      const Mesh3 &Th3(**i);
+      if(verbosity>1)  cout << " loop over mesh for create new mesh "<< endl;
+      if(verbosity>1)  cout << " GluMesh3D + "<< Th3.nv << " " << Th3.nt <<" " << Th3.nbe << endl;
+      int nbv0 = nbv;
+      
+      for (int ii=0;ii<Th3.nv;ii++){
+	const Vertex3 &vi(Th3.vertices[ii]);
+	Vertex3 * pvi=gtree->ToClose(vi,hseuil);
+
+	   
+	if(!pvi){
+	  v[nbv].x = vi.x;
+	  v[nbv].y = vi.y;
+	  v[nbv].z = vi.z;
+	  v[nbv].lab = vi.lab;
+	  gtree->Add( v[nbv++] );
+	}
+      }
+	  
+      for (int k=0;k<Th3.nt;k++){
+	const Tet  &K(Th3.elements[k]);
+	int iv[4];
+	iv[0]=gtree->NearestVertex(K[0])-v;
+	iv[1]=gtree->NearestVertex(K[1])-v;
+	iv[2]=gtree->NearestVertex(K[2])-v;  //-v;
+	iv[3]=gtree->NearestVertex(K[3])-v;  //-v;
+	(tt++)->set(v,iv,K.lab);
+      }
+      /*
+	for (int k=0;k<Th3.nbe;k++)
+	{
+	const Triangle3 & K(Th3.be(k));//bedges[k]);
+	int iv[3];
+	iv[0]=gtree->NearestVertex(K[0])-v; //-v;
+	iv[1]=gtree->NearestVertex(K[1])-v; //-v;
+	iv[2]=gtree->NearestVertex(K[2])-v; //-v;
+	  
+	if( iv[2]<nbv0 && iv[1]<nbv0 && iv[0] < nbv0 ) continue;  // Faux
+	(bb++)->set(v,iv,K.lab);
+	nbe++;
+	  
+	}   
+      */
+    }
   
+  cout << " creation of : BuildGTree for border elements" << endl;
+  Vertex3  *becog= new Vertex3[nbex];  
+  EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog,Pn,Px,0);
   
-  //cout << " creation of : BuildGTree for border elements" << endl;
-  //Vertex3  *becog= new Vertex3[nbex];  
-  //EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog,Pn,Px,0);
-  
-  cout << " creation of : Mesh3 th3_tmp" << endl;
-  /*Mesh3 th3_tmp;
-    th3_tmp.set(nbvx,nbt,nbex);*/
+  double hseuil_border = hseuil/3.;
+	
+  for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++){
+    const Mesh3 &Th3(**i);
+      
+    for (int k=0;k<Th3.nbe;k++)
+      {
+	const Triangle3 & K(Th3.be(k));//bedges[k]);
+	int iv[3];
+	iv[0]=Th3.operator()(K[0]); //gtree->NearestVertex(K[0])-v; //-v;
+	iv[1]=Th3.operator()(K[1]); //gtree->NearestVertex(K[1])-v; //-v;
+	iv[2]=Th3.operator()(K[2]); //gtree->NearestVertex(K[2])-v; //-v;
+	
+	//assert( iv[2]<nbv && iv[1]<nbv && iv[0] < nbv );  
+	  
+	R cdgx,cdgy,cdgz;
+	  
+	cdgx = (Th3.vertices[iv[0]].x+ Th3.vertices[iv[1]].x+ Th3.vertices[iv[2]].x)/3.;
+	cdgy = (Th3.vertices[iv[0]].y+ Th3.vertices[iv[1]].y+ Th3.vertices[iv[2]].y)/3.;
+	cdgz = (Th3.vertices[iv[0]].z+ Th3.vertices[iv[1]].z+ Th3.vertices[iv[2]].z)/3.;
+	 
+	//cout << "cdg=" << cdgx << " " << cdgy << " " << cdgz << " "<<endl; 
+	const R3 r3vi( cdgx, cdgy, cdgz ); 
+	const Vertex3 &vi( r3vi);
+	    
+	Vertex3 * pvi=gtree_be->ToClose(vi,hseuil_border);
+	if(!pvi){
+	  becog[nbe].x = vi.x;
+	  becog[nbe].y = vi.y;
+	  becog[nbe].z = vi.z;
+	  becog[nbe].lab = vi.lab;
+	  gtree_be->Add( becog[nbe++]);
+		  
+	  int igluv[3];
+	  igluv[0]=gtree->NearestVertex(K[0])-v; //-v;
+	  igluv[1]=gtree->NearestVertex(K[1])-v; //-v;
+	  igluv[2]=gtree->NearestVertex(K[2])-v; //-v;
+		  
+	  (bb++)->set(v,igluv,K.lab);
+	}
+     }
+    
+  }
+  /*
+  // version hecht
   {  
     EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pn,Px,0);  
     typedef SortArray<int,3>  SortFace;
@@ -169,67 +258,14 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 	    if(bbe.find(sbe)) continue;
 	    //if( iv[2]<nbv0 && iv[1]<nbv0 && iv[0] < nbv0 ) continue;  // Faux
 	    (bb++)->set(v,iv,K.lab);
-	      nbe++;
+	    nbe++;
 	      
 	  }   
 	cout << "nbe="<<nbe<<endl;   
-	// Remarque on a besoin 
-	
       }
-      delete gtree;
+  
+    delete gtree;
   }
-   /* 
-  if(0) 
-    {// old code  ..
-      cout << " creation of : BuildGTree for border elements" << endl;
-      Vertex3  *becog= new Vertex3[nbex];  
-      EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog,Pn,Px,0);
-      
-      double hseuil_border = hseuil/3.;
-      
-      for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++){
-	const Mesh3 &Th3(**i);
-	
-	for (int k=0;k<Th3.nbe;k++)
-	  {
-	    const Triangle3 & K(Th3.be(k));//bedges[k]);
-	    int iv[3];
-	    iv[0]=Th3.operator()(K[0]); //gtree->NearestVertex(K[0])-v; //-v;
-	    iv[1]=Th3.operator()(K[1]); //gtree->NearestVertex(K[1])-v; //-v;
-	    iv[2]=Th3.operator()(K[2]); //gtree->NearestVertex(K[2])-v; //-v;
-	    
-	    //assert( iv[2]<nbv && iv[1]<nbv && iv[0] < nbv );  
-	    
-	    R cdgx,cdgy,cdgz;
-	    
-	    cdgx = (Th3.vertices[iv[0]].x+ Th3.vertices[iv[1]].x+ Th3.vertices[iv[2]].x)/3.;
-	    cdgy = (Th3.vertices[iv[0]].y+ Th3.vertices[iv[1]].y+ Th3.vertices[iv[2]].y)/3.;
-	    cdgz = (Th3.vertices[iv[0]].z+ Th3.vertices[iv[1]].z+ Th3.vertices[iv[2]].z)/3.;
-	    
-	    //cout << "cdg=" << cdgx << " " << cdgy << " " << cdgz << " "<<endl; 
-	    const R3 r3vi( cdgx, cdgy, cdgz ); 
-	    const Vertex3 &vi( r3vi);
-	    
-	    Vertex3 * pvi=gtree_be->ToClose(vi,hseuil_border);
-	    if(!pvi){
-	      becog[nbe].x = vi.x;
-	      becog[nbe].y = vi.y;
-	      becog[nbe].z = vi.z;
-	      becog[nbe].lab = vi.lab;
-	      gtree_be->Add( becog[nbe++]);
-	      
-	      int igluv[3];
-	      igluv[0]=gtree->NearestVertex(K[0])-v; //-v;
-	      igluv[1]=gtree->NearestVertex(K[1])-v; //-v;
-	      igluv[2]=gtree->NearestVertex(K[2])-v; //-v;
-	      
-	      (bb++)->set(v,igluv,K.lab);
-	    }
-	  }
-	
-      }
-      //delete th0;
-    }
   */
   
   if(verbosity>1)
@@ -237,6 +273,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
       cout << "     Nb of glu3D  point " << nbvx-nbv;
       cout << "     Nb of glu3D  Boundary faces " << nbex-nbe << endl;
     }
+
   cout << " nbv="  << nbv  << endl;
   cout << " nbvx=" << nbvx << endl;
   cout << " nbt="  << nbt  << endl;
@@ -294,7 +331,7 @@ class Movemesh3D_Op : public E_F0mps
 public:
   Expression eTh;
   Expression xx,yy,zz;
-  static const int n_name_param =3; // 
+  static const int n_name_param =4; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
@@ -312,7 +349,7 @@ public:
  
     if(a1) {
       if(a1->size() !=3) 
-      CompileError("Build2D3D (Th,transfo=[X,Y,Z],) ");
+      CompileError("movemesh3D (Th,transfo=[X,Y,Z],) ");
       xx=to<double>( (*a1)[0]);
       yy=to<double>( (*a1)[1]);
       zz=to<double>( (*a1)[2]);
@@ -325,19 +362,8 @@ public:
 basicAC_F0::name_and_type Movemesh3D_Op::name_param[]= {
   {  "transfo", &typeid(E_Array)},
   {  "reftet", &typeid(KN_<long> )},
-  {  "refface", &typeid(KN_<long> )}
-  
-};
-
-
-class  Movemesh3D : public OneOperator { public:  
-    Movemesh3D() : OneOperator(atype<pmesh3>(),atype<pmesh3>()) {}
-  
-  E_F0 * code(const basicAC_F0 & args) const 
-  {
-	cout << " je suis dans code(const basicAC_F0 & args) const" << endl;
-	return  new Movemesh3D_Op(args,t[0]->CastTo(args[0])); 
-  }
+  {  "refface", &typeid(KN_<long> )},
+  {  "ptmerge", &typeid(double)}
 };
 
 AnyType Movemesh3D_Op::operator()(Stack stack)  const 
@@ -358,8 +384,8 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   KN<long> zzempty;
   KN<long> nrtet  (arg(1,stack,zzempty));  
   KN<long> nrf (arg(2,stack,zzempty)); 
-
-  cout << nrtet.N() << nrf.N() << endl;
+  double precis_mesh( arg(3,stack,1e-7));
+  cout << nrtet.N() <<" " << nrf.N() << endl;
   
   //if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
   ffassert( nrtet.N() %2 ==0);
@@ -368,48 +394,62 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
 
   // realisation de la map par default
   
-    assert((xx) && (yy) && (zz) );
+  assert((xx) && (yy) && (zz) );
   
-	KN<double> txx(Th.nv), tyy(Th.nv), tzz(Th.nv);
-	Mesh3 &rTh3 = Th;
-	{
-	KN<int> takemesh(Th.nv);
-	MeshPoint *mp3(MeshPointStack(stack)); 
-	  
-	takemesh=0;
-	for (int it=0;it<Th.nt;++it){
-		  for( int iv=0; iv<4; ++iv){
-			   int i=Th(it,iv);  
-				if(takemesh[i]==0){
-					mp3->setP(&rTh3,it,iv);
-					if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
-					if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
-					if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
-					takemesh[i] = takemesh[i]+1;
-				}
-			}
-		}
-	}
-	
-	int border_only = 0;
-	int recollement_elem=0, recollement_border=1, point_confondus_ok=0;
-	Mesh3 *T_Th3=Transfo_Mesh3( rTh3, txx, tyy, tzz, border_only, 
-		recollement_elem, recollement_border, point_confondus_ok);
-	  
-	/*  changement de label   */
-	
-	
-	T_Th3->BuildBound();
-	T_Th3->BuildAdj();
-	T_Th3->Buildbnormalv();  
-	T_Th3->BuildjElementConteningVertex();
-	T_Th3->BuildGTree();
-	//	T_Th3->decrement();  
-	Add2StackOfPtr2FreeRC(stack,T_Th3);
+  KN<double> txx(Th.nv), tyy(Th.nv), tzz(Th.nv);
   
-	*mp=mps;
-	return T_Th3;
+  Mesh3 &rTh3 = Th;
+ 
+  KN<int> takemesh(Th.nv);
+  MeshPoint *mp3(MeshPointStack(stack)); 
+  
+  takemesh=0;
+  for (int it=0;it<Th.nt;++it){
+    for( int iv=0; iv<4; ++iv){
+      int i=Th(it,iv);  
+      
+      if(takemesh[i]==0){
+	mp3->setP(&Th,it,iv);
+	if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
+	if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
+	if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
+	
+	takemesh[i] = takemesh[i]+1;
+      }
+    }
+  }
+  
+	
+  int border_only = 0;
+  int recollement_elem=0, recollement_border=1, point_confondus_ok=0;
+  Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh,rTh3, txx, tyy, tzz, border_only, 
+			      recollement_elem, recollement_border, point_confondus_ok);
+	  
+  /*  changement de label   */
+	
+  if(nbt != 0)
+    {
+      T_Th3->BuildBound();
+      T_Th3->BuildAdj();
+      T_Th3->Buildbnormalv();  
+      T_Th3->BuildjElementConteningVertex();
+      T_Th3->BuildGTree();
+      //	T_Th3->decrement();  
+      Add2StackOfPtr2FreeRC(stack,T_Th3);
+    }
+      *mp=mps;
+      return T_Th3;
 }
+
+class  Movemesh3D : public OneOperator { public:  
+    Movemesh3D() : OneOperator(atype<pmesh3>(),atype<pmesh3>()) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  {
+	cout << " je suis dans code(const basicAC_F0 & args) const" << endl;
+	return  new Movemesh3D_Op(args,t[0]->CastTo(args[0])); 
+  }
+};
 
 //// version 3D de change label
 
@@ -548,8 +588,7 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
   mpq->BuildjElementConteningVertex(); 
   mpq->BuildGTree();
   //mpq->decrement();
-  Add2StackOfPtr2FreeRC(stack,mpq);
-
+  Add2StackOfPtr2FreeRC(stack,mpq);  
   
   return mpq;
 }
@@ -574,17 +613,17 @@ class Movemesh2D_3D_surf_Op : public E_F0mps
 public:
   Expression eTh;
   Expression xx,yy,zz; 
-  static const int n_name_param =3; //  add nbiter FH 30/01/2007 11 -> 12 
+  static const int n_name_param =4; //  add nbiter FH 30/01/2007 11 -> 12 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
-
-  
+  int arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny<int>( (*nargs[i])(stack) ): a;}
+  double arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
 public:
   Movemesh2D_3D_surf_Op(const basicAC_F0 &  args,Expression tth) : 
   eTh(tth),xx(0),yy(0),zz(0) 
   {
-  
+
     args.SetNameParam(n_name_param,name_param,nargs);
     
     const E_Array * a1=0 ;
@@ -606,8 +645,9 @@ public:
 
 basicAC_F0::name_and_type Movemesh2D_3D_surf_Op::name_param[]= {
   {  "transfo", &typeid(E_Array )},
+  {  "mesuremesh", &typeid(long)},
   {  "refface", &typeid(KN_<long>)},
-  {  "mesuremesh", &typeid(KN_<long>)}
+  {  "ptmerge", &typeid(double)}
 };
 
 AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const 
@@ -622,8 +662,10 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
   cout << "Vertex Triangle Edge"<< nbv << nbt << nbe << endl;  
   
   KN<long> zzempty;
-  KN<long> nrface (arg(1,stack,zzempty));
-  KN<long> mesuremesh (arg(2,stack,zzempty));
+  //int intempty=0;
+  int mesureM (arg(1,stack,0));
+  KN<long> nrface (arg(2,stack,zzempty));
+  double precis_mesh(arg(3,stack,-1));
   
   
   if(nrface.N()<0 ) return m;
@@ -641,8 +683,8 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
     }
   
   int surface_orientation=1; 
-  if( mesuremesh.N() >0  && mesuremesh[0] > 0){
-	  surface_orientation=-1;
+  if( mesureM <0 ){
+    surface_orientation=-1;
   }
         
 
@@ -650,27 +692,27 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
   MeshPoint *mp3(MeshPointStack(stack)); 
   
   {
-	KN<int> takemesh(nbv);  
-	takemesh=0;  
-	Mesh &rTh = Th;
-	for (int it=0; it<nbt; ++it){
-		  for( int iv=0; iv<3; ++iv){
-				int i=Th(it,iv);
-				if(takemesh[i]==0){
-					mp3->setP(&Th,it,iv);
-					if(xx){ 
-						txx[i]=GetAny<double>((*xx)(stack));
-					}
-					if(yy){ 
-						tyy[i]=GetAny<double>((*yy)(stack));
-					}
-					if(zz){ 
-						tzz[i]=GetAny<double>((*zz)(stack));
-					}
-					takemesh[i] = takemesh[i]+1;
-				}
-			}
-		}
+    KN<int> takemesh(nbv);  
+    takemesh=0;  
+    Mesh &rTh = Th;
+    for (int it=0; it<nbt; ++it){
+      for( int iv=0; iv<3; ++iv){
+	int i=Th(it,iv);
+	if(takemesh[i]==0){
+	  mp3->setP(&Th,it,iv);
+	  if(xx){ 
+	    txx[i]=GetAny<double>((*xx)(stack));
+	  }
+	  if(yy){ 
+	    tyy[i]=GetAny<double>((*yy)(stack));
+	  }
+	  if(zz){ 
+	    tzz[i]=GetAny<double>((*zz)(stack));
+	  }
+	  takemesh[i] = takemesh[i]+1;
+	}
+      }
+    }
   }
   
   Mesh3 *Th3= new Mesh3;
@@ -678,85 +720,85 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
   int vertex_out=1;
   
   if( vertex_out == 1){
-	/* determinate the same vertex */ 
-	int border_only = 0;
-	int recollement_border=1, point_confondus_ok=0;
+    /* determinate the same vertex */ 
+    int border_only = 0;
+    int recollement_border=1, point_confondus_ok=0;
 
-	// faire version de Transfo_Mesh2_tetgen pour ce cas précis.
-	Th3= MoveMesh2_func( Th, txx, tyy, tzz, 
-		border_only, recollement_border, point_confondus_ok);
+    // faire version de Transfo_Mesh2_tetgen pour ce cas précis.
+    Th3= MoveMesh2_func( precis_mesh, Th, txx, tyy, tzz, 
+			 border_only, recollement_border, point_confondus_ok);
 	
-	// Rajouter fonction flip a l interieure
+    // Rajouter fonction flip a l interieure
 	
-	for(int ii=0; ii < Th3->nbe; ii++){
+    for(int ii=0; ii < Th3->nbe; ii++){
 		
-		const Triangle3 & K(Th3->be(ii)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
-		int iv[3];
-		int lab;
-		double mes_triangle3;
+      const Triangle3 & K(Th3->be(ii)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
+      int iv[3];
+      int lab;
+      double mes_triangle3;
 		
-		iv[0] = Th3->operator()(K[0]);
-		iv[1] = Th3->operator()(K[1]);
-		iv[2] = Th3->operator()(K[2]);
+      iv[0] = Th3->operator()(K[0]);
+      iv[1] = Th3->operator()(K[1]);
+      iv[2] = Th3->operator()(K[2]);
 		
-		map< int, int>:: const_iterator imap;
-		imap = mapface.find(K.lab); 
+      map< int, int>:: const_iterator imap;
+      imap = mapface.find(K.lab); 
 		
-		if(imap!= mapface.end()){
-			 lab=imap->second;
-		} 
-		else{
-			lab=K.lab;
-		}
+      if(imap!= mapface.end()){
+	lab=imap->second;
+      } 
+      else{
+	lab=K.lab;
+      }
 		
-		Th3->be(ii).set( Th3->vertices, iv, lab ) ;
-		mes_triangle3 = Th3->be(ii).mesure();
+      Th3->be(ii).set( Th3->vertices, iv, lab ) ;
+      mes_triangle3 = Th3->be(ii).mesure();
 		
-		if( surface_orientation*mes_triangle3 < 0){
-			int iv_temp=iv[1];
-			iv[1]=iv[2];
-			iv[2]=iv_temp;
-			Th3->be(ii).set( Th3->vertices, iv, lab ) ;
-		}
+      if( surface_orientation*mes_triangle3 < 0){
+	int iv_temp=iv[1];
+	iv[1]=iv[2];
+	iv[2]=iv_temp;
+	Th3->be(ii).set( Th3->vertices, iv, lab ) ;
+      }
 		
-		/* autre methode a tester */
-		/*
-		Triangle3 Kmes;
-		Kmes.set( Th3->vertices, iv, lab ) ;
-		mes_triangle3 = Kmes.mesure();
-		if( surface_orientation*mes_triangle3) < 0){
-			int iv_temp=iv[1];
-			iv[1]=iv[2];
-			iv[2]=iv_temp;
-		}
-		Th3->be(ii).set( Th3->vertices, iv, lab ) ;
-		*/
+      /* autre methode a tester */
+      /*
+	Triangle3 Kmes;
+	Kmes.set( Th3->vertices, iv, lab ) ;
+	mes_triangle3 = Kmes.mesure();
+	if( surface_orientation*mes_triangle3) < 0){
+	int iv_temp=iv[1];
+	iv[1]=iv[2];
+	iv[2]=iv_temp;
 	}
+	Th3->be(ii).set( Th3->vertices, iv, lab ) ;
+      */
+    }
   }
   
   if( vertex_out == 0){
 	  
-	  Tet       *t;
-	  Vertex3   *v = new Vertex3[nbv];
-	  Triangle3 *b = new Triangle3[nbe];
-	  // generation des nouveaux sommets 
-	  Vertex3 *vv=v;
-	 // copie des anciens sommets (remarque il n'y a pas operateur de copy des sommets)
-	  for (int i=0;i<nbv;i++)
-	  {
-		  const Mesh::Vertex & V( Th.vertices[i]);
-		  vv->x = txx[i];
-		  vv->y = tyy[i];
-		  vv->z = tzz[i];
-		  vv->lab = V.lab;
-		  vv++;      
-	  }
+    Tet       *t;
+    Vertex3   *v = new Vertex3[nbv];
+    Triangle3 *b = new Triangle3[nbe];
+    // generation des nouveaux sommets 
+    Vertex3 *vv=v;
+    // copie des anciens sommets (remarque il n'y a pas operateur de copy des sommets)
+    for (int i=0;i<nbv;i++)
+      {
+	const Mesh::Vertex & V( Th.vertices[i]);
+	vv->x = txx[i];
+	vv->y = tyy[i];
+	vv->z = tzz[i];
+	vv->lab = V.lab;
+	vv++;      
+      }
  
-	// les arete frontieres qui n'ont pas change
+    // les arete frontieres qui n'ont pas change
   
-	  Triangle3 * bb=b;
-	  for (int i=0;i<nbt;i++)
-	  { 
+    Triangle3 * bb=b;
+    for (int i=0;i<nbt;i++)
+      { 
       	const Mesh::Triangle &K( Th.t(i) );
       	int iv[3];       
     
@@ -764,13 +806,13 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
       	iv[1] = Th.operator()(K[1]);
       	iv[2] = Th.operator()(K[2]);
       	
-      // calcul de la mesure 
-      //  inversement si on a besoin    
+	// calcul de la mesure 
+	//  inversement si on a besoin    
       
       	(*bb++).set( v, iv, K.lab);
       }
       
-      Th3 = new Mesh3(nbv,0,nbt,v,t,b);  
+    Th3 = new Mesh3(nbv,0,nbt,v,t,b);  
       
   }
   
