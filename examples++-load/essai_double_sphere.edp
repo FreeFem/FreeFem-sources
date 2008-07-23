@@ -1,0 +1,80 @@
+// file heatex.edp
+load "glumesh2D"
+load "glumesh3D"
+load "tetgen"
+load "buildlayer"
+
+// Test 1
+
+int C1=1, C2=1; // could be anything
+
+border C01(t=0,pi){ x=t;  y=0;      label=1;}
+border C02(t=0,2*pi){ x=pi; y=t;  label=1;}
+border C03(t=0,pi){ x=pi-t;  y=2*pi;    label=1;}
+border C04(t=0,2*pi){ x=0;    y=2*pi-t; label=1;}
+
+
+border C11(t=0,0.7){ x=0.5+t;  y=2.5;      label=C1;}
+border C12(t=0,2){ x=1.2;    y=2.5+t;  label=C1;}
+border C13(t=0,0.7){ x=1.2-t;  y=4.5;     label=C1;}
+border C14(t=0,2){ x=0.5;    y=4.5-t; label=C1;}
+
+
+border C21(t=0,0.7){ x= 2.3+t;     y=2.5;  label=C2;}
+border C22(t=0,2){        x=3;   y=2.5+t;  label=C2;}
+border C23(t=0,0.7){   x=3-t;     y=4.5;  label=C2;}
+border C24(t=0,2){       x=2.3;   y=4.5-t; label=C2;}
+
+mesh Th=buildmesh(    C01(10)+C02(10)+ C03(10)+C04(10)
+                    + C11(5)+C12(5)+C13(5)+C14(5) 
+                    + C21(-5)+C22(-5)+C23(-5)+C24(-5));
+
+mesh Ths=buildmesh(    C01(20)+C02(20)+ C03(20)+C04(20) );
+                    //+ C11(5)+C12(5)+C13(5)+C14(5) );
+                    
+savemesh(Th,"2domaine_th2.mesh");
+
+// version sphere
+real Rmin = 1.;
+func XX1 = cos(y)*sin(x);
+func YY1 = sin(y)*sin(x);
+func ZZ1 = cos(x);
+
+int pos =1;
+int neg =-1;
+
+mesh3 Th3sph=movemesh2D3Dsurf(Ths,transfo=[XX1,YY1,ZZ1],mesuremesh=neg);
+//savemesh(Th3sph,"sphere_1.mesh"); 
+// version sphere
+
+real Rmax = 2.;
+func XX2 = Rmax*cos(y)*sin(x);
+func YY2 = Rmax*sin(y)*sin(x);
+func ZZ2 = Rmax*cos(x);
+
+mesh3 Th3sph2=movemesh2D3Dsurf(Ths,transfo=[XX2,YY2,ZZ2],mesuremesh=pos);
+//savemesh(Th3sph2,"sphere_2.mesh"); 
+
+cout << "addition" << endl;
+mesh3 Th3trou=Th3sph+Th3sph2;
+
+real[int] domaine2 =[1.5,0.,0.,145,0.01,0.5,0.,0.,18,0.01];
+cout << "==============================" << endl;
+cout << " appele de tetgen : pas trou  " << endl;
+cout << "==============================" << endl;
+mesh3 Th3fin=tetg(Th3trou,switch="paAACCQ",nbofregions=2,regionlist=domaine2);
+cout << "=============================" << endl;
+cout << " appele de tetgen : pas trou " << endl;
+cout << "=============================" << endl;
+savemesh(Th3fin,"sphere_sanstrou.mesh"); 
+
+real[int] trou=[0.,0.,0.];
+real[int] domaine =[1.5,0.,0.,53,0.01];
+cout << "=============================" << endl;
+cout << " appele de tetgen : trou     " << endl;
+cout << "=============================" << endl;
+mesh3 Th3fin1=tetg(Th3trou,switch="pqAAQYY",nbofholes=1,holelist=trou,nbofregions=1,regionlist=domaine);
+//cout << "=============================" << endl;
+//cout << " appele de tetgen : trou     " << endl;
+//cout << "=============================" << endl;
+savemesh(Th3fin1,"sphere_avectrou.mesh"); 
