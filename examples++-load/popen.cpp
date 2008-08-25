@@ -134,6 +134,21 @@ basicAC_F0::name_and_type PopenMeditMesh_Op::name_param[]= {
   {  "order", &typeid(long)}
 };
 
+static char * meditcmd(int nbsol,const string &  ffnn)
+{
+  string  meditcmm=medit_char;
+  meditcmm += ' ';
+  meditcmm += medit_popen;
+  if(nbsol) 
+    {
+      meditcmm += ' ';
+      meditcmm += medit_addsol;
+    }
+  meditcmm += " 1 ";
+  char * ret= new char[meditcmm.size()+1];
+  strcpy( ret, meditcmm.c_str()); 
+  return ret;
+}
 AnyType PopenMeditMesh_Op::operator()(Stack stack)  const 
 {
 
@@ -157,19 +172,10 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
   //  const char *medit_char= "medit-2.3-win.exeCC -popen 1";  // depend de l endroit ou se trouve medit
   //  const char *medit_charsol= "medit-2.3-win.exeCC -popen -addsol 1";
 
-  char commandline[500];
-  long valsortie=0;
-  int typsol,nbsol;
-
   string * ffname= GetAny<string *>( (*filename)(stack) );
-  size_t size_ffname = ffname->size()+1;
-  char* medit_name =new char[size_ffname];
-  strncpy( medit_name, ffname->c_str(), size_ffname); 
-
-  if(sol==0)
-    snprintf(commandline,500,"%s %s 1 %s",medit_char,medit_popen,medit_name);
-  else
-    snprintf(commandline,500,"%s %s %s 1 %s",medit_char,medit_popen,medit_sol,medit_name);
+  char * commandline = meditcmd(sol,*ffname);
+  long valsortie=0;
+  int typsol,nbsol=sol;
 
   printf("version de medit %s\n",commandline);
 
@@ -367,6 +373,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
   }
   // fermeture du stream pour popen
   fclose(popenstream);
+  delete [] commandline; 
   return valsortie;
 }
 
@@ -477,19 +484,10 @@ AnyType PopenMeditMesh2ALL::PopenMeditMesh2ALL_Op::operator()(Stack stack)  cons
   float fx,fy;
 
   
-  char commandline[500];
+  //  string * ffname= GetAny<string *>( (*filename)(stack) );
+  char * commandline = meditcmd(sol,*ffname);
   long valsortie=0;
-  
-  int typsol,nbsol;
-
-  size_t size_ffname = ffname->size()+1;
-  char* medit_name =new char[size_ffname];
-  strncpy( medit_name, ffname->c_str(), size_ffname); 
-
-  if(sol==0)
-    snprintf(commandline,500,"%s %s",medit_char,medit_name);
-  else
-    snprintf(commandline,500,"%s %s",medit_charsol,medit_name);
+  int typsol,nbsol=sol;
     
   FILE *popenstream= popen(commandline,"w");
 
@@ -755,6 +753,7 @@ AnyType PopenMeditMesh2ALL::PopenMeditMesh2ALL_Op::operator()(Stack stack)  cons
   
   // fermeture du stream pour popen
   fclose(popenstream);
+  delete [] commandline; 
   return valsortie;
 }
 
@@ -1371,22 +1370,29 @@ AnyType PopenMeditMesh3_Op::operator()(Stack stack)  const
   // char *medit_char= "medit-2.3-win.exeCC -popen 1";  // depend de l endroit ou se trouve medit
   //char *medit_charsol= "medit-2.3-win.exeCC -popen -addsol 1";
   
-  char commandline[500];
-  long valsortie=0;
-  int typsol,nbsol;
+ //  char commandline[500];
+//   long valsortie=0;
+//   int typsol,nbsol;
+
+//   string * ffname= GetAny<string *>( (*filename)(stack) );
+//   size_t size_ffname = ffname->size()+1;
+//   char* medit_name =new char[size_ffname];
+//   strncpy( medit_name, ffname->c_str(), size_ffname); 
+
+//   if(sol==0)
+//     snprintf(commandline,500,"%s %s",medit_char,medit_name);
+//   else
+//     snprintf(commandline,500,"%s %s",medit_charsol,medit_name);
+    
+//   printf("version de medit %s :::  Vertices%i\n",commandline,nv);
+  
+//   FILE *popenstream= popen(commandline,"w");
 
   string * ffname= GetAny<string *>( (*filename)(stack) );
-  size_t size_ffname = ffname->size()+1;
-  char* medit_name =new char[size_ffname];
-  strncpy( medit_name, ffname->c_str(), size_ffname); 
-
-  if(sol==0)
-    snprintf(commandline,500,"%s %s",medit_char,medit_name);
-  else
-    snprintf(commandline,500,"%s %s",medit_charsol,medit_name);
+  char * commandline = meditcmd(sol,*ffname);
+  long valsortie=0;
+  int typsol,nbsol=sol;
     
-  printf("version de medit %s :::  Vertices%i\n",commandline,nv);
-  
   FILE *popenstream= popen(commandline,"w");
 
   fprintf(popenstream,"MeshVersionFormatted\n");
@@ -1519,6 +1525,7 @@ AnyType PopenMeditMesh3_Op::operator()(Stack stack)  const
   
   // fermeture du stream pour popen
   fclose(popenstream);
+  delete [] commandline; 
   return valsortie;
 }
 
@@ -1636,21 +1643,30 @@ AnyType PopenMeditMesh3ALL<v_fes>::PopenMeditMesh3ALL_Op::operator()(Stack stack
   // char *medit_char= "medit-2.3-win.exeCC -popen 1";  // depend de l endroit ou se trouve medit
   //  char *medit_charsol= "medit-2.3-win.exeCC -popen -addsol 1";
   
-  char commandline[500];
-  long valsortie=0;
+//   char commandline[500];
+//   long valsortie=0;
   
-  int typsol,nbsol;
+//   int typsol,nbsol;
 
-  size_t size_ffname = ffname->size()+1;
-  char* medit_name =new char[size_ffname];
-  strncpy( medit_name, ffname->c_str(), size_ffname); 
+//   size_t size_ffname = ffname->size()+1;
+//   char* medit_name =new char[size_ffname];
+//   strncpy( medit_name, ffname->c_str(), size_ffname); 
 
-  if(sol==0)
-    snprintf(commandline,500,"%s %s",medit_char,medit_name);
-  else
-    snprintf(commandline,500,"%s %s",medit_charsol,medit_name);
+//   if(sol==0)
+//     snprintf(commandline,500,"%s %s",medit_char,medit_name);
+//   else
+//     snprintf(commandline,500,"%s %s",medit_charsol,medit_name);
+    
+//   FILE *popenstream= popen(commandline,"w");
+
+
+//  string * ffname= GetAny<string *>( (*filename)(stack) );
+  char * commandline = meditcmd(sol,*ffname);
+  long valsortie=0;
+  int typsol,nbsol=sol;
     
   FILE *popenstream= popen(commandline,"w");
+
   fprintf(popenstream,"%s\n",ffname->c_str());
   fprintf(popenstream,"MeshVersionFormatted\n");
   fprintf(popenstream,"%i\n",ver);
@@ -1926,6 +1942,7 @@ AnyType PopenMeditMesh3ALL<v_fes>::PopenMeditMesh3ALL_Op::operator()(Stack stack
   
   // fermeture du stream pour popen
   fclose(popenstream);
+  delete [] commandline; 
   return valsortie;
 }
 
