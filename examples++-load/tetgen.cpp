@@ -65,6 +65,12 @@ Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,
 				 const int & nbregion, const double *tabregion, 
 				 const int &nbfacecl, const double *tabfacecl);
 
+Mesh3 *  ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3, 
+				     const int &nbhole, const double *tabhole, 
+				     const int & nbregion, const double *tabregion, 
+		                     const int &nbfacecl, const double *tabfacecl, const double *tsizevol);
+
+
 class Build2D3D_Op : public E_F0mps 
 {
 public:
@@ -145,7 +151,7 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   cout <<" == Build2D_3D_Op==" << endl;
  
   KN<long> zzempty;
-  string  stringempty = string("pqYQC");
+  string  stringempty = string("pqaAAYCQ");
   string* switch_tet= (arg(1,stack,&stringempty));  
   int label_tet(arg(2,stack,0));  
   KN<long> nrf (arg(3,stack,zzempty));
@@ -291,9 +297,11 @@ void mesh3_tetgenio_out(const tetgenio &out, Mesh3 & Th3)
     iv[2] = out.tetrahedronlist[i+2]-1;
     iv[3] = out.tetrahedronlist[i+3]-1;
     //lab   = label_tet;
-
+    for(int jj=0; jj<4; jj++){
+      assert( iv[jj] >=0 && iv[jj] <Th3.nv );
+    }
     //cout << "nnt= " <<  nnt << " " << lab  << " " << out.tetrahedronattributelist[nnt] << endl;
-    lab = out.tetrahedronattributelist[nnt];
+    lab =  out.tetrahedronattributelist[nnt];
     //cout << "nnt= " <<  lab  << " " << out.tetrahedronattributelist[nnt] << endl;
       
     Th3.elements[nnt].set( Th3.vertices, iv, lab);
@@ -305,6 +313,10 @@ void mesh3_tetgenio_out(const tetgenio &out, Mesh3 & Th3)
     iv[0] = out.trifacelist[3*ibe]-1;
     iv[1] = out.trifacelist[3*ibe+1]-1;
     iv[2] = out.trifacelist[3*ibe+2]-1; 
+    for(int jj=0; jj<3; jj++){
+      if(iv[jj]>= Th3.nv || iv[jj]< 0 ) cout << "iv[jj]=" << iv[jj] << " triangle" << ibe << endl;
+      assert( iv[jj] >=0 && iv[jj] <Th3.nv );
+    }
     Th3.be(ibe).set( Th3.vertices, iv, out.trifacemarkerlist[ibe]);
   }
 
@@ -914,7 +926,202 @@ Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,
   return T_Th3;
 }
 
+// Fonction Refine avec tetgen
 
+Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3, 
+				     const int &nbhole, const double *tabhole, 
+				     const int & nbregion, const double *tabregion, 
+				     const int &nbfacecl, const double *tabfacecl, const double *tsizevol){
+
+  // verif option refine
+  int i;
+  Mesh3 *T_Th3= new Mesh3;	
+  assert(Th3.nt != 0 );
+  {
+    size_t testr, testp;
+    int lenswitch;
+    const char* test_tetgen = switch_tetgen;
+    
+    testr = strcspn(test_tetgen,"r");
+    testp = strcspn(test_tetgen,"p");
+    cout << "switch_tetgen=" << switch_tetgen << endl;
+    cout << "testr=" << testr  <<" testp="<< testp <<  endl;
+    cout << "strlen(test_tetgen)" << strlen(test_tetgen) << endl; 
+    if( testr == strlen(test_tetgen) )
+      { 
+	cout << "The option 'r' of tetgen is not used" << endl;
+	exit(1);
+      }
+    testp = strcspn(test_tetgen,"p");
+    if( testp != strlen(test_tetgen) )
+      { 
+	cout << "With TetGen :: the option 'p' is not possible to use with option 'r' " << endl;
+	exit(1);
+      }
+  }
+
+  int nv_t = Th3.nv;
+  int nt_t = Th3.nt;
+  int nbe_t = Th3.nbe;
+	
+  cout << "3D RemplissageSurf3D:: Vertex  triangle2  border " 
+       << nv_t << " "<< nt_t << " " << nbe_t<< endl;
+  // Creation des tableau de tetgen
+	
+  tetgenio in,out;
+  //tetgenio::facet *f;
+  //tetgenio::polygon *p;
+	
+  cout << " tetgenio: vertex " << endl;
+  int itet,jtet;
+  // All indices start from 1.
+  in.firstnumber = 1;
+  in.numberofpoints = nv_t;
+  in.pointlist = new REAL[in.numberofpoints*3];
+  in.pointmarkerlist = new int[in.numberofpoints];
+  itet=0;
+  jtet=0;
+  for(int nnv=0; nnv < nv_t; nnv++)
+    {
+      in.pointlist[itet]   = Th3.vertices[nnv].x;
+      in.pointlist[itet+1] = Th3.vertices[nnv].y;
+      in.pointlist[itet+2] = Th3.vertices[nnv].z;       
+      in.pointmarkerlist[nnv] =  Th3.vertices[nnv].lab;   
+      itet=itet+3;
+    }
+  assert(itet==in.numberofpoints*3);
+
+  // Tetrahedrons
+  cout << "tetrahedrons" << endl;
+  in.numberofcorners = 4;
+  in.numberoftetrahedra = Th3.nt;
+  in.tetrahedronlist = new int[in.numberofcorners*in.numberoftetrahedra];
+  in.numberoftetrahedronattributes = 1;
+  in.tetrahedronattributelist = new REAL[in.numberoftetrahedronattributes*in.numberoftetrahedra];
+  
+  in.tetrahedronvolumelist = new REAL[in.numberoftetrahedra];
+
+  i=0;
+  for(int nnt=0; nnt < Th3.nt; nnt++){
+    const Tet & K(Th3.elements[nnt]);
+
+    in.tetrahedronlist[i]   = Th3.operator()(K[0])+1;
+    in.tetrahedronlist[i+1] = Th3.operator()(K[1])+1;
+    in.tetrahedronlist[i+2] = Th3.operator()(K[2])+1;
+    in.tetrahedronlist[i+3] = Th3.operator()(K[3])+1;
+
+    /*
+    if( Th3.vertices[Th3.operator()(K[0])].y > 3.14) {
+    in.tetrahedronvolumelist[nnt] = 0.001;
+    }
+    else{
+    in.tetrahedronvolumelist[nnt] = 0.01;
+    }
+    */
+    
+    in.tetrahedronvolumelist[nnt] = tsizevol[nnt];
+
+    in.tetrahedronattributelist[nnt] = K.lab;
+    
+    i=i+4;
+  }
+
+  
+  cout << "lecture des facettes" << endl;
+  in.numberoftrifaces = Th3.nbe;
+  in.trifacelist = new int[3*in.numberoftrifaces];
+  in.trifacemarkerlist = new int[in.numberoftrifaces];
+
+  for(int ibe=0; ibe < Th3.nbe; ibe++){
+    const Triangle3 & K(Th3.be(ibe));
+    
+    in.trifacelist[3*ibe]   = Th3.operator()(K[0])+1;
+    in.trifacelist[3*ibe+1] = Th3.operator()(K[1])+1;
+    in.trifacelist[3*ibe+2] = Th3.operator()(K[2])+1; 					      
+    in.trifacemarkerlist[ibe] = K.lab;
+
+  }
+  
+  
+  /*
+  cout << " tetgenio: facet " << endl;
+  // Version avec des facettes
+
+  in.numberoffacets = nbe_t;
+  in.facetlist = new tetgenio::facet[in.numberoffacets];
+  in.facetmarkerlist = new int[in.numberoffacets];
+	  
+  for(int ibe=0; ibe < nbe_t; ibe++){
+    tetgenio::facet *f;
+    tetgenio::polygon *p;
+    f = &in.facetlist[ibe];
+    f->numberofpolygons = 1;
+    f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
+    f->numberofholes = 0;
+    f->holelist = NULL;
+		
+    p = &f->polygonlist[0];
+    p->numberofvertices = 3;
+    p->vertexlist = new int[3];
+		
+    // creation of elements
+    const Triangle3 & K(Th3.be(ibe)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
+    p->vertexlist[0] = Th3.operator()(K[0])+1;
+    p->vertexlist[1] = Th3.operator()(K[1])+1;
+    p->vertexlist[2] = Th3.operator()(K[2])+1;
+		
+    for( int kkk=0; kkk<3; kkk++){ 
+      assert( p->vertexlist[kkk]<= in.numberofpoints && p->vertexlist[kkk]>0);
+    }
+		
+    in.facetmarkerlist[ibe] = K.lab; 
+		
+  }  
+  */
+
+  // mise a jour des nouvelles variables
+ 
+  in.numberofholes = nbhole;
+  in.holelist = new REAL[3*nbhole];
+  
+  for(int ii=0; ii<3*in.numberofholes; ii++){
+    in.holelist[ii]   = tabhole[ii];
+    cout << "in.holelist[ii]=" << in.holelist[ii] << endl;
+  }
+
+  in.numberofregions = nbregion;
+  in.regionlist = new REAL[5*nbregion];
+  for(int ii=0; ii<5*in.numberofregions; ii++){
+    in.regionlist[ii] = tabregion[ii];
+    cout << "in.regionlist[ii]=" << in.regionlist[ii] << endl;
+  }
+
+  in.numberoffacetconstraints = nbfacecl;
+  in.facetconstraintlist = new REAL[2*in.numberoffacetconstraints];
+
+  for(int ii=0; ii<2*in.numberoffacetconstraints; ii++){
+    in.facetconstraintlist[ii+1] = tabfacecl[ii+1];
+  }
+
+  cout << "debut de tetrahedralize( , &in, &out);" << endl;
+  cout << "numberof regions "<<  in.numberofregions  << endl;
+  cout << "numberof hole "<<  in.numberofholes  << endl;
+	
+  tetrahedralize(switch_tetgen, &in, &out);
+	 
+  cout << "fin de tetrahedralize( , &in, &out);" << endl;
+  mesh3_tetgenio_out( out, *T_Th3);
+	
+  cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
+	
+  //in.deinitialize();
+  //out.deinitialize();
+
+  return T_Th3;
+}
+
+
+// declaration pour FreeFem++
 
 class Remplissage_Op : public E_F0mps 
 {
@@ -978,7 +1185,7 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
  
   KN<long> zzempty;
   //int intempty=0;
-  string stringempty= string("pqYQC");
+  string stringempty= string("pqaAAYQC");
   string* switch_tet(arg(0,stack,&stringempty));
   int label_tet(arg(1,stack,0));  
   KN<long> nrf (arg(2,stack,zzempty));
@@ -1049,16 +1256,226 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
     }
   }
   cout << "fin du changmenet de label " << endl;
+  
   Th3->BuildBound();
   Th3->BuildAdj();
   Th3->Buildbnormalv();  
   Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   //Th3->decrement();    
-	
+  
   *mp=mps;
   return Th3;
 }
+
+// Refine et Recontruction 
+
+class ReconstructionRefine_Op : public E_F0mps 
+{
+public:
+  Expression eTh;
+  static const int n_name_param =10; // 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
+  { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
+  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  string*  arg(int i,Stack stack, string* a ) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
+public:
+  ReconstructionRefine_Op(const basicAC_F0 &  args,Expression tth) 
+    : eTh(tth)
+  {
+    cout << "ReconstructionRefine du bord"<< endl;
+    args.SetNameParam(n_name_param,name_param,nargs);
+    
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
+
+
+basicAC_F0::name_and_type ReconstructionRefine_Op::name_param[]= {
+  {  "switch", &typeid(string*)},
+  {  "reftet", &typeid(KN_<long>)}, 
+  {  "refface", &typeid(KN_<long> )},
+  // new parmameters
+  {  "nbofholes", &typeid(long)},
+  {  "holelist", &typeid(KN_<double>)},
+  {  "nbofregions", &typeid(long)},
+  {  "regionlist", &typeid(KN_<double>)},
+  {  "nboffacetcl", &typeid(long)},
+  {  "facetcl", &typeid(KN_<double>)},
+  {  "sizeofvolume", &typeid(double)}
+};
+
+class  ReconstructionRefine : public OneOperator { public:  
+
+  ReconstructionRefine() : OneOperator(atype<pmesh3>(),atype<pmesh3>()) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  { 
+    return  new ReconstructionRefine_Op( args, t[0]->CastTo(args[0]) ); 
+  }
+};
+
+AnyType ReconstructionRefine_Op::operator()(Stack stack)  const 
+{
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+  Mesh3 * pTh= GetAny<Mesh3 *>((*eTh)(stack));
+  //double msvol= GetAny<double>((*maxvol)(stack));
+ 
+  ffassert( pTh );
+  Mesh3 &Th=*pTh;
+  Mesh3 *m= pTh;   // question a quoi sert *m ??
+  int nbv=Th.nv; // nombre de sommet 
+  int nbt=Th.nt; // nombre de triangles
+  int nbe=Th.nbe; // nombre d'aretes fontiere
+  cout << " Vertex Triangle Border " << nbv<< "  "<< nbt << " "<< nbe << endl; 
+ 
+  KN<long> zzempty;
+  //int intempty=0;
+  string stringempty= string("rqaAAYQC");
+  string* switch_tet(arg(0,stack,&stringempty));
+  KN<long> nrtet(arg(1,stack,zzempty));  
+  KN<long> nrf (arg(2,stack,zzempty));
+
+  // new parameters
+  KN<double> zdzempty;
+  int nbhole (arg(3,stack,0));
+  KN<double> tabhole (arg(4,stack,zdzempty));
+  int nbregion (arg(5,stack,0));
+  KN<double> tabregion (arg(6,stack,zdzempty));
+  int nbfacecl (arg(7,stack,0));
+  KN<double> tabfacecl (arg(8,stack,zdzempty));
+
+  
+  // assertion au niveau de la taille
+  cout << "tabregion.N() " <<  tabregion.N() << endl; 
+  cout << "tabregion= "   << tabregion << endl;
+  ffassert( tabhole.N()   == 3*nbhole);
+  ffassert( tabregion.N() == 5*nbregion);
+  ffassert( tabfacecl.N() == 2*nbfacecl);
+  
+  //====================================
+  //  How to change string* into char* 
+  //====================================
+  size_t size_switch_tet = switch_tet->size()+1;
+  char* switch_tetgen =new char[size_switch_tet];
+  strncpy(switch_tetgen, switch_tet->c_str(), size_switch_tet); 
+   
+  ffassert( nrf.N() %2 ==0);
+  map<int,int> mapf;
+  for(int i=0;i<nrf.N();i+=2)
+    {
+      if(nrf[i] != nrf[i+1]){
+	mapf[nrf[i]]=nrf[i+1];
+      }
+    }
+
+  ffassert( nrtet.N() %2 ==0);
+  map<int,int> maptet;
+  for(int i=0;i<nrtet.N();i+=2)
+    {
+      if(nrtet[i] != nrtet[i+1]){
+	maptet[nrtet[i]]=nrtet[i+1];
+      }
+    }
+
+  KN<double> tsizevol(nbt);
+  MeshPoint *mp3(MeshPointStack(stack)); 
+	
+  R3 Cdg_hat = R3(1./4.,1./4.,1./4.);
+
+  for (int it=0; it<nbt; it++){
+    Tet & K(Th.elements[it]);
+
+    mp3->set( Th, K(Cdg_hat), Cdg_hat, K, K.lab);
+    if( nargs[9]){
+      tsizevol[it]=  GetAny< double >( (*nargs[9])(stack) );
+    }
+    else if(tabregion.N()==0){
+      for(int i=0; i< nbregion;i++){
+	if( K.lab == tabregion[3+5*i] ){
+	  tsizevol[it] = tabregion[4+5*i];
+	}
+      }
+      
+    }
+    else{
+      tsizevol[it] = K.mesure();
+    }
+  }
+
+  cout << "Before reconstruction" << endl;
+  cout << "nbhole="   << nbhole << endl;
+  cout << "nbregion=" << nbregion << endl;
+ 
+  Mesh3 *Th3 = ReconstructionRefine_tetgen(switch_tetgen, Th, nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl,tsizevol);
+	
+  cout << "fin du remplissage " << endl;
+  // changement de label 1
+ 
+  if( nrtet.N() > 0){
+    for(int ii=0; ii< Th3->nt; ii++){
+      const Tet & K(Th3->elements[ii]);
+      int lab;
+      int iv[4];
+			
+      iv[0] = Th3->operator()(K[0]);
+      iv[1] = Th3->operator()(K[1]);
+      iv[2] = Th3->operator()(K[2]);
+      iv[3] = Th3->operator()(K[3]);
+
+      map< int, int> :: const_iterator imap;
+      imap = maptet.find(K.lab);
+      if( imap != maptet.end() ){
+	lab = imap -> second;
+      }
+      else{
+	lab = K.lab;
+      }
+      Th3->elements[ii].set(Th3->vertices,iv,lab);
+    }
+  }
+
+  if( nrf.N() > 0){
+    for(int ii=0; ii< Th3->nbe; ii++){
+      const Triangle3 & K(Th3->be(ii));
+      int lab;
+      int iv[3];
+			
+      iv[0] = Th3->operator()(K[0]);
+      iv[1] = Th3->operator()(K[1]);
+      iv[2] = Th3->operator()(K[2]);
+			
+      map< int, int> :: const_iterator imap;
+      imap = mapf.find(K.lab);
+      if( imap != mapf.end() ){
+	lab = imap -> second;
+      }
+      else{
+	lab = K.lab;
+      }
+      Th3->be(ii).set(Th3->vertices,iv,lab);
+    }
+  }
+  cout << "fin du changement de label " << endl;
+  
+  Th3->BuildBound();
+  Th3->BuildAdj();
+  Th3->Buildbnormalv();  
+  Th3->BuildjElementConteningVertex();
+  Th3->BuildGTree();
+  //Th3->decrement();    
+    
+  *mp=mps;
+  return Th3;
+}
+
+
 
 // ConvexHull3D_tetg_Op
 
@@ -1120,11 +1537,11 @@ AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
   
   for(int ii=0; ii<nbv; ii++)
   {
-	  //cxx[ii] = GetAny< double > ((*xx)(stack));
-	  //cyy[ii] = GetAny< double > ((*yy)(stack));
-	  //czz[ii] = GetAny< double > ((*zz)(stack));
-	  cout << "ii= " << ii << endl;
-	  cout << "coord "<< cxx[ii] << " " << cyy[ii] << " " << czz[ii] << endl;
+    //cxx[ii] = GetAny< double > ((*xx)(stack));
+    //cyy[ii] = GetAny< double > ((*yy)(stack));
+    //czz[ii] = GetAny< double > ((*zz)(stack));
+    cout << "ii= " << ii << endl;
+    cout << "coord "<< cxx[ii] << " " << cyy[ii] << " " << czz[ii] << endl;
   }
   assert( cxx.N() == nbv );
   assert( cyy.N() == nbv );
@@ -1132,7 +1549,7 @@ AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
      
   KN<long> zzempty;
   //int intempty=0;
-  string stringempty= string("YQV");
+  string stringempty= string("YqaAAQC");
   string* switch_tet(arg(0,stack,&stringempty));
   int label_tet(arg(1,stack,0));  
   int label_face(arg(2,stack,1));
@@ -1258,7 +1675,7 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
  
   Mesh3 *Th3 =new Mesh3; 
   
-  Th3 =  Convexhull_3Dpoints ( switch_tetgen, nbv, cxx, cyy, czz, label_tet, label_face );
+  Th3 = Convexhull_3Dpoints( switch_tetgen, nbv, cxx, cyy, czz, label_tet, label_face );
 	
   Th3->BuildBound();
   Th3->BuildAdj();
@@ -1286,4 +1703,6 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Global.Add("tetgconvexhull","(",new ConvexHull3D_tetg);
   Global.Add("tetgtransfo","(",new Build2D3D);
   Global.Add("tetg","(",new Remplissage);
+  Global.Add("tetgreconstruction","(",new ReconstructionRefine);
+
 }
