@@ -30,7 +30,7 @@
  ref:ANR-07-CIS7-002-01 
  */
 
-const char *medit_char= "medit-2.3-win.exeCC";
+const char *medit_char= "meditff";
 const char *medit_popen="-popen";// 1";  // depend de l endroit ou se trouve medit
 const char *medit_addsol="-addsol";
 

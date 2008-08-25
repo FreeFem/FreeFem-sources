@@ -1,0 +1,24 @@
+// meditsol.edp
+load "popen"
+
+border Gamma(t=0,2*pi){x=cos(t); y=sin(t); label=12;};
+
+mesh Th=buildmesh(Gamma(20));
+
+fespace Vh(Th,P2);
+func f1=x;
+func f=sqrt(x*x+y*y);
+Vh f1vh=f1;
+
+Vh u,v;
+macro Grad2(u) [dx(u),dy(u)]  // EOM
+
+problem Lap3d(u,v,solver=CG)=int2d(Th)(Grad2(v)' *Grad2(u)) - int2d(Th)(f*v) + on(Gamma,u=1);
+Lap3d;
+
+int bb=savesol("f1.sol",Th,nbscalar=1,scalar=[f1],order=1);
+int bbVh=savesolVh("f1Vh.sol",Th,nbscalar=1,scalar=[f1vh],order=1);
+
+int medit=meditmeshsol("second",Th,solution=1,scalar=f,order=1);
+int meditVh=meditmeshsolVh("solPoison",Th,solution=1,scalar=u,order=1);
+
