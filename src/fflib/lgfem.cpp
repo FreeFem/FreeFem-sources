@@ -1964,14 +1964,18 @@ class fCLD { public:
 
 class Convect : public E_F0mps  { public:
     typedef double  Result; // return type 
-    Expression u,v,ff,dt;    
-    Convect(const basicAC_F0 & args)  
+    Expression u,v,w,ff,dt;
+    int d;
+    Convect(const basicAC_F0 & args)  : u(0),v(0),w(0),ff(0),dt(0)
     {
       args.SetNameParam(); 
       const E_Array * a = dynamic_cast<const E_Array *>(args[0].LeftValue());
             ffassert(a);
-       if (a->size() != 2) 
-          { CompileError("convect d'un vecteur ˆ qui n'a pas 2 composantes");}
+	d= a->size();
+       if (d == 3) 
+	   w= CastTo<double>((*a)[3]);
+       else if (d != 2) 
+          { CompileError("convect vector have only 2 or 3 componant");}
        u= CastTo<double>((*a)[0]);
        v= CastTo<double>((*a)[1]);
        
@@ -1984,9 +1988,14 @@ class Convect : public E_F0mps  { public:
       
     static  E_F0 * f(const basicAC_F0 & args) { return new Convect(args);} 
     AnyType operator()(Stack s) const ; 
+    AnyType eval2(Stack s) const ; 
+    AnyType eval3(Stack s) const ; 
     operator aType () const { return atype<Result>();}         
     
-};    
+};
+
+ 
+
    
 
 class Plot :  public E_F0mps { public:
@@ -2891,9 +2900,14 @@ AnyType Plot::operator()(Stack s) const  {
      
      return 0L;}     
 
-
  
 AnyType Convect::operator()(Stack s) const 
+{  
+    if(d==2)  return eval2(s);
+    else  return eval3(s);    
+}
+
+AnyType Convect::eval2(Stack s) const
 {
   MeshPoint* mp(MeshPointStack(s));
   static MeshPoint mpp,mps;
@@ -2943,6 +2957,49 @@ AnyType Convect::operator()(Stack s) const
   MeshPointStack(s,mp);
   
   return r;
+}
+
+AnyType Convect::eval3(Stack s) const 
+{
+MeshPoint* mp(MeshPointStack(s));
+static MeshPoint mpp,mps;
+static R ddts;
+R ddt = GetAny<double>((*dt)(s));
+if (ddt) 
+{
+    MeshPoint mpc(*mp);
+    MeshPointStack(s,&mpc);
+    if(*mp==mpp && ddt == ddts) 
+	mpc=mps;
+	else 
+	  {
+	      
+	      const Mesh3 & Th3(*mp->Th3);
+	      ffassert(mp->Th3 && mp->T3);
+	      R3 PHat=mpc.PHat;
+	      	      
+	      int k=0;
+	      int j; 
+	      int it=Th3(mpc.T3);
+	     
+	      while ( (j=WalkInTet(Th3,it,PHat,R3(GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),GetAny<double>((*w)(s))),ddt))>=0) 
+                { 
+		   
+                   int itt =  Th3.ElementAdj(it,j,PHat);
+		   mpc.change(PHat,Th3[it],0);             
+		   ffassert(k++<10000);
+                }
+	      
+	      mpc.change(PHat,Th3[it],0);
+	      mpp=*mp; 
+	      mps=mpc;         
+	  }
+}
+ddts=ddt;
+AnyType r= (*ff)(s);
+MeshPointStack(s,mp);
+
+return r;
 }
 
 

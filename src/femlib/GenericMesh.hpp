@@ -49,7 +49,6 @@ extern long verbosity;
 using namespace ::std;
 
 
-
 #include "Serialize.hpp"
 
 #include "GQuadTree.hpp"
@@ -185,10 +184,10 @@ private: // pas de copie pour ne pas prendre l'adresse
   void operator=(const GenericVertex &); 
   
 };
-  inline  R1 ExtNormal( GenericVertex<R1> *const v[2],int const f[1])  {   return f[0]==0 ? R1(-1):R1(0);  }
-  inline  R2 ExtNormal( GenericVertex<R2> *const v[3],int const f[2])  {   return R2(*v[f[0]],*v[f[1]]).perp();  }
-  inline  R3 ExtNormal( GenericVertex<R3> *const v[4],int const f[3])  {   return R3(*v[f[0]],*v[f[1]])^R3(*v[f[0]],*v[f[2]]) ;  }
-
+  inline  R1 ExtNormal( GenericVertex<R1> *const v[2],int const f[1])  {   return f[0]==0 ? R1(-1):R1(1);  }
+  inline  R2 ExtNormal( GenericVertex<R2> *const v[3],int const f[2])  {   return R2(*v[f[1]],*v[f[0]]).perp();  }
+  inline  R3 ExtNormal( GenericVertex<R3> *const v[4],int const f[3])  {   return R3(*v[f[1]],*v[f[0]])^R3(*v[f[2]],*v[f[0]]) ;  }
+    
 
 template<typename Data>  
 class GenericElement: public Label {
@@ -285,7 +284,7 @@ public:
     Vertex * f[3]={&at(nvface[i][0]), &at(nvface[i][1]), &at(nvface[i][2])}; 
     if(f[0]>f[1]) fo+=1,Exchange(f[0],f[1]); 
     if(f[1]>f[2]) { fo+=2,Exchange(f[1],f[2]); 
-      if(f[0]>f[1]) fo+=4,Exchange(f[0],f[1]); }
+    if(f[0]>f[1]) fo+=4,Exchange(f[0],f[1]); }
     return fo;
   }
 
@@ -330,8 +329,35 @@ private:
 };
 
 
-
-
+    template<int N> inline void PermI2J(const void **I,const void **J,int *S)
+    {
+	ffassert(0);
+    }
+    template<> inline void PermI2J<1>(const void **I,const void **J,int *S)
+    {
+	S[0]=0;
+    }
+    template<> inline void PermI2J<2>(const void **I,const void **J,int *S)
+    {
+	if(I[0]==J[0])
+	  { assert(I[1]==J[1]);
+	    S[0]=0;S[1]=1;}
+	else 
+	  { assert(I[1]==J[0]&&I[0]==J[1]);
+	    S[0]=1;S[1]=0;}	
+    }
+    template<> inline void PermI2J<3>(const void **I,const void **J,int *S)
+    {
+	if(I[0]==J[0]) S[0]=0;
+	else if(I[0]==J[1]) S[0]=1;
+	else {S[0]=2; assert(I[0]==J[2]) ;}
+	if(I[1]==J[0]) S[1]=0;
+	else if(I[1]==J[1]) S[1]=1;
+	else {S[1]=2; assert(I[1]==J[2]) ; }
+	S[2]=3-S[0]-S[1];
+	assert(I[2]==J[3-S[0]-S[1]]);
+    }
+    
 template<typename T,typename B,typename V>
 class GenericMesh : public RefCounter
 { 
@@ -442,6 +468,49 @@ public:
     j=p%nea;
     return p>=0 ? p/nea: -1;}
 
+  int ElementAdj(int k,int &j,Rd PHat) const  
+    {
+    //   return the kk the number of adj element k  to hyperface j (opposite to vertex j)
+    //   out j: is the new hyperface number in element kk.
+    // and 
+    // in : Pt is the point  on hyperface j on element k on ref element K hat.
+    //  remark   lb[j]==0  at enter
+    // you get the new 	point Pt (in  on hyperface j on element kk
+    //  and lb[j] ==0 at return (j have change).
+    int p=TheAdjacencesLink[nea*k+j];
+    if(p>=0) 
+      {
+	  R lb[Rd::d+1];//{1.-PHat.sum(),PHat}; 
+	  PHat.toBary(lb); // R1 R2 R3 
+	  assert(Abs(lb[j])<1e-10);
+	R ll[T::nva];
+	int sigma[T::nva];
+	  
+	const void * nvkj[T::nva], *nvkkjj[T::nva];
+	int jj=p%nea;
+	int kk=p/nea;
+
+	Element & K(elements[CheckT(k)]);
+	Element & KK(elements[CheckT(kk)]);
+	  
+	for (int l=0;l<T::nva;++l)
+	    nvkj[l] =&K[T::nvadj[j][l]];
+	for (int l=0;l<T::nva;++l)
+	    ll[l] = lb[T::nvadj[j][l]];
+	for (int l=0;l<T::nva;++l)
+	    nvkkjj[l] = &KK[T::nvadj[jj][l]];
+	//  il faut permute ll.
+	PermI2J<nva>(nvkj,nvkkjj,sigma);
+	for (int l=0;l<T::nva;++l)
+	    lb[T::nvadj[jj][l]]=ll[sigma[l]];
+	lb[jj]=0; 
+	PHat=Rd(lb+1);
+	j=jj;
+	return kk;
+      }
+    return -1;//  on border 
+  }
+    
   int GetAllElementAdj(int it,int *tabk) const
   { //  get the tab of all adj element (max ne)
     //  and return the size of the tab 

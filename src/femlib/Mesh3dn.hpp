@@ -156,6 +156,8 @@ private:
   Mesh3(const Mesh3 &); // pas de construction par copie
   void operator=(const Mesh3 &);// pas affectation par copy 
 };
+// for the caracteristic method.
+    int  WalkInTet(const Mesh3 & Th,int it, R3 Phat,R3 U, R & dt);
 
 } 
 #endif

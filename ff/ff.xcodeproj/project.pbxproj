@@ -60,7 +60,6 @@
 		3D15D49F0BD3A6E000CEB4C6 /* error.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DCFA097015B4002A1826 /* error.hpp */; };
 		3D15D4A00BD3A6E000CEB4C6 /* ffstack.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DCFD097015B4002A1826 /* ffstack.hpp */; };
 		3D15D4A10BD3A6E000CEB4C6 /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD00097015B4002A1826 /* global.cpp */; };
-		3D15D4A20BD3A6E000CEB4C6 /* gmres.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD02097015B4002A1826 /* gmres.hpp */; };
 		3D15D4A30BD3A6E000CEB4C6 /* InitFunct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD03097015B4002A1826 /* InitFunct.cpp */; };
 		3D15D4A40BD3A6E000CEB4C6 /* InitFunct.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD04097015B4002A1826 /* InitFunct.hpp */; };
 		3D15D4A50BD3A6E000CEB4C6 /* lex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD06097015B4002A1826 /* lex.cpp */; };
@@ -159,7 +158,6 @@
 		3D90DCFA097015B4002A1826 /* error.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
 		3D90DCFD097015B4002A1826 /* ffstack.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = ffstack.hpp; sourceTree = "<group>"; };
 		3D90DD00097015B4002A1826 /* global.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = global.cpp; sourceTree = "<group>"; };
-		3D90DD02097015B4002A1826 /* gmres.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = gmres.hpp; sourceTree = "<group>"; };
 		3D90DD03097015B4002A1826 /* InitFunct.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = InitFunct.cpp; sourceTree = "<group>"; };
 		3D90DD04097015B4002A1826 /* InitFunct.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = InitFunct.hpp; sourceTree = "<group>"; };
 		3D90DD06097015B4002A1826 /* lex.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = lex.cpp; sourceTree = "<group>"; };
@@ -379,7 +377,6 @@
 				3D90DCFA097015B4002A1826 /* error.hpp */,
 				3D90DCFD097015B4002A1826 /* ffstack.hpp */,
 				3D90DD00097015B4002A1826 /* global.cpp */,
-				3D90DD02097015B4002A1826 /* gmres.hpp */,
 				3D90DD03097015B4002A1826 /* InitFunct.cpp */,
 				3D90DD04097015B4002A1826 /* InitFunct.hpp */,
 				3D90DD06097015B4002A1826 /* lex.cpp */,
@@ -666,7 +663,6 @@
 				3D15D49F0BD3A6E000CEB4C6 /* error.hpp in Sources */,
 				3D15D4A00BD3A6E000CEB4C6 /* ffstack.hpp in Sources */,
 				3D15D4A10BD3A6E000CEB4C6 /* global.cpp in Sources */,
-				3D15D4A20BD3A6E000CEB4C6 /* gmres.hpp in Sources */,
 				3D15D4A30BD3A6E000CEB4C6 /* InitFunct.cpp in Sources */,
 				3D15D4A40BD3A6E000CEB4C6 /* InitFunct.hpp in Sources */,
 				3D15D4A50BD3A6E000CEB4C6 /* lex.cpp in Sources */,

@@ -166,7 +166,7 @@ class MeshPointBase { public:
      d=2;  
    }
    
-  void change(const R2 & PH,Triangle & tt,int ll)
+  void change(const R2 & PH,const Triangle & tt,int ll)
    { 
      T= &tt;
      (R2 &) PHat = PH;
@@ -178,6 +178,19 @@ class MeshPointBase { public:
      d=2;  
      
    }
+    void change(const R3 & PH,const Tet & tt,int ll)
+    { 
+	T3= &tt;
+	(R3 &) PHat = PH;
+	(R3 &) P = (*T3)(PH);
+	region = T3->lab;
+	label = ll;
+	t=v=f=e=0;
+	VF=0;
+	d=2;  
+	
+    }
+    
    void unset() 
    {
      P.x=-1e30;
@@ -212,7 +225,7 @@ class MeshPointBase { public:
      PHat=P_Hat;
      T3=&K.T;
      Th3=&K.Vh.Th; 
-     region = T->lab;
+     region = T3->lab;
      label = ll;
      v=f=-1; 
      e=iedge;
@@ -228,7 +241,7 @@ class MeshPointBase { public:
      PHat=P_Hat;
      T3=&aK;
      Th3=&aTh; 
-     region = T->lab;
+     region = T3->lab;
      label = ll;
      v=f=-1;
      t=(*Th)(T); 
@@ -245,7 +258,7 @@ class MeshPointBase { public:
      PHat=P_Hat;
      T3=&K.T;
      Th3=&K.Vh.Th; 
-     region = T->lab;
+     region = T3->lab;
      label = ll;
      t=(*Th)(T);
      v=f=e=-1;  
@@ -262,7 +275,7 @@ class MeshPointBase { public:
      PHat=P_Hat;
      T3=&K.T;
      Th3=&K.Vh.Th; 
-     region = T->lab;
+     region = T3->lab;
      v=f=e=-1;  
      N.x=0;   
      N.y=0;   
@@ -303,7 +316,7 @@ class MeshPointBase { public:
      PHat=P_Hat;
      T3=&aK;
      Th3=&aTh; 
-     region = T->lab;
+     region = T3->lab;
      label = ll;
      t=v=f=e=-1;  
      N.x=0;   
@@ -321,7 +334,7 @@ class MeshPointBase { public:
       P= V ;
       PHat = TetHat[ss];
      Th3=pTh; 
-     region = T->lab;
+     region = T3->lab;
      label = V.lab;
      t=v=f=e=0;
      v=ss;
@@ -377,10 +390,13 @@ class MeshPoint : public MeshPointBase { public:
   void set(R x=0.0,R y=0.0,R z=0.0) {  
      MeshPointBase::set(x,y,z);
      other.unset();} 
-  void change(const R2 & PH,Triangle & tt,int ll) {
+  void change(const R2 & PH,const Triangle & tt,int ll) {
      MeshPointBase::change(PH,tt,ll);
      other.unset(); }
-   void setP(const Mesh * pTh,int tt,int ss) { 
+    void change(const R3 & PH,const Tet & tt,int ll) {
+	MeshPointBase::change(PH,tt,ll);
+    other.unset(); }
+    void setP(const Mesh * pTh,int tt,int ss) { 
       MeshPointBase::setP(pTh,tt,ss); 
       other.unset(); } 
   void setP(const Mesh3 * pTh,int tt,int ss) {  // 3d
