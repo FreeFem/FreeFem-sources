@@ -245,8 +245,8 @@ EXTRA_DIST = load.link dfft.link  include.tar.gz \
   glumesh2D.cpp glumesh2D.edp \
   glumesh3D.cpp glumesh3D.edp buildlayer.cpp tetgen.cpp\
   LayerMesh.hpp TransfoMesh_v2.hpp LayerMesh.cpp  TransfoMesh_v2.cpp\
-  ffrandom.cpp ffrandom.edp  popen.cpp
-
+  ffrandom.cpp ffrandom.edp  \
+  popen.cpp 
 
 LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
