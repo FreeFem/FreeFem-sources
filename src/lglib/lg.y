@@ -257,26 +257,28 @@ start:   input ENDOFFILE {
                         try {                  
                           $1.eval(stack);}
                         catch ( E_exception & e)  {
-                          cerr << e.what() << endl;
+                          cerr << e.what() << " ,  mpirank " << mpirank << endl;
                           return 1; }
                         catch( Error & err) {
                           cerr << err.what() << endl;
-			  cerr << " err code " << err.errcode() << endl;
+			  cerr << " err code " << err.errcode() << " ,  mpirank " << mpirank << endl;
                           return err.errcode();
                         }
                          catch( ...) { cerr << "Strange catch exception ???\n"; 
-                          cerr << " at exec line  " << TheCurrentLine << endl;
+                          cerr << " at exec line  " << TheCurrentLine << " ,  mpirank " << mpirank << endl;
                           return 1; 
                          }
 
-                        if(verbosity)  cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " <<  CPUtime()-CPUcompile << "s\n";
+                        if(verbosity)  cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " 
+			    <<  CPUtime()-CPUcompile  <<"s,  mpirank:" << mpirank << endl;
                         deleteStack(stack);
                         //debugstack.clear() 
                         } 
                         fingraphique();
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         
-                        if (NbPtr) { cout << " ######## We forget of deleting   " << NbPtr << " Nb pointer,   " <<  lg1-lg0 << "Bytes\n" ;}
+			    if (NbPtr) { cout << " ######## We forget of deleting   " << NbPtr 
+			                      << " Nb pointer,   " <<  lg1-lg0 << "Bytes " << " ,  mpirank " << mpirank <<endl;}
   return 0;}
 ;
 
