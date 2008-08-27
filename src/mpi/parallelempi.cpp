@@ -410,7 +410,7 @@ void init_lgparallele()
    {
     MPI::Finalize();
     if(mpirank==0) cout << "FreeFem++-mpi finalize correctly .\n" << flush ; 
-    else   cout << '.' << flush ;
+    else if(verbosity>5)  cout << '.' << endl ;
    }
 //   MPI::COMM_WORLD.Recv(&msg, 1, MPI::INT, from, MPI::ANY_TAG);
 //    MPI::COMM_WORLD.Isend(&msg, 1, MPI::INT, to, 4);
