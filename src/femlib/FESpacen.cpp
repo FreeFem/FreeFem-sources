@@ -80,7 +80,7 @@ int *builddata_d(const int ndfitem[4],const int nd[4])
     for(int j=0;j<nd[i];++j,nw++)// pour les what (support de node)
       for(int k=0;k<ndfitem[i];++k)// 	    
 	data[p++] = nw;
-  cout << p << " " <<ndfitem[0]<< ndfitem[1]<<ndfitem[2]<<ndfitem[3]<< " " << ndf  << endl;
+ // cout << p << " " <<ndfitem[0]<< ndfitem[1]<<ndfitem[2]<<ndfitem[3]<< " " << ndf  << endl;
   assert(p==ndf);
   for(int i=0,nw=0;i<=3;++i)
     for(int j=0;j<nd[i];++j,nw++)// pour les what (support de node)
@@ -459,6 +459,7 @@ void GTypeOfFESum<Mesh>::Build()
 	for(int p=0;p<ti.NbPtforInterpolation;++p,++kkk)
 	  {
 	    Ptt[kkk]=ti.PtInterpolation[p];
+	    if(verbosity>5)
 	    cout << "    p= "<< p << " [ " << Ptt[kkk]<< "] ,  "<< kkk<< " "<< npp<<endl;;
 	    if( mpt.find(Ptt[kkk]) == mpt.end())
 	      mpt[Ptt[kkk]]=npp++;
@@ -466,6 +467,7 @@ void GTypeOfFESum<Mesh>::Build()
 	  }
       }
     assert(this->NbPtforInterpolation==0);
+    if(verbosity>5)
     cout << npp;
     this->NbPtforInterpolation=npp;
     this->PtInterpolation.init(npp);

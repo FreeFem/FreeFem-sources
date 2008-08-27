@@ -4116,7 +4116,7 @@ aType  typeFESpace(const basicAC_F0 &args)
       cerr << " bug " << d << " != 2 ror 3 \n";
       ffassert(0);
     }
-  cout<< " d= " << d << endl;
+ //  cout<< " d= " << d << endl;
   return d == 2 ? atype<pfes *>() : atype<pfes3 *>();
 }
 
