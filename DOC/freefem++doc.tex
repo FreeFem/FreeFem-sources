@@ -14,7 +14,7 @@
 
 
 \usepackage{times}
-\def\VERSION{3.0.$\alpha$}
+\def\VERSION{3.0.$\beta$}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -5486,6 +5486,908 @@ plot(Th,ps="ThreePoint.eps",bw=1); // Fig. \ref{ThreePoint}
 \end{center}
 \end{multicols}
 \end{figure}
+
+
+\subsection{How to change the label of elements and border elements of a mesh in FreeFem++ ?}
+\label{sec.changelab.gluemesh}
+Changing the label of elements and border elements will be done using the keyword {\bf{change}}. The parameters for this
+command line are for a two dimensional case:
+\begin{description}
+\item [\texttt{refe =}] is a vector of integer that contains the old labels and the new labels of edges.
+\item [\texttt{reft =}] is a vector of integer that contains the old labels and the new labels of triangles.
+\end{description}
+and for a three dimensional case:
+\begin{description}
+\item [\texttt{reftet =}] is a vector of integer that contains the old labels and the new labels of tetrahedrons.
+\item [\texttt{refface =}] is a vector of integer that contains the old labels and the new labels of triangles.
+\end{description}
+
+These vectors are composed of $n_{l}$ succesive sub vectors of size two where $n_{l}$ is the number of label
+that we want to change. The first element and second element of sub vector are respectively the old label and the new label.
+For example, we have
+\begin{equation}
+\label{eq.org.vector.change.label}
+refe = [ V_{1}, ..., V_{n_{l}}].
+\end{equation}
+where the sub vector $V_{i}$ is defined by $V_{i}=[\mbox{old label of set } i, \mbox{new label of set } i]$.
+
+An example of using this function is given in "glumesh2D.edp":
+\begin{example}[glumesh2D.edp]
+\label{changelabel}~
+\bFF
+
+ 1: @load "glumesh2D"
+ 2: @mesh Th1=@square(10,10);
+ 3: @mesh Th2=@square(20,10,[x+1,y]);
+ 4: verbosity=3;
+ 5: @int[int] r1=[2,0],  r2=[4,0];
+ 6: @plot(Th1,wait=1);
+ 7: Th1=@change(Th1,refe=r1); // Change the label of Edges of Th1 with label 2 into label 0.
+ 8: @plot(Th1,wait=1);
+ 9: Th2=@change(Th2,refe=r2); // Change the label of Edges of Th1 with label 4 into label 0.
+10: @mesh Th=Th1+Th2;         //  ``gluing together'' of meshes Th1 and Th2
+11: @cout << " nb ref = " << int1d(Th1,1,3,4)(1./lenEdge)+int1d(Th2,1,2,3)(1./lenEdge)
+12:          << " == " << int1d(Th,1,2,3,4)(1./lenEdge) <<" == " << ((10+20)+10)*2 << endl;
+13: @plot(Th,wait=1);
+14: @fespace Vh(Th,P1);
+15: @macro Grad(u) [dx(u),dy(u)]; // definition of a macro
+16: Vh u,v;
+17: @solve P(u,v)=int2d(Th)(Grad(u)'*Grad(v))-int2d(Th)(v)+on(1,3,u=0);
+18: @plot(u,wait=1);
+
+\eFF
+\end{example}
+
+\paragraph{``gluing'' different mesh}
+In line 10 of previous file, the method to ``gluing'' different mesh of the same dimension in FreeFem++ is using.
+This function is just call using the symbol addition "+" between meshes.
+The method implemented need that the point in adjacent mesh are the same. .
+%%The method implemented need that the result's mesh of ``gluing'' meshes is conformal.
+
+
+\subsection{Mesh in three dimension}
+
+\subsubsection{Read/Write Statements for a Mesh in 3D}
+\index{readmesh}\index{savemesh}
+
+In three dimension, the file mesh format supported for input and output files by FreeFem++ are the extension .msh and .mesh.
+These format are described in Chapter Mesh Files in two dimension.
+
+\paragraph{extension file .msh}
+The structure of the extension .msh in three dimensional are given in Table \ref{tab:mesh3DSample}.
+In this structure, $n_v$ denotes the number of vertices, $n_{tet}$ the number of tetrahedra and $n_{tri}$ the number of triangles
+For each vertex $q^i,\, i=1,\cdots,n_v$, we denote by $(q^i_x,q^i_y,q^i_z)$ the $x$-coordinate, the $y$-coordinate and the $z$-coordinate.
+Each tetrahedra $T_k, k=1,\cdots,n_{tet}$ has four vertices $q^{k_1},\, q^{k_2},\,q^{k_3}, \,q^{k_4}$.
+The boundary consists of an union of triangles. Each triangle $be_j, j=1,\cdots,n_{tri}$ has three vertices $q^{j_1},\, q^{j_2},\,q^{j_3}$.
+%that are oriented counterclockwise par rapport \`{a} la normale sortante.
+
+\begin{table}[htbp]
+\hspace*{3cm}
+\begin{tabular}{|ccccc|}
+\hline
+$n_v$&  $n_{tet}$& $n_{tri}$ & &\\
+$q^1_x$& $q^1_y$& $q^1_z$ & Vertex label &\\
+$q^2_x$& $q^2_y$&  $q^2_z$ & Vertex label &\\
+$\vdots$  &$\vdots$ &$\vdots$ &$\vdots$ &\\
+$q^{n_v}_x$& $q^{n_v}_y$&  $q^{n_v}_z$ & Vertex label&\\
+$1_1$& $1_2$& $1_3$& $1_4$ & region label \\
+$2_1$& $2_2$& $2_3$& $2_4$ & region label  \\
+$\vdots$  &$\vdots$ &$\vdots$ &$\vdots$  &$\vdots$ \\
+$(n_{tet})_1$& $(n_{tet})_2$& $(n_{tet})_3  $& $(n_{tet})_4$ & region label \\
+$1_1$ & $1_2$& $1_3$& boundary label & \\
+$2_1$ & $2_2$& $2_3$& boundary label & \\
+$\vdots$&  $\vdots$ &$\vdots$ &$\vdots$ &\\
+$(n_tri)_{1}$ & $(n_{tri})_2$& $(n_{tri})_3$ & boundary label &\\
+\hline
+\end{tabular}
+ \caption{The structure of mesh file format ``.msh'' in three dimension.}
+\label{tab:mesh3DSample}
+\end{table}
+
+
+\paragraph{extension file .mesh}
+\def\Int#1{ {\tt(I)} #1}
+\def\Vertex#1{{{\tt @@Vertex}#1}}
+\def\Loop#1#2{{\bf\Large(}\,#1\,{\bf\Large{,\,\,}}\,#2\,{\bf\Large)}}
+
+The data structure for a three dimensional mesh is composed of the data structure presented in Section \ref{meshformatfile.mesh}
+and a data structure for tetrahedrons. The tetrahedrons of a three dimensional mesh are refereed using the following field:
+\small
+\begin{description}
+\item {\tt{Tetrahedra}}\\
+  \Int{NbOfTetrahedrons} \\
+    \Loop{\Loop{\Vertex{$_i^j$}}{j=1,4}\,,\,\Int{$Ref \phi_i^{tet}$} }{ i=1\,,\,NbOfTetrahedrons}
+\end{description}
+This field is express with the notation of Section \ref{meshformatfile.mesh}.
+
+\subsubsection{TetGen: A tetrahedral mesh generator }
+
+\paragraph{TetGen}
+
+TetGen is a software developed by Hang Si of Weierstrass Institute for Applied Analysis and Stochastics of
+Berlin in Germany \cite{tetgen}. TetGen is a free for research and non-commercial uses. For any commercial
+licence utilization, a commercial licence is available upon request of Hang Si.
+
+This software is a tetrahedral mesh generator of a three dimensional domain defined by its boundary.
+The input domain take into account a polyhedral or a piecewise linear complex.
+This tetrahelization is a constrained Delaunay tetrahelization.
+
+The method used in TetGen to control the quality of the mesh is a Delaunay refinement from
+Shewchuk \cite{tetgenshewchuk}. The quality measure of this algorithm is the Radius-Edge
+Ratio (see Section 1.3.1 \cite{tetgen} for more details). A theorical bounds of this ratio of the algorithm
+of Shewchuk is obtained for a given complex of vertices, constrained segments and facets of surface mesh,
+with no input angle less than 90 degree. This theorical bounds is 2.0.\\
+
+The call of Tetgen is done with the keyword \texttt{tetg}. The parameters of this command line is:
+
+\begin{description}
+%%\item [\texttt{reftet  =}] set the label of tetrahedrons.
+\item [\texttt{refface =}] is a vector of integer that contains the old labels and the new labels of Triangles.
+This parameters is initialized as refface for the keyword change (\ref{eq.org.vector.change.label}).
+\item [\texttt{switch  =}] A string expression. This string corresponds to the command line switch of Tetgen see Section 3.2 of \cite{tetgen}.
+\item [\texttt{nbofholes=}] Number of holes.
+\item [\texttt{holelist =}] This array correspond to {\bf{holelist}} of tetgenio data structure \cite{tetgen}.
+A real vector of size $3\times \texttt{nbofholes}$. In TetGen, each hole is associated with a point inside this domain.
+This vector is $x_{1}^{h}, y_{1}^{h}, z_{1}^{h}, x_{2}^{h}, y_{2}^{h}, z_{2}^{h}, \cdots,$ where $x_{i}^{h},y_{i}^{h},z_{i}^{h}$
+is the associated point with the $i^{\mathrm{th}}$ hole.
+\item [\texttt{nbofregions =}] Number of regions.
+\item [\texttt{regionlist =}] This array correspond to {\bf{regionlist}} of tetgenio data structure \cite{tetgen}.
+The attribute and the volume constraint of region are given in this real vector of size $5\times \texttt{nbofregions}$.
+The $i^{\mathrm{th}}$ region is described by five elements: $x-$coordinate, $y-$coordinate and $z-$coordinate of
+a point inside this domain ($x_{i},y_{i},z_{i}$); the attribute ($at_{i}$) and the maximum volume for tetrahedrons ($mvol_{i}$) for this region.
+The \texttt{regionlist} vector is: $x_{1}, y_{1}, z_{1}, at_{1}, mvol_{1}, x_{2}, y_{2}, z_{2}, at_{2}, mvol_{2}, \cdots, \cdots $.
+\item [\texttt{nboffacetcl=}] Number of facets constraints.
+\item [\texttt{facetcl=}] This array correspond to {\bf{facetconstraintlist}} of tetgenio data structure \cite{tetgen}.
+The $i^{th}$ facet constraint is defined by the facet marker $Ref_{i}^{fc}$ and the maximum area for faces $marea_{i}^{fc}$.
+The \texttt{facetcl} array is: $Ref_{1}^{fc}, marea_{1}^{fc}, Ref_{2}^{fc}, marea_{2}^{fc}, \cdots, \cdots$.
+This parameters has no effect if switch \texttt{q} is not selected.
+%\item [\texttt{nbofsegcl=}] Number of segments constraints.
+%\item [\texttt{segcl =}] This array correspond to {\bf{segmentconstraintlist}} of tetgenio data structure \cite{tetgen}.
+\end{description}
+
+
+Principal switch parameters in TetGen:
+\begin{description}
+\item [\texttt{p}] Tetrahedralization of boundary.
+\item [\texttt{q}] Quality mesh generation. The bound of Radius-Edge Ratio will be given after the option q. By default, this value is 2.0.
+\item [\texttt{a}] Construct with the volumes constraints on tetrahedrons. These volumes constraints are defined with the bound of the previous
+switch \texttt{q} or in the parameter \texttt{regionlist}.
+\item [\texttt{A}] Attributes reference to region given in the \texttt{regionlist}. The other regions have label 0.
+The option \texttt{AA} gives a different label at each region. This switch work with the option 'p'. If option 'r' is used, this switch has no effect.
+\item [\texttt{r}] Reconstructs and Refines a previously generated mesh (This character is only used with the command line \texttt{tetgreconstruction}. 
+\item [\texttt{Y}] This switch allow to preserve the mesh on the exterior boundary.
+This switch must be used to ensure conformal mesh between two adjacents mesh.
+\item [\texttt{YY}] This switch allow to preserve the mesh on the boundary.
+\item [\texttt{C}] The consistency of the result's mesh is testing by TetGen.
+\item [\texttt{CC}] The consistency of the result's mesh is testing by TetGen and also checks constrained delaunay mesh
+(if 'p' switch is selected) or the consistency of Conformal Delaunay (if 'q' switch is selected).
+\item [\texttt{V}] Give information of the work of TetGen. More information can be obtained in specified 'VV' or 'VVV'.
+\item [\texttt{Q}] Quiet: No terminal output except errors
+\item [\texttt{M}] The coplanar facets are not merging.
+\item [\texttt{T}] Set a tolerance for coplanar test. The default value is $1e-8$.
+\item [\texttt{d}] Itersections of facets are detected.
+\end{description}
+
+To obtain a tetrahedral mesh generator with tetgen, we need the surface mesh of three dimensional domain.
+We give now the command line in FreeFem++ to construct these meshes.
+
+\paragraph{keyword: ``movemesh2D3Dsurf''}
+
+A simple method to construct a surface is to place a two dimensional domain in a three dimensional space.
+This corresponding to move the domain by a displacement vector of this form $\Phi(x,y) = ( \Phi1(x,y), \Phi2(x,y), \Phi3(x,y) )$.
+The result of moving a two dimensional mesh Th2 by this three dimensional displacement is obtained using:
+
+\bFF
+@mesh3 Th3 = @movemesh2D3Dsurf(Th2,transfo=[$\Phi$1,$\Phi$2,$\Phi$3]);
+\eFF
+
+The parameters of this command line are:
+\begin{description}
+\item [\texttt{transfo   =}] \texttt{[$\Phi$1, $\Phi$2, $\Phi$3]} set the displacement vector of transformation $\Phi(x,y) = [\Phi1(x,y), \Phi2(x,y), \Phi3(x,y) ]$.
+\item [\texttt{refface   =}] set integer label of triangles
+\item [\texttt{mesuremesh=}] set integer orientation of mesh.
+\item [\texttt{ptmerge =}] A real expression. When you transform a mesh, some points can be merged. This parameters is the criteria to define two merging points. By default, we use
+$$
+ptmerge \: = \: 1e-7 \: \:Vol( B ),
+$$
+where $B$ is the smallest axis parallel boxes containing the discretize domain of $\Omega$ and $Vol(B)$ is the volume of this box.
+\end{description}
+
+We can ``gluing'' surface meshes using the process given in Section \ref{sec.changelab.gluemesh}. An example of obtaining a three dimensional
+mesh using the command line \texttt{tetg} and \texttt{movemesh2D3Dsurf} is given in the file tetgencube.edp.
+
+\begin{example}[tetgencube.edp]
+\label{tetgenboxedp}~
+\bFF
+// file tetgencube.edp
+@load "glumesh3D"
+@load "tetgen"
+
+@real x0,x1,y0,y1;
+x0=1.; x1=2.; y0=0.; y1=2*pi;
+@mesh Thsq1 = @square(5,35,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+
+@func ZZ1min = 0;
+@func ZZ1max = 1.5;
+@func XX1 = x;
+@func YY1 = y;
+
+@mesh3 Th31h = @movemesh2D3Dsurf(Thsq1,transfo=[XX1,YY1,ZZ1max]);
+@mesh3 Th31b = @movemesh2D3Dsurf(Thsq1,transfo=[XX1,YY1,ZZ1min]);
+
+/////////////////////////////////
+x0=1.; x1=2.; y0=0.; y1=1.5;
+@mesh Thsq2 = @square(5,8,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+
+@func ZZ2 = y;
+@func XX2 = x;
+@func YY2min = 0.;
+@func YY2max = 2*pi;
+
+@mesh3 Th32h = @movemesh2D3Dsurf(Thsq2,transfo=[XX2,YY2max,ZZ2]);  
+@mesh3 Th32b = @movemesh2D3Dsurf(Thsq2,transfo=[XX2,YY2min,ZZ2]);
+
+/////////////////////////////////
+x0=0.; x1=2*pi; y0=0.; y1=1.5;
+@mesh Thsq3 = @square(35,8,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+@func XX3min = 1.;
+@func XX3max = 2.;
+@func YY3 = x;
+@func ZZ3 = y;
+
+@mesh3 Th33h = @movemesh2D3Dsurf(Thsq3,transfo=[XX3max,YY3,ZZ3]);  
+@mesh3 Th33b = @movemesh2D3Dsurf(Thsq3,transfo=[XX3min,YY3,ZZ3]); 
+
+////////////////////////////////
+@mesh3 Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
+@savemesh(Th33,"Th33.mesh");
+
+// build a mesh of a axis parallel box with TetGen
+@real[int] domain =[1.5,pi,0.75,145,0.0025];
+@mesh3 Thfinal = @tetg(Th33,switch="paAAQY",nbofregions=1,regionlist=domain);    // Tetrahelize the interior of the cube with tetgen
+@savemesh(Thfinal,"Thfinal.mesh");
+
+// build a mesh of a half cylindrical shell of interior radius 1. and exterior radius 2 and heigh 1.5
+@func mv2x = x*cos(y);
+@func mv2y = x*sin(y);
+@func mv2z = z;
+@mesh3 Thmv2 = @movemesh3D(Thfinal, transfo=[mv2x,mv2y,mv2z]);
+@savemesh(Thmv2,"halfcylindricalshell.mesh")
+\eFF
+\end{example}
+The command \texttt{movemesh} is describe in the following section.
+
+%% description des options de Tetgen dans ce cas.
+
+\paragraph{The keyword ``tetgtransfo''} \index{tetgtransfo}
+
+This keyword correspond to a composition of command line \texttt{tetg} and \texttt{movemesh3D3Dsurf}:
+\bFF
+@tetgtransfo( Th2, transfo= [$\Phi$1, $\Phi$2, $\Phi$3] ), $\cdots$ ) = @tetg( Th3surf, $\cdots$ ),
+\eFF
+
+where Th3surf = \texttt{movemesh3D3Dsurf}( Th2,tranfo=[$\Phi$1, $\Phi$2, $\Phi$3] ) and Th2 is the input two dimensional mesh of \texttt{tetgtransfo}.
+
+The parameters of this command line are on the one hand the parameters: \\
+\hspace*{2cm} \texttt{refface}, \texttt{switch}, \texttt{regionlist} \texttt{nboffacetcl} \texttt{facetcl}\\
+of keyword \texttt{tetg} and on the other hand the parameter \texttt{ptmerge} of keyword \texttt{movemesh2D3Dsurf}.
+
+\paragraph{Remark:} To use \texttt{tetgtransfo}, the result's mesh of \texttt{movemesh3D3Dsurf} must be an enclosed surface and defined one region.
+Therefore, the parameter \texttt{regionlist} is defined for one region.
+
+An example of this keyword can be found in line  of file ``buildlayers.edp''
+
+\paragraph{The keyword "tetgconvexhull"}\index{tetgconvexhull}
+
+\freefempp, using tetgen, is able to build a tetrahelization from a set of points. This
+tetrahelization is a Delaunay mesh of the convex hull of the set of points.
+
+The coordinates of the points can be initializes in two way. The first is a file that contains
+the coordinate of points $X_{i}=(x_{i}, y_{i}, z_{i})$. This files is organized as follow:
+$$
+\begin{array}{ccc}
+n_{v} & & \\
+x_{1} & y_{1} & z_{1}  \\
+x_{2} & y_{2} & z_{2} \\
+\vdots &\vdots & \vdots \\
+x_{n_v} & y_{n_v} & z_{n_v}
+\end{array}
+$$
+The second way is to give three arrays that corresponding respectively to
+$x-$coordinates, $y-$coordinates and $z-$coordinates.\\
+
+The parameters of this command line are
+\begin{description}
+\item [\texttt{switch  =}] A string expression. This string corresponds to the command line {\it{switch}} of TetGen see Section 3.2 of \cite{tetgen}.
+\item [\texttt{reftet  =}] An integer expression. set the label of tetrahedrons.
+\item [\texttt{refface =}] An integer expression. set the label of triangles.
+\end{description}
+
+In the string switch, we can't used the option 'p' and 'q' of tetgen.
+%% Construire un example
+
+
+\subsubsection{Moving mesh in three dimension }
+
+Meshes in three dimension can be translated rotated and deformed using the command line movemesh as in the 2D case
+(see section movemesh in chapiter 5). If $\Omega$ is tetrahelize as $T_{h}(\Omega)$, and $\Phi(x,y)=(\Phi1(x,y,z), \Phi1(x,y,z), \Phi3(x,y,z))$
+is a displacement vector then $\Phi(T_{h})$ is obtained by
+
+\bFF
+@mesh3 Th = @movemesh( Th, transfo=[$\Phi$1, $\Phi$2, $\Phi$3], ... );
+\eFF
+
+The parameters of movemesh in three dimension are
+\begin{description}
+\item [\texttt{transfo =}] \texttt{[$\Phi$1,$\Phi$2, $\Phi$3]} set the displacement vector of 3D transformation $[\Phi1(x,y,z), \Phi2(x,y,z), \Phi3(x,y,z) ]$.
+\item [\texttt{reftet  =}] set integer label of tetrahedrons. 0 by default.
+\item [\texttt{refface =}] set the label of faces of border. This parameters is initialized as refface for the keyword change (\ref{eq.org.vector.change.label}).
+\item [\texttt{facemerge =}] An integer expression. When you transform a mesh, some faces can be merged. This parameters equals to one if merge's faces is considerer as a boundary. Otherwise equals to zero.
+\item [\texttt{ptmerge =}] A real expression. When you transform a mesh, some points can be merged. This parameters is the criteria to define two merging points.
+By default, we use
+$$
+ptmerge \: = \: 1e-7 \: \:Vol( B ),
+$$
+where $B$ is the smallest axis parallel boxes containing the discretion domain of $\Omega$ and $Vol(B)$ is the volume of this box.
+\end{description}
+
+
+%%\paragraph{Remark:} This command line can be used also to move a surface mesh into an other surface mesh.
+
+An example of this command can be found in the file ''Poisson3d.edp'' situed in the directory examples++-3d. 
+
+
+\subsubsection{Layer mesh}
+
+In this section, we present the command line to obtain a Layer mesh: \texttt{buildlayermesh}.
+This mesh is obtaining in extending a two dimensional mesh in the z-axis.
+
+The domain $\Omega_{3d}$ defined by the layer mesh is equals to $\Omega_{3d} = \Omega_{2d} \times [zmin, zmax]$
+where $\Omega_{2d}$ is the domain define by the two dimensional mesh, $zmin$ and $zmax$ are function
+of $\Omega_{2d}$ in $R$ that defines respectively the lower surface and upper surface of $\Omega_{3d}$.
+
+\begin{figure}
+\hspace*{4cm} \includegraphics[height=5cm]{buillayermesh}
+\caption{Example of Layer mesh in three dimension.}
+\label{fig-layermeshextend}
+\end{figure}
+
+For a vertex of two dimensional mesh $V_{i}^{2d} = (x_{i},y_{i})$, we introduce the number of associated vertices in the $z-$axis $M_{i}+1$.
+We denote by $M$ the maximum of $M_{i}$ over the vertices of the two dimensional mesh. This value are called th number of layers (if $\forall i, \; N_{i}=N$ then there are $N$ layers in the mesh of $\Omega_{3d}$). $V_{i}^{2d}$ generated $M+1$ vertices which are defined by
+$$
+\forall j=0, \ldots, M, \qquad  V_{i,j}^{3d} = ( x_{i}, y_{i}, \theta_{i}(z_{i,j})  ),
+$$
+where $(z_{i,j})_{j=0,\ldots,M}$ are the $M+1$ equidistant points on the interval $[zmin( V_{i}^{2d} ), zmax( V_{i}^{2d})]$:
+\begin{eqnarray*}
+z_{i,j} =  j \: \delta \alpha + zmin(V_{i}^{2d}), \qquad \delta \alpha= \frac{ zmax( V_{i}^{2d} ) - zmin( V_{i}^{2d}) }{M}.
+\end{eqnarray*}
+The function $\theta_{i}$ defined on  $[zmin( V_{i}^{2d} ), zmax( V_{i}^{2d} )]$ is given by
+$$
+\theta_{i}(z) = \left \{
+\begin{array}{cl}
+\theta_{i,0} & \mbox{if} \: z=zmin(V_{i}^{2d}), \\
+\theta_{i,j} & \mbox{if} \: z \in ] \theta_{i,j-1}, \theta_{i,j}],\\
+\end{array}
+\right.
+$$
+with $(\theta_{i,j})_{j=0,\ldots,M_{i}}$ are the $M_{i}+1$ equidistant points on the interval $[zmin( V_{i}^{2d} ), zmax( V_{i}^{2d} )]$.\\
+
+Set a triangle $K=(V_{i1}^{2d}$, $V_{i2}^{2d}$, $V_{i3}^{2d})$ of the two dimensional mesh.
+$K$ is associated with a triangle on the upper surface (resp. on the lower surface) of layer mesh:
+$( V_{i1,M}^{3d}, V_{i2,M}^{3d}, V_{i3,M}^{3d} )$ (resp. $( V_{i1,0}^{3d}, V_{i2,0}^{3d}, V_{i3,0}^{3d})$).
+
+Also $K$ is associated with $M$ volume primatic elements which are defined by for $j=0,\ldots,M$
+$$
+H_{j} = ( V_{i1,j}^{3d}, V_{i2,j}^{3d}, V_{i3,j}^{3d}, V_{i1,j+1}^{3d}, V_{i2,j+1}^{3d}, V_{i3,j+1}^{3d} ).
+$$
+
+Theses volume elements can be have some merged point:
+\begin{description}
+\item 0 merged point : prism
+\item 1 merged points : pyramid
+\item 2 merged points : tetrahedra
+\item 3 merged points : no elements
+\end{description}
+
+The volume with merged points are called degenerate elements. To obtain a meshing with tetrahedrons, we decompose
+the pyramid into two tetrahedrons and the prism into three tetrahedrons. These tetrahedons are obtaining in cut the quadrilateral
+face of pyramid and prism with the diagonal with have the vertex with the maximum index.\\
+
+The triangles on the middle surface obtained with the decomposition of the volume prismatic elements are also the triangles generated by the edges on the border of the two dimensional mesh.\\
+
+The label of triangles on the border elements and tetrahedrons are defined with the label of these associated elements.\\
+
+
+The arguments of \texttt{buildlayermesh} is a two dimensional mesh and the number of layers $M$.
+
+The parameters of this command are:
+\begin{description}
+\item [\texttt{zbound  =}] [zmin,zmax] where zmin and zmax are functions expression. Theses functions define the lower surface mesh and upper mesh of surface mesh.
+\item [\texttt{coef    =}] A function expression between [0,1]. This parameter is used to introduce degenerate element in mesh.
+The number of associated points of vertex $V_{i}^{2d}$ is the integer part of $coef(V_{i}^{2d}) M$.
+\item [\texttt{reftet  =}] This vector is used to initialized the labels of tetrahedrons. This vector contains these labels and labels of triangles of the 2D mesh.
+\item [\texttt{reffacemid =}] This vector is used to initialized the labels of triangles of the layermesh of middle surface mesh. This vector contains these labels and labels of edges of the 2D mesh.
+\item [\texttt{reffaceup  =}] This vector is used to initialized the label of triangles of the layermesh of upper surface mesh. This vector contains these labels and labels of triangles of the 2D mesh.
+\item [\texttt{reffacelow =}] This vector is used to initialized the label of triangles of the layermesh of lower surface mesh. This vector contains these labels and labels of triangles of the 2D mesh.
+\end{description}
+
+Moreover, we also add post processing parameters that allow to moving the mesh. These parameters correspond to parameters
+\texttt{transfo =}, \texttt{facemerge} and \texttt{ptmerge =} of the command line \texttt{movemesh}.
+
+The vector \texttt{reftet},\texttt{reffacemid}, \texttt{reffaceup} and \texttt{reffacelow} are composed of $n_{l}$ succesive sub vectors of size two where $n_{l}$ is the number of label that we want to initialized. The first element and second element of sub vector are respectively a label of elements of the two dimensional mesh and the label of elements of layer mesh which is associated with these elements.
+
+%%% Example a couper entre les differentes commandes
+An example of this command line is given in ``buildlayermesh.edp''.
+
+\begin{example}[buildlayermesh.edp]
+\label{buildlayermesh}~
+\bFF
+
+// file buildlayermesh.edp
+load "glumesh2D"
+load "glumesh3D"
+load "tetgen"
+load "buildlayer"
+
+// Test 1
+
+@int C1=99, C2=98; // could be anything
+@border C01(t=0,pi){ x=t;  y=0;      label=1;}
+@border C02(t=0,2*pi){ x=pi; y=t;  label=1;}
+@border C03(t=0,pi){ x=pi-t;  y=2*pi;    label=1;}
+@border C04(t=0,2*pi){ x=0;    y=2*pi-t; label=1;}
+
+@border C11(t=0,0.7){ x=0.5+t;  y=2.5;      label=C1;}
+@border C12(t=0,2){ x=1.2;    y=2.5+t;  label=C1;}
+@border C13(t=0,0.7){ x=1.2-t;  y=4.5;     label=C1;}
+@border C14(t=0,2){ x=0.5;    y=4.5-t; label=C1;}
+
+@border C21(t=0,0.7){ x= 2.3+t;     y=2.5;  label=C2;}
+@border C22(t=0,2){        x=3;   y=2.5+t;  label=C2;}
+@border C23(t=0,0.7){   x=3-t;     y=4.5;  label=C2;}
+@border C24(t=0,2){       x=2.3;   y=4.5-t; label=C2;}
+
+@mesh Th=@buildmesh(    C01(10)+C02(10)+ C03(10)+C04(10)
+                    + C11(5)+C12(5)+C13(5)+C14(5)
+                    + C21(-5)+C22(-5)+C23(-5)+C24(-5));
+
+@mesh Ths=@buildmesh(    C01(10)+C02(10)+ C03(10)+C04(10)
+                    + C11(5)+C12(5)+C13(5)+C14(5) );
+
+// construction of a box with one hole and two regions
+@func zmin=0.;
+@func zmax=1.;
+@int MaxLayer=10;
+
+@func XX = x*cos(y);
+@func YY = x*sin(y);
+@func ZZ = z;
+
+@int[int] r1=[0,41], r2=[98,98,99,99,1,56];
+@int[int] r3=[4,12];    //  The triangles of uppper surface mesh generated by the triangle in the 2D region of mesh Th of label 4 as label 12.
+@int[int] r4=[4,45];    //  The triangles of lower surface mesh  generated by the triangle in the 2D region of mesh Th of label 4 as label 45.
+
+@mesh3 Th3=@buildlayers( Th, MaxLayer, zbound=[zmin,zmax], reftet=r1, reffacemid=r2, reffaceup = r3, reffacelow = r4 );
+@savemesh(Th3,"box2region1hole.mesh");
+// construction of a sphere with TetGen
+@func XX1 = cos(y)*sin(x);
+@func YY1 = sin(y)*sin(x);
+@func ZZ1 = cos(x);
+@string test="paACQ";
+cout << "test=" << test << endl;
+@mesh3 Th3sph=@tetgtransfo(Ths,transfo=[XX1,YY1,ZZ1],switch=test,nbofregions=1,regionlist=domain);
+@savemesh(Th3sph,"sphere2region.mesh");
+
+\eFF
+\end{example}
+
+\subsection{Meshing examples}
+
+
+\begin{example}[lac.edp]
+// file "lac.edp"
+\bFF
+@load ``buildlayer''
+@int nn=5;
+@border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}
+@mesh Th2 = @buildmesh(cc(100));
+@fespace Vh2(Th2,P2);
+Vh2 ux,uy,p2;
+@int[int] rup=[0,2], rdlow=[0,1], rmid=[1,1,2,1,3,1,4,1];
+@func zmin = 2-sqrt(4-(x*x+y*y));
+@func zmax = 2-sqrt(3.);
+
+@mesh3 Th = @buildlayers(Th2,nn,
+  coeff = max((zmax-zmin)/zmax, 1./nn),
+  zbound=[zmin,zmax],
+  reffacemid=rmid;
+  reffaceup=rup;
+  reffacelow=rlow);
+@savemesh(Th,''Th.meshb'');
+@exec(``medit Th; Th.meshb'');
+\eFF
+\end{example}
+
+\begin{example}[tetgenholeregion.edp]
+\bFF
+// file tetgenholeregion.edp
+@load "glumesh2D"
+@load "glumesh3D"
+@load "tetgen"
+@load "buildlayer"
+
+@mesh Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
+//  a parametrization of a sphere 
+@func f1 =cos(x)*cos(y);
+@func f2 =cos(x)*sin(y);
+@func f3 = sin(x);
+//  partiel derivative of the parametrization DF
+@func f1x=sin(x)*cos(y);   
+@func f1y=-cos(x)*sin(y);
+@func f2x=-sin(x)*sin(y);
+@func f2y=cos(x)*cos(y);
+@func f3x=cos(x);
+@func f3y=0;
+// $  M = DF^t DF $
+@func m11=f1x^2+f2x^2+f3x^2;
+@func m21=f1x*f1y+f2x*f2y+f3x*f3y;
+@func m22=f1y^2+f2y^2+f3y^2;
+
+@func perio=[[4,y],[2,y],[1,x],[3,x]];  
+@real hh=0.1;
+@real vv= 1/square(hh);
+verbosity=2;
+Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+@plot(Th,wait=1);
+
+verbosity=2;
+
+// construction of the surface of spheres
+@real Rmin  = 1.;
+@func f1min = Rmin*f1;
+@func f2min = Rmin*f2;
+@func f3min = Rmin*f3;
+
+@mesh3 Th3sph = @movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min]);
+
+@real Rmax  = 2.;
+@func f1max = Rmax*f1;
+@func f2max = Rmax*f2;
+@func f3max = Rmax*f3;
+
+@mesh3 Th3sph2 = @movemesh2D3Dsurf(Th,transfo=[f1max,f2max,f3max]);
+
+cout << "addition" << endl;
+@mesh3 Th3 = Th3sph+Th3sph2;
+
+@real[int] domain2 = [1.5,0.,0.,145,0.001,0.5,0.,0.,18,0.001];
+cout << "==============================" << endl;
+cout << " tetgen call without hole " << endl;
+cout << "==============================" << endl;
+@mesh3 Th3fin = @tetg(Th3,switch="paAAQYY",nbofregions=2,regionlist=domain2);
+cout << "=============================" << endl;
+cout << "finish tetgen call without hole" << endl;
+cout << "=============================" << endl;
+savemesh(Th3fin,"spherewithtworegion.mesh"); 
+
+@real[int] hole = [0.,0.,0.];
+@real[int] domain = [1.5,0.,0.,53,0.001];
+cout << "=============================" << endl;
+cout << "  tetgen call with hole   " << endl;
+cout << "=============================" << endl;
+@mesh3 Th3finhole=@tetg(Th3,switch="paAAQYY",nbofholes=1,holelist=hole,
+nbofregions=1,regionlist=domain);
+cout << "=============================" << endl;
+cout << "finish tetgen call with hole   " << endl;
+cout << "=============================" << endl;
+@savemesh(Th3finhole,"spherewithahole.mesh"); 
+\eFF
+\end{example}
+
+
+
+\newpage
+Documentation for new function 
+
+\subsection{Reconstruct/Refine a three dimensional mesh with TetGen}
+Meshes in three dimension can be refined using TetGen with the command line \texttt{tetgreconstruction}.
+
+The parameter of this keyword are
+\begin{description}
+\item [\texttt{reftet=}] an integer array that allow to change the label of tetrahedrons. 
+This array is defined as the parameter \texttt{reftet} in the keyword \texttt{change} for a three dimensional mesh.
+\item [\texttt{refface=}] an integer array that allow to change the label of triangles  
+This array is defined as the parameter \texttt{refface} in the keyword \texttt{change} for a three dimensional mesh.
+\item [\texttt{sizevolume=}] a function. This function allows to constraint volume size of tetrahedrons in the domain. 
+\end{description}
+
+The parameter \texttt{switch} \texttt{nbofregions}, \texttt{regionlist}, 
+\texttt{nboffacetcl} and \texttt{facetcl} of the command line which call TetGen (tetg) 
+is used for \texttt{tetgreconstruction}.
+
+In the parameter \texttt{switch=}, the character 'r' should be used without the character 'p'. 
+For instance, see the manual of TetGen \cite{tetgen} for effect of 'r' with other character.
+
+The parameter \texttt{regionlist} allow to define a new volume contraint in the region. 
+The label in the \texttt{regionlist} will be the previous label of region. 
+This parameter and \texttt{nbofregions} can't be used with parameter \texttt{sizevolume}.
+
+\begin{example}[sphererefine.edp]
+\bFF
+// file sphererefine.edp
+@load "glumesh2D"
+@load "glumesh3D"
+@load "tetgen"
+@load "popen"
+
+@mesh Th=@square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},\frac{-pi}{2}[\times]0,2\pi[ $
+//  a parametrization of a sphere 
+@func f1 =cos(x)*cos(y);
+@func f2 =cos(x)*sin(y);
+@func f3 = sin(x);
+//  partiel derivative of the parametrization DF
+@func f1x=sin(x)*cos(y);   
+@func f1y=-cos(x)*sin(y);
+@func f2x=-sin(x)*sin(y);
+@func f2y=cos(x)*cos(y);
+@func f3x=cos(x);
+@func f3y=0;
+// $  M = DF^t DF $
+@func m11=f1x^2+f2x^2+f3x^2;
+@func m21=f1x*f1y+f2x*f2y+f3x*f3y;
+@func m22=f1y^2+f2y^2+f3y^2;
+
+@func perio=[[4,y],[2,y],[1,x],[3,x]];  
+real hh=0.1;
+real vv= 1/square(hh);
+verbosity=2;
+Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+@plot(Th,wait=1);
+
+verbosity=2;
+
+// construction of the surface of spheres
+real Rmin  = 1.;
+@func f1min = Rmin*f1;
+@func f2min = Rmin*f2;
+@func f3min = Rmin*f3;
+
+@mesh3 Th3=@movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min]);
+
+real[int] domain = [0.,0.,0.,145,0.01];
+@mesh3 Th3sph=@tetg(Th3,switch="paAAQYY",nbofregions=1,regionlist=domain);
+
+int[int] newlabel = [145,18]; //parameter to change label of tetrahedrons
+real[int] domainrefine = [0.,0.,0.,145,0.0001]; 
+// This array contains the previous label of tetrahedrons of Th3 (145).
+@mesh3 Th3sphrefine=@tetgreconstruction(Th3sph,switch="raAQ",reftet=newlabel,
+nbofregions=1,regionlist=domainrefine);
+
+int[int] newlabel2 = [145,53];
+@func fsize = 0.01/(( 1 + 5*sqrt( (x-0.5)^2+(y-0.5)^2+(z-0.5)^2) )^3);
+@mesh3 Th3sphrefine2=@tetgreconstruction(Th3sph,switch="raAQ",reftet=newlabel2,sizeofvolume=fsize);
+
+int medit = @meditmeshsol(Th3sph);
+int meditrefine = @meditmeshsol(Th3sphrefine);
+int meditrefine2 = @meditmeshsol(Th3sphrefine2);
+
+\eFF
+\end{example}
+
+Commentaire : 
+1: lorsque l'on définis deux zones, il y a des soucis à la frontière commune. 
+Je vais envoyer un mail à Hang Si pour lui soumettre le cas. 
+2: Il faut rajouter une option wait dans cette version de medit.
+
+\subsection{Write solution at the format .sol}
+With the keyword savesol, we can store a scalar functions, a scalar FE functions, 
+a vector fields, a vector FE fields, a symmetric tensor and a symmetric FE tensor.. 
+Such format is used in medit.
+
+\paragraph{extension file .sol} This presentation is done using notation of Section \ref{meshformatfile.mesh}.\\
+
+\def\Int#1{ {\tt(I)} #1}
+\def\Loop#1#2{{\bf\Large(}\,#1\,{\bf\Large{,\,\,}}\,#2\,{\bf\Large)}}
+
+
+
+The first two lines of the file are
+\small
+\begin{description}
+\item {\tt MeshVersionFormatted 0}
+\end{description}
+\normalsize
+
+\small
+\begin{description}
+\item {\tt Dimension}
+  \Int{dim}
+\end{description}
+
+The following fields are begin with one of the following keyword: 
+SolAtVertices, SolAtEdges, SolAtTriangles, SolAtQuadrilaterals, 
+SolAtTetrahedra, SolAtPentahedra, SolAtHexahedra.
+
+In each field, we give then in the next line the number of elements in solutions 
+(SolAtVertices: number of vertices, SolAtTriangles: number of triangles, ...). In other lines, we give 
+ the number of solutions , the type of solution (1: scalar, 2: vector, 3: symmetric tensor). 
+ And finaly,  we give the solutions at the differents elements.
+
+An example of field with the keyword SolAtTetrahedra:
+\small
+\begin{description}
+\item {\tt{SolAtTetrahedra}}\\
+  \Int{NbOfTetrahedrons} 
+  {\tt \obeylines
+  $ \mathtt{ \quad nbsol \quad typesol^1 \quad ... \quad typesol^n }  $
+  $\left(\left(\left( \mathtt{U}_{ij}^k, \quad \forall i \in \{1,...,\mathtt{nbrealsol}^k\}\right), %
+\quad \forall k \in \{1,...\mathtt{nbsol}\}\right) %
+ \quad \forall j \in \{1,...,\mathtt{NbOfTetrahedrons}\}\right)$
+ }
+\end{description}
+where
+\begin{description}
+\item {\tt  nbsol} is an integer equal to the number of solutions
+\item $\mathtt{  typesol^k}$, type of the solution  number $ k$, is
+  \begin{description}
+   \item $\mathtt{typesol^k = 1}$ the solution {\tt k} is scalar.  
+   \item $\mathtt{typesol^k = 2}$ the solution {\tt k} is vectorial.
+   \item $\mathtt{typesol^k = 3}$ the solution {\tt k} is a symmetric tensor or symmetric matrix.
+   \end{description}
+\item  $\mathtt{  nbrealsol^k}$ number of real to discribe solution number $k$ is
+  \begin{description}
+   \item $\mathtt{nbrealsol^k = 1}$ the solution {\tt k} is scalar.  
+   \item $\mathtt{nbrealsol^k = dim}$ the solution {\tt k} is vectorial ($dim$ is the dimension of the solution).
+   \item $\mathtt{nbrealsol^k = dim \: (dim+1)/2}$ the solution {\tt k} is a symmetric tensor or symmetric matrix.
+   \end{description}
+\item  {\tt U$_{ij}^k$} is a real equal to the value of the component  $i$ of the solution  $k$ at tetrahedra $j$
+on the associated mesh. 
+\end{description}
+
+The file must be finished with the keyword End.
+
+The real element of symmetric tensor
+$$
+ST^{3d}=\left(
+\begin{array}{ccc}
+ST_{xx}^{3d} & ST_{xy}^{3d} & ST_{xz}^{3d}\\
+ST_{yx}^{3d} & ST_{yy}^{3d} & ST_{yz}^{3d} \\
+ST_{zx}^{3d} & ST_{zy}^{3d} & ST_{zz}^{3d} 
+\end{array}
+\right)
+\qquad \mbox{and} \qquad
+ST^{2d}= \left(
+\begin{array}{cc}
+ST_{xx}^{2d} & ST_{xy}^{2d} \\
+ST_{yx}^{2d} & ST_{yy}^{2d} 
+\end{array}
+\right)
+$$
+stored in the extension .sol are respectively $ST_{xx}^{3d}, ST_{yx}^{3d}, ST_{yy}^{3d}, ST_{zx}^{3d}, ST_{zy}^{3d}, ST_{zz}^{3d}$ 
+and  $ST_{xx}^{2d}, ST_{yx}^{2d}, ST_{yy}^{2d}$
+
+A real scalar functions $f1$ and a vector fields $\Phi=[\Phi1,\Phi2,\Phi3]$ at the vertices of the three 
+dimensional mesh Th3 is stored in the file "f1PhiTh3.sol" using
+
+\bFF
+@int bb = @savesol("f1PhiTh3.sol",Th3, nbscalar=1, scalar=[$f1$], nbvector=1, vector=[$\Phi$1, $\Phi$2, $\Phi$3]);
+\eFF
+
+The parmameters of this keyword are
+\begin{description}
+\item [\texttt{nbscalar =}] number of scalar solutions ($nbs$).
+\item [\texttt{scalar   =}]  \texttt{[$f_{1}$, $f_{2}$, $f_{3}$, ..., $f_{nbs}$]} set the $nbs$ scalar solutions.
+\item [\texttt{nbvector =}] number of vector solutions ($nbv$). 
+\item [\texttt{nbsymtensor =}] number of symmetric tensor solutions ($nbst$).
+\item [\texttt{vector    =}] set the real element of $nbv$ vector solutions. 
+\item [\texttt{symtensor =}] set the real element of $nbst$ symmetric tensor solutions.
+\item [\texttt{order =}] 0 is the solution is given at the center of gravity of elements. 
+1 is the solution is given at the vertices of elements.  
+\end{description}
+
+In two dimensional case for vector solutions $v^{j}=(v^{j}_{x},v^{j}_{y}), \quad j=1,\ldots nbv$, the parameter \texttt{vector} is equal to 
+\texttt{[$v_{x}^{1}$, $v_{y}^{1}$, ..., $v_{x}^{nbv}$, $v_{y}^{nbv}$]}. 
+
+In two dimensional case for symtensor solutions $st^{j}= \left (
+\begin{array}{ccc}
+st_{xx}^{j} & st_{xy}^{j} \\
+st_{yx}^{j} & st_{yy}^{j} 
+\end{array}
+\right) \quad j=1,\ldots nbst$, the parameter \texttt{vector} is equal to 
+\texttt{[ $st_{xx}^{1}$, $st_{yx}^{1}$, $st_{yy}^{1}$, ..., $st_{xx}^{nbst}$, $st_{yx}^{nbst}$, $st_{yy}^{nbst}$]}
+
+%%\item [\texttt{symtensor =}] \texttt{[ $st_{xx}^{1}$, $st_{yx}^{1}$, $st_{yy}^{1}$, ..., $st_{xx}^{nbst}$, $st_{yx}^{nbst}$, $st_{yy}^{nbst}$]} 
+%%set the real element of $nbst$ symmetric tensor solutions  $st^{j}=(st^{j}_{x},st^{j}_{y}), \quad j=1,\ldots nbst$.
+%%Three dimensional case:
+%%\item [\texttt{vector   =}] \texttt{[$f_{x}^{1}$, $f_{y}^{1}$, $f_{z}^{1}$, ..., $f_{x}^{nbv}$, $f_{y}^{nbv}$, $f_{z}^{nbv}$  ]} 
+%%set the $nbv$ vector solutions.
+%%\item [\texttt{symtensor   =}] \texttt{[ $f_{xx}^{1}$, $f_{yx}^{1}$, $f_{yy}^{1}$, $f_{zx}^{1}$, $f_{zy}^{1}$, $f_{zz}^{1}$, 
+%%..., $f_{xx}^{nbst}$, $f_{yx}^{nbst}$, $f_{yy}^{nbst}$, $f_{zx}^{nbst}$, $f_{zy}^{nbst}$, $f_{zz}^{nbst}$ ]} 
+%%set the $nbst$ symmetric tensor solutions.
+
+In the file, solutions are stored in this order : scalar solutions, vector solutions and finaly symmetric 
+tensor solutions.\\
+
+
+
+Commentaire: 
+1. Le resultat pour l'instant est un entier. La valeur de retour n'a pas de sens. 
+2. Pour l'instant, lorsque l'on veut sauvegarder une solution éléments finis il faut utiliser le mots clé "savesolVh" à la place de savesol. 
+3. matrice non symétrique: pas coder dans la version de medit sous cvs. 
+
+\subsection{Call medit with the keyword meditmeshsol}
+
+The keyword meditmeshsol allow to dipslay a mesh or mesh and solution using medit. 
+Medit is a freeware display package by Pascal Frey using OpenGL. 
+To use this command we need to install medit. This command allow to represent one solution.
+
+The argument of this command line is a mesh and a name for the display.
+The parmameters of this command line are
+\begin{description}
+\item [\texttt{solution =}] An integer parameter. This parameter is equal to 0 if there is no solution to display and otherwise is equal to 1.
+\item [\texttt{order =}] 0 is the solution is given at the center of gravity of elements. 
+1 is the solution is given at the vertices of elements.
+\item [\texttt{scalar =}] set the scalar solutions to display.
+
+\texttt{two dimensional case:}
+\item [\texttt{vector =}] set the vector field solution $v=(v_{x},v_{y})$. This parameter is equal to \texttt{[$v_{x}$,$v_{y}$]}.    
+\item [\texttt{symtensor =}]  set the symmetric tensor solution 
+$
+st= \left (
+\begin{array}{cc}
+st_{xx} & st_{xy} \\
+st_{yx} & st_{yy}
+\end{array}
+\right)
+$. This parmameter is equal to \texttt{[$st_{xx}$, $st_{yx}$, $st_{yy}$]}
+
+\texttt{three dimensional case:}
+\item [\texttt{vector =}] set the vector field solution $v=(v_{x},v_{y},v_{z})$. This parameter is equal to  \texttt{[$v_{x}$,$v_{y}$,$v_{z}$]}.
+\item [\texttt{symtensor =}] set the symmetric tensor solution 
+$
+st= \left (
+\begin{array}{ccc}
+st_{xx} & st_{xy} & st_{xz}\\
+st_{yx} & st_{yy} & st_{yz} \\
+st_{zx} & st_{zy} & st_{zz} 
+\end{array}
+\right)
+$. This parameter is equal to \texttt{[$st_{xx}$, $st_{yx}$, $st_{yy}$, $st_{zx}$, $st_{zy}$, $st_{zz}$]}
+\end{description}
+
+\begin{example}[meditsol.edp]
+\bFF
+@load "popen"
+
+@border Gamma(t=0,2*pi){x=cos(t); y=sin(t); label=1;};
+@border Gamma2(t=0,2*pi){x=5*cos(t); y=5*sin(t); label=2;};
+@mesh Th=@buildmesh(Gamma2(30)+Gamma(-15));
+
+@fespace Vh(Th,P2);
+@func f1=x;
+Vh f1vh=f1;
+
+Vh u,v,f=x^2;
+  
+@solve Lap(u,v)=int2d(Th)( dx(u)*dx(v)+dy(u)*dy(v) ) - int2d(Th)(f*v) 
++ on(Gamma2,u=1)+on(Gamma,u=0);
+
+@int bb=savesol("f1.sol",Th,nbscalar=1,scalar=[f1],order=1);
+@int bbVh=savesolVh("f1Vh.sol",Th,nbscalar=1,scalar=[f1vh],order=1);
+
+@int medit=meditmeshsol("second",Th,solution=1,scalar=f,order=1);
+@int meditVh=meditmeshsolVh("solPoison",Th,solution=1,scalar=u,order=1);
+\eFF
+\end{example}
+
+Commentaire:
+1. Le resultat pour l'instant est un entier. La valeur de retour n'a pas de sens. 
+2. Pour l'instant, lorsque l'on veut représenter une solution éléments finis il 
+faut utiliser le mots clé "meditmeshsolVh" à la place de meditmeshsol. 
+3. matrice non symétrique: pas coder dans la version de medit sous cvs. 
+4. Le passage à plusieurs solutions, je le ferais plus tard.
 
 
 \section{\setS{Finite Elements}} \index{finite element space}\label{finite elements}
@@ -13936,6 +14838,12 @@ Raviart, P; Thomas J; Introduction \`{a} l'analyse num\'{e}rique des
 \'{e}quations aux d\'{e}riv\'{e}es partielles, Masson, 1983.
 
 %\bibitem{COOLL} COOL package , 
+\bibitem{tetgen} Hang Si,
+{\it TetGen Users' Guide: A quality Tetrahedral Mesh Generator and Three-Dimensional Delaunay Triangulator} //
+ \url{http://tetgen.berlios.de}
+ 
+\bibitem{tetgenshewchuk} Shewchuk J. R.,
+{\it{Tetrahedral Mesh Generation by Delaunay Refinement}} Proceeding of the Fourteenth Anual Symposium on Computational Geometry (Minneapolis, Minnesota), pp 86--95, 1998.
 
 \bibitem{0501496} {\sc M. A. Taylor,  B. A.
 Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integration in the triangle , Report-no: SAND2005-0034J,

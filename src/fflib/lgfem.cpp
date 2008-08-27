@@ -1973,7 +1973,7 @@ class Convect : public E_F0mps  { public:
             ffassert(a);
 	d= a->size();
        if (d == 3) 
-	   w= CastTo<double>((*a)[3]);
+	   w= CastTo<double>((*a)[2]);
        else if (d != 2) 
           { CompileError("convect vector have only 2 or 3 componant");}
        u= CastTo<double>((*a)[0]);
@@ -2981,13 +2981,16 @@ if (ddt)
 	      int k=0;
 	      int j; 
 	      int it=Th3(mpc.T3);
-	     
+	      cout << " IN: " <<  (*mpc.T3)(PHat) << " " << ddt << endl;
 	      while ( (j=WalkInTet(Th3,it,PHat,R3(GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),GetAny<double>((*w)(s))),ddt))>=0) 
                 { 
-		   
-                   int itt =  Th3.ElementAdj(it,j,PHat);
-		   mpc.change(PHat,Th3[it],0);             
-		   ffassert(k++<10000);
+		   cout << (*mpc.T3)(PHat) << " " << PHat << " : j = " << j  <<  " it:  " << it << endl;
+                    int itt =  Th3.ElementAdj(it,j,PHat);
+		    cout << (*mpc.T3)(PHat) << " " << ddt << endl;	
+		    if(itt<0) break;
+		    it=itt;
+		    mpc.change(PHat,Th3[it],0);             
+		   ffassert(k++<1000);
                 }
 	      
 	      mpc.change(PHat,Th3[it],0);

@@ -480,31 +480,46 @@ public:
     int p=TheAdjacencesLink[nea*k+j];
     if(p>=0) 
       {
+	
 	  R lb[Rd::d+1];//{1.-PHat.sum(),PHat}; 
+	  R lbb[Rd::d+1];//{1.-PHat.sum(),PHat}; 
 	  PHat.toBary(lb); // R1 R2 R3 
-	  assert(Abs(lb[j])<1e-10);
-	R ll[T::nva];
-	int sigma[T::nva];
-	  
+	  if(Abs(lb[j])>1e-10)
+	   assert(Abs(lb[j])<1e-10);
+	int sigma[T::nva];	  
 	const void * nvkj[T::nva], *nvkkjj[T::nva];
 	int jj=p%nea;
 	int kk=p/nea;
 
 	Element & K(elements[CheckT(k)]);
 	Element & KK(elements[CheckT(kk)]);
-	  
+	Rd Pin=K(PHat);  
 	for (int l=0;l<T::nva;++l)
 	    nvkj[l] =&K[T::nvadj[j][l]];
-	for (int l=0;l<T::nva;++l)
-	    ll[l] = lb[T::nvadj[j][l]];
 	for (int l=0;l<T::nva;++l)
 	    nvkkjj[l] = &KK[T::nvadj[jj][l]];
 	//  il faut permute ll.
 	PermI2J<nva>(nvkj,nvkkjj,sigma);
 	for (int l=0;l<T::nva;++l)
-	    lb[T::nvadj[jj][l]]=ll[sigma[l]];
-	lb[jj]=0; 
-	PHat=Rd(lb+1);
+	    lbb[T::nvadj[jj][l]]=lb[T::nvadj[j][sigma[l]]];
+	lbb[jj]=0; 
+	Rd PH=PHat;  
+	PHat=Rd(lbb+1);
+	Rd Pout=KK(PHat);
+	if( (Pin-Pout).norme2() > 1e-10 )
+	    {
+		for (int l=0;l<=T::nva;++l)
+		    cout << lbb[l] <<" < -- " << lb[l] << endl;
+		for (int l=0;l<T::nva;++l)
+		    cout <<l << " :    o=  " << nvkkjj[l]  << "   i= " << nvkj[l] << " " <<  sigma[l] 
+		         << " -- " << &KK[T::nvadj[jj][l]]  << " == " << &K[T::nvadj[j][sigma[l]]] 
+		    << " -- " << &K[T::nvadj[j][l]]  << " == " << &KK[T::nvadj[jj][sigma[l]]] 
+		    << " -- " << lbb[T::nvadj[jj][l]] << " == " << lb[T::nvadj[j][sigma[l]]]
+		    << " ++ " << T::nvadj[jj][l] << " <-- " << T::nvadj[j][sigma[l]] 
+		    << endl;
+		cout << "Adj:  j= " << j << " ," << Pin << " != " << Pout << " , " << PH << " -> " << PHat << "  jj = " << jj <<  endl;
+		assert(0);
+	    }
 	j=jj;
 	return kk;
       }

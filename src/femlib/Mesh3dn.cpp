@@ -405,7 +405,7 @@ namespace Fem2D {
     return p;
   }
 
-  int  WalkInTet(const Mesh3 & Th,int it, R3 Phat,R3 U, R & dt)
+  int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt)
   {
     
     R lambda[4];
@@ -431,7 +431,7 @@ namespace Fem2D {
     l[1] /= Det;
     l[2] /= Det;
     l[3] /= Det;
-    
+    cout << "\t\t\tWT " << it << " " << Phat << ",  " << PF << " :  "<< l[0] << " " <<l[1] <<" " <<l[2] << " " <<l[3] <<endl ;
     const R eps = 1e-5;
     int neg[nve],k=0;
     int kk=-1;
@@ -450,7 +450,7 @@ namespace Fem2D {
 	if (l[3]<eps ) neg[k++]=3;
 	
 	R eps1 = T.mesure()   * 1.e-5;
-	
+	  cout << " k= " << k << endl;
 	if (k==3) //  3 face de sortie possible 
 	  {
 	    // let j be the vertex beetween the 3 faces 
@@ -458,12 +458,14 @@ namespace Fem2D {
 	    int i0 = Tet::nvface[j][0];
 	    int i1 = Tet::nvface[j][1];
 	    int i2 = Tet::nvface[j][2];
+	    cout << "  -------- " << j << " " << i0 << " " << i1 << " " << i2  << endl;
 	    //  le tet i0,i1,i2,j est positif. 
 	    assert(signe_permutation(i0,i1,i2,j)==1);
 	    // 
 	    R v0= det(Q[i0],Q[j],P,PF); 
 	    R v1= det(Q[i1],Q[j],P,PF); 
 	    R v2= det(Q[i2],Q[j],P,PF); 
+	      cout << "\t\t\t " << j << " v0123 =" << v0 << " "<< v1 << " " << v2 << endl;
 	    if( v0 > eps && v1 < -eps ) 
 	      kk= i1 ;// on sort par la face j i0, j1
 	    else if( v1 > eps && v2 < -eps ) 
@@ -481,6 +483,7 @@ namespace Fem2D {
 		  kk =  nul[1+(rand()/(RAND_MAX/2))%2];		  
 		else // on sort par le sommet j.  on choisi la face alleatoirement 
 		  kk = nul[(rand()/(RAND_MAX/3))%3];
+		  
 	      }
 	  }
 	else if (k==2)
@@ -496,6 +499,7 @@ namespace Fem2D {
 	    int   jj1[6] = {3,1,2,3,0,1};
 	    int j0 = jj0[e];
 	    int j1 = jj1[e];
+	      cout << " e " << e << " i0 " << i0 << " " << i1 << " j0 =" << j0 << " " << j1 << endl;
 	    // le tet  j0,j1,i0,i1  doit est positif (ie. la pemutation est positive)
 	    // de meme  i0,i1,j0,j1
 	    assert(signe_permutation(j0,j1,i0,i1)==1);
@@ -514,7 +518,8 @@ namespace Fem2D {
 	if(kk>=0)
 	  {
 	    R d=lambda[kk]-l[kk];
-	    
+	    if ( l[kk] )
+	     {
 	    throwassert(d);
 	    R coef =  lambda[kk]/d;
 	    R coef1 = 1-coef;
@@ -524,6 +529,13 @@ namespace Fem2D {
 	    lambda[2] = lambda[2]*coef1 + coef *l[2];
 	    lambda[3] = lambda[3]*coef1 + coef *l[3];
 	    lambda[kk] =0;
+	     }
+	    else // on ne bouge pas on resort 
+	      {
+	      cout << "            WT : on ne bouge pas on resort \n";
+	      return kk;
+	      }
+	      
 	  }
       }
     //  on remette le point dans le tet. 
@@ -536,7 +548,9 @@ namespace Fem2D {
     if(lambda[1]<0) lambda[jj] += lambda[1],lambda[1]=0;
     if(lambda[2]<0) lambda[jj] += lambda[2],lambda[2]=0;
     if(lambda[3]<0) lambda[jj] += lambda[3],lambda[3]=0;
-    
+    Phat=R3(lambda+1);
+    cout  << "\t\t\t -> " << Phat << " " << kk << endl; 
+    assert(kk<0 || lambda[kk]==0);
     return kk;
   }        
     
