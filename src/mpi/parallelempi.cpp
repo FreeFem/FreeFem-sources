@@ -376,7 +376,7 @@ void init_lgparallele()
      TheOperators->Add("<-", 
        new OneOperator2_<MPIrank*,MPIrank*,MPIrank>(&set_copympi));
      Global.Add("processor","(",new OneOperator1<MPIrank,long>(mpiwho));
-     cout << " Add " << endl;
+
      TheOperators->Add(">>",
 		       new OneBinaryOperator<Op_Readmpi<double> >,
 		       new OneBinaryOperator<Op_Readmpi<long> > ,
@@ -409,6 +409,7 @@ void init_lgparallele()
   void end_parallele()
    {
     MPI::Finalize();
+    if(mpirank==0 ) cout << "FreeFem++-mpi end correctly\n"; 
    }
 //   MPI::COMM_WORLD.Recv(&msg, 1, MPI::INT, from, MPI::ANY_TAG);
 //    MPI::COMM_WORLD.Isend(&msg, 1, MPI::INT, to, 4);

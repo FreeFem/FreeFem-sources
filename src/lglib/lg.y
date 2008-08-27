@@ -631,11 +631,11 @@ int Compile()
     retvalue=yyparse(); //  compile
     if(retvalue==0)  
       if(currentblock) 
-	retvalue=1,cerr <<  "Error:a block is not close" << endl;   
+	{retvalue=1; if(!mpirank) cerr <<  "Error:a block is not close" << endl; }  
       else {
-	  if( verbosity) {
-	      cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg << endl;
-	      cerr <<  "Bien: On a fini Normalement" << endl; }
+	  if( verbosity  ) {
+	      cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg << " mpirank: " <<mpirank << endl;
+	      if(!mpirank) cerr <<  "Bien: On a fini Normalement" << endl; }
 	}
   }
 
@@ -643,23 +643,23 @@ int Compile()
     {
       retvalue=e.errcode();
       cerr << "error " << e.what() 
-	   << "\n code = "<<  retvalue << endl;
+	   << "\n code = "<<  retvalue << " mpirank: " <<mpirank  << endl;
     }
   catch(std::ios_base::failure & e)
     {
      cerr << "std  catch io failure \n what : " << e.what() << endl;; 
-     cerr << " at exec line  " << TheCurrentLine << endl; 
+     cerr << " at exec line  " << TheCurrentLine << " mpirank: " <<mpirank  << endl; 
     }
   catch(std::exception & e)
     {
      cerr << "std  catch exception \n what : " << e.what() << endl;; 
-     cerr << " at exec line  " << TheCurrentLine << endl; 
+     cerr << " at exec line  " << TheCurrentLine << " mpirank: " <<mpirank  << endl; 
     
     }
   catch(...)
    {
      cerr << "Strange catch exception ???\n"; 
-     cerr << " at exec line  " << TheCurrentLine << endl; 
+     cerr << " at exec line  " << TheCurrentLine << " mpirank: " <<mpirank << endl; 
     }
   return retvalue; 
 }
@@ -684,8 +684,12 @@ static void SetcppIo()
 
 int mainff (int  argc, char **argv)
 {
+    int vvold=verbosity; 
+    if(mpirank !=0) verbosity=0;
   SetcppIo();
-GetEnvironment();     
+  GetEnvironment();   
+    vvold=verbosity; 
+    if(mpirank !=0) verbosity=0; 
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;
@@ -756,7 +760,9 @@ GetEnvironment();
  // callInitsFunct(); Pb opimisation 
   if(verbosity)  cout << endl;
   zzzfff->input(cc);
-  EnvironmentLoad(); // just before compile     
+  EnvironmentLoad(); // just before compile
+  verbosity=vvold; 
+    
   retvalue= Compile(); 
       
 #ifdef PARALLELE

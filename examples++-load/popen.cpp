@@ -180,7 +180,8 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
   printf("version de medit %s\n",commandline);
 
   FILE *popenstream= popen(commandline,"wb");
-
+  if(popenstream)
+    {
   fprintf(popenstream,"MeshVersionFormatted\n");
   fprintf(popenstream,"%i\n",ver);
   fprintf(popenstream,"Dimension\n");
@@ -373,6 +374,8 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
   }
   // fermeture du stream pour popen
   fclose(popenstream);
+    }
+  else {  cerr << " Error popen : " << commandline<<endl;}
   delete [] commandline; 
   return valsortie;
 }
@@ -490,7 +493,8 @@ AnyType PopenMeditMesh2ALL::PopenMeditMesh2ALL_Op::operator()(Stack stack)  cons
   int typsol,nbsol=sol;
     
   FILE *popenstream= popen(commandline,"w");
-
+  if(popenstream)
+    {
   fprintf(popenstream,"MeshVersionFormatted\n");
   fprintf(popenstream,"%i\n",ver);
   fprintf(popenstream,"Dimension\n");
@@ -753,6 +757,9 @@ AnyType PopenMeditMesh2ALL::PopenMeditMesh2ALL_Op::operator()(Stack stack)  cons
   
   // fermeture du stream pour popen
   fclose(popenstream);
+    }
+ else {  cerr << " Error popen : " << commandline<< endl;}
+
   delete [] commandline; 
   return valsortie;
 }
@@ -1394,7 +1401,8 @@ AnyType PopenMeditMesh3_Op::operator()(Stack stack)  const
   int typsol,nbsol=sol;
     
   FILE *popenstream= popen(commandline,"w");
-
+  if(popenstream)
+    {
   fprintf(popenstream,"MeshVersionFormatted\n");
   fprintf(popenstream,"%i\n",ver);
   fprintf(popenstream,"Dimension\n");
@@ -1525,6 +1533,9 @@ AnyType PopenMeditMesh3_Op::operator()(Stack stack)  const
   
   // fermeture du stream pour popen
   fclose(popenstream);
+    }
+ else {  cerr << " Error popen : " << commandline<< endl;}
+
   delete [] commandline; 
   return valsortie;
 }
@@ -1666,7 +1677,8 @@ AnyType PopenMeditMesh3ALL<v_fes>::PopenMeditMesh3ALL_Op::operator()(Stack stack
   int typsol,nbsol=sol;
     
   FILE *popenstream= popen(commandline,"w");
-
+  if(popenstream)
+    {
   fprintf(popenstream,"%s\n",ffname->c_str());
   fprintf(popenstream,"MeshVersionFormatted\n");
   fprintf(popenstream,"%i\n",ver);
@@ -1942,6 +1954,9 @@ AnyType PopenMeditMesh3ALL<v_fes>::PopenMeditMesh3ALL_Op::operator()(Stack stack
   
   // fermeture du stream pour popen
   fclose(popenstream);
+    }
+ else {  cerr << " Error popen : " << commandline<< endl;}
+
   delete [] commandline; 
   return valsortie;
 }

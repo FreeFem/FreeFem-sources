@@ -72,7 +72,7 @@ public:
   R norme() const { return std::sqrt(x*x+y*y+z*z);}
   R norme2() const { return (x*x+y*y+z*z);}
   R sum() const { return x+y+z;}
-  R * toBary(R * b) { b[0]=1.-x-y;b[1]=x;b[2]=y;b[3]=z;return b;}    
+  R * toBary(R * b) { b[0]=1.-x-y-z;b[1]=x;b[2]=y;b[3]=z;return b;}    
   R  X() const {return x;}
   R  Y() const {return y;}
   R  Z() const {return z;}
