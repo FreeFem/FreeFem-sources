@@ -408,8 +408,9 @@ void init_lgparallele()
   }
   void end_parallele()
    {
+     if(mpirank!=0) cout << '.' << flush ;
     MPI::Finalize();
-    if(mpirank==0 ) cout << "FreeFem++-mpi end correctly\n"; 
+    if(mpirank==0) cout << "FreeFem++-mpi finalize correctly .\n"; 
    }
 //   MPI::COMM_WORLD.Recv(&msg, 1, MPI::INT, from, MPI::ANY_TAG);
 //    MPI::COMM_WORLD.Isend(&msg, 1, MPI::INT, to, 4);
