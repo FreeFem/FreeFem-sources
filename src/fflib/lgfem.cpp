@@ -2967,6 +2967,7 @@ static R ddts;
 R ddt = GetAny<double>((*dt)(s));
 if (ddt) 
 {
+    bool ddd=verbosity>100;
     MeshPoint mpc(*mp);
     MeshPointStack(s,&mpc);
     if(*mp==mpp && ddt == ddts) 
@@ -2981,12 +2982,12 @@ if (ddt)
 	      int k=0;
 	      int j; 
 	      int it=Th3(mpc.T3);
-	      cout << " IN: " <<  (*mpc.T3)(PHat) << " " << ddt << endl;
+	      if(ddd) cout << " IN: " <<  (*mpc.T3)(PHat) << " " << ddt << endl;
 	      while ( (j=WalkInTet(Th3,it,PHat,R3(GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),GetAny<double>((*w)(s))),ddt))>=0) 
                 { 
-		   cout << (*mpc.T3)(PHat) << " " << PHat << " : j = " << j  <<  " it:  " << it << endl;
+		  if(ddd) cout << (*mpc.T3)(PHat) << " " << PHat << " : j = " << j  <<  " it:  " << it << endl;
                     int itt =  Th3.ElementAdj(it,j,PHat);
-		    cout << (*mpc.T3)(PHat) << " " << ddt << endl;	
+		   if(ddd) cout << (*mpc.T3)(PHat) << " " << ddt << endl;	
 		    if(itt<0) break;
 		    it=itt;
 		    mpc.change(PHat,Th3[it],0);             

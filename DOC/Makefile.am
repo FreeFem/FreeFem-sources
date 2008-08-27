@@ -57,6 +57,7 @@ figures/FreeFem++-cs.eps        figures/aTutorial.eps           figures/soapfilm
 figures/L-shape.eps             figures/adaptmesh.eps           figures/soapfilm3d.eps \
 figures/L-shape2.eps            figures/border.eps              figures/square.eps \
 figures/mach2r.eps \
+figures/buillayermesh.eps figures/layer2D.eps figures/degenerate.eps \
 plots/BSth.eps                  plots/eigen12.eps               plots/onoldmesh.eps \
 plots/BSval.eps                 plots/emptymesh-1.eps           plots/perio4.eps \
 plots/FIGII1.eps                plots/emptymesh-2.eps           plots/period.eps \
