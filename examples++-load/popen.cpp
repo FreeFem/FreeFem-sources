@@ -2505,15 +2505,15 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
     cout << " load:popen.cpp  " << endl;
   
   // 2D
-  Global.Add("meditmeshsol","(",new PopenMeditMesh);
-  Global.Add("savesol","(",new datasolMesh2);
-  Global.Add("meditmeshsolVh","(",new PopenMeditMesh2ALL);
-  Global.Add("savesolVh","(",new datasolMesh2VhALL);
+  Global.Add("medit","(",new PopenMeditMesh);
+  Global.Add("savemedit","(",new datasolMesh2);
+  Global.Add("medit","(",new PopenMeditMesh2ALL);
+  Global.Add("savemedit","(",new datasolMesh2VhALL);
   
   // 3D
-  Global.Add("meditmeshsol","(",new PopenMeditMesh3);
-  Global.Add("savesol","(",new datasolMesh3);
-  Global.Add("meditmeshsolVh","(",new PopenMeditMesh3ALL<v_fes3>);
-  Global.Add("savesolVh","(",new datasolMesh3VhALL<v_fes3>);
+  Global.Add("medit","(",new PopenMeditMesh3);
+  Global.Add("savemedit","(",new datasolMesh3);
+  Global.Add("medit","(",new PopenMeditMesh3ALL<v_fes3>);
+  Global.Add("savemedit","(",new datasolMesh3VhALL<v_fes3>);
   
 }

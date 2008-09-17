@@ -56,10 +56,13 @@ static void SetPtPk(Rd *Pt,const int *dfon,int nn)
     
     if(dfon[d]==1) 
 	Pt[k++]=Rd::diag(1./(d+1));
-    
-    assert(nn==k);   
+    if(nn != k)
+      { 
+	cout << nn << " == " << k << " d = "<< d << " " << dfon[0]<< dfon[1]<<dfon[2]<<dfon[3]<<endl;
+	assert(nn==k); 
+      }  
     if(verbosity>9)
-    cout << " Pk = " << KN_<Rd>(Pt,nn)<<"\n";
+      cout << " Pk = " << KN_<Rd>(Pt,nn)<<"\n";
     
 }
 

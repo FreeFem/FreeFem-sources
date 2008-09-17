@@ -62,7 +62,7 @@ then
           case $i in 	  
 # save last directory of the list 
 	   -L*) 
-	   d=`expr $i : -L\(.*\)`; 
+	   d=`expr $i : '-L\(.*\)'`; 
 	   echo " try $d "
 	   if test  -e $d/libg2c.so -o	-e $d/libg2c.a ; then   
 	      ff_flibs="$i" 
@@ -77,7 +77,7 @@ then
          for i in $FLIBS; do
           case $i in
            -L*)  
-	   d=`expr $i : -L\(.*\)`; 
+	   d=`expr $i : '-L\(.*\)'`; 
 	   if test -e $d/libgfortran.so -o -e $d/libgfortran.a ; then   
 	      ff_flibs="$i" 
 	   fi;;
