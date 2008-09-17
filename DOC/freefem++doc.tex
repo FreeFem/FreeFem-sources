@@ -5054,6 +5054,14 @@ This method is described in detail in \cite{bamg}. It has a number of
 default parameters which can be modified~:
 
 \index{adaptmesh}
+
+Si \texttt{f1,f2} sont des functions  et \texttt{thold, Thnew} des maillages.
+\bFF
+    Thnew = @adaptmesh(Thold, f1  ...  );
+    Thnew = @adaptmesh(Thold, f1,f2  ...  ]); 
+    Thnew = @adaptmesh(Thold, [f1,f2]  ...  );   
+\eFF
+Les paramters additionnels de adaptmesh représente par les "..."
 \begin{description}
 
     \item[\texttt{hmin=}] Minimum edge size.  \index{adaptmesh!hmin=}

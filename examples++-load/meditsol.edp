@@ -9,16 +9,17 @@ fespace Vh(Th,P2);
 func f1=x;
 func f=sqrt(x*x+y*y);
 Vh f1vh=f1;
-
+func f3=f1vh;
 Vh u,v;
 macro Grad2(u) [dx(u),dy(u)]  // EOM
 
-problem Lap3d(u,v,solver=CG)=int2d(Th)(Grad2(v)' *Grad2(u)) - int2d(Th)(f*v) + on(Gamma,u=1);
+problem Lap3d(u,v,solver=CG)=int2d(Th)(Grad2(v)' *Grad2(u)) - int2d(Th)(f*v) + on(12,u=1);
 Lap3d;
+plot(u,wait=1);
 
-int bb=savesol("f1.sol",Th,nbscalar=1,scalar=[f1],order=1);
-int bbVh=savesolVh("f1Vh.sol",Th,nbscalar=1,scalar=[f1vh],order=1);
+savemedit("f1.sol",Th,nbscalar=1,scalar=[f1],order=1);
+savesolVh("f1Vh.sol",Th,nbscalar=1,scalar=[f1vh],order=1);
 
-int medit=meditmeshsol("second",Th,solution=1,scalar=f,order=1);
-int meditVh=meditmeshsolVh("solPoison",Th,solution=1,scalar=u,order=1);
+medit(Th,f,cmm="second",order=1);
+medit(Th,[f,f1],cmm="second",order=1);
 

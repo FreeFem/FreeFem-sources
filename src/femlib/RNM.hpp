@@ -31,7 +31,7 @@
  */
 #ifndef KNM_H_
 #define KNM_H_
-// version aout 2007 FH.
+// version sept 2008 FH.
 // ----------------------
 // une tentative qui ne marche pas 
 // de tableau constant 
@@ -39,6 +39,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <cassert>
 
 
 using namespace std;
