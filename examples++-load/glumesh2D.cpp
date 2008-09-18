@@ -284,7 +284,6 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
 	int l0,l1=ChangeLab(mape,l0=m->bedges[i].lab) ;
 	 nebn++;
       }
-	  
 
   Vertex * v= new Vertex[nbv];
   Triangle *t= new Triangle[nbt];
