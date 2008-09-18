@@ -122,8 +122,10 @@ public:
 class Mesh2 : public GenericMesh<Triangle2,BoundaryEdge2,Vertex2> { 
 public:
   Mesh2(const char *); // 
+  Mesh2(int nnv, int nnt, int nnbe, Vertex2 *vv, Triangle2 *tt, BoundaryEdge2 *bb); 
   const Element * Find( R2 P, R2 & Phat,bool & outside,const Element * tstart) const;
   int Save(const string & filename);
+  //int Popen(const FILE *namestream);
  private:
   int load(const string & filename); 
    Mesh2(const Mesh2 &); // pas de construction par copie

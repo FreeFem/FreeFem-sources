@@ -1,6 +1,7 @@
 // build de mesh of a Sphere
 // -------------------------- 
 load "tetgen"
+load "datasol"
 
 mesh Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
 //  a parametrization of a sphere 
@@ -28,21 +29,26 @@ Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
 plot(Th,wait=1);
 
 verbosity=2;
-
-mesh3 Th3=tetgtransfo(Th,transfo=[f1,f2,f3]);
+real[int] domaine =[0.,0.,0.,1,0.01];
+mesh3 Th3=tetgtransfo(Th,transfo=[f1,f2,f3],nbofregions=1,regionlist=domaine);
 savemesh(Th3,"sphere.meshb");
-exec("medit sphere; rm sphere.meshb");
+//exec("medit sphere; rm sphere.meshb");
 
 fespace Vh(Th3,P23d);
-func ue =   2*x*x + 3*y*y + 4*z*z + 5*x*y+6*x*z+1;
+func ue =   2*x*x + 3*y*y + 4*z*z+ 5*x*y+6*x*z+1;
 func f= -18. ;
 Vh uhe = ue; // bug ..
-cout << " uhe min:  " << uhe[]. min << " max:" << uhe[].max << endl;
+cout << " uhe min:  " << uhe[].min << " max:" << uhe[].max << endl;
+cout << uhe(0.,0.,0.) << endl;
 
+
+savesol("f3.sol",Th3,ue,ue,[f,ue,f],order=1);
+//int bb=meditmeshsol("sol",Th3,solution=1,scalar=uhe);
+
+/*
 border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}
 mesh Th2=buildmesh(cc(50));
 fespace Vh2(Th2,P2);
-
 
 Vh u,v;
 
@@ -60,3 +66,4 @@ plot(u2,wait=1);
 plot(u2,u2e,wait=1);
 
 assert(err < 1e-9);
+*/

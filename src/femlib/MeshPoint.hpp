@@ -2,7 +2,7 @@
 //typedef double R;
 namespace  Fem2D {
 class MeshPointBase { public:
- R3 P;
+  R3 P;
   R3 PHat;
   union {
   const Mesh * Th;  
@@ -331,8 +331,8 @@ class MeshPointBase { public:
    { 
      T3=&(*pTh)[tt];
      const Mesh3::Vertex & V=(*T3)[ss];
-      P= V ;
-      PHat = TetHat[ss];
+     P= V ;
+     PHat = TetHat[ss];
      Th3=pTh; 
      region = T3->lab;
      label = V.lab;
@@ -396,7 +396,7 @@ class MeshPoint : public MeshPointBase { public:
     void change(const R3 & PH,const Tet & tt,int ll) {
 	MeshPointBase::change(PH,tt,ll);
     other.unset(); }
-    void setP(const Mesh * pTh,int tt,int ss) { 
+  void setP(const Mesh * pTh,int tt,int ss) { 
       MeshPointBase::setP(pTh,tt,ss); 
       other.unset(); } 
   void setP(const Mesh3 * pTh,int tt,int ss) {  // 3d

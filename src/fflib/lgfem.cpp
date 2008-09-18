@@ -1994,10 +1994,6 @@ class Convect : public E_F0mps  { public:
     
 };
 
- 
-
-   
-
 class Plot :  public E_F0mps { public:
     typedef KN_<R>  tab;
     typedef pferbase sol;
@@ -2036,7 +2032,8 @@ class Plot :  public E_F0mps { public:
        
          if (args[i].left()==atype<E_Array>())
           {
-            l[i].composant=false;
+	    cout << "args[i].left()==atype<E_Array>()" << endl;
+	    l[i].composant=false;
             const E_Array * a = dynamic_cast<const E_Array *>(args[i].LeftValue());
             ffassert(a);
             if (a->size() >2) { CompileError("plot d'un vecteur ˆ + 2 composantes");}
@@ -2054,16 +2051,20 @@ class Plot :  public E_F0mps { public:
              }
           }
          else if (BCastTo<pferbase>(args[i])) {
+	   cout << "BCastTo<pferbase>(args[i])" << endl;
           l[i].composant=true;
           l[i][0]=CastTo<pferbase>(args[i]); }
          else if (BCastTo<pfer>(args[i])) {
+	   cout << "BCastTo<pfer>(args[i])" << endl;
           l[i].composant=false;
           l[i].what=1;
           l[i][0]=CastTo<pfer>(args[i]);}
          else if (BCastTo<pmesh>(args[i])){
+	   
           l[i].what=0;
           l[i][0]=CastTo<pmesh>(args[i]);}
          else if (BCastTo<const E_BorderN *>(args[i])){
+	   cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
           l[i].what=4;
           l[i][0]=CastTo<const E_BorderN *>(args[i]);}
           
@@ -2431,91 +2432,91 @@ void Show(const char * s,int k=1)
 }
 
 AnyType Plot::operator()(Stack s) const  { 
-   if (!withrgraphique) {initgraphique();withrgraphique=true;}
-    viderbuff();
-    MeshPoint *mps=MeshPointStack(s),mp=*mps ;
-    int nbcolors=0;
-    float *colors=0;
-    bool hsv=true; // hsv  type 
-    R boundingbox[4];
-    double coeff=1;
-    bool wait=TheWait;
-    bool value=false;
-    bool fill=false;
-    bool aspectratio=false;
-    bool clean=true;
-    bool uaspectratio=false;
-    bool pViso=false,pVarrow=false;
-    int Niso=20,Narrow=20;
+  if (!withrgraphique) {initgraphique();withrgraphique=true;}
+  viderbuff();
+  MeshPoint *mps=MeshPointStack(s),mp=*mps ;
+  int nbcolors=0;
+  float *colors=0;
+  bool hsv=true; // hsv  type 
+  R boundingbox[4];
+  double coeff=1;
+  bool wait=TheWait;
+  bool value=false;
+  bool fill=false;
+  bool aspectratio=false;
+  bool clean=true;
+  bool uaspectratio=false;
+  bool pViso=false,pVarrow=false;
+  int Niso=20,Narrow=20;
     
-    KN<R> Viso,Varrow;
+  KN<R> Viso,Varrow;
         
-    bool bw=false;
-    string * psfile=0;
-    string * cm=0;
-    pferbase  fe=0,fe1=0;
-    int cmp0,cmp1;
-    bool grey=getgrey();
-    bool greyo=grey;
-    bool drawborder=true;
-    if (nargs[0]) coeff= GetAny<double>((*nargs[0])(s));
-    if (nargs[1]) cm = GetAny<string *>((*nargs[1])(s));
-    if (nargs[2]) psfile= GetAny<string*>((*nargs[2])(s));
-    if (nargs[3]) wait= GetAny<bool>((*nargs[3])(s));
-    if (nargs[4]) fill= GetAny<bool>((*nargs[4])(s));
-    if (nargs[5]) value= GetAny<bool>((*nargs[5])(s));
-    if (nargs[6]) clean= GetAny<bool>((*nargs[6])(s));
-    if (nargs[7]) uaspectratio=true,uaspectratio= GetAny<bool>((*nargs[7])(s));
-    if (nargs[8])  
-        for (int i=0;i<4;i++)
-            boundingbox[i]= GetAny<double>((*bb[i])(s));
-    if (nargs[9]) Niso=  GetAny<long>((*nargs[9])(s));
-    if (nargs[10]) Narrow=  GetAny<long>((*nargs[10])(s));
-    if (nargs[11]) { 
-          KN_<double> v =GetAny<KN_<double> >((*nargs[11])(s)) ;
-          Niso=v.N();
-          Viso.init(Niso);
-          Viso=v;
-          pViso=true;}
+  bool bw=false;
+  string * psfile=0;
+  string * cm=0;
+  pferbase  fe=0,fe1=0;
+  int cmp0,cmp1;
+  bool grey=getgrey();
+  bool greyo=grey;
+  bool drawborder=true;
+  if (nargs[0]) coeff= GetAny<double>((*nargs[0])(s));
+  if (nargs[1]) cm = GetAny<string *>((*nargs[1])(s));
+  if (nargs[2]) psfile= GetAny<string*>((*nargs[2])(s));
+  if (nargs[3]) wait= GetAny<bool>((*nargs[3])(s));
+  if (nargs[4]) fill= GetAny<bool>((*nargs[4])(s));
+  if (nargs[5]) value= GetAny<bool>((*nargs[5])(s));
+  if (nargs[6]) clean= GetAny<bool>((*nargs[6])(s));
+  if (nargs[7]) uaspectratio=true,uaspectratio= GetAny<bool>((*nargs[7])(s));
+  if (nargs[8])  
+    for (int i=0;i<4;i++)
+      boundingbox[i]= GetAny<double>((*bb[i])(s));
+  if (nargs[9]) Niso=  GetAny<long>((*nargs[9])(s));
+  if (nargs[10]) Narrow=  GetAny<long>((*nargs[10])(s));
+  if (nargs[11]) { 
+    KN_<double> v =GetAny<KN_<double> >((*nargs[11])(s)) ;
+    Niso=v.N();
+    Viso.init(Niso);
+    Viso=v;
+    pViso=true;}
           
-    if (nargs[12]) {
-          KN_<double> v =GetAny<KN_<double> >((*nargs[12])(s)) ;
-          Niso=v.N();
-          Varrow.init(Niso);
-          Varrow=v;
-          pVarrow=true;
-          }
+  if (nargs[12]) {
+    KN_<double> v =GetAny<KN_<double> >((*nargs[12])(s)) ;
+    Niso=v.N();
+    Varrow.init(Niso);
+    Varrow=v;
+    pVarrow=true;
+  }
                  
-    if (nargs[13]) bw= GetAny<bool>((*nargs[13])(s));
-    if (nargs[14]) grey= GetAny<bool>((*nargs[14])(s));
-    if (nargs[15]) {  
-       KN_<double> cc= GetAny<KN_<double> >((*nargs[15])(s));
-       nbcolors= cc.N()/3;
-       if ( nbcolors > 1&& nbcolors < 100)
-        {
-         colors = new float [nbcolors*3];
-         for (int i=0; i<3*nbcolors; i++) colors[i]=cc[i];
-        }
-        else nbcolors = 0;
-    }
-    if (nargs[16]) drawborder= GetAny<bool>((*nargs[16])(s));
-    //  for the gestion of the PTR. 
-    WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH aout 2007 
+  if (nargs[13]) bw= GetAny<bool>((*nargs[13])(s));
+  if (nargs[14]) grey= GetAny<bool>((*nargs[14])(s));
+  if (nargs[15]) {  
+    KN_<double> cc= GetAny<KN_<double> >((*nargs[15])(s));
+    nbcolors= cc.N()/3;
+    if ( nbcolors > 1&& nbcolors < 100)
+      {
+	colors = new float [nbcolors*3];
+	for (int i=0; i<3*nbcolors; i++) colors[i]=cc[i];
+      }
+    else nbcolors = 0;
+  }
+  if (nargs[16]) drawborder= GetAny<bool>((*nargs[16])(s));
+  //  for the gestion of the PTR. 
+  WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH aout 2007 
 	
-    setgrey(grey);
-    if (Viso.unset()) Viso.init(Niso);
-    if (Varrow.unset()) Varrow.init(Narrow);
+  setgrey(grey);
+  if (Viso.unset()) Viso.init(Niso);
+  if (Varrow.unset()) Varrow.init(Narrow);
     
-   // KN<R> Viso(Niso);
-   // KN<R> Varrow(Narrow);
-   // if (pViso) Viso=*pViso;
-   // if (pVarrow) Varrow=*pVarrow;
-    const Mesh * cTh=0;
-    bool vecvalue=false,isovalue=false;
-    bool ops=psfile;
-    bool drawmeshes=false;
-    if ( clean ) {
-         reffecran(); 
+  // KN<R> Viso(Niso);
+  // KN<R> Varrow(Narrow);
+  // if (pViso) Viso=*pViso;
+  // if (pVarrow) Varrow=*pVarrow;
+  const Mesh * cTh=0;
+  bool vecvalue=false,isovalue=false;
+  bool ops=psfile;
+  bool drawmeshes=false;
+  if ( clean ) {
+    reffecran(); 
 
     if (psfile) {
       openPS(psfile->c_str());
@@ -2525,124 +2526,125 @@ AnyType Plot::operator()(Stack s) const  {
     R2 uminmax(1e100,-1e100);
     R2 Vminmax(1e100,-1e100);
     bool first=true;
-     for (size_t i=0;i<l.size();i++)
+    for (size_t i=0;i<l.size();i++)
       { R2  P1,P2;
       if (l[i].what==1 || l[i].what==2) 
-      {
+	{
          
-        if( !uaspectratio)   aspectratio= true;
+	  if( !uaspectratio)   aspectratio= true;
          
-         fe   = l[i].eval(0,s,cmp0);
-         fe1  = l[i].eval(1,s,cmp1);
+	  fe   = l[i].eval(0,s,cmp0);
+	  fe1  = l[i].eval(1,s,cmp1);
          
-         if (!fe->x()) continue; 
+	  if (!fe->x()) continue; 
          
-         //int nb=fe->x()->N();
+	  //int nb=fe->x()->N();
 
-         fe->Vh->cmesh->BoundingBox(P1,P2);
+	  fe->Vh->cmesh->BoundingBox(P1,P2);
           cTh=fe->Vh->cmesh;
-         if (fe1==0)
+	  if (fe1==0)
             uminmax = minmax(uminmax,fe->Vh->MinMax(*fe->x(),cmp0));
-         else
-          {
-         if (fe1) 
-          {
-          if (fe->Vh == fe1->Vh) 
-            {  
-              KN_<R> u( *fe->x()),v(*fe1->x());     
-              Vminmax = minmax(Vminmax,fe->Vh->MinMax(u,v,cmp0,cmp1));
-             }  
-          else
-           cerr << " On ne sait tracer que de vecteur sur un meme interpolation " << endl;
-          }      
+	  else
+	    {
+	      if (fe1) 
+		{
+		  if (fe->Vh == fe1->Vh) 
+		    {  
+		      KN_<R> u( *fe->x()),v(*fe1->x());     
+		      Vminmax = minmax(Vminmax,fe->Vh->MinMax(u,v,cmp0,cmp1));
+		    }  
+		  else
+		    cerr << " On ne sait tracer que de vecteur sur un meme interpolation " << endl;
+		}      
            
-        }
-      }
+	    }
+	}
       else if (l[i].what==0) 
-       {
-        if( !uaspectratio) aspectratio= true;
-        const  Mesh & Th= l[i].evalm(0,s);
-         Th.BoundingBox(P1,P2);
-         cTh=&Th;
-       }
+	{
+	  if( !uaspectratio) aspectratio= true;
+	  const  Mesh & Th= l[i].evalm(0,s);
+	  Th.BoundingBox(P1,P2);
+	  cTh=&Th;
+	}
       else if (l[i].what==4) 
-       {
-        if( !uaspectratio) aspectratio= true;
-        const  E_BorderN * Bh= l[i].evalb(0,s);
-        Bh->BoundingBox(s,P1.x,P2.x,P1.y,P2.y);
+	{
+	  if( !uaspectratio) aspectratio= true;
+	  const  E_BorderN * Bh= l[i].evalb(0,s);
+	  Bh->BoundingBox(s,P1.x,P2.x,P1.y,P2.y);
           
-       }
+	}
       else if (l[i].what==3) 
-       {
-         tab  ttx=l[i].evalt(0,s);
-         tab  tty=l[i].evalt(1,s);
-         tab *tx=&ttx,*ty=&tty;
-         P1=R2(tx->min(),ty->min());
-         P2=R2(tx->max(),ty->max());   
-         if(verbosity>2)  
-          cout << "Plot: bound  Pmin=" <<  P1 << ",  Pmax=" << P2 << endl;  
-       }
+	{
+	  tab  ttx=l[i].evalt(0,s);
+	  tab  tty=l[i].evalt(1,s);
+	  tab *tx=&ttx,*ty=&tty;
+	  P1=R2(tx->min(),ty->min());
+	  P2=R2(tx->max(),ty->max());   
+	  if(verbosity>2)  
+	    cout << "Plot: bound  Pmin=" <<  P1 << ",  Pmax=" << P2 << endl;  
+	}
       else continue;
       
-         if (first)
-          {first=false; Pmin=P1;Pmax=P2;}
-         else {
-            Pmin.x = Min(Pmin.x,P1.x);
-            Pmin.y = Min(Pmin.y,P1.y);
-            Pmax.x = Max(Pmax.x,P2.x);
-            Pmax.y = Max(Pmax.y,P2.y);
-          }
+      if (first)
+	{first=false; Pmin=P1;Pmax=P2;}
+      else {
+	Pmin.x = Min(Pmin.x,P1.x);
+	Pmin.y = Min(Pmin.y,P1.y);
+	Pmax.x = Max(Pmax.x,P2.x);
+	Pmax.y = Max(Pmax.y,P2.y);
+      }
        
       }
       
-      {
-        R umx=uminmax.y,umn=uminmax.x;
-        if (verbosity>5) 
+    {
+      R umx=uminmax.y,umn=uminmax.x;
+      if (verbosity>5) 
         cout << " u bound " <<  uminmax << "  V : " << Vminmax <<endl;
 
-        if (verbosity>1)
-         cout << "Plot bound [x,y] " <<  Pmin << " max [x,y] " << Pmax << endl;  
-        int N=Viso.N();
-        int Na=Varrow.N();
-        R2 O((Pmin+Pmax)/2);
-        R rx(Pmax.x-Pmin.x),ry(Pmax.y-Pmin.y);
-        // bug   version 1.41 correct FH to remove div by zero.
-        rx = Max(rx,1e-30);
-        ry = Max(ry,1e-30);
-        // -- end correction
-        R r =  (Max(rx,ry)*0.55);
-        showgraphic();
-        if (aspectratio)
-          cadreortho((float)O.x,(float)(O.y+r*0.05),(float) r);
-        else 
-          cadre( (float)(O.x-rx*.55),(float)(O.x+rx*0.55),(float)(O.y-ry*.55),(float)(O.y+ry*.55));
-        R d = fill ? (umx-umn)/(N-1)  : (umx-umn)/(N);       
-        R x = fill ? umn-d/2 :umn+d/2;
-       if (!pViso) 
+      if (verbosity>1)
+	cout << "Plot bound [x,y] " <<  Pmin << " max [x,y] " << Pmax << endl;  
+      int N=Viso.N();
+      int Na=Varrow.N();
+      R2 O((Pmin+Pmax)/2);
+      R rx(Pmax.x-Pmin.x),ry(Pmax.y-Pmin.y);
+      // bug   version 1.41 correct FH to remove div by zero.
+      rx = Max(rx,1e-30);
+      ry = Max(ry,1e-30);
+      // -- end correction
+      R r =  (Max(rx,ry)*0.55);
+      showgraphic();
+      if (aspectratio)
+	cadreortho((float)O.x,(float)(O.y+r*0.05),(float) r);
+      else 
+	cadre( (float)(O.x-rx*.55),(float)(O.x+rx*0.55),(float)(O.y-ry*.55),(float)(O.y+ry*.55));
+      R d = fill ? (umx-umn)/(N-1)  : (umx-umn)/(N);       
+      R x = fill ? umn-d/2 :umn+d/2;
+      if (!pViso) 
         for (int i = 0;i < N;i++)
-         {Viso[i]=x;x +=d; }
-       if (fill && !pViso) {Viso[0]=umn-d;Viso[N-1]=umx+d;}
-        x=0; d= sqrt(Vminmax.y)/(Na-1.001);
-       if (!pVarrow)
+	  {Viso[i]=x;x +=d; }
+      if (fill && !pViso) {Viso[0]=umn-d;Viso[N-1]=umx+d;}
+      x=0; d= sqrt(Vminmax.y)/(Na-1.001);
+      if (!pVarrow)
         for (int i = 0;i < Na;i++)
           {Varrow[i]=x;x +=d; }
    
-        SetColorTable(Max(N,Na)+4) ;           
-       }
-     }  // clean
-   float xx0,xx1,yy0,yy1;
-   if (nargs[8])
-     {
-       xx0=min(boundingbox[0],boundingbox[2]);
-       xx1=max(boundingbox[0],boundingbox[2]);
-       yy0=min(boundingbox[1],boundingbox[3]);
-       yy1=max(boundingbox[1],boundingbox[3]);
-       if (verbosity>2) 
-         cout << "bb=  xmin =" << xx0 << ", max =" << xx1 << ", ymin = " << yy0 << ", ymax = " << yy1 << endl;
-       if (aspectratio)
-         cadreortho((xx0+xx1)*0.5,(yy0+yy1)*0.5, max(xx1-xx0,yy1-yy0)*0.5);
-       else 
+      SetColorTable(Max(N,Na)+4) ;           
+    }
+  }  // clean
+  float xx0,xx1,yy0,yy1;
+  if (nargs[8])
+    {
+      xx0=min(boundingbox[0],boundingbox[2]);
+      xx1=max(boundingbox[0],boundingbox[2]);
+      yy0=min(boundingbox[1],boundingbox[3]);
+      yy1=max(boundingbox[1],boundingbox[3]);
+      if (verbosity>2) 
+	cout << "bb=  xmin =" << xx0 << ", max =" << xx1 << ", ymin = " << yy0 << ", ymax = " << yy1 << endl;
+      if (aspectratio)
+	cadreortho((xx0+xx1)*0.5,(yy0+yy1)*0.5, max(xx1-xx0,yy1-yy0)*0.5);
+      else 
         cadre(xx0,xx1,yy0,yy1);
+
      }
    getcadre(xx0,xx1,yy0,yy1);
    const R ccoeff=coeff;
@@ -2678,227 +2680,229 @@ AnyType Plot::operator()(Stack s) const  {
           if (drawmeshes) fe->Vh->Th.Draw(0,fill);
          }      
       else 
-        
-        if (fill)
-         isovalue=true,fe->Vh->Drawfill(*fe->x(),Viso,cmp0,1.,colors,nbcolors,hsv,drawborder);
-        else 
-         isovalue=true,fe->Vh->Draw(*fe->x(),Viso,cmp0,colors,nbcolors,hsv,drawborder);
-         
-        if (drawmeshes) fe->Vh->Th.Draw(0,fill);
 
-     }
-      else if (l[i].what==4) 
-       {
-        const  E_BorderN * Bh= l[i].evalb(0,s);
-        Bh->Plot(s);          
-       }
-     
-     else if(l[i].what==3)
-      {
         
-        tab x=l[i].evalt(0,s);
-        tab y=l[i].evalt(1,s);
-       long k= Min(x.N(),y.N());
-       // cout << " ˆ faire " << endl;
-       // cout << " plot :\n" << * l[i].evalt(0,s) << endl << * l[i].evalt(1,s) << endl;
-       rmoveto(x[0],y[0]);
-       couleur(2+i);
-       for (int i= 1;i<k;i++)
-         rlineto(x[i],y[i]);
-      }
+	      if (fill)
+		isovalue=true,fe->Vh->Drawfill(*fe->x(),Viso,cmp0,1.,colors,nbcolors,hsv,drawborder);
+	      else 
+		isovalue=true,fe->Vh->Draw(*fe->x(),Viso,cmp0,colors,nbcolors,hsv,drawborder);
+         
+	    if (drawmeshes) fe->Vh->Th.Draw(0,fill);
+
+	  }
+	else if (l[i].what==4) 
+	  {
+	    const  E_BorderN * Bh= l[i].evalb(0,s);
+	    Bh->Plot(s);          
+	  }
+     
+	else if(l[i].what==3)
+	  {
+        
+	    tab x=l[i].evalt(0,s);
+	    tab y=l[i].evalt(1,s);
+	    long k= Min(x.N(),y.N());
+	    // cout << " ˆ faire " << endl;
+	    // cout << " plot :\n" << * l[i].evalt(0,s) << endl << * l[i].evalt(1,s) << endl;
+	    rmoveto(x[0],y[0]);
+	    couleur(2+i);
+	    for (int i= 1;i<k;i++)
+	      rlineto(x[i],y[i]);
+	  }
       if (value) {
-          int k=0; 
-           if (isovalue) {PlotValue(Viso,k,"IsoValue");k+= Viso.N()+3;}
-           if (vecvalue) {PlotValue(Varrow,k,"Vec Value");k+= Varrow.N()+3;}
-        } 
-     // value=false;
+	int k=0; 
+	if (isovalue) {PlotValue(Viso,k,"IsoValue");k+= Viso.N()+3;}
+	if (vecvalue) {PlotValue(Varrow,k,"Vec Value");k+= Varrow.N()+3;}
+      } 
+      // value=false;
       
-     if (cm) {       
-       couleur(1);
-       DrawCommentaire(cm->c_str(),0.1,0.97);
-     }
-     if (ops ) {
-       ops=false;
-       closePS();
-     }
+      if (cm) {       
+	couleur(1);
+	DrawCommentaire(cm->c_str(),0.1,0.97);
+      }
+      if (ops ) {
+	ops=false;
+	closePS();
+      }
       if (wait && ! NoWait) 
-       {  
-          next:
+	{  
+	next:
           float x,y,x0,y0,x1,y1,dx,dy,coef=1.5;
           getcadre(x0,x1,y0,y1);
           char c=Getxyc(x,y);
           dx=(x1-x0)/2.;dy=(y1-y0)/2.;
           
           switch (c) 
-           { 
-             case '+' :  plotting=true; 
-               cadre(x-dx/coef,x+dx/coef,y-dy/coef,y+dy/coef);reffecran();
-             break;
-             case '-' :  plotting=true; 
-               cadre(x-dx*coef,x+dx*coef,y-dy*coef,y+dy*coef);;reffecran();
-             break;
-             case '=' :  plotting=true; 
-               coeff=ccoeff;
-               cadre(xx0,xx1,yy0,yy1);;reffecran();
-             break;
-             case 'r' :  plotting=true; 
-               reffecran();
-             break;
-             case 'a' : 
-             case 'c' : coeff /= 1.5; plotting=true;reffecran(); 
-               reffecran();
-               break;
-             case 'A' : 
-             case 'C' : coeff *= 1.5;
-                 plotting=true;
-               reffecran();
-                break;
-             case 'b' : bw= !bw;NoirEtBlanc(bw)  ;
-                 plotting=true;
-                 reffecran();
-                 break;
-              case 'v' : value = !value ; plotting=true;
-                 reffecran();
-                 break;
-              case 'f' : fill = !fill ; plotting=true;
-                 reffecran();
-                 break;
-              case 'g' : setgrey(grey=!getgrey()); plotting=true;
-                 reffecran();
-                 break;
+	    { 
+	    case '+' :  plotting=true; 
+	      cadre(x-dx/coef,x+dx/coef,y-dy/coef,y+dy/coef);reffecran();
+	      break;
+	    case '-' :  plotting=true; 
+	      cadre(x-dx*coef,x+dx*coef,y-dy*coef,y+dy*coef);;reffecran();
+	      break;
+	    case '=' :  plotting=true; 
+	      coeff=ccoeff;
+	      cadre(xx0,xx1,yy0,yy1);;reffecran();
+	      break;
+	    case 'r' :  plotting=true; 
+	      reffecran();
+	      break;
+	    case 'a' : 
+	    case 'c' : coeff /= 1.5; plotting=true;reffecran(); 
+	      reffecran();
+	      break;
+	    case 'A' : 
+	    case 'C' : coeff *= 1.5;
+	      plotting=true;
+	      reffecran();
+	      break;
+	    case 'b' : bw= !bw;NoirEtBlanc(bw)  ;
+	      plotting=true;
+	      reffecran();
+	      break;
+	    case 'v' : value = !value ; plotting=true;
+	      reffecran();
+	      break;
+	    case 'f' : fill = !fill ; plotting=true;
+	      reffecran();
+	      break;
+	    case 'g' : setgrey(grey=!getgrey()); plotting=true;
+	      reffecran();
+	      break;
                  
-              case 'm' : 
-                 reffecran();
-                 drawmeshes= !drawmeshes;
-                  plotting=true;
-                 break;
-              case 'p' : 
-                plotting=true;
-                reffecran();
-                ops=true;
-                openPS(0);
-                plotting=true;
-                break;
-              case 'q' :
-               couleur(8);
+	    case 'm' : 
+	      reffecran();
+	      drawmeshes= !drawmeshes;
+	      plotting=true;
+	      break;
+	    case 'p' : 
+	      plotting=true;
+	      reffecran();
+	      ops=true;
+	      openPS(0);
+	      plotting=true;
+	      break;
+	    case 'q' :
+	      couleur(8);
 #ifdef DRAWING		      
-               if (cTh) cTh->quadtree->Draw();
+	      if (cTh) cTh->quadtree->Draw();
 #endif		       
-               couleur(1);
-                goto next;
-              case 's' :
-                if(cTh)
-               {
-                R2 P(x,y),PF(P),Phat;
-                bool outside;
-                const Vertex * v=cTh->quadtree->NearestVertexWithNormal(P);
-                if (!v)  v=cTh->quadtree->NearestVertex(P);
-                else {
-                     couleur(2);
-                     const Triangle * t= cTh->Find( PF,  Phat,outside,&(*cTh)[cTh->Contening(v)]) ;
-                     t->Draw(0.8);
-                     couleur(2);
-                     PF=(*t)(Phat);
-                     DrawMark(PF,0.003);
+	      couleur(1);
+	      goto next;
+	    case 's' :
+	      if(cTh)
+		{
+		  R2 P(x,y),PF(P),Phat;
+		  bool outside;
+		  const Vertex * v=cTh->quadtree->NearestVertexWithNormal(P);
+		  if (!v)  v=cTh->quadtree->NearestVertex(P);
+		  else {
+		    couleur(2);
+		    const Triangle * t= cTh->Find( PF,  Phat,outside,&(*cTh)[cTh->Contening(v)]) ;
+		    t->Draw(0.8);
+		    couleur(2);
+		    PF=(*t)(Phat);
+		    DrawMark(PF,0.003);
                 
-                   }
-                 couleur(5);
+		  }
+		  couleur(5);
                   DrawMark(P,0.0015);
                 
-                 couleur(1);
-                 if (v)
-                  DrawMark(*v,0.005);
+		  couleur(1);
+		  if (v)
+		    DrawMark(*v,0.005);
                 
-                 goto next;}
-              case '?':
-                int i=2;
-                 reffecran();               
-              	//Show("Enter a keyboard character in graphic window to do :",i++);
-              	Show("Enter a keyboard character in the FreeFem Graphics window in order to:",i++);
+		  goto next;}
+	    case '?':
+	      int i=2;
+	      reffecran();               
+	      //Show("Enter a keyboard character in graphic window to do :",i++);
+	      Show("Enter a keyboard character in the FreeFem Graphics window in order to:",i++);
 
-              	i+=2;
-              	//Show("+)  zomm around the cursor 3/2 times ",i++);
-              	Show("+)  zoom in around the cursor 3/2 times ",i++);
-              	Show("-)  zoom out around the cursor 3/2 times  ",i++);
-              	//Show("-)  unzomm around the cursor 3/2 times  ",i++)	;
-              	Show("=)  reset zooming  ",i++);
-              	Show("r)  refresh plot ",i++);
-              	Show("ac) increase   the size arrow ",i++);
-              	Show("AC) decrease the size arrow  ",i++);
-              	Show("b)  switch between black and white or color plotting ",i++);
-              	Show("g)  switch between grey or color plotting ",i++);
-              	Show("f)  switch between filling iso or not  ",i++);
-              	Show("v)  switch between show  the numerical value of iso or not",i++);
-              	Show("p)   save  plot in a Postscprit file",i++);
-              	Show("m)  switch between show  meshes or not",i++);
-              	Show("p)  switch between show  quadtree or not (for debuging)",i++);
-              	Show("t)  find  Triangle ",i++);
-              	Show("?)  show this help window",i++);
-              	Show("any other key : continue ",++i);
-                goto next;
-           }   
-         if (!pViso || !pVarrow)
-          { //  recompute the iso bound
-             R2 uminmax(1e100,-1e100);
-             R2 Vminmax(1e100,-1e100);
-	     for (size_t i=0;i<l.size();i++)
-	       { R2  P1,P2;
-	       if (l[i].what==1 || l[i].what==2) 
-		 {
-		   fe   = l[i].eval(0,s,cmp0);
-		   fe1  = l[i].eval(1,s,cmp1);
+	      i+=2;
+	      //Show("+)  zomm around the cursor 3/2 times ",i++);
+	      Show("+)  zoom in around the cursor 3/2 times ",i++);
+	      Show("-)  zoom out around the cursor 3/2 times  ",i++);
+	      //Show("-)  unzomm around the cursor 3/2 times  ",i++)	;
+	      Show("=)  reset zooming  ",i++);
+	      Show("r)  refresh plot ",i++);
+	      Show("ac) increase   the size arrow ",i++);
+	      Show("AC) decrease the size arrow  ",i++);
+	      Show("b)  switch between black and white or color plotting ",i++);
+	      Show("g)  switch between grey or color plotting ",i++);
+	      Show("f)  switch between filling iso or not  ",i++);
+	      Show("v)  switch between show  the numerical value of iso or not",i++);
+	      Show("p)   save  plot in a Postscprit file",i++);
+	      Show("m)  switch between show  meshes or not",i++);
+	      Show("p)  switch between show  quadtree or not (for debuging)",i++);
+	      Show("t)  find  Triangle ",i++);
+	      Show("?)  show this help window",i++);
+	      Show("any other key : continue ",++i);
+	      goto next;
+	    }   
+	  if (!pViso || !pVarrow)
+	    { //  recompute the iso bound
+	      R2 uminmax(1e100,-1e100);
+	      R2 Vminmax(1e100,-1e100);
+	      for (size_t i=0;i<l.size();i++)
+		{ R2  P1,P2;
+		if (l[i].what==1 || l[i].what==2) 
+		  {
+		    fe   = l[i].eval(0,s,cmp0);
+		    fe1  = l[i].eval(1,s,cmp1);
 		   
-		   if (!fe->x()) continue; 
+		    if (!fe->x()) continue; 
 		   
-		   // int nb=fe->x()->N();
+		    // int nb=fe->x()->N();
 		   
 		   
-		   if (fe1==0)
-		     uminmax = minmax(uminmax,fe->Vh->MinMax(*fe->x(),cmp0,false));
-		   else
-		     {
-		       if (fe1) 
-			 if (fe->Vh == fe1->Vh) 
-			   {  
-			     KN_<R> u( *fe->x()),v(*fe1->x());     
-			     Vminmax = minmax(uminmax,fe->Vh->MinMax(u,v,cmp0,cmp1,false));
-			   }  
-		     }
-		 }
-	       else continue;
+		    if (fe1==0)
+		      uminmax = minmax(uminmax,fe->Vh->MinMax(*fe->x(),cmp0,false));
+		    else
+		      {
+			if (fe1) 
+			  if (fe->Vh == fe1->Vh) 
+			    {  
+			      KN_<R> u( *fe->x()),v(*fe1->x());     
+			      Vminmax = minmax(uminmax,fe->Vh->MinMax(u,v,cmp0,cmp1,false));
+			    }  
+		      }
+		  }
+		else continue;
 	       
 	       
-	       }
-	     if (verbosity>5)   cout << " u bound " <<  uminmax << endl;
-	     R umx=uminmax.y,umn=uminmax.x;
-	     int N=Viso.N();
-	     int Na=Varrow.N();
-	     R d = fill ? (umx-umn)/(N-1)  : (umx-umn)/(N);       
-	     R x = fill ? umn-d/2 :umn+d/2;
-	     if (!pViso) 
-	       for (int i = 0;i < N;i++)
-	         {Viso[i]=x;x +=d; }
-	     if (fill && !pViso) {Viso[0]=umn-d;Viso[N-1]=umx+d;}
-	     x=0; d= sqrt(Vminmax.y)/Na;
-	     if (!pVarrow)
-	       for (int i = 0;i < Na;i++)
-		 {Varrow[i]=x;x +=d; }
+		}
+	      if (verbosity>5)   cout << " u bound " <<  uminmax << endl;
+	      R umx=uminmax.y,umn=uminmax.x;
+	      int N=Viso.N();
+	      int Na=Varrow.N();
+	      R d = fill ? (umx-umn)/(N-1)  : (umx-umn)/(N);       
+	      R x = fill ? umn-d/2 :umn+d/2;
+	      if (!pViso) 
+		for (int i = 0;i < N;i++)
+		  {Viso[i]=x;x +=d; }
+	      if (fill && !pViso) {Viso[0]=umn-d;Viso[N-1]=umx+d;}
+	      x=0; d= sqrt(Vminmax.y)/Na;
+	      if (!pVarrow)
+		for (int i = 0;i < Na;i++)
+		  {Varrow[i]=x;x +=d; }
 	     
 	     
 	     
-          }
-       }  
+	    }
+	}  
       *mps=mp;
-   } //  end plotting 
-   NoirEtBlanc(0)  ;
-     setgrey(greyo);
-     if (colors) delete[] colors;
-     // modif mars 2006  auto stack ptr
-     // if (cm)        delete cm;
-     // if (psfile)        delete psfile;
-     viderbuff();
+    } //  end plotting 
+  NoirEtBlanc(0)  ;
+  setgrey(greyo);
+  if (colors) delete[] colors;
+  // modif mars 2006  auto stack ptr
+  // if (cm)        delete cm;
+  // if (psfile)        delete psfile;
+  viderbuff();
      
-     return 0L;}     
+  return 0L;
+}     
 
  
 AnyType Convect::operator()(Stack s) const 
@@ -2914,44 +2918,44 @@ AnyType Convect::eval2(Stack s) const
   static R ddts;
   R ddt = GetAny<double>((*dt)(s));
   if (ddt) 
-   {
-    MeshPoint mpc(*mp);
-    MeshPointStack(s,&mpc);
-    if(*mp==mpp && ddt == ddts) 
-      mpc=mps;
-    else 
-     {
+    {
+      MeshPoint mpc(*mp);
+      MeshPointStack(s,&mpc);
+      if(*mp==mpp && ddt == ddts) 
+	mpc=mps;
+      else 
+	{
 
-            const Mesh & Th(*mp->Th);
-            ffassert(mp->Th && mp->T);
-            R l[3];
-            l[1]=mpc.PHat.x;
-            l[2]=mpc.PHat.y;
-            l[0]=1-l[1]-l[2];
+	  const Mesh & Th(*mp->Th);
+	  ffassert(mp->Th && mp->T);
+	  R l[3];
+	  l[1]=mpc.PHat.x;
+	  l[2]=mpc.PHat.y;
+	  l[0]=1-l[1]-l[2];
 
-            int k=0;
-            int j; 
-            int it=Th(mpc.T);
-            while ( (j=WalkInTriangle(Th,it,l,GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),ddt))>=0) 
-                { 
-                    ffassert( l[j] == 0);
-                    //int jj  = j;            
-                    R a= l[(j+1)%3], b= l[(j+2)%3];
-                    int itt =  Th.ElementAdj(it,j);
-                    if(itt==it || itt <0)  break; // le bord 
-                    it = itt;
-                    l[j]=0;
-                    l[(j+1)%3] = b;
-                    l[(j+2)%3] = a;
-                     mpc.change(R2(l[1],l[2]),Th[it],0);             
-                      ffassert(k++<1000);
-                }
+	  int k=0;
+	  int j; 
+	  int it=Th(mpc.T);
+	  while ( (j=WalkInTriangle(Th,it,l,GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),ddt))>=0) 
+	    { 
+	      ffassert( l[j] == 0);
+	      //int jj  = j;            
+	      R a= l[(j+1)%3], b= l[(j+2)%3];
+	      int itt =  Th.ElementAdj(it,j);
+	      if(itt==it || itt <0)  break; // le bord 
+	      it = itt;
+	      l[j]=0;
+	      l[(j+1)%3] = b;
+	      l[(j+2)%3] = a;
+	      mpc.change(R2(l[1],l[2]),Th[it],0);             
+	      ffassert(k++<1000);
+	    }
 
-            mpc.change(R2(l[1],l[2]),Th[it],0);
-            mpp=*mp; 
-            mps=mpc;         
-     }
-   }
+	  mpc.change(R2(l[1],l[2]),Th[it],0);
+	  mpp=*mp; 
+	  mps=mpc;         
+	}
+    }
   ddts=ddt;
   AnyType r= (*ff)(s);
   MeshPointStack(s,mp);
@@ -3015,18 +3019,18 @@ class Op3_pfe2K : public ternary_function<pair<FEbase<K,v_fes> *,int>,R,R,K> { p
 
 
   class Op : public E_F0mps { public:
-      Expression a,b,c;
-       Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}       
-       AnyType operator()(Stack s)  const 
-        { 
-           R xx(GetAny<R>((*b)(s)));
-           R yy(GetAny<R>((*c)(s)));
-           MeshPoint & mp = *MeshPointStack(s),mps=mp;
-           mp.set(xx,yy,0.0);
-           AnyType ret = pfer2R<K,0>(s,(*a)(s));
-           mp=mps;
-           return  ret;}
-   
+    Expression a,b,c;
+    Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {cout << "Op3_pfe2K" << endl;}       
+    AnyType operator()(Stack s)  const 
+    { 
+      R xx(GetAny<R>((*b)(s)));
+      R yy(GetAny<R>((*c)(s)));
+      MeshPoint & mp = *MeshPointStack(s),mps=mp;
+      mp.set(xx,yy,0.0);
+      AnyType ret = pfer2R<K,0>(s,(*a)(s));
+      mp=mps;
+      return  ret;
+    }
   };
 };
 
@@ -3534,7 +3538,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 // Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  with rhs (must be zer
  Global.Add("LinearCG","(",new LinearCG<R>(1)); //  without right handsize
  Global.Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
-  zzzfff->AddF("varf",t_form);    //  var. form ~
+ zzzfff->AddF("varf",t_form);    //  var. form ~
  zzzfff->AddF("solve",t_solve);
  zzzfff->AddF("problem",t_problem);
  

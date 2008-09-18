@@ -307,15 +307,18 @@ public:
   void destroy() { // cout << "~FEbase  destroy " << this << endl; 
     delete this;}
   
-  void operator=( KN<K> *y) { Vh=**pVh; 
-  throwassert((bool) Vh);
-  if (xx) delete xx;xx=y;
-  ffassert( y->N() == Vh->NbOfDF);}
+  void operator=( KN<K> *y) { 
+    Vh=**pVh; 
+    throwassert((bool) Vh);
+    if (xx) delete xx;xx=y;
+    ffassert( y->N() == Vh->NbOfDF);
+  }
   FESpace * newVh() { 
     throwassert(pVh  );
     const pfes pp= *pVh;
     // cout << pVh << " " << *pVh << endl;
-    return *pp;}  
+    return *pp;
+  }  
   
   operator  FESpace &() { throwassert(Vh); return *Vh;}
 
@@ -602,7 +605,7 @@ class Op3_K2R : public ternary_function<K,R,R,K> { public:
 
   class Op : public E_F0mps { public:
       Expression a,b,c;
-       Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}       
+    Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}       
        AnyType operator()(Stack s)  const 
         { 
            R xx(GetAny<R>((*b)(s)));
@@ -624,6 +627,7 @@ class Op4_K2R : public quad_function<K,R,R,R,K> { public:
 	: a(aa),b(bb),c(cc),d(dd) {}       
       AnyType operator()(Stack s)  const 
       { 
+	cout <<"class Op4_K2R : public quad_function<K,R,R,R,K>" << endl;
 	R xx(GetAny<R>((*b)(s)));
 	R yy(GetAny<R>((*c)(s)));
 	R zz(GetAny<R>((*d)(s)));
@@ -652,8 +656,8 @@ public:
   E_Array  aa;
   Expression   ppfe;
   bool optimize;
-       vector<size_t>  where_in_stack_opt;
-       Expression optiexp0,optiexpK;
+  vector<size_t>  where_in_stack_opt;
+  Expression optiexp0,optiexpK;
 
   E_set_fev3(const E_Array * a,Expression pp) ;
   

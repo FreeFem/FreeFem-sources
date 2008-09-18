@@ -139,6 +139,7 @@ void  ILineTo(long i,long j)
     return sb->bc++;
   }
   ~FQuadTree();
+  FQuadTree(Mesh* t,long tnv,R2 Pmin,R2 Pmax,long nbv=-1);
   FQuadTree(Mesh * t,R2 Pmin,R2 Pmax,long nbv=-1);
   FQuadTree(Vertex * v,R2 Pmin,R2 Pmax,long nbv);
   FQuadTree();

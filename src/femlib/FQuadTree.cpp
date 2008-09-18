@@ -402,6 +402,31 @@ FQuadTree::FQuadTree(Mesh * t,R2 Pmin,R2 Pmax,long nbv) :
 #endif
 }
 
+FQuadTree::FQuadTree(Mesh* t,long tnv,R2 Pmin,R2 Pmax,long nbv) : 
+ lenStorageQuadTreeBox(tnv/8+100),
+  th(t),
+  NbQuadTreeBoxSearch(0),
+  NbVerticesSearch(0),
+  NbQuadTreeBox(0),
+  NbVertices(0),
+  cMin(Pmin-(Pmax-Pmin)/2),
+  cMax(Pmax+(Pmax-Pmin)/2),
+  coef( MaxISize/Norme_infty(cMax-cMin))
+  
+{ 
+  if (nbv == -1) nbv = tnv;
+  sb =new StorageQuadTreeBox(lenStorageQuadTreeBox);
+  root=NewQuadTreeBox();
+//  throwassert( MaxISize > MaxICoor);
+  if (t)
+  for (long i=0;i<nbv;i++) 
+    Add(t->vertices[i]);
+#ifdef DRAWING1
+  Draw();
+#endif
+}
+
+
 FQuadTree::FQuadTree() : 
   lenStorageQuadTreeBox(100),
   th(0),

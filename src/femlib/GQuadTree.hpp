@@ -137,7 +137,7 @@ namespace EF23 {
   public:
   
     static  const int d =Rd::d;
-    static const int N = 1 << d;  
+    static const int N = 1 << d;  // N=2^(d-1)
     
     
     class QuadTreeBox { 
@@ -193,6 +193,7 @@ namespace EF23 {
     Vertex *  ToClose(const Rd & ,R ,Zd );
     Vertex *  ToClose(const Rd & P,R delta){
       int hx = (int) (coef*delta);
+      //if(verbosity > 5 ) cout << "hx=" << hx << " coef=" << coef << endl;
       return ToClose(P,delta,Zd(hx));}
     int SizeOf() const {return sizeof(GTree)+sb->SizeOf();}
     
