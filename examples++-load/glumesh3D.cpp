@@ -424,21 +424,29 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   int recollement_elem=0, recollement_border=1, point_confondus_ok=0;
   Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh,rTh3, txx, tyy, tzz, border_only, 
 			      recollement_elem, recollement_border, point_confondus_ok);
-	  
-  /*  changement de label   */
-	
+  
   if(nbt != 0)
     {
       T_Th3->BuildBound();
+
+    
       T_Th3->BuildAdj();
+
+      
       T_Th3->Buildbnormalv();  
+
       T_Th3->BuildjElementConteningVertex();
+      
       T_Th3->BuildGTree();
+      
       //	T_Th3->decrement();  
       Add2StackOfPtr2FreeRC(stack,T_Th3);
+     
+      
     }
-      *mp=mps;
-      return T_Th3;
+
+  *mp=mps;
+  return T_Th3;
 }
 
 class  Movemesh3D : public OneOperator { public:  

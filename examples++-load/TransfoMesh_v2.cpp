@@ -102,6 +102,7 @@ Mesh3 * Transfo_Mesh3(const double &precis_mesh,const Mesh3 & Th3, const double 
 	  T_Th3->vertices[i_som].z = tab_ZZ[ii];
 	  T_Th3->vertices[i_som].lab = K.lab; 
 			
+	  
 	  i_som = i_som + 1;		
 	}	
 	cout << "i_som, nv_t=" <<i_som << " "<<nv_t << endl;
@@ -112,23 +113,24 @@ Mesh3 * Transfo_Mesh3(const double &precis_mesh,const Mesh3 & Th3, const double 
 	// determination of volume elements
 	i_elem = 0;
 	for( int i=0; i< nt_t; i++){
-		int & ii=ind_nt_t[i];
+	  int & ii=ind_nt_t[i];
 	
-		// creation of elements
+	  // creation of elements
 		
-		const Tet & K(Th3.elements[ii]);
-		int iv[4];
-		int lab;
-		//lab = K.lab;
-		lab = label_nt_t[i];
-		for(int jj=0; jj <4; jj++){
-			iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ]; 
-			assert( iv[jj] >= 0 && iv[jj] <= nv_t);  	
-		}
-		//if(i_elem == 65) cout << "border 5:" << iv[0] << " "<< iv[1] << " " <<iv[2] << endl;
+	  const Tet & K(Th3.elements[ii]);
+	  int iv[4];
+	  int lab;
+	  //lab = K.lab;
+	  lab = label_nt_t[i];
+	  for(int jj=0; jj <4; jj++){
+	    iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ]; 
+	    assert( iv[jj] >= 0 && iv[jj] < nv_t); 
+	    //cout <<"i_elem=" << i_elem << "i=" <<  ii <<" " << jj << " " <<  Th3.operator()(K[jj]) << " "  << iv[jj] << endl;
+	  }
+	 
 		
-		T_Th3->elements[i_elem].set(T_Th3->vertices, iv, lab);
-		i_elem=i_elem+1;
+	  T_Th3->elements[i_elem].set(T_Th3->vertices, iv, lab);
+	  i_elem=i_elem+1;
 	} 
 	
 	assert( i_elem == nt_t);
@@ -137,25 +139,28 @@ Mesh3 * Transfo_Mesh3(const double &precis_mesh,const Mesh3 & Th3, const double 
 	// determination of border elements
 	i_border= 0;
 	for( int i=0; i< nbe_t; i++){
-		int & ii=ind_nbe_t[i];
+	  int & ii=ind_nbe_t[i];
 	
-		// creation of elements
-		const Triangle3 & K(Th3.be(ii));
-		int iv[3];
-		int lab;
+	  // creation of elements
+	  const Triangle3 & K(Th3.be(ii));
+	  int iv[3];
+	  int lab;
 		
-		//lab = K.lab; 
-		lab = label_nbe_t[i];
+	  //lab = K.lab; 
+	  lab = label_nbe_t[i];
 		
-		for(int jj=0; jj <3; jj++){
-			iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
-			assert( iv[jj] >= 0 && iv[jj] <= nv_t);
-		}
-		T_Th3->be(i_border).set(T_Th3->vertices, iv, lab);
-		i_border=i_border+1;
+	  for(int jj=0; jj <3; jj++){
+	    iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
+	    assert( iv[jj] >= 0 && iv[jj] < nv_t);
+	  }
+
+	  T_Th3->be(i_border).set(T_Th3->vertices, iv, lab);
+	  i_border=i_border+1;
 	} 
 	assert( i_border == nbe_t);
 	
+
+
 	return T_Th3;
 }
 
@@ -169,7 +174,7 @@ void SamePointElement( const double &precis_mesh, const double *tab_XX, const do
   R3 bmin,bmax;
   //int recollement_element=1,recollement_border=1;
   
-  cout << "  OrderVertexTransfo_hcode gtree " <<endl;
+  cout << "  BuilBound " <<endl;
   BuildBoundMinDist_th3( precis_mesh, tab_XX, tab_YY, tab_ZZ, Th3, bmin, bmax, hmin);
   cout << " =============================== " << endl;
 		
@@ -202,7 +207,7 @@ void SamePointElement( const double &precis_mesh, const double *tab_XX, const do
     Elem_ok = 1;
 			
     for(int jj=0; jj <4; jj++){
-      iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];   
+      iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
     }
 			
     for(int jj=0; jj<4; jj++){
@@ -280,6 +285,7 @@ void SamePointElement( const double &precis_mesh, const double *tab_XX, const do
 			
     for(int jj=0; jj <3; jj++){
       iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
+      assert( iv[jj] >= 0 && iv[jj] < nv_t);
     }
 			
     for(int jj=0; jj<3; jj++){
@@ -693,7 +699,7 @@ Mesh3 * MoveMesh2_func( const double &precis_mesh, const Mesh & Th2, const doubl
 	{
 		int ii = ind_nv_t[nnv];
 		assert( Numero_Som[ii] == nnv );
-		const Mesh::Vertex & K = Th2.vertices[ii];//const Vertex3 & K(Th2.vertices[ii]); //Version Mesh2   
+		const Mesh::Vertex & K = Th2.vertices[ii];//const Vertex2 & K(Th2.vertices[ii]); //Version Mesh2   
 		T_Th3->vertices[nnv].x = tab_XX[ii];
 		T_Th3->vertices[nnv].y = tab_YY[ii];
 		T_Th3->vertices[nnv].z = tab_ZZ[ii];       
@@ -1585,11 +1591,13 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
 	
   // parametre interne pour debugger le code
   int verifnumberofpoints;
-  verifnumberofpoints = 1;
+  verifnumberofpoints = 0;
 	
   // hmin a determiner plus haut
   assert(hmin>Norme2(bmin-bmax)/1e9);
   double hseuil =hmin/10.; 
+
+  //hseuil = hseuil/10.;
 	
   Vertex3  *v= new Vertex3[tab_nv];
 	
@@ -1611,7 +1619,8 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
     /*vi.x = tab_XX[ii];
       vi.y = tab_YY[ii];
       vi.z = tab_ZZ[ii];*/
-		
+	
+
     Vertex3 * pvi=gtree->ToClose(vi,hseuil);
     if(!pvi){
       v[nv_t].x = vi.x;
@@ -1620,11 +1629,12 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
       v[nv_t].lab = vi.lab; // lab mis a zero par default
       ind_nv_t[nv_t] = ii;
       Numero_Som[ii] = nv_t;
-      gtree->Add( v[nv_t++] );
+      gtree->Add( v[nv_t] );
+      nv_t=nv_t+1;
     }
+
     else{
       Numero_Som[ii] = pvi-v;
-      //cout << ii << " <--> " << pvi - v << endl;
     }
   }
 	
@@ -1640,8 +1650,8 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
       for(int jj=ii+1; jj<tab_nv; jj++){
 	double dist = 0.;
 	dist = pow(tab_XX[jj]-tab_XX[ii],2)+pow(tab_YY[jj]-tab_YY[ii],2)+pow(tab_ZZ[jj]-tab_ZZ[ii],2); //pow(Coord_Point[jj][kk]-Coord_Point[ii][kk],2);
-	if( sqrt(dist) < hseuil/10.){
-	  //cout << "point_commun:"<< ii << " " << jj << endl;
+	if( sqrt(dist) < hseuil){
+	  //cout << "point_commun:"<< ii << "<--> " << jj << " coord ii " << tab_XX[ii] << " " << tab_YY[ii] << " " << tab_ZZ[ii] << " jj " << tab_XX[jj] << " " << tab_YY[jj] << " " << tab_ZZ[jj] << endl;
 	  numberofpointsdiff=1;
 	} 
       }
