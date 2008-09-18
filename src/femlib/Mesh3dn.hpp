@@ -151,6 +151,7 @@ public:
   Mesh3(const string); 
   Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb); 
   int Save(const string & filename);
+  //int Popen(const FILE *popenstream);
 private:
   int load(const string & filename); 
   Mesh3(const Mesh3 &); // pas de construction par copie

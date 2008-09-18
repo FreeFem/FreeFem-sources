@@ -415,29 +415,8 @@ public:
     assert( nv >0 && vertices);
     
   }
-  /*
-   void set(int mv,int mt,int mbe, V *vv, T *tt, B *bb) 
-  {
-    assert(nt==0 && nv==0 && nbe ==0); 
-    nt=mt;
-    nv=mv;
-    nbe=mbe;
-    vertices= new V[nv];
-    elements= new T[nt];
-    borderelements = new B[nbe]; 
-    
-    vertices=vv;
-    elements=tt;
-    borderelements=bb;
-    
-    assert( nt >0 && elements);
-    assert( nv >0 && vertices);
-    assert( nbe > 0 && borderelements);
-    
-  }
-  */
  
-  
+ 
   int operator()(const T & t) const {return CheckT(&t - elements);}
   int operator()(const T * t) const {return CheckT(t - elements);}
   int operator()(const V & v) const {return CheckV(&v - vertices);}
@@ -549,8 +528,10 @@ public:
     int nv[N];
     Element & K(elements[CheckT(k)]);
     ASSERTION(i>=0 && i <M);
-    for (int j=0;j<N;++j)
+    for (int j=0;j<N;++j){
       nv[j] = operator()(K[nu[i][j]]);
+    }
+
     return SortArray<int,N>(nv);
   }
 
@@ -563,8 +544,11 @@ public:
   {
     int nv[B::nv];
     B & K(borderelements[CheckBE(k)]);
-    for (int j=0;j<B::nv;++j)
+    
+    for (int j=0;j<B::nv;++j){
       nv[j] = operator()(K[j]);
+    }
+
     return SortArray<int,B::nv>(nv);
   }
 
@@ -623,10 +607,13 @@ void GenericMesh<T,B,V>::BuildAdj()
   HashTable<SortArray<int,nva>,int> h(nea*nt,nv);
   int nk=0,nba=0;
   int err=0;
+
+  cout << "nva=// nea=" << nva << " " << nea << " "<< nbe << endl;
   for (int k=0;k<nt;++k)
     for (int i=0;i<nea;++i)
       {
         SortArray<int,nva> a(itemadj(k,i));
+	//cout << " ### "   << " item(k,i)= " << itemadj(k,i) << " a= " << a << " k " << k << " i " << i << endl;
 	typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
 	if(!p) 
 	  { 
@@ -648,20 +635,22 @@ void GenericMesh<T,B,V>::BuildAdj()
   for (int k=0;k<nbe;++k)
      {
 	SortArray<int,nva> a(itembe(k));
-	 typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
-	 if(!p) { err++;
-	   if(err==1) cerr << "Err  Border element not in mesh \n";
-	    if (err<10)  cerr << " \t " << k << " " << a << endl;
-	 }
+
+	typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
+	//cout << k << " ### "   << " item(k,i)= " << itembe(k) << " a= " << a << endl;
+	if(!p) { err++;
+	if(err==1) cerr << "Err  Border element not in mesh \n";
+	if (err<10)  cerr << " \t " << k << " " << a << endl;
+	}
 	 else
 	   {
 	     BoundaryElementHeadLink[k] = p->v <0 ? -p->v-1 : p->v;
-#ifndef NDEBUG
+	     #ifndef NDEBUG
 	     int t=BoundaryElementHeadLink[k]/nea;
 	     int e=BoundaryElementHeadLink[k]%nea;
-	     // cout << k << " ### "   << a << " = " << itemadj(t,e) << " t " << t << " e " << e << endl;
+	     //cout << k << " ### "   << a << " = " << itemadj(t,e) << " t " << t << " e " << e << endl;
 	     assert(itemadj(t,e)==a);
-#endif
+	     #endif
 	   }
      }
 

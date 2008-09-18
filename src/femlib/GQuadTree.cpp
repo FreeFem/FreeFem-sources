@@ -217,61 +217,71 @@ namespace EF23 {
     QuadTreeBox * b;
     long h=MaxISize;
     long hb =  MaxISize;
-    Zd p0;
+    Zd p0( 0 );
     
     if (!root->n)
       return 0; // empty tree 
-    
+   
     // general case -----
     pb[0]= root;
-    pi[0]=  root->n>0 ?(int)  root->n : N ;
-    pp[0]=p0;
+    pi[0]= root->n>0 ?(int)  root->n : N ;
+    pp[0]= p0;
     h=hb;
     do {    
       b= pb[l];
       while (pi[l]--)
 	{ 	      
 	  int k = pi[l];
-	  
+	  //cout << "b" << b << ", k= " << k << endl;
+	  //cout << " b->n " << b->n << endl;
 	  if (b->n>0) // Vertex QuadTreeBox none empty
 	    { 
 	      NbVerticesSearch++;
 	      Vertex & V(*b->v[k]);
 	      Zd i2 =  VtoZd(V);
+	   
 	      if ( Zd(i2,p).less(H) )
 		{
+		  
 		  Rd XY(X,V);
 		  R dd;
 		  if( (dd= (XY,XY) ) < seuil2 ) // LengthInterpole(Mx(XY), b->v[k]->m(XY)))  < seuil )
-		    {// cout << dd << " " << XY << " ";
-		      return &V; }
+		    { 
+		
+		      return &V; 
+		    }
 		}
 	    }
 	  else // Pointer QuadTreeBox 
 	    { 
 	      QuadTreeBox *b0=b;
 	      NbQuadTreeBoxSearch++;
-	      if ((b=b->b[k])) 
+	      if( (b=b->b[k]) ) 
 		{
-		  hb >>=1 ; // div by 2
+			
+		  hb >>=1; // div by 2
 		  Zd ppp(pp[l],k,hb);
-		  if (ppp.interseg(p,hb,H))
+		  	
+		  if( ppp.interseg(p,hb,H) )
 		    {
+		      	
 		      pb[++l]=  b;
-		      pi[l]= b->n>0 ?(int)  b->n : N  ;
-		      pp[l]=ppp;		    
+		      pi[l]= b->n>0 ?(int)  b->n : N;  
+		      pp[l]=ppp;
 		    }
 		  else
 		    b=b0, hb <<=1 ;
+		    	
 		}
 	      else
 		b=b0;
 	    }
-      }
+	} // fin: while(pi[l]--)
       hb <<= 1; // mul by 2 
     } while (l--);
-    
+
     return 0;
+    
   }
   
   template<class Vertex>
@@ -281,7 +291,7 @@ namespace EF23 {
     Zd p(VtoZd(w));
     long l=MaxISize;
     pb = &root;
-    //cout << "add : "<< w << " : "<< p  << ", " << pb << " " << &root << endl;
+   
     while( (b=*pb) && (b->n<0))
       { 
 	b->n--;
@@ -290,16 +300,20 @@ namespace EF23 {
       }
     if  (b) {
       for(int i=N-1;i>=0;--i)
-	if (b->n > i &&  b->v[i] == &w) return;
+	if (b->n > i &&  b->v[i] == &w)
+	  {
+	    //if( abs(w.x+0.5)<1e-10 ) cout << "if (b->n > i &&  b->v[i] == &w)" <<endl;
+	    return;
+	  }
     }
     assert(l);
     while ((b= *pb) && (b->n == N)) // the QuadTreeBox is full
       { 
-	//cout << " b = " << b << b->n << "  " << l << endl;
+	//if(verbosity > 5) cout << " b = " << b << b->n << "  " << l << endl;
 	Vertex *v4[N]; // copy of the QuadTreeBox vertices      
 	for(int i=0;i<N;++i)
 	  { v4[i]= b->v[i];
-	    b->v[i]=0;}
+	  b->v[i]=0;}
 	
 	b->n = -b->n; // mark is pointer QuadTreeBox
 	
@@ -309,21 +323,22 @@ namespace EF23 {
 	  { 
 	    int ij;
 	    QuadTreeBox * bb =  b->b[ij=VtoZd(v4[k]).Case(l)];
-	    //cout << "ij= "<< ij <<  " " << VtoZd(v4[k])<< endl;
+	    //if(verbosity > 5)  cout << "ij= "<< ij <<  " " << VtoZd(v4[k])<< endl;
 	    if (!bb) 
 	      bb=b->b[ij]=NewQuadTreeBox(); // alloc the QuadTreeBox 
-	    //cout << bb << " " << k << " "  << ij <<  endl;
-	     bb->v[bb->n++] = v4[k];
+	    //if(verbosity > 5)  cout << bb << " " << k << " "  << ij <<  endl;
+	    bb->v[bb->n++] = v4[k];
 	  }
 	pb = &b->b[p.Case(l)];
       }
     if (!(b = *pb))
-      { //cout << "Qbox \n";
+      { //if(verbosity > 5)  cout << "Qbox \n";
 	b=*pb= NewQuadTreeBox(); //  alloc the QuadTreeBox 
       }
-    //   cout << b << " " << b->n << endl;
+    //if(verbosity > 5)  cout << b << " " << b->n << endl;
     b->v[b->n++]=&w; // we add the vertex 
     NbVertices++;    
+    
   }
 
     
@@ -340,8 +355,12 @@ GTree<Vertex>::GTree(Vertex * v,Rd Pmin,Rd Pmax,int nbv) :
  coef( MaxISize/Norme_infty(cMax-cMin))
  
 { 
-  if(verbosity>5)
+  if(verbosity>5){
     cout << "  GTree: box: "<<  Pmin << " " << Pmax << " " << cMin << " "<< cMax << " nbv : " << nbv <<endl;
+    cout << "MaxISize " << MaxISize << endl; 
+    //cout << "  RdtoZd(cMin)" << RdtoZd(cMin) << " RdtoZd(cMax)" << RdtoZd(cMax) << endl;
+    //cout << "  RdtoZd(Pmin)" << RdtoZd(Pmin) << " RdtoZd(Pmax)" << RdtoZd(Pmax) << endl;
+    }
   sb =new StorageQuadTreeBox(lenStorageQuadTreeBox);
   root=NewQuadTreeBox();
   //  throwassert( MaxISize > MaxICoor);

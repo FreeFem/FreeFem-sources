@@ -496,6 +496,7 @@ E_set_fev3<K,v_fes>::E_set_fev3(const E_Array * a,Expression pp)
 template<class K,class v_fes>   
 AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
 {  
+
   StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);     
   MeshPoint *mps=MeshPointStack(s), mp=*mps;   
   FEbase<K,v_fes> ** pp=GetAny< FEbase<K,v_fes> **>((*ppfe)(s));
@@ -611,19 +612,16 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
 template<class K>
 inline FEbase<K,v_fes> * MakePtrFE3_(pfes3 * const &  a){ 
   FEbase<K,v_fes3> * p=new FEbase<K,v_fes3>(a);
-  //cout << "MakePtrFE " << p<< endl; 
   return p ;}
   
 template<class K>
 inline FEbase<K,v_fes3> ** MakePtrFE3_2(FEbase<K,v_fes3> * * const &  p,pfes3 * const &  a){ 
   *p=new FEbase<K,v_fes3>(a);
-  //cout << "MakePtrFE2 " << *p<< endl; 
   return p ;}
 
 template<class K>  
 inline FEbaseArray<K,v_fes3> ** MakePtrFE3_3(FEbaseArray<K,v_fes3> * * const &  p,pfes3 * const &  a,const long & N){ 
   *p=new FEbaseArray<K,v_fes3>(a,N);
-  //cout << "MakePtrFE2 " << *p<< endl; 
   return p ;}
 
 template<class K,class v_fes>
@@ -729,6 +727,7 @@ AnyType pf3r2R(Stack s,const AnyType &a)
   typedef typename  Mesh::Vertex Vertex;  
   typedef typename  Mesh::RdHat RdHat;  
   typedef typename  Mesh::Rd Rd;  
+
   
   pair< FEbase<R,v_fes> *  ,int> ppfe=GetAny<pair< FEbase<R,v_fes> *,int> >(a);
   FEbase<R,v_fes> & fe( *ppfe.first);
@@ -764,7 +763,7 @@ AnyType pf3r2R(Stack s,const AnyType &a)
     K=Th.Find(mp.P,PHat,outside);
     mp.other.set(Th,mp.P,PHat,*K,0,outside);
   }
-  // cout << "  ---  " << qnu << "  " << mp.P << " " << mp.outside <<  " " << outside << endl;
+  cout << "  ---  " << qnu << "  " << mp.P << " " << mp.outside <<  " " << outside << endl;
   const FElement KK(Vh[Th(K)]);
   if (outside && KK.tfe->discontinue) 
     return   SetAny<R>(0.0); 
@@ -801,7 +800,7 @@ AnyType pf3r2R(Stack s,const AnyType &a)
      } */
 //  if ( qnu )   
  //  cout << " f()  triangle       " << Th(K) << " " << mp.P << " " << PHat << " =  " << r <<  endl;
-  if(verbosity>=10000)
+ if(verbosity>=10000)
       cout << componante<< " "<< dd << " f()  Tet:  " << Th(K) << " " << mp.P << " " << PHat << " =  " << rr <<  endl; 
   return SetAny<R>(rr);
 }
@@ -817,6 +816,7 @@ class Op4_pf32K : public quad_function<pair<FEbase<K,v_fes> *,int>,R,R,R,K> { pu
 	: a(aa),b(bb),c(cc),d(dd) {}       
       AnyType operator()(Stack s)  const 
       { 
+	
 	R xx(GetAny<R>((*b)(s)));
 	R yy(GetAny<R>((*c)(s)));
 	R zz(GetAny<R>((*d)(s)));
@@ -832,6 +832,7 @@ class Op4_pf32K : public quad_function<pair<FEbase<K,v_fes> *,int>,R,R,R,K> { pu
 template<class K,class v_fes>    
 KN<K> * pf3r2vect( pair<FEbase<K,v_fes> *,int> p)
 {  
+  cout << "  pf3r2vect " << endl;
   typedef typename  v_fes::FESpace FESpace;
   KN<K> * x=p.first->x();
   if ( !x) {  // defined 

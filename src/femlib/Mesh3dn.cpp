@@ -98,7 +98,7 @@ namespace Fem2D {
   const int (* const GenericElement<DataTet>::onWhatBorder)[15] = SetonWhatIsFace(onWhatIsFace,nvfaceTet,nvedgeTet) ;
   
   template<> int   GenericMesh<Tet,Triangle3,Vertex3>::kfind=0;
-    template<> int   GenericMesh<Tet,Triangle3,Vertex3>::kthrough=0;
+  template<> int   GenericMesh<Tet,Triangle3,Vertex3>::kthrough=0;
   
   
   const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15]
@@ -123,13 +123,13 @@ namespace Fem2D {
       for(int j=0;j<4;++j)
 	{
 	  for(int i=0;i<15;++i)
-		    cout << onWhatIsFace[j][i] << " ";
+	    cout << onWhatIsFace[j][i] << " ";
 	  cout << endl;
 	}
     
     return onWhatIsFace;
   }
-  
+
   Mesh3::Mesh3(const string  filename)
   { // read the mesh
     int i;
@@ -235,8 +235,8 @@ namespace Fem2D {
       bin=false;
     else
       { if(verbosity>5)
-	  cerr << " Erreur ouverture file " << (char *) fileb << " " << (char *) filef << endl;
-	return   1;
+	cerr << " Erreur ouverture file " << (char *) fileb << " " << (char *) filef << endl;
+      return   1;
       }
     int nv,nt,neb;
     nv = GmfStatKwd(inm,GmfVertices);
@@ -295,7 +295,7 @@ namespace Fem2D {
 	  }
 	
 	if(kmv&& verbosity>1)
-				cout << "    Aucun label Hack (FH)  ??? => 1 sur les triangle frontiere "<<endl;
+	  cout << "    Aucun label Hack (FH)  ??? => 1 sur les triangle frontiere "<<endl;
       }
     
     
@@ -314,7 +314,7 @@ namespace Fem2D {
     return(0); // OK
     
   }
-  
+
 		    
   int Mesh3::Save(const string & filename)
   {
@@ -323,6 +323,7 @@ namespace Fem2D {
       cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< filename << endl;
       return(1);
     }
+    
     float fx,fy,fz;
     GmfSetKwd(outm,GmfVertices,this->nv);
     for (int k=0; k<nv; k++) {
@@ -355,10 +356,10 @@ namespace Fem2D {
     return (0);
     
   }
-  
+
   Mesh3::Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb)
   {
-    
+  
     nv = nnv;
     nt = nnt;
     nbe =nnbe;
@@ -391,7 +392,7 @@ namespace Fem2D {
     if(verbosity>1)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
     
-  } 
+  }
   
   int  signe_permutation(int i0,int i1,int i2,int i3)
   {
@@ -404,6 +405,7 @@ namespace Fem2D {
     if(i2>i3) Exchange(i2,i3), p = -p;
     return p;
   }
+
 
   int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt)
   {
@@ -439,7 +441,7 @@ namespace Fem2D {
       {
 	dt =0;
 	Phat=R3(l+1);
-	
+
       }
     else 
       {

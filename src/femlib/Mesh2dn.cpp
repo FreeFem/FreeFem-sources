@@ -250,4 +250,86 @@ int Mesh2::Save(const string & filename)
   return (0);
 
 }
+/*
+int Mesh2::Popen(const FILE *namestream)
+{
+  
+  int ver = GmfFloat;
+  int dimp =2;
+  float fx,fy;
+
+  FILE *popenstream;
+  popenstream = namestream;
+
+  fprintf(popenstream,"MeshVersionFormatted\n");
+  fprintf(popenstream,"%i\n",ver);
+  fprintf(popenstream,"Dimension\n");
+  fprintf(popenstream,"%i\n",dimp);
+  fprintf(popenstream,"Vertices\n");
+  fprintf(popenstream,"%i\n",this->nv);
+
+  for (int k=0; k<nv; k++) {
+    const  Vertex & P = this->vertices[k];
+    fx=P.x; fy=P.y;
+    fprintf(popenstream,"%f %f %i\n",fx,fy,P.lab);
+  }
+  
+  fprintf(popenstream,"Triangles\n");
+  fprintf(popenstream,"%i\n",this->nt);
+  for (int k=0; k<nt; k++) {
+    const Element & K(this->elements[k]);
+    int i0=this->operator()(K[0])+1;
+    int i1=this->operator()(K[1])+1;
+    int i2=this->operator()(K[2])+1;
+    int lab=K.lab;
+    fprintf(popenstream,"%i %i %i %i\n",i0,i1,i2,lab);
+  }
+
+  fprintf(popenstream,"Edges\n");
+  for (int k=0; k<nbe; k++) {
+    const BorderElement & K(this->borderelements[k]);
+    int i0=this->operator()(K[0])+1;
+    int i1=this->operator()(K[1])+1;
+    int lab=K.lab;
+    fprintf(popenstream,"%i %i %i\n",i0,i1,lab);
+  }
+
+  return (0);
+}
+*/
+Mesh2::Mesh2(int nnv, int nnt, int nnbe, Vertex2 *vv, Triangle2 *tt, BoundaryEdge2 *bb)
+{
+	
+	nv = nnv;
+	nt = nnt;
+	nbe =nnbe;
+	
+	vertices = vv;
+	elements = tt;
+	borderelements = bb;
+	
+	mes=0.;
+	mesb=0.;
+	
+	for (int i=0;i<nt;i++)  
+	  mes += this->elements[i].mesure();
+	
+	for (int i=0;i<nbe;i++)  
+	  mesb += this->be(i).mesure();  
+	
+
+//if(nnt !=0){
+  //BuildBound();
+  //BuildAdj();
+  //Buildbnormalv();  
+  //BuildjElementConteningVertex();
+  //BuildGTree();
+  //decrement();    
+//}
+    
+  if(verbosity>1)
+  cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
+	
+} 
+
 }

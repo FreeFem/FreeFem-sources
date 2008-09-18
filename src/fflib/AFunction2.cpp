@@ -886,7 +886,7 @@ void basicAC_F0::SetNameParam(int n,name_and_type *l , Expression * e) const
        if(!map_type[l[i].type->name()] )
 	 {
 	   cerr << " missing ff type: '" <<l[i].type->name() << "'   "<< map_type.size()  <<  "\n";
-	  
+	   cerr << "i= " << i << "\n";
 	   InternalError(" missing type ");
 	   assert(map_type[l[i].type->name()]);
 	 }
