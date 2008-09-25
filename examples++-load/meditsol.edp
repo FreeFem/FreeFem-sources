@@ -1,6 +1,6 @@
 // meditsol.edp
 load "glumesh2D"
-load "datasolddm"
+load "popen"
 
 border Gamma(t=0,2*pi){x=cos(t); y=sin(t); label=12;};
 border Gamma1(t=0,2*pi){x=cos(t)+3; y=sin(t); label=1;};
