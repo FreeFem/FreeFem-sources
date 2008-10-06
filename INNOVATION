@@ -1,6 +1,7 @@
 v 3.00
+  - correct gestion of the counter of ConstructDataFElement class (09/2008)
+       in Valladolid spain. 
   - add 3D FINITE ELEMENT P0,P1,P2 
-     work only with matrix , solve and problem do not work
      mesh3 Th("toto.mesh")
      int3d(Th) , int2d(Th)
      see examples++-3d/first.edp example
