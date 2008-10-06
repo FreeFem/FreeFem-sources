@@ -1,4 +1,4 @@
-load "../examples++-load/glumesh"
+load "buildlayer"
 int nn=10;
 mesh Th2=square(nn,nn);
 fespace Vh2(Th2,P2);

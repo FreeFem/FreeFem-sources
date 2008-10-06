@@ -1,4 +1,4 @@
-load "glumesh"
+load "buildlayer"
 real nu=0.01,dt=0.3;
 real alpha=1./dt,alpha2=sqrt(alpha);
 
@@ -15,7 +15,7 @@ mesh3 Th=buildlayers(Th2,nn,
   // reftet=r1, 
   reffacemid=rmid, 
   reffaceup = rup,
-  reffacedown = rdown);
+  reffacelow = rdown);
 
 fespace VVh(Th,[P23d,P23d,P23d,P13d]);
 fespace Vh(Th,P23d);
