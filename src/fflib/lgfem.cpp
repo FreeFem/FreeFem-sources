@@ -2986,16 +2986,29 @@ if (ddt)
 	      int k=0;
 	      int j; 
 	      int it=Th3(mpc.T3);
-	      if(ddd) cout << " IN: " <<  (*mpc.T3)(PHat) << " " << ddt << endl;
+	      if(ddd) cout << " IN: " <<  (*mpc.T3)(PHat) << " ; " << mpc.P <<" : " << ddt << endl;
 	      while ( (j=WalkInTet(Th3,it,PHat,R3(GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),GetAny<double>((*w)(s))),ddt))>=0) 
                 { 
-		  if(ddd) cout << (*mpc.T3)(PHat) << " " << PHat << " : j = " << j  <<  " it:  " << it << endl;
+		  if(ddd) cout << "P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it ;
+#ifdef DEBUG		    
+		    R3  Po=(*mpc.T3)(PHat),Pho=PHat; int ito=it;
+#endif
                     int itt =  Th3.ElementAdj(it,j,PHat);
-		   if(ddd) cout << (*mpc.T3)(PHat) << " " << ddt << endl;	
+		   if(ddd && itt>=0) cout << "  -> " << itt << " " << j  << "  : Pn " <<  Th3[itt](PHat) << " PHn " << PHat << " , " << ddt << endl;	
 		    if(itt<0) break;
 		    it=itt;
-		    mpc.change(PHat,Th3[it],0);             
-		   ffassert(k++<1000);
+		    mpc.change(PHat,Th3[it],0);  
+#ifdef DEBUG		    
+		    if(((Po-mpc.P).norme2() > 1e-10))
+		      {   cout << ito << " " << &Th3[ito][0] << " " << &Th3[ito][1] << " " << &Th3[ito][2] << " " << &Th3[ito][3] << " "  << endl;
+			   cout << it << " " <<  &Th3[it][0] << " " <<  &Th3[it][1] << " " <<  &Th3[it][2] << " " <<  &Th3[it][3] << endl;
+			  cout << Pho  << "o Hat " << PHat << endl;
+			  cout << Po << " o != " << mpc.P << " diff= "<< (Po-mpc.P).norme2() <<endl;
+			  assert(0);
+			  
+		      }
+#endif			  
+		   ffassert(k++<200);
                 }
 	      
 	      mpc.change(PHat,Th3[it],0);
