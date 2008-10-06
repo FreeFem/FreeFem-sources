@@ -526,6 +526,7 @@ namespace Fem2D {
 	      // on sort par l'arete  j0,j1
 	      // on choisi aleatoirement la face de sortie 
 	      kk = (rand()/(RAND_MAX/2)) ? i0 : i1; 
+	      if(ddd)
 		  cout << " rand choose  2 :  " << kk << endl;
 	      }
 	    else 

@@ -763,6 +763,7 @@ AnyType pf3r2R(Stack s,const AnyType &a)
     K=Th.Find(mp.P,PHat,outside);
     mp.other.set(Th,mp.P,PHat,*K,0,outside);
   }
+  if(verbosity>100)
   cout << "  ---  " << qnu << "  " << mp.P << " " << mp.outside <<  " " << outside << endl;
   const FElement KK(Vh[Th(K)]);
   if (outside && KK.tfe->discontinue) 
