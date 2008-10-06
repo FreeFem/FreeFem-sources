@@ -447,7 +447,7 @@ public:
     j=p%nea;
     return p>=0 ? p/nea: -1;}
 
-  int ElementAdj(int k,int &j,Rd PHat) const  
+  int ElementAdj(int k,int &j,Rd& PHat) const  
     {
     //   return the kk the number of adj element k  to hyperface j (opposite to vertex j)
     //   out j: is the new hyperface number in element kk.
@@ -481,9 +481,12 @@ public:
 	PermI2J<nva>(nvkj,nvkkjj,sigma);
 	for (int l=0;l<T::nva;++l)
 	    lbb[T::nvadj[jj][l]]=lb[T::nvadj[j][sigma[l]]];
-	lbb[jj]=0; 
+	lbb[jj]=0;
+#ifdef DEBUG	  
 	Rd PH=PHat;  
+#endif
 	PHat=Rd(lbb+1);
+#ifdef DEBUG	  
 	Rd Pout=KK(PHat);
 	if( (Pin-Pout).norme2() > 1e-10 )
 	    {
@@ -499,6 +502,7 @@ public:
 		cout << "Adj:  j= " << j << " ," << Pin << " != " << Pout << " , " << PH << " -> " << PHat << "  jj = " << jj <<  endl;
 		assert(0);
 	    }
+#endif	  
 	j=jj;
 	return kk;
       }

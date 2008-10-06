@@ -608,15 +608,19 @@ ConstructDataFElement::~ConstructDataFElement()
 {
   if(*counter==0) 
    {
+   // cout << " delete ConstructDataFElement " <<   NodesOfElement << " " <<  FirstNodeOfElement << " "<< FirstDfOfNode << "  " << counter << endl;
     delete [] NodesOfElement;
     delete []  FirstNodeOfElement;
     delete [] FirstDfOfNode;
+    delete counter;
   }
+  // else 
+     // cout << " no delete ConstructDataFElement " <<   NodesOfElement << " " <<  FirstNodeOfElement << " "<< FirstDfOfNode << "  " << counter << endl;
  (*counter)--; // correction mai 2006 bug in counter incrementation 
 }
 
  ConstructDataFElement::ConstructDataFElement(const ConstructDataFElement * t,int k)
-  :thecounter(0), 
+  ://thecounter(0), 
    counter(t->counter),
    MaxNbNodePerElement(t->MaxNbNodePerElement),
    MaxNbDFPerElement(t->MaxNbDFPerElement*k),
@@ -636,13 +640,13 @@ ConstructDataFElement::~ConstructDataFElement()
 ConstructDataFElement::ConstructDataFElement (const Mesh &Th,/*int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement*/
 const  KN<const TypeOfFE *> & TFEs,const TypeOfMortar *tm,
 int nbdfv,const int *ndfv,int nbdfe,const int *ndfe)
-: thecounter(0) ,counter(&thecounter)
+: counter(NewCounter())
 { 
  Make(Th,TFEs,/*NbDfOnSommet,NbDfOnEdge,NbDfOnElement,*/ tm,nbdfv,ndfv,nbdfe,ndfe);
 }
 
 ConstructDataFElement::ConstructDataFElement(const FESpace ** l,int k,const KN<const TypeOfFE *>  & TFEs) 
-: thecounter(0),counter(&thecounter) 
+: counter(NewCounter()) 
 {
  int NbDfOnSommet=0;
  int NbDfOnEdge=0;
@@ -1014,6 +1018,7 @@ FESpace::FESpace(const FESpace & Vh,int k )
        // cout << " remum " << cdef->counter << " != " << Vh.cdef->counter  <<endl; 
        renum(); // correction mai 2006 no renumbering of existing cdef 
        }
+    Show();
      }
  
 FESpace::FESpace(const FESpace ** Vh,int k )
@@ -1037,7 +1042,9 @@ FESpace::FESpace(const FESpace ** Vh,int k )
      MaxNbNodePerElement(cdef->MaxNbNodePerElement),
      MaxNbDFPerElement(cdef->MaxNbDFPerElement) 
 {
-     if(cdef) renum(); }
+     if(cdef) renum();
+    Show();
+}
      
 FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const int *ndfv,int nbdfe,const int *ndfe )
  :
@@ -1064,7 +1071,9 @@ FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const in
      MaxNbNodePerElement(cdef->MaxNbNodePerElement),
      MaxNbDFPerElement(cdef->MaxNbDFPerElement)
 {
-  if(cdef) renum(); }
+  if(cdef) renum();
+  Show();
+}
 
 
  FESpace::FESpace(const Mesh & TTh,const TypeOfFE & tef,int nbdfv,const int *ndfv,int nbdfe,const int *ndfe)
@@ -1090,11 +1099,15 @@ FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const in
      MaxNbDFPerElement(cdef->MaxNbDFPerElement)
 {
   if(tef.NbDfOnVertex || tef.NbDfOnEdge) renum();
+  Show();
 }
      
  FESpace::~FESpace()
    {
      SHOWVERB(cout << " FESpace::~FESpace() " << endl);
+     /*  cout << " del FESpace " << this << " " <<  cdef << " "  ;
+       if(cdef) cout << cdef->NodesOfElement << endl;
+       else cout << endl;*/
       delete  cdef;
       if(ptrTFE) 
         delete  ptrTFE;
@@ -1124,6 +1137,7 @@ FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const in
      // cout << "avant renum ="<< *this <<endl;
        renum();
      // cout << "apres renum ="<< *this <<endl;
+    Show();
      }
      
 void ConstructDataFElement::renum(const long *r,int l)   

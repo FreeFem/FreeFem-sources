@@ -80,7 +80,7 @@ public:
   R1   operator+()const  {return *this;}
   // un methode
   R sum() const { return x;}
-  R * toBary(R * b) { b[0]=1-x;b[1]=x;return b;}
+  R * toBary(R * b) const { b[0]=1-x;b[1]=x;return b;}
   // les operators  tableaux
   // version qui peut modifie la class  via l'adresse de x
   R  &  operator[](int i){ return (&x)[i];}

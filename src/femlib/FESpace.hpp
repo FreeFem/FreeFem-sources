@@ -117,7 +117,8 @@ class VofScalarFE {
 
 class ConstructDataFElement {
   friend class FESpace;
-  int thecounter;
+  //int thecounter; //  chang 09/2008 the counter is a pointer because 
+    //  if you remove before the master the counter become invalide. 
   int * counter;
   int MaxNbNodePerElement;
   int MaxNbDFPerElement;
@@ -137,7 +138,8 @@ class ConstructDataFElement {
   ~ConstructDataFElement();
  void Make(const Mesh &Th,/*int NbDfOnSommet,int NbDfOnEdge,int NbDfOnElement*/const  KN<const TypeOfFE *> & TFEs,const TypeOfMortar *tm=0,
    int nbdfv=0,const int *ndfv=0,int nbdfe=0,const int *ndfe=0);
-  
+private:
+    static int *NewCounter() { int * p=new int; *p=0;return p;}// add the build thecounter. 
 };
 
 template<class T>
@@ -728,8 +730,13 @@ extern TypeOfFE & P1ncLagrange;
   R2 MinMax(const KN_<R>& U,int j0, bool bb=true) const ;
  // void destroy() {RefCounter::destroy();}
   bool isFEMesh() const { return !cdef && ( N==1) ;} // to make optim
+  void Show() const {  
+ // cout << " Show: FESpace " << this << " " <<  N << " ";  if(cdef) cout << cdef->NodesOfElement << endl;else cout << endl;
+  }
+
  private: // for gibbs  
   int gibbsv (long* ptvoi,long* vois,long* lvois,long* w,long* v);
+    
 };
 
 inline baseFElement::baseFElement(  const FESpace &aVh, int k) 
