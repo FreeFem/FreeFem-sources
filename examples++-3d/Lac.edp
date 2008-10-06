@@ -1,4 +1,4 @@
-load "glumesh"// buildlayer
+load "buildlayer"// buildlayer
 int nn=5;
 border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}
 mesh Th2= buildmesh(cc(100));
@@ -13,6 +13,6 @@ mesh3 Th=buildlayers(Th2,nn,
   zbound=[zmin,zmax],
   reffacemid=rmid, 
   reffaceup = rup,
-  reffacedown = rdown);
+  reffacelow = rdown);
 savemesh(Th,"Th.meshb");
 exec("medit Th;rm Th.meshb");

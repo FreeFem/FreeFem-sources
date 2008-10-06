@@ -1,4 +1,4 @@
-load "glumesh"
+load "buildlayer"
 
 int nn=8;
 
@@ -12,7 +12,7 @@ mesh3 Th=buildlayers(Th2,nn,
   // reftet=r1, 
   reffacemid=rmid, 
   reffaceup = rup,
-  reffacedown = rdown);
+  reffacelow = rdown);
 func  real hill(real r2){return exp(-10.*(r2));};
 
 fespace Vh(Th,P13d);
