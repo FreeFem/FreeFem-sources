@@ -409,9 +409,14 @@ namespace Fem2D {
 
   int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt)
   {
-      bool ddd=verbosity>100;
+      bool ddd=verbosity>200;
     R lambda[4];
     Phat.toBary(lambda);
+    if(ddd) cout << "\n\n\n   WT: "  << Phat << " :  "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3] << " u = "<< U << " dt " << dt <<endl;
+#ifndef NDEBUG      
+      for(int i=0;i<4;++i)
+      assert(lambda[i]<1.000001 && lambda[i]>-0.0000001);
+#endif
     typedef R3 Rd;
     const Mesh3::Element & T(Th[it]);
     const int nve = 4;
@@ -426,15 +431,21 @@ namespace Fem2D {
     R l[nve];
     double Det=T.mesure()*6;
     l[0] = det(PF  ,Q[1],Q[2],Q[3]);
-    l[1] = det(Q[0],PF  ,Q[2],Q[3]); ;
-    l[2] = det(Q[0],Q[1],PF  ,Q[3]); ;
-    l[3] = Det - l[0]+l[1]+l[2];
+    l[1] = det(Q[0],PF  ,Q[2],Q[3]); 
+    l[2] = det(Q[0],Q[1],PF  ,Q[3]); 
+    l[3] = Det - l[0]-l[1]-l[2];
     l[0] /= Det;
     l[1] /= Det;
     l[2] /= Det;
     l[3] /= Det;
-     if(ddd)  cout << "\t\t\tWT " << it << " " << Phat << ",  " << PF << " :  "<< l[0] << " " <<l[1] <<" " <<l[2] << " " <<l[3] <<endl ;
-    const R eps = 1e-5;
+     if(ddd)  cout << "\t\t\tWT " << it << ", " << Phat << ",  " << PF
+		   << " :  "  << l[0] << " " <<l[1] <<" " <<l[2] << " " <<l[3] 
+	           << " == " << det(Q[0],Q[1],Q[2],PF)/Det
+		   << " :  "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3] 
+	             
+		   <<endl ;
+		  
+    const R eps = 1e-8;
     int neg[nve],k=0;
     int kk=-1;
     if (l[0]>-eps && l[1]>-eps && l[2]>-eps && l[3]>-eps) 
@@ -445,11 +456,14 @@ namespace Fem2D {
       }
     else 
       {
-	
-	if (l[0]<eps ) neg[k++]=0;
-	if (l[1]<eps ) neg[k++]=1;
-	if (l[2]<eps ) neg[k++]=2;
-	if (l[3]<eps ) neg[k++]=3;
+	// on regarde de les reelement negatif 
+        // on ne veut pas des points sur les faces.
+        // car sinon il va y avoir un probleme ans on va projete sur la face
+	//  et remettre le point dans le tetraedre.
+	if (l[0]<=-eps ) neg[k++]=0;
+	if (l[1]<=-eps ) neg[k++]=1;
+	if (l[2]<=-eps ) neg[k++]=2;
+	if (l[3]<=-eps ) neg[k++]=3;
 	
 	R eps1 = T.mesure()   * 1.e-5;
 	   if(ddd)  cout << " k= " << k << endl;
@@ -506,10 +520,14 @@ namespace Fem2D {
 	    // de meme  i0,i1,j0,j1
 	    assert(signe_permutation(j0,j1,i0,i1)==1);
 	    R v0= det(Q[j0],Q[j1],P,PF); 
+            if(ddd) cout << " v0 =" << v0 <<endl;
 	    if( Abs(v0) < eps  ) 
+	      {
 	      // on sort par l'arete  j0,j1
 	      // on choisi aleatoirement la face de sortie 
 	      kk = (rand()/(RAND_MAX/2)) ? i0 : i1; 
+		  cout << " rand choose  2 :  " << kk << endl;
+	      }
 	    else 
 	      kk= v0 >0 ? i0 : i1; // Attention dyslexie ici durdur FH....
 	    
@@ -530,6 +548,8 @@ namespace Fem2D {
 	    lambda[1] = lambda[1]*coef1 + coef *l[1];
 	    lambda[2] = lambda[2]*coef1 + coef *l[2];
 	    lambda[3] = lambda[3]*coef1 + coef *l[3];
+            if(ddd) cout << "   \t\t -> kk=" << kk << " d=" << d << " , l= "<< lambda[0]  << " " 
+			 <<lambda[1] << " " <<lambda[2] << " " << lambda[3] << endl;
 	    lambda[kk] =0;
 	     }
 	    else // on ne bouge pas on resort 
@@ -540,7 +560,7 @@ namespace Fem2D {
 	      
 	  }
       }
-    //  on remette le point dans le tet. 
+    //  on remet le point dans le tet. 
     int jj=0;
     R lmx=lambda[0];
     if (lmx<lambda[1])  jj=1, lmx=lambda[1];
@@ -551,7 +571,7 @@ namespace Fem2D {
     if(lambda[2]<0) lambda[jj] += lambda[2],lambda[2]=0;
     if(lambda[3]<0) lambda[jj] += lambda[3],lambda[3]=0;
     Phat=R3(lambda+1);
-    if(ddd) cout  << "\t\t\t -> " << Phat << " " << kk << endl; 
+    if(ddd) cout  << "\t\t\t -> "<< dt << " : "  << Phat << ", " << kk << " jj= "<< jj << " "<< lmx << endl; 
     assert(kk<0 || lambda[kk]==0);
     return kk;
   }        

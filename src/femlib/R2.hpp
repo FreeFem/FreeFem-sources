@@ -85,7 +85,7 @@ public:
   // un methode
   R2   perp() const {return R2(-y,x);} // la perpendiculaire
   R sum() const { return x+y;}
-  R * toBary(R * b) { b[0]=1.-x-y;b[1]=x;b[2]=y;return b;}
+  R * toBary(R * b) const  { b[0]=1.-x-y;b[1]=x;b[2]=y;return b;}
 
   // les operators  tableau
   // version qui peut modifie la class  via l'adresse de x ou y 
