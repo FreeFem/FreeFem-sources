@@ -3,6 +3,22 @@
 // $Id$
 // compile and link with ./load.link  mat\_dervieux.cpp 
 #include  <iostream>
+using namespace std;
+#include "cfloat"
+#include "rgraph.hpp"
+#include "error.hpp"
+#include "AFunction.hpp"
+
+//#include "lex.hpp"
+#include "MatriceCreuse_tpl.hpp"
+#include "Mesh3dn.hpp"
+#include "MeshPoint.hpp"
+#include "lgfem.hpp"
+#include "lgmesh3.hpp"
+#include "lgsolver.hpp"
+#include "problem.hpp"
+/*
+#include  <iostream>
 #include  <cfloat>
 #include  <cmath>
 using namespace std;
@@ -16,9 +32,11 @@ using namespace std;
 #include "MatriceCreuse_tpl.hpp"
 #include "MeshPoint.hpp"
 #include "lgfem.hpp"
+#include "lgmesh.hpp"
+#include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
-
+*/
 class MatrixUpWind0 :  public E_F0mps { public:
   typedef Matrice_Creuse<R> * Result;
   Expression emat,expTh,expc,expu1,expu2;
@@ -117,8 +135,8 @@ AnyType MatrixUpWind0::operator()(Stack stack) const
       }
     amorse=  new MatriceMorse<R>(Th.nv,Th.nv,Aij,false);
   }
-  sparce_mat->pUh=0;
-  sparce_mat->pVh=0;
+  sparce_mat->Uh=UniqueffId();
+  sparce_mat->Vh=UniqueffId();
   sparce_mat->A.master(amorse);
   sparce_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   *mp=mps;

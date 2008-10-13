@@ -41,9 +41,8 @@ using namespace std;
 #include "QuadTree.h"
 #include "SetOfE4.h"
 namespace bamg {
-
 void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a geometry if no geo 
-{
+ {
   //  if equiedges existe taille nbe 
   //   equiedges[i]/2 == i  original
   //   equiedges[i]/2 = j  =>   equivalence entre i et j => meme maillage
@@ -929,7 +928,7 @@ void Geometry::AfterRead()
     // generation of  all the tangente 
     for (i=0;i<nbe;i++) {
         R2 AB = edges[i].v[1]->r -edges[i].v[0]->r;        
-            Real8 lAB = Norme2(AB); // length of current edge AB
+	Real8 lAB = Norme2(AB); // length of current edge AB
         Real8 ltg2[2];
         ltg2[0]=0;ltg2[1]=0;
         for (jj=0;jj<2;jj++) {
@@ -941,6 +940,11 @@ void Geometry::AfterRead()
 		   - edges[i].Adj[jj]->v[1-edges[i].SensAdj[jj]]->r;
 		 ltg =  Norme2(tg);
 		 tg =  tg *(lAB/ltg),ltg=lAB;
+		/*
+		   if(edges[i].ref >=4) 
+		   cout << " tg " << tg.x << " "<< tg.y  << " " << edges[i].v[1-jj]->r << edges[i].Adj[jj]->v[1-edges[i].SensAdj[jj]]->r << " y-y = "
+		     << edges[i].v[1-jj]->r.y -edges[i].Adj[jj]->v[1-edges[i].SensAdj[jj]]->r.y <<  endl;
+		*/
 	       }
 	       
 	       //else ;// a Corner with no tangent => nothing to do    
@@ -950,6 +954,7 @@ void Geometry::AfterRead()
              ltg2[jj] = ltg;
              if ( (tg,AB) < 0) 
                tg = -tg;
+	    //if(edges[i].ref >=4) cout << " tg = " << tg << endl;
              edges[i].tg[jj] = tg;
 	}     // for (jj=0;jj<2;jj++) 
 	
@@ -1065,7 +1070,7 @@ Geometry::~Geometry()
 
 }
 
-Real8 GeometricalEdge::R1tg(Real4 theta,R2 & t) const // 1/R of radius of cuvature
+Real8 GeometricalEdge::R1tg(Real8 theta,R2 & t) const // 1/R of radius of cuvature
 { R2 A=v[0]->r,B=v[1]->r;
  Real8 dca,dcb,dcta,dctb;
  Real8 ddca,ddcb,ddcta,ddctb;
@@ -1135,9 +1140,9 @@ Real8 GeometricalEdge::R1tg(Real4 theta,R2 & t) const // 1/R of radius of cuvatu
 }
 
 
-R2 GeometricalEdge::F(Real4 theta) const // parametrization of the curve edge
+R2 GeometricalEdge::F(Real8 theta) const // parametrization of the curve edge
 { R2 A=v[0]->r,B=v[1]->r;
- Real4 ca,cb,cta,ctb;
+ Real8 ca,cb,cta,ctb;
  assert( theta >=-1e-12);
  assert( theta <=1+1e-12);
  if (TgA()) 
@@ -1145,9 +1150,12 @@ R2 GeometricalEdge::F(Real4 theta) const // parametrization of the curve edge
    { cb =  theta*theta*(3-2*theta);
      ca =  1-cb;     
      cta = (1-theta)*(1-theta)*theta;
-     ctb = (theta-1)*theta*theta ;}
+     ctb = (theta-1)*theta*theta ;
+   //  if(ref==4 || ref==5)
+   //  cout << " FFF " << tg[0] << tg[1] << A << B << " => " << A*ca + B*cb + tg[0]* cta + tg[1] * ctb << endl;
+    }
   else { // 1-t*t, t-t*t, t*t
-    Real4 t = theta;
+    Real8 t = theta;
     cb = t*t;
     ca = 1-cb;
     cta= t-cb;
@@ -1155,13 +1163,15 @@ R2 GeometricalEdge::F(Real4 theta) const // parametrization of the curve edge
   }    
  else
   if (TgB()){
-    Real4 t = 1-theta;
+    Real8 t = 1-theta;
     ca = t*t;
     cb = 1-ca;
     ctb= -t+ca;
     cta=0;    
    }
-  else ca =(1-theta),cb = theta,cta=ctb=0; // lagrange P1
+  else {
+      ca =(1-theta),cb = theta,cta=ctb=0; // lagrange P1
+   }
  return A*ca + B*cb + tg[0]* cta + tg[1] * ctb;
 
 }

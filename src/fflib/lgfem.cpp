@@ -3295,6 +3295,22 @@ void DclTypeMatrix()
   
 }
 
+map<TypeOfFE *,TypeOfFE3 *> TEF2dto3d;
+AnyType TypeOfFE3to2(Stack,const AnyType &b) { 
+    TypeOfFE3 *t3=0;
+    TypeOfFE  *t2=GetAny<TypeOfFE *>(b);
+    map<TypeOfFE *,TypeOfFE3 *>::const_iterator i=TEF2dto3d.find(t2);
+    if(i != TEF2dto3d.end())
+	t3=i->second;
+    
+    if(t3==0)
+      {
+        cerr << " sorry no cast to this 3d finite element " <<endl;
+        ExecError( " sorry no cast to this 3d finite element ");
+      }
+    return t3;
+}
+
 
 void  init_lgfem() 
 {
@@ -3323,6 +3339,9 @@ void  init_lgfem()
 
  Dcl_Type<TypeOfFE*>(); 
  Dcl_Type<TypeOfFE3*>(); // 3d
+    map_type[typeid(TypeOfFE3*).name()]->AddCast(
+						 new E_F1_funcT<TypeOfFE3*,TypeOfFE*>(TypeOfFE3to2)	);				 
+
  Dcl_Type<TypeSolveMat*>();
  DclTypeMatrix<R>();
  DclTypeMatrix<Complex>();
@@ -3853,9 +3872,11 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("intallVFedges","(",new OneOperatorCode<CDomainOfIntegrationVFEdges>);
  Global.Add("jump","(",new OneUnaryOperator<JumpOp<R>,JumpOp<R> >);
  Global.Add("mean","(",new OneUnaryOperator<MeanOp<R>,MeanOp<R> >);
+ Global.Add("average","(",new OneUnaryOperator<MeanOp<R>,MeanOp<R> >);
  
  Global.Add("jump","(",new OneUnaryOperator<JumpOp<Complex>,JumpOp<Complex> >);
  Global.Add("mean","(",new OneUnaryOperator<MeanOp<Complex>,MeanOp<Complex> >);
+ Global.Add("average","(",new OneUnaryOperator<MeanOp<Complex>,MeanOp<Complex> >);
 
   
  Add<const CDomainOfIntegration*>("(","",new OneOperatorCode<FormBilinear> );
@@ -3916,7 +3937,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("P13d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P1));   
  Global.New("P23d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P2));   
  Global.New("P03d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P0));   
-
+ // TEF2dto3d[]=&DataFE<Mesh3>::P1;
 }   
 
 void clean_lgfem()

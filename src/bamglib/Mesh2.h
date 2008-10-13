@@ -327,8 +327,8 @@ class GeometricalEdge {
   GeometricalVertex * operator()(int i){return v[i];};  
  // inline void Set(const Geometry &,Int4,Geometry &);
 
-  R2 F(Real4 theta) const ; // parametrization of the curve edge
-  Real8 R1tg(Real4 theta,R2 &t) const ; // 1/radius of curvature + tangente
+  R2 F(Real8 theta) const ; // parametrization of the curve edge
+  Real8 R1tg(Real8 theta,R2 &t) const ; // 1/radius of curvature + tangente
   int Cracked() const {return flag & 1;}
   int Dup() const { return flag & 32;}
   int Equi()const {return flag & 2;}
