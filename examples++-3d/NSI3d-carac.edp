@@ -2,7 +2,7 @@ load "glumesh3D"
 real nu=0.01,dt=0.3;
 real alpha=1./dt,alpha2=sqrt(alpha);
 
-int nn=5;
+int nn=10;
 
 mesh Th2=square(nn,nn);
 fespace Vh2(Th2,P2);
@@ -60,7 +60,7 @@ macro XX3() (z-u3*dt)//
   + on(2,uu1=1,uu2=0,uu3=0)
   + on(1,uu1=0,uu2=0,uu3=0)
  
-    +  int3d(Th,optimize=0)(   alpha*(  convect([u1,u2,u3],-dt,u1)*v1  +   convect([u1,u2,u3],-dt,u2)*v2  +   convect([u1,u2,u3],-dt,u3)*v3 )  ) ;
+    +  int3d(Th,optimize=1,qforder=4)(   alpha*(  convect([u1,u2,u3],-dt,u1)*v1  +   convect([u1,u2,u3],-dt,u2)*v2  +   convect([u1,u2,u3],-dt,u3)*v3 )  ) ;
   //   +  int3d(Th,optimize=1)(   alpha*(  u1(X1,X2,X3)*v1  +  u2(X1,X2,X3)*v2  +  u3(X1,X2,X3)*v3 )  ) ;
 //  +  int3d(Th,optimize=1)(   alpha*(  u1(XX1,XX2,XX3)*v1  +  u2(XX1,XX2,XX3)*v2  +  u3(XX1,XX2,XX3)*v3 )  ) ;
 //+  int3d(Th,optimize=1)(   alpha*(  u1(x,y,z)*v1  +  u2(x,y,z)*v2  +  u3(x,y,z)*v3 )  ) ;
@@ -84,6 +84,7 @@ for(int i=0;i<50;++i)
     uz= u3(x,0.5,y);
     p2= p(x,0.5,y);
     plot([ux,uz],p2,cmm=" cut y = 0.5, time ="+t,wait=0);
+    if(i%5==0)
     {
       exec("mkdir dd");
       string prefu="dd/u-"+(100+i);

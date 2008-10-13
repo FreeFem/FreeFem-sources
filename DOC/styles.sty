@@ -1,14 +1,14 @@
-
+\usepackage{ifpdf}
 %\RequirePackage{everyshi}%
-\newif\ifpdf
-\pdffalse
-\@ifundefined{pdfoutput}{\message{-- no pdf -- }}{
-    \ifcase\pdfoutput
-    \message{-- no  pdf -- }
-    \else
-    \pdftrue
-    \message{--  ++ pdf -- }
-    \fi}
+%\newif\ifpdf
+%\pdffalse
+%\@ifundefined{pdfoutput}{\message{-- no pdf -- }}{
+%    \ifcase\pdfoutput
+%    \message{-- no  pdf -- }
+%    \else
+%    \pdftrue
+%    \message{--  ++ pdf -- }
+%    \fi}
 
 \ifpdf
 \usepackage{pdfsync}
