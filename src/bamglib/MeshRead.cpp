@@ -757,7 +757,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
 
 void  Triangles::Read_msh(MeshIstream &f_in)
 {
-
+    Metric M1(1.);
   if (verbosity>1)
     cout << " -- ReadMesh .msh file " <<  f_in.CurrentFile  << endl;
    	
@@ -779,6 +779,8 @@ void  Triangles::Read_msh(MeshIstream &f_in)
      for ( i=0;i<nbv;i++)
 	{
 	 f_in >> vertices[i].r.x >>   vertices[i].r.y >> vertices[i].ReferenceNumber;
+	    vertices[i].on=0;
+	    vertices[i].m=M1;
          //if(vertices[i].ReferenceNumber>NbRef)	NbRef=vertices[i].ReferenceNumber;  
   	}
      for (     i=0;i<nbt;i++)
@@ -797,6 +799,7 @@ void  Triangles::Read_msh(MeshIstream &f_in)
 	      edges[i].adj[0]=0;
 	      edges[i].adj[1]=0;
 	      edges[i].ref = r;
+	      edges[i].on=0;
        }
       
 }

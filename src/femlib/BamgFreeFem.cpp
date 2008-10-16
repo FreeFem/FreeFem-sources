@@ -237,10 +237,12 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian)
   Tn->edges = new Edge [Th.neb];
  
   Int4 i;
+  Metric Mid(1.);
   for (i = 0; i < Th.nv; i++)
     {
       Tn->vertices[i].r.x = Th(i).x;
       Tn->vertices[i].r.y = Th(i).y;
+	Tn->vertices[i].m=Mid;
       Tn->vertices[i].ReferenceNumber = Th(i).lab;
     }
   
@@ -258,6 +260,7 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian)
       Tn->edges[i].v[0] = Tn->vertices + Th(Th.bedges[i][0]);
       Tn->edges[i].v[1] = Tn->vertices + Th(Th.bedges[i][1]);
       Tn->edges[i].ref = Th.bedges[i].lab;
+      Tn->edges[i].on = 0; 
     }
   //  Real8 cutoffradian = -1;
   Tn->ConsGeometry(cutoffradian);
@@ -316,11 +319,13 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,
   Tn->edges = new Edge [Th.neb];
   
   Int4 i;
+    Metric Mid(1.);  
   for (i = 0; i < Th.nv; i++)
     {
       Tn->vertices[i].r.x = Th(i).x;
       Tn->vertices[i].r.y = Th(i).y;
       Tn->vertices[i].ReferenceNumber = Th(i).lab;
+      Tn->vertices[i].m=Mid;
     }
   
   //  Int4 i1 [nbt],i2 [nbt],i3 [nbt];
@@ -787,8 +792,8 @@ Fem2D::Mesh *  buildmeshbamg( string * const & s, int nbvxin) {
   using bamg::Triangles;
   using bamg::Geometry;
   Geometry Gh(s->c_str());
-  double	 hmin = Max(hmin,Gh.MinimalHmin());
-  double	 hmax = Min(hmax,Gh.MaximalHmax());
+  double	 hmin = Gh.MinimalHmin();
+  double	 hmax = Gh.MaximalHmax();
   int nbvx = nbvxin ? nbvxin : ((Gh.nbv*Gh.nbv)/9 +1000); 
   Triangles * bTh=  new Triangles(nbvx,Gh);
   // bTh->inquire();

@@ -859,8 +859,26 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
     if(lambda[2]<0) lambda[jj] += lambda[2],lambda[2]=0;
     return kk;
 }
-
-
+R2  SubInternalVertex(int N,int k)
+    {
+	if(N<0)
+	  {
+	      R eps = 1e-08;
+	      R2 p[3][3]= { 
+		  { R2(1-eps,+eps),R2(eps,1-eps),R2(1./3.+eps,1./3.+eps) },
+		  { R2(0,1-eps)  ,R2(0,+eps),R2(1./3.-eps,1./3.) },
+		  { R2(eps,0),R2(1-eps,0),R2(1./3.,1./3.-eps) } };
+	      
+	      int j=k%3;
+	      R2 P=SubInternalVertex(-N,k/3);
+	      R l0=1.-P.x-P.y,l1=P.x,l2=P.y;
+	      return p[j][0]*l0+ p[j][1]*l1+ p[j][2]*l2;
+	  }
+	int i,j;
+	num1SubTVertex(k,i,j);
+	return R2( (double) i/ (double)N,(double) j/(double)N);
+    }
+    
 R2 SubTriangle(const int N,const int n,const int l)
 {
     // compute the subdivision of a triangle in N*N
@@ -879,7 +897,6 @@ R2 SubTriangle(const int N,const int n,const int l)
 	R2 P=SubTriangle(-N,n/3,l);
 	R l0=1.-P.x-P.y,l1=P.x,l2=P.y;
 	return p[j][0]*l0+ p[j][1]*l1+ p[j][2]*l2;
-
     }
     throwassert(n < N*N);
     int i = n % N;
@@ -889,8 +906,8 @@ R2 SubTriangle(const int N,const int n,const int l)
     if(l==2) j++;
     // if ( k <= 0 )cout << " - " << endl;
     return k >0 
-	? R2( (float) i/ (float)N,(float) j/(float)N)
-	: R2( (float) (N-j)/ (float)N,(float) (N-i)/(float)N);
+	? R2( (double) i/ (double)N,(double) j/(double)N)
+	: R2( (double) (N-j)/ (double)N,(double) (N-i)/(double)N);
     
 } 
 
@@ -1203,6 +1220,8 @@ Mesh::~Mesh()
     ffassert(0);
     return 0;
 }
+    
+
  int NbOfSubInternalVertices(int kk)
 { 
     assert(kk);

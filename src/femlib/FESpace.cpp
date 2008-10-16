@@ -606,17 +606,19 @@ inline void dump(char *m,int n,int * p)
 
 ConstructDataFElement::~ConstructDataFElement()
 {
-  if(*counter==0) 
+  if((*counter)--==0) 
    {
    // cout << " delete ConstructDataFElement " <<   NodesOfElement << " " <<  FirstNodeOfElement << " "<< FirstDfOfNode << "  " << counter << endl;
     delete [] NodesOfElement;
     delete []  FirstNodeOfElement;
     delete [] FirstDfOfNode;
+    (*counter)--; // correct bug oct 2008
     delete counter;
   }
+//  else (*counter)--; // correct bug oct 2008
   // else 
      // cout << " no delete ConstructDataFElement " <<   NodesOfElement << " " <<  FirstNodeOfElement << " "<< FirstDfOfNode << "  " << counter << endl;
- (*counter)--; // correction mai 2006 bug in counter incrementation 
+// (*counter)--; // correction mai 2006 bug in counter incrementation 
 }
 
  ConstructDataFElement::ConstructDataFElement(const ConstructDataFElement * t,int k)

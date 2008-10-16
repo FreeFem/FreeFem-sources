@@ -265,6 +265,7 @@ void FElement::Draw(const RN_& U,const RN_ & Viso,int composante) const
      DrawIsoT(P,ff,Viso);  
    } 
 } 
+    
 void FElement::Drawfill(const RN_& U,const RN_ & Viso,int composante, double rapz) const
 {   
   int nsb = nbsubdivision();
@@ -525,6 +526,85 @@ void TBoundaryEdge<R2>::Draw() const
   MoveTo(*vertices[0]);
   LineTo(*vertices[1]);
 }
+
+    void FElement::SaveDraw(const KN_<R> & U,int composante,R* Usave) const 
+    {
+	int nsb = nbsubdivision();
+	int nsbv = NbOfSubInternalVertices(nsb);
+	int nbdf=NbDoF();
+	RN fk(nbdf);
+	for (int i=0;i<nbdf;i++) // get the local value
+	    fk[i] = U[operator()(i)];
+	R2 Pt;
+	bool whatd[last_operatortype];
+	initwhatd(whatd,0);
+	
+	RNMK fb(nbdf,N,3); //  the value for basic fonction
+	for (int k=0;k<nsbv;k++)
+	  {
+	      Pt=SubInternalVertex(nsb,k); 
+	      BF(whatd,Pt,fb);
+	      Usave[k] = (fb('.',composante,0),fk);
+	  }
+	
+    }
+    void FElement::SaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,R * Usave) const 
+    {
+	int nsb = nbsubdivision();
+	int nsbv = NbOfSubInternalVertices(nsb);
+	int nbdf=NbDoF();
+	RN fk(nbdf);
+	RN gk(nbdf);
+	for (int i=0;i<nbdf;i++) // get the local valu
+	  {
+	      fk[i] = U[operator()(i)];
+	      gk[i] = V[operator()(i)];
+	  }
+	R2 Pt;
+	bool whatd[last_operatortype];
+	initwhatd(whatd,0);
+	
+	RNMK fb(nbdf,N,3); //  the value for basic fonction
+	for (int k=0,k2=0;k<nsbv;k++)
+	  {
+	      Pt=SubInternalVertex(nsb,k); 
+	      BF(whatd,Pt,fb);
+	      Usave[k2++] = (fb('.',iU,0),fk);
+	      Usave[k2++] = (fb('.',iV,0),gk);
+	  }
+	
+    } 
+    
+R *  FESpace::newSaveDraw(const KN_<R> & U,int composante,int & lg) const 
+    {
+	int nsb = TFE[0]->nbsubdivision;
+	int nsbv = NbOfSubInternalVertices(nsb);
+	lg = nsbv*Th.nt;
+	
+	double *v = new R[lg];
+	ffassert(v);
+        for (int k=0,i=0;k<Th.nt;k++)
+	  {
+	    (*this)[k].SaveDraw( U,composante,v + i);	
+	      i+=nsbv;
+	  }
+	return v;
+    }
+    R *  FESpace::newSaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,int & lg) const 
+    {
+	int nsb = TFE[0]->nbsubdivision;
+	int nsbv = NbOfSubInternalVertices(nsb)*2;
+	lg = nsbv*Th.nt;
+	
+	double *v = new R[lg];
+	ffassert(v);
+        for (int k=0,i=0;k<Th.nt;k++)
+	  {
+	      (*this)[k].SaveDraw( U,V,iU,iV,v + i);	
+	      i+=nsbv;
+	  }
+	return v;
+    }   
 void  FESpace::Draw(const RN_& U,const RN_ & Viso,int j,float *colors,int nbcolors,bool hsv,bool drawborder) const 
 {
   showgraphic();

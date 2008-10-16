@@ -1760,6 +1760,7 @@ L130:
 /*     prise en compte des sous domaines */
 /* ----------------------------------------------------------------------- */
 /*  add FH   si pas de nbsd ---  jan 2004 */
+    
     if (nbsd<0) {
      i_1 = nbt;
     for (ie = 1; ie <= i_1; ++ie)
@@ -1768,11 +1769,12 @@ L130:
 	     {
 	    nu[ie * 6 + 1] = -nu[ie * 6 + 1];
 	     }
+	 reft[ie]=1;
      }
      
       goto L205; //  pas triangle retire
       }    
-    else if (nbsd == 0) {
+     if (nbsd == 0) {
 	 long i__1 = nbt,nbssd,exter,i__,headt,nst,j;
 	for (t = 1; t <= i__1; ++t) {
 	    reft[t] = -1073741824;

@@ -50,7 +50,7 @@ static void SetPtPk(Rd *Pt,const int *dfon,int nn)
 	  Pt[i+1][i]=1.;
       }
 
-    if(dfon[1])
+    if(dfon[1]&& d !=1)
 	for(int i=0;i<E::ne;++i)
 	    Pt[k++] = (Pt[E::nvedge[i][0]]+Pt[E::nvedge[i][1]])*0.5;
     
@@ -58,7 +58,7 @@ static void SetPtPk(Rd *Pt,const int *dfon,int nn)
 	Pt[k++]=Rd::diag(1./(d+1));
     if(nn != k)
       { 
-	cout << nn << " == " << k << " d = "<< d << " " << dfon[0]<< dfon[1]<<dfon[2]<<dfon[3]<<endl;
+	cout << nn << " == " << k << " d = "<< d << " " << dfon[0]<< dfon[1]<<dfon[2]<<dfon[3]<<" "<< E::ne << endl;
 	assert(nn==k); 
       }  
     if(verbosity>9)

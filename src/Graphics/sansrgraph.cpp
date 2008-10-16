@@ -129,7 +129,7 @@ const float fMaxPixel = +32000;
 static XColor *colortable;
 static int ncolortable,fcolor;
 static reel echx,echy,rxmin,rxmax,rymin,rymax;
-static int  lacouleur, width, height, currx, curry;
+static int  lacouleur=0, width, height, currx=0, curry=0;
 #define call(i) i
 static int INITGRAPH=0;
 void myend()
