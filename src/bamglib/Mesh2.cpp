@@ -1740,9 +1740,11 @@ Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
 			Vertex & vj = vertices[iv];
 			Int4 j = vj.ReferenceNumber; 
 			assert( &vj== ordre[j]);
-			
-			Exchange(vi,vj);
-			Exchange(ordre[j],ordre[i]);
+			if(i!=j)
+			  { //  for valgring 
+			    Exchange(vi,vj);
+			    Exchange(ordre[j],ordre[i]);
+			  }
 		      vj.ReferenceNumber=0; 
 			//	cout << " Add " << Number(vj) << " " << vj 
 			// << "   " <<  Number(vi) << " <--> " << Number(vj) <<endl;

@@ -37,4 +37,5 @@ plot(Th,th1,th2,th3,wait=1);
  Th4=Th+th1+th2+th3;
 
 plot(Th4,wait=1);
+Th=Th4;
 }

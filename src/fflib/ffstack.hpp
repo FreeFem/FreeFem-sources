@@ -311,9 +311,11 @@ T * Add2StackOfPtr2FreeA(Stack s,T * p)
 
 inline Stack newStack(size_t l)
  {
+   char *  mps;
   Stack thestack = new char[l];
   for (size_t i = 0;i< l/sizeof(long);i++) ((long*) thestack)[i]=0;
-  ((char **) thestack)[MeshPointStackOffset] = new char [1000]; 
+  ((char **) thestack)[MeshPointStackOffset] = mps = new char [1000]; 
+  for(int i=0;i<1000;++i) mps[i]=0;
   WhereStackOfPtr2Free(thestack)=new StackOfPtr2Free(thestack); 
   
   return thestack;

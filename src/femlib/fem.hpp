@@ -598,9 +598,24 @@ void  HeapSort(T *c,T1 *c1,T2 *c2,long n)
     }
   }
 }
-          
- R2 SubTriangle(const int N,const int n,const int l);
+
+ inline   int numSubTVertex(int i,int j)
+    {
+	assert(j<=i && 0<= j); 
+	return j+i*(i+1)/2;
+    }
+    
+ inline    void  num1SubTVertex(int l,int & i,int & j)
+    {
+	i= (-1 + sqrt(1+8*l))/2;
+	j = l - i*(i+1)/2;
+	assert( l == numSubTVertex(i,j)); 
+    }
+    
+  R2 SubTriangle(const int N,const int n,const int l);
  int  NbOfSubTriangle(const int N);
+ int NbOfSubInternalVertices(int kk);
+    R2  SubInternalVertex(int N,int k);
       //  warning  i is in [0, nleft]
 template<class Rd>
  inline     TVertex<Rd> & TMortar<Rd>::VLeft(int i) const 

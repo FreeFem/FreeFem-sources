@@ -481,6 +481,10 @@ class FElement : public baseFElement { public:
   int  operator()(int i,int df) const ;// { N\u00c9 du DoF du noeud i de df local df 
   int  operator()(int df) const { return operator()(NodeOfDF(df),DFOfNode(df));}
   void Draw(const KN_<R> & U, const  KN_<R> & VIso,int j=0) const ;  
+    
+  void SaveDraw(const KN_<R> & U,int j,R* Usave) const ;  
+  void SaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,R* UVsave) const ;  
+
   void Drawfill(const KN_<R> & U, const  KN_<R> & VIso,int j=0,double rapz=1) const ;  
   void Draw(const RN_& U,const RN_& V, const  KN_<R> & Viso,R coef,int i0,int i1) const;
   R2   MinMax(const RN_& U,const RN_& V,int i0,int i1) const  ;
@@ -724,6 +728,8 @@ extern TypeOfFE & P1ncLagrange;
   void Draw(const KN_<R>& U,const KN_<R>& Viso,int j=0,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const ; // Draw iso line
   void Drawfill(const KN_<R>& U,const KN_<R>& Viso,int j=0,double rapz=1,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const ; // Draw iso line
  
+  R *  newSaveDraw(const KN_<R> & U,int composante,int & lg) const   ; 
+  R *  newSaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int IV,int & lg) const   ; 
   void Draw(const KN_<R>& U,const KN_<R> & Viso, R coef,int j0=0,int j1=1,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const  ; // Arrow
   void Draw(const KN_<R>& U,const KN_<R>& V,const KN_<R> & Viso, R coef,int iu=0,int iv=0,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const  ; // Arrow
   R2 MinMax(const KN_<R>& U,const KN_<R>& V,int j0,int j1,bool bb=true) const ;
