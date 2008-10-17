@@ -69,6 +69,7 @@ static bool TheWait=false;
 bool  NoWait=false;
 
 extern long verbosity;
+extern ostream *ThePlotStream; //  Add for new plot. FH oct 2008
 void init_lgmesh() ;
 
 namespace FreeFempp {
@@ -2432,6 +2433,47 @@ void Show(const char * s,int k=1)
 }
 
 AnyType Plot::operator()(Stack s) const  { 
+  if(ThePlotStream)
+    {   const char * newplot= "NewPlot\n";
+	const char * endplot= "EndPlot\n";
+	const char * endnarg= "EndNameArg\n";
+	ThePlotStream->write(newplot,strlen(newplot));
+	if (nargs[0]) *ThePlotStream<< 0 <<' ' << GetAny<double>((*nargs[0])(s))<<'\n';
+	if (nargs[1]) *ThePlotStream<< 1 <<' ' <<GetAny<string *>((*nargs[1])(s))<<'\n';
+	if (nargs[2]) *ThePlotStream<< 2 <<' ' << GetAny<string*>((*nargs[2])(s))<<'\n';
+	if (nargs[3]) *ThePlotStream<< 3 <<' ' <<GetAny<bool>((*nargs[3])(s))<<'\n';
+	if (nargs[4]) *ThePlotStream<< 4 <<' ' <<GetAny<bool>((*nargs[4])(s))<<'\n';
+	if (nargs[5]) *ThePlotStream<< 5 <<' ' <<GetAny<bool>((*nargs[5])(s))<<'\n';
+	if (nargs[6]) *ThePlotStream<< 6 <<' ' <<GetAny<bool>((*nargs[6])(s))<<'\n';
+	if (nargs[7]) *ThePlotStream<< 7 <<' ' <<GetAny<bool>((*nargs[7])(s))<<'\n';
+	if (nargs[8])  
+	  {  KN<double> bbox(4);
+	    for (int i=0;i<4;i++)
+		bbox[i]= GetAny<double>((*bb[i])(s));
+	      
+	      *ThePlotStream<< 8 << ' ' << bb <<endl;
+	  }
+	if (nargs[9])  *ThePlotStream<< 9 << ' ' <<  GetAny<long>((*nargs[9])(s));
+	if (nargs[10])  *ThePlotStream<< 10 << ' ' << GetAny<long>((*nargs[10])(s));
+	if (nargs[11]) { 
+	    KN_<double> v =GetAny<KN_<double> >((*nargs[11])(s)) ;
+	    *ThePlotStream<< 11 << ' ' << v << endl    ;}
+	
+	if (nargs[12]) 
+	    *ThePlotStream<< 12 << GetAny<KN_<double> >((*nargs[12])(s)) ;
+	   
+
+	
+	if (nargs[13]) *ThePlotStream<< 12 << ' ' << GetAny<bool>((*nargs[13])(s));
+	if (nargs[14]) *ThePlotStream<< 14 << ' ' <<GetAny<bool>((*nargs[14])(s));
+	if (nargs[15]) 
+	    *ThePlotStream<< 15 << ' ' << GetAny<KN_<double> >((*nargs[15])(s));
+	if (nargs[16]) *ThePlotStream<< 16 << ' ' << GetAny<bool>((*nargs[16])(s));	
+	ThePlotStream->write(newplot,strlen(endnarg));
+	ThePlotStream->write(newplot,strlen(endplot));
+	
+	
+    }
   if (!withrgraphique) {initgraphique();withrgraphique=true;}
   viderbuff();
   MeshPoint *mps=MeshPointStack(s),mp=*mps ;
