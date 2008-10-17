@@ -334,7 +334,7 @@ MatriceProfile<R>::MatriceProfile(const FESpace & Vh,bool VF)
    // -----
   this->dummy=0;
   this->n = this->m = Vh.NbOfDF;
-  int i,j,k,ke,ie,mn,jl;
+  int i,j,k,ke,ie,mn,jl,iVhk;
   int itab,tabk[5]; 
   int *pf = new int [this->n+1];
   for (i=0;i<this->n;i++)  pf[i]=0;
@@ -346,13 +346,19 @@ MatriceProfile<R>::MatriceProfile(const FESpace & Vh,bool VF)
       tabk[itab]=-1;    
       mn = this->n;
       for( k=tabk[ie=0]; ie <itab; k=tabk[++ie])
-        for (j=Vh(k,jl=0);jl<(int) Vh(k);j=Vh(k,++jl)) 
-	      mn = Min ( mn , Vh.FirstDFOfNode(j) ) ;
-
+	{ iVhk=(int) Vh(k);
+        for (jl=0;jl<iVhk;jl++) // modif Oct 2008 valgrind
+	  { 
+	    j=Vh(k,jl) ;
+	    mn = Min ( mn , Vh.FirstDFOfNode(j) ) ;}
+        }
        //for( k=tabk[ie=0]; ie <itab; k=tabk[++ie])
         { k=ke; // bof bof a verifier finement .... FH
-        for (j=Vh(k,jl=0);jl<(int) Vh(k);j=Vh(k,++jl)) 
+	  iVhk=(int) Vh(k);  
+        //for (j=Vh(k,jl=0);jl<(int) Vh(k);j=Vh(k,++jl)) 
+	for (jl=0;jl<iVhk;jl++) // modif Oct 2008 valgrind
 	     {
+		 j=Vh(k,jl);
 	      int df1 = Vh.LastDFOfNode(j);
 	      for (int df= Vh.FirstDFOfNode(j);  df < df1; df++  )
 	       pf[df] = Max(pf[df],df-mn);

@@ -39,7 +39,7 @@
 
 
  long verbosity = 1;
-
+ ostream *ThePlotStream=0; //  Add for new plot. FH oct 2008
 
  
  Map_type_of_map map_type_of_map ; //  to store te type 
