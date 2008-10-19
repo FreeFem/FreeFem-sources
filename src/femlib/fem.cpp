@@ -762,7 +762,7 @@ public:
 		    } */
 		    ConsAdjacence();
 		}
-		cout << " build: Mesh : " << this << endl;
+		// cout << " build: Mesh : " << this << endl;
 	    }  
 	    
 	    inline int BinaryRand(){
@@ -1195,7 +1195,7 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
 }        
 Mesh::~Mesh()
 {
-    (cout << "   -- delete mesh " << this << endl);
+    //(cout << "   -- delete mesh " << this << endl);
     delete  quadtree;
     delete [] triangles;
     delete [] vertices;

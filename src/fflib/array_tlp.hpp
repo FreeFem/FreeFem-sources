@@ -604,24 +604,25 @@ struct set_AI_B: public binary_function<pair<KN_<K>, KN_<L> > * ,KN_<K>, Nothing
 
 template<class K> 
 struct Op3_paac: public ternary_function<KN_<K>,KN_<K>,K,if_arth_KN_<K>*> { 
-static if_arth_KN_<K>* f(const KN_<K> & a,const KN_<K> & b,const  K & c )  {
-    K cc(c);
-    KN_<K> kc(&cc,1,0);
+static if_arth_KN_<K>* f(Stack s,const KN_<K> & a,const KN_<K> & b,const  K & c )  {
+    //K cc(c);
+    KN_<K> kc(new(NewAllocTmp(s,sizeof(c))) K(c),1,0);
   return new if_arth_KN_<K>(a,b,kc);}
 };   
 template<class K> 
 struct Op3_paca: public ternary_function<KN_<K>,K,KN_<K>,if_arth_KN_<K>*> { 
-    static if_arth_KN_<K>* f(const KN_<K> & a,const  K & b,const KN_<K> & c )  {
-	K bb(b);
-	KN_<K> kb(&bb,1,0);
+    static if_arth_KN_<K>* f(Stack s,const KN_<K> & a,const  K & b,const KN_<K> & c )  {
+	//K bb(b);
+	KN_<K> kb(new(NewAllocTmp(s,sizeof(b))) K(b),1,0);
     return new if_arth_KN_<K>(a,kb,c);}
 };   
 
 template<class K> 
 struct Op3_pacc: public ternary_function<KN_<K>,K,K,if_arth_KN_<K>*> { 
-    static if_arth_KN_<K>* f(const KN_<K> & a,const K & b,const  K & c )  {
+    static if_arth_KN_<K>* f(Stack s,const KN_<K> & a,const K & b,const  K & c )  {
 	K cc(c),bb(b);
-	KN_<K> kc(&cc,1,0), kb(&bb,1,0);
+	KN_<K> kc(new(NewAllocTmp(s,sizeof(c))) K(c),1,0),
+	       kb(new(NewAllocTmp(s,sizeof(b))) K(b),1,0);    
     return new if_arth_KN_<K>(a,kb,kc);}
 };   
 

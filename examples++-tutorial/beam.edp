@@ -21,7 +21,7 @@ real sqrt2=sqrt(2.);
 macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
 macro div(u,v) ( dx(u)+dy(v) ) // EOM
 
-solve bb([uu,vv],[w,s],solver=Crout)=
+solve bb([uu,vv],[w,s],solver=CG)=
 	int2d(th)(  
 		  lambda*div(w,s)*div(uu,vv)	
                   +2.*mu*( epsilon(w,s)'*epsilon(uu,vv) ) 

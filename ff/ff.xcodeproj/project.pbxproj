@@ -156,7 +156,7 @@
 		3D90DCF7097015B4002A1826 /* environment.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = environment.cpp; sourceTree = "<group>"; };
 		3D90DCF8097015B4002A1826 /* environment.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = environment.hpp; sourceTree = "<group>"; };
 		3D90DCFA097015B4002A1826 /* error.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
-		3D90DCFD097015B4002A1826 /* ffstack.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = ffstack.hpp; sourceTree = "<group>"; };
+		3D90DCFD097015B4002A1826 /* ffstack.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ffstack.hpp; sourceTree = "<group>"; };
 		3D90DD00097015B4002A1826 /* global.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = global.cpp; sourceTree = "<group>"; };
 		3D90DD03097015B4002A1826 /* InitFunct.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = InitFunct.cpp; sourceTree = "<group>"; };
 		3D90DD04097015B4002A1826 /* InitFunct.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = InitFunct.hpp; sourceTree = "<group>"; };

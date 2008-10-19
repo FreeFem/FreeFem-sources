@@ -178,6 +178,9 @@ struct StackOfPtr2Free {
 	StackOfPtr2Free *prev; // previous stack 
 
 	vector<BaseNewInStack *> stackptr;
+         static const int sizeofmemory4tmp=1024;
+        int topmemory4tmp;
+        char *memory4tmp ;  //
 	void add(BaseNewInStack *p) { 
 	   // cout << "\n\t\t ### ptr/lg add  " << p << "  at " << stackptr.size() << "  \n";	   
 	   stackptr.push_back(p);}
@@ -185,7 +188,9 @@ struct StackOfPtr2Free {
 public: 
 	StackOfPtr2Free(Stack s):
 		where(&WhereStackOfPtr2Free(s)),
-		prev(*where)
+		prev(*where),
+		topmemory4tmp(0),  // add FH oct 2008 of tmp allocation clean after each instruction 
+                memory4tmp(new char[sizeofmemory4tmp])  // add FH oct 2008 of tmp allocation  clean after each instruction
 	       { 
 			stackptr.reserve(20); 	
 			if(prev) Add2StackOfPtr2Free(s,this);
@@ -195,8 +200,10 @@ public:
 	 { bool ret= !stackptr.empty();
 	    if(ret)
 	      { 
+		topmemory4tmp=0;// clean the tmp allocation 
 	        if(stackptr.size()>=20 && verbosity>2) 
 	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n ";
+		
 		for (iterator i=stackptr.end(); i != stackptr.begin();)
 		{
 		   
@@ -208,19 +215,32 @@ public:
 	     }
 	   return ret;
 	}
-	
-	~StackOfPtr2Free() {clean(); *where=prev;} // restore the previous stack
+    void * alloc(int lg) 
+       { 
+	int lg8=lg%8; 
+	if(lg8) lg += 8-lg8; 
+	if(topmemory4tmp + lg>= sizeofmemory4tmp) {ffassert(0);}
+	void *   p=static_cast<void*> (memory4tmp+lg);
+	topmemory4tmp+= lg;
+	return p;
+	}
+    ~StackOfPtr2Free() {clean();delete [] memory4tmp;  *where=prev;} // restore the previous stack
 private:// no copy ....
  	StackOfPtr2Free(const StackOfPtr2Free&);
 	void operator =(const StackOfPtr2Free&);
 
+ template<class T>
+    friend  T * NewTmp(Stack s);
  template<class T>
   friend  T * Add2StackOfPtr2Free(Stack s,T * p);
 	
 };	
 
  
-
+inline void * NewAllocTmp(Stack s,size_t l)
+{
+  return WhereStackOfPtr2Free(s)->alloc(l);
+}
 
 template<class T>
 struct NewInStack: public BaseNewInStack   {	
