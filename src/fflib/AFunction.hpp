@@ -740,7 +740,6 @@ template<class A> AnyType InitializePtr(Stack stack,const AnyType &x){
 template<class A> inline AnyType Delete(Stack,const AnyType &x){
   A * a=PGetAny<A>(x);
   SHOWVERB(cout << "DESTROY " <<typeid(A).name() << " " << a <<  endl); 
-    cout << "Delete DESTROY " <<typeid(A).name() << " " << a <<  endl;
   (*a).~A(); 
   return  Nothing;
 }
@@ -2095,7 +2094,7 @@ class  OneTernaryOperator3 : public OneOperator{
          Expression a,b,c;
        public:
        AnyType operator()(Stack s)  const 
-        {return  SetAny<R>(static_cast<R>(T::f( GetAny<A>((*a)(s)) ,
+        {return  SetAny<R>(static_cast<R>(T::f( s, GetAny<A>((*a)(s)) ,
                                                 GetAny<B>((*b)(s)) ,
                                                 GetAny<C>((*c)(s)))));}
        Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {} 

@@ -1,4 +1,8 @@
 v 3.00
+  - correct ?: operator with array and real. 
+  - correct memory erreur with  valgrind tool (19 oct 2008)
+       In ~ConstructDataFElement() change counter after free
+       nosym eigen call to neupp missing +1 in size of array 
   - correct gestion of the counter of ConstructDataFElement class (09/2008)
        in Valladolid spain. 
   - add 3D FINITE ELEMENT P0,P1,P2 

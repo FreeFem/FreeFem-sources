@@ -2052,11 +2052,11 @@ class Plot :  public E_F0mps { public:
              }
           }
          else if (BCastTo<pferbase>(args[i])) {
-	   cout << "BCastTo<pferbase>(args[i])" << endl;
+	  // cout << "BCastTo<pferbase>(args[i])" << endl;
           l[i].composant=true;
           l[i][0]=CastTo<pferbase>(args[i]); }
          else if (BCastTo<pfer>(args[i])) {
-	   cout << "BCastTo<pfer>(args[i])" << endl;
+	  // cout << "BCastTo<pfer>(args[i])" << endl;
           l[i].composant=false;
           l[i].what=1;
           l[i][0]=CastTo<pfer>(args[i]);}
@@ -2065,7 +2065,7 @@ class Plot :  public E_F0mps { public:
           l[i].what=0;
           l[i][0]=CastTo<pmesh>(args[i]);}
          else if (BCastTo<const E_BorderN *>(args[i])){
-	   cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
+	  // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
           l[i].what=4;
           l[i][0]=CastTo<const E_BorderN *>(args[i]);}
           

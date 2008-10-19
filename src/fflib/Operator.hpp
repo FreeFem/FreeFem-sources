@@ -578,7 +578,7 @@ struct Op2_sub_pn: public binary_function<A,B,R*> {
 
 template<class R,class A=R,class B=A,class C=A> 
 struct Op3_p: public ternary_function<A,B,C,R*> { 
-  static R* f(const A & a,const B & b,const  C & c )  { return new R(a,b,c);} };   
+  static R* f(Stack s,const A & a,const B & b,const  C & c )  { return new R(a,b,c);} };   
 
 template<class R,class A=R,class B=A> 
 struct Op2_p: public binary_function<A,B,R*> { 

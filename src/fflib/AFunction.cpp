@@ -74,7 +74,7 @@ struct SubArray2: public binary_function<long,long,SubArray> {
    // cout << "SubArray: " << a << " " << b << endl;
     return SubArray(b-a+1,a);} }; 
 struct SubArray3: public ternary_function<long,long,long,SubArray> { 
-  static SubArray f(const long & a,const long & b,const long & c)  {  
+  static SubArray f(Stack s,const long & a,const long & b,const long & c)  {  
   // cout << "SubArray: " << a << " " << b << " " <<  c << endl;
    return SubArray((b-a+1)/c,a,c);} }; 
 
@@ -203,7 +203,7 @@ struct Op2_set_pstring: public binary_function<R,string*,R> {
 
 template<class R,class RR> 
 struct Op2_set_pstringiomode: public ternary_function<R,string*,ios::openmode,R> { 
-  static R  f(R const & p,string * const & a,const ios::openmode & mode) 
+  static R  f(Stack s,R const & p,string * const & a,const ios::openmode & mode) 
    {*p =  new RR(a->c_str(),mode);
      // delete a;   modif mars 2006 FH
     return p;} }; 
