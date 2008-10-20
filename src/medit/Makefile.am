@@ -14,9 +14,9 @@ clip.c			gisfil.c		inout_popenbinaire.c	mesh.c			parsop.c		scissor.c		vector.c \
 clipvol.c		hash.c			items.c			mlists.c		particle.c		sftcpy.c		view.c \
 critip.c		ilists.c		keyboard.c		morphing.c		path.c			status.c		zaldy1.c
  
-medit_DEPENDENCIES= ../fflib/libmesh5.o
+medit_DEPENDENCIES= 
 
-LDADD= $(LIBSGLUT)
-INCLUDES=-I../femlib
+LDADD= ../libMesh/libMesh.a $(LIBSGLUT)
+INCLUDES=-I../libMesh
 
 
