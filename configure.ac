@@ -1392,6 +1392,7 @@ AC_OUTPUT(Makefile
 	src/agl/Makefile
 	src/glx/Makefile
 	src/bamg/Makefile
+	src/medit/Makefile
 	src/bin-win32/Makefile
 	examples++/Makefile
 	examples++-eigen/Makefile
