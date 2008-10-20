@@ -393,7 +393,7 @@ fi
 ff_gl_ok=no
 ff_glx_ok=no
 ff_agl_ok=no
-
+ff_libs="$LIBS"
 # GL libraries seem to depend on some dlopen capabilities
 if test "$enable_static" != yes
 then
@@ -404,6 +404,7 @@ then
                 ff_gl_ok=no
                 ff_agl_ok=no)
 
+
 	if test "$ff_gl_ok" = no 
 	then
 	AC_CHECK_HEADERS(GL/gl.h,
@@ -412,6 +413,17 @@ then
 		ff_gl_ok=no
 		ff_agl_ok=no)
 	fi
+        AC_CHECK_HEADERS(GLUT/glut.h,
+                ff_glut_ok=yes,
+                ff_glut_ok=no)
+
+	if test "$ff_glut_ok" = no 
+	then
+	AC_CHECK_HEADERS(GL/glut.h,
+		ff_glut_ok=yes,
+		ff_glut_ok=no)
+	fi
+
 	if test "$ff_gl_ok" = yes
 	then
 		AC_CHECK_HEADERS(GL/glx.h,
@@ -433,6 +445,33 @@ then
 			ff_glx_ok=no,
 			-lGL)
 	fi
+# GLUT .....
+	if test "$ff_glut_ok" =	yes
+        then			
+	 ff_glut="-framework GLUT -framework OpenGL -framework Cocoa"
+	 $ff_libs1="$LIBS"
+     	 LIBS="$LIBS $ff_glut"
+	 AC_TRY_LINK_FUNC(glutInit,
+			ff_glut_ok=yes,
+			ff_glut_ok=next);
+	 LIBS="$ff_libs1"
+	fi
+	if test "$ff_glut_ok" = next
+	then
+		AC_CHECK_LIB(GLUT,
+			glutInit,
+			ff_glut_ok=yes
+			ff_glut="-lglut -lGLU -lGL",
+			ff_glut_ok=yes1
+			)
+
+	fi
+        if test "$ff_glut_ok" = yes
+        then
+	AC_SUBST(LIBSGLUT,$ff_glut)
+	ff_meditprog="medit"
+        fi
+
 fi
 
 # If we cannot find GL, we cannot compile FreeFem++-agl
@@ -447,6 +486,7 @@ if test "$ff_glx_ok" = yes
 then
 	ff_glxprog=FreeFem++-glx${EXEEXT}
 fi
+
 
 AC_ARG_WITH(suffix,[  --with-suffix=[G3/G4/G4,P4,..] or --without-suffix (default no suffix package name)])
 if test "$with_suffix" = yes
@@ -1359,6 +1399,7 @@ ff_bamgprog="$ff_bamgprog drawbdmesh${EXEEXT}"
 fi
 
 # The final list of executable programs
+AC_SUBST(MEDITPROG,$ff_meditprog)
 AC_SUBST(BAMGPROG,$ff_bamgprog)
 AC_SUBST(GLXPROG,$ff_glxprog)
 AC_SUBST(STDPROG,$ff_stdprog)
@@ -1368,7 +1409,7 @@ AC_SUBST(IDEPROG,$ff_ideprog)
 AC_SUBST(TESTIDEPROG,$ff_testideprog)
 # The final test program
 AC_SUBST(IDE_TESTS,$ff_idetest)
-ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_ideprog  $ff_mpiprog"
+ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_ideprog  $ff_mpiprog $ff_meditprog"
 
 # All makefiles
 AC_OUTPUT(Makefile
@@ -1392,6 +1433,7 @@ AC_OUTPUT(Makefile
 	src/agl/Makefile
 	src/glx/Makefile
 	src/bamg/Makefile
+	src/libMesh/Makefile
 	src/medit/Makefile
 	src/bin-win32/Makefile
 	examples++/Makefile

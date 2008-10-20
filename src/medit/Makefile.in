@@ -36,7 +36,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS =
+bin_PROGRAMS = $(am__EXEEXT_1)
 EXTRA_PROGRAMS = medit$(EXEEXT)
 subdir = src/medit
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -49,6 +49,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
+am__EXEEXT_1 = @MEDITPROG@
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
@@ -71,6 +72,7 @@ am_medit_OBJECTS = animat.$(OBJEXT) cube.$(OBJEXT) image.$(OBJEXT) \
 	zaldy1.$(OBJEXT)
 medit_OBJECTS = $(am_medit_OBJECTS)
 medit_LDADD = $(LDADD)
+am__DEPENDENCIES_1 =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -157,6 +159,7 @@ LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
 LIBC_VERSION = @LIBC_VERSION@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LIBSGLUT = @LIBSGLUT@
 LOAD_COMPILE = @LOAD_COMPILE@
 LOAD_TESTS = @LOAD_TESTS@
 LTLIBOBJS = @LTLIBOBJS@
@@ -164,6 +167,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+MEDITPROG = @MEDITPROG@
 MPICXX = @MPICXX@
 MPIPROG = @MPIPROG@
 OBJEXT = @OBJEXT@
@@ -262,9 +266,9 @@ clip.c			gisfil.c		inout_popenbinaire.c	mesh.c			parsop.c		scissor.c		vector.c \
 clipvol.c		hash.c			items.c			mlists.c		particle.c		sftcpy.c		view.c \
 critip.c		ilists.c		keyboard.c		morphing.c		path.c			status.c		zaldy1.c
 
-medit_DEPENDENCIES = ../fflib/libmesh5.o
-LDADD = $(LIBSGLUT)
-INCLUDES = -I../femlib
+medit_DEPENDENCIES = 
+LDADD = ../libMesh/libMesh.a $(LIBSGLUT)
+INCLUDES = -I../libMesh
 all: all-am
 
 .SUFFIXES:

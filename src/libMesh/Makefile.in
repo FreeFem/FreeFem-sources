@@ -13,13 +13,23 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
+# Makefile using Automake + Autoconf
+# ----------------------------------
+# $Id$
+
+# This is not compiled as a separate library because its
+# interconnections with other libraries have not been solved.
+
+SOURCES = $(libmesh_a_SOURCES)
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
-top_builddir = ..
+top_builddir = ../..
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 INSTALL = @INSTALL@
 install_sh_DATA = $(install_sh) -c -m 644
@@ -33,7 +43,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-subdir = DOC
+subdir = src/libMesh
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acmacros.m4 \
@@ -44,8 +54,23 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-SOURCES =
-DIST_SOURCES =
+LIBRARIES = $(noinst_LIBRARIES)
+libmesh_a_AR = $(AR) $(ARFLAGS)
+libmesh_a_LIBADD =
+am_libmesh_a_OBJECTS = chrono.$(OBJEXT) eigenv.$(OBJEXT) \
+	libmesh3.$(OBJEXT) libmesh5.$(OBJEXT) memory.$(OBJEXT)
+libmesh_a_OBJECTS = $(am_libmesh_a_OBJECTS)
+DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+am__depfiles_maybe = depfiles
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+SOURCES = $(libmesh_a_SOURCES)
+DIST_SOURCES = $(libmesh_a_SOURCES)
+ETAGS = etags
+CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ADD_PACKAGE_NAME = @ADD_PACKAGE_NAME@
@@ -214,83 +239,15 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-FIGS_EPS = \
-figures/1stCOD.eps              figures/LastCOD.eps             figures/cfunc1.eps \
-figures/1stCOD2.eps             figures/LastCOD2.eps            figures/cfunc2.eps \
-figures/1stPhoto.eps            figures/LastPhoto.eps           figures/electro.eps \
-figures/1stPhoto2.eps           figures/LastPhoto2.eps          figures/electroMesh.eps \
-figures/BellInit.eps            figures/NACA0012.eps            figures/mesh_sample.eps \
-figures/BellLast.eps            figures/P0P1P2P1nc.eps          figures/naca1.eps \
-figures/Bezier.eps              figures/P1P2.eps                figures/naca2.eps \
-figures/Cardioid.eps            figures/SmileFace.eps           figures/projP0.eps \
-figures/Cassini.eps             figures/ThreePoint.eps          figures/projP1.eps \
-figures/Cycloid1.eps            figures/TouchSide.eps           figures/projP1b.eps \
-figures/Cycloid2.eps            figures/U-shape.eps             figures/projP1nc.eps \
-figures/Engine.eps              figures/V-shape.eps             figures/projP2.eps \
-figures/FreeFem++-cs.eps        figures/aTutorial.eps           figures/soapfilm.eps \
-figures/L-shape.eps             figures/adaptmesh.eps           figures/soapfilm3d.eps \
-figures/L-shape2.eps            figures/border.eps              figures/square.eps \
-figures/mach2r.eps \
-figures/buillayermesh.eps figures/layer2D.eps figures/degenerate.eps \
-plots/BSth.eps                  plots/eigen12.eps               plots/onoldmesh.eps \
-plots/BSval.eps                 plots/emptymesh-1.eps           plots/perio4.eps \
-plots/FIGII1.eps                plots/emptymesh-2.eps           plots/period.eps \
-plots/FIGII2.eps                plots/emptymesh.eps             plots/potential.eps \
-plots/FIGII3.eps                plots/err02.eps                 plots/potheat.eps \
-plots/FIGII4.eps                plots/fastInterpolat.eps        plots/region.eps \
-plots/FIGII5.eps                plots/firstTh.eps               plots/region_nu.eps \
-plots/FIGII6.eps                plots/firstU.eps                plots/region_u.eps \
-plots/FIGII7.eps                plots/fluidstruct1.eps          plots/rhoP2.eps \
-plots/FIGII8.eps                plots/fluidstruct2.eps          plots/rmuonde.eps \
-plots/FIGII9.eps                plots/fluidstruct3.eps          plots/schwarz-no-th.eps \
-plots/Laplace.eps               plots/gnumembrane.eps           plots/schwarz-no-u.eps \
-plots/NScahouetChabart.eps      plots/gnuplot.eps               plots/schwarz-no-u0.eps \
-plots/NSprojP.eps               plots/hat.eps                   plots/schwarz-th.eps \
-plots/NSprojTh.eps              plots/heatex.eps                plots/schwarz-u.eps \
-plots/NSprojU.eps               plots/heatexTh.eps              plots/schwarz-u0.eps \
-plots/RT0.eps                   plots/imuonde.eps               plots/secondT.eps \
-plots/ThrhoP2.eps               plots/laRTp.eps                 plots/sound.eps \
-plots/Thwithhole.eps            plots/lamedeform.eps            plots/sound0.eps \
-plots/Thwithouthole.eps         plots/lamevect.eps              plots/splitmesh.eps \
-plots/Thxy.eps                  plots/lapRTuv.eps               plots/squareb.eps \
-plots/condensor.eps             plots/likegnu.eps               plots/stokes.eps \
-plots/condensorth.eps           plots/logo.eps                  plots/tempmuonde.eps \
-plots/condersor.eps             plots/lshape.eps                plots/thermic.eps \
-plots/convectCG.eps             plots/lshapeSol.eps             plots/thermicvst.eps \
-plots/convectDG.eps             plots/medit.eps                 plots/three.eps \
-plots/csSnap.eps                plots/membrane.eps              plots/threeg.eps \
-plots/dTh.eps                   plots/membraneTh.eps            plots/trunc0.eps \
-plots/d_Thf.eps                 plots/movemesh.eps              plots/trunc6.eps \
-plots/d_u.eps                   plots/nl-elas.eps               plots/twosquare.eps \
-plots/eigen.eps                 plots/nosplitmesh.eps           plots/xyf.eps \
-plots/eigen11.eps               plots/onnewmesh.eps \
-plots/medit2.eps  		plots/threehsv.eps		plots/hsv.eps \
-plots/crimpson.eps              plots/J-bfgs.eps		plots/u-bfgs.eps \
-plots/csSnapOld.eps \
-plots/logo.eps  plots/arei-Thu.eps      plots/arei-etak.eps \
-plots/overlapTh.eps plots/us-ug.eps plots/vs-vg.eps  \
-plots/square-0.eps      plots/square-1.eps      plots/square-2.eps 
-
-#  Pour la page de garde FH
-FIGS_JPG = plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg  \
-figures/mi.jpg plots/LogoUPMC.jpg
-
-FIGS_PDF = plots/LogoCNRS.pdf    plots/LogoLJLL.pdf  plots/ffauteurs4.pdf  \
-plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf
-
-EXTRA_DIST = addfe.tex docFFGUI.tex manual-full.tex freefem++doc.tex  manual.tex FF.sty FFF.sty dessin.sty pdfsync.sty styles.sty \
-$(FIGS_EPS)    $(FIGS_JPG)    $(FIGS_PDF)  
-
-CPFIGS_PDF = $(addprefix cpfigs/,$(notdir $(patsubst %.eps,%.pdf,$(FIGS_EPS)) \
-))
-
-CPFIGS_EPS = $(addprefix cpfigs/,$(notdir $(patsubst %.pdf,%.eps,$(FIGS_PDF))) \
-                                 $(notdir $(patsubst %.jpg,%.eps,$(FIGS_JPG))) \
-)
+noinst_LIBRARIES = libmesh.a
+libmesh_a_SOURCES = \
+chrono.c eigenv.c libmesh3.c  libmesh5.c memory.c \
+chrono.h	eigenv.h	libmesh3.h	libmesh5.h	memory.h
 
 all: all-am
 
 .SUFFIXES:
+.SUFFIXES: .c .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -300,9 +257,10 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  DOC/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  src/libMesh/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  DOC/Makefile
+	  $(AUTOMAKE) --gnu  src/libMesh/Makefile
+.PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -319,16 +277,90 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+libmesh.a: $(libmesh_a_OBJECTS) $(libmesh_a_DEPENDENCIES) 
+	-rm -f libmesh.a
+	$(libmesh_a_AR) libmesh.a $(libmesh_a_OBJECTS) $(libmesh_a_LIBADD)
+	$(RANLIB) libmesh.a
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT)
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chrono.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eigenv.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmesh3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmesh5.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 uninstall-info-am:
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique
 tags: TAGS
-TAGS:
 
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	if test -z "$(ETAGS_ARGS)$$tags$$unique"; then :; else \
+	  test -n "$$unique" || unique=$$empty_fix; \
+	  $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+	    $$tags $$unique; \
+	fi
 ctags: CTAGS
-CTAGS:
+CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(CTAGS_ARGS)$$tags$$unique" \
+	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
+	     $$tags $$unique
 
+GTAGS:
+	here=`$(am__cd) $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/figures $(distdir)/plots
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -357,7 +389,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile
+all-am: Makefile $(LIBRARIES)
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -383,11 +415,15 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean-am: clean-generic mostlyclean-am
+clean: clean-am
+
+clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
 
 distclean: distclean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
-distclean-am: clean-am distclean-generic
+distclean-am: clean-am distclean-compile distclean-generic \
+	distclean-tags
 
 dvi: dvi-am
 
@@ -410,12 +446,13 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
 
 pdf: pdf-am
 
@@ -427,58 +464,17 @@ ps-am:
 
 uninstall-am: uninstall-info-am
 
-.PHONY: all all-am check check-am clean clean-generic distclean \
-	distclean-generic distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-info-am
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+	clean-noinstLIBRARIES ctags distclean distclean-compile \
+	distclean-generic distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-info-am
 
-
-documentation: $(DOCPDF) 
-docps:  $(DOCPS) $(DOCPSGZ) 
-docpdf: $(DOCPDF) 
-
-%.dvi:%.tex cpfigs $(CPFIGS_EPS) 
-	-rm $*.dvi $*.aux $*.log \
-                $*.toc $*.ind $*.glo $*.out $*.blg $*ilg $*.idx $*.bbl $*.tmp	
-	latex $*
-	latex $*
-	makeindex $*
-	latex $*
-%.ps:%.dvi
-	dvips -u +psfonts.map -u +pdftex.map -u +Ttbbold.map -z -K $* -o $@
-
-%.pdf:%.tex  cpfigs $(CPFIGS_PDF) 
-	-rm $*.pdf $*.aux $*.log \
-                $*.toc $*.ind $*.glo $*.out $*.blg $*ilg $*.idx $*.bbl $*.tmp	
-	pdflatex $*
-	pdflatex $*
-	makeindex $*
-	pdflatex $*
-cpfigs: 
-	-mkdir cpfigs
-
-%.gz:%
-	gzip -c  -9 $*  >$*.gz
-clean:
-	-rm *.dvi *.pdf *~ *.aux *.log *.ps *.ps.gz \
-		*.toc *.ind *.glo *.out *.blg *ilg *.idx *.bbl *.tmp
-	-rm -r cpfigs
-
-cpfigs/%.pdf:plots/%.eps
-	epstopdf $^ --outfile=$@
-cpfigs/%.pdf:figures/%.eps
-	epstopdf $^ --outfile=$@
-cpfigs/%.eps:plots/%.jpg
-	convert $^  $@
-cpfigs/%.eps:plots/%.pdf
-	pdf2ps $^  $@
-
-# do not delete the copy figure to long to created 
-.PRECIOUS: $(CPFIGS_PDF) $(CPFIGS_EPS)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
