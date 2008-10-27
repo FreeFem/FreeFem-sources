@@ -25,8 +25,9 @@ using namespace std;
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
-#include "LayerMesh.hpp"
-#include "TransfoMesh_v2.hpp"
+//#include "LayerMesh.hpp"
+//#include "TransfoMesh_v2.hpp"
+#include "msh3.hpp"
 #include "tetgen.h"
 //#include "GQuadTree.hpp"
 
@@ -90,7 +91,7 @@ public:
   Build2D3D_Op(const basicAC_F0 &  args,Expression tth) 
     : eTh(tth),xx(0),yy(0),zz(0)
   {
-    cout << "construction par BuilLayeMesh_Op" << endl;
+    if(verbosity) cout << "construction par BuilLayeMesh_Op" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
     const E_Array * a1=0 ;
     if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
@@ -145,10 +146,10 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
 
   int nbt=Th.nt; // nombre de triangles
   int neb=Th.neb; // nombre d'aretes fontiere
-  cout << " Vertex Triangle Border " << nbv<< "  "<< nbt << " " << neb << endl; 
+  if(verbosity) cout << " Vertex Triangle Border " << nbv<< "  "<< nbt << " " << neb << endl; 
 
-  cout <<" ======================= " << endl;
-  cout <<" == Build2D_3D_Op==" << endl;
+  if(verbosity >1) cout <<" ======================= " << endl;
+  if(verbosity >1) cout <<" == Build2D_3D_Op==" << endl;
  
   KN<long> zzempty;
   string  stringempty = string("pqaAAYCQ");
@@ -169,7 +170,6 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
 
 
   // assertion au niveau de la taille
-   cout << "tabregion.N() " <<  tabregion.N() << endl; 
   ffassert( tabhole.N()   == 3*nbhole);
   ffassert( tabregion.N() == 5*nbregion);
   ffassert( tabfacecl.N() == 2*nbfacecl);
@@ -429,7 +429,7 @@ void mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, const int & 
     i=i+4;
   }
 
-  cout << &out.trifacemarkerlist << endl;
+  if(verbosity) cout << &out.trifacemarkerlist << endl;
   
   for(int ibe=0; ibe < Th3.nbe; ibe++){
     int iv[3];
@@ -467,17 +467,17 @@ const double *Zcoord, const int &label_tet, const int &label_face){
       in.pointlist[itet+1] = Ycoord[nnv];
       in.pointlist[itet+2] = Zcoord[nnv];       
       in.pointmarkerlist[nnv] =  0;
-      cout << in.pointlist[itet] << " " << in.pointlist[itet+1] << " " << in.pointlist[itet+2] << endl;
+      
       itet=itet+3;
     }
   assert(itet==in.numberofpoints*3);
 	
   in.numberoffacets = 0;
 
-  cout << "debut de tetrahedralize( , &in, &out): switch=" << switch_tetgen<< endl;
+  cout << "tetgen: before tetrahedralize( , &in, &out): switch=" << switch_tetgen<< endl;
   tetrahedralize(switch_tetgen, &in, &out);
 	 
-  cout << "fin de tetrahedralize( , &in, &out);" << endl;
+  cout << "tetgen: finish tetrahedralize( , &in, &out);" << endl;
   mesh3_tetgenio_out( out, label_tet, label_face,*T_Th3);
 	
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
@@ -496,15 +496,14 @@ Mesh3 * RemplissageSurf3D_tetgen(char *switch_tetgen,const Mesh3 & Th3, const in
   int nt_t = Th3.nt;
   int nbe_t = Th3.nbe;
 	
-  cout << "3D RemplissageSurf3D:: Vertex  triangle2  border " 
-       << nv_t << " "<< nt_t << " " << nbe_t<< endl;
+  if(verbosity) cout << "3D RemplissageSurf3D:: Vertex  triangle2  border "    << nv_t << " "<< nt_t << " " << nbe_t<< endl;
   // Creation des tableau de tetgen
 	
   tetgenio in,out;
   //tetgenio::facet *f;
   //tetgenio::polygon *p;
 	
-  cout << " tetgenio: vertex " << endl;
+  if(verbosity) cout << " tetgenio: vertex " << endl;
   int itet,jtet;
   // All indices start from 1.
   in.firstnumber = 1;
@@ -523,7 +522,7 @@ Mesh3 * RemplissageSurf3D_tetgen(char *switch_tetgen,const Mesh3 & Th3, const in
     }
   assert(itet==in.numberofpoints*3);
 	
-  cout << " tetgenio: facet " << endl;
+  if(verbosity) cout << " tetgenio: facet " << endl;
   // Version avec des facettes
   in.numberoffacets = nbe_t;
   in.facetlist = new tetgenio::facet[in.numberoffacets];
@@ -555,11 +554,11 @@ Mesh3 * RemplissageSurf3D_tetgen(char *switch_tetgen,const Mesh3 & Th3, const in
     in.facetmarkerlist[ibe] = K.lab; 
 		
   }  
-  cout << "debut de tetrahedralize( , &in, &out);" << endl;
+  cout << "tetgen: before tetrahedralize( , &in, &out);" << endl;
 	
   tetrahedralize(switch_tetgen, &in, &out);
 	 
-  cout << "fin de tetrahedralize( , &in, &out);" << endl;
+  cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
   mesh3_tetgenio_out( out, label_tet, *T_Th3);
 	
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
@@ -579,15 +578,14 @@ Mesh3 * RemplissageSurf3D_tetgen_new(char *switch_tetgen,const Mesh3 & Th3, cons
   int nt_t = Th3.nt;
   int nbe_t = Th3.nbe;
 	
-  cout << "3D RemplissageSurf3D:: Vertex  triangle2  border " 
-       << nv_t << " "<< nt_t << " " << nbe_t<< endl;
+  if(verbosity) cout << "3D RemplissageSurf3D:: Vertex  triangle2  border " << nv_t << " "<< nt_t << " " << nbe_t<< endl;
   // Creation des tableau de tetgen
 	
   tetgenio in,out;
   //tetgenio::facet *f;
   //tetgenio::polygon *p;
 	
-  cout << " tetgenio: vertex " << endl;
+  if(verbosity) cout << " tetgenio: vertex " << endl;
   int itet,jtet;
   // All indices start from 1.
   in.firstnumber = 1;
@@ -606,7 +604,7 @@ Mesh3 * RemplissageSurf3D_tetgen_new(char *switch_tetgen,const Mesh3 & Th3, cons
     }
   assert(itet==in.numberofpoints*3);
 	
-  cout << " tetgenio: facet " << endl;
+  if(verbosity) cout << " tetgenio: facet " << endl;
   // Version avec des facettes
   in.numberoffacets = nbe_t;
   in.facetlist = new tetgenio::facet[in.numberoffacets];
@@ -661,13 +659,13 @@ Mesh3 * RemplissageSurf3D_tetgen_new(char *switch_tetgen,const Mesh3 & Th3, cons
   }
 
 
-  cout << "debut de tetrahedralize( , &in, &out);" << endl;
+  cout << "tetgen: before tetrahedralize( , &in, &out);" << endl;
   cout << "numberof regions "<<  in.numberofregions  << endl;
   cout << "numberof hole "<<  in.numberofholes  << endl;
 	
   tetrahedralize(switch_tetgen, &in, &out);
 	 
-  cout << "fin de tetrahedralize( , &in, &out);" << endl;
+  cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
   mesh3_tetgenio_out( out, *T_Th3);
 	
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
@@ -698,19 +696,19 @@ Mesh3 * Transfo_Mesh2_tetgen(const double &precis_mesh, char *switch_tetgen,cons
 	     
 	label_nbe_t = new int[Th2.nt];
 	
-        cout << "2D: Mesh::Vertex  triangle2  border " << Th2.nv << " "<<Th2.nt<< " " << Th2.neb<< endl;
+        if(verbosity) cout << "2D: Mesh::Vertex  triangle2  border " << Th2.nv << " "<<Th2.nt<< " " << Th2.neb<< endl;
 	
 	for(int ii=0; ii<Th2.nv; ii++){ 
 		Numero_Som[ii]=ii;
 	}
-	cout <<" debut: SamePointElement " <<endl;
+	if(verbosity) cout <<" debut: SamePointElement " <<endl;
 	
 	SamePointElement_Mesh2( precis_mesh, tab_XX, tab_YY, tab_ZZ, Th2, recollement_border, point_confondus_ok, 
 		Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nbe_t, nv_t, nt_t, nbe_t);
 	
-	cout <<" fin: SamePointElement " <<endl;
+	if(verbosity) cout <<" fin: SamePointElement " <<endl;
 	
-	cout << "2D transfo: Mesh::Vertex  triangle2  border " << nv_t << " "<< nt_t << " " << nbe_t<< endl;
+	if(verbosity) cout << "2D transfo: Mesh::Vertex  triangle2  border " << nv_t << " "<< nt_t << " " << nbe_t<< endl;
 	// Creation des tableau de tetgen
 	
 	
@@ -718,7 +716,7 @@ Mesh3 * Transfo_Mesh2_tetgen(const double &precis_mesh, char *switch_tetgen,cons
 	//tetgenio::facet *f;
 	//tetgenio::polygon *p;
 	
-	cout << " tetgenio: vertex " << endl;
+	if(verbosity) cout << " tetgenio: vertex " << endl;
 	int itet,jtet;
 // All indices start from 1.
 	in.firstnumber = 1;
@@ -742,7 +740,7 @@ Mesh3 * Transfo_Mesh2_tetgen(const double &precis_mesh, char *switch_tetgen,cons
 	}
 	assert(itet==in.numberofpoints*3);
 	
-	cout << " tetgenio: facet " << endl;
+	if(verbosity) cout << " tetgenio: facet " << endl;
 	// Version avec des facettes
 	in.numberoffacets = nbe_t;
 	in.facetlist = new tetgenio::facet[in.numberoffacets];
@@ -777,11 +775,12 @@ Mesh3 * Transfo_Mesh2_tetgen(const double &precis_mesh, char *switch_tetgen,cons
 	  in.facetmarkerlist[ibe] = imap->second; // K.lab; // before 
 		
 	}  
-	cout << "debut de tetrahedralize( , &in, &out);" << endl;
+
+	cout << "tetgen: before tetrahedralize( , &in, &out);" << endl;
 	
 	tetrahedralize(switch_tetgen, &in, &out);
 	 
-	cout << "fin de tetrahedralize( , &in, &out);" << endl;
+	cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
 	mesh3_tetgenio_out( out, label_tet, *T_Th3);
 	
 	cout <<" Finish Mesh3 :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
@@ -811,19 +810,19 @@ Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,
 	     
   label_nbe_t = new int[Th2.nt];
 	
-  cout << "2D: Mesh::Vertex  triangle2  border " << Th2.nv << " "<<Th2.nt<< " " << Th2.neb<< endl;
+  if(verbosity) cout << "2D: Mesh::Vertex  triangle2  border " << Th2.nv << " "<<Th2.nt<< " " << Th2.neb<< endl;
 	
   for(int ii=0; ii<Th2.nv; ii++){ 
     Numero_Som[ii]=ii;
   }
-  cout <<" debut: SamePointElement " <<endl;
+  if(verbosity) cout <<" debut: SamePointElement " <<endl;
 	
   SamePointElement_Mesh2( precis_mesh, tab_XX, tab_YY, tab_ZZ, Th2, recollement_border, point_confondus_ok, 
 			  Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nbe_t, nv_t, nt_t, nbe_t);
 	
-  cout <<" fin: SamePointElement " <<endl;
+  if(verbosity) cout <<" fin: SamePointElement " <<endl;
 	
-  cout << "2D transfo: Mesh::Vertex  triangle2  border " << nv_t << " "<< nt_t << " " << nbe_t<< endl;
+  if(verbosity) cout << "2D transfo: Mesh::Vertex  triangle2  border " << nv_t << " "<< nt_t << " " << nbe_t<< endl;
   // Creation des tableau de tetgen
 	
 	
@@ -831,7 +830,7 @@ Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,
   //tetgenio::facet *f;
   //tetgenio::polygon *p;
 	
-  cout << " tetgenio: vertex " << endl;
+  if(verbosity) cout << " tetgenio: vertex " << endl;
   int itet,jtet;
   // All indices start from 1.
   in.firstnumber = 1;
@@ -855,7 +854,7 @@ Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,
     }
   assert(itet==in.numberofpoints*3);
 	
-  cout << " tetgenio: facet " << endl;
+  if(verbosity) cout << " tetgenio: facet " << endl;
   // Version avec des facettes
   in.numberoffacets = nbe_t;
   in.facetlist = new tetgenio::facet[in.numberoffacets];
@@ -914,11 +913,11 @@ Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,
     in.facetconstraintlist[ii+1] = tabfacecl[ii+1];
   }
   
-  cout << "debut de tetrahedralize( , &in, &out);" << endl;
+  cout << "tetgen: before tetrahedralize( , &in, &out);" << endl;
   
   tetrahedralize(switch_tetgen, &in, &out);
   
-  cout << "fin de tetrahedralize( , &in, &out);" << endl;
+  cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
   mesh3_tetgenio_out( out, *T_Th3);
   
   cout <<" Finish Mesh3 :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
@@ -944,9 +943,9 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
     
     testr = strcspn(test_tetgen,"r");
     testp = strcspn(test_tetgen,"p");
-    cout << "switch_tetgen=" << switch_tetgen << endl;
-    cout << "testr=" << testr  <<" testp="<< testp <<  endl;
-    cout << "strlen(test_tetgen)" << strlen(test_tetgen) << endl; 
+    //cout << "switch_tetgen=" << switch_tetgen << endl;
+    //cout << "testr=" << testr  <<" testp="<< testp <<  endl;
+    //cout << "strlen(test_tetgen)" << strlen(test_tetgen) << endl; 
     if( testr == strlen(test_tetgen) )
       { 
 	cout << "The option 'r' of tetgen is not used" << endl;
@@ -964,15 +963,14 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
   int nt_t = Th3.nt;
   int nbe_t = Th3.nbe;
 	
-  cout << "3D RemplissageSurf3D:: Vertex  triangle2  border " 
-       << nv_t << " "<< nt_t << " " << nbe_t<< endl;
+  if(verbosity) cout << "3D RemplissageSurf3D:: Vertex  triangle2  border "  << nv_t << " "<< nt_t << " " << nbe_t<< endl;
   // Creation des tableau de tetgen
 	
   tetgenio in,out;
   //tetgenio::facet *f;
   //tetgenio::polygon *p;
 	
-  cout << " tetgenio: vertex " << endl;
+  if(verbosity) cout << " tetgenio: vertex " << endl;
   int itet,jtet;
   // All indices start from 1.
   in.firstnumber = 1;
@@ -992,7 +990,7 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
   assert(itet==in.numberofpoints*3);
 
   // Tetrahedrons
-  cout << "tetrahedrons" << endl;
+  if(verbosity) cout << "tetrahedrons" << endl;
   in.numberofcorners = 4;
   in.numberoftetrahedra = Th3.nt;
   in.tetrahedronlist = new int[in.numberofcorners*in.numberoftetrahedra];
@@ -1027,7 +1025,7 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
   }
 
   
-  cout << "lecture des facettes" << endl;
+  if(verbosity) cout << "lecture des facettes" << endl;
   in.numberoftrifaces = Th3.nbe;
   in.trifacelist = new int[3*in.numberoftrifaces];
   in.trifacemarkerlist = new int[in.numberoftrifaces];
@@ -1086,14 +1084,14 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
   
   for(int ii=0; ii<3*in.numberofholes; ii++){
     in.holelist[ii]   = tabhole[ii];
-    cout << "in.holelist[ii]=" << in.holelist[ii] << endl;
+    if(verbosity) cout << "in.holelist[ii]=" << in.holelist[ii] << endl;
   }
 
   in.numberofregions = nbregion;
   in.regionlist = new REAL[5*nbregion];
   for(int ii=0; ii<5*in.numberofregions; ii++){
     in.regionlist[ii] = tabregion[ii];
-    cout << "in.regionlist[ii]=" << in.regionlist[ii] << endl;
+    if(verbosity) cout << "in.regionlist[ii]=" << in.regionlist[ii] << endl;
   }
 
   in.numberoffacetconstraints = nbfacecl;
@@ -1103,13 +1101,13 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
     in.facetconstraintlist[ii+1] = tabfacecl[ii+1];
   }
 
-  cout << "debut de tetrahedralize( , &in, &out);" << endl;
+  cout << "tetgen: before tetrahedralize( , &in, &out);" << endl;
   cout << "numberof regions "<<  in.numberofregions  << endl;
   cout << "numberof hole "<<  in.numberofholes  << endl;
 	
   tetrahedralize(switch_tetgen, &in, &out);
 	 
-  cout << "fin de tetrahedralize( , &in, &out);" << endl;
+  cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
   mesh3_tetgenio_out( out, *T_Th3);
 	
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
@@ -1141,7 +1139,7 @@ public:
   Remplissage_Op(const basicAC_F0 &  args,Expression tth) 
     : eTh(tth)
   {
-    cout << "Remplissage du bord" << endl;
+    if(verbosity >1) cout << "Remplissage du bord" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
   } 
   
@@ -1181,7 +1179,7 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   int nbv=Th.nv; // nombre de sommet 
   int nbt=Th.nt; // nombre de triangles
   int nbe=Th.nbe; // nombre d'aretes fontiere
-  cout << " Vertex Triangle Border " << nbv<< "  "<< nbt << " nbe "<< nbe << endl; 
+  cout << "Tetgen : Vertex Triangle Border " << nbv<< "  "<< nbt << " nbe "<< nbe << endl; 
  
   KN<long> zzempty;
   //int intempty=0;
@@ -1200,8 +1198,7 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   KN<double> tabfacecl (arg(8,stack,zdzempty));
 
   
-  // assertion au niveau de la taille
-  cout << "tabregion.N() " <<  tabregion.N() << endl; 
+  // assertion au niveau de la taille 
   ffassert( tabhole.N()   == 3*nbhole);
   ffassert( tabregion.N() == 5*nbregion);
   ffassert( tabfacecl.N() == 2*nbfacecl);
@@ -1226,13 +1223,11 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
     }
   //Mesh3 *Th3 = Th3 = RemplissageSurf3D_tetgen( switch_tetgen, Th, label_tet);
   // new 
-  cout << "Avant remplissage" << endl;
-  cout << "nbhole="   << nbhole << endl;
-  cout << "nbregion=" << nbregion << endl;
+  cout << "tetgen:" << "nbhole="   << nbhole << "nbregion=" << nbregion << endl;
  
   Mesh3 *Th3 = RemplissageSurf3D_tetgen_new( switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl);
 	
-  cout << "fin du remplissage " << endl;
+  cout << "finish tetgen " << endl;
   // changement de label 
   if( nrf.N() > 0){
     for(int ii=0; ii< Th3->nbe; ii++){
@@ -1255,7 +1250,6 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
       Th3->be(ii).set(Th3->vertices,iv,lab);
     }
   }
-  cout << "fin du changmenet de label " << endl;
   
   Th3->BuildBound();
   Th3->BuildAdj();
@@ -1288,7 +1282,7 @@ public:
   ReconstructionRefine_Op(const basicAC_F0 &  args,Expression tth) 
     : eTh(tth)
   {
-    cout << "ReconstructionRefine du bord"<< endl;
+    if(verbosity >1) cout << "ReconstructionRefine du bord"<< endl;
     args.SetNameParam(n_name_param,name_param,nargs);
     
   } 
@@ -1333,7 +1327,7 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
   int nbv=Th.nv; // nombre de sommet 
   int nbt=Th.nt; // nombre de triangles
   int nbe=Th.nbe; // nombre d'aretes fontiere
-  cout << " Vertex Triangle Border " << nbv<< "  "<< nbt << " "<< nbe << endl; 
+  cout << "refine tetgen: Vertex Triangle Border " << nbv<< "  "<< nbt << " "<< nbe << endl; 
  
   KN<long> zzempty;
   //int intempty=0;
@@ -1353,8 +1347,6 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
 
   
   // assertion au niveau de la taille
-  cout << "tabregion.N() " <<  tabregion.N() << endl; 
-  cout << "tabregion= "   << tabregion << endl;
   ffassert( tabhole.N()   == 3*nbhole);
   ffassert( tabregion.N() == 5*nbregion);
   ffassert( tabfacecl.N() == 2*nbfacecl);
@@ -1409,13 +1401,11 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
     }
   }
 
-  cout << "Before reconstruction" << endl;
-  cout << "nbhole="   << nbhole << endl;
-  cout << "nbregion=" << nbregion << endl;
+  cout << "Before reconstruction:" << " nbhole="   << nbhole << " nbregion=" << nbregion << endl;
  
   Mesh3 *Th3 = ReconstructionRefine_tetgen(switch_tetgen, Th, nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl,tsizevol);
 	
-  cout << "fin du remplissage " << endl;
+  cout << "finish reconstruction " << endl;
   // changement de label 1
  
   if( nrtet.N() > 0){
@@ -1462,7 +1452,7 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
       Th3->be(ii).set(Th3->vertices,iv,lab);
     }
   }
-  cout << "fin du changement de label " << endl;
+  //cout << "fin du changement de label " << endl;
   
   Th3->BuildBound();
   Th3->BuildAdj();
@@ -1501,7 +1491,7 @@ public:
   Expression ffxx, Expression ffyy, Expression ffzz ) 
     : numofpts(nop), xx(ffxx), yy(ffyy), zz(ffzz)
   {
-    cout << "Convex Hull with TetGen" << endl;
+    if(verbosity) cout << "Convex Hull with TetGen" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
   } 
   
@@ -1535,14 +1525,7 @@ AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
   cyy = GetAny< KN<double> > ((*yy)(stack));
   czz = GetAny< KN<double> > ((*zz)(stack));
   
-  for(int ii=0; ii<nbv; ii++)
-  {
-    //cxx[ii] = GetAny< double > ((*xx)(stack));
-    //cyy[ii] = GetAny< double > ((*yy)(stack));
-    //czz[ii] = GetAny< double > ((*zz)(stack));
-    cout << "ii= " << ii << endl;
-    cout << "coord "<< cxx[ii] << " " << cyy[ii] << " " << czz[ii] << endl;
-  }
+
   assert( cxx.N() == nbv );
   assert( cyy.N() == nbv );
   assert( czz.N() == nbv );
@@ -1598,7 +1581,7 @@ public:
   ConvexHull3D_tetg_file_Op(const basicAC_F0 &  args, Expression zfilename ) 
     : filename(zfilename)
   {
-    cout << "Convex Hull with TetGen" << endl;
+    if(verbosity) cout << "Convex Hull with TetGen" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
   } 
   
@@ -1688,16 +1671,16 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
 }
 
 
-class Init { public:
-  Init();
+class Init1 { public:
+  Init1();
 };
 
-static Init init;  //  une variable globale qui serat construite  au chargement dynamique 
+static Init1 init1;  //  une variable globale qui serat construite  au chargement dynamique 
 
-Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   
-  if (verbosity)
-    cout << " load: tetgen  " << endl;
+  //if (verbosity)
+  if(verbosity) cout << " load: tetgen  " << endl;
   
   Global.Add("tetgconvexhull","(",new ConvexHull3D_tetg_file);
   Global.Add("tetgconvexhull","(",new ConvexHull3D_tetg);

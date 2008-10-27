@@ -334,6 +334,7 @@ public:
     else 
       return 0;
     }
+    
   };
   vector<Expression2> l; 
   static const int n_name_param =1;  
@@ -383,7 +384,7 @@ public:
       else if ( args[i].left()==atype<E_Array>() )
 	{
 	  const E_Array * a0  = dynamic_cast<const E_Array *>( args[i].LeftValue() );
-	  cout << "taille" << a0->size() << endl;
+	  //cout << "taille" << a0->size() << endl;
 	  //if (a0->size() != ddim || a0->size() != stsize) 
 	  //  CompileError("savesol in 2D: vector solution is 2 composant, vector solution is 3 composant");
 
@@ -770,8 +771,8 @@ public:
 
     // verification que la nature des solutions sont identiques pour les differents maillages.
 
-    cout << "number of solution = " << offset-1 << endl;
-    cout << "number of mesh     = " << nbTh << endl;
+    //cout << "number of solution = " << offset-1 << endl;
+    //cout << "number of mesh     = " << nbTh << endl;
   } 
   
   static ArrayOfaType  typeargs() { return  ArrayOfaType( atype<string *>(), atype<pmesh>(), true); }// all type
@@ -878,7 +879,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
     jt++;
   }
   assert( it==nt ); assert(iv==nv); assert(ibe=nbe);
-  cout << "vertex "<< nv << " triangle "<< nt << " edge " << nbe << endl;  
+  if(verbosity) cout << "Popen medit : vertex "<< nv << " triangle "<< nt << " edge " << nbe << endl;  
   Mesh * pTh = new Mesh(nv,nt,nbe,v,t,b);
   Mesh &Th = *pTh;
 
@@ -1316,7 +1317,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
       }
 
       if(boolsave){
-	cout << "writing solution in file"  << endl;
+	if(verbosity) cout << "writing solution in file"  << endl;
 	if(typsol==1){
 	  writetabsol( datasize, nboftmp, vxx, solsave);
 	  nboftmp=nboftmp+1;
@@ -1559,9 +1560,10 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
   long filebin (arg(4,stack,1));
   int smedit=max(1,nbsol);     
   char * commandline = meditcmd( filebin, smedit, *meditff, *ffname);
+  
   printf("version de medit %s\n",commandline);  
-  cout << "number of solution = " << offset-1 << endl;
-  cout << "number of mesh     = " << nbTh << endl;
+  if(verbosity) cout << "number of solution = " << offset-1 << endl;
+  if(verbosity) cout << "number of mesh     = " << nbTh << endl;
 
   // lecture des differents maillages
   int nv=0,nt=0,nbe=0; // sommet, triangles, arretes du maillage unifies
@@ -1627,7 +1629,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
     jt++;
   }
   assert( it==nt ); assert(iv==nv); assert(ibe=nbe);
-  cout << "Value of elements: vertex "<< nv << " Tet "<< nt << " triangle " << nbe << endl;  
+  if(verbosity) cout << "meditff :: Value of elements: vertex "<< nv << " Tet "<< nt << " triangle " << nbe << endl;  
   Mesh3 * pTh = new Mesh3(nv,nt,nbe,v,t,b);
   Mesh3 &Th = *pTh;
   //cout << "Mesh is created" << endl;
@@ -2091,7 +2093,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
 
 
       if(boolsave){
-	cout << "writing solution in file" << endl;
+	if(verbosity) cout << "writing solution in file" << endl;
 	if(typsol==1){
 	  writetabsol( datasize, nboftmp, vxx, solsave);
 	  nboftmp=nboftmp+1;

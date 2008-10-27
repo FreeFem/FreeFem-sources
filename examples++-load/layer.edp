@@ -1,4 +1,5 @@
-load "glumesh"
+//load "buildlayer"
+load "msh3"
 mesh Th=square(3,3);
 
 mesh3 Th3=buildlayers(Th,3);
