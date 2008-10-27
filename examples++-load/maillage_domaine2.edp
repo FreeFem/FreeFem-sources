@@ -1,8 +1,10 @@
 // file heatex.edp
 load "glumesh2D"
-load "glumesh3D"
-load "tetgen"
-load "buildlayer"
+//load "tetgen"
+load "msh3"
+//load "glumesh3D"
+//load "tetgen"
+//load "buildlayer"
 
 // Test 1
 
@@ -46,13 +48,13 @@ func ZZ = z;
 
 int[int] r1=[0,41],  r2=[98,98,99,99,1,56], r3=[4,12], r4=[4,45];
 
-mesh3 Th3=buildlayers(Th,3,zbound=[zmin,zmax], reftet=r1, reffacemid=r2, reffaceup = r3, reffacedown = r4 ); //,transfo=[XX,YY,ZZ]); 
+mesh3 Th3=buildlayers(Th,3,zbound=[zmin,zmax], reftet=r1, reffacemid=r2, reffaceup = r3, reffacelow = r4 ); //,transfo=[XX,YY,ZZ]); 
 
 cout << "fin build layers " << endl;
 
 int[int] r1i=[41,188],  r2i=[98,38, 99,32, 12,15, 45,37];
 cout << "debut change3D " << endl;
-mesh3 Th3bis=change3D(Th3,reftet=r1i,refface=r2i);
+mesh3 Th3bis=change(Th3,reftet=r1i,refface=r2i);
 cout << "fin change3D " << endl;
 
 savemesh(Th3,"2domaine_cylinder.mesh");

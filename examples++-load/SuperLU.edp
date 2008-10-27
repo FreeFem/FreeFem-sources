@@ -2,6 +2,7 @@ load "SuperLU"
 verbosity=2;
 for(int i=0;i<3;++i)
 {
+  cout << "%%%%%%%%%%% i= " << i << endl;	
   {
     matrix A = 
       [[ 0, 1, 0, 10],

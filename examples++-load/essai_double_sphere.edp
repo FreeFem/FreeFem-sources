@@ -1,8 +1,9 @@
 // file heatex.edp
 load "glumesh2D"
-load "glumesh3D"
+//load "glumesh3D"
+load "msh3"
 load "tetgen"
-load "buildlayer"
+//load "buildlayer"
 
 // Test 1
 

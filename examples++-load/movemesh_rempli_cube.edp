@@ -1,5 +1,6 @@
 // file movemesh_rempli.edp
-load "glumesh3D"
+//load "glumesh3D"
+load "msh3"
 load "tetgen"
 
 int C1=99; // could be anything
