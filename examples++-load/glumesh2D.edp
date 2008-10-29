@@ -3,16 +3,16 @@ mesh Th1=square(10,10);
 mesh Th2=square(20,10,[x+1,y]);
 verbosity=3;
 int[int] r1=[2,18],  r2=[4,0];
-savemesh(Th1,"meshTh1_av.mesh");
-Th1=change(Th1,refe=r1);
-savemesh(Th1,"meshTh1_ap.mesh");
-Th2=change(Th2,refe=r2);
-mesh Th=Th1+Th2;
+plot(Th1,wait=1);
+Th1=change(Th1,refe=r1); // Change the label of Edges of Th1 with label 2 into label 0
+plot(Th1,wait=1);
+Th2=change(Th2,refe=r2); // Change the label of Edges of Th2 with label 4 into label 0
+mesh Th=Th1+Th2;         //  "gluing together" of meshes Th1 and Th2
 cout << " nb ref = " << int1d(Th1,1,3,4)(1./lenEdge)+int1d(Th2,1,2,3)(1./lenEdge) 
      << " == " << int1d(Th,1,2,3,4)(1./lenEdge) <<" == " << ((10+20)+10)*2 << endl; 
 plot(Th,wait=1);
 fespace Vh(Th,P1);
-macro Grad(u) [dx(u),dy(u)]//
+macro Grad(u) [dx(u),dy(u)] // definition of a macro 
 Vh u,v;
 solve P(u,v)=int2d(Th)(Grad(u)'*Grad(v))-int2d(Th)(v)+on(1,3,u=0);
 plot(u,wait=1);
@@ -42,3 +42,4 @@ plot(Th,wait=1);
 cout << "cccc \n";
 savemesh(Th,"glumesh2D_final.mesh");
 }
+*/

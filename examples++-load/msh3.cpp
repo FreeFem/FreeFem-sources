@@ -2536,6 +2536,15 @@ Mesh3 * MoveMesh2_func( const double &precis_mesh, const Mesh & Th2, const doubl
 		//T_Th3->be(ibe).set(T_Th3->vertices,iv,K.lab);
 		(bb++)->set(v,iv,K.lab);
 	}  
+<<<<<<< msh3.cpp
+
+	Mesh3 *T_Th3 = new Mesh3(nv_t,0,nbe_t,v,t,b);
+ 	delete [ ] Numero_Som;
+	delete [ ] ind_nv_t;
+	delete [ ] ind_nbe_t;
+	delete [ ] label_nbe_t;
+       
+=======
 
 	Mesh3 *T_Th3 = new Mesh3(nv_t,0,nbe_t,v,t,b);
  	delete [ ] Numero_Som;
@@ -2544,6 +2553,7 @@ Mesh3 * MoveMesh2_func( const double &precis_mesh, const Mesh & Th2, const doubl
 	delete [ ] label_nbe_t;
 	
        
+>>>>>>> 1.2
 	return T_Th3;
 }
 

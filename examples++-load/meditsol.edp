@@ -8,6 +8,12 @@ border Gamma1(t=0,2*pi){x=cos(t)+3; y=sin(t); label=1;};
 mesh Th=buildmesh(Gamma(40));
 mesh Th1=buildmesh(Gamma1(40));
 
+<<<<<<< meditsol.edp
+fespace Vh(Th,P2);
+func f=sqrt(x*x+y*y);
+Vh u,v;
+macro Grad2(u) [dx(u),dy(u)]  // EOM
+=======
 fespace Vh(Th,P2);
 func f=x;
 
@@ -15,13 +21,20 @@ Vh u,v;
 macro Grad2(u) [dx(u),dy(u)]  // EOM
 verbosity = 5;
 problem Lap3d(u,v,init=false)=int2d(Th)(Grad2(v)' *Grad2(u)) - int2d(Th)(f*v) + on(Gamma,u=0);
+>>>>>>> 1.5
 
+<<<<<<< meditsol.edp
+mesh Ths=Th1+Th;
+problem Lap2d(u,v,solver=CG)=int2d(Th)(Grad2(v)' *Grad2(u)) - int2d(Th)(f*v) + on(Gamma,u=0);
+Lap2d;
+=======
 Lap3d;
 /*
+>>>>>>> 1.5
 mesh Ths=Th1+Th;
 savesol("f2.solb",Th,f,order=1);
 savemesh(Ths,"testsavemedit.meshb");
-medit("second",Th1,f3,Th,f1,order=1,mediff="medit-2.3-win.exeCC",save="testsavemedit.solb",bin=1);	
+medit("second",Th1,f3,Th,f1,order=1,meditff="medit-2.3-win.exeCC",save="testsavemedit.solb",bin=1);	
 //int bbVh=savesol("f1Vh.sol",Th,nbscalar=1,scalar=[f1vh],order=1);
 //int bbVh2=savesolVh("f1Vhok.sol",Th,nbscalar=1,scalar=[f1vh],order=1);
 //int medit=meditmeshsol("second",Th,solution=1,scalar=f,order=0);
