@@ -1,7 +1,11 @@
 // Regression tests
 // ----------------
 
+<<<<<<< regtests.edp
 // $Id$
+=======
+// $Id$
+>>>>>>> 1.12
 
 // Regression tests
 // ----------------
@@ -12,7 +16,11 @@
 // "ref.edp" contains all reference values and may be rebuilt with
 // "make Ref"
 
+<<<<<<< regtests.edp
 // $Id$
+=======
+// $Id$
+>>>>>>> 1.12
 
 // The values tested here may not have a physical or mathematical
 // meaning. Their main property is to gather numerical values from the

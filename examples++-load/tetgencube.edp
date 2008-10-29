@@ -1,5 +1,4 @@
-// file movemesh_rempli.edp
-//load "glumesh3D"
+// file tetgencube.edp
 load "msh3"
 load "tetgen"
 load "popen"
@@ -44,12 +43,16 @@ mesh3 Th33b = movemesh2D3Dsurf(Thsq3,transfo=[XX3min,YY3,ZZ3]);
 mesh3 Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
 savemesh(Th33,"Th33.mesh");
 
-
 // build a mesh of a axis parallel box with TetGen
 real[int] domaine = [1.5,pi,0.75,145,0.01];
 mesh3 Thfinal = tetg(Th33,switch="pqaAAQ",nbofregions=1,regionlist=domaine);    // Tetrahelize the interior of the cube with tetgen
+<<<<<<< tetgencube.edp
+=======
 /*
+>>>>>>> 1.4
 savemesh(Thfinal,"Thfinal.mesh");
+<<<<<<< tetgencube.edp
+=======
 int ttt=0;
 int pp;
 func distc= x*x+y*y+z*z;
@@ -74,6 +77,7 @@ func raffinage= 0.01*((pi+avol)/(y+avol))^4;
 
 mesh3 Thfinalrefine = tetgreconstruction(Thfinal,maxvol,switch="raAQ",nbofregions=1,regionlist=domainrefine,sizeofvolume=min(0.01,raffinage));    // Tetrahelize the interior of the cube with tetgen
 savemesh(Thfinalrefine,"Thfinalrefine.mesh");
+>>>>>>> 1.4
 
 // build a mesh of a half cylindrical shell of interior radius 1. and exterior radius 2 and heigh 1.5
 func mv2x = x*cos(y);
@@ -81,6 +85,7 @@ func mv2y = x*sin(y);
 func mv2z = z;
 mesh3 Thmv2 = movemesh3D(Thfinal, transfo=[mv2x,mv2y,mv2z]);
 savemesh(Thmv2,"halfcylindricalshell.mesh");
-*/
+
+
 
 

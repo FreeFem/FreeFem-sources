@@ -55,7 +55,7 @@ fespace Vh3(Th3,P13d);
 func ue =   2*x*x + 3*y*y + 4*z*z+ 5*x*y+6*x*z+1;
 func f= x ;
 func f2=-x;
-Vh3 uhe = ue; // bug ..
+//Vh3 uhe = ue; // bug ..
 cout << "avant savesol" << endl;
 //savesol("box2region1hole.sol",Th3,f,order=1);
 medit("first",Th3,f,Th32,f2,order=1,mediff="medit-2.3-win.exeCC",save="box2region1hole.sol");

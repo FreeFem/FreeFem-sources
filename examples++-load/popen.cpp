@@ -586,7 +586,7 @@ AnyType datasolMesh3_Op<v_fes>::operator()(Stack stack)  const
 //
 //*************************
 
-static char * meditcmd(long filebin, int nbsol,const string &meditff, const string & ffnn)
+static char * meditcmd(long filebin, int nbsol, int smedit, const string &meditff, const string & ffnn)
 {
   string meditcmm=meditff;
   meditcmm += ' ';
@@ -603,7 +603,7 @@ static char * meditcmd(long filebin, int nbsol,const string &meditff, const stri
     }
   
   char meditsol[5];
-  sprintf(meditsol," %i",nbsol);
+  sprintf(meditsol," %i",smedit);
   meditcmm += meditsol; 
    
   meditcmm += ' ';
@@ -786,7 +786,7 @@ public:
 
 basicAC_F0::name_and_type PopenMeditMesh_Op::name_param[]= {
   {  "order", &typeid(long)},
-  {  "mediff", &typeid(string*)},
+  {  "meditff", &typeid(string*)},
   {  "save",&typeid(string*)},
   {  "wait",&typeid(bool)},
   {  "bin",&typeid(long)}
@@ -817,7 +817,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
 
   long filebin (arg(4,stack,1));
   int smedit=max(1,nbsol);
-  char * commandline = meditcmd( filebin, smedit , *meditff, *ffname);
+  char * commandline = meditcmd( filebin, nbsol, smedit, *meditff, *ffname);
   printf("version de medit %s\n",commandline);
 
  
@@ -1533,7 +1533,7 @@ public:
 template<class v_fes>
 basicAC_F0::name_and_type PopenMeditMesh3_Op<v_fes>::name_param[]= {
   {  "order", &typeid(long)},
-  {  "mediff", &typeid(string*)},
+  {  "meditff", &typeid(string*)},
   {  "save",&typeid(string*)},
   {  "wait",&typeid(bool)},
   {  "bin",&typeid(long)}
@@ -1564,7 +1564,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
 
   long filebin (arg(4,stack,1));
   int smedit=max(1,nbsol);     
-  char * commandline = meditcmd( filebin, smedit, *meditff, *ffname);
+  char * commandline = meditcmd( filebin, nbsol, smedit, *meditff, *ffname);
   
   printf("version de medit %s\n",commandline);  
   if(verbosity) cout << "number of solution = " << offset-1 << endl;
@@ -1635,8 +1635,10 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
   }
   assert( it==nt ); assert(iv==nv); assert(ibe=nbe);
   if(verbosity) cout << "meditff :: Value of elements: vertex "<< nv << " Tet "<< nt << " triangle " << nbe << endl;  
-  Mesh3 * pTh = new Mesh3(nv,nt,nbe,v,t,b);
+
+  Mesh3 *pTh = new Mesh3(nv,nt,nbe,v,t,b);
   Mesh3 &Th = *pTh;
+
   //cout << "Mesh is created" << endl;
   // determination of the number of elements to represent the solution
   int datasize;
