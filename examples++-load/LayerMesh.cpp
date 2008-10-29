@@ -275,7 +275,8 @@ Mesh3 * build_layer (const Mesh & Th2, const int Nmax, const int *tab_Ni,
 		const map<int, int> &mapemil, const map<int, int> &mapezmax, const map<int, int> &mapezmin ){
 
   int MajSom, MajElem, MajBord2D;     
-  Mesh3 *Th3=new Mesh3;
+  Mesh3 *Th3 = new Mesh3;
+
   NbSom3D_NbElem3D_NbBord2D_mesh_product_mesh_tab( Nmax, tab_Ni, Th2, MajSom, MajElem, MajBord2D);   
   cout << "MajSom = " <<  MajSom  << "  "  << "MajElem = " <<  MajElem  << " " << "MajBord2D =" << MajBord2D << endl;
   

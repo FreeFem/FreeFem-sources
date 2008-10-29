@@ -20,7 +20,7 @@ func YY1 = y;
 // build the differents face of cube
 
 mesh3 Th31h = movemesh2D3Dsurf(Th1,transfo=[XX1,YY1,ZZ1max]);
-
+savemesh(Th31h,"essaiTh31h.mesh");
 mesh3 Th31b = movemesh2D3Dsurf(Th1,transfo=[XX1,YY1,ZZ1min]);
 
 mesh3 Th32h = movemesh2D3Dsurf(Th1,transfo=[XX1,ZZ1max,YY1]);  
@@ -30,10 +30,11 @@ mesh3 Th32b = movemesh2D3Dsurf(Th1,transfo=[XX1,ZZ1min,YY1]);
 mesh3 Th33h = movemesh2D3Dsurf(Th1,transfo=[ZZ1max,XX1,YY1]);  
 
 mesh3 Th33b = movemesh2D3Dsurf(Th1,transfo=[ZZ1min,XX1,YY1]); 
-
+/*
+verbosity=2;
 mesh3 Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
-
-mesh3 Thfinal = tetg(Th33,switch="pCQV");    // Tetrahelize the interior of the cube with tetgen
+real[int] domaine = [0.5,0.5,0.5,12,0.001];
+mesh3 Thfinal = tetg(Th33,switch="pAACQV",nbofregions=1,regionlist=domaine);    // Tetrahelize the interior of the cube with tetgen
 
 
 func XXm =2*x;
@@ -42,3 +43,4 @@ func ZZm =z*18+3;
 
 mesh3 Th2final = movemesh3D(Thfinal,transfo=[XXm,YYm,ZZm]);
 savemesh( Th2final,"remplissage_cube_move_final.mesh");
+*/

@@ -309,6 +309,8 @@ AnyType datasolMesh2_Op::operator()(Stack stack)  const
     }
   }
   GmfCloseMesh(outm);
+
+  delete [] OutSolTab;
   return longdefault;
 }
   
@@ -574,6 +576,7 @@ AnyType datasolMesh3_Op<v_fes>::operator()(Stack stack)  const
     }
   }
   GmfCloseMesh(outm);
+  delete [] OutSolTab;
   return longdefault;
 }
 
@@ -607,6 +610,7 @@ static char * meditcmd(long filebin, int nbsol,const string &meditff, const stri
   meditcmm += ffnn;
 	  
   char * ret= new char[meditcmm.size()+1];
+  //char ret[meditcmm.size()+1];
   strcpy( ret, meditcmm.c_str()); 
   return ret;
 }
@@ -880,9 +884,9 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
   }
   assert( it==nt ); assert(iv==nv); assert(ibe=nbe);
   if(verbosity) cout << "Popen medit : vertex "<< nv << " triangle "<< nt << " edge " << nbe << endl;  
+
   Mesh * pTh = new Mesh(nv,nt,nbe,v,t,b);
   Mesh &Th = *pTh;
-
 
   // determination of the number of elements to represent the solution
   int datasize;
@@ -1395,6 +1399,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
 	GmfSetLin(outm, GmfSolAtVertices, OutSolTab);
       }
     }
+    delete [] OutSolTab;
   }
   return valsortie;
 }
@@ -2143,6 +2148,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
 	GmfSetLin(outm, GmfSolAtVertices, OutSolTab);
       }
     }
+    delete [] OutSolTab;
   }
   return valsortie;
 }
