@@ -29,8 +29,8 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
   splitmesh3.cpp  splitmesh3.edp  splitmesh6.cpp  splitmesh6.edp \
   SuperLU_3.0-include-ff.tar.gz REAME_SuperLU \
   glumesh2D.cpp glumesh2D.edp \
-  glumesh3D.cpp glumesh3D.edp buildlayer.cpp tetgen.cpp\
-  LayerMesh.hpp TransfoMesh_v2.hpp LayerMesh.cpp  TransfoMesh_v2.cpp\
+  tetgen.cpp\
+  msh3.cpp msh3.hpp\
   ffrandom.cpp ffrandom.edp  \
   popen.cpp 
 
@@ -51,14 +51,16 @@ load_compile:include  $(LIST_COMPILE)
 
 .cpp.$(DYLIB_SUFFIX): 
 	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)"  $< 
-glumesh2D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh2D.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp glumesh2D.cpp
-glumesh3D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh3D.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp glumesh3D.cpp
-buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
-tetgen.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp LayerMesh.cpp $(TETGEN_LOADLINK)
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" -I../download/include -L../download/lib -ltet TransfoMesh_v2.cpp  LayerMesh.cpp tetgen.cpp
+glumesh2D.$(DYLIB_SUFFIX): glumesh2D.cpp 
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" glumesh2D.cpp
+#glumesh3D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh3D.cpp 
+#	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp glumesh3D.cpp
+#buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
+#	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
+msh3.$(DYLIB_SUFFIX): msh3.cpp 
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" msh3.cpp 
+tetgen.$(DYLIB_SUFFIX): msh3.cpp $(TETGEN_LOADLINK)
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" -I../download/include -L../download/lib -ltet msh3.cpp tetgen.cpp
 
 include: include.tar.gz
 	rm -rf include 
