@@ -103,6 +103,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   ffassert(hmin>Norme2(Pn-Px)/1e9);
   double hseuil =hmin/10.; 
 
+  
   // VERSION morice
   cout << " creation of : BuildGTree" << endl;   
   EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pn,Px,0);  
@@ -137,25 +138,11 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 	iv[3]=gtree->NearestVertex(K[3])-v;  //-v;
 	(tt++)->set(v,iv,K.lab);
       }
-      /*
-	for (int k=0;k<Th3.nbe;k++)
-	{
-	const Triangle3 & K(Th3.be(k));//bedges[k]);
-	int iv[3];
-	iv[0]=gtree->NearestVertex(K[0])-v; //-v;
-	iv[1]=gtree->NearestVertex(K[1])-v; //-v;
-	iv[2]=gtree->NearestVertex(K[2])-v; //-v;
-	  
-	if( iv[2]<nbv0 && iv[1]<nbv0 && iv[0] < nbv0 ) continue;  // Faux
-	(bb++)->set(v,iv,K.lab);
-	nbe++;
-	  
-	}   
-      */
-    }
-  
+     
+
+    }          
   cout << " creation of : BuildGTree for border elements" << endl;
-  Vertex3  *becog= new Vertex3[nbex];  
+  Vertex3  *becog= new Vertex3[nbex];
   EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog,Pn,Px,0);
   
   double hseuil_border = hseuil/3.;
@@ -201,6 +188,8 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
      }
     
   }
+  delete gtree;
+  delete gtree_be;
   /*
   // version hecht
   {  
@@ -222,6 +211,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
        
 	    //  if( abs(vi.x) <1e-6 || abs(vi.x-1) <1e-6 || abs(vi.x+1) <1e-6 ){
 	    //   cout << ii << *i << "avant test" << vi << endl;	   }
+
 	    
 	    if(!pvi)
 	      {
@@ -286,6 +276,8 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   
   
   Mesh3 *mpq= new Mesh3(nbv,nbt,nbe,v,t,b);  
+  
+  
   cout << "fin de la definition de mpq" << endl;
   
   if(nbt !=0){     
@@ -723,17 +715,17 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
     }
   }
   
-  Mesh3 *Th3= new Mesh3;
+  //Mesh3 *Th3 = new Mesh3;
   
   int vertex_out=1;
   
-  if( vertex_out == 1){
+  //if( vertex_out == 1){
     /* determinate the same vertex */ 
     int border_only = 0;
     int recollement_border=1, point_confondus_ok=0;
 
     // faire version de Transfo_Mesh2_tetgen pour ce cas précis.
-    Th3= MoveMesh2_func( precis_mesh, Th, txx, tyy, tzz, 
+    Mesh3 *Th3 = MoveMesh2_func( precis_mesh, Th, txx, tyy, tzz, 
 			 border_only, recollement_border, point_confondus_ok);
 	
     // Rajouter fonction flip a l interieure
@@ -782,10 +774,10 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
 	Th3->be(ii).set( Th3->vertices, iv, lab ) ;
       */
     }
-  }
-  
-  if( vertex_out == 0){
-	  
+    //}
+  /*
+    if( vertex_out == 0){
+    
     Tet       *t;
     Vertex3   *v = new Vertex3[nbv];
     Triangle3 *b = new Triangle3[nbe];
@@ -820,10 +812,11 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
       	(*bb++).set( v, iv, K.lab);
       }
       
-    Th3 = new Mesh3(nbv,0,nbt,v,t,b);  
-      
+    Th3 = new Mesh3(nbv,0,nbt,v,t,b);        
   }
-  
+  */
+
+
   return Th3;
 }
 

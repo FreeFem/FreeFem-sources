@@ -46,7 +46,7 @@ Mesh3 * Transfo_Mesh3(const double &precis_mesh,const Mesh3 & Th3, const double 
 	// cas besoin memoire important
 
 
-	Mesh3 *T_Th3=new Mesh3;	
+        Mesh3 *T_Th3=new Mesh3;	
 	int nv_t,nt_t,nbe_t;
 
 	int* Numero_Som;
@@ -363,7 +363,7 @@ Mesh3 * Transfo_Mesh3_surf(const double &precis_mesh, const Mesh3 & Th3, const d
 	int &recollement_border, int &point_confondus_ok){
 	// cas besoin memoire important
 	
-	Mesh3 *T_Th3=new Mesh3;
+  Mesh3 *T_Th3=new Mesh3;
 	int nv_t,nbe_t;
 	int nt_t=0;
 	
@@ -663,8 +663,8 @@ void Transfo_Mesh2_map_face(const Mesh &Th2, map<int, int> &maptri ){
 Mesh3 * MoveMesh2_func( const double &precis_mesh, const Mesh & Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
 	int &border_only, int &recollement_border, int &point_confondus_ok){
 	
-	Mesh3 *T_Th3= new Mesh3;
-	int nv_t,nt_t,nbe_t;
+        Mesh3 *T_Th3; //= new Mesh3;
+        int nv_t,nt_t,nbe_t;
 	int* Numero_Som;
 	
 	int* ind_nv_t;
@@ -673,12 +673,13 @@ Mesh3 * MoveMesh2_func( const double &precis_mesh, const Mesh & Th2, const doubl
 	int* label_nbe_t;
 	
 	//int i_som;
+	//T_Th3 = new Mesh3;
 	Numero_Som = new int[Th2.nv];
 	ind_nv_t   = new int[Th2.nv];
 	ind_nbe_t  = new int[Th2.nt];   
 	label_nbe_t = new int[Th2.nt];
 	
-    cout << "2D: Mesh::Vertex  triangle2  border " << Th2.nv << " "<<Th2.nt<< " " << Th2.neb<< endl;
+	cout << "2D: Mesh::Vertex  triangle2  border " << Th2.nv << " "<<Th2.nt<< " " << Th2.neb<< endl;
 	
 	for(int ii=0; ii<Th2.nv; ii++){ 
 		Numero_Som[ii]=ii;

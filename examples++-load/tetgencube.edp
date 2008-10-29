@@ -48,7 +48,7 @@ savemesh(Th33,"Th33.mesh");
 // build a mesh of a axis parallel box with TetGen
 real[int] domaine = [1.5,pi,0.75,145,0.01];
 mesh3 Thfinal = tetg(Th33,switch="pqaAAQ",nbofregions=1,regionlist=domaine);    // Tetrahelize the interior of the cube with tetgen
-
+/*
 savemesh(Thfinal,"Thfinal.mesh");
 int ttt=0;
 int pp;
@@ -57,12 +57,12 @@ func v1= x;
 func v2= y;
 func v3= z;
 
-pp=savesol("Thfinal.sol",Thfinal,nbscalar=1,scalar=[v1],order=1);
-pp=meditmeshsol("solsca",Thfinal,solution=1,scalar=distc);
-pp=meditmeshsol("solvec",Thfinal,solution=1,vector=[v1,v2,v3]);
+//pp=savesol("Thfinal.sol",Thfinal,nbscalar=1,scalar=[v1],order=1);
+//pp=meditmeshsol("solsca",Thfinal,solution=1,scalar=distc);
+//p=meditmeshsol("solvec",Thfinal,solution=1,vector=[v1,v2,v3]);
 
 
-/*
+
 cout << "%%%%%%%%%%%%%%"<< endl;
 cout << "rafinement " << endl;
 cout << "%%%%%%%%%%%%%%"<< endl;

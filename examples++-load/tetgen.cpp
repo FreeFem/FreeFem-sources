@@ -245,6 +245,8 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   //Th3->decrement();    
+
+  delete [] switch_tetgen;
 		
   *mp=mps;
   return Th3;
@@ -679,9 +681,10 @@ Mesh3 * RemplissageSurf3D_tetgen_new(char *switch_tetgen,const Mesh3 & Th3, cons
 Mesh3 * Transfo_Mesh2_tetgen(const double &precis_mesh, char *switch_tetgen,const Mesh & Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
 	int &border_only, int &recollement_border, int &point_confondus_ok, 
 	const int &label_tet, const map<int, int> &maptri ){
-	Mesh3 *T_Th3= new Mesh3;
-	int nv_t,nt_t,nbe_t;
-	int* Numero_Som;
+  
+        Mesh3 *T_Th3= new Mesh3;
+        int nv_t,nt_t,nbe_t;
+        int* Numero_Som;
 	
 	int* ind_nv_t;
 	int* ind_nt_t;
@@ -784,7 +787,12 @@ Mesh3 * Transfo_Mesh2_tetgen(const double &precis_mesh, char *switch_tetgen,cons
 	mesh3_tetgenio_out( out, label_tet, *T_Th3);
 	
 	cout <<" Finish Mesh3 :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
-	
+
+	delete [] Numero_Som;
+	delete [] ind_nv_t;
+	delete [] ind_nbe_t;
+	delete [] label_nbe_t;
+
 	return T_Th3;
 }
 
@@ -921,6 +929,11 @@ Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,
   mesh3_tetgenio_out( out, *T_Th3);
   
   cout <<" Finish Mesh3 :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
+
+  delete [] Numero_Som;
+  delete [] ind_nv_t;
+  delete [] ind_nbe_t;
+  delete [] label_nbe_t;
 	
   return T_Th3;
 }
@@ -1259,6 +1272,7 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   //Th3->decrement();    
   
   *mp=mps;
+  delete [] switch_tetgen; 
   return Th3;
 }
 
@@ -1460,7 +1474,8 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
   Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   //Th3->decrement();    
-    
+
+  delete [] switch_tetgen;
   *mp=mps;
   return Th3;
 }
@@ -1556,6 +1571,7 @@ AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
   Th3->BuildGTree();
   //Th3->decrement();    
   
+  delete [] switch_tetgen;
   return Th3;
 }
 
@@ -1666,7 +1682,8 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
   Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   Th3->decrement();    
-  
+
+  delete [] switch_tetgen;
   return Th3;
 }
 
