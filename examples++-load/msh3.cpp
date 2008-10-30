@@ -2194,8 +2194,7 @@ void SamePointElement( const double &precis_mesh, const double *tab_XX, const do
     for( int i_border=0; i_border< np; i_border++){
       ind_nbe_t[ i_border ] = ind_nbe_t_tmp[ i_border ]; 
     }
-    nbe_t = np;
-
+   
     delete [] ind_np; 
     delete [] label_be;
     for(int i=0; i<nbe_t; i++) delete [ ] Cdg_be[i];
@@ -2203,6 +2202,7 @@ void SamePointElement( const double &precis_mesh, const double *tab_XX, const do
 
     delete [] ind_nbe_t_tmp;
 			
+    nbe_t = np;
     if(verbosity > 1) cout << "fin recollement : nbe_t= "<< nbe_t << endl; 
 			
     // Affectation de la nouvelle valeur du label
@@ -2387,10 +2387,12 @@ void SamePointElement_surf( const double &precis_mesh, const double *tab_XX, con
 			
     int np,dim=3;
     int *ind_np = new int [nbe_t];
-    double **Cdg_be=new double *[nbe_t];
     int *label_be = new int [nbe_t];
+
+    double **Cdg_be=new double *[nbe_t];
     for(int i=0; i<nbe_t; i++) Cdg_be[i] = new double[dim];
-			
+  
+		
     for( int i_border=0; i_border< nbe_t; i_border++){
 				
       int & ii=ind_nbe_t[i_border];
@@ -2426,17 +2428,15 @@ void SamePointElement_surf( const double &precis_mesh, const double *tab_XX, con
     for( int i_border=0; i_border< np; i_border++){
       ind_nbe_t[ i_border ] = ind_nbe_t_tmp[ i_border ]; 
     }
-    nbe_t = np;
+  
 
     delete [] ind_np; 
     delete [] label_be;
-    for(int i=0; i<nbe_t; i++) delete [ ] Cdg_be[i];
-    delete [] Cdg_be;
-
     delete [] ind_nbe_t_tmp;
-			
-    //delete [] ind_nbe_t_tmp;
-    //delete [] ind_np;
+    for(int i=0; i<nbe_t; i++) delete [] Cdg_be[i];
+    delete [] Cdg_be;
+	
+    nbe_t = np;
     if(verbosity > 1) cout << "fin recollement : nbe_t= "<< nbe_t << endl; 
 			
     // Affectation de la nouvelle valeur du label
@@ -2643,7 +2643,8 @@ void SamePointElement_Mesh2( const double &precis_mesh, const double *tab_XX, co
 			     ind_np, label_nbe_t,np); // new
     if(verbosity > 1) cout << "points commun finis " <<endl;
     assert( np <= nbe_t );
-		
+
+    	
     //int *ind_nbe_t_tmp= new int [np];
     int ind_nbe_t_tmp[np];
 
@@ -2656,12 +2657,15 @@ void SamePointElement_Mesh2( const double &precis_mesh, const double *tab_XX, co
       ind_nbe_t[ i_border ] = ind_nbe_t_tmp[ i_border ]; 
     }	
 		
-    nbe_t = np;
-    if(verbosity > 1) cout << "fin recollement : nbe_t= "<< nbe_t << endl; 
+   
     delete [ ] ind_np; //= new int [nbe_t];
     delete [ ] label_be;// = new int [nbe_t ];
     for(int i=0; i<nbe_t; i++) delete [ ] Cdg_be[i];
     delete [ ] Cdg_be; //=new double *[nbe_t];
+    
+    nbe_t = np;
+    if(verbosity > 1) cout << "fin recollement : nbe_t= "<< nbe_t << endl; 
+
   }
 }
 
