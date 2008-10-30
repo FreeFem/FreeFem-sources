@@ -1,5 +1,5 @@
 // file tetgencube.edp
-load "msh3"
+//load "msh3"
 load "tetgen"
 load "popen"
 
@@ -46,38 +46,8 @@ savemesh(Th33,"Th33.mesh");
 // build a mesh of a axis parallel box with TetGen
 real[int] domaine = [1.5,pi,0.75,145,0.01];
 mesh3 Thfinal = tetg(Th33,switch="pqaAAQ",nbofregions=1,regionlist=domaine);    // Tetrahelize the interior of the cube with tetgen
-<<<<<<< tetgencube.edp
-=======
-/*
->>>>>>> 1.4
 savemesh(Thfinal,"Thfinal.mesh");
-<<<<<<< tetgencube.edp
-=======
-int ttt=0;
-int pp;
-func distc= x*x+y*y+z*z;
-func v1= x;
-func v2= y;
-func v3= z;
 
-//pp=savesol("Thfinal.sol",Thfinal,nbscalar=1,scalar=[v1],order=1);
-//pp=meditmeshsol("solsca",Thfinal,solution=1,scalar=distc);
-//p=meditmeshsol("solvec",Thfinal,solution=1,vector=[v1,v2,v3]);
-
-
-
-cout << "%%%%%%%%%%%%%%"<< endl;
-cout << "rafinement " << endl;
-cout << "%%%%%%%%%%%%%%"<< endl;
-// build a mesh of a axis parallel box with TetGen
-real[int] domainrefine =[1.75,pi,1.2,140,0.001];
-real avol = 0.000000001;
-real maxvol = 0.01;
-func raffinage= 0.01*((pi+avol)/(y+avol))^4;
-
-mesh3 Thfinalrefine = tetgreconstruction(Thfinal,maxvol,switch="raAQ",nbofregions=1,regionlist=domainrefine,sizeofvolume=min(0.01,raffinage));    // Tetrahelize the interior of the cube with tetgen
-savemesh(Thfinalrefine,"Thfinalrefine.mesh");
->>>>>>> 1.4
 
 // build a mesh of a half cylindrical shell of interior radius 1. and exterior radius 2 and heigh 1.5
 func mv2x = x*cos(y);
