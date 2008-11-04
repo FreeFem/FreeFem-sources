@@ -404,7 +404,7 @@ public:
   
   void set(int mv,int mt,int mbe) 
   {
-    assert(nt==0 && nv==0 && nbe ==0); 
+    assert(nt==0 && nv==0 && nbe ==0);
     nt=mt;
     nv=mv;
     nbe=mbe;
@@ -564,14 +564,16 @@ public:
   R bordermesure(){ return mesb;}
   virtual ~GenericMesh() { 
     cout << "~GenericMesh\n";
+   
     delete [] ElementConteningVertex;
     delete [] TheAdjacencesLink;
     delete [] BoundaryElementHeadLink;
     delete [] borderelements;
-    delete [] elements;
+    if(nt>0) delete [] elements;
     delete [] vertices;
     delete [] bnormalv;
     if(gtree) delete gtree;
+    
   }
 
     Serialize serialize() const;
