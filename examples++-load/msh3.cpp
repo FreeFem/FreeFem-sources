@@ -1112,19 +1112,12 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   
   // probleme memoire
   Vertex3  *v= new Vertex3[nbvx];
-  Tet      *t= new Tet[nbt];
+  Tet      *t;
+  if(nbt!=0) t= new Tet[nbt];
   Tet      *tt=t;
   Triangle3 *b= new Triangle3[nbex];
   Triangle3 *bb= b;
   
-  /*
-    Vertex3  v[nbvx];
-    Tet      t[nbt];
-    Tet      *tt=t;
-    Triangle3 b[nbex];
-    Triangle3 *bb= b;
-  */
-
   ffassert(hmin>Norme2(Pn-Px)/1e9);
   double hseuil =hmin/10.; 
 
@@ -1307,11 +1300,13 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
       cout << "     Nb of glu3D  Boundary faces " << nbex-nbe << endl;
     }
 
+  if(nbt==0){
+    Mesh3 *mpq= new Mesh3(nbv,nbe,v,b);  
+    return mpq;
+  }
+  else{
+    Mesh3 *mpq= new Mesh3(nbv,nbt,nbe,v,t,b);  
   
-  Mesh3 *mpq= new Mesh3(nbv,nbt,nbe,v,t,b);  
-  cout << "fin de la definition de mpq" << endl;
-  
-  if(nbt !=0){     
     mpq->BuildBound();
     if(verbosity > 1) cout << "fin de BuildBound" << endl;
     mpq->BuildAdj();
@@ -1322,9 +1317,9 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
     if(verbosity > 1) cout << "fin de ConteningVertex()" << endl;
     mpq->BuildGTree();
     if(verbosity > 1) cout << "fin de BuildGTree()" << endl;
-  }
-  return mpq;
   
+    return mpq;
+  }
 }
 
 
@@ -1804,12 +1799,13 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
 	Th3->be(ii).set( Th3->vertices, iv, lab ) ;
       */
     }
+    Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
   }
   
   if( vertex_out == 0){
 	  
-    Tet       *t;
+    Tet       *t = new Tet[1];
     Vertex3   *v = new Vertex3[nbv];
     Triangle3 *b = new Triangle3[nbe];
     // generation des nouveaux sommets 
@@ -1843,12 +1839,10 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
       	(*bb++).set( v, iv, K.lab);
       }
       
-    Mesh3 *Th3 = new Mesh3(nbv,0,nbt,v,t,b); 
+    Mesh3 *Th3 = new Mesh3(nbv,0,nbt,v,t,b);
+    Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
-      
   }
-  
-  
 }
 
 
@@ -1873,7 +1867,7 @@ Mesh3 * Transfo_Mesh3(const double &precis_mesh,const Mesh3 & Th3, const double 
 //Mesh3 *T_Th3=new Mesh3;	
  int nv_t,nt_t,nbe_t;
    
-   int* Numero_Som;
+ int* Numero_Som;
      
   int* ind_nv_t;
   int* ind_nt_t;
@@ -2111,7 +2105,6 @@ void SamePointElement( const double &precis_mesh, const double *tab_XX, const do
       ind_nt_t[ i_elem ] = ind_nt_t_tmp[ i_elem ]; 
     }
 			
-    nt_t = np;
     
     delete [] ind_np; 
     delete [] label_t;
@@ -2120,6 +2113,7 @@ void SamePointElement( const double &precis_mesh, const double *tab_XX, const do
 
     delete [] ind_nt_t_tmp;
 		
+    nt_t = np;
     if(verbosity > 1) cout << "fin recollement : nt_t= "<< nt_t << endl; 
   }
 		
@@ -2538,7 +2532,9 @@ Mesh3 * MoveMesh2_func( const double &precis_mesh, const Mesh & Th2, const doubl
 	}  
 
 
-	Mesh3 *T_Th3 = new Mesh3(nv_t,0,nbe_t,v,t,b);
+	//Mesh3 *T_Th3 = new Mesh3(nv_t,0,nbe_t,v,t,b);
+	Mesh3 *T_Th3 = new Mesh3(nv_t,nbe_t,v,b);
+
  	delete [ ] Numero_Som;
 	delete [ ] ind_nv_t;
 	delete [ ] ind_nbe_t;
@@ -3565,8 +3561,8 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
       Th3->Buildbnormalv();  
       Th3->BuildjElementConteningVertex();
       Th3->BuildGTree();
-      Th3->decrement();  
-      
+      //Th3->decrement();  
+      Add2StackOfPtr2FreeRC(stack,Th3);
       *mp=mps;
       return Th3;
     }
@@ -3604,10 +3600,12 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
       T_Th3->Buildbnormalv();  
       T_Th3->BuildjElementConteningVertex();
       T_Th3->BuildGTree();
-      T_Th3->decrement();  
-      
+      //T_Th3->decrement();  
+      Add2StackOfPtr2FreeRC(stack,T_Th3);
+
       *mp=mps;
       return T_Th3;
+
     }
 }
 
