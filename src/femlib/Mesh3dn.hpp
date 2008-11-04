@@ -150,6 +150,7 @@ public:
   Mesh3(){}
   Mesh3(const string); 
   Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb); 
+  Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb);  // surface mesh 
   int Save(const string & filename);
   //int Popen(const FILE *popenstream);
 private:

@@ -378,9 +378,8 @@ namespace Fem2D {
       mesb += this->be(i).mesure();  
     
     
-    //if(nnt !=0){
-		      
-    cout << "action  sur le maillage" << endl;
+    //if(nnt !=0){		      
+    //cout << "action  sur le maillage" << endl;
     //BuildBound();
     //BuildAdj();
     //Buildbnormalv();  
@@ -394,6 +393,25 @@ namespace Fem2D {
     
   }
   
+  Mesh3::Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb)
+  {
+  
+    nv = nnv;
+    nbe =nnbe;
+    
+    vertices = vv;
+    borderelements = bb;
+    
+    mes=0.;
+    mesb=0.;
+    
+    for (int i=0;i<nbe;i++)  
+      mesb += this->be(i).mesure();  
+    
+    if(verbosity>1)
+      cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
+  }
+
   int  signe_permutation(int i0,int i1,int i2,int i3)
   {
     int p=1;
