@@ -46,6 +46,13 @@ void mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, Mesh3 & Th3)
 
 void mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, const int & label_face, Mesh3 & Th3);
 
+Mesh3 * mesh3_tetgenio_out(const tetgenio &out);
+
+Mesh3 *mesh3_tetgenio_out(const tetgenio &out, const int & label_tet);
+
+Mesh3 * mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, const int & label_face);
+
+
 Mesh3 * Convexhull_3Dpoints( char* switch_tetgen, const int &nv_t, const double *Xcoord, const double *Ycoord, const double *Zcoord, const int &label_tet);
 
 Mesh3 * RemplissageSurf3D_tetgen( char* switch_tetgen, const Mesh3 & Th3, const int & label_tet);
@@ -245,6 +252,7 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   //Th3->decrement();    
+  Add2StackOfPtr2FreeRC(stack,Th3);
 
   delete [] switch_tetgen;
 		
@@ -442,13 +450,231 @@ void mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, const int & 
   }
 
 }
+// verison Mesh3 *
+
+Mesh3 * mesh3_tetgenio_out(const tetgenio &out)
+{ 
+  int i;
+
+// All indices start from 1.
+  if(out.firstnumber != 1){
+    cout << " probleme ???" << endl;
+    exit(1);
+  }   
+  
+  if(out.numberoffacets !=0){
+    cout << "tetgen: faces non triangulaire" << endl;
+    exit(1);
+  }
+  
+  if(out.numberofcorners !=4){
+    cout << "tetgen: element subparametric of order 2" <<endl;
+    exit(1);
+  }
+
+  cout << "Th3 :: Vertex Element Border :: " << out.numberofpoints << " " <<out.numberoftetrahedra  << " " << out.numberoftrifaces << endl;
+  //Th3.set(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces);
+
+  // new parameter
+  if( out.numberoftetrahedronattributes !=  1){
+    cout << "out.numberoftetrahedronattributes" << out.numberoftetrahedronattributes << endl;
+  }
+   
+  Vertex3 *v = new Vertex3[out.numberofpoints];
+  Tet *t  = new Tet[out.numberoftetrahedra];
+  Tet *tt = t;
+  Triangle3 *b  = new Triangle3[out.numberoftrifaces];
+  Triangle3 *bb = b;
+
+  i=0;
+  for(int nnv=0; nnv <out.numberofpoints ; nnv++){
+    v[nnv].x=out.pointlist[i];
+    v[nnv].y=out.pointlist[i+1];
+    v[nnv].z=out.pointlist[i+2];       
+    v[nnv].lab=out.pointmarkerlist[nnv];
+    i=i+3;    
+  }
+    
+  i=0;
+  for(int nnt=0; nnt < out.numberoftetrahedra; nnt++){
+    int iv[4],lab;
+    iv[0] = out.tetrahedronlist[i]-1;
+    iv[1] = out.tetrahedronlist[i+1]-1;
+    iv[2] = out.tetrahedronlist[i+2]-1;
+    iv[3] = out.tetrahedronlist[i+3]-1;
+    //lab   = label_tet;
+    for(int jj=0; jj<4; jj++){
+      assert( iv[jj] >=0 && iv[jj] < out.numberofpoints );
+    }
+    //cout << "nnt= " <<  nnt << " " << lab  << " " << out.tetrahedronattributelist[nnt] << endl;
+    lab =  out.tetrahedronattributelist[nnt];
+    //cout << "nnt= " <<  lab  << " " << out.tetrahedronattributelist[nnt] << endl;
+    //Th3.elements[nnt].set( Th3.vertices, iv, lab);
+    (*tt++).set( v, iv, lab);   
+    i=i+4;
+  }
+ 
+  for(int ibe=0; ibe < out.numberoftrifaces; ibe++){
+    int iv[3];
+    iv[0] = out.trifacelist[3*ibe]-1;
+    iv[1] = out.trifacelist[3*ibe+1]-1;
+    iv[2] = out.trifacelist[3*ibe+2]-1; 
+    for(int jj=0; jj<3; jj++){
+      if(iv[jj]>= out.numberofpoints || iv[jj]< 0 ) cout << "iv[jj]=" << iv[jj] << " triangle" << ibe << endl;
+      assert( iv[jj] >=0 && iv[jj] < out.numberofpoints );
+    }
+    //Th3.be(ibe).set( Th3.vertices, iv, out.trifacemarkerlist[ibe]);
+    (*bb++).set( v, iv, out.trifacemarkerlist[ibe]);   
+  }
+
+  Mesh3 *T_TH3 = new Mesh3(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces, v, t, b);
+  /*
+  if( out.numberoftetrahedronattributes != 1 ){
+    cout << "out.numberoftetrahedronattributes" << out.numberoftetrahedronattributes  << endl;
+    exit(1);
+   }
+  */
+  return T_TH3;
+}
+
+
+Mesh3* mesh3_tetgenio_out(const tetgenio &out, const int & label_tet)
+{ 
+  int i;
+
+// All indices start from 1.
+  if(out.firstnumber != 1){
+    cout << " probleme ???" << endl;
+    exit(1);
+  }   
+  
+  if(out.numberoffacets !=0){
+    cout << "tetgen: faces non triangulaire" << endl;
+    exit(1);
+  }
+  
+  if(out.numberofcorners !=4){
+    cout << "tetgen: element subparametric of order 2" <<endl;
+    exit(1);
+  }
+  
+  cout << "Th3 :: Vertex Element Border :: " << out.numberofpoints << " " <<out.numberoftetrahedra  << " " << out.numberoftrifaces << endl;
+  //Th3.set(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces);
+   
+  Vertex3 *v = new Vertex3[out.numberofpoints];
+  Tet *t  = new Tet[out.numberoftetrahedra];
+  Tet *tt = t;
+  Triangle3 *b  = new Triangle3[out.numberoftrifaces];
+  Triangle3 *bb = b;
+    
+   
+  i=0;
+  for(int nnv=0; nnv < out.numberofpoints ; nnv++){
+    v[nnv].x=out.pointlist[i];
+    v[nnv].y=out.pointlist[i+1];
+    v[nnv].z=out.pointlist[i+2];       
+    v[nnv].lab=out.pointmarkerlist[nnv];
+    i=i+3;    
+  }
+    
+  i=0;
+  for(int nnt=0; nnt < out.numberoftetrahedra; nnt++){
+    int iv[4],lab;
+    iv[0] = out.tetrahedronlist[i]-1;
+    iv[1] = out.tetrahedronlist[i+1]-1;
+    iv[2] = out.tetrahedronlist[i+2]-1;
+    iv[3] = out.tetrahedronlist[i+3]-1;
+    lab   = label_tet;
+    //lab = out.tetrahedronmarkerlist[nnt];
+    //Th3.elements[nnt].set( Th3.vertices, iv, lab);
+    (*tt++).set( v, iv, lab);   
+    i=i+4;
+  }
+ 
+  for(int ibe=0; ibe < out.numberoftrifaces ; ibe++){
+    int iv[3];
+    iv[0] = out.trifacelist[3*ibe]-1;
+    iv[1] = out.trifacelist[3*ibe+1]-1;
+    iv[2] = out.trifacelist[3*ibe+2]-1; 
+    //Th3.be(ibe).set( Th3.vertices, iv, out.trifacemarkerlist[ibe]);
+    (*bb++).set( v, iv, out.trifacemarkerlist[ibe]);  
+  }
+  Mesh3 *T_TH3 = new Mesh3(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces, v, t, b);
+  return T_TH3;
+}
+
+Mesh3* mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, const int & label_face)
+{ 
+  int i;
+
+// All indices start from 1.
+  if(out.firstnumber != 1){
+    cout << " probleme ???" << endl;
+    exit(1);
+  }   
+  
+  if(out.numberoffacets !=0){
+    cout << "tetgen: faces non triangulaire" << endl;
+    exit(1);
+  }
+  
+  if(out.numberofcorners !=4){
+    cout << "tetgen: element subparametric of order 2" <<endl;
+    exit(1);
+  }
+  
+  cout << "Th3 :: Vertex Element Border :: " << out.numberofpoints << " " <<out.numberoftetrahedra  << " " << out.numberoftrifaces << endl;
+  //Th3.set(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces);
+  Vertex3 *v = new Vertex3[out.numberofpoints];
+  Tet *t  = new Tet[out.numberoftetrahedra];
+  Tet *tt = t;
+  Triangle3 *b  = new Triangle3[out.numberoftrifaces];
+  Triangle3 *bb = b;
+
+  i=0;
+  for(int nnv=0; nnv < out.numberofpoints; nnv++){
+    v[nnv].x=out.pointlist[i];
+    v[nnv].y=out.pointlist[i+1];
+    v[nnv].z=out.pointlist[i+2];       
+    v[nnv].lab=out.pointmarkerlist[nnv];
+    i=i+3;    
+  }
+    
+  i=0;
+  for(int nnt=0; nnt < out.numberoftetrahedra; nnt++){
+    int iv[4],lab;
+    iv[0] = out.tetrahedronlist[i]-1;
+    iv[1] = out.tetrahedronlist[i+1]-1;
+    iv[2] = out.tetrahedronlist[i+2]-1;
+    iv[3] = out.tetrahedronlist[i+3]-1;
+    lab   = label_tet;
+    //lab = out.tetrahedronmarkerlist[nnt];
+    //Th3.elements[nnt].set( Th3.vertices, iv, lab);
+    (*tt++).set( v, iv, lab); 
+    i=i+4;
+  }
+
+  if(verbosity) cout << &out.trifacemarkerlist << endl;
+  
+  for(int ibe=0; ibe < out.numberoftrifaces ; ibe++){
+    int iv[3];
+    iv[0] = out.trifacelist[3*ibe]-1;
+    iv[1] = out.trifacelist[3*ibe+1]-1;
+    iv[2] = out.trifacelist[3*ibe+2]-1; 
+    //Th3.be(ibe).set( Th3.vertices, iv, label_face);
+    (*bb++).set( v, iv, label_face);  
+  }
+
+  Mesh3 *T_TH3 = new Mesh3(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces, v, t, b);
+  return T_TH3;
+}
 
 
 
 Mesh3 * Convexhull_3Dpoints(char *switch_tetgen, const int &nv_t, const double *Xcoord, const double *Ycoord, 
 const double *Zcoord, const int &label_tet, const int &label_face){
 	
-  Mesh3 *T_Th3= new Mesh3;
+  //Mesh3 *T_Th3= new Mesh3;
 		
   tetgenio in,out;
   //tetgenio::facet *f;
@@ -480,8 +706,8 @@ const double *Zcoord, const int &label_tet, const int &label_face){
   tetrahedralize(switch_tetgen, &in, &out);
 	 
   cout << "tetgen: finish tetrahedralize( , &in, &out);" << endl;
-  mesh3_tetgenio_out( out, label_tet, label_face,*T_Th3);
-	
+  //mesh3_tetgenio_out( out, label_tet, label_face,*T_Th3);
+  Mesh3* T_Th3=mesh3_tetgenio_out( out, label_tet, label_face);
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
 	
  
@@ -491,7 +717,7 @@ const double *Zcoord, const int &label_tet, const int &label_face){
 
 Mesh3 * RemplissageSurf3D_tetgen(char *switch_tetgen,const Mesh3 & Th3, const int & label_tet){
 	
-  Mesh3 *T_Th3= new Mesh3;
+  //Mesh3 *T_Th3= new Mesh3;
 	
   assert(Th3.nt == 0 );
   int nv_t = Th3.nv;
@@ -561,8 +787,8 @@ Mesh3 * RemplissageSurf3D_tetgen(char *switch_tetgen,const Mesh3 & Th3, const in
   tetrahedralize(switch_tetgen, &in, &out);
 	 
   cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
-  mesh3_tetgenio_out( out, label_tet, *T_Th3);
-	
+  //mesh3_tetgenio_out( out, label_tet, *T_Th3);
+  Mesh3 *T_Th3 = mesh3_tetgenio_out( out, label_tet);
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
 	
   return T_Th3;
@@ -573,7 +799,7 @@ Mesh3 * RemplissageSurf3D_tetgen_new(char *switch_tetgen,const Mesh3 & Th3, cons
 				     const int & nbregion, const double *tabregion, 
 				     const int &nbfacecl, const double *tabfacecl){
 	
-  Mesh3 *T_Th3= new Mesh3;
+  //Mesh3 *T_Th3= new Mesh3;
 	
   assert(Th3.nt == 0 );
   int nv_t = Th3.nv;
@@ -668,8 +894,8 @@ Mesh3 * RemplissageSurf3D_tetgen_new(char *switch_tetgen,const Mesh3 & Th3, cons
   tetrahedralize(switch_tetgen, &in, &out);
 	 
   cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
-  mesh3_tetgenio_out( out, *T_Th3);
-	
+  //mesh3_tetgenio_out( out, *T_Th3);
+  Mesh3* T_Th3=mesh3_tetgenio_out( out);
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
 	
   //in.deinitialize();
@@ -682,7 +908,7 @@ Mesh3 * Transfo_Mesh2_tetgen(const double &precis_mesh, char *switch_tetgen,cons
 	int &border_only, int &recollement_border, int &point_confondus_ok, 
 	const int &label_tet, const map<int, int> &maptri ){
   
-        Mesh3 *T_Th3= new Mesh3;
+  //Mesh3 *T_Th3= new Mesh3;
         int nv_t,nt_t,nbe_t;
         int* Numero_Som;
 	
@@ -784,8 +1010,8 @@ Mesh3 * Transfo_Mesh2_tetgen(const double &precis_mesh, char *switch_tetgen,cons
 	tetrahedralize(switch_tetgen, &in, &out);
 	 
 	cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
-	mesh3_tetgenio_out( out, label_tet, *T_Th3);
-	
+	//mesh3_tetgenio_out( out, label_tet, *T_Th3);
+	Mesh3 *T_Th3=mesh3_tetgenio_out( out, label_tet);
 	cout <<" Finish Mesh3 :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
 
 	delete [] Numero_Som;
@@ -801,7 +1027,7 @@ Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,
 				 const int &label_tet, const map<int, int> &maptri, 
 				 const int &nbhole, const double *tabhole, const int & nbregion, const double *tabregion, 
 				 const int &nbfacecl, const double *tabfacecl){
-  Mesh3 *T_Th3= new Mesh3;
+  //Mesh3 *T_Th3= new Mesh3;
   int nv_t,nt_t,nbe_t;
   int* Numero_Som;
 	
@@ -926,8 +1152,8 @@ Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,
   tetrahedralize(switch_tetgen, &in, &out);
   
   cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
-  mesh3_tetgenio_out( out, *T_Th3);
-  
+  //mesh3_tetgenio_out( out, *T_Th3);
+  Mesh3 *T_Th3=mesh3_tetgenio_out( out);
   cout <<" Finish Mesh3 :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
 
   delete [] Numero_Som;
@@ -947,7 +1173,7 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
 
   // verif option refine
   int i;
-  Mesh3 *T_Th3= new Mesh3;	
+  //Mesh3 *T_Th3= new Mesh3;	
   assert(Th3.nt != 0 );
   {
     size_t testr, testp;
@@ -1121,8 +1347,8 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
   tetrahedralize(switch_tetgen, &in, &out);
 	 
   cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
-  mesh3_tetgenio_out( out, *T_Th3);
-	
+  //mesh3_tetgenio_out( out, *T_Th3);
+  Mesh3 *T_Th3=mesh3_tetgenio_out( out);
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
 	
   //in.deinitialize();
@@ -1270,6 +1496,7 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   //Th3->decrement();    
+  Add2StackOfPtr2FreeRC(stack,Th3);
   
   *mp=mps;
   delete [] switch_tetgen; 
@@ -1474,6 +1701,7 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
   Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   //Th3->decrement();    
+  Add2StackOfPtr2FreeRC(stack,Th3);
 
   delete [] switch_tetgen;
   *mp=mps;
@@ -1560,16 +1788,15 @@ AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
   strncpy(switch_tetgen, switch_tet->c_str(), size_switch_tet); 
   //======================================
  
-  Mesh3 *Th3 =new Mesh3; 
-  
-  Th3 =  Convexhull_3Dpoints ( switch_tetgen, nbv, cxx, cyy, czz, label_tet, label_face );
+  Mesh3 *Th3 =  Convexhull_3Dpoints ( switch_tetgen, nbv, cxx, cyy, czz, label_tet, label_face );
 	
   Th3->BuildBound();
   Th3->BuildAdj();
   Th3->Buildbnormalv();  
   Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
-  //Th3->decrement();    
+  //Th3->decrement();   
+  Add2StackOfPtr2FreeRC(stack,Th3);
   
   delete [] switch_tetgen;
   return Th3;
@@ -1681,7 +1908,8 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
   Th3->Buildbnormalv();  
   Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
-  Th3->decrement();    
+  //Th3->decrement();    
+  Add2StackOfPtr2FreeRC(stack,Th3);
 
   delete [] switch_tetgen;
   return Th3;
