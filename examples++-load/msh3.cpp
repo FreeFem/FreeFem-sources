@@ -1805,7 +1805,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
   
   if( vertex_out == 0){
 	  
-    Tet       *t = new Tet[1];
+    //Tet       *t = new Tet[1];
     Vertex3   *v = new Vertex3[nbv];
     Triangle3 *b = new Triangle3[nbe];
     // generation des nouveaux sommets 
@@ -1839,7 +1839,8 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
       	(*bb++).set( v, iv, K.lab);
       }
       
-    Mesh3 *Th3 = new Mesh3(nbv,0,nbt,v,t,b);
+    //Mesh3 *Th3 = new Mesh3(nbv,0,nbt,v,t,b);
+    Mesh3 *Th3 = new Mesh3(nbv,nbt,v,b);
     Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
   }
@@ -2248,7 +2249,7 @@ Mesh3 * Transfo_Mesh3_surf(const double &precis_mesh, const Mesh3 & Th3, const d
 
 	//T_Th3->set(nv_t,nt_t,nbe_t);
 	Vertex3 *v = new Vertex3[nv_t];
-	Tet     *t;
+	//Tet     *t;
 	Triangle3 *b= new Triangle3[nbe_t];
 	Triangle3 *bb=b;
 
@@ -2303,14 +2304,14 @@ Mesh3 * Transfo_Mesh3_surf(const double &precis_mesh, const Mesh3 & Th3, const d
 	} 
 	assert( i_border == nbe_t);
 
-
 	delete [] Numero_Som;
 	delete [] ind_nv_t;
 	delete [] ind_nbe_t;  
 	delete [] label_nbe_t;
 
-	Mesh3* T_Th3 = new Mesh3(nv_t,nt_t,nbe_t,v,t,b); 
-	
+	//Mesh3* T_Th3 = new Mesh3(nv_t,nt_t,nbe_t,v,t,b); 
+	Mesh3* T_Th3 = new Mesh3(nv_t,nbe_t,v,b);
+
 	return T_Th3;
 }
 
