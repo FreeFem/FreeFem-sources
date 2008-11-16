@@ -875,7 +875,7 @@ R2  SubInternalVertex(int N,int k)
 	      return p[j][0]*l0+ p[j][1]*l1+ p[j][2]*l2;
 	  }
 	int i,j;
-	num1SubTVertex(k,i,j);
+	num1SubTVertex(N,k,i,j);
 	return R2( (double) i/ (double)N,(double) j/(double)N);
     }
     
@@ -910,6 +910,31 @@ R2 SubTriangle(const int N,const int n,const int l)
 	: R2( (double) (N-j)/ (double)N,(double) (N-i)/(double)N);
     
 } 
+
+int numSubTriangle(const int N,const int n,const int l)
+    {
+	// compute the subdivision of a triangle in N*N
+	// N number of sub division
+	// n number of the sub triangle
+	// l vertex of the sub triangle
+	if(N<0)
+	  {
+	    int j=n%3;
+	    return numSubTriangle(-N,n/3,l)*3+j;
+	  }
+	throwassert(n < N*N);
+	int i = n % N;
+	int j = n / N;
+	int k = N - i - j;
+	if(l==1) i++;
+	if(l==2) j++;
+	// if ( k <= 0 )cout << " - " << endl;
+	return k >0 
+	? numSubTVertex(N,i, j)
+	: numSubTVertex(N,N-j,N-i);
+	
+} 
+    
 
 int Walk(const Mesh & Th,int& it, R *l,
          const KN_<R>  & U,const KN_<R>  & V, R dt) 

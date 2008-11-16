@@ -1863,7 +1863,12 @@ for ( t=0; t< 2*pi ; t+=dt)
 
 \eFF
 \end{example}
-Notice the new keywords, \x{intalledges} to integrate on all edges, \x{nTonEdge} which is one
+Notice the new keywords, \texttt{intalledges} to integrate on all edges of all triangles 
+\begin{equation}
+\mathtt{intalledges}(\mathtt{Th}) \equiv \sum_{T\in\mathtt{Th}}\int_{\p T }
+\end{equation}
+
+(so all internal edges are see two times ), \x{nTonEdge} which is one
 if the triangle has a boundary edge and zero otherwise, {\tt jump} to implement $[c]$.
 Results of both methods are shown on Figure \ref{figconvect} with identical levels for the \x{level line};
 this is done with the plot-modifier \x{viso}.

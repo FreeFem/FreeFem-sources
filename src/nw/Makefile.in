@@ -18,7 +18,7 @@
 # ----------------------------------
 # $Id$
 
-SOURCES = $(FreeFem___nw_SOURCES)
+SOURCES = $(FreeFem___nw_SOURCES) $(ffglut_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -40,7 +40,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = FreeFem++-nw$(EXEEXT)
+bin_PROGRAMS = FreeFem++-nw$(EXEEXT) @FFGLUTPROG@
+EXTRA_PROGRAMS = ffglut$(EXEEXT)
 subdir = src/nw
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -58,6 +59,8 @@ PROGRAMS = $(bin_PROGRAMS)
 am_FreeFem___nw_OBJECTS = sansrgraph.$(OBJEXT)
 FreeFem___nw_OBJECTS = $(am_FreeFem___nw_OBJECTS)
 FreeFem___nw_LDADD = $(LDADD)
+am_ffglut_OBJECTS = ffglut.$(OBJEXT) gggg.$(OBJEXT)
+ffglut_OBJECTS = $(am_ffglut_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -65,8 +68,8 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(FreeFem___nw_SOURCES)
-DIST_SOURCES = $(FreeFem___nw_SOURCES)
+SOURCES = $(FreeFem___nw_SOURCES) $(ffglut_SOURCES)
+DIST_SOURCES = $(FreeFem___nw_SOURCES) $(ffglut_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -112,8 +115,10 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EIGENOBJ = @EIGENOBJ@
 EIGENTEST = @EIGENTEST@
+EPSTOPDF = @EPSTOPDF@
 EXEEXT = @EXEEXT@
 F77 = @F77@
+FFGLUTPROG = @FFGLUTPROG@
 FFLAGS = @FFLAGS@
 FF_LAPACKdir = @FF_LAPACKdir@
 FF_SECOND = @FF_SECOND@
@@ -208,7 +213,6 @@ exec_prefix = @exec_prefix@
 ff_convert = @ff_convert@
 ff_curl = @ff_curl@
 ff_dvips = @ff_dvips@
-ff_epstopdf = @ff_epstopdf@
 ff_fltk = @ff_fltk@
 ff_gzip = @ff_gzip@
 ff_history = @ff_history@
@@ -240,10 +244,13 @@ target_alias = @target_alias@
 
 # To create statically linked executables (see configure.ac)
 CXXLD = $(STATICTOOL) $(CXX)
+ffglut_SOURCES = ../Graphics/ffglut.cpp ../Graphics/gggg.cpp
+ffglut_DEPENDENCIES = ../fflib/fem.o ../fflib/FQuadTree.o ../fflib/Drawing.o ../fflib/mshptg.o 
+ffglut_LDADD = ./fflib/fem.o ../fflib/FQuadTree.o ../fflib/Drawing.o ../fflib/mshptg.o  @LIBSGLUT@
 FreeFem___nw_SOURCES = ../Graphics/sansrgraph.cpp
 FreeFem___nw_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
 LDADD = ../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
-INCLUDES = -I../fflib -I../Graphics
+INCLUDES = -I../fflib -I../Graphics -I../.. -I../femlib 
 all: all-am
 
 .SUFFIXES:
@@ -303,6 +310,9 @@ clean-binPROGRAMS:
 FreeFem++-nw$(EXEEXT): $(FreeFem___nw_OBJECTS) $(FreeFem___nw_DEPENDENCIES) 
 	@rm -f FreeFem++-nw$(EXEEXT)
 	$(CXXLINK) $(FreeFem___nw_LDFLAGS) $(FreeFem___nw_OBJECTS) $(FreeFem___nw_LDADD) $(LIBS)
+ffglut$(EXEEXT): $(ffglut_OBJECTS) $(ffglut_DEPENDENCIES) 
+	@rm -f ffglut$(EXEEXT)
+	$(CXXLINK) $(ffglut_LDFLAGS) $(ffglut_OBJECTS) $(ffglut_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -310,6 +320,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffglut.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gggg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sansrgraph.Po@am__quote@
 
 .cpp.o:
@@ -339,6 +351,34 @@ sansrgraph.obj: ../Graphics/sansrgraph.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/sansrgraph.cpp' object='sansrgraph.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o sansrgraph.obj `if test -f '../Graphics/sansrgraph.cpp'; then $(CYGPATH_W) '../Graphics/sansrgraph.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/sansrgraph.cpp'; fi`
+
+ffglut.o: ../Graphics/ffglut.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ffglut.o -MD -MP -MF "$(DEPDIR)/ffglut.Tpo" -c -o ffglut.o `test -f '../Graphics/ffglut.cpp' || echo '$(srcdir)/'`../Graphics/ffglut.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ffglut.Tpo" "$(DEPDIR)/ffglut.Po"; else rm -f "$(DEPDIR)/ffglut.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/ffglut.cpp' object='ffglut.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ffglut.o `test -f '../Graphics/ffglut.cpp' || echo '$(srcdir)/'`../Graphics/ffglut.cpp
+
+ffglut.obj: ../Graphics/ffglut.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ffglut.obj -MD -MP -MF "$(DEPDIR)/ffglut.Tpo" -c -o ffglut.obj `if test -f '../Graphics/ffglut.cpp'; then $(CYGPATH_W) '../Graphics/ffglut.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/ffglut.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ffglut.Tpo" "$(DEPDIR)/ffglut.Po"; else rm -f "$(DEPDIR)/ffglut.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/ffglut.cpp' object='ffglut.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ffglut.obj `if test -f '../Graphics/ffglut.cpp'; then $(CYGPATH_W) '../Graphics/ffglut.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/ffglut.cpp'; fi`
+
+gggg.o: ../Graphics/gggg.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT gggg.o -MD -MP -MF "$(DEPDIR)/gggg.Tpo" -c -o gggg.o `test -f '../Graphics/gggg.cpp' || echo '$(srcdir)/'`../Graphics/gggg.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/gggg.Tpo" "$(DEPDIR)/gggg.Po"; else rm -f "$(DEPDIR)/gggg.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/gggg.cpp' object='gggg.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o gggg.o `test -f '../Graphics/gggg.cpp' || echo '$(srcdir)/'`../Graphics/gggg.cpp
+
+gggg.obj: ../Graphics/gggg.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT gggg.obj -MD -MP -MF "$(DEPDIR)/gggg.Tpo" -c -o gggg.obj `if test -f '../Graphics/gggg.cpp'; then $(CYGPATH_W) '../Graphics/gggg.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/gggg.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/gggg.Tpo" "$(DEPDIR)/gggg.Po"; else rm -f "$(DEPDIR)/gggg.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/gggg.cpp' object='gggg.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o gggg.obj `if test -f '../Graphics/gggg.cpp'; then $(CYGPATH_W) '../Graphics/gggg.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/gggg.cpp'; fi`
 uninstall-info-am:
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)

@@ -871,6 +871,7 @@ friend class KN_<R>;
 
 template<class R>
 class KN :public KN_<R> { public:
+
   typedef R K;
 
  // explicit  KN(const R & u):KN_<R>(new R(uu),1,0) {}
@@ -890,6 +891,8 @@ class KN :public KN_<R> { public:
         {for (long i=0;i<this->n;i++) this->v[i] = f(s[i]);}
   KN(const KN<R> & u):KN_<R>(new R[u.n],u.n)
         { KN_<R>::operator=(u);}
+  KN(bool ,KN<R> & u):KN_<R>(u) {u.v=0;u.n=0;}// remove copy for return of local KN. 
+    
   //  explicit KN(const KN_<R> & u):KN_<R>(new R[u.n],u.n) 
   //      { KN_<R>::operator=(u);}
         

@@ -39,3 +39,15 @@ cout << " IV Wh4<-Vh  " << IW4  << endl;
 
 
 
+fespace V4h(Th4,[P1,P1,P1,P1]);
+fespace V3h(Th,[P1,P1,P1]);
+int[int] u2vc=[1,3,-1];// -1 => put zero on the componante ;
+matrix IV34= interpolate(V3h,V4h,inside=0,U2Vc=u2vc);//  here the function is 
+V4h [a1,a2,a3,a4]=[1,2,3,4];
+V3h [b1,b2,b3]=[10,20,30];
+b1[]=IV34*a1[];
+
+cout << "b1 = " << b1(.25,.25) << " == " << 2 << endl;
+cout << "b2 = " << b2(.25,.25) << " == " << 4 <<endl;
+cout << "b3 = " << b3(.25,.25) << " == " << 0 <<endl;
+// exended by zero

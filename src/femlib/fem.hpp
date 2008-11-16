@@ -599,23 +599,31 @@ void  HeapSort(T *c,T1 *c1,T2 *c2,long n)
   }
 }
 
- inline   int numSubTVertex(int i,int j)
-    {
+ inline   int numSubTVertex(int N,int i,int j)
+    {  //  i,j  coordonne barycentre * N dans l'eleùent de reference.
+	i=i+j; // numerotation / diag  
+	// i,j 
 	assert(j<=i && 0<= j); 
 	return j+i*(i+1)/2;
     }
     
- inline    void  num1SubTVertex(int l,int & i,int & j)
+ inline    void  num1SubTVertex(int N,int l,int & i,int & j)
     {
+	
 	i= (-1 + sqrt(1+8*l))/2;
 	j = l - i*(i+1)/2;
-	assert( l == numSubTVertex(i,j)); 
+        // io=in+j;
+	// in = io-j
+	i=i-j;
+	assert( l == numSubTVertex(N,i,j)); 
     }
     
   R2 SubTriangle(const int N,const int n,const int l);
- int  NbOfSubTriangle(const int N);
- int NbOfSubInternalVertices(int kk);
-    R2  SubInternalVertex(int N,int k);
+    int numSubTriangle(const int N,const int n,const int l);
+  int  NbOfSubTriangle(const int N);
+  int NbOfSubInternalVertices(int kk);
+  R2  SubInternalVertex(int N,int k);
+    
       //  warning  i is in [0, nleft]
 template<class Rd>
  inline     TVertex<Rd> & TMortar<Rd>::VLeft(int i) const 

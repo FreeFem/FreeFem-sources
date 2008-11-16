@@ -138,7 +138,7 @@ AC_LANG(C++)
 
 # Some useful libraries
 
-AC_CHECK_LIB(pthread,pthread_create)
+AC_CHECK_LIB(pthread,pthread_create,ff_pthread="-lpthread")
 
 # Necessary absolute pathname for local directory when some libraries
 # are used from several different locations (for instance locally in
@@ -448,28 +448,28 @@ then
 # GLUT .....
 	if test "$ff_glut_ok" =	yes
         then			
-	 ff_glut="-framework GLUT -framework OpenGL -framework Cocoa"
-	 $ff_libs1="$LIBS"
-     	 LIBS="$LIBS $ff_glut"
-	 AC_TRY_LINK_FUNC(glutInit,
-			ff_glut_ok=yes,
-			ff_glut_ok=next);
-	 LIBS="$ff_libs1"
+	    for glut in \
+		"-framework GLUT -framework OpenGL -framework Cocoa" \
+		"-lglut -lGLU -lGL" 	
+	    do
+		ff_glut="$glut"
+		ff_libs1="$LIBS"
+     		LIBS="$LIBS $ff_glut"
+		AC_TRY_LINK_FUNC(glutInit,
+		    ff_glut_ok=yes
+		    break,
+		    ff_glut_ok=next);
+		LIBS="$ff_libs1"
+	    done	
 	fi
-	if test "$ff_glut_ok" = next
-	then
-		AC_CHECK_LIB(GLUT,
-			glutInit,
-			ff_glut_ok=yes
-			ff_glut="-lglut -lGLU -lGL",
-			ff_glut_ok=yes1
-			)
-
-	fi
+	
         if test "$ff_glut_ok" = yes
         then
-	AC_SUBST(LIBSGLUT,$ff_glut)
-	ff_meditprog="medit"
+	    AC_SUBST(LIBSGLUT,$ff_glut)
+#	    if [ -n  "$ff_pthread" ]; then 
+#	    fi
+	    ff_meditprog="ffmedit"
+	    ff_ffglutprog="ffglut"
         fi
 
 fi
@@ -1201,7 +1201,7 @@ AC_CHECK_PROG(ff_makeindex,makeindex,yes,no)
 AC_CHECK_PROG(ff_dvips,dvips,yes,no)
 # to translate the figure 
 AC_CHECK_PROG(ff_pdf2ps,pdf2ps,yes,no)
-AC_CHECK_PROG(ff_epstopdf,epstopdf,yes,no)
+AC_CHECK_PROGS(EPSTOPDF,[epstopdf pstopdf],[false])
 AC_CHECK_PROG(ff_convert,convert,yes,no)
 if test "$ff_latex" = yes -a "$ff_makeindex" = yes -a "$ff_dvips" = yes -a $ff_pdf2ps = yes -a $ff_convert = yes;
 then
@@ -1221,7 +1221,7 @@ AC_ARG_ENABLE(pdf,[  --disable-pdf	Disable PDF documentation building])
 if test "$enable_pdf" = yes 
 then
    AC_CHECK_PROG(ff_pdflatex,pdflatex,yes,no)
-   if test "$ff_pdflatex" = yes -a $ff_epstopdf = yes -a $ff_convert = yes;
+   if test "$ff_pdflatex" = yes -a $EPSTOPDF != false -a $ff_convert = yes;
    then
 	AC_SUBST(DOCPDF,"freefem++doc.pdf")
    fi
@@ -1400,6 +1400,7 @@ fi
 
 # The final list of executable programs
 AC_SUBST(MEDITPROG,$ff_meditprog)
+AC_SUBST(FFGLUTPROG,$ff_ffglutprog)
 AC_SUBST(BAMGPROG,$ff_bamgprog)
 AC_SUBST(GLXPROG,$ff_glxprog)
 AC_SUBST(STDPROG,$ff_stdprog)
@@ -1409,7 +1410,7 @@ AC_SUBST(IDEPROG,$ff_ideprog)
 AC_SUBST(TESTIDEPROG,$ff_testideprog)
 # The final test program
 AC_SUBST(IDE_TESTS,$ff_idetest)
-ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_ideprog  $ff_mpiprog $ff_meditprog"
+ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_ideprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 
 # All makefiles
 AC_OUTPUT(Makefile

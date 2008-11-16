@@ -64,7 +64,6 @@ for(int i=0;i<mat.n;i++)
     mat(i,j)=i+100*(j+1);
 mmat=mat;
 cout << mmat << endl;
-
 mat.resize(15,15);
 for(int i=10;i<mat.n;i++)
   for(int j=0;j<mat.m;j++)

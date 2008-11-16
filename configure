@@ -311,7 +311,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 FLIBS CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ WIN32DLLTARGET ff_prefix_dir OPTIM_TYPE ADD_PACKAGE_NAME CXXCPP X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS X11_LIBS EGREP LIBSGLUT ff_mpirun MPIPROG MPICXX ff_wget ff_curl WGET ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIBS BLASINC G2CLIB DOWNLOAD_ARPACK FF_LAPACKdir ARPACKLIB LAPACKLIB ARPACKLIBS EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK FF_UMFPACK_CONFIG UMFPACKLIBS FF_SECOND ff_libtool STATICTOOL AR ARFLAGS RANLIN LOAD_TESTS LOAD_COMPILE DYLIB_SUFFIX ff_latex ff_makeindex ff_dvips ff_pdf2ps ff_epstopdf ff_convert DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION MEDITPROG BAMGPROG GLXPROG STDPROG AGLPROG X11PROG IDEPROG TESTIDEPROG IDE_TESTS LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar RANLIB ac_ct_RANLIB MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE F77 FFLAGS ac_ct_F77 FLIBS CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEX LEXLIB LEX_OUTPUT_ROOT YACC WINDRESOBJ WIN32DLLTARGET ff_prefix_dir OPTIM_TYPE ADD_PACKAGE_NAME CXXCPP X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS X11_LIBS EGREP LIBSGLUT ff_mpirun MPIPROG MPICXX ff_wget ff_curl WGET ff_unzip GENERIC_BLAS GENERIC_BLAS_BUILT_SOURCES DOWNLOAD_BLAS BLASLIBS BLASINC G2CLIB DOWNLOAD_ARPACK FF_LAPACKdir ARPACKLIB LAPACKLIB ARPACKLIBS EIGENTEST EIGENOBJ DOWNLOAD_UMFPACK FF_UMFPACK_CONFIG UMFPACKLIBS FF_SECOND ff_libtool STATICTOOL AR ARFLAGS RANLIN LOAD_TESTS LOAD_COMPILE DYLIB_SUFFIX ff_latex ff_makeindex ff_dvips ff_pdf2ps EPSTOPDF ff_convert DOCPS ff_gzip DOCPSGZ ff_pdflatex DOCPDF ff_history HISTORY STD_GRAPH_OBJ STD_LDFLAGS STD_LIBS ff_fltk DOWNLOAD_FLTK FLTK_VERSION FLTK_CONFIG_PARAM FLTK_CONFIG IDE_LIBS FLTK_XONLY KERNEL_VERSION LIBC_VERSION MEDITPROG FFGLUTPROG BAMGPROG GLXPROG STDPROG AGLPROG X11PROG IDEPROG TESTIDEPROG IDE_TESTS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -5402,7 +5402,6 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 # Some useful libraries
 
 
-
 echo "$as_me:$LINENO: checking for pthread_create in -lpthread" >&5
 echo $ECHO_N "checking for pthread_create in -lpthread... $ECHO_C" >&6
 if test "${ac_cv_lib_pthread_pthread_create+set}" = set; then
@@ -5468,12 +5467,7 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_lib_pthread_pthread_create" >&5
 echo "${ECHO_T}$ac_cv_lib_pthread_pthread_create" >&6
 if test $ac_cv_lib_pthread_pthread_create = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBPTHREAD 1
-_ACEOF
-
-  LIBS="-lpthread $LIBS"
-
+  ff_pthread="-lpthread"
 fi
 
 
@@ -10728,10 +10722,14 @@ fi
 # GLUT .....
 	if test "$ff_glut_ok" =	yes
         then
-	 ff_glut="-framework GLUT -framework OpenGL -framework Cocoa"
-	 $ff_libs1="$LIBS"
-     	 LIBS="$LIBS $ff_glut"
-	 cat >conftest.$ac_ext <<_ACEOF
+	    for glut in \
+		"-framework GLUT -framework OpenGL -framework Cocoa" \
+		"-lglut -lGLU -lGL"
+	    do
+		ff_glut="$glut"
+		ff_libs1="$LIBS"
+     		LIBS="$LIBS $ff_glut"
+		cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -10776,6 +10774,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   ff_glut_ok=yes
+		    break
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
@@ -10784,89 +10783,18 @@ ff_glut_ok=next
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext;
-	 LIBS="$ff_libs1"
+		LIBS="$ff_libs1"
+	    done
 	fi
-	if test "$ff_glut_ok" = next
-	then
-		echo "$as_me:$LINENO: checking for glutInit in -lGLUT" >&5
-echo $ECHO_N "checking for glutInit in -lGLUT... $ECHO_C" >&6
-if test "${ac_cv_lib_GLUT_glutInit+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lGLUT  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
 
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char glutInit ();
-int
-main ()
-{
-glutInit ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_GLUT_glutInit=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_lib_GLUT_glutInit=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_GLUT_glutInit" >&5
-echo "${ECHO_T}$ac_cv_lib_GLUT_glutInit" >&6
-if test $ac_cv_lib_GLUT_glutInit = yes; then
-  ff_glut_ok=yes
-			ff_glut="-lglut -lGLU -lGL"
-else
-  ff_glut_ok=yes1
-
-fi
-
-
-	fi
         if test "$ff_glut_ok" = yes
         then
-	LIBSGLUT=$ff_glut
+	    LIBSGLUT=$ff_glut
 
-	ff_meditprog="medit"
+#	    if [ -n  "$ff_pthread" ]; then
+#	    fi
+	    ff_meditprog="ffmedit"
+	    ff_ffglutprog="ffglut"
         fi
 
 fi
@@ -14783,15 +14711,17 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-# Extract the first word of "epstopdf", so it can be a program name with args.
-set dummy epstopdf; ac_word=$2
+for ac_prog in epstopdf pstopdf
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_prog_ff_epstopdf+set}" = set; then
+if test "${ac_cv_prog_EPSTOPDF+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  if test -n "$ff_epstopdf"; then
-  ac_cv_prog_ff_epstopdf="$ff_epstopdf" # Let the user override the test.
+  if test -n "$EPSTOPDF"; then
+  ac_cv_prog_EPSTOPDF="$EPSTOPDF" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -14800,24 +14730,27 @@ do
   test -z "$as_dir" && as_dir=.
   for ac_exec_ext in '' $ac_executable_extensions; do
   if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_ff_epstopdf="yes"
+    ac_cv_prog_EPSTOPDF="$ac_prog"
     echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
 done
 done
 
-  test -z "$ac_cv_prog_ff_epstopdf" && ac_cv_prog_ff_epstopdf="no"
 fi
 fi
-ff_epstopdf=$ac_cv_prog_ff_epstopdf
-if test -n "$ff_epstopdf"; then
-  echo "$as_me:$LINENO: result: $ff_epstopdf" >&5
-echo "${ECHO_T}$ff_epstopdf" >&6
+EPSTOPDF=$ac_cv_prog_EPSTOPDF
+if test -n "$EPSTOPDF"; then
+  echo "$as_me:$LINENO: result: $EPSTOPDF" >&5
+echo "${ECHO_T}$EPSTOPDF" >&6
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
+
+  test -n "$EPSTOPDF" && break
+done
+test -n "$EPSTOPDF" || EPSTOPDF="false"
 
 # Extract the first word of "convert", so it can be a program name with args.
 set dummy convert; ac_word=$2
@@ -14949,7 +14882,7 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-   if test "$ff_pdflatex" = yes -a $ff_epstopdf = yes -a $ff_convert = yes;
+   if test "$ff_pdflatex" = yes -a $EPSTOPDF != false -a $ff_convert = yes;
    then
 	DOCPDF="freefem++doc.pdf"
 
@@ -15267,6 +15200,8 @@ fi
 # The final list of executable programs
 MEDITPROG=$ff_meditprog
 
+FFGLUTPROG=$ff_ffglutprog
+
 BAMGPROG=$ff_bamgprog
 
 GLXPROG=$ff_glxprog
@@ -15284,7 +15219,7 @@ TESTIDEPROG=$ff_testideprog
 # The final test program
 IDE_TESTS=$ff_idetest
 
-ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_ideprog  $ff_mpiprog $ff_meditprog"
+ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_ideprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 
 # All makefiles
                                                                                                                                                                                                                                                                                                                                                     ac_config_files="$ac_config_files Makefile download/Makefile download/blas/Makefile download/arpack/Makefile download/umfpack/Makefile download/fltk/Makefile src/Makefile src/bamglib/Makefile src/Graphics/Makefile src/femlib/Makefile src/Algo/Makefile src/lglib/Makefile src/fflib/Makefile src/std/Makefile src/x11/Makefile src/ide/Makefile src/nw/Makefile src/mpi/Makefile src/agl/Makefile src/glx/Makefile src/bamg/Makefile src/libMesh/Makefile src/medit/Makefile src/bin-win32/Makefile examples++/Makefile examples++-eigen/Makefile examples++-tutorial/Makefile examples++-mpi/Makefile examples++-load/Makefile examples++-chapt3/Makefile examples++-bug/Makefile examples++-other/Makefile examples++-3d/Makefile DOC/Makefile"
@@ -16085,7 +16020,7 @@ s,@ff_latex@,$ff_latex,;t t
 s,@ff_makeindex@,$ff_makeindex,;t t
 s,@ff_dvips@,$ff_dvips,;t t
 s,@ff_pdf2ps@,$ff_pdf2ps,;t t
-s,@ff_epstopdf@,$ff_epstopdf,;t t
+s,@EPSTOPDF@,$EPSTOPDF,;t t
 s,@ff_convert@,$ff_convert,;t t
 s,@DOCPS@,$DOCPS,;t t
 s,@ff_gzip@,$ff_gzip,;t t
@@ -16107,6 +16042,7 @@ s,@FLTK_XONLY@,$FLTK_XONLY,;t t
 s,@KERNEL_VERSION@,$KERNEL_VERSION,;t t
 s,@LIBC_VERSION@,$LIBC_VERSION,;t t
 s,@MEDITPROG@,$MEDITPROG,;t t
+s,@FFGLUTPROG@,$FFGLUTPROG,;t t
 s,@BAMGPROG@,$BAMGPROG,;t t
 s,@GLXPROG@,$GLXPROG,;t t
 s,@STDPROG@,$STDPROG,;t t

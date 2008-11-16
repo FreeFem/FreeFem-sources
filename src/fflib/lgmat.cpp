@@ -281,11 +281,12 @@ class MatrixInterpolation : public OneOperator { public:
        Expression a,b,c; 
        // if c = 0 => a,b FESpace
        // if c != a FESpace et b,c KN_<double> 
-       static const int n_name_param =4;
+       static const int n_name_param =5;
        static basicAC_F0::name_and_type name_param[] ;
         Expression nargs[n_name_param];
      bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
      long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+     KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
 
        public:
        Op(const basicAC_F0 &  args,Expression aa,Expression bb) : a(aa),b(bb),c(0) {
@@ -321,7 +322,9 @@ basicAC_F0::name_and_type  MatrixInterpolation::Op::name_param[]= {
    {  "t", &typeid(bool)}, 
    {  "op", &typeid(long)},
    {  "inside",&typeid(bool)},
-   {  "composante",&typeid(long)}
+   {  "composante",&typeid(long)},
+   {  "U2Vc",&typeid(KN_<long>)}
+
 };
 
 
@@ -498,12 +501,14 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
   int op=op_id; //  value of the function
   bool transpose=false;
   bool inside=false;
+   int * iU2V=0;  
   if (data)
    {
      int * idata=static_cast<int*>(data);
      transpose=idata[0];
      op=idata[1];
      inside=idata[2];
+       iU2V= idata + 5;
      ffassert(op>=0 && op < 4);
    }
   if(verbosity>2) 
@@ -557,7 +562,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
   int NVh= Vh0.N;
   int NUh= Uh0.N;
   
-  ffassert(NVh==NUh); 
+  //ffassert(NVh==NUh); 
   
   
   int nbp= PtHatU.N(); // 
@@ -625,38 +630,42 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	      for (int i=0;i<ipjU.N();i++) 
 	          { // pour tous le terme 
 	           const FElement::IPJ &ipj_i(ipjU[i]);
-	           assert(ipj_i.j==0); // car  Vh.N=0
+	          // assert(ipj_i.j==0); // car  Vh.N=0
 	           int dfu = KU(ipj_i.i); // le numero de df global 
 	           if(fait[dfu]) continue;
-	           int j = ipj_i.j; // la composante
+	           int jU = ipj_i.j; // la composante dans U
 	           int p=ipj_i.p;  //  le points
 	           if (intV[p]) continue; //  ouside and inside flag => next 
 	           R aipj = AipjU[i];
 	           FElement KV(Vh[itV[p]]);
-	           
-	            KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype); 
-	            KN_<R> fbj(fb('.',j,op)); 
-	            
-	           for (int idfv=0;idfv<nbdfVK;idfv++) 
-	             if (Abs(fbj[idfv])>eps) 
-	              {
-	                int dfv=KV(idfv);
-	                int i=dfu, j=dfv;
-	                if(transpose) Exchange(i,j);
-	                // le term dfu,dfv existe dans la matrice
-	                R c= fbj[idfv]*aipj;
-	                //  cout << " Mat inter " << i << " , "<< j << " = " << c << " " <<step << " " << it << " " <<  endl; 
-	                if(Abs(c)>eps)
-	                 //
-	                   sij[make_pair(i,j)] = c;
-	                /*   
-	                 if(step==0)
-	                   sij.insert(make_pair(i,j));
-	                 else	                  
-	                   (*m)(i,j)=c;
-                        */
-	              }
-	              
+		      int jV=jU;
+		      if(iU2V) jV=iU2V[jU];
+		    
+		    if(jV>=0 && jV<NVh)
+			{
+			    KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype); 
+			    KN_<R> fbj(fb('.',jV,op)); 
+			    
+			    for (int idfv=0;idfv<nbdfVK;idfv++) 
+				if (Abs(fbj[idfv])>eps) 
+				  {
+				      int dfv=KV(idfv);
+				      int ii=dfu, jj=dfv;
+				      if(transpose) Exchange(ii,jj);
+				      // le term dfu,dfv existe dans la matrice
+				      R c= fbj[idfv]*aipj;
+				      //  cout << " Mat inter " << i << " , "<< j << " = " << c << " " <<step << " " << it << " " <<  endl; 
+				      if(Abs(c)>eps)
+					  //
+					  sij[make_pair(ii,jj)] = c;
+				      /*   
+				       if(step==0)
+				       sij.insert(make_pair(i,j));
+				       else	                  
+				       (*m)(i,j)=c;
+				       */
+				  }
+			}
 	                      
 	          }
 	          
@@ -792,17 +801,39 @@ AnyType SetMatrixInterpolation(Stack stack,Expression emat,Expression einter)
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
   const MatrixInterpolation::Op * mi(dynamic_cast<const MatrixInterpolation::Op *>(einter));
   ffassert(einter);
-  int data[ MatrixInterpolation::Op::n_name_param];
+  int data[ MatrixInterpolation::Op::n_name_param+100];
   data[0]=mi->arg(0,stack,false); // transpose not
   data[1]=mi->arg(1,stack,(long) op_id); ; // get just value
   data[2]=mi->arg(2,stack,false); ; // get just value
   data[3]=mi->arg(3,stack,0L); ; // get just value
+  KN<long> U2Vc;
+  U2Vc= mi->arg(4,stack,U2Vc); ;
   if( mi->c==0)
   { // old cas 
   pfes * pUh = GetAny< pfes * >((* mi->a)(stack));
   pfes * pVh = GetAny<  pfes * >((* mi->b)(stack));
   FESpace * Uh = **pUh;
   FESpace * Vh = **pVh;
+  int NVh =Vh->N;
+  int NUh =Uh->N;
+  ffassert(NUh< 100-MatrixInterpolation::Op::n_name_param);
+
+      for(int i=0;i<NUh;++i)    
+        data[5+i]=i;// 
+      for(int i=0;i<min(NUh,(int) U2Vc.size());++i)    
+	  data[5+i]= U2Vc[i];//
+  if(verbosity>3)
+	for(int i=0;i<NUh;++i)
+	  {
+	    cout << "The Uh componante " << i << " -> " << data[5+i] << "  Componante of Vh  " <<endl;
+	  }
+	  for(int i=0;i<NUh;++i)    
+	if(data[5+i]>=NVh)
+	  {
+	      cout << "The Uh componante " << i << " -> " << data[5+i] << " >= " << NVh << " number of Vh Componante " <<endl;
+	      ExecError("Interpolation incompability beetween componante ");
+	  }
+      
   ffassert(Vh);
   ffassert(Uh);
   

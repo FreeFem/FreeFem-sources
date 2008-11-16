@@ -63,6 +63,8 @@ class Iden;
 #include "lex.hpp"
 #include "environment.hpp"
 
+    extern FILE *ThePlotStream;
+    
 class Routine;
 bool load(string s);
 
@@ -245,7 +247,8 @@ void lgerror (const char* s) ;
 %% 
 
 start:   input ENDOFFILE {
-	            
+		        const char *  magicffglut="#!ffglutdata...\n";
+                        if(ThePlotStream) fwrite(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
                         $1+=currentblock->close(currentblock);
                         if(verbosity) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
@@ -275,6 +278,7 @@ start:   input ENDOFFILE {
                         //debugstack.clear() 
                         } 
                         fingraphique();
+			if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         
 			    if (NbPtr) { cout << " ######## We forget of deleting   " << NbPtr 
@@ -772,6 +776,7 @@ int mainff (int  argc, char **argv)
 #endif
   //  currentblock->close(currentblock).eval(thestack);
   fingraphique();
+  if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}  
   Destroylex( zzzfff);
   
    // ClearMem();

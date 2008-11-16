@@ -1,6 +1,6 @@
 
 extern long verbosity;
-
+extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
 int getprog(char* fn,int argc, char **argv)
 {
     
@@ -19,6 +19,21 @@ int getprog(char* fn,int argc, char **argv)
 		i++;	
 		if(verbosity>10) printf(" verbosity : %ld\n",verbosity);
 	    }
+            else if(strcmp(argv[i],"-fglut")==0 && i+1 < argc)
+		    {
+		      ThePlotStream = fopen(argv[i+1],"w");
+		      i++;
+		      printf(" save of all plot in file : %s\n",argv[i]);
+		      if(!ThePlotStream) { cerr << "  Error fopen  "<< endl;exit(1);}
+		    }
+	    else if( strcmp(argv[i],"-glut")==0 && i+1 < argc) 
+		 {
+		    ThePlotStream = popen(argv[i+1],"w");
+		   
+		    i++;
+		    printf(" EXEC of the plot in file : %s\n",argv[i]);
+		    if(!ThePlotStream) { cerr << "  Error popen "<< endl;exit(1);}
+		  }			    
 	    else if(ret==0)
 	    {
 		strcpy(fn,argv[i]);

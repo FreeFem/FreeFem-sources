@@ -1229,7 +1229,7 @@ void ConstructDataFElement::renum(const long *r,int l)
 { 
    R u0(u(K(0))), u1(u(K(1))), u2(u(K(2)));
    R r=0;
-   if (op==0)
+   if (op==op_id)
     {
       R l0=1-PHat.x-PHat.y,l1=PHat.x,l2=PHat.y; 
       r = u0*l0+u1*l1+l2*u2;
@@ -1238,9 +1238,9 @@ void ConstructDataFElement::renum(const long *r,int l)
     { 
        const Triangle & T=K.T;
        R2 D0 = T.H(0) , D1 = T.H(1)  , D2 = T.H(2) ;
-       if (op==1)
+       if (op==op_dx)
          r =  D0.x*u0 + D1.x*u1 + D2.x*u2 ;
-        else 
+        else if(op==op_dy)
          r =  D0.y*u0 + D1.y*u1 + D2.y*u2 ;
     }
  //  cout << r << "\t";

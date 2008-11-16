@@ -82,7 +82,7 @@ void plot(double i)
 void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso);
 void DrawIsoTfill(const R2 Pt[3],const R ff[3],const RN_ & Viso,double rapz);
 
-void     FillRect(float x0,float y0, float x1, float y1)
+void FillRect(float x0,float y0, float x1, float y1)
  {
      float r[8];
      r[0]=x0;r[1]=y0;
@@ -575,35 +575,35 @@ void TBoundaryEdge<R2>::Draw() const
 	
     } 
     
-R *  FESpace::newSaveDraw(const KN_<R> & U,int composante,int & lg) const 
+KN<double>  FESpace::newSaveDraw(const KN_<R> & U,int composante,int & lg,int & nsb) const 
     {
-	int nsb = TFE[0]->nbsubdivision;
+	nsb = TFE[0]->nbsubdivision;
 	int nsbv = NbOfSubInternalVertices(nsb);
 	lg = nsbv*Th.nt;
-	
-	double *v = new R[lg];
+	cout << "newSaveDraw what: nt " << Th.nt << " " << nsbv << " " << lg << endl;
+	KN<double> v(lg);
 	ffassert(v);
         for (int k=0,i=0;k<Th.nt;k++)
 	  {
-	    (*this)[k].SaveDraw( U,composante,v + i);	
+	    (*this)[k].SaveDraw( U,composante,&v[i]);	
 	      i+=nsbv;
 	  }
-	return v;
+	return KN<double>(true,v);// to remove the copy.
     }
-    R *  FESpace::newSaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,int & lg) const 
+KN<double>  FESpace::newSaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,int & lg,int & nsb) const 
     {
-	int nsb = TFE[0]->nbsubdivision;
+	nsb = TFE[0]->nbsubdivision;
 	int nsbv = NbOfSubInternalVertices(nsb)*2;
 	lg = nsbv*Th.nt;
 	
-	double *v = new R[lg];
-	ffassert(v);
+	KN<double> v(lg);
+	
         for (int k=0,i=0;k<Th.nt;k++)
 	  {
-	      (*this)[k].SaveDraw( U,V,iU,iV,v + i);	
+	      (*this)[k].SaveDraw( U,V,iU,iV,&v[i]);	
 	      i+=nsbv;
 	  }
-	return v;
+	return  KN<double>(true,v);// to remove the copy.
     }   
 void  FESpace::Draw(const RN_& U,const RN_ & Viso,int j,float *colors,int nbcolors,bool hsv,bool drawborder) const 
 {
