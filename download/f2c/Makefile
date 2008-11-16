@@ -1,13 +1,15 @@
 
+DIRPKG=../pkg
 LISTINST=  ../bin/f2c ../bin/fort77 ../include/f2c.h ../lib/libf2c.a
 DIRINSTALL=/usr/local
+F2C_TAR=$(DIRPKG)/f2c.tar
 all:compile
 
-f2c.tar:
+$(F2C_TAR):
 	$(WGET) # wget --passive-ftp ftp://netlib.bell-labs.com/netlib/f2c.tar
-	curl http://netlib.sandia.gov/cgi-bin/netlib/netlibfiles.tar?filename=netlib/f2c -o "f2c.tar"
-f2c:f2c.tar
-	tar xvf f2c.tar
+	curl http://netlib.sandia.gov/cgi-bin/netlib/netlibfiles.tar?filename=netlib/f2c -o "$(DIRPKG)/f2c.tar"
+f2c:$(F2C_TAR)
+	tar xvf $(F2C_TAR)
 	gunzip -rf f2c/*
 	gunzip -rf f2c/*/*
 	cd f2c;unzip libf2c.zip
@@ -69,7 +71,7 @@ $(DIRINSTALL)/bin/fort77: fort77.sed Makefile
 clean:
 	-rm -rf  f2c *~  a.out
 veryclean: clean 
-	-rm $(LISTINST) f2c.tar
+	-rm $(LISTINST) $(F2C_TAR)
 
 
 

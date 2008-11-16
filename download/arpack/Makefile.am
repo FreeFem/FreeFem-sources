@@ -11,6 +11,9 @@ EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz
 
 # set in configure 
 #ARPACKLIB=ARPACK/libarpack_ff++.a
+DIRPKG=../pkg
+ARPACK96_TAR_GZ=$(DIRPKG)/arpack96.tar.gz
+PATCH_TAR_GZ=$(DIRPKG)/patch.tar.gz
 
 arpack: $(ARPACKLIB)
 
@@ -23,10 +26,10 @@ $(ARPACKLIB): ARPACK/fait
 	-if test -n "FF_LAPACKdir" ; then 	$(AR) $(ARFLAGS) $(LAPACKLIB)  ARPACK/LAPACK/*.o ; fi
 
 
-ARPACK/fait: arpack96.tar.gz patch.tar.gz ARmake.m4 Makefile
+ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
 	-rm -rf ARPACK
-	gunzip -c arpack96.tar.gz | tar xf -
-	gunzip -c patch.tar.gz | tar xf -
+	gunzip -c $(ARPACK96_TAR_GZ) | tar xf -
+	gunzip -c $(PATCH_TAR_GZ) | tar xf -
 	gunzip -c arpack-patch-lapack.tar.gz | tar xf -
 	for i in ARPACK/SRC/*.f ; do \
 	    mv  $$i $$i.cpy; sed 's/call *second/call secnd2/' <$$i.cpy >$$i;rm $$i.cpy; done 
@@ -51,12 +54,11 @@ ARPACK/fait: arpack96.tar.gz patch.tar.gz ARmake.m4 Makefile
 	touch ARPACK/fait
 	cd ARPACK/LAPACK;
 
-arpack96.tar.gz:
-	@WGET@ -N http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz
+$(ARPACK96_TAR_GZ):
+	cd $(DIRPKG);@WGET@ -N http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz
 
-patch.tar.gz:
-	@WGET@ -N http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz
+$(PATCH_TAR_GZ):
+	cd $(DIRPKG);@WGET@ -N http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz
 
 clean-local:
-	-rm -r arpack++.tar.gz arpack++
-	-rm -r arpack96.tar.gz patch.tar.gz ARPACK
+	-rm -r ARPACK

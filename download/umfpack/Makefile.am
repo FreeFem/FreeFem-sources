@@ -9,6 +9,9 @@ EXTRA_DIST=UFconfig_mk.m4
 # Downloading and compiling UMFPACK
 # ---------------------------------
 
+DIRPKG=../pkg
+SUITESPARSE_TGZ=$(DIRPKG)/SuiteSparse-2.4.0.tar.gz
+
 UMFPACKLIB=../lib/libumfpack.a 
 AMDLIB=../lib/libamd.a
 
@@ -37,8 +40,8 @@ UMFPACKv4.4:
 UMFPACKv4.4/AMD/Makefile2 UMFPACKv4.4/UMFPACK/Makefile2: UMFPACKv4.4  
 	sed 's/lib:/libb:/' < UMFPACKv4.4/UMFPACK/`basename $@ 2`  >$@
 
-SuiteSparse/DATE:SuiteSparse-2.4.0.tar.gz
-	tar zxvf SuiteSparse-2.4.0.tar.gz
+SuiteSparse/DATE:$(SUITESPARSE_TGZ)
+	tar zxvf $(SUITESPARSE_TGZ)
 	touch SuiteSparse/DATE
 SuiteSparse/FF:SuiteSparse/DATE  SuiteSparse/UFconfig/UFconfig.mk
 	touch SuiteSparse/FF
@@ -78,8 +81,8 @@ UMFPACK_Make.m4: Makefile UMFPACKv4.4
 	fi; 
 UMFPACKv4.4.tar.gz:
 	@WGET@ -N http://www.cise.ufl.edu/research/sparse/umfpack/v4.4/UMFPACKv4.4.tar.gz
-SuiteSparse-2.4.0.tar.gz:
-	@WGET@ -N http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-2.4.0.tar.gz
+$(SUITESPARSE_TGZ):
+	cd $(DIRPKG);@WGET@ -N http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-2.4.0.tar.gz
 
 clean-local:
 	-rm -rf UMFPACKv4.?.tar.gz UMFPACKv4.?
