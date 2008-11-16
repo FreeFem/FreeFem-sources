@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-SOURCES = $(medit_SOURCES)
+SOURCES = $(ffmedit_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -37,7 +37,7 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = $(am__EXEEXT_1)
-EXTRA_PROGRAMS = medit$(EXEEXT)
+EXTRA_PROGRAMS = ffmedit$(EXEEXT)
 subdir = src/medit
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -53,7 +53,7 @@ am__EXEEXT_1 = @MEDITPROG@
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_medit_OBJECTS = animat.$(OBJEXT) cube.$(OBJEXT) image.$(OBJEXT) \
+am_ffmedit_OBJECTS = animat.$(OBJEXT) cube.$(OBJEXT) image.$(OBJEXT) \
 	listnum.$(OBJEXT) mouse.$(OBJEXT) persp.$(OBJEXT) \
 	stream.$(OBJEXT) zaldy2.$(OBJEXT) bbfile.$(OBJEXT) \
 	dlists.$(OBJEXT) inmsh2.$(OBJEXT) material.$(OBJEXT) \
@@ -70,8 +70,8 @@ am_medit_OBJECTS = animat.$(OBJEXT) cube.$(OBJEXT) image.$(OBJEXT) \
 	critip.$(OBJEXT) ilists.$(OBJEXT) keyboard.$(OBJEXT) \
 	morphing.$(OBJEXT) path.$(OBJEXT) status.$(OBJEXT) \
 	zaldy1.$(OBJEXT)
-medit_OBJECTS = $(am_medit_OBJECTS)
-medit_LDADD = $(LDADD)
+ffmedit_OBJECTS = $(am_ffmedit_OBJECTS)
+ffmedit_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -80,8 +80,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(medit_SOURCES)
-DIST_SOURCES = $(medit_SOURCES)
+SOURCES = $(ffmedit_SOURCES)
+DIST_SOURCES = $(ffmedit_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -258,7 +258,7 @@ target_alias = @target_alias@
 # ----------------------------------
 # $Id$
 CXXLD = $(STATICTOOL) $(CXX)
-medit_SOURCES = \
+ffmedit_SOURCES = \
 animat.c		cube.c			image.c			listnum.c		mouse.c			persp.c			stream.c		zaldy2.c \
 bbfile.c		dlists.c		inmsh2.c		material.c		normal.c		picking.c		tiles.c \
 camera.c		ellipse.c		inout.c			medit.c			param.c			psfile.c		transform.c \
@@ -267,7 +267,7 @@ clip.c			gisfil.c		inout_popenbinaire.c	mesh.c			parsop.c		scissor.c		vector.c \
 clipvol.c		hash.c			items.c			mlists.c		particle.c		sftcpy.c		view.c \
 critip.c		ilists.c		keyboard.c		morphing.c		path.c			status.c		zaldy1.c
 
-medit_DEPENDENCIES = 
+ffmedit_DEPENDENCIES = 
 LDADD = ../libMesh/libMesh.a $(LIBSGLUT)
 INCLUDES = -I../libMesh
 all: all-am
@@ -326,9 +326,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-medit$(EXEEXT): $(medit_OBJECTS) $(medit_DEPENDENCIES) 
-	@rm -f medit$(EXEEXT)
-	$(LINK) $(medit_LDFLAGS) $(medit_OBJECTS) $(medit_LDADD) $(LIBS)
+ffmedit$(EXEEXT): $(ffmedit_OBJECTS) $(ffmedit_DEPENDENCIES) 
+	@rm -f ffmedit$(EXEEXT)
+	$(LINK) $(ffmedit_LDFLAGS) $(ffmedit_OBJECTS) $(ffmedit_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
