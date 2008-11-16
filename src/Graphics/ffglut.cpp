@@ -1422,9 +1422,8 @@ int main(int argc,  char** argv)
     void * argu[2]={ (void *) & argc, (void*) argv};
     int ok;
 //    ok=pthread_mutex_init(&mutex_readdata,0);
-//    ok=pthread_mutex_init(&wait_next_read,0);
-    
-    ffassert(!ok);
+//    ok=pthread_mutex_init(&wait_next_read,0);    
+//    ffassert(!ok);
     ok=pthread_create(&tid_readdata,NULL,readdata,(void *) argu);
     ffassert(!ok);
     
