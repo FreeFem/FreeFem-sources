@@ -537,8 +537,8 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	// Finding eigenvalues and eigenvectors.                                                                                                   
 	  if(nconv)
 	    {
-	      KN<double> evr(nbev+1), evi(nbev+1);// miss +1 corrrect FH oct 2008
-	      KNM<double> Z(n,nbev+1); // miss +1 corrrect FH oct 2008
+	      KN<double> evr(nbev), evi(nbev);
+	      KNM<double> Z(n,nbev);
 	      KN<double> workev(3*ncv);
 	      int ldz=n;
 	      char HowMny ='A';
