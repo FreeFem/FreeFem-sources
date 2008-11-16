@@ -267,7 +267,7 @@ clip.c			gisfil.c		inout_popenbinaire.c	mesh.c			parsop.c		scissor.c		vector.c \
 clipvol.c		hash.c			items.c			mlists.c		particle.c		sftcpy.c		view.c \
 critip.c		ilists.c		keyboard.c		morphing.c		path.c			status.c		zaldy1.c
 
-ffmedit_DEPENDENCIES = 
+ffmedit_DEPENDENCIES = compil.date
 LDADD = ../libMesh/libMesh.a $(LIBSGLUT)
 INCLUDES = -I../libMesh
 all: all-am
@@ -568,6 +568,10 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
+
+compil.date: 
+	echo "#define COMPIL " '"' `date` '(with ff++ $(VERSION))''"' > compil.date
+.PHONY: compil.date
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
