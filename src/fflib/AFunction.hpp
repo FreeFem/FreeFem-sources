@@ -1510,7 +1510,7 @@ class E_Array  :public E_F0 {  public:
   operator aType () const { return atype<void>();} 
  
   };
-  
+class PlotStream;  
 class E_Border ;
 class E_BorderN :public E_F0mps { public: 
    const E_Border * b;
@@ -1555,6 +1555,8 @@ class E_BorderN :public E_F0mps { public:
   void code(Stack stack) const ;
   long label()const  ;
   void Plot(Stack stack) const ;
+  void SavePlot(Stack stack,PlotStream & plot ) const;
+    
   void BoundingBox(Stack stack,double  &xmin,double & xmax, double & ymin,double & ymax) const ;
 };
 

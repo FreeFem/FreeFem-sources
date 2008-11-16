@@ -98,6 +98,7 @@
 		3D9B0EC30C8495C0008A8F03 /* RNM_opc.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB20C8495C0008A8F03 /* RNM_opc.hpp */; };
 		3D9B0EC40C8495C0008A8F03 /* RNM_tpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB30C8495C0008A8F03 /* RNM_tpl.hpp */; };
 		3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB40C8495C0008A8F03 /* RNM.hpp */; };
+		3DB73EFB0EB635950083AFB9 /* PlotStream.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DB73EFA0EB635950083AFB9 /* PlotStream.hpp */; };
 		3DBBD59D0C356C5B007E5F45 /* vecLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D90DDED097050AC002A1826 /* vecLib.framework */; };
 		3DBBD5AF0C356E99007E5F45 /* lgalgo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC6299409723FE000D487F6 /* lgalgo.cpp */; };
 		3DBBD5BC0C356EEE007E5F45 /* string_def.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */; };
@@ -198,6 +199,7 @@
 		3D9B0EB30C8495C0008A8F03 /* RNM_tpl.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = RNM_tpl.hpp; path = ../src/femlib/RNM_tpl.hpp; sourceTree = SOURCE_ROOT; };
 		3D9B0EB40C8495C0008A8F03 /* RNM.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = RNM.hpp; path = ../src/femlib/RNM.hpp; sourceTree = SOURCE_ROOT; };
 		3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libfflib.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DB73EFA0EB635950083AFB9 /* PlotStream.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PlotStream.hpp; sourceTree = "<group>"; };
 		3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = string_def.cpp; sourceTree = "<group>"; };
 		3DBBD5E50C3573DA007E5F45 /* mymain.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = mymain.cpp; sourceTree = "<group>"; };
 		3DC6296009723F8E00D487F6 /* Mesh2.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh2.cpp; path = ../src/bamglib/Mesh2.cpp; sourceTree = SOURCE_ROOT; };
@@ -253,6 +255,7 @@
 		3DC62AF2097299D800D487F6 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
 		3DC62AF6097299F400D487F6 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		3DC62AFC09729A7400D487F6 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = /System/Library/Frameworks/AGL.framework; sourceTree = "<absolute>"; };
+		3DCC78380EC0B11C00ED5A17 /* ffglut.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ffglut.hpp; path = ../src/Graphics/ffglut.hpp; sourceTree = SOURCE_ROOT; };
 		3DDEA1800DFFD92F00F54E1C /* GenericMesh.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = GenericMesh.hpp; path = ../src/femlib/GenericMesh.hpp; sourceTree = SOURCE_ROOT; };
 		3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = GQuadTree.cpp; path = ../src/femlib/GQuadTree.cpp; sourceTree = SOURCE_ROOT; };
 		3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = lgmesh3.cpp; sourceTree = "<group>"; };
@@ -308,6 +311,7 @@
 		3D90DC7D097012B3002A1826 = {
 			isa = PBXGroup;
 			children = (
+				3DCC78380EC0B11C00ED5A17 /* ffglut.hpp */,
 				3DC62AFC09729A7400D487F6 /* AGL.framework */,
 				3DC62AF6097299F400D487F6 /* OpenGL.framework */,
 				3DC62AF2097299D800D487F6 /* GLUT.framework */,
@@ -358,6 +362,7 @@
 		3D90DCAD097015B3002A1826 /* fflib */ = {
 			isa = PBXGroup;
 			children = (
+				3DB73EFA0EB635950083AFB9 /* PlotStream.hpp */,
 				3D90DCDC097015B4002A1826 /* AddNewFE.h */,
 				3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */,
 				3D90DCDD097015B4002A1826 /* AFunction.cpp */,
@@ -551,6 +556,7 @@
 				3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */,
 				3DDEA1820DFFD92F00F54E1C /* GenericMesh.hpp in Headers */,
 				3D338F980E069DF400E1E7E8 /* GQuadTree.hpp in Headers */,
+				3DB73EFB0EB635950083AFB9 /* PlotStream.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

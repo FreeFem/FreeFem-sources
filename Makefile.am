@@ -42,10 +42,10 @@ history:
 		fi
 
 documentation:
-	cd DOC && make documentation
+	cd DOC && $(MAKE) $(AM_MAKEFLAGS) documentation
 
 DOC/freefem++doc.pdf:
-	cd doc && make freefem++doc.pdf
+	cd $(@D) && $(MAKE) $(AM_MAKEFLAGS) $(@F)
 
 clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
@@ -60,30 +60,30 @@ clean-local::
 # -------------------
 
 quick:
-	cd src/lglib && make
-	cd src/fflib && make
-	cd src/std && make
+	cd src/lglib && $(MAKE) $(AM_MAKEFLAGS)
+	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS)
+	cd src/std && $(MAKE) $(AM_MAKEFLAGS)
 
 agl:
-	cd src/lglib && make
-	cd src/fflib && make
-	cd src/agl&& make
+	cd src/lglib && $(MAKE) $(AM_MAKEFLAGS)
+	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS)
+	cd src/agl && $(MAKE) $(AM_MAKEFLAGS)
 
 nw:
-	cd src/lglib && make
-	cd src/fflib && make
-	cd src/nw&& make
+	cd src/lglib && $(MAKE) $(AM_MAKEFLAGS)
+	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS)
+	cd src/nw && $(MAKE) $(AM_MAKEFLAGS)
 
 bamg:
-	cd src/lglib && make
-	cd src/fflib && make
-	cd src/bamg && make
+	cd src/lglib && $(MAKE) $(AM_MAKEFLAGS)
+	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS)
+	cd src/bamg && $(MAKE) $(AM_MAKEFLAGS)
 
 ide:
-	cd download && make
-	cd src/lglib && make
-	cd src/fflib && make
-	cd src/ide && make FreeFem++-cs$(EXEEXT)
+	cd download && $(MAKE) $(AM_MAKEFLAGS) 
+	cd src/lglib && $(MAKE) $(AM_MAKEFLAGS) 
+	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS) 
+	cd src/ide && $(MAKE) $(AM_MAKEFLAGS) FreeFem++-cs$(EXEEXT)
 
 # Cleaning generated files which are stored in the CVS repository, to
 # avoid technical CVS conflicts.
@@ -99,10 +99,10 @@ clean-gen:
 # of the workspace).
 
 visualcheck: all
-	make check VISUALCHECK=yes
+	$(MAKE) $(AM_MAKEFLAGS) check VISUALCHECK=yes
 
 speedtest: all
-	cd examples++-other && make check
+	cd examples++-other && $(MAKE) $(AM_MAKEFLAGS) check
 
 # Windows package
 # ---------------

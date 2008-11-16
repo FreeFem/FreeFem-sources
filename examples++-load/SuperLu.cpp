@@ -8,7 +8,20 @@ using namespace std;
 //#include "lex.hpp"
 #include "MatriceCreuse_tpl.hpp"
 #include "slu_ddefs.h"
+#define GlobalLU_t GlobalLU_txxx
+#define countnz countnzxxx
+#define fixupL fixupLxxx
+#define  print_lu_col print_lu_colxxx
+#define   check_tempv check_tempvxxx
+#define PrintPerf PrintPerfxxxx
 #include "slu_zdefs.h"
+#undef GlobalLU_t
+#undef countnz
+#undef fixupL
+#undef print_lu_col
+#undef check_tempv
+#undef PrintPerf
+
 
 template <class R> struct SuperLUDriver
 {

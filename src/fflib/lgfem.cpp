@@ -49,6 +49,7 @@ using namespace std;
 #include "Operator.hpp" 
 
 #include <set>
+#include <map>
 #include <vector>
 
 #include "lex.hpp"
@@ -59,7 +60,7 @@ using namespace std;
 #include "CGNL.hpp"
 #include "AddNewFE.h"
 #include "array_resize.hpp"
-
+#include "PlotStream.hpp"
 namespace bamg { class Triangles; }
 namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso); }
 
@@ -69,7 +70,7 @@ static bool TheWait=false;
 bool  NoWait=false;
 
 extern long verbosity;
-extern ostream *ThePlotStream; //  Add for new plot. FH oct 2008
+extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
 void init_lgmesh() ;
 
 namespace FreeFempp {
@@ -2434,46 +2435,135 @@ void Show(const char * s,int k=1)
 
 AnyType Plot::operator()(Stack s) const  { 
   if(ThePlotStream)
-    {   const char * newplot= "NewPlot\n";
-	const char * endplot= "EndPlot\n";
-	const char * endnarg= "EndNameArg\n";
-	ThePlotStream->write(newplot,strlen(newplot));
-	if (nargs[0]) *ThePlotStream<< 0 <<' ' << GetAny<double>((*nargs[0])(s))<<'\n';
-	if (nargs[1]) *ThePlotStream<< 1 <<' ' <<GetAny<string *>((*nargs[1])(s))<<'\n';
-	if (nargs[2]) *ThePlotStream<< 2 <<' ' << GetAny<string*>((*nargs[2])(s))<<'\n';
-	if (nargs[3]) *ThePlotStream<< 3 <<' ' <<GetAny<bool>((*nargs[3])(s))<<'\n';
-	if (nargs[4]) *ThePlotStream<< 4 <<' ' <<GetAny<bool>((*nargs[4])(s))<<'\n';
-	if (nargs[5]) *ThePlotStream<< 5 <<' ' <<GetAny<bool>((*nargs[5])(s))<<'\n';
-	if (nargs[6]) *ThePlotStream<< 6 <<' ' <<GetAny<bool>((*nargs[6])(s))<<'\n';
-	if (nargs[7]) *ThePlotStream<< 7 <<' ' <<GetAny<bool>((*nargs[7])(s))<<'\n';
+    { 
+	PlotStream theplot(ThePlotStream);
+	pferbase  fe=0,fe1=0;
+	int cmp0,cmp1;
+	theplot.SendNewPlot();
+	if (nargs[0]) theplot<< 0L <<  GetAny<double>((*nargs[0])(s));
+	if (nargs[1]) theplot<< 1L <<GetAny<string *>((*nargs[1])(s));
+	if (nargs[2]) theplot<< 2L << GetAny<string*>((*nargs[2])(s));
+	if (nargs[3]) theplot<< 3L  <<(bool) (!NoWait &&  GetAny<bool>((*nargs[3])(s)));
+	else theplot<< 3L  <<  (bool) (TheWait&& !NoWait);
+	if (nargs[4]) theplot<< 4L  <<GetAny<bool>((*nargs[4])(s));
+	if (nargs[5]) theplot<< 5L <<GetAny<bool>((*nargs[5])(s));
+	if (nargs[6]) theplot<< 6L <<GetAny<bool>((*nargs[6])(s));
+	if (nargs[7]) theplot<< 7L  <<GetAny<bool>((*nargs[7])(s));
 	if (nargs[8])  
 	  {  KN<double> bbox(4);
 	    for (int i=0;i<4;i++)
 		bbox[i]= GetAny<double>((*bb[i])(s));
 	      
-	      *ThePlotStream<< 8 << ' ' << bb <<endl;
+	      theplot<< 8L << bbox ;
 	  }
-	if (nargs[9])  *ThePlotStream<< 9 << ' ' <<  GetAny<long>((*nargs[9])(s));
-	if (nargs[10])  *ThePlotStream<< 10 << ' ' << GetAny<long>((*nargs[10])(s));
+	if (nargs[9])  theplot<< 9L  <<  GetAny<long>((*nargs[9])(s));
+	if (nargs[10])  theplot<< 10L << GetAny<long>((*nargs[10])(s));
 	if (nargs[11]) { 
 	    KN_<double> v =GetAny<KN_<double> >((*nargs[11])(s)) ;
-	    *ThePlotStream<< 11 << ' ' << v << endl    ;}
+	    theplot<< 11L  << v   ;}
 	
 	if (nargs[12]) 
-	    *ThePlotStream<< 12 << GetAny<KN_<double> >((*nargs[12])(s)) ;
+	    theplot<< 12L <<  GetAny<KN_<double> >((*nargs[12])(s)) ;
 	   
 
 	
-	if (nargs[13]) *ThePlotStream<< 12 << ' ' << GetAny<bool>((*nargs[13])(s));
-	if (nargs[14]) *ThePlotStream<< 14 << ' ' <<GetAny<bool>((*nargs[14])(s));
+	if (nargs[13]) theplot<< 13L  << GetAny<bool>((*nargs[13])(s));
+	if (nargs[14]) theplot<< 14L <<GetAny<bool>((*nargs[14])(s));
 	if (nargs[15]) 
-	    *ThePlotStream<< 15 << ' ' << GetAny<KN_<double> >((*nargs[15])(s));
-	if (nargs[16]) *ThePlotStream<< 16 << ' ' << GetAny<bool>((*nargs[16])(s));	
-	ThePlotStream->write(newplot,strlen(endnarg));
-	ThePlotStream->write(newplot,strlen(endplot));
+	    theplot<< 15L  << GetAny<KN_<double> >((*nargs[15])(s));
+	if (nargs[16]) theplot<< 16L  << GetAny<bool>((*nargs[16])(s));	
+	theplot.SendEndArgPlot();
+	map<const Mesh *,long> mapth;
+	long kth=0;
+	//  send all the mesh: 
+	for (size_t i=0;i<l.size();i++)
+	  {
+	      long what = l[i].what;
+	      const Mesh *th=0;
+	      if(what ==0)
+		  th= & (l[i].evalm(0,s));
+	      else if (what==1 || what==2)
+		{   
+		    fe=  l[i].eval(0,s,cmp0);
+		    fe1= l[i].eval(1,s,cmp1);
+		    if (fe->x()) th=&fe->Vh->Th;
+		    if(fe1 && fe1->x()) {
+			th == &fe1->Vh->Th;
+			assert(th);
+		    };
+		}
+	     if(th)
+		if(mapth.find(th)==mapth.end())
+		  {
+		    mapth[th]=++kth;
+		  }
+	  }
+	theplot.SendMeshes();
+	theplot << kth ;
+	for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i)
+	  {
+	      theplot << i->second << *  i->first ;
+	  }
+	theplot.SendPlots();	
+	theplot <<(long) l.size(); 
+	for (size_t i=0;i<l.size();i++)
+	  {
+	      long what = l[i].what;
+	      theplot << what ; 
+	      if(what ==0)
+		  theplot <<mapth[ &l[i].evalm(0,s)];// numero du maillage
+	      else if (what==1 || what==2)
+		{    int lg,nsb;
+		    fe=  l[i].eval(0,s,cmp0);
+		    fe1= l[i].eval(1,s,cmp1);
+		    if(what==1)
+		      {
+			  if (!fe->x()) continue;		 
+			  theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
+			  //int lg,nsb;
+			  // R *  FESpace::newSaveDraw(const KN_<R> & U,int composante,int & lg,int & nsb) const
+			  KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),cmp0,lg,nsb);
+			  
+			  cout << " what: " << what << " " << nsb << " "<< V1.N() << " "  << V1.max() << " " << V1.min() << endl;
+			  theplot <<(long) nsb<< V1;
+			  
+			  //fe->Vh->SendDraw(ThePlotStream,*fe->x(),cmp0);
+		      }
+		    else
+		      {
+			  
+			  if (!fe->x()) continue;
+			  if (!fe1->x()) continue;	
+			  
+			  KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),*fe1->x(),cmp0,cmp1,lg,nsb);
+			  theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
+			  theplot << (long) nsb<< V1;
+			  //     R *  FESpace::newSaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,int & lg,int & nsb) const 
+			  
+			  
+			  //fe->Vh->Th.SendPlot(ThePlotStream);		     
+			  //fe->Vh->SendDraw(ThePlotStream,*fe->x(),cmp0,*fe1->x(),cmp1);
+		      }
+		    
+		}
+	      else if (l[i].what==3 )
+		{
+		    tab x=l[i].evalt(0,s);
+		    tab y=l[i].evalt(1,s);
+		    cout << "tab: " << x.N() << " " << y.N() <<  endl;
+		    theplot << x << y ;
+		}
+	      else if (l[i].what==4 )
+		{
+		    const  E_BorderN * Bh= l[i].evalb(0,s);
+		    Bh->SavePlot(s,theplot);
+		}
+	      else
+		  ffassert(0);// erreur type theplot inconnue
+	  }
 	
-	
-    }
+	theplot.SendEndPlot();
+    } 
   if (!withrgraphique) {initgraphique();withrgraphique=true;}
   viderbuff();
   MeshPoint *mps=MeshPointStack(s),mp=*mps ;
@@ -3356,6 +3446,7 @@ AnyType TypeOfFE3to2(Stack,const AnyType &b) {
 
 void  init_lgfem() 
 {
+ // ThePlotStream = new ofstream("ttttt.plot");
   if(verbosity) cout <<"lg_fem ";
 #ifdef HAVE_CADNA
   cout << "cadna ";

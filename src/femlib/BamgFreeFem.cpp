@@ -40,6 +40,7 @@ extern long verbosity ;
 #include <cmath>
 #include <ctime>
 #include <iomanip>
+#include <fstream>
 using namespace std;
 
 #include "Meshio.h"
@@ -55,7 +56,7 @@ using namespace std;
 #include "FESpace.hpp"
 #include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
-
+#include "PlotStream.hpp"
 
 Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
 { 
@@ -718,6 +719,46 @@ void E_BorderN::Plot(Stack stack) const
     }
   if(verbosity>9) cout << " -- Plot size : " << nbd << " Border \n";
   mp=mps; 
+}
+void E_BorderN::SavePlot(Stack stack,PlotStream & plot ) const
+{  
+    using Fem2D::R2;
+    
+    Fem2D::MeshPoint & mp (*Fem2D::MeshPointStack(stack)), mps = mp;
+    //float x0,x1,y0,y1;
+    //getcadre(x0,x1,y0,y1);
+    //float h= (x1-x0)*0.01;
+    
+    long nbd1=0;
+    for (E_BorderN const * k=this;k;k=k->next)
+	nbd1++;
+   plot << nbd1;
+   int nbd=0;
+    for (E_BorderN const * k=this;k;k=k->next)
+      {
+	  nbd++;
+	  assert(k->b->xfrom); // a faire 
+	  double & t = *  k->var(stack);
+	  double a(k->from(stack)),b(k->to(stack));
+	  long n=Max(Abs(k->Nbseg(stack)),1L);     
+	  t=a;
+	  double delta = (b-a)/n;
+	  R2 P,Po;
+	  plot<< (long) n;
+	  for (int  nn=0;nn<=n;nn++, t += delta)
+	    {
+		if (nn==n) t=b; // to remove roundoff error 
+		mp.label = k->label();
+		mp.P.z=0;
+		k->code(stack); // compute x,y, label
+		P=mp.P.p2();
+		plot << (long) mp.label <<P.x << P.y;
+	    }
+	 
+      }
+    assert(nbd==nbd1);
+    if(verbosity>9) cout << " -- Plot size : " << nbd << " Border \n";
+    mp=mps; 
 }
 
 Fem2D::Mesh *  BuildMeshBorder(Stack stack, E_BorderN const * const & b) 
