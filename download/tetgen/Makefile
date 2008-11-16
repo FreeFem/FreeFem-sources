@@ -10,9 +10,9 @@ all-local: tetgen
 # ------------------------------
 
 # Tetgen information
-
+DIRPKG=../pkg
 SRCDIR=tetgen$(tetgen_VERSION)
-PACKAGE=tetgen$(tetgen_VERSION).tar.gz
+PACKAGE=$(DIRPKG)/tetgen$(tetgen_VERSION).tar.gz
 SERVER=http://www.wias-berlin.de/people/si
 INSTALL=../..
 tetgen_VERSION=1.4.2
@@ -28,9 +28,12 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR) cxxflags
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
+	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
 
 $(PACKAGE):
-	curl  -O  $(SERVER)/$(PACKAGE)
+	cd $(DIRPKG);curl  -O  $(SERVER)/$(PACKAGE)
+
+
 
 clean-local:
 	-rm -rf tetgen*

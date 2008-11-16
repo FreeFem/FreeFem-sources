@@ -2,6 +2,11 @@
 # -----------------------------------------
 
 # $Id$
+DIRPKG=../pkg
+ATLAS_TAR=$(DIRPKG)/atlas3.6.0.tar.bz2
+BLAS_TGZ=$(DIRPKG)/blas.tgz
+CBLAS_TGZ=$(DIRPKG)/cblas.tgz
+
 
 ATLASSRCLIB=ATLAS/lib/ff++/libatlas.a ATLAS/lib/ff++/libcblas.a	\
 	ATLAS/lib/ff++/libf77blas.a
@@ -19,15 +24,15 @@ atlas-binary: $(ATLASBINLIB)
 $(ATLASSRCLIB): ATLAS/Make.ff++
 	cd ATLAS && make install arch=ff++
 
-ATLAS/Make.ff++: atlas3.6.0.tar.bz2
-	tar -x --bzip -f atlas3.6.0.tar.bz2
+ATLAS/Make.ff++: $(ATLAS_TAR)
+	tar -x --bzip -f $(ATLAS_TAR)
 	@echo In the following questions, \"Architecture name\" must be ff++
 	@echo "(Press ENTER)"
 	@read
 	cd ATLAS && make
 
-atlas3.6.0.tar.bz2:
-	@WGET@ -N http://heanet.dl.sourceforge.net/sourceforge/math-atlas/atlas3.6.0.tar.bz2
+$(ATLAS_TAR):
+	cd $(DIRPKG);@WGET@ -N http://heanet.dl.sourceforge.net/sourceforge/math-atlas/atlas3.6.0.tar.bz2
 
 clean-local::
 	-rm atlas*.tar.bz2
@@ -165,11 +170,11 @@ libcblas_a_CFLAGS=-DADD_
 
 BLAS:BLAS/fait
 
-BLAS/fait:blas.tgz
-	-if tar xvzf blas.tgz BLAS/xerbla.f 2>&1 1>/dev/null ; then \
-	tar xvzf blas.tgz ; \
+BLAS/fait:$(BLAS_TGZ)
+	-if tar xvzf $(BLAS_TGZ) BLAS/xerbla.f 2>&1 1>/dev/null ; then \
+	tar xvzf $(BLAS_TGZ) ; \
 	else \
-	mkdir -p BLAS;cd BLAS && tar xvzf ../blas.tgz;\
+	mkdir -p BLAS;cd BLAS && tar xvzf ../$(BLAS_TGZ);\
 	fi
 	cp BLAS/xerbla.f blas_xerbla.f
 	touch BLAS/fait
@@ -177,18 +182,18 @@ $(F77BLAS_SOURCES): BLAS
 
 CBLAS:CBLAS/fait
 
-CBLAS/fait: cblas.tgz
-	tar xvzf cblas.tgz
+CBLAS/fait: $(CBLAS_TGZ)
+	tar xvzf $(CBLAS_TGZ)
 	touch CBLAS/fait
 $(CBLAS_SOURCES): CBLAS/fait
 
-blas.tgz:
-	@WGET@ -N http://www.netlib.org/blas/blas.tgz
+$(BLAS_TGZ):
+	cd $(DIRPKG);@WGET@ -N http://www.netlib.org/blas/blas.tgz
 
-cblas.tgz:
-	@WGET@ -N http://www.netlib.org/blas/blast-forum/cblas.tgz
+$(CBLAS_TGZ):
+	cd $(DIRPKG);@WGET@ -N http://www.netlib.org/blas/blast-forum/cblas.tgz
 
 
 clean-local::
 	-rm -r BLAS CBLAS blas_xerbla.f
-	-rm blas.tgz cblas.tgz
+

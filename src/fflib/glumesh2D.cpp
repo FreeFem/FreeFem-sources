@@ -346,7 +346,28 @@ typedef Mesh *pmesh;
 //  truc pour que la fonction 
 // Init::Init() soit appele a moment du chargement dynamique
 // du fichier 
-//  
+//
+#ifndef  DYNAMICS_LIBS
+void init_glumesh2D()
+{
+  Dcl_Type<listMesh>();
+  typedef Mesh *pmesh;
+  
+  //Dcl_Type<listMesh3>();
+  //typedef Mesh3 *pmesh3;
+  
+  if (verbosity)
+    cout << " load: glumesh2D  " << endl;
+  //cout << " je suis dans Init " << endl; 
+  TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );
+  TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,listMesh,pmesh>  >      );
+  TheOperators->Add("=",new OneBinaryOperator_st< Op2_setmesh<false,pmesh*,pmesh*,listMesh>  >     );
+  TheOperators->Add("<-",new OneBinaryOperator_st< Op2_setmesh<true,pmesh*,pmesh*,listMesh>  >     );
+  
+  Global.Add("change","(",new SetMesh);
+
+}
+#else  
 class Init { public:
   Init();
 };
@@ -371,3 +392,4 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Global.Add("change","(",new SetMesh);
 
 }
+#endif

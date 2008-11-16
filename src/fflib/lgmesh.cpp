@@ -1564,6 +1564,8 @@ void init_lgmesh() {
 // use for :   mesh Th = readmesh ( ...);       
   TheOperators->Add("<-",
        new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));
+  extern void init_glumesh2D();
+  init_glumesh2D();
    
 }
 #include "InitFunct.hpp"

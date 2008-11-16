@@ -70,7 +70,7 @@ am__objects_1 = AFunction.$(OBJEXT) AFunction2.$(OBJEXT) \
 	environment.$(OBJEXT) string_def.$(OBJEXT) FESpacen.$(OBJEXT) \
 	P012_1d.$(OBJEXT) P012_2d.$(OBJEXT) P012_3d.$(OBJEXT) \
 	Mesh1dn.$(OBJEXT) Mesh2dn.$(OBJEXT) Mesh3dn.$(OBJEXT) \
-	GQuadTree.$(OBJEXT) libmesh5.$(OBJEXT)
+	GQuadTree.$(OBJEXT) libmesh5.$(OBJEXT) glumesh2D.$(OBJEXT)
 am_libff_a_OBJECTS = $(am__objects_1) strversionnumber.$(OBJEXT)
 libff_a_OBJECTS = $(am_libff_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -291,6 +291,7 @@ environment.cpp environment.hpp string_def.cpp \
 ../femlib/Mesh3dn.cpp \
 ../femlib/GQuadTree.cpp \
 ../femlib/libmesh5.c \
+glumesh2D.cpp \
 ../Eigen/arpackff.hpp 
 
 libff_a_SOURCES = $(libff_a_SOURCES2)  strversionnumber.cpp 
@@ -393,6 +394,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gibbs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/global.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/glumesh2D.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lgalgo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lgfem.Po@am__quote@
