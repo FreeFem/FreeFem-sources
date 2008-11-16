@@ -21,7 +21,7 @@
 # This is not compiled as a separate library because its
 # interconnections with other libraries have not been solved.
 
-SOURCES = $(libmesh_a_SOURCES)
+SOURCES = $(libMesh_a_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -55,11 +55,11 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
-libmesh_a_AR = $(AR) $(ARFLAGS)
-libmesh_a_LIBADD =
-am_libmesh_a_OBJECTS = chrono.$(OBJEXT) eigenv.$(OBJEXT) \
+libMesh_a_AR = $(AR) $(ARFLAGS)
+libMesh_a_LIBADD =
+am_libMesh_a_OBJECTS = chrono.$(OBJEXT) eigenv.$(OBJEXT) \
 	libmesh3.$(OBJEXT) libmesh5.$(OBJEXT) memory.$(OBJEXT)
-libmesh_a_OBJECTS = $(am_libmesh_a_OBJECTS)
+libMesh_a_OBJECTS = $(am_libMesh_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -67,8 +67,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libmesh_a_SOURCES)
-DIST_SOURCES = $(libmesh_a_SOURCES)
+SOURCES = $(libMesh_a_SOURCES)
+DIST_SOURCES = $(libMesh_a_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -240,8 +240,8 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-noinst_LIBRARIES = libmesh.a
-libmesh_a_SOURCES = \
+noinst_LIBRARIES = libMesh.a
+libMesh_a_SOURCES = \
 chrono.c eigenv.c libmesh3.c  libmesh5.c memory.c \
 chrono.h	eigenv.h	libmesh3.h	libmesh5.h	memory.h
 
@@ -281,10 +281,10 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libmesh.a: $(libmesh_a_OBJECTS) $(libmesh_a_DEPENDENCIES) 
-	-rm -f libmesh.a
-	$(libmesh_a_AR) libmesh.a $(libmesh_a_OBJECTS) $(libmesh_a_LIBADD)
-	$(RANLIB) libmesh.a
+libMesh.a: $(libMesh_a_OBJECTS) $(libMesh_a_DEPENDENCIES) 
+	-rm -f libMesh.a
+	$(libMesh_a_AR) libMesh.a $(libMesh_a_OBJECTS) $(libMesh_a_LIBADD)
+	$(RANLIB) libMesh.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
