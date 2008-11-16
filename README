@@ -224,7 +224,10 @@ Some configure flags use to build the current version
   the installed packages + dependance are:   
    gcc g++  g77
    wget 
+   m4 bison flex
    libx11-dev  libxt-dev  libxext-dev 
+   freeglut3-dev  libglut3-dev	
+   libglu1-mesa-dev 
    libumfpack4 libumfpack4-dev
    libarpack2 libarpack2-dev
  - to rebuild de documentation:  
