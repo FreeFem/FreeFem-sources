@@ -1,0 +1,10 @@
+--- tetgen1.4.2/tetgen.cxx	2008-11-16 15:32:54.000000000 +0100
++++ tetgen1.4.2-ok/tetgen.cxx	2008-11-16 15:21:47.000000000 +0100
+@@ -25978,6 +25978,7 @@
+   }
+   delete [] oldtetlist;
+   delete [] newtetlist;
++  delete [] newpt; // Add by J. Morice for FreeFem++ (missing delete) Nov 2008
+   // Clear work lists.
+   newsegshlist->clear();
+   spinshlist->clear();
