@@ -31,7 +31,7 @@ $(SRCDIR): $(PACKAGE)
 	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
 
 $(PACKAGE):
-	cd $(DIRPKG);curl  -O  $(SERVER)/$(PACKAGE)
+	cd $(DIRPKG);curl  -O  $(SERVER)/`basename $(PACKAGE)`
 
 
 

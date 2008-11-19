@@ -87,6 +87,7 @@ void * readdata(void *argu)
 	      //donextplot=true;
 
 	      if(debug>0) cout << " Wait : for the next plot :"<< kread << " .... " <<endl;
+	      pthread_mutex_unlock(&mutex_wait_next_read);
 	      pthread_cond_wait( &cond_wait_next_read, &mutex_wait_next_read );	  
 	      pthread_mutex_unlock(&mutex_wait_next_read);
 	      if(debug>0) cout << " OK for the next plot :"<< kread << " .... " <<endl;
@@ -1430,6 +1431,7 @@ int main(int argc,  char** argv)
     // attent de lecture 
     cout << "wait read " << kread << endl;
 
+    pthread_mutex_lock(&mutex_wait_1_read);
     ok=pthread_cond_wait( &cond_wait_1_read, &mutex_wait_1_read );	  
     pthread_mutex_unlock(&mutex_wait_1_read);
     ffassert(!ok);
