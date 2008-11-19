@@ -96,6 +96,7 @@ $(SRCDIR): $(PACKAGE_PATH)
 	touch $(SRCDIR)
 
 $(PACKAGE_PATH):
+	-mkdir $(DIRPKG);
 	cd $(DIRPKG);curl  -O  $(SERVER)$(PACKAGE)
 
 clean-local:
