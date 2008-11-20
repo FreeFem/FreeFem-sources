@@ -203,7 +203,7 @@ public:
   bool windowdump;
   GLdouble modelMatrix[16];
   GLdouble projMatrix[16];
-  int viewport[4];  
+  GLint viewport[4];  
   
   //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
   OneWindow(int h,int w,ThePlot *p);
