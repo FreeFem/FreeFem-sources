@@ -97,7 +97,7 @@ $(SRCDIR): $(PACKAGE_PATH)
 
 $(PACKAGE_PATH):
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);curl  -O  $(SERVER)$(PACKAGE)
+	cd $(DIRPKG);$(WGET)  $(SERVER)$(PACKAGE)
 
 clean-local:
 	-rm -rf superlu*
@@ -116,4 +116,5 @@ ff-FLAGS: ../Makefile  Makefile
 	grep '^AR *='  ../Makefile|grep =  >>$@
 	grep '^ARFLAGS *='  ../Makefile|grep =  >>$@
 	grep '^RANLIB *='    ../Makefile|grep =  >>$@
+	grep '^WGET *='    ../Makefile|grep =  >>$@
 
