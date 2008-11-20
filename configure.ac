@@ -138,7 +138,7 @@ AC_LANG(C++)
 
 # Some useful libraries
 
-AC_CHECK_LIB(pthread,pthread_create,ff_pthread="-lpthread")
+AC_CHECK_LIB(pthread,pthread_create,ff_pthread="-lpthread",ff_pthread="")
 
 # Necessary absolute pathname for local directory when some libraries
 # are used from several different locations (for instance locally in
@@ -466,10 +466,11 @@ then
         if test "$ff_glut_ok" = yes
         then
 	    AC_SUBST(LIBSGLUT,$ff_glut)
-#	    if [ -n  "$ff_pthread" ]; then 
-#	    fi
+	    if test -n  "$ff_pthread" ; then 
+	    	    ff_ffglutprog="ffglut"
+		     AC_SUBST(LIBSPTHREAD,$ff_pthread)
+	    fi
 	    ff_meditprog="ffmedit"
-	    ff_ffglutprog="ffglut"
         fi
 
 fi
