@@ -4,13 +4,8 @@
 #include <GL/glut.h>
 #endif
 
-#include <pthread.h>
-pthread_mutex_t mutex_readdata=PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex_wait_next_read=PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t  cond_wait_next_read=PTHREAD_COND_INITIALIZER;
-pthread_cond_t  cond_wait_1_read=PTHREAD_COND_INITIALIZER;
-pthread_mutex_t mutex_wait_1_read=PTHREAD_MUTEX_INITIALIZER;
-pthread_t tid_readdata;
+//#include <pthread.h>
+
 
 #include <limits>
 #include <cfloat>
@@ -32,6 +27,9 @@ using namespace std;
 #include "fem.hpp"
 #include "RNM.hpp"
 #include "PlotStream.hpp"
+
+
+
 using namespace Fem2D;
 using std::numeric_limits;
 const R pi=M_PI;//4*atan(1.); 
@@ -41,65 +39,72 @@ int debug=2;
 
 #include "ffglut.hpp"
 
+#include "ffthreads.hpp"
+
+//Mutex MutexNextPlot;
+Thread::Id tidRead=0;
 bool NoMorePlot=false;
 ThePlot *currentPlot=0, *nextPlot=0;
-//bool donextplot=true;
-int kread=0;
+bool inThreadRead=false;
+FILE *datafile=0;
 
 static  bool TryNewPlot( void );
 
 
-void * readdata(void *argu)
-{
-  //  read the data in a second thread 
-  //  to have ansynchronous IO 
-    const char ** argv =   (const char **) ((void**) argu)[1];
-    int &  argc =  * (int *) ((void**) argu )[0]  ;
-    //    ffassert(argc>1);
-    FILE * fp=stdin;
-    if(argc>1 && *argv[argc-1] != '-' ) fp=fopen(argv[argc-1],"r");
-    ffassert(fp);
-    PlotStream f(fp);
-    const char *  magic="#!ffglutdata...\n";
-    int err=0;
-    for(int i=0;i<strlen(magic);i++)
-      { int c=getc(fp);
-	err += c != magic[i];
-	if(err) break;
-      }
-    if(err==0) 
-      while ( !  feof(fp) || ferror(fp)) 
-	{ long cas; 
-	  f >> cas;
-	  if (feof(fp)) break;
-	  if((debug > 10)) cout << " readdata " << kread << " cas = " << cas << endl;
-	  if(cas==PlotStream::dt_newplot)  
-	    {
-	      pthread_mutex_lock(&mutex_readdata);
-	      nextPlot = new ThePlot(f,currentPlot,++kread);
-	      pthread_mutex_unlock(&mutex_readdata); 	      
-	      cout << " next is build " << nextPlot<< " wait :" << nextPlot->wait <<  endl;
-	      if(kread==1)
-		{
-		  cout << " send signal read first OK" << endl;
-		  pthread_cond_signal( &cond_wait_1_read);	      
-		}
-	      //donextplot=true;
+void LauchNextRead();
+void WaitNextRead();
+void * ThreadRead(void *fd);
 
-	      if(debug>0) cout << " Wait : for the next plot :"<< kread << " .... " <<endl;
-	      pthread_mutex_unlock(&mutex_wait_next_read);
-	      pthread_cond_wait( &cond_wait_next_read, &mutex_wait_next_read );	  
-	      pthread_mutex_unlock(&mutex_wait_next_read);
-	      if(debug>0) cout << " OK for the next plot :"<< kread << " .... " <<endl;
-	  }
-	  else break;	  
+int kread=-1;
+
+int Fin(int code)
+{
+  WaitNextRead();
+  if(!NoMorePlot)
+    cout << " exit before end  " << endl;
+  exit(NoMorePlot ? 0  : 1);
+}
+
+int   ReadOnePlot(FILE *fp)
+{ 
+  int err=0;
+   if(!fp) return -4; 
+  err= feof(fp) ;
+  if(err) return -2;
+  err= ferror(fp) ;
+  if(err) return -3;
+  PlotStream f(fp);
+  const char *  magic="#!ffglutdata...\n";
+  err=0;
+  // init ..
+  if(kread==-1)
+    {
+      for(int i=0;i<strlen(magic);i++)
+	{ int c=getc(fp);
+	  err += c != magic[i];
+	  if(err) break;
 	}
-    NoMorePlot=true;
-    if(kread==0) {
-      cout << " Error: no graphic data (nberr= " << err << endl;;
-      exit(1);
+      if(err) return err;
+      kread++;
+      if(debug>0) cout << " Read entete " << endl;
     }
-    return 0; 
+  err=1;
+  
+  long cas; 
+  f >> cas;
+  if (feof(fp)) return -1;
+  if((debug > 1)) cout << " ReadOnePlot " << kread+1<< " cas = " << cas << " " << nextPlot << endl;
+  if(cas==PlotStream::dt_newplot)  
+    {
+      assert(nextPlot==0);
+      nextPlot = new ThePlot(f,currentPlot,++kread);
+      cout << " next is build " << nextPlot<< " wait :" << nextPlot->wait << " -> " << kread <<  endl;
+      assert(nextPlot);
+      err=0;
+    }
+  else 
+    cout << " Error Cas inconnue (skip) " << endl;
+  return err;
 }
 
 
@@ -122,17 +127,12 @@ int SendForNextPlot()
   //  to send a event to plot the date sheet.
   // and out a timer to wait to the end of read..
   // every 25/ second..  = 1000/25 = 40 ms
-
   if(NoMorePlot)
     {
     if((debug > 0)) cout << " send signal For Next plot, skip: No More Plot !  " << endl;
     return 0;
     }
-  if((debug > 0)) cout << " send signal For Next Plot  " << endl;
-  pthread_mutex_lock(&mutex_wait_next_read);
-  pthread_cond_signal( &cond_wait_next_read);	      
-  pthread_mutex_unlock(&mutex_wait_next_read);	      	    
-  if((debug > 10)) cout << " continue plot "<< endl;
+  if((debug > 1)) cout << " Try to read read  plot "<< endl;
   //  put a timer for wait to the  end of read
   glutTimerFunc(40,TimerNextPlot,40);
   
@@ -141,32 +141,25 @@ int SendForNextPlot()
 
 static  bool TryNewPlot( void )
 {
-  // the routine to try to seend if the next pot is read or not. 
+  // the routine to try to see if the next plot is read or not. 
   // -----------------------------------------------------------
   bool ret=false;
-  OneWindow * win=CurrentWin();
   if(debug>2)
-  cout << "  TryNewPlot   polt: " << win->theplot << " next = " << nextPlot << endl;;
-  //  if(donextplot)
+    cout << "  TryNewPlot   plot : " << currentPlot << " next = " << nextPlot << endl;;
+  if (nextPlot!=0)
     {
-      int trylock=pthread_mutex_trylock(&mutex_readdata);
-      if( ! trylock) // is already lock ???? 
-	{
-	  if (nextPlot!=0)
-	    {
-	      if(debug>1) cout << " change current plot to: " << nextPlot << " . " << endl;;
-	      AllWindows[glutGetWindow()]->set(nextPlot);
-	      delete currentPlot;
-	      //if(debug) cout << ".\n";
-	      currentPlot=nextPlot;
-	      nextPlot=0;
-	      ret=true;
-	      //	      donextplot=false;
-	    }
-	  pthread_mutex_unlock(&mutex_readdata);
-	}
-      }
-    return ret;    
+      WaitNextRead();
+      if(debug>1) cout << " change current plot to: " << nextPlot << " et  Lock Plot . " << endl;;
+      AllWindows[glutGetWindow()]->set(nextPlot);
+      if(currentPlot) delete currentPlot;
+      // MutexNextPlot.WAIT();      
+      currentPlot=nextPlot;
+      nextPlot=0;
+      // MutexNextPlot.Free();
+      LauchNextRead();  
+      ret=true;
+    }
+  return ret;    
 }
 
 
@@ -491,7 +484,7 @@ OneWindow::OneWindow(int h,int w,ThePlot *p)
 }
 void OneWindow::set(ThePlot *p)
 {
-    ffassert(p);
+  //ffassert(p);
     bool first = !theplot;
     bool change = theplot != p;
     theplot=p;
@@ -1333,7 +1326,7 @@ static void Key( unsigned char key, int x, int y )
     OneWindow * win=CurrentWin();
     switch (key) {
 	case 27: // esc char
-	    exit(0);
+	    Fin(0);
 	    break;
 	case 'w':
 	    if(win)
@@ -1409,38 +1402,62 @@ void SpecialKey(int key, int x, int y)
     glutPostRedisplay();
     
 }
-int Fin()
+
+void LauchNextRead()
 {
-    
-    exit(0);
+  if(!NoMorePlot)
+    {
+      inThreadRead=true;
+      tidRead = Thread::Start(&ThreadRead,(void *) datafile);
+    }
 }
+
+void WaitNextRead()
+{
+  if( inThreadRead )
+    {
+      assert(tidRead!=0);
+      Thread::Wait(tidRead);
+      tidRead =0;
+      inThreadRead=false;;
+    }
+}
+
+void * ThreadRead(void *fd)
+{   
+  int err=0;
+  assert(nextPlot==0);
+  //  MutexNextPlot.WAIT(); 
+  err=ReadOnePlot((FILE*)fd);
+  // MutexNextPlot.Free(); 
+  if(debug)
+    cout << " We Read Plot  : " << kread << " " << nextPlot << " " << err << endl;
+  if(err<0)
+    NoMorePlot=true; 
+  Thread::Exit();
+}
+
+
 int main(int argc,  char** argv)
 {
+
+  try {
+    datafile =stdin;
+    if(argc>1 && *argv[argc-1] != '-' ) datafile=fopen(argv[argc-1],"r");
+    ffassert(datafile);
+    int err=ReadOnePlot(datafile);
+    if(err) throw string(" no plot in file? ");
+    
     bool stereo=false;
     bool fullscreen = false;
-    
-    
-    void * argu[2]={ (void *) & argc, (void*) argv};
-    int ok;
-//    ok=pthread_mutex_init(&mutex_readdata,0);
-//    ok=pthread_mutex_init(&wait_next_read,0);    
-//    ffassert(!ok);
-    ok=pthread_create(&tid_readdata,NULL,readdata,(void *) argu);
-    ffassert(!ok);
-    
-    // attent de lecture 
-    cout << "wait read " << kread << endl;
 
-    pthread_mutex_lock(&mutex_wait_1_read);
-    ok=pthread_cond_wait( &cond_wait_1_read, &mutex_wait_1_read );	  
-    pthread_mutex_unlock(&mutex_wait_1_read);
-    ffassert(!ok);
-	      
-    cout << "on a lue le premier plot." <<endl;
-    /*    while(kread==0)
-      { if((debug > 10)) cout << "whilep  kread " << kread << endl;
-	  sleep(1);
-	  }*/
+
+    if(kread==0) {
+      cout << " Error: no graphic data " << endl; 
+      Fin(1);
+    }
+    
+    cout << "on a lue le premier plot next plot: " << nextPlot << endl;
 
     glutInit(&argc, argv);
 
@@ -1454,18 +1471,14 @@ int main(int argc,  char** argv)
     glutInitWindowSize(Width , Height);
     glutInitWindowPosition(100, 100);
 
-    currentPlot=nextPlot;
-    nextPlot=0;
-    string titre = " FreeFem++ ";
+    string titre = "GLUT/ FreeFem++ ";
     glutCreateWindow(titre.c_str());
     glutPushWindow();
     if (fullscreen)
 	glutFullScreen();
+    
     AllWindows[glutGetWindow()]=new OneWindow(Width , Height,currentPlot); 
-    
-    
-    //   global=new Global(Height,Width,stereo);
-    //   global->MakeListDraw();    
+    TryNewPlot();
     
     glDisable(GL_DEPTH_TEST); 
     glutReshapeFunc( Reshape ); // pour changement de fenetre 
@@ -1475,7 +1488,14 @@ int main(int argc,  char** argv)
     glutMotionFunc(MotionMouse); // les mouvements  de la sourie 
     glutDisplayFunc( Display ); // l'affichage
     glutMainLoop(); 
-    return 0;
+  }
+  catch (const StringErr & s)
+    {
+      cout << " catch error " << s << endl;
+      Fin(2);
+    }
+
+  return 0;
 }
 
 

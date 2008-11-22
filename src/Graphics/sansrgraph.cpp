@@ -342,8 +342,8 @@ void initgraphique()
   fcolor=1;  /* des couleurs */
   SetColorTable(8);
   INITGRAPH = 1;
-  width = 500;
-  height =  300;
+  width = 1500;
+  height =  900;
 }
 
 void closegraphique()
