@@ -59,7 +59,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_FreeFem___nw_OBJECTS = sansrgraph.$(OBJEXT)
 FreeFem___nw_OBJECTS = $(am_FreeFem___nw_OBJECTS)
 FreeFem___nw_LDADD = $(LDADD)
-am_ffglut_OBJECTS = ffglut.$(OBJEXT) gggg.$(OBJEXT)
+am_ffglut_OBJECTS = ffglut.$(OBJEXT) gggg.$(OBJEXT) ffthreads.$(OBJEXT)
 ffglut_OBJECTS = $(am_ffglut_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -245,8 +245,8 @@ target_alias = @target_alias@
 
 # To create statically linked executables (see configure.ac)
 CXXLD = $(STATICTOOL) $(CXX)
-ffglut_SOURCES = ../Graphics/ffglut.cpp ../Graphics/gggg.cpp
-ffglut_DEPENDENCIES = ../fflib/fem.o ../fflib/FQuadTree.o ../fflib/Drawing.o ../fflib/mshptg.o 
+ffglut_SOURCES = ../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads.cpp
+ffglut_DEPENDENCIES = ../fflib/fem.o ../fflib/FQuadTree.o ../fflib/Drawing.o ../fflib/mshptg.o  
 ffglut_LDADD = ../fflib/fem.o ../fflib/FQuadTree.o ../fflib/Drawing.o ../fflib/mshptg.o  @LIBSGLUT@ @LIBSPTHREAD@
 FreeFem___nw_SOURCES = ../Graphics/sansrgraph.cpp
 FreeFem___nw_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
@@ -324,6 +324,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffglut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gggg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sansrgraph.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffthreads.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -380,6 +381,20 @@ gggg.obj: ../Graphics/gggg.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/gggg.cpp' object='gggg.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o gggg.obj `if test -f '../Graphics/gggg.cpp'; then $(CYGPATH_W) '../Graphics/gggg.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/gggg.cpp'; fi`
+
+ffthreads.o: ../Graphics/ffthreads.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ffthreads.o -MD -MP -MF "$(DEPDIR)/ffthreads.Tpo" -c -o ffthreads.o `test -f '../Graphics/ffthreads.cpp' || echo '$(srcdir)/'`../Graphics/ffthreads.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ffthreads.Tpo" "$(DEPDIR)/ffthreads.Po"; else rm -f "$(DEPDIR)/ffthreads.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/ffthreads.cpp' object='ffthreads.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ffthreads.o `test -f '../Graphics/ffthreads.cpp' || echo '$(srcdir)/'`../Graphics/ffthreads.cpp
+
+ffthreads.obj: ../Graphics/ffthreads.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ffthreads.obj -MD -MP -MF "$(DEPDIR)/ffthreads.Tpo" -c -o ffthreads.obj `if test -f '../Graphics/ffthreads.cpp'; then $(CYGPATH_W) '../Graphics/ffthreads.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/ffthreads.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ffthreads.Tpo" "$(DEPDIR)/ffthreads.Po"; else rm -f "$(DEPDIR)/ffthreads.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/ffthreads.cpp' object='ffthreads.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ffthreads.obj `if test -f '../Graphics/ffthreads.cpp'; then $(CYGPATH_W) '../Graphics/ffthreads.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/ffthreads.cpp'; fi`
 uninstall-info-am:
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
