@@ -35,22 +35,6 @@ using namespace std;
 
 // Just check that we are in a known environment (otherwise it may be
 // difficult to recognise that the simple cause is an ifdef problem).
-#ifdef __MINGW32__
-#define THREADS_HPP_OK
-#endif
-#ifdef __linux__
-#define THREADS_HPP_OK
-#endif
-
-// Do not use __APPLE__ because we undefine it to force FLTK into X11
-// mode.
-#ifdef __APPLE_CC__
-#define THREADS_HPP_OK
-#endif
-#ifndef THREADS_HPP_OK
-#error FFCS threads not implemented in this environment yet
-#endif
-
 
 class Thread{
 public:

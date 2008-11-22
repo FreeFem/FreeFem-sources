@@ -53,7 +53,8 @@ static  bool TryNewPlot( void );
 
 void LauchNextRead();
 void WaitNextRead();
-void * ThreadRead(void *fd);
+THREADFUNC(ThreadRead,fd);
+//void * ThreadRead(void *fd);
 
 int kread=-1;
 
@@ -1423,7 +1424,8 @@ void WaitNextRead()
     }
 }
 
-void * ThreadRead(void *fd)
+//void * ThreadRead(void *fd)
+THREADFUNC(ThreadRead,fd)
 {   
   int err=0;
   assert(nextPlot==0);
@@ -1431,7 +1433,7 @@ void * ThreadRead(void *fd)
   err=ReadOnePlot((FILE*)fd);
   // MutexNextPlot.Free(); 
   if(debug)
-    cout << " We Read Plot  : " << kread << " " << nextPlot << " " << err << endl;
+    cout << " We Read a plot  : " << kread << " " << nextPlot << " " << err << endl;
   if(err<0)
     NoMorePlot=true; 
   Thread::Exit();

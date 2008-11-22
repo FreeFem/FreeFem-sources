@@ -55,7 +55,7 @@ Thread::Id Thread::Start(THREADFUNC(f,),Thread::Parm p){
 void Thread::Wait(Thread::Id tid){
 #ifdef __MINGW32__
   DWORD R = WaitForSingleObject(tid,INFINITE);
-  if(R == WAIT_FAILED) throw StringErr("Thread::Wait","Wait failed");
+  if(R == WAIT_FAILED) throw StringErr("Thread::Wait" " -- Wait failed");
   CloseHandle(tid);
 #else
   int R=pthread_join(tid,NULL);
