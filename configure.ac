@@ -210,14 +210,16 @@ CYGWIN*)
                 ff_mingw=yes 
                 enable_cygwindll=no;
 		ff_pthread="-mthread"
-		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
+		CXXFLAGS="$CXXFLAGS -mno-cygwin -I/usr/include/mingw"
 		FFLAGS="$FFLAGS -mno-cygwin"
 		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
-		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -lws2_32"
+		LIBS="$LIBS -mno-cygwin -mthreads -lws2_32"
+		LIBSNOCONSOLE="-mwindows"
 		FLIBS="-mno-cygwin -lg2c"
                 ff_glut="-lglut32 -mthreads -lglu32 -lopengl32"
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(WINDRESOBJ,windres.o)
+	        AC_SUBST(LIBSNOCONSOLE,$LIBSNOCONSOLE)
                 AC_SUBST(WIN32DLLTARGET,win32-dll-target)
                 AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
 		ff_dynload=yes
