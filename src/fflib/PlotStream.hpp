@@ -7,6 +7,16 @@
  *
  */
 #include <cstdio>
+
+#ifdef __WIN32__
+#define  MODE_READ_BINARY "rb"
+#define  MODE_WRITE_BINARY "wb"
+#else
+#define  MODE_READ_BINARY "r"
+#define  MODE_WRITE_BINARY "w"
+#endif
+
+
 using  Fem2D::Mesh;
 class PlotStream 
 {
@@ -23,7 +33,7 @@ public:
   void SendEndPlot() { write((long )dt_endplot);fflush(TheStream); }
   void SendPlots() { write((long )dt_plots); }
   void SendMeshes() { write((long )dt_meshes);}
-  void write(const void *data,size_t l) {fwrite(data,l,1,TheStream);}
+  void write(const void *data,size_t l) {fwrite(data,1,l,TheStream);}
   PlotStream& write(const bool& b) {write(reinterpret_cast<const void *> (&b),sizeof(bool));return *this;}
   PlotStream& write(const long& b) {write(reinterpret_cast<const void *> (&b),sizeof(long));return *this;}
   PlotStream& write(const double& b) {write(reinterpret_cast<const void *> (&b),sizeof(double));return *this;}
@@ -67,7 +77,13 @@ public:
     return *this;
   }
   
-  void read( void *data,size_t l) {fread(data,l,1,TheStream);}
+  void read( void *data,size_t l) {
+	char * p= (char*)data;
+	for(int i=0;i<l;++i)	
+	  *p++ = (char) getc(TheStream);
+//	fread(  p++,1,1,TheStream);
+//       read(data,l);
+}
   bool good() const {return ferror(TheStream)==0;}
   void GetNewPlot() { get(dt_newplot) ;}
   void GetEndArgPlot() {get(dt_endarg); }
