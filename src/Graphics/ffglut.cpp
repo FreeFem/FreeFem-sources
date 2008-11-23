@@ -5,8 +5,6 @@
 #endif
 
 //#include <pthread.h>
-
-
 #include <limits>
 #include <cfloat>
 #include <cstdlib>
@@ -75,7 +73,7 @@ int   ReadOnePlot(FILE *fp)
   err= ferror(fp) ;
   if(err) return -3;
   PlotStream f(fp);
-  const char *  magic="#!ffglutdata...\n";
+  const char *  magic="#!ffglutdata...";
   err=0;
   // init ..
   if(kread==-1)
@@ -85,10 +83,21 @@ int   ReadOnePlot(FILE *fp)
 	  err += c != magic[i];
 	  if(err) break;
 	}
-      if(err) return err;
+      if(err) {
+	 cout << " Err read heading " << endl;
+	return err;
+	}
       kread++;
       if(debug>0) cout << " Read entete " << endl;
+	  int c1 =getc(fp);//
+      if(c1==13)	  
+        int c2 =getc(fp);//	
+
+
     }
+
+
+  
   err=1;
   
   long cas; 
@@ -1217,7 +1226,7 @@ bool WindowDump(int width,int height)
     
     /* Open the file */
     sprintf(fname,"L_%04d.ppm",counter);
-    if ((fptr = fopen(fname,"w")) == NULL) {
+    if ((fptr = fopen(fname, MODE_WRITE_BINARY)) == NULL) {
 	fprintf(stderr,"WindowDump - Failed to open file for window dump\n");
 	return(false);
     }
@@ -1442,9 +1451,12 @@ THREADFUNC(ThreadRead,fd)
 
 int main(int argc,  char** argv)
 {
-
-    datafile =stdin;
-    if(argc>1 && *argv[argc-1] != '-' ) datafile=fopen(argv[argc-1],"r");
+cout <<  " mode read = " << MODE_READ_BINARY << endl;
+    datafile =0;;
+    if(argc>1 && *argv[argc-1] != '-' ) 
+	datafile=fopen(argv[argc-1], MODE_READ_BINARY);
+    else
+	datafile=fdopen(0, MODE_READ_BINARY);
     ffassert(datafile);
     int err=ReadOnePlot(datafile);
     if(err) {cout << "Err ReadOnePlot " << err << endl;

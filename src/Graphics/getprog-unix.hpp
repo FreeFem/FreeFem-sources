@@ -21,15 +21,14 @@ int getprog(char* fn,int argc, char **argv)
 	    }
             else if(strcmp(argv[i],"-fglut")==0 && i+1 < argc)
 		    {
-		      ThePlotStream = fopen(argv[i+1],"w");
+		      ThePlotStream = fopen(argv[i+1], MODE_WRITE_BINARY );
 		      i++;
 		      printf(" save of all plot in file : %s\n",argv[i]);
 		      if(!ThePlotStream) { cerr << "  Error fopen  "<< endl;exit(1);}
 		    }
 	    else if( strcmp(argv[i],"-glut")==0 && i+1 < argc) 
-		 {
-		    ThePlotStream = popen(argv[i+1],"w");
-		   
+		 {  
+		    ThePlotStream = popen(argv[i+1],MODE_WRITE_BINARY);		   
 		    i++;
 		    printf(" EXEC of the plot in file : %s\n",argv[i]);
 		    if(!ThePlotStream) { cerr << "  Error popen "<< endl;exit(1);}
