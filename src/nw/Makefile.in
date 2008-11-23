@@ -59,7 +59,8 @@ PROGRAMS = $(bin_PROGRAMS)
 am_FreeFem___nw_OBJECTS = sansrgraph.$(OBJEXT)
 FreeFem___nw_OBJECTS = $(am_FreeFem___nw_OBJECTS)
 FreeFem___nw_LDADD = $(LDADD)
-am_ffglut_OBJECTS = ffglut.$(OBJEXT) gggg.$(OBJEXT) ffthreads.$(OBJEXT)
+am_ffglut_OBJECTS = ffglut.$(OBJEXT) gggg.$(OBJEXT) \
+	ffthreads.$(OBJEXT)
 ffglut_OBJECTS = $(am_ffglut_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -68,6 +69,10 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(FreeFem___nw_SOURCES) $(ffglut_SOURCES)
 DIST_SOURCES = $(FreeFem___nw_SOURCES) $(ffglut_SOURCES)
 ETAGS = etags
@@ -245,7 +250,9 @@ target_alias = @target_alias@
 
 # To create statically linked executables (see configure.ac)
 CXXLD = $(STATICTOOL) $(CXX)
-ffglut_SOURCES = ../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads.cpp
+ffglut_SOURCES = ../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads.cpp \
+../Graphics/ffthreads.hpp 
+
 ffglut_DEPENDENCIES = ../fflib/fem.o ../fflib/FQuadTree.o ../fflib/Drawing.o ../fflib/mshptg.o  
 ffglut_LDADD = ../fflib/fem.o ../fflib/FQuadTree.o ../fflib/Drawing.o ../fflib/mshptg.o  @LIBSGLUT@ @LIBSPTHREAD@
 FreeFem___nw_SOURCES = ../Graphics/sansrgraph.cpp
@@ -322,9 +329,9 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffglut.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffthreads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gggg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sansrgraph.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffthreads.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
