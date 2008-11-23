@@ -8,15 +8,6 @@
  */
 #include <cstdio>
 
-#ifdef __WIN32__
-#define  MODE_READ_BINARY "rb"
-#define  MODE_WRITE_BINARY "wb"
-#else
-#define  MODE_READ_BINARY "r"
-#define  MODE_WRITE_BINARY "w"
-#endif
-
-
 using  Fem2D::Mesh;
 class PlotStream 
 {
