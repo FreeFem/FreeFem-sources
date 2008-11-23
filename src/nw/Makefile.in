@@ -60,7 +60,8 @@ am_FreeFem___nw_OBJECTS = sansrgraph.$(OBJEXT)
 FreeFem___nw_OBJECTS = $(am_FreeFem___nw_OBJECTS)
 FreeFem___nw_LDADD = $(LDADD)
 am_ffglut_OBJECTS = ffglut.$(OBJEXT) gggg.$(OBJEXT) \
-	ffthreads.$(OBJEXT)
+	ffthreads.$(OBJEXT) fem.$(OBJEXT) FQuadTree.$(OBJEXT) \
+	Drawing.$(OBJEXT) mshptg.$(OBJEXT)
 ffglut_OBJECTS = $(am_ffglut_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -251,10 +252,12 @@ target_alias = @target_alias@
 # To create statically linked executables (see configure.ac)
 CXXLD = $(STATICTOOL) $(CXX)
 ffglut_SOURCES = ../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads.cpp \
-../Graphics/ffthreads.hpp 
+../Graphics/ffthreads.hpp \
+../femlib/fem.cpp ../femlib/FQuadTree.cpp \
+../femlib/Drawing.cpp ../femlib/mshptg.cpp  
 
-ffglut_DEPENDENCIES = ../fflib/fem.o ../fflib/FQuadTree.o ../fflib/Drawing.o ../fflib/mshptg.o  
-ffglut_LDADD = ../fflib/fem.o ../fflib/FQuadTree.o ../fflib/Drawing.o ../fflib/mshptg.o  @LIBSGLUT@ @LIBSPTHREAD@
+ffglut_DEPENDENCIES = 
+ffglut_LDADD = @LIBSGLUT@ @LIBSPTHREAD@
 FreeFem___nw_SOURCES = ../Graphics/sansrgraph.cpp
 FreeFem___nw_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
 LDADD = ../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
@@ -328,9 +331,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Drawing.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FQuadTree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffglut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffthreads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gggg.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mshptg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sansrgraph.Po@am__quote@
 
 .cpp.o:
@@ -402,6 +409,62 @@ ffthreads.obj: ../Graphics/ffthreads.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/ffthreads.cpp' object='ffthreads.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ffthreads.obj `if test -f '../Graphics/ffthreads.cpp'; then $(CYGPATH_W) '../Graphics/ffthreads.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/ffthreads.cpp'; fi`
+
+fem.o: ../femlib/fem.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT fem.o -MD -MP -MF "$(DEPDIR)/fem.Tpo" -c -o fem.o `test -f '../femlib/fem.cpp' || echo '$(srcdir)/'`../femlib/fem.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/fem.Tpo" "$(DEPDIR)/fem.Po"; else rm -f "$(DEPDIR)/fem.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/fem.cpp' object='fem.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fem.o `test -f '../femlib/fem.cpp' || echo '$(srcdir)/'`../femlib/fem.cpp
+
+fem.obj: ../femlib/fem.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT fem.obj -MD -MP -MF "$(DEPDIR)/fem.Tpo" -c -o fem.obj `if test -f '../femlib/fem.cpp'; then $(CYGPATH_W) '../femlib/fem.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/fem.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/fem.Tpo" "$(DEPDIR)/fem.Po"; else rm -f "$(DEPDIR)/fem.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/fem.cpp' object='fem.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fem.obj `if test -f '../femlib/fem.cpp'; then $(CYGPATH_W) '../femlib/fem.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/fem.cpp'; fi`
+
+FQuadTree.o: ../femlib/FQuadTree.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT FQuadTree.o -MD -MP -MF "$(DEPDIR)/FQuadTree.Tpo" -c -o FQuadTree.o `test -f '../femlib/FQuadTree.cpp' || echo '$(srcdir)/'`../femlib/FQuadTree.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/FQuadTree.Tpo" "$(DEPDIR)/FQuadTree.Po"; else rm -f "$(DEPDIR)/FQuadTree.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/FQuadTree.cpp' object='FQuadTree.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o FQuadTree.o `test -f '../femlib/FQuadTree.cpp' || echo '$(srcdir)/'`../femlib/FQuadTree.cpp
+
+FQuadTree.obj: ../femlib/FQuadTree.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT FQuadTree.obj -MD -MP -MF "$(DEPDIR)/FQuadTree.Tpo" -c -o FQuadTree.obj `if test -f '../femlib/FQuadTree.cpp'; then $(CYGPATH_W) '../femlib/FQuadTree.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/FQuadTree.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/FQuadTree.Tpo" "$(DEPDIR)/FQuadTree.Po"; else rm -f "$(DEPDIR)/FQuadTree.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/FQuadTree.cpp' object='FQuadTree.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o FQuadTree.obj `if test -f '../femlib/FQuadTree.cpp'; then $(CYGPATH_W) '../femlib/FQuadTree.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/FQuadTree.cpp'; fi`
+
+Drawing.o: ../femlib/Drawing.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Drawing.o -MD -MP -MF "$(DEPDIR)/Drawing.Tpo" -c -o Drawing.o `test -f '../femlib/Drawing.cpp' || echo '$(srcdir)/'`../femlib/Drawing.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/Drawing.Tpo" "$(DEPDIR)/Drawing.Po"; else rm -f "$(DEPDIR)/Drawing.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/Drawing.cpp' object='Drawing.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Drawing.o `test -f '../femlib/Drawing.cpp' || echo '$(srcdir)/'`../femlib/Drawing.cpp
+
+Drawing.obj: ../femlib/Drawing.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Drawing.obj -MD -MP -MF "$(DEPDIR)/Drawing.Tpo" -c -o Drawing.obj `if test -f '../femlib/Drawing.cpp'; then $(CYGPATH_W) '../femlib/Drawing.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/Drawing.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/Drawing.Tpo" "$(DEPDIR)/Drawing.Po"; else rm -f "$(DEPDIR)/Drawing.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/Drawing.cpp' object='Drawing.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Drawing.obj `if test -f '../femlib/Drawing.cpp'; then $(CYGPATH_W) '../femlib/Drawing.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/Drawing.cpp'; fi`
+
+mshptg.o: ../femlib/mshptg.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mshptg.o -MD -MP -MF "$(DEPDIR)/mshptg.Tpo" -c -o mshptg.o `test -f '../femlib/mshptg.cpp' || echo '$(srcdir)/'`../femlib/mshptg.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mshptg.Tpo" "$(DEPDIR)/mshptg.Po"; else rm -f "$(DEPDIR)/mshptg.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/mshptg.cpp' object='mshptg.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mshptg.o `test -f '../femlib/mshptg.cpp' || echo '$(srcdir)/'`../femlib/mshptg.cpp
+
+mshptg.obj: ../femlib/mshptg.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mshptg.obj -MD -MP -MF "$(DEPDIR)/mshptg.Tpo" -c -o mshptg.obj `if test -f '../femlib/mshptg.cpp'; then $(CYGPATH_W) '../femlib/mshptg.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/mshptg.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mshptg.Tpo" "$(DEPDIR)/mshptg.Po"; else rm -f "$(DEPDIR)/mshptg.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/mshptg.cpp' object='mshptg.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mshptg.obj `if test -f '../femlib/mshptg.cpp'; then $(CYGPATH_W) '../femlib/mshptg.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/mshptg.cpp'; fi`
 uninstall-info-am:
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
