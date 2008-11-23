@@ -8,10 +8,12 @@ CXXLD=$(STATICTOOL) $(CXX)
 bin_PROGRAMS=FreeFem++-nw @FFGLUTPROG@
 EXTRA_PROGRAMS=ffglut
 ffglut_SOURCES=../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads.cpp \
-../Graphics/ffthreads.hpp 
+../Graphics/ffthreads.hpp \
+../femlib/fem.cpp ../femlib/FQuadTree.cpp \
+../femlib/Drawing.cpp ../femlib/mshptg.cpp  
 
-ffglut_DEPENDENCIES=../fflib/fem.o ../fflib/FQuadTree.o ../fflib/Drawing.o ../fflib/mshptg.o  
-ffglut_LDADD= ../fflib/fem.o ../fflib/FQuadTree.o ../fflib/Drawing.o ../fflib/mshptg.o  @LIBSGLUT@ @LIBSPTHREAD@
+ffglut_DEPENDENCIES=
+ffglut_LDADD=  @LIBSGLUT@ @LIBSPTHREAD@
 FreeFem___nw_SOURCES=../Graphics/sansrgraph.cpp
 
 FreeFem___nw_DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
