@@ -1443,13 +1443,13 @@ THREADFUNC(ThreadRead,fd)
 int main(int argc,  char** argv)
 {
 
-  try {
     datafile =stdin;
     if(argc>1 && *argv[argc-1] != '-' ) datafile=fopen(argv[argc-1],"r");
     ffassert(datafile);
     int err=ReadOnePlot(datafile);
-    if(err) throw string(" no plot in file? ");
-    
+    if(err) {cout << "Err ReadOnePlot " << err << endl;
+      Fin(1);}
+   
     bool stereo=false;
     bool fullscreen = false;
 
@@ -1490,12 +1490,6 @@ int main(int argc,  char** argv)
     glutMotionFunc(MotionMouse); // les mouvements  de la sourie 
     glutDisplayFunc( Display ); // l'affichage
     glutMainLoop(); 
-  }
-  catch (const StringErr & s)
-    {
-      cout << " catch error " << s << endl;
-      Fin(2);
-    }
 
   return 0;
 }

@@ -1,7 +1,7 @@
 // SUMMARY  : Threads for Linux and Microsoft Win32
 // USAGE    :        
 // ORG      : 
-// AUTHOR   : Antoine Le Hyaric
+// AUTHOR   : Antoine Le Hyaric / F. Hecht
 // E-MAIL   : lehyaric@ann.jussieu.fr
 
 // This file is part of Freefem++
@@ -20,7 +20,7 @@
 // along with Freefem++; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-// Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 21/10/04
+//  Frederic Hecht  .
 
 #include <cassert>
 #include <string>
@@ -29,6 +29,7 @@
 #include <iostream>
 using namespace std;
 
+#define ERROR_FF(msg) (cerr << msg<<endl, assert(0), exit(1)) 
 
 #include "ffthreads.hpp"
 
@@ -44,10 +45,10 @@ Thread::Id Thread::Start(THREADFUNC(f,),Thread::Parm p){
 #ifdef __MINGW32__
   unsigned ThreadId;
   tid = (HANDLE) _beginthreadex(NULL,0,f,p,0,&ThreadId);
-  if(tid == NULL) throw StringErr("Thread::Start: Thread could not be created");
+  if(tid == NULL) ERROR_FF("Thread::Start: Thread could not be created");
 #else
   int R = pthread_create(&tid,NULL,f,p);
-  if(R != 0) throw StringErr("Thread::Start: Thread could not be created");
+  if(R != 0) ERROR_FF("Thread::Start: Thread could not be created");
 #endif
   return tid;
 }
@@ -55,11 +56,11 @@ Thread::Id Thread::Start(THREADFUNC(f,),Thread::Parm p){
 void Thread::Wait(Thread::Id tid){
 #ifdef __MINGW32__
   DWORD R = WaitForSingleObject(tid,INFINITE);
-  if(R == WAIT_FAILED) throw StringErr("Thread::Wait" " -- Wait failed");
+  if(R == WAIT_FAILED) ERROR_FF("Thread::Wait" " -- Wait failed");
   CloseHandle(tid);
 #else
   int R=pthread_join(tid,NULL);
-  if(R!=0) throw StringErr("Thread::Wait: Wait failed");
+  if(R!=0) ERROR_FF("Thread::Wait: Wait failed");
 #endif
 }
 
@@ -74,10 +75,10 @@ void Thread::Exit(){
 void Thread::Kill(Thread::Id tid){
 #ifdef __MINGW32__
     if(TerminateThread(tid,0) == 0)
-      throw StringErr("Thread::Kill: Thread not killed");
+      ERROR_FF("Thread::Kill: Thread not killed");
 #else
     if(pthread_kill(tid,SIGINT)!=0)
-      throw StringErr("Thread::Kill: Thread not killed");
+      ERROR_FF("Thread::Kill: Thread not killed");
 #endif
 }
 

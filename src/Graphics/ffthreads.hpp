@@ -19,8 +19,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Freefem++; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
+// from:
 // Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 21/10/04
+//  simplify by F. Hecht
+// Antoine Le Hyaric - LJLL Paris 6 - hect@ann.jussieu.fr - 22/11/08
 
 #ifndef THREADS_HPP
 #define THREADS_HPP
@@ -59,10 +61,5 @@ public:
   static Id Current();
 };
  
-struct StringErr {
-  const char * s;
-  StringErr(const char * ss) : s(ss) {}
-  friend ostream & operator<<(ostream & f,const StringErr & se) { return f << se.s << endl;}
-};
 
 #endif // THREADS_HPP
