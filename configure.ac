@@ -215,7 +215,7 @@ CYGWIN*)
 		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
 		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -lws2_32"
 		FLIBS="-mno-cygwin -lg2c"
-                ff_ffglutprog="-lglut32 -mthreads -lglu32 -lopengl32"
+                ff_ffglut="-lglut32 -mthreads -lglu32 -lopengl32"
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(WINDRESOBJ,windres.o)
                 AC_SUBST(WIN32DLLTARGET,win32-dll-target)
@@ -473,10 +473,10 @@ if test "$ff_glut_ok" = yes
 then
     AC_SUBST(LIBSGLUT,$ff_glut)
     if test -n  "$ff_pthread" ; then 
-	ff_ffglutprog="ffglut"
+	ff_ffglutprog="ffglut${EXEEXT}"
 	AC_SUBST(LIBSPTHREAD,$ff_pthread)
     fi
-    ff_meditprog="ffmedit"
+    ff_meditprog="ffmedit${EXEEXT}"
 fi
 
 # If we cannot find GL, we cannot compile FreeFem++-agl
