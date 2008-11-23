@@ -1,3 +1,4 @@
+#include "mode_open.hpp"
 
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
