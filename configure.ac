@@ -206,13 +206,16 @@ CYGWIN*)
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
 	then
+	        ff_glut_ok=yes
                 ff_mingw=yes 
                 enable_cygwindll=no;
+		ff_pthread="-mthread"
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
 		FFLAGS="$FFLAGS -mno-cygwin"
 		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
 		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -lws2_32"
 		FLIBS="-mno-cygwin -lg2c"
+                ff_ffglutprog="-lglut32 -mthreads -lglu32 -lopengl32"
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(WINDRESOBJ,windres.o)
                 AC_SUBST(WIN32DLLTARGET,win32-dll-target)
@@ -395,84 +398,85 @@ ff_glx_ok=no
 ff_agl_ok=no
 ff_libs="$LIBS"
 # GL libraries seem to depend on some dlopen capabilities
-if test "$enable_static" != yes
+if test "$enable_static" != yes -a "$ff_glut_ok" != yes
 then
 	# If we cannot find gl.h, no OpenGL version can be produced
-        AC_CHECK_HEADERS(OpenGL/gl.h,
-                ff_gl_ok=yes
-                ff_agl_ok=yes,
-                ff_gl_ok=no
-                ff_agl_ok=no)
-
-
-	if test "$ff_gl_ok" = no 
-	then
+    AC_CHECK_HEADERS(OpenGL/gl.h,
+        ff_gl_ok=yes
+        ff_agl_ok=yes,
+        ff_gl_ok=no
+        ff_agl_ok=no)
+    
+    
+    if test "$ff_gl_ok" = no 
+    then
 	AC_CHECK_HEADERS(GL/gl.h,
-		ff_gl_ok=yes
-		ff_agl_ok=yes,
-		ff_gl_ok=no
-		ff_agl_ok=no)
-	fi
-        AC_CHECK_HEADERS(GLUT/glut.h,
-                ff_glut_ok=yes,
-                ff_glut_ok=no)
+	    ff_gl_ok=yes
+	    ff_agl_ok=yes,
+	    ff_gl_ok=no
+	    ff_agl_ok=no)
+    fi
+    AC_CHECK_HEADERS(GLUT/glut.h,
+        ff_glut_ok=yes,
+        ff_glut_ok=no)
 
-	if test "$ff_glut_ok" = no 
-	then
+    if test "$ff_glut_ok" = no 
+    then
 	AC_CHECK_HEADERS(GL/glut.h,
-		ff_glut_ok=yes,
-		ff_glut_ok=no)
-	fi
-
-	if test "$ff_gl_ok" = yes
-	then
-		AC_CHECK_HEADERS(GL/glx.h,
-			ff_glx_ok=yes,
-			ff_glx_ok=no)
-	fi
-	if test "$ff_glx_ok" = yes -a   "$ff_x11" = yes 
-	then
-		AC_CHECK_LIB(GL,
-			glBegin,
-			ff_glx_ok=yes,
-			ff_glx_ok=no)
-	fi
-	if test "$ff_glx_ok" = yes
-	then
-		AC_CHECK_LIB(GLU,
-			gluSphere,
-			ff_glx_ok=yes,
-			ff_glx_ok=no,
-			-lGL)
-	fi
+	    ff_glut_ok=yes,
+	    ff_glut_ok=no)
+    fi
+    
+    if test "$ff_gl_ok" = yes
+    then
+	AC_CHECK_HEADERS(GL/glx.h,
+	    ff_glx_ok=yes,
+	    ff_glx_ok=no)
+    fi
+    if test "$ff_glx_ok" = yes -a   "$ff_x11" = yes 
+    then
+	AC_CHECK_LIB(GL,
+	    glBegin,
+	    ff_glx_ok=yes,
+	    ff_glx_ok=no)
+    fi
+    if test "$ff_glx_ok" = yes
+    then
+	AC_CHECK_LIB(GLU,
+	    gluSphere,
+	    ff_glx_ok=yes,
+	    ff_glx_ok=no,
+	    -lGL)
+    fi
 # GLUT .....
-	if test "$ff_glut_ok" =	yes
-        then			
-	    for glut in \
-		"-framework GLUT -framework OpenGL -framework Cocoa" \
-		"-lglut -lGLU -lGL" 	
-	    do
-		ff_glut="$glut"
-		ff_libs1="$LIBS"
-     		LIBS="$LIBS $ff_glut"
-		AC_TRY_LINK_FUNC(glutInit,
-		    ff_glut_ok=yes
-		    break,
-		    ff_glut_ok=next);
-		LIBS="$ff_libs1"
-	    done	
-	fi
-	
-        if test "$ff_glut_ok" = yes
-        then
-	    AC_SUBST(LIBSGLUT,$ff_glut)
-	    if test -n  "$ff_pthread" ; then 
-	    	    ff_ffglutprog="ffglut"
-		     AC_SUBST(LIBSPTHREAD,$ff_pthread)
-	    fi
-	    ff_meditprog="ffmedit"
-        fi
+    if test "$ff_glut_ok" =	yes
+    then			
+	for glut in \
+	    "-framework GLUT -framework OpenGL -framework Cocoa" \
+	    "-lglut -lGLU -lGL" 	
+	do
+	    ff_glut="$glut"
+	    ff_libs1="$LIBS"
+     	    LIBS="$LIBS $ff_glut"
+	    AC_TRY_LINK_FUNC(glutInit,
+		ff_glut_ok=yes
+		break,
+		ff_glut_ok=next);
+	    LIBS="$ff_libs1"
+	done	
+    fi
+    
 
+fi
+
+if test "$ff_glut_ok" = yes
+then
+    AC_SUBST(LIBSGLUT,$ff_glut)
+    if test -n  "$ff_pthread" ; then 
+	ff_ffglutprog="ffglut"
+	AC_SUBST(LIBSPTHREAD,$ff_pthread)
+    fi
+    ff_meditprog="ffmedit"
 fi
 
 # If we cannot find GL, we cannot compile FreeFem++-agl

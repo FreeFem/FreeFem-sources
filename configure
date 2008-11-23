@@ -5550,13 +5550,16 @@ CYGWIN*)
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
 	then
+	        ff_glut_ok=yes
                 ff_mingw=yes
                 enable_cygwindll=no;
+		ff_pthread="-mthread"
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -mwindows -mthreads -I/usr/include/mingw"
 		FFLAGS="$FFLAGS -mno-cygwin"
 		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
 		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -lws2_32"
 		FLIBS="-mno-cygwin -lg2c"
+                ff_ffglutprog="-lglut32 -mthreads -lglu32 -lopengl32"
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        WINDRESOBJ=windres.o
 
@@ -9542,10 +9545,10 @@ ff_glx_ok=no
 ff_agl_ok=no
 ff_libs="$LIBS"
 # GL libraries seem to depend on some dlopen capabilities
-if test "$enable_static" != yes
+if test "$enable_static" != yes -a "$ff_glut_ok" != yes
 then
 	# If we cannot find gl.h, no OpenGL version can be produced
-        echo "$as_me:$LINENO: checking for egrep" >&5
+    echo "$as_me:$LINENO: checking for egrep" >&5
 echo $ECHO_N "checking for egrep... $ECHO_C" >&6
 if test "${ac_cv_prog_egrep+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9944,18 +9947,18 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
  ff_gl_ok=yes
-                ff_agl_ok=yes
+        ff_agl_ok=yes
 else
   ff_gl_ok=no
-                ff_agl_ok=no
+        ff_agl_ok=no
 fi
 
 done
 
 
 
-	if test "$ff_gl_ok" = no
-	then
+    if test "$ff_gl_ok" = no
+    then
 
 for ac_header in GL/gl.h
 do
@@ -10102,15 +10105,15 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
  ff_gl_ok=yes
-		ff_agl_ok=yes
+	    ff_agl_ok=yes
 else
   ff_gl_ok=no
-		ff_agl_ok=no
+	    ff_agl_ok=no
 fi
 
 done
 
-	fi
+    fi
 
 for ac_header in GLUT/glut.h
 do
@@ -10264,8 +10267,8 @@ fi
 done
 
 
-	if test "$ff_glut_ok" = no
-	then
+    if test "$ff_glut_ok" = no
+    then
 
 for ac_header in GL/glut.h
 do
@@ -10418,10 +10421,10 @@ fi
 
 done
 
-	fi
+    fi
 
-	if test "$ff_gl_ok" = yes
-	then
+    if test "$ff_gl_ok" = yes
+    then
 
 for ac_header in GL/glx.h
 do
@@ -10574,10 +10577,10 @@ fi
 
 done
 
-	fi
-	if test "$ff_glx_ok" = yes -a   "$ff_x11" = yes
-	then
-		echo "$as_me:$LINENO: checking for glBegin in -lGL" >&5
+    fi
+    if test "$ff_glx_ok" = yes -a   "$ff_x11" = yes
+    then
+	echo "$as_me:$LINENO: checking for glBegin in -lGL" >&5
 echo $ECHO_N "checking for glBegin in -lGL... $ECHO_C" >&6
 if test "${ac_cv_lib_GL_glBegin+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -10647,10 +10650,10 @@ else
   ff_glx_ok=no
 fi
 
-	fi
-	if test "$ff_glx_ok" = yes
-	then
-		echo "$as_me:$LINENO: checking for gluSphere in -lGLU" >&5
+    fi
+    if test "$ff_glx_ok" = yes
+    then
+	echo "$as_me:$LINENO: checking for gluSphere in -lGLU" >&5
 echo $ECHO_N "checking for gluSphere in -lGLU... $ECHO_C" >&6
 if test "${ac_cv_lib_GLU_gluSphere+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -10720,18 +10723,18 @@ else
   ff_glx_ok=no
 fi
 
-	fi
+    fi
 # GLUT .....
-	if test "$ff_glut_ok" =	yes
-        then
-	    for glut in \
-		"-framework GLUT -framework OpenGL -framework Cocoa" \
-		"-lglut -lGLU -lGL"
-	    do
-		ff_glut="$glut"
-		ff_libs1="$LIBS"
-     		LIBS="$LIBS $ff_glut"
-		cat >conftest.$ac_ext <<_ACEOF
+    if test "$ff_glut_ok" =	yes
+    then
+	for glut in \
+	    "-framework GLUT -framework OpenGL -framework Cocoa" \
+	    "-lglut -lGLU -lGL"
+	do
+	    ff_glut="$glut"
+	    ff_libs1="$LIBS"
+     	    LIBS="$LIBS $ff_glut"
+	    cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -10776,7 +10779,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   ff_glut_ok=yes
-		    break
+		break
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
@@ -10785,22 +10788,23 @@ ff_glut_ok=next
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext;
-		LIBS="$ff_libs1"
-	    done
-	fi
+	    LIBS="$ff_libs1"
+	done
+    fi
 
-        if test "$ff_glut_ok" = yes
-        then
-	    LIBSGLUT=$ff_glut
 
-	    if test -n  "$ff_pthread" ; then
-	    	    ff_ffglutprog="ffglut"
-		     LIBSPTHREAD=$ff_pthread
+fi
 
-	    fi
-	    ff_meditprog="ffmedit"
-        fi
+if test "$ff_glut_ok" = yes
+then
+    LIBSGLUT=$ff_glut
 
+    if test -n  "$ff_pthread" ; then
+	ff_ffglutprog="ffglut"
+	LIBSPTHREAD=$ff_pthread
+
+    fi
+    ff_meditprog="ffmedit"
 fi
 
 # If we cannot find GL, we cannot compile FreeFem++-agl
