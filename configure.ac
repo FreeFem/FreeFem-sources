@@ -215,7 +215,7 @@ CYGWIN*)
 		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
 		LIBS="$LIBS -mno-cygwin -mwindows -mthreads -lws2_32"
 		FLIBS="-mno-cygwin -lg2c"
-                ff_ffglut="-lglut32 -mthreads -lglu32 -lopengl32"
+                ff_glut="-lglut32 -mthreads -lglu32 -lopengl32"
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(WINDRESOBJ,windres.o)
                 AC_SUBST(WIN32DLLTARGET,win32-dll-target)
