@@ -4,6 +4,8 @@
 #include <GL/glut.h>
 #endif
 
+#include <fcntl.h>
+
 //#include <pthread.h>
 #include <limits>
 #include <cfloat>
@@ -1451,13 +1453,26 @@ THREADFUNC(ThreadRead,fd)
 
 int main(int argc,  char** argv)
 {
-cout <<  " mode read = " << MODE_READ_BINARY << endl;
+    glutInit(&argc, argv);
+
+    cout <<  " mode read = " << MODE_READ_BINARY << endl;
     datafile =0;;
     if(argc>1 && *argv[argc-1] != '-' ) 
+     {	
 	datafile=fopen(argv[argc-1], MODE_READ_BINARY);
-    else
-	datafile=fdopen(0, MODE_READ_BINARY);
-    ffassert(datafile);
+	cout << " fopen :" << argv[argc-1] << " " <<datafile << endl;
+     }
+
+    if(datafile==0)
+	datafile=stdin;//fdopen(fileno(stdin), MODE_READ_BINARY);
+#ifdef WIN32
+        _setmode(fileno(stdin),O_BINARY);	
+#endif
+	//datafile=fdopen(fileno(stdin), MODE_READ_BINARY);
+    if ( !datafile){
+	cerr<< " Erreur fdopen stdin in binary " << endl;
+	Fin(1);
+     }
     int err=ReadOnePlot(datafile);
     if(err) {cout << "Err ReadOnePlot " << err << endl;
       Fin(1);}
@@ -1473,7 +1488,6 @@ cout <<  " mode read = " << MODE_READ_BINARY << endl;
     
     cout << "on a lue le premier plot next plot: " << nextPlot << endl;
 
-    glutInit(&argc, argv);
 
     if(stereo)
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STEREO);
