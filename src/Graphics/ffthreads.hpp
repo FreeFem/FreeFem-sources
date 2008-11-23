@@ -24,9 +24,9 @@
 //  simplify by F. Hecht
 // Antoine Le Hyaric - LJLL Paris 6 - hect@ann.jussieu.fr - 22/11/08
 
-#ifndef THREADS_HPP
-#define THREADS_HPP
-
+#ifndef FFTHREADS_HPP
+#define FFTHREADS_HPP
+#include "mode_open.hpp"
 #include <string>
 using namespace std;
 #ifdef __MINGW32__
