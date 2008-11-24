@@ -7,6 +7,9 @@
  *
  */
 #include <cstdio>
+#ifdef WIN32
+#include <fcntl.h>
+#endif
 
 using  Fem2D::Mesh;
 class PlotStream 
@@ -19,9 +22,9 @@ public:
   // datatype mush be < 0 to have no collistion with arg number. 
   enum datatype { dt_meshes=-1,dt_plots=-2,dt_endplot=-3,dt_endarg=99999,dt_newplot=-5  };
   
-  void SendNewPlot() {  write((long )dt_newplot); }
+  void SendNewPlot() {  write((long )dt_newplot); set_binary_mode(); }
   void SendEndArgPlot() {write((long )dt_endarg); }
-  void SendEndPlot() { write((long )dt_endplot);fflush(TheStream); }
+  void SendEndPlot() { write((long )dt_endplot);fflush(TheStream); set_text_mode() ;}
   void SendPlots() { write((long )dt_plots); }
   void SendMeshes() { write((long )dt_meshes);}
   void write(const void *data,size_t l) {fwrite(data,1,l,TheStream);}
@@ -36,8 +39,19 @@ public:
     return *this;
     }
   
-  
-    
+  void set_text_mode() 
+  {    
+#ifdef WIN32
+        _setmode(fileno(TheStream),O_TEXT);	
+#endif
+  }
+  void set_binary_mode()
+  {    
+#ifdef WIN32
+    _setmode(fileno(TheStream),O_BINARY));	
+#endif
+  }
+ 
   PlotStream & operator << (const bool& b) 
   { return write(b); }
   PlotStream & operator << (const long& b) 
@@ -76,13 +90,13 @@ public:
 //       read(data,l);
 }
   bool good() const {return ferror(TheStream)==0;}
-  void GetNewPlot() { get(dt_newplot) ;}
+void GetNewPlot() { get(dt_newplot) ; set_binary_mode();}
   void GetEndArgPlot() {get(dt_endarg); }
-  void GetEndPlot() {get(dt_endplot); }
+void GetEndPlot() {get(dt_endplot); set_text_mode();}
   void GetPlots() { get(dt_plots); }
   void GetMeshes() { get(dt_meshes);}
   void get(datatype t) { long tt; read(tt);
-    if( tt !=(long) t) cout << " Error Check :  get " << tt << " == wiat for  "<< t << endl; 
+    if( tt !=(long) t) cout << " Error Check :  get " << tt << " == wait for  "<< t << endl; 
     ffassert(tt==(long) t);}
   PlotStream& read( bool& b) {read(reinterpret_cast< void *> (&b),sizeof(bool));return *this;}
   PlotStream& read( long& b) {read(reinterpret_cast< void *> (&b),sizeof(long));return *this;}
