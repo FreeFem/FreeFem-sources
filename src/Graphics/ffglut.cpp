@@ -3,9 +3,6 @@
 #else
 #include <GL/glut.h>
 #endif
-
-#include <fcntl.h>
-
 //#include <pthread.h>
 #include <limits>
 #include <cfloat>
@@ -74,7 +71,9 @@ int   ReadOnePlot(FILE *fp)
   if(err) return -2;
   err= ferror(fp) ;
   if(err) return -3;
+
   PlotStream f(fp);
+  f.set_binary_mode();
   const char *  magic="#!ffglutdata...";
   err=0;
   // init ..
@@ -87,7 +86,8 @@ int   ReadOnePlot(FILE *fp)
 	}
       if(err) {
 	 cout << " Err read heading " << endl;
-	return err;
+	 goto Lreturn;
+	 //return err;
 	}
       kread++;
       if(debug>0) cout << " Read entete " << endl;
@@ -97,14 +97,10 @@ int   ReadOnePlot(FILE *fp)
 
 
     }
-
-
-  
-  err=1;
-  
   long cas; 
   f >> cas;
-  if (feof(fp)) return -1;
+  err=-1;
+  if (feof(fp)) goto Lreturn ;
   if((debug > 1)) cout << " ReadOnePlot " << kread+1<< " cas = " << cas << " " << nextPlot << endl;
   if(cas==PlotStream::dt_newplot)  
     {
@@ -115,7 +111,12 @@ int   ReadOnePlot(FILE *fp)
       err=0;
     }
   else 
-    cout << " Error Cas inconnue (skip) " << endl;
+    {
+      err=1;
+      cout << " Error Cas inconnue (skip) " << endl;
+    }
+ Lreturn:
+  f.set_text_mode();
   return err;
 }
 
@@ -1465,9 +1466,6 @@ int main(int argc,  char** argv)
 
     if(datafile==0)
 	datafile=stdin;//fdopen(fileno(stdin), MODE_READ_BINARY);
-#ifdef WIN32
-        _setmode(fileno(stdin),O_BINARY);	
-#endif
 	//datafile=fdopen(fileno(stdin), MODE_READ_BINARY);
     if ( !datafile){
 	cerr<< " Erreur fdopen stdin in binary " << endl;
