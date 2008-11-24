@@ -1,5 +1,7 @@
 #include "mode_open.hpp"
-
+#if WIN32
+#include  "ff-win32.cpp"
+#endif
 
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
