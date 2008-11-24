@@ -671,7 +671,8 @@ int Compile()
 }
 static void SetcppIo()
 {
-#ifdef _WIN32
+
+#ifdef _WIN32XXXX
   freopen("conin$", "r", stdin);
   freopen("conout$", "w", stdout);
   using namespace __gnu_cxx;

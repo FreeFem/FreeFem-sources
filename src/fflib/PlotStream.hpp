@@ -96,7 +96,8 @@ void GetEndPlot() {get(dt_endplot); set_text_mode();}
   void GetPlots() { get(dt_plots); }
   void GetMeshes() { get(dt_meshes);}
   void get(datatype t) { long tt; read(tt);
-    if( tt !=(long) t) cout << " Error Check :  get " << tt << " == wait for  "<< t << endl; 
+    if( tt !=(long) t) 
+	cout << " Error Check :  get " << tt << " == wait for  "<< t << endl; 
     ffassert(tt==(long) t);}
   PlotStream& read( bool& b) {read(reinterpret_cast< void *> (&b),sizeof(bool));return *this;}
   PlotStream& read( long& b) {read(reinterpret_cast< void *> (&b),sizeof(long));return *this;}
