@@ -1,5 +1,4 @@
 // file adaptsphere.edp
-load "glumesh2D"
 load "msh3"
 load "tetgen"
 load "popen"

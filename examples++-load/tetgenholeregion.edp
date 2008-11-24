@@ -1,5 +1,4 @@
 // file adapt_double_sphere.edp
-load "glumesh2D"
 load "msh3"
 load "tetgen"
 

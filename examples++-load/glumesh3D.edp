@@ -1,6 +1,3 @@
-load "glumesh2D"
-//load "glumesh3D"
-//load "buildlayer"
 load "msh3"
 
 real x0=-1.,x1=-0.5;
