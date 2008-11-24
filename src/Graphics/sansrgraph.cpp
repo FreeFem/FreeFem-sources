@@ -172,6 +172,11 @@ extern int mymain(int argc,char **argv);
 int main (int argc, char **argv)
 {
   int ret=mymain(argc,argv);
+#ifdef WIN32
+  char c;  
+  if(ret !=0)
+	cin >> c;
+#endif
   return ret;
 }
 

@@ -1,4 +1,7 @@
+
 #ifdef WIN32
+#include <string>
+using namespace std;
 #include <windows.h>
 #include <commdlg.h>
 #include <io.h>      //*OT  use for the console window
@@ -35,6 +38,7 @@ string ChangeExt(string & ff,const char * suff)
 bool GetConsoleBuff(string &edpname)
 {
   CONSOLE_SCREEN_BUFFER_INFO csbi; //* to get buffer info
+  HANDLE hConOut= GetStdHandle(STD_OUTPUT_HANDLE);
   GetConsoleScreenBufferInfo(hConOut, &csbi);
   
   COORD coordLine = {0,0};
@@ -43,13 +47,14 @@ bool GetConsoleBuff(string &edpname)
   FILE *fp;
   string  fname=ChangeExt(edpname,"log");
   if ((fp = fopen(fname.c_str(),"w"))==NULL) {
-    perror(fname);
-    return FALSE;
+    perror(fname.c_str());
+    return false;
   }
   
-  szLine = new char [csbi.dwSize.X+1];
-  for (int i=0; i<csbi.dwCursorPosition.Y; i++) {
-    if (ReadConsoleOutputCharacter(hConOut, szLine,
+  szLine = new CHAR [csbi.dwSize.X+1];
+  for (int i=0; i<csbi.dwCursorPosition.Y; i++) 
+	{
+        if (ReadConsoleOutputCharacter(hConOut, szLine,
 				   csbi.dwSize.X, coordLine,
 				   &dwCharsRead)== FALSE)
       {
@@ -63,7 +68,7 @@ bool GetConsoleBuff(string &edpname)
     coordLine.Y++;
   }
   fclose(fp);
-  delete [] szline;
+  delete [] szLine;
   return true;
 }
 #endif
