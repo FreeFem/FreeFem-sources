@@ -1,5 +1,4 @@
 // meditddm.edp
-load "glumesh2D"
 load "popen"
 
 /********************************************
