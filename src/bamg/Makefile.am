@@ -14,7 +14,7 @@ cvmsh2_DEPENDENCIES=../fflib/libff.a
 EXTRA_drawbdmesh_SOURCES=../Graphics/Xrgraph.cpp ../Graphics/Pcrgraph.cpp
 drawbdmesh_DEPENDENCIES=../fflib/libff.a  @STD_GRAPH_OBJ@
 drawbdmesh_SOURCES=drawbdmesh.cpp 
-drawbdmesh_LDADD = @STD_GRAPH_OBJ@ $(LDADD)  @STD_LIBS@
+drawbdmesh_LDADD = @STD_GRAPH_OBJ@ $(LDADD)  @STD_LIBS@ @LIBSNOCONSOLE@
 
 LDADD= ../fflib/libff.a
 INCLUDES=-I../fflib -I../bamglib -I../Graphics
