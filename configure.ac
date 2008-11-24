@@ -10,7 +10,7 @@
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.0,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.0-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -213,7 +213,7 @@ CYGWIN*)
 		CXXFLAGS="$CXXFLAGS -mno-cygwin -I/usr/include/mingw"
 		FFLAGS="$FFLAGS -mno-cygwin"
 		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
-		LIBS="$LIBS -mno-cygwin -mthreads -lws2_32"
+		LIBS="$LIBS -mno-cygwin -mthreads -lws2_32 -lcomdlg32" 
 		LIBSNOCONSOLE="-mwindows"
 		FLIBS="-mno-cygwin -lg2c"
                 ff_glut="-lglut32 -mthreads -lglu32 -lopengl32"

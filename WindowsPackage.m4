@@ -33,6 +33,8 @@ Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
 ;  to day the dll version do not works so we use the static one (FH)
 ;Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
 Source: "src\ide\FreeFem++-cs.exe"; DestDir: "{app}"
+Source: "src\nw\ffglut.exe"; DestDir: "{app}"
+Source: "src\medit\ffmedit.exe"; DestDir: "{app}"
 Source: "src\bin-win32\FreeFem++-nw.exe"; DestDir: "{app}"
 Source: "src\bin-win32\bamg.exe"; DestDir: "{app}"
 Source: "src\bin-win32\cvmsh2.exe"; DestDir: "{app}"
@@ -43,6 +45,7 @@ Source: "src\bin-win32\*.dll"; DestDir: "{app}"
 ; flag.
 
 Source: "C:\Cygwin\bin\mingwm10.dll"; DestDir: "{app}"
+Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
 
 ; Does not include FreeFem++-x11 which would need the Cygwin X-Server
 ; Does not include FreeFem++-glx which would need the Cygwin X-Server

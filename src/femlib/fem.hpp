@@ -610,7 +610,7 @@ void  HeapSort(T *c,T1 *c1,T2 *c2,long n)
  inline    void  num1SubTVertex(int N,int l,int & i,int & j)
     {
 	
-	i= (-1 + sqrt(1+8*l))/2;
+	i= (int) ((-1 + sqrt(1+8*l))/2);
 	j = l - i*(i+1)/2;
         // io=in+j;
 	// in = io-j
