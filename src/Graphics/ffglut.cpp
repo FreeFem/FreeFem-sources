@@ -32,7 +32,7 @@ using std::numeric_limits;
 const R pi=M_PI;//4*atan(1.); 
 using namespace std;
 
-int debug=2;
+int debug=0;
 
 #include "ffglut.hpp"
 
@@ -106,6 +106,7 @@ int   ReadOnePlot(FILE *fp)
     {
       assert(nextPlot==0);
       nextPlot = new ThePlot(f,currentPlot,++kread);
+	if(debug)	
       cout << " next is build " << nextPlot<< " wait :" << nextPlot->wait << " -> " << kread <<  endl;
       assert(nextPlot);
       err=0;
@@ -599,7 +600,7 @@ void  OneWindow::zoom(int w,int h,R coef)
 
     GLint ok= gluUnProject( x,y,z,modelMatrix,projMatrix,viewport,&xx,&yy,&zz);
     ShowGlerror(" UnPro .. ");
-
+    if(debug)
     cout << x << " " << y << " " << z << " -> " << xx << " " << yy << " " << zz << endl;
     R2  oD(oBmin,oBmax);
     R2  D(Bmin,Bmax);
@@ -1455,18 +1456,17 @@ THREADFUNC(ThreadRead,fd)
 int main(int argc,  char** argv)
 {
     glutInit(&argc, argv);
-
+    if(debug)		
     cout <<  " mode read = " << MODE_READ_BINARY << endl;
     datafile =0;;
     if(argc>1 && *argv[argc-1] != '-' ) 
      {	
-	datafile=fopen(argv[argc-1], MODE_READ_BINARY);
+	datafile=fopen(argv[argc-1], "r");
 	cout << " fopen :" << argv[argc-1] << " " <<datafile << endl;
      }
 
     if(datafile==0)
-	datafile=stdin;//fdopen(fileno(stdin), MODE_READ_BINARY);
-	//datafile=fdopen(fileno(stdin), MODE_READ_BINARY);
+	datafile=stdin;
     if ( !datafile){
 	cerr<< " Erreur fdopen stdin in binary " << endl;
 	Fin(1);
@@ -1483,7 +1483,7 @@ int main(int argc,  char** argv)
       cout << " Error: no graphic data " << endl; 
       Fin(1);
     }
-    
+    if(debug) 
     cout << "on a lue le premier plot next plot: " << nextPlot << endl;
 
 

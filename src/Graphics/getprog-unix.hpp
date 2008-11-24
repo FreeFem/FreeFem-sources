@@ -1,6 +1,9 @@
 #include "mode_open.hpp"
 
 #ifdef WIN32
+#include <windows.h>
+#include <commdlg.h>
+#include <io.h>      //*OT  use for the console window
 
 BOOL ShowOpenDialogBox1(char *fileName)
 {
@@ -85,6 +88,26 @@ int getprog(char* fn,int argc, char **argv)
 	  strcpy(fn,argv[i]);
 	    ret=1;
 	}
+
+  if( ! progffglut && !noffglut)
+    progffglut=ffglut;
+  
+  if(progffglut)
+    {
+      ThePlotStream = popen(progffglut,"w");		   
+      if(verbosity)
+	printf(" EXEC of the plot  : %s\n",progffglut);
+      if(!ThePlotStream) { cerr << "  Error popen  "<< progffglut << endl;exit(1);}
+      
+    }
+  else if (fileglut)
+    {
+      ThePlotStream = fopen(progffglut, MODE_WRITE_BINARY );
+      if(verbosity)
+	printf(" save of the plot in file : %s\n",fileglut);
+      if(!ThePlotStream) { cerr << "  Error save file glut " << fileglut << endl;exit(1);}
+    }
+
 #ifdef WIN32
   if(ret==0)
     {
@@ -110,23 +133,5 @@ int getprog(char* fn,int argc, char **argv)
   if(verbosity>10) 
     cout << " file : " << fn << endl ; 
 
-  if( ! progffglut && !noffglut)
-    progffglut=ffglut;
-  
-  if(progffglut)
-    {
-      ThePlotStream = popen(progffglut,MODE_WRITE_BINARY);		   
-      if(verbosity)
-	printf(" EXEC of the plot  : %s\n",progffglut);
-      if(!ThePlotStream) { cerr << "  Error popen  "<< progffglut << endl;exit(1);}
-      
-    }
-  else if (fileglut)
-    {
-      ThePlotStream = fopen(progffglut, MODE_WRITE_BINARY );
-      if(verbosity)
-	printf(" save of the plot in file : %s\n",fileglut);
-      if(!ThePlotStream) { cerr << "  Error save file glut " << fileglut << endl;exit(1);}
-    }
     return 1;
 }
