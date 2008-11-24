@@ -1,31 +1,5 @@
 #include "mode_open.hpp"
 
-#ifdef WIN32
-#include <windows.h>
-#include <commdlg.h>
-#include <io.h>      //*OT  use for the console window
-
-BOOL ShowOpenDialogBox1(char *fileName)
-{
-  OPENFILENAME ofn; 
-  char szDirName[256];   
-  char *strFilter="PCgFEM Files (*.edp)\0*.edp\0All Files (*.*)\0*.*\0\0"; 
-  
-  memset(&ofn, 0, sizeof(OPENFILENAME));
-  getcwd(szDirName,sizeof(szDirName));
-  ofn.lStructSize = sizeof(OPENFILENAME);
-  ofn.hwndOwner = NULL;
-  ofn.lpstrFilter = strFilter;
-  ofn.lpstrFileTitle = fileName;
-  ofn.nMaxFileTitle = 80;
-  ofn.lpstrInitialDir=szDirName;
-  ofn.lpstrTitle ="Choose you freefem '*.edp' File";
-  ofn.Flags=OFN_SHOWHELP|OFN_PATHMUSTEXIST|OFN_FILEMUSTEXIST;
-  
-  return GetOpenFileName(&ofn);
-} 
-
-#endif
 
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
