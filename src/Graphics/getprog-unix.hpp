@@ -2,7 +2,7 @@
 
 #ifdef WIN32
 
-BOOL ShowOpenDialogBox(char *fileName)
+BOOL ShowOpenDialogBox1(char *fileName)
 {
   OPENFILENAME ofn; 
   char szDirName[256];   
@@ -88,7 +88,7 @@ int getprog(char* fn,int argc, char **argv)
 #ifdef WIN32
   if(ret==0)
     {
-      if ( ShowOpenDialogBox(fn) )
+      if ( ShowOpenDialogBox1(fn) )
 	ret=1;			    
     }
 #endif
