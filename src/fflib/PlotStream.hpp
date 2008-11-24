@@ -48,7 +48,7 @@ public:
   void set_binary_mode()
   {    
 #ifdef WIN32
-    _setmode(fileno(TheStream),O_BINARY));	
+    _setmode(fileno(TheStream),O_BINARY);	
 #endif
   }
  
