@@ -1,5 +1,29 @@
 #include "mode_open.hpp"
 
+#ifdef WIN32
+
+BOOL ShowOpenDialogBox(char *fileName)
+{
+  OPENFILENAME ofn; 
+  char szDirName[256];   
+  char *strFilter="PCgFEM Files (*.edp)\0*.edp\0All Files (*.*)\0*.*\0\0"; 
+  
+  memset(&ofn, 0, sizeof(OPENFILENAME));
+  getcwd(szDirName,sizeof(szDirName));
+  ofn.lStructSize = sizeof(OPENFILENAME);
+  ofn.hwndOwner = NULL;
+  ofn.lpstrFilter = strFilter;
+  ofn.lpstrFileTitle = fileName;
+  ofn.nMaxFileTitle = 80;
+  ofn.lpstrInitialDir=szDirName;
+  ofn.lpstrTitle ="Choose you freefem '*.edp' File";
+  ofn.Flags=OFN_SHOWHELP|OFN_PATHMUSTEXIST|OFN_FILEMUSTEXIST;
+  
+  return GetOpenFileName(&ofn);
+} 
+
+#endif
+
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
 int getprog(char* fn,int argc, char **argv)
@@ -43,12 +67,14 @@ int getprog(char* fn,int argc, char **argv)
 	  i++;	
 	  if(verbosity>10) printf(" verbosity : %ld\n",verbosity);
 	}
-      else if  (strcmp(argv[i],"-nw")==0 && i+1 < argc) 
+      else if  (strcmp(argv[i],"-nw")==0 ) 
 	noffglut=true;
       else if(strcmp(argv[i],"-fglut")==0 && i+1 < argc)
 	fileglut=argv[++i];
       else if(strcmp(argv[i],"-glut")==0 && i+1 < argc)
 	progffglut=argv[++i];
+      else if(strcmp(argv[i],"-?")==0 )
+	ret=2;
       else if( strcmp(argv[i],"-f")==0 && i+1 < argc) 
 	{
 	  strcpy(fn,argv[++i]);
@@ -59,8 +85,15 @@ int getprog(char* fn,int argc, char **argv)
 	  strcpy(fn,argv[i]);
 	    ret=1;
 	}
-  
-  if(ret==0) 
+#ifdef WIN32
+  if(ret==0)
+    {
+      if ( ShowOpenDialogBox(fn) )
+	ret=1;			    
+    }
+#endif
+
+  if(ret !=1) 
     {
       const char * ff = argc ? argv[0] : "FreeFem++" ;
       cout << " Syntaxe = " << ff  << " [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  \n"
