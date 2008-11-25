@@ -39,7 +39,7 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = download
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in compile
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acmacros.m4 \
 	$(top_srcdir)/acmacros.m4 $(top_srcdir)/acoptim.m4 \
@@ -92,6 +92,7 @@ DEPDIR = @DEPDIR@
 DOCPDF = @DOCPDF@
 DOCPS = @DOCPS@
 DOCPSGZ = @DOCPSGZ@
+DOWNLOADCOMPILE = @DOWNLOADCOMPILE@
 DOWNLOAD_ARPACK = @DOWNLOAD_ARPACK@
 DOWNLOAD_BLAS = @DOWNLOAD_BLAS@
 DOWNLOAD_FLTK = @DOWNLOAD_FLTK@
@@ -432,7 +433,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-recursive
-all-am: Makefile
+all-am: Makefile all-local
 installdirs: installdirs-recursive
 installdirs-am:
 install: install-recursive
@@ -507,8 +508,8 @@ uninstall-am: uninstall-info-am
 
 uninstall-info: uninstall-info-recursive
 
-.PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am check check-am \
-	clean clean-generic clean-local clean-recursive ctags \
+.PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am all-local check \
+	check-am clean clean-generic clean-local clean-recursive ctags \
 	ctags-recursive distclean distclean-generic \
 	distclean-recursive distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
@@ -531,6 +532,19 @@ pkg:
 
 clean-local:
 	-rm -rf  lib include 
+	-rm */FAIT 
+	for d in tetgen superlu fftw; do \
+	  ( cd "$$d";$(MAKE) clean ) ; \
+	done 
+all-local: $(DOWNLOADCOMPILE) 
+
+compile:
+	-if [ -n "$(WGET)" ] ; then \
+	for d in tetgen superlu fftw; do \
+	 echo "(cd $$d;$(MAKE) ) " ;\
+	  ( cd "$$d";$(MAKE) ) ; \
+	done ;\
+	fi 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

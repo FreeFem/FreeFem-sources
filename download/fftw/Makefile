@@ -5,7 +5,6 @@
 include cxxflags
 
 
-all-local:fftw
 
 # Downloading and compiling FFTW
 # ------------------------------
@@ -20,9 +19,13 @@ FFTW_VERSION=3.2
 INSTALL=../..
 
 
-fftw: $(SRCDIR)/FAIT
+fftw:FAIT
 
-$(SRCDIR)/FAIT: $(SRCDIR) 
+FAIT:	
+	$(MAKE) FAIRE
+	touch FAIT
+
+FAIRE: $(SRCDIR) 
 	cd $(SRCDIR) && ./configure  --disable-fortran  --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
@@ -35,7 +38,8 @@ $(PKGDIR)/$(PACKAGE):
 	cd $(PKGDIR); $(WGET)  $(SERVER)/$(PACKAGE)
 
 clean-local:
-	-rm -rf fftw-*
+	-rm -rf fftw-* FAIT 
+
 cxxflags: ../Makefile
 	grep 'CXX *=' ../Makefile >cxxflags
 	grep 'CC *=' ../Makefile >>cxxflags

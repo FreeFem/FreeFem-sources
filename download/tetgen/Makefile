@@ -17,7 +17,15 @@ SERVER=http://www.wias-berlin.de/people/si
 INSTALL=../..
 tetgen_VERSION=1.4.2
 
-tetgen: $(SRCDIR)/$(INSTALL) cxxflags
+tetgen: FAIT
+
+FAIT:
+	$(MAKE) FAIRE
+	touch FAIT
+	
+
+FAIRE:$(SRCDIR)/$(INSTALL) cxxflags
+	touch FAIT
 
 $(SRCDIR)/$(INSTALL): $(SRCDIR) cxxflags
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
@@ -36,9 +44,12 @@ $(PACKAGE):
 
 
 clean-local:
-	-rm -rf tetgen*
+	-rm -rf tetgen* FAIT
 clean:
 	-rm $(SRCDIR)/$(INSTALL)/lib/libtet.a
 	-rm $(SRCDIR)/$(INSTALL)/include/tetgen.h
 cxxflags: ../Makefile
-	grep CXX ../Makefile >cxxflags
+	grep 'CXX *=' ../Makefile >cxxflags
+	grep 'CC *=' ../Makefile >>cxxflags
+	grep 'CXXFLAGS *=' ../Makefile >>cxxflags
+	grep 'WGET *=' ../Makefile >>cxxflags

@@ -78,7 +78,15 @@ OBJ_SUPERLU = $(ALLAUX) $(LAAUX) \
  $(CLUSRC)  $(CLASRC) \
  $(ZLUSRC)  $(ZLASRC) 
 
-superlu: $(SRCDIR)/SRC/$(SUPERLULIB) 
+superlu: FAIT
+
+FAIT:	
+	$(MAKE) FAIRE
+	touch FAIT
+
+
+FAIRE: $(SRCDIR)/SRC/$(SUPERLULIB) 
+	mkdir FAIT
 
 $(SRCDIR)/SRC/$(SUPERLULIB): $(SRCDIR)
 	cd $(SRCDIR)/SRC; $(MAKE) -f ../../ff-FLAGS  $(OBJ_SUPERLU)
