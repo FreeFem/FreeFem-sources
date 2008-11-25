@@ -1,5 +1,7 @@
 v 3.00-1
   - complety change of the graphic (freefem++ is now the old freefem++-nw )
+       suppress the ide version until Antoine Le Hyaric do a good one
+          see page: http://www.ann.jussieu.fr/~lehyaric/ffcs
        We put a client-server architecture
         (freefem++,freefem++-nw)  / ffglut
 	- freefem++-nw and freefem++ is now the same file 

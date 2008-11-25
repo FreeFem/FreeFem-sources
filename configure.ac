@@ -1273,13 +1273,17 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 
 # For development purposes, we may need to use X libraries instead of
 # native libraries (mainly to run the programs remotely)
-AC_ARG_WITH(fltk,[  --without-fltk	(to suppress explicity    --enable-download imply --with-fltk ) ])
-AC_ARG_WITH(xfltk,[  --with-xfltk	When recompiling FLTK, use X libraries instead of native Win32 or MacOS])
-
+#  AC_ARG_WITH(fltk,[  --without-fltk	(to suppress explicity    --enable-download imply --with-fltk ) ])
+#  AC_ARG_WITH(xfltk,[  --with-xfltk	When recompiling FLTK, use X libraries instead of native Win32 or MacOS])
+#  remove all fltk stuff
+# to remove of FLTK
+AC_MSG_NOTICE(without ide/ fltk ..... Please wait the next version.... ) 
+if test 0 != 0 
+ then  
 if test "$with_fltk" = no 
 then 
      ff_fltk=no
-	AC_MSG_NOTICE(without FLTK)
+	AC_MSG_NOTICE(without FLTK sorry in next no ide today ) 
 else
 # under mingw use download fltk version
 if test "$ff_mingw" = yes 
@@ -1363,7 +1367,8 @@ then
 	fi
 fi
 fi
-
+# end of remove fltk
+fi 
 # Flex compatibility with Bison
 # -----------------------------
 
