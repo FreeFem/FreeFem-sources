@@ -12,7 +12,10 @@ camera.c		ellipse.c		inout.c			medit.c			param.c			psfile.c		transform.c \
 cenrad.c		geometry.c		inout_morice.c		menus.c			parsar.c		scene.c			util.c \
 clip.c			gisfil.c		inout_popenbinaire.c	mesh.c			parsop.c		scissor.c		vector.c \
 clipvol.c		hash.c			items.c			mlists.c		particle.c		sftcpy.c		view.c \
-critip.c		ilists.c		keyboard.c		morphing.c		path.c			status.c		zaldy1.c
+critip.c		ilists.c		keyboard.c		morphing.c		path.c			status.c		zaldy1.c \
+chrono.h	extern.h	image.h		mesh.h \
+eigenv.h	grafic.h	medit.h		sproto.h 
+
 
 LDADD= ../libMesh/libMesh.a $(LIBSGLUT)
 INCLUDES=-I../libMesh

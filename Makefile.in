@@ -726,11 +726,6 @@ quick:
 	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS)
 	cd src/std && $(MAKE) $(AM_MAKEFLAGS)
 
-agl:
-	cd src/lglib && $(MAKE) $(AM_MAKEFLAGS)
-	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS)
-	cd src/agl && $(MAKE) $(AM_MAKEFLAGS)
-
 nw:
 	cd src/lglib && $(MAKE) $(AM_MAKEFLAGS)
 	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS)
@@ -788,10 +783,6 @@ deb:
 # Build all versions
 # ------------------
 
-native:$(FF_MAC_PREFIX)_MacOS $(FF_MAC_PREFIX)_MacOsX.tgz DOC/freefem++doc.pdf
-	echo "done"
-native9:$(FF_MAC_PREFIX)_MacOS 
-	echo "done"
 nativeX: $(FF_MAC_PREFIX)_MacOsX.tgz 
 	echo "done"
 
@@ -809,8 +800,8 @@ ListFiles-natives: .FORCE
 	echo ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh >> $@
 	echo ./download/fftw/Makefile ./download/fftw/Makefile.am  >>$@
 	find .  -name '*.edp' -o -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
-List-agl-dylib: src/agl/FreeFem++-agl
-	otool -L src/agl/FreeFem++-agl|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}' >$@
+List-agl-dylib: src/nw/FreeFem++
+	otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}' >$@
 .FORCE:
 
 $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives
@@ -828,13 +819,11 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
            -e "s/@VVERSION@/$(VERSION)$(ADD_PACKAGE_NAME)/g" \
            -e "s/@DATE@/`date`/g"  
 	-mkdir -p  $@/FreeFem++.app/Contents/FreeFem++.app/Contents
-	cp $@/FreeFem++.app/Contents/Info.plist $@/FreeFem++.app/Contents/FreeFem++.app/Contents/Info.plist
-	cp src/agl/FreeFem++-agl $@/FreeFem++.app/Contents/FreeFem++.app/FreeFem++
+	cp src/nw/FreeFem++ $@/FreeFem++.app/Contents/bin
+	cp src/nw/ffglut $@/FreeFem++.app/Contents/bin
 	mkdir $@/FreeFem++.app/Contents/include 
 	cp examples++-load/include/* $@/FreeFem++.app/Contents/include
-	mkdir $@/FreeFem++.app/Contents/MacOS/lib
-	cp examples++-load/*.dylib  $@/FreeFem++.app/Contents/MacOS/lib
-	cp src/FreeFem++-CoCoa $@
+	cp examples++-load/*.dylib  $@/FreeFem++.app/Contents/lib
 	-if [ -s List-agl-dylib ]; then tar zchvf $@/OtherMacOsLib.tgz `cat List-agl-dylib`; fi; 
 	cp -p Install-MacOS.command $@
 

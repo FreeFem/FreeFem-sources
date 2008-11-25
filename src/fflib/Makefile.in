@@ -294,6 +294,7 @@ environment.cpp environment.hpp string_def.cpp \
 ../femlib/GQuadTree.cpp \
 ../femlib/libmesh5.c \
 glumesh2D.cpp \
+PlotStream.hpp \
 ../Eigen/arpackff.hpp 
 
 libff_a_SOURCES = $(libff_a_SOURCES2)  strversionnumber.cpp 

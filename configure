@@ -5495,7 +5495,7 @@ if test `uname` = Darwin;
 then
 	ff_suffix_dylib="dylib"
 	ff_mac=yes
-	ff_aglprog=FreeFem++-agl${EXEEXT}
+#	ff_aglprog=FreeFem++-agl${EXEEXT}
 fi
 echo "$as_me:$LINENO: result: $ff_mac" >&5
 echo "${ECHO_T}$ff_mac" >&6
@@ -14485,8 +14485,6 @@ _ACEOF
 
 	LOAD_COMPILE=load_compile
 
-        DYLIB_SUFFIX=$ff_suffix_dylib
-
 
 	# gcc on MacOS does not produce an error with "-rdynamic" but
 	# still complains about it.
@@ -14571,6 +14569,8 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 	fi
 fi
+DYLIB_SUFFIX=$ff_suffix_dylib
+
 
 # Checking wether we can generate some documentation
 # --------------------------------------------------
