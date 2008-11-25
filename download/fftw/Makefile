@@ -2,6 +2,7 @@
 # -----------------------------------------
 
 # $Id$
+include cxxflags
 
 
 all-local:fftw
@@ -10,30 +11,33 @@ all-local:fftw
 # ------------------------------
 
 # FFTW information
-
+#http://www.fftw.org/fftw-3.2.tar.gz
 SRCDIR=fftw-$(FFTW_VERSION)
 PACKAGE=fftw-$(FFTW_VERSION).tar.gz
 SERVER=http://www.fftw.org
-<<<<<<< Makefile
-INSTALL=../../install
-FFTW_VERSION=3.1.2
-=======
+PKGDIR=../pkg
+FFTW_VERSION=3.2
 INSTALL=../..
-FFTW_VERSION=3.1.2
->>>>>>> 1.2
 
-fftw: $(SRCDIR)/$(INSTALL)
 
-$(SRCDIR)/$(INSTALL): $(SRCDIR)
-	cd $(SRCDIR) && ./configure  --prefix=`pwd`/$(INSTALL) CXX=$(CXX) CC=$(CC) 
+fftw: $(SRCDIR)/FAIT
+
+$(SRCDIR)/FAIT: $(SRCDIR) 
+	cd $(SRCDIR) && ./configure  --disable-fortran  --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
+	touch FAIT
 
-$(SRCDIR): $(PACKAGE)
-	tar xvzf $(PACKAGE)
+$(SRCDIR): $(PKGDIR)/$(PACKAGE)
+	zcat  $^ | tar xvf - 
 
-$(PACKAGE):
-	curl -O  $(SERVER)/$(PACKAGE)
+$(PKGDIR)/$(PACKAGE):
+	cd $(PKGDIR); $(WGET)  $(SERVER)/$(PACKAGE)
 
 clean-local:
 	-rm -rf fftw-*
+cxxflags: ../Makefile
+	grep 'CXX *=' ../Makefile >cxxflags
+	grep 'CC *=' ../Makefile >>cxxflags
+	grep 'CXXFLAGS *=' ../Makefile >>cxxflags
+	grep 'WGET *=' ../Makefile >>cxxflags

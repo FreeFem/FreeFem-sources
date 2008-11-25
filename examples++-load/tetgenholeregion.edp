@@ -38,6 +38,7 @@ func f1min = Rmin*f1;
 func f2min = Rmin*f2;
 func f3min = Rmin*f3;
 
+
 mesh3 Th3sph=movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min]);
 
 real Rmax  = 2.;

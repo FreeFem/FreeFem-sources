@@ -32,7 +32,7 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
   tetgen.cpp\
   msh3.cpp msh3.hpp\
   ffrandom.cpp ffrandom.edp  \
-  popen.cpp 
+  medit.cpp 
 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
@@ -43,7 +43,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	tetgen.$(DYLIB_SUFFIX)\
 	splitmesh3.$(DYLIB_SUFFIX)  splitmesh6.$(DYLIB_SUFFIX) \
 	ffrandom.$(DYLIB_SUFFIX)  \
-	popen.$(DYLIB_SUFFIX)  \
+	medit.$(DYLIB_SUFFIX)  \
 	$(DYLIB_OTHER_COMPILE)
 
 load_compile:include  $(LIST_COMPILE)
@@ -59,8 +59,8 @@ glumesh2D.$(DYLIB_SUFFIX): glumesh2D.cpp
 #	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
 msh3.$(DYLIB_SUFFIX): msh3.cpp 
 	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" msh3.cpp 
-tetgen.$(DYLIB_SUFFIX): msh3.cpp $(TETGEN_LOADLINK)
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" -I../download/include -L../download/lib -ltet msh3.cpp tetgen.cpp
+tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" -I../download/include -L../download/lib -ltet  tetgen.cpp
 
 include: include.tar.gz
 	rm -rf include 

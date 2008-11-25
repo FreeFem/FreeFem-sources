@@ -28,7 +28,7 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
-
+#include "mode_open.hpp"
 #include <iostream>
 #include <cfloat>
 #include <cmath>
@@ -73,6 +73,14 @@ using namespace std;
 //extern bool NoWait; 
 //const char *medit_char= "meditff"; *
 #define WrdSiz 4
+
+#ifdef WIN32
+string stringffmedit= "ffmedit.exe";
+//string stringemptymedit= "ffmedit.exe";
+#else
+string stringffmedit= "ffmedit";
+#endif
+
 
 const char *medit_popen="-popen";// 1";  // depend de l endroit ou se trouve medit
 const char *medit_bin="-filebin";
@@ -811,9 +819,9 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
     TypTab[i]=l[i+1].what;
   }
 
-  string stringemptymedit= string("medit.exe"); 
+  //  string stringffmedit= string("medit.exe"); 
   string * ffname  = GetAny<string *>( (*filename)(stack) );
-  string * meditff(arg(1,stack,&stringemptymedit));
+  string * meditff(arg(1,stack,&stringffmedit));
 
   long filebin (arg(4,stack,1));
   int smedit=max(1,nbsol);
@@ -927,7 +935,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
 
   int nboftmp = 0;
 
-  FILE *popenstream= popen(commandline,"wb");
+  FILE *popenstream= popen(commandline,MODE_WRITE_BINARY);
   if( !popenstream){
     cerr << " Error popen : " << commandline<<endl;
     exit(1);
@@ -1558,9 +1566,9 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
     TypTab[i]=l[i+1].what;
   }
 
-  string stringemptymedit= string("medit");
+  //  string stringemptymedit= string("medit");
   string * ffname  = GetAny<string *>( (*filename)(stack) );
-  string * meditff(arg(1,stack,&stringemptymedit));
+  string * meditff(arg(1,stack,&stringffmedit));
 
   long filebin (arg(4,stack,1));
   int smedit=max(1,nbsol);     
@@ -1682,7 +1690,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
 
   int nboftmp = 0;
     
-  FILE *popenstream= popen(commandline,"wb");
+  FILE *popenstream= popen(commandline,MODE_WRITE_BINARY);
   if( !popenstream){
     cerr << " Error popen : " << commandline<<endl;
     exit(1);
