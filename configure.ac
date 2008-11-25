@@ -163,7 +163,7 @@ if test `uname` = Darwin;
 then
 	ff_suffix_dylib="dylib"
 	ff_mac=yes
-	ff_aglprog=FreeFem++-agl${EXEEXT}
+#	ff_aglprog=FreeFem++-agl${EXEEXT}
 fi
 AC_MSG_RESULT($ff_mac)
 
@@ -1190,7 +1190,6 @@ then
 	# Activate dynamic loading tests (see examples++-load/Makefile.am)
 	AC_SUBST(LOAD_TESTS,../regtests.sh)
 	AC_SUBST(LOAD_COMPILE,load_compile)
-        AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
 
 	# gcc on MacOS does not produce an error with "-rdynamic" but
 	# still complains about it.
@@ -1199,6 +1198,7 @@ then
 		CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
 	fi
 fi
+AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
 
 # Checking wether we can generate some documentation
 # --------------------------------------------------

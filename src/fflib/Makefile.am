@@ -37,6 +37,7 @@ environment.cpp environment.hpp string_def.cpp \
 ../femlib/GQuadTree.cpp \
 ../femlib/libmesh5.c \
 glumesh2D.cpp \
+PlotStream.hpp \
 ../Eigen/arpackff.hpp 
 
 
