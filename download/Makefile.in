@@ -39,7 +39,7 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = download
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in compile
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acmacros.m4 \
 	$(top_srcdir)/acmacros.m4 $(top_srcdir)/acoptim.m4 \
@@ -233,7 +233,9 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 SUBDIRS = blas arpack umfpack fltk 
-EXTRA_DIST = f2c/Makefile  f2c/fort77.sed	f2c/Makefile-MacOs tetgen/Makefile tetgen/tetgen1.4.2.patch
+EXTRA_DIST = f2c/Makefile  f2c/fort77.sed	f2c/Makefile-MacOs tetgen/Makefile tetgen/tetgen1.4.2.patch superlu/Makefile \
+fftw/Makefile
+
 all: all-recursive
 
 .SUFFIXES:
@@ -389,7 +391,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/f2c $(distdir)/tetgen
+	$(mkdir_p) $(distdir)/f2c $(distdir)/fftw $(distdir)/superlu $(distdir)/tetgen
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -538,7 +540,7 @@ clean-local:
 	done 
 all-local: $(DOWNLOADCOMPILE) 
 
-compile:
+compile-pkg:
 	-if [ -n "$(WGET)" ] ; then \
 	for d in tetgen superlu fftw; do \
 	 echo "(cd $$d;$(MAKE) ) " ;\

@@ -57,14 +57,17 @@ LK_FFTW3=-I../download/include -L../download/lib -l$(LLFFTW3)
 load_compile:include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG) 
 
 load_download:
-	if [  -f ../download/lib/lib$(LLTET).a -o -f ../download/lib/lib$(LLFFTW3).a \
-	     -o -f ../download/lib/lib$(LLSUPERLU).a   ]; then $(MAKE) load_download; \
+	if [  -f ../download/lib/lib$(LLTET).a -a -f ../download/lib/lib$(LLFFTW3).a \
+	     -a -f ../download/lib/lib$(LLSUPERLU).a   ]; then \
+             $(MAKE) compile-pkg ; \
 	else echo " no $(LLTET), $(LLSUPERLU) $(LLFFTW3) ";\
 	     echo " try to compile in ../download "; \
-	     echo "( cd "`pwd`"/../download/; make compile )" ;  \
+	     echo "( cd "`pwd`"/../download/; $(MAKE) compile-pkg )" ;  \
 	fi
 
-compile : include load_download  $(LIST_COMPILE_PKG) 
+#compile : include load_download 
+
+compile-pkg:  $(LIST_COMPILE_PKG) 
 
 
 .cpp.$(DYLIB_SUFFIX): 
