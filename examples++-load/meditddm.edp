@@ -1,5 +1,5 @@
 // meditddm.edp
-load "popen"
+load "medit"
 
 /********************************************
  Initial Problem:
@@ -47,4 +47,4 @@ problem Lap2dOmega1(u1,v1,init=false)=int2d(Th1)(Grad21(v1)' *Grad21(u1)) - int2
 Lap2dOmega1; 
 
 // vizualisation of solution of the initial problem
-medit("solution",Th,us,Th1,u1,order=1,meditff="medit-2.3-win.exeCC",save="testsavemedit.solb");	
+medit("solution",Th,us,Th1,u1,order=1,meditff="ffmedit",save="testsavemedit.solb");	

@@ -35,7 +35,7 @@ v 3.00-1
 	  examples++-load/tetgenholeregion.edp
 
   - add interface with medit (medit is now in freefem++ this call
-       ffmedit in popen.{so,dll,dylib}
+       ffmedit in medit.{so,dll,dylib}
        add freefem++ function medit savesol (2d , 3d  medit plot)
 
   - correct ?: operator with array and real. 

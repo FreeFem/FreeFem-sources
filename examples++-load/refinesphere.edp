@@ -1,7 +1,7 @@
 // file adaptsphere.edp
 load "msh3"
 load "tetgen"
-load "popen"
+load "medit"
 
 mesh Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
 //  a parametrization of a sphere 

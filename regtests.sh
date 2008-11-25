@@ -44,7 +44,7 @@ fi
 
 if test "$VISUALCHECK" = yes
 then
-    dotest ${PROGLOC}/std/FreeFem++${EXEEXT} std $script
+    export PATH="${PROGLOC}/nw/:$PATH";  dotest FreeFem++${EXEEXT} std $script
 fi
 
 if test $nprocs = 1
