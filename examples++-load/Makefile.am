@@ -39,13 +39,32 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          qf11to25.$(DYLIB_SUFFIX)  Element_P3.$(DYLIB_SUFFIX)    Element_P4.$(DYLIB_SUFFIX)  \
 	 Element_P3dc.$(DYLIB_SUFFIX)    Element_P4dc.$(DYLIB_SUFFIX) 	\
 	 Element_PkEdge.$(DYLIB_SUFFIX)   \
-	tetgen.$(DYLIB_SUFFIX)\
 	splitmesh3.$(DYLIB_SUFFIX)  splitmesh6.$(DYLIB_SUFFIX) \
 	ffrandom.$(DYLIB_SUFFIX)  \
 	medit.$(DYLIB_SUFFIX)  \
 	$(DYLIB_OTHER_COMPILE)
 
-load_compile:include  $(LIST_COMPILE)
+LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX)
+
+LLSUPERLU=superlu_3.1
+LLTET=tet
+LLFFTW3=fftw3
+
+LK_TET=-I../download/include -L../download/lib -l$(LLTET)
+LK_SUPERLU=-I../download/include -L../download/lib -l$(LLSUPERLU)
+LK_FFTW3=-I../download/include -L../download/lib -l$(LLFFTW3)
+
+load_compile:include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG) 
+
+load_download:
+	if [  -f ../download/lib/lib$(LLTET).a -o -f ../download/lib/lib$(LLFFTW3).a \
+	     -o -f ../download/lib/lib$(LLSUPERLU).a   ]; then $(MAKE) load_download; \
+	else echo " no $(LLTET), $(LLSUPERLU) $(LLFFTW3) ";\
+	     echo " try to compile in ../download "; \
+	     echo "( cd "`pwd`"/../download/; make compile )" ;  \
+	fi
+
+compile : include load_download  $(LIST_COMPILE_PKG) 
 
 
 .cpp.$(DYLIB_SUFFIX): 
@@ -58,8 +77,14 @@ load_compile:include  $(LIST_COMPILE)
 #	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
 msh3.$(DYLIB_SUFFIX): msh3.cpp 
 	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" msh3.cpp 
+
+# --  
 tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" -I../download/include -L../download/lib -ltet  tetgen.cpp
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" $(LK_TET)  tetgen.cpp
+SuperLu.$(DYLIB_SUFFIX): 
+	./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" $(LK_SUPERLU) SuperLU.cpp 
+dfft.$(DYLIB_SUFFIX): 
+	./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" $(LK_FFTW3) dfft.cpp  
 
 include: include.tar.gz
 	rm -rf include 

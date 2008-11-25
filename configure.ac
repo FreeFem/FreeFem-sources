@@ -623,12 +623,12 @@ fi
 # if enabling downloads find wget or curl to do download 
 # ------------------------------------------------------
 
-if test  "$ff_wget" =  no -a "$enable_download" = yes
+if test  "$ff_wget" =  no 
 then
-	ff_wget=""
+	ff_wget=""	
 	AC_CHECK_PROG(ff_wget,wget,yes,no)
-fi
-if test  "$ff_wget" = no -a "$enable_download" = yes
+fi	
+if test  "$ff_wget" = no 
 then
         ff_wget_command="curl -O"
   	ff_curl=""
@@ -636,7 +636,20 @@ then
 	ff_wget="$ff_curl"
 fi
 
+# for automatique compilation of 
+# lib in download 
+if test -z "$ff_wget_command" -a "$enable_download"  = "yes"  ; then
+  enable_download=no
+  AC_MSG_ERROR([   enable-download and no wget or curl. ],1);  
+fi
+if test "$enable_download"  = "yes" ; then
+DOWNLOADCOMPILE=compile
+else
+DOWNLOADCOMPILE=
+fi 
+
 AC_SUBST(WGET,$ff_wget_command)
+AC_SUBST(DOWNLOADCOMPILE,$DOWNLOADCOMPILE)
 
 #  modif FH -----
 #  -- looking for cadna  
