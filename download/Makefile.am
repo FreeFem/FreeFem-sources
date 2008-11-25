@@ -4,7 +4,8 @@
 # $Id$
 
 SUBDIRS=blas arpack umfpack fltk 
-EXTRA_DIST=f2c/Makefile  f2c/fort77.sed	f2c/Makefile-MacOs tetgen/Makefile tetgen/tetgen1.4.2.patch
+EXTRA_DIST=f2c/Makefile  f2c/fort77.sed	f2c/Makefile-MacOs tetgen/Makefile tetgen/tetgen1.4.2.patch superlu/Makefile \
+fftw/Makefile
 all-recursive: lib include pkg
 
 lib: 
@@ -22,7 +23,7 @@ clean-local:
 	done 
 all-local: $(DOWNLOADCOMPILE) 
 
-compile:
+compile-pkg:
 	-if [ -n "$(WGET)" ] ; then \
 	for d in tetgen superlu fftw; do \
 	 echo "(cd $$d;$(MAKE) ) " ;\

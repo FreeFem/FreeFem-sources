@@ -36,8 +36,7 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = examples++-load
-DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	compile
+DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acmacros.m4 \
 	$(top_srcdir)/acmacros.m4 $(top_srcdir)/acoptim.m4 \
@@ -503,14 +502,17 @@ all-local: @LOAD_COMPILE@
 load_compile:include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG) 
 
 load_download:
-	if [  -f ../download/lib/lib$(LLTET).a -o -f ../download/lib/lib$(LLFFTW3).a \
-	     -o -f ../download/lib/lib$(LLSUPERLU).a   ]; then $(MAKE) load_download; \
+	if [  -f ../download/lib/lib$(LLTET).a -a -f ../download/lib/lib$(LLFFTW3).a \
+	     -a -f ../download/lib/lib$(LLSUPERLU).a   ]; then \
+             $(MAKE) compile-pkg ; \
 	else echo " no $(LLTET), $(LLSUPERLU) $(LLFFTW3) ";\
 	     echo " try to compile in ../download "; \
-	     echo "( cd "`pwd`"/../download/; make compile )" ;  \
+	     echo "( cd "`pwd`"/../download/; $(MAKE) compile-pkg )" ;  \
 	fi
 
-compile : include load_download  $(LIST_COMPILE_PKG) 
+#compile : include load_download 
+
+compile-pkg:  $(LIST_COMPILE_PKG) 
 
 .cpp.$(DYLIB_SUFFIX): 
 	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)"  $< 
