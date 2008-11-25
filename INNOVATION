@@ -1,4 +1,43 @@
-v 3.00
+v 3.00-1
+  - complety change of the graphic (freefem++ is now the old freefem++-nw )
+       We put a client-server architecture
+        (freefem++,freefem++-nw)  / ffglut
+	- freefem++-nw and freefem++ is now the same file 
+	- ffglut is the visualisator in glut library (run on linux, mac, win32)
+    how to use now: 
+        freefem++  file.dp # by default load ffglut (so ffglut must be in the PATH).
+	freefem++  -glut ffglut-path  file.edp  # change ffglut command
+	freefem++  -fglut saveglutfile  file.edp # save data plot
+	ffglut saveglutfile # plot a data file
+	freefem++ -nw file.edp # freefem++ with  
+
+    now  glumesh2D dynamics tool is in freefem++   
+        add operator + beetween meshes
+        examples++-tutorial/glumesh.edp
+  - add 3 meshing tools in msh3.{so,dll,dylib}      	
+	operator + between mesh3
+	add freefem++ function:
+	  movemesh2D3Dsurf movemesh3D buildlayers
+
+    	  examples++-load/buildlayermesh.edp
+	  examples++-load/glumesh3D.edp
+	  examples++-load/refinesphere.edp
+	  examples++-load/tetgenholeregion.edp
+
+	    
+  - add interface with tetgen  3d mesher (tetgen.{so,dll,dylib})
+        add freefem++ function: 
+	  tetgconvexhull tetgtransfo tetg tetgreconstruction
+	
+      	  examples++-load/buildlayermesh.edp
+	  examples++-load/refinesphere.edp
+	  examples++-load/tetgencube.edp
+	  examples++-load/tetgenholeregion.edp
+
+  - add interface with medit (medit is now in freefem++ this call
+       ffmedit in popen.{so,dll,dylib}
+       add freefem++ function medit savesol (2d , 3d  medit plot)
+
   - correct ?: operator with array and real. 
   - correct memory erreur with  valgrind tool (19 oct 2008)
        In ~ConstructDataFElement() change counter after free

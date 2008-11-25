@@ -18,7 +18,7 @@
 # ----------------------------------
 # $Id$
 
-SOURCES = $(FreeFem___nw_SOURCES) $(ffglut_SOURCES)
+SOURCES = $(FreeFem___SOURCES) $(FreeFem___nw_SOURCES) $(ffglut_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -40,7 +40,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = FreeFem++-nw$(EXEEXT) @FFGLUTPROG@
+bin_PROGRAMS = FreeFem++$(EXEEXT) FreeFem++-nw$(EXEEXT) @FFGLUTPROG@
 EXTRA_PROGRAMS = ffglut$(EXEEXT)
 subdir = src/nw
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -56,6 +56,9 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
+am_FreeFem___OBJECTS = sansrgraph.$(OBJEXT)
+FreeFem___OBJECTS = $(am_FreeFem___OBJECTS)
+FreeFem___LDADD = $(LDADD)
 am_FreeFem___nw_OBJECTS = sansrgraph.$(OBJEXT)
 FreeFem___nw_OBJECTS = $(am_FreeFem___nw_OBJECTS)
 FreeFem___nw_LDADD = $(LDADD)
@@ -74,8 +77,10 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(FreeFem___nw_SOURCES) $(ffglut_SOURCES)
-DIST_SOURCES = $(FreeFem___nw_SOURCES) $(ffglut_SOURCES)
+SOURCES = $(FreeFem___SOURCES) $(FreeFem___nw_SOURCES) \
+	$(ffglut_SOURCES)
+DIST_SOURCES = $(FreeFem___SOURCES) $(FreeFem___nw_SOURCES) \
+	$(ffglut_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -260,7 +265,9 @@ ffglut_SOURCES = ../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthrea
 ffglut_DEPENDENCIES = 
 ffglut_LDADD = @LIBSGLUT@ @LIBSPTHREAD@
 FreeFem___nw_SOURCES = ../Graphics/sansrgraph.cpp
+FreeFem___SOURCES = ../Graphics/sansrgraph.cpp
 FreeFem___nw_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
+FreeFem___DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
 LDADD = ../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
 INCLUDES = -I../fflib -I../Graphics -I../.. -I../femlib 
 all: all-am
@@ -319,6 +326,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+FreeFem++$(EXEEXT): $(FreeFem___OBJECTS) $(FreeFem___DEPENDENCIES) 
+	@rm -f FreeFem++$(EXEEXT)
+	$(CXXLINK) $(FreeFem___LDFLAGS) $(FreeFem___OBJECTS) $(FreeFem___LDADD) $(LIBS)
 FreeFem++-nw$(EXEEXT): $(FreeFem___nw_OBJECTS) $(FreeFem___nw_DEPENDENCIES) 
 	@rm -f FreeFem++-nw$(EXEEXT)
 	$(CXXLINK) $(FreeFem___nw_LDFLAGS) $(FreeFem___nw_OBJECTS) $(FreeFem___nw_LDADD) $(LIBS)
