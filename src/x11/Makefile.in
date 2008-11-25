@@ -42,7 +42,6 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = $(am__EXEEXT_1)
 EXTRA_PROGRAMS = FreeFem++-x11$(EXEEXT)
-INCLUDES=-I../fflib -I../Graphics -I../.. -I../femlib 
 subdir = src/x11
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -248,7 +247,8 @@ target_alias = @target_alias@
 CXXLD = $(STATICTOOL) $(CXX)
 FreeFem___x11_SOURCES = ../Graphics/Xrgraph.cpp
 FreeFem___x11_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
-LDADD = ../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@  @X11_LIBS@
+LDADD = ../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @X11_LIBS@
+INCLUDES = -I../fflib -I../Graphics -I../.. -I../femlib @X_CFLAGS@ 
 all: all-am
 
 .SUFFIXES:

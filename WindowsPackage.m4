@@ -5,7 +5,8 @@
 ; WindowsPackage.m4 with the command "make WindowsPackage.iss".
 
 ; No source file here. They are in the source tar ball.
-
+; suppress -cs version no fltk to day , wait the next version
+;  FH version 3.0-1
 [Setup]
 AppName=FreeFem++-VERSION
 AppVerName=FreeFem++ version VERSION
@@ -32,7 +33,7 @@ Source: "crimon-freefem++.zip"; DestDir: "{app}"
 Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
 ;  to day the dll version do not works so we use the static one (FH)
 ;Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
-Source: "src\ide\FreeFem++-cs.exe"; DestDir: "{app}"
+;Source: "src\ide\FreeFem++-cs.exe"; DestDir: "{app}"
 Source: "src\nw\ffglut.exe"; DestDir: "{app}"
 Source: "src\medit\ffmedit.exe"; DestDir: "{app}"
 Source: "src\bin-win32\FreeFem++-nw.exe"; DestDir: "{app}"
@@ -83,7 +84,7 @@ Source: "logo.ico"; DestDir: "{app}"
 
 ; Menu
 Name: "{group}\FreeFem++"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
-Name: "{group}\FreeFem++ GUI"; Filename: "{app}\FreeFem++-cs.exe"
+;Name: "{group}\FreeFem++ GUI"; Filename: "{app}\FreeFem++-cs.exe"
 Name: "{group}\PDF manual"; Filename: "{app}\freefem++doc.pdf"
 Name: "{group}\Examples\Tutorial"; Filename: "{app}\examples++-tutorial"
 Name: "{group}\Examples\chapt3"; Filename: "{app}\examples++-chapt3"
@@ -95,7 +96,7 @@ Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
 
 ; Desktop
 Name: "{userdesktop}\FreeFem++ VERSION"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
-Name: "{userdesktop}\FreeFem++ VERSION GUI"; Filename: "{app}\FreeFem++-cs.exe"
+;Name: "{userdesktop}\FreeFem++ VERSION GUI"; Filename: "{app}\FreeFem++-cs.exe"
 Name: "{userdesktop}\FreeFem++ VERSION Examples"; Filename: "{group}\Examples"
 
 
