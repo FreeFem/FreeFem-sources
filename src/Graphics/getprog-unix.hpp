@@ -10,25 +10,32 @@ int getprog(char* fn,int argc, char **argv)
   
   int ret=0;
   *fn='\0';
+#if WIN32
+ const  int lsuffix= 4;
+#else 
+ const  int lsuffix= 0;
+#endif
   
 #ifdef PROG_FFGLUT
   const char * ffglut=PROG_FFGLUT;
-#elifdef WIN32
-  const char * nodefffglut="nw.exe";
 #else
   const char *ffglut="ffglut";
-#endif
-#ifdef WIN32
-  const char * nodefffglut="nw.exe";
-#else
-  const char * nodefffglut="nw";
 #endif
   const char *progffglut=0;
   const char *fileglut=0;
   bool noffglut=false;
 #ifndef NODEFFFGLUT
   if(argc)
-    noffglut= ( strcmp(argv[0]+strlen(argv[0])-strlen(nodefffglut),nodefffglut)==0);
+    {
+      const char *prog =argv[0];
+      const char *pm= rindex(argv[0],'-');      
+      if( pm )
+        noffglut = ((strlen(prog)- (pm-prog)) < lsuffix+5);
+      else   noffglut==  false;
+      //      cout << " noffglut= " << noffglut << endl;
+      //  suffix ++-glx.exe -> no ffglut
+      // pm = 0= > pas de moin -> freefem++ -> ffglut
+    }
 #endif
     
   

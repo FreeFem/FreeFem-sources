@@ -14953,7 +14953,7 @@ fi
 
 if test "$ff_mingw" = yes
 then
-	ff_stdprog="FreeFem++${EXEEXT}"
+	ff_stdprog="FreeFem++-std${EXEEXT}"
 	ff_std_graph_obj=Pcrgraph.$OBJEXT
 	ff_std_ldflags=-mwindows
 	ff_std_libs=
@@ -14963,8 +14963,7 @@ elif test "$ff_x11" = yes ; then
 	ff_std_libs=$ff_x11_libs
 	# If the standard version already uses x11, we do not need to
 	# make the contents of the src/x11 directory.
-	ff_stdprog="FreeFem++${EXEEXT}"
-	ff_x11prog=
+	ff_x11prog="FreeFem++-x11${EXEEXT}"
 fi
 STD_GRAPH_OBJ=$ff_std_graph_obj
 
