@@ -247,7 +247,6 @@ EXTRA_DIST = load.link dfft.link  include.tar.gz \
   testFE-PkEdge.edp \
   splitmesh3.cpp  splitmesh3.edp  splitmesh6.cpp  splitmesh6.edp \
   SuperLU_3.0-include-ff.tar.gz REAME_SuperLU \
-  glumesh2D.cpp glumesh2D.edp \
   tetgen.cpp\
   msh3.cpp msh3.hpp\
   ffrandom.cpp ffrandom.edp  \
@@ -497,8 +496,8 @@ load_compile:include  $(LIST_COMPILE)
 
 .cpp.$(DYLIB_SUFFIX): 
 	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)"  $< 
-glumesh2D.$(DYLIB_SUFFIX): glumesh2D.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" glumesh2D.cpp
+#glumesh2D.$(DYLIB_SUFFIX): glumesh2D.cpp 
+#	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" glumesh2D.cpp
 #glumesh3D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh3D.cpp 
 #	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp glumesh3D.cpp
 #buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
