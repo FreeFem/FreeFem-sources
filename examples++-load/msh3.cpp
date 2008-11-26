@@ -3610,7 +3610,8 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
     }
 }
 
-
+// because i include this file in tetgen.cpp (very bad)
+#ifndef WITH_NO_INIT
 class Init { public:
   Init();
 };
@@ -3638,3 +3639,4 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Global.Add("buildlayers","(",new  BuildLayerMesh);  
 }
 
+#endif

@@ -27,7 +27,7 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
   convect_dervieux.edp    testFEMorley.edp \
   testFE-PkEdge.edp \
   splitmesh3.cpp  splitmesh3.edp  splitmesh6.cpp  splitmesh6.edp \
-  SuperLU_3.0-include-ff.tar.gz REAME_SuperLU \
+  REAME_SuperLU \
   tetgen.cpp\
   msh3.cpp msh3.hpp\
   ffrandom.cpp ffrandom.edp  \
