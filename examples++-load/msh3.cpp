@@ -1,3 +1,4 @@
+#ifndef WITH_NO_INIT
 #include <fstream>
 #include <iostream>
 #include <cfloat>
@@ -32,6 +33,7 @@ using namespace std;
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
+#endif
 
 //  TransfoMesh_v2.cpp
 using namespace std;
