@@ -1934,3 +1934,7 @@ Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freef
   Global.Add("tetgreconstruction","(",new ReconstructionRefine);
 
 }
+// because i include this file in tetgen.cpp (very bad) FH
+// a will correct this in next version ...
+#define  WITH_NO_INIT
+#include "msh3.cpp" 
