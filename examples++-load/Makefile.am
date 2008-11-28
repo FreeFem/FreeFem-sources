@@ -86,7 +86,7 @@ msh3.$(DYLIB_SUFFIX): msh3.cpp
 tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
 	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" $(LK_TET)  tetgen.cpp
 SuperLu.$(DYLIB_SUFFIX): 
-	./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" $(LK_SUPERLU) SuperLU.cpp 
+	./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" $(LK_SUPERLU) SuperLu.cpp 
 dfft.$(DYLIB_SUFFIX): 
 	./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" $(LK_FFTW3) dfft.cpp  
 
