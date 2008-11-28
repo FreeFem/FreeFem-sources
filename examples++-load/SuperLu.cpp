@@ -11,8 +11,8 @@ using namespace std;
 #define GlobalLU_t GlobalLU_txxx
 #define countnz countnzxxx
 #define fixupL fixupLxxx
-#define  print_lu_col print_lu_colxxx
-#define   check_tempv check_tempvxxx
+#define print_lu_col print_lu_colxxx
+#define check_tempv check_tempvxxx
 #define PrintPerf PrintPerfxxxx
 #include "slu_zdefs.h"
 #undef GlobalLU_t
@@ -81,6 +81,14 @@ template <> struct SuperLUDriver<double>
 	    dCreate_SuperNode_Matrix( p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,  p11,p12,p13);
     }
     
+    static void 
+    CompRow_to_CompCol(int p1, int p2, int p3, 
+		       double *p4, int *p5, int *p6,
+		       double **p7, int **p8, int **p9)
+  {
+    dCompRow_to_CompCol( p1, p2, p3, p4, p5, p6, p7, p8, p9);
+  }
+
     
 };
 
@@ -89,9 +97,10 @@ template <> struct SuperLUDriver<double>
 template <> struct SuperLUDriver<Complex>
 {
     /* Driver routines */
-        static  Dtype_t R_SLU_T() { return SLU_Z;} 
-    static doublecomplex *dc(Complex *p)  { return (doublecomplex *) (void *) p;}
-    
+  static  Dtype_t R_SLU_T() { return SLU_Z;} 
+  static doublecomplex *dc(Complex *p)  { return (doublecomplex *) (void *) p;}
+  static doublecomplex **dc(Complex **p)  { return (doublecomplex **) (void *) p;}
+  
     static void
     gssv(superlu_options_t * p1, SuperMatrix * p2, int * p3, int * p4, SuperMatrix * p5,
 	 SuperMatrix * p6, SuperMatrix * p7 , SuperLUStat_t * p8, int * p9)
@@ -141,6 +150,13 @@ template <> struct SuperLUDriver<Complex>
 	zCreate_SuperNode_Matrix( p1,p2,p3,p4,dc(p5),p6,p7,p8,p9,p10,  p11,p12,p13);
     }
     
+  static void 
+  CompRow_to_CompCol(int p1, int p2, int p3, Complex *p4, int *p5, 
+		     int *p6, Complex **p7, int **p8, int **p9)
+  {
+    zCompRow_to_CompCol( p1, p2, p3, dc(p4), p5, p6, dc(p7), p8, p9);
+  }
+
     
 };
 
@@ -167,6 +183,10 @@ class SolveSuperLU :   public MatriceMorse<R>::VirtualSolver, public SuperLUDriv
    R         *rhsb, *rhsx, *xact;
    double         *RR, *CC;
    int m, n, nnz;
+
+   R         *arow;
+   int       *asubrow, *xarow;
+
    
    mutable superlu_options_t options;
    mutable mem_usage_t    mem_usage;
@@ -197,13 +217,18 @@ public:
      U.Store=0;
 	
     int status;
-     n=AA.n;
-     m=AA.m;
-     nnz=AA.nbcoef;
-     a=AA.a;
-     asub=AA.cl;
-     xa=AA.lg;
-	 
+    n=AA.n;
+    m=AA.m;
+    nnz=AA.nbcoef;
+
+    arow=AA.a;
+    asubrow=AA.cl;
+    xarow=AA.lg;
+
+    /* FreeFem++ use Morse Format */ 
+    CompRow_to_CompCol(m, n, nnz, arow, asubrow, xarow, 
+		       &a, &asub, &xa);
+
     /* Defaults */
     lwork = 0;
     nrhs  = 0;
@@ -221,7 +246,7 @@ public:
     options.PrintStat = YES;
     */
     set_default_options(&options);
-    options.Trans = TRANS;
+    //options.Trans = TRANS;
 
     Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
     Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);
