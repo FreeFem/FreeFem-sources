@@ -1,6 +1,6 @@
 load "SuperLU"
 verbosity=0;
-for(int i=0;i<1;++i)
+for(int i=0;i<3;++i)
 {
   {
     matrix A = 
