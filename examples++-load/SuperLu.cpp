@@ -7,6 +7,7 @@ using namespace std;
 
 //#include "lex.hpp"
 #include "MatriceCreuse_tpl.hpp"
+
 #include "slu_ddefs.h"
 #define GlobalLU_t GlobalLU_txxx
 #define countnz countnzxxx
@@ -156,7 +157,6 @@ template <> struct SuperLUDriver<Complex>
   {
     zCompRow_to_CompCol( p1, p2, p3, dc(p4), p5, p6, dc(p7), p8, p9);
   }
-
     
 };
 
@@ -204,12 +204,15 @@ public:
      SuperMatrix    B, X;
      SuperLUStat_t stat;
      void           *work=0;
-     int            info, lwork=0, nrhs=0;
+     int            info, lwork=0, nrhs=1;
      int            i;
-     double         ferr, berr;
+     double         ferr[1];
+     double         berr[1];
      double          rpg, rcond;
     
-	
+     R *bb;
+     R *xx;
+
      A.Store=0;
      B.Store=0;
      X.Store=0;
@@ -217,6 +220,7 @@ public:
      U.Store=0;
 	
     int status;
+
     n=AA.n;
     m=AA.m;
     nnz=AA.nbcoef;
@@ -246,34 +250,42 @@ public:
     options.PrintStat = YES;
     */
     set_default_options(&options);
-    //options.Trans = TRANS;
-
+  
     Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
+
     Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);
-    if(verbosity>4)
-    printf("Dimension %dx%d; # nonzeros %d\n", A.nrow, A.ncol, nnz);
-    
+  
     Create_Dense_Matrix(&B, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
     Create_Dense_Matrix(&X, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
-    
+      
+
     if ( !(etree  = new int[n]) ) ABORT("Malloc fails for etree[].");
     if ( !(perm_r = new int[n]) ) ABORT("Malloc fails for perm_r[].");
     if ( !(perm_c = new int[n]) ) ABORT("Malloc fails for perm_c[].");
     
-    if ( !(RR = new double[n]) ) 
+    if ( !(RR = new double[n]) )
         ABORT("SUPERLU_MALLOC fails for R[].");
+    for(int ii=0; ii<n; ii++){
+      RR[ii]=1.;
+    }
     if ( !(CC = new double[m]) )
         ABORT("SUPERLU_MALLOC fails for C[].");
-    ferr=0;
-    berr=0;
+    for(int ii=0; ii<n; ii++){
+      CC[ii]=1.;
+    }    
+    ferr[0]=0;
+    berr[0]=0;
     /* Initialize the statistics variables. */
     StatInit(&stat);
     
     /* ONLY PERFORM THE LU DECOMPOSITION */
     B.ncol = 0;  /* Indicate not to solve the system */
     SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
-           &L, &U, work, lwork, &B, &X, &rpg, &rcond, &ferr, &berr,
+           &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
            &mem_usage, &stat, &info);
+
+   
+
     if(verbosity>2)
     printf("LU factorization: dgssvx() returns info %d\n", info);
     if(verbosity>3)
@@ -311,35 +323,44 @@ public:
     void           *work=0;
     int            info=0, lwork=0, nrhs=1;
     int            i;
-    double         ferr, berr;
+    double       ferr[1], berr[1];
     double         rpg, rcond;
-    
+    double       *xx;
+
     B.Store=0;
     X.Store=0;
     ffassert ( &x[0] != &b[0]);
     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
 
+        
     Create_Dense_Matrix(&B, m, 1, b, m, SLU_DN, R_SLU, SLU_GE);
     Create_Dense_Matrix(&X, m, 1, x, m, SLU_DN, R_SLU, SLU_GE);
     
     B.ncol = nrhs;  /* Set the number of right-hand side */
-    
+
     /* Initialize the statistics variables. */
     StatInit(&stat);
     
+  
     SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
-           &L, &U, work, lwork, &B, &X, &rpg, &rcond, &ferr, &berr,
+           &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
            &mem_usage, &stat, &info);
+
+
+
     if(verbosity>2)
     printf("Triangular solve: dgssvx() returns info %d\n", info);
-    
+  
+   
+
     if(verbosity>3)
     {
     if ( info == 0 || info == n+1 ) {
 	
         /* This is how you could access the solution matrix. */
         R *sol = (R*) ((DNformat*) X.Store)->nzval; 
+	
 	
 	if ( options.IterRefine ) {
             printf("Iterative Refinement:\n");
@@ -351,7 +372,10 @@ public:
         printf("** Estimated memory: %d bytes\n", info - n);
     }
     }
-    if(verbosity>1) cout << "   x min max " << x.min() << " " <<x.max() << endl;
+    
+
+    cout << "   x min max " << x.min() << " " <<x.max() << endl;
+    cout << "=========================================" << endl;
     if( B.Store)  Destroy_SuperMatrix_Store(&B);
     if( X.Store)  Destroy_SuperMatrix_Store(&X);
   }
@@ -389,14 +413,13 @@ BuildSolverSuperLU(const MatriceMorse<double> *A,int strategy,double tgv, double
     return new SolveSuperLU<double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
 
-
  MatriceMorse<Complex>::VirtualSolver *
 BuildSolverSuperLU(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
 		   int NbSpace,int itmax ,const  void * precon, void * stack)
 {
-    if(verbosity>9)
+  if(verbosity>9)
     cout << " BuildSolverSuperLU<Complex>" << endl;
-    return new SolveSuperLU<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
+  return new SolveSuperLU<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
 
 
