@@ -1,4 +1,4 @@
-load "buildlayer"
+load "msh3"
 int nn=10;
 mesh Th2=square(nn,nn);
 fespace Vh2(Th2,P2);
@@ -31,7 +31,7 @@ VVh [v1,v2,v3,q];
 ux= v1(x,0.5,y);
 uz= v3(x,0.5,y);
 p2= q(x,0.5,y);
-plot([ux,uz],p2,cmm=" cut y = 0.5",wait=1);
+//plot([ux,uz],p2,cmm=" cut y = 0.5",wait=1);
 
 
 

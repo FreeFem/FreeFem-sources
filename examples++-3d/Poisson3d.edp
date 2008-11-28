@@ -1,16 +1,8 @@
-<<<<<<< Poisson3d.edp
 // build de mesh of a Sphere
 // -------------------------- 
 load "tetgen"
-//load "datasol"
+load "medit"
 
-=======
-// build de mesh of a Sphere
-// -------------------------- 
-load "tetgen"
-load "popen"
-
->>>>>>> 1.3
 mesh Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
 //  a parametrization of a sphere 
 func f1 =cos(x)*cos(y);
@@ -53,7 +45,7 @@ cout << uhe(0.,0.,0.) << endl;
 //savesol("f3.sol",Th3,ue,ue,[f,ue,f],order=1);
 //int bb=meditmeshsol("sol",Th3,solution=1,scalar=uhe);
 
-/*
+
 border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}
 mesh Th2=buildmesh(cc(50));
 fespace Vh2(Th2,P2);
@@ -74,4 +66,3 @@ plot(u2,wait=1);
 plot(u2,u2e,wait=1);
 
 assert(err < 1e-9);
-*/

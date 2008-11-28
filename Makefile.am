@@ -135,6 +135,7 @@ ListFiles-natives: .FORCE
 	echo COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX INNOVATION >$@	
 	echo mode-mi-edp.zip >> $@
 	echo examples++-tutorial/aile.msh examples++-tutorial/xyf >> $@
+	echo examples++-3d/dodecaedre01.mesh  >> $@
 	echo examples++-load/load.link >> $@
 	echo ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh >> $@
 	echo ./download/fftw/Makefile ./download/fftw/Makefile.am  >>$@
