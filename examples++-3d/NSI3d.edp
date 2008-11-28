@@ -1,4 +1,4 @@
-load "buildlayer"
+load "msh3"
 real nu=0.01,dt=0.3;
 real alpha=1./dt,alpha2=sqrt(alpha);
 
@@ -69,7 +69,7 @@ A = vNS(VVh,VVh);
 cout << " fac A" << endl;
 set(A,solver=UMFPACK);
 real t=0;
-for(int i=0;i<50;++i)
+for(int i=0;i<10;++i)
   {
     t += dt;
     cout << " iteration " << i << " t = " << t << endl;

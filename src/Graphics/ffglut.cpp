@@ -32,7 +32,7 @@ using std::numeric_limits;
 const R pi=M_PI;//4*atan(1.); 
 using namespace std;
 
-int debug=0;
+int debug=2;
 
 #include "ffglut.hpp"
 
