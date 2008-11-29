@@ -15,6 +15,7 @@ using namespace std;
 #include "MatriceCreuse_tpl.hpp"
 #include "MeshPoint.hpp"
 #include "lgfem.hpp"
+#include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
 
@@ -164,8 +165,8 @@ AnyType MatrixUpWind0::operator()(Stack stack) const
       }
     amorse=  new MatriceMorse<R>(Th.nv,Th.nv,Aij,false); 
   }
-  sparce_mat->pUh=0;
-  sparce_mat->pVh=0; 
+  sparce_mat->Uh=UniqueffId();
+  sparce_mat->Vh=UniqueffId();
   sparce_mat->A.master(amorse);
   sparce_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   *mp=mps;
