@@ -22,8 +22,8 @@ cout << " 0.2,0.1 : " << dxx(vi)(0.2,0.1)<<  " " << p9xx(0.2,0.1) << endl;
 cout << " 0.2,0.1 : " << dyy(vi)(0.2,0.1)<<  " " << p9yy(0.2,0.1) << endl;
 cout << " 0.2,0.1 : " << dxy(vi)(0.2,0.1)<<  " " << p9xy(0.2,0.1) << endl;
 vi=0;
-if(1)
-for (int i=0;i<vi[].n;++i)
+if(!NoUseOfWait)
+  for (int i=0;i<min(vi[].n,5);++i)
  {
     vi[][i]=1;
     vi;
