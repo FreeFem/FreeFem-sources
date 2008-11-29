@@ -19,7 +19,7 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
   NewSolver.cpp \
   LapDG3.edp              convectchacon.edp       plot-fb-P3dc.edp \
   LapDG4.edp              dfft.edp                plot-fb-P4dc.edp \
-  LaplaceP3.edp           ff-mt19937ar.edp        ref.edp \
+  LaplaceP3.edp                  ref.edp \
   LaplaceP4.edp           funcTemplate.edp        regtests.edp \
   NSP2BRP0.edp            load.edp                testFE-P3.edp \
   all.edp                 makeref.edp             testFE-P3dc.edp \
