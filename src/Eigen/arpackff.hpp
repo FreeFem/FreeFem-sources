@@ -4,7 +4,8 @@
   but a by tanks  to arpack++ for the idea of this code
    F. Hecht. 
 */
-
+//  Change V[1] -> V[0]
+//  Change workev[1] -> workev[0]
 #ifndef ARPACKFF_HPP
 #define ARPACKFF_HPP
 #include "error.hpp"
@@ -162,7 +163,7 @@ inline void saupp(int& ido, char bmat, int n, char* which, int nev,
 {
 
   F77NAME(dsaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
-                  &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
+                  &V[0], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
                   &lworkl, &info HIDDEN_12);
 
 } // saupp (double).
@@ -175,7 +176,7 @@ inline void saupp(int& ido, char bmat, int n, char* which, int nev,
 {
 
   F77NAME(ssaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
-                  &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
+                  &V[0], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
                   &lworkl, &info HIDDEN_12);
 
 } // saupp (float).
@@ -196,10 +197,10 @@ inline void seupp(bool rvec, char HowMny, double d[], double Z[],
 
   irvec   = (int) rvec;
   iselect = new logical[ncv];
-  iZ = (Z == NULL) ? &V[1] : Z;
+  iZ = (Z == NULL) ? &V[0] : Z;
 
   F77NAME(dseupd)(&irvec, &HowMny, iselect, d, iZ, &ldz, &sigma, &bmat,
-                  &n, which, &nev, &tol, resid, &ncv, &V[1], &ldv, &iparam[1],
+                  &n, which, &nev, &tol, resid, &ncv, &V[0], &ldv, &iparam[1],
                   &ipntr[1], &workd[1], &workl[1], &lworkl, &info HIDDEN_112);
 
   delete[] iselect;
@@ -219,10 +220,10 @@ inline void seupp(bool rvec, char HowMny, float d[], float Z[],
 
   irvec   = (int) rvec;
   iselect = new logical[ncv];
-  iZ = (Z == NULL) ? &V[1] : Z;
+  iZ = (Z == NULL) ? &V[0] : Z;
 
   F77NAME(sseupd)(&irvec, &HowMny, iselect, d, iZ, &ldz, &sigma, &bmat,
-                  &n, which, &nev, &tol, resid, &ncv, &V[1], &ldv, &iparam[1],
+                  &n, which, &nev, &tol, resid, &ncv, &V[0], &ldv, &iparam[1],
                   &ipntr[1], &workd[1], &workl[1], &lworkl, &info HIDDEN_112 );
 
   delete[] iselect;
@@ -236,7 +237,7 @@ inline void naupp(int& ido, char bmat, int n, char* which, int nev,
 {
 
   F77NAME(dnaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
-                  &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
+                  &V[0], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
                   &lworkl, &info HIDDEN_12);
 
 } // naupp (double).
@@ -249,7 +250,7 @@ inline void naupp(int& ido, char bmat, int n, char* which, int nev,
 {
 
   F77NAME(snaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
-                  &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
+                  &V[0], &ldv, &iparam[1], &ipntr[1], &workd[1], &workl[1],
                   &lworkl, &info HIDDEN_12 );
 
 } // naupp (float).
@@ -265,7 +266,7 @@ inline void caupp(int& ido, char bmat, int n, char* which, int nev,
 {
 
   F77NAME(znaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
-                  &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1],
+                  &V[0], &ldv, &iparam[1], &ipntr[1], &workd[1],
                   &workl[1], &lworkl, &rwork[1], &info HIDDEN_12 );
 
 } // caupp 
@@ -278,7 +279,7 @@ inline void caupp(int& ido, char bmat, int n, char* which, int nev,
 {
 
   F77NAME(cnaupd)(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv,
-                  &V[1], &ldv, &iparam[1], &ipntr[1], &workd[1],
+                  &V[0], &ldv, &iparam[1], &ipntr[1], &workd[1],
                   &workl[1], &lworkl, &rwork[1], &info HIDDEN_12);
 
 } // caupp 
@@ -298,11 +299,11 @@ inline void ceupp(bool rvec, char HowMny, complex<double> d[],
 
   irvec   = (int) rvec;
   iselect = new logical[ncv];
-  iZ = (Z == NULL) ? &V[1] : Z;
+  iZ = (Z == NULL) ? &V[0] : Z;
 
   F77NAME(zneupd)(&irvec, &HowMny, iselect, d, iZ, &ldz, &sigma,
-                  &workev[1], &bmat, &n, which, &nev, &tol, resid,
-                  &ncv, &V[1], &ldv, &iparam[1], &ipntr[1],
+                  &workev[0], &bmat, &n, which, &nev, &tol, resid,
+                  &ncv, &V[0], &ldv, &iparam[1], &ipntr[1],
                   &workd[1], &workl[1], &lworkl, &rwork[1], &info HIDDEN_112);
 
   delete[] iselect;
@@ -325,11 +326,11 @@ inline void ceupp(bool rvec, char HowMny, complex<float> d[],
 
   irvec   = (int) rvec;
   iselect = new logical[ncv];
-  iZ = (Z == NULL) ? &V[1] : Z;
+  iZ = (Z == NULL) ? &V[0] : Z;
 
   F77NAME(cneupd)(&irvec, &HowMny, iselect, d, iZ, &ldz, &sigma,
-                  &workev[1], &bmat, &n, which, &nev, &tol, resid,
-                  &ncv, &V[1], &ldv, &iparam[1], &ipntr[1],
+                  &workev[0], &bmat, &n, which, &nev, &tol, resid,
+                  &ncv, &V[0], &ldv, &iparam[1], &ipntr[1],
                   &workd[1], &workl[1], &lworkl, &rwork[1], &info HIDDEN_112);
 
   delete[] iselect;
@@ -351,11 +352,11 @@ inline void neupp(bool rvec, char HowMny, double dr[],
 
   irvec   = (int) rvec;
   iselect = new logical[ncv];
-  iZ = (Z == NULL) ? &V[1] : Z;
+  iZ = (Z == NULL) ? &V[0] : Z;
 
   F77NAME(dneupd)(&irvec, &HowMny, iselect, dr, di, iZ, &ldz, &sigmar,
                   &sigmai, &workv[1], &bmat, &n, which, &nev, &tol,
-                  resid, &ncv, &V[1], &ldv, &iparam[1], &ipntr[1],
+                  resid, &ncv, &V[0], &ldv, &iparam[1], &ipntr[1],
                   &workd[1], &workl[1], &lworkl, &info HIDDEN_112);
 
   delete[] iselect;
@@ -378,11 +379,11 @@ inline void neupp(bool rvec, char HowMny, float dr[],
 
   irvec   = (int) rvec;
   iselect = new logical[ncv];
-  iZ = (Z == NULL) ? &V[1] : Z;
+  iZ = (Z == NULL) ? &V[0] : Z;
 
   F77NAME(sneupd)(&irvec, &HowMny, iselect, dr, di, iZ, &ldz, &sigmar,
                   &sigmai, &workv[1], &bmat, &n, which, &nev, &tol,
-                  resid, &ncv, &V[1], &ldv, &iparam[1], &ipntr[1],
+                  resid, &ncv, &V[0], &ldv, &iparam[1], &ipntr[1],
                   &workd[1], &workl[1], &lworkl, &info HIDDEN_112);
 
   delete[] iselect;

@@ -23,7 +23,7 @@ varf vfStokes ([u1,u2,p],[v1,v2,q]) =
            )
   + on(1,2,3,4,u1=0,u2=0) 
 ;
-varf b([u1,u2,p],[v1,v2,q]) = int2d(Th)(  u1*v2+u2*v2+p*q*1e-10) ; // no  Boundary condition
+varf b([u1,u2,p],[v1,v2,q]) = int2d(Th)(  u1*v1+u2*v2+p*q*0.) ; // no  Boundary condition
 
 matrix A= vfStokes(XhxXhxMh,XhxXhxMh,solver=Crout,factorize=1); 
 matrix B= b(XhxXhxMh,XhxXhxMh,solver=CG,eps=1e-20); 
