@@ -1,5 +1,5 @@
 load "Element_P3"
-load "NewLSolver"
+load "NewSolver"
 verbosity=3;
  mesh Th=square(10,10);
  fespace Vh(Th,P3);     // P1 FE space

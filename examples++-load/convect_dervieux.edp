@@ -14,7 +14,7 @@ problem  FVM(v,vh) = int2d(th,qft=qf1pTlump)(v*vh/dt)
 + rhs[] ;
 
 matrix A;
-MatUpWind0(A,th,vold,[u1,u2]);
+MatUpWind1(A,th,vold,[u1,u2]);
 
 for ( int t=0; t< 2*pi ; t+=dt){
   vold=v;
