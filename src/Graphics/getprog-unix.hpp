@@ -28,7 +28,7 @@ int getprog(char* fn,int argc, char **argv)
   if(argc)
     {
       const char *prog =argv[0];
-      const char *pm= rindex(argv[0],'-');      
+      const char *pm= strrchr(argv[0],'-');      
       if( pm )
         noffglut = ((strlen(prog)- (pm-prog)) < lsuffix+5);
       else   noffglut==  false;
