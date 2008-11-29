@@ -70,15 +70,6 @@ verbosity=verbosityy;
 	
 };
 
-cout << "--------- file : glumesh.edp -----------------" << endl;
-verbosity=verbosityy;
-{
-		
-	
-	include "glumesh.edp";
-	
-};
-
 cout << "--------- file : LapDG3.edp -----------------" << endl;
 verbosity=verbosityy;
 {

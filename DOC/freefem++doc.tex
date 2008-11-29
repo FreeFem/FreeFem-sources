@@ -14,7 +14,7 @@
 
 
 \usepackage{times}
-\def\VERSION{3.0.$\beta$}
+\def\VERSION{3.0-1}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -55,14 +55,14 @@
 \thispagestyle{empty}
 \vbox to 20cm {\begin{center}
    \vglue-0.5cm\includegraphics[width=10cm]{titre-ff}
-    \\  \large  \Blue{Second Edition,   Version \VERSION }
+    \\  \large  \Blue{Third Edition,   Version \VERSION }
  \\ \vglue 0.7cm
   {\large \Blue{\url{http://www.freefem.org/ff++}}} \\ ~
  \\~  \\
 % \Blue{{ \sc {\Huge F. Hecht,  O. Pironneau}
 % \\ ~ \\
 %{\Huge A. Le Hyaric, K. Ohtsuka } }}
-\includegraphics[width=10cm]{ffauteurs4}
+\includegraphics[width=6cm]{ffauteur}
 \vglue 1cm
 \includegraphics[width=15cm]{csSnap}
 \\ \vglue0.5cm
@@ -71,9 +71,10 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \end{center}}
 \clearpage\thispagestyle{empty}\cleardoublepage
 \thispagestyle{empty}
+
 \begin{center}
  {\Blue{ \TitreFont FreeFem++}} \\ \vglue 1cm  ~ \\
-   Second Edition, Version \VERSION 
+   Third Edition, Version \VERSION 
  \\ \vglue 0.7cm
  {\Large \url{http://www.freefem.org/ff++}} \\
 \vglue 1cm
@@ -85,58 +86,86 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 
 \url{http://www.ann.jussieu.fr/~hecht}
 
-\medskip
-
-{\Large Olivier Pironneau${}^{1,3}$}
-
-  \url{mailto:olivier.pironneau@upmc.fr}
-
-\url{http://www.ann.jussieu.fr/pironneau}
-
 
 \bigskip
 
+The participants of the documentation and of the developement are:
+\begin{itemize}
+\item {\Large Olivier Pironneau}, \url{mailto:olivier.pironneau@upmc.fr}\url{http://www.ann.jussieu.fr/pironneau}
+{Olivier Pironneau is a professor of numerical analysis at the university of Paris VI and at LJLL.  His scientific contributions are in numerical methods for fluids.  He is a member of the Institut Universitaire de France and of the French  Academy of Sciences}
+
+\item {\Large Jacques Morice}, \url{mailto:morice@ann.jussieu.fr}.
+Jacaues Morice is a Post Doctorant , ( à faire .....)
+
+\item {\Large Antoine Le Hyaric}, \url{mailto:lehyaric@ann.jussieu.fr},\url{http://www.ann.jussieu.fr/~lehyaric/}
+{Antoine Le Hyaric}{ is a research engineer  from the "Centre National de la
+Recherche Scientifique" (CNRS) at LJLL . He is an expert in software engineering
+for scientific applications. He has applied his skills mainly to
+electromagnetics simulation, parallel computing and three-dimensional
+visualization.}
+
+\item {\Large Kohji Ohtsuka},\url{mailto:ohtsuka@hkg.ac.jp}, \url{http://http://www.comfos.org/}
+{Koji Ohtsuka}{ is a professor at the Hiroshima Kokusai Gakuin University, Japan and chairman of the World Scientific and Engineering academy and Society, Japan chapter.  His research is in fracture dynamics, modelling and computing.}
+\end{itemize}
 
 
-{\Large Antoine Le Hyaric${}^{1,2}$ }
-
- \url{mailto:lehyaric@ann.jussieu.fr}
-
-\url{http://www.ann.jussieu.fr/~lehyaric/}
 
 
-\bigskip
+%\medskip
 
+%{\Large Olivier Pironneau${}^{1,3}$}
 
-{\Large Kohji Ohtsuka${}^{5}$ }
+%  \url{mailto:olivier.pironneau@upmc.fr}
 
-  \url{mailto:ohtsuka@hkg.ac.jp}
+%\url{http://www.ann.jussieu.fr/pironneau}
 
-\url{http://http://www.comfos.org/}
-\end{center}
-
+%
 %\bigskip
 
+%
 
-\begin{enumerate}
-\item  Laboratoire Jacques-Louis Lions,
-175 rue du Chevaleret , 75013 Paris, France
+%{\Large Antoine Le Hyaric${}^{1,2}$ }
 
- Universit\'{e} Pierre et Marie Curie,
-4 Place  Jussieu,  75252  PARIS cedex 05, France.
+% \url{mailto:lehyaric@ann.jussieu.fr}
 
-\item CNRS, UMR 7598,  Laboratoire Jacques-Louis Lions,
-175 rue du Chevaleret , 75013 Paris, France.
-\item Institut de France, Acad\'{e}mie des sciences, 23, quai de Conti,  75006 Paris,  France.
-\item INRIA, Projet Gamma, Domaine de Voluceau, Rocquencourt, B.P. 105, 78153 Le Chesnay Cedex, France.
-\item Hiroshima Kokusai Gakuin University, Hiroshima, Japan.
+%\url{http://www.ann.jussieu.fr/~lehyaric/}
 
-\end{enumerate}
+%
+%\bigskip
+
+%
+%{\Large Kohji Ohtsuka${}^{5}$ }
+
+%  \url{mailto:ohtsuka@hkg.ac.jp}
+
+%\url{http://http://www.comfos.org/}
+\end{center}
+
+%%\bigskip
+
+%
+%\begin{enumerate}
+%\item  Laboratoire Jacques-Louis Lions,
+%175 rue du Chevaleret , 75013 Paris, France
+
+% Universit\'{e} Pierre et Marie Curie,
+%4 Place  Jussieu,  75252  PARIS cedex 05, France.
+
+%\item CNRS, UMR 7598,  Laboratoire Jacques-Louis Lions,
+%175 rue du Chevaleret , 75013 Paris, France.
+%\item Institut de France, Acad\'{e}mie des sciences, 23, quai de Conti,  75006 Paris,  France.
+%\item INRIA, Projet Gamma, Domaine de Voluceau, Rocquencourt, B.P. 105, 78153 Le Chesnay Cedex, France.
+%\item Hiroshima Kokusai Gakuin University, Hiroshima, Japan.
+
+%\end{enumerate}
+
+
+\vfill
 \hbox to \hsize
 {\hss
 \includegraphics[height=1.7cm]{LogoLJLL} \hss
 \includegraphics[height=1.7cm]{LogoUPMC} \hss
-\includegraphics[height=1.7cm]{LogoCNRS} \hss
+%\includegraphics[height=1.7cm]{LogoCNRS} \hss
 \includegraphics[height=1.7cm]{logo-finance-par-anr} \hss
 }
 \bigskip
@@ -299,17 +328,18 @@ After installation, The list of application ( depending of the system and the co
 
 \begin{enumerate}
 \item \texttt{FreeFem++}, standard version, with a graphical interface
-based on X11, Win32 
+based on GLUT/OpenGL (use ffglut visualizator)
+\item \texttt{ffglut} the visualisator through a pipe of freefem++ 
 \item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no graphics windows)
 \item \texttt{FreeFem++-mpi}, parallel version, postscript output only
-\item \texttt{FreeFem++-glx}, graphics using OpenGL and X11
-\item \texttt{FreeFem++-cs}, integrated development environment
+%\item \texttt{FreeFem++-glx}, graphics using OpenGL and X11
+%\item \texttt{FreeFem++-cs}, integrated development environment
 %\item \texttt{FreeFem++-ag}, integrated development environment
 (please see chapter Graphical User Interface \ref{GUI}  for more details).
 \item \texttt{/Applications/FreeFem++.app}, Drag and Drop CoCoa MacOs
 Application
-\item \texttt{FreeFem++-CoCoa}, MacOS Shell script for MacOS OpenGL
-version (MacOS 10.2 or better) (note: it uses
+%\item \texttt{FreeFem++-CoCoa}, MacOS Shell script for MacOS OpenGL
+version (MacOS 10.3 or better) (note: it uses
 /Applications/FreeFem++.app)
 \item \texttt{bamg} , the bamg mesh generator
 \item \texttt{cvmsh2} , a mesh file convertor
@@ -331,7 +361,24 @@ If you are using \texttt{nedit} as your text editor,
 do one time \verb!nedit -import edp.nedit! to have coloring syntax for your \ttCC{.edp}
 files. 
 
-
+The syntax of tools \texttt{FreeFem++},\texttt{FreeFem++-nw} on the command-line  are
+{ \small
+\begin{itemize}
+\item  \verb!FreeFem++ [-?] [-vnn] [-fglut file1] [-glut file2] [-f]  edpfilepath ! where the 
+\item or \verb!FreeFem++-nw -? [-vnn] [-fglut file1] [-glut file2] [-f]  edpfilepath ! where the 
+ \begin{description}
+ \item \verb!-?!  show the usage. 
+\item \verb!-fglut filename!  to store all the data for graphic in file \verb! filename!, and to replay do
+\verb!ffglut filename!.
+\item \verb!-glut  ffglutprogam!  to change the visualisator program's.
+\item \verb!-nw! no call to ffglut 
+\item \verb!-v nn!  set the level of verbosity to \texttt{nn} before execution of the  script.
+\item  if no file path then you get a dialog box to choose the edp file on windows systeme.
+\end{description}
+\end{itemize}}
+\medskip
+ where the part in \texttt{[]} is optional.
+ 
 
 \subsubsection{Windows binaries install}
   First download the windows installation file, then execute the
@@ -339,7 +386,7 @@ files.
   three new icons on your desktop:
   \begin{itemize}
    \item \texttt{FreeFem++ (VERSION).exe}  the classical \freefempp application. 
-   \item \texttt{FreeFem++ (VERSION) GUI.exe}  the GUI \freefempp application, see section \ref{GUI} for more information. 
+  % \item \texttt{FreeFem++ (VERSION) GUI.exe}  the GUI \freefempp application, see section \ref{GUI} for more information. 
    \item \texttt{FreeFem++ (VERSION) Examples} a link to the \freefempp  directory examples.
   \end{itemize}
   where \texttt{(VERSION)} is the version of the files (for example \texttt{2.3-0-P4}).
@@ -358,21 +405,21 @@ files.
 you can use all the programs in 
 the window Command-line shell. (Use System in Control Panel, On the Advanced tab, click Environment Variables, then add the correct string).
 
-The syntax of tools on the command-line  are
-{ \small
-\begin{itemize}
-\item  \verb!FreeFem++.exe [-vnn] [-b] [-s] [-n] [-h] [-f]  [ filepath ]! where the 
- \begin{description}
-\item \verb!-b!  no color (black and white plot)
-\item \verb!-n!  no edit 
-\item \verb!-s!  not wait at end of execution
-\item \verb!-vnn!  set the level of verbosity to \texttt{nn} before execution of the  script.
-\item  if no file path then you get a dialog box to choose the edp file. 
-\end{description}
-\item  \verb!FreeFem++-nw.exe [-v nn]   [[-f] filepath]!
-\end{itemize}}
-\medskip
- where the part in \texttt{[]} is optional.
+The syntax of tools on the command-line  are same 
+%{ \small
+%\begin{itemize}
+%\item  \verb!FreeFem++.exe [-vnn] [-b] [-s] [-n] [-h] [-f]  [ filepath ]! where the 
+% \begin{description}
+%\item \verb!-b!  no color (black and white plot)
+%\item \verb!-n!  no edit 
+%\item \verb!-s!  not wait at end of execution
+%\item \verb!-vnn!  set the level of verbosity to \texttt{nn} before execution of the  script.
+%\item  if no file path then you get a dialog box to choose the edp file. 
+%\end{description}
+%\item  \verb!FreeFem++-nw.exe [-v nn]   [[-f] filepath]!
+%\end{itemize}}
+%\medskip
+% where the part in \texttt{[]} is optional.
  
 \paragraph{Link with other text editor}
 \begin{description}
@@ -437,7 +484,7 @@ has an item to launch \freefempp by a Ctrl+1 command.}
   Download the MacOS X binary version file, extract all the files with a double click on the
   icon of the file, go the the directory and put the \texttt{FreeFem+.app} application in the 
   \texttt{/Applications} directory.
-  If you want a terminal access to \freefempp just copy the file \texttt{FreeFem++-CoCoa} in a
+  If you want a terminal access to \freefempp just copy the file \texttt{FreeFem++} in a
    directory of your \verb!$PATH! shell environment variable.
    
   If you want to automatically launch the \texttt{FreeFem++.app}, double click on a \texttt{.edp} file icon.
@@ -448,30 +495,30 @@ has an item to launch \freefempp by a Ctrl+1 command.}
   
 \subsection{How to use \freefempp}
 
-\paragraph{Under Windows with Graphic Interfaces}
+%\paragraph{Under Windows with Graphic Interfaces}
 
-The executable \texttt{freefem++.exe} opens a dialog box for
-choosing the input file, then it executes the input file content and produces
-graphics and output files.
-\\\\
-You can create and modify \freefempp programs with your favorite text editor.
-\\\\
-An integrated environment (\freefempp GUI), written by A. Le Hyaric, is also included
-with the distribution. the application name is \texttt{FreeFem++-cs}; note however that
-the graphics display is slower in this mode.
-There are other ways to have an integrated environment. TeX users usually have
-an editor installed; if it is winedt or TeXnicCenter then these can
-be programmed to handle the edit-run-correct cycle of \freefempp with
-color syntax and automatic launch of freefem.  If you don't have one of these
-installed the easiest is to download the freeware \texttt{Crimson Editor}.
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics[width=15cm]{csSnapOld}
-\caption{ The 3 panels of the integrated environment \texttt{freefem++-cs}:
-to the top left one has the program (which can be edited?), on the top right the graphic output window, and the bottom pane displays text messages.
-}
-\end{center}
-\end{figure}
+%The executable \texttt{freefem++.exe} opens a dialog box for
+%choosing the input file, then it executes the input file content and produces
+%graphics and output files.
+%\\\\
+%You can create and modify \freefempp programs with your favorite text editor.
+%\\\\
+%An integrated environment (\freefempp GUI), written by A. Le Hyaric, is also included
+%with the distribution. the application name is \texttt{FreeFem++-cs}; note however that
+%the graphics display is slower in this mode.
+%There are other ways to have an integrated environment. TeX users usually have
+%an editor installed; if it is winedt or TeXnicCenter then these can
+%be programmed to handle the edit-run-correct cycle of \freefempp with
+%color syntax and automatic launch of freefem.  If you don't have one of these
+%installed the easiest is to download the freeware \texttt{Crimson Editor}.
+%\begin{figure}[htbp]
+%\begin{center}
+%\includegraphics[width=15cm]{csSnapOld}
+%\caption{ The 3 panels of the integrated environment \texttt{freefem++-cs}:
+%to the top left one has the program (which can be edited?), on the top right the graphic output window, and the bottom pane displays text messages.
+%}
+%\end{center}
+%\end{figure}
 \paragraph{Under MacOS X with Graphic Interfaces}
 
 For testing or running  an \texttt{.edp} file, just drag and drop 
@@ -5498,20 +5545,22 @@ plot(Th,ps="ThreePoint.eps",bw=1); // Fig. \ref{ThreePoint}
 \end{multicols}
 \end{figure}
 
+%%%  3d 
+
 
 \subsection{How to change the label of elements and border elements of a mesh in FreeFem++ ?}
 \label{sec.changelab.gluemesh}
 Changing the label of elements and border elements will be done using the keyword {\bf{change}}. The parameters for this
 command line are for a two dimensional case:
-\begin{description}
+\begin{itemize}
 \item [\texttt{refe =}] is a vector of integer that contains the old labels and the new labels of edges.
 \item [\texttt{reft =}] is a vector of integer that contains the old labels and the new labels of triangles.
-\end{description}
+\end{itemize}
 and for a three dimensional case:
-\begin{description}
+\begin{itemize}
 \item [\texttt{reftet =}] is a vector of integer that contains the old labels and the new labels of tetrahedrons.
 \item [\texttt{refface =}] is a vector of integer that contains the old labels and the new labels of triangles.
-\end{description}
+\end{itemize}
 
 These vectors are composed of $n_{l}$ succesive sub vectors of size two where $n_{l}$ is the number of label
 that we want to change. The first element and second element of sub vector are respectively the old label and the new label.
@@ -5527,7 +5576,7 @@ An example of using this function is given in "glumesh2D.edp":
 \label{changelabel}~
 \bFF
 
- 1: @load "glumesh2D"
+ 1:
  2: @mesh Th1=@square(10,10);
  3: @mesh Th2=@square(20,10,[x+1,y]);
  4: verbosity=3;
@@ -5535,7 +5584,7 @@ An example of using this function is given in "glumesh2D.edp":
  6: @plot(Th1,wait=1);
  7: Th1=@change(Th1,refe=r1); // Change the label of Edges of Th1 with label 2 into label 0.
  8: @plot(Th1,wait=1);
- 9: Th2=@change(Th2,refe=r2); // Change the label of Edges of Th1 with label 4 into label 0.
+ 9: Th2=@change(Th2,refe=r2); // Change the label of Edges of Th2 with label 4 into label 0.
 10: @mesh Th=Th1+Th2;         //  ``gluing together'' of meshes Th1 and Th2
 11: @cout << " nb ref = " << int1d(Th1,1,3,4)(1./lenEdge)+int1d(Th2,1,2,3)(1./lenEdge)
 12:          << " == " << int1d(Th,1,2,3,4)(1./lenEdge) <<" == " << ((10+20)+10)*2 << endl;
@@ -5552,7 +5601,7 @@ An example of using this function is given in "glumesh2D.edp":
 \paragraph{``gluing'' different mesh}
 In line 10 of previous file, the method to ``gluing'' different mesh of the same dimension in FreeFem++ is using.
 This function is just call using the symbol addition "+" between meshes.
-The method implemented need that the point in adjacent mesh are the same. .
+The method implemented need that the point in adjacent mesh are the same.
 %%The method implemented need that the result's mesh of ``gluing'' meshes is conformal.
 
 
@@ -5604,14 +5653,14 @@ $(n_tri)_{1}$ & $(n_{tri})_2$& $(n_{tri})_3$ & boundary label &\\
 The data structure for a three dimensional mesh is composed of the data structure presented in Section \ref{meshformatfile.mesh}
 and a data structure for tetrahedrons. The tetrahedrons of a three dimensional mesh are refereed using the following field:
 \small
-\begin{description}
+\begin{itemize}
 \item {\tt{Tetrahedra}}\\
   \Int{NbOfTetrahedrons} \\
     \Loop{\Loop{\Vertex{$_i^j$}}{j=1,4}\,,\,\Int{$Ref \phi_i^{tet}$} }{ i=1\,,\,NbOfTetrahedrons}
-\end{description}
+\end{itemize}
 This field is express with the notation of Section \ref{meshformatfile.mesh}.
 
-\subsubsection{TetGen: A tetrahedral mesh generator }
+\subsubsection{TeGen: A tetrahedral mesh generator }
 
 \paragraph{TetGen}
 
@@ -5646,11 +5695,11 @@ is the associated point with the $i^{\mathrm{th}}$ hole.
 The attribute and the volume constraint of region are given in this real vector of size $5\times \texttt{nbofregions}$.
 The $i^{\mathrm{th}}$ region is described by five elements: $x-$coordinate, $y-$coordinate and $z-$coordinate of
 a point inside this domain ($x_{i},y_{i},z_{i}$); the attribute ($at_{i}$) and the maximum volume for tetrahedrons ($mvol_{i}$) for this region.
-The \texttt{regionlist} vector is: $x_{1}, y_{1}, z_{1}, at_{1}, mvol_{1}, x_{2}, y_{2}, z_{2}, at_{2}, mvol_{2}, \cdots, \cdots $.
+The \texttt{regionlist} vector is: $x_{1}, y_{1}, z_{1}, at_{1}, mvol_{1}, x_{2}, y_{2}, z_{2}, at_{2}, mvol_{2}, \cdots  $.
 \item [\texttt{nboffacetcl=}] Number of facets constraints.
 \item [\texttt{facetcl=}] This array correspond to {\bf{facetconstraintlist}} of tetgenio data structure \cite{tetgen}.
 The $i^{th}$ facet constraint is defined by the facet marker $Ref_{i}^{fc}$ and the maximum area for faces $marea_{i}^{fc}$.
-The \texttt{facetcl} array is: $Ref_{1}^{fc}, marea_{1}^{fc}, Ref_{2}^{fc}, marea_{2}^{fc}, \cdots, \cdots$.
+The \texttt{facetcl} array is: $Ref_{1}^{fc}, marea_{1}^{fc}, Ref_{2}^{fc}, marea_{2}^{fc}, \cdots$.
 This parameters has no effect if switch \texttt{q} is not selected.
 %\item [\texttt{nbofsegcl=}] Number of segments constraints.
 %\item [\texttt{segcl =}] This array correspond to {\bf{segmentconstraintlist}} of tetgenio data structure \cite{tetgen}.
@@ -5658,17 +5707,17 @@ This parameters has no effect if switch \texttt{q} is not selected.
 
 
 Principal switch parameters in TetGen:
-\begin{description}
+\begin{itemize}
 \item [\texttt{p}] Tetrahedralization of boundary.
 \item [\texttt{q}] Quality mesh generation. The bound of Radius-Edge Ratio will be given after the option q. By default, this value is 2.0.
 \item [\texttt{a}] Construct with the volumes constraints on tetrahedrons. These volumes constraints are defined with the bound of the previous
 switch \texttt{q} or in the parameter \texttt{regionlist}.
 \item [\texttt{A}] Attributes reference to region given in the \texttt{regionlist}. The other regions have label 0.
 The option \texttt{AA} gives a different label at each region. This switch work with the option 'p'. If option 'r' is used, this switch has no effect.
-\item [\texttt{r}] Reconstructs and Refines a previously generated mesh (This character is only used with the command line \texttt{tetgreconstruction}. 
+\item [\texttt{r}] Reconstructs and Refines a previously generated mesh. This character is only used with the command line \texttt{tetgreconstruction}. 
 \item [\texttt{Y}] This switch allow to preserve the mesh on the exterior boundary.
 This switch must be used to ensure conformal mesh between two adjacents mesh.
-\item [\texttt{YY}] This switch allow to preserve the mesh on the boundary.
+\item [\texttt{YY}] This switch allow to preserve the mesh on the exterior and interior boundary.
 \item [\texttt{C}] The consistency of the result's mesh is testing by TetGen.
 \item [\texttt{CC}] The consistency of the result's mesh is testing by TetGen and also checks constrained delaunay mesh
 (if 'p' switch is selected) or the consistency of Conformal Delaunay (if 'q' switch is selected).
@@ -5677,7 +5726,7 @@ This switch must be used to ensure conformal mesh between two adjacents mesh.
 \item [\texttt{M}] The coplanar facets are not merging.
 \item [\texttt{T}] Set a tolerance for coplanar test. The default value is $1e-8$.
 \item [\texttt{d}] Itersections of facets are detected.
-\end{description}
+\end{itemize}
 
 To obtain a tetrahedral mesh generator with tetgen, we need the surface mesh of three dimensional domain.
 We give now the command line in FreeFem++ to construct these meshes.
@@ -5711,7 +5760,7 @@ mesh using the command line \texttt{tetg} and \texttt{movemesh2D3Dsurf} is given
 \label{tetgenboxedp}~
 \bFF
 // file tetgencube.edp
-@load "glumesh3D"
+@load "msh3"
 @load "tetgen"
 
 @real x0,x1,y0,y1;
@@ -5772,12 +5821,12 @@ The command \texttt{movemesh} is describe in the following section.
 
 \paragraph{The keyword ``tetgtransfo''} \index{tetgtransfo}
 
-This keyword correspond to a composition of command line \texttt{tetg} and \texttt{movemesh3D3Dsurf}:
+This keyword correspond to a composition of command line \texttt{tetg} and \texttt{movemesh2D3Dsurf}:
 \bFF
 @tetgtransfo( Th2, transfo= [$\Phi$1, $\Phi$2, $\Phi$3] ), $\cdots$ ) = @tetg( Th3surf, $\cdots$ ),
 \eFF
 
-where Th3surf = \texttt{movemesh3D3Dsurf}( Th2,tranfo=[$\Phi$1, $\Phi$2, $\Phi$3] ) and Th2 is the input two dimensional mesh of \texttt{tetgtransfo}.
+where Th3surf = \texttt{movemesh2D3Dsurf}( Th2,tranfo=[$\Phi$1, $\Phi$2, $\Phi$3] ) and Th2 is the input two dimensional mesh of \texttt{tetgtransfo}.
 
 The parameters of this command line are on the one hand the parameters: \\
 \hspace*{2cm} \texttt{refface}, \texttt{switch}, \texttt{regionlist} \texttt{nboffacetcl} \texttt{facetcl}\\
@@ -5816,6 +5865,93 @@ The parameters of this command line are
 
 In the string switch, we can't used the option 'p' and 'q' of tetgen.
 %% Construire un example
+\subsubsection{Reconstruct/Refine a three dimensional mesh with TetGen}
+Meshes in three dimension can be refined using TetGen with the command line \texttt{tetgreconstruction}.
+
+The parameter of this keyword are
+\begin{description}
+\item [\texttt{reftet=}] an integer array that allow to change the label of tetrahedrons. 
+This array is defined as the parameter \texttt{reftet} in the keyword \texttt{change}.
+\item [\texttt{refface=}] an integer array that allow to change the label of triangles. 
+This array is defined as the parameter \texttt{refface} in the keyword \texttt{change}.
+\item [\texttt{sizevolume=}] a function. This function allows to constraint volume size of tetrahedrons in the domain. 
+\end{description}
+
+The parameter \texttt{switch} \texttt{nbofregions}, \texttt{regionlist}, 
+\texttt{nboffacetcl} and \texttt{facetcl} of the command line which call TetGen (tetg) 
+is used for \texttt{tetgrefine}.
+
+In the parameter \texttt{switch=}, the character 'r' should be used without the character 'p'. 
+For instance, see the manual of TetGen \cite{tetgen} for effect of 'r' to other character.
+
+The parameter \texttt{regionlist} allow to define a new volume contraint in the region. 
+The label in the \texttt{regionlist} will be the previous label of region. 
+This parameter and \texttt{nbofregions} can't be used with parameter \texttt{sizevolume}.
+
+Example:
+\begin{example}[refinesphere.edp]
+\bFF
+// file refinesphere.edp
+
+@load "glumesh3D"
+@load "tetgen"
+@load "medit"
+
+@mesh Th=@square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
+//  a parametrization of a sphere 
+@func f1 =cos(x)*cos(y);
+@func f2 =cos(x)*sin(y);
+@func f3 = sin(x);
+//  partiel derivative of the parametrization DF
+@func f1x=sin(x)*cos(y);   
+@func f1y=-cos(x)*sin(y);
+@func f2x=-sin(x)*sin(y);
+@func f2y=cos(x)*cos(y);
+@func f3x=cos(x);
+@func f3y=0;
+// $  M = DF^t DF $
+@func m11=f1x^2+f2x^2+f3x^2;
+@func m21=f1x*f1y+f2x*f2y+f3x*f3y;
+@func m22=f1y^2+f2y^2+f3y^2;
+
+@func perio=[[4,y],[2,y],[1,x],[3,x]];  
+real hh=0.1;
+real vv= 1/square(hh);
+verbosity=2;
+Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+@plot(Th,wait=1);
+
+verbosity=2;
+
+// construction of the surface of spheres
+real Rmin  = 1.;
+@func f1min = Rmin*f1;
+@func f2min = Rmin*f2;
+@func f3min = Rmin*f3;
+
+@mesh3 Th3=@movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min]);
+
+real[int] domain = [0.,0.,0.,145,0.01];
+@mesh3 Th3sph=@tetg(Th3,switch="paAAQYY",nbofregions=1,regionlist=domain);
+
+int[int] newlabel = [145,18];
+real[int] domainrefine = [0.,0.,0.,145,0.0001];
+@mesh3 Th3sphrefine=@tetgreconstruction(Th3sph,switch="raAQ",reftet=newlabel, 
+nbofregions=1,regionlist=domainrefine);
+
+int[int] newlabel2 = [145,53];
+@func fsize = 0.01/(( 1 + 5*sqrt( (x-0.5)^2+(y-0.5)^2+(z-0.5)^2) )^3);
+@mesh3 Th3sphrefine2=@tetgreconstruction(Th3sph,switch="raAQ",reftet=newlabel2, 
+sizeofvolume=fsize);
+
+@medit(``sphere'',Th3sph);
+@medit(``isotroperefine'' ,Th3sphrefine);
+@medit(``anisotroperefine'',Th3sphrefine2);
+
+\eFF
+\end{example}
+
 
 
 \subsubsection{Moving mesh in three dimension }
@@ -5833,7 +5969,8 @@ The parameters of movemesh in three dimension are
 \item [\texttt{transfo =}] \texttt{[$\Phi$1,$\Phi$2, $\Phi$3]} set the displacement vector of 3D transformation $[\Phi1(x,y,z), \Phi2(x,y,z), \Phi3(x,y,z) ]$.
 \item [\texttt{reftet  =}] set integer label of tetrahedrons. 0 by default.
 \item [\texttt{refface =}] set the label of faces of border. This parameters is initialized as refface for the keyword change (\ref{eq.org.vector.change.label}).
-\item [\texttt{facemerge =}] An integer expression. When you transform a mesh, some faces can be merged. This parameters equals to one if merge's faces is considerer as a boundary. Otherwise equals to zero.
+\item [\texttt{facemerge =}] An integer expression. When you transform a mesh, some faces can be merged. This parameters equals to one if merge's faces is considered. 
+Otherwise equals to zero. By default, this parameter is equals to 1.
 \item [\texttt{ptmerge =}] A real expression. When you transform a mesh, some points can be merged. This parameters is the criteria to define two merging points.
 By default, we use
 $$
@@ -5864,7 +6001,8 @@ of $\Omega_{2d}$ in $R$ that defines respectively the lower surface and upper su
 \end{figure}
 
 For a vertex of two dimensional mesh $V_{i}^{2d} = (x_{i},y_{i})$, we introduce the number of associated vertices in the $z-$axis $M_{i}+1$.
-We denote by $M$ the maximum of $M_{i}$ over the vertices of the two dimensional mesh. This value are called th number of layers (if $\forall i, \; N_{i}=N$ then there are $N$ layers in the mesh of $\Omega_{3d}$). $V_{i}^{2d}$ generated $M+1$ vertices which are defined by
+We denote by $M$ the maximum of $M_{i}$ over the vertices of the two dimensional mesh. This value are called the number of layers 
+(if $\forall i, \; M_{i}=M$ then there are $M$ layers in the mesh of $\Omega_{3d}$). $V_{i}^{2d}$ generated $M+1$ vertices which are defined by
 $$
 \forall j=0, \ldots, M, \qquad  V_{i,j}^{3d} = ( x_{i}, y_{i}, \theta_{i}(z_{i,j})  ),
 $$
@@ -5872,7 +6010,7 @@ where $(z_{i,j})_{j=0,\ldots,M}$ are the $M+1$ equidistant points on the interva
 \begin{eqnarray*}
 z_{i,j} =  j \: \delta \alpha + zmin(V_{i}^{2d}), \qquad \delta \alpha= \frac{ zmax( V_{i}^{2d} ) - zmin( V_{i}^{2d}) }{M}.
 \end{eqnarray*}
-The function $\theta_{i}$ defined on  $[zmin( V_{i}^{2d} ), zmax( V_{i}^{2d} )]$ is given by
+The function $\theta_{i}$, defined on  $[zmin( V_{i}^{2d} ), zmax( V_{i}^{2d} )]$, is given by
 $$
 \theta_{i}(z) = \left \{
 \begin{array}{cl}
@@ -5887,26 +6025,26 @@ Set a triangle $K=(V_{i1}^{2d}$, $V_{i2}^{2d}$, $V_{i3}^{2d})$ of the two dimens
 $K$ is associated with a triangle on the upper surface (resp. on the lower surface) of layer mesh:
 $( V_{i1,M}^{3d}, V_{i2,M}^{3d}, V_{i3,M}^{3d} )$ (resp. $( V_{i1,0}^{3d}, V_{i2,0}^{3d}, V_{i3,0}^{3d})$).
 
-Also $K$ is associated with $M$ volume primatic elements which are defined by for $j=0,\ldots,M$
+Also $K$ is associated with $M$ volume primatic elements which are defined by
 $$
-H_{j} = ( V_{i1,j}^{3d}, V_{i2,j}^{3d}, V_{i3,j}^{3d}, V_{i1,j+1}^{3d}, V_{i2,j+1}^{3d}, V_{i3,j+1}^{3d} ).
+\forall j=0,\ldots,M, \quad H_{j} = ( V_{i1,j}^{3d}, V_{i2,j}^{3d}, V_{i3,j}^{3d}, V_{i1,j+1}^{3d}, V_{i2,j+1}^{3d}, V_{i3,j+1}^{3d} ).
 $$
 
 Theses volume elements can be have some merged point:
-\begin{description}
+\begin{itemize}
 \item 0 merged point : prism
 \item 1 merged points : pyramid
 \item 2 merged points : tetrahedra
 \item 3 merged points : no elements
-\end{description}
+\end{itemize}
 
 The volume with merged points are called degenerate elements. To obtain a meshing with tetrahedrons, we decompose
 the pyramid into two tetrahedrons and the prism into three tetrahedrons. These tetrahedons are obtaining in cut the quadrilateral
-face of pyramid and prism with the diagonal with have the vertex with the maximum index.\\
+face of pyramid and prism with the diagonal with have the vertex with the maximum index (see \cite{hdrHecht} for explication of this choice).\\
 
-The triangles on the middle surface obtained with the decomposition of the volume prismatic elements are also the triangles generated by the edges on the border of the two dimensional mesh.\\
-
-The label of triangles on the border elements and tetrahedrons are defined with the label of these associated elements.\\
+The triangles on the middle surface obtained with the decomposition of the volume prismatic elements are the triangles generated by the edges 
+on the border of the two dimensional mesh. The label of triangles on the border elements and tetrahedrons are defined with the label of these 
+associated elements.\\
 
 
 The arguments of \texttt{buildlayermesh} is a two dimensional mesh and the number of layers $M$.
@@ -5923,9 +6061,9 @@ The number of associated points of vertex $V_{i}^{2d}$ is the integer part of $c
 \end{description}
 
 Moreover, we also add post processing parameters that allow to moving the mesh. These parameters correspond to parameters
-\texttt{transfo =}, \texttt{facemerge} and \texttt{ptmerge =} of the command line \texttt{movemesh}.
+\texttt{transfo}, \texttt{facemerge} and \texttt{ptmerge} of the command line \texttt{movemesh}.
 
-The vector \texttt{reftet},\texttt{reffacemid}, \texttt{reffaceup} and \texttt{reffacelow} are composed of $n_{l}$ succesive sub vectors of size two where $n_{l}$ is the number of label that we want to initialized. The first element and second element of sub vector are respectively a label of elements of the two dimensional mesh and the label of elements of layer mesh which is associated with these elements.
+The vector \texttt{reftet}, \texttt{reffacemid}, \texttt{reffaceup} and \texttt{reffacelow} are composed of $n_{l}$ succesive sub vectors of size two where $n_{l}$ is the number of label that we want to initialized. The first element and second element of sub vector are respectively a label of elements of the two dimensional mesh and the label of elements of layer mesh which is associated with these elements.
 
 %%% Example a couper entre les differentes commandes
 An example of this command line is given in ``buildlayermesh.edp''.
@@ -5935,10 +6073,10 @@ An example of this command line is given in ``buildlayermesh.edp''.
 \bFF
 
 // file buildlayermesh.edp
-load "glumesh2D"
-load "glumesh3D"
+
+load "msh3"
 load "tetgen"
-load "buildlayer"
+
 
 // Test 1
 
@@ -5998,7 +6136,7 @@ cout << "test=" << test << endl;
 \begin{example}[lac.edp]
 // file "lac.edp"
 \bFF
-@load ``buildlayer''
+@load ``msh3''
 @int nn=5;
 @border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}
 @mesh Th2 = @buildmesh(cc(100));
@@ -6021,11 +6159,9 @@ Vh2 ux,uy,p2;
 
 \begin{example}[tetgenholeregion.edp]
 \bFF
-// file tetgenholeregion.edp
-@load "glumesh2D"
-@load "glumesh3D"
+// file ``tetgenholeregion.edp''
+@load "msh3''
 @load "tetgen"
-@load "buildlayer"
 
 @mesh Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
 //  a parametrization of a sphere 
@@ -6087,7 +6223,7 @@ savemesh(Th3fin,"spherewithtworegion.mesh");
 cout << "=============================" << endl;
 cout << "  tetgen call with hole   " << endl;
 cout << "=============================" << endl;
-@mesh3 Th3finhole=@tetg(Th3,switch="paAAQYY",nbofholes=1,holelist=hole,
+@mesh3 Th3finhole=@tetg(Th3,switch="paAAQYY",nbofholes=1,holelist=hole, 
 nbofregions=1,regionlist=domain);
 cout << "=============================" << endl;
 cout << "finish tetgen call with hole   " << endl;
@@ -6096,126 +6232,30 @@ cout << "=============================" << endl;
 \eFF
 \end{example}
 
+%Commentaire : 
+%1: lorsque l'on définis deux zones, il y a des soucis à la frontière commune. Je vais envoyer un mail à Hang Si pour lui soumettre le problème.
 
-
-\newpage
-Documentation for new function 
-
-\subsection{Reconstruct/Refine a three dimensional mesh with TetGen}
-Meshes in three dimension can be refined using TetGen with the command line \texttt{tetgreconstruction}.
-
-The parameter of this keyword are
-\begin{description}
-\item [\texttt{reftet=}] an integer array that allow to change the label of tetrahedrons. 
-This array is defined as the parameter \texttt{reftet} in the keyword \texttt{change} for a three dimensional mesh.
-\item [\texttt{refface=}] an integer array that allow to change the label of triangles  
-This array is defined as the parameter \texttt{refface} in the keyword \texttt{change} for a three dimensional mesh.
-\item [\texttt{sizevolume=}] a function. This function allows to constraint volume size of tetrahedrons in the domain. 
-\end{description}
-
-The parameter \texttt{switch} \texttt{nbofregions}, \texttt{regionlist}, 
-\texttt{nboffacetcl} and \texttt{facetcl} of the command line which call TetGen (tetg) 
-is used for \texttt{tetgreconstruction}.
-
-In the parameter \texttt{switch=}, the character 'r' should be used without the character 'p'. 
-For instance, see the manual of TetGen \cite{tetgen} for effect of 'r' with other character.
-
-The parameter \texttt{regionlist} allow to define a new volume contraint in the region. 
-The label in the \texttt{regionlist} will be the previous label of region. 
-This parameter and \texttt{nbofregions} can't be used with parameter \texttt{sizevolume}.
-
-\begin{example}[sphererefine.edp]
-\bFF
-// file sphererefine.edp
-@load "glumesh2D"
-@load "glumesh3D"
-@load "tetgen"
-@load "popen"
-
-@mesh Th=@square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},\frac{-pi}{2}[\times]0,2\pi[ $
-//  a parametrization of a sphere 
-@func f1 =cos(x)*cos(y);
-@func f2 =cos(x)*sin(y);
-@func f3 = sin(x);
-//  partiel derivative of the parametrization DF
-@func f1x=sin(x)*cos(y);   
-@func f1y=-cos(x)*sin(y);
-@func f2x=-sin(x)*sin(y);
-@func f2y=cos(x)*cos(y);
-@func f3x=cos(x);
-@func f3y=0;
-// $  M = DF^t DF $
-@func m11=f1x^2+f2x^2+f3x^2;
-@func m21=f1x*f1y+f2x*f2y+f3x*f3y;
-@func m22=f1y^2+f2y^2+f3y^2;
-
-@func perio=[[4,y],[2,y],[1,x],[3,x]];  
-real hh=0.1;
-real vv= 1/square(hh);
-verbosity=2;
-Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
-Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
-@plot(Th,wait=1);
-
-verbosity=2;
-
-// construction of the surface of spheres
-real Rmin  = 1.;
-@func f1min = Rmin*f1;
-@func f2min = Rmin*f2;
-@func f3min = Rmin*f3;
-
-@mesh3 Th3=@movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min]);
-
-real[int] domain = [0.,0.,0.,145,0.01];
-@mesh3 Th3sph=@tetg(Th3,switch="paAAQYY",nbofregions=1,regionlist=domain);
-
-int[int] newlabel = [145,18]; //parameter to change label of tetrahedrons
-real[int] domainrefine = [0.,0.,0.,145,0.0001]; 
-// This array contains the previous label of tetrahedrons of Th3 (145).
-@mesh3 Th3sphrefine=@tetgreconstruction(Th3sph,switch="raAQ",reftet=newlabel,
-nbofregions=1,regionlist=domainrefine);
-
-int[int] newlabel2 = [145,53];
-@func fsize = 0.01/(( 1 + 5*sqrt( (x-0.5)^2+(y-0.5)^2+(z-0.5)^2) )^3);
-@mesh3 Th3sphrefine2=@tetgreconstruction(Th3sph,switch="raAQ",reftet=newlabel2,sizeofvolume=fsize);
-
-int medit = @meditmeshsol(Th3sph);
-int meditrefine = @meditmeshsol(Th3sphrefine);
-int meditrefine2 = @meditmeshsol(Th3sphrefine2);
-
-\eFF
-\end{example}
-
-Commentaire : 
-1: lorsque l'on définis deux zones, il y a des soucis à la frontière commune. 
-Je vais envoyer un mail à Hang Si pour lui soumettre le cas. 
-2: Il faut rajouter une option wait dans cette version de medit.
-
-\subsection{Write solution at the format .sol}
+\subsection{Write solution at the format .sol and .solb}
 With the keyword savesol, we can store a scalar functions, a scalar FE functions, 
 a vector fields, a vector FE fields, a symmetric tensor and a symmetric FE tensor.. 
 Such format is used in medit.
 
-\paragraph{extension file .sol} This presentation is done using notation of Section \ref{meshformatfile.mesh}.\\
-
+\paragraph{extension file .sol}
 \def\Int#1{ {\tt(I)} #1}
 \def\Loop#1#2{{\bf\Large(}\,#1\,{\bf\Large{,\,\,}}\,#2\,{\bf\Large)}}
 
-
-
 The first two lines of the file are
 \small
-\begin{description}
+\begin{itemize}
 \item {\tt MeshVersionFormatted 0}
-\end{description}
+\end{itemize}
 \normalsize
 
 \small
-\begin{description}
+\begin{itemize}
 \item {\tt Dimension}
   \Int{dim}
-\end{description}
+\end{itemize}
 
 The following fields are begin with one of the following keyword: 
 SolAtVertices, SolAtEdges, SolAtTriangles, SolAtQuadrilaterals, 
@@ -6226,9 +6266,32 @@ In each field, we give then in the next line the number of elements in solutions
  the number of solutions , the type of solution (1: scalar, 2: vector, 3: symmetric tensor). 
  And finaly,  we give the solutions at the differents elements.
 
+The file must be finished with the keyword End.
+
+The real element of symmetric tensor
+\begin{eqnarray}
+\label{savesol.def.symtensor}
+ST^{3d}=\left(
+\begin{array}{ccc}
+ST_{xx}^{3d} & ST_{xy}^{3d} & ST_{xz}^{3d}\\
+ST_{yx}^{3d} & ST_{yy}^{3d} & ST_{yz}^{3d} \\
+ST_{zx}^{3d} & ST_{zy}^{3d} & ST_{zz}^{3d} 
+\end{array}
+\right)
+\qquad \qquad
+ST^{2d}= \left(
+\begin{array}{cc}
+ST_{xx}^{2d} & ST_{xy}^{2d} \\
+ST_{yx}^{2d} & ST_{yy}^{2d} 
+\end{array}
+\right)
+\end{eqnarray}
+stored in the extension .sol are respectively $ST_{xx}^{3d}, ST_{yx}^{3d}, ST_{yy}^{3d}, ST_{zx}^{3d}, ST_{zy}^{3d}, ST_{zz}^{3d}$ 
+and  $ST_{xx}^{2d}, ST_{yx}^{2d}, ST_{yy}^{2d}$
+
 An example of field with the keyword SolAtTetrahedra:
 \small
-\begin{description}
+\begin{itemize}
 \item {\tt{SolAtTetrahedra}}\\
   \Int{NbOfTetrahedrons} 
   {\tt \obeylines
@@ -6237,78 +6300,66 @@ An example of field with the keyword SolAtTetrahedra:
 \quad \forall k \in \{1,...\mathtt{nbsol}\}\right) %
  \quad \forall j \in \{1,...,\mathtt{NbOfTetrahedrons}\}\right)$
  }
-\end{description}
+\end{itemize}
 where
-\begin{description}
+\begin{itemize}
 \item {\tt  nbsol} is an integer equal to the number of solutions
 \item $\mathtt{  typesol^k}$, type of the solution  number $ k$, is
-  \begin{description}
+  \begin{itemize}
    \item $\mathtt{typesol^k = 1}$ the solution {\tt k} is scalar.  
    \item $\mathtt{typesol^k = 2}$ the solution {\tt k} is vectorial.
    \item $\mathtt{typesol^k = 3}$ the solution {\tt k} is a symmetric tensor or symmetric matrix.
-   \end{description}
+   \end{itemize}
 \item  $\mathtt{  nbrealsol^k}$ number of real to discribe solution number $k$ is
-  \begin{description}
+  \begin{itemize}
    \item $\mathtt{nbrealsol^k = 1}$ the solution {\tt k} is scalar.  
    \item $\mathtt{nbrealsol^k = dim}$ the solution {\tt k} is vectorial ($dim$ is the dimension of the solution).
-   \item $\mathtt{nbrealsol^k = dim \: (dim+1)/2}$ the solution {\tt k} is a symmetric tensor or symmetric matrix.
-   \end{description}
+   \item $\mathtt{nbrealsol^k = dim*(dim+1)/2}$ the solution {\tt k} is a symmetric tensor or symmetric matrix.
+   \end{itemize}
 \item  {\tt U$_{ij}^k$} is a real equal to the value of the component  $i$ of the solution  $k$ at tetrahedra $j$
 on the associated mesh. 
-\end{description}
+\end{itemize}
 
-The file must be finished with the keyword End.
+This field is express with the notation of Section \ref{meshformatfile.mesh}. 
+The format .solb is the format .sol writing in binary. 
 
-The real element of symmetric tensor
-$$
-ST^{3d}=\left(
-\begin{array}{ccc}
-ST_{xx}^{3d} & ST_{xy}^{3d} & ST_{xz}^{3d}\\
-ST_{yx}^{3d} & ST_{yy}^{3d} & ST_{yz}^{3d} \\
-ST_{zx}^{3d} & ST_{zy}^{3d} & ST_{zz}^{3d} 
-\end{array}
-\right)
-\qquad \mbox{and} \qquad
-ST^{2d}= \left(
-\begin{array}{cc}
-ST_{xx}^{2d} & ST_{xy}^{2d} \\
-ST_{yx}^{2d} & ST_{yy}^{2d} 
-\end{array}
-\right)
-$$
-stored in the extension .sol are respectively $ST_{xx}^{3d}, ST_{yx}^{3d}, ST_{yy}^{3d}, ST_{zx}^{3d}, ST_{zy}^{3d}, ST_{zz}^{3d}$ 
-and  $ST_{xx}^{2d}, ST_{yx}^{2d}, ST_{yy}^{2d}$
-
-A real scalar functions $f1$ and a vector fields $\Phi=[\Phi1,\Phi2,\Phi3]$ at the vertices of the three 
-dimensional mesh Th3 is stored in the file "f1PhiTh3.sol" using
-
+A real scalar functions $f1$, a vector fields $\Phi=[\Phi1,\Phi2,\Phi3]$ and a symmetric tensor $ST^{3d}$ 
+(\ref{savesol.def.symtensor}) at the vertices of the three dimensional mesh Th3 is stored in the file "f1PhiTh3.sol" using
 \bFF
-@int bb = @savesol("f1PhiTh3.sol",Th3, nbscalar=1, scalar=[$f1$], nbvector=1, vector=[$\Phi$1, $\Phi$2, $\Phi$3]);
+@savesol("f1PhiST3dTh3.sol",Th3, $f1$, [$\Phi$1, $\Phi$2, $\Phi$3], VV3, order=1);
 \eFF
+where $VV3=[ ST_{xx}^{3d}, ST_{yx}^{3d}, ST_{yy}^{3d}, ST_{zx}^{3d}, ST_{zy}^{3d}, ST_{zz}^{3d}]$.
+For a two dimension mesh Th, A real scalar functions $f2$, a vector fields $\Psi=[\Psi1,\Psi2]$ and a symmetric tensor $ST^{2d}$ 
+(\ref{savesol.def.symtensor}) at triangles is stored in the file "f2PsiST2dTh3.solb" using
+\bFF
+@savesol("f2PsiST2dTh3.solb",Th, $f2$, [$\Psi$1, $\Psi$2], VV2, order=0);
+\eFF
+where $VV2=[ST_{xx}^{2d}, ST_{yx}^{2d}, ST_{yy}^{2d}]$
+The arguments of \texttt{savesol} functions are the name of a file, a mesh and solutions. These arguments must be given in this order.
 
 The parmameters of this keyword are
 \begin{description}
-\item [\texttt{nbscalar =}] number of scalar solutions ($nbs$).
-\item [\texttt{scalar   =}]  \texttt{[$f_{1}$, $f_{2}$, $f_{3}$, ..., $f_{nbs}$]} set the $nbs$ scalar solutions.
-\item [\texttt{nbvector =}] number of vector solutions ($nbv$). 
-\item [\texttt{nbsymtensor =}] number of symmetric tensor solutions ($nbst$).
-\item [\texttt{vector    =}] set the real element of $nbv$ vector solutions. 
-\item [\texttt{symtensor =}] set the real element of $nbst$ symmetric tensor solutions.
+%\item [\texttt{nbscalar =}] number of scalar solutions ($nbs$).
+%\item [\texttt{scalar   =}]  \texttt{[$f_{1}$, $f_{2}$, $f_{3}$, ..., $f_{nbs}$]} set the $nbs$ scalar solutions.
+%\item [\texttt{nbvector =}] number of vector solutions ($nbv$). 
+%\item [\texttt{nbsymtensor =}] number of symmetric tensor solutions ($nbst$).
+%\item [\texttt{vector    =}] set the real element of $nbv$ vector solutions. 
+%\item [\texttt{symtensor =}] set the real element of $nbst$ symmetric tensor solutions.
 \item [\texttt{order =}] 0 is the solution is given at the center of gravity of elements. 
 1 is the solution is given at the vertices of elements.  
 \end{description}
 
-In two dimensional case for vector solutions $v^{j}=(v^{j}_{x},v^{j}_{y}), \quad j=1,\ldots nbv$, the parameter \texttt{vector} is equal to 
-\texttt{[$v_{x}^{1}$, $v_{y}^{1}$, ..., $v_{x}^{nbv}$, $v_{y}^{nbv}$]}. 
+%%In two dimensional case for vector solutions $v^{j}=(v^{j}_{x},v^{j}_{y}), \quad j=1,\ldots nbv$, the parameter \texttt{vector} is equal to 
+%%\texttt{[$v_{x}^{1}$, $v_{y}^{1}$, ..., $v_{x}^{nbv}$, $v_{y}^{nbv}$]}. 
 
-In two dimensional case for symtensor solutions $st^{j}= \left (
-\begin{array}{ccc}
-st_{xx}^{j} & st_{xy}^{j} \\
-st_{yx}^{j} & st_{yy}^{j} 
-\end{array}
-\right) \quad j=1,\ldots nbst$, the parameter \texttt{vector} is equal to 
-\texttt{[ $st_{xx}^{1}$, $st_{yx}^{1}$, $st_{yy}^{1}$, ..., $st_{xx}^{nbst}$, $st_{yx}^{nbst}$, $st_{yy}^{nbst}$]}
-
+%%In two dimensional case for symtensor solutions $st^{j}= \left (
+%%\begin{array}{ccc}
+%%st_{xx}^{j} & st_{xy}^{j} & st_{xz}^{j} \\
+%%st_{yx}^{j} & st_{yy}^{j} & st_{yz}^{j} \\
+%%st_{zx}^{j} & st_{zy}^{j} & st_{zz}^{j} 
+%%\end{array}
+%%\right) \quad j=1,\ldots nbst$, the parameter \texttt{vector} is equal to 
+%%\texttt{[ $st_{xx}^{1}$, $st_{yx}^{1}$, $st_{yy}^{1}$, ..., $st_{xx}^{nbst}$, $st_{yx}^{nbst}$, $st_{yy}^{nbst}$]}.
 %%\item [\texttt{symtensor =}] \texttt{[ $st_{xx}^{1}$, $st_{yx}^{1}$, $st_{yy}^{1}$, ..., $st_{xx}^{nbst}$, $st_{yx}^{nbst}$, $st_{yy}^{nbst}$]} 
 %%set the real element of $nbst$ symmetric tensor solutions  $st^{j}=(st^{j}_{x},st^{j}_{y}), \quad j=1,\ldots nbst$.
 %%Three dimensional case:
@@ -6319,88 +6370,177 @@ st_{yx}^{j} & st_{yy}^{j}
 %%set the $nbst$ symmetric tensor solutions.
 
 In the file, solutions are stored in this order : scalar solutions, vector solutions and finaly symmetric 
-tensor solutions.\\
+tensor solutions.
 
+\subsection{Call medit with the keyword medit}
 
-
-Commentaire: 
-1. Le resultat pour l'instant est un entier. La valeur de retour n'a pas de sens. 
-2. Pour l'instant, lorsque l'on veut sauvegarder une solution éléments finis il faut utiliser le mots clé "savesolVh" à la place de savesol. 
-3. matrice non symétrique: pas coder dans la version de medit sous cvs. 
-
-\subsection{Call medit with the keyword meditmeshsol}
-
-The keyword meditmeshsol allow to dipslay a mesh or mesh and solution using medit. 
+The keyword medit allows to dipslay a mesh or mesh and solution using medit. 
 Medit is a freeware display package by Pascal Frey using OpenGL. 
-To use this command we need to install medit. This command allow to represent one solution.
+To use this command we need to install medit. 
+%%This command allow to represent one solution.
 
-The argument of this command line is a mesh and a name for the display.
+A vizualisation with medit of scalar solutions $f1$ and $f2$ at vertices of the mesh Th is obtained using
+\bFF
+@medit("sol1 sol2",Th, $f1$, $f2$, order=1);
+\eFF
+The first plot  named ``sol1'' display f1. The second plot names ``sol2'' display f2. 
+
+The arguments of function \texttt{medit} are the name of the differents scenes (separated by a space) of medit, a mesh and solutions. 
+Each solution is associated with one scene. The scalar, vector and symmetric tensor solutions are given as in 
+the keyword \texttt{savesol}.
+
+%%These arguments must be given in this order.
+
 The parmameters of this command line are
 \begin{description}
-\item [\texttt{solution =}] An integer parameter. This parameter is equal to 0 if there is no solution to display and otherwise is equal to 1.
+%%\item [\texttt{solution =}] An integer parameter. This parameter is equal to 0 if there is no solution to display and otherwise is equal to 1.
 \item [\texttt{order =}] 0 is the solution is given at the center of gravity of elements. 
 1 is the solution is given at the vertices of elements.
-\item [\texttt{scalar =}] set the scalar solutions to display.
-
-\texttt{two dimensional case:}
-\item [\texttt{vector =}] set the vector field solution $v=(v_{x},v_{y})$. This parameter is equal to \texttt{[$v_{x}$,$v_{y}$]}.    
-\item [\texttt{symtensor =}]  set the symmetric tensor solution 
-$
-st= \left (
-\begin{array}{cc}
-st_{xx} & st_{xy} \\
-st_{yx} & st_{yy}
-\end{array}
-\right)
-$. This parmameter is equal to \texttt{[$st_{xx}$, $st_{yx}$, $st_{yy}$]}
-
-\texttt{three dimensional case:}
-\item [\texttt{vector =}] set the vector field solution $v=(v_{x},v_{y},v_{z})$. This parameter is equal to  \texttt{[$v_{x}$,$v_{y}$,$v_{z}$]}.
-\item [\texttt{symtensor =}] set the symmetric tensor solution 
-$
-st= \left (
-\begin{array}{ccc}
-st_{xx} & st_{xy} & st_{xz}\\
-st_{yx} & st_{yy} & st_{yz} \\
-st_{zx} & st_{zy} & st_{zz} 
-\end{array}
-\right)
-$. This parameter is equal to \texttt{[$st_{xx}$, $st_{yx}$, $st_{yy}$, $st_{zx}$, $st_{zy}$, $st_{zz}$]}
+\item [\texttt{meditff =}] set the name of execute command of medit. By default, this string is medit.
+\item [\texttt{save =}] set the name of a file .sol or .solb to save solutions.
+%%\item [\texttt{scalar =}] set the scalar solutions to display.
+%%two dimensional case:
+%%\item [\texttt{vector =}] set the vector field solution $v=(v_{x},v_{y})$. This parameter is equal to \texttt{[$v_{x}$,$v_{y}$]}.    
+%%\item [\texttt{symtensor =}]  set the symmetric tensor solution 
+%%$
+%%f= \left (
+%%\begin{array}{cc}
+%%f_{xx} & f_{xy} \\
+%%f_{yx} & f_{yy}
+%%\end{array}
+%%\right)
+%%$. This parmameter is equal to \texttt{[$f_{xx}$, $f_{yx}$, $f_{yy}$]}
+%%three dimensional case:
+%%\item [\texttt{vector =}] set the vector field solution $v=(v_{x},v_{y},v_{z})$. This parameter is equal to  \texttt{[$v_{x}$,$v_{y}$,$v_{z}$]}.
+%%\item [\texttt{symtensor =}] set the symmetric tensor solution 
+%%$
+%%f= \left (
+%%\begin{array}{ccc}
+%%f_{xx} & f_{xy} & f_{xz}\\
+%%f_{yx} & f_{yy} & f_{yz} \\
+%%f_{zx} & f_{zy} & f_{zz} 
+%%\end{array}
+%%\right)
+%%$. This parameter is equal to \texttt{[$f_{xx}$, $f_{yx}$, $f_{yy}$, $f_{zx}$, $f_{zy}$, $f_{zz}$]}
 \end{description}
 
-\begin{example}[meditsol.edp]
+This commandline allows also to represent two differents meshes with solutions in the same windows. 
+The nature of solutions must be the same. Hence, we can vizualize in the same window the different 
+domains in a domain decomposition method. A vizualisation with medit of scalar solutions $h1$ and $h2$ 
+at vertices of the mesh Th1 and Th2 respectively  are obtained using
 \bFF
-@load "popen"
+@medit("sol2domain",Th1, $h1$, Th2, $h2$, order=1);
+\eFF
+
+\begin{example}[meditddm.edp]
+\bFF
+// meditddm.edp
+@load "glumesh2D"
+@load "medit"
+
+
+// Initial Problem:
+//Resolution of the following EDP:
+//$- \Delta u = f$ on   $\Omega =\{ (x,y) |  1 \leq sqrt(x^2+y^2) \geq 2 \}$
+//$- \Delta u = f1$ on  $\Omega_{1}=\{ (x,y) |  0.5 \leq sqrt(x^2+y^2) \geq 1. \}$
+//$u = 1$ on $\Gamma$  +  Null Neumman condition on $\Gamma_{1}$ and on $\Gamma_{2}$
+//We find the solution $u$ in solving two EDP defined on domain $\Omega$ and $\Omega_{1}$
+//This solution is vizualize with medit 
+
+verbosity=3;
 
 @border Gamma(t=0,2*pi){x=cos(t); y=sin(t); label=1;};
-@border Gamma2(t=0,2*pi){x=5*cos(t); y=5*sin(t); label=2;};
-@mesh Th=@buildmesh(Gamma2(30)+Gamma(-15));
+@border Gamma1(t=0,2*pi){x=2*cos(t); y=2*sin(t); label=2;};
+@border Gamma2(t=0,2*pi){x=0.5*cos(t); y=0.5*sin(t); label=3;};
+
+// construction of mesh of domain $\Omega$
+@mesh Th=buildmesh(Gamma1(40)+Gamma(-40)); 
 
 @fespace Vh(Th,P2);
-@func f1=x;
-Vh f1vh=f1;
+@func f=sqrt(x*x+y*y);
+Vh us,v;
+@macro Grad2(us) [dx(us),dy(us)]  // EOM
 
-Vh u,v,f=x^2;
-  
-@solve Lap(u,v)=int2d(Th)( dx(u)*dx(v)+dy(u)*dy(v) ) - int2d(Th)(f*v) 
-+ on(Gamma2,u=1)+on(Gamma,u=0);
+@problem Lap2dOmega(us,v,init=false)=int2d(Th)(Grad2(v)' *Grad2(us)) - int2d(Th)(f*v)+on(Gamma,us=1) ;
+//  Resolution of EDP defined on the domain $\Omega$
+// $- \Delta u = f$ on $\Omega$ 
+//     $u = 1$ on $\Gamma$
+//   + Null Neumann condition on $\Gamma_{1}$
+Lap2dOmega;
 
-@int bb=savesol("f1.sol",Th,nbscalar=1,scalar=[f1],order=1);
-@int bbVh=savesolVh("f1Vh.sol",Th,nbscalar=1,scalar=[f1vh],order=1);
+// construction of mesh of domain $\Omega_{1}$
+@mesh Th1=buildmesh(Gamma(40)+Gamma2(-40));
 
-@int medit=meditmeshsol("second",Th,solution=1,scalar=f,order=1);
-@int meditVh=meditmeshsolVh("solPoison",Th,solution=1,scalar=u,order=1);
+@fespace Vh1(Th1,P2);
+@func f1=10*sqrt(x*x+y*y);
+Vh1 u1,v1;
+@macro Grad21(u1) [dx(u1),dy(u1)]  // EOM
+
+@problem Lap2dOmega1(u1,v1,init=false)=int2d(Th1)(Grad21(v1)' *Grad21(u1)) - int2d(Th1)(f1*v1)+on(Gamma,u1=1) ;
+//   Resolution of EDP defined on the domain $\Omega_{1}$
+// $- \Delta u = f1$ on $\Omega_{1}$ 
+//      $u = 1$ on $\Gamma$
+//   + Null Neumann condition on $\Gamma_{2}$
+Lap2dOmega1; 
+
+// vizualisation of solution of the initial problem
+@medit("solution",Th,us,Th1,u1,order=1,save="testsavemedit.solb");	
 \eFF
 \end{example}
 
-Commentaire:
-1. Le resultat pour l'instant est un entier. La valeur de retour n'a pas de sens. 
-2. Pour l'instant, lorsque l'on veut représenter une solution éléments finis il 
-faut utiliser le mots clé "meditmeshsolVh" à la place de meditmeshsol. 
-3. matrice non symétrique: pas coder dans la version de medit sous cvs. 
-4. Le passage à plusieurs solutions, je le ferais plus tard.
+\begin{example}[StockesUzawa.edp]
+\bFF
+//  signe of pressure is correct 
+assert(version>1.18); 
+real s0=clock();
+mesh Th=square(10,10);
+fespace Xh(Th,P2),Mh(Th,P1);
+Xh u1,u2,v1,v2;
+Mh p,q,ppp;
 
 
+varf bx(u1,q) = int2d(Th)( (dx(u1)*q)); 
+
+varf by(u1,q) = int2d(Th)( (dy(u1)*q));
+
+varf a(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
+                    +  on(1,2,4,u1=0)  +  on(3,u1=1) ;
+
+Xh bc1; bc1[] = a(0,Xh);
+Xh b;
+                   
+matrix A= a(Xh,Xh,solver=CG); 
+matrix Bx= bx(Xh,Mh);
+matrix By= by(Xh,Mh);
+Xh bcx=1,bcy=0;
+
+func real[int] divup(real[int] & pp)
+{ 
+  int verb=verbosity;
+   verbosity=0;
+   b[]  = Bx'*pp; b[] += bc1[] .*bcx[];
+   u1[] = A^-1*b[];
+   b[]  = By'*pp; b[] += bc1[] .*bcy[];
+   u2[] = A^-1*b[];
+   ppp[] =   Bx*u1[];
+   ppp[] +=  By*u2[];
+   verbosity=verb;
+   return ppp[] ;
+};
+p=0;q=0;u1=0;v1=0;
+
+        
+LinearCG(divup,p[],q[],eps=1.e-6,nbiter=50);
+
+divup(p[]);
+
+plot([u1,u2],p,wait=1,value=true,coef=0.1);
+medit(``velocity pressure'',Th,[u1,u2],p,order=1);
+\eFF
+\end{example}
+
+
+%%%  fin 3d
 \section{\setS{Finite Elements}} \index{finite element space}\label{finite elements}
 As stated in Section \ref{sec:example}.
 FEM approximates all functions $w$ as
@@ -12307,7 +12447,7 @@ Vhother U=0;
 
 \eFF
 
-\include{docFFGUI}
+%%\include{docFFGUI}
 
 
 \section{\setS{Mesh Files}}
@@ -14748,8 +14888,11 @@ TOMS,
 \bibitem{George}
 {\sc George, P.L}: {\it Automatic triangulation}, Wiley 1996.
 
+\bibitem{hdrHecht} Hecht F. Outils et algorithmes pour la méthode des éléments finis, HdR, Université Pierre et Marie Curie, France, 1992 
+
 \bibitem{bamg}
 {\sc Hecht, F}: The mesh adapting software: bamg. INRIA report 1998.
+
 
 \bibitem{modulef}
 Library Modulef , INRIA,
@@ -14904,7 +15047,7 @@ This book is ideal for students at Master level, for  researchers at any level a
 
 "\ldots  The chapter on discontinuous fems is so hilarious \ldots."
  
-\hbox to \hsize {{\sc B. Galerkine, }\hbox to 6cm {\vbox to 0.4cm {\vglue+0.5mm\includegraphics[width=6cm]{BG-russe}}}. \hss  }
+\hbox to \hsize {{\sc B. Galerkine, }\hbox to 6cm {\vbox to 0.4cm {\vglue-0mm\includegraphics[width=6cm]{BG-russe}}}. \hss  }
 
 \bigskip
 
@@ -14919,15 +15062,15 @@ This book is ideal for students at Master level, for  researchers at any level a
  \par\medskip}
 
 
-\AUTEUR{fig-fh}{Fr\'{e}d\'{e}ric Hecht}{  is a professor of numerical analysis at the university of Paris VI and does his research at the Laboratoire Jacques-Louis Lions (LJLL).  He is also a member of the project gamma at INRIA.  He is the author of several advanced software tools for automatic triangulations including the public domain EMC2.}
+\AUTEUR{fig-fh}{Fr\'{e}d\'{e}ric Hecht}{  is a professor of numerical analysis at the university of Paris VI and does his research at the Laboratoire Jacques-Louis Lions (LJLL).  He was also a member of the project gamma at INRIA.  He is the author of several advanced software tools for automatic triangulations including the public domain EMC2.}
+%
+%\AUTEUR{fig-op}{Olivier Pironneau}{ is a professor of numerical analysis at the university of Paris VI and at LJLL.  His scientific contributions are in numerical methods for fluids.  He is a member of the Institut Universitaire de France and of the French  Academy of Sciences}
 
-\AUTEUR{fig-op}{Olivier Pironneau}{ is a professor of numerical analysis at the university of Paris VI and at LJLL.  His scientific contributions are in numerical methods for fluids.  He is a member of the Institut Universitaire de France and of the French  Academy of Sciences}
+%\AUTEUR{fig-ko}{Koji Ohtsuka}{ is a professor at the Hiroshima Kokusai Gakuin University, Japan and chairman of the World Scientific and Engineering academy and Society, Japan chapter.  His research is in fracture dynamics, modelling and computing.}
 
-\AUTEUR{fig-ko}{Koji Ohtsuka}{ is a professor at the Hiroshima Kokusai Gakuin University, Japan and chairman of the World Scientific and Engineering academy and Society, Japan chapter.  His research is in fracture dynamics, modelling and computing.}
-
-\AUTEUR{fig-alh}{Antoine Le Hyaric}{ is a research engineer  from the "Centre National de la
-Recherche Scientifique" (CNRS) at LJLL . He is an expert in software engineering
-for scientific applications. He has applied his skills mainly to
-electromagnetics simulation, parallel computing and three-dimensional
-visualization.}
+%\AUTEUR{fig-alh}{Antoine Le Hyaric}{ is a research engineer  from the "Centre National de la
+%Recherche Scientifique" (CNRS) at LJLL . He is an expert in software engineering
+%for scientific applications. He has applied his skills mainly to
+%electromagnetics simulation, parallel computing and three-dimensional
+%visualization.}
 \end{document}
