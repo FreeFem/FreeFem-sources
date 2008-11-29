@@ -2,7 +2,7 @@
 #if WIN32
 #include  "ff-win32.cpp"
 #endif
-
+extern long mpirank;
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
 int getprog(char* fn,int argc, char **argv)
@@ -75,7 +75,7 @@ int getprog(char* fn,int argc, char **argv)
   if( ! progffglut && !noffglut)
     progffglut=ffglut;
   
-  if(progffglut)
+  if(progffglut && mpirank==0)
     {
       ThePlotStream = popen(progffglut,"w");		   
       if(verbosity)
