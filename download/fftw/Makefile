@@ -26,7 +26,7 @@ FAIT:
 	touch FAIT
 
 FAIRE: $(SRCDIR) 
-	cd $(SRCDIR) && ./configure  --disable-fortran  --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CXXFLAGS="$(CXXFLAGS)"
+	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CXXFLAGS="$(CXXFLAGS)" CPP='gcc -E'
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 	touch FAIT
