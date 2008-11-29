@@ -244,7 +244,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
       int iparam[12]= {0,ishift,0,maxit,1,nconv,0,mode,0,0,0,0};
       int ipntr[12]={ 0,0,0, 0,0,0,  0,0,0, 0,0,0 };
       KN<double> workd(3*n+1);
-      int lworkl = ncv*(ncv+8);
+      int lworkl = ncv*(ncv+9);
       KN<double> workl(lworkl+1);
       KN<double> vp(ncv*n+1);
 
@@ -263,7 +263,6 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	  // Calling ARPACK FORTRAN code. Almost all work needed to
 	  // GetVector supplies  a pointer to the input vector, v, 
 	  //  and PutVector a pointer  to the output vector, w.
-	  int kkk;
 	  switch (ido) {
 	  case -1: {
 	    KN_<K> v(&workd[ipntr[1]],n);
@@ -277,7 +276,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	      {
 		ws=w.sum();
 		vs=v.sum();
-		cout << " ?kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" 
+		cout << " ?kkk " << ido << " " << w.max() << " " << w.min() << " s w =" 
 		     << ws << " s v " << vs  << endl;}
 	    work = B*v;
 	    assert(v.min() >= -2. && v.max() < 2.);	
@@ -285,14 +284,14 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	      {
 		ws=w.sum();
 		vs=v.sum();
-		cout << " -kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" << ws 
+		cout << " -kkk " << ido << " " << w.max() << " " << w.min() << " s w =" << ws 
 		     << " s v " << vs  << endl;}
 	    OP1.Solve(w,work);
 	    if(dddd)
 	      {
 		ws=w.sum();
 		vs=v.sum();
-		cout << " +kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" 
+		cout << " +kkk " << ido << " " << w.max() << " " << w.min() << " s w =" 
 		     << ws << " s v " << vs  << endl;
 	      }
 	    
@@ -312,7 +311,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	      {
 		ws=w.sum();
 		vs=v.sum();
-		cout << " -kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" 
+		cout << " -kkk " << ido << " " << w.max() << " " << w.min() << " s w =" 
 		     << ws << " s v " << vs  << endl;
 	      }
 	    OP1.Solve(w,v);
@@ -320,10 +319,10 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	      {		     
 		ws=w.sum();
 		vs=v.sum();
-		cout << " +kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" 
+		cout << " +kkk " << ido << " " << w.max() << " " << w.min() << " s w =" 
 		     << ws << " s v " << vs  << endl;
 	      }
-	    // cout << " kkk" << kkk << " " << w.max() << " " << w.min() << endl;
+	    // cout << " kkk" << ido << " " << w.max() << " " << w.min() << endl;
 	    //P.MultOPv(prob.GetProd(), &workd[ipntr[2]]);
 	    break; }
 	    
@@ -337,7 +336,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	      {
 		ws=w.sum();
 		vs=v.sum();
-		cout << " -kkk " << kkk << " " << w.max() << " " << w.min() << " s w =" 
+		cout << " -kkk " << ido << " " << w.max() << " " << w.min() << " s w =" 
 		     << ws << " s v " << vs  << endl;
 	      }
 	    w = B*v;
@@ -346,11 +345,13 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	      {
 		ws=w.sum();
 		vs=v.sum();
-		cout << " +kkk " << kkk << " " << w.max() << " " << w.min() << " s w ="
+		cout << " +kkk " << ido << " " << w.max() << " " << w.min() << " s w ="
 		     << ws << " s v " << vs  << endl;
 	      }
 	    break;
 	  }
+	  default :
+	    ffassert(0);
 	  }
 	  
 	  sauppError(info);
@@ -476,7 +477,6 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	  
 	  // GetVector supplies  a pointer to the input vector, v, 
 	  //  and PutVector a pointer  to the output vector, w.
-	  int kkk;
 	  switch (ido) {
 	  case -1: {
 	    KN_<K> v(&workd[ipntr[1]],n);
@@ -537,8 +537,8 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	// Finding eigenvalues and eigenvectors.                                                                                                   
 	  if(nconv)
 	    {
-	      KN<double> evr(nbev), evi(nbev);
-	      KNM<double> Z(n,nbev);
+	      KN<double> evr(nbev+1), evi(nbev+1);
+	      KNM<double> Z(n,nbev+1);
 	      KN<double> workev(3*ncv);
 	      int ldz=n;
 	      char HowMny ='A';
