@@ -382,7 +382,7 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   //typedef Mesh3 *pmesh3;
   
   if (verbosity)
-    cout << " load: glumesh2D  " << endl;
+    cout << "  glumesh2D " ;
   //cout << " je suis dans Init " << endl; 
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,listMesh,pmesh>  >      );
