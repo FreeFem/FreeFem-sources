@@ -31,7 +31,8 @@ EXTRA_DIST=load.link dfft.link  include.tar.gz \
   tetgen.cpp\
   msh3.cpp msh3.hpp\
   ffrandom.cpp ffrandom.edp  \
-  medit.cpp 
+  medit.cpp  \
+  bmo.cpp lgbmo.cpp bmo.hpp
 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
@@ -43,6 +44,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	splitmesh3.$(DYLIB_SUFFIX)  splitmesh6.$(DYLIB_SUFFIX) \
 	ffrandom.$(DYLIB_SUFFIX)  \
 	medit.$(DYLIB_SUFFIX)  \
+	mat_dervieux.$(DYLIB_SUFFIX) lgbmo.$(DYLIB_SUFFIX) mat_psi.$(DYLIB_SUFFIX)\
 	$(DYLIB_OTHER_COMPILE)
 
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX)
@@ -81,6 +83,8 @@ compile-pkg:  $(LIST_COMPILE_PKG)
 #	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
 msh3.$(DYLIB_SUFFIX): msh3.cpp 
 	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" msh3.cpp 
+lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp 
+	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" bmo.cpp  lgbmo.cpp 
 
 # --  
 tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)

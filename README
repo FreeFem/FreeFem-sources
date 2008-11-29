@@ -2,14 +2,12 @@ Compilation of FreeFem++ under unix, MacOs 10 or cygwin (Windows)
 and bamg (mesh generator)
 ----------------------------------------------------------------
 
-New:  Test version 3 beta.  F. Hecht & J. Morice 6 oct 2008.
-to get the mesh tetgen mesh generator 
-try 
-./configure +your option
-(cd download/tetgen;make)
-make
-otherwise the compilation of the example++-load trap (no tetgen).
-
+New:  Test version 3.  F. Hecht & J. Morice 6 oct 2008.
+remark the graphique is now base of Open/Glut lib.
+so to today the ide/cs  version is not  currently available
+nothing in src/ide si compilde.
+This part of the software under construction.
+F. Hecht.
 ---------------------------
 
 
