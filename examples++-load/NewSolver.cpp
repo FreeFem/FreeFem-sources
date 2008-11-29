@@ -295,8 +295,8 @@ bool SetUMFPACK()
 {
     if(verbosity>1)
 	cout << " SetDefault sparse solver to IUMFPack" << endl;
-    DefSparseSolver<double>::solver  =BuildISolverUMFPack;
-    DefSparseSolver<Complex>::solver =BuildISolverUMFPack;    
+    DefSparseSolver<double>::solver  =BuildSolverIUMFPack;
+    DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;    
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
 }
 

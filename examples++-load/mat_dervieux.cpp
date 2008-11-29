@@ -154,5 +154,5 @@ Init init;
 Init::Init()
 {
   cout << " lood: init Mat Chacon " << endl;
-  Global.Add("MatUpWind0","(", new OneOperatorCode<MatrixUpWind0 >( ));
+  Global.Add("MatUpWind1","(", new OneOperatorCode<MatrixUpWind0 >( ));
 }
