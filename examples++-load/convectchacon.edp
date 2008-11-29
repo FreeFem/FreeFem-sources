@@ -1,4 +1,4 @@
-load "./mat_psi.so"
+load "mat_psi"
 border a(t=0, 2*pi)     {    x = cos(t);    y = sin(t);  };
 mesh th = buildmesh(a(70));
 fespace Vh(th,P1);
