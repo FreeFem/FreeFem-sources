@@ -32,7 +32,7 @@ using std::numeric_limits;
 const R pi=M_PI;//4*atan(1.); 
 using namespace std;
 
-int debug=2;
+int debug=1;
 
 #include "ffglut.hpp"
 
@@ -90,7 +90,7 @@ int   ReadOnePlot(FILE *fp)
 	 //return err;
 	}
       kread++;
-      if(debug>0) cout << " Read entete " << endl;
+      if(debug>2) cout << " Read entete " << endl;
 	  int c1 =getc(fp);//
       if(c1==13)	  
         int c2 =getc(fp);//	
@@ -101,12 +101,12 @@ int   ReadOnePlot(FILE *fp)
   f >> cas;
   err=-1;
   if (feof(fp)) goto Lreturn ;
-  if((debug > 1)) cout << " ReadOnePlot " << kread+1<< " cas = " << cas << " " << nextPlot << endl;
+  if((debug > 2)) cout << " ReadOnePlot " << kread+1<< " cas = " << cas << " " << nextPlot << endl;
   if(cas==PlotStream::dt_newplot)  
     {
       assert(nextPlot==0);
       nextPlot = new ThePlot(f,currentPlot,++kread);
-	if(debug)	
+	if(debug>1)	
       cout << " next is build " << nextPlot<< " wait :" << nextPlot->wait << " -> " << kread <<  endl;
       assert(nextPlot);
       err=0;
@@ -492,7 +492,7 @@ void OnePlotBorder::Draw(OneWindow *win)
 OneWindow::OneWindow(int h,int w,ThePlot *p)
   : height(h),width(w),theplot(0),hpixel(1),
     Bmin(0,0),Bmax(1,1),oBmin(Bmin),oBmax(Bmax),zmin(0),zmax(1),
-    windowdump(false)
+    windowdump(false),help(false)
 {
     set(p);
 }
@@ -600,7 +600,7 @@ void  OneWindow::zoom(int w,int h,R coef)
 
     GLint ok= gluUnProject( x,y,z,modelMatrix,projMatrix,viewport,&xx,&yy,&zz);
     ShowGlerror(" UnPro .. ");
-    if(debug)
+    if(debug>2)
     cout << x << " " << y << " " << z << " -> " << xx << " " << yy << " " << zz << endl;
     R2  oD(oBmin,oBmax);
     R2  D(Bmin,Bmax);
@@ -638,12 +638,23 @@ void OneWindow::getcadre(double &xmin,double &xmax,double &ymin,double &ymax)
 void OneWindow::Display()
 {
   ffassert(this && theplot);
+  SetScreenView() ;
+  glColor3d(0.,0.,0.);
+     
+  if(help)
+    {
+      theplot->DrawHelp(this);
+      help=false;
+    }
+  else
+    {
   ShowGlerror("Begin Display");
   
   //  SetView();
   if(theplot)
     theplot->Draw(this);
   ShowGlerror("After Display");
+    }
 }
 void OneWindow::cadreortho(R2 A, R2 B)
 {
@@ -707,6 +718,33 @@ void OnePlot::GLDraw(OneWindow *win)
   }
     //  else glCallList(gllist);
 }
+
+void ThePlot::DrawHelp(OneWindow *win) 
+{
+  int i = 2;
+  win->Show("Enter a keyboard character in the FreeFem Graphics window in order to:",i++);
+  
+  i+=2;
+  //Show("+)  zomm around the cursor 3/2 times ",i++);
+  win->Show("+)  zoom in around the cursor 3/2 times ",i++);
+  win->Show("-)  zoom out around the cursor 3/2 times  ",i++);
+  win->Show("=)  reset zooming  ",i++);
+  win->Show("r)  refresh plot ",i++);
+  win->Show("ac) increase   the size arrow ",i++);
+  win->Show("AC) decrease the size arrow  ",i++);
+  win->Show("b)  switch between black and white or color plotting ",i++);
+  win->Show("g)  switch between grey or color plotting ",i++);
+  win->Show("f)  switch between filling iso or not  ",i++);
+  win->Show("v)  switch between show  the numerical value of iso or not",i++);
+  win->Show("w)  graphic window dump in file ",i++);
+  win->Show("m)  switch between show  meshes or not",i++);
+  win->Show("p)  switch between show  quadtree or not (for debuging)",i++);
+  win->Show("t)  find  Triangle ",i++);
+  win->Show("?)  show this help window",i++);
+  win->Show("enter) wait next plot",i++);
+  win->Show("any other key : nothing ",++i);
+}
+
 
 void ThePlot::Draw(OneWindow *win) 
 {
@@ -965,6 +1003,14 @@ void ThePlot::SetDefIsoV()
   SetColorTable(Max(Niso,Narrow)+4) ; 
 }
 
+void OneWindow::Show(const char *str,int i)
+{
+  int hx= 18;
+  int ix= width/20;
+  int iy= height-hx*i;
+  plot(ix,iy,str,3);
+}
+
 void  FillRectRasterPos(R x0,R y0,R x1,R y1)
 {
   //  if((debug > 10)) cout << "FR Rp:   " << x0 << " " << y0 << " " << x1 << " " << y1 << endl;
@@ -1051,7 +1097,7 @@ void OneWindow::DrawCommentaire(const char * cm,R x,R y)
  va_end(args);
  }
  */
-void  plot(double xx,double yy,const char *cmm)
+void  plot(double xx,double yy,const char *cmm,int font)
 {
     glRasterPos2f(xx,yy);   
     float x[4];
@@ -1066,17 +1112,32 @@ void  plot(double xx,double yy,const char *cmm)
       #define GLUT_BITMAP_HELVETICA_12((void*)7)
       #define GLUT_BITMAP_HELVETICA_18((void*)8)
      */
-    //void * glut_font=GLUT_BITMAP_8_BY_13;    
+    void * glut_font=GLUT_BITMAP_TIMES_ROMAN_10;    
+    switch (font)
+      {
+      case  0: glut_font=GLUT_STROKE_ROMAN;break;
+      case  1: glut_font=GLUT_STROKE_MONO_ROMAN;break;
+      case  2: glut_font=GLUT_BITMAP_9_BY_15;break;
+      case  3: glut_font=GLUT_BITMAP_8_BY_13;break;
+      case  4: glut_font=GLUT_BITMAP_TIMES_ROMAN_10;break;
+      case  5: glut_font=GLUT_BITMAP_TIMES_ROMAN_24;break;
+      case  6: glut_font=GLUT_BITMAP_HELVETICA_10;break;
+      case  7: glut_font=GLUT_BITMAP_HELVETICA_12;break;
+      case  8: glut_font=GLUT_BITMAP_HELVETICA_18;break;
+
+
+	
+      }
     for (const char *s=cmm; *s; s++)
       {if((debug > 10)) cout << *s ;
-	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10,*s);
+	glutBitmapCharacter(glut_font,*s);
       }
     if((debug > 10)) cout << " ;;; " <<endl;
 }
-void plot(double x,double y,double i)
+void plot(double x,double y,double i,int font)
 {
     char buf[24];
-    snprintf(buf,24,"%g",i);
+    snprintf(buf,24,"%g",i,font);
     plot(x,y,buf);
 }
 
@@ -1346,6 +1407,10 @@ static void Key( unsigned char key, int x, int y )
 	    if(win)
 		win->windowdump=true;
 	    break;
+    case '?' :
+	    if(win)
+		win->help=true;
+
 	case '+':
 	    win->zoom(x,y,0.7);
 	    break;
@@ -1375,7 +1440,6 @@ static void Key( unsigned char key, int x, int y )
 	case 'B':
 	    win->theplot->drawborder = ! win->theplot->drawborder  ;
 	    break;
-	    
 	case 'p':
 	    
 	    break;
@@ -1445,7 +1509,7 @@ THREADFUNC(ThreadRead,fd)
   //  MutexNextPlot.WAIT(); 
   err=ReadOnePlot((FILE*)fd);
   // MutexNextPlot.Free(); 
-  if(debug)
+  if(debug>1)
     cout << " We Read a plot  : " << kread << " " << nextPlot << " " << err << endl;
   if(err<0)
     NoMorePlot=true; 
@@ -1456,7 +1520,7 @@ THREADFUNC(ThreadRead,fd)
 int main(int argc,  char** argv)
 {
     glutInit(&argc, argv);
-    if(debug)		
+    if(debug>1)		
     cout <<  " mode read = " << MODE_READ_BINARY << endl;
     datafile =0;;
     if(argc>1 && *argv[argc-1] != '-' ) 
@@ -1483,7 +1547,7 @@ int main(int argc,  char** argv)
       cout << " Error: no graphic data " << endl; 
       Fin(1);
     }
-    if(debug) 
+    if(debug>1) 
     cout << "on a lue le premier plot next plot: " << nextPlot << endl;
 
 

@@ -42,13 +42,23 @@ int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,n
 //   ncv   see arpack doc.
 //  the return value is number of converged eigen value.
 
+int nerr=0;
+real[int]  eev(36);
+eev=1e100;
+for(int i=1,k=0;i<6;++i)
+for(int j=1;j<6;++j)
+  eev[k++]=i*i+j*j;
+eev.sort;
+cout << eev << endl;
 for (int i=0;i<k;i++)
 {
   u1=eV[i];
   real gg = int2d(Th)(dx(u1)*dx(u1) + dy(u1)*dy(u1));
   real mm= int2d(Th)(u1*u1) ;
-  cout << " ---- " <<  i<< " " << ev[i]<< " err= " 
-       <<int2d(Th)(dx(u1)*dx(u1) + dy(u1)*dy(u1) - (ev[i])*u1*u1) << " --- "<<endl;
+  real err = int2d(Th)(dx(u1)*dx(u1) + dy(u1)*dy(u1) - (ev[i])*u1*u1) ;
+  if(abs(err) > 1e-6) nerr++;
+  if(abs(ev[i]-eev[i]) > 1e-1) nerr++;
+  cout << " ---- " <<  i<< " " << ev[i] << " == " << eev[i] << " err= " << err << " --- "<<endl;
   plot(eV[i],cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,ps="eigen"+i+".eps");
 }
-
+assert(nerr==0);
