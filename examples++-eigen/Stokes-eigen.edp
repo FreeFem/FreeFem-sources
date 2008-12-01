@@ -35,8 +35,10 @@ real[int] ev(nev); // to store nev eigein value
 XhxXhxMh[int] [eu1,eu2,ep](nev);   // to store nev eigen vector
 
 int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eu1,tol=1e-10,maxit=0,ncv=0);
+
 for (int i=0;i<k;i++)
 {
+  cout << " valeur propre : " << i << "  : " << ev[i] << endl;
   u1=eu1[i];
   u2=eu2[i];
   p=ep[i];
@@ -44,3 +46,4 @@ for (int i=0;i<k;i++)
 }
 
 cout << "CPU " << clock()-s0 << "s " << endl;     
+assert(abs(ev[0]-52.3471) < 0.1); 

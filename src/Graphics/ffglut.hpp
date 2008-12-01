@@ -171,6 +171,7 @@ class ThePlot { public:
   ThePlot(PlotStream & fin,ThePlot *old , int kcount);
     
     void Draw(OneWindow *win) ;
+    void DrawHelp(OneWindow *win) ;
  
     struct RGB  { float r,g,b;
 	void set(int k,int nb,ThePlot *theplot ) 
@@ -200,7 +201,8 @@ public:
   R zmin,zmax;
   R hpixel;// taille pixel en coordonne x,y,z 
   int xold,yold;
-  bool windowdump;
+  bool windowdump,help;
+
   GLdouble modelMatrix[16];
   GLdouble projMatrix[16];
   GLint viewport[4];  
@@ -223,6 +225,8 @@ public:
   void PlotValue(const KN_<double> & Viso,int  k0,const char * cmm);
   void DrawCommentaire(const char * cm,R x,R y); 
   void SetScreenView() const ;
+  void Show(const char *str,int i);
+  
   void Seg(R2 A, R2 B) const  { 
     glVertex3d(A.x,A.y,theplot->z0);
     glVertex3d(B.x,B.y,theplot->z0);
@@ -230,8 +234,8 @@ public:
     
 };
 
-void plot(double x,double y,const char *cmm);
-void plot(double x,double y,double i);
+void plot(double x,double y,const char *cmm,int font=-1);
+void plot(double x,double y,double i,int fint = -1);
 
 extern map<int,OneWindow*> AllWindows; 
 

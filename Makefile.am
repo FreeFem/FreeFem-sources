@@ -158,10 +158,9 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	sed <src/agl/Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
            -e "s/@VVERSION@/$(VERSION)$(ADD_PACKAGE_NAME)/g" \
            -e "s/@DATE@/`date`/g"  
-	-mkdir -p  $@/FreeFem++.app/Contents/FreeFem++.app/Contents
 	cp src/nw/FreeFem++ $@/FreeFem++.app/Contents/bin
 	cp src/nw/ffglut $@/FreeFem++.app/Contents/bin
-	mkdir $@/FreeFem++.app/Contents/include 
+	-mkdir $@/FreeFem++.app/Contents/include 
 	cp examples++-load/include/* $@/FreeFem++.app/Contents/include
 	cp examples++-load/*.dylib  $@/FreeFem++.app/Contents/lib
 	-if [ -s List-agl-dylib ]; then tar zchvf $@/OtherMacOsLib.tgz `cat List-agl-dylib`; fi; 
