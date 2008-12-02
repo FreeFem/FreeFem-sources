@@ -89,13 +89,14 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 
 \bigskip
 
-The participants of the documentation and of the developement are:
+The main participants of the documentation and of the developement are:
 \begin{itemize}
 \item {\Large Olivier Pironneau}, \url{mailto:olivier.pironneau@upmc.fr}\url{http://www.ann.jussieu.fr/pironneau}
 {Olivier Pironneau is a professor of numerical analysis at the university of Paris VI and at LJLL.  His scientific contributions are in numerical methods for fluids.  He is a member of the Institut Universitaire de France and of the French  Academy of Sciences}
 
 \item {\Large Jacques Morice}, \url{mailto:morice@ann.jussieu.fr}.
-Jacaues Morice is a Post Doctorant , ( à faire .....)
+Jacaues Morice is a Post-Doct at LJLL. His doing is Thesis in University of Bordeaux I on fast multipole method (FMM). 
+On this version, he do all three dimension mesh generation and coupling with medit software.
 
 \item {\Large Antoine Le Hyaric}, \url{mailto:lehyaric@ann.jussieu.fr},\url{http://www.ann.jussieu.fr/~lehyaric/}
 {Antoine Le Hyaric}{ is a research engineer  from the "Centre National de la
@@ -7306,15 +7307,19 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
 
     \item  The boundary condition terms :
     \begin{itemize}
-        \item  An "on" form (for Dirichlet ) :\index{on}
+        \item  An "on" scalar form (for Dirichlet ) :\index{on!scalar}
          \texttt{ on(1, u = g )}\index{on}
          
         The meaning is 
         for all degree of freedom $i$ of this associated boundary,  the diagonal 
         term  of the matrix $a_{ii}= tgv$  with the   {\em terrible geant value} \ttCC{tgv} (=$10^{30}$ by default)
-          and   the right hand side $b[i] = "g[i]" \times tgv $,
-                where the $"g[i]"$ is the boundary node value given by  the interpolation of $g$.
-        \item  a linear form on $\Gamma$  (for Neumann ) \index{Neumann}
+          and   the right hand side $b[i] = "(\Pi_h g)[i]" \times tgv $,
+                where the $"(\Pi_h g)g[i]"$ is the boundary node value given by  the interpolation of $g$.
+         \item  An "on" vectorial  form (for Dirichlet ) :\index{on!scalar}
+             \texttt{ on(1,u1=g1,u2=g2) }
+                If you have vectorial finite element like \texttt{RT0}, the 2 components are coupled, and so 
+                 you have : $b[i] = "(\Pi_h (g1,g2))[i]" \times tgv $, where $\Pi_h $ is the vectorial finite element interpolant. 
+       \item  a linear form on $\Gamma$  (for Neumann ) \index{Neumann}
          \texttt{ -int1d(Th))( f*w) } or \texttt{ -int1d(Th,3))( f*w) }
         \item   a bilinear form on $\Gamma$  or $\Gamma_{2}$ (for  Robin )\index{Robin}
          \texttt{ int1d(Th))( K*v*w) } or
@@ -14410,13 +14415,11 @@ This is The \texttt{FreeFem++} software.
 Programs in it were maintained by
 \begin{itemize}
 \item \texttt{Frédéric hecht <Frederic.Hecht@upmc.fr>} 
-\item \texttt{Olivier Pironneau <Olivier.Pironneau@upmc.fr>} 
-\item \texttt{Antoine Le Hyaric <lehyaric@ann.jussieu.fr>}
+\item \texttt{Jacques Morice <morice@ann.jussieu.fr>}
 \end{itemize}
 
 All its programs except files the comming from 
- ARPACK++ software (files  in directory \texttt{ARPACK/a\-pack++/include} )
- COOOL sofware (files in directory src/Algo) 
+  COOOL sofware (files in directory src/Algo) 
  and the file \texttt{mt19937ar.cpp} 
 which may be redistributed under the terms of the
  GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
@@ -15055,17 +15058,17 @@ This book is ideal for students at Master level, for  researchers at any level a
 \bigskip
 
 
-\textbf{About the Authors}
+%\textbf{About the Author}
 
- \medskip
+% \medskip
 
-\def\AUTEUR#1#2#3{\hbox to \hsize{
-\begin{minipage}{3cm}\includegraphics[height=2.5cm]{#1}\end{minipage}
-\hss \begin{minipage}{14cm}{\textbf{#2} #3}\end{minipage}}
- \par\medskip}
+%\def\AUTEUR#1#2#3{\hbox to \hsize{
+%\begin{minipage}{3cm}\includegraphics[height=2.5cm]{#1}\end{minipage}
+%\hss \begin{minipage}{14cm}{\textbf{#2} #3}\end{minipage}}
+% \par\medskip}
 
-
-\AUTEUR{fig-fh}{Fr\'{e}d\'{e}ric Hecht}{  is a professor of numerical analysis at the university of Paris VI and does his research at the Laboratoire Jacques-Louis Lions (LJLL).  He was also a member of the project gamma at INRIA.  He is the author of several advanced software tools for automatic triangulations including the public domain EMC2.}
+%
+%\AUTEUR{fig-fh}{Fr\'{e}d\'{e}ric Hecht}{  is a professor of numerical analysis at the university of Paris VI and does his research at the Laboratoire Jacques-Louis Lions (LJLL).  He was also a member of the project gamma at INRIA.  He is the author of several advanced software tools for automatic triangulations including the public domain EMC2.}
 %
 %\AUTEUR{fig-op}{Olivier Pironneau}{ is a professor of numerical analysis at the university of Paris VI and at LJLL.  His scientific contributions are in numerical methods for fluids.  He is a member of the Institut Universitaire de France and of the French  Academy of Sciences}
 
