@@ -1,17 +1,26 @@
 #!/bin/sh
 # Create a loadable object from a C++ function defined in a .cpp file
 # $Id$
+FFVERSION='@VERSION@'
+FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@'
+INCFF=
+if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
+if [ "$CXX" == '@'CXX'@' ] ; then CXX=""; fi
+if [ "$FFCXXFLAGS" == '@'CXXFLAGS'@' ] ; then FFCXXFLAGS=""; fi
+if [ "$FFVERSION" == '@'VERSION'@' ] ; then FFVERSION=""; fi
 if [ -z "$INCFF" ] ; then
-if [ -d "@INCFF@" ] ; then
-INCFF="-I@INCFF@"
-elif [ -d include ]; then
-INCFF="-Iinclude"
-elif [ -f /usr/include/ff++ ] ; then 
- INCFF="-I/usr/include/ff++"
-else
-   echo " erreur PB include freefem++ directory " ;
-   exit 1;
-fi
+    if [ -d "@INCFF@/." ] ; then
+	INCFF="-I@INCFF@"
+    elif [ -d include/. ]; then
+	INCFF="-Iinclude"
+    elif [ -d "FFAPPLI_INC/." ] ; then 
+	INCFF="-IFFAPPLI_INC" 
+    elif [ -d '@ff_prefix_dir@/include/.' ] ; then 
+	INCFF='-I@ff_prefix_dir@/include' 
+    else
+	echo " erreur PB include freefem++ directory " ;
+	exit 1;
+    fi
 fi
 do="yes"
 DEBUG=""
@@ -79,10 +88,7 @@ while [ $# -ne 0 ]  ; do
 done
 if [ -z "$out" ] ; then  out=$o  ; fi;
 # Default compiler
-if [ "$CXX" = "" ];
-then
-    CXX=g++
-fi
+if [ -z "$CXX"  ];then  CXX=g++ ; fi
 
 INC="$INCFF $INC"  
 SUF=so
@@ -121,7 +127,7 @@ case "$WIN32$uu" in
 	echo "sorry unknown achitecture "`uname`
 	exit 1;;
 esac
-FLAGS="$FLAGS $DEBUG"
+FLAGS="$FLAGS $DEBUG $FFCXXFLAGS"
 if [ -n "$files$fileso" ] ; then
     if [ "$WIN32" = "yes" -a -f $bin/libff.dll  ]; then
 	echo " Sorry, no freefem .dll file (libff.dll)  in $bin dir "
