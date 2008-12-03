@@ -48,7 +48,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	$(DYLIB_OTHER_COMPILE)
 
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX)
-
+bin_PROGRAMS=ff-c++
 LLSUPERLU=superlu_3.1
 LLTET=tet
 LLFFTW3=fftw3
@@ -70,29 +70,29 @@ load_download:
 
 #compile : include load_download 
 
-compile-pkg:  $(LIST_COMPILE_PKG) 
+compile-pkg:  $(LIST_COMPILE_PKG)  ff-c++
 
 
 .cpp.$(DYLIB_SUFFIX): 
-	 ./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)"  $< 
+	 ./ff-c++   $< 
 #glumesh2D.$(DYLIB_SUFFIX): glumesh2D.cpp 
-#	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" glumesh2D.cpp
+#	 ./ff-c++   glumesh2D.cpp
 #glumesh3D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh3D.cpp 
-#	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp glumesh3D.cpp
+#	 ./ff-c++   TransfoMesh_v2.cpp glumesh3D.cpp
 #buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
-#	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
+#	 ./ff-c++   TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
 msh3.$(DYLIB_SUFFIX): msh3.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" msh3.cpp 
+	 ./ff-c++   msh3.cpp 
 lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp 
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" bmo.cpp  lgbmo.cpp 
+	 ./ff-c++   bmo.cpp  lgbmo.cpp 
 
 # --  
 tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
-	 ./load.link  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" $(LK_TET)  tetgen.cpp
+	 ./ff-c++   $(LK_TET)  tetgen.cpp
 SuperLu.$(DYLIB_SUFFIX): 
-	./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" $(LK_SUPERLU) SuperLu.cpp 
+	./ff-c++  $(LK_SUPERLU) SuperLu.cpp 
 dfft.$(DYLIB_SUFFIX): 
-	./load.link CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" $(LK_FFTW3) dfft.cpp  
+	./ff-c++  $(LK_FFTW3) dfft.cpp  
 
 include: include.tar.gz
 	rm -rf include 
@@ -119,13 +119,14 @@ all.edp:
 regtests.edp: regtests.m4 ../regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
 
-$(LIST_COMPILE):include Makefile
+$(LIST_COMPILE):include Makefile ff-c++
 
 clean-local:
 	-rm *.o  $(LIST_COMPILE)  regtests.edp makeref.edp
 	-rm -rf include
 ff-c++:load.link
-	sed <load.link >ff-c++ -e 's;INC=";INC="-I$(ff_prefix_dir)/include;'
+	../config.status  --file=ff-c++:load.link
+#	#sed <load.link >ff-c++ -e 's;INC=";INC="-I$(ff_prefix_dir)/include;' 
 	chmod a+x ff-c++
 
 install-exec-local:: load_compile
