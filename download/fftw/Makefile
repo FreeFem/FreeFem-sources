@@ -19,14 +19,17 @@ FFTW_VERSION=3.2
 INSTALL=../..
 
 
-fftw:FAIT
+fftw:FAIT$(WIN32DLLTARGET)
+
+FAITwin32-dll-target:
+	echo "On Pure Win32 (to hard to compile) "
 
 FAIT:	
 	$(MAKE) FAIRE
 	touch FAIT
 
 FAIRE: $(SRCDIR) 
-	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CXXFLAGS="$(CXXFLAGS)" CPP='gcc -E'
+	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 	touch FAIT
@@ -44,4 +47,7 @@ cxxflags: ../Makefile
 	grep 'CXX *=' ../Makefile >cxxflags
 	grep 'CC *=' ../Makefile >>cxxflags
 	grep 'CXXFLAGS *=' ../Makefile >>cxxflags
+	grep 'CFLAGS *=' ../Makefile >>cxxflags
 	grep 'WGET *=' ../Makefile >>cxxflags
+	grep 'WIN32DLLTARGET *=' ../Makefile >>cxxflags
+
