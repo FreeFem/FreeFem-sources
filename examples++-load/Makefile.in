@@ -502,7 +502,7 @@ uninstall-am: uninstall-info-am
 
 all-local: @LOAD_COMPILE@
 
-load_compile:include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG) 
+load_compile:ff-c++ include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG) 
 
 load_download:
 	if [  -f ../download/lib/lib$(LLTET).a -a -f ../download/lib/lib$(LLFFTW3).a \
@@ -517,7 +517,7 @@ load_download:
 
 compile-pkg:  $(LIST_COMPILE_PKG) 
 
-.cpp.$(DYLIB_SUFFIX): ff-c++
+.cpp.$(DYLIB_SUFFIX):
 	 ./ff-c++   $< 
 #glumesh2D.$(DYLIB_SUFFIX): glumesh2D.cpp 
 #	 ./ff-c++   glumesh2D.cpp
@@ -563,7 +563,7 @@ all.edp:
 regtests.edp: regtests.m4 ../regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
 
-$(LIST_COMPILE):include Makefile
+$(LIST_COMPILE):ff-c++ include Makefile
 
 clean-local:
 	-rm *.o  $(LIST_COMPILE)  regtests.edp makeref.edp

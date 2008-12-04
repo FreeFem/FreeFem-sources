@@ -1,9 +1,11 @@
-v 3.00-1
-  - complety change of the graphic (freefem++ is now the old freefem++-nw )
-       suppress the ide version until Antoine Le Hyaric do a good one
+v 3.00-1 (4 dec 2008)
+  - complety change of the graphic (freefem++ is now the old freefem++-nw ) 
+      - add  medit (a visualisator software by  P. Frey)  inside freefem++
+          with a name ffmedit  
+      - suppress the ide version until Antoine Le Hyaric do a good one
           see page: http://www.ann.jussieu.fr/~lehyaric/ffcs
-       We put a client-server architecture
-        (freefem++,freefem++-nw)  / ffglut
+      - We put a client-server architecture
+        (freefem++,freefem++-nw)  <->  ffglut
 	- freefem++-nw and freefem++ is now the same file 
 	- ffglut is the visualisator in glut library (run on linux, mac, win32)
     how to use now: 
@@ -11,16 +13,19 @@ v 3.00-1
 	freefem++  -glut ffglut-path  file.edp  # change ffglut command
 	freefem++  -fglut saveglutfile  file.edp # save data plot
 	ffglut saveglutfile # plot a data file
-	freefem++ -nw file.edp # freefem++ with  
+	freefem++ -nw file.edp # freefem++ with  graphics 
+	ffmedit  #  used medit in freefem  
+	
 
-    now  glumesh2D dynamics tool is in freefem++   
-        add operator + beetween meshes
+  - now glumesh2D dynamics tool is in freefem++   
+        add operator + beetween meshes with glu
         examples++-tutorial/glumesh.edp
+        
   - add 3 meshing tools in msh3.{so,dll,dylib}      	
 	operator + between mesh3
 	add freefem++ function:
 	  movemesh2D3Dsurf movemesh3D buildlayers
-
+        see:
     	  examples++-load/buildlayermesh.edp
 	  examples++-load/glumesh3D.edp
 	  examples++-load/refinesphere.edp
@@ -30,7 +35,7 @@ v 3.00-1
   - add interface with tetgen  3d mesher (tetgen.{so,dll,dylib})
         add freefem++ function: 
 	  tetgconvexhull tetgtransfo tetg tetgreconstruction
-	
+	see:
       	  examples++-load/buildlayermesh.edp
 	  examples++-load/refinesphere.edp
 	  examples++-load/tetgencube.edp
