@@ -30,10 +30,10 @@ LIBS_FF = libff.dll
 
 
 
-all-local: $(WIN32DLLTARGET)
+all-local: $(WIN32DLLTARGET) ff-c++
 	-for i in $(LDADD2) ; do case $$i in  *.dll) echo cp -p $$i .; cp -p $$i . ;;	  esac ; done
 	echo done
-win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  FreeFem++-cs.exe bamg.exe cvmsh2.exe drawbdmesh.exe
+win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe
 	echo "on a fini"
 
 libff.dll: $(FFD_OBJ0)  $(FFD_OBJ_AR)  $(FFD_OBJ_AC)  $(FFD_OBJ_AL)  $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o
@@ -46,12 +46,14 @@ FreeFem++-nw.exe: ../nw/sansrgraph.o   ../lglib/mymain.o $(LIBS_FF)
 	g++   -mno-cygwin libff.dll $^ -o $@  -lcomdlg32
 FreeFem++.exe: ../nw/sansrgraph.o   ../lglib/mymain.o $(LIBS_FF)
 	g++   -mno-cygwin libff.dll $^ -o $@  -lcomdlg32
-FreeFem++-cs.exe:$(FFD_OBJIDE)  ../lglib/lg.tab.o $(LIBS_FF)
-	g++  $^  `$(FLTK_CONFIG) --ldflags` -mno-cygwin    -o $@
+##FreeFem++-cs.exe:$(FFD_OBJIDE)  ../lglib/lg.tab.o $(LIBS_FF)
+##	g++  $^  `$(FLTK_CONFIG) --ldflags` -mno-cygwin    -o $@
 bamg.exe:  libff.dll $(LIBS_FF)
 	g++   -mno-cygwin ../bamg/bamg.o  -Wl,--enable-auto-import $^ -o $@ 
 cvmsh2.exe:  $(LIBS_FF)
 	g++   -mno-cygwin  -Wl,--enable-auto-import ../bamg/cvmsh2.o  $^ -o $@ 
 drawbdmesh.exe:../std/Pcrgraph.o  ../bamg/drawbdmesh.o $(LIBS_FF)
 	g++   -mno-cygwin -mwindows  -Wl,--enable-auto-import  $^ -o $@ 
-
+ff-c++:../../examples++-load/load.link
+	../../config.status  --file=ff-c++:$<
+	chmod a+x ff-c++
