@@ -32,7 +32,7 @@ FAIRE: $(SRCDIR)
 	touch FAIT
 
 $(SRCDIR): $(PKGDIR)/$(PACKAGE)
-	zcat  $^ | tar xvf - 
+	gunzip -c   $^ | tar xvf - 
 
 $(PKGDIR)/$(PACKAGE):
 	cd $(PKGDIR); $(WGET)  $(SERVER)/$(PACKAGE)
