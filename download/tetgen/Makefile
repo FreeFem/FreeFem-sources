@@ -22,7 +22,6 @@ tetgen: FAIT
 FAIT:
 	$(MAKE) FAIRE
 	touch FAIT
-	
 
 FAIRE:$(SRCDIR)/$(INSTALL) cxxflags
 	touch FAIT
@@ -48,6 +47,8 @@ clean-local:
 clean:
 	-rm $(SRCDIR)/$(INSTALL)/lib/libtet.a
 	-rm $(SRCDIR)/$(INSTALL)/include/tetgen.h
+	-rm FAIT
+	-rm -rf tetgem*
 cxxflags: ../Makefile
 	grep 'CXX *=' ../Makefile >cxxflags
 	grep 'CC *=' ../Makefile >>cxxflags

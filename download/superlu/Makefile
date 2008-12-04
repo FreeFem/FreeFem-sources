@@ -86,7 +86,7 @@ FAIT:
 
 
 FAIRE: $(SRCDIR)/SRC/$(SUPERLULIB) 
-	mkdir FAIT
+	touch FAIT
 
 $(SRCDIR)/SRC/$(SUPERLULIB): $(SRCDIR)
 	cd $(SRCDIR)/SRC; $(MAKE) -f ../../ff-FLAGS  $(OBJ_SUPERLU)
@@ -114,6 +114,7 @@ clean:
 	-rm $(SRCDIR)/$(INSTALL)/include/slu*h 
 	-rm $(SRCDIR)/$(INSTALL)/include/supermatrix.h
 	-rm -r $(SRCDIR) ff-FLAGS
+	-rm -rf FAIT
 
 
 ff-FLAGS: ../Makefile  Makefile 
