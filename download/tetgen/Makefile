@@ -29,7 +29,7 @@ FAIRE:$(SRCDIR)/$(INSTALL) cxxflags
 $(SRCDIR)/$(INSTALL): $(SRCDIR) cxxflags
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
-	cd $(SRCDIR);ar r $(INSTALL)/lib/libtet.a tetgen.o predicates.o
+	cd $(SRCDIR);libtool  -static  -o  $(INSTALL)/lib/libtet.a tetgen.o predicates.o
 	cp $(SRCDIR)/tetgen.h $(SRCDIR)/$(INSTALL)/include 
 
 

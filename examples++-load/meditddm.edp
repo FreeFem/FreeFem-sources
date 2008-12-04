@@ -8,7 +8,7 @@ $- \Delta u = f$ on   $\Omega =\{ (x,y) |  1 \leq sqrt(x^2+y^2) \geq 2}$
 $- \Delta u = f1$ on  $\Omega_{1} =\{ (x,y) |  0.5 \leq sqrt(x^2+y^2) \geq 1.}$
 $u = 1$ on $\Gamma$  +  Null Neumman condition on $\Gamma_{1}$ and on $\Gamma_{2}$	
 We find the solution $u$ in solving two EDP defined on domain $\Omega$ and $\Omega_{1}$
-This solution is vizualize with medit 
+This solution is vizualize with ffmedit 
 *********************************************/
 verbosity=3;
 
