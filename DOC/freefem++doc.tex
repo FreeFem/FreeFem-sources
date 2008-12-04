@@ -329,7 +329,7 @@ After installation, The list of application ( depending of the system and the co
 
 \begin{enumerate}
 \item \texttt{FreeFem++}, standard version, with a graphical interface
-based on GLUT/OpenGL (use ffglut visualizator)
+based on GLUT/OpenGL (use ffglut visualizator) or not just add \texttt{ -nw } parameter.
 \item \texttt{ffglut} the visualisator through a pipe of freefem++ 
 \item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no graphics windows)
 \item \texttt{FreeFem++-mpi}, parallel version, postscript output only
@@ -340,11 +340,12 @@ based on GLUT/OpenGL (use ffglut visualizator)
 \item \texttt{/Applications/FreeFem++.app}, Drag and Drop CoCoa MacOs
 Application
 %\item \texttt{FreeFem++-CoCoa}, MacOS Shell script for MacOS OpenGL
-version (MacOS 10.3 or better) (note: it uses
-/Applications/FreeFem++.app)
+%version (MacOS 10.3 or better) (note: it uses
+%/Applications/FreeFem++.app)
 \item \texttt{bamg} , the bamg mesh generator
 \item \texttt{cvmsh2} , a mesh file convertor
 \item \texttt{drawbdmesh} , a mesh file viewer
+\item \texttt{ffmedit} the freefem++ version of medit software (thank to P. Frey)
 \end{enumerate}
 
 Remark, in most cases you can set the level of output (verbosity\index{verbosity}) to value \texttt{nn} by adding the parameters
@@ -492,6 +493,8 @@ has an item to launch \freefempp by a Ctrl+1 command.}
   Under the finder pick a \texttt{.edp} in directory \texttt{examples++-tutorial} for example, 
   select menu  \texttt{File -> Get Info} an \texttt{change Open with:} (choose FreeFem++.app) and click on button 
   \texttt{change All...}. 
+  
+  
 
   
 \subsection{How to use \freefempp}
@@ -543,7 +546,7 @@ unzip \texttt{mode-mi-edp.zip} and put the created folder in the folder opened w
 \end{figure}    
 \paragraph{Under terminal}
 
-First choose the type of application from \texttt{FreeFem++}, \texttt{FreeFem++-nw}, \dots  depending on your pleasure, system, etc\dots.  Next you enter, for example 
+First choose the type of application from \texttt{FreeFem++}, \texttt{FreeFem++-nw},  \texttt{FreeFem++-mpi}, \dots  depending on your pleasure, system, etc\dots.  Next you enter, for example 
 \bFF
  FreeFem++ your-edp-file-path
 \eFF 

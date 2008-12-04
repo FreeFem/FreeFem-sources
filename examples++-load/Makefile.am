@@ -57,7 +57,7 @@ LK_TET=-I../download/include -L../download/lib -l$(LLTET)
 LK_SUPERLU=-I../download/include -L../download/lib -l$(LLSUPERLU)
 LK_FFTW3=-I../download/include -L../download/lib -l$(LLFFTW3)
 
-load_compile:include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG) 
+load_compile:ff-c++ include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG) 
 
 load_download:
 	if [  -f ../download/lib/lib$(LLTET).a -a -f ../download/lib/lib$(LLFFTW3).a \
@@ -70,10 +70,10 @@ load_download:
 
 #compile : include load_download 
 
-compile-pkg:  $(LIST_COMPILE_PKG)  ff-c++
+compile-pkg:  $(LIST_COMPILE_PKG)  
 
 
-.cpp.$(DYLIB_SUFFIX): 
+.cpp.$(DYLIB_SUFFIX):
 	 ./ff-c++   $< 
 #glumesh2D.$(DYLIB_SUFFIX): glumesh2D.cpp 
 #	 ./ff-c++   glumesh2D.cpp
@@ -81,17 +81,17 @@ compile-pkg:  $(LIST_COMPILE_PKG)  ff-c++
 #	 ./ff-c++   TransfoMesh_v2.cpp glumesh3D.cpp
 #buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
 #	 ./ff-c++   TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
-msh3.$(DYLIB_SUFFIX): msh3.cpp 
+msh3.$(DYLIB_SUFFIX): msh3.cpp
 	 ./ff-c++   msh3.cpp 
-lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp 
+lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp
 	 ./ff-c++   bmo.cpp  lgbmo.cpp 
 
 # --  
 tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
 	 ./ff-c++   $(LK_TET)  tetgen.cpp
-SuperLu.$(DYLIB_SUFFIX): 
+SuperLu.$(DYLIB_SUFFIX):
 	./ff-c++  $(LK_SUPERLU) SuperLu.cpp 
-dfft.$(DYLIB_SUFFIX): 
+dfft.$(DYLIB_SUFFIX):
 	./ff-c++  $(LK_FFTW3) dfft.cpp  
 
 include: include.tar.gz
@@ -119,7 +119,7 @@ all.edp:
 regtests.edp: regtests.m4 ../regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
 
-$(LIST_COMPILE):include Makefile ff-c++
+$(LIST_COMPILE):ff-c++ include Makefile 
 
 clean-local:
 	-rm *.o  $(LIST_COMPILE)  regtests.edp makeref.edp
