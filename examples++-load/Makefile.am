@@ -54,7 +54,7 @@ LLTET=tet
 LLFFTW3=fftw3
 
 LK_TET=-I../download/include -L../download/lib -l$(LLTET)
-LK_SUPERLU=-I../download/include -L../download/lib -l$(LLSUPERLU)
+LK_SUPERLU=-I../download/include -L../download/lib -l$(LLSUPERLU) 
 LK_FFTW3=-I../download/include -L../download/lib -l$(LLFFTW3)
 
 load_compile:ff-c++ include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG) 
@@ -90,7 +90,7 @@ lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp
 tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
 	 ./ff-c++   $(LK_TET)  tetgen.cpp
 SuperLu.$(DYLIB_SUFFIX):
-	./ff-c++  $(LK_SUPERLU) SuperLu.cpp 
+	./ff-c++  $(LK_SUPERLU) SuperLu.cpp $(BLASLIBS) 
 dfft.$(DYLIB_SUFFIX):
 	./ff-c++  $(LK_FFTW3) dfft.cpp  
 
