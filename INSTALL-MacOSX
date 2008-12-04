@@ -15,7 +15,14 @@ This version can be used in 3 modes
 	-  Terminal mode: in this case the application FreeFem++.app must be in the /Applications 
 	directory and you have just to put the command FreeFem++ in a directory of shell 
 	$PATH by putting it in the directory /usr/local/bin (for instance);
+ 
+  -the installer command on /usr/local/bin are:
+
+ff-c++     tools to compile dynamic libray  with freefem++ 
+FreeFem++  the freefem++ command
+ffglut     the graphic visalisator
+ffmedit    the medit sofware
 
 Some external library are the archive file OtherMacOsLib.tgz
-you need to install this libray in the systeme 
+you need to install this libray in the system
 	
