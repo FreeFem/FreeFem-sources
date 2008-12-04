@@ -57,7 +57,7 @@ LK_TET=-I../download/include -L../download/lib -l$(LLTET)
 LK_SUPERLU=-I../download/include -L../download/lib -l$(LLSUPERLU) 
 LK_FFTW3=-I../download/include -L../download/lib -l$(LLFFTW3)
 
-load_compile:ff-c++ include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG) 
+load_compile:ff-c++ include  $(LIST_COMPILE) 
 
 load_download:
 	if [  -f ../download/lib/lib$(LLTET).a -a -f ../download/lib/lib$(LLFFTW3).a \
@@ -71,7 +71,7 @@ load_download:
 #compile : include load_download 
 
 compile-pkg:  $(LIST_COMPILE_PKG)  
-
+	echo  $(LIST_COMPILE_PKG)  
 
 .cpp.$(DYLIB_SUFFIX):
 	 ./ff-c++   $< 
