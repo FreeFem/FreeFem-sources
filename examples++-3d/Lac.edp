@@ -1,4 +1,5 @@
-load "msh3"// msh3
+load "msh3"
+load "medit"
 int nn=5;
 border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}
 mesh Th2= buildmesh(cc(100));
@@ -14,5 +15,4 @@ mesh3 Th=buildlayers(Th2,nn,
   reffacemid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
-savemesh(Th,"Th.meshb");
-exec("medit Th;rm Th.meshb");
+medit("lac",Th);

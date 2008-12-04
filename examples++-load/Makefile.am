@@ -40,7 +40,6 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          qf11to25.$(DYLIB_SUFFIX)  Element_P3.$(DYLIB_SUFFIX)    Element_P4.$(DYLIB_SUFFIX)  \
 	 Element_P3dc.$(DYLIB_SUFFIX)    Element_P4dc.$(DYLIB_SUFFIX) 	\
 	 Element_PkEdge.$(DYLIB_SUFFIX)  msh3.$(DYLIB_SUFFIX) \
-	tetgen.$(DYLIB_SUFFIX) \
 	splitmesh3.$(DYLIB_SUFFIX)  splitmesh6.$(DYLIB_SUFFIX) \
 	ffrandom.$(DYLIB_SUFFIX)  \
 	medit.$(DYLIB_SUFFIX)  \
@@ -71,7 +70,8 @@ load_download:
 #compile : include load_download 
 
 compile-pkg:  $(LIST_COMPILE_PKG)  
-	echo  $(LIST_COMPILE_PKG)  
+	echo " finish build $(LIST_COMPILE_PKG)"
+
 
 .cpp.$(DYLIB_SUFFIX):
 	 ./ff-c++   $< 
