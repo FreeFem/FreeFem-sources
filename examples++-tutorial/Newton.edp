@@ -65,7 +65,7 @@ int iter=0;
 	for (j=0;j<u[].n ; j++)  
 	  file << u[][j] << endl; 
     }  	
-    exec("medit N");
+    exec("ffmedit N");
     exec("rm N.*");
     
 

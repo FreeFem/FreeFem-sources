@@ -32,4 +32,4 @@ plot(Th,wait=1);
 Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
 savemesh(Th,"sphere-a",[f1,f2,f3]);
 plot(Th,wait=1);
-exec("medit sphere-a");
+exec("ffmedit sphere-a");

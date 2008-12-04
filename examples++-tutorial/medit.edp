@@ -13,8 +13,8 @@ Vh u=2-x*x-y*y;
 	for (j=0;j<u[].n ; j++)  
 	  file << u[][j] << endl; 
     }  
-    // call medit command 	
-    exec("medit mm");
+    // call ffmedit command 	
+    exec("ffmedit mm");
     // clean files
     exec("rm mm.bb mm.faces mm.points");
     

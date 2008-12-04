@@ -48,5 +48,5 @@ for ( i=0;i<5;i++)
    for (j=0;j<fh[].n ; j++)  {
      file << fh[][j] << endl; }
  }	
-    exec("medit `pwd`/Thh"+i);
+    exec("ffmedit `pwd`/Thh"+i);
  }
