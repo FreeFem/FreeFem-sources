@@ -14,8 +14,8 @@ ffglut_SOURCES=../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads
 
 ffglut_DEPENDENCIES=
 ffglut_LDADD=  @LIBSGLUT@ @LIBSPTHREAD@
-FreeFem___nw_SOURCES=../Graphics/sansrgraph.cpp
-FreeFem___SOURCES=../Graphics/sansrgraph.cpp
+FreeFem___nw_SOURCES=../Graphics/sansrgraph.cpp ../Graphics/ff-win32.cpp
+FreeFem___SOURCES=../Graphics/sansrgraph.cpp ../Graphics/ff-win32.cpp
 
 FreeFem___nw_DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
 FreeFem___DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a

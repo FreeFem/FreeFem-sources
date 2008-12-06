@@ -42,9 +42,9 @@ libff.dll: $(FFD_OBJ0)  $(FFD_OBJ_AR)  $(FFD_OBJ_AC)  $(FFD_OBJ_AL)  $(FFD_OBJ1)
 
 #FreeFem++.exe: ../std/Pcrgraph.o ../lglib/mymain.o $(LIBS_FF)
 #	g++   -mno-cygwin -mwindows -mthreads  -Wl,--enable-auto-import $^  -o $@
-FreeFem++-nw.exe: ../nw/sansrgraph.o   ../lglib/mymain.o $(LIBS_FF)
+FreeFem++-nw.exe: ../nw/sansrgraph.o ../Graphics/ff-win32.o   ../lglib/mymain.o $(LIBS_FF)
 	g++   -mno-cygwin libff.dll $^ -o $@  -lcomdlg32
-FreeFem++.exe: ../nw/sansrgraph.o   ../lglib/mymain.o $(LIBS_FF)
+FreeFem++.exe: ../nw/sansrgraph.o ../Graphics/ff-win32.o   ../lglib/mymain.o $(LIBS_FF)
 	g++   -mno-cygwin libff.dll $^ -o $@  -lcomdlg32
 ##FreeFem++-cs.exe:$(FFD_OBJIDE)  ../lglib/lg.tab.o $(LIBS_FF)
 ##	g++  $^  `$(FLTK_CONFIG) --ldflags` -mno-cygwin    -o $@

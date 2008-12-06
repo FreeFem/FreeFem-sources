@@ -61,6 +61,7 @@ using namespace std;
 #include <io.h>      //*OT  use for the console window
 ///#include <stat.h>
 
+int  edpfilenamearg=-1; 
 #define fill thequikdrawfill
 
 #include "rgraph.hpp"

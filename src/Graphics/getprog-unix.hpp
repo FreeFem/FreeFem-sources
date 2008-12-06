@@ -5,6 +5,7 @@
 extern long mpirank;
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
+extern int  edpfilenamearg;
 int getprog(char* fn,int argc, char **argv)
 {
   
@@ -65,10 +66,12 @@ int getprog(char* fn,int argc, char **argv)
 	{
 	  strcpy(fn,argv[++i]);
 	  ret=1;
+	  edpfilenamearg=i;	 
 	}
       else if(ret==0)
 	{
 	  strcpy(fn,argv[i]);
+	  edpfilenamearg=i;	 	
 	    ret=1;
 	}
 
