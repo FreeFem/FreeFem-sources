@@ -16,6 +16,7 @@ Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
 OutputBaseFilename=FreeFem++-VERSION
+ChangesEnvironment=yes
 
 [Files]
 ; README 
@@ -107,3 +108,19 @@ Root: HKCR; Subkey: ".edp"; ValueType: string; ValueName: ""; ValueData: "FreeFe
 Root: HKCR; Subkey: "FreeFemVERSIONScript"; ValueType: string; ValueName: ""; ValueData: "FreeFem++ Script"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "FreeFemVERSIONScript\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\logo.ico"
 Root: HKCR; Subkey: "FreeFemVERSIONScript\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\FreeFem++.exe"" ""%1"""
+
+
+[Tasks]
+Name: modifypath; Description: &Add application directory to your system path; Flags: unchecked
+
+[Code]
+function ModPathDir(): TArrayOfString;
+var
+			Dir:	TArrayOfString;
+		begin
+			setArrayLength(Dir, 1)
+			Dir[0] := ExpandConstant('{app}');
+			Result := Dir;
+		end;
+ #include "modpath.iss"
+
