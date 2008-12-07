@@ -176,14 +176,15 @@ void doatexitff()
   bool err=true;
   if(edpfilenamearg)
 	{
-	string fn = argv[edpfilenamearg];
+	cout << " try getConsole " << edpfilenamearg << endl; 
+	string fn = edpfilenamearg;
 	err=GetConsoleBuff(fn);
         }	
   if(err)
     {
       char c;  
       cout << "wait enter ? ";
-      cin >> c;
+      cin.get();
     }
 #endif
 

@@ -72,7 +72,7 @@ int getprog(char* fn,int argc, char **argv)
 	{
 	  strcpy(fn,argv[i]);
 	  edpfilenamearg=argv[i];	 
-	    ret=1;
+	  ret=1;
 	}
 
   if( ! progffglut && !noffglut)
