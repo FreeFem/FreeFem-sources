@@ -143,7 +143,7 @@ void myexit(int err) {
   cout << " The End err=" << err << endl;
   exit(err);}
 
-int edpfilename=-1;	 	
+const char * edpfilename=0;	 	
 #ifdef FREEFEM
 #include <fstream.h>
 #include <new.h>
@@ -170,21 +170,29 @@ int main (int argc, char **argv)
 }
 #else
 
+void doatexitff()
+{
+#ifdef WIN32
+  bool err=true;
+  if(edpfilenamearg)
+	{
+	string fn = argv[edpfilenamearg];
+	err=GetConsoleBuff(fn);
+        }	
+  if(err)
+    {
+      char c;  
+      cout << "wait enter ? ";
+      cin >> c;
+    }
+#endif
+
+}
 extern int mymain(int argc,char **argv);
 int main (int argc, char **argv)
 {
+  atexit(doatexeitff);
   int ret=mymain(argc,argv);
-#ifdef WIN32
-  
-  if(edpfilenamearg>0)
-	{
-	string fn = argv[edpfilenamearg];
-	GetConsoleBuff(fn);
-        }	
-  char c;  
-  if(ret !=0)
-	cin >> c;
-#endif
   return ret;
 }
 

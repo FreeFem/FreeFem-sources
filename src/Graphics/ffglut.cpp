@@ -41,6 +41,7 @@ int debug=1;
 //Mutex MutexNextPlot;
 Thread::Id tidRead=0;
 bool NoMorePlot=false;
+bool NoMorePlotTilte=false;
 ThePlot *currentPlot=0, *nextPlot=0;
 bool inThreadRead=false;
 FILE *datafile=0;
@@ -725,6 +726,9 @@ void ThePlot::DrawHelp(OneWindow *win)
   win->Show("Enter a keyboard character in the FreeFem Graphics window in order to:",i++);
   
   i+=2;
+  win->Show("enter) wait next plot",i++);
+  win->Show("ESC) exit from ffglut",i++);
+
   //Show("+)  zomm around the cursor 3/2 times ",i++);
   win->Show("+)  zoom in around the cursor 3/2 times ",i++);
   win->Show("-)  zoom out around the cursor 3/2 times  ",i++);
@@ -741,7 +745,6 @@ void ThePlot::DrawHelp(OneWindow *win)
   win->Show("p)  switch between show  quadtree or not (for debuging)",i++);
   win->Show("t)  find  Triangle ",i++);
   win->Show("?)  show this help window",i++);
-  win->Show("enter) wait next plot",i++);
   win->Show("any other key : nothing ",++i);
 }
 
@@ -964,7 +967,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   PmaxT=Pmax;
   fminT=fmin;
   fmaxT=fmax;
-  if(old)
+  if(old && 0)
     {
       Pmin= Minc(Pmin,old->PminT);
       Pmax= Maxc(Pmax,old->PmaxT);
@@ -973,7 +976,8 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
     }
   
   z0= fminT +(fmaxT-fminT)*0.01;
-  if((debug > 2)) cout << "               data bound: " << PminT << " " << PmaxT  << " fmin == " << fminT << "  " << fmaxT << " z0 " << z0 <<  endl;
+  if((debug > 2)) cout << "               data bound: " << PminT << " " << PmaxT  << " fmin == " << fminT << "  " << fmaxT 
+		       << " z0 " << z0 <<  endl;
   fin.GetEndPlot(); 
   Viso.resize(Niso);
   Varrow.resize(Narrow);
@@ -1371,7 +1375,11 @@ void Display(void)
 
     if(!win->theplot->wait)
       SendForNextPlot();
-
+    if(!NoMorePlotTilte  &&NoMorePlot)
+      {
+	NoMorePlotTilte=true;
+	glutSetWindowTitle("FreeFem++ / no plot enter ESC to exit)");
+      }
 }
 
 static void Mouse( int button,int state,int x,int y )
@@ -1561,7 +1569,7 @@ int main(int argc,  char** argv)
     glutInitWindowSize(Width , Height);
     glutInitWindowPosition(100, 100);
 
-    string titre = "GLUT/ FreeFem++ ";
+    string titre = "GLUT/ FreeFem++ (enter key for next plot) ";
     glutCreateWindow(titre.c_str());
     glutPushWindow();
     if (fullscreen)

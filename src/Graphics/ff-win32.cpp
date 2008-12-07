@@ -35,7 +35,7 @@ string ChangeExt(string & ff,const char * suff)
   return ff.substr(0,dot)+suff;
 }
 
-bool GetConsoleBuff(string &edpname)
+bool GetConsoleBuff(const string &edpname)
 {
   CONSOLE_SCREEN_BUFFER_INFO csbi; //* to get buffer info
   HANDLE hConOut= GetStdHandle(STD_OUTPUT_HANDLE);
