@@ -28,7 +28,7 @@ BOOL ShowOpenDialogBox1(char *fileName)
 
 
 
-string ChangeExt(string & ff,const char * suff)
+string ChangeExt(const string & ff,const char * suff)
 {
   int dot = ff.rfind(".edp");
   assert(dot>0);
@@ -45,20 +45,21 @@ bool GetConsoleBuff(const string &edpname)
   CHAR *szLine=0;  //* buffer to read from the console (a line)
   DWORD dwCharsRead;
   FILE *fp;
-  string  fname=ChangeExt(edpname,"log");
+  string  fname=ChangeExt(edpname,".log");
   if ((fp = fopen(fname.c_str(),"w"))==NULL) {
     perror(fname.c_str());
+    cout<< " err fopen logfile: "<< fname <<  endl;	  	
     return false;
   }
-  
   szLine = new CHAR [csbi.dwSize.X+1];
   for (int i=0; i<csbi.dwCursorPosition.Y; i++) 
 	{
-        if (ReadConsoleOutputCharacter(hConOut, szLine,
+       	 if (ReadConsoleOutputCharacter(hConOut, szLine,
 				   csbi.dwSize.X, coordLine,
 				   &dwCharsRead)== FALSE)
       {
 	perror("ReadConsoleOutputCharacter");
+	cout << " err ReadConsoleOutputCharacter " <<i << " " << csbi.dwCursorPosition.Y <<  endl;
 	return false;
       }
     int j=csbi.dwSize.X-1;
@@ -69,6 +70,7 @@ bool GetConsoleBuff(const string &edpname)
   }
   fclose(fp);
   delete [] szLine;
+  cout << " save log in :  '"<< fname << "'\n"  ;
   return true;
 }
 #endif
