@@ -143,7 +143,7 @@ void myexit(int err) {
   cout << " The End err=" << err << endl;
   exit(err);}
 
-const char * edpfilename=0;	 	
+const char * edpfilenamearg=0;	 	
 #ifdef FREEFEM
 #include <fstream.h>
 #include <new.h>
@@ -191,7 +191,7 @@ void doatexitff()
 extern int mymain(int argc,char **argv);
 int main (int argc, char **argv)
 {
-  atexit(doatexeitff);
+  atexit(doatexitff);
   int ret=mymain(argc,argv);
   return ret;
 }
