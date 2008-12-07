@@ -10,7 +10,7 @@
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.0-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.0-2,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.4 is too old
@@ -1071,7 +1071,7 @@ then
 		AC_CHECK_LIB(umfpack,umf_i_malloc,
 			ff_umfpack_libs=" -lumfpack $ff_umfpack_libs"
 			ff_umfpack_ok=yes,,$ff_umfpack_libs)
-		if test "$ff_umfpack_ok" != yes -o "$ff_umfpack_header" = yes ; then
+		if test "$ff_umfpack_ok" != yes -o "$ff_umfpack_header" != yes ; then
 			AC_MSG_WARN([		Sorry we find UMFPACK lib but not the include umfpack.h file])
 		fi
 	fi	

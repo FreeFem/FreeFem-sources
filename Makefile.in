@@ -823,7 +823,8 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	cp src/nw/FreeFem++ $@/FreeFem++.app/Contents/bin
 	cp src/nw/ffglut $@/FreeFem++.app/Contents/bin
 	cp src/medit/ffmedit $@/FreeFem++.app/Contents/bin
-	cp examples++-load/ff-c++  $@/FreeFem++.app/Contents/bin/ff-c++ 
+	sed <examples++-load/ff-c++ > $@/FreeFem++.app/Contents/bin/ff-c++ \
+	-e 's;FFAPPLI_INC;$@/FreeFem++.app/Contents/include;' 
 	chmod a+x $@/FreeFem++.app/Contents/bin/ff-c++
 	-mkdir $@/FreeFem++.app/Contents/include 
 	cp examples++-load/include/* $@/FreeFem++.app/Contents/include

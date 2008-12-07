@@ -15,6 +15,9 @@
 @SET_MAKE@
 
 # $Id$
+
+SOURCES = ff-c++.c
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -35,6 +38,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+bin_PROGRAMS = ff-c++$(EXEEXT)
 subdir = examples++-load
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -46,8 +50,23 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-SOURCES =
-DIST_SOURCES =
+am__installdirs = "$(DESTDIR)$(bindir)"
+binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+PROGRAMS = $(bin_PROGRAMS)
+ff_c___SOURCES = ff-c++.c
+ff_c___OBJECTS = ff-c++.$(OBJEXT)
+ff_c___LDADD = $(LDADD)
+DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+am__depfiles_maybe = depfiles
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+SOURCES = ff-c++.c
+DIST_SOURCES = ff-c++.c
+ETAGS = etags
+CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ADD_PACKAGE_NAME = @ADD_PACKAGE_NAME@
@@ -239,7 +258,7 @@ EXTRA_DIST = load.link dfft.link  include.tar.gz \
   NewSolver.cpp \
   LapDG3.edp              convectchacon.edp       plot-fb-P3dc.edp \
   LapDG4.edp              dfft.edp                plot-fb-P4dc.edp \
-  LaplaceP3.edp                 ref.edp \
+  LaplaceP3.edp                  ref.edp \
   LaplaceP4.edp           funcTemplate.edp        regtests.edp \
   NSP2BRP0.edp            load.edp                testFE-P3.edp \
   all.edp                 makeref.edp             testFE-P3dc.edp \
@@ -270,12 +289,12 @@ LLSUPERLU = superlu_3.1
 LLTET = tet
 LLFFTW3 = fftw3
 LK_TET = -I../download/include -L../download/lib -l$(LLTET)
-LK_SUPERLU = -I../download/include -L../download/lib -l$(LLSUPERLU)
+LK_SUPERLU = -I../download/include -L../download/lib -l$(LLSUPERLU) 
 LK_FFTW3 = -I../download/include -L../download/lib -l$(LLFFTW3)
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .$(DYLIB_SUFFIX) .cpp
+.SUFFIXES: .$(DYLIB_SUFFIX) .c .cpp .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -305,13 +324,100 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	test -z "$(bindir)" || $(mkdir_p) "$(DESTDIR)$(bindir)"
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(binPROGRAMS_INSTALL) '$$p' '$(DESTDIR)$(bindir)/$$f'"; \
+	   $(INSTALL_PROGRAM_ENV) $(binPROGRAMS_INSTALL) "$$p" "$(DESTDIR)$(bindir)/$$f" || exit 1; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f '$(DESTDIR)$(bindir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(bindir)/$$f"; \
+	done
+
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT)
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ff-c++.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 uninstall-info-am:
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique
 tags: TAGS
-TAGS:
 
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	if test -z "$(ETAGS_ARGS)$$tags$$unique"; then :; else \
+	  test -n "$$unique" || unique=$$empty_fix; \
+	  $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+	    $$tags $$unique; \
+	fi
 ctags: CTAGS
-CTAGS:
+CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(CTAGS_ARGS)$$tags$$unique" \
+	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
+	     $$tags $$unique
 
+GTAGS:
+	here=`$(am__cd) $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 check-TESTS: $(TESTS)
 	@failed=0; all=0; xfail=0; xpass=0; skip=0; \
@@ -416,8 +522,11 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile all-local
+all-am: Makefile $(PROGRAMS) all-local
 installdirs:
+	for dir in "$(DESTDIR)$(bindir)"; do \
+	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
+	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -444,11 +553,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-local mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-local mostlyclean-am
 
 distclean: distclean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
-distclean-am: clean-am distclean-generic
+distclean-am: clean-am distclean-compile distclean-generic \
+	distclean-tags
 
 dvi: dvi-am
 
@@ -462,7 +573,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-exec-local
+install-exec-am: install-binPROGRAMS install-exec-local
 
 install-info: install-info-am
 
@@ -471,12 +582,13 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
 
 pdf: pdf-am
 
@@ -486,22 +598,24 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
-.PHONY: all all-am all-local check check-TESTS check-am clean \
-	clean-generic clean-local distclean distclean-generic distdir \
-	dvi dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-exec install-exec-am \
-	install-exec-local install-info install-info-am install-man \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-info-am
+.PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
+	clean clean-binPROGRAMS clean-generic clean-local ctags \
+	distclean distclean-compile distclean-generic distclean-tags \
+	distdir dvi dvi-am html html-am info info-am install \
+	install-am install-binPROGRAMS install-data install-data-am \
+	install-exec install-exec-am install-exec-local install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
 
 all-local: @LOAD_COMPILE@
 
-load_compile:ff-c++ include  $(LIST_COMPILE)  load_download
+load_compile:ff-c++ include  $(LIST_COMPILE) 
 
 load_download:
 	if [  -f ../download/lib/lib$(LLTET).a -a -f ../download/lib/lib$(LLFFTW3).a \
@@ -514,7 +628,7 @@ load_download:
 
 #compile : include load_download 
 
-compile-pkg:  $(LIST_COMPILE_PKG) 
+compile-pkg:  $(LIST_COMPILE_PKG)  
 	echo " finish build $(LIST_COMPILE_PKG)"
 
 .cpp.$(DYLIB_SUFFIX):
@@ -525,17 +639,17 @@ compile-pkg:  $(LIST_COMPILE_PKG)
 #	 ./ff-c++   TransfoMesh_v2.cpp glumesh3D.cpp
 #buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
 #	 ./ff-c++   TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
-msh3.$(DYLIB_SUFFIX): msh3.cpp 
+msh3.$(DYLIB_SUFFIX): msh3.cpp
 	 ./ff-c++   msh3.cpp 
-lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp 
+lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp
 	 ./ff-c++   bmo.cpp  lgbmo.cpp 
 
 # --  
 tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
 	 ./ff-c++   $(LK_TET)  tetgen.cpp
-SuperLu.$(DYLIB_SUFFIX): 
-	./ff-c++  $(LK_SUPERLU) SuperLu.cpp $(BLASLIBS)  
-dfft.$(DYLIB_SUFFIX): 
+SuperLu.$(DYLIB_SUFFIX):
+	./ff-c++  $(LK_SUPERLU) SuperLu.cpp $(BLASLIBS) 
+dfft.$(DYLIB_SUFFIX):
 	./ff-c++  $(LK_FFTW3) dfft.cpp  
 
 include: include.tar.gz
@@ -563,7 +677,7 @@ all.edp:
 regtests.edp: regtests.m4 ../regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
 
-$(LIST_COMPILE):ff-c++ include Makefile
+$(LIST_COMPILE):ff-c++ include Makefile 
 
 clean-local:
 	-rm *.o  $(LIST_COMPILE)  regtests.edp makeref.edp
