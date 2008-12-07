@@ -27,6 +27,8 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 /******************************************************************/
+const char * edpfilenamearg=0;	 	
+
 #define FF_GRAPH_SET_PTR
 #include <math.h>
 #include <time.h>

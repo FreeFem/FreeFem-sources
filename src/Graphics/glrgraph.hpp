@@ -33,6 +33,9 @@
 //  AGL  apple 
 //  XGL   X11  
 //  WGL   window (a faire) 
+
+const char * edpfilenamearg=0;	 	
+
 #ifdef AGL
 #define TARGET_API_MAC_CARBON 1
 #define CALL_IN_SPOCKETS_BUT_NOT_IN_CARBON 1
