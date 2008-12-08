@@ -12,7 +12,6 @@
 
 AC_INIT(FreeFem++,3.0-2,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
-
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
 
@@ -246,8 +245,12 @@ AC_DEFINE_UNQUOTED(VersionFreeFempp,$ff_numver,FreeFem++ version as a float)
 # Since src/fflib/strversionnumber.cpp is recreated at each build, this
 # date is only useful for config-version.h
 
+test "$prefix" = NONE && prefix="$ac_default_prefix"
+ff_prefix_dir="${prefix}/ff++-$VERSION"   
+AC_MSG_CHECKING(prefix dir freefem++  )
+AC_MSG_RESULT($ff_prefix_dir)	 
+
 FF_DATE=`date`
-ff_prefix_dir=${ac_default_prefix}/ff++-$VERSION
 AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
 AC_DEFINE_UNQUOTED(FF_PREFIX_DIR,"${ff_prefix_dir}",FreeFem prefix  dir)
 AC_SUBST(ff_prefix_dir,$ff_prefix_dir)
