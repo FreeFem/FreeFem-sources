@@ -87,11 +87,16 @@ int getprog(char* fn,int argc, char **argv)
       
     }
   else if (fileglut)
-    {
-      ThePlotStream = fopen(progffglut, MODE_WRITE_BINARY );
+    {// corection progffglut -> fileglut v3.0-2
+      ThePlotStream = fopen(fileglut, MODE_WRITE_BINARY );
       if(verbosity)
 	printf(" save of the plot in file : %s\n",fileglut);
-      if(!ThePlotStream) { cerr << "  Error save file glut " << fileglut << endl;exit(1);}
+      if(!ThePlotStream) 
+	{
+	  cerr << "  Error save file glut " << fileglut 
+	       << " mode " << MODE_WRITE_BINARY<< endl;
+	  exit(1);
+	}
     }
 
 #ifdef WIN32
