@@ -87,7 +87,7 @@ int getprog(char* fn,int argc, char **argv)
       
     }
   else if (fileglut)
-    {// corection progffglut -> fileglut v3.0-2
+    {// correction progffglut -> fileglut v3.0-2 FH.
       ThePlotStream = fopen(fileglut, MODE_WRITE_BINARY );
       if(verbosity)
 	printf(" save of the plot in file : %s\n",fileglut);
