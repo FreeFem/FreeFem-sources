@@ -553,7 +553,7 @@ void  OneWindow::SetView()
   R zzmax = Max(zmax,theplot->fmaxT);    
   R dz = (zzmax-zzmin);
   R zm=(zzmin+zzmax)*0.5;
-  if((debug > 3)) cout << "\t\t\t   SetView " << this << " " << Bmin  << " " << Bmax << " " << zzmin << " " << zzmax 
+  if((debug>3 )) cout << "\t\t\t   SetView " << this << " " << Bmin  << " " << Bmax << " " << zzmin << " " << zzmax 
 		       << "  zm  " << zm << " dz  " << dz << endl;
   ShowGlerror("0 Set MV");
   glMatrixMode(GL_MODELVIEW);
@@ -563,6 +563,7 @@ void  OneWindow::SetView()
   glLoadIdentity(); 
   ShowGlerror(" Set PM 1");
   glOrtho(Bmin.x,Bmax.x,Bmin.y,Bmax.y,-dz,dz);
+
   ShowGlerror(" Set PM 2");
   
   R2 M=(Bmin+Bmax)/2.;
@@ -955,14 +956,20 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       p->bfv(fmin,fmax,vmax);
       ffassert(fin.good());		      
     }
-  //cout << "\t\t\t\t  f min, max v max :" << fmin << " " << fmax << " " << vmax << endl;
+  // cout << "\t\t\t\t  f min, max v max :" << fmin << " " << fmax << " " << vmax << endl;
     
+  double ref_f = abs(fmax)+abs(fmin) ; 
   if(fmax < fmin)
     {
       fmax = 1;
       fmin = 0;
     }
-    
+  else if( (fmax-fmin) <= 1e-8*ref_f)
+    {
+      if(ref_f< 1e-20) ref_f=0.5;
+      fmax += ref_f/2;
+      fmin -= ref_f/2;
+    }
   PminT=Pmin;
   PmaxT=Pmax;
   fminT=fmin;
