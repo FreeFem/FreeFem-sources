@@ -5,9 +5,9 @@ FFVERSION='@VERSION@'
 FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@'
 INCFF=
 if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
-if [ "$CXX" == '@'CXX'@' ] ; then CXX=""; fi
-if [ "$FFCXXFLAGS" == '@'CXXFLAGS'@' ] ; then FFCXXFLAGS=""; fi
-if [ "$FFVERSION" == '@'VERSION'@' ] ; then FFVERSION=""; fi
+if [ "$CXX" = '@'CXX'@' ] ; then CXX=""; fi
+if [ "$FFCXXFLAGS" = '@'CXXFLAGS'@' ] ; then FFCXXFLAGS=""; fi
+if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
 if [ -z "$INCFF" ] ; then
     if [ -d "@INCFF@/." ] ; then
 	INCFF="-I@INCFF@"
