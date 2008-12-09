@@ -2906,9 +2906,13 @@ static void SetcppIo()
 #endif
    ios::sync_with_stdio();
 }
-
+// pour l'environement.
+extern const char *  prognamearg;
 int mainff (int  argc, char **argv)
 {
+  if(argc)  
+    prognamearg=argv[0];
+
     int vvold=verbosity; 
     if(mpirank !=0) verbosity=0;
   SetcppIo();

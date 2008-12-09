@@ -5,6 +5,8 @@
 extern long mpirank;
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
+// for the environ variables ...
+extern const char *  prognamearg;
 extern const char *  edpfilenamearg;
 int getprog(char* fn,int argc, char **argv)
 {
@@ -39,7 +41,9 @@ int getprog(char* fn,int argc, char **argv)
     }
 #endif
     
-  
+  if(argc)
+    prognamearg=argv[0];
+
   if(argc)
     for (int i=1; i<argc;i++)
       if  (ret ==0 && strcmp(argv[i],"-f")==0 && i+1 < argc  ) 
@@ -57,7 +61,10 @@ int getprog(char* fn,int argc, char **argv)
       else if  (strcmp(argv[i],"-nw")==0 ) 
 	noffglut=true;
       else if(strcmp(argv[i],"-fglut")==0 && i+1 < argc)
-	fileglut=argv[++i];
+	{ 
+	  fileglut=argv[++i];
+	  noffglut=true;
+	}
       else if(strcmp(argv[i],"-glut")==0 && i+1 < argc)
 	{
 	  progffglut=argv[++i];

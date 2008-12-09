@@ -3,6 +3,9 @@
 /* FreeFem prefix dir */
 #undef FF_PREFIX_DIR
 
+/* FreeFem prefix dir */
+#undef FF_PREFIX_DIR_APPLE
+
 /* Define to 1 if you have the `acosh' function. */
 #undef HAVE_ACOSH
 

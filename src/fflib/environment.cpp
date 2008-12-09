@@ -30,7 +30,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
 #include <algorithm>
+
+// set in getprog-unix.hpp in Graphic dir..
+const char *  prognamearg=0;
 
 #ifdef PURE_WIN32
 #include <windows.h>
@@ -46,6 +50,12 @@ bool load(string s);
 const char SLACH='/';
 const char BACKSLACH='\\';
 
+string basename(const char * f)
+{
+  char *c= strrchr(f,'/');
+  if(c==0) return string();
+  else return string(f,strlen(f)-strlen(c));
+}
 string TransDir(string dir)
 {
 #ifdef PURE_WIN32
@@ -284,14 +294,26 @@ void GetEnvironment()
   if (GetEnvironmentVariable("HOMEPATH", envh, LEN) > 0) 
     home=envh;
 #endif 
+  if ( ff_verbosity ) { 
+    verbosity = atoi(ff_verbosity);
+    if(verbosity>2) cout << " --  verbosity is set to " << verbosity << endl;
+  }
 
 #ifdef PURE_WIN32 
 #else
   EnvironmentInsert("init-files","/etc/"+ffpref,"$");
 #endif
+#ifdef FF_PREFIX_DIR_APPLE
+  EnvironmentInsert("init-files",string(FF_PREFIX_DIR_APPLE) + "/etc/" + ffpref ,"$");
+#endif
 #ifdef FF_PREFIX_DIR
   EnvironmentInsert("init-files",string(FF_PREFIX_DIR) + "/etc/" + ffpref  ,"$");
 #endif
+  if(prognamearg)
+    if(strchr(prognamearg,'/')  == '/')
+      {
+	EnvironmentInsert("init-files",TransDir(basename(prognamearg))+"/../etc/"+ffpref,"$");
+      }
   if(home) 
 	EnvironmentInsert("init-files",TransDir(home)+"."+ffpref,"$");
 
