@@ -310,7 +310,7 @@ void GetEnvironment()
   EnvironmentInsert("init-files",string(FF_PREFIX_DIR) + "/etc/" + ffpref  ,"$");
 #endif
   if(prognamearg)
-    if(strchr(prognamearg,'/')  == '/')
+    if( *strchr(prognamearg,'/')  == '/')
       {
 	EnvironmentInsert("init-files",TransDir(basename(prognamearg))+"/../etc/"+ffpref,"$");
       }
