@@ -33,8 +33,11 @@ echo "  install $lbin    commands in /usr/local/bin (need of admin password)"
 
 sudo mkdir -p  /usr/local/bin
 sudo ln -s  "$appl"/FreeFem++.app/Contents/bin/* /usr/local/bin
-sudo rm usr/local/bin/ff-c++
+sudo rm /usr/local/bin/ff-c++
 sudo sed <"$appl"/FreeFem++.app/Contents/bin/ff-c++ >/usr/local/bin/ff-c++ \
 	-e 's;FFAPPLI_INC;$app/FreeFem++.app/Contents/include;' 
+chmod a+rx /usr/local/bin/ff-c++
 
 echo "++  FreeFem++ is correctly install in $appl  directory."
+echo " install in /usr/local/bin: $lbin "
+echo " Thanks for  using  FreeFem++ v3 "

@@ -59,7 +59,10 @@ int getprog(char* fn,int argc, char **argv)
       else if(strcmp(argv[i],"-fglut")==0 && i+1 < argc)
 	fileglut=argv[++i];
       else if(strcmp(argv[i],"-glut")==0 && i+1 < argc)
-	progffglut=argv[++i];
+	{
+	  progffglut=argv[++i];
+	  noffglut=true;
+	}
       else if(strcmp(argv[i],"-?")==0 )
 	ret=2;
       else if( strcmp(argv[i],"-f")==0 && i+1 < argc) 
