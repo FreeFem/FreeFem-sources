@@ -5495,6 +5495,11 @@ then
 	ff_suffix_dylib="dylib"
 	ff_mac=yes
 #	ff_aglprog=FreeFem++-agl${EXEEXT}
+
+cat >>confdefs.h <<_ACEOF
+#define FF_PREFIX_DIR_APPLE "/Applications/FreeFem++.app/Contents/"
+_ACEOF
+
 fi
 echo "$as_me:$LINENO: result: $ff_mac" >&5
 echo "${ECHO_T}$ff_mac" >&6

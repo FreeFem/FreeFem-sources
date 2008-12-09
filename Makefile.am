@@ -19,7 +19,7 @@ mode-mi-edp.zip aclocal.m4  acmacros.m4   acoptim.m4    \
 freefem++.spec crimon-freefem++.zip \
 examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \
 examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \
-examples-bamg/test/dotest*.pl 
+examples-bamg/test/dotest*.pl Install-MacOS.command.in
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
@@ -168,7 +168,12 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	cp examples++-load/include/* $@/FreeFem++.app/Contents/include
 	cp examples++-load/*.dylib  $@/FreeFem++.app/Contents/lib
 	-if [ -s List-agl-dylib ]; then tar zchvf $@/OtherMacOsLib.tgz `cat List-agl-dylib`; fi; 
-	cp -p Install-MacOS.command $@
+	../config.status  --file=$@/Install-MacOS.command:Install-MacOS.command.in
+	chmod a+rx $@/Install-MacOS.command
+	-mkdir $@/FreeFem++.app/Contents/etc
+	echo loadpath += \"$(ff_prefix_dir)/lib\"  >$@/FreeFem++.app/Contents/etc/freefem++.pref
+	echo includepath += \"$(ff_prefix_dir)/edp\"  >>$@/FreeFem++.app/Contents/etc/freefem++.pref
+
 
 $(FF_MAC_PREFIX)_MacOsX.tgz: $(FF_MAC_PREFIX)_MacOsX
 	tar zcvf $(FF_MAC_PREFIX)_MacOsX.tgz  $(FF_MAC_PREFIX)_MacOsX

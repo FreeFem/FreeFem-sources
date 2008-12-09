@@ -37,11 +37,12 @@ sudo rm /usr/local/bin/ff-c++
 sudo sed <"$appl"/FreeFem++.app/Contents/bin/ff-c++ >/usr/local/bin/ff-c++ \
 	-e 's;FFAPPLI_INC;$app/FreeFem++.app/Contents/include;' 
 chmod a+rx /usr/local/bin/ff-c++
-if [ -d "/Users/hecht/ff++-3.0-2" ] ;then
-    echo Warning "/Users/hecht/ff++-3.0-2" is a dirctory keep this.
+if [ -d "@ff_prefix_dir@" ] ; then
+    echo Warning "@ff_prefix_dir@" is a dirctory keep this.
 else
-    rm -f "/Users/hecht/ff++-3.0-2"
-    ln -s /FreeFem++.app/Contents/ '/Users/hecht/ff++-3.0-2"
+    rm -f "@ff_prefix_dir@"
+    ln -s "$appl//FreeFem++.app/Contents" "@ff_prefix_dir@"
+    echo link "@ff_prefix_dir@  ->  $appl/FreeFem++.app/Contents/ "
 fi
 echo "++  FreeFem++ is correctly install in $appl  directory."
 echo " install in /usr/local/bin: $lbin "

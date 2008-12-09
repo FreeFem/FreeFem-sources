@@ -163,6 +163,7 @@ then
 	ff_suffix_dylib="dylib"
 	ff_mac=yes
 #	ff_aglprog=FreeFem++-agl${EXEEXT}
+AC_DEFINE_UNQUOTED(FF_PREFIX_DIR_APPLE,"/Applications/FreeFem++.app/Contents/",FreeFem prefix  dir)	
 fi
 AC_MSG_RESULT($ff_mac)
 
