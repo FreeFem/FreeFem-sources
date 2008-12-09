@@ -18,6 +18,7 @@ void getline_bin_float_vertex(int ddim, double *c, int *ref){
   }
   fread( (unsigned char *)&(*ref) ,WrdSiz, 1, stdin);   
   
+
 }
 
 void getline_bin_double_vertex(int ddim, double *c, int *ref){
@@ -171,7 +172,7 @@ int loadMesh_popen_bin(pMesh mesh) {
     fread( (unsigned char *)&KwdCod ,WrdSiz, 1, stdin);
 
     /* determination of KwdCod */
-    //printf("reading KwdCod %i %i\n",KwdCod,loopdebug);
+    printf("reading KwdCod %i %i\n",KwdCod,loopdebug);
 
     switch (KwdCod){
     
@@ -192,6 +193,7 @@ int loadMesh_popen_bin(pMesh mesh) {
       assert(mesh->point);
       
       for (k=1; k<=mesh->np; k++) {
+	printf("lecture point du maillage k=%i np=%i ver=%i \n",k,mesh->np,mesh->ver);
 	ppt = &mesh->point[k];
 	
 	if(mesh->ver==GmfFloat)
