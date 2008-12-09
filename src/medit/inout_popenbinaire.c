@@ -2,6 +2,9 @@
 #include "libmesh5.h"
 #include "extern.h"
 #include "string.h"
+#ifdef WIN32
+#include <fcntl.h>
+#endif
 
 #define WrdSiz 4
 
