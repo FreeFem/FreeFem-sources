@@ -333,6 +333,7 @@ static void infoData(pScene sc,pMesh mesh,int k,int typel) {
               ps->m[0],ps->m[1],ps->m[2],ps->m[3],ps->m[4],ps->m[5]);
     drawEllipsoid(sc,mesh,typel,k);
   }
+  fflush(stdout); /* add J. Morice 12/2008 */
 }
 
 
@@ -409,6 +410,7 @@ static void infoEntity(pScene sc,pMesh mesh,int k,int type) {
     }
     break;  
   }
+  fflush(stdout); /* add J. Morice 12/2008 */
 }
 
 
