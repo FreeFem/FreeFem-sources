@@ -660,8 +660,18 @@ public:
 		} 
 		//  cout << " Bounding Box = " << Pmin <<" " <<  Pmax << endl;       
 	    }
-	    
 	    void Mesh::read(const char * filename)
+    {
+	 ifstream f(filename);
+	if (!f) {
+	    cerr << "Erreur ouverture du fichier " << filename << endl;
+	throw(ErrorExec("exit",1));}
+	// ffassert(f);
+	if(verbosity)
+	    cout << " -- Mesh::read On file \"" <<filename<<"\""<<  endl;
+	 read(f);
+    }
+	    void Mesh::read(ifstream & f)
 	    { // read the mesh
 		dim=2;
 		ne=0;
@@ -681,13 +691,8 @@ public:
 		bnormalv=0;
 		
 		int i,i0,i1,i2,ir;
-		ifstream f(filename);
-		if (!f) {
-		    cerr << "Erreur ouverture du fichier " << filename << endl;
-		    throw(ErrorExec("exit",1));}
-		// ffassert(f);
-		if(verbosity)
-		    cout << " -- Mesh::read On file \"" <<filename<<"\""<<  endl;
+		
+
 		f >> nv >> nt >> neb ;
 		if(verbosity>10)
 		    cout << "    Nb of Vertex " << nv << " " << " Nb of Triangles " 

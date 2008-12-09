@@ -61,6 +61,11 @@ using namespace std;
 #include "AddNewFE.h"
 #include "array_resize.hpp"
 #include "PlotStream.hpp"
+
+// add for the gestion of the endianness of the file.
+PlotStream::fBytes PlotStream::zott; //0123;
+PlotStream::hBytes PlotStream::zottffss; //012345678;
+// ---- FH
 namespace bamg { class Triangles; }
 namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso); }
 

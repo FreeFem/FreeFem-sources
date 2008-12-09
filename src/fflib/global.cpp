@@ -25,6 +25,7 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "config-wrapper.h"
 
 #include <complex>
@@ -36,6 +37,7 @@
 
 #define  FF_GRAPH_PTR_DCL
 #include "rgraph.hpp"
+//#include "PlotStream.hpp"
 
 
  long verbosity = 1;

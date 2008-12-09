@@ -515,8 +515,10 @@ public:
     return 0;}
  void destroy() {RefCounter::destroy();}
  void MakeQuadTree() ;
+      
 private:
   void read(const char * filename); 
+  void read(ifstream & f); 
   void BuildBoundaryAdjacences();
   void ConsAdjacence();
   void Buildbnormalv(); 

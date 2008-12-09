@@ -15,9 +15,36 @@ using  Fem2D::Mesh;
 class PlotStream 
 {
 public:
-  
-  FILE * TheStream; 
-  PlotStream(FILE *Stream) :TheStream(Stream) {}
+    struct fBytes {
+	union {
+	int i;
+	float f;
+	unsigned char c[4]; 
+	};
+	
+	void set() {c[0]=0;c[1]=1;c[2]=2;c[3]=3;}
+    };
+    struct hBytes {
+	union {
+	long long ll;
+	double d;
+	unsigned char c[8];
+	};
+	void set() {c[0]=0;c[1]=1;c[2]=2;c[3]=3;c[4]=4;c[5]=5;c[6]=6;c[7]=7;}
+    };
+  // for the enddianness  
+  static   fBytes zott; //0123;
+  static   hBytes zottffss; //012345678;
+  //  just change a read level ...
+    
+    
+  FILE * TheStream;
+
+  fBytes s_zott;
+  hBytes s_hBytes;
+  int s_sizeoflong; // 32 of 64 bit computeur ...
+    
+  PlotStream(FILE *Stream) :TheStream(Stream) { zott.set();zottffss.set(); }
   operator bool() const { return TheStream;}
   // datatype mush be < 0 to have no collistion with arg number. 
   enum datatype { dt_meshes=-1,dt_plots=-2,dt_endplot=-3,dt_endarg=99999,dt_newplot=-5  };
