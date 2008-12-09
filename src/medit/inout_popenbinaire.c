@@ -113,13 +113,16 @@ int loadMesh_popen_bin(pMesh mesh) {
   int        tvatn[3];
  
   /* variable rajouter pour popen */
+  int retcode=0;
   int cod;
   int KwdCod;
   int NulPos;
   int NextKwdPos;
-
   /* rajout */
   float ftab[3];
+#ifdef WIN32
+  _setmode(fileno(stdin),O_BINARY);     
+#endif 
   
   /* parse keywords */
   mesh->np   = 0;
@@ -178,7 +181,8 @@ int loadMesh_popen_bin(pMesh mesh) {
    
       if ( !mesh->np ) {
 	fprintf(stdout,"  ## No vertex\n");
-	return(-1);
+ 	retcode=-1;
+	goto Lret; 
       }
       if ( ddebug ) printf("allocate %d points\n",mesh->np);
       mesh->point = (pPoint)M_calloc(mesh->np+1,sizeof(Point),"zaldy1.point");
@@ -641,14 +645,21 @@ int loadMesh_popen_bin(pMesh mesh) {
   /* check if vertices and elements found */
   if ( !mesh->np ) {
     fprintf(stdout,"  ## No vertex\n");
-    return(-1);
+    retcode=-1;
+    goto Lret; 
   }
   mesh->ne = mesh->nt + mesh->nq + mesh->ntet + mesh->nhex;
 
   if ( disc > 0 ) {
     fprintf(stdout,"  ## %d entities discarded\n",disc);
   }
-  return(1);
+  retcode=1;
+
+ Lret:
+#ifdef WIN32
+  _setmode(fileno(stdin),O_TEXT);     
+#endif 
+return retcode;
 }
 
 /* function of lecture */
@@ -662,6 +673,7 @@ int loadScaVecTen_bin(pMesh mesh, int numsol, int dim, int ver, int nel, int typ
   char        *ptr,data[128];
   double       ScaSol[1],VecSol[3],TenSol[9];
   float        fScaSol[1],fVecSol[3],fTenSol[9];
+  int retcode=0;
 
   if(ddebug) printf("numsol=%i, type=%i, size=%i\n",numsol,type,size); 
   if ( numsol > type )  numsol = 1;
@@ -670,7 +682,8 @@ int loadScaVecTen_bin(pMesh mesh, int numsol, int dim, int ver, int nel, int typ
   mesh->bbmin  =  1.0e20;
   mesh->bbmax  = -1.0e20;
   if ( !zaldy2(mesh) ) {
-    return(0);
+    retcode=0;
+    goto Lret; 
   }
   sol = mesh->sol;
   sol->dim = dim;
@@ -772,8 +785,10 @@ int loadScaVecTen_bin(pMesh mesh, int numsol, int dim, int ver, int nel, int typ
     
     break;
   }
+  retcode=1;
+ Lret: 
   
-  return(1);
+  return retcode;
 }
 
 /*load solution (metric) */
@@ -793,8 +808,11 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
   int       KwdCod;
   int       cod;
   int       NulPos;
+  int retcode=0;
   NumberofSolAT=0;
-
+#ifdef WIN32
+  _setmode(fileno(stdin),O_BINARY);     
+#endif
   // read code
   fread( (unsigned char *)&cod ,WrdSiz, 1, stdin);
   if(cod != 1 ){
@@ -816,7 +834,9 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
   /*control of the dimension*/
   if( dim != mesh->dim ){
     fprintf(stderr,"  %%%% Wrong dimension %d.\n",dim);
-    return(0);
+    retcode=0;
+    goto Lret; 
+    //    return(0);
   }
 
   while( !feof(stdin) ){
@@ -830,7 +850,9 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
       fprintf(stdout,"SolAtVertices : nel %i, mesh->np %i \n",nel,mesh->np);
       if ( nel != mesh->np ) {
 	fprintf(stderr,"  %%%% Wrong number: %d Solutions discarded\n",nel-mesh->np);
-	return(0);
+	retcode=0;
+	goto Lret; 
+	//	return(0);
       }
       mesh->typage = 2;
       key = GmfSolAtVertices;
@@ -851,7 +873,9 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
 	fprintf(stdout,"SolAtTriangles : nel %i, mesh->nt %i \n",nel,mesh->nt);
 	if ( nel && nel != mesh->nt ) {
 	  fprintf(stderr,"  %%%% Wrong number %d.\n",nel);
-	  return(0);
+	  retcode=0;
+	  goto Lret; 
+	  // return(0);
         }
 
 	mesh->typage = 1;
@@ -876,7 +900,9 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
 	fprintf(stdout,"SolAtQuadrilaterals : nel %i, mesh->nq %i \n",nel,mesh->nq);
 	if ( nel && nel != mesh->nq ) {
 	  fprintf(stderr,"  %%%% Wrong number %d.\n",nel);
-	  return(0);
+	  retcode=0;
+	  goto Lret; 
+	  //return(0);
 	}
 	
 	mesh->typage = 1;
@@ -898,7 +924,9 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
 	fprintf(stdout,"SolAtTetrahedra : nel %i, mesh->ntet %i \n",nel,mesh->ntet);
 	if ( nel && nel != mesh->ntet ) {
 	  fprintf(stderr,"  %%%% Wrong number %d.\n",nel); 
-	  return(0);
+	  retcode=0;
+	  goto Lret; 
+	  //return(0);
 	}
 	mesh->typage = 1;
 	key = GmfSolAtTetrahedra;
@@ -921,7 +949,9 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
 	if ( nel && nel != mesh->nhex ) {
 	  fprintf(stderr,"  %%%% Wrong number %d.\n",nel);
 	  GmfCloseMesh(inm);
-	  return(0);
+	  retcode=0;
+	  goto Lret; 
+	  //return(0);
 	}
 	mesh->typage = 1;
 	key = GmfSolAtHexahedra;
@@ -940,8 +970,12 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
       break;
     }    
   }
- 
-  return(1);
+  retcode=1;
+ Lret:
+#ifdef WIN32
+  _setmode(fileno(stdin),O_BINARY);     
+#endif 
+  return(retcode);
 }
 
 
