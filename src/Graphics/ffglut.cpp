@@ -26,6 +26,10 @@ using namespace std;
 #include "PlotStream.hpp"
 
 
+// add for the gestion of the endianness of the file.
+PlotStream::fBytes PlotStream::zott; //0123;
+PlotStream::hBytes PlotStream::zottffss; //012345678;
+// ---- FH
 
 using namespace Fem2D;
 using std::numeric_limits;

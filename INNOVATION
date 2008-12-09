@@ -1,4 +1,8 @@
-v 3.00-1 (4 dec 2008)
+v 3.0-2 ( 9 dec 2008)
+  - correct the Makefiles et load-link
+  - correct ffmedit (binary read /win32)
+  - cosmetic change in ffglut + stabilization
+v 3.0-1 (4 dec 2008)
   - complety change of the graphic (freefem++ is now the old freefem++-nw ) 
       - add  medit (a visualisator software by  P. Frey)  inside freefem++
           with a name ffmedit  
