@@ -26,6 +26,7 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+/*
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
@@ -56,6 +57,9 @@ using namespace std;
 
 #include "BamgFreeFem.hpp"
 #include "lgfem.hpp"
+*/
+#include "ff++.hpp"
+
 using Fem2D::Mesh;
 using Fem2D::MeshPoint;
 
