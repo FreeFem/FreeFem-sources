@@ -50,7 +50,7 @@ bool load(string s);
 const char SLACH='/';
 const char BACKSLACH='\\';
 
-string basename(const char * f)
+string BaseName(const char * f)
 {
   char *c= strrchr(f,'/');
   if(c==0) return string();
@@ -296,7 +296,6 @@ void GetEnvironment()
 #endif 
   if ( ff_verbosity ) { 
     verbosity = atoi(ff_verbosity);
-    if(verbosity>2) cout << " --  verbosity is set to " << verbosity << endl;
   }
 
 #ifdef PURE_WIN32 
@@ -312,7 +311,7 @@ void GetEnvironment()
   if(prognamearg)
     if( *strchr(prognamearg,'/')  == '/')
       {
-	EnvironmentInsert("init-files",TransDir(basename(prognamearg))+"/../etc/"+ffpref,"$");
+	EnvironmentInsert("init-files",TransDir(BaseName(prognamearg))+"/../etc/"+ffpref,"$");
       }
   if(home) 
 	EnvironmentInsert("init-files",TransDir(home)+"."+ffpref,"$");
@@ -333,7 +332,6 @@ void GetEnvironment()
   
   if ( ff_verbosity ) { 
     verbosity = atoi(ff_verbosity);
-    if(verbosity>2) cout << " --  verbosity is set to " << verbosity << endl;
   }
   if(ff_loadpath)
     GetEnvironment("loadpath",ff_loadpath);
@@ -351,6 +349,10 @@ void GetEnvironment()
 	show("\ninclude path : ",inc->second, "\n \t ");
 	cout <<"(.)"<<endl;}
     }
+  if ( ff_verbosity ) { 
+    verbosity = atoi(ff_verbosity);
+    if(verbosity>2) cout << " --  verbosity is set to " << verbosity << endl;
+  }
   
  }
 void EnvironmentLoad()
