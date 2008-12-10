@@ -25,41 +25,8 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include  <iostream>
-#include  <cfloat>
-#include  <cmath>
-#include <cstdio>
-using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "rgraph.hpp"
 
-#include "RNM.hpp"
-#include "fem.hpp"
-
-
-
-#include "FESpacen.hpp" 
-#include "FESpace.hpp" 
-
-#include "MatriceCreuse_tpl.hpp"
-
-//#include "fem3.hpp"
-#include "MeshPoint.hpp"
-#include <complex>
-#include "Operator.hpp" 
-
-#include <set>
-#include <vector>
-#include <fstream>
-
-#include "lex.hpp"
-
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "lgsolver.hpp"
-#include "problem.hpp"
-
+#include "ff++.hpp"
 
 using Fem2D::Mesh;
 using Fem2D::MeshPoint;

@@ -29,7 +29,7 @@
 #pragma optimization_level 0
 //#pragma inline_depth(0) 
 #endif
-
+/*
 #include "error.hpp"
 #include "RNM.hpp"
 #include <set>
@@ -56,7 +56,10 @@ using namespace std;
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
+*/
+#include "ff++.hpp" 
 #include "CGNL.hpp"
+
 namespace bamg { class Triangles; }
 namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso); }
 

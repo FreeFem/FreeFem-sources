@@ -1,5 +1,6 @@
 v 3.0-2 ( 9 dec 2008)
-  - correct the Makefiles et load-link
+  - ff-c++ to dynamic load program (add ff++.hpp file  with all include, may be)
+  - correct the Makefiles et load-link, 
   - correct ffmedit (binary read /win32)
   - cosmetic change in ffglut + stabilization
 v 3.0-1 (4 dec 2008)
