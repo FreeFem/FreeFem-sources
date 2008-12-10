@@ -301,18 +301,20 @@ void GetEnvironment()
 #ifdef PURE_WIN32 
 #else
   EnvironmentInsert("init-files","/etc/"+ffpref,"$");
-#endif
 #ifdef FF_PREFIX_DIR_APPLE
   EnvironmentInsert("init-files",string(FF_PREFIX_DIR_APPLE) + "/etc/" + ffpref ,"$");
 #endif
 #ifdef FF_PREFIX_DIR
   EnvironmentInsert("init-files",string(FF_PREFIX_DIR) + "/etc/" + ffpref  ,"$");
 #endif
+
   if(prognamearg)
     if( *strchr(prognamearg,'/')  == '/')
       {
 	EnvironmentInsert("init-files",TransDir(BaseName(prognamearg))+"/../etc/"+ffpref,"$");
       }
+#endif
+
   if(home) 
 	EnvironmentInsert("init-files",TransDir(home)+"."+ffpref,"$");
 
