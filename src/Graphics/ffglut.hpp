@@ -114,7 +114,15 @@ struct OnePlotBorder: public OnePlot {
   vector<vector<pair<long,R2> > > data;
   OnePlotBorder(PlotStream & f);	  
   void Draw(OneWindow *win);
-  //  virtual void boundingbox(R2 & Pmin,R2 &Pmax);
+};
+
+// add 11/12/2008 for gestion of error FH  (what -1) 
+struct OnePlotError: public OnePlot {
+  int item;
+  OnePlotError(PlotStream & f) 
+    : OnePlot(-1)
+  {    f >> item;   }	  
+  void Draw(OneWindow *win) ;
   
 };
 

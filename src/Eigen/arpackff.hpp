@@ -392,6 +392,8 @@ inline void neupp(bool rvec, char HowMny, float dr[],
 
 inline void sauppError(int info)
 {
+  if(info<0)
+    cerr << " erreur arpack sauppError" <<info <<  endl;
   switch (info) {
   case     0:
     return;
@@ -415,7 +417,8 @@ inline void sauppError(int info)
 
 inline void seuppError(int info)
 {
-
+  if(info<0)
+    cerr << " erreur arpack seuppError" <<info <<  endl;
   switch (info) {
   case   0:
     return;

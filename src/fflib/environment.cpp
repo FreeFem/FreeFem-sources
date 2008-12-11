@@ -50,10 +50,10 @@ bool load(string s);
 const char SLACH='/';
 const char BACKSLACH='\\';
 
-string BaseName(const char * f)
+string DirName(const char * f)
 {
   char *c= strrchr(f,'/');
-  if(c==0) return string();
+  if(c==0) return string("");
   else return string(f,strlen(f)-strlen(c));
 }
 string TransDir(string dir)
@@ -308,11 +308,13 @@ void GetEnvironment()
   EnvironmentInsert("init-files",string(FF_PREFIX_DIR) + "/etc/" + ffpref  ,"$");
 #endif
 
+#ifdef __APPLE__
   if(prognamearg)
     if( *strchr(prognamearg,'/')  == '/')
       {
-	EnvironmentInsert("init-files",TransDir(BaseName(prognamearg))+"/../etc/"+ffpref,"$");
+	EnvironmentInsert("init-files",TransDir(DirName(prognamearg))+"/../etc/"+ffpref,"$");
       }
+#endif
 #endif
 
   if(home) 

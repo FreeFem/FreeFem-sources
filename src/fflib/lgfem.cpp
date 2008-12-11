@@ -2441,6 +2441,15 @@ void Show(const char * s,int k=1)
 AnyType Plot::operator()(Stack s) const  { 
   if(ThePlotStream)
     { 
+      /*
+	les different item of the plot are given by the number what:
+	   what = 0 -> mesh
+	   what = 1 -> scalar field (FE function  2d) 
+	   what = 2 -> 2d vector field (two FE function  2d) 
+	   what = 3 -> curve def by 2 plot
+	   what = 4 -> border 
+	   what = -1 -> error, item empty 
+       */
 	PlotStream theplot(ThePlotStream);
 	pferbase  fe=0,fe1=0;
 	int cmp0,cmp1;
@@ -2493,8 +2502,8 @@ AnyType Plot::operator()(Stack s) const  {
 		    fe1= l[i].eval(1,s,cmp1);
 		    if (fe->x()) th=&fe->Vh->Th;
 		    if(fe1 && fe1->x()) {
-			th == &fe1->Vh->Th;
-			assert(th);
+			th == &fe1->Vh->Th;			
+			//    assert(th);
 		    };
 		}
 	     if(th)
@@ -2507,66 +2516,90 @@ AnyType Plot::operator()(Stack s) const  {
 	theplot << kth ;
 	for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i)
 	  {
-	      theplot << i->second << *  i->first ;
+	    theplot << i->second << *  i->first ;
 	  }
 	theplot.SendPlots();	
 	theplot <<(long) l.size(); 
 	for (size_t i=0;i<l.size();i++)
 	  {
-	      long what = l[i].what;
-	      theplot << what ; 
-	      if(what ==0)
+	    int err =1;//  by default we are in error
+	    const Mesh *pTh=0;
+	    long what = l[i].what;
+	    if(what ==0)
+	      {
+		pTh=&l[i].evalm(0,s);
+		if(pTh) {
+		  err=0;
+		  theplot << what ; 
 		  theplot <<mapth[ &l[i].evalm(0,s)];// numero du maillage
-	      else if (what==1 || what==2)
-		{    int lg,nsb;
-		    fe=  l[i].eval(0,s,cmp0);
-		    fe1= l[i].eval(1,s,cmp1);
-		    if(what==1)
-		      {
-			  if (!fe->x()) continue;		 
-			  theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
-			  //int lg,nsb;
-			  // R *  FESpace::newSaveDraw(const KN_<R> & U,int composante,int & lg,int & nsb) const
-			  KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),cmp0,lg,nsb);
-			  
-			  cout << " what: " << what << " " << nsb << " "<< V1.N() << " "  << V1.max() << " " << V1.min() << endl;
-			  theplot <<(long) nsb<< V1;
-			  
-			  //fe->Vh->SendDraw(ThePlotStream,*fe->x(),cmp0);
-		      }
-		    else
-		      {
-			  
-			  if (!fe->x()) continue;
-			  if (!fe1->x()) continue;	
-			  
-			  KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),*fe1->x(),cmp0,cmp1,lg,nsb);
-			  theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
-			  theplot << (long) nsb<< V1;
-			  //     R *  FESpace::newSaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,int & lg,int & nsb) const 
-			  
-			  
-			  //fe->Vh->Th.SendPlot(ThePlotStream);		     
-			  //fe->Vh->SendDraw(ThePlotStream,*fe->x(),cmp0,*fe1->x(),cmp1);
-		      }
-		    
 		}
-	      else if (l[i].what==3 )
-		{
-		    tab x=l[i].evalt(0,s);
-		    tab y=l[i].evalt(1,s);
-		    cout << "tab: " << x.N() << " " << y.N() <<  endl;
+	      }
+	    else if (what==1 || what==2)
+	      {    
+		int lg,nsb;		   
+		fe=  l[i].eval(0,s,cmp0);
+		fe1= l[i].eval(1,s,cmp1);
+		
+		if(what==1)
+		  {
+		    if (fe->x()) 
+		      {		 
+			err=0;
+			theplot << what ;
+			theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
+			KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),cmp0,lg,nsb);
+			if(verbosity>5)
+			  cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
+			       << " "  << V1.max() << " " << V1.min() << endl;
+			theplot <<(long) nsb<< V1;
+		      }
+		  }
+		else
+		  {
+		    if ( fe->x() && fe1->x())
+		      {
+			err=0;
+			theplot << what ;
+			KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),*fe1->x(),cmp0,cmp1,lg,nsb);
+			theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
+			theplot << (long) nsb<< V1;
+		      }
+		  }
+	      }
+	    else if (l[i].what==3 )
+	      {
+		err=0;
+		tab x=l[i].evalt(0,s);
+		tab y=l[i].evalt(1,s);
+		if( x.N() >0 && y.N() != x.N())
+		  {
+		    theplot << what ;
 		    theplot << x << y ;
-		}
-	      else if (l[i].what==4 )
-		{
-		    const  E_BorderN * Bh= l[i].evalb(0,s);
-		    Bh->SavePlot(s,theplot);
-		}
-	      else
-		  ffassert(0);// erreur type theplot inconnue
+		  }
+		else  
+		      if(verbosity)
+			cerr << "Warning:  Plot of array with wrong size (item "<< i + 1 
+			     << ") sizes = " << x.size()<< " , " << y.size()  << endl;
+		
+	      }
+	    else if (l[i].what==4 )
+	      {
+		err=0;
+		theplot << what ;
+		const  E_BorderN * Bh= l[i].evalb(0,s);
+		Bh->SavePlot(s,theplot);
+	      }
+	    else
+	      ffassert(0);// erreur type theplot inconnue
+	    if(err==1)
+	      { if(verbosity) 
+		  cerr << "Warning: May be a bug in your script, \n" 
+		       << " a part of the plot is wrong t (mesh or FE function, curve)  => skip the item  " << i+1 
+		       << " in plot command " << endl;
+		theplot << -1L << (long) i ;
+	      }
+	    
 	  }
-	
 	theplot.SendEndPlot();
     } 
   if (!withrgraphique) {initgraphique();withrgraphique=true;}

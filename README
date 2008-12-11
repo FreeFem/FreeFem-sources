@@ -208,6 +208,7 @@ Some configure flags use to build the current version
   libsuitesparse-dev
   libarpack2-dev
   libx11-dev libxt-dev libxext-dev
+
  - to rebuild de documentation:  
   imagemagick 
   tetex-base   tetex-bin  tetex-extra 
@@ -223,11 +224,15 @@ Some configure flags use to build the current version
    gcc g++  g77
    wget 
    m4 bison flex
+   libx11-dev libxt-dev libxext-dev 
+    libxpm4 libxpm4-dbg 
+    libsuitesparse-dev libarpack2-devlibarpack2 libarpack2-dev
+    libfltk1.1 libfltk1.1-dbg libfltk1.1-dev
+    libopenmpi1 libopenmpi-dev
+    libopenmpi-dbg libxpm-dev 
+    freeglut3 freeglut3-dev
    libx11-dev  libxt-dev  libxext-dev 
    freeglut3-dev  libglut3-dev	
-   libglu1-mesa-dev 
-   libumfpack4 libumfpack4-dev
-   libarpack2 libarpack2-dev
  - to rebuild de documentation:  
   imagemagick 
   tetex-base   tetex-bin  tetex-extra 
