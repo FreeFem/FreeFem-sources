@@ -310,6 +310,21 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
 
 }
 
+
+
+void OnePlotError::Draw(OneWindow *win)
+{
+  ThePlot & plot=*win->theplot;
+  win->SetScreenView() ;
+  glColor3d(0.,0.,0.);
+  cout << " Error plot item empty " << item <<  endl;
+  int i = 4;
+  char s[100];
+  sprintf(s,"Warning the item %d fot the plot is empty",item);
+  win->Show(s,4+item*2);
+  win->SetView() ;
+}
+
 void OnePlotMesh::Draw(OneWindow *win)
 {
   ThePlot & plot=*win->theplot;
@@ -911,14 +926,27 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
     { 
       long l;
       fin >> l;
-      if((debug > 3)) cout << " read mesh " << i  << " -> " << l << "  " <<nbmeshes << endl;
-      l--;
-      ffassert(l>=0 && l < nbmeshes);
-      ffassert(Ths[l]==0);
-      fin >>Ths[l] ;
-      if((debug > 3))
-	cout << i << " nt/nv " << l << " "  <<Ths[l]->nt << " " << Ths[l]->nv << endl;
-      ffassert(fin.good());
+      if(l>=0) 
+	{
+	if((debug > 3)) cout << " read mesh " << i  << " -> " << l << "  " <<nbmeshes << endl;
+	l--;
+	ffassert(l>=0 && l < nbmeshes);
+	ffassert(Ths[l]==0);
+	fin >>Ths[l] ;
+	if((debug > 3))
+	  cout << i << " nt/nv " << l << " "  <<Ths[l]->nt << " " << Ths[l]->nv << endl;
+	ffassert(fin.good());
+      }
+      else // Add FH optimisation FH 11/12/2008 (not use to day)
+	{// the mesh is already in the previous plot with number ll
+	  ffassert(l==-1);
+	  long ll;
+	  fin >> l>> ll; // read l and ll
+	  ffassert(old);
+	  Ths[l]=old->Ths[ll];
+	  Ths[l]->increment(); // 
+	}
+      
     }
   
   fin.GetPlots();
@@ -933,7 +961,9 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       long imsh;
       if((debug > 2)) cout << "    plot  " << i << " what " << what << endl;
       if(what !=3 && !uaspectratio) aspectratio= true;
-      if(what==0) 
+      if(what==-1)  // gestion of error (empty plot)
+	  p = new OnePlotError(fin);
+      else if(what==0) 
 	{ 
 	  
 	  fin >> imsh;
