@@ -15,7 +15,7 @@ mesh3 Th=buildlayers(Th2,nn,
   // reftet=r1, 
   reffacemid=rmid, 
   reffaceup = rup,
-  reffacedown = rdown);
+  reffacelow = rdown);
 
 fespace VVh(Th,[P23d,P23d,P23d,P13d]);
 fespace Vh(Th,P23d);

@@ -247,7 +247,7 @@ AC_DEFINE_UNQUOTED(VersionFreeFempp,$ff_numver,FreeFem++ version as a float)
 # date is only useful for config-version.h
 
 test "$prefix" = NONE && prefix="$ac_default_prefix"
-ff_prefix_dir="${prefix}/ff++-$VERSION"   
+ff_prefix_dir="${prefix}/lib/ff++/$VERSION"   
 AC_MSG_CHECKING(prefix dir freefem++  )
 AC_MSG_RESULT($ff_prefix_dir)	 
 
