@@ -830,7 +830,7 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	cp examples++-load/include/* $@/FreeFem++.app/Contents/include
 	cp examples++-load/*.dylib  $@/FreeFem++.app/Contents/lib
 	-if [ -s List-agl-dylib ]; then tar zchvf $@/OtherMacOsLib.tgz `cat List-agl-dylib`; fi; 
-	../config.status  --file=$@/Install-MacOS.command:Install-MacOS.command.in
+	./config.status  --file=$@/Install-MacOS.command:Install-MacOS.command.in
 	chmod a+rx $@/Install-MacOS.command
 	-mkdir $@/FreeFem++.app/Contents/etc
 	echo loadpath += \"$(ff_prefix_dir)/lib\"  >$@/FreeFem++.app/Contents/etc/freefem++.pref
