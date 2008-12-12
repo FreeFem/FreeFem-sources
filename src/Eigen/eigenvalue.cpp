@@ -48,73 +48,54 @@ using namespace std;
 extern Block *currentblock;
 
 typedef double R;
-const bool dddd=false;
-
+static  bool dddd=false;
 template<class K>
-void  cB(long mode,int n,K *x,K *y,const MatriceCreuse<K>  & M)
+void Show(int ido,KN_<K> w,const char *cmm)
 {
-  KN_<K> X(x,n);
-  KN_<K> Y(y,n);
-  switch(mode)
-    {
-    case 1:  
-      Y= X; //
-      break;
-    case 2:  
-    case 3:  
-    case 4:  
-    case 5:  
-      Y = M*X;// OP = inv(M) A
-      break;
-    default:
-      ffassert(0); // a faire 
-    }
-  
-}
-template<class K>
-void  cOP(long mode,int n,K *x,K *y,KN<K> W,const MatriceCreuse<K> & OP,const MatriceCreuse<K>  & M)
-{ 
-  //  y entre , y = OP * x  sortie, w working arrayy
-  /*
-    c  Mode 1:  ===> OP = A  and  B = I.
-    c
-    c  Mode 2: 
-    c           ===> OP = inv[M]*A  and  B = M.
-    c
-    c  Mode 3: 
-    c           ===> OP = (inv[K - sigma*M])*M  and  B = M.  // DSAUPD
-    c           ===> OP = Real_Part{ inv[A - sigma*M]*M }  and  B = M. //DNAUPD 
-    c           ===> OP =  inv[A - sigma*M]*M   and  B = M.  // ZNAUPD
-    c  
-    c  Mode 4: 
-    c           ===> OP = (inv[K - sigma*KG])*K  and  B = K. // DSAUPD  
-    c           ===> OP = Imaginary_Part{ inv[A - sigma*M]*M }  and  B = M. //DNAUPD 
-    c  Mode 5:
-    c           ===> OP = inv[A - sigma*M]*[A + sigma*M]  and  B = M. // DSAUPD      
-  */
-
-  KN_<K> X(x,n);
-  KN_<K> Y(y,n);
-  switch(mode)
-    {
-    case 1:  
-      Y= OP*X; //
-      break;
-    case 2:  
-      W = OP*X;// OP = inv(M) A
-      M.Solve(Y,W);
-      break;
-    case 3: // OP inv( A-sigma  B)    
-      OP.Solve(Y,X); // 
-      break;
-    case 4: // OP image inv( A-sigma  B)    
-      OP.Solve(Y,X); // 
-      break;
-    default:
-      ffassert(0); // a faire 
-    }
+  cout << cmm << ido << " max " << w.max() << " min  " << w.min() << " sum  =" 
+       << w.sum()  << endl;
 }
 
+template<class K,class Mat>
+void  DoIdoAction(int ido,int mode,KN_<K> &xx,KN_<K> &yy,KN_<K> &zz,KN_<K> &work,Mat &OP1,Mat &B)
+{
+  if(mode>2) // inverse mode 
+    switch (ido) {
+    case -1: //y <--- OP*x = inv[A-SIGMA*M]*M*x   
+      if(dddd) Show(ido,xx,"  <- (xx) ");
+      OP1.Solve(yy,work=B*xx);
+      if(dddd) Show(ido,yy,"  -> (yy) ");
+      break;
+    case  1://  y <-- OP*x = inv[A-sigma*M]*z
+      if(dddd) Show(ido,zz,"  <- (zz) ");
+      OP1.Solve(yy,zz);
+      if(dddd) Show(ido,yy,"  -> (yy) ");
+      break;
+    case  2: //  y <--- M*x 
+      if(dddd) Show(ido,xx,"  <- (xx) ");
+      yy = B*xx;
+      if(dddd) Show(ido,yy,"  -> (yy) ");
+      break;
+    default :
+      ffassert(0);
+    }
+  else // direct mode 
+    switch (ido)
+      {
+      case -1: // y <--- OP*x = inv[M]*A*x
+      case  1: 
+	if(mode== 1)  // M = Id
+	  yy=OP1*xx;
+	else
+	  B.Solve(yy,work=OP1*xx);
+	break;
+      case 2: //  y <--- M*x. // not use mode = 1
+	yy = B*xx;
+	break;
+      default :
+	ffassert(0);  
+      }
+}
 class EigenValue : public OneOperator
 { public:
   typedef R K;
@@ -232,7 +213,9 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
 };
 
 
-AnyType EigenValue::E_EV::operator()(Stack stack)  const {
+AnyType EigenValue::E_EV::operator()(Stack stack)  const 
+{
+  dddd = (verbosity>=200);
   double tol=1e-6;
   long nconv=0; 
   long nbev=1;
@@ -287,106 +270,6 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
   ncv = min(ncv,n);
 
   if(!maxit)  maxit = 100*nbev;
-
-    
-    /* daupp
-
-     c  Mode 1:  A*x = lambda*x, A symmetric 
-     c           ===> OP = A  and  B = I.
-     c
-     c  Mode 2:  A*x = lambda*M*x, A symmetric, M symmetric positive definite
-     c           ===> OP = inv[M]*A  and  B = M.
-     c           ===> (If M can be factored see remark 3 below)
-     c
-     c  Mode 3:  K*x = lambda*M*x, K symmetric, M symmetric positive semi-definite
-     c           ===> OP = (inv[K - sigma*M])*M  and  B = M. 
-     c           ===> Shift-and-Invert mode
-     c
-     c  Mode 4:  K*x = lambda*KG*x, K symmetric positive semi-definite, 
-     c           KG symmetric indefinite
-     c           ===> OP = (inv[K - sigma*KG])*K  and  B = K.
-     c           ===> Buckling mode
-     c
-     c  Mode 5:  A*x = lambda*M*x, A symmetric, M symmetric positive semi-definite
-     c           ===> OP = inv[A - sigma*M]*[A + sigma*M]  and  B = M.
-     c           ===> Cayley transformed mode
-     
-     c  WHICH   Character*2.  (INPUT)
-     c          Specify which of the Ritz values of OP to compute.
-     c
-     c          'LA' - compute the NEV largest (algebraic) eigenvalues.
-     c          'SA' - compute the NEV smallest (algebraic) eigenvalues.
-     c          'LM' - compute the NEV largest (in magnitude) eigenvalues.
-     c          'SM' - compute the NEV smallest (in magnitude) eigenvalues. 
-     c          'BE' - compute NEV eigenvalues, half from each end of the
-     c                 spectrum.  When NEV is odd, compute one more from the
-     c                 high end than from the low end.
-
-     c  NEV     Integer.  (INPUT)
-     c          Number of eigenvalues of OP to be computed. 0 < NEV < N.
-
-     c  NCV     Integer.  (INPUT)
-     c          Number of columns of the matrix V (less than or equal to N).
-
-     */
-    
-    /* Naupp
-     Mode 1:  A*x = lambda*x.
-     c           ===> OP = A  and  B = I.
-     c
-     c  Mode 2:  A*x = lambda*M*x, M symmetric positive definite
-     c           ===> OP = inv[M]*A  and  B = M.
-     c
-     c  Mode 3:  A*x = lambda*M*x, M symmetric semi-definite
-     c           ===> OP = Real_Part{ inv[A - sigma*M]*M }  and  B = M. 
-     c           ===> shift-and-invert mode (in real arithmetic)
-
-     c  Mode 4:  A*x = lambda*M*x, M symmetric semi-definite
-     c           ===> OP = Imaginary_Part{ inv[A - sigma*M]*M }  and  B = M. 
-     c           ===> shift-and-invert mode (in real arithmetic)
-
-
-
-     c          IDO =  0: first call to the reverse communication interface
-     c          IDO = -1: compute  Y = OP * X  where
-     c                    IPNTR(1) is the pointer into WORKD for X,
-     c                    IPNTR(2) is the pointer into WORKD for Y.
-     c                    This is for the initialization phase to force the
-     c                    starting vector into the range of OP.
-     c          IDO =  1: compute  Y = OP * Z  and Z = B * X where
-     c                    IPNTR(1) is the pointer into WORKD for X,
-     c                    IPNTR(2) is the pointer into WORKD for Y,
-     c                    IPNTR(3) is the pointer into WORKD for Z.
-     c          IDO =  2: compute  Y = B * X  where
-     c                    IPNTR(1) is the pointer into WORKD for X,
-     c                    IPNTR(2) is the pointer into WORKD for Y.
-     c          IDO =  3: compute the IPARAM(8) real and imaginary parts 
-     c                    of the shifts where INPTR(14) is the pointer
-     c                    into WORKL for placing the shifts. See Remark
-     c                    5 below.
-     c          IDO =  4: compute Z = OP * X
-     c          IDO = 99: done
-     c 
-     
-     c  WHICH   Character*2.  (INPUT)
-     c          'LM' -> want the NEV eigenvalues of largest magnitude.
-     c          'SM' -> want the NEV eigenvalues of smallest magnitude.
-     c          'LR' -> want the NEV eigenvalues of largest real part.
-     c          'SR' -> want the NEV eigenvalues of smallest real part.
-     c          'LI' -> want the NEV eigenvalues of largest imaginary part.
-     c          'SI' -> want the NEV eigenvalues of smallest imaginary part.
-     c
-     
-     c  NCV     Integer.  (INPUT)
-     c          Number of columns of the matrix V. NCV must satisfy the two
-     c          inequalities 2 <= NCV-NEV and NCV <= N.
-     
-     c  NEV     Integer.  (INPUT)
-     c          Number of eigenvalues of OP to be computed. 0 < NEV < N-1.
-     
-     
-     */
-    
     
     const char *serr[10];
     int err=0;
@@ -436,7 +319,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
       int ido=0;
       char bmat= mode == 1 ? 'I' : 'G';
       char which[3]= "LM";	// larger value
-      if(mode >2) which[0] ='S'; // smaller value
+      //      if(mode >2) which[0] ='S'; // smaller value
       int ishift=1; // Auto Shift true by default
       int iparam[12]= {0,ishift,0,maxit,1,nconv,0,mode,0,0,0,0};
       int ipntr[12]={ 0,0,0, 0,0,0,  0,0,0, 0,0,0 };
@@ -453,24 +336,6 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const {
 	
 	saupp(ido,bmat,n,which,nbev,tol,  residptr,  ncv,  vp, n,
 	      iparam,  ipntr,  workd,   workl,  lworkl, info);
-/*
-c          IDO =  0: first call to the reverse communication interface
-c          IDO = -1: compute  Y = OP * X  where
-c                    IPNTR(1) is the pointer into WORKD for X,
-c                    IPNTR(2) is the pointer into WORKD for Y.
-c                    This is for the initialization phase to force the
-c                    starting vector into the range of OP.
-c          IDO =  1: compute  Y = OP * Z  and Z = B * X where
-c                    IPNTR(1) is the pointer into WORKD for X,
-c                    IPNTR(2) is the pointer into WORKD for Y,
-c                    IPNTR(3) is the pointer into WORKD for Z.
-c          IDO =  2: compute  Y = B * X  where
-c                    IPNTR(1) is the pointer into WORKD for X,
-c                    IPNTR(2) is the pointer into WORKD for Y.
-c          IDO =  3: compute the IPARAM(8) shifts where
-c                    IPNTR(11) is the pointer into WORKL for
-c                    placing the shifts. See remark 6 below.
-*/
 	if(verbosity>99) 
 	  cout << "    saupp ido: " << ido << " info : " << info << endl;
 	if(info<0) {cerr << " -- err arpack info = " << info << endl;}  
@@ -478,25 +343,10 @@ c                    placing the shifts. See remark 6 below.
 
 	if(ido==99) break;
 	
-	K *xx=&workd[ipntr[1]];
-	K *yy=&workd[ipntr[2]];
-	K *zz=&workd[ipntr[3]];
-	
-	  switch (ido) {
-	  case -1: 
-	    cOP(mode,n,xx,yy,work,OP1,B);
-	    break;
-	  case  1:
-	    cOP(mode,n,zz,yy,work,OP1,B);
-	    cB(mode,n,xx,zz,B);
-	    break;
-	  case  2: 
-	    cB(mode,n,xx,yy,B);	    
-	    break;
-	  default :
-	    ffassert(0);
-	  }
-	  
+	KN_<double>  xx(&workd[ipntr[1]],n);
+	KN_<double>  yy(&workd[ipntr[2]],n);
+	KN_<double>  zz(&workd[ipntr[3]],n);
+	DoIdoAction(ido,mode,xx,yy,zz,work,OP1,B);
       }
       nconv = iparam[5];
       if(nconv==0) cerr << " -- Strange: no eigens values ??? " << endl;
@@ -596,57 +446,14 @@ c                    placing the shifts. See remark 6 below.
 	
 	while (1)
 	{
-	  
-	  /*
-	    
-	    c          IDO =  0: first call to the reverse communication interface
-	    c          IDO = -1: compute  Y = OP * X  where
-	    c                    IPNTR(1) is the pointer into WORKD for X,
-	    c                    IPNTR(2) is the pointer into WORKD for Y.
-	    c                    This is for the initialization phase to force the
-	    c                    starting vector into the range of OP.
-	    c          IDO =  1: compute  Y = OP * Z  and Z = B * X where
-	    c                    IPNTR(1) is the pointer into WORKD for X,
-	    c                    IPNTR(2) is the pointer into WORKD for Y,
-	    c                    IPNTR(3) is the pointer into WORKD for Z.
-	    c          IDO =  2: compute  Y = B * X  where
-	    c                    IPNTR(1) is the pointer into WORKD for X,
-	    c                    IPNTR(2) is the pointer into WORKD for Y.
-	    c          IDO =  3: compute the IPARAM(8) real and imaginary parts 
-	    c                    of the shifts where INPTR(14) is the pointer
-	    c                    into WORKL for placing the shifts. See Remark
-	    c                    5 below.
-	    c          IDO =  4: compute Z = OP * X
-	    
-	  */
 	  naupp(ido,bmat,n,which,nbev,tol,  residptr,  ncv,  vp, n,
 		iparam,  ipntr,  workd,   workl,  lworkl, info);
 	  if(ido==99) break;
-
-	  K *xx=&workd[ipntr[1]];
-	  K *yy=&workd[ipntr[2]];
-	  K *zz=&workd[ipntr[3]];
-
-	  switch (ido) {
-	  case -1: 
-	    cOP(mode,n,xx,yy,work,OP1,B);
-	    break;
-	  case  1:
-	    cOP(mode,n,zz,yy,work,OP1,B);
-	    cB(mode,n,xx,zz,B);
-	    break;
-	  case  2: 
-	    cB(mode,n,xx,yy,B);	    
-	    break;
-	    // case 5  je ne sais pas quoi faire... 
-	  case 4:
-	    cOP(mode,n,xx,zz,work,OP1,B);	    
-	    break;
-	  default :
-	    cout << " bug ido " << ido << endl;
-	    ffassert(0);
-	  }
-	sauppError(info);
+	  sauppError(info);
+	  KN_<double>  xx(&workd[ipntr[1]],n);
+	  KN_<double>  yy(&workd[ipntr[2]],n);
+	  KN_<double>  zz(&workd[ipntr[3]],n);
+	  DoIdoAction(ido,mode,xx,yy,zz,work,OP1,B);
 	}
 	nconv = iparam[5];
 	if(nconv)
@@ -760,8 +567,9 @@ c                    placing the shifts. See remark 6 below.
 }
   
 
-AnyType EigenValueC::E_EV::operator()(Stack stack)  const {
-  
+AnyType EigenValueC::E_EV::operator()(Stack stack)  const 
+{
+  dddd = (verbosity>=200);  
   double tol=1e-6;
   long nconv=0; 
   long nbev=1;
@@ -880,55 +688,26 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const {
 
   while(1)
     {
-      // GetVector supplies  a pointer to the input vector, v, 
-      //  and PutVector a pointer  to the output vector, w.
+
       caupp(ido,bmat,n,which,nbev,
 	    tol,  residptr,  ncv,
 	    vp, n,   iparam,  ipntr,workd, workl,
 	    lworkl,rwork,  info);
-      
-      if(ido==99) break;
 
-      
-      switch (ido) {
-      case -1: {
-	KN_<K> v(&workd[ipntr[1]],n);
-	KN_<K> w(&workd[ipntr[2]],n);
+      if(ido==99) break;
+	if(verbosity>99) 
+	  cout << "    saupp ido: " << ido << " info : " << info << endl;
+	if(info<0) {cerr << " -- err arpack info = " << info << endl;}  
+	sauppError(info);
+
+	if(ido==99) break;
 	
-	// Performing w <- OP*B*v for the first time.
-	// This product must be performed only if GetIdo is equal to
-	// -1. GetVector supplies a pointer to the input vector, v,
-	// and PutVector a pointer to the output vector, w.
-	work = B*v;
-	if(mode==1)
-	  w = OP1*v;
-	else 	  
-	  OP1.Solve(w,work);
-	//    P.B.MultMv(&workd[ipntr[1]], temp);
-	//    P.MultOPv(temp, &workd[ipntr[2]]);
-	break;
-      }
-      case  1: {
-	KN_<K> v(&workd[ipntr[3]],n);
-	KN_<K> w(&workd[ipntr[2]],n);
-	if(mode==1)
-	  w = OP1*v;
-	else 	  
-	  OP1.Solve(w,v);
-	break; }
-	
-      case  2: {
-	KN_<K> v(&workd[ipntr[1]],n);
-	KN_<K> w(&workd[ipntr[2]],n);
-	w = B*v; 
-	break;
-      }
-      case 3: {
-	cout << " Bizzare " << 3 << endl;
-      } 
-      }
-      sauppError(info);
+	KN_<K>  xx(&workd[ipntr[1]],n);
+	KN_<K>  yy(&workd[ipntr[2]],n);
+	KN_<K>  zz(&workd[ipntr[3]],n);
+	DoIdoAction(ido,mode,xx,yy,zz,work,OP1,B);
     }
+  
   nconv = iparam[5];
   if(nconv)
     {
