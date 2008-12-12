@@ -49,24 +49,24 @@ bool load(string s);
 
 const char SLACH='/';
 const char BACKSLACH='\\';
+#ifdef PURE_WIN32
+ const  char dirsep=BACKSLACH, dirnsep=SLACH;
+#else
+ const  char dirnsep=BACKSLACH, dirsep=SLACH;
+#endif
 
 string DirName(const char * f)
 {
-  char *c= strrchr(f,'/');
-  if(c==0) return string("");
+  char *c= strrchr(f,dirsep);
+  if(!c) return string("");
   else return string(f,strlen(f)-strlen(c));
 }
 string TransDir(string dir)
 {
-#ifdef PURE_WIN32
-  char sep=BACKSLACH, nsep=SLACH;
-#else
-  char nsep=BACKSLACH, sep=SLACH;
-#endif
   for (size_t i=0; i<dir.size(); ++i)
-    if(dir[i]==nsep) dir[i]=sep;
-  if(dir.size()>1 && dir[dir.size()-1] != sep) 
-    dir += sep;
+    if(dir[i]==dirnsep) dir[i]=dirsep;
+  if(dir.size()>1 && dir[dir.size()-1] != dirsep) 
+    dir += dirsep;
   return  dir;    
 }
 
@@ -308,13 +308,13 @@ void GetEnvironment()
   EnvironmentInsert("init-files",string(FF_PREFIX_DIR) + "/etc/" + ffpref  ,"$");
 #endif
 
-#ifdef __APPLE__
   if(prognamearg)
-    if( *strchr(prognamearg,'/')  == '/')
+    {
+    if( strchr(prognamearg,dirsep) )
       {
 	EnvironmentInsert("init-files",TransDir(DirName(prognamearg))+"/../etc/"+ffpref,"$");
       }
-#endif
+    }
 #endif
 
   if(home) 
