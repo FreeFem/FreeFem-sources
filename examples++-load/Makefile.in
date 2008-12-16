@@ -600,18 +600,16 @@ $(LIST_COMPILE):ff-c++ include Makefile
 clean-local:
 	-rm *.o  $(LIST_COMPILE)  regtests.edp makeref.edp
 	-rm -rf include
-ff-c++:load.link
+ff-c++:load.link Makefile
 	../config.status  --file=ff-c++:load.link
 #	#sed <load.link >ff-c++ -e 's;INC=";INC="-I$(ff_prefix_dir)/include;' 
 	chmod a+x ff-c++
 
 install-exec-local:: load_compile
-	mkdir -p $(ff_prefix_dir)/lib
-	mkdir -p $(ff_prefix_dir)/include
-	mkdir -p $(ff_prefix_dir)/etc
-	mkdir -p $(ff_prefix_dir)/edp
-	$(INSTALL_DATA) include/* $(ff_prefix_dir)/include
-	$(INSTALL) -m 555 $(LIST_COMPILE) $(ff_prefix_dir)/lib
+	$(mkinstalldirs) -m 755 $(ff_prefix_dir)/lib
+	$(mkinstalldirs) -m 755 $(ff_prefix_dir)/include
+	$(INSTALL_DATA)  include/* $(ff_prefix_dir)/include
+	$(INSTALL)  -m 555 $(LIST_COMPILE) $(ff_prefix_dir)/lib
 	echo loadpath += \"$(ff_prefix_dir)/lib\"  >$(ff_prefix_dir)/etc/freefem++.pref
 	echo includepath += \"$(ff_prefix_dir)/edp\"  >>$(ff_prefix_dir)/etc/freefem++.pref
 	$(INSTALL_SCRIPT) ff-c++  ${bindir}
