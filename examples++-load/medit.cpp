@@ -86,6 +86,8 @@ const char *medit_popen="-popen";// 1";  // depend de l endroit ou se trouve med
 const char *medit_bin="-filebin";
 const char *medit_addsol="-addsol";
 
+const char *medit_debug="-d";
+
 static bool TheWait=false;
 bool  NoWait=false;
 
@@ -597,6 +599,12 @@ AnyType datasolMesh3_Op<v_fes>::operator()(Stack stack)  const
 static char * meditcmd(long filebin, int nbsol, int smedit, const string &meditff, const string & ffnn)
 {
   string meditcmm=meditff;
+  int ddebug=0;
+  if(ddebug)
+    {
+      meditcmm += ' ';
+      meditcmm += medit_debug;
+    }
   meditcmm += ' ';
   meditcmm += medit_popen;
   if(filebin)
@@ -859,6 +867,8 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
   //int numTht[nbe]; // numero of Th assoctiated with a BoundaryEdge
 
   int jt=0;
+
+
   for(size_t i=0; i<l.size();i=i+offset){
     int nvtmp  = iv;
     int nttmp  = it;
@@ -893,7 +903,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
   assert( it==nt ); assert(iv==nv); assert(ibe=nbe);
   if(verbosity) cout << "Popen medit : vertex "<< nv << " triangle "<< nt << " edge " << nbe << endl;  
 
-  Mesh * pTh = new Mesh(nv,nt,nbe,v,t,b);
+  Mesh *pTh = new Mesh(nv,nt,nbe,v,t,b);
   Mesh &Th = *pTh;
 
   // determination of the number of elements to represent the solution
@@ -1152,8 +1162,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
 	      int i=Th(it,iv);  
 		  
 	      mp3->setP(&Th,it,iv);
-	      vxx[i] = vxx[i]+l[jojo1].eval(0,stack); //GetAny< double >( (*nargs[1])(stack) );
-		  
+	      vxx[i] = vxx[i]+l[jojo1].eval(0,stack); //GetAny< double >( (*nargs[1])(stack) );		  
 	      takemesh[i] = takemesh[i]+1;
 	    }
 	  }
@@ -1352,13 +1361,6 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
     }
   }
 
-  // fermeture du stream pour popen
-  int valfclose;
-  valfclose=fclose(popenstream);
-  //cout << valfclose << endl;
-  
- 
-  /*
   // rajout pour wait
   bool wait=TheWait;
   if (nargs[3]) wait= GetAny<bool>((*nargs[3])(stack));
@@ -1367,16 +1369,14 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
   //  drawing part  ------------------------------
   
   if (wait && !NoWait) 
-  {
-  next:
-  float x,y;
-  char c;
-  do{
-  c=getchar();
-  }while( c != 'q');
+    {
+      pclose(popenstream);
+    }
+  else
+    {
+      fclose(popenstream);
+    }
   
-  }
-  */
   // rajout pout la sauvegarde de la solution
   if(boolsave){
     //cout <<"save solution in file avec printf\n"<< endl;;
@@ -1409,6 +1409,10 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
     }
     delete [] OutSolTab;
   }
+  
+  delete pTh;
+
+ 
   return valsortie;
 }
 
@@ -2128,7 +2132,20 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
     }
   }
   // fermeture du stream pour popen
-  fclose(popenstream);
+  bool wait=TheWait;
+  if (nargs[3]) wait= GetAny<bool>((*nargs[3])(stack));
+  
+  bool plotting = true;   
+  //  drawing part  ------------------------------
+  
+  if (wait && !NoWait) 
+    {
+      pclose(popenstream);
+    }
+  else
+    {
+      fclose(popenstream);
+    }
   
   if(boolsave){
     int outm;
