@@ -3,8 +3,9 @@
 
 template<class T>
  T Square(const T & r){return r*r;}
+
  
-#ifdef HAVE_LIBUMFPACK  
+#ifdef HAVE_LIBUMFPACK_XXXXXXXXXXXXX
 extern "C" {
 #ifdef HAVE_UMFPACK_H
 #include <umfpack.h>
@@ -32,6 +33,7 @@ extern "C" {
 #endif // HAVE_UMFPACK_H
 }
 #endif
+
 #include "RNM.hpp"
 #include "fem.hpp"
 #include "FESpace.hpp" 
@@ -839,7 +841,25 @@ struct TypeSolveMat {
 };
 
 
-#ifdef HAVE_LIBUMFPACK
+inline void C2RR(int n,Complex *c,double *cr,double *ci)
+{
+ for (int i=0;i<n;i++)
+  {
+   cr[i]=real(c[i]);
+   ci[i]=imag(c[i]);
+  }
+}
+
+inline void RR2C(int n,double *cr,double *ci,Complex *c)
+{
+ for (int i=0;i<n;i++)
+  {
+    c[i]=Complex(cr[i],ci[i]);   
+  }
+}
+
+
+#ifdef HAVE_LIBUMFPACK__XXXXXXXXXXXX
 template<class R>
 class SolveUMFPack :   public MatriceMorse<R>::VirtualSolver  {
   double eps;
@@ -955,23 +975,6 @@ public:
   }
      
 }; 
-
-inline void C2RR(int n,Complex *c,double *cr,double *ci)
-{
- for (int i=0;i<n;i++)
-  {
-   cr[i]=real(c[i]);
-   ci[i]=imag(c[i]);
-  }
-}
-
-inline void RR2C(int n,double *cr,double *ci,Complex *c)
-{
- for (int i=0;i<n;i++)
-  {
-    c[i]=Complex(cr[i],ci[i]);   
-  }
-}
 
 template<>
 class SolveUMFPack<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {

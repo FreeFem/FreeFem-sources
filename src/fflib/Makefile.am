@@ -4,7 +4,8 @@
 
 noinst_LIBRARIES=libff.a
 
-libff_a_SOURCES2=AFunction.cpp AFunction2.cpp  \
+libff_a_SOURCES2=  UMFPack_Solver.cpp \
+AFunction.cpp AFunction2.cpp  \
  array_long.cpp          array_real.cpp        array_complex.cpp \
 lex.cpp lgmesh.cpp	lgmesh3.cpp 	\
 CodeAlloc.cpp lgmat.cpp global.cpp 					\

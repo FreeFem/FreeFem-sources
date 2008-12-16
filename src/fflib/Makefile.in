@@ -53,8 +53,8 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 libff_a_AR = $(AR) $(ARFLAGS)
-am__objects_1 = AFunction.$(OBJEXT) AFunction2.$(OBJEXT) \
-	array_long.$(OBJEXT) array_real.$(OBJEXT) \
+am__objects_1 = UMFPack_Solver.$(OBJEXT) AFunction.$(OBJEXT) \
+	AFunction2.$(OBJEXT) array_long.$(OBJEXT) array_real.$(OBJEXT) \
 	array_complex.$(OBJEXT) lex.$(OBJEXT) lgmesh.$(OBJEXT) \
 	lgmesh3.$(OBJEXT) CodeAlloc.$(OBJEXT) lgmat.$(OBJEXT) \
 	global.$(OBJEXT) Drawing.$(OBJEXT) gibbs.$(OBJEXT) \
@@ -262,7 +262,8 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 noinst_LIBRARIES = libff.a
-libff_a_SOURCES2 = AFunction.cpp AFunction2.cpp  \
+libff_a_SOURCES2 = UMFPack_Solver.cpp \
+AFunction.cpp AFunction2.cpp  \
  array_long.cpp          array_real.cpp        array_complex.cpp \
 lex.cpp lgmesh.cpp	lgmesh3.cpp 	\
 CodeAlloc.cpp lgmat.cpp global.cpp 					\
@@ -390,6 +391,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QuadratureFormular.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/R2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SetOfE4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UMFPack_Solver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array_complex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array_long.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array_real.Po@am__quote@

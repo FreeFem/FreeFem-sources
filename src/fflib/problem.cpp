@@ -3042,8 +3042,10 @@ template<class R>
             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 	  }
     }  
-    else ffassert(0);
-    
+    else {
+      cout << " Strange (unknows) kind = " << kind << endl; 
+      ffassert(0);
+    }
     if (n_where_in_stack_opt) delete [] where_in_stack;
              
   }
@@ -3442,6 +3444,7 @@ bool SetCG()
     return true;
 }
 
+#ifdef XXXXXXXXXXX
 #ifdef HAVE_LIBUMFPACK
 bool SetUMFPACK()
 {
@@ -3471,7 +3474,7 @@ bool SetUMFPACK()
 }
 
 #endif
-  
+#endif
 
  
 template<class R>
