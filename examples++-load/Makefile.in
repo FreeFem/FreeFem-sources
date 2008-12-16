@@ -608,6 +608,7 @@ ff-c++:load.link Makefile
 install-exec-local:: load_compile
 	$(mkinstalldirs) -m 755 $(ff_prefix_dir)/lib
 	$(mkinstalldirs) -m 755 $(ff_prefix_dir)/include
+	$(mkinstalldirs) -m 755 $(ff_prefix_dir)/etc
 	$(INSTALL_DATA)  include/* $(ff_prefix_dir)/include
 	$(INSTALL)  -m 555 $(LIST_COMPILE) $(ff_prefix_dir)/lib
 	echo loadpath += \"$(ff_prefix_dir)/lib\"  >$(ff_prefix_dir)/etc/freefem++.pref
