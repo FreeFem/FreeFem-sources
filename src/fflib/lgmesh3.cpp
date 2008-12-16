@@ -800,7 +800,7 @@ class Op4_pf32K : public quad_function<pair<FEbase<K,v_fes> *,int>,R,R,R,K> { pu
 template<class K,class v_fes>    
 KN<K> * pf3r2vect( pair<FEbase<K,v_fes> *,int> p)
 {  
-  cout << "  pf3r2vect " << endl;
+  //  cout << "  pf3r2vect " << endl;
   typedef typename  v_fes::FESpace FESpace;
   KN<K> * x=p.first->x();
   if ( !x) {  // defined 

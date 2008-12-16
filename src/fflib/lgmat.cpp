@@ -458,9 +458,11 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
 }
 
 
+
 bool SetDefaultSolver()
 {
-#ifdef HAVE_LIBUMFPACK
+
+#ifdef HAVE_LIBUMFPACKXXXXXX
     if(verbosity>1)
 	cout << " SetDefault sparse solver to UMFPACK" << endl;
     DefSparseSolver<double>::solver  =BuildSolverUMFPack;
@@ -2178,6 +2180,9 @@ bool SparseDefault()
     return TypeSolveMat::SparseSolver== TypeSolveMat::defaultvalue;
 }
 
+bool Have_UMFPACK_=false;
+bool Have_UMFPACK() { return Have_UMFPACK_;}
+//OneOperator0<bool> *TheSetDefaultSolver=0; // to change the SetDefaultSolver
 void  init_lgmat() 
 
 {
@@ -2202,14 +2207,18 @@ void  init_lgmat()
  Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
  Global.Add("defaulttoCG","(",new OneOperator0<bool>(SetCG));
  Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
- 
+
+ // Global.New("HaveUMFPACK",new OneOperator0<bool>(Have_UMFPACK));
+ //Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetDefaultSolver));
+ /*  
 #ifdef HAVE_LIBUMFPACK
  Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));
- Global.New("HaveUMFPACK",CConstant<bool>(true)); 
+ // Global.New("HaveUMFPACK",CConstant<bool>(true)); 
 #else
  Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetGMRES));
- Global.New("HaveUMFPACK",CConstant<bool>(false)); 
+ // Global.New("HaveUMFPACK",CConstant<bool>(false)); 
 #endif
+ */
  Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefaultSolver));
  
  // pour compatibiliter 
@@ -2225,6 +2234,9 @@ void  init_lgmat()
  
  TheOperators->Add("<-", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,E_F_StackF0F0>(CopyMat<R,Complex>)
 		   );
+
+ extern  void init_UMFPack_solver();
+ init_UMFPack_solver();
 }
 
 

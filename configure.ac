@@ -10,7 +10,7 @@
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.0-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.0-3,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
@@ -403,6 +403,7 @@ ff_gl_ok=no
 ff_glx_ok=no
 ff_agl_ok=no
 ff_libs="$LIBS"
+# echo "  .... LIBS = $LIBS .... " 
 # GL libraries seem to depend on some dlopen capabilities
 if test "$enable_static" != yes -a "$ff_glut_ok" != yes
 then
@@ -466,6 +467,7 @@ then
      	    LIBS="$LIBS $ff_glut"
 	    AC_TRY_LINK_FUNC(glutInit,
 		ff_glut_ok=yes
+	        LIBS="$ff_libs1"
 		break,
 		ff_glut_ok=next);
 	    LIBS="$ff_libs1"
@@ -480,10 +482,12 @@ then
     AC_SUBST(LIBSGLUT,$ff_glut)
     if test -n  "$ff_pthread" ; then 
 	ff_ffglutprog="ffglut${EXEEXT}"
+	AC_DEFINE_UNQUOTED(PROG_FFGLUT,"$ff_ffglutprog", the ffglut application for the new graphics )
 	AC_SUBST(LIBSPTHREAD,$ff_pthread)
     fi
     ff_meditprog="ffmedit${EXEEXT}"
 fi
+# echo "  .... LIBS = $LIBS .... " 
 
 # If we cannot find GL, we cannot compile FreeFem++-agl
 if test "$ff_agl_ok" = no
@@ -1484,3 +1488,11 @@ AC_OUTPUT(Makefile
         AC_MSG_NOTICE([		 --  with X11             $ff_x11])
         AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
 	AC_MSG_NOTICE([    progs: $ff_progs ])
+if test "$ff_glut_ok" != yes  ; then
+ 	AC_MSG_NOTICE([     *********************************************** ])
+ 	AC_MSG_NOTICE([     WARNING: you do not have the new grachics tools ])
+ 	AC_MSG_NOTICE([         because the configure do not find OpenGL, GLUT or pthread  developer stuff ])
+ 	AC_MSG_NOTICE([         read the README to find missing package  ])
+ 	AC_MSG_NOTICE([         F. Hecht  ])
+ 	AC_MSG_NOTICE([     *********************************************** ])
+fi

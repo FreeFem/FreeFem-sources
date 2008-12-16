@@ -3,6 +3,9 @@ verbosity=2;
 mesh3 Th("dodecaedre01");
 fespace Vh(Th,P23d);
 func ue =   2*x*x + 3*y*y + 4*z*z + 5*x*y+6*x*z+1;
+func uex=   4*x+  5*y+6*z;
+func uey=   6*y + 5*x;
+func uez=   8*z +6*x;
 func f= -18. ;
 Vh uhe = ue; // bug ..
 cout << " uhe min:  " << uhe[]. min << " max:" << uhe[].max << endl;
@@ -16,7 +19,8 @@ Vh u,v;
 
 macro Grad3(u) [dx(u),dy(u),dz(u)]  // EOM
 
-problem Lap3d(u,v,solver=CG)=int3d(Th)(Grad3(v)' *Grad3(u)) - int3d(Th)(f*v) + on(0,1,u=ue);
+problem Lap3d(u,v,solver=CG)=int3d(Th)(Grad3(v)' *Grad3(u)) - int3d(Th)(f*v) 
++ on(0,1,u=ue);
 Lap3d;
 cout << " u min::   " << u[]. min << "  max: " << u[].max << endl;
 real err= int3d(Th)( square(u-ue) );

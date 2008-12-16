@@ -298,8 +298,8 @@ public:
 
 class CDomainOfIntegrationBorder3d: public CDomainOfIntegration { 
 public:
-  CDomainOfIntegrationBorder3d( const basicAC_F0 & args) :CDomainOfIntegration(args,int1d,3) {}
-  static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int1d,3);}    
+  CDomainOfIntegrationBorder3d( const basicAC_F0 & args) :CDomainOfIntegration(args,int2d,3) {}
+  static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int2d,3);}    
   static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmesh3>(), true);} // all type
 };
 

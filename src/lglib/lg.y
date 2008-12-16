@@ -765,9 +765,9 @@ int mainff (int  argc, char **argv)
 #ifdef PARALLELE
    init_lgparallele(); 
 #endif 
-#ifdef HAVE_LIBUMFPACK   
-  if(verbosity)  cout << " UMFPACK ";  
-#endif
+   //#ifdef HAVE_LIBUMFPACK   
+     //if(verbosity)  cout << " UMFPACK ";  
+   // #endif
  // callInitsFunct(); Pb opimisation 
   if(verbosity)  cout << endl;
   zzzfff->input(cc);
