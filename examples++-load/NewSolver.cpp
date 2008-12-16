@@ -9,9 +9,33 @@ using namespace std;
 
 #include "MatriceCreuse_tpl.hpp"
 
-#ifndef HAVE_LIBUMFPACK
-extern "C"  {
+ 
+#ifdef HAVE_LIBUMFPACK
+extern "C" {
+#ifdef HAVE_UMFPACK_H
 #include <umfpack.h>
+#else
+#ifdef HAVE_UMFPACK_UMFPACK_H
+#include <umfpack/umfpack.h>
+#else
+#ifdef HAVE_BIG_UMFPACK_UMFPACK_H
+#include <UMFPACK/umfpack.h>
+#else
+#ifdef HAVE_UFSPARSE_UMFPACK_H
+#include <ufsparse/umfpack.h>
+#else
+#ifdef HAVE_SUITESPARSE_UMFPACK_H
+#include <suitesparse/umfpack.h>
+#else
+
+  // Defaults to a local version of the UMFPACK headers
+#include "../../download/include/umfpack.h"
+
+#endif // HAVE_SUITESPARSE_UMFPACK_H
+#endif // HAVE_UFSPARSE_UMFPACK_H
+#endif // HAVE_BIG_UMFPACK_UMFPACK_H
+#endif // HAVE_UMFPACK_UMFPACK_H
+#endif // HAVE_UMFPACK_H
 }
 #endif
 template<class R>
@@ -311,13 +335,14 @@ Init::Init(){
     cout << "\n Add: UMFPACK:  defaultsolver defaultsolverUMFPACK" << endl;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   
-  DefSparseSolver<double>::solver =BuildSolverUMFPack;
-  DefSparseSolver<Complex>::solver =BuildSolverUMFPack;
+  DefSparseSolver<double>::solver =BuildSolverIUMFPack;
+  DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
   if(! Global.Find("defaultsolver").NotNull() )
     {    cout << "\n add defaultsolver" << endl;
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   }
-  Global.Add("defaulttoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));  
+  if(! Global.Find("defaulttoUMFPACK").NotNull() )
+    Global.Add("defaulttoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));  
 }
 
 
