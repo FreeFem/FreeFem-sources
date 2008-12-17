@@ -537,9 +537,18 @@ void OneWindow::DefaultView()
 	  D *=0.05;
 	  zmax = theplot->fmax;
 	  zmin = theplot->fmin;
-	  
-	  A -= D;
-	  B += D;
+	  if(theplot->boundingbox.size() !=4)
+	    {
+	      A -= D;
+	      B += D;
+	    }
+	  else
+	    {
+	      R x1=theplot->boundingbox[0],y1=theplot->boundingbox[1];
+	      R x2=theplot->boundingbox[2],y2=theplot->boundingbox[3];
+	      A = R2(min(x1,x2),min(y1,y2));
+	      B = R2(max(x1,x2),max(y1,y2));
+	    }
 	  
 	  if (theplot->aspectratio)
 	      cadreortho(A,B);
@@ -615,14 +624,14 @@ void  OneWindow::resize(int w,int h)
 
 void  OneWindow::zoom(int w,int h,R coef)
 {
-    GLdouble x=w,y=h,z=(zmin+zmax)/2.;
+    GLdouble x=w,y=height-h,z=(zmin+zmax)/2.;
     GLdouble xx,yy,zz;
     
 
     GLint ok= gluUnProject( x,y,z,modelMatrix,projMatrix,viewport,&xx,&yy,&zz);
     ShowGlerror(" UnPro .. ");
-    if(debug>2)
-    cout << x << " " << y << " " << z << " -> " << xx << " " << yy << " " << zz << endl;
+    //    if(debug>2)
+    cout << " ok " << ok << " " << x << " " << y << " " << z << " -> " << xx << " " << yy << " " << zz << endl;
     R2  oD(oBmin,oBmax);
     R2  D(Bmin,Bmax);
     R2 O(xx,yy);// oBmin.x+D.x*xx/width,oBmin.y+D.y*yy/height); 
