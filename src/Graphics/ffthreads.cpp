@@ -27,6 +27,7 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
+#include <cstdlib>
 using namespace std;
 
 #define ERROR_FF(msg) (cerr << msg<<endl, assert(0), exit(1)) 

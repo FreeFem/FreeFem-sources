@@ -1,10 +1,10 @@
 #!/bin/sh
 # Create a loadable object from a C++ function defined in a .cpp file
 # $Id$
-FFVERSION='3.0-3'
-FFCXXFLAGS='-g  -DDRAWING -DBAMG_LONG_LONG -DCHECK_KN -fno-inline  -fexceptions   -I/usr/X11/include'
+FFVERSION='@VERSION@'
+FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@'
 INCFF=
-if [ -z "$CXX" ] ; then CXX='g++' ; fi
+if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
 if [ "$CXX" = '@'CXX'@' ] ; then CXX=""; fi
 if [ "$FFCXXFLAGS" = '@'CXXFLAGS'@' ] ; then FFCXXFLAGS=""; fi
 if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
@@ -15,8 +15,8 @@ if [ -z "$INCFF" ] ; then
 	INCFF="-Iinclude"
     elif [ -d "FFAPPLI_INC/." ] ; then 
 	INCFF="-IFFAPPLI_INC" 
-    elif [ -d '/usr/local/lib/ff++/3.0-3/include/.' ] ; then 
-	INCFF='-I/usr/local/lib/ff++/3.0-3/include' 
+    elif [ -d '@ff_prefix_dir@/include/.' ] ; then 
+	INCFF='-I@ff_prefix_dir@/include' 
     else
 	echo " erreur PB include freefem++ directory " ;
 	exit 1;
