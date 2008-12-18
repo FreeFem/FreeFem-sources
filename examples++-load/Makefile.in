@@ -231,7 +231,7 @@ TESTS_ENVIRONMENT = PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
 	VISUALCHECK=$(VISUALCHECK)
 
-EXTRA_DIST = load.link dfft.link  include.tar.gz \
+EXTRA_DIST = load.link.in load.link  dfft.link  include.tar.gz \
  BernadiRaugel.cpp Morley.cpp dfft.cpp  \
  funcTemplate.cpp mat_dervieux.cpp mat_psi.cpp myfunction.cpp \
  mat_dervieux.cpp convect_dervieux.edp funcTemplate.cpp AFunction_ext.hpp \
@@ -600,19 +600,21 @@ $(LIST_COMPILE):ff-c++ include Makefile
 clean-local:
 	-rm *.o  $(LIST_COMPILE)  regtests.edp makeref.edp
 	-rm -rf include
-ff-c++:load.link Makefile
-	../config.status  --file=ff-c++:load.link
-#	#sed <load.link >ff-c++ -e 's;INC=";INC="-I$(ff_prefix_dir)/include;' 
+ff-c++:load.link.in  Makefile load.link
+	../config.status  --file=ff-c++:load.link.in
 	chmod a+x ff-c++
+load.link:load.link.in  Makefile
+	../config.status  --file=load.link:load.link.in
+	chmod a+x load.link
 
 install-exec-local:: load_compile
-	$(mkinstalldirs) -m 755 $(ff_prefix_dir)/lib
-	$(mkinstalldirs) -m 755 $(ff_prefix_dir)/include
-	$(mkinstalldirs) -m 755 $(ff_prefix_dir)/etc
-	$(INSTALL_DATA)  include/* $(ff_prefix_dir)/include
-	$(INSTALL)  -m 555 $(LIST_COMPILE) $(ff_prefix_dir)/lib
-	echo loadpath += \"$(ff_prefix_dir)/lib\"  >$(ff_prefix_dir)/etc/freefem++.pref
-	echo includepath += \"$(ff_prefix_dir)/edp\"  >>$(ff_prefix_dir)/etc/freefem++.pref
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
+	$(INSTALL_DATA)  include/* $(DESTDIR)$(ff_prefix_dir)/include
+	$(INSTALL)  -m 555 $(LIST_COMPILE) $(DESTDIR)$(ff_prefix_dir)/lib
+	echo loadpath += \"$(DESTDIR)$(ff_prefix_dir)/lib\"  >$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
+	echo includepath += \"$(DESTDIR)$(ff_prefix_dir)/edp\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
 	$(INSTALL_SCRIPT) ff-c++  ${bindir}
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
