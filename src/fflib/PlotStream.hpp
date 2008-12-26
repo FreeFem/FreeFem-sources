@@ -40,8 +40,7 @@ public:
   PlotStream& write(const double& bb) {double b=w_endian(bb);write(reinterpret_cast<const void *> (&b),sizeof(double));return *this;}
   PlotStream& write(const string& b) {  
     int l=b.size();
-    // cout << " l : " << b.size() <<endl; 
-    write(reinterpret_cast<const void *> (&l),sizeof(size_t));
+    write(i);
     write(b.data(),l);
     return *this;
   }
@@ -118,11 +117,9 @@ public:
   PlotStream& read( int& b) {read(reinterpret_cast< void *> (&b),sizeof(int)); b=r_endian(b);return *this;}
   PlotStream& read( double& b) {read(reinterpret_cast< void *> (&b),sizeof(double)); b=r_endian(b);return *this;}
   PlotStream& read( string& b) {  	
-    int l=b.size();
-    read(reinterpret_cast< void *> (&l),sizeof(int));
-    l=r_endian(l);
+    int l;
+    read(l);
     b.resize(l);
-    //    cout << "read str :len str=" << l << endl;
     read(& (b[0]),l);
     return *this;
   }
