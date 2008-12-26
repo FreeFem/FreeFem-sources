@@ -430,7 +430,7 @@ cvmsh2.exe:  $(LIBS_FF)
 	g++   -mno-cygwin  -Wl,--enable-auto-import ../bamg/cvmsh2.o  $^ -o $@ 
 drawbdmesh.exe:../std/Pcrgraph.o  ../bamg/drawbdmesh.o $(LIBS_FF)
 	g++   -mno-cygwin -mwindows  -Wl,--enable-auto-import  $^ -o $@ 
-ff-c++:../../examples++-load/load.link
+ff-c++:../../examples++-load/load.link.in
 	../../config.status  --file=ff-c++:$<
 	chmod a+x ff-c++
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
