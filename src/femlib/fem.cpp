@@ -1924,8 +1924,8 @@ Mesh::Mesh(const  Serialize &serialized)
 Serialize  Mesh::serialize() const
 {
     
-    size_t l=0;
-    l += sizeof(long);
+    long long  l=0;
+    l += sizeof(long long);
     l += 3*sizeof(int);
     l += nt*(sizeof(int)*4);
     l += nv*( sizeof(int) + sizeof(double)*2);
