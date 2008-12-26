@@ -1940,7 +1940,7 @@ Serialize  Mesh::serialize() const
     serialized.put( pp,nv);
     serialized.put( pp,neb);
     if (verbosity>2) 
-	cout << " mesh Serialized : " << nt << " " << nv << " " << neb << endl;
+      cout << " mesh Serialized : " << l << " "  << nt << " " << nv << " " << neb << endl;
     for (int i=0;i<nv;i++)
     {
 	serialized.put(pp, vertices[i].x);
