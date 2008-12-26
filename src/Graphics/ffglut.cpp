@@ -27,8 +27,8 @@ using namespace std;
 
 
 // add for the gestion of the endianness of the file.
-PlotStream::fBytes PlotStream::zott; //0123;
-PlotStream::hBytes PlotStream::zottffss; //012345678;
+//PlotStream::fBytes PlotStream::zott; //0123;
+//PlotStream::hBytes PlotStream::zottffss; //012345678;
 // ---- FH
 
 using namespace Fem2D;
@@ -79,7 +79,7 @@ int   ReadOnePlot(FILE *fp)
 
   PlotStream f(fp);
   f.set_binary_mode();
-  const char *  magic="#!ffglutdata...";
+  const char *  magic="#!ffglutdata2..";
   err=0;
   // init ..
   if(kread==-1)
@@ -992,7 +992,10 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       else if(what==4)
 	p=new OnePlotBorder(fin);
       else
+	{
+	  cout << "Bizarre unkown what :  " << what<< endl;
 	ffassert(0);
+	}
       ffassert(p);
       plots.push_back(p);
       p->bb(Pmin,Pmax);
@@ -1578,6 +1581,12 @@ THREADFUNC(ThreadRead,fd)
 int main(int argc,  char** argv)
 {
     glutInit(&argc, argv);
+    if(argc>2) {
+      if( strcmp(argv[1],"-nv")==0) debug=0;
+      if( strcmp(argv[1],"-v")==0) debug=2;
+      if( strcmp(argv[1],"-vv")==0) debug=5;
+      if( strcmp(argv[1],"-vvv")==0) debug=10;
+    }
     if(debug>1)		
     cout <<  " mode read = " << MODE_READ_BINARY << endl;
     datafile =0;;

@@ -28,6 +28,7 @@
 #ifndef SERIALEZE_HPP_
 #define SERIALEZE_HPP_
 #include <cstring>
+#include "endian.hpp"
 struct MPIrank;
  class Serialize {  
    // we store a refcounter in the pointer p a adresse p-sizeof(long)
@@ -61,20 +62,25 @@ struct MPIrank;
   
  template<typename T>  inline void get(size_t & k,T & x) const
    { 
+     T xx;//= r_endian(x);
      assert(k<=lg+sizeof(T));
-     memcpy(&x,p+ k,sizeof(T));
-     k +=  sizeof(T);   }
- template<typename T>  inline void put(size_t & k,const T & x) 
+     memcpy(&xx,p+ k,sizeof(T));
+     k +=  sizeof(T);
+     x=r_endian(xx);
+   }
+   template<typename T>  inline void put(size_t & k,const T & x) 
    { 
      if ( !(k<=lg+sizeof(T)) )
-     {
-       cout << " assert put " << k << " <=" << lg + sizeof(T) << endl;
-       assert((k<=lg+sizeof(T)));
-     }
-    memcpy( p + k,&x,sizeof(T));
-   k += sizeof(T);  }
+       {
+	 cout << " assert put " << k << " <=" << lg + sizeof(T) << endl;
+	 assert((k<=lg+sizeof(T)));
+       }
+     T xx= w_endian(x);
+     memcpy( p + k,&xx,sizeof(T));
+     k += sizeof(T);
+   }
    
-  private:
+ private:
    long & count() const  { return * (long*) (void*) (p-sizeof(long));}
    void operator=(Serialize & s) ; // no affectation
 

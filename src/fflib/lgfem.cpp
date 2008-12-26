@@ -63,8 +63,8 @@ using namespace std;
 #include "PlotStream.hpp"
 
 // add for the gestion of the endianness of the file.
-PlotStream::fBytes PlotStream::zott; //0123;
-PlotStream::hBytes PlotStream::zottffss; //012345678;
+//PlotStream::fBytes PlotStream::zott; //0123;
+//PlotStream::hBytes PlotStream::zottffss; //012345678;
 // ---- FH
 namespace bamg { class Triangles; }
 namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso); }
@@ -2568,18 +2568,20 @@ AnyType Plot::operator()(Stack s) const  {
 	      }
 	    else if (l[i].what==3 )
 	      {
-		err=0;
 		tab x=l[i].evalt(0,s);
 		tab y=l[i].evalt(1,s);
-		if( x.N() >0 && y.N() != x.N())
+		if( x.N() >0 && y.N() == x.N())
 		  {
+		    err=0; // correction dec 2008 FH 
 		    theplot << what ;
 		    theplot << x << y ;
 		  }
 		else  
-		      if(verbosity)
-			cerr << "Warning:  Plot of array with wrong size (item "<< i + 1 
-			     << ") sizes = " << x.size()<< " , " << y.size()  << endl;
+		  {
+		    if(verbosity)
+		      cerr << "Warning:  Plot of array with wrong size (item "<< i + 1 
+			   << ") sizes = " << x.size()<< " , " << y.size()  << endl;
+		  }
 		
 	      }
 	    else if (l[i].what==4 )

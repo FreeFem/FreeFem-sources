@@ -118,10 +118,11 @@ struct OnePlotBorder: public OnePlot {
 
 // add 11/12/2008 for gestion of error FH  (what -1) 
 struct OnePlotError: public OnePlot {
-  int item;
+  long item;
   OnePlotError(PlotStream & f) 
     : OnePlot(-1)
-  {    f >> item;   }	  
+  {    f >> item; 
+     }	  
   void Draw(OneWindow *win) ;
   
 };

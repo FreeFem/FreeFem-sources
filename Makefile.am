@@ -17,9 +17,10 @@ WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS \
 logo.ico copysharedlibs.sh COPYRIGHT edp.nedit INNOVATION reconfigure \
 mode-mi-edp.zip aclocal.m4  acmacros.m4   acoptim.m4    \
 freefem++.spec crimon-freefem++.zip \
-examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \
+Install-MacOS.command.in \
 examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \
-examples-bamg/test/dotest*.pl Install-MacOS.command.in
+examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \
+examples-bamg/test/dotest*.pl 
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)

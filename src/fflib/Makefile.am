@@ -39,6 +39,7 @@ environment.cpp environment.hpp string_def.cpp \
 ../femlib/libmesh5.c \
 glumesh2D.cpp \
 PlotStream.hpp \
+endian.hpp \
 ff++.hpp \
 ../Eigen/arpackff.hpp 
 
