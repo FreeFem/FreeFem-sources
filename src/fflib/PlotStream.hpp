@@ -40,7 +40,7 @@ public:
   PlotStream& write(const double& bb) {double b=w_endian(bb);write(reinterpret_cast<const void *> (&b),sizeof(double));return *this;}
   PlotStream& write(const string& b) {  
     int l=b.size();
-    write(i);
+    write(l);
     write(b.data(),l);
     return *this;
   }
