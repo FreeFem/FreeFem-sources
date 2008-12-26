@@ -1878,7 +1878,7 @@ Mesh::Mesh(const  Serialize &serialized)
     bnormalv=0;
     //  ---  assert(serialized.samewhat(magicmesh));
     size_t  pp=0;;
-    long l;
+    long long l;
     serialized.get(pp,l);
     serialized.get( pp,nt);
     serialized.get( pp,nv);
