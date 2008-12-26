@@ -247,7 +247,7 @@ void lgerror (const char* s) ;
 %% 
 
 start:   input ENDOFFILE {
-		        const char *  magicffglut="#!ffglutdata...\n";
+		        const char *  magicffglut="#!ffglutdata2..\n";
                         if(ThePlotStream) fwrite(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
                         $1+=currentblock->close(currentblock);

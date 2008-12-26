@@ -518,7 +518,7 @@ public:
       
 private:
   void read(const char * filename); 
-  void read(ifstream & f); 
+  void read(ifstream & f,bool bin=false); 
   void BuildBoundaryAdjacences();
   void ConsAdjacence();
   void Buildbnormalv(); 

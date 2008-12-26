@@ -660,69 +660,69 @@ public:
 		} 
 		//  cout << " Bounding Box = " << Pmin <<" " <<  Pmax << endl;       
 	    }
-	    void Mesh::read(const char * filename)
+    void Mesh::read(const char * filename)
     {
-	 ifstream f(filename);
+	ifstream f(filename);
 	if (!f) {
 	    cerr << "Erreur ouverture du fichier " << filename << endl;
 	throw(ErrorExec("exit",1));}
 	// ffassert(f);
 	if(verbosity)
 	    cout << " -- Mesh::read On file \"" <<filename<<"\""<<  endl;
-	 read(f);
+	read(f);
     }
-	    void Mesh::read(ifstream & f)
-	    { // read the mesh
-		dim=2;
-		ne=0;
-		ntet=0;
-		volume=0;
-		TriangleConteningVertex =0;
-		BoundaryAdjacencesHead=0;
-		BoundaryAdjacencesLink=0;
-		BoundaryEdgeHeadLink=0;
-		quadtree =0;
-		NbMortars=0;
-		tet=0;
-		edges=0;    
-		mortars=0;
-		TheAdjacencesLink =0;
-		area=0;
-		bnormalv=0;
-		
-		int i,i0,i1,i2,ir;
-		
-
-		f >> nv >> nt >> neb ;
-		if(verbosity>10)
-		    cout << "    Nb of Vertex " << nv << " " << " Nb of Triangles " 
-			<< nt << " Nb of boundary edge " << neb <<  endl;
-		ffassert(f.good() && nt && nv) ;
-		triangles = new Triangle [nt];
-		vertices  = new Vertex[nv];
-		bedges    = new BoundaryEdge[neb];
-		area=0;
-		ffassert(triangles && vertices && bedges);
-		
-		for (i=0;i<nv;i++)    
-		    f >> vertices[i],ffassert(f.good());
-		
-		for (i=0;i<nt;i++) { 
-		    f >> i0 >> i1 >> i2 >> ir;
-		    ffassert(f.good() && i0>0 && i0<=nv && i1>0 && i1<=nv && i2>0 && i2<=nv);
-		    triangles[i].set(vertices,i0-1,i1-1,i2-1,ir); 
-		    area += triangles[i].area;}
-		
-		for (i=0;i<neb;i++) { 
-		    f >> i0 >> i1 >> ir;
-		    bedges[i] = BoundaryEdge(vertices,i0-1,i1-1,ir); }
-		
-		if(verbosity)
-		    cout << "   End of read: area on mesh = " << area <<endl;  
-		ConsAdjacence();
-		//   BoundingBox(cMin,cMax);//  Set of cMin,Cmax
-	    }
-	    
+    void Mesh::read(ifstream & f , bool bin )
+    { // read the mesh
+	dim=2;
+	ne=0;
+	ntet=0;
+	volume=0;
+	TriangleConteningVertex =0;
+	BoundaryAdjacencesHead=0;
+	BoundaryAdjacencesLink=0;
+	BoundaryEdgeHeadLink=0;
+	quadtree =0;
+	NbMortars=0;
+	tet=0;
+	edges=0;    
+	mortars=0;
+	TheAdjacencesLink =0;
+	area=0;
+	bnormalv=0;
+	
+	int i,i0,i1,i2,ir;
+	
+	
+	f >> nv >> nt >> neb ;
+	if(verbosity>10)
+	    cout << "    Nb of Vertex " << nv << " " << " Nb of Triangles " 
+	    << nt << " Nb of boundary edge " << neb <<  endl;
+	ffassert(f.good() && nt && nv) ;
+	triangles = new Triangle [nt];
+	vertices  = new Vertex[nv];
+	bedges    = new BoundaryEdge[neb];
+	area=0;
+	ffassert(triangles && vertices && bedges);
+	
+	for (i=0;i<nv;i++)    
+	    f >> vertices[i],ffassert(f.good());
+	
+	for (i=0;i<nt;i++) { 
+	    f >> i0 >> i1 >> i2 >> ir;
+	    ffassert(f.good() && i0>0 && i0<=nv && i1>0 && i1<=nv && i2>0 && i2<=nv);
+	    triangles[i].set(vertices,i0-1,i1-1,i2-1,ir); 
+	area += triangles[i].area;}
+	
+	for (i=0;i<neb;i++) { 
+	    f >> i0 >> i1 >> ir;
+	bedges[i] = BoundaryEdge(vertices,i0-1,i1-1,ir); }
+	
+	if(verbosity)
+	    cout << "   End of read: area on mesh = " << area <<endl;  
+	ConsAdjacence();
+	//   BoundingBox(cMin,cMax);//  Set of cMin,Cmax
+    }
+    
 	    Mesh::Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b)
 	    {
 		TriangleConteningVertex =0;
