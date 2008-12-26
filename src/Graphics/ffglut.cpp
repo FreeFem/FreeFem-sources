@@ -25,6 +25,7 @@ using namespace std;
 #include "RNM.hpp"
 #include "PlotStream.hpp"
 
+extern long verbosity;
 
 // add for the gestion of the endianness of the file.
 //PlotStream::fBytes PlotStream::zott; //0123;
@@ -877,7 +878,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   while(1)
     {
       fin >> cas;
-      if((debug > 4)) cout << " read cas: " << cas << " " << PlotStream::dt_endarg << endl;
+      if((debug > 4)) cout << " read cas: " << cas << "  " << PlotStream::dt_endarg << endl;
       
       if(cas==PlotStream::dt_endarg) break;
       switch (cas) {
@@ -1585,7 +1586,7 @@ int main(int argc,  char** argv)
       if( strcmp(argv[1],"-nv")==0) debug=0;
       if( strcmp(argv[1],"-v")==0) debug=2;
       if( strcmp(argv[1],"-vv")==0) debug=5;
-      if( strcmp(argv[1],"-vvv")==0) debug=10;
+      if( strcmp(argv[1],"-vvv")==0) debug=10, verbosity=1000;
     }
     if(debug>1)		
     cout <<  " mode read = " << MODE_READ_BINARY << endl;
