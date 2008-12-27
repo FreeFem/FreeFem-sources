@@ -147,25 +147,12 @@ public:
     for (size_t i=2;i<args.size();i++){
       size_t jj=i-2;
 
-      if ( args[i].left()==atype<double>() )
+      if ( BCastTo<double>( args[i] ))
 	{
 	  l[jj].what=1;
 	  l[jj].nbfloat=1;
 	  l[jj][0]=to<double>( args[i] );
 	  
-	}
-      else if ( args[i].left()==atype<double *>() )
-	{
-	  l[jj].what=1;
-	  l[jj].nbfloat=1;
-	  l[jj][0]=to<double>( args[i] );
-	  
-	}
-      else if ( BCastTo<pfer>(args[i]) )
-	{
-	  l[jj].what=1;
-	  l[jj].nbfloat=1;
-	  l[jj][0]=to<double>( args[i] );
 	}
       else if ( args[i].left()==atype<E_Array>() )
 	{
@@ -173,7 +160,7 @@ public:
 	  //cout << "taille" << a0->size() << endl;
 	  //if (a0->size() != ddim || a0->size() != stsize) 
 	  //  CompileError("savesol in 2D: vector solution is 2 composant, vector solution is 3 composant");
-
+	  
 	  if( a0->size() == ddim){
 	    // vector solution
 	    l[jj].what=2;
@@ -193,6 +180,7 @@ public:
 	  
 	}
       else {
+	cout << " arg " << i << " " << args[i].left() << endl;
 	CompileError("savesol in 2D: Sorry no way to save this kind of data");
       }
       
@@ -363,35 +351,22 @@ public:
     //cout << "construction data medit solution avec datasolMesh3_Op" << args << endl;
     args.SetNameParam(n_name_param,name_param,nargs); 
 
-    if (BCastTo<string *>(args[0])){
+    //if (BCastTo<string *>(args[0])){
       filename = CastTo<string *>(args[0]);
-    }
-    if (BCastTo<pmesh3>(args[1])){
+      // }
+      //if (BCastTo<pmesh3>(args[1])){
       eTh= CastTo<pmesh3>(args[1]);
-    }
+      // }
     nbofsol = l.size();
     for (size_t i=2;i<args.size();i++){
       size_t jj=i-2;
 
-      if ( args[i].left()==atype<double>() )
+      if ( BCastTo<double>(args[i]))
 	{
 	  l[jj].what=1;
 	  l[jj].nbfloat=1;
 	  l[jj][0]=to<double>( args[i] );
 	  
-	}
-      else if ( args[i].left()==atype<double *>() )
-	{
-	  l[jj].what=1;
-	  l[jj].nbfloat=1;
-	  l[jj][0]=to<double>( args[i] );
-	  
-	}
-      else if ( BCastTo< pair< FEbase<double,v_fes> *,int> >(args[i]) )
-	{
-	  l[jj].what=1;
-	  l[jj].nbfloat=1;
-	  l[jj][0]=to<double>( args[i] );
 	}
       else if ( args[i].left()==atype<E_Array>() )
 	{
@@ -715,25 +690,12 @@ public:
     for (size_t i=1;i<args.size();i++){
       size_t jj=i-1;
 
-      if ( args[i].left()==atype<double>() )
+      if (  BCastTo<double>(args[i])  )
 	{
 	  l[jj].what=1;
 	  l[jj].nbfloat=1;
 	  l[jj][0]=to<double>( args[i] );
 	  
-	}
-      else if ( args[i].left()==atype<double *>() )
-	{
-	  l[jj].what=1;
-	  l[jj].nbfloat=1;
-	  l[jj][0]=to<double>( args[i] );
-	  
-	}
-      else if ( BCastTo<pfer>(args[i]) )
-	{
-	  l[jj].what=1;
-	  l[jj].nbfloat=1;
-	  l[jj][0]=to<double>( args[i] );
 	}
       else if ( args[i].left()==atype<E_Array>() )
 	{
@@ -812,7 +774,7 @@ basicAC_F0::name_and_type PopenMeditMesh_Op::name_param[]= {
 AnyType PopenMeditMesh_Op::operator()(Stack stack)  const 
 {
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-  long order (arg(0,stack,0));
+  long order (arg(0,stack,1));
   //
   int ver = GmfFloat;
   int dimp =2;
@@ -1462,22 +1424,7 @@ public:
     
     for (size_t i=1;i<args.size();i++){
       size_t jj=i-1;
-
-      if ( args[i].left()==atype<double>() )
-	{
-	  l[jj].what=1;
-	  l[jj].nbfloat=1;
-	  l[jj][0]=to<double>( args[i] );
-	  
-	}
-      else if ( args[i].left()==atype<double *>() )
-	{
-	  l[jj].what=1;
-	  l[jj].nbfloat=1;
-	  l[jj][0]=to<double>( args[i] );
-	  
-	}
-      else if ( BCastTo<pfer>(args[i]) )
+      if ( BCastTo<double>(args[i]) )
 	{
 	  l[jj].what=1;
 	  l[jj].nbfloat=1;
@@ -1514,7 +1461,7 @@ public:
 	l[jj][0] = CastTo<pmesh3>(args[i]);
       }
       else {
-	CompileError("medit: Sorry no way to save this kind of data");
+	CompileError("medit 3d: Sorry no way to save this kind of data");
       }      
     }
     // determination of the number of solutions.
@@ -1555,7 +1502,7 @@ template<class v_fes>
 AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const 
 {
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-  long order (arg(0,stack,0));
+  long order (arg(0,stack,1));
   //
   int ver = GmfFloat;
   int dimp =3;
