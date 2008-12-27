@@ -60,7 +60,8 @@ typedef void *Stack;
 
 template<class T>
 T * Stack_offset (Stack stack,size_t offset)  
-  {return   (T *) (void *) (((char *) stack)+offset);}
+{  //cout << "Stack_offset" << stack << " " << offset << endl;
+    return   (T *) (void *) (((char *) stack)+offset);}
 
 template<class T>
 T * & Stack_Ptr (Stack stack,size_t offset)  

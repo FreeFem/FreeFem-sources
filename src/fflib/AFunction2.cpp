@@ -670,16 +670,32 @@ E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)
 
 E_Routine::~E_Routine() { delete [] param;}
 
+struct CleanE_Routine {
+  const E_Routine * er; 
+    Stack s;
+    AnyType * l;
+    CleanE_Routine(const  E_Routine * r,Stack ss,AnyType *ll): er(r),s(ss),l(ll) {}
+    ~CleanE_Routine() {
+   // cout << " Clean E_routine " << er <<endl;	
+    (*er->clean)(s);
+    delete [] l; 
+    }
+};
+
 AnyType E_Routine::operator()(Stack s)  const  {
    debugstack.push(make_pair<const E_Routine*,int>(this,TheCurrentLine));
    const int lgsave=BeginOffset*sizeof(void*);
    char  save[lgsave];
    AnyType ret=Nothing;
    memcpy(save,s,lgsave); // save register 
-   AnyType *listparam=Add2StackOfPtr2FreeA(s,new AnyType[nbparam]);
+    AnyType *listparam;
+   Add2StackOfPtr2Free(s,new CleanE_Routine(this,s,listparam=new AnyType[nbparam]));
+  //  Add2StackOfPtr2FreeA(s,new AnyType[nbparam]);
+    
+    //   AnyType *listparam =Add2StackOfPtr2FreeA(s,new AnyType[nbparam]);
    // 
  //  WhereStackOfPtr2Free(s)->Add2StackOfPtr2Free(s,listparam);
-   
+//  to day the memory gestion of the local variable are static,   
    for (int i=0;i<nbparam;i++)
      listparam[i]= (*param[i])(s); // set of the parameter 
    Stack_Ptr<AnyType>(s,ParamPtrOffset) = listparam;
@@ -688,7 +704,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
    try {  
       ret=(*code)(s);  }
    catch( E_exception & e) { 
-           (*clean)(s); 
+          //  (*clean)(s);   the celan is done in CleanE_Routine delete . 
           // cout << " catch " << e.what() << " clean & throw " << endl;
            if (e.type() == E_exception::e_return)  
               ret = e.r;
@@ -849,10 +865,10 @@ Routine::Routine(aType tf,aType tr,const char * iden,  ListOfId *l,Block * & cb)
      {
        delete l;  // add  FH 24032005 (trap ) 
        cb = currentblock; 
-	 cout <<"Routine: tf = " << *tf << "  " <<  *tr << endl;
+	// cout <<"Routine: tf = " << *tf << "  " <<  *tr << endl;
        for (size_t i=0;i<param.size();i++)
        {
-	   cout << "Routine " << i << " ref=  " << param[i].ref << " " << *param[i].r << " " << *param[i].r->right() << endl;
+	//   cout << "Routine " << i << " ref=  " << param[i].ref << " " << *param[i].r << " " << *param[i].r->right() << endl;
            currentblock->NewID(param[i].r,param[i].id,C_F0(new E_F0para(i),// modif FH 2007 
 							   param[i].r), 
 							  // (param[i].ref ? param[i].r :  param[i].r->right() ),

@@ -661,7 +661,9 @@ class LinearGMRES : public OneOperator
    void addMatMul(const  Kn_  & xx, Kn_ & Ax) const { 
       ffassert(xx.N()==Ax.N());
       x =xx;
-      Ax  += GetAny<Kn>((*mat)(stack)); } 
+      Ax  += GetAny<Kn>((*mat)(stack));
+      WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008 
+   } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
   virtual bool ChecknbLine(int n) const { return true;}  
   virtual bool ChecknbColumn(int m) const { return true;} 

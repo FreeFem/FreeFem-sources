@@ -1659,7 +1659,7 @@ inline Type_Expr  NewVariable(aType t,size_t &off)
    size_t o= align8(off);//  align    
  //  off += t->un_ptr_type->size;
  // bug    off += t->size;
-   off += t->un_ptr_type->size; // coorection 16/09/2003 merci à Richard MICHEL
+   off += t->un_ptr_type->size; // correction 16/09/2003 merci à Richard MICHEL
    return  Type_Expr(t,new T(o,t));
 } 
 

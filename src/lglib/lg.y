@@ -398,11 +398,12 @@ declaration:   type_of_dcl {dcltype=$1} list_of_dcls ';' {$$=$3}
                       rettype[++kkembtype] = $2->right();
                       routineinblock[kkembtype] = currentblock;
                       $<routine>5=new Routine($1,$2->right(),$3,$5,currentblock);
+		      // routineinblock[kkembtype]->Add($3,"(",$<routine>5); //pas recursif pour l'instanat test  FH 27 dec 2008
                      // cout << " \n after new routine \n " << endl;                      
                       }
                     '{' instructions'}' 
                      { currentblock=$<routine>5->Set($9);
-                       currentblock->Add($3,"(",$<routine>5);
+                       currentblock->Add($3,"(",$<routine>5); //pas recursif pour l'instant test  FH 27 dec 2008
                        kkembtype--;
                        $$=0;
                     
