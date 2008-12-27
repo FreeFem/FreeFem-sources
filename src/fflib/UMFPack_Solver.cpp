@@ -285,7 +285,7 @@ inline MatriceMorse<double>::VirtualSolver *
 BuildSolverIUMFPack(const MatriceMorse<double> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym ,
 		   int NbSpace,int itmax ,const  void * precon, void * stack)
 {
-    cout << " BuildSolverUMFPack<double>" << endl;
+  //cout << " BuildSolverUMFPack<double>" << endl;
     return new SolveUMFPACK<double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
 
@@ -293,7 +293,7 @@ inline MatriceMorse<Complex>::VirtualSolver *
 BuildSolverIUMFPack(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym ,
 		   int NbSpace,int itmax ,const  void * precon, void * stack)
 {
-    cout << " BuildSolverUMFPack<Complex>" << endl;
+  //cout << " BuildSolverUMFPack<Complex>" << endl;
     return new SolveUMFPACK<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
 
