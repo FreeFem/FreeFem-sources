@@ -5,6 +5,7 @@ v 3.0-3 (27 dec 2008)
     - correct ffglut in case of plot of array and when the plot is empty.
       remark ffglut is not compatible with previous version (sorry)
     the filename create with option w is ffglut_xxxx.ppm (window dump)
+    correct int2d on 3d mesh3d for Neuman Boundary condition
 v 3.0-2 ( 9 dec 2008)
   - ff-c++ to dynamic load program (add ff++.hpp file  with all include, may be)
   - correct the Makefiles et load-link, 
