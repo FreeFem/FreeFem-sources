@@ -774,6 +774,7 @@ void ThePlot::DrawHelp(OneWindow *win)
   win->Show("m)  switch between show  meshes or not",i++);
   win->Show("p)  switch between show  quadtree or not (for debuging)",i++);
   win->Show("t)  find  Triangle ",i++);
+  win->Show("w)  window dump in file ffglut00NN.ppm ",i++);
   win->Show("?)  show this help window",i++);
   win->Show("any other key : nothing ",++i);
 }
@@ -1348,7 +1349,7 @@ bool WindowDump(int width,int height)
     }
     
     /* Open the file */
-    sprintf(fname,"L_%04d.ppm",counter);
+    sprintf(fname,"ffglut_%04d.ppm",counter);
     if ((fptr = fopen(fname, MODE_WRITE_BINARY)) == NULL) {
 	fprintf(stderr,"WindowDump - Failed to open file for window dump\n");
 	return(false);

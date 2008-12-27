@@ -193,7 +193,7 @@ int loadMesh_popen_bin(pMesh mesh) {
       assert(mesh->point);
       
       for (k=1; k<=mesh->np; k++) {
-	printf("lecture point du maillage k=%i np=%i ver=%i \n",k,mesh->np,mesh->ver);
+	if(0) printf("lecture point du maillage k=%i np=%i ver=%i \n",k,mesh->np,mesh->ver);
 	ppt = &mesh->point[k];
 	
 	if(mesh->ver==GmfFloat)
