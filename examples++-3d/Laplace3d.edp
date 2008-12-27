@@ -16,6 +16,7 @@ mesh3 Th=buildlayers(Th2,nn,
 
 
 fespace Vh(Th,P23d);
+
 func ue =   2*x*x + 3*y*y + 4*z*z + 5*x*y+6*x*z+1;
 func uex=   4*x+  5*y+6*z;
 func uey=   6*y + 5*x;
@@ -45,4 +46,4 @@ cout << int3d(Th)(1.) << " = " << Th.mesure << endl;
 Vh d= ue-u;
 cout <<  " err = " << err <<  " diff l^\intfy = " << d[].linfty << endl;
 assert(err < 1e-9);
-medit(" Sol ", Th, u[] );
+medit(" Sol ", Th, u ,order=1);//  to see the sol in P1 
