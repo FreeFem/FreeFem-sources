@@ -9,13 +9,13 @@ if [ "$CXX" = '@'CXX'@' ] ; then CXX=""; fi
 if [ "$FFCXXFLAGS" = '@'CXXFLAGS'@' ] ; then FFCXXFLAGS=""; fi
 if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
 if [ -z "$INCFF" ] ; then
-    if [ -d "@INCFF@/." ] ; then
+    if [ -f "@INCFF@/ff++.hpp" ] ; then
 	INCFF="-I@INCFF@"
-    elif [ -d include/. ]; then
+    elif [ -f include/ff++.hpp ]; then
 	INCFF="-Iinclude"
-    elif [ -d "FFAPPLI_INC/." ] ; then 
+    elif [ -f "FFAPPLI_INC/ff++.hpp" ] ; then 
 	INCFF="-IFFAPPLI_INC" 
-    elif [ -d '@ff_prefix_dir@/include/.' ] ; then 
+    elif [ -f '@ff_prefix_dir@/include/ff++.hpp' ] ; then 
 	INCFF='-I@ff_prefix_dir@/include' 
     else
 	echo " erreur PB include freefem++ directory " ;
