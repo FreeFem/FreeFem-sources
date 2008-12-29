@@ -689,8 +689,8 @@ AnyType E_Routine::operator()(Stack s)  const  {
    AnyType ret=Nothing;
    memcpy(save,s,lgsave); // save register 
     AnyType *listparam;
-   Add2StackOfPtr2Free(s,new CleanE_Routine(this,s,listparam=new AnyType[nbparam]));
-  //  Add2StackOfPtr2FreeA(s,new AnyType[nbparam]);
+ //  Add2StackOfPtr2Free(s,new CleanE_Routine(this,s,listparam=new AnyType[nbparam]));
+    Add2StackOfPtr2FreeA(s,listparam=new AnyType[nbparam]);
     
     //   AnyType *listparam =Add2StackOfPtr2FreeA(s,new AnyType[nbparam]);
    // 
@@ -704,7 +704,6 @@ AnyType E_Routine::operator()(Stack s)  const  {
    try {  
       ret=(*code)(s);  }
    catch( E_exception & e) { 
-          //  (*clean)(s);   the celan is done in CleanE_Routine delete . 
           // cout << " catch " << e.what() << " clean & throw " << endl;
            if (e.type() == E_exception::e_return)  
               ret = e.r;
@@ -712,21 +711,23 @@ AnyType E_Routine::operator()(Stack s)  const  {
               ErrorExec("E_exception: break or contine not in loop ",1);
   }
   catch(...) { // clean and rethrow the exception 
-      delete [] listparam; 
+      //::delete [] listparam; 
+       (*clean)(s); 
       WhereStackOfPtr2Free(s)->clean(); // FH mars 2005 
       memcpy(s,save,lgsave);  // restore register
       TheCurrentLine=debugstack.front().second;
       debugstack.pop();
       throw ;             
      }
-        
+  
+    (*clean)(s); //  the clean is done in CleanE_Routine delete .         
    //  delete [] listparam; after return 
     memcpy(s,save,lgsave);  // restore register
     TheCurrentLine=debugstack.front().second;
     debugstack.pop();
    // il faudrait que les variable locale soit detruire apres le return 
    // cf routine clean, pour le cas ou l'on retourne un tableau local.
-   // plus safe ?????  FH. 
+   // plus safe ?????  FH.  (fait 2008)
    // mais pb si   a = f()+g()   OK les pointeurs des instruction sont detruit
     //  en fin d'instruction programme de l'appelant  FH 2007 
    // ... ou alors changer le return ???? qui doit copie le resultat.. (voir)
