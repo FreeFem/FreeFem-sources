@@ -1,5 +1,5 @@
 v 3.0-3 (27 dec 2008)
-  - build a not to bad version (correct old bug when function returning array)
+  - build a not to bad version 
   - remove so crazy print 
   - change the ffglut  io with  freefem++  ( to be more universal independant of the achitecture an more universal)
     - correct ffglut in case of plot of array and when the plot is empty.
