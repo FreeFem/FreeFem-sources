@@ -29,7 +29,7 @@ FAIRE:$(SRCDIR)/$(INSTALL) cxxflags
 $(SRCDIR)/$(INSTALL): $(SRCDIR) cxxflags
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
-	cd $(SRCDIR);libtool  -static  -o  $(INSTALL)/lib/libtet.a tetgen.o predicates.o
+	cd $(SRCDIR);$(AR) $(ARFLAGS)  $(INSTALL)/lib/libtet.a tetgen.o predicates.o
 	cp $(SRCDIR)/tetgen.h $(SRCDIR)/$(INSTALL)/include 
 
 
@@ -38,7 +38,7 @@ $(SRCDIR): $(PACKAGE)
 	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
 
 $(PACKAGE):
-	cd $(DIRPKG);curl  -O  $(SERVER)/`basename $(PACKAGE)`
+	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 
 
@@ -54,3 +54,5 @@ cxxflags: ../Makefile
 	grep 'CC *=' ../Makefile >>cxxflags
 	grep 'CXXFLAGS *=' ../Makefile >>cxxflags
 	grep 'WGET *=' ../Makefile >>cxxflags
+	grep 'AR *=' ../Makefile >>cxxflags
+	grep 'ARFLAGS *=' ../Makefile >>cxxflags

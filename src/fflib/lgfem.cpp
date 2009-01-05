@@ -2373,8 +2373,8 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		 const Mesh3::Element & K(Th[i]);   
 		 R3 NN=K.N(ie);
 		 double mes = sqrt((NN,NN)); 
-		 NN /= mes;
-		 mes *= 0.5; 
+		 NN /= mes; 
+		 mes *= 0.5; //   warning correct FH 050109
 		 for (int npi=0;npi<FI.n;npi++) // loop on the integration point
 		   {
 		     GQuadraturePoint<R2> pi( FI[npi]);
@@ -2411,7 +2411,8 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		 const Mesh3::Element  & K(Th[i]);   
 		 R3 NN=K.N(ie);
 		 double mes = NN.norme(); 
-		 NN /= mes;
+		   NN /= mes;
+		   mes*=0.5;//  correction 05/01/09 FH 
 		 for (int npi=0;npi<FI.n;npi++) // loop on the integration point
 		   {
 		     GQuadraturePoint<R2> pi( FI[npi]);

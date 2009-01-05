@@ -139,7 +139,7 @@ install-exec-local:: load_compile
 	$(INSTALL)  -m 555 $(LIST_COMPILE) $(DESTDIR)$(ff_prefix_dir)/lib
 	echo loadpath += \"$(DESTDIR)$(ff_prefix_dir)/lib\"  >$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
 	echo includepath += \"$(DESTDIR)$(ff_prefix_dir)/edp\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
-	$(INSTALL_SCRIPT) ff-c++  ${bindir}
+	$(INSTALL_SCRIPT) ff-c++  $(DESTDIR)${bindir}
 
 
 
