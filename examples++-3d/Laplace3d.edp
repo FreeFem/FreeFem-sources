@@ -49,6 +49,6 @@ real  aire2=int2d(Th,2)(1.); // bug correct in version 3.0-4
 cout << " aire2 = " << aire2 << endl;
 func uuu= 2.+x;
 cout << uuu(1,1,1) << endl;
-//assert( abs(aire2-1.) < 1e-6);
+assert( abs(aire2-1.) < 1e-6);
 assert(err < 1e-9);
 medit(" Sol ", Th, u ,order=1);//  to see the sol in P1 
