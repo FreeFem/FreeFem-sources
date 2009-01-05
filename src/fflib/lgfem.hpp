@@ -627,7 +627,7 @@ class Op4_K2R : public quad_function<K,R,R,R,K> { public:
 	: a(aa),b(bb),c(cc),d(dd) {}       
       AnyType operator()(Stack s)  const 
       { 
-	cout <<"class Op4_K2R : public quad_function<K,R,R,R,K>" << endl;
+	//cout <<"class Op4_K2R : public quad_function<K,R,R,R,K>" << endl;
 	R xx(GetAny<R>((*b)(s)));
 	R yy(GetAny<R>((*c)(s)));
 	R zz(GetAny<R>((*d)(s)));
