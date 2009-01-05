@@ -49,7 +49,7 @@ clean:
 	-rm $(SRCDIR)/$(INSTALL)/include/tetgen.h
 	-rm FAIT
 	-rm -rf tetgem*
-cxxflags: ../Makefile
+cxxflags: ../Makefile  Makefile
 	grep 'CXX *=' ../Makefile >cxxflags
 	grep 'CC *=' ../Makefile >>cxxflags
 	grep 'CXXFLAGS *=' ../Makefile >>cxxflags
