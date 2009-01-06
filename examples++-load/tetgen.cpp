@@ -1,3 +1,4 @@
+
 // $Id$
 
 #include  <iostream>
@@ -66,7 +67,7 @@ Mesh3 * Transfo_Mesh2_tetgen( const double &precis_mesh, char* switch_tetgen, co
 		int &border_only, int &recollement_border, int &point_confondus_ok, 
 		const int &label_tet,const map<int, int> &maptri );
 
-Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,const Mesh & Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
+Mesh3 *Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,const Mesh & Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
 				 int &border_only, int &recollement_border, int &point_confondus_ok, 
 				 const int &label_tet, const map<int, int> &maptri, 
 				 const int &nbhole, const double *tabhole, 
@@ -246,6 +247,8 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   Mesh3 *Th3=Transfo_Mesh2_tetgen_new( precis_mesh, switch_tetgen, Th, txx, tyy, tzz, border_only, 
 				   recollement_border, point_confondus_ok, label_tet, mapfme, 
 				   nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl);
+
+  
   Th3->BuildBound();
   Th3->BuildAdj();
   Th3->Buildbnormalv();  
@@ -257,6 +260,7 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   delete [] switch_tetgen;
 		
   *mp=mps;
+  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
   return Th3;
 }
 
@@ -487,13 +491,31 @@ Mesh3 * mesh3_tetgenio_out(const tetgenio &out)
   Triangle3 *bb = b;
 
   i=0;
-  for(int nnv=0; nnv <out.numberofpoints ; nnv++){
+  for(int nnv=0; nnv<out.numberofpoints; nnv++){
     v[nnv].x=out.pointlist[i];
     v[nnv].y=out.pointlist[i+1];
     v[nnv].z=out.pointlist[i+2];       
     v[nnv].lab=out.pointmarkerlist[nnv];
     i=i+3;    
   }
+
+  // test pour la distance minimale entre les points 
+//   {
+//     double dist,dist1;
+//     dist = 1000000000000.;
+//     for(int nnv=0; nnv<out.numberofpoints; nnv++){
+//       for(int nnv1=nnv+1; nnv1< out.numberofpoints; nnv1++){
+// 	dist1=(v[nnv].x-v[nnv1].x)*(v[nnv].x-v[nnv1].x)+(v[nnv].y-v[nnv1].y)*(v[nnv].y-v[nnv1].y)
+// 	  +(v[nnv].z-v[nnv1].z)*(v[nnv].z-v[nnv1].z);
+// 	dist=min(dist,sqrt(dist1));
+// 	if( sqrt(dist1) < 1e-12){ 
+// 	  cout << "point confondus" << nnv << "<--->" <<nnv1 << endl;
+// 	  if( sqrt( pow(v[nnv].x,2)+pow(v[nnv].y,2)+pow(v[nnv].z,2) ) > 1e-10   )  cout << v[nnv] << " " << v[nnv1] << endl;
+// 	}
+//       }
+//     }
+//     cout << "dist entre les points du maillage tetgen" << dist << endl;
+//   }
     
   i=0;
   for(int nnt=0; nnt < out.numberoftetrahedra; nnt++){
@@ -506,6 +528,7 @@ Mesh3 * mesh3_tetgenio_out(const tetgenio &out)
     for(int jj=0; jj<4; jj++){
       assert( iv[jj] >=0 && iv[jj] < out.numberofpoints );
     }
+    
     //cout << "nnt= " <<  nnt << " " << lab  << " " << out.tetrahedronattributelist[nnt] << endl;
     lab =  out.tetrahedronattributelist[nnt];
     //cout << "nnt= " <<  lab  << " " << out.tetrahedronattributelist[nnt] << endl;
@@ -528,13 +551,18 @@ Mesh3 * mesh3_tetgenio_out(const tetgenio &out)
   }
 
   Mesh3 *T_TH3 = new Mesh3(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces, v, t, b);
-  /*
-  if( out.numberoftetrahedronattributes != 1 ){
-    cout << "out.numberoftetrahedronattributes" << out.numberoftetrahedronattributes  << endl;
+  cout << "FreeFem++: Check mesh given by tetgen" << endl;
+  //return T_TH3;
+
+  if( TestElementMesh3(*T_TH3) != 1){  
+    return T_TH3;
+  }
+  else{
+    //Mesh3 *T2_TH3 = TestElementMesh3_patch( *T_TH3 );
+    //return T2_TH3;
     exit(1);
-   }
-  */
-  return T_TH3;
+  }
+
 }
 
 
@@ -600,7 +628,17 @@ Mesh3* mesh3_tetgenio_out(const tetgenio &out, const int & label_tet)
     (*bb++).set( v, iv, out.trifacemarkerlist[ibe]);  
   }
   Mesh3 *T_TH3 = new Mesh3(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces, v, t, b);
-  return T_TH3;
+  //return T_TH3;
+  cout << "FreeFem++: Check mesh given by tetgen" << endl;
+  if( TestElementMesh3(*T_TH3) != 1){  
+    return T_TH3;
+  }
+  else{ 
+    //cout << "patch pour tetgen " << endl;
+    //Mesh3 *T2_TH3 = TestElementMesh3_patch( *T_TH3 );
+    //return T2_TH3;
+    exit(1);
+  }
 }
 
 Mesh3* mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, const int & label_face)
@@ -625,6 +663,7 @@ Mesh3* mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, const int 
   
   cout << "Th3 :: Vertex Element Border :: " << out.numberofpoints << " " <<out.numberoftetrahedra  << " " << out.numberoftrifaces << endl;
   //Th3.set(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces);
+
   Vertex3 *v = new Vertex3[out.numberofpoints];
   Tet *t  = new Tet[out.numberoftetrahedra];
   Tet *tt = t;
@@ -666,7 +705,15 @@ Mesh3* mesh3_tetgenio_out(const tetgenio &out, const int & label_tet, const int 
   }
 
   Mesh3 *T_TH3 = new Mesh3(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces, v, t, b);
-  return T_TH3;
+
+  if( TestElementMesh3( *T_TH3 ) != 1){  
+    return T_TH3;
+  }
+  else{
+    exit(1);
+    //Mesh3 *T2_TH3 = TestElementMesh3_patch( *T_TH3 );
+    //return T2_TH3;
+  }
 }
 
 
@@ -709,9 +756,9 @@ const double *Zcoord, const int &label_tet, const int &label_face){
   //mesh3_tetgenio_out( out, label_tet, label_face,*T_Th3);
   Mesh3* T_Th3=mesh3_tetgenio_out( out, label_tet, label_face);
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
-	
- 
-  return T_Th3;
+
+  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
+  return T_Th3; 
 }
 
 
@@ -790,7 +837,7 @@ Mesh3 * RemplissageSurf3D_tetgen(char *switch_tetgen,const Mesh3 & Th3, const in
   //mesh3_tetgenio_out( out, label_tet, *T_Th3);
   Mesh3 *T_Th3 = mesh3_tetgenio_out( out, label_tet);
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
-	
+  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
   return T_Th3;
 }
 
@@ -897,10 +944,7 @@ Mesh3 * RemplissageSurf3D_tetgen_new(char *switch_tetgen,const Mesh3 & Th3, cons
   //mesh3_tetgenio_out( out, *T_Th3);
   Mesh3* T_Th3=mesh3_tetgenio_out( out);
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
-	
-  //in.deinitialize();
-  //out.deinitialize();
-
+  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
   return T_Th3;
 }
 
@@ -1013,13 +1057,18 @@ Mesh3 * Transfo_Mesh2_tetgen(const double &precis_mesh, char *switch_tetgen,cons
 	//mesh3_tetgenio_out( out, label_tet, *T_Th3);
 	Mesh3 *T_Th3=mesh3_tetgenio_out( out, label_tet);
 	cout <<" Finish Mesh3 :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
+	
+	
 
 	delete [] Numero_Som;
 	delete [] ind_nv_t;
 	delete [] ind_nbe_t;
 	delete [] label_nbe_t;
 
+	cout << "FreeFem++: End check mesh given by tetgen" << endl;  
 	return T_Th3;
+
+
 }
 
 Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,const Mesh & Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
@@ -1160,7 +1209,8 @@ Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,
   delete [] ind_nv_t;
   delete [] ind_nbe_t;
   delete [] label_nbe_t;
-	
+  
+  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
   return T_Th3;
 }
 
@@ -1350,10 +1400,7 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
   //mesh3_tetgenio_out( out, *T_Th3);
   Mesh3 *T_Th3=mesh3_tetgenio_out( out);
   cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
-	
-  //in.deinitialize();
-  //out.deinitialize();
-
+  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
   return T_Th3;
 }
 
@@ -1461,7 +1508,7 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
       }
     }
   //Mesh3 *Th3 = Th3 = RemplissageSurf3D_tetgen( switch_tetgen, Th, label_tet);
-  // new 
+  
   cout << "tetgen:" << "nbhole="   << nbhole << "nbregion=" << nbregion << endl;
  
   Mesh3 *Th3 = RemplissageSurf3D_tetgen_new( switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl);
@@ -1469,6 +1516,7 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   cout << "finish tetgen " << endl;
   // changement de label 
   if( nrf.N() > 0){
+    cout << "changement de label" << endl;
     for(int ii=0; ii< Th3->nbe; ii++){
       const Triangle3 & K(Th3->be(ii));
       int lab;
@@ -1489,7 +1537,8 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
       Th3->be(ii).set(Th3->vertices,iv,lab);
     }
   }
-  
+  cout << "action sur le maillage" << endl;
+
   Th3->BuildBound();
   Th3->BuildAdj();
   Th3->Buildbnormalv();  
@@ -1500,6 +1549,7 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   
   *mp=mps;
   delete [] switch_tetgen; 
+  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
   return Th3;
 }
 
@@ -1705,6 +1755,7 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
 
   delete [] switch_tetgen;
   *mp=mps;
+  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
   return Th3;
 }
 
@@ -1799,6 +1850,7 @@ AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
   Add2StackOfPtr2FreeRC(stack,Th3);
   
   delete [] switch_tetgen;
+  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
   return Th3;
 }
 
@@ -1912,6 +1964,7 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
   Add2StackOfPtr2FreeRC(stack,Th3);
 
   delete [] switch_tetgen;
+  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
   return Th3;
 }
 

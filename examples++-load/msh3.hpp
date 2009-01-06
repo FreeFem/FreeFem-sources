@@ -18,7 +18,6 @@ void BuildBoundMinDist_th3( const double &precis_mesh, const double *tab_XX, con
 //void PointCommun_hcode( const int &dim, const int &NbPoints, const int &point_confondus_ok,double **Coord_Point, int * ind_np, int & np);
 void PointCommun_hcode( const int &dim, const int &NbPoints, const int &point_confondus_ok,double **Coord_Point, 
 const double *bmin, const double *bmax, const double hmin, int * ind_np, int & np);
-
 void PointCommun_hcode_gtree( const int &dim, const int &NbPoints, const int &point_confondus_ok, 
 	double **Coord_Point, const int * label_point,
 	const R3 & bmin, const R3 & bmax, const double &hmin, int * ind_np, int * ind_label, int & np);
@@ -92,6 +91,16 @@ Mesh3 * build_layer (const Mesh & Th2, const int Nmax, const int *tab_Ni, const 
 			const map<int, int> &maptet, 
 			const map<int, int> &maptrimil, const map<int, int> &maptrizmax, const map<int, int> &maptrizmin, 
 			const map<int, int> &mapemil, const map<int, int> &mapezmax, const map<int, int> &mapezmin );
+
+
+// add 04/01/09
+void TestSameVertexMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int & nv_t, int *Numero_Som);
+void TestSameTetrahedraMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int & nt_t );
+void TestSameTetrahedraMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int *Elem_ok, int & nt_t );
+void TestSameTriangleMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int & nbe_t );
+void TestSameTriangleMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int *Border_ok ,int & nbe_t );
+int TestElementMesh3( const Mesh3 & Th3 );
+Mesh3 *TestElementMesh3_patch( const Mesh3 & Th3 );
 
 
 #endif
