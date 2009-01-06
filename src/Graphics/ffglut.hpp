@@ -166,7 +166,10 @@ class ThePlot { public:
     R3 Pvue,Peyes;
     R alpha; 
     R coefr; 
-    R z0; //  z pour les objets 2d. 
+  R z0; //  z pour les objets 2d. 
+  //  for 3d plot jan 2009
+  int  plotdim;
+  R theta, phi, dcoef, focal;
     // 2D
     
     bool Change() const  { return changeViso||changeVarrow||changeColor||changeBorder||changeFill;}
