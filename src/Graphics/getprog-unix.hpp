@@ -22,7 +22,7 @@ int getprog(char* fn,int argc, char **argv)
 #ifdef PROG_FFGLUT
   const char * ffglut=PROG_FFGLUT;
 #else
-  const char *ffglut= *;//"ffglut";
+  const char *ffglut= "ffglut";
 #endif
   const char *progffglut=0;
   const char *fileglut=0;

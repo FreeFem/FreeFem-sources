@@ -840,7 +840,8 @@ void  ThePlot::SetColorTable(int nb)
 ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   :  count(kcount), state(0),gllist(1),
      changeViso(true),changeVarrow(true),changeColor(true),
-     changeBorder(true),changeFill(true), withiso(false),witharrow(false)
+     changeBorder(true),changeFill(true), withiso(false),witharrow(false),
+     plotdim(2),theta(30),phi(45),dcoef(1),focal(10.*M_PI/180.)
 {
   
   hsv=true; // hsv  type 

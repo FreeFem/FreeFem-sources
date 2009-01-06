@@ -137,8 +137,8 @@ install-exec-local:: load_compile
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
 	$(INSTALL_DATA)  include/* $(DESTDIR)$(ff_prefix_dir)/include
 	$(INSTALL)  -m 555 $(LIST_COMPILE) $(DESTDIR)$(ff_prefix_dir)/lib
-	echo loadpath += \"$(DESTDIR)$(ff_prefix_dir)/lib\"  >$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
-	echo includepath += \"$(DESTDIR)$(ff_prefix_dir)/edp\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
+	echo loadpath += \"$(ff_prefix_dir)/lib\"  >$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
+	echo includepath += \"$(ff_prefix_dir)/edp\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
 	$(INSTALL_SCRIPT) ff-c++  $(DESTDIR)${bindir}
 
 
