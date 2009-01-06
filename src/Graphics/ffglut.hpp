@@ -219,6 +219,9 @@ public:
   GLdouble projMatrix[16];
   GLint viewport[4];  
   
+  int  plotdim;
+  R theta, phi, coef_dist, focal, dtheta;
+  R3 Bmin3,Bmax3,Pvue3;
   //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
   OneWindow(int h,int w,ThePlot *p);
   void DefaultView() ;
