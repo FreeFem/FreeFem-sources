@@ -559,6 +559,7 @@ void OneWindow::DefaultView()
 	  }
 	Bmin3.z=theplot->fmin;
 	Bmax3.z=theplot->fmax;
+	Pvue3=(Bmin3+Bmax3)/2;
       }
       
       
