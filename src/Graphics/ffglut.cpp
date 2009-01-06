@@ -531,35 +531,60 @@ void OneWindow::set(ThePlot *p)
 
 void OneWindow::DefaultView() 
 {
-    if(theplot)
+  if(theplot)
+    {
+      R2 A(theplot->Pmin),B(theplot->Pmax);
+      R2 D(A,B);
+      D *=0.05;
+      zmax = theplot->fmax;
+      zmin = theplot->fmin;
+      theta=theplot->theta;
+      phi=theplot->phi;
+      coef_dist=theplot->dcoef;
+      focal=theplot->focal;
       {
-	  R2 A(theplot->Pmin),B(theplot->Pmax);
-	  R2 D(A,B);
-	  D *=0.05;
-	  zmax = theplot->fmax;
-	  zmin = theplot->fmin;
-	  if(theplot->boundingbox.size() !=4)
-	    {
-	      A -= D;
-	      B += D;
-	    }
-	  else
-	    {
-	      R x1=theplot->boundingbox[0],y1=theplot->boundingbox[1];
-	      R x2=theplot->boundingbox[2],y2=theplot->boundingbox[3];
-	      A = R2(min(x1,x2),min(y1,y2));
-	      B = R2(max(x1,x2),max(y1,y2));
-	    }
-	  
-	  if (theplot->aspectratio)
-	      cadreortho(A,B);
-	  else 
-	      cadre(A,B);
+	if(theplot->boundingbox.size() ==4)
+	  {
+	    Bmin3.x=theplot->boundingbox[0];
+	    Bmin3.y=theplot->boundingbox[1];
+	    Bmax3.x=theplot->boundingbox[2];
+	    Bmax3.y=theplot->boundingbox[3];	    
+	  }
+	else 
+	  {
+	    Bmin3.x=A.x;
+	    Bmin3.y=A.y;
+	    Bmax3.x=B.x;
+	    Bmax3.y=B.y;
+	  }
+	Bmin3.z=theplot->fmin;
+	Bmax3.z=theplot->fmax;
       }
-    hpixel = (Bmax.x-Bmin.x)/width;
-    
-   // SetView() ;
+      
+      
+      if(theplot->boundingbox.size() !=4)
+	{
+	  A -= D;
+	  B += D;
+	}
+      else
+	{
+	  R x1=theplot->boundingbox[0],y1=theplot->boundingbox[1];
+	  R x2=theplot->boundingbox[2],y2=theplot->boundingbox[3];
+	  A = R2(min(x1,x2),min(y1,y2));
+	  B = R2(max(x1,x2),max(y1,y2));
+	}
+      
+      if (theplot->aspectratio)
+	cadreortho(A,B);
+      else 
+	cadre(A,B);
+    }
+  hpixel = (Bmax.x-Bmin.x)/width;
+  
+  // SetView() ;
 }
+
 void  OneWindow::SetScreenView() const
 {
 
@@ -574,42 +599,78 @@ void  OneWindow::SetScreenView() const
 
 void  OneWindow::SetView()
 {
-  ShowGlerror("Begin SetView");   
-  glDisable(GL_DEPTH_TEST);
-  glViewport(0, 0,width, height);
+  if(plotdim==3 && theplot)
+    {
+      glViewport(0, 0,width, height);
+      
+      glMatrixMode(GL_PROJECTION); 
+      glLoadIdentity(); 
+      R ratio= (double) width / (double)  height; 
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity(); 
+      
+      
+      R aspect=ratio;
+      R3 DD(Bmin3,Bmax3);
+      R dmax= DD.norme();;
+      R dist = dmax/2/asin(focal/2*pi/180.)*coef_dist;
+      R camx=Pvue3.x+cos(phi)*cos(theta)*dist;
+      R camy=Pvue3.y+cos(phi)*sin(theta)*dist;
+      R camz=Pvue3.z+dist*sin(phi);  
+      R znear=max(dist-dmax,0.);
+      R zfare=dist+dmax;
+      gluPerspective(focal,aspect,znear,zfare);
+      /*      
+      if (eye)
+	{
+	  R dmm = -dmax*ceyes;
+	  R dx = -dmm*sin(theta);
+	  R dy = dmm*cos(theta);
+	  camx += dx*eye;
+	  camy += dy*eye;
+	  }
+      */   
+      gluLookAt(camx,camy,camz,Pvue3.x,Pvue3.y,Pvue3.z,0.,0.,1.);
+    }
+  else
+    {
+      ShowGlerror("Begin SetView");   
+      glDisable(GL_DEPTH_TEST);
+      glViewport(0, 0,width, height);
+      
+      R zzmin = Min(zmin,theplot->fminT);
+      R zzmax = Max(zmax,theplot->fmaxT);    
+      R dz = (zzmax-zzmin);
+      R zm=(zzmin+zzmax)*0.5;
+      if((debug>3 )) cout << "\t\t\t   SetView " << this << " " << Bmin  << " " 
+			  << Bmax << " " << zzmin << " " << zzmax 
+			  << "  zm  " << zm << " dz  " << dz << endl;
+      ShowGlerror("0 Set MV");
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+      ShowGlerror(" Set MV");
+      glMatrixMode(GL_PROJECTION); 
+      glLoadIdentity(); 
+      ShowGlerror(" Set PM 1");
+      glOrtho(Bmin.x,Bmax.x,Bmin.y,Bmax.y,-dz,dz);
+      
+      ShowGlerror(" Set PM 2");
+      
+      R2 M=(Bmin+Bmax)/2.;
+      glTranslated(0,0,-zm);
+      
+      //glLineWidth(1);
+      //glColor3d(0.,0.,0.);
+      glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+      ShowGlerror(" Get PM");
+      glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+      ShowGlerror(" Get MV");
+      glGetIntegerv(GL_VIEWPORT,viewport);
+      ShowGlerror(" Get VP");
   
-  R zzmin = Min(zmin,theplot->fminT);
-  R zzmax = Max(zmax,theplot->fmaxT);    
-  R dz = (zzmax-zzmin);
-  R zm=(zzmin+zzmax)*0.5;
-  if((debug>3 )) cout << "\t\t\t   SetView " << this << " " << Bmin  << " " << Bmax << " " << zzmin << " " << zzmax 
-		       << "  zm  " << zm << " dz  " << dz << endl;
-  ShowGlerror("0 Set MV");
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  ShowGlerror(" Set MV");
-  glMatrixMode(GL_PROJECTION); 
-  glLoadIdentity(); 
-  ShowGlerror(" Set PM 1");
-  glOrtho(Bmin.x,Bmax.x,Bmin.y,Bmax.y,-dz,dz);
-
-  ShowGlerror(" Set PM 2");
-  
-  R2 M=(Bmin+Bmax)/2.;
-  glTranslated(0,0,-zm);
-    
-  //glLineWidth(1);
-    //glColor3d(0.,0.,0.);
-  glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
-  ShowGlerror(" Get PM");
-  glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-  ShowGlerror(" Get MV");
-  glGetIntegerv(GL_VIEWPORT,viewport);
-  ShowGlerror(" Get VP");
-  
-  
-  ShowGlerror("End SetView ");
-  
+      
+      ShowGlerror("End SetView ");
+  }
     
 }
 void  OneWindow::resize(int w,int h)
@@ -631,12 +692,15 @@ void  OneWindow::zoom(int w,int h,R coef)
 
     GLint ok= gluUnProject( x,y,z,modelMatrix,projMatrix,viewport,&xx,&yy,&zz);
     ShowGlerror(" UnPro .. ");
-    //    if(debug>2)
-    cout << " ok " << ok << " " << x << " " << y << " " << z << " -> " << xx << " " << yy << " " << zz << endl;
+    if(debug>2)
+      cout << " ok " << ok << " " << x << " " << y << " " << z 
+	   << " -> " << xx << " " << yy << " " << zz << endl;
     R2  oD(oBmin,oBmax);
     R2  D(Bmin,Bmax);
     R2 O(xx,yy);// oBmin.x+D.x*xx/width,oBmin.y+D.y*yy/height); 
-    if((debug > 3)) cout<< " zoom : "  << this << " O " << O  << " " << coef << " D = "<<  D<< "as "<< theplot->aspectratio <<  endl;
+    if((debug > 3)) cout<< " zoom : "  << this << " O " << O  
+			<< " " << coef << " D = "<<  D<< "as "
+			<< theplot->aspectratio <<  endl;
     oD *= 0.5*coef;
     R2 A = O - oD;
     R2 B = O + oD;
@@ -646,7 +710,13 @@ void  OneWindow::zoom(int w,int h,R coef)
 	cadre(A,B);
 }
 void OneWindow::MoveXView(R dx,R dy) 
-{}
+{
+  R3 D(Bmin3,Bmax3);
+  Pvue3.z -= dy*D.z/50.;
+  Pvue3.x += dx*D.x*sin(theta)/50;
+  Pvue3.y -= dx*D.y*cos(theta)/50;   
+  // cout << xm << " " << ym << " " << zm << endl;
+}
 
 void OneWindow::cadre(R2 A,R2 B)
 {
@@ -764,6 +834,8 @@ void ThePlot::DrawHelp(OneWindow *win)
   win->Show("-)  zoom out around the cursor 3/2 times  ",i++);
   win->Show("=)  reset zooming  ",i++);
   win->Show("r)  refresh plot ",i++);
+  win->Show("3)  3d plot ",i++);
+  win->Show("2)  2d plot ",i++);
   win->Show("ac) increase   the size arrow ",i++);
   win->Show("AC) decrease the size arrow  ",i++);
   win->Show("b)  switch between black and white or color plotting ",i++);
@@ -841,11 +913,11 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   :  count(kcount), state(0),gllist(1),
      changeViso(true),changeVarrow(true),changeColor(true),
      changeBorder(true),changeFill(true), withiso(false),witharrow(false),
-     plotdim(2),theta(30),phi(45),dcoef(1),focal(10.*M_PI/180.)
+     plotdim(2),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.)
+     
 {
   
-  hsv=true; // hsv  type 
-  
+  hsv=true; // hsv  type   
   coeff=1;
   wait=0;
   value=false;
@@ -1442,86 +1514,106 @@ static void Mouse( int button,int state,int x,int y )
 {
     // state up or down 
     OneWindow * win=CurrentWin();
-    if(win && state == GLUT_DOWN) { win->xold=x,win->yold=y;return;}
-    // if((debug > 10)) cout << "Mouse " << button<< " " << state << " " << x-xold << " " << y-yold << endl;
-    //  x gauche -> droitre
-    //  y  haut -> bas`
-    glutPostRedisplay();
-    
+    if(win)
+      {
+	if(win && state == GLUT_DOWN) { win->xold=x,win->yold=y;return;}
+	win->phi += (y-win->yold)/(2.*180.);
+	win->theta -= (x-win->xold)/(2*180.);
+	glutPostRedisplay();
+      }
 }
 static void MotionMouse(int x,int y )
 {
     OneWindow * win=CurrentWin();
     if(win)
       {
-	  win->xold=x;
-	  win->yold=y;
-	  glutPostRedisplay();
+	win->phi += (y-win->yold)/(2.*180.);
+	win->theta -= (x-win->xold)/(2*180.);
+	win->xold=x;
+	win->yold=y;
+	glutPostRedisplay();
       }
 }
 
 static void Key( unsigned char key, int x, int y )
 {
     OneWindow * win=CurrentWin();
-    switch (key) {
-	case 27: // esc char
-	    Fin(0);
-	    break;
-	case 'w':
-	    if(win)
+    switch (key) 
+      {
+      case 27: // esc char
+	Fin(0);
+	break;
+      case 'w':
+	if(win)
 		win->windowdump=true;
-	    break;
-    case '?' :
-	    if(win)
-		win->help=true;
-
-	case '+':
-	    win->zoom(x,y,0.7);
-	    break;
-	case '-':
-	    
-	    win->zoom(x,y,1./0.7);
-	    break;
-	case '=':
-	    win->DefaultView();
-	    break;
-	case 'f':
-	    win->theplot->fill = ! win->theplot->fill  ;
-	    break;
-	case 'b':
-	    win->theplot->grey = ! win->theplot->grey   ;
-	    break;
-	case 'g':
-	    win->theplot->grey = !  win->theplot->grey   ;
-	    break;
-	    
-	case 'v':
-	    win->theplot->value = ! win->theplot->value  ;
-	    break;
-	case 'm':
-	    win->theplot->drawmeshes = ! win->theplot->drawmeshes  ;
-	    break;
-	case 'B':
-	    win->theplot->drawborder = ! win->theplot->drawborder  ;
-	    break;
-	case 'p':
-	    
-	    break;
-	case 'a':
-	    win->theplot->coeff/= 1.2;
-	    break;
-	case 'A':
-	    win->theplot->coeff*= 1.2;
-	    break;
-	    
-	case '\r':
-	case '\n':
-	  SendForNextPlot();
-	    break;
-	default:
-	    if((debug > 10)) cout << " Key Character " << (int) key << " " << key << endl;  
-	    
-    }
+	break;
+      case '?' :
+	if(win)
+	  win->help=true;
+	
+      case '+':
+	win->zoom(x,y,0.7);
+	win->coef_dist /= 1.2;
+	break;
+      case '-':	    
+	win->zoom(x,y,1./0.7);
+	win->coef_dist *= 1.2;
+	break;
+      case '3':	    
+	win->plotdim=3;
+	break;
+      case '2':	    
+	win->plotdim=2;
+	break;
+      case '=':
+	win->DefaultView();
+	break;
+      case 'f':
+	win->theplot->fill = ! win->theplot->fill  ;
+	break;
+      case '@':
+	win->dtheta = win->dtheta ? 0 : pi/1800.;
+	break;
+	
+      case 'b':
+	win->theplot->grey = ! win->theplot->grey   ;
+	break;
+      case 'g':
+	win->theplot->grey = !  win->theplot->grey   ;
+	break;
+	
+      case 'v':
+	win->theplot->value = ! win->theplot->value  ;
+	break;
+      case 'm':
+	win->theplot->drawmeshes = ! win->theplot->drawmeshes  ;
+	break;
+      case 'B':
+	win->theplot->drawborder = ! win->theplot->drawborder  ;
+	break;
+      case 'p':
+	
+	break;
+      case 'a':
+	win->theplot->coeff/= 1.2;
+	break;
+      case 'A':
+	win->theplot->coeff*= 1.2;
+	break;
+      case 'z':
+	win->focal *=1.2;
+	break;
+      case 'Z':
+	win->focal /=1.2;
+	break;
+      case '\r':
+      case '\n':
+	SendForNextPlot();
+	break;
+      default:
+	if((debug > 10)) cout << " Key Character " << (int) key << " " << key << endl;  
+	
+      }
     glutPostRedisplay();
 }
 
@@ -1529,20 +1621,21 @@ static void Key( unsigned char key, int x, int y )
 void SpecialKey(int key, int x, int y)
 {
     OneWindow * win=CurrentWin();
-    
+    if(win)
+      {
     // if((debug > 10)) cout << " SpecialKey " << key << " " << x << " " << y << " : ";
-    R dx(0),dy(0);
-    switch (key) {
+	R dx(0),dy(0);
+	switch (key) {
 	case  GLUT_KEY_LEFT:   dx = -1; break;
 	case  GLUT_KEY_RIGHT:  dx = +1; break;
 	case  GLUT_KEY_DOWN:   dy = -1; break;
 	case  GLUT_KEY_UP:     dy = +1; break;
-    }
-    // calcul du deplacement de xm,ym,zm;
-    // if((debug > 10)) cout << " " << dx << " " << dy << endl;
-    win->MoveXView(dx,dy);
-    glutPostRedisplay();
-    
+	}
+	// calcul du deplacement de xm,ym,zm;
+	// if((debug > 10)) cout << " " << dx << " " << dy << endl;
+	win->MoveXView(dx,dy);
+	glutPostRedisplay();
+      }
 }
 
 void LauchNextRead()
