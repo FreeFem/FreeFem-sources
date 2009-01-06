@@ -50,6 +50,524 @@ using namespace std;
 
 using namespace  Fem2D;
 
+void TestSameVertexMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int & nv_t, int *Numero_Som){
+  
+  Vertex3      v[Th3.nv];
+  nv_t=0;
+  
+  EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pinf,Psup,0);
+  
+  // creation of octree
+  for (int ii=0;ii<Th3.nv;ii++){
+    const R3 r3vi( Th3.vertices[ii].x, Th3.vertices[ii].y, Th3.vertices[ii].z );
+    const Vertex3 &vi(r3vi);
+    
+    Vertex3 * pvi=gtree->ToClose(vi,hseuil);
+    
+    if(!pvi){
+      v[nv_t].x = vi.x;
+      v[nv_t].y = vi.y;
+      v[nv_t].z = vi.z;
+      v[nv_t].lab = Th3.vertices[ii].lab; // lab mis a zero par default
+      Numero_Som[ii] = nv_t; 
+      gtree->Add( v[nv_t] );
+      nv_t=nv_t+1;
+    }
+    else{
+      Numero_Som[ii] = pvi-v;
+    }
+  }
+  
+  delete gtree;
+}
+
+void TestSameTetrahedraMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int & nt_t ){
+
+  Vertex3  vt[Th3.nt];
+  EF23::GTree<Vertex3> *gtree_t = new EF23::GTree<Vertex3>(vt,Pinf,Psup,0);
+  
+  nt_t=0;
+  // creation of octree
+  for (int ii=0;ii<Th3.nt;ii++){
+    const Tet & K(Th3.elements[ii]);
+    int iv[4];
+
+    for(int jj=0; jj <4; jj++)
+      iv[jj] = Th3.operator()(K[jj]);
+    
+    const double Cdg_x = ( Th3.vertices[iv[0]].x + Th3.vertices[iv[1]].x + Th3.vertices[iv[2]].x + Th3.vertices[iv[3]].x )/4.;
+    const double Cdg_y = ( Th3.vertices[iv[0]].y + Th3.vertices[iv[1]].y + Th3.vertices[iv[2]].y + Th3.vertices[iv[3]].y )/4.;
+    const double Cdg_z = ( Th3.vertices[iv[0]].z + Th3.vertices[iv[1]].z + Th3.vertices[iv[2]].z + Th3.vertices[iv[3]].z )/4.;
+
+    const R3 r3vi( Cdg_x, Cdg_y, Cdg_z );
+    const Vertex3 &vi(r3vi);
+    
+    Vertex3 * pvi=gtree_t->ToClose(vi,hseuil);
+    
+    if(!pvi){
+      vt[nt_t].x = vi.x;
+      vt[nt_t].y = vi.y;
+      vt[nt_t].z = vi.z;
+      vt[nt_t].lab = K.lab ; // lab mis a zero par default
+      gtree_t->Add( vt[nt_t] );
+      nt_t=nt_t+1;
+    }
+  }
+  
+  delete gtree_t;
+} 
+
+void TestSameTetrahedraMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int *Elem_ok, int & nt_t ){
+
+  Vertex3  vt[Th3.nt];
+  EF23::GTree<Vertex3> *gtree_t = new EF23::GTree<Vertex3>(vt,Pinf,Psup,0);
+  
+  nt_t=0;
+  // creation of octree
+  for (int ii=0;ii<Th3.nt;ii++){
+    if(Elem_ok[ii]!=1) continue;
+    const Tet & K(Th3.elements[ii]);
+    int iv[4];
+
+    for(int jj=0; jj <4; jj++)
+      iv[jj] = Th3.operator()(K[jj]);
+    
+    const double Cdg_x = ( Th3.vertices[iv[0]].x + Th3.vertices[iv[1]].x + Th3.vertices[iv[2]].x + Th3.vertices[iv[3]].x )/4.;
+    const double Cdg_y = ( Th3.vertices[iv[0]].y + Th3.vertices[iv[1]].y + Th3.vertices[iv[2]].y + Th3.vertices[iv[3]].y )/4.;
+    const double Cdg_z = ( Th3.vertices[iv[0]].z + Th3.vertices[iv[1]].z + Th3.vertices[iv[2]].z + Th3.vertices[iv[3]].z )/4.;
+
+    const R3 r3vi( Cdg_x, Cdg_y, Cdg_z );
+    const Vertex3 &vi(r3vi);
+    
+    Vertex3 * pvi=gtree_t->ToClose(vi,hseuil);
+    
+    if(!pvi){
+      vt[nt_t].x = vi.x;
+      vt[nt_t].y = vi.y;
+      vt[nt_t].z = vi.z;
+      vt[nt_t].lab = K.lab ; // lab mis a zero par default
+      gtree_t->Add( vt[nt_t] );
+      nt_t=nt_t+1;
+    }
+    else{
+      Elem_ok[ii]=0;
+    }
+  }
+  
+  delete gtree_t;
+} 
+
+
+void TestSameTriangleMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int & nbe_t){
+
+  Vertex3  vbe[Th3.nbe];
+  EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(vbe,Pinf,Psup,0);
+  
+  nbe_t=0;
+  // creation of octree
+  for (int ii=0;ii<Th3.nbe;ii++){
+    const Triangle3 & K(Th3.be(ii));
+    int iv[3];
+
+    for(int jj=0; jj<3; jj++)
+      iv[jj] = Th3.operator()(K[jj]);
+    
+    const double Cdg_x = ( Th3.vertices[iv[0]].x + Th3.vertices[iv[1]].x + Th3.vertices[iv[2]].x )/3.;
+    const double Cdg_y = ( Th3.vertices[iv[0]].y + Th3.vertices[iv[1]].y + Th3.vertices[iv[2]].y )/3.;
+    const double Cdg_z = ( Th3.vertices[iv[0]].z + Th3.vertices[iv[1]].z + Th3.vertices[iv[2]].z )/3.;
+
+    const R3 r3vi( Cdg_x, Cdg_y, Cdg_z );
+    const Vertex3 &vi(r3vi);
+    
+    Vertex3 * pvi=gtree_be->ToClose(vi,hseuil);
+    
+    if(!pvi){
+      vbe[nbe_t].x = vi.x;
+      vbe[nbe_t].y = vi.y;
+      vbe[nbe_t].z = vi.z;
+      vbe[nbe_t].lab = K.lab ; // lab mis a zero par default
+      gtree_be->Add( vbe[nbe_t] );
+      nbe_t=nbe_t+1;
+    }
+   
+  }
+  
+  delete gtree_be;
+} 
+
+void TestSameTriangleMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int *Border_ok ,int & nbe_t ){
+
+  Vertex3  vbe[Th3.nbe];
+  EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(vbe,Pinf,Psup,0);
+  
+  nbe_t=0;
+  // creation of octree
+  for (int ii=0;ii<Th3.nbe;ii++){
+    if(Border_ok[ii]!=1) continue;
+    const Triangle3 & K(Th3.be(ii));
+    int iv[3];
+
+    for(int jj=0; jj<3; jj++)
+      iv[jj] = Th3.operator()(K[jj]);
+    
+    const double Cdg_x = ( Th3.vertices[iv[0]].x + Th3.vertices[iv[1]].x + Th3.vertices[iv[2]].x )/3.;
+    const double Cdg_y = ( Th3.vertices[iv[0]].y + Th3.vertices[iv[1]].y + Th3.vertices[iv[2]].y )/3.;
+    const double Cdg_z = ( Th3.vertices[iv[0]].z + Th3.vertices[iv[1]].z + Th3.vertices[iv[2]].z )/3.;
+
+    const R3 r3vi( Cdg_x, Cdg_y, Cdg_z );
+    const Vertex3 &vi(r3vi);
+    
+    Vertex3 * pvi=gtree_be->ToClose(vi,hseuil);
+    
+    if(!pvi){
+      vbe[nbe_t].x = vi.x;
+      vbe[nbe_t].y = vi.y;
+      vbe[nbe_t].z = vi.z;
+      vbe[nbe_t].lab = K.lab ; // lab mis a zero par default
+      gtree_be->Add( vbe[nbe_t] );
+      nbe_t=nbe_t+1;
+    }
+    else{      
+      if(K.lab == vbe[pvi-vbe].lab )  Border_ok[ii] = 0;
+    }
+  }
+  
+  delete gtree_be;
+} 
+
+int TestElementMesh3( const Mesh3 & Th3 ) 
+// Test si le maillage à des éléments communs : Sommet, triangle, ...
+{
+  R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremité de la boîte englobante
+  double hmin=1e10;   // longueur minimal des arrêtes
+  double hseuil;
+  int Numero_Som[Th3.nv];
+  int nv_t,nt_t,nbe_t;
+  
+  // calcul de la boite englobante
+  for (int ii=0;ii<Th3.nv;ii++){ 
+    R3 P( Th3.vertices[ii].x, Th3.vertices[ii].y, Th3.vertices[ii].z);
+    Pinf=Minc(P,Pinf);
+    Psup=Maxc(P,Psup);     
+  }
+
+
+  // calcul de la longueur minimal des arrêtes
+  for (int k=0;k<Th3.nt;k++){
+    for (int e=0;e<6;e++){
+      if( Th3[k].lenEdge(e) < Norme2(Psup-Pinf)/1e9 )
+	{
+	  const Tet & K(Th3.elements[k]);
+	  int iv[4];
+	  for(int jj=0; jj <4; jj++){
+	    iv[jj] = Th3.operator()(K[jj]);
+	  }
+	  for (int eh=0;eh<6;eh++){
+	    cout << "tetrahedra: " << k << " edge : " << eh << " lenght "<<  Th3[k].lenEdge(eh) << endl;
+	  }
+	  cout << " A tetrahedra with a very small edge was created " << endl;
+	  return 1;
+	}
+      hmin=min(hmin,Th3[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+    }
+  }
+  
+  for (int k=0;k<Th3.nbe;k++){
+    for (int e=0;e<3;e++){
+      if( Th3.be(k).lenEdge(e) < Norme2(Psup-Pinf)/1e9 )
+	{
+	  for (int eh=0;eh<3;e++){
+	    cout << "triangles: " << k << " edge : " << eh << " lenght "<<  Th3.be(k).lenEdge(e) << endl;
+	  }
+	  cout << " A triangle with a very small edges was created " << endl;
+	  return 1;
+	}
+      hmin=min(hmin,Th3.be(k).lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+    }
+  }
+
+  if(verbosity > 1) cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pinf << " "<< Psup << endl;
+
+  ffassert(hmin>Norme2(Psup-Pinf)/1e9);
+
+  // determination du nombre de sommets confondus
+  hseuil = hmin/10.;     
+  
+  if(verbosity >1) cout << "TestSameVertexMesh3 " << hseuil << endl;
+  TestSameVertexMesh3( Th3, hseuil, Psup, Pinf, nv_t, Numero_Som );
+  
+  if(verbosity >1) cout << "hseuil=" << hseuil << endl; 
+  if(verbosity >1) cout << "NbVertexRecollement " << nv_t << " / " << "NbVertex(anc)" << Th3.nv <<endl;   
+
+  if(nv_t != Th3.nv) {
+    cout << " A vertex was referenced twice or more " << endl;
+    return 1;
+  }
+  /* degenerate element ??? */ 
+  int Elem_ok[Th3.nt];
+  int i_elem=0;
+  for(int ii=0; ii< Th3.nt; ii++){
+    const Tet & K(Th3.elements[ii]);
+    int iv[4];
+    
+    Elem_ok[ii] = 1;
+    
+    for(int jj=0; jj <4; jj++){
+      iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
+    }
+      
+    for(int jj=0; jj<4; jj++){
+      for(int kk=jj+1; kk<4; kk++){
+	if( iv[jj]==iv[kk] ){
+	  Elem_ok[ii] = 0;
+	}
+      }
+    }
+    i_elem = i_elem + Elem_ok[ii];
+  }
+   
+  if( i_elem != Th3.nt ){
+    cout << "There are a false tetrahedra in the mesh" << endl;
+    assert( i_elem == Th3.nt);
+  }
+
+  int Border_ok[Th3.nbe];
+  int i_border= 0;
+  for( int ii=0; ii< Th3.nbe; ii++){
+    Border_ok[ii]=1;
+    
+    const Triangle3 & K(Th3.be(ii));
+    int iv[3];
+    
+    for(int jj=0; jj <3; jj++){
+      iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
+      assert( iv[jj] >= 0 && iv[jj] < nv_t);
+    }
+    
+    for(int jj=0; jj<3; jj++){
+      for(int kk=jj+1; kk<3; kk++){
+	if( iv[jj]==iv[kk] ) Border_ok[ii]=0;
+      }
+    }
+    i_border = i_border + Border_ok[ii];
+  }
+  
+  if( i_border != Th3.nbe){
+    cout << "There are a false tetrahedra in the mesh" << endl;
+    assert( i_elem == Th3.nt);
+  }
+
+  /* determination du nombre de tetrahedre confondus */ 
+  hseuil = hmin/10.;
+  hseuil = hseuil/4.;
+  
+  if(verbosity >1) cout << "TestSameVertexMesh3 " << hseuil << endl;
+  TestSameTetrahedraMesh3( Th3, hseuil, Psup, Pinf, Elem_ok, nt_t );
+
+  if(verbosity >1) cout << "hseuil=" << hseuil << endl; 
+  if(verbosity >1) cout << "NbVertexRecollement " << nt_t << " / " << "NbVertex(anc)" << Th3.nt <<endl;  
+
+  if(nt_t != Th3.nt){
+    cout << " a tetrahedra was referenced twice or more " << endl;
+    return 1;
+  }
+  /* determination du nombre de triangles confondus */ 
+  hseuil = hmin/10.;
+  hseuil = hseuil/3.;
+  if(verbosity >1) cout << "TestSameVertexMesh3 " << hseuil << endl;
+  TestSameTriangleMesh3( Th3, hseuil, Psup, Pinf, Border_ok,  nbe_t );
+ 
+  if(verbosity >1) cout << "hseuil=" << hseuil << endl; 
+  if(verbosity >1) cout << "NbVertexRecollement " << nbe_t << " / " << "NbVertex(anc)" << Th3.nbe <<endl;  
+
+  if(nbe_t != Th3.nbe){
+    cout << " a triangle was referenced twice or more " << endl;
+    return 1;
+  }
+  return 0;
+}
+
+
+Mesh3 *TestElementMesh3_patch( const Mesh3 & Th3 ) 
+// Test si le maillage à des éléments communs : Sommet, triangle, ...
+{
+  R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremité de la boîte englobante
+  double hmin=1e10;   // longueur minimal des arrêtes
+  double hseuil;
+  int Numero_Som[Th3.nv];
+  int nv_t,nt_t,nbe_t;
+  
+  // calcul de la boite englobante
+  for (int ii=0;ii<Th3.nv;ii++){ 
+    R3 P( Th3.vertices[ii].x, Th3.vertices[ii].y, Th3.vertices[ii].z);
+    Pinf=Minc(P,Pinf);
+    Psup=Maxc(P,Psup);     
+  }
+
+  // calcul de la longueur minimal des arrêtes
+  for (int k=0;k<Th3.nt;k++){
+    for (int e=0;e<6;e++){
+      if( Th3[k].lenEdge(e) < Norme2(Psup-Pinf)/1e9 ) continue;
+      hmin=min(hmin,Th3[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+    }
+  }
+  
+  for (int k=0;k<Th3.nbe;k++){
+    for (int e=0;e<3;e++){
+      if( Th3[k].lenEdge(e) < Norme2(Psup-Pinf)/1e9 ) continue;
+      hmin=min(hmin,Th3.be(k).lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+    }
+  }
+
+  if(verbosity > 1) cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pinf << " "<< Psup << endl;
+
+  ffassert(hmin>Norme2(Psup-Pinf)/1e9);
+
+  // determination du nombre de sommets confondus
+  hseuil = hmin/10.;     
+  if(verbosity >1) cout << "TestSameVertexMesh3" << endl;
+  TestSameVertexMesh3( Th3, hseuil, Psup, Pinf, nv_t, Numero_Som );
+  
+  if(verbosity >1) cout << "hseuil=" << hseuil << endl; 
+  if(verbosity >1) cout << "NbVertexRecollement " << nv_t << " / " << "NbVertex(anc)" << Th3.nv <<endl;   
+
+  /* degenerate element ??? */ 
+  int Elem_ok[Th3.nt];
+  int i_elem=0;
+  for(int ii=0; ii< Th3.nt; ii++){
+    const Tet & K(Th3.elements[ii]);
+    int iv[4];
+    
+    Elem_ok[ii] = 1;
+    
+    for(int jj=0; jj <4; jj++){
+      iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
+    }
+      
+    for(int jj=0; jj<4; jj++){
+      for(int kk=jj+1; kk<4; kk++){
+	if( iv[jj]==iv[kk] ){
+	  Elem_ok[ii] = 0;
+	}
+      }
+    }
+    i_elem = i_elem + Elem_ok[ii];
+  }
+   
+  if( i_elem != Th3.nt ){
+    cout << "There are a false tetrahedra in the mesh" << endl;
+    //assert( i_elem == Th3.nt);
+  }
+
+  int Border_ok[Th3.nbe];
+  int i_border= 0;
+  for( int ii=0; ii< Th3.nbe; ii++){
+    Border_ok[ii]=1;
+    
+    const Triangle3 & K(Th3.be(ii));
+    int iv[3];
+    
+    for(int jj=0; jj <3; jj++){
+      iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
+      assert( iv[jj] >= 0 && iv[jj] < nv_t);
+    }
+    
+    for(int jj=0; jj<3; jj++){
+      for(int kk=jj+1; kk<3; kk++){
+	if( iv[jj]==iv[kk] ) Border_ok[ii]=0;
+      }
+    }
+    i_border = i_border + Border_ok[ii];
+  }
+  
+  if( i_border != Th3.nbe){
+    cout << "There are a false tetrahedra in the mesh" << endl;
+    //assert( i_elem == Th3.nt);
+  }
+
+  /* determination du nombre de tetrahedre confondus */ 
+  hseuil = hmin/10.;
+  hseuil = hseuil/4.;
+  TestSameTetrahedraMesh3( Th3, hseuil, Psup, Pinf, Elem_ok, nt_t );
+
+  if(verbosity >1) cout << "hseuil=" << hseuil << endl; 
+  if(verbosity >1) cout << "NbVertexRecollement " << nt_t << " / " << "NbVertex(anc)" << Th3.nt <<endl;  
+
+  /* determination du nombre de triangles confondus */ 
+  hseuil = hmin/10.;
+  hseuil = hseuil/3.;
+  TestSameTriangleMesh3( Th3, hseuil, Psup, Pinf, Border_ok,  nbe_t );
+ 
+  if(verbosity >1) cout << "hseuil=" << hseuil << endl; 
+  if(verbosity >1) cout << "NbVertexRecollement " << nbe_t << " / " << "NbVertex(anc)" << Th3.nbe <<endl;  
+
+  Vertex3   *v= new Vertex3[nv_t];
+  Tet       *t= new Tet[nt_t];
+  Triangle3 *b= new Triangle3[nbe_t]; 
+  Tet       *tt=t;
+  Triangle3 *bb=b; 
+
+  EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pinf,Psup,0);
+
+  // determination des nouveaux sommets
+  int nbv = 0; 
+  hseuil = hmin/10.;
+  for (int ii=0;ii<Th3.nv;ii++){
+    const Vertex3 &vi(Th3.vertices[ii]); 
+    Vertex3 * pvi=gtree->ToClose(vi,hseuil);
+      
+    if(!pvi){
+      v[nbv].x = vi.x;
+      v[nbv].y = vi.y;
+      v[nbv].z = vi.z;
+      v[nbv].lab = vi.lab;
+      gtree->Add( v[nbv++] );
+    }
+   
+  }
+  delete gtree;
+  assert(nbv == nv_t);
+
+  // determination des nouveaux tetrahedres
+  int nbt = 0; 
+  hseuil = hmin/10.;
+  hseuil = hseuil/4.;
+  for (int ii=0;ii<Th3.nt;ii++){
+    if(Elem_ok[ii] == 0) continue; 
+    const Tet  &K(Th3.elements[ii]);
+    int iv[4];
+    iv[0]=Numero_Som[Th3.operator()(K[0])];
+    iv[1]=Numero_Som[Th3.operator()(K[1])];
+    iv[2]=Numero_Som[Th3.operator()(K[2])];
+    iv[3]=Numero_Som[Th3.operator()(K[3])];
+    (tt++)->set(v,iv,K.lab);
+ 
+  }
+  assert(nbv == nv_t);
+
+  // determination des nouveaux trianglesxs
+  int nbbe = 0; 
+  hseuil = hmin/10.;
+  hseuil = hseuil/4.;
+  for (int ii=0;ii<Th3.nbe;ii++){
+    if(Border_ok[ii] == 0) continue; 
+    const Triangle3 & K(Th3.be(ii));
+    int iv[3];
+    iv[0]=Numero_Som[Th3.operator()(K[0])]; 
+    iv[1]=Numero_Som[Th3.operator()(K[1])]; 
+    iv[2]=Numero_Som[Th3.operator()(K[2])]; 
+  
+    (bb++)->set(v,iv,K.lab);
+  }
+  assert(nbbe == nbe_t);
+
+  Mesh3 *Th3_new = new Mesh3(nv_t,nt_t,nbe_t,v,t,b); 
+  return Th3_new;
+}
+
+
+
+
 
 // TransfoMesh_v2.cpp
 
@@ -576,7 +1094,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	if(DiagMax1 > DiagMax2){  
 	  idl = 1; 
       
-      ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1pp;
+	  ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1pp;
 	  ijj[1] = tab_NumSommet[i_ind2]+i_recoll_2pp;
 	  ijj[0] = tab_NumSommet[i_ind2]+i_recoll_2; 
 	
@@ -591,7 +1109,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	else{
 	  idl = 2;
 	  
-      ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1pp;
+	  ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1pp;
 	  ijj[1] = tab_NumSommet[i_ind2]+i_recoll_2pp;
 	  ijj[0] = tab_NumSommet[i_ind1]+i_recoll_1; 
 
@@ -1920,30 +2438,30 @@ Mesh3 * Transfo_Mesh3(const double &precis_mesh,const Mesh3 & Th3, const double 
   cout << "Transfo TH3 : Vertex, Tetrahedra, Border : "<< "nv_t="<< nv_t << " nt_t=" << nt_t << " nbe_t=" << nbe_t << endl;
   
   // determination of vertex		
-    i_som = 0;
-    for(int i=0; i<nv_t; i++){
+  i_som = 0;
+  for(int i=0; i<nv_t; i++){
     
-      int & ii = ind_nv_t[i];
-      assert( Numero_Som[ii] == i_som );
-      
-      const Vertex3 & K(Th3.vertices[ii]);
-      
-      /*
-	T_Th3->vertices[i_som].x = tab_XX[ii];
-	T_Th3->vertices[i_som].y = tab_YY[ii];
-	T_Th3->vertices[i_som].z = tab_ZZ[ii];
-	T_Th3->vertices[i_som].lab = K.lab; 
-      */
-      v[i_som].x = tab_XX[ii];
-      v[i_som].y = tab_YY[ii];
-      v[i_som].z = tab_ZZ[ii];
-      v[i_som].lab = K.lab; 
-      
-      
-      i_som = i_som + 1;		
-    }	
-    //cout << "i_som, nv_t=" <<i_som << " "<<nv_t << endl;
-    assert( i_som == nv_t);
+    int & ii = ind_nv_t[i];
+    assert( Numero_Som[ii] == i_som );
+    
+    const Vertex3 & K(Th3.vertices[ii]);
+    
+    /*
+      T_Th3->vertices[i_som].x = tab_XX[ii];
+      T_Th3->vertices[i_som].y = tab_YY[ii];
+      T_Th3->vertices[i_som].z = tab_ZZ[ii];
+      T_Th3->vertices[i_som].lab = K.lab; 
+    */
+    v[i_som].x = tab_XX[ii];
+    v[i_som].y = tab_YY[ii];
+    v[i_som].z = tab_ZZ[ii];
+    v[i_som].lab = K.lab; 
+    
+    
+    i_som = i_som + 1;		
+  }	
+  //cout << "i_som, nv_t=" <<i_som << " "<<nv_t << endl;
+  assert( i_som == nv_t);
   
 	
   //cout << " Transfo volume elements " << endl;
@@ -2031,11 +2549,9 @@ void SamePointElement( const double &precis_mesh, const double *tab_XX, const do
   bmax3[0] = bmax.x;
   bmax3[1] = bmax.y;
   bmax3[2] = bmax.z;
-  /*
-    cout << "  OrderVertexTransfo_hcode " << endl;
-    OrderVertexTransfo_hcode_nv( Th3.nv, tab_XX, tab_YY, tab_ZZ, bmin3, bmax3, hmin, Numero_Som, ind_nv_t, nv_t );
-    cout << "fin order vertex: nv_t=" << nv_t << endl;
-  */
+ 
+
+
   if(verbosity > 1) cout << "  OrderVertexTransfo_hcode gtree " << endl;
   OrderVertexTransfo_hcode_nv_gtree( Th3.nv, bmin, bmax, hmin, tab_XX, tab_YY, tab_ZZ, Numero_Som, ind_nv_t, nv_t );
   if(verbosity > 1) cout << "fin order vertex gtree: nv_t=" << nv_t << endl;
@@ -2404,7 +2920,7 @@ void SamePointElement_surf( const double &precis_mesh, const double *tab_XX, con
       }
       Cdg_be[i_border][0] = ( tab_XX[iv[0]] + tab_XX[iv[1]] + tab_XX[iv[2]] )/3.; //( Th3.vertices[iv[0]].x + Th3.vertices[iv[1]].x + Th3.vertices[iv[2]].x )/3.;
       Cdg_be[i_border][1] = ( tab_YY[iv[0]] + tab_YY[iv[1]] + tab_YY[iv[2]] )/3.; //( Th3.vertices[iv[0]].y + Th3.vertices[iv[1]].y + Th3.vertices[iv[2]].y )/3.;
-      Cdg_be[i_border][2] = ( tab_ZZ[iv[0]] + tab_ZZ[iv[1]] + tab_ZZ[iv[2]] )/3.; //( Th3.vertices[iv[0]].z + Th3.vertices[iv[1]].z + Th3.vertices[iv[2]].z )/3.;		
+      Cdg_be[i_border][2] = ( tab_ZZ[iv[0]] + tab_ZZ[iv[1]] +  tab_ZZ[iv[2]] )/3.; //( Th3.vertices[iv[0]].z + Th3.vertices[iv[1]].z + Th3.vertices[iv[2]].z )/3.;		
 				
       label_be[i_border] = K.lab;
     }
@@ -2649,7 +3165,6 @@ void SamePointElement_Mesh2( const double &precis_mesh, const double *tab_XX, co
     	
     //int *ind_nbe_t_tmp= new int [np];
     int ind_nbe_t_tmp[np];
-
 	
     for( int i_border=0; i_border<np; i_border++){
       ind_nbe_t_tmp[ i_border ] = ind_nbe_t[ ind_np[i_border] ]; 
@@ -3176,7 +3691,7 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
 	
   // parametre interne pour debugger le code
   int verifnumberofpoints;
-  verifnumberofpoints = 0;
+  verifnumberofpoints = 1;
 	
   // hmin a determiner plus haut
   assert(hmin>Norme2(bmin-bmax)/1e9);
@@ -3229,7 +3744,7 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
 	
   if(verbosity >1) cout << "hseuil=" << hseuil <<endl;
   if(verbosity >1) cout << "nv_t = " << nv_t << " / " << "nv_t(anc)" << tab_nv <<endl;   
-	
+  
   if(verifnumberofpoints ==1){
     int numberofpoints=0;
     int numberofpointsdiff;

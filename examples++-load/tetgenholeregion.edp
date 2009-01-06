@@ -1,7 +1,7 @@
 // file adapt_double_sphere.edp
 load "msh3"
 load "tetgen"
-
+verbosity=2;
 
 // Test 1
 
@@ -38,38 +38,43 @@ func f1min = Rmin*f1;
 func f2min = Rmin*f2;
 func f3min = Rmin*f3;
 
-
+cout << "=====================" << endl;
+cout << "=====================" << endl;
 mesh3 Th3sph=movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min]);
-
+cout << "=====================" << endl;
+cout << "=====================" << endl;
 real Rmax  = 2.;
 func f1max = Rmax*f1;
 func f2max = Rmax*f2;
 func f3max = Rmax*f3;
-
+cout << "=====================" << endl;
+cout << "=====================" << endl;
 mesh3 Th3sph2=movemesh2D3Dsurf(Th,transfo=[f1max,f2max,f3max]);
-
+cout << "=====================" << endl;
+cout << "=====================" << endl;
 cout << "addition" << endl;
 mesh3 Th3=Th3sph+Th3sph2;
 
-real[int] domain2 = [1.5,0.,0.,145,0.001,0.5,0.,0.,18,0.001];
+real[int] domain2 = [1.5,0.,0.,145,0.001,0.5,0.,0.,18,0.01];
 cout << "==============================" << endl;
 cout << " tetgen call without hole " << endl;
 cout << "==============================" << endl;
-mesh3 Th3fin=tetg(Th3,switch="paAAQYY",nbofregions=2,regionlist=domain2);
+mesh3 Th3fin=tetg(Th3,switch="paAAYYCCV",nbofregions=2,regionlist=domain2);
 cout << "=============================" << endl;
 cout << "finish: tetgen call without hole" << endl;
 cout << "=============================" << endl;
 savemesh(Th3fin,"spherewithtworegion.mesh"); 
-
-
-
+/*
 real[int] hole = [0.,0.,0.];
 real[int] domain = [1.5,0.,0.,53,0.001];
 cout << "=============================" << endl;
 cout << "  tetgen call with hole   " << endl;
 cout << "=============================" << endl;
-mesh3 Th3finhole=tetg(Th3,switch="paAAQYY",nbofholes=1,holelist=hole,nbofregions=1,regionlist=domain);
+mesh3 Th3finhole=tetg(Th3,switch="paAAYCCV",nbofholes=1,holelist=hole,nbofregions=1,regionlist=domain);
 cout << "=============================" << endl;
 cout << "finish: tetgen call with hole   " << endl;
 cout << "=============================" << endl;
 savemesh(Th3finhole,"spherewithahole.mesh"); 
+*/
+
+
