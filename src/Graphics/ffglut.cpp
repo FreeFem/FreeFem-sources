@@ -1509,7 +1509,7 @@ void Display(void)
     if(!NoMorePlotTilte  &&NoMorePlot)
       {
 	NoMorePlotTilte=true;
-	glutSetWindowTitle("FreeFem++ / no plot enter ESC to exit)");
+	glutSetWindowTitle("FreeFem++ / Program ended; enter ESC to exit)");
       }
 }
 
@@ -1735,7 +1735,7 @@ int main(int argc,  char** argv)
     glutInitWindowSize(Width , Height);
     glutInitWindowPosition(100, 100);
 
-    string titre = "GLUT/ FreeFem++ (enter key for next plot) ";
+    string titre = "FreeFem++: type return key to proceed (or ? for help on other)";
     glutCreateWindow(titre.c_str());
     glutPushWindow();
     if (fullscreen)
