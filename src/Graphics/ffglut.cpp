@@ -614,13 +614,13 @@ void  OneWindow::SetView()
       R aspect=ratio;
       R3 DD(Bmin3,Bmax3);
       R dmax= DD.norme();;
-      R dist = dmax/2/asin(focal/2*pi/180.)*coef_dist;
+      R dist = 0.5*dmax/sin(focal/2)*coef_dist;
       R camx=Pvue3.x+cos(phi)*cos(theta)*dist;
       R camy=Pvue3.y+cos(phi)*sin(theta)*dist;
       R camz=Pvue3.z+dist*sin(phi);  
-      R znear=max(dist-dmax,0.);
+      R znear=max(dist-dmax,1e-30);
       R zfare=dist+dmax;
-      gluPerspective(focal,aspect,znear,zfare);
+      gluPerspective(focal*180./M_PI,aspect,znear,zfare);
       /*      
       if (eye)
 	{
@@ -835,7 +835,9 @@ void ThePlot::DrawHelp(OneWindow *win)
   win->Show("-)  zoom out around the cursor 3/2 times  ",i++);
   win->Show("=)  reset zooming  ",i++);
   win->Show("r)  refresh plot ",i++);
-  win->Show("3)  3d plot ",i++);
+  win->Show("3)  3d plot (in test)  keys : ",i++);
+  win->Show("       move : <- ->  mouse to return etc.  ",i++);
+  win->Show("       z/Z (focal zoom)  ",i++);
   win->Show("2)  2d plot ",i++);
   win->Show("ac) increase   the size arrow ",i++);
   win->Show("AC) decrease the size arrow  ",i++);
@@ -1602,10 +1604,18 @@ static void Key( unsigned char key, int x, int y )
 	win->theplot->coeff*= 1.2;
 	break;
       case 'z':
-	win->focal *=1.2;
+	if(win->focal < M_PI/1.2 ) 
+	  {
+	    win->coef_dist*=sin(win->focal*1.2/2)/sin(win->focal/2);
+	    win->focal *=1.2;
+	  }
 	break;
       case 'Z':
-	win->focal /=1.2;
+	if(win->focal > 1e-5)
+	  {
+	    win->coef_dist*=sin(win->focal/1.2/2)/sin(win->focal/2);
+	    win->focal /=1.2;
+	  }
 	break;
       case '\r':
       case '\n':
