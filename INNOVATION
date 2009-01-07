@@ -1,5 +1,6 @@
 v 3.0-4 (05 jan 2009)
   - correct int2d in 3d case: all this integrale was multiply by 2. 
+  - add 3d viewing in plot (in test)
 v 3.0-3 (27 dec 2008)
   - build a not to bad version 
   - remove so crazy print 
