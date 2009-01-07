@@ -157,7 +157,7 @@ struct MPIrank {
     
    const MPIrank & operator<<(const KN<double> *aa)const  {
      const KN<double> & a=*aa;
-      ffassert(a); 
+      ffassert(&a); 
       int n= a.N();
       MPI::COMM_WORLD.Isend((double *) a, n, MPI::DOUBLE, who, 10);
       return *this;
@@ -165,7 +165,7 @@ struct MPIrank {
  
     const MPIrank & operator<<(const KN<long> *aa)const  {
 	const KN<long> & a=*aa;
-	ffassert(a); 
+	ffassert(&a); 
 	int n= a.N();
 	MPI::COMM_WORLD.Isend((long *) a, n, MPI::LONG, who, 11);
 	return *this;
@@ -173,7 +173,7 @@ struct MPIrank {
  
     const MPIrank & operator<<(const KN<Complex> *aa)const  {
 	const KN<Complex> & a=*aa;
-	ffassert(a); 
+	ffassert(&a); 
 	int n= a.N();
 #ifdef MPI_DOUBLE_COMPLEX_
 	MPI::COMM_WORLD.Isend((Complex *) a, n, MPI::DOUBLE_COMPLEX, who, 12);

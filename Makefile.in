@@ -278,7 +278,7 @@ freefem++.spec crimon-freefem++.zip \
 Install-MacOS.command.in \
 examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \
 examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \
-examples-bamg/test/dotest*.pl 
+examples-bamg/test/dotest*.pl 0ldUserReadMe.txt
 
 FF_MAC_PREFIX = FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
 all: config.h
