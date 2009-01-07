@@ -188,7 +188,7 @@ struct MPIrank {
     
    const MPIrank & Bcast(const KN<double> *aa)const  {
       const KN<double> & a=*aa;
-      assert(a); 
+      assert(aa); 
       int n= a.N();
       (void) MPI::COMM_WORLD.Bcast((double *) a, n, MPI::DOUBLE, who);
       ffassert(a.N()==n);
@@ -197,7 +197,7 @@ struct MPIrank {
 
     const MPIrank & Bcast(const KN<long> *aa)const  {
 	const KN<long> & a=*aa;
-	assert(a); 
+	assert(aa); 
 	int n= a.N();
 	(void) MPI::COMM_WORLD.Bcast((long *) a, n, MPI::LONG, who);
 	ffassert(a.N()==n);
@@ -206,7 +206,7 @@ struct MPIrank {
 
     const MPIrank & Bcast(const KN<Complex> *aa)const  {
 	const KN<Complex> & a=*aa;
-	assert(a); 
+	assert(aa); 
 	int n= a.N();
 #ifdef MPI_DOUBLE_COMPLEX_
 	(void) MPI::COMM_WORLD.Bcast((Complex *) a, n, MPI::DOUBLE_COMPLEX, who);
