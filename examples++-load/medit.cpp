@@ -1050,8 +1050,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
 	  fwrite( (unsigned char *) &NulPos, WrdSiz,1,popenstream );
 	  fwrite( (unsigned char *) &nt, WrdSiz,1,popenstream );
 
-	  //fprintf(popenstream,"SolAtTriangles\n");
-	  //fprintf(popenstream,"%i\n",nt);
+	  printf("SolAtTriangles nt=%i\n",nt);
 	}
 	if(order==1){
 	  KwdCod = GmfSolAtVertices;
@@ -1059,14 +1058,14 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
 	  fwrite( (unsigned char *) &NulPos, WrdSiz,1,popenstream );
 	  fwrite( (unsigned char *) &nv, WrdSiz,1,popenstream );
 	  
-	  //fprintf(popenstream,"SolAtVertices\n");
-	  //fprintf(popenstream,"%i\n",nv);
+	  printf("SolAtVertices nv=%i\n",nv);
+
 	}
 	typsol = TypTab[jojo];
 
 	fwrite( (unsigned char *) &codtypjm, WrdSiz,1,popenstream );
 	fwrite( (unsigned char *) &typsol, WrdSiz,1,popenstream );
-	//fprintf(popenstream,"%i %i\n",1,typsol);
+	//printf(popenstream,"%i %i\n",codtypjm,typsol);
       }
       else{
 	fprintf(popenstream,"MeshVersionFormatted %i\n",ver);

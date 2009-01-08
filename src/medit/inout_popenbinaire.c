@@ -193,7 +193,7 @@ int loadMesh_popen_bin(pMesh mesh) {
       assert(mesh->point);
       
       for (k=1; k<=mesh->np; k++) {
-	if(0) printf("lecture point du maillage k=%i np=%i ver=%i \n",k,mesh->np,mesh->ver);
+	//if(0) printf("lecture point du maillage k=%i np=%i ver=%i \n",k,mesh->np,mesh->ver);
 	ppt = &mesh->point[k];
 	
 	if(mesh->ver==GmfFloat)
@@ -688,7 +688,6 @@ int loadScaVecTen_bin(pMesh mesh, int numsol, int dim, int ver, int nel, int typ
   mesh->bbmax  = -1.0e20;
   if ( !zaldy2(mesh) ) {
     retcode=0;
-    goto Lret; 
   }
   sol = mesh->sol;
   sol->dim = dim;
@@ -710,6 +709,7 @@ int loadScaVecTen_bin(pMesh mesh, int numsol, int dim, int ver, int nel, int typ
   //printf("min= %f, max= %f\n",mesh->bbmin,mesh->bbmax);
  
   if(ddebug) printf("numsol=%i,typtab[i]=%i\n",numsol,typtab[i]); 
+  fflush(stdout);
   switch(typtab[numsol]) {
   case GmfSca:
     mesh->nfield = 1;
@@ -791,7 +791,6 @@ int loadScaVecTen_bin(pMesh mesh, int numsol, int dim, int ver, int nel, int typ
     break;
   }
   retcode=1;
- Lret: 
   
   return retcode;
 }
@@ -807,7 +806,6 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
 
   // rajout pour popen
   int       NumberofSolAT;
-  char*     tictac;
   char       *natureread;
   // rajout binaire
   int       KwdCod;
@@ -835,7 +833,7 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
   fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
   fread( (unsigned char *)&dim ,WrdSiz, 1, stdin);
   natureread="Dimension";
-  printf(".sol: %s %i (mesh)%i (lecture)%s \n",natureread,dim,mesh->dim,tictac);
+  printf(".sol: %s %i (mesh)%i (lecture)%i \n",natureread,dim,mesh->dim,ver);
   /*control of the dimension*/
   if( dim != mesh->dim ){
     fprintf(stderr,"  %%%% Wrong dimension %d.\n",dim);
@@ -845,14 +843,15 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
   }
 
   while( !feof(stdin) ){
-
+   
     fread( (unsigned char *)&KwdCod ,WrdSiz, 1, stdin);
-     
+   
     if(KwdCod == GmfSolAtVertices){   
       fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
       fread( (unsigned char *)&nel ,WrdSiz, 1, stdin);
       natureread = "SolAtVertices";
       fprintf(stdout,"SolAtVertices : nel %i, mesh->np %i \n",nel,mesh->np);
+      
       if ( nel != mesh->np ) {
 	fprintf(stderr,"  %%%% Wrong number: %d Solutions discarded\n",nel-mesh->np);
 	retcode=0;
@@ -865,7 +864,7 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
       /*  type,size,typetab  */  
       read_TypeSizeTyptab_bin( &type, &size, typtab);
       printf("sol: %s; type %i; size%i;\n",natureread, type, size); 
-
+      fflush(stdout);
       /* Reading solutions*/
       loadScaVecTen_bin( mesh, 1, dim, ver, nel, type, size, typtab, key);
     }

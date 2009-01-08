@@ -679,7 +679,7 @@ int loadSol(pMesh mesh,char *filename,int numsol) {
             fbuf[i] = dbuf[off+i];
         }
         mesh->sol[k].bb = fbuf[off];
-	printf("valeur donneer %i %f\n",k,fbuf[off]);
+	if(ddebug) printf("valeur donneer %i %f\n",k,fbuf[off]);
 	if ( mesh->sol[k].bb < mesh->bbmin )  mesh->bbmin = mesh->sol[k].bb;
         if ( mesh->sol[k].bb > mesh->bbmax )  mesh->bbmax = mesh->sol[k].bb;
       }
@@ -699,7 +699,7 @@ int loadSol(pMesh mesh,char *filename,int numsol) {
         }
         for (i=0; i<sol->dim; i++) {
           mesh->sol[k].m[i] = fbuf[off+i];
-	  printf("valeur donner %i composante %i %f\n",k,i,fbuf[off+i]);
+	  if(ddebug) printf("valeur donner %i composante %i %f\n",k,i,fbuf[off+i]);
           mesh->sol[k].bb  += fbuf[off+i]*fbuf[off+i];
         }
         mesh->sol[k].bb = sqrt(mesh->sol[k].bb);

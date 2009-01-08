@@ -1944,6 +1944,7 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   MeshPoint *mp3(MeshPointStack(stack)); 
   
   takemesh=0;
+  // loop over tetrahedral 
   for (int it=0;it<Th.nt;++it){
     for( int iv=0; iv<4; ++iv){
       int i=Th(it,iv);  
@@ -1953,12 +1954,13 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
 	if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
 	if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
 	if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
-	
 	takemesh[i] = takemesh[i]+1;
       }
     }
   }
-  
+
+  // loop over border elements
+
 	
   int border_only = 0;
   int recollement_elem=0, recollement_border=1, point_confondus_ok=0;
@@ -1968,10 +1970,8 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   if(nbt != 0)
     {
       T_Th3->BuildBound();
-
     
       T_Th3->BuildAdj();
-
       
       T_Th3->Buildbnormalv();  
 
@@ -1982,7 +1982,6 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
       //	T_Th3->decrement();  
       Add2StackOfPtr2FreeRC(stack,T_Th3);
      
-      
     }
 
   *mp=mps;
