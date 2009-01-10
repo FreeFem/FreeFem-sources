@@ -29,6 +29,7 @@ Source: "COPYRIGHT"; DestDir: "{app}"
 Source: "COPYING"; DestDir: "{app}"
 Source: "README"; DestDir: "{app}"
 Source: "crimon-freefem++.zip"; DestDir: "{app}"
+Source: "0ldUserReadMe.txt"; DestDir: "{app}"
 
 ; Programs
 Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
@@ -67,6 +68,11 @@ Source: "examples++-load\load.link"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\include-tmp\*"; DestDir: "{app}\examples++-load\include"
 Source: "examples++-3d\*.edp"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\*.mesh"; DestDir: "{app}\examples++-3d"
+Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-load"
+Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-tutorial"
+Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-chapt3"
+Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++"
+Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-eigen"
 
 
 
