@@ -4253,8 +4253,10 @@ C_F0 NewFEvariableT(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0
   str += "]";
      bool binit= !init.Empty(); 
      char * name = strcpy(CodeAllocT<char>::New(str.size()+1),str.c_str());
-     C_F0 ret= binit ? currentblock->NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,init))
-       : currentblock->NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype));
+     C_F0 ret; 
+     // modif  100109 (add Block::  before NewVar for g++ 3.3.3 on Suse 9)
+    ret= binit ? currentblock->Block::NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,init)) 
+      : currentblock->Block::NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype));
      C_F0 base = currentblock->Find(name);
      if (cplx)
        for (int i=0;i<n;i++) 
@@ -4378,7 +4380,7 @@ C_F0 NewFEarrayT(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 si
     }
      str += "]";
      char * name = strcpy(CodeAllocT<char>::New(str.size()+1),str.c_str());
-     C_F0 ret=  currentblock->NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,sizeofarray)); 
+     C_F0 ret=  currentblock->Block::NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,sizeofarray)); 
      C_F0 base = currentblock->Find(name);
      if(cplx)
       for (int i=0;i<n;i++) 

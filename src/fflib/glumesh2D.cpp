@@ -266,7 +266,7 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   KN<long> nre (arg(0,stack,zz));  
   KN<long> nrt (arg(1,stack,zz));  
 
-  if(nre.N() <=0 && nrt.N() ) return m;
+  if(nre.N() <=0 && nrt.N()<=0 ) return m;
   ffassert( nre.N() %2 ==0);
   ffassert( nrt.N() %2 ==0);
   map<int,int> mape,mapt;
