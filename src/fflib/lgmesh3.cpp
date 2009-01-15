@@ -99,7 +99,26 @@ long pmesh_nt(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nt ;}
 long pmesh_nv(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nv ;}
 long pmesh_nbe(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nbe ;}
 
+pf3rbase* get_element(pf3rbasearray *const & a, long const & n)
+{
+    return (**a)[n];
+}
 
+pf3r get_element(pf3rarray const & a, long const & n)
+{
+    return pf3r( *(*a.first)[n],a.second);
+}
+
+//  complex case 
+pf3cbase* get_element(pf3cbasearray *const & a, long const & n)
+{
+    return (**a)[n];
+}
+pf3c get_element(pf3carray const & a, long const & n)
+{
+    return pf3c( *(*a.first)[n],a.second);
+}
+//  end complex case 
 
 class MoveMesh3 :  public E_F0mps { public:  
  
@@ -956,6 +975,10 @@ void init_lgmesh3() {
  Global.Add("intallfaces","(",new OneOperatorCode<CDomainOfIntegrationAllFaces>);
 
 
+    Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));
+    Add<pf3rarray>("[","",new OneOperator2_<pf3r,pf3rarray,long>(get_element));
+    Add<pf3carray>("[","",new OneOperator2_<pf3c,pf3carray,long>(get_element));
+    
  /*
  Add<pfer>("n",".",new OneOperator1<long,pfer>(pfer_nbdf<R>));
  Add<pfec>("n",".",new OneOperator1<long,pfec>(pfer_nbdf<Complex>));
