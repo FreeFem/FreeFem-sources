@@ -627,7 +627,7 @@ if test "$enable_generic_blas" = yes
 then
 	enable_download=yes
 fi
-
+#  echo " ----------- $enable_download --"
 # if enabling downloads find wget or curl to do download 
 # ------------------------------------------------------
 
@@ -646,7 +646,7 @@ fi
 
 # for automatique compilation of 
 # lib in download 
-if test -z "$ff_wget_command" -a "$enable_download"  = "yes"  ; then
+if test -z "$ff_wget" != yes  -a "$enable_download"  = "yes"  ; then
   enable_download=no
   AC_MSG_ERROR([   enable-download and no wget or curl. ],1);  
 fi
@@ -819,7 +819,7 @@ then
 fi
 #echo "LIBS = " $LIBS
 # If all else fails, download!
-if test "$ff_blas_ok" = no -a "$ff_wget" = yes \
+if test "$ff_blas_ok" = no -a "$enable_download" = yes \
    -a "$enable_fortran" != no -a "$enable_c" != no
 then
 	AC_CHECK_PROG(ff_unzip,unzip,yes,no)
@@ -993,9 +993,10 @@ then
     fi
 
 	# If all else fails, download!
-	if test "$ff_arpack_ok" = no -a "$ff_wget" = yes \
+	if test "$ff_arpack_ok" = no -a "$enable_download" = yes \
 	   -a "$enable_fortran" != no
 	then
+                ff_arpack_download=yes
 		AC_MSG_NOTICE(using downloaded Arpack)
 		AC_SUBST(DOWNLOAD_ARPACK,arpack)
 		AC_SUBST(FF_LAPACKdir,$ff_lapackdir)
@@ -1010,7 +1011,7 @@ then
 fi
 if test  "$ff_arpack_ok" != yes 
  then
-	    AC_MSG_NOTICE(-- NO ARPACK --  wget: $ff_wget)
+	    AC_MSG_NOTICE(-- NO ARPACK --  enable_download : $enable_download , wget: $ff_wget )
 fi
 
 # Do not insert ARPACK libs in $LIBS yet, because they may not exist
@@ -1093,11 +1094,11 @@ fi
 LIBS="$ff_save_libs"
 
 # If all else fails, download!
-if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes 
+if test "$ff_umfpack_ok" = no -a "$enable_download" = yes 
    then
 	AC_MSG_NOTICE(using downloaded UMFPACK)
 	AC_SUBST(DOWNLOAD_UMFPACK,umfpack)
-
+	ff_umfpack_download=yes
 	# Do not update $LIBS, but create an extra LIB variable,
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
@@ -1488,6 +1489,16 @@ AC_OUTPUT(Makefile
         AC_MSG_NOTICE([		 --  with X11             $ff_x11])
         AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
 	AC_MSG_NOTICE([    progs: $ff_progs ])
+if test  "$ff_umfpack_download" = yes  ;then
+   	AC_MSG_NOTICE([      use of download UMFPACK see  download/umfpack/SuiteSparse/UMFPACK/README.txt for the License])
+fi
+if test "$ff_arpack_download" = yes  ; then
+   	AC_MSG_NOTICE([      use of download ARPACK see  download/arpack/ARPACK/README  no License ])
+fi
+if test "$enable_download" = yes  ;then
+        AC_MSG_NOTICE([      use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT ])
+   	AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.4.2/LICENSE ])
+fi
 if test "$ff_glut_ok" != yes  ; then
  	AC_MSG_NOTICE([     *********************************************** ])
  	AC_MSG_NOTICE([     WARNING: you do not have the new grachics tools ])
@@ -1496,3 +1507,4 @@ if test "$ff_glut_ok" != yes  ; then
  	AC_MSG_NOTICE([         F. Hecht  ])
  	AC_MSG_NOTICE([     *********************************************** ])
 fi
+

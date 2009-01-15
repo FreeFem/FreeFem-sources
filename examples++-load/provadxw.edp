@@ -1,3 +1,4 @@
+// test of DxWriter  from Sala Lorenzo.
 load "DxWriter"
 mesh Th=square(5,5);
 DxWriter ff("pippo");

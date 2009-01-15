@@ -11651,7 +11651,7 @@ if test "$enable_generic_blas" = yes
 then
 	enable_download=yes
 fi
-
+#  echo " ----------- $enable_download --"
 # if enabling downloads find wget or curl to do download
 # ------------------------------------------------------
 
@@ -11744,7 +11744,7 @@ fi
 
 # for automatique compilation of
 # lib in download
-if test -z "$ff_wget_command" -a "$enable_download"  = "yes"  ; then
+if test -z "$ff_wget" != yes  -a "$enable_download"  = "yes"  ; then
   enable_download=no
   { { echo "$as_me:$LINENO: error:    enable-download and no wget or curl. " >&5
 echo "$as_me: error:    enable-download and no wget or curl. " >&2;}
@@ -12665,7 +12665,7 @@ echo "${ECHO_T}$ff_cblas_libs" >&6; }
 fi
 #echo "LIBS = " $LIBS
 # If all else fails, download!
-if test "$ff_blas_ok" = no -a "$ff_wget" = yes \
+if test "$ff_blas_ok" = no -a "$enable_download" = yes \
    -a "$enable_fortran" != no -a "$enable_c" != no
 then
 	# Extract the first word of "unzip", so it can be a program name with args.
@@ -13594,9 +13594,10 @@ echo "${ECHO_T}$ff_arpack_ok" >&6; }
     fi
 
 	# If all else fails, download!
-	if test "$ff_arpack_ok" = no -a "$ff_wget" = yes \
+	if test "$ff_arpack_ok" = no -a "$enable_download" = yes \
 	   -a "$enable_fortran" != no
 	then
+                ff_arpack_download=yes
 		{ echo "$as_me:$LINENO: using downloaded Arpack" >&5
 echo "$as_me: using downloaded Arpack" >&6;}
 		DOWNLOAD_ARPACK=arpack
@@ -13616,8 +13617,8 @@ echo "$as_me: using downloaded Arpack" >&6;}
 fi
 if test  "$ff_arpack_ok" != yes
  then
-	    { echo "$as_me:$LINENO: -- NO ARPACK --  wget: $ff_wget" >&5
-echo "$as_me: -- NO ARPACK --  wget: $ff_wget" >&6;}
+	    { echo "$as_me:$LINENO: -- NO ARPACK --  enable_download : $enable_download " >&5
+echo "$as_me: -- NO ARPACK --  enable_download : $enable_download " >&wget: $ff_wget ;}
 fi
 
 # Do not insert ARPACK libs in $LIBS yet, because they may not exist
@@ -14126,13 +14127,13 @@ fi
 LIBS="$ff_save_libs"
 
 # If all else fails, download!
-if test "$ff_umfpack_ok" = no -a "$ff_wget" = yes
+if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
    then
 	{ echo "$as_me:$LINENO: using downloaded UMFPACK" >&5
 echo "$as_me: using downloaded UMFPACK" >&6;}
 	DOWNLOAD_UMFPACK=umfpack
 
-
+	ff_umfpack_download=yes
 	# Do not update $LIBS, but create an extra LIB variable,
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
@@ -17144,6 +17145,20 @@ echo "$as_me: 		 --  with X11             $ff_x11" >&6;}
 echo "$as_me: 		 --  with MPI             $ff_mpi" >&6;}
 	{ echo "$as_me:$LINENO:     progs: $ff_progs " >&5
 echo "$as_me:     progs: $ff_progs " >&6;}
+if test  "$ff_umfpack_download" = yes  ;then
+   	{ echo "$as_me:$LINENO:       use of download UMFPACK see  download/umfpack/SuiteSparse/UMFPACK/README.txt for the License" >&5
+echo "$as_me:       use of download UMFPACK see  download/umfpack/SuiteSparse/UMFPACK/README.txt for the License" >&6;}
+fi
+if test "$ff_arpack_download" = yes  ; then
+   	{ echo "$as_me:$LINENO:       use of download ARPACK see  download/arpack/ARPACK/README  no License " >&5
+echo "$as_me:       use of download ARPACK see  download/arpack/ARPACK/README  no License " >&6;}
+fi
+if test "$enable_download" = yes  ;then
+        { echo "$as_me:$LINENO:       use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT " >&5
+echo "$as_me:       use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT " >&6;}
+   	{ echo "$as_me:$LINENO:       use of download tetgen  see download/tetgen/tetgen1.4.2/LICENSE " >&5
+echo "$as_me:       use of download tetgen  see download/tetgen/tetgen1.4.2/LICENSE " >&6;}
+fi
 if test "$ff_glut_ok" != yes  ; then
  	{ echo "$as_me:$LINENO:      *********************************************** " >&5
 echo "$as_me:      *********************************************** " >&6;}
@@ -17158,3 +17173,4 @@ echo "$as_me:          F. Hecht  " >&6;}
  	{ echo "$as_me:$LINENO:      *********************************************** " >&5
 echo "$as_me:      *********************************************** " >&6;}
 fi
+

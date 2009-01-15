@@ -88,7 +88,7 @@ void    Edge::Draw(Int4  i) const
     v[1]->LineTo();
     R2 M= ((R2) *v[0] + (R2) * v[1])*0.5;
     Move(M);
-    char VertexDraw_i10[10];
+    char VertexDraw_i10[20];
     if (i<0)
       sprintf(VertexDraw_i10,"%p",this);
     else 
@@ -107,7 +107,7 @@ void    Vertex::Draw(Int4 i) const
 	i = CurrentTh->Number(this);
     }
   if (InPtScreen(r.x,r.y)) {
-   char VertexDraw_i10[10];
+   char VertexDraw_i10[20];
    if (i<0)
      sprintf(VertexDraw_i10,"%p",this);
    else 
@@ -142,7 +142,7 @@ void  Triangle::Draw(Int4 i ) const
       if (CurrentTh->triangles <= this && this < CurrentTh->triangles + CurrentTh->nbt)
 	i = CurrentTh->Number(this);
     }	
-  char i10[10];
+  char i10[20];
   if (i<0)   sprintf(i10,"%p",this);
   else  sprintf(i10,"%ld",i);
   showgraphic();
@@ -743,7 +743,7 @@ void GeometricalEdge::Draw(Int4  i)
       if (InPtScreen(v[1]->r.x,v[1]->r.y))      
 	v[1]->LineTo();  
 
-      char VertexDraw_i10[10];
+      char VertexDraw_i10[20];
       if( k50) {
 	if (i<0)
 	  sprintf(VertexDraw_i10,"Eg%p",this);
@@ -794,7 +794,7 @@ void   Geometry::Draw() const {
    couleur(6);
   for (i=0;i<nbv;i++)
     if (vertices[i].Required()) {
-      char i10[20];
+      char i10[40];
       sprintf(i10,"%ld:%d",i,vertices[i].Required());
       Move(vertices[i].r);
       if(vertices[i].Corner()) couleur(2);
