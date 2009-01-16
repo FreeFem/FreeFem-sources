@@ -170,8 +170,9 @@ static  bool TryNewPlot( void )
     {
       WaitNextRead();
       if(debug>1) cout << " change current plot to: " << nextPlot << " et  Lock Plot . " << endl;;
-      AllWindows[glutGetWindow()]->set(nextPlot);
-      if(currentPlot) delete currentPlot;
+
+      AllWindows[glutGetWindow()]->add(nextPlot);
+      //if(currentPlot) delete currentPlot; //  a change fait dans add 
       // MutexNextPlot.WAIT();      
       currentPlot=nextPlot;
       nextPlot=0;
@@ -244,7 +245,8 @@ void DefColor(float & r, float & g, float & b,
 
 void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot)
 {
-  glDisable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
+
     ShowGlerror("begin Mesh plot");
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE); 
     R z1= plot.z0;
@@ -357,10 +359,12 @@ void OnePlotFE::Draw(OneWindow *win)
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
   else
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+  
   if(what==2)
-    {
-      glDisable(GL_DEPTH_TEST);
-    }
+    glDisable(GL_DEPTH_TEST);
+  else 
+    glEnable(GL_DEPTH_TEST);
+
   R coef = plot.coeff;
   double xmin,xmax,ymin,ymax;
   win->getcadre(xmin,xmax,ymin,ymax);
@@ -423,8 +427,8 @@ void OnePlotFE::Draw(OneWindow *win)
       }
   }
   // if(plot.drawmeshes)
-  if(what==2)
-    glEnable(GL_DEPTH_TEST);  
+  //  if(what==2)
+  //  glEnable(GL_DEPTH_TEST);  
   ShowGlerror("b mesh  OnePlotFE plot");  
   Plot(Th,false,plot.drawmeshes,plot.drawborder,plot);
   ShowGlerror("OnePlotFE::Draw");
@@ -454,6 +458,7 @@ void OnePlotCurve::Draw(OneWindow *win)
 
 void OnePlotBorder::Draw(OneWindow *win)
 {
+  glDisable(GL_DEPTH_TEST);
   ThePlot & plot= *win->theplot;
   R h = 8*win->hpixel;
   
@@ -511,22 +516,54 @@ void OnePlotBorder::Draw(OneWindow *win)
 
 
 OneWindow::OneWindow(int h,int w,ThePlot *p)
-  : height(h),width(w),theplot(0),hpixel(1),
-    Bmin(0,0),Bmax(1,1),oBmin(Bmin),oBmax(Bmax),zmin(0),zmax(1),
-    windowdump(false),help(false)
+  :
+  icurrentPlot(lplots.begin()), 
+  lplotssize(0),
+  height(h),width(w),theplot(0),hpixel(1),
+  Bmin(0,0),Bmax(1,1),oBmin(Bmin),oBmax(Bmax),zmin(0),zmax(1),
+  windowdump(false),help(false), rapz0(-1.),rapz(1)
 {
-    set(p);
+  
+  add(p);
 }
+
+
 void OneWindow::set(ThePlot *p)
 {
   //ffassert(p);
     bool first = !theplot;
     bool change = theplot != p;
     theplot=p;
+    rapz0 =-1; // to recompute the defalut rapz
     //    p->win=this;
-    if(first) DefaultView() ;
+    //    if(first)
+ DefaultView() ;
     
     
+}
+
+void OneWindow::add(ThePlot *p)
+{
+  if(p) {
+    lplots.push_back(p);
+    lplotssize++;
+    ++icurrentPlot;
+    if(icurrentPlot==lplots.end())
+      --icurrentPlot;// the previous
+    if(icurrentPlot != lplots.end())
+      set(*icurrentPlot);
+    if( lplotssize>10)
+      {
+	bool isfirst = theplot == *lplots.begin();  
+	cout << " delete a plot " << *lplots.begin() << endl;
+	delete *lplots.begin();
+	lplots.erase(lplots.begin());
+        lplotssize--;
+	if(isfirst) set(*lplots.begin()); // change to the next plot
+      }
+  }
+  else 
+    set(p);
 }
 
 void OneWindow::DefaultView() 
@@ -535,11 +572,21 @@ void OneWindow::DefaultView()
     {
       R2 A(theplot->Pmin),B(theplot->Pmax);
       R2 D(A,B);
-      D *=0.05;
+      R dxy= max(D.x,D.y);
       zmax = theplot->fmax;
       zmin = theplot->fmin;
       theta=theplot->theta;
       phi=theplot->phi;
+      if(rapz0<=0)
+	{ //  ( zmax-zmin )*rapz0 =  0.3 dxyy
+	  rapz0  =  0.4* dxy/(zmax-zmin) ;
+	  if(debug>0)
+	    {
+	      cout << " rapz0 = " << rapz0 ;
+	      cout << " dz = " << zmax-zmin  << " dxy =" << dxy << endl;
+	    }
+	}
+      rapz=rapz0;
       coef_dist=theplot->dcoef;
       focal=theplot->focal;
       {
@@ -562,7 +609,7 @@ void OneWindow::DefaultView()
 	Pvue3=(Bmin3+Bmax3)/2;
       }
       
-      
+      D *=0.05;      
       if(theplot->boundingbox.size() !=4)
 	{
 	  A -= D;
@@ -613,11 +660,12 @@ void  OneWindow::SetView()
       
       R aspect=ratio;
       R3 DD(Bmin3,Bmax3);
+      DD.z *= rapz;
       R dmax= DD.norme();;
       R dist = 0.5*dmax/sin(focal/2)*coef_dist;
       R camx=Pvue3.x+cos(phi)*cos(theta)*dist;
       R camy=Pvue3.y+cos(phi)*sin(theta)*dist;
-      R camz=Pvue3.z+dist*sin(phi);  
+      R camz=Pvue3.z*rapz+dist*sin(phi);  
       R znear=max(dist-dmax,1e-30);
       R zfare=dist+dmax;
       gluPerspective(focal*180./M_PI,aspect,znear,zfare);
@@ -630,8 +678,15 @@ void  OneWindow::SetView()
 	  camx += dx*eye;
 	  camy += dy*eye;
 	  }
-      */   
-      gluLookAt(camx,camy,camz,Pvue3.x,Pvue3.y,Pvue3.z,0.,0.,1.);
+      */
+      /*
+      cout << rapz << endl;
+      cout << camx << " " << camx << " " << camx << endl;
+      cout << Pvue3 << endl;
+      */
+      gluLookAt(camx,camy,camz,Pvue3.x,Pvue3.y,Pvue3.z*rapz,0.,0.,1.);
+      glScaled(1.,1.,rapz);   
+      
     }
   else
     {
@@ -643,6 +698,11 @@ void  OneWindow::SetView()
       R zzmax = Max(zmax,theplot->fmaxT);    
       R dz = (zzmax-zzmin);
       R zm=(zzmin+zzmax)*0.5;
+      //  to be sur  the the z size is no zero . 
+      dz = max(dz,(Bmax.x-Bmin.x)*0.1);
+      dz = max(dz,(Bmax.y-Bmin.y)*0.1);
+
+
       if((debug>3 )) cout << "\t\t\t   SetView " << this << " " << Bmin  << " " 
 			  << Bmax << " " << zzmin << " " << zzmax 
 			  << "  zm  " << zm << " dz  " << dz << endl;
@@ -823,34 +883,30 @@ void OnePlot::GLDraw(OneWindow *win)
 
 void ThePlot::DrawHelp(OneWindow *win) 
 {
-  int i = 2;
+  int i = 1;
   win->Show("Enter a keyboard character in the FreeFem Graphics window in order to:",i++);
   
-  i+=2;
+  i+=1;
   win->Show("enter) wait next plot",i++);
-  win->Show("ESC) exit from ffglut",i++);
+  win->Show("p)     previous plot",i++);
+  win->Show("ESC)   exit from ffglut",i++);
+  win->Show("?)  show this help window",i++);
+  win->Show("+) -)   zoom in/out  around the cursor 3/2 times ",i++);
+  win->Show("=)   reset vue ",i++);
+  win->Show("r)   refresh plot ",i++);
+  win->Show("3)   switch 3d/2d plot (in test)  keys : ",i++);
+  win->Show("        move : <- ->  mouse to return etc.  ",i++);
+  win->Show("        z) Z) (focal zoom unzoom)  ",i++);
+  win->Show("        H) h) switch increase or decrease the Z scale of the plot ",i++);
 
-  //Show("+)  zomm around the cursor 3/2 times ",i++);
-  win->Show("+)  zoom in around the cursor 3/2 times ",i++);
-  win->Show("-)  zoom out around the cursor 3/2 times  ",i++);
-  win->Show("=)  reset zooming  ",i++);
-  win->Show("r)  refresh plot ",i++);
-  win->Show("3)  3d plot (in test)  keys : ",i++);
-  win->Show("       move : <- ->  mouse to return etc.  ",i++);
-  win->Show("       z/Z (focal zoom)  ",i++);
-  win->Show("2)  2d plot ",i++);
-  win->Show("ac) increase   the size arrow ",i++);
-  win->Show("AC) decrease the size arrow  ",i++);
+  win->Show("a) A) increase or decrease the size arrow ",i++);
   win->Show("b)  switch between black and white or color plotting ",i++);
   win->Show("g)  switch between grey or color plotting ",i++);
   win->Show("f)  switch between filling iso or not  ",i++);
-  win->Show("v)  switch between show  the numerical value of iso or not",i++);
+  win->Show("v)  switch between show the numerical value of iso or not",i++);
   win->Show("w)  graphic window dump in file ",i++);
   win->Show("m)  switch between show  meshes or not",i++);
-  win->Show("p)  switch between show  quadtree or not (for debuging)",i++);
-  win->Show("t)  find  Triangle ",i++);
-  win->Show("w)  window dump in file ffglut00NN.ppm ",i++);
-  win->Show("?)  show this help window",i++);
+  win->Show("w)  window dump in file ffglutXXXX.ppm ",i++);
   win->Show("any other key : nothing ",++i);
 }
 
@@ -1562,12 +1618,14 @@ static void Key( unsigned char key, int x, int y )
 	win->zoom(x,y,1./0.7);
 	win->coef_dist *= 1.2;
 	break;
-      case '3':	    
-	win->plotdim=3;
+      case '3':
+	
+	win->plotdim=win->plotdim==2?3:2;
 	break;
-      case '2':	    
-	win->plotdim=2;
-	break;
+	/*
+	  case '2':	    
+	  win->plotdim=2;
+	  break; */
       case '=':
 	win->DefaultView();
 	break;
@@ -1594,8 +1652,15 @@ static void Key( unsigned char key, int x, int y )
       case 'B':
 	win->theplot->drawborder = ! win->theplot->drawborder  ;
 	break;
+      case 'H':
+	win->rapz *= 1.2;
+	break;
+      case 'h':
+	win->rapz /= 1.2;
+	break;
       case 'p':
-	
+	if(win->icurrentPlot != win->lplots.begin())
+	  win->set(*--win->icurrentPlot);
 	break;
       case 'a':
 	win->theplot->coeff/= 1.2;
@@ -1619,8 +1684,14 @@ static void Key( unsigned char key, int x, int y )
 	break;
       case '\r':
       case '\n':
-	SendForNextPlot();
-	break;
+	{
+	  list<ThePlot*>::iterator ic = win->icurrentPlot;
+	  if(++ic == win->lplots.end()) // last plot ->  try new one
+	    SendForNextPlot();
+	  else
+	    win->set(*++win->icurrentPlot);
+	  break;
+	}
       default:
 	if((debug > 10)) cout << " Key Character " << (int) key << " " << key << endl;  
 	
