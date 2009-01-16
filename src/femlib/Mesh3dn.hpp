@@ -151,7 +151,9 @@ public:
   Mesh3(const string); 
   Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb); 
   Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb);  // surface mesh 
-  int Save(const string & filename);
+  int Save(const string & filename);  
+  int SaveSurface(const string & filename);  
+  int SaveSurface(const string & filename1, const string & filename2);  
   //int Popen(const FILE *popenstream);
 private:
   int load(const string & filename); 

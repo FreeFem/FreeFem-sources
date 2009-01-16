@@ -330,18 +330,20 @@ namespace Fem2D {
       const  Vertex & P = this->vertices[k];
       GmfSetLin(outm,GmfVertices,fx=P.x,fy=P.y,fz=P.z,P.lab);
     }
-    
-    GmfSetKwd(outm,GmfTetrahedra,nt);
-    for (int k=0; k<nt; k++) {
-      const Element & K(this->elements[k]);
-      int i0=this->operator()(K[0])+1;
-      int i1=this->operator()(K[1])+1;
-      int i2=this->operator()(K[2])+1;
-      int i3=this->operator()(K[3])+1;
-      int lab=K.lab;
-      GmfSetLin(outm,GmfTetrahedra,i0,i1,i2,i3,lab);
+
+    if(nt != 0){
+      GmfSetKwd(outm,GmfTetrahedra,nt);
+      for (int k=0; k<nt; k++) {
+	const Element & K(this->elements[k]);
+	int i0=this->operator()(K[0])+1;
+	int i1=this->operator()(K[1])+1;
+	int i2=this->operator()(K[2])+1;
+	int i3=this->operator()(K[3])+1;
+	int lab=K.lab;
+	GmfSetLin(outm,GmfTetrahedra,i0,i1,i2,i3,lab);
+      }
     }
-    
+
     GmfSetKwd(outm,GmfTriangles,nbe);
     for (int k=0; k<nbe; k++) {
       const BorderElement & K(this->borderelements[k]);
@@ -356,6 +358,129 @@ namespace Fem2D {
     return (0);
     
   }
+
+   int Mesh3::SaveSurface(const string & filename)
+  {
+    int ver = GmfFloat, outm;
+    if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,3)) ) {
+      cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< filename << endl;
+      return(1);
+    }
+
+    // Number of Vertex in the surface
+    int *v_num_surf=new int[nv];
+    int *liste_v_num_surf=new int[nv];
+    for (int k=0; k<nv; k++){ 
+      v_num_surf[k]=-1;
+      liste_v_num_surf[k]=0;
+    }
+    // Search Vertex on the surface
+    int nbv_surf=0;
+    for (int k=0; k<nbe; k++) {
+      const BorderElement & K(this->borderelements[k]);     
+      for(int jj=0; jj<3; jj++){
+	int i0=this->operator()(K[jj]);
+	if( v_num_surf[i0] == -1 ){
+	  v_num_surf[i0] = nbv_surf;
+	  liste_v_num_surf[nbv_surf]= i0;
+	  nbv_surf++;
+	}
+      }
+    }
+
+    float fx,fy,fz;
+    GmfSetKwd(outm,GmfVertices,nbv_surf);
+    for (int k=0; k<nbv_surf; k++) {
+      int k0 = liste_v_num_surf[k];
+      const  Vertex & P = this->vertices[k0];
+      GmfSetLin(outm,GmfVertices,fx=P.x,fy=P.y,fz=P.z,P.lab);
+    }
+    
+    GmfSetKwd(outm,GmfTriangles,nbe);
+    for (int k=0; k<nbe; k++) {
+      const BorderElement & K(this->borderelements[k]);
+      int i0=v_num_surf[this->operator()(K[0])]+1;
+      int i1=v_num_surf[this->operator()(K[1])]+1;
+      int i2=v_num_surf[this->operator()(K[2])]+1;
+      int lab=K.lab;
+
+      assert( i0-1 < nbv_surf &&  i1-1 < nbv_surf &&  i2-1 < nbv_surf );
+      assert( 0<i0 && 0<i1 && 0<i2 );
+
+      GmfSetLin(outm,GmfTriangles,i0,i1,i2,lab);
+    }
+    
+    GmfCloseMesh(outm);
+
+    delete [ ] v_num_surf;
+    delete [ ] liste_v_num_surf;
+
+    return (0); 
+  }
+
+
+  int Mesh3::SaveSurface(const string & filename1,const string & filename2)
+  {    
+    // Number of Vertex in the surface
+    int *v_num_surf=new int[nv];
+    int *liste_v_num_surf=new int[nv];
+    for (int k=0; k<nv; k++){ 
+      v_num_surf[k]=-1;
+      liste_v_num_surf[k]=0;
+    }
+    // Search Vertex on the surface
+    int nbv_surf=0;
+    for (int k=0; k<nbe; k++) {
+      const BorderElement & K(this->borderelements[k]);     
+      for(int jj=0; jj<3; jj++){
+	int i0=this->operator()(K[jj]);
+	if( v_num_surf[i0] == -1){
+	  v_num_surf[i0] = nbv_surf;
+	  nbv_surf++;
+	}
+      }
+    }
+
+    // file .points
+    FILE *fpoints = fopen(filename1.c_str(),"w");
+    fprintf(fpoints,"%i\n",nbv_surf);
+    
+    for (int k=0; k<nbv_surf; k++) {
+      int k0 = liste_v_num_surf[k];
+      const  Vertex & P = this->vertices[k];
+      fprintf(fpoints,"%f %f %f %i\n",P.x,P.y,P.z,P.lab);
+    }
+    fclose(fpoints);
+    
+    // file .faces
+    FILE *ffaces = fopen(filename2.c_str(),"w");
+    fprintf(ffaces,"%i\n",nbe);
+    for (int k=0; k<nbe; k++) {
+      const BorderElement & K(this->borderelements[k]);
+      int i0=this->operator()(K[0]);
+      int i1=this->operator()(K[1]);
+      int i2=this->operator()(K[2]);
+      int lab=K.lab;
+      int label0= this->vertices[i0].lab; 
+      int label1= this->vertices[i1].lab; 
+      int label2= this->vertices[i2].lab;
+      //GmfSetLin(outm,GmfTriangles,i0,i1,i2,lab);
+      int nature=3;
+      int i0v=v_num_surf[i0]+1;
+      int i1v=v_num_surf[i1]+1;
+      int i2v=v_num_surf[i2]+1;
+      assert( i0v-1 < nbv_surf &&  i1v-1 < nbv_surf &&  i2v-1 < nbv_surf );
+      assert( 0<i0v && 0<i1v && 0<i2v );
+
+      fprintf(ffaces,"%i %i %i %i %i %i %i\n", nature, i0v, i1v, i2v, lab, label0, label1, label2);
+    }
+    fclose(ffaces);
+    
+    delete [ ] v_num_surf;
+    delete [ ] liste_v_num_surf;
+    return (0);  
+  }
+
 
   Mesh3::Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb)
   {
