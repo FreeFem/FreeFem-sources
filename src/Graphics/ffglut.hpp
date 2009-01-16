@@ -207,6 +207,10 @@ class ThePlot { public:
 class OneWindow { 
 public:
   ThePlot *theplot;
+  list<ThePlot*> lplots;//  to store some plot 
+  list<ThePlot*>::iterator icurrentPlot;//=lplots.begin();
+  int lplotssize;
+
   int height,width;
   R2 Bmin,Bmax;
   R2 oBmin,oBmax;// orign box 
@@ -221,6 +225,7 @@ public:
   
   int  plotdim;
   R theta, phi, coef_dist, focal, dtheta;
+  R  rapz,rapz0;     
   R3 Bmin3,Bmax3,Pvue3;
   //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
   OneWindow(int h,int w,ThePlot *p);
@@ -228,6 +233,7 @@ public:
   void  SetView() ;
   void MoveXView(R dx,R dy) ;
   void set(ThePlot *p);
+  void add(ThePlot *p);
   void cadre(R2 A,R2 B);
   void cadreortho(R2 A,R2 B);
   void getcadre(double &xmin,double &xmax,double &ymin,double &ymax);
