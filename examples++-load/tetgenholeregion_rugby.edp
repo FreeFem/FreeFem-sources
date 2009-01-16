@@ -1,21 +1,27 @@
-// file tetgenholeregion.edp
+// file tetgenholeregion_rugby.edp
 load "msh3"
 load "tetgen"
+load "medit"
 verbosity=2;
 
 // Test 1
 
+// data of rugby ball
+real Ra=2.; 
+real Rb=2.;
+real Rc=1.;
+
 mesh Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},\frac{-pi}{2}[\times]0,2\pi[ $
-//  a parametrization of a sphere 
-func f1 =cos(x)*cos(y);
-func f2 =cos(x)*sin(y);
-func f3 = sin(x);
+//  a parametrization of a ellipsoid
+func f1 = Ra*cos(x)*cos(y);
+func f2 = Rb*cos(x)*sin(y);
+func f3 = Rc*sin(x);
 //  partiel derivative of the parametrization DF
-func f1x=sin(x)*cos(y);   
-func f1y=-cos(x)*sin(y);
-func f2x=-sin(x)*sin(y);
-func f2y=cos(x)*cos(y);
-func f3x=cos(x);
+func f1x=Ra*sin(x)*cos(y);   
+func f1y=-Ra*cos(x)*sin(y);
+func f2x=-Rb*sin(x)*sin(y);
+func f2y=Rb*cos(x)*cos(y);
+func f3x=Rc*cos(x);
 func f3y=0;
 // $  M = DF^t DF $
 func m11=f1x^2+f2x^2+f3x^2;
@@ -32,7 +38,7 @@ plot(Th,wait=1);
 
 verbosity=2;
 
-// construction of the surface of spheres
+// construction of the surface of prolate ellipsoide
 real Rmin  = 1.;
 func f1min = Rmin*f1;
 func f2min = Rmin*f2;
@@ -43,7 +49,6 @@ cout << "=====================" << endl;
 mesh3 Th3sph=movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min],mesuremesh=1);
 cout << "=====================" << endl;
 cout << "=====================" << endl;
-savemesh(Th3sph,"sphereR1.mesh");
 real Rmax  = 2.;
 func f1max = Rmax*f1;
 func f2max = Rmax*f2;
@@ -53,13 +58,11 @@ cout << "=====================" << endl;
 mesh3 Th3sph2=movemesh2D3Dsurf(Th,transfo=[f1max,f2max,f3max],mesuremesh=-1);
 cout << "=====================" << endl;
 cout << "=====================" << endl;
-savemesh(Th3sph2,"sphereR2.mesh");
 cout << "addition" << endl;
 mesh3 Th3=Th3sph+Th3sph2;
-savemesh(Th3,"sphereAdd.mesh");
+savemesh(Th3sph,"ellipsoide.mesh");
 
-
-real[int] domain2 = [1.5,0.,0.,145,0.001,0.5,0.,0.,18,0.01];
+real[int] domain2 = [1.5*Ra,0.,0.,145,0.001,0.,0.,0.,18,0.001];
 cout << "==============================" << endl;
 cout << " tetgen call without hole " << endl;
 cout << "==============================" << endl;
@@ -68,9 +71,10 @@ cout << "=============================" << endl;
 cout << "finish: tetgen call without hole" << endl;
 cout << "=============================" << endl;
 savemesh(Th3fin,"spherewithtworegion.mesh"); 
+medit("maillagetwo",Th3fin);
 
 real[int] hole = [0.,0.,0.];
-real[int] domain = [1.5,0.,0.,53,0.001];
+real[int] domain = [1.5*Ra,0.,0.,53,0.001];
 cout << "=============================" << endl;
 cout << "  tetgen call with hole   " << endl;
 cout << "=============================" << endl;

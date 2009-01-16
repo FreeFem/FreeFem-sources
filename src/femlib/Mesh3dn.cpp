@@ -472,7 +472,7 @@ namespace Fem2D {
       assert( i0v-1 < nbv_surf &&  i1v-1 < nbv_surf &&  i2v-1 < nbv_surf );
       assert( 0<i0v && 0<i1v && 0<i2v );
 
-      fprintf(ffaces,"%i %i %i %i %i %i %i\n", nature, i0v, i1v, i2v, lab, label0, label1, label2);
+      fprintf(ffaces,"%i %i %i %i %i %i %i %i\n", nature, i0v, i1v, i2v, lab, label0, label1, label2);
     }
     fclose(ffaces);
     
