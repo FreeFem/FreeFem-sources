@@ -152,7 +152,7 @@ class MoveMesh3 :  public E_F0mps { public:
     static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<pmesh>(),atype<E_Array>(),true);}
     static  E_F0 * f(const basicAC_F0 & args){ return new MoveMesh3(args);} 
     AnyType operator()(Stack s) const ;
-      operator aType () const { return atype<Result>();} 
+  operator aType () const { return atype<Result>();} 
 
 };
 
@@ -203,6 +203,60 @@ AnyType SaveMesh3::operator()(Stack stack) const
    return SetAny<pmesh3>(Thh);
 
 }
+
+class SaveSurfaceMesh3 :  public E_F0 { public:  
+ 
+    typedef pmesh  Result;
+  Expression getmesh;
+  Expression filename; 
+  Expression filename1;  
+  int pointsfaces;
+  SaveSurfaceMesh3(const basicAC_F0 & args) 
+  {   
+    args.SetNameParam();
+    getmesh=to<pmesh3>(args[0]); 
+    filename=to<string*>(args[1]); 
+    pointsfaces=0;
+    if (args.size() >2) 
+      {
+	if(BCastTo<string *>(args[2])){ 
+	  pointsfaces=1;
+	  filename1=CastTo<string*>(args[2]);
+	}  
+	else{
+	  CompileError("savesurfmesh(Th,filename.points,filename.faces)");
+	}
+      }
+    
+  }   
+  static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<pmesh3>(),atype<string*>(),true);}
+  static  E_F0 * f(const basicAC_F0 & args){ return new SaveSurfaceMesh3(args);} 
+  AnyType operator()(Stack s) const ;
+  
+};
+
+
+AnyType SaveSurfaceMesh3::operator()(Stack stack) const 
+{
+  using  Fem2D::MeshPointStack;
+  
+  
+  pmesh3 Thh = GetAny<pmesh3>((*getmesh)(stack));
+  string * fn =  GetAny<string*>((*filename)(stack));
+  if( pointsfaces==0 ){
+    cout << "SaveSurfaceMesh3 " << *fn << " " << Thh << endl;
+    Thh->SaveSurface(*fn);
+  }
+  else{
+    string * fn1 =  GetAny<string*>((*filename1)(stack));
+    cout << "SaveSurfaceMesh3 " << *fn << " " << *fn1 << " " << Thh << endl;
+    Thh->SaveSurface(*fn,*fn1); 
+  }
+  return SetAny<pmesh3>(Thh);
+  
+}
+
+
 
 AnyType MoveMesh3::operator()(Stack stack) const 
 {
@@ -861,7 +915,8 @@ void init_lgmesh3() {
        new OneOperator2_<pmesh3*,pmesh3*,pmesh3 >(&set_copy_incr));
 
    Global.Add("savemesh","(",new OneOperatorCode<SaveMesh3>);
-
+   Global.Add("savesurfacemesh","(",new OneOperatorCode<SaveSurfaceMesh3>);
+  
    Dcl_Type<GlgVertex<Mesh3> >(); 
    Dcl_Type<GlgElement<Mesh3> >( ); 
 
@@ -975,19 +1030,18 @@ void init_lgmesh3() {
  Global.Add("intallfaces","(",new OneOperatorCode<CDomainOfIntegrationAllFaces>);
 
 
-    Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));
-    Add<pf3rarray>("[","",new OneOperator2_<pf3r,pf3rarray,long>(get_element));
-    Add<pf3carray>("[","",new OneOperator2_<pf3c,pf3carray,long>(get_element));
+ /*decommente par J. Morice 14/01/09*/ 
+ Add<pf3r>("n",".",new OneOperator1<long,pf3r>(pf3r_nbdf<R>));
+ Add<pf3c>("n",".",new OneOperator1<long,pf3c>(pf3r_nbdf<Complex>));
+ Add<pfes3*>("ndof",".",new OneOperator1<long,pfes3*>(pVh3_ndof));
+ Add<pfes3*>("nt",".",new OneOperator1<long,pfes3*>(pVh3_nt));
+ Add<pfes3*>("ndofK",".",new OneOperator1<long,pfes3*>(pVh3_ndofK));
+
+ Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));
+ Add<pf3rarray>("[","",new OneOperator2_<pf3r,pf3rarray,long>(get_element));
+ Add<pf3carray>("[","",new OneOperator2_<pf3c,pf3carray,long>(get_element));
     
  /*
- Add<pfer>("n",".",new OneOperator1<long,pfer>(pfer_nbdf<R>));
- Add<pfec>("n",".",new OneOperator1<long,pfec>(pfer_nbdf<Complex>));
- Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
- Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
- Add<pmesh*>("nv",".",new OneOperator1<long,pmesh*>(pmesh_nv));
- Add<pfes*>("ndof",".",new OneOperator1<long,pfes*>(pVh_ndof));
- Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
- Add<pfes*>("ndofK",".",new OneOperator1<long,pfes*>(pVh_ndofK));
  Add<pfes*>("(","", new OneTernaryOperator<pVh_ndf,pVh_ndf::Op>  );
  */
 }
