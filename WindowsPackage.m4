@@ -117,7 +117,7 @@ Root: HKCR; Subkey: "FreeFemVERSIONScript\shell\open\command"; ValueType: string
 
 
 [Tasks]
-Name: modifypath; Description: &Add application directory to your system path; Flags:  checkedonce
+Name: modifypath; Description: &Add application directory to your system path (if missing you can have trouble with on-the-fly graphic ) ; Flags:  checkedonce
 ; unchecked
 
 [Code]
