@@ -12717,7 +12717,9 @@ echo $ECHO_N "checking for BLAS version to download... $ECHO_C" >&6; }
 	# When compiling a generic version, we do not need an
 	# optimized version of the BLAS.
 
-	if test "$enable_generic" = yes -o "$enable_generic_blas" = yes
+#	if test "$enable_generic" = yes -o "$enable_generic_blas" = yes
+#   supress the automatic compilation of atlas, to expencive  (FH version 3.0-5)
+	if true
 	then
 		ff_download_blas=generic
 		ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
@@ -17158,6 +17160,16 @@ if test "$enable_download" = yes  ;then
 echo "$as_me:       use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT " >&6;}
    	{ echo "$as_me:$LINENO:       use of download tetgen  see download/tetgen/tetgen1.4.2/LICENSE " >&5
 echo "$as_me:       use of download tetgen  see download/tetgen/tetgen1.4.2/LICENSE " >&6;}
+fi
+if test "$ff_download_blas" = "generic"  ; then
+        { echo "$as_me:$LINENO:       use of download generic blas and cblas freefem may be slow  " >&5
+echo "$as_me:       use of download generic blas and cblas freefem may be slow  " >&6;}
+        { echo "$as_me:$LINENO:         you can try to use the  Kazushige Goto's BLAS at http://www.cs.utexas.edu/users/flame/goto/  " >&5
+echo "$as_me:         you can try to use the  Kazushige Goto's BLAS at http://www.cs.utexas.edu/users/flame/goto/  " >&6;}
+        { echo "$as_me:$LINENO:           or at  http://www.tacc.utexas.edu/~kgoto/ for the best BLAS ." >&5
+echo "$as_me:           or at  http://www.tacc.utexas.edu/~kgoto/ for the best BLAS ." >&6;}
+        { echo "$as_me:$LINENO:       or try to download/compile the altas blas ." >&5
+echo "$as_me:       or try to download/compile the altas blas ." >&6;}
 fi
 if test "$ff_glut_ok" != yes  ; then
  	{ echo "$as_me:$LINENO:      *********************************************** " >&5

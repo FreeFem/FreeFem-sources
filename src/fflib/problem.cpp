@@ -1165,61 +1165,51 @@ void Check(const Opera &Op,int N,int  M)
 	}
     
     else // int on edge ie 
-      ffassert(0);
-    /*
-    for (npi=0;npi<FIb.n;npi++) // loop on the integration point
+     for (npi=0;npi<FIb.n;npi++) // loop on the integration point
       {
         pa =a;
-        QuadratureFormular1dPoint pi( FIb[npi]);
-        R2 E=T.Edge(ie);
-        double le = sqrt((E,E));
-        double coef = le*pi.a;
-        double sa=pi.x,sb=1-sa;
-        R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
-          PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
-        R2 Pt(PA*sa+PB*sb ); //  
-        Ku.BF(Dop,Pt,fu);
-        if (!same) Kv.BF(Dop,Pt,fv);      
-        // int label=-999999; // a passer en argument 
-        MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,R2(E.y,-E.x)/le,ie);
-        if (classoptm) (*Op.optiexpK)(stack); // call optim version 
+	GQuadraturePoint<R2> pi( FIb[npi]);
+	R3 NN= T.N(ie);
+	  double mes=NN.norme();
+	  NN/=mes;
+	  double coef = 0.5*mes*pi.a; // correction 0.5 050109 FH
+	  R3 Pt(T.PBord(ie,pi));
+	  Ku.BF(Dop,Pt,fu);
+	  if (!same) Kv.BF(Dop,Pt,fv);      
+          MeshPointStack(stack)->set(T(Pt),Pt,Ku,label,NN,ie);
+         if (classoptm) (*Op.optiexpK)(stack); // call optim version 
         
         
-        for ( i=0;  i<n;   i++ )  
-         // if (onWhatIsEdge[ie][Kv.DFOnWhat(i)]) // juste the df on edge bofbof generaly wrong FH dec 2003
-            { 
-              RNM_ wi(fv(i,'.','.'));       
-              for ( j=0;  j<m;   j++,pa++ ) 
-                { 
-                  RNM_ wj(fu(j,'.','.'));
-                  int il=0;
-                  for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
-                   // if (onWhatIsEdge[ie][Kv.DFOnWhat(j)]) // juste the df on edge bofbof generaly wrong FH dec 2003
-                      {       
-                        BilinearOperator::K ll(*l);
-                        pair<int,int> jj(ll.first.first),ii(ll.first.second);
-                        
-                        double w_i =  wi(ii.first,ii.second); 
-                        double w_j =  wj(jj.first,jj.second);
-                       // R ccc = GetAny<R>(ll.second.eval(stack));
-                       
-                    R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-                if ( copt && Kv.number <1)
-                 {
-                     R cc  =  GetAny<R>(ll.second.eval(stack));
-                     if ( ccc != cc) { 
-                        cerr << cc << " != " << ccc << " => ";
-                       cerr << "Sorry error in Optimization (b) add:  int2d(Th,optimize=0)(...)" << endl;
-                       ExecError("In Optimized version "); }
-                 }
-                         *pa += coef * ccc * w_i*w_j;
-                      }
-                }
-		} 
-
-         // else pa += m;  FH dec 2003
-  }
-    */
+	  for ( i=0;  i<n;   i++ )  
+	    { 
+		RNM_ wi(fv(i,'.','.'));       
+		for ( j=0;  j<m;   j++,pa++ ) 
+		  { 
+		      RNM_ wj(fu(j,'.','.'));
+		      int il=0;
+		      for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+			{       
+			    BilinearOperator::K ll(*l);
+			    pair<int,int> jj(ll.first.first),ii(ll.first.second);
+			    
+			    double w_i =  wi(ii.first,ii.second); 
+			    double w_j =  wj(jj.first,jj.second);
+			    
+			    R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+			    if ( copt && Kv.number <1)
+			      {
+				  R cc  =  GetAny<R>(ll.second.eval(stack));
+				  if ( ccc != cc) { 
+				      cerr << cc << " != " << ccc << " => ";
+				      cerr << "Sorry error in Optimization (b) add:  int2d(Th,optimize=0)(...)" << endl;
+				  ExecError("In Optimized version "); }
+			      }
+			    *pa += coef * ccc * w_i*w_j;
+			}
+		  }
+	    } 
+      }
+   
     
     if (Ku.Vh.Th(T) <1 && verbosity>100) {
       pa=mat.a;

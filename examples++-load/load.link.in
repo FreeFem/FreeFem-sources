@@ -39,8 +39,13 @@ WIN32="";
 case "$uu" in
   CYGWIN*)
   WIN32="win32-"
+  wff=`which FreeFem++.exe`
+  dff=`dirname "$wff"`
   if [ "$bin" = "." -a  -f ../src/bin-win32/libff.dll  ]; then
     bin=../src/bin-win32 
+  elif [  -f "$dff/libff.dll"  ]; then
+#  modif for install on cygwin
+    bin=$dff
   elif [ "$bin" = "." -a  -f ../libff.dll  ]; then
     bin=..
   elif [ "$bin" = "." -a  -f ../../libff.dll  ]; then
@@ -71,8 +76,8 @@ while [ $# -ne 0 ]  ; do
 	-g)  DEBUG="$DEBUG $1";;
 	-c)  CONLY=yes;;
 	-O*) DEBUG="$DEBUG $1";;
-	-cygwin)   uu="cygwin-version";; 
-	-win32)   uu="win32";; 
+	-cygwin)  onwin23=1; uu="cygwin-version";; 
+	-win32)   onwin32=1; uu="win32";; 
 	-b)     bin=$2  ; shift;;
 	-I*)    INC="$INC $1";;
 	-dll)   DLL="$DLL $2";shift;;
@@ -86,6 +91,14 @@ while [ $# -ne 0 ]  ; do
     esac
     shift
 done
+
+if [ -n "$onwin32" -a -f "$bin/libff.dll" ] ; then 
+    echo " erreur the file libff.dll  must be exist in '$bin' the install directory," 
+    echo " to link on windows OS "
+    echo " Use the parameter -b to set the correct install directory " 
+    exit 1;
+fi
+
 if [ -z "$out" ] ; then  out=$o  ; fi;
 # Default compiler
 if [ -z "$CXX"  ];then  CXX=g++ ; fi

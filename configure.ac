@@ -833,7 +833,9 @@ then
 	# When compiling a generic version, we do not need an
 	# optimized version of the BLAS.
 
-	if test "$enable_generic" = yes -o "$enable_generic_blas" = yes 
+#	if test "$enable_generic" = yes -o "$enable_generic_blas" = yes 
+#   supress the automatic compilation of atlas, to expencive  (FH version 3.0-5)
+	if true 
 	then
 		ff_download_blas=generic
 		ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
@@ -1498,6 +1500,12 @@ fi
 if test "$enable_download" = yes  ;then
         AC_MSG_NOTICE([      use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT ])
    	AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.4.2/LICENSE ])
+fi
+if test "$ff_download_blas" = "generic"  ; then
+        AC_MSG_NOTICE([      use of download generic blas and cblas freefem may be slow  ])
+        AC_MSG_NOTICE([        you can try to use the  Kazushige Goto's BLAS at http://www.cs.utexas.edu/users/flame/goto/  ])
+        AC_MSG_NOTICE([          or at  http://www.tacc.utexas.edu/~kgoto/ for the best BLAS .])
+        AC_MSG_NOTICE([      or try to download/compile the altas blas .])
 fi
 if test "$ff_glut_ok" != yes  ; then
  	AC_MSG_NOTICE([     *********************************************** ])
