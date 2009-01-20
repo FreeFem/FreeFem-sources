@@ -384,8 +384,13 @@ The syntax of tools \texttt{FreeFem++},\texttt{FreeFem++-nw} on the command-line
 
 \subsubsection{Windows binaries install}
   First download the windows installation file, then execute the
-  download file to install \texttt{FreeFem++}. After that you have
-  three new icons on your desktop:
+  download file to install \texttt{FreeFem++}. In Select Additional Task windows, check once the  "Add application directory to your system path 
+  your system path .." boxes, because the screen on-the-fly plot is done with programm  \texttt{ffglut.exe} and it can be not found. 
+  
+  
+  
+   After that you have
+  two new icons on your desktop:
   \begin{itemize}
    \item \texttt{FreeFem++ (VERSION).exe}  the classical \freefempp application. 
   % \item \texttt{FreeFem++ (VERSION) GUI.exe}  the GUI \freefempp application, see section \ref{GUI} for more information. 
@@ -398,14 +403,10 @@ The syntax of tools \texttt{FreeFem++},\texttt{FreeFem++-nw} on the command-line
   \verb!C:\Programs Files\FreeFem++!
   \end{center}
   In this directory, you have all the \texttt{.dll} files and and 
-    other applications: \texttt{FreeFem++-nw.exe} the \freefempp application 
+    other applications: \texttt{FreeFem++-nw.exe},\texttt{ffglut.exe}, ...  the \freefempp application 
     without graphic windows. 
 \medskip
     
- Remark: If you specify the path to \verb!C:\Program Files\FreeFem++!
- by adding this directory to the environment variables \texttt{PATH}, 
-you can use all the programs in 
-the window Command-line shell. (Use System in Control Panel, On the Advanced tab, click Environment Variables, then add the correct string).
 
 The syntax of tools on the command-line  are same 
 %{ \small

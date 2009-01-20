@@ -1,3 +1,11 @@
+v 3.0-5 (20 jan 2009)
+  - correct the install on under windows / cygwin
+      add src/Graphics/ff-win32.cpp missing file in tar.gz under windows
+      correct ff-c++  under cygwin compile (fist test) 
+  - automatic compilation of BLAS, suppress the automatic compilation of BLAS atlas (to long) 
+  - ffglut improvement 
+        - now save 10 graphic states and use "p" key to show previous graphic
+	- do automic z rescale on Z direction the  3d plot 
 v 3.0-4 (05 jan 2009)
   - correct int2d in 3d case: all this integral was multiply by 2. 
   - add 3d viewing in plot (in test)

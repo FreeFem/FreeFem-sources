@@ -884,7 +884,57 @@ KN<K> * pf3r2vect( pair<FEbase<K,v_fes> *,int> p)
   }
   return x;}
 
+// add 19 jan 2009 FH
 
+class pVh3_ndf : public ternary_function<pfes3 *,long,long,long> { public:
+    
+    
+    class Op : public E_F0mps { public:
+	Expression a,b,c;
+	Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}       
+	AnyType operator()(Stack s)  const 
+        { 
+	    pfes3 * p(GetAny<pfes3 *>((*a)(s)));
+	    long  k(GetAny<long>((*b)(s)));
+	    long  i(GetAny<long>((*c)(s)));
+	    throwassert(p && *p);
+	    FESpace3 *fes=**p;
+	    throwassert(fes && k >=0 && k < fes->NbOfElements );
+	    FESpace3::FElement K=(*fes)[k];
+	    throwassert(i>=0 && i <K.NbDoF() );
+	    long ret(K(i));
+	    return  ret;
+	}
+	
+    };
+};
+
+
+/*  no trivial ....   FH jan 2009.. 
+class Op3_Mesh32mp : public ternary_function<pmesh3*,R,R,MeshPoint *> { public:
+    class Op : public E_F0mps { public:
+	Expression a,b,c,d;
+	Op(Expression aa,Expression bb,Expression cc,Expression dd) : a(aa),b(bb),c(cc),d(dd) {}       
+	AnyType operator()(Stack s)  const 
+        { 
+	    R xx(GetAny<R>((*b)(s)));
+	    R yy(GetAny<R>((*c)(s)));
+	    R zz(GetAny<R>((*d)(s)));
+	    pmesh3 *ppTh(GetAny<pmesh3*>((*a)(s)));
+	    if( !ppTh || !*ppTh) ExecError("Op3_Mesh32mp unset mesh ??");
+	    pmesh3 pTh(*ppTh);
+	    MeshPoint * mp = new MeshPoint();
+	    mp->set(xx,yy,zz);
+	    R3 PHat;
+	    bool outside;
+	    const Tet * K=pTh->Find(mp->P.p2(),PHat,outside);
+	    mp->set(*pTh,(R2) mp->P.p2(),PHat,*K,0,outside);
+	return mp;}
+	
+    };
+};
+*/
+// FH
 
 void init_lgmesh3() {
    if(verbosity)  cout <<"lg_mesh3 ";
@@ -1041,9 +1091,9 @@ void init_lgmesh3() {
  Add<pf3rarray>("[","",new OneOperator2_<pf3r,pf3rarray,long>(get_element));
  Add<pf3carray>("[","",new OneOperator2_<pf3c,pf3carray,long>(get_element));
     
- /*
- Add<pfes*>("(","", new OneTernaryOperator<pVh_ndf,pVh_ndf::Op>  );
- */
+ 
+ Add<pfes3*>("(","", new OneTernaryOperator<pVh3_ndf,pVh3_ndf::Op>  );
+ 
 }
 //#include "InitFunct.hpp"
 //static addingInitFunct TheaddingInitFunct(-10,init_lgmesh);
