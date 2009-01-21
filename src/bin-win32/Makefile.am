@@ -57,6 +57,11 @@ drawbdmesh.exe:../std/Pcrgraph.o  ../bamg/drawbdmesh.o $(LIBS_FF)
 ff-c++:../../examples++-load/load.link.in
 	../../config.status  --file=ff-c++:$<
 	chmod a+x ff-c++
-install-exec-local:: 
-	$(INSTALL_SCRIPT) FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe ff-c++  $(DESTDIR)${bindir}
-	$(INSTALL_SCRIPT) *.dll   $(DESTDIR)${bindir}
+install-exec-local:: install-exec-local--$(WIN32DLLTARGET)
+
+install-exec-local--WIN32DLLTARGET::
+	$(INSTALL_SCRIPT) FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe ff-c++  $(DESTDIR)${bindir} \
+	$(INSTALL_SCRIPT) *.dll   $(DESTDIR)${bindir} 
+install-exec-local--::
+
+
