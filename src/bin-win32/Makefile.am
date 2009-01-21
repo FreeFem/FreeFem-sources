@@ -59,8 +59,8 @@ ff-c++:../../examples++-load/load.link.in
 	chmod a+x ff-c++
 install-exec-local:: install-exec-local--$(WIN32DLLTARGET)
 
-install-exec-local--WIN32DLLTARGET::
-	$(INSTALL_SCRIPT) FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe ff-c++  $(DESTDIR)${bindir} \
+install-exec-local--win32-dll-target::
+	$(INSTALL_SCRIPT) FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe ff-c++  $(DESTDIR)${bindir} 
 	$(INSTALL_SCRIPT) *.dll   $(DESTDIR)${bindir} 
 install-exec-local--::
 
