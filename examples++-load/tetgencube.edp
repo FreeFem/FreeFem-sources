@@ -12,8 +12,9 @@ func ZZ1max = 1.5;
 func XX1 = x;
 func YY1 = y;
 
-mesh3 Th31h = movemesh2D3Dsurf(Thsq1,transfo=[XX1,YY1,ZZ1max]);
+mesh3 Th31h = movemesh2D3Dsurf(Thsq1,transfo=[XX1,YY1,ZZ1max],mesuremesh=1);
 mesh3 Th31b = movemesh2D3Dsurf(Thsq1,transfo=[XX1,YY1,ZZ1min],mesuremesh=-1);   
+
 
 /////////////////////////////////
 x0=1.; x1=2.; y0=0.; y1=1.5;
@@ -25,7 +26,7 @@ func YY2min = 0.;
 func YY2max = 2*pi;
 
 mesh3 Th32h = movemesh2D3Dsurf(Thsq2,transfo=[XX2,YY2max,ZZ2],mesuremesh=-1);  
-mesh3 Th32b = movemesh2D3Dsurf(Thsq2,transfo=[XX2,YY2min,ZZ2]);
+mesh3 Th32b = movemesh2D3Dsurf(Thsq2,transfo=[XX2,YY2min,ZZ2],mesuremesh=1);
 
 /////////////////////////////////
 x0=0.; x1=2*pi; y0=0.; y1=1.5;
@@ -36,16 +37,18 @@ func XX3max = 2.;
 func YY3 = x;
 func ZZ3 = y;
 
-mesh3 Th33h = movemesh2D3Dsurf(Thsq3,transfo=[XX3max,YY3,ZZ3]);  
+mesh3 Th33h = movemesh2D3Dsurf(Thsq3,transfo=[XX3max,YY3,ZZ3],mesuremesh=1);  
 mesh3 Th33b = movemesh2D3Dsurf(Thsq3,transfo=[XX3min,YY3,ZZ3],mesuremesh=-1); 
 
 ////////////////////////////////
 mesh3 Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
+medit("glumesh",Th33);
 savemesh(Th33,"Th33.mesh");
 
 // build a mesh of a axis parallel box with TetGen
-real[int] domaine = [1.5,pi,0.75,145,0.01];
-mesh3 Thfinal = tetg(Th33,switch="pqaAAQ",nbofregions=1,regionlist=domaine);    // Tetrahelize the interior of the cube with tetgen
+real[int] domaine = [1.5,pi,0.75,145,0.001];
+mesh3 Thfinal = tetg(Th33,switch="pqaAAYYQ",nbofregions=1,regionlist=domaine);    // Tetrahelize the interior of the cube with tetgen
+medit("tetg",Thfinal);
 savemesh(Thfinal,"Thfinal.mesh");
 
 
@@ -55,7 +58,10 @@ func mv2y = x*sin(y);
 func mv2z = z;
 mesh3 Thmv2 = movemesh3D(Thfinal, transfo=[mv2x,mv2y,mv2z]);
 savemesh(Thmv2,"halfcylindricalshell.mesh");
-
+verbosity=2;
+mesh3 Thmv2surf = movemesh3D(Th33, transfo=[mv2x,mv2y,mv2z]);
+medit("maillagesurf",Thmv2surf);
+medit("maillageplein",Thmv2);
 
 
 

@@ -1,3 +1,33 @@
+// ORIG-DATE: Novembre 2008
+// -*- Mode : c++ -*-
+//
+// SUMMARY  :  
+// USAGE    : LGPL      
+// ORG      : LJLL Universite Pierre et Marie Curie, Paris,  FRANCE 
+// AUTHOR   : Jacques Morice
+// E-MAIL   : jacques.morice@ann.jussieu.fr
+//
+
+/* 
+ This file is part of Freefem++
+ 
+ Freefem++ is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 2.1 of the License, or
+ (at your option) any later version.
+ 
+ Freefem++  is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public License
+ along with Freefem++; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ Thank to the ARN ()  FF2A3 grant
+ ref:ANR-07-CIS7-002-01 
+ */
 #ifndef WITH_NO_INIT
 /*
 #include <fstream>
@@ -52,7 +82,7 @@ using namespace  Fem2D;
 
 void TestSameVertexMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int & nv_t, int *Numero_Som){
   
-  Vertex3      v[Th3.nv];
+  Vertex3  *v=new Vertex3[Th3.nv];
   nv_t=0;
   
   EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pinf,Psup,0);
@@ -79,11 +109,12 @@ void TestSameVertexMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & P
   }
   
   delete gtree;
+  delete [] v;
 }
 
 void TestSameTetrahedraMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int & nt_t ){
 
-  Vertex3  vt[Th3.nt];
+  Vertex3 *vt=new Vertex3[Th3.nt];
   EF23::GTree<Vertex3> *gtree_t = new EF23::GTree<Vertex3>(vt,Pinf,Psup,0);
   
   nt_t=0;
@@ -115,11 +146,12 @@ void TestSameTetrahedraMesh3( const Mesh3 & Th3, const double & hseuil, const R3
   }
   
   delete gtree_t;
+  delete [] vt;
 } 
 
 void TestSameTetrahedraMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int *Elem_ok, int & nt_t ){
 
-  Vertex3  vt[Th3.nt];
+  Vertex3 *vt=new Vertex3[Th3.nt];
   EF23::GTree<Vertex3> *gtree_t = new EF23::GTree<Vertex3>(vt,Pinf,Psup,0);
   
   nt_t=0;
@@ -155,12 +187,13 @@ void TestSameTetrahedraMesh3( const Mesh3 & Th3, const double & hseuil, const R3
   }
   
   delete gtree_t;
+  delete [] vt;
 } 
 
 
 void TestSameTriangleMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int & nbe_t){
 
-  Vertex3  vbe[Th3.nbe];
+  Vertex3  *vbe= new Vertex3[Th3.nbe];
   EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(vbe,Pinf,Psup,0);
   
   nbe_t=0;
@@ -193,11 +226,12 @@ void TestSameTriangleMesh3( const Mesh3 & Th3, const double & hseuil, const R3 &
   }
   
   delete gtree_be;
+  delete [] vbe;
 } 
 
 void TestSameTriangleMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int *Border_ok ,int & nbe_t ){
 
-  Vertex3  vbe[Th3.nbe];
+  Vertex3 *vbe=new Vertex3 [Th3.nbe];
   EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(vbe,Pinf,Psup,0);
   
   nbe_t=0;
@@ -233,6 +267,7 @@ void TestSameTriangleMesh3( const Mesh3 & Th3, const double & hseuil, const R3 &
   }
   
   delete gtree_be;
+  delete [] vbe;
 } 
 
 int TestElementMesh3( const Mesh3 & Th3 ) 
@@ -241,7 +276,7 @@ int TestElementMesh3( const Mesh3 & Th3 )
   R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremité de la boîte englobante
   double hmin=1e10;   // longueur minimal des arrêtes
   double hseuil;
-  int Numero_Som[Th3.nv];
+  int *Numero_Som=new int[Th3.nv];
   int nv_t,nt_t,nbe_t;
   
   // calcul de la boite englobante
@@ -266,6 +301,7 @@ int TestElementMesh3( const Mesh3 & Th3 )
 	    cout << "tetrahedra: " << k << " edge : " << eh << " lenght "<<  Th3[k].lenEdge(eh) << endl;
 	  }
 	  cout << " A tetrahedra with a very small edge was created " << endl;
+	  delete [] Numero_Som;
 	  return 1;
 	}
       hmin=min(hmin,Th3[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
@@ -280,6 +316,7 @@ int TestElementMesh3( const Mesh3 & Th3 )
 	    cout << "triangles: " << k << " edge : " << eh << " lenght "<<  Th3.be(k).lenEdge(e) << endl;
 	  }
 	  cout << " A triangle with a very small edges was created " << endl;
+	  delete [] Numero_Som;
 	  return 1;
 	}
       hmin=min(hmin,Th3.be(k).lenEdge(e));   // calcul de .lenEdge pour un Mesh3
@@ -293,18 +330,19 @@ int TestElementMesh3( const Mesh3 & Th3 )
   // determination du nombre de sommets confondus
   hseuil = hmin/10.;     
   
-  if(verbosity >1) cout << "TestSameVertexMesh3 " << hseuil << endl;
+  if(verbosity >1) cout << "TestSameVertexMesh3 " << hseuil << " size" <<Th3.nv<< endl;
   TestSameVertexMesh3( Th3, hseuil, Psup, Pinf, nv_t, Numero_Som );
   
   if(verbosity >1) cout << "hseuil=" << hseuil << endl; 
   if(verbosity >1) cout << "NbVertexRecollement " << nv_t << " / " << "NbVertex(anc)" << Th3.nv <<endl;   
 
   if(nv_t != Th3.nv) {
+    delete [] Numero_Som;
     cout << " A vertex was referenced twice or more " << endl;
     return 1;
   }
   /* degenerate element ??? */ 
-  int Elem_ok[Th3.nt];
+  int *Elem_ok= new int [Th3.nt];
   int i_elem=0;
   for(int ii=0; ii< Th3.nt; ii++){
     const Tet & K(Th3.elements[ii]);
@@ -331,7 +369,7 @@ int TestElementMesh3( const Mesh3 & Th3 )
     assert( i_elem == Th3.nt);
   }
 
-  int Border_ok[Th3.nbe];
+  int *Border_ok = new int[Th3.nbe];
   int i_border= 0;
   for( int ii=0; ii< Th3.nbe; ii++){
     Border_ok[ii]=1;
@@ -361,20 +399,23 @@ int TestElementMesh3( const Mesh3 & Th3 )
   hseuil = hmin/10.;
   hseuil = hseuil/4.;
   
-  if(verbosity >1) cout << "TestSameVertexMesh3 " << hseuil << endl;
+  if(verbosity >1) cout << "TestSameTetrahedraMesh3 " << hseuil << " size "<< Th3.nt <<endl;
   TestSameTetrahedraMesh3( Th3, hseuil, Psup, Pinf, Elem_ok, nt_t );
 
   if(verbosity >1) cout << "hseuil=" << hseuil << endl; 
-  if(verbosity >1) cout << "NbVertexRecollement " << nt_t << " / " << "NbVertex(anc)" << Th3.nt <<endl;  
+  if(verbosity >1) cout << "NbTetrahedraRecollement " << nt_t << " / " << "NbVertex(anc)" << Th3.nt <<endl;  
 
   if(nt_t != Th3.nt){
     cout << " a tetrahedra was referenced twice or more " << endl;
+    delete [] Numero_Som;
+    delete [] Border_ok;
+    delete [] Elem_ok;
     return 1;
   }
   /* determination du nombre de triangles confondus */ 
   hseuil = hmin/10.;
   hseuil = hseuil/3.;
-  if(verbosity >1) cout << "TestSameVertexMesh3 " << hseuil << endl;
+  if(verbosity >1) cout << "TestSameTriangleMesh3 " << hseuil << endl;
   TestSameTriangleMesh3( Th3, hseuil, Psup, Pinf, Border_ok,  nbe_t );
  
   if(verbosity >1) cout << "hseuil=" << hseuil << endl; 
@@ -382,6 +423,9 @@ int TestElementMesh3( const Mesh3 & Th3 )
 
   if(nbe_t != Th3.nbe){
     cout << " a triangle was referenced twice or more " << endl;
+    delete [] Numero_Som;
+    delete [] Border_ok;
+    delete [] Elem_ok;
     return 1;
   }
   return 0;
@@ -394,7 +438,7 @@ Mesh3 *TestElementMesh3_patch( const Mesh3 & Th3 )
   R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremité de la boîte englobante
   double hmin=1e10;   // longueur minimal des arrêtes
   double hseuil;
-  int Numero_Som[Th3.nv];
+  int *Numero_Som = new int [Th3.nv];
   int nv_t,nt_t,nbe_t;
   
   // calcul de la boite englobante
@@ -432,7 +476,7 @@ Mesh3 *TestElementMesh3_patch( const Mesh3 & Th3 )
   if(verbosity >1) cout << "NbVertexRecollement " << nv_t << " / " << "NbVertex(anc)" << Th3.nv <<endl;   
 
   /* degenerate element ??? */ 
-  int Elem_ok[Th3.nt];
+  int *Elem_ok=new int[Th3.nt];
   int i_elem=0;
   for(int ii=0; ii< Th3.nt; ii++){
     const Tet & K(Th3.elements[ii]);
@@ -459,7 +503,7 @@ Mesh3 *TestElementMesh3_patch( const Mesh3 & Th3 )
     //assert( i_elem == Th3.nt);
   }
 
-  int Border_ok[Th3.nbe];
+  int *Border_ok=new int[Th3.nbe];
   int i_border= 0;
   for( int ii=0; ii< Th3.nbe; ii++){
     Border_ok[ii]=1;
@@ -488,6 +532,7 @@ Mesh3 *TestElementMesh3_patch( const Mesh3 & Th3 )
   /* determination du nombre de tetrahedre confondus */ 
   hseuil = hmin/10.;
   hseuil = hseuil/4.;
+  nt_t=0;
   TestSameTetrahedraMesh3( Th3, hseuil, Psup, Pinf, Elem_ok, nt_t );
 
   if(verbosity >1) cout << "hseuil=" << hseuil << endl; 
@@ -561,6 +606,10 @@ Mesh3 *TestElementMesh3_patch( const Mesh3 & Th3 )
   }
   assert(nbbe == nbe_t);
 
+  delete [] Numero_Som;
+  delete [] Border_ok;
+  delete [] Elem_ok;
+  
   Mesh3 *Th3_new = new Mesh3(nv_t,nt_t,nbe_t,v,t,b); 
   return Th3_new;
 }
@@ -878,12 +927,13 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
    
     //val_dz = (val_zmax - val_zmin)/Ni;
     if( Ni == 0){
-	     val_dz = 0.;
-	 }
-     else{
-	     val_dz = (val_zmax - val_zmin)/Ni;
-	 }
-     
+      val_dz = 0.;
+    }
+    else{
+      val_dz = (val_zmax - val_zmin)/Ni;
+      //if( abs(val_dz) < 1e-9 ) Ni=0; 
+    }
+    
 
     tab_NumSommet[ii] = NumSommet; // Numero du premier sommet 3D associé au sommet 2D ii.
     //cout << "ii, tab_NumSommet[ii]= "<< ii <<" "<< tab_NumSommet[ii] << endl;
@@ -963,12 +1013,12 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
     const Mesh::Element & K(Th2.t(ii));
     int lab;
     map<int,int>::const_iterator imap=maptrizmax.find(K.lab);
-	assert( imap!=maptrizmax.end() );
-	lab=imap->second;
+    assert( imap!=maptrizmax.end() );
+    lab=imap->second;
    
     for(int kk=0; kk < 3; kk++){
-	  ijj[kk] = Th2.operator()(K[kk]);
-	  ijj[kk] = tab_NumSommet[ijj[kk]+1]-1;
+      ijj[kk] = Th2.operator()(K[kk]);
+      ijj[kk] = tab_NumSommet[ijj[kk]+1]-1;
     }
      
     Th3.be(ElemBord).set(Th3.vertices,ijj,lab);
@@ -988,10 +1038,10 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
     
   
     for(int kk=0; kk < 3; kk++){
-	  ijj[2-kk] = Th2.operator()(K[kk]);
-	  bjj[2-kk] = ijj[2-kk] ;
-	  ijj[2-kk] = tab_NumSommet[ijj[2-kk]];
-	  }
+      ijj[2-kk] = Th2.operator()(K[kk]);
+      bjj[2-kk] = ijj[2-kk] ;
+      ijj[2-kk] = tab_NumSommet[ijj[2-kk]];
+    }
 
     Th3.be(ElemBord).set(Th3.vertices,ijj,lab);
 
@@ -1004,20 +1054,20 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
     int ijj[3];
 	
     const Mesh::BorderElement & K(Th2.be(ii));
-	int lab;
-	
-	map<int,int>::const_iterator imap=maptrimil.find(K.lab);
-	assert( imap!=maptrimil.end() );
-	lab=imap->second;
-
+    int lab;
+    
+    map<int,int>::const_iterator imap=maptrimil.find(K.lab);
+    assert( imap!=maptrimil.end() );
+    lab=imap->second;
+    
     i_ind1  = Th2.operator()(K[0]);
     i_ind2  = Th2.operator()(K[1]);
 
     Ni_ind1 =  tab_Ni[i_ind1];  
     Ni_ind2 =  tab_Ni[i_ind2]; 
 	  
-	assert( Ni_ind1 <= Nmax);
-	assert( Ni_ind2 <= Nmax);
+    assert( Ni_ind1 <= Nmax);
+    assert( Ni_ind2 <= Nmax);
 	
     for(int jNmax=Nmax-1; jNmax >=0; jNmax--){
 	    
@@ -1064,20 +1114,20 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	// rien n a faire
 	break;
       case 1:
-	
-	ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1pp;
+	// avant 2,1,0 --> 0,1,2
+	ijj[0] = tab_NumSommet[i_ind1]+i_recoll_1pp;   
 	ijj[1] = tab_NumSommet[i_ind2]+i_recoll_2pp;
-	ijj[0] = tab_NumSommet[i_ind1]+i_recoll_1; 
+	ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1; 
 	
 	Th3.be(ElemBord).set(Th3.vertices,ijj,lab);
 	
 	ElemBord = ElemBord+1;
 	break;
       case 2:
-     
-	ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1pp;
+	// avant 2,1,0 --> 0,1,2
+	ijj[0] = tab_NumSommet[i_ind1]+i_recoll_1pp;
 	ijj[1] = tab_NumSommet[i_ind2]+i_recoll_2pp;
-	ijj[0] = tab_NumSommet[i_ind2]+i_recoll_2; 
+	ijj[2] = tab_NumSommet[i_ind2]+i_recoll_2; 
 	
 	Th3.be(ElemBord).set(Th3.vertices,ijj,lab);
 	
@@ -1094,30 +1144,30 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	if(DiagMax1 > DiagMax2){  
 	  idl = 1; 
       
-	  ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1pp;
+	  ijj[0] = tab_NumSommet[i_ind1]+i_recoll_1pp;
 	  ijj[1] = tab_NumSommet[i_ind2]+i_recoll_2pp;
-	  ijj[0] = tab_NumSommet[i_ind2]+i_recoll_2; 
+	  ijj[2] = tab_NumSommet[i_ind2]+i_recoll_2; 
 	
 	  Th3.be(ElemBord).set(Th3.vertices,ijj,lab);
 	  
-	  ijj[2] = tab_NumSommet[i_ind2]+i_recoll_2;
+	  ijj[0] = tab_NumSommet[i_ind2]+i_recoll_2;
 	  ijj[1] = tab_NumSommet[i_ind1]+i_recoll_1;
-	  ijj[0] = tab_NumSommet[i_ind1]+i_recoll_1pp; 
+	  ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1pp; 
 	
 	  Th3.be(ElemBord+1).set(Th3.vertices,ijj,lab);
 	}
 	else{
 	  idl = 2;
 	  
-	  ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1pp;
+	  ijj[0] = tab_NumSommet[i_ind1]+i_recoll_1pp;
 	  ijj[1] = tab_NumSommet[i_ind2]+i_recoll_2pp;
-	  ijj[0] = tab_NumSommet[i_ind1]+i_recoll_1; 
+	  ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1; 
 
 	  Th3.be(ElemBord).set(Th3.vertices,ijj,lab);
 	  
-	  ijj[2] = tab_NumSommet[i_ind2]+i_recoll_2;
+	  ijj[0] = tab_NumSommet[i_ind2]+i_recoll_2;
 	  ijj[1] = tab_NumSommet[i_ind1]+i_recoll_1;
-	  ijj[0] = tab_NumSommet[i_ind2]+i_recoll_2pp; 
+	  ijj[2] = tab_NumSommet[i_ind2]+i_recoll_2pp; 
 	  
 	  Th3.be(ElemBord+1).set(Th3.vertices,ijj,lab);
 	}
@@ -1960,8 +2010,27 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   }
 
   // loop over border elements
-
-	
+   // loop over tetrahedral 
+  for (int it=0;it<Th.nbe;++it){
+    const Triangle3 &K(Th.be(it));
+    int iv[3];
+    iv[0]=Th.operator()(K[0]); 
+    iv[1]=Th.operator()(K[1]);
+    iv[2]=Th.operator()(K[2]);
+    
+    R coordx,coordy,coordz;
+    for(int jj=0; jj< 3; jj++){
+      int i=iv[jj];
+      if(takemesh[i]==0){	 
+	mp3->set( Th.vertices[i].x, Th.vertices[i].y, Th.vertices[i].z );
+	if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
+	if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
+	if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
+	takemesh[i] = takemesh[i]+1;
+      }
+    }
+  }
+ 
   int border_only = 0;
   int recollement_elem=0, recollement_border=1, point_confondus_ok=0;
   Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh,rTh3, txx, tyy, tzz, border_only, 
@@ -1979,11 +2048,11 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
       
       T_Th3->BuildGTree();
       
-      //	T_Th3->decrement();  
-      Add2StackOfPtr2FreeRC(stack,T_Th3);
-     
+      //	T_Th3->decrement(); 
     }
-
+  
+  Add2StackOfPtr2FreeRC(stack,T_Th3);
+ 
   *mp=mps;
   return T_Th3;
 }
@@ -2276,14 +2345,14 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
 			 border_only, recollement_border, point_confondus_ok);
 	
     // Rajouter fonction flip a l interieure
-	
+    int nbflip=0;
     for(int ii=0; ii < Th3->nbe; ii++){
-		
-      const Triangle3 & K(Th3->be(ii)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
+      const Triangle3 & K(Th3->be(ii)); 
       int iv[3];
       int lab;
       double mes_triangle3;
-		
+	
+    
       iv[0] = Th3->operator()(K[0]);
       iv[1] = Th3->operator()(K[1]);
       iv[2] = Th3->operator()(K[2]);
@@ -2306,6 +2375,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
 	iv[1]=iv[2];
 	iv[2]=iv_temp;
 	Th3->be(ii).set( Th3->vertices, iv, lab ) ;
+	nbflip++;
       }
 		
       /* autre methode a tester */
@@ -2321,6 +2391,8 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
 	Th3->be(ii).set( Th3->vertices, iv, lab ) ;
       */
     }
+    
+    assert(nbflip==0 || nbflip== Th3->nbe);
     Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
   }
@@ -2355,14 +2427,35 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
       	iv[1] = Th.operator()(K[1]);
       	iv[2] = Th.operator()(K[2]);
       	
-	// calcul de la mesure 
-	//  inversement si on a besoin    
-      
       	(*bb++).set( v, iv, K.lab);
+		
       }
       
     //Mesh3 *Th3 = new Mesh3(nbv,0,nbt,v,t,b);
     Mesh3 *Th3 = new Mesh3(nbv,nbt,v,b);
+
+    int nbflip=0;
+    for (int i=0;i<Th3->nbe;i++)
+      { 
+	double mes_triangle3= Th3->be(i).mesure();
+	
+	if( surface_orientation*mes_triangle3 < 0){
+	  const Triangle3 &K( Th3->be(i) );
+	  int iv[3];       
+	  
+	  iv[0] = Th3->operator()(K[0]);
+	  iv[1] = Th3->operator()(K[1]);
+	  iv[2] = Th3->operator()(K[2]);
+	  
+	  int iv_temp=iv[1];
+	  iv[1]=iv[2];
+	  iv[2]=iv_temp;
+	  Th3->be(i).set( Th3->vertices, iv, K.lab ) ;
+	  nbflip++;
+	}
+      }
+    assert(nbflip==0 || nbflip== Th3->nbe);
+
     Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
   }
@@ -3362,6 +3455,31 @@ void BuildBoundMinDist_th3(  const double &precis_mesh,  const double *tab_XX, c
       }
     }
   }
+
+  if( Th3.nt == 0){
+    for( int ii=0; ii< Th3.nbe; ii++){
+      if(verbosity >1) cout << "border" << ii <<" hmin =" << hmin << endl;
+      const Triangle3 & K(Th3.be(ii));
+      double longedge;
+      int iv[3];
+      for(int jj=0; jj <3; jj++){
+	iv[jj] = Th3.operator()(K[jj]) ;
+      }
+			
+      for( int jj=0; jj<3; jj++){
+	for( int kk=jj+1; kk<3; kk++){ 
+	  int & i1= iv[jj];
+	  int & i2= iv[kk];
+	  longedge = pow(tab_XX[i1]-tab_XX[i2],2) 
+	    + pow(tab_YY[i1]-tab_YY[i2],2) 
+	    + pow(tab_ZZ[i1]-tab_ZZ[i2],2);
+	  longedge = sqrt(longedge);
+	  if(longedge > precispt ) hmin = min( hmin, longedge);
+	}
+      }
+    }
+  }
+
   if(verbosity >1) cout << "longmini_box" << longmini_box << endl; 
   if(verbosity >1) cout << "hmin =" << hmin << endl;
   assert( hmin < longmini_box);

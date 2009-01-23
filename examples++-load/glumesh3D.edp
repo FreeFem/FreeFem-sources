@@ -32,10 +32,10 @@ func zmin=0.;
 func zmax=1.;
 int MaxLayer=10;
 
-mesh3 Th31=buildlayers(Th1,1,zbound=[zmin,zmax]); 
+mesh3 Th31=buildlayers(Th1,MaxLayer,zbound=[zmin,zmax]); 
 savemesh( Th31, "bl31.mesh");
 
-mesh3 Th32=buildlayers(Th2,1,zbound=[zmin,zmax]); 
+mesh3 Th32=buildlayers(Th2,MaxLayer,zbound=[zmin,zmax]); 
 savemesh( Th32, "bl32.mesh");
 
 mesh3 Tht=Th31+Th32;
