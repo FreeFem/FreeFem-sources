@@ -1,4 +1,33 @@
+// ORIG-DATE:     Juin 2008
+// -*- Mode : c++ -*-
+//
+// SUMMARY  : liaison medit freefem++ : popen  
+// USAGE    : LGPL      
+// ORG      : LJLL Universite Pierre et Marie Curie, Paris,  FRANCE 
+// AUTHOR   : Jacques Morice
+// E-MAIL   : jacques.morice@ann.jussieu.fr
+//
 
+/* 
+ This file is part of Freefem++
+ 
+ Freefem++ is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 2.1 of the License, or
+ (at your option) any later version.
+ 
+ Freefem++  is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public License
+ along with Freefem++; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ Thank to the ARN ()  FF2A3 grant
+ ref:ANR-07-CIS7-002-01 
+ */
 // $Id$
 
 #include  <iostream>
@@ -85,7 +114,7 @@ class Build2D3D_Op : public E_F0mps
 public:
   Expression eTh;
   Expression xx,yy,zz;
-  static const int n_name_param =12; // 
+  static const int n_name_param =13; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
@@ -131,7 +160,9 @@ basicAC_F0::name_and_type Build2D3D_Op::name_param[]= {
   {  "nbofregions", &typeid(long)},
   {  "regionlist", &typeid(KN_<double>)},
   {  "nboffacetcl", &typeid(long)},
-  {  "facetcl", &typeid(KN_<double>)}
+  {  "facetcl", &typeid(KN_<double>)},
+  // mesure mesh
+  {  "mesuremesh", &typeid(long)}
 };
 
 class  Build2D3D : public OneOperator { public:  
@@ -175,7 +206,13 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   KN<double> tabregion (arg(9,stack,zdzempty));
   int nbfacecl (arg(10,stack,0));
   KN<double> tabfacecl (arg(11,stack,zdzempty));
-
+  
+  // mesuremesh parameters
+  int mesureM(arg(13,stack,1));
+  int surface_orientation=1; 
+  if( mesureM <0 ){
+    surface_orientation=-1;
+  }
 
   // assertion au niveau de la taille
   ffassert( tabhole.N()   == 3*nbhole);
@@ -214,11 +251,18 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
 	}
   }  
   
-  KN<double> txx(nbv), tyy(nbv), tzz(nbv);
-  KN<int> takemesh(nbv);
+  //KN<double> txx(nbv), tyy(nbv), tzz(nbv);
+  //KN<int> takemesh(nbv);
+  double *txx=new double[nbv];
+  double *tyy=new double[nbv];
+  double *tzz=new double[nbv];
+  int *takemesh=new int[nbv];
+
   MeshPoint *mp3(MeshPointStack(stack)); 
-	
-  takemesh=0;  
+  
+  for(int ii=0; ii<nbv; ii++) 
+      takemesh[ii]=0;  
+
   Mesh &rTh = Th;
   for (int it=0; it<nbt; ++it){
     for( int iv=0; iv<3; ++iv){
@@ -238,16 +282,62 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
       }
     }
   }
+
+  delete [] takemesh;
   int border_only = 0;
   int recollement_border=1;
   /*
     Mesh3 *Th3=Transfo_Mesh2_tetgen( precis_mesh, switch_tetgen, Th, txx, tyy, tzz, border_only, 
 				   recollement_border, point_confondus_ok, label_tet, mapfme);  
   */
+
+  Mesh3 *Th3_tmp = MoveMesh2_func( precis_mesh, Th, txx, tyy, tzz, border_only, recollement_border, point_confondus_ok);
+
+  /* delete array */
+  delete [] txx;
+  delete [] tyy;
+  delete [] tzz;
+
+  /* check orientation of the mesh and flip if necessary*/ 
+  Th3_tmp->flipSurfaceMesh3(surface_orientation);
+
+  /* set label of surface Th3_tmp */
+  for(int ii=0; ii< Th3_tmp->nbe; ii++)
+    {
+      const Triangle3 & K(Th3_tmp->be(ii)); 
+      int iv[3];
+      int lab;
+     
+      iv[0] = Th3_tmp->operator()(K[0]);
+      iv[1] = Th3_tmp->operator()(K[1]);
+      iv[2] = Th3_tmp->operator()(K[2]);
+		
+      map< int, int>:: const_iterator imap;
+      imap = mapfme.find(K.lab); 
+		
+      if(imap!= mapfme.end()){
+	lab=imap->second;	
+      } 
+      else{
+	lab=K.lab;
+      }
+		
+      Th3_tmp->be(ii).set( Th3_tmp->vertices, iv, lab ) ;
+    }
+  /* mesh domains with tetgen */ 
+  Mesh3 *Th3 = RemplissageSurf3D_tetgen_new( switch_tetgen, *Th3_tmp, label_tet,
+					     nbhole, tabhole, nbregion, tabregion, 
+					     nbfacecl, tabfacecl);
+
+
+  /*
   Mesh3 *Th3=Transfo_Mesh2_tetgen_new( precis_mesh, switch_tetgen, Th, txx, tyy, tzz, border_only, 
 				   recollement_border, point_confondus_ok, label_tet, mapfme, 
 				   nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl);
 
+  */
+
+  delete Th3_tmp;
   
   Th3->BuildBound();
   Th3->BuildAdj();
@@ -1159,6 +1249,8 @@ Mesh3 * Transfo_Mesh2_tetgen_new(const double &precis_mesh, char *switch_tetgen,
     int & ii=ind_nbe_t[ibe];
     // creation of elements
     const Mesh::Triangle & K(Th2.t(ii)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
+    
+    
     p->vertexlist[0] = Numero_Som[ Th2.operator()(K[0]) ]+1;
     p->vertexlist[1] = Numero_Som[ Th2.operator()(K[1]) ]+1;
     p->vertexlist[2] = Numero_Som[ Th2.operator()(K[2]) ]+1;
