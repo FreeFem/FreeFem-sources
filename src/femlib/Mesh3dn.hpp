@@ -14,7 +14,7 @@
  
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
+  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
  
  Freefem++  is distributed in the hope that it will be useful,
@@ -154,7 +154,7 @@ public:
   int Save(const string & filename);  
   int SaveSurface(const string & filename);  
   int SaveSurface(const string & filename1, const string & filename2);  
-  //int Popen(const FILE *popenstream);
+  void flipSurfaceMesh3(int surfaceorientation);
 private:
   int load(const string & filename); 
   Mesh3(const Mesh3 &); // pas de construction par copie

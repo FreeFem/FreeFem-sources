@@ -156,9 +156,38 @@ class MoveMesh3 :  public E_F0mps { public:
 
 };
 
+
+
+
+class ReadMesh3 :  public E_F0 { public:  
+    
+  Expression filename; 
+  typedef pmesh3  Result;
+  ReadMesh3(const basicAC_F0 & args) 
+  {   
+    args.SetNameParam(); 
+    filename=to<string*>(args[0]);   
+  }   
+  static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<string*>());}
+  static  E_F0 * f(const basicAC_F0 & args){ return new ReadMesh3(args);} 
+  AnyType operator()(Stack stack) const;
+};
+
+
+AnyType ReadMesh3::operator()(Stack stack) const 
+{
+  using  Fem2D::MeshPointStack;
+ 
+  string * fn =  GetAny<string*>((*filename)(stack));
+  cout << "ReadMesh3 " << *fn << endl;
+  Mesh3 *Thh = new Mesh3(*fn);
+  return SetAny<pmesh3>(Thh);;
+  
+}
+
 class SaveMesh3 :  public E_F0 { public:  
  
-   typedef pmesh  Result;
+   typedef pmesh3  Result;
    Expression getmesh;
    Expression filename; 
    Expression xx,yy,zz;  
@@ -536,7 +565,6 @@ E_set_fev3<K,v_fes>::E_set_fev3(const E_Array * a,Expression pp)
 template<class K,class v_fes>   
 AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
 {  
-
   StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);     
   MeshPoint *mps=MeshPointStack(s), mp=*mps;   
   FEbase<K,v_fes> ** pp=GetAny< FEbase<K,v_fes> **>((*ppfe)(s));
@@ -964,16 +992,17 @@ void init_lgmesh3() {
   TheOperators->Add("<-",
        new OneOperator2_<pmesh3*,pmesh3*,pmesh3 >(&set_copy_incr));
 
-   Global.Add("savemesh","(",new OneOperatorCode<SaveMesh3>);
-   Global.Add("savesurfacemesh","(",new OneOperatorCode<SaveSurfaceMesh3>);
-  
+  Global.Add("readmesh3D","(",new OneOperatorCode<ReadMesh3>);
+  Global.Add("savemesh","(",new OneOperatorCode<SaveMesh3>);
+  Global.Add("savesurfacemesh","(",new OneOperatorCode<SaveSurfaceMesh3>);
+
    Dcl_Type<GlgVertex<Mesh3> >(); 
    Dcl_Type<GlgElement<Mesh3> >( ); 
 
    atype<long>()->AddCast( 
 			  new E_F1_funcT<long,GlgVertex<Mesh3> >(Cast<long,GlgVertex<Mesh3> >),
 			  new E_F1_funcT<long,GlgElement<Mesh3> >(Cast<long,GlgElement<Mesh3> >)
-  );
+			   );
 
    Add<pmesh3>("[","",new OneOperator2_<GlgElement<Mesh3>,pmesh3,long>(get_element));
    Add<pmesh3*>("[","",new OneOperator2_<GlgElement<Mesh3>,pmesh3*,long>(get_element));
