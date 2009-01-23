@@ -609,7 +609,7 @@ void GenericMesh<T,B,V>::BuildAdj()
   const int nea   = T::nea;
   assert(TheAdjacencesLink==0);
   TheAdjacencesLink = new int[nea*nt];
-  BoundaryElementHeadLink = new   int[nbe];
+  BoundaryElementHeadLink = new int[nbe];
   HashTable<SortArray<int,nva>,int> h(nea*nt,nv);
   int nk=0,nba=0;
   int err=0;

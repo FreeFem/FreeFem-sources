@@ -1540,6 +1540,8 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
     return SetAny<double>(minarea/2.);
 
 }
+
+
 void init_lgmesh() {
    if(verbosity)  cout <<"lg_mesh ";
     bamg::MeshIstreamErrorHandler = MeshErrorIO;

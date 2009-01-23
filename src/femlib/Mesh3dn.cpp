@@ -201,14 +201,18 @@ namespace Fem2D {
 		while ( (c=f.get()) != '\n' &&  c != EOF) 
 		  //cout << c << endl;
 		  ;
-				    }
+	      }
 	  }
-	assert( nt >0 && nv>0) ;
+	assert( (nt >0 || nbe>0)  && nv>0) ;
       }
+
     BuildBound();
-    BuildAdj();
-    Buildbnormalv();  
-    BuildjElementConteningVertex();  
+    
+    if(nt > 0){ 
+      BuildAdj();
+      Buildbnormalv();  
+      BuildjElementConteningVertex();  
+    }
     
     if(verbosity>1)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
@@ -241,13 +245,13 @@ namespace Fem2D {
     int nv,nt,neb;
     nv = GmfStatKwd(inm,GmfVertices);
     nt = GmfStatKwd(inm,GmfTetrahedra);
-    neb=GmfStatKwd(inm,GmfTriangles);
+    neb= GmfStatKwd(inm,GmfTriangles);
     this->set(nv,nt,neb);
     cout << "  -- Mesh3(load): "<<pfile <<", ver " << ver << ", d "<< dim  << ", nt " << nt << ", nv " << nv << " nbe:  = " << nbe << endl;
     if(dim  != 3) { 
       cerr << "Err dim == " << dim << " !=3 " <<endl;
       return 2; }
-    if( nv<=0 && nt <=0 ) {
+    if( nv<=0 && (nt <=0 || nbe <=0)  ) {
       cerr << " missing data "<< endl;
       return 3;
     }
@@ -274,42 +278,57 @@ namespace Fem2D {
     
     
     //    /* read mesh triangles */
-    if(mnlab==0 &&mxlab==0 )
-      {
-	int kmv=0;
-	mesb=0;
-	GmfGotoKwd(inm,GmfTriangles);
-	for(int i=0;i<nbe;++i)
-	  {  
-	    GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
-	    for(int j=0;j<3;++j)
-	      if(!vertices[iv[j]-1].lab)
-		{
-		  vertices[iv[j]-1].lab=1;
-		  kmv++;
-		}
-	    for (int j=0;j<3;++j)  
-	      iv[j]--;
-	    this->be(i).set(this->vertices,iv,lab);
-	    mesb += this->be(i).mesure();
-	  }
-	
-	if(kmv&& verbosity>1)
-	  cout << "    Aucun label Hack (FH)  ??? => 1 sur les triangle frontiere "<<endl;
-      }
-    
-    
-    /* read mesh tetrahedra */
-    GmfGotoKwd(inm,GmfTetrahedra);
-    for(int i=0;i<nt;++i)
-      {  
-	GmfGetLin(inm,GmfTetrahedra,&iv[0],&iv[1],&iv[2],&iv[3],&lab);
-	assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv && iv[2]>0 && iv[2]<=nv && iv[3]>0 && iv[3]<=nv);
-	for (int j=0;j<4;j++) iv[j]--;
-	this->elements[i].set(vertices,iv,lab); 
-	mes += this->elements[i].mesure();	    
-      }
-    
+    if(nbe > 0) {
+      if(mnlab==0 && mxlab==0 )
+	{
+	  int kmv=0;
+	  mesb=0;
+	  GmfGotoKwd(inm,GmfTriangles);
+	  for(int i=0;i<nbe;++i)
+	    {  
+	      GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
+	      for(int j=0;j<3;++j)
+		if(!vertices[iv[j]-1].lab)
+		  {
+		    vertices[iv[j]-1].lab=1;
+		    kmv++;
+		  }
+	      for (int j=0;j<3;++j)  
+		iv[j]--;
+	      this->be(i).set(this->vertices,iv,lab);
+	      mesb += this->be(i).mesure();
+	    }
+	  
+	  if(kmv&& verbosity>1)
+	    cout << "    Aucun label Hack (FH)  ??? => 1 sur les triangle frontiere "<<endl;
+	}
+      else
+	{
+	  mesb=0;
+	  GmfGotoKwd(inm,GmfTriangles);
+	  for(int i=0;i<nbe;++i)
+	    {  
+	      GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
+	      for (int j=0;j<3;++j)  
+		iv[j]--;
+	      this->be(i).set(this->vertices,iv,lab);
+	      mesb += this->be(i).mesure();
+	    }
+	}
+    }
+      
+    if(nt>0){
+      /* read mesh tetrahedra */
+      GmfGotoKwd(inm,GmfTetrahedra);
+      for(int i=0;i<nt;++i)
+	{  
+	  GmfGetLin(inm,GmfTetrahedra,&iv[0],&iv[1],&iv[2],&iv[3],&lab);
+	  assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv && iv[2]>0 && iv[2]<=nv && iv[3]>0 && iv[3]<=nv);
+	  for (int j=0;j<4;j++) iv[j]--;
+	  this->elements[i].set(vertices,iv,lab); 
+	  mes += this->elements[i].mesure();	    
+	}
+    }
     GmfCloseMesh(inm);    
     return(0); // OK
     
@@ -536,6 +555,34 @@ namespace Fem2D {
     if(verbosity>1)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
   }
+
+  void Mesh3::flipSurfaceMesh3(int surface_orientation)
+  {
+    /* inverse the orientation of the surface if necessary*/
+    /* and control that all surfaces are oriented in the same way*/
+    int nbflip=0;
+    for (int i=0;i<this->nbe;i++)
+      { 
+	double mes_triangle3= this->be(i).mesure();
+	
+	if( surface_orientation*mes_triangle3 < 0){
+	  const Triangle3 &K( this->be(i) );
+	  int iv[3];       
+	  
+	  iv[0] = this->operator()(K[0]);
+	  iv[1] = this->operator()(K[1]);
+	  iv[2] = this->operator()(K[2]);
+	  
+	  int iv_temp=iv[1];
+	  iv[1]=iv[2];
+	  iv[2]=iv_temp;
+	  this->be(i).set( this->vertices, iv, K.lab ) ;
+	  nbflip++;
+	}
+      }
+    assert(nbflip==0 || nbflip== this->nbe); 
+  }
+
 
   int  signe_permutation(int i0,int i1,int i2,int i3)
   {
