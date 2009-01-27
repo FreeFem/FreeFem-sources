@@ -14,6 +14,13 @@ real nu = 0.0025, dt = 0.2; // Reynolds=200
 Vh w,u = 4*y*(1-y)*(y>0)*(x<2), v =0, p = 0, q=0;
 real area= int2d(Th)(1.);
 
+varf vMdx(p,v)=int2d(Th,qforder=1)(dx(p)*v*dt);
+varf vMdy(p,v)=int2d(Th,qforder=1)(dy(p)*v*dt);
+varf vML(u,v)=int2d(Th,qforder=1)(v);
+real[int] ML=vML(0,Vh); 
+matrix Mx = vMdx(Vh,Vh);
+matrix My = vMdy(Vh,Vh);
+
 for(int n=0;n<100;n++){
   Vh uold = u,  vold = v, pold=p;
   Vh f=convect([u,v],-dt,uold),  g=convect([u,v],-dt,vold);
@@ -37,10 +44,22 @@ for(int n=0;n<100;n++){
  real meanpq = int2d(Th)(pold - q)/area;
  if(n==50){
     Th = adaptmesh(Th,u,v,q); plot(Th, wait=true);
+    ML.resize(Th.nv);
+    ML=vML(0,Vh); 
+    Mx = vMdx(Vh,Vh);
+    My = vMdy(Vh,Vh);
+    u=u;
+    v=v;
  }
  p = pold-q-meanpq;
- u = u + dx(q)*dt;
- v = v + dy(q)*dt;
+ // u = u + dx(q)*dt;
+ //v = v + dy(q)*dt;
+
+ real[int] Mdxp = Mx*p[];
+ real[int] Mdyp = My*p[];
+
+ u[] += Mdxp ./ ML;
+ v[] += Mdyp ./ ML;
 }
 plot(p,wait=1,ps="NSprojP.eps");
 plot(u,wait=1,ps="NSprojU.eps");
