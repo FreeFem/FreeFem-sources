@@ -1,5 +1,8 @@
+  - correct  dy(uh) (always 0) for P13d finite element  (27 jan 2009)
+      op==op_dy =>  op==op_dy line 97 P012_3D.cpp
 v 3.0-5 (20 jan 2009)
-  - correct the install on under windows / cygwin
+  - correct array 3D  FE function +  missing function in 3D (not finish) 
+  - correct the install on under windows / cygwin 
       add src/Graphics/ff-win32.cpp missing file in tar.gz under windows
       correct ff-c++  under cygwin compile (fist test) 
   - automatic compilation of BLAS, suppress the automatic compilation of BLAS atlas (to long) 

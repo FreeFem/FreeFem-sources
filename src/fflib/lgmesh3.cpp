@@ -832,15 +832,22 @@ AnyType pf3r2R(Stack s,const AnyType &a)
     mp.other.set(Th,mp.P,PHat,*K,0,outside);
   }
   if(verbosity>100)
-  cout << "  ---  " << qnu << "  " << mp.P << " " << mp.outside <<  " " << outside << endl;
+    {
+    if(outside)
+	cout << "  ---  " << qnu << "  " << mp.P << " out=" << mp.outside <<  " out=" << outside << " K= " << K << " " << PHat << endl;
+    else 
+	cout << "  ---  " << qnu << " P=  " << mp.P << " out=" << mp.outside <<  " out=" << outside << " K(PHat) == P =  " <<  (*K)(PHat) << " PHat = " << PHat << endl;
+    }
   const FElement KK(Vh[Th(K)]);
   if (outside && KK.tfe->discontinue) 
     return   SetAny<R>(0.0); 
-/*  if (!outside) 
+#ifndef NDEBUG 
+  if (!outside) 
     {
       if ( Norme2_2( (*K)(PHat) - mp.P ) > 1e-12 )
         cout << "bug ??  " << Norme2_2( (*K)(PHat) - mp.P ) << " " << mp.P << " " << (*K)(PHat) << endl;
-    } */
+    } 
+#endif
 /*  int nbdf=KK.NbDoF();
   
   int N= KK.N;

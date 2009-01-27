@@ -94,7 +94,7 @@ R TypeOfFE_P1Lagrange3d::operator()(const FElement & K,const  R3 & PHat,const KN
       R l0=1-PHat.x-PHat.y-PHat.z,l1=PHat.x,l2=PHat.y,l3=PHat.z; 
       r = u0*l0+u1*l1+l2*u2+l3*u3;
     }
-  else if(op==op_dx || op==op_dx || op==op_dz)
+  else if(op==op_dx || op==op_dy || op==op_dz) // dx => dy thank to Pichon 27/01/2008 (FH)
     { 
       const Element & T=K.T;
       R3 D[4];
