@@ -36,7 +36,7 @@ func f1min = Rmin*f1;
 func f2min = Rmin*f2;
 func f3min = Rmin*f3;
 
-mesh3 Th3=movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min],mesuremesh=-1);
+mesh3 Th3=movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min],normal=-1);
 
 real[int] domain = [0.,0.,0.,145,0.01];
 mesh3 Th3sph=tetg(Th3,switch="paAAQYY",nbofregions=1,regionlist=domain);
