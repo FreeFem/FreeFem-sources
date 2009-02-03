@@ -46,7 +46,7 @@ func f3min = Rmin*f3;
 
 cout << "=====================" << endl;
 cout << "=====================" << endl;
-mesh3 Th3sph=movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min],mesuremesh=1);
+mesh3 Th3sph=movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min],normal=1);
 cout << "=====================" << endl;
 cout << "=====================" << endl;
 real Rmax  = 2.;
@@ -55,7 +55,7 @@ func f2max = Rmax*f2;
 func f3max = Rmax*f3;
 cout << "=====================" << endl;
 cout << "=====================" << endl;
-mesh3 Th3sph2=movemesh2D3Dsurf(Th,transfo=[f1max,f2max,f3max],mesuremesh=-1);
+mesh3 Th3sph2=movemesh2D3Dsurf(Th,transfo=[f1max,f2max,f3max],normal=-1);
 cout << "=====================" << endl;
 cout << "=====================" << endl;
 cout << "addition" << endl;

@@ -2195,7 +2195,7 @@ public:
 
 basicAC_F0::name_and_type Movemesh2D_3D_surf_Op::name_param[]= {
   {  "transfo", &typeid(E_Array )},
-  {  "mesuremesh", &typeid(long)},
+  {  "normal", &typeid(long)},
   {  "refface", &typeid(KN_<long>)},
   {  "ptmerge", &typeid(double)}
 };
