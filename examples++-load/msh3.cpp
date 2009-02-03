@@ -1694,16 +1694,20 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   ffassert(hmin>Norme2(Pn-Px)/1e9);
   double hseuil =hmin/10.; 
 
+  //int *NumSom= new int[nbvx];
+
   // VERSION morice
   if(verbosity > 1) cout << " creation of : BuildGTree" << endl;   
   EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pn,Px,0);  
   
+  nbv=0;
+  //int nbv0=0;
   for(list<Mesh3 *>::const_iterator i=lth.begin(); i!=lth.end();i++)
     {
       const Mesh3 &Th3(**i);
       if(verbosity>1)  cout << " loop over mesh for create new mesh "<< endl;
       if(verbosity>1)  cout << " GluMesh3D + "<< Th3.nv << " " << Th3.nt <<" " << Th3.nbe << endl;
-      int nbv0 = nbv;
+      //nbv0 =+Th3.nv;
       
       for (int ii=0;ii<Th3.nv;ii++){
 	const Vertex3 &vi(Th3.vertices[ii]);
@@ -1715,63 +1719,54 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 	  v[nbv].y = vi.y;
 	  v[nbv].z = vi.z;
 	  v[nbv].lab = vi.lab;
-	  gtree->Add( v[nbv++] );
+	  //NumSom[ii+nbv0] = nbv;
+	  gtree->Add( v[nbv] );
+	  nbv++;
 	}
+	/*
+	  else{
+	  NumSom[ii+nbv0] = pvi-v;
+	  assert(pvi-v <nbv); 
+	  }
+	*/
       }
 	  
       for (int k=0;k<Th3.nt;k++){
 	const Tet  &K(Th3.elements[k]);
 	int iv[4];
-	iv[0]=gtree->NearestVertex(K[0])-v;
-	iv[1]=gtree->NearestVertex(K[1])-v;
-	iv[2]=gtree->NearestVertex(K[2])-v;  //-v;
-	iv[3]=gtree->NearestVertex(K[3])-v;  //-v;
+	iv[0]=gtree->ToClose(K[0],hseuil)-v;
+	iv[1]=gtree->ToClose(K[1],hseuil)-v;
+	iv[2]=gtree->ToClose(K[2],hseuil)-v;  
+	iv[3]=gtree->ToClose(K[3],hseuil)-v;  
 	(tt++)->set(v,iv,K.lab);
       }
-      /*
-	for (int k=0;k<Th3.nbe;k++)
-	{
-	const Triangle3 & K(Th3.be(k));//bedges[k]);
-	int iv[3];
-	iv[0]=gtree->NearestVertex(K[0])-v; //-v;
-	iv[1]=gtree->NearestVertex(K[1])-v; //-v;
-	iv[2]=gtree->NearestVertex(K[2])-v; //-v;
-	  
-	if( iv[2]<nbv0 && iv[1]<nbv0 && iv[0] < nbv0 ) continue;  // Faux
-	(bb++)->set(v,iv,K.lab);
-	nbe++;
-	  
-	}   
-      */
+      //nbv0 =+Th3.nv;
     }
   
   if(verbosity > 1) cout << " creation of : BuildGTree for border elements" << endl;
-  //Vertex3  *becog= new Vertex3[nbex];  
-  Vertex3  becog[nbex]; 
+  Vertex3  *becog= new Vertex3[nbex];  
+  //Vertex3  becog[nbex]; 
   EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog,Pn,Px,0);
   
   double hseuil_border = hseuil/3.;
-	
+  //nbv0=0;
   for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++){
     const Mesh3 &Th3(**i);
       
     for (int k=0;k<Th3.nbe;k++)
       {
-	const Triangle3 & K(Th3.be(k));//bedges[k]);
+	const Triangle3 & K(Th3.be(k));
 	int iv[3];
-	iv[0]=Th3.operator()(K[0]); //gtree->NearestVertex(K[0])-v; //-v;
-	iv[1]=Th3.operator()(K[1]); //gtree->NearestVertex(K[1])-v; //-v;
-	iv[2]=Th3.operator()(K[2]); //gtree->NearestVertex(K[2])-v; //-v;
-	
-	//assert( iv[2]<nbv && iv[1]<nbv && iv[0] < nbv );  
-	  
+	iv[0]=Th3.operator()(K[0]); 
+	iv[1]=Th3.operator()(K[1]); 
+	iv[2]=Th3.operator()(K[2]); 
+
 	R cdgx,cdgy,cdgz;
 	  
 	cdgx = (Th3.vertices[iv[0]].x+ Th3.vertices[iv[1]].x+ Th3.vertices[iv[2]].x)/3.;
 	cdgy = (Th3.vertices[iv[0]].y+ Th3.vertices[iv[1]].y+ Th3.vertices[iv[2]].y)/3.;
 	cdgz = (Th3.vertices[iv[0]].z+ Th3.vertices[iv[1]].z+ Th3.vertices[iv[2]].z)/3.;
 	 
-	//cout << "cdg=" << cdgx << " " << cdgy << " " << cdgz << " "<<endl; 
 	const R3 r3vi( cdgx, cdgy, cdgz ); 
 	const Vertex3 &vi( r3vi);
 	    
@@ -1784,83 +1779,18 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 	  gtree_be->Add( becog[nbe++]);
 		  
 	  int igluv[3];
-	  igluv[0]=gtree->NearestVertex(K[0])-v; //-v;
-	  igluv[1]=gtree->NearestVertex(K[1])-v; //-v;
-	  igluv[2]=gtree->NearestVertex(K[2])-v; //-v;
-		  
+	  igluv[0]= gtree->ToClose(K[0],hseuil)-v; //NumSom[iv[0]+nbv0];  
+	  igluv[1]= gtree->ToClose(K[1],hseuil)-v; //NumSom[iv[1]+nbv0]; 
+	  igluv[2]= gtree->ToClose(K[2],hseuil)-v; //NumSom[iv[2]+nbv0]; 
+	 
 	  (bb++)->set(v,igluv,K.lab);
 	}
-     }
-    
+      }
+    //nbv0 =+Th3.nv;
   }
   delete gtree;
   delete gtree_be;
-  /*
-  // version hecht
-  {  
-    EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pn,Px,0);  
-    typedef SortArray<int,3>  SortFace;
-    HashTable<SortFace,int> bbe(nbex,nbvx);
-    typedef HashTable<SortArray<int,3>,int>::iterator HT_iterator;
-    for(list<Mesh3 *>::const_iterator i=lth.begin(); i!=lth.end();i++)
-      {
-	const Mesh3 &Th3(**i);
-	if(verbosity>1)  cout << " loop over mesh for create new mesh "<< endl;
-	if(verbosity>1)  cout << " GluMesh3D + "<< Th3.nv << " " << Th3.nt <<" " << Th3.nbe << endl;
-	int nbv0 = nbv;
-	
-	for (int ii=0;ii<Th3.nv;ii++)
-	  {
-	    const Vertex3 &vi(Th3.vertices[ii]);
-	    Vertex3 * pvi=gtree->ToClose(vi,hseuil);
-       
-	    //  if( abs(vi.x) <1e-6 || abs(vi.x-1) <1e-6 || abs(vi.x+1) <1e-6 ){
-	    //   cout << ii << *i << "avant test" << vi << endl;	   }
-	    
-	    if(!pvi)
-	      {
-		if(abs(vi.x) <1e-6 || abs(vi.x-1) <1e-6 || abs(vi.x+1) <1e-6){
-		  cout << "nbv=" << nbv << " vi=" << vi << endl;
-		}
-		v[nbv].x = vi.x;
-		v[nbv].y = vi.y;
-		v[nbv].z = vi.z;
-		v[nbv].lab = vi.lab;
-		gtree->Add( v[nbv++] );
-	      }
-	  }
-	
-	for (int k=0;k<Th3.nt;k++)
-	  {
-	    const Tet  &K(Th3.elements[k]);
-	    int iv[4];
-	    iv[0]=gtree->NearestVertex(K[0])-v;
-	    iv[1]=gtree->NearestVertex(K[1])-v;
-	    iv[2]=gtree->NearestVertex(K[2])-v;  //-v;
-	    iv[3]=gtree->NearestVertex(K[3])-v;  //-v;
-	    (tt++)->set(v,iv,K.lab);
-	  }
-	
-	for (int k=0;k<Th3.nbe;k++)
-	  {
-	    const Triangle3 & K(Th3.be(k));//bedges[k]);
-	    int iv[3];
-	    iv[0]=gtree->NearestVertex(K[0])-v; //-v;
-	    iv[1]=gtree->NearestVertex(K[1])-v; //-v;
-	    iv[2]=gtree->NearestVertex(K[2])-v; //-v;
-	    SortFace sbe(iv);
-	    if(bbe.find(sbe)) continue;
-	    //if( iv[2]<nbv0 && iv[1]<nbv0 && iv[0] < nbv0 ) continue;  // Faux
-	    (bb++)->set(v,iv,K.lab);
-	    nbe++;
-	      
-	  }   
-	cout << "nbe="<<nbe<<endl;   
-      }
-  
-    delete gtree;
-  }
-  */
+  delete [] becog;
   
   if(verbosity > 2) cout << " nbv="  << nbv  << endl;
   if(verbosity > 2) cout << " nbvx=" << nbvx << endl;
@@ -1875,6 +1805,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 
   if(nbt==0){
     Mesh3 *mpq= new Mesh3(nbv,nbe,v,b);  
+    mpq->BuildSurfaceAdj();
     return mpq;
   }
   else{
@@ -2050,7 +1981,10 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
       
       //	T_Th3->decrement(); 
     }
-  
+  else
+    {
+      T_Th3->BuildSurfaceAdj();
+    }
   Add2StackOfPtr2FreeRC(stack,T_Th3);
  
   *mp=mps;
@@ -2138,7 +2072,7 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
   for(int i=0;i<nbe;++i)
   {
   	const Triangle3 & K = Th.be(i);	
-    int l0,l1=ChangeLab3D(mapface, l0= K.lab) ;
+	int l0,l1=ChangeLab3D(mapface, l0= K.lab) ;
 	nben++;
   }
 	  
@@ -2393,6 +2327,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
     }
     
     assert(nbflip==0 || nbflip== Th3->nbe);
+    Th3->BuildSurfaceAdj();
     Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
   }
@@ -2455,7 +2390,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
 	}
       }
     assert(nbflip==0 || nbflip== Th3->nbe);
-
+    Th3->BuildSurfaceAdj();
     Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
   }

@@ -433,6 +433,7 @@ public:
    
   int Contening(const Vertex * v) const{ return ElementConteningVertex[ v  - vertices];} 
   void BuildAdj();
+  void BuildSurfaceAdj();  // Add J. Morice function that give the TheAdjacencesSurfaceLink
   void Buildbnormalv();
   void BuildBound();
   void BuildjElementConteningVertex();
@@ -525,7 +526,30 @@ public:
     int i= BoundaryElementHeadLink[be]; 
     ItemInK = i%nea; 
     return i/nea;}
-    
+  
+  // Add J. Morice 
+  template<int N,int M>
+  SortArray<int,N> itemadjs(const int (* const  nu )[N],int k,int i, int *sens) 
+  {
+    int nv[N];
+    B & K(borderelements[CheckBE(k)]);
+    ASSERTION(i>=0 && i <M);
+    for (int j=0;j<N;++j){
+      nv[j] = operator()(K[nu[i][j]]);
+    }
+    if(nv[0] > nv[1] )
+      *sens = 1;
+    else
+      *sens =-1;
+    return SortArray<int,N>(nv);
+  }
+
+  SortArray<int,B::nva> items(int k,int i,int *sens) 
+  {
+    return itemadjs<B::nva,B::nv>(B::nvadj,k,i,sens);
+  }
+
+  
   template<int N,int M>
   SortArray<int,N> iteme(const int (* const  nu )[N],int k,int i) 
   {
@@ -576,7 +600,7 @@ public:
     
   }
 
-    Serialize serialize() const;
+  Serialize serialize() const;
   
 private:
   GenericMesh(const GenericMesh &); // pas de construction par copie
@@ -669,6 +693,55 @@ void GenericMesh<T,B,V>::BuildAdj()
   else
     cout << endl;
 }
+
+template<typename T,typename B,typename V>
+void GenericMesh<T,B,V>::BuildSurfaceAdj()
+{
+ 
+  // assert(TheSurfaceAdjacencesLink==0); plus tard
+  int *TheSurfaceAdjacencesLink = new int[B::nea*nbe];
+  HashTable<SortArray<int,B::nva>,int> h(B::nea*nbe,nv);
+  int nk=0;
+  int err=0;
+  int sens;
+
+  cout << "nea/nva" << B::nea << " "  << B::nva << endl;
+  for (int k=0;k<nbe;++k)
+    for (int i=0;i<B::nea;++i)
+      {
+        SortArray<int,B::nva> a(items(k,i,&sens));
+
+	typename HashTable<SortArray<int,B::nva>,int>::iterator p= h.find(a);
+	if(!p) 
+	  { 
+	    h.add(a,nk);
+	    TheSurfaceAdjacencesLink[nk]=sens;
+	  }
+	else 
+	  {	  
+	    ASSERTION(p->v>=0);
+	    if( sens*TheSurfaceAdjacencesLink[p->v] != -1){
+	 
+	      B & K(borderelements[CheckBE(k)]);
+	      int firstVertex  =  operator()(K[B::nvadj[i][0]])+1;
+	      int secondVertex =  operator()(K[B::nvadj[i][1]])+1;
+	      cout << " The edges defined by vertex is " << firstVertex << "-" << secondVertex << " is oriented twicd in the same direction "<< endl;
+	      err++;
+	    }
+	    TheSurfaceAdjacencesLink[nk]=p->v;
+	    TheSurfaceAdjacencesLink[p->v]=nk;    
+	  }
+	if( err > 10 ) 
+	  exit(1); 
+	nk++;
+      }
+    
+  assert(err==0);
+  delete [ ] TheSurfaceAdjacencesLink; 
+  cout << "number of adjacents edges " << nk << endl; 
+}
+
+
 
 template<typename T,typename B,typename V>
 DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement]) const

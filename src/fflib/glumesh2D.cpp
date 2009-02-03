@@ -113,19 +113,18 @@ Mesh * GluMesh(listMesh const & lst)
 	for (int k=0;k<Th.nt;k++)
 	  {
 	    const Triangle  &K(Th[k]);
-	    int i0=quadtree->NearestVertex(K[0])-v;
-	    int i1=quadtree->NearestVertex(K[1])-v;
-	    int i2=quadtree->NearestVertex(K[2])-v;
+	    int i0=quadtree->ToClose(K[0],hseuil)-v; //NearestVertex(K[0])-v;
+	    int i1=quadtree->ToClose(K[1],hseuil)-v; //NearestVertex(K[1])-v;
+	    int i2=quadtree->ToClose(K[2],hseuil)-v; //NearestVertex(K[2])-v;
 	    (*tt++).set(v,i0,i1,i2,K.lab);
 	  }
 	
-	// bug glumesh done after 
       
 	for (int k=0;k<Th.neb;k++)
 	  {
 	    const BoundaryEdge & be(Th.bedges[k]);
-	    int i0=quadtree->NearestVertex(be[0])-v;
-	    int i1=quadtree->NearestVertex(be[1])-v;
+	    int i0=quadtree->ToClose(be[0],hseuil)-v;
+	    int i1=quadtree->ToClose(be[1],hseuil)-v;
 	    int ii0=i0,ii1=i1;
 	    if(ii1<ii0) Exchange(ii0,ii1);
 	    pair<int,int> i01(ii0,ii1);
@@ -172,8 +171,8 @@ Mesh * GluMesh(listMesh const & lst)
 	    becog[neb].lab = vi.lab;
 	    quadtree_be->Add( becog[neb++] );
 	    
-	    int iglu0=quadtree->NearestVertex(be[0])-v;
-	    int iglu1=quadtree->NearestVertex(be[1])-v;
+	    int iglu0=quadtree->ToClose(be[0],hseuil)-v;
+	    int iglu1=quadtree->ToClose(be[1],hseuil)-v;
 	    
 	    (bb++)->set(v,iglu0,iglu1,vi.lab);
 	  }

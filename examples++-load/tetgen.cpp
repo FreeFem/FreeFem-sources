@@ -300,6 +300,10 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
 
   /* check orientation of the mesh and flip if necessary*/ 
   Th3_tmp->flipSurfaceMesh3(surface_orientation);
+ 
+  cout << "check :: orientation des surfaces" << endl;
+  Th3_tmp->BuildSurfaceAdj();
+  cout << "fin check :: orientation des surfaces" << endl;
 
   /* set label of surface Th3_tmp */
   for(int ii=0; ii< Th3_tmp->nbe; ii++)
@@ -862,6 +866,8 @@ Mesh3 * RemplissageSurf3D_tetgen(char *switch_tetgen,const Mesh3 & Th3, const in
   int nbe_t = Th3.nbe;
 	
   if(verbosity) cout << "3D RemplissageSurf3D:: Vertex  triangle2  border "    << nv_t << " "<< nt_t << " " << nbe_t<< endl;
+  
+
   // Creation des tableau de tetgen
 	
   tetgenio in,out;
@@ -942,7 +948,8 @@ Mesh3 * RemplissageSurf3D_tetgen_new(char *switch_tetgen,const Mesh3 & Th3, cons
   int nv_t = Th3.nv;
   int nt_t = Th3.nt;
   int nbe_t = Th3.nbe;
-	
+
+ 
   if(verbosity) cout << "3D RemplissageSurf3D:: Vertex  triangle2  border " << nv_t << " "<< nt_t << " " << nbe_t<< endl;
   // Creation des tableau de tetgen
 	
@@ -1602,6 +1609,10 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   //Mesh3 *Th3 = Th3 = RemplissageSurf3D_tetgen( switch_tetgen, Th, label_tet);
   
   cout << "tetgen:" << "nbhole="   << nbhole << "nbregion=" << nbregion << endl;
+
+  cout << "check :: orientation des surfaces" << endl;
+  Th.BuildSurfaceAdj();
+  cout << "fin check :: orientation des surfaces" << endl;
  
   Mesh3 *Th3 = RemplissageSurf3D_tetgen_new( switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl);
 	

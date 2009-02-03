@@ -999,6 +999,11 @@ void init_lgmesh3() {
   TheOperators->Add("<-",
        new OneOperator2_<pmesh3*,pmesh3*,pmesh3 >(&set_copy_incr));
 
+  TheOperators->Add("=",
+		    new OneOperator2<pmesh3*,pmesh3*,pmesh3 >(&set_eqdestroy_incr)
+		    );
+  
+ 
   Global.Add("readmesh3D","(",new OneOperatorCode<ReadMesh3>);
   Global.Add("savemesh","(",new OneOperatorCode<SaveMesh3>);
   Global.Add("savesurfacemesh","(",new OneOperatorCode<SaveSurfaceMesh3>);
@@ -1049,6 +1054,11 @@ void init_lgmesh3() {
        );
  TheOperators->Add("<-",
        new OneOperator2_<pfes3*,pfes3*,pfes3>(&set_copy_incr));
+
+ TheOperators->Add("=",
+		   new OneOperator2<pfes3*,pfes3*,pfes3>(&set_eqdestroy_incr)
+		   ); 
+
 
  TheOperators->Add("=",
        new OneOperator2_<pf3r,pf3r,double,E_F_StackF0F0opt2<double> >(set_fe3<double>) ,

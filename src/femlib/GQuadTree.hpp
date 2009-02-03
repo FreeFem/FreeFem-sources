@@ -184,9 +184,10 @@ namespace EF23 {
     Zd  VtoZd(const Vertex * v) const {return RdtoZd( (const Rd&) *v);} 
     Zd  VtoZd(const Vertex & v) const {return RdtoZd( (const Rd&) v);} 
     
-    Rd  ZdtoRd(const Zd &I) const { return ((Rd) I )*coef+cMin;}
+    Rd  ZdtoRd(const Zd &I) const { return ( (Rd) I )/coef+cMin;}
     
-    Vertex * NearestVertex(const Rd & P) { return NearestVertex(RdtoZd(P));} //XtoI(P.x),YtoJ(P.y));}
+    Vertex * NearestVertex(const Rd & P) {
+      return NearestVertex(RdtoZd(P));} //XtoI(P.x),YtoJ(P.y));}
     Vertex * NearestVertexWithNormal(const Rd & P);
     Vertex * NearestVertex(Zd i2);
     
