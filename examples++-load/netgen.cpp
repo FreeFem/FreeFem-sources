@@ -104,8 +104,48 @@ basicAC_F0::name_and_type RemplissageNetgen_Op::name_param[]= {
   {  "refface", &typeid(KN_<long>)},
   //  Netgen Options
   {  "maxh", &typeid(double)},
-  {  "fineness", &typeid(double)},
-  {  "secondorder", &typeid(long)}
+  {  "secondorder", &typeid(long)},
+  {  "meshsizefilename", &typeid(string*)}
+  /* // Parametres de netgen non définis encore
+  // other parameters of netgen : see libsrc/meshing/meshtype.hpp of netgen directory for more information
+  // parameters defined by default is given in MeshingParameters :: MeshingParameters () in libsrc/meshing/meshtype.cpp.
+  
+  {  "optimize3d", &typeid(string*)},
+  {  "optsteps3d", &typeid(long)},
+  {  "optimize2d", &typeid(string*)},
+  {  "optsteps2d", &typeid(long)}, 
+  {  "opterrpow", &typeid(double)},
+  {  "blockfill", &typeid(int)},
+  {  "filldist", &typeid(double)},
+  {  "safety", &typeid(double)},
+  {  "relinnersafety", &typeid(double)},
+  {  "uselocalh", &typeid(int)},
+  {  "grading", &typeid(double)},
+  {  "delaunay", &typeid(int)},
+
+  {  "minh", &typeid(double)},
+  {  "startinsurface", &typeid(int)},
+  {  "checkoverlap", &typeid(int)}, // debug
+  {  "checkoverlappingboundary", &typeid(int)}, 
+  {  "checkchartboundary", &typeid(int)},
+  {  "curvaturesafety", &typeid(double)},
+  {  "segmentsperedge", &typeid(double)},
+  {  "parthread",&typeid(int)}, //use parallel threads
+  {  "elsizeweight", &typeid(double)}, // weight of element size w.r.t element shape
+  // from mp3:
+  {  "giveuptol", &typeid(int)},
+  {  "maxoutersteps", &typeid(int)},
+  {  "starshapeclass", &typeid(int)},
+  {  "baseelnp", &typeid(int)},
+  {  "sloppy", &typeid(int)},
+  {  "badellimit", &typeid(double)}, /// limit for max element angle (150-180)
+  {  "check_impossible", &typeid(bool)}, 
+  {  "elementorder", &typeid(int)}, 
+  {  "quad", &typeid(int)}, 
+  {  "inverttets", &typeid(int)}, 
+  {  "inverttrigs", &typeid(int)}, 
+  {  "autozrefine", &typeid(int)}
+  */
 };
 
 class  RemplissageNetgen : public OneOperator { public:  
@@ -129,15 +169,17 @@ AnyType RemplissageNetgen_Op::operator()(Stack stack)  const
   KN<long> zzempty;
   long     nrtet (arg(0, stack, 1));
   KN<long> nrf (arg(1,stack,zzempty)); 
-  double   netgen_maxh (arg( 2, stack, 1.)); 
-  double  netgen_fineness (arg( 3, stack, 1.)); 
-  int  netgen_secondorder (arg( 4, stack, 0));
-
+ 
   ffassert( nrf.N() %2 ==0);
 
   int nbv=Th3.nv; // nombre de sommet 
-  int nbt=Th3.nt; // nombre de triangles
-  int nbe=Th3.nbe; // nombre d'aretes fontiere
+  int nbt=Th3.nt; // nombre de tetrahedre
+  int nbe=Th3.nbe; // nombre de surfaces
+
+  // check consistency of surface mesh
+  cout << "check :: orientation des surfaces" << endl;
+  Th3.BuildSurfaceAdj();
+  cout << "fin check :: orientation des surfaces" << endl;
 
   if(nbt!=0) {
     cerr << " The mesh must be a 3D surface mesh " << endl;
@@ -167,25 +209,51 @@ AnyType RemplissageNetgen_Op::operator()(Stack stack)  const
   for (int ii = 0; ii < Th3.nbe; ii++)
     {
       const Triangle3 & K(Th3.be(ii));
+      int label=K.lab;
       for(int jj=0; jj <3; jj++)
 	trig[jj] = Th3.operator()(K[jj])+1;
-      
-      Ng_AddSurfaceElement (netgen_mesh, NG_TRIG, trig);       
+      //cout << "label= " << label << endl; 
+      Ng_AddSurfaceElement (netgen_mesh, NG_TRIG, trig); //, &label);       
     }
   
   Ng_Meshing_Parameters netgen_mp;
-  netgen_mp.maxh     = 1;     //netgen_maxh;
-  netgen_mp.fineness = 1.;    //netgen_fineness;
-  netgen_mp.secondorder = 0;  //netgen_secondorder;
- 
-
-  //cout << "start meshing" << endl;
-  //Ng_GenerateVolumeMesh (netgen_mesh, &netgen_mp);
-  //cout << "meshing done" << endl;
   
-  netgen_mp.maxh     = 0.09;     //netgen_maxh;
-  netgen_mp.fineness = 1.;    //netgen_fineness;
-  netgen_mp.secondorder = 0;  //netgen_secondorder;
+  if(nargs[2]){
+    double netgen_maxh = GetAny< double >( (*nargs[2])(stack) ); 
+    netgen_mp.maxh = netgen_maxh;   
+  }
+
+  if(nargs[3]){
+    int  netgen_secondorder = GetAny< int >( (*nargs[3])(stack) ); 
+    netgen_mp.secondorder = netgen_secondorder;  
+  }
+
+  if(nargs[4]){
+    string *netgen_meshsize_filename =  GetAny<string *>( (*(nargs[4]))(stack) );
+    size_t size_filename = netgen_meshsize_filename->size()+1;
+    char* netgen_meshsize_filename_char =new char[size_filename];
+    strncpy(netgen_meshsize_filename_char, netgen_meshsize_filename->c_str(), size_filename);
+ 
+    netgen_mp.meshsize_filename = netgen_meshsize_filename_char;   
+  }
+
+  // Essai des restrictions pour tetgen
+  
+  double pmin[3],pmax[3];
+  pmin[0] = 0.9;
+  pmin[1] = -0.1;
+  pmin[2] = -0.1;
+  
+  pmax[0] = 1.5;
+  pmax[1] = 3.;
+  pmax[2] = 1.5;
+
+  //Ng_RestrictMeshSizeGlobal ( netgen_mesh, 0.1 );
+  Ng_RestrictMeshSizeBox ( netgen_mesh, pmin, pmax, 0.05 );
+  //Ng_RestrictMeshSizeGlobal ( netgen_mesh, 0.01 );
+  
+  //Ng_RestrictMeshSizePoint (netgen_mesh, point, 0.01);
+
   cout << "start remeshing" << endl;
   Ng_GenerateVolumeMesh (netgen_mesh, &netgen_mp);
   cout << "meshing done" << endl;
@@ -234,7 +302,9 @@ AnyType RemplissageNetgen_Op::operator()(Stack stack)  const
     }
   for (int ii = 0; ii < netgen_nbe; ii++)
     {
-      int label=0;
+      const Triangle3 & K(Th3.be(ii));
+      int label=K.lab;
+      //int label=0;
       int iv[3];
       Ng_GetSurfaceElement (netgen_mesh, ii+1, iv);
       for(int jj=0;jj<3;jj++)
@@ -242,7 +312,7 @@ AnyType RemplissageNetgen_Op::operator()(Stack stack)  const
       (*bb++).set(v, iv ,label);
     }
 
-
+  
   Ng_DeleteMesh (netgen_mesh);
   Ng_Exit();
 
@@ -266,8 +336,8 @@ class Netgen_STL_Op : public E_F0mps
 {
 public:
   Expression filename;
-  static const int n_name_param =4; // 
-  static basicAC_F0::name_and_type name_param[] ;
+  static const int n_name_param = 3; // 
+  static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
   { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
@@ -291,9 +361,8 @@ public:
 basicAC_F0::name_and_type Netgen_STL_Op::name_param[]= {
   //  Netgen Options
   {  "maxh", &typeid(double)},
-  {  "fineness", &typeid(double)},
   {  "secondorder", &typeid(long)},
-  {  "meshsizefilename", &typeid(long)}
+  {  "meshsizefilename", &typeid(string*)}
 };
 
 class  Netgen_STL : public OneOperator { public:  
@@ -314,10 +383,6 @@ AnyType Netgen_STL_Op::operator()(Stack stack)  const
   strncpy( char_pffname, pffname->c_str(), size_pffname); 
 
   // lecture des arguments
-  double   netgen_maxh (arg( 2, stack, 1.)); 
-  double  netgen_fineness (arg( 3, stack, 1.)); 
-  int  netgen_secondorder (arg( 4, stack, 0));
-  if( nargs[3] ) string *netgen_meshsize_filename =  GetAny<string *>( (*(nargs[3]))(stack) );
 
   if(verbosity >1) cout <<" ===================== " << endl;
   if(verbosity >1) cout <<" ==   Netgen_STL    == " << endl;
@@ -328,10 +393,27 @@ AnyType Netgen_STL_Op::operator()(Stack stack)  const
   Ng_STL_Geometry * netgen_geom;
 
   Ng_Meshing_Parameters netgen_mp;
-  netgen_mp.maxh=100000;
-  netgen_mp.fineness = 0.5;
-  netgen_mp.secondorder = 0;
-  netgen_mp.meshsize_filename = "hinge.msz";
+
+  if(nargs[0]){
+    double netgen_maxh = GetAny< double >( (*nargs[0])(stack) ); 
+    netgen_mp.maxh = netgen_maxh;   
+  }
+  
+  if(nargs[1]){
+    int  netgen_secondorder = GetAny< int >( (*nargs[1])(stack) ); 
+    netgen_mp.secondorder = netgen_secondorder;  
+  }
+
+  if(nargs[2]){
+    string *netgen_meshsize_filename =  GetAny<string *>( (*(nargs[2]))(stack) );
+    size_t size_filename = netgen_meshsize_filename->size()+1;
+    char* netgen_meshsize_filename_char =new char[size_filename];
+    strncpy(netgen_meshsize_filename_char, netgen_meshsize_filename->c_str(), size_filename);
+ 
+    netgen_mp.meshsize_filename = netgen_meshsize_filename_char;   
+
+    //netgen_mp.meshsize_filename = "hinge.msz";
+  }
 
   Ng_Init();
 
@@ -341,7 +423,8 @@ AnyType Netgen_STL_Op::operator()(Stack stack)  const
       cerr << "Ng_STL_LoadGeometry return NULL" << endl;
       exit(1);
     }
-
+ 
+  
   rv = Ng_STL_InitSTLGeometry(netgen_geom);
   cout << "InitSTLGeometry: NG_result=" << rv << endl;
 
@@ -388,7 +471,7 @@ AnyType Netgen_STL_Op::operator()(Stack stack)  const
     {
       int nrtet=1;
       int iv[4];
-      Ng_GetVolumeElement (netgen_mesh, ii+1, iv);
+      Ng_GetVolumeElement (netgen_mesh, ii+1, iv, &nrtet);
       for(int jj=0;jj<4;jj++)
 	iv[jj]=iv[jj]-1;
 
@@ -396,9 +479,9 @@ AnyType Netgen_STL_Op::operator()(Stack stack)  const
     }
   for (int ii = 0; ii < netgen_nbe; ii++)
     {
-      int label=0;
+      int label;
       int iv[3];
-      Ng_GetSurfaceElement (netgen_mesh, ii+1, iv);
+      Ng_GetSurfaceElement (netgen_mesh, ii+1, iv, &label);
       for(int jj=0;jj<3;jj++)
 	iv[jj]=iv[jj]-1;
       (*bb++).set(v, iv ,label);

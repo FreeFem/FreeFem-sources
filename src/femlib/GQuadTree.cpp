@@ -121,35 +121,81 @@ namespace EF23 {
 		// QuadTreeBox containing  the point (i,j)
 		long hb2 = hb >> 1 ;
 		int k = plus.Case(hb2);//(iplus,jplus,hb2);// QuadTreeBox number of size hb2 contening i;j
+
 		QuadTreeBox * b0= b->b[k];
+		//cout << "hb2 " <<  hb2 <<" k " << k <<endl; 
+		//cout << "plus " << plus << endl;
+		//cout << "b0->n" << b0->n << endl;
+		// if ( (b0->n > 0) ){
+// 		  for(int kk=0; kk<b0->n; kk++){
+// 		    Vertex & VVF(*b0->v[kk]);
+// 		    Zd i2 =  VtoZd(VVF);
+// 		    cout << "i2= " << i2  << endl;
+// 		  }
+// 		}
+	
 		if ( ( b0 == 0) || (b0->n == 0) ){
-			 break; // null box or empty box   => break 
+		  //cout << "I am in the break" << endl;
+		  /*
+		  for(int kk=0; kk < 8; kk++)
+		  {
+		  QuadTreeBox * bb0= b->b[kk];
+		  if ( ( bb0 == 0) || (bb0->n == 0) ){
+		  cout << "I am in the break "<< kk << endl;
+		  }
+		  else{
+		  if ( (bb0->n > 0) ){
+		  cout << "Vertex for boxex k "<< kk << endl;
+		  for(int kk=0; kk<bb0->n; kk++){
+		  Vertex & VVF(*bb0->v[kk]);
+		  Zd i2 =  VtoZd(VVF);
+		  cout << "i2= " << i2  << " vertex " <<VVF<< endl;
+		  //cout << "value of N " << N << endl;
+		  }
+		  }
+		  }
+		  }
+		  */
+		  break; // null box or empty box   => break 
 		}   
 		NbQuadTreeBoxSearch++;
+		/*
+		  if ( (b0->n > 0) ){
+ 		  for(int kk=0; kk<b0->n; kk++){
+		  Vertex & VVF(*b0->v[kk]);
+		  Zd i2 =  VtoZd(VVF);
+		  //cout << "i2= " << i2  << endl;
+ 		  }
+		  }
+		*/
 		b=b0;
 		p0.Add(k,hb2);
 		hb = hb2; 
+		//cout << "b0->n" << b0->n << endl;
+		
       }
       // n0 number of boxes of in b ("b0")
     
-    //cout << "n0=" << n0 << endl;
+    cout << "n0=" << n0 << endl;
     
     if ( n0 > 0) 
     {  
       for( int k=0;k<n0;k++)
-		{
-			Zd i2 =  VtoZd(b->v[k]);
-			h0 = Zd(i2,plus).norm();  //NORM(iplus,i2.x,jplus,i2.y);
-			if (h0 <h) {
-				h = h0;
-				vn = b->v[k];
-			}
-			NbVerticesSearch++;
-		}
-		
-		return vn;
+	{
+	  Zd i2 =  VtoZd(b->v[k]);
+	  h0 = Zd(i2,plus).norm();  //NORM(iplus,i2.x,jplus,i2.y);
+	  if (h0 <h) {
+	    h = h0;
+	    vn = b->v[k];
+	  }
+	  NbVerticesSearch++;
+	}
+      
+      return vn;
     }
     
+
+    cout << "general case : NearVertex" << endl; 
     // general case -----
   pb[0]= b;
   pi[0]=b->n>0 ?(int)  b->n : N  ;
