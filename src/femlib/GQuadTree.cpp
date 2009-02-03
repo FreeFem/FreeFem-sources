@@ -123,55 +123,14 @@ namespace EF23 {
 		int k = plus.Case(hb2);//(iplus,jplus,hb2);// QuadTreeBox number of size hb2 contening i;j
 
 		QuadTreeBox * b0= b->b[k];
-		//cout << "hb2 " <<  hb2 <<" k " << k <<endl; 
-		//cout << "plus " << plus << endl;
-		//cout << "b0->n" << b0->n << endl;
-		// if ( (b0->n > 0) ){
-// 		  for(int kk=0; kk<b0->n; kk++){
-// 		    Vertex & VVF(*b0->v[kk]);
-// 		    Zd i2 =  VtoZd(VVF);
-// 		    cout << "i2= " << i2  << endl;
-// 		  }
-// 		}
-	
+ 
 		if ( ( b0 == 0) || (b0->n == 0) ){
-		  //cout << "I am in the break" << endl;
-		  /*
-		  for(int kk=0; kk < 8; kk++)
-		  {
-		  QuadTreeBox * bb0= b->b[kk];
-		  if ( ( bb0 == 0) || (bb0->n == 0) ){
-		  cout << "I am in the break "<< kk << endl;
-		  }
-		  else{
-		  if ( (bb0->n > 0) ){
-		  cout << "Vertex for boxex k "<< kk << endl;
-		  for(int kk=0; kk<bb0->n; kk++){
-		  Vertex & VVF(*bb0->v[kk]);
-		  Zd i2 =  VtoZd(VVF);
-		  cout << "i2= " << i2  << " vertex " <<VVF<< endl;
-		  //cout << "value of N " << N << endl;
-		  }
-		  }
-		  }
-		  }
-		  */
 		  break; // null box or empty box   => break 
 		}   
 		NbQuadTreeBoxSearch++;
-		/*
-		  if ( (b0->n > 0) ){
- 		  for(int kk=0; kk<b0->n; kk++){
-		  Vertex & VVF(*b0->v[kk]);
-		  Zd i2 =  VtoZd(VVF);
-		  //cout << "i2= " << i2  << endl;
- 		  }
-		  }
-		*/
 		b=b0;
 		p0.Add(k,hb2);
 		hb = hb2; 
-		//cout << "b0->n" << b0->n << endl;
 		
       }
       // n0 number of boxes of in b ("b0")
