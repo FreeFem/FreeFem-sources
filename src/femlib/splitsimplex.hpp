@@ -1,3 +1,3 @@
 
-template<class Rd>  void  SplitSimplex<Rd>(int N,int & nv, Rd *& P, int & nk , int *& K);
+template<class Rd>  void  SplitSimplex(int N,int & nv, Rd *& P, int & nk , int *& K);
 
