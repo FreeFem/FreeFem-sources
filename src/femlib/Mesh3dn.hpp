@@ -149,12 +149,19 @@ class Mesh3 : public GenericMesh<Tet,Triangle3,Vertex3> {
 public:
   Mesh3(){}
   Mesh3(const string); 
+  Mesh3(FILE *f);     
   Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb); 
   Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb);  // surface mesh 
-  int Save(const string & filename);  
-  int SaveSurface(const string & filename);  
-  int SaveSurface(const string & filename1, const string & filename2);  
-  void flipSurfaceMesh3(int surfaceorientation);
+
+  void GSave(FILE * f) const ;
+  void GRead(FILE * f);
+  int Save(const string & filename) const ;  
+  int SaveSurface(const string & filename) const ;  
+  int SaveSurface(const string & filename1, const string & filename2) const ;  
+  void flipSurfaceMesh3(int surface_orientation);
+  void read(istream &);
+  //int Popen(const FILE *popenstream);
+
 private:
   int load(const string & filename); 
   Mesh3(const Mesh3 &); // pas de construction par copie

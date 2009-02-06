@@ -2006,10 +2006,11 @@ class Convect : public E_F0mps  { public:
 class Plot :  public E_F0mps { public:
     typedef KN_<R>  tab;
     typedef pferbase sol;
+    typedef pf3rbase sol3;
     
     typedef long  Result;
     struct Expression2 {
-     long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border 
+     long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border , 5  mesh3, 6 iso 3d 
      bool composant;
      Expression e[2];
      Expression2() {e[0]=0;e[1]=0;composant=false;what=0;}
@@ -2020,13 +2021,20 @@ class Plot :  public E_F0mps { public:
         else {return GetAny< pferbase >((*e[i])(s));}
         }
        else return 0;}
-     const Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
+      sol3 eval3(int i,Stack s,int & cmp) const  {  cmp=-1;
+	    if (e[i]) {
+		if (!composant) {pf3r p= GetAny< pf3r >((*e[i])(s)); cmp=p.second;return p.first;}
+		else {return GetAny< pf3rbase >((*e[i])(s));}
+	    }
+	else return 0;}
+	const Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
+     const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
      const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
      tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
     };
 
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =17;
+   static const int n_name_param =20 ;
    Expression bb[4];
     vector<Expression2> l;
     Expression nargs[n_name_param];
@@ -2068,10 +2076,19 @@ class Plot :  public E_F0mps { public:
           l[i].composant=false;
           l[i].what=1;
           l[i][0]=CastTo<pfer>(args[i]);}
+         else if (BCastTo<pf3r>(args[i])) {
+	     // cout << "BCastTo<pfer>(args[i])" << endl;
+	  l[i].composant=false;
+	 l[i].what=6;
+	 l[i][0]=CastTo<pf3r>(args[i]);}
          else if (BCastTo<pmesh>(args[i])){
 	   
           l[i].what=0;
           l[i][0]=CastTo<pmesh>(args[i]);}
+         else if (BCastTo<pmesh3>(args[i])){
+	     
+	     l[i].what=5;
+	 l[i][0]=CastTo<pmesh3>(args[i]);}
          else if (BCastTo<const E_BorderN *>(args[i])){
 	  // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
           l[i].what=4;
@@ -2105,7 +2122,10 @@ class Plot :  public E_F0mps { public:
   {   "bw",&typeid(bool)},
   {   "grey", &typeid(bool)},
   {   "hsv", &typeid(KN_<double>)},
-  {   "boundary", &typeid(bool)}
+  {   "boundary", &typeid(bool)}, // 16
+  {   "dim", &typeid(long)}, // 2 or 3 
+  {   "add", &typeid(bool)}, // add to previous plot
+  {   "prev", &typeid(bool)}, // keep previou  view point 
 
    };
 
@@ -2452,10 +2472,13 @@ AnyType Plot::operator()(Stack s) const  {
 	   what = 2 -> 2d vector field (two FE function  2d) 
 	   what = 3 -> curve def by 2 plot
 	   what = 4 -> border 
+           what = 5 3d meshes
+           what = 6  FE function 3d
 	   what = -1 -> error, item empty 
        */
 	PlotStream theplot(ThePlotStream);
 	pferbase  fe=0,fe1=0;
+	pf3rbase  fe30=0,fe31=0;
 	int cmp0,cmp1;
 	theplot.SendNewPlot();
 	if (nargs[0]) theplot<< 0L <<  GetAny<double>((*nargs[0])(s));
@@ -2490,16 +2513,24 @@ AnyType Plot::operator()(Stack s) const  {
 	if (nargs[15]) 
 	    theplot<< 15L  << GetAny<KN_<double> >((*nargs[15])(s));
 	if (nargs[16]) theplot<< 16L  << GetAny<bool>((*nargs[16])(s));	
+	// add frev 2008 FH for 3d plot ...
+	if (nargs[17]) theplot<< 17L  << GetAny<long>((*nargs[17])(s));	
+	if (nargs[18]) theplot<< 18L  << GetAny<bool>((*nargs[18])(s));	
+	if (nargs[19]) theplot<< 19L  << GetAny<bool>((*nargs[19])(s));	
 	theplot.SendEndArgPlot();
 	map<const Mesh *,long> mapth;
-	long kth=0;
+	map<const Mesh3 *,long> mapth3;
+	long kth=0,kth3=0;
 	//  send all the mesh: 
 	for (size_t i=0;i<l.size();i++)
 	  {
 	      long what = l[i].what;
 	      const Mesh *th=0;
+	      const Mesh3 *th3=0;
 	      if(what ==0)
 		  th= & (l[i].evalm(0,s));
+	      if(what ==5)
+		  th3= & (l[i].evalm3(0,s));	      
 	      else if (what==1 || what==2)
 		{   
 		    fe=  l[i].eval(0,s,cmp0);
@@ -2510,24 +2541,45 @@ AnyType Plot::operator()(Stack s) const  {
 			//    assert(th);
 		    };
 		}
-	     if(th)
-		if(mapth.find(th)==mapth.end())
-		  {
+	      else if (what==6 )
+		{   
+		    fe30=  l[i].eval3(0,s,cmp0);
+		    if (fe30->x()) th3=&fe30->Vh->Th;
+		    
+		 };
+		
+	      
+	     if(th && mapth.find(th)==mapth.end()) 
 		    mapth[th]=++kth;
-		  }
-	  }
+		  
+	     if(th3 && (mapth3.find(th3)==mapth3.end()))
+		  mapth3[th3]=++kth3;
+
+         }
 	theplot.SendMeshes();
 	theplot << kth ;
 	for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i)
 	  {
 	    theplot << i->second << *  i->first ;
 	  }
+	//  3d meshes 	
+	if(kth3)
+	    {
+		theplot.SendMeshes3();
+		theplot << kth3 ;
+		for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
+		{
+		  theplot << i->second << *  i->first ;
+		}
+		
+	    }
 	theplot.SendPlots();	
 	theplot <<(long) l.size(); 
 	for (size_t i=0;i<l.size();i++)
 	  {
 	    int err =1;//  by default we are in error
 	    const Mesh *pTh=0;
+	    const Mesh3 *pTh3=0;
 	    long what = l[i].what;
 	    if(what ==0)
 	      {
@@ -2595,7 +2647,55 @@ AnyType Plot::operator()(Stack s) const  {
 		const  E_BorderN * Bh= l[i].evalb(0,s);
 		Bh->SavePlot(s,theplot);
 	      }
-	    else
+	    else if(what ==5)
+	      {
+		  pTh3=&l[i].evalm3(0,s);
+		  if(pTh) {
+		      err=0;
+		      theplot << what ; 
+		      theplot <<mapth3[ &l[i].evalm3(0,s)];// numero du maillage
+		  }
+	      }
+	    else  if (what==6 || what==6)
+	      {    
+		  int lg,nsb;		   
+		  fe30=  l[i].eval3(0,s,cmp0);
+		  fe31=  l[i].eval3(1,s,cmp1);
+		  
+		  if(what==6)
+		    {
+			if (fe30->x()) 
+			  {		 
+			      err=0;
+			      theplot << what ;
+			      theplot <<mapth3[ &(fe30->Vh->Th)];// numero du maillage
+			      // KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
+			      //   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
+			      KN<R3> Psub;
+			      KN<int> Ksub;
+			      KN<double> V1=fe30->Vh->newSaveDraw(*fe30->x(),cmp0,lg,Psub,Ksub,0);
+			      if(verbosity>5)
+				  cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
+				  << " "  << V1.max() << " " << V1.min() << endl;
+			      theplot << Psub ;
+			      theplot << Ksub ;
+			      theplot << V1;
+			  }
+		    }/*
+		  else
+		    {
+			if ( fe->x() && fe1->x())
+			  {
+			      err=0;
+			      theplot << what ;
+			      KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),*fe1->x(),cmp0,cmp1,lg,nsb);
+			      theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
+			      theplot << (long) nsb<< V1;
+			  }
+		    } */
+	      }
+	      
+	    else 
 	      ffassert(0);// erreur type theplot inconnue
 	    if(err==1)
 	      { if(verbosity) 
@@ -2676,6 +2776,12 @@ AnyType Plot::operator()(Stack s) const  {
     else nbcolors = 0;
   }
   if (nargs[16]) drawborder= GetAny<bool>((*nargs[16])(s));
+  int   dimplot=2;
+  if (nargs[17]) dimplot= GetAny<long>((*nargs[17])(s));
+  bool addtoplot=false, keepPV=false;
+  if (nargs[18]) addtoplot= GetAny<bool>((*nargs[18])(s));
+  if (nargs[19]) keepPV= GetAny<bool>((*nargs[19])(s));
+
   //  for the gestion of the PTR. 
   WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH aout 2007 
 	

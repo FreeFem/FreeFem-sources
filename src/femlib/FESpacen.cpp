@@ -44,7 +44,7 @@
 
 #include "FESpacen.hpp"
 
-
+#include "splitsimplex.hpp"
  int UniqueffId::count=0;
  namespace Fem2D {
 
@@ -530,7 +530,50 @@ template<class MMesh>
 	 for(int i=0;i<kk;++i)
 	     ffassert(&Th==&pVh[i]->Th);
      }
-     
+   
+template<class MMesh>     
+KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int componante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U) const  
+{
+  const int d =  Rd::d;
+  Rd *Ps;
+  int *Ks;
+  int nsb = TFE[0]->nbsubdivision;        
+  int nvsub,nksub;
+  SplitSimplex<Rd>(nsb, nvsub,  Ps,  nksub ,  Ks);
+  ffassert( Psub.unset());
+  ffassert( Ksub.unset());
+  Psub.set(Ps,nvsub);
+  Ksub.set(Ks,nksub*(d+1));
+   lg= nvsub*Th.nt;
+  KN<double> v(lg);
+  for (int k=0,i=0;k<Th.nt;k++)
+    { 
+      FElement K=(*this)[k];
+      for(int l=0;l<nvsub;l++)
+	  v[i++] =   K(Psub[l], U, componante, op_U)  ;
+
+    }                                                                                                                                                                                                                            
+  return KN<double>(true,v);// to remove the copy.    
+}
+
+   /*
+template<class MMesh>
+KN<double>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,int & nsb) const 
+     {
+	 nsb = TFE[0]->nbsubdivision;
+	 int nsbv = NbOfSubInternalVertices(nsb,d);
+	 lg = nsbv*Th.nt;
+	 cout << "newSaveDraw what: nt " << Th.nt << " " << nsbv << " " << lg << endl;
+	 KN<double> v(lg);
+	 ffassert(v);
+	 for (int k=0,i=0;k<Th.nt;k++)
+	   {
+	       (*this)[k].SaveDraw( U,composante,&v[i]);	
+	       i+=nsbv;
+	   }
+	 return KN<double>(true,v);// to remove the copy.
+     }
+   */     
 // explicite instance..
 template class GTypeOfFESum<Mesh2>;
 template class GTypeOfFESum<Mesh3>;

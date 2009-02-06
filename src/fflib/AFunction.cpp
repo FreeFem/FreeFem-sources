@@ -688,6 +688,12 @@ struct evalE_mul {
 	return SetAny<R>(static_cast<R>(rr)); 
     }
 };
+istream *Getline(istream * f, string ** s)
+{
+    if( *s==0) *s=new string;
+    getline(*f,**s);
+       return f;    
+}
 // Fin Add ne marche pas ....
 // fiun avril 2007
 void Init_map_type()
@@ -1107,6 +1113,7 @@ void Init_map_type()
      Add<ostream*>("noshowpos",".",new OneOperator1<ostream*,ostream*>(set_os1<noshowpos>));
      Add<ostream*>("default",".",new OneOperator1<ostream*,ostream*>(set_os1<default1>));
      
+    Global.Add("getline","(",new OneOperator2<istream*,istream*,string **>(Getline));
 // add 2.16
      Global.Add("trace","(",new opFormal(atype<E_Array>(),formalMatTrace ));
      Global.Add("det","(",new opFormal(atype<E_Array>(),formalMatDet ));
