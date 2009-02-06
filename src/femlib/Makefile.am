@@ -34,4 +34,5 @@ GQuadTree.cpp \
 HeapSort.hpp \
 libmesh5.c \
 libmesh5.h  \
-ufunction.hpp 
+ufunction.hpp  \
+splitsimplex.cpp InvIntFunc.cpp splitsimplex.hpp

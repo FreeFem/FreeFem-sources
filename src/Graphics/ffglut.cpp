@@ -23,6 +23,8 @@ using namespace std;
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "RNM.hpp"
+#include "Mesh3dn.hpp"
+
 #include "PlotStream.hpp"
 
 extern long verbosity;
@@ -184,6 +186,103 @@ static  bool TryNewPlot( void )
 }
 
 
+
+int  signep4(int i0,int i1,int i2,int i3)
+{ // calcul du signe dans la permutation 
+  int s =1;
+  if(i0>i1) s=-s,Exchange(i0,i1);
+  if(i1>i2) s=-s,Exchange(i1,i2);
+  if(i2>i3) s=-s,Exchange(i2,i3); // i3 max
+  if(i0>i1) s=-s,Exchange(i0,i1);
+  if(i1>i2) s=-s,Exchange(i1,i2); // i2 max < i
+  if(i0>i1) s=-s,Exchange(i0,i1);
+  return s;
+}
+inline R3 bary(const R3 K[4],R f[4],int i0,int i1,R v)
+{
+  R d=f[i0]-f[i1];
+  assert(fabs(d)>1e-20);
+  R l1= (f[i0] - v)/ d;  //  == 1 si v = f[i1]  
+  R l0 = 1. -l1;
+  assert(l0 >=-1e-10 && l1 >= -1e-10);
+  return K[i0]*l0 + K[i1]*l1; // == K[i1] si l1 ==1 => v = f[i1] 
+}
+void drawisoTet(const R3 K[4],R f[4],R v)
+{
+  static const int  nvfaceTet[4][3]  ={{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}  ;//{ {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
+
+  R3 P[4];
+  int nP=0;
+  int np[4],nm[4];
+  int km=0,kp=0;
+  for (int i=0;i<4;++i)
+    {
+      if(f[i]<=v) nm[km++]=i;
+      if(f[i]>=v) np[kp++]=i;
+    }
+  
+  //cout << "km kp "<< km << " " << kp << endl;
+  int h=-1,b[3];
+  if(kp==1 && km==3)
+    {
+      h = np[0];
+      b[0]=nvfaceTet[h][0];
+      b[1]=nvfaceTet[h][1];
+      b[2]=nvfaceTet[h][2];
+    }
+  if(km==1 && kp == 3)
+    {
+      h = nm[0];
+      b[0]=nvfaceTet[h][0];
+      b[2]=nvfaceTet[h][1];
+      b[1]=nvfaceTet[h][2];
+    }
+  if(kp==2 && km==2)
+    {//  cas quad 
+      if(signep4(nm[0],nm[1],np[0],np[1]) < 0)
+	Exchange(nm[0],nm[1]);
+      //  le tet m[0],nm[1],np[0],np[1] est positif
+      P[0]=bary(K,f,nm[0],np[0],v);
+      P[1]=bary(K,f,nm[0],np[1],v);
+      P[2]=bary(K,f,nm[1],np[1],v);
+      P[3]=bary(K,f,nm[1],np[0],v);
+      nP=4;      
+    }
+  else if (h>=0)
+    { // cas triangle 
+      P[0]=bary(K,f,h,b[0],v);
+      P[1]=bary(K,f,h,b[1],v);
+      P[2]=bary(K,f,h,b[2],v);
+      nP=3;
+    }
+  
+
+  /*
+    if(nP)
+    {
+    cout << "+ " << np[0] << " - " << nm[0] << endl;
+    cout << nP << " ;  ";
+    for(int i=0;i<nP;++i)
+    cout << P[i] << " ;  ";
+    cout << endl;
+    
+    }
+  */
+    if(nP)
+    {
+      glBegin(GL_POLYGON);
+      for(int i=0;i<nP;++i)
+	glVertex3f(P[i].x, P[i].y,P[i].z); // 
+      glEnd();
+    }
+
+  //  verification de l'orientation
+  assert(nP < 3 || det(P[0],P[1],P[2],K[np[0]]) >=0)   ;
+  assert(nP < 3 || det(P[0],P[1],P[2],K[nm[0]]) <=0)   ;
+  
+}
+
+
 int dichotomie(const KN_<double>  &viso,R v) 
 {
     int i=0,j=viso.N(),k;
@@ -314,6 +413,82 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
 }
 
 
+void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot)
+{
+  typedef Mesh3::BorderElement BE;
+  typedef Mesh3::Element Tet;
+    glEnable(GL_DEPTH_TEST);
+    
+    ShowGlerror("begin Mesh plot");
+    glPolygonMode(GL_FRONT_AND_BACK,GL_LINE); 
+    R z1= plot.z0;
+    R z2= plot.z0;
+    
+    
+    double r=0,g=0,b=0;
+
+    // plot.SetColorTable(16) ; 
+    if(plotborder)
+      {
+	glLineWidth(2); 
+	glBegin(GL_TRIANGLES);    
+	for (int i=0;i<Th.nbe;i++)
+	  {
+	    const BE & K(Th.be(i)); 
+	    plot.color(1+abs(K.lab));
+	    glVertex3d(K[0].x,K[0].y,K[0].z);
+	    glVertex3d(K[1].x,K[1].y,K[1].z);
+	    glVertex3d(K[2].x,K[2].y,K[2].z);
+	    
+	    
+	  }
+	glEnd(); 
+      }
+    glLineWidth(1); 
+    if(plotmesh)
+      {
+	/*
+	if(fill)
+	    {
+	      glPolygonMode(GL_FRONT,GL_FILL);//GL_FILL	
+	      glBegin(GL_TRIANGLES);
+		for (int i=0;i<Th.nt;i++)
+		  {
+		      const Triangle & K(Th[i]);
+		      plot.color(K.lab?1+abs(K.lab):0);
+		      
+		      //glColor3d(r,g,b);
+		      int i0= Th(K[0]),  i1= Th(K[1]),   i2= Th(K[2]) ;    		
+		      glVertex3d(K[0].x,K[0].y,z2);
+		      glVertex3d(K[1].x,K[1].y,z2);
+		      glVertex3d(K[2].x,K[2].y,z2);
+		      
+		  }    
+		glEnd();
+	    }
+	  glPolygonMode(GL_FRONT,GL_LINE);
+	  glBegin(GL_TRIANGLES);
+	  for (int i=0;i<Th.nt;i++)
+	    {
+		const Triangle & K(Th[i]);
+		plot.color(fill? 1 : 1+abs(K.lab));
+		
+		//glColor3d(r,g,b);
+		int i0= Th(K[0]),  i1= Th(K[1]),   i2= Th(K[2]) ;    
+		glVertex3d(K[0].x,K[0].y,z1);
+		glVertex3d(K[1].x,K[1].y,z1);
+		glVertex3d(K[2].x,K[2].y,z1);
+		
+	    }    
+	  
+	  glEnd();
+	*/
+      }
+    ShowGlerror("end Mesh plot");
+
+}
+
+
 
 void OnePlotError::Draw(OneWindow *win)
 {
@@ -334,6 +509,65 @@ void OnePlotMesh::Draw(OneWindow *win)
   Plot(*Th,plot.fill,true,true,plot);
   ShowGlerror("OnePlotMesh::Draw");
 }
+void OnePlotMesh3::Draw(OneWindow *win)
+{
+    ThePlot & plot=*win->theplot;
+   // Plot(*Th,plot.fill,true,true,plot);
+    ShowGlerror("OnePlotMesh3::Draw");
+}
+void OnePlotFE3::Draw(OneWindow *win)
+{
+    
+    ThePlot & plot=*win->theplot;
+    ShowGlerror("begin OnePlotFE plot");
+    plot.SetDefIsoV();
+    if(plot.fill && what==6)
+      glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+    else
+      glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    
+    if(what==6)
+      glEnable(GL_DEPTH_TEST);
+    else 
+      glEnable(GL_DEPTH_TEST);
+    int nsubV=Psub.N();
+    int nsubT=Ksub.N()/4;
+    KN<R3> Pn(nsubV);
+    int nK=v.N()/ Th->nt;
+    for(int k=0,o=0;k<Th->nt;++k, o+= nK)
+      {
+	const Mesh3::Element & K=(*Th)[k];
+	int ii[4];// 
+	R ff[4];
+	R3 Pt[4];
+	for(int i=0;i<nsubV;++i)
+	  Pn[i]=K(Psub[i]);
+	int lK=0;
+	if(what==6)
+	  for(int sk=0;sk<nsubT;++sk)
+	    {
+	      
+	      for(int l=0;l<4;++l)
+		{
+		  int iv= Ksub[lK++];
+		  ii[l]= iv;
+		  Pt[l]=Pn[iv];
+		  ff[l]=v[o+iv];
+		}
+	      
+	      for(int i=0;i< plot.Viso.N();++i)
+		{
+		  plot.color(i+4);			    
+		  drawisoTet( Pt,ff,plot.Viso[i]);
+		}
+	      
+	    }
+      }
+    ShowGlerror("b mesh  OnePlotFE plot");  
+    Plot(*Th,false,plot.drawmeshes,plot.drawborder,plot);
+    ShowGlerror("OnePlotFE::Draw");
+    
+}    
 void OnePlotFE::Draw(OneWindow *win)
 {
 
@@ -534,10 +768,14 @@ void OneWindow::set(ThePlot *p)
     bool first = !theplot;
     bool change = theplot != p;
     theplot=p;
+    if(p)
+      {
+	plotdim=p->plotdim;
+      }
     rapz0 =-1; // to recompute the defalut rapz
     //    p->win=this;
     //    if(first)
- DefaultView() ;
+    DefaultView() ;
     
     
 }
@@ -570,14 +808,16 @@ void OneWindow::DefaultView()
 {
   if(theplot)
     {
-      R2 A(theplot->Pmin),B(theplot->Pmax);
-      R2 D(A,B);
+      plotdim=theplot->plotdim;
+      R3 A(theplot->Pmin),B(theplot->Pmax);
+      R3 D(A,B);
       R dxy= max(D.x,D.y);
       zmax = theplot->fmax;
       zmin = theplot->fmin;
       theta=theplot->theta;
       phi=theplot->phi;
-      if(rapz0<=0)
+      if(theplot->datadim==3) rapz=1;
+      else   if(rapz0<=0)
 	{ //  ( zmax-zmin )*rapz0 =  0.3 dxyy
 	  rapz0  =  0.4* dxy/(zmax-zmin) ;
 	  if(debug>0)
@@ -588,26 +828,35 @@ void OneWindow::DefaultView()
 	}
       rapz=rapz0;
       coef_dist=theplot->dcoef;
-      focal=theplot->focal;
-      {
-	if(theplot->boundingbox.size() ==4)
-	  {
-	    Bmin3.x=theplot->boundingbox[0];
-	    Bmin3.y=theplot->boundingbox[1];
-	    Bmax3.x=theplot->boundingbox[2];
-	    Bmax3.y=theplot->boundingbox[3];	    
-	  }
-	else 
-	  {
-	    Bmin3.x=A.x;
-	    Bmin3.y=A.y;
-	    Bmax3.x=B.x;
-	    Bmax3.y=B.y;
-	  }
-	Bmin3.z=theplot->fmin;
-	Bmax3.z=theplot->fmax;
-	Pvue3=(Bmin3+Bmax3)/2;
-      }
+      focal=theplot->focal;      
+
+      if(theplot->datadim==3)
+	{
+	  Bmin3=A;
+	  Bmax3=B;
+	}
+      else
+	{ // data plot 2d ou 1 d... 
+	  if(theplot->boundingbox.size() ==4)
+	    {
+	      Bmin3.x=theplot->boundingbox[0];
+	      Bmin3.y=theplot->boundingbox[1];
+	      Bmax3.x=theplot->boundingbox[2];
+	      Bmax3.y=theplot->boundingbox[3];	    
+	    }
+	  else 
+	    {
+	      Bmin3.x=A.x;
+	      Bmin3.y=A.y;
+	      Bmax3.x=B.x;
+	      Bmax3.y=B.y;
+	    }
+	  Bmin3.z=theplot->fmin;
+	  Bmax3.z=theplot->fmax;
+	}
+      Pvue3=(Bmin3+Bmax3)/2;
+      
+      
       
       D *=0.05;      
       if(theplot->boundingbox.size() !=4)
@@ -624,9 +873,9 @@ void OneWindow::DefaultView()
 	}
       
       if (theplot->aspectratio)
-	cadreortho(A,B);
+	cadreortho(A.p2(),B.p2());
       else 
-	cadre(A,B);
+	cadre(A.p2(),B.p2());
     }
   hpixel = (Bmax.x-Bmin.x)/width;
   
@@ -679,11 +928,12 @@ void  OneWindow::SetView()
 	  camy += dy*eye;
 	  }
       */
-      /*
-      cout << rapz << endl;
-      cout << camx << " " << camx << " " << camx << endl;
-      cout << Pvue3 << endl;
-      */
+      if(debug>2)
+	{
+	  cout <<" setview 3d: rapz " <<  rapz << " cam: ";
+	  cout << camx << " " << camx << " " << camx << " Pvue:" ;
+	  cout << Pvue3 << endl;
+	}
       gluLookAt(camx,camy,camz,Pvue3.x,Pvue3.y,Pvue3.z*rapz,0.,0.,1.);
       glScaled(1.,1.,rapz);   
       
@@ -972,7 +1222,8 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   :  count(kcount), state(0),gllist(1),
      changeViso(true),changeVarrow(true),changeColor(true),
      changeBorder(true),changeFill(true), withiso(false),witharrow(false),
-     plotdim(2),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.)
+     plotdim(2),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.),
+     datadim(1)
      
 {
   
@@ -986,7 +1237,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   uaspectratio=false;
   pViso=false;
   pVarrow=false;
-  Niso=20;
+  Niso=0;
   Narrow=20;
   bw=false;
   psfile=0;
@@ -998,6 +1249,9 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   greyo=grey;
   drawborder=true;
   drawmeshes=false;
+  add=false; 
+  keepPV=false;
+    
   Pmin=R2(+dinfty,+dinfty);
   fmin = +dinfty;    
   fmax = -dinfty;
@@ -1005,7 +1259,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   vmax=0;
   
   coefr=1;
-  
+  long dimpp=0;
   long cas;
   
   while(1)
@@ -1032,6 +1286,9 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       case 14: fin >> grey; break;
       case 15: fin >> colors; break;
       case 16: fin >> drawborder; break;
+      case 17: fin >> dimpp; break;// ajout fevr 2008  v3.0.6
+      case 18: fin >> add; break;
+      case 19: fin >> keepPV; break;
       default: 
 	cout << " cas : " << cas <<endl;
 	ffassert(0);
@@ -1039,6 +1296,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       }
       ffassert(fin.good());
     }
+  if(dimpp) plotdim=dimpp; 
   //    if( !uaspectratio) aspectratio= true;
   ffassert(cas==PlotStream::dt_endarg);
   if((debug > 2))
@@ -1057,8 +1315,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       
       cout << endl;
     } 
-  fin.GetMeshes();
-  
+  fin.GetMeshes();  
   long nbmeshes;
   fin >> nbmeshes;
   if((debug > 2)) cout << " read nb : mesh " << nbmeshes << endl;
@@ -1091,9 +1348,48 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	}
       
     }
-  
-  fin.GetPlots();
+    long nbmeshes3=0;
+   if(fin.GetMeshes3())
+     { //  il y a des solution 3d; 
+	 
+	 fin >> nbmeshes3;
+	 if((debug > 2)) cout << " read nb : mesh3 " << nbmeshes3 << endl;
+	 Ths3.resize(nbmeshes3);
+	 for(int i=0;i<nbmeshes3;++i)
+	     Ths3[i]=0;
+	 for(int i=0;i<nbmeshes3;++i)
+	   { 
+	       long l;
+	       fin >> l;
+	       if(l>=0) 
+		 {
+		     if((debug > 3)) cout << " read mesh3 " << i  << " -> " << l << "  " <<nbmeshes3 << endl;
+		     l--;
+		     ffassert(l>=0 && l < nbmeshes3);
+		     ffassert(Ths3[l]==0);
+		     fin >>Ths3[l] ;
+		     if((debug > 3))
+			 cout << i << " nt/nv " << l << " "  <<Ths3[l]->nt << " " << Ths3[l]->nv << endl;
+		     ffassert(fin.good());
+		 }
+	       else // Add FH optimisation FH 11/12/2008 (not use to day)
+		 {// the mesh is already in the previous plot with number ll
+		     ffassert(l==-1);
+		     long ll;
+		     fin >> l>> ll; // read l and ll
+		     ffassert(old);
+		     Ths3[l]=old->Ths3[ll];
+		     Ths3[l]->increment(); // 
+		 }
+	       
+	   }	 
+	 
+	 
+	 
+      fin.GetPlots();
+     }
   long nbplot;
+  int iso3d=0;
   fin >>nbplot;
   if((debug > 2)) cout << " nb item plot " << nbplot << endl;
   for(int i=0;i<nbplot;++i)
@@ -1125,6 +1421,22 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	p=new OnePlotCurve(fin);
       else if(what==4)
 	p=new OnePlotBorder(fin);
+      else if(what==5) 
+	{ 	    
+	    fin >> imsh;
+	    p=new OnePlotMesh3(Ths3[imsh-1]);
+	}
+      else if (what==6 )
+	{
+	  iso3d++;
+	    fin >> imsh;
+	    if(what==6) withiso=true;
+	   
+	    if((debug > 10)) cout << " plot : mesh3 " << imsh << endl;
+	    ffassert(imsh>0 && imsh <=nbmeshes3);
+	    p=new OnePlotFE3(Ths3[imsh-1],what,fin);
+	}
+	
       else
 	{
 	  cout << "Bizarre unkown what :  " << what<< endl;
@@ -1134,8 +1446,13 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       plots.push_back(p);
       p->bb(Pmin,Pmax);
       p->bfv(fmin,fmax,vmax);
+      plotdim=max(plotdim,p->dim);
       ffassert(fin.good());		      
+      datadim=max(datadim,p->dim); 
     }
+  if(Niso==0) 
+      Niso = iso3d ? 5 : 20;
+    
   // cout << "\t\t\t\t  f min, max v max :" << fmin << " " << fmax << " " << vmax << endl;
     
   double ref_f = abs(fmax)+abs(fmin) ; 
@@ -1761,8 +2078,8 @@ int main(int argc,  char** argv)
     glutInit(&argc, argv);
     if(argc>2) {
       if( strcmp(argv[1],"-nv")==0) debug=0;
-      if( strcmp(argv[1],"-v")==0) debug=2;
-      if( strcmp(argv[1],"-vv")==0) debug=5;
+      if( strcmp(argv[1],"-v")==0) debug=2,verbosity=2;
+      if( strcmp(argv[1],"-vv")==0) debug=5,verbosity=2;
       if( strcmp(argv[1],"-vvv")==0) debug=10, verbosity=1000;
     }
     if(debug>1)		

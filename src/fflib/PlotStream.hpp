@@ -13,6 +13,11 @@
 #include "endian.hpp"
 
 using  Fem2D::Mesh;
+using  Fem2D::Mesh3;
+namespace Fem2D {
+    
+}
+
 class PlotStream 
 {
 public:
@@ -22,13 +27,14 @@ public:
   PlotStream(FILE *Stream) :TheStream(Stream) { }
   operator bool() const { return TheStream;}
   // datatype mush be < 0 to have no collistion with arg number. 
-  enum datatype { dt_meshes=-1,dt_plots=-2,dt_endplot=-3,dt_endarg=99999,dt_newplot=-5  };
+    enum datatype { dt_meshes=-1,dt_plots=-2,dt_endplot=-3,dt_meshes3=-10,dt_plots3=-11,dt_endarg=99999,dt_newplot=-5  };
   
   void SendNewPlot() {  write((long )dt_newplot); set_binary_mode(); }
   void SendEndArgPlot() {write((long )dt_endarg); }
   void SendEndPlot() { write((long )dt_endplot);fflush(TheStream); set_text_mode() ;}
   void SendPlots() { write((long )dt_plots); }
   void SendMeshes() { write((long )dt_meshes);}
+  void SendMeshes3() { write((long )dt_meshes3);}
   void write(const void *data,size_t l) {fwrite(data,1,l,TheStream);}
 
   PlotStream& write(const bool& bb) {bool b=w_endian(bb);write(reinterpret_cast<const void *> (&b),sizeof(bool));return *this;}
@@ -38,6 +44,10 @@ public:
     return *this;}
   PlotStream& write(const int& bb) {int b=w_endian(bb);write(reinterpret_cast<const void *> (&b),sizeof(int));return *this;}
   PlotStream& write(const double& bb) {double b=w_endian(bb);write(reinterpret_cast<const void *> (&b),sizeof(double));return *this;}
+  PlotStream &write(const Fem2D::R1 & P) { return write(P.x);}
+  PlotStream &write(const Fem2D::R2 & P) { return write(P.x),write(P.x);}
+  PlotStream &write(const Fem2D::R3 & P) { return write(P.x),write(P.y),write(P.z);}
+
   PlotStream& write(const string& b) {  
     int l=b.size();
     write(l);
@@ -78,7 +88,10 @@ public:
     write( n );
     write(s,s.size());
     return *this;}
-  PlotStream & operator << (const KN_<double>& b)
+
+
+  template<class T>    
+  PlotStream & operator << (const KN_<T>& b)
   {
     long n=b.N();
     write(n);
@@ -100,6 +113,13 @@ public:
   void GetEndPlot() {get(dt_endplot); set_text_mode();}
   void GetPlots() { get(dt_plots); }
   void GetMeshes() { get(dt_meshes);}
+  bool GetMeshes3() { long tt; read(tt);
+      if(tt== dt_meshes3) return true;
+      else if (tt= dt_plots) return false;
+      cout << " Error Check :  get " << tt << " == wait for  "<< dt_meshes3 << " or "<< dt_plots << endl;
+      ffassert(0);
+     }
+    
   void get(datatype t) { long tt; read(tt);
     if( tt !=(long) t) 
       cout << " Error Check :  get " << tt << " == wait for  "<< t << endl; 
@@ -116,6 +136,9 @@ public:
     return *this;}
   PlotStream& read( int& b) {read(reinterpret_cast< void *> (&b),sizeof(int)); b=r_endian(b);return *this;}
   PlotStream& read( double& b) {read(reinterpret_cast< void *> (&b),sizeof(double)); b=r_endian(b);return *this;}
+  PlotStream &read( Fem2D::R1 & P) { return read(P.x);}
+  PlotStream &read( Fem2D::R2 & P) { return read(P.x),read(P.y);}
+  PlotStream &read( Fem2D::R3 & P) { return read(P.x),read(P.y),read(P.z);}
   PlotStream& read( string& b) {  	
     int l;
     read(l);
@@ -146,18 +169,29 @@ public:
     Th= new Mesh(s);
     return *this;
   }
-  
-  PlotStream & operator >> ( KN<double>& b)
+ 
+ 
+  template<class T>  
+  PlotStream & operator >> ( KN<T>& b)
   {
     long n;
     read(n);
     if( ! b.N() ) b.init(n);
     ffassert( b.N()==n); 
     for (int i=0;i<n;++i)
-	  read(b[i]);
+      read(b[i]);
     return *this;
   }
-  
-  
+  //  PlotStream & operator << (const Mesh3& Th);   
+  //  PlotStream & operator >> ( Mesh3 *& Th);
+    PlotStream & operator << (const Fem2D::Mesh3& Th) {
+	Th.GSave(TheStream);
+    return *this;}
+    PlotStream &  operator >> ( Fem2D::Mesh3 *& Th)
+    {		
+	Th= new Mesh3(TheStream);
+	return *this;
+    }
+    
 };
 

@@ -48,5 +48,15 @@ cout << "r find abc " << t2.rfind("abc") << endl;
 cout << " find abc from 10  " << t2.find("abc",10) << endl;
 cout << " ffind abc from 10 " <<t2.rfind("abc",10) << endl;
 cout << "   " << string("abcc").length << endl; 
+{  // add getline version 3.0-6 jan 2009 FH
+string s;
+ifstream toto("xyf");
+for (int i=0;i<10;++i)
+  {
+   getline(toto,s);
+   cout << i << " : " << s << endl;
+  }
+}
+
 
  

@@ -63,7 +63,8 @@ am__objects_1 = UMFPack_Solver.$(OBJEXT) AFunction.$(OBJEXT) \
 	environment.$(OBJEXT) string_def.$(OBJEXT) FESpacen.$(OBJEXT) \
 	P012_1d.$(OBJEXT) P012_2d.$(OBJEXT) P012_3d.$(OBJEXT) \
 	Mesh1dn.$(OBJEXT) Mesh2dn.$(OBJEXT) Mesh3dn.$(OBJEXT) \
-	GQuadTree.$(OBJEXT) libmesh5.$(OBJEXT) glumesh2D.$(OBJEXT)
+	GQuadTree.$(OBJEXT) libmesh5.$(OBJEXT) glumesh2D.$(OBJEXT) \
+	splitsimplex.$(OBJEXT)
 am_libff_a_OBJECTS = $(am__objects_1) strversionnumber.$(OBJEXT)
 libff_a_OBJECTS = $(am_libff_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
@@ -302,7 +303,8 @@ glumesh2D.cpp \
 PlotStream.hpp \
 endian.hpp \
 ff++.hpp \
-../Eigen/arpackff.hpp 
+../Eigen/arpackff.hpp \
+../femlib/splitsimplex.cpp 
 
 libff_a_SOURCES = $(libff_a_SOURCES2)  strversionnumber.cpp 
 
@@ -417,6 +419,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mshptg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mt19937ar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/problem.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/splitsimplex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/string_def.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strversionnumber.Po@am__quote@
 
@@ -909,6 +912,20 @@ GQuadTree.obj: ../femlib/GQuadTree.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/GQuadTree.cpp' object='GQuadTree.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GQuadTree.obj `if test -f '../femlib/GQuadTree.cpp'; then $(CYGPATH_W) '../femlib/GQuadTree.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/GQuadTree.cpp'; fi`
+
+splitsimplex.o: ../femlib/splitsimplex.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT splitsimplex.o -MD -MP -MF $(DEPDIR)/splitsimplex.Tpo -c -o splitsimplex.o `test -f '../femlib/splitsimplex.cpp' || echo '$(srcdir)/'`../femlib/splitsimplex.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/splitsimplex.Tpo $(DEPDIR)/splitsimplex.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/splitsimplex.cpp' object='splitsimplex.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o splitsimplex.o `test -f '../femlib/splitsimplex.cpp' || echo '$(srcdir)/'`../femlib/splitsimplex.cpp
+
+splitsimplex.obj: ../femlib/splitsimplex.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT splitsimplex.obj -MD -MP -MF $(DEPDIR)/splitsimplex.Tpo -c -o splitsimplex.obj `if test -f '../femlib/splitsimplex.cpp'; then $(CYGPATH_W) '../femlib/splitsimplex.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/splitsimplex.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/splitsimplex.Tpo $(DEPDIR)/splitsimplex.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/splitsimplex.cpp' object='splitsimplex.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o splitsimplex.obj `if test -f '../femlib/splitsimplex.cpp'; then $(CYGPATH_W) '../femlib/splitsimplex.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/splitsimplex.cpp'; fi`
 
 eigenvalue.o: ../Eigen/eigenvalue.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT eigenvalue.o -MD -MP -MF $(DEPDIR)/eigenvalue.Tpo -c -o eigenvalue.o `test -f '../Eigen/eigenvalue.cpp' || echo '$(srcdir)/'`../Eigen/eigenvalue.cpp

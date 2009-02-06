@@ -31,6 +31,10 @@ Vh2 u2=u,u2e=ue;
 plot(u2,wait=1);
 plot(u2,u2e,wait=1);
 
+// test new plot ... 
+plot(Th,wait=1);
+plot(u,wait=1);
+
 /*
 	{
  ofstream file("dd.bb"); 

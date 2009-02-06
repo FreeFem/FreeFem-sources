@@ -11529,7 +11529,6 @@ Now the beam will feel the stress constraint from the fluid:
 \eFF
 which comes as a boundary condition to the PDE of the beam:
 \bFF
-  @varf fluidf([uu,vv],[w,s]) fluidforce =
   @solve  bbst([uu,vv],[w,s],init=i)  =
      @int2d(th)(
                   lambda*@div(w,s)*@div(uu,vv)

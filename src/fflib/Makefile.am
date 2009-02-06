@@ -41,8 +41,8 @@ glumesh2D.cpp \
 PlotStream.hpp \
 endian.hpp \
 ff++.hpp \
-../Eigen/arpackff.hpp 
-
+../Eigen/arpackff.hpp \
+../femlib/splitsimplex.cpp 
 
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp 
 

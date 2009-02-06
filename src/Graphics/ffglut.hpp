@@ -18,7 +18,8 @@ class OneWindow;
 
 struct OnePlot 
 {
-  R2 Pmin,Pmax;
+  int dim;
+  R3 Pmin,Pmax;
   double fmin,fmax;
   double vmax;
   GLuint gllist; 
@@ -26,7 +27,7 @@ struct OnePlot
 
 
   virtual void Draw(OneWindow *win) =0;
-  void bb(R2 & Pmn,R2 &Pmx) const 
+  void bb(R3 & Pmn,R3 &Pmx) const 
   { 
     Pmn=Minc(Pmin,Pmn);
     Pmx=Maxc(Pmax,Pmx);
@@ -39,8 +40,9 @@ struct OnePlot
     vmx=Max(vmax,vmx);
   }
   
-  OnePlot(long w) :
-    Pmin(dinfty,dinfty),Pmax(-dinfty,-dinfty),
+  OnePlot(long w,int ddim=2) :
+    dim(ddim),
+    Pmin(dinfty,dinfty,dinfty),Pmax(-dinfty,-dinfty,-dinfty),
     fmin(dinfty),fmax(-dinfty),vmax(0),
     gllist(0),what(w) {}
   
@@ -55,9 +57,24 @@ struct OnePlotMesh : public OnePlot
   OnePlotMesh(const Mesh *T)
     : OnePlot(0),Th(T) 
   {
-    Th->BoundingBox(Pmin,Pmax);     
+    R2 P0,P1;
+    Th->BoundingBox(P0,P1);
+    Pmin=P0;
+    Pmax=P1;
   }
   void Draw(OneWindow *win);
+};
+struct OnePlotMesh3 : public OnePlot
+{
+    const Mesh3 *Th;
+    OnePlotMesh3(const Mesh3 *T)
+      : OnePlot(0,3),Th(T) 
+    {
+	Pmin=Th->Pmin;
+	Pmax=Th->Pmax;
+	//Th->BoundingBox(Pmin,Pmax);     
+    }
+    void Draw(OneWindow *win);
 };
 
 struct OnePlotFE: public OnePlot 
@@ -68,7 +85,10 @@ struct OnePlotFE: public OnePlot
   OnePlotFE(const Mesh *T,long w,PlotStream & f)
     :OnePlot(w),Th(T)
   {
-    Th->BoundingBox(Pmin,Pmax);
+    R2 P0,P1;
+    Th->BoundingBox(P0,P1);
+      Pmin=P0;
+      Pmax=P1;
     f>> nsub;
     f>> v;
     if(what==1)
@@ -94,6 +114,47 @@ struct OnePlotFE: public OnePlot
   void Draw(OneWindow *win);
   
 };
+
+struct OnePlotFE3: public OnePlot 
+{
+    const Mesh3 *Th;
+    long nsub;
+    KN<double> v;
+    KN<R3> Psub;
+    KN<int> Ksub;
+    OnePlotFE3(const Mesh3 *T,long w,PlotStream & f)
+      :OnePlot(w,3),Th(T)
+    {
+	Pmin=Th->Pmin;
+	Pmax=Th->Pmax;
+
+	f >> Psub ;
+	f >> Ksub ;
+	f >>  v;
+	if(what==6)
+	  {
+	      fmin = min(fmin,v.min());
+	      fmax = max(fmax,v.max());
+	  }
+	else if (what==7)
+	  {  
+	      ffassert(0); // afaire
+	      int n= v.N()/2;
+	      for (int i=0,j=0;i<n;i++, j+=2)
+		{
+		    R2 u(v[j],v[j+1]);
+		    vmax = max(vmax,u.norme());
+		}
+	      //cout << " vmax = " << vmax << endl; 
+	  }
+	if(debug>3) cout << "OnePlotFE3" << Th <<" " << what<< " " << nsub <<" " << v.N() << endl; 
+	ffassert(f.good());
+	
+    }
+    void Draw(OneWindow *win);
+    
+};
+
 struct OnePlotCurve: public OnePlot {
   KN<double> xx,yy;
   OnePlotCurve(PlotStream & f)
@@ -148,7 +209,7 @@ class ThePlot { public:
     bool witharrow;
     
     long  Niso,Narrow;
-    R2 Pmin,Pmax,PminT,PmaxT, ;//  with R -> true bound
+    R3 Pmin,Pmax,PminT,PmaxT, ;//  with R -> true bound
     R  fmin,fmax,fminT,fmaxT; // withoiut bound with previous plot. 
     R  vmax;
     KN<R> Viso,Varrow;
@@ -160,7 +221,9 @@ class ThePlot { public:
     bool greyo;
     bool drawborder;
     bool drawmeshes;
+    bool add,keepPV;
     vector<Mesh *> Ths;
+    vector<Mesh3 *> Ths3;
     list<OnePlot *> plots;
     bool changeViso,changeVarrow,changeColor,changeBorder,changeFill;
     R3 Pvue,Peyes;
@@ -170,6 +233,7 @@ class ThePlot { public:
   //  for 3d plot jan 2009
   int  plotdim;
   R theta, phi, dcoef, focal;
+  int datadim;
     // 2D
     
     bool Change() const  { return changeViso||changeVarrow||changeColor||changeBorder||changeFill;}

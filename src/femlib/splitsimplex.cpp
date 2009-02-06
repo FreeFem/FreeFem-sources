@@ -38,11 +38,19 @@ $:
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01  */
 
+#include <cmath>
 #include <iostream>
 #include <fstream>
 #include "ufunction.hpp"
-#include "R3.hpp"
 using namespace std;
+namespace Fem2D  {
+#include "R3.hpp"
+};
+using Fem2D::R1;
+using Fem2D::R2;
+using Fem2D::R3;
+#include "splitsimplex.hpp"
+
 /*
   construction an array of sub simplex for plot ... 
   see last template function 

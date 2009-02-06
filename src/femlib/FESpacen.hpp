@@ -698,6 +698,9 @@ public:
     // void destroy() {RefCounter::destroy();}
     */
     bool isFEMesh() const { return ! NodesOfElement  && ( N==1) ;} // to make optim
+  KN<R>  newSaveDraw(const KN_<R> & U,int composante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U=0) const  ; 
+
+
 private: // for gibbs  
   int gibbsv (long* ptvoi,long* vois,long* lvois,long* w,long* v);
 };
@@ -894,5 +897,6 @@ typedef  GbaseFElement<Mesh2> baseFElement2;
 typedef  GbaseFElement<Mesh3> baseFElement3;
 
 }
+
 
 #endif

@@ -56,8 +56,9 @@ am_FreeFem___nw_OBJECTS = sansrgraph.$(OBJEXT)
 FreeFem___nw_OBJECTS = $(am_FreeFem___nw_OBJECTS)
 FreeFem___nw_LDADD = $(LDADD)
 am_ffglut_OBJECTS = ffglut.$(OBJEXT) gggg.$(OBJEXT) \
-	ffthreads.$(OBJEXT) fem.$(OBJEXT) FQuadTree.$(OBJEXT) \
-	Drawing.$(OBJEXT) mshptg.$(OBJEXT)
+	ffthreads.$(OBJEXT) fem.$(OBJEXT) Mesh3dn.$(OBJEXT) \
+	Mesh2dn.$(OBJEXT) Mesh1dn.$(OBJEXT) GQuadTree.$(OBJEXT) \
+	FQuadTree.$(OBJEXT) Drawing.$(OBJEXT) mshptg.$(OBJEXT)
 ffglut_OBJECTS = $(am_ffglut_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -263,11 +264,11 @@ top_srcdir = @top_srcdir@
 CXXLD = $(STATICTOOL) $(CXX)
 ffglut_SOURCES = ../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads.cpp \
 ../Graphics/ffthreads.hpp \
-../femlib/fem.cpp ../femlib/FQuadTree.cpp \
+../femlib/fem.cpp ../femlib/Mesh3dn.cpp ../femlib/Mesh2dn.cpp  ../femlib/Mesh1dn.cpp ../femlib/GQuadTree.cpp  ../femlib/FQuadTree.cpp \
 ../femlib/Drawing.cpp ../femlib/mshptg.cpp  
 
-ffglut_DEPENDENCIES = 
-ffglut_LDADD = @LIBSGLUT@ @LIBSPTHREAD@
+ffglut_DEPENDENCIES = ../libMesh/libMesh.a
+ffglut_LDADD = ../libMesh/libMesh.a @LIBSGLUT@ @LIBSPTHREAD@ 
 FreeFem___nw_SOURCES = ../Graphics/sansrgraph.cpp 
 FreeFem___SOURCES = ../Graphics/sansrgraph.cpp 
 FreeFem___nw_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
@@ -348,6 +349,10 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Drawing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FQuadTree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GQuadTree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mesh1dn.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mesh2dn.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mesh3dn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffglut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffthreads.Po@am__quote@
@@ -438,6 +443,62 @@ fem.obj: ../femlib/fem.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/fem.cpp' object='fem.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fem.obj `if test -f '../femlib/fem.cpp'; then $(CYGPATH_W) '../femlib/fem.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/fem.cpp'; fi`
+
+Mesh3dn.o: ../femlib/Mesh3dn.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Mesh3dn.o -MD -MP -MF $(DEPDIR)/Mesh3dn.Tpo -c -o Mesh3dn.o `test -f '../femlib/Mesh3dn.cpp' || echo '$(srcdir)/'`../femlib/Mesh3dn.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Mesh3dn.Tpo $(DEPDIR)/Mesh3dn.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/Mesh3dn.cpp' object='Mesh3dn.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Mesh3dn.o `test -f '../femlib/Mesh3dn.cpp' || echo '$(srcdir)/'`../femlib/Mesh3dn.cpp
+
+Mesh3dn.obj: ../femlib/Mesh3dn.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Mesh3dn.obj -MD -MP -MF $(DEPDIR)/Mesh3dn.Tpo -c -o Mesh3dn.obj `if test -f '../femlib/Mesh3dn.cpp'; then $(CYGPATH_W) '../femlib/Mesh3dn.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/Mesh3dn.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Mesh3dn.Tpo $(DEPDIR)/Mesh3dn.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/Mesh3dn.cpp' object='Mesh3dn.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Mesh3dn.obj `if test -f '../femlib/Mesh3dn.cpp'; then $(CYGPATH_W) '../femlib/Mesh3dn.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/Mesh3dn.cpp'; fi`
+
+Mesh2dn.o: ../femlib/Mesh2dn.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Mesh2dn.o -MD -MP -MF $(DEPDIR)/Mesh2dn.Tpo -c -o Mesh2dn.o `test -f '../femlib/Mesh2dn.cpp' || echo '$(srcdir)/'`../femlib/Mesh2dn.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Mesh2dn.Tpo $(DEPDIR)/Mesh2dn.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/Mesh2dn.cpp' object='Mesh2dn.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Mesh2dn.o `test -f '../femlib/Mesh2dn.cpp' || echo '$(srcdir)/'`../femlib/Mesh2dn.cpp
+
+Mesh2dn.obj: ../femlib/Mesh2dn.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Mesh2dn.obj -MD -MP -MF $(DEPDIR)/Mesh2dn.Tpo -c -o Mesh2dn.obj `if test -f '../femlib/Mesh2dn.cpp'; then $(CYGPATH_W) '../femlib/Mesh2dn.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/Mesh2dn.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Mesh2dn.Tpo $(DEPDIR)/Mesh2dn.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/Mesh2dn.cpp' object='Mesh2dn.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Mesh2dn.obj `if test -f '../femlib/Mesh2dn.cpp'; then $(CYGPATH_W) '../femlib/Mesh2dn.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/Mesh2dn.cpp'; fi`
+
+Mesh1dn.o: ../femlib/Mesh1dn.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Mesh1dn.o -MD -MP -MF $(DEPDIR)/Mesh1dn.Tpo -c -o Mesh1dn.o `test -f '../femlib/Mesh1dn.cpp' || echo '$(srcdir)/'`../femlib/Mesh1dn.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Mesh1dn.Tpo $(DEPDIR)/Mesh1dn.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/Mesh1dn.cpp' object='Mesh1dn.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Mesh1dn.o `test -f '../femlib/Mesh1dn.cpp' || echo '$(srcdir)/'`../femlib/Mesh1dn.cpp
+
+Mesh1dn.obj: ../femlib/Mesh1dn.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Mesh1dn.obj -MD -MP -MF $(DEPDIR)/Mesh1dn.Tpo -c -o Mesh1dn.obj `if test -f '../femlib/Mesh1dn.cpp'; then $(CYGPATH_W) '../femlib/Mesh1dn.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/Mesh1dn.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Mesh1dn.Tpo $(DEPDIR)/Mesh1dn.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/Mesh1dn.cpp' object='Mesh1dn.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Mesh1dn.obj `if test -f '../femlib/Mesh1dn.cpp'; then $(CYGPATH_W) '../femlib/Mesh1dn.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/Mesh1dn.cpp'; fi`
+
+GQuadTree.o: ../femlib/GQuadTree.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GQuadTree.o -MD -MP -MF $(DEPDIR)/GQuadTree.Tpo -c -o GQuadTree.o `test -f '../femlib/GQuadTree.cpp' || echo '$(srcdir)/'`../femlib/GQuadTree.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/GQuadTree.Tpo $(DEPDIR)/GQuadTree.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/GQuadTree.cpp' object='GQuadTree.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GQuadTree.o `test -f '../femlib/GQuadTree.cpp' || echo '$(srcdir)/'`../femlib/GQuadTree.cpp
+
+GQuadTree.obj: ../femlib/GQuadTree.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GQuadTree.obj -MD -MP -MF $(DEPDIR)/GQuadTree.Tpo -c -o GQuadTree.obj `if test -f '../femlib/GQuadTree.cpp'; then $(CYGPATH_W) '../femlib/GQuadTree.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/GQuadTree.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/GQuadTree.Tpo $(DEPDIR)/GQuadTree.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../femlib/GQuadTree.cpp' object='GQuadTree.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GQuadTree.obj `if test -f '../femlib/GQuadTree.cpp'; then $(CYGPATH_W) '../femlib/GQuadTree.cpp'; else $(CYGPATH_W) '$(srcdir)/../femlib/GQuadTree.cpp'; fi`
 
 FQuadTree.o: ../femlib/FQuadTree.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT FQuadTree.o -MD -MP -MF $(DEPDIR)/FQuadTree.Tpo -c -o FQuadTree.o `test -f '../femlib/FQuadTree.cpp' || echo '$(srcdir)/'`../femlib/FQuadTree.cpp
