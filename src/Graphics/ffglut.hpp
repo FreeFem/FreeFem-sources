@@ -22,10 +22,11 @@ struct OnePlot
   R3 Pmin,Pmax;
   double fmin,fmax;
   double vmax;
-  GLuint gllist; 
   long what;
-
-
+  GLsizei ngllists;
+  GLint gllists;
+  KN<int> oklist;
+  int setgllists;
   virtual void Draw(OneWindow *win) =0;
   void bb(R3 & Pmn,R3 &Pmx) const 
   { 
@@ -40,22 +41,41 @@ struct OnePlot
     vmx=Max(vmax,vmx);
   }
   
-  OnePlot(long w,int ddim=2) :
+  OnePlot(long w,int ddim=2,int nbgllist=0) :
     dim(ddim),
     Pmin(dinfty,dinfty,dinfty),Pmax(-dinfty,-dinfty,-dinfty),
     fmin(dinfty),fmax(-dinfty),vmax(0),
-    gllist(0),what(w) {}
+    what(w),ngllists(nbgllist),gllists(0),
+    oklist(nbgllist),setgllists(0)
+  {
+  }
   
+  void initlist()
+  {
+    if(! setgllists)
+      if(ngllists>0) 
+	{
+	  oklist=0; //  
+	  gllists= glGenLists(ngllists);
+	  setgllists=1;
+	  assert(gllists);
+	}
+  }
   
   void GLDraw(OneWindow *win);
-  virtual ~OnePlot() {};
+  virtual ~OnePlot() {
+    if(setgllists) glDeleteLists(gllists,ngllists);
+  };
+private: // pas de copy  car il y a des destructeurs dans les classes derives
+  OnePlot(const OnePlot & );
+  OnePlot & operator=(const OnePlot & );
 };
 
 struct OnePlotMesh : public OnePlot
 {
   const Mesh *Th;
   OnePlotMesh(const Mesh *T)
-    : OnePlot(0),Th(T) 
+    : OnePlot(0,2,3),Th(T) 
   {
     R2 P0,P1;
     Th->BoundingBox(P0,P1);
@@ -63,12 +83,13 @@ struct OnePlotMesh : public OnePlot
     Pmax=P1;
   }
   void Draw(OneWindow *win);
+  
 };
 struct OnePlotMesh3 : public OnePlot
 {
     const Mesh3 *Th;
     OnePlotMesh3(const Mesh3 *T)
-      : OnePlot(0,3),Th(T) 
+      : OnePlot(0,3,3),Th(T) 
     {
 	Pmin=Th->Pmin;
 	Pmax=Th->Pmax;
@@ -83,12 +104,12 @@ struct OnePlotFE: public OnePlot
   long nsub;
   KN<double> v;
   OnePlotFE(const Mesh *T,long w,PlotStream & f)
-    :OnePlot(w),Th(T)
+    :OnePlot(w,2,5),Th(T)
   {
     R2 P0,P1;
     Th->BoundingBox(P0,P1);
-      Pmin=P0;
-      Pmax=P1;
+    Pmin=P0;
+    Pmax=P1;
     f>> nsub;
     f>> v;
     if(what==1)
@@ -123,7 +144,7 @@ struct OnePlotFE3: public OnePlot
     KN<R3> Psub;
     KN<int> Ksub;
     OnePlotFE3(const Mesh3 *T,long w,PlotStream & f)
-      :OnePlot(w,3),Th(T)
+      :OnePlot(w,3,5),Th(T)
     {
 	Pmin=Th->Pmin;
 	Pmax=Th->Pmax;
@@ -147,7 +168,8 @@ struct OnePlotFE3: public OnePlot
 		}
 	      //cout << " vmax = " << vmax << endl; 
 	  }
-	if(debug>3) cout << "OnePlotFE3" << Th <<" " << what<< " " << nsub <<" " << v.N() << endl; 
+	if(debug>3) cout << "OnePlotFE3" << Th <<" " << what<< " " << nsub <<" " << v.N() << endl
+			 << "       Pmin " << Pmin << " Pmax  " << Pmax << endl;
 	ffassert(f.good());
 	
     }
@@ -158,7 +180,7 @@ struct OnePlotFE3: public OnePlot
 struct OnePlotCurve: public OnePlot {
   KN<double> xx,yy;
   OnePlotCurve(PlotStream & f)
-    :OnePlot(3)
+    :OnePlot(3,2,1)
   {
     f >> xx>>yy;
     // cout << xx << " " << yy <<endl;
@@ -265,7 +287,6 @@ class ThePlot { public:
     void SetDefIsoV(); 
     void DrawIsoT(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
     void DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
-    
 }; 
 
 class OneWindow { 
@@ -291,6 +312,7 @@ public:
   R theta, phi, coef_dist, focal, dtheta;
   R  rapz,rapz0;     
   R3 Bmin3,Bmax3,Pvue3;
+  R3 cam;
   //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
   OneWindow(int h,int w,ThePlot *p);
   void DefaultView() ;
@@ -311,7 +333,8 @@ public:
   void DrawCommentaire(const char * cm,R x,R y); 
   void SetScreenView() const ;
   void Show(const char *str,int i);
-  
+  void   setLighting();
+  void unsetLighting();
   void Seg(R2 A, R2 B) const  { 
     glVertex3d(A.x,A.y,theplot->z0);
     glVertex3d(B.x,B.y,theplot->z0);
