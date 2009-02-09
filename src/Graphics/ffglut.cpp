@@ -45,6 +45,8 @@ int debug=1;
 
 #include "ffthreads.hpp"
 
+
+
 //Mutex MutexNextPlot;
 Thread::Id tidRead=0;
 bool NoMorePlot=false;
@@ -342,7 +344,7 @@ void DefColor(float & r, float & g, float & b,
     
 }
 
-void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot)
+void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot,GLint gllists,int * lok)
 {
     glDisable(GL_DEPTH_TEST);
 
@@ -355,50 +357,72 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
     double r=0,g=0,b=0;
     if((debug > 3)) cout<< " OnePlotMesh::Draw " << plotmesh << " " << plotborder << " " <<  Th.neb << " " << z1 << " "  << z2 << endl;
     // plot.SetColorTable(16) ; 
-    if(plotborder)
-      {
+    bool cc[3]= { plotborder , plotmesh && fill , plotmesh };
+    int kk=0;
+    //for(int i=0;i<3;i++)
+    //  cout << cc[i] << " " << lok[i] << " , ";
+    //cout << endl;
+    if(cc[kk])
+      if(lok[kk])   glCallList(gllists+kk);
+      else 
+	{ 
+	  lok[kk]=1;
+	  glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
 	  glLineWidth(2); 
 	  glBegin(GL_LINES);    
 	  for (int i=0;i<Th.neb;i++)
 	    {
-		const BoundaryEdge & K(Th.be(i)); 
-		plot.color(1+abs(K.lab));
-		glVertex3d(K[0].x,K[0].y,z1);
-		glVertex3d(K[1].x,K[1].y,z1);
-		
-		
+	      const BoundaryEdge & K(Th.be(i)); 
+	      plot.color(1+abs(K.lab));
+	      glVertex3d(K[0].x,K[0].y,z1);
+	      glVertex3d(K[1].x,K[1].y,z1);
+	      
+	      
 	    }
-	  glEnd(); 
-      }
-    glLineWidth(1); 
-    if(plotmesh)
-      {
-	  if(fill)
+	  glEnd(); 	  
+	  glLineWidth(1); 
+	  glEndList();  // fin de la list
+	}
+      else ;
+    
+    kk++;	
+    if(cc[kk])
+      if(lok[kk])   glCallList(gllists+kk);
+      else 
+	{ 
+	  lok[kk]=1;
+	  glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
+	  glPolygonMode(GL_FRONT,GL_FILL);//GL_FILL	
+	  glBegin(GL_TRIANGLES);
+	  for (int i=0;i<Th.nt;i++)
 	    {
-		glPolygonMode(GL_FRONT,GL_FILL);//GL_FILL	
-		glBegin(GL_TRIANGLES);
-		for (int i=0;i<Th.nt;i++)
-		  {
-		      const Triangle & K(Th[i]);
-		      plot.color(K.lab?1+abs(K.lab):0);
-		      
-		      //glColor3d(r,g,b);
-		      int i0= Th(K[0]),  i1= Th(K[1]),   i2= Th(K[2]) ;    		
-		      glVertex3d(K[0].x,K[0].y,z2);
-		      glVertex3d(K[1].x,K[1].y,z2);
-		      glVertex3d(K[2].x,K[2].y,z2);
-		      
-		  }    
-		glEnd();
-	    }
+	      const Triangle & K(Th[i]);
+	      plot.color(K.lab?1+abs(K.lab):0);
+	      
+	      //glColor3d(r,g,b);
+	      int i0= Th(K[0]),  i1= Th(K[1]),   i2= Th(K[2]) ;    		
+	      glVertex3d(K[0].x,K[0].y,z2);
+	      glVertex3d(K[1].x,K[1].y,z2);
+	      glVertex3d(K[2].x,K[2].y,z2);
+	      
+	    }    
+	  glEnd();
+	  glEndList();  //
+	}
+    
+    kk++;
+    if(cc[kk])
+      if(lok[kk])   glCallList(gllists+kk);
+      else 
+	{ 
+	  lok[kk]=1;
+	  glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
 	  glPolygonMode(GL_FRONT,GL_LINE);
 	  glBegin(GL_TRIANGLES);
 	  for (int i=0;i<Th.nt;i++)
 	    {
 		const Triangle & K(Th[i]);
 		plot.color(fill? 1 : 1+abs(K.lab));
-		
-		//glColor3d(r,g,b);
 		int i0= Th(K[0]),  i1= Th(K[1]),   i2= Th(K[2]) ;    
 		glVertex3d(K[0].x,K[0].y,z1);
 		glVertex3d(K[1].x,K[1].y,z1);
@@ -407,30 +431,42 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
 	    }    
 	  
 	  glEnd();
+	glEndList();  // fin de la list
       }
+
     ShowGlerror("end Mesh plot");
 
 }
 
 
-void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot)
+void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot,GLint gllists,int * lok)
 {
   typedef Mesh3::BorderElement BE;
   typedef Mesh3::Element Tet;
-    glEnable(GL_DEPTH_TEST);
-    
-    ShowGlerror("begin Mesh plot");
-    glPolygonMode(GL_FRONT_AND_BACK,GL_LINE); 
-    R z1= plot.z0;
-    R z2= plot.z0;
-    
-    
-    double r=0,g=0,b=0;
-
-    // plot.SetColorTable(16) ; 
-    if(plotborder)
-      {
-	glLineWidth(2); 
+  glEnable(GL_DEPTH_TEST);
+  /*
+  if(fill)  glPolygonMode(GL_FRONT_AND_BACK,GL_LINE); 
+  else glPolygonMode(GL_FRONT_AND_BACK,GL_LINE); 
+  */
+  ShowGlerror("begin Mesh plot");
+  
+  glPolygonMode(GL_FRONT_AND_BACK,GL_LINE); 
+  
+  R z1= plot.z0;
+  R z2= plot.z0;
+  
+  double r=0,g=0,b=0;
+  
+  bool cc[3]= { plotborder , plotborder && fill , plotmesh };
+  
+  int kk=0;
+  if(cc[kk])
+    if(lok[kk])   glCallList(gllists+kk);
+    else 
+      { 
+	lok[kk]=1;
+	glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
+	glLineWidth(1); 
 	glBegin(GL_TRIANGLES);    
 	for (int i=0;i<Th.nbe;i++)
 	  {
@@ -439,59 +475,22 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 	    glVertex3d(K[0].x,K[0].y,K[0].z);
 	    glVertex3d(K[1].x,K[1].y,K[1].z);
 	    glVertex3d(K[2].x,K[2].y,K[2].z);
-	    
-	    
 	  }
 	glEnd(); 
+	glLineWidth(1); 
+	glEndList();  // fin de la list	  
       }
-    glLineWidth(1); 
-    if(plotmesh)
-      {
-	/*
-	if(fill)
-	    {
-	      glPolygonMode(GL_FRONT,GL_FILL);//GL_FILL	
-	      glBegin(GL_TRIANGLES);
-		for (int i=0;i<Th.nt;i++)
-		  {
-		      const Triangle & K(Th[i]);
-		      plot.color(K.lab?1+abs(K.lab):0);
-		      
-		      //glColor3d(r,g,b);
-		      int i0= Th(K[0]),  i1= Th(K[1]),   i2= Th(K[2]) ;    		
-		      glVertex3d(K[0].x,K[0].y,z2);
-		      glVertex3d(K[1].x,K[1].y,z2);
-		      glVertex3d(K[2].x,K[2].y,z2);
-		      
-		  }    
-		glEnd();
-	    }
-	  glPolygonMode(GL_FRONT,GL_LINE);
-	  glBegin(GL_TRIANGLES);
-	  for (int i=0;i<Th.nt;i++)
-	    {
-		const Triangle & K(Th[i]);
-		plot.color(fill? 1 : 1+abs(K.lab));
-		
-		//glColor3d(r,g,b);
-		int i0= Th(K[0]),  i1= Th(K[1]),   i2= Th(K[2]) ;    
-		glVertex3d(K[0].x,K[0].y,z1);
-		glVertex3d(K[1].x,K[1].y,z1);
-		glVertex3d(K[2].x,K[2].y,z1);
-		
-	    }    
-	  
-	  glEnd();
-	*/
-      }
-    ShowGlerror("end Mesh plot");
-
+  
+  kk++;
+  ShowGlerror("end Mesh plot");
+  
 }
 
 
 
 void OnePlotError::Draw(OneWindow *win)
 {
+  initlist();
   ThePlot & plot=*win->theplot;
   win->SetScreenView() ;
   glColor3d(0.,0.,0.);
@@ -505,20 +504,23 @@ void OnePlotError::Draw(OneWindow *win)
 
 void OnePlotMesh::Draw(OneWindow *win)
 {
+  initlist();
   ThePlot & plot=*win->theplot;
-  Plot(*Th,plot.fill,true,true,plot);
+  Plot(*Th,plot.fill,true,true,plot,gllists,oklist);
   ShowGlerror("OnePlotMesh::Draw");
 }
 void OnePlotMesh3::Draw(OneWindow *win)
 {
+  initlist();
     ThePlot & plot=*win->theplot;
-   // Plot(*Th,plot.fill,true,true,plot);
+    Plot(*Th,plot.fill,true,true,plot,gllists,oklist);
     ShowGlerror("OnePlotMesh3::Draw");
 }
 void OnePlotFE3::Draw(OneWindow *win)
 {
-    
-    ThePlot & plot=*win->theplot;
+  initlist();
+  
+  ThePlot & plot=*win->theplot;
     ShowGlerror("begin OnePlotFE plot");
     plot.SetDefIsoV();
     if(plot.fill && what==6)
@@ -530,46 +532,56 @@ void OnePlotFE3::Draw(OneWindow *win)
       glEnable(GL_DEPTH_TEST);
     else 
       glEnable(GL_DEPTH_TEST);
-    int nsubV=Psub.N();
-    int nsubT=Ksub.N()/4;
-    KN<R3> Pn(nsubV);
-    int nK=v.N()/ Th->nt;
-    for(int k=0,o=0;k<Th->nt;++k, o+= nK)
-      {
-	const Mesh3::Element & K=(*Th)[k];
-	int ii[4];// 
-	R ff[4];
-	R3 Pt[4];
-	for(int i=0;i<nsubV;++i)
-	  Pn[i]=K(Psub[i]);
-	int lK=0;
-	if(what==6)
-	  for(int sk=0;sk<nsubT;++sk)
-	    {
-	      
-	      for(int l=0;l<4;++l)
+    win->setLighting();
+    if(oklist[0])
+      glCallList(gllists+0);
+    else
+      { 
+	oklist[0]=1;
+        glNewList(gllists+0,GL_COMPILE_AND_EXECUTE); // save  la list sans affichage
+	int nsubV=Psub.N();
+	int nsubT=Ksub.N()/4;
+	KN<R3> Pn(nsubV);
+	int nK=v.N()/ Th->nt;
+	for(int k=0,o=0;k<Th->nt;++k, o+= nK)
+	  {
+	    const Mesh3::Element & K=(*Th)[k];
+	    int ii[4];// 
+	    R ff[4];
+	    R3 Pt[4];
+	    for(int i=0;i<nsubV;++i)
+	      Pn[i]=K(Psub[i]);
+	    int lK=0;
+	    if(what==6)
+	      for(int sk=0;sk<nsubT;++sk)
 		{
-		  int iv= Ksub[lK++];
-		  ii[l]= iv;
-		  Pt[l]=Pn[iv];
-		  ff[l]=v[o+iv];
+		  
+		  for(int l=0;l<4;++l)
+		    {
+		      int iv= Ksub[lK++];
+		      ii[l]= iv;
+		      Pt[l]=Pn[iv];
+		      ff[l]=v[o+iv];
+		    }
+		  
+		  for(int i=0;i< plot.Viso.N();++i)
+		    {
+		      plot.color(i+4);			    
+		      drawisoTet( Pt,ff,plot.Viso[i]);
+		    }
+		  
 		}
-	      
-	      for(int i=0;i< plot.Viso.N();++i)
-		{
-		  plot.color(i+4);			    
-		  drawisoTet( Pt,ff,plot.Viso[i]);
-		}
-	      
-	    }
+	  }
+        glEndList();  // fin de la list
       }
+    win->unsetLighting();
     ShowGlerror("b mesh  OnePlotFE plot");  
-    Plot(*Th,false,plot.drawmeshes,plot.drawborder,plot);
+    Plot(*Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2]);
     ShowGlerror("OnePlotFE::Draw");
-    
 }    
 void OnePlotFE::Draw(OneWindow *win)
 {
+  initlist();
 
   ThePlot & plot=*win->theplot;
   ShowGlerror("begin OnePlotFE plot");
@@ -606,74 +618,83 @@ void OnePlotFE::Draw(OneWindow *win)
   R kk = 4*win->hpixel;
   R cc = win->hpixel*40;
   
-  {
-    for(int k=0;k<Th.nt;++k, o+= nK)
-      {
-	const Mesh::Element & K=Th[k];
-	for(int i=0;i<nsubV;++i)
-	  Pn[i]=K(SubInternalVertex(nsub,i));
-	if(what==1)
-	  for(int sk=0;sk<nsubT;++sk)
-	    {
-	      int i0=numSubTriangle(nsub,sk,0);
-	      int i1=numSubTriangle(nsub,sk,1);
-	      int i2=numSubTriangle(nsub,sk,2);
-	      
-	      R ff[3]={v[o+i0],v[o+i1],v[o+i2]};
-	      R2 Pt[3]={Pn[i0],Pn[i1],Pn[i2]};
-	      if(plot.fill)
-		plot.DrawIsoTfill( Pt, ff, plot.Viso,plot.Viso.N());
-	      else
-		plot.DrawIsoT( Pt, ff, plot.Viso,plot.Viso.N()); 
-	    }
-	else // what ==2
-	  for (int i=0,j=0;i<nsubV;++i)
-	    {
-	      R2 P=Pn[i];
-	      R2 uv(v[o+j],v[o+j+1]);
-	      j+=2;
-	      R  l = Max(sqrt((uv,uv)),1e-30) ;
-	      int col = 2+dichotomie(plot.Varrow,l);
-	      if(debug>100) 
-		cout << uv << " l= " << l << " " << coef << " " <<col <<  endl;
-	      
-	      plot.color(2+col);
-	      uv = coef*uv;
-	      l *= coef;
-	      R2 dd = uv*(-0.005/l);
-	      R2 dn = dd.perp()*0.5;
-	      if (l*10000.< kk) continue;
-	      if (l < kk) 
-		uv = uv*(kk/l);
-	      else if (l> cc)
-		uv = uv*(cc/l);	   
-	      glBegin(GL_LINES);          
-	      
-	      win->Seg(P,P+uv);
-	      
-	      if (l>kk) {
-		win->Seg(P+uv,P+uv+dd+dn);
-		win->Seg(P+uv,P+uv+dd-dn);
+  int klist=0;
+  if( (what==1) ) 
+    if ( plot.fill) klist=1; 
+  //  cout << klist << " ... " << oklist[klist] << "  fill = " <<  plot.fill <<  endl;
+  if (oklist[klist])
+    glCallList(gllists+klist);
+  else 
+    {
+      oklist[klist]=1;
+      glNewList(gllists+klist,GL_COMPILE_AND_EXECUTE); // save  la list sans affichage
+      for(int k=0;k<Th.nt;++k, o+= nK)
+	{
+	  const Mesh::Element & K=Th[k];
+	  for(int i=0;i<nsubV;++i)
+	    Pn[i]=K(SubInternalVertex(nsub,i));
+	  if(what==1)
+	    for(int sk=0;sk<nsubT;++sk)
+	      {
+		int i0=numSubTriangle(nsub,sk,0);
+		int i1=numSubTriangle(nsub,sk,1);
+		int i2=numSubTriangle(nsub,sk,2);
+		
+		R ff[3]={v[o+i0],v[o+i1],v[o+i2]};
+		R2 Pt[3]={Pn[i0],Pn[i1],Pn[i2]};
+		if(plot.fill)
+		  plot.DrawIsoTfill( Pt, ff, plot.Viso,plot.Viso.N());
+		else
+		  plot.DrawIsoT( Pt, ff, plot.Viso,plot.Viso.N()); 
+	      }
+	  else // what ==2
+	    for (int i=0,j=0;i<nsubV;++i)
+	      {
+		R2 P=Pn[i];
+		R2 uv(v[o+j],v[o+j+1]);
+		j+=2;
+		R  l = Max(sqrt((uv,uv)),1e-30) ;
+		int col = 2+dichotomie(plot.Varrow,l);
+		if(debug>100) 
+		  cout << uv << " l= " << l << " " << coef << " " <<col <<  endl;
+		
+		plot.color(2+col);
+		uv = coef*uv;
+		l *= coef;
+		R2 dd = uv*(-0.005/l);
+		R2 dn = dd.perp()*0.5;
+		if (l*10000.< kk) continue;
+		if (l < kk) 
+		  uv = uv*(kk/l);
+		else if (l> cc)
+		  uv = uv*(cc/l);	   
+		glBegin(GL_LINES);          
+		
+		win->Seg(P,P+uv);
+		
+		if (l>kk) {
+		  win->Seg(P+uv,P+uv+dd+dn);
+		  win->Seg(P+uv,P+uv+dd-dn);
 		}
-	      glEnd();		
-	    }
-	
-      }
-  }
+		glEnd();		
+	      }
+
+	}
+      glEndList();  // fin de la list
+    }
+  
   // if(plot.drawmeshes)
   //  if(what==2)
   //  glEnable(GL_DEPTH_TEST);  
   ShowGlerror("b mesh  OnePlotFE plot");  
-  Plot(Th,false,plot.drawmeshes,plot.drawborder,plot);
+  Plot(Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2]);
   ShowGlerror("OnePlotFE::Draw");
-
-
-  
-  
 }
 
 void OnePlotCurve::Draw(OneWindow *win)
 {
+  initlist();
+
   ThePlot & plot= *win->theplot;
   plot.SetColorTable(16) ;
     double z = plot.z0;
@@ -692,6 +713,8 @@ void OnePlotCurve::Draw(OneWindow *win)
 
 void OnePlotBorder::Draw(OneWindow *win)
 {
+  initlist();
+
   glDisable(GL_DEPTH_TEST);
   ThePlot & plot= *win->theplot;
   R h = 8*win->hpixel;
@@ -816,7 +839,7 @@ void OneWindow::DefaultView()
       zmin = theplot->fmin;
       theta=theplot->theta;
       phi=theplot->phi;
-      if(theplot->datadim==3) rapz=1;
+      if(theplot->datadim==3) rapz0=1;
       else   if(rapz0<=0)
 	{ //  ( zmax-zmin )*rapz0 =  0.3 dxyy
 	  rapz0  =  0.4* dxy/(zmax-zmin) ;
@@ -912,9 +935,9 @@ void  OneWindow::SetView()
       DD.z *= rapz;
       R dmax= DD.norme();;
       R dist = 0.5*dmax/sin(focal/2)*coef_dist;
-      R camx=Pvue3.x+cos(phi)*cos(theta)*dist;
-      R camy=Pvue3.y+cos(phi)*sin(theta)*dist;
-      R camz=Pvue3.z*rapz+dist*sin(phi);  
+       cam.x=Pvue3.x+cos(phi)*cos(theta)*dist;
+       cam.y=Pvue3.y+cos(phi)*sin(theta)*dist;
+       cam.z=Pvue3.z*rapz+dist*sin(phi);  
       R znear=max(dist-dmax,1e-30);
       R zfare=dist+dmax;
       gluPerspective(focal*180./M_PI,aspect,znear,zfare);
@@ -931,10 +954,10 @@ void  OneWindow::SetView()
       if(debug>2)
 	{
 	  cout <<" setview 3d: rapz " <<  rapz << " cam: ";
-	  cout << camx << " " << camx << " " << camx << " Pvue:" ;
-	  cout << Pvue3 << endl;
+	  cout << cam << " Pvue:" ;
+	  cout << Pvue3  << " theta " << theta << "  phi = "<<  phi << endl;
 	}
-      gluLookAt(camx,camy,camz,Pvue3.x,Pvue3.y,Pvue3.z*rapz,0.,0.,1.);
+      gluLookAt(cam.x,cam.y,cam.z,Pvue3.x,Pvue3.y,Pvue3.z*rapz,0.,0.,1.);
       glScaled(1.,1.,rapz);   
       
     }
@@ -943,19 +966,28 @@ void  OneWindow::SetView()
       ShowGlerror("Begin SetView");   
       glDisable(GL_DEPTH_TEST);
       glViewport(0, 0,width, height);
-      
-      R zzmin = Min(zmin,theplot->fminT);
-      R zzmax = Max(zmax,theplot->fmaxT);    
-      R dz = (zzmax-zzmin);
-      R zm=(zzmin+zzmax)*0.5;
-      //  to be sur  the the z size is no zero . 
-      dz = max(dz,(Bmax.x-Bmin.x)*0.1);
-      dz = max(dz,(Bmax.y-Bmin.y)*0.1);
-
-
+      R dz0,dz1,zm=0;
+      if(plotdim==3)
+	{
+	    dz0=Bmin3.z;
+	    dz1=Bmax3.z;
+	}
+      else
+	{  
+	    R zzmin = Min(zmin,theplot->fminT);
+	    R zzmax = Max(zmax,theplot->fmaxT);    
+	    R dz = (zzmax-zzmin);
+	    zm=(zzmin+zzmax)*0.5;
+	    //  to be sur  the the z size is no zero . 
+	    dz = max(dz,(Bmax.x-Bmin.x)*0.1);
+	    dz = max(dz,(Bmax.y-Bmin.y)*0.1);
+	    dz0=-dz;
+	    dz1 = dz;
+	}
+	
       if((debug>3 )) cout << "\t\t\t   SetView " << this << " " << Bmin  << " " 
-			  << Bmax << " " << zzmin << " " << zzmax 
-			  << "  zm  " << zm << " dz  " << dz << endl;
+			  << Bmax  << " dz  " << dz0 << " " << dz1  
+			  << " theta " << theta << "  phi = "<<  phi << endl;
       ShowGlerror("0 Set MV");
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
@@ -963,7 +995,7 @@ void  OneWindow::SetView()
       glMatrixMode(GL_PROJECTION); 
       glLoadIdentity(); 
       ShowGlerror(" Set PM 1");
-      glOrtho(Bmin.x,Bmax.x,Bmin.y,Bmax.y,-dz,dz);
+      glOrtho(Bmin.x,Bmax.x,Bmin.y,Bmax.y,dz0,dz1);
       
       ShowGlerror(" Set PM 2");
       
@@ -1023,9 +1055,10 @@ void  OneWindow::zoom(int w,int h,R coef)
 void OneWindow::MoveXView(R dx,R dy) 
 {
   R3 D(Bmin3,Bmax3);
-  Pvue3.z -= dy*D.z/50.;
-  Pvue3.x += dx*D.x*sin(theta)/50;
-  Pvue3.y -= dx*D.y*cos(theta)/50;   
+  R3 dd( dx*D.x*sin(theta),-dx*D.y*cos(theta), - dy*D.z);
+  if(debug>2)
+  cout << " MoveXView  "<< dx << " " << dy << " " << D << " mn: " << Bmin3 <<"  mx :" << Bmax3 << " d=" << dd << endl;
+  Pvue3 += dd/50.;
   // cout << xm << " " << ym << " " << zm << endl;
 }
 
@@ -1090,9 +1123,47 @@ void OneWindow::cadreortho(R2 A, R2 B)
     
     // if((debug > 10)) cout << "cadreortho\n";
 }
+void OneWindow::setLighting(){
+    glEnable(GL_LIGHTING);	
+    GLfloat dif[] = { 0.9,0.9,0.9,1.0f };
+    GLfloat amb[] = {0.5f, 0.5f, 0.5f, 1.0f};
+    if(plotdim==3)
+      {
+	if(debug>1)  cout << " Light pos  3d:  " << cam << endl;
+        GLfloat position[] = {cam.x,cam.y,cam.z,1.f} ;
+     glLightfv(GL_LIGHT0, GL_POSITION, position);
+      }
+    else
+      {
+	  
+	GLfloat position[] = {Pvue3.x,Pvue3.y,Pvue3.z+(Bmax3.z-Bmin3.z)*3,1.f} ;
+	  glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+      }
+    //glLightfv(GL_LIGHT0, GL_SPECULAR, sp);
+    //glLightfv(GL_LIGHT0, GL_DIFFUSE, dif);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, amb);
+    glEnable(GL_LIGHT0);
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);				
+    //glEnable(GL_COLOR_MATERIAL);	
+    //glColorMaterial(GL_FRONT_AND_BACK,GL_DIFFUSE);
+    GLfloat lum_ambiente[]={0.9,0.9,0.9,1.0}; /* composantes R,G */ 
+    /* B,A par defaut */ 
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lum_ambiente); 
+    glShadeModel(GL_FLAT); 
+    //glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,dif); 
+    //glColorMaterial(GL_FRONT_AND_BACK,GL_SPECULAR);
+    glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT);
+    glDisable(GL_LIGHTING);glDisable(GL_LIGHT0);
+
+}
+void OneWindow::unsetLighting(){
+    glDisable(GL_LIGHTING);glDisable(GL_LIGHT0);
+    //g->lightning=false;
+}
 
 OnePlotBorder::OnePlotBorder(PlotStream & f) 
-  :OnePlot(4)
+  :OnePlot(4,2,1)
 { 
     long nbd;
     f>> nbd;
@@ -1121,14 +1192,10 @@ OnePlotBorder::OnePlotBorder(PlotStream & f)
 void OnePlot::GLDraw(OneWindow *win)
 {
     ThePlot & plot= *win->theplot; 
-    //  if(!gllist && plot.Change() )
-  {
-      if(!gllist) gllist= plot.gllist++;
-      glNewList(gllist,GL_COMPILE_AND_EXECUTE); // save  la list sans affichage
+    //      glNewList(gllists,GL_COMPILE_AND_EXECUTE); // save  la list sans affichage
       Draw(win);
-      glEndList();  // fin de la list
-  }
-    //  else glCallList(gllist);
+      //  glEndList();  // fin de la list
+    //  else glCallList(gllists);
 }
 
 void ThePlot::DrawHelp(OneWindow *win) 
@@ -1219,7 +1286,7 @@ void  ThePlot::SetColorTable(int nb)
 
 
 ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
-  :  count(kcount), state(0),gllist(1),
+  :  count(kcount), state(0),
      changeViso(true),changeVarrow(true),changeColor(true),
      changeBorder(true),changeFill(true), withiso(false),witharrow(false),
      plotdim(2),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.),
@@ -1252,10 +1319,10 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   add=false; 
   keepPV=false;
     
-  Pmin=R2(+dinfty,+dinfty);
+  Pmin=R3(+dinfty,+dinfty,+dinfty);
   fmin = +dinfty;    
   fmax = -dinfty;
-  Pmax=R2(-dinfty,-dinfty);
+  Pmax=R3(-dinfty,-dinfty,-dinfty);
   vmax=0;
   
   coefr=1;
@@ -1783,6 +1850,7 @@ void ThePlot::DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso
       }
 } 
 
+
 bool WindowDump(int width,int height)
 {
     int i,j;
@@ -2076,6 +2144,14 @@ THREADFUNC(ThreadRead,fd)
 int main(int argc,  char** argv)
 {
     glutInit(&argc, argv);
+    bool stereo=false;
+    bool fullscreen = false;
+
+    if(stereo)
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STEREO);
+    else  
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH );
+
     if(argc>2) {
       if( strcmp(argv[1],"-nv")==0) debug=0;
       if( strcmp(argv[1],"-v")==0) debug=2,verbosity=2;
@@ -2101,8 +2177,6 @@ int main(int argc,  char** argv)
     if(err) {cout << "Err ReadOnePlot " << err << endl;
       Fin(1);}
    
-    bool stereo=false;
-    bool fullscreen = false;
 
 
     if(kread==0) {
@@ -2113,10 +2187,6 @@ int main(int argc,  char** argv)
     cout << "on a lue le premier plot next plot: " << nextPlot << endl;
 
 
-    if(stereo)
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STEREO);
-    else  
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH );
     int Height = 512;
     int Width = 512*3/2; 
     
