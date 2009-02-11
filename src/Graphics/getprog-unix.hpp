@@ -8,9 +8,10 @@ extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
 // for the environ variables ...
 extern const char *  prognamearg;
 extern const char *  edpfilenamearg;
+extern bool  waitatend;
 int getprog(char* fn,int argc, char **argv)
 {
-  
+  waitatend=true;  // attent 
   int ret=0;
   *fn='\0';
 #if WIN32
@@ -60,6 +61,8 @@ int getprog(char* fn,int argc, char **argv)
 	}
       else if  (strcmp(argv[i],"-nw")==0 ) 
 	noffglut=true;
+      else if  (strcmp(argv[i],"-nowait")==0 ) 
+	waitatend=false;
       else if(strcmp(argv[i],"-fglut")==0 && i+1 < argc)
 	{ 
 	  fileglut=argv[++i];
@@ -124,6 +127,7 @@ int getprog(char* fn,int argc, char **argv)
 	   << "        -v      verbosity :  0 -- 1000000 level of freefem output \n"
 	   << "        -fglut  filepath  :  the file name of save all plots (replot with ffglut command ) \n"
 	   << "        -glut    command  :  the command name of ffglut  \n"
+	   << "        -nowait           : nowait at the end on window   \n"
 	   << "        -nw               :  no ffglut (=> no graphics windows) \n";
       if(noffglut)  cout << " without     default ffglut : " << ffglut << endl;
       else          cout << " with        default ffglut : " << ffglut << endl;

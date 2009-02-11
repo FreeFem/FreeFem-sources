@@ -61,6 +61,7 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 const char * edpfilenamearg=0;	 	
+bool  waitatend=true;
 
 //#define TARGET_API_MAC_CARBON 1
 #define FF_GRAPH_SET_PTR

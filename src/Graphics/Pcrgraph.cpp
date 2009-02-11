@@ -62,6 +62,8 @@ using namespace std;
 ///#include <stat.h>
 
 const char *  edpfilenamearg=0; 
+bool  waitatend=true;
+
 #define fill thequikdrawfill
 
 #include "rgraph.hpp"
