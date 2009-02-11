@@ -47,6 +47,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
   //   equiedges[i]/2 == i  original
   //   equiedges[i]/2 = j  =>   equivalence entre i et j => meme maillage
   //   equiedges[i]%2   : 0 meme sens , 1 pas meme sens 
+  //       
   // --------------------------
   if (verbosity>1) 
     cout << " -- construction of the geometry from the 2d mesh " << endl;
@@ -375,7 +376,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
   assert(Gh.coefIcoor >0);
   
   Real8 hmin = HUGE_VAL;
-  
+     int kreq=0;
   for (i=0;i<nbe;i++)
     {
       Int4 i0 = Number(edges[i][0]);
@@ -389,11 +390,12 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
       Gh.edges[i].tg[0]=R2();
       Gh.edges[i].tg[1]=R2();
       bool requis= edges[i].on; 
+	if(requis) kreq++;
       edges[i].on =  Gh.edges + i;
       if(equiedges && i < nbeold ) {
         int j=equiedges[i]/2;
         int sens=equiedges[i]%2;
-        if(i!=j) {
+        if(i!=j && equiedges[i]>=0) {
           if(verbosity>9)  
              cout << " Edges Equi " << i << " <=> " << j << " sens = " << sens  << endl;
            if( sens==0)
@@ -403,8 +405,13 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
            Gh.edges[i].link= & Gh.edges[j];
            //assert(sens==0);//  meme sens pour l'instant
         }
-      }
-      if(requis)   Gh.edges[i].Required(); // fin modif ... 
+	
+       }
+	if(requis)  {  // correction fevr 2009 JYU ...
+	    Gh.edges[i].v[0]->SetRequired();
+	    Gh.edges[i].v[1]->SetRequired();
+	    Gh.edges[i].SetRequired(); // fin modif ... 
+	}
       R2 x12 = Gh.vertices[j0].r-Gh.vertices[j1].r;
       Real8 l12=Norme2(x12);        
       hmin = Min(hmin,l12);

@@ -80,6 +80,8 @@
 		3D15D4B50BD3A6E000CEB4C6 /* strversionnumber.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD32097015B4002A1826 /* strversionnumber.hpp */; };
 		3D15D4B60BD3A6E000CEB4C6 /* throwassert.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD35097015B4002A1826 /* throwassert.hpp */; };
 		3D15D4B70BD3A6E000CEB4C6 /* versionnumber.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD36097015B4002A1826 /* versionnumber.hpp */; };
+		3D2D5C9A0F43095A00F41F4C /* splitsimplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */; };
+		3D2D5C9B0F43095A00F41F4C /* splitsimplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */; };
 		3D338F980E069DF400E1E7E8 /* GQuadTree.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */; };
 		3D71696C0F371DEC00031DA8 /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D7169690F371DEC00031DA8 /* libamd.a */; };
 		3D71696E0F371DEC00031DA8 /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D71696B0F371DEC00031DA8 /* libarpack.a */; };
@@ -144,6 +146,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = splitsimplex.cpp; path = ../src/femlib/splitsimplex.cpp; sourceTree = SOURCE_ROOT; };
 		3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = GQuadTree.hpp; path = ../src/femlib/GQuadTree.hpp; sourceTree = SOURCE_ROOT; };
 		3D7169690F371DEC00031DA8 /* libamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.a; path = ../download/lib/libamd.a; sourceTree = SOURCE_ROOT; };
 		3D71696B0F371DEC00031DA8 /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = ../download/lib/libarpack.a; sourceTree = SOURCE_ROOT; };
@@ -375,6 +378,7 @@
 			isa = PBXGroup;
 			children = (
 				3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */,
+				3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */,
 				3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */,
 				3DB73EFA0EB635950083AFB9 /* PlotStream.hpp */,
 				3D90DCDC097015B4002A1826 /* AddNewFE.h */,
@@ -751,6 +755,7 @@
 				3DDEA19B0DFFF7D000F54E1C /* Mesh1dn.cpp in Sources */,
 				3D71697B0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */,
 				3D71697F0F371F9E00031DA8 /* glumesh2D.cpp in Sources */,
+				3D2D5C9B0F43095A00F41F4C /* splitsimplex.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -762,6 +767,7 @@
 				3D15D46F0BD3A68500CEB4C6 /* DefColor.cpp in Sources */,
 				3D71697A0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */,
 				3D71697E0F371F9E00031DA8 /* glumesh2D.cpp in Sources */,
+				3D2D5C9A0F43095A00F41F4C /* splitsimplex.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
