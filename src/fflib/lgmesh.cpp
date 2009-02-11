@@ -227,7 +227,7 @@ class Adaptation :   public E_F0mps { public:
   typedef pmesh  Result;
   
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =26;
+  static const int n_name_param =27;
   
   int nbsol;    
   Expression nargs[n_name_param];
@@ -307,8 +307,7 @@ class Adaptation :   public E_F0mps { public:
      nbcperiodic=0;
      periodic=0;
      GetPeriodic(nargs[25],nbcperiodic,periodic);
-     
-     
+       
    }  
     
     static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<pmesh>(),true);}
@@ -319,7 +318,7 @@ class Adaptation :   public E_F0mps { public:
 
 
  basicAC_F0::name_and_type Adaptation::name_param[Adaptation::n_name_param] = {
-       {   "hmin",             &typeid(double)},
+       {   "hmin",             &typeid(double)},  // à 
        {   "hmax",             &typeid(double)},
        {   "err",              &typeid(double)}, 
        {   "errg",             &typeid(double)}, 
@@ -344,7 +343,8 @@ class Adaptation :   public E_F0mps { public:
        {   "splitin2",         &typeid(bool) },
        {  "nomeshgeneration", &typeid(bool) },
        {   "metric"          ,  &typeid(E_Array)},  // 24
-       {   "periodic"        ,  &typeid(E_Array) }// 25 
+       {   "periodic"        ,  &typeid(E_Array) },// 25 
+       { "requirededges",    &typeid(KN_<long> ) } // 26 
     };
 
 struct Op_trunc_mesh : public OneOperator {
@@ -611,7 +611,12 @@ AnyType Adaptation::operator()(Stack stack) const
   //  const E_Array * expmetrix = dynamic_cast<const E_Array *>(nargs[24]);
   //   the 25th param is periodic and it store at compilation time
   // in nbcperiodic,periodic  variable 
-  
+    KN<long> reqedges0;
+    //  list of label of required edges , for no adapattion on this part of the boundary.     
+    KN<long> reqedges ( nargs[26] ? GetAny< KN_<long> >( (*nargs[26])(stack) ): (KN_<long>)reqedges0); 
+
+  if(reqedges.N() && verbosity)
+      cout << " reqedges labels "  << reqedges << endl;
   KN<double> *mm11=0, *mm12=0,* mm22=0;
 
   using Fem2D::MeshPoint;
@@ -624,13 +629,13 @@ AnyType Adaptation::operator()(Stack stack) const
     KN<int> ndfe(Thh->neb);
     int nbdfv=0,nbdfe=0;      
     BuildPeriodic(nbcperiodic,periodic,*Thh,stack,nbdfv,ndfv,nbdfe,ndfe);
-     oTh = msh2bamg(*Thh,cutoffradian,nbdfv,ndfv,nbdfe,ndfe);
+     oTh = msh2bamg(*Thh,cutoffradian,nbdfv,ndfv,nbdfe,ndfe,reqedges,reqedges.N());
      
   //  cerr << " Sorry periodic mesh adaptation is not well implemented "<< endl;
   //  ExecError("adaptmesh( ... )");
   }
   else
-   oTh = msh2bamg(*Thh,cutoffradian);
+   oTh = msh2bamg(*Thh,cutoffradian,reqedges,reqedges.N());
   Triangles &Th(*oTh);
   bool mtx=em11 && em22 && em12;
   if( mtx )

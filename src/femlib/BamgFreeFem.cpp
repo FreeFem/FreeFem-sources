@@ -41,6 +41,7 @@ extern long verbosity ;
 #include <ctime>
 #include <iomanip>
 #include <fstream>
+
 using namespace std;
 
 #include "Meshio.h"
@@ -57,7 +58,7 @@ using namespace std;
 #include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
 #include "PlotStream.hpp"
-
+#include <set>
 Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
 { 
   using namespace bamg;
@@ -221,7 +222,7 @@ Fem2D::Mesh *bamg2msh(const bamg::Geometry &Gh)
 
 
 
-bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian)
+bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,long * reqedgeslab,int nreqedgeslab)
   
 {
   using namespace bamg;
@@ -256,15 +257,36 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian)
       Tn->triangles[i]= Triangle( Tn,i1 ,i2 ,i3 );
       Tn->triangles[i].color = Th[i].lab;
     }
-  for (i = 0; i < Th.neb; i++)
+    //  Real8 cutoffradian = -1;    
+    // add code   un change boundary part ...  frev 2009 JYU FH
+    set<int> labreq;
+    if(nreqedgeslab && verbosity) cout << " label of required edges " ;
+    for (int i=0; i <nreqedgeslab;++i)
+      {
+	  if(verbosity)
+	      cout << " " << reqedgeslab[i];
+	  labreq.insert(reqedgeslab[i]);
+      }
+    bamg::GeometricalEdge paszero;  // add JYU    fevr 2009   for  required edge ....
+    if(nreqedgeslab && verbosity) cout << endl;
+    int k=0;  
+    for (i = 0; i < Th.neb; i++)
     {
       Tn->edges[i].v[0] = Tn->vertices + Th(Th.bedges[i][0]);
       Tn->edges[i].v[1] = Tn->vertices + Th(Th.bedges[i][1]);
       Tn->edges[i].ref = Th.bedges[i].lab;
       Tn->edges[i].on = 0; 
+      if( labreq.find( Tn->edges[i].ref) != labreq.end())
+	{
+	    k++; 
+	    Tn->edges[i].on = &paszero; 
+	}
+
     }
-  //  Real8 cutoffradian = -1;
-  Tn->ConsGeometry(cutoffradian);
+  if(verbosity)cout << "  number of required edges : "<< k << endl;
+   
+    
+  Tn->ConsGeometry(cutoffradian);   
   Tn->Gh.AfterRead();    
   Tn->SetIntCoor();
   Tn->FillHoleInMesh();
@@ -273,7 +295,8 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian)
 
 
 bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian, 
-                           int  nbdfv, int * ndfv,int  nbdfe, int * ndfe)
+                           int  nbdfv, int * ndfv,int  nbdfe, int * ndfe,
+			   long * reqedgeslab,int nreqedgeslab)
 {
   using namespace bamg;
   Triangles *Tn=new Triangles(Th.nv);
@@ -338,11 +361,31 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,
       Tn->triangles[i]= Triangle( Tn,i1 ,i2 ,i3 );
       Tn->triangles[i].color = Th[i].lab;
     }
+    
+    // add code   un change boundary part ...  frev 2009 JYU FH
+    set<int> labreq;
+    if(nreqedgeslab && verbosity) cout << " label of required edges " ;
+    for (int i=0; i <nreqedgeslab;++i)
+      {
+	  if(verbosity)
+	      cout << " " << reqedgeslab[i];
+	  labreq.insert(reqedgeslab[i]);
+      }
+    bamg::GeometricalEdge paszero;  // add JYU    fevr 2009   for  required edge ....
+    if(nreqedgeslab && verbosity) cout << endl;
+    int k=0;  
+    
   for (i = 0; i < Th.neb; i++)
     {
       Tn->edges[i].v[0] = Tn->vertices + Th(Th.bedges[i][0]);
       Tn->edges[i].v[1] = Tn->vertices + Th(Th.bedges[i][1]);
       Tn->edges[i].ref = Th.bedges[i].lab;
+      Tn->edges[i].on = 0; 
+      if( labreq.find( Tn->edges[i].ref) != labreq.end())
+	  {
+	      k++; 
+	      Tn->edges[i].on = &paszero; 
+	  }
     }
   //  Real8 cutoffradian = -1;
   Tn->ConsGeometry(cutoffradian,equiedges);
@@ -558,6 +601,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
           Gh->edges[i].link=0;
 	  if(Requiredboundary)
 	  Gh->edges[i].SetRequired();
+	    
           if (!hvertices) 
             {
               Gh->vertices[i1].color++;
