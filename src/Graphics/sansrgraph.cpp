@@ -144,6 +144,8 @@ void myexit(int err) {
   exit(err);}
 
 const char * edpfilenamearg=0;	 	
+bool  waitatend=true;
+
 #ifdef FREEFEM
 #include <fstream.h>
 #include <new.h>
@@ -180,7 +182,7 @@ void doatexitff()
 	string fn = edpfilenamearg;
 	err=GetConsoleBuff(fn);
         }	
-  if(err)
+  if( waitatend &&  err)
     {
       char c;  
       cout << "wait enter ? ";

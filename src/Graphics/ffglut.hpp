@@ -231,7 +231,7 @@ class ThePlot { public:
     bool witharrow;
     
     long  Niso,Narrow;
-    R3 Pmin,Pmax,PminT,PmaxT, ;//  with R -> true bound
+    R3 Pmin,Pmax,PminT,PmaxT;//  with R -> true bound
     R  fmin,fmax,fminT,fmaxT; // withoiut bound with previous plot. 
     R  vmax;
     KN<R> Viso,Varrow;
