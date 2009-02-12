@@ -91,6 +91,7 @@ double BijanMO::main(Vect & xx,Vect & xxmin, Vect &xxmax)
   xmax=xxmax;
   
   finit=func(vinit);
+  if(debug)
   cout  << " ndim = "<< ndim <<  endl;
   
   f = finit;
@@ -102,15 +103,20 @@ double BijanMO::main(Vect & xx,Vect & xxmin, Vect &xxmax)
     goto L9101;
   }
   epsij *= finit;
+  if(debug)
   cout << " F = "<< finit << endl;
   if(ncstr>0)
     { 
-      cout << " CSTR = " ;
-      for(int i=0;i<ncstr;++i) 
-	cout <<cstr[i] << " ";
-      cout << endl;
+      if(debug)
+	{
+	  cout << " CSTR = " ;
+	  for(int i=0;i<ncstr;++i) 
+	    cout <<cstr[i] << " ";
+	  cout << endl;
+	}
     }
-  cout  << finit << " "<< 1. << " "<< xoptg[0] << " "<<  xoptg[1] << " /J/  " << endl;
+  if(debug)
+    cout  << finit << " "<< 1. << " "<< xoptg[0] << " "<<  xoptg[1] << " /J/  " << endl;
   /* cccccccccccccccccccccccccccccccccccccccccccccccccccccc */
   
   /* x        open(2,file='hist.J',status='unknown') */
@@ -123,6 +129,7 @@ double BijanMO::main(Vect & xx,Vect & xxmin, Vect &xxmax)
   itersom = 0;
   costsaveming = finit;
   irestart2=1;
+  //  cout << " ------ " <<  nbrestart << " " << nbext1 << "  " << nbbvp << endl;
   for (irestart = 1; irestart <= nbrestart; ++irestart) 
     {
       xsave=vinit; 
@@ -144,22 +151,25 @@ double BijanMO::main(Vect & xx,Vect & xxmin, Vect &xxmax)
 	      x1 = v;	
 	      rho = rho0 / iterbvp2;
 	      if(debug> 4)
-	      cout << "MM " << irestart << " " << iter1 << " " << iterbvp << " " << rho 
-		   << " ------------------------------ \n";
+		cout << "MM " << irestart << " " << iter1 << " " << iterbvp << " " << rho 
+		     << " ------------------------------ \n";
 	      gradopt(  x1, fpx, temp, rho, f, gnorm,fpx0, hgc);
 	      
 	      if (costsaveming < epsij) 
 	        break;      
 	      if (iterbvp >= 2) 
-	         tir(  v,  fpx);
+		tir(  v,  fpx);
 	      else 
 		rand(v);
 		
 	      v0=v;
 	      f0 = f;
 	    }
-	  cout.precision(15); 
-	  cout << " F = " << costsavemin << " FM = " << costsaveming << endl;
+	  if(debug)
+	    {
+	      cout.precision(15); 
+	      cout << " F = " << costsavemin << " FM = " << costsaveming << endl;
+	    }
 	  if (costsaveming < epsij) 
 	    goto L9101;
 	  

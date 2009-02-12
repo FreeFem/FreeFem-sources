@@ -122,6 +122,7 @@ void Triangles::Write(const char * filename,const TypeFileMesh typein )
        cerr << " Error openning file " << filename << endl;
        MeshError(1);
      }
+   if(verbosity>5)
    cout << "end write" << endl;
       
 }
