@@ -50,6 +50,7 @@ class BijanMO
       histpath(0),
       histcpath(0)
     {
+      cout << nbrestart << " == " << wnbrestart << endl;
       
       /*   1 1 1 10 rho =1 epsloc=1e4 (unused), epsglo=1, */
       /*      open(1,file='DATA_BMO.txt',status='unknown') */

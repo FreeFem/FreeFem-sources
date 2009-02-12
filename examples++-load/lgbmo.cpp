@@ -184,8 +184,10 @@ public:
 	};
 	
       */
-      R tol=arg(0,stack,1E-6);
+
+      R tol=arg(0,stack,1E-6); // not used ....
       int nbrestart=arg(1,stack,5L);
+      int nbext1=5; // bof bof 
       int nbbvp=arg(2,stack,5L);
       int nbgrad=arg(3,stack,5L);
       double epsfd=arg(4,stack,1e-5);
@@ -215,7 +217,8 @@ public:
 	GetAny<KN<double>*>( inittheparam.eval(stack) ) ; // do allocation 
 	
 	KN_<R> param(x);
-	lgBMO nrj1(stack,n,theparam,JJ,dJJ, tol,nbrestart,nbbvp,nbgrad,epsfd,rho000,epsloc,epsij,n100);
+	//cout << nbrestart << " ---- \n";
+	lgBMO nrj1(stack,n,theparam,JJ,dJJ,nbrestart,nbext1,nbbvp,nbgrad,epsfd,rho000,epsloc,epsij,n100);
 	nrj1.diagrand=diagrand;
 	nrj1.debug=verbosity;
 	  nrj1.typealgo=typealgo;
