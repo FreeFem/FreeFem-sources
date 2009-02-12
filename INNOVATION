@@ -1,3 +1,5 @@
+v 3.0-6
+  - add tool to required edge in adaptmesh with label of edges. 
   - correct  dy(uh) (always 0) for P13d finite element  (27 jan 2009)
       op==op_dy =>  op==op_dy line 97 P012_3D.cpp
 v 3.0-5 (20 jan 2009)
