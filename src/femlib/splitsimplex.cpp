@@ -39,6 +39,7 @@ $:
  ref:ANR-07-CIS7-002-01  */
 
 #include <cmath>
+#include <cassert>
 #include <iostream>
 #include <fstream>
 #include "ufunction.hpp"
