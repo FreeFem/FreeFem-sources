@@ -57,7 +57,7 @@ const char BACKSLACH='\\';
 
 string DirName(const char * f)
 {
-  char *c= strrchr(f,dirsep);
+  const char *c= strrchr(f,dirsep);
   if(!c) return string("");
   else return string(f,strlen(f)-strlen(c));
 }
