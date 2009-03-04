@@ -219,7 +219,7 @@ class MeshPointBase { public:
 
 
   // ------- 3D
-  void set(const R3 &P2,const R3 & P_Hat,const  baseFElement3 & K,int ll,const R3 &NN,int iedge)
+  void set(const R3 &P2,const R3 & P_Hat,const  baseFElement3 & K,int ll,const R3 &NN,int iface)
    { 
      P=P2;
      PHat=P_Hat;
@@ -227,15 +227,15 @@ class MeshPointBase { public:
      Th3=&K.Vh.Th; 
      region = T3->lab;
      label = ll;
-     v=f=-1; 
-     e=iedge;
-     t=(*Th)(T); 
+     e=v=-1; 
+     f=iface;
+     t=(*Th3)(T3); 
      assert( Abs( (NN,NN) -1.0) < 1e-5 );
      N=NN;   
      VF=0;
      d=3;
    }
-  void set(const Mesh3 & aTh,const R3 &P2,const R3 & P_Hat,const  Tet & aK,int ll,const R3 &NN,int iedge,int VFF=0)
+  void set(const Mesh3 & aTh,const R3 &P2,const R3 & P_Hat,const  Tet & aK,int ll,const R3 &NN,int iface,int VFF=0)
    { 
      P=P2;
      PHat=P_Hat;
@@ -244,8 +244,9 @@ class MeshPointBase { public:
      region = T3->lab;
      label = ll;
      v=f=-1;
-     t=(*Th)(T); 
-     e=iedge; 
+     t=(*Th3)(T3); 
+     v=e=-1;
+     f=iface; 
      assert( Abs( (NN,NN) -1.0) < 1e-5 );
      N=NN;   
      VF=VFF;
@@ -306,7 +307,7 @@ class MeshPointBase { public:
        label=-1;// to say 
       }
    
-     t=(*Th)(T);
+     t=(*Th3)(T3);
      d=3;
    }
 
@@ -322,6 +323,7 @@ class MeshPointBase { public:
      N.x=0;   
      N.y=0;   
      N.z=0;   
+    // area=mes;
      outside=coutside;
      VF=0;  
      d=3;
@@ -336,7 +338,7 @@ class MeshPointBase { public:
      Th3=pTh; 
      region = T3->lab;
      label = V.lab;
-     t=v=f=e=0;
+     t=v=f=e=-1;
      v=ss;
      VF=0;
      d=3;  

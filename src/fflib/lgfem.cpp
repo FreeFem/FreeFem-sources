@@ -421,8 +421,8 @@ class E_F_A_Ptr_o_R :public  E_F0 { public:
 
 class E_P_Stack_lenEdge   :public  E_F0mps { public: 
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    MeshPoint * mp=MeshPointStack(s);
-    assert(mp->T && mp ->e >=0);
+    MeshPoint * mp=MeshPointStack(s);      
+    ffassert(mp->T && mp ->e >=0 && mp->d==2);
     double l= mp->T->lenEdge(mp->e);
     return SetAny<double>(l);} 
     operator aType () const { return atype<double>();}         
@@ -442,7 +442,7 @@ class E_P_Stack_hTriangle   :public  E_F0mps { public:
 class E_P_Stack_nTonEdge   :public  E_F0mps { public: 
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
     MeshPoint * mp=MeshPointStack(s);
-    assert(mp->T && mp->e > -1  ) ;
+    assert(mp->T && mp->e > -1 && mp->d==2 ) ;
     long l=mp->Th->nTonEdge(mp->t,mp->e);
     // cout << " nTonEdge " << l << endl;
     return SetAny<long>( l) ;} 
@@ -454,7 +454,19 @@ class E_P_Stack_areaTriangle   :public  E_F0mps { public:
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
     MeshPoint * mp=MeshPointStack(s);
     assert(mp->T) ;
-    double l= mp->T->area;
+      double l=-1; // unset ...
+    if(mp->d==2)	
+      l= mp->T->area;	
+    else if (mp->d==3 && mp->f >=0)
+      {	
+	  R3 NN = mp->T3->N(mp->f);
+	  l= NN.norme()/2.;
+      }
+    else 
+      {
+	  cout << "erreur : E_P_Stack_areaTriangle" << mp->d << " " << mp->f << endl;
+	  ffassert(0); // undef 
+      }
     return SetAny<double>(l);} 
     operator aType () const { return atype<double>();}         
     
