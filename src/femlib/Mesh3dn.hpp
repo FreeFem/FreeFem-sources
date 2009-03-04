@@ -61,7 +61,8 @@ struct DataTriangle3  {
   typedef  V::Rd Rd ;
   typedef R2 RdHat;
   typedef R1 RdHatBord;
-  static RdHat PBord(const int * nvb,const RdHatBord &P)  { return RdHat::KHat[nvb[0]]*(1-P.x)+R2::KHat[nvb[1]]*(P.x) ;}  
+  static RdHat PBord(const int * nvb,const RdHatBord &P)  { 
+  return RdHat::KHat[nvb[0]]*(1-P.x)+R2::KHat[nvb[1]]*(P.x) ;}  
 
   static R mesure(  V *  pv[NbOfVertices]) {    
     return (R3(*pv[0],*pv[1])^R3(*pv[0],*pv[2])).norme()*0.5;
@@ -88,7 +89,10 @@ struct DataTet  {
   static const int (* const nvedge)[2];//  = nvedgeTet;
   typedef R3 RdHat;
   typedef R2 RdHatBord;
-  static RdHat PBord(const int * nvb,const RdHatBord& P)  { return RdHat::KHat[nvb[0]]*(1-P.x-P.y)+R2::KHat[nvb[1]]*(P.x)+R2::KHat[nvb[2]]*(P.y) ;}  
+  static RdHat PBord(const int * nvb,const RdHatBord& P)  { 
+ //     cout << "PBORD : " << nvb[0] << " " <<  nvb[1] <<  nvb[2] << " " << P<< " -> " <<  RdHat::KHat[nvb[0]]*(1-P.x-P.y)+RdHat::KHat[nvb[1]]*(P.x)+RdHat::KHat[nvb[2]]*(P.y) 
+//	<< "," <<  RdHat::KHat[nvb[0]] << "," <<  RdHat::KHat[nvb[1]] << "," << RdHat::KHat[nvb[2]] <<endl;
+  return RdHat::KHat[nvb[0]]*(1-P.x-P.y)+RdHat::KHat[nvb[1]]*(P.x)+RdHat::KHat[nvb[2]]*(P.y) ;}  
 
 };
 

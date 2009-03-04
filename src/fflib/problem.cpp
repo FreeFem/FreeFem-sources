@@ -1570,7 +1570,8 @@ void Check(const Opera &Op,int N,int  M)
 	  R3 NN= T.N(ie);
 	  double mes=NN.norme();
 	  NN/=mes;
-	  double coef = 0.5*mes*pi.a; // correction 0.5 050109 FH
+	  mes *=0.5;	
+	  double coef = mes*pi.a; // correction 0.5 050109 FH
 	  R3 Pt(T.PBord(ie,pi));
           Ku.BF(Dop,Pt,fu);
           // int label=-999999; // a passer en argument 
