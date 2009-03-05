@@ -1,5 +1,7 @@
 v 3.0-6
-  - correct int2d in 3d. bug in   Face -> tet mapping  (PBord method)
+  - correct int2d in 3d. bug in   Face -> tet mapping  (PBord method) March 5 2009
+        nuTriangle   given the tet  number in 3d case (5 march 2009)
+        area  given the area of the triangle on 3d border integral. 
   - add tool to required edge in adaptmesh with label of edges. 
   - correct  dy(uh) (always 0) for P13d finite element  (27 jan 2009)
       op==op_dy =>  op==op_dy line 97 P012_3D.cpp

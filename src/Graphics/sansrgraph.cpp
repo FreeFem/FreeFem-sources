@@ -576,7 +576,7 @@ void openPS(const char *filename )
   int count=0;
   if(psfile_save) closePS();
   time_t t_loc;
-  float s=1;
+    float s= 27./2.54*20./width;
   char  username[10];
   /*if (!cuserid(username)) */ strcpy(username,"inconnue");
   time(&t_loc);
