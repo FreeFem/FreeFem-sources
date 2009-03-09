@@ -272,6 +272,12 @@ void drawisoTet(const R3 K[4],R f[4],R v)
   */
     if(nP)
     {
+      if(nP>2)
+	{
+	  R3 N(R3(P[0],P[1])^R3(P[0],P[2]));
+	  N /= N.norme();
+	  glNormal3d(N.x,N.y,N.z);
+	}
       glBegin(GL_POLYGON);
       for(int i=0;i<nP;++i)
 	glVertex3f(P[i].x, P[i].y,P[i].z); // 
@@ -472,6 +478,9 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 	  {
 	    const BE & K(Th.be(i)); 
 	    plot.color(1+abs(K.lab));
+	    R3 N(R3(K[0],K[1])^R3(K[0],K[2]));
+	    N /= N.norme();
+	    glNormal3d(N.x,N.y,N.z);
 	    glVertex3d(K[0].x,K[0].y,K[0].z);
 	    glVertex3d(K[1].x,K[1].y,K[1].z);
 	    glVertex3d(K[2].x,K[2].y,K[2].z);
@@ -582,10 +591,10 @@ void OnePlotFE3::Draw(OneWindow *win)
 void OnePlotFE::Draw(OneWindow *win)
 {
   initlist();
-
   ThePlot & plot=*win->theplot;
   ShowGlerror("begin OnePlotFE plot");
   plot.SetDefIsoV();
+  win->setLighting();
   //    OneWindow * win=plot.win;// bof bof  la struct est tres mauvaise . 
   assert(win);
   const Mesh & Th(*this->Th);
@@ -687,6 +696,7 @@ void OnePlotFE::Draw(OneWindow *win)
   //  if(what==2)
   //  glEnable(GL_DEPTH_TEST);  
   ShowGlerror("b mesh  OnePlotFE plot");  
+  win->unsetLighting();
   Plot(Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2]);
   ShowGlerror("OnePlotFE::Draw");
 }
@@ -778,7 +788,7 @@ OneWindow::OneWindow(int h,int w,ThePlot *p)
   lplotssize(0),
   height(h),width(w),theplot(0),hpixel(1),
   Bmin(0,0),Bmax(1,1),oBmin(Bmin),oBmax(Bmax),zmin(0),zmax(1),
-  windowdump(false),help(false), rapz0(-1.),rapz(1)
+  windowdump(false),help(false), rapz0(-1.),rapz(1),withlight(false)
 {
   
   add(p);
@@ -1123,43 +1133,58 @@ void OneWindow::cadreortho(R2 A, R2 B)
     
     // if((debug > 10)) cout << "cadreortho\n";
 }
-void OneWindow::setLighting(){
-    glEnable(GL_LIGHTING);	
-    GLfloat dif[] = { 0.9,0.9,0.9,1.0f };
-    GLfloat amb[] = {0.5f, 0.5f, 0.5f, 1.0f};
-    if(plotdim==3)
-      {
-	if(debug>1)  cout << " Light pos  3d:  " << cam << endl;
-        GLfloat position[] = {cam.x,cam.y,cam.z,1.f} ;
-     glLightfv(GL_LIGHT0, GL_POSITION, position);
-      }
-    else
-      {
+void OneWindow::setLighting()
+{
+  if(withlight)
+    {
+      if(plotdim==3)
+	{
+	  GLfloat lp0[4] = { cam.x,cam.y,cam.z, 1.0 };
+	  glLightfv(GL_LIGHT0,GL_POSITION,lp0);	
 	  
-	GLfloat position[] = {Pvue3.x,Pvue3.y,Pvue3.z+(Bmax3.z-Bmin3.z)*3,1.f} ;
+	  if(debug>1)  cout << " Light pos  3d:  " << cam << endl;
+	}
+      else
+	{
+	  
+	  GLfloat position[] = {Pvue3.x,Pvue3.y,Pvue3.z+(Bmax3.z-Bmin3.z)*3,1.f} ;
 	  glLightfv(GL_LIGHT0, GL_POSITION, position);
-
-      }
-    //glLightfv(GL_LIGHT0, GL_SPECULAR, sp);
-    //glLightfv(GL_LIGHT0, GL_DIFFUSE, dif);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, amb);
-    glEnable(GL_LIGHT0);
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);				
-    //glEnable(GL_COLOR_MATERIAL);	
-    //glColorMaterial(GL_FRONT_AND_BACK,GL_DIFFUSE);
-    GLfloat lum_ambiente[]={0.9,0.9,0.9,1.0}; /* composantes R,G */ 
-    /* B,A par defaut */ 
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lum_ambiente); 
-    glShadeModel(GL_FLAT); 
-    //glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,dif); 
-    //glColorMaterial(GL_FRONT_AND_BACK,GL_SPECULAR);
-    glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT);
-    glDisable(GL_LIGHTING);glDisable(GL_LIGHT0);
+	  
+	}
+      
+      float cca=0.3,ccd=1., ccs=0.8;
+      GLfloat ambient[] = {cca,cca,cca,1.0f};//différents paramètres
+      GLfloat diffuse[] = {ccd,ccd,ccd,1.0f};
+      GLfloat specular_reflexion[] = {ccs,ccs,ccs,1.0f};
+      GLubyte shiny_obj = 128;
+      glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,1);
+      glEnable(GL_LIGHTING);//positionnement de la lumière avec
+      glLightfv(GL_LIGHT0,GL_AMBIENT,ambient);//les différents paramètres
+      glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuse);
+      
+      glEnable(GL_COLOR_MATERIAL);//spécification de la réflexion sur les matériaux
+      glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT,ambient);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,diffuse);
+      // glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular_reflexion);// on peut le faire avant chaque objet
+      glMateriali(GL_FRONT_AND_BACK,GL_SHININESS,shiny_obj);//si on veut qu'ils aient des caractéristiques #
+      glShadeModel(GL_FLAT);  
+      glEnable(GL_LIGHTING);
+      glEnable(GL_LIGHT0); 
+    }
+  else
+    {
+      glDisable(GL_LIGHTING);
+      glDisable(GL_LIGHT0);
+    }
 
 }
-void OneWindow::unsetLighting(){
-    glDisable(GL_LIGHTING);glDisable(GL_LIGHT0);
-    //g->lightning=false;
+
+void OneWindow::unsetLighting()
+{
+  glDisable(GL_LIGHTING);
+  glDisable(GL_LIGHT0);
+  //g->lightning=false;
 }
 
 OnePlotBorder::OnePlotBorder(PlotStream & f) 
@@ -1220,6 +1245,7 @@ void ThePlot::DrawHelp(OneWindow *win)
   win->Show("b)  switch between black and white or color plotting ",i++);
   win->Show("g)  switch between grey or color plotting ",i++);
   win->Show("f)  switch between filling iso or not  ",i++);
+  win->Show("l)  switch between lighting or not  ",i++);
   win->Show("v)  switch between show the numerical value of iso or not",i++);
   win->Show("w)  graphic window dump in file ",i++);
   win->Show("m)  switch between show  meshes or not",i++);
@@ -1837,15 +1863,23 @@ void ThePlot::DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso
 	    }
 	  if (im>2) 
 	    {
-		color(l+4);
-		glBegin(GL_POLYGON);
-		//SetColor((xfb+xfh)/2); 
-		for (int i=0;i<im;i++)
-		  {// if((debug > 10)) cout << i << " \t : " << PQ[i].x << " " <<  PQ[i].y << " " << z[i]*rapz << endl;
-		      glVertex3f(PQ[i].x, PQ[i].y,z[i]*rapz);
-		  }
-		glEnd();
-		
+	      color(l+4);
+	      R3 P[10];
+	      for(int i=0;i<im;++i)
+		P[i]= R3(PQ[i].x,PQ[i].y,z[i]*rapz);
+	      R3 N(R3(P[0],P[1])^R3(P[0],P[2]));
+	      N /= N.norme();
+	      if(N.z<0) N = -N;
+	      glNormal3d(N.x,N.y,N.z);
+	      
+	      glBegin(GL_POLYGON);
+	      //SetColor((xfb+xfh)/2); 
+	      for (int i=0;i<im;i++)
+		{// if((debug > 10)) cout << i << " \t : " << PQ[i].x << " " <<  PQ[i].y << " " << z[i]*rapz << endl;
+		  glVertex3f(P[i].x, P[i].y,P[i].z);
+		}
+	      glEnd();
+	      
 	    }
       }
 } 
@@ -1990,6 +2024,9 @@ static void Key( unsigned char key, int x, int y )
       case 'w':
 	if(win)
 		win->windowdump=true;
+	break;
+      case 'l':
+	win->withlight = !win->withlight;
 	break;
       case '?' :
 	if(win)

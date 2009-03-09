@@ -1,5 +1,9 @@
+v 3.1
+  -correct compile  order missing libMesh
+  - add lighting in ffglut (key l) for 3d isovalue 
 v 3.0-6
   - correct int2d in 3d. bug in   Face -> tet mapping  (PBord method) March 5 2009
+        change the postscript  plot dimension to be in A4 paper.  
         nuTriangle   given the tet  number in 3d case (5 march 2009)
         area  given the area of the triangle on 3d border integral. 
   - add tool to required edge in adaptmesh with label of edges. 

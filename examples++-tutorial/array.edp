@@ -1,6 +1,8 @@
 int i;
 real [int] tab(10), tab1(10); // 2 array of 10 real 
 complex [int] ctab(10), ctab1(10); // 2 array of 10 complex 
+//string [int] stab(10);   pas code ... 
+
 //  real [int] tab2; //  bug 
 tab = 1;  //  set all the array to 1
 tab[1]=2;
@@ -27,6 +29,7 @@ cout << ctab[1] << " " << ctab[9] <<  endl;
 
 
 real [string] map; //  a dynamique array
+ string[string] smap;
 for (i=0;i<10;i=i+1)
   {
     tab[i] = i*i;

@@ -1,17 +1,27 @@
-Compilation of FreeFem++ under unix, MacOs 10 or cygwin (Windows)
+Compilation of FreeFem++ under unix, MacOs X or cygwin (Windows)
 and bamg (mesh generator)
 ----------------------------------------------------------------
 
-New:  Test version 3.  F. Hecht & J. Morice 6 oct 2008.
-remark the graphique is now base of Open/Glut lib.
-so to today the ide/cs  version is not  currently available
-nothing in src/ide si compilde.
+New:  Test version 3.1  F. Hecht & J. Morice 6 oct 2008.
+Remark:
+     *  the graphique is now base of Open/Glut lib.
+     *  IN CASE  of problem under UBUNTU/GLUT  (no graphics window tilte: (march 2009) 
+        they are a know bug with compiz package so  try
+	To disable/enable it graphically, install the compiz-swith package with synatic. Or try this in command line:
+	killall compiz.real && killall compiz && metacity --replace --display :0 & 
+
+     *  to today the ide/cs  version is not  currently available
+        nothing in src/ide si compilde.
+	you can get a experiental version from http://www.ann.jussieu.fr/~lehyaric/ffcs/index.htm
+
 This part of the software under construction.
 F. Hecht.
----------------------------
+-
 
 
-remark: for debian, ubuntu, MacOS, Windows  see the the prerequisite
+For debian, ubuntu, MacOS, Windows  see the the prerequisite
+------------------------------------------------------------
+
 installed packages before configuration and compilatation.
 
 This file details specific configuration details for FreeFem++. For
@@ -53,8 +63,7 @@ Linear algebra libraries and eigen value problem
 By default, "./configure" looks for the X11, BLAS, ARPACK and UMFPACK
 libraries on the local system.
 ARPACK is use to compute eigenvalue.
-and UMFPACK is a new fast sparce linear solver.
-
+and UMFPACK is a new fast sparse linear solver.
 
  If configure cannot find the libraries
 by itself, you can specify the full path to a library file (ending
@@ -73,14 +82,10 @@ compilation step ("make") will try to download the missing libraries
 Remark, under linux or window the simplest way to get
 a not to bad version is
 ./configure --enable-generic_blas
-or without ide 
-./configure --enable-generic_blas --without-fltk 
 
 
 and reconfigure for example: 
-./configure --enable-generic_blas --without-fltk 
-
-
+./configure --enable-generic_blas 
 
 Here are the different versions of FreeFem++ produced by one
 compilation (some versions may be missing if your system does not
@@ -91,23 +96,22 @@ support them):
 
 * FreeFem++-nw: without graphics (located in src/nw)
 
-* FreeFem++-glx: graphics based on OpenGL (located in src/glx)
+* FreeFem++: graphics based on OpenGL (located in src/nw)
 
-* FreeFem++-agl: graphics based on MacOS X CoCoa (located in src/agl)
+* ffglut: the graphic tools
 
 * FreeFem++-mpi: parallel version, without graphics (located in src/mpi)
 
-* FreeFem++-cs: integrated development environment (located in src/ide)
 
 The compilation procedure (produced with automake) builds all the
 libraries and executables sequentially. Running "make" in a
 subdirectory does not rebuild dependencies in other directories.
 
 The compilation has been tested under linux and MacOs/Darwin with g++
-version 2.95.2, 2.95.3, 3.01 3.1 3.3. It take 30 mn to compile all on
+version  3.3. 4.0 4.4 It take 30 mn to compile all on
 my PowerBook G4 1Mhz 1024MB.
 
-Rebuilding "./configure"
+Rebuilding "configure"
 ------------------------
 
 Developers of FreeFem++ can rebuild the configuration system using
@@ -146,10 +150,7 @@ and directory  to seach dynamic lib  (shell variable LD_LIBRARY_PATH)
 
 warning under  Window XP,  first install the cygwin environnent (see http://www.cygwin.com)
 > cd example++-load build a dll file with the following shell script:
-> ./mkdll-ff.sh -win32  myfunction 
-or under other achitecture
-> g++  ./mkdll-ff.sh   myfunction
-g++ -c -I../src/fflib -I../src/femlib -I../src/Graphics myfunction.cpp
+> ./ff-c++  myfunction 
 
 to execute the examples try  
   under window xp
@@ -279,7 +280,7 @@ are install
 
 or if you have compile the download/f2c   with : (cd download/f2c;make install)
 
-./configure '-with-suffix' 'MacIntel' '-without-fltk' '--enable-download' '-with-mpi=mpic++' '-enable-download' 
+./configure '-with-suffix' 'MacIntel'  '--enable-download' '-with-mpi=mpic++' '-enable-download' 
 
 # to build universal FreeFem++ of 10.4 macOS (ppc , i386):
 

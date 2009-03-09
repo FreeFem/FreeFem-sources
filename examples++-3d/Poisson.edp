@@ -25,6 +25,7 @@ Lap3d;
 cout << " u min::   " << u[]. min << "  max: " << u[].max << endl;
 real err= int3d(Th)( square(u-ue) );
 cout << int3d(Th)(1.) << " = " << Th.mesure << endl;
+plot(u,wait=1);
 Vh d= ue-u;
 cout <<  " err = " << err <<  " diff l^\intfy = " << d[].linfty << endl;
 Vh2 u2=u,u2e=ue;
