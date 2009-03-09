@@ -367,7 +367,7 @@ void initgraphique()
   SetColorTable(8);
   INITGRAPH = 1;
   width = 1500;
-  height =  900;
+  height =  1060; // aspect ratio  \sqrt(2)
 }
 
 void closegraphique()
@@ -576,7 +576,9 @@ void openPS(const char *filename )
   int count=0;
   if(psfile_save) closePS();
   time_t t_loc;
-    float s= 27./2.54*20./width;
+  int  widthA4PS=596;
+  int heightA4PS=842;
+  float s= (double)widthA4PS/width;
   char  username[10];
   /*if (!cuserid(username)) */ strcpy(username,"inconnue");
   time(&t_loc);

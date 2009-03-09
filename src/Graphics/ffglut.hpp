@@ -313,6 +313,7 @@ public:
   R  rapz,rapz0;     
   R3 Bmin3,Bmax3,Pvue3;
   R3 cam;
+  bool withlight;
   //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
   OneWindow(int h,int w,ThePlot *p);
   void DefaultView() ;
