@@ -642,7 +642,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
       //if(verbosity>199) cout << "it " << it <<endl;
       const Element & K(Th[it]);
       Mesh::kthrough++;
-      assert(k++<100);
+      assert(k++<1000);
       int kk,n=0,nl[nkv];
       R l[nkv];
       for(int iii=0; iii<nkv; iii++)
@@ -657,7 +657,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
       // R eps =  -K.mesure()*1e-10;
       R eps = -1e-10;
       for(int i=0;i<nkv;++i)
-	if( l[i]*K.mesure() < eps){
+	if( l[i] < eps){
 	  nl[n++]=i;
 	}
       /*
@@ -718,7 +718,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  int nn=0,ii;
 	  int nadj[d+1],ni[d+1];
 	  for(int i=0;i<nkv;++i)
-	    if (l[i]*K.mesure() < eps && (itt=Th.ElementAdj(it,ii=i)) != it && itt && find5(itt,kbord,nbord) < -1 ) 
+	    if (l[i] < eps && (itt=Th.ElementAdj(it,ii=i)) != it && itt && find5(itt,kbord,nbord) < -1 ) 
 	      ni[nn++]=i,nadj[i]=itt;
 	  if(verbosity>100)
 	    cout << " nn : "<< nn << endl;
