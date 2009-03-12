@@ -478,8 +478,8 @@ template<class R,class A>  R * set_eqdestroy(R* a,A b){
   ( *a =b); return a;}
   
 template<class R,class A>  R * set_eqdestroy_incr(R* a,A b){
-   (*b).increment() ;
-   (**a).destroy() ;//  le cas debile Th=Th doit marcher
+  if(b) (*b).increment() ;
+  if(*a) (**a).destroy() ;//  le cas debile Th=Th doit marcher
    // cout << " set_eqdestroy " << a << " " << b << endl;
   ( *a =b); return a;}
   
