@@ -560,6 +560,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
     l[0]=1-l[1]-l[2];
   }
   
+
   inline void CoorBary(const Tet & K,const  R3  & P, R *l)
   {
     R detK = 6.*K.mesure() ;
@@ -624,6 +625,8 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	it=Th.Contening(v);
       }
     
+    cout << "tstart=" << tstart << " "<< "it=" << it << " P="<< P << endl; 
+
     //     int itdeb=it;     
     //     int count=0;
     //     L1: 
@@ -639,15 +642,31 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
       //if(verbosity>199) cout << "it " << it <<endl;
       const Element & K(Th[it]);
       Mesh::kthrough++;
-      assert(k++<1000);
+      assert(k++<100);
       int kk,n=0,nl[nkv];
       R l[nkv];
+      for(int iii=0; iii<nkv; iii++)
+	l[iii]=0.;
+
       CoorBary(K,P,l);
+
+      // CoorBary :: donner entre 0 et 1
+      // Pb si K.mesure*1.e-10 precision machine ==> bug
       
-      R eps =  -K.mesure() *1e-10;
+      // avant:
+      // R eps =  -K.mesure()*1e-10;
+      R eps = -1e-10;
       for(int i=0;i<nkv;++i)
-	if (l[i] < eps) nl[n++]=i;
-      
+	if( l[i]*K.mesure() < eps){
+	  nl[n++]=i;
+	}
+      /*
+	cout << "K.mesure=" << K.mesure() ;
+	cout << " eps=" << eps << endl;
+	for(int i=0;i<nkv;++i)
+	cout<< " l["<< i <<"]=" <<  l[i] << endl;
+	cout << " n=" << n << endl;
+      */
       if (n==0)
 	{  // interior => return
 	  outside=false; 
@@ -666,6 +685,8 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  return &K;
 	}
       
+      
+
       kk=n==1 ? 0 : nRand(n);
       j= nl[ kk ];
       int itt =  Th.ElementAdj(it,j);
@@ -682,7 +703,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  kbord[nbord++]=it;
 	  if(nbord>=5)  HeapSort(kbord,nbord);
 	}
-      if(verbosity>100)
+      if(verbosity>1)
 	{
 	cout << " bord "<< it<< "   nbf < 0 : " <<n << " (inb) " << inkbord << " nfb" << nbord<<endl;
 	    R ss=0; 
@@ -697,7 +718,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  int nn=0,ii;
 	  int nadj[d+1],ni[d+1];
 	  for(int i=0;i<nkv;++i)
-	    if (l[i] < eps && (itt=Th.ElementAdj(it,ii=i)) != it && itt && find5(itt,kbord,nbord) < -1 ) 
+	    if (l[i]*K.mesure() < eps && (itt=Th.ElementAdj(it,ii=i)) != it && itt && find5(itt,kbord,nbord) < -1 ) 
 	      ni[nn++]=i,nadj[i]=itt;
 	  if(verbosity>100)
 	    cout << " nn : "<< nn << endl;
