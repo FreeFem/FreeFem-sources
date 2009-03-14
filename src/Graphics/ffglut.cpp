@@ -68,7 +68,7 @@ int kread=-1;
 int Fin(int code)
 {
   WaitNextRead();
-  if(!NoMorePlot)
+  if(!NoMorePlot && debug>2)
     cout << " exit before end  " << endl;
   exit(NoMorePlot ? 0  : 1);
 }
@@ -95,6 +95,7 @@ int   ReadOnePlot(FILE *fp)
 	  if(err) break;
 	}
       if(err) {
+	if(debug>2)
 	 cout << " Err read heading " << endl;
 	 goto Lreturn;
 	 //return err;
@@ -1167,7 +1168,7 @@ void OneWindow::setLighting()
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT,ambient);
       glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,diffuse);
       // glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular_reflexion);// on peut le faire avant chaque objet
-      glMateriali(GL_FRONT_AND_BACK,GL_SHININESS,shiny_obj);//si on veut qu'ils aient des caractéristiques #
+      //glMateriali(GL_FRONT_AND_BACK,GL_SHININESS,shiny_obj);//si on veut qu'ils aient des caractéristiques #
       glShadeModel(GL_FLAT);  
       glEnable(GL_LIGHTING);
       glEnable(GL_LIGHT0); 

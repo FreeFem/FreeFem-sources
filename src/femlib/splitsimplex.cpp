@@ -39,8 +39,9 @@ $:
  ref:ANR-07-CIS7-002-01  */
 
 #include <cmath>
-#include <cassert>
+#include <cstdlib>
 #include <iostream>
+#include <cassert>
 #include <fstream>
 #include "ufunction.hpp"
 using namespace std;

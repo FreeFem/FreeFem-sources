@@ -505,7 +505,7 @@ template<class R>  R ** set_copyp_new( R**  a,R*  b){
 
 template<class R>  R ** set_copy_incr( R** const & a, R * const & b){ 
    *a=b;
-   b->increment();
+   if(b) b->increment();
    return a;}
 
 template<class R,class A>  R * set_init2( R* const & a,const A & b,const A & c){ 

@@ -74,6 +74,7 @@ while [ $# -ne 0 ]  ; do
 	    ;;
 	F77=*) F77=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	CXX=*) CXX=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	F77=*) F77=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	CXXFLAGS=*) CXXFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	-n)  do="no";;
 	-g)  DEBUG="$DEBUG $1";;
