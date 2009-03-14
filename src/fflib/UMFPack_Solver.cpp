@@ -6,6 +6,7 @@ using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
 #include "MatriceCreuse_tpl.hpp"
+#include "lgsolver.hpp"
 
  
 #ifdef HAVE_LIBUMFPACK
@@ -360,6 +361,9 @@ Init::Init(){
 #endif
 
 #else
+  using namespace Fem2D;
+
+bool SetGMRES();
 void init_UMFPack_solver() {
   cout << " no UMFPACK -> replace by LU or GMRES  "; 
   Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetGMRES));

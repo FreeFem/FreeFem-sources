@@ -504,5 +504,4 @@ BuildSolverCG(const MatriceMorse<R> *A,int strategy,
 }
 
 
-}
-
+} // end of namespace Fem2D
