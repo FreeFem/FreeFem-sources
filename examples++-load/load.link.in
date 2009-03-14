@@ -5,7 +5,9 @@ FFVERSION='@VERSION@'
 FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@'
 INCFF=
 if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
+if [ -z "$F77" ] ; then F77='@F77@' ; fi
 if [ "$CXX" = '@'CXX'@' ] ; then CXX=""; fi
+if [ "$F77" = '@'F77'@' ] ; then F77=""; fi
 if [ "$FFCXXFLAGS" = '@'CXXFLAGS'@' ] ; then FFCXXFLAGS=""; fi
 if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
 if [ -z "$INCFF" ] ; then
@@ -67,9 +69,10 @@ while [ $# -ne 0 ]  ; do
 	    echo "    -b dir  to change the default install  dir " 
 	    echo "    -dll file  add  dll and this file copie in the install dir"
 	    echo "    -o outputfile without suffix"
-	    echo "    file.{cpp,cp,cxx}"
+	    echo "    file.{cpp,cp,cxx,f,F}"
 	    exit 0;
 	    ;;
+	F77=*) F77=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	CXX=*) CXX=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	CXXFLAGS=*) CXXFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	-n)  do="no";;
@@ -85,6 +88,8 @@ while [ $# -ne 0 ]  ; do
 	*.cpp) files="$files $1";  o=`basename $1 .cpp` ; fileso="$fileso $o.o";; 
 	*.cp) files="$files $1";  o=`basename $1 .cp`   ; fileso="$fileso $o.o";; 
 	*.cxx) files="$files $1";  o=`basename $1 .cxx` ; fileso="$fileso $o.o";; 
+	*.f) ffiles="$ffiles $1";  o=`basename $1 .f` ; fileso="$fileso $o.o";; 
+	*.F) ffiles="$ffiles $1";  o=`basename $1 .F` ; fileso="$fileso $o.o";; 
 	*.o) fileso="$fileso $1"; o=`basename $1 .o` ;; 
 	-o)  out=$2; shift;;
 	*) OTHER="$OTHER $1";;
@@ -141,7 +146,7 @@ case "$WIN32$uu" in
 	exit 1;;
 esac
 FLAGS="$FLAGS $DEBUG $FFCXXFLAGS"
-if [ -n "$files$fileso" ] ; then
+if [ -n "$ffiles$files$fileso" ] ; then
     if [ "$WIN32" = "yes" -a -f $bin/libff.dll  ]; then
 	echo " Sorry, no freefem .dll file (libff.dll)  in $bin dir "
 	echo " try with -b dir-path where the file libff.dll exist"
@@ -151,6 +156,13 @@ if [ -n "$files$fileso" ] ; then
 	echo $CXX -c $FLAGS $CXXFLAGS $INC $PIC $files
 	if [  $do = yes ] ; then 
 	    $CXX -c $INC $FLAGS $CXXFLAGS $PIC  $files
+	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
+	fi
+    fi
+    if [ "$ffiles" ] ;then 
+	echo $F77 -c $FLAGS $CXXFLAGS $INC $PIC $ffiles
+	if [  $do = yes ] ; then 
+	    $F77 -c $INC $FLAGS $CXXFLAGS $PIC  $ffiles
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
     fi
