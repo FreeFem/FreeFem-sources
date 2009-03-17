@@ -181,6 +181,8 @@ AnyType ReadMesh3::operator()(Stack stack) const
   string * fn =  GetAny<string*>((*filename)(stack));
   cout << "ReadMesh3 " << *fn << endl;
   Mesh3 *Thh = new Mesh3(*fn);
+  Thh->BuildGTree();
+  Add2StackOfPtr2FreeRC(stack,Thh);
   return SetAny<pmesh3>(Thh);;
   
 }
@@ -1004,7 +1006,7 @@ void init_lgmesh3() {
 		    );
   
  
-  Global.Add("readmesh3D","(",new OneOperatorCode<ReadMesh3>);
+  Global.Add("readmesh3","(",new OneOperatorCode<ReadMesh3>);
   Global.Add("savemesh","(",new OneOperatorCode<SaveMesh3>);
   Global.Add("savesurfacemesh","(",new OneOperatorCode<SaveSurfaceMesh3>);
 
