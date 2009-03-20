@@ -341,7 +341,7 @@ inline int cestac(const complex<double_st> & z)
 class Problem  : public Polymorphic { 
   //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =13; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter   
+  static const int n_name_param =23; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter   
   int Nitem,Mitem;
   const int dim; 
 public:
@@ -548,7 +548,7 @@ struct OpCall_FormLinear_np {
 
 struct OpCall_FormBilinear_np {
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =12; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007
+  static const int n_name_param =22; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007  // 12->22 MUMPS+ Autre Solveur 02/08
 };
 
 template<class T,class v_fes>
@@ -1001,8 +1001,12 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 }
 
 template<class R>
-void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool VF,double eps,int NbSpace,int itmax,const OneOperator * const precon,int umfpackstrategy, double tgv,
-double tol_pivot,double tol_pivot_sym)
+void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool VF,double eps,int NbSpace,int itmax,
+	       const OneOperator * const precon,int umfpackstrategy, double tgv,
+	       double tol_pivot,double tol_pivot_sym, 
+	       int *param_int, double *param_double, string *param_char, int *perm_r, 
+	       int *perm_c, string *file_param_int, string *file_param_double, string *file_param_char, 
+	       string *file_param_perm_r, string *file_param_perm_c)
 { 
   using namespace Fem2D;
   if (typemat->profile)
@@ -1044,7 +1048,9 @@ double tol_pivot,double tol_pivot_sym)
         break;
 //#ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::SparseSolver :
-	    AA.SetSolverMaster(DefSparseSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,(void *)precon,stack )); 
+	    AA.SetSolverMaster(DefSparseSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,
+							 param_int, param_double, param_char, perm_r, perm_c, file_param_int, file_param_double, file_param_char, 
+							 file_param_perm_r, file_param_perm_c, (void *)precon,stack )); 
          //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
         break;
            
@@ -1092,6 +1098,18 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   int umfpackstrategy=0;
   double tol_pivot=-1;
   double tol_pivot_sym=-1;
+
+  int *param_int = NULL;
+  double *param_double = NULL; 
+  string *param_char = NULL;
+  int *perm_r = NULL; 
+  int  *perm_c = NULL;
+  string *file_param_int;  // Add J. Morice 02/09 
+  string *file_param_double; 
+  string* file_param_char;
+  string* file_param_perm_r;
+  string* file_param_perm_c;  
+
   TypeSolveMat typemat(  & Uh == & Vh  ? TypeSolveMat::GMRES :TypeSolveMat::NONESQUARE);
   bool initmat=true;
   if (b->nargs[0]) initmat= ! GetAny<bool>((*b->nargs[0])(stack));
@@ -1104,7 +1122,18 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   if (b->nargs[9]) tol_pivot= GetAny<double>((*b->nargs[9])(stack));
   if (b->nargs[10]) tol_pivot_sym= GetAny<double>((*b->nargs[10])(stack));
   if (b->nargs[11]) itermax= GetAny<long>((*b->nargs[11])(stack));
-  
+
+  if (b->nargs[12]) param_int= GetAny< KN<int> >((*b->nargs[12])(stack));  // Add J. Morice 02/09 
+  if (b->nargs[13]) param_double= GetAny< KN<double> >((*b->nargs[13])(stack));
+  if (b->nargs[14]) param_char= GetAny< string * >((*b->nargs[14])(stack));  //
+  if (b->nargs[15]) perm_r = GetAny< KN< int > >((*b->nargs[15])(stack));
+  if (b->nargs[16]) perm_c = GetAny< KN< int > >((*b->nargs[16])(stack));  //
+  if (b->nargs[17]) file_param_int= GetAny< string* >((*b->nargs[17])(stack));  // Add J. Morice 02/09 
+  if (b->nargs[18]) file_param_double= GetAny< string* >((*b->nargs[18])(stack));
+  if (b->nargs[19]) file_param_char= GetAny< string* >((*b->nargs[19])(stack));  //
+  if (b->nargs[20]) file_param_perm_r = GetAny< string* >((*b->nargs[20])(stack));
+  if (b->nargs[21]) file_param_perm_c = GetAny< string* >((*b->nargs[21])(stack));  //
+ 
   if (! A_is_square && typemat != TypeSolveMat::NONESQUARE) 
    {
      cout << " -- Error the solver << "<< typemat <<"  is set  on rectangular matrix  " << endl;
@@ -1177,7 +1206,9 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
     
   }    
   if (A_is_square) 
-    SetSolver(stack,*A.A,&typemat,VF,eps,NbSpace,itermax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym);
+    SetSolver(stack,*A.A,&typemat,VF,eps,NbSpace,itermax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym, 
+	      param_int, param_double, param_char, perm_r, perm_c, file_param_int, file_param_double, file_param_char, 
+	      file_param_perm_r, file_param_perm_c);
   
   return SetAny<Matrice_Creuse<R>  *>(&A);
   

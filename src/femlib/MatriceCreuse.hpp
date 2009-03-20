@@ -250,8 +250,8 @@ public:
   R & operator() (int i,int j) {return this->a[i*this->m+j];}
   // MatPleineElementFunc element;
   void  (* element)(MatriceElementairePleine &,const FElement &,const FElement &, double*,int ie,int label,void *) ; 
-   void  (* faceelement)(MatriceElementairePleine &,const FElement &,const FElement &,const FElement &,const FElement &, double*,int ie,int iee, int label,void *) ; 
- void call(int k,int ie,int label,void *);
+  void  (* faceelement)(MatriceElementairePleine &,const FElement &,const FElement &,const FElement &,const FElement &, double*,int ie,int iee, int label,void *) ; 
+  void call(int k,int ie,int label,void *);
   
   MatriceElementairePleine & operator()(int k,int ie,int label,void * stack=0)
   {call(k,ie,label,stack);return *this;}
@@ -798,46 +798,66 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 // add Sep 2007 for generic Space solver
 typedef MatriceMorse<double>::VirtualSolver *
    (*SparseRMatSolve)(const MatriceMorse<double> *A,int strategy,
-		   double ttgv, double epsilon, double pivot,double pivot_sym,
-		   int NbSpace,int itmax , const void * precon, void * stack);
+		      double ttgv, double epsilon, double pivot,double pivot_sym,
+		      int NbSpace,int itmax ,  
+		      int *param_int, double *param_double, string *param_char, 
+		      int *perm_r, int *perm_c, string *file_param_int,  
+		      string *file_param_double, string *file_param_char, 
+		      string *file_param_perm_r, string *file_param_perm_c,
+		      const void * precon, void * stack);
+
 typedef MatriceMorse<Complex>::VirtualSolver *
    (*SparseCMatSolve)(const MatriceMorse<Complex> *A,int strategy,
-		   double ttgv, double epsilon, double pivot,double pivot_sym,
-		   int NbSpace,int itmax , const void * precon, void * stack);
+		      double ttgv, double epsilon, double pivot,double pivot_sym,
+		      int NbSpace,int itmax , 
+		      int *param_int, double *param_double, string *param_char, 
+		      int *perm_r, int *perm_c, string *file_param_int,  
+		      string *file_param_double, string *file_param_char, 
+		      string *file_param_perm_r, string *file_param_perm_c,
+		      const void * precon, void * stack);
 
 
 template<class R> struct DefSparseSolver {
-    typedef typename MatriceMorse<R>::VirtualSolver * 
-            (*SparseMatSolver)(const MatriceMorse<R> *A,int strategy,
-			       double ttgv, double epsilon, double pivot,double pivot_sym ,
-			       int NbSpace,int itmax , const void * precon, void * stack);
-    static SparseMatSolver solver;
+  typedef typename MatriceMorse<R>::VirtualSolver * 
+  (*SparseMatSolver)(const MatriceMorse<R> *A,int strategy,
+		     double ttgv, double epsilon, double pivot,double pivot_sym ,
+		     int NbSpace,int itmax ,
+		     int *param_int, double *param_double, string *param_char, 
+		     int *perm_r, int *perm_c, string *file_param_int,  
+		     string *file_param_double, string *file_param_char, 
+		     string *file_param_perm_r, string *file_param_perm_c,
+		     const void * precon, void * stack);
+  static SparseMatSolver solver;
     
   static  typename MatriceMorse<R>::VirtualSolver * 
-      Build(const MatriceMorse<R> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-	    int NbSpace,int itmax ,const  void * precon, void * stack)
-
-    {
-      typename MatriceMorse<R>::VirtualSolver *ret=0;
-	if(solver)
-	    ret =(solver)(A,strategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,(const void *) precon,stack);
-	return ret;	
-    }
+  Build(const MatriceMorse<R> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
+	int NbSpace,int itmax ,  int *param_int, double *param_double, string *param_char, int *perm_r, 
+	int *perm_c, string *file_param_int, string *file_param_double, string *file_param_char, 
+	string *file_param_perm_r, string *file_param_perm_c,const  void * precon, void * stack)
+    
+  {
+    typename MatriceMorse<R>::VirtualSolver *ret=0;
+    if(solver)
+      ret =(solver)(A,strategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax, param_int, param_double, 
+		    param_char, perm_r, perm_c, file_param_int, file_param_double, file_param_char, 
+		    file_param_perm_r, file_param_perm_c,(const void *) precon,stack);
+    return ret;	
+  }
 };
 
 // End Sep 2007 for generic Space solver
 
 struct TypeSolveMat {
-    enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6 };
-    TSolveMat t;
-    bool sym;
-    bool profile;
-    TypeSolveMat(TSolveMat tt=LU) :t(tt),
-	sym(t == CROUT || t ==CHOLESKY  ||  t==GC ),
-	profile(t != GC && t != GMRES && t != NONESQUARE && t != SparseSolver ) {}
-    bool operator==(const TypeSolveMat & a) const { return t == a.t;}                               
-    bool operator!=(const TypeSolveMat & a) const { return t != a.t;}
-    static TSolveMat defaultvalue;
+  enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6 };
+  TSolveMat t;
+  bool sym;
+  bool profile;
+  TypeSolveMat(TSolveMat tt=LU) :t(tt),
+				 sym(t == CROUT || t ==CHOLESKY  ||  t==GC ),
+				 profile(t != GC && t != GMRES && t != NONESQUARE && t != SparseSolver ) {}
+  bool operator==(const TypeSolveMat & a) const { return t == a.t;}                               
+  bool operator!=(const TypeSolveMat & a) const { return t != a.t;}
+  static TSolveMat defaultvalue;
 };
 
 
@@ -986,7 +1006,7 @@ class SolveUMFPack<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
   double *ar,*ai;
 
 
-    double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
+  double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
 
 public:
   SolveUMFPack(const MatriceMorse<Complex> &A,int strategy,double ttgv, double epsilon=1e-6,
@@ -1107,14 +1127,20 @@ public:
 
 inline MatriceMorse<double>::VirtualSolver *
 BuildSolverUMFPack(const MatriceMorse<double> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-		   int NbSpace,int itmax , const void * precon, void * stack )
+		   int NbSpace,int itmax ,  int *param_int, double *param_double, string **param_char, 
+		   int *perm_r, int *perm_c, string *file_param_int,  
+		   string *file_param_double, string *file_param_char, 
+		   string *file_param_perm_r, string *file_param_perm_c, const void * precon, void * stack )
 {
     return new SolveUMFPack<double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
 
 inline MatriceMorse<Complex>::VirtualSolver *
 BuildSolverUMFPack(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-		   int NbSpace,int itmax , const void * precon, void * stack )
+		   int NbSpace,int itmax ,  int *param_int, double *param_double, string **param_char, 
+		   int *perm_r, int *perm_c, string *file_param_int,  
+		   string *file_param_double, string *file_param_char, 
+		   string *file_param_perm_r, string *file_param_perm_c, const void * precon, void * stack )
 {
     return new SolveUMFPack<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
 }
