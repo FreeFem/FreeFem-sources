@@ -477,7 +477,10 @@ template<class R>
 typename MatriceMorse<R>::VirtualSolver *
 BuildSolverGMRES(const MatriceMorse<R> *A,int strategy,
 		 double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-		 int NbSpace,int itmax , const void * precon, void * stack )
+		 int NbSpace,int itmax ,  int *param_int, double *param_double, string *param_char, 
+		 int *perm_r, int *perm_c, string *file_param_int,  
+		 string *file_param_double, string *file_param_char, 
+		 string *file_param_perm_r, string *file_param_perm_c,const void * precon, void * stack )
 {
     typename MatriceMorse<R>::VirtualSolver * ret=0;
     if (precon)
@@ -491,8 +494,11 @@ BuildSolverGMRES(const MatriceMorse<R> *A,int strategy,
 template<class R>
 typename MatriceMorse<R>::VirtualSolver *
 BuildSolverCG(const MatriceMorse<R> *A,int strategy,
-		 double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-		 int NbSpace,int itmax , const void * precon, void * stack )
+	      double tgv, double eps, double tol_pivot,double tol_pivot_sym,
+	      int NbSpace,int itmax ,  int *param_int, double *param_double, string *param_char, 
+	      int *perm_r, int *perm_c, string *file_param_int,  
+	      string *file_param_double, string *file_param_char, 
+	      string *file_param_perm_r, string *file_param_perm_c,const void * precon, void * stack )
 {
     typename MatriceMorse<R>::VirtualSolver * ret=0;
     if (precon)

@@ -68,8 +68,17 @@ basicAC_F0::name_and_type  Problem::name_param[]= {
   {  "cadna",&typeid(KN<double>*)},
   {  "tolpivot", &typeid(double)},
   {  "tolpivotsym", &typeid(double)},
-  {  "nbiter", &typeid(long)} // 12 
-  
+  {  "nbiter", &typeid(long)}, // 12 
+  {   "paramint",&typeid(KN<int>)}, // Add J. Morice 02/09 
+  {   "paramdouble",&typeid(KN<double>)},
+  {   "paramstring",&typeid(string *)},
+  {   "permrow",&typeid(KN<int>)},
+  {   "permcol",&typeid(KN<int>)},
+  {   "fileparamint",&typeid(string*)}, // Add J. Morice 02/09 
+  {   "fileparamdouble",&typeid(string*)},
+  {   "fileparamstring",&typeid(string* )},
+  {   "filepermrow",&typeid(string*)},
+  {   "filepermcol",&typeid(string*)} //22
 };
 
 
@@ -3356,16 +3365,19 @@ void InitProblem( int Nb, const FESpace & Uh,
 
 template<class R>
 void DefSolver(Stack stack,
-  TypeSolveMat    *typemat,
-  MatriceCreuse<R>  & A,
-  long NbSpace , 
-  long itmax, 
-  double & eps,
-  bool initmat,
-  int umfpackstrategy,
-  const OneOperator *precon,
-  double tgv,
-  double tol_pivot, double tol_pivot_sym
+	       TypeSolveMat    *typemat,
+	       MatriceCreuse<R>  & A,
+	       long NbSpace , 
+	       long itmax, 
+	       double & eps,
+	       bool initmat,
+	       int umfpackstrategy,
+	       const OneOperator *precon,
+	       double tgv,
+	       double tol_pivot, double tol_pivot_sym,
+	       int *param_int, double *param_double, string *param_char, int *perm_r, 
+	       int *perm_c, string *file_param_int, string *file_param_double, string *file_param_char, 
+	       string *file_param_perm_r, string *file_param_perm_c
 )
 {
     if (typemat->profile)
@@ -3404,7 +3416,9 @@ void DefSolver(Stack stack,
          break;
 //#ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::SparseSolver :
-            AA.SetSolverMaster(DefSparseSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,(const void *) precon,stack));
+            AA.SetSolverMaster(DefSparseSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax, 
+							 param_int, param_double, param_char, perm_r, perm_c, file_param_int, file_param_double, file_param_char, 
+							 file_param_perm_r, file_param_perm_c,(const void *) precon,stack));
 //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
          break;
            
@@ -3632,6 +3646,18 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   int umfpackstrategy=0;
   double tol_pivot=-1.; // defaut UMFPACK value  Add FH 31 oct 2005 
   double tol_pivot_sym=-1.; // defaut Add FH 31 oct 2005 
+  
+  int *param_int = NULL;
+  double *param_double = NULL; 
+  string *param_char = NULL;
+  int *perm_r = NULL; 
+  int *perm_c = NULL;
+  string *file_param_int;  // Add J. Morice 02/09 
+  string *file_param_double; 
+  string* file_param_char;
+  string* file_param_perm_r;
+  string* file_param_perm_c;  
+  
   KN<double>* cadna=0; 
   if (nargs[0]) initmat= ! GetAny<bool>((*nargs[0])(stack));
   if (nargs[1]) typemat= GetAny<TypeSolveMat *>((*nargs[1])(stack));
@@ -3645,6 +3671,20 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   if (nargs[10]) tol_pivot= GetAny<double>((*nargs[10])(stack));
   if (nargs[11]) tol_pivot_sym= GetAny<double>((*nargs[11])(stack));
   if (nargs[12]) itmax = GetAny<long>((*nargs[12])(stack)); //  fevr 2007
+
+  if (nargs[13]) param_int= GetAny< KN<int> >((*nargs[13])(stack));  // Add J. Morice 02/09 
+  if (nargs[14]) param_double= GetAny< KN<double> >((*nargs[14])(stack));
+  if (nargs[15]) param_char= GetAny< string * >((*nargs[15])(stack));  //
+  if (nargs[16]) perm_r = GetAny< KN<int > >((*nargs[16])(stack));
+  if (nargs[17]) perm_c = GetAny< KN<int> >((*nargs[17])(stack));  //
+  if (nargs[18]) file_param_int= GetAny< string* >((*nargs[18])(stack));  // Add J. Morice 02/09 
+  if (nargs[19]) file_param_double= GetAny< string* > ((*nargs[19])(stack));
+  if (nargs[20]) file_param_char= GetAny< string* >((*nargs[20])(stack));  //
+  if (nargs[21]) file_param_perm_r = GetAny< string* >((*nargs[21])(stack));
+  if (nargs[22]) file_param_perm_c = GetAny< string* >((*nargs[22])(stack));  //
+  
+
+
   //  for the gestion of the PTR. 
   WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007 
 
@@ -3788,7 +3828,10 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     if(cadna)
      ACadna = DefSolverCadna( stack,typemat,A, NbSpace ,  itmax, eps, initmat, umfpackstrategy,precon,tgv,tol_pivot,tol_pivot_sym);
     else
-     DefSolver( stack,typemat,A, NbSpace ,  itmax, eps, initmat, umfpackstrategy,precon,tgv,tol_pivot,tol_pivot_sym);
+      DefSolver( stack,typemat,A, NbSpace ,  itmax, eps, initmat, umfpackstrategy,precon,tgv,
+		 tol_pivot,tol_pivot_sym, param_int, param_double, param_char, perm_r, 
+		 perm_c, file_param_int, file_param_double, file_param_char, 
+		 file_param_perm_r, file_param_perm_c);
   
 
 

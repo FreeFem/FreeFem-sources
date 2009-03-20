@@ -100,10 +100,17 @@ basicAC_F0::name_and_type  OpCall_FormBilinear_np::name_param[]= {
   {   "strategy",&typeid(long )},
   {   "tolpivot", &typeid(double)},
   {   "tolpivotsym", &typeid(double) },
-  {   "nbiter", &typeid(long)} // 12 
-
-     
-          
+  {   "nbiter", &typeid(long)}, // 12   
+  {   "paramint",&typeid(KN<int>)}, // Add J. Morice 02/09 
+  {   "paramdouble",&typeid(KN<double>)},
+  {   "paramstring",&typeid(string*)},
+  {   "permrow",&typeid(KN<int>)},
+  {   "permcol",&typeid(KN<int>)},
+  {   "fileparamint",&typeid(string*)}, // Add J. Morice 02/09 
+  {   "fileparamdouble",&typeid(string*)},
+  {   "fileparamstring",&typeid(string* )},
+  {   "filepermrow",&typeid(string*)},
+  {   "filepermcol",&typeid(string*)} //22
 };
 
 
