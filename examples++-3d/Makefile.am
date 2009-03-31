@@ -6,7 +6,8 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
 	VISUALCHECK=$(VISUALCHECK)
-EXTRA_DIST=*.edp  all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh
+EXTRA_DIST=*.edp  all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh \
+  lac-leman-v4.msh
 
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
@@ -23,6 +24,9 @@ Ref: makeref.edp
 
 makeref.edp: regtests.m4 ../regtests.m4
 	m4 regtests.m4 > makeref.edp
+freefem++.pref:
+	echo loadpath = \"../examples++-load/\" >freefem++.pref
+	echo loadpath += \"./\" >>freefem++.pref
 
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4

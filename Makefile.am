@@ -176,7 +176,8 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	./config.status  --file=$@/Install-MacOS.command:Install-MacOS.command.in
 	chmod a+rx $@/Install-MacOS.command
 	-mkdir $@/FreeFem++.app/Contents/etc
-	echo loadpath += \"$(ff_prefix_dir)/lib\"  >$@/FreeFem++.app/Contents/etc/freefem++.pref
+	echo loadpath += \"./\"  >$@/FreeFem++.app/Contents/etc/freefem++.pref
+	echo loadpath += \"$(ff_prefix_dir)/lib\"  >>$@/FreeFem++.app/Contents/etc/freefem++.pref
 	echo includepath += \"$(ff_prefix_dir)/edp\"  >>$@/FreeFem++.app/Contents/etc/freefem++.pref
 
 

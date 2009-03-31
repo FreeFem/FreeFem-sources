@@ -947,8 +947,8 @@ class pVh3_ndf : public ternary_function<pfes3 *,long,long,long> { public:
 };
 
 
-/*  no trivial ....   FH jan 2009.. 
-class Op3_Mesh32mp : public ternary_function<pmesh3*,R,R,MeshPoint *> { public:
+/*  no trivial ....   FH jan 2009..  */
+class Op4_Mesh32mp : public quad_function<pmesh3*,R,R,R,MeshPoint *> { public:
     class Op : public E_F0mps { public:
 	Expression a,b,c,d;
 	Op(Expression aa,Expression bb,Expression cc,Expression dd) : a(aa),b(bb),c(cc),d(dd) {}       
@@ -964,13 +964,16 @@ class Op3_Mesh32mp : public ternary_function<pmesh3*,R,R,MeshPoint *> { public:
 	    mp->set(xx,yy,zz);
 	    R3 PHat;
 	    bool outside;
-	    const Tet * K=pTh->Find(mp->P.p2(),PHat,outside);
-	    mp->set(*pTh,(R2) mp->P.p2(),PHat,*K,0,outside);
+	    const Tet * K=pTh->Find(mp->P,PHat,outside);
+	    int n=(*pTh)(K);
+	    if(verbosity>200)
+	    cout << " n Tet = " << n << " " << K << " " <<  mp->P <<  endl;
+	    mp->set(*pTh,mp->P,PHat,*K,0,outside);
 	return mp;}
 	
     };
 };
-*/
+
 // FH
 
 void init_lgmesh3() {
@@ -992,7 +995,8 @@ void init_lgmesh3() {
  Add<double>("(","",new OneQuadOperator<Op4_K2R<R>,Op4_K2R<R>::Op> );
 // Add<long>("(","",new OneTernaryOperator<Op3_K2R<long>,Op3_K2R<long>::Op> ); // FH stupide 
  Add<Complex>("(","",new OneQuadOperator<Op4_K2R<Complex>,Op4_K2R<Complex>::Op> );
- // Add<pmesh3 *>("(","",new OneTernaryOperator<Op3_Mesh2mp,Op3_Mesh2mp::Op> );
+ Add<pmesh3 *>("(","",new OneQuadOperator<Op4_Mesh32mp,Op4_Mesh32mp::Op> );
+
  
  TheOperators->Add("<-",
        new OneOperator2_<pmesh3*,pmesh3*,string* >(&initMesh));

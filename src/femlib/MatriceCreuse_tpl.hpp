@@ -1246,6 +1246,83 @@ MatriceMorse<R>::MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bo
    ffassert(nbcoef==k);  
   }
 
+template<class R>
+ void  MatriceMorse<R>::resize(int nn,int mm) 
+{
+    int nc=0;   
+    int *nlg=new int[nn+1],*ncl=0;
+    int nm=min(nn,this->n);
+    nc =0;
+    nlg[0]=nc; 
+    if (symetrique)
+      {   if( nn != mm) AFAIRE("MatriceMorse<R>::resize symetric  n!=m");
+	  for (int i=0;i<nm;i++)
+	    {
+	      for (int k=lg[i];k<lg[i+1];k++)
+		{   int j=cl[k];
+		    if( j<this->m && norm(a[k]))		    
+			++nc;		   
+		}
+		nlg[i+1]=nc;
+	    }
+	  
+      }
+    else
+      {
+	  for (int i=0;i<nm;i++)
+	    {
+	      for (int k=lg[i];k<lg[i+1];k++)
+		{
+		    int j=cl[k];
+		    if(i<this->n && j<this->m && norm(a[k]))
+			++nc ;
+		}
+		nlg[i+1]=nc;
+	    }
+      }
+    for(int i=nm+1;i<=nn;++i)
+	nlg[i]=nc;
+    ncl = new int[nc];
+    R *na=new R[nc];
+    nc=0;
+
+    if (symetrique)
+      {   if( nn != mm) AFAIRE("MatriceMorse<R>::resize symetric  n!=m");
+	  for (int i=0;i<nm;i++)
+	      for (int k=lg[i];k<lg[i+1];k++)
+		{   int j=cl[k];
+		    if( j<this->m && norm(a[k]))		    
+		      {na[nc]=a[k];
+		       ncl[nc++]=j;}
+		}
+	  
+      }
+    else
+      {
+	  for (int i=0;i<nm;i++)
+	      for (int k=lg[i];k<lg[i+1];k++)
+		{
+		    int j=cl[k];
+		    if( j<this->m && norm(a[k]))
+		      {na[nc]=a[k];
+		       ncl[nc++]=j;}
+		}
+      }
+    
+    delete [] cl;
+    delete [] lg;
+    delete [] a;
+    cl=ncl;
+    lg=nlg;
+    a=na;
+    this->n=nn;
+    this->m=mm;
+    this->N=nn;
+    this->M=mm;
+    this->nbcoef=nc;
+ //   cout << nn << " " << mm << "  " <<  KN_<int>(lg,nn+1) << endl;
+    
+}
 template<class RA>
  template<class RB,class RAB>
  void  MatriceMorse<RA>::prod(const MatriceMorse<RB> & B, MatriceMorse<RAB> & AB)
@@ -1304,6 +1381,7 @@ template<class RA>
             {
                 int i=ii[ll];
                 int j=jj[ll];
+		if(j>=B.n) continue; // in case of not equal size A.m != B.n 
                 for (int kkb=blg[j];kkb<blg[j+1];kkb++)
                   { 
                    int kz= bcl[kkb];
@@ -1372,6 +1450,7 @@ template<class RA>
             {
                 int i=ii[ll];
                 int j=jj[ll];
+		if(j>=B.n) continue; // in case of not equal size A.m != B.n 
                 for (int kb=blg[j];kb<blg[j+1];kb++)
                   { 
                    int k= bcl[kb];

@@ -1,3 +1,9 @@
+v 3.1-1
+  - add resize of sparce matrix ( only  morse matrix)
+  - add  new 3d finite element P1b3d   (P1 bulle 3d) 
+  - add  new option in int1d function in case for  build matrix with different meshes
+        mortar=1 ( do not remove integration point if the point is outside of the domain)
+    to make no to bad integration on same curve with different meshes. 
 v 3.1
   -correct compile  order missing libMesh
   - add lighting in ffglut (key l) for 3d isovalue 

@@ -54,16 +54,16 @@ KN<Complex> * dfft_eq(  KN<Complex> * const   &x,const DFFT_1dor2d & d)
   ffassert(x->N()==d.n*d.m);
   Complex *px =  *x;
   fftw_plan p; 
-  cout << " dfft " << px << " = " << d.x << " n = " << d.n << " " << d.m << " sign = " << d.sign << endl; 
+  //cout << " dfft " << px << " = " << d.x << " n = " << d.n << " " << d.m << " sign = " << d.sign << endl; 
   if ( d.n > 1)
     p = fftw_plan_dft_2d(d.n,d.m,reinterpret_cast<fftw_complex*>(d.x),reinterpret_cast<fftw_complex*> (px),d.sign,FFTW_ESTIMATE);
   else
     p = fftw_plan_dft_1d(d.n,reinterpret_cast<fftw_complex*>(d.x),reinterpret_cast<fftw_complex*> (px),d.sign,FFTW_ESTIMATE);
-  cout << " ---" ;
+ // cout << " ---" ;
   fftw_execute(p);
-  cout << " ---" ;
+ // cout << " ---" ;
   fftw_destroy_plan(p);
-  cout << " ---" ;
+ // cout << " ---" ;
   return  x;
 }
 

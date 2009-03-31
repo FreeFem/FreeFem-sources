@@ -762,7 +762,8 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
 	      xx= new KN<K>(vi);
 	      
 	    }
-	  if(rawvector)
+	}
+       if(rawvector)
 	    {
 	      int m = Min(nconv,rawvector->M());
 	      ffassert(rawvector->N()==n);
@@ -770,11 +771,12 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
 		{
 		  KN_<K> vi(Z(':',i)) ;
 		  (*rawvector)(':',i)=vi;
+		    cout << " raw " << vi.l2() << " == " << (*rawvector)(':',i).l2()<< endl;
 		}
 	      
 	    }
 	  
-	}
+	
     }
   
 return (long) nconv;
