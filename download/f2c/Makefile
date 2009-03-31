@@ -6,6 +6,7 @@ F2C_TAR=$(DIRPKG)/f2c.tar
 all:compile
 
 $(F2C_TAR):
+	mkdir -p $(DIRPKG)
 	$(WGET) # wget --passive-ftp ftp://netlib.bell-labs.com/netlib/f2c.tar
 	curl http://netlib.sandia.gov/cgi-bin/netlib/netlibfiles.tar?filename=netlib/f2c -o "$(DIRPKG)/f2c.tar"
 f2c:$(F2C_TAR)

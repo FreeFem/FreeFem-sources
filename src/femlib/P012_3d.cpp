@@ -47,6 +47,7 @@ public:
   
 } ;
 
+     
 
 
 R TypeOfFE_P0Lagrange3d::operator()(const FElement & K,const  R3 & PHat,const KN_<R> & u,int componante,int op) const 
@@ -175,7 +176,16 @@ public:
   void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
 } ;
 
-
+class TypeOfFE_P1bLagrange3d : public TypeOfFE_Lagrange<Mesh3>  { 
+    public:  
+	 typedef Mesh3 Mesh;
+	 typedef GFElement<Mesh3> FElement;
+	 TypeOfFE_P1bLagrange3d(): TypeOfFE_Lagrange<Mesh3>(-1) {  }
+	 void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
+} ;
+     
+     
+      
 
 
 void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & K,const R3 & P,RNMK_ & val) const
@@ -298,7 +308,110 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
     
 }
 
-
+     /*
+ R TypeOfFE_P1bLagrange3d::operator()(const FElement & K,const  R3 & PHat,const KN_<R> & u,int componante,int op) const 
+     { 
+	 R u0(u(K(0))), u1(u(K(1))), u2(u(K(2))),u3(u(K(3))),u4(u(K(4)));
+	 R r=0;
+	 if (op==0)
+	   {
+	       R l0=1-PHat.x-PHat.y-PHat.z,l1=PHat.x,l2=PHat.y,l3=PHat.z; 
+	       R l0123=
+	       r = u0*l0+u1*l1+l2*u2+l3*u3;
+	   }
+	 else if(op==op_dx || op==op_dy || op==op_dz) // dx => dy thank to Pichon 27/01/2008 (FH)
+	   { 
+	       const Element & T=K.T;
+	       R3 D[4];
+	       T.Gradlambda(D);
+	       if (op==op_dx)
+		   r =  D[0].x*u0 + D[1].x*u1 + D[2].x*u2+ D[3].x*u3 ;
+	       else if (op==op_dy) 
+		   r =  D[0].y*u0 + D[1].y*u1 + D[2].y*u2+ D[3].y*u3 ;
+	       else 
+		   r =  D[0].z*u0 + D[1].z*u1 + D[2].z*u2+ D[3].z*u3 ;
+	   }
+	 //  cout << r << "\t";
+	 return r;
+     }
+ */    
+     void TypeOfFE_P1bLagrange3d::FB(const What_d whatd,const Mesh & ,const Element & K,const R3 & P,RNMK_ & val) const
+     {
+	 //  const Triangle & K(FE.T);
+	 const R d1=d+1.;
+	 const R d13=d1*d1*d1;
+	 const R d14=d13*d1;
+	 R ll[]={1.-P.sum(),P.x,P.y,P.z}; 
+	 R lb4= (ll[0]*ll[1]*ll[2]*ll[3])*d13; // d1^-4 d1^3 = 1/d1 in G
+	 R lb=lb4*d1; // 1  in G     
+	 R l[5];
+	 for(int i=0;i<4;i++)
+	    l[i]=ll[i]-lb4;  //  1/d1 in G - 1/d1 G =0 
+	 l[5]=lb;
+	 
+	 assert(val.N() >=Element::nv);
+	 assert(val.M()==1 );
+	 
+	 val=0; 
+	 RN_ f0(val('.',0,op_id)); 
+	 
+	 if (whatd & Fop_D0) 
+	   {
+	       f0[0] = l[0];
+	       f0[1] = l[1];
+	       f0[2] = l[2];
+	       f0[3] = l[3];
+	       f0[4] = l[4];
+	   }
+	 if (whatd & Fop_D1)
+	   {
+	       R3 Dl[4];
+	       K.Gradlambda(Dl);
+	       R3 Dlb4 = (
+			 + Dl[0]*(ll[1]*ll[2]*ll[3])
+			 + Dl[1]*(ll[0]*ll[2]*ll[3])
+			 + Dl[2]*(ll[0]*ll[1]*ll[3])
+			 + Dl[3]*(ll[0]*ll[1]*ll[2]) )*d13;
+	       
+	       //for(int i=0;i<4;++i)
+	       //      cout << Dl[i] << endl;
+	      
+	       if (whatd & Fop_dx) 
+		 {
+		     RN_ f0x(val('.',0,op_dx)); 
+		     f0x[0] = Dl[0].x-Dlb4.x;
+		     f0x[1] = Dl[1].x-Dlb4.x;
+		     f0x[2] = Dl[2].x-Dlb4.x;
+		     f0x[3] = Dl[3].x-Dlb4.x;
+		     f0x[4] = Dlb4.x*d1;
+		     
+		 }
+	       
+	       if (whatd & Fop_dy) {
+		   RN_ f0y(val('.',0,op_dy)); 
+		   f0y[0] = Dl[0].y-Dlb4.y;
+		   f0y[1] = Dl[1].y-Dlb4.y;
+		   f0y[2] = Dl[2].y-Dlb4.y;
+		   f0y[3] = Dl[3].y-Dlb4.y;
+		   f0y[4] = Dlb4.y*d1;
+	       }
+	       
+	       if (whatd & Fop_dz) {
+		   RN_ f0z(val('.',0,op_dz)); 
+		   f0z[0] = Dl[0].z-Dlb4.z;
+		   f0z[1] = Dl[1].z-Dlb4.z;
+		   f0z[2] = Dl[2].z-Dlb4.z;
+		   f0z[3] = Dl[3].z-Dlb4.z;
+		   f0z[4] = Dlb4.z*d1;
+		   
+	       }
+	   }
+	 else if (whatd & Fop_D2)
+	     ffassert(0); // a faire ...
+	 //  cout << val << endl;
+     }
+     
+     
 
 static TypeOfFE_P0Lagrange3d  P0_3d;
 GTypeOfFE<Mesh3> & P0Lagrange3d(P0_3d);
@@ -308,6 +421,9 @@ GTypeOfFE<Mesh3> & P1Lagrange3d(P1_3d);
 
 static TypeOfFE_P2Lagrange3d  P2_3d;
 GTypeOfFE<Mesh3> & P2Lagrange3d(P2_3d);
+
+static TypeOfFE_P1bLagrange3d  P1b_3d;
+GTypeOfFE<Mesh3> & P1bLagrange3d(P1b_3d);
 
 
 

@@ -234,13 +234,13 @@ class BC_set : public E_F0mps { public:
 
 class CDomainOfIntegration: public E_F0mps { 
 public:
-  static const int n_name_param =7;
+  static const int n_name_param =8;
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5 } ; //3d
   typeofkind  kind; //  0 
   int d; // 3d
-  typedef const CDomainOfIntegration* Result;
+   typedef const CDomainOfIntegration* Result;
   Expression Th; 
   vector<Expression> what;
   CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2) // 3d
@@ -254,7 +254,7 @@ public:
       Th=CastTo<pmesh3>(args[0]);
     else ffassert(0); // a faire 
     int n=args.size();
-
+    
     for (int i=1;i<n;i++)
       what[i-1]=CastTo<long>(args[i]); 
     // cout << " CDomainOfIntegration " << this << endl;       
@@ -269,6 +269,8 @@ public:
   const Fem2D::GQuadratureFormular<R3> & FIV(Stack) const ;  // 3d
   bool UseOpt(Stack s) const  {  return nargs[5] ? GetAny<bool>( (*(nargs[5]))(s) )  : 1;}
   double  binside(Stack s) const { return nargs[6] ? GetAny<double>( (*(nargs[6]))(s) )  : 0;} // truc pour FH
+  bool intmortar(Stack s) const { return nargs[7] ? GetAny<bool>( (*(nargs[7]))(s) )  : 1;} // truc  pour 
+
 };  
 
 class CDomainOfIntegrationBorder: public CDomainOfIntegration { 
@@ -838,6 +840,7 @@ public:
     :A(aa),Uh(*pUh),Vh(*pVh) {}//,pUh(ppUh),pVh(ppVh),Uh(*ppUh),Vh(*ppVh) {}
   long N() const {return  A ? A->n : 0;}
   long M() const { return A ? A->m : 0;}
+  void resize(int n,int m) { if(A) A->resize(n,m);}
   
 };
 

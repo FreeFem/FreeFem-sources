@@ -98,7 +98,8 @@ plots/overlapTh.eps plots/us-ug.eps plots/vs-vg.eps  \
 plots/square-0.eps      plots/square-1.eps      plots/square-2.eps 
 #  Pour la page de garde FH
 FIGS_JPG=plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg  \
-figures/mi.jpg plots/LogoUPMC.jpg
+figures/mi.jpg plots/LogoUPMC.jpg \
+plots/logo-finance-par-anr.jpg 
 
 FIGS_PDF= plots/LogoCNRS.pdf    plots/LogoLJLL.pdf  plots/ffauteur.pdf  \
 plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf

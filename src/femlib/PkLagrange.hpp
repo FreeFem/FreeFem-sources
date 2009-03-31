@@ -37,7 +37,7 @@ namespace Fem2D {
 
 template<class Rd,class E>
 static void SetPtPk(Rd *Pt,const int *dfon,int nn)
-{  // P0 P1 et P2 
+{  // P0 P1 et P2 , P1b 
     const int d= E::Rd::d;
     int k=0;
     
@@ -86,6 +86,12 @@ public:
 	  dfon[0]=dfon[1]=dfon[2]=dfon[3]=0;
 	  dfon[d]=1;
 	}
+      else if(k==-1) //  P1b. add  FH   March 2009 
+	  {
+	      dfon[0]=1;
+	      dfon[1]=dfon[2]=dfon[3]=0;
+	      dfon[d]=1;
+	  }	
       else
 	{
 	  dfon[0]=1;
@@ -100,7 +106,8 @@ public:
   
   RdHat *Pt;
   TypeOfFE_Lagrange(int k):
-    GTypeOfFE<Mesh>(A4(k),1,Max(k,1),k<=2,k==0)
+    //              dfon ,N,nsub(graphique) ,  const mat interpolation , discontinuous 
+    GTypeOfFE<Mesh>(A4(k),1,k==-1?-1:Max(k,1),k<=2,k==0)
   {
     int n=this->NbDoF;
     if(verbosity>9)    

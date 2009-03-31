@@ -1,7 +1,6 @@
 #ifndef LGMESH3_HPP
 #define LGMESH3_HPP
 // 3d
-#define AFAIRE(cmm) { cerr << "A Faire/ To Do  "<< cmm << " file " << __FILE__<< " line "<< __LINE__ << endl; InternalError(cmm);}
 typedef FEbase<double,v_fes3> * pf3rbase ;
 typedef FEbaseArray<double,v_fes3> * pf3rbasearray ;
 typedef pair<pf3rbase,int> pf3r ;

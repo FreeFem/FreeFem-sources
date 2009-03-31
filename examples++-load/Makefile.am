@@ -56,7 +56,7 @@ LK_TET=-I../download/include -L../download/lib -l$(LLTET)
 LK_SUPERLU=-I../download/include -L../download/lib -l$(LLSUPERLU) 
 LK_FFTW3=-I../download/include -L../download/lib -l$(LLFFTW3)
 
-load_compile:ff-c++ include  $(LIST_COMPILE) 
+load_compile:ff-c++ freefem++.pref include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
 
 load_download:
 	if [  -f ../download/lib/lib$(LLTET).a -a -f ../download/lib/lib$(LLFFTW3).a \
@@ -71,6 +71,7 @@ load_download:
 
 compile-pkg:  $(LIST_COMPILE_PKG)  
 	echo " finish build $(LIST_COMPILE_PKG)"
+
 
 
 .cpp.$(DYLIB_SUFFIX):
@@ -88,11 +89,14 @@ lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp
 
 # --  
 tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
-	 ./ff-c++   $(LK_TET)  tetgen.cpp
+	echo  try to compile 
+	 -./ff-c++   $(LK_TET)  tetgen.cpp
 SuperLu.$(DYLIB_SUFFIX):
-	./ff-c++  $(LK_SUPERLU) SuperLu.cpp $(BLASLIBS) 
+	echo  try to compile 
+	-./ff-c++  $(LK_SUPERLU) SuperLu.cpp $(BLASLIBS) 
 dfft.$(DYLIB_SUFFIX):
-	./ff-c++  $(LK_FFTW3) dfft.cpp  
+	echo  try to compile 
+	-./ff-c++  $(LK_FFTW3) dfft.cpp  
 
 include: include.tar.gz
 	rm -rf include 
@@ -130,16 +134,20 @@ ff-c++:load.link.in  Makefile load.link
 load.link:load.link.in  Makefile
 	../config.status  --file=load.link:load.link.in
 	chmod a+x load.link
-
+freefem++.pref:
+	echo loadpath = \"./\" >freefem++.pref
 install-exec-local:: load_compile
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
 	$(INSTALL_DATA)  include/* $(DESTDIR)$(ff_prefix_dir)/include
 	$(INSTALL)  -m 555 $(LIST_COMPILE) $(DESTDIR)$(ff_prefix_dir)/lib
-	echo loadpath += \"$(ff_prefix_dir)/lib\"  >$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
+	echo loadpath += \"./\"  >$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
+	echo loadpath += \"$(ff_prefix_dir)/lib\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
 	echo includepath += \"$(ff_prefix_dir)/edp\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
 	$(INSTALL_SCRIPT) ff-c++  $(DESTDIR)${bindir}
+	-$(INSTALL)  -m 555 $(LIST_COMPILE_PKG) $(DESTDIR)$(ff_prefix_dir)/lib
+
 
 
 

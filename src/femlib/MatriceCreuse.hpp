@@ -349,7 +349,8 @@ public:
   virtual ~MatriceCreuse(){}
   virtual R & diag(int i)=0;
   virtual R & operator()(int i,int j)=0;
-  virtual R * pij(int i,int j) const =0; // Add FH   
+  virtual R * pij(int i,int j) const =0; // Add FH 
+  virtual  void  resize(int n,int m)  {AFAIRE("MatriceCreuse::resize");}  // a faire dans les classe derive ... // add march 2009  FH 
   virtual MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not 
   virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false)=0;
   // Add FH april 2005
@@ -439,6 +440,7 @@ public:
     if (&x != &b) x=b;x/=*this;} 
   
   int size() const ;
+  void  resize(int n,int m)  { AFAIRE("MatriceProfile::resize");}  // a faire ...  add march 2009  FH 
   ~MatriceProfile();
   //  KN_<R>         operator* (const KN_<R> & ) const ;
   void addMatMul(const KN_<R> &x,KN_<R> &ax) const;
@@ -597,7 +599,7 @@ public:
    void setcoef(const KN_<R> & x);
    void getcoef( KN_<R> & x) const ;
   // end add
-  
+void  resize(int n,int m) ; // add march 2009 ...
 template<class K>
   MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bool sym);
   

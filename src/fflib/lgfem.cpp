@@ -67,7 +67,9 @@ using namespace std;
 //PlotStream::hBytes PlotStream::zottffss; //012345678;
 // ---- FH
 namespace bamg { class Triangles; }
-namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso); }
+namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso);
+   extern GTypeOfFE<Mesh3> &P1bLagrange3d;
+}
 
 #include "BamgFreeFem.hpp"
 
@@ -1412,7 +1414,12 @@ long pVh_ndofK(pfes * p)
 
 long mp_nuTriangle(MeshPoint * p)
  { throwassert(p  && p->Th && p->T);
-   long  nu((*p->Th)(p->T));
+   long nu=0;
+   if(p->d==2)
+     nu=(*p->Th)(p->T);
+   else if  (p->d==3)
+     nu=(*p->Th3)(p->T3);
+   else ffassert(0);
    delete p;
    return nu ;}
    
@@ -3309,7 +3316,7 @@ if (ddt)
 			  
 		      }
 #endif			  
-		   ffassert(k++<200);
+		   ffassert(k++<2000);
                 }
 	      
 	      mpc.change(PHat,Th3[it],0);
@@ -4234,11 +4241,13 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  using namespace FreeFempp; 
  FreeFempp::TypeVarForm<double>::Global = new TypeVarForm<double>();       
  FreeFempp::TypeVarForm<Complex>::Global = new TypeVarForm<Complex>();       
+    
  
-
  Global.New("P13d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P1));   
  Global.New("P23d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P2));   
- Global.New("P03d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P0));   
+ Global.New("P03d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P0)); 
+ Global.New("P1b3d",CConstant<TypeOfFE3*>(&P1bLagrange3d));   
+    
  // TEF2dto3d[]=&DataFE<Mesh3>::P1;
 }   
 

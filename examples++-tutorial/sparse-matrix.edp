@@ -221,3 +221,8 @@ aM[9]= MM;
   cout << " coef = "<< coef << endl;
   
 }
+
+// version 3.1-1
+cout << MM << endl;
+MM.resize(10,100);
+cout << MM << endl;

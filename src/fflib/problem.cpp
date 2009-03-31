@@ -51,7 +51,8 @@ basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
     { "qfnbpT",&typeid(long)},
     { "qfnbpE",&typeid(long)},
     { "optimize",&typeid(bool)},
-    { "binside",&typeid(double)}
+    { "binside",&typeid(double)},
+    { "mortar",&typeid(bool)}
 };
 
 
@@ -695,7 +696,7 @@ void Check(const Opera &Op,int N,int  M)
 		     const FESpace & Uh,const FESpace & Vh,
 		     const QuadratureFormular & FI,
 		     const QuadratureFormular1d & FIb,
-		     double *p,   void *stack)
+		     double *p,   void *stack, bool intmortar=false)
     {
 	MeshPoint mp= *MeshPointStack(stack);
 	R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -830,7 +831,7 @@ void Check(const Opera &Op,int N,int  M)
 			else
 			{	
 			    tu= Thu.Find(P,Ptu,outsideu);
-			    if( !tu ||  outsideu)  { 
+			    if( !tu ||  (outsideu && !intmortar) )  { 
 				//R dd=-1;
 				//if(tu) { R2 PP((*tu)(Ptu)),PPP(P,PP) ; cout << PP << " " << sqrt( (PPP,PPP) ) <<"    "; } 
 				if(verbosity>100) cout << " On a pas trouver (u) " << P << " " <<Ptu << " " << tu <<   endl; 
@@ -852,7 +853,7 @@ void Check(const Opera &Op,int N,int  M)
 			    }
 			    else {
 				tv= Thv.Find(P,Ptv,outsidev);
-				if( !tv || outsidev)  { 
+				if( !tv || (outsidev&& !intmortar))  { 
 				    if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl; 
 				    continue;}} 
 			    ivt = Thv(tv);
@@ -927,12 +928,13 @@ void Check(const Opera &Op,int N,int  M)
     // MatriceElementairePleine<R> *matep =0;
     const bool useopt=di.UseOpt(stack);    
     //double binside=di.binside(stack);
-    
+    const bool intmortar=di.intmortar(stack);
     if ( verbosity >1)
      {
       cout << " Integral   on Th nv :  " << Th.nv << " nt : " << Th.nt << endl;
       cout << "        Th/ u nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
       cout << "        Th/ v nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
+      cout << "        suppose in mortar " << intmortar << endl;
      }
     assert(pThdi == & Th);
     const vector<Expression>  & what(di.what);             
@@ -1020,7 +1022,7 @@ void Check(const Opera &Op,int N,int  M)
             if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
               {                  
                 int ie,i =Th.BoundaryElement(e,ie);
-                AddMatElem(A,Th,*b->b,sym,i,ie,Th.bedges[e].lab,Uh,Vh,FIT,FIE,p,stack);  
+		  AddMatElem(A,Th,*b->b,sym,i,ie,Th.bedges[e].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);  
                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
               }
           }
@@ -1032,7 +1034,7 @@ void Check(const Opera &Op,int N,int  M)
           {
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
              for (int ie=0;ie<3;ie++)   
-                AddMatElem(A,Th,*b->b,sym,i,ie,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);  
+                AddMatElem(A,Th,*b->b,sym,i,ie,Th[i].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);  
              if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr   
                 
                 
@@ -2409,7 +2411,7 @@ void Check(const Opera &Op,int N,int  M)
  template<class R>
  void  Element_rhs(const  Mesh & ThI,const Triangle & KI, const FESpace & Vh,
  int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
-                    const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false)
+                    const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false,bool intmortar=false)
   {
      // integration 1d on 2 diff mesh 
     
@@ -2452,7 +2454,7 @@ void Check(const Opera &Op,int N,int  M)
         bool outside;
         R2 PIt;
         const Triangle & K  = *Vh.Th.Find(PI,PIt,outside,Kp);
-       // if ( ! outside) 
+        if ( ! outside || intmortar) //  FH march 2009 ???
           {
             const  FElement  Kv= Vh[K];
             long i,n=Kv.NbDoF(),N=Kv.N;
@@ -3066,6 +3068,7 @@ template<class R>
     const CDomainOfIntegration & di= *l->di;
     const Mesh & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
     bool sameMesh = &ThI == &Vh.Th;
+    const bool intmortar=di.intmortar(stack);
     
     SHOWVERB(cout << " FormLinear " << endl);
     const vector<Expression>  & what(di.what);
@@ -3082,7 +3085,7 @@ template<class R>
     if (verbosity>2) cout << "  -- AssembleLinearForm discontinous Galerkin  =" << VF << " binside = "<< binside <<"\n";
 
     if (verbosity>3) 
-      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") , samemesh :"<< sameMesh<< " "  ;
+      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") , samemesh :"<< sameMesh<< " int mortar: " << intmortar ;
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
       else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
@@ -3150,7 +3153,7 @@ template<class R>
                 if ( sameMesh) 
                   Element_rhs<R>(Vh[i],ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false); 
                 else 
-                  Element_rhs<R>(ThI,ThI[i],Vh,ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false); 
+                  Element_rhs<R>(ThI,ThI[i],Vh,ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false,intmortar); 
                if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr   
               }
           }

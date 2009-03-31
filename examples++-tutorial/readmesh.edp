@@ -12,7 +12,9 @@ mesh th2 = readmesh("toto.msh");
 fespace femp1(th,P1);
 femp1 f = sin(x)*cos(y),g;
 {
+
 ofstream file("f.txt");
+file.precision(16);
 file << f[] << endl;
 }
 {

@@ -134,7 +134,7 @@ namespace EF23 {
 		
       }
       // n0 number of boxes of in b ("b0")
-    
+    if(verbosity>200)
     cout << "n0=" << n0 << endl;
     
     if ( n0 > 0) 
@@ -153,7 +153,7 @@ namespace EF23 {
       return vn;
     }
     
-
+if(verbosity>200)
     cout << "general case : NearVertex" << endl; 
     // general case -----
   pb[0]= b;
@@ -623,55 +623,58 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	const Vertex * v=quadtree->NearestVertexWithNormal(P);
 	if (!v) 
 	  { 
-	  v=quadtree->NearestVertex(P);
-	  assert(v);
+	    v=quadtree->NearestVertex(P);
+	    assert(v);
 	  }
 	it=Th.Contening(v);
-      }
+	if(verbosity>200)
+	  cout <<  "  Close : "<<  *v << " " << Th(v) << " "; 
     
-    cout << "tstart=" << tstart << " "<< "it=" << it << " P="<< P << endl; 
-
+      }
+    if(verbosity>200)
+      cout << "tstart=" << tstart << " "<< "it=" << it << " P="<< P << endl; 
+    
     //     int itdeb=it;     
     //     int count=0;
     //     L1: 
-  outside=true; 
-  //int its=it;
-  //dPdP	int iib=-1;//,iit=-1;
-  R dP=DBL_MAX;
-  Rd PPhat;
-  int k=0;    
-  Mesh::kfind++;
-  while (1)
-    { 
-      //if(verbosity>199) cout << "it " << it <<endl;
-      const Element & K(Th[it]);
-      Mesh::kthrough++;
-      assert(k++<1000);
-      int kk,n=0,nl[nkv];
-      R l[nkv];
-      for(int iii=0; iii<nkv; iii++)
-	l[iii]=0.;
-
-      CoorBary(K,P,l);
-
-      // CoorBary :: donner entre 0 et 1
-      // Pb si K.mesure*1.e-10 precision machine ==> bug
-      
-      // avant:
-      // R eps =  -K.mesure()*1e-10;
-      R eps = -1e-10;
-      for(int i=0;i<nkv;++i)
-	if( l[i] < eps){
-	  nl[n++]=i;
+    outside=true; 
+    //int its=it;
+    //dPdP	int iib=-1;//,iit=-1;
+    R dP=DBL_MAX;
+    Rd PPhat;
+    int k=0;    
+    Mesh::kfind++;
+    while (1)
+      { 
+	//if(verbosity>199) cout << "it " << it <<endl;
+	const Element & K(Th[it]);
+	Mesh::kthrough++;
+	assert(k++<1000);
+	int kk,n=0,nl[nkv];
+	R l[nkv];
+	for(int iii=0; iii<nkv; iii++)
+	  l[iii]=0.;
+	
+	CoorBary(K,P,l);
+	
+	// CoorBary :: donner entre 0 et 1
+	// Pb si K.mesure*1.e-10 precision machine ==> bug
+	
+	// avant:
+	// R eps =  -K.mesure()*1e-10;
+	R eps = -1e-10;
+	for(int i=0;i<nkv;++i)
+	  if( l[i] < eps){
+	    nl[n++]=i;
+	  }
+	if(verbosity>200){
+	  cout << "tet it=" << it ;
+	  cout << "  K.mesure=" << K.mesure() ;
+	  cout << " eps=" << eps << endl;
+	  for(int i=0;i<nkv;++i)
+	    cout<< " l["<< i <<"]=" <<  l[i] ;
+	  cout << " n=" << n << endl;
 	}
-      
-      cout << "tet it=" << it << endl;
-      cout << "K.mesure=" << K.mesure() ;
-      cout << " eps=" << eps << endl;
-      for(int i=0;i<nkv;++i)
-	cout<< " l["<< i <<"]=" <<  l[i] << endl;
-      cout << " n=" << n << endl;
-     
       if (n==0)
 	{  // interior => return
 	  outside=false; 
@@ -685,7 +688,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	      cout << "Phat== " << Phat << " diff= " << pp << endl;
 	      assert(0);
 	    }
-
+	  
 #endif	  
 	  return &K;
 	}
@@ -718,6 +721,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	    cout << " s=" << ss << endl;;
 	    
 	}
+	if(verbosity>200)
       cout << "GQuadTree::value of n " << n << endl;
 
       if ( n!=1 )  // on est sur le bord, mais plusieurs face <0 => on test les autre

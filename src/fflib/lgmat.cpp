@@ -58,6 +58,8 @@ using namespace std;
 #include "problem.hpp"
 */
 #include "ff++.hpp" 
+#include "array_resize.hpp" 
+
 #include "CGNL.hpp"
 
 namespace bamg { class Triangles; }
@@ -2224,7 +2226,7 @@ void  init_lgmat()
   //  new OneOperator1<Transpose<KN_<long> >,KN<long> *>(&Build<Transpose<KN_<long> >,KN<long> *>),
   //  new OneOperator1<Transpose<KN_<long> >,KN_<long> >(&Build<Transpose<KN_<long> >,KN_<long> >)       
   Dcl_Type<const  MatrixInterpolation::Op *>(); 
-  
+
   map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<double*>())]=atype<Matrice_Creuse<double> *>();
   map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<Complex*>())]=atype<Matrice_Creuse<Complex> *>();
   AddSparseMat<double>();
@@ -2241,7 +2243,10 @@ void  init_lgmat()
  Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
  Global.Add("defaulttoCG","(",new OneOperator0<bool>(SetCG));
  Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
-
+    
+ Dcl_Type< Resize<Matrice_Creuse<double> > > ();
+ Add<Matrice_Creuse<double> *>("resize",".",new OneOperator1< Resize<Matrice_Creuse<double>  >,Matrice_Creuse<double> *>(to_Resize));
+ Add<Resize<Matrice_Creuse<double> > >("(","",new OneOperator3_<Matrice_Creuse<double>  *,Resize<Matrice_Creuse<double>  > , long, long  >(resize2));   
  // Global.New("HaveUMFPACK",new OneOperator0<bool>(Have_UMFPACK));
  //Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetDefaultSolver));
  /*  
