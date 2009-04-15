@@ -93,6 +93,14 @@ while ($_ = $ARGV[0]) {
     elsif (/^-fnofast-math$/) {
 	$fast_math = 0;
     }
+    elsif (/^-m64$/) {
+	push(@copts, $_); 
+	push(@lopts, $_);
+    }
+    elsif (/^-m32$/) {
+	push(@copts, $_); 
+	push(@lopts, $_);
+    }
 
 # The '-f' option to f2c...
 

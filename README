@@ -298,6 +298,14 @@ by the way just do:
 cd  download/f2c
 # to build and install fort77,  linf2c.a in download/bin  download/lib
 make install
-# to build and universal f2c library on MacOS 10.4 and install in /usr/local/bin  /usr/loaal/lib
-make -n install-universal
+# to install in /usr/local/
+make install-sudo
+
+# to build and universal f2c library on MacOS 10.4 and install in /usr/local/bin  /usr/local/lib
+# and in download/bin  download/lib download/bin  download/include
+#    32/ 64   bits architecture on    intel and ppc
+make -n install-10.4 
+
+for the 64 on intel   version 10.5 (SDK)
+make -n install-10.5
 
