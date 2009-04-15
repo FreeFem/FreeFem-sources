@@ -8,6 +8,15 @@ then
 	LDFLAGS="$LDFLAGS -pg"
 fi
 
+AC_ARG_ENABLE(profiling,[  --enable-m64	Turn on 64 bits architecture])
+if test "$enable_64" = yes
+then
+	ff_m64=-m64	
+        CHECK_COMPILE_FLAG(C,$ff_m64,CFLAGS)
+	CHECK_COMPILE_FLAG(C++,$ff_m64,CXXFLAGS)
+	CHECK_COMPILE_FLAG(Fortran 77,$ff_m64,FFLAGS)	
+fi
+
 # Debug mode (no optimisation)
 # ----------------------------
 

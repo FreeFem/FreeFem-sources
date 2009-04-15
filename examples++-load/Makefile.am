@@ -53,8 +53,12 @@ LLTET=tet
 LLFFTW3=fftw3
 
 LK_TET=-I../download/include -L../download/lib -l$(LLTET)
+FINC_TET=./download/include/tetgen.h
 LK_SUPERLU=-I../download/include -L../download/lib -l$(LLSUPERLU) 
+FINC_SUPERLU=./download/include/slu_util.h
 LK_FFTW3=-I../download/include -L../download/lib -l$(LLFFTW3)
+FINC_FFTW3=./download/include/fftw3.h
+
 
 load_compile:ff-c++ freefem++.pref include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
 
@@ -89,14 +93,11 @@ lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp
 
 # --  
 tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
-	echo  try to compile 
-	 -./ff-c++   $(LK_TET)  tetgen.cpp
+	if [ -f "$FINC_TET" ] ; then ./ff-c++   $(LK_TET)  tetgen.cpp ; else echo " not $FINC_TET file : no tetgen tools "; fi
 SuperLu.$(DYLIB_SUFFIX):
-	echo  try to compile 
-	-./ff-c++  $(LK_SUPERLU) SuperLu.cpp $(BLASLIBS) 
+	if [ -f "$FINC_SUPERLU" ] ; then ./ff-c++   $(LK_SUPERLU)  SuperLu.cpp $(BLASLIBS) ; else echo " not $FINC_SUPERLU  file : no SuperLU  solver "; fi
 dfft.$(DYLIB_SUFFIX):
-	echo  try to compile 
-	-./ff-c++  $(LK_FFTW3) dfft.cpp  
+	if [ -f "$FINC_FFTW3" ] ; then ./ff-c++   $(LK_FFTW3)  dfft.cpp ; else echo " not $FINC_FFTW3  file : no dfft tools  "; fi
 
 include: include.tar.gz
 	rm -rf include 

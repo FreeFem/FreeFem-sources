@@ -22,29 +22,36 @@ compile:f2c f2c/libf2c/makefile
 	cd f2c/src; make -f makefile.u
 	cd f2c/libf2c; make 
 
-compile-universal:f2c Makefile-MacOs
+compile-10.4:f2c Makefile-MacOs
 	cd f2c/src; make -f makefile.u
-	cd f2c/libf2c; make -f ../../Makefile-MacOs
+	cd f2c/libf2c; make -f ../../Makefile-MacOs OS=10.4
+compile-10.5:f2c Makefile-MacOs
+	cd f2c/src; make -f makefile.u
+	cd f2c/libf2c; make -f ../../Makefile-MacOs OS=10.5
 
-install:compile  ../lib ../include ../bin ../bin/fort77
+
+install:  ../lib ../include ../bin ../bin/fort77
 	cp f2c/src/f2c ../bin
 	cp f2c/src/f2c.h ../include
 	cp f2c/libf2c/libf2c.a ../lib
 	../bin/fort77 tt.f
 	rm a.out
 
-install-universal: compile-universal
-	sudo make install-universal-sudo
-install-macos: compile-universal
-	sudo make install-universal-sudo
-
-install-universal-sudo: compile-universal $(DIRINSTALL)/bin/fort77
+install-10.4: compile-10.4
+	sudo make install-sudo
+	make install
+install-10.5: compile-10.5
+	sudo make install-sudo
+	make install
+install-sudo: $(DIRINSTALL)/bin/fort77
 	mkdir -p $(DIRINSTALL)/bin $(DIRINSTALL)/include $(DIRINSTALL)/lib
 	cp f2c/src/f2c $(DIRINSTALL)/bin; 
 	cp f2c/src/f2c.h $(DIRINSTALL)/include; 
 	cp f2c/libf2c/libf2c.a $(DIRINSTALL)/lib 	 
 	$(DIRINSTALL)/bin/fort77 tt.f	
 	rm a.out
+
+
 
 ../bin/fort77: fort77.sed Makefile
 	dd="`pwd`/.." ; \
