@@ -9,7 +9,7 @@ then
 fi
 
 AC_ARG_ENABLE(profiling,[  --enable-m64	Turn on 64 bits architecture])
-if test "$enable_64" = yes
+if test "$enable_m64" = yes
 then
 	ff_m64=-m64	
         CHECK_COMPILE_FLAG(C,$ff_m64,CFLAGS)
