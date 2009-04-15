@@ -6172,7 +6172,7 @@ if test "${enable_profiling+set}" = set; then
   enableval=$enable_profiling;
 fi
 
-if test "$enable_64" = yes
+if test "$enable_m64" = yes
 then
 	ff_m64=-m64
         { echo "$as_me:$LINENO: checking whether the C compiler accepts $ff_m64" >&5
