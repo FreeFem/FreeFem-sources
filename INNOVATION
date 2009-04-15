@@ -1,3 +1,7 @@
+v 3.2
+  - add --enable-m64 for 64 bit complilation flags 
+  - correct f2c of  take the -m64 flags 
+  -  build the universal f2c library with 4 achitecture ppc i386 ppc64 x86_64
 v 3.1-1
   - add resize of sparce matrix ( only  morse matrix)
   - add  new 3d finite element P1b3d   (P1 bulle 3d) 
