@@ -631,9 +631,9 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  cout <<  "  Close : "<<  *v << " " << Th(v) << " "; 
     
       }
+
     if(verbosity>200)
       cout << "tstart=" << tstart << " "<< "it=" << it << " P="<< P << endl; 
-    
     //     int itdeb=it;     
     //     int count=0;
     //     L1: 
@@ -673,6 +673,14 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  cout << " eps=" << eps << endl;
 	  for(int i=0;i<nkv;++i)
 	    cout<< " l["<< i <<"]=" <<  l[i] ;
+	  cout << " n=" << n << endl;
+	}
+	if(verbosity>200){
+	  cout << "tet it=" << it << endl;
+	  cout << "K.mesure=" << K.mesure() ;
+	  cout << " eps=" << eps << endl;
+	  for(int i=0;i<nkv;++i)
+	    cout<< " l["<< i <<"]=" <<  l[i] << endl;
 	  cout << " n=" << n << endl;
 	}
       if (n==0)
