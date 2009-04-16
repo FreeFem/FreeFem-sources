@@ -341,7 +341,7 @@ template<class R>
        Expression a; 
        
        static  aType btype;
-       static const int n_name_param =22; //  add nbiter FH 30/01/2007 11 -> 12  //add var MUMPS+autre
+       static const int n_name_param =NB_NAME_PARM_MAT; //  add nbiter FH 30/01/2007 11 -> 12  //add var MUMPS+autre
        static basicAC_F0::name_and_type name_param[] ;
        Expression nargs[n_name_param];
        const OneOperator * precon;
@@ -382,18 +382,11 @@ template<class R>
 
 template <class R> 
 basicAC_F0::name_and_type  SetMatrix_Op<R>::name_param[]= {
-   {  "init", &typeid(bool)},
-   {  "solver", &typeid(TypeSolveMat*)},
-   {  "eps", &typeid(double)  },
-   {  "precon",&typeid(Polymorphic*)}, 
-   {  "dimKrylov",&typeid(long)},
-   {  "bmat",&typeid(Matrice_Creuse<R>* )},
-   {  "tgv",&typeid(double )},
-   {  "factorize",&typeid(bool)},
-   {  "strategy",&typeid(long )},
-   {  "tolpivot",&typeid(double )},
-   {  "tolpivotsym",&typeid(double )},
-   {  "nbiter", &typeid(long)}, // 11
+ LIST_NAME_PARM_MAT
+
+
+
+/*
    {   "paramint",&typeid(KN<int>)}, // Add J. Morice 02/09 
    {   "paramdouble",&typeid(KN<double>)},
    {   "paramstring",&typeid(string*)},
@@ -404,6 +397,7 @@ basicAC_F0::name_and_type  SetMatrix_Op<R>::name_param[]= {
    {   "fileparamstring",&typeid(string* )},
    {   "filepermrow",&typeid(string*)},
    {   "filepermcol",&typeid(string*)} //22
+ */
 };
 
 template<class R>
@@ -411,15 +405,18 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
 {
    Matrice_Creuse<R> *  A= GetAny<Matrice_Creuse<R> *>((*a)(stack));
    assert(A && A->A);
+    Data_Sparse_Solver ds;
+    bool VF=false;
+   // bool factorize=false;
+    ds.factorize=false;
+    /*
   long NbSpace = 50; 
   long itmax=0; 
-  double eps=1e-6;
+  double epsilon=1e-6;
 //  bool VF=false;
 //  VF=isVF(op->largs);
  // assert(!VF); 
   double tgv = 1e30;
-  bool VF=false;
-  bool factorize=false;
   double tol_pivot=-1;
   double tol_pivot_sym=-1;
   
@@ -433,62 +430,64 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   string* file_param_char;
   string* file_param_perm_r;
   string* file_param_perm_c;  
-
+*/
 // type de matrice par default 
-  TypeSolveMat tmat( TypeSolveMat::defaultvalue); 
+  TypeSolveMat tmat= TypeSolveMat::defaultvalue; 
   if(   tmat !=  TypeSolveMat::SparseSolver  )    
-      tmat=TypeSolveMat::GMRES;
-   
-     
+    tmat=TypeSolveMat::GMRES;
+ ds.typemat=&tmat; 
+ SetEnd_Data_Sparse_Solver(stack,ds,nargs,n_name_param);  
+/*     
   TypeSolveMat    *typemat=&tmat;
   bool initmat=true;
-  int umfpackstrategy=0; 
-  if (nargs[0]) initmat= ! GetAny<bool>((*nargs[0])(stack));
-  if (nargs[1]) typemat= GetAny<TypeSolveMat *>((*nargs[1])(stack));
-  if (nargs[2]) eps= GetAny<double>((*nargs[2])(stack));
-  // 3 precon 
-  if (nargs[4]) NbSpace= GetAny<long>((*nargs[4])(stack));
-  if (nargs[6]) tgv= GetAny<double>((*nargs[6])(stack));
-  if (nargs[7]) factorize= GetAny<bool>((*nargs[7])(stack));
-  
-  if (nargs[8]) umfpackstrategy = GetAny<long>((*nargs[8])(stack)); 
-  if (nargs[9]) tol_pivot = GetAny<double>((*nargs[9])(stack)); 
-  if (nargs[10]) tol_pivot_sym = GetAny<double>((*nargs[10])(stack)); 
-  if (nargs[11]) itmax = GetAny<long>((*nargs[11])(stack)); //  frev 2007 OK
+  int strategy=0; 
    
-  if (nargs[12]) param_int= GetAny< KN<int> >((*nargs[12])(stack));  // Add J. Morice 02/09 
-  if (nargs[13]) param_double= GetAny< KN<double> >((*nargs[13])(stack));
-  if (nargs[14]) param_char= GetAny< string * >((*nargs[14])(stack));  //
-  if (nargs[15]) perm_r = GetAny< KN<int > >((*nargs[15])(stack));
-  if (nargs[16]) perm_c = GetAny< KN<int> >((*nargs[16])(stack));  //
-  if (nargs[17]) file_param_int= GetAny< string* >((*nargs[17])(stack));  // Add J. Morice 02/09 
-  if (nargs[18]) file_param_double= GetAny< string* >((*nargs[18])(stack));
-  if (nargs[19]) file_param_char= GetAny< string* >((*nargs[19])(stack));  //
-  if (nargs[20]) file_param_perm_r = GetAny< string* >((*nargs[20])(stack));
-  if (nargs[21]) file_param_perm_c = GetAny< string* >((*nargs[21])(stack));  //
+  if (nargs[0]) ds.initmat= ! GetAny<bool>((*nargs[0])(stack));
+  if (nargs[1]) ds.typemat= GetAny<TypeSolveMat *>((*nargs[1])(stack));
+  if (nargs[2]) ds.epsilon= GetAny<double>((*nargs[2])(stack));
+  // 3 precon 
+  if (nargs[4]) ds.NbSpace= GetAny<long>((*nargs[4])(stack));
+  if (nargs[6]) ds.tgv= GetAny<double>((*nargs[6])(stack));
+  if (nargs[7]) ds.factorize= GetAny<bool>((*nargs[7])(stack));
+  
+  if (nargs[8]) ds.strategy = GetAny<long>((*nargs[8])(stack)); 
+  if (nargs[9]) ds.tol_pivot = GetAny<double>((*nargs[9])(stack)); 
+  if (nargs[10]) ds.tol_pivot_sym = GetAny<double>((*nargs[10])(stack)); 
+  if (nargs[11]) ds.itmax = GetAny<long>((*nargs[11])(stack)); //  frev 2007 OK
+   
+  if (nargs[12]) ds.param_int= GetAny< KN<int> >((*nargs[12])(stack));  // Add J. Morice 02/09 
+  if (nargs[13]) ds.param_double= GetAny< KN<double> >((*nargs[13])(stack));
+  if (nargs[14]) ds.param_char= GetAny< string * >((*nargs[14])(stack));  //
+  if (nargs[15]) ds.perm_r = GetAny< KN<int > >((*nargs[15])(stack));
+  if (nargs[16]) ds.perm_c = GetAny< KN<int> >((*nargs[16])(stack));  //
+  if (nargs[17]) ds.file_param_int= GetAny< string* >((*nargs[17])(stack));  // Add J. Morice 02/09 
+  if (nargs[18]) ds.file_param_double= GetAny< string* >((*nargs[18])(stack));
+  if (nargs[19]) ds.file_param_char= GetAny< string* >((*nargs[19])(stack));  //
+  if (nargs[20]) ds.file_param_perm_r = GetAny< string* >((*nargs[20])(stack));
+  if (nargs[21]) ds.file_param_perm_c = GetAny< string* >((*nargs[21])(stack));  //
+*/
 
-
-   if(A->typemat.profile != typemat->profile) 
+   if(A->typemat.profile != ds.typemat->profile) 
    {
      cerr << " type of matrix " << A->typemat<<endl;
-     cerr << " type of matrix for solver " <<*typemat<<endl;
+     cerr << " type of matrix for solver " <<*ds.typemat<<endl;
      
      ExecError(" Set incompatibility between solver and type of matrix");
    }
-  if( factorize ) {
+  if( ds.factorize ) {
     MatriceProfile<R> * pf = dynamic_cast<MatriceProfile<R> *>((MatriceCreuse<R> *) A->A);
     assert(pf);
-    switch (typemat->t) {
-    case TypeSolveMat::LU: pf->LU(Abs(eps));break;
-    case TypeSolveMat::CROUT: pf->crout(Abs(eps));break;
-    case TypeSolveMat::CHOLESKY: pf->cholesky(Abs(eps));break;
+    switch (ds.typemat->t) {
+    case TypeSolveMat::LU: pf->LU(Abs(ds.epsilon));break;
+    case TypeSolveMat::CROUT: pf->crout(Abs(ds.epsilon));break;
+    case TypeSolveMat::CHOLESKY: pf->cholesky(Abs(ds.epsilon));break;
     default: ExecError("Sorry no factorization for this type for matrix"); 
     }
     
   }    
-  SetSolver<R>(stack,*A->A,typemat,VF,eps,NbSpace,itmax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym, 
+  SetSolver<R>(stack,VF,*A->A,ds) ;/*stack,*A->A,typemat,VF,epsilon,NbSpace,itmax,precon,strategy,tgv,tol_pivot,tol_pivot_sym, 
 	       param_int, param_double, param_char, perm_r, perm_c, file_param_int, file_param_double, 
-	       file_param_char, file_param_perm_r, file_param_perm_c);
+	       file_param_char, file_param_perm_r, file_param_perm_c);*/
 
   return Nothing; 
 }

@@ -475,39 +475,113 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
 
 template<class R>
 typename MatriceMorse<R>::VirtualSolver *
-BuildSolverGMRES(const MatriceMorse<R> *A,int strategy,
-		 double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-		 int NbSpace,int itmax ,  int *param_int, double *param_double, string *param_char, 
-		 int *perm_r, int *perm_c, string *file_param_int,  
-		 string *file_param_double, string *file_param_char, 
-		 string *file_param_perm_r, string *file_param_perm_c,const void * precon, void * stack )
+BuildSolverGMRES(DCL_ARG_SPARSE_SOLVER(R,A))
 {
     typename MatriceMorse<R>::VirtualSolver * ret=0;
-    if (precon)
-	ret=new SolveGMRESPrecon<R>(*A,(const OneOperator *)precon,stack,NbSpace,itmax,eps);
+    if (ds.precon)
+	ret=new SolveGMRESPrecon<R>(*A,(const OneOperator *)ds.precon,stack,ds.NbSpace,ds.itmax,ds.epsilon);
     else 
-	ret=new SolveGMRESDiag<R>(*A,NbSpace,itmax,eps);
+	ret=new SolveGMRESDiag<R>(*A,ds.NbSpace,ds.itmax,ds.epsilon);
     
     return ret;
 }
 
 template<class R>
 typename MatriceMorse<R>::VirtualSolver *
-BuildSolverCG(const MatriceMorse<R> *A,int strategy,
-	      double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-	      int NbSpace,int itmax ,  int *param_int, double *param_double, string *param_char, 
-	      int *perm_r, int *perm_c, string *file_param_int,  
-	      string *file_param_double, string *file_param_char, 
-	      string *file_param_perm_r, string *file_param_perm_c,const void * precon, void * stack )
+BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
 {
     typename MatriceMorse<R>::VirtualSolver * ret=0;
-    if (precon)
-	ret=new SolveGCPrecon<R>(*A,(const OneOperator *)precon,stack,itmax,eps);
+    if (ds.precon)
+	ret=new SolveGCPrecon<R>(*A,(const OneOperator *)ds.precon,stack,ds.itmax,ds.epsilon);
     else 
-	ret=new SolveGCDiag<R>(*A,itmax,eps);
-    
+	ret=new SolveGCDiag<R>(*A,ds.itmax,ds.epsilon);    
     return ret;
 }
+    
+#define LIST_NAME_PARM_MAT \
+    {  "init", &typeid(bool)}, \
+    {  "solver", &typeid(TypeSolveMat*)}, \
+    {  "eps", &typeid(double)  }, \
+    {  "precon",&typeid(Polymorphic*)}, \
+    {  "dimKrylov",&typeid(long)}, \
+    {  "tgv",&typeid(double )}, \
+    {  "factorize",&typeid(bool)}, \
+    {  "strategy",&typeid(long )}, \
+    {  "tolpivot",&typeid(double )}, \
+    {  "tolpivotsym",&typeid(double )}, \
+    {  "nbiter", &typeid(long)}, \
+    { "datafilename", &typeid(string*)} , \
+    { "lparams",&typeid(KN_<long>)} , \
+    { "dparams", &typeid(KN_<double>)},  \
+    { "smap", &typeid(map<string,string>*)}, \
+    { "permr", &typeid(KN_<long>)}, \
+    { "permc", &typeid(KN_<long>)}, \
+    { "scaler", &typeid(KN_<double>)}, \
+    { "scalec", &typeid(KN_<double>)} 
+    
+const int NB_NAME_PARM_MAT =  19 ;
+    
+/*
+ {  "init", &typeid(bool)},
+ {  "solver", &typeid(TypeSolveMat*)},
+ {  "eps", &typeid(double)  },
+ {  "precon",&typeid(Polymorphic*)}, 
+ {  "dimKrylov",&typeid(long)},
+ {  "bmat",&typeid(Matrice_Creuse<R>* )},
+ {  "tgv",&typeid(double )},
+ {  "factorize",&typeid(bool)},
+ {  "strategy",&typeid(long )},
+ {  "tolpivot",&typeid(double )},
+ {  "tolpivotsym",&typeid(double )},
+ {  "nbiter", &typeid(long)}, // 11
+ //  avril 2009  FH
+ { "datafilename",& &typeid(string*)} 
+ { "lparams",& &typeid(KN_<long>)} 
+ { "dparams",& &typeid(KN_<double>)} 
+ { "smap", &typeid(map<string,string>*)} 
+ { "permr", &typeid(KN_<long>)} 
+ { "permc", &typeid(KN_<long>)} 
+ { "scaler", &typeid(KN_<double>)} 
+ { "scalec", &typeid(KN_<double>)} 
+ 
+*/  
+    
 
-
+inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expression const *nargs ,int n_name_param)
+    {
+	int kk = n_name_param-NB_NAME_PARM_MAT-1;
+	if (nargs[++kk]) ds.initmat= ! GetAny<bool>((*nargs[kk])(stack));	
+	if (nargs[++kk]) ds.typemat= GetAny<TypeSolveMat *>((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.epsilon= GetAny<double>((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.precon= GetAny<const void *>((*nargs[kk])(stack));	
+	if (nargs[++kk]) ds.NbSpace= GetAny<long>((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.tgv= GetAny<double>((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.factorize= GetAny<bool>((*nargs[kk])(stack));	
+	if (nargs[++kk]) ds.strategy = GetAny<long>((*nargs[kk])(stack)); 
+	if (nargs[++kk]) ds.tol_pivot = GetAny<double>((*nargs[kk])(stack)); 
+	if (nargs[++kk]) ds.tol_pivot_sym = GetAny<double>((*nargs[kk])(stack)); 
+	if (nargs[++kk]) ds.itmax = GetAny<long>((*nargs[kk])(stack)); //  frev 2007 OK
+	if (nargs[++kk]) ds.data_filename = *GetAny<string*>((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.lparams = GetAny<KN_<long> >((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.dparams = GetAny<KN_<double> >((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.smap = GetAny<MyMap<String,String> *>((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.perm_r = GetAny<KN_<long> >((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.perm_c = GetAny<KN_<long> >((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.scale_r = GetAny<KN_<double> >((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.scale_c = GetAny<KN_<double> >((*nargs[kk])(stack));
+		  /* de datafilename a scalec */
+/*	
+	if (nargs[++kk]) ds.param_int= GetAny< KN<int> >((*nargs[kk+12])(stack));  // Add J. Morice 02/09 
+	if (nargs[kk+13]) ds.param_double= GetAny< KN<double> >((*nargs[kk+13])(stack));
+	if (nargs[kk+14]) ds.param_char= GetAny< string * >((*nargs[kk+14])(stack));  //
+	if (nargs[kk+15]) ds.perm_r = GetAny< KN<int > >((*nargs[kk+15])(stack));
+	if (nargs[kk+16]) ds.perm_c = GetAny< KN<int> >((*nargs[kk+16])(stack));  //
+	if (nargs[kk+17]) ds.file_param_int= GetAny< string* >((*nargs[kk+17])(stack));  // Add J. Morice 02/09 
+	if (nargs[kk+18]) ds.file_param_double= GetAny< string* >((*nargs[kk+18])(stack));
+	if (nargs[kk+19]) ds.file_param_char= GetAny< string* >((*nargs[kk+19])(stack));  //
+	if (nargs[kk+20]) ds.file_param_perm_r = GetAny< string* >((*nargs[kk+20])(stack));
+	if (nargs[kk+21]) ds.file_param_perm_c = GetAny< string* >((*nargs[kk+21])(stack));  //
+*/	
+	assert(++kk == n_name_param);
+    }
 } // end of namespace Fem2D
