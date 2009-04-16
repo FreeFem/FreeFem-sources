@@ -91,6 +91,9 @@ TypeSolveMat *dTypeSolveMat[nTypeSolveMat];
 
 
 basicAC_F0::name_and_type  OpCall_FormBilinear_np::name_param[]= {
+{   "bmat",&typeid(Matrice_Creuse<R>* )},
+     LIST_NAME_PARM_MAT
+/*
   {   "init", &typeid(bool)},
   {   "solver", &typeid(TypeSolveMat*)},
   {   "eps", &typeid(double) } ,
@@ -113,6 +116,7 @@ basicAC_F0::name_and_type  OpCall_FormBilinear_np::name_param[]= {
   {   "fileparamstring",&typeid(string* )},
   {   "filepermrow",&typeid(string*)},
   {   "filepermcol",&typeid(string*)} //22
+ */
 };
 
 

@@ -159,7 +159,7 @@ private:
   static long NbuDelPtr;
   static long uDelPtr[Maxundelptr];
   static bool after_end; 
-
+  static char filename[128];
   AllocData * NewAllocData();
   OneAlloc *Alloc();
 public:
@@ -195,7 +195,7 @@ void * AllocExtern::NextFree =0;
 long AllocExtern::NbuDelPtr =0;
 long AllocExtern::uDelPtr[Maxundelptr];
 bool AllocExtern::after_end =false;
-
+char AllocExtern::filename[128] ="ListOfUnAllocPtr.bin";
 
 AllocExtern::AllocData * AllocExtern::NewAllocData()
 {
@@ -302,6 +302,7 @@ void AllocExtern::init()
    static int count=0;
    if(0== (count++)) 
     {
+      sprintf(filename,"ListOfUnAllocPtr-%d.bin",sizeof(void*));
       AllocSize =0;
       MaxUsedSize =0;
       AllocHead =0;  
@@ -311,13 +312,18 @@ void AllocExtern::init()
       NbuDelPtr =0;
       NbuDelPtr = 0;
       after_end = false;
-
-      FILE *file=fopen("ListOfUnAllocPtr.bin","rb");
+      
+      FILE *file=fopen(filename,"rb");
       
       if (file) 
 	{
 	  fread(&NbuDelPtr,sizeof(long),1,file);
 	  fread(uDelPtr,sizeof(long),NbuDelPtr,file);
+	  if(NbuDelPtr> 100000000 && NbuDelPtr <0) 
+	    {
+	      printf("Fatal error in the file %s is wrong (please remove)",filename);
+	      exit(1);
+	    }
 	  fclose(file);
 	}  
       else
@@ -361,7 +367,7 @@ AllocExtern::~AllocExtern()
       }
     if (kk)
       {
-	FILE *file=fopen("ListOfUnAllocPtr.bin","wb");
+	FILE *file=fopen(filename,"wb");
 	if (file) 
 	  {
 	    NbuDelPtr=kk;

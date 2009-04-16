@@ -343,7 +343,7 @@ inline int cestac(const complex<double_st> & z)
 class Problem  : public Polymorphic { 
   //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =23; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter   
+  static const int n_name_param =3+NB_NAME_PARM_MAT; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter   
   int Nitem,Mitem;
   const int dim; 
 public:
@@ -550,7 +550,7 @@ struct OpCall_FormLinear_np {
 
 struct OpCall_FormBilinear_np {
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =22; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007  // 12->22 MUMPS+ Autre Solveur 02/08
+  static const int n_name_param =1+NB_NAME_PARM_MAT; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007  // 12->22 MUMPS+ Autre Solveur 02/08
 };
 
 template<class T,class v_fes>
@@ -1004,25 +1004,27 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 }
 
 template<class R>
-void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool VF,double eps,int NbSpace,int itmax,
+void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds) 
+	       /*Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool VF,double eps,int NbSpace,int itmax,
 	       const OneOperator * const precon,int umfpackstrategy, double tgv,
 	       double tol_pivot,double tol_pivot_sym, 
 	       int *param_int, double *param_double, string *param_char, int *perm_r, 
 	       int *perm_c, string *file_param_int, string *file_param_double, string *file_param_char, 
-	       string *file_param_perm_r, string *file_param_perm_c)
+	       string *file_param_perm_r, string *file_param_perm_c)*/
 { 
   using namespace Fem2D;
-  if (typemat->profile)
+  const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
+  if (ds.typemat->profile)
     {
       MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
       ffassert(&AA);
-      switch (typemat->t) {
+      switch (ds.typemat->t) {
         
       case TypeSolveMat::LU       : AA.typesolver=FactorizationLU; break;
       case TypeSolveMat::CROUT    : AA.typesolver=FactorizationCrout; break;
       case TypeSolveMat::CHOLESKY :  AA.typesolver=FactorizationCholeski; break;
       default:
-        cerr << " type resolution " << typemat->t <<" sym=" <<  typemat->profile <<  endl;
+        cerr << " type resolution " << ds.typemat->t <<" sym=" <<  ds.typemat->profile <<  endl;
         CompileError("type resolution unknown"); break;       
       }
     }
@@ -1033,28 +1035,27 @@ void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool
       MatriceMorse<R> & AA(dynamic_cast<MatriceMorse<R> &>(A));
       ffassert(&AA);
       //     ffassert(typemat->t==TypeSolveMat::GC);
-      switch (typemat->t) {
+     // using Fem2D;
+      switch (ds.typemat->t) {
       case    TypeSolveMat::GC:   
-        if (precon)
+        if (pprecon)
           AA.SetSolverMaster(static_cast<const VirtualSolver *>(
-                                                                new Fem2D::SolveGCPrecon<R>(AA,precon,stack,itmax,eps)));
+                                                                new Fem2D::SolveGCPrecon<R>(AA,pprecon,stack,ds.itmax,ds.epsilon)));
         else 
           AA.SetSolverMaster(static_cast<const VirtualSolver *>(
-                                                                new SolveGCDiag<R>(AA,itmax,eps)));
+                                                                new SolveGCDiag<R>(AA,ds.itmax,ds.epsilon)));
         break; 
       case TypeSolveMat::GMRES :
         //        InternalError("GMRES solveur to do");
-        if (precon)
-          AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,precon,stack,NbSpace,itmax,eps));
+        if (pprecon)
+          AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,pprecon,stack,ds.NbSpace,ds.itmax,ds.epsilon));
         else 
-          AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,NbSpace,itmax,eps));
+          AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,ds.NbSpace,ds.itmax,ds.epsilon));
         break;
 //#ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::SparseSolver :
-	    AA.SetSolverMaster(DefSparseSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax,
-							 param_int, param_double, param_char, perm_r, perm_c, file_param_int, file_param_double, file_param_char, 
-							 file_param_perm_r, file_param_perm_c, (void *)precon,stack )); 
-         //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
+	  AA.SetSolverMaster(DefSparseSolver<R>::Build( stack,&AA,ds) ); 
+         //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
         break;
            
 //#endif         
@@ -1064,7 +1065,7 @@ void SetSolver(Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool
       
         if (verbosity >5)
           cout << "  SetSolver:: no  default solver " << endl;
-        // cerr << " type resolution " << typemat->t << endl;
+        // cerr << " type resolution " << ds.typemat->t << endl;
         //  CompileError("type resolution inconnue"); break;       
       }
       
@@ -1093,12 +1094,15 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   // MatriceProfile<R> *pmatpf=0;
   bool VF=isVF(b->largs);
 //  assert(!VF);
-  bool factorize=false;
-  long NbSpace = 50; 
-  long itermax=0; 
-  double eps=1e-6;
+ // bool factorize=false;
+  Data_Sparse_Solver ds;
+  ds.factorize=false;
+  /*
+    long NbSpace = 50; 
+  long itmax=0; 
+  double epsilon=1e-6;
   double tgv = 1e30;
-  int umfpackstrategy=0;
+  int strategy=0;
   double tol_pivot=-1;
   double tol_pivot_sym=-1;
 
@@ -1112,41 +1116,44 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   string* file_param_char;
   string* file_param_perm_r;
   string* file_param_perm_c;  
-
-  TypeSolveMat typemat(  & Uh == & Vh  ? TypeSolveMat::GMRES :TypeSolveMat::NONESQUARE);
-  bool initmat=true;
+*/
+  TypeSolveMat tmat=  ( & Uh == & Vh  ? TypeSolveMat::GMRES : TypeSolveMat::NONESQUARE);
+  ds.typemat=&tmat;
+  ds.initmat=true;
+    SetEnd_Data_Sparse_Solver(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
+  /*  
   if (b->nargs[0]) initmat= ! GetAny<bool>((*b->nargs[0])(stack));
   if (b->nargs[1]) typemat= *GetAny<TypeSolveMat *>((*b->nargs[1])(stack));
-  if (b->nargs[2]) eps= GetAny<double>((*b->nargs[2])(stack));
-  if (b->nargs[4]) NbSpace= GetAny<long>((*b->nargs[4])(stack));
-  if (b->nargs[6]) tgv= GetAny<double>((*b->nargs[6])(stack));
+  if (b->nargs[2]) ds.epsilon= GetAny<double>((*b->nargs[2])(stack));
+  if (b->nargs[4]) ds.NbSpace= GetAny<long>((*b->nargs[4])(stack));
+  if (b->nargs[6]) ds.tgv= GetAny<double>((*b->nargs[6])(stack));
   if (b->nargs[7]) factorize= GetAny<bool>((*b->nargs[7])(stack));
-  if (b->nargs[8]) umfpackstrategy= GetAny<long>((*b->nargs[8])(stack));
-  if (b->nargs[9]) tol_pivot= GetAny<double>((*b->nargs[9])(stack));
-  if (b->nargs[10]) tol_pivot_sym= GetAny<double>((*b->nargs[10])(stack));
-  if (b->nargs[11]) itermax= GetAny<long>((*b->nargs[11])(stack));
+  if (b->nargs[8]) ds.strategy= GetAny<long>((*b->nargs[8])(stack));
+  if (b->nargs[9]) ds.tol_pivot= GetAny<double>((*b->nargs[9])(stack));
+  if (b->nargs[10]) ds.tol_pivot_sym= GetAny<double>((*b->nargs[10])(stack));
+  if (b->nargs[11]) ds.itmax= GetAny<long>((*b->nargs[11])(stack));
 
-  if (b->nargs[12]) param_int= GetAny< KN<int> >((*b->nargs[12])(stack));  // Add J. Morice 02/09 
-  if (b->nargs[13]) param_double= GetAny< KN<double> >((*b->nargs[13])(stack));
-  if (b->nargs[14]) param_char= GetAny< string * >((*b->nargs[14])(stack));  //
-  if (b->nargs[15]) perm_r = GetAny< KN< int > >((*b->nargs[15])(stack));
-  if (b->nargs[16]) perm_c = GetAny< KN< int > >((*b->nargs[16])(stack));  //
-  if (b->nargs[17]) file_param_int= GetAny< string* >((*b->nargs[17])(stack));  // Add J. Morice 02/09 
-  if (b->nargs[18]) file_param_double= GetAny< string* >((*b->nargs[18])(stack));
-  if (b->nargs[19]) file_param_char= GetAny< string* >((*b->nargs[19])(stack));  //
-  if (b->nargs[20]) file_param_perm_r = GetAny< string* >((*b->nargs[20])(stack));
-  if (b->nargs[21]) file_param_perm_c = GetAny< string* >((*b->nargs[21])(stack));  //
- 
-  if (! A_is_square && typemat != TypeSolveMat::NONESQUARE) 
+  if (b->nargs[12]) ds.param_int= GetAny< KN<int> >((*b->nargs[12])(stack));  // Add J. Morice 02/09 
+  if (b->nargs[13]) ds.param_double= GetAny< KN<double> >((*b->nargs[13])(stack));
+  if (b->nargs[14]) ds.param_char= GetAny< string * >((*b->nargs[14])(stack));  //
+  if (b->nargs[15]) ds.perm_r = GetAny< KN< int > >((*b->nargs[15])(stack));
+  if (b->nargs[16]) ds.perm_c = GetAny< KN< int > >((*b->nargs[16])(stack));  //
+  if (b->nargs[17]) ds.file_param_int= GetAny< string* >((*b->nargs[17])(stack));  // Add J. Morice 02/09 
+  if (b->nargs[18]) ds.file_param_double= GetAny< string* >((*b->nargs[18])(stack));
+  if (b->nargs[19]) ds.file_param_char= GetAny< string* >((*b->nargs[19])(stack));  //
+  if (b->nargs[20]) ds.file_param_perm_r = GetAny< string* >((*b->nargs[20])(stack));
+  if (b->nargs[21]) ds.file_param_perm_c = GetAny< string* >((*b->nargs[21])(stack));  //
+ */
+  if (! A_is_square && *ds.typemat != TypeSolveMat::NONESQUARE) 
    {
-     cout << " -- Error the solver << "<< typemat <<"  is set  on rectangular matrix  " << endl;
+     cout << " -- Error the solver << "<< ds.typemat <<"  is set  on rectangular matrix  " << endl;
      ExecError("A solver is set on a none square matrix!");
-    typemat= TypeSolveMat::NONESQUARE;
+    ds.typemat= &(tmat =TypeSolveMat::NONESQUARE);
    }
-  const OneOperator *precon = 0; //  a changer 
-  if ( b->nargs[3])
+  const OneOperator *precon = static_cast<const OneOperator *> (ds.precon); //  a changer 
+  if ( precon)
     {
-      const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(b->nargs[3]);
+      const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(precon);
       ffassert(op);
       precon = op->Find("(",ArrayOfaType(atype<KN<double>* >(),false));
     }
@@ -1155,7 +1162,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   
   Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
   if(init) A.init(); //  
-  /*  if  ( (pUh != A.pUh ) || (pVh != A.pVh  || A.typemat.t != typemat.t) )
+  /*  if  ( (pUh != A.pUh ) || (pVh != A.pVh  || A.typemat->t != typemat->t) )
     { 
       A.Uh.destroy();
       A.Vh.destroy();
@@ -1164,16 +1171,16 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   bool same=isSameMesh(b->largs,&Uh.Th,&Vh.Th,stack);     
   if ( same)
    {
-     A.typemat = typemat;
+     A.typemat = *ds.typemat;
      if ( A.Uh != Uh  || A.Vh != Vh ) 
        { // reconstruct all the matrix
 	 A.A=0; // to delete  old  matrix ADD FH 16112005 
 	 A.Uh=Uh;
 	 A.Vh=Vh;
-	 if (typemat.profile)
+	 if (ds.typemat->profile)
 	   { A.A.master( new MatriceProfile<R>(Vh,VF) ); ffassert( &Uh == & Vh);}
-	 else if (typemat.sym )
-	   {  A.A.master( new  MatriceMorse<R>(Vh,typemat.sym,VF) ); 
+	 else if (ds.typemat->sym )
+	   {  A.A.master( new  MatriceMorse<R>(Vh,ds.typemat->sym,VF) ); 
 	     ffassert( &Uh == & Vh);}
 	 else 
 	   {
@@ -1182,36 +1189,37 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
        }
      *A.A=R(); // reset value of the matrix
      
-     if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >( stack,Th,Uh,Vh,typemat.sym,A.A,0,b->largs) )
-       AssembleBC<R,FESpace>( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
+     if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >( stack,Th,Uh,Vh,ds.typemat->sym,A.A,0,b->largs) )
+       AssembleBC<R,FESpace>( stack,Th,Uh,Vh,ds.typemat->sym,A.A,0,0,b->largs,ds.tgv);
    }
   else
    { // add FH 17 06 2005  int on different meshes. 
      map<pair<int,int>, R >   AAA;
-     bool bc=AssembleVarForm<R,map<pair<int,int>, R >,FESpace  >( stack,Th,Uh,Vh,typemat.sym,&AAA,0,b->largs);
-     if (typemat.profile)
+     bool bc=AssembleVarForm<R,map<pair<int,int>, R >,FESpace  >( stack,Th,Uh,Vh,ds.typemat->sym,&AAA,0,b->largs);
+     if (ds.typemat->profile)
         { ExecError(" Sorry, construction of Skyline matrix with different meshes is not implemented! ");}
       else 
-        { A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA,typemat.sym) ); }
+        { A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA,ds.typemat->sym) ); }
       if (bc)
-           AssembleBC<R>( stack,Th,Uh,Vh,typemat.sym,A.A,0,0,b->largs,tgv);
+           AssembleBC<R>( stack,Th,Uh,Vh,ds.typemat->sym,A.A,0,0,b->largs,ds.tgv);
     
    }
-  if( A_is_square && factorize ) {
+  if( A_is_square && ds.factorize ) {
     MatriceProfile<R> * pf = dynamic_cast<MatriceProfile<R> *>((MatriceCreuse<R> *) A.A);
     assert(pf);
-    switch (typemat.t) {
-    case TypeSolveMat::LU: pf->LU(Abs(eps));break;
-    case TypeSolveMat::CROUT: pf->crout(Abs(eps));break;
-    case TypeSolveMat::CHOLESKY: pf->cholesky(Abs(eps));break;
+    switch (ds.typemat->t) {
+    case TypeSolveMat::LU: pf->LU(Abs(ds.epsilon));break;
+    case TypeSolveMat::CROUT: pf->crout(Abs(ds.epsilon));break;
+    case TypeSolveMat::CHOLESKY: pf->cholesky(Abs(ds.epsilon));break;
     default: ExecError("Sorry no factorize for this type for matrix"); 
     }
     
   }    
   if (A_is_square) 
-    SetSolver(stack,*A.A,&typemat,VF,eps,NbSpace,itermax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym, 
+    SetSolver(stack,VF,*A.A,ds);
+	      /*stack,*A.A,&typemat,VF,eps,NbSpace,itmax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym, 
 	      param_int, param_double, param_char, perm_r, perm_c, file_param_int, file_param_double, file_param_char, 
-	      file_param_perm_r, file_param_perm_c);
+	      file_param_perm_r, file_param_perm_c );*/
   
   return SetAny<Matrice_Creuse<R>  *>(&A);
   

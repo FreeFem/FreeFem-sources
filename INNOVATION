@@ -1,4 +1,6 @@
 v 3.2
+  - add complet rewrite of the way  to set parameter for sparse solver
+    in vue of parallele solver ( no progress)
   - add --enable-m64 for 64 bit complilation flags 
   - correct f2c of  take the -m64 flags 
   -  build the universal f2c library with 4 achitecture ppc i386 ppc64 x86_64

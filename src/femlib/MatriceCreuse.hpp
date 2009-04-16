@@ -797,70 +797,126 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 
 };
 
+struct TypeSolveMat {
+    enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6 };
+    TSolveMat t;
+    bool sym;
+    bool profile;
+    TypeSolveMat(TSolveMat tt=LU) :t(tt),
+    sym(t == CROUT || t ==CHOLESKY  ||  t==GC ),
+    profile(t != GC && t != GMRES && t != NONESQUARE && t != SparseSolver ) {}
+    bool operator==(const TypeSolveMat & a) const { return t == a.t;}                               
+    bool operator!=(const TypeSolveMat & a) const { return t != a.t;}
+    static TSolveMat defaultvalue;
+};
+
+// add FH , JM  avril 2009 
+template<class K,class V> class MyMap;
+class String; 
+
+struct Data_Sparse_Solver {
+    bool initmat;
+    TypeSolveMat* typemat;
+    double epsilon;
+    const void * precon;
+    int NbSpace;
+  int strategy;
+  double tgv;
+    bool factorize;
+  double tol_pivot;
+  double tol_pivot_sym;
+  int itmax ;
+    string data_filename;  
+    KN<long> lparams;  //  copy arry more secure ...
+    KN<double> dparams;   
+    
+    MyMap<String,String> * smap;   
+    
+    KN<long> perm_r; 
+    KN<long> perm_c;     
+    KN<double> scale_r; 
+    KN<double> scale_c; 
+    
+ /*   
+  int *param_int;
+  double *param_double;
+  string *param_char;
+  int *perm_r;
+  int *perm_c;
+  string *file_param_int;
+  string *file_param_double;
+  string *file_param_char;
+  string *file_param_perm_r;
+  string *file_param_perm_c;
+  */
+    
+    Data_Sparse_Solver()
+	:
+    initmat(1),
+    typemat(0),
+    strategy(0),
+    tgv(1e30),
+    factorize(0),
+    epsilon(1e-6),
+    precon(0),
+    tol_pivot(-1),
+    tol_pivot_sym(-1),
+    NbSpace(50),
+    itmax(0),
+ //   lparams(0,0),
+ //   dparams(0,0),
+    smap(0) 
+//    perm_r(0,0),
+//    perm_c(0,0),
+//    scale_r(0,0),
+ //   scale_c(0,0)
+    
+    /*
+    param_int(0),
+    param_double(0),
+    param_char(0),
+    perm_r(0),
+    perm_c(0),
+    file_param_int(0),
+    file_param_double(0),
+    file_param_perm_r(0),
+    file_param_perm_c(0),
+     */
+ 
+    {}
+private:
+    Data_Sparse_Solver(const Data_Sparse_Solver& ); // pas de copie 
+};
+
 // add Sep 2007 for generic Space solver
+#define DCL_ARG_SPARSE_SOLVER(T,A)  Stack stack,const MatriceMorse<T> *A, Data_Sparse_Solver & ds
+#define ARG_SPARSE_SOLVER(A) stack,A, ds					
+
 typedef MatriceMorse<double>::VirtualSolver *
-   (*SparseRMatSolve)(const MatriceMorse<double> *A,int strategy,
-		      double ttgv, double epsilon, double pivot,double pivot_sym,
-		      int NbSpace,int itmax ,  
-		      int *param_int, double *param_double, string *param_char, 
-		      int *perm_r, int *perm_c, string *file_param_int,  
-		      string *file_param_double, string *file_param_char, 
-		      string *file_param_perm_r, string *file_param_perm_c,
-		      const void * precon, void * stack);
+(*SparseRMatSolve)(DCL_ARG_SPARSE_SOLVER(double,A) );
 
 typedef MatriceMorse<Complex>::VirtualSolver *
-   (*SparseCMatSolve)(const MatriceMorse<Complex> *A,int strategy,
-		      double ttgv, double epsilon, double pivot,double pivot_sym,
-		      int NbSpace,int itmax , 
-		      int *param_int, double *param_double, string *param_char, 
-		      int *perm_r, int *perm_c, string *file_param_int,  
-		      string *file_param_double, string *file_param_char, 
-		      string *file_param_perm_r, string *file_param_perm_c,
-		      const void * precon, void * stack);
+(*SparseCMatSolve)(DCL_ARG_SPARSE_SOLVER(Complex,A) );
 
 
 template<class R> struct DefSparseSolver {
   typedef typename MatriceMorse<R>::VirtualSolver * 
-  (*SparseMatSolver)(const MatriceMorse<R> *A,int strategy,
-		     double ttgv, double epsilon, double pivot,double pivot_sym ,
-		     int NbSpace,int itmax ,
-		     int *param_int, double *param_double, string *param_char, 
-		     int *perm_r, int *perm_c, string *file_param_int,  
-		     string *file_param_double, string *file_param_char, 
-		     string *file_param_perm_r, string *file_param_perm_c,
-		     const void * precon, void * stack);
+  (*SparseMatSolver)(DCL_ARG_SPARSE_SOLVER(R,A) );
   static SparseMatSolver solver;
     
   static  typename MatriceMorse<R>::VirtualSolver * 
-  Build(const MatriceMorse<R> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-	int NbSpace,int itmax ,  int *param_int, double *param_double, string *param_char, int *perm_r, 
-	int *perm_c, string *file_param_int, string *file_param_double, string *file_param_char, 
-	string *file_param_perm_r, string *file_param_perm_c,const  void * precon, void * stack)
+  Build( DCL_ARG_SPARSE_SOLVER(R,A) )
     
   {
     typename MatriceMorse<R>::VirtualSolver *ret=0;
     if(solver)
-      ret =(solver)(A,strategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax, param_int, param_double, 
-		    param_char, perm_r, perm_c, file_param_int, file_param_double, file_param_char, 
-		    file_param_perm_r, file_param_perm_c,(const void *) precon,stack);
+      ret =(solver)(ARG_SPARSE_SOLVER(A));
     return ret;	
   }
 };
 
 // End Sep 2007 for generic Space solver
 
-struct TypeSolveMat {
-  enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6 };
-  TSolveMat t;
-  bool sym;
-  bool profile;
-  TypeSolveMat(TSolveMat tt=LU) :t(tt),
-				 sym(t == CROUT || t ==CHOLESKY  ||  t==GC ),
-				 profile(t != GC && t != GMRES && t != NONESQUARE && t != SparseSolver ) {}
-  bool operator==(const TypeSolveMat & a) const { return t == a.t;}                               
-  bool operator!=(const TypeSolveMat & a) const { return t != a.t;}
-  static TSolveMat defaultvalue;
-};
 
 
 inline void C2RR(int n,Complex *c,double *cr,double *ci)
@@ -881,275 +937,4 @@ inline void RR2C(int n,double *cr,double *ci,Complex *c)
 }
 
 
-#ifdef HAVE_LIBUMFPACK__XXXXXXXXXXXX
-template<class R>
-class SolveUMFPack :   public MatriceMorse<R>::VirtualSolver  {
-  double eps;
-  mutable double  epsr;
-  double tgv;
-  void *Symbolic, *Numeric ;
-  int umfpackstrategy;
-  double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
-public:
-  SolveUMFPack(const MatriceMorse<R> &A,int strategy,double ttgv, double epsilon=1e-6,
-	       double pivot=-1.,double pivot_sym=-1.  ) : 
-    eps(epsilon),epsr(0),
-    tgv(ttgv),
-    Symbolic(0),Numeric(0)  ,
-    umfpackstrategy(strategy),
-    tol_pivot_sym(pivot_sym),tol_pivot(pivot)
-  { 
-    
-    int status;
-    throwassert( !A.sym() && Numeric == 0 && Symbolic==0 );
-    int n=A.n;
-    double Control[UMFPACK_CONTROL];
-    double Info[UMFPACK_INFO];
-    
-    for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
-    for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
-    
-    umfpack_di_defaults (Control) ;
-    Control[UMFPACK_PRL]=1;
-   // Control[UMFPACK_PIVOT_TOLERANCE]=1E-10;
-    
-    if(verbosity>4) Control[UMFPACK_PRL]=2;
-    if(tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=pivot_sym;
-    if(tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=pivot;
-    if(umfpackstrategy>=0)   Control[UMFPACK_STRATEGY]=umfpackstrategy;
-    if(verbosity>3) { 
-      cout << "  UMFpack real  Solver Control :" ;
-      cout << "\n\t SYM_PIVOT_TOLERANCE "<< Control[UMFPACK_SYM_PIVOT_TOLERANCE];
-      cout << "\n\t PIVOT_TOLERANCE     "<< Control[UMFPACK_PIVOT_TOLERANCE];
-      cout << "\n\t PRL                 "<< Control[UMFPACK_PRL];
-      cout << "\n";      
-    }
-    
-    status = umfpack_di_symbolic (n, n, A.lg, A.cl, A.a, &Symbolic,Control,Info) ;
-    if (status !=  0)
-    {
-      (void) umfpack_di_report_matrix (n, n, A.lg, A.cl, A.a, 1, Control) ;
-
-	umfpack_di_report_info (Control, Info) ;
-	umfpack_di_report_status (Control, status) ;
-	cerr << "umfpack_di_symbolic failed" << endl;
-	ExecError("umfpack_di_symbolic failed");
-	//ffassert(0);
-    }
-
-    status = umfpack_di_numeric (A.lg, A.cl, A.a, Symbolic, &Numeric,Control,Info) ;
-    if (status !=  0)
-    {
-	umfpack_di_report_info (Control, Info) ;
-	umfpack_di_report_status (Control, status) ;
-	cerr << "umfpack_di_numeric failed" << endl;
-	ExecError("umfpack_di_numeric failed");
-	ffassert(0);
-    }
-
-    if (Symbolic) umfpack_di_free_symbolic (&Symbolic),Symbolic=0; 
-    if(verbosity>3)
-    cout << "  -- umfpack_di_build LU " << n <<  endl;
-    if(verbosity>5)     (void)  umfpack_di_report_info(Control,Info);
-
-  }
-  void Solver(const MatriceMorse<R> &A,KN_<R> &x,const KN_<R> &b) const  {
-    ffassert ( &x[0] != &b[0]);
-    epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
-    // cout << " epsr = " << epsr << endl;
-    double Control[UMFPACK_CONTROL];
-    double Info[UMFPACK_INFO];
-    for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
-    for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
-    int n= b.N(); 
-     ffassert(A.ChecknbLine( n) && n == x.N() && A.ChecknbColumn(n) );
-    
-     umfpack_di_defaults (Control) ;
-     // change UMFPACK_At to UMFPACK_Aat in complex 
-    int status = umfpack_di_solve (UMFPACK_Aat, A.lg, A.cl, A.a, x, b, Numeric,Control,Info) ;
-    if (status != 0)
-    {
-	umfpack_di_report_info (Control, Info) ;
-	umfpack_di_report_status (Control, status) ;
-	cerr << "umfpack_di_solve failed" << endl;
-	ExecError("umfpack_di_solve failed");
-	
-	ffassert(0);
-    }
-     if(verbosity>2)
-    cout << " -- umfpack_di_solve " << endl;
-    if(verbosity>3)
-    cout << "   b min max " << b.min() << " " <<b.max() << endl;
-    if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
-     if(verbosity>1) cout << "   x min max " << x.min() << " " <<x.max() << endl;
-  }
-
-  ~SolveUMFPack() { 
-   if(verbosity>3)
-    cout << "~SolveUMFPack S:" << Symbolic << " N:" << Numeric <<endl;
-    if (Symbolic)   umfpack_di_free_symbolic  (&Symbolic),Symbolic=0; 
-    if (Numeric)    umfpack_di_free_numeric (&Numeric),Numeric=0;
-  }
-  void addMatMul(const KN_<R> & x, KN_<R> & Ax) const 
-  {  
-    ffassert(x.N()==Ax.N());
-    Ax +=  (const MatriceMorse<R> &) (*this) * x; 
-  }
-     
-}; 
-
-template<>
-class SolveUMFPack<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
-  double eps;
-  mutable double  epsr;
-  int umfpackstrategy;
-  double tgv;
-  void *Symbolic, *Numeric ;
-  double *ar,*ai;
-
-
-  double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
-
-public:
-  SolveUMFPack(const MatriceMorse<Complex> &A,int strategy,double ttgv, double epsilon=1e-6,
-     double pivot=-1.,double pivot_sym=-1.
-) : 
-    eps(epsilon),epsr(0),umfpackstrategy(strategy),tgv(ttgv),
-    Symbolic(0),Numeric(0),
-    ar(0),ai(0),
-    tol_pivot_sym(pivot_sym), 
-    tol_pivot(pivot)
-   { 
-    int status;
-    throwassert( !A.sym());
-    int n=A.n;
-    //  copy the coef of the matrice ---
-     ar= new double[A.nbcoef];
-     ai= new double[A.nbcoef];
-     ffassert(ar && ai);
-     C2RR(A.nbcoef,A.a,ar,ai);
-        
-    double Control[UMFPACK_CONTROL];
-    double Info[UMFPACK_INFO];
-    umfpack_zi_defaults (Control) ;
-    Control[UMFPACK_PRL]=1;
-    if(verbosity>4) Control[UMFPACK_PRL]=2;
-   //    Control[UMFPACK_SYM_PIVOT_TOLERANCE]=1E-10;
-  //  Control[UMFPACK_PIVOT_TOLERANCE]=1E-10;
-    if(tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=pivot_sym;
-    if(tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=pivot;
-    if(umfpackstrategy>=0) Control[UMFPACK_STRATEGY]=umfpackstrategy;
-    if(verbosity>3) { 
-      cout << "  UMFpack complex Solver Control :" ;
-      cout << "\n\t SYM_PIVOT_TOLERANCE "<< Control[UMFPACK_SYM_PIVOT_TOLERANCE];
-      cout << "\n\t PIVOT_TOLERANCE     "<< Control[UMFPACK_PIVOT_TOLERANCE];
-      cout << "\n\t PRL                 "<< Control[UMFPACK_PRL];
-      cout << "\n";      
-    }
-    status = umfpack_zi_symbolic (n, n, A.lg, A.cl, ar,ai, &Symbolic,Control,Info) ;
-    if (status < 0)
-    {
-      (void) umfpack_zi_report_matrix (n, n, A.lg, A.cl, ar,ai, 1, Control) ;
-
-	umfpack_zi_report_info (Control, Info) ;
-	umfpack_zi_report_status (Control, status) ;
-	cerr << "umfpack_zi_symbolic failed" << endl;
-	ExecError("umfpack_zi_symbolic failed");
-	ffassert(0);
-	exit(2);
-    }
-
-    status = umfpack_zi_numeric (A.lg, A.cl, ar,ai, Symbolic, &Numeric,Control,Info) ;
-    if (status < 0)
-    {
-	umfpack_zi_report_info (Control, Info) ;
-	umfpack_zi_report_status (Control, status) ;
-	cerr << "umfpack_zi_numeric failed" << endl;
-	ExecError("umfpack_zi_numeric failed");
-	ffassert(0);
-	exit(2);
-    }
-
-    if (Symbolic) umfpack_zi_free_symbolic (&Symbolic),Symbolic=0; 
-    if(verbosity>3)
-    cout << "umfpack_zi_build LU " << n <<  endl;
-    if(verbosity>5)     (void)  umfpack_zi_report_info(Control,Info);
-
-  }
-  void Solver(const MatriceMorse<Complex> &A,KN_<Complex> &x,const KN_<Complex> &b) const  {
-        ffassert ( &x[0] != &b[0]);
-    epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
-    // cout << " epsr = " << epsr << endl;
-    double Control[UMFPACK_CONTROL];
-    double Info[UMFPACK_INFO];
-     umfpack_zi_defaults (Control) ;
-     int n = b.N();
-     ffassert(A.ChecknbLine( n) && n == x.N() && A.ChecknbColumn(n) );
-     KN<double> xr(n),xi(n),br(n),bi(n);
-     C2RR(n,b,br,bi);
-     // change UMFPACK_At to UMFPACK_Aat in complex  oct 2005 
-    int status = umfpack_zi_solve (UMFPACK_Aat, A.lg, A.cl, ar,ai, xr, xi, br,bi, Numeric,Control,Info) ;
-    if (status < 0)
-    {
-	umfpack_zi_report_info (Control, Info) ;
-	umfpack_zi_report_status (Control, status) ;
-	cerr << "umfpack_zi_solve failed" << endl;
-	ExecError("umfpack_zi_numeric failed");
-	ffassert(0);
-	exit(2);
-    }
-    RR2C(n,xr,xi,x);
-    if(verbosity>1)
-    {
-     cout << "  -- umfpack_zi_solve " << endl;
-     if(verbosity>3)     (void)  umfpack_zi_report_info(Control,Info);
-    
-      cout << "   b min max " << b.min() << " " <<b.max() << endl;
-      cout << "   x min max " << x.min() << " " <<x.max() << endl;
-    }
-  }
-
-  ~SolveUMFPack() { 
-    if(verbosity>5)
-    cout << "~SolveUMFPack " << endl;
-    if (Symbolic)   umfpack_zi_free_symbolic  (&Symbolic),Symbolic=0; 
-    if (Numeric)    umfpack_zi_free_numeric (&Numeric),Numeric=0;
-    delete [] ar;
-    delete [] ai;   
-  }
-  void addMatMul(const KN_<Complex> & x, KN_<Complex> & Ax) const 
-  {  
-    ffassert(x.N()==Ax.N());
-    Ax +=  (const MatriceMorse<Complex> &) (*this) * x; 
-  }
-     
-
-}; 
-
-
-inline MatriceMorse<double>::VirtualSolver *
-BuildSolverUMFPack(const MatriceMorse<double> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-		   int NbSpace,int itmax ,  int *param_int, double *param_double, string **param_char, 
-		   int *perm_r, int *perm_c, string *file_param_int,  
-		   string *file_param_double, string *file_param_char, 
-		   string *file_param_perm_r, string *file_param_perm_c, const void * precon, void * stack )
-{
-    return new SolveUMFPack<double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
-}
-
-inline MatriceMorse<Complex>::VirtualSolver *
-BuildSolverUMFPack(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-		   int NbSpace,int itmax ,  int *param_int, double *param_double, string **param_char, 
-		   int *perm_r, int *perm_c, string *file_param_int,  
-		   string *file_param_double, string *file_param_char, 
-		   string *file_param_perm_r, string *file_param_perm_c, const void * precon, void * stack )
-{
-    return new SolveUMFPack<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
-}
-
-
-
-
-#endif  
-//  endif ---- UMFPACK ----
 #endif

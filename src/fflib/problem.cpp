@@ -57,6 +57,11 @@ basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
 
 
 basicAC_F0::name_and_type  Problem::name_param[]= {
+{  "save",&typeid(string* )},
+{  "cadna",&typeid(KN<double>*)},
+{  "bmat",&typeid(Matrice_Creuse<R>* )},
+LIST_NAME_PARM_MAT
+/*
   {  "init", &typeid(bool)},
   {  "solver", &typeid(TypeSolveMat*)},
   {  "eps", &typeid(double) },
@@ -80,6 +85,7 @@ basicAC_F0::name_and_type  Problem::name_param[]= {
   {   "fileparamstring",&typeid(string* )},
   {   "filepermrow",&typeid(string*)},
   {   "filepermcol",&typeid(string*)} //22
+ */
 };
 
 
@@ -3367,67 +3373,52 @@ void InitProblem( int Nb, const FESpace & Uh,
 } 
 
 template<class R>
-void DefSolver(Stack stack,
-	       TypeSolveMat    *typemat,
-	       MatriceCreuse<R>  & A,
-	       long NbSpace , 
-	       long itmax, 
-	       double & eps,
-	       bool initmat,
-	       int umfpackstrategy,
-	       const OneOperator *precon,
-	       double tgv,
-	       double tol_pivot, double tol_pivot_sym,
-	       int *param_int, double *param_double, string *param_char, int *perm_r, 
-	       int *perm_c, string *file_param_int, string *file_param_double, string *file_param_char, 
-	       string *file_param_perm_r, string *file_param_perm_c
-)
+void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds )
 {
-    if (typemat->profile)
+    const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
+    if (ds.typemat->profile)
       {
-        if(verbosity>5) cout << " Matrix skyline type:" << typemat->t <<endl;
+        if(verbosity>5) cout << " Matrix skyline type:" << ds.typemat->t <<endl;
         MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
         throwassert(&AA);
-        double tol_pivot1= (tol_pivot>0.) ? tol_pivot : EPSILON/8.;
+        double tol_pivot1= (ds.tol_pivot>0.) ? ds.tol_pivot : EPSILON/8.;
        // cout << " tol_pivot1 " <<tol_pivot1 <<  endl; auto_ptr
-        switch (typemat->t) {
+        switch (ds.typemat->t) {
         case TypeSolveMat::LU       : AA.LU(tol_pivot1); break;
         case TypeSolveMat::CROUT    : AA.crout(tol_pivot1); break;
         case TypeSolveMat::CHOLESKY : AA.cholesky(tol_pivot1); break;
         default:
-          cerr << " type resolution " << typemat->t << endl;
+          cerr << " type resolution " << ds.typemat->t << endl;
           CompileError("type resolution profile inconnue"); break;       
         }
       }
     else 
       {
-        if(verbosity>5) cout << " Matrix morse type:" << typemat->t <<endl;
-        MatriceMorse<R> & AA(dynamic_cast<MatriceMorse<R> &>(A));
-        throwassert(&AA);
-        switch (typemat->t) {
+        if(verbosity>5) cout << " Matrix morse type:" << ds.typemat->t <<endl;
+	MatriceMorse<R> & AA(dynamic_cast<MatriceMorse<R> &>(A));
+        throwassert(&A);
+        switch (ds.typemat->t) {
         case    TypeSolveMat::GC:   
-          if (precon)
-            AA.SetSolverMaster(new SolveGCPrecon<R>(AA,precon,stack,itmax,eps));
+          if (ds.precon)
+            AA.SetSolverMaster(new SolveGCPrecon<R>(AA,pprecon,stack,ds.itmax,ds.epsilon));
           else 
-            AA.SetSolverMaster(new SolveGCDiag<R>(AA,itmax,eps));
+            AA.SetSolverMaster(new SolveGCDiag<R>(AA,ds.itmax,ds.epsilon));
           break; 
         case TypeSolveMat::GMRES :
-          if (precon)
-            AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,precon,stack,NbSpace,itmax,eps));
+          if (ds.precon)
+            AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,pprecon,stack,ds.NbSpace,ds.itmax,ds.epsilon));
           else 
-            AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,NbSpace,itmax,eps));
+            AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,ds.NbSpace,ds.itmax,ds.epsilon));
          break;
-//#ifdef HAVE_LIBUMFPACK         
+	 //#ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::SparseSolver :
-            AA.SetSolverMaster(DefSparseSolver<R>::Build(&AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym,NbSpace,itmax, 
-							 param_int, param_double, param_char, perm_r, perm_c, file_param_int, file_param_double, file_param_char, 
-							 file_param_perm_r, file_param_perm_c,(const void *) precon,stack));
+	  AA.SetSolverMaster(DefSparseSolver<R>::Build(stack,&AA,ds));
 //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
          break;
            
 //#endif         
         default:
-          cerr << " type resolution " << typemat->t << endl;
+          cerr << " type resolution " << ds.typemat->t << endl;
           CompileError("type resolution inconnue"); break;       
         }
         
@@ -3486,37 +3477,38 @@ bool SetUMFPACK()
 
  
 template<class R>
- MatriceCreuse<typename CadnaType<R>::Scalaire> * DefSolverCadna(Stack stack,
-  TypeSolveMat    *typemat,
+ MatriceCreuse<typename CadnaType<R>::Scalaire> * DefSolverCadna(
+  Stack stack,
   MatriceCreuse<R>  & A,
-  long NbSpace , 
+  Data_Sparse_Solver & ds
+/*  long NbSpace , 
   long itmax, 
   double & eps,
   bool initmat,
-  int umfpackstrategy,
+  int strategy,
   const OneOperator *precon,
   double tgv,
   double tol_pivot, double tol_pivot_sym
-
+*/
 )
 {
    typedef typename CadnaType<R>::Scalaire R_st;
  //  MatriceCreuse<R_st> *CadnaMat;
-    if (typemat->profile)
+    if (ds.typemat->profile)
       {
-        if(verbosity>5) cout << " Matrix skyline type:" << typemat->t <<endl;
+        if(verbosity>5) cout << " Matrix skyline type:" << ds.typemat->t <<endl;
         MatriceProfile<R> & AAA(dynamic_cast<MatriceProfile<R> &>(A));
         MatriceProfile<R_st> &AA(*new MatriceProfile<R_st>(AAA)); // 
         
         throwassert(&AA);
-        double tol_pivot1= (tol_pivot1>0) ? tol_pivot : EPSILON/8.;
+        double tol_pivot1= (ds.tol_pivot>0) ? ds.tol_pivot : EPSILON/8.;
        // cout << " tol_pivot1 " <<tol_pivot1 <<  endl;
-        switch (typemat->t) {
+        switch (ds.typemat->t) {
         case TypeSolveMat::LU       : AA.LU(tol_pivot1); break;
         case TypeSolveMat::CROUT    : AA.crout(tol_pivot1); break;
         case TypeSolveMat::CHOLESKY : AA.cholesky(tol_pivot1); break;
         default:
-          cerr << " type resolution " << typemat->t << endl;
+          cerr << " type resolution " << ds.typemat->t << endl;
           CompileError("type resolution profile inconnue"); break;       
         }
         return &AA;
@@ -3524,43 +3516,7 @@ template<class R>
     else 
       {
          ExecError("matrix morse & CADNA are incompatible today, sorry!");
-         /* 
-        if(verbosity>5) cout << " Matrix morse type:" << typemat->t <<endl;
-        MatriceMorse<R> & AAA(dynamic_cast<MatriceMorse<R> &>(A));
-        MatriceMorse<R_st> &AA(*new MatriceMorse<R_st>(AAA)); // 
-          ExecError("morse  & CADNA are incompatible today, sorry!");
-        throwassert(&AA);
-        switch (typemat->t) {
-        case    TypeSolveMat::GC:   
-          if (precon)
-            AA.SetSolverMaster(new SolveGCPrecon<R>(AA,precon,stack,itmax,eps));
-          else 
-            AA.SetSolverMaster(new SolveGCDiag<R>(AA,itmax,eps));
-          break; 
-        case TypeSolveMat::GMRES :
-          if (precon)
-            AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,precon,stack,NbSpace,itmax,eps));
-          else 
-            AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,NbSpace,itmax,eps));
-         break;
-#ifdef HAVE_LIBUMFPACK 
-               
-        case TypeSolveMat::UMFpack :
-         ExecError("UMFPACK & CADNA are incompatible today, sorry!");
-         //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps));
-         break;
-           
-#endif     
-      
-        default:
-          cerr << " type resolution " << typemat->t << endl;
-          CompileError("type resolution inconnue"); break;   
-           
-        }
-        return &AA;
-        */
          return 0;
-
       }
    return 0;   
   }      
@@ -3633,20 +3589,23 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   using namespace Fem2D;
   typedef typename CadnaType<R>::Scalaire R_st;
   MeshPoint *mps= MeshPointStack(stack),mp=*mps;
-  long NbSpace = 50; 
+    Data_Sparse_Solver ds;
+ /* long NbSpace = 50; 
   long itmax=0; 
-  double eps=1e-6;
+  double epsilon=1e-6;*/
   string save;
+    
 //  bool VF=false;
 //  VF=isVF(op->largs);
  // assert(!VF); 
-  double tgv = 1e30;
+//  double tgv = 1e30;
 // type de matrice par default
     TypeSolveMat tmat(TypeSolveMat::defaultvalue); 
      
-   TypeSolveMat    *typemat=&tmat;
-  bool initmat=true;
-  int umfpackstrategy=0;
+   ds.typemat=&tmat;
+ // bool initmat=true;
+/*
+    int strategy=0;
   double tol_pivot=-1.; // defaut UMFPACK value  Add FH 31 oct 2005 
   double tol_pivot_sym=-1.; // defaut Add FH 31 oct 2005 
   
@@ -3660,38 +3619,50 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   string* file_param_char;
   string* file_param_perm_r;
   string* file_param_perm_c;  
-  
+*/
   KN<double>* cadna=0; 
-  if (nargs[0]) initmat= ! GetAny<bool>((*nargs[0])(stack));
-  if (nargs[1]) typemat= GetAny<TypeSolveMat *>((*nargs[1])(stack));
-  if (nargs[2]) eps= GetAny<double>((*nargs[2])(stack));
+/*
+ {  "save",&typeid(string* )}, 0
+ {  "cadna",&typeid(KN<double>*)}, 1
+ {  "bmat",&typeid(Matrice_Creuse<R>* )}, 2
+ 
+ */
+ if (nargs[0]) save = *GetAny<string*>((*nargs[0])(stack));
+ if (nargs[1]) cadna= GetAny<KN<double>* >((*nargs[1])(stack));   
+  // bmat not used .... bizarre  
+/*    
+  if (nargs[0]) ds.initmat= ! GetAny<bool>((*nargs[0])(stack));
+  if (nargs[1]) ds.typemat= GetAny<TypeSolveMat *>((*nargs[1])(stack));
+  if (nargs[2]) ds.epsilon= GetAny<double>((*nargs[2])(stack));
   // 3 precon 
-  if (nargs[4]) NbSpace= GetAny<long>((*nargs[4])(stack));
-  if (nargs[6]) tgv= GetAny<double>((*nargs[6])(stack));
-  if (nargs[7]) umfpackstrategy = GetAny<long>((*nargs[7])(stack));
+  if (nargs[4]) ds.NbSpace= GetAny<long>((*nargs[4])(stack));
+  if (nargs[6]) ds.tgv= GetAny<double>((*nargs[6])(stack));
+  if (nargs[7]) ds.strategy = GetAny<long>((*nargs[7])(stack));
   if (nargs[8]) save = *GetAny<string*>((*nargs[8])(stack));
   if (nargs[9]) cadna= GetAny<KN<double>* >((*nargs[9])(stack));
-  if (nargs[10]) tol_pivot= GetAny<double>((*nargs[10])(stack));
-  if (nargs[11]) tol_pivot_sym= GetAny<double>((*nargs[11])(stack));
-  if (nargs[12]) itmax = GetAny<long>((*nargs[12])(stack)); //  fevr 2007
+/*
+  if (nargs[10]) ds.tol_pivot= GetAny<double>((*nargs[10])(stack));
+  if (nargs[11]) ds.tol_pivot_sym= GetAny<double>((*nargs[11])(stack));
+  if (nargs[12]) ds.itmax = GetAny<long>((*nargs[12])(stack)); //  fevr 2007
 
-  if (nargs[13]) param_int= GetAny< KN<int> >((*nargs[13])(stack));  // Add J. Morice 02/09 
-  if (nargs[14]) param_double= GetAny< KN<double> >((*nargs[14])(stack));
-  if (nargs[15]) param_char= GetAny< string * >((*nargs[15])(stack));  //
-  if (nargs[16]) perm_r = GetAny< KN<int > >((*nargs[16])(stack));
-  if (nargs[17]) perm_c = GetAny< KN<int> >((*nargs[17])(stack));  //
-  if (nargs[18]) file_param_int= GetAny< string* >((*nargs[18])(stack));  // Add J. Morice 02/09 
-  if (nargs[19]) file_param_double= GetAny< string* > ((*nargs[19])(stack));
-  if (nargs[20]) file_param_char= GetAny< string* >((*nargs[20])(stack));  //
-  if (nargs[21]) file_param_perm_r = GetAny< string* >((*nargs[21])(stack));
-  if (nargs[22]) file_param_perm_c = GetAny< string* >((*nargs[22])(stack));  //
-  
+  if (nargs[13]) ds.param_int= GetAny< KN<int> >((*nargs[13])(stack));  // Add J. Morice 02/09 
+  if (nargs[14]) ds.param_double= GetAny< KN<double> >((*nargs[14])(stack));
+  if (nargs[15]) ds.param_char= GetAny< string * >((*nargs[15])(stack));  //
+  if (nargs[16]) ds.perm_r = GetAny< KN<int > >((*nargs[16])(stack));
+  if (nargs[17]) ds.perm_c = GetAny< KN<int> >((*nargs[17])(stack));  //
+  if (nargs[18]) ds.file_param_int= GetAny< string* >((*nargs[18])(stack));  // Add J. Morice 02/09 
+  if (nargs[19]) ds.file_param_double= GetAny< string* > ((*nargs[19])(stack));
+  if (nargs[20]) ds.file_param_char= GetAny< string* >((*nargs[20])(stack));  //
+  if (nargs[21]) ds.file_param_perm_r = GetAny< string* >((*nargs[21])(stack));
+  if (nargs[22]) ds.file_param_perm_c = GetAny< string* >((*nargs[22])(stack));  //
+ */
+    SetEnd_Data_Sparse_Solver(stack,ds,nargs,n_name_param);
 
 
   //  for the gestion of the PTR. 
   WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007 
 
-  bool sym = typemat->sym;
+  bool sym = ds.typemat->sym;
   
   list<C_F0>::const_iterator ii,ib=op->largs.begin(),
     ie=op->largs.end();
@@ -3742,7 +3713,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
       ExecError("all the finites elements spaces must be defined on the same mesh in solve");
   if ( pTh != data->pTh ) 
     {
-       initmat = true;
+       ds.initmat = true;
        data->pTh=pTh;
        if (Nb==1) 
          { //  cas scalaire
@@ -3788,15 +3759,15 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   bool initx = true; //typemat->t==TypeSolveMat::GC ; //  make x and b different in all case 
   // more safe for the future ( 4 days lose with is optimization FH )
 
-  InitProblem<R,FESpace,v_fes>(  Nb,  Uh, Vh, B, X,u_hh,typemat , u_h,  LL,  initx);
+  InitProblem<R,FESpace,v_fes>(  Nb,  Uh, Vh, B, X,u_hh,ds.typemat , u_h,  LL,  initx);
 
-  if(verbosity>2) cout << "   Problem(): initmat " << initmat << " VF (discontinuous Galerkin) = " << VF << endl;
+  if(verbosity>2) cout << "   Problem(): initmat " << ds.initmat << " VF (discontinuous Galerkin) = " << VF << endl;
   
 
   
-  if (initmat) 
+  if (ds.initmat) 
    {
-    if (typemat->profile) 
+    if (ds.typemat->profile) 
       {
       dataA.master(new MatriceProfile<R>(Vh,VF));      
       }
@@ -3808,17 +3779,17 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
           dataA.master(new MatriceMorse<R>(Vh,Uh,VF));
       }
       MatriceCreuse<R>  & AA(dataA);
-     if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" << " skyline =" <<typemat->profile << endl;
+     if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" << " skyline =" <<ds.typemat->profile << endl;
     }
   MatriceCreuse<R>  & A(dataA);
-  if  (AssembleVarForm( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, op->largs)) 
+  if  (AssembleVarForm( stack,Th,Uh,Vh,sym, ds.initmat ? &A:0 , B, op->largs)) 
     { 
       *B = - *B; 
       // hach FH 
       for (int i=0, n= B->N(); i< n; i++)
         if( abs((*B)[i]) < 1.e-60 ) (*B)[i]=0;
         
-      AssembleBC<R,FESpace>     ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  op->largs, tgv );
+      AssembleBC<R,FESpace>     ( stack,Th,Uh,Vh,sym, ds.initmat ? &A:0 , B, initx ? X:0,  op->largs, ds.tgv );
     }
   else 
     *B = - *B;
@@ -3827,14 +3798,11 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   
   try {  
   
-  if (initmat)
+  if (ds.initmat)
     if(cadna)
-     ACadna = DefSolverCadna( stack,typemat,A, NbSpace ,  itmax, eps, initmat, umfpackstrategy,precon,tgv,tol_pivot,tol_pivot_sym);
+     ACadna = DefSolverCadna( stack,A, ds);
     else
-      DefSolver( stack,typemat,A, NbSpace ,  itmax, eps, initmat, umfpackstrategy,precon,tgv,
-		 tol_pivot,tol_pivot_sym, param_int, param_double, param_char, perm_r, 
-		 perm_c, file_param_int, file_param_double, file_param_char, 
-		 file_param_perm_r, file_param_perm_c);
+      DefSolver(stack,  A, ds);
   
 
 
@@ -4152,9 +4120,9 @@ Problem::Problem(const C_args * ca,const ListOfId &l,size_t & top) :
     else ffassert(0); // bug 
         
   precon = 0; //  a changer 
-  if ( nargs[3])
+  if ( nargs[3+3])
     {
-      const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[3]);
+      const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[3+3]);
       assert(op);
       precon = op->Find("(",ArrayOfaType(atype<KN<R>* >(),false));
    }
