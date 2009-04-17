@@ -1245,7 +1245,7 @@ MatriceMorse<R>::MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bo
       
    ffassert(nbcoef==k);  
   }
-
+// FH  mars 2009 ... 
 template<class R>
  void  MatriceMorse<R>::resize(int nn,int mm) 
 {
