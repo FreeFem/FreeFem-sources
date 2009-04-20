@@ -1,0 +1,70 @@
+load "MUMPS_all"
+
+int[int] ICNTL(40);
+{
+	string bidule;
+	ifstream ff("icntl_default.txt");
+	for(int iii=0; iii<40;iii++){
+	ff >> ICNTL(iii);      	
+	}
+
+}
+
+// Given data of MUMPS solver in array lparams(ICNTL) and string (PAR,SYM) 
+// The value of SYM will be 0. The matrix is considered nonsymmetric
+ 
+{
+matrix A = 
+      [[ 40,  0,     45,  0, 0],
+       [ 0,    12,     0,  0 , 0],
+       [ 0,     0,  40,  0, 0], 
+       [ 12,     0,    0,  22, 0],
+       [ 0,     0,    20,  0., 22]];
+
+
+    real[int] xx = [ 1,32,45,7,2], x(5), b(5), di(5); // xb(4),bbb(4);
+    b=A*xx;
+    cout << "b="  << b  << endl;
+    cout << "xx=" << xx << endl;
+    
+    set(A,solver=sparsesolver,sparams="SYM=0,PAR=1",lparams=ICNTL); 
+   
+    cout << "solving solution" << endl;
+    x = A^-1*b;		
+    cout << "b=" << b << endl;
+    cout << "x=" << endl; cout << x << endl;
+    di = xx-x;
+    if(mpirank==0){	
+    cout << "x-xx="<< endl; cout << "Linf "<< di.linfty << " L2 " << di.l2 << endl;
+    }
+}
+
+// Read data of MUMPS solver in file ffmumps_fileparam.txt
+
+{
+matrix A = 
+      [[ 40,  0,     45,  0, 0],
+       [ 0,    12,     0,  0 , 0],
+       [ 0,     0,  40,  0, 0], 
+       [ 12,     0,    0,  22, 0],
+       [ 0,     0,    20,  0., 22]];
+
+
+    real[int] xx = [ 1,32,45,7000,2], x(5), b(5), di(5); // xb(4),bbb(4);
+    b=A*xx;
+    cout << "b="  << b  << endl;
+    cout << "xx=" << xx << endl;
+    
+    set(A,solver=sparsesolver,datafilename="ffmumps_fileparam.txt"); 
+   
+    cout << "solving solution" << endl;
+    x = A^-1*b;		
+    cout << "b=" << b << endl;
+    cout << "x=" << endl; cout << x << endl;
+    di = xx-x;
+    if(mpirank==0){	
+    cout << "x-xx="<< endl; cout << "Linf "<< di.linfty << " L2 " << di.l2 << endl;
+    }
+}
+
+
