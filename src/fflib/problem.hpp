@@ -72,11 +72,11 @@ inline void SetOp(KN_<bool> & d,const pair<MGauche,MDroit> & p)
 inline unsigned int GetDiffOp(const MGauche &i, int& lastop) 
    {int op=(i.second% last_operatortype);
      lastop=max(lastop,op) ;
-      return 1<<op;}
+     return 1<<op;}
 inline unsigned int GetDiffOp(const MDroit &i, int& lastop)
    {int op=(i.second% last_operatortype);
      lastop=max(lastop,op) ;
-      return 1<<op;}
+     return 1<<op;}
 inline unsigned int GetDiffOp(const  pair<MGauche,MDroit> &p, int& lastop) 
 { return GetDiffOp(p.first,lastop)|GetDiffOp(p.second,lastop);}
 
@@ -1106,11 +1106,11 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   double tol_pivot=-1;
   double tol_pivot_sym=-1;
 
-  int *param_int = NULL;
-  double *param_double = NULL; 
+  KN<int> param_int;
+  KN<double> param_double; 
   string *param_char = NULL;
-  int *perm_r = NULL; 
-  int  *perm_c = NULL;
+  KN<int> perm_r; 
+  KN<int> perm_c;
   string *file_param_int;  // Add J. Morice 02/09 
   string *file_param_double; 
   string* file_param_char;
@@ -1120,7 +1120,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   TypeSolveMat tmat=  ( & Uh == & Vh  ? TypeSolveMat::GMRES : TypeSolveMat::NONESQUARE);
   ds.typemat=&tmat;
   ds.initmat=true;
-    SetEnd_Data_Sparse_Solver(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
+  SetEnd_Data_Sparse_Solver(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
   /*  
   if (b->nargs[0]) initmat= ! GetAny<bool>((*b->nargs[0])(stack));
   if (b->nargs[1]) typemat= *GetAny<TypeSolveMat *>((*b->nargs[1])(stack));

@@ -389,9 +389,10 @@ basicAC_F0::name_and_type  SetMatrix_Op<R>::name_param[]= {
 /*
    {   "paramint",&typeid(KN<int>)}, // Add J. Morice 02/09 
    {   "paramdouble",&typeid(KN<double>)},
+>>>>>>> 1.42
    {   "paramstring",&typeid(string*)},
-   {   "permrow",&typeid(KN<int>)},
-   {   "permcol",&typeid(KN<int>)},
+   {   "permrow",&typeid(KN_<long>)},
+   {   "permcol",&typeid(KN_<long>)},
    {   "fileparamint",&typeid(string*)}, // Add J. Morice 02/09 
    {   "fileparamdouble",&typeid(string*)},
    {   "fileparamstring",&typeid(string* )},
@@ -420,11 +421,11 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   double tol_pivot=-1;
   double tol_pivot_sym=-1;
   
-  int *param_int = NULL;
-  double *param_double = NULL; 
-  string *param_char = NULL;
-  int *perm_r = NULL; 
-  int *perm_c = NULL;
+  KN<int>  param_int;
+  KN<double> param_double; 
+  string *param_char=NULL;
+  KN<int> perm_r; 
+  KN<int> perm_c;
   string *file_param_int;  // Add J. Morice 02/09 
   string *file_param_double; 
   string* file_param_char;
@@ -455,6 +456,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   if (nargs[10]) ds.tol_pivot_sym = GetAny<double>((*nargs[10])(stack)); 
   if (nargs[11]) ds.itmax = GetAny<long>((*nargs[11])(stack)); //  frev 2007 OK
    
+
   if (nargs[12]) ds.param_int= GetAny< KN<int> >((*nargs[12])(stack));  // Add J. Morice 02/09 
   if (nargs[13]) ds.param_double= GetAny< KN<double> >((*nargs[13])(stack));
   if (nargs[14]) ds.param_char= GetAny< string * >((*nargs[14])(stack));  //
@@ -466,6 +468,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   if (nargs[20]) ds.file_param_perm_r = GetAny< string* >((*nargs[20])(stack));
   if (nargs[21]) ds.file_param_perm_c = GetAny< string* >((*nargs[21])(stack));  //
 */
+
 
    if(A->typemat.profile != ds.typemat->profile) 
    {
