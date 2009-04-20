@@ -75,11 +75,11 @@ LIST_NAME_PARM_MAT
   {  "tolpivot", &typeid(double)},
   {  "tolpivotsym", &typeid(double)},
   {  "nbiter", &typeid(long)}, // 12 
-  {   "paramint",&typeid(KN<int>)}, // Add J. Morice 02/09 
-  {   "paramdouble",&typeid(KN<double>)},
+  {   "paramint",&typeid(KN_<long>)}, // Add J. Morice 02/09 
+  {   "paramdouble",&typeid(KN_<double>)},
   {   "paramstring",&typeid(string *)},
-  {   "permrow",&typeid(KN<int>)},
-  {   "permcol",&typeid(KN<int>)},
+  {   "permrow",&typeid(KN_<long>)},
+  {   "permcol",&typeid(KN_<long>)},
   {   "fileparamint",&typeid(string*)}, // Add J. Morice 02/09 
   {   "fileparamdouble",&typeid(string*)},
   {   "fileparamstring",&typeid(string* )},
@@ -1117,14 +1117,15 @@ void Check(const Opera &Op,int N,int  M)
     assert(Op.MaxOp() <last_operatortype);
     //
     int lastop;
+    lastop = 0;
     What_d Dop = Op.DiffOp(lastop);
-    //cout << " lastop = " << lastop<<endl;
-    //    KN<bool> Dop(last_operatortype);
-    //Op.DiffOp(Dop);  
+    //KN<bool> Dop(last_operatortype);
+    //p.DiffOp(Dop);  
     //int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
     //assert(lastop<=3);
     RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
     RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
+  
     for (i=0;i< nx;i++) 
       *pa++ = 0.; 
     if (ie<0)    
@@ -1274,7 +1275,6 @@ void Check(const Opera &Op,int N,int  M)
   if (Ku.number<1 && verbosity/100 && verbosity % 10 == 2) 
      cout << "Element_Op P: copt = " << copt << " " << classoptm << endl;
     assert(Op.MaxOp() <last_operatortype);
-//
   
     
   KN<bool> Dop(last_operatortype);
@@ -1283,6 +1283,7 @@ void Check(const Opera &Op,int N,int  M)
  //assert(lastop<=3);
   RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
   RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
+
   for (i=0;i< nx;i++) 
     *pa++ = 0.; 
   if (ie<0)    
@@ -1293,7 +1294,7 @@ void Check(const Opera &Op,int N,int  M)
         R2 Pt(pi);
         pa =a;
         Ku.BF(Dop,Pt,fu);
-        MeshPointStack(stack)->set(T(Pt),Pt,Kv);
+	MeshPointStack(stack)->set(T(Pt),Pt,Kv);
         if (classoptm) {
 	    if( oldopt) (*Op.optiexpK)(stack); // call old optim version 
 	    else Op.optiexpK->eval(stack,iloop++,unvarexp); // new optim version 
@@ -1520,6 +1521,7 @@ void Check(const Opera &Op,int N,int  M)
     assert(Op.MaxOp() <last_operatortype);
     
     RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
+    
     
     pa =a;
     for (i=0;i< nx;i++) 
@@ -3609,11 +3611,11 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   double tol_pivot=-1.; // defaut UMFPACK value  Add FH 31 oct 2005 
   double tol_pivot_sym=-1.; // defaut Add FH 31 oct 2005 
   
-  int *param_int = NULL;
-  double *param_double = NULL; 
+  KN<int> param_int;
+  KN<double> param_double; 
   string *param_char = NULL;
-  int *perm_r = NULL; 
-  int *perm_c = NULL;
+  KN<int> perm_r; 
+  KN<int> perm_c;
   string *file_param_int;  // Add J. Morice 02/09 
   string *file_param_double; 
   string* file_param_char;
@@ -3640,6 +3642,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   if (nargs[7]) ds.strategy = GetAny<long>((*nargs[7])(stack));
   if (nargs[8]) save = *GetAny<string*>((*nargs[8])(stack));
   if (nargs[9]) cadna= GetAny<KN<double>* >((*nargs[9])(stack));
+*/
 /*
   if (nargs[10]) ds.tol_pivot= GetAny<double>((*nargs[10])(stack));
   if (nargs[11]) ds.tol_pivot_sym= GetAny<double>((*nargs[11])(stack));

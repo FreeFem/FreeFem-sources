@@ -517,9 +517,10 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
     { "permr", &typeid(KN_<long>)}, \
     { "permc", &typeid(KN_<long>)}, \
     { "scaler", &typeid(KN_<double>)}, \
-    { "scalec", &typeid(KN_<double>)} 
-    
-const int NB_NAME_PARM_MAT =  19 ;
+    { "scalec", &typeid(KN_<double>)}, \
+    { "sparams", &typeid(string*)}  // Add J.Morice 
+
+const int NB_NAME_PARM_MAT =  20 ;
     
 /*
  {  "init", &typeid(bool)},
@@ -569,7 +570,8 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
 	if (nargs[++kk]) ds.perm_c = GetAny<KN_<long> >((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.scale_r = GetAny<KN_<double> >((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.scale_c = GetAny<KN_<double> >((*nargs[kk])(stack));
-		  /* de datafilename a scalec */
+	if (nargs[++kk]) ds.sparams = *GetAny<string*>((*nargs[kk])(stack));
+  /* de datafilename a scalec */
 /*	
 	if (nargs[++kk]) ds.param_int= GetAny< KN<int> >((*nargs[kk+12])(stack));  // Add J. Morice 02/09 
 	if (nargs[kk+13]) ds.param_double= GetAny< KN<double> >((*nargs[kk+13])(stack));
