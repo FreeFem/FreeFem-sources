@@ -239,7 +239,6 @@ class MatriceElementairePleine:public MatriceElementaireFES<R,FES> {
      // 10 11 12 13 14
      // 15 16 17 18 19
      ------------------*/
-
 public:
   typedef FES FESpace;
   typedef typename  FESpace::Mesh Mesh;
@@ -815,28 +814,28 @@ template<class K,class V> class MyMap;
 class String; 
 
 struct Data_Sparse_Solver {
-    bool initmat;
-    TypeSolveMat* typemat;
-    double epsilon;
-    const void * precon;
-    int NbSpace;
+  bool initmat;
+  TypeSolveMat* typemat;
+  double epsilon;
+  const void * precon;
+  int NbSpace;
   int strategy;
   double tgv;
-    bool factorize;
+  bool factorize;
   double tol_pivot;
   double tol_pivot_sym;
   int itmax ;
-    string data_filename;  
-    KN<long> lparams;  //  copy arry more secure ...
-    KN<double> dparams;   
-    
-    MyMap<String,String> * smap;   
-    
-    KN<long> perm_r; 
-    KN<long> perm_c;     
-    KN<double> scale_r; 
-    KN<double> scale_c; 
-    
+  string data_filename;  
+  KN<long> lparams;  //  copy arry more secure ...
+  KN<double> dparams;   
+  
+  MyMap<String,String> * smap;   
+  
+  KN<long> perm_r; 
+  KN<long> perm_c;     
+  KN<double> scale_r; 
+  KN<double> scale_c; 
+  string sparams;  
  /*   
   int *param_int;
   double *param_double;
@@ -895,6 +894,7 @@ private:
 typedef MatriceMorse<double>::VirtualSolver *
 (*SparseRMatSolve)(DCL_ARG_SPARSE_SOLVER(double,A) );
 
+
 typedef MatriceMorse<Complex>::VirtualSolver *
 (*SparseCMatSolve)(DCL_ARG_SPARSE_SOLVER(Complex,A) );
 
@@ -902,9 +902,11 @@ typedef MatriceMorse<Complex>::VirtualSolver *
 template<class R> struct DefSparseSolver {
   typedef typename MatriceMorse<R>::VirtualSolver * 
   (*SparseMatSolver)(DCL_ARG_SPARSE_SOLVER(R,A) );
+
   static SparseMatSolver solver;
     
   static  typename MatriceMorse<R>::VirtualSolver * 
+
   Build( DCL_ARG_SPARSE_SOLVER(R,A) )
     
   {
@@ -935,6 +937,7 @@ inline void RR2C(int n,double *cr,double *ci,Complex *c)
     c[i]=Complex(cr[i],ci[i]);   
   }
 }
+
 
 
 #endif
