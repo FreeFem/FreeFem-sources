@@ -158,7 +158,6 @@ void read_datafile_pastixff(const string &datafile, pastix_int_t *iparmtab, doub
       fgets(szbuff,MAX_CHAR_PER_LINE,m_File);
       token = strtok(szbuff," /#!\t\n");
       dparmtab[i] = atof(token);
-      printf("freefem++: dparm[%d]=%e",i,dparmtab[i]); 
       i++;
     }
  
