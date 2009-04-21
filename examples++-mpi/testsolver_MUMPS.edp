@@ -1,14 +1,20 @@
 load "MUMPS_all"
 
 int[int] ICNTL(40);
-{
-	string bidule;
-	ifstream ff("icntl_default.txt");
-	for(int iii=0; iii<40;iii++){
-	ff >> ICNTL(iii);      	
-	}
 
+if(mpirank == 0) 
+{	
+	ifstream ff("ffmumps_fileparam.txt");
+	string line;
+	getline(ff,line);
+	getline(ff,line);
+	for(int iii=0; iii<40;iii++){
+	ff >> ICNTL[iii];      	
+	getline(ff,line);
+	} 
 }
+     	
+broadcast(processor(0),ICNTL);
 
 // Given data of MUMPS solver in array lparams(ICNTL) and string (PAR,SYM) 
 // The value of SYM will be 0. The matrix is considered nonsymmetric
