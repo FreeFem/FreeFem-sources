@@ -113,7 +113,7 @@ class dSolveMUMPSmpi :   public MatriceMorse<double>::VirtualSolver   {
 public:
   dSolveMUMPSmpi(const MatriceMorse<double> &AA,int strategy,double ttgv, double epsilon=1e-6,
 		 double pivot=-1.,double pivot_sym=-1., string param_string, string datafile, KN<long> &param_int, 
-		 KN<long> &pperm_r, KN_<long> &pperm_c, KN<double> &pscale_r,KN<double> &pscale_c
+		 KN<long> &pperm_r, KN<long> &pperm_c, KN<double> &pscale_r,KN<double> &pscale_c
 		) : 
     eps(epsilon),epsr(0),
     tgv(ttgv), string_option(param_string), data_option(datafile), perm_r(pperm_r), perm_c(pperm_c), 
