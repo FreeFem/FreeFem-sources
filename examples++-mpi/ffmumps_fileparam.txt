@@ -1,6 +1,6 @@
  0         /* SYM */
  1         /* PAR */
- -1         /* ICNTL(1) */
+ -1         /* ICNTL(1) ::   Remarks :: array ICNTL in MUMPS become with index 1 like array in fortran  */ 
  -1         /* ICNTL(2) */
  -1         /* ICNTL(3) */
  0         /* ICNTL(4) */
