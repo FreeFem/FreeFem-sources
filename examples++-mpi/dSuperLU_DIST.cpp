@@ -677,7 +677,7 @@ BuildSolverSuperLUmpi(DCL_ARG_SPARSE_SOLVER(double,A))
     if(verbosity>9)
     cout << " BuildSolverSuperLUmpi<double>" << endl;
     return new SolveSuperLUmpi<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym,
-				       ds.dparams, ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c);
+				       ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c);
 }
 
 
