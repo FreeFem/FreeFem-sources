@@ -1639,7 +1639,9 @@ public:
 };
 
 Mesh3 * GluMesh3(listMesh3 const & lst)
-{
+{ 
+  int flagsurfaceall = 0;
+
   int nbt=0;
   int nbe=0;
   int nbex=0;
@@ -1805,7 +1807,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 
   if(nbt==0){
     Mesh3 *mpq= new Mesh3(nbv,nbe,v,b);  
-    mpq->BuildSurfaceAdj();
+    if(flagsurfaceall==1) mpq->BuildSurfaceAdj();
     return mpq;
   }
   else{
@@ -1821,6 +1823,8 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
     if(verbosity > 1) cout << "fin de ConteningVertex()" << endl;
     mpq->BuildGTree();
     if(verbosity > 1) cout << "fin de BuildGTree()" << endl;
+    
+    //Add2StackOfPtr2FreeRC(stack,mpq);
   
     return mpq;
   }
@@ -1830,19 +1834,25 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 template<class RR,class AA=RR,class BB=AA> 
 struct Op3_addmesh: public binary_function<AA,BB,RR> { 
   static RR f(Stack s,const AA & a,const BB & b)  
-  { return RR(s, a, b );} 
+  { cout << "Op3_addmesh" << endl; return RR(s, a, b );} 
 };
 
 template<bool INIT,class RR,class AA=RR,class BB=AA> 
 struct Op3_setmesh: public binary_function<AA,BB,RR> { 
-  static RR f(const AA & a,const BB & b)  
+  static RR f(Stack stack,const AA & a,const BB & b)  
   {
     ffassert(a );
     pmesh3  p=GluMesh3(b);
     
-    if(!INIT &&  *a) delete *a;
-    //  Add2StackOfPtr2FreeRC(stack,p); //  the pointer is use to set variable so no remove. 
-    return *a=p,a;
+    cout << "INIT=" << INIT << endl;
+    if(!INIT && *a){
+      //Add2StackOfPtr2FreeRC(stack,*a);
+      delete *a;
+      cout << "destruction du pointeur" << endl;
+    }
+    //Add2StackOfPtr2FreeRC(stack,p); //  the pointer is use to set variable so no remove. 
+    *a=p;
+    return a;
   } 
 };
 
@@ -1853,13 +1863,13 @@ class Movemesh3D_Op : public E_F0mps
 public:
   Expression eTh;
   Expression xx,yy,zz;
-  static const int n_name_param =4; // 
+  static const int n_name_param =6; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
   { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
-  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  
+  double  arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
 public:
   Movemesh3D_Op(const basicAC_F0 &  args,Expression tth) 
     : eTh(tth), xx(0) , yy(0) , zz(0)
@@ -1871,8 +1881,8 @@ public:
  
     if(a1) {
       if(a1->size() !=3) 
-      CompileError("movemesh3D (Th,transfo=[X,Y,Z],) ");
-      xx=to<double>( (*a1)[0]);
+      CompileError("movemesh3 (Th,transfo=[X,Y,Z],) ");
+      xx=to<double>( (*a1)[0]); 
       yy=to<double>( (*a1)[1]);
       zz=to<double>( (*a1)[2]);
     }    
@@ -1883,9 +1893,13 @@ public:
 
 basicAC_F0::name_and_type Movemesh3D_Op::name_param[]= {
   {  "transfo", &typeid(E_Array)},
-  {  "reftet", &typeid(KN_<long> )},
-  {  "refface", &typeid(KN_<long> )},
-  {  "ptmerge", &typeid(double)}
+  {  "reftet", &typeid(KN_<long>)},
+  {  "refface", &typeid(KN_<long>)},
+  {  "ptmerge", &typeid(double)},
+  {  "facemerge",&typeid(long)},
+  {  "boolsurface",&typeid(long)}
+  // option a rajouter
+  // facemerge 0,1 + label
 };
 
 AnyType Movemesh3D_Op::operator()(Stack stack)  const 
@@ -1907,7 +1921,9 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   KN<long> nrtet  (arg(1,stack,zzempty));  
   KN<long> nrf (arg(2,stack,zzempty)); 
   double precis_mesh( arg(3,stack,1e-7));
-  
+  long  mergefacemesh( arg(4,stack,0) );
+  long  flagsurfaceall( arg(5,stack,1) );
+
   //if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
   ffassert( nrtet.N() %2 ==0);
   ffassert( nrf.N() %2 ==0);
@@ -1961,18 +1977,48 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
       }
     }
   }
- 
-  int border_only = 0;
-  int recollement_elem=0, recollement_border=1, point_confondus_ok=0;
+  
+  // option (Transfo_Mesh3) :: 
+  
+  // border_only = 0, recollement_border=1, point_confondus_ok=0;   == > 1900 triangles
+  // border_only = 0, recollement_border=0, point_confondus_ok=0;   == > 1980 triangles
+  // border_only = 0, recollement_border=1, point_confondus_ok=1;   == > 1820 triangles
+
+  // border_only = 1, recollement_border=1, point_confondus_ok=0;   == > 1900 triangles
+  // border_only = 1, recollement_border=0, point_confondus_ok=0;   == > 1980 triangles
+  // border_only = 1, recollement_border=1, point_confondus_ok=1;   == > 1820 triangles
+
+
+  int border_only=0; // ne sert a rien !!!!! A enlever
+  int recollement_elem=0;
+  int recollement_border, point_confondus_ok;
+  
+  if(mergefacemesh == 0)
+    {
+      recollement_border=0;
+      point_confondus_ok=0;
+    }
+  if(mergefacemesh == 1)
+    { 
+      recollement_border=1;
+      point_confondus_ok=0;
+    }
+  if(mergefacemesh == 2)
+    { 
+      recollement_border=1;
+      point_confondus_ok=1;
+    }
+  
   Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh,rTh3, txx, tyy, tzz, border_only, 
 			      recollement_elem, recollement_border, point_confondus_ok);
-  
   if(nbt != 0)
     {
       T_Th3->BuildBound();
     
       T_Th3->BuildAdj();
       
+      if(flagsurfaceall==1) T_Th3->BuildSurfaceAdj();
+
       T_Th3->Buildbnormalv();  
 
       T_Th3->BuildjElementConteningVertex();
@@ -1983,7 +2029,7 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
     }
   else
     {
-      T_Th3->BuildSurfaceAdj();
+      if(flagsurfaceall==1) T_Th3->BuildSurfaceAdj();
     }
   Add2StackOfPtr2FreeRC(stack,T_Th3);
  
@@ -1996,10 +2042,18 @@ class  Movemesh3D : public OneOperator { public:
   
   E_F0 * code(const basicAC_F0 & args) const 
   {
-	if(verbosity > 2) cout << " je suis dans code(const basicAC_F0 & args) const" << endl;
 	return  new Movemesh3D_Op(args,t[0]->CastTo(args[0])); 
   }
 };
+
+
+
+
+
+
+
+
+
 
 //// version 3D de change label
 
@@ -2163,7 +2217,7 @@ class Movemesh2D_3D_surf_Op : public E_F0mps
 public:
   Expression eTh;
   Expression xx,yy,zz; 
-  static const int n_name_param =4; //  add nbiter FH 30/01/2007 11 -> 12 
+  static const int n_name_param =5; 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
@@ -2182,7 +2236,7 @@ public:
     
     if(a1) {
       if(a1->size() !=3) 
-	CompileError("Movemesh2D_3D_surf (Th,transfo=[X,Y,Z],) ");
+	CompileError("Movemesh23 (Th,transfo=[X,Y,Z],) ");
       xx=to<double>( (*a1)[0]);
       yy=to<double>( (*a1)[1]);
       zz=to<double>( (*a1)[2]);
@@ -2195,9 +2249,10 @@ public:
 
 basicAC_F0::name_and_type Movemesh2D_3D_surf_Op::name_param[]= {
   {  "transfo", &typeid(E_Array )},
-  {  "normal", &typeid(long)},
+  {  "orientation", &typeid(long)},
   {  "refface", &typeid(KN_<long>)},
-  {  "ptmerge", &typeid(double)}
+  {  "ptmerge", &typeid(double)},
+  {  "boolsurface",&typeid(long)}
 };
 
 AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const 
@@ -2216,7 +2271,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
   int mesureM (arg(1,stack,0));
   KN<long> nrface (arg(2,stack,zzempty));
   double precis_mesh(arg(3,stack,-1));
-  
+  long flagsurfaceall(arg(4,stack,-1));
   
   if(nrface.N()<0 ) return m;
   ffassert( nrface.N() %2 ==0);
@@ -2327,7 +2382,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
     }
     
     assert(nbflip==0 || nbflip== Th3->nbe);
-    Th3->BuildSurfaceAdj();
+    if(flagsurfaceall==1) Th3->BuildSurfaceAdj();
     Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
   }
@@ -2390,7 +2445,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
 	}
       }
     assert(nbflip==0 || nbflip== Th3->nbe);
-    Th3->BuildSurfaceAdj();
+    if(flagsurfaceall==1) Th3->BuildSurfaceAdj();
     Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
   }
@@ -3688,7 +3743,7 @@ void PointCommun_hcode( const int &dim, const int &NbPoints, const int &point_co
   case 1:
     int point_multiple;
     np=0;
-    for(int	icode =0; icode < NbCode; icode++){
+    for(int icode =0; icode < NbCode; icode++){
       //int ii,jj;		
       double dist;		
 		
@@ -4164,7 +4219,12 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
       }
 		
       int border_only = 0;
-      int recollement_elem=0, recollement_border=1;
+      int recollement_elem=0, recollement_border=1; 
+      if(point_confondus_ok == 2){
+	recollement_border = 0;
+	point_confondus_ok = 1;
+      }
+
       Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh, rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok);
 		  
       
@@ -4181,6 +4241,246 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
 
     }
 }
+
+
+// function nouveau nom de fonction
+
+class Movemesh2D_3D_surf_cout_Op : public E_F0mps 
+{
+public:
+  Expression eTh;
+  Expression xx,yy,zz; 
+  static const int n_name_param =4; //  add nbiter FH 30/01/2007 11 -> 12 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+ 
+public:
+  Movemesh2D_3D_surf_cout_Op(const basicAC_F0 &  args,Expression tth) : 
+  eTh(tth),xx(0),yy(0),zz(0) 
+  {
+
+    CompileError("The keyword movemesh2D3Dsurf is remplaced now by the keyword movemesh23 (see Manual) ::: Moreover, the parameter mesuremesh are denoted now orientation ");
+
+    args.SetNameParam(n_name_param,name_param,nargs);
+   
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
+
+basicAC_F0::name_and_type Movemesh2D_3D_surf_cout_Op::name_param[]= {
+  {  "transfo", &typeid(E_Array )},
+  {  "orientation", &typeid(long)},
+  {  "refface", &typeid(KN_<long>)},
+  {  "ptmerge", &typeid(double)}
+};
+
+AnyType Movemesh2D_3D_surf_cout_Op::operator()(Stack stack)  const 
+{
+  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
+ 
+  Mesh3 *Th3;
+  return Th3;
+}
+
+
+class Movemesh2D_3D_surf_cout : public OneOperator { public:  
+typedef Mesh *pmesh;
+typedef Mesh3 *pmesh3;
+    
+  Movemesh2D_3D_surf_cout() : OneOperator(atype<pmesh3>(),atype<pmesh>() ) {}
+    E_F0 * code(const basicAC_F0 & args) const 
+  { 
+    return  new Movemesh2D_3D_surf_cout_Op(args,t[0]->CastTo(args[0]));  // CastTo(args[]); // plus tard
+  }
+};
+
+
+/***********************************************/
+
+class Movemesh3D_cout_Op : public E_F0mps 
+{
+public:
+  Expression eTh;
+  Expression xx,yy,zz; 
+  static const int n_name_param =4; //  add nbiter FH 30/01/2007 11 -> 12 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+ 
+public:
+  Movemesh3D_cout_Op(const basicAC_F0 &  args,Expression tth) : 
+  eTh(tth),xx(0),yy(0),zz(0) 
+  {
+    CompileError("The keyword movemesh3D is remplaced in this new version of freefem++ by the keyword movemesh3 (see manual)");
+    args.SetNameParam(n_name_param,name_param,nargs);
+   
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
+
+basicAC_F0::name_and_type Movemesh3D_cout_Op::name_param[]= {
+  {  "transfo", &typeid(E_Array )},
+  {  "reftet", &typeid(KN_<long>)},
+  {  "refface", &typeid(KN_<long>)},
+  {  "ptmerge", &typeid(double)}
+};
+
+AnyType Movemesh3D_cout_Op::operator()(Stack stack)  const 
+{
+  Mesh3 * pTh= GetAny<Mesh3 *>((*eTh)(stack));
+ 
+  Mesh3 *Th3;
+  return Th3;
+}
+
+
+class Movemesh3D_cout : public OneOperator { public:  
+typedef Mesh *pmesh;
+typedef Mesh3 *pmesh3;
+    
+  Movemesh3D_cout() : OneOperator(atype<pmesh3>(),atype<pmesh>() ) {}
+    E_F0 * code(const basicAC_F0 & args) const 
+  { 
+    return  new Movemesh3D_cout_Op(args,t[0]->CastTo(args[0]));  // CastTo(args[]); // plus tard
+  }
+};
+
+
+//
+
+class DeplacementTab_Op : public E_F0mps 
+{
+public:
+  Expression eTh;
+  //Expression xx,yy,zz;
+  static const int n_name_param =6; // 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
+  { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
+  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  int  arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+public:
+  DeplacementTab_Op(const basicAC_F0 &  args,Expression tth) 
+    : eTh(tth)  //, xx(0) , yy(0) , zz(0)
+  {
+    args.SetNameParam(n_name_param,name_param,nargs);
+   
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
+
+basicAC_F0::name_and_type DeplacementTab_Op::name_param[]= {
+  {  "deltax", &typeid(KN_<double>)},
+  {  "deltay", &typeid(KN_<double>)},
+  {  "deltaz", &typeid(KN_<double>)},
+  {  "ptmerge", &typeid(double)},
+  {  "facemerge", &typeid(long)},
+  {  "boolsurface",&typeid(long)}
+};
+
+AnyType DeplacementTab_Op::operator()(Stack stack)  const 
+{
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+  Mesh3 * pTh= GetAny<Mesh3 *>((*eTh)(stack));
+  
+  ffassert(pTh);
+  Mesh3 &Th=*pTh;
+  Mesh3 *m= pTh;   // question a quoi sert *m ??
+  int nbv=Th.nv; // nombre de sommet 
+  int nbt=Th.nt; // nombre de triangles
+  int nbe=Th.nbe; // nombre d'aretes fontiere
+  cout << "before movemesh: Vertex " << nbv<< " Tetrahedra " << nbt << " triangles "<< nbe << endl; 
+ 
+ // lecture des references
+   
+  KN<double> zzempty;
+  KN<double> dx (arg(0,stack,zzempty));
+  KN<double> dy (arg(1,stack,zzempty));
+  KN<double> dz (arg(2,stack,zzempty));
+  double precis_mesh( arg(3,stack,1e-7));
+
+  ffassert( dx.N() == Th.nv);
+  ffassert( dy.N() == Th.nv);
+  ffassert( dz.N() == Th.nv);
+    
+  // realisation de la map par default
+ 
+  KN<double> txx(Th.nv), tyy(Th.nv), tzz(Th.nv);
+  // loop over tetrahedral 
+  for (int i=0;i<Th.nv;++i){   
+    txx[i]=Th.vertices[i].x+dx[i];
+    tyy[i]=Th.vertices[i].y+dy[i];
+    tzz[i]=Th.vertices[i].z+dz[i];
+  }
+  
+  int border_only = 0;
+  int recollement_elem=0;
+  int recollement_border,point_confondus_ok;
+  
+  int  mergefacemesh( arg(4,stack,0) );
+  long  flagsurfaceall( arg(5,stack,1) );
+
+   if(mergefacemesh == 0)
+    {
+      recollement_border=0;
+      point_confondus_ok=0;
+    }
+  if(mergefacemesh == 1)
+    { 
+      recollement_border=1;
+      point_confondus_ok=0;
+    }
+  if(mergefacemesh == 2)
+    { 
+      recollement_border=1;
+      point_confondus_ok=1;
+    }
+
+  Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh,Th, txx, tyy, tzz, border_only, 
+			      recollement_elem, recollement_border, point_confondus_ok);
+  
+  if(nbt != 0)
+    {
+      T_Th3->BuildBound();
+    
+      T_Th3->BuildAdj();
+
+      if(flagsurfaceall==1) T_Th3->BuildSurfaceAdj();
+      
+      T_Th3->Buildbnormalv();  
+
+      T_Th3->BuildjElementConteningVertex();
+      
+      T_Th3->BuildGTree();
+      
+      //	T_Th3->decrement(); 
+    }
+  else
+    {
+       if(flagsurfaceall==1) T_Th3->BuildSurfaceAdj();
+    }
+  Add2StackOfPtr2FreeRC(stack,T_Th3);
+ 
+  *mp=mps;
+  return T_Th3;
+}
+
+class  DeplacementTab : public OneOperator { public:  
+    DeplacementTab() : OneOperator(atype<pmesh3>(),atype<pmesh3>()) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  {
+	return  new DeplacementTab_Op(args,t[0]->CastTo(args[0])); 
+  }
+
+};
+
+
 
 // because i include this file in tetgen.cpp (very bad)
 #ifndef WITH_NO_INIT
@@ -4202,12 +4502,19 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   
   TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,pmesh3,pmesh3>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,listMesh3,pmesh3>  >      );
-  TheOperators->Add("=",new OneBinaryOperator< Op3_setmesh<false,pmesh3*,pmesh3*,listMesh3>  >     );
-  TheOperators->Add("<-",new OneBinaryOperator< Op3_setmesh<true,pmesh3*,pmesh3*,listMesh3>  >     );
+  //TheOperators->Add("=",new OneBinaryOperator< Op3_setmesh<false,pmesh3*,pmesh3*,listMesh3>  >     );
+  //TheOperators->Add("<-",new OneBinaryOperator< Op3_setmesh<true,pmesh3*,pmesh3*,listMesh3>  >     );
   
+  TheOperators->Add("=",new OneBinaryOperator_st< Op3_setmesh<false,pmesh3*,pmesh3*,listMesh3>  >     );
+  TheOperators->Add("<-",new OneBinaryOperator_st< Op3_setmesh<true,pmesh3*,pmesh3*,listMesh3>  >     );
+
+
   Global.Add("change","(",new SetMesh3D);
-  Global.Add("movemesh2D3Dsurf","(",new Movemesh2D_3D_surf);
-  Global.Add("movemesh3D","(",new Movemesh3D);
+  Global.Add("movemesh23","(",new Movemesh2D_3D_surf);
+  Global.Add("movemesh2D3Dsurf","(",new Movemesh2D_3D_surf_cout);
+  Global.Add("movemesh3","(",new Movemesh3D);
+  Global.Add("movemesh3D","(", new Movemesh3D_cout);
+  Global.Add("deplacement","(",new DeplacementTab);
   Global.Add("buildlayers","(",new  BuildLayerMesh);  
 }
 
