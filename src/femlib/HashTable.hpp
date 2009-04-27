@@ -22,6 +22,8 @@ struct SortArray<T,1> {
   SortArray(){}
   bool operator == (const SortArray<T,1> & t)  const
   {  return v[0] == t.v[0]  ;}
+  bool operator<(const SortArray<T,1> & t)  const 
+  {  return v[0] < t.v[0]  ;}  
   size_t hash() const {return (size_t) v[0];}
 };
 
@@ -45,6 +47,8 @@ struct SortArray<T,2> {
   SortArray(){}
   bool operator == (const SortArray<T,2> & t)  const
   {  return v[0] == t.v[0] && v[1] == t.v[1] ;}
+    bool operator<(const SortArray<T,2> & t)  const 
+    {  return v[0] != t.v[0] ? v[0] < t.v[0] : v[1] < t.v[1] ;}  
   size_t hash() const {return (size_t) v[0];}
 };
 
@@ -68,6 +72,11 @@ struct SortArray<T,3> {
   SortArray(){}
   bool operator == (const SortArray<T,3> & t)  const
   {  return v[0] == t.v[0] && v[1] == t.v[1]  && v[2] == t.v[2] ;}
+    
+  bool operator<(const SortArray<T,3> & t)  const 
+    {  return v[0] != t.v[0] ? v[0] < t.v[0] :
+           ( v[1] != t.v[1] ? v[1] < t.v[1] :  v[2] < t.v[2] );}  
+  
   size_t hash() const {return (size_t) v[0];}
 };
 
@@ -87,7 +96,7 @@ public:
   size_t n,nx,nk,ncol,nfind;
   size_t * head;
   nKV * t;
-  static const  size_t end= (size_t) -1; 
+  static const  size_t endhash= (size_t) -1; 
   
   HashTable(size_t nnx,size_t nnk)
     :    n(0),nx(nnx),nk(nnk),ncol(0),nfind(0),
@@ -99,20 +108,25 @@ public:
     n=0;
     ncol=0;
     for (size_t j=0;j<nk;++j) 
-      head[j]=end;
+      head[j]=endhash;
   }
   
   nKV *  find(const K & key)
   { 
     nfind++;
-    for (size_t k=head[key.hash() %nk];k!=end;k=t[k].next)
+    for (size_t k=head[key.hash() %nk];k!=endhash;k=t[k].next)
       {
 	++ncol;
 	if(key == t[k].k) return t+k;
       }
     return 0;
-  }    
-  
+  } 
+    // add FH  21 avril 2009
+  size_t  operator()(nKV * p) { return p ? p-t : n;}
+    
+  iterator end(){ return t+n;}
+  iterator begin(){ return t;}
+    
   nKV *add(const K & key,const V & v)
   {
     size_t k =key.hash()%nk;
@@ -132,7 +146,7 @@ public:
   }
   ~HashTable()
   {
-    if(nfind)
+    if(nfind && verbosity>4)
       cout << "    ~HashTable:   Cas moyen : " << (double) ncol/ nfind << endl;
     delete [] head;
     delete [] t;

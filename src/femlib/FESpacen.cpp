@@ -494,10 +494,10 @@ void GTypeOfFESum<Mesh>::Build()
 }
 
 template<class MMesh> 
-GFESpace<MMesh>::GFESpace(const GFESpace & Vh,int kk)
+     GFESpace<MMesh>::GFESpace(const GFESpace & Vh,int kk,int nbequibe,int *equibe)
      :
      GFESpacePtrTFE<MMesh>(new GTypeOfFESum<MMesh>(Vh,kk)),
-     DataFENodeDF(Vh.Th.BuildDFNumbering(this->ptrTFE->ndfonVertex,this->ptrTFE->ndfonEdge,this->ptrTFE->ndfonFace,this->ptrTFE->ndfonVolume)),
+     DataFENodeDF(Vh.Th.BuildDFNumbering(this->ptrTFE->ndfonVertex,this->ptrTFE->ndfonEdge,this->ptrTFE->ndfonFace,this->ptrTFE->ndfonVolume,nbequibe,equibe)),
      Th(Vh.Th),
      TFE(1,0,this->ptrTFE), 
      cmesh(Th),
@@ -512,10 +512,10 @@ GFESpace<MMesh>::GFESpace(const GFESpace & Vh,int kk)
      }
     
 template<class MMesh> 
-     GFESpace<MMesh>::GFESpace(const GFESpace ** pVh,int kk)
+     GFESpace<MMesh>::GFESpace(const GFESpace ** pVh,int kk,int nbequibe,int *equibe)
      :
      GFESpacePtrTFE<MMesh>(new GTypeOfFESum<MMesh>(pVh,kk)),
-     DataFENodeDF((**pVh).Th.BuildDFNumbering(this->ptrTFE->ndfonVertex,this->ptrTFE->ndfonEdge,this->ptrTFE->ndfonFace,this->ptrTFE->ndfonVolume)),
+     DataFENodeDF((**pVh).Th.BuildDFNumbering(this->ptrTFE->ndfonVertex,this->ptrTFE->ndfonEdge,this->ptrTFE->ndfonFace,this->ptrTFE->ndfonVolume,nbequibe,equibe)),
      Th((**pVh).Th),
      TFE(1,0,this->ptrTFE), 
      cmesh(Th),

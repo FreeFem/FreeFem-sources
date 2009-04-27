@@ -97,7 +97,7 @@ namespace {
 
  } // end namespace blanc
 
-void GetPeriodic(Expression perio,    int & nbcperiodic ,    Expression * &periodic);
+void GetPeriodic(const int d,Expression perio,    int & nbcperiodic ,    Expression * &periodic);
 
 bool BuildPeriodic( 
   int nbcperiodic,
@@ -174,8 +174,8 @@ class v_fes3 : public RefCounter { public:
   
   void destroy(){ ppTh=0;pVh=0; delete this;}
   virtual ~v_fes3() {}
-  bool buildperiodic(Stack stack,int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe)  ;
-  virtual  FESpace3 * buildupdate(int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) {return 0;}
+  bool buildperiodic(Stack stack, KN<int> & ndfe)  ;
+  virtual  FESpace3 * buildupdate( KN<int> & ndfe) {  return 0;}
   virtual  FESpace3 * buildupdate() {return 0;};
   
 };  
@@ -218,10 +218,7 @@ class pfes3_tef : public v_fes3 { public:
     const TypeOfFE3 * tef ;  
   pfes3_tef(const pmesh3* t,const TypeOfFE3 * tt,Stack s=NullStack, int n=0,Expression *p=0 ) 
     : v_fes3(tt->N,t,s,n,p),tef(tt) { operator FESpace3 * ();} 
-  FESpace3 * buildupdate(int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) 
-  {
-    ffassert(0); // a faire return  new FESpace3(**ppTh3,*tef,nbdfv,(int *) ndfv,nbdfe,(int*)ndfe);
-  }
+  FESpace3 * buildupdate( KN<int> & ndfe)   { return  new FESpace3(**ppTh,*tef,ndfe.size()/2,ndfe);   }
   FESpace3 * buildupdate()   {  return  new FESpace3(**ppTh,*tef);}
   
 };
@@ -247,11 +244,9 @@ public:
     //assert(tef);
     return  new FESpace3(**ppTh,tefs);}
   virtual ~pfes3_tefk() { delete [] tef;}
-  FESpace3 * buildupdate(int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) 
+  FESpace3 * buildupdate(KN<int> & ndfe) 
   {
-    ffassert(0); // afaire 
-    // assert(tef);
-    //return  new FESpace3(**ppTh3,tef,k,nbdfv,ndfv,nbdfe,ndfe);
+    return  new FESpace3(**ppTh,tefs,ndfe.size()/2,ndfe);
   }
     
 }; 
@@ -358,8 +353,9 @@ private: // rule of programming
   void operator= (const FEbaseArray &); 
 };
 
-void GetPeriodic(Expression perio,    int & nbcperiodic ,    Expression * &periodic);
+void GetPeriodic(const int d,Expression perio,    int & nbcperiodic ,    Expression * &periodic);
 int GetPeriodic(Expression  bb, Expression & b,Expression & f);
+int GetPeriodic(Expression  bb, Expression & b,Expression & f1,Expression & f2);
 
 /*
 template<class K>
@@ -498,14 +494,13 @@ inline FESpace * v_fes::update() {
 inline FESpace3 * v_fes3::update() {     
   assert(d==3);
   if (nbcperiodic ) {
-    ffassert(0); // a faire
     assert(periodic);
     const Mesh3 &Th(**ppTh);
-       KN<int> ndfv(Th.nv);
-       KN<int> ndfe(Th.nbe);
-       int nbdfv,nbdfe;    
-       //       buildperiodic(stack,nbdfv,ndfv,nbdfe,ndfe);
-       return   buildupdate(nbdfv,ndfv,nbdfe,ndfe);
+   //    KN<int> ndfv(Th.nv);
+       KN<int> ndfe;
+     //  int nbdfv,nbdfe;    
+	  buildperiodic(stack,ndfe);
+       return   buildupdate(ndfe);
       }
      else 
        return  buildupdate();
@@ -684,3 +679,8 @@ class E_set_fev: public E_F0mps {public:
   operator aType () const { return atype<void>();} 
   
 };
+
+bool  InCircularList(const int *p,int i,int k);
+template<class T> int numeroteclink(KN_<T> & ndfv) ;
+
+    

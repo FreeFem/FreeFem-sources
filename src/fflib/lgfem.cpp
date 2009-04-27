@@ -812,7 +812,9 @@ typename map<int,int2>::iterator closeto(map<int,int2> & m, int k)
     }
    return i;
  }
- 
+
+
+
 template<class T,int N>
 class Smallvect { public: 
  T v[N];
@@ -1149,6 +1151,43 @@ basicAC_F0::name_and_type  OpMake_pfes_np::name_param[]= {
   "periodic", &typeid(E_Array) 
 };
 
+map<TypeOfFE *,TypeOfFE3 *> TEF2dto3d;
+AnyType TypeOfFE3to2(Stack,const AnyType &b) { 
+    TypeOfFE3 *t3=0;
+    TypeOfFE  *t2=GetAny<TypeOfFE *>(b);
+    map<TypeOfFE *,TypeOfFE3 *>::const_iterator i=TEF2dto3d.find(t2);
+    if(i != TEF2dto3d.end())
+	t3=i->second;
+    
+    if(t3==0)
+      {
+	  cerr << " sorry no cast to this 3d finite element " <<endl;
+	  ExecError( " sorry no cast to this 3d finite element ");
+      }
+    return t3;
+}
+
+/*
+ for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
+ {
+ ffassert(i->tfe); // check 
+ AddNewFE(i->name,i->tfe);
+ // Global.New(i->name, Type_Expr(atype<TypeOfFE*>(),new  EConstantTypeOfFE(i->tfe)));
+ }
+ 
+ */
+TypeOfFE * FindFE2(const char * s)
+{
+    for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
+	if(strcmp(i->name,s)==0)
+	    return i->tfe;
+    cout << " s =" << s << endl;
+    lgerror("FindFE2 ");
+    return 0;
+}
+
+
+typedef TypeOfFE TypeOfFE2;
 template<class pfes,class Mesh,class TypeOfFE,class pfes_tefk>
 struct OpMake_pfes: public OneOperator , public OpMake_pfes_np { 
   
@@ -1161,17 +1200,23 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
     int nb;
     int nbcperiodic;
     Expression *periodic;
-    
-    Op(Expression ppfes,Expression ppTh, const E_Array & aatef,int nbp,Expression * pr) 
-      : eppTh(ppTh),eppfes(ppfes),atef(aatef),nbcperiodic(nbp),periodic(pr) {       
+    KN<int>  tedim;
+    Op(Expression ppfes,Expression ppTh, const E_Array & aatef,int nbp,Expression * pr,KN<int> &ttedim) 
+      : eppTh(ppTh),eppfes(ppfes),atef(aatef),nbcperiodic(nbp),periodic(pr),tedim(ttedim) {       
     }
     ~Op() { if(periodic) delete []periodic;}
-    AnyType operator()(Stack s)  const {       
+    AnyType operator()(Stack s)  const {  
+      const int d = Mesh::Rd::d;
       Mesh ** ppTh = GetAny<Mesh  **>( (*eppTh)(s) );
       AnyType r = (*eppfes)(s) ;
       const TypeOfFE ** tef= new  const TypeOfFE * [ atef.size()];
       for (int i=0;i<atef.size();i++)
-	tef[i]= GetAny<TypeOfFE *>(atef[i].eval(s));
+	if(tedim[i]==d)
+	  tef[i]= GetAny<TypeOfFE *>(atef[i].eval(s));
+	else if(tedim[i]==2 && d ==3)
+	    tef[i]= GetAny<TypeOfFE *>(TypeOfFE3to2(s,atef[i].eval(s)));
+	else ffassert(0);
+	  
       pfes * ppfes = GetAny<pfes *>(r);
       bool same = true;
       for (int i=1;i<atef.size();i++)
@@ -1190,17 +1235,25 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
     Expression nargs[n_name_param];
     
     args.SetNameParam(n_name_param,name_param,nargs);
-    GetPeriodic(nargs[0],nbcperiodic,periodic);
-    
+      GetPeriodic(Mesh::Rd::d,nargs[0],nbcperiodic,periodic);
     aType t_tfe= atype<TypeOfFE*>();
+    aType t_tfe2= atype<TypeOfFE2*>();  
+    int d=  TypeOfFE::Rd::d;
+    string sdim= d ?  " 2d : " : " 3d : " ; 
     const E_Array * a2(dynamic_cast<const E_Array *>(args[2].LeftValue()));
     ffassert(a2);
     int N = a2->size(); ;
-    if (!N) CompileError(" We wait an array of Type of Element ");
+    if (!N) CompileError(sdim+" We wait an array of Type of Element ");
+      KN<int> tedim(N);
     for (int i=0;i< N; i++) 
-      if ((*a2)[i].left() != t_tfe) CompileError(" We wait an array of  Type of Element ");
+      if ((*a2)[i].left() == t_tfe)
+	  tedim[i]=d;
+      else if ((*a2)[i].left() ==t_tfe2)
+	  tedim[i]=2;
+      else
+	    CompileError(sdim+" We wait an array of  Type of Element ");
     //    ffassert(0);
-    return  new Op(args[0],args[1],*a2,nbcperiodic,periodic);
+    return  new Op(args[0],args[1],*a2,nbcperiodic,periodic,tedim);
   } 
   OpMake_pfes() : 
     OneOperator(atype<pfes*>(),atype<pfes*>(),atype<Mesh **>(),atype<E_Array>()) {}
@@ -1289,8 +1342,9 @@ class OP_MakePtr3 { public:
 			atype<Op::C>(),false ) ;}
 };  
 
-void GetPeriodic(Expression perio,    int & nbcperiodic ,    Expression * &periodic)
+void GetPeriodic(const int d,Expression perio,    int & nbcperiodic ,    Expression * &periodic)
 {
+    ffassert(d==2 || d ==3);
       if ( perio) 
        {
          if( verbosity>1) 
@@ -1302,10 +1356,17 @@ void GetPeriodic(Expression perio,    int & nbcperiodic ,    Expression * &perio
         if( verbosity>1) 
         cout << "    the number of periodicBC " << n << endl;
         if ( 2*nbcperiodic != n ) CompileError(" Sorry the number of periodicBC must by even"); 
-        periodic = new Expression[n*2]; 
-        for (int i=0,j=0;i<n;i++,j+=2)
-          if (GetPeriodic((*a)[i],periodic[j],periodic[j+1])==0)
+        periodic = new Expression[n*d]; 
+        for (int i=0,j=0;i<n;i++,j+=d)
+	  if(d==2)
+	    { if (GetPeriodic((*a)[i],periodic[j],periodic[j+1])==0)
             CompileError(" a sub array of periodic BC must be [label, realfunction ]");
+	    }
+	  else if (d==3)
+	    { if (GetPeriodic((*a)[i],periodic[j],periodic[j+1],periodic[j+2])==0)
+		CompileError(" a sub array of periodic BC must be [label, realfunction , realfunction]");
+	    }
+	  else ffassert(0); 
         }
 
 
@@ -1318,7 +1379,7 @@ OP_MakePtr2::Op::Op(const basicAC_F0 & args)
       nbcperiodic=0;
       periodic=0;
       args.SetNameParam(n_name_param,name_param,nargs);
-      GetPeriodic(nargs[0],nbcperiodic,periodic);
+      GetPeriodic(2,nargs[0],nbcperiodic,periodic);
      }
     
 OP_MakePtr3::Op::Op(const basicAC_F0 & args)
@@ -1327,7 +1388,7 @@ OP_MakePtr3::Op::Op(const basicAC_F0 & args)
   nbcperiodic=0;
   periodic=0;
   args.SetNameParam(n_name_param,name_param,nargs);
-  GetPeriodic(nargs[0],nbcperiodic,periodic);
+  GetPeriodic(3,nargs[0],nbcperiodic,periodic);
 }
 
 int GetPeriodic(Expression  bb, Expression & b,Expression & f)
@@ -1342,6 +1403,19 @@ int GetPeriodic(Expression  bb, Expression & b,Expression & f)
       else 
 	return 0;
     }
+int GetPeriodic(Expression  bb, Expression & b,Expression & f1,Expression & f2)
+{
+    const E_Array * a= dynamic_cast<const E_Array *>(bb);
+    if(a && a->size() == 3)
+      {
+	  b= to<long>((*a)[0]);
+	  f1= to<double>((*a)[1]);
+	  f2= to<double>((*a)[2]);
+	  return 1;
+      }
+    else 
+	return 0;
+}
 
 basicAC_F0::name_and_type  OP_MakePtr2::Op::name_param[]= {
   "periodic", &typeid(E_Array) 
@@ -3607,22 +3681,6 @@ void DclTypeMatrix()
   
 }
 
-map<TypeOfFE *,TypeOfFE3 *> TEF2dto3d;
-AnyType TypeOfFE3to2(Stack,const AnyType &b) { 
-    TypeOfFE3 *t3=0;
-    TypeOfFE  *t2=GetAny<TypeOfFE *>(b);
-    map<TypeOfFE *,TypeOfFE3 *>::const_iterator i=TEF2dto3d.find(t2);
-    if(i != TEF2dto3d.end())
-	t3=i->second;
-    
-    if(t3==0)
-      {
-        cerr << " sorry no cast to this 3d finite element " <<endl;
-        ExecError( " sorry no cast to this 3d finite element ");
-      }
-    return t3;
-}
-
 
 void  init_lgfem() 
 {
@@ -4251,8 +4309,20 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("P23d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P2));   
  Global.New("P03d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P0)); 
  Global.New("P1b3d",CConstant<TypeOfFE3*>(&P1bLagrange3d));   
-    
- // TEF2dto3d[]=&DataFE<Mesh3>::P1;
+    /*
+     for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
+     {
+     ffassert(i->tfe); // check 
+     AddNewFE(i->name,i->tfe);
+     // Global.New(i->name, Type_Expr(atype<TypeOfFE*>(),new  EConstantTypeOfFE(i->tfe)));
+     }
+     
+     */
+  TEF2dto3d[FindFE2("P1")]=&DataFE<Mesh3>::P1;
+  TEF2dto3d[FindFE2("P2")]=&DataFE<Mesh3>::P2;
+  TEF2dto3d[FindFE2("P0")]=&DataFE<Mesh3>::P0;
+  TEF2dto3d[FindFE2("P1b")]=&P1bLagrange3d;
+  
 }   
 
 void clean_lgfem()
@@ -4460,12 +4530,13 @@ aType  typeFESpace(const basicAC_F0 &args)
   aType t_tfe3= atype<TypeOfFE3*>();
   aType t_a= atype<E_Array>();
   size_t d=0;
+    // 20 avril 2009 add brak 
   for (int i=0;i<args.size();i++)
     
     if (args[i].left() == t_tfe || args[i].left() == t_m2)
-      {   ffassert(d==0 || d==2) ;d=2;}
+      {   ffassert(d==0 || d==2) ;d=2;break;}
     else if (args[i].left() == t_tfe3 || args[i].left() == t_m3)
-      {   ffassert(d==0 || d==3) ;d=3;}
+      {   ffassert(d==0 || d==3) ;d=3;break;}
   
   if(!(d == 2 || d == 3))
     {

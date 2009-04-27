@@ -306,7 +306,7 @@ class Adaptation :   public E_F0mps { public:
      }
      nbcperiodic=0;
      periodic=0;
-     GetPeriodic(nargs[25],nbcperiodic,periodic);
+     GetPeriodic(2,nargs[25],nbcperiodic,periodic);
        
    }  
     

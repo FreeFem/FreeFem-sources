@@ -55,14 +55,18 @@ namespace Fem2D {
   
   static const int   nvfaceSeg[1][3]  = {{-1,-1,1}};
   static const int  nvedgeSeg[1][2] = { {0,1} };
+    
+  static const int  nvadjSeg[2][1] = { {0},{1} };
+    
+ 
+  template<> const int (* const GenericElement<DataSeg2>::nvface)[3] = 0 ;
+  template<> const int (* const GenericElement<DataSeg2>::nvedge)[2] = nvedgeSeg; //nvedgeTria ;
+  template<> const int (* const GenericElement<DataSeg2>::nvadj)[1] = nvadjSeg ;
+    
   
-  
-  template<>
-  const int (* const GenericElement<DataTriangle2>::nvface)[3] = nvfaceTria ;
-  template<>
-  const int (* const GenericElement<DataTriangle2>::nvedge)[2] = nvedgeTria ;
-  template<>
-  const int (* const GenericElement<DataTriangle2>::nvadj)[2] = nvedgeTria ;
+  template<> const int (* const GenericElement<DataTriangle2>::nvface)[3] = nvfaceTria ;
+  template<>  const int (* const GenericElement<DataTriangle2>::nvedge)[2] = nvedgeTria ;
+  template<>  const int (* const GenericElement<DataTriangle2>::nvadj)[2] = nvedgeTria ;
   template<> const int  GenericElement<DataTriangle2>::nitemdim[4] = {3,3,1,0 }  ;
   
   

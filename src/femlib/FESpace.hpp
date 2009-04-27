@@ -165,6 +165,10 @@ class TypeOfFE { public:
 //  The FEM is in R^N
 //  The FEM is compose from nb_sub_fem
 //  dim_which_sub_fem[N] give
+    typedef R2 RdHat;  // add avril 2009 FH
+    typedef R2 Rd;  // add avril 2009 FH
+
+
   friend class FESpace;
   friend class FElement;
   friend class FEProduitConstruct;

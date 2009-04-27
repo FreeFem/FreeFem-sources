@@ -36,7 +36,353 @@ extern bool NoWait;
 typedef Mesh * pmesh;
 typedef Mesh3 * pmesh3;
 
- 
+map<pair<int,int>,int>::iterator closeto(map<pair<int,int>,int> & m, pair<int,int> & k)
+{
+    map<pair<int,int>,int>::iterator it= m.end();
+    for (int i=-1;i<2;++i)
+	for (int j=-1;j<2;++j)
+	  {
+	      pair<int,int>  kk(k.first+i,k.second+i);
+	      it=  m.find(kk);
+	      if(it != m.end()) return it;
+	  }
+    return it;
+}
+
+ inline void Perm3_I2J(const int *I,const int*J,int *S)
+{
+    if(I[0]==J[0]) S[0]=0;
+    else if(I[0]==J[1]) S[0]=1;
+    else {S[0]=2; assert(I[0]==J[2]) ;}
+    if(I[1]==J[0]) S[1]=0;
+    else if(I[1]==J[1]) S[1]=1;
+    else {S[1]=2; assert(I[1]==J[2]) ; }
+    S[2]=3-S[0]-S[1];
+    assert(I[2]==J[3-S[0]-S[1]]);
+}
+
+bool BuildPeriodic( 
+		   int nbcperiodic,
+		   Expression *periodic,
+		   const Mesh3 &Th,Stack stack,
+		   KN<int> & ndfe) 
+{ 
+    
+    /*
+     build numbering of vertex form 0 to nbdfv-1
+     and build numbering  of  edge form 0 to nbdfe-1
+     we removing common vextex or common edge    
+     --  we suppose one df by vertex 
+     nbdfv number of df on vertex 
+     ndfv[i]  given the numero of the df of the vertex 
+     -- we suppose 1 df
+     */ 
+    typedef Mesh3::BorderElement BE;
+    //typedef Smallvect<int,2> int2;    
+    if (nbcperiodic ) {
+	
+	//    KN<int> ndfv(Th.nv);
+	//   KN<int> ndfe(Th.nbe);
+	//ffassert(ndfv.N()==Th.nv);
+	//ffassert(ndfe.N()==Th.nbe);
+        
+	MeshPoint *mp=MeshPointStack(stack),smp=*mp;   
+	int n= nbcperiodic;
+	if (verbosity >2)
+	    cout << " Nb of pair of periodic conditions (3d) : = " << n <<  endl;
+	int * link1=0;
+	int * link2=0;
+	KN<int*> plk1(n),plk2(n);
+	KN<int> nlk1(n),nlk2(n);
+	KN<int> lab1(n),lab2(n);
+#ifndef  HUGE_VAL      
+	const double infty= numeric_limits<double>::infinity();
+#else
+	const double infty= HUGE_VAL;
+#endif       
+	int nblink1, nblink2;
+	int *plink1 , *plink2;
+        for (int step=0;step<2;step++)
+	  {
+	      nblink1=0,     nblink2=0;
+	      plink1=link1,  plink2=link2;
+	      for (int ip=0, k=0;ip<n;ip++,k+=6)
+		{
+		    int label1=GetAny<long>((*periodic[k+0])(stack));
+		    int label2=GetAny<long>((*periodic[k+3])(stack));
+		    lab1[ip]=label1;
+		    lab2[ip]=label2;
+		    
+		    int l1=nblink1;
+		    int l2=nblink2;
+		    plk1[ip]= plink1;
+		    plk2[ip]= plink2;
+		    for (int ke=0;ke<Th.nbe;ke++)
+		      {
+			  if (Th.be(ke).lab==label1)
+			    {
+				if (plink1) *plink1++=ke;
+				nblink1++;
+			    }
+			  else if (Th.be(ke).lab==label2)
+			    {
+				if (plink2) *plink2++=ke;
+				nblink2++;
+			    }
+		      }
+		    nlk1[ip]= nblink1-l1;
+		    nlk2[ip]= nblink2-l2;              
+		}
+	      if(step) break; // no reallocl 
+	      if (verbosity >3)
+		  cout << "  Periodic = " << nblink1 << " " << nblink2 << " step=" << step << endl;
+	      if(nblink1 != nblink2)
+		    ExecError("Periodic 3d:  the both number of face is not the same ");
+		
+	      
+	      ndfe.resize(nblink1*2);
+	      link1 = new int[nblink1];
+	      link2 = new int[nblink2];
+	  }
+        if ( nblink1 >0) 
+	  {
+	      int indfe=0;
+	      for (int ip=0, k=0;ip<n;ip++,k+=6)
+		{
+		    map<pair<int,int>,int> m;
+		    const int kkx1=1,kky1=2,kkx2=4,kky2=5;
+		    int label1=lab1[ip],label2=lab2[ip];
+		    int n1=nlk1[ip],n2=nlk2[ip];
+		    int *pke1=plk1[ip], *pke2=plk2[ip];
+		    int oip=pke1-link1;
+		    typedef HashTable<SortArray<int,3>,int> HTable;
+		    typedef HTable::iterator HTiterator;
+		    HashTable<SortArray<int,3>,int> table1(n1,Th.nv); //  Table of face lab 1
+		    R2 P[3];
+		    R2 Pmin(infty,infty),Pmax(-infty,-infty);
+		    double hmn=infty;
+		    int iface[3];
+		    if (verbosity >1)
+			cout << "  --Update: periodic  couple label1= " << label1 
+			     << ", n faces= " << n1 << "; "
+			<< ", label2= " << label2<<  ", n faces= " << n2 <<endl; 
+		    if (n1 != n2) 
+		      ExecError("periodic 3D BC:  the number of set of faces is not the same ");
+		    //  compute the hmn size to find common point 
+		    for (int i1=0;i1<n1;i1++)
+		      {
+			  const BE & e =Th.be(pke1[i1]);
+			  
+			  assert(e.lab==label1) ;
+			  {   
+			      for(int ee=0;ee<3;++ee)
+				{
+				    iface[ee]=Th(e[ee]);
+				    mp->set(e[ee].x,e[ee].y,e[ee].z);
+				    P[ee].x=GetAny<double>((*periodic[k+kkx1])(stack));
+				    P[ee].y=GetAny<double>((*periodic[k+kky1])(stack));
+				}
+			      
+			      HTiterator hte=table1.add(SortArray<int,3>(iface),pke1[i1]);
+			      ffassert(hte-table1.begin() == i1);
+			      for(int ee=0,eo=2;ee<3;eo=ee++)
+				{
+				    double l = (P[ee]-P[eo]).norme2();
+				    Pmin=Minc(Pmin,P[ee]);
+				    Pmax=Maxc(Pmax,P[ee]);
+				    hmn=Min(hmn,l);
+				}
+			      
+			      
+			  }                                
+		      }
+		    hmn=sqrt(hmn);
+		    ffassert(hmn>1.0e-20);
+		    double coef = 8/hmn;
+		    double x0 = Pmin.x;
+		    double y0 = Pmin.y;
+		    if (verbosity > 2)
+			cout << "  --Update: periodic " << Pmin << " " << Pmax << " " << " h=" << hmn 
+			<< " ,  coef = "<< coef << endl;
+		    ffassert(coef>1e-10 && (Pmax-Pmin).norme2()*coef < 1.e7 );
+		    
+		    //  map construction ----
+		    for (int i1=0;i1<n1;i1++)
+		      {
+			  int ie=pke1[i1];
+			  const BE & e =Th.be(ie);
+			  assert (e.lab==label1);
+			  for (int ne=0;ne<3;ne++)
+			    {
+				int kv=Th(e[ne]);
+				
+				// cout << ne << " " << kv << " " << " " << e[ne] << " ";
+				mp->set(e[ne].x,e[ne].y,e[ne].z);
+				double xx=GetAny<double>((*periodic[k+kkx1])(stack));
+				double yy=GetAny<double>((*periodic[k+kky1])(stack));
+				pair<int,int> ij((int) ((xx-x0)*coef),(int) ((yy-y0)*coef));				    
+				map<pair<int,int>,int>::iterator im=closeto(m,ij);
+				if (im==m.end())
+				  {
+				      if (verbosity >50)
+					  cout << kv << " " << xx << " " << yy << " ->   " << ij << " :: " << ie << endl;
+				      im=m.insert(make_pair<pair<int,int>,int>(ij,kv)).first;
+				  }
+				else {
+				    if(im->second != kv)
+					cout << kv << " ==  " << im->second << " " << xx << " " << yy << " ->   " << ij << " == " << im->first << endl;
+				    ffassert( im->second == kv);
+				}
+				
+			    }                                
+		      }
+		    //  find ...  face of list 2 in list 1 .... 
+		    int err=0;
+		    for (int i2=0;i2<n2;i2++)
+		      {
+			  int ie2=pke2[i2];
+			  const BE & e =Th.be(ie2);
+			  assert (e.lab==label2);
+			{
+			    if (verbosity >50)
+				cout << ie2 << " : " <<Th(e[0]) << " " << Th(e[1]) << " " << Th(e[2]) << ":: ";
+			    R2 P[3];
+			    pair<int,int> I[3];
+			    map<pair<int,int>,int>::iterator im;
+			    int i2to1[3];
+			    
+			    for(int ee=0;ee<3;++ee)
+			      {
+				  mp->set(e[ee].x,e[ee].y,e[ee].z);
+				  
+				  P[ee].x=GetAny<double>((*periodic[k+kkx2])(stack));
+				  P[ee].y=GetAny<double>((*periodic[k+kky2])(stack));
+				  I[ee].first = (P[ee].x-x0)*coef;
+				  I[ee].second= (P[ee].y-y0)*coef;
+				  im=closeto(m,I[ee]);
+				  
+				  if(im == m.end() )
+				    {
+					cout << " vertex : " << Th(e[ee]) << " " <<e[ee]<< "  Abscisses: s = "<< P[ee]   << "  " <<  I[ee] << endl; 
+					ExecError("periodic: Sorry one vertex of face is losted "); 
+				    }
+				  i2to1[ee] = im->second;
+				  
+			      }
+			    
+			    int ie1=-1;
+			    SortArray<int,3> sf(i2to1);
+			    HTiterator ht=table1.find(sf);
+			    if( ! ht ) {
+				err++;
+				cerr << " missing face " << ie2 << " " << sf <<  endl;
+			    }
+			    else
+			      {
+				
+				  int ie1 = ht->v; 
+				  assert(ie1>=0  );
+				  const BE & eo =Th.be(ie1);
+				  int fo[3]={Th(eo[0]),Th(eo[1]),Th(eo[2])};
+				  
+				  int np1= NumPerm1<3>(fo); //  number of 
+				  int np2= NumPerm1<3>(i2to1);
+				  ndfe[indfe++]=ie1*8+np1; 
+				  ndfe[indfe++]=ie2*8+np2; 
+				  int p1[3],p2[3];
+				  SetNumPerm<3>(np1,p1);
+				  SetNumPerm<3>(np2,p2);
+				  if(verbosity>50)
+				      cout <<"  " << ie1 << " ==  " << ie2  << ":  " <<  fo[p1[0]] << " " << fo[p1[1]] << " " << fo[p1[2]] << " == " 
+				       << i2to1[p2[0]] << " " << i2to1[p2[1]] << " " << i2to1[p2[2]]  << "  e ="
+				       << Th(e[p2[0]]) << " " << Th(e[p2[1]]) << " " << Th(e[p2[2]])  << " "
+ 				      
+				           << " nu= " << np1 << " , " << np2  << endl;
+				 
+			      }
+			    
+			}
+		      }
+		    if(err ) {
+			cerr << " 3d periodic FE: number of  missing periodic faces " << err << endl; 
+			ExecError(" 3d periodic condition missing common face ");
+		    }
+		    
+		    
+		}
+	      *mp = smp;
+	      ffassert(indfe==ndfe.size());
+
+	      /*  rm  FH :
+	      for (int i=0;i<Th.nbe;i++)
+		  ndfe[i]=i;// circular link
+	      for (int i=0;i<Th.nv;i++)
+		  ndfv[i]=i;// circular link
+	      for (int i=0;i<nblink1;i++)
+		{
+		    int ie1=-link1[i]/8;
+		    int ie2=link2[i];
+		    int np=-link1[i]%8;
+		    int p[3]={np%3,np/3,3-np%3-np/3};
+		    if (verbosity >50)
+			cout << " face " << ie1 << " <==> " << ie2 << endl;
+		    ffassert(ie1!=ie2);
+		    if(!InCircularList(ndfe,ie1,ie2))   // merge of two list 
+			Exchange(ndfe[ie1],ndfe[ie2]);
+		    int kv1[3],kv2[3];
+		    // kv1 == kv2 (p) 
+		    const BE & e1=Th.be(ie1), &e2=Th.be(ie2);
+		    for (int ee=0;ee<3;ee++)
+		      {
+			  kv1[ee] =Th(e1[ee]);
+			  kv2[ee] =Th(e2[ee]);		           
+		      }
+		    for (int ee=0;ee<3;ee++)
+		      {
+			  int iv1=kv1[ee];
+			  int iv2=kv2[p[ee]];
+			  //  l'orientation de la face 2 / face 1  est  dans p.
+			  
+			  if (!InCircularList(ndfv,iv1,iv2)) {  // merge of two list 
+			      Exchange(ndfv[iv2],ndfv[iv1]);
+			      
+			      if (verbosity >50)
+				{ 
+				    int ii=iv1,l=1;
+				    while ( (ii=ndfv[ii]) != iv1 && l++<10) (void) 0;
+				    if( (verbosity >50) || ( l > 2 && verbosity >40)) 
+				     cout << l << "  vertex " << iv1 <<  "<==> " << iv2 << " list : " << iv1 << " " << Th(iv1) << " <=> " << Th(iv2);
+				    int i=iv1,k=0;
+				    while ( (i=ndfv[i]) != iv1 && k++<10)
+					cout << ", "<< i ; 
+				    cout << endl;
+				    
+				}}                  
+		      }
+		    
+		} 
+	      // generation de numero de dlt
+	      
+	      nbdfv = numeroteclink(ndfv) ; 
+	      nbdfe = numeroteclink(ndfe) ; 
+	      if (verbosity>2) 
+		  cout << " -- nb df on vertices " << nbdfv << endl;
+	      */
+	      delete [] link1;
+	      delete [] link2;
+	      return true; //new FESpace(**ppTh,*tef,nbdfv,ndfv,nbdfe,ndfe);
+	  }
+	
+    }
+    return false;   
+}
+
+
+bool  v_fes3::buildperiodic(Stack stack, KN<int> & ndfe) { 
+    return BuildPeriodic(nbcperiodic,periodic,**ppTh,stack,ndfe);
+    
+}
+
 template<class Mesh> 
 class GlgVertex {
 public:
