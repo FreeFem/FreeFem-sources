@@ -1,5 +1,13 @@
 v 3.2
-  - add periodic boundary condition like in 2d
+  - renmae  movemesh2D3Dsurf movemesh23 and change named 
+     parameter normal= in orientation=
+  - add periodic boundary in condition like in 2d
+  example for a cube with label face numbering 
+      1 :  ( x == xmin)        2 :  ( x == xmax) 
+      3 :  ( y == ymin)        4 :  ( y == ymax) 
+      5 :  ( z == zmin)        6 :  ( z == zmax) 
+     fespace Vh(Th,P2,periodic=[[1,y,z],[2,y,z],[3,x,z],[4,x,z],[5,x,y],[6,x,y]]);
+
   -  automatic: Finite element name conversion  beetween 2d and 3d
       old : fespace(Th3,P13d);
       new : fespace(Th3,P1); 
