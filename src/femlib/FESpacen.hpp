@@ -631,10 +631,10 @@ public:
   
   //  par defaut P1                
   
-    GFESpace(const Mesh & TTh,const GTypeOfFE<Mesh> & tfe=DataFE<Mesh>::P1)
+    GFESpace(const Mesh & TTh,const GTypeOfFE<Mesh> & tfe=DataFE<Mesh>::P1,int nbequibe=0,int *equibe=0)
     :
     GFESpacePtrTFE<MMesh>(0),
-    DataFENodeDF(TTh.BuildDFNumbering(tfe.ndfonVertex,tfe.ndfonEdge,tfe.ndfonFace,tfe.ndfonVolume)),
+    DataFENodeDF(TTh.BuildDFNumbering(tfe.ndfonVertex,tfe.ndfonEdge,tfe.ndfonFace,tfe.ndfonVolume,nbequibe,equibe)),
     Th(TTh),
     TFE(1,0,&tfe), 
     cmesh(TTh),
@@ -650,8 +650,8 @@ public:
 	    << " Nb of DoF " << NbOfDF << endl;
     }
     
-  GFESpace(const GFESpace & Vh,int kk);
-  GFESpace(const GFESpace ** Vh,int kk);
+  GFESpace(const GFESpace & Vh,int kk,int nbequibe=0,int *equibe=0);
+  GFESpace(const GFESpace ** Vh,int kk,int nbequibe=0,int *equibe=0);
     
   int FirstDFOfNode(int i) const {return FirstDfOfNodeData ? FirstDfOfNodeData[i] : i*Nproduit;}
   int LastDFOfNode(int i)  const {return FirstDfOfNodeData ? FirstDfOfNodeData[i+1] : (i+1)*Nproduit;}

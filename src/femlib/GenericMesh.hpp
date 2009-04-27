@@ -73,8 +73,70 @@ const int TypeVertex =0;
 const int TypeEdge   =1;
 const int TypeFace   =2;
 const int TypeVolume =3;
-
-
+    //  add FH  ... april 2009  for peroidic Boundary Condition.
+    //  gestion of the permutation 1,2,3
+    // here just user order     
+    //  NumPerm  : number of the permutation  
+    //   p  permutation      n= NumPerm(p)
+    //   p1 permutation inv  n1 = NumPerm(p1)
+    //   p1[p[i]]=i 
+    //   =>  n1   number of the perm /  p[p1[i]]  increase <=> i
+    //  SetNumPerm: set the permutation form number 
+    
+    template<int d> inline int NumPerm(int *p) {ffassert(0);}  
+    template<int d> inline int NumPerm1(int *p) {ffassert(0);}  // num perm inverse 
+    template<> inline int NumPerm<1>(int *p) { return 0;}
+    template<> inline int NumPerm1<1>(int *p) { return 0;}
+    template<> inline int NumPerm<2>(int *p) { return p[0] > p[1] ;}
+    template<> inline int NumPerm1<2>(int *p) { return p[0] > p[1] ;}
+    
+    template<> inline int NumPerm1<3>(int *p) { 
+	// signe + depart*2
+	int k=0,i0=0,i1=1,i2=2,j[3];
+	if(p[i0]> p[i1]) swap(i0,i1),k +=1;
+	if(p[i1]> p[i2]) swap(i1,i2),k +=1;
+	if(p[i0]> p[i1]) swap(i0,i1),k +=1;
+	assert(p[i0] < p[i1] && p[i1] < p[i2]);
+	// j is inv of i1,i2,i3
+	j[i0]=0;j[i1]=1;j[i2]=2;
+	return (k%2)+i0*2; // signe + depart*2
+    }
+    
+    template<> inline int NumPerm<3>(int *p) { 
+	// signe + depart*2
+	int k=0,i0=0,i1=1,i2=2,j[3];
+	if(p[i0]> p[i1]) swap(i0,i1),k +=1;
+	if(p[i1]> p[i2]) swap(i1,i2),k +=1;
+	if(p[i0]> p[i1]) swap(i0,i1),k +=1;
+	assert(p[i0] < p[i1] && p[i1] < p[i2]);
+	// j is inv of i1,i2,i3
+	j[i0]=0;j[i1]=1;j[i2]=2; 
+	return (k%2)+ ((j[0]+3)%3)*2; // signe + depart*2
+    }    
+    // build de permutation     
+    template<int d> inline int SetNumPerm(int n,int *p) { ffassert(0);return 0; }// a error}    
+    template<int d> inline int SetNumPerm1(int n,int *p) { ffassert(0);return 0; }// a error}    
+    
+    template<> inline int SetNumPerm<1>(int n,int *p) { p[0]=0;} // a error}    
+    template<> inline int SetNumPerm<2>(int n,int *p) { p[0]=n;p[1]=1-n;} // a error}    
+    
+    // build perm inverse
+    template<> inline int SetNumPerm1<1>(int n,int *p) { p[0]=0;} // a error}    
+    template<> inline int SetNumPerm1<2>(int n,int *p) { p[0]=n;p[1]=1-n;} // a error} 
+    
+    template<> inline  int SetNumPerm1<3>(int n,int *p) { 
+	int i=n/2, j= n%2 ? 2:1;
+	p[i]=0;p[(i+j)%3]=1;p[(i+j+j)%3]=2;
+	assert( n == NumPerm1<3>(p));
+    }    
+    
+    template<> inline   int SetNumPerm<3>(int n,int *p) { 
+	int i=n/2, j= n%2 ? 2:1;
+	p[0]=i;p[1]=(i+j)%3;p[2]=(i+j+j)%3;
+	assert( n == NumPerm<3>(p));
+    } 
+    // ---  end add periodic 
+    
 class DataFENodeDF {
     int  * nbref; // pointer  on common ref counter 
 public:
@@ -328,7 +390,7 @@ private:
   GenericElement &operator = (const  GenericElement &);
 };
 
-
+ 
     template<int N> inline void PermI2J(const void **I,const void **J,int *S)
     {
 	ffassert(0);
@@ -438,10 +500,11 @@ public:
   void BuildBound();
   void BuildjElementConteningVertex();
   void BuildGTree() {if(gtree==0)  gtree=new GTree(vertices,Pmin,Pmax,nv);}    
-  DataFENodeDF BuildDFNumbering(int dfon[NbTypeItemElement]) const ;
-  DataFENodeDF BuildDFNumbering(int ndfv,int ndfe,int ndff,int ndft) const 
+  DataFENodeDF BuildDFNumbering(int dfon[NbTypeItemElement],int nbequibe=0,int *equibe=0) const ;
+    DataFENodeDF BuildDFNumbering(int ndfv,int ndfe,int ndff,int ndft,int nbequibe=0,int *equibe=0) const 
   { int dfon[NbTypeItemElement]={ndfv,ndfe,ndff,ndft};
-    return  BuildDFNumbering(dfon);}
+    return  BuildDFNumbering(dfon,nbequibe,equibe);
+  }
   
   int ElementAdj(int k,int &j) const  {
     int p=TheAdjacencesLink[nea*k+j];
@@ -744,16 +807,36 @@ void GenericMesh<T,B,V>::BuildSurfaceAdj()
 
 
 template<typename T,typename B,typename V>
-DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement]) const
+DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],int nbequibe,int *equibe) const
 {
+/*
+   nbequibe nb of  borderelement with equi boundary condition
+  for i =0, 2*nbequibe, i+= 2)
+    
+     be0= equibe[i]/8 <=>  be1=equibe[i+1] /8
+     equibe[i]%8    given the permuation  p0 compare to sort array. 
+     equibe[i+1]%8 given the permuation   p1 compare to sort array.
+    the  numbering of perumation 
+     SetNumPerm<nkf>(p0,equibe[i+1]%8);
+     SetNumPerm<nkf>(p1,equibe[i+1]%8);
+    
+    so a level of point with always have:
+      be0[p0[j]] <==>  be1[p1[j]]
+ 
+ 
+ */
   const GenericMesh & Th(*this);
   int nnodeK = T::NbNodes(ndfon);
   int *p = 0, *pp=0; 
   unsigned int tinfty=-1;
+    
   const int nkv= T::nv;
   const int nkf= T::nf;
   const int nke= T::ne;
   const int nkt= T::nt;
+  const int nbev= B::nv;
+  const int nbef= B::nf;
+  const int nbee= B::ne;
   const int nk[]={nkv,nke,nkf,nkt};
   int MaxNbNodePerElement=0;
   int MaxNbDFPerElement=0;
@@ -774,28 +857,118 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement]) 
 	MaxNbNodePerElement += nk[dd];
       }
   bool constndfpernode = minndf == maxndf;
-  bool nodearevertices = nbnzero ==1  && ndfon[0];
+  bool nodearevertices = ( nbnzero ==1  && ndfon[0]) && nbequibe==0 ;
+ 
   assert(maxndf>0);
   const int nkeys=4+6+4+1;
   assert(nnodeK<= nkeys);
+  
   if(nodearevertices)
     {
       nbNodes=nv;
       NbOfDF=nbNodes*ndfon[0];
     }
   else
-    {      
-      //  construction of nodes numbering 
+    { 
       p =  new int[nnodeK*nt];
       typedef SortArray<unsigned int,2> Key;
-      // ------------
-      Key keys[nkeys];
-      int keysdim[nkeys];
+	
+      Key keys[nkeys*2];
+      int keysdim[nkeys*2];
+      
       int of = Th.nv+1;
       int ndim[NbTypeItemElement]={0,0,0,0};
       NbOfDF=0;
       {
 	HashTable<Key,int> h(nnodeK*nt,of+nt);
+	int  nbmaxeq = 1+nnodeK*nbequibe;
+	int  nbhasheq = nbequibe ? of+nt : 1;
+	HashTable<Key,Key> equi(nbmaxeq,nbhasheq); 
+	  //  constuction of item translation for 
+	  if(verbosity>2)
+	  cout << " nb equi be :  " << nbequibe << endl;
+	  for(int ieq=0,keq=0;keq<nbequibe;++keq)
+	    {
+		int p1[nbev],p2[nbev];
+		int v1[nbev],v2[nbev];
+		int be1=equibe[ieq]/8,pe1=equibe[ieq++]%8;
+		int be2=equibe[ieq]/8,pe2=equibe[ieq++]%8;
+		int itemb1,k1=BoundaryElement(be1,itemb1);
+		int itemb2,k2=BoundaryElement(be2,itemb2);
+		const B& b1(Th.be(be1));
+	        const B& b2(Th.be(be2));
+		SetNumPerm<nbev>(pe1,p1);
+		SetNumPerm<nbev>(pe2,p2);
+		int m=0;
+		for(int i=0;i<nbev;++i)
+		  {
+		      v1[i]=Th(b1[p1[i]]);
+		      v2[i]=Th(b2[p2[i]]);
+		  }
+		
+		int dimb= B::RdHat::d;
+		if(ndfon[dimb])
+		  { //  simple border element
+		  }
+                if( ndfon[0] )
+		    for(int i=0;i<nbev;++i)
+		  {
+		    keysdim[m]=0,keys[m++]=Key(v1[i],tinfty);
+		    keysdim[m]=0,keys[m++]=Key(v2[i],tinfty);
+		      if(verbosity >100) cout << be1<< " " << be2 << "  " <<  v1[i] << " <--> " << v2[i] 
+			                 << " /  " << Th(v1[i]) << " <=> " << Th(v2[i]) << endl;
+		  }
+		if( ndfon[1] )
+		  for(int i=0;i<nbee;++i)
+		  {
+		      keysdim[m]=1,keys[m++]=Key(v1[B::nvedge[i][0]],v1[B::nvedge[i][1]]);
+		      keysdim[m]=1,keys[m++]=Key(v2[B::nvedge[i][0]],v2[B::nvedge[i][1]]);
+		  }
+		if( ndfon[2] && dimb ==2)
+		  {
+		      assert(nbef==1 && nkf != 1);
+		      int ii;
+		      keysdim[m]=2,keys[m++]=Key(k1+of,ElementAdj(k1,ii=itemb1) +of);
+		      keysdim[m]=2,keys[m++]=Key(k2+of,ElementAdj(k2,ii=itemb2) +of);		     
+		  }
+		        
+		for(int j=0;j<m;)
+		  {
+		      int i0=j++,i1=j++; 
+		      if(keys[i1]<keys[i0]) swap( keys[i0],keys[i1]);
+		      typename HashTable<Key,Key>::iterator pe = equi.add(keys[i0],keys[i1]);
+		     // if(pe) assert(pe->k == keys[i0]);
+		  }
+		
+	    }
+	  
+	  //  to find the final equivalent  key ... 
+	  //  in change of chaibe of equi key
+	  for (int it=0,change=1;change;it++)
+	    { 
+	    change=0;
+	    assert(it<10);
+	    for (typename HashTable<Key,Key>::iterator qe,pe=equi.begin() ; pe != equi.end(); ++pe)
+	      { 
+		  
+		  assert( pe->k < pe->v); 
+		  qe=equi.find(pe->v);
+		  if(qe) 
+		    { change++;
+		     assert( qe->k < qe->v);
+		      pe->v = qe->v;
+		  }
+	    
+		  
+	      }
+	      cout << " iteration in final equivalent " << it << " nb change " << change << endl;
+	    }
+	    
+	
+	  //  construction of nodes numbering 
+	  
+	  // ------------
+	  
 	for(int k=0;k<nt;++k)
 	  {
 	    const T & K(Th[k]);
@@ -831,12 +1004,16 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement]) 
 	    assert(m==nnodeK);
 	    for(int i=0;i<m;i++)
 	      {
-		typename HashTable<Key,int>::iterator pk= h.find(keys[i]);
+		Key ki=keys[i],kio=ki; 
+		typename HashTable<Key,Key>::iterator pe= equi.find(ki);
+		  if(pe) {   ki= pe->v;  }
+		typename HashTable<Key,int>::iterator pk= h.find(ki);
 		if(!pk)
 		 {
-		  pk = h.add(keys[i],nbNodes++);
+		  pk = h.add(ki,nbNodes++);
 		  NbOfDF += ndfon[keysdim[i]];
 		 }
+		if(verbosity>100 && pe ) cout << kio << " -> " << pe->k  << " :: " <<  pk->v << endl;   
 		p[n++] = pk->v;
 		ndim[keysdim[i]]++;
 			  

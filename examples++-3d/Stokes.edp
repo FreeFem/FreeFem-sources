@@ -9,7 +9,7 @@ mesh3 Th=buildlayers(Th2,nn,
   reffaceup = rup,     reffacelow = rdown);
   
 medit("c10x10x10",Th);
-fespace VVh(Th,[P23d,P23d,P23d,P13d]);
+fespace VVh(Th,[P2,P2,P2,P1]);
 fespace Vh(Th,P23d);
 macro Grad(u) [dx(u),dy(u),dz(u)]// EOM
 macro div(u1,u2,u3) (dx(u1)+dy(u2)+dz(u3)) //EOM
