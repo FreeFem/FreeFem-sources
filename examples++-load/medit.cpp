@@ -1370,7 +1370,8 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
     }
     delete [] OutSolTab;
   }
-  
+    cout << " de" << commandline << " " <<  pTh << endl;
+  delete [] commandline;
   delete pTh;
 
  
@@ -2123,6 +2124,10 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
     }
     delete [] OutSolTab;
   }
+// add F. Hecht avril 2009    
+    delete [] commandline;
+    delete pTh;
+ 
   return valsortie;
 }
 
