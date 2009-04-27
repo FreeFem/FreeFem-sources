@@ -1,4 +1,6 @@
 v 3.2
+  - add interface with MUMPS  parallel solver (in progress) 
+    http://graal.ens-lyon.fr/MUMPS/
   - renmae  movemesh2D3Dsurf movemesh23 and change named 
      parameter normal= in orientation=
   - add periodic boundary in condition like in 2d
