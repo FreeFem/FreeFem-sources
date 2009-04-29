@@ -225,8 +225,11 @@ AnyType datasolMesh2_Op::operator()(Stack stack)  const
 
   // determination de OutSolTab
 
-  if ( !(outm = GmfOpenMesh(ffname->c_str(),GmfWrite,ver,2)) ) {
-    cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< ffname << endl;
+  char * ret= new char[ffname->size()+1];
+  strcpy(ret, ffname->c_str());
+
+  if ( !(outm = GmfOpenMesh( ret, GmfWrite, ver, 2)) ) {
+    cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< ret << endl;
     exit(1);
   }
  
@@ -307,7 +310,7 @@ AnyType datasolMesh2_Op::operator()(Stack stack)  const
     }
   }
   GmfCloseMesh(outm);
-
+  delete [] ret;
   delete [] OutSolTab;
   return longdefault;
 }
@@ -438,7 +441,11 @@ AnyType datasolMesh3_Op<v_fes>::operator()(Stack stack)  const
 
   // determination de OutSolTab
 
-  if ( !(outm = GmfOpenMesh(ffname->c_str(),GmfWrite,ver,3)) ) {
+  char * ret= new char[ffname->size()+1];
+  strcpy(ret, ffname->c_str());
+
+  cout << ret << endl;
+  if ( !(outm = GmfOpenMesh( ret, GmfWrite, ver, 3)) ) {
     cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< filename << endl;
     exit(1);
   }
@@ -561,6 +568,7 @@ AnyType datasolMesh3_Op<v_fes>::operator()(Stack stack)  const
     }
   }
   GmfCloseMesh(outm);
+  delete [] ret;
   delete [] OutSolTab;
   return longdefault;
 }
@@ -1368,13 +1376,15 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
 	GmfSetLin(outm, GmfSolAtVertices, OutSolTab);
       }
     }
-    delete [] OutSolTab;
-  }
-    cout << " de" << commandline << " " <<  pTh << endl;
-  delete [] commandline;
-  delete pTh;
+   
+    GmfCloseMesh(outm);
 
- 
+    delete [] OutSolTab;
+    
+  }
+  delete [] commandline;  
+  delete pTh;
+    
   return valsortie;
 }
 
@@ -1545,7 +1555,8 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
   }
   
   Vertex3    *v = new Vertex3[nv];
-  Tet        *t = new Tet[nt];
+  Tet        *t;
+  if(nt !=0 ) t = new Tet[nt];
   Triangle3  *b = new Triangle3[nbe]; 
   Tet       *tt = t;
   Triangle3 *bb = b;
@@ -2123,11 +2134,12 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
       }
     }
     delete [] OutSolTab;
+    GmfCloseMesh(outm);
   }
-// add F. Hecht avril 2009    
-    delete [] commandline;
-    delete pTh;
- 
+
+  delete [] commandline;
+  delete pTh; 
+
   return valsortie;
 }
 

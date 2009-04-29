@@ -161,19 +161,6 @@ template <> struct SuperLUDriver<Complex>
 };
 
 // read options for superlu in freefem++
-/*
-#ifdef __cpluscplus
-int s_(char *ff, ...)
-{
-  int i = 0;
-  while( *(++i+&str) != 0 )
-    if( strcmp(str, (char*)*(&str+i)) == 0)
-      return i;
-  return 0;
-}
-
-#else
-*/
 int s_(char* str, const char* cmp[])
 {
   int i = 0;
@@ -187,25 +174,6 @@ int s_(char* str, const char* cmp[])
   //cout << *str << " return 0" << endl;
   return 0;
 }
-//#endif
-/*
-  static const yes_no_t  enumyes_no_t[2] = {NO, YES};
-  static const fact_t  enumfact_t[4] = {DOFACT, SamePattern, SamePattern_SameRowPerm, FACTORED};
-  static const colperm_t  enumcolperm_t[5] = {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD, MY_PERMC};
-  static const trans_t  enumtrans_t[3] = {NOTRANS, TRANS, CONJ};
-  static const  IterRefine_t enumIterRefine_t[4] = {NOREFINE, SINGLE, DOUBLE, EXTRA};  
-  
-  static const char*  compyes_no_t[] = {"NO", "YES",0};
-  static const char* compfact_t[] = {"DOFACT", "SamePattern", "SamePattern_SameRowPerm", "FACTORED",0};
-  static const char* compcolperm_t[] = {"NATURAL", "MMD_ATA", "MMD_AT_PLUS_A", "COLAMD", "MY_PERMC",0};
-  static const char* comptrans_t[] = {"NOTRANS", "TRANS", "CONJ",0};
-  static const char* compIterRefine_t[] = {"NOREFINE", "SINGLE", "DOUBLE", "EXTRA",0};
-  
-  static const char* comp[] = {"Fact", "Equil","ColPerm",
-  "DiagPivotThresh","Trans","IterRefine",
-  "SymmetricMode","PivotGrowth","ConditionNumber",
-  "PrintStat",0};
-*/
 
 void read_options_freefem(string *string_option, superlu_options_t *options){
   static const yes_no_t  enumyes_no_t[2] = {NO, YES};
@@ -237,111 +205,22 @@ void read_options_freefem(string *string_option, superlu_options_t *options){
 	options.PivotGrowth = NO;
 	options.ConditionNumber = NO;
 	options.PrintStat = YES;
-    */
-  //cout << "string_option" <<  *string_option << endl;
+    */ 
   char data[string_option->size()+1];  
   strcpy( data, string_option->c_str()); 
   cout << "data=" << data << endl;
   char * tictac;
+  char * tictac2;
   tictac = strtok(data," =,\t\n");
   cout << "tictac=" << data << endl;
-// #ifdef __cplusplus
-//   while(tictac != NULL){
-//     int id_option = s_(tictac, "Fact", "Equil","ColPerm",
-// 				"DiagPivotThresh","Trans","IterRefine",
-// 				"SymmetricMode","PivotGrowth","ConditionNumber",
-// 				"PrintStat",0);
-//     tictac = strtok(NULL," ,\t\n");
-//     int val_options;
-//     switch (id_option)
-//       { 
-//       case 1 : // Fact
-// 	val_options= s_(tictac, "DOFACT", "SamePattern", "SamePattern_SameRowPerm", "FACTORED",0);
-// 	if( val_options == 0){
-// 	  printf("value given for SuperLU for options %s is not correct\n","Fact");
-// 	  exit(1);
-// 	}
-// 	options->Fact= enumfact_t[val_options-1];
-// 	break;
-//       case 2:  // Equil
-// 	val_options= s_(tictac, "NO", "YES", 0);
-// 	if( val_options == 0){
-// 	  printf("value given for SuperLU for options %s is not correct\n","Equil");
-// 	  exit(1);
-// 	}
-// 	options->Equil= enumyes_no_t[val_options-1];
-// 	break;
-//       case 3:  // ColPerm
-// 	val_options= s_(tictac,"NATURAL", "MMD_ATA", "MMD_AT_PLUS_A", "COLAMD", "MY_PERMC", 0);
-// 	if( val_options == 0){
-// 	  printf("value given for SuperLU for options %s is not correct\n","ColPerm");
-// 	  exit(1);
-// 	}
-// 	options->ColPerm= enumcolperm_t[val_options-1];
-//       case 4:  // DiagPivotThresh
-// 	options->DiagPivotThresh= strtod(tictac,&tictac);
-// 	break;
-//       case 5:  // Trans
-// 	val_options= s_(tictac, "NOTRANS", "TRANS", "CONJ",0);
-// 	if( val_options == 0){
-// 	  printf("value given for SuperLU for options %s is not correct\n","Trans");
-// 	  exit(1);
-// 	}
-// 	options->Trans= enumtrans_t[val_options-1];
-// 	break;
-//       case 6:  // IterRefine
-// 	val_options= s_(tictac, "NOREFINE", "SINGLE", "DOUBLE", "EXTRA",0);
-// 	if( val_options == 0){
-// 	  printf("value given for SuperLU for options %s is not correct\n","IterRefine");
-// 	  exit(1);
-// 	}
-// 	options->IterRefine= enumIterRefine_t[val_options-1];
-// 	break;
-//       case 7:  // SymmetricMode
-// 	val_options= s_(tictac, "NO","YES",0);
-// 	if( val_options == 0){
-// 	  printf("value given for SuperLU for options %s is not correct\n","SymmetricMode");
-// 	  exit(1);
-// 	}
-// 	options->SymmetricMode= enumyes_no_t[val_options-1];
-// 	break;
-//       case 8:  // PivotGrowth
-// 	val_options= s_(tictac, "NO","YES",0);
-// 	if( val_options == 0){
-// 	  printf("value given for SuperLU for options %s is not correct\n","PivotGrowth");
-// 	  exit(1);
-// 	}
-// 	options->PivotGrowth= enumyes_no_t[val_options-1];
-// 	break;
-//       case 9:  // ConditionNumber
-// 	val_options= s_(tictac, "NO","YES",0);
-// 	if( val_options == 0){
-// 	  printf("value given for SuperLU for options %s is not correct\n","ConditionNumber");
-// 	  exit(1);
-// 	}
-// 	options->ConditionNumber = enumyes_no_t[val_options-1];
-// 	break;
-//       case 10: // PrintStat
-// 	val_options= s_(tictac, "NO","YES",0);
-// 	if( val_options == 0){
-// 	  printf("value given for SuperLU for options %s is not correct\n","PrintStat");
-// 	  exit(1);
-// 	}
-// 	options->PrintStat = enumyes_no_t[val_options-1];
-// 	break;
-//       case 0: // Equivalent of case default
-// 	printf("A false parameter for  SuperLU is given %s \n",tictac);
-// 	exit(1);
-//       }  
-//     tictac = strtok(NULL," ,\t\n");
-//   }
-// #else
+
   while(tictac != NULL){
     //char* comp[] = {"Fact", "Equil","ColPerm",
     //"DiagPivotThresh","Trans","IterRefine",
     //"SymmetricMode","PivotGrowth","ConditionNumber",
     //"PrintStat",0 };
     int id_option = s_(tictac, comp);
+    tictac2 = tictac;
     tictac = strtok(NULL," =,\t\n");
     int val_options;
 
@@ -430,12 +309,17 @@ void read_options_freefem(string *string_option, superlu_options_t *options){
 	}
 	options->PrintStat = enumyes_no_t[val_options-1];
 	break;
-      case 0: // Equivalent of case default
+      default : // Equivalent of case default
+	if(id_option == 0)
+	  {
+	    printf("parameter is not valid for superlu_dist %s \n", tictac2 );
+	    exit(1);
+	  }	 
 	break;
       }  
     tictac = strtok(NULL," =,\t\n");
   }
-  //#endif
+  
 }
 
   
@@ -469,6 +353,7 @@ class SolveSuperLU :   public MatriceMorse<R>::VirtualSolver, public SuperLUDriv
   int            *etree;
   R         *rhsb, *rhsx, *xact;
   double         *RR, *CC;
+  int    RR_store,CC_store;
   int m, n, nnz;
   
   R         *arow;
@@ -480,11 +365,11 @@ class SolveSuperLU :   public MatriceMorse<R>::VirtualSolver, public SuperLUDriv
    
 public:
   SolveSuperLU(const MatriceMorse<R> &AA,int strategy,double ttgv, double epsilon=1e-6,
-	       double pivot=-1.,double pivot_sym=-1., string *param_char, int *pperm_r, 
-	       int *pperm_c ) : 
+	       double pivot=-1.,double pivot_sym=-1., KN_<double> &param_double, string *param_char, KN_<int> &pperm_r, 
+	       KN_<int> &pperm_c ) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),
-    etree(0),string_option(param_char),perm_r(pperm_r), perm_c(pperm_c),
+    etree(0),string_option(param_char),
     RR(0), CC(0), 
     tol_pivot_sym(pivot_sym),tol_pivot(pivot)
   { 
@@ -536,33 +421,9 @@ public:
 	options.ConditionNumber = NO;
 	options.PrintStat = YES;
     */
-    set_default_options(&options);
-    
-    printf(".. default options:\n");
-    printf("\tFact\t %8d\n", options.Fact);
-    printf("\tEquil\t %8d\n", options.Equil);
-    printf("\tColPerm\t %8d\n", options.ColPerm);
-    printf("\tDiagPivotThresh %8.4f\n", options.DiagPivotThresh);
-    printf("\tTrans\t %8d\n", options.Trans);
-    printf("\tIterRefine\t%4d\n", options.IterRefine);
-    printf("\tSymmetricMode\t%4d\n", options.SymmetricMode);
-    printf("\tPivotGrowth\t%4d\n", options.PivotGrowth);
-    printf("\tConditionNumber\t%4d\n", options.ConditionNumber);
-    printf("..\n");
-    
+    set_default_options(&options);   
     if(string_option) read_options_freefem(string_option,&options);
     
-    printf(".. options:\n");
-    printf("\tFact\t %8d\n", options.Fact);
-    printf("\tEquil\t %8d\n", options.Equil);
-    printf("\tColPerm\t %8d\n", options.ColPerm);
-    printf("\tDiagPivotThresh %8.4f\n", options.DiagPivotThresh);
-    printf("\tTrans\t %8d\n", options.Trans);
-    printf("\tIterRefine\t%4d\n", options.IterRefine);
-    printf("\tSymmetricMode\t%4d\n", options.SymmetricMode);
-    printf("\tPivotGrowth\t%4d\n", options.PivotGrowth);
-    printf("\tConditionNumber\t%4d\n", options.ConditionNumber);
-    printf("..\n");
 
     Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
 
@@ -573,21 +434,32 @@ public:
       
 
     if ( !(etree  = new int[n]) ) ABORT("Malloc fails for etree[].");
-    if( !perm_r )
-      if ( !(perm_r = new int[n]) ) ABORT("Malloc fails for perm_r[].");
-    if( !perm_c )
-      if ( !(perm_c = new int[n]) ) ABORT("Malloc fails for perm_c[].");
+
+    if ( !(perm_r = new int[n]) ) ABORT("Malloc fails for perm_r[].");
     
+    if( pperm_r ){
+      for(int ii=0; ii<n; ii++) perm_r[ii] = pperm_r[ii];
+    }
+    
+    if ( !(perm_c = new int[n]) ) ABORT("Malloc fails for perm_c[].");
+    if( pperm_c ){
+      for(int ii=0; ii<n; ii++) perm_c[ii] = pperm_c[ii];
+     
+    }
+   
     if ( !(RR = new double[n]) )
         ABORT("SUPERLU_MALLOC fails for R[].");
-    for(int ii=0; ii<n; ii++){
-      RR[ii]=1.;
-    }
+   
     if ( !(CC = new double[m]) )
         ABORT("SUPERLU_MALLOC fails for C[].");
-    for(int ii=0; ii<n; ii++){
-      CC[ii]=1.;
-    }    
+    
+    if(param_double){
+      RR_store=1; CC_store=1;
+      for(int ii=0; ii<n; ii++)
+	RR[ii]=param_double[ii];
+      for(int ii=0; ii<m; ii++)
+	CC[ii]=param_double[ii+n];
+    }
     ferr[0]=0;
     berr[0]=0;
     /* Initialize the statistics variables. */
@@ -718,24 +590,26 @@ public:
 
 MatriceMorse<double>::VirtualSolver *
 BuildSolverSuperLU(const MatriceMorse<double> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-		   int NbSpace,int itmax, int *param_int, double *param_double, string *param_char, int *perm_r, 
-		   int *perm_c, string *file_param_int, string *file_param_double, string *file_param_char, 
-		   string *file_param_perm_r, string *file_param_perm_c, Const  void * precon, void * stack)
+		   int NbSpace,int itmax,  KN_<int> &param_int, KN_<double> &param_double, string *param_char, 
+		   KN_<int> &perm_r, KN_<int> &perm_c, string *file_param_int, string *file_param_double, string *file_param_char, 
+		   string *file_param_perm_r, string *file_param_perm_c, const  void * precon, void * stack)
 {
     if(verbosity>9)
     cout << " BuildSolverSuperLU<double>" << endl;
-    return new SolveSuperLU<double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym,param_char,perm_r,perm_c);
+    return new SolveSuperLU<double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym,param_double,param_char,perm_r,perm_c);
 }
 
 MatriceMorse<Complex>::VirtualSolver *
-BuildSolverSuperLU(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym,
-		   int NbSpace,int itmax , int *param_int, double *param_double, string *param_char, int *perm_r, 
-		   int *perm_c, string *file_param_int, string *file_param_double, string *file_param_char, 
+BuildSolverSuperLU(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot, 
+		   double tol_pivot_sym,
+		   int NbSpace,int itmax, KN_<int> &param_int, KN_<double> &param_double, 
+		   string *param_char, KN_<int>  &perm_r, KN_<int> &perm_c, string *file_param_int, 
+		   string *file_param_double, string *file_param_char, 
 		   string *file_param_perm_r, string *file_param_perm_c, const  void * precon, void * stack)
 {
   if(verbosity>9)
     cout << " BuildSolverSuperLU<Complex>" << endl;
-  return new SolveSuperLU<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym,param_char,perm_r,perm_c);
+  return new SolveSuperLU<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym,param_double,param_char,perm_r,perm_c);
 }
 
 

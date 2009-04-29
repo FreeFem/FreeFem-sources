@@ -179,10 +179,10 @@ int GmfOpenMesh(const char *FilNam, int mod, ...)
 
 	if(!IniFlg)
 	{
-		for(i=0;i<MaxMsh;i++)
-			MshTab[i] = NULL;
+	  for(i=0;i<MaxMsh;i++)
+	    MshTab[i] = NULL;
 
-		IniFlg = 1;
+	  IniFlg = 1;
 	}
 
 	/*---------------------*/
@@ -190,19 +190,19 @@ int GmfOpenMesh(const char *FilNam, int mod, ...)
 	/*---------------------*/
 
 	for(i=1;i<MaxMsh;i++)
-		if(!MshTab[i])
-		{
-			MshIdx = i;
-			break;
-		}
-
+	  if(!MshTab[i])
+	    {
+	      MshIdx = i;
+	      break;
+	    }
+	
 	if( !MshIdx || !(msh = (GmfMshSct *) calloc(1, sizeof(GmfMshSct))) )
-		return(0);
+	  return(0);
 
 	/* Copy the FilNam into the structure */
 
 	if(strlen(FilNam) + 7 >= GmfStrSiz)
-		return(0);
+	  return(0);
 
 	strcpy(msh->FilNam, FilNam);
 
@@ -365,8 +365,9 @@ int GmfCloseMesh(int MshIdx)
 	GmfMshSct *msh;
 
 	if( (MshIdx < 1) || (MshIdx > MaxMsh) )
-		return(0);
-
+	  return(0);
+	
+	fflush(stdout);
 	msh = MshTab[ MshIdx ];
 
 	/* In write down the "End" kw in write mode */
@@ -384,7 +385,6 @@ int GmfCloseMesh(int MshIdx)
 
 	free(msh);
 	MshTab[ MshIdx ] = NULL;
-
 	return(res);
 }
 

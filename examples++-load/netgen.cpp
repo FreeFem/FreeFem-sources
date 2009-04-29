@@ -72,6 +72,9 @@ using namespace nglib;
 using namespace Fem2D;
 
 
+
+
+
 class RemplissageNetgen_Op : public E_F0mps 
 {
 public:
@@ -177,9 +180,9 @@ AnyType RemplissageNetgen_Op::operator()(Stack stack)  const
   int nbe=Th3.nbe; // nombre de surfaces
 
   // check consistency of surface mesh
-  cout << "check :: orientation des surfaces" << endl;
+  if(verbosity >1) cout << "check :: orientation des surfaces" << endl;
   Th3.BuildSurfaceAdj();
-  cout << "fin check :: orientation des surfaces" << endl;
+  if(verbosity >1) cout << "fin check :: orientation des surfaces" << endl;
 
   if(nbt!=0) {
     cerr << " The mesh must be a 3D surface mesh " << endl;
@@ -505,6 +508,911 @@ AnyType Netgen_STL_Op::operator()(Stack stack)  const
   return Th3_t;
 }
 
+
+class Netgen_Face
+{
+ public:
+  int label;
+  int domin;
+  int domout;
+  int bcd;
+  Netgen_Face *pp;
+  Netgen_Face();
+  Netgen_Face(int a, int b, int c, int d) : label(a), domin(b), domout(c), bcd(d), pp(0) { };
+ 
+  int Test_Face(int a, int b, int c, int d){ 
+    if( label == a && domin == b &&  domout == c && bcd == d )
+      return 1;
+    else
+      return 0;
+  }
+
+  Netgen_Face * Next_Face( ) {
+    return pp;
+  }
+
+  void Initialisation_Face(int a, int b, int c, int d){
+    label  = a;
+    domin  = b;
+    domout = c;
+    bcd    = d;
+  }
+
+  void Initialisation_Next_Face(Netgen_Face *e){
+    pp = e;
+  }
+
+
+ private:
+  ~Netgen_Face();
+};
+
+
+
+class Netgen_LoadMesh_Op : public E_F0mps 
+{
+public:
+  Expression filename;
+  static const int n_name_param = 2; // 
+  static basicAC_F0::name_and_type name_param[];
+  Expression nargs[n_name_param];
+public:
+  Netgen_LoadMesh_Op(const basicAC_F0 &  args,Expression ffname) 
+    : filename(ffname)
+  {
+    if(verbosity) cout << "Load mesh given by Netgen " << endl;
+    args.SetNameParam(n_name_param,name_param,nargs);
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
+basicAC_F0::name_and_type Netgen_LoadMesh_Op::name_param[]= {
+  {  "reftet", &typeid(long)},
+  {  "renum", &typeid(long)}
+};
+
+
+class  Netgen_LoadMesh : public OneOperator { public:  
+    Netgen_LoadMesh() : OneOperator(atype<pmesh3>(),atype<string *>()) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  { 
+    return  new Netgen_LoadMesh_Op( args,t[0]->CastTo(args[0]) ); 
+  }
+};
+
+Mesh3 * NETGEN_Load (const string & filename,const int & flagsnewlabelsurf)
+  {
+
+    //int flagsnewlabelsurf=1;
+    char str[100];
+    int i, n;
+    
+    double scale = 1;  // globflags.GetNumFlag ("scale", 1);
+
+    // freefempp
+    int nv, nt, nbe;
+    int dimension;
+    Vertex3   *v;
+   
+
+    // reading first the filex
+    ifstream infile(filename.c_str());
+    if (!infile.good())
+      cerr << "probleme in reading file" << filename << endl;
+     
+    bool endmesh = false;
+    
+
+    while (infile.good() && !endmesh)
+      {
+	infile >> str;
+	
+	if (strcmp (str, "dimension") == 0)
+	  {
+	    infile >> dimension;
+	    if(dimension != 3) 
+	      cerr << "dimension will be 3 for reading a netgen file"<< endl;
+	  }
+	
+	if (strcmp (str, "surfaceelements") == 0)
+	  {
+	    infile >> n;
+	    cout << "surface element" << n << endl;
+	    nbe = n;
+	  }
+      
+	if (strcmp (str, "surfaceelementsgi") == 0)
+	  {
+	    infile >> n;
+	    cout << "surface element" << n << endl;
+	    nbe = n;
+	  }
+
+	if (strcmp (str, "volumeelements") == 0)
+	  {
+	    infile >> n;
+	    cout << "volume element" << n << endl;
+	    nt = n;
+	  }
+    
+	if (strcmp (str, "edgesegments") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	  }
+     
+	if (strcmp (str, "edgesegmentsgi") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	  }
+	
+	if (strcmp (str, "edgesegmentsgi2") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	  }
+      
+	if (strcmp (str, "points") == 0)
+	  {
+	    infile >> n;
+	    cout << " vertex " << n << endl;
+	    nv=n;
+	    // read vertex coordinate 
+	    v = new Vertex3[nv];
+	    for (i = 0; i < n; i++)
+	      {
+		infile >>  v[i].x  >>  v[i].y  >> v[i].z; 
+		v[i].lab = 1;
+	      }
+	  }
+ 
+
+	if (strcmp (str, "identifications") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	  }
+       
+	if (strcmp (str, "identificationtypes") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;	   
+	  }
+
+	if (strcmp (str, "materials") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	  }
+
+	if ( strcmp (str, "bcnames" ) == 0 )
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	  }
+	
+	
+	if (strcmp (str, "singular_points") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	  }
+
+	if (strcmp (str, "singular_edge_left") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	  }
+
+	if (strcmp (str, "singular_edge_right") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	  }
+
+	if (strcmp (str, "singular_face_inside") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	  }
+
+	if (strcmp (str, "singular_face_outside") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	  }
+	
+	if (strcmp (str, "endmesh") == 0)
+	  endmesh = true;
+	  
+	strcpy (str, "");
+      }
+    infile.close();
+
+
+    // Allocate Array
+    Tet *t;
+    if(nt !=0){
+      t  = new Tet[nt];
+    }
+    Tet *tt=t;
+   
+    Triangle3 *b = new Triangle3[nbe];
+    Triangle3 *bb = b;
+
+
+    // second lecture
+    ifstream infile2(filename.c_str());
+    if (!infile2.good())
+      cerr << "probleme in reading file" << filename << endl;
+     
+    bool endmesh2 = false;
+
+    while (infile2.good() && !endmesh2)
+	{
+	  infile2 >> str;
+	  
+	  if (strcmp (str, "dimension") == 0)
+	    {
+	      infile2 >> dimension;
+	    }
+	  
+	  if (strcmp (str, "surfaceelements") == 0)
+	    {
+	      infile2 >> n;
+	      cout << "surface elements " << n << endl;
+	    
+	      int flagsnewlabelsurf=1;
+	      if( flagsnewlabelsurf == 0 )
+		for (i = 1; i <= n; i++)
+		  {
+		    int j;
+		    int surfnr, bcp, domin, domout, nep, faceind = 0;
+		    
+		    infile2 >> surfnr >> bcp >> domin >> domout;
+		    /* 
+		    // details des entrees
+		    surfnr: label de la surface
+		    bcp   : condition de bord
+		    domin : label du domaine interieure
+		    domout: label du domaine exterieure
+		    */
+		    		    
+		    infile2 >> nep;
+		    if (nep!=3) 
+		      cerr << "only triangle elements are considered in Freefem++" <<endl;
+		    nep = 3;
+		    
+		    int label=faceind;
+		    int iv[3];
+		    for (j = 0; j < nep; j++)
+		      infile2 >> iv[j]; //tri.PNum(j);
+		   
+		    
+		    for (j = 0; j < nep; j++)
+		      iv[j]--;
+		    
+		    (bb++)->set(v,iv,label); // add boundary
+		    
+		  }
+
+	      if(flagsnewlabelsurf==1){
+		int maxlabelsurf=10000;
+		int *ngf = new int[maxlabelsurf*4];
+
+		int nbfacesnetg=0;
+		for (i = 1; i <= n; i++)
+		  {
+		    int j;
+		    int surfnr, bcp, domin, domout, nep, faceind = 0;
+		    
+		    infile2 >> surfnr >> bcp >> domin >> domout;
+		    /* 
+		    // details des entrees
+		    surfnr: label de la surface
+		    bcp   : condition de bord
+		    domin : label du domaine interieure
+		    domout: label du domaine exterieure
+		    */
+		  
+		    int label;
+  
+		    label = -1;
+		    for (j = 0; j < nbfacesnetg; j++)
+		      if (  ngf[4*j] == surfnr &&
+			    ngf[4*j+1] == bcp &&
+			    ngf[4*j+2] == domin &&
+			    ngf[4*j+3] == domout)
+			label = j+1;
+		      
+		    if (label == -1)
+		      {
+			ngf[4*nbfacesnetg] = surfnr;
+			ngf[4*nbfacesnetg+1] = bcp; 
+			ngf[4*nbfacesnetg+2] = domin; 
+			ngf[4*nbfacesnetg+3] = domout;
+			label = nbfacesnetg+1;
+			nbfacesnetg++;
+			if(nbfacesnetg == 10000) {
+			  cerr << "number of different surfaces is larger than 10000"<< endl;
+			  exit(1);
+			}
+		      }
+		    
+		    
+		    infile2 >> nep;
+		    if (nep!=3) 
+		      cerr << "only triangle elements are considered in Freefem++" <<endl;
+		    nep = 3;
+		    
+		   
+		    int iv[3];
+		    for (j = 0; j < nep; j++)
+		      infile2 >> iv[j]; //tri.PNum(j);
+		    
+		    
+		    for (j = 0; j < nep; j++)
+		      iv[j]--;
+		    
+		    (bb++)->set(v,iv,label); // add boundary
+		    
+		  }
+
+		delete [ ] ngf;
+	      }
+	      if(flagsnewlabelsurf==2){
+		Netgen_Face *debutpngdf;
+		Netgen_Face *iteratorpngdf;
+
+		int nbfacesnetg=0;
+		for (i = 1; i <= n; i++)
+		  {
+		    int j;
+		    int surfnr, bcp, domin, domout, nep, faceind = 0;
+		    
+		    infile2 >> surfnr >> bcp >> domin >> domout;
+		    /* 
+		    // details des entrees
+		    surfnr: label de la surface
+		    bcp   : condition de bord
+		    domin : label du domaine interieure
+		    domout: label du domaine exterieure
+		    */
+		  
+		    int label;
+  
+		    label = -1;
+		    iteratorpngdf = debutpngdf;
+		    for (j = 0; j < nbfacesnetg; j++){
+		      if(iteratorpngdf->Test_Face( surfnr, domin, domout, bcp )==1)
+			label = j+1;
+		      iteratorpngdf = iteratorpngdf->Next_Face(); 
+		    }
+		    
+		    if (label == -1)
+		      {
+			if(nbfacesnetg == 0) 
+			  //debutpngdf->Initialisation_Face( surfnr, domin, domout, bcp );
+			  debutpngdf= new Netgen_Face( surfnr, domin, domout, bcp );
+			else{
+			  //iteratorpngdf = debutpngdf;
+			  Netgen_Face * bb=debutpngdf;
+			  for (j = 0; j < nbfacesnetg; j++){
+			    iteratorpngdf = bb;
+			    bb = iteratorpngdf->Next_Face();
+			  }  
+			  bb = new Netgen_Face( surfnr, domin, domout, bcp );
+			  iteratorpngdf->Initialisation_Next_Face(bb);
+			}
+			label= nbfacesnetg+1;
+			nbfacesnetg++; 
+		      }
+		    
+		    infile2 >> nep;
+		    if (nep!=3) 
+		      cerr << "only triangle elements are considered in Freefem++" <<endl;
+		    nep = 3;
+		    
+		   
+		    int iv[3];
+		    for (j = 0; j < nep; j++)
+		      infile2 >> iv[j]; //tri.PNum(j);
+		    
+		    
+		    for (j = 0; j < nep; j++)
+		      iv[j]--;
+		    
+		    (bb++)->set(v,iv,label); // add boundary
+		    
+		  }
+	      }
+	    }
+      
+	if (strcmp (str, "surfaceelementsgi") == 0)
+	  {
+	    infile2 >> n;
+	    cout << "surface element sgi" << n << endl;
+	    
+	    if(flagsnewlabelsurf==0){
+	      for (i = 1; i <= n; i++)
+		{
+		  int j;
+		  int surfnr, bcp, domin, domout, nep, faceind = 0;
+		  infile2 >> surfnr >> bcp >> domin >> domout;
+		
+		
+		  infile2 >> nep;
+		  if (nep!=3) 
+		    cerr << "only triangle elements are considered in Freefem++" <<endl;
+		  nep = 3;
+		  
+		  int label=surfnr;
+		  int iv[3],infoP[3];
+		  
+		  for (j = 0; j < nep; j++)
+		    infile2 >> iv[j]; //tri.PNum(j);
+		 
+		  for (j = 0; j < nep; j++)
+		    infile2 >> infoP[j]; //tri.PNum(j); // No Need By Freefem++
+		  
+		  for (j = 0; j < nep; j++)
+		    iv[j]--;
+		  
+		  (bb++)->set(v,iv,label); // add boundary
+		  
+		}
+	    }
+	    if(flagsnewlabelsurf==1){
+		int maxlabelsurf=10000;
+		int *ngf = new int[maxlabelsurf*4];
+
+		int nbfacesnetg=0;
+		for (i = 1; i <= n; i++)
+		  {
+		    int j;
+		    int surfnr, bcp, domin, domout, nep, faceind = 0;
+		    infile2 >> surfnr >> bcp >> domin >> domout;
+		    
+		    int label;
+		  
+		    label = -1;
+		    for (j = 0; j < nbfacesnetg; j++)
+		      if (  ngf[4*j] == surfnr &&
+			    ngf[4*j+1] == bcp &&
+			    ngf[4*j+2] == domin &&
+			    ngf[4*j+3] == domout)
+			label = j+1;
+		      
+		    if (label == -1)
+		      {
+			ngf[4*nbfacesnetg] = surfnr;
+			ngf[4*nbfacesnetg+1] = bcp;
+			ngf[4*nbfacesnetg+2] = domin; 
+			ngf[4*nbfacesnetg+3] = domout;
+			label = nbfacesnetg+1;
+			nbfacesnetg++;
+			if(nbfacesnetg == 10000) {
+			  cerr << "numb"<< endl;
+			  exit(1);
+			}
+		      }
+		    //cout << " i = " << i << " anc "<<  surfnr << " " << bcp << " " << domin << " " << domout<< " <-> "  << label << endl;
+
+		    infile2 >> nep;
+		    if (nep!=3) 
+		      cerr << "only triangle elements are considered in Freefem++" <<endl;
+		    nep = 3;
+		    
+		    int iv[3],infoP[3];
+		    
+		    for (j = 0; j < nep; j++)
+		      infile2 >> iv[j]; //tri.PNum(j);
+		   
+		    for (j = 0; j < nep; j++)
+		      infile2 >> infoP[j]; //tri.PNum(j); // No Need By Freefem++
+		   
+		    for (j = 0; j < nep; j++)
+		      iv[j]--;
+		  
+		    (bb++)->set(v,iv,label); // add boundary
+		    
+		  }
+		delete [ ] ngf;
+	      }
+	      if(flagsnewlabelsurf==2){
+		
+
+		Netgen_Face *debutpngdf;
+		Netgen_Face *iteratorpngdf;
+	
+		int nbfacesnetg=0;
+		for (i = 1; i <= n; i++)
+		  {
+		    int j;
+		    int surfnr, bcp, domin, domout, nep, faceind = 0;
+		    infile2 >> surfnr >> bcp >> domin >> domout;
+		    
+		    int label;
+		  
+		    label = -1;
+		    iteratorpngdf = debutpngdf;
+		    for (j = 0; j < nbfacesnetg; j++){
+		      if(iteratorpngdf->Test_Face( surfnr, domin, domout, bcp )==1)
+			label = j+1;
+		      iteratorpngdf = iteratorpngdf->Next_Face(); 
+		    }
+		    
+		    if (label == -1)
+		      {
+			if(nbfacesnetg == 0) 
+			  //debutpngdf->Initialisation_Face( surfnr, domin, domout, bcp );
+			  debutpngdf= new Netgen_Face( surfnr, domin, domout, bcp );
+			  else{
+			    //iteratorpngdf = debutpngdf;
+			    Netgen_Face * bb=debutpngdf;
+			    for (j = 0; j < nbfacesnetg; j++){
+			      iteratorpngdf = bb;
+			      bb = iteratorpngdf->Next_Face();
+			    }  
+			     bb = new Netgen_Face( surfnr, domin, domout, bcp );
+			     iteratorpngdf->Initialisation_Next_Face(bb);
+			  }
+			label= nbfacesnetg+1;
+			nbfacesnetg++; 
+		      }
+		    //cout << " i = " << i << " anc "<<  surfnr << " " << bcp << " " << domin << " " << domout<< " <-> "  << label << endl;
+
+		    infile2 >> nep;
+		    if (nep!=3) 
+		      cerr << "only triangle elements are considered in Freefem++" <<endl;
+		    nep = 3;
+		    
+		    int iv[3],infoP[3];
+		    
+		    for (j = 0; j < nep; j++)
+		      infile2 >> iv[j]; //tri.PNum(j);
+		   
+		    for (j = 0; j < nep; j++)
+		      infile2 >> infoP[j]; //tri.PNum(j); // No Need By Freefem++
+		   
+		    for (j = 0; j < nep; j++)
+		      iv[j]--;
+		  
+		    (bb++)->set(v,iv,label); // add boundary
+		    
+		  }
+		
+	      }
+	  }  
+
+	if (strcmp (str, "volumeelements") == 0)
+	  {
+	    infile2 >> n;
+	    //PrintMessage (3, n, " volume elements");
+	    nt=n;
+	    if( nt !=0 ){
+	      for (i = 0; i < n; i++)
+		{
+		  //Element el;
+		  int label, nep;
+		  int iv[4];
+		  
+		  infile2 >> label;
+		  infile2 >> nep;
+		  if(nep != 4)
+		    cerr << "freefem++ doesn't support second order element" << endl; 
+		  
+		  for (int j = 0; j < nep; j++)
+		    infile2 >> iv[j];
+		  
+		  for (int j = 0; j < nep; j++)
+		    iv[j]--;
+
+		  (tt++)->set(v,iv,label); // add element
+		}
+	    }
+	  }
+
+	if (strcmp (str, "edgesegments") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	    /*
+	      infile2 >> n;
+	      for (i = 1; i <= n; i++)
+	      {
+	      Segment seg;
+	      int hi;
+	      infile2 >> seg.si >> hi >> seg.p1 >> seg.p2;
+	      AddSegment (seg);
+	      }
+	    */
+	  }
+      
+
+
+	if (strcmp (str, "edgesegmentsgi") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	    /*
+	      infile2 >> n;
+	      for (i = 1; i <= n; i++)
+	      {
+	      Segment seg;
+	      int hi;
+	      infile2 >> seg.si >> hi >> seg.p1 >> seg.p2
+	      >> seg.geominfo[0].trignum
+	      >> seg.geominfo[1].trignum;
+	      AddSegment (seg);
+	      }
+	    */
+	  }
+	
+	if (strcmp (str, "edgesegmentsgi2") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	    /*
+	      int a; 
+	      infile2 >> a;
+	      n=a; 
+	      
+	      PrintMessage (3, n, " curve elements");
+	      
+	      for (i = 1; i <= n; i++)
+	      {
+	      Segment seg;
+	      int hi;
+	      infile2 >> seg.si >> hi >> seg.p1 >> seg.p2
+	      >> seg.geominfo[0].trignum
+	      >> seg.geominfo[1].trignum
+	      >> seg.surfnr1 >> seg.surfnr2
+	      >> seg.edgenr
+	      >> seg.epgeominfo[0].dist
+	      >> seg.epgeominfo[1].edgenr
+	      >> seg.epgeominfo[1].dist;
+	      
+	      seg.epgeominfo[0].edgenr = seg.epgeominfo[1].edgenr;
+	      
+	      seg.domin = seg.surfnr1;
+	      seg.domout = seg.surfnr2;
+	      
+	      seg.surfnr1--;
+	      seg.surfnr2--;
+	      
+	      AddSegment (seg);
+	      }
+	    */
+	  }
+      
+	if (strcmp (str, "points") == 0)
+	  {
+	     cout << "this parameter was taken in consideration before" << endl;
+	    /*
+	    infile2 >> n;
+	    PrintMessage (3, n, " points");
+	    for (i = 1; i <= n; i++)
+	      {
+		Point3d p;
+		infile2 >> p.X() >> p.Y() >> p.Z();
+		p.X() *= scale;
+		p.Y() *= scale;
+		p.Z() *= scale;
+		AddPoint (p);
+	      }
+	    */
+	  }
+
+	if (strcmp (str, "identifications") == 0)
+	  {
+	     cout << "this parameter is not taken in consideration in freefem++" << endl;
+	    /*
+	      infile2 >> n;
+	      for (i = 1; i <= n; i++)
+	      {
+	      PointIndex pi1, pi2;
+	      int ind;
+	      infile2 >> pi1 >> pi2 >> ind;
+	      ident -> Add (pi1, pi2, ind);
+	      }
+	    */
+	  }
+       
+	if (strcmp (str, "identificationtypes") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	    /*
+	      infile2 >> n;
+	      for (i = 1; i <= n; i++)
+	      {
+	      int type;
+	      infile2 >> type;
+	      ident -> SetType(i,Identifications::ID_TYPE(type));
+	      }
+	    */
+	  }
+
+	if (strcmp (str, "materials") == 0)
+	  {
+	     cout << "this parameter is not taken in consideration in freefem++" << endl;
+	    /*
+	      infile2 >> n;
+	      for (i = 1; i <= n; i++)
+	      {
+	      int nr;
+	      string mat;
+	      infile2 >> nr >> mat;
+	      SetMaterial (nr, mat.c_str());
+	      }
+	    */
+	  }
+
+	if ( strcmp (str, "bcnames" ) == 0 )
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	    /*
+	    infile2 >> n;
+	    ARRAY<int,0> bcnrs(n);
+
+	    SetNBCNames(n);
+	    for ( i = 1; i <= n; i++ )
+	      {
+		string nextbcname;
+		infile2 >> bcnrs[i-1] >> nextbcname;
+		bcnames[bcnrs[i-1]-1] = new string(nextbcname);
+	      }
+
+
+
+	    
+	    if ( GetDimension() == 2 )
+	      {
+		for (i = 1; i <= GetNSeg(); i++)
+		  {
+		    Segment & seg = LineSegment (i);
+		    if ( seg.si <= n )
+		      seg.SetBCName (bcnames[seg.si-1]);
+		    else
+		      seg.SetBCName(0);
+		  }
+	      }
+	    else
+	      {
+		for (SurfaceElementIndex sei = 0; sei < GetNSE(); sei++)
+		  {
+		    if ((*this)[sei].GetIndex())
+		      {
+			int bcp = GetFaceDescriptor((*this)[sei].GetIndex ()).BCProperty();
+			if ( bcp <= n )
+			  GetFaceDescriptor((*this)[sei].GetIndex ()).SetBCName(bcnames[bcp-1]);
+			else
+			  GetFaceDescriptor((*this)[sei].GetIndex ()).SetBCName(0);
+
+		      }
+		  }
+
+	      }
+	    
+	    */
+	  }
+	
+	
+	if (strcmp (str, "singular_points") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	    /*
+	    infile2 >> n;
+	    for (i = 1; i <= n; i++)
+	      {
+		PointIndex pi;
+		double s; 
+		infile2 >> pi;
+		infile2 >> s; 
+		(*this)[pi].Singularity (s);
+	      }
+	    */
+	  }
+
+	if (strcmp (str, "singular_edge_left") == 0)
+	  {
+	     cout << "this parameter is not taken in consideration in freefem++" << endl;
+	     /*
+	    infile2 >> n;
+	    for (i = 1; i <= n; i++)
+	      {
+		SegmentIndex si;
+		double s; 
+		infile2 >> si;
+		infile2 >> s; 
+		(*this)[si].singedge_left = s;
+	      }
+	    */
+	  }
+	if (strcmp (str, "singular_edge_right") == 0)
+	  {
+	     cout << "this parameter is not taken in consideration in freefem++" << endl;
+	    /*
+	    infile2 >> n;
+	    for (i = 1; i <= n; i++)
+	      {
+		SegmentIndex si;
+		double s; 
+		infile2 >> si;
+		infile2 >> s; 
+		(*this)[si].singedge_right = s;
+	      }
+	    */
+	  }
+
+	if (strcmp (str, "singular_face_inside") == 0)
+	  {
+	     cout << "this parameter is not taken in consideration in freefem++" << endl;
+	    /*
+	    infile2 >> n;
+	    for (i = 1; i <= n; i++)
+	      {
+		SurfaceElementIndex sei;
+		double s; 
+		infile2 >> sei;
+		infile2 >> s; 
+		GetFaceDescriptor((*this)[sei].GetIndex()).domin_singular = s;
+	      }
+	    */
+	  }
+
+	if (strcmp (str, "singular_face_outside") == 0)
+	  {
+	    cout << "this parameter is not taken in consideration in freefem++" << endl;
+	    /*
+	    infile2 >> n;
+	    for (i = 1; i <= n; i++)
+	      {
+		SurfaceElementIndex sei;
+		double s; 
+		infile2 >> sei;
+		infile2 >> s; 
+		GetFaceDescriptor((*this)[sei].GetIndex()).domout_singular = s;
+	      }
+	    */
+	  }
+	
+	if (strcmp (str, "endmesh2") == 0)
+	  endmesh2 = true;
+	  
+
+
+	strcpy (str, "");
+	  }
+    infile2.close();
+
+    if(nt==0){
+      Mesh3 *Th3 = new Mesh3(nv,nbe,v,b);
+      return Th3;
+    }
+    else{
+      Mesh3 *Th3 = new Mesh3(nv,nt,nbe,v,t,b);
+      return Th3;  
+    }
+    
+  }
+
+
+
+AnyType Netgen_LoadMesh_Op::operator()(Stack stack)  const 
+{
+ 
+  string * pffname= GetAny<string *>((*filename)(stack));
+  int renumsurf = 0; 
+  if( nargs[1] )  renumsurf = GetAny< int >( (*nargs[1])(stack) );
+  assert( renumsurf <=1 && renumsurf >= 0);
+
+  Mesh3 * Th3_t = NETGEN_Load( *pffname, renumsurf ); 
+
+  if(Th3_t->nt == 0)
+    Th3_t->BuildSurfaceAdj();
+  else{
+    Th3_t->BuildBound();
+    Th3_t->BuildAdj();
+    Th3_t->Buildbnormalv();  
+    Th3_t->BuildjElementConteningVertex();
+    Th3_t->BuildGTree();
+  }
+    //Th3->decrement();    
+  Add2StackOfPtr2FreeRC(stack,Th3_t);
+		
+  return Th3_t;
+}
+
+
+
 class Init1 { public:
   Init1();
 };
@@ -517,5 +1425,7 @@ Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freef
   if(verbosity) cout << " load: netgen  " << endl;
   Global.Add("netg","(",new RemplissageNetgen);
   Global.Add("netgstl","(",new Netgen_STL);
-  
+  if(verbosity) cout << " load: netgloadmesh  " << endl;
+  Global.Add("netgload","(",new Netgen_LoadMesh);
+  if(verbosity) cout << " load: netgload  " << endl;
 }

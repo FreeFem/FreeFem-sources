@@ -40,7 +40,7 @@ func f3min = Rmin*f3;
 
 cout << "=====================" << endl;
 cout << "=====================" << endl;
-mesh3 Th3sph=movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min],normal=1);
+mesh3 Th3sph=movemesh23(Th,transfo=[f1min,f2min,f3min],orientation=-1);
 cout << "=====================" << endl;
 cout << "=====================" << endl;
 savemesh(Th3sph,"sphereR1.mesh");
@@ -50,7 +50,7 @@ func f2max = Rmax*f2;
 func f3max = Rmax*f3;
 cout << "=====================" << endl;
 cout << "=====================" << endl;
-mesh3 Th3sph2=movemesh2D3Dsurf(Th,transfo=[f1max,f2max,f3max],normal=-1);
+mesh3 Th3sph2=movemesh23(Th,transfo=[f1max,f2max,f3max],orientation=1);
 cout << "=====================" << endl;
 cout << "=====================" << endl;
 savemesh(Th3sph2,"sphereR2.mesh");
@@ -69,6 +69,7 @@ cout << "finish: tetgen call without hole" << endl;
 cout << "=============================" << endl;
 savemesh(Th3fin,"spherewithtworegion.mesh"); 
 
+
 real[int] hole = [0.,0.,0.];
 real[int] domain = [1.5,0.,0.,53,0.001];
 cout << "=============================" << endl;
@@ -79,6 +80,7 @@ cout << "=============================" << endl;
 cout << "finish: tetgen call with hole   " << endl;
 cout << "=============================" << endl;
 savemesh(Th3finhole,"spherewithahole.mesh"); 
+
 
 
 

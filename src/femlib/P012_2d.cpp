@@ -186,7 +186,7 @@ void TypeOfFE_P2Lagrange2d::FB(const What_d whatd,const Mesh & ,const Element & 
   {
       R2 Dl[3];
       R l4[3]={ (4*l[0]-1),(4*l[1]-1),(4*l[2]-1)}; 
-      
+    
       K.Gradlambda(Dl);
       RN_ f0x(val('.',0,op_dx));
       RN_ f0y(val('.',0,op_dy)); 

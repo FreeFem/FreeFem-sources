@@ -675,14 +675,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	    cout<< " l["<< i <<"]=" <<  l[i] ;
 	  cout << " n=" << n << endl;
 	}
-	if(verbosity>200){
-	  cout << "tet it=" << it << endl;
-	  cout << "K.mesure=" << K.mesure() ;
-	  cout << " eps=" << eps << endl;
-	  for(int i=0;i<nkv;++i)
-	    cout<< " l["<< i <<"]=" <<  l[i] << endl;
-	  cout << " n=" << n << endl;
-	}
+
       if (n==0)
 	{  // interior => return
 	  outside=false; 
@@ -729,14 +722,16 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	    cout << " s=" << ss << endl;;
 	    
 	}
-	if(verbosity>200)
-      cout << "GQuadTree::value of n " << n << endl;
+
+      if(verbosity>200)
+	cout << "GQuadTree::value of n " << n << endl;
 
       if ( n!=1 )  // on est sur le bord, mais plusieurs face <0 => on test les autre
 	{  // 1) existe t'il un adj interne
 	  int nn=0,ii;
 	  int nadj[d+1],ni[d+1];
 	  for(int i=0;i<nkv;++i)
+	    //avant :: if (l[i] < eps && (itt=Th.ElementAdj(it,ii=i)) != it && itt && find5(itt,kbord,nbord) < -1 ) 
 	    if (l[i] < eps && (itt=Th.ElementAdj(it,ii=i)) != it && (itt>=0) && find5(itt,kbord,nbord) < 0 ) 
 	      ni[nn++]=i,nadj[i]=itt;
 	  if(verbosity>100)
@@ -747,7 +742,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	      j=ni[nRand(nn)];
 	      it=nadj[j];
 	      dP=DBL_MAX;
-	      cout << "new it= " << it << endl;
+	      //cout << "new it= " << it << endl;
 	      continue;
 	    }
 	}

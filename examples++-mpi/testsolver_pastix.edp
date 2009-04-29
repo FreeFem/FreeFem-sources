@@ -1,13 +1,12 @@
-//load "dSuperLU_DIST"
 load "interfacepastix"
 verbosity=2;
 
 // reading parameter of pastix from datafile
 {
 matrix A = 
-      [[ 1e16,  2,     2,  1, 1],
+      [[ 1e20,  2,     2,  1, 1],
        [ 2,    12,     0,  10 , 10],
-       [ 2,     0,  1e16,  0, 2], 
+       [ 2,     0,  1e20,  0, 2], 
        [ 1,     10,    0,  22, 0.],
        [ 1,     10,    2,  0., 22]];
 
@@ -70,7 +69,7 @@ matrix A =
     cout << "solving solution" << endl;
     x = A^-1*b;		
     cout << "b=" << b << endl;
-    cout << "x=" << endl; cout << x << endl;
+    cout << "x=" << endl; cout << x << endl;7
     di = xx-x;
     if(mpirank==0){	
     cout << "x-xx="<< endl; cout << "Linf "<< di.linfty << " L2 " << di.l2 << endl;

@@ -122,7 +122,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  int  arg(int i,Stack stack, int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
 public:
   Build2D3D_Op(const basicAC_F0 &  args,Expression tth) 
@@ -208,7 +208,7 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   KN<double> tabfacecl (arg(11,stack,zdzempty));
   
   // mesuremesh parameters
-  int mesureM(arg(13,stack,1));
+  int mesureM(arg(12,stack,1));
   int surface_orientation=1; 
   if( mesureM <0 ){
     surface_orientation=-1;
@@ -222,12 +222,14 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   //====================================
   //  How to change string* into char* 
   //====================================
+  cout << "string" << switch_tet << endl; 
+
   size_t size_switch_tet = switch_tet->size()+1;
   char* switch_tetgen =new char[size_switch_tet];
   strncpy(switch_tetgen, switch_tet->c_str(), size_switch_tet); 
 
   cout << "switch_tetgen=" << switch_tetgen << endl;
-
+  //exit(1);
   ffassert( nrf.N() %2 ==0);
   
   map<int,int> mapf;
@@ -302,7 +304,7 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   Th3_tmp->flipSurfaceMesh3(surface_orientation);
  
   cout << "check :: orientation des surfaces" << endl;
-  Th3_tmp->BuildSurfaceAdj();
+  Th3_tmp->BuildBoundaryElementAdj();
   cout << "fin check :: orientation des surfaces" << endl;
 
   /* set label of surface Th3_tmp */
@@ -1593,10 +1595,13 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   //====================================
   //  How to change string* into char* 
   //====================================
+  cout << "string" << *switch_tet << endl; 
   size_t size_switch_tet = switch_tet->size()+1;
   char* switch_tetgen =new char[size_switch_tet];
   strncpy(switch_tetgen, switch_tet->c_str(), size_switch_tet); 
    
+  cout << "char" << switch_tetgen << endl; 
+  
   ffassert( nrf.N() %2 ==0);
 
   map<int,int> mapf;
@@ -1611,7 +1616,7 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   cout << "tetgen:" << "nbhole="   << nbhole << "nbregion=" << nbregion << endl;
 
   cout << "check :: orientation des surfaces" << endl;
-  Th.BuildSurfaceAdj();
+  Th.BuildBoundaryElementAdj();
   cout << "fin check :: orientation des surfaces" << endl;
  
   Mesh3 *Th3 = RemplissageSurf3D_tetgen_new( switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl);
