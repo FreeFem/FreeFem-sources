@@ -32,7 +32,8 @@ EXTRA_DIST=load.link.in  include.tar.gz \
   msh3.cpp msh3.hpp\
   ffrandom.cpp ffrandom.edp  \
   medit.cpp  \
-  bmo.cpp lgbmo.cpp bmo.hpp
+  bmo.cpp lgbmo.cpp bmo.hpp \
+ fflapack.cpp	lapack.cpp	lapack.edp
 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
