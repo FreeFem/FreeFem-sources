@@ -871,15 +871,17 @@ void NbSom3D_NbElem3D_NbBord2D_mesh_product_mesh_tab(const int Nmax, const int *
  
   for(int ii=0; ii < Th2.neb;ii++)
     {
-	    const Mesh::BorderElement  & K(Th2.be(ii));
-	    for(int jj=0; jj < 2; jj++)
-		{  
-			// i  = A2D.ElemBord1D[ii][jj];
-			i=Th2(K[jj]); 
-			MajBord2D = MajBord2D + tab_Ni[i];
-			assert( tab_Ni[i] <= Nmax);	
-		}
+      const Mesh::BorderElement  & K(Th2.be(ii));
+      for(int jj=0; jj < 2; jj++)
+	{  
+	  // i  = A2D.ElemBord1D[ii][jj];
+	  i=Th2.operator()(K[jj]); 
+	  
+	  MajBord2D = MajBord2D + tab_Ni[i];
+	  assert( tab_Ni[i] <= Nmax);	
+	}
     }
+  //exit(1);
 }
 
 void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax, 
@@ -1029,17 +1031,17 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
   //cout << "bord en zmin" << endl;
  
   for(int ii=0; ii < Th2.nt; ii++){
-    int ijj[3],bjj[3];
+    int ijj[3];//bjj[3];
     const Mesh::Element & K(Th2.t(ii));
     int lab; 
     map<int,int>::const_iterator imap=maptrizmin.find(K.lab);
-	assert( imap!=maptrizmin.end() );
-	lab = imap->second; 
+    assert( imap!=maptrizmin.end() );
+    lab = imap->second; 
     
   
     for(int kk=0; kk < 3; kk++){
       ijj[2-kk] = Th2.operator()(K[kk]);
-      bjj[2-kk] = ijj[2-kk] ;
+      //bjj[2-kk] = ijj[2-kk] ;
       ijj[2-kk] = tab_NumSommet[ijj[2-kk]];
     }
 
@@ -1059,11 +1061,34 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
     map<int,int>::const_iterator imap=maptrimil.find(K.lab);
     assert( imap!=maptrimil.end() );
     lab=imap->second;
-    
-    i_ind1  = Th2.operator()(K[0]);
-    i_ind2  = Th2.operator()(K[1]);
 
-    Ni_ind1 =  tab_Ni[i_ind1];  
+    int edgebid ;
+    int ffbid   = Th2.BoundaryElement( ii, edgebid );     // ii : number of edge => sortie :: ffbid = numero triangles, edgebid = numero edges
+    int j0bid,j1bid;
+    Th2.VerticesNumberOfEdge( Th2.t(ffbid), edgebid, j0bid, j1bid);
+
+    //bool ffsens = Th2.SensOfEdge( Th2.t(ffbid), edgebid ); // sens du parcours de la edge correcte ou non
+
+    /*
+      if( ffsens == true){
+      i_ind1  = Th2.operator()(K[0]);
+      i_ind2  = Th2.operator()(K[1]);
+      }
+      else{
+      i_ind1  = Th2.operator()(K[1]);
+      i_ind2  = Th2.operator()(K[0]);
+      }
+      
+
+      printf("value of vertex edge (verticesNumberOfEdge) :: %d--%d \n", j0bid, j1bid );
+      printf("value of vertex edge ( Th2.operator() ) :: %d--%d \n",  Th2.operator()(K[0]), Th2.operator()(K[1]) );
+      printf("value of vertex edge ( bool sens  ) :: %d--%d \n",  i_ind1, i_ind2 );
+    */
+    i_ind1 = j0bid;
+    i_ind2 = j1bid;
+
+
+    Ni_ind1 =  tab_Ni[i_ind1]; 
     Ni_ind2 =  tab_Ni[i_ind2]; 
 	  
     assert( Ni_ind1 <= Nmax);
@@ -1085,7 +1110,21 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
       i_recoll_1pp = int(jNmax*Ni_ind1/Nmax);
       i_recoll_2pp = int(jNmax*Ni_ind2/Nmax);
       
+//       if( (i_ind1== 11 ||  i_ind1== 0) && (i_ind2==11 || i_ind2==0) ) {
+// 	printf("i_recoll1   %d,    i_recoll2 %d\n", i_recoll_1, i_recoll_2);
+// 	printf("i_recoll1pp %d,  i_recoll2pp %d\n", i_recoll_1pp, i_recoll_2pp);
+//       }
       /*
+
+	1     ===   2 
+	
+	|           |
+	|           |
+	
+	1pp   ===   2pp   
+	
+	sens 2D : 1pp => 2pp et 1 => 2
+
 	type_dec_border = 0  tous les points sont confondus
 	type_dec_border = 1  les points 1pp et 1 sont differents
 	type_dec_border = 2  les points 2pp et 2 sont differents
@@ -1107,13 +1146,15 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	type_dec_border = type_dec_border + 2;
       }
 
-      //cout << "type decoupage bord= " <<  type_dec_border <<endl;
+//   if( (i_ind1== 11 ||  i_ind1== 0) && (i_ind2==11 || i_ind2==0) ) 
+// 	cout << "type decoupage bord= " <<  type_dec_border <<endl;
            
       switch( type_dec_border ){
       case 0:
 	// rien n a faire
 	break;
       case 1:
+	// 2pp = 2
 	// avant 2,1,0 --> 0,1,2
 	ijj[0] = tab_NumSommet[i_ind1]+i_recoll_1pp;   
 	ijj[1] = tab_NumSommet[i_ind2]+i_recoll_2pp;
@@ -1124,6 +1165,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	ElemBord = ElemBord+1;
 	break;
       case 2:
+	// 1pp = 1
 	// avant 2,1,0 --> 0,1,2
 	ijj[0] = tab_NumSommet[i_ind1]+i_recoll_1pp;
 	ijj[1] = tab_NumSommet[i_ind2]+i_recoll_2pp;
@@ -1149,12 +1191,13 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	  ijj[2] = tab_NumSommet[i_ind2]+i_recoll_2; 
 	
 	  Th3.be(ElemBord).set(Th3.vertices,ijj,lab);
-	  
+
 	  ijj[0] = tab_NumSommet[i_ind2]+i_recoll_2;
 	  ijj[1] = tab_NumSommet[i_ind1]+i_recoll_1;
 	  ijj[2] = tab_NumSommet[i_ind1]+i_recoll_1pp; 
 	
 	  Th3.be(ElemBord+1).set(Th3.vertices,ijj,lab);
+
 	}
 	else{
 	  idl = 2;
@@ -1168,7 +1211,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	  ijj[0] = tab_NumSommet[i_ind2]+i_recoll_2;
 	  ijj[1] = tab_NumSommet[i_ind1]+i_recoll_1;
 	  ijj[2] = tab_NumSommet[i_ind2]+i_recoll_2pp; 
-	  
+
 	  Th3.be(ElemBord+1).set(Th3.vertices,ijj,lab);
 	}
 	//cout << "idl=" << idl << endl; 
@@ -1248,7 +1291,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	  i_recoll_jMax   = int( (jNmax)*Ni_elem[jj]/Nmax );
 	  i_recoll_jMaxpp = int( (jNmax+1)*Ni_elem[jj]/Nmax );
 	  
-	  SommetPrisme[jj+3]   = tab_NumSommet[ K_jj[jj] ] + i_recoll_jMaxpp;
+	  SommetPrisme[jj+3] = tab_NumSommet[ K_jj[jj] ] + i_recoll_jMaxpp;
 	  SommetPrisme[jj] = tab_NumSommet[ K_jj[jj] ] + i_recoll_jMax;
 	  
 	  assert( SommetPrisme[jj]   <= Th3.nv);
@@ -1449,7 +1492,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	int idl[3];
 	int nu[12];
 	
-    DiagMax1 = max( SommetPrisme[0], SommetPrisme[5] );
+	DiagMax1 = max( SommetPrisme[0], SommetPrisme[5] );
 	DiagMax2 = max( SommetPrisme[2], SommetPrisme[3] );	
 	
 	// determination de idl
@@ -1807,7 +1850,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 
   if(nbt==0){
     Mesh3 *mpq= new Mesh3(nbv,nbe,v,b);  
-    if(flagsurfaceall==1) mpq->BuildSurfaceAdj();
+    if(flagsurfaceall==1) mpq->BuildBoundaryElementAdj();
     return mpq;
   }
   else{
@@ -1921,8 +1964,8 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   KN<long> nrtet  (arg(1,stack,zzempty));  
   KN<long> nrf (arg(2,stack,zzempty)); 
   double precis_mesh( arg(3,stack,1e-7));
-  long  mergefacemesh( arg(4,stack,0) );
-  long  flagsurfaceall( arg(5,stack,1) );
+  long  mergefacemesh( arg(4,stack,1) );
+  long  flagsurfaceall( arg(5,stack,0) );
 
   //if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
   ffassert( nrtet.N() %2 ==0);
@@ -2017,7 +2060,7 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
     
       T_Th3->BuildAdj();
       
-      if(flagsurfaceall==1) T_Th3->BuildSurfaceAdj();
+      if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
 
       T_Th3->Buildbnormalv();  
 
@@ -2029,7 +2072,7 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
     }
   else
     {
-      if(flagsurfaceall==1) T_Th3->BuildSurfaceAdj();
+      if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
     }
   Add2StackOfPtr2FreeRC(stack,T_Th3);
  
@@ -2132,7 +2175,8 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
 	  
 	  
   Vertex3   *v = new Vertex3[nbv];
-  Tet       *t = new Tet[nbt];
+  Tet       *t;
+  if(nbt!=0) t=new Tet[nbt];
   Triangle3 *b = new Triangle3[nben];
   // generation des nouveaux sommets 
   Vertex3 *vv=v;
@@ -2183,18 +2227,30 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
     }
     
   assert(nben==bb-b);
-  
-  Mesh3 *mpq = new Mesh3(nbv,nbt,nbe,v,t,b);
-  
-  mpq->BuildBound();
-  mpq->BuildAdj();
-  mpq->Buildbnormalv();  
-  mpq->BuildjElementConteningVertex(); 
-  mpq->BuildGTree();
-  //mpq->decrement();   // ?? decrement enlever ???
-  Add2StackOfPtr2FreeRC(stack,mpq);  
-  
-  return mpq;
+
+  if(nbt != 0)
+    {
+      Mesh3 *mpq = new Mesh3(nbv,nbt,nbe,v,t,b);
+      
+      mpq->BuildBound();
+      mpq->BuildAdj();
+      mpq->Buildbnormalv();  
+      mpq->BuildjElementConteningVertex(); 
+      mpq->BuildGTree();
+      //mpq->decrement();   // ?? decrement enlever ???
+      Add2StackOfPtr2FreeRC(stack,mpq);  
+      
+      return mpq;
+    }
+  if(nbt == 0)
+    {
+      Mesh3 *mpq = new Mesh3(nbv,nbe,v,b);
+      
+      mpq->BuildBound();
+      Add2StackOfPtr2FreeRC(stack,mpq);  
+      
+      return mpq;
+    }
 }
 
 
@@ -2382,7 +2438,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
     }
     
     assert(nbflip==0 || nbflip== Th3->nbe);
-    if(flagsurfaceall==1) Th3->BuildSurfaceAdj();
+    if(flagsurfaceall==1) Th3->BuildBoundaryElementAdj();
     Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
   }
@@ -2445,7 +2501,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
 	}
       }
     assert(nbflip==0 || nbflip== Th3->nbe);
-    if(flagsurfaceall==1) Th3->BuildSurfaceAdj();
+    if(flagsurfaceall==1) Th3->BuildBoundaryElementAdj();
     Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
   }
@@ -2605,9 +2661,19 @@ Mesh3 * Transfo_Mesh3(const double &precis_mesh,const Mesh3 & Th3, const double 
   delete [] label_nt_t;
   delete [] label_nbe_t;
   
-  Mesh3 *T_Th3 = new Mesh3(nv_t,nt_t,nbe_t,v,t,b);
+  if( nt_t !=0){
+    Mesh3 *T_Th3 = new Mesh3(nv_t,nt_t,nbe_t,v,t,b);
+    
+    return T_Th3;
+  }
+  else{
+    Mesh3 *T_Th3 = new Mesh3(nv_t,nbe_t,v,b);
 
-  return T_Th3;
+    delete t;
+    return T_Th3;
+  }
+    
+
 }
 void SamePointElement( const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 & Th3, 
 	int &recollement_element, int &recollement_border, int &point_confondus_ok,
@@ -4450,7 +4516,7 @@ AnyType DeplacementTab_Op::operator()(Stack stack)  const
     
       T_Th3->BuildAdj();
 
-      if(flagsurfaceall==1) T_Th3->BuildSurfaceAdj();
+      if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
       
       T_Th3->Buildbnormalv();  
 
@@ -4462,7 +4528,7 @@ AnyType DeplacementTab_Op::operator()(Stack stack)  const
     }
   else
     {
-       if(flagsurfaceall==1) T_Th3->BuildSurfaceAdj();
+       if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
     }
   Add2StackOfPtr2FreeRC(stack,T_Th3);
  
@@ -4479,6 +4545,197 @@ class  DeplacementTab : public OneOperator { public:
   }
 
 };
+
+// CheckSurfaceMesh ==> 
+
+int  GetBEManifold( Expression bb,  Expression &label, Expression &orient);
+void GetNumberBEManifold( Expression surf, int & mani_nbe);
+
+void GetManifolds( Expression mani, int & nbcmanifold,  int * &mani_nbe, Expression * &manifold)
+{
+  if ( mani ) 
+    {
+      int i,j;
+      const E_Array * a= dynamic_cast<const  E_Array *>(mani);
+      ffassert(a);
+      int n = a->size();
+      if( verbosity>1) 
+	cout << "    the number of manifold " << n << endl;
+      
+      nbcmanifold = n;  // nombre de manifold définis
+      
+      //manifold = new Expression[n]; 
+      mani_nbe = new int[n];
+      int size = 0;
+      for ( i=0; i<n; i++){
+	GetNumberBEManifold( (*a)[i], mani_nbe[i]);
+	cout << "number of manifold = " << n << "manifold i=" << i << "nb BE label=" << mani_nbe[i] << endl;
+	size=size+mani_nbe[i];
+      }
+   
+      manifold = new Expression[size*2];
+      int count=0;
+      for ( i=0; i<n; i++){
+	Expression tmp=(*a)[i];
+	const E_Array * aa = dynamic_cast<const  E_Array *>( tmp );
+	for( j=0; j< mani_nbe[i]; j++){
+	  if(GetBEManifold( (*aa)[j], manifold[count], manifold[count+1] ) ==0)   
+	    CompileError(" a manifold is defined by a pair of [label, orientation ]");
+	  count=count+2;
+	}
+      }
+      assert(count == 2*size);
+    }  
+}
+
+void GetNumberBEManifold( Expression surf, int & mani_nbe)
+{
+  if ( surf ) 
+    {
+      int i,j;
+      if( verbosity>1) 
+	cout << "  -- Manifoldal Condition to do" << endl;
+      const E_Array * a= dynamic_cast<const  E_Array *>(surf);
+      ffassert(a);
+      mani_nbe = a->size();
+      
+    }
+}
+
+
+// void GetManifold( Expression surf, int & mani_nbe, Expression * &manifold)
+// {
+//   if ( surf ) 
+//     {
+//       int i,j;
+//       if( verbosity>1) 
+// 	cout << "  -- Manifoldal Condition to do" << endl;
+//       const E_Array * a= dynamic_cast<const  E_Array *>(surf);
+//       ffassert(a);
+//       int n = a->size()/2;
+//       mani_nbe = n;
+//       if( verbosity>1) 
+// 	cout << "    the number of face label in a manifold " << n << endl;
+//       if( n*2 != a->size() )
+// 	CompileError(" a manifold is defined by a pair of [label, orientation ]");
+//       manifold = new Expression[n*2]; 
+//       for ( i=0,j=0;i<n;i++,j+=2)
+// 	if (GetBEManifold((*a)[i],manifold[j],manifold[j+1])==0)
+// 	  CompileError(" a sub array of a sub manifold must be [label, orientation ]");
+//     }
+// }
+
+int GetBEManifold( Expression bb, Expression &label, Expression &orient)
+{
+  
+  const E_Array * a= dynamic_cast<const  E_Array *>(bb);
+  if( a &&  a->size() == 2 ){
+    label  =  to<long>((*a)[0]);
+    orient =  to<long>((*a)[1]);
+    
+    return 1;
+  }
+  else
+    return 0;
+}
+
+class CheckManifoldMesh_Op : public E_F0mps 
+{
+public:
+  Expression eTh;
+  static const int n_name_param =1; // 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+  int nbmanifold;
+  int *mani_nbe;
+  Expression *manifolds;
+
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  double  arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+public:
+  CheckManifoldMesh_Op(const basicAC_F0 &  args,Expression tth) 
+    : eTh(tth)
+  {
+    args.SetNameParam(n_name_param,name_param,nargs);
+    if(nargs[0])   
+      GetManifolds(nargs[0],nbmanifold, mani_nbe, manifolds);
+    else
+      CompileError("check ::: no definition of manifold");
+   
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
+
+basicAC_F0::name_and_type CheckManifoldMesh_Op::name_param[]= {
+  {  "manifolds", &typeid(E_Array)}
+  // option a rajouter
+  // facemerge 0,1 + label
+};
+
+AnyType CheckManifoldMesh_Op::operator()(Stack stack)  const 
+{
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+  Mesh3 * pTh= GetAny<Mesh3 *>((*eTh)(stack));
+
+
+  int size=0;
+  KN<int> BeginManifold(nbmanifold+1);
+  
+  for (int i=0; i< nbmanifold; i++){
+    BeginManifold[i]=size;
+    size=size+mani_nbe[i];
+  }
+  BeginManifold[nbmanifold]=size;
+  
+  KN<int> TabLabelManifold(size ), OrientLabelManifold(size );
+    
+  int count=0;
+  for (int i=0; i< nbmanifold; i++){
+    for(int j=0; j< mani_nbe[i]; j++){
+      TabLabelManifold   [count]  = GetAny< long > ( ( *manifolds[2*count] )(stack) ); 
+      OrientLabelManifold [count] = GetAny< long > ( ( *manifolds[2*count+1] )(stack) ); 
+      count++;
+    }
+  }
+  assert(count == size);
+
+//   int count=0;
+//   for(int ii=0; ii<nbvariete; ii++)
+//     {
+//       beginvariete[ii]=count;
+//       for(int jj=0; jj<labelvariete[ii]; jj++)
+// 	{
+// 	  TabLabelVariete    [count] = GetAny< long > ( (*surface[2*ii+1][2*jj])(stack) ); 
+// 	  OrientLabelVariete [count] = GetAny< long > ( (*surface[2*ii+1][2*jj+1])(stack) ); 
+// 	  count++;
+// 	}
+//     }
+//   beginvariete[nbvariete]=count;
+  
+  long resultat=1;
+  pTh->BuildBoundaryElementAdj( nbmanifold, BeginManifold,TabLabelManifold,OrientLabelManifold); // nbvariete, beginvariete, TabLabelVariete, OrientLabelVariete);
+  
+  cout << "utilisation V2" << endl;
+  *mp=mps;
+  return resultat;
+}
+      
+
+class  CheckManifoldMesh : public OneOperator { public:  
+    CheckManifoldMesh() : OneOperator(atype<long>(),atype<pmesh3>() ) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  {
+	return  new CheckManifoldMesh_Op(args,t[0]->CastTo(args[0])); 
+  }
+};
+
+
+
+
 
 
 
@@ -4515,6 +4772,7 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Global.Add("movemesh3","(",new Movemesh3D);
   Global.Add("movemesh3D","(", new Movemesh3D_cout);
   Global.Add("deplacement","(",new DeplacementTab);
+  Global.Add("checkbemesh","(",new CheckManifoldMesh);  
   Global.Add("buildlayers","(",new  BuildLayerMesh);  
 }
 

@@ -104,8 +104,8 @@ void Triangles::Write(const char * filename,const TypeFileMesh typein )
                   f << Gh ;
                   Gh.OnDisk=true;
               }
-            f << *this     ;
-               break;
+	     f << *this     ;
+	     break;
            }
        case NOPOMesh   :  Write_nopo(f)  ; break;
        case amMesh     :  Write_am(f)    ; break;

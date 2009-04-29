@@ -1,7 +1,7 @@
-
-load "msh3"
-load "medit"
-int nn=8;
+load "../examples++-load/SuperLu"
+load "../examples++-load/msh3"
+load "../examples++-load/medit"
+int nn=20;
 mesh Th2=square(nn,nn);
 fespace Vh2(Th2,P2);
 Vh2 ux,uz,p2;
@@ -29,7 +29,7 @@ Vh u,v;
 
 macro Grad3(u) [dx(u),dy(u),dz(u)]  // EOM
 
-problem Lap3d(u,v,solver=CG)
+problem Lap3d(u,v,solver=sparsesolver)
   =
   int3d(Th)(Grad3(v)' *Grad3(u)) 
    +int2d(Th)(u*v)

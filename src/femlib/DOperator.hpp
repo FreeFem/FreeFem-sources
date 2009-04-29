@@ -8,6 +8,7 @@ using Fem2D::operatortype;
 using Fem2D::op_id;
 using Fem2D::op_dx;
 using Fem2D::op_dy;
+using Fem2D::op_dz;
 using Fem2D::last_operatortype;
 
 template<class T> 
@@ -180,13 +181,15 @@ template<class I,class R>
  }  
   unsigned int DiffOp(int & lastop) const
  {
-     unsigned int d=0;
-    lastop=0;
-    for (const_iterator k=v.begin();k!=v.end();k++)
-       d |=GetDiffOp(k->first,lastop);
-    assert(lastop<last_operatortype);
-    lastop++;
-    return d;
+   unsigned int d=0;
+   lastop=0;
+   for (const_iterator k=v.begin();k!=v.end();k++)
+     d |= GetDiffOp(k->first,lastop);
+     
+   assert(lastop<last_operatortype);
+   lastop++;
+   
+   return d;
   }  
   
   ostream & dump(ostream &f) const {

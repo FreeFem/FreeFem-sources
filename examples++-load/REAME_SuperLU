@@ -8,15 +8,11 @@ go SuperLU_3.0 directory
 edite make.inc
 make 
 
-2) in directoy include do
-tar xvfz ../SuperLU_3.0-include-ff.tar.gz
-due to a mistake un SuperLu header, I will give a correct one
-to compile with freefm++
 
 to compile  the freefem++ load file  of SuperLu with freefem do:
 some find like : 
-./load.link SuperLU.cpp  -L$HOME/work/LinearSolver/SuperLU_3.0/ -lsuperlu_3.0
-to test 
+./ff-c++ SuperLU.cpp  -I$HOME/work/LinearSolver/SuperLU_3.1/include -L$HOME/work/LinearSolver/SuperLU_3.0/ -lsuperlu_3.0
+To test 
 FreeFem++ SuperLu.edp
 
 Gook Luck. F. Hecht

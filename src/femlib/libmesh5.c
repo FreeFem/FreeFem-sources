@@ -181,6 +181,7 @@ int GmfOpenMesh(const char *FilNam, int mod, ...)
     /* MESH STRUCTURE INIT */
     /*---------------------*/
 
+    if( NmbMsh == MaxMsh) NmbMsh=0;  // Add J. Morice allow to read/write more than 100 mesh/sol 
     if( !(msh = calloc(1, sizeof(GmfMshSct))) || (NmbMsh >= MaxMsh) )
         return(0);
 
@@ -364,6 +365,7 @@ int GmfCloseMesh(int MshIdx)
     ret=fclose(msh->hdl);
 
     free(msh);
+    fprintf(stdout,"NmbMsh=%d",NmbMsh);
     return ret!=0;
 }
 

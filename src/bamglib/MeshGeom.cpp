@@ -196,16 +196,16 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	  if (add>=0 && add < nbe)
 	    {
 	      
-		 edges[add].v[0] = &triangles[it][VerticesOfTriangularEdge[j][0]];
-		 edges[add].v[1] = &triangles[it][VerticesOfTriangularEdge[j][1]];
-		  edges[add].on=0; 
-		 if (i<nbeold) // in file edge // Modif FH 06122055 
-		 {
-		    edges[add].ref = edgessave[i].ref; 		      
-		    edges[add].on = edgessave[i].on; //  HACK pour recuperer les aretes requise midf FH avril 2006 ???? 
-		    }
-		 else
-		   edges[add].ref = Min(edges[add].v[0]->ref(),edges[add].v[1]->ref()); // no a good choice
+	      edges[add].v[0] = &triangles[it][VerticesOfTriangularEdge[j][0]];
+	      edges[add].v[1] = &triangles[it][VerticesOfTriangularEdge[j][1]];
+	      edges[add].on=0; 
+	      if (i<nbeold) // in file edge // Modif FH 06122055 
+		{
+		  edges[add].ref = edgessave[i].ref; 		      
+		  edges[add].on = edgessave[i].on; //  HACK pour recuperer les aretes requise midf FH avril 2006 ???? 
+		}
+	      else
+		edges[add].ref = Min(edges[add].v[0]->ref(),edges[add].v[1]->ref()); // no a good choice
 	    }
 	}
       assert(k==nbe);
@@ -407,11 +407,11 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
         }
 	
        }
-	if(requis)  {  // correction fevr 2009 JYU ...
-	    Gh.edges[i].v[0]->SetRequired();
-	    Gh.edges[i].v[1]->SetRequired();
-	    Gh.edges[i].SetRequired(); // fin modif ... 
-	}
+      if(requis)  {  // correction fevr 2009 JYU ...
+	Gh.edges[i].v[0]->SetRequired();
+	Gh.edges[i].v[1]->SetRequired();
+	Gh.edges[i].SetRequired(); // fin modif ... 
+      }
       R2 x12 = Gh.vertices[j0].r-Gh.vertices[j1].r;
       Real8 l12=Norme2(x12);        
       hmin = Min(hmin,l12);

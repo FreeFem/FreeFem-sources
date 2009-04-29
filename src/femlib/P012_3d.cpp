@@ -211,64 +211,221 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
   
   if (whatd & (Fop_D1|Fop_D2))
   {
-      R3 Dl[4];
-      R l4[4]={ (4*l[0]-1),(4*l[1]-1),(4*l[2]-1),(4*l[3]-1)}; 
+   
+    R3 Dl[4];
+    R l4[4]={ (4*l[0]-1),(4*l[1]-1),(4*l[2]-1),(4*l[3]-1)}; 
       
-      K.Gradlambda(Dl);
+    K.Gradlambda(Dl);
+
+    if( whatd & Fop_dx)
+      {
+	RN_ f0x(val('.',0,op_dx));
+ 
+	int k=0;
+	for(int i=0;i<E::nv;++i,++k)
+	  {
+	    f0x[k] = Dl[i].x*l4[i];
+	  }
+	for(int i=0;i<E::ne;++i,++k)
+	  {
+	    int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+	    f0x[k] = 4*(Dl[i1].x*l[i0] + Dl[i0].x*l[i1]) ;
+	  }
+	assert(k==10);
+      }
+
+    if( whatd & Fop_dy)
+      {
+	RN_ f0y(val('.',0,op_dy));
+ 
+	int k=0;
+	for(int i=0;i<E::nv;++i,++k)
+	  {
+	    f0y[k] = Dl[i].y*l4[i];
+	  }
+	for(int i=0;i<E::ne;++i,++k)
+	  {
+	    int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+	    f0y[k] = 4*(Dl[i1].y*l[i0] + Dl[i0].y*l[i1]) ;
+	  }
+	assert(k==10);
+      }
+
+    if( whatd & Fop_dz)
+      {
+	RN_ f0z(val('.',0,op_dz));
+ 
+	int k=0;
+	for(int i=0;i<E::nv;++i,++k)
+	  {
+	    f0z[k] = Dl[i].z*l4[i];
+	  }
+	for(int i=0;i<E::ne;++i,++k)
+	  {
+	    int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+	    f0z[k] = 4*(Dl[i1].z*l[i0] + Dl[i0].z*l[i1]) ;
+	  }
+	assert(k==10);
+      }
+
+    /* avant
       RN_ f0x(val('.',0,op_dx));
       RN_ f0y(val('.',0,op_dy)); 
       RN_ f0z(val('.',0,op_dz)); 
+      
       int k=0;
       for(int i=0;i<E::nv;++i,++k)
       {
-	  f0x[k] = Dl[i].x*l4[i];
-	  f0y[k] = Dl[i].y*l4[i];
-	  f0z[k] = Dl[i].z*l4[i];
+      f0x[k] = Dl[i].x*l4[i];
+      f0y[k] = Dl[i].y*l4[i];
+      f0z[k] = Dl[i].z*l4[i];
       }
       for(int i=0;i<E::ne;++i,++k)
       {
-	  int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
-	  f0x[k] = 4*(Dl[i1].x*l[i0] + Dl[i0].x*l[i1]) ;
-	  f0y[k] = 4*(Dl[i1].y*l[i0] + Dl[i0].y*l[i1]) ;
-	  f0z[k] = 4*(Dl[i1].z*l[i0] + Dl[i0].z*l[i1]) ;
+      int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+      f0x[k] = 4*(Dl[i1].x*l[i0] + Dl[i0].x*l[i1]) ;
+      f0y[k] = 4*(Dl[i1].y*l[i0] + Dl[i0].y*l[i1]) ;
+      f0z[k] = 4*(Dl[i1].z*l[i0] + Dl[i0].z*l[i1]) ;
       }
       assert(k==10);
-      
-      //cout << " D2 " << whatd <<  endl;
-      if (whatd & Fop_D2)
+    */
+    //cout << " D2 " << whatd <<  endl;
+    if (whatd & Fop_D2)
       {
-	  //cout << " D2 " << endl;
+	
+	//cout << " D2 " << endl;
+	if (whatd & Fop_dxx){
 	  RN_ f0xx(val('.',0,op_dxx));
-	  RN_ f0yy(val('.',0,op_dyy)); 
-	  RN_ f0zz(val('.',0,op_dzz)); 
-	  RN_ f0xy(val('.',0,op_dxy));
-	  RN_ f0xz(val('.',0,op_dxz));
-	  RN_ f0yz(val('.',0,op_dyz));
-	  
-	   k=0;
+	
+	  int k=0;
 	  for(int i=0;i<E::nv;++i,++k)
-	  {
+	    {
 	      f0xx[k] = 4.*Dl[i].x*Dl[i].x;
-	      f0yy[k] = 4.*Dl[i].y*Dl[i].y;
-	      f0zz[k] = 4.*Dl[i].z*Dl[i].z;
-	      f0xy[k] = 4.*Dl[i].x*Dl[i].y;
-	      f0xz[k] = 4.*Dl[i].x*Dl[i].z;
-	      f0yz[k] = 4.*Dl[i].y*Dl[i].z;
-	  }
+	    }
 	  for(int i=0;i<E::ne;++i,++k)
-	  {
+	    {
 	      int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
 	      f0xx[k] = 8.*Dl[i0].x*Dl[i1].x;
-	      f0yy[k] = 8.*Dl[i0].y*Dl[i1].y;
-	      f0zz[k] = 8.*Dl[i0].z*Dl[i1].z;
-	      f0xy[k] = 4.*(Dl[i0].x*Dl[i1].y+ Dl[i1].x*Dl[i0].y);
-	      f0xz[k] = 4.*(Dl[i0].x*Dl[i1].z+ Dl[i1].x*Dl[i0].z);
-	      f0yz[k] = 4.*(Dl[i0].y*Dl[i1].z+ Dl[i1].y*Dl[i0].z);
-	  } 
+	    } 
 	  assert(k==10);
-      }
+	}
+	//cout << " D2 " << endl;
+	if (whatd & Fop_dyy){
+	  RN_ f0yy(val('.',0,op_dyy)); 
+	
+	  int k=0;
+	  for(int i=0;i<E::nv;++i,++k)
+	    {	
+	      f0yy[k] = 4.*Dl[i].y*Dl[i].y;
+	    }
+	  for(int i=0;i<E::ne;++i,++k)
+	    {
+	      int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+	      f0yy[k] = 8.*Dl[i0].y*Dl[i1].y;
+	    }
+	  assert(k==10);
+	}
+	//cout << " D2 " << endl;
+	if (whatd & Fop_dzz){	 
+	  RN_ f0zz(val('.',0,op_dzz)); 
       
-  } 
+	  int k=0;
+	  for(int i=0;i<E::nv;++i,++k)
+	    {
+	      f0zz[k] = 4.*Dl[i].z*Dl[i].z;
+	    }
+	  for(int i=0;i<E::ne;++i,++k)
+	    {
+	      int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+	      f0zz[k] = 8.*Dl[i0].z*Dl[i1].z;
+	      
+	    }
+	  assert(k==10);
+	}
+	//cout << " D2 " << endl;
+	if (whatd & Fop_dxy){		  
+	  RN_ f0xy(val('.',0,op_dxy));
+	 
+	  int k=0;
+	  for(int i=0;i<E::nv;++i,++k)
+	    {
+	      f0xy[k] = 4.*Dl[i].x*Dl[i].y;
+	    }
+	  for(int i=0;i<E::ne;++i,++k)
+	    {
+	      int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+	      f0xy[k] = 4.*(Dl[i0].x*Dl[i1].y+ Dl[i1].x*Dl[i0].y);
+	    } 
+	  assert(k==10);
+	}
+
+	//cout << " D2 " << endl;
+	if (whatd & Fop_dxz){
+	  RN_ f0xz(val('.',0,op_dxz));
+	 
+	  int k=0;
+	  for(int i=0;i<E::nv;++i,++k)
+	    {
+	      f0xz[k] = 4.*Dl[i].x*Dl[i].z;
+	    }
+	  for(int i=0;i<E::ne;++i,++k)
+	    {
+	      int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+	      f0xz[k] = 4.*(Dl[i0].x*Dl[i1].z+ Dl[i1].x*Dl[i0].z);
+	    } 
+	  assert(k==10);
+	}
+	//cout << " D2 " << endl;
+	if (whatd & Fop_dyz){
+
+	  RN_ f0yz(val('.',0,op_dyz));
+	  
+	  int k=0;
+	  for(int i=0;i<E::nv;++i,++k)
+	    {
+	      f0yz[k] = 4.*Dl[i].y*Dl[i].z;
+	    }
+	  for(int i=0;i<E::ne;++i,++k)
+	    {
+	      int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+	      f0yz[k] = 4.*(Dl[i0].y*Dl[i1].z+ Dl[i1].y*Dl[i0].z);
+	    } 
+	  assert(k==10);
+	}
+	/*
+	//cout << " D2 " << endl;
+	RN_ f0xx(val('.',0,op_dxx));
+	RN_ f0yy(val('.',0,op_dyy)); 
+	RN_ f0zz(val('.',0,op_dzz)); 
+	RN_ f0xy(val('.',0,op_dxy));
+	RN_ f0xz(val('.',0,op_dxz));
+	RN_ f0yz(val('.',0,op_dyz));
+	
+	k=0;
+	for(int i=0;i<E::nv;++i,++k)
+	{
+	f0xx[k] = 4.*Dl[i].x*Dl[i].x;
+	f0yy[k] = 4.*Dl[i].y*Dl[i].y;
+	f0zz[k] = 4.*Dl[i].z*Dl[i].z;
+	f0xy[k] = 4.*Dl[i].x*Dl[i].y;
+	f0xz[k] = 4.*Dl[i].x*Dl[i].z;
+	f0yz[k] = 4.*Dl[i].y*Dl[i].z;
+	}
+	for(int i=0;i<E::ne;++i,++k)
+	{
+	int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+	f0xx[k] = 8.*Dl[i0].x*Dl[i1].x;
+	f0yy[k] = 8.*Dl[i0].y*Dl[i1].y;
+	f0zz[k] = 8.*Dl[i0].z*Dl[i1].z;
+	f0xy[k] = 4.*(Dl[i0].x*Dl[i1].y+ Dl[i1].x*Dl[i0].y);
+	f0xz[k] = 4.*(Dl[i0].x*Dl[i1].z+ Dl[i1].x*Dl[i0].z);
+	f0yz[k] = 4.*(Dl[i0].y*Dl[i1].z+ Dl[i1].y*Dl[i0].z);
+	} 
+	assert(k==10);
+      
+	*/
+      }
+  }
 /* 
  if (whatd[op_dxx])
  {  

@@ -735,7 +735,7 @@ inline   int  GFElement<Mesh>::NbDoF(int i) const {
 
 template<class Mesh>
 inline void GFElement<Mesh>::BF(const Rd & P,RNMK_ & val) const {
-  this->tfe->FB(Fop_D0|Fop_D1,this->Vh.Th,this->T,P,val);}
+  this->tfe->FB(Fop_D0|Fop_D1,this->Vh.Th,this->T,P,val);}  
 
 template<class Mesh>
 inline void GFElement<Mesh>::BF(const What_d whatd,const Rd & P,RNMK_ & val) const { this->tfe->FB(whatd,this->Vh.Th,this->T,P,val);}

@@ -327,7 +327,10 @@ class ShapeOfArray{ protected:
 
   
 // protected:
-  long operator[](long k) const {  K_throwassert( (k>=0) && ( (k <n) || !step) );
+  long operator[](long k) const {  
+    if( k<0 || ( k<n && !step) )
+      cout << "k,n,step=" << k << " " << n << " " << step << endl;
+    K_throwassert( (k>=0) && ( (k <n) || !step) );
            return step*k;}     
   void init(long nn,long s=1,long nextt=-1) { n=nn; step=s; next=nextt;}         
 };
