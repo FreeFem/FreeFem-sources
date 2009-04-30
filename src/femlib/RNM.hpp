@@ -354,6 +354,14 @@ ostream & operator<<(ostream & f,const KN_<const_R> & v) ;
 template<class R> istream & operator>>(istream & f, KN_<R> & v);
 template<class R> istream & operator>>(istream & f, KN<R> & v);
 
+template<class R>
+class SetArray { public:
+    R o,step;
+    long n;
+    SetArray(long nn,R oo=R(),R sstep=R(1)): o(oo),n(nn),step(sstep) {}
+    R operator[](long i) const { return i <= n ? o + i*step : R();}
+    long size() const {return n;}
+};
 
 template<class R>
 class KN_: public  ShapeOfArray {
@@ -378,13 +386,19 @@ public:
 
   R operator,(const KN_<const_R> & v) const; // dot  product 
 
-   KN_& operator  =(const KN_<const_R> & u)  ;
-   KN_& operator +=(const KN_<const_R> & u)  ;
-   KN_& operator -=(const KN_<const_R> & u)  ;
-  
-   KN_& operator *=(const KN_<const_R> & u)  ;
-   KN_& operator /=(const KN_<const_R> & u)  ;
-  
+   KN_& operator  =(const SetArray<R> & u)  ;
+   KN_& operator +=(const SetArray<R> & u)  ;
+   KN_& operator -=(const SetArray<R> & u)  ;  
+   KN_& operator *=(const SetArray<R> & u)  ;
+   KN_& operator /=(const SetArray<R> & u)  ;
+
+    KN_& operator  =(const KN_<const_R> & u)  ;
+    KN_& operator +=(const KN_<const_R> & u)  ;
+    KN_& operator -=(const KN_<const_R> & u)  ;
+    
+    KN_& operator *=(const KN_<const_R> & u)  ;
+    KN_& operator /=(const KN_<const_R> & u)  ;
+    
   
    KN_& operator = (const_R  a) ;  
    KN_& operator +=(const_R  a) ;

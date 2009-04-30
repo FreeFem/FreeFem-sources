@@ -64,7 +64,15 @@ template<class  A,class B,class C>
       *l oper  u[i]; 
     return *this;}
 
-  
+template<class R>
+KN_<R>& KN_<R>::operator oper (const SetArray<R> & u)  {
+    R * l(v);  //  first line   
+    for (long i=0;i<n;i++,l += step)  
+	*l oper  u[i]; 
+return *this;}
+
+
+
 template<class R>
  KN_<R>& KN_<R>::operator oper (const Mul_KNM_KN_<R> & u)  {
     K_throwassert (SameShape(u.A.shapei) && !constant());

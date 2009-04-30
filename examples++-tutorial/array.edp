@@ -234,10 +234,14 @@ cout << " b = a(I) : " << b << "\n  c(I) = a " << c << endl;
 // sort array : 
 real[int] a=[3,5,7,9,0];
 real[int] b(a);
+int[int] p=[0,1,2,3,4];
+
 b=a;
-cout << a << endl;
-cout << b.sort << endl;
-cout << b << endl;
+cout << " a =" <<a << endl;
+sort(b,p);
+cout << " b.sort=" <<  b << endl;
+cout << " b = " << b << endl;
+cout << " p =  " << p << endl;
 b=a;
 b(0:5:2).sort;
 cout << b << endl; 
