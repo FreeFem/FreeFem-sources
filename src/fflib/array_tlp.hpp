@@ -45,6 +45,7 @@
 #include "InitFunct.hpp"
 #include <queue>
 #include "array_resize.hpp"
+#include "HeapSort.hpp"
 
 template <class T>
 struct affectation: binary_function<T, T, T>
@@ -124,10 +125,31 @@ void  HeapSort(T *c,long n,long o)
     }
 }
 
-template<class R,class A> A  SortKn(const A  & ca){ 
+template<class R,class A> A  SortKn(const A  & ca)
+{ 
     A a(ca);
     HeapSort<R>(&a[0],a.n,a.step);
     return a;}
+
+template<class R,class RR,class A,class B> A  SortKn(const A  & ca,const B  & cb)
+{ 
+    cout << "SortKn  " << endl;
+    const A &a(ca);
+    const B &b(cb);
+    ffassert(a.n == b.n);
+    ffassert(a.step == b.step && b.step ==1);
+    HeapSort<R,RR>(&a[0],&b[0],a.n);
+    cout << b << endl;
+return a;}
+
+template<class R,class RR> KN<R> *  SortpKn2( KN<R> * const & pa,KN<RR> * const & pb){ 
+  //  cout << " SortpKn2 " << endl;
+    KN<R> &a(*pa);
+    KN<RR> &b(*pb);
+    ffassert(a.n == b.n);
+    ffassert(a.step == b.step && b.step ==1);
+    HeapSort<R,RR>(&a[0],&b[0],a.n);
+   return pa;}
 
 template<class R> KN<R> *  SortpKn( KN<R> * const & pa){ 
     KN<R> &a(*pa);

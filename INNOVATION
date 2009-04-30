@@ -1,4 +1,6 @@
 v 3.2
+  - sort(a,p);  // where a is and array and p is a integer array
+    p=0:n-1;  
   - add interface with MUMPS  parallel solver (in progress) 
     http://graal.ens-lyon.fr/MUMPS/
   - renmae  movemesh2D3Dsurf movemesh23 and change named 
