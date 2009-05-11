@@ -68,6 +68,11 @@ void initArrayOperatordouble()
     Add<KN<double> * >("quantile",".",new OneOperator1<QuantileKN<K>,KN_<K> >(Build<QuantileKN<K>,KN_<K> >, atype<KN<K> *>() ));
     Add<QuantileKN<K> >("(","",new OneOperator2_<K,QuantileKN<K>,double>(Quantile<K>));
 
+    map_type[typeid(SetArray<K>).name()]->AddCast(					     
+						  new E_F1_funcT<SetArray<K>,SetArray<long> >(Cast<SetArray<K>,SetArray<long> >)
+												  
+						  );
+    
     
 //     ArrayDCL<long>();
 }

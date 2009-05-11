@@ -358,8 +358,10 @@ template<class R>
 class SetArray { public:
     R o,step;
     long n;
-    SetArray(long nn,R oo=R(),R sstep=R(1)): o(oo),n(nn),step(sstep) {}
-    R operator[](long i) const { return i <= n ? o + i*step : R();}
+    explicit SetArray(long nn,R oo=R(),R sstep=R(1)): o(oo),n(nn),step(sstep) {}
+    template<class K>   SetArray(SetArray<K> sa): o(sa.o),n(sa.n),step(sa.step) {}
+    
+  R operator[](long i) const { return i <= n ? o + R(i)*step : R();}
     long size() const {return n;}
 };
 
@@ -921,6 +923,17 @@ class KN :public KN_<R> { public:
    KN& operator *= (R*  a) { CheckSet(); return operator*=(KN_<R>(a,this->n));}  
    KN& operator /= (R*  a) { CheckSet(); return operator/=(KN_<R>(a,this->n));}  
   
+   KN& operator  =(const SetArray<R> & u)  
+     { if(this->unset()) set(new R[u.size()],u.size(),0,0); KN_<R>::operator= (u);return *this;}
+   KN& operator +=(const SetArray<R> & u)  
+     { if(this->unset()) set(new R[u.size()],u.size(),0,0); KN_<R>::operator+= (u);return *this;}
+   KN& operator -=(const SetArray<R> & u)    
+     { if(this->unset()) set(new R[u.size()],u.size(),0,0); KN_<R>::operator-= (u);return *this;}
+   KN& operator *=(const SetArray<R> & u)  
+     { if(this->unset()) set(new R[u.size()],u.size(),0,0); KN_<R>::operator*= (u);return *this;}
+   KN& operator /=(const SetArray<R> & u)  
+     { if(this->unset()) set(new R[u.size()],u.size(),0,0); KN_<R>::operator/= (u);return *this;}
+
    KN& operator =(const_R a)  
         { if(this->unset()) set(new R[1],1,0,0); KN_<R>::operator= (a);return *this;}
    KN& operator =(const KN_<R>& a)  

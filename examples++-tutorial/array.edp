@@ -3,6 +3,7 @@ real [int] tab(10), tab1(10); // 2 array of 10 real
 complex [int] ctab(10), ctab1(10); // 2 array of 10 complex 
 //string [int] stab(10);   pas code ... 
 
+
 //  real [int] tab2; //  bug 
 tab = 1;  //  set all the array to 1
 tab[1]=2;
@@ -109,7 +110,7 @@ int N=5;
 {
 real[int] a(N),b(N),c(N);
 a =1; 
-a(0:4:2) = 2;
+ a(0:4:2) = 2;
 a(3:4) = 4;
 cout <<" a = " << a << endl;
 b = a+ a;
@@ -252,4 +253,29 @@ macro AA [ [1,2],[3,4]] //
 macro BB [ [1,2],[5,10]] //
  cout << AA[1][0] << " 3  " << endl;
  cout << trace( AA * BB' + AA - BB' ) <<endl;
+}
+//  version 3.2  mai 2009
+//  like math lab. and scilab
+{
+int[int] tt(2:10); //  2,3,4,5,6,7,8,9,10  
+int[int] t1(2:3:10); // 2,5,8,
+cout << " tt= " << tt << endl;
+cout << " t1= " << t1 << endl;
+tt=1:2:5;
+cout << " 1.:2:5 =>  " << tt << endl;
+}
+
+{
+real[int] tt(2:10); //  2,3,4,5,6,7,8,9,10  
+real[int] t1(2.:3:10.); // 2,5,8,
+cout << " tt= " << tt << endl;
+cout << " t1= " << t1 << endl;
+tt=1.:0.5:3.999;
+cout << " 1.:0.5:3.999 =>  " << tt << endl;
+}
+{
+complex[int] tt(2.+0i:10.+0i); //  2,3,4,5,6,7,8,9,10  
+complex[int] t1(2.:3.:10.); // 2,5,8,
+cout << " tt= " << tt << endl;
+cout << " t1= " << t1 << endl;
 }

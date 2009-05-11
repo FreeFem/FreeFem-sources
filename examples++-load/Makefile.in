@@ -263,7 +263,9 @@ EXTRA_DIST = load.link.in  include.tar.gz \
   ffrandom.cpp ffrandom.edp  \
   medit.cpp  \
   bmo.cpp lgbmo.cpp bmo.hpp \
-  fflapack.cpp	lapack.cpp	lapack.edp
+  fflapack.cpp	lapack.cpp	lapack.edp \
+ fig.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp 
+
 
 LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
