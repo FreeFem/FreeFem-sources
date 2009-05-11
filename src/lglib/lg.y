@@ -508,7 +508,10 @@ no_comma_expr:
 
 no_set_expr:
 	no_ternary_expr
-	| no_ternary_expr '?' no_set_expr ':' no_set_expr {$$=C_F0(TheOperators,"?:",$1,$3,$5)}
+	| no_ternary_expr '?' no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,"?:",$1,$3,$5)}
+        | no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,"::",$1,$3)}
+	| no_ternary_expr ':' no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,"::",$1,$3,$5)} 	
+			    
 ;
 no_ternary_expr:
 	  unary_expr 
@@ -535,10 +538,11 @@ no_ternary_expr:
 ;
 
 sub_script_expr:  
-	    no_set_expr {$$=$1} 
-    |   ':' {$$=C_F0(TheOperators,":")}
-	|   no_set_expr ':' no_set_expr {$$=C_F0(TheOperators,":",$1,$3)}
-	|   no_set_expr ':' no_set_expr ':' no_set_expr {$$=C_F0(TheOperators,":",$1,$3,$5)} 	
+	    no_ternary_expr {$$=$1} 
+    |   ':' {$$=C_F0(TheOperators,":")}			    
+    |   no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,":",$1,$3)}
+    |   no_ternary_expr ':' no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,":",$1,$3,$5)} 
+
 ;
   
 parameters:  {$$=0} 

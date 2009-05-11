@@ -61,3 +61,4 @@ tetgen.cpp:  		tetgconvexhull
 tetgen.cpp:  		tetgtransfo
 tetgen.cpp:  		tetg
 tetgen.cpp:  		tetgreconstruction
+ppm2rnm:  read pgm  ilage file

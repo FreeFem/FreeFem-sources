@@ -648,6 +648,39 @@ struct Op3_pacc: public ternary_function<KN_<K>,K,K,if_arth_KN_<K>*> {
     return new if_arth_KN_<K>(a,kb,kc);}
 };   
 
+template<class K>
+struct SetArray2: public binary_function<K,K,SetArray<K> > { 
+    static SetArray<K> f(const K & a,const K & b)  { 
+	// cout << "SubArray: " << a << " " << b << endl;
+	//     SetArray(long nn,R oo=R(),R sstep=R(1)): o(oo),n(nn),step(sstep) {}
+	int n= abs((b-a));
+	ffassert(n);
+	K s= (b-a)/K(n);
+	n++;
+	if(verbosity>100)
+	cout << "    SetArray " << n << " " << a << " " << s << endl;
+    return SetArray<K>(n,a,s);} }; 
+
+template<class K>
+struct SetArray3: public ternary_function<K,K,K,SetArray<K> > { 
+    static SetArray<K> f(Stack s,const K & a,const K &b,const K & c)  {  
+	// cout << "SubArray: " << a << " " << b << " " <<  c << endl;
+    int n= 1+abs((c-a)/b);
+    if(verbosity>100)
+    cout << "    SetArray " << n << " :  "  << " " << a << " " << b << " " << c << endl;	
+    return SetArray<K>(n,a,b);} }; 
+
+template<class R,class A>  R * set_init_array( R* const & a,const A & b){ 
+    SHOWVERB( cout << " set_init " << typeid(R).name() << " " << &b << endl);
+    a->init(b.size());
+    *a=b;
+return a;}
+template<class R,class A>  R * set_array( R* const & a,const A & b){ 
+    SHOWVERB( cout << " set_init " << typeid(R).name() << " " << &b << endl);
+    a->resize(b.size());
+    *a=b;
+return a;}
+
   
 extern aType aaaa_knlp;
 template<class K,class Z>
@@ -991,6 +1024,18 @@ void ArrayOperator()
      map_type_of_map[make_pair(atype<string*>(),atype<K>())]=atype<MyMap<String,K>*>(); 
      
      atype<MyMap<String,K>*>()->Add("[","",new OneOperator2_<K*,MyMap<String,K>*,string*>(get_element<K>));
+    
+    // Add Mai 2009
+    Dcl_Type<SetArray<K> >();
+    TheOperators->Add("::",
+		    
+		      new OneBinaryOperator<SetArray2<K> >,
+		      new OneTernaryOperator3<SetArray3<K> >);
+    TheOperators->Add("<-", 
+		      new OneOperator2_<KN<K> *,KN<K> *,SetArray<K> >(&set_init_array));
+    TheOperators->Add("=", 
+		      new OneOperator2_<KN<K> *,KN<K> *,SetArray<K> >(&set_array));
+    
 
 }
 

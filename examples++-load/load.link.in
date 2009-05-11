@@ -69,7 +69,7 @@ while [ $# -ne 0 ]  ; do
 	    echo "    -b dir  to change the default install  dir " 
 	    echo "    -dll file  add  dll and this file copie in the install dir"
 	    echo "    -o outputfile without suffix"
-	    echo "    file.{cpp,cp,cxx,f,F}"
+	    echo "    file.{cpp,cp,cxx,c,f,F}"
 	    exit 0;
 	    ;;
 	F77=*) F77=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
@@ -87,12 +87,13 @@ while [ $# -ne 0 ]  ; do
 	-dll)   DLL="$DLL $2";shift;;
 	-[Ll]*)    LIBS="$LIBS $1" ;;
 	*.cpp) files="$files $1";  o=`basename $1 .cpp` ; fileso="$fileso $o.o";; 
-	*.cp) files="$files $1";  o=`basename $1 .cp`   ; fileso="$fileso $o.o";; 
-	*.cxx) files="$files $1";  o=`basename $1 .cxx` ; fileso="$fileso $o.o";; 
-	*.f) ffiles="$ffiles $1";  o=`basename $1 .f` ; fileso="$fileso $o.o";; 
-	*.F) ffiles="$ffiles $1";  o=`basename $1 .F` ; fileso="$fileso $o.o";; 
-	*.o) fileso="$fileso $1"; o=`basename $1 .o` ;; 
-	-o)  out=$2; shift;;
+	*.cp)  files="$files $1";  o=`basename $1 .cp`   ; fileso="$fileso $o.o";; 
+	*.cxx) files="$files $1";  o=`basename $1 .cxx` ; fileso="$fileso $o.o";;
+	*.c)   files="$files $1";  o=`basename $1 .c` ; fileso="$fileso $o.o";;  
+	*.f)   ffiles="$ffiles $1";  o=`basename $1 .f` ; fileso="$fileso $o.o";; 
+	*.F)   ffiles="$ffiles $1";  o=`basename $1 .F` ; fileso="$fileso $o.o";; 
+	*.o)   fileso="$fileso $1"; o=`basename $1 .o` ;; 
+	-o)    out=$2; shift;;
 	*) OTHER="$OTHER $1";;
     esac
     shift

@@ -159,7 +159,7 @@ typedef union YYSTYPE
  ListOfId *clist_id;
 /* ListCatch * clist_Catchs;*/
 }
-/* Line 1489 of yacc.c.  */
+/* Line 1529 of yacc.c.  */
 #line 164 "lg.tab.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

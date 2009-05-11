@@ -69,5 +69,10 @@ void initArrayOperatorComplex()
     Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(square));
     Global.Add("conj","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(conj));
 
-
+    map_type[typeid(SetArray<K>).name()]->AddCast(					     
+						  new E_F1_funcT<SetArray<K>,SetArray<long> >(Cast<SetArray<K>,SetArray<long> >),
+						  new E_F1_funcT<SetArray<K>,SetArray<double> >(Cast<SetArray<K>,SetArray<double> >)
+	  					      
+					      );
+    
 }
