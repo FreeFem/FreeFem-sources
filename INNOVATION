@@ -1,12 +1,20 @@
 v 3.2
-  - sort(a,p);  // where a is and array and p is a integer array
-    p=0:n-1;  
+  - add tools to set array like in matlab/scilab
+    real[int] a(1:2:10),  def  a to 1,3,.. 10.
+    int[int] I(0:n-1) , set array of size n to 0, .., n-1
+    real[int] b(0.1:0.5:9.99) , set   0.1, 0.6, 1.1,..., 9.6  
+    add :   b.n == (9.99-0.1)/0.5 +1
+  - sort(a,p);  // sort a is and array and p in parallel 
+     where is a integer array same size of a.
+        
   - add interface with MUMPS  parallel solver (in progress) 
     http://graal.ens-lyon.fr/MUMPS/
+
   - renmae  movemesh2D3Dsurf movemesh23 and change named 
      parameter normal= in orientation=
+
   - add periodic boundary in condition like in 2d
-  example for a cube with label face numbering 
+    example for a cube with label face numbering 
       1 :  ( x == xmin)        2 :  ( x == xmax) 
       3 :  ( y == ymin)        4 :  ( y == ymax) 
       5 :  ( z == zmin)        6 :  ( z == zmax) 
@@ -21,7 +29,7 @@ v 3.2
   - correct f2c of  take the -m64 flags 
   -  build the universal f2c library with 4 achitecture ppc i386 ppc64 x86_64
 v 3.1-1
-  - add resize of sparce matrix ( only  morse matrix)
+  - add resize of sparse matrix ( only  morse matrix)
   - add  new 3d finite element P1b3d   (P1 bulle 3d) 
   - add  new option in int1d function in case for  build matrix with different meshes
         mortar=1 ( do not remove integration point if the point is outside of the domain)
@@ -232,7 +240,7 @@ v 2.17
         functions of first and second kind
   - add  erf, erfc -- error function operators
   - add   tgamma, lgamma  -- gamma and log of gamma
-  - add   tool set and get   line,colunm and value of a sparce matrix
+  - add   tool set and get   line,colunm and value of a sparse matrix
              [I,J,C]=A; // resizing  array I,J,C
              A=[I,J,C] ;
             where
