@@ -259,8 +259,8 @@ macro BB [ [1,2],[5,10]] //
 {
 int[int] tt(2:10); //  2,3,4,5,6,7,8,9,10  
 int[int] t1(2:3:10); // 2,5,8,
-cout << " tt= " << tt << endl;
-cout << " t1= " << t1 << endl;
+cout << " tt(2:10)= " << tt << endl;
+cout << " t1(2:3:10)= " << t1 << endl;
 tt=1:2:5;
 cout << " 1.:2:5 =>  " << tt << endl;
 }
@@ -268,14 +268,48 @@ cout << " 1.:2:5 =>  " << tt << endl;
 {
 real[int] tt(2:10); //  2,3,4,5,6,7,8,9,10  
 real[int] t1(2.:3:10.); // 2,5,8,
-cout << " tt= " << tt << endl;
-cout << " t1= " << t1 << endl;
+cout << " tt(2:10) = = " << tt << endl;
+cout << " t1(2.:3:10.)= " << t1 << endl;
 tt=1.:0.5:3.999;
 cout << " 1.:0.5:3.999 =>  " << tt << endl;
 }
 {
 complex[int] tt(2.+0i:10.+0i); //  2,3,4,5,6,7,8,9,10  
 complex[int] t1(2.:3.:10.); // 2,5,8,
-cout << " tt= " << tt << endl;
-cout << " t1= " << t1 << endl;
+cout << " tt(2.+0i:10.+0i)= " << tt << endl;
+cout << " t1(2.:3.:10.);= " << t1 << endl;
+}
+{
+
+real [int] tab(10), tab1(10); // 2 array of 10 real
+//real [int] tab2;    //  bug array with no size
+tab = 1.03;                //  set all the array to 1.03
+tab[1]=2.15;
+cout << tab[1] << " " << tab[9] << " size of tab = "
+     << tab.n << " min: " << tab.min << "  max:" << tab.max
+     << " sum : "   << tab.sum <<   endl; //
+tab.resize(12); //  change the size of array tab
+  // to 12 with preserving first value
+tab(10:11)=3.14; //  set unset value
+cout <<" resize tab: " <<  tab << endl;
+real [string] tt;
+tt["+"]=1.5;
+cout<<tt["a"]<<"  "<<tt["+"]<<endl;
+real[int]  a(5),b(5),c(5),d(5);
+a = 1;
+b = 2;
+c = 3;
+a[2]=0;
+d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] ,
+cout << " d = ( a ? b : c )  is " << d << endl;
+d = ( a ? 1 : c );// for i = 0, n-1: d[i] = a[i] ? 1 : c[i] ,   (v2.23-1)
+d = ( a ? b : 0 );// for i = 0, n-1: d[i] = a[i] ? b[i] : 0 ,   (v2.23-1)
+d = ( a ? 1 : 0 );// for i = 0, n-1: d[i] = a[i] ? 0 : 1 ,     \hfill (v2.23-1)
+ tab.sort ; //  sort the array tab  (version 2.18) 
+cout << " tab (after sort) "  << tab << endl;
+int[int] ii(0:d.n-1); // set array ii to 0,1, ..., d.n-1
+d=-1:-5; // set d to  -1,-2, .. -5
+sort(d,ii); // sort array d and ii in parallele
+cout << " d " << d << "\n ii = " << ii << endl;
+
 }
