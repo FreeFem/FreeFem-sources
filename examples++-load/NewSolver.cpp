@@ -284,19 +284,17 @@ public:
 }; 
 
 inline MatriceMorse<double>::VirtualSolver *
-BuildSolverIUMFPack(const MatriceMorse<double> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym ,
-		   int NbSpace,int itmax ,const  void * precon, void * stack)
+BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(double,A))
 {
     cout << " BuildSolverUMFPack<double>" << endl;
-    return new SolveUMFPACK<double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
+    return new SolveUMFPACK<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
 
 inline MatriceMorse<Complex>::VirtualSolver *
-BuildSolverIUMFPack(const MatriceMorse<Complex> *A,int strategy,double tgv, double eps, double tol_pivot,double tol_pivot_sym ,
-		   int NbSpace,int itmax ,const  void * precon, void * stack)
+BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(Complex,A))
 {
     cout << " BuildSolverUMFPack<Complex>" << endl;
-    return new SolveUMFPACK<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
+    return new SolveUMFPACK<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
 
 
