@@ -14,7 +14,7 @@
 
 
 \usepackage{times}
-\def\VERSION{3.0-1}
+\def\VERSION{3.2}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -330,13 +330,15 @@ After installation, The list of application ( depending of the system and the co
 \begin{enumerate}
 \item \texttt{FreeFem++}, standard version, with a graphical interface
 based on GLUT/OpenGL (use ffglut visualizator) or not just add \texttt{ -nw } parameter.
-\item \texttt{ffglut} the visualisator through a pipe of freefem++ 
-\item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no graphics windows)
+\item \texttt{ffglut} the visualisator through a pipe of freefem++ (remark: {\it if ffglut is not in the system path, 
+you have no plot})
+\item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no graphics windows via ffglut )
 \item \texttt{FreeFem++-mpi}, parallel version, postscript output only
 %\item \texttt{FreeFem++-glx}, graphics using OpenGL and X11
 %\item \texttt{FreeFem++-cs}, integrated development environment
 %\item \texttt{FreeFem++-ag}, integrated development environment
-(please see chapter Graphical User Interface \ref{GUI}  for more details).
+\item  Sorry, the integrated development environment is reconstruction with the new architecture
+% (please see chapter Graphical User Interface \ref{GUI}  for more details).
 \item \texttt{/Applications/FreeFem++.app}, Drag and Drop CoCoa MacOs
 Application
 %\item \texttt{FreeFem++-CoCoa}, MacOS Shell script for MacOS OpenGL
@@ -592,7 +594,7 @@ are searched from  \texttt{loadpath} list.
 \end{itemize}
  
 We can also use shell environment variable to change verbosity and 
-the search rule. 
+the search rule before the init files. 
 
 \begin{verbatim}     
     export FF_VERBOSITY=50 
@@ -3654,14 +3656,19 @@ c = 3;
 a[2]=0;
 d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] ,
 @cout << " d = ( a ? b : c )  is " << d << endl;
-d = ( a ? 1 : c );// for i = 0, n-1: d[i] = a[i] ? 1 : c[i] ,   (v2.23-1)
-d = ( a ? b : 0 );// for i = 0, n-1: d[i] = a[i] ? b[i] : 0 ,   (v2.23-1)
+d = ( a ? 1 : c );// for i = 0, n-1: d[i] = a[i] ? 1 : c[i] ,  \hfill (v2.23-1)
+d = ( a ? b : 0 );// for i = 0, n-1: d[i] = a[i] ? b[i] : 0 ,  \hfill (v2.23-1)
 d = ( a ? 1 : 0 );// for i = 0, n-1: d[i] = a[i] ? 0 : 1 ,     \hfill (v2.23-1)
-tab2.sort; //  sort the array tab2  (version 2.18) 
+tab.sort ; //  sort the array tab  (version 2.18)                                                     
+cout << " tab (after sort) "  << tab << endl;
+int[int] ii(0:d.n-1); // set array ii to 0,1, ..., d.n-1 \hfill (v3.2)
+d=-1:-5; // set d to  -1,-2, .. -5 \hfill (v3.2)
 
+sort(d,ii); // sort array d and ii in parallele  
+cout << " d " << d << "\n ii = " << ii << endl;
 \eFF
-\index{array!resize}\index{resize}\index{max}\index{array!max} \index{min}\index{array!min}\index{sum}\index{array!sum}\index{array!?:}%modif FH
-\index{array!sort}
+\index{array!resize}\index{resize}\index{max}\index{array!max} \index{min}\index{array!min}\index{sum}\index{array!sum}\index{array!?:}\index{array!::}%modif FH
+\index{array!sort}\index{sort}
 produce the output
 \bFF
 2.15 1.03 size of tab = 10 min: 1.03  max:2.15 sum : 11.42
@@ -3672,7 +3679,74 @@ produce the output
  0  1.5
  d = ( a ? b : c )  is  5
           3       3       2       3       3
+ tab (after sort) 12	
+	1.03	1.03	1.03	1.03	1.03
+	1.03	1.03	1.03	1.03	2.15
+	3.14	3.14	          
+ d 5	
+	 -5	 -4	 -3	 -2	 -1
+	
+ ii = 5	
+	  4	  3	  2	  1	  0
 
+\eFF
+
+You can set array like in matlab or scilab with operator \verb!::!, the 
+array generator of  \verb!a:c! is equivalent to \verb!a:1:c!, and the  array set by \verb!a:b:c!
+is set to size  $ \lfloor |(b-a)/c|+1 \rfloor$  and the value $i$ is set by 
+$ a + i (b-a)/c$.
+
+So you have of  \texttt{int,real, complex} array:
+
+\bFF
+//  version 3.2  mai 2009
+//  like matlab. and scilab
+{
+int[int] tt(2:10); //  2,3,4,5,6,7,8,9,10  
+int[int] t1(2:3:10); // 2,5,8,
+cout << " tt(2:10)= " << tt << endl;
+cout << " t1(2:3:10)= " << t1 << endl;
+tt=1:2:5;
+cout << " 1.:2:5 =>  " << tt << endl;
+}
+
+{
+real[int] tt(2:10); //  2,3,4,5,6,7,8,9,10  
+real[int] t1(2.:3:10.); // 2,5,8,
+cout << " tt(2:10)= " << tt << endl;
+cout << " t1(2:3:10)= " << t1 << endl;
+tt=1.:0.5:3.999;
+cout << " 1.:0.5:3.999 =>  " << tt << endl;
+}
+{
+complex[int] tt(2.+0i:10.+0i); //  2,3,4,5,6,7,8,9,10  
+complex[int] t1(2.:3.:10.); // 2,5,8,
+cout << " tt(2.+0i:10.+0i)= " << tt << endl;
+cout << " t1(2.:3.:10.)= " << t1 << endl;
+}
+\eFF
+The output is :
+\bFF
+ tt(2:10)= 9	
+	  2	  3	  4	  5	  6
+	  7	  8	  9	 10	
+ t1(2:3:10)= 3	
+	  2	  5	  8	
+ 1.:2:5 =>  3	
+	  1	  3	  5	
+ tt(2:10) = = 9	
+	  2	  3	  4	  5	  6
+	  7	  8	  9	 10	
+ t1(2.:3:10.)= 3	
+	  2	  5	  8	
+ 1.:0.5:3.999 =>  6	
+	  1	1.5	  2	2.5	  3
+	3.5	
+ tt(2.+0i:10.+0i)= 9	
+	(2,0)	(3,0)	(4,0)	(5,0)	(6,0)
+	(7,0)	(8,0)	(9,0)	(10,0)	
+ t1(2.:3.:10.);= 3	
+	(2,0)	(5,0)	(8,0)	
 \eFF
 
 the all integer array operator are  : % modif v2.0-3
@@ -4037,6 +4111,12 @@ A=[I,J,C]; // set a new matrix
 matrix D=[diagofA] ; // set a diagonal matrix D from the array diagofA. \index{diagonal matrix}
 cout << " D = " << D << endl;
 \eFF
+You can also resize a sparse matrix $A$ \index{resize}\index{matrix!resize} 
+\bFF
+A.resize(10,100); 
+\eFF
+remark, the new size can be greater or lesser than the previous size, all new term are put to 
+zero.
 
 On the triangulation of Figure \ref{fig-hatFunction} this produce the following:
 \begin{eqnarray*}
@@ -4124,6 +4204,8 @@ at zero);
         5         5 1.0000000000000000199e+30
         6         6 1.0000000000000000199e+30
 \end{verbatim}\normal
+
+
 \end{example}
 \begin{note}
 The operators \verb|^-1| cannot be used to create a matrix;
@@ -4131,7 +4213,73 @@ the following gives an error
 \bFF
 @matrix AAA = A^-1;
 \eFF
+But in \textit{examples++-load/lapack.edp} you can inverse full matrix using 
+lapack labrary and this  small  dynamic link interface (see for more detail section \ref{Dynamical link} page \pageref{Dynamical link}).
+\bFF
+load "lapack"
+load "fflapack"
+int n=5;
+real[int,int] A(n,n),A1(n,n),B(n,n);
+for(int i=0;i<n;++i)
+for(int j=0;j<n;++j)
+  A(i,j)= (i==j) ? n+1 : 1;
+cout << A << endl;
+A1=A^-1; // def in \verb!load "lapack"!
+cout << A1 << endl;
+
+B=0;
+for(int i=0;i<n;++i)
+  for(int j=0;j<n;++j)
+    for(int k=0;k<n;++k)
+      B(i,j) +=A(i,k)*A1(k,j);
+cout << B << endl;
+// \verb!A1+A^-1!;  attention ne marche pas
+
+inv(A1); // def in \verb!load "fflapack"!
+cout << A1 << endl;
+\eFF
+and the output is: 
+\bFF
+5 5	
+	   6   1   1   1   1
+	   1   6   1   1   1
+	   1   1   6   1   1
+	   1   1   1   6   1
+	   1   1   1   1   6
+	
+ error:  dgesv_ 0
+5 5	
+	 0.18 -0.02 -0.02 -0.02 -0.02
+	 -0.02 0.18 -0.02 -0.02 -0.02
+	 -0.02 -0.02 0.18 -0.02 -0.02
+	 -0.02 -0.02 -0.02 0.18 -0.02
+	 -0.02 -0.02 -0.02 -0.02 0.18
+	
+5 5	
+	   1 -1.387778781e-17 -1.040834086e-17 3.469446952e-17   0
+	 -1.040834086e-17   1 -1.040834086e-17 -2.081668171e-17   0
+	 3.469446952e-18 -5.551115123e-17   1 -2.081668171e-17 -2.775557562e-17
+	 1.387778781e-17 -4.510281038e-17 -4.857225733e-17   1 -2.775557562e-17
+	 -1.387778781e-17 -9.714451465e-17 -5.551115123e-17 -4.163336342e-17   1
+	
+5 5	
+	   6   1   1   1   1
+	   1   6   1   1   1
+	   1   1   6   1   1
+	   1   1   1   6   1
+	   1   1   1   1   6
+	
+\eFF
+to compile \texttt{lapack.cpp} or \texttt{fflapack.cpp} you must have 
+the library lapack on you system and try in directory \texttt{examples++-load}
+\bFF
+  ff-c++ lapack.cpp -llapack
+  ff-c++ fflapack.cpp -llapack
+\eFF
+
 \end{note}
+
+
 
 
 
@@ -5565,15 +5713,15 @@ plot(Th,ps="ThreePoint.eps",bw=1); // Fig. \ref{ThreePoint}
 \label{sec.changelab.gluemesh}
 Changing the label of elements and border elements will be done using the keyword {\bf{change}}. The parameters for this
 command line are for a two dimensional case:
-\begin{itemize}
+\begin{description}
 \item [\texttt{refe =}] is a vector of integer that contains the old labels and the new labels of edges.
 \item [\texttt{reft =}] is a vector of integer that contains the old labels and the new labels of triangles.
-\end{itemize}
+\end{description}
 and for a three dimensional case:
-\begin{itemize}
+\begin{description}
 \item [\texttt{reftet =}] is a vector of integer that contains the old labels and the new labels of tetrahedrons.
 \item [\texttt{refface =}] is a vector of integer that contains the old labels and the new labels of triangles.
-\end{itemize}
+\end{description}
 
 These vectors are composed of $n_{l}$ succesive sub vectors of size two where $n_{l}$ is the number of label
 that we want to change. The first element and second element of sub vector are respectively the old label and the new label.
@@ -5584,7 +5732,7 @@ refe = [ V_{1}, ..., V_{n_{l}}].
 \end{equation}
 where the sub vector $V_{i}$ is defined by $V_{i}=[\mbox{old label of set } i, \mbox{new label of set } i]$.
 
-An example of using this function is given in "glumesh2D.edp":
+An example of using this function is given in "glumesh2D.edp":  \index{mesh!change}\index{change}
 \begin{example}[glumesh2D.edp]
 \label{changelabel}~
 \bFF
@@ -5613,7 +5761,7 @@ An example of using this function is given in "glumesh2D.edp":
 
 \paragraph{``gluing'' different mesh}
 In line 10 of previous file, the method to ``gluing'' different mesh of the same dimension in FreeFem++ is using.
-This function is just call using the symbol addition "+" between meshes.
+This function is just call using the symbol addition "+" between meshes. \index{mesh!+}
 The method implemented need that the point in adjacent mesh are the same.
 %%The method implemented need that the result's mesh of ``gluing'' meshes is conformal.
 
@@ -5744,21 +5892,21 @@ This switch must be used to ensure conformal mesh between two adjacents mesh.
 To obtain a tetrahedral mesh generator with tetgen, we need the surface mesh of three dimensional domain.
 We give now the command line in FreeFem++ to construct these meshes.
 
-\paragraph{keyword: ``movemesh2D3Dsurf''}
+\paragraph{keyword: ``movemesh23''}
 
 A simple method to construct a surface is to place a two dimensional domain in a three dimensional space.
 This corresponding to move the domain by a displacement vector of this form $\Phi(x,y) = ( \Phi1(x,y), \Phi2(x,y), \Phi3(x,y) )$.
 The result of moving a two dimensional mesh Th2 by this three dimensional displacement is obtained using:
 
 \bFF
-@mesh3 Th3 = @movemesh2D3Dsurf(Th2,transfo=[$\Phi$1,$\Phi$2,$\Phi$3]);
+@mesh3 Th3 = @movemesh23(Th2,transfo=[$\Phi$1,$\Phi$2,$\Phi$3]);
 \eFF
 
 The parameters of this command line are:
 \begin{description}
 \item [\texttt{transfo   =}] \texttt{[$\Phi$1, $\Phi$2, $\Phi$3]} set the displacement vector of transformation $\Phi(x,y) = [\Phi1(x,y), \Phi2(x,y), \Phi3(x,y) ]$.
 \item [\texttt{refface   =}] set integer label of triangles
-\item [\texttt{mesuremesh=}] set integer orientation of mesh.
+\item [\texttt{orientation=}] set integer orientation of mesh.
 \item [\texttt{ptmerge =}] A real expression. When you transform a mesh, some points can be merged. This parameters is the criteria to define two merging points. By default, we use
 $$
 ptmerge \: = \: 1e-7 \: \:Vol( B ),
@@ -5767,7 +5915,7 @@ where $B$ is the smallest axis parallel boxes containing the discretize domain o
 \end{description}
 
 We can ``gluing'' surface meshes using the process given in Section \ref{sec.changelab.gluemesh}. An example of obtaining a three dimensional
-mesh using the command line \texttt{tetg} and \texttt{movemesh2D3Dsurf} is given in the file tetgencube.edp.
+mesh using the command line \texttt{tetg} and \texttt{movemesh23} is given in the file tetgencube.edp.
 
 \begin{example}[tetgencube.edp]
 \label{tetgenboxedp}~
@@ -5785,8 +5933,8 @@ x0=1.; x1=2.; y0=0.; y1=2*pi;
 @func XX1 = x;
 @func YY1 = y;
 
-@mesh3 Th31h = @movemesh2D3Dsurf(Thsq1,transfo=[XX1,YY1,ZZ1max]);
-@mesh3 Th31b = @movemesh2D3Dsurf(Thsq1,transfo=[XX1,YY1,ZZ1min]);
+@mesh3 Th31h = @movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1max]);
+@mesh3 Th31b = @movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1min]);
 
 /////////////////////////////////
 x0=1.; x1=2.; y0=0.; y1=1.5;
@@ -5797,8 +5945,8 @@ x0=1.; x1=2.; y0=0.; y1=1.5;
 @func YY2min = 0.;
 @func YY2max = 2*pi;
 
-@mesh3 Th32h = @movemesh2D3Dsurf(Thsq2,transfo=[XX2,YY2max,ZZ2]);  
-@mesh3 Th32b = @movemesh2D3Dsurf(Thsq2,transfo=[XX2,YY2min,ZZ2]);
+@mesh3 Th32h = @movemesh23(Thsq2,transfo=[XX2,YY2max,ZZ2]);  
+@mesh3 Th32b = @movemesh23(Thsq2,transfo=[XX2,YY2min,ZZ2]);
 
 /////////////////////////////////
 x0=0.; x1=2*pi; y0=0.; y1=1.5;
@@ -5808,8 +5956,8 @@ x0=0.; x1=2*pi; y0=0.; y1=1.5;
 @func YY3 = x;
 @func ZZ3 = y;
 
-@mesh3 Th33h = @movemesh2D3Dsurf(Thsq3,transfo=[XX3max,YY3,ZZ3]);  
-@mesh3 Th33b = @movemesh2D3Dsurf(Thsq3,transfo=[XX3min,YY3,ZZ3]); 
+@mesh3 Th33h = @movemesh23(Thsq3,transfo=[XX3max,YY3,ZZ3]);  
+@mesh3 Th33b = @movemesh23(Thsq3,transfo=[XX3min,YY3,ZZ3]); 
 
 ////////////////////////////////
 @mesh3 Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
@@ -5824,7 +5972,7 @@ x0=0.; x1=2*pi; y0=0.; y1=1.5;
 @func mv2x = x*cos(y);
 @func mv2y = x*sin(y);
 @func mv2z = z;
-@mesh3 Thmv2 = @movemesh3D(Thfinal, transfo=[mv2x,mv2y,mv2z]);
+@mesh3 Thmv2 = @movemesh3(Thfinal, transfo=[mv2x,mv2y,mv2z]);
 @savemesh(Thmv2,"halfcylindricalshell.mesh")
 \eFF
 \end{example}
@@ -5834,18 +5982,18 @@ The command \texttt{movemesh} is describe in the following section.
 
 \paragraph{The keyword ``tetgtransfo''} \index{tetgtransfo}
 
-This keyword correspond to a composition of command line \texttt{tetg} and \texttt{movemesh2D3Dsurf}:
+This keyword correspond to a composition of command line \texttt{tetg} and \texttt{movemesh23}:
 \bFF
 @tetgtransfo( Th2, transfo= [$\Phi$1, $\Phi$2, $\Phi$3] ), $\cdots$ ) = @tetg( Th3surf, $\cdots$ ),
 \eFF
 
-where Th3surf = \texttt{movemesh2D3Dsurf}( Th2,tranfo=[$\Phi$1, $\Phi$2, $\Phi$3] ) and Th2 is the input two dimensional mesh of \texttt{tetgtransfo}.
+where Th3surf = \texttt{movemesh23}( Th2,tranfo=[$\Phi$1, $\Phi$2, $\Phi$3] ) and Th2 is the input two dimensional mesh of \texttt{tetgtransfo}.
 
 The parameters of this command line are on the one hand the parameters: \\
 \hspace*{2cm} \texttt{refface}, \texttt{switch}, \texttt{regionlist} \texttt{nboffacetcl} \texttt{facetcl}\\
-of keyword \texttt{tetg} and on the other hand the parameter \texttt{ptmerge} of keyword \texttt{movemesh2D3Dsurf}.
+of keyword \texttt{tetg} and on the other hand the parameter \texttt{ptmerge} of keyword \texttt{movemesh23}.
 
-\paragraph{Remark:} To use \texttt{tetgtransfo}, the result's mesh of \texttt{movemesh3D3Dsurf} must be an enclosed surface and defined one region.
+\paragraph{Remark:} To use \texttt{tetgtransfo}, the result's mesh of \texttt{movemesh23} must be an enclosed surface and defined one region.
 Therefore, the parameter \texttt{regionlist} is defined for one region.
 
 An example of this keyword can be found in line  of file ``buildlayers.edp''
@@ -5943,7 +6091,7 @@ real Rmin  = 1.;
 @func f2min = Rmin*f2;
 @func f3min = Rmin*f3;
 
-@mesh3 Th3=@movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min]);
+@mesh3 Th3=@movemesh23(Th,transfo=[f1min,f2min,f3min]);
 
 real[int] domain = [0.,0.,0.,145,0.01];
 @mesh3 Th3sph=@tetg(Th3,switch="paAAQYY",nbofregions=1,regionlist=domain);
@@ -6209,14 +6357,14 @@ verbosity=2;
 @func f2min = Rmin*f2;
 @func f3min = Rmin*f3;
 
-@mesh3 Th3sph = @movemesh2D3Dsurf(Th,transfo=[f1min,f2min,f3min]);
+@mesh3 Th3sph = @movemesh23(Th,transfo=[f1min,f2min,f3min]);
 
 @real Rmax  = 2.;
 @func f1max = Rmax*f1;
 @func f2max = Rmax*f2;
 @func f3max = Rmax*f3;
 
-@mesh3 Th3sph2 = @movemesh2D3Dsurf(Th,transfo=[f1max,f2max,f3max]);
+@mesh3 Th3sph2 = @movemesh23(Th,transfo=[f1max,f2max,f3max]);
 
 cout << "addition" << endl;
 @mesh3 Th3 = Th3sph+Th3sph2;
@@ -6245,6 +6393,100 @@ cout << "=============================" << endl;
 \eFF
 \end{example}
 
+\subsubsection{Build a 3d mesh of a cube with a ballon incrustation}
+\label{cube-ballon}
+\bFF
+ mesh Th; // to store the final mesh 
+{ // to clean all intermedial variable  
+  mesh3 ThHex;
+  @real volumetet;  // use in tetg.
+  {
+    //  first  build the 6 faces of the hex.
+    @real x0=-1,x1=1;
+    @real y0=-1.1,y1=1.1;
+    @real z0=-1.2,z1=1.2;
+    
+    @int nx=19,ny=20,nz=21;
+    //  a  volume  of  @on tet. 
+    volumetet= (x1-x0)*(y1-y0)*(z1-z0)/ (nx*ny*ny) /6.;
+    
+    @mesh Thx = square(ny,nz,[y0+(y1-y0)*x,z0+(z1-z0)*y]);
+    @mesh Thy = square(nx,nz,[x0+(x1-x0)*x,z0+(z1-z0)*y]);
+    @mesh Thz = square(nx,ny,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+    
+    @int[@int] refz=[0,5];  //  bas
+    @int[@int] refZ=[0,6];   //  haut
+    @int[@int] refy=[0,3];  //  devant
+    @int[@int] refY=[0,4];   // derriere
+    @int[@int] refx=[0,1];  // gauche
+    @int[@int] refX=[0,2];   // droite 
+    
+    // buil the mesh of the 6 faces ..
+    mesh3 Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-1,refface=refx);
+    mesh3 Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=1,refface=refX);
+    mesh3 Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+1,refface=refy);
+    mesh3 Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-1,refface=refY);
+    mesh3 Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-1,refface=refz);
+    mesh3 Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+1,refface=refZ);
+    
+    //medit("  --- ", Thx0,Thx1,Thy0,Thy1,Thz0,Thz1);
+    ThHex = Thx0+Thx1+Thy0+Thy1+Thz0+Thz1;
+    
+  }
+  mesh3 Thsph; // 
+  
+  {
+    @mesh  Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
+    //  a paratrization of a sphere 
+    @func f1 =cos(x)*cos(y);
+    @func f2 =cos(x)*sin(y);
+    @func f3 = sin(x);
+    //  de  partiel derivatrive of the parametrization DF
+    @func f1x=sin(x)*cos(y);   
+    @func f1y=-cos(x)*sin(y);
+    @func f2x=-sin(x)*sin(y);
+    @func f2y=cos(x)*cos(y);
+    @func f3x=cos(x);
+    @func f3y=0;
+    // $  M = DF^t DF $
+    @func m11=f1x^2+f2x^2+f3x^2;
+    @func m21=f1x*f1y+f2x*f2y+f3x*f3y;
+    @func m22=f1y^2+f2y^2+f3y^2;
+    
+    @func perio=[[4,y],[2,y],[1,x],[3,x]];  // to store the periodic condition 
+    
+    // the intial @mesh
+    savemesh(Th,"sphere",[f1,f2,f3]);
+    
+    @real R=0.5,hh=0.1/R;// hh  taille du maille sur la shere unite. 
+    @real vv= 1/square(hh);
+    verbosity=2;
+    Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,inquire=1,periodic=perio);
+    @plot(Th,wait=1);
+    Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+    @plot(Th,wait=1);
+    Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+    @plot(Th,wait=1);
+    Th=@adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+    
+    Thsph = movemesh23(Th,transfo=[f1*R,f2*R,f3*R],orientation=-1);
+  }
+  
+  
+  ////////////////////////////////
+  mesh3 ThS = ThHex+Thsph; // "gluing" surface meshs to total boundary meshes
+  medit("Bounday @mesh",ThS,wait=1);
+  
+  // build a @mesh of a axis parallel box with TetGen
+  
+  @real[@int] domaine = [0,0,0,1,volumetet,0,0,0.7,2,volumetet];
+  Th = tetg(ThS,switch="pqaAAYYQ",nbofregions=2,regionlist=domaine);    
+  // Tetrahelize the interior of the cube with tetgen
+  medit("tetg",Th);
+  
+  savemesh(Th,"Th-hex-sph.@mesh");
+} // to clean all intermedial variable   
+\eFF
 %Commentaire : 
 %1: lorsque l'on définis deux zones, il y a des soucis à la frontière commune. Je vais envoyer un mail à Hang Si pour lui soumettre le problème.
 
@@ -6571,19 +6813,28 @@ $$
 \bFF
      @fespace IDspace(IDmesh,<IDFE>) ;
 \eFF
-or with $\ell$ pairs of periodic boundary condition
+or with $\ell$ pairs of periodic boundary condition in 2d 
 \bFF
      @fespace IDspace(IDmesh,<IDFE>,
                       periodic=[[la$_1$,sa$_1$],[lb$_1$,sb$_1$],
                                 ...
                                 [la$_k$,sa$_k$],[lb$_k$,sb$_\ell$]]);
 \eFF
+and in 3d
+\bFF
+     @fespace IDspace(IDmesh,<IDFE>,
+                      periodic=[[la$_1$,sa$_1$,ta$_1$],[lb$_1$,sb$_1$,tb$_1$],
+                                ...
+                                [la$_k$,sa$_k$,ta$_k$],[lb$_k$,sb$_\ell$,tb$_\ell$]]);
+\eFF
+
 where
 \index{fespace}\index{periodic}
 \ttCC{IDspace} is the name of the space (e.g. \ttCC{Vh}),
 \ttCC{IDmesh} is the name of the associated mesh and  \ttCC{<IDFE>}
 is a identifier of finite element type.
-In a pair of periodic boundary condition, \label{periodic BC}
+
+In 2d case, a pair of periodic boundary condition, \label{periodic BC}
 if \ttCC{[la$_i$,sa$_i$],[lb$_i$,sb$_i$]} is a pair of
 \texttt{int}, the 2 labels \ttCC{la$_i$} and \ttCC{lb$_i$}
 define the 2 piece of boundary to be in equivalence;
@@ -6592,23 +6843,34 @@ then \ttCC{sa$_i$} and \ttCC{sb$_i$}
 give two common abscissa on the two boundary curve, and two points are identified as one
 if the two abscissa are equal.
 
-Remark, the mesh of the two identified border must be the same, so
+In 2d case, a pair of periodic boundary condition, \label{periodic BC}
+if \ttCC{[la$_i$,sa$_i$,ta$_i$],[lb$_i$,sb$_i$,tb$_i$]} is a pair of
+\texttt{int}, the 2 labels \ttCC{la$_i$} and \ttCC{lb$_i$}
+define the 2 piece of boundary to be in equivalence; 
+
+If \ttCC{[la$_i$,sa$_i$,ta$_i$],[lb$_i$,sb$_i$,tb$_i$]} is a pair of \texttt{real},
+then \ttCC{sa$_i$,ta$_i$} and \ttCC{sb$_i$,tb$_i$}
+give two common parameter on the two boundary surface, and two points are identified as one
+if the two parameter are equal.
+
+
+Remark, the 2d  mesh of the two identified border must be the same, so
 to be sure,  used  the parameter  \texttt{fixeborder=true} in \texttt{buildmesh} command (see \ref{buildmesh fixeborder})
-like in example \texttt{periodic2bis.edp} (see \ref{periodic2bis.edp}).
+like in example \texttt{periodic2bis.edp} (see \ref{exm:periodic4bis}).
 
 
 \medskip
  As of today, the known
 types of finite element are: \index{type of finite element}
 \begin{description}
-     \item[P0]  piecewise constante discontinuous finite element
+     \item[P0]  piecewise constante discontinuous finite element  (2d, 3d)
      \index{P0|textbf}\index{fespace!P0}
     \begin{eqnarray}
     \label{eq:P0}
      P0_{h} = \left\{ v \in L^2(\Omega) \left|\; \textrm{for all }K \in \mathcal{T}_{h}\;\;\textrm{there is }\alpha_{K}\in \R :
         \;\; v_{|K} = \alpha_{K } \right.\right\}
      \end{eqnarray}
-     \item[P1]  piecewise linear  continuous finite element
+     \item[P1]  piecewise linear  continuous finite element (2d, 3d)
      \index{P1|textbf}\index{fespace!P1}
      \begin{eqnarray}
      &&P1_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -6620,7 +6882,7 @@ types of finite element are: \index{type of finite element}
      P1dc_{h} = \left\{ v \in L^{2}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{1} \right.\right\} \label{eq:P1dc}
      \end{equation}
-     \item[P1b]  piecewise linear  continuous finite element plus bubble
+     \item[P1b]  piecewise linear  continuous finite element plus bubble (2d, 3d)
      \index{P1b|textbf}\index{fespace!P1b}
      \begin{equation}
      P1b_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -6628,7 +6890,7 @@ types of finite element are: \index{type of finite element}
      \end{equation}
      where $\lambda ^{K}_{i}, i=0,1,2$ are the 3 area coordinate functions of the triangle $K$
 
-     \item[P2] piecewise $P_{2}$  continuous finite element,
+     \item[P2] piecewise $P_{2}$  continuous finite element (2d, 3d), 
      \index{P2|textbf}\index{fespace!P2}
      \begin{equation}
      P2_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -8053,6 +8315,7 @@ The parameters are
     \eFF
      where \texttt{hi,si,vi} is the ith color to defined the color table.
     \itemtt[boundary=] \index{plot!boundary =} (bool) to plot or not the boundary of the domain (true by default).
+    \itemtt[dim=] \index{plot!dim=} (int)  sets dim of the plot 2d or 3d (2 by default)
 
 \end{description}
 For example: \index{plot!cut}
@@ -8152,6 +8415,7 @@ quit' | gnuplot");
 First you must install medit \footnote{\url{http://www-rocq.inria.fr/gamma/medit/medit.html}}, a
 freeware display package by Pascal Frey using OpenGL. Then you may run the follwoing example.
 
+remark, now \texttt{medit} software is include in \texttt{FreeFem++} under \texttt{ffmedit} name. \index{medit} \index{ffmedit}
 \plot[width=8cm]{medit2}{medit plot}
 
 \index{medit}\index{exec}
@@ -8168,7 +8432,7 @@ Vh u=2-x*x-y*y;
      file << u[][j] << endl;
   }
     // call medit command
-    exec("medit mm");
+    exec("ffmedit mm");
     // clean files on unix OS
     exec("rm mm.bb      mm.faces   mm.points");
 
@@ -8906,8 +9170,59 @@ cc= @int2d(Th)((x-gx)*(y-gy)-cc)/Th.area;
 \eFF
 \end{example}
 
+\begin{example}[Period-Poisson-cube-ballon.edp]~
+\label{exm:Period-Poisson-cube-ballon}
+\index{3d!periodic}\index{periodic!3d}
+\bFF
+verbosity=1;
+load "msh3"
+load "tetgen"
+load "medit"
+
+bool buildTh=0;
+mesh3 Th;
+try { //  a way to build one time the mesh an read if the file exist. 
+  Th=readmesh3("Th-hex-sph.@mesh");
+ }
+catch(...) { buildTh=1;}
+@if( buildTh ){
+  ...
+ put the code \ref{cube-ballon} example  page // \pageref{cube-ballon}
+  without the first line 
+ }
 
 
+@fespace Ph(Th,P0);
+verbosity=50;
+@fespace Vh(Th,P1,periodic=[[3,x,z],[4,x,z],[1,y,z],[2,y,z],[5,x,y],[6,x,y]]);// back and front
+verbosity=1;
+Ph reg=region;
+
+@cout << "  centre = " << reg(0,0,0) << @endl;
+@cout << " exterieur = " << reg(0,0,0.7) << @endl;
+
+macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
+
+Vh uh,vh;
+@real x0=0.3,y0=0.4,z0=06;
+@func f= sin(x*2*pi+x0)*sin(y*2*pi+y0)*sin(z*2*pi+z0);
+@real gn = 1.;
+@real cf= 1;
+@problem P(uh,vh)=
+     int3d(Th,1)( Grad(uh)'*Grad(vh)*100) 
+  +  int3d(Th,2)( Grad(uh)'*Grad(vh)*2) 
+  + int3d(Th) (vh*f)
+  ; 
+  
+  P;
+
+@plot(uh,wait=1, nbiso=6);
+medit("   uh ",Th, uh); 
+\eFF
+
+\twoplot[height=7cm]{cube-bal-perio}{cube-bal-perio-medit}{view of the  surface isovalue of periodic solution $uh$ }{~\hfill\break view a the cut of the solution $uh$  with ffmedit}
+
+\end{example}
 \subsubsection{Poisson with mixed boundary condition}
 Here we consider the Poisson equation with mixed boundary value
 problems: For given functions $f$ and $g$, find $u$ such that
@@ -13579,7 +13894,7 @@ they are all the \texttt{FreeFem++} include file to make the link with \texttt{F
 \end{note}
 
 {\bf The compilation of your module}:
-the script \texttt{./load.link} compiles and makes
+the script \texttt{ff-c++} compiles and makes
 the link with \texttt{FreeFem++}, but be careful, the script
 has no way to known if you try to compile for a
 pure Windows environment or for a cygwin environment
@@ -13674,7 +13989,7 @@ It will be called automatically at load module time.
 
 To compile and link, do
 \bFF
-Brochet% ./load.link myfunction.cpp
+Brochet% ff-c++ myfunction.cpp
 g++ -c -g -Iinclude myfunction.cpp
 g++ -bundle -undefined dynamic_lookup -g myfunction.o -o ./myfunction.dylib
 \eFF
@@ -13757,7 +14072,7 @@ $$   \mathtt{dfft}(f,m,\varepsilon)_{k+nl} = \sum_{j'=0}^{m-1} \sum_{j=0}^{n-1} 
 
 {\scriptsize
 \begin{verbatim}
-% ./load.link  dfft.cpp ../download/install/lib/libfftw3.a -I../download/install/include
+%  ff-c++  dfft.cpp ../download/install/lib/libfftw3.a -I../download/install/include
 export MACOSX_DEPLOYMENT_TARGET=10.3
 g++ -c -Iinclude -I../download/install/include dfft.cpp
 g++ -bundle -undefined dynamic_lookup dfft.o -o ./dfft.dylib ../download/install/lib/libfftw3.a
@@ -13861,7 +14176,7 @@ the associed edp file is  \texttt{examples++-load/convect\_dervieux.edp}
 //  Implementation of P1-P0 FVM-FEM
 // ---------------------------------------------------------------------
 // $Id$
-// compile and link with ./load.link mat\_dervieux.cpp  (i.e. the file name without .cpp)
+// compile and link with ff-c++  mat\_dervieux.cpp  (i.e. the file name without .cpp)
 #include  <iostream>
 #include  <cfloat>
 #include  <cmath>
@@ -14364,7 +14679,7 @@ to compile with freefm++.
 To compile  the freefem++ load file  of SuperLu with freefem do:
 some find like : 
 \begin{verbatim}
-./load.link SuperLU.cpp  -L$HOME/work/LinearSolver/SuperLU_3.0/ -lsuperlu_3.0
+ff-c++ SuperLU.cpp  -L$HOME/work/LinearSolver/SuperLU_3.0/ -lsuperlu_3.0
 \end{verbatim}
 
 And to test the simple example:
