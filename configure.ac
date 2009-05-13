@@ -957,7 +957,7 @@ AC_ARG_WITH(lapack,
 )
 fi
 
-ff_lapackdir='$(LAPACKdir)'
+ff_lapackdir='$$(LAPACKdir)'
 if  test "$ff_lapack_ok" = yes ; then
   # no compilation of lapack in  arpack 
   ff_lapackdir=

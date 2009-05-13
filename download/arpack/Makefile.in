@@ -409,7 +409,7 @@ $(ARPACKLIB): ARPACK/fait
 	fi; \
 	cd ARPACK && make lib 
 	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o
-	-if test -n "FF_LAPACKdir" ; then 	$(AR) $(ARFLAGS) $(LAPACKLIB)  ARPACK/LAPACK/*.o ; fi
+	-if test -n '@FF_LAPACKdir@' ; then 	$(AR) $(ARFLAGS) $(LAPACKLIB)  ARPACK/LAPACK/*.o ; fi
 
 ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
 	-rm -rf ARPACK
