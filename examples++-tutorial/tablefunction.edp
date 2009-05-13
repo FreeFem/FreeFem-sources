@@ -17,4 +17,5 @@ Vhxy xx=x,yy=y;
 
 mesh Th=triangulate(xx[],yy[]);
 cout << " region = " <<  triangulate(xx[],yy[])[1].region  <<endl; 
+cout << fxy[]'*fxy[] << endl;
 plot(Th,wait=1); 
