@@ -3681,6 +3681,9 @@ void DclTypeMatrix()
   
 }
 
+template<class A,class B> 
+AnyType First(Stack,const AnyType &b) { 
+return   SetAny<A>(GetAny<B>(b).first);}
 
 void  init_lgfem() 
 {
@@ -3724,18 +3727,27 @@ void  init_lgfem()
  Dcl_TypeandPtr<pferbasearray>(); // il faut le 2 pour pourvoir initialiser 
  Dcl_Type< pfer >(); 
  Dcl_Type< pferarray >(); 
+ Dcl_Type< pferarray >(); 
 
+
+
+    
 //  pour des Func FE complex   // FH  v 1.43
- Dcl_TypeandPtr<pfecbase>(); // il faut le 2 pour pourvoir initialiser 
- Dcl_TypeandPtr<pfecbasearray>(); // il faut le 2 pour pourvoir initialiser 
- Dcl_Type< pfec >(); 
- Dcl_Type< pfecarray >(); 
-//  FH v 1.43
-
-// Dcl_Type< pmesharray *>(); // il faut le 2 pour pourvoir initialiser 
-
- map_type[typeid(pfes).name()] = new ForEachType<pfes>(); 
- map_type[typeid(pfes*).name()] = new ForEachTypePtrfspace<pfes,2>();
+    Dcl_TypeandPtr<pfecbase>(); // il faut le 2 pour pourvoir initialiser 
+    Dcl_TypeandPtr<pfecbasearray>(); // il faut le 2 pour pourvoir initialiser 
+    Dcl_Type< pfec >(); 
+    Dcl_Type< pfecarray >(); 
+    //  FH v 1.43
+    // add  mai 2009 FH for 3d eigen value.
+    Dcl_Type<FEbaseArrayKn<double> *>();
+    Dcl_Type<FEbaseArrayKn<Complex> *>();
+ 
+ 							      							   				 
+    
+    // Dcl_Type< pmesharray *>(); // il faut le 2 pour pourvoir initialiser 
+    
+    map_type[typeid(pfes).name()] = new ForEachType<pfes>(); 
+    map_type[typeid(pfes*).name()] = new ForEachTypePtrfspace<pfes,2>();
 
 
  Dcl_TypeandPtr<pf3rbase>(); // il faut le 2 pour pourvoir initialiser 
@@ -3749,6 +3761,23 @@ void  init_lgfem()
  Dcl_Type< pf3c >(); 
  Dcl_Type< pf3carray >(); 
 
+    
+    //  cast of eigen value  mai 2009 ...
+    map_type[typeid(FEbaseArrayKn<double> *).name()]->AddCast(
+							      new E_F1_funcT<FEbaseArrayKn<double> *,pferbasearray>(Cast<FEbaseArrayKn<double> *,pferbasearray> ),
+							      new E_F1_funcT<FEbaseArrayKn<double> *,pferarray>(First<FEbaseArrayKn<double> *,pferarray> ),
+							      new E_F1_funcT<FEbaseArrayKn<double> *,pf3rbasearray>(Cast<FEbaseArrayKn<double> *,pf3rbasearray> ),
+							      new E_F1_funcT<FEbaseArrayKn<double> *,pf3rarray>(First<FEbaseArrayKn<double> *,pf3rarray> )
+							      
+							      );				 
+    map_type[typeid(FEbaseArrayKn<Complex> *).name()]->AddCast(
+							       new E_F1_funcT<FEbaseArrayKn<Complex> *,pfecbasearray>(Cast<FEbaseArrayKn<Complex> *,pfecbasearray> ),
+							       new E_F1_funcT<FEbaseArrayKn<Complex> *,pfecarray>(First<FEbaseArrayKn<Complex> *,pfecarray> ),
+							       new E_F1_funcT<FEbaseArrayKn<Complex> *,pf3cbasearray>(Cast<FEbaseArrayKn<Complex> *,pf3cbasearray> ),
+							       new E_F1_funcT<FEbaseArrayKn<Complex> *,pf3carray>(First<FEbaseArrayKn<Complex> *,pf3carray> )
+							       
+							       );				 
+    
  map_type[typeid(pfes3).name()] = new ForEachType<pfes3>();  // 3d 
  map_type[typeid(pfes3*).name()] = new ForEachTypePtrfspace<pfes3,3>(); // 3d
 

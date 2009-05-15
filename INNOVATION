@@ -1,3 +1,5 @@
+v 3.2-1
+  - add EigenValue tool  for 3d case  mai 15, 2009. 
 v 3.2
   - add tools to set array like in matlab/scilab
     real[int] a(1:2:10),  def  a to 1,3,.. 10.

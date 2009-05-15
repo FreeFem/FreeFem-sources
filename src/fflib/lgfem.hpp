@@ -308,6 +308,20 @@ public:
     if (xx) delete xx;xx=y;
     ffassert( y->N() == Vh->NbOfDF);
   }
+    
+    void operator=(KN_<K> & y) { 
+	Vh=**pVh; 
+	throwassert((bool) Vh);
+	if (xx) 
+	  { // resize if need
+	  if(xx->N() != Vh->NbOfDF)
+	       delete xx;xx=0;
+	  }
+	if(!xx) xx= new KN<K>(Vh->NbOfDF) ; 
+	ffassert(SameShape(y,*xx));
+	*xx=y;
+    }
+    
   FESpace * newVh() { 
     throwassert(pVh  );
     const pfes pp= *pVh;
@@ -322,32 +336,40 @@ private: // rule of programming
   void operator= (const FEbase &); 
 };
 
+template<class K>
+class FEbaseArrayKn { public:// for eigen value 
+    int N;
+    FEbaseArrayKn(int NN):N(NN){}
+  virtual  void  set(int i,KN_<K> ) =0;
 
+};
 
 template<class K,class v_fes>
-class FEbaseArray {
+class FEbaseArray :public FEbaseArrayKn<K> {
 public:
   typedef typename v_fes::pfes pfes;
   typedef typename v_fes::FESpace FESpace;
   
-  int N;
+ // int N;
   FEbase<K,v_fes>  **xx;
-  FEbaseArray(const pfes  *ppVh,int NN) :N(NN),xx(new FEbase<K,v_fes> * [NN])
+  FEbaseArray(const pfes  *ppVh,int NN) :FEbaseArrayKn<K>(NN),xx(new FEbase<K,v_fes> * [NN])
   {
-    for (int i=0;i<N;i++)
+    for (int i=0;i<this->N;i++)
       xx[i]=new FEbase<K,v_fes>(ppVh);
   }
   ~FEbaseArray() { 
     //  cout << " ~FEbaseArray " << endl;
-    for (int i=0;i<N;i++)
+    for (int i=0;i<this->N;i++)
       xx[i]->destroy();
     delete [] xx;} 
   void destroy() { //cout << " destroy ~FEbaseArray " << endl; 
     delete this;}         
   FEbase<K,v_fes>** operator[](int i)  {
-    if(xx==0 || i <0 || i>=N) 
+    if(xx==0 || i <0 || i>=this->N) 
       ExecError("Out of bound in FEbaseArray");
     return xx+i;}  
+    
+    void  set(int i,KN_<K>  v){  **(operator[](i))=v;} 
 private: // rule of programming 
   FEbaseArray(const FEbaseArray &);
   void operator= (const FEbaseArray &); 

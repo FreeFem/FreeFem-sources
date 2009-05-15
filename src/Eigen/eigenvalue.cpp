@@ -187,7 +187,7 @@ basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
   {   "sym",&typeid(bool)},
   {   "sigma",&typeid(double)},
   {   "value",&typeid(KN<double> *)},
-  {   "vector",&typeid(pferarray) }, 
+  {   "vector",&typeid(FEbaseArrayKn<double> *) }, // pferarray
   {   "ncv",&typeid(long) }, // the number of Arnoldi vectors generated 
   {   "maxit",&typeid(long)}, // the maximum number of Arnoldi iterations 
   {   "ivalue",&typeid(KN<double> *)},
@@ -203,7 +203,7 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
   {  "nev",&typeid(long) },
   {  "sigma",&typeid(K)},
   {  "value",&typeid(KN<Complex> *)},
-  {  "vector",&typeid(pfecarray) }, 
+  {  "vector",&typeid(FEbaseArrayKn<double> *) }, // pfecarray
   {  "ncv",&typeid(long) }, // the number of Arnoldi vectors generated 
   {  "maxit",&typeid(long)}, // the maximum number of Arnoldi iterations 
   {  "rawvector",&typeid(KNM<Complex> *) }, 
@@ -229,14 +229,14 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
   KN<double> * resid=0;
   KNM<double> * rawvector=0;
   double ws,vs;           // for debugging FH ++++++++++
-  pferarray  evector2;
-  pferbasearray   evector=0;
+ // pferarray  evector2;
+  FEbaseArrayKn<double> *   evector=0;// change mai 2009
   tol=arg<double>(0,stack,0);
   nbev=arg<long>(1,stack,10);
   sym=arg<bool>(2,stack,false);
   sigma=arg<double>(3,stack,0.0);
   evalue=arg<KN<double> *>(4,stack,0);
-  evector2 =arg<pferarray>(5,stack,make_pair<pferbasearray,int>(0,0)); 
+  evector =arg<FEbaseArrayKn<double> *>(5,stack,0); 
   ncv= arg<long>(6,stack,0);
   maxit= arg<long>(7,stack,0);
   evaluei=arg<KN<double> *>(8,stack,0);
@@ -244,7 +244,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
   resid=arg<KN<double> *>(10,stack,0);
   mode = arg<long>(11,stack,3);
     
-  evector=evector2.first;
+ // evector=evector2.first;
   Matrice_Creuse<K> *pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
   Matrice_Creuse<K> *pB =  GetAny<Matrice_Creuse<K> *>((*expB)(stack));
   double * residptr=resid? (double*) *resid : 0;
@@ -406,18 +406,18 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	  
 	  if (evector)
 	    {
-	      FEbaseArray<K,v_fes> & ev(*evector);
+	      FEbaseArrayKn<K> & ev(*evector);
 	      int m = Min(nconv,(long) ev.N);
 	      for(int i=0;i<m;i++)
 		{
-		  FEbase<K,v_fes> & xx= **(ev[i]);
+		  //KN<K> & xx= *(ev(i));
 		    //if(xx.pVh->NbDoF != n)
 		    //ExecError("Wrong Type size of FEspace to store the eigen vector ");
 		    // if (xx.pVh != pOP1->pUh) 
 		    //    ExecError("Wrong Type of FEspace to store the eigen vector ");
 		    //xx.Vh = pOP1->Uh;
-		  KN_<K> vi(Z(':',i)) ;
-		  xx= new KN<K>(vi);
+		    KN_<K> vi(Z(':',i)) ;
+		    ev.set(i,vi);
 		  
 		}
 	    }
@@ -542,21 +542,21 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 		//  iev < 0 =>  complex  
 		//      start real :  rawev + n*(k-1) 
 		//      -start imag :  ramev +n*(k)
-		FEbaseArray<K,v_fes> & ev(*evector);
+		FEbaseArrayKn<K> & ev(*evector);
 		int m = Min(nconv,(long) ev.N);
 		for(int i=0;i<m;i++)
 		  {
 		    // K ev_i=
 		    //prob.EigenvalueImag(i);
-		    FEbase<K,v_fes> & xx= **(ev[i]);
+		    //KN<K> & xx= *(ev[i]);
 		    // if (xx.pVh != pOP1->pUh) 
 		    //    ExecError("Wrong Type of FEspace to store the eigen vector ");
 		    // xx.Vh = pOP1->Uh;
 		    // int  k=(ev_i < 0) ? i-1 : i;
 		    //int k=i;
-		    KN_<K> vi(Z(':',i));//rawev+n*k,n) ;
-		    xx= new KN<K>(vi);
-		    
+		     KN_<K> vi(Z(':',i));//rawev+n*k,n) ;
+		    //xx= new KN<K>(vi);
+		      ev.set(i,vi);//new KN<K>(vi));
 		  }
 	      }
 	    
@@ -581,20 +581,21 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
   KN<K> * resid=0;
   KNM<K> * rawvector=0;
   
-  pfecarray  evector2;
-  pfecbasearray   evector=0;
+ // pfecarray  evector2;
+  FEbaseArrayKn<Complex> *   evector=0;
   tol=arg<double>(0,stack,0);
   nbev=arg<long>(1,stack,0);
   sigma=arg<K>(2,stack,0.0);
   evalue=arg<KN<K> *>(3,stack,0);
-  evector2 =arg<pfecarray>(4,stack,make_pair<pfecbasearray,int>(0,0)); 
+ // evector2 =arg<pfecarray>(4,stack,make_pair<pfecbasearray,int>(0,0));
+   evector= arg<FEbaseArrayKn<Complex> * >(4,stack,0);
   ncv= arg<long>(5,stack,0);
   maxit= arg<long>(6,stack,0);
   rawvector=arg<KNM<K> *>(7,stack,0);
   resid=arg<KN<K> *>(8,stack,0);
   mode = arg<long>(9,stack,3);
   K * residptr= resid ? (K*) *resid : 0;
-  evector=evector2.first;
+  //evector=evector2.first;
   ffassert(mode>0 && mode <4) ; 
   Matrice_Creuse<K> *pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
   Matrice_Creuse<K> *pB =  GetAny<Matrice_Creuse<K> *>((*expB)(stack));
@@ -753,13 +754,15 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
 	}
       if (evector)
 	{
-	  FEbaseArray<K,v_fes> & ev(*evector);
+	  //FEbaseArray<K,v_fes> & ev(*evector);
+	    FEbaseArrayKn<K>  & ev(*evector);
 	  int m = Min(nconv,(long) ev.N);
 	  for(int i=0;i<m;i++)
 	    {
-	      FEbase<K,v_fes> & xx= **(ev[i]);
-	      KN_<K> vi(Z(':',i)) ;
-	      xx= new KN<K>(vi);
+	      //FEbase<K,v_fes> & xx= **(ev[i]);
+	      //KN_<K> vi(Z(':',i)) ;
+	      //xx= new KN<K>(vi);
+		ev.set(i,Z(':',i));
 	      
 	    }
 	}
