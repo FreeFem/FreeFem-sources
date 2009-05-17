@@ -25,6 +25,16 @@ examples-bamg/test/dotest*.pl 0ldUserReadMe.txt
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
 
+FF_EXAMPLES_FILES = COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX INNOVATION \
+mode-mi-edp.zip \
+examples++-tutorial/aile.msh examples++-tutorial/xyf \
+examples++-3d/dodecaedre01.mesh  \
+examples++-load/load.link \
+./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh  \
+./download/fftw/Makefile ./download/fftw/Makefile.am \
+examples++/*.edp 
+
+
 # Creates a file named "ChangeLog" containing the chronology of all
 # modifications to the source files. Needs "cvs2cl" to be installed.
 
@@ -136,15 +146,21 @@ clean-local::
 
 # Native MacOS packaging
 # ----------------------
+install-exec-local:: 
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(pkgdatadir)/$(VERSION)
+	tar cvf - $(FF_EXAMPLES_FILES)| (cd $(DESTDIR)$(pkgdatadir)/$(VERSION); tar xvf -)
+
 ListFiles-natives: .FORCE 
-	echo COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX INNOVATION >$@	
-	echo mode-mi-edp.zip >> $@
-	echo examples++-tutorial/aile.msh examples++-tutorial/xyf >> $@
-	echo examples++-3d/dodecaedre01.mesh  >> $@
-	echo examples++-load/load.link >> $@
-	echo ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh >> $@
+#	echo COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX INNOVATION >$@	
+#	echo mode-mi-edp.zip >> $@
+	echo $(FF_EXAMPLES_FILES) >$@
+#	echo examples++-tutorial/aile.msh examples++-tutorial/xyf >> $@
+#	echo examples++-3d/dodecaedre01.mesh  >> $@
+#	echo examples++-load/load.link >> $@
+#	echo ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh >> $@
 	echo ./download/fftw/Makefile ./download/fftw/Makefile.am  >>$@
-	find .  -name '*.edp' -o -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
+#	find .  -name '*.edp' -o -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
+	find .  -o -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
 List-agl-dylib: src/nw/FreeFem++
 	otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}' >$@
 .FORCE:

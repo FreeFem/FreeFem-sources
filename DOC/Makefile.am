@@ -1,8 +1,7 @@
-
+dist_pkgdata_DATA=$(DOCPDF)
 documentation: $(DOCPDF) 
 docps:  $(DOCPS) $(DOCPSGZ) 
 docpdf: $(DOCPDF) 
-
 %.dvi:%.tex cpfigs $(CPFIGS_EPS) 
 	-rm $*.dvi $*.aux $*.log \
                 $*.toc $*.ind $*.glo $*.out $*.blg $*ilg $*.idx $*.bbl $*.tmp	
