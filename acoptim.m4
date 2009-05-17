@@ -15,6 +15,11 @@ then
         CHECK_COMPILE_FLAG(C,$ff_m64,CFLAGS)
 	CHECK_COMPILE_FLAG(C++,$ff_m64,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,$ff_m64,FFLAGS)	
+#  add -fPIC on on 64 architecture 
+        CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS)
+	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
+	CHECK_COMPILE_FLAG(Fortran 77,-fPIC,FFLAGS)	
+
 fi
 
 # Debug mode (no optimisation)
