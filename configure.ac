@@ -10,7 +10,7 @@
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.2-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.3,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
@@ -344,10 +344,7 @@ ff_x11=no
 
 if test "$ff_mingw" = no && test "$with_x" != "no";
 then
-	if test -d /usr/X11R6
-	then
-		ff_x11=yes
-	fi
+	ff_x11=yes
 fi
 
 AC_MSG_RESULT($ff_x11)
@@ -403,7 +400,12 @@ ff_gl_ok=no
 ff_glx_ok=no
 ff_agl_ok=no
 ff_libs="$LIBS"
+AC_ARG_WITH(flib,[  --with-flib= the fortran library ])
+AC_ARG_ENABLE([opengl],AS_HELP_STRING([--enable-opengl],
+                                      [Enable/disable support for OpenGL]))
+
 # echo "  .... LIBS = $LIBS .... " 
+if test x$enable_opengl != xno; then
 # GL libraries seem to depend on some dlopen capabilities
 if test "$enable_static" != yes -a "$ff_glut_ok" != yes
 then
@@ -475,6 +477,7 @@ then
     fi
     
 
+fi
 fi
 
 if test "$ff_glut_ok" = yes

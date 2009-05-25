@@ -40,6 +40,8 @@ $(SRCDIR): $(PKGDIR)/$(PACKAGE)
 $(PKGDIR)/$(PACKAGE):
 	cd $(PKGDIR); $(WGET)  $(SERVER)/$(PACKAGE)
 
+clean: clean-local
+
 clean-local:
 	-rm -rf fftw-* FAIT 
 

@@ -771,7 +771,7 @@ AnyType Adaptation::operator()(Stack stack) const
   nTh= new Triangles(nbsx,Th,KeepBackVertices); // Adaption is here
   
   if (split)
-	    Th.SplitElement(1);
+	    nTh->SplitElement(1); // modif FH mai 2009 (thank J-M Mirebeau) : Th ->nTh
  
   if(SplitEdgeWith2Boundary)
     nTh->SplitInternalEdgeWithBorderVertices();

@@ -618,7 +618,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
     int nbord=0;
     if ( tstart )
       it =  Th(tstart);
-    else  
+    else  if(quadtree)
       {  
 	const Vertex * v=quadtree->NearestVertexWithNormal(P);
 	if (!v) 
@@ -631,6 +631,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  cout <<  "  Close : "<<  *v << " " << Th(v) << " "; 
     
       }
+    else ffassert(0);
 
     if(verbosity>200)
       cout << "tstart=" << tstart << " "<< "it=" << it << " P="<< P << endl; 
@@ -712,7 +713,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  kbord[nbord++]=it;
 	  if(nbord>=5)  HeapSort(kbord,nbord);
 	}
-      if(verbosity>1)
+      if(verbosity>101)
 	{
 	cout << " bord "<< it<< "   nbf < 0 : " <<n << " (inb) " << inkbord << " nfb" << nbord<<endl;
 	    R ss=0; 
