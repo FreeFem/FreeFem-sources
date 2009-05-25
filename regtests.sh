@@ -76,7 +76,7 @@ if test "${MPIPROG}" != ""
     if [ $mpich -ne 0 ] ; then
     dotest "mpirun -np $nprocs -machinefile machinefile ${PROGLOC}/mpi/FreeFem++-mpi${EXEEXT}" mpi $script
     else
-    lamboot 
+	[[ -f "$(which lamboot 2>/dev/null)" ]] && lamboot	
      dotest "mpirun -np $nprocs ${PROGLOC}/mpi/FreeFem++-mpi${EXEEXT}" mpi $script
     fi
 fi

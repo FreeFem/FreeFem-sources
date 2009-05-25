@@ -729,7 +729,8 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 
   int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt)
   {
-      bool ddd=verbosity>200;
+    bool ddd=verbosity>200;
+      bool nomove=true;
     R lambda[4];
     Phat.toBary(lambda);
     if(ddd) cout << "\n\n\n   WT: "  << Phat << " :  "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3] << " u = "<< U << " dt " << dt <<endl;
@@ -772,7 +773,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
       {
 	dt =0;
 	Phat=R3(l+1);
-
+	nomove=false;
       }
     else 
       {
@@ -787,6 +788,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	
 	R eps1 = T.mesure()   * 1.e-5;
 	   if(ddd)  cout << " k= " << k << endl;
+    
 	if (k==3) //  3 face de sortie possible 
 	  {
 	    // let j be the vertex beetween the 3 faces 
@@ -864,6 +866,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	    throwassert(d);
 	    R coef =  lambda[kk]/d;
 	    R coef1 = 1-coef;
+	    nomove= (coef<1.e-6);
 	    dt        = dt*coef1;
 	    lambda[0] = lambda[0]*coef1 + coef *l[0];
 	    lambda[1] = lambda[1]*coef1 + coef *l[1];
@@ -873,14 +876,35 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 			 <<lambda[1] << " " <<lambda[2] << " " << lambda[3] << endl;
 	    lambda[kk] =0;
 	     }
-	    else // on ne bouge pas on resort 
-	      {
-	       if(ddd)  cout << "            WT : on ne bouge pas on resort \n";
-	      return kk;
-	      }
 	      
+	 
+	  
 	  }
+	 
       }
+    if(nomove )
+	// on ne bouge pas on utilse Find ... 
+	  {
+	      R dx2= (U,U)*dt*dt;
+	      R ddt=dt, dc=1;
+	      // if Udt < h/2 => recherche un point final  
+	      if(dx2*dx2*dx2 < Det*Det/4)
+		  dt=0;       
+	      else 
+		{ 
+		    dc=0.25;
+		    ddt=dt*dc;
+		    PF= P + U*ddt; // on avance que d'un 1/4
+		    dt -= ddt;
+		}
+	      bool outside;
+	      const Mesh3::Element  *K=Th.Find(PF, Phat,outside,&Th[it]);
+	      if(outside) dt=0; // on a fini 
+	      if(ddd) cout << "   \t ***** WT :  Lock -> Find P+U*ddt*c "<< it<< " " << " -> "<< Th(K) 
+		  << " dt = " << dt << " c = " << dc << " outside: "<< outside <<endl;
+	      return 4+Th(K);
+     }
+      
     //  on remet le point dans le tet. 
     int jj=0;
     R lmx=lambda[0];

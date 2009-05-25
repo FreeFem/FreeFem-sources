@@ -249,7 +249,8 @@ private: // pas de copie pour ne pas prendre l'adresse
 };
   inline  R1 ExtNormal( GenericVertex<R1> *const v[2],int const f[1])  {   return f[0]==0 ? R1(-1):R1(1);  }
   inline  R2 ExtNormal( GenericVertex<R2> *const v[3],int const f[2])  {   return R2(*v[f[1]],*v[f[0]]).perp();  }
-  inline  R3 ExtNormal( GenericVertex<R3> *const v[4],int const f[3])  {   return R3(*v[f[1]],*v[f[0]])^R3(*v[f[2]],*v[f[0]]) ;  }
+    // correct signe N in 3d mai 2009 (FH)
+  inline  R3 ExtNormal( GenericVertex<R3> *const v[4],int const f[3])  {   return R3(*v[f[0]],*v[f[2]])^R3(*v[f[0]],*v[f[1]]) ;  }
     
 
 template<typename Data>  

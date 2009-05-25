@@ -1,6 +1,8 @@
-load "../examples++-load/SuperLu"
-load "../examples++-load/msh3"
-load "../examples++-load/medit"
+/*
+   Warning in before version 3.2-1 the nomarl are interal normal
+   after the signe is correct and now the noral was exterior normal. 
+ */
+load "msh3"
 int nn=20;
 mesh Th2=square(nn,nn);
 fespace Vh2(Th2,P2);
@@ -14,14 +16,14 @@ mesh3 Th=buildlayers(Th2,nn,
   reffacelow = rdown);
 
 
-fespace Vh(Th,P23d);
+fespace Vh(Th,P2);
 
 func ue =   2*x*x + 3*y*y + 4*z*z + 5*x*y+6*x*z+1;
 func uex=   4*x+  5*y+6*z;
 func uey=   6*y + 5*x;
 func uez=   8*z +6*x;
 func f= -18. ;
-Vh uhe = ue; // bug ..
+Vh uhe = ue; //
 
 cout << " uhe min:  " << uhe[].min << " max:" << uhe[].max << endl;
 
@@ -29,15 +31,13 @@ Vh u,v;
 
 macro Grad3(u) [dx(u),dy(u),dz(u)]  // EOM
 
-problem Lap3d(u,v,solver=sparsesolver)
-  =
-  int3d(Th)(Grad3(v)' *Grad3(u)) 
-   +int2d(Th)(u*v)
-  - int3d(Th)(f*v) 
 
-//  + int2d(Th,2) (ue + uez*v ) //(uex*N.x +uey*N.y +uez*N.z)*v )
-  + int2d(Th,2) ( ue*v+ (uex*N.x +uey*N.y +uez*N.z)*v )
-  + on(1,2,u=ue);
+  problem Lap3d(u,v,solver=CG)  =
+  int3d(Th)(Grad3(v)' *Grad3(u)) //') for emacs 
+  + int2d(Th,2)(u*v)  
+  - int3d(Th)(f*v) 
+  - int2d(Th,2) ( ue*v + (uex*N.x +uey*N.y +uez*N.z)*v )
+  + on(1,u=ue);
 Lap3d;
 cout << " u min::   " << u[]. min << "  max: " << u[].max << endl;
 real err= int3d(Th)( square(u-ue) );
@@ -49,5 +49,7 @@ cout << " aire2 = " << aire2 << endl;
 func uuu= 2.+x;
 cout << uuu(1,1,1) << endl;
 assert( abs(aire2-1.) < 1e-6);
-assert(err < 1e-9);
-medit(" Sol ", Th, u ,order=1);//  to see the sol in P1 
+plot(u,wait=1);
+
+assert( err < 1e-6);
+
