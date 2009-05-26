@@ -1342,6 +1342,15 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
 template<typename T,typename B,typename V>
 void GenericMesh<T,B,V>::BuildBound()
 {
+    mes=0.;
+    mesb=0.;
+    
+    for (int i=0;i<nt;i++)  
+	mes += this->elements[i].mesure();
+    
+    for (int i=0;i<nbe;i++)  
+	mesb += this->be(i).mesure();  
+    
     if(vertices && (nv>0))
     {
 	Pmin=vertices[0];

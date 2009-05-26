@@ -686,6 +686,24 @@ typedef GQuadratureFormular<R3>  PQF3;
 // 2 4 (formule 2)
 // A.H. Stroud, Approximate calculation of multiple integrals, Prentice-Hall, Englewood Cliffs, N.J., 1971.
 // JavaScript:formule('t3-2-4b')
+    
+    PQP3  QF_TET_1[]=
+    { 
+    PQP3(R3(0.25,0.25,0.25), 1)
+    };
+    PQF3 const QuadratureFormular_Tet_1(1,1,QF_TET_1);
+ 
+    
+    PQP3  QF_TET_1lump[]=
+    { 
+    PQP3(R3(0,0,0),0.25),
+    PQP3(R3(1.,0,0),0.25),
+    PQP3(R3(0,1.,0),0.25),
+    PQP3(R3(0,0,1.),0.25),
+    };
+    PQF3 const QuadratureFormular_Tet_1lump(1,4,QF_TET_1lump);
+    
+    
 PQP3  QF_TET_2[]=
   { 
      PQP3(R3(0.58541019662496845446137605030968, 0.138196601125010515179541316563436, 0.138196601125010515179541316563436), 0.25),

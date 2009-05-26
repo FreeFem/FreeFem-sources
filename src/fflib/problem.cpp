@@ -52,7 +52,9 @@ basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
     { "qfnbpE",&typeid(long)},
     { "optimize",&typeid(bool)},
     { "binside",&typeid(double)},
-    { "mortar",&typeid(bool)}
+    { "mortar",&typeid(bool)},
+    { "qfV", &typeid(const Fem2D::GQuadratureFormular<R3> *)},
+
 };
 
 
@@ -4286,7 +4288,7 @@ void SetArgsFormLinear(const ListOfId *lid,int ordre)
 const Fem2D::GQuadratureFormular<R3> & CDomainOfIntegration::FIV(Stack stack) const 
 {
   using namespace Fem2D;
-  if (nargs[0]) return  *GetAny<const Fem2D::GQuadratureFormular<R3> *>((*nargs[0])(stack));
+  if (nargs[8]) return  *GetAny<const Fem2D::GQuadratureFormular<R3> *>((*nargs[8])(stack));
   int exact = 5;
   if (nargs[2]) exact=  GetAny<long>((*nargs[2])(stack))-1;
   GQuadratureFormular<R3> *qf=QF_Simplex<R3>(exact);//QF_Tria_exact(exact);
@@ -4299,7 +4301,7 @@ const Fem2D::GQuadratureFormular<R3> & CDomainOfIntegration::FIV(Stack stack) co
   if( QuadratureFormular_T_7.exact >= exact ) return QuadratureFormular_T_7;
   if( QuadratureFormular_T_9.exact >= exact ) return QuadratureFormular_T_9;
   */
-  cerr << " Ordre of the Integration Formular ordre " << exact+1 << " exact = " << exact << endl;
+  cerr << "Warning :  Order of the Integration Formular ordre " << exact+1 << " exact = " << exact << endl;
   //  ExecError(" We find  no Integration Formular on Tet for this  order to hight");
   return QuadratureFormular_Tet_5;
 }

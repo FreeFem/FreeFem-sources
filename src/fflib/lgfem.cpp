@@ -3805,6 +3805,12 @@ void  init_lgfem()
  Global.New("qf5pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre5));
  Global.New("qf1pElump",CConstant<const QuadratureFormular1d *>(&QF_LumpP1_1D));
  
+  Global.New("qfV1",CConstant<const GQuadratureFormular<R3>  *>(&QuadratureFormular_Tet_1));
+  Global.New("qfV2",CConstant<const GQuadratureFormular<R3>  *>(&QuadratureFormular_Tet_2));
+  Global.New("qfV5",CConstant<const GQuadratureFormular<R3>  *>(&QuadratureFormular_Tet_5));
+  Global.New("qfV1lump",CConstant<const GQuadratureFormular<R3>  *>(&QuadratureFormular_Tet_1lump));
+     
+    
  //  juste du code genere 
  
  Global.New("wait",CConstant<bool*>(&TheWait));
