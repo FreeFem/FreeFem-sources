@@ -844,6 +844,8 @@ Mesh3 * build_layer (const Mesh & Th2, const int Nmax, const int *tab_Ni,
   if(verbosity > 1) cout << "debut :   Som3D_mesh_product_Version_Sommet_mesh_tab( Nmax, tab_Ni, tab_zmin, tab_zmax, Th2, Th3);   "<< endl;
   Som3D_mesh_product_Version_Sommet_mesh_tab( Nmax, tab_Ni, tab_zmin, tab_zmax, Th2, 
 			maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin, *Th3);    
+    
+    
   return Th3;
 }
 

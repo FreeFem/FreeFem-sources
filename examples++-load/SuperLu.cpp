@@ -481,8 +481,8 @@ class SolveSuperLU :   public MatriceMorse<R>::VirtualSolver, public SuperLUDriv
    mutable mem_usage_t    mem_usage;
    
 public:
-  SolveSuperLU(const MatriceMorse<R> &AA,int strategy,double ttgv, double epsilon=1e-6,
-	       double pivot=-1.,double pivot_sym=-1., string & param_char, KN<long> pperm_r, 
+  SolveSuperLU(const MatriceMorse<R> &AA,int strategy,double ttgv, double epsilon,
+	       double pivot,double pivot_sym, string & param_char, KN<long> pperm_r, 
 	       KN<long> pperm_c ) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),
