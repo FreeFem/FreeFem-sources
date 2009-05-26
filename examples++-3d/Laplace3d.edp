@@ -2,6 +2,7 @@
    Warning in before version 3.2-1 the nomarl are interal normal
    after the signe is correct and now the noral was exterior normal. 
  */
+verbosity=2;
 load "msh3"
 int nn=20;
 mesh Th2=square(nn,nn);
@@ -41,7 +42,14 @@ macro Grad3(u) [dx(u),dy(u),dz(u)]  // EOM
 Lap3d;
 cout << " u min::   " << u[]. min << "  max: " << u[].max << endl;
 real err= int3d(Th)( square(u-ue) );
+real aa1= int3d(Th,qfV=qfV1)(u) ;
+real aa2= int3d(Th,qfV=qfV1lump)(u) ;
+
+cout << " aa1 = " << aa1 << endl;
+cout << " aa2 = " << aa2 << endl;
 cout << int3d(Th)(1.) << " = " << Th.mesure << endl;
+cout << int3d(Th,qfV=qfV1)(1.) << " = " << Th.mesure << endl;
+cout << int3d(Th,qfV=qfV1lump)(1.) << " = " << Th.mesure << endl;
 Vh d= ue-u;
 cout <<  " err = " << err <<  " diff l^\intfy = " << d[].linfty << endl;
 real  aire2=int2d(Th,2)(1.); // bug correct in version 3.0-4 

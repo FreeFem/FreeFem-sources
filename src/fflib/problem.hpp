@@ -234,7 +234,7 @@ class BC_set : public E_F0mps { public:
 
 class CDomainOfIntegration: public E_F0mps { 
 public:
-  static const int n_name_param =8;
+  static const int n_name_param =9;
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5 } ; //3d

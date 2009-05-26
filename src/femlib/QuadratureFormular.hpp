@@ -133,6 +133,8 @@ typedef GQuadratureFormular<R1> QuadratureFormular1d;
   extern const GQuadratureFormular<R2> QuadratureFormular_T_7;
   extern const GQuadratureFormular<R2>  QuadratureFormular_T_9;
 
+  extern const GQuadratureFormular<R3> QuadratureFormular_Tet_1;
+  extern const GQuadratureFormular<R3> QuadratureFormular_Tet_1lump;
   extern const GQuadratureFormular<R3> QuadratureFormular_Tet_2;
   extern const GQuadratureFormular<R3> QuadratureFormular_Tet_5;
   
