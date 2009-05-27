@@ -759,11 +759,11 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     l[1] /= Det;
     l[2] /= Det;
     l[3] /= Det;
-     if(ddd)  cout << "\t\t\tWT " << it << ", " << Phat << ",  " << PF
+     if(ddd)  cout << "\t\t\tWT " << it << ", " << Phat << ",  PF=" << PF
 		   << " :  "  << l[0] << " " <<l[1] <<" " <<l[2] << " " <<l[3] 
 	           << " == " << det(Q[0],Q[1],Q[2],PF)/Det
-		   << " :  "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3] 
-	             
+		   << " : l (in) "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3] 
+		   << " PF= K(l) = " << Th[it](R3(l+1)) 
 		   <<endl ;
 		  
     const R eps = 1e-8;
@@ -774,6 +774,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	dt =0;
 	Phat=R3(l+1);
 	nomove=false;
+	return -1;
       }
     else 
       {
@@ -888,7 +889,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	      R dx2= (U,U)*dt*dt;
 	      R ddt=dt, dc=1;
 	      // if Udt < h/2 => recherche un point final  
-	      if(dx2*dx2*dx2 < Det*Det/4)
+	      if(dx2*dx2*dx2 > Det*Det/4)
 		  dt=0;       
 	      else 
 		{ 
@@ -901,7 +902,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	      const Mesh3::Element  *K=Th.Find(PF, Phat,outside,&Th[it]);
 	      if(outside) dt=0; // on a fini 
 	      if(ddd) cout << "   \t ***** WT :  Lock -> Find P+U*ddt*c "<< it<< " " << " -> "<< Th(K) 
-		  << " dt = " << dt << " c = " << dc << " outside: "<< outside <<endl;
+		  << " dt = " << dt << " c = " << dc << " outside: "<< outside <<" , PF " << PF << endl;
 	      return 4+Th(K);
      }
       
@@ -916,7 +917,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     if(lambda[2]<0) lambda[jj] += lambda[2],lambda[2]=0;
     if(lambda[3]<0) lambda[jj] += lambda[3],lambda[3]=0;
     Phat=R3(lambda+1);
-    if(ddd) cout  << "\t\t\t -> "<< dt << " : "  << Phat << ", " << kk << " jj= "<< jj << " "<< lmx << endl; 
+    if(ddd) cout  << "\t\t\t -> "<< dt << " : "  << Phat << " K(Phat) ="<< Th[it](Phat) <<  ", " << kk << " jj= "<< jj << " "<< lmx << endl; 
     assert(kk<0 || lambda[kk]==0);
     return kk;
   }        

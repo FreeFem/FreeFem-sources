@@ -3374,7 +3374,11 @@ if (ddt)
 	      int it=Th3(mpc.T3);
 	      if(ddd) cout << " IN: " <<  (*mpc.T3)(PHat) << " ; " << mpc.P <<" : " << ddt << endl;
 	      while ( (j=WalkInTet(Th3,it,PHat,R3(GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),GetAny<double>((*w)(s))),ddt))>=0) 
-		if(j>3) it=j-4;
+		  if(j>3)  { 
+		      it=j-4;
+		  mpc.change(PHat,Th3[it],0);
+	          if(ddd) cout << "   **P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it ;
+		  }
 		else
                 { 
 		  if(ddd) cout << "P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it ;
