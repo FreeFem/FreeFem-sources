@@ -84,7 +84,7 @@ void initArrayOperatorlong()
      aatypeknlongp= atype<KN<long>*>(); // for  compilation error with g++ 3.2.2
 
      Add<KN_<long> >("sort",".",new OneOperator1_<KN_<K>,KN_<K> >(SortKn<K, KN_<K> >));
-     Add<KN<long> >("sort",".",new OneOperator1_<KN<K>,KN<K> >(SortKn<K, KN<K> >));
+    // Add<KN<long> >("sort",".",new OneOperator1_<KN<K>,KN<K> >(SortKn<K, KN<K> >));
      Add<KN<long> *>("sort",".",new OneOperator1_<KN<K>*,KN<K>* >(SortpKn<K>));
      
      

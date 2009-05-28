@@ -55,7 +55,7 @@ void initArrayOperatordouble()
 
     Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(square));
     Add<KN_<double> >("sort",".",new OneOperator1_<KN_<K>,KN_<K> >(SortKn<K, KN_<K> >));
-    Add<KN<double> >("sort",".",new OneOperator1_<KN<K>,KN<K> >(SortKn<K, KN<K> >));
+   // Add<KN<double> >("sort",".",new OneOperator1_<KN<K>,KN<K> >(SortKn<K, KN<K> >));
     Add<KN<double> *>("sort",".",new OneOperator1_<KN<K>*,KN<K>* >(SortpKn<K>));
     
   //  Add<KN_<double> >("sort",".",new OneOperator2_<KN_<K>,KN_<K>,KN_<long> >(SortKn<K,long, KN_<K>,KN_<long>  >));
@@ -63,7 +63,7 @@ void initArrayOperatordouble()
     Global.Add("sort","(",new OneOperator2_<KN<K>*,KN<K>*,KN<long>* >(SortpKn2<K,long>));
     
     Add<KN_<double> >("quantile",".",new OneOperator1<QuantileKN<K>,KN_<K> >(Build<QuantileKN<K>,KN_<K> >));
-    Add<KN<double> >("quantile",".",new OneOperator1<QuantileKN<K>,KN_<K> >(Build<QuantileKN<K>,KN_<K> >, atype<KN<K> >()));
+ //   Add<KN<double> >("quantile",".",new OneOperator1<QuantileKN<K>,KN_<K> >(Build<QuantileKN<K>,KN_<K> >, atype<KN<K> >()));
    // Add<KN_<double> * >("quantile",".",new OneOperator1<QuantileKN<K>,KN_<K> >(Build<QuantileKN<K>,KN_<K> >, atype<KN<K> >()));
     Add<KN<double> * >("quantile",".",new OneOperator1<QuantileKN<K>,KN_<K> >(Build<QuantileKN<K>,KN_<K> >, atype<KN<K> *>() ));
     Add<QuantileKN<K> >("(","",new OneOperator2_<K,QuantileKN<K>,double>(Quantile<K>));

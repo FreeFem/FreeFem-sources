@@ -1,6 +1,9 @@
 
 v 3.3
   warning : 
+  -  in int3d flag qfV=  a 3d quadrature formula
+        the 3d quadrature formula are
+         qfV1 , qfV1lump, qfV2 , qfV5  (where the number is the ordre of the quadrature)
   -  correct signe of the normal in 3d (now the normal is exterior)
       -------------------------------------------------------------
   - correct in adapted mesh the flag splitin2=  (no tested)

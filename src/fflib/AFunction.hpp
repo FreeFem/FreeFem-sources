@@ -250,12 +250,13 @@ class basicForEachType : public CodeAlloc {
      virtual Expression Destroy(const C_F0 &) const ;
      virtual bool ExistDestroy() const {return destroy;} 
      virtual Type_Expr SetParam(const C_F0 & c,const ListOfId * l,size_t & top) const;
+     virtual Expression OnReturn(Expression f) const; 
      // { return make_pair<aType,const E_F0  *>(this,c.left());}
 
    protected: 
      basicForEachType(const type_info  & k ,const size_t ,
                             const E_F1_funcT_Type * p=0,basicForEachType *rr=0,
-                            Function1 iv=0,Function1 id=0) ;
+                            Function1 iv=0,Function1 id=0, Function1 dreturn=0) ;
 /*    inline basicForEachType(const type_info  & k ,const type_info  & kf ,const size_t ,
                             const E_F1_funcT_Type * p=0,basicForEachType *rr=0,
                             Function1 iv=0,Function1 id=0) ;*/
@@ -267,6 +268,7 @@ public:
     OneOperator * casting; // list of operator for casting to this type 
     
     const E_F1_funcT_Type * un_ptr;        //  is ptr -> get value function
+    Function1 DoOnReturn;        //  to call some thing on return. 
     
     
     Function1 InitExp;       //  to init the ptr value 
@@ -623,6 +625,7 @@ class basicAC_F0;
 	  bool operator!=(const C_F0 & a) const {return f!=a.f || r != a.r;}
 //          Type_Expr SetParam(const ListOfId * l,size_t & top) const ;
       bool MeshIndependent() const { return f ==0 ? f->MeshIndependent() : false;}
+     C_F0 OnReturn() {	 f=r->OnReturn(f); return *this;  } // Add mai 2009 (for return statment.
 private:
 friend class Block;	 
 friend class TableOfIdentifier; 
@@ -647,7 +650,7 @@ class ForTypeVoid:  public basicForEachType{public:
 
 template<class T> 
 class ForEachType:  public basicForEachType{public:
-    ForEachType(Function1 iv=0,Function1 id=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id) {
+    ForEachType(Function1 iv=0,Function1 id=0,Function1 OnReturn=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id,OnReturn) {
      if (sizeof(T) > sizeof(AnyTypeWithOutCheck) )
       {
         cout << " Sorry the " <<typeid(T).name() << " is too large  ( " << sizeof(T) 
@@ -658,7 +661,7 @@ class ForEachType:  public basicForEachType{public:
 };
 template<class T> 
 class ForEachType<T*>:  public basicForEachType{public:
-    ForEachType(Function1 iv=0,Function1 id=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id) { }
+    ForEachType(Function1 iv=0,Function1 id=0,Function1 OnReturn=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id,OnReturn) { }
 };
 
 template<class A,class B>  AnyType UnRef(Stack,const AnyType &a) ; 
@@ -669,14 +672,14 @@ template<class A>  AnyType Destroy(Stack,const AnyType &a) ;
 template<class T> 
 class ForEachTypePtr:  public basicForEachType { public:
     ForEachTypePtr();
-    ForEachTypePtr(Function1 init,Function1 dl);         
+    ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn=0);         
     ForEachTypePtr(Function1 dl);
 };
 
 template<class T> 
 class ForEachTypePtr<T*>:  public basicForEachType { public:
-    ForEachTypePtr();
-    ForEachTypePtr(Function1 init,Function1 dl);         
+    ForEachTypePtr(T* bb=0,Function1 onreturn=0);
+    ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn=0);         
     ForEachTypePtr(Function1 dl);
 };
 
@@ -2564,12 +2567,12 @@ template<class T>
          ::Initialize<T>,::Delete<T>){}
          
 template<class T> 
- ForEachTypePtr<T>::ForEachTypePtr(Function1 init,Function1 dl): 
+ ForEachTypePtr<T>::ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn): 
          basicForEachType(typeid(T*),sizeof(T*),
 //         new E_F1_funcT<T,T*>(UnRef<T>),atype<T>(),
          new E_F1_funcT_Type(atype<T>(),this,UnRef<T>),atype<T>(),
-
-         init,dl){}
+			  init,
+			  dl , onreturn ){}
          
 template<class T> 
  ForEachTypePtr<T>::ForEachTypePtr(Function1 dl): 
@@ -2579,19 +2582,21 @@ template<class T>
          
 
 template<class T> 
- ForEachTypePtr<T*>::ForEachTypePtr(): 
+ ForEachTypePtr<T*>::ForEachTypePtr(T* unused,Function1 OnReturn): 
          basicForEachType(typeid(T**),sizeof(T**),
 //         new E_F1_funcT<T*,T**>(UnRef<T*>),atype<T*>(),
          new E_F1_funcT_Type(atype<T*>(),this,UnRef<T*>),atype<T*>(),
 
-         ::InitializePtr<T*>,::DestroyPtr<T*>){}
+         ::InitializePtr<T*>,::DestroyPtr<T*>,OnReturn){}
       
 template<class T> 
- ForEachTypePtr<T*>::ForEachTypePtr(Function1 init,Function1 dl): 
+ ForEachTypePtr<T*>::ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn): 
          basicForEachType(typeid(T**),sizeof(T**),
         // new E_F1_funcT<T*,T**>(UnRef<T*>),atype<T*>(),
          new E_F1_funcT_Type(atype<T*>(),this,UnRef<T*>),atype<T*>(),
-         init,dl){}
+			  init  ,
+			  dl ,
+			  onreturn){}
         
 template<class T> 
  ForEachTypePtr<T*>::ForEachTypePtr(Function1 dl): 
@@ -2634,10 +2639,10 @@ inline C_F0 & operator+=(C_F0 & a,C_F0 &b)
 
 
 template<class T>
-  void Dcl_TypeandPtr (Function1 i,Function1 d,Function1 pi,Function1 pd)
+  void Dcl_TypeandPtr (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)
    {
-      map_type[typeid(T).name()] = new ForEachType<T>(i,d); 
-      map_type[typeid(T*).name()] = new ForEachTypePtr<T>(pi,pd); 
+      map_type[typeid(T).name()] = new ForEachType<T>(i,d,OnReturn); 
+      map_type[typeid(T*).name()] = new ForEachTypePtr<T>(pi,pd,pOnReturn); 
    }
 
 
@@ -2663,12 +2668,12 @@ template<class T>
    }
    
 template<class T>
-  aType Dcl_Type (Function1 iv=0,Function1 id=0)
+  aType Dcl_Type (Function1 iv=0,Function1 id=0,Function1 Onreturn=0)
    {
      if (sizeof(T) >sizeof(AnyData)) {
        cerr << " the type   " << typeid(T).name() << " is too large " << sizeof(AnyData) <<  endl;
        throwassert(sizeof(T) <=sizeof(AnyData));}
-     return map_type[typeid(T).name()] = new ForEachType<T>(iv,id); 
+     return map_type[typeid(T).name()] = new ForEachType<T>(iv,id,Onreturn); 
     
    }
 
@@ -2784,6 +2789,14 @@ inline void CompileError(string msg,aType r){
    throw(ErrorExec(msg.c_str(),1));
  }
  
+const  Function1 NotReturnOfthisType = reinterpret_cast<Function1>(1); 
+
+inline Expression basicForEachType::OnReturn(Expression f) const {
+    if(!DoOnReturn) return f;
+    else if(DoOnReturn== NotReturnOfthisType )
+	CompileError("Problem when returning this type (sorry work in progress FH!) ", this);
+    else return new  E_F0_Func1(DoOnReturn,f);
+}
 
 
 inline  void CC_F0::operator=(const AC_F0& a) {  f=new E_Array(a); r= atype<E_Array>();};

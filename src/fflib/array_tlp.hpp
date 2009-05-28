@@ -510,11 +510,46 @@ template<class K,class T> K  get_linfty_0(const T &p){ return p.linfty();}
  };
 
 template<class A,class B> B castto(const A & a){ return a;}
- 
+
+/*
+template<class K>
+AnyType ClearReturnpKN(Stack stack, const AnyType & a)
+{
+    KN<K> * m = GetAny<K>(a);
+    Add2StackOfPtr2FreeRC(stack, (K*) (*m) );
+    if(verbosity>1)
+	cout << "AddIncrement:: increment + Add2StackOfPtr2FreeRC " << endl;
+    return new KN<K>(true, *m);
+}*/
+
+template<class K>
+AnyType ClearReturnpKN(Stack stack, const AnyType & a)
+{
+    KN<K> * m = GetAny<KN<K> * >(a);
+    KN<K> *cm=new KN<K>(true, *m);
+    Add2StackOfPtr2Free(stack,cm);
+    if(verbosity>1)
+	cout << "ClearReturnKN:: increment + Add2StackOfPtr2FreeA " <<  *cm << endl;
+    return m;
+}
+/*
+template<class K>
+AnyType ClearReturnKN(Stack stack, const AnyType & a)
+{
+    KN<K> & m(GetAny<KN<K> >(a));
+    KN<K> *cm=new KN<K>(true, m);
+    Add2StackOfPtr2Free(stack,cm);
+    if(verbosity>1)
+	cout << "ClearReturnKN:: increment + Add2StackOfPtr2FreeA " <<  *cm << endl;
+    return ;
+}*/
+
 template<class K>
 void ArrayDCL()
 {
-    Dcl_TypeandPtr<KN<K> >(0,0,0,::Destroy<KN<K> >);
+  //  Dcl_TypeandPtr<KN<K> >(0,0,0,::Destroy<KN<K> >, 0 ,  ::ClearReturnKN<K> );
+    Dcl_Type<KN<K> *>(0,::Destroy<KN<K> >,   ::ClearReturnpKN<K> );
+
   //  Dcl_Type<KN<Complex> *>(0,::Destroy<KN<Complex> >);
    // Dcl_Type<KN<K> *>(0,::Destroy<KN<K> >); // Modif 17102005 
    // attention un exp KN<> * right est un KN<> et non un KN<> *
@@ -544,19 +579,19 @@ void ArrayDCL()
 
      map_type[typeid(KN_<K> ).name()]->AddCast(
        new E_F1_funcT<KN_<K>,KN_<K>*>(UnRef<KN_<K> >),
-     //  new E_F1_funcT<KN_<K>,KN<K>*>(UnRef<KN_<K>,KN<K>* >), inutil cas KN<K> est right expression de KN<K>* 
-       new E_F1_funcT<KN_<K>,KN<K> >(Cast<KN_<K>,KN<K> >)
+       new E_F1_funcT<KN_<K>,KN<K>*>(UnRef<KN_<K>,KN<K>* >) //  inutil cas KN<K> est right expression de KN<K>* 
+//       new E_F1_funcT<KN_<K>,KN<K> >(Cast<KN_<K>,KN<K> >)
        
        );
     //   ,new E_F1_funcT<KN_<K>,K>(ValueToKN_<K>),
     //   new E_F1_funcT<KN_<K>,K*>(PtrToKN_<K>)       
-       
+/*       
      // Ajoute FH   
      map_type[typeid(KN<K> ).name()]->AddCast(
        new E_F1_funcT<KN<K>,KN<K>*>(UnRef<KN<K> >)
     //   ,new E_F1_funcT<KN_<K>,K>(ValueToKN_<K>),
     //   new E_F1_funcT<KN_<K>,K*>(PtrToKN_<K>)       
-       ); 
+       ); */
     map_type_of_map[make_pair(atype<long>(),atype<K>())]=atype<KN<K>*>(); // vector
     map_pair_of_type[make_pair(atype<long>(),atype<long>())] =atype<pair<long,long> >();   
     map_type_of_map[make_pair(atype<pair<long,long> >(),atype<K>())]=atype<KNM<K>*>(); // matrix                                               
@@ -724,14 +759,14 @@ void ArrayOperator()
      Add<KN_<K> >("l2",".",new OneOperator1_<double,KN_<K> >(get_l2_0<double,KN_<K> >));
      Add<KN_<K> >("l1",".",new OneOperator1_<double,KN_<K> >(get_l1_0<double,KN_<K> >));
      Add<KN_<K> >("linfty",".",new OneOperator1_<double,KN_<K> >(get_linfty_0<double,KN_<K> >));
-    
+/*    
      Add<KN<K> >("sum",".",   new OneOperator1_<K,KN<K> >(get_sum0<K,KN<K> >));
      Add<KN<K> >("min",".",   new OneOperator1_<K,KN<K> >(get_min0<K,KN<K> >));
      Add<KN<K> >("max",".",   new OneOperator1_<K,KN<K> >(get_max0<K,KN<K> >));
      Add<KN<K> >("l2",".",    new OneOperator1_<double,KN<K> >(get_l2_0<double,KN<K> >));
      Add<KN<K> >("l1",".",    new OneOperator1_<double,KN<K> >(get_l1_0<double,KN<K> >));
      Add<KN<K> >("linfty",".",new OneOperator1_<double,KN<K> >(get_linfty_0<double,KN<K> >));
-     
+*/     
 
      Add<KN<K> *>("resize",".",new OneOperator1< Resize<KN<K> >,KN<K> *>(to_Resize));
      Add<KNM<K> *>("resize",".",new OneOperator1< Resize<KNM<K> >,KNM<K> *>(to_Resize));
@@ -741,9 +776,9 @@ void ArrayOperator()
 
      TheOperators->Add("<-", 
        new OneOperator2_<KN<K> *,KN<K> *,Z>(&set_init),
-       new InitArrayfromArray<K,true>,
-       new OneOperator2_<KN<K> *,KN<K> *,KN<K> >(&set_init),
-       new OneOperator2_<KN<K> *,KN<K> *,KN_<K> >(&set_init)		       
+       new InitArrayfromArray<K,true>
+    //   new OneOperator2_<KN<K> *,KN<K> *,KN<K> >(&set_init),
+    //   new OneOperator2_<KN<K> *,KN<K> *,KN_<K> >(&set_init)		????       
      //  new OneOperator2_<KN<K> *,KN<K> *,KN<K> * >(&set_initp)
        );
      TheOperators->Add("<-", 

@@ -434,13 +434,14 @@ basicForEachType::basicForEachType(const type_info  & k,
                                           const size_t s,
                                           const E_F1_funcT_Type * p,
                                           basicForEachType *rr,
-                                          Function1 iv,Function1 id) 
+                                          Function1 iv,Function1 id, Function1  dreturn) 
       : ktype(&k),//ktypefunc(0),
         size(s),
         un_ptr_type(rr?rr:this), 
         casting(0), // no casting to 
         un_ptr(p),
         InitExp(iv),
+        DoOnReturn(dreturn),
         //funct_type(0),
         destroy(id) {} 
  void basicForEachType::SetArgs(const ListOfId *lid) const

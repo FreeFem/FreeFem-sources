@@ -3687,9 +3687,22 @@ void DclTypeMatrix()
   
 }
 
+
 template<class A,class B> 
 AnyType First(Stack,const AnyType &b) { 
 return   SetAny<A>(GetAny<B>(b).first);}
+
+template<class K>
+AnyType AddIncrement(Stack stack, const AnyType & a)
+{
+    K m = GetAny<K>(a);
+    m->increment();
+    Add2StackOfPtr2FreeRC(stack,m);
+    if(verbosity>1)
+    cout << "AddIncrement:: increment + Add2StackOfPtr2FreeRC " << endl;
+    return a;
+}
+
 
 void  init_lgfem() 
 {
@@ -3706,8 +3719,8 @@ void  init_lgfem()
  Dcl_Type<R2*>(::Initialize<R2>);
 
  map_type[typeid(R3*).name()] = new ForEachType<R3*>(Initialize<R3>);   
-  Dcl_TypeandPtr<pmesh>(); 
-  Dcl_TypeandPtr<pmesh3>(); 
+  Dcl_TypeandPtr<pmesh>(0,0, ::InitializePtr<pmesh>,::DestroyPtr<pmesh>,AddIncrement<pmesh>,NotReturnOfthisType); 
+  Dcl_TypeandPtr<pmesh3>(0,0,::InitializePtr<pmesh3>,::DestroyPtr<pmesh3>,AddIncrement<pmesh3>,NotReturnOfthisType); 
   Dcl_Type<lgVertex>(); 
   Dcl_Type<lgElement>( ); 
 
