@@ -474,11 +474,15 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 	lok[kk]=1;
 	glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
 	glLineWidth(1); 
+	glAlphaFunc ( GL_GREATER, 0.1 ) ;
+	glEnable(GL_ALPHA_TEST) ;
+	glLineStipple(1, 0x300C);
+	glEnable(GL_LINE_STIPPLE);
 	glBegin(GL_TRIANGLES);    
-	for (int i=0;i<Th.nbe;i++)
+		for (int i=0;i<Th.nbe;i++)
 	  {
 	    const BE & K(Th.be(i)); 
-	    plot.color(1+abs(K.lab));
+	    plot.color(1+abs(K.lab),0.25);
 	    R3 N(R3(K[0],K[1])^R3(K[0],K[2]));
 	    N /= N.norme();
 	    glNormal3d(N.x,N.y,N.z);
@@ -487,7 +491,10 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 	    glVertex3d(K[2].x,K[2].y,K[2].z);
 	  }
 	glEnd(); 
+	glDisable(GL_LINE_STIPPLE);
 	glLineWidth(1); 
+	glDisable(GL_ALPHA_TEST) ;
+
 	glEndList();  // fin de la list	  
       }
   

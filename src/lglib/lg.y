@@ -463,7 +463,7 @@ instruction:   ';' {$$=0;}
                     else lgerror("continue not in loop")}
          |  RETURN  Expr ';' { 
                     if (kkembtype>=0)
-                      $$= C_F0(new E_throw(E_exception::e_return,rettype[kkembtype]->CastTo($2)) ,atype<void>());
+                      $$= C_F0(new E_throw(E_exception::e_return,(rettype[kkembtype]->CastTo($2)).OnReturn()) ,atype<void>());
                      else lgerror(" return not in routine ") }
 
 ;

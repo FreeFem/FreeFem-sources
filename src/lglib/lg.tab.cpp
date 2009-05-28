@@ -2548,7 +2548,7 @@ yyreduce:
 #line 464 "lg.y"
     { 
                     if (kkembtype>=0)
-                      (yyval.cexp)= C_F0(new E_throw(E_exception::e_return,rettype[kkembtype]->CastTo((yyvsp[(2) - (3)].cexp))) ,atype<void>());
+                      (yyval.cexp)= C_F0(new E_throw(E_exception::e_return,(rettype[kkembtype]->CastTo((yyvsp[(2) - (3)].cexp))).OnReturn()) ,atype<void>());
                      else lgerror(" return not in routine ") ;}
     break;
 

@@ -124,7 +124,7 @@ class OptimAlgo : public OneOperator
       
       VECT* Gradient(const Param<R>& x) {
 	setparam(x);
-	if ( dJ) { *gg=GetAny<Kn>( (*dJ)(stack));
+	if ( dJ) { *gg=GetAny<Kn_>( (*dJ)(stack));
 	WhereStackOfPtr2Free(stack)->clean(); }
 	return gg ; //dJ ? GetAny<Kn*>( (*dJ)(stack)) :0;}
      }
@@ -166,7 +166,7 @@ class OptimAlgo : public OneOperator
       
       J= to<R>(C_F0(opJ,"(",theparam));
       if(opdJ)
-        dJ= to<Kn>(C_F0(opdJ,"(",theparam));// Modif FH 17102005 (a verifier) to<Kn*> ->to<Kn>
+        dJ= to<Kn_>(C_F0(opdJ,"(",theparam));// mai2009 (bug????) Modif FH 17102005 (a verifier) to<Kn*> ->to<Kn>
       if(ophJ)
 	hJ= to< Matrice_Creuse<R> *>(C_F0(ophJ,"(",theparam));
       

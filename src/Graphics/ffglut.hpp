@@ -278,10 +278,18 @@ class ThePlot { public:
 	}
     } ;
     vector<RGB>  tbc;
-    void color(int i) { 
+    void color(int i,R alpha=1.) { 
       ffassert(tbc.size());
 	RGB c(tbc[min(max(0,i),(const int) tbc.size())]);
-      glColor3d(c.r,c.g,c.b);
+	if(alpha<1) {
+	    R a1=1.-alpha;
+	    c.r=c.r*alpha+a1;
+	    c.g=c.g*alpha+a1;
+	    c.b=c.b*alpha+a1;
+	    
+	 // cout << " aaaa" << alpha << endl;
+	}
+      glColor4f(c.r,c.g,c.b,alpha);
     }
     void  SetColorTable(int nb); 
     void SetDefIsoV(); 
@@ -328,7 +336,7 @@ public:
   void resize(int w,int h);
   void zoom(int w,int h,R coef);
   float GetHeigthFont(){return 10;}
-  void color(int i) {theplot->color(i);}
+    void color(int i,R alpha=1) {theplot->color(i,alpha);}
   void FillRect(R x0,R y0,R x1,R y1);
   void PlotValue(const KN_<double> & Viso,int  k0,const char * cmm);
   void DrawCommentaire(const char * cm,R x,R y); 
