@@ -522,47 +522,80 @@ AnyType ClearReturnpKN(Stack stack, const AnyType & a)
     return new KN<K>(true, *m);
 }*/
 
-template<class K>
-AnyType ClearReturnpKN(Stack stack, const AnyType & a)
+template<typename K,typename KK>
+AnyType ClearReturnpKK(Stack stack, const AnyType & a)
 {
-    KN<K> * m = GetAny<KN<K> * >(a);
-    KN<K> *cm=new KN<K>(true, *m);
-    Add2StackOfPtr2Free(stack,cm);
-    if(verbosity>1)
-	cout << "ClearReturnKN:: increment + Add2StackOfPtr2FreeA " <<  *cm << endl;
+    // a ne faire que pour les variables local au return...
+    //  pour l'instant on copie pour fqire mqrche 
+    // a repense  FH  mqi 2009....
+    KK * m = GetAny<KK * >(a);
+  //   KN<K> *cm=new KN<K>(true, *m); bug quant KN est une variable global
+   // KN<K> *cm=new KN<K>( *m); // on duplique le tableau comme en C++  (dur dur ?????? FH)
+    m->increment();
+    Add2StackOfPtr2FreeRC(stack,m);
+    if(verbosity>400)
+	cout << "ClearReturnpKK:: increment + Add2StackOfPtr2FreeRC nb ref  " <<  -m->next  << endl;
     return m;
 }
-/*
-template<class K>
-AnyType ClearReturnKN(Stack stack, const AnyType & a)
+template<typename K,typename KK,typename KK_>
+AnyType ClearReturnpKK_(Stack stack, const AnyType & a)
 {
-    KN<K> & m(GetAny<KN<K> >(a));
-    KN<K> *cm=new KN<K>(true, m);
-    Add2StackOfPtr2Free(stack,cm);
-    if(verbosity>1)
-	cout << "ClearReturnKN:: increment + Add2StackOfPtr2FreeA " <<  *cm << endl;
-    return ;
-}*/
+   // il faut faire un copie du tableau 
+    KK_ * m = GetAny<KK_ * >(a);
+    KK *cm=new KK(*m); 
+   
+    Add2StackOfPtr2Free(stack,cm);// detruire la copie 
+    if(verbosity>400)
+	cout << "ClearReturnpKK_:: copie  Add2StackOfPtr2Free "  << endl;
+    return (KK_ *) cm;
+}
+template<typename K,typename KK,typename KK_>
+AnyType ClearReturnKK_(Stack stack, const AnyType & a)
+{
+    // il faut faire un copie du tableau 
+    KK_  m = GetAny<KK_>(a);
+    KK *cm=new KK(m); 
+    
+    Add2StackOfPtr2Free(stack,cm);// detruire la copie 
+    if(verbosity>400)
+	cout << "ClearReturnKK_:: copie  Add2StackOfPtr2Free   "  << endl;
+    return SetAny<KK_>(*cm);
+}
+template<typename K,typename KK_,typename KK>
+AnyType CopieKK_pKK(Stack stack,const AnyType &a) {
+    KK_  m = GetAny<KK_>(a);
+    KK *cm=new KK(m);     
+    if(verbosity>400)
+	cout << "CopieKK_pKK:: copie  Add2StackOfPtr2Free   "<< cm   << endl;
+    Add2StackOfPtr2Free(stack,cm);// detruire la copie 
+return cm;}
+
+
+template<class K> 
+AnyType UnRefpKN(Stack,const AnyType &a) {
+    KN_<K> a_(*PGetAny<KN<K> >(a));
+    return  SetAny<KN_<K> >(a_);}
+template<class K> 
+AnyType UnRefpKN_(Stack,const AnyType &a) {
+    KN_<K> a_(*PGetAny<KN_<K> >(a));
+return  SetAny<KN_<K> >(a_);}
 
 template<class K>
 void ArrayDCL()
 {
   //  Dcl_TypeandPtr<KN<K> >(0,0,0,::Destroy<KN<K> >, 0 ,  ::ClearReturnKN<K> );
-    Dcl_Type<KN<K> *>(0,::Destroy<KN<K> >,   ::ClearReturnpKN<K> );
+    Dcl_Type<KN<K> *>(0,::Destroy<KN<K> >,   ::ClearReturnpKK<K,KN<K> > );
+    Dcl_TypeandPtr<KN_<K> >(0,0,0,0,::ClearReturnKK_<K,KN<K>,KN_<K> >,::ClearReturnpKK_<K,KN<K>,KN_<K> >);
 
   //  Dcl_Type<KN<Complex> *>(0,::Destroy<KN<Complex> >);
    // Dcl_Type<KN<K> *>(0,::Destroy<KN<K> >); // Modif 17102005 
    // attention un exp KN<> * right est un KN<> et non un KN<> *
 
-    Dcl_Type<KNM<K> *>(0,::Destroy<KNM<K> >);
-   //  Dcl_Type< Transpose<KN<K> *> > ();  remove mars 2006 FH 
+    Dcl_Type<KNM<K> *>(0,::Destroy<KNM<K> > ,::ClearReturnpKK<K,KNM<K> >);
     Dcl_Type< outProduct_KN_<K>* >();
     Dcl_Type< Transpose<KN_<K> > > ();
     Dcl_Type< Transpose< KNM<K> *> >();
-    //Dcl_Type< Transpose<KN<Complex> > > ();
-    Dcl_TypeandPtr<KN_<K> >(0,0,0,0);
-    //Dcl_TypeandPtr<KN_<Complex> >(0,0,0,0);
-
+ 
     Dcl_Type<Add_KN_<K> >();
     
     Dcl_Type<DotStar_KN_<K> >();
@@ -576,10 +609,14 @@ void ArrayDCL()
     Dcl_Type<pair<KN_<K>,Inv_KN_long> *>();
     Dcl_Type<pair<KN_<K>,KN_<long> > *>();
     
+    map_type[typeid(KN<K> * ).name()]->AddCast(
+    new E_F1_funcT<KN<K>*,KN_<K> >(CopieKK_pKK<K,KN_<K>,KN<K> > )
+	 );
 
      map_type[typeid(KN_<K> ).name()]->AddCast(
-       new E_F1_funcT<KN_<K>,KN_<K>*>(UnRef<KN_<K> >),
-       new E_F1_funcT<KN_<K>,KN<K>*>(UnRef<KN_<K>,KN<K>* >) //  inutil cas KN<K> est right expression de KN<K>* 
+       new E_F1_funcT<KN_<K>,KN_<K>*>(UnRefpKN_<K> ),
+       new E_F1_funcT<KN_<K>,KN<K>*>(UnRefpKN<K>  )
+	//  inutil cas KN<K> est right expression de KN<K>* 
 //       new E_F1_funcT<KN_<K>,KN<K> >(Cast<KN_<K>,KN<K> >)
        
        );

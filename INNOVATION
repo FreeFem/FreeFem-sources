@@ -1,5 +1,14 @@
 
-v 3.3
+v 3.3  29 may 2009
+  -  correct some probleme in return in function :
+   the following function prototype now work without memory fault. 
+
+    func real[int]   a1(int n)  {real[int] a(n);return a;}
+    func real[int]   a2(real[int] &a) { return a;}
+    real[int] G=[7,8,9];		  
+    func real[int]   a3(real[int] &a) { return G;}
+    func mesh carre(int n) { mesh th=square(n,n);  return th;}
+   (lot of change, warning:  now KN<K> is not a freefem++ internal type). 
   warning : 
   -  in int3d flag qfV=  a 3d quadrature formula
         the 3d quadrature formula are

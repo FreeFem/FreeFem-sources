@@ -321,7 +321,7 @@ template<class K,class T> K  get_linfty_0(const T &p){ return p.linfty();}
  };
 
 template<class A,class B> B castto(const A & a){ return a;}
- 
+/* 
 template<class K>
 void ArrayDCL()
 {
@@ -367,7 +367,7 @@ void ArrayDCL()
     map_pair_of_type[make_pair(atype<long>(),atype<long>())] =atype<pair<long,long> >();   
     map_type_of_map[make_pair(atype<pair<long,long> >(),atype<K>())]=atype<KNM<K>*>(); // matrix                                               
 }
-
+*/
 
 template<class T> struct  Resize{ T *v;
   Resize( T * vv) : v(vv) {}

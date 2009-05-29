@@ -46,7 +46,6 @@
 		3D15D4910BD3A6E000CEB4C6 /* AFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DCDD097015B4002A1826 /* AFunction.cpp */; };
 		3D15D4920BD3A6E000CEB4C6 /* AFunction.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DCDE097015B4002A1826 /* AFunction.hpp */; };
 		3D15D4930BD3A6E000CEB4C6 /* AFunction2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DCE0097015B4002A1826 /* AFunction2.cpp */; };
-		3D15D4940BD3A6E000CEB4C6 /* AFunction3.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DCE2097015B4002A1826 /* AFunction3.hpp */; };
 		3D15D4950BD3A6E000CEB4C6 /* AnyType.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DCE4097015B4002A1826 /* AnyType.hpp */; };
 		3D15D4960BD3A6E000CEB4C6 /* array_complex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DCE5097015B4002A1826 /* array_complex.cpp */; };
 		3D15D4970BD3A6E000CEB4C6 /* array_init.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DCE7097015B4002A1826 /* array_init.hpp */; };
@@ -136,6 +135,7 @@
 		3DDEA1980DFFF77D00F54E1C /* libmesh5.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1970DFFF77D00F54E1C /* libmesh5.c */; };
 		3DDEA19B0DFFF7D000F54E1C /* Mesh1dn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA19A0DFFF7D000F54E1C /* Mesh1dn.cpp */; };
 		3DED22BF0D22C9B700200751 /* libf2c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DED22BB0D22C9B700200751 /* libf2c.a */; };
+		3DEF8E430FCFD95C00AEB8DD /* ffstack.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DEF8E420FCFD95C00AEB8DD /* ffstack.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -166,7 +166,6 @@
 		3D90DCDD097015B4002A1826 /* AFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = AFunction.cpp; sourceTree = "<group>"; };
 		3D90DCDE097015B4002A1826 /* AFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = AFunction.hpp; sourceTree = "<group>"; };
 		3D90DCE0097015B4002A1826 /* AFunction2.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = AFunction2.cpp; sourceTree = "<group>"; };
-		3D90DCE2097015B4002A1826 /* AFunction3.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = AFunction3.hpp; sourceTree = "<group>"; };
 		3D90DCE4097015B4002A1826 /* AnyType.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = AnyType.hpp; sourceTree = "<group>"; };
 		3D90DCE5097015B4002A1826 /* array_complex.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = array_complex.cpp; sourceTree = "<group>"; };
 		3D90DCE7097015B4002A1826 /* array_init.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = array_init.hpp; sourceTree = "<group>"; };
@@ -289,6 +288,7 @@
 		3DDEA1970DFFF77D00F54E1C /* libmesh5.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; name = libmesh5.c; path = ../src/femlib/libmesh5.c; sourceTree = SOURCE_ROOT; };
 		3DDEA19A0DFFF7D000F54E1C /* Mesh1dn.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh1dn.cpp; path = ../src/femlib/Mesh1dn.cpp; sourceTree = SOURCE_ROOT; };
 		3DED22BB0D22C9B700200751 /* libf2c.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libf2c.a; path = /usr/local/lib/libf2c.a; sourceTree = "<absolute>"; };
+		3DEF8E420FCFD95C00AEB8DD /* ffstack.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = ffstack.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -391,7 +391,6 @@
 				3D90DCDD097015B4002A1826 /* AFunction.cpp */,
 				3D90DCDE097015B4002A1826 /* AFunction.hpp */,
 				3D90DCE0097015B4002A1826 /* AFunction2.cpp */,
-				3D90DCE2097015B4002A1826 /* AFunction3.hpp */,
 				3D90DCE4097015B4002A1826 /* AnyType.hpp */,
 				3D90DCE5097015B4002A1826 /* array_complex.cpp */,
 				3D90DCE7097015B4002A1826 /* array_init.hpp */,
@@ -424,6 +423,7 @@
 				3D90DD30097015B4002A1826 /* String.hpp */,
 				3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */,
 				3D90DD31097015B4002A1826 /* strversionnumber.cpp */,
+				3DEF8E420FCFD95C00AEB8DD /* ffstack.hpp */,
 				3D90DD32097015B4002A1826 /* strversionnumber.hpp */,
 				3D90DD35097015B4002A1826 /* throwassert.hpp */,
 				3D90DD36097015B4002A1826 /* versionnumber.hpp */,
@@ -587,6 +587,7 @@
 				3D2B6F650F9CC1C00058C8EB /* R3.hpp in Headers */,
 				3D2B6F660F9CC1C00058C8EB /* R2.hpp in Headers */,
 				3D2B6F670F9CC1C00058C8EB /* R1.hpp in Headers */,
+				3DEF8E430FCFD95C00AEB8DD /* ffstack.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -688,7 +689,6 @@
 				3D15D4910BD3A6E000CEB4C6 /* AFunction.cpp in Sources */,
 				3D15D4920BD3A6E000CEB4C6 /* AFunction.hpp in Sources */,
 				3D15D4930BD3A6E000CEB4C6 /* AFunction2.cpp in Sources */,
-				3D15D4940BD3A6E000CEB4C6 /* AFunction3.hpp in Sources */,
 				3D15D4950BD3A6E000CEB4C6 /* AnyType.hpp in Sources */,
 				3D15D4960BD3A6E000CEB4C6 /* array_complex.cpp in Sources */,
 				3D15D4970BD3A6E000CEB4C6 /* array_init.hpp in Sources */,

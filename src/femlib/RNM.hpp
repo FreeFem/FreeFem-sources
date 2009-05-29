@@ -299,7 +299,8 @@ class ShapeOfArray{ protected:
     long n;     //   n  nb of item
     long step;  //   step  nb of between 2 item
     long next;  //  the   next array of same type in matrix for subarray  
-              // by default  no next 
+              // by default  no next ( in case of KN, and KNM  -next is
+              // a counter of destruction  (use in frefem++)
   ShapeOfArray(const ShapeOfArray & s,long nn): n(s.n),step(s.n),next(nn) {}              
   ShapeOfArray(long nn): n(nn),step(1),next(-1) {}
   
@@ -916,6 +917,7 @@ class KN :public KN_<R> { public:
   //      { KN_<R>::operator=(u);}
         
   ~KN(){delete [] this->v;}
+   
   void CheckSet() { if(!(this->n)) {cerr << "Error RNM set array\n";K_throwassert(0); exit(1);}}
    KN& operator  = (R*  a) { CheckSet(); return operator =(KN_<R>(a,this->n));}
    KN& operator += (R*  a) { CheckSet(); return operator+=(KN_<R>(a,this->n));}  
@@ -1110,7 +1112,8 @@ class KN :public KN_<R> { public:
          for(long i=0,j=0;j<no;i++,j+=so) 
            this->v[i]=vo[j]; 
         delete [] vo;} }
-  void destroy(){delete [] this->v; this->v=0;this->n=0;}
+    void destroy(){assert(this->next<0);  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}}
+    void increment() {assert(this->next<0);  this->next--;}
 };
 
 //  Array with 2 indices
@@ -1206,8 +1209,10 @@ class KNM: public KNM_<R>{ public:
     }
         
    }
+    void destroy(){assert(this->next<0);  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}}
+    void increment() {assert(this->next<0);  this->next--;}
     
-  void destroy(){delete [] this->v;this->n=0 ;}
+//  void destroy(){delete [] this->v;this->n=0 ;}
 
 };
 

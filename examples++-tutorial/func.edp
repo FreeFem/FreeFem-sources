@@ -1,0 +1,47 @@
+//  test of diff kind of freefem++ function
+// work if version >= 3.3 
+
+verbosity=500;
+
+real[int] G=[7,8,9];
+
+func mesh carre(int n) 
+{ mesh th=square(n,n);
+  return th;}
+  
+  
+func real[int]   aaa(int n) 
+{ real[int] a(n);
+  a=0;
+  a[2]=n;
+  return a;}
+  
+  
+ func real[int]   bb(real[int] &a) 
+{ cout << " sum " <<a.sum <<endl;
+  return a;}
+
+ func real[int]   GG(int i) 
+{ G[1]=i;
+  return G;}
+ 
+ func real[int]   GGG(int i) 
+{ G[1]=i;
+  return G(1:2);} 
+
+  
+  
+mesh Th=  carre(2);
+carre(3); // the mesh is lose 
+cout << Th.nt << endl;
+cout << aaa(3) << endl;
+  
+real[int] A=[1,4,7];
+cout << bb(A) << endl;
+real[int] aa=bb(A);
+cout << " xxxx "<< endl;
+cout << aa << endl;
+cout << GG(3) << endl;
+cout << GGG(5) << endl;
+
+verbosity=1;
