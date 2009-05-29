@@ -6,6 +6,7 @@
 #include  <cfloat>
 #include  <cmath>
 using namespace std;
+/*
 #include "error.hpp"
 #include "AFunction.hpp"
 #include "rgraph.hpp"
@@ -19,7 +20,8 @@ using namespace std;
 #include "lgmesh3.hpp"
 #include "problem.hpp"
 //#include "ellipsemax.hpp"
-
+*/
+#include "ff++.hpp" 
 
 using namespace std;
 

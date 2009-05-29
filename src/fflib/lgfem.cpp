@@ -524,19 +524,23 @@ class LinearCG : public OneOperator
    Stack stack;
    mutable  Kn x;
    C_F0 c_x;
-   Expression  mat;
+  
+   Expression  mat1,mat;
    typedef  typename VirtualMatrice<R>::plusAx plusAx;
    MatF_O(int n,Stack stk,const OneOperator * op) 
      : VirtualMatrice<R>(n),stack(stk),
        x(n),c_x(CPValue(x)),
-       mat(op->code(basicAC_F0_wa(c_x))) {
-         ffassert(atype<Kn >() ==(aType) *op);
+       mat1(op->code(basicAC_F0_wa(c_x))),
+       mat( CastTo<Kn_>(C_F0(mat1,(aType)*op))) {
+         //ffassert(atype<Kn_ >() ==(aType) *op);
          // WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
          
          }
    ~MatF_O() { 
      // cout << " del MatF_O mat " << endl;
-     delete mat;
+     if(mat1 != mat) 
+       delete mat;
+      delete mat1;
      // cout << " del MatF_Ocx ..." <<  endl;
       Expression zzz = c_x;
      // cout << " zzz "<< zzz << endl;
@@ -547,7 +551,7 @@ class LinearCG : public OneOperator
    void addMatMul(const  Kn_  & xx, Kn_ & Ax) const { 
       ffassert(xx.N()==Ax.N());
       x =xx;
-      Ax  += GetAny<Kn>((*mat)(stack));
+      Ax  += GetAny<Kn_>((*mat)(stack));
       WhereStackOfPtr2Free(stack)->clean();
        } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
@@ -674,19 +678,21 @@ class LinearGMRES : public OneOperator
    Stack stack;
    mutable  Kn x;
    C_F0 c_x;
-   Expression  mat;
+   Expression  mat1,mat;
    typedef  typename VirtualMatrice<R>::plusAx plusAx;
    MatF_O(int n,Stack stk,const OneOperator * op) 
      : VirtualMatrice<R>(n),
        stack(stk),
        x(n),c_x(CPValue(x)),
-       mat(op->code(basicAC_F0_wa(c_x))) {
-       ffassert(atype<Kn >() ==(aType) *op); }
-   ~MatF_O() { delete mat;delete c_x.LeftValue();}
+       mat1(op->code(basicAC_F0_wa(c_x))), 
+       mat( CastTo<Kn_>(C_F0(mat1,(aType)*op))  /*op->code(basicAC_F0_wa(c_x))*/) {
+      // ffassert(atype<Kn_ >() ==(aType) *op);
+       }
+     ~MatF_O() { if(mat1!=mat) delete mat; delete mat1; delete c_x.LeftValue();}
    void addMatMul(const  Kn_  & xx, Kn_ & Ax) const { 
       ffassert(xx.N()==Ax.N());
       x =xx;
-      Ax  += GetAny<Kn>((*mat)(stack));
+      Ax  += GetAny<Kn_>((*mat)(stack));
       WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008 
    } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
