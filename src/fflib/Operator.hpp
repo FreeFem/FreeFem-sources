@@ -548,6 +548,9 @@ struct Op2_sub0: public binary_function<A,B,R> {
 template<class R,class A=R> 
 struct Op1_subp: public unary_function<A,R> { 
   static R f(const A & a)  { return (- *a );} };   
+template<class R,class A=R> 
+struct Op1_sub: public unary_function<A,R> { 
+static R f(const A & a)  { return (- a );} };   
 
 template<class R,class A=R,class B=A> 
 struct Op2_mulcp: public binary_function<A,B,R> { 

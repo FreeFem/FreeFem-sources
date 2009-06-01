@@ -20,6 +20,10 @@ func real[int]   aaa(int n)
  func real[int]   bb(real[int] &a) 
 { cout << " sum " <<a.sum <<endl;
   return a;}
+ func real[int]   bbb(real[int] a) 
+{ cout << " sum " <<a.sum <<endl;
+  a[0]=100; // change the value of the parameter  
+  return a;}
 
  func real[int]   GG(int i) 
 { G[1]=i;
@@ -39,8 +43,11 @@ cout << aaa(3) << endl;
 real[int] A=[1,4,7];
 cout << bb(A) << endl;
 real[int] aa=bb(A);
+real[int] ac=bbb(A); //  warning A[0] is set to 100.
 cout << " xxxx "<< endl;
-cout << aa << endl;
+cout << aa << " == "  << A <<endl;
+assert(A[0]==100);
+cout << ac << " == " << A << endl;
 cout << GG(3) << endl;
 cout << GGG(5) << endl;
 
