@@ -1,4 +1,13 @@
-
+V 3.3-1 1 juin 2009
+  to correct the problem of the destruction of parameter in cas: 
+      func real[int]   a2(real[int] a) {a[0]=2; return a;}
+   so now the parameter cast to KN_<double> so  the array is not
+   duplicate like in C++, and the value of the parameter is change. 
+   
+  - simplify the gestion of arrqy now of 2 type
+    KN<> * of varaible (left expression)
+    and  KN_<> of   right expression 
+  - correct UnRef<A,B> where B ~ A*
 v 3.3  29 may 2009
   -  correct some probleme in return in function :
    the following function prototype now work without memory fault. 

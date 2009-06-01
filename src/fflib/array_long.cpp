@@ -80,13 +80,16 @@ void initArrayOperatorlong()
      ArrayOperator<long,long>();
      // to def inverse permutation // Add FH mars 2005
      TheOperators->Add("^", new OneBinaryOperatorInv_KN_long(atype<KN_<long> >() ));
-     TheOperators->Add("^", new OneBinaryOperatorInv_KN_long(atype<KN<long> *>() )) ;
+    //- TheOperators->Add("^", new OneBinaryOperatorInv_KN_long(atype<KN<long> *>() )) ;
      aatypeknlongp= atype<KN<long>*>(); // for  compilation error with g++ 3.2.2
 
      Add<KN_<long> >("sort",".",new OneOperator1_<KN_<K>,KN_<K> >(SortKn<K, KN_<K> >));
     // Add<KN<long> >("sort",".",new OneOperator1_<KN<K>,KN<K> >(SortKn<K, KN<K> >));
-     Add<KN<long> *>("sort",".",new OneOperator1_<KN<K>*,KN<K>* >(SortpKn<K>));
+   //  Add<KN<long> *>("sort",".",new OneOperator1_<KN<K>*,KN<K>* >(SortpKn<K>));
      
      
 //     ArrayDCL<long>();
+}
+
+ void xxxx() {
 }

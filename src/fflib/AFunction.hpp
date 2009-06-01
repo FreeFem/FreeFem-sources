@@ -669,7 +669,7 @@ template<class A>  AnyType Initialize(Stack,const AnyType &a) ;
 template<class A>  AnyType Destroy(Stack,const AnyType &a) ; 
 
 //  the type of variable is pointer because we need to write in 
-template<class T> 
+template<class T,class PT=T*> 
 class ForEachTypePtr:  public basicForEachType { public:
     ForEachTypePtr();
     ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn=0);         
@@ -677,7 +677,7 @@ class ForEachTypePtr:  public basicForEachType { public:
 };
 
 template<class T> 
-class ForEachTypePtr<T*>:  public basicForEachType { public:
+class ForEachTypePtr<T*,T**>:  public basicForEachType { public:
     ForEachTypePtr(T* bb=0,Function1 onreturn=0);
     ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn=0);         
     ForEachTypePtr(Function1 dl);
@@ -715,7 +715,7 @@ template<class A>
 
 template<class A,class B> 
   AnyType UnRef(Stack,const AnyType &a) { 
-    return   SetAny<A>(*PGetAny<B>(a));}
+    return   SetAny<A>(*GetAny<B>(a));}
     
     
 template<class A> 
@@ -2558,31 +2558,31 @@ template<>  struct binary_trait<long,complex<double> > { typedef  complex<double
 template<>  struct binary_trait<double,complex<double> > { typedef  complex<double> R ;}; 
 template<class A>  struct binary_trait<A,string* > { typedef  string*  R ;}; 
 
-template<class T> 
- ForEachTypePtr<T>::ForEachTypePtr(): 
-         basicForEachType(typeid(T*),sizeof(T*),
+template<class T,class PT> 
+ ForEachTypePtr<T,PT>::ForEachTypePtr(): 
+         basicForEachType(typeid(PT),sizeof(PT),
 //         new E_F1_funcT<T,T*>(UnRef<T>),atype<T>(),
-         new E_F1_funcT_Type(atype<T>(),this,UnRef<T>),atype<T>(),
+         new E_F1_funcT_Type(atype<T>(),this,UnRef<T,PT>),atype<T>(),
 
          ::Initialize<T>,::Delete<T>){}
          
-template<class T> 
- ForEachTypePtr<T>::ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn): 
-         basicForEachType(typeid(T*),sizeof(T*),
+template<class T,class PT> 
+ ForEachTypePtr<T,PT>::ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn): 
+         basicForEachType(typeid(PT),sizeof(PT),
 //         new E_F1_funcT<T,T*>(UnRef<T>),atype<T>(),
-         new E_F1_funcT_Type(atype<T>(),this,UnRef<T>),atype<T>(),
+         new E_F1_funcT_Type(atype<T>(),this,UnRef<T,PT>),atype<T>(),
 			  init,
 			  dl , onreturn ){}
          
-template<class T> 
- ForEachTypePtr<T>::ForEachTypePtr(Function1 dl): 
-         basicForEachType(typeid(T*),sizeof(T*),
-         new E_F1_funcT_Type(atype<T>(),this,UnRef<T>),atype<T>(),
+template<class T,class PT> 
+ ForEachTypePtr<T,PT>::ForEachTypePtr(Function1 dl): 
+         basicForEachType(typeid(PT),sizeof(PT),
+         new E_F1_funcT_Type(atype<T>(),this,UnRef<T,PT>),atype<T>(),
          ::Initialize<T>,dl){}
          
 
 template<class T> 
- ForEachTypePtr<T*>::ForEachTypePtr(T* unused,Function1 OnReturn): 
+ ForEachTypePtr<T*,T**>::ForEachTypePtr(T* unused,Function1 OnReturn): 
          basicForEachType(typeid(T**),sizeof(T**),
 //         new E_F1_funcT<T*,T**>(UnRef<T*>),atype<T*>(),
          new E_F1_funcT_Type(atype<T*>(),this,UnRef<T*>),atype<T*>(),
@@ -2590,7 +2590,7 @@ template<class T>
          ::InitializePtr<T*>,::DestroyPtr<T*>,OnReturn){}
       
 template<class T> 
- ForEachTypePtr<T*>::ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn): 
+ ForEachTypePtr<T*,T**>::ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn): 
          basicForEachType(typeid(T**),sizeof(T**),
         // new E_F1_funcT<T*,T**>(UnRef<T*>),atype<T*>(),
          new E_F1_funcT_Type(atype<T*>(),this,UnRef<T*>),atype<T*>(),
@@ -2599,7 +2599,7 @@ template<class T>
 			  onreturn){}
         
 template<class T> 
- ForEachTypePtr<T*>::ForEachTypePtr(Function1 dl): 
+ ForEachTypePtr<T*,T**>::ForEachTypePtr(Function1 dl): 
          basicForEachType(typeid(T**),sizeof(T**),
 //         new E_F1_funcT<T*,T**>(UnRef<T*>),atype<T*>(),
          new E_F1_funcT_Type(atype<T*>(),this,UnRef<T*>),atype<T*>(),
@@ -2638,12 +2638,18 @@ inline C_F0 & operator+=(C_F0 & a,C_F0 &b)
 }
 
 
-template<class T>
-  void Dcl_TypeandPtr (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)
+template<typename T,typename PT>
+void Dcl_TypeandPtr_ (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)
    {
       map_type[typeid(T).name()] = new ForEachType<T>(i,d,OnReturn); 
-      map_type[typeid(T*).name()] = new ForEachTypePtr<T>(pi,pd,pOnReturn); 
+      map_type[typeid(PT).name()] = new ForEachTypePtr<T,PT>(pi,pd,pOnReturn); 
    }
+template<class T>
+void Dcl_TypeandPtr (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)
+{
+map_type[typeid(T).name()] = new ForEachType<T>(i,d,OnReturn); 
+map_type[typeid(T*).name()] = new ForEachTypePtr<T>(pi,pd,pOnReturn); 
+}
 
 
 template<class T>
