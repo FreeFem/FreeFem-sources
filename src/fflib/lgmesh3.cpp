@@ -830,7 +830,7 @@ AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
 	{
 	  FElement K(Vh[t]);
 	  int nbdf=K.NbDoF() ;	  
-	  ipmat.set(t);
+	  ipmat.set(K);
 	  for (int p=0;p<ipmat.np;p++)
 	    { 
 	      const RdHat & PtHat(ipmat.P[p]);

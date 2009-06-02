@@ -2794,8 +2794,9 @@ template<class R>
 	lll[r]++;
         if (on.find(r) != on.end() ) 
           {
-	    ipmat.set(it);
-            const FElement K(Uh[it]);
+	     const FElement K(Uh[it]);
+	    ipmat.set(K);
+           
             //R2 E=K.T.Edge(ie);
             double le = be.mesure(); 
             
@@ -2825,7 +2826,7 @@ template<class R>
                     
                   }
 		int nbdf=K.NbDoF() ;	  
-		ipmat.set(it);
+		//ipmat.set(it);
 		PtonB = 0;
 		Rd NN=K.T.N(ie);
 		NN /= NN.norme();
