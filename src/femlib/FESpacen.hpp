@@ -185,7 +185,8 @@ public:
   template<class Mesh>
   InterpolationMatrix(const GTypeOfFE<Mesh> & tef);
 
-  void set(int k);
+  template<class Mesh>
+  void set(const GFElement<Mesh> & FK);
 
 
 private: // copie interdit ...
@@ -203,95 +204,6 @@ ostream & operator<<(ostream& f,const InterpolationMatrix<RdHat> &M)
   f << "dofe = " << M.dofe;
   return f;
 }
-
-/*
-struct IPJ { 
-    int i,p,j; // i is DoF, p is Point, j is componante 
-    IPJ(int ii=0,int pp=0,int jj=0):i(ii),p(pp),j(jj) {}
-};
-inline ostream & operator<<( ostream & f,const IPJ & ipj)
-{ f << ipj.i << ' '<< ipj.p << ' '<< ipj.j << " ,  ";
-  return f;}
-*/
-/*
-template<class RdHat>
-class GFEInterpole 
-{
-public:
-  KN<IPJ> pij_alpha ;
-  KN<RdHat> P_Pi_h ;
-  double *coef_Pi_h_alpha;
-  bool clean;
-  
-  GFEInterpole(int kPi,int npPi,double * coef_Pi_h_a,bool cc)
-    : pij_alpha(kPi),
-      P_Pi_h(npPi),
-      coef_Pi_h_alpha(coef_Pi_h_a),
-      clean(cc)
-  {}
-  
-  GFEInterpole(const KN< GFEInterpole< RdHat> const  *>  & tef, const KN<int> &tefN)
-    : pij_alpha(),P_Pi_h(),coef_Pi_h_alpha(0),clean(true)
-  {
-    
-    map<RdHat,int,lessRd> mpt;
-
-    int np=0,nc=0;
-    for(int i=0;i<tef.N();++i)
-      {
-	np += tef[i]->P_Pi_h.N();
-	nc += tef[i]->pij_alpha.N();
-      }
-    
-    KN<int>  kpt(np);
-    int npp=0,kkk=0;
-    for(int i=0,k=0;i<tef.N();++i)
-      for(int j=0;j<tef[i]->P_Pi_h.N();++j,++k)
-	{	
-	  RdHat P(tef[i]->P_Pi_h[j]);
-	  if( mpt.find(P) == mpt.end())
-	    mpt[P]=npp++; 
-	  kpt[kkk++]=mpt[P]; 
-	}
-    
-    pij_alpha.init(nc);
-    P_Pi_h.init(npp);
-    for(int i=0,k=0;i<tef.N();++i)
-      for(int j=0;j<tef[i]->P_Pi_h.N();++j,++k)
-	P_Pi_h[kpt[k]]=tef[i]->P_Pi_h[j];
-    int op=0,oj=0,oi=0;
-    for(int i=0,k=0;i<tef.N();++i)
-      {
-	for(int j=0;j<tef[i]->pij_alpha.N();++j,++k)
-	  {
-	    IPJ a =tef[i]->pij_alpha[j];
-	    pij_alpha[k]=IPJ(a.i+oi,kpt[a.p+op],a.j+oj);
-	  }
-	op += tef[i]->P_Pi_h.N();
-	oi += tef[i]->pij_alpha.N();
-	oj += tefN[i];
-      }
-    
-    cout << "GFEInterpole pij_alpha : n Pt " << npp << " " << pij_alpha.N() <<  endl;
-    for(int i=0;i<nc;++i)
-      cout << pij_alpha[i] << endl;
-    coef_Pi_h_alpha = new double[nc]; 
-    assert(op==np);
-    assert(oi==nc);
-  }
-      
-  const KN<IPJ > & Ph_ijalpha() const {return pij_alpha;} // la struct de la matrice
-  const KN<RdHat> & Pi_h_Rd() const { return P_Pi_h;}   // les points
-  
-  
-  virtual ~GFEInterpole() 
-  {
-    if(clean) delete[] coef_Pi_h_alpha;
-  }
-  
-  };
-  
-*/
 
 
 template<class Mesh>
@@ -415,6 +327,7 @@ public:
   
   virtual R operator()(const GFElement<Mesh>  & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const  ;
   virtual void FB(const What_d whatd,const Mesh & Th,const Element & K,const Rd &P, KNMK_<R> & val) const =0;
+  virtual void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M   ) const {}; // no change by deflaut 
   
   static KN<int> tefN(const KN<GTypeOfFE const  *>  & tef) {
     int n=tef.N();
@@ -530,7 +443,7 @@ public:
   //Rd   MinMax(const RN_& U,int i0) const  ;
   void BF(const Rd & P,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
   void BF(const What_d whatd, const Rd & P,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
-  
+    void set(InterpolationMatrix<RdHat> &M) const {this->tfe->set(this->Vh.Th,this->T,M);}
   // add april 08   begin end number for df of the componante ic 
   int dfcbegin(int ic) const { return this->tfe->begin_dfcomp[ic];}
   int dfcend(int ic) const { return this->tfe->end_dfcomp[ic];}
@@ -548,7 +461,7 @@ public:
     vdf=RR();
     
     if(M.k != this->number) 
-      M.set( this->number); 
+      M.set( (const GFElement &) *this); 
     
     for (int k=0;k<M.ncoef;++k)
       vdf[M.dofe[k]] += M.coef[k]*vpt(M.p[k],M.comp[k]);            	
@@ -737,8 +650,12 @@ template<class Mesh>
 inline void GFElement<Mesh>::BF(const Rd & P,RNMK_ & val) const {
   this->tfe->FB(Fop_D0|Fop_D1,this->Vh.Th,this->T,P,val);}  
 
+ 
 template<class Mesh>
-inline void GFElement<Mesh>::BF(const What_d whatd,const Rd & P,RNMK_ & val) const { this->tfe->FB(whatd,this->Vh.Th,this->T,P,val);}
+    inline void GFElement<Mesh>::BF(const What_d whatd,const Rd & P,RNMK_ & val) const { this->tfe->FB(whatd,this->Vh.Th,this->T,P,val);}
+    
+//template<class Mesh>
+ //   inline void GFElement<Mesh>::set(InterpolationMatrix<typename Mesh::Element::RdHat> &M) const { this->tfe->set(this->Vh.Th,this->T,&M);}
 
 template<class Mesh>
 inline   R GFElement<Mesh>::operator()(const Rd & PHat,
@@ -830,20 +747,7 @@ void GTypeOfFESum<Mesh>::FB(const What_d whatd,const Mesh & Th,const Element & K
       }
 } 
 
-/* il faut reflechir   mais a faire
- // une class qui mettre une chapeau sur les type d'element finis. 
-template<class Mesh>
-struct TypeOfFE {
-    
-    GTypeOfFE<Mesh> *tef; 
-    bool clean;
-    TypeOfFE(GTypeOfFE<Mesh> & t):tef(&t),clean(false){}
-    TypeOfFE(GTypeOfFE<Mesh> * t):tef(t),clean(false){}
-    TypeOfFE(GTypeOfFE<Mesh> & t):tef(t),clean(false){}
-    
-    ~TypeOfFE() {if(clean) delete tef;}
-}    
-*/
+
 
 template<class RdHat>
 template<class Mesh>
@@ -876,13 +780,14 @@ InterpolationMatrix<RdHat>::InterpolationMatrix(const GTypeOfFE<Mesh> & tef)
   tef.GTypeOfFE<Mesh>::init(*this,0,0,0,0);
 }
 
-template<class RdHat>
-void InterpolationMatrix<RdHat>::set(int kk)
+template<class RdHat> template<class Mesh>
+void InterpolationMatrix<RdHat>::set(const GFElement<Mesh> & FK) 
 {
-  if(k==kk) return;
-  k=kk;
+  if(k==FK.number) return;
+  k=FK.number;
   if(invariant) return;
-  assert(invariant);
+    FK.set(*this);
+  //assert(invariant);
   // a faire ...
 }
 

@@ -345,7 +345,7 @@ public:
   int faceOrientation(int i) const 
   {// def the permutatution of orient the face
     int fo =0;
-    Vertex * f[3]={&at(nvface[i][0]), &at(nvface[i][1]), &at(nvface[i][2])}; 
+    const Vertex * f[3]={&at(nvface[i][0]), &at(nvface[i][1]), &at(nvface[i][2])}; 
     if(f[0]>f[1]) fo+=1,Exchange(f[0],f[1]); 
     if(f[1]>f[2]) { fo+=2,Exchange(f[1],f[2]); 
     if(f[0]>f[1]) fo+=4,Exchange(f[0],f[1]); }

@@ -45,7 +45,8 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	ffrandom.$(DYLIB_SUFFIX)  \
 	medit.$(DYLIB_SUFFIX)  \
 	mat_dervieux.$(DYLIB_SUFFIX) lgbmo.$(DYLIB_SUFFIX) mat_psi.$(DYLIB_SUFFIX)\
-	$(DYLIB_OTHER_COMPILE)
+	ppm2rnm.$(DYLIB_SUFFIX) provadxw.$(DYLIB_SUFFIX) \
+	$(DYLIB_OTHER_COMPILE) 
 
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX)
 bin_PROGRAMS=
