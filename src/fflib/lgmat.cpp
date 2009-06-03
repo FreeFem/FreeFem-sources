@@ -556,7 +556,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
    }
   if(verbosity>2) 
     {
-      cout << " -- buildInterpolationMatrix   transpose =" << transpose << endl
+      cout << "  -- buildInterpolationMatrix   transpose =" << transpose << endl
            << "              value, dx , dy          op = " << op << endl
            << "                            just  inside = " << inside << endl;
     }
@@ -772,7 +772,7 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
    }
   if(verbosity>2) 
     {
-      cout << " -- buildInterpolationMatrix   transpose =" << transpose << endl
+      cout << "  -- buildInterpolationMatrix   transpose =" << transpose << endl
            << "              value, dx , dy          op = " << op << endl
            << "              composante                 = " << icomp << endl
            << "                            just  inside = " << inside << endl;
@@ -916,8 +916,8 @@ AnyType ProdMat(Stack stack,Expression emat,Expression prodmat)
   MatriceMorse<RB> *mB= AB.B->A->toMatriceMorse(AB.tb);
   if( !mA && ! mB) ExecError(" Sorry error: in MatProd,  pb trans in MorseMat");
   if( mA->m != mB->n) {
-    cerr << " -- Error dim ProdMat A*B : tA =" << AB.ta << " = tB " << AB.tb << endl;
-    cerr << " --MatProd " << mA->n<< " "<< mA->m << " x " << mB->n<< " "<< mB->m <<  endl;
+    cerr << "  -- Error dim ProdMat A*B : tA =" << AB.ta << " = tB " << AB.tb << endl;
+    cerr << "  --MatProd " << mA->n<< " "<< mA->m << " x " << mB->n<< " "<< mB->m <<  endl;
     ExecError(" Wrong mat dim in MatProd");
   }
   MatriceMorse<RAB> *mAB=new MatriceMorse<RA>();
@@ -1853,7 +1853,7 @@ template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
     //cout <<  " nxm  =" <<n<< "x" << m <<endl; 
     amorse=  new MatriceMorse<R>(n,m,Aij,sym); 
     if(verbosity)
-	cout << " -- Raw Matrix    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
+	cout << "  -- Raw Matrix    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
     
     Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));       
     // sparse_mat->pUh=0;
@@ -1975,7 +1975,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
   amorse=  new MatriceMorse<R>(n,m,Aij,false); 
   }
   if(verbosity)
-     cout << " -- Block Matrix NxM = " << N << "x" << M << "    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
+     cout << "  -- Block Matrix NxM = " << N << "x" << M << "    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
   
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(s));       
   //sparse_mat->pUh=0;

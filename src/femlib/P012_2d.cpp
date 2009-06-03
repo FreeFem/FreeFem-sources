@@ -59,7 +59,7 @@ R TypeOfFE_P0Lagrange2d::operator()(const FElement & K,const  R2 & PHat,const KN
 
 void TypeOfFE_P0Lagrange2d::FB(const What_d whatd,const Mesh & ,const Element & K,const R2 & P,RNMK_ & val) const
 {
-  assert(val.N() >=Element::nv);
+  assert(val.N() >=1);
   assert(val.M()==1 );
   
   val=0; 

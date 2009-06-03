@@ -343,7 +343,7 @@ ostream* dumptable(ostream* f)
    ListOfTOfId::const_iterator i=tables_of_identifier.begin();
    for(;i!=tables_of_identifier.end();++i)
     { 
-      cout << " --------- table of identifier ---------\n";
+      cout << "  --------- table of identifier ---------\n";
       TableOfIdentifier * ti=*i;
       TableOfIdentifier::const_iterator mc=ti->m.begin();
       TableOfIdentifier::const_iterator end=ti->m.end();

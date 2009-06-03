@@ -50,7 +50,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
   //       
   // --------------------------
   if (verbosity>1) 
-    cout << " -- construction of the geometry from the 2d mesh " << endl;
+    cout << "  -- construction of the geometry from the 2d mesh " << endl;
   if (nbt<=0 || nbv <=0 ) { MeshError(101);}
 
   // construction of the edges 
@@ -609,7 +609,7 @@ retry:
           // if (NbTry) cout <<"Read (int) to Show Sioux window", cin >> kkk ;
 	       if(NbTry) 
 	          {
-		    cerr << " --Fatal Error: on the class triangles before call Geometry::ProjectOnCurve" << endl; 
+		    cerr << " -- Fatal Error: on the class triangles before call Geometry::ProjectOnCurve" << endl; 
 		    cerr << "   The mesh of the  Geometry is to fine: ";
 		    cerr << "     1)  a mesh edge  contening more than "<< mxe/2 << " geometrical edges." << endl;
 		    cerr << "     2)  code bug : be sure that we call   Triangles::SetVertexFieldOn() before " << endl;

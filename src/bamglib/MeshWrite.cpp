@@ -62,7 +62,7 @@ void Triangles::Write(const char * filename,const TypeFileMesh typein )
     } 
   if (verbosity>1)
     {
-      cout << " -- Writing the file " << filename << " of type " ;
+      cout << "  -- Writing the file " << filename << " of type " ;
      switch (type) 
        {
        case BDMesh     :  cout << " BD Mesh "  ; break;
@@ -802,7 +802,7 @@ void Geometry::Write(const char * filename)
   if (f)
     {
       if(verbosity>1)
-	cout << " -- write geometry in file " << filename << endl;
+	cout << "  -- write geometry in file " << filename << endl;
        if (name) delete name;
        name = new char[strlen(filename)+1];
        strcpy(name,filename);

@@ -607,13 +607,13 @@ template<class K>
 template<class R>
 inline  ostream & ShowBound(const KN<R> & y,ostream & f)
  {
-  f << " -- vector function's bound  " << y.min() << " " << y.max() ;
+  f << "  -- vector function's bound  " << y.min() << " " << y.max() ;
   return f;
  }
 template<>
 inline   ostream & ShowBound<Complex>(const KN<Complex> & y,ostream & f)
  {
-  f << " -- vector function's bound : (no complex Value) " ;
+  f << "  -- vector function's bound : (no complex Value) " ;
   return f;
  }
 

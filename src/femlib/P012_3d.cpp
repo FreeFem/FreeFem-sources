@@ -62,7 +62,7 @@ R TypeOfFE_P0Lagrange3d::operator()(const FElement & K,const  R3 & PHat,const KN
 
 void TypeOfFE_P0Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & K,const R3 & P,RNMK_ & val) const
 {
-  assert(val.N() >=Element::nv);
+  assert(val.N() >=1);
   assert(val.M()==1 );
   
   val=0; 
@@ -578,6 +578,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 static int dfon[];
 	 static const int d=Mesh::Rd::d;
 	 TypeOfFE_RT0_3d();
+	 int edgeface[4][3] ;
 	void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
 	void  TypeOfFE_RT0_3d::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M  ) const;
      } ;
@@ -591,39 +592,62 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	R3 Pt[]= {R3(0.,0.,0.), R3(1.,0.,0.),R3(0.,1.,0.),R3(0.,0.,1.)};
 	for (int i=0;i<Element::ne;++i)
           (Pt[Element::nvedge[i][0]]+Pt[Element::nvedge[i][1]])*0.5;
-	 int i=0;
+	 
 //	 static const int  nvfaceTet[4][3]  ={{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}  ;//{ {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
 //	    { {0,1},{0,2},{0,3},{1,2},{1,3},{2,3} };
 	 //     0     1     2     3     4     5
-
-	 int edgeface[4][3] ;
-	 for (int f=0;f<4;f++)
-	     for (int e=0,i=0;e<6;e++)
-		if ((Element::nvedge[e][0] !=f)  && (Element::nvedge[e][1]!=f))
-		    edgeface[f][i++]=e; 
-
+       {
+	   int i=0;
+	   for (int f=0;f<4;f++)
+	       for (int e=0,i=0;e<6;e++)
+		   if ((Element::nvedge[e][0] !=f)  && (Element::nvedge[e][1]!=f))
+		       edgeface[f][i++]=e; 
+	  // assert(i==6);
+       }
+       {
+	 int i=0;
 	 for (int f=0;f<4;f++) 
 	   {
 	    
 	     for (int p=0;p<3;p++) 
 	     {
 		 int e= edgeface[f][p] ; 
-		 for (int c=0;c<3;c++) 
+		 for (int c=0;c<3;c++,i++) 
 
 	           {
 	             this->pInterpolation[i]=e;
 	             this->cInterpolation[i]=c;
-		     this->dofInterpolation[i]=f;
+		   this->dofInterpolation[i]=f;
 	             this->coefInterpolation[i]=0.;	       
 	           }
 	     }}
+       }
        
      }
      void  TypeOfFE_RT0_3d::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M  ) const
      {
 	 //   compute de coef d'interpolation
 	// M.coef 
-	 
+	 int i=0;
+	 for (int f=0;f<4;f++) 
+	   {
+	       R3 N=K.N(f);//  exterior and  ||N|| = 2* area f
+	       N *= K.faceOrient(f)/6.;
+	       for (int p=0;p<3;p++) 
+		 {
+		     int e= edgeface[f][p] ; 
+		     for (int c=0;c<3;c++,i++) 
+			 
+		       {
+			   this->pInterpolation[i]=e;
+			   this->cInterpolation[i]=c;
+			   this->dofInterpolation[i]=f;
+			   M.coef[i]=N[c];	       
+		       }
+		 }}
+	// cout << " M.coef :" << M.coef << endl;
+	 ffassert(i==M.ncoef && M.np == 6 );
+ 	 
      }
      void  TypeOfFE_RT0_3d::FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const
      {
@@ -633,7 +657,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 val=0; 
 	 
 	 R cc =1./(d*K.mesure());
-	 R ci[4]={ cc*K.faceOrientation(0),cc*K.faceOrientation(1),cc*K.faceOrientation(2),cc*K.faceOrientation(3)};
+	 R ci[4]={ cc*K.faceOrient(0),cc*K.faceOrient(1),cc*K.faceOrient(2),cc*K.faceOrient(3)};
 	 
 	 if (whatd & Fop_D0) 
 	   {
@@ -644,6 +668,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 		     val(i,0,op_id) = wi.x ;
 		     val(i,1,op_id)= wi.y ;
 		     val(i,2,op_id)= wi.z ;
+		     cout  << "RT 3d  "<<i << " "<< X << " " <<wi << " fo: " << K.faceOrient(3) <<endl;
 		 }
 	   }
 	 
@@ -673,6 +698,10 @@ GTypeOfFE<Mesh3> & P2Lagrange3d(P2_3d);
 static TypeOfFE_P1bLagrange3d  P1b_3d;
 GTypeOfFE<Mesh3> & P1bLagrange3d(P1b_3d);
 
+static TypeOfFE_RT0_3d  RT0_3d;
+GTypeOfFE<Mesh3> & RT03d(RT0_3d);
+     
+     
 
 
 

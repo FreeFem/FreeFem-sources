@@ -64,7 +64,7 @@ int nbnode_d(const int ndfitem[4],const  int nd[4])
 }
 
 //template<class Element>
-int *builddata_d(const int ndfitem[4],const int nd[4])
+int *builddata_d(const int ndfitem[4],const int nd[4],int N)
 {
   //    const int d=Element::Rd::d;
   //    const int nwhat=Element::nitem;
@@ -73,7 +73,7 @@ int *builddata_d(const int ndfitem[4],const int nd[4])
   //    cout << " nitem="<< nitem<< endl;
   const int ndf = nbdf_d(ndfitem,nd);
   const int nnode=nbnode_d(ndfitem,nd);
-  int lgdata= ndf*5+2;
+  int lgdata= ndf*5+N;
   int * data = new int[lgdata];
   int p=0;
   for(int i=0,nw=0;i<=3;++i)
@@ -96,11 +96,11 @@ int *builddata_d(const int ndfitem[4],const int nd[4])
 	  data[p++] = nn;
     }
   // cout << p << " " << 3*ndf << " " << nitem << endl;
-  for(int i=0;i<ndf*2;++i)	    
+  for(int i=0;i<ndf*2+N;++i)	    
     data[p++] = 0;
   
-  data[p++] = 0;
-  data[p++] = 0;
+ // data[p++] = 0;
+ // data[p++] = 0;
   //cout << p << " == " << lgdata << endl;
   assert(p== lgdata);
   //cout << nn << " " << nnode << endl;
@@ -120,7 +120,7 @@ int *builddata_d(const int ndfitem[4],const int nd[4])
 
    dataTypeOfFE::dataTypeOfFE(const int nitemdim[4],const int dfon[4],int NN,int nbsubdivisionn,int nb_sub_femm,bool discon)
      :
-     data(builddata_d(dfon,nitemdim)),  
+     data(builddata_d(dfon,nitemdim,NN)),  
      dataalloc(data),
      ndfonVertex(dfon[0]),
      ndfonEdge(dfon[1]),
@@ -179,14 +179,15 @@ int *builddata_d(const int nitemdim[4],const KN< dataTypeOfFE const  *> &teb)
 	nbsubdivision = max(nbsubdivision,teb[i]->nbsubdivision);
 	discon = discon || teb[i]->discontinue; // bof bof 1 FE discontinue => discontinue
       }
-    int ostart=10;
+    int nwhat=15; // 15 = 4+6+1+1 (nb of  support item  (what) : vertex, edges, fqces, tet)
+    
+    int ostart=nwhat;
     int * data0=new int[ostart+7*NbDoF+N];
     int * data=data0+ostart;
     int * data1=data+5*NbDoF;
    
       int c=0;
-    
-    KN<int> w(10),nn(10);
+    KN<int> w(nwhat),nn(nwhat); 
     
     w=0;
     nn=0; 
@@ -196,10 +197,10 @@ int *builddata_d(const int nitemdim[4],const KN< dataTypeOfFE const  *> &teb)
 	for ( i=0;i<teb[j]->NbDoF;i++)
 	    nn[teb[j]->DFOnWhat[i]]++;
     int nbn=0;      
-    for( j=0;j<10;j++)
+    for( j=0;j<nwhat;j++)
 	if (nn[j]) nn[j]=nbn++;
 	else nn[j]=-1;
-    KN<int> dln(10);
+    KN<int> dln(nwhat);
     dln=0;
     // nn donne numero de noeud sur what            
     for ( j=0;j<k;j++)
@@ -311,14 +312,14 @@ N(data[6]),
 nb_sub_fem(data[7]),
 nbsubdivision(data[8]),
 discontinue(data[9]),
-DFOnWhat(data+10+0*NbDoF),
-DFOfNode(data+10+1*NbDoF),
-NodeOfDF(data+10+2*NbDoF),
-fromFE(data+10+3*NbDoF),
-fromDF(data+10+4*NbDoF),
-fromASubFE(data+10+5*NbDoF),
-fromASubDF(data+10+6*NbDoF) ,
-dim_which_sub_fem(data+10+7*NbDoF)
+DFOnWhat(data+15+0*NbDoF),
+DFOfNode(data+15+1*NbDoF),
+NodeOfDF(data+15+2*NbDoF),
+fromFE(data+15+3*NbDoF),
+fromDF(data+15+4*NbDoF),
+fromASubFE(data+15+5*NbDoF),
+fromASubDF(data+15+6*NbDoF) ,
+dim_which_sub_fem(data+15+7*NbDoF)
 {}
 
 template<class Mesh>
@@ -375,7 +376,7 @@ template<class Mesh>
 template<class Mesh>
 void GTypeOfFESum<Mesh>::Build()
 {
-  bool debug=true;
+    bool debug=verbosity>5;;
   {
     const KN< GTypeOfFE<Mesh> const *> & t=teb;
     map<const GTypeOfFE<Mesh> *,int> m;
@@ -502,7 +503,7 @@ template<class MMesh>
      TFE(1,0,this->ptrTFE), 
      cmesh(Th),
      N(TFE[0]->N),
-     Nproduit(TFE[0]->N),
+     Nproduit(kk),
      nb_sub_fem(TFE[0]->nb_sub_fem),
      dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
      maxNbPtforInterpolation(TFE[0]->NbPtforInterpolation),
@@ -520,7 +521,7 @@ template<class MMesh>
      TFE(1,0,this->ptrTFE), 
      cmesh(Th),
      N(TFE[0]->N),
-     Nproduit(TFE[0]->N),
+     Nproduit(1),
      nb_sub_fem(TFE[0]->nb_sub_fem),
      dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
      maxNbPtforInterpolation(TFE[0]->NbPtforInterpolation),

@@ -301,7 +301,7 @@ double QuadQuality(const Vertex & a,const Vertex &b,const Vertex &c,const Vertex
 void Triangles::MakeQuadrangles(double costheta)
 {
   if (verbosity>2) 
-    cout << " -- MakeQuadrangles costheta = " << costheta << endl;
+    cout << "  -- MakeQuadrangles costheta = " << costheta << endl;
   if (verbosity>5)  
     cout << "    (in)  Nb of Quadrilaterals = " << NbOfQuad 
 	 << " Nb Of Triangles = " << nbt-NbOutT- NbOfQuad*2 
@@ -363,7 +363,7 @@ int  Triangles::SplitElement(int choice)
   Direction NoDirOfSearch;
   const  int withBackground = &BTh != this && &BTh;
  if (verbosity>2) 
-   cout << " -- SplitElement " << (choice? " Q->4Q and T->4T " : " Q->4Q or T->3Q " ) << endl;;
+   cout << "  -- SplitElement " << (choice? " Q->4Q and T->4T " : " Q->4Q or T->3Q " ) << endl;;
  if (verbosity>5)
    cout << endl << "    (in)  Nb of Quadrilaterals = " << NbOfQuad 
 	<< " Nb Of Triangles = " << nbt-NbOutT- NbOfQuad*2 
@@ -688,7 +688,7 @@ int  Triangles::SplitElement(int choice)
   for (i=0;i<nbtsave;i++)
     {
       //     cout << "Triangle " << i << " " << ksplit[i] << ":" << triangles[i]
-      //	   << " ----------------------------------------------- " <<endl;
+      //	   << "  ----------------------------------------------- " <<endl;
       // Triangle * tc=0;
       int  nbmkadj=0;
       Int4 mkadj [100];
@@ -831,7 +831,7 @@ int  Triangles::SplitElement(int choice)
 	 break;         
        }
  
-       // cout << " -- " << i << " " << nbmkadj << " " << kkk << " " << tc << endl;
+       // cout << "  -- " << i << " " << nbmkadj << " " << kkk << " " << tc << endl;
        //  t0.SetDetf();
        // save all the new triangles
        mkadj[nbmkadj++]=i;
@@ -844,7 +844,7 @@ int  Triangles::SplitElement(int choice)
 	     mkadj[nbmkadj++]=jj;
 	     // triangles[jj].SetDet();
 	   }
-       // cout << " -- " << i << " " << nbmkadj << endl;
+       // cout << "  -- " << i << " " << nbmkadj << endl;
        assert(nbmkadj<=13);// 13 = 6 + 4 + 3
   
        if (kk==6)  newNbOfQuad+=3;

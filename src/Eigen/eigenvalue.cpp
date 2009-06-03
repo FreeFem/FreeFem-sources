@@ -338,7 +338,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	      iparam,  ipntr,  workd,   workl,  lworkl, info);
 	if(verbosity>99) 
 	  cout << "    saupp ido: " << ido << " info : " << info << endl;
-	if(info<0) {cerr << " -- err arpack info = " << info << endl;}  
+	if(info<0) {cerr << "  -- err arpack info = " << info << endl;}  
 	sauppError(info);
 
 	if(ido==99) break;
@@ -349,7 +349,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	DoIdoAction(ido,mode,xx,yy,zz,work,OP1,B);
       }
       nconv = iparam[5];
-      if(nconv==0) cerr << " -- Strange: no eigens values ??? " << endl;
+      if(nconv==0) cerr << "  -- Strange: no eigens values ??? " << endl;
       // Finding eigenvalues and eigenvectors.
       if(nconv)
 	{
@@ -524,7 +524,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	      {
 		int k=i;
 		KN_<K> vi(Z(':',i)) ;
-		cout << " ------ EV--raw " << vi.min() << " " << vi.max() << endl;
+		cout << "     ------ EV--raw " << vi.min() << " " << vi.max() << endl;
 		(*rawvector)(':',i)=vi;
 	      }
 	    

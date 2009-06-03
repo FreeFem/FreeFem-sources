@@ -552,7 +552,7 @@ public:
     TFE(1,0,&tfe), 
     cmesh(TTh),
     N(TFE[0]->N),
-    Nproduit(TFE[0]->N),
+    Nproduit(1),
     nb_sub_fem(TFE[0]->nb_sub_fem),
     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
     maxNbPtforInterpolation(TFE[0]->NbPtforInterpolation),

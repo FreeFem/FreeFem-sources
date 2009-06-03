@@ -341,8 +341,17 @@ public:
     return r;
   }
 
-
-  int faceOrientation(int i) const 
+ int faceOrient(int i) const 
+    {// def the permutatution of orient the face
+	int fo =1;
+	const Vertex * f[3]={&at(nvface[i][0]), &at(nvface[i][1]), &at(nvface[i][2])}; 
+	if(f[0]>f[1]) fo = -fo,Exchange(f[0],f[1]); 
+	if(f[1]>f[2]) { fo = -fo,Exchange(f[1],f[2]); 
+	if(f[0]>f[1]) fo = -fo,Exchange(f[0],f[1]); }
+	return fo;
+    }
+    
+  int facePermutation(int i) const 
   {// def the permutatution of orient the face
     int fo =0;
     const Vertex * f[3]={&at(nvface[i][0]), &at(nvface[i][1]), &at(nvface[i][2])}; 
@@ -654,7 +663,7 @@ public:
   R mesure(){ return mes;}
   R bordermesure(){ return mesb;}
   virtual ~GenericMesh() { 
-    cout << "~GenericMesh\n";
+    //cout << "~GenericMesh\n";
    
     delete [] ElementConteningVertex;
     delete [] TheAdjacencesLink;
@@ -704,8 +713,8 @@ void GenericMesh<T,B,V>::BuildAdj()
   HashTable<SortArray<int,nva>,int> h(nea*nt,nv);
   int nk=0,nba=0;
   int err=0;
-
-  cout << "nva=// nea=" << nva << " " << nea << " "<< nbe << endl;
+if(verbosity>5) 
+  cout << "   -- BuildAdj:nva=// nea=" << nva << " " << nea << " "<< nbe << endl;
   for (int k=0;k<nt;++k)
     for (int i=0;i<nea;++i)
       {
@@ -754,11 +763,15 @@ void GenericMesh<T,B,V>::BuildAdj()
     
   assert(err==0);
   int na= h.n;
-  cout << "  -- Nb adj  = "<< na << " on border " << nba << " nea = " << nea << " nva = " << nva ;
-  if(nea==2)
-    cout << " Const d'Euler: " << nt - na + nv << endl;
-  else
-    cout << endl;
+  if(verbosity>1) 
+    {
+	cout << "  -- BuildAdj: nb Elememt " << nt << " nb vertices " << nv << endl;
+	cout << "             : nb adj  = "<< na << " on border " << nba << " nea = " << nea << " nva = " << nva ;
+      if(nea==2)
+        cout << " Const d'Euler: " << nt - na + nv << endl;
+      else
+        cout << endl;	
+    }	
 }
 /*
 template<typename T,typename B,typename V>
@@ -1259,7 +1272,8 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
 	    
 		  
 	      }
-	      cout << " iteration in final equivalent " << it << " nb change " << change << endl;
+	     if(verbosity>5)
+	      cout << "     -- BuildDF: iteration in final equivalent " << it << " nb change " << change << endl;
 	    }
 	    
 	
@@ -1318,8 +1332,10 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
 	      }
 	  }
       }
-      cout << " nb of Nodes " << nbNodes << endl;
-      cout << " nb of DoF   " << NbOfDF << endl ;
+       if(verbosity)
+	 {   cout << "  -- Build Nodes/ DF on mesh :   n.v. " << nv <<  ", n. elmt. " << nt << ", n b. elmt. " <<nbe << endl;
+	     cout << "     nb of Nodes " << nbNodes << "    nb of DoF   " << NbOfDF << endl ;	     
+	 }
       if( ! constndfpernode) 
 	{ 
 	  pp=new int[nbNodes+1];
@@ -1362,7 +1378,9 @@ void GenericMesh<T,B,V>::BuildBound()
 
 	 }
     }
-	
+  if(verbosity)
+      cout << "  -- Mesh" << V::d << " , n V: " << nv << " , n Elm: " << nt << " , n B Elm: " << nbe 
+	 << " , bb: (" << Pmin << ") , (" << Pmax << ")\n"; 
 }
 
 template<typename T,typename B,typename V>

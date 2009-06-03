@@ -57,7 +57,7 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
   Int4 ifgeom=0;
   Metric M1(1);
   if (verbosity>1)
-    cout << " -- ReadMesh " << f_in.CurrentFile  << " Version = " << Version << endl;
+    cout << "  -- ReadMesh " << f_in.CurrentFile  << " Version = " << Version << endl;
   int field=0;
   int showfield=0;
   while (f_in.cm()) 
@@ -387,7 +387,7 @@ void Triangles::Read_am_fmt(MeshIstream & f_in)
   Metric M1(1);
 
   if (verbosity>1)
-    cout << " -- ReadMesh .am_fmt file " <<  f_in.CurrentFile  << endl;
+    cout << "  -- ReadMesh .am_fmt file " <<  f_in.CurrentFile  << endl;
    	
      Int4 i;
      f_in.cm() >> nbv >> nbt ;
@@ -430,7 +430,7 @@ void Triangles::Read_am_fmt(MeshIstream & f_in)
 void  Triangles::Read_am(MeshIstream &ff)
 {
   if (verbosity>1)
-    cout << " -- ReadMesh .am_fmt file " <<  ff.CurrentFile  << endl;
+    cout << "  -- ReadMesh .am_fmt file " <<  ff.CurrentFile  << endl;
     Metric M1(1);	
   
   IFortranUnFormattedFile f_in(ff);
@@ -481,7 +481,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
 {
 
  if (verbosity>1)
-    cout << " -- ReadMesh .nopo file " <<  ff.CurrentFile  << endl;
+    cout << "  -- ReadMesh .nopo file " <<  ff.CurrentFile  << endl;
  IFortranUnFormattedFile f_in(ff);
  
  
@@ -697,7 +697,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
 {
   //  
   if (verbosity>1)
-    cout << " -- ReadMesh .ftq file " <<  f_in.CurrentFile  << endl;
+    cout << "  -- ReadMesh .ftq file " <<  f_in.CurrentFile  << endl;
   
   Int4 i,ne,nt,nq;
   f_in.cm() >> nbv >> ne >> nt >> nq ;
@@ -759,7 +759,7 @@ void  Triangles::Read_msh(MeshIstream &f_in)
 {
     Metric M1(1.);
   if (verbosity>1)
-    cout << " -- ReadMesh .msh file " <<  f_in.CurrentFile  << endl;
+    cout << "  -- ReadMesh .msh file " <<  f_in.CurrentFile  << endl;
    	
      Int4 i;
      f_in.cm() >> nbv >> nbt ;
@@ -810,7 +810,7 @@ void  Triangles::Read_amdba(MeshIstream &f_in )
 {
   Metric M1(1);
   if (verbosity>1)
-    cout << " -- ReadMesh .amdba file " <<  f_in.CurrentFile  << endl;
+    cout << "  -- ReadMesh .amdba file " <<  f_in.CurrentFile  << endl;
    	
      Int4 i;
      f_in.cm() >> nbv >> nbt ;
@@ -913,7 +913,7 @@ void Geometry::ReadGeometry(const char * filename)
 {
   OnDisk = 1;
   if(verbosity>1)
-      cout << " -- ReadGeometry " << filename << endl;
+      cout << "  -- ReadGeometry " << filename << endl;
   MeshIstream f_in (filename);
   ReadGeometry(f_in,filename);
 }
@@ -923,7 +923,7 @@ void Geometry::ReadGeometry(const char * filename)
 void Geometry::ReadGeometry(MeshIstream & f_in,const char * filename)  
 {
   if(verbosity>1)
-    cout << " -- ReadGeometry " << filename << endl;
+    cout << "  -- ReadGeometry " << filename << endl;
   assert(empty());
   nbiv=nbv=nbvx=0;
   nbe=nbt=nbtx=0;

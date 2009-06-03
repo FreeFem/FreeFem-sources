@@ -597,7 +597,7 @@ void MatriceProfile<R>::LU(double eps) const  {
   int i,j;
   if (L == U && ( pL[this->n]  || pU[this->n] ) ) ERREUR(LU,"matrix LU  symmetric");
   if(verbosity>3)
-  cout << " -- LU " << endl;
+  cout << "  -- LU " << endl;
   typefac=FactorizationLU;
 
   for (i=1;i<this->n;i++) // boucle sur les sous matrice de rang i 
@@ -989,7 +989,7 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
       kkk=kk;
     } 
   if(verbosity>4) 
-    cout <<" -- MatriceMorse<R>::Build " << kk << " " << nbn_u << " " << Uh.SizeToStoreAllNodeofElement() 
+    cout <<"  -- MatriceMorse<R>::Build " << kk << " " << nbn_u << " " << Uh.SizeToStoreAllNodeofElement() 
 	 << " " <<  nbn_u+1+Uh.SizeToStoreAllNodeofElement() << endl;
   ffassert(kk== nbn_u+1+Uh.SizeToStoreAllNodeofElement());
   for (int k=0;k<nbe;k++)
@@ -1547,7 +1547,7 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
    {
    
     //    if(verbosity>3)
-    cout << " -- Morse Matrice is empt: let's build it" << endl;
+    cout << "  -- Morse Matrice is empt: let's build it" << endl;
     ffassert(0); 
     /*
     this->n=me.Uh.NbOfDF;
