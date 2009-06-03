@@ -132,7 +132,7 @@ public:
 	ffassert(0);
     }
      if(verbosity>2)
-    cout << " -- umfpack_di_solve " << endl;
+    cout << "  -- umfpack_di_solve " << endl;
     if(verbosity>3)
     cout << "   b min max " << b.min() << " " <<b.max() << endl;
     if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);

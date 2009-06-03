@@ -668,7 +668,7 @@ public:
 	throw(ErrorExec("exit",1));}
 	// ffassert(f);
 	if(verbosity)
-	    cout << " -- Mesh::read On file \"" <<filename<<"\""<<  endl;
+	    cout << "  -- Mesh::read On file \"" <<filename<<"\""<<  endl;
 	read(f);
     }
     void Mesh::read(ifstream & f , bool bin )

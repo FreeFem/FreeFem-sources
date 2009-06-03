@@ -415,7 +415,7 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
      }
      *mp=mps;
      if (verbosity>1) 
-     cout << " -- Trunc mesh: Nb of Triangle = " << kk << " label=" <<label <<endl;
+     cout << "  -- Trunc mesh: Nb of Triangle = " << kk << " label=" <<label <<endl;
   pmesh pmsh = new Mesh(Th,split,false,label);
   pmsh->renum();
    /* deja fait  dans bamg2msh
@@ -456,7 +456,7 @@ AnyType SplitMesh::operator()(Stack stack) const
       smin=min(smin,split[it]);
       smax=max(smax,split[it]);
     }
-   if(verbosity) cout << " -- Splitmesh " << Thh << " split  min: " << smin << " max: " << smax << endl; 
+   if(verbosity) cout << "  -- Splitmesh " << Thh << " split  min: " << smin << " max: " << smax << endl; 
    Mesh * pth= new Mesh(*Thh,split,false,label);
    R2 Pn,Px;
    pth->BoundingBox(Pn,Px);
@@ -485,7 +485,7 @@ AnyType SaveMesh::operator()(Stack stack) const
      ofstream ff((*fn+".faces").c_str());
      fp.precision(12);
      if (verbosity>1) 
-       cout << " -- Opening files " << (*fn+".points") << " and " << (*fn+".faces") << endl;
+       cout << "  -- Opening files " << (*fn+".points") << " and " << (*fn+".faces") << endl;
     const   Fem2D::Mesh & Th=*Thh;
     long nbv=Thh->nv;
     long nbt=Thh->nt;
@@ -1068,7 +1068,7 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
   // 
   bool direct = det(v[0],v[1],v[nx1+1]) > 0; //  signe  triangle 0
   
-    if(verbosity>1&& !direct) cout << " -- square : all triangles are reversed" <<   endl;
+    if(verbosity>1&& !direct) cout << "  -- square : all triangles are reversed" <<   endl;
 
     int p[2]={1,0};
     if(direct) {p[0]=0,p[1]=1;} 
@@ -1150,7 +1150,7 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
     }     
     
  {
-  if(verbosity) cout << " -- square mesh : nb vertices  =" << nbv 
+  if(verbosity) cout << "  -- Square mesh : nb vertices  =" << nbv 
                      << " ,  nb triangles = " << nbt << " ,  nb boundary edges " << neb << endl;  
   Mesh * m = new Mesh(nbv,nbt,neb,v,t,b);
   R2 Pn,Px;

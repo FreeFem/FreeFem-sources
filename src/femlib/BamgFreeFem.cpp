@@ -149,7 +149,7 @@ Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
   // construction of the edges --
   
   if (nbcrakev && verbosity>2)
-    cout << " -- Nb of craked vertices = " << nbcrakev << " Nb of created vertices " << nv - th.nbv << endl;
+    cout << "  -- Nb of craked vertices = " << nbcrakev << " Nb of created vertices " << nv - th.nbv << endl;
   
   
   for (i=0;i<tTh->nbe;i++)
@@ -761,7 +761,7 @@ void E_BorderN::Plot(Stack stack) const
       DrawMark(mp.P.p2(),0.01);
       MoveTo(mp.P.p2());
     }
-  if(verbosity>9) cout << " -- Plot size : " << nbd << " Border \n";
+  if(verbosity>9) cout << "  -- Plot size : " << nbd << " Border \n";
   mp=mps; 
 }
 void E_BorderN::SavePlot(Stack stack,PlotStream & plot ) const
@@ -801,7 +801,7 @@ void E_BorderN::SavePlot(Stack stack,PlotStream & plot ) const
 	 
       }
     assert(nbd==nbd1);
-    if(verbosity>9) cout << " -- Plot size : " << nbd << " Border \n";
+    if(verbosity>9) cout << "  -- Plot size : " << nbd << " Border \n";
     mp=mps; 
 }
 

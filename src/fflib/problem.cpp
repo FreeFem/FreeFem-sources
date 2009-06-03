@@ -3876,7 +3876,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   
  
   if (verbosity) 
-    {cout << " -- Solve : " ; 
+    {cout << "  -- Solve : " ; 
     for (int i=0;i<Nb;i++) 
       cout  << "          min " << (u_h[i])->x()->min() << "  max " << (u_h[i])->x()->max() << endl ;
     }
@@ -4139,7 +4139,7 @@ Problem::Problem(const C_args * ca,const ListOfId &l,size_t & top) :
  if( complextype && !iscomplex) 
     CompileError("Error: Problem  a complex problem with no complex FE function ");
  if( verbosity > 1)
-    cout << " -- Problem type  ( complex : " << complextype << " )  "  <<endl;  
+    cout << "  -- Problem type  ( complex : " << complextype << " )  "  <<endl;  
 }
 
 Expression IsFebaseArray(Expression f)

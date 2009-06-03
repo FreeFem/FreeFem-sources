@@ -366,7 +366,7 @@ bool BuildPeriodic(
 	      nbdfv = numeroteclink(ndfv) ; 
 	      nbdfe = numeroteclink(ndfe) ; 
 	      if (verbosity>2) 
-		  cout << " -- nb df on vertices " << nbdfv << endl;
+		  cout << "  -- nb df on vertices " << nbdfv << endl;
 	      */
 	      delete [] link1;
 	      delete [] link2;
@@ -803,7 +803,7 @@ AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
   KNM<R>   Vp(npPh,1);
   KN<R>  Vdf(Vh.MaxNbDFPerElement);
   const E_F0 & ff(* (const  E_F0 *) e ) ;
-  
+ //   cout << "Vh.isFEMesh() :" <<Vh.isFEMesh() << endl;
   if (Vh.isFEMesh() )
     {
       
@@ -837,7 +837,8 @@ AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
 	      mps->set(K.T(PtHat),PtHat,K);
 	      Vp[p]=GetAny<R>( ff(s) );
 	    }
-	  K.Pi_h(Vp,Vdf,ipmat);  
+	  K.Pi_h(Vp,Vdf,ipmat);
+	 //   cout << "Vp::: " << Vp << " " << Vdf << endl;
 	  for (int df=0;df<nbdf;df++)         
 	    (*y)[K(df)] =  Vdf[df] ;
 	  sptr->clean(); // modif FH mars 2006  clean Ptr	
@@ -1008,8 +1009,8 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
 		   else Vp(p,j)=0;
 	       
 	     }
-           
 	   Kt.Pi_h(Vp,Vdf,ipmat);  
+	   //  cout << "Vp --- "<< Vp  << "  Vdf;; " << Vdf[0] << endl;
 	   for (int df=0;df<nbdf;df++)         
 	     yy[Kt(df)] =  Vdf[df] ;
 	   
@@ -1319,6 +1320,7 @@ class Op4_Mesh32mp : public quad_function<pmesh3*,R,R,R,MeshPoint *> { public:
 	
     };
 };
+
 
 // FH
 

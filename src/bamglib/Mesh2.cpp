@@ -1859,7 +1859,7 @@ void  Triangles::NewPoints(Triangles & Bh,int KeepBackVertex)
 { // Triangles::NewPoints
   Int4 nbtold(nbt),nbvold(nbv);
   if (verbosity>2) 
-    cout << " -- Triangles::NewPoints ";
+    cout << "  -- Triangles::NewPoints ";
   if (verbosity>3)cout <<  " nbv (in)  on Boundary  = " << nbv  <<endl;
   Int4 i,k;
   int j;
@@ -1948,7 +1948,7 @@ void  Triangles::NewPoints(Triangles & Bh,int KeepBackVertex)
     }// for triangle   
   
 #ifdef DRAWING1
-  cout << " -------------------------------------------- " << endl;
+  cout << "  -------------------------------------------- " << endl;
   inquire();
   reffecran();
   Draw();
@@ -2424,7 +2424,7 @@ void  Triangles::NewPointsOld(Triangles & Bh)
 
 void Triangles::Insert() 
 {
-  if (verbosity>2) cout << " -- Insert initial " << nbv << " vertices " << endl ;
+  if (verbosity>2) cout << "  -- Insert initial " << nbv << " vertices " << endl ;
   Triangles * OldCurrentTh =CurrentTh;
 
   CurrentTh=this;
@@ -2499,7 +2499,7 @@ void Triangles::Insert()
 
   time1=CPUtime();
 
-    if (verbosity>3) cout << " -- Begin of insertion process " << endl;
+    if (verbosity>3) cout << "  -- Begin of insertion process " << endl;
 
   for (Int4 icount=2; icount<nbv; icount++) {
     Vertex *vi  = ordre[icount];
@@ -2574,7 +2574,7 @@ void Triangles::Insert()
 void Triangles::ForceBoundary()
 {
   if (verbosity > 2)
-    cout << " -- ForceBoundary  nb of edge " << nbe << endl;
+    cout << "  -- ForceBoundary  nb of edge " << nbe << endl;
   int k=0;
   Int4  nbfe=0,nbswp=0,Nbswap=0;
   for (Int4 t = 0; t < nbt; t++)  
@@ -2628,9 +2628,9 @@ void Triangles::FindSubDomain(int OutSide=0)
     if (verbosity >2)
     {
 	if (OutSide)
-	    cout << " -- Find all external sub-domain ";	
+	    cout << "  -- Find all external sub-domain ";	
 	else
-	    cout << " -- Find all internal sub-domain ";
+	    cout << "  -- Find all internal sub-domain ";
 	
     }
     // if (verbosity > 4) cout << " OutSide=" << OutSide << endl;
@@ -3442,7 +3442,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
                   Vertex *A1;
 		  VertexOnGeom *GA1;
                   Edge * PreviousNewEdge = 0;
-		  //  cout << " --------------New Curve phase " << phase 
+		  //  cout << "  --------------New Curve phase " << phase 
 		  //       << "---------- A0=" << *A0 << ei[k0]  <<endl;
                   assert (A0-vertices>=0 && A0-vertices <nbv);
                   if(ongequi->Required() ) 
@@ -3533,7 +3533,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 			  A0=A1;
 			  sNew += Lstep;
 			  //   cout << " sNew = " << sNew << " L = " << L 
-			  //        << " ------" <<NbCreatePointOnCurve << " " << i <<  endl;
+			  //        << "  ------" <<NbCreatePointOnCurve << " " << i <<  endl;
 			  if (++i== NbCreatePointOnCurve) break;
 			}
 			
@@ -3724,7 +3724,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
       Int4 nbex = 0;
       nbe = 0;
       Int4 NbVerticesOnGeomEdge0=NbVerticesOnGeomEdge;
-    //  cout <<  " -------------- step =" << step << endl;
+    //  cout <<  "  -------------- step =" << step << endl;
       Gh.UnMarkEdges();	
       NbOfCurves = 0;
       for (i=0;i<Gh.nbe;i++) {
@@ -4125,7 +4125,7 @@ void Triangles::FillHoleInMesh()
     // recherche des extrema des vertices pmin,pmax
     Int4 i;
     if(verbosity>2)
-      cout << " -- FillHoleInMesh: Nb of vertices =" << nbv 
+      cout << "  -- FillHoleInMesh: Nb of vertices =" << nbv 
 	   << " Pmin = "<< pmin << " Pmax = "<< pmax << endl;
     
     assert(ordre);
@@ -4636,7 +4636,7 @@ Int4  Triangle::Optim(Int2 i,int koption)
     for ( k=0;k<NbVerticesOnGeomEdge;k++ ) 
       tstart[ Number(VerticesOnGeomEdge[k].mv)]=&vide;
     if(verbosity>2) 
-      cout << " -- SmoothingVertex: nb Iteration = " << nbiter << " Omega = " << omega << endl;
+      cout << "  -- SmoothingVertex: nb Iteration = " << nbiter << " Omega = " << omega << endl;
     for (k=0;k<nbiter;k++)
      {
       Int4 i,NbSwap =0;
@@ -4781,7 +4781,7 @@ void  Triangles::ShowHistogram() const
 		}
 	    }
 	}  
-	    cout << " -- Histogram of the unit mesh,  nb of edges" << nbedges << endl <<endl;
+	    cout << "  -- Histogram of the unit mesh,  nb of edges" << nbedges << endl <<endl;
  
     cout << "        length of edge in   | % of edge  | Nb of edges " << endl;
     cout << "        ------------------- | ---------- | ----------- " << endl;

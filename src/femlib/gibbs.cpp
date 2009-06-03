@@ -1020,7 +1020,7 @@ int Mesh::renum()
   delete [] vois;
   delete [] ptvois;
      if(verbosity>1)
-  cout << " -- Mesh: Gibbs: old skyline = " << pfold << "  new skyline = " << pfnew << endl;
+  cout << "  -- Mesh: Gibbs: old skyline = " << pfold << "  new skyline = " << pfnew << endl;
   if (err == 0 && (pfnew <= pfold))
      {
        int i,j;

@@ -260,7 +260,8 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   int nbv=Th.nv; // nombre de sommet 
   int nbt=Th.nt; // nombre de triangles
   int neb=Th.neb; // nombre d'aretes fontiere
-  cout << " " << nbv<< " "<< nbv << " nbe "<< neb << endl;  
+  if(verbosity>1)
+  cout << "  -- SetMesh_Op: nb vertices" << nbv<< " nb Trai "<< nbt << " nb b. edges  "<< neb << endl;  
   KN<long> zz;
   KN<long> nre (arg(0,stack,zz));  
   KN<long> nrt (arg(1,stack,zz));  

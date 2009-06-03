@@ -69,6 +69,7 @@ using namespace std;
 namespace bamg { class Triangles; }
 namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso);
    extern GTypeOfFE<Mesh3> &P1bLagrange3d;
+   extern GTypeOfFE<Mesh3> &RT03d;
 }
 
 #include "BamgFreeFem.hpp"
@@ -1118,7 +1119,7 @@ bool BuildPeriodic(
           nbdfv = numeroteclink(ndfv) ; 
           nbdfe = numeroteclink(ndfe) ; 
           if (verbosity>2) 
-            cout << " -- nb df on vertices " << nbdfv << endl;
+            cout << "  -- nb df on vertices " << nbdfv << endl;
         delete [] link1;
         delete [] link2;
         return true; //new FESpace(**ppTh,*tef,nbdfv,ndfv,nbdfe,ndfe);
@@ -1296,7 +1297,7 @@ class OP_MakePtr2 { public:
 	A p= GetAny<A>( (*a)(s) );
 	B th= GetAny<B>( (*b)(s) );
 	C tef= GetAny<C>( (*c)(s) );   
-	//  cout << " ----------- " << endl;  
+	//  cout << "  ----------- " << endl;  
 	*p=new pfes_tef(th,tef,s,nbcperiodic,periodic) ;
 	(**p).decrement();
 	return  SetAny<R>(p);
@@ -1332,7 +1333,7 @@ class OP_MakePtr3 { public:
 	A p= GetAny<A>( (*a)(s) );
 	B th= GetAny<B>( (*b)(s) );
 	C tef= GetAny<C>( (*c)(s) );   
-	//  cout << " ----------- " << endl;  
+	//  cout << "  ----------- " << endl;  
 	*p=new pfes3_tef(th,tef,s,nbcperiodic,periodic) ;
 	(**p).decrement();
 	return  SetAny<R>(p);
@@ -1751,7 +1752,7 @@ AnyType set_feoX_1 (Stack s,Expression ppfeX_1, Expression e)
     *MeshPointStack(s)=mp;
     fe=y;
     if(verbosity>1)
-    cout << " -- interpole f= g*X^-1, function's bound:  " << y->min() << " " << y->max() << endl; 
+    cout << "  -- interpole f= g*X^-1, function's bound:  " << y->min() << " " << y->max() << endl; 
     return SetAny<FEbase<R,v_fes>*>(&fe); 
   }
 
@@ -3709,6 +3710,27 @@ AnyType AddIncrement(Stack stack, const AnyType & a)
     return a;
 }
 
+class EConstantTypeOfFE3 :public E_F0
+    { public:
+	//  using namespace   Fem2D;
+	typedef Fem2D::TypeOfFE3 * T;
+	T  v;
+    public:
+	AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<T>(v);}
+	EConstantTypeOfFE3( T o):v(o) { /*cout << "New constant " << o << endl;*/}
+	size_t nbitem() const { assert(v);
+	cout << " nb item = " << v->N << endl;
+	return v->N ;} 
+	operator aType () const { return atype<T>();} 
+    };
+
+
+Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
+{
+    throwassert(map_type[typeid( EConstantTypeOfFE3::T).name()]);
+    return make_pair(map_type[typeid( EConstantTypeOfFE3::T).name()],new EConstantTypeOfFE3(v));
+}
+
 
 void  init_lgfem() 
 {
@@ -4014,7 +4036,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("mean","(",new OneOperatorCode<Code_VF<Finconnue,Code_Mean> >);
  Global.Add("otherside","(",new OneOperatorCode<Code_VF<Ftest,Code_OtherSide> >);
  Global.Add("otherside","(",new OneOperatorCode<Code_VF<Finconnue,Code_OtherSide> >);
- 
+
  Global.Add("dx","(",new OneOperatorCode<CODE_Diff<Ftest,op_dx> >);
  Global.Add("dy","(",new OneOperatorCode<CODE_Diff<Ftest,op_dy> >);
  Global.Add("dx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dx> >);
@@ -4365,10 +4387,11 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  FreeFempp::TypeVarForm<Complex>::Global = new TypeVarForm<Complex>();       
     
  
- Global.New("P13d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P1));   
- Global.New("P23d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P2));   
- Global.New("P03d",CConstant<TypeOfFE3*>(&DataFE<Mesh3>::P0)); 
- Global.New("P1b3d",CConstant<TypeOfFE3*>(&P1bLagrange3d));   
+ Global.New("P13d",CConstantTFE3(&DataFE<Mesh3>::P1));   
+ Global.New("P23d",CConstantTFE3(&DataFE<Mesh3>::P2));   
+ Global.New("P03d",CConstantTFE3(&DataFE<Mesh3>::P0)); 
+ Global.New("RT03d",CConstantTFE3(&RT03d));   
+ Global.New("P1b3d",CConstantTFE3(&P1bLagrange3d));   
     /*
      for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
      {
@@ -4382,7 +4405,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
   TEF2dto3d[FindFE2("P2")]=&DataFE<Mesh3>::P2;
   TEF2dto3d[FindFE2("P0")]=&DataFE<Mesh3>::P0;
   TEF2dto3d[FindFE2("P1b")]=&P1bLagrange3d;
-  
+  TEF2dto3d[FindFE2("RT0")]=&RT03d;
+    
 }   
 
 void clean_lgfem()

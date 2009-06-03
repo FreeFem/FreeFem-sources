@@ -483,7 +483,7 @@ class FormLinear : public E_F0mps { public:
     assert(di);
     Expression a1=CastTo<B>(args[1]);
     assert(a1);
-   // cout << " ---FormLinear: "<< a1 << "  " << typeid(*a1).name() << *a1 <<endl;
+   // cout << "  ---FormLinear: "<< a1 << "  " << typeid(*a1).name() << *a1 <<endl;
     B ll= dynamic_cast<B>(a1);
     assert(ll);
     l = new Ftest(*ll); // FH1004 ->Optimize(currentblock);  same as bilinear

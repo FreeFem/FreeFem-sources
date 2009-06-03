@@ -4144,7 +4144,8 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   int nbv=Th.nv; // nombre de sommet 
   int nbt=Th.nt; // nombre de triangles
   int neb=Th.neb; // nombre d'aretes fontiere
-  cout << " " << nbv<< " "<< nbv << " nbe "<< neb << endl; 
+  if(verbosity>2)
+  cout << "  -- BuildLayeMesh_Op input: nv" << nbv<< "  nt: "<< nbt << " nbe "<< neb << endl; 
   KN<double> zmin(nbv),zmax(nbv);
   KN<double> clayer(nbv); //  nombre de layer est nlayer*clayer
   

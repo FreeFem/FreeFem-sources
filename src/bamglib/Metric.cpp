@@ -76,7 +76,7 @@ void ReductionSimultanee( MetricAnIso M1,  MetricAnIso M2,double & l1,double & l
     V= D2xD2(1,0,0,1);
    }
   else {
-    // cerr << " -- " << a << endl ;
+    // cerr << "  -- " << a << endl ;
     const double delta2 = sqrt(delta);
     l1= (-b - delta2)/(2*a);
     l2= (-b + delta2)/(2*a);
@@ -221,7 +221,7 @@ void Triangles::IntersectGeomMetric(const Real8 err=1,const int iso=0)
 
 {
   if(verbosity>1)
-    cout << " -- IntersectGeomMetric geometric err=" << err << (iso ? " iso " : " aniso "  ) << endl;
+    cout << "  -- IntersectGeomMetric geometric err=" << err << (iso ? " iso " : " aniso "  ) << endl;
   Real8 ss[2]={0.00001,0.99999};
   Real8 errC = 2*sqrt(2*err);
   Real8 hmax = Gh.MaximalHmax();
@@ -271,7 +271,7 @@ void Triangles::IntersectGeomMetric(const Real8 err=1,const int iso=0)
 void  Triangles::BoundAnisotropy(Real8 anisomax)
 {
   if (verbosity > 1) 
-    cout << " -- BoundAnisotropy by  " << anisomax << endl; 
+    cout << "  -- BoundAnisotropy by  " << anisomax << endl; 
   Real8 h1=1.e30,h2=1e-30,rx=0;
   Real8 coef = 1./(anisomax*anisomax);
   Real8 hn1=1.e30,hn2=1e-30,rnx =1.e-30;  
@@ -308,7 +308,7 @@ void  Triangles::BoundAnisotropy(Real8 anisomax,Real8 hminaniso)
 {
   double lminaniso = 1/ (Max(hminaniso*hminaniso,1e-100));
   if (verbosity > 1) 
-    cout << " -- BoundAnisotropy by  " << anisomax << endl; 
+    cout << "  -- BoundAnisotropy by  " << anisomax << endl; 
   Real8 h1=1.e30,h2=1e-30,rx=0;
   Real8 coef = 1./(anisomax*anisomax);
   Real8 hn1=1.e30,hn2=1e-30,rnx =1.e-30;  
@@ -379,7 +379,7 @@ void Triangles::IntersectConsMetric(const double * s,const Int4 nbsol,const int 
 
   if(verbosity>1) 
     {
-      cout << " -- Construction of Metric: Nb of field. " << n << " nbt = " 
+      cout << "  -- Construction of Metric: Nb of field. " << n << " nbt = " 
 	   << nbt << " nbv= " << nbv 
 	   << " coef = " << coef << endl
 	   << "     hmin = " << hmin << " hmax=" << hmax 
@@ -880,7 +880,7 @@ const  Real8 maxsubdiv2 = maxsubdiv*maxsubdiv;
   inquire();
 #endif	    
   if(verbosity>1)
-    cout << " -- Limit the subdivision of a edges in the new mesh by " << maxsubdiv <<   endl  ;
+    cout << "  -- Limit the subdivision of a edges in the new mesh by " << maxsubdiv <<   endl  ;
   // for all the edges 
   // if the len of the edge is to long 
   Int4 it,nbchange=0;    
@@ -957,7 +957,7 @@ void Triangles::SmoothMetric(Real8 raisonmax)
 { 
   if(raisonmax<1.1) return;
   if(verbosity > 1)
-     cout << " -- Triangles::SmoothMetric raisonmax = " << raisonmax << " " <<nbv <<endl;
+     cout << "  -- Triangles::SmoothMetric raisonmax = " << raisonmax << " " <<nbv <<endl;
   ReMakeTriangleContainingTheVertex();
   Int4 i,j,kch,kk,ip;
   Int4 *first_np_or_next_t0 = new Int4[nbv];
@@ -983,7 +983,7 @@ void Triangles::SmoothMetric(Real8 raisonmax)
 	Vertex *pvj0 = ta.EdgeVertex(0);
 	while (1) {
 	  //	  cout << i << " " <<  Number(ta.EdgeVertex(0)) << " "
-	  //      << Number(ta.EdgeVertex(1)) << " ---> " ;
+	  //      << Number(ta.EdgeVertex(1)) << "  ---> " ;
 	  ta=Previous(Adj(ta));
 	  // cout <<  Number(ta.EdgeVertex(0)) << " " << Number(ta.EdgeVertex(1)) << endl;
 	  assert(vertices+i == ta.EdgeVertex(1));
@@ -1041,7 +1041,7 @@ void Geometry::ReadMetric(const char * fmetrix,Real8 hmin=1.0e-30,Real8 hmax=1.0
   Int4 k,j;
   f_metrix >>  k >> j ;
   if(verbosity>1)
-    cout << " -- ReadMetric  " << fmetrix 
+    cout << "  -- ReadMetric  " << fmetrix 
 	 << ",  coef = " << coef
 	 << ", hmin = " << hmin 
 	 << ", hmax = " << hmax 
