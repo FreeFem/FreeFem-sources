@@ -585,13 +585,13 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
      int TypeOfFE_RT0_3d::dfon[]={0,0,1,0}; 
      
 
-     //   GTypeOfFE(const int dfon[4],const int NN,int  nsub,int kPi,int npPi,bool invar,bool discon) 
      TypeOfFE_RT0_3d::TypeOfFE_RT0_3d(): GTypeOfFE<Mesh3>(dfon,d,1,3*3*4,6,false,true)
      { 	
-       //  integration on middle of edge (light )
+       //  integration on middle of edge (light ) on  each face .. 
 	R3 Pt[]= {R3(0.,0.,0.), R3(1.,0.,0.),R3(0.,1.,0.),R3(0.,0.,1.)};
 	for (int i=0;i<Element::ne;++i)
-          (Pt[Element::nvedge[i][0]]+Pt[Element::nvedge[i][1]])*0.5;
+          this->PtInterpolation[i]=(Pt[Element::nvedge[i][0]]+Pt[Element::nvedge[i][1]])*0.5;
+	 
 	 
 //	 static const int  nvfaceTet[4][3]  ={{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}  ;//{ {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
 //	    { {0,1},{0,2},{0,3},{1,2},{1,3},{2,3} };
@@ -602,25 +602,27 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	       for (int e=0,i=0;e<6;e++)
 		   if ((Element::nvedge[e][0] !=f)  && (Element::nvedge[e][1]!=f))
 		       edgeface[f][i++]=e; 
-	  // assert(i==6);
-       }
+      }
        {
 	 int i=0;
 	 for (int f=0;f<4;f++) 
 	   {
-	    
+	     //  cout << " face : " << f << endl;
 	     for (int p=0;p<3;p++) 
 	     {
 		 int e= edgeface[f][p] ; 
+		// cout << "  , "  << this->PtInterpolation[e];
 		 for (int c=0;c<3;c++,i++) 
 
 	           {
 	             this->pInterpolation[i]=e;
 	             this->cInterpolation[i]=c;
-		   this->dofInterpolation[i]=f;
+		     this->dofInterpolation[i]=f;
 	             this->coefInterpolation[i]=0.;	       
 	           }
-	     }}
+	     }
+	   //cout <<  endl;
+	   }
        }
        
      }
@@ -645,7 +647,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 			   M.coef[i]=N[c];	       
 		       }
 		 }}
-	// cout << " M.coef :" << M.coef << endl;
+		// cout << " M.coef :" << M.coef << endl;
 	 ffassert(i==M.ncoef && M.np == 6 );
  	 
      }
@@ -666,9 +668,9 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	       for(int i=0;i<4;++i)
 		 { R3 wi=(X-K[i])*ci[i];
 		     val(i,0,op_id) = wi.x ;
-		     val(i,1,op_id)= wi.y ;
-		     val(i,2,op_id)= wi.z ;
-		     cout  << "RT 3d  "<<i << " "<< X << " " <<wi << " fo: " << K.faceOrient(3) <<endl;
+		     val(i,1,op_id) = wi.y ;
+		     val(i,2,op_id) = wi.z ;
+		     //cout  << "RT 3d  "<<i << " "<< X << " " <<wi << " fo: " << K.faceOrient(i) <<endl;
 		 }
 	   }
 	 
@@ -681,6 +683,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 		   val('.',1,op_dy) = Ci;	       
 	       if (whatd & Fop_dz) 
 		   val('.',2,op_dz) = Ci;
+	        //cout  << "RT 3d  "<< val('.','.',op_dz) << endl;
 	   }	 
 	 
      }     
