@@ -13,21 +13,7 @@
 #include <cmath>
 #include <iterator>
 using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#include "fem.hpp"
-#include "FESpacen.hpp" 
-#include "FESpace.hpp" 
-#include "MeshPoint.hpp"
-#include "MatriceCreuse_tpl.hpp"
-#include "Operator.hpp"
-#include "lex.hpp"
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "libmesh5.h"
-#include "problem.hpp"
+#include "ff++.hpp"
 using namespace Fem2D;
 
 
