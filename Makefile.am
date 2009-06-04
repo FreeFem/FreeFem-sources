@@ -32,7 +32,7 @@ examples++-3d/dodecaedre01.mesh  \
 examples++-load/load.link \
 ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh  \
 ./download/fftw/Makefile ./download/fftw/Makefile.am \
-examples++/*.edp 
+examples++*/*.[ie]dp 
 
 
 # Creates a file named "ChangeLog" containing the chronology of all
