@@ -1,0 +1,17 @@
+load "msh3"
+load "medit"
+border BC(t=0,2*pi){ x=cos(t);y=sin(t);label=1;}
+mesh TC= buildmesh(BC(100));
+plot(TC,wait=1);
+mesh3 Thup=movemesh23(TC,transfo=[x,y,sqrt(abs(1-square(x)-square(y)))]);
+mesh3 Thdown=movemesh23(TC,transfo=[x,y,-sqrt(abs(1-square(x)-square(y)))]);
+verbosity=10;
+mesh3 Th= Thup+Thdown;
+
+
+if(1)
+  {
+    medit("Thup",Thup);
+    medit("Thdown",Thdown);
+    medit("Th",Th);
+  }

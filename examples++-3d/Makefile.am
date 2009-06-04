@@ -6,7 +6,7 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
 	VISUALCHECK=$(VISUALCHECK)
-EXTRA_DIST=*.edp  all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh \
+EXTRA_DIST=*.[ei]dp  all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh \
   lac-leman-v4.msh
 
 all.edp:
