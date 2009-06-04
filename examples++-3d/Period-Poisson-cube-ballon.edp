@@ -2,7 +2,7 @@ verbosity=1;
 load "msh3"
 load "tetgen"
 load "medit"
-include "MeshSurface.edp"
+include "MeshSurface.idp"
 
 mesh3 Th;
 try {

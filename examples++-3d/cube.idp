@@ -1,0 +1,45 @@
+load "msh3"
+load "tetgen"
+load "medit"
+// ! basic functions to build regular mesh of a cube
+/*
+  mesh3   Cube(NN,BB,L);
+    --   build the surface mesh of a 3d box 
+    where: for exqmple:
+  int[int]  NN=[nx,ny,nz]; //  the number of seg in the 3 direction
+  real [int,int]  BB=[[xmin,xmax],[ymin,ymax],[zmin,zmax]]; // bounding bax  
+  int [int,int]  L=[[1,2],[3,4],[5,6]]; // the label of the 6 face left,right, front, back, down, right
+*/
+func mesh3 Cube(int[int] & NN,real[int,int] &BB ,int[int,int] & L)
+{
+//  real volumetet;  // use in tetg.
+    //  first  build the 6 faces of the hex.
+    real x0=BB(0,0),x1=BB(0,1);
+    real y0=BB(1,0),y1=BB(1,1);
+    real z0=BB(2,0),z1=BB(2,1);
+    
+    int nx=NN[0],ny=NN[1],nz=NN[2];
+    mesh Thx = square(ny,nz,[y0+(y1-y0)*x,z0+(z1-z0)*y]);
+   
+    int l1=L(0,0);
+    int l2=L(0,1);
+    int l3=L(1,0);
+    int l4=L(1,1);
+    int l5=L(2,0);
+    int l6=L(2,1);
+ 
+ int[int] rup=[0,l6],  rdown=[0,l5], rmid=[1,l3,2,l2,3,l4,4,l1];
+
+mesh3 Th=buildlayers(Thx,nz,
+  zbound=[z0,z1],
+  // reftet=r1, 
+  reffacemid=rmid, 
+  reffaceup = rup,
+  reffacelow = rdown);
+ 
+    return Th;
+}
+ 
+ 
+
+  
