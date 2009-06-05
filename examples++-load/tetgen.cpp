@@ -302,11 +302,13 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
 
   /* check orientation of the mesh and flip if necessary*/ 
   Th3_tmp->flipSurfaceMesh3(surface_orientation);
- 
-  cout << "check :: orientation des surfaces" << endl;
-  Th3_tmp->BuildBoundaryElementAdj();
-  cout << "fin check :: orientation des surfaces" << endl;
-
+  
+  int addcheckorientation=0;
+  if( addcheckorientation==1  ){
+    cout << "check :: orientation des surfaces" << endl;
+    Th3_tmp->BuildBoundaryElementAdj();
+    cout << "fin check :: orientation des surfaces" << endl;
+  }
   /* set label of surface Th3_tmp */
   for(int ii=0; ii< Th3_tmp->nbe; ii++)
     {
@@ -1615,10 +1617,15 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   
   cout << "tetgen:" << "nbhole="   << nbhole << "nbregion=" << nbregion << endl;
 
-  cout << "check :: orientation des surfaces" << endl;
-  Th.BuildBoundaryElementAdj();
-  cout << "fin check :: orientation des surfaces" << endl;
- 
+  /*
+    int addcheckorientation=0;
+    if( addcheckorientation==1  ){
+    cout << "check :: orientation des surfaces" << endl;
+    Th.BuildBoundaryElementAdj();
+    cout << "fin check :: orientation des surfaces" << endl;
+    }
+  */
+
   Mesh3 *Th3 = RemplissageSurf3D_tetgen_new( switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl);
 	
   cout << "finish tetgen " << endl;
