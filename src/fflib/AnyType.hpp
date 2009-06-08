@@ -39,7 +39,9 @@ ostream & operator<<(ostream & f,const basicForEachType & e);
 //  change for 64 architecture must containt 2*(1 ptr + 3 long))
 //  and for 32    2( ptr + 2 double) 
 //  so 2( 3ptr + double ) sims Ok FH MAI 2006
-typedef  unsigned char  AnyData[ 2*(sizeof(void*)+3*sizeof(double)) ];
+//typedef  unsigned char  AnyData[2*(3*sizeof(void*)+sizeof(double))];
+typedef  unsigned char  AnyData[2*(5*sizeof(void*))]; //  change . 
+
 
 extern map<const string,basicForEachType *> map_type;
 
