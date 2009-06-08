@@ -186,8 +186,10 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	-e 's;FFAPPLI_INC;$@/FreeFem++.app/Contents/include;' 
 	chmod a+x $@/FreeFem++.app/Contents/bin/ff-c++
 	-mkdir $@/FreeFem++.app/Contents/include 
+	-mkdir $@/FreeFem++.app/Contents/idp 
 	cp examples++-load/include/* $@/FreeFem++.app/Contents/include
 	cp examples++-load/*.dylib  $@/FreeFem++.app/Contents/lib
+	cp examples++-*/*.idp  $@/FreeFem++.app/Contents/idp       
 	-if [ -s List-agl-dylib ]; then tar zchvf $@/OtherMacOsLib.tgz `cat List-agl-dylib`; fi; 
 	./config.status  --file=$@/Install-MacOS.command:Install-MacOS.command.in
 	chmod a+rx $@/Install-MacOS.command
@@ -195,6 +197,7 @@ $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	echo loadpath += \"./\"  >$@/FreeFem++.app/Contents/etc/freefem++.pref
 	echo loadpath += \"$(ff_prefix_dir)/lib\"  >>$@/FreeFem++.app/Contents/etc/freefem++.pref
 	echo includepath += \"$(ff_prefix_dir)/edp\"  >>$@/FreeFem++.app/Contents/etc/freefem++.pref
+	echo includepath += \"$(ff_prefix_dir)/idp\"  >>$@/FreeFem++.app/Contents/etc/freefem++.pref
 
 
 $(FF_MAC_PREFIX)_MacOsX.tgz: $(FF_MAC_PREFIX)_MacOsX

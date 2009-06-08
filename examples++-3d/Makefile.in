@@ -231,8 +231,9 @@ TESTS_ENVIRONMENT = PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
 	VISUALCHECK=$(VISUALCHECK)
 
-EXTRA_DIST = *.[ie]dp  all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh \
-  lac-leman-v4.msh
+LIST_IDP = MeshSurface.idp cube.idp
+EXTRA_DIST = *.edp  all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh \
+  lac-leman-v4.msh $(LIST_IDP)
 
 all: all-am
 
@@ -423,7 +424,7 @@ install-data-am:
 
 install-dvi: install-dvi-am
 
-install-exec-am:
+install-exec-am: install-exec-local
 
 install-html: install-html-am
 
@@ -461,12 +462,12 @@ uninstall-am:
 	clean-generic distclean distclean-generic distdir dvi dvi-am \
 	html html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am uninstall uninstall-am
+	install-exec-am install-exec-local install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am
 
 
 all-local: all.edp regtests.edp 
@@ -489,6 +490,10 @@ makeref.edp: regtests.m4 ../regtests.m4
 freefem++.pref:
 	echo loadpath = \"../examples++-load/\" >freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
+
+install-exec-local:: load_compile
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
+	$(INSTALL)  -m 555 $ $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/lib
 
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4

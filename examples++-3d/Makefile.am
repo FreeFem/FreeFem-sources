@@ -6,8 +6,10 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
 	VISUALCHECK=$(VISUALCHECK)
-EXTRA_DIST=*.[ei]dp  all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh \
-  lac-leman-v4.msh
+LIST_IDP=MeshSurface.idp cube.idp
+
+EXTRA_DIST=*.edp  all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh \
+  lac-leman-v4.msh $(LIST_IDP)
 
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
@@ -27,6 +29,11 @@ makeref.edp: regtests.m4 ../regtests.m4
 freefem++.pref:
 	echo loadpath = \"../examples++-load/\" >freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
+
+install-exec-local:: load_compile
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
+	$(INSTALL)  -m 555 $ $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/lib
+
 
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4

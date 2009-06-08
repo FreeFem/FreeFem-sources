@@ -580,7 +580,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 TypeOfFE_RT0_3d();
 	 int edgeface[4][3] ;
 	void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
-	void  TypeOfFE_RT0_3d::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump  ) const;
+	void  set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump  ) const;
      } ;
      int TypeOfFE_RT0_3d::dfon[]={0,0,1,0}; 
      
@@ -701,7 +701,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 int edgeface[4][3] ;
 	 TypeOfFE_Edge0_3d();
 	 void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
-	 void  TypeOfFE_Edge0_3d::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M ,int ocoef,int odf,int *nump  ) const;
+	 void  set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M ,int ocoef,int odf,int *nump  ) const;
      } ;
      int TypeOfFE_Edge0_3d::dfon[]={0,1,0,0}; 
      

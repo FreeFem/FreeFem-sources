@@ -1,4 +1,11 @@
-V 3.3-1 1 juin 2009
+V 3.3-2  8 june 2009
+  add   2 new finite element:
+   Edge03d : the Nedelec 3d  Edge finite elements.
+   RT03d : the Raviart-Thomas 3d  finite elements
+   correct the size of anytype for 64 bits achitecture.
+   install the new .idp file (include of edp file) in
+   directory idp    
+V 3.3-1 1 june 2009
   to correct the problem of the destruction of parameter in cas: 
       func real[int]   a2(real[int] a) {a[0]=2; return a;}
    so now the parameter cast to KN_<double> so  the array is not
