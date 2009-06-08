@@ -327,7 +327,10 @@ public:
   
   virtual R operator()(const GFElement<Mesh>  & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const  ;
   virtual void FB(const What_d whatd,const Mesh & Th,const Element & K,const Rd &P, KNMK_<R> & val) const =0;
-  virtual void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M   ) const {}; // no change by deflaut 
+  virtual void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump ) const {}; // no change by deflaut
+    // ocoef is the offset of the coef in M 
+    // odf is the offset in the df 
+    // nump  if exist give the numbering of p  . 0=> no change
   
   static KN<int> tefN(const KN<GTypeOfFE const  *>  & tef) {
     int n=tef.N();
@@ -443,7 +446,7 @@ public:
   //Rd   MinMax(const RN_& U,int i0) const  ;
   void BF(const Rd & P,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
   void BF(const What_d whatd, const Rd & P,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
-    void set(InterpolationMatrix<RdHat> &M) const {this->tfe->set(this->Vh.Th,this->T,M);}
+  void set(InterpolationMatrix<RdHat> &M) const {this->tfe->set(this->Vh.Th,this->T,M,0,0,0);}
   // add april 08   begin end number for df of the componante ic 
   int dfcbegin(int ic) const { return this->tfe->begin_dfcomp[ic];}
   int dfcend(int ic) const { return this->tfe->end_dfcomp[ic];}
@@ -719,7 +722,7 @@ public:
   void Build();  // the true constructor 
     
   void init(InterpolationMatrix<RdHat> & M,FElement * pK=0,int odf=0,int ocomp=0,int *pp=0) const;
-   
+  void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump ) const; // no change by deflaut 
   void FB(const What_d whatd,const Mesh & Th,const Element & K,const Rd &P, KNMK_<R> & val) const ;
   ~GTypeOfFESum(){}
 } ;

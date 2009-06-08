@@ -580,7 +580,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 TypeOfFE_RT0_3d();
 	 int edgeface[4][3] ;
 	void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
-	void  TypeOfFE_RT0_3d::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M  ) const;
+	void  TypeOfFE_RT0_3d::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump  ) const;
      } ;
      int TypeOfFE_RT0_3d::dfon[]={0,0,1,0}; 
      
@@ -626,11 +626,11 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
        }
        
      }
-     void  TypeOfFE_RT0_3d::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M  ) const
+     void  TypeOfFE_RT0_3d::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M ,int ocoef,int odf,int *nump) const
      {
 	 //   compute de coef d'interpolation
 	// M.coef 
-	 int i=0;
+	 int i=ocoef;
 	 for (int f=0;f<4;f++) 
 	   {
 	       R3 N=K.N(f);//  exterior and  ||N|| = 2* area f
@@ -641,14 +641,14 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 		     for (int c=0;c<3;c++,i++) 
 			 
 		       {
-			   this->pInterpolation[i]=e;
-			   this->cInterpolation[i]=c;
-			   this->dofInterpolation[i]=f;
+			   //this->pInterpolation[i]=e;
+			   //this->cInterpolation[i]=c;
+			   //this->dofInterpolation[i]=f;
 			   M.coef[i]=N[c];	       
 		       }
 		 }}
 		// cout << " M.coef :" << M.coef << endl;
-	 ffassert(i==M.ncoef && M.np == 6 );
+	 //ffassert(i==M.ncoef && M.np == 6 );
  	 
      }
      void  TypeOfFE_RT0_3d::FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const
@@ -689,6 +689,140 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
      }     
      
 
+     class TypeOfFE_Edge0_3d  :public   GTypeOfFE<Mesh3>  { 
+     public:  
+	 typedef Mesh3 Mesh;
+	 typedef  Mesh3::Element  Element;
+	 
+	 typedef GFElement<Mesh3> FElement;
+	 static int dfon[];
+	 static const int d=Mesh::Rd::d;
+	 static const GQuadratureFormular<R1> &QFe;
+	 int edgeface[4][3] ;
+	 TypeOfFE_Edge0_3d();
+	 void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
+	 void  TypeOfFE_Edge0_3d::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M ,int ocoef,int odf,int *nump  ) const;
+     } ;
+     int TypeOfFE_Edge0_3d::dfon[]={0,1,0,0}; 
+     
+     const  GQuadratureFormular<R1> &TypeOfFE_Edge0_3d::QFe = QF_GaussLegendre2;
+     
+     TypeOfFE_Edge0_3d::TypeOfFE_Edge0_3d(): GTypeOfFE<Mesh3>(TypeOfFE_Edge0_3d::dfon,d,1,Element::ne*3*QFe.n,Element::ne*QFe.n,false,true)
+     { 	
+	 //  integration on edge use QFe
+	 R3 Pt[]= {R3(0.,0.,0.), R3(1.,0.,0.),R3(0.,1.,0.),R3(0.,0.,1.)};
+	 for (int e=0,i=0;e<Element::ne;++e)
+	     for(int q=0;q<QFe.n;++q,++i)
+	       {
+		   double x=QFe[q].x;
+		   this->PtInterpolation[i]=Pt[Element::nvedge[e][0]]*x+Pt[Element::nvedge[e][1]]*(1-x);
+	       }
+       {
+	   int i=0,p=0;
+	   for (int e=0;e<Element::ne;e++) 
+	     {
+		 for(int q=0;q<QFe.n;++q,++p) 
+		     for (int c=0;c<3;c++,i++) 
+		       {
+			   this->pInterpolation[i]=p;
+			   this->cInterpolation[i]=c;
+			   this->dofInterpolation[i]=e;
+			   this->coefInterpolation[i]=0.;	       
+		       }
+		 
+		 
+	     }
+       }
+	// cout <<  " ++ TypeOfFE_Edge0_3d():"<< this->PtInterpolation << endl;
+     }
+     void  TypeOfFE_Edge0_3d::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M ,int ocoef,int odf,int *nump ) const
+     {
+	 // compute de coef d'interpolation
+	 // M.coef 
+	 int i=ocoef,p=0;
+	 for (int e=0;e<Element::ne;++e) 
+	   {
+	       R3 E=K.Edge(e);//  exterior and  ||N|| = 2* area f
+	       if(! K.EdgeOrientation(e)) E=-E;
+	       for(int q=0;q<QFe.n;++q,++p)  
+		    for (int c=0;c<3;c++,i++) 
+			     
+			   {
+			      // this->pInterpolation[i]=p;
+			       //this->cInterpolation[i]=c;
+			       //this->dofInterpolation[i]=e;
+			       M.coef[i]=E[c]*QFe[q].a;	       
+			   }
+		 }
+	 
+	// ffassert(i==M.ncoef && M.np == p );
+ 	 
+     }
+     void  TypeOfFE_Edge0_3d::FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const
+     {
+	 assert(val.N() >=6);
+	 assert(val.M()==3 );
+         R l[]={1.-P.sum(),P.x,P.y,P.z}; 
+	 R3 D[4];
+	 K.Gradlambda(D);
+	 
+	 // wi = signe * (x - qi)/ (volume*d)   
+	 val=0; 
+	 //  i,j : l1 grad lj - lj grad lj
+	 // int_i^j  grad lj . t_ij = 1
+	 
+	 
+	 bool  se[]={ K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2), 
+	 K.EdgeOrientation(3), K.EdgeOrientation(4), K.EdgeOrientation(5)};
+	 
+	 if (whatd & Fop_D0) 
+	   {
+	       R3 X=K(P);
+	       int k=0;
+	       for(int i=0;i<6;++i)
+		 { 
+		     int i0=Element::nvedge[i][0],i1=Element::nvedge[i][1];
+		     if( !se[i]) Exchange(i0,i1);
+		     R3 wi = l[i0]*D[i1]-l[i1]*D[i0];
+		     val(i,0,op_id) = wi.x ;
+		     val(i,1,op_id) = wi.y ;
+		     val(i,2,op_id) = wi.z ;
+		    // cout  << "Edge0 3d  "<<i << " "<< X << " " <<wi << " fo: " <<se[i] <<endl;
+		 }
+	   }
+	 
+	 if (whatd & Fop_D1)
+	     
+	     for(int i=0;i<6;++i)
+	       { 
+		   int i0=Element::nvedge[i][0],i1=Element::nvedge[i][1];
+		   if( !se[i]) Exchange(i0,i1);
+		   if (whatd & Fop_dx) 
+		     {
+			 R3 wi = D[i0].x*D[i1]-D[i1].x*D[i0];		    
+			 val(i,0,op_dx) = wi.x ;
+			 val(i,1,op_dx) = wi.y ;
+			 val(i,2,op_dx) = wi.z ;
+		     }
+		   if (whatd & Fop_dy) 
+		     {
+			 R3 wi = D[i0].y*D[i1]-D[i1].y*D[i0];		    
+			 val(i,0,op_dy) = wi.x ;
+			 val(i,1,op_dy) = wi.y ;
+			 val(i,2,op_dy) = wi.z ;
+		     }
+		   if (whatd & Fop_dz) 
+		     {
+			 R3 wi = D[i0].z*D[i1]-D[i1].z*D[i0];		    
+			 val(i,0,op_dz) = wi.x ;
+			 val(i,1,op_dz) = wi.y ;
+			 val(i,2,op_dz) = wi.z ;
+		     }
+		   
+	       }	 
+	 
+     }     
+     
 static TypeOfFE_P0Lagrange3d  P0_3d;
 GTypeOfFE<Mesh3> & P0Lagrange3d(P0_3d);
 
@@ -703,7 +837,10 @@ GTypeOfFE<Mesh3> & P1bLagrange3d(P1b_3d);
 
 static TypeOfFE_RT0_3d  RT0_3d;
 GTypeOfFE<Mesh3> & RT03d(RT0_3d);
-     
+
+static TypeOfFE_Edge0_3d  Edge0_3d;
+GTypeOfFE<Mesh3> & Edge03d(Edge0_3d);
+
      
 
 

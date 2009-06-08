@@ -1333,8 +1333,9 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
 	  }
       }
        if(verbosity)
-	 {   cout << "  -- Build Nodes/ DF on mesh :   n.v. " << nv <<  ", n. elmt. " << nt << ", n b. elmt. " <<nbe << endl;
-	     cout << "     nb of Nodes " << nbNodes << "    nb of DoF   " << NbOfDF << endl ;	     
+	 {   cout << "  -- Build Nodes/DF on mesh :   n.v. " << nv <<  ", n. elmt. " << nt << ", n b. elmt. " <<nbe << endl;
+	     cout << "     nb of Nodes " << nbNodes << "    nb of DoF   " << NbOfDF <<"  DFon="
+	          << ndfon[0]<<ndfon[1]<<ndfon[2]<<ndfon[3]<<endl ;	     
 	 }
       if( ! constndfpernode) 
 	{ 
