@@ -494,6 +494,25 @@ void GTypeOfFESum<Mesh>::Build()
   assert(c==this->N);
 }
 
+     
+template<class Mesh> void GTypeOfFESum<Mesh>::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int oocoef,int oodf,int *nnump ) const
+     {
+	 int op=0,oc=0,odof=oodf,ocoef=oocoef;
+	 assert(nnump==0);
+	 for (int i=0,k=0;i<this->nb_sub_fem;i++)
+	   {
+	       const GTypeOfFE<Mesh> &ti=*this->Sub_ToFE[i];
+	       if(!ti.invariantinterpolationMatrix)
+		   ti.set(Th,K,M,ocoef,odof,&numPtInterpolation[op]);
+	       oc += ti.N;
+	       odof += ti.NbDoF; 
+	       ocoef += ti.NbcoefforInterpolation;
+	       op += ti.NbPtforInterpolation;
+	       
+	   }
+	 
+     }
+     
 template<class MMesh> 
      GFESpace<MMesh>::GFESpace(const GFESpace & Vh,int kk,int nbequibe,int *equibe)
      :

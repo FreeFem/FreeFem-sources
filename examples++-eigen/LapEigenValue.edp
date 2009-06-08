@@ -7,7 +7,7 @@
 //  find $\lamda$ such that:
 // $$  \int_{\omega}  \nabla u_ \nabla v = \lamba \int_{\omega} u \nabla v  $$
 verbosity=1;
-mesh Th=square(20,20,[pi*x,pi*y]);
+mesh Th=square(20,20,[pi*y,pi*x]);
 fespace Vh(Th,P2);
 Vh u1,u2;
 

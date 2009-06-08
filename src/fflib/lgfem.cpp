@@ -70,6 +70,7 @@ namespace bamg { class Triangles; }
 namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso);
    extern GTypeOfFE<Mesh3> &P1bLagrange3d;
    extern GTypeOfFE<Mesh3> &RT03d;
+    extern GTypeOfFE<Mesh3> &Edge03d;
 }
 
 #include "BamgFreeFem.hpp"
@@ -4391,6 +4392,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("P23d",CConstantTFE3(&DataFE<Mesh3>::P2));   
  Global.New("P03d",CConstantTFE3(&DataFE<Mesh3>::P0)); 
  Global.New("RT03d",CConstantTFE3(&RT03d));   
+ Global.New("Edge03d",CConstantTFE3(&Edge03d));   
  Global.New("P1b3d",CConstantTFE3(&P1bLagrange3d));   
     /*
      for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)

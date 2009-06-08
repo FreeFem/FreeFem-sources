@@ -11,12 +11,12 @@ try {
 catch(...)
   { 
     real hs = 0.2;  // mesh size on sphere 
-    int[int]  N=[11,9,10];
-    real [int,int]  B=[[-1.1,1.1],[-.9,.9],[-1,1]];
-    int [int,int]  L=[[1,2],[3,4],[5,6]];
+    int[int]  NN=[11,9,10];
+    real [int,int]  BB=[[-1.1,1.1],[-.9,.9],[-1,1]];
+    int [int,int]  LL=[[1,2],[3,4],[5,6]];
     
     ////////////////////////////////
-    mesh3 ThHS = SurfaceHex(N,B,L,1)+Sphere(0.5,hs,7,1); // "gluing" surface meshs to tolat boundary meshes
+    mesh3 ThHS = SurfaceHex(NN,BB,LL,1)+Sphere(0.5,hs,7,1); // "gluing" surface meshs to tolat boundary meshes
     real voltet=(hs^3)/6.;
     cout << " voltet = " << voltet << endl;
     real[int] domaine = [0,0,0,1,voltet,0,0,0.7,2,voltet];
