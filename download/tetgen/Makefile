@@ -56,3 +56,4 @@ cxxflags: ../Makefile  Makefile
 	grep 'WGET *=' ../Makefile >>cxxflags
 	grep 'AR *=' ../Makefile >>cxxflags
 	grep 'ARFLAGS *=' ../Makefile >>cxxflags
+.PHONY:$(SRCDIR)/$(INSTALL)
