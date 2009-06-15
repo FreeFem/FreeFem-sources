@@ -39,7 +39,9 @@ using namespace std;
 // #include "read_matrix.h"
 
 #include <assert.h>
+extern "C"{
 #include "pastix.h"
+}
 //#include "cscd_utils.h"
 //#include "read_matrix.h"
 
@@ -218,11 +220,8 @@ class dSolvepastixmpi :   public MatriceMorse<double>::VirtualSolver   {
 
 public:
 
-  dSolvepastixmpi(const MatriceMorse<double> &AA,int strategy,double ttgv, double epsilon=1e-6,
-		  double pivot=-1.,double pivot_sym=-1., string datafile, KN<long> &param_int, KN<double> &param_double, 
+  dSolvepastixmpi(const MatriceMorse<double> &AA, string datafile, KN<long> &param_int, KN<double> &param_double, 
 		  KN<long> &pperm_r, KN<long> &pperm_c) : 
-    eps(epsilon),epsr(0),
-    tgv(ttgv),tol_pivot_sym(pivot_sym),tol_pivot(pivot),
     data_option(datafile) 
   { 
     //int m;
@@ -492,7 +491,7 @@ BuildSolverpastixmpi(DCL_ARG_SPARSE_SOLVER(double,A))
 {
     if(verbosity>9)
     cout << " BuildSolverpastixmpi<double>" << endl;
-    return new dSolvepastixmpi(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym, ds.data_filename, 
+    return new dSolvepastixmpi(*A,ds.data_filename, 
 			       ds.lparams, ds.dparams, ds.perm_r, ds.perm_c);
 }
 

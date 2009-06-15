@@ -133,12 +133,9 @@ class SolveSuperLUmpi :   public MatriceMorse<R>::VirtualSolver, public SuperLUm
   static const int distributed =2;
 
 public:
-  SolveSuperLUmpi(const MatriceMorse<R> &AA,int strategy,double ttgv, double epsilon=1e-6,
-		  double pivot=-1.,double pivot_sym=-1., string datafile,
+  SolveSuperLUmpi(const MatriceMorse<R> &AA,string datafile,
 		  string param_char, KN<long> &pperm_r, KN<long> &pperm_c) : 
-    eps(epsilon),epsr(0),
-    tgv(ttgv),string_option(param_char),data_option(datafile),
-    tol_pivot_sym(pivot_sym),tol_pivot(pivot)
+    string_option(param_char),data_option(datafile)
   { 
     
     R*      B;
@@ -676,8 +673,7 @@ BuildSolverSuperLUmpi(DCL_ARG_SPARSE_SOLVER(double,A))
 {
     if(verbosity>9)
     cout << " BuildSolverSuperLUmpi<double>" << endl;
-    return new SolveSuperLUmpi<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym,
-				       ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c);
+    return new SolveSuperLUmpi<double>(*A,ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c);
 }
 
 

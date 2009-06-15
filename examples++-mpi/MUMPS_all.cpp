@@ -110,14 +110,13 @@ class dSolveMUMPSmpi :   public MatriceMorse<double>::VirtualSolver   {
   mutable DMUMPS_STRUC_C id;
   
 #define ICNTL(I) icntl[(I)-1] /* macro s.t. indices match documentation */
+//#define KEEP(I) keep[(I)-1] /* macro s.t. indices match documentation */
 public:
-  dSolveMUMPSmpi(const MatriceMorse<double> &AA,int strategy,double ttgv, double epsilon=1e-6,
-		 double pivot=-1.,double pivot_sym=-1., string param_string, string datafile, KN<long> &param_int, 
+  dSolveMUMPSmpi(const MatriceMorse<double> &AA, string param_string, string datafile, KN<long> &param_int, 
 		 KN<long> &pperm_r, KN<long> &pperm_c, KN<double> &pscale_r,KN<double> &pscale_c
 		) : 
-    eps(epsilon),epsr(0),
-    tgv(ttgv), string_option(param_string), data_option(datafile), perm_r(pperm_r), perm_c(pperm_c), 
-    tol_pivot_sym(pivot_sym),tol_pivot(pivot), scale_r(pscale_r), scale_c(pscale_c)
+    string_option(param_string), data_option(datafile), perm_r(pperm_r), perm_c(pperm_c), 
+    scale_r(pscale_r), scale_c(pscale_c)
   { 
     if(verbosity) starttime = clock();
     int dataint[40];
@@ -193,9 +192,11 @@ public:
     id.par=PAR; 
     id.sym=SYM;
     id.comm_fortran=USE_COMM_WORLD;
-
+    
+    printf("initialized mumps para√meter\n");
     dmumps_c(&id);
-
+    printf("end initialized parameter\n");
+    //id.KEEP(33)=8;
     /* set parameter of mumps */
     if(param_int){
       if(!data_option.empty()){ 
@@ -771,12 +772,10 @@ class zSolveMUMPSmpi :   public MatriceMorse<Complex>::VirtualSolver   {
   
 #define ICNTL(I) icntl[(I)-1] /* macro s.t. indices match documentation */
 public:
-  zSolveMUMPSmpi(const MatriceMorse<Complex> &AA,int strategy,double ttgv, double epsilon=1e-6,
-		 double pivot=-1.,double pivot_sym=-1., string param_string, string datafile, KN<long> &param_int, 
+  zSolveMUMPSmpi(const MatriceMorse<Complex> &AA,string param_string, string datafile, KN<long> &param_int, 
 		 KN<long> &pperm_r, KN_<long> &pperm_c, KN<double> &pscale_r,KN<double> &pscale_c) : 
-    eps(epsilon),epsr(0),
-    tgv(ttgv), string_option(param_string), data_option(datafile), perm_r(pperm_r), perm_c(pperm_c), 
-    tol_pivot_sym(pivot_sym),tol_pivot(pivot), scale_r(pscale_r), scale_c(pscale_c)
+    string_option(param_string), data_option(datafile), perm_r(pperm_r), perm_c(pperm_c),
+    scale_r(pscale_r), scale_c(pscale_c)
   { 
     if(verbosity) starttime = clock();
     int dataint[40];
@@ -1364,7 +1363,7 @@ BuildSolverMUMPSmpi(DCL_ARG_SPARSE_SOLVER(double,A))
 {
     if(verbosity>9)
       cout << " BuildSolverMUMPSmpi<double>" << endl;
-    return new dSolveMUMPSmpi(*A,ds.strategy, ds.tgv, ds.epsilon, ds.tol_pivot, ds.tol_pivot_sym, ds.sparams, ds.data_filename,
+    return new dSolveMUMPSmpi(*A,ds.sparams, ds.data_filename,
 			      ds.lparams, ds.perm_r, ds.perm_c, ds.scale_r, ds.scale_c);
 }
 
@@ -1376,7 +1375,7 @@ BuildSolverMUMPSmpi(DCL_ARG_SPARSE_SOLVER(Complex,A))
 {
     if(verbosity>9)
       cout << " BuildSolverMUMPSmpi<Complex>" << endl;
-    return new zSolveMUMPSmpi(*A,ds.strategy, ds.tgv, ds.epsilon, ds.tol_pivot, ds.tol_pivot_sym, ds.sparams, ds.data_filename,  
+    return new zSolveMUMPSmpi(*A,ds.sparams, ds.data_filename,  
 			      ds.lparams, ds.perm_r, ds.perm_c, ds.scale_r, ds.scale_c);
 }
 
