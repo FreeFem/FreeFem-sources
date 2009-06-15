@@ -491,7 +491,7 @@ freefem++.pref:
 	echo loadpath = \"../examples++-load/\" >freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
 
-install-exec-local:: load_compile
+install-exec-local:: 
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
 	$(INSTALL)  -m 555 $ $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/lib
 
