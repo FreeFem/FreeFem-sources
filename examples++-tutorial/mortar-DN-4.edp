@@ -15,7 +15,7 @@ int labext= nbsd+1;
 real meshsize=0.025; 
 real meshsizem=meshsize*1.5; 
 bool noconforme=0;
-include "mortar-msh.hdp"
+include "mortar-msh.idp"
 cout << "mortar : " << endl;
 mesh Thm=Tha;
 Thm=adaptmesh(Thm,meshsizem,IsMetric=1,thetamax=60,nbvx=100000);

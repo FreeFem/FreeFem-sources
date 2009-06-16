@@ -34,7 +34,8 @@ EXTRA_DIST=load.link.in  include.tar.gz \
   medit.cpp  \
   bmo.cpp lgbmo.cpp bmo.hpp \
  fflapack.cpp	lapack.cpp	lapack.edp \
- fig.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp 
+ fig.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp \
+ DxWriter.cpp 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \

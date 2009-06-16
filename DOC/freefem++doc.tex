@@ -14,7 +14,7 @@
 
 
 \usepackage{times}
-\def\VERSION{3.2}
+\def\VERSION{3.3-2}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -6863,34 +6863,41 @@ like in example \texttt{periodic2bis.edp} (see \ref{exm:periodic4bis}).
  As of today, the known
 types of finite element are: \index{type of finite element}
 \begin{description}
-     \item[P0]  piecewise constante discontinuous finite element  (2d, 3d)
+     \item[P0,P03d]  piecewise constante discontinuous finite element  (2d, 3d), the degres of freedom are  the barycenter element value.
      \index{P0|textbf}\index{fespace!P0}
     \begin{eqnarray}
     \label{eq:P0}
      P0_{h} = \left\{ v \in L^2(\Omega) \left|\; \textrm{for all }K \in \mathcal{T}_{h}\;\;\textrm{there is }\alpha_{K}\in \R :
         \;\; v_{|K} = \alpha_{K } \right.\right\}
      \end{eqnarray}
-     \item[P1]  piecewise linear  continuous finite element (2d, 3d)
-     \index{P1|textbf}\index{fespace!P1}
+     \item[P1,P13d]  piecewise linear  continuous finite element (2d, 3d), the degres of freedom are the vertices values.
+     \index{P1|textbf}\index{fespace!P1}\index{fespace!P13d}
      \begin{eqnarray}
      &&P1_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{1} \right.\right\} \label{eq:P1}
      \end{eqnarray}
-     \item[P1dc]  piecewise linear  discontinuous finite element
+     \item[P1dc]  piecewise linear  discontinuous finite element 
      \index{P1dc|textbf}\index{fespace!P1dc}
      \begin{equation}
      P1dc_{h} = \left\{ v \in L^{2}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{1} \right.\right\} \label{eq:P1dc}
      \end{equation}
-     \item[P1b]  piecewise linear  continuous finite element plus bubble (2d, 3d)
-     \index{P1b|textbf}\index{fespace!P1b}
+     \item[P1b,P!b3d]  piecewise linear  continuous finite element plus bubble (2d, 3d)
+     \index{P1b|textbf}\index{fespace!P1b}\index{fespace!P1b3d}
+     
+     The 2d case:
      \begin{equation}
      P1b_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{1} \oplus \mathrm{Span}\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \} \right.\right\} \label{eq:P1b}
      \end{equation}
-     where $\lambda ^{K}_{i}, i=0,1,2$ are the 3 area coordinate functions of the triangle $K$
+     The 3d case:
+      \begin{equation}
+     P1b_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
+        \quad v_{|K} \in P_{1} \oplus \mathrm{Span}\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \lambda^{K}_{3} \} \right.\right\} \label{eq:P1b-3d}
+     \end{equation}
+    where $\lambda ^{K}_{i}, i=0,..,d$ are the $d+1$ barycentric  coordinate functions of the element  $K$ (triangle or tetrqhedron). 
 
-     \item[P2] piecewise $P_{2}$  continuous finite element (2d, 3d), 
+     \item[P2,P23d] piecewise $P_{2}$  continuous finite element (2d, 3d), 
      \index{P2|textbf}\index{fespace!P2}
      \begin{equation}
      P2_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -6911,24 +6918,53 @@ types of finite element are: \index{type of finite element}
      P2dc_{h} = \left\{ v \in L^{2}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{2} \right.\right\}
      \end{equation}
-     \item[RT0]  Raviart-Thomas finite element
+     \item[RT0,RT03d]  Raviart-Thomas finite element of degree $0$.
      \index{RT0|textbf}\index{fespace!RT0}
+     
+     The 2d case:
      \begin{equation}
          RT0_{h} = \left\{ \mathbf{v} \in H(\textrm{div}) \left|\; \forall K \in
          \mathcal{T}_{h} \quad  \mathbf{v}_{|K}(x,y) =
-         \vecttwo{\alpha_{K}}{\beta_{K}} + \gamma_{K}\vecttwo{x}{y}  \right.\right\}
+         \vecttwo{\alpha^1_{K}}{\alpha^2_{K}} + \beta_{K}\vecttwo{x}{y}  \right.\right\}
          \label{eq:RT0}
      \end{equation}
+     The 3d case:
+     \begin{equation}
+         RT0_{h} = \left\{ \mathbf{v} \in H(\textrm{div}) \left|\; \forall K \in
+         \mathcal{T}_{h} \quad  \mathbf{v}_{|K}(x,y,z) =
+         \vectthree{\alpha^1_{K}}{\alpha^2_{K}}{\alpha^3_{K}} + \beta_{K}\vectthree{x}{y}{z}  \right.\right\}
+        \label{eq:RT03d}
+     \end{equation}
       where by writing
-      $\textrm{div }\mathbf{w}=\p w_1/\p x+\p w_2/\p y,
-      \, \mathbf{w}=(w_1,w_2)$,
+      $\textrm{div }\mathbf{w}=\sum_{i=!}^d\p w_i/\p x_i$ and 
+      $ \mathbf{w}=(w_i)_{i=1}^d$,
       $$
-      H(\textrm{div})=\left\{\mathbf{w}\in L^{2}(\Omega)^2\left|
+      H(\textrm{div})=\left\{\mathbf{w}\in L^{2}(\Omega)^d\left|
       \textrm{div } \mathbf{w}\in L^{2}(\Omega)
       \right.\right\}
       $$
       and
-      $\alpha_{K},\beta_{K},\gamma_{K} $ are real numbers.
+      $\alpha^1_{K},\alpha^2_{K},\alpha^3_{K},\beta_{K} $ are real numbers.
+     \item[Edge03d]  Nedelec finite element or Edge  Element of degree $0$.
+     \index{Edge03d|textbf}\index{fespace!Edge03d}
+     
+     The 3d case:
+     \begin{equation}
+         RT0_{h} = \left\{ \mathbf{v} \in H(\textrm{Curl}) \left|\; \forall K \in
+         \mathcal{T}_{h} \quad  \mathbf{v}_{|K}(x,y,z) =
+         \vectthree{\alpha^1_{K}}{\alpha^2_{K}}{\alpha^3_{K}} + \vectthree{\beta^1_{K}}{\beta^2_{K}}{\beta^3_{K}}\times\vectthree{x}{y}{z}  \right.\right\}
+         \label{eq:Edge03d}
+     \end{equation}
+      where by writing
+      $\textrm{curl}\mathbf{w}=\vectthree{\p w_2/\p x_3-\p w_3/\p x_2}{\p w_3/\p x_1-\p w_1/\p x_3}{\p w_1/\p x_2-\p w_2/\p x_1}$ and 
+      $ \mathbf{w}=(w_i)_{i=1}^d$,
+      $$
+      H(\textrm{curl})=\left\{\mathbf{w}\in L^{2}(\Omega)^d\left|
+      \textrm{curl } \mathbf{w}\in L^{2}(\Omega)^d
+      \right.\right\}
+      $$
+      and
+      $\alpha^1_{K},\alpha^2_{K},\alpha^3_{K},\beta^1_{K},\beta^12_{K},\beta^3_{K} $ are real numbers.
      \item[P1nc] \index{P1nc|textbf}\index{fespace!P1nc} piecewise linear   element continuous at
      the middle of edge only.
 
@@ -6978,19 +7014,19 @@ $$U_{h}=\vecttwo{Uxh}{Uyh}  \quad \mbox{and}\quad V_{h}=\vecttwo{Vxh}{Vyh}$$
 \subsection{Lagrange finite element}
 \label{sec:P0P1P2}
 \subsubsection{P0-element}
-For each triangle $T_k$, the basis function $\phi_k$ in \texttt{Vh(Th,P0)}
+For each triangle (d=2)  or tetrahedron (d=3)  $T_k$, the basis function $\phi_k$ in \texttt{Vh(Th,P0)}
 is given by
 $$
-\phi_k(x,y)=1\textrm{ if }(x,y)\in T_k,\qquad
-\phi_k(x,y)=0\textrm{ if }(x,y)\not\in T_k
+\phi_k(\bm{x})=1\textrm{ if }(\bm{x})\in T_k,\qquad
+\phi_k(\bm{x})=0\textrm{ if }(\bm{x})\not\in T_k
 $$
 If we write
 \bFF
-Vh(Th,@P0);  Vh fh=$f(x.y)$;
+Vh(Th,@P0);  Vh fh=$f(x,y)$;
 \eFF
-then for vertices $q^{k_i},\, i=1,2,3$ in Fig. \ref{P1P2}(a), $f_h$ is built as
+then for vertices $q^{k_i},\, i=1,2,.. d+1 $ in Fig. \ref{P1P2}(a), $f_h$ is built as
 $$
-\ttCC{fh}=f_h(x,y)=\sum_{k=1}^{n_t}\frac{f(q^{k_1})+f(q^{k_2})+f(q^{k_3})}{3}\phi_k
+\ttCC{fh}=f_h(x,y)=\sum_k f(\frac{\sum_i q^{k_i}}{d+1}) \phi_k
 $$
 See Fig. \ref{projP0} for the projection of $f(x,y)=\sin(\pi x)\cos(\pi y)$
 on \ttCC{Vh(Th,@P0)} when
