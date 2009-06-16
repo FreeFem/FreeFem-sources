@@ -1,4 +1,4 @@
-load "hips_FreeFem"
+load "interfacepastix"
 
 verbosity=2;
 
