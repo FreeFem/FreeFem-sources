@@ -29,6 +29,7 @@ FF_EXAMPLES_FILES = COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTA
 mode-mi-edp.zip \
 examples++-tutorial/aile.msh examples++-tutorial/xyf \
 examples++-3d/dodecaedre01.mesh  \
+examples++-3d/lac-leman-v4.msh \
 examples++-load/load.link \
 ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh  \
 ./download/fftw/Makefile ./download/fftw/Makefile.am \
