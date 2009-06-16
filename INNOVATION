@@ -1,3 +1,5 @@
+V 3.3-3 
+  add missing file in distribution examples++-load/DxWriter.cpp
 V 3.3-2  8 june 2009
   add   2 new finite element:
    Edge03d : the Nedelec 3d  Edge finite elements.

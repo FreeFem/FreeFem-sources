@@ -30,7 +30,7 @@ int [int] regsd(4);
 if(mpirank==0)
   {
     
-    mesh Thacopy; //hack to dcl Tha ouside of mortar-msh.hdp
+    mesh Thacopy; //hack to dcl Tha ouside of mortar-msh.idp
     {  
       include "mortar-msh.hdp"  
 	Thacopy=Tha;
