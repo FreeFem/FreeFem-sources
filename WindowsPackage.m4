@@ -43,7 +43,7 @@ Source: "src\bin-win32\bamg.exe"; DestDir: "{app}"
 Source: "src\bin-win32\cvmsh2.exe"; DestDir: "{app}"
 Source: "src\bin-win32\drawbdmesh.exe"; DestDir: "{app}"
 Source: "src\bin-win32\*.dll"; DestDir: "{app}"
-Source: "src\examples++-load\ff-c++"; DestDir: "{app}"
+Source: "examples++-load\ff-c++"; DestDir: "{app}"
 
 ; mingwm10.dll is necessary when "-mthreads" is used as a compilation
 ; flag.
@@ -69,6 +69,7 @@ Source: "examples++-load\load.link"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\include-tmp\*"; DestDir: "{app}\examples++-load\include"
 Source: "examples++-3d\*.edp"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\dodecaedre01.mesh"; DestDir: "{app}\examples++-3d"
+Source: "examples++-3d\lac-leman-v4.msh"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\*.idp"; DestDir: "{app}\examples++-3d"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-load"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-tutorial"
