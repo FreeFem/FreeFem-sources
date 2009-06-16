@@ -2161,11 +2161,11 @@ class Plot :  public E_F0mps { public:
        
          if (args[i].left()==atype<E_Array>())
           {
-	    cout << "args[i].left()==atype<E_Array>()" << endl;
+	    //cout << "args[i].left()==atype<E_Array>()" << endl;
 	    l[i].composant=false;
             const E_Array * a = dynamic_cast<const E_Array *>(args[i].LeftValue());
             ffassert(a);
-            if (a->size() >2) { CompileError("plot d'un vecteur ˆ + 2 composantes");}
+            if (a->size() >2) { CompileError("plot of vector with more than 2 components");}
             if (BCastTo<pfer>((*a)[0]))
              {
               l[i].what=2;
