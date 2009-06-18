@@ -32,7 +32,7 @@ if(mpirank==0)
     
     mesh Thacopy; //hack to dcl Tha ouside of mortar-msh.idp
     {  
-      include "mortar-msh.hdp"  
+      include "mortar-msh.idp"  
 	Thacopy=Tha;
       regsd=regi;
     }   
