@@ -23,6 +23,7 @@ using namespace std;
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "RNM.hpp"
+#include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
 
 #include "PlotStream.hpp"
@@ -45,7 +46,7 @@ int debug=1;
 
 #include "ffthreads.hpp"
 
-
+int version =0;
 
 //Mutex MutexNextPlot;
 Thread::Id tidRead=0;
@@ -84,24 +85,33 @@ int   ReadOnePlot(FILE *fp)
 
   PlotStream f(fp);
   f.set_binary_mode();
-  const char *  magic="#!ffglutdata2..";
+  const char *  magic2="#!ffglutdata2..";
+  const char *  magic3="#!ffglutdata3..";
+  const int lmagic=strlen(magic2);
+    char magicxx[32];
   err=0;
   // init ..
   if(kread==-1)
     {
-      for(int i=0;i<strlen(magic);i++)
+      for(int i=0;i<lmagic;i++)
 	{ int c=getc(fp);
-	  err += c != magic[i];
-	  if(err) break;
+	    magicxx[i]=c;
+	  //err += c != magic[i];
+	  //if(err) break;
 	}
+	magicxx[lmagic]='\0';
+	if( strcmp(magicxx,magic2)==0)  version=2;
+	else if( strcmp(magicxx,magic3)==0)  version=3;
+	else err =1; 
+	
       if(err) {
 	if(debug>2)
-	 cout << " Err read heading " << endl;
+	 cout << " Err read magic heading " << endl;
 	 goto Lreturn;
 	 //return err;
 	}
       kread++;
-      if(debug>2) cout << " Read entete " << endl;
+      if(debug>2) cout << " Read entete " << version << endl;
 	  int c1 =getc(fp);//
       if(c1==13)	  
         int c2 =getc(fp);//	
@@ -154,7 +164,7 @@ int SendForNextPlot()
   // every 25/ second..  = 1000/25 = 40 ms
   if(NoMorePlot)
     {
-    if((debug > 0)) cout << " send signal For Next plot, skip: No More Plot !  " << endl;
+    if((debug > 1)) cout << " send signal For Next plot, skip: No More Plot !  " << endl;
     return 0;
     }
   if((debug > 1)) cout << " Try to read read  plot "<< endl;
@@ -351,6 +361,7 @@ void DefColor(float & r, float & g, float & b,
     
 }
 
+template<class Mesh>
 void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot,GLint gllists,int * lok)
 {
     glDisable(GL_DEPTH_TEST);
@@ -362,7 +373,7 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
     
     
     double r=0,g=0,b=0;
-    if((debug > 3)) cout<< " OnePlotMesh::Draw " << plotmesh << " " << plotborder << " " <<  Th.neb << " " << z1 << " "  << z2 << endl;
+    if((debug > 3)) cout<< " OnePlotMesh::Draw " << plotmesh << " " << plotborder << " " <<  Th.nbBrdElmts() << " " << z1 << " "  << z2 << endl;
     // plot.SetColorTable(16) ; 
     bool cc[3]= { plotborder , plotmesh && fill , plotmesh };
     int kk=0;
@@ -377,9 +388,9 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
 	  glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
 	  glLineWidth(2); 
 	  glBegin(GL_LINES);    
-	  for (int i=0;i<Th.neb;i++)
+	  for (int i=0;i<Th.nbBrdElmts();i++)
 	    {
-	      const BoundaryEdge & K(Th.be(i)); 
+		const typename  Mesh::BorderElement  & K(Th.be(i)); 
 	      plot.color(1+abs(K.lab));
 	      glVertex3d(K[0].x,K[0].y,z1);
 	      glVertex3d(K[1].x,K[1].y,z1);
@@ -403,7 +414,7 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
 	  glBegin(GL_TRIANGLES);
 	  for (int i=0;i<Th.nt;i++)
 	    {
-	      const Triangle & K(Th[i]);
+	      const typename  Mesh::Element & K(Th[i]);
 	      plot.color(K.lab?1+abs(K.lab):0);
 	      
 	      //glColor3d(r,g,b);
@@ -428,7 +439,7 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
 	  glBegin(GL_TRIANGLES);
 	  for (int i=0;i<Th.nt;i++)
 	    {
-		const Triangle & K(Th[i]);
+		const  typename  Mesh::Element  & K(Th[i]);
 		plot.color(fill? 1 : 1+abs(K.lab));
 		int i0= Th(K[0]),  i1= Th(K[1]),   i2= Th(K[2]) ;    
 		glVertex3d(K[0].x,K[0].y,z1);
@@ -519,7 +530,8 @@ void OnePlotError::Draw(OneWindow *win)
   win->SetView() ;
 }
 
-void OnePlotMesh::Draw(OneWindow *win)
+template<class Mesh>
+void OnePlotMesh<Mesh>::Draw(OneWindow *win)
 {
   initlist();
   ThePlot & plot=*win->theplot;
@@ -538,7 +550,7 @@ void OnePlotFE3::Draw(OneWindow *win)
   initlist();
   
   ThePlot & plot=*win->theplot;
-    ShowGlerror("begin OnePlotFE plot");
+    ShowGlerror("begin OnePlotFE3 plot");
     plot.SetDefIsoV();
     if(plot.fill && what==6)
       glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
@@ -596,7 +608,67 @@ void OnePlotFE3::Draw(OneWindow *win)
     Plot(*Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2]);
     ShowGlerror("OnePlotFE::Draw");
 }    
-void OnePlotFE::Draw(OneWindow *win)
+
+template<class Mesh>
+ OnePlotFE<Mesh>::OnePlotFE(const Mesh *T,long w,PlotStream & f)
+:OnePlot(w,2,5),Th(T)
+{
+    R2 P0,P1;
+    Th->BoundingBox(P0,P1);
+    Pmin=P0;
+    Pmax=P1;
+    if(version==2)
+      {
+	  long nsub;
+	  
+	  f>> nsub;
+	  int nsubT=NbOfSubTriangle(nsub);
+	  int nsubV=NbOfSubInternalVertices(nsub);
+	  
+	  Psub.resize(nsubV);
+	  Ksub.resize(nsubT*3);
+	  for(int i=0,j=0;i<nsubV;++i)
+	    Psub[i]=SubInternalVertex(nsub,i);
+	   
+	  for(int sk=0,p=0;sk<nsubT;++sk)
+	      for(int i=0;i<3;++i,++p)
+		  Ksub[p]=numSubTriangle(nsub,sk,i);
+	  
+	  
+      }
+    else
+      {	  f >> Psub ;
+	  f >> Ksub ;
+	  if(debug>2) {
+	  cout << " Psub " << Psub << endl;
+	  cout << " Ksub " << Ksub << endl;}
+
+      }
+    
+    f>> v;
+    if(what==1)
+      {
+	  fmin = min(fmin,v.min());
+	  fmax = max(fmax,v.max());
+      }
+    else if (what==2)
+      {  
+	  //ffassert(0); // afaire
+	  int n= v.N()/2;
+	  for (int i=0,j=0;i<n;i++, j+=2)
+	    {
+		R2 u(v[j],v[j+1]);
+		vmax = max(vmax,u.norme());
+	    }
+	  //cout << " vmax = " << vmax << endl; 
+      }
+    if(debug>3) cout << "OnePlotFE" << Th <<" " << what<< " " << Psub.N() << " " << Ksub.N()/3 <<" " << v.N() << endl; 
+    ffassert(f.good());
+    
+}
+
+template<class Mesh>
+void OnePlotFE<Mesh>::Draw(OneWindow *win)
 {
   initlist();
   ThePlot & plot=*win->theplot;
@@ -606,17 +678,17 @@ void OnePlotFE::Draw(OneWindow *win)
   //    OneWindow * win=plot.win;// bof bof  la struct est tres mauvaise . 
   assert(win);
   const Mesh & Th(*this->Th);
-  int nsubT=NbOfSubTriangle(nsub);
-  int nsubV=NbOfSubInternalVertices(nsub);
+    int nsubT= Ksub.N()/3;//NbOfSubTriangle(nsub);
+  int nsubV=Psub.N();//NbOfSubInternalVertices(nsub);
   int nK=v.N()/ Th.nt;
   if(debug>4)
   cout << "\t\t\tOnePlotMesh::Draw  " <<v.N() << " ,nt " << Th.nt << " " << nK << " " 
-       << nsubV << " " << what << " ,nv " << Th.nv <<  endl;
+       << Psub.N() << " " << what << " ,nv " << Th.nv <<  endl;
   ffassert(v.N()== Th.nt*nK);
   ffassert(nK = nsubV*what);
   int o=0;
-  KN<R2> Pn(nsubV);
-  if((debug > 10)) cout << " " << nsubT << " " << nsubV << endl;
+  KN<R2> Pn(Psub.N());
+  if((debug > 10)) cout << " " <<nsubV  << " " << nsubT << endl;
   
   if(plot.fill && what==1)
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
@@ -647,15 +719,15 @@ void OnePlotFE::Draw(OneWindow *win)
       glNewList(gllists+klist,GL_COMPILE_AND_EXECUTE); // save  la list sans affichage
       for(int k=0;k<Th.nt;++k, o+= nK)
 	{
-	  const Mesh::Element & K=Th[k];
+	  const typename Mesh::Element & K=Th[k];
 	  for(int i=0;i<nsubV;++i)
-	    Pn[i]=K(SubInternalVertex(nsub,i));
+	    Pn[i]=K(Psub[i]);// local to global coord. 
 	  if(what==1)
 	    for(int sk=0;sk<nsubT;++sk)
 	      {
-		int i0=numSubTriangle(nsub,sk,0);
-		int i1=numSubTriangle(nsub,sk,1);
-		int i2=numSubTriangle(nsub,sk,2);
+		int i0= Ksub[sk*3+0];//numSubTriangle(nsub,sk,0);
+		int i1= Ksub[sk*3+1];//numSubTriangle(nsub,sk,1);
+		int i2= Ksub[sk*3+2];//numSubTriangle(nsub,sk,2);
 		
 		R ff[3]={v[o+i0],v[o+i1],v[o+i2]};
 		R2 Pt[3]={Pn[i0],Pn[i1],Pn[i2]};
@@ -861,7 +933,7 @@ void OneWindow::DefaultView()
       else   if(rapz0<=0)
 	{ //  ( zmax-zmin )*rapz0 =  0.3 dxyy
 	  rapz0  =  0.4* dxy/(zmax-zmin) ;
-	  if(debug>0)
+	  if(debug>2)
 	    {
 	      cout << " rapz0 = " << rapz0 ;
 	      cout << " dz = " << zmax-zmin  << " dxy =" << dxy << endl;
@@ -1365,37 +1437,67 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   
   while(1)
     {
-      fin >> cas;
-      if((debug > 4)) cout << " read cas: " << cas << "  " << PlotStream::dt_endarg << endl;
-      
-      if(cas==PlotStream::dt_endarg) break;
-      switch (cas) {
-      case  0: fin >> coeff; break;
-      case 1: fin >> cm; break;
-      case 2: fin >> psfile; break;
-      case 3: fin >> wait; break;
-      case 4: fin >> fill; break;
-      case 5: fin >> value; break;
-      case 6: fin >> clean; break;
-      case 7: fin >> aspectratio;uaspectratio=true; break;
-      case 8: fin >> boundingbox; break;
-      case 9: fin >> Niso; break;
-      case 10: fin >> Narrow; break;
-      case 11: fin >> Viso;Niso=Viso.N();pViso=true; break;
-      case 12: fin >> Varrow;Narrow=Varrow.N();pVarrow=true; break;
-      case 13: fin >> bw; break;
-      case 14: fin >> grey; break;
-      case 15: fin >> colors; break;
-      case 16: fin >> drawborder; break;
-      case 17: fin >> dimpp; break;// ajout fevr 2008  v3.0.6
-      case 18: fin >> add; break;
-      case 19: fin >> keepPV; break;
-      default: 
-	cout << " cas : " << cas <<endl;
-	ffassert(0);
-	break;
-      }
-      ffassert(fin.good());
+	fin >> cas;
+	if((debug > 4)) cout << " read cas: " << cas << "  " << PlotStream::dt_endarg << endl;
+	if(cas==PlotStream::dt_endarg) break;
+	if(version==2)
+	    switch (cas) {
+		case  0: fin >> coeff; break;
+		case 1: fin >> cm; break;
+		case 2: fin >> psfile; break;
+		case 3: fin >> wait; break;
+		case 4: fin >> fill; break;
+		case 5: fin >> value; break;
+		case 6: fin >> clean; break;
+		case 7: fin >> aspectratio;uaspectratio=true; break;
+		case 8: fin >> boundingbox; break;
+		case 9: fin >> Niso; break;
+		case 10: fin >> Narrow; break;
+		case 11: fin >> Viso;Niso=Viso.N();pViso=true; break;
+		case 12: fin >> Varrow;Narrow=Varrow.N();pVarrow=true; break;
+		case 13: fin >> bw; break;
+		case 14: fin >> grey; break;
+		case 15: fin >> colors; break;
+		case 16: fin >> drawborder; break;
+		case 17: fin >> dimpp; break;// ajout fevr 2008  v3.0.6
+		case 18: fin >> add; break;
+		case 19: fin >> keepPV; break;
+		default: 
+		    cout << "Fatal error: Unknow  case  : " << cas <<endl;
+		    ffassert(0);
+		    break;
+	    }
+	else if(version ==3)
+	    switch (cas) {
+		case  0: fin >= coeff; break;
+		case 1: fin >= cm; break;
+		case 2: fin >= psfile; break;
+		case 3: fin >= wait; break;
+		case 4: fin >= fill; break;
+		case 5: fin >= value; break;
+		case 6: fin >= clean; break;
+		case 7: fin >= aspectratio;uaspectratio=true; break;
+		case 8: fin >= boundingbox; break;
+		case 9: fin >= Niso; break;
+		case 10: fin >= Narrow; break;
+		case 11: fin >= Viso;Niso=Viso.N();pViso=true; break;
+		case 12: fin >= Varrow;Narrow=Varrow.N();pVarrow=true; break;
+		case 13: fin >= bw; break;
+		case 14: fin >= grey; break;
+		case 15: fin >= colors; break;
+		case 16: fin >= drawborder; break;
+		case 17: fin >= dimpp; break;// ajout fevr 2008  v3.0.6
+		case 18: fin >= add; break;
+		case 19: fin >= keepPV; break;
+		default: 
+		    static int nccc=0;
+		    if(nccc++<5)
+			cout << " Skip Unknow case " << cas <<" (ffglut is too old ?)\n";
+		    fin.SkipData();
+		    break;
+	    }   
+	else ffassert(0);
+	ffassert(fin.good());
     }
   if(dimpp) plotdim=dimpp; 
   //    if( !uaspectratio) aspectratio= true;
@@ -1420,9 +1522,19 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   long nbmeshes;
   fin >> nbmeshes;
   if((debug > 2)) cout << " read nb : mesh " << nbmeshes << endl;
-  Ths.resize(nbmeshes);
+ if(version==2)
+   {
+  Ths.resize(nbmeshes);    
   for(int i=0;i<nbmeshes;++i)
     Ths[i]=0;
+   }
+   else
+     {
+	 Ths2.resize(nbmeshes);    
+	 for(int i=0;i<nbmeshes;++i)
+	     Ths2[i]=0;
+     }
+    
   for(int i=0;i<nbmeshes;++i)
     { 
       long l;
@@ -1432,10 +1544,23 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	if((debug > 3)) cout << " read mesh " << i  << " -> " << l << "  " <<nbmeshes << endl;
 	l--;
 	ffassert(l>=0 && l < nbmeshes);
+	if(version==2)
+	  {
 	ffassert(Ths[l]==0);
 	fin >>Ths[l] ;
+	  }
+	else
+	  {
+	      ffassert(Ths2[l]==0);
+	      fin >>Ths2[l] ;
+	  }
+	    
 	if((debug > 3))
+	  if(version==2)
 	  cout << i << " nt/nv " << l << " "  <<Ths[l]->nt << " " << Ths[l]->nv << endl;
+	  else
+	      cout << i << " nt/nv " << l << " "  <<Ths2[l]->nt << " " << Ths2[l]->nv << endl;
+	      
 	ffassert(fin.good());
       }
       else // Add FH optimisation FH 11/12/2008 (not use to day)
@@ -1444,8 +1569,17 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	  long ll;
 	  fin >> l>> ll; // read l and ll
 	  ffassert(old);
+	  if(version==2)
+	    {
 	  Ths[l]=old->Ths[ll];
 	  Ths[l]->increment(); // 
+	    }
+	  else
+	    {
+		Ths2[l]=old->Ths2[ll];
+		Ths2[l]->increment(); // 
+	    }
+	    
 	}
       
     }
@@ -1507,7 +1641,11 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	{ 
 	  
 	  fin >> imsh;
-	  p=new OnePlotMesh(Ths[imsh-1]);
+	  if(version==2)
+	     p=new OnePlotMesh<Mesh>(Ths[imsh-1]);
+	  else
+	      p=new OnePlotMesh<Mesh2>(Ths2[imsh-1]);
+	      
 	}
       else if (what==1 || what==2)
 	{
@@ -1516,7 +1654,10 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	  else if (what==2) witharrow=true;
 	  if((debug > 10)) cout << " plot : mesh " << imsh << endl;
 	  ffassert(imsh>0 && imsh <=nbmeshes);
-	  p=new OnePlotFE(Ths[imsh-1],what,fin);
+	  if(version==2)
+	    p=new OnePlotFE<Mesh>(Ths[imsh-1],what,fin);
+	  else 
+	    p=new OnePlotFE<Mesh2>(Ths2[imsh-1],what,fin);
 	}
       else if(what==3)
 	p=new OnePlotCurve(fin);

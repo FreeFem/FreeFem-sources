@@ -39,6 +39,11 @@
 
 
 #include "Mesh2dn.hpp"
+//  for plotStream (a change)
+#include "Mesh3dn.hpp"
+#include "rgraph.hpp"
+#include "fem.hpp"
+#include "PlotStream.hpp"
 
 namespace Fem2D {
   long verbosity=1;
@@ -70,12 +75,12 @@ namespace Fem2D {
   template<> const int  GenericElement<DataTriangle2>::nitemdim[4] = {3,3,1,0 }  ;
   
   
-  static const int onWhatIsEdge[3][7] = {  {0,1,3, 2,0,0, 0}, // edge 0 
+  static const int onWhatIsEdge2d[3][7] = {  {0,1,3, 2,0,0, 0}, // edge 0 
 					   {3,0,1, 0,2,0, 0},
 					   {1,3,0, 0,0,2, 0}};
   
   template<>
-  const int (* const GenericElement<DataTriangle2>::onWhatBorder)[7] = onWhatIsEdge ;
+  const int (* const GenericElement<DataTriangle2>::onWhatBorder)[7] = onWhatIsEdge2d ;
   
   template<> int   GenericMesh<Triangle2,BoundaryEdge2,Vertex2>::kfind=0;
   template<> int   GenericMesh<Triangle2,BoundaryEdge2,Vertex2>::kthrough=0;
@@ -254,6 +259,117 @@ int Mesh2::Save(const string & filename)
   return (0);
 
 }
+
+const     string Gsbegin="Mesh2::GSave v0",Gsend="end"; 
+
+template<class Mesh>
+void GSave2(FILE * ff,const Mesh & Th) 
+    {  
+	PlotStream f(ff);
+	
+	f <<  Gsbegin ;
+	int nbe=Th.nbBrdElmts();
+	f << Th.nv << Th.nt << nbe;
+	for (int k=0; k<Th.nv; k++) {
+	    const  typename Mesh::Vertex & P = Th(k);		
+	    f << P.x <<P.y  << P.lab ;
+	}
+	
+	    for (int k=0; k<Th.nt; k++) {
+		const typename Mesh::Element & K(Th[k]);
+		int i0=Th(K[0]);
+		int i1=Th(K[1]);
+		int i2=Th(K[2]);
+		
+		int lab=K.lab;
+		f << i0 << i1 << i2  << lab;
+	    }
+	
+	
+	
+	for (int k=0; k<nbe; k++) {
+	    const typename Mesh::BorderElement & K(Th.be(k));
+	    int i0=Th(K[0]);
+	    int i1=Th(K[1]);	   
+	    int lab=K.lab;
+	    f << i0 << i1  << lab;
+	}
+	f << Gsend;
+    }
+
+ //template   void GSave2<Mesh2>(FILE * ff,const Mesh2 & Th) ;
+ template   void GSave2<Mesh>(FILE * ff,const Mesh & Th) ;
+   
+    
+    Mesh2::Mesh2(FILE *f)
+    {
+	
+	GRead(f);
+	assert( (nt >= 0 || nbe>=0)  && nv>0) ;
+	BuildBound();
+	if(verbosity>1)
+	    cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
+	
+	if(nt > 0){ 
+	    BuildAdj();
+	    Buildbnormalv();  
+	    BuildjElementConteningVertex();  
+	}
+	
+	if(verbosity>1)
+	    cout << "  -- Mesh2  (File *), d "<< 2  << ", n Tet " << nt << ", n Vtx "
+	    << nv << " n Bord " << nbe << endl;
+	
+    }
+    
+    void Mesh2::GRead(FILE * ff)
+    {  
+	PlotStream f(ff);
+	string s;
+	f >> s;
+	ffassert( s== Gsbegin);
+	f >> nv >> nt >> nbe;
+	if(verbosity>1)
+	    cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
+	this->vertices = new Vertex[nv];
+	this->elements = new Element [nt];
+	this->borderelements = new BorderElement[nbe];		
+	for (int k=0; k<nv; k++) {
+	    Vertex & P = this->vertices[k];
+	    f >> P.x >>P.y >> P.lab ;
+	}
+	mes=0.;
+	mesb=0.;
+	
+	if(nt != 0)
+	  {
+	      
+	      for (int k=0; k<nt; k++) {
+		  int i[4],lab;
+		  Element & K(this->elements[k]);
+		  f >> i[0] >> i[1] >> i[2] >> lab;
+		  K.set(this->vertices,i,lab);
+		  mes += K.mesure();	    
+		  
+	      }
+	  }
+	
+	
+	for (int k=0; k<nbe; k++) {
+	    int i[4],lab;
+	    BorderElement & K(this->borderelements[k]);
+	    f >> i[0] >> i[1]   >> lab;
+	    K.set(this->vertices,i,lab);
+	    mesb += K.mesure();	    
+	    
+	}
+	f >> s;
+	ffassert( s== Gsend);
+    }
+    
+    
+    
+    
 /*
 int Mesh2::Popen(const FILE *namestream)
 {

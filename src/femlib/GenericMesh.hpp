@@ -460,10 +460,13 @@ public:
   int *ElementConteningVertex;  
   GTree *gtree;
 public:
-  const T & operator[](int i) const {return elements[CheckT(i)];}
+    int nbElmts() const {return nt;}
+    int nbBrdElmts() const {return nbe;}
+    int nbVertices() const {return nv;}
+    const T & operator[](int i) const {return elements[CheckT(i)];}
   const V& operator()(int i) const {return vertices[CheckV(i)];}
   const B& be(int i) const {return borderelements[CheckBE(i)];}
-  
+  void  BoundingBox(Rd &pmin,Rd &pmax) const {pmin=Pmin;pmax=Pmax;} 
   T & t(int i)  {return elements[CheckT(i)];}
   V & v(int i)  {return vertices[CheckV(i)];}
   B & be(int i) {return borderelements[CheckBE(i)];}
@@ -1379,8 +1382,8 @@ void GenericMesh<T,B,V>::BuildBound()
 
 	 }
     }
-  if(verbosity)
-      cout << "  -- Mesh" << V::d << " , n V: " << nv << " , n Elm: " << nt << " , n B Elm: " << nbe 
+  if(verbosity>3)
+      cout << "  -- GMesh" << V::d << " , n V: " << nv << " , n Elm: " << nt << " , n B Elm: " << nbe 
 	 << " , bb: (" << Pmin << ") , (" << Pmax << ")\n"; 
 }
 

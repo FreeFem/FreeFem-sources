@@ -580,7 +580,8 @@ KN<double>  FESpace::newSaveDraw(const KN_<R> & U,int composante,int & lg,int & 
 	nsb = TFE[0]->nbsubdivision;
 	int nsbv = NbOfSubInternalVertices(nsb);
 	lg = nsbv*Th.nt;
-	cout << "newSaveDraw what: nt " << Th.nt << " " << nsbv << " " << lg << endl;
+	if(verbosity>99)
+	cout << "           ++ newSaveDraw what: nt " << Th.nt << " " << nsbv << " " << lg << endl;
 	KN<double> v(lg);
 	ffassert(v);
         for (int k=0,i=0;k<Th.nt;k++)

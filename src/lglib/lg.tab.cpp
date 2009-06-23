@@ -2023,7 +2023,7 @@ yyreduce:
         case 2:
 #line 249 "lg.y"
     {
-		        const char *  magicffglut="#!ffglutdata2..\n";
+		        const char *  magicffglut="#!ffglutdata3..\n";
                         if(ThePlotStream) fwrite(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
                         (yyvsp[(1) - (2)].cinst)+=currentblock->close(currentblock);

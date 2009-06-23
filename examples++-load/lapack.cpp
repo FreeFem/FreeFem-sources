@@ -98,7 +98,7 @@ KNM<R>* Solve(KNM<R>* a,Inverse<KNM<R >*> b)
     (*a)(i,i)=(R) 1;;
 
   dgesv_(&n,&n,B,&n,p,*a,&n,&info);
-  if(!info) cerr << " error:  dgesv_ "<< info << endl;
+  if(info) cerr << " error:  dgesv_ "<< info << endl;
   return a;
 }
 
@@ -154,7 +154,7 @@ KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b)
     (*a)(i,i)=(R) 1;;
 
   zgesv_(&n,&n,(R*) B,&n,p, (R*) *a,&n,&info);
-  if(!info) cerr << " error:  cgesv_ "<< info << endl;
+  if(info) cerr << " error:  zgesv_ "<< info << endl;
   return a;
 }
 

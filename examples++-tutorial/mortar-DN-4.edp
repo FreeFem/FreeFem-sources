@@ -209,11 +209,12 @@ func real[int] PSkPb(real[int] &l)
 verbosity=100;
 lh[]=0;
 LinearCG(SkPb,lh[],eps=1.e-7,nbiter=100,precon=PSkPb);
+verbosity=1; 
+
 plot(Psd(usd),wait=1,cmm="CG");
 
 
 {  
-verbosity=1; 
 fespace Vha(Tha,P1);
 Vha vah,uah;
 solve vLapMM([uah],[vah]) =

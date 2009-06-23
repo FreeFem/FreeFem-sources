@@ -38,6 +38,7 @@
 #include "ufunction.hpp"
 #include "error.hpp"
 #include "RNM.hpp"
+#include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
 #include "rgraph.hpp"
 #include "fem.hpp"
