@@ -2593,42 +2593,42 @@ AnyType Plot::operator()(Stack s) const  {
 	pf3rbase  fe30=0,fe31=0;
 	int cmp0,cmp1;
 	theplot.SendNewPlot();
-	if (nargs[0]) theplot<< 0L <<  GetAny<double>((*nargs[0])(s));
-	if (nargs[1]) theplot<< 1L <<GetAny<string *>((*nargs[1])(s));
-	if (nargs[2]) theplot<< 2L << GetAny<string*>((*nargs[2])(s));
-	if (nargs[3]) theplot<< 3L  <<(bool) (!NoWait &&  GetAny<bool>((*nargs[3])(s)));
-	else theplot<< 3L  <<  (bool) (TheWait&& !NoWait);
-	if (nargs[4]) theplot<< 4L  <<GetAny<bool>((*nargs[4])(s));
-	if (nargs[5]) theplot<< 5L <<GetAny<bool>((*nargs[5])(s));
-	if (nargs[6]) theplot<< 6L <<GetAny<bool>((*nargs[6])(s));
-	if (nargs[7]) theplot<< 7L  <<GetAny<bool>((*nargs[7])(s));
+	if (nargs[0]) theplot<< 0L <=  GetAny<double>((*nargs[0])(s));
+	if (nargs[1]) theplot<< 1L <=  GetAny<string *>((*nargs[1])(s));
+	if (nargs[2]) theplot<< 2L <=  GetAny<string*>((*nargs[2])(s));
+	if (nargs[3]) theplot<< 3L  <= (bool) (!NoWait &&  GetAny<bool>((*nargs[3])(s)));
+	else theplot<< 3L  <=  (bool)  (TheWait&& !NoWait);
+	if (nargs[4]) theplot<< 4L  <= GetAny<bool>((*nargs[4])(s));
+	if (nargs[5]) theplot<< 5L <=  GetAny<bool>((*nargs[5])(s));
+	if (nargs[6]) theplot<< 6L <=  GetAny<bool>((*nargs[6])(s));
+	if (nargs[7]) theplot<< 7L  <= GetAny<bool>((*nargs[7])(s));
 	if (nargs[8])  
 	  {  KN<double> bbox(4);
 	    for (int i=0;i<4;i++)
 		bbox[i]= GetAny<double>((*bb[i])(s));
 	      
-	      theplot<< 8L << bbox ;
+	      theplot<< 8L <= bbox ;
 	  }
-	if (nargs[9])  theplot<< 9L  <<  GetAny<long>((*nargs[9])(s));
-	if (nargs[10])  theplot<< 10L << GetAny<long>((*nargs[10])(s));
+	if (nargs[9])  theplot<< 9L   <=  GetAny<long>((*nargs[9])(s));
+	if (nargs[10])  theplot<< 10L <= GetAny<long>((*nargs[10])(s));
 	if (nargs[11]) { 
 	    KN_<double> v =GetAny<KN_<double> >((*nargs[11])(s)) ;
-	    theplot<< 11L  << v   ;}
+	    theplot<< 11L  <= v   ;}
 	
 	if (nargs[12]) 
-	    theplot<< 12L <<  GetAny<KN_<double> >((*nargs[12])(s)) ;
+	    theplot<< 12L <=  GetAny<KN_<double> >((*nargs[12])(s)) ;
 	   
 
 	
-	if (nargs[13]) theplot<< 13L  << GetAny<bool>((*nargs[13])(s));
-	if (nargs[14]) theplot<< 14L <<GetAny<bool>((*nargs[14])(s));
+	if (nargs[13]) theplot<< 13L  <= GetAny<bool>((*nargs[13])(s));
+	if (nargs[14]) theplot<< 14L <= GetAny<bool>((*nargs[14])(s));
 	if (nargs[15]) 
-	    theplot<< 15L  << GetAny<KN_<double> >((*nargs[15])(s));
-	if (nargs[16]) theplot<< 16L  << GetAny<bool>((*nargs[16])(s));	
+	    theplot<< 15L  <= GetAny<KN_<double> >((*nargs[15])(s));
+	if (nargs[16]) theplot<< 16L  <= GetAny<bool>((*nargs[16])(s));	
 	// add frev 2008 FH for 3d plot ...
-	if (nargs[17]) theplot<< 17L  << GetAny<long>((*nargs[17])(s));	
-	if (nargs[18]) theplot<< 18L  << GetAny<bool>((*nargs[18])(s));	
-	if (nargs[19]) theplot<< 19L  << GetAny<bool>((*nargs[19])(s));	
+	if (nargs[17]) theplot<< 17L  <= GetAny<long>((*nargs[17])(s));	
+	if (nargs[18]) theplot<< 18L  <= GetAny<bool>((*nargs[18])(s));	
+	if (nargs[19]) theplot<< 19L  <= GetAny<bool>((*nargs[19])(s));	
 	theplot.SendEndArgPlot();
 	map<const Mesh *,long> mapth;
 	map<const Mesh3 *,long> mapth3;
@@ -2716,10 +2716,27 @@ AnyType Plot::operator()(Stack s) const  {
 			theplot << what ;
 			theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
 			KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),cmp0,lg,nsb);
-			if(verbosity>5)
+			  
+			  // construction of the sub division ... 
+			  int nsubT=NbOfSubTriangle(nsb);
+			  int nsubV=NbOfSubInternalVertices(nsb);
+			  KN<R2> Psub(nsubV);
+			  KN<int> Ksub(nsubT*3);
+			  for(int i=0;i<nsubV;++i)
+			      Psub[i]=SubInternalVertex(nsb,i);
+			  //cout << " Psub " << Psub <<endl;
+			  for(int sk=0,p=0;sk<nsubT;++sk)
+			      for(int i=0;i<3;++i,++p)
+				  Ksub[p]=numSubTriangle(nsb,sk,i);
+			  
+			if(verbosity>9)
 			  cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
 			       << " "  << V1.max() << " " << V1.min() << endl;
-			theplot <<(long) nsb<< V1;
+			  theplot << Psub ;
+			  theplot << Ksub ;
+                          theplot << V1;
+			  // theplot << (long) nsb<< V1;
+
 		      }
 		  }
 		else
@@ -2728,9 +2745,26 @@ AnyType Plot::operator()(Stack s) const  {
 		      {
 			err=0;
 			theplot << what ;
-			KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),*fe1->x(),cmp0,cmp1,lg,nsb);
-			theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
-			theplot << (long) nsb<< V1;
+			  
+			 
+			 KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),*fe1->x(),cmp0,cmp1,lg,nsb);
+			  // construction of the sub division ... 
+			  int nsubT=NbOfSubTriangle(nsb);
+			  int nsubV=NbOfSubInternalVertices(nsb);
+			  KN<R2> Psub(nsubV);
+			  KN<int> Ksub(nsubT*3);
+			  for(int i=0;i<nsubV;++i)
+			      Psub[i]=SubInternalVertex(nsb,i);
+			  for(int sk=0,p=0;sk<nsubT;++sk)
+			      for(int i=0;i<3;++i,++p)
+				  Ksub[p]=numSubTriangle(nsb,sk,i);
+			  
+			  theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
+			  theplot << Psub ;
+			  theplot << Ksub ;
+			  theplot <<  V1;
+
+			// theplot << (long) nsb<< V1;
 		      }
 		  }
 	      }
@@ -2786,7 +2820,7 @@ AnyType Plot::operator()(Stack s) const  {
 			      KN<R3> Psub;
 			      KN<int> Ksub;
 			      KN<double> V1=fe30->Vh->newSaveDraw(*fe30->x(),cmp0,lg,Psub,Ksub,0);
-			      if(verbosity>5)
+			      if(verbosity>9)
 				  cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
 				  << " "  << V1.max() << " " << V1.min() << endl;
 			      theplot << Psub ;

@@ -431,7 +431,10 @@ public:
   BoundaryEdge  *bedges;
   Edge  *edges;  // edge element 
   Tetraedre * tet; // 
-  
+
+    int nbElmts() const {return nt;}
+    int nbBrdElmts() const {return neb;}
+    int nbVertices() const {return nv;}
     
   int NbMortars,NbMortarsPaper;
   Mortar *mortars; //  list of mortar

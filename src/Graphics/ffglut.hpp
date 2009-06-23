@@ -71,6 +71,7 @@ private: // pas de copy  car il y a des destructeurs dans les classes derives
   OnePlot & operator=(const OnePlot & );
 };
 
+template<class Mesh>
 struct OnePlotMesh : public OnePlot
 {
   const Mesh *Th;
@@ -85,6 +86,7 @@ struct OnePlotMesh : public OnePlot
   void Draw(OneWindow *win);
   
 };
+
 struct OnePlotMesh3 : public OnePlot
 {
     const Mesh3 *Th;
@@ -98,41 +100,17 @@ struct OnePlotMesh3 : public OnePlot
     void Draw(OneWindow *win);
 };
 
+template<class Mesh>
 struct OnePlotFE: public OnePlot 
 {
   const Mesh *Th;
-  long nsub;
+ // long nsub;
   KN<double> v;
-  OnePlotFE(const Mesh *T,long w,PlotStream & f)
-    :OnePlot(w,2,5),Th(T)
-  {
-    R2 P0,P1;
-    Th->BoundingBox(P0,P1);
-    Pmin=P0;
-    Pmax=P1;
-    f>> nsub;
-    f>> v;
-    if(what==1)
-      {
-	fmin = min(fmin,v.min());
-	fmax = max(fmax,v.max());
-      }
-    else if (what==2)
-      {  
-	//ffassert(0); // afaire
-	int n= v.N()/2;
-	for (int i=0,j=0;i<n;i++, j+=2)
-	  {
-	    R2 u(v[j],v[j+1]);
-	    vmax = max(vmax,u.norme());
-	  }
-	//cout << " vmax = " << vmax << endl; 
-      }
-    if(debug>3) cout << "OnePlotFE" << Th <<" " << what<< " " << nsub <<" " << v.N() << endl; 
-    ffassert(f.good());
+  KN<R2> Psub;
+  KN<int> Ksub;
     
-  }
-  void Draw(OneWindow *win);
+    OnePlotFE(const Mesh *T,long w,PlotStream & f);
+    void Draw(OneWindow *win);
   
 };
 
@@ -245,6 +223,7 @@ class ThePlot { public:
     bool drawmeshes;
     bool add,keepPV;
     vector<Mesh *> Ths;
+    vector<Mesh2 *> Ths2;
     vector<Mesh3 *> Ths3;
     list<OnePlot *> plots;
     bool changeViso,changeVarrow,changeColor,changeBorder,changeFill;
@@ -262,9 +241,14 @@ class ThePlot { public:
     ~ThePlot()
     {
 	for (list<OnePlot *>::iterator i= plots.begin();i != plots.end(); ++i)
-	    delete *i;
+	    if(*i) delete *i;
 	for (vector<Mesh *>::iterator i= Ths.begin();i != Ths.end(); ++i)
-	    delete *i;
+	    if(*i) delete *i;
+	for (vector<Mesh2 *>::iterator i= Ths2.begin();i != Ths2.end(); ++i)
+	    if(*i) delete *i;
+	for (vector<Mesh3 *>::iterator i= Ths3.begin();i != Ths3.end(); ++i)
+	    if(*i) delete *i;
+
     }
   ThePlot(PlotStream & fin,ThePlot *old , int kcount);
     

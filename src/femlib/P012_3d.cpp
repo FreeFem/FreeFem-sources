@@ -709,7 +709,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
      
      TypeOfFE_Edge0_3d::TypeOfFE_Edge0_3d(): GTypeOfFE<Mesh3>(TypeOfFE_Edge0_3d::dfon,d,1,Element::ne*3*QFe.n,Element::ne*QFe.n,false,true)
      { 	
-	 assert(QFE.n);
+	 assert(QFe.n);
 	 //  integration on edge use QFe
 	 R3 Pt[]= {R3(0.,0.,0.), R3(1.,0.,0.),R3(0.,1.,0.),R3(0.,0.,1.)};
 	 for (int e=0,i=0;e<Element::ne;++e)

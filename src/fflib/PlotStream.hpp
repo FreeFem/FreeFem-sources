@@ -18,6 +18,7 @@ namespace Fem2D {
     
 }
 
+
 class PlotStream 
 {
 public:
@@ -45,7 +46,7 @@ public:
   PlotStream& write(const int& bb) {int b=w_endian(bb);write(reinterpret_cast<const void *> (&b),sizeof(int));return *this;}
   PlotStream& write(const double& bb) {double b=w_endian(bb);write(reinterpret_cast<const void *> (&b),sizeof(double));return *this;}
   PlotStream &write(const Fem2D::R1 & P) { return write(P.x);}
-  PlotStream &write(const Fem2D::R2 & P) { return write(P.x),write(P.x);}
+  PlotStream &write(const Fem2D::R2 & P) { return write(P.x),write(P.y);}
   PlotStream &write(const Fem2D::R3 & P) { return write(P.x),write(P.y),write(P.z);}
 
   PlotStream& write(const string& b) {  
@@ -68,38 +69,38 @@ public:
 #endif
   }
  
-  PlotStream & operator << (const bool& b) 
-  { return write(b); }
-  PlotStream & operator << (const long& b) 
-  { return write(b); }        
-  PlotStream & operator << (const long long & b) 
-  { return write(b); }        
-  PlotStream & operator << (const int& b) 
-  { return write(b); }        
-  PlotStream & operator << (const double& b) 
-  { return write(b); }
-  PlotStream & operator << (const string& s) 
-  { return write(s); }
-  PlotStream & operator << (const string* s) 
-  { ffassert(s); return write(*s); }
+  PlotStream & operator << (const bool& b)    { return write(b); }
+  PlotStream & operator << (const long& b)    { return write(b); }        
+  PlotStream & operator << (const long long & b)   { return write(b); }        
+  PlotStream & operator << (const int& b)      { return write(b); }        
+  PlotStream & operator << (const double& b)   { return write(b); }
+  PlotStream & operator << (const string& s)   { return write(s); }
+  PlotStream & operator << (const string* s)   { ffassert(s); return write(*s); }
+    template<class T>    
+    PlotStream & operator << (const KN_<T>& b)
+    {
+	long n=b.N();
+	write(n);
+	for (int i=0;i<n;++i)
+	    write(b[i]);
+	return *this;
+    }
+
+
   PlotStream & operator << (const Mesh& Th) {
+      /*
     Serialize s=Th.serialize();
     long  n=s.size();
     write( n );
-    write(s,s.size());
+    write(s,s.size());*/
+    GSave2(TheStream , Th) ; 
     return *this;}
 
+  PlotStream & operator << (const Fem2D::Mesh2& Th) { Th.GSave(TheStream); return *this;}
+  PlotStream & operator << (const Fem2D::Mesh3& Th) { Th.GSave(TheStream); return *this;}
 
-  template<class T>    
-  PlotStream & operator << (const KN_<T>& b)
-  {
-    long n=b.N();
-    write(n);
-    for (int i=0;i<n;++i)
-      write(b[i]);
-    return *this;
-  }
-  
+    
+    
   void read( void *data,size_t l) {
 	char * p= (char*)data;
 	for(int i=0;i<l;++i)	
@@ -184,14 +185,56 @@ public:
   }
   //  PlotStream & operator << (const Mesh3& Th);   
   //  PlotStream & operator >> ( Mesh3 *& Th);
-    PlotStream & operator << (const Fem2D::Mesh3& Th) {
-	Th.GSave(TheStream);
-    return *this;}
-    PlotStream &  operator >> ( Fem2D::Mesh3 *& Th)
-    {		
-	Th= new Mesh3(TheStream);
-	return *this;
-    }
+    PlotStream &  operator >> ( Fem2D::Mesh3 *& Th) {	Th= new Fem2D::Mesh3(TheStream); return *this;}
+    PlotStream &  operator >> ( Fem2D::Mesh2 *& Th) {	Th= new Fem2D::Mesh2(TheStream); return *this;}
+    
+    
+    // ---   I also write the type .. to skip data if we  need  to skip data 
+    // just change   >> and <<  by :  <= and >= 
+    PlotStream & operator <= (const bool& b)    { return write(1),write(b); }
+    PlotStream & operator <= (const long& b)    { return write(2),write(b); }        
+    PlotStream & operator <= (const long long & b)   { return write(3),write(b); }        
+    PlotStream & operator <= (const int& b)      { return write(4),write(b); }        
+    PlotStream & operator <= (const double& b)   { return write(5),write(b); }
+    PlotStream & operator <= (const string& s)   { return write(6),write(s); }
+    PlotStream & operator <= (const string* s)   { return write(6),write(*s); }
+    template<class T>    
+    PlotStream & operator <= (const KN_<T>& b)   { return write(10),write((int) sizeof(T)),write(b);}
+    
+    PlotStream & operator >= ( bool& b)       { return readc(1)>>b; }
+    PlotStream & operator >= ( long& b)       { return readc(2)>>b; }        
+    PlotStream & operator >= ( long long & b) {return  readc(3)>>b; }        
+    PlotStream & operator >= ( int& b)        { return readc(4)>>b; }        
+    PlotStream & operator >= ( double& b)     { return readc(5)>>b; }
+    PlotStream & operator >= ( string& s)     { return readc(6)>>s; }
+    PlotStream & operator >= ( string* s)     { return readc(6)>>s; }
+    template<class T>    
+    PlotStream & operator >= ( KN<T>& b)   { return readc(10), readc((int) sizeof(T)),*this >>b;}
+    PlotStream & readc(int cc) { int c; read(c); assert(c==cc); return *this;}
+    
+    void SkipData() { int c; read(c); 
+	bool b;
+	int i;
+	long l,n;
+	long long ll;
+	string s;
+	double d;
+	char buf[100];
+	switch (c) {
+	    case 1: read(b);break;
+	    case 2: read(l);break;
+	    case 3: read(ll);break;
+	    case 4: read(i);break;
+	    case 5: read(d);break;
+	    case 6: read(s);break;
+            case 10: read(l); assert(l>0 && l <100);
+		read(n);
+		for(int i=0;i<n;++n) read(buf,l);
+	    default:
+		break;
+	}
+	
+    }    
     
 };
 
