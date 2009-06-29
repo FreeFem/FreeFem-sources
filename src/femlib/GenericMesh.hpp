@@ -115,23 +115,23 @@ const int TypeVolume =3;
 	return (k%2)+ ((j[0]+3)%3)*2; // signe + depart*2
     }    
     // build de permutation     
-    template<int d> inline int SetNumPerm(int n,int *p) { ffassert(0);return 0; }// a error}    
-    template<int d> inline int SetNumPerm1(int n,int *p) { ffassert(0);return 0; }// a error}    
+    template<int d> inline void SetNumPerm(int n,int *p) { ffassert(0);return 0; }// a error}    
+    template<int d> inline void SetNumPerm1(int n,int *p) { ffassert(0);return 0; }// a error}    
     
-    template<> inline int SetNumPerm<1>(int n,int *p) { p[0]=0;} // a error}    
-    template<> inline int SetNumPerm<2>(int n,int *p) { p[0]=n;p[1]=1-n;} // a error}    
+    template<> inline void SetNumPerm<1>(int n,int *p) { p[0]=0;} // a error}    
+    template<> inline void SetNumPerm<2>(int n,int *p) { p[0]=n;p[1]=1-n;} // a error}    
     
     // build perm inverse
-    template<> inline int SetNumPerm1<1>(int n,int *p) { p[0]=0;} // a error}    
-    template<> inline int SetNumPerm1<2>(int n,int *p) { p[0]=n;p[1]=1-n;} // a error} 
+    template<> inline void SetNumPerm1<1>(int n,int *p) { p[0]=0;} // a error}    
+    template<> inline void SetNumPerm1<2>(int n,int *p) { p[0]=n;p[1]=1-n;} // a error} 
     
-    template<> inline  int SetNumPerm1<3>(int n,int *p) { 
+    template<> inline  void SetNumPerm1<3>(int n,int *p) { 
 	int i=n/2, j= n%2 ? 2:1;
 	p[i]=0;p[(i+j)%3]=1;p[(i+j+j)%3]=2;
 	assert( n == NumPerm1<3>(p));
     }    
     
-    template<> inline   int SetNumPerm<3>(int n,int *p) { 
+    template<> inline   void SetNumPerm<3>(int n,int *p) { 
 	int i=n/2, j= n%2 ? 2:1;
 	p[0]=i;p[1]=(i+j)%3;p[2]=(i+j+j)%3;
 	assert( n == NumPerm<3>(p));
