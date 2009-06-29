@@ -21,7 +21,7 @@ catch(...)
     cout << " voltet = " << voltet << endl;
     real[int] domaine = [0,0,0,1,voltet,0,0,0.7,2,voltet];
     
-    mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",nbofregions=2,regionlist=domaine);    
+    mesh3 Th = tetg(ThHS,switch="pqaAYY",nbofregions=2,regionlist=domaine);    
     // Tetrahelize the interior of the cube with tetgen
     medit("tetg",Th);
     savemesh(Th,"Th-hex-sph.mesh");
