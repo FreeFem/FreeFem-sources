@@ -1497,7 +1497,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 		    break;
 	    }   
 	else ffassert(0);
-	ffassert(fin.good());
+	ffassert(fin.good() && ! fin.eof());
     }
   if(dimpp) plotdim=dimpp; 
   //    if( !uaspectratio) aspectratio= true;

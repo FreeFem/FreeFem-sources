@@ -81,6 +81,8 @@ public:
     {
 	long n=b.N();
 	write(n);
+	// cout << "PlotStream :<<  n " << n << endl;
+
 	for (int i=0;i<n;++i)
 	    write(b[i]);
 	return *this;
@@ -125,6 +127,7 @@ public:
     if( tt !=(long) t) 
       cout << " Error Check :  get " << tt << " == wait for  "<< t << endl; 
     ffassert(tt==(long) t);}
+    bool eof() {return feof(TheStream);}
   PlotStream& read( bool& b) {read(reinterpret_cast< void *> (&b),sizeof(bool));  b=r_endian(b);return *this;}
   PlotStream& read( long long& b) {read(reinterpret_cast< void *> (&b),sizeof(long long)); b=r_endian(b);return *this;}
   PlotStream& read( long& b) { long long l;
@@ -177,6 +180,8 @@ public:
   {
     long n;
     read(n);
+   // cout << "PlotStream >>  : n " << n << endl;
+      
     if( ! b.N() ) b.init(n);
     ffassert( b.N()==n); 
     for (int i=0;i<n;++i)
@@ -199,7 +204,7 @@ public:
     PlotStream & operator <= (const string& s)   { return write(6),write(s); }
     PlotStream & operator <= (const string* s)   { return write(6),write(*s); }
     template<class T>    
-    PlotStream & operator <= (const KN_<T>& b)   { return write(10),write((int) sizeof(T)),write(b);}
+    PlotStream & operator <= (const KN_<T>& b)   { return write(10),write((int) sizeof(T)),operator<<(b);}
     
     PlotStream & operator >= ( bool& b)       { return readc(1)>>b; }
     PlotStream & operator >= ( long& b)       { return readc(2)>>b; }        
@@ -209,7 +214,7 @@ public:
     PlotStream & operator >= ( string& s)     { return readc(6)>>s; }
     PlotStream & operator >= ( string* s)     { return readc(6)>>s; }
     template<class T>    
-    PlotStream & operator >= ( KN<T>& b)   { return readc(10), readc((int) sizeof(T)),*this >>b;}
+    PlotStream & operator >= ( KN<T>& b)   { return readc(10), readc(sizeof(T)), operator>>(b);}
     PlotStream & readc(int cc) { int c; read(c); assert(c==cc); return *this;}
     
     void SkipData() { int c; read(c); 
