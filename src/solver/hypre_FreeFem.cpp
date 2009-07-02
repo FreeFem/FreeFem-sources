@@ -1,6 +1,34 @@
-/*
-  compilation: -I../../SuperLU_DIST_2.3/SRC/ -L../../SuperLU_DIST_2.3/lib/ -l superlu_dist_2_melis 
-*/
+// ORIG-DATE: 02/2009
+// -*- Mode : c++ -*-
+//
+// SUMMARY  :  
+// USAGE    : LGPL      
+// ORG      : INRIA FUTUR 
+// AUTHOR   : Guy Atenekeng
+// E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
+//
+
+/* 
+ This file is part of Freefem++
+ 
+ Freefem++ is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 2.1 of the License, or
+ (at your option) any later version.
+ 
+ Freefem++  is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public License
+ along with Freefem++; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ Thank to the ARN ()  FF2A3 grant
+ ref:ANR-07-CIS7-002-01 
+ */
+
 #include  <iostream>
 using namespace std;
 
@@ -11,15 +39,19 @@ using namespace std;
 //#include "lex.hpp"
 #include "MatriceCreuse_tpl.hpp"
 
-extern "C" {
-#include "metis.h"
-}
-
-
+// #ifdef __cplusplus
+// extern "C" {
+// #include "metis.h"
+// #endif
+// #ifdef __cplusplus
+// }
+// #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "mpi.h"
 
 #ifdef MPI_WTIME_IS_GLOBAL
 #undef MPI_WTIME_IS_GLOBAL
@@ -81,7 +113,13 @@ double dwalltime() {
 
 
 
-
+#ifdef __cplusplus
+extern "C" {
+#include "metis.h"
+#endif
+#ifdef __cplusplus
+}
+#endif
 
 
 
@@ -937,7 +975,7 @@ class Init { public:
 
 //  the 2 default sparse solver double and complex
 DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; 
-DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
+//DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
@@ -946,7 +984,7 @@ bool SetDefault()
     if(verbosity)
 	cout << " SetDefault sparse to default" << endl;
     DefSparseSolver<double>::solver =SparseMatSolver_R;
-    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
+    //DefSparseSolver<Complex>::solver =SparseMatSolver_C;
     TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
         return 1;
 }
@@ -954,7 +992,7 @@ bool SetDefault()
 bool BuildHypreSolver()
 {
     if(verbosity)
-	cout << " SetDefault sparse solver to MUMPSmpi" << endl;
+	cout << " SetDefault sparse solver to Hyprempi" << endl;
     DefSparseSolver<double>::solver  =BuildHypreSolver;
     TypeSolveMat::defaultvalue  = TypeSolveMatdefaultvalue;
     return 1;
@@ -967,12 +1005,12 @@ Init::Init()
   
   
   if(verbosity>1)
-    cout << "\n Add: MUMPSmpi,  defaultsolver defaultsolverMUMPSmpi" << endl;
+    cout << "\n Add: Hyprempi,  defaultsolver defaultsolverHyprempi" << endl;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   DefSparseSolver<double>::solver =BuildHypreSolver;
   if(! Global.Find("defaultsolver").NotNull() )
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-  Global.Add("defaulttoMUMPSmpi","(",new OneOperator0<bool>(BuildHypreSolver));
+  Global.Add("defaulttoHyprempi","(",new OneOperator0<bool>(BuildHypreSolver));
 }
 
 
