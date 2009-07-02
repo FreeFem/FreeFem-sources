@@ -1,3 +1,35 @@
+// ORIG-DATE: 04/2009
+// -*- Mode : c++ -*-
+//
+// SUMMARY  :  
+// USAGE    : LGPL      
+// ORG      : INRIA FUTUR
+// AUTHOR   : Guy Atenekeng
+// E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
+//
+
+/* 
+ This file is part of Freefem++
+ 
+ Freefem++ is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 2.1 of the License, or
+ (at your option) any later version.
+ 
+ Freefem++  is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public License
+ along with Freefem++; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ Thank to the ARN ()  FF2A3 grant
+ ref:ANR-07-CIS7-002-01 
+ */
+
+
 #include  <iostream>
 using namespace std;
 
@@ -14,12 +46,15 @@ using namespace std;
 #include "mpi.h"
 
 /* Explain here what foobar does */
+#ifdef __cplusplus
 extern "C" {
+#endif
 #include "psparslib.h"
 #include "generaldefs.h"
 #include "metis.h"
+#ifdef __cplusplus
 }
-
+#endif
 
 
 #include <stdio.h>
@@ -428,7 +463,7 @@ public:
 	/*---- parameters for preconditioning and iteration*/
 	if((datafile.empty())&&(param_double==NULL)&&(param_int==NULL)){
 		if(dm->comm->myproc==0)
-		printf("%s","We are going to set default parameters because use did not specify any one  \n \n ");
+		printf("%s","We are going to set default parameters because user did not specify any one  \n \n ");
 		
 		parm_param * pp= new parm_param(); 
 		 
@@ -437,6 +472,7 @@ public:
 		method= assignprecon(meth[pp->method], dm);
 		
 		prepar=pp->prepar; ipar=pp->ipar; VERBOSE=pp->VERBOSE; solver=pp->solver;
+	
 	}
 	if(((param_double!=NULL)||(param_int!=NULL))&&(datafile.empty()))
 	{
@@ -712,7 +748,7 @@ public:
 		 /* delete distributed local vector */	 
 		 free(prepar);
 		 free(ipar);
-		 free(pp);
+		 free(pp); 
 	         
 		 /* exit PARMS and MPI environment */
 		 PARMS_Final();
@@ -928,13 +964,13 @@ Init::Init()
   //SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   
   if(verbosity>1)
-    cout << "\n Add: MUMPSmpi,  defaultsolver defaultsolverMUMPSmpi" << endl;
+    cout << "\n Add: pARMSmpi,  defaultsolver defaultsolverpARMSmpi" << endl;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   DefSparseSolver<double>::solver =BuilddSolvePARMS;
   //DefSparseSolver<Complex>::solver =BuildSolverMUMPSmpi;
   if(! Global.Find("defaultsolver").NotNull() )
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-  Global.Add("defaulttoMUMPSmpi","(",new OneOperator0<bool>(SetdSolvePARMS));
+  Global.Add("defaulttopARMSmpi","(",new OneOperator0<bool>(SetdSolvePARMS));
 }
 
 

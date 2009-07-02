@@ -1,61 +1,51 @@
-#Commons variables
-HYPRE_DIR     =
-METIS         =    /home/guy/soft/metis-4.0
-MPI           =    /home/guy/soft/mpich2-install
-FREEFEM       =    /home/guy/soft/FreeFem_dev/freefem++
-MPI_INCLUDE     =  -I$(MPI)/include
-METIS_INCLUDE   =  -I$(METIS)/Lib
-METIS_LIB       =  $(METIS)/libmetis.a
-FREEFEM_INCLUDE =  -I$(FREEFEM)/examples++-load/include
-BLAS            =  /home/guy/Documents/soft/BLAS/blas_LINUX.a
-# Variables needs by HIPS
-HIPS_DIR      = /home/guy/soft/hips-1.2beta-rc3
-HIPS_INCLUDE  = -I$(HIPS_DIR)/SRC/INCLUDE
-LIB_DIR	      = -L$(HIPS_DIR)/LIB
-
-LIBIO             = $(HIPS_DIR)/LIB/libio.a
-LIBHIPSSEQUENTIAL = $(HIPS_DIR)/LIB/libhipssequential.a
-LIBHIPS           = $(HIPS_DIR)/LIB/libhips.a
-LIBIOMM	          = $(HIPS_DIR)/LIB/libio.a
-LIBSPKIT	  = $(HIPS_DIR)/LIB/libspkit.a
-#Variables needs by pARMS
-
-PARMS_DIR     = /home/guy/soft/pARMS_2.2
-PARMS_INCLUDE = -I$(PARMS_DIR)/INCLUDE
-PARMS_LIB     =  -L$(PARMS_DIR)/LIB/ -lparms-O2
-#Variables needs by HYPRE
-
-HYPRE_DIR     = /home/guy/soft/hypre-2.4.0b
-HYPRE_INCLUDE = -I$(HYPRE_DIR)/src/hypre/include/
-HYPRE_LIB     = -L$(HYPRE_DIR)/src/lib/ -lHYPRE
-
-#
-# Compiler
-#
-ARCH       = -DLINUX
-CC	   =  gcc       # C compiler 
-MPICC      =  mpicc
-FC         =  gfortran  # Fortran compiler 
-MPIFC      =  mpif90
-LD	   =  $(FC)     # Linker
-MPILD      =  $(MPIFC)
-CFLAGS	   =   -Wall -fPIC -DLINUX -DSPKIT_F  -DMPICH_IGNORE_CXX_SEEK  -DNDEBUG -rdynamic        # Additional C compiler flags
-FFLAGS	   =   -shared -fPIC  -DNDEBUG -O3 -rdynamic        # Additional Fortran compiler flags
-LFLAGS     =           # Additional linker flags
-COPTFLAGS  =    -O3   # Optimization flags
-FOPTFLAGS  =         # 
-
+#include makefile-gene.inc
+#include makefile-common.inc
+##include makefile-hips.inc
+#include makefile-parms.inc
+#include makefile-hypre.inc
+#include makefile-slu_dist.inc
+#include makefile-mumps.inc
+#include makefile-pastix.inc
+include makefile-sparsesolver.inc
 
 #Creation of Hips dynamic librairy
 hips    : 
-	$(MPICC) -c $(CFLAGS) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(HIPS_INCLUDE) $(METIS_INCLUDE) hips_FreeFem.cpp 
-	$(MPIFC)$  $(FFLAGS) hips_FreeFem.o -o hips_FreeFem.so $(LIBHIPS) $(LIBIO) $(LIBSPKIT) $(BLAS) $(METIS_LIB)
+	$(MPICC) -c $(CFLAGS) $(CFLAGS_HIPS) $(FREEFEM_INCLUDE) $(HIPS_INCLUDE) $(METIS_INCLUDE) $(HIPS_OTHER_INCLUDE) hips_FreeFem.cpp 
+	$(MPIFC)$  $(FFLAGS) hips_FreeFem.o -o hips_FreeFem.$(SUF) $(HIPS_LIB) $(IO_LIB) $(SPKIT_LIB) $(BLAS_LIB) $(METIS_LIB) $(HIPS_OTHER_LIB)
 
 parms	:
-	$(MPICC) -c $(CFLAGS) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(PARMS_INCLUDE) $(METIS_INCLUDE) parms_FreeFem.cpp 
-	$(MPIFC)$  $(FFLAGS) parms_FreeFem.o -o parms_FreeFem.so $(PARMS_LIB) $(BLAS) $(METIS_LIB)
+	$(MPICC) -c $(CFLAGS) $(CFLAGS_PARMS) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(PARMS_INCLUDE) $(METIS_INCLUDE) $(PARMS_OTHER_INCLUDE) parms_FreeFem.cpp 
+	$(MPIFC)$  $(FFLAGS) parms_FreeFem.o -o parms_FreeFem.$(SUF) $(PARMS_LIB) $(BLAS_LIB) $(METIS_LIB) $(PARMS_OTHER_LIB)
 
 hypre	:
-	$(MPICC) -c $(CFLAGS) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(HYPRE_INCLUDE) $(METIS_INCLUDE) hypre_FreeFem.cpp 
-	$(MPIFC)$  $(FFLAGS) hypre_FreeFem.o -o hypre_FreeFem.so $(HYPRE_LIB) $(BLAS) $(METIS_LIB)
+	$(MPICC) -c $(CFLAGS) $(CFLAGS_HYPRE) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(HYPRE_INCLUDE) $(METIS_INCLUDE) $(HYPRE_OTHER_INCLUDE) hypre_FreeFem.cpp 
+	$(MPIFC)$  $(FFLAGS) hypre_FreeFem.o -o hypre_FreeFem.$(SUF) $(HYPRE_LIB) $(BLAS_LIB) $(METIS_LIB) $(HYPRE_OTHER_LIB)
+
+mumps	:
+	$(MPICC) -c $(CFLAGS) $(CFLAGS_MUMPS) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(MUMPS_OTHER_INCLUDE) $(MUMPS_INCLUDE) $(SCOTCH_INCLUDE)  MUMPS_FreeFem.cpp
+	$(MPIFC)  $(FFLAGS) $(MPI_INCLUDE) $(MUMPS_OTHER_INCLUDE) $(MUMPS_INCLUDE) MUMPS_FreeFem.o -o MUMPS_FreeFem.$(SUF) $(MPI_LIB) $(BLAS_LIB) $(BLACS_LIB) $(SCALAPACK_LIB) $(METIS_LIB) $(PORD_LIB) $(SCOTCH_LIB) $(MUMPS_LIB) $(MUMPS_OTHER_LIB)
+#
+rpastix_dist:
+	$(MPICC) -c $(CFLAGS) $(CFLAGS_PASTIX)  $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(PTSCOTCH_INCLUDE) $(REAL_PASTIX_INCLUDE) $(PASTIX_OTHER_INCLUDE) real_dpastix_FreeFem.cpp
+	$(MPIFC) $(FFLAGS) $(PTSCOTCH_INCLUDE) $(REAL_PASTIX_INCLUDE) $(PASTIX_OTHER_INCLUDE) real_dpastix_FreeFem.o -o real_dpastix_FreeFem.$(SUF) $(MPI_LIB) $(BLAS_LIB) $(PTSCOTCH_LIB) $(METIS_LIB) $(REAL_PASTIX_LIB) $(PASTIX_OTHER_LIB)
+
+rpastix:
+	$(MPICC) -c $(CFLAGS) $(CFLAGS_PASTIX) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(SCOTCH_INCLUDE) $(REAL_PASTIX_INCLUDE) $(PASTIX_OTHER_INCLUDE) real_pastix_FreeFem.cpp
+	$(MPIFC) $(FFLAGS) $(SCOTCH_INCLUDE) $(REAL_PASTIX_INCLUDE) $(PASTIX_OTHER_INCLUDE) real_pastix_FreeFem.o -o real_pastix_FreeFem.$(SUF) $(MPI_LIB) $(BLAS_LIB) $(SCOTCH_LIB) $(METIS_LIB) $(REAL_PASTIX_LIB) $(PASTIX_OTHER_LIB)
+
+cpastix_dist:
+	$(MPICC) -c $(CFLAGS) $(CFLAGS_PASTIX) -Wno-deprecated $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(SCOTCH_INCLUDE) $(COMPLEX_PASTIX_INCLUDE) $(PASTIX_OTHER_INCLUDE) complex_dpastix_FreeFem.cpp
+	$(MPIFC) $(FFLAGS) $(PTSCOTCH_INCLUDE) $(COMPLEX_PASTIX_INCLUDE) $(PASTIX_OTHER_INCLUDE) complex_dpastix_FreeFem.o -o complex_dpastix_FreeFem.$(SUF) $(MPI_LIB) $(BLAS_LIB) $(PTSCOTCH_LIB) $(METIS_LIB) $(COMPLEX_PASTIX_LIB) $(PASTIX_OTHER_LIB)
+
+cpastix:
+	$(MPICC) -c $(CFLAGS) $(CFLAGS_PASTIX) -Wno-deprecated $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(SCOTCH_INCLUDE) $(COMPLEX_PASTIX_INCLUDE) $(PASTIX_OTHER_INCLUDE) complex_pastix_FreeFem.cpp
+	$(MPIFC) $(FFLAGS) $(SCOTCH_INCLUDE) $(COMPLEX_PASTIX_INCLUDE) $(PASTIX_OTHER_INCLUDE) complex_pastix_FreeFem.o -o complex_pastix_FreeFem.$(SUF) $(MPI_LIB) $(BLAS_LIB) $(SCOTCH_LIB) $(METIS_LIB) $(COMPLEX_PASTIX_LIB) $(PASTIX_OTHER_LIB)
+
+rsuperludist:
+	$(MPICC) -c $(CFLAGS) $(CFLAGS_SLUDIST) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(SLUDIST_INCLUDE) $(SLUDIST_OTHER_INCLUDE) real_SuperLU_DIST_FreeFem.cpp
+	$(MPIFC) $(FFLAGS)  $(SLUDIST_INCLUDE) $(SLUDIST_OTHER_INCLUDE) real_SuperLU_DIST_FreeFem.o -o real_SuperLU_DIST_FreeFem.$(SUF) $(MPI_LIB) $(BLAS_LIB) $(PARMETIS_LIB) $(METIS_LIB) $(SLUDIST_LIB) $(SLUDIST_OTHER_LIB)
+
+zsuperludist:
+	$(MPICC) -c $(CFLAGS) $(CFLAGS_SLUDIST) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(SLUDIST_INCLUDE) $(SLUDIST_OTHER_INCLUDE) complex_SuperLU_DIST_FreeFem.cpp
+	$(MPIFC) $(FFLAGS)  $(SLUDIST_INCLUDE) $(SLUDIST_OTHER_INCLUDE) complex_SuperLU_DIST_FreeFem.o -o complex_SuperLU_DIST_FreeFem.$(SUF) $(MPI_LIB) $(BLAS_LIB) $(PARMETIS_LIB) $(METIS_LIB) $(SLUDIST_LIB) $(SLUDIST_OTHER_LIB)
 
