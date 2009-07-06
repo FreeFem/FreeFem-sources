@@ -154,7 +154,8 @@ public:
   Mesh3(){}
   Mesh3(const string); 
   Mesh3(FILE *f);     
-  Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb); 
+  Mesh3(const  Serialize &);     
+    Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb); 
   Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb);  // surface mesh 
 
   void GSave(FILE * f) const ;

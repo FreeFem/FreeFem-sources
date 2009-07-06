@@ -68,9 +68,10 @@ template <class R> class MatriceProdTensoriel;
 template <class T> T* docpyornot(bool nocpy,T* p,int n)
 { 
   T * r=p;
-   if( !nocpy) { // do copy 
+   if( !nocpy && r ) { // do copy 
       r= new T[n]; ffassert(r);
-      for(int i=0;i<n;i++) 
+      if(p) 
+       for(int i=0;i<n;i++) 
         r[i]=p[i];
       }
    return r;
@@ -560,7 +561,8 @@ public:
     :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
   {build(this,Uh,Vh,data);           
   }
-  MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa,int *ll,int *cc,bool dd, const VirtualSolver * s=0,bool transpose=false )
+
+MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=false, const VirtualSolver * s=0,bool transpose=false )
     :MatriceCreuse<R>(nn,mm,dd && !transpose),
      nbcoef(nbc),
      symetrique(sym), // transpose = true => dummy false (new matrix)

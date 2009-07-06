@@ -1,3 +1,9 @@
+V 3.4
+    correct in interpolation matrix ( un set variable in cas of save mesh 
+      => missing some term) 
+    in buildInterpolationMatrix add line 651 
+     intV= false;// add July 2009 (unset varaible FH)
+
 V 3.3-3 
   add missing file in distribution examples++-load/DxWriter.cpp
 V 3.3-2  8 june 2009

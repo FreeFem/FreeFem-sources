@@ -28,7 +28,7 @@ Source: "BUGS"; DestDir: "{app}"
 Source: "COPYRIGHT"; DestDir: "{app}"
 Source: "COPYING"; DestDir: "{app}"
 Source: "README"; DestDir: "{app}"
-Source: "crimon-freefem++.zip"; DestDir: "{app}"
+Source: "crimson-freefem++.zip"; DestDir: "{app}"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}"
 
 ; Programs
