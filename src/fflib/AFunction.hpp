@@ -650,7 +650,7 @@ class ForTypeVoid:  public basicForEachType{public:
 
 template<class T> 
 class ForEachType:  public basicForEachType{public:
-    ForEachType(Function1 iv=0,Function1 id=0,Function1 OnReturn=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id,OnReturn) {
+    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id,OOnReturn) {
      if (sizeof(T) > sizeof(AnyTypeWithOutCheck) )
       {
         cout << " Sorry the " <<typeid(T).name() << " is too large  ( " << sizeof(T) 
@@ -661,7 +661,7 @@ class ForEachType:  public basicForEachType{public:
 };
 template<class T> 
 class ForEachType<T*>:  public basicForEachType{public:
-    ForEachType(Function1 iv=0,Function1 id=0,Function1 OnReturn=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id,OnReturn) { }
+    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id,OOnReturn) { }
 };
 
 template<class A,class B>  AnyType UnRef(Stack,const AnyType &a) ; 
@@ -2543,10 +2543,10 @@ class  OneOperatorCode : public OneOperator {
     public: 
     E_F0 * code(const basicAC_F0 & args) const  { return CODE::f(args);} 
     OneOperatorCode():  OneOperator(atype<typename CODE::Result>(),CODE::typeargs()) {pref=ppref;}
-    OneOperatorCode(aType r,const ArrayOfaType & l):  OneOperator(r,l)  {pref=ppref;}
-    OneOperatorCode(aType r,aType a):  OneOperator(r,a)  {pref=ppref;}
-    OneOperatorCode(aType r,aType a,aType b):  OneOperator(r,a,b)  {pref=ppref;}
-    OneOperatorCode(aType r,aType a,aType b,aType c):  OneOperator(r,a,b,c)  {pref=ppref;}
+    OneOperatorCode(aType rr,const ArrayOfaType & l):  OneOperator(rr,l)  {pref=ppref;}
+    OneOperatorCode(aType rr,aType a):  OneOperator(rr,a)  {pref=ppref;}
+    OneOperatorCode(aType rr,aType a,aType b):  OneOperator(rr,a,b)  {pref=ppref;}
+    OneOperatorCode(aType rr,aType a,aType b,aType c):  OneOperator(rr,a,b,c)  {pref=ppref;}
     
 };
 
@@ -2582,12 +2582,12 @@ template<class T,class PT>
          
 
 template<class T> 
- ForEachTypePtr<T*,T**>::ForEachTypePtr(T* unused,Function1 OnReturn): 
+ ForEachTypePtr<T*,T**>::ForEachTypePtr(T* unused,Function1 OOnReturn): 
          basicForEachType(typeid(T**),sizeof(T**),
 //         new E_F1_funcT<T*,T**>(UnRef<T*>),atype<T*>(),
          new E_F1_funcT_Type(atype<T*>(),this,UnRef<T*>),atype<T*>(),
 
-         ::InitializePtr<T*>,::DestroyPtr<T*>,OnReturn){}
+         ::InitializePtr<T*>,::DestroyPtr<T*>,OOnReturn){}
       
 template<class T> 
  ForEachTypePtr<T*,T**>::ForEachTypePtr(Function1 init,Function1 dl,Function1 onreturn): 
@@ -2705,7 +2705,7 @@ inline  void CC_F0::operator=(const CListOfInst& c)
 inline   CListOfInst &  CListOfInst::operator+=(const CC_F0 & a)
   { if( !a.Empty()){ f->Add(a);r=a.left();};return *this;} 
   
-inline Type_Expr basicForEachType::SetParam(const C_F0 & c,const ListOfId * ,size_t & ) const
+inline Type_Expr basicForEachType::SetParam(const C_F0 & ,const ListOfId * ,size_t & ) const
      { cerr << " int basicForEachType " << name() << endl; 
        InternalError("basicForEachType::SetParam non defined");  }//return make_pair<aType,const E_F0  *>(c.left(),c.LeftValue());}
      
@@ -2776,7 +2776,7 @@ class E_F1_funcT_Type: public OneOperator{ public:
 template<class R,class A>
 class E_F1_funcT :public  E_F1_funcT_Type{ public:   
    E_F1_funcT(Function1 ff) : E_F1_funcT_Type(map_type[typeid(R).name()],map_type[typeid(A).name()],ff){}
-   E_F1_funcT(aType r,aType a,Function1 ff) : E_F1_funcT_Type(r,a,ff){}
+   E_F1_funcT(aType rr,aType a,Function1 ff) : E_F1_funcT_Type(rr,a,ff){}
 };
 
 inline Expression  basicForEachType::RightValueExpr(Expression f) const 
@@ -2892,7 +2892,7 @@ class TypeLineFunction: public ForEachType<C_F0> {
   Type_Expr SetParam(const C_F0 & c,const ListOfId *l,size_t & top) const 
     {  return Type_Expr(c.left(),c.LeftValue());  } 
     
-  C_F0 Initialization(const Type_Expr & e) const 
+  C_F0 Initialization(const Type_Expr & ) const 
     {  return C_F0(); }  // nothing to initialize 
     
 };

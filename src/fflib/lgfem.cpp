@@ -2982,7 +2982,7 @@ AnyType Plot::operator()(Stack s) const  {
 		      Vminmax = minmax(Vminmax,fe->Vh->MinMax(u,v,cmp0,cmp1));
 		    }  
 		  else
-		    cerr << " On ne sait tracer que de vecteur sur un meme interpolation " << endl;
+		    cerr << " On ne sait tracer que de vecteur sur un meme type element finite. " << endl;
 		}      
            
 	    }

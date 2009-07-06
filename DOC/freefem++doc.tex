@@ -14,7 +14,7 @@
 
 
 \usepackage{times}
-\def\VERSION{3.3-2}
+\def\VERSION{3.4}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -826,7 +826,7 @@ the degree of freedom.
 It is said also that the \index{nodes}\emph{nodes} of this finite element method
 are the vertices.
 \\
-Currently \freefempp implements the following elements \index{elements}, (see section \ref{finite elements} for the full description) 
+Currently \freefempp implements the following elements \index{elements} in 2d, (see section \ref{finite elements} for the full description) 
 {\parskip=0cm
 \par \ttCC{P0} piecewise constant,
 \par \ttCC{P1} continuous piecewise linear,
@@ -837,6 +837,17 @@ Currently \freefempp implements the following elements \index{elements}, (see se
 \par \ttCC{P2dc} piecewise quadratic discontinuous,
 \par \ttCC{P1b} piecewise linear continuous plus bubble,
 \par \ttCC{P2b} piecewise quadratic continuous plus bubble.
+\par {...} \par
+}
+
+Currently \freefempp implements the following elements \index{elements} in 3d, (see section \ref{finite elements} for the full description) 
+{\parskip=0cm
+\par \ttCC{P03d} piecewise constant,
+\par \ttCC{P13d} continuous piecewise linear,
+\par \ttCC{P23d} continuous piecewise quadratic,
+\par \ttCC{RT03d} Raviart-Thomas piecewise constant,
+\par \ttCC{Edge03d} The Nedelec Edge element
+\par \ttCC{P1b3d} piecewise linear continuous plus bubble,
 \par {...} \par
 }
 To get the full list do in a unix terminal, in directory \texttt{examples++-tutorial} do
@@ -7589,6 +7600,8 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
      list to recall name as in a \Cpp function, see  note \ref{varf param}, 
     \item  the terms of the bilinear form itself: if $K$ is a  given function,
     \begin{itemize}
+       \item[-)]   \texttt{ int3d(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T } K\,v\,w  $
+       \item[-)]   \texttt{ int3d(Th,1)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{1}}\int_{T} K\,v\,w  $
        \item[-)]   \texttt{ int2d(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T } K\,v\,w  $
        \item[-)]   \texttt{ int2d(Th,1)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{1}}\int_{T} K\,v\,w  $
 
@@ -7602,6 +7615,9 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
        \end{itemize}
     \item  the right handside of the PDE, volumic terms of the linear form: for given functions $K,\, f$:
          \begin{itemize}
+       \item[-)]
+         \texttt{ int3d(Th)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T
+          } K\,w  $
        \item[-)]
          \texttt{ int2d(Th)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T
           } K\,w  $
@@ -14023,7 +14039,7 @@ It will be called automatically at load module time.
 
 \medskip
 
-To compile and link, do
+To compile and link, use the \texttt{ff-c++} script :
 \bFF
 Brochet% ff-c++ myfunction.cpp
 g++ -c -g -Iinclude myfunction.cpp
@@ -14523,6 +14539,8 @@ And the plot instruction is also change  because the pressure is constant, and  
 See the example. 
 
 \subsection{Add a new sparse solver}
+Warning the sparse solver interface as been complety rewrite in version 3.2 , 
+so the section is obsolete, the example in are correct/
 
 I will show the sketch of the code, see the full code 
 from \texttt{SuperLU.cpp} or \texttt{NewSolve.cpp}.
@@ -14568,7 +14586,7 @@ To get  Matrix value, we have just to remark that  the Morse Matrice the storage
 is  the   \texttt{SLU\_NR} format is the compressed row storage, this is 
 the transpose of the compressed column storage.
 
-So if \texttt{AA} is a MatriceMorse you have with SuperLU notatiopn.
+So if \texttt{AA} is a MatriceMorse you have with SuperLU notation.
 \bFF
      n=AA.n;
      m=AA.m;
@@ -14600,27 +14618,23 @@ sparse solver variable
 \ttCC{DefSparseSolver<@double>::solver }
         
 \bFF 
-
-MatriceMorse<@double>::VirtualSolver *
-BuildSolverSuperLU(@const MatriceMorse<@double> *A,@int strategy,@double tgv, @double eps, 
-                   @double  tol_pivot,@double tol_pivot_sym,
-		            @int NbSpace,@int @itmax ,@const  @void * precon, @?void * stack)
+MatriceMorse<double>::VirtualSolver *
+BuildSolverSuperLU(DCL_ARG_SPARSE_SOLVER(double,A))
 {
     if(verbosity>9)
-       cout << " BuildSolverSuperLU<double>" << endl;
-    @return @new SolveSuperLU<@double>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
+    cout << " BuildSolverSuperLU<double>" << endl;
+    return new SolveSuperLU<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym,ds.sparams,ds.perm_r,ds.perm_c);
 }
-
 
 MatriceMorse<Complex>::VirtualSolver *
-BuildSolverSuperLU(@const MatriceMorse<Complex> *A,@int strategy,@double tgv, @double eps,
-           @double tol_pivot,@double tol_pivot_sym,
-		    @int NbSpace,@int itmax ,@const  @void * @precon, @void * stack)
+BuildSolverSuperLU(DCL_ARG_SPARSE_SOLVER(Complex,A))
 {
-    if(verbosity>9)
+  if(verbosity>9)
     cout << " BuildSolverSuperLU<Complex>" << endl;
-    @return@ new SolveSuperLU<Complex>(*A,strategy,tgv,eps,tol_pivot,tol_pivot_sym);
+  return new SolveSuperLU<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym,ds.sparams,ds.perm_r,ds.perm_c);
 }
+
+
 \eFF
 
 The link to \texttt{FreeFem++}

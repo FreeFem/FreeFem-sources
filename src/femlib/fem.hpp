@@ -177,6 +177,7 @@ public:
        R3 B=*(vertices[1]=v0+i1);
        R3 C=*(vertices[2]=v0+i2); 
        R3 D=*(vertices[3]=v0+i3); 
+	 lab = r;
        volume = a ==0 ? det(R3(A,B),R3(A,C),R3(A,D))/6. : a;
        throwassert(volume>0);}
             
@@ -456,14 +457,14 @@ public:
   Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b);  
   Mesh(const Mesh & Thold,int *split,bool WithMortar=true,int label=1);
   ~Mesh();
-  int number(const Triangle & t) const {return &t - triangles;}
-  int number(const Triangle * t) const {return t  - triangles;}
-  int number(const Vertex & v)   const {return &v - vertices;}
-  int number(const Vertex * v)   const {return v  - vertices;}
-  int operator()(const Triangle & t) const {return &t - triangles;}
-  int operator()(const Triangle * t) const {return t  - triangles;}
-  int operator()(const Vertex & v)   const {return &v - vertices;}
-  int operator()(const Vertex * v)   const {return v  - vertices;}
+  int number(const Triangle & tt) const {return &tt - triangles;}
+  int number(const Triangle * tt) const {return tt- triangles;}
+  int number(const Vertex & vv)   const {return &vv - vertices;}
+  int number(const Vertex * vv)   const {return vv  - vertices;}
+  int operator()(const Triangle & tt) const {return &tt - triangles;}
+  int operator()(const Triangle * tt) const {return tt  - triangles;}
+  int operator()(const Vertex & vv)   const {return &vv - vertices;}
+  int operator()(const Vertex * vv)   const {return vv  - vertices;}
   int operator()(int it,int j) const {return number(triangles[it][j]);}
   BoundaryEdge &  be(int i) const { return bedges[i];}
   Element &  t(int i) const { return triangles[i];}
@@ -474,7 +475,7 @@ public:
   void InitDraw() const ;
   void Draw(int init=2,bool fill=false) const;
   void DrawBoundary() const; 
-  int Contening(const Vertex * v) const{ return TriangleConteningVertex[ v  - vertices];}
+  int Contening(const Vertex * vv) const{ return TriangleConteningVertex[ vv  - vertices];}
   int renum();
   int gibbsv (long* ptvoi,long* vois,long* lvois,long* w,long* v);
   int ElementAdj(int it,int &j) const 
@@ -499,8 +500,8 @@ public:
       return i;
    }
       
-  int BoundaryElement(int be,int & edgeInT) const {
-     int i= BoundaryEdgeHeadLink[be]; edgeInT = i%3; 
+  int BoundaryElement(int bbe,int & edgeInT) const {
+     int i= BoundaryEdgeHeadLink[bbe]; edgeInT = i%3; 
      return i/3;}
 
      

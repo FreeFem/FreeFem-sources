@@ -648,6 +648,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	          nbkU = 1; 
 	          PV = PtHatU;
 	          itV = it;
+		  intV= false;// add July 2009 (unset varaible FH)
 	        }
 	      else 
 	       {  

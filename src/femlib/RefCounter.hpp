@@ -83,7 +83,7 @@ class CountPointer: private baseCountPointer {
  T * c;
  public: 
  CountPointer() : c(0) {}
- CountPointer( T * a,bool master=false) :c(a) { if(!master) add(c);} 
+ CountPointer( T * a,bool mmaster=false) :c(a) { if(!mmaster) add(c);} 
  CountPointer(  T & a) :c(&a) { add(c);}
  CountPointer(const CountPointer & a) :c(a.c) { add(c);}
  ~CountPointer()  { destroyPtr(c);c=0;}

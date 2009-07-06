@@ -435,7 +435,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   
   Gh->nbe = nbe;
   Gh->edges = new GeometricalEdge[Gh->nbe];
-  bamg::Vertex *vertices =  new GeometricalVertex[Gh->nbvx];
+  bamg::Vertex *vertices =  new Vertex[Gh->nbvx];// correction 2009/07/03 
   double lmin= HUGE_VAL;
   //  generation des points et des lignes 
   i=0;

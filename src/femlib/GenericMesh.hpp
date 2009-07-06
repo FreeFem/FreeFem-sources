@@ -84,10 +84,10 @@ const int TypeVolume =3;
     //   =>  n1   number of the perm /  p[p1[i]]  increase <=> i
     //  SetNumPerm: set the permutation form number 
     
-    template<int d> inline int NumPerm(int *p) {ffassert(0);}  
-    template<int d> inline int NumPerm1(int *p) {ffassert(0);}  // num perm inverse 
-    template<> inline int NumPerm<1>(int *p) { return 0;}
-    template<> inline int NumPerm1<1>(int *p) { return 0;}
+    template<int d> inline int NumPerm(int *) {ffassert(0);}  
+    template<int d> inline int NumPerm1(int *) {ffassert(0);}  // num perm inverse 
+    template<> inline int NumPerm<1>(int *) { return 0;}
+    template<> inline int NumPerm1<1>(int *) { return 0;}
     template<> inline int NumPerm<2>(int *p) { return p[0] > p[1] ;}
     template<> inline int NumPerm1<2>(int *p) { return p[0] > p[1] ;}
     
@@ -118,11 +118,11 @@ const int TypeVolume =3;
     template<int d> inline void SetNumPerm(int n,int *p) { ffassert(0);return 0; }// a error}    
     template<int d> inline void SetNumPerm1(int n,int *p) { ffassert(0);return 0; }// a error}    
     
-    template<> inline void SetNumPerm<1>(int n,int *p) { p[0]=0;} // a error}    
+    template<> inline void SetNumPerm<1>(int ,int *p) { p[0]=0;} // a error}    
     template<> inline void SetNumPerm<2>(int n,int *p) { p[0]=n;p[1]=1-n;} // a error}    
     
     // build perm inverse
-    template<> inline void SetNumPerm1<1>(int n,int *p) { p[0]=0;} // a error}    
+    template<> inline void SetNumPerm1<1>(int ,int *p) { p[0]=0;} // a error}    
     template<> inline void SetNumPerm1<2>(int n,int *p) { p[0]=n;p[1]=1-n;} // a error} 
     
     template<> inline  void SetNumPerm1<3>(int n,int *p) { 
@@ -295,13 +295,14 @@ public:
 
   Vertex& at(int i)    { return *vertices[i];} // to see triangle as a array of vert
 
-  void set(Vertex * v0,int * iv,int r,double mss=UnSetMesure) 
+  GenericElement & set(Vertex * v0,int * iv,int r,double mss=UnSetMesure) 
   { 
     for(int i=0;i<nv;++i)	
       vertices[i]=v0+iv[i];
     mes=(mss!=UnSetMesure) ? mss : Data::mesure(vertices);
     lab=r;
     ASSERTION(mss==UnSetMesure && mes>0);
+    return *this;
   }
 
   
@@ -470,14 +471,17 @@ public:
   T & t(int i)  {return elements[CheckT(i)];}
   V & v(int i)  {return vertices[CheckV(i)];}
   B & be(int i) {return borderelements[CheckBE(i)];}
-  
+    
+    
   GenericMesh()
     : nt(0),nv(0),nbe(0),  mes(0.),mesb(0.) ,
       vertices(0),elements(0),borderelements(0),bnormalv(0),
       TheAdjacencesLink(0),BoundaryElementHeadLink(0),
       ElementConteningVertex(0), gtree(0)
   {} 
-  
+ 
+  GenericMesh(const  Serialize &serialized) ;
+    
   void set(int mv,int mt,int mbe) 
   {
     assert(nt==0 && nv==0 && nbe ==0);
@@ -493,10 +497,10 @@ public:
   }
  
  
-  int operator()(const T & t) const {return CheckT(&t - elements);}
-  int operator()(const T * t) const {return CheckT(t - elements);}
-  int operator()(const V & v) const {return CheckV(&v - vertices);}
-  int operator()(const V  * v) const{return CheckV(v - vertices);}
+  int operator()(const T & tt) const {return CheckT(&tt - elements);}
+  int operator()(const T * tt) const {return CheckT(tt - elements);}
+  int operator()(const V & vv) const {return CheckV(&vv - vertices);}
+  int operator()(const V  * vv) const{return CheckV(vv - vertices);}
   int operator()(const B & k) const {return CheckBE(&k - borderelements);}
   int operator()(const B  * k) const{return CheckBE(k - borderelements);}
   int operator()(int it,int j) const {return operator()(elements[it][j]);}// Nu vertex j of triangle it
@@ -507,7 +511,7 @@ public:
   int CheckBE(int i) const { ASSERTION(i>=0 && i < nbe); return i;}
   
    
-  int Contening(const Vertex * v) const{ return ElementConteningVertex[ v  - vertices];} 
+  int Contening(const Vertex * vv) const{ return ElementConteningVertex[ vv  - vertices];} 
   void BuildAdj();
   void BuildBoundaryElementAdj();  // Add J. Morice function that give the TheAdjacencesSurfaceLink :: Version avec un manifold
   void BuildBoundaryElementAdj(const int &nbsurf, int* firstDefSurface, int* labelDefSurface, int* senslabelDefSurface); // version avec plusieurs variétés
@@ -601,8 +605,8 @@ public:
     return i;
   }
 
-  int BoundaryElement(int be,int & ItemInK) const {
-    int i= BoundaryElementHeadLink[be]; 
+  int BoundaryElement(int bbe,int & ItemInK) const {
+    int i= BoundaryElementHeadLink[bbe]; 
     ItemInK = i%nea; 
     return i/nea;}
   
@@ -610,17 +614,17 @@ public:
   template<int N,int M>
   SortArray<int,N> itemadjs(const int (* const  nu )[N],int k,int i, int *sens) 
   {
-    int nv[N];
+    int nnv[N];
     B & K(borderelements[CheckBE(k)]);
     ASSERTION(i>=0 && i <M);
     for (int j=0;j<N;++j){
-      nv[j] = operator()(K[nu[i][j]]);
+      nnv[j] = operator()(K[nu[i][j]]);
     }
-    if(nv[0] > nv[1] )
+    if(nnv[0] > nnv[1] )
       *sens = 1;
     else
       *sens =-1;
-    return SortArray<int,N>(nv);
+    return SortArray<int,N>(nnv);
   }
 
   SortArray<int,B::nva> items(int k,int i,int *sens) 
@@ -632,14 +636,14 @@ public:
   template<int N,int M>
   SortArray<int,N> iteme(const int (* const  nu )[N],int k,int i) 
   {
-    int nv[N];
+    int nnv[N];
     Element & K(elements[CheckT(k)]);
     ASSERTION(i>=0 && i <M);
     for (int j=0;j<N;++j){
-      nv[j] = operator()(K[nu[i][j]]);
+      nnv[j] = operator()(K[nu[i][j]]);
     }
 
-    return SortArray<int,N>(nv);
+    return SortArray<int,N>(nnv);
   }
 
   SortArray<int,B::nv> itemadj(int k,int i) 
@@ -649,14 +653,14 @@ public:
   
   SortArray<int,B::nv> itembe(int k) 
   {
-    int nv[B::nv];
+    int nnv[B::nv];
     B & K(borderelements[CheckBE(k)]);
     
     for (int j=0;j<B::nv;++j){
-      nv[j] = operator()(K[j]);
+      nnv[j] = operator()(K[j]);
     }
 
-    return SortArray<int,B::nv>(nv);
+    return SortArray<int,B::nv>(nnv);
   }
 
   //  const Element * Find(const Rd & P) const ;
@@ -708,8 +712,8 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
 template<typename T,typename B,typename V>
 void GenericMesh<T,B,V>::BuildAdj()
 {
-  const int nva   = T::nva;
-  const int nea   = T::nea;
+ // const int nva   = T::nva;
+ // const int nea   = T::nea;
   assert(TheAdjacencesLink==0);
   TheAdjacencesLink = new int[nea*nt];
   BoundaryElementHeadLink = new int[nbe];
@@ -755,10 +759,10 @@ if(verbosity>5)
 	   {
 	     BoundaryElementHeadLink[k] = p->v <0 ? -p->v-1 : p->v;
 	     #ifndef NDEBUG
-	     int t=BoundaryElementHeadLink[k]/nea;
-	     int e=BoundaryElementHeadLink[k]%nea;
+	     int tt=BoundaryElementHeadLink[k]/nea;
+	     int ee=BoundaryElementHeadLink[k]%nea;
 	     //cout << k << " ### "   << a << " = " << itemadj(t,e) << " t " << t << " e " << e << endl;
-	     assert(itemadj(t,e)==a);
+	     assert(itemadj(tt,ee)==a);
 	     #endif
 	   }
      }
@@ -1427,5 +1431,115 @@ void GenericMesh<T,B,V>::Buildbnormalv()
     assert(n - bnormalv <= nb );
 }
 
+static const char * GenericMesh_magicmesh="GenericMesh v0";
+template<typename T,typename B,typename V>
+Serialize GenericMesh<T,B,V>::serialize() const
+{
+    const int nve = T::nv;
+    const int nvbe = B::nv;
+    const int d = Rd::d;
+    long long  l=0;
+    l += sizeof(long long);
+    l += 6*sizeof(int);
+    l += nt*(sizeof(int)*nve + 1);
+    l += nv*( sizeof(int) + sizeof(double)*d);
+    l += nbe*(sizeof(int)*nvbe+1);
+    
+    // cout << l << magicmesh << endl;
+    Serialize  serialized(l,GenericMesh_magicmesh);
+    // cout << l << magicmesh << endl;
+    size_t pp=0;
+    serialized.put(pp, l); 
+    serialized.put( pp,d);
+    serialized.put( pp,nve);
+    serialized.put( pp,nvbe);
+    serialized.put( pp,nt);
+    serialized.put( pp,nv);
+    serialized.put( pp,nbe);
+    if (verbosity>2) 
+	cout << " GenericMesh Serialized : " << l << " "  << nt << " " << nv << " " << nbe << endl;
+    for (int i=0;i<nv;i++)
+      {
+	  for(int j=0;j<d;++j)
+	  serialized.put(pp,vertices[i][j]);
+	  serialized.put(pp,vertices[i].lab);
+      }
+    for (int i=0;i<nt;i++)
+      {
+	  
+	  const Element & K(elements[i]);
+	  for(int j=0;j<nve;++j)
+	      serialized.put(pp,(int) operator()(K[j]));
+	  serialized.put(pp, K.lab);
+      }
+    for (int i=0;i<nbe;i++)
+      {
+	  const BorderElement & K(borderelements[i]);
+	  for(int j=0;j<nvbe;++j)
+	      serialized.put(pp,(int) operator()(K[j]));
+	  serialized.put(pp, K.lab);
+      }
+    assert(pp==serialized.size());
+    return serialized;  
+}
+    
+/*    GenericMesh()
+    : nt(0),nv(0),nbe(0),  mes(0.),mesb(0.) ,
+    vertices(0),elements(0),borderelements(0),bnormalv(0),
+    TheAdjacencesLink(0),BoundaryElementHeadLink(0),
+    ElementConteningVertex(0), gtree(0)
+    {} 
+ */  
+    template<typename T,typename B,typename V>
+    GenericMesh<T,B,V>::GenericMesh(const  Serialize &serialized) 
+    : nt(0),nv(0),nbe(0),  mes(0.),mesb(0.) ,
+    vertices(0),elements(0),borderelements(0),bnormalv(0),
+    TheAdjacencesLink(0),BoundaryElementHeadLink(0),
+    ElementConteningVertex(0), gtree(0)
+    {
+	const int nve = T::nv;
+	const int nvbe = B::nv;
+	const int d = Rd::d;
+	int dd,nnve,nnvbe;
+	long long  l=0;
+	size_t pp=0;	
+	serialized.get(pp, l); 
+	serialized.get( pp,dd);
+	serialized.get( pp,nnve);
+	serialized.get( pp,nnvbe);
+	serialized.get( pp,nt);
+	serialized.get( pp,nv);
+	serialized.get( pp,nbe);
+	ffassert(d==dd && nve == nnve && nvbe == nnvbe);
+	set(nv,nt,nbe);
+	for (int i=0;i<nv;i++)
+	  {
+	      double r[d];
+	      for(int j=0;j<d;++j)
+		  serialized.get(pp,vertices[i][j]);
+	      serialized.get(pp,vertices[i].lab);
+	  }
+	mes=0.;
+	for (int i=0;i<nt;i++)
+	  {
+	      int ii[nve],lab;
+	      for(int j=0;j<nve;++j)
+		  serialized.get(pp,ii[j]);
+	      serialized.get(pp,lab);
+	     mes += elements[i].set(vertices,ii,lab).mesure();
+	      
+	  }
+	mesb=0;
+	for (int i=0;i<nbe;i++)
+	  {
+	      int ii[nvbe],lab;
+	      for(int j=0;j<nvbe;++j)
+		  serialized.get(pp,ii[i]);
+	      serialized.get(pp, lab);
+	      mesb += borderelements[i].set(vertices,ii,lab).mesure();
+	  }
+       assert(pp==serialized.size());	
+    }
+    
 }
 #endif

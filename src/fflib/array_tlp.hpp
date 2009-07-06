@@ -520,12 +520,20 @@ template<class K> double get_l2(KN<K> * p){ return p->l2();}
 template<class K> double get_l1(KN<K> * p){ return p->l1();}
 template<class K> double get_linfty(KN<K> * p){ return p->linfty();}
 
+template<class K> K get_max(KNM<K> * p){ return p->max();}
+template<class K> K get_min(KNM<K> * p){ return p->min();}
+template<class K> K get_sum(KNM<K> * p){ return p->sum();}
+template<class K> double get_l2(KNM<K> * p){ return p->l2();}
+template<class K> double get_l1(KNM<K> * p){ return p->l1();}
+template<class K> double get_linfty(KNM<K> * p){ return p->linfty();}
+
 template<class K,class T > K get_sum0(const T & p){ return p.sum();}
 template<class K,class T > K get_max0(const T &p){ return p.max();}
 template<class K,class T > K get_min0(const T &p){ return p.min();}
 template<class K,class T> K  get_l2_0(const T &p){ return p.l2();}
 template<class K,class T> K  get_l1_0(const T &p){ return p.l1();}
 template<class K,class T> K  get_linfty_0(const T &p){ return p.linfty();}
+
 
  
  class ostream_precis { public:
@@ -834,7 +842,14 @@ void ArrayOperator()
      Add<KN<K> *>("l2",".",new OneOperator1<double,KN<K> *>(get_l2));
      Add<KN<K> *>("l1",".",new OneOperator1<double,KN<K> *>(get_l1));
      Add<KN<K> *>("linfty",".",new OneOperator1<double,KN<K> *>(get_linfty));
-     
+// add july 2009 
+    Add<KNM<K> *>("sum",".",new OneOperator1<K,KNM<K> *>(get_sum));
+    Add<KNM<K> *>("min",".",new OneOperator1<K,KNM<K> *>(get_min));
+    Add<KNM<K> *>("max",".",new OneOperator1<K,KNM<K> *>(get_max));
+    Add<KNM<K> *>("l2",".",new OneOperator1<double,KNM<K> *>(get_l2));
+    Add<KNM<K> *>("l1",".",new OneOperator1<double,KNM<K> *>(get_l1));
+    Add<KNM<K> *>("linfty",".",new OneOperator1<double,KNM<K> *>(get_linfty));
+// end add     
      
      Add<KN_<K> >("sum",".",new OneOperator1_<K,KN_<K> >(get_sum0<K,KN_<K> >));
      Add<KN_<K> >("min",".",new OneOperator1_<K,KN_<K> >(get_min0<K,KN_<K> >));
@@ -842,6 +857,17 @@ void ArrayOperator()
      Add<KN_<K> >("l2",".",new OneOperator1_<double,KN_<K> >(get_l2_0<double,KN_<K> >));
      Add<KN_<K> >("l1",".",new OneOperator1_<double,KN_<K> >(get_l1_0<double,KN_<K> >));
      Add<KN_<K> >("linfty",".",new OneOperator1_<double,KN_<K> >(get_linfty_0<double,KN_<K> >));
+    
+// add july 2009    
+    Add<KNM_<K> >("sum",".",new OneOperator1_<K,KNM_<K> >(get_sum0<K,KNM_<K> >));
+    Add<KNM_<K> >("min",".",new OneOperator1_<K,KNM_<K> >(get_min0<K,KNM_<K> >));
+    Add<KNM_<K> >("max",".",new OneOperator1_<K,KNM_<K> >(get_max0<K,KNM_<K> >));
+    Add<KNM_<K> >("l2",".",new OneOperator1_<double,KNM_<K> >(get_l2_0<double,KNM_<K> >));
+    Add<KNM_<K> >("l1",".",new OneOperator1_<double,KNM_<K> >(get_l1_0<double,KNM_<K> >));
+    Add<KNM_<K> >("linfty",".",new OneOperator1_<double,KNM_<K> >(get_linfty_0<double,KNM_<K> >));
+// end add     
+    
+    
 /*    
      Add<KN<K> >("sum",".",   new OneOperator1_<K,KN<K> >(get_sum0<K,KN<K> >));
      Add<KN<K> >("min",".",   new OneOperator1_<K,KN<K> >(get_min0<K,KN<K> >));

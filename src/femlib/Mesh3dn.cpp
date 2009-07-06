@@ -397,7 +397,24 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     }
     f << Gsend;
   }
-  
+	      
+   Mesh3::Mesh3(const  Serialize &serialized)
+   :GenericMesh<Tet,Triangle3,Vertex3> (serialized) 
+    {
+	BuildBound();
+	if(verbosity>1)
+	    cout << "  -- End of serialized: mesure = " << mes << " border mesure " << mesb << endl;  
+	
+	if(nt > 0){ 
+	    BuildAdj();
+	    Buildbnormalv();  
+	    BuildjElementConteningVertex();  
+	}
+	
+	if(verbosity)
+	    cout << "  -- Mesh3  (serialized), d "<< 3  << ", n Tet " << nt << ", n Vtx "
+	    << nv << " n Bord " << nbe << endl;
+    }
   Mesh3::Mesh3(FILE *f)
   {
     
