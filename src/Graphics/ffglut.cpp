@@ -906,6 +906,7 @@ void OneWindow::add(ThePlot *p)
     if( lplotssize>10)
       {
 	bool isfirst = theplot == *lplots.begin();  
+	if(debug >1)
 	cout << " delete a plot " << *lplots.begin() << endl;
 	delete *lplots.begin();
 	lplots.erase(lplots.begin());
@@ -2350,6 +2351,7 @@ int main(int argc,  char** argv)
     if(argc>1 && *argv[argc-1] != '-' ) 
      {	
 	datafile=fopen(argv[argc-1], "r");
+	if(debug >1)
 	cout << " fopen :" << argv[argc-1] << " " <<datafile << endl;
      }
 

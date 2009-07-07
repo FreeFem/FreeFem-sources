@@ -68,12 +68,14 @@ template <class R> class MatriceProdTensoriel;
 template <class T> T* docpyornot(bool nocpy,T* p,int n)
 { 
   T * r=p;
-   if( !nocpy && r ) { // do copy 
+   if( !nocpy) { // do copy 
       r= new T[n]; ffassert(r);
       if(p) 
        for(int i=0;i<n;i++) 
         r[i]=p[i];
       }
+    else if( r==0) // always do allocation  July 2009 for mpi matrice  
+      { r= new T[n]; ffassert(r);}
    return r;
  }
  template <class T,class TT> T* docpy(TT* p,int n)
