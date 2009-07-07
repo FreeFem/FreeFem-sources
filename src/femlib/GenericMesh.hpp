@@ -1441,11 +1441,11 @@ Serialize GenericMesh<T,B,V>::serialize() const
     long long  l=0;
     l += sizeof(long long);
     l += 6*sizeof(int);
-    l += nt*(sizeof(int)*nve + 1);
+    l += nt*(sizeof(int)*(nve + 1));
     l += nv*( sizeof(int) + sizeof(double)*d);
-    l += nbe*(sizeof(int)*nvbe+1);
+    l += nbe*(sizeof(int)*(nvbe+1));
     
-    // cout << l << magicmesh << endl;
+    cout << "Serialize gmesh " << l << " " << nve << " " << nvbe << endl;
     Serialize  serialized(l,GenericMesh_magicmesh);
     // cout << l << magicmesh << endl;
     size_t pp=0;
@@ -1500,18 +1500,18 @@ Serialize GenericMesh<T,B,V>::serialize() const
 	const int nve = T::nv;
 	const int nvbe = B::nv;
 	const int d = Rd::d;
-	int dd,nnve,nnvbe;
+	int dd,nnve,nnvbe,nnt,nnv,nnbe;
 	long long  l=0;
 	size_t pp=0;	
 	serialized.get(pp, l); 
 	serialized.get( pp,dd);
 	serialized.get( pp,nnve);
 	serialized.get( pp,nnvbe);
-	serialized.get( pp,nt);
-	serialized.get( pp,nv);
-	serialized.get( pp,nbe);
+	serialized.get( pp,nnt);
+	serialized.get( pp,nnv);
+	serialized.get( pp,nnbe);
 	ffassert(d==dd && nve == nnve && nvbe == nnvbe);
-	set(nv,nt,nbe);
+	set(nnv,nnt,nnbe);
 	for (int i=0;i<nv;i++)
 	  {
 	      double r[d];
@@ -1534,7 +1534,7 @@ Serialize GenericMesh<T,B,V>::serialize() const
 	  {
 	      int ii[nvbe],lab;
 	      for(int j=0;j<nvbe;++j)
-		  serialized.get(pp,ii[i]);
+		  serialized.get(pp,ii[j]);
 	      serialized.get(pp, lab);
 	      mesb += borderelements[i].set(vertices,ii,lab).mesure();
 	  }

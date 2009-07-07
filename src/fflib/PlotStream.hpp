@@ -212,7 +212,7 @@ public:
     PlotStream & operator >= ( int& b)        { return readc(4)>>b; }        
     PlotStream & operator >= ( double& b)     { return readc(5)>>b; }
     PlotStream & operator >= ( string& s)     { return readc(6)>>s; }
-    PlotStream & operator >= ( string* s)     { return readc(6)>>s; }
+    PlotStream & operator >= ( string*& s)     { return readc(6)>>s; }
     template<class T>    
     PlotStream & operator >= ( KN<T>& b)   { return readc(10), readc(sizeof(T)), operator>>(b);}
     PlotStream & readc(int cc) { int c; read(c); assert(c==cc); return *this;}
