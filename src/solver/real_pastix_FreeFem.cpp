@@ -151,7 +151,7 @@ void read_datafile_pastixff(const string &datafile, int &mpi_flag, pastix_int_t 
   int     i = 0;
   char    szbuff[MAX_CHAR_PER_LINE];
   char*   token;
-
+  
   char filename[datafile.size()+1];  
   strcpy( filename, datafile.c_str()); 
 
@@ -290,7 +290,13 @@ public:
     //int m;
     //int ierr;
     struct timeval  tv1, tv2;
+    int nnz;
    
+     // time variables
+    long int starttime,finishtime;
+    long int timeused;
+    if(verbosity) starttime = clock();
+
     ia    = NULL;
     ja    = NULL;
     avals   = NULL;
@@ -340,28 +346,53 @@ public:
     }
     
     //################################
-        
-    Ncol = AA.m;
-    Nrow = AA.n;
-  
-    // Avant : on ecrit la transposée
-   
-    // AA.cl : indices des colonnes
-    // AA.lg : pointeurs des lignes
-    Morse_to_CSC( AA.n , AA.m, AA.nbcoef, AA.a, AA.cl, AA.lg, &avals, &ja, &ia);
-    // ia : pointeurs des colonnes
-    // ja : indices des lignes
+    if( !myid ){
+      Ncol = AA.m;
+      Nrow = AA.n;
+      nnz  = AA.nbcoef;
+
+      // Avant : on ecrit la transposée
+      
+      // AA.cl : indices des colonnes
+      // AA.lg : pointeurs des lignes
+      Morse_to_CSC( AA.n , AA.m, AA.nbcoef, AA.a, AA.cl, AA.lg, &avals, &ja, &ia);
+      // ia : pointeurs des colonnes
+      // ja : indices des lignes
+      
+      cout << "AA.n= "<< AA.n << " AA.m=" <<  AA.m << " AA.nbcoef=" << AA.nbcoef << endl;
     
-    cout << "AA.n= "<< AA.n << " AA.m=" <<  AA.m << " AA.nbcoef=" << AA.nbcoef << endl;
-   
-    for(int ii=0; ii < Ncol+1; ii++){
-      ia[ii] = ia[ii]+1;
+     
+      for(int ii=0; ii < Ncol+1; ii++){
+	ia[ii] = ia[ii]+1;
+      }
+      assert( ia[Ncol]-1 == AA.nbcoef );
+      for(int ii=0; ii < ia[Ncol]-1; ii++){
+	ja[ii] = ja[ii]+1; 
+      }
+      
+      
+      MPI_Bcast( &Ncol,   1,    MPI_INT,   0, MPI_COMM_WORLD );
+      MPI_Bcast( &Nrow,   1,    MPI_INT,   0, MPI_COMM_WORLD );
+      MPI_Bcast( &nnz,    1,    MPI_INT,   0, MPI_COMM_WORLD );
+
+      MPI_Bcast( avals, nnz,    MPI_PASTIX_FLOAT, 0, MPI_COMM_WORLD );
+      MPI_Bcast(    ia, Ncol+1, MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
+      MPI_Bcast(    ja, nnz,    MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
     }
-    assert( ia[Ncol]-1 == AA.nbcoef );
-    for(int ii=0; ii < ia[Ncol]-1; ii++){
-      ja[ii] = ja[ii]+1; 
+    else{
+      MPI_Bcast( &Ncol, 1, MPI_PASTIX_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast( &Nrow, 1, MPI_PASTIX_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast( &nnz,  1,        MPI_INT,  0, MPI_COMM_WORLD );
+      
+      avals = (pastix_float_t *) malloc( nnz*sizeof(pastix_float_t) );
+      ia = (pastix_int_t *) malloc( (Ncol+1)*sizeof(pastix_int_t) );
+      ja = (pastix_int_t *) malloc( nnz*sizeof(pastix_int_t) );
+
+      MPI_Bcast( avals, nnz,  MPI_PASTIX_FLOAT,   0, MPI_COMM_WORLD );
+      MPI_Bcast(    ia, Ncol+1, MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
+      MPI_Bcast(    ja, nnz,    MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
     }
-       
+
     perm = (pastix_int_t *) malloc(Ncol*sizeof(pastix_int_t));
     invp = (pastix_int_t *) malloc(Ncol*sizeof(pastix_int_t));
     
@@ -492,11 +523,23 @@ public:
     for(int ii=0; ii < ia[Ncol]-1; ii++)
       ja[ii] = ja[ii]-1;
     
+
+     if(myid==0){
+       finishtime = clock();
+       timeused= (finishtime-starttime)/(1000);
+       printf("=====================================================\n");
+       cout << " pastix : time factorization  :: " << timeused << " ms" <<endl;
+       printf("=====================================================\n");
+     }
+
   }
   void Solver(const MatriceMorse<double> &AA,KN_<double> &x,const KN_<double> &b) const  {
   
     struct timeval  tv1, tv2;
-
+    // time variables
+    long int starttime,finishtime;
+    long int timeused;
+    if(verbosity) starttime = clock();
     
 
     // index for pastix    
@@ -562,6 +605,14 @@ public:
       ia[ii] = ia[ii]-1;
     for(int ii=0; ii < ia[Ncol]-1; ii++)
       ja[ii] = ja[ii]-1;
+
+    if(myid==0){
+      finishtime = clock();
+      timeused= (finishtime-starttime)/(1000 );
+      printf("=====================================================\n");
+      cout << " pastix : time solve  :: " << timeused << " ms" <<endl;
+      printf("=====================================================\n");
+    }
     
   }
 

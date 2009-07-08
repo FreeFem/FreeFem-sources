@@ -132,8 +132,6 @@ class dSolveMUMPSmpi :   public MatriceMorse<double>::VirtualSolver   {
   double *a_loc;
   
 
-  long int starttime,finishtime;
-  long int timeused;
 
   static const int JOB_INIT=-1;
   static const int JOB_END=-2;
@@ -155,16 +153,34 @@ public:
     tgv(ttgv), string_option(param_string), data_option(datafile), perm_r(pperm_r), perm_c(pperm_c), 
     tol_pivot_sym(pivot_sym),tol_pivot(pivot), scale_r(pscale_r), scale_c(pscale_c)
   { 
+    long int starttime,finishtime;
+    long int timeused;
+
     if(verbosity) starttime = clock();
     int dataint[40];
     double datadouble[15];
     int ierr;
-  
-    n    = AA.n;
-    m    = AA.m; 
-    nz   = AA.nbcoef;
-    
 
+    /* ------------------------------------------------------------
+       INITIALIZE THE MUMPS PROCESS GRID. 
+       ------------------------------------------------------------*/
+    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    
+    if( myid ==0){
+      n    = AA.n;
+      m    = AA.m; 
+      nz   = AA.nbcoef;
+    
+      MPI_Bcast(  &n, 1, MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast(  &m, 1, MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast( &nz, 1, MPI_INT,  0, MPI_COMM_WORLD );
+    }
+    else{
+      MPI_Bcast(  &n, 1, MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast(  &m, 1, MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast( &nz, 1, MPI_INT,  0, MPI_COMM_WORLD );
+    }
+    
     if(param_int) 
       assert( param_int.N() == 40);
     if(param_double) 
@@ -179,59 +195,85 @@ public:
     if( n != m )
       cerr << "only square matrix are supported by MUMPS" << endl;
    
-     /* ------------------------------------------------------------
-       INITIALIZE THE MUMPS PROCESS GRID. 
-       ------------------------------------------------------------*/
-   
-    //ierr = MPI_Init(&argc, &argv);
-    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-
+  
     // initialisation par defaut
     SYM=0; PAR=1;
     
     if(!string_option.empty()) 
       {
-	if(myid==0) cout << "read string option" <<endl;
-	read_options_freefem(&string_option,&SYM,&PAR);
+	if(myid==0){
+	  cout << "read string option" <<endl;
+	  read_options_freefem(&string_option,&SYM,&PAR);
+	  
+	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	}
+	else{
+	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	}
       }
     
     if(!data_option.empty())
       {	
-	//if(myid==0) cout << "lecture data option file" <<endl;
-	char * retfile= new char[data_option.size()+1];
-	strcpy(retfile, (&data_option)->c_str());
-	if(myid==0) printf("lecture data option file %s\n",retfile);
-	FILE *pFile=fopen(retfile,"rt");
+	if(myid==0){
+	  
+	  char * retfile= new char[data_option.size()+1];
+	  strcpy(retfile, (&data_option)->c_str());
+	  printf("read data option file %s\n",retfile);
+	  FILE *pFile=fopen(retfile,"rt");
 	
-	int     i_data=0;
-	int     d_data=0;
-	char    data[256];
-	char   *tictac;
-	
-	fgets(data,256,pFile);
-	tictac = strtok(data," /!#\t\n");
-	SYM = atoi(tictac);
-	
-	fgets(data,256,pFile);
-	tictac = strtok(data," /!#\t\n");
-	PAR = atoi(tictac);
-	
-	while( !feof(pFile) && i_data < 40){
+	  int     i_data=0;
+	  int     d_data=0;
+	  char    data[256];
+	  char   *tictac;
+	  
 	  fgets(data,256,pFile);
 	  tictac = strtok(data," /!#\t\n");
-	  dataint[i_data] = (int)atol(tictac);
-	  i_data++;
-	}  
-
-	while( !feof(pFile) && d_data < 15){
+	  SYM = atoi(tictac);
+	  
+	  fgets(data,256,pFile);
+	  tictac = strtok(data," /!#\t\n");
+	  PAR = atoi(tictac);
+	  
+	  while( !feof(pFile) && i_data < 40){
+	    fgets(data,256,pFile);
+	    tictac = strtok(data," /!#\t\n");
+	    dataint[i_data] = (int)atol(tictac);
+	    i_data++;
+	  }  
+	  
+	  while( !feof(pFile) && d_data < 15){
 	    fgets(data,256,pFile);
 	    tictac = strtok(data," /!#\t\n");
 	    datadouble[d_data] = (double)atof(tictac);
 	    d_data++;
 	  }  
-	
-	fclose(pFile);
-	delete [] retfile;
+	  
+	  for(int ii=0; ii< 40; ii++){
+	    cout << "double int["<< ii <<"] ="<< dataint[ii] << endl;
+	  }  
+	  for(int ii=0; ii< 15; ii++){
+	    cout << "double data["<< ii <<"] ="<< datadouble[ii] << endl;
+	  }  
+	  
+	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+
+	  MPI_Bcast(  dataint, 40, MPI_INT,  0, MPI_COMM_WORLD );
+	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, MPI_COMM_WORLD );
+
+	  fclose(pFile);
+	  delete [] retfile;
+	}
+	else{
+	  
+	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+
+	  MPI_Bcast(  dataint, 40, MPI_INT,  0, MPI_COMM_WORLD );
+	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, MPI_COMM_WORLD );
+	}
       }
     
   
@@ -241,7 +283,11 @@ public:
     id.sym=SYM;
     id.comm_fortran=USE_COMM_WORLD;
 
+    cout << "init parameter " << PAR << " " <<SYM << endl; 
+
     dmumps_c(&id);
+
+    cout << "fin init parameter" << endl; 
 
     /* set parameter of mumps */
     if(param_int || param_double ){
@@ -312,26 +358,29 @@ public:
 
     if( id.ICNTL(18) == 0)
       {
+        
 	// CASE:: NON DISTRIBUTED MATRIX
-	a=AA.a;
-	// ATTENTION 
-	// AA.cl :: indice des colonnes (exacte) et AA.lg :: indice des lignes 
-	// index of row and colummn by 1
-	jcn = AA.cl;
-	for(int ii=0; ii<nz; ii++)
-	  jcn[ii] = jcn[ii]+1;
+	if (myid == 0) { // nouveau
+
+	  a=AA.a;
+	  // ATTENTION 
+	  // AA.cl :: indice des colonnes (exacte) et AA.lg :: indice des lignes 
+	  // index of row and colummn by 1
+	  jcn = AA.cl;
+	  for(int ii=0; ii<nz; ii++)
+	    jcn[ii] = jcn[ii]+1;
+	  
+	  if( !(irn = (int*) malloc(sizeof(int)*nz)) ){
+	    printf("problem allocation jcn ");
+	    exit(1);
+	  }
 	
-	if( !(irn = (int*) malloc(sizeof(int)*nz)) ){
-	  printf("problem allocation jcn ");
-	  exit(1);
-	}
-	
-	assert(AA.lg[n] == nz);
-	for(int ii=0; ii< n; ii++)
-	  for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
-	    irn[ii1] = ii+1;  
+	  assert(AA.lg[n] == nz);
+	  for(int ii=0; ii< n; ii++)
+	    for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
+	      irn[ii1] = ii+1;  
 		
-	if (myid == 0) {
+	  // if (myid == 0) {   // ancien
 	  id.irn=irn; id.jcn=jcn;
 	  id.a = a; //id.rhs = rhs;
 	}
@@ -347,26 +396,29 @@ public:
     if( id.ICNTL(18) == 1 || id.ICNTL(18) == 2 )
       {
 
-	cout <<"id.ICNTL(18) = 1 || id.ICNTL(18) == 2 "<< endl;;
+	cout <<"id.ICNTL(18) = 1 || id.ICNTL(18) == 2 "<< endl;
 	// ATTENTION 
 	// AA.cl :: indice des colonnes (exacte) et AA.lg :: indice des lignes 
 	// index of row and column by 1
-	jcn = AA.cl;
-	for(int ii=0; ii<nz; ii++)
-	  jcn[ii] = jcn[ii]+1;
-		
-	if( !(irn = (int*) malloc(sizeof(int)*nz)) ){
-	  printf("problem allocation irn ");
-	  exit(1);
-	}
 	
-	assert(AA.lg[n] == nz);
-	for(int ii=0; ii< n; ii++)
-	  for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
-	    irn[ii1] = ii+1;  
-
-
-	if (myid == 0) {
+	if (myid == 0) { // new host process 
+	
+	  jcn = AA.cl;
+	  for(int ii=0; ii<nz; ii++)
+	    jcn[ii] = jcn[ii]+1;
+	  
+	  if( !(irn = (int*) malloc(sizeof(int)*nz)) ){
+	    printf("problem allocation irn ");
+	    exit(1);
+	  }
+	  
+	  assert(AA.lg[n] == nz);
+	  for(int ii=0; ii< n; ii++)
+	    for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
+	      irn[ii1] = ii+1;  
+	  
+	  
+	  //if (myid == 0) {  // enlever new host
 	  id.irn=irn; id.jcn=jcn;
 	}
 	
@@ -376,71 +428,246 @@ public:
 	dmumps_c(&id);
 
 	if(id.ICNTL(18) == 1 ){
-  
-	  if(myid==0){
+	  
+	   if( PAR == 0 ){ 
+	    int *nz_loc_procs;
+	    int *fst_nz_procs;
+	    int *irn_g;
+	    int *jcn_g;
+	    double *a_g;
+	    int commSize;
+	    
+	    MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    cout << commSize << "commSize" << "nz =" << nz << endl;
+	    if(myid==0){
+	      // allocation des differents tableaux
+	      nz_loc_procs = (int*) malloc ( commSize*sizeof(int) );
+	      for(int ii=0; ii<commSize; ii++){
+		nz_loc_procs[ii]=0;
+	      }
+	      for(int ii=0; ii<nz; ii++){
+		nz_loc_procs[ id.mapping[ii] ]++;
+	      }
+	      assert(nz_loc_procs[0] == 0);
+	      nz_loc_procs[0] = 2;
 
-	    MPI_Bcast( id.mapping, nz, MPI_INT,  0, MPI_COMM_WORLD );
-
-	    nz_loc=0;
-	    for(int ii=0;ii<nz; ii++){
-	      if( id.mapping[ii] == myid) nz_loc++;
+	      fst_nz_procs = (int*) malloc ( commSize*sizeof(int) );	      
+	      fst_nz_procs[0] = 0;
+	      for(int ii=1; ii<commSize; ii++){
+		fst_nz_procs[ii] = fst_nz_procs[ii-1]+nz_loc_procs[ii-1];
+	      }
+	      
+	      irn_g = (int*) malloc( sizeof(int)*(nz+2) );
+	      jcn_g = (int*) malloc( sizeof(int)*(nz+2) );
+	      a_g   = (double*) malloc( sizeof(double)*(nz+2) );
+	      
+	      int *index_p;
+	      index_p = (int*) malloc ( commSize*sizeof(int) );
+	      for(int ii=0; ii<commSize; ii++)
+		index_p[ii] =0;
+	      
+	      irn_g[ 0 ] = 1;
+	      jcn_g[ 0 ] = 1;
+	      a_g  [ 0 ] = 1.;
+	      
+	      irn_g[ 1 ] = 1;
+	      jcn_g[ 1 ] = 1;
+	      a_g  [ 1 ] = 1.;
+	      
+	      for(int ii=0;ii<nz; ii++){	      
+		int jj1 = id.mapping[ii];
+		int jj2 = fst_nz_procs[jj1] + index_p[jj1];
+		assert(jj2 > 1);
+		irn_g[ jj2 ] =  irn[ ii ];
+		jcn_g[ jj2 ] =  jcn[ ii ];
+		a_g  [ jj2 ] = AA.a[ ii ];
+		cout << "jj2= " << jj2 << endl;
+		assert( jj2 < nz+2);
+		index_p[jj1]++;
+	      }
+	      free(index_p);
+	      
 	    }
-	   
+	    
+	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	    
+	    // allocation des tableaux locaux
 	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
 	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
-	    a_loc   = (double*) malloc(sizeof(double)*nz_loc);
-
-	    int jj=0;
-	    for(int ii=0;ii<nz; ii++)
-	      if( id.mapping[ii] == myid){
-		irn_loc[jj] = irn[ ii ];
-		jcn_loc[jj] = jcn[ ii ];
-		a_loc[jj] = AA.a[ ii ];
-		jj++;
-	      }
-	    assert(jj==nz_loc);
+	    a_loc    = (double*) malloc(sizeof(double)*nz_loc);
 	    
-	    if(PAR==1){
+	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    cout << "myid=" << myid <<" nz_loc=" << nz_loc << endl;
+	    if( myid == 1){
+	      cout << "nz_loc=" << nz_loc << endl;
+	      for(int ii=0;ii<nz_loc; ii++){
+		cout << "a_loc[ii]" << a_loc[ii] << endl;
+	
+	      }
+	    }
+	    
+	    if( myid > 0){
 	      id.nz_loc = nz_loc;
 	      id.irn_loc = irn_loc;
 	      id.jcn_loc = jcn_loc;
 	      id.a_loc = a_loc;
 	    }
 	    
-	  }
-	  else{
-	    int *mapping;
-	    mapping = (int*) malloc(sizeof(int)*nz);
-	    MPI_Bcast( mapping, nz, MPI_INT,  0, MPI_COMM_WORLD );
-	    nz_loc=0;
-
-	    for(int ii=0;ii<nz; ii++)
-	      if( mapping[ii] == myid) nz_loc++;
+	    if( myid == 0){
+	      //free( irn_loc );
+	      //free( jcn_loc );
+	      //free( a_loc );
+	      free( nz_loc_procs );
+	      free( fst_nz_procs );
+	      free( irn_g );
+	      free( jcn_g );
+	      free( a_g );
+	    }
+	   }
+	
+	  
+	  if( PAR == 1 ){ 
+	    int *nz_loc_procs;
+	    int *fst_nz_procs;
+	    int *irn_g;
+	    int *jcn_g;
+	    double *a_g;
+	    int commSize;
 	    
+	    MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    
+	    if(myid==0){
+	      // allocation des differents tableaux
+	      nz_loc_procs = (int*) malloc ( commSize*sizeof(int) );
+	      for(int ii=0; ii<commSize; ii++){
+		nz_loc_procs[ii]=0;
+	      }
+	      for(int ii=0; ii<nz; ii++){
+		nz_loc_procs[ id.mapping[ii] ]++;
+	      }
+	      
+	      fst_nz_procs = (int*) malloc ( commSize*sizeof(int) );
+	      
+	      fst_nz_procs[0] = 0;
+	      for(int ii=1; ii<commSize; ii++){
+		fst_nz_procs[ii] = fst_nz_procs[ii-1]+nz_loc_procs[ii-1];
+	      }
+	      
+	      irn_g = (int*) malloc(sizeof(int)*nz);
+	      jcn_g = (int*) malloc(sizeof(int)*nz);
+	      a_g   = (double*) malloc(sizeof(double)*nz);
+	      
+	      int *index_p;
+	      index_p = (int*) malloc ( commSize*sizeof(int) );
+	      for(int ii=0; ii<commSize; ii++)
+		index_p[ii] =0;
+	      
+	      for(int ii=0;ii<nz; ii++){	      
+		int jj1 = id.mapping[ii];
+		int jj2 = fst_nz_procs[jj1] + index_p[jj1];
+
+		irn_g[ jj2 ] =  irn[ ii ];
+		jcn_g[ jj2 ] =  jcn[ ii ];
+		a_g  [ jj2 ] = AA.a[ ii ];
+		index_p[jj1]++;
+	      }
+	      free(index_p);
+	      
+	    }
+	    
+	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	    
+	    // allocation des tableaux locaux
 	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
 	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
-	    a_loc    = (double*) malloc(sizeof(double)* nz_loc);
+	    a_loc    = (double*) malloc(sizeof(double)*nz_loc);
 	    
-	    int jj=0.;
-	    for(int ii=0;ii<nz; ii++)
-	      if( mapping[ii] == myid){
-		irn_loc[jj] = irn[ ii ];
-		jcn_loc[jj] = jcn[ ii ];
-		a_loc[jj] = AA.a[ ii ];
-		jj++;
-	      }
-	    assert(jj==nz_loc);
-
-	    free(mapping);
-
+	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    
 	    id.nz_loc = nz_loc;
 	    id.irn_loc = irn_loc;
 	    id.jcn_loc = jcn_loc;
 	    id.a_loc = a_loc;
-
-
-
+	    
+	    
+	    if( myid == 0){
+	      free( nz_loc_procs );
+	      free( fst_nz_procs );
+	      free( irn_g );
+	      free( jcn_g );
+	      free( a_g );
+	    }
 	  }
+	  // version all procs
+// 	    if(myid==0){
+//	    
+// 	    MPI_Bcast( id.mapping, nz, MPI_INT,  0, MPI_COMM_WORLD );
+//    
+// 	    nz_loc=0;
+// 	    for(int ii=0;ii<nz; ii++){
+// 	      if( id.mapping[ii] == myid) nz_loc++;
+// 	    }
+//   
+// 	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
+// 	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
+// 	    a_loc   = (double*) malloc(sizeof(double)*nz_loc);
+//
+// 	    int jj=0;
+// 	    for(int ii=0;ii<nz; ii++)
+// 	      if( id.mapping[ii] == myid){
+// 		irn_loc[jj] = irn[ ii ];
+// 		jcn_loc[jj] = jcn[ ii ];
+// 		a_loc[jj] = AA.a[ ii ];
+// 		jj++;
+// 	      }
+// 	    assert(jj==nz_loc);
+//	    
+// 	    if(PAR==1){
+// 	      id.nz_loc = nz_loc;
+// 	      id.irn_loc = irn_loc;
+// 	      id.jcn_loc = jcn_loc;
+// 	      id.a_loc = a_loc;
+// 	    }
+//	    
+// 	  }
+// 	  else{
+// 	    int *mapping;
+// 	    mapping = (int*) malloc(sizeof(int)*nz);
+// 	    MPI_Bcast( mapping, nz, MPI_INT,  0, MPI_COMM_WORLD );
+// 	    nz_loc=0;
+//
+// 	    for(int ii=0;ii<nz; ii++)
+// 	      if( mapping[ii] == myid) nz_loc++;
+//	    
+// 	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
+// 	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
+// 	    a_loc    = (double*) malloc(sizeof(double)* nz_loc);
+//	    
+// 	    //==============================
+// 	    //    besoin de irn, jcn, AA.a
+// 	    //==============================
+//
+// 	    int jj=0.;
+// 	    for(int ii=0;ii<nz; ii++)
+// 	      if( mapping[ii] == myid){
+// 		irn_loc[jj] = irn[ ii ];  
+// 		jcn_loc[jj] = jcn[ ii ];
+// 		a_loc[jj] = AA.a[ ii ];
+// 		jj++;
+// 	      }
+// 	    assert(jj==nz_loc);
+//
+// 	    free(mapping);
+//
+// 	    id.nz_loc = nz_loc;
+// 	    id.irn_loc = irn_loc;
+// 	    id.jcn_loc = jcn_loc;
+// 	    id.a_loc = a_loc;
+// 	  }
 	 
 	  /* Call the MUMPS package. */
 	  // Factorisation   
@@ -451,18 +678,26 @@ public:
       
 
 	if(id.ICNTL(18) == 2 ){
+	  printf("id.ICNTL(18)==2 not avaible yet \n");
+	  exit(1);
+
 
 	  if(PAR == 0){ 
-	    printf("id.ICNTL(18)==2 pas prevus \n");
+	    printf("id.ICNTL(18)==2 with PAR=0 not available yet \n");
 	    exit(1);
 	    if(myid !=0) {
+	      
+	      //==============================
+	      //    besoin de irn, jcn, AA.a
+	      //==============================
+	      
 	      int commSize;	    
 	      ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
 	      commSize=commSize-1;
 	      int myidpar=myid-1;
-	      int m_loc_fst = AA.m/commSize;
+	      int m_loc_fst = m/commSize;
 	      int m_loc;
-	      if( myidpar == commSize-1 && ( m_loc_fst*commSize != AA.m ) )  
+	      if( myidpar == commSize-1 && ( m_loc_fst*commSize != m ) )  
 		m_loc = m-m_loc_fst*( commSize-1 );
 	      else
 		m_loc = m_loc_fst;
@@ -494,13 +729,15 @@ public:
 	  }
 	  if(PAR == 1){
 
-	    cout << "value of m=" << m << endl;
-	    cout << "value of AA.m=" << AA.m << endl;
+	    //==============================
+	    //    besoin de irn, jcn, AA.a
+	    //==============================
+	      
 	    int commSize;	    
 	    ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
-	    int m_loc_fst = AA.m/commSize;
+	    int m_loc_fst = m/commSize;
 	    int m_loc;
-	    if( myid == commSize-1 && ( m_loc_fst*commSize != AA.m ) )  
+	    if( myid == commSize-1 && ( m_loc_fst*commSize != m ) )  
 	      m_loc = m-m_loc_fst*( commSize-1 );
 	    else
 	      m_loc = m_loc_fst;
@@ -529,13 +766,6 @@ public:
 	    id.jcn_loc = jcn_loc;
 	    id.a_loc = a_loc;
 	    
-// 	    cout << "value of nz_loc=" << nz_loc << endl; 
-// 	    for(int ii=0; ii < nz_loc; ii++){
-// 	     cout << "a_loc[" << ii << "] =" <<  a_loc[ii] << " ";
-// 	     cout << "jcn_loc[" << ii << "] =" <<  jcn_loc[ii] << " ";
-// 	     cout << "irn_loc[" << ii << "] =" <<  irn_loc[ii] << endl;
-// 	    }
-
 	  }
 
 	  /* Call the MUMPS package. */
@@ -573,102 +803,347 @@ public:
 	// Matrice :: distribution bloc continue de lignes :: voir SuperLU 
 	// Attention :: performance ???
 	
+// 	    //==================
+// 	    // pour un proc :
+// 	    // a:     AA.a[fstow]   , ..., AA.a[fstrow+nz_loc-1] 
+// 	    // jcn:   AA.cl[fstrow] , ..., AA.cl[fstrow+nz_loc-1]
+// 	    // irn:   AA.lg[fstrow] , ..., AA.lg[fstrow+m_loc] 
+// 	    //==================
+// 	    // apres reception : 
+// 	    // irn_reel:  
+// 	    //  int jj=0, 
+// 	    //  do ii=0,m_loc-1
+// 	    //      do ii1=irn_donnee[ii],irn_donnee[ii+1]-1
+// 	    //         irn_reel[jj] = fst_row+ii+1;
+// 	    //         jj++
+// 	    //      end do
+// 	    //  end do
+// 	    //=================
 
 	cout <<"id.ICNTL(18) = 3,  PAR="<< PAR << endl;
 
-	 if(PAR == 0){ 
-	    printf("id.ICNTL(18)==2 pas prevus \n");
-	    exit(1);
-	    if(myid !=0) {
-	      int commSize;	    
-	      ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
-	      commSize=commSize-1;
-	      int myidpar=myid-1;
-	      int m_loc_fst;
-	      m_loc_fst= AA.m/commSize;
-	      int m_loc;
-	      if( myidpar == commSize-1 && ( m_loc_fst*commSize != AA.m ) )  
-		m_loc = m-m_loc_fst*( commSize-1 );
-	      else
-		m_loc = m_loc_fst;
-	      
-	      int fst_row;
-	      fst_row= myidpar*m_loc_fst;
-	      nz_loc = AA.lg[fst_row+m_loc]-AA.lg[fst_row];
-	      
-	      // allocation des tableaux
-	      irn_loc = (int*) malloc(sizeof(int)*nz_loc);
-	      jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
-	      a_loc    = (double*) malloc(sizeof(double)* nz_loc);
-	      
-	      int fst_nnz;
-	      fst_nnz = AA.lg[fst_row];
-	      for(int ii=0; ii < nz_loc; ii++){
-		a_loc[ii] = AA.a[fst_nnz+ii];
-		jcn_loc[ii] = AA.cl[fst_nnz+ii]+1;
-	      }
-	      
-	      for(int ii=fst_row; ii< fst_row+m_loc; ii++){
-		for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
-		  irn_loc[ii1-fst_nnz] = ii+1;  
-	      }
-	      
-	      id.nz_loc = nz_loc;
-	      id.irn_loc = irn_loc;
-	      id.jcn_loc = jcn_loc;
-	      id.a_loc = a_loc;
-	    }
-	 }
-	 if(PAR ==1) {
-	   if(verbosity > 10){ 
-	     cout << "avant repar" << endl;
-	     cout << "value of m=" << m << endl;
-	     cout << "value of AA.m=" << AA.m << endl;
-	   }
-	   int commSize;
-	   ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
-	   int m_loc_fst;
-	   m_loc_fst= AA.m/commSize;
-	   int m_loc;
-	   if( myid == commSize-1 && ( m_loc_fst*commSize != AA.m ) )  
-	     m_loc = m-m_loc_fst*( commSize-1 );
-	   else
-	     m_loc = m_loc_fst;
-	   
-	   int fst_row;
-	   fst_row = myid*m_loc_fst;
-	   nz_loc = AA.lg[fst_row+m_loc]-AA.lg[fst_row];
+	if(PAR == 0){
+	  	  
 	    
-	   // allocation des tableaux
-	   irn_loc = (int*) malloc(sizeof(int)*nz_loc);
-	   jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
-	   a_loc    = (double*) malloc(sizeof(double)* nz_loc);
-	   
-	   int fst_nnz;
-	   fst_nnz= AA.lg[fst_row];
-	   for(int ii=0; ii < nz_loc; ii++){
-	     a_loc[ii] = AA.a[fst_nnz+ii];
-	     jcn_loc[ii] = AA.cl[fst_nnz+ii]+1; 
-	   }
-	   
-	   for(int ii=fst_row; ii< fst_row+m_loc; ii++){
-	     for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
-	       irn_loc[ii1-fst_nnz] = ii+1;  
-	   }
-	   
+// 	  if(myid != 0) {
+// 	    int commSize;	    
+// 	    ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+// 	    commSize=commSize-1;
+// 	    int myidpar=myid-1;
+// 	    int m_loc_fst;
+// 	    m_loc_fst= m/commSize;
+// 	    int m_loc;
+// 	    if( myidpar == commSize-1 && ( m_loc_fst*commSize != m ) )  
+// 	      m_loc = m-m_loc_fst*( commSize-1 );
+// 	    else
+// 	      m_loc = m_loc_fst;
+	    
+// 	    int fst_row;
+// 	    fst_row= myidpar*m_loc_fst;
+// 	    nz_loc = AA.lg[fst_row+m_loc]-AA.lg[fst_row];
+	    
+// 	    // allocation des tableaux
+// 	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
+// 	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
+// 	    a_loc    = (double*) malloc(sizeof(double)* nz_loc);
+	    
+// 	    int fst_nnz;
+// 	    fst_nnz = AA.lg[fst_row];
+// 	    for(int ii=0; ii < nz_loc; ii++){
+// 	      a_loc[ii] = AA.a[fst_nnz+ii];
+// 	      jcn_loc[ii] = AA.cl[fst_nnz+ii]+1;
+// 	    }
+	    
+// 	    for(int ii=fst_row; ii< fst_row+m_loc; ii++){
+// 	      for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
+// 		irn_loc[ii1-fst_nnz] = ii+1;  
+// 	    }
+	 
+// 	    id.nz_loc = nz_loc;
+// 	    id.irn_loc = irn_loc;
+// 	    id.jcn_loc = jcn_loc;
+// 	    id.a_loc = a_loc;
+// 	  }
 
-// 	   for(int ii=0; ii < nz_loc; ii++){
-// 	     cout << "a_loc[" << ii << "] =" <<  a_loc[ii] << " ";
-// 	     cout << "jcn_loc[" << ii << "] =" <<  jcn_loc[ii] << " ";
-// 	     cout << "irn_loc[" << ii << "] =" <<  irn_loc[ii] << endl;
-// 	   }
-	   
 
-	   id.nz_loc = nz_loc;
-	   id.irn_loc = irn_loc;
-	   id.jcn_loc = jcn_loc;
-	   id.a_loc = a_loc;
-	 }
+	  // definition de variables
+	  int commSize;
+	  int m_loc_fst;	 
+	  int m_loc;
+	  int fst_row;
+	  
+
+	  int *nz_loc_procs;
+	  int *fst_nz_procs;
+	  int *m_loc_procs;
+	  int *fst_row_procs;
+	 
+
+	  double *tab_a;
+	  int *tab_cl;
+	  int *tab_lg;
+	  int *tab_lg_loc;
+
+	  MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	  
+	  if( myid !=0){
+	    int commSizemm;
+	    int myidpar=myid-1;
+
+	    commSizemm = commSize-1;
+	    m_loc_fst= m/commSizemm;
+	  
+	    if( myidpar == commSizemm-1 && ( m_loc_fst*commSizemm != m ) )  
+	      m_loc = m-m_loc_fst*( commSizemm-1 );
+	    else
+	      m_loc = m_loc_fst;
+	  
+	    if(verbosity > 5){
+	      fst_row = myidpar*m_loc_fst;
+	      cout << "   myid = " << myid << endl;
+	      cout <<"   m_loc = " << m_loc << endl;
+	      cout <<" fst_row = " << fst_row << endl;
+	    }
+
+	  }
+	  if( myid ==0){
+
+	    int commSizemm;
+	    commSizemm = commSize-1;
+	    m_loc_fst= m/commSizemm;
+
+	    fst_row_procs = (int* ) malloc( commSize*sizeof(int) );
+	    m_loc_procs = (int* ) malloc( commSize*sizeof(int) );
+	    fst_nz_procs = (int* ) malloc( commSize*sizeof(int) );
+	    nz_loc_procs = (int* ) malloc ( commSize*sizeof(int) );
+	    
+	    
+	    fst_row_procs [0] = 0;
+	    m_loc_procs   [0] = 0;
+
+	    for( int ii= 1; ii<commSize; ii++){
+	      fst_row_procs [ii] = (ii-1)*m_loc_fst;
+	      m_loc_procs [ii] = m_loc_fst;
+	    }
+	    
+	    if( m_loc_fst*(commSize-1) != m ) 
+	      m_loc_procs [commSize-1] = m-m_loc_fst*( (commSize-1)-1 );
+
+
+	    nz_loc_procs [0] = 0;
+	    fst_nz_procs [0] = 0;
+	    
+	    for( int ii= 1; ii<commSize; ii++){
+	      nz_loc_procs [ii] = AA.lg[fst_row_procs[ii]+m_loc_procs[ii] ] - AA.lg[fst_row_procs[ii]];
+	      fst_nz_procs [ii] = AA.lg[fst_row_procs[ii]];
+	    }
+
+	   
+	    /*
+	      tab_a= (int* ) malloc( nz*sizeof(double) );
+	      tab_cl = (int* ) malloc( nz*sizeof(int) );
+	      tab_lg = (int* ) malloc ( n*sizeof(int) );
+	    */
+	    tab_a  = AA.a;
+	    tab_cl = AA.cl;
+	    tab_lg = AA.lg;
+	  }
+
+	  MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatter( m_loc_procs,  1, MPI_INT, &m_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatter( fst_row_procs,  1, MPI_INT, &fst_row, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+	  if(verbosity > 5){
+	    cout << "after scatter " << myid << endl;
+	    cout << "   myid = " << myid << endl;
+	    cout <<"   m_loc = " << m_loc << endl;
+	    cout <<" fst_row = " << fst_row << endl;
+	  }
+	  // allocation des tableaux locaux
+	  irn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	  jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	  a_loc    = (double*) malloc(sizeof(double)*nz_loc);
+	  tab_lg_loc = (int*) malloc(sizeof(int)*(m_loc) );
+	  
+	
+
+	  MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	  MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	  
+	
+	  int jj=0;
+	  for(int  ii=0; ii<m_loc-1; ii++)
+	    for(int ii1= tab_lg_loc[ii]; ii1 < tab_lg_loc[ii+1]; ii1++){
+	      irn_loc[jj] = fst_row+ii+1;
+	      jj++;
+	    }
+	  
+	  for(int ii1= tab_lg_loc[m_loc-1]; ii1 < tab_lg_loc[0]+nz_loc; ii1++){
+	    irn_loc[jj] = fst_row+(m_loc-1)+1;
+	    jj++;
+	  }
+	  
+	  for(int ii=0; ii < nz_loc; ii++){	    
+	    jcn_loc[ii] = jcn_loc[ii]+1; 
+	  }
+
+	  assert( jj == nz_loc );
+	  
+	  free( tab_lg_loc );
+	  
+	  id.nz_loc = nz_loc;
+	  id.irn_loc = irn_loc;
+	  id.jcn_loc = jcn_loc;
+	  id.a_loc = a_loc;
+	 
+	  if( myid == 0 ){
+	    free( fst_row_procs );
+	    free( m_loc_procs );
+	    free( fst_nz_procs );
+	    free( nz_loc_procs );
+	  }
+
+	}
+	if(PAR ==1) {
+	  /*
+	    int commSize;
+	    ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    int m_loc_fst;
+	    m_loc_fst= m/commSize;
+	    int m_loc;
+	    if( myid == commSize-1 && ( m_loc_fst*commSize != m ) )  
+	    m_loc = m-m_loc_fst*( commSize-1 );
+	    else
+	    m_loc = m_loc_fst;	  
+	    
+	    int fst_row;
+	    fst_row = myid*m_loc_fst;
+	    
+	    nz_loc = AA.lg[fst_row+m_loc]-AA.lg[fst_row];
+	    
+	    // allocation des tableaux
+	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	    a_loc    = (double*) malloc(sizeof(double)* nz_loc);
+	    
+	    int fst_nnz;
+	    fst_nnz= AA.lg[fst_row];
+	    for(int ii=0; ii < nz_loc; ii++){
+	    a_loc[ii] = AA.a[fst_nnz+ii];
+	    jcn_loc[ii] = AA.cl[fst_nnz+ii]+1; 
+	    }
+	  
+	    for(int ii=fst_row; ii< fst_row+m_loc; ii++){
+	    for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++)
+	    irn_loc[ii1-fst_nnz] = ii+1;  
+	    }
+	    
+	  */
+
+	  // definition de variables
+	  int commSize;
+	  int m_loc_fst;	 
+	  int m_loc;
+	  int fst_row;
+	  
+
+	  int *nz_loc_procs;
+	  int *fst_nz_procs;
+	  int *m_loc_procs;
+	  int *fst_row_procs;
+	 
+
+	  double *tab_a;
+	  int *tab_cl;
+	  int *tab_lg;
+	  int *tab_lg_loc;
+
+	  MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	  m_loc_fst= m/commSize;
+	  
+	  if( myid == commSize-1 && ( m_loc_fst*commSize != m ) )  
+	    m_loc = m-m_loc_fst*( commSize-1 );
+	  else
+	    m_loc = m_loc_fst;	  
+	  
+	  fst_row = myid*m_loc_fst;
+	  
+	  if( myid ==0){
+	    fst_row_procs = (int* ) malloc( commSize*sizeof(int) );
+	    m_loc_procs = (int* ) malloc( commSize*sizeof(int) );
+	    fst_nz_procs = (int* ) malloc( commSize*sizeof(int) );
+	    nz_loc_procs = (int* ) malloc ( commSize*sizeof(int) );
+
+	    for( int ii= 0; ii<commSize; ii++){
+	      fst_row_procs [ii] = ii*m_loc_fst;
+	      m_loc_procs [ii] = m_loc_fst;
+	    }
+	    
+	    if( m_loc_fst*commSize != m ) 
+	      m_loc_procs [commSize-1] = m-m_loc_fst*( commSize-1 );
+	    
+	    for( int ii= 0; ii<commSize; ii++){
+	      nz_loc_procs [ii] = AA.lg[fst_row_procs[ii]+m_loc_procs[ii] ] - AA.lg[fst_row_procs[ii]];
+	      fst_nz_procs [ii] = AA.lg[fst_row_procs[ii]];
+	    }
+
+	   
+	    /*
+	      tab_a= (int* ) malloc( nz*sizeof(double) );
+	      tab_cl = (int* ) malloc( nz*sizeof(int) );
+	      tab_lg = (int* ) malloc ( n*sizeof(int) );
+	    */
+	    tab_a  = AA.a;
+	    tab_cl = AA.cl;
+	    tab_lg = AA.lg;
+	  }
+
+	  MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	  cout << "nz_loc("<<myid<<")="<< nz_loc << endl;
+	  cout << "m_loc("<<myid<<")="<< m_loc << endl;
+	  // allocation des tableaux locaux
+	  irn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	  jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	  a_loc    = (double*) malloc(sizeof(double)*nz_loc);
+	  tab_lg_loc = (int*) malloc(sizeof(int)*(m_loc) );
+	
+	  MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	  MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	
+	  int jj=0;
+	  for(int  ii=0; ii<m_loc-1; ii++)
+	    for(int ii1= tab_lg_loc[ii]; ii1 < tab_lg_loc[ii+1]; ii1++){
+	      irn_loc[jj] = fst_row+ii+1;
+	      jj++;
+	    }
+	  
+	  for(int ii1= tab_lg_loc[m_loc-1]; ii1 < tab_lg_loc[0]+nz_loc; ii1++){
+	    irn_loc[jj] = fst_row+(m_loc-1)+1;
+	    jj++;
+	  }
+	  
+	  for(int ii=0; ii < nz_loc; ii++){	    
+	    jcn_loc[ii] = jcn_loc[ii]+1; 
+	  }
+
+	  assert( jj == nz_loc );
+	  
+	  free( tab_lg_loc );
+	  
+	  id.nz_loc = nz_loc;
+	  id.irn_loc = irn_loc;
+	  id.jcn_loc = jcn_loc;
+	  id.a_loc = a_loc;
+	 
+	  if( myid == 0 ){
+	    free( fst_row_procs );
+	    free( m_loc_procs );
+	    free( fst_nz_procs );
+	    free( nz_loc_procs );
+	  }
+	}
 	/* Call the MUMPS package. */
 	// Analyse + Factorisation
 	 
@@ -680,8 +1155,6 @@ public:
       }
     
     
-    
-
     // indices des colonnes commence par 1 avec mumps 
     //  et 0 dans freefem ==> renumerotation
     if( jcn != NULL )
@@ -692,13 +1165,9 @@ public:
       free(irn); 
       irn=NULL;
     }
-    if(verbosity){
-      finishtime = clock();
-      timeused= (finishtime-starttime)/(1000 );
-      
-      cout << "Factorisation with MUMPS (rank "<< myid << ") :: " << timeused << " ms" <<endl;
-    }
-   
+
+
+    
     if( verbosity > 0){
     /* information given by mumps*/
     int Rinfo=20;
@@ -715,18 +1184,26 @@ public:
        printf("=====================================================\n");
     }
     }
-//       FILE *pfile=fopen("ffmumps_fileparam2.txt","w");
-//       fprintf(  pfile," %d         /* SYM */\n", SYM);
-//       fprintf(  pfile," %d         /* PAR */\n", PAR);
-//       for(int ii=0; ii<40; ii++)
-// 	fprintf(pfile," %d         /* ICNTL(%d) */\n",id.ICNTL(ii+1),ii+1); 
-//       fclose(pfile);
+    
+    if( verbosity)
+      if(myid==0){
+	finishtime = clock();
+	timeused= (finishtime-starttime)/(1000 );
+	printf("=====================================================\n");
+	cout << "MUMPS : time factorisation  :: " << timeused << " ms" <<endl;
+	printf("=====================================================\n");
+      }
+
 
   }
   void Solver(const MatriceMorse<double> &AA,KN_<double> &x,const KN_<double> &b) const  {
-	
+    long int starttime,finishtime;
+    long int timeused;
+    /////////////////////////////
     double *rhs;
     int job;
+
+    if(verbosity) starttime = clock();
     
     ffassert ( &x[0] != &b[0]);
     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
@@ -738,12 +1215,12 @@ public:
 	jcn[ii] = jcn[ii]+1;
    
 
-    if ( !(rhs = (double*) malloc(sizeof(double)*AA.m) ) ){
+    if ( !(rhs = (double*) malloc(sizeof(double)*m) ) ){
       printf("Pb allocate rhs in MUMPS\n");
       exit(1);
     }
    
-    for(int ii=0; ii<AA.m; ++ii){
+    for(int ii=0; ii<m; ++ii){
       rhs[ii] = b[ii];
     }
 
@@ -757,10 +1234,10 @@ public:
 
     if( myid==0 ){
       x=id.rhs;
-      MPI_Bcast( x, AA.n, MPI_DOUBLE, 0, MPI_COMM_WORLD );
+      MPI_Bcast( x, n, MPI_DOUBLE, 0, MPI_COMM_WORLD );
     }
     else
-      MPI_Bcast( x, AA.n, MPI_DOUBLE, 0, MPI_COMM_WORLD );
+      MPI_Bcast( x, n, MPI_DOUBLE, 0, MPI_COMM_WORLD );
     
     // deallocation de rhs
     free(rhs);
@@ -773,23 +1250,35 @@ public:
     
     if(verbosity) cout << "   x min max " << x.min() << " " <<x.max() << endl;
 
-    if( verbosity > 0){
-    /* information given by mumps*/
-    int Rinfo=20;
-    int Sinfo=40;
-    // in Freefem++ we give only global information
-    if(myid == 0){
-      printf("Global Output Information of MUMPS: RINFOG and INFOG \n");
-      printf("=============  After Solving       ==================\n");
-      for(int ii=0; ii< Rinfo; ii++) 
-	printf( "RINFOG[%d]= %f \n", ii, id.RINFOG(ii+1) );
-      printf("=====================================================\n");
-      for(int ii=0; ii< Sinfo; ii++) 
-	printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
-       printf("=====================================================\n");
-    }
+    
+
+
+    if( verbosity ){
+      /* information given by mumps*/
+      int Rinfo=20;
+      int Sinfo=40;
+      // in Freefem++ we give only global information
+      if(myid == 0){
+	printf("Global Output Information of MUMPS: RINFOG and INFOG \n");
+	printf("=============  After Solving       ==================\n");
+	for(int ii=0; ii< Rinfo; ii++) 
+	  printf( "RINFOG[%d]= %f \n", ii, id.RINFOG(ii+1) );
+	printf("=====================================================\n");
+	for(int ii=0; ii< Sinfo; ii++) 
+	  printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
+	printf("=====================================================\n");
+      }
     }
 
+    if( verbosity ){
+      if(myid==0){
+	finishtime = clock();
+	timeused= (finishtime-starttime)/(1000 );
+	printf("=====================================================\n");
+	cout << "MUMPS : time solve step  :: " << timeused << " ms" <<endl;
+	printf("=====================================================\n");
+      }
+    }
   }
 
   ~dSolveMUMPSmpi() { 
@@ -849,9 +1338,6 @@ class zSolveMUMPSmpi :   public MatriceMorse<Complex>::VirtualSolver   {
   Complex *a_loc;
 
 
-  long int starttime,finishtime;
-  long int timeused;
-  
   static const int JOB_INIT=-1;
   static const int JOB_END=-2;
   static const int USE_COMM_WORLD= -987654;
@@ -873,6 +1359,8 @@ public:
     tgv(ttgv), string_option(param_string), data_option(datafile), perm_r(pperm_r), perm_c(pperm_c), 
     tol_pivot_sym(pivot_sym),tol_pivot(pivot), scale_r(pscale_r), scale_c(pscale_c)
   { 
+    long int starttime,finishtime;
+    long int timeused;
     if(verbosity) starttime = clock();
     int dataint[40];
     double datadouble[15];
@@ -1066,22 +1554,24 @@ public:
 	// ATTENTION 
 	// AA.cl :: indice des colonnes (exacte) et AA.lg :: indice des lignes 
 	// index of row and column by 1
-	jcn = AA.cl;
-	for(int ii=0; ii<nz; ii++)
-	  jcn[ii] = jcn[ii]+1;
-		
-	if( !(irn = (int*) malloc(sizeof(int)*nz)) ){
-	  printf("problem allocation irn ");
-	  exit(1);
-	}
+
+	if(myid == 0) { // uniquement sur le proc 0
+	  jcn = AA.cl;
+	  for(int ii=0; ii<nz; ii++)
+	    jcn[ii] = jcn[ii]+1;
+	  
+	  if( !(irn = (int*) malloc(sizeof(int)*nz)) ){
+	    printf("problem allocation irn ");
+	    exit(1);
+	  }
 	
-	assert(AA.lg[n] == nz);
-	for(int ii=0; ii< n; ii++)
-	  for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
-	    irn[ii1] = ii+1;  
+	  assert(AA.lg[n] == nz);
+	  for(int ii=0; ii< n; ii++)
+	    for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
+	      irn[ii1] = ii+1;  
 
 
-	if (myid == 0) {
+	  //if (myid == 0) { // changement uniquement sur le proc 0
 	  id.irn=irn; id.jcn=jcn;
 	}
 	
@@ -1091,14 +1581,182 @@ public:
 	zmumps_c(&id);
 
 	if(id.ICNTL(18) == 1 ){
+
+	   if( PAR == 0 ){ 
+	    int *nz_loc_procs;
+	    int *fst_nz_procs;
+	    int *irn_g;
+	    int *jcn_g;
+	    Complex *a_g;
+	    int commSize;
+	    
+	    MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    cout << commSize << "commSize" << "nz =" << nz << endl;
+	    if(myid==0){
+	      // allocation des differents tableaux
+	      nz_loc_procs = (int*) malloc ( commSize*sizeof(int) );
+	      for(int ii=0; ii<commSize; ii++){
+		nz_loc_procs[ii]=0;
+	      }
+	      for(int ii=0; ii<nz; ii++){
+		nz_loc_procs[ id.mapping[ii] ]++;
+	      }
+	      assert(nz_loc_procs[0] == 0);
+	      nz_loc_procs[0] = 2;
+
+	      fst_nz_procs = (int*) malloc ( commSize*sizeof(int) );	      
+	      fst_nz_procs[0] = 0;
+	      for(int ii=1; ii<commSize; ii++){
+		fst_nz_procs[ii] = fst_nz_procs[ii-1]+nz_loc_procs[ii-1];
+	      }
+	      
+	      irn_g = (int*) malloc( sizeof(int)*(nz+2) );
+	      jcn_g = (int*) malloc( sizeof(int)*(nz+2) );
+	      a_g   = (Complex*) malloc( 2*sizeof(double)*(nz+2) );
+	      
+	      int *index_p;
+	      index_p = (int*) malloc ( commSize*sizeof(int) );
+	      for(int ii=0; ii<commSize; ii++)
+		index_p[ii] =0;
+	      
+	      irn_g[ 0 ] = 1;
+	      jcn_g[ 0 ] = 1;
+	      a_g  [ 0 ] = 1.;
+	      
+	      irn_g[ 1 ] = 1;
+	      jcn_g[ 1 ] = 1;
+	      a_g  [ 1 ] = 1.;
+	      
+	      for(int ii=0;ii<nz; ii++){	      
+		int jj1 = id.mapping[ii];
+		int jj2 = fst_nz_procs[jj1] + index_p[jj1];
+		assert(jj2 > 1);
+		irn_g[ jj2 ] =  irn[ ii ];
+		jcn_g[ jj2 ] =  jcn[ ii ];
+		a_g  [ jj2 ] = AA.a[ ii ];
+		cout << "jj2= " << jj2 << endl;
+		assert( jj2 < nz+2);
+		index_p[jj1]++;
+	      }
+	      free(index_p);
+	      
+	    }
+	    
+	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	    
+	    // allocation des tableaux locaux
+	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	    a_loc    = (Complex*) malloc(2*sizeof(double)*nz_loc);
+	    
+	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    	    
+	    if( myid > 0){
+	      id.nz_loc = nz_loc;
+	      id.irn_loc = irn_loc;
+	      id.jcn_loc = jcn_loc;
+	      id.a_loc = mumps_dc(a_loc);
+	    }
+	    
+	    if( myid == 0){
+	      //free( irn_loc );
+	      //free( jcn_loc );
+	      //free( a_loc );
+	      free( nz_loc_procs );
+	      free( fst_nz_procs );
+	      free( irn_g );
+	      free( jcn_g );
+	      free( a_g );
+	    }
+	   }
+	
+	  
+	  if( PAR == 1 ){ 
+	    int *nz_loc_procs;
+	    int *fst_nz_procs;
+	    int *irn_g;
+	    int *jcn_g;
+	    Complex *a_g;
+	    int commSize;
+	    
+	    MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    
+	    if(myid==0){
+	      // allocation des differents tableaux
+	      nz_loc_procs = (int*) malloc ( commSize*sizeof(int) );
+	      for(int ii=0; ii<commSize; ii++){
+		nz_loc_procs[ii]=0;
+	      }
+	      for(int ii=0; ii<nz; ii++){
+		nz_loc_procs[ id.mapping[ii] ]++;
+	      }
+	      
+	      fst_nz_procs = (int*) malloc ( commSize*sizeof(int) );
+	      
+	      fst_nz_procs[0] = 0;
+	      for(int ii=1; ii<commSize; ii++){
+		fst_nz_procs[ii] = fst_nz_procs[ii-1]+nz_loc_procs[ii-1];
+	      }
+	      
+	      irn_g = (int*) malloc(sizeof(int)*nz);
+	      jcn_g = (int*) malloc(sizeof(int)*nz);
+	      a_g   = (Complex*) malloc(2*sizeof(double)*nz);
+	      
+	      int *index_p;
+	      index_p = (int*) malloc ( commSize*sizeof(int) );
+	      for(int ii=0; ii<commSize; ii++)
+		index_p[ii] =0;
+	      
+	      for(int ii=0;ii<nz; ii++){	      
+		int jj1 = id.mapping[ii];
+		int jj2 = fst_nz_procs[jj1] + index_p[jj1];
+
+		irn_g[ jj2 ] =  irn[ ii ];
+		jcn_g[ jj2 ] =  jcn[ ii ];
+		a_g  [ jj2 ] = AA.a[ ii ];
+		index_p[jj1]++;
+	      }
+	      free(index_p);
+	      
+	    }
+	    
+	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	    
+	    // allocation des tableaux locaux
+	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	    a_loc   = (Complex*) malloc(2*sizeof(double)*nz_loc);
+	    
+	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    
+	    id.nz_loc = nz_loc;
+	    id.irn_loc = irn_loc;
+	    id.jcn_loc = jcn_loc;
+	    id.a_loc = mumps_dc(a_loc);
+	    
+	    
+	    if( myid == 0){
+	      free( nz_loc_procs );
+	      free( fst_nz_procs );
+	      free( irn_g );
+	      free( jcn_g );
+	      free( a_g );
+	    }
+	  }
+
+
+
+
 	  //printf("id.ICNTL(18)==1 pas prevus a construire \n");
 	  //exit(1);
 
-	  
+	  /* // version matrice sur tous les processeurs
 	  if(myid==0){
-// 	    for(int ii=0;ii<nz; ii++){
-// 	      cout << "proc0::  id.mapping["<< ii << "]=" << id.mapping[ii] << endl;
-// 	    }
+
 	    MPI_Bcast( id.mapping, nz, MPI_INT,  0, MPI_COMM_WORLD );
 
 	    nz_loc=0;
@@ -1133,9 +1791,7 @@ public:
 	    mapping = (int*) malloc(sizeof(int)*nz);
 	    MPI_Bcast( mapping, nz, MPI_INT,  0, MPI_COMM_WORLD );
 	    nz_loc=0;
-// 	    for(int ii=0;ii<nz; ii++){
-// 	      cout << "proc 1 id.mapping["<< ii << "]=" << mapping[ii] << endl;
-// 	    }
+
 	    for(int ii=0;ii<nz; ii++)
 	      if( mapping[ii] == myid) nz_loc++;
 	    
@@ -1163,7 +1819,8 @@ public:
 
 
 	  }
-	 
+	  */
+
 	  /* Call the MUMPS package. */
 	  // Factorisation   
 	  id.job=2;
@@ -1173,6 +1830,8 @@ public:
       
 
 	if(id.ICNTL(18) == 2 ){
+	   printf("id.ICNTL(18)==2 not yet available \n");
+	   exit(1);
 
 	  if(PAR == 0){ 
 	    printf("id.ICNTL(18)==2 pas prevus \n");
@@ -1182,9 +1841,9 @@ public:
 	      ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
 	      commSize=commSize-1;
 	      int myidpar=myid-1;
-	      int m_loc_fst = AA.m/commSize;
+	      int m_loc_fst = m/commSize;
 	      int m_loc;
-	      if( myidpar == commSize-1 && ( m_loc_fst*commSize != AA.m ) )  
+	      if( myidpar == commSize-1 && ( m_loc_fst*commSize != m ) )  
 		m_loc = m-m_loc_fst*( commSize-1 );
 	      else
 		m_loc = m_loc_fst;
@@ -1216,13 +1875,11 @@ public:
 	  }
 	  if(PAR == 1){
 
-	    cout << "value of m=" << m << endl;
-	    cout << "value of AA.m=" << AA.m << endl;
 	    int commSize;	    
 	    ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
-	    int m_loc_fst = AA.m/commSize;
+	    int m_loc_fst = m/commSize;
 	    int m_loc;
-	    if( myid == commSize-1 && ( m_loc_fst*commSize != AA.m ) )  
+	    if( myid == commSize-1 && ( m_loc_fst*commSize != m ) )  
 	      m_loc = m-m_loc_fst*( commSize-1 );
 	    else
 	      m_loc = m_loc_fst;
@@ -1292,87 +1949,326 @@ public:
 	cout <<"id.ICNTL(18) = 3,  PAR="<< PAR << endl;
 
 	 if(PAR == 0){ 
-	    if(myid !=0) {
-	      int commSize;	    
-	      ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
-	      commSize=commSize-1;
-	      int myidpar=myid-1;
-	      int m_loc_fst;
-	      m_loc_fst= AA.m/commSize;
-	      int m_loc;
-	      if( myidpar == commSize-1 && ( m_loc_fst*commSize != AA.m ) )  
-		m_loc = m-m_loc_fst*( commSize-1 );
-	      else
-		m_loc = m_loc_fst;
-	      
-	      int fst_row;
-	      fst_row= myidpar*m_loc_fst;
-	      nz_loc = AA.lg[fst_row+m_loc]-AA.lg[fst_row];
-	      
-	      // allocation des tableaux
-	      irn_loc = (int*) malloc(sizeof(int)*nz_loc);
-	      jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
-	      a_loc    = (Complex*) malloc(sizeof(Complex)* nz_loc);
-	      
-	      int fst_nnz;
-	      fst_nnz = AA.lg[fst_row];
-	      for(int ii=0; ii < nz_loc; ii++){
-		a_loc[ii] = AA.a[fst_nnz+ii];
-		jcn_loc[ii] = AA.cl[fst_nnz+ii]+1;
-	      }
-	      
-	      for(int ii=fst_row; ii< fst_row+m_loc; ii++){
-		for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
-		  irn_loc[ii1-fst_nnz] = ii+1;  
-	      }
-	      
-	      id.nz_loc = nz_loc;
-	      id.irn_loc = irn_loc;
-	      id.jcn_loc = jcn_loc;
-	      id.a_loc = mumps_dc(a_loc);
+// 	    if(myid !=0) {
+// 	      int commSize;	    
+// 	      ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+// 	      commSize=commSize-1;
+// 	      int myidpar=myid-1;
+// 	      int m_loc_fst;
+// 	      m_loc_fst= m/commSize;
+// 	      int m_loc;
+// 	      if( myidpar == commSize-1 && ( m_loc_fst*commSize != m ) )  
+// 		m_loc = m-m_loc_fst*( commSize-1 );
+// 	      else
+// 		m_loc = m_loc_fst;
+//	      
+// 	      int fst_row;
+// 	      fst_row= myidpar*m_loc_fst;
+// 	      nz_loc = AA.lg[fst_row+m_loc]-AA.lg[fst_row];
+//	      
+// 	      // allocation des tableaux
+// 	      irn_loc = (int*) malloc(sizeof(int)*nz_loc);
+// 	      jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
+// 	      a_loc    = (Complex*) malloc(sizeof(Complex)* nz_loc);
+//	      
+// 	      int fst_nnz;
+// 	      fst_nnz = AA.lg[fst_row];
+// 	      for(int ii=0; ii < nz_loc; ii++){
+// 		a_loc[ii] = AA.a[fst_nnz+ii];
+// 		jcn_loc[ii] = AA.cl[fst_nnz+ii]+1;
+// 	      }	      
+// 	      for(int ii=fst_row; ii< fst_row+m_loc; ii++){
+// 		for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
+// 		  irn_loc[ii1-fst_nnz] = ii+1;  
+// 	      }	      
+// 	      id.nz_loc = nz_loc;
+// 	      id.irn_loc = irn_loc;
+// 	      id.jcn_loc = jcn_loc;
+// 	      id.a_loc = mumps_dc(a_loc);
+// 	    }
+
+	    // definition de variables
+	  int commSize;
+	  int m_loc_fst;	 
+	  int m_loc;
+	  int fst_row;
+	  
+
+	  int *nz_loc_procs;
+	  int *fst_nz_procs;
+	  int *m_loc_procs;
+	  int *fst_row_procs;
+	 
+
+	  Complex *tab_a;
+	  int *tab_cl;
+	  int *tab_lg;
+	  int *tab_lg_loc;
+
+	  MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	  
+	  if( myid !=0){
+	    int commSizemm;
+	    int myidpar=myid-1;
+
+	    commSizemm = commSize-1;
+	    m_loc_fst= m/commSizemm;
+	  
+	    if( myidpar == commSizemm-1 && ( m_loc_fst*commSizemm != m ) )  
+	      m_loc = m-m_loc_fst*( commSizemm-1 );
+	    else
+	      m_loc = m_loc_fst;
+	  
+	    if(verbosity > 5){
+	      fst_row = myidpar*m_loc_fst;
+	      cout << "   myid = " << myid << endl;
+	      cout <<"   m_loc = " << m_loc << endl;
+	      cout <<" fst_row = " << fst_row << endl;
 	    }
+
+	  }
+	  if( myid ==0){
+
+	    int commSizemm;
+	    commSizemm = commSize-1;
+	    m_loc_fst= m/commSizemm;
+
+	    fst_row_procs = (int* ) malloc( commSize*sizeof(int) );
+	    m_loc_procs = (int* ) malloc( commSize*sizeof(int) );
+	    fst_nz_procs = (int* ) malloc( commSize*sizeof(int) );
+	    nz_loc_procs = (int* ) malloc ( commSize*sizeof(int) );
+	    
+	    
+	    fst_row_procs [0] = 0;
+	    m_loc_procs   [0] = 0;
+
+	    for( int ii= 1; ii<commSize; ii++){
+	      fst_row_procs [ii] = (ii-1)*m_loc_fst;
+	      m_loc_procs [ii] = m_loc_fst;
+	    }
+	    
+	    if( m_loc_fst*(commSize-1) != m ) 
+	      m_loc_procs [commSize-1] = m-m_loc_fst*( (commSize-1)-1 );
+
+
+	    nz_loc_procs [0] = 0;
+	    fst_nz_procs [0] = 0;
+	    
+	    for( int ii= 1; ii<commSize; ii++){
+	      nz_loc_procs [ii] = AA.lg[fst_row_procs[ii]+m_loc_procs[ii] ] - AA.lg[fst_row_procs[ii]];
+	      fst_nz_procs [ii] = AA.lg[fst_row_procs[ii]];
+	    }
+
+	   
+	    /*
+	      tab_a= (int* ) malloc( nz*sizeof(double) );
+	      tab_cl = (int* ) malloc( nz*sizeof(int) );
+	      tab_lg = (int* ) malloc ( n*sizeof(int) );
+	    */
+	    tab_a  = AA.a;
+	    tab_cl = AA.cl;
+	    tab_lg = AA.lg;
+	  }
+
+	  MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatter( m_loc_procs,  1, MPI_INT, &m_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatter( fst_row_procs,  1, MPI_INT, &fst_row, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+	  if(verbosity > 5){
+	    cout << "after scatter " << myid << endl;
+	    cout << "   myid = " << myid << endl;
+	    cout <<"   m_loc = " << m_loc << endl;
+	    cout <<" fst_row = " << fst_row << endl;
+	  }
+	  // allocation des tableaux locaux
+	  irn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	  jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
+	  a_loc    = (Complex*) malloc(2*sizeof(double)*nz_loc);
+	  tab_lg_loc = (int*) malloc(sizeof(int)*(m_loc) );
+	  
+	
+
+	  MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
+	  MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	  
+	
+	  int jj=0;
+	  for(int  ii=0; ii<m_loc-1; ii++)
+	    for(int ii1= tab_lg_loc[ii]; ii1 < tab_lg_loc[ii+1]; ii1++){
+	      irn_loc[jj] = fst_row+ii+1;
+	      jj++;
+	    }
+	  
+	  for(int ii1= tab_lg_loc[m_loc-1]; ii1 < tab_lg_loc[0]+nz_loc; ii1++){
+	    irn_loc[jj] = fst_row+(m_loc-1)+1;
+	    jj++;
+	  }
+	  
+	  for(int ii=0; ii < nz_loc; ii++){	    
+	    jcn_loc[ii] = jcn_loc[ii]+1; 
+	  }
+
+	  assert( jj == nz_loc );
+	  
+	  free( tab_lg_loc );
+	  
+	  id.nz_loc = nz_loc;
+	  id.irn_loc = irn_loc;
+	  id.jcn_loc = jcn_loc;
+	  id.a_loc = mumps_dc(a_loc);
+	 
+	  if( myid == 0 ){
+	    free( fst_row_procs );
+	    free( m_loc_procs );
+	    free( fst_nz_procs );
+	    free( nz_loc_procs );
+	  }
+	   
+
 	 }
 	 if(PAR ==1) {
-	   if(verbosity > 10){ 
-	     cout << "avant repar" << endl;
-	     cout << "value of m=" << m << endl;
-	     cout << "value of AA.m=" << AA.m << endl;
-	   }
+	  
+	   
+// 	   int commSize;
+// 	   ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+// 	   int m_loc_fst;
+// 	   m_loc_fst= m/commSize;
+// 	   int m_loc;
+// 	   if( myid == commSize-1 && ( m_loc_fst*commSize != m ) )  
+// 	     m_loc = m-m_loc_fst*( commSize-1 );
+// 	   else
+// 	     m_loc = m_loc_fst;
+//	   
+// 	   int fst_row;
+// 	   fst_row = myid*m_loc_fst;
+// 	   nz_loc = AA.lg[fst_row+m_loc]-AA.lg[fst_row];
+//	    
+// 	   allocation des tableaux
+// 	   irn_loc = (int*) malloc(sizeof(int)*nz_loc);
+// 	   jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
+// 	   a_loc    = (Complex*) malloc(sizeof(Complex)*nz_loc);
+//	   
+// 	   int fst_nnz;
+// 	   fst_nnz= AA.lg[fst_row];
+// 	   for(int ii=0; ii < nz_loc; ii++){
+// 	     a_loc[ii] = AA.a[fst_nnz+ii];
+// 	     jcn_loc[ii] = AA.cl[fst_nnz+ii]+1; 
+// 	   }
+//   
+// 	   for(int ii=fst_row; ii< fst_row+m_loc; ii++){
+// 	     for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
+// 	       irn_loc[ii1-fst_nnz] = ii+1;  
+// 	   }
+//	   
+// 	   id.nz_loc = nz_loc;
+// 	   id.irn_loc = irn_loc;
+// 	   id.jcn_loc = jcn_loc;
+// 	   id.a_loc = mumps_dc(a_loc);
+
+	   // definition de variables
 	   int commSize;
-	   ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
-	   int m_loc_fst;
-	   m_loc_fst= AA.m/commSize;
+	   int m_loc_fst;	 
 	   int m_loc;
-	   if( myid == commSize-1 && ( m_loc_fst*commSize != AA.m ) )  
+	   int fst_row;
+	   
+
+	   int *nz_loc_procs;
+	   int *fst_nz_procs;
+	   int *m_loc_procs;
+	   int *fst_row_procs;
+	   
+	   
+	   Complex *tab_a;
+	   int *tab_cl;
+	   int *tab_lg;
+	   int *tab_lg_loc;
+	   
+	   MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	   m_loc_fst= m/commSize;
+	   
+	   if( myid == commSize-1 && ( m_loc_fst*commSize != m ) )  
 	     m_loc = m-m_loc_fst*( commSize-1 );
 	   else
-	     m_loc = m_loc_fst;
+	     m_loc = m_loc_fst;	  
 	   
-	   int fst_row;
 	   fst_row = myid*m_loc_fst;
-	   nz_loc = AA.lg[fst_row+m_loc]-AA.lg[fst_row];
-	    
-	   // allocation des tableaux
+	   
+	   if( myid ==0){
+	     fst_row_procs = (int* ) malloc( commSize*sizeof(int) );
+	     m_loc_procs = (int* ) malloc( commSize*sizeof(int) );
+	     fst_nz_procs = (int* ) malloc( commSize*sizeof(int) );
+	     nz_loc_procs = (int* ) malloc ( commSize*sizeof(int) );
+
+	     for( int ii= 0; ii<commSize; ii++){
+	       fst_row_procs [ii] = ii*m_loc_fst;
+	       m_loc_procs [ii] = m_loc_fst;
+	     }
+	     
+	     if( m_loc_fst*commSize != m ) 
+	       m_loc_procs [commSize-1] = m-m_loc_fst*( commSize-1 );
+	     
+	     for( int ii= 0; ii<commSize; ii++){
+	       nz_loc_procs [ii] = AA.lg[fst_row_procs[ii]+m_loc_procs[ii] ] - AA.lg[fst_row_procs[ii]];
+	       fst_nz_procs [ii] = AA.lg[fst_row_procs[ii]];
+	     }
+	     
+	     
+	     /*
+	       tab_a= (int* ) malloc( nz*sizeof(double) );
+	       tab_cl = (int* ) malloc( nz*sizeof(int) );
+	       tab_lg = (int* ) malloc ( n*sizeof(int) );
+	     */
+	     tab_a  = AA.a;
+	     tab_cl = AA.cl;
+	     tab_lg = AA.lg;
+	   }
+	   
+	   MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	  
+	   // allocation des tableaux locaux
 	   irn_loc = (int*) malloc(sizeof(int)*nz_loc);
 	   jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
-	   a_loc    = (Complex*) malloc(sizeof(Complex)*nz_loc);
+	   a_loc    = (Complex*) malloc(2*sizeof(double)*nz_loc);
+	   tab_lg_loc = (int*) malloc(sizeof(int)*(m_loc) );
 	   
-	   int fst_nnz;
-	   fst_nnz= AA.lg[fst_row];
-	   for(int ii=0; ii < nz_loc; ii++){
-	     a_loc[ii] = AA.a[fst_nnz+ii];
-	     jcn_loc[ii] = AA.cl[fst_nnz+ii]+1; 
+	   MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
+	   MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	   MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	
+	   int jj=0;
+	   for(int  ii=0; ii<m_loc-1; ii++)
+	     for(int ii1= tab_lg_loc[ii]; ii1 < tab_lg_loc[ii+1]; ii1++){
+	       irn_loc[jj] = fst_row+ii+1;
+	      jj++;
+	     }
+	   
+	   for(int ii1= tab_lg_loc[m_loc-1]; ii1 < tab_lg_loc[0]+nz_loc; ii1++){
+	     irn_loc[jj] = fst_row+(m_loc-1)+1;
+	     jj++;
 	   }
 	   
-	   for(int ii=fst_row; ii< fst_row+m_loc; ii++){
-	     for(int ii1=AA.lg[ii]; ii1 < AA.lg[ii+1]; ii1++ )
-	       irn_loc[ii1-fst_nnz] = ii+1;  
+	   for(int ii=0; ii < nz_loc; ii++){	    
+	     jcn_loc[ii] = jcn_loc[ii]+1; 
 	   }
 	   
-	   id.nz_loc = nz_loc;
+	   assert( jj == nz_loc );
+	   
+	   free( tab_lg_loc );
+	   
+	   id.nz_loc  = nz_loc;
 	   id.irn_loc = irn_loc;
 	   id.jcn_loc = jcn_loc;
 	   id.a_loc = mumps_dc(a_loc);
+	 
+	   if( myid == 0 ){
+	     free( fst_row_procs );
+	     free( m_loc_procs );
+	     free( fst_nz_procs );
+	     free( nz_loc_procs );
+	   }
+	   
+
 	 }
 	/* Call the MUMPS package. */
 	// Analyse + Factorisation
@@ -1394,15 +2290,9 @@ public:
 	jcn[ii] = jcn[ii]-1;
 
     if( irn != NULL ) free(irn); 
+ 
 
-    if(verbosity){
-      finishtime = clock();
-      timeused= (finishtime-starttime)/(1000 );
-      
-      cout << "Factorisation with MUMPS (rank "<< myid << ") :: " << timeused << " ms" <<endl;
-    }
-
-    if( verbosity > 0){
+    if( verbosity ){
       /* information given by mumps*/
       int Rinfo=20;
       int Sinfo=40;
@@ -1417,17 +2307,30 @@ public:
 	  printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
 	printf("=====================================================\n");
       }
+
+      if(myid==0){
+	finishtime = clock();
+	timeused= (finishtime-starttime)/(1000 );
+	printf("=====================================================\n");
+	cout << "MUMPS : time factorisation :: " << timeused << " ms" <<endl;
+	printf("=====================================================\n");
+      }
+
     }
         
   
   }
 
   void Solver(const MatriceMorse<Complex> &AA,KN_<Complex> &x,const KN_<Complex> &b) const  {
+    long int starttime,finishtime;
+    long int timeused;
     //*******************************************************************//
     //    depend pas de la forme de la matrice: distribuer ou assembler
     Complex *rhs;
     int job;
     
+    if(verbosity) starttime = clock();
+
     ffassert ( &x[0] != &b[0]);
     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
   
@@ -1437,12 +2340,12 @@ public:
       for(int ii=0; ii<nz; ii++)
 	jcn[ii] = jcn[ii]+1;
     
-    if ( !(rhs = (Complex*) malloc(sizeof(Complex)*AA.m) ) ){
+    if ( !(rhs = (Complex*) malloc(sizeof(Complex)*m) ) ){
       printf("Pb allocate rhs in MUMPS\n");
       exit(1);
     }
    
-    for(int ii=0; ii<AA.m; ++ii){
+    for(int ii=0; ii<m; ++ii){
       rhs[ii] = b[ii];
     }
 
@@ -1456,10 +2359,10 @@ public:
    
     if( myid==0 ){
       x=inv_mumps_dc(id.rhs); 
-      MPI_Bcast( x,  AA.n, MPI_DOUBLE_COMPLEX,  0, MPI_COMM_WORLD );
+      MPI_Bcast( x,  n, MPI_DOUBLE_COMPLEX,  0, MPI_COMM_WORLD );
     }
     else
-      MPI_Bcast( x,  AA.n, MPI_DOUBLE_COMPLEX,  0, MPI_COMM_WORLD );
+      MPI_Bcast( x,  n, MPI_DOUBLE_COMPLEX,  0, MPI_COMM_WORLD );
     
   
     
@@ -1472,24 +2375,33 @@ public:
       for(int ii=0; ii<nz; ii++)
 	jcn[ii] = jcn[ii]-1;
 
-      if( verbosity > 0){
-    /* information given by mumps*/
-    int Rinfo=20;
-    int Sinfo=40;
-    // in Freefem++ we give only global information
-    if(myid == 0){
-      printf("Global Output Information of MUMPS: RINFOG and INFOG \n");
-      printf("=============  After Solving       ==================\n");
-      for(int ii=0; ii< Rinfo; ii++) 
-	printf( "RINFOG[%d]= %f \n", ii, id.RINFOG(ii+1) );
-      printf("=====================================================\n");
-      for(int ii=0; ii< Sinfo; ii++) 
-	printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
-       printf("=====================================================\n");
+
+    if( verbosity > 0){
+      /* information given by mumps*/
+      int Rinfo=20;
+      int Sinfo=40;
+      // in Freefem++ we give only global information
+      if(myid == 0){
+	printf("Global Output Information of MUMPS: RINFOG and INFOG \n");
+	printf("=============  After Solving       ==================\n");
+	for(int ii=0; ii< Rinfo; ii++) 
+	  printf( "RINFOG[%d]= %f \n", ii, id.RINFOG(ii+1) );
+	printf("=====================================================\n");
+	for(int ii=0; ii< Sinfo; ii++) 
+	  printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
+	printf("=====================================================\n");
+      }
     }
-    }
+
+    if(verbosity)
+      if(myid==0){
+	finishtime = clock();
+	timeused= (finishtime-starttime)/(1000 );
+	printf("=====================================================\n");
+	cout << " MUMPS : time solve  :: " << timeused << " ms" <<endl;
+	printf("=====================================================\n");
+      }
     
-   
   }
 
   ~zSolveMUMPSmpi() { 

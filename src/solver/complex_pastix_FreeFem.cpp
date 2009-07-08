@@ -292,7 +292,11 @@ public:
     //int m;
     //int ierr;
     struct timeval  tv1, tv2;
-   
+    // time variables
+    long int starttime,finishtime;
+    long int timeused;
+    if(verbosity) starttime = clock();
+
     ia    = NULL;
     ja    = NULL;
     avals   = NULL;
@@ -493,14 +497,25 @@ public:
       ia[ii] = ia[ii]-1;
     for(int ii=0; ii < ia[Ncol]-1; ii++)
       ja[ii] = ja[ii]-1;
+
+    if(myid==0){
+      finishtime = clock();
+      timeused= (finishtime-starttime)/(1000 );
+      printf("=====================================================\n");
+      cout << " pastix : time factorization  :: " << timeused << " ms" <<endl;
+      printf("=====================================================\n");
+    }
+
     
   }
   void Solver(const MatriceMorse<Complex> &AA,KN_<Complex> &x,const KN_<Complex> &b) const  {
   
     struct timeval  tv1, tv2;
-
+    // time variables
+    long int starttime,finishtime;
+    long int timeused;
+    if(verbosity) starttime = clock();
     
-
     // index for pastix    
     for(int ii=0; ii < Ncol+1; ii++)
       ia[ii] = ia[ii]+1;
@@ -564,6 +579,15 @@ public:
       ia[ii] = ia[ii]-1;
     for(int ii=0; ii < ia[Ncol]-1; ii++)
       ja[ii] = ja[ii]-1;
+
+    if(myid==0){
+      finishtime = clock();
+      timeused= (finishtime-starttime)/(1000 );
+      printf("=====================================================\n");
+      cout << " pastix : time solve  :: " << timeused << " ms" <<endl;
+      printf("=====================================================\n");
+    }
+    
     
   }
 

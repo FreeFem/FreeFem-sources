@@ -29,12 +29,6 @@
  ref:ANR-07-CIS7-002-01 
  */
 
-/*
-  Interface freefem++ et SuperLU_DIST_2.3 
-
-  /bin/sh ff-mpic++ dSuperLU_DIST.cpp -I/Users/morice/librairie/SuperLU_DIST_2.3/SRC/ -L/Users/morice/librairie/openmpi/lib/ -lmpi -lopal -lorte -L/Users/morice/librairie/PATCHVECLIB/ -lwrapperdotblas -framework veclib -L/Users/morice/librairie/ParMetis-3.1/ -lparmetis -lmetis -L/Users/morice/librairie/SuperLU_DIST_2.3/lib/ -lsuperlu_dist_2.3
-
-*/
 #include  <iostream>
 using namespace std;
 
@@ -188,7 +182,14 @@ public:
     A.Store=0;
    
     int status;
-   
+    // time variables
+
+    long int starttime,finishtime;
+    long int timeused;
+
+    if(verbosity) starttime = clock();
+
+
     /* Defaults */
     nrhs  = 0;
 
@@ -381,9 +382,9 @@ public:
 	     /* Allocate storage for compressed column representation. */
 	     dallocateA_dist(n, nnz, &a, &asub, &xa);
 	     
-	     MPI_Bcast( a, nnz, MPI_DOUBLE, 0, grid.comm );
-	     MPI_Bcast( asub, nnz, mpi_int_t,  0, grid.comm );
-	     MPI_Bcast( xa,   n+1, mpi_int_t,  0, grid.comm );
+	     MPI_Bcast(    a,   nnz, MPI_DOUBLE,  0, grid.comm );
+	     MPI_Bcast( asub,   nnz,  mpi_int_t,  0, grid.comm );
+	     MPI_Bcast(   xa,   n+1,  mpi_int_t,  0, grid.comm );
 
 	   }
 	   
@@ -417,8 +418,12 @@ public:
 	     aloc[ii] = a[fst_nnz+ii];
 	     asubloc[ii] = asub[fst_nnz+ii];
 	   }
-	   
-	   
+
+	   if( iam ){
+	     SUPERLU_FREE( a );
+	     SUPERLU_FREE( asub );
+	     SUPERLU_FREE( xa );
+	   }
 	   Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
 	   
 	   cout << "Debut: Create_CompRowCol_Matrix_dist" <<endl;
@@ -458,8 +463,6 @@ public:
 	   
 	   LUstructInit(m, n, &LUstruct);
 	   
-
-
 	   /* Initialize the statistics variables. */
 	   PStatInit(&stat);
 	   
@@ -498,8 +501,16 @@ public:
 	options.Fact = FACTORED; /* Indicate the factored form of A is supplied. */
 	nrhs=1;
 	SUPERLU_FREE(berr);  	
+      
+	if(iam==0){
+	  finishtime = clock();
+	  timeused= (finishtime-starttime)/(1000 );
+	  printf("=====================================================\n");
+	  cout << "SuperLU_DIST : time factorisation :: " << timeused << " ms" <<endl;
+	  printf("=====================================================\n");
+	}
       }
-    }
+  }
 
   void Solver(const MatriceMorse<R> &AA,KN_<R> &x,const KN_<R> &b) const  {
     R*        B;
@@ -512,7 +523,12 @@ public:
     double         rpg, rcond;
       
     int_t    m_loc,m_loc_fst,fst_row;
-    
+    // time variable
+    long int starttime,finishtime;
+    long int timeused;
+
+    if(verbosity) starttime = clock();
+
     if(n != m) exit(1);
 
     ffassert ( &x[0] != &b[0]);
@@ -647,6 +663,14 @@ public:
       SUPERLU_FREE( berr );
       
       PStatFree(&stat);
+   
+      if(iam==0){
+	finishtime = clock();
+	timeused= (finishtime-starttime)/(1000 );
+	printf("=====================================================\n");
+	cout << "SuperLu_DIST: time solve step :: " << timeused << " ms" <<endl;
+	printf("=====================================================\n");
+      }
     }
   }
     
