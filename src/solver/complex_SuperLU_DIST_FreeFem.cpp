@@ -206,8 +206,12 @@ public:
     R             *aloc;
     int           *asubloc, *xaloc;
     // End Add for distributed matrix
+    
+    // time variables
+    long int starttime,finishtime;
+    long int timeused;
+    if(verbosity) starttime = clock();
 
-  
     A.Store=0;  
     /* Defaults */
     nrhs  = 0;
@@ -261,8 +265,8 @@ public:
 	    
 	    /* transform Row to Col */
 	    // cela coute cher comme fonction //
-	    //dallocateA_dist(n, nnz, &a, &asub, &xa);
-	    //dCompRow_to_CompCol_dist(m,n,nnz,arow,asubrow,xarow,&a,&asub,&xa);
+	    // dallocateA_dist(n, nnz, &a, &asub, &xa);
+	    // dCompRow_to_CompCol_dist(m,n,nnz,arow,asubrow,xarow,&a,&asub,&xa);
 	    
 	    CompRow_to_CompCol_dist(m,n,nnz,AA.a,AA.cl,AA.lg,&a,&asub,&xa);
 	  
@@ -270,10 +274,10 @@ public:
 	    MPI_Bcast( &m,   1,   mpi_int_t,  0, grid.comm );
 	    MPI_Bcast( &n,   1,   mpi_int_t,  0, grid.comm );
 	    MPI_Bcast( &nnz, 1,   mpi_int_t,  0, grid.comm );
+
 	    MPI_Bcast( a,    nnz, SuperLU_MPI_DOUBLE_COMPLEX, 0, grid.comm );
 	    MPI_Bcast( asub, nnz, mpi_int_t,  0, grid.comm );
-	    MPI_Bcast( xa,   n+1, mpi_int_t,  0, grid.comm );
-	    
+	    MPI_Bcast( xa,   n+1, mpi_int_t,  0, grid.comm );	    
 	    
 	  }
 	  else{
@@ -441,6 +445,11 @@ public:
 	     asubloc[ii] = asub[fst_nnz+ii];
 	   }
 	   
+	   if( iam ){
+	     SUPERLU_FREE( a );
+	     SUPERLU_FREE( asub );
+	     SUPERLU_FREE( xa );
+	   }
 	   
 	   Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
 	   
@@ -521,8 +530,17 @@ public:
 	options.Fact = FACTORED; /* Indicate the factored form of A is supplied. */
 	nrhs=1;
 	SUPERLU_FREE(berr);  	
+
+	if(iam==0){
+	  finishtime = clock();
+	  timeused= (finishtime-starttime)/(1000 );
+	  printf("=====================================================\n");
+	  cout << "SuperLU_DIST : time factorisation :: " << timeused << " ms" <<endl;
+	  printf("=====================================================\n");
+	}
+	 
       }
-    }
+  }
 
   void Solver(const MatriceMorse<R> &AA,KN_<R> &x,const KN_<R> &b) const  {
     R*        B;
@@ -536,6 +554,11 @@ public:
       
     int_t    m_loc,m_loc_fst,fst_row;
     
+    // time variables
+    long int starttime,finishtime;
+    long int timeused;
+    if(verbosity) starttime = clock();
+
     if(n != m) exit(1);
 
     ffassert ( &x[0] != &b[0]);
@@ -670,6 +693,15 @@ public:
       SUPERLU_FREE( berr );
       
       PStatFree(&stat);
+
+      if(iam==0){
+	finishtime = clock();
+	timeused= (finishtime-starttime)/(1000 );
+	printf("=====================================================\n");
+	cout << " SuperLU_DIST : time solve  :: " << timeused << " ms" <<endl;
+	printf("=====================================================\n");
+      }
+
     }
   }
     
