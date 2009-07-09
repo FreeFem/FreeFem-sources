@@ -30,10 +30,10 @@ LIBS_FF = libff.dll
 
 
 
-all-local: $(WIN32DLLTARGET) ff-c++
+all-local: $(WIN32DLLTARGET) ff-c++ launchff++.exe
 	-for i in $(LDADD2) ; do case $$i in  *.dll) echo cp -p $$i .; cp -p $$i . ;;	  esac ; done
 	echo done
-win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe
+win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe launchff++.exe
 	echo "on a fini"
 
 libff.dll: $(FFD_OBJ0)  $(FFD_OBJ_AR)  $(FFD_OBJ_AC)  $(FFD_OBJ_AL)  $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o
@@ -54,7 +54,7 @@ cvmsh2.exe:  $(LIBS_FF)
 	g++   -mno-cygwin  -Wl,--enable-auto-import ../bamg/cvmsh2.o  $^ -o $@ 
 drawbdmesh.exe:../std/Pcrgraph.o  ../bamg/drawbdmesh.o $(LIBS_FF)
 	g++   -mno-cygwin -mwindows  -Wl,--enable-auto-import  $^ -o $@ 
-launchff++.exe:lauchff++.cpp
+launchff++.exe:launchff++.cpp
 	g++ -mno-cygwin lauchff++.cpp -o lauchff++.exe
 
 ff-c++:../../examples++-load/load.link.in
