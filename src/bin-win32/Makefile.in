@@ -409,7 +409,7 @@ uninstall-am:
 	pdf-am ps ps-am uninstall uninstall-am
 
 
-all-local: $(WIN32DLLTARGET) ff-c++
+all-local: $(WIN32DLLTARGET) launchff++.exe ff-c++
 	-for i in $(LDADD2) ; do case $$i in  *.dll) echo cp -p $$i .; cp -p $$i . ;;	  esac ; done
 	echo done
 win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe
@@ -430,8 +430,8 @@ cvmsh2.exe:  $(LIBS_FF)
 	g++   -mno-cygwin  -Wl,--enable-auto-import ../bamg/cvmsh2.o  $^ -o $@ 
 drawbdmesh.exe:../std/Pcrgraph.o  ../bamg/drawbdmesh.o $(LIBS_FF)
 	g++   -mno-cygwin -mwindows  -Wl,--enable-auto-import  $^ -o $@ 
-launchff++.exe:lauchff++.cpp 
-	g++ -mno-cygwin lauchff++.cpp -o lauchff++.exe
+launchff++.exe:launchff++.cpp 
+	g++ -mno-cygwin launchff++.cpp -o launchff++.exe
 ff-c++:../../examples++-load/load.link.in
 	../../config.status  --file=ff-c++:$<
 	chmod a+x ff-c++
