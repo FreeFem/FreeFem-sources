@@ -46,15 +46,17 @@ using namespace std;
 #undef MPICH_IGNORE_CXX_SEEK
 #define MPICH_IGNORE_CXX_SEEK
 #include "mpi.h"
-
-#ifdef HAVE_MPICXX_H
-#include <mpicxx.h>
+//  July change of cluster.cica.es parallele compute
+//  where mpicxx.h is wrong and penmpi/ompi/mpi/cxx/mpicxx.h is good !!!
+// F. Hecht 
+#ifdef HAVE_OPENMPI_OMPI_MPI_CXX_MPICXX_H
+#include <openmpi/ompi/mpi/cxx/mpicxx.h>
 #elif HAVE_MPI_CXX_MPICXX_H
 #include <mpi/cxx/mpicxx.h>
 #elif HAVE_OMPI_MPI_CXX_MPICXX_H
 #include <ompi/mpi/cxx/mpicxx.h>
-#elif HAVE_OPENMPI_OMPI_MPI_CXX_MPICXX_H
-#include <openmpi/ompi/mpi/cxx/mpicxx.h>
+#elif HAVE_MPICXX_H
+#include <mpicxx.h>
 #elif  HAVE_MPI___H
 #include <mpi++.h>
 #else

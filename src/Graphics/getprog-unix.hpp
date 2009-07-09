@@ -63,6 +63,8 @@ int getprog(char* fn,int argc, char **argv)
 	noffglut=true;
       else if  (strcmp(argv[i],"-nowait")==0 ) 
 	waitatend=false;
+      else if  (strcmp(argv[i],"-wait")==0 ) 
+	  waitatend=true;
       else if(strcmp(argv[i],"-fglut")==0 && i+1 < argc)
 	{ 
 	  fileglut=argv[++i];
@@ -128,6 +130,7 @@ int getprog(char* fn,int argc, char **argv)
 	   << "        -fglut  filepath  :  the file name of save all plots (replot with ffglut command ) \n"
 	   << "        -glut    command  :  the command name of ffglut  \n"
 	   << "        -nowait           : nowait at the end on window   \n"
+	   << "        -wait             : wait at the end on window   \n"
 	   << "        -nw               :  no ffglut (=> no graphics windows) \n";
       if(noffglut)  cout << " without     default ffglut : " << ffglut << endl;
       else          cout << " with        default ffglut : " << ffglut << endl;
