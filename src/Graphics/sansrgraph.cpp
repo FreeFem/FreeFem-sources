@@ -144,7 +144,7 @@ void myexit(int err) {
   exit(err);}
 
 const char * edpfilenamearg=0;	 	
-bool  waitatend=true;
+bool  waitatend=false;
 
 #ifdef FREEFEM
 #include <fstream.h>
