@@ -2,22 +2,8 @@
 // ---------------------------------------------------------------------
 // $Id$
 
-#include  <iostream>
-#include  <cfloat>
-#include  <cmath>
-using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-using namespace std;  
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#undef  HAVE_LIBUMFPACK
-#include "MatriceCreuse_tpl.hpp"
-#include "MeshPoint.hpp"
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "lgsolver.hpp"
-#include "problem.hpp"
+
+#include "ff++.hpp"
 
 class MatrixUpWind0 :  public E_F0 { public: 
   typedef Matrice_Creuse<R> * Result;
@@ -45,6 +31,35 @@ class MatrixUpWind0 :  public E_F0 { public:
   static  E_F0 * f(const basicAC_F0 & args){ return new MatrixUpWind0(args);} 
   AnyType operator()(Stack s) const ;
   
+};
+
+class MatrixUpWind3 :  public E_F0 { public: 
+    typedef Matrice_Creuse<R> * Result;
+    Expression emat,expTh,expc,expu1,expu2,expu3; 
+    MatrixUpWind3(const basicAC_F0 & args) 
+    {   
+	
+	args.SetNameParam();
+	emat =args[0];
+	expTh= to<pmesh3>(args[1]);
+	expc = CastTo<double>(args[2]);
+	const E_Array * a= dynamic_cast<const E_Array*>((Expression) args[3]);
+	if (a->size() != 3) CompileError("syntax:  MatrixUpWind0(Th,rhi,[u1,u2])");
+	int err =0;
+	expu1= CastTo<double>((*a)[0]);
+	expu2= CastTo<double>((*a)[1]);
+	expu3= CastTo<double>((*a)[2]);
+	
+    }
+    
+    ~MatrixUpWind3() 
+    {  
+    }     
+    
+    static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<Matrice_Creuse<R>*>(),atype<pmesh3>(),atype<double>(),atype<E_Array>());}
+    static  E_F0 * f(const basicAC_F0 & args){ return new MatrixUpWind3(args);} 
+    AnyType operator()(Stack s) const ;
+    
 };
 
 int   gladys(double q[3][2], double u[2],double c[3], double a[3][3] )  //PSI Deconninck
@@ -175,8 +190,69 @@ AnyType MatrixUpWind0::operator()(Stack stack) const
   
   return sparce_mat;  
 }
-
-
+int   Marco(const Mesh3::Element & K, R3 U,R c[4], double a[4][4] )  //PSI Deconninck
+{
+    ExecError("Not Implemented Sorry Marco!");
+}
+AnyType MatrixUpWind3::operator()(Stack stack) const 
+{
+    Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack)); 
+    MatriceMorse<R> * amorse =0; 
+    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+    Mesh3 * pTh = GetAny<pmesh3>((*expTh)(stack));
+    ffassert(pTh);
+    Mesh3 & Th (*pTh);
+  {
+      map< pair<int,int>, R> Aij;
+      KN<double> cc(Th.nv);
+      double infini=DBL_MAX;   
+      cc=infini;
+      for (int it=0;it<Th.nt;it++)
+	  for (int iv=0;iv<4;iv++)
+	    {
+		int i=Th(it,iv);
+		if ( cc[i]==infini) { // if nuset the set 
+		    mp->setP(&Th,it,iv);
+		    cc[i]=GetAny<double>((*expc)(stack));
+		}
+	    }
+      
+      for (int k=0;k<Th.nt;k++)
+	{   
+	    const Mesh3::Element & K(Th[k]); 
+	    const Mesh3::Vertex & A(K[0]), &B(K[1]),&C(K[2]),&D(K[3]);
+	    R3 Pt(1./4.,1./4.,1./4.);
+	    R3 U;
+	    MeshPointStack(stack)->set(Th,K(Pt),Pt,K,K.lab);
+	    U.x = GetAny< R>( (*expu1)(stack) ) ;
+	    U.y = GetAny< R>( (*expu2)(stack) ) ;
+	    U.z = GetAny< R>( (*expu3)(stack) ) ;
+	    
+	    int ii[4] ={  Th(A), Th(B),Th(C),Th(D)};//  number of 4 vertex
+	   
+	    double c[4]={cc[ii[0]],cc[ii[1]],cc[ii[2]],cc[ii[3]]};
+	    double a[4][4];
+	    if (Marco(K,U,c,a) )
+	      {
+		  for (int i=0;i<4;i++)
+		      for (int j=0;j<4;j++)
+			  if (fabs(a[i][j]) >= 1e-30)
+			      Aij[make_pair(ii[i],ii[j])]+=a[i][j];	   
+	      }
+	}
+      amorse=  new MatriceMorse<R>(Th.nv,Th.nv,Aij,false); 
+  }
+    sparce_mat->Uh=UniqueffId();
+    sparce_mat->Vh=UniqueffId();
+    sparce_mat->A.master(amorse);
+    sparce_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+    *mp=mps;
+    
+    if(verbosity>3) { cout << "  End Build MatrixUpWind : " << endl;}
+    
+    return sparce_mat;  
+    
+}
 
 
 
@@ -188,4 +264,5 @@ class Init { public:
    {
      cout << " lood: init Mat Chacon " << endl;
      Global.Add("MatUpWind0","(", new OneOperatorCode<MatrixUpWind0 >( ));
+     Global.Add("MatUpWind0","(", new OneOperatorCode<MatrixUpWind3 >( ));
    }

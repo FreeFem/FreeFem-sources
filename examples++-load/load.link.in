@@ -20,14 +20,21 @@ if [ -z "$INCFF" ] ; then
     elif [ -f '@ff_prefix_dir@/include/ff++.hpp' ] ; then 
 	INCFF='-I@ff_prefix_dir@/include' 
     else
-	echo " erreur PB include freefem++ directory " ;
-	exit 1;
+	ff=`which freefem++.exe`;
+	ffinc=`dirname "$ff"`/examples++-load/include
+	if [ -f "$ffinc/ff++.hpp" ]; then
+	  INCFF=-I"'$ffinc'";
+        else	
+	  echo " erreur PB include freefem++ directory " ;
+	  exit 1;
+	fi
     fi
 fi
 do="yes"
 DEBUG=""
 CONLY="false"
 uu=`uname -s` 
+if [ -z "@WIN32DLLTARGET@" ] ; then uu="win32" ; fi
 INC=""
 LIBS=""
 DLL=""
@@ -80,7 +87,7 @@ while [ $# -ne 0 ]  ; do
 	-g)  DEBUG="$DEBUG $1";;
 	-c)  CONLY=yes;;
 	-O*) DEBUG="$DEBUG $1";;
-	-cygwin)  onwin23=1; uu="cygwin-version";; 
+	-cygwin)  onwin32=1; uu="cygwin-version";; 
 	-win32)   onwin32=1; uu="win32";; 
 	-b)     bin=$2  ; shift;;
 	-I*)    INC="$INC '$1'";;

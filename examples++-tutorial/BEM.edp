@@ -1,0 +1,111 @@
+//  compute the solution of a Laplace operator in a Semi infini domain.
+//  with coupling of Boundary element with periodicity BC in x . 
+//  author:  F. Hecht  in Seville 2009. 
+// -------------------------------------------------------------
+/*
+Let $\Gamma_b$ the straight  border of length $p$ // to x axis. 
+We need to \Red{add border term} in the variational formulation
+\Blue{\begin{equation} 
+\int_{\Omega } \nabla u.\nabla \overline{v} -  \Red{ \int_{\Gamma_b} \, \overline{v}\, dn({u}) } = \int_{\Omega} f \overline{v}, 
+\quad \forall v ..  
+\end{equation} }
+where  $dn$ is the normal derivative 
+
+We  decompose $w^i$ in the orthogonal de Floquet basic on border $\Gamma_b = \{x\in [0,p[, y=0\}$
+$$\Blue{f_n=exp(-2\pi (inx + |n| y)/p )}, \qquad 
+\DarkGreen{  \int_{\Gamma_b} f_n \overline{f_m}= p \delta_{mn}}$$.
+Remark $-\Delta f_n=0 $ , and we  have
+$$\DarkGreen{ w_i = \sum_n c_n^i f_n }
+\quad\mbox{ and by  orthogonality}\quad 
+\DarkGreen{ c_n^i = 1/p \int_{\Gamma_b} w_i\overline{f_m}}$$
+and  \DarkGreen{$dn(f_n)= - g_n f_n$} with   \DarkGreen{$g_n= 2 \pi |n| / p$}
+So we have:
+\Blue{$$ - \int_{\Gamma_b} \overline{w^i} dn({w^j}) ds = p \sum_n g_n \overline{c_n^i}{c_n^j} $$
+*/
+real eps0=1;
+int labup=3, labdown=1;
+int nharm= 50; // Number of  Harmonique
+
+func ug= max(0.,-(x-0.25)*(x-0.75)); // boundary condition.. 
+
+macro Grad(u) [dx(u),dy(u)] // eom
+
+int NNx=100,NNy=1;
+real Xmax=1,Ymax=0.01;
+mesh Th=square(NNx,NNy,[x*Xmax,y*Ymax]); 
+fespace Vh(Th,P1,periodic=[[2,y],[4,y]]);
+
+Vh uref; // la solution de reference. 
+
+{ // calcule de la solution de reference in  Huge Domaine.
+mesh Th1=square(NNx,NNx*10,[x*Xmax,10*Xmax*y]); // pour la solution de reference 
+fespace Uh(Th1,P1,periodic=[[2,y],[4,y]]);
+Uh uu,vv;
+solve Pref(uu,vv)=int2d(Th1)(eps0*(Grad(uu)'*Grad(vv)))+on(labdown,uu=ug);
+ uref=uu; 
+ plot(uu,wait=1,cmm=" ref sol / large Th ");
+} // pour nettoyer la memoire
+
+plot(uref,wait=1,cmm=" ref sol / Th");
+
+
+varf vP(u,v)=int2d(Th)(eps0*(Grad(u)'*Grad(v)))+on(labdown,u=ug);
+varf vF(u,v)=on(labdown,u=ug);
+matrix<complex> A=vP(Vh,Vh);  // la matrice sans BEM. 
+
+complex[int] b=vF(0,Vh);
+Vh<complex> u;
+
+{// for cleanning all local varaible at end of block.
+
+// computation of the matrice BEM
+int lbord = labup; // label of the BEM border
+//  computation of the compressed df  BEM numbering ... 
+//  kdfbem 
+varf vBord(u,v)=int1d(Th,lbord)(v); // to find node on border lbord
+real[int] onbord=vBord(0,Vh); // none zero on  BEM border
+
+int kdfBEM=0;//  compute the number of df on BEM border
+for(int i=0;i<onbord.n;++i )
+   if( onbord(i) ) kdfBEM++;
+  cout << " kdfBEM = " << kdfBEM << endl;
+   
+ int[int] IdfB2Vh(kdfBEM); //  number on Bem to number in Vh.
+ for(int i=0,k=0;i<onbord.n;++i )
+   if( onbord(i) )
+       IdfB2Vh[k++] = i;
+ //  end of the numbering computation
+ // so  IdfB2Vh[ibem] = iVh where ibem is a df of on bem , and iVh is a df in Vh space. 
+   real perio=Xmax;
+   real perio1=1./perio;
+   complex  deuxpiip=2*pi*1i/perio;
+   int n=0;// 
+   // Use of higher order Quadarture formular ...
+   varf vWn(u,w)=int1d(Th,labup,qforder=10)(perio1*exp(-deuxpiip*(n)*x)*w);
+      
+   complex[int] wn=vWn(0,Vh);//  with Vh numbering.. 
+
+   complex[int,int] ABemFull(kdfBEM,kdfBEM);// the full bem matrix in Bem numbering.
+   ABemFull=0;//  set of 0 
+   for ( n=-nharm;n<=nharm;++n)
+    {
+    	complex[int] wwn(kdfBEM);
+    	complex[int] wn=vWn(0,Vh);
+    	wwn=wn(IdfB2Vh);
+        complex Gs=+2.*pi*abs(n*perio1)*eps0;
+    	ABemFull += Gs*wwn*wwn';
+    }
+    
+  //  ABem(IdfB2Vh(ib),IdfB2Vh(jb)) = ABemFull(ib,jb) 
+  matrix<complex> ABem=ABemFull(IdfB2Vh^-1,IdfB2Vh^-1); // Build the sparse BEm matrix
+  A = A + ABem;
+  }// for cleanning all local varaible at end of block. ABem ABemFull
+  set(A,solver=UMFPACK);
+  u[]=A^-1*b;
+  Vh ur=real(u),ui=imag(u);
+  Vh  err=ur-uref;
+  cout << " err Linty=" << err[].linfty << " /  " <<  uref[].linfty << endl; 
+
+  plot(ur,uref,wait=1,cmm="ur + uref ");
+
+    
