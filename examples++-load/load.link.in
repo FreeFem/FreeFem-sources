@@ -34,7 +34,6 @@ do="yes"
 DEBUG=""
 CONLY="false"
 uu=`uname -s` 
-if [ -z "@WIN32DLLTARGET@" ] ; then uu="win32" ; fi
 INC=""
 LIBS=""
 DLL=""
@@ -47,6 +46,11 @@ WIN32="";
 
 case "$uu" in
   CYGWIN*)
+  if [ -z "@WIN32DLLTARGET@" ] ; then 
+      onwin32=1; uu="cygwin-version";
+  else
+      onwin32=1; uu="win32"; # pure windows 
+  fi
   WIN32="win32-"
   wff=`which FreeFem++.exe`
   dff=`dirname "$wff"`
