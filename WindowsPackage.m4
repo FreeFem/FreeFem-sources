@@ -33,6 +33,7 @@ Source: "0ldUserReadMe.txt"; DestDir: "{app}"
 
 ; Programs
 Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
+Source: "src\bin-win32\launchff++.exe"; DestDir: "{app}"
 ;  to day the dll version do not works so we use the static one (FH)
 ;Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
 ;Source: "src\ide\FreeFem++-cs.exe"; DestDir: "{app}"
@@ -93,7 +94,7 @@ Source: "logo.ico"; DestDir: "{app}"
 [Icons]
 
 ; Menu
-Name: "{group}\FreeFem++"; Filename: "{app}\FreeFem++.exe"; IconFilename: "{app}\logo.ico"
+Name: "{group}\FreeFem++"; Filename: "{app}\launchff++.exe"; IconFilename: "{app}\logo.ico"
 ;Name: "{group}\FreeFem++ GUI"; Filename: "{app}\FreeFem++-cs.exe"
 Name: "{group}\PDF manual"; Filename: "{app}\freefem++doc.pdf"
 Name: "{group}\Examples\Tutorial"; Filename: "{app}\examples++-tutorial"
@@ -116,7 +117,7 @@ Name: "{userdesktop}\FreeFem++ VERSION Examples"; Filename: "{group}\Examples"
 Root: HKCR; Subkey: ".edp"; ValueType: string; ValueName: ""; ValueData: "FreeFemVERSIONScript"; Flags: uninsdeletevalue
 Root: HKCR; Subkey: "FreeFemVERSIONScript"; ValueType: string; ValueName: ""; ValueData: "FreeFem++ Script"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "FreeFemVERSIONScript\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\logo.ico"
-Root: HKCR; Subkey: "FreeFemVERSIONScript\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\FreeFem++.exe"" ""%1"""
+Root: HKCR; Subkey: "FreeFemVERSIONScript\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\launchff++.exe"" ""%1"""
 
 
 [Tasks]

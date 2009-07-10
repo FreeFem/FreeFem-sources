@@ -1,5 +1,6 @@
 assert(version>=2.23);
-if ( mpisize != 4 ) 
+
+if ( mpisize  ) 
   {
     cout << " sorry number of processeur !=4 " << endl;
     exit(1);
@@ -30,20 +31,9 @@ int [int] regsd(4);
 if(mpirank==0)
   {
     
-    mesh Thacopy; //hack to dcl Tha ouside of mortar-msh.idp
-    {  
-      include "mortar-msh.idp"  
-	Thacopy=Tha;
-      regsd=regi;
-    }   
-    Tha=Thacopy;
-    cout << "mortar : " << endl;
-    Thm=Tha;
-    Thm=adaptmesh(Thm,meshsizem,IsMetric=1,thetamax=60);
-    Thm=emptymesh(Thm);       Thmm=Thm;
-    Thmm=trunc(Thm,split=4,1); // for fine integration
-    Thmm=emptymesh(Thmm);
-    plot(Thm,wait=0,ps="mortar-Thm.eps");
+    mesh Thacopy=square(NN,NN);
+    
+    
   }
 
 // send meshes 

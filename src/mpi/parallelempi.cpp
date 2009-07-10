@@ -210,8 +210,14 @@ struct MPIrank {
     template<class R>
     const MPIrank & operator>>(KN<R> & a) const {
 	assert(&a);
+	if(verbosity>9)
+	  cout << " ---- " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R> >::TAG 
+	       <<" from " << mpirank << "  "<<  (R *) a << endl;
 	int n= a.N();
 	WRecv((R *) a, n, who, MPI_TAG<KN<R> >::TAG );
+	if(verbosity>9)
+	  cout << " ++++ " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R> >::TAG 
+	       <<" from  " << mpirank << "  "<<  (R *) a << endl;
 	ffassert(a.N()==n);
 	return *this;
     }
@@ -221,6 +227,9 @@ struct MPIrank {
 	const KN<R> & a=*aa;
 	ffassert(&a); 
 	int n= a.N();
+	if(verbosity>9)
+	  cout << " .... " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R> >::TAG 
+	       <<" from  " << mpirank << "  "<<  (R *) a << endl;
 	WSend((R *) a,n,who,MPI_TAG<KN<R> >::TAG);
 	return *this;
     }

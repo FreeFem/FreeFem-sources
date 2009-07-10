@@ -1,5 +1,8 @@
 V 3.4
-    correct in interpolation matrix ( un set variable in cas of save mesh 
+    add in parallel version mpi send, receive and broadcasr of  3d mesh and matrix ( sparse matrix).
+    build a 3d mpi schwatz example (see example++-mpi/schwatz-3.edp)
+    make a wrapper (launchff++.exe)  to launch freefem++ under windows/OS in the edp file directory. 
+    correct in interpolation matrix ( unset variable in case of save mesh 
       => missing some term) 
     in buildInterpolationMatrix add line 651 
      intV= false;// add July 2009 (unset varaible FH)
@@ -10,21 +13,21 @@ V 3.3-2  8 june 2009
   add   2 new finite element:
    Edge03d : the Nedelec 3d  Edge finite elements.
    RT03d : the Raviart-Thomas 3d  finite elements
-   correct the size of anytype for 64 bits achitecture.
+   correct the size of anytype for 64 bits architecture.
    install the new .idp file (include of edp file) in
    directory idp    
 V 3.3-1 1 june 2009
-  to correct the problem of the destruction of parameter in cas: 
+  to correct the problem of the destruction of parameter in case: 
       func real[int]   a2(real[int] a) {a[0]=2; return a;}
    so now the parameter cast to KN_<double> so  the array is not
    duplicate like in C++, and the value of the parameter is change. 
    
-  - simplify the gestion of arrqy now of 2 type
-    KN<> * of varaible (left expression)
+  - simplify the internal (C++)  definition of array now of 2 type
+    KN<> * of variable (left expression)
     and  KN_<> of   right expression 
   - correct UnRef<A,B> where B ~ A*
 v 3.3  29 may 2009
-  -  correct some probleme in return in function :
+  -  correct some problem in return in function :
    the following function prototype now work without memory fault. 
 
     func real[int]   a1(int n)  {real[int] a(n);return a;}
@@ -37,11 +40,11 @@ v 3.3  29 may 2009
   -  in int3d flag qfV=  a 3d quadrature formula
         the 3d quadrature formula are
          qfV1 , qfV1lump, qfV2 , qfV5  (where the number is the ordre of the quadrature)
-  -  correct signe of the normal in 3d (now the normal is exterior)
+  -  correct sign of the normal in 3d (now the normal is exterior)
       -------------------------------------------------------------
-  - correct in adapted mesh the flag splitin2=  (no tested)
+  -  correct in adapted mesh the flag splitin2=  (no tested)
   -  correct the convect operator in 3d 
-  -  add EigenValue tool  for 3d case  mai 15, 2009. 
+  -  add EigenValue tool  for 3d case  May 15, 2009. 
 v 3.2
   - add tools to set array like in matlab/scilab
     real[int] a(1:2:10),  def  a to 1,3,.. 10.
@@ -54,7 +57,7 @@ v 3.2
   - add interface with MUMPS  parallel solver (in progress) 
     http://graal.ens-lyon.fr/MUMPS/
 
-  - renmae  movemesh2D3Dsurf movemesh23 and change named 
+  - rename  movemesh2D3Dsurf in movemesh23 and change named 
      parameter normal= in orientation=
 
   - add periodic boundary in condition like in 2d
@@ -67,11 +70,11 @@ v 3.2
   -  automatic: Finite element name conversion  beetween 2d and 3d
       old : fespace(Th3,P13d);
       new : fespace(Th3,P1); 
-  - add complet rewrite of the way  to set parameter for sparse solver
-    in vue of parallele solver ( no progress)
-  - add --enable-m64 for 64 bit compilalation flags 
+  - add complete rewrite of the way  to set parameter of the sparse solver
+    for  parallel solver ( no progress)
+  - add --enable-m64 for 64 bit compilation flags 
   - correct f2c of  take the -m64 flags 
-  -  build the universal f2c library with 4 achitecture ppc i386 ppc64 x86_64
+  -  build the universal f2c library with 4 architecture ppc i386 ppc64 x86_64
 v 3.1-1
   - add resize of sparse matrix ( only  morse matrix)
   - add  new 3d finite element P1b3d   (P1 bulle 3d) 
@@ -97,14 +100,14 @@ v 3.0-5 (20 jan 2009)
   - automatic compilation of BLAS, suppress the automatic compilation of BLAS atlas (to long) 
   - ffglut improvement 
         - now save 10 graphic states and use "p" key to show previous graphic
-	- do automic z rescale on Z direction the  3d plot 
+	- do automatic z rescale on Z direction the  3d plot 
 v 3.0-4 (05 jan 2009)
   - correct int2d in 3d case: all this integral was multiply by 2. 
   - add 3d viewing in plot (in test)
 v 3.0-3 (27 dec 2008)
   - build a not to bad version 
   - remove so crazy print 
-  - change the ffglut  io with  freefem++  ( to be more universal independant of the achitecture an more universal)
+  - change the ffglut  io with  freefem++  ( to be more universal independant of the architecture an more universal)
     - correct ffglut in case of plot of array and when the plot is empty.
       remark ffglut is not compatible with previous version (sorry)
     the filename create with option w is ffglut_xxxx.ppm (window dump)
@@ -115,7 +118,7 @@ v 3.0-2 ( 9 dec 2008)
   - correct ffmedit (binary read /win32)
   - cosmetic change in ffglut + stabilization
 v 3.0-1 (4 dec 2008)
-  - complety change of the graphic (freefem++ is now the old freefem++-nw ) 
+  - complete change of the graphic (freefem++ is now the old freefem++-nw ) 
       - add  medit (a visualisator software by  P. Frey)  inside freefem++
           with a name ffmedit  
       - suppress the ide version until Antoine Le Hyaric do a good one
