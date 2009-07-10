@@ -111,8 +111,8 @@ while [ $# -ne 0 ]  ; do
     shift
 done
 
-if [ -n "$onwin32" -a -f "$bin/libff.dll" ] ; then 
-    echo " erreur the file libff.dll  must be exist in '$bin' the install directory," 
+if [  -z "$onwin32" -o ! -f "$bin/libff.dll"  ] ; then 
+    echo " Error the file libff.dll  must be exist in '$bin' the install directory," 
     echo " to link on windows OS "
     echo " Use the parameter -b to set the correct install directory " 
     exit 1;
@@ -161,7 +161,7 @@ case "$WIN32$uu" in
 esac
 FLAGS="$FLAGS $DEBUG $FFCXXFLAGS"
 if [ -n "$ffiles$files$fileso" ] ; then
-    if [ "$WIN32" = "yes" -a -f "$bin/libff.dll"  ]; then
+    if [  -z "$WIN32"  -o  ! -f "$bin/libff.dll"  ]; then
 	echo " Sorry, no freefem .dll file (libff.dll)  in $bin dir "
 	echo " try with -b dir-path where the file libff.dll exist"
 	exit 1;
