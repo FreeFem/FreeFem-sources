@@ -33,6 +33,7 @@ struct OnePlot
     Pmn=Minc(Pmin,Pmn);
     Pmx=Maxc(Pmax,Pmx);
     }
+
   void bfv(R & fmn,R &fmx,R & vmx) const 
   { 
     // cout << "\t\t\t\t  f min, max v max :" << fmin << " " << fmax << " " << vmax << endl;
@@ -40,14 +41,17 @@ struct OnePlot
     fmx=Max(fmax,fmx);
     vmx=Max(vmax,vmx);
   }
+
+  virtual void dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const 
+  {//  compute the function bound and arrow bound view ....  
+  }
   
   OnePlot(long w,int ddim=2,int nbgllist=0) :
     dim(ddim),
     Pmin(dinfty,dinfty,dinfty),Pmax(-dinfty,-dinfty,-dinfty),
     fmin(dinfty),fmax(-dinfty),vmax(0),
     what(w),ngllists(nbgllist),gllists(0),
-    oklist(nbgllist),setgllists(0)
-  {
+    oklist(nbgllist),setgllists(0){
   }
   
   void initlist()
@@ -111,7 +115,7 @@ struct OnePlotFE: public OnePlot
     
     OnePlotFE(const Mesh *T,long w,PlotStream & f);
     void Draw(OneWindow *win);
-  
+    void dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const ;
 };
 
 struct OnePlotFE3: public OnePlot 
@@ -210,7 +214,7 @@ class ThePlot { public:
     
     long  Niso,Narrow;
     R3 Pmin,Pmax,PminT,PmaxT;//  with R -> true bound
-    R  fmin,fmax,fminT,fmaxT; // withoiut bound with previous plot. 
+    R  fmin,fmax,fminT,fmaxT; // with  bound with previous plot. 
     R  vmax;
     KN<R> Viso,Varrow;
     bool bw;
@@ -275,10 +279,12 @@ class ThePlot { public:
 	}
       glColor4f(c.r,c.g,c.b,alpha);
     }
-    void  SetColorTable(int nb); 
-    void SetDefIsoV(); 
-    void DrawIsoT(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
-    void DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
+  void  SetColorTable(int nb); 
+  void SetDefIsoV(int niso=0,int narr=0,R fmn=1.,R fmx=-1.,R vmn=1.,R vmx=-1.); 
+  void DrawIsoT(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
+  void DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
+  void dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const ;
+
 }; 
 
 class OneWindow { 
@@ -306,6 +312,8 @@ public:
   R3 Bmin3,Bmax3,Pvue3;
   R3 cam;
   bool withlight;
+  bool changearrow,changeiso;// to rebuild de graphic list if neccessary
+
   //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
   OneWindow(int h,int w,ThePlot *p);
   void DefaultView() ;
@@ -319,6 +327,7 @@ public:
   void Display();
   void resize(int w,int h);
   void zoom(int w,int h,R coef);
+  void zoom(R coef);
   float GetHeigthFont(){return 10;}
     void color(int i,R alpha=1) {theplot->color(i,alpha);}
   void FillRect(R x0,R y0,R x1,R y1);
@@ -331,8 +340,20 @@ public:
   void Seg(R2 A, R2 B) const  { 
     glVertex3d(A.x,A.y,theplot->z0);
     glVertex3d(B.x,B.y,theplot->z0);
-  } 
+  }
+ 
+  int InRecScreen(R2 P1,R2 P2) const 
+  {  
+    R2 Pmn=Minc(P1,P2),Pmx=Maxc(P1,P2);
+    return (Pmx.x >= Bmin.x) && (Pmn.x <= Bmax.x) && (Pmx.y >= Bmin.y) && (Pmn.y <= Bmax.y);
+  }
+  int InRecScreen(R3 P1,R3 P2) const 
+  {  
+    R3 Pmn=Minc(P1,P2),Pmx=Maxc(P1,P2);
+    return (Pmx.x >= viewport[0]) && (Pmn.x <= viewport[2]) && (Pmx.y >= viewport[1]) && (Pmn.y <= viewport[3]);
+  }
     
+
 };
 
 void plot(double x,double y,const char *cmm,int font=-1);
