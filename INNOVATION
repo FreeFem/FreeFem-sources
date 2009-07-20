@@ -1,10 +1,15 @@
+v 3.4-1
+   add next command in ffglut graphic interface
+     n,N,i,I  to change the number of isovalue and to set the min,max value to the
+     graphic
+   add left button motion to zoom , and + alt to translate
 V 3.4
     add in parallel version mpi send, receive and broadcasr of  3d mesh and matrix ( sparse matrix).
     build a 3d mpi schwatz example (see example++-mpi/schwatz-3.edp)
     make a wrapper (launchff++.exe)  to launch freefem++ under windows/OS in the edp file directory. 
     correct in interpolation matrix ( unset variable in case of save mesh 
       => missing some term) 
-    in buildInterpolationMatrix add line 65
+    in buildInterpolationMatrix add line 651
      intV= false;// add July 2009 (unset varaible FH)
 
 V 3.3-3 

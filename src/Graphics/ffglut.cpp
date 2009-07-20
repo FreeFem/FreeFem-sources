@@ -1447,7 +1447,7 @@ void ThePlot::DrawHelp(OneWindow *win)
   win->Show("+) -)   zoom in/out  around the cursor 3/2 times ",i++);
   win->Show("=)   reset vue ",i++);
   win->Show("r)   refresh plot ",i++);
-  win->Show("<-) ->)   tanslate   ",i++);
+  win->Show("up, down, left, right) special keys  to  tanslate   ",i++);
   win->Show("3)   switch 3d/2d plot (in test)  keys : ",i++);
   win->Show("        z) Z) (focal zoom unzoom)  ",i++);
   win->Show("        H) h) switch increase or decrease the Z scale of the plot ",i++);
@@ -1458,7 +1458,7 @@ void ThePlot::DrawHelp(OneWindow *win)
 
   win->Show("a) A) increase or decrease the arrow size",i++);
   win->Show("B)  switch between show  border meshes or not",i++);
-  win->Show("i) I) update or not the functions bound to the window",i++);
+  win->Show("i) I) update or not: the min/max bound of the functions to the window",i++);
   win->Show("n) N) decrease or increase the number of iso value array ",i++);
   win->Show("b)  switch between black and white or color plotting ",i++);
   win->Show("g)  switch between grey or color plotting ",i++);
