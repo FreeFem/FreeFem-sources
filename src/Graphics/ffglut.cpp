@@ -41,7 +41,7 @@ const R pi=M_PI;//4*atan(1.);
 using namespace std;
 
 int debug=1;
-
+int casemouse=0,keyact=0;
 #include "ffglut.hpp"
 
 #include "ffthreads.hpp"
@@ -551,7 +551,7 @@ void OnePlotFE3::Draw(OneWindow *win)
   
   ThePlot & plot=*win->theplot;
     ShowGlerror("begin OnePlotFE3 plot");
-    plot.SetDefIsoV();
+    ///    plot.SetDefIsoV();
     if(plot.fill && what==6)
       glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     else
@@ -608,6 +608,8 @@ void OnePlotFE3::Draw(OneWindow *win)
     Plot(*Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2]);
     ShowGlerror("OnePlotFE::Draw");
 }    
+
+
 
 template<class Mesh>
  OnePlotFE<Mesh>::OnePlotFE(const Mesh *T,long w,PlotStream & f)
@@ -673,7 +675,7 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
   initlist();
   ThePlot & plot=*win->theplot;
   ShowGlerror("begin OnePlotFE plot");
-  plot.SetDefIsoV();
+  //plot.SetDefIsoV();
   win->setLighting();
   //    OneWindow * win=plot.win;// bof bof  la struct est tres mauvaise . 
   assert(win);
@@ -708,15 +710,29 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
   R cc = win->hpixel*40;
   
   int klist=0;
+  bool  change=false;
   if( (what==1) ) 
-    if ( plot.fill) klist=1; 
-  //  cout << klist << " ... " << oklist[klist] << "  fill = " <<  plot.fill <<  endl;
-  if (oklist[klist])
+    {
+      if ( plot.fill) klist=1;
+      change = win->changeiso ;
+    }
+  else if (what==2)
+    change  =  win->changearrow ;
+  if(debug>9)
+    cout << change << " " << klist << " ... " << oklist[klist] << "  fill = " 
+	 <<  plot.fill <<  " " <<  coef << endl;
+  if (oklist[klist] && ! change )
     glCallList(gllists+klist);
   else 
     {
+      //      R fmn,fmx,vmn,vmx;
+            
+      // win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
+      //win->theplot->SetDefIsoV(0,0,fmn,fmx,vmn,vmx) ;
       oklist[klist]=1;
-      glNewList(gllists+klist,GL_COMPILE_AND_EXECUTE); // save  la list sans affichage
+      glNewList(gllists+klist,GL_COMPILE_AND_EXECUTE); // save  la list aevc  affichage
+      if(debug>100)
+      cout << win->Bmin << ", Bmax:   " << win->Bmax << " Viso: "<< plot.Viso << endl;
       for(int k=0;k<Th.nt;++k, o+= nK)
 	{
 	  const typename Mesh::Element & K=Th[k];
@@ -750,7 +766,7 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
 		plot.color(2+col);
 		uv = coef*uv;
 		l *= coef;
-		R2 dd = uv*(-0.005/l);
+		R2 dd = uv*(-0.01/l);
 		R2 dn = dd.perp()*0.5;
 		if (l*10000.< kk) continue;
 		if (l < kk) 
@@ -761,7 +777,7 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
 		
 		win->Seg(P,P+uv);
 		
-		if (l>kk) {
+		if (10*l>kk) {
 		  win->Seg(P+uv,P+uv+dd+dn);
 		  win->Seg(P+uv,P+uv+dd-dn);
 		}
@@ -780,6 +796,88 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
   Plot(Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2]);
   ShowGlerror("OnePlotFE::Draw");
 }
+
+template<class Mesh>
+ void OnePlotFE<Mesh>::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const 
+{
+  const Mesh & Th(*this->Th);
+  int nsubT= Ksub.N()/3;//NbOfSubTriangle(nsub);
+  int nsubV=Psub.N();//NbOfSubInternalVertices(nsub);
+  int nK=v.N()/ Th.nt;
+  ffassert(v.N()== Th.nt*nK);
+  ffassert(nK = nsubV*what);
+  int o=0;
+  KN<R2> Pn(Psub.N());
+  KN<R3> P3(Psub.N());
+  double xmin,xmax,ymin,ymax;
+  KN<int> inCadre(nsubV);
+  win->getcadre(xmin,xmax,ymin,ymax);
+  bool ccc=false;
+  bool ddd=false;
+  if(ddd)
+  cout << " dyn__ .. " << endl;
+  for(int k=0;k<Th.nt;++k, o+= nK)
+    {
+      const typename Mesh::Element & K=Th[k];
+      inCadre=0;
+      for(int i=0;i<nsubV;++i)
+	Pn[i]=K(Psub[i]);// local to global coord. 
+      for(int i=0;i<nsubV;++i)
+	{
+	  double f=0;
+	  if(what==1) f=v[o+i];
+	  gluProject(Pn[i].x,Pn[i].y,f,win->modelMatrix,win->projMatrix,win->viewport,
+		      &P3[i].x,&P3[i].y,&P3[i].z);
+	  if(ddd)
+	    cout  <<P3[i]  << ", " ;
+	  
+	}// local to global coord. 
+      if(ddd)
+	cout << endl;
+      for(int sk=0;sk<nsubT;++sk)
+	{
+	  int i1=Ksub[sk*3+0], i2=Ksub[sk*3+1], i3=Ksub[sk*3+2];
+	  R3 P0= Minc(Minc(P3[i1],P3[i2]),P3[i3]);
+	  R3 P1= Maxc(Maxc(P3[i1],P3[i2]),P3[i3]);
+	  if( win->InRecScreen(P0,P1))
+	      {
+		if(debug>100)
+		cout << " ???  " << P0 << " " << P1 << " ,  " << win->Bmin 
+		     << " , " << win->Bmax << endl;
+		inCadre[i1]=2;
+		inCadre[i2]=2;
+		inCadre[i3]=2;
+	      }
+	}
+      for (int i=0,j=0;i<nsubV;++i)
+	if(inCadre[i])
+	  {
+	    ccc=true;
+	    if(what==1)
+	      {
+		R f=v[o+i];
+		fmn=min(f,fmn);
+		fmx=max(f,fmx);
+		
+	      }		    
+	    else // what ==2
+	      
+	      {
+		R2 uv(v[o+j],v[o+j+1]);
+		j+=2;		
+		R  l =(uv,uv) ;
+		vmn=min(l,vmn);
+		vmx=max(l,vmx);
+	      }
+	  }
+      if(debug>100 && ccc)
+	cout << " dny_bfv :  "  << fmn << " " << fmx << " " << vmn << " " << vmx 
+	     <<  " : " << Pn[0] << endl;
+      
+    }
+}
+
+
 
 void OnePlotCurve::Draw(OneWindow *win)
 {
@@ -868,7 +966,8 @@ OneWindow::OneWindow(int h,int w,ThePlot *p)
   lplotssize(0),
   height(h),width(w),theplot(0),hpixel(1),
   Bmin(0,0),Bmax(1,1),oBmin(Bmin),oBmax(Bmax),zmin(0),zmax(1),
-  windowdump(false),help(false), rapz0(-1.),rapz(1),withlight(false)
+  windowdump(false),help(false), rapz0(-1.),rapz(1),withlight(false),
+  changearrow(true),changeiso(true) 
 {
   
   add(p);
@@ -1050,6 +1149,15 @@ void  OneWindow::SetView()
 	}
       gluLookAt(cam.x,cam.y,cam.z,Pvue3.x,Pvue3.y,Pvue3.z*rapz,0.,0.,1.);
       glScaled(1.,1.,rapz);   
+
+      glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+      ShowGlerror(" Get PM");
+      glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+      ShowGlerror(" Get MV");
+      glGetIntegerv(GL_VIEWPORT,viewport);
+      ShowGlerror(" Get VP");
+  
+
       
     }
   else
@@ -1095,6 +1203,7 @@ void  OneWindow::SetView()
       
       //glLineWidth(1);
       //glColor3d(0.,0.,0.);
+
       glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
       ShowGlerror(" Get PM");
       glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
@@ -1118,6 +1227,19 @@ void  OneWindow::resize(int w,int h)
     
 }
 
+void OneWindow::zoom(R coef)
+{
+  coef_dist*=coef;
+  R2 M=(oBmin+oBmax)/2.;
+  R2 D=(oBmax-oBmin)/2.;
+  R2 A=  M - D*coef;
+  R2 B=  M + D*coef;
+  if (theplot->aspectratio)
+    cadreortho(A,B);
+  else 
+    cadre(A,B);
+
+}
 void  OneWindow::zoom(int w,int h,R coef)
 {
     GLdouble x=w,y=height-h,z=(zmin+zmax)/2.;
@@ -1150,6 +1272,14 @@ void OneWindow::MoveXView(R dx,R dy)
   if(debug>2)
   cout << " MoveXView  "<< dx << " " << dy << " " << D << " mn: " << Bmin3 <<"  mx :" << Bmax3 << " d=" << dd << endl;
   Pvue3 += dd/50.;
+  // 2d ...  add  FH   july 2009
+  R2 D2(-dx*5*hpixel,-dy*5*hpixel);
+  oBmin += D2;
+  oBmax += D2;
+  Bmin += D2;
+  Bmax += D2;
+
+
   // cout << xm << " " << ym << " " << zm << endl;
 }
 
@@ -1297,11 +1427,11 @@ OnePlotBorder::OnePlotBorder(PlotStream & f)
 
 void OnePlot::GLDraw(OneWindow *win)
 {
-    ThePlot & plot= *win->theplot; 
-    //      glNewList(gllists,GL_COMPILE_AND_EXECUTE); // save  la list sans affichage
-      Draw(win);
-      //  glEndList();  // fin de la list
-    //  else glCallList(gllists);
+  ThePlot & plot= *win->theplot; 
+  Draw(win);
+  
+  win->changeiso=0;
+  win->changearrow=0; 
 }
 
 void ThePlot::DrawHelp(OneWindow *win) 
@@ -1311,29 +1441,50 @@ void ThePlot::DrawHelp(OneWindow *win)
   
   i+=1;
   win->Show("enter) wait next plot",i++);
-  win->Show("p)     previous plot",i++);
+  win->Show("p)     previous plot (10 plots saved) ",i++);
   win->Show("ESC)   exit from ffglut",i++);
   win->Show("?)  show this help window",i++);
   win->Show("+) -)   zoom in/out  around the cursor 3/2 times ",i++);
   win->Show("=)   reset vue ",i++);
   win->Show("r)   refresh plot ",i++);
+  win->Show("<-) ->)   tanslate   ",i++);
   win->Show("3)   switch 3d/2d plot (in test)  keys : ",i++);
-  win->Show("        move : <- ->  mouse to return etc.  ",i++);
   win->Show("        z) Z) (focal zoom unzoom)  ",i++);
   win->Show("        H) h) switch increase or decrease the Z scale of the plot ",i++);
+  win->Show("mouse motion)    ",i++);
+  win->Show("   - left button)  rotate    ",i++);
+  win->Show("   - right button)       zoom        (ctrl+button on mac) ",i++);
+  win->Show("   - right button +alt)  tanslate    (alt+ctrl+button on mac)",i++);
 
-  win->Show("a) A) increase or decrease the size arrow ",i++);
+  win->Show("a) A) increase or decrease the arrow size",i++);
+  win->Show("B)  switch between show  border meshes or not",i++);
+  win->Show("i) I) update or not the functions bound to the window",i++);
+  win->Show("n) N) decrease or increase the number of iso value array ",i++);
   win->Show("b)  switch between black and white or color plotting ",i++);
   win->Show("g)  switch between grey or color plotting ",i++);
-  win->Show("f)  switch between filling iso or not  ",i++);
+  win->Show("f)  switch between filling iso or iso line  ",i++);
   win->Show("l)  switch between lighting or not  ",i++);
-  win->Show("v)  switch between show the numerical value of iso or not",i++);
-  win->Show("w)  graphic window dump in file ",i++);
-  win->Show("m)  switch between show  meshes or not",i++);
+  win->Show("v)  switch between show or not the numerical value of colors ",i++);
+  win->Show("m)  switch between show or not  meshes  ",i++);
   win->Show("w)  window dump in file ffglutXXXX.ppm ",i++);
   win->Show("any other key : nothing ",++i);
 }
 
+void ThePlot::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const 
+{
+  fmn=+1e100;
+  fmx=-fmn;
+  vmx=0;
+  vmn=fmin;
+  for (list<OnePlot *>::const_iterator i= plots.begin();i != plots.end(); ++i)
+    {
+      if(*i)  (*i)->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
+    }
+  if(debug>4)
+    cout << "dyn_bfv  " << fmn << " " << fmx << endl;
+  if(fmn>fmx) fmn=fmin,fmx=fmax;
+  if(vmn>vmx) vmn=0,vmx=vmax;
+}
 
 void ThePlot::Draw(OneWindow *win) 
 {
@@ -1558,12 +1709,12 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	    
 	if((debug > 3))
 	  if(version==2)
-	  cout << i << " nt/nv " << l << " "  <<Ths[l]->nt << " " << Ths[l]->nv << endl;
+	    cout << i << " nt/nv " << l << " "  <<Ths[l]->nt << " " << Ths[l]->nv << endl;
 	  else
-	      cout << i << " nt/nv " << l << " "  <<Ths2[l]->nt << " " << Ths2[l]->nv << endl;
-	      
+	    cout << i << " nt/nv " << l << " "  <<Ths2[l]->nt << " " << Ths2[l]->nv << endl;
+	
 	ffassert(fin.good());
-      }
+	}
       else // Add FH optimisation FH 11/12/2008 (not use to day)
 	{// the mesh is already in the previous plot with number ll
 	  ffassert(l==-1);
@@ -1572,58 +1723,60 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	  ffassert(old);
 	  if(version==2)
 	    {
-	  Ths[l]=old->Ths[ll];
-	  Ths[l]->increment(); // 
+	      Ths[l]=old->Ths[ll];
+	      Ths[l]->increment(); // 
 	    }
 	  else
 	    {
 		Ths2[l]=old->Ths2[ll];
 		Ths2[l]->increment(); // 
 	    }
-	    
+	  
 	}
       
     }
-    long nbmeshes3=0;
-   if(fin.GetMeshes3())
-     { //  il y a des solution 3d; 
-	 
-	 fin >> nbmeshes3;
-	 if((debug > 2)) cout << " read nb : mesh3 " << nbmeshes3 << endl;
-	 Ths3.resize(nbmeshes3);
-	 for(int i=0;i<nbmeshes3;++i)
-	     Ths3[i]=0;
-	 for(int i=0;i<nbmeshes3;++i)
-	   { 
-	       long l;
+  long nbmeshes3=0;
+  if(fin.GetMeshes3())
+    { //  il y a des solution 3d; 
+      
+      fin >> nbmeshes3;
+      if((debug > 2)) cout << " read nb : mesh3 " << nbmeshes3 << endl;
+      Ths3.resize(nbmeshes3);
+      for(int i=0;i<nbmeshes3;++i)
+	Ths3[i]=0;
+      for(int i=0;i<nbmeshes3;++i)
+	{ 
+	  long l;
 	       fin >> l;
 	       if(l>=0) 
 		 {
-		     if((debug > 3)) cout << " read mesh3 " << i  << " -> " << l << "  " <<nbmeshes3 << endl;
-		     l--;
-		     ffassert(l>=0 && l < nbmeshes3);
-		     ffassert(Ths3[l]==0);
-		     fin >>Ths3[l] ;
-		     if((debug > 3))
-			 cout << i << " nt/nv " << l << " "  <<Ths3[l]->nt << " " << Ths3[l]->nv << endl;
-		     ffassert(fin.good());
+		   if((debug > 3)) cout << " read mesh3 " << i  << " -> " << l 
+					<< "  " <<nbmeshes3 << endl;
+		   l--;
+		   ffassert(l>=0 && l < nbmeshes3);
+		   ffassert(Ths3[l]==0);
+		   fin >>Ths3[l] ;
+		   if((debug > 3))
+		     cout << i << " nt/nv " << l << " "  <<Ths3[l]->nt << " " 
+			  << Ths3[l]->nv << endl;
+		   ffassert(fin.good());
 		 }
 	       else // Add FH optimisation FH 11/12/2008 (not use to day)
 		 {// the mesh is already in the previous plot with number ll
-		     ffassert(l==-1);
-		     long ll;
-		     fin >> l>> ll; // read l and ll
-		     ffassert(old);
+		   ffassert(l==-1);
+		   long ll;
+		   fin >> l>> ll; // read l and ll
+		   ffassert(old);
 		     Ths3[l]=old->Ths3[ll];
 		     Ths3[l]->increment(); // 
 		 }
 	       
-	   }	 
-	 
-	 
-	 
+	}	 
+      
+      
+      
       fin.GetPlots();
-     }
+    }
   long nbplot;
   int iso3d=0;
   fin >>nbplot;
@@ -1637,16 +1790,16 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       if((debug > 2)) cout << "    plot  " << i << " what " << what << endl;
       if(what !=3 && !uaspectratio) aspectratio= true;
       if(what==-1)  // gestion of error (empty plot)
-	  p = new OnePlotError(fin);
+	p = new OnePlotError(fin);
       else if(what==0) 
 	{ 
 	  
 	  fin >> imsh;
 	  if(version==2)
-	     p=new OnePlotMesh<Mesh>(Ths[imsh-1]);
+	    p=new OnePlotMesh<Mesh>(Ths[imsh-1]);
 	  else
-	      p=new OnePlotMesh<Mesh2>(Ths2[imsh-1]);
-	      
+	    p=new OnePlotMesh<Mesh2>(Ths2[imsh-1]);
+	  
 	}
       else if (what==1 || what==2)
 	{
@@ -1666,24 +1819,24 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	p=new OnePlotBorder(fin);
       else if(what==5) 
 	{ 	    
-	    fin >> imsh;
+	  fin >> imsh;
 	    p=new OnePlotMesh3(Ths3[imsh-1]);
 	}
       else if (what==6 )
 	{
 	  iso3d++;
-	    fin >> imsh;
-	    if(what==6) withiso=true;
-	   
-	    if((debug > 10)) cout << " plot : mesh3 " << imsh << endl;
-	    ffassert(imsh>0 && imsh <=nbmeshes3);
-	    p=new OnePlotFE3(Ths3[imsh-1],what,fin);
+	  fin >> imsh;
+	  if(what==6) withiso=true;
+	  
+	  if((debug > 10)) cout << " plot : mesh3 " << imsh << endl;
+	  ffassert(imsh>0 && imsh <=nbmeshes3);
+	  p=new OnePlotFE3(Ths3[imsh-1],what,fin);
 	}
-	
+      
       else
 	{
 	  cout << "Bizarre unkown what :  " << what<< endl;
-	ffassert(0);
+	  ffassert(0);
 	}
       ffassert(p);
       plots.push_back(p);
@@ -1694,10 +1847,10 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       datadim=max(datadim,p->dim); 
     }
   if(Niso==0) 
-      Niso = iso3d ? 5 : 20;
-    
+    Niso = iso3d ? 5 : 20;
+  
   // cout << "\t\t\t\t  f min, max v max :" << fmin << " " << fmax << " " << vmax << endl;
-    
+  
   double ref_f = abs(fmax)+abs(fmin) ; 
   if(fmax < fmin)
     {
@@ -1723,40 +1876,80 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
     }
   
   z0= fminT +(fmaxT-fminT)*0.01;
-  if((debug > 2)) cout << "               data bound: " << PminT << " " << PmaxT  << " fmin == " << fminT << "  " << fmaxT 
+  if((debug > 2)) cout << "               data bound: " << PminT << " " << PmaxT  
+		       << " fmin == " << fminT << "  " << fmaxT 
 		       << " z0 " << z0 <<  endl;
   fin.GetEndPlot(); 
   Viso.resize(Niso);
   Varrow.resize(Narrow);
   
   SetColorTable(Max(Niso,Narrow)+4) ;           
-  
+  SetDefIsoV() ;
+
 }
 
 
-void ThePlot::SetDefIsoV()
+void ThePlot::SetDefIsoV(int niso,int narr,double fmn,double fmx,double vmn,double vmx)
 {
-  R d = fill ? (fmaxT-fminT)/(Niso-2)  : (fmaxT-fminT)/(Niso-1);       
-  R x = fill ? fminT-d/2 :fminT+d/2;
-  if(!pViso)
+  bool dyn=false; 
+  R d,x;
+  
+  if( fmx>fmn)
+    {
+      if(debug>3)
+	cout << "Set Def dyn_bfv  " << fmn << " " << fmx << endl;
+
+      if(niso>2) 
+	Viso.resize(niso); 
+      Niso=Viso.N();
+      Narrow=narr;
+      d =  (fmx-fmn)/(Niso-2) ;
+      x =  (fmn+fmx)/2-d*0.5*(Niso-1);
+      dyn=true;
+    }
+  else
+    {
+      d = 1 ? (fmaxT-fminT)/(Niso-2)  : (fmaxT-fminT)/(Niso-1);       
+      x = 1 ? (fminT+fmaxT)/2-d*0.5*(Niso-1) :fminT+d/2;
+    }
+  if(!pViso || dyn)
     {
       for (int i = 0;i < Niso;i++)
 	{Viso[i]=x;x +=d; }
-      if (fill ) {Viso[0]=fminT-d;Viso[Niso-1]=fmaxT+d;}    
+      //if (fill ) {Viso[0]=fminT-d;Viso[Niso-1]=fmaxT+d;}    
     }
-  x=0; 
-  if(debug>10)
-    cout << "vmax=  " << vmax << endl;
-  d= sqrt(vmax)/(Narrow-1.1);   
-  if (!pVarrow)
+  dyn=false;
+
+  if(vmx>vmn)
+    {
+      if(narr>2) 
+	Varrow.resize(niso); 
+      Narrow=Varrow.N();
+      dyn=true;
+      x = sqrt(vmn);
+      d = (sqrt(vmx)-x)/(Narrow-1.1);
+    }
+  else
+    {
+      x=0; 
+      if(debug>10)
+	cout << "vmax=  " << vmax << endl;
+      d= sqrt(vmax)/(Narrow-1.1);
+    }   
+  if (!pVarrow || dyn)
     for (int i = 0;i < Narrow;i++)
-      {Varrow[i]=x;x +=d; }
+      {
+	Varrow[i]=x;
+	x +=d; 
+      }
+  if(debug>100)
+    cout << " Viso ..; " << Viso <<endl;
   SetColorTable(Max(Niso,Narrow)+4) ; 
 }
 
 void OneWindow::Show(const char *str,int i)
 {
-  int hx= 18;
+  int hx= 15;
   int ix= width/20;
   int iy= height-hx*i;
   plot(ix,iy,str,3);
@@ -2142,30 +2335,81 @@ static void Mouse( int button,int state,int x,int y )
 {
     // state up or down 
     OneWindow * win=CurrentWin();
-    if(win)
+     keyact = glutGetModifiers();
+    switch(button)
       {
-	if(win && state == GLUT_DOWN) { win->xold=x,win->yold=y;return;}
-	win->phi += (y-win->yold)/(2.*180.);
-	win->theta -= (x-win->xold)/(2*180.);
-	glutPostRedisplay();
+      case GLUT_LEFT_BUTTON:
+        casemouse=GLUT_LEFT_BUTTON;
+	if(win)
+	  {
+	    if(win && state == GLUT_DOWN) { win->xold=x,win->yold=y;return;}
+	    win->phi += (y-win->yold)/(2.*180.);
+	    win->theta -= (x-win->xold)/(2*180.);
+	    glutPostRedisplay();
+	  }
+	break;
+      case GLUT_RIGHT_BUTTON:
+        casemouse=GLUT_RIGHT_BUTTON;
+        if(win)
+          {
+            if(win && state == GLUT_DOWN) { win->xold=x,win->yold=y;return;}
+          }
+        break;
+
+
+
       }
 }
 static void MotionMouse(int x,int y )
 {
     OneWindow * win=CurrentWin();
-    if(win)
+    switch(casemouse)
       {
-	win->phi += (y-win->yold)/(2.*180.);
-	win->theta -= (x-win->xold)/(2*180.);
-	win->xold=x;
-	win->yold=y;
-	glutPostRedisplay();
+      case GLUT_LEFT_BUTTON:
+	
+	if(win)
+	  {
+	    win->phi += (y-win->yold)/(2.*180.);
+	    win->theta -= (x-win->xold)/(2*180.);
+	    win->xold=x;
+	    win->yold=y;
+	    glutPostRedisplay();
+	  }
+	break;
+      case GLUT_RIGHT_BUTTON:
+        casemouse=GLUT_RIGHT_BUTTON;
+	
+        if(win)
+          {
+	    if(keyact & GLUT_ACTIVE_ALT)
+	      {
+                int dx = (x-win->xold);
+                int dy = (y-win->yold);
+		win->MoveXView(dx,-dy);
+		glutPostRedisplay();
+		{ win->xold=x,win->yold=y;}	      
+	      }
+	    else {
+	      //  zoom en y 
+	      R dd= (y-win->yold);
+	      
+	      { win->xold=x,win->yold=y;}
+	      win->zoom(pow(0.99,dd));
+	      glutPostRedisplay();
+
+	    }
+	  }
+        break;
       }
+
 }
 
 static void Key( unsigned char key, int x, int y )
 {
     OneWindow * win=CurrentWin();
+    int ni=win->theplot->Viso.N();
+    int na=win->theplot->Varrow.N();
+
     switch (key) 
       {
       case 27: // esc char
@@ -2236,10 +2480,48 @@ static void Key( unsigned char key, int x, int y )
 	break;
       case 'a':
 	win->theplot->coeff/= 1.2;
+	win->changearrow=true;
 	break;
       case 'A':
 	win->theplot->coeff*= 1.2;
+	win->changearrow=true;
 	break;
+	
+      case 'n':
+	na  -=  na < 10  ? 2 : 5;
+      ni  -=  ni <10 ? 2 : 5;	
+      {
+	R fmn,fmx,vmn,vmx;	  
+	win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
+	win->theplot->SetDefIsoV(ni,na,fmn,fmx,vmn,vmx) ;
+	
+	win->changeiso=true;
+	win->changearrow=true;
+      }
+      break ;
+      case 'N':
+	na  += 5;
+	ni  += 5;	
+      case 'i':
+	{
+	  R fmn,fmx,vmn,vmx;	  
+	  win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
+	  win->theplot->SetDefIsoV(ni,na,fmn,fmx,vmn,vmx) ;
+	  
+	  win->changeiso=true;
+	  win->changearrow=true;
+	}
+	break;
+      case 'I':
+	{
+	  R fmn,fmx,vmn,vmx;	  
+	  win->theplot->SetDefIsoV(ni,na) ;	  
+	  win->changeiso=true;
+	  win->changearrow=true;
+	}
+	break;
+	
+	
       case 'z':
 	if(win->focal < M_PI/1.2 ) 
 	  {

@@ -4,7 +4,7 @@ V 3.4
     make a wrapper (launchff++.exe)  to launch freefem++ under windows/OS in the edp file directory. 
     correct in interpolation matrix ( unset variable in case of save mesh 
       => missing some term) 
-    in buildInterpolationMatrix add line 651 
+    in buildInterpolationMatrix add line 65
      intV= false;// add July 2009 (unset varaible FH)
 
 V 3.3-3 
