@@ -1,4 +1,4 @@
-
+EXTRA_DIST=lauchff++.cpp
 LDADD2 = $(ARPACKLIBS) $(UMFPACKLIBS)  $(BLASLIBS) $(G2CLIB)
 # remark the libff.dll  was  splited in 6 because  ld trap
 #  to much routine => memory fault in ld

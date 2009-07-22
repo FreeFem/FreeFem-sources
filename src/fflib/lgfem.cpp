@@ -2118,11 +2118,38 @@ class Convect : public E_F0mps  { public:
 class Plot :  public E_F0mps { public:
     typedef KN_<R>  tab;
     typedef pferbase sol;
+    typedef pferbasearray asol;
     typedef pf3rbase sol3;
+    typedef pf3rbasearray asol3;
     
     typedef long  Result;
+    struct ListWhat {
+	int what,i;
+	pferbase fe,fe1;
+	int cmp,cmp1;
+	pf3rbase fe3;
+	pmesh th;
+        pmesh3 th3;
+	ListWhat(int w=-1,int ii=-1 )
+	: what(w),i(ii),fe(0),cmp(-1),fe1(0),cmp1(-1),fe3(0),th(0),th3(0) {}
+	ListWhat(int ii,pferbase ffe, int cmpp,pferbase ffe1=0, int cmp11=-1 )
+	: what(ffe1 ? 2 : 1),i(ii),fe(ffe),cmp(cmpp),fe1(ffe1),cmp1(cmp11),fe3(0),th(0),th3(0) {}
+	ListWhat(int ii,pf3rbase ffe, int cmpp)
+	: what(6),i(ii),fe(0),cmp(cmpp),fe1(0),cmp1(0),fe3(ffe),th(0),th3(0) {}
+	ListWhat(int ii,pmesh tth)
+	: what(0),i(ii),fe(0),cmp(0),fe1(0),cmp1(0),fe3(0),th(tth),th3(0) {}
+	ListWhat(int ii,pmesh3 tth)
+	: what(5),i(ii),fe(0),cmp(0),fe1(0),cmp1(0),fe3(0),th(0),th3(tth) {}
+	
+	void eval(pferbase &ffe, int &cmpp,pferbase &ffe1, int &cmp11)
+	{ ffe=fe;cmpp=cmp;ffe1=fe1;cmp11=cmp1;}
+	void eval(pf3rbase &ffe, int &cmpp)
+	{ ffe=fe3;cmpp=cmp;}
+
+    };
     struct Expression2 {
-     long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border , 5  mesh3, 6 iso 3d 
+     long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border , 5  mesh3, 6 iso 3d, 
+	// 7 array of iso 2d  , 8 array of iso 3d  , 9  array of meshes 
      bool composant;
      Expression e[2];
      Expression2() {e[0]=0;e[1]=0;composant=false;what=0;}
@@ -2139,8 +2166,18 @@ class Plot :  public E_F0mps { public:
 		else {return GetAny< pf3rbase >((*e[i])(s));}
 	    }
 	else return 0;}
-	const Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
-     const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
+	asol evala(int i, Stack s,int & cmp) const  {  cmp=-1;
+	    if (e[i]) 
+		 {pferarray p= GetAny< pferarray >((*e[i])(s)); cmp=p.second;return p.first;}
+	    else return 0;}
+	asol3 evala3(int i, Stack s,int & cmp) const  {  cmp=-1;
+	    if (e[i]) 
+	      {pf3rarray p= GetAny< pf3rarray >((*e[i])(s)); cmp=p.second;return p.first;}
+	else return 0;}
+	
+	 Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
+	KN<pmesh> * evalma(int i,Stack s) const  { throwassert(e[i]);return   GetAny< KN<pmesh> * >((*e[i])(s)) ;}
+    const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
      const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
      tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
     };
@@ -2193,6 +2230,16 @@ class Plot :  public E_F0mps { public:
 	  l[i].composant=false;
 	 l[i].what=6;
 	 l[i][0]=CastTo<pf3r>(args[i]);}
+         else if (BCastTo<pferarray>(args[i])) {
+	     // cout << "BCastTo<pfer>(args[i])" << endl;
+	     l[i].composant=false;
+	     l[i].what=7;
+	      l[i][0]=CastTo<pferarray>(args[i]);}
+         else if (BCastTo<pf3rarray>(args[i])) {
+	     // cout << "BCastTo<pfer>(args[i])" << endl;
+	     l[i].composant=false;
+	     l[i].what=8;
+	     l[i][0]=CastTo<pf3rarray>(args[i]);}	
          else if (BCastTo<pmesh>(args[i])){
 	   
           l[i].what=0;
@@ -2205,7 +2252,10 @@ class Plot :  public E_F0mps { public:
 	  // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
           l[i].what=4;
           l[i][0]=CastTo<const E_BorderN *>(args[i]);}
-          
+         else if (BCastTo<KN<pmesh> *>(args[i])){
+	     // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
+	     l[i].what=9;
+	     l[i][0]=CastTo<KN<pmesh> *>(args[i]);}
          else {
            CompileError("Sorry no way to plot this kind of data");
          }
@@ -2575,6 +2625,80 @@ void Show(const char * s,int k=1)
 }
 
 AnyType Plot::operator()(Stack s) const  { 
+    
+   // remap  case 7 and 8 for array of FE. 
+  vector<ListWhat> ll;
+  ll.reserve(l.size());
+  // generation de la list de plot ...
+    for (size_t i=0;i<l.size();i++)
+      {
+	  pferbase  fe=0,fe1=0;
+	  pferbasearray fea;
+	  pf3rbase  fe30=0,fe31=0;
+	  pf3rbasearray  fea3;
+	  KN<pmesh > * ath;
+	  pmesh th;
+	  int cmp0,cmp1;
+	  switch (l[i].what) {
+	      case 0:
+	    {
+		 th =&l[i].evalm(0,s);
+		 ll.push_back(ListWhat(i,th));
+		break;
+	    }
+	      case 1:
+	      case 2:
+		  fe=  l[i].eval(0,s,cmp0);
+		  fe1= l[i].eval(1,s,cmp1);
+		  ll.push_back(ListWhat(i,fe,cmp0,fe1,cmp1));
+		  break;
+	      case  6 :
+		  fe30=  l[i].eval3(0,s,cmp0);
+		  ll.push_back(ListWhat(i,fe30,cmp0));
+		  break;
+	      case  7 :
+		  fea = l[i].evala(0,s,cmp0);
+                  for(int j=0;j<fea->N;++j)
+		    {
+			fe = * fea->operator[](j);			    
+			if(fe && fe->x()) 
+			    ll.push_back(ListWhat(i,fe,cmp0));
+		    }
+		  
+		  break;
+	      case  8 :
+	    {
+		fea3 = l[i].evala3(0,s,cmp0);
+		int n = fea3->N;
+		for(int j=0;j<n;++j)
+		  {
+		      fe30 = * fea3->operator[](j);			    
+		      if(fe30 && fe30->x()) 
+			  ll.push_back(ListWhat(i,fe30,cmp0));
+		  }	
+	    }
+		  break;
+	      case  9 :
+	      { ath= l[i].evalma(0,s);
+		  if( !ath) break;
+		  
+		  int n = ath->N();
+		  for(int j=0;j<n;++j)
+		    {
+			pmesh th =  ath->operator[](j);			    
+			if(th) 
+			    ll.push_back(ListWhat(i,th));
+		    }	
+	      }
+		  break;
+		  
+	      default:
+		  ll.push_back(ListWhat(l[i].what,i));
+		  break;
+	  }
+	  
+      }
+    
   if(ThePlotStream)
     { 
       /*
@@ -2590,7 +2714,9 @@ AnyType Plot::operator()(Stack s) const  {
        */
 	PlotStream theplot(ThePlotStream);
 	pferbase  fe=0,fe1=0;
+	pferbasearray fea;
 	pf3rbase  fe30=0,fe31=0;
+	pf3rbasearray  fea3;
 	int cmp0,cmp1;
 	theplot.SendNewPlot();
 	if (nargs[0]) theplot<< 0L <=  GetAny<double>((*nargs[0])(s));
@@ -2634,19 +2760,20 @@ AnyType Plot::operator()(Stack s) const  {
 	map<const Mesh3 *,long> mapth3;
 	long kth=0,kth3=0;
 	//  send all the mesh: 
-	for (size_t i=0;i<l.size();i++)
+	for (size_t ii=0;ii<ll.size();ii++)
 	  {
-	      long what = l[i].what;
+	      int i=ll[ii].i;
+	      long what = ll[i].what;
 	      const Mesh *th=0;
 	      const Mesh3 *th3=0;
 	      if(what ==0)
-		  th= & (l[i].evalm(0,s));
+		  th= ll[ii].th;
 	      if(what ==5)
 		  th3= & (l[i].evalm3(0,s));	      
 	      else if (what==1 || what==2)
 		{   
-		    fe=  l[i].eval(0,s,cmp0);
-		    fe1= l[i].eval(1,s,cmp1);
+		    
+		    ll[ii].eval(fe,cmp0,fe1,cmp0);		    
 		    if (fe->x()) th=&fe->Vh->Th;
 		    if(fe1 && fe1->x()) {
 			th == &fe1->Vh->Th;			
@@ -2655,11 +2782,10 @@ AnyType Plot::operator()(Stack s) const  {
 		}
 	      else if (what==6 )
 		{   
-		    fe30=  l[i].eval3(0,s,cmp0);
+		    ll[ii].eval(fe30,cmp0);
 		    if (fe30->x()) th3=&fe30->Vh->Th;
 		    
-		 };
-		
+		 }
 	      
 	     if(th && mapth.find(th)==mapth.end()) 
 		    mapth[th]=++kth;
@@ -2686,171 +2812,162 @@ AnyType Plot::operator()(Stack s) const  {
 		
 	    }
 	theplot.SendPlots();	
-	theplot <<(long) l.size(); 
-	for (size_t i=0;i<l.size();i++)
+	theplot <<(long) ll.size(); 
+	for (size_t ii=0;ii<ll.size();ii++)
 	  {
-	    int err =1;//  by default we are in error
-	    const Mesh *pTh=0;
-	    const Mesh3 *pTh3=0;
-	    long what = l[i].what;
-	    if(what ==0)
-	      {
-		pTh=&l[i].evalm(0,s);
-		if(pTh) {
-		  err=0;
-		  theplot << what ; 
-		  theplot <<mapth[ &l[i].evalm(0,s)];// numero du maillage
+	      int i=ll[ii].i;
+	      long what = ll[ii].what;
+	      int err =1;//  by default we are in error
+	      const Mesh *pTh=0;
+	      const Mesh3 *pTh3=0;
+	      // long what = l[i].what;
+	      if(what ==0)
+		{
+		    pTh=ll[ii].th;
+		    if(pTh) {
+			err=0;
+			theplot << what ; 
+			theplot <<mapth[ ll[ii].th ];// numero du maillage
+		    }
 		}
-	      }
-	    else if (what==1 || what==2)
-	      {    
-		int lg,nsb;		   
-		fe=  l[i].eval(0,s,cmp0);
-		fe1= l[i].eval(1,s,cmp1);
-		
-		if(what==1)
-		  {
-		    if (fe->x()) 
-		      {		 
-			err=0;
-			theplot << what ;
-			theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
-			KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),cmp0,lg,nsb);
-			  
-			  // construction of the sub division ... 
-			  int nsubT=NbOfSubTriangle(nsb);
-			  int nsubV=NbOfSubInternalVertices(nsb);
-			  KN<R2> Psub(nsubV);
-			  KN<int> Ksub(nsubT*3);
-			  for(int i=0;i<nsubV;++i)
-			      Psub[i]=SubInternalVertex(nsb,i);
-			  //cout << " Psub " << Psub <<endl;
-			  for(int sk=0,p=0;sk<nsubT;++sk)
-			      for(int i=0;i<3;++i,++p)
-				  Ksub[p]=numSubTriangle(nsb,sk,i);
-			  
-			if(verbosity>9)
-			  cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
-			       << " "  << V1.max() << " " << V1.min() << endl;
-			  theplot << Psub ;
-			  theplot << Ksub ;
-                          theplot << V1;
-			  // theplot << (long) nsb<< V1;
-
-		      }
-		  }
-		else
-		  {
-		    if ( fe->x() && fe1->x())
+	      else if (what==1 || what==2)
+		{    
+		    int lg,nsb;
+		    ll[ii].eval(fe,cmp0,fe1,cmp1);
+		    //fe=  l[i].eval(0,s,cmp0);
+		    //fe1= l[i].eval(1,s,cmp1);
+		    
+		    if(what==1)
 		      {
-			err=0;
-			theplot << what ;
-			  
-			 
-			 KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),*fe1->x(),cmp0,cmp1,lg,nsb);
-			  // construction of the sub division ... 
-			  int nsubT=NbOfSubTriangle(nsb);
-			  int nsubV=NbOfSubInternalVertices(nsb);
-			  KN<R2> Psub(nsubV);
-			  KN<int> Ksub(nsubT*3);
-			  for(int i=0;i<nsubV;++i)
-			      Psub[i]=SubInternalVertex(nsb,i);
-			  for(int sk=0,p=0;sk<nsubT;++sk)
-			      for(int i=0;i<3;++i,++p)
-				  Ksub[p]=numSubTriangle(nsb,sk,i);
-			  
-			  theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
-			  theplot << Psub ;
-			  theplot << Ksub ;
-			  theplot <<  V1;
-
-			// theplot << (long) nsb<< V1;
+			  if (fe->x()) 
+			    {		 
+				err=0;
+				theplot << what ;
+				theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
+				KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),cmp0,lg,nsb);
+				
+				// construction of the sub division ... 
+				int nsubT=NbOfSubTriangle(nsb);
+				int nsubV=NbOfSubInternalVertices(nsb);
+				KN<R2> Psub(nsubV);
+				KN<int> Ksub(nsubT*3);
+				for(int i=0;i<nsubV;++i)
+				    Psub[i]=SubInternalVertex(nsb,i);
+				//cout << " Psub " << Psub <<endl;
+				for(int sk=0,p=0;sk<nsubT;++sk)
+				    for(int i=0;i<3;++i,++p)
+					Ksub[p]=numSubTriangle(nsb,sk,i);
+				
+				if(verbosity>9)
+				    cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
+				    << " "  << V1.max() << " " << V1.min() << endl;
+				theplot << Psub ;
+				theplot << Ksub ;
+				theplot << V1;
+				// theplot << (long) nsb<< V1;
+				
+			    }
 		      }
-		  }
-	      }
-	    else if (l[i].what==3 )
-	      {
-		tab x=l[i].evalt(0,s);
-		tab y=l[i].evalt(1,s);
-		if( x.N() >0 && y.N() == x.N())
-		  {
-		    err=0; // correction dec 2008 FH 
+		    else
+		      {
+			  if ( fe->x() && fe1->x())
+			    {
+				err=0;
+				theplot << what ;
+				
+				
+				KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),*fe1->x(),cmp0,cmp1,lg,nsb);
+				// construction of the sub division ... 
+				int nsubT=NbOfSubTriangle(nsb);
+				int nsubV=NbOfSubInternalVertices(nsb);
+				KN<R2> Psub(nsubV);
+				KN<int> Ksub(nsubT*3);
+				for(int i=0;i<nsubV;++i)
+				    Psub[i]=SubInternalVertex(nsb,i);
+				for(int sk=0,p=0;sk<nsubT;++sk)
+				    for(int i=0;i<3;++i,++p)
+					Ksub[p]=numSubTriangle(nsb,sk,i);
+				
+				theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
+				theplot << Psub ;
+				theplot << Ksub ;
+				theplot <<  V1;
+				
+				// theplot << (long) nsb<< V1;
+			    }
+		      }
+		}
+	      else if (l[i].what==3 )
+		{
+		    tab x=l[i].evalt(0,s);
+		    tab y=l[i].evalt(1,s);
+		    if( x.N() >0 && y.N() == x.N())
+		      {
+			  err=0; // correction dec 2008 FH 
+			  theplot << what ;
+			  theplot << x << y ;
+		      }
+		    else  
+		      {
+			  if(verbosity)
+			      cerr << "Warning:  Plot of array with wrong size (item "<< i + 1 
+			      << ") sizes = " << x.size()<< " , " << y.size()  << endl;
+		      }
+		    
+		}
+	      else if (l[i].what==4 )
+		{
+		    err=0;
 		    theplot << what ;
-		    theplot << x << y ;
-		  }
-		else  
-		  {
-		    if(verbosity)
-		      cerr << "Warning:  Plot of array with wrong size (item "<< i + 1 
-			   << ") sizes = " << x.size()<< " , " << y.size()  << endl;
-		  }
-		
-	      }
-	    else if (l[i].what==4 )
-	      {
-		err=0;
-		theplot << what ;
-		const  E_BorderN * Bh= l[i].evalb(0,s);
-		Bh->SavePlot(s,theplot);
-	      }
-	    else if(what ==5)
-	      {
-		  pTh3=&l[i].evalm3(0,s);
-		  if(pTh) {
-		      err=0;
-		      theplot << what ; 
-		      theplot <<mapth3[ &l[i].evalm3(0,s)];// numero du maillage
-		  }
-	      }
-	    else  if (what==6 || what==6)
-	      {    
-		  int lg,nsb;		   
-		  fe30=  l[i].eval3(0,s,cmp0);
-		  fe31=  l[i].eval3(1,s,cmp1);
-		  
-		  if(what==6)
-		    {
-			if (fe30->x()) 
-			  {		 
-			      err=0;
-			      theplot << what ;
-			      theplot <<mapth3[ &(fe30->Vh->Th)];// numero du maillage
-			      // KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
-			      //   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
-			      KN<R3> Psub;
-			      KN<int> Ksub;
-			      KN<double> V1=fe30->Vh->newSaveDraw(*fe30->x(),cmp0,lg,Psub,Ksub,0);
-			      if(verbosity>9)
-				  cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
-				  << " "  << V1.max() << " " << V1.min() << endl;
-			      theplot << Psub ;
-			      theplot << Ksub ;
-			      theplot << V1;
-			  }
-		    }/*
-		  else
-		    {
-			if ( fe->x() && fe1->x())
-			  {
-			      err=0;
-			      theplot << what ;
-			      KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),*fe1->x(),cmp0,cmp1,lg,nsb);
-			      theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
-			      theplot << (long) nsb<< V1;
-			  }
-		    } */
-	      }
-	      
-	    else 
-	      ffassert(0);// erreur type theplot inconnue
-	    if(err==1)
-	      { if(verbosity) 
-		  cerr << "Warning: May be a bug in your script, \n" 
-		       << " a part of the plot is wrong t (mesh or FE function, curve)  => skip the item  " << i+1 
-		       << " in plot command " << endl;
-		theplot << -1L << (long) i ;
-	      }
-	    
+		    const  E_BorderN * Bh= l[i].evalb(0,s);
+		    Bh->SavePlot(s,theplot);
+		}
+	      else if(what ==5)
+		{
+		    pTh3=&l[i].evalm3(0,s);
+		    if(pTh) {
+			err=0;
+			theplot << what ; 
+			theplot <<mapth3[ &l[i].evalm3(0,s)];// numero du maillage
+		    }
+		}
+	      else  if (what==6 || what==6)
+		{    
+		    int lg,nsb;
+		    fe31=0;
+		    cmp1=-1;
+		    ll[ii].eval(fe30,cmp0);
+		    if(what==6)
+		      {
+			  if (fe30->x()) 
+			    {		 
+				err=0;
+				theplot << what ;
+				theplot <<mapth3[ &(fe30->Vh->Th)];// numero du maillage
+				// KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
+				//   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
+				KN<R3> Psub;
+				KN<int> Ksub;
+				KN<double> V1=fe30->Vh->newSaveDraw(*fe30->x(),cmp0,lg,Psub,Ksub,0);
+				if(verbosity>9)
+				    cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
+				    << " "  << V1.max() << " " << V1.min() << endl;
+				theplot << Psub ;
+				theplot << Ksub ;
+				theplot << V1;
+			    }
+		      }
+		    else 
+			ffassert(0);// erreur type theplot inconnue
+		    if(err==1)
+		      { if(verbosity) 
+			  cerr << "Warning: May be a bug in your script, \n" 
+			  << " a part of the plot is wrong t (mesh or FE function, curve)  => skip the item  " << i+1 
+			  << " in plot command " << endl;
+			  theplot << -1L << (long) i ;
+		      }
+		    
+		}
 	  }
 	theplot.SendEndPlot();
     } 
@@ -2954,15 +3071,16 @@ AnyType Plot::operator()(Stack s) const  {
     R2 uminmax(1e100,-1e100);
     R2 Vminmax(1e100,-1e100);
     bool first=true;
-    for (size_t i=0;i<l.size();i++)
-      { R2  P1,P2;
-      if (l[i].what==1 || l[i].what==2) 
+    for (size_t ii=0;ii<ll.size();ii++)
+	{
+	    int i=ll[ii].i;
+	    long what = ll[ii].what;
+	    R2  P1,P2;
+      if (what==1 || what==2) 
 	{
          
 	  if( !uaspectratio)   aspectratio= true;
-         
-	  fe   = l[i].eval(0,s,cmp0);
-	  fe1  = l[i].eval(1,s,cmp1);
+          ll[ii].eval(fe,cmp0,fe1,cmp1);
          
 	  if (!fe->x()) continue; 
          
@@ -2990,7 +3108,7 @@ AnyType Plot::operator()(Stack s) const  {
       else if (l[i].what==0) 
 	{
 	  if( !uaspectratio) aspectratio= true;
-	  const  Mesh & Th= l[i].evalm(0,s);
+	    const  Mesh & Th= *ll[ii].th;
 	  Th.BoundingBox(P1,P2);
 	  cTh=&Th;
 	}
@@ -3079,248 +3197,254 @@ AnyType Plot::operator()(Stack s) const  {
    bool plotting = true;   
      //  drawing part  ------------------------------
    while (plotting)
-   {
-    if(verbosity>99) cout << "plot::operator() Drawing part \n";
-    plotting = false; 
-    for (size_t i=0;i<l.size();i++)
-    if (l[i].what==0) 
-     if (fill)
-       l[i].evalm(0,s).Draw(0,fill);
-     else 
-        l[i].evalm(0,s).Draw(0,fill);
-    else  if (l[i].what==1 || l[i].what==2)
      {
-      fe=  l[i].eval(0,s,cmp0);
-      fe1= l[i].eval(1,s,cmp1);;
-     if (!fe->x()) continue;
+	 if(verbosity>99) cout << "plot::operator() Drawing part \n";
+	 plotting = false; 
+	 for (size_t ii=0;ii<ll.size();ii++)
+	   {
+	       int i=ll[ii].i;
+	       long what = ll[i].what;
+	       
+	       if (l[i].what==0) 
+		   if (fill)
+		       ll[ii].th->Draw(0,fill);
+		   else 
+		       ll[ii].th->Draw(0,fill);
+		   else  if (what==1 || what==2)
+		     {
+			 ll[ii].eval(fe,cmp0,fe1,cmp1);
+			 // fe=  l[i].eval(0,s,cmp0);
+			 // fe1= l[i].eval(1,s,cmp1);;
+			 if (!fe->x()) continue;
 #ifdef VVVVVVV      
-       cout << "   Min = " << fe->x->min() << " max = " << fe->x->max() ;
-      if(fe1 && verbosity > 1)
-        cout << " Min = " << fe1->x->min() << " max = " << fe1->x->max() ;   
-      cout << endl;   
+			 cout << "   Min = " << fe->x->min() << " max = " << fe->x->max() ;
+			 if(fe1 && verbosity > 1)
+			     cout << " Min = " << fe1->x->min() << " max = " << fe1->x->max() ;   
+			 cout << endl;   
 #endif
-      if (fe1) 
-         {
-          if (fe->Vh == fe1->Vh)           
-           vecvalue=true,fe->Vh->Draw(*fe->x(),*fe1->x(),Varrow,coeff,cmp0,cmp1,colors,nbcolors,hsv,drawborder);
-          else
-           cerr << " On ne sait tracer que de vecteur sur un meme interpolation " << endl;
-          if (drawmeshes) fe->Vh->Th.Draw(0,fill);
-         }      
-      else 
-
-        
-	      if (fill)
-		isovalue=true,fe->Vh->Drawfill(*fe->x(),Viso,cmp0,1.,colors,nbcolors,hsv,drawborder);
-	      else 
-		isovalue=true,fe->Vh->Draw(*fe->x(),Viso,cmp0,colors,nbcolors,hsv,drawborder);
-         
-	    if (drawmeshes) fe->Vh->Th.Draw(0,fill);
-
-	  }
-	else if (l[i].what==4) 
-	  {
-	    const  E_BorderN * Bh= l[i].evalb(0,s);
-	    Bh->Plot(s);          
-	  }
-     
-	else if(l[i].what==3)
-	  {
-        
-	    tab x=l[i].evalt(0,s);
-	    tab y=l[i].evalt(1,s);
-	    long k= Min(x.N(),y.N());
-	    // cout << " ˆ faire " << endl;
-	    // cout << " plot :\n" << * l[i].evalt(0,s) << endl << * l[i].evalt(1,s) << endl;
-	    rmoveto(x[0],y[0]);
-	    couleur(2+i);
-	    for (int i= 1;i<k;i++)
-	      rlineto(x[i],y[i]);
-	  }
-      if (value) {
-	int k=0; 
-	if (isovalue) {PlotValue(Viso,k,"IsoValue");k+= Viso.N()+3;}
-	if (vecvalue) {PlotValue(Varrow,k,"Vec Value");k+= Varrow.N()+3;}
-      } 
-      // value=false;
-      
-      if (cm) {       
-	couleur(1);
-	DrawCommentaire(cm->c_str(),0.1,0.97);
-      }
-      if (ops ) {
-	ops=false;
-	closePS();
-      }
-      if (wait && ! NoWait) 
-	{  
-	next:
-          float x,y,x0,y0,x1,y1,dx,dy,coef=1.5;
-          getcadre(x0,x1,y0,y1);
-          char c=Getxyc(x,y);
-          dx=(x1-x0)/2.;dy=(y1-y0)/2.;
-          
-          switch (c) 
-	    { 
-	    case '+' :  plotting=true; 
-	      cadre(x-dx/coef,x+dx/coef,y-dy/coef,y+dy/coef);reffecran();
-	      break;
-	    case '-' :  plotting=true; 
-	      cadre(x-dx*coef,x+dx*coef,y-dy*coef,y+dy*coef);;reffecran();
-	      break;
-	    case '=' :  plotting=true; 
-	      coeff=ccoeff;
-	      cadre(xx0,xx1,yy0,yy1);;reffecran();
-	      break;
-	    case 'r' :  plotting=true; 
-	      reffecran();
-	      break;
-	    case 'a' : 
-	    case 'c' : coeff /= 1.5; plotting=true;reffecran(); 
-	      reffecran();
-	      break;
-	    case 'A' : 
-	    case 'C' : coeff *= 1.5;
-	      plotting=true;
-	      reffecran();
-	      break;
-	    case 'b' : bw= !bw;NoirEtBlanc(bw)  ;
-	      plotting=true;
-	      reffecran();
-	      break;
-	    case 'v' : value = !value ; plotting=true;
-	      reffecran();
-	      break;
-	    case 'f' : fill = !fill ; plotting=true;
-	      reffecran();
-	      break;
-	    case 'g' : setgrey(grey=!getgrey()); plotting=true;
-	      reffecran();
-	      break;
-                 
-	    case 'm' : 
-	      reffecran();
-	      drawmeshes= !drawmeshes;
-	      plotting=true;
-	      break;
-	    case 'p' : 
-	      plotting=true;
-	      reffecran();
-	      ops=true;
-	      openPS(0);
-	      plotting=true;
-	      break;
-	    case 'q' :
-	      couleur(8);
+			 if (fe1) 
+			   {
+			       if (fe->Vh == fe1->Vh)           
+				   vecvalue=true,fe->Vh->Draw(*fe->x(),*fe1->x(),Varrow,coeff,cmp0,cmp1,colors,nbcolors,hsv,drawborder);
+			       else
+				   cerr << " On ne sait tracer que de vecteur sur un meme interpolation " << endl;
+			       if (drawmeshes) fe->Vh->Th.Draw(0,fill);
+			   }      
+			 else 
+			     
+			     
+			     if (fill)
+				 isovalue=true,fe->Vh->Drawfill(*fe->x(),Viso,cmp0,1.,colors,nbcolors,hsv,drawborder);
+			     else 
+				 isovalue=true,fe->Vh->Draw(*fe->x(),Viso,cmp0,colors,nbcolors,hsv,drawborder);
+			 
+			 if (drawmeshes) fe->Vh->Th.Draw(0,fill);
+			 
+		     }
+		   else if (l[i].what==4) 
+		     {
+			 const  E_BorderN * Bh= l[i].evalb(0,s);
+			 Bh->Plot(s);          
+		     }
+	       
+		   else if(l[i].what==3)
+		     {
+			 
+			 tab x=l[i].evalt(0,s);
+			 tab y=l[i].evalt(1,s);
+			 long k= Min(x.N(),y.N());
+			 // cout << " ˆ faire " << endl;
+			 // cout << " plot :\n" << * l[i].evalt(0,s) << endl << * l[i].evalt(1,s) << endl;
+			 rmoveto(x[0],y[0]);
+			 couleur(2+i);
+			 for (int i= 1;i<k;i++)
+			     rlineto(x[i],y[i]);
+		     }
+	   }
+	 if (value) {
+	     int k=0; 
+	     if (isovalue) {PlotValue(Viso,k,"IsoValue");k+= Viso.N()+3;}
+	     if (vecvalue) {PlotValue(Varrow,k,"Vec Value");k+= Varrow.N()+3;}
+	 } 
+	 // value=false;
+	 
+	 if (cm) {       
+	     couleur(1);
+	     DrawCommentaire(cm->c_str(),0.1,0.97);
+	 }
+	 if (ops ) {
+	     ops=false;
+	     closePS();
+	 }
+	 if (wait && ! NoWait) 
+	   {  
+	   next:
+	       float x,y,x0,y0,x1,y1,dx,dy,coef=1.5;
+	       getcadre(x0,x1,y0,y1);
+	       char c=Getxyc(x,y);
+	       dx=(x1-x0)/2.;dy=(y1-y0)/2.;
+	       
+	       switch (c) 
+	       { 
+		   case '+' :  plotting=true; 
+		       cadre(x-dx/coef,x+dx/coef,y-dy/coef,y+dy/coef);reffecran();
+		       break;
+		   case '-' :  plotting=true; 
+		       cadre(x-dx*coef,x+dx*coef,y-dy*coef,y+dy*coef);;reffecran();
+		       break;
+		   case '=' :  plotting=true; 
+		       coeff=ccoeff;
+		       cadre(xx0,xx1,yy0,yy1);;reffecran();
+		       break;
+		   case 'r' :  plotting=true; 
+		       reffecran();
+		       break;
+		   case 'a' : 
+		   case 'c' : coeff /= 1.5; plotting=true;reffecran(); 
+		       reffecran();
+		       break;
+		   case 'A' : 
+		   case 'C' : coeff *= 1.5;
+		       plotting=true;
+		       reffecran();
+		       break;
+		   case 'b' : bw= !bw;NoirEtBlanc(bw)  ;
+		       plotting=true;
+		       reffecran();
+		       break;
+		   case 'v' : value = !value ; plotting=true;
+		       reffecran();
+		       break;
+		   case 'f' : fill = !fill ; plotting=true;
+		       reffecran();
+		       break;
+		   case 'g' : setgrey(grey=!getgrey()); plotting=true;
+		       reffecran();
+		       break;
+		       
+		   case 'm' : 
+		       reffecran();
+		       drawmeshes= !drawmeshes;
+		       plotting=true;
+		       break;
+		   case 'p' : 
+		       plotting=true;
+		       reffecran();
+		       ops=true;
+		       openPS(0);
+		       plotting=true;
+		       break;
+		   case 'q' :
+		       couleur(8);
 #ifdef DRAWING		      
-	      if (cTh) cTh->quadtree->Draw();
+		       if (cTh) cTh->quadtree->Draw();
 #endif		       
-	      couleur(1);
-	      goto next;
-	    case 's' :
-	      if(cTh)
-		{
-		  R2 P(x,y),PF(P),Phat;
-		  bool outside;
-		  const Vertex * v=cTh->quadtree->NearestVertexWithNormal(P);
-		  if (!v)  v=cTh->quadtree->NearestVertex(P);
-		  else {
-		    couleur(2);
-		    const Triangle * t= cTh->Find( PF,  Phat,outside,&(*cTh)[cTh->Contening(v)]) ;
-		    t->Draw(0.8);
-		    couleur(2);
-		    PF=(*t)(Phat);
-		    DrawMark(PF,0.003);
-                
-		  }
-		  couleur(5);
-                  DrawMark(P,0.0015);
-                
-		  couleur(1);
-		  if (v)
-		    DrawMark(*v,0.005);
-                
-		  goto next;}
-	    case '?':
-	      int i=2;
-	      reffecran();               
-	      //Show("Enter a keyboard character in graphic window to do :",i++);
-	      Show("Enter a keyboard character in the FreeFem Graphics window in order to:",i++);
-
-	      i+=2;
-	      //Show("+)  zomm around the cursor 3/2 times ",i++);
-	      Show("+)  zoom in around the cursor 3/2 times ",i++);
-	      Show("-)  zoom out around the cursor 3/2 times  ",i++);
-	      //Show("-)  unzomm around the cursor 3/2 times  ",i++)	;
-	      Show("=)  reset zooming  ",i++);
-	      Show("r)  refresh plot ",i++);
-	      Show("ac) increase   the size arrow ",i++);
-	      Show("AC) decrease the size arrow  ",i++);
-	      Show("b)  switch between black and white or color plotting ",i++);
-	      Show("g)  switch between grey or color plotting ",i++);
-	      Show("f)  switch between filling iso or not  ",i++);
-	      Show("v)  switch between show  the numerical value of iso or not",i++);
-	      Show("p)   save  plot in a Postscprit file",i++);
-	      Show("m)  switch between show  meshes or not",i++);
-	      Show("p)  switch between show  quadtree or not (for debuging)",i++);
-	      Show("t)  find  Triangle ",i++);
-	      Show("?)  show this help window",i++);
-	      Show("any other key : continue ",++i);
-	      goto next;
-	    }   
-	  if (!pViso || !pVarrow)
-	    { //  recompute the iso bound
-	      R2 uminmax(1e100,-1e100);
-	      R2 Vminmax(1e100,-1e100);
-	      for (size_t i=0;i<l.size();i++)
-		{ R2  P1,P2;
-		if (l[i].what==1 || l[i].what==2) 
-		  {
-		    fe   = l[i].eval(0,s,cmp0);
-		    fe1  = l[i].eval(1,s,cmp1);
-		   
-		    if (!fe->x()) continue; 
-		   
-		    // int nb=fe->x()->N();
-		   
-		   
-		    if (fe1==0)
-		      uminmax = minmax(uminmax,fe->Vh->MinMax(*fe->x(),cmp0,false));
-		    else
-		      {
-			if (fe1) 
-			  if (fe->Vh == fe1->Vh) 
-			    {  
-			      KN_<R> u( *fe->x()),v(*fe1->x());     
-			      Vminmax = minmax(uminmax,fe->Vh->MinMax(u,v,cmp0,cmp1,false));
-			    }  
-		      }
-		  }
-		else continue;
-	       
-	       
-		}
-	      if (verbosity>5)   cout << " u bound " <<  uminmax << endl;
-	      R umx=uminmax.y,umn=uminmax.x;
-	      int N=Viso.N();
-	      int Na=Varrow.N();
-	      R d = fill ? (umx-umn)/(N-1)  : (umx-umn)/(N);       
-	      R x = fill ? umn-d/2 :umn+d/2;
-	      if (!pViso) 
-		for (int i = 0;i < N;i++)
-		  {Viso[i]=x;x +=d; }
-	      if (fill && !pViso) {Viso[0]=umn-d;Viso[N-1]=umx+d;}
-	      x=0; d= sqrt(Vminmax.y)/Na;
-	      if (!pVarrow)
-		for (int i = 0;i < Na;i++)
-		  {Varrow[i]=x;x +=d; }
-	     
-	     
-	     
-	    }
-	}  
-      *mps=mp;
-    } //  end plotting 
+		       couleur(1);
+		       goto next;
+		   case 's' :
+		       if(cTh)
+			 {
+			     R2 P(x,y),PF(P),Phat;
+			     bool outside;
+			     const Vertex * v=cTh->quadtree->NearestVertexWithNormal(P);
+			     if (!v)  v=cTh->quadtree->NearestVertex(P);
+			     else {
+				 couleur(2);
+				 const Triangle * t= cTh->Find( PF,  Phat,outside,&(*cTh)[cTh->Contening(v)]) ;
+				 t->Draw(0.8);
+				 couleur(2);
+				 PF=(*t)(Phat);
+				 DrawMark(PF,0.003);
+				 
+			     }
+			     couleur(5);
+			     DrawMark(P,0.0015);
+			     
+			     couleur(1);
+			     if (v)
+				 DrawMark(*v,0.005);
+			     
+			 goto next;}
+		   case '?':
+		       int i=2;
+		       reffecran();               
+		       //Show("Enter a keyboard character in graphic window to do :",i++);
+		       Show("Enter a keyboard character in the FreeFem Graphics window in order to:",i++);
+		       
+		       i+=2;
+		       //Show("+)  zomm around the cursor 3/2 times ",i++);
+		       Show("+)  zoom in around the cursor 3/2 times ",i++);
+		       Show("-)  zoom out around the cursor 3/2 times  ",i++);
+		       //Show("-)  unzomm around the cursor 3/2 times  ",i++)	;
+		       Show("=)  reset zooming  ",i++);
+		       Show("r)  refresh plot ",i++);
+		       Show("ac) increase   the size arrow ",i++);
+		       Show("AC) decrease the size arrow  ",i++);
+		       Show("b)  switch between black and white or color plotting ",i++);
+		       Show("g)  switch between grey or color plotting ",i++);
+		       Show("f)  switch between filling iso or not  ",i++);
+		       Show("v)  switch between show  the numerical value of iso or not",i++);
+		       Show("p)   save  plot in a Postscprit file",i++);
+		       Show("m)  switch between show  meshes or not",i++);
+		       Show("p)  switch between show  quadtree or not (for debuging)",i++);
+		       Show("t)  find  Triangle ",i++);
+		       Show("?)  show this help window",i++);
+		       Show("any other key : continue ",++i);
+		       goto next;
+	       }   
+	       if (!pViso || !pVarrow)
+		 { //  recompute the iso bound
+		     R2 uminmax(1e100,-1e100);
+		     R2 Vminmax(1e100,-1e100);
+		     for (size_t i=0;i<l.size();i++)
+		       { R2  P1,P2;
+			   if (l[i].what==1 || l[i].what==2) 
+			     {
+				 fe   = l[i].eval(0,s,cmp0);
+				 fe1  = l[i].eval(1,s,cmp1);
+				 
+				 if (!fe->x()) continue; 
+				 
+				 // int nb=fe->x()->N();
+				 
+				 
+				 if (fe1==0)
+				     uminmax = minmax(uminmax,fe->Vh->MinMax(*fe->x(),cmp0,false));
+				 else
+				   {
+				       if (fe1) 
+					   if (fe->Vh == fe1->Vh) 
+					     {  
+						 KN_<R> u( *fe->x()),v(*fe1->x());     
+						 Vminmax = minmax(uminmax,fe->Vh->MinMax(u,v,cmp0,cmp1,false));
+					     }  
+				   }
+			     }
+			   else continue;
+			   
+			   
+		       }
+		     if (verbosity>5)   cout << " u bound " <<  uminmax << endl;
+		     R umx=uminmax.y,umn=uminmax.x;
+		     int N=Viso.N();
+		     int Na=Varrow.N();
+		     R d = fill ? (umx-umn)/(N-1)  : (umx-umn)/(N);       
+		     R x = fill ? umn-d/2 :umn+d/2;
+		     if (!pViso) 
+			 for (int i = 0;i < N;i++)
+			   {Viso[i]=x;x +=d; }
+		     if (fill && !pViso) {Viso[0]=umn-d;Viso[N-1]=umx+d;}
+		     x=0; d= sqrt(Vminmax.y)/Na;
+		     if (!pVarrow)
+			 for (int i = 0;i < Na;i++)
+			   {Varrow[i]=x;x +=d; }
+		     
+		     
+		     
+		 }
+	   }  
+	 *mps=mp;
+     } //  end plotting 
   NoirEtBlanc(0)  ;
   setgrey(greyo);
   if (colors) delete[] colors;

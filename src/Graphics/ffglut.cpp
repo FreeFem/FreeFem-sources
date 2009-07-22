@@ -2454,9 +2454,15 @@ static void Key( unsigned char key, int x, int y )
 	
       case 'b':
 	win->theplot->grey = ! win->theplot->grey   ;
+	win->changeiso=true;
+	win->changearrow=true;
+
 	break;
       case 'g':
 	win->theplot->grey = !  win->theplot->grey   ;
+	win->changeiso=true;
+	win->changearrow=true;
+
 	break;
 	
       case 'v':
