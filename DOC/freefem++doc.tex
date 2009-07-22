@@ -14,7 +14,7 @@
 
 
 \usepackage{times}
-\def\VERSION{3.4}
+\def\VERSION{3.4-1}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -6893,7 +6893,9 @@ types of finite element are: \index{type of finite element}
      P1dc_{h} = \left\{ v \in L^{2}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{1} \right.\right\} \label{eq:P1dc}
      \end{equation}
-     \item[P1b,P!b3d]  piecewise linear  continuous finite element plus bubble (2d, 3d)
+     Warning, due to interpolation problem, the degree of freedom is not the vertices but three vectices  move  
+     inside with $T(X)= G + .99  (X-G) $ where $G$ is the barycenter, (version 2.24-4).
+     \item[P1b,P1b3d]  piecewise linear  continuous finite element plus bubble (2d, 3d) \label{warP1dc}
      \index{P1b|textbf}\index{fespace!P1b}\index{fespace!P1b3d}
      
      The 2d case:
@@ -6906,7 +6908,7 @@ types of finite element are: \index{type of finite element}
      P1b_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{1} \oplus \mathrm{Span}\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \lambda^{K}_{3} \} \right.\right\} \label{eq:P1b-3d}
      \end{equation}
-    where $\lambda ^{K}_{i}, i=0,..,d$ are the $d+1$ barycentric  coordinate functions of the element  $K$ (triangle or tetrqhedron). 
+    where $\lambda ^{K}_{i}, i=0,..,d$ are the $d+1$ barycentric  coordinate functions of the element  $K$ (triangle or tetrahedron). 
 
      \item[P2,P23d] piecewise $P_{2}$  continuous finite element (2d, 3d), 
      \index{P2|textbf}\index{fespace!P2}
@@ -6929,6 +6931,9 @@ types of finite element are: \index{type of finite element}
      P2dc_{h} = \left\{ v \in L^{2}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{2} \right.\right\}
      \end{equation}
+    Warning, due to interpolation problem, the degree of freedom is not the six  P2 nodes  but six  nodes  move
+     inside with $T(X)= G + .99  (X-G) $ where $G$ is the barycenter, (version 2.24-4).
+     
      \item[RT0,RT03d]  Raviart-Thomas finite element of degree $0$.
      \index{RT0|textbf}\index{fespace!RT0}
      
@@ -6947,14 +6952,14 @@ types of finite element are: \index{type of finite element}
         \label{eq:RT03d}
      \end{equation}
       where by writing
-      $\textrm{div }\mathbf{w}=\sum_{i=!}^d\p w_i/\p x_i$ and 
+      $\textrm{div }\mathbf{w}=\sum_{i=!}^d\p w_i/\p x_i$ with  
       $ \mathbf{w}=(w_i)_{i=1}^d$,
       $$
       H(\textrm{div})=\left\{\mathbf{w}\in L^{2}(\Omega)^d\left|
       \textrm{div } \mathbf{w}\in L^{2}(\Omega)
       \right.\right\}
       $$
-      and
+      and where 
       $\alpha^1_{K},\alpha^2_{K},\alpha^3_{K},\beta_{K} $ are real numbers.
      \item[Edge03d]  Nedelec finite element or Edge  Element of degree $0$.
      \index{Edge03d|textbf}\index{fespace!Edge03d}
@@ -6967,7 +6972,7 @@ types of finite element are: \index{type of finite element}
          \label{eq:Edge03d}
      \end{equation}
       where by writing
-      $\textrm{curl}\mathbf{w}=\vectthree{\p w_2/\p x_3-\p w_3/\p x_2}{\p w_3/\p x_1-\p w_1/\p x_3}{\p w_1/\p x_2-\p w_2/\p x_1}$ and 
+      $\textrm{curl}\mathbf{w}=\vectthree{\p w_2/\p x_3-\p w_3/\p x_2}{\p w_3/\p x_1-\p w_1/\p x_3}{\p w_1/\p x_2-\p w_2/\p x_1}$ with 
       $ \mathbf{w}=(w_i)_{i=1}^d$,
       $$
       H(\textrm{curl})=\left\{\mathbf{w}\in L^{2}(\Omega)^d\left|
@@ -6975,13 +6980,13 @@ types of finite element are: \index{type of finite element}
       \right.\right\}
       $$
       and
-      $\alpha^1_{K},\alpha^2_{K},\alpha^3_{K},\beta^1_{K},\beta^12_{K},\beta^3_{K} $ are real numbers.
+      $\alpha^1_{K},\alpha^2_{K},\alpha^3_{K},\beta^1_{K},\beta^2_{K},\beta^3_{K} $ are real numbers.
      \item[P1nc] \index{P1nc|textbf}\index{fespace!P1nc} piecewise linear   element continuous at
      the middle of edge only.
 
 \end{description}
-
-If we get the finite element spaces
+\subsection{usage  of two dimensional finite element spaces}
+If we get the two dinensional finite element spaces
 $$  X_{h} = \{ v \in H^{1}(]0,1[^2) |\; \forall K \in \mathcal{T}_{h}
 \quad v_{|K} \in
 P_{1} \}$$
@@ -7017,10 +7022,60 @@ and $U_{h},V_{h} \in R_{h}$
   Rh [Uxh,Uyh],[Vxh,Vyh];
   Xh[@int] Uh(10); //  array of 10 function in Xh
   Rh[@int] [Wxh,Wyh](10); //  array of 10 functions in Rh.\index{array!fespace}
+  Wxh[5](0.5,0.5)  // the 6th  function at point $(0.5,0.5)$
+  Wxh[5][] // the array of the degre of freedom of the 6 function.  
 \eFF
 
 The functions $U_{h},V_{h}$ have two components so we have
 $$U_{h}=\vecttwo{Uxh}{Uyh}  \quad \mbox{and}\quad V_{h}=\vecttwo{Vxh}{Vyh}$$
+
+\subsection{usage  of thee dimensional finite element spaces}
+If we get the three dimensional finite element spaces
+$$  X_{h} = \{ v \in H^{1}(]0,1[^3) |\; \forall K \in \mathcal{T}_{h}
+\quad v_{|K} \in
+P_{1} \}$$
+$$ X_{ph} = \{  v \in X_{h} |\; v(\vecttwo{0}{.} ) =  v(\vecttwo{1}{.}) , v(\vecttwo{.}{0} ) =  v(\vecttwo{.}{1} )  \}$$
+$$  M_{h} = \{ v \in H^{1}(]0,1[^2) |\; \forall K \in \mathcal{T}_{h}
+\quad v_{|K} \in
+P_{2} \}$$
+$$  R_{h} = \{ \mathbf{v} \in H^{1}(]0,1[^2)^{2} |\; \forall K \in \mathcal{T}_{h}
+\quad
+ \mathbf{v}_{|K}(x,y) =
+         \vecttwo{\alpha_{K}}{\beta_{K}} + \gamma_{K}\vecttwo{x}{y} \}$$
+
+when $\mathcal{T}_h$ is a mesh $10\times 10\times 10$ of the unit cubic  $]0,1[^2$,
+we only write in \freefempp as follows:
+\bFF
+@mesh3 Th=buildlayers(square(10,10),10, zbound=[0,1]);
+// label:  0 up, 1 down; 2 front, 3 left, 4 back, 5: right   
+@fespace Xh(Th,@P1);      //  scalar FE
+@fespace Xph(Th,P1,
+         periodic=[[0,x,y],[1,x,y],
+                   [2,x,z],[4,x,z],
+                   [3,y,z],[5,y,z]]);//three-periodic FE
+@fespace Mh(Th,@P2);      //  scalar FE
+@fespace Rh(Th,@RT03d);     //  vectorial FE
+\eFF
+where \texttt{Xh,Mh,Rh} expresses finite element spaces (called FE spaces
+\index{FE space}) $X_h,\, M_h,\, R_h$, respectively.
+If we want use FE-functions
+$ u_{h},v_{h} \in X_{h} $ and $ p_{h},q_{h} \in M_{h} $
+and $U_{h},V_{h} \in R_{h}$
+\index{FE-function}, we write in \freefempp
+\bFF
+  Xh uh,vh;
+  Xph uph,vph;
+  Mh ph,qh;
+  Rh [Uxh,Uyh,Uyzh],[Vxh,Vyh, Vyzh];
+  Xh[@int] Uh(10); //  array of 10 function in Xh 
+  Rh[@int] [Wxh,Wyh,Wzh](10); //  array of 10 functions in Rh.\index{array!fespace}
+  Wxh[5](0.5,0.5,0.5)  // the 6th  function at point $(0.5,0.5,0.5)$
+  Wxh[5][] // the array of the degre of freedom of the 6 function.  
+
+\eFF
+
+The functions $U_{h},V_{h}$ have three components so we have
+$$U_{h}=\vectthree{Uxh}{Uyh}{Uzh}  \quad \mbox{and}\quad V_{h}=\vectthree{Vxh}{Vyh}{Vzh}$$
 
 \subsection{Lagrange finite element}
 \label{sec:P0P1P2}
@@ -7386,21 +7441,21 @@ Two problems need to be solved:
 \index{=}\index{interpolation}
 Try the following example
 \bFF
-mesh Ths= square(10,10);
- mesh Thg= square(30,30,[x*3-1,y*3-1]); 
- plot(Ths,Thg,ps="overlapTh.eps",wait=1);
-fespace Ch(Ths,P2); fespace Dh(Ths,P2dc);
-fespace Fh(Thg,P2dc); 
+@mesh Ths= square(10,10);
+@mesh Thg= square(30,30,[x*3-1,y*3-1]); 
+@plot(Ths,Thg,ps="overlapTh.eps",wait=1);
+@fespace Ch(Ths,P2); fespace Dh(Ths,P2dc);
+@fespace Fh(Thg,P2dc); 
 Ch us= (x-0.5)*(y-0.5);
 Dh vs= (x-0.5)*(y-0.5);
 Fh ug=us,vg=vs;
-plot(us,ug,wait=1,ps="us-ug.eps"); // see figure \ref{fig:us-ug}
-plot(vs,vg,wait=1,ps="vs-vg.eps"); // see figure \ref{fig:vs-vg}
+@plot(us,ug,wait=1,ps="us-ug.eps"); // see figure \ref{fig:us-ug}
+@plot(vs,vg,wait=1,ps="vs-vg.eps"); // see figure \ref{fig:vs-vg}
 \eFF
 
 \twoplot[height=6cm]{us-ug}{vs-vg}{Extension of a continuous FE-function
  \label{fig:us-ug}}%
-{Extention of discontinuous FE-function\label{fig:vs-vg} }
+{Extention of discontinuous FE-function\label{fig:vs-vg}, see warning \ref{warP1dc} }
 
 \end{note}
 
@@ -7428,7 +7483,7 @@ To present the principles  of Variational Formulations or also called weak forms
 let us take a model problem : a Poisson equation with  Dirichlet and Robin Boundary condition
 \index{Dirichlet}\index{Robin}.
 
-The problem is: Find $u$ a real function defined on  domain $\Omega$ of $\R^2$ such that
+The problem is: Find $u$ a real function defined on  domain $\Omega$ of $\R^d$ $(d=2,3)$ such that
 
 \begin{equation} -  \nabla.(\nu \nabla u) = f  , \quad \mbox{in}\quad \Omega, \quad
  a u + \nu \frac{\p u}{\p n} = b \quad\mbox{on}\quad \Gamma_r, \quad
@@ -7437,9 +7492,13 @@ The problem is: Find $u$ a real function defined on  domain $\Omega$ of $\R^2$ s
 
 where
 \begin{itemize}
-\item $ \nabla.(\nu \nabla u) = \p_x(\nu \p_x u ) + \p_y(\nu \p_y u ) $
+\item if $d=2$ then  $ \nabla.(\nu \nabla u) = \p_x(\nu \p_x u ) + \p_y(\nu \p_y u ) $
 with $ \p_x u = \frac{\p u}{\p x}$
 and $\p_y u = \frac{\p u}{\p y}$
+\item if $d=3$ then $ \nabla.(\nu \nabla u) = \p_x(\nu \p_x u ) + \p_y(\nu \p_y u ) +  \p_z(\nu \p_z u ) $
+with $ \p_x u = \frac{\p u}{\p x}$
+, $\p_y u = \frac{\p u}{\p y}$ and , $\p_z u = \frac{\p u}{\p z}$
+
 \item the border $\Gamma=\p \Omega$ is split in $\Gamma_d$ and $\Gamma_n$
 such that $\Gamma_d \cup \Gamma_n = \emptyset$ and $ \Gamma_d \cap \Gamma_n = \p \Omega$,
 \item $\nu$ is a given positive function, such that $\exists \nu_0 \in \R ,\quad 0 < \nu_0  \leq \nu $.
@@ -7456,12 +7515,14 @@ the function is defined just by derivative, so this defined too a constant
 
 Let  ${ v} $  a regular test function  null  on  $\Gamma_d$ , by integration par part we get
  \begin{equation}-\int_{\Omega}  \nabla.(\nu \nabla  u) \, { v} \,d\omega = \int_{\Omega}  \nu \nabla{ v} . \nabla u  \,d\omega= \int_{\Omega} f {v}  \,d\omega - \int_{\Gamma} {v}
- \nu \frac{  \p u}{\p n}  \,d\gamma,
+ \nu \frac{  \p u}{\p \bm{n}}  \,d\gamma,
   \end{equation}
 
-where $ \nabla{ v} . \nabla u = \frac{\p u}{\p x}\frac{\p { v}}{\p x}
-+\frac{\p u}{\p y}\frac{\p { v}}{\p y}$ , and where $n$ is the unitary outside normal of
- $\p\Omega$.
+where if $d=2$ the $ \nabla{ v} . \nabla u = (\frac{\p u}{\p x}\frac{\p { v}}{\p x}
++\frac{\p u}{\p y}\frac{\p { v}}{\p y})$ , 
+where if $d=3$ the $ \nabla{ v} . \nabla u = (\frac{\p u}{\p x}\frac{\p { v}}{\p x}
++\frac{\p u}{\p y}\frac{\p { v}}{\p y} + \frac{\p u}{\p z}\frac{\p { v}}{\p z})$ , 
+and where $\bm{n}$ is the unitary outside normal of $\p\Omega$.
 
 Now we note that $ \nu \frac{  \p u}{\p n} = - a u + g $  on $\Gamma_r$
 and $  v = 0 $ on $ \Gamma_d $ and $ \p \Omega = \Gamma_d \cup \Gamma_n $
@@ -7502,21 +7563,37 @@ where $\varepsilon$ is a small parameter ( $ \sim 10^{-10}$ ).
 
 Remark that if the solution
 is of order $ \frac{1}{\varepsilon}$ then the compatibility condition is unsatisfied, otherwise
-we get the solution such that $\int_\Omega u = 0 $.
-
+we get the solution such that $\int_\Omega u = 0 $, you can also add a Lagrange multiplier to solver
+the real mathemaical probleme like in the \verb!examples++-tutorial/Laplace-lagrange-mult.edp!
+example.
 \end{note}
 
-In \texttt{FreeFem++},  the problem (\ref{eq:v-poisson}) become
+In \texttt{FreeFem++},  the bidimensional problem (\ref{eq:v-poisson}) become
 \bFF
-  problem Pw(u,v) =
-       @int2d(Th)( nu* ( dx(u)*dx(u) +  dy(u)*dy(u)))  // $\int_{\Omega} \nu \nabla{v} . \nabla u  \,d\omega$ \hfilll
+ @ problem Pw(u,v) =
+       @int2d(Th)( nu*( dx(u)*dx(u) +  dy(u)*dy(u)) )  // $\int_{\Omega} \nu \nabla{v} . \nabla u  \,d\omega$ \hfilll
      + @int1d(Th,gn)( a * u*v )                        // $\int_{\Gamma_r} a u v  \,d\gamma$  \hfilll
      - @int2d(Th)(f*v)                                 // $\int_{\Omega} f v  \,d\omega $ \hfilll
      - @int1d(Th,gn)( b * v )                          // $ \int_{\Gamma_r} b v  \,d\gamma$ \hfilll
      + @on(gd)(u= g) ;                                 // $ u =g $ on $\Gamma_d$  \hfilll
 \eFF
-where \texttt{Th} is a mesh of the domain $\Omega$, and \texttt{gd} and \texttt{gn} are respectively the
+where \texttt{Th} is a mesh of the the bidimensional  domain $\Omega$, and \texttt{gd} and \texttt{gn} are respectively the
 boundary label of boundary $\Gamma_d$ and $\Gamma_n$.
+
+And the the three dimensional problem (\ref{eq:v-poisson}) become
+
+\bFF
+  @macro Grad(u) [dx(u),dy(u),dz(u) ]//EOM :  definition of the 3d Grad macro  
+  @problem Pw(u,v) =
+       @int3d(Th)( nu*( Grad(u)'*Grad(v) ) )  // $\int_{\Omega} \nu \nabla{v} . \nabla u  \,d\omega$ \hfilll
+     + @int2d(Th,gn)( a * u*v )                        // $\int_{\Gamma_r} a u v  \,d\gamma$  \hfilll
+     - @int3d(Th)(f*v)                                 // $\int_{\Omega} f v  \,d\omega $ \hfilll
+     - @int2d(Th,gn)( b * v )                          // $ \int_{\Gamma_r} b v  \,d\gamma$ \hfilll
+     + @on(gd)(u= g) ;                                 // $ u =g $ on $\Gamma_d$  \hfilll
+\eFF
+where \texttt{Th} is a mesh of the three dimensional  domain $\Omega$, and \texttt{gd} and \texttt{gn} are respectively the
+boundary label of boundary $\Gamma_d$ and $\Gamma_n$.
+
 
 \subsection{Parameters affecting \texttt{solve} and \texttt{problem}}
 \label{def problem}
@@ -7644,17 +7721,22 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
              \texttt{ on(1,u1=g1,u2=g2) }
                 If you have vectorial finite element like \texttt{RT0}, the 2 components are coupled, and so 
                  you have : $b[i] = "(\Pi_h (g1,g2))[i]" \times tgv $, where $\Pi_h $ is the vectorial finite element interpolant. 
-       \item  a linear form on $\Gamma$  (for Neumann ) \index{Neumann}
+       \item  a linear form on $\Gamma$  (for Neumann in 2d ) \index{Neumann}
          \texttt{ -int1d(Th))( f*w) } or \texttt{ -int1d(Th,3))( f*w) }
-        \item   a bilinear form on $\Gamma$  or $\Gamma_{2}$ (for  Robin )\index{Robin}
+        \item   a bilinear form on $\Gamma$  or $\Gamma_{2}$ (for  Robin in 2d)\index{Robin}
          \texttt{ int1d(Th))( K*v*w) } or
          \texttt{ int1d(Th,2))( K*v*w)}.
+       \item  a linear form on $\Gamma$  (for Neumann in 3d ) \index{Neumann}
+         \texttt{ -int2d(Th))( f*w) } or \texttt{ -int2d(Th,3))( f*w) }
+        \item   a bilinear form on $\Gamma$  or $\Gamma_{2}$ (for  Robin in 3d)\index{Robin}
+         \texttt{ int2d(Th))( K*v*w) } or
+         \texttt{ int2d(Th,2))( K*v*w)}.
 
     \end{itemize}
 
 \end{itemize}
 
-\begin{note}
+\begin{note} ~
 
 \begin{itemize}
 \item
@@ -7664,7 +7746,7 @@ If needed, the different kind of terms in the sum can appear more than once.
 function can be different in the case of linear form.
 
 
-\item  \texttt{N.x} and \texttt{N.y} are the normal's components. \index{normal}\index{N}
+\item  \texttt{N.x}, \texttt{N.y} and  \texttt{N.z} are the normal's components. \index{normal}\index{N}
 \end{itemize}
  \end{note}
 
@@ -7703,8 +7785,13 @@ we can calculate the integral over $\Gamma_h=\p\Omega_h$ by
 &=&\texttt{int1d(Th,qforder=*)(f)}
 \end{eqnarray*}
 where * stands for the name of the quadrature formula or the precision (order) of the Gauss formula.
-\begin{figure}[hbt]
+%\begin{figure}[hbt]
+\begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    \multicolumn{6}{|c|}{ Quadature formula on an edge}\\
+%    \hline
+%     \multicolumn{6}{c}{~}\\
     \hline
     $L$ & (\texttt{qfe=}) & \texttt{qforder=} &
     point in $[q^iq^j](=t)$ & $\omega_\ell$~~~  & exact on $P_k, k=$ \\
@@ -7717,16 +7804,16 @@ where * stands for the name of the quadrature formula or the precision (order) o
     3 & \textbf{qf3pE} &6&$(1\pm\sqrt{3/5})/2$ & $(5/18)|q^iq^j|$ & 5  \\
     & & & $1/2$ & $(8/18)|q^iq^j|$ & \\
     \hline
-    4 & \textbf{qf4pE} &8&$ (1 \pm  \frac{\sqrt{ 525  + 70 \sqrt{30}}}{35})/2
+    4 &{qf4pE} &8&$ (1 \pm  \frac{\sqrt{ 525  + 70 \sqrt{30}}}{35})/2
   .    $ & $  \frac{18-\sqrt{30}}{72} |q^iq^j|$ & 7  \\
      & & &$ (1 \pm  \frac{\sqrt{ 525  - 70 \sqrt{30}}}{35})/2
   .    $ & $  \frac{18+\sqrt{30}}{72} |q^iq^j|$ &   \\
     \hline
-    5 & \textbf{qf5pE} &10&$ (1 \pm  \frac{\sqrt{245+14\sqrt{70}}}{21})/2$  & $ \frac{322-13\sqrt{70}}{1800} |q^iq^j|$ & 9  \\
+    5 &{qf5pE} &10&$ (1 \pm  \frac{\sqrt{245+14\sqrt{70}}}{21})/2$  & $ \frac{322-13\sqrt{70}}{1800} |q^iq^j|$ & 9  \\
     & & & $1/2$ & $\frac{64}{225}|q^iq^j|$ & \\
     & & & $ (1 \pm  \frac{\sqrt{245-14\sqrt{70}}}{21})/2$ & $ \frac{322+13\sqrt{70}}{1800} |q^iq^j|$ &\\
     \hline
-    2 &qf1pElump&2& $-1$ & $|q^iq^j|/2$ & 1 \\
+    2 &qf1pElump&2& $0$ & $|q^iq^j|/2$ & 1 \\
     & &&$+1$ & $|q^iq^j|/2$ &  \\
     \hline
 
@@ -7734,7 +7821,9 @@ where * stands for the name of the quadrature formula or the precision (order) o
 \index{quadrature:qf1pE}\index{quadrature:qf2pE}%
 \index{quadrature:qf3pE}%
 \index{quadrature:qf1pElump}%
-\end{figure}
+%\end{figure}
+\end{center}
+
 where $|q^iq^j|$ is the length of segment $\overline{q^iq^j}$.
 For a part $\Gamma_1$ of $\Gamma_h$ with the label ``1'', we can
 calculate the integral over $\Gamma_1$ by
@@ -7750,7 +7839,7 @@ The integral over $\Gamma_1,\, \Gamma_3$ are given by
 For each triangule $T_k=[q^{k_1}q^{k_2}q^{k_3}]$ , the point
 $P(x,y)$ in $T_k$ is expressed by the \emph{area coordinate}\index{area coordinate} as $P(\xi,\eta)$:
 \begin{eqnarray*}
-&&|T_k|=\left|
+&&|T_k|=\frac12 \left|
 \begin{array}{ccc}
 1&q^{k_1}_x&q^{k_1}_y\\
 1&q^{k_2}_x&q^{k_2}_y\\
@@ -7780,11 +7869,11 @@ D_3=\left|
 1&x&y
 \end{array}
 \right|\\
-&&\xi=D_1/|T_k|\qquad
-\eta=D_2/|T_k|\qquad \textrm{then }
-1-\xi-\eta=D_3/|T_k|
+&&\xi=\frac12 D_1/|T_k|\qquad
+\eta=\frac12 D_2/|T_k|\qquad \textrm{then }
+1-\xi-\eta=\frac12 D_3/|T_k|
 \end{eqnarray*}
-For a domain $\Omega_h=\sum_{k=1}^{n_t}T_k,\, \mathcal{T}_h=\{T_k\}$,
+For a two dimensional  domain or border of three dimensional  domain  $\Omega_h=\sum_{k=1}^{n_t}T_k,\, \mathcal{T}_h=\{T_k\}$,
 we can calculate the integral over $\Omega_h$ by
 \begin{eqnarray*}
 \int_{\Omega_h}f(x,y)&=&\texttt{int2d(Th)(f)}\\
@@ -7792,11 +7881,15 @@ we can calculate the integral over $\Omega_h$ by
 &=&\texttt{int2d(Th,qforder=*)(f)}
 \end{eqnarray*}
 where * stands for the name of quadrature formula or the order of the Gauss formula.
-\begin{figure}[hbt]
+
+\begin{center}
+%\begin{figure}[hbt]
 \begin{tabular}{|c|c|c|c|c|c|}
     \hline
+      \multicolumn{6}{|c|}{ Quadature formula on a triangle}\\
+     \hline    
     $L$ & \texttt{qft=} & \texttt{qforder=} &
-    point in $T_k$ & $\omega_\ell$~~~  & degree of exact \\
+    point in $T_k$ & $\omega_\ell$~~~  & exact on $P_k, k=$ \\
     \hline
     \hline
     1 & qf1pT&2&$\left(\frac{1}{3},\frac{1}{3}\right)$ & $|T_k|$ & 1 \\
@@ -7839,13 +7932,63 @@ where * stands for the name of quadrature formula or the order of the Gauss form
 \index{quadrature:qf7pT}\index{quadrature:qf7pT}
 
 \index{quadrature:qfe=} \index{quadrature:qft=}\index{quadrature:qforder=}
-\end{figure}
+%\end{figure}
+\end{center}
+
+\bigskip
+
+For a three dimensional  domain  $\Omega_h=\sum_{k=1}^{n_t}T_k,\, \mathcal{T}_h=\{T_k\}$,
+we can calculate the integral over $\Omega_h$ by
+\begin{eqnarray*}
+\int_{\Omega_h}f(x,y)&=&\texttt{int3d(Th)(f)}\\
+&=&\texttt{int3d(Th,qfV=*)(f)}\\
+&=&\texttt{int3d(Th,qforder=*)(f)}
+\end{eqnarray*}
+where * stands for the name of quadrature formula or the order of the Gauss formula.
+\index{quadrature:qfV}%\begin{figure}[hbt]
+\begin{center}
+
+\begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+      \multicolumn{6}{|c|}{ Quadature formula on a tetraedron} \\
+    \hline
+    $L$ & \texttt{qfV=} & \texttt{qforder=} &
+    point in $T_k\in \R^3$ & $\omega_\ell$~~~  &exact on $P_k, k=$  \\
+    \hline
+    \hline
+    1 & qfV1&2&$\left(\frac{1}{4},\frac{1}{4},\frac{1}{4}\right)$ & $|T_k|$ & 1 \\
+    \hline
+    4 & qfV2&3& $ G4(0.58\ldots ,0.13\ldots ,0.13\ldots )$ & $|T_k|/4$ & 2 \\
+    \hline
+    14 & \textbf{qfV5}&6&$G4(0.72\ldots,0.092\ldots,0.092\ldots)$ & $ 0.073\ldots |T_k|$ & 5 \\
+    & &                 &$G4(0.067\ldots,0.31\ldots,0.31\ldots)$ & $ 0.11\ldots     |T_k|$ & \\
+    & &                 &$G6(0.45\ldots,0.045\ldots,0.45\ldots)$ & $ 0.042\ldots     |T_k|$ & \\
+  
+    \hline
+    4 & qfV1lump& & $G4(1,0,0)$ & $|T_k|/4$ & 1 \\
+    \hline
+\end{tabular}
+\end{center}
+\medskip
+
+ Where $G4 (a,b,b) $ such that $a+3b=1$ is the set of the four point in barycentric coordinate  
+ $$\{ (a,b,b,b), (b,a,b,b), (b,b,a,b),(b,b,b,a) \}$$ and where 
+ $G6 (a,b,b) $ such that $2a+2b=1$ is the set of the six points in barycentric coordinate 
+ $$\{ (a,a,b,b),(a,b,a,b),(a,b,b,a), (b,b,a,a),(b,a,b,a),(b,a,a,b) \}.$$
+ 
+ Remark, all this tetraedral quadrature formula come from \url{http://www.cs.kuleuven.be/~nines/research/ecf/mtables.html} 
+
+\index{quadrature:qfV1} \index{quadrature:qfV2}\index{quadrature: qfV5}
+\index{quadrature:qfV1lump}
+
+\index{quadrature:qfe=} \index{quadrature:qft=}\index{quadrature:qforder=}
+%\end{figure}
 
 \begin{note}
- By default,  we use the formula which is exact for polynomes of degrees $5$ on triangles or edges (in bold in two tables)\index{quadrature:default}.
+ By default,  we use the formula which is exact for polynomes of degrees $5$ on triangles or edges (in bold in three tables)\index{quadrature:default}.
 \end{note}
 
-
+\newpage
 
 
 \subsection{Variational Form, Sparse Matrix, PDE Data Vector}

@@ -1,11 +1,12 @@
 v 3.4-1
-   add next command in ffglut graphic interface
+   add plot of array of mesh and array of finite element functions
+   add new command in ffglut graphic interface
      n,N,i,I  to change the number of isovalue and to set the min,max value to the
-     graphic
+           graphic
    add left button motion to zoom , and + alt to translate
 V 3.4
     add in parallel version mpi send, receive and broadcasr of  3d mesh and matrix ( sparse matrix).
-    build a 3d mpi schwatz example (see example++-mpi/schwatz-3.edp)
+    build a 3d mpi schwarz example (see example++-mpi/schwarz-3.edp)
     make a wrapper (launchff++.exe)  to launch freefem++ under windows/OS in the edp file directory. 
     correct in interpolation matrix ( unset variable in case of save mesh 
       => missing some term) 
