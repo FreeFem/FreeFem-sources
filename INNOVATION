@@ -8,10 +8,8 @@ V 3.4
     add in parallel version mpi send, receive and broadcasr of  3d mesh and matrix ( sparse matrix).
     build a 3d mpi schwarz example (see example++-mpi/schwarz-3.edp)
     make a wrapper (launchff++.exe)  to launch freefem++ under windows/OS in the edp file directory. 
-    correct in interpolation matrix ( unset variable in case of save mesh 
-      => missing some term) 
-    in buildInterpolationMatrix add line 651
-     intV= false;// add July 2009 (unset varaible FH)
+    correct in interpolation matrix ( unset variable in case of same mesh 
+      => missing some term in the matrix) 
 
 V 3.3-3 
   add missing file in distribution examples++-load/DxWriter.cpp
