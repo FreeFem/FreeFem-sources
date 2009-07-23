@@ -576,12 +576,13 @@ class ForEachType<MPI_Comm>:  public basicForEachType{public:// coorection july 
     }
 };
 // end Hack  ... 
-MPI_Group* def_group( MPI_Group* const & a,const KN_<long> & b)
+MPI_Group* def_group( MPI_Group* const & a, KN_<long>  const & b)
 {
     cout << b.N() <<endl;
     for(int i=0;i<b.N();++i)
 	cout << b[i] << endl;
-    // ici def a ..  
+    // ici def a .. 
+    ffassert(0); //   A AFAIRE  //  pour arete le programm 
     return a;
 }
 void init_lgparallele()
@@ -592,8 +593,8 @@ void init_lgparallele()
       
      Dcl_TypeandPtr<MPI_Group>(0,0,InitializeGroup,DeleteGroup); 
      Dcl_TypeandPtr<MPI_Comm>(0,0,InitializeComm,DeleteComm);  
-     zzzfff->Add("mpiGroup",atype<MPI_Group>());
-     zzzfff->Add("mpiComm",atype<MPI_Comm>());
+     zzzfff->Add("mpiGroup",atype<MPI_Group*>());
+     zzzfff->Add("mpiComm",atype<MPI_Comm*>());
 
      map_type[typeid(MPIrank).name()]->AddCast(new E_F1_funcT<MPIrank,MPIrank*>(UnRef<MPIrank>));
      map_type[typeid(MPI_Group).name()]->AddCast(new E_F1_funcT<MPI_Group,MPI_Group*>(UnRef<MPI_Group>));
