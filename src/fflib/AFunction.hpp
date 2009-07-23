@@ -660,8 +660,10 @@ class ForEachType:  public basicForEachType{public:
     }
 };
 template<class T> 
-class ForEachType<T*>:  public basicForEachType{public:
-    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id,OOnReturn) { }
+class ForEachType<T*>:  public basicForEachType{public:// coorection july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...) 
+    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(T),sizeof(T),0,0,iv,id,OOnReturn) {
+	//T i= 0.0;
+    }
 };
 
 template<class A,class B>  AnyType UnRef(Stack,const AnyType &a) ; 
