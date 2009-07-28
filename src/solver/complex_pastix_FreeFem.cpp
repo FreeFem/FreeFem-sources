@@ -663,11 +663,11 @@ Init::Init()
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   
   if(verbosity>1)
-    cout << "\n Add: pastixmpi,  defaultsolver defaultsolverpastixmpi" << endl;
+    cout << "\n Add: pastix,  defaultsolver defaultsolverpastix" << endl;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   //DefSparseSolver<double>::solver =BuildSolverpastix_complex_mpi;
   DefSparseSolver<Complex>::solver =BuildSolverpastix_complex_mpi;
   if(! Global.Find("defaultsolver").NotNull() )
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-  Global.Add("complexdefaulttopastixmpi","(",new OneOperator0<bool>(Setpastixmpi));
+  Global.Add("complexdefaulttopastix","(",new OneOperator0<bool>(Setpastixmpi));
 }
