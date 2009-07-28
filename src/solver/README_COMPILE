@@ -1,0 +1,169 @@
+#############################################
+# README_COMPILE:
+#
+# HELP TO COMPILE THE DIFFERENT SPARSE SOLVER
+#
+#############################################
+
+General pre-requirements :
+
+- C,  C++ and Fortran (f77, f90)  compilers 
+- MPI  library
+- BLAS library
+
+These different elements are defined in the configure step of the compilation FreeFem++. Therefore, it must be same for the following solver. For computation, it is important to have an optimized BLAS. 
+Among optimized BLAS can be cited ATLAS (Automatically Tuned Linear Algebra Software) http://math-atlas.sourceforge.net/ (BSD licence), GotoBLAS  http://www.tacc.utexas.edu/resources/software/ (UT TACC Research license). These library can be used free under their license limitation. For GotoBLAS, the software and documentation can be used without any charge for academic, research, experimental or personal use. For commercial use, it is required to purchase a license. For more details, please see the UT TACC Research license  http://svn.pardus.org.tr/uludag/trunk/pisi/licenses/tacc.
+
+
+A) Sparse Direct Solver
+
+We have interfaced freefem++ with the following parallel sparse direct solver: SuperLU_DIST, MUMPS and pastix. These solver used different ordering library: Metis, ParMetis and scotch and pt-scotch.
+
+
+1. SuperLU_DIST
+
+The interface of SuperLU_DIST with freefem++ was tested with the version 3.2 of SuperLU_DIST. This solver use the external ordering libraries: Metis and ParMetis. To used these ordering or parallel symbolic factorization (which depend on ParMetis) in SuperLU_DIST, we need to install them. In the section ordering library, a description of installation of Metis and ParMetis is given.  
+
+pre-requirement: 
+	- Metis and ParMetis ordering libraries 
+
+installation procedure:
+	-  install Metis and ParMetis (see section ordering library for more details)
+	-  donwload the SuperLU_DIST 3.2 package on the web site http://crd.lbl.gov/~xiaoye/SuperLU
+	-  untar and decompress the tar.gz file
+				tar xvfz superlu_dist_2.3.tar.gz
+	-  go to the directory SuperLU_DIST_3.2
+	-  edit the make.inc to yours system (see the README file in this directory for more details)  
+	-  compilation can be done by simply typing "make"  on this directory.
+	
+ compilation of freefem++ load file of SuperLU_DIST (interface):
+	- go to the directory /src/solver/ on the tree of the source code of Freefem++
+	- edit the makefile-sparsesolver.inc
+	- type in this directory "make rslu_dist"(resp."make cslu_dist") to obtain dynamic library of the interface for real (resp. complex) arithmetic.  
+
+	
+References on SuperLU_DIST:
+
+[1] SuperLU_DIST: A Scalable Distributed-Memory Sparse Direct Solver for Unsymmetric Linear Systems. Xiaoye S.  Li and James W. Demmel. ACM Trans. on Math. Software, Vol. 29, No. 2, pp.110-140, 2003. 
+
+[2] Parallel Symbolic Factorization for Sparse LU with Static Pivoting. L. Grigori, J. Demmel and X.S. Li. SIAM J. Sci. Comp, Vol. 29, Issue 3, pp 1289--1314,  2007.
+
+2.  MUMPS
+
+MUMPS is a package writing in fortran 90. So we need a fortran compiler. The interface of MUMPS with freefem++ was tested with the version 4.8.3 and 4.8.4 of MUMPS. This solver use the external libraries: BLAS, BLACS, LAPACK, ScaLAPACK,  Metis, ParMetis and Scotch. BLAS and LAPACK are installed in most of system now. Therefore, we only describe BLACS and ScaLAPACK installations. BLAS, BLACS and LAPACK are libraries need by ScaLAPACK. Hence, we need to compile BLACS before.  A ScaLAPACK installer allow to download, compile and install automatically all the following librairies BLAS, LAPACK, BLACS and ScaLAPACK. This installer is based on Python and it can download at http://www.netlib.org/scalapack/. Here, we describe only the installation procedure by hand of BLACS and ScaLAPACK.
+
+Pre-requirement:
+	- Fortran 90 compiler
+	- BLACS  (http://www.netlib.org/blacs/)
+	- LAPACK  (http://www.netlib.org/lapack/)
+	- SCALAPACK  (http://www.netlib.org/scalapack/)
+	- Metis and Scotch ordering (optional). It is recommended by the MUMPS team to have full possibility to ordering automatically.
+	
+Installation procedure for BLACS and ScaLAPACK:
+	a) installation of BLACS
+		
+		- download on the website http://www.netlib.org/blacs/ :  mpiblacs.tgz, mpiblacs-patch03.tgz and blacstester.tgz
+		- decompress all these file
+				tar -xvzf mpiblacs.tgz
+				tar -xvzf mpiblacs-patch03.tgz
+				tar -xvzf blacstester.tgz
+		- go to the directory BLACS.
+		- edit the Bmake.inc for yours system (some example of Bmake.inc is given in the directory BMAKES). Please refer to blacs_install.ps on the web site of BLACS for more information about this file.
+		- the installation can be done by typing "make mpi" in this directory.
+
+	b) installation of ScaLAPACK 
+		
+		- download the file "scalapack.tgz" on the website http://www.netlib.org/scalapack/.
+		- decompress this file 
+				tar -xvzf scalapack.tgz
+		- go to the directory's created scalapack-1.8.0
+		- edit the SLmake.inc for your system (some example of SLmake.inc is given in the directory INSTALL). Please refer to scalapack_install.ps on the web site of ScaLAPACK for more information about this file.
+		- the installation can be done by typing "make" in this directory.
+
+Installation procedure for MUMPS:
+	- install BLACS, SCALAPACK, Metis ordering(optional) and Scotch ordering (optional). Please see section ordering library for Metis and Scotch.
+	- go to website http://mumps.enseeiht.fr/  to fill the download request submission.
+	- decompress the tar.gz file.
+				tar -xvfz MUMPS_4.8.4.tar.gz
+	- go to the directory MUMPS_4.8.4.
+	- edit the Makefile.inc to yours system (see README file in this directory and example of Makefile.inc in the directory Make.inc).
+	- compilation can be done by simply "make" in this directory.
+
+Compilation of freefem++ load file of MUMPS(interface)
+
+	- go to the directory /src/solver/ on the tree of the source code of Freefem++.
+	- edit the makefile-sparsesolver.inc.
+	- type in this directory "make mumps" to obtain dynamic library of the interface.  
+
+References on MUMPS:
+
+[1]  P. R. Amestoy, I. S. Duff and J.-Y. L'Excellent. Multifrontal parallel ditributed symmetric and unsymmetric solvers, in Comput. Methods in Appl. Mech. Eng., 184, pp 501-520, 2000. 
+
+[2]  P. R. Amestoy, I. S. Duff, J. Koster and J.-Y. L'Excellent. A fully asynchronous multifrontal solver using distributed dynamic scheduling, SIAM J. Math. Anal. and Appl., Vol. 23(1), pp 15-41, 2001.  
+
+[3] P. R. Amestoy, A. Guermouche, J.-Y.L'Excellent and S. Pralet. Hybrid scheduling for the parallel solution of linear systems. Parallel Computing, Vol. 32(2), pp 136-156, 2006.
+
+3.  Pastix
+
+The interface of pastix with freefem++ was tested with the package pastix_release_2200.tar.bz2. The distributed matrix version of pastix is under developpement and some bug are not fixed in this release. The interface with distributed matrix version of pastix in Freefem++ is not given yet for this reason.
+
+Pre-requirement :
+	- Fortran 90 compiler
+	- Scotch or Metis ordering
+
+Procedure installation:
+	- install Scotch or Metis ordering
+	- download on the website  http://gforge.inria.fr/frs/?group_id=248 the pastix package.
+	- decompress the package  pastix_releas_***.
+	- go to the pastix directory's created. For package  pastix_release_2200.tar.bz2, this directory is pastix_release_2200.
+	- go to the directory src. Installation instruction are given in the file INSTALL.txt. 
+	- select the config file corresponding to your machine (these files are located in the directory config) and copy this file in the main src directory of pastix. For Mac, just type 
+				cp config/Mac.in config.in
+	(if there is not a config file corresponding copy one of them). 
+	- adapt the config.in to yours system. For freefem++ interface, the double precision support must be selected.  
+	- compile the Pastix library
+				make expor
+	- install the Pastix library
+				make install
+
+The header file and Pastix library are located in the directory pastix_release_2200/install for the package pastix_release_2200.tar.bz2. We have constructed interface for real and complex support. The header file and Pastix library are compile for one of these arithmetics (see the file config.in). A simple method to obtain these two arithmetics is to compile and install pastix in two different directory. 
+
+Compilation of freefem++ load file of pastix(interface)
+	
+	- go to the directory src/solver/ on the tree of the source code of Freefem++.
+	- edit the makefile makefile-sparsesolver.inc.
+	- type in this directory 
+			make rpastix		(real dynamic library)      
+			make cpastix 		(complex dynamic library)
+
+References on Pastix:
+
+[1] P. Hénon, P.Ramet and J. Roman. PaStiX: A High-Performance Parallel Direct Solver for Sparse Symmetric Definite Systems. Parallel Computing, Vol. 28(2), pp. 301-321, 2002.
+ 
+B) Sparse Iterative Solver
+
+under construction
+
+C) Ordering 
+
+1. Metis and ParMetis
+
+The Metis Library is include in ParMetis package. Hence, we only need to build ParMetis. To install ParMetis,  download on the web site http://glaros.dtc.umn.edu/gkhome/metis/parmetis/download the file ParMetis-3.1.1. After this, read installation instuction on this web page to obtain ParMetis's library. 
+
+References on Metis and ParMetis:
+
+[1] G. Karypis and V. Kumar. A fast and Highly Quality Multilevel Scheme for Partitioning Irregular Graphs. SIAM J. Sci. Comp., Vol. 20(1), pp. 359 - 392, 1999.
+
+[2] G. Karypis and V. Kumar. A Parallel Algorithm for Multilevel Graph Partitioning and Sparse Matrix Ordering. Journal of Parallel and Distributed Computing. Vol. 48, pp. 71-85, 1998.
+
+2. Scotch and Pt-Scotch
+
+Scotch and Pt-Scotch are include in the same package. This file can be download on http://www.labri.fr/perso/pelegrin/scotch/. We must take the version of Scotch with interface for mumps. This file is named scotch_*.*.*_esmumps.tar.gz where *.*.* is the number of version of scotch. After decompress this file  tar -xvfz scotch_*.*.*_esmumps.tar.gz. Go to the new directory named scotch_*.*_esmumps.  Go to the src directory and edit makefile.inc to your system.  The instruction for fill this file is given in scotch_*.*_esmumps/INSTALL.txt. To compile these libraries, just type "make" and "make ptscotch".
+
+References on Scotch and Pt-Scotch:
+
+[1]  C. Chevalier and F. Pellegrini,  PT-SCOTCH: a tool for efficient parallel graph ordering. Parallel Computing, 34(6-8), pp. 318-331, 2008.
+
+[2] F. Pellegrini and J. Roman, SCOTCH: a software package for static mapping by dual recursive bipartitioning of process and architecture graphs. In: Proc. HPCN'96, Brussels. 
+LNCS, Vol  1067, pp 493-498, 1996.
+
