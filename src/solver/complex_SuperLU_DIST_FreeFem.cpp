@@ -806,12 +806,12 @@ Init::Init()
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   
   if(verbosity>1)
-    cout << "\n Add: SuperLUmpi,  defaultsolver defaultsolverSuperLUmpi" << endl;
+    cout << "\n Add: Complex SuperLU_DIST,  defaultsolver defaultsolverSuperLUdist" << endl;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   //DefSparseSolver<double>::solver =BuildSolverSuperLUmpi;
   DefSparseSolver<Complex>::solver =BuildSolverSuperLUmpi;
   if(! Global.Find("defaultsolver").NotNull() )
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-  Global.Add("defaulttoSuperLUmpi","(",new OneOperator0<bool>(SetSuperLUmpi));
+  Global.Add("complexdefaulttoSuperLUdist","(",new OneOperator0<bool>(SetSuperLUmpi));
 }
 

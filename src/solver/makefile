@@ -1,11 +1,3 @@
-#include makefile-gene.inc
-#include makefile-common.inc
-##include makefile-hips.inc
-#include makefile-parms.inc
-#include makefile-hypre.inc
-#include makefile-slu_dist.inc
-#include makefile-mumps.inc
-#include makefile-pastix.inc
 include makefile-sparsesolver.inc
 
 #Creation of Hips dynamic librairy
