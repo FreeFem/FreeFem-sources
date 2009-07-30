@@ -182,11 +182,13 @@ public:
     }
     
     if(param_int) 
-      assert( param_int.N() == 40);
+      assert( param_int.N() == 42);
     if(param_double) 
       assert( param_double.N() == 15);
     if(pperm_r)
       assert( perm_r.N() == n);
+    if(pperm_c)
+      assert( perm_c.N() == m);
     if(pscale_r) 
       assert( scale_r.N() == n);
     if(pscale_c) 
@@ -199,21 +201,27 @@ public:
     // initialisation par defaut
     SYM=0; PAR=1;
     
-    if(!string_option.empty()) 
+    /*
+      if(!string_option.empty()) 
       {
-	if(myid==0){
-	  cout << "read string option" <<endl;
-	  read_options_freefem(&string_option,&SYM,&PAR);
-	  
-	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
-	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
-	}
-	else{
-	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
-	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
-	}
+      if(myid==0){
+      cout << "read string option" <<endl;
+      read_options_freefem(&string_option,&SYM,&PAR);
+      
+      MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
       }
-    
+      else{
+      MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+      }
+      }
+    */
+    if(param_int){
+      SYM = param_int[0];
+      PAR = param_int[1];
+    }
+      
     if(!data_option.empty())
       {	
 	if(myid==0){
@@ -242,21 +250,22 @@ public:
 	    dataint[i_data] = (int)atol(tictac);
 	    i_data++;
 	  }  
-	  
+	  assert(i_data == 40);
 	  while( !feof(pFile) && d_data < 15){
 	    fgets(data,256,pFile);
 	    tictac = strtok(data," /!#\t\n");
 	    datadouble[d_data] = (double)atof(tictac);
 	    d_data++;
 	  }  
-	  
-	  for(int ii=0; ii< 40; ii++){
+	  assert(d_data == 15);
+	  /*
+	    for(int ii=0; ii< 40; ii++){
 	    cout << "double int["<< ii <<"] ="<< dataint[ii] << endl;
-	  }  
-	  for(int ii=0; ii< 15; ii++){
+	    }  
+	    for(int ii=0; ii< 15; ii++){
 	    cout << "double data["<< ii <<"] ="<< datadouble[ii] << endl;
-	  }  
-	  
+	    }  
+	  */
 	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
 	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
 
@@ -283,11 +292,11 @@ public:
     id.sym=SYM;
     id.comm_fortran=USE_COMM_WORLD;
 
-    cout << "init parameter " << PAR << " " <<SYM << endl; 
+    if(verbosity) cout << "init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
 
     dmumps_c(&id);
 
-    cout << "fin init parameter" << endl; 
+    if(verbosity) cout << "fin init parameter" << endl; 
 
     /* set parameter of mumps */
     if(param_int || param_double ){
@@ -297,8 +306,8 @@ public:
       }
       
       if(param_int){
-	for(int ii=0; ii<40; ii++)
-	  id.ICNTL(ii+1) = param_int[ii];
+	for(int ii=0; ii<40; ii++)	  
+	  id.ICNTL(ii+1) = param_int[ii+2];
       }
       else
 	// parameter by default
@@ -396,7 +405,7 @@ public:
     if( id.ICNTL(18) == 1 || id.ICNTL(18) == 2 )
       {
 
-	cout <<"id.ICNTL(18) = 1 || id.ICNTL(18) == 2 "<< endl;
+	if(verbosity > 1) cout <<"id.ICNTL(18) = 1 || id.ICNTL(18) == 2 "<< endl;
 	// ATTENTION 
 	// AA.cl :: indice des colonnes (exacte) et AA.lg :: indice des lignes 
 	// index of row and column by 1
@@ -1168,24 +1177,24 @@ public:
 
 
     
-    if( verbosity > 0){
-    /* information given by mumps*/
-    int Rinfo=20;
-    int Sinfo=40;
-    // in Freefem++ we give only global information
-    if(myid == 0){
-      printf("Global Output Information of MUMPS: RINFOG and INFOG \n");
-      printf("=============  After Factorisation ==================\n");
-      for(int ii=0; ii< Rinfo; ii++) 
-	printf( "RINFOG[%d]= %f \n", ii, id.RINFOG(ii+1) );
-      printf("=====================================================\n");
-      for(int ii=0; ii< Sinfo; ii++) 
-	printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
-       printf("=====================================================\n");
-    }
+    if( verbosity > 1){
+      /* information given by mumps*/
+      int Rinfo=20;
+      int Sinfo=40;
+      // in Freefem++ we give only global information
+      if(myid == 0){
+	printf("Global Output Information of MUMPS: RINFOG and INFOG \n");
+	printf("=============  After Factorisation ==================\n");
+	for(int ii=0; ii< Rinfo; ii++) 
+	  printf( "RINFOG[%d]= %f \n", ii, id.RINFOG(ii+1) );
+	printf("=====================================================\n");
+	for(int ii=0; ii< Sinfo; ii++) 
+	  printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
+	printf("=====================================================\n");
+      }
     }
     
-    if( verbosity)
+    if( verbosity )
       if(myid==0){
 	finishtime = clock();
 	timeused= (finishtime-starttime)/(1000 );
@@ -1253,7 +1262,7 @@ public:
     
 
 
-    if( verbosity ){
+    if( verbosity >1){
       /* information given by mumps*/
       int Rinfo=20;
       int Sinfo=40;
@@ -1371,7 +1380,7 @@ public:
     nz   = AA.nbcoef;
 
     if(param_int) 
-      assert( param_int.N() == 40);
+      assert( param_int.N() == 42);
     if(param_double) 
       assert( param_double.N() == 15);
     if(pperm_r)
@@ -1392,54 +1401,74 @@ public:
 
     // initialisation par defaut
  
-     SYM=0; PAR=1;
-     if(!string_option.empty()) 
-      {
-	
-	read_options_freefem(&string_option,&SYM,&PAR);
-      }
+    SYM=0; PAR=1;
+    
+    //      if(!string_option.empty()) 
+    //       {	
+    // 	read_options_freefem(&string_option,&SYM,&PAR);
+    //       }
+    if( param_int ){
+      SYM = param_int[0];
+      PAR = param_int[1];
+    }
     else 
       if(!data_option.empty())
 	{
-	  
-	  char * retfile= new char[data_option.size()+1];
-	  strcpy(retfile, (&data_option)->c_str());
-	  printf("read data from file %s\n", retfile);
-	  FILE *pFile=fopen(retfile,"rt");
-	  
-	  int     i_data=0;
-	  int     d_data=0.;
-	  char    data[256];
-	  char   *tictac;
-	  
-	  fgets(data,256,pFile);
-	  tictac = strtok(data," /!#\t\n");
-	  SYM = atoi(tictac);
-	  
-	  fgets(data,256,pFile);
-	  tictac = strtok(data," /!#\t\n");
-	  PAR = atoi(tictac);
-	  
-	  while( !feof(pFile) && i_data < 40){
+	  if(myid==0){
+	    char * retfile= new char[data_option.size()+1];
+	    strcpy(retfile, (&data_option)->c_str());
+	    printf("read data from file %s\n", retfile);
+	    FILE *pFile=fopen(retfile,"rt");
+	    
+	    int     i_data=0;
+	    int     d_data=0.;
+	    char    data[256];
+	    char   *tictac;
+	    
 	    fgets(data,256,pFile);
 	    tictac = strtok(data," /!#\t\n");
-	    dataint[i_data] = (int)atol(tictac);
-	    i_data++;
-	  }  
-
-	  while( !feof(pFile) && d_data < 15){
+	    SYM = atoi(tictac);
+	    
 	    fgets(data,256,pFile);
 	    tictac = strtok(data," /!#\t\n");
-	    datadouble[d_data] = (double)atof(tictac);
-	    d_data++;
-	  }  
-	  
-	  fclose(pFile);
-	  delete [] retfile;
+	    PAR = atoi(tictac);
+	    
+	    while( !feof(pFile) && i_data < 40){
+	      fgets(data,256,pFile);
+	      tictac = strtok(data," /!#\t\n");
+	      dataint[i_data] = (int)atol(tictac);
+	      i_data++;
+	    }  
+	    assert(i_data == 40);
+	    while( !feof(pFile) && d_data < 15){
+	      fgets(data,256,pFile);
+	      tictac = strtok(data," /!#\t\n");
+	      datadouble[d_data] = (double)atof(tictac);
+	      d_data++;
+	    }  
+	    assert(d_data == 15);
+	    fclose(pFile);
+	    delete [] retfile;
+	    
+	    MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	    MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	    
+	    MPI_Bcast(  dataint, 40, MPI_INT,  0, MPI_COMM_WORLD );
+	    MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, MPI_COMM_WORLD );
+	    
+	    fclose(pFile);
+	    delete [] retfile;
+	  }
+	  else{
+	    
+	    MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	    MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	    
+	    MPI_Bcast(  dataint, 40, MPI_INT,  0, MPI_COMM_WORLD );
+	    MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, MPI_COMM_WORLD );
+	  }
 	}
     
-   
-
     /* Initialize a MUMPS instance. Use MPI_COMM_WORLD */
     id.job=JOB_INIT; 
     id.par=PAR; 
@@ -1457,7 +1486,7 @@ public:
       
       if(param_int){ 
 	for(int ii=0; ii<40; ii++)
-	  id.ICNTL(ii+1) = param_int[ii];
+	  id.ICNTL(ii+1) = param_int[ii+2];
       }
       else
 	// parameter by default
@@ -2292,7 +2321,7 @@ public:
     if( irn != NULL ) free(irn); 
  
 
-    if( verbosity ){
+    if( verbosity >1){
       /* information given by mumps*/
       int Rinfo=20;
       int Sinfo=40;
@@ -2307,7 +2336,8 @@ public:
 	  printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
 	printf("=====================================================\n");
       }
-
+    }
+    if( verbosity){
       if(myid==0){
 	finishtime = clock();
 	timeused= (finishtime-starttime)/(1000 );
@@ -2376,7 +2406,7 @@ public:
 	jcn[ii] = jcn[ii]-1;
 
 
-    if( verbosity > 0){
+    if( verbosity > 1){
       /* information given by mumps*/
       int Rinfo=20;
       int Sinfo=40;
@@ -2427,7 +2457,7 @@ MatriceMorse<double>::VirtualSolver *
 BuildSolverMUMPSmpi(DCL_ARG_SPARSE_SOLVER(double,A))
 {
     if(verbosity>9)
-      cout << " BuildSolverMUMPSmpi<double>" << endl;
+      cout << " BuildSolverMUMPS<double>" << endl;
     return new dSolveMUMPSmpi(*A,ds.strategy, ds.tgv, ds.epsilon, ds.tol_pivot, ds.tol_pivot_sym, ds.sparams, ds.data_filename,
 			      ds.lparams, ds.dparams, ds.perm_r, ds.perm_c, ds.scale_r, ds.scale_c);
 }
@@ -2439,7 +2469,7 @@ MatriceMorse<Complex>::VirtualSolver *
 BuildSolverMUMPSmpi(DCL_ARG_SPARSE_SOLVER(Complex,A))
 {
     if(verbosity>9)
-      cout << " BuildSolverMUMPSmpi<Complex>" << endl;
+      cout << " BuildSolverMUMPS<Complex>" << endl;
     return new zSolveMUMPSmpi(*A,ds.strategy, ds.tgv, ds.epsilon, ds.tol_pivot, ds.tol_pivot_sym, ds.sparams, ds.data_filename,  
 			      ds.lparams, ds.dparams, ds.perm_r, ds.perm_c, ds.scale_r, ds.scale_c);
 }
