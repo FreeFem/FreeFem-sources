@@ -244,7 +244,7 @@ void read_datafile_pastixff(const string &datafile, int &mpi_flag, pastix_int_t 
 // ATTENTION :: pastix_float_t  
 //      peut être soit un complex ou un reel cela depend de la maniere dont on a compiler pastix
 
-// CAS DOUBLE SEULEMENT 
+// CAS COMPLEX SEULEMENT 
 
 
 class zSolvepastixmpi :   public MatriceMorse<Complex>::VirtualSolver   {
@@ -282,16 +282,20 @@ class zSolvepastixmpi :   public MatriceMorse<Complex>::VirtualSolver   {
 
 public:
 
-  zSolvepastixmpi(const MatriceMorse<Complex> &AA,int strategy,double ttgv, double epsilon=1e-6,
-		  double pivot=-1.,double pivot_sym=-1., string datafile, KN<long> &param_int, KN<double> &param_double, 
+  zSolvepastixmpi(const MatriceMorse<Complex> &AA,int strategy,double ttgv, double epsilon,
+		  double pivot,double pivot_sym, string datafile, KN<long> &param_int, KN<double> &param_double, 
 		  KN<long> &pperm_r, KN<long> &pperm_c) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),tol_pivot_sym(pivot_sym),tol_pivot(pivot),
     data_option(datafile) 
   { 
+    //KN_<long> param_int(pparam_int);
+    //KN_<double> param_double(pparam_double);
+
     //int m;
     //int ierr;
     struct timeval  tv1, tv2;
+    int nnz;
     // time variables
     long int starttime,finishtime;
     long int timeused;
@@ -314,7 +318,7 @@ public:
     thrd_flag = 0;
 
     // ######################  
-    pastix_int_t init_raff;
+    //pastix_int_t init_raff;
     fprintf(stdout,"-- INIT PARAMETERS --\n");
     
     // reading iparm from array    
@@ -323,18 +327,18 @@ public:
       if(mpi_flag != 0) 
 	cerr << "ERROR :: GLOBAT INPUT MATRIX FOR ALL PROCS  matrix=assembled" << endl;
     }
-    else if(param_int || param_double){
-      if( param_int ) 
+    else if( !(param_int==NULL) || !(param_double==NULL)){
+	if( ! (param_int==NULL) ) 
       {
-	cout << "read param_int" << endl;
+	cout << "internal param_int" << endl;
 	assert(param_int.N() == 64);
 	for(int ii=0; ii<64; ii++) 
 	  iparm[ii] = param_int[ii];
 	iparm[IPARM_MODIFY_PARAMETER] = API_YES;
       }
-      if( param_double ) 
+	if( !(param_double==NULL) ) 
       {
-	cout << "read param_double" << endl;
+	cout << "internal param_double" << endl;
 	assert(param_double.N() == 64);
 	for(int ii=0; ii<64; ii++) 
 	  dparm[ii] = param_double[ii];
@@ -342,32 +346,53 @@ public:
     }  
     else{
       iparm[IPARM_MODIFY_PARAMETER] = API_NO;
-      cout << "initialize parameter" << endl;
+      cout << "initialize default parameter" << endl;
     }
     
     //################################
-        
-    Ncol = AA.m;
-    Nrow = AA.n;
-  
-    // Avant : on ecrit la transposée
-   
-    // AA.cl : indices des colonnes
-    // AA.lg : pointeurs des lignes
-    Morse_to_CSC( AA.n , AA.m, AA.nbcoef, AA.a, AA.cl, AA.lg, &avals, &ja, &ia);
-    // ia : pointeurs des colonnes
-    // ja : indices des lignes
-    
-    cout << "AA.n= "<< AA.n << " AA.m=" <<  AA.m << " AA.nbcoef=" << AA.nbcoef << endl;
-   
-    for(int ii=0; ii < Ncol+1; ii++){
-      ia[ii] = ia[ii]+1;
+    if(myid == 0){
+      Ncol = AA.m;
+      Nrow = AA.n;
+      nnz  = AA.nbcoef;
+      // Avant : on ecrit la transposée
+      
+      // AA.cl : indices des colonnes
+      // AA.lg : pointeurs des lignes
+      Morse_to_CSC( AA.n , AA.m, AA.nbcoef, AA.a, AA.cl, AA.lg, &avals, &ja, &ia);
+      // ia : pointeurs des colonnes
+      // ja : indices des lignes
+      
+      cout << "AA.n= "<< AA.n << " AA.m=" <<  AA.m << " AA.nbcoef=" << AA.nbcoef << endl;
+      
+      for(int ii=0; ii < Ncol+1; ii++){
+	ia[ii] = ia[ii]+1;
+      }
+      assert( ia[Ncol]-1 == AA.nbcoef );
+      for(int ii=0; ii < ia[Ncol]-1; ii++){
+	ja[ii] = ja[ii]+1; 
+      }
+      MPI_Bcast( &Ncol,   1,    MPI_INT,   0, MPI_COMM_WORLD );
+      MPI_Bcast( &Nrow,   1,    MPI_INT,   0, MPI_COMM_WORLD );
+      MPI_Bcast( &nnz,    1,    MPI_INT,   0, MPI_COMM_WORLD );
+
+      MPI_Bcast( avals, nnz,    MPI_PASTIX_FLOAT, 0, MPI_COMM_WORLD );
+      MPI_Bcast(    ia, Ncol+1, MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
+      MPI_Bcast(    ja, nnz,    MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
     }
-    assert( ia[Ncol]-1 == AA.nbcoef );
-    for(int ii=0; ii < ia[Ncol]-1; ii++){
-      ja[ii] = ja[ii]+1; 
+    else{
+      MPI_Bcast( &Ncol, 1,        MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast( &Nrow, 1,        MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast( &nnz,  1,        MPI_INT,  0, MPI_COMM_WORLD );
+      
+      avals = (pastix_float_t *) malloc( nnz*sizeof(pastix_float_t) );
+      ia = (pastix_int_t *) malloc( (Ncol+1)*sizeof(pastix_int_t) );
+      ja = (pastix_int_t *) malloc( nnz*sizeof(pastix_int_t) );
+
+      MPI_Bcast( avals, nnz,  MPI_PASTIX_FLOAT,   0, MPI_COMM_WORLD );
+      MPI_Bcast(    ia, Ncol+1, MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
+      MPI_Bcast(    ja, nnz,    MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
     }
-       
+
     perm = (pastix_int_t *) malloc(Ncol*sizeof(pastix_int_t));
     invp = (pastix_int_t *) malloc(Ncol*sizeof(pastix_int_t));
     
@@ -391,23 +416,23 @@ public:
       cerr << "error :: mpi_flag = 0 for calling pastix" << endl; 
     fprintf(stdout,"-- FIN INIT PARAMETERS --\n");
     init_raff = iparm[IPARM_ITERMAX];
-    
+    cout << "init_raff=" << init_raff << endl;
     fflush(stdout);
     /* Passage en mode verbose */
     
     iparm[IPARM_RHS_MAKING] = API_RHS_B;
-    if( !param_int && data_option.empty() ){
+    if( (param_int==NULL) && data_option.empty() ){
       iparm[IPARM_MATRIX_VERIFICATION] = API_YES;
       iparm[IPARM_REFINEMENT] = API_RAF_GMRES;
       iparm[IPARM_INCOMPLETE] = API_NO;
     }
 
-    if( !param_double && data_option.empty()){
+    if( (param_double==NULL) && data_option.empty()){
       dparm[DPARM_EPSILON_REFINEMENT] = 1e-12;
       dparm[DPARM_EPSILON_MAGN_CTRL] = 1e-32;
     }
 
-
+  
  //    cscd_checksym(Ncol, ia, ja, loc2glob, MPI_COMM_WORLD);
     
 //     if (iparm[IPARM_SYM]==API_SYM_YES)
@@ -467,11 +492,11 @@ public:
     iparm[IPARM_START_TASK] = API_TASK_ANALYSE;
     iparm[IPARM_END_TASK]   = API_TASK_ANALYSE;
     if( SYM == 1 ){
-      //iparm[IPARM_SYM] = API_SYM_YES;
+      iparm[IPARM_SYM] = API_SYM_YES;
       iparm[IPARM_FACTORIZATION] = API_FACT_LDLT;
     }
     if( SYM == 0 ){
-      //iparm[IPARM_SYM] = API_SYM_NO;
+      iparm[IPARM_SYM] = API_SYM_NO;
       iparm[IPARM_FACTORIZATION] = API_FACT_LU;
     }
     if(mpi_flag == 0)
@@ -493,10 +518,14 @@ public:
 	    (long)((tv2.tv_sec  - tv1.tv_sec ) * 1000000 + 
 		   tv2.tv_usec - tv1.tv_usec));
     
-    for(int ii=0; ii < Ncol+1; ii++)
-      ia[ii] = ia[ii]-1;
     for(int ii=0; ii < ia[Ncol]-1; ii++)
       ja[ii] = ja[ii]-1;
+    
+    for(int ii=0; ii < Ncol+1; ii++)
+      ia[ii] = ia[ii]-1;
+    
+    //for(int ii=0; ii < ia[Ncol]-1; ii++)
+    //  ja[ii] = ja[ii]-1;
 
     if(myid==0){
       finishtime = clock();
@@ -575,10 +604,13 @@ public:
       x[ii] = rhs[ii];
        
     // index for freefem
-    for(int ii=0; ii < Ncol+1; ii++)
-      ia[ii] = ia[ii]-1;
     for(int ii=0; ii < ia[Ncol]-1; ii++)
       ja[ii] = ja[ii]-1;
+    for(int ii=0; ii < Ncol+1; ii++)
+      ia[ii] = ia[ii]-1;
+    
+    //for(int ii=0; ii < ia[Ncol]-1; ii++)
+    //  ja[ii] = ja[ii]-1;
 
     if(myid==0){
       finishtime = clock();

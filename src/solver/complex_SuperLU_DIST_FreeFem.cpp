@@ -321,10 +321,10 @@ public:
 	  
 	  /* Initialize ScalePermstruct and LUstruct. */
 	  ScalePermstructInit(m, n, &ScalePermstruct);
-	  if(pperm_r  ||  pperm_c ) ScalePermstruct.DiagScale=optionDiagScale;
-	  if(pperm_r) 
+	  if(!(pperm_r==NULL)  || !(pperm_c==NULL) ) ScalePermstruct.DiagScale=optionDiagScale;
+	  if( !(pperm_r==NULL) ) 
 	    for(int ii=0; ii<m; ii++) ScalePermstruct.perm_r[ii] = pperm_r[ii];
-	  if(pperm_c)
+	  if( !(pperm_c==NULL) )
 	    for(int ii=0; ii<n; ii++) ScalePermstruct.perm_c[ii]= pperm_c[ii];
 	  
 	  if( ScalePermstruct.DiagScale != NOEQUIL ){
