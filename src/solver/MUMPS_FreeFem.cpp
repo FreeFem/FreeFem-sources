@@ -115,11 +115,11 @@ class dSolveMUMPSmpi :   public MatriceMorse<double>::VirtualSolver   {
   int          n, m, nz; 
  
   // parameter MUMPS
-  KN<int>        iparam;
-  KN<int>        perm_r; /* row permutations from partial pivoting */
-  KN<int>        perm_c;
-  KN<double>     scale_r;
-  KN<double>     scale_c;
+  
+  KN_<long>        perm_r; /* row permutations from partial pivoting */
+  KN_<long>        perm_c;
+  KN_<double>     scale_r;
+  KN_<double>     scale_c;
   string string_option;
   string data_option;
   int SYM;
@@ -181,17 +181,17 @@ public:
       MPI_Bcast( &nz, 1, MPI_INT,  0, MPI_COMM_WORLD );
     }
     
-    if(param_int) 
+    if( !(param_int==NULL) ) 
       assert( param_int.N() == 42);
-    if(param_double) 
+    if( !(param_double==NULL) ) 
       assert( param_double.N() == 15);
-    if(pperm_r)
+    if(perm_r)
       assert( perm_r.N() == n);
-    if(pperm_c)
+    if(perm_c)
       assert( perm_c.N() == m);
-    if(pscale_r) 
+    if(scale_r) 
       assert( scale_r.N() == n);
-    if(pscale_c) 
+    if(scale_c) 
       assert( scale_c.N() == m);
 
     if( n != m )
@@ -217,12 +217,11 @@ public:
       }
       }
     */
-    if(param_int){
+    if( !(param_int==NULL) ){
       SYM = param_int[0];
       PAR = param_int[1];
     }
-      
-    if(!data_option.empty())
+    else if( !data_option.empty() )
       {	
 	if(myid==0){
 	  
@@ -299,26 +298,28 @@ public:
     if(verbosity) cout << "fin init parameter" << endl; 
 
     /* set parameter of mumps */
-    if(param_int || param_double ){
+    if( !(param_int == NULL) || !(param_double == NULL) ){
       if(!data_option.empty()){ 
 	printf("MUMPS ERROR:  parameters are given on the file %s and in the array lparams and dparams => double definition of parameters.",&data_option);
 	exit(1);
       }
       
-      if(param_int){
+      if( !(param_int == NULL) ){
+	cout << "internal parameter" << endl;
 	for(int ii=0; ii<40; ii++)	  
 	  id.ICNTL(ii+1) = param_int[ii+2];
       }
-      else
+      else{
+
 	// parameter by default
 	id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
-
-      if(param_double)
+      }
+      if( !(param_double == NULL) ){
+	cout << "internal parameter" << endl;
 	for(int ii=0; ii<15; ii++)
 	  id.CNTL(ii+1) = param_double[ii];
- 
-    }
-    
+      }
+    }    
     else 
       if(!data_option.empty()){
 	for(int ii=0; ii<40; ii++)
@@ -327,16 +328,21 @@ public:
 	  id.CNTL(ii+1) = datadouble[ii];
       }
       else{
-      // parameter by default
-      id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
+	// parameter by default
+	cout << "default parameter" << endl;
+	id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
     }
 
     // uniquement donner au host 
     if(myid==0){
-      if(perm_r && id.ICNTL(7)==1){
+      if( !(perm_r==NULL) && id.ICNTL(7)==1){
 	for(int ii=0; ii<n; ii++) id.perm_in[ii] = pperm_r[ii];
       }
-      if( scale_r && scale_c && id.ICNTL(8)==-1 ){
+      // a decommenter
+      //if( !(perm_c==NULL) && id.ICNTL(6)==1){
+      //for(int ii=0; ii<m; ii++) id.perm_in[ii] = pperm_c[ii];
+      //}
+      if( !(scale_r==NULL) && !(scale_c==NULL) && id.ICNTL(8)==-1 ){
 	// param_double[0::n-1] :: row  
 	// param_double[n::n+m-1] :: column 
 	for(int ii=0; ii<n; ii++) id.rowsca[ii] = scale_r[ii]; 
@@ -1379,9 +1385,9 @@ public:
     m    = AA.m; 
     nz   = AA.nbcoef;
 
-    if(param_int) 
+    if( !(param_int==NULL) ) 
       assert( param_int.N() == 42);
-    if(param_double) 
+    if( !(param_double==NULL) ) 
       assert( param_double.N() == 15);
     if(pperm_r)
       assert( perm_r.N() == n);
@@ -1407,7 +1413,7 @@ public:
     //       {	
     // 	read_options_freefem(&string_option,&SYM,&PAR);
     //       }
-    if( param_int ){
+    if( !(param_int==NULL) ){
       SYM = param_int[0];
       PAR = param_int[1];
     }
@@ -1478,13 +1484,13 @@ public:
     zmumps_c(&id);
 
      /* set parameter of mumps */
-    if(param_int || param_double){
+    if( !(param_int==NULL) || !(param_double==NULL) ){
       if(!data_option.empty()){ 
 	printf("read option before with the file %s\n",&data_option);
 	exit(1);
       }
       
-      if(param_int){ 
+      if( !(param_int==NULL) ){ 
 	for(int ii=0; ii<40; ii++)
 	  id.ICNTL(ii+1) = param_int[ii+2];
       }
@@ -1492,7 +1498,7 @@ public:
 	// parameter by default
 	id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
 
-      if(param_double)
+      if( !(param_double==NULL) )
 	for(int ii=0; ii<15; ii++)
 	  id.CNTL(ii+1) = param_double[ii];
       
@@ -1511,12 +1517,14 @@ public:
 
     // uniquement donner au host 
     if(myid==0){
-      if(perm_r && id.ICNTL(7)==1){
+      if( !(perm_r==NULL) && id.ICNTL(7)==1){
 	for(int ii=0; ii<n; ii++) id.perm_in[ii] = pperm_r[ii];
       }
-      if( scale_r && scale_c && id.ICNTL(8)==-1 ){
-	// param_double[0::n-1] :: row  
-	// param_double[n::n+m-1] :: column 
+      // a decommenter
+      //if( !(perm_c==NULL) && id.ICNTL(6)==1){
+      //for(int ii=0; ii<m; ii++) id.perm_in[ii] = pperm_c[ii];
+      //}
+      if( !(scale_r==NULL) && !(scale_c==NULL) && id.ICNTL(8)==-1 ){
 	for(int ii=0; ii<n; ii++) id.rowsca[ii] = scale_r[ii]; 
 	for(int ii=0; ii<m; ii++) id.colsca[ii] = scale_c[ii];
       }

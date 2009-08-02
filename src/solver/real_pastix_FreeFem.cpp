@@ -74,7 +74,7 @@ using namespace std;
 extern "C" {
 #endif
 #include "pastix.h"
-#include "cscd_utils.h"
+//#include "cscd_utils.h"
 #ifdef __cplusplus
 }
 #endif
@@ -245,6 +245,7 @@ void read_datafile_pastixff(const string &datafile, int &mpi_flag, pastix_int_t 
 // CAS DOUBLE SEULEMENT 
 
 
+
 class dSolvepastixmpi :   public MatriceMorse<double>::VirtualSolver   {
   
   double eps;
@@ -263,8 +264,8 @@ class dSolvepastixmpi :   public MatriceMorse<double>::VirtualSolver   {
   
   string data_option;
   
-  mutable pastix_int_t    iparm[64];
-  mutable double          dparm[64];
+  mutable pastix_int_t  iparm[64];
+  mutable double        dparm[64];
   mutable pastix_int_t    Ncol;
   mutable pastix_int_t   *ia;
   mutable pastix_int_t   *ja;
@@ -280,13 +281,16 @@ class dSolvepastixmpi :   public MatriceMorse<double>::VirtualSolver   {
 
 public:
 
-  dSolvepastixmpi(const MatriceMorse<double> &AA,int strategy,double ttgv, double epsilon=1e-6,
-		  double pivot=-1.,double pivot_sym=-1., string datafile, KN<long> &param_int, KN<double> &param_double, 
+  dSolvepastixmpi(const MatriceMorse<double> &AA, int strategy, double ttgv, double epsilon,
+		  double pivot, double pivot_sym, string datafile, KN<long> &pparam_int, KN<double> &pparam_double, 
 		  KN<long> &pperm_r, KN<long> &pperm_c) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),tol_pivot_sym(pivot_sym),tol_pivot(pivot),
     data_option(datafile) 
   { 
+    KN_<long> param_int(pparam_int);
+    KN_<double> param_double(pparam_double);
+
     //int m;
     //int ierr;
     struct timeval  tv1, tv2;
@@ -314,7 +318,7 @@ public:
     thrd_flag = 0;
 
     // ######################  
-    pastix_int_t init_raff;
+    //pastix_int_t init_raff;
     fprintf(stdout,"-- INIT PARAMETERS --\n");
     
     // reading iparm from array    
@@ -323,8 +327,8 @@ public:
       if(mpi_flag != 0) 
 	cerr << "ERROR :: GLOBAT INPUT MATRIX FOR ALL PROCS  matrix=assembled" << endl;
     }
-    else if(param_int || param_double){
-      if( param_int ) 
+    else if( !(param_int==NULL) || !(param_double==NULL) ){
+      if( !(param_int==NULL) ) 
       {
 	cout << "read param_int" << endl;
 	assert(param_int.N() == 64);
@@ -332,7 +336,7 @@ public:
 	  iparm[ii] = param_int[ii];
 	iparm[IPARM_MODIFY_PARAMETER] = API_YES;
       }
-      if( param_double ) 
+      if( !(param_double==NULL) ) 
       {
 	cout << "read param_double" << endl;
 	assert(param_double.N() == 64);
@@ -346,7 +350,7 @@ public:
     }
     
     //################################
-    if( !myid ){
+    if( myid==0 ){
       Ncol = AA.m;
       Nrow = AA.n;
       nnz  = AA.nbcoef;
@@ -369,8 +373,7 @@ public:
       for(int ii=0; ii < ia[Ncol]-1; ii++){
 	ja[ii] = ja[ii]+1; 
       }
-      
-      
+            
       MPI_Bcast( &Ncol,   1,    MPI_INT,   0, MPI_COMM_WORLD );
       MPI_Bcast( &Nrow,   1,    MPI_INT,   0, MPI_COMM_WORLD );
       MPI_Bcast( &nnz,    1,    MPI_INT,   0, MPI_COMM_WORLD );
@@ -380,8 +383,8 @@ public:
       MPI_Bcast(    ja, nnz,    MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
     }
     else{
-      MPI_Bcast( &Ncol, 1, MPI_PASTIX_INT,  0, MPI_COMM_WORLD );
-      MPI_Bcast( &Nrow, 1, MPI_PASTIX_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast( &Ncol, 1,        MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast( &Nrow, 1,        MPI_INT,  0, MPI_COMM_WORLD );
       MPI_Bcast( &nnz,  1,        MPI_INT,  0, MPI_COMM_WORLD );
       
       avals = (pastix_float_t *) malloc( nnz*sizeof(pastix_float_t) );
@@ -405,11 +408,12 @@ public:
     if(pperm_c)  
       for(int ii=0; ii < Ncol; ii++)
 	invp[ii] = pperm_c[ii];
-   
-  
+
+      
     iparm[IPARM_START_TASK] = API_TASK_INIT;
     iparm[IPARM_END_TASK]   = API_TASK_INIT;
     iparm[IPARM_SYM] = API_SYM_NO; // Matrix is considered nonsymetric    
+
     if(mpi_flag == 0)
       pastix(&pastix_data, MPI_COMM_WORLD, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm); 
     else
@@ -421,19 +425,18 @@ public:
     /* Passage en mode verbose */
     
     iparm[IPARM_RHS_MAKING] = API_RHS_B;
-    if( !param_int && data_option.empty() ){
+    if( (param_int==NULL) && data_option.empty() ){
       iparm[IPARM_MATRIX_VERIFICATION] = API_YES;
       iparm[IPARM_REFINEMENT] = API_RAF_GMRES;
       iparm[IPARM_INCOMPLETE] = API_NO;
     }
 
-    if( !param_double && data_option.empty()){
+    if( (param_double==NULL) && data_option.empty()){
       dparm[DPARM_EPSILON_REFINEMENT] = 1e-12;
       dparm[DPARM_EPSILON_MAGN_CTRL] = 1e-32;
     }
 
-
- //    cscd_checksym(Ncol, ia, ja, loc2glob, MPI_COMM_WORLD);
+//    cscd_checksym(Ncol, ia, ja, loc2glob, MPI_COMM_WORLD);
     
 //     if (iparm[IPARM_SYM]==API_SYM_YES)
 //       {
@@ -518,19 +521,20 @@ public:
 	    (long)((tv2.tv_sec  - tv1.tv_sec ) * 1000000 + 
 		   tv2.tv_usec - tv1.tv_usec));
     
-    for(int ii=0; ii < Ncol+1; ii++)
-      ia[ii] = ia[ii]-1;
+   
     for(int ii=0; ii < ia[Ncol]-1; ii++)
       ja[ii] = ja[ii]-1;
+    for(int ii=0; ii < Ncol+1; ii++)
+      ia[ii] = ia[ii]-1;
     
-
-     if(myid==0){
-       finishtime = clock();
-       timeused= (finishtime-starttime)/(1000);
-       printf("=====================================================\n");
-       cout << " pastix : time factorization  :: " << timeused << " ms" <<endl;
-       printf("=====================================================\n");
-     }
+    if(verbosity)
+      if(myid==0){
+	finishtime = clock();
+	timeused= (finishtime-starttime)/(1000);
+	printf("=====================================================\n");
+	cout << " pastix : time factorization  :: " << timeused << " ms" <<endl;
+	printf("=====================================================\n");
+      }
 
   }
   void Solver(const MatriceMorse<double> &AA,KN_<double> &x,const KN_<double> &b) const  {
@@ -545,6 +549,7 @@ public:
     // index for pastix    
     for(int ii=0; ii < Ncol+1; ii++)
       ia[ii] = ia[ii]+1;
+    assert( ia[Ncol]-1 == AA.nbcoef );
     for(int ii=0; ii < ia[Ncol]-1; ii++)
       ja[ii] = ja[ii]+1;
     
@@ -554,8 +559,7 @@ public:
       rhs[ii] = b[ii];  
     }
     
-  
-
+    
 
     //fprintf(stdout,"SOLVE STEP %ld (in FACTORIZE STEP %ld)\n",(long)ii,(long)jj);
     
@@ -573,9 +577,9 @@ public:
 	    (long)((tv2.tv_sec  - tv1.tv_sec ) * 1000000 + 
 		   tv2.tv_usec - tv1.tv_usec));    
     
-    if(verbosity > 1)
-      for(int jj=0; jj < Ncol; jj++)
-	cout << "rhs["<< jj << "]=" << rhs[jj] << endl;
+    //if(verbosity > 1)
+    //  for(int jj=0; jj < Ncol; jj++)
+    //cout << "rhs["<< jj << "]=" << rhs[jj] << endl;
     
     
     //fprintf(stdout,"RAFF STEP %ld (in FACTORIZE STEP %ld)\n",(long)ii,(long)jj);
@@ -585,7 +589,7 @@ public:
     iparm[IPARM_START_TASK] = API_TASK_REFINE;
     iparm[IPARM_END_TASK]   = API_TASK_REFINE;
     iparm[IPARM_RHS_MAKING] = API_RHS_B;
-    iparm[IPARM_ITERMAX]    = 1; //init_raff;
+    iparm[IPARM_ITERMAX]    = init_raff;
     gettimeofday(&tv1, NULL);
     if(mpi_flag == 0)
       pastix(&pastix_data, MPI_COMM_WORLD, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
@@ -601,19 +605,22 @@ public:
       x[ii] = rhs[ii];
        
     // index for freefem
-    for(int ii=0; ii < Ncol+1; ii++)
-      ia[ii] = ia[ii]-1;
+    assert( ia[Ncol]-1 == AA.nbcoef );
     for(int ii=0; ii < ia[Ncol]-1; ii++)
       ja[ii] = ja[ii]-1;
+    for(int ii=0; ii < Ncol+1; ii++)
+      ia[ii] = ia[ii]-1;
 
-    if(myid==0){
-      finishtime = clock();
-      timeused= (finishtime-starttime)/(1000 );
-      printf("=====================================================\n");
-      cout << " pastix : time solve  :: " << timeused << " ms" <<endl;
-      printf("=====================================================\n");
-    }
-    
+    if(verbosity)
+      if(myid==0){
+	finishtime = clock();
+	timeused= (finishtime-starttime)/(1000 );
+	printf("=====================================================\n");
+	cout << " pastix : time solve  :: " << timeused << " ms" <<endl;
+	printf("=====================================================\n");
+      }
+
+  
   }
 
   ~dSolvepastixmpi(){
@@ -622,13 +629,19 @@ public:
     iparm[IPARM_END_TASK]   = API_TASK_CLEAN;
     
     pastix(&pastix_data, MPI_COMM_WORLD, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
-   
+      
+    //if( sizeof(pastix_int_t) != sizeof(int) )
+    //  {
     memFree_null(ia);
     memFree_null(ja);
-    
+    //}
+    memFree_null(avals);
     /* Free mem no longer necessary */
     memFree_null(perm);
+    memFree_null(invp);
     memFree_null(rhs);
+    
+  
     
   }
   
