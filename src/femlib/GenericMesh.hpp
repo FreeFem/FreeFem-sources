@@ -714,7 +714,7 @@ void GenericMesh<T,B,V>::BuildAdj()
 {
  // const int nva   = T::nva;
  // const int nea   = T::nea;
-  assert(TheAdjacencesLink==0);
+  if(TheAdjacencesLink!=0) return ;//  already build ... 
   TheAdjacencesLink = new int[nea*nt];
   BoundaryElementHeadLink = new int[nbe];
   HashTable<SortArray<int,nva>,int> h(nea*nt,nv);
@@ -1400,7 +1400,7 @@ void GenericMesh<T,B,V>::Buildbnormalv()
    // const int nkt= T::nt;
     
     if (bnormalv) 
-      {assert(0);return;}
+      {return;}
     int nb=0;
     for (int k=0;k<nt;k++)
 	for (int i=0;i<nkv;i++)

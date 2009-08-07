@@ -98,17 +98,19 @@ namespace Fem2D
   template<> const int  GenericElement<DataTet>::nitemdim[4] = {4,6,4,1 }  ;
   
   int onWhatIsFace[4][15] ; 
-  
-  static const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15];
-  
+    typedef const int   (*const PtrConst15int) [15]; //  a pointeur on  const arry of 15 int. (to help xcode) 
+ // static const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15];
+    static PtrConst15int SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]);
+    
   template<>
   const int (* const GenericElement<DataTet>::onWhatBorder)[15] = SetonWhatIsFace(onWhatIsFace,nvfaceTet,nvedgeTet) ;
   
   template<> int   GenericMesh<Tet,Triangle3,Vertex3>::kfind=0;
   template<> int   GenericMesh<Tet,Triangle3,Vertex3>::kthrough=0;
   
-  
-  const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15]
+
+//  const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15]
+  PtrConst15int  SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2])
   {
     for(int i=0;i<15;++i)
       for(int j=0;j<4;++j)
@@ -669,17 +671,15 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     for (int i=0;i<nbe;i++)  
       mesb += this->be(i).mesure();  
     
-    
-    //if(nnt !=0){		      
-    //cout << "action  sur le maillage" << endl;
-    //BuildBound();
-    //BuildAdj();
-    //Buildbnormalv();  
-    //BuildjElementConteningVertex();
-    //BuildGTree();
-    //decrement();    
-    //}
-    
+//  Add FH to be consitant we all constructor ...  July 09
+      BuildBound();
+      if(nt > 0){ 
+	  BuildAdj();
+	  Buildbnormalv();  
+	  BuildjElementConteningVertex();  
+      }
+//  end add       
+          
     if(verbosity>1)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
     
@@ -699,9 +699,18 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     
     for (int i=0;i<nbe;i++)  
       mesb += this->be(i).mesure();  
-    
+
+//  Add FH to be consitant we all constructor ...  July 09
+      BuildBound();
+      if(nt > 0){ 
+	  BuildAdj();
+	  Buildbnormalv();  
+	  BuildjElementConteningVertex();  
+      }
+//  end add       
+      
     if(verbosity>1)
-      cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
+      cout << "  -- End of Construct  mesh3: mesure = " << mes << " border mesure " << mesb << endl;  
   }
 
   void Mesh3::flipSurfaceMesh3(int surface_orientation)

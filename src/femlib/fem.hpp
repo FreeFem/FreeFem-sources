@@ -465,6 +465,9 @@ public:
   int operator()(const Triangle * tt) const {return tt  - triangles;}
   int operator()(const Vertex & vv)   const {return &vv - vertices;}
   int operator()(const Vertex * vv)   const {return vv  - vertices;}
+  int operator()(const BoundaryEdge & be)   const {return &be- bedges;}//  add FH 04/07/09
+  int operator()(const BoundaryEdge * be)   const {return be  - bedges;}//  add FH 04/07/09
+    
   int operator()(int it,int j) const {return number(triangles[it][j]);}
   BoundaryEdge &  be(int i) const { return bedges[i];}
   Element &  t(int i) const { return triangles[i];}
