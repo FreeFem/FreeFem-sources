@@ -1,4 +1,6 @@
 v 3.4-1
+   rewrite of the mpi interface in vue of use group and comunicator
+     now we only use mpi.h and not mpi++.h
    add plot of array of mesh and array of finite element functions
    add new command in ffglut graphic interface
      n,N,i,I  to change the number of isovalue and to set the min,max value to the

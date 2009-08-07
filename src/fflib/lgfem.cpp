@@ -1486,6 +1486,8 @@ double pmesh_area(pmesh * p)
  { throwassert(p && *p) ;  return (**p).area ;}
 long pmesh_nt(pmesh * p)
  { throwassert(p && *p) ;  return (**p).nt ;}
+long pmesh_nbe(pmesh * p)
+{ throwassert(p && *p) ;  return (**p).neb ;}
 long pmesh_nv(pmesh * p)
  { throwassert(p && *p) ;  return (**p).nv ;}
 long pVh_ndof(pfes * p)
@@ -3706,6 +3708,17 @@ lgElement get_element(pmesh *const & a, long const & n)
 }
 
 
+
+lgBoundaryEdge get_belement(lgBoundaryEdge::BE const & a, long const & n)
+{
+    return lgBoundaryEdge(a,n);
+}
+
+lgElement get_adj(lgElement::Adj const & a, long  * const & n)
+{
+    return  a.adj(*n);
+}
+
 lgVertex get_vertex(pmesh const & a, long const & n)
 {
     return lgVertex(a,n);
@@ -3718,6 +3731,11 @@ lgVertex get_element(lgElement const & a, long const & n)
 {
   return a[n];
 }
+lgVertex get_belement(lgBoundaryEdge const & a, long const & n)
+{
+    return a[n];
+}
+
 R getx(lgVertex const & a)
 {
   return a.x();
@@ -3735,9 +3753,26 @@ long getlab(lgElement const & a)
 {
   return a.lab();
 }
+long getlab(lgBoundaryEdge const & a)
+{
+    return a.lab();
+}
+
 double getarea(lgElement const & a)
 {
     return a.area();
+}
+double getlength(lgBoundaryEdge const & a)
+{
+    return a.length();
+}
+lgElement getElement(lgBoundaryEdge const & a)
+{
+    return a.Element();
+}
+long EdgeElement(lgBoundaryEdge const & a)
+{
+    return a.EdgeElement();
 }
 
 /*
@@ -3890,7 +3925,7 @@ Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
     return make_pair(map_type[typeid( EConstantTypeOfFE3::T).name()],new EConstantTypeOfFE3(v));
 }
 
-
+//  end --- call meth be .. 
 void  init_lgfem() 
 {
  // ThePlotStream = new ofstream("ttttt.plot");
@@ -3910,10 +3945,15 @@ void  init_lgfem()
   Dcl_TypeandPtr<pmesh3>(0,0,::InitializePtr<pmesh3>,::DestroyPtr<pmesh3>,AddIncrement<pmesh3>,NotReturnOfthisType); 
   Dcl_Type<lgVertex>(); 
   Dcl_Type<lgElement>( ); 
+  Dcl_Type<lgElement::Adj>( ); 
+    
+  Dcl_Type<lgBoundaryEdge::BE >( ); 
+  Dcl_Type<lgBoundaryEdge>( ); 
 
   atype<long>()->AddCast( 
     new E_F1_funcT<long,lgVertex>(Cast<long,lgVertex>),
-    new E_F1_funcT<long,lgElement>(Cast<long,lgElement>)
+    new E_F1_funcT<long,lgElement>(Cast<long,lgElement>),
+    new E_F1_funcT<long,lgBoundaryEdge>(Cast<long,lgBoundaryEdge>)
   );
 
 
@@ -4074,6 +4114,8 @@ void  init_lgfem()
  Add<pfec>("n",".",new OneOperator1<long,pfec>(pfer_nbdf<Complex>));
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
+ Add<pmesh*>("nbe",".",new OneOperator1<long,pmesh*>(pmesh_nbe));
+    
  Add<pmesh*>("nv",".",new OneOperator1<long,pmesh*>(pmesh_nv));
  Add<pfes*>("ndof",".",new OneOperator1<long,pfes*>(pVh_ndof));
  Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
@@ -4152,17 +4194,35 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Add<R2*>("y",".", new OneOperator_Ptr_o_R<R,R2>(  & R2::y));
  
  Add<pmesh>("[","",new OneOperator2_<lgElement,pmesh,long>(get_element));
+    
+ Add<pmesh*>("be",".",new OneOperator1_<lgBoundaryEdge::BE,pmesh*>(Build));
+ Add<lgElement>("adj",".",new OneOperator1_<lgElement::Adj,lgElement>(Build));
+ Add<lgBoundaryEdge::BE>("(","",new OneOperator2_<lgBoundaryEdge,lgBoundaryEdge::BE,long>(get_belement));
+ Add<lgElement::Adj>("(","",new OneOperator2_<lgElement,lgElement::Adj,long*>(get_adj));
+// Add<lgElement::Adj>("(","",new OneOperator2_<lgElement,lgElement::Adj,long**>(get_adj));
+ TheOperators->Add("==", new OneBinaryOperator<Op2_eq<lgElement,lgElement> >);
+ TheOperators->Add("!=", new OneBinaryOperator<Op2_ne<lgElement,lgElement> >);
+ TheOperators->Add("<", new OneBinaryOperator<Op2_lt<lgElement,lgElement> >);
+ TheOperators->Add("<=", new OneBinaryOperator<Op2_le<lgElement,lgElement> >);
+		      
+    
  Add<pmesh*>("[","",new OneOperator2_<lgElement,pmesh*,long>(get_element));
  Add<pmesh>("(","",new OneOperator2_<lgVertex,pmesh,long>(get_vertex));
  Add<pmesh*>("(","",new OneOperator2_<lgVertex,pmesh*,long>(get_vertex));
 
  Add<lgElement>("[","",new OneOperator2_<lgVertex,lgElement,long>(get_element));
+ Add<lgBoundaryEdge>("[","",new OneOperator2_<lgVertex,lgBoundaryEdge,long>(get_belement));
+
  Add<lgVertex>("x",".",new OneOperator1_<R,lgVertex>(getx));
  Add<lgVertex>("y",".",new OneOperator1_<R,lgVertex>(gety));
  Add<lgVertex>("label",".",new OneOperator1_<long,lgVertex>(getlab));
  Add<lgElement>("label",".",new OneOperator1_<long,lgElement>(getlab));
  Add<lgElement>("region",".",new OneOperator1_<long,lgElement>(getlab));
  Add<lgElement>("area",".",new OneOperator1_<double,lgElement>(getarea));
+ Add<lgBoundaryEdge>("length",".",new OneOperator1_<double,lgBoundaryEdge>(getlength));
+ Add<lgBoundaryEdge>("label",".",new OneOperator1_<long,lgBoundaryEdge>(getlab));
+ Add<lgBoundaryEdge>("Element",".",new OneOperator1_<lgElement,lgBoundaryEdge>(getElement));
+ Add<lgBoundaryEdge>("EdgeElement",".",new OneOperator1_<long,lgBoundaryEdge>(EdgeElement));
  
  
 //  new type  

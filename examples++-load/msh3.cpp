@@ -28,6 +28,15 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
+
+//  FH   July 2009
+//   comment all
+//       Th3_t->BuildBound();
+//       Th3_t->BuildAdj();
+//       Th3_t->Buildbnormalv();  
+//       Th3_t->BuildjElementConteningVertex();
+//   is now in the constructor of Mesh3 to be consistante. 
+//   
 #ifndef WITH_NO_INIT
 /*
 #include <fstream>
@@ -273,10 +282,11 @@ void TestSameTriangleMesh3( const Mesh3 & Th3, const double & hseuil, const R3 &
 int TestElementMesh3( const Mesh3 & Th3 ) 
 // Test si le maillage à des éléments communs : Sommet, triangle, ...
 {
+//  FH 31/09/2009:  Change  int* to KN<int> to remove pb of missing free in some case 
   R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremité de la boîte englobante
   double hmin=1e10;   // longueur minimal des arrêtes
   double hseuil;
-  int *Numero_Som=new int[Th3.nv];
+  KN<int> Numero_Som(Th3.nv);
   int nv_t,nt_t,nbe_t;
   
   // calcul de la boite englobante
@@ -301,7 +311,7 @@ int TestElementMesh3( const Mesh3 & Th3 )
 	    cout << "tetrahedra: " << k << " edge : " << eh << " lenght "<<  Th3[k].lenEdge(eh) << endl;
 	  }
 	  cout << " A tetrahedra with a very small edge was created " << endl;
-	  delete [] Numero_Som;
+	 
 	  return 1;
 	}
       hmin=min(hmin,Th3[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
@@ -316,7 +326,6 @@ int TestElementMesh3( const Mesh3 & Th3 )
 	    cout << "triangles: " << k << " edge : " << eh << " lenght "<<  Th3.be(k).lenEdge(e) << endl;
 	  }
 	  cout << " A triangle with a very small edges was created " << endl;
-	  delete [] Numero_Som;
 	  return 1;
 	}
       hmin=min(hmin,Th3.be(k).lenEdge(e));   // calcul de .lenEdge pour un Mesh3
@@ -337,12 +346,12 @@ int TestElementMesh3( const Mesh3 & Th3 )
   if(verbosity >1) cout << "NbVertexRecollement " << nv_t << " / " << "NbVertex(anc)" << Th3.nv <<endl;   
 
   if(nv_t != Th3.nv) {
-    delete [] Numero_Som;
+   // delete [] Numero_Som;
     cout << " A vertex was referenced twice or more " << endl;
     return 1;
   }
   /* degenerate element ??? */ 
-  int *Elem_ok= new int [Th3.nt];
+  KN<int> Elem_ok(Th3.nt);
   int i_elem=0;
   for(int ii=0; ii< Th3.nt; ii++){
     const Tet & K(Th3.elements[ii]);
@@ -369,7 +378,7 @@ int TestElementMesh3( const Mesh3 & Th3 )
     assert( i_elem == Th3.nt);
   }
 
-  int *Border_ok = new int[Th3.nbe];
+  KN<int> Border_ok(Th3.nbe);
   int i_border= 0;
   for( int ii=0; ii< Th3.nbe; ii++){
     Border_ok[ii]=1;
@@ -407,9 +416,6 @@ int TestElementMesh3( const Mesh3 & Th3 )
 
   if(nt_t != Th3.nt){
     cout << " a tetrahedra was referenced twice or more " << endl;
-    delete [] Numero_Som;
-    delete [] Border_ok;
-    delete [] Elem_ok;
     return 1;
   }
   /* determination du nombre de triangles confondus */ 
@@ -423,11 +429,9 @@ int TestElementMesh3( const Mesh3 & Th3 )
 
   if(nbe_t != Th3.nbe){
     cout << " a triangle was referenced twice or more " << endl;
-    delete [] Numero_Som;
-    delete [] Border_ok;
-    delete [] Elem_ok;
     return 1;
   }
+    
   return 0;
 }
 
@@ -844,6 +848,12 @@ Mesh3 * build_layer (const Mesh & Th2, const int Nmax, const int *tab_Ni,
   if(verbosity > 1) cout << "debut :   Som3D_mesh_product_Version_Sommet_mesh_tab( Nmax, tab_Ni, tab_zmin, tab_zmax, Th2, Th3);   "<< endl;
   Som3D_mesh_product_Version_Sommet_mesh_tab( Nmax, tab_Ni, tab_zmin, tab_zmax, Th2, 
 			maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin, *Th3);    
+    
+//  Add FH because remove in call function.. 
+   Th3->BuildBound();
+   Th3->BuildAdj();
+   Th3->Buildbnormalv();  
+   Th3->BuildjElementConteningVertex();
     
     
   return Th3;
@@ -1857,7 +1867,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   }
   else{
     Mesh3 *mpq= new Mesh3(nbv,nbt,nbe,v,t,b);  
-  
+ /* 
     mpq->BuildBound();
     if(verbosity > 1) cout << "fin de BuildBound" << endl;
     mpq->BuildAdj();
@@ -1866,8 +1876,9 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
     if(verbosity > 1) cout << "fin de Buildnormalv()" << endl;
     mpq->BuildjElementConteningVertex();
     if(verbosity > 1) cout << "fin de ConteningVertex()" << endl;
+  */
     mpq->BuildGTree();
-    if(verbosity > 1) cout << "fin de BuildGTree()" << endl;
+    if(verbosity > 2) cout << "fin de BuildGTree()" << endl;
     
     //Add2StackOfPtr2FreeRC(stack,mpq);
   
@@ -2058,15 +2069,16 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
 			      recollement_elem, recollement_border, point_confondus_ok);
   if(nbt != 0)
     {
-      T_Th3->BuildBound();
+
+//      T_Th3->BuildBound();
     
-      T_Th3->BuildAdj();
+//      T_Th3->BuildAdj();
       
       if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
 
-      T_Th3->Buildbnormalv();  
+ //     T_Th3->Buildbnormalv();  
 
-      T_Th3->BuildjElementConteningVertex();
+ //      T_Th3->BuildjElementConteningVertex();
       
       T_Th3->BuildGTree();
       
@@ -2234,10 +2246,10 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
     {
       Mesh3 *mpq = new Mesh3(nbv,nbt,nbe,v,t,b);
       
-      mpq->BuildBound();
-      mpq->BuildAdj();
-      mpq->Buildbnormalv();  
-      mpq->BuildjElementConteningVertex(); 
+	//mpq->BuildBound();
+     // mpq->BuildAdj();
+     // mpq->Buildbnormalv();  
+     // mpq->BuildjElementConteningVertex(); 
       mpq->BuildGTree();
       //mpq->decrement();   // ?? decrement enlever ???
       Add2StackOfPtr2FreeRC(stack,mpq);  
@@ -2248,7 +2260,7 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
     {
       Mesh3 *mpq = new Mesh3(nbv,nbe,v,b);
       
-      mpq->BuildBound();
+     // mpq->BuildBound();
       Add2StackOfPtr2FreeRC(stack,mpq);  
       
       return mpq;
@@ -4253,10 +4265,10 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
 	  Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
 	  */
       
-      Th3->BuildBound();
-      Th3->BuildAdj();
-      Th3->Buildbnormalv();  
-      Th3->BuildjElementConteningVertex();
+     // Th3->BuildBound();
+     // Th3->BuildAdj();
+     // Th3->Buildbnormalv();  
+     // Th3->BuildjElementConteningVertex();
       Th3->BuildGTree();
       //Th3->decrement();  
       Add2StackOfPtr2FreeRC(stack,Th3);
@@ -4297,10 +4309,10 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
       Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh, rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok);
 		  
       
-      T_Th3->BuildBound();
-      T_Th3->BuildAdj();
-      T_Th3->Buildbnormalv();  
-      T_Th3->BuildjElementConteningVertex();
+     // T_Th3->BuildBound();
+    //  T_Th3->BuildAdj();
+     // T_Th3->Buildbnormalv();  
+     // T_Th3->BuildjElementConteningVertex();
       T_Th3->BuildGTree();
       //T_Th3->decrement();  
       Add2StackOfPtr2FreeRC(stack,T_Th3);
@@ -4515,15 +4527,15 @@ AnyType DeplacementTab_Op::operator()(Stack stack)  const
   
   if(nbt != 0)
     {
-      T_Th3->BuildBound();
+      //T_Th3->BuildBound();
     
-      T_Th3->BuildAdj();
+      //T_Th3->BuildAdj();
 
       if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
       
-      T_Th3->Buildbnormalv();  
+      //T_Th3->Buildbnormalv();  
 
-      T_Th3->BuildjElementConteningVertex();
+     // T_Th3->BuildjElementConteningVertex();
       
       T_Th3->BuildGTree();
       

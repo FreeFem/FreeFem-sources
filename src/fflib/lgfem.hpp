@@ -78,22 +78,70 @@ namespace {
   };
   
   class lgElement { public:
-      CountPointer<Mesh> pTh;
-    Triangle *k;
-    
+   struct Adj {// 
+	  Mesh *pTh;
+          Triangle *k;
+	  Adj(const lgElement & pp) : pTh(pp.pTh),k(pp.k) {}
+       lgElement adj(long & e) const  {
+         int ee;
+	   ffassert(pTh && k && e >=0 && e < 3 );
+         long kk=pTh->ElementAdj((*pTh)(k),ee=e); 
+         e=ee;
+	return  lgElement(pTh,kk);}
+      }; 
+  CountPointer<Mesh> pTh; 
+  Triangle *k;
+
   lgElement():  k(0) {}
   void  Check() const  {   if (!k || !pTh) { ExecError("Unset Triangle,Sorry!"); } }
   void init() { k=0;pTh.init();}
   void destroy() {pTh.destroy();}
-  lgElement(Mesh * Th,long kk): pTh(Th),k( &(*pTh)[kk]) {}
+  lgElement(Mesh * Th,long kk): pTh(Th),k( &(*Th)[kk]) {}
   lgElement(Mesh * Th,Triangle * kk): pTh(Th),k(kk) {}
   operator int() const { Check(); return (* pTh)(k);} 
   lgVertex operator [](const long & i) const { Check(); return lgVertex(pTh,&(*k)[i]);}   
   long lab() const {Check() ; return k ? k->lab : 0;}
   double area() const {Check() ; return k->area ;}
   long n() const { return k ? 3: 0 ;}
+  bool operator==(const lgElement & l) const { return pTh==l.pTh && k == l.k;}
+  bool operator!=(const lgElement & l) const { return pTh!=l.pTh || k != l.k;}
+  bool operator<(const lgElement & l) const { return pTh==l.pTh && k <l.k;}
+  bool operator<=(const lgElement & l) const { return pTh==l.pTh && k <=l.k;}
+      
 
 };
+    // add FH  August 2009 ...   
+
+class lgBoundaryEdge { public:
+    struct BE {
+	Mesh * p;
+	BE(Mesh *pp) : p(pp) {}
+	BE(Mesh **pp) : p(*pp) {}
+	 operator Mesh * () const {return p;}
+    };
+    
+	CountPointer<Mesh> pTh;
+	BoundaryEdge *k;
+	
+	lgBoundaryEdge():  k(0) {}
+	void  Check() const  {   if (!k || !pTh) { ExecError("Unset BoundaryEdge,Sorry!"); } }
+	void init() { k=0;pTh.init();}
+	void destroy() {pTh.destroy();}
+	lgBoundaryEdge(Mesh * Th,long kk): pTh(Th),k( &(*pTh).be(kk)) {}
+	lgBoundaryEdge(Mesh * Th,BoundaryEdge * kk): pTh(Th),k(kk) {}
+        lgBoundaryEdge(const BE & be,long kk): pTh(be.p),k( &(*pTh).be(kk)) {}
+        lgBoundaryEdge(const BE & be,BoundaryEdge * kk): pTh(be.p),k(kk) {}
+	operator int() const { Check(); return (* pTh)(k);} 
+	lgVertex operator [](const long & i) const { Check(); return lgVertex(pTh,&(*k)[i]);}   
+	long lab() const {Check() ; return k ? k->lab : 0;}
+	double length() const {Check() ; return k->length()  ;}
+	long n() const { return k ? 2: 0 ;}
+       lgElement Element() const {Check() ;int ee; return lgElement(pTh,(*pTh).BoundaryElement((*pTh)(k),ee));}
+       long EdgeElement() const {Check() ;int ee;  (*pTh).BoundaryElement((*pTh)(k),ee);return ee;}
+
+    };
+    
+    
 
  } // end namespace blanc
 

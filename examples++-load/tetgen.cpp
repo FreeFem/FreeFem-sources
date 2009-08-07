@@ -30,6 +30,16 @@
  */
 // $Id$
 
+//  FH   July 2009
+//   comment all
+//       Th3_t->BuildBound();
+//       Th3_t->BuildAdj();
+//       Th3_t->Buildbnormalv();  
+//       Th3_t->BuildjElementConteningVertex();
+//   is now in the constructor of Mesh3 to be consistante. 
+//   
+
+
 #include  <iostream>
 #include  <cfloat>
 #include <cmath>
@@ -347,10 +357,10 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
 
   delete Th3_tmp;
   
-  Th3->BuildBound();
-  Th3->BuildAdj();
-  Th3->Buildbnormalv();  
-  Th3->BuildjElementConteningVertex();
+//Th3->BuildBound();
+//  Th3->BuildAdj();
+//  Th3->Buildbnormalv();  
+//  Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   //Th3->decrement();    
   Add2StackOfPtr2FreeRC(stack,Th3);
@@ -1654,10 +1664,10 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   }
   cout << "action sur le maillage" << endl;
 
-  Th3->BuildBound();
-  Th3->BuildAdj();
-  Th3->Buildbnormalv();  
-  Th3->BuildjElementConteningVertex();
+ // Th3->BuildBound();
+ // Th3->BuildAdj();
+ // Th3->Buildbnormalv();  
+ // Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   //Th3->decrement();    
   Add2StackOfPtr2FreeRC(stack,Th3);
@@ -1860,10 +1870,10 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
   }
   //cout << "fin du changement de label " << endl;
   
-  Th3->BuildBound();
-  Th3->BuildAdj();
-  Th3->Buildbnormalv();  
-  Th3->BuildjElementConteningVertex();
+//  Th3->BuildBound();
+//  Th3->BuildAdj();
+//  Th3->Buildbnormalv();  
+//  Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   //Th3->decrement();    
   Add2StackOfPtr2FreeRC(stack,Th3);
@@ -1956,10 +1966,10 @@ AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
  
   Mesh3 *Th3 =  Convexhull_3Dpoints ( switch_tetgen, nbv, cxx, cyy, czz, label_tet, label_face );
 	
-  Th3->BuildBound();
-  Th3->BuildAdj();
-  Th3->Buildbnormalv();  
-  Th3->BuildjElementConteningVertex();
+//  Th3->BuildBound();
+//  Th3->BuildAdj();
+//  Th3->Buildbnormalv();  
+//  Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   //Th3->decrement();   
   Add2StackOfPtr2FreeRC(stack,Th3);
@@ -2070,10 +2080,10 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
   
   Th3 = Convexhull_3Dpoints( switch_tetgen, nbv, cxx, cyy, czz, label_tet, label_face );
 	
-  Th3->BuildBound();
-  Th3->BuildAdj();
-  Th3->Buildbnormalv();  
-  Th3->BuildjElementConteningVertex();
+//  Th3->BuildBound();
+//  Th3->BuildAdj();
+//  Th3->Buildbnormalv();  
+//  Th3->BuildjElementConteningVertex();
   Th3->BuildGTree();
   //Th3->decrement();    
   Add2StackOfPtr2FreeRC(stack,Th3);

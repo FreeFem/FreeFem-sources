@@ -39,7 +39,7 @@ for(int i=0;i<3;++i)
     b=A*xx;
     cout << "b="  << b  << endl;
     cout << "xx=" << xx << endl;
-    set(A,solver=sparsesolver,paramstring="DiagPivotThresh=0.05,ColPerm=MMD_AT_PLUS_A,Equil=NO"); 
+    set(A,solver=sparsesolver,sparams="DiagPivotThresh=0.05,ColPerm=MMD_AT_PLUS_A,Equil=NO"); 
     x = A^-1*b;	
     cout << "x=" << endl; cout << x << endl;	
   }

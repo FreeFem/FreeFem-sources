@@ -29,6 +29,14 @@
  ref:ANR-07-CIS7-002-01 
  */
 
+//  FH   July 2009
+//   comment all
+//       Th3_t->BuildBound();
+//       Th3_t->BuildAdj();
+//       Th3_t->Buildbnormalv();  
+//       Th3_t->BuildjElementConteningVertex();
+//   is now in the constructor of Mesh3 to be consistante. 
+//   
 
 #include  <iostream>
 #include  <cfloat>
@@ -321,10 +329,10 @@ AnyType RemplissageNetgen_Op::operator()(Stack stack)  const
 
   Mesh3 * Th3_t = new Mesh3(netgen_nv,netgen_nt,netgen_nbe,v,t,b);
 
-  Th3_t->BuildBound();
-  Th3_t->BuildAdj();
-  Th3_t->Buildbnormalv();  
-  Th3_t->BuildjElementConteningVertex();
+ // Th3_t->BuildBound();
+ // Th3_t->BuildAdj();
+ // Th3_t->Buildbnormalv();  
+ // Th3_t->BuildjElementConteningVertex();
   Th3_t->BuildGTree();
   //Th3->decrement();    
   Add2StackOfPtr2FreeRC(stack,Th3_t);
@@ -495,10 +503,10 @@ AnyType Netgen_STL_Op::operator()(Stack stack)  const
   Ng_Exit();
   Mesh3 * Th3_t = new Mesh3(netgen_nv,netgen_nt,netgen_nbe,v,t,b);
 
-  Th3_t->BuildBound();
-  Th3_t->BuildAdj();
-  Th3_t->Buildbnormalv();  
-  Th3_t->BuildjElementConteningVertex();
+ // Th3_t->BuildBound();
+ // Th3_t->BuildAdj();
+ // Th3_t->Buildbnormalv();  
+ // Th3_t->BuildjElementConteningVertex();
   Th3_t->BuildGTree();
   //Th3->decrement();    
   Add2StackOfPtr2FreeRC(stack,Th3_t);
@@ -1398,13 +1406,14 @@ AnyType Netgen_LoadMesh_Op::operator()(Stack stack)  const
 
   if(Th3_t->nt == 0)
     Th3_t->BuildSurfaceAdj();
-  else{
-    Th3_t->BuildBound();
-    Th3_t->BuildAdj();
-    Th3_t->Buildbnormalv();  
-    Th3_t->BuildjElementConteningVertex();
-    Th3_t->BuildGTree();
-  }
+ // else{
+  //  Th3_t->BuildBound();
+   // Th3_t->BuildAdj();
+   // Th3_t->Buildbnormalv();  
+   // Th3_t->BuildjElementConteningVertex();
+
+ // }
+        Th3_t->BuildGTree();
     //Th3->decrement();    
   Add2StackOfPtr2FreeRC(stack,Th3_t);
 		
