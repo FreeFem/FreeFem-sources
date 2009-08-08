@@ -406,8 +406,23 @@ public:
 
 template<class Mesh>
 class GlgElement { public:
+typedef typename Mesh::Element Element;
+
+    struct Adj {// 
+	Mesh *pTh;
+	const Element *k;
+	Adj(const GlgElement<Mesh> & pp) : pTh(pp.pTh),k(pp.k) {}
+	GlgElement<Mesh> adj(long & e) const  {
+	    int ee,ko;
+	    ffassert(pTh && k && e >=0 && e < Element::nv );
+	    long kk=pTh->ElementAdj(ko=(*pTh)(k),ee=e);
+	    if(ee>=0) e=ee;//  ok adj exist
+	    else  return  GlgElement<Mesh>(pTh,ko);// return same .. 
+	    
+	return  GlgElement<Mesh>(pTh,kk);}
+    }; 
+    
     CountPointer<Mesh> pTh;
-  typedef typename Mesh::Element Element;
   const Element *k;
   
   GlgElement():  k(0) {}
@@ -421,9 +436,52 @@ class GlgElement { public:
   long lab() const {Check() ; return k ? k->lab : 0;}
   double mes() const {Check() ; return k->mesure() ;}
   long n() const { return k ? Element::nv: 0 ;}
-
+    
+  bool operator==(const GlgElement & l) const { return pTh==l.pTh && k == l.k;}
+  bool operator!=(const GlgElement & l) const { return pTh!=l.pTh || k != l.k;}
+  bool operator<(const GlgElement & l) const { return pTh==l.pTh && k <l.k;}
+  bool operator<=(const GlgElement & l) const { return pTh==l.pTh && k <=l.k;}
+    
 };
 
+template<class Mesh>
+class GlgBoundaryElement { public:
+    
+    typedef typename Mesh::Element Element;
+    typedef typename Mesh::BorderElement BorderElement;
+    
+    struct BE {
+	Mesh * p;
+	BE(Mesh *pp) : p(pp) {}
+	BE(Mesh **pp) : p(*pp) {}
+	operator Mesh * () const {return p;}
+    };
+    
+    CountPointer<Mesh> pTh;
+    BorderElement *k;
+    
+    GlgBoundaryElement():  k(0) {}
+    void  Check() const  {   if (!k || !pTh) { ExecError("Unset BoundaryEdge,Sorry!"); } }
+    void init() { k=0;pTh.init();}
+    void destroy() {pTh.destroy();}
+    GlgBoundaryElement(Mesh * Th,long kk): pTh(Th),k( &(*pTh).be(kk)) {}
+    GlgBoundaryElement(Mesh * Th,BoundaryEdge * kk): pTh(Th),k(kk) {}
+    GlgBoundaryElement(const BE & be,long kk): pTh(be.p),k( &(*pTh).be(kk)) {}
+    GlgBoundaryElement(const BE & be,BoundaryEdge * kk): pTh(be.p),k(kk) {}
+    operator int() const { Check(); return (* pTh)(k);} 
+    GlgVertex<Mesh> operator [](const long & i) const { Check(); return GlgVertex<Mesh>(pTh,&(*k)[i]);}   
+    long lab() const {Check() ; return k ? k->lab : 0;}
+    double length() const {Check() ; return k->length()  ;}
+    long n() const { return k ? BorderElement::nv : 0 ;}
+    GlgElement<Mesh> element() const {Check() ;int ee; return GlgElement<Mesh>(pTh,(*pTh).BoundaryElement((*pTh)(k),ee));}
+    long nuBoundaryElement() const {Check() ;int ee;  (*pTh).BoundaryElement((*pTh)(k),ee);return ee;}
+    
+};
+
+GlgBoundaryElement<Mesh3> get_element(GlgBoundaryElement<Mesh3>::BE const & a, long const & n){  return GlgBoundaryElement<Mesh3>(a,n);}
+GlgVertex<Mesh3> get_element(GlgBoundaryElement<Mesh3> const & a, long const & n){  return a[n];}
+
+GlgElement<Mesh3> get_adj(GlgElement<Mesh3>::Adj const & a, long  * const & n){return  a.adj(*n);}
 
 GlgElement<Mesh3> get_element(pmesh3 const & a, long const & n) {  return GlgElement<Mesh3>(a,n);}
 GlgElement<Mesh3> get_element(pmesh3 *const & a, long const & n) {  return GlgElement<Mesh3>(*a,n);}
@@ -432,11 +490,18 @@ GlgVertex<Mesh3> get_vertex(pmesh3 const & a, long const & n){ return GlgVertex<
 GlgVertex<Mesh3> get_vertex(pmesh3 *const & a, long const & n){ return GlgVertex<Mesh3>(*a,n);}
 GlgVertex<Mesh3> get_element(GlgElement<Mesh3> const & a, long const & n) {  return a[n];}
 
+GlgElement<Mesh3> getElement(GlgBoundaryElement<Mesh3> const & a)
+{    return a.element();}
+
+long NuElement(GlgBoundaryElement<Mesh3> const & a)
+{    return a.nuBoundaryElement(); }
+
 R getx(GlgVertex<Mesh3> const & a){  return a.x();}
 R gety(GlgVertex<Mesh3> const & a){  return a.y();}
 R getz(GlgVertex<Mesh3> const & a){  return a.z();}
 long  getlab(GlgVertex<Mesh3> const & a){  return a.lab();}
 long getlab(GlgElement<Mesh3> const & a){  return a.lab();}
+long getlab(GlgBoundaryElement<Mesh3> const & a){  return a.lab();}
 R getmes(GlgElement<Mesh3> const & a){  return a.mes();}
 
 double pmesh_mes(pmesh3 * p) { ffassert(p && *p) ;  return (**p).mes ;}
@@ -1364,10 +1429,16 @@ void init_lgmesh3() {
 
    Dcl_Type<GlgVertex<Mesh3> >(); 
    Dcl_Type<GlgElement<Mesh3> >( ); 
-
+    Dcl_Type<GlgElement<Mesh3>::Adj>( ); 
+    
+    Dcl_Type<GlgBoundaryElement<Mesh3>::BE >( ); 
+    Dcl_Type<GlgBoundaryElement<Mesh3> >( ); 
+    
    atype<long>()->AddCast( 
 			  new E_F1_funcT<long,GlgVertex<Mesh3> >(Cast<long,GlgVertex<Mesh3> >),
-			  new E_F1_funcT<long,GlgElement<Mesh3> >(Cast<long,GlgElement<Mesh3> >)
+			  new E_F1_funcT<long,GlgElement<Mesh3> >(Cast<long,GlgElement<Mesh3> >),
+			  new E_F1_funcT<long,GlgBoundaryElement<Mesh3> >(Cast<long,GlgBoundaryElement<Mesh3> >)
+
 			   );
 
    Add<pmesh3>("[","",new OneOperator2_<GlgElement<Mesh3>,pmesh3,long>(get_element));
@@ -1375,7 +1446,23 @@ void init_lgmesh3() {
    Add<pmesh3>("(","",new OneOperator2_<GlgVertex<Mesh3>,pmesh3,long>(get_vertex));
    Add<pmesh3*>("(","",new OneOperator2_<GlgVertex<Mesh3>,pmesh3*,long>(get_vertex));
 
+    Add<pmesh3*>("be",".",new OneOperator1_<GlgBoundaryElement<Mesh3>::BE,pmesh3*>(Build));
+    Add<GlgElement<Mesh3> >("adj",".",new OneOperator1_<GlgElement<Mesh3>::Adj,GlgElement<Mesh3> >(Build));
+    Add<GlgBoundaryElement<Mesh3>::BE>("(","",new OneOperator2_<GlgBoundaryElement<Mesh3>,GlgBoundaryElement<Mesh3>::BE,long>(get_element));
+    Add<GlgElement<Mesh3>::Adj>("(","",new OneOperator2_<GlgElement<Mesh3>,GlgElement<Mesh3>::Adj,long*>(get_adj));
+    TheOperators->Add("==", new OneBinaryOperator<Op2_eq<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
+    TheOperators->Add("!=", new OneBinaryOperator<Op2_ne<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
+    TheOperators->Add("<", new OneBinaryOperator<Op2_lt<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
+    TheOperators->Add("<=", new OneBinaryOperator<Op2_le<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
+
+    Add<GlgBoundaryElement<Mesh3> >("label",".",new OneOperator1_<long,GlgBoundaryElement<Mesh3> >(getlab));
+    Add<GlgBoundaryElement<Mesh3> >("Element",".",new OneOperator1_<GlgElement<Mesh3> ,GlgBoundaryElement<Mesh3> >(getElement));
+    Add<GlgBoundaryElement<Mesh3> >("whoinElement",".",new OneOperator1_<long,GlgBoundaryElement<Mesh3> >(NuElement));
+    
+
    Add<GlgElement<Mesh3> >("[","",new OneOperator2_<GlgVertex<Mesh3> ,GlgElement<Mesh3> ,long>(get_element));
+   Add<GlgBoundaryElement<Mesh3> >("[","",new OneOperator2_<GlgVertex<Mesh3>,GlgBoundaryElement<Mesh3>,long>(get_element));
+ 
    Add<GlgVertex<Mesh3> >("x",".",new OneOperator1_<R,GlgVertex<Mesh3> >(getx));
    Add<GlgVertex<Mesh3> >("y",".",new OneOperator1_<R,GlgVertex<Mesh3> >(gety));
    Add<GlgVertex<Mesh3> >("z",".",new OneOperator1_<R,GlgVertex<Mesh3> >(getz));
