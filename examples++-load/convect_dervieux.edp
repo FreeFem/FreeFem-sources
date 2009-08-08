@@ -1,4 +1,4 @@
-bool fast=ture;
+bool fast=true;
 load "mat_dervieux";  // external module in C++ must be loaded
 border a(t=0, 2*pi){ x = cos(t); y = sin(t);  }
 mesh th = buildmesh(a(100));
