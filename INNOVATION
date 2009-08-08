@@ -1,3 +1,18 @@
+v 3.4-2
+  add boundary mesh inqure in 2d and 3d
+  Th.nbe ; // return the number of boundary element \hfilll
+  Th.be(k);   // return the boundary element k $\in \{0,...,Th.nbe-1\}$ \hfilll
+  Th.be(k)[l];   // return the vertices l $\in \{0,1\}$ of  boundary elmt k \hfilll
+  Th.be(k).Element ;   // return the triangle contening the  boundary elmt k \hfilll
+  Th.be(k).whoinElement ;   // return the edge/face number of element contening \hfilll
+  //the  boundary elmt k 
+  Th[k].adj(e) ; // return adjacent element to k by edge/face e, and change \hfill 
+  // the value of e to the corresponding edge in the adjacent element
+  Th[k] == Th[k].adj(e) // non adjacent element return the same 
+  Th[k] != Th[k].adj(e) // true adjacent element 
+
+  do small change in msh3.cpp  file 
+ 
 v 3.4-1
    rewrite of the mpi interface in vue of use group and comunicator
      now we only use mpi.h and not mpi++.h
