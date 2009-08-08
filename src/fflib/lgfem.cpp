@@ -4199,7 +4199,6 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Add<lgElement>("adj",".",new OneOperator1_<lgElement::Adj,lgElement>(Build));
  Add<lgBoundaryEdge::BE>("(","",new OneOperator2_<lgBoundaryEdge,lgBoundaryEdge::BE,long>(get_belement));
  Add<lgElement::Adj>("(","",new OneOperator2_<lgElement,lgElement::Adj,long*>(get_adj));
-// Add<lgElement::Adj>("(","",new OneOperator2_<lgElement,lgElement::Adj,long**>(get_adj));
  TheOperators->Add("==", new OneBinaryOperator<Op2_eq<lgElement,lgElement> >);
  TheOperators->Add("!=", new OneBinaryOperator<Op2_ne<lgElement,lgElement> >);
  TheOperators->Add("<", new OneBinaryOperator<Op2_lt<lgElement,lgElement> >);
@@ -4222,7 +4221,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Add<lgBoundaryEdge>("length",".",new OneOperator1_<double,lgBoundaryEdge>(getlength));
  Add<lgBoundaryEdge>("label",".",new OneOperator1_<long,lgBoundaryEdge>(getlab));
  Add<lgBoundaryEdge>("Element",".",new OneOperator1_<lgElement,lgBoundaryEdge>(getElement));
- Add<lgBoundaryEdge>("EdgeElement",".",new OneOperator1_<long,lgBoundaryEdge>(EdgeElement));
+ Add<lgBoundaryEdge>("whoinElement",".",new OneOperator1_<long,lgBoundaryEdge>(EdgeElement));
  
  
 //  new type  

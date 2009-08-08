@@ -4917,7 +4917,7 @@ The following example explains methods to obtain mesh information.
   Th.be(k);   // return the boundary element k $\in \{0,...,Th.nbe-1\}$ \hfilll
   Th.be(k)[l];   // return the vertices l $\in \{0,1\}$ of  boundary elmt k \hfilll
   Th.be(k).Element ;   // return the triangle contening the  boundary elmt k \hfilll
-  Th.be(k).EdgeElement ;   // return the egde number of triangle contening \hfilll
+  Th.be(k).whoinElement ;   // return the edge number of triangle contening \hfilll
   //the  boundary elmt k 
   Th[k].adj(e) ; // return adjacent triangle to k by edge e, and change \hfill 
   // the value of e to the corresponding edge in the adjacent triangle
@@ -4936,10 +4936,8 @@ The following example explains methods to obtain mesh information.
     @for (@int e=0,ee;e<3;++e) 
       //  remark FH hack:  set ee to e, and ee is change by method adj, 
       //  in () to make difference with  named parameters. 
-      {
 	    @cout << k <<  " " << e << " <=>  " << int(Th[k].adj((ee=e))) << " " << ee  
 	     << "  adj: " << ( Th[k].adj((ee=e)) != Th[k]) << endl;  
-      }
       // note :     if k == int(Th[k].adj(ee=e)) not adjacent element 
 
 
@@ -4948,7 +4946,7 @@ The following example explains methods to obtain mesh information.
   @for (int k=0;k<nbboundaryelement;++k)
       cout << k << " : " <<  Th.be(k)[0] << " " << Th.be(k)[1] << " , label " 
            << Th.be(k).label <<  " tria  " << int(Th.be(k).Element) 
-           << " " << Th.be(k).EdgeElement <<  endl; 
+           << " " << Th.be(k).whoinElement <<  endl; 
       
 }
 \eFF
