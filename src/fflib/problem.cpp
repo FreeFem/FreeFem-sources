@@ -2197,7 +2197,8 @@ void Check(const Opera &Op,int N,int  M)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
-                       cerr << "Sorry orrer in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+			 cerr << c << " =! " << cc << endl;
+                       cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
                  }
                   
@@ -2271,7 +2272,8 @@ void Check(const Opera &Op,int N,int  M)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
-                       cerr << "Sorry orrer in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+			 cerr << c << " =! " << cc << endl;
+                       cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
                  }
                   
@@ -2392,7 +2394,8 @@ void Check(const Opera &Op,int N,int  M)
 			    {
 				R cc  =  GetAny<R>(ll.second.eval(stack));
 				if ( c != cc) { 
-				    cerr << "Sorry orrer in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+				     cerr << c << " =! " << cc << endl;
+				    cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
 				ExecError("In Optimized version "); }
 			    }
 			  
@@ -2486,7 +2489,8 @@ void Check(const Opera &Op,int N,int  M)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
-                       cerr << "Sorry orrer in Optimization add:  int1d(Th,optimize=0)(...)" << endl;
+			  cerr << c << " =! " << cc << endl;
+                       cerr << "Sorry error in Optimization add:  int1d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
                  }
                   

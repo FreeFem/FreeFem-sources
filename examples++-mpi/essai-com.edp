@@ -28,7 +28,7 @@ if (mpirank==1)
   { A=A+A;
     processor(0) << A;
   }
- else
+ else if(mpirank==0)
    processor(1) >>  A;
 cout << " mpirank = " << " A =  " <<  A << endl;
 

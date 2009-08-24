@@ -1,9 +1,9 @@
-verbosity=100;
+verbosity=2;
 cout << " rank = " << mpirank << " " << " size " << mpisize << endl;
 if ( mpisize > 1) 
   if( mpirank==0) 
     {
-      cout << " send to 1 " << endl;
+      cout << mpirank << " send to 1 " << endl;
       processor(1) << 123456;
     }
   else if (mpirank==1) 
@@ -27,8 +27,66 @@ if (mpirank==1)
   { A=A+A;
     processor(0) << A;
   }
- else
+ else if (mpirank==0)
    processor(1) >>  A;
+
 cout << " mpirank = " << " A =  " <<  A << endl;
 
 cout << " " <<  norm(A(1,1) - 2-1i) << endl;
+
+// asyncronous  send/recv  messages....
+mpiRequest rr;
+real[int] vv(mpirank*mpisize:mpirank*mpisize+mpisize-1),ww(mpisize);
+processor(0,rr) << vv;
+if(mpirank==0)
+  {
+    mpiRequest[int] rq(mpisize);
+    cout << " --- in ++ " <<mpisize << endl;
+    for (int i=0;i<mpisize;++i)
+       processor(i,rq[i]) >> ww;
+    cout << " --- out ++ " <<mpisize << endl;
+
+    int k=0;
+    for (int i=0;i<mpisize;++i)
+      {
+	int k= mpiWaitAny(rq);
+	cout << k << "  mpiWaitAny " << ww << endl; 
+      }
+  }
+cout << " mpiWait " << mpiWait(rr) << " " << mpirank << endl;
+//  a way to get data from any proc ... 
+processor(0,rr) << vv;
+if(mpirank==0)
+  {
+    for (int i=0;i<mpisize;++i)
+      {
+	processor(-1) >> ww;  
+	cout << " case " << i << "   " <<  ww[0] << endl ;
+      }
+  }
+
+mpiAlltoall(vv,ww);
+cout << " all2all " << mpirank << " :  "  ;
+for(int i=0;i<mpisize;i++) 
+  cout << vv[i] << " ";
+cout << " -> "  ;
+for(int i=0;i<mpisize;i++) 
+  cout << ww[i] << " ";
+
+
+
+
+cout << endl; 
+
+
+real[int,int] aa(mpisize,10),bb(mpisize,10);
+
+for(int i=0;i<mpisize;i++)
+  for(int j=0;j<10;j++) 
+    aa(i,j)=100*i+j;
+mpiAlltoall(aa,bb);
+
+cout << " all2all " << mpirank << " :  "  ;
+cout << mpirank << " aa = " << aa << endl;
+cout << mpirank << " bb = " << bb << endl;
+

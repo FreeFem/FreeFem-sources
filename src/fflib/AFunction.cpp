@@ -175,7 +175,7 @@ template<class RR,class B>
 
 inline   string ** get_elements( MyMap<String,String> *  const  &  a,string*  const   & b)
  { String* Sret=  &((*a)[*b]); // correction FH feb 2004
-    delete b;
+    //delete b; remove now the string automatic clean 
     return Sret->getap();}
 
 template<class RR> RR Abs(RR a) { return a<0?-a:a;}

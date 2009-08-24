@@ -581,7 +581,9 @@ ff_mpi=no)
 		# We do not AC_DEFINE any special flag for parallel
 		# computation here, because it must only be set when the
  		# parallel program is compiled (see src/mpi/Makfile.am)
-        AC_CHECK_HEADERS(mpicxx.h mpi/cxx/mpicxx.h ompi/mpi/cxx/mpicxx.h openmpi/ompi/mpi/cxx/mpicxx.h mpi++.h, ff_mpicxx_include=yes)
+#  no use of mpi++.h now
+# more simple ...  FH  version 3.4-2
+##        AC_CHECK_HEADERS(mpicxx.h mpi/cxx/mpicxx.h ompi/mpi/cxx/mpicxx.h openmpi/ompi/mpi/cxx/mpicxx.h mpi++.h, ff_mpicxx_include=yes)
 #
 #                AC_CHECK_HEADER(mpicxx.h,
 #                        AC_DEFINE(HAVE_MPICXX_H,1, mpicxx.h  have include file))
@@ -595,13 +597,13 @@ ff_mpi=no)
 #                AC_CHECK_HEADER(mpi++.h,
 #                        AC_DEFINE(HAVE_MPICPP_H,1, mpi++.h  have include file))
 		ff_mpiprog="FreeFem++-mpi${EXEEXT}"
-		if test "$ff_mpicxx_include" = yes ; then
+##		if test "$ff_mpicxx_include" = yes ; then
    		  AC_SUBST(MPIPROG,$ff_mpiprog)
                   AC_SUBST(MPICXX,$ff_mpicxx)
-		else
-		  ff_mpi=no
-	          AC_SUBST(MPICXX,$ff_save_cxx)
-		fi
+##		else
+##		  ff_mpi=no
+##	          AC_SUBST(MPICXX,$ff_save_cxx)
+##		fi
 	else
 	        AC_SUBST(MPICXX,$ff_save_cxx)
 	fi

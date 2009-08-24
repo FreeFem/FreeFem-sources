@@ -47,8 +47,8 @@ struct MPIrank;
   ~Serialize(){ if(count()--==0) delete [] (p-sizeof(long));}
   size_t size() const { return lg;}
   //  mpi routine
-  void mpisend(const MPIrank &,long tag,void * comm);
-  Serialize(const MPIrank &,const char * wht,long tag,void * comm); 
+  void mpisend(const MPIrank &,long tag,const void * comm);
+  Serialize(const MPIrank &,const char * wht,long tag,const void * comm); 
   //  end mpi routine 
   operator void *() { return p;} 
   operator char *() { return p;} 
