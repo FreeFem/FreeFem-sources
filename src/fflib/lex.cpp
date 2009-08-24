@@ -298,7 +298,7 @@ int mylex::basescan()
       case '^': 
       case '~': 
       case '\'': 
-//      case '_': 
+      case '_': 
       case '?':
         break;
       case '.': 

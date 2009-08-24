@@ -645,7 +645,11 @@ void ArrayDCL()
     map_type[typeid(KN<K> * ).name()]->AddCast(
     new E_F1_funcT<KN<K>*,KN_<K> >(CopieKK_pKK<K,KN_<K>,KN<K> > )
 	 );
-
+// add  august 2009 FH  to see full  matrix as a array
+    map_type[typeid(KN_<K>  ).name()]->AddCast(
+						     new E_F1_funcT<KN_<K>,KNM<K>* >(UnRef<KN_<K>,KNM<K> *> ));					     
+						 
+    
      map_type[typeid(KN_<K> ).name()]->AddCast(
     //   new E_F1_funcT<KN_<K>,KN_<K>*>(UnRefpKN_<K> ),
        new E_F1_funcT<KN_<K>,KN<K>*>(UnRefpKN<KN<K>,KN_<K> >  )
@@ -789,6 +793,13 @@ template<class R,class A>  R * set_array( R* const & a,const A & b){
     a->resize(b.size());
     *a=b;
 return a;}
+// missing FH august 2009 
+template<class R,class A>  R  set_array_( R const & a,const A & b){ 
+    SHOWVERB( cout << " set_array_ " << typeid(R).name() << " " << &b << endl);
+    ffassert(a.N()==b.size());
+    R aa=a;
+    aa=b;
+return a;}
 
   
 extern aType aaaa_knlp;
@@ -925,8 +936,8 @@ void ArrayOperator()
         new OneBinaryOperator<set_eqarray<KN<K> ,Mul_KNM_KN_<K> > > ,
         new OneBinaryOperator<set_eqarray<KN<K> ,KN_<K> > > , // Add FH juin 2005         
         new OneBinaryOperator<set_eqarraypd<KN<K> ,Add_Mulc_KN_<K>* > > , // Add FH aug 2005     
-        new OneBinaryOperator<set_eqarraypd<KN<K> ,if_arth_KN_<K>* > > ,
-        new OneBinaryOperator<set_eqarrayp<KN<K> ,KN<K>* > >       
+        new OneBinaryOperator<set_eqarraypd<KN<K> ,if_arth_KN_<K>* > > 
+      //  new OneBinaryOperator<set_eqarrayp<KN<K> ,KN<K>* > >   // test aug 2009    
       );
   // add august 2007 
     
@@ -960,7 +971,8 @@ void ArrayOperator()
         new OneBinaryOperator<set_eq_array<KN_<K> ,Mul_KNM_KN_<K> > > ,
 	new OneBinaryOperator<set_eq_arraypd<KN_<K> ,if_arth_KN_<K>* > > ,
         new OneBinaryOperator<set_eq_arraypd<KN_<K> ,Add_Mulc_KN_<K>* > >  , // Add FH aug 2005    
-	new OneBinaryOperator<set_eq_array<KN_<K> ,KN_<K> > > // add FH juin 2005
+	new OneBinaryOperator<set_eq_array<KN_<K> ,KN_<K> > >, // add FH juin 2005		       
+        new OneBinaryOperator<set_eq_arraypd<KN_<K> ,KN<K>* > >
 		       
       //-  new OneBinaryOperator<set_eq_arrayp<KN_<K> ,KN<K>* > >       
       );
@@ -1188,7 +1200,8 @@ void ArrayOperator()
     TheOperators->Add("<-", 
 		      new OneOperator2_<KN<K> *,KN<K> *,SetArray<K> >(&set_init_array));
     TheOperators->Add("=", 
-		      new OneOperator2_<KN<K> *,KN<K> *,SetArray<K> >(&set_array));
+		      new OneOperator2_<KN<K> *,KN<K> *,SetArray<K> >(&set_array),
+		      new OneOperator2_<KN_<K> ,KN_<K> ,SetArray<K> >(&set_array_));// missing aug 200: a(:)=1:3
     
 
 }

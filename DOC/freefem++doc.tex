@@ -7046,8 +7046,8 @@ types of finite element are: \index{type of finite element}
      the middle of edge only.
 
 \end{description}
-\subsection{usage  of two dimensional finite element spaces}
-If we get the two dinensional finite element spaces
+\subsection{Usage  of two dimensional finite element spaces}
+If we get the two dimensional finite element spaces
 $$  X_{h} = \{ v \in H^{1}(]0,1[^2) |\; \forall K \in \mathcal{T}_{h}
 \quad v_{|K} \in
 P_{1} \}$$
@@ -7090,7 +7090,7 @@ and $U_{h},V_{h} \in R_{h}$
 The functions $U_{h},V_{h}$ have two components so we have
 $$U_{h}=\vecttwo{Uxh}{Uyh}  \quad \mbox{and}\quad V_{h}=\vecttwo{Vxh}{Vyh}$$
 
-\subsection{usage  of thee dimensional finite element spaces}
+\subsection{Usage  of thee dimensional finite element spaces}
 If we get the three dimensional finite element spaces
 $$  X_{h} = \{ v \in H^{1}(]0,1[^3) |\; \forall K \in \mathcal{T}_{h}
 \quad v_{|K} \in
@@ -7546,23 +7546,23 @@ let us take a model problem : a Poisson equation with  Dirichlet and Robin Bound
 
 The problem is: Find $u$ a real function defined on  domain $\Omega$ of $\R^d$ $(d=2,3)$ such that
 
-\begin{equation} -  \nabla.(\nu \nabla u) = f  , \quad \mbox{in}\quad \Omega, \quad
- a u + \nu \frac{\p u}{\p n} = b \quad\mbox{on}\quad \Gamma_r, \quad
+\begin{equation} -  \nabla.(\kappa \nabla u) = f  , \quad \mbox{in}\quad \Omega, \quad
+ a u + \kappa \frac{\p u}{\p n} = b \quad\mbox{on}\quad \Gamma_r, \quad
  u = g  \quad\mbox{on}\quad \Gamma_d
  \end{equation}
 
 where
 \begin{itemize}
-\item if $d=2$ then  $ \nabla.(\nu \nabla u) = \p_x(\nu \p_x u ) + \p_y(\nu \p_y u ) $
+\item if $d=2$ then  $ \nabla.(\kappa \nabla u) = \p_x(\kappa \p_x u ) + \p_y(\kappa \p_y u ) $
 with $ \p_x u = \frac{\p u}{\p x}$
 and $\p_y u = \frac{\p u}{\p y}$
-\item if $d=3$ then $ \nabla.(\nu \nabla u) = \p_x(\nu \p_x u ) + \p_y(\nu \p_y u ) +  \p_z(\nu \p_z u ) $
+\item if $d=3$ then $ \nabla.(\kappa \nabla u) = \p_x(\kappa \p_x u ) + \p_y(\kappa \p_y u ) +  \p_z(\kappa \p_z u ) $
 with $ \p_x u = \frac{\p u}{\p x}$
 , $\p_y u = \frac{\p u}{\p y}$ and , $\p_z u = \frac{\p u}{\p z}$
 
 \item the border $\Gamma=\p \Omega$ is split in $\Gamma_d$ and $\Gamma_n$
 such that $\Gamma_d \cup \Gamma_n = \emptyset$ and $ \Gamma_d \cap \Gamma_n = \p \Omega$,
-\item $\nu$ is a given positive function, such that $\exists \nu_0 \in \R ,\quad 0 < \nu_0  \leq \nu $.
+\item $\kappa$ is a given positive function, such that $\exists \kappa_0 \in \R ,\quad 0 < \kappa_0  \leq \kappa $.
 \item  $a$ a given non negative function,
 \item  $ b$ a given function.
 \end{itemize}
@@ -7575,8 +7575,8 @@ the function is defined just by derivative, so this defined too a constant
 \end{note}
 
 Let  ${ v} $  a regular test function  null  on  $\Gamma_d$ , by integration par part we get
- \begin{equation}-\int_{\Omega}  \nabla.(\nu \nabla  u) \, { v} \,d\omega = \int_{\Omega}  \nu \nabla{ v} . \nabla u  \,d\omega= \int_{\Omega} f {v}  \,d\omega - \int_{\Gamma} {v}
- \nu \frac{  \p u}{\p \bm{n}}  \,d\gamma,
+ \begin{equation}-\int_{\Omega}  \nabla.(\kappa \nabla  u) \, { v} \,d\omega = \int_{\Omega}  \kappa \nabla{ v} . \nabla u  \,d\omega= \int_{\Omega} f {v}  \,d\omega - \int_{\Gamma} {v}
+ \kappa \frac{  \p u}{\p \bm{n}}  \,d\gamma,
   \end{equation}
 
 where if $d=2$ the $ \nabla{ v} . \nabla u = (\frac{\p u}{\p x}\frac{\p { v}}{\p x}
@@ -7585,18 +7585,18 @@ where if $d=3$ the $ \nabla{ v} . \nabla u = (\frac{\p u}{\p x}\frac{\p { v}}{\p
 +\frac{\p u}{\p y}\frac{\p { v}}{\p y} + \frac{\p u}{\p z}\frac{\p { v}}{\p z})$ , 
 and where $\bm{n}$ is the unitary outside normal of $\p\Omega$.
 
-Now we note that $ \nu \frac{  \p u}{\p n} = - a u + g $  on $\Gamma_r$
+Now we note that $ \kappa \frac{  \p u}{\p n} = - a u + g $  on $\Gamma_r$
 and $  v = 0 $ on $ \Gamma_d $ and $ \p \Omega = \Gamma_d \cup \Gamma_n $
 thus
 $$
   - \int_{\p \Omega} {v}
- \nu \frac{  \p u}{\p n} = \int_{\Gamma_r} a u v - \int_{\Gamma_r} b v
+ \kappa \frac{  \p u}{\p n} = \int_{\Gamma_r} a u v - \int_{\Gamma_r} b v
 $$
 
 The problem become:
 
 Find   $u \in V_g = \{v \in H^1(\Omega) / v = g \mbox{ on } \Gamma_d \} $  such that
-\begin{equation} {\int_{\Omega} \nu \nabla{ v} . \nabla u  \,d\omega
+\begin{equation} {\int_{\Omega} \kappa \nabla{ v} . \nabla u  \,d\omega
  + \int_{\Gamma_r} a u v  \,d\gamma = \int_{\Omega} f {v}}  \,d\omega  + \int_{\Gamma_r} b v  \,d\gamma , \quad \forall v \in V_0 \label{eq:v-poisson}
 \end{equation}
 
@@ -7617,7 +7617,7 @@ $
 $
 and a way to fix the constant is to solve for $u \in H^1(\Omega)$ such that:
 \begin{equation}
- {\int_{\Omega} \varepsilon u v \,\,d\omega\; + \; \nu \nabla{ v} . \nabla u  \,d\omega
+ {\int_{\Omega} \varepsilon u v \,\,d\omega\; + \; \kappa \nabla{ v} . \nabla u  \,d\omega
   = \int_{\Omega} f {v}}  \,d\omega  + \int_{\Gamma_r} b v  \,d\gamma , \quad \forall v \in H^1(\Omega) \label{eq:v-poisson-N}
 \end{equation}
 where $\varepsilon$ is a small parameter ( $ \sim 10^{-10}$ ).
@@ -7632,7 +7632,7 @@ example.
 In \texttt{FreeFem++},  the bidimensional problem (\ref{eq:v-poisson}) become
 \bFF
  @ problem Pw(u,v) =
-       @int2d(Th)( nu*( dx(u)*dx(u) +  dy(u)*dy(u)) )  // $\int_{\Omega} \nu \nabla{v} . \nabla u  \,d\omega$ \hfilll
+       @int2d(Th)( kappa*( dx(u)*dx(u) +  dy(u)*dy(u)) )  // $\int_{\Omega} \kappa \nabla{v} . \nabla u  \,d\omega$ \hfilll
      + @int1d(Th,gn)( a * u*v )                        // $\int_{\Gamma_r} a u v  \,d\gamma$  \hfilll
      - @int2d(Th)(f*v)                                 // $\int_{\Omega} f v  \,d\omega $ \hfilll
      - @int1d(Th,gn)( b * v )                          // $ \int_{\Gamma_r} b v  \,d\gamma$ \hfilll
@@ -7646,7 +7646,7 @@ And the the three dimensional problem (\ref{eq:v-poisson}) become
 \bFF
   @macro Grad(u) [dx(u),dy(u),dz(u) ]//EOM :  definition of the 3d Grad macro  
   @problem Pw(u,v) =
-       @int3d(Th)( nu*( Grad(u)'*Grad(v) ) )  // $\int_{\Omega} \nu \nabla{v} . \nabla u  \,d\omega$ \hfilll
+       @int3d(Th)( kappa*( Grad(u)'*Grad(v) ) )  // $\int_{\Omega} \kappa \nabla{v} . \nabla u  \,d\omega$ \hfilll
      + @int2d(Th,gn)( a * u*v )                        // $\int_{\Gamma_r} a u v  \,d\gamma$  \hfilll
      - @int3d(Th)(f*v)                                 // $\int_{\Omega} f v  \,d\omega $ \hfilll
      - @int2d(Th,gn)( b * v )                          // $ \int_{\Gamma_r} b v  \,d\gamma$ \hfilll
@@ -8069,7 +8069,7 @@ where $ V_0 = \{w\in H^1(\Omega)/ w_{|\Gamma_{24}}=0\}$.
 So the to code the method with the matrices $A=(A_{ij})$, $M=(M_{ij})$, and  the vectors 
 $ u^n, b^n, b',b", b_{cl}$ 
 ( notation if $w$ is a vector then $w_i$ is a component of the vector).
-\def\tgv{{\nu}_\infty}
+\def\tgv{{\frac{1}{\varepsilon}}}
 \begin{equation} u^n = A^{-1} b^n, \quad
   \quad b' = b_0 + M u^{n-1}, 
   \quad b"=  \tgv \; b_{cl} , 
@@ -8181,8 +8181,9 @@ To build matrix $A$ from the bilinear part the the variational form $a$ of type 
 \index{matrix!varf}
 \bFF
   A = a(Vh,Wh [, ...] );
- // where  Vh is "unkown  fespace"  with a correct number of component
- // where  Wh is "test  fespace"  with a correct number of component
+ // where \hfilll
+ //Vh is "fespace" for the unknow fields  with a correct number of component\hfilll
+ //Wh is "fespace" for the test fields  with a correct number of component\hfilll
 \eFF
 
 The possible named parameter \texttt{" [, ... ] "} of the construction are 
