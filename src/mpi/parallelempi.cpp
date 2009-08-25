@@ -583,22 +583,67 @@ struct Op_Allgather : public binary_function<KN_<R>,KN_<R>,long> {
 			    (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(), comm);	
     }
 };
-/*
+
 template<class R>
-struct Op_Scatter : public binary_function<KN_<R>,KN_<R>,long> {
-    static long  f( KN_<R>  const  & s, KN_<R>  const  &r)  
+struct Op_All2All3 : public ternary_function<KN_<R>,KN_<R>,MPI_Comm,long> {
+    static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,MPI_Comm const & cmm )  
     { 
-	MPI_Comm comm=MPI_COMM_WORLD;
+	MPI_Comm comm=cmm;
 	int mpisizew;
-	MPI_Comm_size(comm, &mpisizew); 
+	MPI_Comm_size(comm, &mpisizew); /* local */ 
+	int chunk = s.N()/mpisizew;
+	ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+	
+	return MPI_Alltoall( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
+			    (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(), comm);	
+    }
+};
+
+template<class R>
+struct Op_Allgather3 : public ternary_function<KN_<R>,KN_<R>,MPI_Comm,long> {
+    static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,MPI_Comm const & cmm)  
+    { 
+	MPI_Comm comm=cmm;
+	int mpisizew;
+	MPI_Comm_size(comm, &mpisizew); /* local */ 
+	int chunk = s.N()/mpisizew;
+	ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+	
+	return MPI_Allgather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
+			     (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(), comm);	
+    }
+};
+
+
+template<class R>
+struct Op_Scatter3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
+    static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root)  
+    { 
+	
+	int mpisizew;
+	MPI_Comm_size(root.comm, &mpisizew); 
 	int chunk = s.N()/mpisizew;
 	ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
 	
 	return MPI_Scatter( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
-			     (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(), comm);	
+			     (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
     }
 };
-*/
+template<class R>
+struct Op_Gather3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
+    static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root)  
+    { 
+	
+	int mpisizew;
+	MPI_Comm_size(root.comm, &mpisizew); 
+	int chunk = s.N()/mpisizew;
+	ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+	
+	return MPI_Gather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
+			   (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
+    }
+};
+
 			     
 
 MPIrank mpiwho(long i) { return MPIrank(i);}
@@ -636,7 +681,20 @@ long mpiWaitAny(KN<MPI_Request>* rq) {
       mpisize =mpisize1;// MPI::COMM_WORLD.Get_size();
      cout << "initparallele rank " <<  mpirank << " on " << mpisize << endl;
   }
-  
+
+long mpiSize(MPI_Comm  cmm) { 
+    int s;
+ //   MPI_Comm_rank(MPI_COMM_WORLD, &s); /* local */ 
+    MPI_Comm_size(MPI_COMM_WORLD, &s); /* local */ 
+    return s;
+}
+long mpiRank(MPI_Comm  cmm) { 
+    int s;
+    MPI_Comm_rank(MPI_COMM_WORLD, &s); /* local */ 
+ //   MPI_Comm_size(MPI_COMM_WORLD, &s); /* local */ 
+    return s;
+}
+
 AnyType InitializeGroup(Stack stack,const AnyType &x){
     MPI_Group *g=PGetAny<MPI_Group>(x);
     *g=0;
@@ -817,8 +875,15 @@ void init_lgparallele()
       Global.Add("mpiAlltoall","(",new OneBinaryOperator<Op_All2All< double > >);
       Global.Add("mpiAllgather","(",new OneBinaryOperator<Op_Allgather< long > >);
       Global.Add("mpiAllgather","(",new OneBinaryOperator<Op_Allgather< double > >);
-  //    Global.Add("mpiScatter","(",new OneBinaryOperator<Op_Scatter< long > >);
-  //    Global.Add("mpiScatter","(",new OneBinaryOperator<Op_Scatter< double > >);
+      Global.Add("mpiAlltoall","(",new OneTernaryOperator3<Op_All2All3< long > >);
+      Global.Add("mpiAlltoall","(",new OneTernaryOperator3<Op_All2All3< double > >);
+      Global.Add("mpiAllgather","(",new OneTernaryOperator3<Op_Allgather3< long > >);
+      Global.Add("mpiAllgather","(",new OneTernaryOperator3<Op_Allgather3< double > >);
+      
+      Global.Add("mpiScatter","(",new OneTernaryOperator3<Op_Scatter3< long > >);
+      Global.Add("mpiScatter","(",new OneTernaryOperator3<Op_Scatter3< double > >);
+      Global.Add("mpiGather","(",new OneTernaryOperator3<Op_Scatter3< long > >);
+      Global.Add("mpiGather","(",new OneTernaryOperator3<Op_Gather3< double > >);
       
 //      Global.Add("mpiAlltoall","(",new OneBinaryOperator<Op_All2Allm< long > >);
   //    Global.Add("mpiAlltoall","(",new OneBinaryOperator<Op_All2Allm< double > >);
@@ -826,6 +891,8 @@ void init_lgparallele()
  
      Global.New("mpirank",CPValue<long>(mpirank));
      Global.New("mpisize",CPValue<long>(mpisize));
+     static MPI_Comm mpiWorld=MPI_COMM_WORLD;
+     Global.New("mpiCommWorld",CPValue<MPI_Comm>(mpiWorld));   
       // add FH 
     
     Dcl_TypeandPtr<MPI_Request>(0,0,InitializeRequest,DeleteRequest); // bof bof ... 
@@ -843,7 +910,9 @@ void init_lgparallele()
      Global.Add("processor","(",new OneOperator2_<MPIrank,long,MPI_Request*>(mpiwho_));
      Global.Add("mpiWait","(",new OneOperator1<long,MPI_Request*>(mpiWait));
      Global.Add("mpiWaitAny","(",new OneOperator1<long,KN<MPI_Request>*>(mpiWaitAny));
-     
+      Global.Add("mpiSize","(",new OneOperator1<long,MPI_Comm>(mpiSize)); 
+      Global.Add("mpiRank","(",new OneOperator1<long,MPI_Comm>(mpiRank)); 
+    
       TheOperators->Add("<-", 
 			new OneOperator2_<KN<MPI_Request> *,KN<MPI_Request> *,long>(&set_init0)
 						);
