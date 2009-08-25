@@ -656,6 +656,12 @@ long mpiWait(MPI_Request * rq) {
     return MPI_Wait(rq,&status);
 }
 
+long mpiBarrier(MPI_Comm * comm) 
+{    
+    return MPI_Barrier(*comm);
+}
+
+
 
 long mpiWaitAny(KN<MPI_Request>* rq) { 
     MPI_Status status;
@@ -714,6 +720,7 @@ AnyType InitializeComm(Stack stack,const AnyType &x){
 }
 AnyType DeleteComm(Stack stack,const AnyType &x){
     MPI_Comm *comm=PGetAny<MPI_Comm>(x);
+    if(comm)
     MPI_Comm_free(comm);
     return  Nothing;
 }
@@ -746,11 +753,43 @@ class ForEachType<MPI_Request>:  public basicForEachType{public:// correction ju
 // end Hack  ... 
 MPI_Group* def_group( MPI_Group* const & a, KN_<long>  const & b)
 {
+    MPI_Group group;
+    MPI_Comm comm=MPI_COMM_WORLD;
+    MPI_Comm_group(comm,& group); 
     cout << b.N() <<endl;
     for(int i=0;i<b.N();++i)
 	cout << b[i] << endl;
+    KN<int> ranks(b);
+    MPI_Group_incl(group, ranks.N(),(int *) ranks, a);
+    MPI_Group_free(&group) ;
     // ici def a .. 
-  //  ffassert(0); //   A AFAIRE  //  pour arete le programm 
+    //  ffassert(0); //   A AFAIRE  //  pour arete le programm 
+return a;}
+
+MPI_Group* def_group( MPI_Group* const & a,MPI_Comm * const &comm)
+{
+  MPI_Comm_group(*comm,a); 
+ return a;}
+
+MPI_Comm* def_comm( MPI_Comm* const & a,MPI_Group* const & g)
+{
+   MPI_Comm_create(MPI_COMM_WORLD,*g,a); 
+   return a;
+}
+
+MPI_Comm* def_comm( MPI_Comm* const & a,MPI_Comm* const & b,MPI_Group* const & g)
+{
+    MPI_Comm_create(*b,*g,a); 
+    return a;
+}
+
+MPI_Group* def_group( MPI_Group* const & a,MPI_Group  * const & group,KN_<long>  const & b)
+{
+  
+    KN<int> ranks(b);
+    MPI_Group_incl(*group, ranks.N(), (int *) ranks, a);
+    // ici def a .. 
+    //  ffassert(0); //   A AFAIRE  //  pour arete le programm 
     return a;
 }
 
@@ -829,15 +868,24 @@ void init_lgparallele()
       
       // constructor example ... 
      TheOperators->Add("<-", 
-			new OneOperator2_<MPI_Group*,MPI_Group*,KN_<long> >(&def_group)); 
+			new OneOperator2_<MPI_Group*,MPI_Group*,KN_<long> >(&def_group),
+		        new OneOperator3_<MPI_Group*,MPI_Group*,MPI_Group*,KN_<long> >(&def_group),
+		        new OneOperator2_<MPI_Group*,MPI_Group*,MPI_Comm*>(&def_group),
+		        new OneOperator2_<MPI_Comm*,MPI_Comm*,MPI_Group* >(&def_comm),
+		        new OneOperator3_<MPI_Comm*,MPI_Comm*,MPI_Comm*,MPI_Group* >(&def_comm)
+		      
+		       
+      ); 
 /*  code edp
      int[int] procs=[1,2,3];
      mpiGroup toto(procs);
+     mpiComm comm(toto);
  
  */
       
+      
      Global.Add("processor","(",new OneOperator1<MPIrank,long>(mpiwho));
-    Global.Add("processor","(",new OneOperator2<MPIrank,long,MPI_Comm>(mpiwho));
+     Global.Add("processor","(",new OneOperator2<MPIrank,long,MPI_Comm>(mpiwho));
      TheOperators->Add(">>",
 		       new OneBinaryOperator<Op_Readmpi<double> >,
 		       new OneBinaryOperator<Op_Readmpi<long> > ,
@@ -912,6 +960,7 @@ void init_lgparallele()
      Global.Add("mpiWaitAny","(",new OneOperator1<long,KN<MPI_Request>*>(mpiWaitAny));
       Global.Add("mpiSize","(",new OneOperator1<long,MPI_Comm>(mpiSize)); 
       Global.Add("mpiRank","(",new OneOperator1<long,MPI_Comm>(mpiRank)); 
+      Global.Add("mpiBarrier","(",new OneOperator1<long,MPI_Comm*>(mpiBarrier)); 
     
       TheOperators->Add("<-", 
 			new OneOperator2_<KN<MPI_Request> *,KN<MPI_Request> *,long>(&set_init0)
