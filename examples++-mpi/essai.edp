@@ -1,5 +1,7 @@
 verbosity=2;
 cout << " rank = " << mpirank << " " << " size " << mpisize << endl;
+cout << " rank = " << mpiRank(mpiCommWorld) << " " << " size " << mpiSize(mpiCommWorld) << endl;
+
 if ( mpisize > 1) 
   if( mpirank==0) 
     {
@@ -78,15 +80,18 @@ for(int i=0;i<mpisize;i++)
 
 cout << endl; 
 
-
+real s0=mpiWtime();
 real[int,int] aa(mpisize,10),bb(mpisize,10);
 
 for(int i=0;i<mpisize;i++)
   for(int j=0;j<10;j++) 
     aa(i,j)=100*i+j;
 mpiAlltoall(aa,bb);
+mpiAlltoall(aa,bb,mpiCommWorld);
+mpiAllgather(aa,bb);
+mpiGather (aa,bb,processor(0,mpiCommWorld));
+mpiScatter(aa,bb,processor(0,mpiCommWorld));
 
-cout << " all2all " << mpirank << " :  "  ;
+cout << " all2all " << mpirank << " " << mpiWtime()-s0 << "s :  "  ;
 cout << mpirank << " aa = " << aa << endl;
 cout << mpirank << " bb = " << bb << endl;
-
