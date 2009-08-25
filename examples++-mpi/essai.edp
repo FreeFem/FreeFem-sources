@@ -67,6 +67,7 @@ if(mpirank==0)
       }
   }
 
+
 mpiAlltoall(vv,ww);
 cout << " all2all " << mpirank << " :  "  ;
 for(int i=0;i<mpisize;i++) 
@@ -74,11 +75,8 @@ for(int i=0;i<mpisize;i++)
 cout << " -> "  ;
 for(int i=0;i<mpisize;i++) 
   cout << ww[i] << " ";
-
-
-
-
 cout << endl; 
+
 
 real s0=mpiWtime();
 real[int,int] aa(mpisize,10),bb(mpisize,10);
@@ -95,3 +93,11 @@ mpiScatter(aa,bb,processor(0,mpiCommWorld));
 cout << " all2all " << mpirank << " " << mpiWtime()-s0 << "s :  "  ;
 cout << mpirank << " aa = " << aa << endl;
 cout << mpirank << " bb = " << bb << endl;
+
+mpiBarrier(mpiCommWorld);
+if( (mpirank==1 || mpirank==2 || mpirank==3)  && 0 )
+  { // boggus  ( dead lock ????  FH ) 
+    int[int] procs=[1,2,3];
+    mpiGroup toto(procs);
+    mpiComm comm(toto);
+  }

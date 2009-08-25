@@ -1,11 +1,41 @@
 v 3.5
   add mpi function  
-  add Resquest feild  of basis asycronuous recv
-  add -1 source of any_source  recv
-  add  mpiAlltoall 
-       mpiAllgather
-  correct operator  a(:)= 1:4; 
-          string[strting] s; s[i]; // tap 
+    Resquest field  of basis asycronuous recv
+   -1 is  any_source  in recv
+    example:
+       // new type :
+      mpiComm comm=mpiCommWorld; //  set a MPI_Comm to MPI_COMM_WORLD
+      int[int] procs=[1,2,3];
+      mpiGroup grp(procs); // set MPI_Group to proc 1,2,3 of MPI_COMM_WORLD
+      mpiComm  commgrp(mpiCommWorld,grp); // set the mpiComm form grp MPI_COMM_WORLD 
+      mpiRequest rq; // def an MPI_Resquest
+      mpiRequest[int] arq(10); // a arry of 10 MPI_Resquest
+      
+      new functions:
+      mpiSize(comm) ; // return the size of comm (int)
+      mpirank(comm) ; // return the rank  in comm (int)
+      
+      processor(i) // proc i with no Resquest in MPI_COMM_WORLD
+      processor(-1) // any source  with no Resquest in MPI_COMM_WORLD
+      processor(i,comm) // proc i with  no Resquest in comm 
+      processor(i,rd,comm) // proc i with Resquest rq  in comm 
+      processor(i,rd) // proc i with Resquest rq in MPI_COMM_WORLD
+      
+      mpiWait(rq); //
+      mpiWaitAll(arq); // 
+      mpiWtime() ; //  return MPIWtime in second (real)
+      mpiWtick() ; // return MPIWTick in second (real)
+     
+    - let a,b to array or full matrix of int ot real. 
+       mpiAlltoall(a,b[,comm]) ;
+       mpiAllgather(a,b[,comm]) ;
+       mpiGather(a,b,processor(..) ) ;
+       mpiScatter(a,b,processor(..)) ;
+    - add communication of type  mesh3, real matrix and   complex matrix.    
+  correct 
+  	  operator  a(:)= 1:4; // before change a copie of a (do nothing)
+      string[string] s; 
+      s[i]; // before trap (two delete) 
 v 3.4-2
   add boundary mesh inqure in 2d and 3d
   Th.nbe ; // return the number of boundary element 
