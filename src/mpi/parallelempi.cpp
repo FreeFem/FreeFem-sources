@@ -37,33 +37,56 @@ using namespace std;
 #include "problem.hpp"
 
 
-
-
-//  pas terrible .... 
-
 #undef MPICH_SKIP_MPICXX
 #define  MPICH_SKIP_MPICXX
 #undef MPICH_IGNORE_CXX_SEEK
 #define MPICH_IGNORE_CXX_SEEK
 #include "mpi.h"
-//  July change of cluster.cica.es parallele compute
-//  where mpicxx.h is wrong and penmpi/ompi/mpi/cxx/mpicxx.h is good !!!
-// F. Hecht 
-#ifdef XXXXXXXXXXXXXXXXXXXXXXXXXXXXXZZZZ
-#ifdef HAVE_OPENMPI_OMPI_MPI_CXX_MPICXX_H
-#include <openmpi/ompi/mpi/cxx/mpicxx.h>
-#elif HAVE_MPI_CXX_MPICXX_H
-#include <mpi/cxx/mpicxx.h>
-#elif HAVE_OMPI_MPI_CXX_MPICXX_H
-#include <ompi/mpi/cxx/mpicxx.h>
-#elif HAVE_MPICXX_H
-#include <mpicxx.h>
-#elif  HAVE_MPI___H
-#include <mpi++.h>
-#else
-#error "no mpixx.h or mpi++.h file" 
-#endif 
-#endif
+
+// Remark on mipich  MPI_Comm, MPI_Resquest, MPI_Group are int 
+//  => encapsulation
+
+struct fMPI_Comm { 
+    MPI_Comm v; 
+    operator  MPI_Comm &() {return v;}
+    operator  MPI_Comm *() {return &v;}
+    operator  MPI_Comm () const  {return v;}
+    
+   // MPI_Comm * operator  &() {return &v;}
+    void operator=(const MPI_Comm vv) { v=vv;}
+    fMPI_Comm(const MPI_Comm vv=0) : v(vv){}
+    bool operator!=(MPI_Comm vv) const {return vv !=v;}
+    bool operator==(MPI_Comm vv) const {return vv ==v;}
+    
+    };
+
+struct fMPI_Group { 
+    MPI_Group v; 
+    operator  MPI_Group &() {return v;}
+    operator  MPI_Group *() {return &v;}
+    operator  MPI_Group () const  {return v;}
+    
+    // MPI_Comm * operator  &() {return &v;}
+    void operator=(const MPI_Group vv) { v=vv;}
+    fMPI_Group(const MPI_Group vv=0) : v(vv){}
+    bool operator!=(MPI_Group vv) const {return vv !=v;}
+    bool operator==(MPI_Group vv) const {return vv ==v;}
+    
+};
+
+struct fMPI_Request { 
+    MPI_Request v; 
+    operator  MPI_Request &() {return v;}
+    operator  MPI_Request *() {return &v;}
+    operator  MPI_Request () const  {return v;}
+    
+    // MPI_Comm * operator  &() {return &v;}
+    void operator=(const MPI_Request vv) { v=vv;}
+    fMPI_Request(const MPI_Request vv=0) : v(vv){}
+    bool operator!=(MPI_Request vv) const {return vv !=v;}
+    bool operator==(MPI_Request vv) const {return vv ==v;}
+    
+};
 /*
  MPI::INT, MPI::LONG, MPI::SHORT, 
  MPI::UNSIGNED SHORT, MPI::UNSIGNED, 
@@ -105,21 +128,21 @@ template<class T> struct MPI_WHAT {};
 template<> struct MPI_WHAT<long>      {static const int WHAT=101;};
 template<> struct MPI_WHAT<double>    {static const int WHAT=102;};
 template<> struct MPI_WHAT<Complex>   {static const int WHAT=103;};
-template<> struct MPI_WHAT<KN<long> >   {static const int WHAT=104;};
-template<> struct MPI_WHAT<KN<double> >   {static const int WHAT=105;};
-template<> struct MPI_WHAT<KN<Complex> >   {static const int WHAT=106;};
+template<> struct MPI_WHAT<KN<long> *>   {static const int WHAT=104;};
+template<> struct MPI_WHAT<KN<double>* >   {static const int WHAT=105;};
+template<> struct MPI_WHAT<KN<Complex>* >   {static const int WHAT=106;};
 
 template<class T> struct MPI_TAG {};
 template<> struct MPI_TAG<long>   {static const int TAG=5;};
 template<> struct MPI_TAG<double>    {static const int TAG=4;};
 template<> struct MPI_TAG<Complex >   {static const int TAG=6;};
-template<> struct MPI_TAG<KN<long> >   {static const int TAG=11;};
-template<> struct MPI_TAG<KN<double> >   {static const int TAG=12;};
-template<> struct MPI_TAG<KN<Complex> >   {static const int TAG=13;};
+template<> struct MPI_TAG<KN<long>* >   {static const int TAG=11;};
+template<> struct MPI_TAG<KN<double>* >   {static const int TAG=12;};
+template<> struct MPI_TAG<KN<Complex>* >   {static const int TAG=13;};
 template<> struct MPI_TAG<Mesh *>   {static const int TAG=1000;};
 template<> struct MPI_TAG<Mesh3 *>   {static const int TAG=1010;};
-template<> struct MPI_TAG<Matrice_Creuse<double> >   {static const int TAG=1020;};
-template<> struct MPI_TAG<Matrice_Creuse<Complex> >   {static const int TAG=1030;};
+template<> struct MPI_TAG<Matrice_Creuse<double> *>   {static const int TAG=1020;};
+template<> struct MPI_TAG<Matrice_Creuse<Complex> *>   {static const int TAG=1030;};
 
   void initparallele(int &, char **&);
   void init_lgparallele();  
@@ -127,65 +150,84 @@ template<> struct MPI_TAG<Matrice_Creuse<Complex> >   {static const int TAG=1030
  extern long mpirank ;
  extern long mpisize ;
 
+MPI_Request *  Syncro_block = reinterpret_cast<MPI_Request * > (1); 
 
 const size_t sizempibuf = 1024*32;
 
 template<class R> 
-void  WSend( R * v,int l,int who,int tag,MPI_Comm comm,MPI_Request *rq)
+long  WSend( R * v,int l,int who,int tag,MPI_Comm comm,MPI_Request *rq)
 {
+    long ret=0;
     MPI_Request rq0,*request=&rq0;
     if(verbosity>100)
-    cout << mpirank<< " send to " << who << " tag " << tag << " " << rq << " " <<  comm <<endl;
-    MPI_Isend((void *) v,l, MPI_TYPE<R>::TYPE() , who, tag,comm,request);
-    if(rq) *rq=*request;
-    else MPI_Request_free(request); 
+	cout << mpirank<< " send to " << who << " tag " << tag << " " << rq << " " <<  comm << " syncro "<<  (rq == Syncro_block) <<endl;
+    if(rq == Syncro_block) 
+	ret=MPI_Send((void *) v,l, MPI_TYPE<R>::TYPE() , who, tag,comm);
+    else{
+	ret=MPI_Isend((void *) v,l, MPI_TYPE<R>::TYPE() , who, tag,comm,request);
+	if(rq) *rq=*request;
+	else MPI_Request_free(request); 
+    }
 }
 
 template<> 
- void  WSend<Complex> ( Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
+long  WSend<Complex> ( Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
 {
+    long ret=0;
     MPI_Request rq0,*request=&rq0;
     if(verbosity>100)
-    cout << mpirank<< " send to " << who << " tag " << tag << " " << rq << " " <<  comm <<  endl;
-
+	cout << mpirank<< " send to " << who << " tag " << tag << " " << rq << " " <<  comm << " syncro "<<  (rq == Syncro_block) << endl;
+    if(rq == Syncro_block) 
+      {
 #ifdef MPI_DOUBLE_COMPLEX
-    MPI_Isend(reinterpret_cast<void*> (v) , n, MPI_DOUBLE_COMPLEX, who, tag,comm,request);
+	  ret=MPI_Send(reinterpret_cast<void*> (v) , n, MPI_DOUBLE_COMPLEX, who, tag,comm);
 #else
-    n *=2;
-    MPI_Isend(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who, tag,comm,request);
-    n /= 2;
+	  n *=2;
+	  ret=  MPI_Send(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who, tag,comm);
+	  n /= 2;
+#endif	  
+      }
+    else
+      {
+#ifdef MPI_DOUBLE_COMPLEX
+	  ret=MPI_Isend(reinterpret_cast<void*> (v) , n, MPI_DOUBLE_COMPLEX, who, tag,comm,request);
+#else
+	  n *=2;
+	  ret=MPI_Isend(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who, tag,comm,request);
+	  n /= 2;
 #endif
-    if(rq) *rq=*request;
-    else MPI_Request_free(request);
+	  if(rq) *rq=*request;
+	  else MPI_Request_free(request);
+      } 
+    return ret;
 }
 
 template<class R> 
-void  WRecv(R * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
+long  WRecv(R * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
 {
     MPI_Status status;
-    if(rq) 
-	MPI_Irecv(reinterpret_cast<void*> (v),n, MPI_TYPE<R>::TYPE() , who, tag,comm,rq);
+    if(rq && (rq != Syncro_block)) 
+	return MPI_Irecv(reinterpret_cast<void*> (v),n, MPI_TYPE<R>::TYPE() , who, tag,comm,rq);
     else 
-        MPI_Recv(reinterpret_cast<void*> (v),n, MPI_TYPE<R>::TYPE() , who, tag,comm,&status);
+        return MPI_Recv(reinterpret_cast<void*> (v),n, MPI_TYPE<R>::TYPE() , who, tag,comm,&status);
 }
 
 template<> 
-void  WRecv<Complex> (Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
+long  WRecv<Complex> (Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
 {
     MPI_Status status;
 #ifdef MPI_DOUBLE_COMPLEX_
-    if(rq) 
-      MPI_Irecv(reinterpret_cast<void*> (v), n, MPI_DOUBLE_COMPLEX, who, tag,comm,rq);
+    if(rq && (rq != Syncro_block)) 
+      return MPI_Irecv(reinterpret_cast<void*> (v), n, MPI_DOUBLE_COMPLEX, who, tag,comm,rq);
     else 
-      MPI_Recv(reinterpret_cast<void*> (v), n, MPI_DOUBLE_COMPLEX, who, tag,comm,&status);
+      return MPI_Recv(reinterpret_cast<void*> (v), n, MPI_DOUBLE_COMPLEX, who, tag,comm,&status);
 #else
     n *=2;
-    if(rq) 
-        MPI_Irecv(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who, tag,comm,rq);
+    if(rq && (rq != Syncro_block)) 
+       return  MPI_Irecv(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who, tag,comm,rq);
     else 
-       MPI_Recv(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who, tag,comm,&status);
-    n /= 2;
-#endif
+       return MPI_Recv(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who, tag,comm,&status);
+   #endif
 }
 			 
 template<class R> 
@@ -215,62 +257,74 @@ struct MPIrank {
    int who; 
    MPI_Comm comm; 
    MPI_Request *rq; 
+  // mutable bool block;  
 
-   MPIrank(int i=0,MPI_Comm com=MPI_COMM_WORLD, MPI_Request *rqq=0) : who(i) , comm(com),rq(rqq) {ffassert(i>=-1 && i < mpisize);} 
+   MPIrank(int i=0,MPI_Comm com=MPI_COMM_WORLD, MPI_Request *rqq=0) : who(i) , comm(com),rq(rqq) 
+    {
+	int n;
+	MPI_Comm_size(comm, &n);
+	// cout <<" who = " << who << " ******** " << n << " "<< ((-2 < who) && (who < n))  << endl;
+	// ffassert( (-2 < who) && (who < n) ); // plant sans raison ...
+    } 
     
     
    
-   const MPIrank & operator<<(double a)const  {
-     WSend(&a, 1, who, 4,comm,rq);
-      return *this;
+   long Send(double a)const  {
+   return WSend(&a, 1, who, 4,comm,rq); 
    }
    const MPIrank & Bcast(double & a) const {
       WBcast(&a, 1, who,comm);
       return *this;
    }
-   const MPIrank & operator>>(double & a) const {
-     WRecv(&a, 1, who, 4,comm,rq);
-      return *this;
+   long Recv(double & a) const {
+    return WRecv(&a, 1, who, 4,comm,rq);
    }
-   const MPIrank & operator<<(long a) const {
-     WSend(&a, 1, who, 5,comm,rq);
-      return *this;
+   long Send(long a) const {
+     return WSend(&a, 1, who, 5,comm,rq);
    }
    const MPIrank & Bcast(long & a) const {
      WBcast(&a, 1,  who,comm);
       return *this;
    }
-   const MPIrank & operator>>(long & a) const {
-      WRecv(&a, 1,  who, 5,comm,rq);
-      return *this;
+   long Recv(long & a) const {
+     return  WRecv(&a, 1,  who, 5,comm,rq);
    }
-   
+    long Recv(Complex & a) const {
+	return  WRecv(&a, 1,  who, 6,comm,rq);
+    }
+    long Send(Complex a) const {
+	return WSend(&a, 1, who, 6,comm,rq);
+    }
+    const MPIrank & Bcast(Complex & a) const {
+	WBcast(&a, 6,  who,comm);
+	return *this;
+    }
+    
 
     template<class R>
-    const MPIrank & operator>>(KN<R> & a) const {
+    long Recv(KN<R> & a) const {
 	assert(&a);
 	if(verbosity>99)
-	  cout << " ---- " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R> >::TAG 
+	  cout << " ---- " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R>* >::TAG 
 	       <<" from " << mpirank << "  "<<  (R *) a << endl;
 	int n= a.N();
-	WRecv((R *) a, n, who, MPI_TAG<KN<R> >::TAG ,comm,rq);
+	long ll=WRecv((R *) a, n, who, MPI_TAG<KN<R>* >::TAG ,comm,rq);
 	if(verbosity>99)
-	  cout << " ++++ " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R> >::TAG 
+	  cout << " ++++ " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R>* >::TAG 
 	       <<" from  " << mpirank << "  "<<  (R *) a << endl;
 	ffassert(a.N()==n);
-	return *this;
+	return ll;
     }
      
     template<class R>
-    const MPIrank & operator<<(const KN<R> *aa)const  {
+    long Send(const KN<R> *aa)const  {
 	const KN<R> & a=*aa;
 	ffassert(&a); 
 	int n= a.N();
 	if(verbosity>99)
-	  cout << " .... " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R> >::TAG 
+	  cout << " .... " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R>* >::TAG 
 	       <<" from  " << mpirank << "  "<<  (R *) a << endl;
-	WSend((R *) a,n,who,MPI_TAG<KN<R> >::TAG,comm,rq);
-	return *this;
+	return WSend((R *) a,n,who,MPI_TAG<KN<R>* >::TAG,comm,rq);
     }
     
    template<class R> 
@@ -387,12 +441,12 @@ struct MPIrank {
     
     
     template<class R>
-    const MPIrank & operator<<(Matrice_Creuse<R> * const &  a) const 
+    long Send(Matrice_Creuse<R> * const &  a) const 
     {
 	//if(verbosity>1) 
 	    cout << " MPI << (Matrice_Creuse *) " << a << endl;
 	ffassert(rq==0) ; // 
-	int tag = MPI_TAG<Matrice_Creuse<R> >::TAG;		       
+	int tag = MPI_TAG<Matrice_Creuse<R>* >::TAG;		       
 	MatriceMorse<R> *mA=a->A->toMatriceMorse();
 	int ldata[4];
 	ldata[0]=mA->n;
@@ -401,48 +455,56 @@ struct MPIrank {
 	ldata[3]=mA->symetrique;
     
 	cout << " ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << endl;
-	WSend( ldata,4, who, tag,comm,rq);
-	WSend(  mA->lg,mA->n+1,  who, tag+1,comm,rq);     
-	WSend( mA->cl,mA->nbcoef,  who, tag+2,comm,rq);     
-	WSend(  mA->a,mA->nbcoef,   who, tag+3,comm,rq);  
+	int ll=0;
+	ll=WSend( ldata,4, who, tag,comm,rq);
+	if(ll == MPI_SUCCESS) 
+	ll=WSend(  mA->lg,mA->n+1,  who, tag+1,comm,rq);     
+	if(ll == MPI_SUCCESS) 
+	ll=WSend( mA->cl,mA->nbcoef,  who, tag+2,comm,rq);  
+	if(ll == MPI_SUCCESS) 
+	ll=WSend(  mA->a,mA->nbcoef,   who, tag+3,comm,rq);  
 	delete mA;
-	return *this;
+	return ll;
     }
     template<class R>
-    const MPIrank & operator>>(Matrice_Creuse<R> &  a) const 
+    long Recv(Matrice_Creuse<R>  &  a) const 
     {
 	if(verbosity>1) 
-	    cout << " MPI << (Matrice_Creuse *) " << a << endl;
-	ffassert(rq==0) ; // 
-	int tag =  MPI_TAG<Matrice_Creuse<R> >::TAG;		       
+	    cout << " MPI << (Matrice_Creuse ) " << a << endl;
+	ffassert(rq==0 || rq == Syncro_block) ; // 
+	int tag =  MPI_TAG<Matrice_Creuse<R>* >::TAG;		       
 	int ldata[4];	
-	WRecv( ldata,4, who, tag,comm,rq);
+	int ll=0;
+	ll=WRecv( ldata,4, who, tag,comm,rq);
 	MatriceMorse<R> *mA= new MatriceMorse<R>(ldata[0],ldata[1],ldata[2],ldata[3]); 
-	WRecv(  mA->lg,mA->n+1,   who, tag+1,comm,rq);     
-	WRecv(  mA->cl,mA->nbcoef,  who, tag+2,comm,rq);     
-	WRecv(  mA->a,mA->nbcoef,  who, tag+3,comm,rq);  
+	if(ll == MPI_SUCCESS) 
+	ll=WRecv(  mA->lg,mA->n+1,   who, tag+1,comm,rq);     
+	if(ll == MPI_SUCCESS) 
+	ll=WRecv(  mA->cl,mA->nbcoef,  who, tag+2,comm,rq);     
+	if(ll == MPI_SUCCESS) 
+	ll=WRecv(  mA->a,mA->nbcoef,  who, tag+3,comm,rq);  
 	a.A.master(mA);
-	return *this;
+	return ll;
     }
     
-   const MPIrank & operator<<(Fem2D::Mesh *  a) const {
+  long Send(Fem2D::Mesh *  a) const {
      if(verbosity>1) 
      cout << " MPI << (mesh *) " << a << endl;
       ffassert(a);
        Serialize  buf=(*a).serialize();       
        buf.mpisend(*this,MPI_TAG<Mesh *>::TAG,static_cast<const void *>(this));
-      return *this;
+      return MPI_SUCCESS;
    }
-    const MPIrank & operator<<(Fem2D::Mesh3 *  a) const {
+  long Send (Fem2D::Mesh3 *  a) const {
 	if(verbosity>1) 
 	    cout << " MPI << (mesh3 *) " << a << endl;
 	ffassert(a);
 	Serialize  buf=(*a).serialize();       
 	buf.mpisend(*this,MPI_TAG<Mesh3 *>::TAG,static_cast<const void *>(this));
-	return *this;
+	return MPI_SUCCESS;
     }
     
-   const MPIrank & operator>>(Fem2D::Mesh *& a) const {
+   long Recv(Fem2D::Mesh *& a) const {
      if(verbosity>1) 
      cout << " MPI >> (mesh *) &" << a << endl;
        Serialize buf(*this,Fem2D::Mesh::magicmesh,MPI_TAG<Mesh *>::TAG,static_cast<const void *>(this));
@@ -452,18 +514,17 @@ struct MPIrank {
       Fem2D::R2 Pn,Px;
       a->BoundingBox(Pn,Px);
       a->quadtree=new Fem2D::FQuadTree(a,Pn,Px,a->nv);
-      return *this;
+      return MPI_SUCCESS;
    }
     
-    const MPIrank & operator>>(Fem2D::Mesh3 *& a) const {
+    long Recv(Fem2D::Mesh3 *& a) const {
 	if(verbosity>1) 
 	    cout << " MPI >> (mesh3 *) &" << a << endl;
 	Serialize buf(*this,Fem2D::GenericMesh_magicmesh,MPI_TAG<Mesh3 *>::TAG,static_cast<const void *>(this));
 	if (a) (*a).decrement();
 	a= new Fem2D::Mesh3(buf);
-	//  add 3 line FH 08/12/2003  forget build quadtree sorry      
 	a->BuildGTree();
-	return *this;
+	return MPI_SUCCESS;
     }
     
   operator int () const { return who;}     
@@ -530,9 +591,28 @@ template<class A>
 struct Op_Readmpi : public binary_function<MPIrank,A*,MPIrank> {
   static MPIrank  f(MPIrank const  & f,A *  const  & a)  
    { 
-     f >> *a;
+       f.Recv(*a);
      return f;
    }
+};
+
+template<class A>
+struct Op_Recvmpi : public binary_function<MPIrank,A*,long> {
+    static MPIrank  f(MPIrank const  & f,A *  const  & a)  
+    { 
+	ffassert(f.rq ==0 || f.rq == Syncro_block); // Block 
+	return f.Recv(*a);
+	
+    }
+};
+template<class A>
+struct Op_IRecvmpi : public binary_function<MPIrank,A*,long> {
+    static MPIrank  f(MPIrank const  & f,A *  const  & a)  
+    { 
+	ffassert(f.rq !=0 || f.rq != Syncro_block); // no Block 
+	return f.Recv(*a);
+	
+    }
 };
 
 
@@ -540,7 +620,7 @@ template<class A>
 struct Op_Writempi : public binary_function<MPIrank,A,MPIrank> {
   static MPIrank  f(MPIrank const  & f,A   const  &  a)  
    { 
-     f << a;
+       f.Send(a);
      return f;
    }
 };
@@ -553,6 +633,24 @@ struct Op_Bcastmpi : public binary_function<MPIrank,A*,MPIrank> {
      return f;
    }
 };
+
+template<class A>
+struct Op_ISendmpi : public binary_function<MPIrank,A,long> {
+    static MPIrank  f(MPIrank const  & f,A   const  & a)  
+    { 
+	ffassert(f.rq != Syncro_block); 
+	return f.Send(a);
+    }
+};
+template<class A>
+struct Op_Sendmpi : public binary_function<MPIrank,A,long> {
+    static MPIrank  f(MPIrank const  & f,A  const  & a)  
+    { 
+	MPIrank ff(f.who,f.comm,Syncro_block); 
+	return ff.Send(a);
+    }
+};
+
 
 template<class R>
 struct Op_All2All : public binary_function<KN_<R>,KN_<R>,long> {
@@ -585,8 +683,8 @@ struct Op_Allgather : public binary_function<KN_<R>,KN_<R>,long> {
 };
 
 template<class R>
-struct Op_All2All3 : public ternary_function<KN_<R>,KN_<R>,MPI_Comm,long> {
-    static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,MPI_Comm const & cmm )  
+struct Op_All2All3 : public ternary_function<KN_<R>,KN_<R>,fMPI_Comm,long> {
+    static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,fMPI_Comm const & cmm )  
     { 
 	MPI_Comm comm=cmm;
 	int mpisizew;
@@ -600,8 +698,8 @@ struct Op_All2All3 : public ternary_function<KN_<R>,KN_<R>,MPI_Comm,long> {
 };
 
 template<class R>
-struct Op_Allgather3 : public ternary_function<KN_<R>,KN_<R>,MPI_Comm,long> {
-    static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,MPI_Comm const & cmm)  
+struct Op_Allgather3 : public ternary_function<KN_<R>,KN_<R>,fMPI_Comm,long> {
+    static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,fMPI_Comm const & cmm)  
     { 
 	MPI_Comm comm=cmm;
 	int mpisizew;
@@ -629,6 +727,50 @@ struct Op_Scatter3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
 			     (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
     }
 };
+
+template<class R>
+struct Op_Reduce  : public   quad_function<KN_<R>,KN_<R>,MPIrank,long,long> {
+    static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root,long const &op)  
+    { 
+	int chunk = s.N();
+	ffassert(chunk==r.N());
+	MPI_Op oop = reinterpret_cast<MPI_Op> (op);
+	return MPI_Reduce( (void *) (R*) s,(void *) (R*) r, chunk , MPI_TYPE<R>::TYPE(),oop,root.who,root.comm);	
+    }
+};
+
+template<class R>
+struct Op_AllReduce  : public   quad_function<KN_<R>,KN_<R>,fMPI_Comm,long,long> {
+    static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  fMPI_Comm const & comm,long const &op)  
+    { 
+	int chunk = s.N();
+	ffassert(chunk==r.N());
+	MPI_Op oop = reinterpret_cast<MPI_Op> (op);
+	return MPI_Allreduce( (void *) (R*) s,(void *) (R*) r, chunk , MPI_TYPE<R>::TYPE(),oop,comm);	
+    }
+};
+/*
+template<class R>
+struct Op_Reducescatter  : public   quad_function<KN_<R>,KN_<R>,fMPI_Comm,long,long> {
+    static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  fMPI_Comm const & comm,long const &op)  
+    { 
+	int chunk = s.N();
+	ffassert(chunk==r.N());
+	MPI_Op oop = reinterpret_cast<MPI_Op> (op);
+	return MPI_Reduce_scatter( (void *) (R*) s,(void *) (R*) r, chunk , MPI_TYPE<R>::TYPE(),oop,comm);	
+    }
+};*/
+
+template<class R>
+struct Op_Reduce1  : public   quad_function<R*,R*,MPIrank,long,long> {
+    static long  f(Stack, R*  const  & s, R*  const  &r,  MPIrank const & root,long const &op)  
+    { 
+	int chunk = 1;
+	MPI_Op oop = reinterpret_cast<MPI_Op> (op);
+	return MPI_Reduce( (void *) (R*) s,(void *) (R*) r, chunk , MPI_TYPE<R>::TYPE(),oop,root.who,root.comm);	
+    }
+};
+
 template<class R>
 struct Op_Gather3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
     static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root)  
@@ -647,16 +789,19 @@ struct Op_Gather3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
 			     
 
 MPIrank mpiwho(long i) { return MPIrank(i);}
-MPIrank mpiwho(long i,MPI_Comm comm) { return MPIrank(i,comm);}
-MPIrank mpiwho_(const long &i,const MPI_Comm &comm,MPI_Request * const &rq) { return MPIrank(i,comm,rq);}
-MPIrank mpiwho_(const long &i,MPI_Request * const &rq) { return MPIrank(i, MPI_COMM_WORLD ,rq);}
+MPIrank mpiwho(long i,fMPI_Comm comm) { return MPIrank(i,comm,Syncro_block);}
+MPIrank mpiwhob(long i) { return MPIrank(i);}
+MPIrank mpiwhob(long i,fMPI_Comm comm) { return MPIrank(i,comm,Syncro_block);}
 
-long mpiWait(MPI_Request * rq) { 
+MPIrank mpiwho_(const long &i,const fMPI_Comm &comm,fMPI_Request * const &rq) { return MPIrank(i,comm,*rq);}
+MPIrank mpiwho_(const long &i,fMPI_Request * const &rq) { return MPIrank(i, MPI_COMM_WORLD ,*rq);}
+
+long mpiWait(fMPI_Request * rq) { 
     MPI_Status status;
-    return MPI_Wait(rq,&status);
+    return MPI_Wait(*rq,&status);
 }
 
-long mpiBarrier(MPI_Comm * comm) 
+long mpiBarrier(fMPI_Comm * comm) 
 {    
     return MPI_Barrier(*comm);
 }
@@ -688,50 +833,52 @@ long mpiWaitAny(KN<MPI_Request>* rq) {
      cout << "initparallele rank " <<  mpirank << " on " << mpisize << endl;
   }
 
-long mpiSize(MPI_Comm  cmm) { 
-    int s;
- //   MPI_Comm_rank(MPI_COMM_WORLD, &s); /* local */ 
-    MPI_Comm_size(MPI_COMM_WORLD, &s); /* local */ 
+long mpiSize(fMPI_Comm  cmm) { 
+    int s=0;
+ //   fMPI_Comm_rank(MPI_COMM_WORLD, &s); /* local */ 
+    if(cmm != MPI_COMM_NULL)
+    MPI_Comm_size(cmm, &s); /* local */ 
     return s;
 }
-long mpiRank(MPI_Comm  cmm) { 
-    int s;
-    MPI_Comm_rank(MPI_COMM_WORLD, &s); /* local */ 
+long mpiRank(fMPI_Comm  cmm) { 
+    int s=MPI_UNDEFINED;
+    if(cmm != MPI_COMM_NULL)
+    MPI_Comm_rank(cmm, &s); /* local */ 
  //   MPI_Comm_size(MPI_COMM_WORLD, &s); /* local */ 
     return s;
 }
 
 AnyType InitializeGroup(Stack stack,const AnyType &x){
-    MPI_Group *g=PGetAny<MPI_Group>(x);
+    MPI_Group *g=*PGetAny<fMPI_Group>(x);
     *g=0;
     MPI_Comm_group(MPI_COMM_WORLD, g);
     return  g;
 }
 AnyType DeleteGroup(Stack stack,const AnyType &x){
-    MPI_Group *g=PGetAny<MPI_Group>(x);
+    MPI_Group *g=*PGetAny<fMPI_Group>(x);
     MPI_Group_free(g);
     return  Nothing;
 }
 AnyType InitializeComm(Stack stack,const AnyType &x){
-    MPI_Comm *comm=PGetAny<MPI_Comm>(x);
+    MPI_Comm *comm= *PGetAny<fMPI_Comm>(x);
     *comm=0;
     MPI_Comm_dup(MPI_COMM_WORLD, comm);
     return  comm;
 }
 AnyType DeleteComm(Stack stack,const AnyType &x){
-    MPI_Comm *comm=PGetAny<MPI_Comm>(x);
-    if(comm)
+    MPI_Comm *comm= *PGetAny<fMPI_Comm>(x);
+    if(comm && (*comm != MPI_COMM_NULL))
     MPI_Comm_free(comm);
     return  Nothing;
 }
 AnyType InitializeRequest(Stack stack,const AnyType &x){
-    MPI_Request *comm=PGetAny<MPI_Request>(x);
+    MPI_Request *comm=*PGetAny<fMPI_Request>(x);
     *comm=0;
     
     return  comm;
 }
 AnyType DeleteRequest(Stack stack,const AnyType &x){
-    MPI_Request *comm=PGetAny<MPI_Request>(x);
+    MPI_Request *comm=*PGetAny<fMPI_Request>(x);
     if(comm) MPI_Request_free(comm);
     return  Nothing;
 }
@@ -742,16 +889,16 @@ class ForEachType<MPI_Group>:  public basicForEachType{public:// correction july
 };
 
 template<> 
-class ForEachType<MPI_Comm>:  public basicForEachType{public:// coorection july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...) 
-    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(MPI_Comm),sizeof(MPI_Comm),0,0,iv,id,OOnReturn) {}
+class ForEachType<fMPI_Comm>:  public basicForEachType{public:// coorection july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...) 
+    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(fMPI_Comm),sizeof(fMPI_Comm),0,0,iv,id,OOnReturn) {}
 };
 
 template<> 
-class ForEachType<MPI_Request>:  public basicForEachType{public:// correction july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...) 
-    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(MPI_Request),sizeof(MPI_Request),0,0,iv,id,OOnReturn) {}
+class ForEachType<fMPI_Request>:  public basicForEachType{public:// correction july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...) 
+    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(fMPI_Request),sizeof(fMPI_Request),0,0,iv,id,OOnReturn) {}
 };
 // end Hack  ... 
-MPI_Group* def_group( MPI_Group* const & a, KN_<long>  const & b)
+fMPI_Group* def_group( fMPI_Group* const & a, KN_<long>  const & b)
 {
     MPI_Group group;
     MPI_Comm comm=MPI_COMM_WORLD;
@@ -760,34 +907,34 @@ MPI_Group* def_group( MPI_Group* const & a, KN_<long>  const & b)
     for(int i=0;i<b.N();++i)
 	cout << b[i] << endl;
     KN<int> ranks(b);
-    MPI_Group_incl(group, ranks.N(),(int *) ranks, a);
+    MPI_Group_incl(group, ranks.N(),(int *) ranks, *a);
     MPI_Group_free(&group) ;
     // ici def a .. 
     //  ffassert(0); //   A AFAIRE  //  pour arete le programm 
 return a;}
 
-MPI_Group* def_group( MPI_Group* const & a,MPI_Comm * const &comm)
+fMPI_Group* def_group( fMPI_Group* const & a,fMPI_Comm * const &comm)
 {
-  MPI_Comm_group(*comm,a); 
+  MPI_Comm_group(*comm,*a); 
  return a;}
 
-MPI_Comm* def_comm( MPI_Comm* const & a,MPI_Group* const & g)
+fMPI_Comm* def_comm( fMPI_Comm* const & a,fMPI_Group* const & g)
 {
-   MPI_Comm_create(MPI_COMM_WORLD,*g,a); 
+    int ok=MPI_Comm_create(MPI_COMM_WORLD,*g,*a); 
    return a;
 }
 
-MPI_Comm* def_comm( MPI_Comm* const & a,MPI_Comm* const & b,MPI_Group* const & g)
+fMPI_Comm* def_comm( fMPI_Comm* const & a,fMPI_Comm* const & b,fMPI_Group* const & g)
 {
-    MPI_Comm_create(*b,*g,a); 
+    MPI_Comm_create(*b,*g,*a); 
     return a;
 }
 
-MPI_Group* def_group( MPI_Group* const & a,MPI_Group  * const & group,KN_<long>  const & b)
+fMPI_Group* def_group( fMPI_Group* const & a,fMPI_Group  * const & group,KN_<long>  const & b)
 {
   
     KN<int> ranks(b);
-    MPI_Group_incl(*group, ranks.N(), (int *) ranks, a);
+    MPI_Group_incl(*group, ranks.N(), (int *) ranks, *a);
     // ici def a .. 
     //  ffassert(0); //   A AFAIRE  //  pour arete le programm 
     return a;
@@ -833,12 +980,12 @@ AnyType ClearReturnKK_(Stack stack, const AnyType & a)
 	cout << "ClearReturnKK_:: copie  Add2StackOfPtr2Free   "  << endl;
     return SetAny<KK_>(*cm);
 }
-template<class RR,class A,class B>  
-RR * get_elementp_(const A & a,const B & b){ 
+//template<class RR,class A,class B>  fMPI_Request*,KN<MPI_Request>*,long
+fMPI_Request * get_elementp_( KN<MPI_Request> * const & a,const long & b){ 
     if( b<0 || a->N() <= b) 
-      { cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " array type = " << typeid(A).name() << endl;
+      { cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " KN<MPI_Request> * " << endl;
       ExecError("Out of bound in operator []");}
-return  &((*a)[b]);}
+   return  reinterpret_cast<fMPI_Request *> (&((*a)[b]));}// bofBof ... 
 
 KN<MPI_Request> * set_init0( KN<MPI_Request> * const & a,const long & b)
    { 
@@ -847,6 +994,32 @@ KN<MPI_Request> * set_init0( KN<MPI_Request> * const & a,const long & b)
 	  (*a)[i]=MPI_REQUEST_NULL;
    return a;
    }
+bool toBool(fMPI_Comm *comm)
+{
+  return (comm && (*comm !=MPI_COMM_NULL)); 
+}
+
+template<typename T>
+class Quad_Op : public E_F0 {
+    typedef typename T::result_type R;
+    typedef typename T::first_argument_type A;
+    typedef typename T::second_argument_type B;
+    typedef typename T::third_argument_type C;
+    typedef typename T::fourth_argument_type D;
+    
+    typedef  typename T::result_type Result;
+    Expression a,b,c,d;
+public:
+    AnyType operator()(Stack s)  const 
+    {return  SetAny<R>(static_cast<R>(T::f(s, GetAny<A>((*a)(s)) ,
+					   GetAny<B>((*b)(s)) ,
+					   GetAny<C>((*c)(s)),
+					   GetAny<D>((*d)(s))
+					   )));}
+    Quad_Op(Expression aa,Expression bb,Expression cc,Expression dd) : a(aa),b(bb),c(cc),d(dd) {} 
+    bool MeshIndependent() const {
+    return a->MeshIndependent() && b->MeshIndependent() && c->MeshIndependent()  && d->MeshIndependent();}
+};
 
 void init_lgparallele()
   {
@@ -854,25 +1027,26 @@ void init_lgparallele()
      using namespace Fem2D;
      Dcl_TypeandPtr<MPIrank>(0);
       
-     Dcl_TypeandPtr<MPI_Group>(0,0,InitializeGroup,DeleteGroup); 
-     Dcl_TypeandPtr<MPI_Comm>(0,0,InitializeComm,DeleteComm);  
-     zzzfff->Add("mpiGroup",atype<MPI_Group*>());
-     zzzfff->Add("mpiComm",atype<MPI_Comm*>());
+     Dcl_TypeandPtr<fMPI_Group>(0,0,InitializeGroup,DeleteGroup); 
+     Dcl_TypeandPtr<fMPI_Comm>(0,0,InitializeComm,DeleteComm);  
+     zzzfff->Add("mpiGroup",atype<fMPI_Group*>());
+     zzzfff->Add("mpiComm",atype<fMPI_Comm*>());
 
      map_type[typeid(MPIrank).name()]->AddCast(new E_F1_funcT<MPIrank,MPIrank*>(UnRef<MPIrank>));
-     map_type[typeid(MPI_Group).name()]->AddCast(new E_F1_funcT<MPI_Group,MPI_Group*>(UnRef<MPI_Group>));
-     map_type[typeid(MPI_Comm).name()]->AddCast(new E_F1_funcT<MPI_Comm,MPI_Comm*>(UnRef<MPI_Comm>));
+     map_type[typeid(fMPI_Group).name()]->AddCast(new E_F1_funcT<fMPI_Group,fMPI_Group*>(UnRef<fMPI_Group>));
+     map_type[typeid(fMPI_Comm).name()]->AddCast(new E_F1_funcT<fMPI_Comm,fMPI_Comm*>(UnRef<fMPI_Comm>));
+     map_type[typeid(bool).name()]->AddCast(new OneOperator1<bool,fMPI_Comm*>(toBool));
        
      TheOperators->Add("<-", 
        new OneOperator2_<MPIrank*,MPIrank*,MPIrank>(&set_copympi));
       
       // constructor example ... 
      TheOperators->Add("<-", 
-			new OneOperator2_<MPI_Group*,MPI_Group*,KN_<long> >(&def_group),
-		        new OneOperator3_<MPI_Group*,MPI_Group*,MPI_Group*,KN_<long> >(&def_group),
-		        new OneOperator2_<MPI_Group*,MPI_Group*,MPI_Comm*>(&def_group),
-		        new OneOperator2_<MPI_Comm*,MPI_Comm*,MPI_Group* >(&def_comm),
-		        new OneOperator3_<MPI_Comm*,MPI_Comm*,MPI_Comm*,MPI_Group* >(&def_comm)
+			new OneOperator2_<fMPI_Group*,fMPI_Group*,KN_<long> >(&def_group),
+		        new OneOperator3_<fMPI_Group*,fMPI_Group*,fMPI_Group*,KN_<long> >(&def_group),
+		        new OneOperator2_<fMPI_Group*,fMPI_Group*,fMPI_Comm*>(&def_group),
+		        new OneOperator2_<fMPI_Comm*,fMPI_Comm*,fMPI_Group* >(&def_comm),
+		        new OneOperator3_<fMPI_Comm*,fMPI_Comm*,fMPI_Comm*,fMPI_Group* >(&def_comm)
 		      
 		       
       ); 
@@ -885,9 +1059,14 @@ void init_lgparallele()
       
       
      Global.Add("processor","(",new OneOperator1<MPIrank,long>(mpiwho));
-     Global.Add("processor","(",new OneOperator2<MPIrank,long,MPI_Comm>(mpiwho));
+     Global.Add("processor","(",new OneOperator2<MPIrank,long,fMPI_Comm>(mpiwho));
+ 
+      Global.Add("processorblock","(",new OneOperator1<MPIrank,long>(mpiwhob));
+      Global.Add("processorblock","(",new OneOperator2<MPIrank,long,fMPI_Comm>(mpiwhob));
+
      TheOperators->Add(">>",
 		       new OneBinaryOperator<Op_Readmpi<double> >,
+		       new OneBinaryOperator<Op_Readmpi<Complex> >,
 		       new OneBinaryOperator<Op_Readmpi<long> > ,
 		       new OneBinaryOperator<Op_Readmpi<KN<double> > > ,
 		       new OneBinaryOperator<Op_Readmpi<KN<long> > > ,
@@ -897,8 +1076,10 @@ void init_lgparallele()
 		       new OneBinaryOperator<Op_Readmpi<Matrice_Creuse<R> > > ,
 		       new OneBinaryOperator<Op_Readmpi<Matrice_Creuse<Complex> > > 
        );
+   
      TheOperators->Add("<<",
        new OneBinaryOperator<Op_Writempi<double> >,
+       new OneBinaryOperator<Op_Writempi<Complex> >,
        new OneBinaryOperator<Op_Writempi<long> > ,
        new OneBinaryOperator<Op_Writempi<KN<double> * > > ,
        new OneBinaryOperator<Op_Writempi<KN<long> * > > ,
@@ -909,8 +1090,56 @@ void init_lgparallele()
        new OneBinaryOperator<Op_Writempi<Matrice_Creuse<Complex>* > > 
 		       
        );
-       
+ 
+      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<double> >);
+      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<long> >);
+      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Complex> >);
+      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<double> *> >);
+      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<long> *> >);
+      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<Complex> *> >);
+      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Mesh *> >);
+      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Mesh3 *> >);
+      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Matrice_Creuse<R> *> >);
+      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Matrice_Creuse<Complex> *> >);
+      
+      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<double> >);
+      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<long> >);
+      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Complex> >);
+      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<double> *> >);
+      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<long> *> >);
+      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<Complex> *> >);
+      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Mesh *> >);
+      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Mesh3 *> >);
+      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Matrice_Creuse<R> *> >);
+      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Matrice_Creuse<Complex> *> >);
+
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<double> >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<long> >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Complex> >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KN<double> > >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KN<long> > >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KN<Complex> > >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Mesh *> >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Mesh3 *> >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Matrice_Creuse<R> > >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Matrice_Creuse<Complex> > >);
+      
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<double> >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<long> >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Complex> >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KN<double> > >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KN<long> > >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KN<Complex> > >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Mesh *> >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Mesh3 *> >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Matrice_Creuse<R> > >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Matrice_Creuse<Complex> > >);
+      
+    
+		 
+	       
     Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<double> >);
+    Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<Complex> >);
     Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<long> >);
     Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<double> > >);
     Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<long> > >);
@@ -933,39 +1162,82 @@ void init_lgparallele()
       Global.Add("mpiGather","(",new OneTernaryOperator3<Op_Scatter3< long > >);
       Global.Add("mpiGather","(",new OneTernaryOperator3<Op_Gather3< double > >);
       
+      Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce< double >, Quad_Op<Op_Reduce< double > > >);
+      Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce1< double >, Quad_Op<Op_Reduce1< double > > >);
+      Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce< double >, Quad_Op<Op_AllReduce< double > > >);
+  //    Global.Add("mpiReduceScatter","(",new OneQuadOperator<Op_Reducescatter< double >, Quad_Op<Op_Reducescatter< double > > >);
+      
+      
+      
 //      Global.Add("mpiAlltoall","(",new OneBinaryOperator<Op_All2Allm< long > >);
   //    Global.Add("mpiAlltoall","(",new OneBinaryOperator<Op_All2Allm< double > >);
       
  
      Global.New("mpirank",CPValue<long>(mpirank));
      Global.New("mpisize",CPValue<long>(mpisize));
-     static MPI_Comm mpiWorld=MPI_COMM_WORLD;
-     Global.New("mpiCommWorld",CPValue<MPI_Comm>(mpiWorld));   
+     static long mpiUndefined=MPI_UNDEFINED, mpiAnySource =  MPI_ANY_SOURCE,mpiAnyTag=MPI_ANY_TAG ;
+      Global.New("mpiUndefined",CPValue<long>(mpiUndefined));
+     Global.New("mpiAnySource",CPValue<long>(mpiAnySource));
+      Global.New("mpiAnyTag",CPValue<long>(mpiAnyTag));
+      
+      
+      
+     static fMPI_Comm fmpiWorld=MPI_COMM_WORLD;
+     Global.New("mpiCommWorld",CPValue<fMPI_Comm>(fmpiWorld));   
       // add FH 
     
-    Dcl_TypeandPtr<MPI_Request>(0,0,InitializeRequest,DeleteRequest); // bof bof ... 
+    Dcl_TypeandPtr<fMPI_Request>(0,0,InitializeRequest,DeleteRequest); // bof bof ... 
     Dcl_TypeandPtr_<KN_<MPI_Request> ,KN<MPI_Request>*  > 
        (0,0,0,::Destroy<KN<MPI_Request> >,
 	::ClearReturnKK_<MPI_Request,KN<MPI_Request>,KN_<MPI_Request> >,
 	::ClearReturnpKK<MPI_Request,KN<MPI_Request> >);
       
-    map_type_of_map[make_pair(atype<long>(),atype<MPI_Request>())]=atype<KN<MPI_Request>*>(); // vector
+    map_type_of_map[make_pair(atype<long>(),atype<fMPI_Request>())]=atype<KN<MPI_Request>*>(); // vector
       
-     zzzfff->Add("mpiRequest",atype<MPI_Request*>());
+     zzzfff->Add("mpiRequest",atype<fMPI_Request*>());
      Global.Add("mpiWtime","(",new OneOperator0<double>(MPI_Wtime));    
      Global.Add("mpiWtick","(",new OneOperator0<double>(MPI_Wtick));    
-      Global.Add("processor","(",new OneOperator3_<MPIrank,long,MPI_Comm,MPI_Request*>(mpiwho_));
-     Global.Add("processor","(",new OneOperator2_<MPIrank,long,MPI_Request*>(mpiwho_));
-     Global.Add("mpiWait","(",new OneOperator1<long,MPI_Request*>(mpiWait));
+      Global.Add("processor","(",new OneOperator3_<MPIrank,long,fMPI_Comm,fMPI_Request*>(mpiwho_));
+     Global.Add("processor","(",new OneOperator2_<MPIrank,long,fMPI_Request*>(mpiwho_));
+     Global.Add("mpiWait","(",new OneOperator1<long,fMPI_Request*>(mpiWait));
      Global.Add("mpiWaitAny","(",new OneOperator1<long,KN<MPI_Request>*>(mpiWaitAny));
-      Global.Add("mpiSize","(",new OneOperator1<long,MPI_Comm>(mpiSize)); 
-      Global.Add("mpiRank","(",new OneOperator1<long,MPI_Comm>(mpiRank)); 
-      Global.Add("mpiBarrier","(",new OneOperator1<long,MPI_Comm*>(mpiBarrier)); 
-    
+      Global.Add("mpiSize","(",new OneOperator1<long,fMPI_Comm>(mpiSize)); 
+      Global.Add("mpiRank","(",new OneOperator1<long,fMPI_Comm>(mpiRank)); 
+      Global.Add("mpiBarrier","(",new OneOperator1<long,fMPI_Comm*>(mpiBarrier)); 
+
+      static   long op_max = reinterpret_cast<long>(MPI_MAX);
+      static   long op_min = reinterpret_cast<long>(MPI_MIN);
+      static   long op_sum = reinterpret_cast<long>(MPI_SUM);
+      static   long op_prod = reinterpret_cast<long>(MPI_PROD);
+      static   long op_land = reinterpret_cast<long>(MPI_LAND);
+      
+      static   long op_lor = reinterpret_cast<long>(MPI_LOR);
+      static   long op_lxor = reinterpret_cast<long>(MPI_LXOR);
+      static   long op_band = reinterpret_cast<long>(MPI_BAND);
+      static   long op_bor = reinterpret_cast<long>(MPI_BOR);
+      static   long op_bxor = reinterpret_cast<long>(MPI_BXOR);
+      static   long op_maxloc = reinterpret_cast<long>(MPI_MAXLOC);
+      static   long op_minloc = reinterpret_cast<long>(MPI_MINLOC);
+      
+      Global.New("mpiMAX",CPValue<long>(op_max));
+      Global.New("mpiMIN",CPValue<long>(op_min));
+      Global.New("mpiSUM",CPValue<long>(op_sum));
+      Global.New("mpiPROD",CPValue<long>(op_prod));
+      Global.New("mpiLAND",CPValue<long>(op_land));
+      
+      Global.New("mpiLOR",CPValue<long>(op_lor));
+      Global.New("mpiLXOR",CPValue<long>(op_lxor));
+      Global.New("mpiBAND",CPValue<long>(op_band));
+      Global.New("mpiBXOR",CPValue<long>(op_bxor));
+      //  sur des pair 
+    //  Global.New("mpiMAXLOC",CPValue<long>(op_maxloc));
+     // Global.New("mpiMINLOC",CPValue<long>(op_minloc));
+      
+      
       TheOperators->Add("<-", 
 			new OneOperator2_<KN<MPI_Request> *,KN<MPI_Request> *,long>(&set_init0)
 						);
-   atype<KN<MPI_Request>* >()->Add("[","",new OneOperator2_<MPI_Request*,KN<MPI_Request>*,long >(get_elementp_<MPI_Request,KN<MPI_Request>*,long>));    
+   atype<KN<MPI_Request>* >()->Add("[","",new OneOperator2_<fMPI_Request*,KN<MPI_Request>*,long >(get_elementp_));    
       
   }
   void end_parallele()
