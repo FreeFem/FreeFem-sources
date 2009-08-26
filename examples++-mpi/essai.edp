@@ -1,24 +1,67 @@
+
 verbosity=2;
 cout << " rank = " << mpirank << " " << " size " << mpisize << endl;
 cout << " rank = " << mpiRank(mpiCommWorld) << " " << " size " << mpiSize(mpiCommWorld) << endl;
+if(mpisize>4)
+  { 
+    int[int] procs=[1,4];
+    mpiGroup gpr(procs);
+    cout << " before  ...  " << mpirank << endl;
+    mpiComm comm(gpr);
+    cout << " after ...  " << mpirank << "  in : " << bool(comm)   << " rank " << mpiRank(comm) << " / " << mpiSize(comm) <<endl;
+  }
 
-if ( mpisize > 1) 
-  if( mpirank==0) 
+if ( mpirank<2 && mpisize>=2)
+  { 
+    
+    if( mpirank==0) 
+      {
+	cout << mpirank << " send to 1 " << endl;
+	processor(1) << 123456; //  unblock send
+      }
+    else if (mpirank==1) 
+      {
+	int k;
+	processor(0) >> k; // block recv 
+	cout << " recived " << k << endl;
+      }
     {
-      cout << mpirank << " send to 1 " << endl;
-      processor(1) << 123456;
+      // UnBlock communication 
+      mpiRequest rq;
+      if( mpirank==0) 
+	{
+	  Isend(processor(1,rq),16.);
+	  mpiWait(rq);// Send
+	}
+      else if (mpirank==1) 
+	{
+	  real  k;
+	  Irecv(processor(0,rq),k);
+	  mpiWait(rq);// Recv 
+	  assert(k==16.);// verif..
+	}
     }
-  else if (mpirank==1) 
+
+
     {
-      int k;
-      processor(0) >> k;
-      cout << " recived " << k << endl;
+    //  Block Communication
+      if( mpirank==0) 
+	  Send(processor(1),16.);
+      else if (mpirank==1) 
+	{
+	  real  k;
+	  Recv(processor(0),k);
+	  assert(k==16.);// verif..
+	}
     }
+
+  }
 int l= mpirank+100;
 cout << " l == " << l << " broadcast l from 0   mpirank = " << mpirank << endl;
 broadcast(processor(0),l);
 cout << " l == " << l << "  mpirank ="<< mpirank << endl;
 
+{
 matrix<complex> A;
 
 if( mpirank==0)
@@ -32,9 +75,11 @@ if (mpirank==1)
  else if (mpirank==0)
    processor(1) >>  A;
 
-cout << " mpirank = " << " A =  " <<  A << endl;
+cout << " mpirank = " << mpirank << " A =  " << endl;
+cout <<   A << endl;
 
 cout << " " <<  norm(A(1,1) - 2-1i) << endl;
+}
 
 // asyncronous  send/recv  messages....
 mpiRequest rr;
@@ -95,9 +140,3 @@ cout << mpirank << " aa = " << aa << endl;
 cout << mpirank << " bb = " << bb << endl;
 
 mpiBarrier(mpiCommWorld);
-if( (mpirank==1 || mpirank==2 || mpirank==3)  && 0 )
-  { // boggus  ( dead lock ????  FH ) 
-    int[int] procs=[1,2,3];
-    mpiGroup toto(procs);
-    mpiComm comm(toto);
-  }

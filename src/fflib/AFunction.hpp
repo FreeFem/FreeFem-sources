@@ -1276,6 +1276,7 @@ template<class R> class PPValue:public E_F0
 
 
 template<class R>
+Type_Expr CPValue(R & v)
  {
    throwassert(map_type[typeid(R*).name()]);
   return make_pair(map_type[typeid(R*).name()],new PValue<R>(&v));
