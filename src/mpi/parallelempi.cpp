@@ -838,20 +838,29 @@ class ForEachType<fMPI_Request>:  public basicForEachType{public:// correction j
 // end Hack  ... 
 
 
-fMPI_Group* def_group( fMPI_Group* const & a, KN_<long>  const & b)
+fMPI_Group* def_group( fMPI_Group* const & a,fMPI_Comm * const &comm, KN_<long>  const & b)
 {
   MPI_Group group;
-  MPI_Comm comm=MPI_COMM_WORLD;
+  MPI_Comm comm=*comm;;
   MPI_Comm_group(comm,& group); 
-  cout << b.N() <<endl;
-  for(int i=0;i<b.N();++i)
-    cout << b[i] << endl;
   KN<int> ranks(b);
   MPI_Group_incl(group, ranks.N(),(int *) ranks, *a);
   MPI_Group_free(&group) ;
   // ici def a .. 
   //  ffassert(0); //   A AFAIRE  //  pour arete le programm 
   return a;}
+
+fMPI_Group* def_group( fMPI_Group* const & a, KN_<long>  const & b)
+{
+    MPI_Group group;
+    MPI_Comm comm=MPI_COMM_WORLD;
+    MPI_Comm_group(comm,& group); 
+    KN<int> ranks(b);
+    MPI_Group_incl(group, ranks.N(),(int *) ranks, *a);
+    MPI_Group_free(&group) ;
+    // ici def a .. 
+    //  ffassert(0); //   A AFAIRE  //  pour arete le programm 
+return a;}
 
 fMPI_Group* def_group( fMPI_Group* const & a,fMPI_Comm * const &comm)
 {
@@ -1044,6 +1053,7 @@ void init_lgparallele()
     TheOperators->Add("<-", 
 		      new OneOperator2_<fMPI_Group*,fMPI_Group*,KN_<long> >(&def_group),
 		      new OneOperator3_<fMPI_Group*,fMPI_Group*,fMPI_Group*,KN_<long> >(&def_group),
+		      new OneOperator3_<fMPI_Group*,fMPI_Group*,fMPI_Comm*,KN_<long> >(&def_group),
 		      new OneOperator2_<fMPI_Group*,fMPI_Group*,fMPI_Comm*>(&def_group));
       
       

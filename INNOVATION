@@ -1,73 +1,9 @@
-v 3.5
-  add lot in  mpi
-  
-    Resquest field  of basis asycronuous recv
-   -1 is  any_source  in recv
-    example:
-       // new type :
-      mpiComm comm=mpiCommWorld; //  set a MPI_Comm to MPI_COMM_WORLD
-      int[int] procs=[1,2,3];
-      mpiGroup grp(procs); // set MPI_Group to proc 1,2,3 of MPI_COMM_WORLD
-      mpiComm  ncomm(mpiCommWorld,grp); // set the mpiComm form grp MPI_COMM_WORLD 
-      mpiComm  ncomm(comm,color,key); // MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *ncomm)
-      mpiComm  nicomm(processor(local_comm,local_leader),processor(peer_comm,peer_leader),tag); 
-         // build  MPI_INTERCOMM_CREATE(local_comm, local_leader, peer_comm, remote_leader, tag, &nicomm)
-      mpiComm  ncomm(intercomm,hight) ; // build using  MPI_Intercomm_merge( intercomm, high, &ncomm)  
-
-    
-      mpiRequest rq; // def an MPI_Resquest
-      mpiRequest[int] arq(10); // a arry of 10 MPI_Resquest
-      
-      new functions:
-      mpiSize(comm) ; // return the size of comm (int)
-      mpirank(comm) ; // return the rank  in comm (int)
-      
-      processor(i) // proc i with no Resquest in MPI_COMM_WORLD
-      processor(-1) // any source  with no Resquest in MPI_COMM_WORLD
-      processor(i,comm) // proc i with  no Resquest in comm 
-      processor(comm,i) // proc i with  no Resquest in comm 
-      processor(i,rd,comm) // proc i with Resquest rq  in comm 
-      processor(i,rd) // proc i with Resquest rq in MPI_COMM_WORLD
-
-      processorblock(i) // proc i  in MPI_COMM_WORLD in block mode 
-      processorblock(-1) // any source in MPI_COMM_WORLD in block mode 
-      processorbloc(i,comm) // proc i in in comm  in block mode 
-
-
-      
-      mpiWait(rq); // of Request 
-      mpiWaitAll(arq); // of Request off arg
-      mpiWtime() ; //  return MPIWtime in second (real)
-      mpiWtick() ; // return MPIWTick in second (real)
-     
-    - let a,b to array or full matrix of int ot real. 
-       mpiAlltoall(a,b[,comm]) ;
-       mpiAllgather(a,b[,comm]) ;
-       mpiGather(a,b,processor(..) ) ;
-       mpiScatter(a,b,processor(..)) ;
-       mpiReduce(a,b,processor(..),mpiMax) ;
-       mpiAllReduce(a,b,comm,mpiMax) ;
-       mpiReduceScatter(a,b,comm,mpiMax) ;
-    - add for reduce operation the  mpiOP constant
-           mpiMAX,mpiMIN,mpiSUM,mpiPROD,
-           mpiLAND,mpiLOR,mpiLXOR,mpiBAND,mpiBXOR
-    - add 
-
-        Send(processor(..), data);
-        Isend(processor(..), data);
-
-        Recv(processor(..), data);
-        Irecv(processor(..), data);
-
-   - add  mpi constant
-      mpiUndefined
-      mpiAnySource
-      mpiCommWorld
-
-    - add communication of type  mesh3, real matrix and   complex matrix.    
+v 3.5 (27 aug. 2009)
+  Complet writing to MPI interface , see chapter 10, page 229, of
+  the freefem++doc.pdf  and see example++-mpi/essai.edp.    
 
   correct 
-  	  operator  a(:)= 1:4; // before change a copie of a (do nothing)
+  	  operator  a(:)= 1:4; // before change a copy of a and so do nothing
       string[string] s; 
       s[i]; // before trap (two delete) 
 v 3.4-2
