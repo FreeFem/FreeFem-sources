@@ -1997,7 +1997,7 @@ struct OneBinaryOperator_Traits {
 };*/
 
 template<class A,class B>  struct SameType { static const int OK=0;};
-template<class A>  struct SameType<A,A> { static const int OK=0;};
+template<class A>  struct SameType<A,A> { static const int OK=1;};
 template<>  struct SameType<bool,bool> { static const int OK=10;};
 template<>  struct SameType<long,long> { static const int OK=20;};
 template<>  struct SameType<double,double> { static const int OK=30;};
@@ -2503,7 +2503,10 @@ class  OneOperator2_ : public OneOperator {
     OneOperator2_(func  ff): 
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
       t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
-      
+     OneOperator2_(int ppref,func  ff): 
+       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
+       t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {pref=ppref;}
+
     OneOperator2_(func  ff,aType tt0,aType tt1): 
       OneOperator(map_type[typeid(R).name()],tt0,tt1),
       t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}

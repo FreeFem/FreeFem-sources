@@ -794,6 +794,11 @@ template<class R,class A>  R * set_array( R* const & a,const A & b){
     *a=b;
 return a;}
 // missing FH august 2009 
+template<class R,class A>  R * set_arrayp( R* const & a,const A & b){ 
+    SHOWVERB( cout << " set_init " << typeid(R).name() << " " << &b << endl);
+    a->resize(b->size());
+    *a=*b;
+return a;}
 template<class R,class A>  R  set_array_( R const & a,const A & b){ 
     SHOWVERB( cout << " set_array_ " << typeid(R).name() << " " << &b << endl);
     ffassert(a.N()==b.size());
@@ -1201,7 +1206,9 @@ void ArrayOperator()
 		      new OneOperator2_<KN<K> *,KN<K> *,SetArray<K> >(&set_init_array));
     TheOperators->Add("=", 
 		      new OneOperator2_<KN<K> *,KN<K> *,SetArray<K> >(&set_array),
-		      new OneOperator2_<KN_<K> ,KN_<K> ,SetArray<K> >(&set_array_));// missing aug 200: a(:)=1:3
+		      new OneOperator2_<KN<K> *,KN<K> *,KN<K> * >(&set_arrayp),  //  to reomve ambiguity aug 2009
+		      new OneOperator2_<KN_<K> ,KN_<K> ,SetArray<K> >(-1,&set_array_) // missing aug 2009 a(:)=1:3 less prioritaire
+    );
     
 
 }

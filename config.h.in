@@ -72,23 +72,8 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* Define to 1 if you have the <mpicxx.h> header file. */
-#undef HAVE_MPICXX_H
-
-/* Define to 1 if you have the <mpi/cxx/mpicxx.h> header file. */
-#undef HAVE_MPI_CXX_MPICXX_H
-
-/* Define to 1 if you have the <mpi++.h> header file. */
-#undef HAVE_MPI___H
-
-/* Define to 1 if you have the <ompi/mpi/cxx/mpicxx.h> header file. */
-#undef HAVE_OMPI_MPI_CXX_MPICXX_H
-
 /* Define to 1 if you have the <OpenGL/gl.h> header file. */
 #undef HAVE_OPENGL_GL_H
-
-/* Define to 1 if you have the <openmpi/ompi/mpi/cxx/mpicxx.h> header file. */
-#undef HAVE_OPENMPI_OMPI_MPI_CXX_MPICXX_H
 
 /* Define to 1 if you have the `second_' function. */
 #undef HAVE_SECOND_

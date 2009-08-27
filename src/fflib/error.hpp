@@ -50,6 +50,7 @@ extern int TheCurrentLine;
 
   using std::exception;
 
+extern long mpirank;
 
 class Error : public exception
 { public:
@@ -79,7 +80,7 @@ protected:
     message = mess.str();
     extern void ShowDebugStack();
     ShowDebugStack();
-    if (c!=NONE) cerr  << message << endl; // cerr << " at exec line  " << TheCurrentLine << endl; 
+    if (c!=NONE && mpirank==0) cerr  << message << endl; // cerr << " at exec line  " << TheCurrentLine << endl; 
     }
 public:
   virtual int errcode() const {return code;} 

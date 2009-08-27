@@ -98,7 +98,7 @@ double CPUcompileInit =0;
 C_F0  fespacetype;
 bool fespacecomplex;
 int fespacedim;
-
+extern int UnShowAlloc;
 int ShowAlloc(const char *s,size_t &);
 inline int yylex()  {return zzzfff->scan();}
 inline int lineno() {return zzzfff->lineno();}
@@ -254,6 +254,7 @@ start:   input ENDOFFILE {
                         if(verbosity) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
                         size_t lg0,lg1;                       
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
+			UnShowAlloc =0;// add FH for parallee
                         if(verbosity) cout << endl;  
                         { Stack stack = newStack(sizestack);
                         double CPUcompile= CPUtime();
@@ -279,6 +280,7 @@ start:   input ENDOFFILE {
                         } 
                         fingraphique();
 			if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}
+			UnShowAlloc =1;
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         
 			    if (NbPtr) { cout << " ######## We forget of deleting   " << NbPtr 
@@ -639,12 +641,15 @@ int Compile()
   currentblock=0;
   Block::open(currentblock);  
   try {
+    UnShowAlloc =0;
     retvalue=yyparse(); //  compile
+   
     if(retvalue==0)  
       if(currentblock) 
 	{retvalue=1; if(!mpirank) cerr <<  "Error:a block is not close" << endl; }  
       else {
 	  if( verbosity  ) {
+	      UnShowAlloc =1;
 	      cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg << " mpirank: " <<mpirank << endl;
 	      if(!mpirank) cerr <<  "Bien: On a fini Normalement" << endl; }
 	}
@@ -653,6 +658,7 @@ int Compile()
   catch (Error & e) 
     {
       retvalue=e.errcode();
+      if(mpirank ==0)
       cerr << "error " << e.what() 
 	   << "\n code = "<<  retvalue << " mpirank: " <<mpirank  << endl;
     }
