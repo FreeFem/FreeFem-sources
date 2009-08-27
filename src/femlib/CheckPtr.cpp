@@ -55,7 +55,7 @@ void exitalloc(int i)
 //  TO DEBUG ALL UN DELETE POINETUR
 
 
-
+int UnShowAlloc =1;
 
 int ShowAlloc(const char *s,size_t & lg); 
         
@@ -339,6 +339,7 @@ AllocExtern::AllocExtern()
 
 AllocExtern::~AllocExtern()
 {
+    if(UnShowAlloc==0) return;
      OneAlloc *  list[Maxundelptr];
      
      AllocData * p=AllocHead;
@@ -428,4 +429,6 @@ int ShowAlloc(const char *s,size_t & lg)
 #include <stdlib.h>
 int ShowAlloc(const char *s,size_t & lg)
 {lg=0; return 0;}
+int UnShowAlloc =0;
+
 #endif

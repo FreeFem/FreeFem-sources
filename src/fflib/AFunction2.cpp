@@ -189,31 +189,35 @@ void Polymorphic::Show(const char *op,const ArrayOfaType & at,ostream &f)  const
 
 C_F0::C_F0(const Polymorphic * poly,const char *op,const basicAC_F0 & p)
 {
-  ArrayOfaType at(p); 
-  if (poly) { // a Polymorphic => polymorphisme
-      const  OneOperator *  ff=poly->Find(op,at);
-      if (ff) { 
-        /* cout << endl;
-         poly->Show(op,at,cout);
-         cout << op << ": (in " << at << ") => " << " " << *ff<< "\n\n";*/
-	 *this= ff->code2(p);
-	 }
-      else
-        { 
-           cerr << " error operator " << op << " " << at << endl;
-           poly->Show(op,at,cerr);
-	   // const  OneOperator *  ff=
-	   poly->Find(op,at);
-	   CompileError();
-        }
-   }
-  else { 
-      //  no polymorphisme
-     cerr << " const Polymorphic * poly,const char *op,const basicAC_F0 & p)   " << endl;
-     cerr  << op << " " << at << endl;
-     CompileError();          
-  }
-}
+    ArrayOfaType at(p); 
+    if (poly) { // a Polymorphic => polymorphisme
+	const  OneOperator *  ff=poly->Find(op,at);
+	if (ff) { 
+	    /* cout << endl;
+	     poly->Show(op,at,cout);
+	     cout << op << ": (in " << at << ") => " << " " << *ff<< "\n\n";*/
+	    *this= ff->code2(p);
+	}
+	else
+	  { if(mpirank==0)
+	    {
+		cerr << " error operator " << op << " " << at << endl;
+		poly->Show(op,at,cerr);
+		// const  OneOperator *  ff=
+		poly->Find(op,at);
+	    }
+	      CompileError();
+	  }
+    }
+    else { 
+	//  no polymorphisme
+	if(mpirank==0){
+	    cerr << " const Polymorphic * poly,const char *op,const basicAC_F0 & p)   " << endl;
+	    cerr  << op << " " << at << endl;
+	}
+	    CompileError();          
+	}
+    }
        
 
 
@@ -376,6 +380,7 @@ void Polymorphic::Add(const char * op,Value *pp) const
       r = ti->Find(name);
       if (r.NotNull()) return r;
     }
+    if(mpirank==0)
     cerr << " The Identifier " << name << " does not exist " << endl;
     CompileError();
     return r;
@@ -477,35 +482,38 @@ Block::~Block(){}
   
     
 const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
- {
-    pair<iterator,bool>  p=m.insert(pKV(k,Value(v,listofvar,del)));
-    listofvar = &*m.find(k);
-    if (!p.second) 
-     {
-       cerr << " The identifier " << k << " exists \n";
-       cerr << " \t  the existing type is " << *p.first->second.first << endl;
-       cerr << " \t  the new  type is " << *v.first << endl;
-       CompileError();
-     }
-    return v;
- }
+  {
+      pair<iterator,bool>  p=m.insert(pKV(k,Value(v,listofvar,del)));
+      listofvar = &*m.find(k);
+      if (!p.second) 
+	{
+	    if(mpirank==0) {
+		cerr << " The identifier " << k << " exists \n";
+		cerr << " \t  the existing type is " << *p.first->second.first << endl;
+		cerr << " \t  the new  type is " << *v.first << endl;
+	    }
+	    CompileError();
+	}
+      return v;
+  }
  void  TableOfIdentifier::Add(Key k,Key op,OneOperator *p0,OneOperator *p1,
       OneOperator *p2,OneOperator *p3,OneOperator *p4,OneOperator *p5,OneOperator *p6)
-{
-  iterator i= m.find(k);
-  if (i==m.end()) // new
-    {
-     Value poly0=Value(atype<Polymorphic*>(),new Polymorphic(),listofvar);     
-    i=m.insert(make_pair<const Key,Value>(k,poly0)).first;
-    listofvar= &*i;
-    }
-    const Polymorphic * p= dynamic_cast<const Polymorphic *>(i->second.second);
-  if ( !p) { 
-    cerr << k << " is not a Polymorphic id " << endl;
-    CompileError();
+  {
+      iterator i= m.find(k);
+      if (i==m.end()) // new
+	{
+	    Value poly0=Value(atype<Polymorphic*>(),new Polymorphic(),listofvar);     
+	    i=m.insert(make_pair<const Key,Value>(k,poly0)).first;
+	    listofvar= &*i;
+	}
+      const Polymorphic * p= dynamic_cast<const Polymorphic *>(i->second.second);
+      if ( !p) { 
+	  if(mpirank==0)
+	      cerr << k << " is not a Polymorphic id " << endl;
+	  CompileError();
+      }
+      p->Add(op,p0,p1,p2,p3,p4,p5,p6);
   }
-  p->Add(op,p0,p1,p2,p3,p4,p5,p6);
-}
 
  ArrayOfaType::ArrayOfaType(const ListOfId * l)
   : n(l->size()),t(new aType[n]),ellipse(false)
@@ -515,6 +523,7 @@ const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
       t[i]=(*l)[i].r;  
        if ( ! t[i])
         {
+	   if(mpirank==0) 
            cerr << " Argument " << i << " '"<< (*l)[i].id << "' without type\n";
            CompileError("DCL routine: Argument without type ");
          }
@@ -544,30 +553,33 @@ bool ArrayOfaType::WithCast( const ArrayOfaType & a,int nbcast) const
  
 void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
   CastFunc f5,CastFunc f6,CastFunc f7,CastFunc f8)
- {
-   CastFunc ff[]={f1,f2,f3,f4,f5,f6,f7,f8,0};
-   for (int i=0;ff[i];i++)
-    {
-      ffassert(this == *ff[i] );
-      if (casting->FindSameR(*ff[i]))
-       {
-         cerr << " The casting to " << *ff[i] << " exists " << endl;
-         cerr << " List of cast " << endl;
-         casting->Show(cerr);
-         CompileError();
-       }
-      if (casting)  *casting += *ff[i];
-      else casting = ff[i];
-/*      
-   if( ! mapofcast.insert(make_pair<const aType,CastFunc>(ff[i]->a,ff[i])).second) 
-     {
-        cerr << " The casting to "<< *this << " from " << ff[i]->a << " exists " << endl;
-        cerr << " List of cast " << endl;
-        for_each(mapofcast.begin(),mapofcast.end(),CerrCast);
-        CompileError();
-     } */
+  {
+      CastFunc ff[]={f1,f2,f3,f4,f5,f6,f7,f8,0};
+      for (int i=0;ff[i];i++)
+	{
+	    ffassert(this == *ff[i] );
+	    if (casting->FindSameR(*ff[i]))
+	      {
+		  if(mpirank==0)
+		    {
+			cerr << " The casting to " << *ff[i] << " exists " << endl;
+			cerr << " List of cast " << endl;
+			casting->Show(cerr);
+		    }
+		  CompileError();
+	      }
+	    if (casting)  *casting += *ff[i];
+	    else casting = ff[i];
+	    /*      
+	     if( ! mapofcast.insert(make_pair<const aType,CastFunc>(ff[i]->a,ff[i])).second) 
+	     {
+	     cerr << " The casting to "<< *this << " from " << ff[i]->a << " exists " << endl;
+	     cerr << " List of cast " << endl;
+	     for_each(mapofcast.begin(),mapofcast.end(),CerrCast);
+	     CompileError();
+	     } */
+	}
   }
-}
 
  ostream & operator<<(ostream & f,const OneOperator & a)     
 {
@@ -903,8 +915,11 @@ void basicAC_F0::SetNameParam(int n,name_and_type *l , Expression * e) const
      else  {
        if(!map_type[l[i].type->name()] )
 	 {
-	   cerr << " missing ff type: '" <<l[i].type->name() << "'   "<< map_type.size()  <<  "\n";
-	   cerr << "i= " << i << "\n";
+	     if(mpirank==0)
+	       {
+		   cerr << " missing ff type: '" <<l[i].type->name() << "'   "<< map_type.size()  <<  "\n";
+		   cerr << "i= " << i << "\n";
+	       }
 	   InternalError(" missing type ");
 	   assert(map_type[l[i].type->name()]);
 	 }
@@ -926,7 +941,7 @@ void basicAC_F0::SetNameParam(int n,name_and_type *l , Expression * e) const
          cout << "\t the parameter is '" << ii->first << "' is unused " << endl;
         L1:;
        }
-    if ( n) {
+    if ( n && mpirank==0) {
     cerr << " The named parameter can be " << endl;
     for (int i=0;i<n;i++)
        cerr << "\t" << l[i].name << " =  <" << l[i].type->name() << ">\n";
@@ -939,11 +954,14 @@ void basicAC_F0::SetNameParam(int n,name_and_type *l , Expression * e) const
 //  change FH to bluid .dll 
 
 void lgerror (const char* s) 
-{
-  cerr << endl;
-  cerr <<" Error line number " << zzzfff->lineno() << ", in file " << zzzfff->filename() 
-       <<", before  token " <<zzzfff->YYText() << endl
-       << s << endl;
-   throw(ErrorCompile(s,zzzfff->lineno(),zzzfff->YYText() ));
-}
+  {
+      if(mpirank==0)
+	{
+	    cerr << endl;
+	    cerr <<" Error line number " << zzzfff->lineno() << ", in file " << zzzfff->filename() 
+	    <<", before  token " <<zzzfff->YYText() << endl
+	    << s << endl;
+	}
+      throw(ErrorCompile(s,zzzfff->lineno(),zzzfff->YYText() ));
+  }
 

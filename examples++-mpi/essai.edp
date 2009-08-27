@@ -8,7 +8,17 @@ if(mpisize>4)
     mpiGroup gpr(procs);
     cout << " before  ...  " << mpirank << endl;
     mpiComm comm(gpr);
-    cout << " after ...  " << mpirank << "  in : " << bool(comm)   << " rank " << mpiRank(comm) << " / " << mpiSize(comm) <<endl;
+    cout << " after ...  " << mpirank << "  in : " << bool(comm)   
+	 << " rank " << mpiRank(comm) << " / " << mpiSize(comm) <<endl;
+    mpiComm  n0comm(mpiCommWorld,mpirank%3,0);// MPI_Comm_split
+    mpiComm  n1comm(mpiCommWorld,mpirank%3,1);// MPI_Comm_split
+    mpiComm  n2comm(mpiCommWorld,mpirank%3,2);// MPI_Comm_split
+    if( ! n1comm)  // not in n1comm 
+      {
+	// MPI_Intercomm_create constructor 
+	mpiComm  nicomm(processor(n1comm,1),processor(n2comm,2),1000); 
+	mpiComm  n12comm(nicomm,true);  // MPI_Intercomm_merge cosntructor 
+      }
   }
 
 if ( mpirank<2 && mpisize>=2)
