@@ -841,8 +841,7 @@ class ForEachType<fMPI_Request>:  public basicForEachType{public:// correction j
 fMPI_Group* def_group( fMPI_Group* const & a,fMPI_Comm * const &comm, KN_<long>  const & b)
 {
   MPI_Group group;
-  MPI_Comm comm=*comm;;
-  MPI_Comm_group(comm,& group); 
+  MPI_Comm_group(*comm,& group); 
   KN<int> ranks(b);
   MPI_Group_incl(group, ranks.N(),(int *) ranks, *a);
   MPI_Group_free(&group) ;
