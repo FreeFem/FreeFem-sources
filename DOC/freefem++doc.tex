@@ -14,7 +14,7 @@
 
 
 \usepackage{times}
-\def\VERSION{3.4-2}
+\def\VERSION{3.5}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -6915,7 +6915,7 @@ then \ttCC{sa$_i$} and \ttCC{sb$_i$}
 give two common abscissa on the two boundary curve, and two points are identified as one
 if the two abscissa are equal.
 
-In 2d case, a pair of periodic boundary condition, \label{periodic BC}
+In 2d case, a pair of periodic boundary condition,% \label{periodic BC}
 if \ttCC{[la$_i$,sa$_i$,ta$_i$],[lb$_i$,sb$_i$,tb$_i$]} is a pair of
 \texttt{int}, the 2 labels \ttCC{la$_i$} and \ttCC{lb$_i$}
 define the 2 piece of boundary to be in equivalence; 
@@ -9444,7 +9444,7 @@ try { //  a way to build one time the mesh an read if the file exist.
 catch(...) { buildTh=1;}
 @if( buildTh ){
   ...
- put the code \ref{cube-ballon} example  page // \pageref{cube-ballon}
+ put the code  example  page // \ref{cube-ballon}\pageref{cube-ballon}
   without the first line 
  }
 
@@ -12943,21 +12943,148 @@ while the weak BVP formulation acquires the form
 
 
 
-\section{Parallel version experimental}
+\section{\texttt{MPI} Parallel version }
 A first attempt of parallelization of \texttt{FreeFem++} is made here with {\bf\texttt{mpi}}.
-We add 4 words in the language:
-\begin{description}
-\itemtt[mpisize] The total number of  processes\index{mpisize}
-\itemtt[mpirank]  the number of my current process in $\{0,..., mpisize-1\}$.\index{mpirank}
-\itemtt [processor] a function to set the possessor to send or receive data
-\itemtt [broadcast] a function to broadcast from a processor to all other a data \index{broadcast}\index{processor}
-\bFF
-    processor(10) << a ; // send to the process 10 the data a;
-    processor(10) >> a ; // receive from the process 10 the data a;
+We add  big interface with MPI in version 3.5,  (see MPI doc for the definition functionality at \url{http://www.mpi-forum.org/docs/mpi21-report.pdf}) 
+ in the language:
 
-\eFF
+
+\subsection{\texttt{MPI}  keywords}\index{mpiGroup},\index{mpiCom},\index{mpiRequest}
+\begin{description}
+\itemtt[mpiGroup] to defined a group of processor in communication world
+\itemtt[mpiCom] to defined a  communication world
+\itemtt[mpiRequest] to defined a  request of wait the end of the communication
 \end{description}
-\subsection{Schwarz in parallel}
+
+\subsection{\texttt{MPI} constants}
+\begin{description}
+\itemtt[mpisize] The total number of  processes\index{mpisize},
+\itemtt[mpirank]  the number of my current process in $\{0,..., mpisize-1\}$,\index{mpirank}
+\itemtt[mpirank]  the number of my current process in $\{0,..., mpisize-1\}$,
+\itemtt[mpiUndefined]  The \verb!MPI_Undefined! constant,\index{mpiUndefined}
+\itemtt[mpiAnySource]  The \verb!MPI_ANY_SOURCE! constant,\index{mpiAnySource}
+\itemtt[mpiCommWorld]  The \verb!MPI_COMM_WORLD! constant ,\index{mpiCommWorld}
+\item[ ... ] All the basic \texttt{MPI\_Op} for reduce operator: \texttt{mpiMAX,mpiMIN,mpiSUM,mpiPROD,
+           mpiLAND},\hfill \texttt{mpiLOR},\texttt{mpiLXOR,mpiBAND,mpiBXOR}.
+           \index{mpiMAX}\index{mpiMIN}\index{mpiSUM}\index{mpiPROD}
+           \index{mpiLAND}\index{mpiLOR}\index{mpiLXOR}\index{mpiBXOR}
+\end{description}
+
+\medskip
+\subsection{\texttt{MPI} Constructor}
+\bFF
+   @int[@int] proc1=[1,2,3],proc2=[0,4];
+   @mpiGroup grp(procs); // set \texttt{MPI\_Group} to proc 1,2,3 in \texttt{MPI\_COMM\_WORLD} 
+   @mpiGroup grp1(comm,proc1); // set \texttt{MPI\_Group} to proc 1,2,3 in comm 
+   @mpiGroup grp2(grp,proc2); // set \texttt{MPI\_Group} to  grp union proc1 
+   
+
+   @mpiComm  comm=mpiCommWorld; //  set a \texttt{MPI\_Comm} to \texttt{MPI\_COMM\_WORLD}
+   @mpiComm  ncomm(mpiCommWorld,grp); // set the \texttt{MPI\_Comm} form grp
+    // \texttt{MPI\_COMM\_WORLD} 
+   @mpiComm  ncomm(comm,color,key); // \verb!MPI_Comm_split(MPI_Comm comm,!
+   // \verb! int color, int key, MPI_Comm *ncomm)!
+   @mpiComm  nicomm(processor(local_comm,local_leader),
+                    processor(peer_comm,peer_leader),tag); 
+ // build \verb! MPI_INTERCOMM_CREATE(local_comm, local_leader, peer_comm,!
+ // \verb! remote_leader, tag, &nicomm)!
+   @mpiComm  ncomm(intercomm,hight) ; // build using  
+   // \verb!MPI_Intercomm_merge( intercomm, high, &ncomm)! 
+
+    
+   @mpiRequest rq; // defined  an \verb!MPI_Request!
+   @mpiRequest[@int] arq(10); // defined an array of 10 \verb!MPI_Request!
+   
+\eFF
+
+\subsection{\texttt{MPI} functions}
+\bFF
+   @mpiSize(comm) ; // return the size of comm (int)\index{mpiSize}
+   @mpiRank(comm) ; // return the rank  in comm (int)\index{mpiRank}
+   
+   @processor(i) // return  processor  i with no Resquest in \verb!MPI_COMM_WORLD!
+   @processor(mpiAnySource) // return processor \texttt{any source} \index{processor} 
+   // with no Resquest in \verb!MPI_COMM_WORLD!
+   @processor(i,comm) // return processor i with  no Resquest in comm 
+   @processor(comm,i) // return processor i with  no Resquest in comm 
+   @processor(i,rq,comm) // return  processor i with Resquest rq  in comm 
+   @processor(i,rq) // return  processor i with Resquest rq in 
+   // \verb!MPI_COMM_WORLD!
+
+   @processorblock(i) // return  processor i  in \verb!MPI_COMM_WORLD! \index{processorblock}
+   // in block mode for synchronously communication
+   @processorblock(mpiAnySource) // return processor  \texttt{any source} 
+   // in \verb!MPI_COMM_WORLD!  in block mode for synchronously communication
+   @processorblock(i,comm) // return processor i in in comm  in block mode 
+
+    
+   @mpiBarrier(comm) ; // do a  \texttt{MPI\_Barrier} on communicator \texttt{comm}, \index{mpiBarrier}
+   @mpiWait(rq); // wait on of Request, \index{mpiWait}
+   @mpiWaitAll(arq); // wait add of Request array,\index{mpiWait}
+   
+   @mpiWtime() ; //  return MPIWtime in second (real),\index{mpiWtime}
+   @mpiWtick() ; // return MPIWTick in second (real),\index{mpiWtick}
+     
+\eFF
+where  a \texttt{processor} is just  a integer rank, pointer to  a \verb!MPI_comm! and pointer to a \verb!MPI_Request!,
+and \texttt{processorblock} with a special \verb!MPI_Request!.
+
+\subsection{\texttt{MPI} communicator  operator}
+
+\bFF
+   @int status;// to get the MPI status of send / recv
+   @processor(10) << a << b; // send a,b asynchronously to the process 1, 
+   @processor(10) >> a >> b;//receive a,b synchronously from the process 10,
+   @broadcast(processor(10,comm),a); // broadcast from processor 
+   // of com  to other comm processor
+   status=@Send( processor(10,comm) , a);// send synchronously\index{Send}
+   //to the process 10 the data a 
+   status=@Recv( processor(10,comm) , a);// receive synchronously \index{Secv}
+   // from the process 10 the data a;
+   status=@Isend( processor(10,comm) , a);// send asynchronously to\index{Isend}
+    //  the process 10 , the data a without request
+   status=@Isend( processor(10,rq,comm) , a) ; // send asynchronously to to
+//  the process 10, the data a with request
+   status=@Irecv( processor(10,rq) , a) ; // receive synchronously from \index{Irecv}
+ // the process 10, the data a;
+   \textRed status=Irecv( processor(10) , a) ; \textBlack // Error
+// Error asynchronously without request .
+   
+@broadcast(@processor(comm,a)); //  Broadcast to all process of \texttt{comm}
+    
+\eFF    
+  where the data type of \texttt{a} can be of type of \texttt{int},\texttt{real}, \texttt{complex}, \texttt{int[int]}, \texttt{double[int]}, \hfill\break\texttt{complex[int]}, \texttt{int[int,int]}, \texttt{double[int,int]},\texttt{complex[int,int]}
+  and for  communication with no request the type can be also
+     \texttt{mesh},\texttt{mesh3},\texttt{mesh[int]},\texttt{mesh3[int]},\texttt{matrix},\texttt{matrix<complex} 
+     because in this case  the communication are multiple (header + data).
+
+\bFF     
+    processor(10,rq) << a ; // send asynchronously to the process 10 
+    // the data a  with request 
+    processor(10,rq) >> a ; // receive asynchronously  from the process 10 
+    //the data a with request
+\eFF
+
+ If  \verb!a,b! are arrays or full matrices of int, real, or complex, we can 
+ use the following MPI functions:\index{mpiAlltoall}\index{mpiAllgather}\index{mpiGather}\index{mpiScatter}\index{mpiReduce}
+ \index{mpiAllReduce} \index{mpiReduceScatter}
+\bFF    
+    @mpiAlltoall(a,b[,comm]) ;
+    @mpiAllgather(a,b[,comm]) ;
+    @mpiGather(a,b,@processor(..) ) ;
+    @mpiScatter(a,b,@processor(..)) ;
+    @mpiReduce(a,b,@processor(..),mpiMax) ;
+    @mpiAllReduce(a,b,comm,mpiMax) ;
+    @mpiReduceScatter(a,b,comm,mpiMax) ;
+\eFF
+
+See the
+  \texttt{examples++-mpi/essai.edp} to test of all this functionality and
+Thank, to Guy Antoine Atenekeng Kahou, for the help of coding this interface. 
+
+
+
+\subsection{Schwarz example in parallel}
 This example is just the rewritting of example \texttt{schwarz-overlap}
 in section \ref{schwarz-overlap}.\index{schwarz}\index{broadcast}\index{processor}
 \index{array!mesh}
@@ -13059,7 +13186,7 @@ Vhother U=0;
  \def\need#1{\hfill{\it  requiert le champ\,:\,#1}}
 
 \subsection{File mesh data structure}
-\index{file!data base}\index{file!bamg}
+\index{file!data base}\index{file!bamg} \label{meshformatfile.mesh}
 The mesh data structure, output of a mesh generation algorithm,
 refers to the geometric data structure and in some case to another
 mesh data structure.
