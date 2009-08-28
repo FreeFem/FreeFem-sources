@@ -1,9 +1,10 @@
 v 3.5 (27 aug. 2009)
-  Complet writing to MPI interface , see chapter 10, page 229, of
-  the freefem++doc.pdf  and see example++-mpi/essai.edp.    
+  Complet writing to MPI interface, tested with Open MPI 1.2.3 and mpich 2.1 
+      see chapter 10, page 229, of  the freefem++doc.pdf  and 
+      see example++-mpi/essai.edp.    
 
   correct 
-  	  operator  a(:)= 1:4; // before change a copy of a and so do nothing
+      operator  a(:)= 1:4; // before change a copy of a and so do nothing
       string[string] s; 
       s[i]; // before trap (two delete) 
 v 3.4-2
