@@ -2,8 +2,8 @@ How to compile FreeFem++ on Microsoft Windows
 ---------------------------------------------
 
 1) Download and install Cygwin from http://www.cygwin.com. Make sure
-that the development tools Automake, Autoconf and GNU C++ , C , g77 are
-installed.
+that the development tools Automake, Autoconf and GNU C++ , C , g77,
+OPENGL, GLUT  are installed.
 
 2) Download and extract the FreeFem++ source archive from
 http://www.freefem.org
