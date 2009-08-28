@@ -226,7 +226,7 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 TESTS = @EIGENTEST@
-TESTS_ENVIRONMENT = PROGLOC=$(top_srcdir)/src REGEDP=all.edp		\
+TESTS_ENVIRONMENT = PROGLOC=$(top_srcdir)/src REGEDP=testeigen.edp		\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
 	VISUALCHECK=$(VISUALCHECK)

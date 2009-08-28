@@ -20,7 +20,6 @@ F. Hecht.
 
 
 For debian, ubuntu, MacOS, Windows  see the the prerequisite
-------------------------------------------------------------
 
 installed packages before configuration and compilatation.
 
@@ -30,12 +29,30 @@ a standard installation, please refer to the file named "INSTALL".
 annd see the end of this file to have some 
 configure example:
 
+Full version 3d need automatic download option
+----------------------------------
+For a Full 3d  version , some external piece of software
+can by usefull, the simplest wait is to add "--enable-download"
+to the "./configure" (need of  "wget" or "curl" unix  command). 
+The download archive are store in : 
+download/pkg/SuiteSparse-2.4.0.tar.gz  # umpack 
+download/pkg/arpack96.tar.gz           # arpack
+download/pkg/f2c.tar                   # f2c if no fortran 77
+download/pkg/fftw-3.2.1.tar.gz         # fft
+download/pkg/patch.tar.gz              # arpack
+download/pkg/superlu_3.1.tar.gz        # superlu
+download/pkg/tetgen1.4.2.tar.gz        # tetgen
+download/blas/cblas.tgz                # blas 
+if you have not internet access juste copie this files at the same  place.
+
+
 Debugging and optimization
 --------------------------
 
 Without any option, "./configure" selects the best optimization
 options for the local machine. To produce optimized binaries that can
 be ported to other machines, add the option "--enable-generic".
+
 
 To produce FreeFem++ programs containing debugging symbols and no
 optimization, use "--enable-debug".
@@ -60,7 +77,7 @@ Other useful configuration variables include:
 
 Linear algebra libraries and eigen value problem
 -----------------------------------------------
-By default, "./configure" looks for the X11, BLAS, ARPACK and UMFPACK
+By default, "./configure" looks for the X11, BLAS, ARPACK and UMFPACK, OpenGL, GLUT
 libraries on the local system.
 ARPACK is use to compute eigenvalue.
 and UMFPACK is a new fast sparse linear solver.
@@ -84,6 +101,7 @@ a not to bad version is
 ./configure --enable-generic_blas
 
 
+
 and reconfigure for example: 
 ./configure --enable-generic_blas 
 
@@ -97,11 +115,9 @@ support them):
 * FreeFem++-nw: without graphics (located in src/nw)
 
 * FreeFem++: graphics based on OpenGL (located in src/nw)
-
 * ffglut: the graphic tools
 
 * FreeFem++-mpi: parallel version, without graphics (located in src/mpi)
-
 
 The compilation procedure (produced with automake) builds all the
 libraries and executables sequentially. Running "make" in a
@@ -118,6 +134,8 @@ Developers of FreeFem++ can rebuild the configuration system using
 Automake and Autoconf with the command:
 
 > autoreconf
+# to reconfigure with the same parameter 
+> ./reconfigure 
 
 Extra utilities
 ---------------
@@ -154,7 +172,7 @@ warning under  Window XP,  first install the cygwin environnent (see http://www.
 
 to execute the examples try  
   under window xp
- ../FreeFem++-nw loadwin32.edp 
+ FreeFem++-nw  load.edp 
   or otherwise 
  ../src/nw/FreeFem++-nw load.edp
 
@@ -190,12 +208,9 @@ Bien: On a fini Normalement
 Note 1: if this does not work, please check the manual page of dlopen
 for your system.
 
-Note 2: on MacOSX, link problems occur because of some incompatibility
-between RTTI, templates and the apple c++ version (2.95.2). But this
-is now working with the new g++3 compiler (default compiler in MacOs
-10.2) and also with g++-3.3.
 
-Note 3. Fast fourier exemple ( FFT )  is in dfft.edp  file
+Note 2. Fast fourier exemple ( FFT )  is in dfft.edp  file
+need of fftw3 
 
 
 Some configure flags use to build the current version
@@ -212,6 +227,8 @@ Some configure flags use to build the current version
   patch
   wget
   freeglut3-dev
+ - bluid the parallel version
+   openmpi-dev openmpi
 
  - to rebuild de documentation:  
   imagemagick 
@@ -237,12 +254,17 @@ Some configure flags use to build the current version
     freeglut3 freeglut3-dev
     libx11-dev  libxt-dev  libxext-dev 
     libglut3-dev	
+ - bluid the parallel version
+    openmpi-dev openmpi
  - to rebuild de documentation:  
-  imagemagick 
-  tetex-base   tetex-bin  tetex-extra 
+    imagemagick 
+    tetex-base   tetex-bin  tetex-extra 
+ 
 
-
- ./configure 
+ ./configure --enable-download  --with-mpi=mpic++
+#  utility of parameter:
+#  --enable-download :  for fft and tetgen ... 
+#  --with-mpi=mpic++ : for mpi version 
   make 
   make check    (to test de version)
   make install  (under root)
@@ -255,6 +277,7 @@ the following rpm:
 blas-3.0-20 gcc-3.2.3-53 tetex-1.0.7-67.9 lapack-3.0-20 ImageMagick-5.5.6-15 wget-1.10.2-0.30E curl-7.10.6-7.rhel3
 are install
 ./configure  '--enable-download' '--with-blas=-lblas -llapack'
+
 
 * Under MacOs: (2008)
 -------------
