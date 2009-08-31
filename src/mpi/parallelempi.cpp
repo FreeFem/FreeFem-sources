@@ -46,7 +46,8 @@ using namespace std;
 // Remark on mipich  MPI_Comm, MPI_Resquest, MPI_Group, MPI_Op are int 
 //  => encapsulation
 
-template<class MPI_type>
+
+template<class MPI_type,int DIFF>
 struct fMPI { 
   MPI_type v; 
   operator  MPI_type &() {return v;}
@@ -63,10 +64,10 @@ struct fMPI {
 
 // the encapsulation for the for MPI type  (int on mpich )
 
-typedef fMPI<MPI_Comm> fMPI_Comm;
-typedef fMPI<MPI_Group> fMPI_Group;
-typedef fMPI<MPI_Request> fMPI_Request;
-typedef fMPI<MPI_Op> fMPI_Op;
+typedef fMPI<MPI_Comm,1> fMPI_Comm;
+typedef fMPI<MPI_Group,2> fMPI_Group;
+typedef fMPI<MPI_Request,3> fMPI_Request;
+typedef fMPI<MPI_Op,4> fMPI_Op;
 
 
 
@@ -711,12 +712,11 @@ struct Op_Reducescatter  : public   quad_function<KN_<R>,KN_<R>,fMPI_Comm,fMPI_O
 };*/
 
 template<class R>
-struct Op_Reduce1  : public   quad_function<R*,R*,MPIrank,long,long> {
-  static long  f(Stack, R*  const  & s, R*  const  &r,  MPIrank const & root,long const &op)  
+struct Op_Reduce1  : public   quad_function<R*,R*,MPIrank,fMPI_Op,long> {
+  static long  f(Stack, R*  const  & s, R*  const  &r,  MPIrank const & root, fMPI_Op const &op)  
   { 
     int chunk = 1;
-    MPI_Op oop = reinterpret_cast<MPI_Op> (op);
-    return MPI_Reduce( (void *) (R*) s,(void *) (R*) r, chunk , MPI_TYPE<R>::TYPE(),oop,root.who,root.comm);	
+    return MPI_Reduce( (void *) (R*) s,(void *) (R*) r, chunk , MPI_TYPE<R>::TYPE(),op,root.who,root.comm);	
   }
 };
 
