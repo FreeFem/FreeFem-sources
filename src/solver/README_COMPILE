@@ -14,6 +14,7 @@ General pre-requirements :
 These different elements are defined in the configure step of the compilation FreeFem++. Therefore, it must be same for the following solver. For computation, it is important to have an optimized BLAS. 
 Among optimized BLAS can be cited ATLAS (Automatically Tuned Linear Algebra Software) http://math-atlas.sourceforge.net/ (BSD licence), GotoBLAS  http://www.tacc.utexas.edu/resources/software/ (UT TACC Research license). These library can be used free under their license limitation. For GotoBLAS, the software and documentation can be used without any charge for academic, research, experimental or personal use. For commercial use, it is required to purchase a license. For more details, please see the UT TACC Research license  http://svn.pardus.org.tr/uludag/trunk/pisi/licenses/tacc.
 
+Remark: In Mac OSX, a problem occur in calling the Blas function CDOTC, CDOTU, ZDOTC, ZDOTU with veclib in Fortran (see http://developper.apple.com/hardwaredrivers/ve/errata.html). A patch for the library veclib is given in the directory PATCHVECLIB.
 
 A) Sparse Direct Solver
 
