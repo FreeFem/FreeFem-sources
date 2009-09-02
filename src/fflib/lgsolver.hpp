@@ -26,6 +26,8 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "gmres.hpp"
+typedef void *    pcommworld;
+
 namespace  Fem2D {
 
 // hack ---  F. Hecht -----
@@ -39,6 +41,7 @@ namespace  Fem2D {
 // Une class qui tranforme une matrice complex en matric real
 
 // et faire de transformateur de vecteur
+
 
 inline KN_<double> C2R(KN_<complex<double> > & vc)
 
@@ -497,6 +500,7 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
 	ret=new SolveGCDiag<R>(*A,ds.itmax,ds.epsilon);    
     return ret;
 }
+
     
 #define LIST_NAME_PARM_MAT \
     {  "init", &typeid(bool)}, \
@@ -518,9 +522,11 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
     { "permc", &typeid(KN_<long>)}, \
     { "scaler", &typeid(KN_<double>)}, \
     { "scalec", &typeid(KN_<double>)}, \
-    { "sparams", &typeid(string*)}  // Add J.Morice 
+    { "sparams", &typeid(string*)}, \
+    { "commworld", &typeid(pcommworld)} \
 
-const int NB_NAME_PARM_MAT =  20 ;
+
+const int NB_NAME_PARM_MAT =  21  ;
     
 /*
  {  "init", &typeid(bool)},
@@ -571,6 +577,7 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
 	if (nargs[++kk]) ds.scale_r = GetAny<KN_<double> >((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.scale_c = GetAny<KN_<double> >((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.sparams = *GetAny<string*>((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.commworld = GetAny<pcommworld>((*nargs[kk])(stack));
   /* de datafilename a scalec */
 /*	
 	if (nargs[++kk]) ds.param_int= GetAny< KN<int> >((*nargs[kk+12])(stack));  // Add J. Morice 02/09 

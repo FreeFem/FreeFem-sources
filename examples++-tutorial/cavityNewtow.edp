@@ -1,10 +1,18 @@
+/*
+  Incompressible Navier Stokes 
+    with Taylor-Hood Finite element
+    No linearity : Newton methode 
+    continuation on Reynols Number
+    Mesh adaptation 
+*/
+real  reymax = 1600; // ok < 125000 
 mesh Th=square(8,8);
 fespace Xh(Th,P2);
 fespace Mh(Th,P1);
 fespace XXMh(Th,[P2,P2,P1]);
 XXMh [u1,u2,p];
 XXMh [v1,v2,q]; 
-//Mh p,q;
+
 macro div(u1,u2) (dx(u1)+dy(u2))//
 macro grad(u1,u2) [dx(u1),dy(u2)]//
 macro ugrad(u1,u2,v) (u1*dx(v)+u2*dy(v)) //
@@ -18,6 +26,7 @@ solve Stokes ([u1,u2,p],[v1,v2,q],solver=UMFPACK) =
            )
   + on(3,u1=4*x*(1-x),u2=0) 
   + on(1,2,4,u1=0,u2=0);
+
  Xh uu1=u1,uu2=u2;  
 plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[uu1,uu2],wait=1);
 
@@ -76,41 +85,42 @@ varf   vNS ([u1,u2,p],[v1,v2,q]) =
             + pp*q*(0.000001) 
             + pp*dx(v1)+ pp*dy(v2)
             + dx(up1)*q+ dy(up2)*q
-            + Ugrad(up1,up2,up1,up2)'*[v1,v2]
-           )
+            + Ugrad(up1,up2,up1,up2)'*[v1,v2]//'
+	      )
   + on(1,2,3,4,u1=0,u2=0) 
-;
+  ;
 
-for(real re=100;re<25000;re *=2)
-{ 
-
-real lerr=0.04;
-
-if(re>8000) lerr=0.01;
-if(re>10000) lerr=0.005; 
-for(int step=0;step<2;step++)
-{
-     Th=adaptmesh(Th,[u1,u2],p,err=lerr,nbvx=100000);
-     //plot(Th,wait=0);
-     [u1,u2,p]=[u1,u2,p];
-     [up1,up2,pp]=[up1,up2,pp];
-	
-for (i=0;i<=20;i++)
- { nu =1./re;
-   up1[]=u1[];
-    real[int] b = vNS(0,XXMh);
-   matrix Ans=vDNS(XXMh,XXMh);
-   set(Ans,solver=UMFPACK);
-   real[int] w = Ans^-1*b;
-   u1[] -= w;
-   cout << " iter = "<< i << "  " << w.l2 <<  " rey = " << re << endl;
-    if(w.l2<1e-6) break; 
-   // uu1=u1;uu2=u2;
-    //plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[uu1,uu2]);  
+for(real re=100;re<=reymax;re *=2)
+  { 
     
- } ;
-}
- uu1=u1;uu2=u2;
- streamlines;
-  plot(coef=0.2,cmm="rey="+re+" [u1,u2] et p  ",psi,[uu1,uu2],wait=0,nbiso=20,ps="cavity-"+re+".ps");  
-}
+    real lerr=0.04;
+    
+    if(re>8000) lerr=0.01;
+    if(re>10000) lerr=0.005; 
+    for(int step=0;step<2;step++)
+      {
+	Th=adaptmesh(Th,[u1,u2],p,err=lerr,nbvx=100000);
+	//plot(Th,wait=0);
+	[u1,u2,p]=[u1,u2,p];
+	[up1,up2,pp]=[up1,up2,pp];
+	
+	for (i=0;i<=20;i++)
+	  {
+	    nu =1./re;
+	    up1[]=u1[];
+	    real[int] b = vNS(0,XXMh);
+	    matrix Ans=vDNS(XXMh,XXMh);
+	    set(Ans,solver=UMFPACK);
+	    real[int] w = Ans^-1*b;
+	    u1[] -= w;
+	    cout << " iter = "<< i << "  " << w.l2 <<  " rey = " << re << endl;
+	    if(w.l2<1e-6) break; 
+	    // uu1=u1;uu2=u2;
+	    //plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[uu1,uu2]);  
+	    
+	  } ;
+      }
+    uu1=u1;uu2=u2;
+    streamlines;
+    plot(coef=0.2,cmm="rey="+re+" [u1,u2] et p  ",psi,[uu1,uu2],wait=0,nbiso=20,ps="cavity-"+re+".ps");  
+  }

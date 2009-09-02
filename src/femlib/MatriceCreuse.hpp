@@ -816,6 +816,7 @@ struct TypeSolveMat {
 // add FH , JM  avril 2009 
 template<class K,class V> class MyMap;
 class String; 
+typedef void *    pcommworld; // to get the pointeur to the comm word ... in mpi 
 
 struct Data_Sparse_Solver {
   bool initmat;
@@ -840,6 +841,7 @@ struct Data_Sparse_Solver {
   KN<double> scale_r; 
   KN<double> scale_c; 
   string sparams;  
+  pcommworld commworld;  // pointeur sur le commworld
  /*   
   int *param_int;
   double *param_double;
@@ -868,7 +870,7 @@ struct Data_Sparse_Solver {
     itmax(0),
  //   lparams(0,0),
  //   dparams(0,0),
-    smap(0) 
+    smap(0) ,
 //    perm_r(0,0),
 //    perm_c(0,0),
 //    scale_r(0,0),
@@ -885,7 +887,8 @@ struct Data_Sparse_Solver {
     file_param_perm_r(0),
     file_param_perm_c(0),
      */
- 
+    //sparams, 
+    commworld(0)
     {}
 private:
     Data_Sparse_Solver(const Data_Sparse_Solver& ); // pas de copie 

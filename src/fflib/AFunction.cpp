@@ -696,6 +696,13 @@ istream *Getline(istream * f, string ** s)
 }
 // Fin Add ne marche pas ....
 // fiun avril 2007
+//  Hack to Bypass a bug in freefem FH  ... 
+template<> 
+class ForEachType<void *>:  public basicForEachType{public:// correction july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...) 
+    ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(void *),sizeof(void *),0,0,iv,id,OOnReturn) { }
+};
+// end Hack 
+
 void Init_map_type()
 {
    TheOperators=new Polymorphic(), 
@@ -709,6 +716,7 @@ void Init_map_type()
     Dcl_TypeandPtr<long>(0);
     Dcl_TypeandPtr<bool>(0);
     Dcl_TypeandPtr<Complex>(0);
+    Dcl_Type<void*>(); // add FH ...  for mpi comm world
     Dcl_Type<char*>();
     Dcl_Type<const char *>();
     Dcl_Type<char>();

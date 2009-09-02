@@ -152,7 +152,7 @@ class SolveSuperLUmpi :   public MatriceMorse<R>::VirtualSolver, public SuperLUm
 
 
   int matrixdist; // type of distributed matrix
-
+  MPI_Comm commworld ;
   static const int assembled =0;
   static const int distributedglobal =1;
   static const int distributed =2;
@@ -160,12 +160,12 @@ class SolveSuperLUmpi :   public MatriceMorse<R>::VirtualSolver, public SuperLUm
 public:
   SolveSuperLUmpi(const MatriceMorse<R> &AA,int strategy,double ttgv, double epsilon=1e-6,
 		  double pivot=-1.,double pivot_sym=-1., string datafile,
-		  string param_char, KN<long> &pperm_r, KN<long> &pperm_c) : 
+		  string param_char, KN<long> &pperm_r, KN<long> &pperm_c,void * ccommworld=0) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),string_option(param_char),data_option(datafile),
     tol_pivot_sym(pivot_sym),tol_pivot(pivot)
   { 
-    
+    commworld = ccommworld ? *static_cast<MPI_Comm*>( ccommworld) : MPI_COMM_WORLD;    
     R*      B;
     //R*      X;
     SuperLUStat_t stat;
@@ -214,8 +214,8 @@ public:
      /* ------------------------------------------------------------
 	 INITIALIZE THE SUPERLU PROCESS GRID. 
 	 ------------------------------------------------------------*/
-    cout << "superlu_gridinit" <<endl;
-    superlu_gridinit(MPI::COMM_WORLD, nprow, npcol, &grid);
+    cout << "Real superlu_gridinit" << " " << commworld << " " << ccommworld <<endl;
+    superlu_gridinit(commworld, nprow, npcol, &grid);
     
     /* Bail out if I do not belong in the grid. */
     iam = grid.iam;
@@ -246,7 +246,7 @@ public:
 	    //dCompRow_to_CompCol_dist(m,n,nnz,arow,asubrow,xarow,&a,&asub,&xa);
 	    
 	    dCompRow_to_CompCol_dist(m,n,nnz,AA.a,AA.cl,AA.lg,&a,&asub,&xa);
-	  
+	    
 	    /* Broadcast matrix A to the other PEs. */
 	    MPI_Bcast( &m,   1,   mpi_int_t,  0, grid.comm );
 	    MPI_Bcast( &n,   1,   mpi_int_t,  0, grid.comm );
@@ -288,7 +288,7 @@ public:
 	  
 	  if(verbosity)
 	    printf("Dimension %dx%d; # nonzeros %d\n", A.nrow, A.ncol, nnz);
-
+	  
 	 
 // 	  /* set the default options */
 // 	  set_default_options_dist(&options);
@@ -347,7 +347,7 @@ public:
 	else if( matrixdist == distributedglobal) {
 	   if(!iam){
 
-	     printf("\tProcess grid\t%d X %d\n", grid.nprow, grid.npcol);
+	     printf("\tProcess grid\t%d X %d iam=%d \n", grid.nprow, grid.npcol,iam);
 	
 	     /* create the matrix for superlu_dist */
 	     n=AA.n;
@@ -373,7 +373,7 @@ public:
 	   }
 	   else{
 	     
-	     printf("\tProcess grid\t%d X %d\n", grid.nprow, grid.npcol);
+	     printf("\tProcess grid\t%d X %d iam=%d \n", grid.nprow, grid.npcol,iam);
 	     /* Receive matrix A from PE 0. */
 	     MPI_Bcast( &m,   1,   mpi_int_t,  0, grid.comm );
 	     MPI_Bcast( &n,   1,   mpi_int_t,  0, grid.comm );
@@ -712,7 +712,7 @@ public:
 	exit(1);
       }
     }
-    printf("superlu_gridexit(&grid), %d\n",iam);
+    printf("Real superlu_gridexit(&grid), %d\n",iam);
     superlu_gridexit(&grid); 
   }
   void addMatMul(const KN_<R> & x, KN_<R> & Ax) const 
@@ -732,7 +732,7 @@ BuildSolverSuperLUmpi(DCL_ARG_SPARSE_SOLVER(double,A))
     if(verbosity>9)
     cout << " BuildSolverSuperLUmpi<double>" << endl;
     return new SolveSuperLUmpi<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym,
-				       ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c);
+				       ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c, ds.commworld);
 }
 
 

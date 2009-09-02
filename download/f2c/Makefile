@@ -30,7 +30,7 @@ compile-10.5:f2c Makefile-MacOs
 	cd f2c/libf2c; make -f ../../Makefile-MacOs OS=10.5
 
 
-install:  ../lib ../include ../bin ../bin/fort77
+install:  ../lib ../include ../bin ../bin/fort77 ../bin/mpifort77
 	cp f2c/src/f2c ../bin
 	cp f2c/src/f2c.h ../include
 	cp f2c/libf2c/libf2c.a ../lib
@@ -43,7 +43,7 @@ install-10.4: compile-10.4
 install-10.5: compile-10.5
 	sudo make install-sudo
 	make install
-install-sudo: $(DIRINSTALL)/bin/fort77
+install-sudo: $(DIRINSTALL)/bin/fort77 $(DIRINSTALL)/bin/mpifort77
 	mkdir -p $(DIRINSTALL)/bin $(DIRINSTALL)/include $(DIRINSTALL)/lib
 	cp f2c/src/f2c $(DIRINSTALL)/bin; 
 	cp f2c/src/f2c.h $(DIRINSTALL)/include; 
@@ -60,10 +60,24 @@ install-sudo: $(DIRINSTALL)/bin/fort77
          -e "s;@LLIBDIR@;-L$$dd/lib;g" \
          -e "s;@f2c@;$$dd/bin/f2c;g"  < fort77.sed >../bin/fort77
 	chmod a+x ../bin/fort77
+../bin/mpifort77: fort77.sed Makefile
+	dd="`pwd`/.." ; \
+	sed -e "s;@CC@;mpicc;"g \
+	-e "s;@INC@;-I$$dd/include;g" \
+         -e "s;@LLIBDIR@;-L$$dd/lib;g" \
+         -e "s;@f2c@;$$dd/bin/f2c;g"  < fort77.sed >../bin/fort77
+	chmod a+x ../bin/fort77
 
 $(DIRINSTALL)/bin/fort77: fort77.sed Makefile
 	dd="$(DIRINSTALL)/" ; \
 	sed -e "s;@CC@;$(CC);"g \
+	-e "s;@INC@;-I$$dd/include;g" \
+         -e "s;@LLIBDIR@;-L$$dd/lib;g" \
+         -e "s;@f2c@;$$dd/bin/f2c;g"  < fort77.sed >$(DIRINSTALL)/bin/fort77
+	chmod a+x $(DIRINSTALL)/bin/fort77
+$(DIRINSTALL)/bin/mpifort77: fort77.sed Makefile
+	dd="$(DIRINSTALL)/" ; \
+	sed -e "s;@CC@;mpicc;"g \
 	-e "s;@INC@;-I$$dd/include;g" \
          -e "s;@LLIBDIR@;-L$$dd/lib;g" \
          -e "s;@f2c@;$$dd/bin/f2c;g"  < fort77.sed >$(DIRINSTALL)/bin/fort77
