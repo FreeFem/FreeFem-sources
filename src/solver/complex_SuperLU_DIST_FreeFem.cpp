@@ -178,6 +178,7 @@ class ZSolveSuperLUmpi :   public MatriceMorse<R>::VirtualSolver, public SuperLU
 
 
   int matrixdist; // type of distributed matrix
+  MPI_Comm commworld ;
 
   static const int assembled =0;
   static const int distributedglobal =1;
@@ -186,11 +187,12 @@ class ZSolveSuperLUmpi :   public MatriceMorse<R>::VirtualSolver, public SuperLU
 public:
   ZSolveSuperLUmpi(const MatriceMorse<R> &AA,int strategy,double ttgv, double epsilon=1e-6,
 		  double pivot=-1.,double pivot_sym=-1., string datafile,
-		  string param_char, KN<long> &pperm_r, KN<long> &pperm_c) : 
+		   string param_char, KN<long> &pperm_r, KN<long> &pperm_c, void * ccommworld=0 ) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),string_option(param_char),data_option(datafile),
     tol_pivot_sym(pivot_sym),tol_pivot(pivot)
   { 
+    commworld = ccommworld ? *static_cast<MPI_Comm*>( ccommworld) : MPI_COMM_WORLD;    
     
     R*      B;
     //R*      X;
@@ -237,9 +239,9 @@ public:
      /* ------------------------------------------------------------
 	 INITIALIZE THE SUPERLU PROCESS GRID. 
 	 ------------------------------------------------------------*/
-    cout << "superlu_gridinit" <<endl;
-    superlu_gridinit(MPI::COMM_WORLD, nprow, npcol, &grid);
-    
+    cout << "Complex superlu_gridinit " << commworld << " "<< ccommworld << " : "  << nprow << "X" <<  npcol <<endl;
+    superlu_gridinit(commworld , nprow, npcol, &grid);
+    cout << " --\n";
     /* Bail out if I do not belong in the grid. */
     iam = grid.iam;
     if ( iam >= nprow * npcol ){
@@ -395,7 +397,8 @@ public:
 	     
 	     
 	   }
-	   else{
+	   else
+	     {
 	     
 	     printf("\tProcess grid\t%d X %d\n", grid.nprow, grid.npcol);
 	     /* Receive matrix A from PE 0. */

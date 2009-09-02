@@ -5,11 +5,11 @@
 #########################################################
 
 # frefem++ variables
-FREEFEM_DIR     = /Users/morice/work/postdoc/freefem++debug/
+FREEFEM_DIR     = $(HOME)/work/freefem++/
 FREEFEM_INCLUDE = -I$(FREEFEM_DIR)examples++-load/include/ 
 
 # directory of the different package
-SOFT_DIR =  /Users/morice/librairie/
+SOFT_DIR =  $(HOME)/work/LinearSolver/
 
 #==========
 #   BLAS

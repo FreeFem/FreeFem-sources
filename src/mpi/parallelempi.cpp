@@ -981,6 +981,7 @@ bool toBool(fMPI_Comm *comm)
 {
   return (comm && (*comm !=MPI_COMM_NULL)); 
 }
+void * topVoid(fMPI_Comm *comm) {    return comm; }
 
 template<typename T>
 class Quad_Op : public E_F0 {
@@ -1044,7 +1045,9 @@ void init_lgparallele()
     map_type[typeid(fMPI_Group).name()]->AddCast(new E_F1_funcT<fMPI_Group,fMPI_Group*>(UnRef<fMPI_Group>));
     map_type[typeid(fMPI_Comm).name()]->AddCast(new E_F1_funcT<fMPI_Comm,fMPI_Comm*>(UnRef<fMPI_Comm>));
     map_type[typeid(bool).name()]->AddCast(new OneOperator1<bool,fMPI_Comm*>(toBool));
-       
+    map_type[typeid(void*).name()]->AddCast(new OneOperator1<void *,fMPI_Comm*>(topVoid));
+      
+      
     TheOperators->Add("<-", 
 		      new OneOperator2_<MPIrank*,MPIrank*,MPIrank>(&set_copympi));
     

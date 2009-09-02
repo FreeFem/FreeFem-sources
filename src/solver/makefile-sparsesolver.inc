@@ -37,24 +37,24 @@
 #    Compiler 
 ###################
 # C compiler
-CC    = gcc-4.4 
-MPICC = /Users/morice/librairie/openmpi/bin/mpicc --prefix /Users/morice/librairie/openmpi/
+CC    = gcc 
+MPICC = mpicc
 
 # C++ compiler
-CXX    = g++4.4
-MPICXX = /Users/morice/librairie/openmpi/bin/mpicxx --prefix /Users/morice/librairie/openmpi/
+CXX    = g++
+MPICXX = mpicxx 
 
 # Fortran compiler
-FC     = f90
-MPIFC  = /Users/morice/librairie/openmpi/bin/mpif90 --prefix /Users/morice/librairie/openmpi/
+FC     = fort77
+MPIFC  = mpicc #mpifort77 #/Users/morice/librairie/openmpi/bin/mpif90 --prefix /Users/morice/librairie/openmpi/
 FC_LIB = 
 
 # Linker
 MPILD = 
 
 # directory of include file for mpi
-MPI_INCLUDE = -I/Users/morice/librairie/openmpi/include/
-MPI_LIB     = -L/Users/morice/librairie/openmpi/lib/ -lmpi -lmpi_cxx -lmpi_f77 -lmpi_f90 -lopen-rte -lopen-pal
+MPI_INCLUDE = #-I/Users/morice/librairie/openmpi/include/
+MPI_LIB     = -L/usr/local/lib -lf2c # -lmpi -lmpi_cxx -lmpi_f77 -lmpi_f90 -lopen-rte -lopen-pal
 
 ###############
 #   FLAGS
@@ -84,17 +84,21 @@ SUF      =  dylib
 #########################################################
 
 # frefem++ variables
-FREEFEM_DIR     = /Users/morice/work/postdoc/freefem++debug/
+#FREEFEM_DIR     = /Users/morice/work/postdoc/freefem++debug/
+#FREEFEM_INCLUDE = -I$(FREEFEM_DIR)examples++-load/include/ 
+
+FREEFEM_DIR     = $(HOME)/work/freefem++/
 FREEFEM_INCLUDE = -I$(FREEFEM_DIR)examples++-load/include/ 
 
 # directory of the different package
-SOFT_DIR =  /Users/morice/librairie/
+#SOFT_DIR =  /Users/morice/librairie/
+SOFT_DIR =  $(HOME)/work/LinearSolver/
 
 #==========
 #   BLAS
 #==========
 BLAS_INCLUDE = 
-BLAS_LIB     = -L$(SOFT_DIR)PATCHVECLIB/ -lwrapperdotblas  -framework veclib
+BLAS_LIB     = -L$(SOFT_DIR)PATCHVECLIB/ wrapper_dotblas.o  -framework veclib
 
 #============
 #  BLACS : this library is need by MUMPS 
@@ -268,11 +272,12 @@ MUMPS_OTHER_LIB     = -L/usr/lib/gcc/i686-apple-darwin9/4.2.1/ -lgfortran
 #    Variables needs by SuperLU_DIST
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # directory of superlu_dist
-SLUDIST_DIR = /Users/morice/librairie/SuperLU_DIST_2.3/
+SLUDIST_DIR = $(SOFT_DIR)/SuperLU_DIST_2.3/
+#/Users/morice/librairie/SuperLU_DIST_2.3/
 # include file of superlu_dist
 SLUDIST_INCLUDE = -I$(SLUDIST_DIR)SRC/ 
 # librairie of superlu_dist
-SLUDIST_LIB = -L$(SLUDIST_DIR)lib/ -lsuperlu_dist_2.3
+SLUDIST_LIB = -L$(SLUDIST_DIR)../lib/ -lsuperlu_dist_2.3
 
 # other compiler option for SuperLU (see value of CFLAGS in SECTION 1)
 SLUDIST_CFLAGS        = 

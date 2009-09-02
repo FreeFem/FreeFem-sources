@@ -296,8 +296,8 @@ void drawisoTet(const R3 K[4],R f[4],R v)
     }
 
   //  verification de l'orientation
-  assert(nP < 3 || det(P[0],P[1],P[2],K[np[0]]) >=0)   ;
-  assert(nP < 3 || det(P[0],P[1],P[2],K[nm[0]]) <=0)   ;
+ // assert(nP < 3 || det(P[0],P[1],P[2],K[np[0]]) >=0)   ;
+ // assert(nP < 3 || det(P[0],P[1],P[2],K[nm[0]]) <=0)   ;
   
 }
 
@@ -556,13 +556,18 @@ void OnePlotFE3::Draw(OneWindow *win)
       glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     else
       glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-    
+    bool  change=false;
+    if( (what==6) ) 
+      {
+	change = win->changeiso ;
+      }
+      
     if(what==6)
       glEnable(GL_DEPTH_TEST);
     else 
       glEnable(GL_DEPTH_TEST);
     win->setLighting();
-    if(oklist[0])
+    if(oklist[0] && !change)
       glCallList(gllists+0);
     else
       { 
