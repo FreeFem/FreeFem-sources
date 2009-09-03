@@ -1,3 +1,8 @@
+//   for automatic  compilation with ff-c++
+//ff-c++-LIBRARY-dep:   superlu
+//ff-c++-cpp-dep: 
+//  
+
 #include  <iostream>
 using namespace std;
 
