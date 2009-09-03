@@ -157,6 +157,8 @@ class SolveSuperLUmpi :   public MatriceMorse<R>::VirtualSolver, public SuperLUm
   static const int distributedglobal =1;
   static const int distributed =2;
 
+  int iam;
+
 public:
   SolveSuperLUmpi(const MatriceMorse<R> &AA,int strategy,double ttgv, double epsilon=1e-6,
 		  double pivot=-1.,double pivot_sym=-1., string datafile,
@@ -173,7 +175,7 @@ public:
     int            i;
     double*        berr;
     
-    int iam;
+    //int iam;
     // Add for distributed matrix
     int_t         m_loc, m_loc_fst, fst_row, nnz_loc, fst_nnz;
     R             *aloc;
@@ -187,6 +189,8 @@ public:
     long int starttime,finishtime;
     long int timeused;
 
+    // rajout debug
+    int myid;
     if(verbosity) starttime = clock();
 
 
@@ -198,33 +202,32 @@ public:
     nprow = 1;
     npcol = 1;
     matrixdist=0;
-    /* set the default options */
-    set_default_options_dist(&options);
-    DiagScale_t optionDiagScale;
     
-    //if(verbosity > 10) print_options_dist(&options);
-
+    
+    if(!data_option.empty()) read_nprow_npcol_matrixdist_superlu_datafile(&data_option, &nprow, &npcol, &matrixdist);
     if(!string_option.empty()) read_nprow_npcol_freefem( &string_option, &nprow, &npcol, &matrixdist);
-    if(!string_option.empty()) read_options_freefem(&string_option,&options,&optionDiagScale);
-
-    if(!data_option.empty()) read_options_superlu_datafile(&data_option,&options,&nprow, &npcol, &matrixdist,&optionDiagScale);
-
-    //if(verbosity > 10) print_options_dist(&options);
     
      /* ------------------------------------------------------------
 	 INITIALIZE THE SUPERLU PROCESS GRID. 
 	 ------------------------------------------------------------*/
+
     cout << "Real superlu_gridinit" << " " << commworld << " " << ccommworld <<endl;
     superlu_gridinit(commworld, nprow, npcol, &grid);
-    
+
     /* Bail out if I do not belong in the grid. */
     iam = grid.iam;
-    if ( iam >= nprow * npcol ){
-      //superlu_gridexit(&grid);
+    if ( iam >= nprow * npcol ){      
       printf("this process is not used in superlu %d \n",iam);
     }
     else
       {
+	/* set the default options */
+	set_default_options_dist(&options);
+	DiagScale_t optionDiagScale;
+
+	if(!string_option.empty()) read_options_freefem(&string_option,&options,&optionDiagScale);	
+	if(!data_option.empty()) read_options_superlu_datafile(&data_option,&options,&nprow, &npcol, &matrixdist,&optionDiagScale);
+
 	// matrix to procs and vectors
 	if( matrixdist == assembled ){
 	  
@@ -288,12 +291,7 @@ public:
 	  
 	  if(verbosity)
 	    printf("Dimension %dx%d; # nonzeros %d\n", A.nrow, A.ncol, nnz);
-	  
-	 
-// 	  /* set the default options */
-// 	  set_default_options_dist(&options);
-// 	  DiagScale_t optionDiagScale;
-// 	  if(!string_option.empty()) read_options_freefem(&string_option,&options,&optionDiagScale);
+
 	  
 	  /* Initialize ScalePermstruct and LUstruct. */
 	  ScalePermstructInit(m, n, &ScalePermstruct);
@@ -446,9 +444,9 @@ public:
 	     printf("Dimension %dx%d; # nonzeros %d\n", A.nrow, A.ncol, nnz);
 	   
 	   /* set the default options */
-	   set_default_options_dist(&options);
-	   DiagScale_t optionDiagScale;
-	   if(!string_option.empty()) read_options_freefem(&string_option,&options,&optionDiagScale);
+	   //set_default_options_dist(&options);
+	   //DiagScale_t optionDiagScale;
+	   //if(!string_option.empty()) read_options_freefem(&string_option,&options,&optionDiagScale);
 	   	   
 	   m=A.nrow;
 	   n=A.ncol;
@@ -515,7 +513,7 @@ public:
   void Solver(const MatriceMorse<R> &AA,KN_<R> &x,const KN_<R> &b) const  {
     R*        B;
     SuperLUStat_t  stat;
-    int            iam;
+    //int            iam;
     int            info=0, ldb=m, nrhs=1;
     int            i;
     double*        berr;
@@ -527,22 +525,24 @@ public:
     long int starttime,finishtime;
     long int timeused;
 
-    if(verbosity) starttime = clock();
-
-    if(n != m) exit(1);
-
-    ffassert ( &x[0] != &b[0]);
-    epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
-
-    Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
-    nrhs= 1;
-    
-     
-    /* Initialize the statistics variables. */
-    PStatInit(&stat);
-
-    iam = grid.iam;
     if( iam < nprow*npcol){
+
+      if(verbosity) starttime = clock();
+      
+      if(n != m) exit(1);
+      
+      ffassert ( &x[0] != &b[0]);
+      epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+      
+      Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
+      nrhs= 1;
+      
+
+  
+      //iam = grid.iam;
+      //if( iam < nprow*npcol){
+      /* Initialize the statistics variables. */
+      PStatInit(&stat);
       /* cas matrix assembled */ 
       if( matrixdist == assembled ){
 	
@@ -581,7 +581,7 @@ public:
       }
       else if( matrixdist == distributedglobal) {
 	double*    xtemp;
-	iam = grid.iam;
+	//iam = grid.iam;
 	/* Compute the number of rows to be distributed to local process */
 	m_loc = m / (grid.nprow * grid.npcol); 
 	m_loc_fst = m_loc;
@@ -672,11 +672,12 @@ public:
 	printf("=====================================================\n");
       }
     }
+    
   }
     
   ~SolveSuperLUmpi() { 
-    int iam;
-    iam = grid.iam;
+    //int iam;
+    //iam = grid.iam;
     if(iam < nprow*npcol){
       if(verbosity)
 	cout << "~SolveSuperLUmpi double:" << endl;
@@ -693,7 +694,7 @@ public:
 	}
       }
       else if( matrixdist == distributedglobal) {
-	if( A.Store)  Destroy_CompRowLoc_Matrix_dist(&A);
+	Destroy_CompRowLoc_Matrix_dist(&A);
 	
 	Destroy_LU(n, &grid, &LUstruct);
 	ScalePermstructFree(&ScalePermstruct);
@@ -714,6 +715,7 @@ public:
     }
     printf("Real superlu_gridexit(&grid), %d\n",iam);
     superlu_gridexit(&grid); 
+    
   }
   void addMatMul(const KN_<R> & x, KN_<R> & Ax) const 
   {  

@@ -456,8 +456,8 @@ public:
 	   
 	   Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
 	   
-	   cout << "Debut: Create_CompRowCol_Matrix_dist" <<endl;
-	   Create_CompRowLoc_Matrix_dist(&A, m, n, nnz_loc, m_loc, fst_row, aloc, asubloc, xaloc, SLU_NR_loc, R_SLU, SLU_GE);
+	   if(verbosity) cout << "Debut: Create_CompRowCol_Matrix_dist" <<endl;
+	   if(verbosity) Create_CompRowLoc_Matrix_dist(&A, m, n, nnz_loc, m_loc, fst_row, aloc, asubloc, xaloc, SLU_NR_loc, R_SLU, SLU_GE);
 	   
 	   cout << "Fin: Create_CompRowCol_Matrix_dist" <<endl;
 	   /* creation of pseudo solution + second member */
@@ -560,28 +560,30 @@ public:
     // time variables
     long int starttime,finishtime;
     long int timeused;
-    if(verbosity) starttime = clock();
-
-    if(n != m) exit(1);
-
-    ffassert ( &x[0] != &b[0]);
-    epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
-
-    Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
-    nrhs= 1;
-    
-     
-    /* Initialize the statistics variables. */
-    PStatInit(&stat);
 
     iam = grid.iam;
     if( iam < nprow*npcol){
+
+      if(verbosity) starttime = clock();
+
+      if(n != m) exit(1);
+      
+      ffassert ( &x[0] != &b[0]);
+      epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+      
+      Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
+      nrhs= 1;
+      
+      
+      /* Initialize the statistics variables. */
+      PStatInit(&stat);
+      
       /* cas matrix assembled */ 
       if( matrixdist == assembled ){
-	
-	if( !(B = new R[m*nrhs] ) ){
-	  printf("probleme d allocation\n");
-	  exit(1);
+      
+      if( !(B = new R[m*nrhs] ) ){
+	printf("probleme d allocation\n");
+	exit(1);
 	}
 	
 	for(int ii=0; ii<n; ii++){
