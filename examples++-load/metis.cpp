@@ -1,3 +1,7 @@
+//   for automatic  compilation with ff-c++
+//ff-c++-LIBRARY-dep:   metis
+//ff-c++-cpp-dep: 
+//  
 //   tools to read ppm file 
 /*  use in freefem++ edp
   see :

@@ -7,9 +7,9 @@ Ph  part;
 metisnodal(nupart,Th,10);
 for(int i=0;i<nupart.n;++i)
   part[][i]=nupart[i];
-plot(part,fill=1);
+plot(part,fill=1,cmm="nodal",wait=1);
 
 metisdual(nupart,Th,10);
 for(int i=0;i<nupart.n;++i)
   part[][i]=nupart[i];
-plot(part,fill=1);
+plot(part,fill=1,cmm="dual",wait=1);

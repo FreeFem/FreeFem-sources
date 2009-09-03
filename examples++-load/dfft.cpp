@@ -1,6 +1,11 @@
-// Example C++ function "myfunction", dynamically loaded into "load.edp"
+// Example C++ function "myfunction", dynamically loaded into "ff-c++ dfft.cpp "
 // ---------------------------------------------------------------------
 // $Id$
+
+//   for automatic  compilation with ff-c++
+//ff-c++-LIBRARY-dep:   fftw3 
+//ff-c++-cpp-dep: 
+//  
 
 #include  <iostream>
 #include  <cfloat>

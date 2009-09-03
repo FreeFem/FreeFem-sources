@@ -7,6 +7,10 @@
 // AUTHOR   : Jacques Morice
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
+//   for automatic  compilation with ff-c++
+//ff-c++-LIBRARY-dep:   tetgen 
+//ff-c++-cpp-dep: 
+//  
 
 /* 
  This file is part of Freefem++
