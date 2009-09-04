@@ -483,6 +483,15 @@ public:
   int gibbsv (long* ptvoi,long* vois,long* lvois,long* w,long* v);
   int ElementAdj(int it,int &j) const 
       {int i=TheAdjacencesLink[3*it+j];j=i%3;return i/3;}
+  int BorderElementAdj(int i, int j) const 
+      {
+	// be: border index, i and j index of vertex of be, i index of common vertex
+	int p2;
+	for (int p=BoundaryAdjacencesHead[i];p>=0;p=BoundaryAdjacencesLink[p])
+	  { 
+	    if ( !bedges[p2=p/2].in(vertices+j) )   return p2;
+	  }
+      } // Add J. Morice
   int nTonEdge(int it,int e) const { int k=3*it+e;return k==TheAdjacencesLink[k] ? 1 : 2;}
       
   void VerticesNumberOfEdge(const Triangle & T,int j,int & j0,int & j1) const 
@@ -520,6 +529,17 @@ public:
      }
      
     return 0;}
+
+  int NumberOfTheBoundaryEdge(int i,int j)  const
+   {  
+    int p2;
+    for (int p=BoundaryAdjacencesHead[i];p>=0;p=BoundaryAdjacencesLink[p])
+     { 
+     if ( bedges[p2=p/2].in(vertices+j) )   return p2;
+     }
+     
+    return -1;}// Add J. Morice
+
  void destroy() {RefCounter::destroy();}
  void MakeQuadTree() ;
       
