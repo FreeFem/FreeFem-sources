@@ -15,15 +15,19 @@ DIRPKG=../pkg
 ARPACK96_TAR_GZ=$(DIRPKG)/arpack96.tar.gz
 PATCH_TAR_GZ=$(DIRPKG)/patch.tar.gz
 
-arpack: $(ARPACKLIB)
+arpack: $(ARPACKLIB) 
 
 $(ARPACKLIB): ARPACK/fait
 	if [ -n '@FF_LAPACKdir@' ] ; then \
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
 	fi; \
 	cd ARPACK && make lib 
-	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o
-	-if test -n '@FF_LAPACKdir@' ; then 	$(AR) $(ARFLAGS) $(LAPACKLIB)  ARPACK/LAPACK/*.o ; fi
+	if test -n '@FF_LAPACKdir@' ; then \
+	$(AR) $(ARFLAGS) $(LAPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ARPACK/LAPACK/*.o ;\
+	else \
+	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o \
+	fi
+
 
 
 ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
@@ -61,4 +65,4 @@ $(PATCH_TAR_GZ):
 	cd $(DIRPKG);@WGET@ -N http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz
 
 clean-local:
-	-rm -r ARPACK
+	-rm -r ARPACK 
