@@ -1505,7 +1505,7 @@ map< pair<int,int>, R> *Matrixmapp2mapIJ (map< pair<int,int>, R> *const &  B,con
     for (int j=0;j<M;++j)
 	if(jj[j]>=0)
 	    J.insert(make_pair(jj[j],j));
-    int n=0,m=0;
+    int n=N-1,m=M-1;// change FH  sep 2009 to have the correct size..
 
     for (It k=B->begin();k!=B->end();++k)
     {
@@ -2227,8 +2227,6 @@ void  init_lgmat()
 
 {
   
-  //  new OneOperator1<Transpose<KN_<long> >,KN<long> *>(&Build<Transpose<KN_<long> >,KN<long> *>),
-  //  new OneOperator1<Transpose<KN_<long> >,KN_<long> >(&Build<Transpose<KN_<long> >,KN_<long> >)       
   Dcl_Type<const  MatrixInterpolation::Op *>(); 
 
   map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<double*>())]=atype<Matrice_Creuse<double> *>();
@@ -2249,19 +2247,15 @@ void  init_lgmat()
  Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
     
  Dcl_Type< Resize<Matrice_Creuse<double> > > ();
+    
  Add<Matrice_Creuse<double> *>("resize",".",new OneOperator1< Resize<Matrice_Creuse<double>  >,Matrice_Creuse<double> *>(to_Resize));
- Add<Resize<Matrice_Creuse<double> > >("(","",new OneOperator3_<Matrice_Creuse<double>  *,Resize<Matrice_Creuse<double>  > , long, long  >(resize2));   
- // Global.New("HaveUMFPACK",new OneOperator0<bool>(Have_UMFPACK));
- //Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetDefaultSolver));
- /*  
-#ifdef HAVE_LIBUMFPACK
- Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));
- // Global.New("HaveUMFPACK",CConstant<bool>(true)); 
-#else
- Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetGMRES));
- // Global.New("HaveUMFPACK",CConstant<bool>(false)); 
-#endif
- */
+ Add<Resize<Matrice_Creuse<double> > >("(","",new OneOperator3_<Matrice_Creuse<double>  *,Resize<Matrice_Creuse<double>  > , long, long  >(resize2)); 
+    // add missing in
+ Dcl_Type< Resize<Matrice_Creuse<Complex> > > ();
+ Add<Matrice_Creuse<Complex> *>("resize",".",new OneOperator1< Resize<Matrice_Creuse<Complex>  >,Matrice_Creuse<Complex> *>(to_Resize));
+ Add<Resize<Matrice_Creuse<Complex> > >("(","",new OneOperator3_<Matrice_Creuse<Complex>  *,Resize<Matrice_Creuse<Complex>  > , long, long  >(resize2));   
+    
+
  Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefaultSolver));
  
  // pour compatibiliter 

@@ -2618,7 +2618,7 @@ void Check(const Opera &Op,int N,int  M)
     bool Aii = A && A->n == A->m;
     int Nbcomp=Vh.N;
     Check(bc,Nbcomp);
-    assert(Vh.N == Uh.N);
+    ffassert(Vh.N == Uh.N);
     TabFuncArg tabexp(stack,Vh.N);
     KN<double> buf(Vh.MaximalNbOfDF()*last_operatortype*Vh.N);
     KN<R> gg(buf);
