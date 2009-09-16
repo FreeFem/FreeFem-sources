@@ -701,6 +701,7 @@ void discretisation_max_mesh(const int choix,  const Mesh & Th2, int & Nmax){
   int Ni;
 
   Nmax = 0;  
+
   /*for(int ii=0; ii < A2D.NbSommet2D;ii++){
     Ni   = Ni_func( choix, A2D.CoorSommet2D[ii][0], A2D.CoorSommet2D[ii][1]); 
   	Nmax = max(Ni,Nmax);
@@ -850,11 +851,12 @@ Mesh3 * build_layer (const Mesh & Th2, const int Nmax, const int *tab_Ni,
 			maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin, *Th3);    
     
 //  Add FH because remove in call function.. 
-   Th3->BuildBound();
-   Th3->BuildAdj();
-   Th3->Buildbnormalv();  
-   Th3->BuildjElementConteningVertex();
-    
+  
+  Th3->BuildBound();
+  Th3->BuildAdj();
+  Th3->Buildbnormalv();  
+  Th3->BuildjElementConteningVertex();
+  
     
   return Th3;
 }
@@ -1189,7 +1191,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	break;
       case 3:
 	int idl;
-
 	// determination de la diagonale Max
 	DiagMax1 = max( tab_NumSommet[i_ind1]+i_recoll_1pp, tab_NumSommet[i_ind2]+i_recoll_2 );
 	DiagMax2 = max( tab_NumSommet[i_ind2]+i_recoll_2pp, tab_NumSommet[i_ind1]+i_recoll_1 );	
@@ -2454,6 +2455,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
     assert(nbflip==0 || nbflip== Th3->nbe);
     if(flagsurfaceall==1) Th3->BuildBoundaryElementAdj();
     Add2StackOfPtr2FreeRC(stack,Th3);
+   
     return Th3;
   }
   
@@ -4246,7 +4248,20 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
       ni[i]=Max(0,Min(nlayer,(int) lrint(nlayer*clayer[i])));
     }
  
+  // triangle 
+  for (int it=0;it<nbt;++it){
+    const Mesh::Element &K(Th.t(it));
+    int i0 = Th.operator()(K[0]); 
+    int i1 = Th.operator()(K[1]); 
+    int i2 = Th.operator()(K[2]); 
+    
+    if( ni[i0] == 0 && ni[i1] == 0 && ni[i2] == 0 ){
+      cout << "A tetrahedra with null volume will be created with triangle " << it << " of 2D Mesh " << endl;
+      cout << "stop procedure of buildlayer" << endl;
+      exit(1);
+    }
 
+  }
   Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
 
     
@@ -4269,8 +4284,9 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
      // Th3->BuildAdj();
      // Th3->Buildbnormalv();  
      // Th3->BuildjElementConteningVertex();
-      Th3->BuildGTree();
-      //Th3->decrement();  
+      
+      Th3->BuildGTree(); //A decommenter
+
       Add2StackOfPtr2FreeRC(stack,Th3);
       *mp=mps;
       return Th3;
@@ -4309,14 +4325,16 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
       Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh, rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok);
 		  
       
-     // T_Th3->BuildBound();
-    //  T_Th3->BuildAdj();
-     // T_Th3->Buildbnormalv();  
-     // T_Th3->BuildjElementConteningVertex();
-      T_Th3->BuildGTree();
-      //T_Th3->decrement();  
+      // T_Th3->BuildBound();
+      //  T_Th3->BuildAdj();
+      // T_Th3->Buildbnormalv();  
+      // T_Th3->BuildjElementConteningVertex();
+      
+      
+      T_Th3->BuildGTree(); //A decommenter
+      
+ 
       Add2StackOfPtr2FreeRC(stack,T_Th3);
-
       *mp=mps;
       return T_Th3;
 
