@@ -47,5 +47,5 @@ cout << "Vertex, Tet, Triangle " << Tht.nv << " "<< Tht.nt << " " << Tht.nbe << 
 func mv1x = 1+x;
 func mv1y = y;
 func mv1z = z;
-mesh3 Thmvs1 = movemesh3D(Tht, transfo=[mv1x,mv1y,mv1z]);
+mesh3 Thmvs1 = movemesh3(Tht, transfo=[mv1x,mv1y,mv1z]);
 savemesh(Thmvs1,"movemeshglumesh.mesh");
