@@ -1,3 +1,13 @@
+  new tools to simplify to find the freefem++ external library
+  now in each file.cpp you  have the dependence .cp and file library
+  by adding this kind of line in the cpp file:
+//   for automatic  compilation with ff-c++
+//ff-c++-LIBRARY-dep:   xxx 
+//ff-c++-cpp-dep:   yyy.cpp
+
+ command ff-dep-cc
+
+  
   new function add with loading facility 
 -----------------------------------------
 MetricKuate.cpp:  		MetricKuate
