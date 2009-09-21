@@ -1,0 +1,43 @@
+ff=$0;
+bb=`basename $0`
+DIR=`dirname $ff`
+pp=`pwd`
+if [ $bb = $ff -a  \( '.' = "$DIR" -o -z "$DIR" \) ] ;  then
+  ff=`which $0`
+  DIR=`dirname $ff`
+  if [ '.' = "$DIR" -o -z "$DIR" ] ;  then
+     echo Sorry cant find the Directory  place of $0
+  fi
+fi
+case $DIR in 
+/*) ;;
+*)  DIR="$pp/$DIR"
+esac
+if [ -d "$DIR/../download/lib" -a -d "$DIR/../download/include"  ] ; then
+    DIR="$DIR/../download/"
+elif [ -d "$DIR/../lib" -a -d "$DIR/../include"  ] ; then
+    DIR="$DIR/.."
+else
+  DIR=@ff_prefix_dir@
+fi
+
+if [   -d $DIR/lib -a -d $DIR/include  ] ; then
+    LIB="$DIR/lib"
+    INC="$DIR/include"
+    cd "$LIB"
+#  set -x
+    for la in arpack amd fftw3 blas lapack superlu superlu_dist metis parmetis tet; do
+        l=`echo $la |sed -e s/tet/tetgen/p`
+	if [ -z "$l" ];then l="$la";fi  
+	if  ( ls  "lib$la"[-._0-9]*a 1>/dev/null 2>/dev/null ) ; then 
+	    ll=`ls  "lib$la"[-._0-9]*a|grep [.]a`
+	    if [ -n "$ll" ]; then 
+		lib=`expr "$ll" : lib'\(.*\).a'`
+		echo $l LD "'"-L$LIB"'" "'"-l$lib"'"
+		echo $l INCLUDE "'"-I$INC"'"
+	    fi
+	fi
+    done
+else
+    echo error not directory $DIR/lib and $DIR/include 
+fi
