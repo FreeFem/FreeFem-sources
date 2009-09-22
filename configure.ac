@@ -1239,6 +1239,8 @@ then
 	then
 		CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
 	fi
+	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
+
 fi
 AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
 

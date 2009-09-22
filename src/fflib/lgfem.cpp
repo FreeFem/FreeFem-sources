@@ -3593,7 +3593,7 @@ class Op3_pfe2K : public ternary_function<pair<FEbase<K,v_fes> *,int>,R,R,K> { p
 
   class Op : public E_F0mps { public:
     Expression a,b,c;
-    Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {cout << "Op3_pfe2K" << endl;}       
+    Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {/*cout << "Op3_pfe2K" << endl;*/}       
     AnyType operator()(Stack s)  const 
     { 
       R xx(GetAny<R>((*b)(s)));
@@ -3930,43 +3930,41 @@ Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
 
 template<class K,class v_fes>
 class  OneOperator2_FEcomp : public OneOperator {
-//   Add<pferbasearray*>("[","",new OneOperator2_FEcomp<pferbase*,pferbasearray*,long>(get_element));
-typedef FEbase<K,v_fes> * pfekbase ;
+// ///  Add<pferbasearray*>("[","",new OneOperator2_FEcomp<pferbase*,pferbasearray*,long>(get_element)); // not used ...
+//    Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
 typedef FEbaseArray<K,v_fes> * pfekbasearray ;
+typedef pair<pferbase,int> pfek ;
+typedef pair<pferbasearray,int> pfekarray ;
+    
 
-typedef pfekbase * R;
-typedef pfekbasearray * A;
+
+typedef pfek  R;
+typedef pfekarray A;
 typedef long B;
 typedef  E_F_F0F0_<R,A,B,E_F0>  CODE;
-
-
-typedef FEbase<double,v_fes> FE;
-typedef E_FEcomp<R,v_fes> FEi;
-typedef typename FEi::Result FEiR;
-
-typedef FEbase<Complex,v_fes> CFE;
-typedef E_FEcomp<Complex,v_fes> CFEi;
-typedef typename  CFEi::Result CFEiR;
+typedef FEbaseArray<K,v_fes>  CFE;
+typedef  E_FEcomp<K,v_fes,CFE > E_KFEArray;
+typedef  E_FEcomp<K,v_fes > E_KFEi;
 
 
 
-aType r,t0,t1; //  return type  type de f,  f(t1, t2) 
+
+
+aType t0,t1; //  return type  type de f,  f(t1, t2) 
 typedef typename  CODE::func  func;
 func f;
 public: 
 E_F0 * code(const basicAC_F0 & args) const 
-{ return  new CODE(f,t0->CastTo(args[0]),t1->CastTo(args[1]));} 
+{ 
+     const E_KFEArray * afe=dynamic_cast<const E_KFEArray *> (args[0].LeftValue());
+  //  cout << " build xxx  " << afe <<  " " << *args[0].left() <<  endl;
+    afe=0;// E_KFEi n'est pas le bon type on mame le vieux code ?????
+    if(afe)     return new  E_KFEi(C_F0(new CODE(f,t0->CastTo(args[0]),t1->CastTo(args[1])),map_type[typeid(R).name()] ),afe->comp,afe->N);
+    else return new CODE(f,t0->CastTo(args[0]),t1->CastTo(args[1]));
+} 
 OneOperator2_FEcomp(func  ff): 
 OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
 t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
-OneOperator2_FEcomp(int ppref,func  ff): 
-OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
-t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {pref=ppref;}
-
-OneOperator2_FEcomp(func  ff,aType tt0,aType tt1): 
-OneOperator(map_type[typeid(R).name()],tt0,tt1),
-t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
-
 };
 
 
@@ -4626,10 +4624,12 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("dyx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dyx>));
 
  
-  Add<pferbasearray*>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element));
-    //   Add<pferbasearray*>("[","",new OneOperator2_FEcomp<pferbase*,pferbasearray*,long>(get_element));  
-  Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
-  Add<pfecarray>("[","",new OneOperator2_<pfec,pfecarray,long>(get_element));
+ // Add<pferbasearray*>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element)); 
+    //   Add<pferbasearray*>("[","",new OneOperator2_FEcomp<pferbase*,pferbasearray*,long>(get_element));  // not use ???? FH sep. 2009 
+  Add<pferarray>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element));// new version FH sep 2009
+  Add<pfecarray>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element));
+//    Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
+//    Add<pfecarray>("[","",new OneOperator2_<pfec,pfecarray,long>(get_element));
   
  // Add<pmesharray>("[","",new OneOperator2_<pmesh*,pmesharray*,long>(get_element));
 
@@ -4690,7 +4690,7 @@ Expression IsFEcomp(const C_F0 &c,int i)
    {
      const E_FEcomp<K,v_fes> * e= dynamic_cast<const E_FEcomp<K,v_fes>*>(c.LeftValue() );
     if( !e) 
-      {  cerr <<" Fatal error " << c.left()<< endl;
+      {  cerr <<" Fatal error " << *c.left()<< endl;
         ffassert(e);
       }
      if (e->comp !=i) return 0;
@@ -4931,7 +4931,7 @@ C_F0 NewFEarrayT(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 si
      ffassert(n>0);
    if ( fes->nbitem() != (size_t) n) {
       cerr << " the array size must be " << fes->nbitem()  << " not " <<  n << endl;
-      CompileError("Invalide array size  for  vectorial fespace function");
+      CompileError("Invalid array size  for  vectorial fespace function");
    }
    for (int i=0;i<n;i++)
     { 
@@ -4962,7 +4962,7 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
   else if  (dim==3) 
     return NewFEarrayT<v_fes3,3>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
   else
-    CompileError("Invalide vectorial fespace on Rd  ( d != 2 or 3) ");
+    CompileError("Invalid vectorial fespace on Rd  ( d != 2 or 3) ");
 
 }
 C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray,bool cplx,int dim)
