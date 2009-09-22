@@ -52,7 +52,8 @@ clean:
 cxxflags: ../Makefile  Makefile
 	grep 'CXX *=' ../Makefile >cxxflags
 	grep 'CC *=' ../Makefile >>cxxflags
-	grep 'CXXFLAGS *=' ../Makefile >>cxxflags
+#  bug under ubuntu et cygwin si option optime  -O3 .... 
+	grep 'CXXFLAGS *=' ../Makefile | sed s/-O3/-O2/  >>cxxflags
 	grep 'WGET *=' ../Makefile >>cxxflags
 	grep 'AR *=' ../Makefile >>cxxflags
 	grep 'ARFLAGS *=' ../Makefile >>cxxflags

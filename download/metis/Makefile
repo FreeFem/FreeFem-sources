@@ -39,6 +39,7 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)/tags
 
 $(SRCDIR)/tags: $(PACKAGE)
 	tar xvzf $(PACKAGE)
+	patch -p0  <patch-metis
 	mv  $(SRCDIR)/Programs/Makefile $(SRCDIR)/Programs/Makefile-orig
 	sed -e 's;BINDIR = ..;BINDIR = ../$(INSTALL)/bin;' \
             -e 's;../libmetis.a;../$(INSTALL)/lib/libmetis.a;' \

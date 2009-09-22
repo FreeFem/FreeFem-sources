@@ -514,7 +514,7 @@ template<class K>
 class interpolate_f_X_1 : public OneOperator  { public:
  //  to interpolate f o X^{-1} 
     typedef FEbase<K,v_fes> * pferbase ;
-  typedef FEbaseArray<K,v_fes> * pferbasearray ;
+typedef FEbaseArray<K,v_fes> * pferbasearray ;
 typedef pair<pferbase,int> pfer ;
 typedef pair<pferbasearray,int> pferarray ;
   class type {};
