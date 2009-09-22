@@ -1,12 +1,17 @@
 #!/bin/sh
 # Create a loadable object from a C++ function defined in a .cpp file
 # $Id$
+thecommand="$0"
+dircommand=`dirname $0`
+
 FFVERSION='@VERSION@'
 FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@'
 INCFF=
 if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
+if [ -z "$MPICXX" ] ; then MPICXX='@MPICXX@' ; fi
 if [ -z "$F77" ] ; then F77='@F77@' ; fi
 if [ "$CXX" = '@'CXX'@' ] ; then CXX=""; fi
+if [ "$MPICXX" = '@'MPICXX'@' ] ; then MPICXX=""; fi
 if [ "$F77" = '@'F77'@' ] ; then F77=""; fi
 if [ "$FFCXXFLAGS" = '@'CXXFLAGS'@' ] ; then FFCXXFLAGS=""; fi
 if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
@@ -65,13 +70,20 @@ case "$uu" in
     bin=../..
   fi;; 
 esac
+autodep=""
+withmpi=""
+args=""
 
 while [ $# -ne 0 ]  ; do
+    argsp=$args
+    args="$args '$1'"
     case "$1" in
 	-[h?]*) echo usage $0 "[-n] [-g] [-win32] [-l libfile] [-I includedir]  files"
+	    echo "    -auto :  build automaticaly the dependance (in test FH) "
 	    echo "    -n  :  do nothing just print"
 	    echo "    -g  :  compile with -g option"
 	    echo "    -c  : compile only"
+	    echo "    -mpi:  with  mpi"
 	    echo "    -O*  :  compile with -O* option"
 	    echo "    -cygwin: compile for cygwin/win32 OS (Window XP, ...)"
 	    echo "    -win32:  compile for win32 OS (Window XP, ...) default under cygwin"
@@ -85,8 +97,11 @@ while [ $# -ne 0 ]  ; do
 	    ;;
 	F77=*) F77=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	CXX=*) CXX=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	MPICXX=*) MPICXX=`echo $1|sed 's/[A-Z0-9]*=//'`;withmpi=yes ;;
 	F77=*) F77=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	CXXFLAGS=*) CXXFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	-auto) autodep=yes;args=$argsp;;
+	-mpi) withmpi=yes;;
 	-n)  do="no";;
 	-g)  DEBUG="$DEBUG $1";;
 	-c)  CONLY=yes;;
@@ -98,10 +113,10 @@ while [ $# -ne 0 ]  ; do
 	-D*)    INC="$INC '$1'";;
 	-dll)   DLL="$DLL '$2'";shift;;
 	-[Ll]*)    LIBS="$LIBS $1" ;;
-	*.cpp) files="$files '$1'";  o=`basename "$1" .cpp` ; fileso="$fileso '$o.o'";; 
-	*.cp)  files="$files '$1'";  o=`basename "$1" .cp`   ; fileso="$fileso '$o.o'";; 
-	*.cxx) files="$files '$1'";  o=`basename "$1" .cxx` ; fileso="$fileso '$o.o'";;
-	*.c)   files="$files '$1'";  o=`basename "$1" .c` ; fileso="$fileso '$o.o'";;  
+	*.cpp) files="$files '$1'";  o=`basename "$1" .cpp` ; fileso="$fileso '$o.o'"; args=$argsp;; 
+	*.cp)  files="$files '$1'";  o=`basename "$1" .cp`   ; fileso="$fileso '$o.o'"; args=$argsp;; 
+	*.cxx) files="$files '$1'";  o=`basename "$1" .cxx` ; fileso="$fileso '$o.o'"; args=$argsp;;
+	*.c)   files="$files '$1'";  o=`basename "$1" .c` ; fileso="$fileso '$o.o'"; args=$argsp;;  
 	*.f)   ffiles="$ffiles '$1'";  o=`basename "$1" .f` ; fileso="$fileso '$o.o'";; 
 	*.F)   ffiles="$ffiles '$1'";  o=`basename "$1" .F` ; fileso="$fileso '$o.o'";; 
 	*.o)   fileso="$fileso '$1'"; o=`basename "$1" .o` ;; 
@@ -110,6 +125,13 @@ while [ $# -ne 0 ]  ; do
     esac
     shift
 done
+if [ -n "$autodep"  ] ; then
+#    echo "$thecommand" $args  `eval $dircommand/ff-get-dep -ff $files`
+    argsdep=`eval $dircommand/ff-get-dep -ff $files`
+    echo eval "$thecommand" $args  $argsdep
+    eval "$thecommand" $args  $argsdep
+    exit 0;
+fi
 
 if [  -n "$onwin32" -a ! -f "$bin/libff.dll"  ] ; then 
     echo " Error the file libff.dll  must be exist in '$bin' the install directory," 
@@ -121,6 +143,7 @@ fi
 if [ -z "$out" ] ; then  out=$o  ; fi;
 # Default compiler
 if [ -z "$CXX"  ];then  CXX=g++ ; fi
+if [ -n "$withmpi" ]; then  CXX=$MPICXX;fi
 
 INC="$INCFF $INC"  
 SUF=so

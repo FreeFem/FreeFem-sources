@@ -51,6 +51,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX)
 bin_PROGRAMS=
+
 LLSUPERLU=superlu_3.1
 LLTET=tet
 LLFFTW3=fftw3
@@ -82,25 +83,27 @@ compile-pkg:  $(LIST_COMPILE_PKG)
 
 
 .cpp.$(DYLIB_SUFFIX):
-	 ./ff-c++   $< 
+	 ./ff-c++ -auto  $< 
 #glumesh2D.$(DYLIB_SUFFIX): glumesh2D.cpp 
 #	 ./ff-c++   glumesh2D.cpp
 #glumesh3D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh3D.cpp 
 #	 ./ff-c++   TransfoMesh_v2.cpp glumesh3D.cpp
 #buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
 #	 ./ff-c++   TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
-msh3.$(DYLIB_SUFFIX): msh3.cpp
-	 ./ff-c++   msh3.cpp 
+#msh3.$(DYLIB_SUFFIX): msh3.cpp
+#	 ./ff-c++   msh3.cpp 
 lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp
-	 ./ff-c++   bmo.cpp  lgbmo.cpp 
+
+
+#	 ./ff-c++   bmo.cpp  lgbmo.cpp 
 
 # --  
-tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
-	if [ -f "$(FINC_TET)" ] ; then ./ff-c++   $(LK_TET)  tetgen.cpp ; else echo " not $(FINC_TET) file : no tetgen tools "; fi
-SuperLu.$(DYLIB_SUFFIX):
-	if [ -f "$(FINC_SUPERLU)" ] ; then ./ff-c++   $(LK_SUPERLU)  SuperLu.cpp $(BLASLIBS) ; else echo " not $(FINC_SUPERLU)  file : no SuperLU  solver "; fi
-dfft.$(DYLIB_SUFFIX):
-	if [ -f "$(FINC_FFTW3)" ] ; then ./ff-c++   $(LK_FFTW3)  dfft.cpp ; else echo " not $(FINC_FFTW3)  file : no dfft tools  "; fi
+#tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
+#	if [ -f "$(FINC_TET)" ] ; then ./ff-c++   $(LK_TET)  tetgen.cpp ; else echo " not $(FINC_TET) file : no tetgen tools "; fi
+#SuperLu.$(DYLIB_SUFFIX):
+#	if [ -f "$(FINC_SUPERLU)" ] ; then ./ff-c++   $(LK_SUPERLU)  SuperLu.cpp $(BLASLIBS) ; else echo " not $(FINC_SUPERLU)  file : no SuperLu  solver "; fi
+#dfft.$(DYLIB_SUFFIX):
+#	if [ -f "$(FINC_FFTW3)" ] ; then ./ff-c++   $(LK_FFTW3)  dfft.cpp ; else echo " not $(FINC_FFTW3)  file : no dfft tools  "; fi
 
 include: include.tar.gz
 	rm -rf include 
@@ -132,12 +135,23 @@ $(LIST_COMPILE):ff-c++ include Makefile
 clean-local:
 	-rm *.o  $(LIST_COMPILE)  regtests.edp makeref.edp
 	-rm -rf include
-ff-c++:load.link.in  Makefile load.link
+ff-c++:load.link.in  Makefile load.link WHERE_LIBRARY-download ff-get-dep
 	../config.status  --file=ff-c++:load.link.in
 	chmod a+x ff-c++
 load.link:load.link.in  Makefile
 	../config.status  --file=load.link:load.link.in
 	chmod a+x load.link
+ff-pkg-download:ff-pkg-download.in Makefile
+	../config.status  --file=$@:$@.in
+	chmod a+x $@
+	cp $@ ../download/bin
+ff-get-dep:ff-get-dep.in Makefile
+	../config.status  --file=$@:$@.in
+	chmod a+x $@
+	cp $@ ../download/bin
+WHERE_LIBRARY-download:ff-pkg-download 
+	./ff-pkg-download >@$
+	touch WHERE_LIBRARY
 freefem++.pref:
 	echo loadpath = \"./\" >freefem++.pref
 install-exec-local:: load_compile
@@ -150,7 +164,10 @@ install-exec-local:: load_compile
 	echo loadpath += \"$(ff_prefix_dir)/lib\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
 	echo includepath += \"$(ff_prefix_dir)/edp\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
 	$(INSTALL_SCRIPT) ff-c++  $(DESTDIR)${bindir}
-	-$(INSTALL)  -m 555 $(LIST_COMPILE_PKG) $(DESTDIR)$(ff_prefix_dir)/lib
+	$(INSTALL_SCRIPT) ff-pkg-download  $(DESTDIR)${bindir}
+	$(INSTALL_SCRIPT) ff-get-dep  $(DESTDIR)${bindir}
+	-for i in $(LIST_COMPILE_PKG); do \
+	 if [ -f $i ] then ;	$(INSTALL)  -m 555 $i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
 
 
 

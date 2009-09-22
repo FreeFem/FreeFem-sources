@@ -14,7 +14,7 @@ case $DIR in
 *)  DIR="$pp/$DIR"
 esac
 if [ -d "$DIR/../download/lib" -a -d "$DIR/../download/include"  ] ; then
-    DIR="$DIR/../download/"
+    DIR="$DIR/../download"
 elif [ -d "$DIR/../lib" -a -d "$DIR/../include"  ] ; then
     DIR="$DIR/.."
 else
@@ -27,14 +27,18 @@ if [   -d $DIR/lib -a -d $DIR/include  ] ; then
     cd "$LIB"
 #  set -x
     for la in arpack amd fftw3 blas lapack superlu superlu_dist metis parmetis tet; do
-        l=`echo $la |sed -e s/tet/tetgen/p`
+        l=`echo $la |sed -e s/^tet$/tetgen/`
 	if [ -z "$l" ];then l="$la";fi  
 	if  ( ls  "lib$la"[-._0-9]*a 1>/dev/null 2>/dev/null ) ; then 
 	    ll=`ls  "lib$la"[-._0-9]*a|grep [.]a`
 	    if [ -n "$ll" ]; then 
 		lib=`expr "$ll" : lib'\(.*\).a'`
 		echo $l LD "'"-L$LIB"'" "'"-l$lib"'"
-		echo $l INCLUDE "'"-I$INC"'"
+		if [ -d $INC/$la ] ; then
+		    echo $l INCLUDE "'"-I$INC/$la"'"
+		else
+		    echo $l INCLUDE "'"-I$INC"'"
+		fi
 	    fi
 	fi
     done
