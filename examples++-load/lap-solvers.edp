@@ -1,4 +1,4 @@
-load "SuperLU"
+load "SuperLu"
 load "NewSolver"
 verbosity=3;
 //  a example to test the level of optimisation

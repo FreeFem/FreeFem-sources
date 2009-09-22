@@ -25,7 +25,7 @@ $(ARPACKLIB): ARPACK/fait
 	if test -n '@FF_LAPACKdir@' ; then \
 	$(AR) $(ARFLAGS) $(LAPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ARPACK/LAPACK/*.o ;\
 	else \
-	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o \
+	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ;\
 	fi
 
 

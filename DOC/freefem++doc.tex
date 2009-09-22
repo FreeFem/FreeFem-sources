@@ -3954,8 +3954,8 @@ The output is
   C +=  3*cb*cc';
   C -=  5i*cb*cc';
   cout << " C = " << C << endl;
-  // the way to transform a array to a sparse matrix
-  matrix B;
+  // the way to transform a array to a sparse matrix\index{matrix!array}\index{matrix!renumbering}
+  matrix B; 
   B = A; 
   B=A(I,J); // B(i,j)= A(I(i),J(j))
   B=A(I^-1,J^-1);  // B(I(i),J(j))= A(i,j)  
@@ -4018,6 +4018,7 @@ The default solver is \texttt{GMRES}.
 
 \eFF
 \item  To set from a block matrix \index{matrix!block} \index{block matrix}
+ 
 \bFF
     @matrix M=[ 
                [ Asd[0] ,0      ,0      ,0      ,Csd[0] ],
@@ -4050,7 +4051,18 @@ The default solver is \texttt{GMRES}.
    \verb! A=[I,J,C] ;! to change all the term matrix. remark the size of 
    the matrix is with \verb! n= I.max! and \verb!m=J.max!. Remark you forget \verb! I,J ! when the build a
    diagonal matrix, and  $n,m$ of the matrix.
-
+\item matrix renumbering
+\bFF
+  int[int] I(15),J(15); // two arry for renumbering 
+  // 
+// the way to transform a matrix to a sparse matrix\index{matrix!renumbering}
+  matrix B; 
+  B = A; //  copie matrix A
+  B=A(I,J); //  B(i,j) = A(I(i),J(j))
+  B=A(I^-1,J^-1);  // B(I(i),J(j))= A(i,j) 
+  B.resize(10,20); //  resize the sparse matrix \index{matrix!resize} and  remove outbound term
+\eFF
+where $A$ is a given matrix.
 \end{itemize}
 
 \subsubsection{\setS{Matrix Operations}}
@@ -7013,7 +7025,7 @@ types of finite element are: \index{type of finite element}
         \label{eq:RT03d}
      \end{equation}
       where by writing
-      $\textrm{div }\mathbf{w}=\sum_{i=!}^d\p w_i/\p x_i$ with  
+      $\textrm{div }\mathbf{w}=\sum_{i=1}^d\p w_i/\p x_i$ with  
       $ \mathbf{w}=(w_i)_{i=1}^d$,
       $$
       H(\textrm{div})=\left\{\mathbf{w}\in L^{2}(\Omega)^d\left|
@@ -8167,8 +8179,8 @@ plot(u,fill=true,wait=1,ps="thermic.eps");
   
 
 \begin{note} \label{varf param}
- The functions appearing in the variational form are formal; they must be declared but not
- necessarily defined, the only important think in the order in the parameter list, like in
+ The functions appearing in the variational form are formal and local to the \texttt{varf} definition,
+  the only important think in the order in the parameter list, like in
 \bFF
  @varf vb1([u1,u2],q) = @int2d(Th)( (dy(u1)+dy(u2)) *q) + int2d(Th)(1*q); 
  @varf vb2([v1,v2],p) = @int2d(Th)( (dy(v1)+dy(v2)) *p) + int2d(Th)(1*p); 

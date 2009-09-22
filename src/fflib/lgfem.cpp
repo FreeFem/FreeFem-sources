@@ -3926,6 +3926,50 @@ Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
 }
 
 //  end --- call meth be .. 
+//  for ...   vectorial FE array ..
+
+template<class K,class v_fes>
+class  OneOperator2_FEcomp : public OneOperator {
+//   Add<pferbasearray*>("[","",new OneOperator2_FEcomp<pferbase*,pferbasearray*,long>(get_element));
+typedef FEbase<K,v_fes> * pfekbase ;
+typedef FEbaseArray<K,v_fes> * pfekbasearray ;
+
+typedef pfekbase * R;
+typedef pfekbasearray * A;
+typedef long B;
+typedef  E_F_F0F0_<R,A,B,E_F0>  CODE;
+
+
+typedef FEbase<double,v_fes> FE;
+typedef E_FEcomp<R,v_fes> FEi;
+typedef typename FEi::Result FEiR;
+
+typedef FEbase<Complex,v_fes> CFE;
+typedef E_FEcomp<Complex,v_fes> CFEi;
+typedef typename  CFEi::Result CFEiR;
+
+
+
+aType r,t0,t1; //  return type  type de f,  f(t1, t2) 
+typedef typename  CODE::func  func;
+func f;
+public: 
+E_F0 * code(const basicAC_F0 & args) const 
+{ return  new CODE(f,t0->CastTo(args[0]),t1->CastTo(args[1]));} 
+OneOperator2_FEcomp(func  ff): 
+OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
+t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
+OneOperator2_FEcomp(int ppref,func  ff): 
+OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
+t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {pref=ppref;}
+
+OneOperator2_FEcomp(func  ff,aType tt0,aType tt1): 
+OneOperator(map_type[typeid(R).name()],tt0,tt1),
+t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
+
+};
+
+
 void  init_lgfem() 
 {
  // ThePlotStream = new ofstream("ttttt.plot");
@@ -4582,7 +4626,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("dyx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dyx>));
 
  
-  Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));
+  Add<pferbasearray*>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element));
+    //   Add<pferbasearray*>("[","",new OneOperator2_FEcomp<pferbase*,pferbasearray*,long>(get_element));  
   Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
   Add<pfecarray>("[","",new OneOperator2_<pfec,pfecarray,long>(get_element));
   
@@ -4644,7 +4689,10 @@ Expression IsFEcomp(const C_F0 &c,int i)
   if(atype<typename E_FEcomp<K,v_fes>::Result>() == c.left())
    {
      const E_FEcomp<K,v_fes> * e= dynamic_cast<const E_FEcomp<K,v_fes>*>(c.LeftValue() );
-     ffassert(e);
+    if( !e) 
+      {  cerr <<" Fatal error " << c.left()<< endl;
+        ffassert(e);
+      }
      if (e->comp !=i) return 0;
      else return e->a0;
    }
