@@ -10,7 +10,7 @@
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.5,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.5-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
@@ -24,6 +24,8 @@ AC_PROG_RANLIB
 # Makefiles
 
 AM_MAINTAINER_MODE
+
+echo >config_LIB_INFO
 
 # Necessary compilers
 AC_PROG_CXX
@@ -115,6 +117,7 @@ then
   AC_TRY_LINK_FUNC(exit,ff_err=,ff_err=ok);
   if test "$ff_err" = "ok" ; then  AC_MSG_ERROR([ Fatal FLIBS: $FLIBS is incorrect. ],1); fi
   LIBS="$ff_libs"
+  echo "F77 LD $ff_libs" >config_LIB_INFO
 fi
 
 AC_ARG_ENABLE(c,[  --disable-c		No C compiler available (C BLAS need it)])
@@ -577,6 +580,7 @@ ff_mpi=no)
 
 	if test "$ff_mpi" = yes;
 	then
+	  echo "MPI CC $ff_mpi" >config_LIB_INFO
 
 		# We do not AC_DEFINE any special flag for parallel
 		# computation here, because it must only be set when the
@@ -725,6 +729,9 @@ do
    if test "$ff_fftw_ok" = yes  -a "$ff_fftw_h" = yes 
     then
       AC_DEFINE(HAVE_FFTW,1, fftw is compute fft)
+    echo "fftw3 LD $LDFLAGS" >config_LIB_INFO
+    echo "fftw3 INCLUDE $CPPFLAGS" >config_LIB_INFO
+
    else
        LIBS="$ff_libs_old"
        LDFLAGS="$ff_ldflags_old"

@@ -6,7 +6,7 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
 	VISUALCHECK=$(VISUALCHECK)
-EXTRA_DIST=load.link.in  include.tar.gz \
+EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  BernadiRaugel.cpp Morley.cpp dfft.cpp  \
  funcTemplate.cpp mat_dervieux.cpp mat_psi.cpp myfunction.cpp \
  mat_dervieux.cpp convect_dervieux.edp funcTemplate.cpp AFunction_ext.hpp \
@@ -35,7 +35,7 @@ EXTRA_DIST=load.link.in  include.tar.gz \
   bmo.cpp lgbmo.cpp bmo.hpp \
  fflapack.cpp	lapack.cpp	lapack.edp \
  fig.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp \
- DxWriter.cpp 
+ DxWriter.cpp  metis.cpp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \

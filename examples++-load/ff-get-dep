@@ -3,8 +3,8 @@
 wherelib=WHERE_LIBRARY
 if [   -f "$wherelib" ] ; then
     wherelib=WHERE_LIBRARY
-elif [ -f '/usr/local/lib/ff++/3.5/WHERE_LIBRARY' ] ; then
-    wherelib='/usr/local/lib/ff++/3.5/WHERE_LIBRARY'
+elif [ -f '/usr/local/lib/ff++/3.5-1/WHERE_LIBRARY' ] ; then
+    wherelib='/usr/local/lib/ff++/3.5-1/WHERE_LIBRARY'
 else
    echo " error no WHERE_LIBRARY  file "
    exit 1;

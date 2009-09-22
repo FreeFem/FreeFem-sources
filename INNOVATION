@@ -1,3 +1,8 @@
+   correct in matrix size of  matrix B=A(I,J) to I.n x I.m 
+     where I, J are array of int 
+     
+   add resize of complex sparse matrix 
+   Add inferface with metis in examples++-load   (metis.cpp, metis.edp)
 v 3.5 (27 aug. 2009)
   Complet writing to MPI interface, tested with Open MPI 1.2.3 and mpich 2.1 
       see chapter 10, page 229, of  the freefem++doc.pdf  and 

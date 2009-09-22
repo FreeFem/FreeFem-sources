@@ -149,7 +149,10 @@ namespace Fem2D
 	  cerr << "  --  Mesh3::Mesh3 Erreur openning " << filename<<endl;ffassert(0);exit(1);}	
 	if(verbosity>1)
 	  cout << "  -- Mesh3:  Read On file \"" <<filename<<"\""<<  endl;
-	read(f);
+	if(filename.rfind(".msh")==filename.length()-4) 
+	    readmsh(f);
+        else 
+	    read(f);
       }
     
     BuildBound();
@@ -482,7 +485,47 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     f >> s;
     ffassert( s== Gsend);
   }
-  
+    void Mesh3::readmsh(ifstream & f)
+    {  
+
+	f >> nv >> nt >> nbe;
+	if(verbosity>1)
+	    cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
+	this->vertices = new Vertex[nv];
+	this->elements = new Element [nt];
+	this->borderelements = new BorderElement[nbe];		
+	for (int k=0; k<nv; k++) {
+	    Vertex & P = this->vertices[k];
+	    f >> P.x >>P.y >> P.z >> P.lab ;
+	}
+	mes=0.;
+	mesb=0.;
+	
+	if(nt != 0)
+	  {
+	      
+	      for (int k=0; k<nt; k++) {
+		  int i[4],lab;
+		  Element & K(this->elements[k]);
+		  f >> i[0] >> i[1] >> i[2] >> i[3] >> lab;
+		  K.set(this->vertices,i,lab);
+		  mes += K.mesure();	    
+		  
+	      }
+	  }
+	
+	
+	for (int k=0; k<nbe; k++) {
+	    int i[4],lab;
+	    BorderElement & K(this->borderelements[k]);
+	    f >> i[0] >> i[1] >> i[2]  >> lab;
+	    K.set(this->vertices,i,lab);
+	    mesb += K.mesure();	    
+	    
+	}
+
+    }
+    
   
   
   int Mesh3::Save(const string & filename) const

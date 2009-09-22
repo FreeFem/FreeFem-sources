@@ -1036,7 +1036,8 @@ void Init_map_type()
       TheOperators->Add("./",new opSum("/",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
       TheOperators->Add("./",new opSum("/",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
       TheOperators->Add("./",new opSum("/",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-      TheOperators->Add(".",new opSum("/",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+    // correct in sept. 2009
+      TheOperators->Add("./",new opSum("/",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
     
       
      // il faut refechir  .....  FH 

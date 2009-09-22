@@ -1,3 +1,7 @@
+/* to run : in a Shell. 
+cd /Users/hecht/work/freefem++/examples++-mpi 
+mpirun -np 2 FreeFem++-mpi schwarz-3.edp -glut ffglut
+*/
 load "msh3"
 if ( mpisize != 2 ) {
 cout << " sorry number of processeur !=2 " << endl;
@@ -25,8 +29,6 @@ if (mpirank == 0)
 	     reffaceup = rup,     reffacelow = rdown);
 
  cout << " end th  " << endl;
-// processor(1) << th ;
-// processor(1) >> TH;
 }
 else
  {
@@ -36,8 +38,6 @@ else
 	     reffaceup = rup,     reffacelow = rdown);
 
  cout << " end TH  " << endl;
-// processor(0) << TH ;
-// processor(0) >> th;
  }
 broadcast(processor(0),th);
 broadcast(processor(1),TH);
@@ -75,8 +75,8 @@ for ( i=0 ;i< 10; i++)
    processor(0) << u[];
    processor(0) >> U[];
   }
-  if (mpirank==0)  
-   plot(U,u);
+  if (mpirank==0)     plot(U,u);
+  
   if(mpirank==0)
     {
       real ERR= int3d(TH)( square(U-u)*CHI*chi) ;

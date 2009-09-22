@@ -1701,6 +1701,12 @@ template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args)
 		e_Mij[i][j]=eij;
 		t_Mij[i][j]=2;
 	    } 
+	    else if ( atype<KNM<R> *  >()->CastingFrom(rij) )
+	      {  //  before KN_ because KNM can be cast in KN_
+		  
+		  e_Mij[i][j]=to<KNM<R> * >(c_Mij);
+		  t_Mij[i][j]=5;
+	      }	    
 	    else if ( atype<KN_<R> >()->CastingFrom(rij) )
 	    {  
 		e_Mij[i][j]=to<KN_<R> >(c_Mij);
@@ -1713,12 +1719,6 @@ template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args)
 		e_Mij[i][j]=to<Transpose<KN_<R> > >(c_Mij);
 		t_Mij[i][j]=4;
 	    } 
-	    else if ( atype<KNM<R> *  >()->CastingFrom(rij) )
-	    {  
-		
-		e_Mij[i][j]=to<KNM<R> * >(c_Mij);
-		t_Mij[i][j]=5;
-	    }
 	    else if ( atype<Transpose< KNM<R> * > >()->CastingFrom(rij) )
 	    {  
 		

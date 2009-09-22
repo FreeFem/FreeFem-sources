@@ -236,7 +236,7 @@ TESTS_ENVIRONMENT = PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
 	VISUALCHECK=$(VISUALCHECK)
 
-EXTRA_DIST = load.link.in  include.tar.gz \
+EXTRA_DIST = ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  BernadiRaugel.cpp Morley.cpp dfft.cpp  \
  funcTemplate.cpp mat_dervieux.cpp mat_psi.cpp myfunction.cpp \
  mat_dervieux.cpp convect_dervieux.edp funcTemplate.cpp AFunction_ext.hpp \
@@ -265,7 +265,7 @@ EXTRA_DIST = load.link.in  include.tar.gz \
   bmo.cpp lgbmo.cpp bmo.hpp \
  fflapack.cpp	lapack.cpp	lapack.edp \
  fig.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp \
- DxWriter.cpp 
+ DxWriter.cpp  metis.cpp
 
 LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -589,7 +589,7 @@ lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp
 #tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
 #	if [ -f "$(FINC_TET)" ] ; then ./ff-c++   $(LK_TET)  tetgen.cpp ; else echo " not $(FINC_TET) file : no tetgen tools "; fi
 #SuperLu.$(DYLIB_SUFFIX):
-#	if [ -f "$(FINC_SUPERLU)" ] ; then ./ff-c++   $(LK_SUPERLU)  SuperLu.cpp $(BLASLIBS) ; else echo " not $(FINC_SUPERLU)  file : no SuperLU  solver "; fi
+#	if [ -f "$(FINC_SUPERLU)" ] ; then ./ff-c++   $(LK_SUPERLU)  SuperLu.cpp $(BLASLIBS) ; else echo " not $(FINC_SUPERLU)  file : no SuperLu  solver "; fi
 #dfft.$(DYLIB_SUFFIX):
 #	if [ -f "$(FINC_FFTW3)" ] ; then ./ff-c++   $(LK_FFTW3)  dfft.cpp ; else echo " not $(FINC_FFTW3)  file : no dfft tools  "; fi
 
