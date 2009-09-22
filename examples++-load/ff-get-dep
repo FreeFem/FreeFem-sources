@@ -3,27 +3,28 @@
 wherelib=WHERE_LIBRARY
 if [   -f "$wherelib" ] ; then
     wherelib=WHERE_LIBRARY
-elif [ -f '@ff_prefix_dir@/WHERE_LIBRARY' ] ; then
-    wherelib='-I@ff_prefix_dir@/WHERE_LIBRARY'
+elif [ -f '/usr/local/lib/ff++/3.5/WHERE_LIBRARY' ] ; then
+    wherelib='/usr/local/lib/ff++/3.5/WHERE_LIBRARY'
 else
    echo " error no WHERE_LIBRARY  file "
    exit 1;
 fi
+
 
 case "$1" in
     -i*)
 	shift;
 	for i in $@ ; do
 	#    echo "$1" 
-	#    echo 	awk -v p="$1" -v m=INCLUDE ' ($1 == p) && ($2 == m) { for (i=3;i<=NF;++i) {print $i," ";}}' $wherelib  
-	    awk -v p="$i" -v m=INCLUDE ' ($1 == p) && ($2 == m) { for (i=3;i<=NF;++i) {print $i," ";}}' $wherelib  
+	#    echo 	awk -v p="$1" -v m=INCLUDE ' ($1 == p) && ($2 == m) { for (i=3;i<=NF;++i) {print $i," ";}}' $wherelib  $wherelib-download
+         awk -v p="$i" -v m=INCLUDE ' ($1 == p) && ($2 == m) && (!first){ first=1;for (i=3;i<=NF;++i) {print $i," ";}}' "$wherelib"  "$wherelib"-download
 	done
 	
 	;;
     -l*)
 	shift;
 	for i in $@ ; do   
-	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) { for (i=3;i<=NF;++i) {print $i," "};}' $wherelib  
+	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first) {first=1; for (i=3;i<=NF;++i) {print $i," "};}' "$wherelib"  "$wherelib"-download
 	done
 	;;
     -dlib)
@@ -42,9 +43,9 @@ case "$1" in
 	 inclins=`$0 -i $libs` 
 	 ldlibs=`$0 -l $libs`
 	 if [ -n "$ldlibs" -o -z "$libs" ]; then
-	 echo "$cpp" "$inclins" "$ldlibs"
+	     echo "$cpp" "$inclins" "$ldlibs"
 	 else
-	 echo " erreur find libs of $0 :  $libs " 1>&2
+	     echo " erreur find libs of $0 :  $libs " 1>&2
 	 fi
 	;;
   *)  
