@@ -167,7 +167,7 @@ install-exec-local:: load_compile
 	$(INSTALL_SCRIPT) ff-pkg-download  $(DESTDIR)${bindir}
 	$(INSTALL_SCRIPT) ff-get-dep  $(DESTDIR)${bindir}
 	-for i in $(LIST_COMPILE_PKG); do \
-	 if [ -f $i ] then ;	$(INSTALL)  -m 555 $i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
+	 if [ -f $$i ] then ;	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
 
 
 
