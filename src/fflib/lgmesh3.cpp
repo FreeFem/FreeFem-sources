@@ -1574,9 +1574,15 @@ void init_lgmesh3() {
  Add<pfes3*>("nt",".",new OneOperator1<long,pfes3*>(pVh3_nt));
  Add<pfes3*>("ndofK",".",new OneOperator1<long,pfes3*>(pVh3_ndofK));
 
- Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));
- Add<pf3rarray>("[","",new OneOperator2_<pf3r,pf3rarray,long>(get_element));
- Add<pf3carray>("[","",new OneOperator2_<pf3c,pf3carray,long>(get_element));
+ //Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));
+ //Add<pf3rarray>("[","",new OneOperator2_<pf3r,pf3rarray,long>(get_element));
+ //Add<pf3carray>("[","",new OneOperator2_<pf3c,pf3carray,long>(get_element));
+ 
+    // 3d new code 
+    Add<pf3cbasearray*>("[","",new OneOperator2_<pf3cbase*,pf3cbasearray*,long>(get_element));  // use ???? FH sep. 2009 
+    Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));  //  use ???? FH sep. 2009 
+    Add<pf3rarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes3>());// new version FH sep 2009
+    Add<pf3carray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes3>());
     
  
  Add<pfes3*>("(","", new OneTernaryOperator<pVh3_ndf,pVh3_ndf::Op>  );

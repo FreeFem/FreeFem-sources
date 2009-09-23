@@ -1,3 +1,8 @@
+   correct problem with tetgen under windows and ubuntu (remove optimisation )
+   correct setting array of vectorial finite element Wh 
+     Wh[int] [u,v](10); // array of 10 value
+     u[1] or v[1] 2 componante function for indice  1.
+     [u[2],v[2]] = [1,2]; //  set the function for indice  2. 
    correct in matrix size of  matrix B=A(I,J) to I.n x I.m 
      where I, J are array of int 
      
