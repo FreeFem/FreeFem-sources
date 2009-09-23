@@ -638,7 +638,7 @@ ff-get-dep:ff-get-dep.in Makefile
 	chmod a+x $@
 	cp $@ ../download/bin
 WHERE_LIBRARY-download:ff-pkg-download 
-	./ff-pkg-download >@$
+	./ff-pkg-download >$@
 	touch WHERE_LIBRARY
 freefem++.pref:
 	echo loadpath = \"./\" >freefem++.pref
