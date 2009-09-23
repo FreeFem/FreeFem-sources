@@ -3926,66 +3926,6 @@ Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
 }
 
 //  end --- call meth be .. 
-//  for ...   vectorial FE array ..
-
-template<class K,class v_fes>
-class E_FEcomp_get_elmnt_array :public  E_F0 { public:
-    typedef FEbaseArray<K,v_fes> * pfekbasearray ;
-    typedef pair<pferbase,int> pfek ;
-    typedef pair<pferbasearray,int> pfekarray ;
-    typedef pfek  R;
-    typedef pfekarray A;
-    typedef long B;
-    typedef FEbaseArray<K,v_fes>  CFE;
-    typedef  E_FEcomp<K,v_fes,CFE > E_KFEArray;
-    
-    Expression a0,a1;
-   const  E_KFEArray * a00;
-    const int comp, N;        
-
-E_FEcomp_get_elmnt_array(Expression aa0,Expression aa1,int compp,int NN,const E_KFEArray * aa00) 
-: a0(aa0),a1(aa1),a00(aa00),comp(compp),N(NN) {}
-AnyType operator()(Stack s)  const 
-{return SetAny<R>( get_element( GetAny<A>((*a0)(s)) , GetAny<B>((*a1)(s)) ) );} 
-bool MeshIndependent() const {return a0->MeshIndependent() && a1->MeshIndependent();} // 
-
-};
-template<class K,class v_fes>
-class  OneOperator2_FE_get_elmnt : public OneOperator {
-// ///  Add<pferbasearray*>("[","",new OneOperator2_FEcomp<pferbase*,pferbasearray*,long>(get_element)); // not used ...
-//    Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
-typedef FEbaseArray<K,v_fes> * pfekbasearray ;
-typedef pair<pferbase,int> pfek ;
-typedef pair<pferbasearray,int> pfekarray ;
-    
-
-
-typedef pfek  R;
-typedef pfekarray A;
-typedef long B;
-typedef E_FEcomp_get_elmnt_array<K,v_fes>  CODE;
-typedef FEbaseArray<K,v_fes>  CFE;
-typedef  E_FEcomp<K,v_fes,CFE > E_KFEArray;
-typedef  E_FEcomp<K,v_fes > E_KFEi;
-
-
-
-
-
-aType t0,t1; //  return type  type de f,  f(t1, t2) 
-public: 
-E_F0 * code(const basicAC_F0 & args) const 
-{ 
-     const E_KFEArray * afe=dynamic_cast<const E_KFEArray *> (args[0].LeftValue());
-  //  cout << " build xxx  " << afe <<  " " << *args[0].left() <<  endl;
-    //afe=0;// E_KFEi n'est pas le bon type on mame le vieux code ?????
-    ffassert(afe);
-    return new   CODE(t0->CastTo(args[0]),t1->CastTo(args[1]),afe->comp,afe->N,afe);
-} 
-OneOperator2_FE_get_elmnt(): 
-OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
-t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ){}
-};
 
 
 void  init_lgfem() 
@@ -4645,10 +4585,11 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
  
  // Add<pferbasearray*>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element)); 
-  Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // not use ???? FH sep. 2009 
-  Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));  // not use ???? FH sep. 2009 
+  Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // use ???? FH sep. 2009 
+  Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));  //  use ???? FH sep. 2009 
   Add<pferarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());// new version FH sep 2009
-  Add<pfecarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());
+  Add<pfecarray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes>());
+   
 //    Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
 //    Add<pfecarray>("[","",new OneOperator2_<pfec,pfecarray,long>(get_element));
   
