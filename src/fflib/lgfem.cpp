@@ -3929,7 +3929,29 @@ Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
 //  for ...   vectorial FE array ..
 
 template<class K,class v_fes>
-class  OneOperator2_FEcomp : public OneOperator {
+class E_FEcomp_get_elmnt_array :public  E_F0 { public:
+    typedef FEbaseArray<K,v_fes> * pfekbasearray ;
+    typedef pair<pferbase,int> pfek ;
+    typedef pair<pferbasearray,int> pfekarray ;
+    typedef pfek  R;
+    typedef pfekarray A;
+    typedef long B;
+    typedef FEbaseArray<K,v_fes>  CFE;
+    typedef  E_FEcomp<K,v_fes,CFE > E_KFEArray;
+    
+    Expression a0,a1;
+   const  E_KFEArray * a00;
+    const int comp, N;        
+
+E_FEcomp_get_elmnt_array(Expression aa0,Expression aa1,int compp,int NN,const E_KFEArray * aa00) 
+: a0(aa0),a1(aa1),a00(aa00),comp(compp),N(NN) {}
+AnyType operator()(Stack s)  const 
+{return SetAny<R>( get_element( GetAny<A>((*a0)(s)) , GetAny<B>((*a1)(s)) ) );} 
+bool MeshIndependent() const {return a0->MeshIndependent() && a1->MeshIndependent();} // 
+
+};
+template<class K,class v_fes>
+class  OneOperator2_FE_get_elmnt : public OneOperator {
 // ///  Add<pferbasearray*>("[","",new OneOperator2_FEcomp<pferbase*,pferbasearray*,long>(get_element)); // not used ...
 //    Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
 typedef FEbaseArray<K,v_fes> * pfekbasearray ;
@@ -3941,7 +3963,7 @@ typedef pair<pferbasearray,int> pfekarray ;
 typedef pfek  R;
 typedef pfekarray A;
 typedef long B;
-typedef  E_F_F0F0_<R,A,B,E_F0>  CODE;
+typedef E_FEcomp_get_elmnt_array<K,v_fes>  CODE;
 typedef FEbaseArray<K,v_fes>  CFE;
 typedef  E_FEcomp<K,v_fes,CFE > E_KFEArray;
 typedef  E_FEcomp<K,v_fes > E_KFEi;
@@ -3951,20 +3973,18 @@ typedef  E_FEcomp<K,v_fes > E_KFEi;
 
 
 aType t0,t1; //  return type  type de f,  f(t1, t2) 
-typedef typename  CODE::func  func;
-func f;
 public: 
 E_F0 * code(const basicAC_F0 & args) const 
 { 
      const E_KFEArray * afe=dynamic_cast<const E_KFEArray *> (args[0].LeftValue());
   //  cout << " build xxx  " << afe <<  " " << *args[0].left() <<  endl;
-    afe=0;// E_KFEi n'est pas le bon type on mame le vieux code ?????
-    if(afe)     return new  E_KFEi(C_F0(new CODE(f,t0->CastTo(args[0]),t1->CastTo(args[1])),map_type[typeid(R).name()] ),afe->comp,afe->N);
-    else return new CODE(f,t0->CastTo(args[0]),t1->CastTo(args[1]));
+    //afe=0;// E_KFEi n'est pas le bon type on mame le vieux code ?????
+    ffassert(afe);
+    return new   CODE(t0->CastTo(args[0]),t1->CastTo(args[1]),afe->comp,afe->N,afe);
 } 
-OneOperator2_FEcomp(func  ff): 
+OneOperator2_FE_get_elmnt(): 
 OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
-t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
+t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ){}
 };
 
 
@@ -4625,9 +4645,10 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
  
  // Add<pferbasearray*>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element)); 
-    //   Add<pferbasearray*>("[","",new OneOperator2_FEcomp<pferbase*,pferbasearray*,long>(get_element));  // not use ???? FH sep. 2009 
-  Add<pferarray>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element));// new version FH sep 2009
-  Add<pfecarray>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element));
+  Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // not use ???? FH sep. 2009 
+  Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));  // not use ???? FH sep. 2009 
+  Add<pferarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());// new version FH sep 2009
+  Add<pfecarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());
 //    Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
 //    Add<pfecarray>("[","",new OneOperator2_<pfec,pfecarray,long>(get_element));
   
@@ -4683,20 +4704,50 @@ void clean_lgfem()
   delete  FreeFempp::TypeVarForm<Complex>::Global;
 }
 template<class K,class v_fes>
-Expression IsFEcomp(const C_F0 &c,int i)
+Expression IsFEcomp(const C_F0 &c,int i, Expression & rrr,Expression &iii)
 {
-//  typedef double K;
-  if(atype<typename E_FEcomp<K,v_fes>::Result>() == c.left())
-   {
-     const E_FEcomp<K,v_fes> * e= dynamic_cast<const E_FEcomp<K,v_fes>*>(c.LeftValue() );
-    if( !e) 
-      {  cerr <<" Fatal error " << *c.left()<< endl;
-        ffassert(e);
+    Expression r=0;
+    if(!i) rrr=0,iii=0;
+    //  typedef double K;
+    if(atype<typename E_FEcomp<K,v_fes>::Result>() == c.left())
+      {
+	  const E_FEcomp<K,v_fes> * e= dynamic_cast<const E_FEcomp<K,v_fes>*>(c.LeftValue() );
+	  if( !e) 	
+	    { 
+		const E_FEcomp_get_elmnt_array<K,v_fes> * ee= dynamic_cast<const E_FEcomp_get_elmnt_array<K,v_fes>*>(c.LeftValue() );
+		
+		if( !ee) 	
+		  { 
+		      cerr <<" Fatal error Copy array .." << *c.left()<< " composante : " << i << endl;
+		      ffassert(ee);
+		  }
+		else 
+		  { 
+		      if (ee->comp ==i) {
+			  if (i && ee->a00->a0 != rrr) cerr << " error composante arry vect. incompatible " << ee->comp << " "<< ee->a00->a0 << " != " << rrr << endl;
+			  else {
+			   r= ee->a0;
+			    rrr= ee->a00->a0;
+			    iii= ee->a1;
+			  }
+			 
+		      }
+		      else cerr << " erreur composante " << ee->comp << " != " << i << endl; 
+		    
+			
+		  }
+	    } 
+	  else 
+	    {
+	    	
+		if (e->comp ==i) {
+		      if (i && e->a0 != rrr) cerr << " error composante incompatible " << e->comp  << endl;
+		      else  rrr=r=e->a0;
+		}
+	      else cerr << " erreur composante " << e->comp << " != " << endl;		
+	  }
       }
-     if (e->comp !=i) return 0;
-     else return e->a0;
-   }
-  else return 0;
+    return r;
 }
 
 /*
@@ -4714,6 +4765,32 @@ Expression IsCFEcomp(const C_F0 &c,int i)
 }
 */
 
+template<class K,class v_fes>
+Expression Op_CopyArrayT(const E_Array & a,const E_Array & b)
+{
+    typedef FEbaseArray<K,v_fes>  FEba;
+
+    int na=a.size();
+    int nb=b.size();
+    Expression r=0,rr=0,rrr,iii;
+    //  try real voctor value FE interpolation 
+    rr=IsFEcomp<K,v_fes>(a[0],0,rrr,iii) ;
+    if (rr !=0) 
+      {
+          for (int i=1;i<nb;i++)
+	      if (!IsFEcomp<K,v_fes>(a[i],i,rrr,iii))  
+		  CompileError("Copy of Array with incompatible K  vector value FE function () !");;
+	  if(iii) {// ffassert(0); //  moralement il : rrr[iii]
+	      C_F0 aa(rrr,atype<FEba**>()),ii(iii,atype<long>());
+	      C_F0 aa_ii(aa,"[",ii);
+	      rr=aa_ii.LeftValue();
+	  }
+	  if(v_fes::d==2) r=new E_set_fev<K>(&b,rr,2);
+	  else if(v_fes::d==3) r=new  E_set_fev3<K,v_fes3>(&b,rr);
+      }
+    //  try complex vector value FE interpolation 
+    return r;
+}
  
  E_F0 * Op_CopyArray::code(const basicAC_F0 & args) const  {
        E_F0 * ret=0;
@@ -4723,47 +4800,56 @@ Expression IsCFEcomp(const C_F0 &c,int i)
       int nb=b.size();
       if (na != nb ) 
         CompileError("Copy of Array with incompatible size!");
-        
-       Expression rr=0;
+      if(0)
+	{ // old code !!!!!!! before removing FH sept. 2009 
+       Expression rr=0,rrr,iii;
        //  try real voctor value FE interpolation 
-       rr=IsFEcomp<double,v_fes>(a[0],0) ;
+       rr=IsFEcomp<double,v_fes>(a[0],0,rrr,iii) ;
        if (rr !=0) 
         {
           for (int i=1;i<nb;i++)
-	    if (rr!= IsFEcomp<double,v_fes>(a[i],i))  
+	    if (!IsFEcomp<double,v_fes>(a[i],i,rrr,iii))  
                 CompileError("Copy of Array with incompatible real vector value FE function () !");;           
 	  return  new E_set_fev<double>(&b,rr,2);
          }
        //  try complex vector value FE interpolation 
 
-       rr=IsFEcomp<Complex,v_fes>(a[0],0) ;
+       rr=IsFEcomp<Complex,v_fes>(a[0],0,rrr,iii) ;
        if (rr !=0) 
         {
           for (int i=1;i<nb;i++)
-	    if (rr!= IsFEcomp<Complex,v_fes>(a[i],i))  
+	    if (!IsFEcomp<Complex,v_fes>(a[i],i,rrr,iii))  
 	      CompileError("Copy of Array with incompatible complex vector value FE function () !");;           
 	  return  new E_set_fev<Complex>(&b,rr,2);
 	}
        
-       rr=IsFEcomp<double,v_fes3>(a[0],0) ;
+       rr=IsFEcomp<double,v_fes3>(a[0],0,rrr,iii) ;
        if (rr !=0) 
         {
           for (int i=1;i<nb;i++)
-	    if (rr!= IsFEcomp<double,v_fes3>(a[i],i))  
+	    if (!IsFEcomp<double,v_fes3>(a[i],i,rrr,iii))  
                 CompileError("Copy of Array with incompatible real vector value FE function () !");;           
 	  return  new E_set_fev3<double,v_fes3>(&b,rr);
          }
        //  try complex vector value FE interpolation 
 
-       rr=IsFEcomp<Complex,v_fes3>(a[0],0) ;
+       rr=IsFEcomp<Complex,v_fes3>(a[0],0,rrr,iii) ;
        if (rr !=0) 
         {
           for (int i=1;i<nb;i++)
-	    if (rr!= IsFEcomp<Complex,v_fes3>(a[i],i))  
+	    if (!IsFEcomp<Complex,v_fes3>(a[i],i,rrr,iii))  
                 CompileError("Copy of Array with incompatible complex vector value FE function () !");;           
 	  return  new E_set_fev3<Complex,v_fes3>(&b,rr);
          }
-
+	}
+       else
+	 {  Expression r=0; // new code FH sep 2009.
+	     if(!r)  r=Op_CopyArrayT<double,v_fes>(a,b);
+	     if(!r)  r=Op_CopyArrayT<Complex,v_fes>(a,b);
+	     if(!r)  r=Op_CopyArrayT<double,v_fes3>(a,b);
+	     if(!r)  r=Op_CopyArrayT<Complex,v_fes3>(a,b);
+	     if(r) return r;
+	 }
         CompileError("Internal Error: General Copy of Array : to do ");
       return ret;}
 
