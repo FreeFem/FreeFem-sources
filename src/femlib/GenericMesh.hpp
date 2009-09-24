@@ -61,7 +61,7 @@ namespace Fem2D  {
 
   const double UnSetMesure=-1e+200;
 
-
+inline int maxdfon(const int *dfon){ return max(max(dfon[0],dfon[1]),max(dfon[2],dfon[3]));}
   // struct R {}; 
 template<int d> struct typeRd {typedef R0 Rd;};
 template<> struct typeRd<1> {typedef R1 Rd;};
@@ -150,7 +150,7 @@ public:
   const int * const FirstNodeOfElement; //  0 
   const int MaxNbNodePerElement;
   const int MaxNbDFPerElement;
-
+  const int MaxNbDFPerNode;
   int ndfonVertex()const {return ndfon[0];}
   int ndfonEdge()const {return ndfon[1];}
   int ndfonFace()const {return ndfon[2];}
@@ -166,7 +166,8 @@ public:
     FirstDfOfNodeData(m.FirstDfOfNodeData),
     FirstNodeOfElement(m.FirstNodeOfElement),
     MaxNbNodePerElement(m.MaxNbNodePerElement),
-    MaxNbDFPerElement(m.MaxNbDFPerElement) 
+    MaxNbDFPerElement(m.MaxNbDFPerElement) ,
+    MaxNbDFPerNode(maxdfon(m.ndfon))
     {
       for(int i=0;i<NbTypeItemElement;++i)
 	    ndfon[i]=m.ndfon[i];
@@ -190,7 +191,8 @@ public:
     FirstDfOfNodeData(aFirstDfOfNodeData),
     FirstNodeOfElement(0),
     MaxNbNodePerElement(aMaxNbNodePerElement),
-    MaxNbDFPerElement(aMaxNbDFPerElement) 
+    MaxNbDFPerElement(aMaxNbDFPerElement) ,
+    MaxNbDFPerNode(maxdfon(andfon))    
   {
     for(int i=0;i<NbTypeItemElement;++i)
       ndfon[i]=andfon[i];

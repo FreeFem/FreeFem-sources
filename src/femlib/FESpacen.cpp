@@ -540,7 +540,7 @@ template<class MMesh>
      TFE(1,0,this->ptrTFE), 
      cmesh(Th),
      N(TFE[0]->N),
-     Nproduit(1),
+     Nproduit(FirstDfOfNodeData ? 1 :MaxNbDFPerNode),
      nb_sub_fem(TFE[0]->nb_sub_fem),
      dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
      maxNbPtforInterpolation(TFE[0]->NbPtforInterpolation),
