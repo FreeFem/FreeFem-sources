@@ -1,4 +1,8 @@
-   correct problem with tetgen under windows and ubuntu (remove optimisation )
+   add trap in case of mesh with negative volume 
+   correct bug  in case  3d finite element with constant number of df / node
+    example fespace Vh(Th2,[P1,P1]); or fespace  Wh(Th3,[P0,P0,P0 ])
+
+   correct problem with tetgen under windows and ubuntu (remove optimisation during compilation of the library)
    correct setting array of vectorial finite element Wh 
      Wh[int] [u,v](10); // array of 10 value
      u[1] or v[1] 2 componante function for indice  1.

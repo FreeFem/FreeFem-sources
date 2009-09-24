@@ -168,7 +168,7 @@ namespace Fem2D
     if(verbosity)
       cout << "  -- Mesh3 : "<<filename  << ", d "<< 3  << ", n Tet " << nt << ", n Vtx "
 	   << nv << " n Bord " << nbe << endl;
-    
+      ffassert(mes>=0); // add F. Hecht sep 2009.
   }
 
   
@@ -419,6 +419,8 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	if(verbosity)
 	    cout << "  -- Mesh3  (serialized), d "<< 3  << ", n Tet " << nt << ", n Vtx "
 	    << nv << " n Bord " << nbe << endl;
+	ffassert(mes>=0); // add F. Hecht sep 2009.
+
     }
   Mesh3::Mesh3(FILE *f)
   {
@@ -434,11 +436,13 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
       Buildbnormalv();  
       BuildjElementConteningVertex();  
     }
+    if(verbosity>1)
+	  cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
     
     if(verbosity)
       cout << "  -- Mesh3  (File *), d "<< 3  << ", n Tet " << nt << ", n Vtx "
 	   << nv << " n Bord " << nbe << endl;
-    
+      ffassert(mes>=0); // add F. Hecht sep 2009.
   }
   
   void Mesh3::GRead(FILE * ff)
@@ -722,10 +726,12 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	  BuildjElementConteningVertex();  
       }
 //  end add       
+      if(verbosity>1)
+	  cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
           
     if(verbosity>1)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
-    
+      assert(mes>=0.);
   }
   
   Mesh3::Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb)
@@ -754,6 +760,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
       
     if(verbosity>1)
       cout << "  -- End of Construct  mesh3: mesure = " << mes << " border mesure " << mesb << endl;  
+      ffassert(mes>0);
   }
 
   void Mesh3::flipSurfaceMesh3(int surface_orientation)

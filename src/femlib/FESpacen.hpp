@@ -525,7 +525,7 @@ private:
 public:
   CountPointer<const Mesh> cmesh;
   const int N; // dim espace d'arrive
-  const int Nproduit; // dim de l'espace produit generalement 1
+  const int Nproduit; // 1 if non constant Max number df par node. else Max number df par node.. 
   const int nb_sub_fem; // nb de sous elements finis tensorise (independe au niveau des composantes)
   int const* const dim_which_sub_fem;// donne les dependant des composantes liee a un meme sous element fini
   const int   maxNbPtforInterpolation;  
@@ -555,7 +555,7 @@ public:
     TFE(1,0,&tfe), 
     cmesh(TTh),
     N(TFE[0]->N),
-    Nproduit(1),
+    Nproduit(FirstDfOfNodeData ? 1 :MaxNbDFPerNode ),
     nb_sub_fem(TFE[0]->nb_sub_fem),
     dim_which_sub_fem(TFE[0]->dim_which_sub_fem),
     maxNbPtforInterpolation(TFE[0]->NbPtforInterpolation),

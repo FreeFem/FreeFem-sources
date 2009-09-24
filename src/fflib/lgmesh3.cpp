@@ -516,7 +516,7 @@ pf3rbase* get_element(pf3rbasearray *const & a, long const & n)
 }
 
 pf3r get_element(pf3rarray const & a, long const & n)
-{
+{  //cout << " ************ " << n << " " << a.second << endl;
     return pf3r( *(*a.first)[n],a.second);
 }
 
@@ -1214,6 +1214,7 @@ AnyType pf3r2R(Stack s,const AnyType &a)
   pair< FEbase<R,v_fes> *  ,int> ppfe=GetAny<pair< FEbase<R,v_fes> *,int> >(a);
   FEbase<R,v_fes> & fe( *ppfe.first);
   int componante=ppfe.second;
+  //  cout << "+++++++++++ " << componante <<endl;
   if ( !fe.x()) {
     if ( !fe.x()){
       // CompileError(" Sorry unset fem array ");
