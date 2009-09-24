@@ -760,7 +760,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
       
     if(verbosity>1)
       cout << "  -- End of Construct  mesh3: mesure = " << mes << " border mesure " << mesb << endl;  
-      ffassert(mes>0);
+      ffassert(mes>=0); // add F. Hecht sep 2009.
   }
 
   void Mesh3::flipSurfaceMesh3(int surface_orientation)
