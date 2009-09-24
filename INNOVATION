@@ -1,17 +1,20 @@
-   add trap in case of mesh with negative volume 
-   correct bug  in case  3d finite element with constant number of df / node
-    example fespace Vh(Th2,[P1,P1]); or fespace  Wh(Th3,[P0,P0,P0 ])
+v 3.5-1  (24 sept. 2009) not to bad ...
+   - add interface to mestis 
+   - correct  display of 3d mesh (with light doday)
+   - add trap in case of mesh with negative volume 
+   - correct bug  in case  3d finite element with constant number of df / node
+     example fespace Vh(Th2,[P1,P1]); or fespace  Wh(Th3,[P0,P0,P0 ])
 
-   correct problem with tetgen under windows and ubuntu (remove optimisation during compilation of the library)
-   correct setting array of vectorial finite element Wh 
+   - correct problem with tetgen under windows and ubuntu (remove optimisation during compilation of the library)
+   - correct setting array of vectorial finite element Wh 
      Wh[int] [u,v](10); // array of 10 value
      u[1] or v[1] 2 componante function for indice  1.
      [u[2],v[2]] = [1,2]; //  set the function for indice  2. 
-   correct in matrix size of  matrix B=A(I,J) to I.n x I.m 
+   - correct in matrix size of  matrix B=A(I,J) to I.n x I.m 
      where I, J are array of int 
      
-   add resize of complex sparse matrix 
-   Add inferface with metis in examples++-load   (metis.cpp, metis.edp)
+   - add resize of complex sparse matrix 
+   - Add inferface with metis in examples++-load   (metis.cpp, metis.edp)
 v 3.5 (27 aug. 2009)
   Complet writing to MPI interface, tested with Open MPI 1.2.3 and mpich 2.1 
       see chapter 10, page 229, of  the freefem++doc.pdf  and 
