@@ -4,7 +4,7 @@ int nn=10;
 // a pententiel flow on a lac .. 
 //  a first freefem++ 3d example 
 // ------  not to bad ......
-
+verbosity=3;
 mesh Th2("lac-leman-v4.msh");
 fespace Vh2(Th2,P1);
 Vh2 deep;
@@ -23,7 +23,7 @@ cout << rmid << endl;
 real maxdeep = deep[].min;
 mesh3 Th=buildlayers(Th2,nn,
   coef= deep/maxdeep,
-  zbound=[0,deep],
+  zbound=[deep,0],
   reffacemid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
