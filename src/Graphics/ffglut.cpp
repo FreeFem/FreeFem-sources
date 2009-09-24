@@ -1741,7 +1741,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       
     }
   long nbmeshes3=0;
-  if(fin.GetMeshes3())
+  if(fin.GetMeshes3()) //  read GetPlots if false ...
     { //  il y a des solution 3d; 
       
       fin >> nbmeshes3;
@@ -1778,10 +1778,9 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	       
 	}	 
       
-      
-      
-      fin.GetPlots();
+     fin.GetPlots(); 
     }
+ 
   long nbplot;
   int iso3d=0;
   fin >>nbplot;

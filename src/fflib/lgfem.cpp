@@ -2703,17 +2703,17 @@ AnyType Plot::operator()(Stack s) const  {
     
   if(ThePlotStream)
     { 
-      /*
-	les different item of the plot are given by the number what:
-	   what = 0 -> mesh
-	   what = 1 -> scalar field (FE function  2d) 
-	   what = 2 -> 2d vector field (two FE function  2d) 
-	   what = 3 -> curve def by 2 plot
-	   what = 4 -> border 
-           what = 5 3d meshes
-           what = 6  FE function 3d
-	   what = -1 -> error, item empty 
-       */
+	/*
+	 les different item of the plot are given by the number what:
+	 what = 0 -> mesh
+	 what = 1 -> scalar field (FE function  2d) 
+	 what = 2 -> 2d vector field (two FE function  2d) 
+	 what = 3 -> curve def by 2 plot
+	 what = 4 -> border 
+	 what = 5 3d meshes
+	 what = 6  FE function 3d
+	 what = -1 -> error, item empty 
+	 */
 	PlotStream theplot(ThePlotStream);
 	pferbase  fe=0,fe1=0;
 	pferbasearray fea;
@@ -2732,8 +2732,8 @@ AnyType Plot::operator()(Stack s) const  {
 	if (nargs[7]) theplot<< 7L  <= GetAny<bool>((*nargs[7])(s));
 	if (nargs[8])  
 	  {  KN<double> bbox(4);
-	    for (int i=0;i<4;i++)
-		bbox[i]= GetAny<double>((*bb[i])(s));
+	      for (int i=0;i<4;i++)
+		  bbox[i]= GetAny<double>((*bb[i])(s));
 	      
 	      theplot<< 8L <= bbox ;
 	  }
@@ -2741,12 +2741,12 @@ AnyType Plot::operator()(Stack s) const  {
 	if (nargs[10])  theplot<< 10L <= GetAny<long>((*nargs[10])(s));
 	if (nargs[11]) { 
 	    KN_<double> v =GetAny<KN_<double> >((*nargs[11])(s)) ;
-	    theplot<< 11L  <= v   ;}
+	theplot<< 11L  <= v   ;}
 	
 	if (nargs[12]) 
 	    theplot<< 12L <=  GetAny<KN_<double> >((*nargs[12])(s)) ;
-	   
-
+	
+	
 	
 	if (nargs[13]) theplot<< 13L  <= GetAny<bool>((*nargs[13])(s));
 	if (nargs[14]) theplot<< 14L <= GetAny<bool>((*nargs[14])(s));
@@ -2787,32 +2787,32 @@ AnyType Plot::operator()(Stack s) const  {
 		    ll[ii].eval(fe30,cmp0);
 		    if (fe30->x()) th3=&fe30->Vh->Th;
 		    
-		 }
+		}
 	      
-	     if(th && mapth.find(th)==mapth.end()) 
-		    mapth[th]=++kth;
-		  
-	     if(th3 && (mapth3.find(th3)==mapth3.end()))
+	      if(th && mapth.find(th)==mapth.end()) 
+		  mapth[th]=++kth;
+	      
+	      if(th3 && (mapth3.find(th3)==mapth3.end()))
 		  mapth3[th3]=++kth3;
-
-         }
+	      
+	  }
 	theplot.SendMeshes();
 	theplot << kth ;
 	for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i)
 	  {
-	    theplot << i->second << *  i->first ;
+	      theplot << i->second << *  i->first ;
 	  }
 	//  3d meshes 	
 	if(kth3)
-	    {
-		theplot.SendMeshes3();
-		theplot << kth3 ;
-		for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
+	  {
+	      theplot.SendMeshes3();
+	      theplot << kth3 ;
+	      for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
 		{
-		  theplot << i->second << *  i->first ;
+		    theplot << i->second << *  i->first ;
 		}
-		
-	    }
+	      
+	  }
 	theplot.SendPlots();	
 	theplot <<(long) ll.size(); 
 	for (size_t ii=0;ii<ll.size();ii++)
@@ -2927,7 +2927,7 @@ AnyType Plot::operator()(Stack s) const  {
 	      else if(what ==5)
 		{
 		    pTh3=&l[i].evalm3(0,s);
-		    if(pTh) {
+		    if(pTh3) {
 			err=0;
 			theplot << what ; 
 			theplot <<mapth3[ &l[i].evalm3(0,s)];// numero du maillage
@@ -2959,17 +2959,18 @@ AnyType Plot::operator()(Stack s) const  {
 				theplot << V1;
 			    }
 		      }
-		    else 
-			ffassert(0);// erreur type theplot inconnue
-		    if(err==1)
-		      { if(verbosity) 
-			  cerr << "Warning: May be a bug in your script, \n" 
-			  << " a part of the plot is wrong t (mesh or FE function, curve)  => skip the item  " << i+1 
-			  << " in plot command " << endl;
-			  theplot << -1L << (long) i ;
-		      }
-		    
 		}
+	      else 
+		  ffassert(0);// erreur type theplot inconnue
+	      if(err==1)
+		{ if(verbosity) 
+		    cerr << "Warning: May be a bug in your script, \n" 
+		    << " a part of the plot is wrong t (mesh or FE function, curve)  => skip the item  " << i+1 
+		    << " in plot command " << endl;
+		    theplot << -1L << (long) i ;
+		}
+	      
+	      
 	  }
 	theplot.SendEndPlot();
     } 
@@ -3202,6 +3203,7 @@ AnyType Plot::operator()(Stack s) const  {
      {
 	 if(verbosity>99) cout << "plot::operator() Drawing part \n";
 	 plotting = false; 
+	 bool thfill=fill;
 	 for (size_t ii=0;ii<ll.size();ii++)
 	   {
 	       int i=ll[ii].i;
@@ -3209,11 +3211,12 @@ AnyType Plot::operator()(Stack s) const  {
 	       
 	       if (l[i].what==0) 
 		   if (fill)
-		       ll[ii].th->Draw(0,fill);
+		       ll[ii].th->Draw(0,thfill);
 		   else 
-		       ll[ii].th->Draw(0,fill);
+		       ll[ii].th->Draw(0,thfill);
 		   else  if (what==1 || what==2)
-		     {
+		     {   
+			 
 			 ll[ii].eval(fe,cmp0,fe1,cmp1);
 			 // fe=  l[i].eval(0,s,cmp0);
 			 // fe1= l[i].eval(1,s,cmp1);;
@@ -3262,6 +3265,7 @@ AnyType Plot::operator()(Stack s) const  {
 			 for (int i= 1;i<k;i++)
 			     rlineto(x[i],y[i]);
 		     }
+	       thfill=false;
 	   }
 	 if (value) {
 	     int k=0; 
