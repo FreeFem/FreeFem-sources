@@ -2305,11 +2305,13 @@ element spaces for the LBB conditions to be satisfied:
 
 @solve stokes([u,v,p],[uu,vv,pp]) =
     @int2d(Th)(@dx(u)*@dx(uu)+@dy(u)*@dy(uu) + @dx(v)*@dx(vv)+ @dy(v)*@dy(vv)
-            + @dx(p)*uu + @dy(p)*vv + pp*(@dx(u)+@dy(v)))
+              + @dx(p)*uu + @dy(p)*vv + pp*(@dx(u)+@dy(v)) 
+              -\bf 1e-10*p*pp\tt)
             + @on(1,2,4,u=0,v=0) + @on(3,u=1,v=0);
 @plot([u,v],p,wait=1);
 \eFF
 
+Remark, we add a stabilization term {\bf{-10e-10*p*pp}} to fixe the constant part of the pressure.
 \begin{figure}[htbp]
 \begin{center}
 \includegraphics[width=8cm]{stokes}

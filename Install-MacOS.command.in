@@ -41,8 +41,8 @@ chmod a+rx /usr/local/bin/ff-c++
 if [ -d "@ff_prefix_dir@" ] ; then
     echo Warning "@ff_prefix_dir@" is a dirctory keep this.
 else
-    rm -f "@ff_prefix_dir@"
-    ln -s "$appl//FreeFem++.app/Contents" "@ff_prefix_dir@"
+    sudo rm -f "@ff_prefix_dir@"
+    sudo ln -s "$appl/FreeFem++.app/Contents" "@ff_prefix_dir@"
     echo link "@ff_prefix_dir@  ->  $appl/FreeFem++.app/Contents/ "
 fi
 echo "++  FreeFem++ is correctly install in $appl  directory."
