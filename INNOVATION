@@ -1,3 +1,6 @@
+v 3.5-2  (28 sept. 2009)
+  - correct install problem under windows (metis.dll do not compile)
+  - correct MacOS install missing /usr/local/lib/ff++/3.xx-yy link 
 v 3.5-1  (24 sept. 2009) not to bad ...
 
    - add interface to mestis 
