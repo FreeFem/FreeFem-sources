@@ -27,14 +27,16 @@ FAIRE: $(SRCDIR)/FAIT
 
 Makefile.in: ../../config.status	
 	../../config.status  --file="Makefile.in:Makefile-metis.in"
+	case `uname` in *CYGWIN*)  cp Makefile.in Makefile.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.inn > Makefile.in; rm Makefile.inn ;; esac 
 
 $(SRCDIR)/$(INSTALL): $(SRCDIR)/tags
 	cp Makefile.in $(SRCDIR)
 	cd $(SRCDIR)/Lib;make 
-	cd $(SRCDIR)/Programs;make 
 #	cp $(SRCDIR)/libmetis.a $(SRCDIR)/$(INSTALL)/lib/
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/metis
 	cp $(SRCDIR)/Lib/*.h $(SRCDIR)/$(INSTALL)/include/metis
+	-cd $(SRCDIR)/Programs;make 
+
 
 
 $(SRCDIR)/tags: $(PACKAGE)
