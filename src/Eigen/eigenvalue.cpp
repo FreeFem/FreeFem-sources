@@ -203,7 +203,7 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
   {  "nev",&typeid(long) },
   {  "sigma",&typeid(K)},
   {  "value",&typeid(KN<Complex> *)},
-  {  "vector",&typeid(FEbaseArrayKn<double> *) }, // pfecarray
+  {  "vector",&typeid(FEbaseArrayKn<Complex> *) }, // pfecarray
   {  "ncv",&typeid(long) }, // the number of Arnoldi vectors generated 
   {  "maxit",&typeid(long)}, // the maximum number of Arnoldi iterations 
   {  "rawvector",&typeid(KNM<Complex> *) }, 
