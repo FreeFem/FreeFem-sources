@@ -1,3 +1,5 @@
+  - add -enable-m32 floag to build 32bits freefem++ on 64 architecture computer
+  - correct eigenvalue.cpp in case of complex finite element
 v 3.5-2  (28 sept. 2009)
   - correct install problem under windows (metis.dll do not compile)
   - correct MacOS install missing /usr/local/lib/ff++/3.xx-yy link 

@@ -9,24 +9,25 @@ $(F2C_TAR):
 	mkdir -p $(DIRPKG)
 	$(WGET) # wget --passive-ftp ftp://netlib.bell-labs.com/netlib/f2c.tar
 	curl http://netlib.sandia.gov/cgi-bin/netlib/netlibfiles.tar?filename=netlib/f2c -o "$(DIRPKG)/f2c.tar"
-f2c:$(F2C_TAR)
+f2c:$(F2C_TAR) f2c.h-int
 	tar xvf $(F2C_TAR)
 	gunzip -rf f2c/*
 	gunzip -rf f2c/*/*
 	cd f2c;unzip -d libf2c  libf2c.zip
+	for i in `find . -name f2c.h`; do cp f2c.h-int $$i; done
 
 f2c/libf2c/makefile: Makefile
 	egrep -v 'ld -r|mv [$$]' <f2c/libf2c/makefile.u >f2c/libf2c/makefile
 
 compile:f2c f2c/libf2c/makefile
-	cd f2c/src; make -f makefile.u
+	cd f2c/src; make -f makefile.u f2c
 	cd f2c/libf2c; make 
 
 compile-10.4:f2c Makefile-MacOs
-	cd f2c/src; make -f makefile.u
-	cd f2c/libf2c; make -f ../../Makefile-MacOs OS=10.4
+	cd f2c/src; make -f makefile.u f2c
+	cd f2c/libf2c; make -f ../../Makefile-MacOs OS=10.4 
 compile-10.5:f2c Makefile-MacOs
-	cd f2c/src; make -f makefile.u
+	cd f2c/src; make -f makefile.u f2c 
 	cd f2c/libf2c; make -f ../../Makefile-MacOs OS=10.5
 
 

@@ -10,7 +10,7 @@
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.5-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.5-3,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
@@ -47,6 +47,7 @@ then
         ff_flibs=""
         # modif FH		
 	AC_F77_LIBRARY_LDFLAGS  
+
 	# correct pb of double def under macos 
 	case $F77 in
 	 *fort77)
@@ -118,6 +119,36 @@ then
   if test "$ff_err" = "ok" ; then  AC_MSG_ERROR([ Fatal FLIBS: $FLIBS is incorrect. ],1); fi
   LIBS="$ff_libs"
   echo "F77 LD $ff_libs" >config_LIB_INFO
+
+  AC_MSG_CHECKING([ Size of fortran 77 integer ])	
+
+
+
+##   AC_LANG(fortran);
+AC_LANG_PUSH([Fortran 77])
+ AC_RUN_IFELSE([[
+      program test
+      integer  p,i
+      p=1024*1024
+      i= p*p
+      open(7,file="conftest.out")
+      if (i>0) then
+         write(7,*) 8
+      else
+         write(7,*) 4
+      endif
+      close(7)
+      end
+ ]],ff_f77intsize=`cat conftest.out`,ff_f77intsize=4,ff_f77intsize=4)
+## AC_LANG(C++)
+ AC_LANG_POP([Fortran 77])
+ AC_MSG_RESULT($ff_f77intsize)
+ AC_F77_WRAPPERS			
+ if test $ff_f77intsize -eq  8
+ then
+     AC_MSG_ERROR([ Fatal Error: Your fortran 77  compiler have by 8 bytes integer ],1);  
+ fi
+# AC_DEFINE_UNQUOTED(FF_F77_INTEGER_SIZE,$ff_f77intsize,[ size of F77 integer ])
 fi
 
 AC_ARG_ENABLE(c,[  --disable-c		No C compiler available (C BLAS need it)])
