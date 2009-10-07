@@ -41,7 +41,8 @@ int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,n
 //   maxit= the maximal iteration see arpack doc.
 //   ncv   see arpack doc.
 //  the return value is number of converged eigen value.
-
+k=min(k,nev); //  some time the number of converged eigen value 
+              // can be greater than nev;
 int nerr=0;
 real[int]  eev(36);
 eev=1e100;

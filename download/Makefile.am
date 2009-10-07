@@ -4,7 +4,7 @@
 # $Id$
 
 SUBDIRS=blas arpack umfpack fltk 
-EXTRA_DIST=f2c/Makefile  f2c/fort77.sed	f2c/Makefile-MacOs tetgen/Makefile tetgen/tetgen1.4.2.patch superlu/Makefile \ 
+EXTRA_DIST=f2c/Makefile f2c/f2c.h-int   f2c/fort77.sed	f2c/Makefile-MacOs tetgen/Makefile tetgen/tetgen1.4.2.patch superlu/Makefile \ 
 fftw/Makefile metis/Makefile metis/Makefile-metis.in metis/patch-metis
 all-recursive: lib include pkg
 

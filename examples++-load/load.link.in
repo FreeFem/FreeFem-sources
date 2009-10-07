@@ -150,8 +150,8 @@ SUF=so
 SHARED="-shared"
 case "$WIN32$uu" in
     Darwin*) 
-        echo "export MACOSX_DEPLOYMENT_TARGET=10.3"
-	export MACOSX_DEPLOYMENT_TARGET=10.3
+#        echo "export MACOSX_DEPLOYMENT_TARGET=10.3"
+	export MACOSX_DEPLOYMENT_TARGET=10.4
 	SUF=dylib
 	SHARED="-bundle -undefined dynamic_lookup"  ;;
     win32-CYGWIN*|win32-win32)

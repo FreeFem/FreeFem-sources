@@ -556,42 +556,10 @@ uninstall-am: uninstall-binPROGRAMS
 all-local: @LOAD_COMPILE@
 
 load_compile:ff-c++ freefem++.pref include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
+	echo " finish build list $(DYLIB_SUFFIX)"
 
-load_download:
-	if [  -f ../download/lib/lib$(LLTET).a -a -f ../download/lib/lib$(LLFFTW3).a \
-	     -a -f ../download/lib/lib$(LLSUPERLU).a   ]; then \
-             $(MAKE) compile-pkg ; \
-	else echo " no $(LLTET), $(LLSUPERLU) $(LLFFTW3) ";\
-	     echo " try to compile in ../download "; \
-	     echo "( cd "`pwd`"/../download/; $(MAKE) compile-pkg )" ;  \
-	fi
-
-#compile : include load_download 
-
-compile-pkg:  $(LIST_COMPILE_PKG)  
-	echo " finish build $(LIST_COMPILE_PKG)"
-
-.cpp.$(DYLIB_SUFFIX):
+.cpp.$(DYLIB_SUFFIX): ff-c++
 	 ./ff-c++ -auto  $< 
-#glumesh2D.$(DYLIB_SUFFIX): glumesh2D.cpp 
-#	 ./ff-c++   glumesh2D.cpp
-#glumesh3D.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp glumesh3D.cpp 
-#	 ./ff-c++   TransfoMesh_v2.cpp glumesh3D.cpp
-#buildlayer.$(DYLIB_SUFFIX): TransfoMesh_v2.cpp  LayerMesh.cpp buildlayer.cpp 
-#	 ./ff-c++   TransfoMesh_v2.cpp LayerMesh.cpp  buildlayer.cpp
-#msh3.$(DYLIB_SUFFIX): msh3.cpp
-#	 ./ff-c++   msh3.cpp 
-lgbmo.$(DYLIB_SUFFIX): bmo.cpp  lgbmo.cpp
-
-#	 ./ff-c++   bmo.cpp  lgbmo.cpp 
-
-# --  
-#tetgen.$(DYLIB_SUFFIX):  $(TETGEN_LOADLINK)
-#	if [ -f "$(FINC_TET)" ] ; then ./ff-c++   $(LK_TET)  tetgen.cpp ; else echo " not $(FINC_TET) file : no tetgen tools "; fi
-#SuperLu.$(DYLIB_SUFFIX):
-#	if [ -f "$(FINC_SUPERLU)" ] ; then ./ff-c++   $(LK_SUPERLU)  SuperLu.cpp $(BLASLIBS) ; else echo " not $(FINC_SUPERLU)  file : no SuperLu  solver "; fi
-#dfft.$(DYLIB_SUFFIX):
-#	if [ -f "$(FINC_FFTW3)" ] ; then ./ff-c++   $(LK_FFTW3)  dfft.cpp ; else echo " not $(FINC_FFTW3)  file : no dfft tools  "; fi
 
 include: include.tar.gz
 	rm -rf include 
@@ -621,7 +589,8 @@ regtests.edp: regtests.m4 ../regtests.m4
 $(LIST_COMPILE):ff-c++ include Makefile 
 
 clean-local:
-	-rm *.o  $(LIST_COMPILE)  regtests.edp makeref.edp
+	-rm *.o  load.link WHERE_LIBRARY-download ff-get-dep ff-c++ ff-pkg-download \
+	  $(LIST_COMPILE) $(LIST_COMPILE_PKG)  regtests.edp makeref.edp
 	-rm -rf include
 ff-c++:load.link.in  Makefile load.link WHERE_LIBRARY-download ff-get-dep
 	../config.status  --file=ff-c++:load.link.in
