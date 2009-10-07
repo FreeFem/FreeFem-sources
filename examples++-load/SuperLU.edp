@@ -1,4 +1,4 @@
-load "SuperLU"
+load "SuperLu"
 
 verbosity=0;
 

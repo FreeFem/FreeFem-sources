@@ -685,7 +685,7 @@ public:
 	if ( options.IterRefine ) {
             printf("Iterative Refinement:\n");
 	    printf("%8s%8s%16s%16s\n", "rhs", "Steps", "FERR", "BERR");
-	    printf("%8d%8d%16e%16e\n", i+1, stat.RefineSteps, ferr, berr);
+	    printf("%8d%8d%16e%16e\n", i+1, stat.RefineSteps, ferr[0], berr[0]);
 	}
 	fflush(stdout);
     } else if ( info > 0 && lwork == -1 ) {
