@@ -112,6 +112,7 @@ public:
   struct Expression2 {
     long what; // 1 scalar, 2 vector, 3 symtensor
     long nbfloat; // 1 scalar, 2 vector (3D), 3 symtensor(3D)
+    string *dataname; 
     Expression e[3];
     Expression2() {e[0]=0; e[1]=0; e[2]=0;  what=0; nbfloat=0;};
     Expression &operator[](int i){return e[i];}
@@ -158,8 +159,8 @@ public:
 	{
 	  const E_Array * a0  = dynamic_cast<const E_Array *>( args[i].LeftValue() );
 	  //cout << "taille" << a0->size() << endl;
-	  //if (a0->size() != ddim || a0->size() != stsize) 
-	  //  CompileError("savesol in 2D: vector solution is 2 composant, vector solution is 3 composant");
+	  if (a0->size() != ddim && a0->size() != stsize) 
+	    CompileError("savesol in 2D: vector solution is 2 composant, tensor solution is 3 composant");
 	  
 	  if( a0->size() == ddim){
 	    // vector solution
@@ -375,8 +376,8 @@ public:
 	{
 	  const E_Array * a0  = dynamic_cast<const E_Array *>( args[i].LeftValue() );
 	  //cout << "taille" << a0->size() << endl;
-	  //if (a0->size() != ddim || a0->size() != stsize) 
-	  //  CompileError("savesol in 2D: vector solution is 2 composant, vector solution is 3 composant");
+	  if (a0->size() != ddim && a0->size() != stsize) 
+	    CompileError("savesol in 3D: vector solution is 3 composant, vector solution is 6 composant");
 
 	  if( a0->size() == ddim){
 	    // vector solution
@@ -709,8 +710,8 @@ public:
 	{
 	  const E_Array * a0  = dynamic_cast<const E_Array *>( args[i].LeftValue() );
 	 
-	  if (a0->size() != ddim || a0->size() != stsize) 
-	    CompileError("savesol in 2D: vector solution is 2 composant, vector solution is 3 composant");
+	  if (a0->size() != ddim && a0->size() != stsize) 
+	    CompileError("medit in 2D: vector solution is 2 composant, tensor solution is 3 composant");
 
 	  if( a0->size() == ddim){
 	    // vector solution
@@ -735,7 +736,7 @@ public:
 	l[jj][0] = CastTo<pmesh>(args[i]);
       }
       else {
-	CompileError("savesol in 2D: Sorry no way to save this kind of data");
+	CompileError("medit in 2D: Sorry no way to save this kind of data");
       }
     }
 
@@ -1444,8 +1445,8 @@ public:
 	{
 	  const E_Array * a0  = dynamic_cast<const E_Array *>( args[i].LeftValue() );
 	  //cout << "taille" << a0->size() << endl;
-	  //if (a0->size() != ddim || a0->size() != stsize) 
-	  //  CompileError("savesol in 2D: vector solution is 2 composant, vector solution is 3 composant");
+	  if (a0->size() != ddim && a0->size() != stsize) 
+	    CompileError("medit in 3D: vector solution is 3 composant, tensor solution is 6 composant");
 
 	  if( a0->size() == ddim){
 	    // vector solution
@@ -1562,7 +1563,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
   Triangle3 *bb = b;
 
   int iv=0,it=0,ibe=0;
-  int numTht[nt]; // numero of Th assoctiated with a tetrahedra 
+  int *numTht = new int[nt]; // numero of Th assoctiated with a tetrahedra 
 
   int jt=0;
   for(size_t i=0; i<l.size();i=i+offset){
@@ -2066,9 +2067,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
       else{
 	fprintf(popenstream,"End");
       }
-
-
-
+ 
       if(boolsave){
 	if(verbosity) cout << "writing solution in file" << endl;
 	if(typsol==1){
@@ -2089,6 +2088,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
 
     }
   }
+  delete [ ] numTht;
   // fermeture du stream pour popen
   bool wait=TheWait;
   if (nargs[3]) wait= GetAny<bool>((*nargs[3])(stack));
