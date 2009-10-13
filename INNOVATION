@@ -1,3 +1,5 @@
+   correct opertor  subsript a:b:c  operator (in some case the last value was miss) 
+   correct the  ?: operator in case of constant array  
   - add -enable-m32 floag to build 32bits freefem++ on 64 architecture computer
   - correct eigenvalue.cpp in case of complex finite element
 v 3.5-2  (28 sept. 2009)

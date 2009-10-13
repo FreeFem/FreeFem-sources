@@ -2631,6 +2631,12 @@ void Triangles::FindSubDomain(int OutSide=0)
 	    cout << "  -- Find all external sub-domain ";	
 	else
 	    cout << "  -- Find all internal sub-domain ";
+      if(verbosity>99)
+	{
+	  
+	  for(int i=0;i<nbt;++i)
+	      cout << i<< " " << triangles[i] << endl;
+	}
 	
     }
     // if (verbosity > 4) cout << " OutSide=" << OutSide << endl;
@@ -4317,9 +4323,10 @@ void Triangles::FillHoleInMesh()
 	 TriangleAdjacent ta(0,0);
 	 Int4 nbloss = 0,knbe=0;
 	 for ( i = 0; i < nbe; i++) 
+	  if (st[i] >=0)  // edge alone => on border ...  FH oct 2009
 	   {
 	     Vertex & a=edges[i][0], & b =    edges[i][1];
-	     if (a.t && b.t) 
+	     if (a.t && b.t) // le bug est la si maillage avec des bod non raffine 1.
 	       {
 		 knbe++;
 		 if (ForceEdge(a,b,ta)<0)

@@ -97,6 +97,95 @@ class classBuildMesh :  public E_F0mps { public:
 
 };
 
+class classBuildMeshArray :  public E_F0mps { public:  
+    
+    typedef pmesh  Result;
+    
+    //static basicAC_F0::name_and_type name_param[] ;
+    static const int n_name_param =0;
+    
+//Expression nargs[n_name_param];
+    
+    Expression env,ent,enbe;
+    Expression ev,et,ebe;
+    
+    
+  
+    
+     classBuildMeshArray(const basicAC_F0 & args) 
+    {   
+	args.SetNameParam(0,0,0);
+	env=to<long>(args[0]); 
+	ent=to<long>(args[1]); 
+	enbe=to<long>(args[2]); 
+	ev=to<KNM_<double> >(args[3]); 
+	et=to<KNM_<long> >(args[4]); 
+	ebe=to<KNM_<long> >(args[5]);
+	
+    }   
+    
+    static ArrayOfaType  typeargs() { 
+	
+	aType ffint =atype< long >();
+	aType ffMi =atype< KNM_<long> >();
+	aType ffMr =atype< KNM_<double> >();
+	return  ArrayOfaType(ffint,ffint,ffint,ffMr,ffMi,ffMi);}
+    
+    static  E_F0 * f(const basicAC_F0 & args){ return new classBuildMeshArray(args);} 
+    AnyType operator()(Stack s) const {
+	long nv = GetAny<long >((*env)(s));
+	long nt = GetAny<long >((*ent)(s));
+	long nbe = GetAny<long >((*enbe)(s));
+	KNM_<double> xyl( GetAny<KNM_<double> >((*ev)(s)));
+	KNM_<long> nut(	GetAny<KNM_<long> >((*et)(s)));	 
+	KNM_<long> nube( GetAny<KNM_<long> >((*ebe)(s)));	
+	using  Fem2D::Vertex;
+	using  Fem2D::R2;
+	using  Fem2D::BoundaryEdge;
+	using  Fem2D::Mesh;
+	using  Fem2D::MeshPointStack;
+
+	//   Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b); 
+	cout << nv << " " << nt << " " << nbe << endl;
+	cout << xyl.N() << " "<< xyl.M() << endl;
+	cout << nut.N() << " "<< nut.M() << endl;
+	cout << nube.N() << " "<< nube.M() << endl;
+	ffassert(xyl.N() >=nv && xyl.M() >= 3);
+	ffassert(nut.N() >=nt && nut.M() >= 4);
+	ffassert(nube.N() >=nbe && nube.M() >= 3);
+	Vertex *v= new Vertex [nv];
+	Triangle *t= new Triangle[nt];
+	BoundaryEdge *b = new BoundaryEdge[nbe];
+	
+	for(int i=0;i<nv;++i)
+	  {
+	    v[i].x = xyl(i,0);
+	    v[i].y = xyl(i,1);
+	    v[i].lab = xyl(i,2);	    
+	  }
+	for(int i=0;i<nt;++i)
+	    t[i].set(v,nut(i,0),nut(i,1),nut(i,2),nut(i,3));
+	for(int i=0;i<nbe;++i)
+	    b[i].set(v,nube(i,0),nube(i,1),nube(i,2));
+	  
+	
+	Mesh * pth= new Mesh(nv,nt,nbe,v,t,b);
+	if(verbosity) cout << "  -- BuildMesh " << pth << " " << nv << " " << nt << " " << nbe << endl; 
+	R2 Pn,Px;
+	pth->BoundingBox(Pn,Px);
+	if(!pth->quadtree)
+	    pth->quadtree=new Fem2D::FQuadTree(pth,Pn,Px,pth->nv);
+	
+	
+	return Add2StackOfPtr2FreeRC(s,pth);//  07/2008 FH	
+	
+	
+    }
+    operator aType () const { return atype<Result>();} 
+    
+};
+
+
 basicAC_F0::name_and_type  classBuildMesh::name_param[]= {
     {  "nbvx", &typeid(long)} ,
     {"fixeborder", &typeid(bool)}  
@@ -1552,6 +1641,7 @@ void init_lgmesh() {
     bamg::MeshIstreamErrorHandler = MeshErrorIO;
 //   Global.Add("buildmesh","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMesh));
    Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh>);
+    Global.Add("buildmesh","(",new OneOperatorCode<classBuildMeshArray>);
    Global.Add("buildmesh","(",new OneOperatorCode<BuildMeshFile>);
 //   Global.Add("buildmesh","(",new OneOperator1_<pmesh,string*>(buildmeshbamg));
    

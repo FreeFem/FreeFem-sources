@@ -76,7 +76,11 @@ struct SubArray2: public binary_function<long,long,SubArray> {
 struct SubArray3: public ternary_function<long,long,long,SubArray> { 
   static SubArray f(Stack s,const long & a,const long & b,const long & c)  {  
   // cout << "SubArray: " << a << " " << b << " " <<  c << endl;
-   return SubArray((b-a+1)/c,a,c);} }; 
+   return SubArray((b-a+c)/c,a,c);} }; // change 1 to c  FH oct 2009
+//  number of 0:kc:c => k valeur 0
+//  number   a:b:c =>  a+(0:b-c:c)
+//   0:kc+c-1:c => k  valeur  aussi
+// donc k = (b-a+c)/c
 
 #ifdef OLDCPP
 template<class T> inline
