@@ -221,7 +221,7 @@ public:
 	int lg8=lg%8; 
 	if(lg8) lg += 8-lg8; 
 	if(topmemory4tmp + lg>= sizeofmemory4tmp) {ffassert(0);}
-	void *   p=static_cast<void*> (memory4tmp+lg);
+	void *   p=static_cast<void*> (memory4tmp+topmemory4tmp);// correct FH Oct 2009
 	topmemory4tmp+= lg;
 	return p;
 	}

@@ -83,10 +83,12 @@
      MOINSEQ = 299,
      MULEQ = 300,
      DIVEQ = 301,
-     ARROW = 302,
-     BORDER = 303,
-     CURVE = 304,
-     SOLVE = 305
+     DOTMULEQ = 302,
+     DOTDIVEQ = 303,
+     ARROW = 304,
+     BORDER = 305,
+     CURVE = 306,
+     SOLVE = 307
    };
 #endif
 /* Tokens.  */
@@ -134,10 +136,12 @@
 #define MOINSEQ 299
 #define MULEQ 300
 #define DIVEQ 301
-#define ARROW 302
-#define BORDER 303
-#define CURVE 304
-#define SOLVE 305
+#define DOTMULEQ 302
+#define DOTDIVEQ 303
+#define ARROW 304
+#define BORDER 305
+#define CURVE 306
+#define SOLVE 307
 
 
 
@@ -160,7 +164,7 @@ typedef union YYSTYPE
 /* ListCatch * clist_Catchs;*/
 }
 /* Line 1529 of yacc.c.  */
-#line 164 "lg.tab.hpp"
+#line 168 "lg.tab.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

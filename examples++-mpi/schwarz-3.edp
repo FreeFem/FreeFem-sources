@@ -1,4 +1,4 @@
-/* to run : in a Shell. 
+/* to run : in a Shell.  cut and past:
 cd /Users/hecht/work/freefem++/examples++-mpi 
 mpirun -np 2 FreeFem++-mpi schwarz-3.edp -glut ffglut
 */

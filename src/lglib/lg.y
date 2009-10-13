@@ -238,6 +238,8 @@ void lgerror (const char* s) ;
 %token MOINSEQ
 %token MULEQ
 %token DIVEQ
+%token DOTMULEQ
+%token DOTDIVEQ
 %token GTGT
 %token ARROW
 %token BORDER
@@ -505,6 +507,8 @@ no_comma_expr:
 	| no_set_expr MOINSEQ no_comma_expr {$$=C_F0(TheOperators,"-=",$1,$3)}
 	| no_set_expr MULEQ no_comma_expr {$$=C_F0(TheOperators,"*=",$1,$3)}
 	| no_set_expr DIVEQ no_comma_expr {$$=C_F0(TheOperators,"/=",$1,$3)}
+	| no_set_expr DOTMULEQ no_comma_expr {$$=C_F0(TheOperators,".*=",$1,$3)}
+	| no_set_expr DOTDIVEQ no_comma_expr {$$=C_F0(TheOperators,"./=",$1,$3)}
 ;
 
 
