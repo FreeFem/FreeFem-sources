@@ -220,9 +220,11 @@ public:
     if( !(param_int==NULL) ){
       SYM = param_int[0];
       PAR = param_int[1];
+      cout << "param :: myid =" << myid << endl;
     }
     else if( !data_option.empty() )
       {	
+	cout << "myid =" << myid << endl;
 	if(myid==0){
 	  
 	  char * retfile= new char[data_option.size()+1];
@@ -268,6 +270,8 @@ public:
 	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
 	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
 
+	  cout << "myid =" << myid << " init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
+
 	  MPI_Bcast(  dataint, 40, MPI_INT,  0, MPI_COMM_WORLD );
 	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, MPI_COMM_WORLD );
 
@@ -278,6 +282,8 @@ public:
 	  
 	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
 	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	  
+	  cout << "myid =" << myid << "  init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
 
 	  MPI_Bcast(  dataint, 40, MPI_INT,  0, MPI_COMM_WORLD );
 	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, MPI_COMM_WORLD );
