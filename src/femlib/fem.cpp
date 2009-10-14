@@ -1067,7 +1067,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 		kk = 1-kk;
 		j= nl[ kk ];
 		itt =  ElementAdj(it,j);                  
-		if (itt && itt != it)
+		if (itt >=0 && itt != it) // correction FH oct 2009
 		{
 		    dP=DBL_MAX;
 		    it=itt;

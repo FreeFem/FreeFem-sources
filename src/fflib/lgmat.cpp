@@ -657,6 +657,8 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	            {
 	              bool outside;
 	              ts=ThV.Find(TU(PtHatU[i]),PV[i],outside,ts); 
+		      if(outside) 
+		        cout << it << " " << i << " :: " << TU(PtHatU[i]) << "  -- "<< outside << PV[i] << " " << ThV(ts) << " ->  " <<  (*ts)(PV[i]) <<endl;
 	              itV[i]= ThV(ts);
 	              intV[i]=outside && inside; //  ouside and inside flag 
 	            }
