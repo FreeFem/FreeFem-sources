@@ -757,7 +757,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
 template <class R> 
 class MatriceIdentite: VirtualMatrice<R> { public:
  typedef typename VirtualMatrice<R>::plusAx plusAx;
-    MatriceIdentite() :VirtualMatrice<R>(0) {}; 
+    MatriceIdentite(int n) :VirtualMatrice<R>(n) {}; 
  void addMatMul(const  KN_<R>  & x, KN_<R> & Ax) const { 
      ffassert(x.N()==Ax.N());
    Ax+=x; } 

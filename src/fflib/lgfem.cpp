@@ -624,14 +624,14 @@ class LinearCG : public OneOperator
          { MatF_O CC(n,stack,C);
            ret = NLCG(AA,CC,x,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
         else 
-           ret = NLCG(AA,MatriceIdentite<R>(),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
+           ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
         }
       else 
       if (C) 
        { MatF_O CC(n,stack,C);
          ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
       else 
-         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(),x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
+         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
       if( nargs[3]) *GetAny<double*>((*nargs[3])(stack)) = -(eps);
       }
       catch(...)
@@ -760,7 +760,7 @@ class LinearGMRES : public OneOperator
          { MatF_O CC(n,stack,C);
            ret = NLGMRES(AA,CC,x,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
         else 
-           ret = NLGMRES(AA,MatriceIdentite<R>(),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
+           ret = NLGMRES(AA,MatriceIdentite<R>(n),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
          ConjuguedGradient  */
         }
       else 
@@ -769,7 +769,7 @@ class LinearGMRES : public OneOperator
         { MatF_O CC(n,stack,C); 
          ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,CC,H,k,nbitermax,epsr);}
        else
-         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,MatriceIdentite<R>(),H,k,nbitermax,epsr);       
+         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,MatriceIdentite<R>(n),H,k,nbitermax,epsr);       
        }
        /*
       if (C) 
@@ -777,7 +777,7 @@ class LinearGMRES : public OneOperator
          
          ret = ConjuguedGradient2(AA,CC,x,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
       else 
-         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));*/
+         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));*/
          
      // if( nargs[3]) *GetAny<double*>((*nargs[3])(stack)) = -(eps);
       return SetAny<long>(ret);
