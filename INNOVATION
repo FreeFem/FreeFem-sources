@@ -1,4 +1,9 @@
-   correct opertor  subsript a:b:c  operator (in some case the last value was miss) 
+     correct bug in GMRES without preconditionner asset error. 
+     correct a rare and ramdomly bug in the interpolation 2d process when the
+      the element 0 touch the boundary
+     correct on versy old bug in bamg in case of internal boundary edge with
+     two extremity  in true boundary (symptome FillHoleInMesh trap).
+1   correct opertor  subsript a:b:c  operator (in some case the last value was miss) 
    correct the  ?: operator in case of constant array  
   - add -enable-m32 floag to build 32bits freefem++ on 64 architecture computer
   - correct eigenvalue.cpp in case of complex finite element
@@ -177,7 +182,7 @@ v 3.0-1 (4 dec 2008)
   - complete change of the graphic (freefem++ is now the old freefem++-nw ) 
       - add  medit (a visualisator software by  P. Frey)  inside freefem++
           with a name ffmedit  
-      - suppress the ide version until Antoine Le Hyaric do a good one
+      - suppress the ide version
           see page: http://www.ann.jussieu.fr/~lehyaric/ffcs
       - We put a client-server architecture
         (freefem++,freefem++-nw)  <->  ffglut
