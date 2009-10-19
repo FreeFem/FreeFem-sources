@@ -35,7 +35,7 @@ EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
   bmo.cpp lgbmo.cpp bmo.hpp \
  fflapack.cpp	lapack.cpp	lapack.edp \
  fig.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp \
- DxWriter.cpp  metis.cpp
+ DxWriter.cpp  metis.cpp pcm.cpp pcm.hpp pcm2rnm.cpp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
