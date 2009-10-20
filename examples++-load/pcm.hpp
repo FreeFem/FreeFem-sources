@@ -3,7 +3,8 @@
  * pcm.h
  *
  * Author: Dion Crannitch (adapted from Dave Mason's complexMap class)
- * Last Modified : 22 June 1999
+ * Modified : 22 June 1999
+ * Last Modified: 20 Oct. 2009  (F. Hecht,  Frederic.Hecht@upmc.fr)   for g++ v4 
  *
  * Declarations for PCM class, a data structure containing a 2D vector
  * image, with encapsulated operations for reading and writing PCM files.

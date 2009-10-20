@@ -1,3 +1,5 @@
+    add tools to read .pcm files for optic-flow computation (pcm2rnm.cpp) 
+  	 see http://www.cs.otago.ac.nz/research/vision/Research/OpticalFlow/pcm.html
      correct bug in GMRES without preconditionner asset error. 
      correct a rare and ramdomly bug in the interpolation 2d process when the
       the element 0 touch the boundary

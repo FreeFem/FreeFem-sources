@@ -1,14 +1,15 @@
 //   tools to read ppm file 
-/*  use in freefem++ edp
-  see :
-  real[int,int] ff1("tt.pmm"); // read  image and set to an array. 
-  real[int]  ff(ff1.nx*ff1.ny);
-  ff=ff1; 
- */
+/*  use in freefem++ edp file:
+  -----------------------------
+  complex[int,int] cc(1,1);
+  readpcm("tt.pcm",cc); // read  the flow image and set to un complex matrix array. 
+  or 
+  real[int,int] u(1,1),v(1,1);
+  readpcm("tt.pcm",u,v); // read the flow image and set to 2  real  matrix array. 
+*/
 #include "pcm.hpp"
 #include  <iostream>
 #include  <cfloat>
-// ff-c++ pcm*cpp -g
 //ff-c++-cpp-dep:pcm.cpp
 using namespace std;
 #include "error.hpp"
