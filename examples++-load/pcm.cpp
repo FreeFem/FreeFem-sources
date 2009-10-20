@@ -4,7 +4,11 @@
  *
  * Author: Dion Crannitch (adapted from Dave Mason's complexMap class)
  * Last Modified : 22 June 1999
- *
+ * Last Modified: 20 Oct. 2009  (F. Hecht,  Frederic.Hecht@upmc.fr)   for g++ v4 
+ *  change ENDIANESS interface
+ *         add  missing read max value in file        
+ *         add const in char * declaration  for g++-4.
+ *         change 32 in 4  for the size of float . 
  */
 
 

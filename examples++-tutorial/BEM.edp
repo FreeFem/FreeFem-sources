@@ -11,7 +11,7 @@ We need to \Red{add border term} in the variational formulation
 \end{equation} }
 where  $dn$ is the normal derivative 
 
-We  decompose $w^i$ in the orthogonal de Floquet basic on border $\Gamma_b = \{x\in [0,p[, y=0\}$
+We  decompose $w^i$ in the orthogonal de Fourier basic on border $\Gamma_b = \{x\in [0,p[, y=0\}$
 $$\Blue{f_n=exp(-2\pi (inx + |n| y)/p )}, \qquad 
 \DarkGreen{  \int_{\Gamma_b} f_n \overline{f_m}= p \delta_{mn}}$$.
 Remark $-\Delta f_n=0 $ , and we  have
@@ -31,7 +31,7 @@ func ug= max(0.,-(x-0.25)*(x-0.75)); // boundary condition..
 macro Grad(u) [dx(u),dy(u)] // eom
 
 int NNx=100,NNy=1;
-real Xmax=1,Ymax=0.01;
+real Xmax=2,Ymax=0.01;
 mesh Th=square(NNx,NNy,[x*Xmax,y*Ymax]); 
 fespace Vh(Th,P1,periodic=[[2,y],[4,y]]);
 
@@ -81,7 +81,7 @@ for(int i=0;i<onbord.n;++i )
    complex  deuxpiip=2*pi*1i/perio;
    int n=0;// 
    // Use of higher order Quadarture formular ...
-   varf vWn(u,w)=int1d(Th,labup,qforder=10)(perio1*exp(-deuxpiip*(n)*x)*w);
+   varf vWn(u,w)=int1d(Th,labup,qforder=10)(exp(-deuxpiip*(n)*x)*w);
       
    complex[int] wn=vWn(0,Vh);//  with Vh numbering.. 
 
@@ -92,7 +92,7 @@ for(int i=0;i<onbord.n;++i )
     	complex[int] wwn(kdfBEM);
     	complex[int] wn=vWn(0,Vh);
     	wwn=wn(IdfB2Vh);
-        complex Gs=+2.*pi*abs(n*perio1)*eps0;
+        complex Gs=+2.*pi*eps0*abs(n/(perio*perio));
     	ABemFull += Gs*wwn*wwn';
     }
     
