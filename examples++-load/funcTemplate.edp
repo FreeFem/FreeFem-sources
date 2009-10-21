@@ -46,3 +46,6 @@ cout << "7 args: uh1: " << uh1[].min  << " " << uh1[].max << endl;
 CppModTemplate8(uh1[], N[], P[], P[], P[], P[], P[], P[]);
 cout << endl;
 cout << "8 args: uh1: " << uh1[].min  << " " << uh1[].max << endl; 
+cout << " funcs1 " << funcs1(2) << endl;
+cout << " funcs2 " << funcs2(2,3) << endl;
+cout << " funcs3 " << funcs3(1,2,3) << endl;
