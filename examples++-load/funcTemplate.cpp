@@ -1,17 +1,6 @@
 // Example C++ function "CppModTemplate" dynamically loaded into "load.edp"
 // ------------------------------------------------------------------------
-
-#include  <iostream>
-#include  <cfloat>
-using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#include "fem.hpp"
-#include "FESpace.hpp" 
-#include "MeshPoint.hpp"
-
+#include <ff++.hpp>
 #include "AFunction_ext.hpp" // Extension of "AFunction.hpp" to deal with more than 3 parameters function
 using namespace Fem2D;
 

@@ -2,7 +2,8 @@
 //ff-c++-LIBRARY-dep:   superlu
 //ff-c++-cpp-dep: 
 //  
-
+#include "ff++.hpp"
+/*
 #include  <iostream>
 using namespace std;
 
@@ -12,7 +13,7 @@ using namespace std;
 
 //#include "lex.hpp"
 #include "MatriceCreuse_tpl.hpp"
-
+*/
 #include "slu_ddefs.h"
 #define GlobalLU_t GlobalLU_txxxx
 #define countnz countnzxxxx

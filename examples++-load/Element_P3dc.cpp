@@ -1,11 +1,6 @@
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "rgraph.hpp"
-using namespace std;  
-#include "RNM.hpp"
-#include "fem.hpp"
-#include "FESpace.hpp"
+#include "ff++.hpp"
 #include "AddNewFE.h"
+
 // Attention probleme de numerotation des inconnues
 // -------------------------------------------------
 // dans freefem, il y a un noeud par objets  sommet, arete, element.

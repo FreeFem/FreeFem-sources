@@ -6,20 +6,8 @@
 //ff-c++-LIBRARY-dep:   fftw3 
 //ff-c++-cpp-dep: 
 //  
-
-#include  <iostream>
-#include  <cfloat>
-using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-using namespace std;  
-#include "rgraph.hpp"
-#include "RNM.hpp"
+#include "ff++.hpp"
 #include <fftw3.h>
-#include <cmath>
-
-//using namespace Fem2D;
-
 
 class DFFT_1dor2d 
 {  

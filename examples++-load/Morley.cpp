@@ -16,14 +16,8 @@
 //  to check  and validate  : testFEMorlay.edp 
 //  to get a real example   :  bilapMorley.edp
 // ------------------------------------------------------------
-#include <iostream>
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "rgraph.hpp"
-using namespace std;  
-#include "RNM.hpp"
-#include "fem.hpp"
-#include "FESpace.hpp"
+
+#include "ff++.hpp"
 #include "AddNewFE.h"
 
 // #include "problem.hpp"

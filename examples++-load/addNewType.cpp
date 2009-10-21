@@ -1,19 +1,7 @@
 
 // Example C++ function "CppModTemplate" dynamically loaded into "load.edp"
 // ------------------------------------------------------------------------
-
-#include  <iostream>
-#include  <cfloat>
-using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "lex.hpp"
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#include "fem.hpp"
-#include "FESpace.hpp" 
-#include "MeshPoint.hpp"
-
+#include "ff++.hpp" 
 using namespace Fem2D;
 
 // see src/femlib/RNM.hpp
