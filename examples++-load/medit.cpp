@@ -29,49 +29,7 @@
  ref:ANR-07-CIS7-002-01 
  */
 #include "mode_open.hpp"
-#include <iostream>
-#include <cfloat>
-#include <cmath>
-#include <complex>
-using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-using namespace std;  
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#include "fem.hpp"
-
-
-#include "FESpacen.hpp" 
-#include "FESpace.hpp" 
-
-#include "MatriceCreuse_tpl.hpp"
-#include "MeshPoint.hpp"
-#include "Operator.hpp" 
-#include "lex.hpp"
-
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "libmesh5.h"
-#include "lgsolver.hpp"
-#include "problem.hpp"
-//#include "LayerMesh.hpp"
-//#include "TransfoMesh_v2.hpp"
-//#include "GQuadTree.hpp"
-
-#include <set>
-#include <vector>
-#include <fstream>
-
-//#include "Operator.hpp" 
-//#include "array_resize.hpp"
-//#include "lex.hpp"
-
-//using Fem2D::Mesh;
-//using Fem2D::MeshPoint;
-
-//extern bool NoWait; 
-//const char *medit_char= "meditff"; *
+#include "ff++.hpp"
 #define WrdSiz 4
 
 #ifdef WIN32

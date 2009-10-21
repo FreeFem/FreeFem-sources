@@ -1,16 +1,4 @@
-/*
-#include<iostream>
-#include<fstream>
-#include<cmath>
-#include<cassert>
-#include<stdlib.h>
-#include "Mesh2dn.hpp"
-#include "Mesh3dn.hpp"
-#include "TransfoMesh_v2.hpp"
-#include "GQuadTree.hpp"
-// Rajout de tetgen
-#include "tetgen.h"
-*/
+
 
 using namespace std;
 #include <fstream>

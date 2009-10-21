@@ -1,11 +1,4 @@
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "rgraph.hpp"
-using namespace std;  
-#include "RNM.hpp"
-#include "fem.hpp"
-#include "FESpace.hpp"
-#include "QuadratureFormular.hpp"
+#include "ff++.hpp"
 #include "AddNewFE.h"
 
 // Attention probleme de numerotation des inconnues

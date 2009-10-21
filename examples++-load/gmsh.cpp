@@ -37,40 +37,7 @@
 //       Th3_t->BuildjElementConteningVertex();
 //   is now in the constructor of Mesh3 to be consistante. 
 //   
-
-#include  <iostream>
-#include  <cfloat>
-#include <cmath>
-#include <complex>
-using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-using namespace std;  
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#include "fem.hpp"
-
-
-#include "FESpacen.hpp" 
-#include "FESpace.hpp" 
-
-#include "MatriceCreuse_tpl.hpp"
-#include "MeshPoint.hpp"
-#include "Operator.hpp" 
-#include "lex.hpp"
-
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "lgsolver.hpp"
-#include "problem.hpp"
-//#include "LayerMesh.hpp"
-//#include "TransfoMesh_v2.hpp"
-#include "msh3.hpp"
-//#include "GQuadTree.hpp"
-
-#include <set>
-#include <vector>
-#include <fstream>
+#include "ff++.hpp"
 
 using namespace Fem2D;
 

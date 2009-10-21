@@ -1,18 +1,4 @@
-#include <fstream>
-#include <iostream>
-#include <cstring>
-#include <map>
-#include "libmesh5.h"
-#include "ufunction.hpp"
-#include "error.hpp"
-#include "RNM.hpp"
-#include <stdlib.h>
-#include "ufunction.hpp"
-#include "Mesh2dn.hpp"
-#include "Mesh3dn.hpp"
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#include "fem.hpp"
+#include "ff++.hpp"
 using namespace std;
 using namespace Fem2D;
 #include "LayerMesh.hpp"
