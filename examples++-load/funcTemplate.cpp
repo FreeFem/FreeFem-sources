@@ -115,7 +115,9 @@ double CppModTemplate8(KN<double> *const & A,                            // OUTP
   return 0.0;  // dummy return value.
 }
 
-
+double funcs3(Stack s,const double &a,const  double &b,const  double &c){  return a+b+c;}
+double funcs2(Stack s,const double &a,const  double &b){  return a+b;}
+double funcs1(Stack s,const double &a){  return a;}
 
 //   add the function name to the freefem++ table 
 class Init { public:
@@ -124,6 +126,9 @@ class Init { public:
 Init init;
 Init::Init(){
   // Add function with 3 arguments
+  Global.Add("funcs1","(",new OneOperator1s_<double, double>(funcs1)); 
+  Global.Add("funcs2","(",new OneOperator2s_<double, double, double >(funcs2)); 
+  Global.Add("funcs3","(",new OneOperator3s_<double, double, double, double  >(funcs3)); 
   Global.Add("CppModTemplate3","(",new OneOperator3_<double, KN<double>*, KN<double>*, KN<double>*>(CppModTemplate3)); 
   Global.Add("CppModTemplate4","(",new OneOperator4_<double, KN<double>*, KN<double>*, KN<double>*, KN<double>*>(CppModTemplate4)); 
   Global.Add("CppModTemplate5","(",new OneOperator5_<double, KN<double>*, KN<double>*, KN<double>*, KN<double>*, KN<double>*>(CppModTemplate5)); 

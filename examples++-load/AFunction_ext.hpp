@@ -1,3 +1,4 @@
+// In order to use functions with the stack and 2 parameters , and more  new classes (OneOperator2s_, OneOperator3s_, etc.) must
 // In order to use functions with more than 3 parameters, new classes (OneOperator4_, OneOperator5_, etc.) must
 // be defined. See example code in include/AFunction.hpp
 // Two classes must be defined (here we show an example for a function accepting 4 arguments):
@@ -6,6 +7,94 @@
 //  class E_F_F0F0F0F0_
 //
 // Note: in file includeAFunction.hpp, the class "OneOperator" (around line 400) mut be modified.
+// ************************************************
+// Add F. Hecht  oct 2009
+// ****  2 paramters with the stack
+//  class OneOperator2s_
+//  class E_F_F0F0s_                                                                                                                                                      
+
+template<class R,class A0,class A1, class E=E_F0>   // extend (4th arg.)
+class E_F_F0F0s_ :public  E { public:                               // extend 
+    typedef  R (*func)(Stack s,const  A0 &,const  A1 & ) ; // extend (statck +2th arg.)
+  func f;
+  Expression a0,a1;          // extend
+  E_F_F0F0s_(func ff,
+	     Expression aa0,
+	     Expression aa1)
+    : f(ff), a0(aa0), a1(aa1) {}  // extend (2th arg.)
+  AnyType operator()(Stack s)  const 
+  {return SetAny<R>( f( s,
+			GetAny<A0>((*a0)(s)),
+			GetAny<A1>((*a1)(s))  ) );}   // extend (2th arg.)
+  virtual size_t nbitem() const {return a1->nbitem(); } // modif ??? 
+  bool MeshIndependent() const 
+  {return a0->MeshIndependent() && a1->MeshIndependent() ;} // extend (2th arg.)
+  
+};
+
+template<class R,class A=R,class B=A,class C=B, class D=C ,class CODE=E_F_F0F0s_<R,A,B,E_F0> >    // extend (4th arg.)
+class  OneOperator2s_ : public OneOperator {     // 
+  aType r; //  return type 
+  typedef typename  CODE::func  func;
+  func f;
+public: 
+  E_F0 * code(const basicAC_F0 & args) const 
+  { return  new CODE(f,
+		     t[0]->CastTo(args[0]),
+		     t[1]->CastTo(args[1]));}     // extend
+  OneOperator2s_(func  ff):                        // 3->4
+    OneOperator(map_type[typeid(R).name()],
+		map_type[typeid(A).name()],
+		map_type[typeid(B).name()]),      // extens
+    f(ff){}
+};
+
+
+
+// ****  2 paramters with the stack
+//  class OneOperator2s_
+//  class E_F_F0F0s_                                                                                                                                                      
+
+template<class R,class A0,class A1,class A2, class E=E_F0>   // extend (4th arg.)
+class E_F_F0F0F0s_ :public  E { public:                               // extend 
+    typedef  R (*func)(Stack s,const  A0 &,const  A1 &,const A2 & ) ; // extend (statck +2th arg.)
+  func f;
+  Expression a0,a1,a2;          // extend
+  E_F_F0F0F0s_(func ff,
+	     Expression aa0,
+	     Expression aa1,
+	     Expression aa2)
+    : f(ff), a0(aa0), a1(aa1), a2(aa2) {}  // extend (2th arg.)
+  AnyType operator()(Stack s)  const 
+  {return SetAny<R>( f( s,
+			GetAny<A0>((*a0)(s)),
+			GetAny<A0>((*a1)(s)),
+			GetAny<A1>((*a2)(s))  ) );}   // extend (3th arg.)
+  virtual size_t nbitem() const {return a2->nbitem(); } // modif ??? 
+  bool MeshIndependent() const 
+  {return a0->MeshIndependent() && a1->MeshIndependent() && a2->MeshIndependent() ;} // extend (2th arg.)
+  
+};
+
+template<class R,class A=R,class B=A,class C=B, class D=C ,class CODE=E_F_F0F0F0s_<R,A,B,C,E_F0> >    // extend (3th arg.)
+class  OneOperator3s_ : public OneOperator {     // 
+  aType r; //  return type 
+  typedef typename  CODE::func  func;
+  func f;
+public: 
+  E_F0 * code(const basicAC_F0 & args) const 
+  { return  new CODE(f,
+		     t[0]->CastTo(args[0]),
+		     t[0]->CastTo(args[1]),
+		     t[1]->CastTo(args[2]));}     // extend
+  OneOperator3s_(func  ff):                        // 2->
+    OneOperator(map_type[typeid(R).name()],
+		map_type[typeid(A).name()],
+		map_type[typeid(B).name()],
+		map_type[typeid(C).name()]),      // extend
+    f(ff){}
+};
+// ***********************************************
 
 // ***********************************************
 // **** 4 parameters
