@@ -1,3 +1,8 @@
+v 3.6 (21 oct 2009)
+    add examples of function with stack parameter in 
+       examples++-load/funcTemplate.cpp load facility
+       and 
+       examples++-load/funcTemplate.edp
     add tools to read .pcm files for optic-flow computation (pcm2rnm.cpp) 
   	 see http://www.cs.otago.ac.nz/research/vision/Research/OpticalFlow/pcm.html
      correct bug in GMRES without preconditionner asset error. 
@@ -5,7 +10,7 @@
       the element 0 touch the boundary
      correct on versy old bug in bamg in case of internal boundary edge with
      two extremity  in true boundary (symptome FillHoleInMesh trap).
-1   correct opertor  subsript a:b:c  operator (in some case the last value was miss) 
+   correct operator  subsript a:b:c  operator (in some case the last value was miss) 
    correct the  ?: operator in case of constant array  
   - add -enable-m32 floag to build 32bits freefem++ on 64 architecture computer
   - correct eigenvalue.cpp in case of complex finite element
