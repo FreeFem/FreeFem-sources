@@ -82,6 +82,7 @@ for(int i=0;i<10;++i)
     uz= u3(x,0.5,y);
     p2= p(x,0.5,y);
     plot([ux,uz],p2,cmm=" cut y = 0.5, time ="+t,wait=0);
+    if(0)
     {
       exec("mkdir dd");
       string prefu="dd/u-"+(100+i);
