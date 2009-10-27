@@ -1,4 +1,7 @@
 #include "ff++.hpp"
+//ff-c++-LIBRARY-dep:   lapack
+//ff-c++-LIBRARY-dep:   blas
+
 extern "C" {
 typedef int integer;
 typedef Complex doublecomplex ;

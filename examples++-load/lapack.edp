@@ -10,6 +10,12 @@ cout << A << endl;
 A1=A^-1;
 cout << A1 << endl;
 
+ complex[int] vp(n);
+ complex[int,int] VP(n,n);
+
+ int nn= dgeev(A,vp,VP);
+ cout << vp << endl;
+ cout << VP << endl;
 B=0;
 for(int i=0;i<n;++i)
   for(int j=0;j<n;++j)
