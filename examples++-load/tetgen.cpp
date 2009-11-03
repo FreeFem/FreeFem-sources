@@ -46,6 +46,7 @@
 
 #include "ff++.hpp" 
 #include "msh3.hpp"
+#define TETLIBRARY
 #include "tetgen.h"
 
 using namespace  Fem2D;

@@ -21,7 +21,7 @@ struct OnePlot
   int dim;
   R3 Pmin,Pmax;
   double fmin,fmax;
-  double vmax;
+  double vmax2;
   long what;
   GLsizei ngllists;
   GLint gllists;
@@ -36,10 +36,10 @@ struct OnePlot
 
   void bfv(R & fmn,R &fmx,R & vmx) const 
   { 
-    // cout << "\t\t\t\t  f min, max v max :" << fmin << " " << fmax << " " << vmax << endl;
+    // cout << "\t\t\t\t  f min, max v max :" << fmin << " " << fmax << " " << vmax2 << endl;
     fmn=Min(fmin,fmn);
     fmx=Max(fmax,fmx);
-    vmx=Max(vmax,vmx);
+    vmx=Max(vmax2,vmx);
   }
 
   virtual void dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const 
@@ -49,7 +49,7 @@ struct OnePlot
   OnePlot(long w,int ddim=2,int nbgllist=0) :
     dim(ddim),
     Pmin(dinfty,dinfty,dinfty),Pmax(-dinfty,-dinfty,-dinfty),
-    fmin(dinfty),fmax(-dinfty),vmax(0),
+    fmin(dinfty),fmax(-dinfty),vmax2(0),
     what(w),ngllists(nbgllist),gllists(0),
     oklist(nbgllist),setgllists(0){
   }
@@ -146,9 +146,9 @@ struct OnePlotFE3: public OnePlot
 	      for (int i=0,j=0;i<n;i++, j+=2)
 		{
 		    R2 u(v[j],v[j+1]);
-		    vmax = max(vmax,u.norme());
+		    vmax2 = max(vmax2,u.norme2());
 		}
-	      //cout << " vmax = " << vmax << endl; 
+	      //cout << " vmax = " << sqrt(vmax2) << endl; 
 	  }
 	if(debug>3) cout << "OnePlotFE3" << Th <<" " << what<< " " << nsub <<" " << v.N() << endl
 			 << "       Pmin " << Pmin << " Pmax  " << Pmax << endl;
@@ -215,7 +215,7 @@ class ThePlot { public:
     long  Niso,Narrow;
     R3 Pmin,Pmax,PminT,PmaxT;//  with R -> true bound
     R  fmin,fmax,fminT,fmaxT; // with  bound with previous plot. 
-    R  vmax;
+    R  vmax2;
     KN<R> Viso,Varrow;
     bool bw;
     string * psfile;
