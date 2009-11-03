@@ -13,9 +13,9 @@ all-local: tetgen
 DIRPKG=../pkg
 SRCDIR=tetgen$(tetgen_VERSION)
 PACKAGE=$(DIRPKG)/tetgen$(tetgen_VERSION).tar.gz
-SERVER=http://www.wias-berlin.de/people/si
+SERVER=http://tetgen.berlios.de/files
 INSTALL=../..
-tetgen_VERSION=1.4.2
+tetgen_VERSION=1.4.3
 
 tetgen: FAIT
 
@@ -35,7 +35,7 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR) cxxflags
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
-	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
+#	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
 
 $(PACKAGE):
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`

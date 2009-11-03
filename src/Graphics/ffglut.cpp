@@ -525,7 +525,7 @@ void OnePlotError::Draw(OneWindow *win)
   cout << " Error plot item empty " << item <<  endl;
   int i = 4;
   char s[100];
-  sprintf(s,"Warning the item %d fot the plot is empty",item);
+  sprintf(s,"Warning the item %ld fot the plot is empty",item);
   win->Show(s,4+item*2);
   win->SetView() ;
 }
@@ -665,9 +665,9 @@ template<class Mesh>
 	  for (int i=0,j=0;i<n;i++, j+=2)
 	    {
 		R2 u(v[j],v[j+1]);
-		vmax = max(vmax,u.norme());
+		vmax2 = max(vmax2,u.norme2());
 	    }
-	  //cout << " vmax = " << vmax << endl; 
+	  // cout << " vmax = " << sqrt(vmax2) << endl; 
       }
     if(debug>3) cout << "OnePlotFE" << Th <<" " << what<< " " << Psub.N() << " " << Ksub.N()/3 <<" " << v.N() << endl; 
     ffassert(f.good());
@@ -803,7 +803,7 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
 }
 
 template<class Mesh>
- void OnePlotFE<Mesh>::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const 
+ void OnePlotFE<Mesh>::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) const 
 {
   const Mesh & Th(*this->Th);
   int nsubT= Ksub.N()/3;//NbOfSubTriangle(nsub);
@@ -871,12 +871,12 @@ template<class Mesh>
 		R2 uv(v[o+j],v[o+j+1]);
 		j+=2;		
 		R  l =(uv,uv) ;
-		vmn=min(l,vmn);
-		vmx=max(l,vmx);
+		vmn2=min(l,vmn2);
+		vmx2=max(l,vmx2);
 	      }
 	  }
       if(debug>100 && ccc)
-	cout << " dny_bfv :  "  << fmn << " " << fmx << " " << vmn << " " << vmx 
+	cout << " dny_bfv :  "  << fmn << " " << fmx << " " << sqrt(vmn2) << " " << sqrt(vmx2) 
 	     <<  " : " << Pn[0] << endl;
       
     }
@@ -1475,20 +1475,20 @@ void ThePlot::DrawHelp(OneWindow *win)
   win->Show("any other key : nothing ",++i);
 }
 
-void ThePlot::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const 
+void ThePlot::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) const 
 {
   fmn=+1e100;
   fmx=-fmn;
-  vmx=0;
-  vmn=fmin;
+  vmx2=0;
+  vmn2=fmin;
   for (list<OnePlot *>::const_iterator i= plots.begin();i != plots.end(); ++i)
     {
-      if(*i)  (*i)->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
+      if(*i)  (*i)->dyn_bfv(win,fmn,fmx,vmn2,vmx2) ;
     }
   if(debug>4)
     cout << "dyn_bfv  " << fmn << " " << fmx << endl;
   if(fmn>fmx) fmn=fmin,fmx=fmax;
-  if(vmn>vmx) vmn=0,vmx=vmax;
+  if(vmn2>vmx2) vmn2=0,vmx2=vmax2;
 }
 
 void ThePlot::Draw(OneWindow *win) 
@@ -1586,7 +1586,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   fmin = +dinfty;    
   fmax = -dinfty;
   Pmax=R3(-dinfty,-dinfty,-dinfty);
-  vmax=0;
+  vmax2=0;
   
   coefr=1;
   long dimpp=0;
@@ -1845,7 +1845,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       ffassert(p);
       plots.push_back(p);
       p->bb(Pmin,Pmax);
-      p->bfv(fmin,fmax,vmax);
+      p->bfv(fmin,fmax,vmax2);
       plotdim=max(plotdim,p->dim);
       ffassert(fin.good());		      
       datadim=max(datadim,p->dim); 
@@ -1853,7 +1853,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   if(Niso==0) 
     Niso = iso3d ? 5 : 20;
   
-  // cout << "\t\t\t\t  f min, max v max :" << fmin << " " << fmax << " " << vmax << endl;
+  // cout << "\t\t\t\t  f min, max v max :" << fmin << " " << fmax << " " << vmax2 << endl;
   
   double ref_f = abs(fmax)+abs(fmin) ; 
   if(fmax < fmin)
@@ -1937,8 +1937,8 @@ void ThePlot::SetDefIsoV(int niso,int narr,double fmn,double fmx,double vmn,doub
     {
       x=0; 
       if(debug>10)
-	cout << "vmax=  " << vmax << endl;
-      d= sqrt(vmax)/(Narrow-1.1);
+	cout << "vmax2=  " << vmax2 << endl;
+      d= sqrt(vmax2)/(Narrow-1.1);
     }   
   if (!pVarrow || dyn)
     for (int i = 0;i < Narrow;i++)
