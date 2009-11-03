@@ -113,6 +113,10 @@ while [ $# -ne 0 ]  ; do
 	-D*)    INC="$INC '$1'";;
 	-dll)   DLL="$DLL '$2'";shift;;
 	-[Ll]*)    LIBS="$LIBS $1" ;;
+	*.a)     LIBS="$LIBS $1" ;;
+	*.so)    LIBS="$LIBS $1" ;;
+	*.dll)   LIBS="$LIBS $1" ;;
+	-Wl*)    LIBS="$LIBS $1" ;;
 	*.cpp) files="$files '$1'";  o=`basename "$1" .cpp` ; fileso="$fileso '$o.o'"; args=$argsp;; 
 	*.cp)  files="$files '$1'";  o=`basename "$1" .cp`   ; fileso="$fileso '$o.o'"; args=$argsp;; 
 	*.cxx) files="$files '$1'";  o=`basename "$1" .cxx` ; fileso="$fileso '$o.o'"; args=$argsp;;

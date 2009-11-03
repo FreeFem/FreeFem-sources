@@ -10,7 +10,7 @@ using namespace std;
   typedef long intblas;
 #endif
 
-#include <vecLib/clapack.h>
+#include "clapack.h"
 class Init { public:
   Init();
 };
