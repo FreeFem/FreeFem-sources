@@ -1,4 +1,4 @@
-# Downloading and compiling extra libraries
+# and compiling extra libraries
 # -----------------------------------------
 
 # $Id$

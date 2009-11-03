@@ -1,5 +1,5 @@
 //   for automatic  compilation with ff-c++
-//ff-c++-LIBRARY-dep:   superlu
+//ff-c++-LIBRARY-dep:   superlu blas 
 //ff-c++-cpp-dep: 
 //  
 #include "ff++.hpp"
