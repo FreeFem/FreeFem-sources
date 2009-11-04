@@ -1,4 +1,6 @@
-v 3.6 (21 oct 2009)
+v 3.6 (4 nov 2009)
+    change the version of tetgen to 1.4.3 download
+    correct in ffglut max value of arrow
     add examples of function with stack parameter in 
        examples++-load/funcTemplate.cpp load facility
        and 
