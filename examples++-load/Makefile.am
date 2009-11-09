@@ -118,7 +118,7 @@ ff-pkg-download:ff-pkg-download.in Makefile
 ff-get-dep:ff-get-dep.in Makefile
 	../config.status  --file=$@:$@.in
 	chmod a+x $@
-	cp $@ ../download/bin
+	-if [ -d ../download/bin ] ;then cp $@ ../download/bin; fi
 WHERE_LIBRARY-download:ff-pkg-download 
 	./ff-pkg-download >$@
 	touch WHERE_LIBRARY

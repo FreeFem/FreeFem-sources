@@ -6,16 +6,23 @@ real[int,int] A(n,n),A1(n,n),B(n,n);
 for(int i=0;i<n;++i)
 for(int j=0;j<n;++j)
   A(i,j)= (i==j) ? n+1 : 1;
+ A(0,n-1)=-100;
 cout << A << endl;
 A1=A^-1;
 cout << A1 << endl;
 
  complex[int] vp(n);
- complex[int,int] VP(n,n);
+ complex[int,int] VP(n,n),KK(n,n);
 
  int nn= dgeev(A,vp,VP);
- cout << vp << endl;
- cout << VP << endl;
+ cout << "  vp = " <<vp << endl;
+ cout << " VP = " << VP << endl;
+ KK =0.;
+ for(int i=0;i<n;++i)
+   for(int j=0;j<n;++j)
+     for(int k=0;k<n;++k)
+       KK(i,j) += (A(i,k) - vp[j]* real(i==k) ) *VP(k,j);
+ cout <<" KK " <<  KK << endl; 
 B=0;
 for(int i=0;i<n;++i)
   for(int j=0;j<n;++j)
@@ -27,6 +34,41 @@ cout << B << endl;
 inv(A1);
 cout << A1 << endl;
 }
+{
+int n=5;
+complex[int,int] A(n,n),A1(n,n),B(n,n);
+for(int i=0;i<n;++i)
+for(int j=0;j<n;++j)
+  A(i,j)= (i==j) ? n+1 : 1;
+ A(0,n-1)=-100;
+cout << A << endl;
+A1=A^-1;
+cout << A1 << endl;
+
+ complex[int] vp(n);
+ complex[int,int] VP(n,n),KK(n,n);
+
+ int nn= zgeev(A,vp,VP);
+ cout << "  vp = " <<vp << endl;
+ cout << " VP = " << VP << endl;
+ KK =0.;
+ for(int i=0;i<n;++i)
+   for(int j=0;j<n;++j)
+     for(int k=0;k<n;++k)
+       KK(i,j) += (A(i,k) - vp[j]* real(i==k) ) *VP(k,j);
+ cout <<" KK " <<  KK << endl; 
+B=0;
+for(int i=0;i<n;++i)
+  for(int j=0;j<n;++j)
+    for(int k=0;k<n;++k)
+      B(i,j) +=A(i,k)*A1(k,j);
+cout << B << endl;
+// A1+A^-1;  attention ne marche pas
+
+//inv(A1);
+//cout << A1 << endl;
+}
+
 {
   int n=5;
   complex[int,int] A(n,n),A1(n,n),B(n,n);

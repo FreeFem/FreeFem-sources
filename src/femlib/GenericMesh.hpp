@@ -34,6 +34,7 @@
 
 // la regle de programmation 3  
 extern long verbosity;
+extern long searchMethod; //pichon
 #include <map>  // Add J. Morice
 
 #include "cassert" 
