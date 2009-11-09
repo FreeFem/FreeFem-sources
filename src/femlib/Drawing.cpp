@@ -703,6 +703,10 @@ void TTriangle<R2>::Draw(int edge,double skrink) const
   LineTo(G+(*vertices[(edge+2)%3]-G)*skrink);
 }
 
+
+template  void TTriangle<R2>::Draw(double skrink) const;
+template  void TTriangle<R2>::Draw(int edge,double skrink) const;
+
 template<class R2>
 void TTriangle<R2>::Fill(int color) const 
 {
