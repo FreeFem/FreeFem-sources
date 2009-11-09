@@ -1,4 +1,7 @@
 //  file to add UMFPACK solver with dynamic load.
+//ff-c++-LIBRARY-dep:   umfpack blas 
+//ff-c++-cpp-dep: 
+
 #include  <iostream>
 using namespace std;
 

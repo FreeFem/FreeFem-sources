@@ -1,3 +1,7 @@
+//   for automatic  compilation with ff-c++
+//ff-c++-LIBRARY-dep: amd  umfpack blas 
+//ff-c++-cpp-dep: 
+//  
 //  file to add UMFPACK solver with dynamic load.
 #include  <iostream>
 using namespace std;
@@ -39,7 +43,7 @@ extern "C" {
 }
 #endif
 template<class R>
-class SolveUMFPACK :   public MatriceMorse<R>::VirtualSolver  {
+class SolveUMFPACK64 :   public MatriceMorse<R>::VirtualSolver  {
   double eps;
   mutable double  epsr;
   double tgv;
@@ -47,7 +51,7 @@ class SolveUMFPACK :   public MatriceMorse<R>::VirtualSolver  {
   int umfpackstrategy;
   double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
 public:
-  SolveUMFPACK(const MatriceMorse<R> &A,int strategy,double ttgv, double epsilon=1e-6,
+  SolveUMFPACK64(const MatriceMorse<R> &A,int strategy,double ttgv, double epsilon=1e-6,
 	       double pivot=-1.,double pivot_sym=-1.  ) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),
@@ -155,9 +159,9 @@ public:
      if(verbosity>1) cout << "   x min max " << x.min() << " " <<x.max() << endl;
   }
 
-  ~SolveUMFPACK() { 
+  ~SolveUMFPACK64() { 
    if(verbosity>3)
-    cout << "~SolveUMFPACK S:" << Symbolic << " N:" << Numeric <<endl;
+    cout << "~SolveUMFPACK 64:" << Symbolic << " N:" << Numeric <<endl;
     if (Symbolic)   umfpack_dl_free_symbolic  (&Symbolic),Symbolic=0; 
     if (Numeric)    umfpack_dl_free_numeric (&Numeric),Numeric=0;
   }
@@ -171,7 +175,7 @@ public:
 
 
 template<>
-class SolveUMFPACK<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
+class SolveUMFPACK64<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
   double eps;
   mutable double  epsr;
   int umfpackstrategy;
@@ -183,7 +187,7 @@ class SolveUMFPACK<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
     double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
 
 public:
-  SolveUMFPACK(const MatriceMorse<Complex> &A,int strategy,double ttgv, double epsilon=1e-6,
+  SolveUMFPACK64(const MatriceMorse<Complex> &A,int strategy,double ttgv, double epsilon=1e-6,
      double pivot=-1.,double pivot_sym=-1.
 ) : 
     eps(epsilon),epsr(0),umfpackstrategy(strategy),tgv(ttgv),
@@ -212,7 +216,7 @@ public:
     if(tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=pivot;
     if(umfpackstrategy>=0) Control[UMFPACK_STRATEGY]=umfpackstrategy;
     if(verbosity>3) { 
-      cout << "  UMFPACK complex Solver Control :" ;
+      cout << "  UMFPACK(64) complex Solver Control :" ;
       cout << "\n\t SYM_PIVOT_TOLERANCE "<< Control[UMFPACK_SYM_PIVOT_TOLERANCE];
       cout << "\n\t PIVOT_TOLERANCE     "<< Control[UMFPACK_PIVOT_TOLERANCE];
       cout << "\n\t PRL                 "<< Control[UMFPACK_PRL];
@@ -301,9 +305,9 @@ public:
     }
   }
 
-  ~SolveUMFPACK() { 
+  ~SolveUMFPACK64() { 
     if(verbosity>5)
-    cout << "~SolveUMFPACK " << endl;
+    cout << "~SolveUMFPACK64 " << endl;
     if (Symbolic)   umfpack_zl_free_symbolic  (&Symbolic),Symbolic=0; 
     if (Numeric)    umfpack_zl_free_numeric (&Numeric),Numeric=0;
     delete [] ar;
@@ -319,17 +323,17 @@ public:
 }; 
 
 inline MatriceMorse<double>::VirtualSolver *
-BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(double,A))
+BuildSolverIUMFPack64(DCL_ARG_SPARSE_SOLVER(double,A))
 {
-    cout << " BuildSolverUMFPack<double>" << endl;
-    return new SolveUMFPACK<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
+    cout << " BuildSolverUMFPack64<double>" << endl;
+    return new SolveUMFPACK64<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
 
 inline MatriceMorse<Complex>::VirtualSolver *
-BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(Complex,A))
+BuildSolverIUMFPack64(DCL_ARG_SPARSE_SOLVER(Complex,A))
 {
-    cout << " BuildSolverUMFPack<Complex>" << endl;
-    return new SolveUMFPACK<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
+    cout << " BuildSolverUMFPack64<Complex>" << endl;
+    return new SolveUMFPACK64<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
 
 
@@ -348,12 +352,12 @@ bool SetDefault()
     TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
 }
 
-bool SetUMFPACK()
+bool SetUMFPACK64()
 {
     if(verbosity>1)
-	cout << " SetDefault sparse solver to IUMFPack" << endl;
-    DefSparseSolver<double>::solver  =BuildSolverIUMFPack;
-    DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;    
+	cout << " SetDefault sparse solver to IUMFPack64" << endl;
+    DefSparseSolver<double>::solver  =BuildSolverIUMFPack64;
+    DefSparseSolver<Complex>::solver =BuildSolverIUMFPack64;    
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
 }
 
@@ -365,17 +369,17 @@ Init::Init(){
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   if(verbosity>1)
-    cout << "\n Add: UMFPACK:  defaultsolver defaultsolverUMFPACK" << endl;
+    cout << "\n Add: UMFPACK64:  defaultsolver defaultsolverUMFPACK" << endl;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   
-  DefSparseSolver<double>::solver =BuildSolverIUMFPack;
-  DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
+  DefSparseSolver<double>::solver =BuildSolverIUMFPack64;
+  DefSparseSolver<Complex>::solver =BuildSolverIUMFPack64;
   if(! Global.Find("defaultsolver").NotNull() )
-    {    cout << "\n add defaultsolver" << endl;
+    {    cout << "\n add defaultsolver (64)" << endl;
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   }
-  if(! Global.Find("defaulttoUMFPACK").NotNull() )
-    Global.Add("defaulttoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));  
+  if(! Global.Find("defaulttoUMFPACK64").NotNull() )
+    Global.Add("defaulttoUMFPACK64","(",new OneOperator0<bool>(SetUMFPACK64));  
 }
 
 
