@@ -61,7 +61,7 @@ inline double CPUtime(){
 }
 
 extern long verbosity;  // level off printing
-
+extern long searchMethod; //pichon
 
 extern bool  withrgraphique;
 

@@ -238,10 +238,10 @@ struct  VirtualMatrice { public:
     VirtualMatrice(int nn): N(nn),M(nn) {}
   //  y += A x
   virtual void addMatMul(const KN_<R> &  x, KN_<R> & y) const =0; 
-  virtual void addMatTransMul(const KN_<R> &  x, KN_<R> & y) const 
+  virtual void addMatTransMul(const KN_<R> &  , KN_<R> & ) const 
     { InternalError("VirtualMatrice::addMatTransMul not implemented "); }
   virtual bool WithSolver() const {return false;} // by default no solver          
-  virtual void Solve( KN_<R> &  x,const KN_<R> & b) const 
+  virtual void Solve( KN_<R> &  ,const KN_<R> & ) const 
     { InternalError("VirtualMatrice::solve not implemented "); } 
 
 #ifdef VersionFreeFempp
@@ -1122,8 +1122,8 @@ class KN :public KN_<R> { public:
 template<class R>
 class KNM: public KNM_<R>{ public:
 
-  KNM(long n,long m) 
-        :KNM_<R>(new R[n*m],n,m){}
+  KNM(long nn,long mm) 
+        :KNM_<R>(new R[nn*mm],nn,mm){}
    KNM(const KNM<R> & u)  // PB si stepi ou stepj nulle
         :KNM_<R>(new R[u.size()],u.N(),u.M()) 
        { KN_<R>::operator=(u);}
@@ -1414,20 +1414,20 @@ template<class R> inline bool  SameShape(const ShapeOfArray & a,const DotSlash_K
            { return SameShape(a,b.a) ;} 
 template<class R> inline bool  SameShape(const ShapeOfArray & a,const Mul_KNM_KN_<R> & b) 
            { return a.n==b.A.N() ;} 
- inline bool  SameShape(const ShapeOfArray & a,const VirtualMatrice<double>::plusAx & b) 
+ inline bool  SameShape(const ShapeOfArray & ,const VirtualMatrice<double>::plusAx & ) 
            { return true ;} //  pas de test car la matrice peut etre rectangulaire
- inline bool  SameShape(const ShapeOfArray & a,const VirtualMatrice<double>::plusAtx & b) 
+ inline bool  SameShape(const ShapeOfArray & ,const VirtualMatrice<double>::plusAtx & ) 
            { return true ;} //  pas de test car la matrice peut etre rectangulaire
- inline bool  SameShape(const ShapeOfArray & a,const VirtualMatrice<complex<double> >::plusAx & b) 
+ inline bool  SameShape(const ShapeOfArray & ,const VirtualMatrice<complex<double> >::plusAx & ) 
            { return true ;} //  pas de test car la matrice peut etre rectangulaire
- inline bool  SameShape(const ShapeOfArray & a,const VirtualMatrice<complex<double> >::plusAtx & b) 
+ inline bool  SameShape(const ShapeOfArray & ,const VirtualMatrice<complex<double> >::plusAtx & ) 
            { return true ;} //  pas de test car la matrice peut etre rectangulaire
 
- inline bool  SameShape(const ShapeOfArray & a,const double) 
+ inline bool  SameShape(const ShapeOfArray & ,const double) 
            { return true;} 
- inline bool  SameShape(const ShapeOfArray & a,const complex<double>) 
+ inline bool  SameShape(const ShapeOfArray & ,const complex<double>) 
            { return true;} 
- inline bool  SameShape(const ShapeOfArray & a,const complex<float>) 
+ inline bool  SameShape(const ShapeOfArray & ,const complex<float>) 
            { return true;}            
 
 template<class R>

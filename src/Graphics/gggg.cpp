@@ -38,6 +38,7 @@
 void ShowDebugStack(){}
 
  long verbosity = 1;
+ long searchMethod=0; // = 9999; //pichon //PROBABLY BUG : can't compile without it
  FILE *ThePlotStream=0; //  Add for new plot. FH oct 2008
 
  

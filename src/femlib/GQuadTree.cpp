@@ -606,77 +606,74 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 				       typename Mesh::RdHat & Phat,
 				       bool & outside,
 				       const typename  Mesh::Element * tstart)
-  {
-    typedef  typename Mesh::Element Element;
-    typedef  typename Mesh::Vertex Vertex;
-    typedef  typename Mesh::Rd Rd;
-    const int nkv=Element::nv;
-    const int d=Rd::d;
-    int it,j;
-    const int mxbord=100;
-    int kbord[mxbord];
-    int nbord=0;
-    if ( tstart )
-      it =  Th(tstart);
-    else  if(quadtree)
-      {  
-	const Vertex * v=quadtree->NearestVertexWithNormal(P);
-	if (!v) 
-	  { 
-	    v=quadtree->NearestVertex(P);
-	    assert(v);
-	  }
-	it=Th.Contening(v);
-	if(verbosity>200)
-	  cout <<  "  Close : "<<  *v << " " << Th(v) << " "; 
-    
-      }
-    else ffassert(0);
+{
+  typedef  typename Mesh::Element Element;
+  typedef  typename Mesh::Vertex Vertex;
+  typedef  typename Mesh::Rd Rd;
+  const int nkv=Element::nv;
+  const int d=Rd::d;
+  R dP=DBL_MAX;
+  Rd PPhat;
+  int k=0;    
 
-    if(verbosity>200)
-      cout << "tstart=" << tstart << " "<< "it=" << it << " P="<< P << endl; 
-    //     int itdeb=it;     
-    //     int count=0;
-    //     L1: 
-    outside=true; 
-    //int its=it;
-    //dPdP	int iib=-1;//,iit=-1;
-    R dP=DBL_MAX;
-    Rd PPhat;
-    int k=0;    
-    Mesh::kfind++;
-    while (1)
-      { 
-	//if(verbosity>199) cout << "it " << it <<endl;
-	const Element & K(Th[it]);
-	Mesh::kthrough++;
-	assert(k++<1000);
-	int kk,n=0,nl[nkv];
-	R l[nkv];
-	for(int iii=0; iii<nkv; iii++)
-	  l[iii]=0.;
-	
-	CoorBary(K,P,l);
-	
-	// CoorBary :: donner entre 0 et 1
-	// Pb si K.mesure*1.e-10 precision machine ==> bug
-	
-	// avant:
-	// R eps =  -K.mesure()*1e-10;
-	R eps = -1e-10;
-	for(int i=0;i<nkv;++i)
-	  if( l[i] < eps){
-	    nl[n++]=i;
-	  }
-	if(verbosity>200){
-	  cout << "tet it=" << it ;
-	  cout << "  K.mesure=" << K.mesure() ;
-	  cout << " eps=" << eps << endl;
-	  for(int i=0;i<nkv;++i)
-	    cout<< " l["<< i <<"]=" <<  l[i] ;
-	  cout << " n=" << n << endl;
+  int it,j;
+  const int mxbord=100;
+  int kbord[mxbord];
+  int nbord=0;
+  if(searchMethod>1) goto PICHON;
+  if ( tstart )
+    it =  Th(tstart);
+  else  if(quadtree)
+    {  
+      const Vertex * v=quadtree->NearestVertexWithNormal(P);
+      if (!v) 
+	{ 
+	  v=quadtree->NearestVertex(P);
+	  assert(v);
 	}
-
+      it=Th.Contening(v);
+      if(verbosity>200)
+	cout <<  "  Close : "<<  *v << " " << Th(v) << " "; 
+      
+    }
+  else ffassert(0);
+  
+  if(verbosity>200)
+    cout << "tstart=" << tstart << " "<< "it=" << it << " P="<< P << endl; 
+  outside=true; 
+  Mesh::kfind++;
+  while (1)
+    { 
+      //if(verbosity>199) cout << "it " << it <<endl;
+      const Element & K(Th[it]);
+      Mesh::kthrough++;
+      assert(k++<1000);
+      int kk,n=0,nl[nkv];
+      R l[nkv];
+      for(int iii=0; iii<nkv; iii++)
+	l[iii]=0.;
+      
+      CoorBary(K,P,l);
+      
+      // CoorBary :: donner entre 0 et 1
+      // Pb si K.mesure*1.e-10 precision machine ==> bug
+      
+      // avant:
+      // R eps =  -K.mesure()*1e-10;
+      R eps = -1e-10;
+      for(int i=0;i<nkv;++i)
+	if( l[i] < eps){
+	  nl[n++]=i;
+	}
+      if(verbosity>200){
+	cout << "tet it=" << it ;
+	cout << "  K.mesure=" << K.mesure() ;
+	cout << " eps=" << eps << endl;
+	for(int i=0;i<nkv;++i)
+	  cout<< " l["<< i <<"]=" <<  l[i] ;
+	cout << " n=" << n << endl;
+      }
+      
       if (n==0)
 	{  // interior => return
 	  outside=false; 
@@ -696,7 +693,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	}
       
       
-
+      
       kk=n==1 ? 0 : nRand(n);
       j= nl[ kk ];
       int itt =  Th.ElementAdj(it,j);
@@ -715,18 +712,18 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	}
       if(verbosity>101)
 	{
-	cout << " bord "<< it<< "   nbf < 0 : " <<n << " (inb) " << inkbord << " nfb" << nbord<<endl;
-	    R ss=0; 
-	    for(int i=0;i<nkv;++i)
-	      {  ss += l[i];
+	  cout << " bord "<< it<< "   nbf < 0 : " <<n << " (inb) " << inkbord << " nfb" << nbord<<endl;
+	  R ss=0; 
+	  for(int i=0;i<nkv;++i)
+	    {  ss += l[i];
 	      cout << l[i] << " ";}
-	    cout << " s=" << ss << endl;;
-	    
+	  cout << " s=" << ss << endl;;
+	  
 	}
-
+      
       if(verbosity>200)
 	cout << "GQuadTree::value of n " << n << endl;
-
+      
       if ( n!=1 )  // on est sur le bord, mais plusieurs face <0 => on test les autre
 	{  // 1) existe t'il un adj interne
 	  int nn=0,ii;
@@ -763,34 +760,81 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	if(verbosity>100)
 	  {
 	    cout << P << " " << n << " l: ";
-	      R ss=0; 
-	  for(int i=0;i<nkv;++i)
-	    {  ss += l[i];
-	    cout << l[i] << " ";}
-	  cout << " s=" << ss <<" " << s <<" exit by bord " << it << " "  << Phat << endl;;
+	    R ss=0; 
+	    for(int i=0;i<nkv;++i)
+	      {  ss += l[i];
+		cout << l[i] << " ";}
+	    cout << " s=" << ss <<" " << s <<" exit by bord " << it << " "  << Phat << endl;;
           }
 	outside=true;
+	if(searchMethod) goto PICHON;
 	return &Th[it] ;
       }		    
     }
+  
+ PICHON:
+  {
+  /*==============================PICHON=================*/
+  // Brute force ** */    
+  R l[4], eps = -1e-6;  //pichon
+  double dist_baryC = 0.0, min_dist_baryC = 1e31;      
+  long closestTet = -1;
+  l[0]=l[1]=l[2]=l[3]=1; //  for d < 3
+  for(int tet=0;tet<Th.nt;tet++) // nkv=4
+    { 
+      const Element & K(Th[tet]);
+      CoorBary(K,P,l);
+      
+      // measure dist by sum ( |lambda_i| )
+      dist_baryC = 0.0;      
+      for(int i=0; i<nkv; i++)
+	dist_baryC += abs(l[i]);
+      
+      // define closest Tetrahedron !!! TO VERIFY THE HYPOTHESE !!! 
+      if( dist_baryC < min_dist_baryC )   
+	{
+	  min_dist_baryC = dist_baryC; 
+	  closestTet = tet; 
+	}
+      
+      
+      if  ( (l[0] >= eps) && (l[1] >= eps) && (l[2] >= eps) &&  (l[3] >= eps) )
+	{	
+	  Phat=Rd(l+1);
+	  return &K;	
+	}
+    }
+  
+  const Element & K(Th[closestTet]);
+  
+  CoorBary(K,P,l);
+  
+  Phat=Rd(l+1);
+  if(verbosity>2)
+    cout << "  --vertex:" << P << " NOT in DOMAIN. use closestTet. Phat:" << Phat << endl;
+  return &K;
+  }
+  /*==============================PICHON=================*/
 }
-// Instantiation du manuel des templates
 
-  template class GTree<Vertex2>;
-  template class GTree<Vertex3>;
-  template class GTree<Vertex1>;
-  typedef Mesh3::GMesh GMesh3;
-  typedef Mesh2::GMesh GMesh2;
-  typedef Mesh1::GMesh GMesh1;
-  template
-  const   GMesh3::Element * Find<GMesh3>(const GMesh3 & Th,
+
+// Instantiation  manuel des templates
+
+template class GTree<Vertex2>;
+template class GTree<Vertex3>;
+template class GTree<Vertex1>;
+typedef Mesh3::GMesh GMesh3;
+typedef Mesh2::GMesh GMesh2;
+typedef Mesh1::GMesh GMesh1;
+template
+const   GMesh3::Element * Find<GMesh3>(const GMesh3 & Th,
 				       GTree< GMesh3::Vertex> *quadtree,
 				       GMesh3::Rd P,
 				       GMesh3::RdHat & Phat,
 				       bool & outside,
 				       const   GMesh3::Element * tstart);
-  template
-  const   GMesh2::Element * Find<GMesh2>(const GMesh2 & Th,
+template
+const   GMesh2::Element * Find<GMesh2>(const GMesh2 & Th,
 				       GTree< GMesh2::Vertex> *quadtree,
 				       GMesh2::Rd P,
 				       GMesh2::RdHat & Phat,
