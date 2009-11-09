@@ -1,5 +1,17 @@
 To compile superlu.cpp 
 
+to build ../download/lib/libsuperlu_3.1.a
+#  Just do : 
+cd ../download/superlu/
+make
+cd -
+make  SuperLu.$suffix_dynamic_lib
+
+where $suffix_dynamic_lib is "so" "dll" "dylib" depending of you
+achitechure  ( linux, windows, MacOSX)
+
+
+
 1) download the SuperLu 3.0 package form
 
 curl   http://crd.lbl.gov/~xiaoye/SuperLU/superlu_3.0.tar.gz  -o superlu_3.0.tar.gz

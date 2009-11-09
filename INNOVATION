@@ -1,3 +1,9 @@
+v 3.6.1 
+    add PICHON stuff for brute force seach point
+    add umpack long interface to by pass the 32bit limits
+    correct  ::Draw undef ref.  ubuntu 10. (gcc 4.4)
+    correct typo error  image tools
+    see UMPACK64  (code and example in examples++-load)
 v 3.6 (4 nov 2009)
     change the version of tetgen to 1.4.3 download
     correct in ffglut max value of arrow

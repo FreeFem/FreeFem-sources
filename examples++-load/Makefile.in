@@ -257,7 +257,7 @@ EXTRA_DIST = ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
   convect_dervieux.edp    testFEMorley.edp \
   testFE-PkEdge.edp \
   splitmesh3.cpp  splitmesh3.edp  splitmesh6.cpp  splitmesh6.edp \
-  REAME_SuperLU \
+  README_SuperLU \
   tetgen.cpp\
   msh3.cpp msh3.hpp\
   ffrandom.cpp ffrandom.edp  \
@@ -265,7 +265,8 @@ EXTRA_DIST = ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
   bmo.cpp lgbmo.cpp bmo.hpp \
  fflapack.cpp	lapack.cpp	lapack.edp \
  fig.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp \
- DxWriter.cpp  metis.cpp pcm.cpp pcm.hpp pcm2rnm.cpp
+ DxWriter.cpp  metis.cpp pcm.cpp pcm.hpp pcm2rnm.cpp \
+ UMFPACK64.cpp
 
 LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -279,16 +280,7 @@ LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	ppm2rnm.$(DYLIB_SUFFIX) DxWriter.$(DYLIB_SUFFIX) \
 	pcm2rnm.$(DYLIB_SUFFIX) $(DYLIB_OTHER_COMPILE) 
 
-LIST_COMPILE_PKG = tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) metis.$(DYLIB_SUFFIX)
-LLSUPERLU = superlu_3.1
-LLTET = tet
-LLFFTW3 = fftw3
-LK_TET = -I../download/include -L../download/lib -l$(LLTET)
-FINC_TET = ../download/include/tetgen.h
-LK_SUPERLU = -I../download/include -L../download/lib -l$(LLSUPERLU) 
-FINC_SUPERLU = ../download/include/slu_util.h
-LK_FFTW3 = -I../download/include -L../download/lib -l$(LLFFTW3)
-FINC_FFTW3 = ../download/include/fftw3.h
+LIST_COMPILE_PKG = tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) metis.$(DYLIB_SUFFIX) UMFPACK64.$(DYLIB_SUFFIX)
 all: all-am
 
 .SUFFIXES:
@@ -565,6 +557,8 @@ include: include.tar.gz
 	rm -rf include 
 	gunzip -c include.tar.gz| tar xvf -
 	-rm -f include/._*
+	-cp -rf ../download/include/* include/.
+
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
 
@@ -605,7 +599,7 @@ ff-pkg-download:ff-pkg-download.in Makefile
 ff-get-dep:ff-get-dep.in Makefile
 	../config.status  --file=$@:$@.in
 	chmod a+x $@
-	cp $@ ../download/bin
+	-if [ -d ../download/bin ] ;then cp $@ ../download/bin; fi
 WHERE_LIBRARY-download:ff-pkg-download 
 	./ff-pkg-download >$@
 	touch WHERE_LIBRARY
