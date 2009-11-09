@@ -11,8 +11,9 @@
  *         change 32 in 4  for the size of float . 
  */
 
-
+using namespace std;
 #include <cstdio>
+#include <cstring>
 #include <cstdlib>
 #include <cmath>
 //#include "bytesex.h"

@@ -29,7 +29,8 @@ extern "C" {
 	pPPMimage  result;
 	FILE      *fp;
 	int        i,k,typimg,ret,r,g,b,s,maxval,bitsize;
-	char      *ptr,c,buff[1024],data[256];
+	const char      *ptr;
+	char c,buff[1024],data[256];
 	
 	/* search for image */
 	fprintf(stdout," Loading image: %s\n",imgname);
@@ -76,7 +77,7 @@ extern "C" {
 	assert(result);
 	
 	do {
-	    ret = fscanf(fp,"%s",&buff);
+	    ret = fscanf(fp,"%s",buff);
 	    if ( ret == EOF ) break;
 	    /* check and strip comments */
 	    if ( buff[0] == '#' )
@@ -112,7 +113,7 @@ extern "C" {
 	else
 	    bitsize = 3*result->sizeX*result->sizeY;
 	if ( !quiet )
-	    fprintf(stdout,"   image size: %dx%d  %ld bytes\n",
+	    fprintf(stdout,"   image size: %dx%d  %d bytes\n",
 		    result->sizeX,result->sizeY,bitsize);
 	
 	result->data = (ubyte*)malloc(1+bitsize*sizeof(ubyte));
@@ -123,7 +124,7 @@ extern "C" {
 	    case P2:  /* ascii file (grey)  */
 	    case P3:  /* ascii file (color) */
 		for (i=0; i<bitsize; i++) {
-		    fscanf(fp,"%d",&r);
+		    int rr=fscanf(fp,"%d",&r);
 		    result->data[i] = (ubyte)r;
 		}
 		break;
