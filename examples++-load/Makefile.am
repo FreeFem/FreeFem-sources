@@ -36,7 +36,7 @@ EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  fflapack.cpp	lapack.cpp	lapack.edp \
  fig.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp \
  DxWriter.cpp  metis.cpp pcm.cpp pcm.hpp pcm2rnm.cpp \
- UMFPACK64.cpp
+ UMFPACK64.cpp iovtk.cpp gmsh.cpp MetricKuate.cpp 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -48,9 +48,11 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	medit.$(DYLIB_SUFFIX)  \
 	mat_dervieux.$(DYLIB_SUFFIX) lgbmo.$(DYLIB_SUFFIX) mat_psi.$(DYLIB_SUFFIX)\
 	ppm2rnm.$(DYLIB_SUFFIX) DxWriter.$(DYLIB_SUFFIX) \
-	pcm2rnm.$(DYLIB_SUFFIX) $(DYLIB_OTHER_COMPILE) 
+	pcm2rnm.$(DYLIB_SUFFIX) $(DYLIB_OTHER_COMPILE)  \
+	iovtk.$(DYLIB_SUFFIX) 	 gmsh.$(DYLIB_SUFFIX) MetricKuate.$(DYLIB_SUFFIX)
 
-LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) metis.$(DYLIB_SUFFIX) UMFPACK64.$(DYLIB_SUFFIX)
+LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) \
+	metis.$(DYLIB_SUFFIX) UMFPACK64.$(DYLIB_SUFFIX) NewSolver.$(DYLIB_SUFFIX)
 bin_PROGRAMS=
 
 

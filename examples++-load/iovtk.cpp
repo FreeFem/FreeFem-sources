@@ -36,12 +36,15 @@
 //       Th3_t->Buildbnormalv();  
 //       Th3_t->BuildjElementConteningVertex();
 //   is now in the constructor of Mesh3 to be consistante. 
-//   
+//  FH  nev 2009
+//  correct  gestion of nameofuser    variable
 
 #include  <iostream>
 #include  <cfloat>
 #include <cmath>
 #include <complex>
+using namespace std;
+
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
@@ -67,13 +70,20 @@ using namespace std;
 //#include "TransfoMesh_v2.hpp"
 #include "msh3.hpp"
 //#include "GQuadTree.hpp"
-
+//#include "lex.hpp"
 #include <set>
 #include <vector>
 #include <list>
 #include <fstream>
 
 using namespace Fem2D;
+
+char * newcopy(const char * s)
+{
+  char *r(new char  [strlen(s)+1]);
+  strcpy(r, s);
+  return r;
+}
 
 // Tables of element type of VTK considered in Freefem++
 static const int nvElemVTK[25] = {  1, 0, 2, 0, 3, 
@@ -199,16 +209,24 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
   bool binary = false;
   if(!strncmp(buffer, "BINARY",6)) binary = true;
     
-  if(fscanf(fp, "%s %s", buffer, buffer2) != 2) { cout << "error in reading vtk files" << endl; exit(1); }
+  if(fscanf(fp, "%s %s", buffer, buffer2) != 2) { 
+    cerr << "error in reading vtk files" << filename << endl;
+    ExecError("load vtk files");
+  }
   if(strcmp(buffer, "DATASET") || strcmp(buffer2, "UNSTRUCTURED_GRID")){
     cout << "VTK reader can only read unstructured datasets" << endl;
+    ExecError("load  vtk files");
     exit(1);
   }
     
   // read mesh vertices
-  if(fscanf(fp, "%s %d %s\n", buffer, &nv, buffer2) != 3){ cout << "error in reading vtk files" << endl; exit(1); }
+  if(fscanf(fp, "%s %d %s\n", buffer, &nv, buffer2) != 3)
+    { cout << "error in reading vtk files" << endl;
+      ExecError("load  vtk files reah vertices");
+      exit(1); }
   if(strcmp(buffer, "POINTS") || !nv){
     cerr << "No points in dataset" << endl;
+      ExecError("load  vtk files: No points in dataset");
     exit(1);
   }
   int datasize;
@@ -216,12 +234,13 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
     datasize = sizeof(double);
   else if(!strncmp(buffer2, "float",5))
     datasize = sizeof(float);
-  else{
+  else {
     cout <<"VTK reader only accepts float or double datasets" << endl;
+    ExecError("load  vtk files VTK reader only accepts float or double datasets");
     exit(1);
   }
-    
-  cout << "Reading %d points" << nv << endl;
+  if(verbosity>1)  
+    cout << "   vtkio: Reading %d points" << nv << endl;
   vff = new Mesh::Vertex[nv];
     
   for(int i = 0 ; i < nv; i++){
@@ -229,33 +248,36 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
     if(binary){
       if(datasize == sizeof(float)){
 	float f[3];
-	if(fread(f, sizeof(float), 3, fp) != 3){ cout << "error in reading vtk files" << endl; exit(1); } 
+	if(fread(f, sizeof(float), 3, fp) != 3){ 
+	  ExecError("load  vtk files VTK reader only accepts float or double datasets");
+	  ExecError("error in reading vtk file"); 
+	} 
 	if(!bigEndian) SwapBytes((char*)f, sizeof(float), 3);
 	for(int j = 0; j < 3; j++) xyz[j] = f[j];
       }
       else{
-	if(fread(xyz, sizeof(double), 3, fp) != 3) { cout << "error in reading vtk files" << endl; exit(1); }
+	if(fread(xyz, sizeof(double), 3, fp) != 3) { cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); }
 	if(!bigEndian) SwapBytes((char*)xyz, sizeof(double), 3);
       }
     }
     else{
-      if(fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3){ cout << "error in reading vtk files" << endl; exit(1); }
+      if(fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); }
     }    
     vff[i].x = xyz[0];
     vff[i].y = xyz[1];
     if( abs(xyz[2]) > 1.e-7){
       cout << "we are plotted a two dimensional mesh: z coordinate must be 0" << endl;
-      exit(1);
+      ExecError("error in reading vtk file,we are plotted a two dimensional mesh: z coordinate must be 0");
     }    
     vff[i].lab = 1;
   }    
 
   // read mesh elements
   int numElements, numElements2, totalNumInt;
-  if(fscanf(fp, "%s %d %d\n", buffer, &numElements, &totalNumInt) != 3){ cout << "error in reading vtk files" << endl; exit(1); }
+  if(fscanf(fp, "%s %d %d\n", buffer, &numElements, &totalNumInt) != 3){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); }
   if(strcmp(buffer, "CELLS") || !numElements){
     cout << "No cells in dataset" << endl;
-    exit(1);
+    ExecError("error in reading vtk file");
   }
   cout << "Reading cells" << numElements << endl;
   
@@ -270,24 +292,24 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
     if(binary){
       if( fread(&numVerts, sizeof(int), 1, fp) != 1 ) {
 	cout << "error in reading VTK files " << endl;
-	exit(1);
+	ExecError("error in reading vtk file");
 	}
       if( !bigEndian) SwapBytes((char*)&numVerts, sizeof(int), 1);
       if((int)fread(n, sizeof(int), numVerts, fp) != numVerts){
 	cout << "error in reading VTK files " << endl;
-	exit(1);
+	ExecError("error in reading vtk file");
       }
       if(!bigEndian) SwapBytes((char*)n, sizeof(int), numVerts);
     }
     else{
       if(fscanf(fp, "%d", &numVerts) != 1){
 	cout << "error in reading VTK files " << endl;
-	  exit(1);
+	  ExecError("error in reading vtk file");
       }
       for(int j = 0; j < numVerts; j++){
 	if(fscanf(fp, "%d", &n[j]) != 1){
 	  cout << "error in reading VTK files " << endl;
-	  exit(1);
+	  ExecError("error in reading vtk file");
 	}
       }
     }
@@ -299,7 +321,7 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
       }	  
       else{
 	cout << "Bad vertex index" << endl;
-	exit(1);
+	ExecError("error in reading vtk file");
 	}
     }
   }
@@ -307,11 +329,11 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
   
   if(fscanf(fp, "%s %d\n", buffer, &numElements2) != 2){
     cout << " Error in reading CELL_TYPES ARGUMENT " << endl;
-    exit(1);
+    ExecError("error in reading vtk file");
   }
   if(strcmp(buffer, "CELL_TYPES") || numElements2 != (int)numElements){
     cout <<"No or invalid number of cells types" << endl;
-    exit(1);
+    ExecError("error in reading vtk file");
   }
   
   
@@ -322,14 +344,14 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
     if(binary){
 	if(fread(&type, sizeof(int), 1, fp) != 1){
 	  cout <<"bug in readings cell types" << endl;
-	  exit(1);
+	  ExecError("error in reading vtk file");
 	}
 	if(!bigEndian) SwapBytes((char*)&type, sizeof(int), 1);
     }
     else{
       if(fscanf(fp, "%d", &type) != 1){
 	cout <<"bug in readings cell types" << endl;
-	exit(1);
+	ExecError("error in reading vtk file");
       }
     }
     TypeCells[i] = type;
@@ -345,11 +367,11 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
       break;   
     case 10: // Tetrahèdre
       cout << "We are loading a three dimensional mesh. Three is no tetrahedron." << endl;
-      exit(1);
+      ExecError("error in reading vtk file");
       break;  
     default: 
       cout << "Error :: This type of cell is not considered in Freefem++"<< endl;
-      exit(1);
+      ExecError("error in reading vtk file");
       break;
       }
   }  
@@ -361,14 +383,14 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
       if(binary){
 	if(fread(&type, sizeof(int), 1, fp) != 1){
 	  cout <<"bug in readings cell types" << endl;
-	  exit(1);
+	  ExecError("error in reading vtk file");
 	}
 	if(!bigEndian) SwapBytes((char*)&type, sizeof(int), 1);
       }
       else{
 	if(fscanf(fp, "%d", &type) != 1){
 	  cout <<"bug in readings cell types" << endl;
-	  exit(1);
+	  ExecError("error in reading vtk file");
 	}
       }
       TypeCells[i] = type;
@@ -387,7 +409,7 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
 	break;  
       default: 
 	cout << "Error :: This type of cell is not considered in Freefem++"<< endl;
-	exit(1);
+	ExecError("error in reading vtk file");
 	break;
 	
       }
@@ -559,8 +581,8 @@ public:
 	  l[jj].nbfloat=1;
 	  l[jj][0]=to<double>( args[i] );
 	  
-	  char number[5];
-	  sprintf(number,"%i",jj+1);
+	  char number[16];
+	  sprintf(number,"%li",jj+1);
 	  l[jj].name=scas;
 	  l[jj].name+=number;
 	  sca++;	  
@@ -581,8 +603,8 @@ public:
 	      l[jj][j] = to<double>( (*a0)[j]);
 	    }
 
-	    char number[5];
-	    sprintf(number,"%i",jj+1);
+	    char number[16];
+	    sprintf(number,"%li",jj+1);
 	    l[jj].name=vecs;
 	    l[jj].name+=number;
 	    vec++;	  
@@ -594,8 +616,8 @@ public:
 	    for(int j=0; j<stsize; j++){
 	      l[jj][j] = to<double>( (*a0)[j]);
 	    }
-	    char number[5];
-	    sprintf(number,"%i",jj+1);
+	    char number[16];
+	    sprintf(number,"%li",jj+1);
 	    l[jj].name=tens;
 	    l[jj].name+=number;
 	    ten++;	
@@ -636,25 +658,27 @@ void VTK_WRITE_MESH( const string &filename, FILE *fp, const Mesh &Th, bool bina
   // get all the entities in the model
 
   // write mesh vertices
-  fprintf(fp, "POINTS %d double\n", Th.nv);
   
-  if(datasize == sizeof(float)) {      
-    for(unsigned int i = 0; i < Th.nv; i++){
-      const  Mesh::Vertex & P = Th.vertices[i];
-      float f[3];
-      f[0]=P.x;
-      f[1]=P.y;
-      f[2]=0;  // P.z; 3D case
-      if(binary){
-	if(!bigEndian) SwapBytes((char*)&f, sizeof(float), 3);
-	fwrite(&f, sizeof(float), 3, fp);
-      }
+  if(datasize == sizeof(float)) 
+    {      
+      fprintf(fp, "POINTS %d float\n", Th.nv);
+      for(unsigned int i = 0; i < Th.nv; i++){
+	const  Mesh::Vertex & P = Th.vertices[i];
+	float f[3];
+	f[0]=P.x;
+	f[1]=P.y;
+	f[2]=0;  // P.z; 3D case
+	if(binary){
+	  if(!bigEndian) SwapBytes((char*)&f, sizeof(float), 3);
+	  fwrite(&f, sizeof(float), 3, fp);
+	}
       else{
-	fprintf(fp,"%f %f %f\n",f[0],f[1],f[2]);
+	fprintf(fp,"%.8g %.8g %.8g\n",P.x,P.y,0.);
       }
     }  
   }
   else if(datasize == sizeof(double)){
+    fprintf(fp, "POINTS %d double\n", Th.nv);
     for(unsigned int i = 0; i < Th.nv; i++){
       const  Mesh::Vertex & P = Th.vertices[i];
       double f[3];
@@ -666,7 +690,7 @@ void VTK_WRITE_MESH( const string &filename, FILE *fp, const Mesh &Th, bool bina
 	fwrite(&f, sizeof(float), 3, fp);
       }
       else{
-	fprintf(fp,"%lf %lf %lf\n",f[0],f[1],f[2]);
+	fprintf(fp,"%.15lg %.15lg %.15lg\n",f[0],f[1],f[2]);
       }
     }  
   }
@@ -787,7 +811,7 @@ void VTK_WRITE_MESH( const string &filename, FILE *fp, const Mesh &Th, bool bina
     if(surface){
       type=VTK_EDGE;
       for(int ibe=0; ibe<Th.neb; ibe++){
-	fprintf(fp,"%d ",type);
+	fprintf(fp,"%d%c",type,(ibe%10==9)? '\n' : ' ');
       }
     }
   } 
@@ -864,13 +888,13 @@ void VTK_WRITE_MESH( const string &filename, FILE *fp, const Mesh &Th, bool bina
     for(int it=0; it< Th.nt; it++){ 
       const Mesh::Triangle &K( Th.t(it) );
       label =K.lab;
-      fprintf(fp,"%d ",label);
+      fprintf(fp,"%d\n",label);
     }
     if(surface){
       for(int ibe=0; ibe<Th.neb; ibe++){
 	const Mesh::BorderElement &K( Th.be(ibe) );
 	label =K.lab;
-	fprintf(fp,"%d ",label);
+	fprintf(fp,"%d\n",label);
       }
     }
   } 
@@ -892,7 +916,7 @@ void VTK_WRITE_MESH( const string &filename, FILE *fp, const Mesh &Th, bool bina
 	fwrite(&tab, sizeof(float), 4, fp);
       }
       else
-	fprintf(fp,"%f %f %f %f\n",tab[0],tab[1],tab[2],tab[3]);
+	fprintf(fp,"%.8f %.8f %.8f %.8f\n",tab[0],tab[1],tab[2],tab[3]);
     }
   }
 }
@@ -934,46 +958,50 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
   if( !floatsol ) datasizeSol= sizeof(double);
 
   int iii=0;
-  if( nargs[0]){
-    char *data = new char[dataname->size()+1];
-    //char *name;
-    
-    strcpy(data, dataname->c_str());  
-    char * name = strtok(data," \n");
-   
-    nameofuser[iii] = name;
+  if( nargs[0])
     {
-     
-      while( name ){
-	name = strtok(NULL," \n\0");
-	if( iii >= nbofsol ){
-	  cout << " The number of data name est plus grand " << endl;
-	  break;
-	}
-	iii++;
-	nameofuser[iii] = name;
-	cout << "value of iii=" << iii << endl;
-      }
-      if( iii < nbofsol){	
-	cout << " The number of data name est plus petit, we give default name " << endl;
-      }
+      char *data = newcopy(dataname->c_str());
+      char * name = strtok(data," \t\n");
       
+      nameofuser[iii] = newcopy(name);
+      if(verbosity>5)
+	cout << "   iovtk : value of iii  =" << iii << "  \""<<  nameofuser[iii] <<  "\"\n";
+      iii++;
+      {
+	
+	while( (name = strtok(NULL," \t\n\0")) ){
+	  
+	  if( iii >= nbofsol ){
+	    if(verbosity>5)
+	      cout << "   iovtk : The number of data name istoo large " << endl;
+	    break;
+	  }
+	  nameofuser[iii] = newcopy(name);
+	  if(verbosity>5)
+	    cout << "   iovtk : value of iii  =" << iii << "  \""<<  nameofuser[iii] <<  "\"\n";
+	  iii++;
+	}
+	if( iii < nbofsol){	
+	  if(verbosity>6)
+	    cout << "   iovtk:  The number of data name is too small, we give default name " << endl;
+	}
+	delete [] data;
+      }
     }
-  }
   if( iii < nbofsol ){
     for( int iiii=iii; iiii<nbofsol; iiii++){
-      char *dataff = new char[l[iii].name.size()+1];
-      strcpy(dataff, l[iii].name.c_str());
-      nameofuser[iiii] = dataff;
+      //      char *dataff = new char[l[iii].name.size()+1];
+      //strcpy(dataff, l[iii].name.c_str());
+      nameofuser[iiii] = newcopy(l[iii].name.c_str());//dataff;
       
     }
   }
 
-
+  
   FILE *fp = fopen( (*pffname).c_str(), "wb");
   if(!fp){
     cerr << "Unable to open file " << (*pffname).c_str() << endl;
-    exit(1);
+    ExecError("error in reading vtk file");
   }
   
   VTK_WRITE_MESH( *pffname, fp, Th, binary, datasize, surface, swap);    		
@@ -1001,7 +1029,8 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
 	  }
 	  	  
 	  //fprintf(fp,"%s %d %d float\n",l[ii].name.c_str(),l[ii].nbfloat,nsol); 
-	  fprintf(fp,"%s %d %d float\n",nameofuser[ii],l[ii].nbfloat,nsol); 
+	  fprintf(fp,"%s %ld %d float\n",nameofuser[ii],l[ii].nbfloat,nsol); 
+	  if(verbosity>5)
 	  cout << "name of data("<< ii <<")=" << nameofuser[ii] << " " << l[ii].name << endl;
 	 
 //	  if(l[ii].what == 1) fprintf(fp,"%s %d %d float\n",l[ii].name,ii,l[ii].nbfloat,nsol); 
@@ -1065,7 +1094,8 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
 	if(order[ii] == 1){
 	
 	  //fprintf(fp,"%s %d %d float\n",l[ii].name.c_str(),l[ii].nbfloat,Th.nv); 
-	  fprintf(fp,"%s %d %d float\n",nameofuser[ii],l[ii].nbfloat,Th.nv); 
+	  fprintf(fp,"%s %ld %d float\n",nameofuser[ii],l[ii].nbfloat,Th.nv); 
+	  if(verbosity>5)
 	  cout << "name of data("<< ii <<")=" << nameofuser[ii] << " " << l[ii].name << endl;
 	  
 	  /*
@@ -1100,21 +1130,27 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
 	    }
 	  }
 	
-	  for (int iv=0;iv<Th.nv;iv++){
-	    for(int j=0;j<l[ii].nbfloat;j++){
-	      valsol[iv*l[ii].nbfloat+j] = valsol[ iv*l[ii].nbfloat+j ]/takemesh[iv];
-	      float value = valsol[iv*l[ii].nbfloat+j];
-	      if(binary){
-		if(!bigEndian) SwapBytes((char*)&value, sizeof(float), 1);
-		fwrite(&value, sizeof(float), 1, fp);
-	      }
-	      else{
-		fprintf(fp,"%lf ",value); 
-	      }
-	    }	   
-	  }
-      
-	  fprintf(fp,"\n");
+	  for (int iv=0;iv<Th.nv;iv++)
+	    {
+	    for(int j=0;j<l[ii].nbfloat;j++)
+	      {
+		valsol[iv*l[ii].nbfloat+j] = valsol[ iv*l[ii].nbfloat+j ]/takemesh[iv];
+		float value = valsol[iv*l[ii].nbfloat+j];
+		if(binary)
+		  {
+		    if(!bigEndian) SwapBytes((char*)&value, sizeof(float), 1);
+		    fwrite(&value, sizeof(float), 1, fp);
+		  }
+		else
+		  {
+		  fprintf(fp,"%.8lf ",value); 
+		  }
+	      }	 
+	    if(!binary)
+	      fprintf(fp,"\n");  
+	    }
+	  if(!binary)	  
+	    fprintf(fp,"\n");
 	}
       }
     }    
@@ -1137,7 +1173,8 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
 	    nsol = Th.nt;
 	  }
 	  
-	  fprintf(fp,"%s %d %d float\n",nameofuser[ii],l[ii].nbfloat,nsol); 
+	  fprintf(fp,"%s %ld %d float\n",nameofuser[ii],l[ii].nbfloat,nsol); 
+	  if(verbosity>5)
 	  cout << "name of data("<< ii <<")=" << nameofuser[ii]  << endl;
 	  /*
 	  if(l[ii].what == 1) fprintf(fp,"pressure%d %d %d double\n",ii,l[ii].nbfloat,nsol); 
@@ -1151,16 +1188,17 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
 	  const Mesh::Triangle  & K(Th.t(it));
 	  mp3->set( Th, K(Cdg_hat), Cdg_hat, K, K.lab);
 
-	  for(int j=0;j<l[ii].nbfloat;j++){
-	    double value = l[ii].eval(j,stack);
-	    if(binary){
-	      if(!bigEndian) SwapBytes((char*)&value, sizeof(double), 1);
-	      fwrite(&value, sizeof(double), 1, fp);
-	    }
-	    else{
-	      fprintf(fp,"%f ",value); 
-	    }
-	  } 
+	  for(int j=0;j<l[ii].nbfloat;j++)
+	    {
+	      double value = l[ii].eval(j,stack);
+	      if(binary){
+		if(!bigEndian) SwapBytes((char*)&value, sizeof(double), 1);
+		fwrite(&value, sizeof(double), 1, fp);
+	      }
+	      else{
+		fprintf(fp,"%.8f\n",value); 
+	      }
+	    } 
 	}
 	if( surface ){
 	  for (int ibe=0;ibe<Th.neb;ibe++){
@@ -1177,7 +1215,7 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
 		fwrite(&value, sizeof(double), 1, fp);
 	      }
 	      else{
-		fprintf(fp,"%f ",value); 
+		fprintf(fp,"%.8f\n",value); 
 	      }
 	    } 
 
@@ -1195,7 +1233,8 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
 	if(order[ii] == 1){
 
 	  
-	  fprintf(fp,"%s %d %d float\n",nameofuser[ii],l[ii].nbfloat,Th.nv); 
+	  fprintf(fp,"%s %ld %d float\n",nameofuser[ii],l[ii].nbfloat,Th.nv); 
+	  if(verbosity>5)
 	  cout << "name of data("<< ii <<")=" << nameofuser[ii]  << endl;
 	  /*
 	    if(nargs[0]){
@@ -1241,7 +1280,7 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
 		fwrite(&value, sizeof(double), 1, fp);
 	      }
 	      else{
-		fprintf(fp,"%f ",value); 
+		fprintf(fp,"%.8f\n",value); 
 	      }
 	    }	   
 	  }
@@ -1315,7 +1354,7 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
   FILE *fp = fopen(filename.c_str(), "rb");
   if(!fp){
     cerr << "Unable to open file " << filename.c_str() << endl;
-    exit(1);
+    ExecError("error in reading vtk file");
   }
 
   char buffer[256], buffer2[256];
@@ -1327,17 +1366,17 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
   bool binary = false;
   if( !strcmp(buffer, "BINARY") ) binary = true;
     
-  if(fscanf(fp, "%s %s", buffer, buffer2) != 2){ cout << "error in reading vtk files" << endl; exit(1); }
+  if(fscanf(fp, "%s %s", buffer, buffer2) != 2){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); }
   if(strcmp(buffer, "DATASET") || strcmp(buffer2, "UNSTRUCTURED_GRID")){
     cout << "VTK reader can only read unstructured datasets" << endl;
-    exit(1);
+    ExecError("error in reading vtk file");
   }
     
   // read mesh vertices
-  if(fscanf(fp, "%s %d %s\n", buffer, &nv, buffer2) != 3){ cout << "error in reading vtk files" << endl; exit(1); } 
+  if(fscanf(fp, "%s %d %s\n", buffer, &nv, buffer2) != 3){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); } 
   if(strcmp(buffer, "POINTS") || !nv){
     cerr << "No points in dataset" << endl;
-    exit(1);
+    ExecError("error in reading vtk file");
   }
   int datasize;
   if( !strncmp(buffer2, "double",6))
@@ -1346,7 +1385,7 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
     datasize = sizeof(float);
   else{
     cout << "VTK reader only accepts float or double datasets" << endl;
-    exit(1);
+    ExecError("error in reading vtk file");
   }
     
   cout << "Reading %d points" << nv << " buffer2" <<  buffer2 << "binary" << binary << " " << datasize << " "<< sizeof(float) << endl;
@@ -1358,22 +1397,22 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
     if(binary){
       if(datasize == sizeof(float)){
 	float f[3];
-	if(fread(f, sizeof(float), 3, fp) != 3){ cout << "error in reading vtk files" << endl; exit(1); }
+	if(fread(f, sizeof(float), 3, fp) != 3){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); }
 	if(!bigEndian) SwapBytes((char*)f, sizeof(float), 3);
 	for(int j = 0; j < 3; j++) xyz[j] = f[j];
       }
       else{
-	if(fread(xyz, sizeof(double), 3, fp) != 3){ cout << "error in reading vtk files" << endl; exit(1); }
+	if(fread(xyz, sizeof(double), 3, fp) != 3){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); }
 	if(!bigEndian) SwapBytes((char*)xyz, sizeof(double), 3);
       }
     }
     else{
       cout << datasize << " "<< sizeof(float) << endl;
       if(datasize == sizeof(float)){ 
-	if(fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3){ cout << "error in reading vtk files (float)" << endl; exit(1); }
+	if(fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3){ cout << "error in reading vtk files (float)" << endl; ExecError("error in reading vtk file"); }
       }
       else{
-	if(fscanf(fp, "%f %f %f", &xyz[0], &xyz[1], &xyz[2]) != 3){ cout << "error in reading vtk files (double)" << endl; exit(1); } 
+	if(fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3){ cout << "error in reading vtk files (double)" << endl; ExecError("error in reading vtk file"); } 
       }
     }
     vff[i].x = xyz[0];
@@ -1386,11 +1425,11 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
 
   // read mesh elements
   int numElements, numElements2, totalNumInt;
-  if(fscanf(fp, "%s %d %d\n", buffer, &numElements, &totalNumInt) != 3){ cout << "error in reading vtk files" << endl; exit(1); }
+  if(fscanf(fp, "%s %d %d\n", buffer, &numElements, &totalNumInt) != 3){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); }
   printf("reading parameter %s %d %d\n", buffer, numElements, totalNumInt);
   if(strncmp(buffer, "CELLS",5) || !numElements){
     cout << "No cells in dataset" << endl;
-    exit(1);
+    ExecError("error in reading vtk file");
   }
   cout << "Reading cells" << numElements << endl;
   
@@ -1406,25 +1445,25 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
     if(binary){
       if( fread(&numVerts, sizeof(int), 1, fp) != 1 ) {
 	cout << "error in reading VTK files " << endl;
-	exit(1);
+	ExecError("error in reading vtk file");
       }
       if( !bigEndian) SwapBytes((char*)&numVerts, sizeof(int), 1);
       if((int)fread(n, sizeof(int), numVerts, fp) != numVerts){
 	cout << "error in reading VTK files " << endl;
-	exit(1);
+	ExecError("error in reading vtk file");
       }
       if(!bigEndian) SwapBytes((char*)n, sizeof(int), numVerts);
     }
     else{
       if(fscanf(fp, "%d", &numVerts) != 1){
 	cout << "error in reading VTK files " << endl;
-	exit(1);
+	ExecError("error in reading vtk file");
       }
       cout << "numVerts" << numVerts << endl;
       for(int j = 0; j < numVerts; j++){
 	if(fscanf(fp, "%d", &n[j]) != 1){
 	  cout << "error in reading VTK files " << endl;
-	  exit(1);
+	  ExecError("error in reading vtk file");
 	}
 	cout << "n[j]" << n[j] << endl;
       }
@@ -1437,7 +1476,7 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
       }	  
       else{
 	cout << "Bad vertex index" << endl;
-	exit(1);
+	ExecError("error in reading vtk file");
       }
     }
   }
@@ -1445,11 +1484,11 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
   
   if(fscanf(fp, "%s %d\n", buffer, &numElements2) != 2){
     cout << " Error in reading CELL_TYPES ARGUMENT " << endl;
-    exit(1);
+    ExecError("error in reading vtk file");
   }
   if(strcmp(buffer, "CELL_TYPES") || numElements2 != (int)numElements){
     cout <<"No or invalid number of cells types" << endl;
-    exit(1);
+    ExecError("error in reading vtk file");
   }
   
   printf( "reading parameter %s %d\n", buffer, numElements2);
@@ -1461,14 +1500,14 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
     if(binary){
       if(fread(&type, sizeof(int), 1, fp) != 1){
 	cout <<"bug in readings cell types" << endl;
-	exit(1);
+	ExecError("error in reading vtk file");
       }
       if(!bigEndian) SwapBytes((char*)&type, sizeof(int), 1);
     }
     else{
       if(fscanf(fp, "%d", &type) != 1){
 	cout <<"bug in readings cell types" << endl;
-	exit(1);
+	ExecError("error in reading vtk file");
       }
     }
     TypeCells[i] = type;
@@ -1487,7 +1526,7 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
 	break;  
       default: 
 	cout << "Error :: This type of cell is not considered in Freefem++"<< endl;
-	exit(1);
+	ExecError("error in reading vtk file");
 	break;
 	
       }
@@ -1635,8 +1674,8 @@ public:
 	  l[jj].nbfloat=1;
 	  l[jj][0]=to<double>( args[i] );
 	  
-	  char number[5];
-	  sprintf(number,"%i",jj+1);
+	  char number[16];
+	  sprintf(number,"%li",jj+1);
 	  l[jj].name=scas;
 	  l[jj].name+=number;
 	  sca++;
@@ -1656,8 +1695,8 @@ public:
 	    for(int j=0; j<ddim; j++){
 	      l[jj][j] = to<double>( (*a0)[j]);
 	    }
-	     char number[5];
-	    sprintf(number,"%i",jj+1);
+	     char number[16];
+	    sprintf(number,"%li",jj+1);
 	    l[jj].name=vecs;
 	    l[jj].name+=number;
 	    vec++;	  
@@ -1670,8 +1709,8 @@ public:
 	    for(int j=0; j<stsize; j++){
 	      l[jj][j] = to<double>( (*a0)[j]);
 	    }
-	    char number[5];
-	    sprintf(number,"%i",jj+1);
+	    char number[16];
+	    sprintf(number,"%li",jj+1);
 	    l[jj].name=tens;
 	    l[jj].name+=number;
 	    ten++;
@@ -1725,7 +1764,7 @@ void VTK_WRITE_MESH3( const string &filename, FILE *fp, const Mesh3 &Th, bool bi
 	fwrite(&f, sizeof(float), 3, fp);
       }
       else{
-	fprintf(fp,"%f %f %f\n",f[0],f[1],f[2]);
+	fprintf(fp,"%.8f %.8f %.8f\n",f[0],f[1],f[2]);
       }
     }  
   }
@@ -1938,13 +1977,13 @@ void VTK_WRITE_MESH3( const string &filename, FILE *fp, const Mesh3 &Th, bool bi
     for(int it=0; it< Th.nt; it++){ 
       const Tet &K( Th.elements[it] );
       label =K.lab;
-      fprintf(fp,"%d ",label);
+      fprintf(fp,"%d\n",label);
     }
     if(surface){
       for(int ibe=0; ibe<Th.nbe; ibe++){
 	const Triangle3 &K( Th.be(ibe) );
 	label =K.lab;
-	fprintf(fp,"%d ",label);
+	fprintf(fp,"%d\n",label);
       }
     }
   } 
@@ -1969,7 +2008,7 @@ void VTK_WRITE_MESH3( const string &filename, FILE *fp, const Mesh3 &Th, bool bi
 	fwrite(&tab, sizeof(float), 4, fp);
       }
       else
-	fprintf(fp,"%f %f %f %f\n",tab[0],tab[1],tab[2],tab[3]);
+	fprintf(fp,"%.8f %.8f %.8f %.8f\n",tab[0],tab[1],tab[2],tab[3]);
     }
   }
   fprintf(fp,"\n");
@@ -2014,38 +2053,39 @@ AnyType VTK_WriteMesh3_Op::operator()(Stack stack)  const
 
   int iii=0;
   if( nargs[0]){
-    char *data = new char[dataname->size()+1];
-    //char *name;
-    
-    strcpy(data, dataname->c_str());  
-    char * name = strtok(data," \n");
-   
-    nameofuser[iii] = name;
+    char *data = newcopy(dataname->c_str());
+    if(verbosity>5)
+      cout << "   iovtk writeMesh3: names  \""<< data <<"\"" <<  endl;
+    char * name =strtok(data," \n\0\t");
+    nameofuser[iii] = newcopy(name);
+    if(verbosity>5)
+      cout << "   iovtk writeMesh3:value of iii=" << iii << " " << nameofuser[iii] <<endl;
+    iii++;
     {
-     
-      while( name ){
-	name = strtok(NULL," \n\0");
-	if( iii >= nbofsol ){
-	  cout << " The number of data name est plus grand " << endl;
-	  break;
-	}
+      
+      while(( name= strtok(NULL," \n\0\t")) ){
+	if( iii >= nbofsol )
+	  {
+	    if(verbosity)
+	      cout << "   iovtk writeMesh3: The number of data name is too large " << endl;
+	    break;
+	  }
+	nameofuser[iii] = newcopy(name);
+	if(verbosity>5)
+	  cout << "   iovtk writeMesh3:value of iii=" << iii << " " << nameofuser[iii] <<endl;
 	iii++;
-	nameofuser[iii] = name;
-	cout << "value of iii=" << iii << endl;
       }
       if( iii < nbofsol){	
-	cout << " The number of data name est plus petit, we give default name " << endl;
+	if(verbosity)
+	cout << "   iovtk writeMesh3: The number of data name is too small, we give default name " << endl;
       }
       
     }
   }
   if( iii < nbofsol ){
-    for( int iiii=iii; iiii<nbofsol; iiii++){
-      char *dataff = new char[l[iii].name.size()+1];
-      strcpy(dataff, l[iii].name.c_str());
-      nameofuser[iiii] = dataff;
-      
-    }
+    for( int iiii=iii; iiii<nbofsol; iiii++)
+      nameofuser[iiii] = newcopy(l[iii].name.c_str());
+    
   }
 
 
@@ -2054,7 +2094,7 @@ AnyType VTK_WriteMesh3_Op::operator()(Stack stack)  const
   FILE *fp = fopen( (*pffname).c_str(), "wb");
   if(!fp){
     cerr << "Unable to open file " << (*pffname).c_str() << endl;
-    exit(1);
+    ExecError("error in reading vtk file")  ;
   }
   
   VTK_WRITE_MESH3( *pffname, fp, Th, binary, datasize, surface, swap); 
@@ -2079,104 +2119,120 @@ AnyType VTK_WriteMesh3_Op::operator()(Stack stack)  const
 	    nsol = Th.nt;
 	  }
 	  	  
-	  fprintf(fp,"%s %d %d float\n",nameofuser[ii],l[ii].nbfloat,nsol); 
-	  cout << "name of data("<< ii <<")=" << nameofuser[ii]  << endl;
+	  fprintf(fp,"%s %ld %d float\n",nameofuser[ii],l[ii].nbfloat,nsol); 
+	  if(verbosity>5)	    
+	  cout << "   iovtk writeMesh3: name of data("<< ii <<")=" << nameofuser[ii]  << endl;
 	
 	  MeshPoint *mp3(MeshPointStack(stack)); 
 	  R3 Cdg_hat = R3(1./4.,1./4.,1./4.);  
 	
-	  for (int it=0;it<Th.nt;it++){
-	    const Tet  & K(Th.t(it));
-	    mp3->set( Th, K(Cdg_hat), Cdg_hat, K, K.lab);
-
-	    for(int j=0;j<l[ii].nbfloat;j++){
-	      float value = l[ii].eval(j,stack);
-	      if(binary){
-		if(!bigEndian) SwapBytes((char*)&value, sizeof(float), 1);
-		fwrite(&value, sizeof(float), 1, fp);
-	      }
-	      else{
-		fprintf(fp,"%lf ",value); 
-	      }
-	    } 
-	  }
-	  if( surface ){
-	    for (int ibe=0;ibe<Th.nbe;ibe++){
-	      // determination du triangle contenant cette edge
-	      int ie;
-	      int it = Th.BoundaryElement( ibe, ie); 
+	  for (int it=0;it<Th.nt;it++)
+	    {
 	      const Tet  & K(Th.t(it));
 	      mp3->set( Th, K(Cdg_hat), Cdg_hat, K, K.lab);
-
-	      for(int j=0;j<l[ii].nbfloat;j++){
-		float value = l[ii].eval(j,stack);
-		if(binary){
-		  if(!bigEndian) SwapBytes((char*)&value, sizeof(float), 1);
-		  fwrite(&value, sizeof(float), 1, fp);
+	      
+	      for(int j=0;j<l[ii].nbfloat;j++)
+		{
+		  float value = l[ii].eval(j,stack);
+		  if(binary){
+		    if(!bigEndian) SwapBytes((char*)&value, sizeof(float), 1);
+		    fwrite(&value, sizeof(float), 1, fp);
+		  }
+		  else{
+		    fprintf(fp,"%lf ",value); 
+		  }
 		}
-		else{
-		  fprintf(fp,"%lf ",value); 
-		}
-	      } 
-
+	      if(!binary)  fprintf(fp,"\n");
 	    }
+	  if( surface ){
+	    for (int ibe=0;ibe<Th.nbe;ibe++)
+	      {
+		// determination du triangle contenant cette edge
+		int ie;
+		int it = Th.BoundaryElement( ibe, ie); 
+		const Tet  & K(Th.t(it));
+		mp3->set( Th, K(Cdg_hat), Cdg_hat, K, K.lab);
+		
+		for(int j=0;j<l[ii].nbfloat;j++){
+		  float value = l[ii].eval(j,stack);
+		  if(binary){
+		    if(!bigEndian) SwapBytes((char*)&value, sizeof(float), 1);
+		    fwrite(&value, sizeof(float), 1, fp);
+		  }
+		  else{
+		    fprintf(fp,"%.8lf ",value); 
+		  }
+		} 
+		if(binary)  fprintf(fp,"\n");
+		
+	      }
 	  }
-
+	  
 	  fprintf(fp,"\n");
 	}
       }
     }
-    if( Norder0 < nbofsol ){
-      fprintf(fp, "POINT_DATA %d\n", Th.nv);
-      fprintf(fp, "FIELD FieldData %d\n", nbofsol-Norder0);
-      for(int ii=0; ii< nbofsol; ii++){
-	if(order[ii] == 1){
-	
-	  fprintf(fp,"%s %d %d float\n",nameofuser[ii],l[ii].nbfloat,Th.nv); 
-	  cout << "name of data("<< ii <<")=" << nameofuser[ii]  << endl;
-	  
-	  
-	  
-	  MeshPoint *mp3(MeshPointStack(stack)); 
-	  KN<double> valsol(Th.nv*l[ii].nbfloat);
-	  KN<int> takemesh(Th.nv);
-	  takemesh =0;
-	  valsol   =0.;
-	  for(int it=0;  it<Th.nt; it++){
-	    for(int iv=0; iv<4; iv++){
-	      int i=Th(it,iv);
-	      mp3->setP(&Th,it,iv);
- 
-	      for(int j=0;j<l[ii].nbfloat;j++){
-		valsol[ i*l[ii].nbfloat+j ] = valsol[ i*l[ii].nbfloat+j ] + l[ii].eval(j,stack);	     
-	      }
-	      takemesh[i] = takemesh[i]+1;    
+    if( Norder0 < nbofsol )
+      {
+	fprintf(fp, "POINT_DATA %d\n", Th.nv);
+	fprintf(fp, "FIELD FieldData %d\n", nbofsol-Norder0);
+	for(int ii=0; ii< nbofsol; ii++){
+	  if(order[ii] == 1)
+	    {
+	      
+	      fprintf(fp,"%s %ld %d float\n",nameofuser[ii],l[ii].nbfloat,Th.nv); 
+	      if(verbosity>5)
+		cout << "   iovtk writeMesh3:name of data("<< ii <<")=" << nameofuser[ii]  << endl;
+	    
+	      
+	      
+	      MeshPoint *mp3(MeshPointStack(stack)); 
+	      KN<double> valsol(Th.nv*l[ii].nbfloat);
+	      KN<int> takemesh(Th.nv);
+	      takemesh =0;
+	      valsol   =0.;
+	      for(int it=0;  it<Th.nt; it++)
+		{
+		  for(int iv=0; iv<4; iv++)
+		    {
+		      int i=Th(it,iv);
+		      mp3->setP(&Th,it,iv);
+		      
+		      for(int j=0;j<l[ii].nbfloat;j++)
+			{
+			  valsol[ i*l[ii].nbfloat+j ] = valsol[ i*l[ii].nbfloat+j ] + l[ii].eval(j,stack);	     
+			}
+		      takemesh[i] = takemesh[i]+1;    
+		    }
+		}
+	      
+	      for (int iv=0;iv<Th.nv;iv++)
+		{
+		  for(int j=0;j<l[ii].nbfloat;j++)
+		    {
+		      valsol[iv*l[ii].nbfloat+j] = valsol[ iv*l[ii].nbfloat+j ]/takemesh[iv];
+		      float value = valsol[iv*l[ii].nbfloat+j];
+		      if(binary)
+			{
+			  if(!bigEndian) SwapBytes((char*)&value, sizeof(float), 1);
+			  fwrite(&value, sizeof(float), 1, fp);
+			}
+		      else
+			{
+			  fprintf(fp,"%lf\n",value); 
+			}
+		    }	   
+		}
+	      if(!binary)
+		fprintf(fp,"\n");
 	    }
-	  }
-	
-	  for (int iv=0;iv<Th.nv;iv++){
-	    for(int j=0;j<l[ii].nbfloat;j++){
-	      valsol[iv*l[ii].nbfloat+j] = valsol[ iv*l[ii].nbfloat+j ]/takemesh[iv];
-	      float value = valsol[iv*l[ii].nbfloat+j];
-	      if(binary){
-		if(!bigEndian) SwapBytes((char*)&value, sizeof(float), 1);
-		fwrite(&value, sizeof(float), 1, fp);
-	      }
-	      else{
-		fprintf(fp,"%lf ",value); 
-	      }
-	    }	   
-	  }
-      
-	  fprintf(fp,"\n");
 	}
-      }
-    }    
+      }    
   }
-
+  
   // datasizeSol == sizeof(double)
-
-
+  
+  
   if( datasizeSol == sizeof(double) ){
     
     if( Norder0 >0){
@@ -2191,8 +2247,9 @@ AnyType VTK_WriteMesh3_Op::operator()(Stack stack)  const
 	    nsol = Th.nt;
 	  }
 	  
-	  fprintf(fp,"%s %d %d float\n",nameofuser[ii],l[ii].nbfloat,nsol); 
-	  cout << "name of data("<< ii <<")=" << nameofuser[ii]  << endl;
+	  fprintf(fp,"%s %ld %d float\n",nameofuser[ii],l[ii].nbfloat,nsol); 
+	  if(verbosity>5)
+	  cout << "   iovtk writeMesh3:name of data("<< ii <<")=" << nameofuser[ii]  << endl;
 	    
 	  MeshPoint *mp3(MeshPointStack(stack)); 
 	  R3 Cdg_hat = R3(1./4.,1./4.,1./4.);  
@@ -2208,7 +2265,7 @@ AnyType VTK_WriteMesh3_Op::operator()(Stack stack)  const
 		fwrite(&value, sizeof(double), 1, fp);
 	      }
 	      else{
-		fprintf(fp,"%f ",value); 
+		fprintf(fp,"%.8f ",value); 
 	      }
 	    } 
 	  }
@@ -2227,7 +2284,7 @@ AnyType VTK_WriteMesh3_Op::operator()(Stack stack)  const
 		  fwrite(&value, sizeof(double), 1, fp);
 		}
 		else{
-		  fprintf(fp,"%f ",value); 
+		  fprintf(fp,"%.8f ",value); 
 		}
 	      } 
 	      
@@ -2244,8 +2301,9 @@ AnyType VTK_WriteMesh3_Op::operator()(Stack stack)  const
       for(int ii=0; ii< nbofsol; ii++){
 	if(order[ii] == 1){
 
-	  fprintf(fp,"%s %d %d float\n",nameofuser[ii],l[ii].nbfloat,Th.nv); 
-	  cout << "name of data("<< ii <<")=" << nameofuser[ii]  << endl;
+	  fprintf(fp,"%s %ld %d float\n",nameofuser[ii],l[ii].nbfloat,Th.nv); 
+	  if(verbosity>5)
+	  cout << "   iovtk writeMesh3:name of data("<< ii <<")=" << nameofuser[ii]  << endl;
 	 
 	  MeshPoint *mp3(MeshPointStack(stack)); 
 	  KN<double> valsol(Th.nv*l[ii].nbfloat);
@@ -2273,7 +2331,7 @@ AnyType VTK_WriteMesh3_Op::operator()(Stack stack)  const
 		fwrite(&value, sizeof(double), 1, fp);
 	      }
 	      else{
-		fprintf(fp,"%f ",value); 
+		fprintf(fp,"%.8f ",value); 
 	      }
 	    }	   
 	  }
@@ -2314,8 +2372,8 @@ Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freef
   //if (verbosity)
   if(verbosity) cout << " load: iovtk " << endl;
   Global.Add("savevtk","(",new OneOperatorCode<VTK_WriteMesh_Op>);
-  Global.Add("savevtk3","(",new OneOperatorCode<VTK_WriteMesh3_Op>);
-  Global.Add("vtkload3","(",new VTK_LoadMesh3);
+  Global.Add("savevtk","(",new OneOperatorCode<VTK_WriteMesh3_Op>);
+  Global.Add("vtkload","(",new VTK_LoadMesh3);
   Global.Add("vtkload","(",new VTK_LoadMesh);
   
 }

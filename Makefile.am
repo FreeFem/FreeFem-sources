@@ -20,7 +20,7 @@ freefem++.spec crimson-freefem++.zip \
 Install-MacOS.command.in \
 examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \
 examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \
-examples-bamg/test/dotest*.pl 0ldUserReadMe.txt
+examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
@@ -33,7 +33,7 @@ examples++-3d/lac-leman-v4.msh \
 examples++-load/load.link \
 ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh  \
 ./download/fftw/Makefile ./download/fftw/Makefile.am \
-examples++*/*.[ie]dp 
+examples++*/*.[ie]dp  CheckAllEdp
 
 
 # Creates a file named "ChangeLog" containing the chronology of all

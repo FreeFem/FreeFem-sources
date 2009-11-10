@@ -134,7 +134,7 @@ Mesh * GMSH_Load(const string & filename)
 	    }
 	  }
 	}
-	else if(!strncmp(&str[1], "PhysicalNames", 13)) {
+	else if(!strncmp(&str[1], "PhysicalNames", 13)) {	  
 	  cout << " PhysicalNames is not considered in freefem++ " << endl;
 	}
 	
@@ -558,77 +558,81 @@ Mesh3 * GMSH_Load3(const string & filename)
 	  sscanf(str, "%d", &numElements);
 	   
 	  if(!binary){
-	    for(int i = 0; i < numElements; i++) {
-	      int num, type, physical = 0, elementary = 0, partition = 0, numVertices;
-	      if(version <= 1.0){
-		fscanf(fp, "%d %d %d %d %d", &num, &type, &physical, &elementary, &numVertices);		
-	      }
-	      else{
-		int numTags;
-		fscanf(fp, "%d %d %d", &num, &type, &numTags);
-		for(int j = 0; j < numTags; j++){
-		  int tag;
-		  fscanf(fp, "%d", &tag);       
-		  if(j == 0)      physical = tag;
-		  else if(j == 1) elementary = tag;
-		  else if(j == 2) partition = tag;
-		  // ignore any other tags for now
+	    for(int i = 0; i < numElements; i++) 
+	      {
+		int num, type, physical = 0, elementary = 0, partition = 0, numVertices;
+		if(version <= 1.0)
+		  {
+		    fscanf(fp, "%d %d %d %d %d", &num, &type, &physical, &elementary, &numVertices);		
+		  }
+		else{
+		  int numTags;
+		  fscanf(fp, "%d %d %d", &num, &type, &numTags);
+		  for(int j = 0; j < numTags; j++){
+		    int tag;
+		    fscanf(fp, "%d", &tag);       
+		    if(j == 0)      physical = tag;
+		    else if(j == 1) elementary = tag;
+		    else if(j == 2) partition = tag;
+		    // ignore any other tags for now
+		  }
+		  assert(type>=1 && type <=31);
+		  if( (numVertices = nvElemGmsh[type-1]) == 0){		  
+		    cerr << "Element of type " << type  << " is not considered in Freefem++" << endl;
+		    exit(1);
+		  }
 		}
-		assert(type>=1 && type <=31);
-		if( (numVertices = nvElemGmsh[type-1]) == 0){
-		  cerr << "Element of type " << type  << " is not considered in Freefem++" << endl;
-		  exit(1);
-		}
-	      }
-	      
-	      if( type == 1 ){
-		cout << "edges in 3D mesh are not considered yet in freefem++" << endl;	
-	      }
-	      if( type == 2 ) nbe++;
-	      if( type == 4 ) nt++;
-	      
-	      int indices[60];
-	      for(int j = 0; j < numVertices; j++) fscanf(fp, "%d", &indices[j]);
-	      
-	    }
-	  }
-	  else{
-	    int numElementsPartial = 0;
-	    while(numElementsPartial < numElements){
-	      int header[3];
-	      if( fread(header, sizeof(int), 3, fp) != 3 ) exit(1);
-	      if(swap) SwapBytes((char*)header, sizeof(int), 3);
-	      int type = header[0];
-	      int numElms = header[1];
-	      int numTags = header[2];
-	      int numVertices; 
-	      assert(type>=1 && type <=31);
-	      if( (numVertices = nvElemGmsh[type-1]) == 0){
-		cout << "Element of type " << type  << " is not considered in Freefem++" << endl;
-		exit(1);
-	      }
-	      unsigned int n = 1 + numTags + numVertices;
-	      int *data = new int[n];
-
-	      for(int i = 0; i < numElms; i++) {
-		if(fread(data, sizeof(int), n, fp) != n) exit(1);
-		if(swap) SwapBytes((char*)data, sizeof(int), n);
-		int num = data[0];
-		int physical = (numTags > 0) ? data[4 - numTags] : 0;
-		int elementary = (numTags > 1) ? data[4 - numTags + 1] : 0;
-		int partition = (numTags > 2) ? data[4 - numTags + 2] : 0;
-		int *indices = &data[numTags + 1];
-
+		
 		if( type == 1 ){
-		  cout << "edges in 3D mesh are not used in freefem++" << endl;
-		  //exit(1);
+		  if(i==0)
+		    cout << "edges in 3D mesh are not considered yet in freefem++, skeep data" << endl;	
 		}
 		if( type == 2 ) nbe++;
 		if( type == 4 ) nt++;
+		
+		int indices[60];
+		for(int j = 0; j < numVertices; j++) fscanf(fp, "%d", &indices[j]);
+		
 	      }
-	      delete [] data;
-	      numElementsPartial += numElms;
-	     
+	  }
+	  else
+	    {
+	      int numElementsPartial = 0;
+	      while(numElementsPartial < numElements){
+		int header[3];
+		if( fread(header, sizeof(int), 3, fp) != 3 ) exit(1);
+		if(swap) SwapBytes((char*)header, sizeof(int), 3);
+		int type = header[0];
+		int numElms = header[1];
+		int numTags = header[2];
+		int numVertices; 
+		assert(type>=1 && type <=31);
+		if( (numVertices = nvElemGmsh[type-1]) == 0){
+		  cout << "Element of type " << type  << " is not considered in Freefem++" << endl;
+		  exit(1);
+	      }
+		unsigned int n = 1 + numTags + numVertices;
+		int *data = new int[n];
+		
+		for(int i = 0; i < numElms; i++) {
+		  if(fread(data, sizeof(int), n, fp) != n) exit(1);
+		  if(swap) SwapBytes((char*)data, sizeof(int), n);
+		  int num = data[0];
+		  int physical = (numTags > 0) ? data[4 - numTags] : 0;
+		  int elementary = (numTags > 1) ? data[4 - numTags + 1] : 0;
+		  int partition = (numTags > 2) ? data[4 - numTags + 2] : 0;
+		  int *indices = &data[numTags + 1];
+		  
+		  if( type == 1 && i==0 ){
+		    cout << "edges in 3D mesh are not used in freefem++,skeep data" << endl;
+		    //exit(1);
+		  }
+		  if( type == 2 ) nbe++;
+		  if( type == 4 ) nt++;
+		}
+		delete [] data;
+		numElementsPartial += numElms;
+		
 	    }
 	  }
 	  break;
