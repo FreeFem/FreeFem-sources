@@ -2496,6 +2496,9 @@ else
 fi
 
 
+ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
+
+echo "#  Build with freefem++ with ./configure " `date`  >$ff_where_lib_conf
 # To allow anonymous CVS version to contain a "./configure" and
 # Makefiles
 
@@ -14229,6 +14232,10 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
 echo "${ECHO_T}$ff_cblas_libs" >&6; }
 	LIBS="$ff_save_libs"
 fi
+if test "$ff_blas_ok" = yes
+then
+    echo LD blas \'$ff_blas_libs\'  >>$ff_where_lib_conf
+fi
 #echo "LIBS = " $LIBS
 # If all else fails, download!
 if test "$ff_blas_ok" = no -a "$enable_download" = yes \
@@ -15095,6 +15102,11 @@ ff_lapackdir='$$(LAPACKdir)'
 if  test "$ff_lapack_ok" = yes ; then
   # no compilation of lapack in  arpack
   ff_lapackdir=
+  if test "$ff_lapack_ok" = yes
+  then
+      echo LD lapack \'$ff_lapack_libs\'  >>$ff_where_lib_conf
+  fi
+
 else
   ff_lapack_libs=-llapack
 fi
@@ -15263,6 +15275,10 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
         { echo "$as_me:$LINENO: result: $ff_arpack_ok" >&5
 echo "${ECHO_T}$ff_arpack_ok" >&6; }
     fi
+  if test "$ff_arpack_ok" = yes
+  then
+      echo LD arpack \'$ff_arpack_libs\'  >>$ff_where_lib_conf
+  fi
 
 	# If all else fails, download!
 	if test "$ff_arpack_ok" = no -a "$enable_download" = yes \
@@ -15488,6 +15504,7 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
  ff_umfpack_header=yes
+	    ff_umfpack_dir=`dirname $ac_header`
 fi
 
 done
@@ -15631,6 +15648,7 @@ echo "${ECHO_T}$ac_cv_header_UMFPACK_umfpack_h" >&6; }
 fi
 if test $ac_cv_header_UMFPACK_umfpack_h = yes; then
   ff_umfpack_header=yes
+			ff_umfpack_dir=UMFPACK
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_BIG_UMFPACK_UMFPACK_H 1
@@ -15811,7 +15829,14 @@ _ACEOF
 
 	 fi
 fi
+  if test "$ff_umfpack_ok" = yes
+  then
+      echo LD amd \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
+      echo LD umfpack    >>$ff_where_lib_conf
+  fi
+
 LIBS="$ff_save_libs"
+
 
 # If all else fails, download!
 if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
@@ -18974,8 +18999,8 @@ fi
 if test "$enable_download" = yes  ;then
         { echo "$as_me:$LINENO:       use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT " >&5
 echo "$as_me:       use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT " >&6;}
-   	{ echo "$as_me:$LINENO:       use of download tetgen  see download/tetgen/tetgen1.4.2/LICENSE " >&5
-echo "$as_me:       use of download tetgen  see download/tetgen/tetgen1.4.2/LICENSE " >&6;}
+   	{ echo "$as_me:$LINENO:       use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE " >&5
+echo "$as_me:       use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE " >&6;}
 fi
 if test "$ff_download_blas" = "generic"  ; then
         { echo "$as_me:$LINENO:       use of download generic blas and cblas freefem may be slow  " >&5

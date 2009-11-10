@@ -1,9 +1,9 @@
 #!/bin/sh
 # ff-c++ `./ff-get-dep -ff metis.cpp`
 wherelib=WHERE_LIBRARY
-if [   -f "$wherelib" ] ; then
+if [   -f "$wherelib-download" ] ; then
     wherelib=WHERE_LIBRARY
-elif [ -f '@ff_prefix_dir@/WHERE_LIBRARY' ] ; then
+elif [ -f '@ff_prefix_dir@/WHERE_LIBRARY-download' ] ; then
     wherelib='@ff_prefix_dir@/WHERE_LIBRARY'
 else
    echo " error no WHERE_LIBRARY  file "
@@ -17,14 +17,14 @@ case "$1" in
 	for i in $@ ; do
 	#    echo "$1" 
 	#    echo 	awk -v p="$1" -v m=INCLUDE ' ($1 == p) && ($2 == m) { for (i=3;i<=NF;++i) {print $i," ";}}' $wherelib  $wherelib-download
-         awk -v p="$i" -v m=INCLUDE ' ($1 == p) && ($2 == m) && (!first){ first=1;for (i=3;i<=NF;++i) {print $i," ";}}' "$wherelib"  "$wherelib"-download
+         awk -v p="$i" -v m=INCLUDE ' ($1 == p) && ($2 == m) && (!first){ first=1;for (i=3;i<=NF;++i) {print $i," ";}}' "$wherelib"  "$wherelib"-config "$wherelib"-download
 	done
 	
 	;;
     -l*)
 	shift;
 	for i in $@ ; do   
-	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first) {first=1; for (i=3;i<=NF;++i) {print $i," "};}' "$wherelib"  "$wherelib"-download
+	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first) {first=1; for (i=3;i<=NF;++i) {print $i," "};}' "$wherelib"  "$wherelib"-config "$wherelib"-download 
 	done
 	;;
     -dlib)
@@ -50,7 +50,7 @@ case "$1" in
 	;;
   *)  
 	for i in $@ ; do   
-	    awk -v p="$i" ' ($1 == p) { k=0;  for (i=3;i<=NF;++i) {k=1;} print k}' $wherelib  
+	    awk -v p="$i" ' ($1 == p) { k=0;  for (i=3;i<=NF;++i) {k=1;} print k}' "$wherelib"  "$wherelib"-config "$wherelib"-download   
 	done
 	
 shift;;

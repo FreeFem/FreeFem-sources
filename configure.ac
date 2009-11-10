@@ -20,6 +20,9 @@ AC_PROG_MAKE_SET
 
 AC_PROG_RANLIB
 
+ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
+
+echo "#  Build with freefem++ with ./configure " `date`  >$ff_where_lib_conf
 # To allow anonymous CVS version to contain a "./configure" and
 # Makefiles
 
@@ -860,6 +863,10 @@ then
         AC_MSG_RESULT($ff_cblas_libs)
 	LIBS="$ff_save_libs"	
 fi
+if test "$ff_blas_ok" = yes 
+then
+    echo LD blas \'$ff_blas_libs\'  >>$ff_where_lib_conf
+fi
 #echo "LIBS = " $LIBS
 # If all else fails, download!
 if test "$ff_blas_ok" = no -a "$enable_download" = yes \
@@ -1004,6 +1011,11 @@ ff_lapackdir='$$(LAPACKdir)'
 if  test "$ff_lapack_ok" = yes ; then
   # no compilation of lapack in  arpack 
   ff_lapackdir=
+  if test "$ff_lapack_ok" = yes   
+  then
+      echo LD lapack \'$ff_lapack_libs\'  >>$ff_where_lib_conf
+  fi   
+
 else
   ff_lapack_libs=-llapack
 fi
@@ -1042,7 +1054,11 @@ then
                 ff_arpack_libs="$ff_lib_arpack")
         AC_MSG_RESULT($ff_arpack_ok)
     fi
-
+  if test "$ff_arpack_ok" = yes 
+  then
+      echo LD arpack \'$ff_arpack_libs\'  >>$ff_where_lib_conf
+  fi   
+  
 	# If all else fails, download!
 	if test "$ff_arpack_ok" = no -a "$enable_download" = yes \
 	   -a "$enable_fortran" != no
@@ -1105,7 +1121,9 @@ then
 
 	# Trying default locations
 
-	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h,ff_umfpack_header=yes)
+	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h,
+	    ff_umfpack_header=yes
+	    ff_umfpack_dir=`dirname $ac_header`)
 
 	# Somes systems like FreeBSD hide umfpack.h in a directory
 	# called UMFPACK (all capitals). This breaks the standard
@@ -1115,6 +1133,7 @@ then
 	then
 		AC_CHECK_HEADER(UMFPACK/umfpack.h,
 			ff_umfpack_header=yes
+			ff_umfpack_dir=UMFPACK
 			AC_DEFINE(HAVE_BIG_UMFPACK_UMFPACK_H,1,
 				If umfpack.h is located in UMFPACK subdir))
 	fi
@@ -1142,7 +1161,14 @@ then
 		AC_DEFINE(HAVE_LIBUMFPACK,1, Umfpack is used for sparse matrices computations )			
 	 fi
 fi
+  if test "$ff_umfpack_ok" = yes 
+  then
+      echo LD amd \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
+      echo LD umfpack    >>$ff_where_lib_conf     
+  fi   
+
 LIBS="$ff_save_libs"
+
 
 # If all else fails, download!
 if test "$ff_umfpack_ok" = no -a "$enable_download" = yes 
@@ -1550,7 +1576,7 @@ if test "$ff_arpack_download" = yes  ; then
 fi
 if test "$enable_download" = yes  ;then
         AC_MSG_NOTICE([      use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT ])
-   	AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.4.2/LICENSE ])
+   	AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE ])
 fi
 if test "$ff_download_blas" = "generic"  ; then
         AC_MSG_NOTICE([      use of download generic blas and cblas freefem may be slow  ])
