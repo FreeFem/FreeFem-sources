@@ -493,7 +493,7 @@ freefem++.pref:
 
 install-exec-local:: 
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
-	$(INSTALL)  -m 555 $ $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/lib
+	$(INSTALL)  -m 555  $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/idp
 
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4

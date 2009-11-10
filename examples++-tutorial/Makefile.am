@@ -6,6 +6,7 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
 	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
 	VISUALCHECK=$(VISUALCHECK)
+LIST_IDP=*.idp
 EXTRA_DIST=*.edp *.idp aile.msh xyf all.edp regtests.edp regtests.m4 ref.edp
 
 all.edp:
@@ -20,6 +21,10 @@ all.edp:
 # To create a new set of reference values in "ref.edp"
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
+install-exec-local:: 
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
+	$(INSTALL)  -m 555  $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/idp
+
 
 makeref.edp: regtests.m4 ../regtests.m4
 	m4 regtests.m4 > makeref.edp
