@@ -1,3 +1,4 @@
+%!TEX encoding =  IsoLatin9
 %  pour imprimer 2 pages par pages en A5 
 % pstops  ``0L@.7(21cm,0)+0L@.7(21cm,14.85cm)'' 
 %  ----
@@ -6,31 +7,13 @@
 % 2.24-2-2 correction bobgus@rcn.com  17 april 2008 (doc-patch2.patch)
 % ---
 \documentclass[a4paper,twoside,12pt]{book}
-% Euler for math | Palatino for rm | Helvetica for ss | Courier for tt
-\renewcommand{\rmdefault}{ppl} % rm
-\linespread{1.05}        % Palatino needs more leading
-\usepackage[scaled]{helvet} % ss
-\usepackage{courier} % tt
-%\usepackage{euler} % math
-\usepackage{eulervm} % a better implementation of the euler package (not in gwTeX)
-\normalfont
-\usepackage[T1]{fontenc}
-%% Palatino for rm and math | Helvetica for ss | Courier for tt
-%\usepackage{mathpazo} % math & rm
-%\linespread{1.05}        % Palatino needs more leading (space between lines)
-%\usepackage[scaled]{helvet} % ss
-%\usepackage{courier} % tt
-%\normalfont
-%\usepackage[T1]{fontenc}
+
 
 \usepackage{styles}
 \usepackage{txfonts}
 \usepackage{bm}
 
 
-
-
-\usepackage{times}
 \def\VERSION{3.5}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
