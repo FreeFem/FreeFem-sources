@@ -1,4 +1,6 @@
 v 3.6.1 
+    add lot of mistake in examples++-load 
+    add tool to compile all examples 
     add PICHON stuff for brute force seach point
     add umpack long interface to by pass the 32bit limits
     correct  ::Draw undef ref.  ubuntu 10. (gcc 4.4)
