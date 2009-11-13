@@ -147,7 +147,7 @@ namespace Fem2D
 	ifstream f(filename.c_str());
 	if(!f) {	
 	  cerr << "  --  Mesh3::Mesh3 Erreur openning " << filename<<endl;ffassert(0);exit(1);}	
-	if(verbosity>1)
+	if(verbosity>2)
 	  cout << "  -- Mesh3:  Read On file \"" <<filename<<"\""<<  endl;
 	if(filename.rfind(".msh")==filename.length()-4) 
 	    readmsh(f);
@@ -163,7 +163,7 @@ namespace Fem2D
     }
 
     
-    if(verbosity>1)
+    if(verbosity>2)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
     if(verbosity)
       cout << "  -- Mesh3 : "<<filename  << ", d "<< 3  << ", n Tet " << nt << ", n Vtx "
@@ -416,7 +416,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	    BuildjElementConteningVertex();  
 	}
 	
-	if(verbosity)
+	if(verbosity>1)
 	    cout << "  -- Mesh3  (serialized), d "<< 3  << ", n Tet " << nt << ", n Vtx "
 	    << nv << " n Bord " << nbe << endl;
 	ffassert(mes>=0); // add F. Hecht sep 2009.
@@ -428,7 +428,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     GRead(f);
     assert( (nt >= 0 || nbe>=0)  && nv>0) ;
     BuildBound();
-    if(verbosity>1)
+    if(verbosity>2)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
     
     if(nt > 0){ 
@@ -436,10 +436,10 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
       Buildbnormalv();  
       BuildjElementConteningVertex();  
     }
-    if(verbosity>1)
+    if(verbosity>2)
 	  cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
     
-    if(verbosity)
+    if(verbosity>1)
       cout << "  -- Mesh3  (File *), d "<< 3  << ", n Tet " << nt << ", n Vtx "
 	   << nv << " n Bord " << nbe << endl;
       ffassert(mes>=0); // add F. Hecht sep 2009.
@@ -452,7 +452,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     f >> s;
     ffassert( s== Gsbegin);
     f >> nv >> nt >> nbe;
-    if(verbosity>1)
+    if(verbosity>2)
     cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
     this->vertices = new Vertex[nv];
     this->elements = new Element [nt];
@@ -493,7 +493,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     {  
 
 	f >> nv >> nt >> nbe;
-	if(verbosity>1)
+	if(verbosity>2)
 	    cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
 	this->vertices = new Vertex[nv];
 	this->elements = new Element [nt];
@@ -729,8 +729,8 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
       if(verbosity>1)
 	  cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
           
-    if(verbosity>1)
-      cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
+//    if(verbosity>1)
+//      cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
       assert(mes>=0.);
   }
   
@@ -759,7 +759,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 //  end add       
       
     if(verbosity>1)
-      cout << "  -- End of Construct  mesh3: mesure = " << mes << " border mesure " << mesb << endl;  
+      cout << "  -- End of Construct  mesh3: mesure = " << mes << " border mesure " << mesb <<  endl;  
       ffassert(mes>=0); // add F. Hecht sep 2009.
   }
 
