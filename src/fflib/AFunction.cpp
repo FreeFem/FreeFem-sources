@@ -712,10 +712,10 @@ void Init_map_type()
     map_type[typeid(void).name()] = new ForTypeVoid();
 
     Dcl_Type<Expression>(0);    
-    Dcl_TypeandPtr<double>(0);
-    Dcl_TypeandPtr<long>(0);
-    Dcl_TypeandPtr<bool>(0);
-    Dcl_TypeandPtr<Complex>(0);
+    Dcl_TypeandPtr<double>(0,0,::InitializeDef<double>,0);
+    Dcl_TypeandPtr<long>(0,0,::InitializeDef<long>,0);
+    Dcl_TypeandPtr<bool>(0,0,::InitializeDef<bool>,0);
+    Dcl_TypeandPtr<Complex>(0,0,::InitializeDef<Complex>,0);
     Dcl_Type<void*>(); // add FH ...  for mpi comm world
     Dcl_Type<char*>();
     Dcl_Type<const char *>();

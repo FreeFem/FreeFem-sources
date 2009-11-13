@@ -1,5 +1,3 @@
-//ff-c++-LIBRARY-dep:   lapack
-
 #include "ff++.hpp"
 //ff-c++-LIBRARY-dep:   lapack
 //ff-c++-LIBRARY-dep:   blas

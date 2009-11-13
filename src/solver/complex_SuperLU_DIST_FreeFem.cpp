@@ -1,3 +1,6 @@
+//   for automatic  compilation with ff-c++
+//ff-c++-LIBRARY-dep: superlu_dist  blas 
+//ff-c++-cpp-dep: 
 // ORIG-DATE: 02/2009
 // -*- Mode : c++ -*-
 //
@@ -185,8 +188,8 @@ class ZSolveSuperLUmpi :   public MatriceMorse<R>::VirtualSolver, public SuperLU
   static const int distributed =2;
 
 public:
-  ZSolveSuperLUmpi(const MatriceMorse<R> &AA,int strategy,double ttgv, double epsilon=1e-6,
-		  double pivot=-1.,double pivot_sym=-1., string datafile,
+  ZSolveSuperLUmpi(const MatriceMorse<R> &AA,int strategy,double ttgv, double epsilon,
+		  double pivot,double pivot_sym, string datafile,
 		   string param_char, KN<long> &pperm_r, KN<long> &pperm_c, void * ccommworld=0 ) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),string_option(param_char),data_option(datafile),
