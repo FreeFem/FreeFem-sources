@@ -75,7 +75,7 @@ for ( i=0 ;i< 10; i++)
    processor(0) << u[];
    processor(0) >> U[];
   }
-  if (mpirank==0)     plot(U,u);
+  if (mpirank==0)     plot(U,u,wait=1);
   
   if(mpirank==0)
     {

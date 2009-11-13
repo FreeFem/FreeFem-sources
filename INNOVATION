@@ -1,8 +1,12 @@
 v 3.6.1 
-    add lot of mistake in examples++-load 
+    correct  font problem in documetation
+             lot of mistake in examples++-load 
     add tool to compile all examples 
     add PICHON stuff for brute force seach point
-    add umpack long interface to by pass the 32bit limits
+    add umpack long interface to by pass the 32bit limits 
+      see UMFPACK64.cpp and LapUmfpack64.edp in examples++-load.
+    add some interface with lapack (inverse of full matrix, 
+       eigenvalue of full matrix) 
     correct  ::Draw undef ref.  ubuntu 10. (gcc 4.4)
     correct typo error  image tools
     see UMPACK64  (code and example in examples++-load)

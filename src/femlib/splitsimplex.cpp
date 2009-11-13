@@ -51,6 +51,8 @@ namespace Fem2D  {
 using Fem2D::R1;
 using Fem2D::R2;
 using Fem2D::R3;
+extern  long verbosity ;
+
 #include "splitsimplex.hpp"
 
 /*
@@ -213,11 +215,15 @@ void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
 	  }
       
     }
-  for (int i=0,l=0;i<n3;i++)
-    for(int m=0;m<4;++m)
-      cout << tet[l++] << (m==3 ? '\n' : ' ' );
-  cout << ptet << "   " << tet << endl;
-  
+  if(verbosity>5)
+    {
+      
+      cout <<   "  SplitSimplex   " << endl;
+      for (int i=0,l=0;i<n3;i++)
+       for(int m=0;m<4;++m)
+         cout << tet[l++] << (m==3 ? '\n' : ' ' );
+       cout << ptet << "   " << tet << endl;
+    }
   assert(ntt==n3);
 }
 
