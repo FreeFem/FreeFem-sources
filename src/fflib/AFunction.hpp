@@ -742,6 +742,14 @@ template<class A> AnyType InitializePtr(Stack stack,const AnyType &x){
   return  x;
 }
 
+template<class A> AnyType InitializeDef(Stack stack,const AnyType &x){
+    A * a=PGetAny<A>(x);
+    SHOWVERB( cout << " init ptr " << typeid(A*).name() <<  (char *) a  - (char*) stack<< endl);
+    *a=A();
+    return  x;
+}
+
+
 template<class A> inline AnyType Delete(Stack,const AnyType &x){
   A * a=PGetAny<A>(x);
   SHOWVERB(cout << "DESTROY " <<typeid(A).name() << " " << a <<  endl); 

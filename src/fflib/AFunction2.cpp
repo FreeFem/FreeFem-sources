@@ -483,6 +483,14 @@ Block::~Block(){}
     
 const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
   {
+    if( this != &Global) {
+	if ( Global.m.find(k) != Global.m.end() )
+	  {
+	    if(mpirank==0) 
+	      cerr << "\n *** Warning  The identifier " << k << " hide a Global identifier  \n";
+	    
+	  }
+    }
       pair<iterator,bool>  p=m.insert(pKV(k,Value(v,listofvar,del)));
       listofvar = &*m.find(k);
       if (!p.second) 

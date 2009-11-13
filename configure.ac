@@ -10,7 +10,7 @@
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.6-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.7,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
@@ -865,7 +865,7 @@ then
 fi
 if test "$ff_blas_ok" = yes 
 then
-    echo LD blas \'$ff_blas_libs\'  >>$ff_where_lib_conf
+    echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
 fi
 #echo "LIBS = " $LIBS
 # If all else fails, download!
@@ -1013,7 +1013,7 @@ if  test "$ff_lapack_ok" = yes ; then
   ff_lapackdir=
   if test "$ff_lapack_ok" = yes   
   then
-      echo LD lapack \'$ff_lapack_libs\'  >>$ff_where_lib_conf
+      echo lapack LD  \'$ff_lapack_libs\'  >>$ff_where_lib_conf
   fi   
 
 else
@@ -1056,7 +1056,7 @@ then
     fi
   if test "$ff_arpack_ok" = yes 
   then
-      echo LD arpack \'$ff_arpack_libs\'  >>$ff_where_lib_conf
+      echo  arpack LD \'$ff_arpack_libs\'  >>$ff_where_lib_conf
   fi   
   
 	# If all else fails, download!
@@ -1163,8 +1163,8 @@ then
 fi
   if test "$ff_umfpack_ok" = yes 
   then
-      echo LD amd \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
-      echo LD umfpack    >>$ff_where_lib_conf     
+      echo  amd LD \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
+      echo LD umfpack \'$ff_umfpack_libs\'   >>$ff_where_lib_conf     
   fi   
 
 LIBS="$ff_save_libs"
