@@ -1,3 +1,9 @@
+v  3.7
+ correct mistake in genertion of file WHERE_LIBRARY-config
+ add  initialization of	scalar variable at zero 
+ add  warning in case of use of	variable with hide freefem++ name
+ add missing file in download version
+
 v 3.6.1 
     correct  font problem in documetation
              lot of mistake in examples++-load 
