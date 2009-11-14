@@ -2121,6 +2121,7 @@ void ThePlot::DrawIsoT(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R 
     glBegin(GL_LINES);
     R2 PQ[5];
     //int NbIso = Viso.N();
+    R  eps2= Min(R2(Pt[0],Pt[1]).norme2(),R2(Pt[0],Pt[2]).norme2(),R2(Pt[1],Pt[2]).norme2() )*1e-8;
     for(int l=0;l< NbIso;l++)  /*    loop on the level curves */
       {
 	  R xf = Viso[l];
@@ -2142,9 +2143,10 @@ void ThePlot::DrawIsoT(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R 
 			    //MoveTo(Pt[i]);
 			    //LineTo(Pt[j]);
 			}
-		      else
+		      else 
 			{
 			    R  xlam=(fi-xf)/(fi-fj);
+			     
 			    PQ[im++]   = Pt[i] * (1.F-xlam)  +  Pt[j]* xlam;
 			}
 		  }
@@ -2155,8 +2157,11 @@ void ThePlot::DrawIsoT(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R 
 		color(l+4);
 		//MoveTo(PQ[0]);
 		//LineTo(PQ[1]);
+	      if( R2(PQ[0],PQ[1]).norme2() > eps2 )
+		{
 		glVertex3f(PQ[0].x, PQ[0].y,xf*rapz);
 		glVertex3f(PQ[1].x, PQ[1].y,xf*rapz);
+		}
 	    }
       }
     glEnd();
