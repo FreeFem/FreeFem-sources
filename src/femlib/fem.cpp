@@ -1393,6 +1393,13 @@ void Mesh::BuilTriangles(bool empty,bool removeouside)
 	triangles = new Triangle[nt];
 	for(int i=0,k=0;i<nt;i++,k+=3)
         {
+	  if( verbosity>1000)
+	    {
+	      cout << vertices[nu[k]-1]<< "  " << endl;
+	      cout << vertices[nu[k+1]-1]<< "  " << endl;
+	      cout << vertices[nu[k+2]-1]<< "  " << endl;
+	      cout << vertices[nu[k]-1]<< "  \n\n" << endl;
+	    }
 	    triangles[i].set(vertices,nu[k]-1,nu[k+1]-1,nu[k+2]-1,reft[i]);
 	    area += triangles[i].area;
         }  

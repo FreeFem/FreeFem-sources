@@ -350,7 +350,8 @@ void Check(const Opera &Op,int N,int  M)
    bool sptrclean=true;
    const CDomainOfIntegration & di= *b->di;
    const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
-   if ( pThdi != &Th) { 
+   if ( pThdi != &Th || &Uh.Th !=&Th || &Vh.Th !=&Th) { 
+       cout << " --Use matrix formulation ---" << endl; 
      ExecError("No way to compute bilinear form with integrale of on mesh \n"
 	       "  test  or unkown function  defined on an other mesh! sorry to hard.   ");
    }
@@ -529,7 +530,8 @@ void Check(const Opera &Op,int N,int  M)
    const CDomainOfIntegration & di= *b->di;
    ffassert(di.d==3);
    const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
-   if ( pThdi != &Th) { 
+   if ( pThdi != &Th || &Uh.Th !=&Th || &Vh.Th !=&Th) { 
+       cout << " Use matrix formulation .... " << endl;
      ExecError("No way to compute bilinear form with integrale of on mesh \n"
 	       "  test  or unkown function  defined on an other mesh! sorry to hard.   ");
    }
