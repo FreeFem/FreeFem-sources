@@ -813,8 +813,9 @@ Mesh3 * build_layer (const Mesh & Th2, const int Nmax, const int *tab_Ni,
   if(verbosity > 1) cout << "debut :   Som3D_mesh_product_Version_Sommet_mesh_tab( Nmax, tab_Ni, tab_zmin, tab_zmax, Th2, Th3);   "<< endl;
   Som3D_mesh_product_Version_Sommet_mesh_tab( Nmax, tab_Ni, tab_zmin, tab_zmax, Th2, 
 			maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin, *Th3);    
-    
-//  Add FH because remove in call function.. 
+  
+  
+  //  Add FH because remove in call function.. 
   
   Th3->BuildBound();
   Th3->BuildAdj();
@@ -1884,7 +1885,7 @@ class Movemesh3D_Op : public E_F0mps
 public:
   Expression eTh;
   Expression xx,yy,zz;
-  static const int n_name_param =6; // 
+  static const int n_name_param =7; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
@@ -1902,7 +1903,7 @@ public:
  
     if(a1) {
       if(a1->size() !=3) 
-      CompileError("movemesh3 (Th,transfo=[X,Y,Z],) ");
+	CompileError("movemesh3 (Th,transfo=[X,Y,Z],) ");
       xx=to<double>( (*a1)[0]); 
       yy=to<double>( (*a1)[1]);
       zz=to<double>( (*a1)[2]);
@@ -1918,7 +1919,8 @@ basicAC_F0::name_and_type Movemesh3D_Op::name_param[]= {
   {  "refface", &typeid(KN_<long>)},
   {  "ptmerge", &typeid(double)},
   {  "facemerge",&typeid(long)},
-  {  "boolsurface",&typeid(long)}
+  {  "boolsurface",&typeid(long)},
+  {  "orientation",&typeid(long)}
   // option a rajouter
   // facemerge 0,1 + label
 };
@@ -2035,15 +2037,13 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   if(nbt != 0)
     {
 
-//      T_Th3->BuildBound();
-    
-//      T_Th3->BuildAdj();
+      //      T_Th3->BuildBound();
+      //      T_Th3->BuildAdj();
       
       if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
 
- //     T_Th3->Buildbnormalv();  
-
- //      T_Th3->BuildjElementConteningVertex();
+      //     T_Th3->Buildbnormalv();  
+      //      T_Th3->BuildjElementConteningVertex();
       
       T_Th3->BuildGTree();
       
@@ -2051,6 +2051,26 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
     }
   else
     {
+      // parameter orientation for a 3D surface mesh
+      long orientationsurf( arg(6,stack,0) );
+      if( orientationsurf == 1){
+	// change all orientation of borderelements
+	for (int i=0;i<T_Th3->nbe;i++)
+	  { 
+	    const Triangle3 &K( T_Th3->be(i) );
+	    int iv[3];       
+	    
+	    iv[0] = T_Th3->operator()(K[0]);
+	    iv[1] = T_Th3->operator()(K[1]);
+	    iv[2] = T_Th3->operator()(K[2]);
+	    
+	    int iv_temp=iv[1];
+	    iv[1]=iv[2];
+	    iv[2]=iv_temp;
+	    T_Th3->be(i).set( T_Th3->vertices, iv, K.lab );
+	  }
+      }
+
       if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
     }
   Add2StackOfPtr2FreeRC(stack,T_Th3);
@@ -3857,10 +3877,11 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
   
   EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,bmin,bmax,0);
 	
-  if(verbosity >1) cout << "taille de la boite " << endl;
-  cout << bmin.x << " " << bmin.y << " " << bmin.z <<  endl;
-  cout << bmax.x << " " << bmax.y << " " << bmax.z <<  endl;
-	
+  if(verbosity >1){
+    cout << "taille de la boite " << endl;
+    cout << bmin.x << " " << bmin.y << " " << bmin.z <<  endl;
+    cout << bmax.x << " " << bmax.y << " " << bmax.z <<  endl;
+  }
 	
   // creation of octree
   nv_t = 0;
@@ -4226,8 +4247,10 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
     }
 
   }
-  Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
 
+  // cas maillage volumique + surfacique
+  Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
+  // cas maillage surfacique simplement // A construire Jacques + donner le numero des edges que l'on veut pas creer à l'intérieure
     
   
   if( !(xx) && !(yy) && !(zz) )
@@ -4297,7 +4320,7 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
       
       T_Th3->BuildGTree(); //A decommenter
       
- 
+      delete Th3;
       Add2StackOfPtr2FreeRC(stack,T_Th3);
       *mp=mps;
       return T_Th3;
