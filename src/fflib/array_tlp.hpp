@@ -763,24 +763,24 @@ struct Op3_pacc: public ternary_function<KN_<K>,K,K,if_arth_KN_<K>*> {
 
 template<class K>
 struct SetArray2: public binary_function<K,K,SetArray<K> > { 
-    static SetArray<K> f(const K & a,const K & b)  { 
-	// cout << "SubArray: " << a << " " << b << endl;
-	//     SetArray(long nn,R oo=R(),R sstep=R(1)): o(oo),n(nn),step(sstep) {}
-	int n= abs((b-a));
-	ffassert(n);
-	K s= (b-a)/K(n);
-	n++;
-	if(verbosity>100)
-	cout << "    SetArray " << n << " " << a << " " << s << endl;
+  static SetArray<K> f(const K & a,const K & b)  { 
+    // cout << "SubArray: " << a << " " << b << endl;
+    //     SetArray(long nn,R oo=R(),R sstep=R(1)): o(oo),n(nn),step(sstep) {}
+    long  n= long(abs((b-a)));
+    ffassert(n);
+    K s= (b-a)/K(n);
+    n++;
+    if(verbosity>100)
+      cout << "    SetArray " << n << " " << a << " " << s << endl;
     return SetArray<K>(n,a,s);} }; 
 
 template<class K>
 struct SetArray3: public ternary_function<K,K,K,SetArray<K> > { 
-    static SetArray<K> f(Stack s,const K & a,const K &b,const K & c)  {  
-	// cout << "SubArray: " << a << " " << b << " " <<  c << endl;
-    int n= 1+abs((c-a)/b);
+  static SetArray<K> f(Stack s,const K & a,const K &b,const K & c)  {  
+    // cout << "SubArray: " << a << " " << b << " " <<  c << endl;
+    long n= long(1+abs((c-a)/b));
     if(verbosity>100)
-    cout << "    SetArray " << n << " :  "  << " " << a << " " << b << " " << c << endl;	
+      cout << "    SetArray " << n << " :  "  << " " << a << " " << b << " " << c << endl;	
     return SetArray<K>(n,a,b);} }; 
 
 template<class R,class A>  R * set_init_array( R* const & a,const A & b){ 
