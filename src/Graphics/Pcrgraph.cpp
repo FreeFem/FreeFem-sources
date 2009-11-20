@@ -358,9 +358,9 @@ static rgb DefColorWin32( int k,int nb, bool hsv,bool grey,int nbcolors,float *c
 extern void DefColor(float & r, float & g, float & b,
               int k,int nb, bool hsv,bool grey,int nbcolors,float *colors);
  DefColor(r,g,b,   k,nb,hsv,grey,nbcolors,colors);
- C.r=255*r;
- C.g=255*g;
- C.b=255*b;
+ C.r= (BYTE) (255*r);
+ C.g= (BYTE) (255*g);
+ C.b= (BYTE) (255*b);
  return C;
 }              
 
