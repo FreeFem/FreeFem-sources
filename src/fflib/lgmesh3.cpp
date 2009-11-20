@@ -257,8 +257,8 @@ bool BuildPeriodic(
 				  
 				  P[ee].x=GetAny<double>((*periodic[k+kkx2])(stack));
 				  P[ee].y=GetAny<double>((*periodic[k+kky2])(stack));
-				  I[ee].first = int(P[ee].x-x0)*coef);
-				  I[ee].second= int(P[ee].y-y0)*coef);
+				  I[ee].first = int((P[ee].x-x0)*coef);
+				  I[ee].second= int((P[ee].y-y0)*coef);
 				  im=closeto(m,I[ee]);
 				  
 				  if(im == m.end() )
