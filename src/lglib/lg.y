@@ -348,7 +348,9 @@ type_of_dcl:   TYPE
              | TYPE '[' TYPE ']' {$$=TypeArray($1,$3)}
              | TYPE '[' TYPE ',' TYPE ']' {$$=TypeArray($1,$3,$5)}
              | TYPE '<' TYPE '>' {$$=TypeTemplate($1,$3)}
-             
+	     | TYPE '<' TYPE '>' '[' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6)}
+	     | TYPE '<' TYPE '>' '[' TYPE ',' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6,$8)}
+			    
              
 ;
 

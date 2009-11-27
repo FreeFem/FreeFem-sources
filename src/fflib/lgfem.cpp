@@ -2185,7 +2185,7 @@ class Plot :  public E_F0mps { public:
     };
 
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =20 ;
+   static const int n_name_param =21 ;
    Expression bb[4];
     vector<Expression2> l;
     Expression nargs[n_name_param];
@@ -2289,7 +2289,9 @@ class Plot :  public E_F0mps { public:
   {   "boundary", &typeid(bool)}, // 16
   {   "dim", &typeid(long)}, // 2 or 3 
   {   "add", &typeid(bool)}, // add to previous plot
-  {   "prev", &typeid(bool)}, // keep previou  view point 
+  {   "prev", &typeid(bool)}, // keep previou  view point  
+  {   "ech", &typeid(double)} // keep previou  view point 
+     
 
    };
 
@@ -2718,6 +2720,7 @@ AnyType Plot::operator()(Stack s) const  {
 	pferbase  fe=0,fe1=0;
 	pferbasearray fea;
 	pf3rbase  fe30=0,fe31=0;
+	double echelle=1;
 	pf3rbasearray  fea3;
 	int cmp0,cmp1;
 	theplot.SendNewPlot();
@@ -2757,6 +2760,8 @@ AnyType Plot::operator()(Stack s) const  {
 	if (nargs[17]) theplot<< 17L  <= GetAny<long>((*nargs[17])(s));	
 	if (nargs[18]) theplot<< 18L  <= GetAny<bool>((*nargs[18])(s));	
 	if (nargs[19]) theplot<< 19L  <= GetAny<bool>((*nargs[19])(s));	
+	if (nargs[20]) theplot<< 20L  <= (echelle=GetAny<double>((*nargs[20])(s)));	
+
 	theplot.SendEndArgPlot();
 	map<const Mesh *,long> mapth;
 	map<const Mesh3 *,long> mapth3;

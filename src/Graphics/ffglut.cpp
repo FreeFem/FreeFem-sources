@@ -1581,6 +1581,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   drawmeshes=false;
   add=false; 
   keepPV=false;
+  echelle=1.;
     
   Pmin=R3(+dinfty,+dinfty,+dinfty);
   fmin = +dinfty;    
@@ -1598,61 +1599,64 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	if((debug > 4)) cout << " read cas: " << cas << "  " << PlotStream::dt_endarg << endl;
 	if(cas==PlotStream::dt_endarg) break;
 	if(version==2)
-	    switch (cas) {
-		case  0: fin >> coeff; break;
-		case 1: fin >> cm; break;
-		case 2: fin >> psfile; break;
-		case 3: fin >> wait; break;
-		case 4: fin >> fill; break;
-		case 5: fin >> value; break;
-		case 6: fin >> clean; break;
-		case 7: fin >> aspectratio;uaspectratio=true; break;
-		case 8: fin >> boundingbox; break;
-		case 9: fin >> Niso; break;
-		case 10: fin >> Narrow; break;
-		case 11: fin >> Viso;Niso=Viso.N();pViso=true; break;
-		case 12: fin >> Varrow;Narrow=Varrow.N();pVarrow=true; break;
-		case 13: fin >> bw; break;
-		case 14: fin >> grey; break;
-		case 15: fin >> colors; break;
-		case 16: fin >> drawborder; break;
-		case 17: fin >> dimpp; break;// ajout fevr 2008  v3.0.6
-		case 18: fin >> add; break;
-		case 19: fin >> keepPV; break;
-		default: 
-		    cout << "Fatal error: Unknow  case  : " << cas <<endl;
-		    ffassert(0);
-		    break;
-	    }
+	  switch (cas) {
+	  case  0: fin >> coeff; break;
+	  case 1: fin >> cm; break;
+	  case 2: fin >> psfile; break;
+	  case 3: fin >> wait; break;
+	  case 4: fin >> fill; break;
+	  case 5: fin >> value; break;
+	  case 6: fin >> clean; break;
+	  case 7: fin >> aspectratio;uaspectratio=true; break;
+	  case 8: fin >> boundingbox; break;
+	  case 9: fin >> Niso; break;
+	  case 10: fin >> Narrow; break;
+	  case 11: fin >> Viso;Niso=Viso.N();pViso=true; break;
+	  case 12: fin >> Varrow;Narrow=Varrow.N();pVarrow=true; break;
+	  case 13: fin >> bw; break;
+	  case 14: fin >> grey; break;
+	  case 15: fin >> colors; break;
+	  case 16: fin >> drawborder; break;
+	  case 17: fin >> dimpp; break;// ajout fevr 2008  v3.0.6
+	  case 18: fin >> add; break;
+	  case 19: fin >> keepPV; break;
+	  case 20: fin >> echelle;break;
+	  default: 
+	    cout << "Fatal error: Unknow  case  : " << cas <<endl;
+	    ffassert(0);
+	    break;
+	  }
 	else if(version ==3)
-	    switch (cas) {
-		case  0: fin >= coeff; break;
-		case 1: fin >= cm; break;
-		case 2: fin >= psfile; break;
-		case 3: fin >= wait; break;
-		case 4: fin >= fill; break;
-		case 5: fin >= value; break;
-		case 6: fin >= clean; break;
-		case 7: fin >= aspectratio;uaspectratio=true; break;
-		case 8: fin >= boundingbox; break;
-		case 9: fin >= Niso; break;
-		case 10: fin >= Narrow; break;
-		case 11: fin >= Viso;Niso=Viso.N();pViso=true; break;
-		case 12: fin >= Varrow;Narrow=Varrow.N();pVarrow=true; break;
-		case 13: fin >= bw; break;
-		case 14: fin >= grey; break;
-		case 15: fin >= colors; break;
-		case 16: fin >= drawborder; break;
-		case 17: fin >= dimpp; break;// ajout fevr 2008  v3.0.6
-		case 18: fin >= add; break;
-		case 19: fin >= keepPV; break;
-		default: 
-		    static int nccc=0;
-		    if(nccc++<5)
-			cout << " Skip Unknow case " << cas <<" (ffglut is too old ?)\n";
-		    fin.SkipData();
-		    break;
-	    }   
+	  switch (cas) {
+	  case  0: fin >= coeff; break;
+	  case 1: fin >= cm; break;
+	  case 2: fin >= psfile; break;
+	  case 3: fin >= wait; break;
+	  case 4: fin >= fill; break;
+	  case 5: fin >= value; break;
+	  case 6: fin >= clean; break;
+	  case 7: fin >= aspectratio;uaspectratio=true; break;
+	  case 8: fin >= boundingbox; break;
+	  case 9: fin >= Niso; break;
+	  case 10: fin >= Narrow; break;
+	  case 11: fin >= Viso;Niso=Viso.N();pViso=true; break;
+	  case 12: fin >= Varrow;Narrow=Varrow.N();pVarrow=true; break;
+	  case 13: fin >= bw; break;
+	  case 14: fin >= grey; break;
+	  case 15: fin >= colors; break;
+	  case 16: fin >= drawborder; break;
+	  case 17: fin >= dimpp; break;// ajout fevr 2008  v3.0.6
+	  case 18: fin >= add; break;
+	  case 19: fin >= keepPV; break;
+	  case 20: fin >> echelle;break;
+	    
+	  default: 
+	    static int nccc=0;
+	    if(nccc++<5)
+	      cout << " Skip Unknow case " << cas <<" (ffglut is too old ?)\n";
+	    fin.SkipData();
+	    break;
+	  }   
 	else ffassert(0);
 	ffassert(fin.good() && ! fin.eof());
     }
@@ -1679,46 +1683,46 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   long nbmeshes;
   fin >> nbmeshes;
   if((debug > 2)) cout << " read nb : mesh " << nbmeshes << endl;
- if(version==2)
-   {
-  Ths.resize(nbmeshes);    
-  for(int i=0;i<nbmeshes;++i)
-    Ths[i]=0;
-   }
-   else
-     {
-	 Ths2.resize(nbmeshes);    
-	 for(int i=0;i<nbmeshes;++i)
-	     Ths2[i]=0;
-     }
-    
+  if(version==2)
+    {
+      Ths.resize(nbmeshes);    
+      for(int i=0;i<nbmeshes;++i)
+	Ths[i]=0;
+    }
+  else
+    {
+      Ths2.resize(nbmeshes);    
+      for(int i=0;i<nbmeshes;++i)
+	Ths2[i]=0;
+    }
+  
   for(int i=0;i<nbmeshes;++i)
     { 
       long l;
       fin >> l;
       if(l>=0) 
 	{
-	if((debug > 3)) cout << " read mesh " << i  << " -> " << l << "  " <<nbmeshes << endl;
-	l--;
-	ffassert(l>=0 && l < nbmeshes);
-	if(version==2)
+	  if((debug > 3)) cout << " read mesh " << i  << " -> " << l << "  " <<nbmeshes << endl;
+	  l--;
+	  ffassert(l>=0 && l < nbmeshes);
+	  if(version==2)
 	  {
-	ffassert(Ths[l]==0);
-	fin >>Ths[l] ;
+	    ffassert(Ths[l]==0);
+	    fin >>Ths[l] ;
 	  }
-	else
-	  {
+	  else
+	    {
 	      ffassert(Ths2[l]==0);
 	      fin >>Ths2[l] ;
-	  }
-	    
-	if((debug > 3))
-	  if(version==2)
-	    cout << i << " nt/nv " << l << " "  <<Ths[l]->nt << " " << Ths[l]->nv << endl;
-	  else
-	    cout << i << " nt/nv " << l << " "  <<Ths2[l]->nt << " " << Ths2[l]->nv << endl;
-	
-	ffassert(fin.good());
+	    }
+	  
+	  if((debug > 3))
+	    if(version==2)
+	      cout << i << " nt/nv " << l << " "  <<Ths[l]->nt << " " << Ths[l]->nv << endl;
+	    else
+	      cout << i << " nt/nv " << l << " "  <<Ths2[l]->nt << " " << Ths2[l]->nv << endl;
+	  
+	  ffassert(fin.good());
 	}
       else // Add FH optimisation FH 11/12/2008 (not use to day)
 	{// the mesh is already in the previous plot with number ll
@@ -1733,8 +1737,8 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	    }
 	  else
 	    {
-		Ths2[l]=old->Ths2[ll];
-		Ths2[l]->increment(); // 
+	      Ths2[l]=old->Ths2[ll];
+	      Ths2[l]->increment(); // 
 	    }
 	  
 	}
@@ -1752,11 +1756,11 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
       for(int i=0;i<nbmeshes3;++i)
 	{ 
 	  long l;
-	       fin >> l;
-	       if(l>=0) 
-		 {
-		   if((debug > 3)) cout << " read mesh3 " << i  << " -> " << l 
-					<< "  " <<nbmeshes3 << endl;
+	  fin >> l;
+	  if(l>=0) 
+	    {
+	      if((debug > 3)) cout << " read mesh3 " << i  << " -> " << l 
+				   << "  " <<nbmeshes3 << endl;
 		   l--;
 		   ffassert(l>=0 && l < nbmeshes3);
 		   ffassert(Ths3[l]==0);
@@ -1765,20 +1769,20 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 		     cout << i << " nt/nv " << l << " "  <<Ths3[l]->nt << " " 
 			  << Ths3[l]->nv << endl;
 		   ffassert(fin.good());
-		 }
-	       else // Add FH optimisation FH 11/12/2008 (not use to day)
+	    }
+	  else // Add FH optimisation FH 11/12/2008 (not use to day)
 		 {// the mesh is already in the previous plot with number ll
 		   ffassert(l==-1);
 		   long ll;
 		   fin >> l>> ll; // read l and ll
 		   ffassert(old);
-		     Ths3[l]=old->Ths3[ll];
-		     Ths3[l]->increment(); // 
+		   Ths3[l]=old->Ths3[ll];
+		   Ths3[l]->increment(); // 
 		 }
-	       
+	  
 	}	 
       
-     fin.GetPlots(); 
+      fin.GetPlots(); 
     }
  
   long nbplot;

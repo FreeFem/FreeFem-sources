@@ -226,6 +226,7 @@ class ThePlot { public:
     bool drawborder;
     bool drawmeshes;
     bool add,keepPV;
+    double echelle;
     vector<Mesh *> Ths;
     vector<Mesh2 *> Ths2;
     vector<Mesh3 *> Ths3;
