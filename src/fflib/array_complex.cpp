@@ -45,6 +45,13 @@ KN_<double> Get_C2R_(KN_<complex<double> >  vc)
   double *pr = static_cast<double*>(static_cast<void*>(pc));
   return KN_<double>(pr+offset,vc.N(),vc.step*2);
 }
+template<int offset>
+KNM_<double> Get_C2R_(KNM_<complex<double> >  vc)
+{
+    complex<double> * pc=vc; // pointeur du tableau                                                                            
+    double *pr = static_cast<double*>(static_cast<void*>(pc));
+    return KNM_<double>(pr+offset,ShapeOfArray(vc.N(),vc.step*2),vc.shapei,vc.shapej);
+}
 
 
 void initArrayDCLComplex()
@@ -66,6 +73,11 @@ void initArrayOperatorComplex()
     Add<KN<Complex> *>("re",".",new OneOperator1<KN_<double>,KN_<Complex> >(Get_C2R_<0>,atype<KN<Complex> * >()));
     Add<KN_<Complex> >("re",".",new OneOperator1<KN_<double>,KN_<Complex> >(Get_C2R_<0>,atype<KN_<Complex>  >()));
 
+    Add<KNM<Complex> *>("im",".",new OneOperator1<KNM_<double>,KNM_<Complex> >(Get_C2R_<1>,atype<KNM<Complex> * >()));
+    Add<KNM_<Complex> >("im",".",new OneOperator1<KNM_<double>,KNM_<Complex> >(Get_C2R_<1>,atype<KNM_<Complex>  >()));
+    Add<KNM<Complex> *>("re",".",new OneOperator1<KNM_<double>,KNM_<Complex> >(Get_C2R_<0>,atype<KNM<Complex> * >()));
+    Add<KNM_<Complex> >("re",".",new OneOperator1<KNM_<double>,KNM_<Complex> >(Get_C2R_<0>,atype<KNM_<Complex>  >()));
+    
     Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(square));
     Global.Add("conj","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(conj));
 

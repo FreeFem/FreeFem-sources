@@ -278,6 +278,12 @@ complex[int] tt(2.+0i:10.+0i); //  2,3,4,5,6,7,8,9,10
 complex[int] t1(2.:3.:10.); // 2,5,8,
 cout << " tt(2.+0i:10.+0i)= " << tt << endl;
 cout << " t1(2.:3.:10.);= " << t1 << endl;
+cout << " tt.re real part array   " << tt.re << endl ; 
+ //  the real part array of the complex array \index{re}\index{array!re}
+cout << " tt.im imag part array   " << tt.im << endl ; 
+//  the imag part array of the complex array \index{im}\index{array!im}
+
+
 }
 {
 

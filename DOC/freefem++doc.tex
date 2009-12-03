@@ -3709,7 +3709,10 @@ array generator of  \verb!a:c! is equivalent to \verb!a:1:c!, and the  array set
 is set to size  $ \lfloor |(b-a)/c|+1 \rfloor$  and the value $i$ is set by 
 $ a + i (b-a)/c$.
 
-So you have of  \texttt{int,real, complex} array:
+So you have of  \texttt{int,real, complex} array
+with two operator (.in, .re) two get the real and imaginary array  of complex array
+(without copy)
+\index{re}\index{array!re}\index{im}\index{array!im}:
 
 \bFF
 //  version 3.2  mai 2009
@@ -3736,6 +3739,11 @@ complex[int] tt(2.+0i:10.+0i); //  2,3,4,5,6,7,8,9,10
 complex[int] t1(2.:3.:10.); // 2,5,8,
 cout << " tt(2.+0i:10.+0i)= " << tt << endl;
 cout << " t1(2.:3.:10.)= " << t1 << endl;
+cout << " tt.re real part array   " << tt.re << endl ; 
+ //  the real part array of the complex array \index{re}\index{array!re}
+cout << " tt.im imag part array   " << tt.im << endl ; 
+//  the imag part array of the complex array \index{im}\index{array!im}
+
 }
 \eFF
 The output is :
@@ -3760,6 +3768,14 @@ The output is :
 	(7,0)	(8,0)	(9,0)	(10,0)	
  t1(2.:3.:10.);= 3	
 	(2,0)	(5,0)	(8,0)	
+
+ tt.re real part array   9	
+	  2	  3	  4	  5	  6
+	  7	  8	  9	 10	
+ tt.im imag part array   9	
+	  0	  0	  0	  0	  0
+	  0	  0	  0	  0	
+2	
 \eFF
 
 the all integer array operator are  : % modif v2.0-3

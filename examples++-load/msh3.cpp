@@ -1869,7 +1869,7 @@ struct Op3_setmesh: public binary_function<AA,BB,RR> {
     cout << "INIT=" << INIT << endl;
     if(!INIT && *a){
       //Add2StackOfPtr2FreeRC(stack,*a);
-      delete *a;
+       (**a).destroy();
       cout << "destruction du pointeur" << endl;
     }
     //Add2StackOfPtr2FreeRC(stack,p); //  the pointer is use to set variable so no remove. 

@@ -214,7 +214,7 @@ struct Op2_setmesh: public binary_function<AA,BB,RR> {
     ffassert(a );
     pmesh  p=GluMesh(b);
     
-    if(!INIT &&  *a) delete *a;
+      if(!INIT &&  *a) (**a).destroy() ;
     //  Add2StackOfPtr2FreeRC(stack,p); //  the pointer is use to set variable so no remove. 
     return *a=p,a;
   } 
