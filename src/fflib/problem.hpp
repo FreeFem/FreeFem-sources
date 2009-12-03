@@ -993,6 +993,8 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
      px = GetAny<KN<R> * >((*x)(stack) );
      if(init ) 
        px->init(Vh.NbOfDF); 
+     if(px->N() != Vh.NbOfDF) //add Dec 2009
+	 px->resize(Vh.NbOfDF);
      ffassert(px->N() == Vh.NbOfDF); 
    }
   KN_<R>  xx( px ? *(KN_<R> *) px : GetAny<KN_<R> >((*x)(stack) ));

@@ -1,3 +1,5 @@
+ correct problem of free of mesh in case of  gluing meshes
+ add .im, .real method on complex [int,int] array 
  correct  missing  matrix<complex>[int]  type in grammar.
 v  3.7
  correct mistake in genertion of file WHERE_LIBRARY-config
