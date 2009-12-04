@@ -6,6 +6,7 @@ dircommand=`dirname $0`
 
 FFVERSION='@VERSION@'
 FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@'
+FFFFLAGS='@FFLAGS@'
 INCFF=
 if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
 if [ -z "$MPICXX" ] ; then MPICXX='@MPICXX@' ; fi
@@ -14,6 +15,7 @@ if [ "$CXX" = '@'CXX'@' ] ; then CXX=""; fi
 if [ "$MPICXX" = '@'MPICXX'@' ] ; then MPICXX=""; fi
 if [ "$F77" = '@'F77'@' ] ; then F77=""; fi
 if [ "$FFCXXFLAGS" = '@'CXXFLAGS'@' ] ; then FFCXXFLAGS=""; fi
+if [ "$FFFFLAGS" = '@'FFLAGS'@' ] ; then FFFFLAGS=""; fi
 if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
 if [ -z "$INCFF" ] ; then
     if [ -f "@INCFF@/ff++.hpp" ] ; then
@@ -100,6 +102,7 @@ while [ $# -ne 0 ]  ; do
 	MPICXX=*) MPICXX=`echo $1|sed 's/[A-Z0-9]*=//'`;withmpi=yes ;;
 	F77=*) F77=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	CXXFLAGS=*) CXXFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	FFLAGS=*) FFFFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	-auto) autodep=yes;args=$argsp;;
 	-mpi) withmpi=yes;;
 	-n)  do="no";;
@@ -201,9 +204,9 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	fi
     fi
     if [ "$ffiles" ] ;then 
-	echo $F77 -c $FLAGS $CXXFLAGS $INC $PIC $ffiles
+	echo $F77 -c $FLAGS $FFFFLAGS $INC $PIC $ffiles
 	if [  $do = yes ] ; then 
-	    eval $F77 -c $INC $FLAGS $CXXFLAGS $PIC  $ffiles
+	    eval $F77 -c $INC $FLAGS $FFFFLAGS $PIC  $ffiles
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
     fi
