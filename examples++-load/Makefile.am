@@ -72,7 +72,7 @@ include: include.tar.gz
 	rm -rf include 
 	gunzip -c include.tar.gz| tar xvf -
 	-rm -f include/._*
-	-cp -rf ../download/include/* include/.
+#	-cp -rf ../download/include/* include/.
 
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
