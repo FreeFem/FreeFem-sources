@@ -1,11 +1,16 @@
- correct problem of free of mesh in case of  gluing meshes
- add .im, .real method on complex [int,int] array 
- correct  missing  matrix<complex>[int]  type in grammar.
 v  3.7
- correct mistake in genertion of file WHERE_LIBRARY-config
- add  initialization of	scalar variable at zero 
- add  warning in case of use of	variable with hide freefem++ name
- add missing file in download version
+   add dynamic load interface with newuoa fortran optimizer without derivative
+      see ffnewuoa.edp example ins examples++-load
+   correct problem of free of mesh in case of  gluing meshes
+     Th= Tha+Thb; // now just the ref counter on Th  is decrease
+                  // and  before  Th is delete 
+   add .im, .real method on complex [int,int] matrix array 
+   add  missing  matrix<complex>[int]  type in grammar.
+
+   correct mistake in genertion of file WHERE_LIBRARY-config
+   add  initialization of	scalar variable at zero 
+   add  warning in case of use of	variable with hide freefem++ name
+   add missing file in download version
 
 v 3.6.1 
     correct  font problem in documetation
