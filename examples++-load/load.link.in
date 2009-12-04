@@ -207,7 +207,7 @@ if [ -n "$ffiles$files$fileso" ] ; then
     fi
     if [ "$ffiles" ] ;then 
 	echo $F77 -c $FLAGS $FFFFLAGS $INC $PIC $ffiles
-	LIBS="$FFIBS $LIBS"
+	LIBS="$FFFLIBS $LIBS"
 	if [  $do = yes ] ; then 
 	    eval $F77 -c $INC $FLAGS $FFFFLAGS $PIC  $ffiles
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
