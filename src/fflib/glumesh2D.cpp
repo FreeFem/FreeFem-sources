@@ -75,8 +75,9 @@ Mesh * GluMesh(listMesh const & lst)
 	  Px=Maxc(P,Px);     
 	}
     } 
-
-  cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn << " "<< Px << endl;
+  if(verbosity>2)
+    cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn 
+	 << " "<< Px << endl;
   
   Vertex * v= new Vertex[nbvx];
   Triangle *t= new Triangle[nbt];
