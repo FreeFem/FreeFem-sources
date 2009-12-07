@@ -476,7 +476,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
   double r=0,g=0,b=0;
   
   bool cc[3]= { plotborder , plotborder && fill , plotmesh };
-  
+  double desaturation =plotmesh ? 0 :  0.25;
   int kk=0;
   if(cc[kk])
     if(lok[kk])   glCallList(gllists+kk);
@@ -487,13 +487,16 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 	glLineWidth(1); 
 	glAlphaFunc ( GL_GREATER, 0.1 ) ;
 	glEnable(GL_ALPHA_TEST) ;
-	glLineStipple(1, 0x300C);
-	glEnable(GL_LINE_STIPPLE);
+	if(!plotmesh)
+	  {
+	    glLineStipple(1, 0x300C);
+	    glEnable(GL_LINE_STIPPLE);
+	  }
 	glBegin(GL_TRIANGLES);    
-		for (int i=0;i<Th.nbe;i++)
+	for (int i=0;i<Th.nbe;i++)
 	  {
 	    const BE & K(Th.be(i)); 
-	    plot.color(1+abs(K.lab),0.25);
+	    plot.color(1+abs(K.lab),desaturation);
 	    R3 N(R3(K[0],K[1])^R3(K[0],K[2]));
 	    N /= N.norme();
 	    glNormal3d(N.x,N.y,N.z);
