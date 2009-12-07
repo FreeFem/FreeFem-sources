@@ -1,5 +1,5 @@
 //   for automatic  compilation with ff-c++
-//ff-c++-LIBRARY-dep: amd  umfpack blas 
+//ff-c++-LIBRARY-dep:  umfpack amd blas 
 //ff-c++-cpp-dep: 
 //  
 //  file to add UMFPACK solver with dynamic load.
