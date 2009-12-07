@@ -19,7 +19,7 @@ func mesh3 Cube(int[int] & NN,real[int,int] &BB ,int[int,int] & L)
     real z0=BB(2,0),z1=BB(2,1);
     
     int nx=NN[0],ny=NN[1],nz=NN[2];
-    mesh Thx = square(ny,nz,[y0+(y1-y0)*x,z0+(z1-z0)*y]);
+    mesh Thx = square(nx,ny,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
    
     int l1=L(0,0);
     int l2=L(0,1);
