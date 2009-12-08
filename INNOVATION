@@ -1,4 +1,5 @@
 v  3.7
+   add 3d beam examples examples++-3d/beam.edp 
    correct install problem due to metis directory
    add dynamic load interface with newuoa fortran optimizer without derivative
       see ffnewuoa.edp example ins examples++-load
