@@ -1,4 +1,5 @@
 v  3.7
+   correct install problem due to metis directory
    add dynamic load interface with newuoa fortran optimizer without derivative
       see ffnewuoa.edp example ins examples++-load
    correct problem of free of mesh in case of  gluing meshes
