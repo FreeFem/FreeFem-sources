@@ -53,6 +53,8 @@ using namespace std;
 
 using namespace  Fem2D;
 
+int  ChangeLab3D(const map<int,int> & m,int lab);
+
 void TestSameVertexMesh3( const Mesh3 & Th3, const double & hseuil, const R3 & Psup, const R3 &Pinf, int & nv_t, int *Numero_Som){
   
   Vertex3  *v=new Vertex3[Th3.nv];
@@ -1951,6 +1953,23 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   ffassert( nrtet.N() %2 ==0);
   ffassert( nrf.N() %2 ==0);
   
+  map<int,int> mapface;
+  for(int i=0;i<nrf.N();i+=2)
+    {
+      if( nrf[i] != nrf[i+1] ){	
+	mapface[nrf[i]] = nrf[i+1];
+      }      
+    }
+  
+  map<int,int> maptet;
+  for(int i=0;i<nrtet.N();i+=2)
+    {
+      if( nrtet[i] != nrtet[i+1] ){	
+	maptet[nrtet[i]] = nrtet[i+1];
+      }      
+    }
+
+
 
   // realisation de la map par default
   
@@ -2034,20 +2053,44 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   
   Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh,rTh3, txx, tyy, tzz, border_only, 
 			      recollement_elem, recollement_border, point_confondus_ok);
-  if(nbt != 0)
-    {
+  
+  if( nrtet.N() >0){ 
+    for (int i=0;i<nbt;i++)
+      {
+	const Tet &K( T_Th3->elements[i] );	
+	int iv[4];
+	iv[0]= T_Th3->operator()(K[0]);
+	iv[1]= T_Th3->operator()(K[1]);
+	iv[2]= T_Th3->operator()(K[2]);
+	iv[3]= T_Th3->operator()(K[3]);
 
-      //      T_Th3->BuildBound();
-      //      T_Th3->BuildAdj();
-      
+	// les 3 triangles par triangles origines 
+	int lab=K.lab;
+	T_Th3->elements[i].set( T_Th3->vertices, iv, ChangeLab3D(maptet,lab));
+      }  
+  }
+  // les arete frontieres qui n'ont pas change
+    
+  if( nrf.N()>0){
+    for (int i=0;i<nbe;i++)
+      { 
+	const Triangle3 &K( T_Th3->be(i) );
+	int iv[3];       
+	iv[0] = T_Th3->operator()(K[0]);
+	iv[1] = T_Th3->operator()(K[1]);
+	iv[2] = T_Th3->operator()(K[2]);
+	
+	int l0,l1=ChangeLab3D(mapface,l0=K.lab) ;
+	T_Th3->be(i).set( T_Th3->vertices, iv, l1 );
+      }
+  }
+  
+
+  if(nbt != 0)
+    {    
       if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
 
-      //     T_Th3->Buildbnormalv();  
-      //      T_Th3->BuildjElementConteningVertex();
-      
       T_Th3->BuildGTree();
-      
-      //	T_Th3->decrement(); 
     }
   else
     {
