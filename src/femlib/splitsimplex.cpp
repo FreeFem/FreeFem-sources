@@ -152,7 +152,7 @@ void SplitSimplex(int N,R2 *P,int *K,int op=0,R2 *ABC=0)
     for (int j=0;j<N;++j)
       if(i+j<N) 
 	{
-	  K[l++]= op+ NumSimplex2(i,j);
+	  K[l++]= op+NumSimplex2(i,j);
 	  K[l++]= op+NumSimplex2(i+1,j);
 	  K[l++]= op+NumSimplex2(i,j+1);
 	}
@@ -189,7 +189,8 @@ void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
 	P[l+op]= R3(i*h,j*h,k*h);
       assert(l<nv);
     }
-  
+  // comment n3  i=m[n]
+  //  m = i+j*n+k*n2 
   for (int m=0;m<n3;m++)
     {
       int i = m % n;
@@ -225,6 +226,106 @@ void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
        cout << ptet << "   " << tet << endl;
     }
   assert(ntt==n3);
+}
+
+// Add J. Morice (trunc functions)
+
+void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
+{
+  const int n=N;
+  const int n2=n*n;
+  
+  int ntri=3*ntri2;
+  int op=0;
+  
+  tri = new int[ntri];
+  //    generation des trianges
+  // --------
+  
+  // face i=0
+  int l=0;
+  cout << "face i=0" << endl;
+  for (int i=0;i<N;++i)
+    for (int j=0;j<N;++j){
+      if(i+j<N) 
+	{
+	  tri[l++]= op+NumSimplex3(0,i,j);
+	  tri[l++]= op+NumSimplex3(0,i+1,j);
+	  tri[l++]= op+NumSimplex3(0,i,j+1); 
+	}
+      else
+	{
+	  tri[l++]= op+NumSimplex3(0,N-i,N-j);
+	  tri[l++]= op+NumSimplex3(0,N-i,N-j-1);
+	  tri[l++]= op+NumSimplex3(0,N-i-1,N-j); 
+	}
+      //cout << "i,j " << i << "," << j << endl;
+      cout << "l="<< l/3 <<  " "<< tri[l-3] <<" "<< tri[l-2] <<" "<<  tri[l-1] <<" "<<  endl;
+    }
+  // face j=0
+  cout << "face j=0" << endl;
+  for (int i=0;i<N;++i)
+    for (int j=0;j<N;++j){
+      if(i+j<N) 
+	{
+	  tri[l++]= op+NumSimplex3(i,0,j);
+	  tri[l++]= op+NumSimplex3(i,0,j+1); // inverser les deux lignes
+	  tri[l++]= op+NumSimplex3(i+1,0,j);
+	}
+      else
+	{
+	  tri[l++]= op+NumSimplex3(N-i,0,N-j);
+	  tri[l++]= op+NumSimplex3(N-i-1,0,N-j); // inverser les deux lignes
+	  tri[l++]= op+NumSimplex3(N-i,0,N-j-1);
+	}
+      //cout << "i,j " << i << "," << j << endl;
+      cout << "l="<< l/3 <<  " "<< tri[l-3] <<" "<< tri[l-2] <<" "<<  tri[l-1] <<" "<<  endl;
+    }
+  // face k=0
+  cout << "face k=0" << endl;
+  for (int i=0;i<N;++i)
+    for (int j=0;j<N;++j){
+      if(i+j<N) 
+	{
+	  tri[l++]= op+NumSimplex3(i,j,0);
+	  tri[l++]= op+NumSimplex3(i+1,j,0);
+	  tri[l++]= op+NumSimplex3(i,j+1,0);
+	  //tri[l++]= op+NumSimplex3(i+1,j,0);
+	}
+      else
+	{
+	  tri[l++]= op+NumSimplex3(N-i,N-j,0);
+	  tri[l++]= op+NumSimplex3(N-i,N-j-1,0);
+	  tri[l++]= op+NumSimplex3(N-i-1,N-j,0); 
+	  //tri[l++]= op+NumSimplex3(N-i,N-j-1,0);
+	}
+      //cout << "i,j " << i << "," << j << endl;
+      cout << "l="<< l/3 <<  " "<< tri[l-3] <<" "<< tri[l-2] <<" "<<  tri[l-1] <<" "<<  endl;
+    }
+  // face i+j+k=1
+  cout << "dernier face " << endl;
+  for (int k=0;k<N;++k)
+    for (int j=0;j<N;++j){
+      if(k+j<N) 
+	{
+	  int i=N-j-k;
+	  tri[l++]= op+NumSimplex3(   i,   j,   k);
+	  tri[l++]= op+NumSimplex3( i-1,   j, k+1); 
+	  tri[l++]= op+NumSimplex3( i-1, j+1,   k);
+	}
+      else
+	{
+	  int i=N-(N-j-1)-(N-k);
+	  tri[l++]= op+NumSimplex3(   i, N-j-1, N-k);
+	  tri[l++]= op+NumSimplex3( i-1, N-j,   N-k); 
+	  tri[l++]= op+NumSimplex3(   i, N-j, N-k-1); 
+	}
+     
+      cout << "l="<< l/3 <<  " "<< tri[l-3] <<" "<< tri[l-2] <<" "<<  tri[l-1] <<" "<<  endl;
+    }
+  
+  cout << "l= " << l << " ntri=" << ntri << endl;
+  assert( l == ntri); 
 }
 
 /*
@@ -304,7 +405,7 @@ void  SplitSimplex(int N,int & nv, Rd *& P, int & nk , int *& K)
   nv = cas*nv1;
   nk = cas*nk1;
   P = new Rd[nv];
-  K = new int [nk*(d+1)];
+  K = new int[nk*(d+1)];
   if( cas ==1) 
     SplitSimplex( N, P,K);
   else 
