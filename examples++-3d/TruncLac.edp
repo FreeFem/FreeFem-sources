@@ -1,6 +1,5 @@
-load "../examples++-load/msh3"
-load "../examples++-load/medit"
-load "../examples++-load/trunc3D"
+load "msh3"
+load "medit"
 int nn=10;
 
 border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}

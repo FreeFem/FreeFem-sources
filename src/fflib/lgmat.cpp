@@ -657,7 +657,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	            {
 	              bool outside;
 	              ts=ThV.Find(TU(PtHatU[i]),PV[i],outside,ts); 
-		      if(outside) 
+		      if(outside && verbosity>9 ) 
 		        cout << it << " " << i << " :: " << TU(PtHatU[i]) << "  -- "<< outside << PV[i] << " " << ThV(ts) << " ->  " <<  (*ts)(PV[i]) <<endl;
 	              itV[i]= ThV(ts);
 	              intV[i]=outside && inside; //  ouside and inside flag 
@@ -2081,6 +2081,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        );
        
  TheOperators->Add("<-",
+       new OneOperatorCode<BlockMatrix<R> >(),
 //       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R,R>,E_F_StackF0F0>(ProdMat<R,R,R>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat<R>)  ,
@@ -2088,8 +2089,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparse<R>) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R>), 
-       new OneOperatorCode<BlockMatrix<R> >()
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R>) 
+      
        
        );
 TheOperators->Add("*", 

@@ -1,3 +1,6 @@
+#define INMESH3 
+// now this code is in msh3.cpp 
+// F. HecHt .. 
 #ifndef WITH_NO_INIT
 /*
 #include <fstream>
@@ -594,4 +597,5 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
 
 }
 
+#endif
 #endif
