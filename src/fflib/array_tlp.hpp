@@ -806,7 +806,32 @@ template<class R,class A>  R  set_array_( R const & a,const A & b){
     aa=b;
 return a;}
 
-  
+template<class K>  
+class  OneOperator_2KN_ : public OneOperator {public:
+    class Op : public E_F0 {
+       public:
+	int N;
+	Expression *tab;
+	
+	Op( const  E_Array &bb) : N(bb.size()), tab(new Expression[N])
+	{
+	  for(int i=0;i<N;++i)	
+	    tab[i]=atype<K>()->CastTo( bb[i]);
+	}
+	AnyType operator()(Stack s)  const { 
+	    K * p = Add2StackOfPtr2FreeA<K>(s,new K[N]); //   mark to be delete .. 
+	    KN<K> A(N, p);
+	    for(int i=0;i<N;++i)
+		A[i]= GetAny<K>( (*tab[i])(s));
+	    return SetAny<KN_<K> >(A);}
+    };
+    E_F0 * code(const basicAC_F0 & a) const 
+    {  const  E_Array * b = dynamic_cast<const E_Array *>(a[0].LeftValue());
+	ffassert(b);
+        return new Op(*b);} 
+    OneOperator_2KN_<K>(): OneOperator(atype<KN_<K> >(),atype<E_Array>()) { pref=-1;}
+};
+
 extern aType aaaa_knlp;
 template<class K,class Z>
 void ArrayOperator()
@@ -826,6 +851,10 @@ void ArrayOperator()
      aType knr_ = atype<KN_<K> >();
    //-  typedef KN<Z> ZN;
       
+    // add  dec 2009.  ne marche pas ( incompatible  avec MatrixBlock) a comprendre ????? FH. 
+   //  map_type[typeid(KN_<K>).name()]->AddCast(new OneOperator_2KN_<K>);
+    // fin add 
+    // ----
      aType knlp=  aaaa_knlp ;
      
      atype<KN<K>* >()->Add("[","",new OneOperator2_<K*,KN<K>*,Z >(get_elementp_<K,KN<K>*,Z>));
@@ -1127,7 +1156,7 @@ void ArrayOperator()
      TheOperators->Add("=",
         new OneBinaryOperator<set_eqarraypd<KNM<K> ,outProduct_KN_<K>* > > 
        );
-// not tested
+//   tested ok ...  FH 
      TheOperators->Add("?:",
        new OneTernaryOperator3<Op3_p<if_arth_KN_<K>, KN_<K> > > ,
        new OneTernaryOperator3<Op3_paac<K > > ,      
