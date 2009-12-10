@@ -21,5 +21,5 @@ mesh3 Th=buildlayers(Th2,nn,
 func u=x^2+y^2;
 
 mesh3 Th3=trunc(Th,(u-0.5)>1.e-10,split=1,label=135);
-medit("Lac",Th);
+medit("Lac",wait=1,Th);
 medit("LacTruncated",Th3,wait=1);
