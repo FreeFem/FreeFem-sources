@@ -10,7 +10,7 @@
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.7,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.7-1,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
@@ -1295,8 +1295,10 @@ then
 	if test "$ff_mac" = "no" -a "$ff_win32"  = "no" -a "$ff_sunos"  = "no" ;
 	then
 		CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
+		CHECK_COMPILE_FLAG(C,-rdynamic,CFLAGS)
 	fi
 	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
+	CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS)
 
 fi
 AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
