@@ -251,7 +251,7 @@ noinst_LIBRARIES = liblg.a
 liblg_a_SOURCES = lg.tab.hpp lg.tab.cpp  mymain.cpp
 INCLUDES = -I../fflib -I../bamglib -I../Graphics -I../femlib
 BUILT_SOURCES = lg.tab.hpp lg.tab.cpp
-EXTRA_DIST = lg.ypp
+EXTRA_DIST = lg.y
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

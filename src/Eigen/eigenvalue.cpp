@@ -448,18 +448,26 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	{
 	  naupp(ido,bmat,n,which,nbev,tol,  residptr,  ncv,  vp, n,
 		iparam,  ipntr,  workd,   workl,  lworkl, info);
-	  if(ido==99) break;
+	  if(verbosity>99) {cout << "    naupp ido: " << ido << " info : " << info << endl;}
+	  if(info<0) {cerr << "  -- err arpack info = " << info << endl;}  
 	  sauppError(info);
+	  if(ido==99) break;
 	  KN_<double>  xx(&workd[ipntr[1]],n);
 	  KN_<double>  yy(&workd[ipntr[2]],n);
 	  KN_<double>  zz(&workd[ipntr[3]],n);
 	  DoIdoAction(ido,mode,xx,yy,zz,work,OP1,B);
 	}
+
 	nconv = iparam[5];
 	if(nconv)
 	  {
-	    KN<double> evr(nbev+1), evi(nbev+1);
-	    KNM<double> Z(n,nbev+1);
+	    int newdim = nbev;
+	    if(nconv>nbev) {
+	      cerr << "WARNING: nconv(naupp) > nbev: " << nconv << " > " << nbev << endl;
+	      newdim = nconv;
+	    }
+	    KN<double> evr(newdim+1), evi(newdim+1);
+	    KNM<double> Z(n,newdim+1);
 	    KN<double> workev(3*ncv);
 	    int ldz=n;
 	    char HowMny ='A';
@@ -524,7 +532,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	      {
 		int k=i;
 		KN_<K> vi(Z(':',i)) ;
-		cout << "     ------ EV--raw " << vi.min() << " " << vi.max() << endl;
+		cout << "   ------ EV--raw " << vi.min() << " " << vi.max() << endl;
 		(*rawvector)(':',i)=vi;
 	      }
 	    
