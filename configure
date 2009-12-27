@@ -3941,16 +3941,19 @@ echo "$as_me: WARNING:   fort77   FLIBS :  $FLIBS " >&2;}
 	 { echo "$as_me:$LINENO: WARNING:   get dir of -lg2c  FLIBS :  $FLIBS " >&5
 echo "$as_me: WARNING:   get dir of -lg2c  FLIBS :  $FLIBS " >&2;}
 	 ;;
-# add FH sep 2006
+# add FH sep 2006 / modif  2009
          *gfortran)
          for i in $FLIBS; do
           case $i in
            -L*)
 	   d=`expr $i : '-L\(.*\)'`;
-	   echo " +++++++ -------------------- .$d/libgfortran.$ff_suffix_dylib.-- "
-	   if test -e "$d/libgfortran.$ff_suffix_dylib" ; then
-	     ff_flibs="$d/libgfortran.$ff_suffix_dylib"
-	   elif test -e $d/libgfortran.so -o -e $d/libgfortran.a ; then
+	   if test -e "$d/libgfortran.so" ; then
+	     ff_flibs="$d/libgfortran.so"
+	   elif test -e "$d/libgfortran.dylib" ; then
+	     ff_flibs="$d/libgfortran.dylib"
+	   elif test -e "$d/libgfortran.a" ; then
+	     ff_flibs="$d/libgfortran.a"
+	   elif test -e $d/libgfortran.so -o -e $d/libgfortran.a -o -e $d/libgfortran.dylib ; then
 	      ff_flibs="$i"
 	   fi;;
           esac
