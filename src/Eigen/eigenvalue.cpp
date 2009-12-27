@@ -228,7 +228,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
   KN<double> * evaluei=0;
   KN<double> * resid=0;
   KNM<double> * rawvector=0;
-  double ws,vs;           // for debugging FH ++++++++++
+  //double ws,vs;           // for debugging FH ++++++++++
  // pferarray  evector2;
   FEbaseArrayKn<double> *   evector=0;// change mai 2009
   tol=arg<double>(0,stack,0);
@@ -333,7 +333,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
       if(!residptr) residptr=&vresid[0];
 
       while (1) {
-	
+
 	saupp(ido,bmat,n,which,nbev,tol,  residptr,  ncv,  vp, n,
 	      iparam,  ipntr,  workd,   workl,  lworkl, info);
 	if(verbosity>99) 
@@ -342,19 +342,25 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	sauppError(info);
 
 	if(ido==99) break;
-	
+
 	KN_<double>  xx(&workd[ipntr[1]],n);
 	KN_<double>  yy(&workd[ipntr[2]],n);
 	KN_<double>  zz(&workd[ipntr[3]],n);
 	DoIdoAction(ido,mode,xx,yy,zz,work,OP1,B);
       }
+
       nconv = iparam[5];
       if(nconv==0) cerr << "  -- Strange: no eigens values ??? " << endl;
       // Finding eigenvalues and eigenvectors.
       if(nconv)
 	{
-	  KN<double> evr(nbev);
-	  KNM<double> Z(n,nbev);
+	  int newdim = nbev;
+	  if(nconv>nbev) {
+	    cerr << "WARNING: nconv(saupp) > nbev: " << nconv << " > " << nbev << endl;
+	    newdim = nconv;
+	  }
+	  KN<double> evr(newdim);
+	  KNM<double> Z(n,newdim);
 	  int ldz=n;
 	  char HowMny ='A';
 	  int rvec=1;
@@ -530,7 +536,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	    ffassert(rawvector->N()==n);
 	    for(int i=0;i<m;i++)
 	      {
-		int k=i;
+		//int k=i;
 		KN_<K> vi(Z(':',i)) ;
 		cout << "   ------ EV--raw " << vi.min() << " " << vi.max() << endl;
 		(*rawvector)(':',i)=vi;
@@ -637,7 +643,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
     if(verbosity)
 	cout << "Real complex eigenvalue problem: A*x - B*x*lambda" << endl;
   if(verbosity>9 ||  err)
-	cout << "   n " << n << " nev "<< nbev << " tol =" << tol << " maxit =" << maxit << " ncv = " <<ncv << " mode = " << mode << endl;	
+	cout << "   n " << n << " nev "<< nbev << " tol =" << tol << " maxit =" << maxit << " ncv = " << ncv << " mode = " << mode << endl;	
   if(err) 
     {
 	cerr << " list of the error " << endl;
@@ -657,35 +663,35 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
   // OP = inv(OP) 
   /*
   ffassert(0);
- 
-    
+
+
     ARrcCompGenEig<R> prob( n, nbev, sigma,"LM",ncv,tol,maxit,residptr);
-    
-    
+
+
     // OP = inv[A - sigma*I]
-    
-    
+
+
     // Finding an Arnoldi basis.
-    
+
     while (!prob.ArnoldiBasisFound()) {
-      
+
       // Calling ARPACK FORTRAN code. Almost all work needed to
-      
+
       prob.TakeStep();
   */
 
-  // cas non symetrique ,                                                                                                                    
+  // cas non symetrique ,
   // Finding an Arnoldi basis.                                                                                                              \
                                                                                                                                                    
  // int mode=3; //  Shift invert			\
-  
+
   int ido=0;
   char bmat='G';
   char which[]="LM";
   int ishift=1; // Auto Shift true by default                                                                                               \
-                                                                                                                                                   
-  int iparam[12]= {0,ishift,0,maxit,1,nconv,0,mode,0,0,0,0};
-  int ipntr[15]={ 0,0,0, 0,0,0,  0,0,0, 0,0,0 ,0,0,0};
+
+  int iparam[12]= { 0, ishift, 0, maxit, 1, nconv, 0, mode, 0, 0, 0, 0 };
+  int ipntr[15]={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   KN<K> workd(3*n+1);
   int lworkl = 3*ncv*ncv+5*ncv;
   KN<K> workl(lworkl+1);
@@ -695,41 +701,46 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
   KN<K> vresid(residptr? 1: n);
   if(!residptr) residptr=&vresid[0];
 
+  
   while(1)
     {
-
-      caupp(ido,bmat,n,which,nbev,
-	    tol,  residptr,  ncv,
-	    vp, n,   iparam,  ipntr,workd, workl,
-	    lworkl,rwork,  info);
-
+      
+      caupp(ido, bmat, n, which, nbev,
+	    tol, residptr, ncv,
+	    vp, n, iparam, ipntr, workd, workl,
+	    lworkl,rwork, info);
+      
+      if(verbosity>99) { cout << "    caupp ido: " << ido << " info : " << info << endl; }
+      if(info<0) {cerr << " -- err arpack info = " << info << endl;}
+      sauppError(info);
+      
       if(ido==99) break;
-	if(verbosity>99) 
-	  cout << "    saupp ido: " << ido << " info : " << info << endl;
-	if(info<0) {cerr << " -- err arpack info = " << info << endl;}  
-	sauppError(info);
-
-	if(ido==99) break;
-	
-	KN_<K>  xx(&workd[ipntr[1]],n);
-	KN_<K>  yy(&workd[ipntr[2]],n);
-	KN_<K>  zz(&workd[ipntr[3]],n);
-	DoIdoAction(ido,mode,xx,yy,zz,work,OP1,B);
+      
+      KN_<K>  xx(&workd[ipntr[1]],n);
+      KN_<K>  yy(&workd[ipntr[2]],n);
+      KN_<K>  zz(&workd[ipntr[3]],n);
+      
+      DoIdoAction(ido,mode,xx,yy,zz,work,OP1,B);
     }
-  
+ 
   nconv = iparam[5];
   if(nconv)
     {
-      KN<K> evc(nbev);
-      KNM<K> Z(n,nbev);
+      int newdim = nbev;
+      if(nconv>nbev) {
+ 	cerr << "WARNING: nconv(caupp) > nbev: " << nconv << " > " << nbev << endl;
+ 	newdim = nconv;
+      }
+      KN<K> evc(newdim);
+      KNM<K> Z(n,newdim);
       KN<K> workev(3*ncv);
-      int ldz=n;
+      //int ldz=n;
       char HowMny ='A';
       int rvec=1;
-      ceupp( rvec, HowMny, evc, Z , n, sigma, workev,	     bmat, n,   which, 
-	     nbev,  tol,  residptr, ncv,
-	     vp, n, iparam , ipntr, workd, workl,lworkl,rwork,info);
-      
+      ceupp( rvec, HowMny, evc, Z, n, sigma, workev,  bmat, n,  which, 
+ 	     nbev, tol, residptr, ncv,
+ 	     vp, n, iparam, ipntr, workd, workl,lworkl,rwork,info);
+
       if (verbosity)
 	{
 	  cout << "Complex eigenvalue problem: A*x - B*x*lambda" << endl;

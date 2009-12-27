@@ -2815,6 +2815,7 @@ inline Expression basicForEachType::OnReturn(Expression f) const {
     else if(DoOnReturn== NotReturnOfthisType )
 	CompileError("Problem when returning this type (sorry work in progress FH!) ", this);
     else return new  E_F0_Func1(DoOnReturn,f);
+    return 0; 
 }
 
 

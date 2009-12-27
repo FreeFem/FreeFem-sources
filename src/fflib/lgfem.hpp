@@ -565,7 +565,7 @@ inline FESpace3 * v_fes3::update() {
   assert(d==3);
   if (nbcperiodic ) {
     assert(periodic);
-    const Mesh3 &Th(**ppTh);
+    //const Mesh3 &Th(**ppTh);
    //    KN<int> ndfv(Th.nv);
        KN<int> ndfe;
      //  int nbdfv,nbdfe;    

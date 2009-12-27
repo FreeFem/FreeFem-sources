@@ -2343,7 +2343,7 @@ yyreduce:
   case 60:
 #line 374 "lg.ypp"
     {
-             if ((yyvsp[(3) - (4)].type) != typevarreal && (yyvsp[(3) - (4)].type) != typevarcomplex) yyerror(" type of finite element <real> or <complex>");
+             if ((yyvsp[(3) - (4)].type) != typevarreal && (yyvsp[(3) - (4)].type) != typevarcomplex) lgerror (" type of finite element <real> or <complex>");
              fespacecomplex=((yyvsp[(3) - (4)].type)==typevarcomplex);
              fespacetype = Find((yyvsp[(1) - (4)].str));;}
     break;
@@ -3223,7 +3223,7 @@ int Compile()
   Block::open(currentblock);  
   try {
     UnShowAlloc =0;
-    retvalue=yyparse(); //  compile
+    retvalue=yyparse (); //  compile
    
     if(retvalue==0)  
       if(currentblock) 

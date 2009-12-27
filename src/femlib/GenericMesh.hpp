@@ -1257,7 +1257,8 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
 		  {
 		      int i0=j++,i1=j++; 
 		      if(keys[i1]<keys[i0]) swap( keys[i0],keys[i1]);
-		      typename HashTable<Key,Key>::iterator pe = equi.add(keys[i0],keys[i1]);
+		      //typename HashTable<Key,Key>::iterator pe = 
+		     equi.add(keys[i0],keys[i1]);
 		     // if(pe) assert(pe->k == keys[i0]);
 		  }
 		
