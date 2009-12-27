@@ -4,6 +4,7 @@
 
 SUBDIRS=libMesh  bamglib femlib  Graphics Algo lglib fflib std x11	\
 nw mpi agl glx ide bamg medit bin-win32 
+
 EXTRA_DIST=FreeFem++-CoCoa Carbon.r  \
 solver/MUMPS_FreeFem.cpp \
 solver/README_COMPILE \
@@ -22,4 +23,5 @@ solver/wrapper_dotblas.c \
 solver/wrapper_dotblas.f \
 solver/wrapper_dotblas1.c \
 solver/wrapper_dotblas1.f 
+
 

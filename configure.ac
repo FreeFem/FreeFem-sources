@@ -69,12 +69,22 @@ then
 	   -L*) 
 	   d=`expr $i : '-L\(.*\)'`; 
 	   echo " try $d "
-	   if test  -e $d/libg2c.so -o	-e $d/libg2c.a ; then   
+	   if test -e "$d/libg2c.so" ; then
+	     ff_flibs="$d/libg2c.so"
+	   elif test -e "$d/libg2c.dylib" ; then
+	     ff_flibs="$d/libg2c.dylib"
+	   elif test -e "$d/libg2c.a" ; then
+	     ff_flibs="$d/libg2c.a"
+	   elif test  -e $d/libg2c.so -o	-e $d/libg2c.a ; then   
 	      ff_flibs="$i" 
 	   fi;;
           esac
 	 done 
-	 FLIBS="$ff_flibs -lg2c"
+	 if test -e "$ff_flibs"  ;then
+          FLIBS="$ff_flibs"
+	 else 	 
+	  FLIBS="$ff_flibs -lg2c"
+	 fi
 	 AC_MSG_WARN([  get dir of -lg2c  FLIBS :  $FLIBS ])
 	 ;;
 # add FH sep 2006 / modif  2009  
