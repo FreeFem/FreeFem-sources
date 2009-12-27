@@ -372,7 +372,7 @@ ID_array_space:
 fespace123: FESPACE { fespacedim=2} |FESPACE1 { fespacedim=1} | FESPACE3 { fespacedim=3};
 fespace:  fespace123 {fespacecomplex=false;  fespacetype = Find($1);}
         | fespace123 '<' TYPE '>' {
-             if ($3 != typevarreal && $3 != typevarcomplex) yyerror(" type of finite element <real> or <complex>");
+             if ($3 != typevarreal && $3 != typevarcomplex) lgerror (" type of finite element <real> or <complex>");
              fespacecomplex=($3==typevarcomplex);
              fespacetype = Find($1);}
 ;        
@@ -648,7 +648,7 @@ int Compile()
   Block::open(currentblock);  
   try {
     UnShowAlloc =0;
-    retvalue=yyparse(); //  compile
+    retvalue=yyparse (); //  compile
    
     if(retvalue==0)  
       if(currentblock) 

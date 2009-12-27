@@ -312,6 +312,7 @@ static bool SetDefault()
     DefSparseSolver<double>::solver =SparseMatSolver_R;
     DefSparseSolver<Complex>::solver =SparseMatSolver_C;
     TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
+    return 1;
 }
 
 static bool SetUMFPACK()
@@ -321,6 +322,7 @@ static bool SetUMFPACK()
     DefSparseSolver<double>::solver  =BuildSolverIUMFPack;
     DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;    
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+    return 1;
 }
 
 void init_UMFPack_solver()
