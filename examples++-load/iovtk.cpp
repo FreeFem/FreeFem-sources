@@ -2381,7 +2381,7 @@ void saveMatlab(const string &file, const Mesh &Th)
    }
 }
 
-void saveTecplot(const string &file, const Mesh &mesh)
+void saveTecplot(const string &file, const Mesh &Th)
 {
   string shape;
   ofstream pf(file.c_str());
@@ -2389,10 +2389,10 @@ void saveTecplot(const string &file, const Mesh &mesh)
   
   pf << "TITLE = \" \"\n";
   pf << "VARIABLES = \"X\", \"Y\"";
-  if (mesh.dim==3)
+  if (Th.dim==3)
     pf << ", \"Z\"";
   pf << endl;
-  if (mesh.dim==2) {
+  if (Th.dim==2) {
     m = 3;
     shape = "TRIANGLE";
   }
@@ -2402,7 +2402,7 @@ void saveTecplot(const string &file, const Mesh &mesh)
 	  }
   */
   
-  else (mesh.dim==3)
+  else if (Th.dim==3)
 	 {
 	   m = 4;
 	   shape = "TETRAHEDRON";
@@ -2410,13 +2410,13 @@ void saveTecplot(const string &file, const Mesh &mesh)
   
   pf << "ZONE N=" << Th.nv  << ", E=" << Th.nt << ", F=FEPOINT, ET=" << shape << endl;
   for (int i=0;i<Th.nv;i++)
-    pf << std::setprecision(5) << setw(18) << (Rd) Th(i)  << " \n" ;
+    pf << std::setprecision(5) << setw(18) << (R2) Th(i)  << " \n" ;
   
   
   for (int k=0;k<Th.nt;++k)
     {
-      for (n=0; n<=m; n++)
-	pf << Th(Th[k][n])  << "  ";
+      for (n=0; n<m; n++)
+	pf << Th(k,n)+1  << "  ";
       pf << endl;
     }
   
