@@ -79,16 +79,23 @@ then
 	 ;;
 # add FH sep 2006
          *gfortran)
+         ff___flibs=""
          for i in $FLIBS; do
           case $i in
            -L*)  
 	   d=`expr $i : '-L\(.*\)'`; 
-	   if test -e $d/libgfortran.so -o -e $d/libgfortran.a ; then   
+	   if test -e "$d/libgfortran.$ff_suffix_dylib" ; then
+	     ff_flibs="$d/libgfortran.$ff_suffix_dylib"
+	   elif test -e $d/libgfortran.so -o -e $d/libgfortran.a ; then   
 	      ff_flibs="$i" 
 	   fi;;
           esac
          done
+	 if [ -e "$ff_flibs" ] ;then
+          FLIBS="$ff_flibs"
+	 else 
          FLIBS="$ff_flibs -lgfortran"
+	 fi
          AC_MSG_WARN([  get dir of -lgfortran  FLIBS :  $FLIBS ])
          ;;
 	esac
