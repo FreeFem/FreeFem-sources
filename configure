@@ -3943,7 +3943,6 @@ echo "$as_me: WARNING:   get dir of -lg2c  FLIBS :  $FLIBS " >&2;}
 	 ;;
 # add FH sep 2006
          *gfortran)
-         ff___flibs=""
          for i in $FLIBS; do
           case $i in
            -L*)
@@ -3955,7 +3954,7 @@ echo "$as_me: WARNING:   get dir of -lg2c  FLIBS :  $FLIBS " >&2;}
 	   fi;;
           esac
          done
-	 if  -e "$ff_flibs"  ;then
+	 if test -e "$ff_flibs"  ;then
           FLIBS="$ff_flibs"
 	 else
          FLIBS="$ff_flibs -lgfortran"

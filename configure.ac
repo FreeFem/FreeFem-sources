@@ -79,7 +79,6 @@ then
 	 ;;
 # add FH sep 2006
          *gfortran)
-         ff___flibs=""
          for i in $FLIBS; do
           case $i in
            -L*)  
@@ -91,7 +90,7 @@ then
 	   fi;;
           esac
          done
-	 if [ -e "$ff_flibs" ] ;then
+	 if test -e "$ff_flibs"  ;then
           FLIBS="$ff_flibs"
 	 else 
          FLIBS="$ff_flibs -lgfortran"
