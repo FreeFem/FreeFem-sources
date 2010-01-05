@@ -227,7 +227,7 @@ struct MPIrank {
   MPI_Request *rq; 
   // mutable bool block;  
   
-   MPIrank(int i=0,MPI_Comm com=MPI_COMM_WORLD, MPI_Request *rqq=0) : who(i) , comm(com),rq(rqq) 
+  MPIrank(int i=0,MPI_Comm com=MPI_COMM_WORLD, MPI_Request *rqq=0) : who(i) , comm(com),rq(rqq) 
   {
 	int n;
 	MPI_Comm_size(comm, &n);
@@ -395,7 +395,7 @@ struct MPIrank {
   {
     if(verbosity>100) 
       cout << " MPI << (Matrice_Creuse *) " << a << endl;
-    ffassert(rq==0) ; // 
+    ffassert(rq==0 || rq == Syncro_block) ; // 
     int tag = MPI_TAG<Matrice_Creuse<R>* >::TAG;		       
     MatriceMorse<R> *mA=a->A->toMatriceMorse();
     int ldata[4];
@@ -485,7 +485,7 @@ void Serialize::mpisend(const MPIrank & rank,long tag,const void * vmpirank)
   const MPIrank * mpirank=static_cast<const MPIrank *> (vmpirank);
   MPI_Comm comm=mpirank->comm;
   MPI_Request *rq=mpirank->rq;
-  ffassert(rq==0);
+  ffassert(rq==0 || rq == Syncro_block);
   char * pp = p-sizeof(long);
   long countsave=count(); // save count 
   count()=lg; // store length in count 
@@ -514,7 +514,7 @@ Serialize::Serialize(const MPIrank & rank,const char * wht,long tag,const void *
   if(verbosity>100) 
     cout << " -- waiting " << mpirank << " from  " << rank << " serialized " << what 
 	 << " tag = " << tag <<  endl;
-  ffassert(rq==0);
+  ffassert(rq==0 || rq == Syncro_block);
   char * buf= new char [sizempibuf];
   WRecv(buf, sizempibuf,  rank, tag,comm,rq);
   lg = * (long *) (void *) buf;
