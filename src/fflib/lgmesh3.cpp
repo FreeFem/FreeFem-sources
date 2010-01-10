@@ -154,7 +154,7 @@ bool BuildPeriodic(
 		    int label1=lab1[ip],label2=lab2[ip];
 		    int n1=nlk1[ip],n2=nlk2[ip];
 		    int *pke1=plk1[ip], *pke2=plk2[ip];
-		    int oip=pke1-link1;
+		    //int oip=pke1-link1;
 		    typedef HashTable<SortArray<int,3>,int> HTable;
 		    typedef HTable::iterator HTiterator;
 		    HashTable<SortArray<int,3>,int> table1(n1,Th.nv); //  Table of face lab 1
@@ -270,7 +270,7 @@ bool BuildPeriodic(
 				  
 			      }
 			    
-			    int ie1=-1;
+			    //int ie1=-1;
 			    SortArray<int,3> sf(i2to1);
 			    HTiterator ht=table1.find(sf);
 			    if( ! ht ) {

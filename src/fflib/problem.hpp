@@ -215,14 +215,23 @@ class BC_set : public E_F0mps { public:
     for (int i=0;i<n;i++)
       on[i]=CastTo<long>(args[i]);
   }
-
-  /*
-  // ajout modif FH  mai 2007 XXXXXXXXXXXXX
-  void mapping(C_F0 (*f)(const C_F0 &)) {
+    template<class K> 
+     void CastToK()
+    {
+      aType rr =  complextype ? atype<Complex>() : atype<double>();
+      if (rr == atype<Complex>()) complextype= true; 
+      cout << " CastToK => " << complextype <<endl;
+     for ( vector<pair<int,Expression> >::iterator k=bc.begin();k!=bc.end();k++)
+	k->second=CastTo<K>(C_F0(k->second,rr)) ;
+    }
+/* De
+  // ajout modif FH  mai 2007 XXXXXXXXXXXXX....
+ void mappingC(C_F0 (*f)(const C_F0 &)) {
+      
       for ( vector<pair<int,Expression> >::iterator k=bc.begin();k!=bc.end();k++)
-	  k->second=(*f)(k->second) ;}
+	  k->second=CastTo<Complex>(C_F0(k->second,rr)) ;}
   // fin ajout
-   */ 
+*/    
   static ArrayOfaType  typeargs() { return ArrayOfaType(atype<long>(),true);}
   AnyType operator()(Stack ) const  { return SetAny<Result>(this);}
   operator aType () const { return atype<Result>();}         
@@ -639,7 +648,12 @@ struct OpArraytoLinearForm
       : l(new Call_FormLinear<v_fes>(*dynamic_cast<const Call_FormLinear<v_fes> *>(ll))),
         x(xx),
         isptr(isptrr),init(initt),zero(zzero)
-        {assert(l);FieldOfForm(l->largs,IsComplexType<R>::value); }
+        {assert(l);
+	    
+	bool iscmplx=FieldOfForm(l->largs,IsComplexType<R>::value);
+	//cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " <<( (iscmplx) == IsComplexType<R>::value) << endl; 
+	ffassert( (iscmplx) == IsComplexType<R>::value); 
+}
      operator aType () const { return atype<KN<R> *>();} 
       
   };
@@ -673,7 +687,11 @@ struct OpMatrixtoBilinearForm
 
     Op(Expression aa,Expression  bb,int initt) 
       : b(new Call_FormBilinear<v_fes>(* dynamic_cast<const Call_FormBilinear<v_fes> *>(bb))),a(aa),init(initt) 
-  {assert(b && b->nargs);FieldOfForm(b->largs,IsComplexType<R>::value)  ;}
+  { assert(b && b->nargs);
+    bool iscmplx=FieldOfForm(b->largs,IsComplexType<R>::value)  ;
+     // cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " << ((iscmplx) == IsComplexType<R>::value) << endl; 
+    ffassert( (iscmplx) == IsComplexType<R>::value);
+}
   operator aType () const { return atype<Matrice_Creuse<R>  *>();} 
     
   };

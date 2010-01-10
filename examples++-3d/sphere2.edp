@@ -11,7 +11,7 @@ mesh3 Th= Thup+Thdown;
 
 if(1)
   {
-    medit("Thup",Thup);
-    medit("Thdown",Thdown);
-    medit("Th",Th);
+    medit("Thup",Thup,wait=1);
+    medit("Thdown",Thdown,wait=1);
+    medit("Th",Th,wait=1);
   }

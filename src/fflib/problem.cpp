@@ -2692,23 +2692,24 @@ void Check(const Opera &Op,int N,int  M)
          PtonB = 0;
         for (int i=0;i<Aipj.N();i++)
            PtonB[ipj[i].p] += onWhatIsEdge[ie][K.DFOnWhat(ipj[i].i)] ;
-                       
+         // cout << "   bc->complextype:  " << bc->complextype << endl;             
          for (int p=0;p<PtHat.N();p++)
           if (PtonB[p]) // in on boundary 
           { 
             mps->set(K.T(PtHat[p]),PtHat[p],K,r,R2(E.y,-E.x)/le,ie); // la normal bofbof ?
             KN_<R> Vpp(Vp('.',p));
+	    Vpp=R();
             for (int j=0;j<dim;j++)
              if (tabexp[j]) 
-	       {
-		 //if(bc->complextype) // FH may 2007  
+	       {  
+		  if(bc->complextype) // FH may 2007  
                    Vpp[j]=GetAny<R>( (*tabexp[j])(stack) );
-		   //else 
-		   //Vpp[j]=GetAny<double>( (*tabexp[j])(stack) );
+		  else 
+		   Vpp[j]=GetAny<double>( (*tabexp[j])(stack) );
 	        }       
               else Vpp[j]=0.;
            }
-           
+		//cout << " ..... Vp " << Vp << " " << bc->complextype << " " << bc << endl;  
          for (int i=0;i<Aipj.N();i++)
           { 
            const FElement::IPJ &ipj_i(ipj[i]);
@@ -2795,7 +2796,7 @@ template<class R>
         int ie;
         int it = Th.BoundaryElement(ib,ie);
 	
-	const BorderElement &be=Th.be(ib);
+	//const BorderElement &be=Th.be(ib);
         int r =Th.be(ib).lab;
 	lll[r]++;
         if (on.find(r) != on.end() ) 
@@ -2804,7 +2805,7 @@ template<class R>
 	    ipmat.set(K);
            
             //R2 E=K.T.Edge(ie);
-            double le = be.mesure(); 
+            //double le = be.mesure(); 
             
             ktbc++;
 	    /*
@@ -2848,9 +2849,14 @@ template<class R>
 		      KN_<R> Vpp(Vp(p,'.'));
 		      for (int j=0;j<dim;j++)
 			if (tabexp[j]) 
+			  if(bc->complextype) // FH may 2007   
 			  Vpp[j]=GetAny<R>( (*tabexp[j])(stack) );
+			  else 
+			  Vpp[j]=GetAny<double>( (*tabexp[j])(stack) );
+    
 			else Vpp[j]=0.;
 		    }
+		cout << " Vp:  " << Vp << endl;
 		K.Pi_h(Vp,Vdf,ipmat);  
                 for (int df=0;df<nbdf;df++)
                   {
@@ -2895,7 +2901,7 @@ template<class R>
     //            const  FormLinear * l=dynamic_cast<const  FormLinear *>(e);
     const CDomainOfIntegration & di= *l->di;
     ffassert(di.d==3);
-    const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
+   // const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
 
     const Mesh & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
     bool sameMesh = &ThI == &Vh.Th;
@@ -2904,7 +2910,7 @@ template<class R>
     const vector<Expression>  & what(di.what);
     
     CDomainOfIntegration::typeofkind  kind = di.kind;
-    const QuadratureFormular1d & FIE = di.FIE(stack);
+    //const QuadratureFormular1d & FIE = di.FIE(stack);
     const QuadratureFormular & FIT = di.FIT(stack);
     const GQuadratureFormular<R3> & FIV = di.FIV(stack);
     const bool useopt=di.UseOpt(stack);    
@@ -3898,8 +3904,8 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
 int dimProblem(const ListOfId &l)
 {
     int dim=2;
-    int nb=l.size(),n=0,nbarray=0;
-    const UnId *p1;
+    int nb=l.size();//,nbarray=0;//,n=0,
+    //const UnId *p1;
     if(nb>0) 
       {
 	  if (l[0].array) 
@@ -4045,6 +4051,7 @@ int DimForm( list<C_F0> & largs)
     }*/
 bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex problem 
 {
+  //  bool   iscomplextype=complextype;
   list<C_F0>::iterator ii,ib=largs.begin(),
     ie=largs.end();
  // bool complextype =false;   
@@ -4071,6 +4078,7 @@ bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex prob
 
        }
     }
+   
   for (ii=ib;ii != ie;ii++)
     {
       Expression e=ii->LeftValue();
@@ -4101,12 +4109,15 @@ bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex prob
         }
       else if (r==atype<const  BC_set *>())
       {// modif FH  mai 2007  A FAIRE il y a un bug ici XXXXXXXXXXXXX
-	  /*
+    
 	BC_set * bc= new BC_set(*dynamic_cast<const  BC_set *>(e));
-	if (complextype)  bc->mapping(&CCastToC) ;
-	else bc->mapping(&CCastToR) ; 
+	if (complextype && !bc->complextype) {
+	    bc->CastToK<Complex>() ;
+	    cout << " Bc to complex " << endl;
+	} 
+	//else bc->mapping(&CCastToR) ; 
           //cout << l <<   " ll->l " <<  ll->l << " " << ll->l->isoptimize <<endl;    
-	   */
+	 *ii=C_F0(bc,r);   
       }
       
     } 

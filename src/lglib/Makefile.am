@@ -14,4 +14,4 @@ lg.tab.hpp  lg.tab.cpp: lg.ypp
 	-mv lg.tab.cpp.h  lg.tab.hpp # pour un  pb entre des versions de bison 
 libfreefem++.dylib: lg.tab.o ../fflib/libff.a
 	g++ -bundle lg.tab.o  ../fflib/libff.a $(UMFPACKLIB) $(ARPACKLIB) $(BLASLIB) $(LIBS) -o libfreefem++.dylib
-EXTRA_DIST=lg.y
+EXTRA_DIST=lg.ypp

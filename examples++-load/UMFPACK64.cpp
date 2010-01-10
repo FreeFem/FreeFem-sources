@@ -369,7 +369,7 @@ Init::Init(){
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   if(verbosity>1)
-    cout << "\n Add: UMFPACK64:  defaultsolver defaultsolverUMFPACK" << endl;
+    cout << "\n Add: UMFPACK64:  defaultsolver defaultsolverUMFPACK64" << endl;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   
   DefSparseSolver<double>::solver =BuildSolverIUMFPack64;
