@@ -75,7 +75,7 @@ for ( i=0 ;i< 10; i++)
    processor(0) << u[];
    processor(0) >> U[];
   }
-  if (mpirank==0)     plot(U,u,wait=1);
+  if (mpirank==0)     plot(U,u,wait=1,fill=1);
   
   if(mpirank==0)
     {
@@ -90,4 +90,4 @@ for ( i=0 ;i< 10; i++)
   
 };
  if (mpirank==0)  
-    plot(U,u,ps="Uu.eps");
+    plot(U,u,ps="Uu.eps",fill=1);

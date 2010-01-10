@@ -1064,7 +1064,7 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
     }  
   double  eps = 1e-6 * max(abs(atotal),1e-100)/atotal0;
   bool rev=(atotal<0);
-  if(verbosity>2 && rev) cout <<  "  -- movemesh negatif tranfomation => reverse all triangle " << endl; 
+  if(verbosity>2 && rev) cout <<  "  -- movemesh negatif tranfomation => reverse all triangle (old area " << atotal0 << ") ( new area  " << atotal << ") "<< endl; 
   for (int i=0;i<nbt;i++)
     {
       int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
@@ -1084,19 +1084,20 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
        else 
         (*tt++).set(v,i0,i1,i2,Th[i].lab,a);
     
-      if (nberr)
-       { if (verbosity) 
-         cerr << "Error movemesh: " << nberr << " triangles was reverse  (=> no move)" <<  endl;  
-         cout << " u min " << U.min() << " max " << U.max() << endl;
-         cout << " v min " << V.min() << " max " << V.max() << endl;
-
-         delete []v;
-         delete []t;
-         delete []b;   
-         throw(ErrorExec("Error move mesh triangles was reverse",1));      
-         return 0;
-       }
    }  
+    if (nberr)
+      { if (verbosity) 
+	  cerr << "Error movemesh: " << nberr << " triangles was reverse  (=> no move)" <<  endl;  
+	  cout << " u min " << U.min() << " max " << U.max() << endl;
+	  cout << " v min " << V.min() << " max " << V.max() << endl;
+	  
+	  delete []v;
+	  delete []t;
+	  delete []b;   
+	  throw(ErrorExec("Error move mesh triangles was reverse",1));      
+	  return 0;
+      }
+    
   BoundaryEdge * bb=b;
   for (int i=0;i<neb;i++)
     {        

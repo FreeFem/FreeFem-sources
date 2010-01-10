@@ -4720,7 +4720,7 @@ Expression Op_CopyArrayT(const E_Array & a,const E_Array & b)
 {
     typedef FEbaseArray<K,v_fes>  FEba;
 
-    int na=a.size();
+    //int na=a.size();
     int nb=b.size();
     Expression r=0,rr=0,rrr,iii;
     //  try real voctor value FE interpolation 

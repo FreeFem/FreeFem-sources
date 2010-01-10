@@ -3920,6 +3920,72 @@ AnyType VTK_WriteMesh3_Op::operator()(Stack stack)  const
 //=======================
 // FIN 3D Fichier .vtk
 //=======================
+void saveMatlab(const string &file, const Mesh &Th)
+{
+  //   ErrorInsaveMesh e;
+   {
+     ofstream pf(file.c_str());
+     ffassert(pf);
+     typedef  Mesh::Element Element;
+     for(int k=0; k<Th.nt;++k)
+       {
+	 Element &K = Th[k];
+	 pf << "x = [ ";
+	 for (size_t n=0; n<3; n++)
+	   pf << std::setprecision(5) << setw(18) << K[n].x << " ";
+	 pf << std::setprecision(5) << setw(18) << K[0].x << " ]; ";
+	 pf << "y = [ ";
+	 for (size_t n=0; n<3; n++)
+	   pf << std::setprecision(5) << setw(18) << K[n].y << " ";
+	 pf << std::setprecision(5) << setw(18) << K[0].y  << " ]; ";
+	   pf << "line(x,y);" << endl;
+       }
+     pf.close();
+   }
+}
+
+void saveTecplot(const string &file, const Mesh &Th)
+{
+  string shape;
+  ofstream pf(file.c_str());
+  size_t n, m;
+  
+  pf << "TITLE = \" \"\n";
+  pf << "VARIABLES = \"X\", \"Y\"";
+  if (Th.dim==3)
+    pf << ", \"Z\"";
+  pf << endl;
+  if (Th.dim==2) {
+    m = 3;
+    shape = "TRIANGLE";
+  }
+  /*      else if (el->getShape()==LINE) {
+	  m = 2;
+	  shape = "LINESEG";
+	  }
+  */
+  
+  else if (Th.dim==3)
+	 {
+	   m = 4;
+	   shape = "TETRAHEDRON";
+	 }
+  
+  pf << "ZONE N=" << Th.nv  << ", E=" << Th.nt << ", F=FEPOINT, ET=" << shape << endl;
+  for (int i=0;i<Th.nv;i++)
+    pf << std::setprecision(5) << setw(18) << (R2) Th(i)  << " \n" ;
+  
+  
+  for (int k=0;k<Th.nt;++k)
+    {
+      for (n=0; n<m; n++)
+	pf << Th(k,n)+1  << "  ";
+      pf << endl;
+    }
+  
+  pf.close();
+}
+
 
 
 class Init1 { public:
