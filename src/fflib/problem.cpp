@@ -2581,8 +2581,8 @@ void Check(const Opera &Op,int N,int  M)
           ret=true;
         else 
           { 
-            cerr << "Problem:operator() unkown type " << * r <<  endl;
-            throw(ErrorExec("Problem:operator() unkown type",1));
+            cerr << "AssembleVarForm  invalid type : " << * r <<  endl;
+            throw(ErrorExec("AssembleVarForm invalid type in varf",1));
           }
       }
     return ret;
