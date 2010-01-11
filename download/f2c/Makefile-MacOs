@@ -17,12 +17,17 @@ CC = cc
 SHELL = /bin/sh
 
 ifeq (10.4,$(OS))
+CC=gcc-4.0
 LIST_ARCH=-arch ppc -arch i386 -arch ppc64  -arch x86_64
 SDK=/Developer/SDKs/MacOSX10.4u.sdk
 endif
 ifeq (10.5,$(OS))  
 LIST_ARCH=-arch ppc -arch i386 -arch x86_64  -arch ppc64
 SDK=/Developer/SDKs/MacOSX10.5.sdk
+endif
+ifeq (10.6,$(OS))  
+LIST_ARCH= -arch i386 -arch x86_64  
+SDK=/Developer/SDKs/MacOSX10.6.sdk
 endif
 
 CFLAGS = -O -isysroot $(SDK) $(LIST_ARCH) -mmacosx-version-min=$(OS) -DNO_My_ctype

@@ -1,7 +1,7 @@
 //   for automatic  compilation with ff-c++
 //ff-c++-LIBRARY-dep:   superlu blas 
 //ff-c++-cpp-dep: 
-//  
+//  for Super4.0 library   
 #include "ff++.hpp"
 /*
 #include  <iostream>
@@ -15,19 +15,23 @@ using namespace std;
 #include "MatriceCreuse_tpl.hpp"
 */
 #include "slu_ddefs.h"
+
 #define GlobalLU_t GlobalLU_txxxx
 #define countnz countnzxxxx
 #define fixupL fixupLxxxx
 #define print_lu_col print_lu_colxxxx
 #define check_tempv check_tempvxxxx
 #define PrintPerf PrintPerfxxxx
+#define ilu_countnz  ilu_countnzxxxx
 #include "slu_zdefs.h"
+
 #undef GlobalLU_t
 #undef countnz
 #undef fixupL
 #undef print_lu_col
 #undef check_tempv
 #undef PrintPerf
+#undef ilu_countnz
 
 
 template <class R> struct SuperLUDriver
@@ -623,7 +627,8 @@ public:
     	printf("No of nonzeros in L+U = %d\n", Lstore->nnz + Ustore->nnz - n);
 	printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
 	       mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-	       mem_usage.expansions);
+	       stat.expansions
+	       );
 	fflush(stdout);
 	
     } else if ( info > 0 && lwork == -1 ) {
