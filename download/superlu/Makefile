@@ -8,15 +8,15 @@ all-local: superlu
 # ------------------------------
 
 # SUPERLU information
-#http://crd.lbl.gov/~xiaoye/SuperLU/superlu_3.1.tar.gz
+#http://crd.lbl.gov/~xiaoye/SuperLU/superlu_4.0.tar.gz
 DIRPKG=../pkg
-SRCDIR=SuperLU_3.1
-PACKAGE=superlu_3.1.tar.gz
+SRCDIR=SuperLU_4.0
+PACKAGE=superlu_4.0.tar.gz
 PACKAGE_PATH=$(DIRPKG)/$(PACKAGE)
 SERVER=http://crd.lbl.gov/~xiaoye/SuperLU/
 INSTALL=../..
-SUPERLU_VERSION=3.1
-SUPERLULIB=../$(INSTALL)/lib/libsuperlu_3.1.a
+SUPERLU_VERSION=4.0
+SUPERLULIB=../$(INSTALL)/lib/libsuperlu_4.0.a
 include  ff-FLAGS
 
 ### LAPACK 

@@ -25,7 +25,7 @@ $(SRCDIR)/FAIT:
 
 FAIRE: $(SRCDIR)/FAIT
 
-Makefile.in: ../../config.status	Makefile
+Makefile.in: ../../config.status Makefile-metis.in
 	../../config.status  --file="Makefile.in:Makefile-metis.in"
 	case `uname` in *CYGWIN*)  cp Makefile.in Makefile.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.inn > Makefile.in; rm Makefile.inn ;; esac 
 
