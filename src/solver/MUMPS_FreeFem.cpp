@@ -109,7 +109,7 @@ class dSolveMUMPSmpi :   public MatriceMorse<double>::VirtualSolver   {
   mutable double  epsr;
   double tgv;
   double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
-
+  mutable MPI_Comm comm;
   double            *a;
   int       *irn, *jcn;
   int          n, m, nz; 
@@ -147,7 +147,7 @@ class dSolveMUMPSmpi :   public MatriceMorse<double>::VirtualSolver   {
 public:
   dSolveMUMPSmpi(const MatriceMorse<double> &AA,int strategy,double ttgv, double epsilon,
 		 double pivot,double pivot_sym, string param_string, string datafile, KN<long> &param_int, 
-		 KN<double> &param_double, KN<long> &pperm_r, KN<long> &pperm_c, KN<double> &pscale_r,KN<double> &pscale_c
+		 KN<double> &param_double, KN<long> &pperm_r, KN<long> &pperm_c, KN<double> &pscale_r,KN<double> &pscale_c, MPI_Comm  * mpicommw
 		) : 
     eps(epsilon),epsr(0),
     tgv(ttgv), string_option(param_string), data_option(datafile), perm_r(pperm_r), perm_c(pperm_c), 
@@ -161,24 +161,31 @@ public:
     double datadouble[15];
     int ierr;
 
+     if(mpicommw==0){
+	comm=comm;
+	}
+	else
+	comm= *mpicommw;
+
+
     /* ------------------------------------------------------------
        INITIALIZE THE MUMPS PROCESS GRID. 
        ------------------------------------------------------------*/
-    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    ierr = MPI_Comm_rank(comm, &myid);
     
     if( myid ==0){
       n    = AA.n;
       m    = AA.m; 
       nz   = AA.nbcoef;
     
-      MPI_Bcast(  &n, 1, MPI_INT,  0, MPI_COMM_WORLD );
-      MPI_Bcast(  &m, 1, MPI_INT,  0, MPI_COMM_WORLD );
-      MPI_Bcast( &nz, 1, MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast(  &n, 1, MPI_INT,  0, comm );
+      MPI_Bcast(  &m, 1, MPI_INT,  0, comm );
+      MPI_Bcast( &nz, 1, MPI_INT,  0, comm );
     }
     else{
-      MPI_Bcast(  &n, 1, MPI_INT,  0, MPI_COMM_WORLD );
-      MPI_Bcast(  &m, 1, MPI_INT,  0, MPI_COMM_WORLD );
-      MPI_Bcast( &nz, 1, MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast(  &n, 1, MPI_INT,  0, comm );
+      MPI_Bcast(  &m, 1, MPI_INT,  0, comm );
+      MPI_Bcast( &nz, 1, MPI_INT,  0, comm );
     }
     
     if( !(param_int==NULL) ) 
@@ -208,12 +215,12 @@ public:
       cout << "read string option" <<endl;
       read_options_freefem(&string_option,&SYM,&PAR);
       
-      MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
-      MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast(  &SYM, 1, MPI_INT,  0, comm );
+      MPI_Bcast(  &PAR, 1, MPI_INT,  0, comm );
       }
       else{
-      MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
-      MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+      MPI_Bcast(  &SYM, 1, MPI_INT,  0, comm );
+      MPI_Bcast(  &PAR, 1, MPI_INT,  0, comm );
       }
       }
     */
@@ -267,31 +274,41 @@ public:
 	    cout << "double data["<< ii <<"] ="<< datadouble[ii] << endl;
 	    }  
 	  */
-	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
-	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, comm );
+	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, comm );
 
+<<<<<<< MUMPS_FreeFem.cpp
+	  MPI_Bcast(  dataint, 40, MPI_INT,  0, comm );
+	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, comm );
+=======
 	  cout << "myid =" << myid << " init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
 
 	  MPI_Bcast(  dataint, 40, MPI_INT,  0, MPI_COMM_WORLD );
 	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, MPI_COMM_WORLD );
+>>>>>>> 1.7
 
 	  fclose(pFile);
 	  delete [] retfile;
 	}
 	else{
 	  
+<<<<<<< MUMPS_FreeFem.cpp
+	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, comm );
+	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, comm );
+=======
 	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
 	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
 	  
 	  cout << "myid =" << myid << "  init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
+>>>>>>> 1.7
 
-	  MPI_Bcast(  dataint, 40, MPI_INT,  0, MPI_COMM_WORLD );
-	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, MPI_COMM_WORLD );
+	  MPI_Bcast(  dataint, 40, MPI_INT,  0, comm );
+	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, comm );
 	}
       }
     
   
-    /* Initialize a MUMPS instance. Use MPI_COMM_WORLD */
+    /* Initialize a MUMPS instance. Use comm */
     id.job=JOB_INIT; 
     id.par=PAR; 
     id.sym=SYM;
@@ -458,7 +475,7 @@ public:
 	    double *a_g;
 	    int commSize;
 	    
-	    MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    MPI_Comm_size(comm,&commSize);
 	    cout << commSize << "commSize" << "nz =" << nz << endl;
 	    if(myid==0){
 	      // allocation des differents tableaux
@@ -510,16 +527,16 @@ public:
 	      
 	    }
 	    
-	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, comm);
 	    
 	    // allocation des tableaux locaux
 	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
 	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
 	    a_loc    = (double*) malloc(sizeof(double)*nz_loc);
 	    
-	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
-	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, comm);
+	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, comm);
+	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, comm);
 	    cout << "myid=" << myid <<" nz_loc=" << nz_loc << endl;
 	    if( myid == 1){
 	      cout << "nz_loc=" << nz_loc << endl;
@@ -557,7 +574,7 @@ public:
 	    double *a_g;
 	    int commSize;
 	    
-	    MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    MPI_Comm_size(comm,&commSize);
 	    
 	    if(myid==0){
 	      // allocation des differents tableaux
@@ -598,16 +615,16 @@ public:
 	      
 	    }
 	    
-	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, comm);
 	    
 	    // allocation des tableaux locaux
 	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
 	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
 	    a_loc    = (double*) malloc(sizeof(double)*nz_loc);
 	    
-	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
-	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, comm);
+	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, comm);
+	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, comm);
 	    
 	    id.nz_loc = nz_loc;
 	    id.irn_loc = irn_loc;
@@ -626,7 +643,7 @@ public:
 	  // version all procs
 // 	    if(myid==0){
 //	    
-// 	    MPI_Bcast( id.mapping, nz, MPI_INT,  0, MPI_COMM_WORLD );
+// 	    MPI_Bcast( id.mapping, nz, MPI_INT,  0, comm );
 //    
 // 	    nz_loc=0;
 // 	    for(int ii=0;ii<nz; ii++){
@@ -658,7 +675,7 @@ public:
 // 	  else{
 // 	    int *mapping;
 // 	    mapping = (int*) malloc(sizeof(int)*nz);
-// 	    MPI_Bcast( mapping, nz, MPI_INT,  0, MPI_COMM_WORLD );
+// 	    MPI_Bcast( mapping, nz, MPI_INT,  0, comm );
 // 	    nz_loc=0;
 //
 // 	    for(int ii=0;ii<nz; ii++)
@@ -713,7 +730,7 @@ public:
 	      //==============================
 	      
 	      int commSize;	    
-	      ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	      ierr=MPI_Comm_size(comm,&commSize);
 	      commSize=commSize-1;
 	      int myidpar=myid-1;
 	      int m_loc_fst = m/commSize;
@@ -755,7 +772,7 @@ public:
 	    //==============================
 	      
 	    int commSize;	    
-	    ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    ierr=MPI_Comm_size(comm,&commSize);
 	    int m_loc_fst = m/commSize;
 	    int m_loc;
 	    if( myid == commSize-1 && ( m_loc_fst*commSize != m ) )  
@@ -848,7 +865,7 @@ public:
 	    
 // 	  if(myid != 0) {
 // 	    int commSize;	    
-// 	    ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+// 	    ierr=MPI_Comm_size(comm,&commSize);
 // 	    commSize=commSize-1;
 // 	    int myidpar=myid-1;
 // 	    int m_loc_fst;
@@ -905,7 +922,7 @@ public:
 	  int *tab_lg;
 	  int *tab_lg_loc;
 
-	  MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	  MPI_Comm_size(comm,&commSize);
 	  
 	  if( myid !=0){
 	    int commSizemm;
@@ -970,9 +987,9 @@ public:
 	    tab_lg = AA.lg;
 	  }
 
-	  MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	  MPI_Scatter( m_loc_procs,  1, MPI_INT, &m_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	  MPI_Scatter( fst_row_procs,  1, MPI_INT, &fst_row, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, comm);
+	  MPI_Scatter( m_loc_procs,  1, MPI_INT, &m_loc, 1, MPI_INT, 0, comm);
+	  MPI_Scatter( fst_row_procs,  1, MPI_INT, &fst_row, 1, MPI_INT, 0, comm);
 
 	  if(verbosity > 5){
 	    cout << "after scatter " << myid << endl;
@@ -988,9 +1005,9 @@ public:
 	  
 	
 
-	  MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	  MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
-	  MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, comm);
+	  MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, comm);
+	  MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, comm);
 	  
 	
 	  int jj=0;
@@ -1029,7 +1046,7 @@ public:
 	if(PAR ==1) {
 	  /*
 	    int commSize;
-	    ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    ierr=MPI_Comm_size(comm,&commSize);
 	    int m_loc_fst;
 	    m_loc_fst= m/commSize;
 	    int m_loc;
@@ -1080,7 +1097,7 @@ public:
 	  int *tab_lg;
 	  int *tab_lg_loc;
 
-	  MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	  MPI_Comm_size(comm,&commSize);
 	  m_loc_fst= m/commSize;
 	  
 	  if( myid == commSize-1 && ( m_loc_fst*commSize != m ) )  
@@ -1120,7 +1137,7 @@ public:
 	    tab_lg = AA.lg;
 	  }
 
-	  MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, comm);
 	  cout << "nz_loc("<<myid<<")="<< nz_loc << endl;
 	  cout << "m_loc("<<myid<<")="<< m_loc << endl;
 	  // allocation des tableaux locaux
@@ -1129,9 +1146,9 @@ public:
 	  a_loc    = (double*) malloc(sizeof(double)*nz_loc);
 	  tab_lg_loc = (int*) malloc(sizeof(int)*(m_loc) );
 	
-	  MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	  MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
-	  MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE, a_loc, nz_loc, MPI_DOUBLE, 0, comm);
+	  MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, comm);
+	  MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, comm);
 	
 	  int jj=0;
 	  for(int  ii=0; ii<m_loc-1; ii++)
@@ -1255,10 +1272,10 @@ public:
 
     if( myid==0 ){
       x=id.rhs;
-      MPI_Bcast( x, n, MPI_DOUBLE, 0, MPI_COMM_WORLD );
+      MPI_Bcast( x, n, MPI_DOUBLE, 0, comm );
     }
     else
-      MPI_Bcast( x, n, MPI_DOUBLE, 0, MPI_COMM_WORLD );
+      MPI_Bcast( x, n, MPI_DOUBLE, 0, comm );
     
     // deallocation de rhs
     free(rhs);
@@ -1409,7 +1426,7 @@ public:
        ------------------------------------------------------------*/
    
     //ierr = MPI_Init(&argc, &argv);
-    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    ierr = MPI_Comm_rank(comm, &myid);
 
     // initialisation par defaut
  
@@ -1462,26 +1479,26 @@ public:
 	    fclose(pFile);
 	    delete [] retfile;
 	    
-	    MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
-	    MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	    MPI_Bcast(  &SYM, 1, MPI_INT,  0, comm );
+	    MPI_Bcast(  &PAR, 1, MPI_INT,  0, comm );
 	    
-	    MPI_Bcast(  dataint, 40, MPI_INT,  0, MPI_COMM_WORLD );
-	    MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, MPI_COMM_WORLD );
+	    MPI_Bcast(  dataint, 40, MPI_INT,  0, comm );
+	    MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, comm );
 	    
 	    fclose(pFile);
 	    delete [] retfile;
 	  }
 	  else{
 	    
-	    MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
-	    MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
+	    MPI_Bcast(  &SYM, 1, MPI_INT,  0, comm );
+	    MPI_Bcast(  &PAR, 1, MPI_INT,  0, comm );
 	    
-	    MPI_Bcast(  dataint, 40, MPI_INT,  0, MPI_COMM_WORLD );
-	    MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, MPI_COMM_WORLD );
+	    MPI_Bcast(  dataint, 40, MPI_INT,  0, comm );
+	    MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, comm );
 	  }
 	}
     
-    /* Initialize a MUMPS instance. Use MPI_COMM_WORLD */
+    /* Initialize a MUMPS instance. Use comm */
     id.job=JOB_INIT; 
     id.par=PAR; 
     id.sym=SYM;
@@ -1633,7 +1650,7 @@ public:
 	    Complex *a_g;
 	    int commSize;
 	    
-	    MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    MPI_Comm_size(comm,&commSize);
 	    cout << commSize << "commSize" << "nz =" << nz << endl;
 	    if(myid==0){
 	      // allocation des differents tableaux
@@ -1685,16 +1702,16 @@ public:
 	      
 	    }
 	    
-	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, comm);
 	    
 	    // allocation des tableaux locaux
 	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
 	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
 	    a_loc    = (Complex*) malloc(2*sizeof(double)*nz_loc);
 	    
-	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
-	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, comm);
+	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, comm);
+	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, comm);
 	    	    
 	    if( myid > 0){
 	      id.nz_loc = nz_loc;
@@ -1724,7 +1741,7 @@ public:
 	    Complex *a_g;
 	    int commSize;
 	    
-	    MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    MPI_Comm_size(comm,&commSize);
 	    
 	    if(myid==0){
 	      // allocation des differents tableaux
@@ -1765,16 +1782,16 @@ public:
 	      
 	    }
 	    
-	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, comm);
 	    
 	    // allocation des tableaux locaux
 	    irn_loc = (int*) malloc(sizeof(int)*nz_loc);
 	    jcn_loc = (int*) malloc(sizeof(int)*nz_loc);
 	    a_loc   = (Complex*) malloc(2*sizeof(double)*nz_loc);
 	    
-	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
-	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	    MPI_Scatterv(   a_g, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, comm);
+	    MPI_Scatterv( jcn_g, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, comm);
+	    MPI_Scatterv( irn_g, nz_loc_procs, fst_nz_procs, MPI_INT, irn_loc, nz_loc, MPI_INT, 0, comm);
 	    
 	    id.nz_loc = nz_loc;
 	    id.irn_loc = irn_loc;
@@ -1800,7 +1817,7 @@ public:
 	  /* // version matrice sur tous les processeurs
 	  if(myid==0){
 
-	    MPI_Bcast( id.mapping, nz, MPI_INT,  0, MPI_COMM_WORLD );
+	    MPI_Bcast( id.mapping, nz, MPI_INT,  0, comm );
 
 	    nz_loc=0;
 	    for(int ii=0;ii<nz; ii++){
@@ -1832,7 +1849,7 @@ public:
 	  else{
 	    int *mapping;
 	    mapping = (int*) malloc(sizeof(int)*nz);
-	    MPI_Bcast( mapping, nz, MPI_INT,  0, MPI_COMM_WORLD );
+	    MPI_Bcast( mapping, nz, MPI_INT,  0, comm );
 	    nz_loc=0;
 
 	    for(int ii=0;ii<nz; ii++)
@@ -1881,7 +1898,7 @@ public:
 	    exit(1);
 	    if(myid !=0) {
 	      int commSize;	    
-	      ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	      ierr=MPI_Comm_size(comm,&commSize);
 	      commSize=commSize-1;
 	      int myidpar=myid-1;
 	      int m_loc_fst = m/commSize;
@@ -1919,7 +1936,7 @@ public:
 	  if(PAR == 1){
 
 	    int commSize;	    
-	    ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	    ierr=MPI_Comm_size(comm,&commSize);
 	    int m_loc_fst = m/commSize;
 	    int m_loc;
 	    if( myid == commSize-1 && ( m_loc_fst*commSize != m ) )  
@@ -1994,7 +2011,7 @@ public:
 	 if(PAR == 0){ 
 // 	    if(myid !=0) {
 // 	      int commSize;	    
-// 	      ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+// 	      ierr=MPI_Comm_size(comm,&commSize);
 // 	      commSize=commSize-1;
 // 	      int myidpar=myid-1;
 // 	      int m_loc_fst;
@@ -2048,7 +2065,7 @@ public:
 	  int *tab_lg;
 	  int *tab_lg_loc;
 
-	  MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	  MPI_Comm_size(comm,&commSize);
 	  
 	  if( myid !=0){
 	    int commSizemm;
@@ -2113,9 +2130,9 @@ public:
 	    tab_lg = AA.lg;
 	  }
 
-	  MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	  MPI_Scatter( m_loc_procs,  1, MPI_INT, &m_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	  MPI_Scatter( fst_row_procs,  1, MPI_INT, &fst_row, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, comm);
+	  MPI_Scatter( m_loc_procs,  1, MPI_INT, &m_loc, 1, MPI_INT, 0, comm);
+	  MPI_Scatter( fst_row_procs,  1, MPI_INT, &fst_row, 1, MPI_INT, 0, comm);
 
 	  if(verbosity > 5){
 	    cout << "after scatter " << myid << endl;
@@ -2131,9 +2148,9 @@ public:
 	  
 	
 
-	  MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-	  MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
-	  MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	  MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, comm);
+	  MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, comm);
+	  MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, comm);
 	  
 	
 	  int jj=0;
@@ -2174,7 +2191,7 @@ public:
 	  
 	   
 // 	   int commSize;
-// 	   ierr=MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+// 	   ierr=MPI_Comm_size(comm,&commSize);
 // 	   int m_loc_fst;
 // 	   m_loc_fst= m/commSize;
 // 	   int m_loc;
@@ -2227,7 +2244,7 @@ public:
 	   int *tab_lg;
 	   int *tab_lg_loc;
 	   
-	   MPI_Comm_size(MPI_COMM_WORLD,&commSize);
+	   MPI_Comm_size(comm,&commSize);
 	   m_loc_fst= m/commSize;
 	   
 	   if( myid == commSize-1 && ( m_loc_fst*commSize != m ) )  
@@ -2267,7 +2284,7 @@ public:
 	     tab_lg = AA.lg;
 	   }
 	   
-	   MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	   MPI_Scatter( nz_loc_procs, 1, MPI_INT, &nz_loc, 1, MPI_INT, 0, comm);
 	  
 	   // allocation des tableaux locaux
 	   irn_loc = (int*) malloc(sizeof(int)*nz_loc);
@@ -2275,9 +2292,9 @@ public:
 	   a_loc    = (Complex*) malloc(2*sizeof(double)*nz_loc);
 	   tab_lg_loc = (int*) malloc(sizeof(int)*(m_loc) );
 	   
-	   MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-	   MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, MPI_COMM_WORLD);
-	   MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, MPI_COMM_WORLD);
+	   MPI_Scatterv(  tab_a, nz_loc_procs, fst_nz_procs, MPI_DOUBLE_COMPLEX, a_loc, nz_loc, MPI_DOUBLE_COMPLEX, 0, comm);
+	   MPI_Scatterv( tab_cl, nz_loc_procs, fst_nz_procs, MPI_INT, jcn_loc, nz_loc, MPI_INT, 0, comm);
+	   MPI_Scatterv( tab_lg,  m_loc_procs, fst_row_procs, MPI_INT, tab_lg_loc, m_loc, MPI_INT, 0, comm);
 	
 	   int jj=0;
 	   for(int  ii=0; ii<m_loc-1; ii++)
@@ -2403,10 +2420,10 @@ public:
    
     if( myid==0 ){
       x=inv_mumps_dc(id.rhs); 
-      MPI_Bcast( x,  n, MPI_DOUBLE_COMPLEX,  0, MPI_COMM_WORLD );
+      MPI_Bcast( x,  n, MPI_DOUBLE_COMPLEX,  0, comm );
     }
     else
-      MPI_Bcast( x,  n, MPI_DOUBLE_COMPLEX,  0, MPI_COMM_WORLD );
+      MPI_Bcast( x,  n, MPI_DOUBLE_COMPLEX,  0, comm );
     
   
     

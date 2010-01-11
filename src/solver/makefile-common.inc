@@ -5,17 +5,25 @@
 #########################################################
 
 # frefem++ variables
-FREEFEM_DIR     = $(HOME)/work/freefem++/
+
+FREEFEM_DIR     = /home/atenekeng/Documents/soft/FreeFem/newfreefem++/freefem++/
+
+#FREEFEM_DIR     = $(HOME)/work/freefem++/
+
 FREEFEM_INCLUDE = -I$(FREEFEM_DIR)examples++-load/include/ 
 
 # directory of the different package
-SOFT_DIR =  $(HOME)/work/LinearSolver/
+
+SOFT_DIR =  /home/atenekeng/Documents/soft/
+
+#SOFT_DIR =  $(HOME)/work/LinearSolver/
+#>>>>>>> 1.2
 
 #==========
 #   BLAS
 #==========
 BLAS_INCLUDE = 
-BLAS_LIB     = -L$(SOFT_DIR)PATCHVECLIB/ -lwrapperdotblas  -framework veclib
+BLAS_LIB     = -L$(SOFT_DIR)BLAS/blas_LINUX.a 
 
 #============
 #  BLACS : this library is need by MUMPS 
@@ -50,8 +58,8 @@ PTSCOTCH_INCLUDE = -I$(SCOTCH_DIR)include/
 PTSCOTCH_LIB     = -L$(SCOTCH_DIR)lib/ -lptscotch -lptscotcherrexit -lm
 
 # metis
-METIS_DIR      = $(SOFT_DIR)ParMetis-3.1.1/
-METIS_INCLUDE  = -I$(METIS_DIR)METISLib/
+METIS_DIR      = $(SOFT_DIR)metis-4.0/
+METIS_INCLUDE  = -I$(METIS_DIR)Lib/
 METIS_LIB      = -L$(METIS_DIR) -lmetis
 
 # parmetis
