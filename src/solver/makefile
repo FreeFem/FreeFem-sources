@@ -1,17 +1,29 @@
-include makefile-sparsesolver.inc
+#include makefile-gene.inc
+#include makefile-common.inc
+##include makefile-hips.inc
+include makefile-parms.inc
+include makefile-hypre.inc
+#include makefile-slu_dist.inc
+#include makefile-mumps.inc
+#include makefile-pastix.inc
+include makefile-common.inc
+include makefile-hips.inc
+
+#include makefile-sparsesolver.inc
+
 
 #Creation of Hips dynamic librairy
 hips    : 
-	$(MPICC) -c $(CFLAGS) $(CFLAGS_HIPS) $(FREEFEM_INCLUDE) $(HIPS_INCLUDE) $(METIS_INCLUDE) $(HIPS_OTHER_INCLUDE) hips_FreeFem.cpp 
-	$(MPIFC)$  $(FFLAGS) hips_FreeFem.o -o hips_FreeFem.$(SUF) $(HIPS_LIB) $(IO_LIB) $(SPKIT_LIB) $(BLAS_LIB) $(METIS_LIB) $(HIPS_OTHER_LIB)
+	$(MPIFC) -c $(CFLAGS) $(CFLAGS_HIPS) $(FREEFEM_INCLUDE) $(HIPS_INCLUDE) $(METIS_INCLUDE)  hips_FreeFem.cpp skitf.f
+	$(MPIFC)$  $(FFLAGS) skitf.o hips_FreeFem.o -o hips_FreeFem.so $(HIPS_LIB)  $(BLAS_LIB) $(METIS_LIB)
 
 parms	:
-	$(MPICC) -c $(CFLAGS) $(CFLAGS_PARMS) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(PARMS_INCLUDE) $(METIS_INCLUDE) $(PARMS_OTHER_INCLUDE) parms_FreeFem.cpp 
-	$(MPIFC)$  $(FFLAGS) parms_FreeFem.o -o parms_FreeFem.$(SUF) $(PARMS_LIB) $(BLAS_LIB) $(METIS_LIB) $(PARMS_OTHER_LIB)
+	$(MPICC) -c $(CFLAGS) $(CFLAGS_PARMS)  $(FREEFEM_INCLUDE) $(PARMS_INCLUDE) $(METIS_INCLUDE)  parms_FreeFem.cpp 
+	$(MPIFC)$  $(FFLAGS) parms_FreeFem.o -o parms_FreeFem.so $(PARMS_LIB) $(BLAS_LIB) $(METIS_LIB) $(PARMS_OTHER_LIB)
 
 hypre	:
 	$(MPICC) -c $(CFLAGS) $(CFLAGS_HYPRE) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(HYPRE_INCLUDE) $(METIS_INCLUDE) $(HYPRE_OTHER_INCLUDE) hypre_FreeFem.cpp 
-	$(MPIFC)$  $(FFLAGS) hypre_FreeFem.o -o hypre_FreeFem.$(SUF) $(HYPRE_LIB) $(BLAS_LIB) $(METIS_LIB) $(HYPRE_OTHER_LIB)
+	$(MPIFC)$  $(FFLAGS)  hypre_FreeFem.o -o hypre_FreeFem.so $(HYPRE_LIB) $(BLAS_LIB) $(METIS_LIB) $(HYPRE_OTHER_LIB)
 
 mumps	:
 	$(MPICC) -c $(CFLAGS) $(CFLAGS_MUMPS) $(MPI_INCLUDE) $(FREEFEM_INCLUDE) $(MUMPS_OTHER_INCLUDE) $(MUMPS_INCLUDE) $(SCOTCH_INCLUDE)  MUMPS_FreeFem.cpp
