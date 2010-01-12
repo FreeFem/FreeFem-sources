@@ -123,6 +123,7 @@ Mesh * GMSH_Load(const string & filename)
 	  if(!fgets(str, sizeof(str), fp)) exit(1);
 	  int format, size;
 	  if(sscanf(str, "%lf %d %d", &version, &format, &size) != 3) exit(1);
+	  cout << "Mesh Format is " <<  format << endl;
 	  if(format){
 	    binary = true;
 	    cout << "Mesh is in binary format" << endl;
@@ -184,6 +185,7 @@ Mesh * GMSH_Load(const string & filename)
 	  int numElements;
 	  sscanf(str, "%d", &numElements);
 	   
+	  if(verbosity) cout << "Loading elements\n" << endl; 
 	  if(!binary){
 	    for(int i = 0; i < numElements; i++) {
 	      int num, type, physical = 0, elementary = 0, partition = 0, numVertices;
@@ -322,7 +324,7 @@ Mesh * GMSH_Load(const string & filename)
 		iv0 = mapnumv[ indices[0] ];	
 		iv1 = mapnumv[ indices[1] ];
 		cout << "Elem " << ie+1 << " " << iv0+1 << " " << iv1+1 << endl;
-		(bbff++)->set(vff, iv0, iv1, elementary);
+		(bbff++)->set(vff, iv0, iv1, physical);
 		ie++;
 	      }
 	      if( type == 2 ){
@@ -332,7 +334,7 @@ Mesh * GMSH_Load(const string & filename)
 		iv2 = mapnumv[ indices[2] ];	
 		cout << "Triangles " << it+1 << " " << iv0+1 << " " << iv1+1 << " " << iv2+1 << endl;
 		
-		(ttff++)->set(vff, iv0, iv1, iv2, elementary);
+		(ttff++)->set(vff, iv0, iv1, iv2, physical);
 		cout << "mes=" << tff[it].area << endl;
 		if( tff[it].area < 1e-8 ){
 		  cout << "bug" << endl;
@@ -378,7 +380,7 @@ Mesh * GMSH_Load(const string & filename)
 		  int iv0,iv1;
 		  iv0 = mapnumv[ indices[0] ];	
 		  iv1 = mapnumv[ indices[1] ];
-		  (bbff++)->set(vff, iv0, iv1, elementary);
+		  (bbff++)->set(vff, iv0, iv1, physical);
 		  ie++;
 		}
 		if( type == 2 ){
@@ -387,7 +389,7 @@ Mesh * GMSH_Load(const string & filename)
 		  iv0 = mapnumv[ indices[0] ];	
 		  iv1 = mapnumv[ indices[1] ];
 		  iv2 = mapnumv[ indices[2] ];		
-		  (ttff++)->set(vff, iv0, iv1, iv2, elementary,mes);
+		  (ttff++)->set(vff, iv0, iv1, iv2, physical,mes);
 		  
 		  it++;
 		}
@@ -664,6 +666,7 @@ Mesh3 * GMSH_Load3(const string & filename)
 
 	  printf("%d tetrahedrons\n", nt);
 	  printf("%d triangles\n", nbe);
+	  printf("%d numElements\n", numElements);
 	  if(!binary){
 
 	    int ie=0; 
@@ -703,7 +706,7 @@ Mesh3 * GMSH_Load3(const string & filename)
 		  ivff[ii] = mapnumv[ indices[ii] ];
 		  assert( ivff[ii]>=0 && ivff[ii]< nv );
 		}
-		(bbff++)->set(vff,ivff,elementary);
+		(bbff++)->set(vff,ivff,physical);
 		ie++;
 	      }
 	      if( type == 4 ){
@@ -712,7 +715,7 @@ Mesh3 * GMSH_Load3(const string & filename)
 		  ivff[ii] = mapnumv[ indices[ii] ];
 		  assert( ivff[ii]>=0 && ivff[ii]< nv );
 		}
-		(ttff++)->set(vff,ivff,elementary);
+		(ttff++)->set(vff,ivff,physical);
 		it++;
 	      }
 	    }
@@ -752,13 +755,13 @@ Mesh3 * GMSH_Load3(const string & filename)
 		if( type == 2 ){
 		  int ivff[3];
 		  for(int ii=0; ii < numVertices; ii++) ivff[ii] = mapnumv[ indices[ii] ];		
-		  (bbff++)->set(vff,ivff,elementary);
+		  (bbff++)->set(vff,ivff,physical);
 		  ie++;
 		}
 		if( type == 4 ){
 		  int ivff[4];
 		  for(int ii=0; ii < numVertices; ii++) ivff[ii] = mapnumv[ indices[ii] ];		
-		  (ttff++)->set(vff,ivff,elementary);
+		  (ttff++)->set(vff,ivff,physical);
 		  it++;
 		}
 		
