@@ -37,25 +37,25 @@ win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh
 	echo "on a fini"
 
 libff.dll: $(FFD_OBJ0)  $(FFD_OBJ_AR)  $(FFD_OBJ_AC)  $(FFD_OBJ_AL)  $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o
-	g++ -mno-cygwin  -shared  -Wl,--enable-auto-import $^  -o $@ $(LDADD2)
+	g++ $(GCCNOCYGWIN)  -shared  -Wl,--enable-auto-import $^  -o $@ $(LDADD2)
 
 
 #FreeFem++.exe: ../std/Pcrgraph.o ../lglib/mymain.o $(LIBS_FF)
-#	g++   -mno-cygwin -mwindows -mthreads  -Wl,--enable-auto-import $^  -o $@
+#	g++   $(GCCNOCYGWIN) -mwindows -mthreads  -Wl,--enable-auto-import $^  -o $@
 FreeFem++-nw.exe: ../nw/sansrgraph.o   ../lglib/mymain.o $(LIBS_FF)
-	g++   -mno-cygwin libff.dll $^ -o $@  -lcomdlg32
+	g++   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 FreeFem++.exe: ../nw/sansrgraph.o    ../lglib/mymain.o $(LIBS_FF)
-	g++   -mno-cygwin libff.dll $^ -o $@  -lcomdlg32
+	g++   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 ##FreeFem++-cs.exe:$(FFD_OBJIDE)  ../lglib/lg.tab.o $(LIBS_FF)
-##	g++  $^  `$(FLTK_CONFIG) --ldflags` -mno-cygwin    -o $@
+##	g++  $^  `$(FLTK_CONFIG) --ldflags` $(GCCNOCYGWIN)    -o $@
 bamg.exe:  libff.dll $(LIBS_FF)
-	g++   -mno-cygwin ../bamg/bamg.o  -Wl,--enable-auto-import $^ -o $@ 
+	g++   $(GCCNOCYGWIN) ../bamg/bamg.o  -Wl,--enable-auto-import $^ -o $@ 
 cvmsh2.exe:  $(LIBS_FF)
-	g++   -mno-cygwin  -Wl,--enable-auto-import ../bamg/cvmsh2.o  $^ -o $@ 
+	g++   $(GCCNOCYGWIN)  -Wl,--enable-auto-import ../bamg/cvmsh2.o  $^ -o $@ 
 drawbdmesh.exe:../std/Pcrgraph.o  ../bamg/drawbdmesh.o $(LIBS_FF)
-	g++   -mno-cygwin -mwindows  -Wl,--enable-auto-import  $^ -o $@ 
+	g++   $(GCCNOCYGWIN) -mwindows  -Wl,--enable-auto-import  $^ -o $@ 
 launchff++.exe:launchff++.cpp
-	g++ -mno-cygwin launchff++.cpp -o launchff++.exe
+	g++ $(GCCNOCYGWIN) launchff++.cpp -o launchff++.exe
 
 ff-c++:../../examples++-load/load.link.in
 	../../config.status  --file=ff-c++:$<
