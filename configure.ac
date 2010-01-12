@@ -257,7 +257,14 @@ ff_uname=`uname`
 #  flag to build window 32   version   ff_mingw = yes 
 ff_mingw=no
 case $ff_uname in
-CYGWIN*)
+    CYGWIN*)	
+	ff_nocygwin=-mno-cygwin;
+	AC_SUBST(GCCNOCYGWIN,$ff_nocygwin);;
+    MINGW*)
+        enable_cygwindll=no;;
+esac
+case $ff_uname in
+CYGWIN*|MINGW*)
 	ff_suffix_dylib="dll";
         ff_win32=yes;
 	# We need Mingw to avoid Cygwin's extra DLLs
@@ -267,12 +274,12 @@ CYGWIN*)
                 ff_mingw=yes 
                 enable_cygwindll=no;
 		ff_pthread="-mthread"
-		CXXFLAGS="$CXXFLAGS -mno-cygwin -I/usr/include/mingw"
-		FFLAGS="$FFLAGS -mno-cygwin"
-		CFLAGS="$CFLAGS -mno-cygwin -I/usr/include/mingw"
-		LIBS="$LIBS -mno-cygwin -mthreads -lws2_32 -lcomdlg32" 
+		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
+		FFLAGS="$FFLAGS $ff_nocygwin"
+		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
+		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32" 
 		LIBSNOCONSOLE="-mwindows"
-		FLIBS="-mno-cygwin -lg2c"
+		FLIBS="$ff_nocygwin -lg2c"
                 ff_glut="-lglut32 -mthreads -lglu32 -lopengl32"
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(WINDRESOBJ,windres.o)

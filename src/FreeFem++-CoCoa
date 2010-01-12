@@ -5,36 +5,19 @@
 # ROLE        : None				# Role (Editor, Viewer, None)
 # SERVICEMENU : FreeFem++     			# Name of Service menu item
 #
-set -x 
-q="'"
 dir=`dirname $0`;
-case $dir in [!/]*) dir=`pwd`/$dir;; esac
-ff="$q$dir/../bin/FreeFem++$q -glut $q$dir/../bin/ffglut$q"
-
+ff="/usr/local/bin/FreeFem++"
+q="'"
 end="exit;"
 begin="cd $PWD;"
-if [ -d "$dir/../lib" ]; then
-lff=$q$dir/../lib$q
-expor="export FF_LOADPATH=$lff;export FF_VERBOSITY=5"
-begin="$begin $expor;"
-else 
-expor="export FF_VERBOSITY=5"
-fi
-
 
 # begin the cmd generation ----------
 cmd=""
 # -----------------
-ffarg=""
-verb=0
 for i in "$@"; do
- if [ "$i" = "-v" ] ; then verb=1;
- elif [ "$verb" = "1" ]; then verb=0;ff="$ff  $q-v$q $q$i$q";
- else 
  d=`dirname "$i"`;
  f=`basename "$i"`;
  cmd="$cmd cd $q$d$q; $ff $q$f$q;"
- fi 
 done
 # ------------------ 
 if [ -z "$cmd" ]; then
@@ -42,7 +25,8 @@ if [ -z "$cmd" ]; then
 fi
 # ------------------
 cmd="$cmd"
-
+# ---- end of cmd generation ----
+echo 'do script "'$cmd'"'
 #
 #
 #  send the command $cmd to the apple terminal via osascript
@@ -50,20 +34,17 @@ cmd="$cmd"
 # (echo $0;echo $*;echo "--$TERM--";printenv;set)  >/tmp/tutu
 
 if [ -z "$TERM_PROGRAM" ] ; then 
-# ---- end of cmd generation ----
-echo 'do script "'$begin$cmd'"'
 echo '
 tell application "Terminal"
 	activate
 	try
-	  do script "/bin/sh -c \"'$begin$cmd$end'\"" 
+	  do script "'$begin$cmd$end'" 
 	end try
 end tell 
 ' | osascript 	
 else
 set -e
-echo "/bin/sh -c  \"$expor;$cmd\""
-/bin/sh -c  "$expor;$cmd"
+eval  $cmd
 fi;
 
 
