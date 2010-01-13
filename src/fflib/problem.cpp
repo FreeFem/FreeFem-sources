@@ -2788,6 +2788,7 @@ template<class R>
     int npPh = Vh.maxNbPtforInterpolation;
     KN<int> PtonB(npPh);
     KNM<R>   Vp(npPh,dim);
+    Vp=R();
     KN<R>  Vdf(Vh.MaxNbDFPerElement);
     
     map<int,int> lll;
@@ -2856,7 +2857,7 @@ template<class R>
     
 			else Vpp[j]=0.;
 		    }
-		cout << " Vp:  " << Vp << endl;
+		// cout << " Vp:  " << Vp << endl;
 		K.Pi_h(Vp,Vdf,ipmat);  
                 for (int df=0;df<nbdf;df++)
                   {
