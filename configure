@@ -6718,13 +6718,13 @@ CYGWIN*|MINGW*)
 		LIBSNOCONSOLE="-mwindows"
 		FLIBS="$ff_nocygwin -lg2c"
                 ff_glutname="glut32"
-		{ echo "$as_me:$LINENO: checking for abort in -lglut" >&5
-echo $ECHO_N "checking for abort in -lglut... $ECHO_C" >&6; }
-if test "${ac_cv_lib_glut_abort+set}" = set; then
+		{ echo "$as_me:$LINENO: checking for abort in -lglut32" >&5
+echo $ECHO_N "checking for abort in -lglut32... $ECHO_C" >&6; }
+if test "${ac_cv_lib_glut32_abort+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lglut  $LIBS"
+LIBS="-lglut32  $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -6773,21 +6773,21 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_glut_abort=yes
+  ac_cv_lib_glut32_abort=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	ac_cv_lib_glut_abort=no
+	ac_cv_lib_glut32_abort=no
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_glut_abort" >&5
-echo "${ECHO_T}$ac_cv_lib_glut_abort" >&6; }
-if test $ac_cv_lib_glut_abort = yes; then
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_glut32_abort" >&5
+echo "${ECHO_T}$ac_cv_lib_glut32_abort" >&6; }
+if test $ac_cv_lib_glut32_abort = yes; then
   ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32"
 else
   ff_glut=""
