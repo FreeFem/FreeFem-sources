@@ -1,4 +1,8 @@
 v 3.7-1
+   add tool to compile under mingw/msys under windows 32 (freefem++-nw works, 
+    (and I have  try to add freeglut.dll llibrary  but the ffglut.exe/ffmedit do not works with this version). 
+   add bug (random trap) in bamg in sub domain computation in case of internal edge in 
+   same region (fist time in 15 years). 
    add bug in varf interpertation in  complex case (miss some convertion)
    add build  interpolation matrix in 3d (see examples++-3d/mat_interpole.edp)
    correct CFLAGS (add -fFIP) in superlu , umfpack under 64 architecture. 
