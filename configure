@@ -6718,6 +6718,8 @@ CYGWIN*|MINGW*)
 		LIBSNOCONSOLE="-mwindows"
 		FLIBS="$ff_nocygwin -lg2c"
                 ff_glutname="glut32"
+		#  check abort a existing function just to find in glut32.dll exist in the path
+		#  because glutInit is not the real symbol on win32 dur dur FH !!!!!!!!!
 		{ echo "$as_me:$LINENO: checking for abort in -lglut32" >&5
 echo $ECHO_N "checking for abort in -lglut32... $ECHO_C" >&6; }
 if test "${ac_cv_lib_glut32_abort+set}" = set; then
