@@ -94,7 +94,9 @@ LIST_NAME_PARM_MAT
 
 namespace Fem2D {
 
-
+    void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all);
+    void  Expandsetoflab(Stack stack,const BC_set & bc,set<long> & setoflab);
+// 
 
 
 void Check(const Opera &Op,int N,int  M)
@@ -361,7 +363,7 @@ void Check(const Opera &Op,int N,int  M)
     const bool useopt=di.UseOpt(stack);    
     double binside=di.binside(stack);
     
-    const vector<Expression>  & what(di.what);             
+    //const vector<Expression>  & what(di.what);             
     CDomainOfIntegration::typeofkind  kind = di.kind;
     set<int> setoflab;
     bool all=true; 
@@ -374,13 +376,15 @@ void Check(const Opera &Op,int N,int  M)
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
       else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+    Expandsetoflab(stack,di, setoflab,all);
+   /*
     for (size_t i=0;i<what.size();i++)
       {
 	long  lab  = GetAny<long>( (*what[i])(stack));
 	setoflab.insert(lab);
 	if ( verbosity>3) cout << lab << " ";
 	all=false;
-      }
+      }*/
     if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
     const E_F0 & optiexp0=*b->b->optiexp0;
     
@@ -541,7 +545,7 @@ void Check(const Opera &Op,int N,int  M)
     const bool useopt=di.UseOpt(stack);    
     double binside=di.binside(stack);
     
-    const vector<Expression>  & what(di.what);             
+    //const vector<Expression>  & what(di.what);             
     CDomainOfIntegration::typeofkind  kind = di.kind;
     set<int> setoflab;
     bool all=true; 
@@ -555,13 +559,15 @@ void Check(const Opera &Op,int N,int  M)
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
       else cout << "  --  int3d   (nQP: "<< FIV.n << " ) in "  ;
+   Expandsetoflab(stack,di, setoflab,all);
+   /*
     for (size_t i=0;i<what.size();i++)
       {
 	long  lab  = GetAny<long>( (*what[i])(stack));
 	setoflab.insert(lab);
 	if ( verbosity>3) cout << lab << " ";
 	all=false;
-      }
+      }*/
     if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
     const E_F0 & optiexp0=*b->b->optiexp0;
     
@@ -947,7 +953,7 @@ void Check(const Opera &Op,int N,int  M)
       cout << "        suppose in mortar " << intmortar << endl;
      }
     assert(pThdi == & Th);
-    const vector<Expression>  & what(di.what);             
+    //const vector<Expression>  & what(di.what);             
     CDomainOfIntegration::typeofkind  kind = di.kind;
     set<int> setoflab;
     bool all=true; 
@@ -966,12 +972,14 @@ void Check(const Opera &Op,int N,int  M)
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges, "   ;
       else cout << "  --  int  in  " ; */
+    Expandsetoflab(stack,di, setoflab,all);
+    /*
     for (size_t i=0;i<what.size();i++)
       {long  lab  = GetAny<long>( (*what[i])(stack));
       setoflab.insert(lab);
       if ( verbosity>3) cout << lab << " ";
       all=false;
-      }
+      }*/
      if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
   const E_F0 & optiexp0=*b->b->optiexp0;
   // const E_F0 & optiexpK=*b->b->optiexpK;
@@ -2628,6 +2636,8 @@ void Check(const Opera &Op,int N,int  M)
     if(verbosity>99) cout << " Problem : BC_set "<< typeid(R).name() << " " ;
     nbon =bc->on.size();
     set<long> on;
+    Expandsetoflab(stack,*bc, on);
+/*
     for (int i=0;i<nbon;i++)
       {
         long  lab  = GetAny<long>( (*bc->on[i])(stack));
@@ -2636,6 +2646,7 @@ void Check(const Opera &Op,int N,int  M)
       }
     if(verbosity>99) 
       cout << endl;
+    */
     int kk=bc->bc.size();
     
     const int dim=Vh.N;
@@ -2772,6 +2783,8 @@ template<class R>
     if(verbosity>99) cout << " Problem : BC_set "<< typeid(R).name() << " " ;
     nbon =bc->on.size();
     set<long> on;
+    Expandsetoflab(stack,*bc, on);
+/*
     for (int i=0;i<nbon;i++)
       {
         long  lab  = GetAny<long>( (*bc->on[i])(stack));
@@ -2779,7 +2792,7 @@ template<class R>
         on.insert(lab);
       }
     if(verbosity>99) 
-      cout << endl;
+      cout << endl;*/
     int kk=bc->bc.size();
     
     const int dim=Vh.N;
@@ -2882,8 +2895,52 @@ template<class R>
       }
     *mps =mp;            
   }
-  
+void  Expandsetoflab(Stack stack,const BC_set & bc,set<long> & setoflab)
+    {
+      for (size_t i=0;i<bc.on.size();i++)
+	  if(bc.onis[i] ==0)
+	    {
+	      long  lab  = GetAny<long>( (*bc.on[i])(stack));
+	      setoflab.insert(lab);
+	      if ( verbosity>99) cout << lab << " ";
+	     
+	    }
+	  else 
+	    {
+	      KN<long>  labs( GetAny<KN_<long> >( (*bc.on[i])(stack)));
+	      for (long j=0; j<labs.N(); ++j) {	      
+		  setoflab.insert(labs[j]);
+		  if ( verbosity>99) cout << labs[j] << " ";
+	      }	  
+	      	  
+	    }
+      if(verbosity>99) 
+	  cout << endl;
 
+    }
+  
+void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all)
+    {
+      for (size_t i=0;i<di.what.size();i++)
+	  if(di.whatis[i] ==0)
+	    {
+	      long  lab  = GetAny<long>( (*di.what[i])(stack));
+	      setoflab.insert(lab);
+	      if ( verbosity>3) cout << lab << " ";
+	      all=false;
+	    }
+	  else 
+	    {
+	      KN<long>  labs( GetAny<KN_<long> >( (*di.what[i])(stack)));
+	      for (long j=0; j<labs.N(); ++j) {	      
+		  setoflab.insert(labs[j]);
+		  if ( verbosity>3) cout << labs[j] << " ";
+	      }	  
+	      all=false;	  
+	    }
+      
+    }
+    
 template<class R>
  void AssembleLinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * l )
 {
@@ -2908,7 +2965,7 @@ template<class R>
     bool sameMesh = &ThI == &Vh.Th;
     
     SHOWVERB(cout << " FormLinear " << endl);
-    const vector<Expression>  & what(di.what);
+    //const vector<Expression>  & what(di.what);
     
     CDomainOfIntegration::typeofkind  kind = di.kind;
     //const QuadratureFormular1d & FIE = di.FIE(stack);
@@ -2935,13 +2992,26 @@ template<class R>
       else cout << "  -- boundary int  " ;
     */
       
-      
+    Expandsetoflab(stack,di, setoflab,all);
+    /*
     for (size_t i=0;i<what.size();i++)
-      {long  lab  = GetAny<long>( (*what[i])(stack));
-      setoflab.insert(lab);
-      if ( verbosity>3) cout << lab << " ";
-      all=false;
+      if(di.whatis[i] ==0)
+      {
+	long  lab  = GetAny<long>( (*what[i])(stack));
+        setoflab.insert(lab);
+        if ( verbosity>3) cout << lab << " ";
+        all=false;
       }
+     else 
+        {
+	   KN<long>  labs( GetAny<KN_<long> >( (*what[i])(stack)));
+	  for (long j=0; j<labs.N(); ++j) {	      
+	      setoflab.insert(labs[j]);
+	      if ( verbosity>3) cout << labs[j] << " ";
+	  }	  
+	  all=false;	  
+     }*/
+
     if (verbosity>3) cout << " Optimized = "<< useopt << ", ";
     
     const E_F0 & optiexp0=*l->l->optiexp0;
@@ -3095,7 +3165,7 @@ template<class R>
     const bool intmortar=di.intmortar(stack);
     
     SHOWVERB(cout << " FormLinear " << endl);
-    const vector<Expression>  & what(di.what);
+   // const vector<Expression>  & what(di.what);
     
     CDomainOfIntegration::typeofkind  kind = di.kind;
     const QuadratureFormular1d & FIE = di.FIE(stack);
@@ -3121,13 +3191,14 @@ template<class R>
       else cout << "  -- boundary int  " ;
     */
       
-      
+    Expandsetoflab(stack,di, setoflab,all);
+    /*
     for (size_t i=0;i<what.size();i++)
       {long  lab  = GetAny<long>( (*what[i])(stack));
       setoflab.insert(lab);
       if ( verbosity>3) cout << lab << " ";
       all=false;
-      }
+      } */
     if (verbosity>3) cout << " Optimized = "<< useopt << ", ";
     
     const E_F0 & optiexp0=*l->l->optiexp0;

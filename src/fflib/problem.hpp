@@ -182,8 +182,12 @@ class BC_set : public E_F0mps { public:
    bool  complextype;
   typedef const BC_set* Result;
   vector<Expression> on;
+  vector<int> onis;
+    
   vector<pair<int,Expression> > bc; //  n¡ de l'inconnue+ valeur
-  BC_set(  const basicAC_F0 & args) :on(args.size()){
+  BC_set(  const basicAC_F0 & args) 
+    :on(args.size()),onis(args.size())
+    {
     int n = args.size();      
     ffassert(args.named_parameter);
     AC_F0::const_iterator ii=args.named_parameter->begin();
@@ -213,7 +217,16 @@ class BC_set : public E_F0mps { public:
         ii->second;
       }     
     for (int i=0;i<n;i++)
-      on[i]=CastTo<long>(args[i]);
+      if( ! BCastTo<KN_<long> >(args[i]))
+         {
+	   on[i]=CastTo<long>(args[i]);
+	   onis[i]=0;
+         }
+	 else 
+	 {
+	   on[i]=CastTo<KN_<long> >(args[i]);
+	   onis[i]=1;	   
+	 }
   }
     template<class K> 
      void CastToK()
@@ -252,8 +265,9 @@ public:
    typedef const CDomainOfIntegration* Result;
   Expression Th; 
   vector<Expression> what;
+  vector<int> whatis; // 0 -> long , 1 -> array ??? 
   CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2) // 3d
-    :kind(b),d(ddim), what(args.size()-1)
+    :kind(b),d(ddim), what(args.size()-1),whatis(args.size()-1)
      
   {
     args.SetNameParam(n_name_param,name_param,nargs);
@@ -265,7 +279,16 @@ public:
     int n=args.size();
     
     for (int i=1;i<n;i++)
-      what[i-1]=CastTo<long>(args[i]); 
+      if(!BCastTo<KN_<long> >(args[i]) )	 
+	 {
+	   whatis[i-1]=0;
+	   what[i-1]=CastTo<long>(args[i]); 
+	 }
+      else 
+	 {
+	   whatis[i-1]=1;
+	   what[i-1]=CastTo<KN_<long> >(args[i]); 	   
+	 }
     // cout << " CDomainOfIntegration " << this << endl;       
   }
   static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmesh>(), true);} // all type

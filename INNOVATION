@@ -1,4 +1,7 @@
 v 3.7-1
+   add possibility to put array  (int[int] )  to set a set on lab in
+    in integral (int1d,int2d,int3d)   or with in on key work 
+    example : int[int] l=[1,2,3]  ,  ...  on(l,u=1);
    add tool to compile under mingw/msys under windows 32 (freefem++-nw works, 
     (and I have  try to add freeglut.dll llibrary  but the ffglut.exe/ffmedit do not works with this version). 
    add bug (random trap) in bamg in sub domain computation in case of internal edge in 

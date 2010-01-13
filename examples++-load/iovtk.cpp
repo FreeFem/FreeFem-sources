@@ -324,7 +324,7 @@ void ENDTYPE_VTU( FILE *fp , string endtype){
 
 
 void VTU_WRITE_MESH( FILE *fp, const Mesh &Th, bool binary, int datasize, bool surface, bool bigEndian){
-  long nc,nv,nconnex;
+  int nc,nv,nconnex;
   if(surface) nc=Th.nt+Th.neb;
   else nc=Th.nt;
 
@@ -440,11 +440,11 @@ void VTU_WRITE_MESH( FILE *fp, const Mesh &Th, bool binary, int datasize, bool s
   else{
     fprintf(fp," format=\"ascii\">\n");   
     for (long i=0; i<Th.nt; i++){
-      fprintf(fp,"%d %d %d ",ien[i*3+0],ien[i*3+1],ien[i*3+2]); 
+      fprintf(fp,"%ld %ld %ld ",ien[i*3+0],ien[i*3+1],ien[i*3+2]); 
     }  
     if(surface){
       for (long i=0; i<Th.neb; i++){
-	fprintf(fp,"%d %d ",ien[i*2+3*Th.nt],ien[i*2+3*Th.nt+1]); 
+	fprintf(fp,"%ld %ld ",ien[i*2+3*Th.nt],ien[i*2+3*Th.nt+1]); 
       }  
     }
   }
@@ -483,12 +483,12 @@ void VTU_WRITE_MESH( FILE *fp, const Mesh &Th, bool binary, int datasize, bool s
     fprintf(fp,"format=\"ascii\" >\n");
     long nelem=3;
     for (long i=nelem; i <= nelem*Th.nt; i+=nelem){   
-      fprintf(fp,"%d ",i);
+      fprintf(fp,"%ld ",i);
     }
     if(surface){
       nelem=2;
       for (long i=nelem; i <= nelem*Th.neb; i+=nelem){
-	fprintf(fp,"%d ",i+3*Th.nt);
+	fprintf(fp,"%ld ",i+3*Th.nt);
       }
     }
   }
@@ -544,7 +544,7 @@ void VTU_WRITE_MESH( FILE *fp, const Mesh &Th, bool binary, int datasize, bool s
 
 
 void VTU_WRITE_MESH( FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool surface, bool bigEndian){
-  long nc,nv,nconnex;
+  int nc,nv,nconnex;
   if(surface) nc=Th.nt+Th.nbe;
   else nc=Th.nt;
 
@@ -670,11 +670,11 @@ void VTU_WRITE_MESH( FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
   else{
     fprintf(fp," format=\"ascii\">\n");   
     for (long i=0; i<Th.nt; i++){
-      fprintf(fp,"%d %d %d %d ",ien[i*3+0],ien[i*3+1],ien[i*3+2],ien[i*3+3]); 
+      fprintf(fp,"%ld %ld %ld %ld ",ien[i*3+0],ien[i*3+1],ien[i*3+2],ien[i*3+3]); 
     }  
     if(surface){
       for (long i=0; i<Th.nbe; i++){
-	fprintf(fp,"%d %d %d ",ien[i*3+4*Th.nt],ien[i*3+4*Th.nt+1],ien[i*3+4*Th.nt+2]); 
+	fprintf(fp,"%ld %ld %ld ",ien[i*3+4*Th.nt],ien[i*3+4*Th.nt+1],ien[i*3+4*Th.nt+2]); 
       }  
     }
   }

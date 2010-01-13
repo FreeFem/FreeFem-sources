@@ -1819,6 +1819,7 @@ AnyType E_set_fev<K>::operator()(Stack s)  const
 {
   if(dim== 2)  return  Op2d(s);
   else if(dim == 3)  return Op3d(s);
+  return Nothing;
 }
 
 
@@ -2637,9 +2638,9 @@ AnyType Plot::operator()(Stack s) const  {
     for (size_t i=0;i<l.size();i++)
       {
 	  pferbase  fe=0,fe1=0;
-	  pferbasearray fea;
-	  pf3rbase  fe30=0,fe31=0;
-	  pf3rbasearray  fea3;
+	  pferbasearray fea=0;
+	pf3rbase  fe30=0;//,fe31=0;
+	  pf3rbasearray  fea3=0;
 	  KN<pmesh > * ath;
 	  pmesh th;
 	  int cmp0,cmp1;
@@ -2718,10 +2719,10 @@ AnyType Plot::operator()(Stack s) const  {
 	 */
 	PlotStream theplot(ThePlotStream);
 	pferbase  fe=0,fe1=0;
-	pferbasearray fea;
+	//pferbasearray fea;
 	pf3rbase  fe30=0,fe31=0;
 	double echelle=1;
-	pf3rbasearray  fea3;
+	//pf3rbasearray  fea3=0;
 	int cmp0,cmp1;
 	theplot.SendNewPlot();
 	if (nargs[0]) theplot<< 0L <=  GetAny<double>((*nargs[0])(s));
@@ -4873,6 +4874,7 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
     return NewFEvariableT<v_fes3,3>(pids,currentblock,fespacetype,init,cplx,dim);
   else
     CompileError("Invalide fespace on Rd  ( d != 2 or 3) ");
+    return C_F0();
 }
 C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx,int dim)
 {
@@ -4884,8 +4886,8 @@ C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 
 
 size_t dimFESpaceImage(const basicAC_F0 &args) 
 {
-  aType t_m2= atype<pmesh*>();
-  aType t_m3= atype<pmesh3*>();
+  //aType t_m2= atype<pmesh*>();
+  // aType t_m3= atype<pmesh3*>();
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
   aType t_a= atype<E_Array>();
@@ -4915,7 +4917,7 @@ aType  typeFESpace(const basicAC_F0 &args)
   aType t_m3= atype<pmesh3*>();
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
-  aType t_a= atype<E_Array>();
+  //aType t_a= atype<E_Array>();
   size_t d=0;
     // 20 avril 2009 add brak 
   for (int i=0;i<args.size();i++)
@@ -4999,7 +5001,7 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
     return NewFEarrayT<v_fes3,3>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
   else
     CompileError("Invalid vectorial fespace on Rd  ( d != 2 or 3) ");
-
+    return C_F0();
 }
 C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray,bool cplx,int dim)
 { 
