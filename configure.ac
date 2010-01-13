@@ -280,8 +280,31 @@ CYGWIN*|MINGW*)
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32" 
 		LIBSNOCONSOLE="-mwindows"
 		FLIBS="$ff_nocygwin -lg2c"
-                ff_glut="-lglut32 -mthreads -lglu32 -lopengl32"
+
+                ff_glutname="glut32"
+                ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32"
+		ff_libs1="$LIBS"
+     		LIBS="$LIBS $ff_glut"
+		AC_TRY_LINK_FUNC(glutInit,
+		ff_glut_ok=yes
+	        LIBS="$ff_libs1",
+		ff_glut_ok=no);
+		LIBS="$ff_libs1"
+                if [ "$ff_glut_ok" != "yes" ] ; then
+                    ff_glutname="freeglut"
+                    ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32"
+		    ff_libs1="$LIBS"
+     		    LIBS="$LIBS $ff_glut"
+		    AC_TRY_LINK_FUNC(glutInit,
+			ff_glut_ok=yes
+			LIBS="$ff_libs1",
+			ff_glut_ok=no
+			ff_glutname="");
+		    LIBS="$ff_libs1"
+		fi
+ 
          	# Resources for FreeFem++-cs in Microsoft Windows format
+	        AC_SUBST(FFGLUTNAME,$ff_glutname)
 	        AC_SUBST(WINDRESOBJ,windres.o)
 	        AC_SUBST(LIBSNOCONSOLE,$LIBSNOCONSOLE)
                 AC_SUBST(WIN32DLLTARGET,win32-dll-target)

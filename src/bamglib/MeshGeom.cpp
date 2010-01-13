@@ -298,7 +298,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
       for (int j=0;j<3;j++)
 	{
 	  tt=triangles[it].TriangleAdj(j);
-	  if ((!tt || tt->color != triangles[it].color) && !subdomains[isd=colorT[it]].head)
+	  if ((!tt ||  triangles[it].Locked(j) || tt->color != triangles[it].color) && !subdomains[isd=colorT[it]].head)
 	    {
 	      subdomains[isd].head = triangles+it;
 	      subdomains[isd].ref =  triangles[it].color;

@@ -710,6 +710,7 @@ LEXLIB
 YACC
 YFLAGS
 GCCNOCYGWIN
+FFGLUTNAME
 WINDRESOBJ
 LIBSNOCONSOLE
 WIN32DLLTARGET
@@ -6716,8 +6717,142 @@ CYGWIN*|MINGW*)
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32"
 		LIBSNOCONSOLE="-mwindows"
 		FLIBS="$ff_nocygwin -lg2c"
-                ff_glut="-lglut32 -mthreads -lglu32 -lopengl32"
+
+                ff_glutname="glut32"
+                ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32"
+		ff_libs1="$LIBS"
+     		LIBS="$LIBS $ff_glut"
+		cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char glutInit ();
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+return glutInit ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ff_glut_ok=yes
+	        LIBS="$ff_libs1"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ff_glut_ok=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext;
+		LIBS="$ff_libs1"
+                if  "$ff_glut_ok" != "yes"  ; then
+                    ff_glutname="freeglut"
+                    ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32"
+		    ff_libs1="$LIBS"
+     		    LIBS="$LIBS $ff_glut"
+		    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char glutInit ();
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+return glutInit ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ff_glut_ok=yes
+			LIBS="$ff_libs1"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ff_glut_ok=no
+			ff_glutname=""
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext;
+		    LIBS="$ff_libs1"
+		fi
+
          	# Resources for FreeFem++-cs in Microsoft Windows format
+	        FFGLUTNAME=$ff_glutname
+
 	        WINDRESOBJ=windres.o
 
 	        LIBSNOCONSOLE=$LIBSNOCONSOLE
@@ -18436,8 +18571,8 @@ LEXLIB!$LEXLIB$ac_delim
 YACC!$YACC$ac_delim
 YFLAGS!$YFLAGS$ac_delim
 GCCNOCYGWIN!$GCCNOCYGWIN$ac_delim
+FFGLUTNAME!$FFGLUTNAME$ac_delim
 WINDRESOBJ!$WINDRESOBJ$ac_delim
-LIBSNOCONSOLE!$LIBSNOCONSOLE$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -18479,6 +18614,7 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+LIBSNOCONSOLE!$LIBSNOCONSOLE$ac_delim
 WIN32DLLTARGET!$WIN32DLLTARGET$ac_delim
 ff_prefix_dir!$ff_prefix_dir$ac_delim
 OPTIM_TYPE!$OPTIM_TYPE$ac_delim
@@ -18566,7 +18702,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 85; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 86; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
