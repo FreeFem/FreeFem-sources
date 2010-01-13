@@ -290,7 +290,7 @@ CYGWIN*|MINGW*)
 	        LIBS="$ff_libs1",
 		ff_glut_ok=no);
 		LIBS="$ff_libs1"
-                if [ "$ff_glut_ok" != "yes" ] ; then
+                if test  "$ff_glut_ok" != "yes"  ; then
                     ff_glutname="freeglut"
                     ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32"
 		    ff_libs1="$LIBS"

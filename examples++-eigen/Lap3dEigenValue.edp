@@ -8,7 +8,7 @@
 // $$  \int_{\omega}  \nabla u_ \nabla v = \lamba \int_{\omega} u \nabla v  $$
 
 load "msh3"	
-int nn=3;
+int nn=15;
 mesh Th2=square(nn,nn,[pi*x,pi*y]);
 fespace Vh2(Th2,P1);
 int[int] rup=[0,1],  rdown=[0,1], rmid=[4,1,2,1, 1,1 ,3,1];
