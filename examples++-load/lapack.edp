@@ -35,12 +35,13 @@ inv(A1);
 cout << A1 << endl;
 }
 {
+  cout << " *****************  complex VP \n";
 int n=5;
 complex[int,int] A(n,n),A1(n,n),B(n,n);
 for(int i=0;i<n;++i)
 for(int j=0;j<n;++j)
   A(i,j)= (i==j) ? n+1 : 1;
- A(0,n-1)=-100;
+A(0,n-1)=-100i;
 cout << A << endl;
 A1=A^-1;
 cout << A1 << endl;
@@ -57,6 +58,7 @@ cout << A1 << endl;
      for(int k=0;k<n;++k)
        KK(i,j) += (A(i,k) - vp[j]* real(i==k) ) *VP(k,j);
  cout <<" KK " <<  KK << endl; 
+ assert( KK.linfty < 1e-10);
 B=0;
 for(int i=0;i<n;++i)
   for(int j=0;j<n;++j)
@@ -67,6 +69,7 @@ cout << B << endl;
 
 //inv(A1);
 //cout << A1 << endl;
+  cout << " *****************  fin --complex VP \n";
 }
 
 {
