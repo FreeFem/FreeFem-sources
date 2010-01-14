@@ -113,19 +113,19 @@ long lapack_zgeev(KNM<Complex> *const &A,KN<Complex> *const &vp,KNM<Complex> *co
   ffassert(vectp->M()>=n);
   ffassert(vectp->N()>=n);
   ffassert(vp->N()>=n);
-  KN<Complex> w(n+5),vr(n*n+20),vl(n*n+20);
+  KN<Complex> w(n),vr(n*n),vl(n*n);
   KNM<Complex> mat(*A);
-  intblas info,lw=n*(n+1);
+  intblas info,lw=n*(n+1)*10;
   KN<Complex> wk(lw);
   KN<double> rwk(2*n);
 
   char N='N',V='V';
-  zgeev_(&N,&V,&n, mat,&n, w, vl,&n, vr,&n,w,&lw,rwk,&info);
-  /*  cout << lw << " " << wk[0] << " " << info <<   endl;
-  lw=wk[0].real();
+  // lw=1;// to get opt size value 
+  zgeev_(&N,&V,&n, mat,&n, w, vl,&n, vr,&n,wk,&lw,rwk,&info);
+  //  cout << lw << " " << wk[0] << " " << info <<   endl;
+  /* lw=wk[0].real();
   w.resize(lw);
-  
-  zgeev_(&N,&V,&n,mat,&n, w, vl,&n,vr,&n,w,&lw,rwk,&info);
+  zgeev_(&N,&V,&n, mat,&n, w, vl,&n, vr,&n,wk,&lw,rwk,&info);
   */
   if(info)
     cout << " info =  " << info << endl;
