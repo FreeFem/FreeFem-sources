@@ -50,7 +50,7 @@ then
         ff_flibs=""
         # modif FH		
 	AC_F77_LIBRARY_LDFLAGS  
-	AC_F77_WRAPPERS
+dnl	AC_F77_WRAPPERS
 	# correct pb of double def under macos 
 	case $F77 in
 	 *fort77)
