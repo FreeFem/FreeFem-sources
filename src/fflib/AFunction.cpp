@@ -800,7 +800,7 @@ void Init_map_type()
        new E_F1_funcT<long,double>(Cast<long,double>),
        new E_F1_funcT<long,bool>(Cast<long,bool>),
        new E_F1_funcT<long,ostream_precis>(Cast<long,ostream_precis>),
-       new E_F1_funcT<long,ostream_precis>(Cast<long,ostream_seekp>)
+       new E_F1_funcT<long,ostream_seekp>(Cast<long,ostream_seekp>)
       // new E_F1_funcT<long,ostream_precis>(Cast<long,istream_seekp>)
        );
        
