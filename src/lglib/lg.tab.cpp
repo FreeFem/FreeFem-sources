@@ -2043,7 +2043,7 @@ yyreduce:
         case 2:
 #line 251 "lg.ypp"
     {
-		        const char *  magicffglut="#!ffglutdata3..\n";
+		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
                         if(ThePlotStream) fwrite(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
                         (yyvsp[(1) - (2)].cinst)+=currentblock->close(currentblock);

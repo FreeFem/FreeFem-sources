@@ -614,6 +614,7 @@ public:
     // void destroy() {RefCounter::destroy();}
     */
     bool isFEMesh() const { return ! NodesOfElement  && ( N==1) ;} // to make optim
+  template <class R>  
   KN<R>  newSaveDraw(const KN_<R> & U,int composante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U=0) const  ; 
 
 

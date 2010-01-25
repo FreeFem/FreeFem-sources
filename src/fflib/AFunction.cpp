@@ -175,7 +175,7 @@ template<class RR,class B>
 
 inline   string ** get_elements( MyMap<String,String> *  const  &  a,string*  const   & b)
  { String* Sret=  &((*a)[*b]); // correction FH feb 2004
-    delete b;
+   // delete b; la chaine est detruire automatiquement en fin d'instruction  FH jan 2010
     return Sret->getap();}
 
 template<class RR> RR Abs(RR a) { return a<0?-a:a;}
@@ -374,11 +374,23 @@ long exec(string *s)
   ostream * f;
    operator long () const {return f->precision();}
  };
+
  ostream_precis ostream_precision(ostream **f){ return ostream_precis(*f);}
   ostream_precis ostream_precision(ostream *f){ return ostream_precis(f);}
-long get_precis( ostream_precis  pf) { return pf.f->precision();}
+ long get_precis( ostream_precis  pf) { return pf.f->precision();}
  long set_precis( ostream_precis  pf, long  l) { return pf.f->precision(l);}
+/* a faire !!!!!!!!!!!!!
+class ostream_seekp { public:
+    ostream_precis(ostream * ff) :f(ff) {}
+    ostream * f;
+    operator long () const {return f->precision();}
+};
 
+ long seekp( ostream_seekp  pf, long  l) { return pf.f->seekp(l);}
+ long tellp( ostream_tellp  pf) { return pf.f->tellp() ;}
+ long seekp( istream_seekp  pf, long  l) { return pf.f->seekp(l);}
+ long tellp( istream_tellp  pf) { return pf.f->tellp() ;}
+*/
  class istream_good { public:
   istream_good(istream * ff) :f(ff) {}
   istream * f;

@@ -6,6 +6,8 @@
  *  Copyright 2008 UPMC. All rights reserved.
  *
  */
+#include <complex>
+typedef std::complex<double> Complex; 
 extern int debug;
 static const double dinfty=numeric_limits<double>::max();
 void DefColor(float & r, float & g, float & b,
@@ -28,6 +30,7 @@ struct OnePlot
   KN<int> oklist;
   int setgllists;
   virtual void Draw(OneWindow *win) =0;
+  virtual bool NextCase() {return false;}
   void bb(R3 & Pmn,R3 &Pmx) const 
   { 
     Pmn=Minc(Pmin,Pmn);
@@ -110,53 +113,48 @@ struct OnePlotFE: public OnePlot
   const Mesh *Th;
  // long nsub;
   KN<double> v;
+  KN<Complex> vc;
   KN<R2> Psub;
   KN<int> Ksub;
-    
-    OnePlotFE(const Mesh *T,long w,PlotStream & f);
-    void Draw(OneWindow *win);
-    void dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const ;
+  int cas; // in cas of complex  chaage interpertation of complex value 
+  OnePlotFE(const Mesh *T,long w,PlotStream & f);
+  void Draw(OneWindow *win);
+  void dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const ;
+  bool  vc2v(); 
+  bool  NextCase() { cas++; return vc2v();}
 };
 
 struct OnePlotFE3: public OnePlot 
 {
-    const Mesh3 *Th;
-    long nsub;
-    KN<double> v;
-    KN<R3> Psub;
-    KN<int> Ksub;
-    OnePlotFE3(const Mesh3 *T,long w,PlotStream & f)
-      :OnePlot(w,3,5),Th(T)
+  const Mesh3 *Th;
+  long nsub;
+  KN<double> v;
+  KN<Complex> vc;
+  KN<R3> Psub;
+  KN<int> Ksub;
+  int cas; // in cas of complex  chaage interpertation of complex value 
+
+  OnePlotFE3(const Mesh3 *T,long w,PlotStream & f)
+    :OnePlot(w,3,5),Th(T),cas(2)
     {
 	Pmin=Th->Pmin;
 	Pmax=Th->Pmax;
 
 	f >> Psub ;
 	f >> Ksub ;
-	f >>  v;
-	if(what==6)
-	  {
-	      fmin = min(fmin,v.min());
-	      fmax = max(fmax,v.max());
-	  }
-	else if (what==7)
-	  {  
-	      ffassert(0); // afaire
-	      int n= v.N()/2;
-	      for (int i=0,j=0;i<n;i++, j+=2)
-		{
-		    R2 u(v[j],v[j+1]);
-		    vmax2 = max(vmax2,u.norme2());
-		}
-	      //cout << " vmax = " << sqrt(vmax2) << endl; 
-	  }
+	if(what<10)
+	  f >>  v;
+	else
+	  f >> vc;
+	vc2v();
 	if(debug>3) cout << "OnePlotFE3" << Th <<" " << what<< " " << nsub <<" " << v.N() << endl
 			 << "       Pmin " << Pmin << " Pmax  " << Pmax << endl;
 	ffassert(f.good());
 	
     }
     void Draw(OneWindow *win);
-    
+  bool  vc2v();     
+  bool  NextCase() { cas++; return vc2v();}
 };
 
 struct OnePlotCurve: public OnePlot {
@@ -194,98 +192,102 @@ struct OnePlotError: public OnePlot {
 
 
 
-class ThePlot { public:
-    int count;
-    int state; // 0 new 
-    GLint gllist;
-    KN<R> colors;
-    bool hsv; // hsv  type 
-    KN<R> boundingbox;
-    double coeff;
-    bool wait;
-    bool value;
-    bool fill;
-    bool aspectratio;
-    bool clean;
-    bool uaspectratio;
-    bool pViso,pVarrow;
-    bool withiso;
-    bool witharrow;
-    
-    long  Niso,Narrow;
-    R3 Pmin,Pmax,PminT,PmaxT;//  with R -> true bound
-    R  fmin,fmax,fminT,fmaxT; // with  bound with previous plot. 
-    R  vmax2;
-    KN<R> Viso,Varrow;
-    bool bw;
-    string * psfile;
-    string * cm;
-    
-    bool grey;
-    bool greyo;
-    bool drawborder;
-    bool drawmeshes;
-    bool add,keepPV;
-    double echelle;
-    vector<Mesh *> Ths;
-    vector<Mesh2 *> Ths2;
-    vector<Mesh3 *> Ths3;
-    list<OnePlot *> plots;
-    bool changeViso,changeVarrow,changeColor,changeBorder,changeFill;
-    R3 Pvue,Peyes;
-    R alpha; 
-    R coefr; 
+class ThePlot 
+{
+public:
+  int count;
+  int state; // 0 new 
+  GLint gllist;
+  KN<R> colors;
+  bool hsv; // hsv  type 
+  KN<R> boundingbox;
+  double coeff;
+  bool wait;
+  bool value;
+  bool fill;
+  bool aspectratio;
+  bool clean;
+  bool uaspectratio;
+  bool pViso,pVarrow;
+  bool withiso;
+  bool witharrow;
+  
+  long  Niso,Narrow;
+  R3 Pmin,Pmax,PminT,PmaxT;//  with R -> true bound
+  R  fmin,fmax,fminT,fmaxT; // with  bound with previous plot. 
+  R  vmax2;
+  KN<R> Viso,Varrow;
+  bool bw;
+  string * psfile;
+  string * cm;
+  
+  bool grey;
+  bool greyo;
+  bool drawborder;
+  bool drawmeshes;
+  bool add,keepPV;
+  double echelle;
+  vector<Mesh *> Ths;
+  vector<Mesh2 *> Ths2;
+  vector<Mesh3 *> Ths3;
+  list<OnePlot *> plots;
+  bool changeViso,changeVarrow,changeColor,changeBorder,changeFill;
+  R3 Pvue,Peyes;
+  R alpha; 
+  R coefr; 
   R z0; //  z pour les objets 2d. 
   //  for 3d plot jan 2009
   int  plotdim;
   R theta, phi, dcoef, focal;
   int datadim;
-    // 2D
+  // 2D
+  
+  bool NextCase();
+  
+  bool Change() const  { return changeViso||changeVarrow||changeColor||changeBorder||changeFill;}
+  ~ThePlot()
+  {
+    for (list<OnePlot *>::iterator i= plots.begin();i != plots.end(); ++i)
+      if(*i) delete *i;
+    for (vector<Mesh *>::iterator i= Ths.begin();i != Ths.end(); ++i)
+      if(*i) delete *i;
+    for (vector<Mesh2 *>::iterator i= Ths2.begin();i != Ths2.end(); ++i)
+      if(*i) delete *i;
+    for (vector<Mesh3 *>::iterator i= Ths3.begin();i != Ths3.end(); ++i)
+      if(*i) delete *i;
     
-    bool Change() const  { return changeViso||changeVarrow||changeColor||changeBorder||changeFill;}
-    ~ThePlot()
-    {
-	for (list<OnePlot *>::iterator i= plots.begin();i != plots.end(); ++i)
-	    if(*i) delete *i;
-	for (vector<Mesh *>::iterator i= Ths.begin();i != Ths.end(); ++i)
-	    if(*i) delete *i;
-	for (vector<Mesh2 *>::iterator i= Ths2.begin();i != Ths2.end(); ++i)
-	    if(*i) delete *i;
-	for (vector<Mesh3 *>::iterator i= Ths3.begin();i != Ths3.end(); ++i)
-	    if(*i) delete *i;
-
-    }
+  }
   ThePlot(PlotStream & fin,ThePlot *old , int kcount);
-    
-    void Draw(OneWindow *win) ;
-    void DrawHelp(OneWindow *win) ;
- 
-    struct RGB  { float r,g,b;
-	void set(int k,int nb,ThePlot *theplot ) 
-	{
-	    DefColor(r,g,b, k,nb,theplot->hsv,theplot->grey,theplot->colors);
-	}
-    } ;
-    vector<RGB>  tbc;
-    void color(int i,R alpha=1.) { 
-      ffassert(tbc.size());
-	RGB c(tbc[min(max(0,i),(const int) tbc.size())]);
-	if(alpha<1) {
-	    R a1=1.-alpha;
-	    c.r=c.r*alpha+a1;
+  
+  void Draw(OneWindow *win) ;
+  void DrawHelp(OneWindow *win) ;
+  
+  struct RGB  { float r,g,b;
+    void set(int k,int nb,ThePlot *theplot ) 
+    {
+      DefColor(r,g,b, k,nb,theplot->hsv,theplot->grey,theplot->colors);
+    }
+  } ;
+  vector<RGB>  tbc;
+  void color(int i,R alpha=1.) { 
+    ffassert(tbc.size());
+    RGB c(tbc[min(max(0,i),(const int) tbc.size())]);
+    if(alpha<1) {
+      R a1=1.-alpha;
+      c.r=c.r*alpha+a1;
 	    c.g=c.g*alpha+a1;
 	    c.b=c.b*alpha+a1;
 	    
-	 // cout << " aaaa" << alpha << endl;
-	}
-      glColor4f(c.r,c.g,c.b,alpha);
+	    // cout << " aaaa" << alpha << endl;
     }
+    glColor4f(c.r,c.g,c.b,alpha);
+  }
   void  SetColorTable(int nb); 
   void SetDefIsoV(int niso=0,int narr=0,R fmn=1.,R fmx=-1.,R vmn=1.,R vmx=-1.); 
   void DrawIsoT(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
   void DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
   void dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const ;
-
+  
 }; 
 
 class OneWindow { 
@@ -318,6 +320,7 @@ public:
   //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
   OneWindow(int h,int w,ThePlot *p);
   void DefaultView() ;
+  bool  NextCase() ;
   void  SetView() ;
   void MoveXView(R dx,R dy) ;
   void set(ThePlot *p);

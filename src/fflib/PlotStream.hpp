@@ -45,6 +45,7 @@ public:
     return *this;}
   PlotStream& write(const int& bb) {int b=w_endian(bb);write(reinterpret_cast<const void *> (&b),sizeof(int));return *this;}
   PlotStream& write(const double& bb) {double b=w_endian(bb);write(reinterpret_cast<const void *> (&b),sizeof(double));return *this;}
+  PlotStream& write(const complex<double>& bb) {return write(bb.real()),write(bb.imag());}
   PlotStream &write(const Fem2D::R1 & P) { return write(P.x);}
   PlotStream &write(const Fem2D::R2 & P) { return write(P.x),write(P.y);}
   PlotStream &write(const Fem2D::R3 & P) { return write(P.x),write(P.y),write(P.z);}
@@ -74,6 +75,7 @@ public:
   PlotStream & operator << (const long long & b)   { return write(b); }        
   PlotStream & operator << (const int& b)      { return write(b); }        
   PlotStream & operator << (const double& b)   { return write(b); }
+  PlotStream & operator << (const complex<double>& b)   { return write(b); }
   PlotStream & operator << (const string& s)   { return write(s); }
   PlotStream & operator << (const string* s)   { ffassert(s); return write(*s); }
     template<class T>    
@@ -140,6 +142,7 @@ public:
     return *this;}
   PlotStream& read( int& b) {read(reinterpret_cast< void *> (&b),sizeof(int)); b=r_endian(b);return *this;}
   PlotStream& read( double& b) {read(reinterpret_cast< void *> (&b),sizeof(double)); b=r_endian(b);return *this;}
+  PlotStream &read( complex<double> &C) { return read(C.real()),read(C.imag());}
   PlotStream &read( Fem2D::R1 & P) { return read(P.x);}
   PlotStream &read( Fem2D::R2 & P) { return read(P.x),read(P.y);}
   PlotStream &read( Fem2D::R3 & P) { return read(P.x),read(P.y),read(P.z);}
@@ -158,6 +161,7 @@ public:
   PlotStream & operator >> ( long long& b) { return read(b); }        
   PlotStream & operator >> ( int& b)       { return read(b); }        
   PlotStream & operator >> ( double& b)    { return read(b); }
+  PlotStream & operator >> ( complex<double>& b)    { return read(b); }
   PlotStream & operator >> ( string& s)    { return read(s); }
   PlotStream & operator >> ( string *& s) 
   { if(!s) s= new string; return read(*s);

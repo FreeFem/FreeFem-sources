@@ -10,7 +10,7 @@
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.7-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.8,hecht@ann.jussieu.fr,freefem++)
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
@@ -50,7 +50,7 @@ then
         ff_flibs=""
         # modif FH		
 	AC_F77_LIBRARY_LDFLAGS  
-
+	AC_F77_WRAPPERS
 	# correct pb of double def under macos 
 	case $F77 in
 	 *fort77)
@@ -361,6 +361,7 @@ EOF
 m4_include(acmacros.m4)
 m4_include(acoptim.m4)
 
+
 # ------------------------------
 # compilation flags of FreeFem++ 
 # ------------------------------
@@ -595,9 +596,13 @@ fi
 
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
-
-# We need to choose between mpich and lam for the Debian package
+dnl m4_include(ax_mpi.m4)
+# We need to choose between mpich, openmpi  and lam for the Debian package
 AC_ARG_WITH(mpi,[  --with-mpi=[yes/no/mpiCC/mpic++/... ]	or --without-mpi	Choose MPI implementation (default is mpich)])
+
+#if test "$with_mpi" != no ; then
+#AX_MPI(with_mpi=yes, with_mpi=no)
+#fi
 
 # Default is mpich
 if test "$with_mpi" = yes -o -z "$with_mpi" 

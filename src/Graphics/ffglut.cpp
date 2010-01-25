@@ -87,6 +87,7 @@ int   ReadOnePlot(FILE *fp)
   f.set_binary_mode();
   const char *  magic2="#!ffglutdata2..";
   const char *  magic3="#!ffglutdata3..";
+  const char *  magic3_1="#!ffglutdata3.1";
   const int lmagic=strlen(magic2);
     char magicxx[32];
   err=0;
@@ -102,6 +103,7 @@ int   ReadOnePlot(FILE *fp)
 	magicxx[lmagic]='\0';
 	if( strcmp(magicxx,magic2)==0)  version=2;
 	else if( strcmp(magicxx,magic3)==0)  version=3;
+	else if( strcmp(magicxx,magic3_1)==0)  version=3;
 	else err =1; 
 	
       if(err) {
@@ -555,17 +557,17 @@ void OnePlotFE3::Draw(OneWindow *win)
   ThePlot & plot=*win->theplot;
     ShowGlerror("begin OnePlotFE3 plot");
     ///    plot.SetDefIsoV();
-    if(plot.fill && what==6)
+    if(plot.fill && what%10==6)
       glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     else
       glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     bool  change=false;
-    if( (what==6) ) 
+    if( (what%10==6) ) 
       {
 	change = win->changeiso ;
       }
       
-    if(what==6)
+    if(what%10==6)
       glEnable(GL_DEPTH_TEST);
     else 
       glEnable(GL_DEPTH_TEST);
@@ -589,7 +591,7 @@ void OnePlotFE3::Draw(OneWindow *win)
 	    for(int i=0;i<nsubV;++i)
 	      Pn[i]=K(Psub[i]);
 	    int lK=0;
-	    if(what==6)
+	    if(what%10==6)
 	      for(int sk=0;sk<nsubT;++sk)
 		{
 		  
@@ -654,27 +656,90 @@ template<class Mesh>
 	  cout << " Ksub " << Ksub << endl;}
 
       }
-    
-    f>> v;
-    if(what==1)
+    if(what<10)
+      f>> v;
+    else
       {
-	  fmin = min(fmin,v.min());
-	  fmax = max(fmax,v.max());
+      f>> vc;
+      vc2v();
       }
-    else if (what==2)
-      {  
-	  //ffassert(0); // afaire
-	  int n= v.N()/2;
-	  for (int i=0,j=0;i<n;i++, j+=2)
-	    {
-		R2 u(v[j],v[j+1]);
-		vmax2 = max(vmax2,u.norme2());
-	    }
-	  // cout << " vmax = " << sqrt(vmax2) << endl; 
-      }
+    cas =2; 
+    vc2v();
     if(debug>3) cout << "OnePlotFE" << Th <<" " << what<< " " << Psub.N() << " " << Ksub.N()/3 <<" " << v.N() << endl; 
     ffassert(f.good());
     
+}
+
+
+
+template<class Mesh>
+bool  OnePlotFE<Mesh>::vc2v() 
+{
+  bool ret=false;
+  if(what>=10)
+    {
+      ret=true;
+      int n = vc.N();
+      if(v.size() !=n) 
+	v.resize(n);
+      for(int i=0;i<n;++i)
+	if( cas%4== 0) v[i] = vc[i].real();
+	else if( cas%4== 1) v[i] = vc[i].imag();
+	else if( cas%4== 2) v[i] = abs(vc[i]);
+	else if( cas%4== 3) v[i] = arg(vc[i]);
+    }
+  
+  if(what%10==1)
+    {
+      fmin = min(fmin,v.min());
+      fmax = max(fmax,v.max());
+    }
+  else if (what%10==2)
+    {  
+      int n= v.N()/2;
+      for (int i=0,j=0;i<n;i++, j+=2)
+	{
+	  R2 u(v[j],v[j+1]);
+	  vmax2 = max(vmax2,u.norme2());
+	}
+    }
+  return ret;  
+}
+
+bool  OnePlotFE3::vc2v() 
+{
+  bool ret=false;
+  if(what>=10)
+    {
+      ret=true;
+      int n = vc.N();
+      if(v.size() !=n) 
+	v.resize(n);
+      for(int i=0;i<n;++i)
+	if( cas%4== 0) v[i] = vc[i].real();
+	else if( cas%4== 1) v[i] = vc[i].imag();
+	else if( cas%4== 2) v[i] = abs(vc[i]);
+	else if( cas%4== 3) v[i] = arg(vc[i]);
+    }
+  
+  
+  if(what%10==6)
+    {
+      fmin = min(fmin,v.min());
+      fmax = max(fmax,v.max());
+    }
+  else if (what%10==7)
+    {  
+      
+      int n= v.N()/3;
+      for (int i=0,j=0;i<n;i++, j+=2)
+	{
+	  R3 u(v[j],v[j+1],v[j+2]);
+	  vmax2 = max(vmax2,u.norme2());
+	}
+      //cout << " vmax = " << sqrt(vmax2) << endl; 
+    }
+  return ret;
 }
 
 template<class Mesh>
@@ -695,17 +760,17 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
   cout << "\t\t\tOnePlotMesh::Draw  " <<v.N() << " ,nt " << Th.nt << " " << nK << " " 
        << Psub.N() << " " << what << " ,nv " << Th.nv <<  endl;
   ffassert(v.N()== Th.nt*nK);
-  ffassert(nK = nsubV*what);
+  ffassert(nK == nsubV*(what%10));
   int o=0;
   KN<R2> Pn(Psub.N());
   if((debug > 10)) cout << " " <<nsubV  << " " << nsubT << endl;
   
-  if(plot.fill && what==1)
+  if(plot.fill && what%10==1)
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
   else
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
   
-  if(what==2)
+  if(what%10==2)
     glDisable(GL_DEPTH_TEST);
   else 
     glEnable(GL_DEPTH_TEST);
@@ -719,12 +784,12 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
   
   int klist=0;
   bool  change=false;
-  if( (what==1) ) 
+  if( (what%10==1) ) 
     {
       if ( plot.fill) klist=1;
       change = win->changeiso ;
     }
-  else if (what==2)
+  else if (what%10==2)
     change  =  win->changearrow ;
   if(debug>9)
     cout << change << " " << klist << " ... " << oklist[klist] << "  fill = " 
@@ -746,7 +811,7 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
 	  const typename Mesh::Element & K=Th[k];
 	  for(int i=0;i<nsubV;++i)
 	    Pn[i]=K(Psub[i]);// local to global coord. 
-	  if(what==1)
+	  if(what%10==1)
 	    for(int sk=0;sk<nsubT;++sk)
 	      {
 		int i0= Ksub[sk*3+0];//numSubTriangle(nsub,sk,0);
@@ -813,7 +878,7 @@ template<class Mesh>
   int nsubV=Psub.N();//NbOfSubInternalVertices(nsub);
   int nK=v.N()/ Th.nt;
   ffassert(v.N()== Th.nt*nK);
-  ffassert(nK = nsubV*what);
+  ffassert(nK == nsubV*(what%10));
   int o=0;
   KN<R2> Pn(Psub.N());
   KN<R3> P3(Psub.N());
@@ -833,7 +898,7 @@ template<class Mesh>
       for(int i=0;i<nsubV;++i)
 	{
 	  double f=0;
-	  if(what==1) f=v[o+i];
+	  if(what%10==1) f=v[o+i];
 	  gluProject(Pn[i].x,Pn[i].y,f,win->modelMatrix,win->projMatrix,win->viewport,
 		      &P3[i].x,&P3[i].y,&P3[i].z);
 	  if(ddd)
@@ -861,7 +926,7 @@ template<class Mesh>
 	if(inCadre[i])
 	  {
 	    ccc=true;
-	    if(what==1)
+	    if(what%10==1)
 	      {
 		R f=v[o+i];
 		fmn=min(f,fmn);
@@ -966,7 +1031,6 @@ void OnePlotBorder::Draw(OneWindow *win)
   ShowGlerror("end OnePlotBorder::Draw");
   
 }
-
 
 OneWindow::OneWindow(int h,int w,ThePlot *p)
   :
@@ -1494,6 +1558,14 @@ void ThePlot::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) const
   if(vmn2>vmx2) vmn2=0,vmx2=vmax2;
 }
 
+bool ThePlot::NextCase() 
+{
+  bool ret=false;
+  for (list<OnePlot *>::iterator i= plots.begin();i != plots.end(); ++i)
+    ret =  (**i).NextCase() || ret; //  alway  run NextCase ..  
+  return  ret;
+}
+
 void ThePlot::Draw(OneWindow *win) 
 {
     if((debug>1 )) 
@@ -1812,12 +1884,12 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	    p=new OnePlotMesh<Mesh2>(Ths2[imsh-1]);
 	  
 	}
-      else if (what==1 || what==2)
+      else if (what==1 || what==2 || what==11 || what==12 )
 	{
 	  fin >> imsh;
-	  if(what==1) withiso=true;
-	  else if (what==2) witharrow=true;
-	  if((debug > 10)) cout << " plot : mesh " << imsh << endl;
+	  if(what%10==1) withiso=true;
+	  else if (what%10==2) witharrow=true;
+	  if((debug >= 10)) cout << " plot : mesh " << imsh << endl;
 	  ffassert(imsh>0 && imsh <=nbmeshes);
 	  if(version==2)
 	    p=new OnePlotFE<Mesh>(Ths[imsh-1],what,fin);
@@ -1833,11 +1905,11 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	  fin >> imsh;
 	    p=new OnePlotMesh3(Ths3[imsh-1]);
 	}
-      else if (what==6 )
+      else if (what==6  || what==7|| what==16  || what==17)
 	{
 	  iso3d++;
 	  fin >> imsh;
-	  if(what==6) withiso=true;
+	  if(what==6||what==16 ) withiso=true;
 	  
 	  if((debug > 10)) cout << " plot : mesh3 " << imsh << endl;
 	  ffassert(imsh>0 && imsh <=nbmeshes3);
@@ -2466,8 +2538,18 @@ static void Key( unsigned char key, int x, int y )
 	break;
       case '@':
 	win->dtheta = win->dtheta ? 0 : pi/1800.;
+      break;
+      case 'k':
+	if(win->theplot->NextCase())
+	  {
+	    R fmn,fmx,vmn,vmx;	  
+	    win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
+	    win->theplot->SetDefIsoV(ni,na,fmn,fmx,vmn,vmx) ;	    
+	    win->changeiso=true;
+	    win->changearrow=true;
+	  }
 	break;
-	
+
       case 'b':
 	win->theplot->grey = ! win->theplot->grey   ;
 	win->changeiso=true;
@@ -2510,20 +2592,24 @@ static void Key( unsigned char key, int x, int y )
 	break;
 	
       case 'n':
-	na  -=  na < 10  ? 2 : 5;
-      ni  -=  ni <10 ? 2 : 5;	
-      {
-	R fmn,fmx,vmn,vmx;	  
-	win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
-	win->theplot->SetDefIsoV(ni,na,fmn,fmx,vmn,vmx) ;
-	
-	win->changeiso=true;
-	win->changearrow=true;
-      }
-      break ;
+	{	
+	  na  -=  na < 10  ? 2 : 5;
+	  ni  -=  ni <10 ? 2 : 5;	
+	  na = max(na,2);
+	  ni = max(ni,2); 
+	  R fmn,fmx,vmn,vmx;	  
+	  win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
+	  win->theplot->SetDefIsoV(ni,na,fmn,fmx,vmn,vmx) ;
+	  
+	  win->changeiso=true;
+	  win->changearrow=true;
+	}
+	break ;
       case 'N':
-	na  += 5;
-	ni  += 5;	
+	{
+	  na  += na < 10  ? 2 : 5;
+	  ni  += ni < 10  ? 2 : 5;
+	}
       case 'i':
 	{
 	  R fmn,fmx,vmn,vmx;	  
@@ -2542,8 +2628,6 @@ static void Key( unsigned char key, int x, int y )
 	  win->changearrow=true;
 	}
 	break;
-	
-	
       case 'z':
 	if(win->focal < M_PI/1.2 ) 
 	  {
