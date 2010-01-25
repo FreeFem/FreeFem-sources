@@ -477,7 +477,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
   
   double r=0,g=0,b=0;
   
-  bool cc[3]= { plotborder , plotborder && fill , plotmesh };
+  bool cc[3]= { plotborder , plotborder && fill , plotmesh && fill };
   double saturation =plotmesh ? 1 :  0.25;
   int kk=0;
   if(cc[kk])
@@ -513,7 +513,35 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 
 	glEndList();  // fin de la list	  
       }
-  
+    kk=2;
+    if(cc[kk])
+	if(lok[kk])   glCallList(gllists+kk);
+	else 
+	  { 
+	      lok[kk]=1;
+	      glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
+	      glLineWidth(1); 
+	      glPolygonMode(GL_FRONT,GL_FILL);//GL_FILL	
+	      glBegin(GL_TRIANGLES);    
+	      for (int i=0;i<Th.nbe;i++)
+		{
+		  const BE & K(Th.be(i)); 
+		  plot.color(0,saturation);
+		  R3 N(R3(K[0],K[1])^R3(K[0],K[2]));
+		  N /= N.norme();
+		  glNormal3d(N.x,N.y,N.z);
+		  glVertex3d(K[0].x,K[0].y,K[0].z);
+		  glVertex3d(K[1].x,K[1].y,K[1].z);
+		  glVertex3d(K[2].x,K[2].y,K[2].z);
+		}
+	      glEnd(); 
+	      glDisable(GL_LINE_STIPPLE);
+	      glLineWidth(1); 
+	      glDisable(GL_ALPHA_TEST) ;
+	      
+	      glEndList();  // fin de la list	  
+	  }
+    
   kk++;
   ShowGlerror("end Mesh plot");
   
