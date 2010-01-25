@@ -2211,11 +2211,12 @@ class Plot :  public E_F0mps { public:
  	int AEvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const  
 	{  typedef pair<A,int> PA;
 	    int nn=-1;
+	    A f[3];
 	    union {
-		A f[3];
+		S fj[3];
 		void *fv[3];
 	    };
-	    fv[0]=fv[1]=fv[2]=0;		
+	    f[0]=f[1]=f[2]=0;		
 	    int cmp[3]={-1,-1,-1};
 	    
 	    for(int i=0;i<3;++i)
@@ -2232,22 +2233,24 @@ class Plot :  public E_F0mps { public:
 	    cout << "add  N = " << n << " " << nn  << " "<< what << endl;
 	    for(int j=0;j<n;++j)
 	      {
-		S fj[3];
+		
 		int m=-1;
+		fj[0]=fj[1]=fj[2]=0;// clean 
 		for (int i=0;i<nn;++i)
 		  {
 		    fj[i]=  *f[i]->operator[](j);
 		    if(fj[i] && fj[i]->x()) m=i;
 		    else break;
-		    
-
-		  }
+		}
 		if(m>=0)  {
 		    ll.push_back(ListWhat(what%100,ii,m+1,fv,cmp));
+		    if(verbosity>100)
 		    cout << ".";
 		}
-		cout << endl;
+		
 	      }	
+	    if(verbosity>100)
+	    cout << endl;
 	    return nn;
 	}
      template<class S> 
@@ -2967,11 +2970,8 @@ AnyType Plot::operator()(Stack s) const  {
 	  switch (l[i].what) {
 	      case 0:
 	      case 5:  
-	        l[i].EvalandPush<void *>(s,i,ll);
-		
+	        l[i].EvalandPush<void *>(s,i,ll);		
 		break;
-	    
-		  
 	      case 1:
 	      case 2:
 	      case 6 :
@@ -2981,8 +2981,7 @@ AnyType Plot::operator()(Stack s) const  {
 	      case 16 :
 	      case 17 :		  
 	       l[i].EvalandPush<void *>(s,i,ll);break;
-		
-	      		  
+			      		  
 	      case  100 : l[i].MEvalandPush< pmesh>(s,i,ll);break;
 	      case  105 : l[i].MEvalandPush< pmesh3>(s,i,ll);break;
 	      case  101 : l[i].AEvalandPush<asol, sol>(s,i,ll);break;
