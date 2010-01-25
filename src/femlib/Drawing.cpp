@@ -527,12 +527,13 @@ void TBoundaryEdge<R2>::Draw() const
   LineTo(*vertices[1]);
 }
 
+    template<class R>   
     void FElement::SaveDraw(const KN_<R> & U,int composante,R* Usave) const 
     {
 	int nsb = nbsubdivision();
 	int nsbv = NbOfSubInternalVertices(nsb);
 	int nbdf=NbDoF();
-	RN fk(nbdf);
+	KN<R> fk(nbdf);
 	for (int i=0;i<nbdf;i++) // get the local value
 	    fk[i] = U[operator()(i)];
 	R2 Pt;
@@ -544,17 +545,21 @@ void TBoundaryEdge<R2>::Draw() const
 	  {
 	      Pt=SubInternalVertex(nsb,k); 
 	      BF(whatd,Pt,fb);
-	      Usave[k] = (fb('.',composante,0),fk);
+	    Usave[k] = R();// (fb('.',composante,0),fk);
+	    for( int i=0; i<nbdf;++i)
+		Usave[k]   +=  fb(i,composante,0)*fk[i];
+	    
 	  }
 	
     }
+     template<class R> 
     void FElement::SaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,R * Usave) const 
     {
 	int nsb = nbsubdivision();
 	int nsbv = NbOfSubInternalVertices(nsb);
 	int nbdf=NbDoF();
-	RN fk(nbdf);
-	RN gk(nbdf);
+	KN<R> fk(nbdf);
+	KN<R> gk(nbdf);
 	for (int i=0;i<nbdf;i++) // get the local valu
 	  {
 	      fk[i] = U[operator()(i)];
@@ -569,43 +574,63 @@ void TBoundaryEdge<R2>::Draw() const
 	  {
 	      Pt=SubInternalVertex(nsb,k); 
 	      BF(whatd,Pt,fb);
-	      Usave[k2++] = (fb('.',iU,0),fk);
-	      Usave[k2++] = (fb('.',iV,0),gk);
+	    Usave[k2]=R();
+	    Usave[k2+1]=R();
+	    for( int i=0; i<nbdf;++i)
+	      {
+		Usave[k2]   +=  fb(i,iU,0)*fk[i];
+		Usave[k2+1] +=  fb(i,iV,0)*gk[i];
+	      }
+	    k2+=2;
 	  }
 	
     } 
     
-KN<double>  FESpace::newSaveDraw(const KN_<R> & U,int composante,int & lg,int & nsb) const 
+template<class R>    
+KN<R>  FESpace::newSaveDraw(const KN_<R> & U,int composante,int & lg,int & nsb) const 
     {
 	nsb = TFE[0]->nbsubdivision;
 	int nsbv = NbOfSubInternalVertices(nsb);
 	lg = nsbv*Th.nt;
 	if(verbosity>99)
 	cout << "           ++ newSaveDraw what: nt " << Th.nt << " " << nsbv << " " << lg << endl;
-	KN<double> v(lg);
+	KN<R> v(lg);
 	ffassert(v);
         for (int k=0,i=0;k<Th.nt;k++)
 	  {
 	    (*this)[k].SaveDraw( U,composante,&v[i]);	
 	      i+=nsbv;
 	  }
-	return KN<double>(true,v);// to remove the copy.
+	return KN<R>(true,v);// to remove the copy.
     }
-KN<double>  FESpace::newSaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,int & lg,int & nsb) const 
+template<class R>      
+KN<R>  FESpace::newSaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,int & lg,int & nsb) const 
     {
 	nsb = TFE[0]->nbsubdivision;
 	int nsbv = NbOfSubInternalVertices(nsb)*2;
 	lg = nsbv*Th.nt;
 	
-	KN<double> v(lg);
+	KN<R> v(lg);
 	
         for (int k=0,i=0;k<Th.nt;k++)
 	  {
 	      (*this)[k].SaveDraw( U,V,iU,iV,&v[i]);	
 	      i+=nsbv;
 	  }
-	return  KN<double>(true,v);// to remove the copy.
-    }   
+	return  KN<R>(true,v);// to remove the copy.
+    }
+    
+typedef complex<double> Complex;   
+template     
+    KN<double>  FESpace::newSaveDraw<double>(const KN_<double> & U,const KN_<double> & V,int iU,int iV,int & lg,int & nsb) const ;
+template    
+    KN<double>  FESpace::newSaveDraw<double>(const KN_<double> & U,int composante,int & lg,int & nsb) const ;
+    template     
+    KN<Complex>  FESpace::newSaveDraw<Complex>(const KN_<Complex> & U,const KN_<Complex> & V,int iU,int iV,int & lg,int & nsb) const ;
+    template    
+    KN<Complex>  FESpace::newSaveDraw<Complex>(const KN_<Complex> & U,int composante,int & lg,int & nsb) const ;
+    
+   
 void  FESpace::Draw(const RN_& U,const RN_ & Viso,int j,float *colors,int nbcolors,bool hsv,bool drawborder) const 
 {
   showgraphic();

@@ -551,7 +551,8 @@ template<class MMesh>
 	     ffassert(&Th==&pVh[i]->Th);
      }
    
-template<class MMesh>     
+template<class MMesh> 
+     template<class R> 
 KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int componante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U) const  
 {
   const int d =  Rd::d;
@@ -564,8 +565,8 @@ KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int componante,int & lg,KN<
   ffassert( Ksub.unset());
   Psub.set(Ps,nvsub);
   Ksub.set(Ks,nksub*(d+1));
-   lg= nvsub*Th.nt;
-  KN<double> v(lg);
+  lg= nvsub*Th.nt;
+  KN<R> v(lg);
   for (int k=0,i=0;k<Th.nt;k++)
     { 
       FElement K=(*this)[k];
@@ -573,7 +574,7 @@ KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int componante,int & lg,KN<
 	  v[i++] =   K(Psub[l], U, componante, op_U)  ;
 
     }                                                                                                                                                                                                                            
-  return KN<double>(true,v);// to remove the copy.    
+  return KN<R>(true,v);// to remove the copy.    
 }
 
    /*
@@ -600,5 +601,15 @@ template class GTypeOfFESum<Mesh3>;
 template class GFESpace<Mesh1>;
 template class GFESpace<Mesh2>;
 template class GFESpace<Mesh3>;
+     
+ template  KN<double>  GFESpace<Mesh3>::newSaveDraw<double>(const KN_<double> & U,int componante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U) const ; 
+ template  KN<double>  GFESpace<Mesh2>::newSaveDraw<double>(const KN_<double> & U,int componante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U) const ; 
+ template  KN<double>  GFESpace<Mesh1>::newSaveDraw<double>(const KN_<double> & U,int componante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U) const  ;
+
+ typedef std::complex<double> Complex; 
+ template  KN<Complex>  GFESpace<Mesh3>::newSaveDraw<Complex>(const KN_<Complex> & U,int componante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U) const ; 
+ template  KN<Complex>  GFESpace<Mesh2>::newSaveDraw<Complex>(const KN_<Complex> & U,int componante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U) const ; 
+ template  KN<Complex>  GFESpace<Mesh1>::newSaveDraw<Complex>(const KN_<Complex> & U,int componante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U) const  ;
+     
     
 }

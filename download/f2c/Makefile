@@ -29,6 +29,9 @@ compile-10.4:f2c Makefile-MacOs
 compile-10.5:f2c Makefile-MacOs
 	cd f2c/src; make -f makefile.u f2c 
 	cd f2c/libf2c; make -f ../../Makefile-MacOs OS=10.5
+compile-10.6:f2c Makefile-MacOs
+	cd f2c/src; make -f makefile.u f2c 
+	cd f2c/libf2c; make -f ../../Makefile-MacOs OS=10.6
 
 
 install:  ../lib ../include ../bin ../bin/fort77 ../bin/mpifort77
@@ -42,6 +45,9 @@ install-10.4: compile-10.4
 	sudo make install-sudo
 	make install
 install-10.5: compile-10.5
+	sudo make install-sudo
+	make install
+install-10.6: compile-10.6
 	sudo make install-sudo
 	make install
 install-sudo: $(DIRINSTALL)/bin/fort77 $(DIRINSTALL)/bin/mpifort77

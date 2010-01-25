@@ -2124,65 +2124,203 @@ class Plot :  public E_F0mps { public:
     typedef pferbasearray asol;
     typedef pf3rbase sol3;
     typedef pf3rbasearray asol3;
+    typedef pfecbase solc;
+    typedef pfecbasearray asolc;
+    typedef pf3cbase solc3;
+    typedef pf3cbasearray asolc3;
     
     typedef long  Result;
     struct ListWhat {
 	int what,i;
-	pferbase fe,fe1;
-	int cmp,cmp1;
-	pf3rbase fe3;
-	pmesh th;
-        pmesh3 th3;
-	ListWhat(int w=-1,int ii=-1 )
-	: what(w),i(ii),fe(0),cmp(-1),fe1(0),cmp1(-1),fe3(0),th(0),th3(0) {}
-	ListWhat(int ii,pferbase ffe, int cmpp,pferbase ffe1=0, int cmp11=-1 )
-	: what(ffe1 ? 2 : 1),i(ii),fe(ffe),cmp(cmpp),fe1(ffe1),cmp1(cmp11),fe3(0),th(0),th3(0) {}
-	ListWhat(int ii,pf3rbase ffe, int cmpp)
-	: what(6),i(ii),fe(0),cmp(cmpp),fe1(0),cmp1(0),fe3(ffe),th(0),th3(0) {}
-	ListWhat(int ii,pmesh tth)
-	: what(0),i(ii),fe(0),cmp(0),fe1(0),cmp1(0),fe3(0),th(tth),th3(0) {}
-	ListWhat(int ii,pmesh3 tth)
-	: what(5),i(ii),fe(0),cmp(0),fe1(0),cmp1(0),fe3(0),th(0),th3(tth) {}
+	int cmp[3];
+	int n;	
+	void * v[3];//  for 
+	pmesh th() { assert(v[0] && what==0); return static_cast<pmesh>(v[0]);}
+	pmesh3 th3() { assert(v[0] && what==5); return static_cast<pmesh3>(v[0]);}
 	
-	void eval(pferbase &ffe, int &cmpp,pferbase &ffe1, int &cmp11)
-	{ ffe=fe;cmpp=cmp;ffe1=fe1;cmp11=cmp1;}
-	void eval(pf3rbase &ffe, int &cmpp)
-	{ ffe=fe3;cmpp=cmp;}
+	void Set(int nn=0,void **vv=0,int *c=0) {
+	    cmp[0]=cmp[1]=cmp[2]=-1;
+	    v[0]=v[1]=v[2]=0;
+	    n=nn;
+	    for(int i=0;i<nn;++i)
+	      {   
+		  if(c) cmp[i]=c[i];
+		  if(vv) v[i]=vv[i];
+	      }		   
+	}	
+	
+	ListWhat(int w=-1,int ii=-1 )
+	: what(w),i(ii) {Set();}
+	ListWhat(int what,int ii,int n,void ** f0,int *c)
+	: what(what),i(ii){ Set(n,f0,c);}
+	ListWhat(int what,int ii,void * f0)
+	: what(what),i(ii){ Set(1,&f0,0);}
+	
+	template<typename S>
+	void eval(S *f,int *c)
+	{ for(int i=0;i<3;++i) {
+	    f[i]= static_cast<S>(v[i]);
+	    c[i]= cmp[i]; }
+	}
+	
+	template<typename M>
+	M eval()
+	{ assert(v[0]);
+	    return static_cast<M>(v[0]);	    
+	}
+	void eval(sol & f0,int & cmp0, sol &f1,int &cmp1)
+	{
+	  f0=static_cast<sol>(v[0]);
+	  f1=static_cast<sol>(v[1]);
+	  cmp0=cmp[0];
+	  cmp1=cmp[1];
+	}
 
     };
-    struct Expression2 {
-     long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border , 5  mesh3, 6 iso 3d, 
-	// 7 array of iso 2d  , 8 array of iso 3d  , 9  array of meshes 
-     bool composant;
-     Expression e[2];
-     Expression2() {e[0]=0;e[1]=0;composant=false;what=0;}
-     Expression &operator[](int i){return e[i];}
-     sol eval(int i,Stack s,int & cmp) const  {  cmp=-1;
-       if (e[i]) {
-        if (!composant) {pfer p= GetAny< pfer >((*e[i])(s)); cmp=p.second;return p.first;}
-        else {return GetAny< pferbase >((*e[i])(s));}
-        }
-       else return 0;}
-      sol3 eval3(int i,Stack s,int & cmp) const  {  cmp=-1;
+    struct Expression2 
+     {
+	long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border , 5  mesh3, 6 iso 3d, 
+	// 7: vector 3d  ( +10 -> complex visu ???? ) 
+	// 101 array of iso 2d  , 106 array of iso 3d  , 100  array of meshes 
+	bool composant;
+	Expression e[3];
+	Expression2() {e[0]=0;e[1]=0;e[2]=0;composant=false;what=0;}
+	Expression &operator[](int i){return e[i];}
+	
+	template<class S>
+	int EvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const  
+	{ 
+	    int n=-1;
+	    S f[3]={0,0,0};		
+	    int cmp[3]={-1,-1,-1};
+
+	    for(int i=0;i<3;++i)
+		if (e[i]) {
+		    if (!composant) 
+		      { pair<S,int> p= GetAny< pair<S,int> >((*e[i])(s));
+			  n=i;cmp[i]=p.second;
+			  f[i]= p.first;}
+		    else { cmp[i]=0;
+			f[i]=GetAny< S >((*e[i])(s));
+			n=i;}
+		}
+	    ll.push_back(ListWhat(what,ii,n+1,f,cmp));
+	    return n;}
+	
+	template<class A,class S> // ok of mesh too because composant=true; 
+ 	int AEvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const  
+	{  typedef pair<A,int> PA;
+	    int nn=-1;
+	    union {
+		A f[3];
+		void *fv[3];
+	    };
+	    fv[0]=fv[1]=fv[2]=0;		
+	    int cmp[3]={-1,-1,-1};
+	    
+	    for(int i=0;i<3;++i)
+		if (e[i]) 
+		  {
+		    if (!composant) 
+		     { PA p= GetAny< PA >((*e[i])(s)); cmp[i]=p.second;f[i]=p.first; nn=i;}
+	            else 
+		     { f[i]= GetAny< A >((*e[i])(s)); cmp[i]=0; nn=i;}
+		  }
+	    	else break;
+	    nn++;
+	    int n = f[0]->N;
+	    cout << "add  N = " << n << " " << nn  << " "<< what << endl;
+	    for(int j=0;j<n;++j)
+	      {
+		S fj[3];
+		int m=-1;
+		for (int i=0;i<nn;++i)
+		  {
+		    fj[i]=  *f[i]->operator[](j);
+		    if(fj[i] && fj[i]->x()) m=i;
+		    else break;
+		    
+
+		  }
+		if(m>=0)  {
+		    ll.push_back(ListWhat(what%100,ii,m+1,fv,cmp));
+		    cout << ".";
+		}
+		cout << endl;
+	      }	
+	    return nn;
+	}
+     template<class S> 
+       int MEvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const  
+       {  typedef KN<S> * A; 
+	  
+	   A ath;		
+	   
+	   ath= GetAny< A >((*e[0])(s));
+	   int n=0;
+	   if(ath) n = ath->N();
+	    S th;
+	   
+	   for(int j=0;j<n;++j)
+	     {
+	       th= ath->operator[](j);
+	       if(th) 		    
+		ll.push_back(ListWhat(what%100,ii,static_cast<void *>(th)));
+       
+	     }
+	   return n;
+       }
+       
+	sol eval(int i,Stack s,int & cmp) const  {  cmp=-1;
+	    if (e[i]) {
+		if (!composant) {pfer p= GetAny< pfer >((*e[i])(s)); cmp=p.second;return p.first;}
+		else {return GetAny< pferbase >((*e[i])(s));}
+	    }
+	    else return 0;}
+	sol3 eval3(int i,Stack s,int & cmp) const  {  cmp=-1;
 	    if (e[i]) {
 		if (!composant) {pf3r p= GetAny< pf3r >((*e[i])(s)); cmp=p.second;return p.first;}
 		else {return GetAny< pf3rbase >((*e[i])(s));}
 	    }
-	else return 0;}
+	    else return 0;}
+	// add FH Japon 2010 ..	for complex visu ...  to complex ....  try to uniformize ...
+	solc evalc(int i,Stack s,int & cmp) const  {  cmp=-1;
+	    if (e[i]) {
+		if (!composant) {pfec p= GetAny< pfec >((*e[i])(s)); cmp=p.second;return p.first;}
+		else {return GetAny< pfecbase >((*e[i])(s));}
+	    }
+	    else return 0;}
+	solc3 evalc3(int i,Stack s,int & cmp) const  {  cmp=-1;
+	    if (e[i]) {
+		if (!composant) {pf3c p= GetAny< pf3c >((*e[i])(s)); cmp=p.second;return p.first;}
+		else {return GetAny< pf3cbase >((*e[i])(s));}
+	    }
+	    else return 0;}
+	
+	
 	asol evala(int i, Stack s,int & cmp) const  {  cmp=-1;
 	    if (e[i]) 
-		 {pferarray p= GetAny< pferarray >((*e[i])(s)); cmp=p.second;return p.first;}
+	      {pferarray p= GetAny< pferarray >((*e[i])(s)); cmp=p.second;return p.first;}
 	    else return 0;}
 	asol3 evala3(int i, Stack s,int & cmp) const  {  cmp=-1;
 	    if (e[i]) 
 	      {pf3rarray p= GetAny< pf3rarray >((*e[i])(s)); cmp=p.second;return p.first;}
-	else return 0;}
+	    else return 0;}
 	
-	 Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
+	asolc evalca(int i, Stack s,int & cmp) const  {  cmp=-1;
+	    if (e[i]) 
+	      {pfecarray p= GetAny< pfecarray >((*e[i])(s)); cmp=p.second;return p.first;}
+	    else return 0;}
+	asolc3 evalca3(int i, Stack s,int & cmp) const  {  cmp=-1;
+	    if (e[i]) 
+	      {pf3carray p= GetAny< pf3carray >((*e[i])(s)); cmp=p.second;return p.first;}
+	    else return 0;}
+	
+	Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
 	KN<pmesh> * evalma(int i,Stack s) const  { throwassert(e[i]);return   GetAny< KN<pmesh> * >((*e[i])(s)) ;}
-    const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
-     const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
-     tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
+	const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
+	const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
+	tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
     };
 
    static basicAC_F0::name_and_type name_param[] ;
@@ -2192,76 +2330,122 @@ class Plot :  public E_F0mps { public:
     Expression nargs[n_name_param];
     Plot(const basicAC_F0 & args) : l(args.size()) 
     {
-
+      
       args.SetNameParam(n_name_param,name_param,nargs);
-       if ( nargs[8] )
-         Box2x2( nargs[8] , bb);   
-         
+      if ( nargs[8] )
+	  Box2x2( nargs[8] , bb);   
+      
       for (size_t i=0;i<l.size();i++)
-       
-         if (args[i].left()==atype<E_Array>())
-          {
-	    //cout << "args[i].left()==atype<E_Array>()" << endl;
-	    l[i].composant=false;
-            const E_Array * a = dynamic_cast<const E_Array *>(args[i].LeftValue());
-            ffassert(a);
-            if (a->size() >2) { CompileError("plot of vector with more than 2 components");}
-            if (BCastTo<pfer>((*a)[0]))
-             {
-              l[i].what=2;
-              for (int j=0;j<a->size();j++)             
-               l[i][j]= CastTo<pfer>((*a)[j]);
-             }
-            else 
-             {
-              l[i].what=3;
-              for (int j=0;j<a->size();j++)             
-               l[i][j]= CastTo<tab>((*a)[j]);
-             }
-          }
-         else if (BCastTo<pferbase>(args[i])) {
-	  // cout << "BCastTo<pferbase>(args[i])" << endl;
-          l[i].composant=true;
-          l[i][0]=CastTo<pferbase>(args[i]); }
-         else if (BCastTo<pfer>(args[i])) {
-	  // cout << "BCastTo<pfer>(args[i])" << endl;
-          l[i].composant=false;
-          l[i].what=1;
-          l[i][0]=CastTo<pfer>(args[i]);}
-         else if (BCastTo<pf3r>(args[i])) {
-	     // cout << "BCastTo<pfer>(args[i])" << endl;
-	  l[i].composant=false;
-	 l[i].what=6;
-	 l[i][0]=CastTo<pf3r>(args[i]);}
-         else if (BCastTo<pferarray>(args[i])) {
-	     // cout << "BCastTo<pfer>(args[i])" << endl;
-	     l[i].composant=false;
-	     l[i].what=7;
+	  
+	  if (args[i].left()==atype<E_Array>())
+	    {
+	      //cout << "args[i].left()==atype<E_Array>()" << endl;
+	      l[i].composant=false;
+	      const E_Array * a = dynamic_cast<const E_Array *>(args[i].LeftValue());
+	      ffassert(a);
+	      int asizea=a->size();
+	      if(asizea==0) CompileError("plot of vector with 0 of components(!= 2 or 3) ");
+	      bool bpfer=  BCastTo<pfer>((*a)[0]);
+	      bool bpf3r=  BCastTo<pf3r>((*a)[0]);
+	      bool bpfec=  BCastTo<pfec>((*a)[0]);
+	      bool bpf3c=  BCastTo<pf3c>((*a)[0]);
+	      
+	      if ( bpfer && asizea <3) 
+		{
+		  l[i].what=asizea;
+		  for (int j=0;j<a->size();j++)             
+		      l[i][j]= CastTo<pfer>((*a)[j]);
+		}
+	      else if ( bpfec && asizea <3) 
+		{
+		  l[i].what=10+asizea;
+		  for (int j=0;j<a->size();j++)             
+		      l[i][j]= CastTo<pfec>((*a)[j]);
+		}
+	      else if (asizea==2)
+		{
+		  l[i].what=3;
+		  for (int j=0;j<a->size();j++)             
+		      l[i][j]= CastTo<tab>((*a)[j]);
+		}
+	      else if (asizea == 3 && bpf3r ) // 3d vector ...
+		{
+		  l[i].what=7; // new 3d vector 
+		  for (int j=0;j<a->size();j++)             
+		      l[i][j]= CastTo<pf3r>((*a)[j]);
+		  
+		}
+	      else if (asizea == 3 && bpf3c ) // 3d vector ...
+		{
+		  l[i].what=17; // new 3d vector 
+		  for (int j=0;j<a->size();j++)             
+		      l[i][j]= CastTo<pf3c>((*a)[j]);
+		  
+		}
+	      
+	      else { CompileError("plot of array with wrong  number of components (!= 2 or 3) ");}
+	    }
+	  else if (BCastTo<pferbase>(args[i])) {
+	      l[i].what=1; //  iso value 2d
+	      // cout << "BCastTo<pferbase>(args[i])" << endl;
+	      l[i].composant=true;
+	      l[i][0]=CastTo<pferbase>(args[i]); }
+	  else if (BCastTo<pfer>(args[i])) {
+	      // cout << "BCastTo<pfer>(args[i])" << endl;
+	      l[i].composant=false;
+	      l[i].what=1; //  iso value 2d
+	      l[i][0]=CastTo<pfer>(args[i]);}
+	  else if (BCastTo<pfecbase>(args[i])) {
+	      l[i].what=11; //  iso value 2d
+	      // cout << "BCastTo<pferbase>(args[i])" << endl;
+	      l[i].composant=true;
+	      l[i][0]=CastTo<pfecbase>(args[i]); }
+	  else if (BCastTo<pfec>(args[i])) {
+	      // cout << "BCastTo<pfer>(args[i])" << endl;
+	      l[i].composant=false;
+	      l[i].what=11; //  iso value 2d
+	      l[i][0]=CastTo<pfec>(args[i]);}
+	  else if (BCastTo<pf3r>(args[i])) {
+	      // cout << "BCastTo<pfer>(args[i])" << endl;
+	      l[i].composant=false;
+	      l[i].what=6; //  iso value 3d
+	      l[i][0]=CastTo<pf3r>(args[i]);}
+	  else if (BCastTo<pf3c>(args[i])) {
+	      // cout << "BCastTo<pfer>(args[i])" << endl;
+	      l[i].composant=false;
+	      l[i].what=16; //  iso value 3d
+	      l[i][0]=CastTo<pf3c>(args[i]);}
+	  else if (BCastTo<pferarray>(args[i])) {
+	      // cout << "BCastTo<pfer>(args[i])" << endl;
+	      l[i].composant=false;
+	      l[i].what=101; //  iso value array iso value 2d 
 	      l[i][0]=CastTo<pferarray>(args[i]);}
-         else if (BCastTo<pf3rarray>(args[i])) {
-	     // cout << "BCastTo<pfer>(args[i])" << endl;
-	     l[i].composant=false;
-	     l[i].what=8;
-	     l[i][0]=CastTo<pf3rarray>(args[i]);}	
-         else if (BCastTo<pmesh>(args[i])){
-	   
-          l[i].what=0;
-          l[i][0]=CastTo<pmesh>(args[i]);}
-         else if (BCastTo<pmesh3>(args[i])){
-	     
-	     l[i].what=5;
-	 l[i][0]=CastTo<pmesh3>(args[i]);}
-         else if (BCastTo<const E_BorderN *>(args[i])){
-	  // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
-          l[i].what=4;
-          l[i][0]=CastTo<const E_BorderN *>(args[i]);}
-         else if (BCastTo<KN<pmesh> *>(args[i])){
-	     // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
-	     l[i].what=9;
-	     l[i][0]=CastTo<KN<pmesh> *>(args[i]);}
-         else {
-           CompileError("Sorry no way to plot this kind of data");
-         }
+	  else if (BCastTo<pf3rarray>(args[i])) {
+	      // cout << "BCastTo<pfer>(args[i])" << endl;
+	      l[i].composant=false;
+	      l[i].what=106; //arry iso value array iso value 3d 
+	      l[i][0]=CastTo<pf3rarray>(args[i]);}	
+	  else if (BCastTo<pmesh>(args[i])){
+	      l[i].composant=true;
+	      l[i].what=0; // mesh ... 
+	      l[i][0]=CastTo<pmesh>(args[i]);}
+	  else if (BCastTo<pmesh3>(args[i])){
+	      l[i].composant=true;
+	      l[i].what=5;// 3d mesh ...
+	      l[i][0]=CastTo<pmesh3>(args[i]);}
+	  else if (BCastTo<const E_BorderN *>(args[i])){
+	      // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
+	      l[i].what=4; // border 2d
+	      l[i].composant=true;
+	      l[i][0]=CastTo<const E_BorderN *>(args[i]);}
+	  else if (BCastTo<KN<pmesh> *>(args[i])){
+	      l[i].composant=true;
+	      // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
+	      l[i].what=100; //  mesh 2d array 
+	      l[i][0]=CastTo<KN<pmesh> *>(args[i]);}
+	  else {
+	      CompileError("Sorry no way to plot this kind of data");
+	  }
     }
     
     static ArrayOfaType  typeargs() { return  ArrayOfaType(true);}// all type
@@ -2628,76 +2812,187 @@ void Show(const char * s,int k=1)
        //  couleur(1);	
   }
 }
+template<class K,class v_fes>
+int Send2d(PlotStream & theplot,Plot::ListWhat & lli,map<const typename v_fes::FESpace::Mesh *,long> & mapth)
+{
+    typedef FEbase<K,v_fes> * pfek ;
+    pfek fe[3]={0,0,0};
+    int cmp[3]={-1,-1,-1};
+    int err=1;
+    long what=lli.what;
+    int lg,nsb;
+    lli.eval(fe,cmp);		    
+    if (fe[0]->x() && what %10 ==1) 
+	{		 
+	      err=0;
+	      theplot << what ;
+	      theplot <<mapth[ &(fe[0]->Vh->Th)];// numero du maillage
+	      KN<K> V1=fe[0]->Vh->newSaveDraw(*fe[0]->x(),cmp[0],lg,nsb);
+	      
+	      // construction of the sub division ... 
+	      int nsubT=NbOfSubTriangle(nsb);
+	      int nsubV=NbOfSubInternalVertices(nsb);
+	      KN<R2> Psub(nsubV);
+	      KN<int> Ksub(nsubT*3);
+	      for(int i=0;i<nsubV;++i)
+	      Psub[i]=SubInternalVertex(nsb,i);
+	      //cout << " Psub " << Psub <<endl;
+	      for(int sk=0,p=0;sk<nsubT;++sk)
+	      for(int i=0;i<3;++i,++p)
+	      Ksub[p]=numSubTriangle(nsb,sk,i);
+	      
+	      if(verbosity>9)
+	      cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
+	      << " Max "  << V1.max() << " min " << V1.min() << endl;
+	      theplot << Psub ;
+	      theplot << Ksub ;
+	      theplot << V1;
+	      // theplot << (long) nsb<< V1;
+	      
+	      }
+    else if (fe[0]->x() && fe[1]->x() &&what %10 ==2)   
+      {
+	
+	{
+	  err=0;
+	  theplot << what ;
+	  
+	  
+	  KN<K> V1=fe[0]->Vh->newSaveDraw(*fe[0]->x(),*fe[1]->x(),cmp[0],cmp[1],lg,nsb);
+	  // construction of the sub division ... 
+	  int nsubT=NbOfSubTriangle(nsb);
+	  int nsubV=NbOfSubInternalVertices(nsb);
+	  KN<R2> Psub(nsubV);
+	  KN<int> Ksub(nsubT*3);
+	  for(int i=0;i<nsubV;++i)
+	      Psub[i]=SubInternalVertex(nsb,i);
+	  for(int sk=0,p=0;sk<nsubT;++sk)
+	      for(int i=0;i<3;++i,++p)
+		  Ksub[p]=numSubTriangle(nsb,sk,i);
+	  
+	  theplot <<mapth[ &(fe[0]->Vh->Th)];// numero du maillage
+	  theplot << Psub ;
+	  theplot << Ksub ;
+	  theplot <<  V1;
+	  
+	  // theplot << (long) nsb<< V1;
+	}
+	
+      }
+    return err;
+	      
+}
 
+template<class K,class v_fes>
+int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FESpace::Mesh *,long> &mapth3)
+{
+    typedef FEbase<K,v_fes> * pfek3 ;
+    pfek3 fe3[3]={0,0,0};
+    int cmp[3]={-1,-1,-1};
+    int err=1,what=lli.what;
+    int lg,nsb;
+    if (what%10==6)
+    {    
+	int lg,nsb;
+	lli.eval(fe3,cmp);
+	if(what==6)
+	  {
+	    if (fe3[0]->x()) 
+	      {		 
+		  err=0;
+		  theplot << what ;
+		  theplot <<mapth3[ &(fe3[0]->Vh->Th)];// numero du maillage
+		  // KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
+		  //   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
+		  KN<R3> Psub;
+		  KN<int> Ksub;
+		  KN<K> V1=fe3[0]->Vh->newSaveDraw(*fe3[0]->x(),cmp[0],lg,Psub,Ksub,0);
+		  if(verbosity>9)
+		      cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
+		      << " "  << V1.max() << " " << V1.min() << endl;
+		  theplot << Psub ;
+		  theplot << Ksub ;
+		  theplot << V1;
+	      }
+	  }
+    }
+    else  if (what%10==7)
+      {    
+	  int lg,nsb;
+	  lli.eval(fe3,cmp);
+	  if(what==7) // ve
+	    {
+	      if (fe3[0]->x()&& fe3[1]->x() && fe3[2]->x()) 
+		{		 
+		    err=0;
+		    theplot << what ;
+		    theplot <<mapth3[ &(fe3[0]->Vh->Th)];// numero du maillage
+		    // KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
+		    //   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
+		    KN<R3> Psub1,Psub2,Psub3; // bf Bof ...
+		    KN<int> Ksub1,Ksub2,Ksub3;
+		    KN<K> V1=fe3[0]->Vh->newSaveDraw(*fe3[0]->x(),cmp[0],lg,Psub1,Ksub1,0);
+		    KN<K> V2=fe3[1]->Vh->newSaveDraw(*fe3[1]->x(),cmp[1],lg,Psub2,Ksub2,0);
+		    KN<K> V3=fe3[2]->Vh->newSaveDraw(*fe3[2]->x(),cmp[2],lg,Psub3,Ksub3,0);
+		    if(verbosity>9)
+			cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
+			<< " "  << V1.max() << " " << V1.min() << endl;
+		    theplot << Psub1 ;
+		    theplot << Ksub1 ;
+		    ffassert( V1.N() == V2.N()  &&V1.N() == V3.N()); 
+		    KNM<K> V123(3,V1.N()); // warning fortran numbering ...
+		    V123(0,'.')=V1;
+		    V123(1,'.')=V2;
+		    V123(2,'.')=V3;
+		    theplot << (KN_<double>&) V123;
+		    
+		}
+	    }
+      }
+    return err;
+}
+   
 AnyType Plot::operator()(Stack s) const  { 
     
-   // remap  case 7 and 8 for array of FE. 
+   // remap  case 107 and 108 , 109  for array of FE. 
   vector<ListWhat> ll;
   ll.reserve(l.size());
   // generation de la list de plot ...
     for (size_t i=0;i<l.size();i++)
       {
-	  pferbase  fe=0,fe1=0;
-	  pferbasearray fea=0;
-	pf3rbase  fe30=0;//,fe31=0;
-	  pf3rbasearray  fea3=0;
-	  KN<pmesh > * ath;
-	  pmesh th;
-	  int cmp0,cmp1;
+	  //KN<pmesh > * ath;
+	  //pmesh th;
+	  //int cmp0=0,cmp1=1,cmp2=2;
 	  switch (l[i].what) {
 	      case 0:
-	    {
-		 th =&l[i].evalm(0,s);
-		 ll.push_back(ListWhat(i,th));
+	      case 5:  
+	        l[i].EvalandPush<void *>(s,i,ll);
+		
 		break;
-	    }
+	    
+		  
 	      case 1:
 	      case 2:
-		  fe=  l[i].eval(0,s,cmp0);
-		  fe1= l[i].eval(1,s,cmp1);
-		  ll.push_back(ListWhat(i,fe,cmp0,fe1,cmp1));
-		  break;
-	      case  6 :
-		  fe30=  l[i].eval3(0,s,cmp0);
-		  ll.push_back(ListWhat(i,fe30,cmp0));
-		  break;
-	      case  7 :
-		  fea = l[i].evala(0,s,cmp0);
-                  for(int j=0;j<fea->N;++j)
-		    {
-			fe = * fea->operator[](j);			    
-			if(fe && fe->x()) 
-			    ll.push_back(ListWhat(i,fe,cmp0));
-		    }
-		  
-		  break;
-	      case  8 :
-	    {
-		fea3 = l[i].evala3(0,s,cmp0);
-		int n = fea3->N;
-		for(int j=0;j<n;++j)
-		  {
-		      fe30 = * fea3->operator[](j);			    
-		      if(fe30 && fe30->x()) 
-			  ll.push_back(ListWhat(i,fe30,cmp0));
-		  }	
-	    }
-		  break;
-	      case  9 :
-	      { ath= l[i].evalma(0,s);
-		  if( !ath) break;
-		  
-		  int n = ath->N();
-		  for(int j=0;j<n;++j)
-		    {
-			pmesh th =  ath->operator[](j);			    
-			if(th) 
-			    ll.push_back(ListWhat(i,th));
-		    }	
-	      }
-		  break;
+	      case 6 :
+	      case 7 :		  
+	      case 11:
+	      case 12:
+	      case 16 :
+	      case 17 :		  
+	       l[i].EvalandPush<void *>(s,i,ll);break;
+		
+	      		  
+	      case  100 : l[i].MEvalandPush< pmesh>(s,i,ll);break;
+	      case  105 : l[i].MEvalandPush< pmesh3>(s,i,ll);break;
+	      case  101 : l[i].AEvalandPush<asol, sol>(s,i,ll);break;
+	      case  106 : l[i].AEvalandPush<asol3, sol3>(s,i,ll);break;
+              case  111:  l[i].AEvalandPush<asolc, solc>(s,i,ll);break;  
+              case  116:  l[i].AEvalandPush<asolc3, solc3>(s,i,ll);break; 
+	        
+
 		  
 	      default:
+		  ffassert(l[i].what<100) ; // missing piece of code FH (jan 2010) ...
 		  ll.push_back(ListWhat(l[i].what,i));
 		  break;
 	  }
@@ -2715,15 +3010,16 @@ AnyType Plot::operator()(Stack s) const  {
 	 what = 4 -> border 
 	 what = 5 3d meshes
 	 what = 6  FE function 3d
+	 what = 100,101,106 //  remap ...
+	 what = 7 => 3d vector field (tree FE function  3d) 
+	 what = 8 ???
 	 what = -1 -> error, item empty 
 	 */
 	PlotStream theplot(ThePlotStream);
-	pferbase  fe=0,fe1=0;
-	//pferbasearray fea;
-	pf3rbase  fe30=0,fe31=0;
+	pferbase  fe[3]={0,0,0};
+	pf3rbase  fe3[3]={0,0,0};
 	double echelle=1;
-	//pf3rbasearray  fea3=0;
-	int cmp0,cmp1;
+	int cmp[3]={-1,-1,-1};
 	theplot.SendNewPlot();
 	if (nargs[0]) theplot<< 0L <=  GetAny<double>((*nargs[0])(s));
 	if (nargs[1]) theplot<< 1L <=  GetAny<string *>((*nargs[1])(s));
@@ -2775,23 +3071,25 @@ AnyType Plot::operator()(Stack s) const  {
 	      const Mesh *th=0;
 	      const Mesh3 *th3=0;
 	      if(what ==0)
-		  th= ll[ii].th;
-	      if(what ==5)
+		  th= ll[ii].th();
+	      if( what ==5 )
 		  th3= & (l[i].evalm3(0,s));	      
-	      else if (what==1 || what==2)
+	      else if (what==1 || what==2|| what==11 || what==12)
 		{   
 		    
-		    ll[ii].eval(fe,cmp0,fe1,cmp0);		    
-		    if (fe->x()) th=&fe->Vh->Th;
-		    if(fe1 && fe1->x()) {
-			th == &fe1->Vh->Th;			
+		    ll[ii].eval(fe,cmp);		    
+		    if (fe[0]->x()) th=&fe[0]->Vh->Th;
+		    if(fe[1] && fe[1]->x()) {
+			ffassert(th == &fe[1]->Vh->Th);			
 			//    assert(th);
 		    };
 		}
-	      else if (what==6 )
+	      else if (what==6 || what==7|| what==16 || what==17)
 		{   
-		    ll[ii].eval(fe30,cmp0);
-		    if (fe30->x()) th3=&fe30->Vh->Th;
+		    ll[ii].eval(fe3,cmp);
+		    if (fe3[0]->x()) th3=&fe3[0]->Vh->Th;
+		    if (fe3[1]) ffassert(th3 == &fe3[1]->Vh->Th);
+		    if (fe3[2]) ffassert(th3 == &fe3[2]->Vh->Th);
 		    
 		}
 	      
@@ -2831,28 +3129,32 @@ AnyType Plot::operator()(Stack s) const  {
 	      // long what = l[i].what;
 	      if(what ==0)
 		{
-		    pTh=ll[ii].th;
+		    pTh=ll[ii].th();
 		    if(pTh) {
 			err=0;
 			theplot << what ; 
-			theplot <<mapth[ ll[ii].th ];// numero du maillage
+			theplot <<mapth[ ll[ii].th() ];// numero du maillage
 		    }
 		}
-	      else if (what==1 || what==2)
+	    
+	      else if (what==1 || what==2 )
+		  err = Send2d<R,v_fes>( theplot,ll[ii] ,mapth);
+	      else if (what==11 || what==12 )
+		  err = Send2d<Complex,v_fes>( theplot,ll[ii] ,mapth);
+		  
+		  
+		  /*
 		{    
 		    int lg,nsb;
-		    ll[ii].eval(fe,cmp0,fe1,cmp1);
-		    //fe=  l[i].eval(0,s,cmp0);
-		    //fe1= l[i].eval(1,s,cmp1);
-		    
+		    ll[ii].eval(fe,cmp);		    
 		    if(what==1)
 		      {
-			  if (fe->x()) 
+			  if (fe[0]->x()) 
 			    {		 
 				err=0;
 				theplot << what ;
-				theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
-				KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),cmp0,lg,nsb);
+				theplot <<mapth[ &(fe[0]->Vh->Th)];// numero du maillage
+				KN<double> V1=fe[0]->Vh->newSaveDraw(*fe[0]->x(),cmp[0],lg,nsb);
 				
 				// construction of the sub division ... 
 				int nsubT=NbOfSubTriangle(nsb);
@@ -2878,13 +3180,13 @@ AnyType Plot::operator()(Stack s) const  {
 		      }
 		    else
 		      {
-			  if ( fe->x() && fe1->x())
+			  if ( fe[0]->x() && fe[1]->x())
 			    {
 				err=0;
 				theplot << what ;
 				
 				
-				KN<double> V1=fe->Vh->newSaveDraw(*fe->x(),*fe1->x(),cmp0,cmp1,lg,nsb);
+				KN<double> V1=fe[0]->Vh->newSaveDraw(*fe[0]->x(),*fe[1]->x(),cmp[0],cmp[1],lg,nsb);
 				// construction of the sub division ... 
 				int nsubT=NbOfSubTriangle(nsb);
 				int nsubV=NbOfSubInternalVertices(nsb);
@@ -2896,7 +3198,7 @@ AnyType Plot::operator()(Stack s) const  {
 				    for(int i=0;i<3;++i,++p)
 					Ksub[p]=numSubTriangle(nsb,sk,i);
 				
-				theplot <<mapth[ &(fe->Vh->Th)];// numero du maillage
+				theplot <<mapth[ &(fe[0]->Vh->Th)];// numero du maillage
 				theplot << Psub ;
 				theplot << Ksub ;
 				theplot <<  V1;
@@ -2904,8 +3206,8 @@ AnyType Plot::operator()(Stack s) const  {
 				// theplot << (long) nsb<< V1;
 			    }
 		      }
-		}
-	      else if (l[i].what==3 )
+		}*/	    
+		  else if (l[i].what==3 )
 		{
 		    tab x=l[i].evalt(0,s);
 		    tab y=l[i].evalt(1,s);
@@ -2939,24 +3241,27 @@ AnyType Plot::operator()(Stack s) const  {
 			theplot <<mapth3[ &l[i].evalm3(0,s)];// numero du maillage
 		    }
 		}
-	      else  if (what==6 || what==6)
+	      else  if (what==6 ||what==7 ) 
+		  err = Send3d<R,v_fes3>( theplot,ll[ii] ,mapth3);
+	      else if (what==16 || what==17 )
+		  err = Send3d<Complex,v_fes3>( theplot,ll[ii] ,mapth3);
+	    
+		/*
 		{    
 		    int lg,nsb;
-		    fe31=0;
-		    cmp1=-1;
-		    ll[ii].eval(fe30,cmp0);
+		    ll[ii].eval(fe3,cmp);
 		    if(what==6)
 		      {
-			  if (fe30->x()) 
+			  if (fe3[0]->x()) 
 			    {		 
 				err=0;
 				theplot << what ;
-				theplot <<mapth3[ &(fe30->Vh->Th)];// numero du maillage
+				theplot <<mapth3[ &(fe3[0]->Vh->Th)];// numero du maillage
 				// KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
 				//   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
 				KN<R3> Psub;
 				KN<int> Ksub;
-				KN<double> V1=fe30->Vh->newSaveDraw(*fe30->x(),cmp0,lg,Psub,Ksub,0);
+				KN<double> V1=fe3[0]->Vh->newSaveDraw(*fe3[0]->x(),cmp[0],lg,Psub,Ksub,0);
 				if(verbosity>9)
 				    cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
 				    << " "  << V1.max() << " " << V1.min() << endl;
@@ -2966,6 +3271,40 @@ AnyType Plot::operator()(Stack s) const  {
 			    }
 		      }
 		}
+	      else  if (what==7)
+		{    
+		    int lg,nsb;
+		    ll[ii].eval(fe3,cmp);
+		    if(what==7) // ve
+		      {
+			if (fe3[0]->x()&& fe3[1]->x() && fe3[2]->x()) 
+			  {		 
+			      err=0;
+			      theplot << what ;
+			      theplot <<mapth3[ &(fe3[0]->Vh->Th)];// numero du maillage
+			      // KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
+			      //   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
+			      KN<R3> Psub1,Psub2,Psub3; // bf Bof ...
+			      KN<int> Ksub1,Ksub2,Ksub3;
+			      KN<double> V1=fe3[0]->Vh->newSaveDraw(*fe3[0]->x(),cmp[0],lg,Psub1,Ksub1,0);
+			      KN<double> V2=fe3[1]->Vh->newSaveDraw(*fe3[1]->x(),cmp[1],lg,Psub2,Ksub2,0);
+			      KN<double> V3=fe3[2]->Vh->newSaveDraw(*fe3[2]->x(),cmp[2],lg,Psub3,Ksub3,0);
+			      if(verbosity>9)
+				  cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N() 
+				  << " "  << V1.max() << " " << V1.min() << endl;
+			      theplot << Psub1 ;
+			      theplot << Ksub1 ;
+			      ffassert( V1.N() == V2.N()  &&V1.N() == V3.N()); 
+			      KNM<double> V123(3,V1.N()); // warning fortran numbering ...
+			      V123(0,'.')=V1;
+			      V123(1,'.')=V2;
+			      V123(2,'.')=V3;
+			      theplot << (KN_<double>&) V123;
+			     
+			  }
+		      }
+		}*/
+	    
 	      else 
 		  ffassert(0);// erreur type theplot inconnue
 	      if(err==1)
@@ -3117,7 +3456,7 @@ AnyType Plot::operator()(Stack s) const  {
       else if (l[i].what==0) 
 	{
 	  if( !uaspectratio) aspectratio= true;
-	    const  Mesh & Th= *ll[ii].th;
+	    const  Mesh & Th= *ll[ii].th();
 	  Th.BoundingBox(P1,P2);
 	  cTh=&Th;
 	}
@@ -3217,9 +3556,9 @@ AnyType Plot::operator()(Stack s) const  {
 	       
 	       if (l[i].what==0) 
 		   if (fill)
-		       ll[ii].th->Draw(0,thfill);
+		       ll[ii].th()->Draw(0,thfill);
 		   else 
-		       ll[ii].th->Draw(0,thfill);
+		       ll[ii].th()->Draw(0,thfill);
 		   else  if (what==1 || what==2)
 		     {   
 			 

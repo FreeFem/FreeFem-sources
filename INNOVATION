@@ -1,14 +1,15 @@
-v 3.7-1
-   add possibility to put array  (int[int] )  to set a set on lab in
-    in integral (int1d,int2d,int3d)   or with in on key work 
+  - correct in fflapack.cpp (example++-load, computation of eigenvalue of complex matrix)
+v 3.7-1 13 jan 2010.. 
+  - EqPoisson.edp (SOlve Poison equation in 3d fish)
+  - add possibility to put array  (int[int] )  to set a set of label/region in
+    in integral (int1d,int2d,int3d)   or  "on" key word 
     example : int[int] l=[1,2,3]  ,  ...  on(l,u=1);
-   add tool to compile under mingw/msys under windows 32 (freefem++-nw works, 
-    (and I have  try to add freeglut.dll llibrary  but the ffglut.exe/ffmedit do not works with this version). 
-   add bug (random trap) in bamg in sub domain computation in case of internal edge in 
-   same region (fist time in 15 years). 
-   add bug in varf interpertation in  complex case (miss some convertion)
-   add build  interpolation matrix in 3d (see examples++-3d/mat_interpole.edp)
-   correct CFLAGS (add -fFIP) in superlu , umfpack under 64 architecture. 
+  - add tool to compile under mingw/msys under windows 32 (freefem++-nw works, 
+  -  add bug (random trap) in bamg in sub domain computation in case of 
+    internal edge in    same region (fist time in 15 years). 
+  -  add bug in varf interpertation in  complex case (miss some convertion)
+  - add build  interpolation matrix in 3d (see examples++-3d/mat_interpole.edp)
+  - correct CFLAGS (add -fFIP) in superlu , umfpack under 64 architecture. 
 v  3.7   8 december 2009 
    add 3d beam examples examples++-3d/beam.edp 
    correct install problem due to metis directory

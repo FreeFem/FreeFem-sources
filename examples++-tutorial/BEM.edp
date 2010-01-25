@@ -102,6 +102,7 @@ for(int i=0;i<onbord.n;++i )
   }// for cleanning all local varaible at end of block. ABem ABemFull
   set(A,solver=UMFPACK);
   u[]=A^-1*b;
+  plot(u,wait=1);
   Vh ur=real(u),ui=imag(u);
   Vh  err=ur-uref;
   cout << " err Linty=" << err[].linfty << " /  " <<  uref[].linfty << endl; 
