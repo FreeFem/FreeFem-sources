@@ -2889,7 +2889,8 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
     typedef FEbase<K,v_fes> * pfek3 ;
     pfek3 fe3[3]={0,0,0};
     int cmp[3]={-1,-1,-1};
-    int err=1,what=lli.what;
+    int err=1;
+    long what=lli.what;
     int lg,nsb;
     if (what%10==6)
     {    
