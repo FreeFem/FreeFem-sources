@@ -379,18 +379,30 @@ long exec(string *s)
   ostream_precis ostream_precision(ostream *f){ return ostream_precis(f);}
  long get_precis( ostream_precis  pf) { return pf.f->precision();}
  long set_precis( ostream_precis  pf, long  l) { return pf.f->precision(l);}
-/* a faire !!!!!!!!!!!!!
+
 class ostream_seekp { public:
-    ostream_precis(ostream * ff) :f(ff) {}
+    ostream_seekp(ostream * ff) :f(ff) {}
     ostream * f;
-    operator long () const {return f->precision();}
+    operator long () const {return f->tellp();}
 };
 
- long seekp( ostream_seekp  pf, long  l) { return pf.f->seekp(l);}
- long tellp( ostream_tellp  pf) { return pf.f->tellp() ;}
- long seekp( istream_seekp  pf, long  l) { return pf.f->seekp(l);}
- long tellp( istream_tellp  pf) { return pf.f->tellp() ;}
+/*
+class istream_seekp { public:
+    istream_seekp(istream * ff) :f(ff) {}
+    istream * f;
+ //   operator long () const {return f->tellp();}
+};
 */
+ostream_seekp ff_oseekp(ostream **f){ return ostream_seekp(*f);}
+ostream_seekp ff_oseekp(ostream *f){ return ostream_seekp(f);}
+//istream_seekp ff_iseekp(istream **f){ return istream_seekp(*f);}
+//istream_seekp ff_iseekp(istream *f){ return istream_seekp(f);}
+
+long ffseekp( ostream_seekp  pf, long  l) { long ll= pf.f->tellp(); return pf.f->seekp(l),ll;}
+ long fftellp( ostream_seekp  pf) { return pf.f->tellp() ;}
+//long ffseekp( istream_seekp  pf, long  l) {return pf.f->seekp(l),l;}
+// long fftellp( istream_seekp  pf) { return pf.f->tellp() ;}
+
  class istream_good { public:
   istream_good(istream * ff) :f(ff) {}
   istream * f;
@@ -736,6 +748,8 @@ void Init_map_type()
     Dcl_TypeandPtr<ostream*>(0,0,::InitializePtr<ostream*>,::DeletePtr<ostream*>);
     Dcl_TypeandPtr<istream*>(0,0,::InitializePtr<istream*>,::DeletePtr<istream*>);
     Dcl_Type< ostream_precis > ();
+    Dcl_Type< ostream_seekp > ();
+  //  Dcl_Type< istream_seekp > ();
     Dcl_Type< istream_good > ();
     Dcl_Type< NothingType > ();
     
@@ -785,8 +799,9 @@ void Init_map_type()
        new E_F1_funcT<long,long*>(UnRef<long>),
        new E_F1_funcT<long,double>(Cast<long,double>),
        new E_F1_funcT<long,bool>(Cast<long,bool>),
-       new E_F1_funcT<long,ostream_precis>(Cast<long,ostream_precis>)
-
+       new E_F1_funcT<long,ostream_precis>(Cast<long,ostream_precis>),
+       new E_F1_funcT<long,ostream_precis>(Cast<long,ostream_seekp>)
+      // new E_F1_funcT<long,ostream_precis>(Cast<long,istream_seekp>)
        );
        
        
@@ -1107,9 +1122,20 @@ void Init_map_type()
     //  Add<ostream*>("precision",".",precis);
      Add<ostream**>("precision",".",new OneOperator1<ostream_precis,ostream**>(ostream_precision));
      Add<ostream*>("precision",".",new OneOperator1<ostream_precis,ostream*>(ostream_precision));
+    
+    // add FH jan 2010 ...
+    Add<ostream**>("seekp",".",new OneOperator1<ostream_seekp,ostream**>(ff_oseekp));
+    Add<ostream*>("seekp",".",new OneOperator1<ostream_seekp,ostream*>(ff_oseekp));
+    
+//    Add<istream**>("seekp",".",new OneOperator1<istream_seekp,ostream**>(ff_iseekp));
+ //   Add<istream*>("seekp",".",new OneOperator1<istream_seekp,ostream*>(ff_iseekp));
      
-     
-     Add<ostream_precis>("(","",new OneOperator1<long,ostream_precis>(get_precis),
+ //   Add<istream_seekp>("(","",new OneOperator1<long,istream_seekp>(fftellp),
+//			new OneOperator2<long,istream_seekp,long>(ffseekp));    
+    Add<ostream_seekp>("(","",new OneOperator1<long,ostream_seekp>(fftellp),
+		       new OneOperator2<long,ostream_seekp,long>(ffseekp));
+    // end add .. 
+    Add<ostream_precis>("(","",new OneOperator1<long,ostream_precis>(get_precis),
                                 new OneOperator2<long,ostream_precis,long>(set_precis));
 //  add v 1.41   
      Add<istream**>("good",".",new OneOperator1<istream_good,istream**>(to_istream_good));
