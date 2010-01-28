@@ -8806,29 +8806,39 @@ quit' | gnuplot");
 \plot[height=5cm,angle=270]{gnuplot}{Plots a cut of uh with gnuplot}
 
 \subsection{link with medit}\label{sec:medit}
-First you must install medit \footnote{\url{http://www-rocq.inria.fr/gamma/medit/medit.html}}, a
+First now  medit \footnote{\url{http://www-rocq.inria.fr/gamma/medit/medit.html}}, a
 freeware display package by Pascal Frey using OpenGL. Then you may run the follwoing example.
 
 remark, now \texttt{medit} software is include in \texttt{FreeFem++} under \texttt{ffmedit} name. \index{medit} \index{ffmedit}
 \plot[width=8cm]{medit2}{medit plot}
 
-\index{medit}\index{exec}
+Now with version 3.2 or better
 \bFF
-mesh Th=square(10,10,[2*x-1,2*y-1]);
-fespace Vh(Th,P1);
+@load "medit"
+@mesh Th=square(10,10,[2*x-1,2*y-1]);
+@fespace Vh(Th,P1);
 Vh u=2-x*x-y*y;
-   savemesh(Th,"mm",[x,y,u*.5]); //save mm.points and mm.faces file
+@medit("mm",u);
+\eFF
+
+\index{medit}\index{exec}
+Before:
+\bFF
+@mesh Th=square(10,10,[2*x-1,2*y-1]);
+@fespace Vh(Th,P1);
+Vh u=2-x*x-y*y;
+   @savemesh(Th,"mm",[x,y,u*.5]); //save mm.points and mm.faces file
 // for medit
    // build a mm.bb file
-  { ofstream file("mm.bb");
+  { @ofstream file("mm.bb");
    file << "2 1 1 "<< u[].n << " 2 \n";
-   for (int j=0;j<u[].n ; j++)
+   @for (@int j=0;j<u[].n ; j++)
      file << u[][j] << endl;
   }
     // call medit command
-    exec("ffmedit mm");
+    @exec("ffmedit mm");
     // clean files on unix OS
-    exec("rm mm.bb      mm.faces   mm.points");
+    @exec("rm mm.bb      mm.faces   mm.points");
 
 \eFF
 
@@ -10132,7 +10142,7 @@ where $V$ is the linear closed subspace of $H^1(\Omega)^2$.
 \begin{example}[Beam.edp]
 \index{tutorial!beam.edp}
 Consider  elastic plate with the undeformed rectangle shape
-$[0,10]\times [0,2]$.
+$]0,10[\times ]0,2[$.
 The body force is the gravity force $\vec f$ and the
 boundary force $\vec g$ is zero on lower and upper side.
 On the two vertical sides of the beam are fixed.
@@ -10174,6 +10184,53 @@ real sqrt2=sqrt(2.);// see lame.edp example \ref{lame.edp}
 \eFF
 \end{example}
 
+
+\begin{example}[beam-3d.edp]
+\index{3d!beam-3d.edp}
+Consider  elastic box  with the undeformed parallelepiped shape
+$]0,5[\times ]0,1[\times]0,1[$.
+The body force is the gravity force $\vec f$ and the
+boundary force $\vec g$ is zero on all face except 
+one the one vertical left  face  where  the beam is fixed.
+
+\bFF
+@include "cube.idp"
+@int[@int@]  Nxyz=[20,5,5];
+@real [@int,@int]  Bxyz=[[0.,5.],[0.,1.],[0.,1.]];
+@int [@int,@int]  Lxyz=[[1,2],[2,2],[2,2]];
+@mesh3 Th=Cube(Nxyz,Bxyz,Lxyz);
+
+@real E = 21.5e4, sigma = 0.29;
+@real mu = E/(2*(1+sigma));
+@real lambda = E*sigma/((1+sigma)*(1-2*sigma));
+@real gravity = -0.05;
+
+@fespace Vh(Th,[P1,P1,P1]);
+Vh [u1,u2,u3], [v1,v2,v3];
+cout << "lambda,mu,gravity ="<<lambda<< " " << mu << " " << gravity << endl;
+
+@real sqrt2=sqrt(2.);
+@macro epsilon(u1,u2,u3)  [dx(u1),dy(u2),dz(u3),(dz(u2)+dy(u3))/sqrt2,
+                       (dz(u1)+dx(u3))/sqrt2,(dy(u1)+dx(u2))/sqrt2] // EOM
+@macro div(u1,u2,u3) ( dx(u1)+dy(u2)+dz(u3) ) // EOM
+  
+@solve Lame([u1,u2,u3],[v1,v2,v3])=
+  @int3d(Th)(  
+	    lambda*div(u1,u2,u3)*div(v1,v2,v3)	
+	    +2.*mu*( epsilon(u1,u2,u3)'*epsilon(v1,v2,v3) ) //')
+	      )
+  - @int3d(Th) (gravity*v3)
+  + @on(1,u1=0,u2=0,u3=0)
+  ;
+@real dmax= u1[].max;
+@cout << " max deplacement = " << dmax << endl;
+@real coef= 0.1/dmax;
+@int[@int] ref2=[1,0,2,0];
+@mesh3 Thm=movemesh3(Th,transfo=[x+u1*coef,y+u2*coef,z+u3*coef],label=ref2);
+Thm=change(Thm,label=ref2);
+@plot(Th,Thm, wait=1,cmm="coef  amplification = "+coef );
+\eFF
+\end{example}
 \subsubsection{Fracture Mechanics}
 Consider the plate with the crack whose undeformed shape is
 a curve $\Sigma$ with the two edges $\gamma_1,\, \gamma_2$.
