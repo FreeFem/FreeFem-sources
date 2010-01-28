@@ -97,7 +97,7 @@ class Build2D3D_Op : public E_F0mps
 public:
   Expression eTh;
   Expression xx,yy,zz;
-  static const int n_name_param =13; // 
+  static const int n_name_param =13+2; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
@@ -124,6 +124,11 @@ public:
       yy=to<double>( (*a1)[1]);
       zz=to<double>( (*a1)[2]);
     }    
+    if( nargs[2] && nargs[13] ) 
+	CompileError("uncompatible movemesh3 (Th, region= , reftet=  ");
+    if( nargs[3] && nargs[14] ) 
+	CompileError("uncompatible movemesh3 (Th, label= , refface=  ");
+    
   } 
   
   AnyType operator()(Stack stack)  const ;
@@ -131,21 +136,24 @@ public:
 
 
 basicAC_F0::name_and_type Build2D3D_Op::name_param[]= {
-  {  "transfo", &typeid(E_Array)},
+  {  "transfo", &typeid(E_Array)},//0
   {  "switch", &typeid(string*)},
-  {  "reftet", &typeid(long)}, 
-  {  "refface", &typeid(KN_<long>)},
+  {  "reftet", &typeid(long)}, //2
+  {  "refface", &typeid(KN_<long>)},//3
   {  "facemerge", &typeid(long)},
   {  "ptmerge", &typeid(double)},
   // nouvelle variable
-  {  "nbofholes", &typeid(long)},
+  {  "nbofholes", &typeid(long)},//6
   {  "holelist", &typeid(KN_<double>)},
   {  "nbofregions", &typeid(long)},
   {  "regionlist", &typeid(KN_<double>)},
   {  "nboffacetcl", &typeid(long)},
-  {  "facetcl", &typeid(KN_<double>)},
+    {  "facetcl", &typeid(KN_<double>)},//11
   // mesure mesh
-  {  "mesuremesh", &typeid(long)}
+  {  "mesuremesh", &typeid(long)},
+    {  "region", &typeid(long)}, //13
+    {  "label", &typeid(KN_<long>)}//14
+    
 };
 
 class  Build2D3D : public OneOperator { public:  
@@ -176,8 +184,8 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   KN<long> zzempty;
   string  stringempty = string("pqaAAYCQ");
   string* switch_tet= (arg(1,stack,&stringempty));  
-  int label_tet(arg(2,stack,0));  
-  KN<long> nrf (arg(3,stack,zzempty));
+  int label_tet(arg(2,stack,arg(13,stack,0)));  
+  KN<long> nrf (arg(3,stack,arg(14,stack,zzempty)));
   int point_confondus_ok(arg(4,stack,0));
   double precis_mesh(arg(5,stack,-1));
 
@@ -1497,7 +1505,7 @@ class Remplissage_Op : public E_F0mps
 {
 public:
   Expression eTh;
-  static const int n_name_param =9; // 
+  static const int n_name_param =9+2; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
@@ -1513,6 +1521,11 @@ public:
   {
     if(verbosity >1) cout << "Remplissage du bord" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
+    if( nargs[2] && nargs[9] ) 
+	CompileError("uncompatible movemesh3 (Th, region= , reftet=  ");
+    if( nargs[3] && nargs[10] ) 
+	CompileError("uncompatible movemesh3 (Th, label= , refface=  ");
+    
   } 
   
   AnyType operator()(Stack stack)  const ;
@@ -1521,15 +1534,18 @@ public:
 
 basicAC_F0::name_and_type Remplissage_Op::name_param[]= {
   {  "switch", &typeid(string*)},
-  {  "reftet", &typeid(long)}, 
-  {  "refface", &typeid(KN_<long> )},
+  {  "reftet", &typeid(long)}, //1
+  {  "refface", &typeid(KN_<long> )},//2
   // new parmameters
   {  "nbofholes", &typeid(long)},
   {  "holelist", &typeid(KN_<double>)},
   {  "nbofregions", &typeid(long)},
   {  "regionlist", &typeid(KN_<double>)},
   {  "nboffacetcl", &typeid(long)},
-  {  "facetcl", &typeid(KN_<double>)}
+  {  "facetcl", &typeid(KN_<double>)},
+    {  "region", &typeid(long)}, //9
+    {  "label", &typeid(KN_<long>)}//10
+    
 };
 
 class  Remplissage : public OneOperator { public:  
@@ -1557,8 +1573,8 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   //int intempty=0;
   string stringempty= string("pqaAAYQC");
   string* switch_tet(arg(0,stack,&stringempty));
-  int label_tet(arg(1,stack,0));  
-  KN<long> nrf (arg(2,stack,zzempty));
+  int label_tet(arg(1,stack,arg(9,stack,0)));  
+  KN<long> nrf (arg(2,stack,arg(10,stack,zzempty)));
 
   // new parameters
   KN<double> zdzempty;
@@ -1657,7 +1673,7 @@ class ReconstructionRefine_Op : public E_F0mps
 {
 public:
   Expression eTh;
-  static const int n_name_param =10; // 
+  static const int n_name_param =10+2; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
@@ -1673,6 +1689,10 @@ public:
   {
     if(verbosity >1) cout << "ReconstructionRefine du bord"<< endl;
     args.SetNameParam(n_name_param,name_param,nargs);
+    if( nargs[2] && nargs[10] ) 
+	CompileError("uncompatible ... (Th, region= , reftet=  ");
+    if( nargs[3] && nargs[11] ) 
+	CompileError("uncompatible ... (Th, label= , refface=  ");
     
   } 
   
@@ -1691,7 +1711,10 @@ basicAC_F0::name_and_type ReconstructionRefine_Op::name_param[]= {
   {  "regionlist", &typeid(KN_<double>)},
   {  "nboffacetcl", &typeid(long)},
   {  "facetcl", &typeid(KN_<double>)},
-  {  "sizeofvolume", &typeid(double)}
+  {  "sizeofvolume", &typeid(double)},
+    {  "region", &typeid(long)}, //10
+    {  "label", &typeid(KN_<long>)}//11
+    
 };
 
 class  ReconstructionRefine : public OneOperator { public:  
@@ -1722,8 +1745,8 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
   //int intempty=0;
   string stringempty= string("rqaAAYQC");
   string* switch_tet(arg(0,stack,&stringempty));
-  KN<long> nrtet(arg(1,stack,zzempty));  
-  KN<long> nrf (arg(2,stack,zzempty));
+  KN<long> nrtet(arg(1,stack,arg(10,stack,zzempty)));  
+  KN<long> nrf (arg(2,stack,arg(11,stack,zzempty)));
 
   // new parameters
   KN<double> zdzempty;
@@ -1866,7 +1889,7 @@ class ConvexHull3D_tetg_Op : public E_F0mps
 public:
   Expression numofpts;
   Expression xx,yy,zz;
-  static const int n_name_param =3; // 
+  static const int n_name_param =3+1; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   
@@ -1885,6 +1908,11 @@ public:
   {
     if(verbosity) cout << "Convex Hull with TetGen" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
+    if( nargs[2] && nargs[3] ) 
+	CompileError("uncompatible ... (Th, region= , reftet=  ");
+    if( nargs[3] && nargs[4] ) 
+	CompileError("uncompatible ... (Th, label= , refface=  ");
+    
   } 
   
   AnyType operator()(Stack stack)  const ;
@@ -1894,7 +1922,9 @@ public:
 basicAC_F0::name_and_type  ConvexHull3D_tetg_Op::name_param[]= {
   {  "switch", &typeid(string*)},
   {  "reftet", &typeid(long)}, 
-  {  "refface", &typeid(long)}
+  {  "refface", &typeid(long)},
+    {  "region", &typeid(long)}, 
+    {  "label", &typeid(long)}
 };
 
 class ConvexHull3D_tetg : public OneOperator { public:  
@@ -1926,8 +1956,8 @@ AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
   //int intempty=0;
   string stringempty= string("YqaAAQC");
   string* switch_tet(arg(0,stack,&stringempty));
-  int label_tet(arg(1,stack,0));  
-  int label_face(arg(2,stack,1));
+  int label_tet(arg(1,stack,arg(3,stack,0)));  
+  int label_face(arg(2,stack,arg(4,stack,1)));
 
   //====================================
   //  How to change string* into char* 
@@ -1976,6 +2006,11 @@ public:
   {
     if(verbosity) cout << "Convex Hull with TetGen" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
+    if( nargs[2] && nargs[3] ) 
+	CompileError("uncompatible ... (Th, region= , reftet=  ");
+    if( nargs[3] && nargs[4] ) 
+	CompileError("uncompatible ... (Th, label= , refface=  ");
+    
   } 
   
   AnyType operator()(Stack stack)  const ;
@@ -1985,7 +2020,10 @@ public:
 basicAC_F0::name_and_type  ConvexHull3D_tetg_file_Op::name_param[]= {
   {  "switch", &typeid(string*)},
   {  "reftet", &typeid(long)}, 
-  {  "refface", &typeid(long)}
+  {  "refface", &typeid(long)},
+    {  "region", &typeid(long)}, 
+    {  "label", &typeid(long)}
+    
 };
 
 class ConvexHull3D_tetg_file : public OneOperator { public:  
@@ -2038,8 +2076,8 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
   //int intempty=0;
   string stringempty= string("YQV");
   string* switch_tet(arg(0,stack,&stringempty));
-  int label_tet(arg(1,stack,0));  
-  int label_face(arg(2,stack,1));
+  int label_tet(arg(1,stack,arg(3,stack,0)));  
+  int label_face(arg(2,stack,arg(4,stack,1)));
 
   //====================================
   //  How to change string* into char* 

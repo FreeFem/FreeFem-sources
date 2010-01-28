@@ -729,7 +729,7 @@ void build_layer_map_tetrahedra(const Mesh &Th2, map<int, int> &maptet ){
     map<int,int>::const_iterator imap=maptet.find(K.lab);
     //cout << "K.lab= " << K.lab << endl; 
     if(imap == maptet.end()){
-      maptet[ K.lab ] = numero_label;
+	maptet[ K.lab ] = K.lab; //  modif FH .. numero_label;
       numero_label = numero_label+1;
     }
   }
@@ -744,7 +744,7 @@ void build_layer_map_triangle(const Mesh &Th2, map<int, int> &maptrimil, map<int
     map<int,int>::const_iterator imap=maptrizmax.find(K.lab);
     
     if(imap == maptrizmax.end()){
-      maptrizmax[ K.lab ] = numero_label;
+	maptrizmax[ K.lab ] = K.lab;// modif FH jan 2010  numero_label;
       numero_label = numero_label+1;
     }
   }
@@ -754,7 +754,7 @@ void build_layer_map_triangle(const Mesh &Th2, map<int, int> &maptrimil, map<int
     map<int,int>::const_iterator imap=maptrizmin.find(K.lab);
     
     if(imap == maptrizmin.end()){
-      maptrizmin[ K.lab ] = numero_label;
+	maptrizmin[ K.lab ] =  K.lab;// modif FH jan 2010 numero_label;
       numero_label = numero_label+1;
     }
   }
@@ -764,7 +764,7 @@ void build_layer_map_triangle(const Mesh &Th2, map<int, int> &maptrimil, map<int
     map<int,int>::const_iterator imap=maptrimil.find(K.lab);
     
     if(imap == maptrimil.end()){
-      maptrimil[ K.lab ] = numero_label;
+	maptrimil[ K.lab ] = K.lab  ;//modif FH jan 2010 numero_label;
       numero_label = numero_label+1;
     }
   }
@@ -782,17 +782,17 @@ void build_layer_map_edge(const Mesh &Th2, map<int, int> &mapemil, map<int, int>
     map<int,int>::const_iterator imap3=mapezmin.find(K.lab);
     
     if(imap1 == mapezmax.end()){
-      mapezmax[ K.lab ] = numero_label;
+	mapezmax[ K.lab ] = K.lab ;//modif FH jan 2010 numero_label;
       numero_label = numero_label+1;
     }
 			
     if(imap2 == mapemil.end()){
-      mapemil[ K.lab ] = numero_label;
+      mapemil[ K.lab ] = K.lab ;//modif FH jan 2010 numero_label;numero_label;
       numero_label = numero_label+1;
     }
     
     if(imap3 == mapezmin.end()){
-      mapezmin[ K.lab ] = numero_label;
+      mapezmin[ K.lab ] = K.lab ;//modif FH jan 2010 numero_label;numero_label;
       numero_label = numero_label+1;
     }
     
@@ -1889,11 +1889,13 @@ class Movemesh3D_Op : public E_F0mps
 public:
   Expression eTh;
   Expression xx,yy,zz;
-  static const int n_name_param =7; // 
+  //Expression  lab,reg;  
+  static const int n_name_param =7+2; // add FH for cleanning name  
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
-  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  KN_<long>  arg(int i,int ii,Stack stack,KN_<long> a ) const
+    {  ffassert( ! (nargs[i] && nargs[ii]) ); i= nargs[i] ? i : ii;
+	return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
   long  arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
 public:
@@ -1904,7 +1906,11 @@ public:
     const E_Array * a1=0 ;
     if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
     int err =0;
- 
+    if( nargs[1] && nargs[7] ) 
+	CompileError("uncompatible movemesh3 (Th, region= , reftet=  ");
+    if( nargs[2] && nargs[8] ) 
+	CompileError("uncompatible movemesh3 (Th, label= , refface=  ");
+
     if(a1) {
       if(a1->size() !=3) 
 	CompileError("movemesh3 (Th,transfo=[X,Y,Z],) ");
@@ -1918,13 +1924,16 @@ public:
 };
 
 basicAC_F0::name_and_type Movemesh3D_Op::name_param[]= {
-  {  "transfo", &typeid(E_Array)},
-  {  "reftet", &typeid(KN_<long>)},
+  {  "transfo", &typeid(E_Array)}, //0
+  {  "reftet", &typeid(KN_<long>)},// 1
   {  "refface", &typeid(KN_<long>)},
   {  "ptmerge", &typeid(double)},
   {  "facemerge",&typeid(long)},
-  {  "boolsurface",&typeid(long)},
-  {  "orientation",&typeid(long)}
+  {  "boolsurface",&typeid(long)}, // 5
+  {  "orientation",&typeid(long)},
+  {  "region", &typeid(KN_<long> )}, //7 
+  {  "label", &typeid(KN_<long> )} // 8
+    
   // option a rajouter
   // facemerge 0,1 + label
 };
@@ -1945,8 +1954,8 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
  // lecture des references
    
   KN<long> zzempty;
-  KN<long> nrtet  (arg(1,stack,zzempty));  
-  KN<long> nrf (arg(2,stack,zzempty)); 
+  KN<long> nrtet  (arg(1,7,stack,zzempty));  
+  KN<long> nrf (arg(2,8,stack,zzempty)); 
   double precis_mesh( arg(3,stack,1e-7));
   long  mergefacemesh( arg(4,stack,1) );
   long  flagsurfaceall( arg(5,stack,0) );
@@ -2149,15 +2158,23 @@ class SetMesh3D_Op : public E_F0mps
 public:
   Expression a; 
   
-  static const int n_name_param =2; //  add nbiter FH 30/01/2007 11 -> 12 
+  static const int n_name_param =2+2; //  add nbiter FH 30/01/2007 11 -> 12 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+    { ffassert( !(nargs[i] && nargs[i+2]));
+      i = nargs[i] ? i : i+2;
+      return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
 
   
 public:
   SetMesh3D_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
     args.SetNameParam(n_name_param,name_param,nargs);
+      if( nargs[0] && nargs[2] ) 
+	  CompileError("uncompatible change(... region= , reftet=  ");
+      if( nargs[1] && nargs[3] ) 
+	  CompileError("uncompatible  change(...label= , refface=  ");
+      
   } 
   
   AnyType operator()(Stack stack)  const ;
@@ -2165,7 +2182,10 @@ public:
 
 basicAC_F0::name_and_type SetMesh3D_Op::name_param[]= {
   {  "reftet", &typeid(KN_<long> )},
-  {  "refface", &typeid(KN_<long> )}
+  {  "refface", &typeid(KN_<long> )},
+  {  "region", &typeid(KN_<long> )},
+  {  "label", &typeid(KN_<long> )}
+   
 };
 //  besoin en cas de fichier 2D / fichier 3D 
 
@@ -2317,10 +2337,11 @@ class Movemesh2D_3D_surf_Op : public E_F0mps
 public:
   Expression eTh;
   Expression xx,yy,zz; 
-  static const int n_name_param =5; 
+  static const int n_name_param =5+2; 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ 
+      return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
   int arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny<int>( (*nargs[i])(stack) ): a;}
   double arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
 public:
@@ -2333,10 +2354,11 @@ public:
     const E_Array * a1=0 ;
     if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
     int err =0;
-    
+    if( nargs[2] && nargs[5] ) 
+	CompileError("uncompatible movemesh23 (Th, label= , refface=  ");
     if(a1) {
       if(a1->size() !=3) 
-	CompileError("Movemesh23 (Th,transfo=[X,Y,Z],) ");
+	CompileError("movemesh23 (Th,transfo=[X,Y,Z],) ");
       xx=to<double>( (*a1)[0]);
       yy=to<double>( (*a1)[1]);
       zz=to<double>( (*a1)[2]);
@@ -2352,7 +2374,9 @@ basicAC_F0::name_and_type Movemesh2D_3D_surf_Op::name_param[]= {
   {  "orientation", &typeid(long)},
   {  "refface", &typeid(KN_<long>)},
   {  "ptmerge", &typeid(double)},
-  {  "boolsurface",&typeid(long)}
+  {  "boolsurface",&typeid(long)},
+  {  "label", &typeid(KN_<long> )}
+    
 };
 
 AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const 
@@ -2369,7 +2393,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
   KN<long> zzempty;
   //int intempty=0;
   int mesureM (arg(1,stack,0));
-  KN<long> nrface (arg(2,stack,zzempty));
+  KN<long> nrface (arg(2,stack,arg(5,stack,zzempty)));
   double precis_mesh(arg(3,stack,-1));
   long flagsurfaceall(arg(4,stack,-1));
   
@@ -4113,7 +4137,7 @@ class BuildLayeMesh_Op : public E_F0mps
 public:
   Expression eTh;
   Expression enmax,ezmin,ezmax,xx,yy,zz;
-  static const int n_name_param =9; // 
+  static const int n_name_param =9+4; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
@@ -4146,7 +4170,16 @@ public:
       xx=to<double>( (*a2)[0]);
       yy=to<double>( (*a2)[1]);
       zz=to<double>( (*a2)[2]);
-    }    
+    }  
+    if( nargs[3] && nargs[9] ) 
+	CompileError("uncompatible buildlayer (Th, region= , reftet=  ");
+    if( nargs[4] && nargs[10] ) 
+	CompileError("uncompatible buildlayer (Th, midlabel= , reffacemid=  ");
+    if( nargs[5] && nargs[11] ) 
+	CompileError("uncompatible buildlayer (Th, toplabel= , reffaceup=  ");
+    if( nargs[6] && nargs[12] ) 
+	CompileError("uncompatible buildlayer (Th, downlabel= , reffacelow=  ");
+    
   } 
   
   AnyType operator()(Stack stack)  const ;
@@ -4156,13 +4189,17 @@ basicAC_F0::name_and_type BuildLayeMesh_Op::name_param[]= {
   {  "zbound", &typeid(E_Array)},
   {  "transfo", &typeid(E_Array)},
   {  "coef", &typeid(double)},
-  {  "reftet", &typeid(KN_<long>)},
+  {  "reftet", &typeid(KN_<long>)}, // 3
   {  "reffacemid", &typeid(KN_<long> )},
   {  "reffaceup", &typeid(KN_<long> )},
   {  "reffacelow", &typeid(KN_<long> )},
   {  "facemerge", &typeid(long)},
-  {  "ptmerge",&typeid(double)}
-
+  {  "ptmerge",&typeid(double)},
+  {  "region", &typeid(KN_<long>)}, // 9
+  {  "labelmid", &typeid(KN_<long> )},
+  {  "labelup", &typeid(KN_<long> )},
+  {  "labeldown", &typeid(KN_<long> )}, // 12
+    
 };
 
 
@@ -4217,10 +4254,10 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   if(verbosity >1) cout << "lecture valeur des references " << endl;
   
   KN<long> zzempty;
-  KN<long> nrtet  (arg(3,stack,zzempty));  
-  KN<long> nrfmid (arg(4,stack,zzempty));  
-  KN<long> nrfup  (arg(5,stack,zzempty));  
-  KN<long> nrfdown (arg(6,stack,zzempty));  
+  KN<long> nrtet  (arg(3,stack,arg(3+6,stack,zzempty)));  
+  KN<long> nrfmid (arg(4,stack,arg(4+6,stack,zzempty)));  
+  KN<long> nrfup  (arg(5,stack,arg(5+6,stack,zzempty)));  
+  KN<long> nrfdown (arg(6,stack,arg(6+6,stack,zzempty)));  
   int point_confondus_ok (arg(7,stack,0));
   double precis_mesh (arg(8,stack,-1));
 
@@ -4379,40 +4416,15 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
 class Movemesh2D_3D_surf_cout_Op : public E_F0mps 
 {
 public:
-  Expression eTh;
-  Expression xx,yy,zz; 
-  static const int n_name_param =4; //  add nbiter FH 30/01/2007 11 -> 12 
-  static basicAC_F0::name_and_type name_param[] ;
-  Expression nargs[n_name_param];
- 
-public:
-  Movemesh2D_3D_surf_cout_Op(const basicAC_F0 &  args,Expression tth) : 
-  eTh(tth),xx(0),yy(0),zz(0) 
+  Movemesh2D_3D_surf_cout_Op(const basicAC_F0 &  args,Expression tth)  
   {
-
     CompileError("The keyword movemesh2D3Dsurf is remplaced now by the keyword movemesh23 (see Manual) ::: Moreover, the parameter mesuremesh are denoted now orientation ");
-
-    args.SetNameParam(n_name_param,name_param,nargs);
-   
   } 
+   AnyType operator()(Stack stack)const { return 0L; }
   
-  AnyType operator()(Stack stack)  const ;
 };
 
-basicAC_F0::name_and_type Movemesh2D_3D_surf_cout_Op::name_param[]= {
-  {  "transfo", &typeid(E_Array )},
-  {  "orientation", &typeid(long)},
-  {  "refface", &typeid(KN_<long>)},
-  {  "ptmerge", &typeid(double)}
-};
 
-AnyType Movemesh2D_3D_surf_cout_Op::operator()(Stack stack)  const 
-{
-  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
- 
-  Mesh3 *Th3;
-  return Th3;
-}
 
 
 class Movemesh2D_3D_surf_cout : public OneOperator { public:  
@@ -4431,39 +4443,19 @@ typedef Mesh3 *pmesh3;
 
 class Movemesh3D_cout_Op : public E_F0mps 
 {
-public:
-  Expression eTh;
-  Expression xx,yy,zz; 
-  static const int n_name_param =4; //  add nbiter FH 30/01/2007 11 -> 12 
-  static basicAC_F0::name_and_type name_param[] ;
-  Expression nargs[n_name_param];
  
 public:
-  Movemesh3D_cout_Op(const basicAC_F0 &  args,Expression tth) : 
-  eTh(tth),xx(0),yy(0),zz(0) 
+  Movemesh3D_cout_Op(const basicAC_F0 &  args,Expression tth)  
+ 
   {
     CompileError("The keyword movemesh3D is remplaced in this new version of freefem++ by the keyword movemesh3 (see manual)");
-    args.SetNameParam(n_name_param,name_param,nargs);
-   
   } 
   
-  AnyType operator()(Stack stack)  const ;
+  AnyType operator()(Stack stack)  const {return 0L;}
+  
 };
 
-basicAC_F0::name_and_type Movemesh3D_cout_Op::name_param[]= {
-  {  "transfo", &typeid(E_Array )},
-  {  "reftet", &typeid(KN_<long>)},
-  {  "refface", &typeid(KN_<long>)},
-  {  "ptmerge", &typeid(double)}
-};
 
-AnyType Movemesh3D_cout_Op::operator()(Stack stack)  const 
-{
-  Mesh3 * pTh= GetAny<Mesh3 *>((*eTh)(stack));
- 
-  Mesh3 *Th3;
-  return Th3;
-}
 
 
 class Movemesh3D_cout : public OneOperator { public:  
@@ -5362,7 +5354,7 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
 
   Global.Add("change","(",new SetMesh3D);
   Global.Add("movemesh23","(",new Movemesh2D_3D_surf);
-  Global.Add("movemesh2D3Dsurf","(",new Movemesh2D_3D_surf_cout);
+  Global.Add("movemesh2D3Dsurf","(",new Movemesh2D_3D_surf_cout);// 
   Global.Add("movemesh3","(",new Movemesh3D);
   Global.Add("movemesh3D","(", new Movemesh3D_cout);
   Global.Add("deplacement","(",new DeplacementTab);

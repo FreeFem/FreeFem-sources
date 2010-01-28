@@ -1117,10 +1117,10 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
       
 }
 }
-Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
+Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg=0)
 {
+  if(verbosity>99)  cout << " region = " << reg << " labels " << lab <<endl;  
   const int unionjack=1;
-  
   using  Fem2D::Vertex;
   using  Fem2D::Triangle;
   using  Fem2D::R2;
@@ -1133,6 +1133,12 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
   int nbv=(nx1)*(ny1);
   int nbt=(nx)*ny*2;
   int neb=(nx+ny)*2;
+  int l1=1,l2=2,l3=3,l4=4;
+  if(lab.N()>=1) l1=lab[0];
+  if(lab.N()>=2) l2=lab[1];
+  if(lab.N()>=3) l3=lab[2];
+  if(lab.N()>=4) l4=lab[3];
+    
   Vertex * v= new Vertex[nbv];
   Triangle *t= new Triangle[nbt];
   BoundaryEdge *b= new BoundaryEdge[neb];
@@ -1175,11 +1181,22 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
        int i1= i0+1;
        int i2=i1+nx1;
        int i3=i2-1;
+       bool c00= (i==0) && (j==0);
+       bool c10= (i==nx-1) && (j==0);
+       bool c01= (i==0) && (j==ny-1);
+       bool c11= (i==nx-1) && (j==ny-1);
+  	 
       bool cas = true;
       switch (flags)
        {
        case unionjack:
           cas =  (i+ j) %2 ; break;
+       case 2: // new  jan 2010 
+	     cas = false; break;
+       case 3:// never triangle with 3 vertex on boundary 
+	     cas = c01 || c10 ? false : true; break;
+       case 4:// never triangle with 3 vertex on boundary
+	     cas = c00 || c11 ? true : false; break;	     
        default:
           cas = true;
        } ;
@@ -1188,26 +1205,26 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
 	   {
 	       if(direct)
 		 {     // diag 1 
-		     (tt++)->set(v,i0,i1,i2,0,0.0);
-		     (tt++)->set(v,i0,i2,i3,0,0.0);	       
+		     (tt++)->set(v,i0,i1,i2,reg,0.0);
+		     (tt++)->set(v,i0,i2,i3,reg,0.0);	       
 		 }
 	       else
 		 {     // diag 1 
-		     (tt++)->set(v,i1,i0,i2,0,0.0);
-		     (tt++)->set(v,i2,i0,i3,0,0.0);	       
+		     (tt++)->set(v,i1,i0,i2,reg,0.0);
+		     (tt++)->set(v,i2,i0,i3,reg,0.0);	       
 		 }
 	   } 
 	 else 
 	   {
 	       if(direct)
 		 {    // diag 2  		     
-		     (tt++)->set(v,i0,i1,i3,0,0.0);
-		     (tt++)->set(v,i3,i1,i2,0,0.0);		     
+		     (tt++)->set(v,i0,i1,i3,reg,0.0);
+		     (tt++)->set(v,i3,i1,i2,reg,0.0);		     
 		 }
 	       else 
 		 {    // diag 2  		     
-		     (tt++)->set(v,i1,i0,i3,0,0.0);
-		     (tt++)->set(v,i1,i3,i2,0,0.0);
+		     (tt++)->set(v,i1,i0,i3,reg,0.0);
+		     (tt++)->set(v,i1,i3,i2,reg,0.0);
 		     
 		 }
 	   }
@@ -1218,31 +1235,31 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags=0)
     {  // bottom 
       //      int j=0;
       int i1=i,i2=i1+1;
-      *bb++ = BoundaryEdge(v,i1,i2,1);
-      v[i1].lab=v[i2].lab=1;
+      *bb++ = BoundaryEdge(v,i1,i2,l1);
+      v[i1].lab=v[i2].lab=l1;
     }     
   for (int j=0;j<ny;j++)
     { // right
       int i=nx;
       int i1= i + j*nx1 ,i2=i1+nx1;
-      *bb++ = BoundaryEdge(v,i1,i2,2);
-      v[i1].lab=v[i2].lab=2;
+      *bb++ = BoundaryEdge(v,i1,i2,l2);
+      v[i1].lab=v[i2].lab=l2;
     }     
     
   for (int i=0;i<nx;i++)
     {  // up
       int j=ny;
       int i1=i + j*nx1,i2=i1+1;
-      *bb++ = BoundaryEdge(v,i1,i2,3);
-      v[i1].lab=v[i2].lab=3;
+      *bb++ = BoundaryEdge(v,i1,i2,l3);
+      v[i1].lab=v[i2].lab=l3;
 
     }     
   for (int j=0;j<ny;j++)
     { // left
       int i=0;
       int i1= i + j*nx1,i2=i1+nx1;
-      *bb++ = BoundaryEdge(v,i1,i2,4);
-      v[i1].lab=v[i2].lab=4;
+      *bb++ = BoundaryEdge(v,i1,i2,l4);
+      v[i1].lab=v[i2].lab=l4;
     }     
     
  {
@@ -1267,11 +1284,13 @@ class MeshCarre2 :   public E_F0mps { public:
     typedef pmesh  Result;
      Expression nx,ny;
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =1;
+   static const int n_name_param =1+2;
     Expression nargs[n_name_param];
    
     long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
-     
+    KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+    { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+    
      
      MeshCarre2(const basicAC_F0 & args) 
     {     
@@ -1287,8 +1306,11 @@ class MeshCarre2 :   public E_F0mps { public:
         return new MeshCarre2(args);} 
         
     AnyType operator()(Stack s) const { 
-           long flags=arg(0,s,0);
-      return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)),0,0,s,flags ));}
+	long flags=arg(0,s,0);
+	KN<long> zz;
+	KN<long> label=arg(1,s,zz);
+	long region=arg(2,s,2);
+	return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)),0,0,s,flags,label,region ));}
     operator aType () const { return atype<pmesh>();} 
       
 };
@@ -1302,10 +1324,12 @@ class MeshCarre2f :   public E_F0mps { public:
      Expression nx,ny;
      Expression fx,fy;
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =1;
+   static const int n_name_param =1+2;
     Expression nargs[n_name_param];
    
     long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+    KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+    { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
      
      MeshCarre2f(const basicAC_F0 & args) 
     { 
@@ -1326,19 +1350,28 @@ class MeshCarre2f :   public E_F0mps { public:
         
     AnyType operator()(Stack s) const { 
       long flags=arg(0,s,0);
-      return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)), fx,fy,s , flags));}
+	KN<long> zz;
+	KN<long> label=arg(1,s,zz);
+	long region=arg(2,s,0L);
+	
+      return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)), fx,fy,s , flags,label,region));}
 
     operator aType () const { return atype<pmesh>();} 
       
 };
 
 basicAC_F0::name_and_type  MeshCarre2::name_param[]= {
-  {   "flags", &typeid(long) }
+	{  "flags", &typeid(long) },	
+	{  "label", &typeid(KN_<long> ) },
+	{  "region", &typeid(long) }      
+    
 };
 basicAC_F0::name_and_type  MeshCarre2f::name_param[]= {
-  {   "flags", &typeid(long) }
-};
-
+	{  "flags", &typeid(long) },
+	{  "label", &typeid(KN_<long> )},
+	{  "region", &typeid(long)}
+    };
+    
 
 /*
 
