@@ -32,7 +32,8 @@
   real y0=0,y1=1;
   int n=5,m=20;
   mesh Th=square(n,m,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
-  mesh th=square(4,5);
+  int[int] lab=[5,5,5,5]; // the 4 side 1,2,3,4 have label 5
+  mesh th=square(4,5,label=lab,region=1);
   plot(Th,th,ps="twosquare.eps");
 
 }

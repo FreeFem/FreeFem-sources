@@ -15,8 +15,8 @@ func YY1 = y;
 int[int] ref31h = [0,12];
 int[int] ref31b = [0,11];
 
-mesh3 Th31h = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1max],refface=ref31h,orientation=1);
-mesh3 Th31b = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1min],refface=ref31b,orientation=-1);   
+mesh3 Th31h = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1max],label=ref31h,orientation=1);
+mesh3 Th31b = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1min],label=ref31b,orientation=-1);   
 
 //medit("haut",Th31h);
 //medit("bas",Th31b);
@@ -33,8 +33,8 @@ func YY2max = 2*pi;
 int[int] ref32h = [0,13];
 int[int] ref32b = [0,14];
 
-mesh3 Th32h = movemesh23(Thsq2,transfo=[XX2,YY2max,ZZ2],refface=ref32h,orientation=-1);  
-mesh3 Th32b = movemesh23(Thsq2,transfo=[XX2,YY2min,ZZ2],refface=ref32b,orientation=1);
+mesh3 Th32h = movemesh23(Thsq2,transfo=[XX2,YY2max,ZZ2],label=ref32h,orientation=-1);  
+mesh3 Th32b = movemesh23(Thsq2,transfo=[XX2,YY2min,ZZ2],label=ref32b,orientation=1);
 
 /////////////////////////////////
 x0=0.; x1=2*pi; y0=0.; y1=1.5;
@@ -48,8 +48,8 @@ func ZZ3 = y;
 int[int] ref33h = [0,15];
 int[int] ref33b = [0,16];
 
-mesh3 Th33h = movemesh23(Thsq3,transfo=[XX3max,YY3,ZZ3],refface=ref33h,orientation=1);  
-mesh3 Th33b = movemesh23(Thsq3,transfo=[XX3min,YY3,ZZ3],refface=ref33b,orientation=-1); 
+mesh3 Th33h = movemesh23(Thsq3,transfo=[XX3max,YY3,ZZ3],label=ref33h,orientation=1);  
+mesh3 Th33b = movemesh23(Thsq3,transfo=[XX3min,YY3,ZZ3],label=ref33b,orientation=-1); 
 
 ////////////////////////////////
 mesh3 Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
@@ -64,7 +64,7 @@ cout << "movemesh ::new mesh" <<endl;
 mesh3 Th33mv = movemesh3(Th33, transfo=[mv2x,mv2y,mv2z]);
 int[int] r1=[12,11,11,21,13,23,14,24,15,25,16,26];
 cout << "change ::new mesh" <<endl;
-Th33mv=change(Th33mv,refface=r1);
+Th33mv=change(Th33mv,label=r1);
 cout << "add ::new mesh" <<endl;
 mesh3 Thall = Th33+Th33mv;  // The vertex of faces of labels 11 of Th33 and Th33mv must be same. The faces of label 11 of Thall correspond to the faces of the first in the sum : Th33.
 

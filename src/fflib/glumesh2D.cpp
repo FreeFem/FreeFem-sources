@@ -226,7 +226,7 @@ class SetMesh_Op : public E_F0mps
 public:
   Expression a; 
   
-  static const int n_name_param =2; //  add nbiter FH 30/01/2007 11 -> 12 
+  static const int n_name_param =2+2; //  add nbiter FH 30/01/2007 11 -> 12 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
@@ -235,6 +235,11 @@ public:
 public:
   SetMesh_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
     args.SetNameParam(n_name_param,name_param,nargs);
+      if( nargs[0] && nargs[1] ) 
+	  CompileError("uncompatible change (Th, label= , refe=  ");
+      if( nargs[1] && nargs[2] ) 
+	  CompileError("uncompatible change (Th, region= , reft=  ");
+      
   } 
   
   AnyType operator()(Stack stack)  const ;
@@ -242,7 +247,10 @@ public:
 
 basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
   {  "refe", &typeid(KN_<long> )},
-  {  "reft", &typeid(KN_<long> )}
+  {  "reft", &typeid(KN_<long> )},
+  {  "label", &typeid(KN_<long> )},
+  {  "region", &typeid(KN_<long> )}
+    
 };
 
 int  ChangeLab(const map<int,int> & m,int lab)
@@ -264,8 +272,8 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   if(verbosity>1)
   cout << "  -- SetMesh_Op: nb vertices" << nbv<< " nb Trai "<< nbt << " nb b. edges  "<< neb << endl;  
   KN<long> zz;
-  KN<long> nre (arg(0,stack,zz));  
-  KN<long> nrt (arg(1,stack,zz));  
+  KN<long> nre (arg(0,stack,arg(2,stack,zz)));  
+  KN<long> nrt (arg(1,stack,arg(3,stack,zz)));  
 
   if(nre.N() <=0 && nrt.N()<=0 ) return m;
   ffassert( nre.N() %2 ==0);

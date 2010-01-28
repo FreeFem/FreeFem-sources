@@ -13,8 +13,8 @@ mesh Th2=square(10,16,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
 
 
 int[int] r1=[2,0],  r2=[4,0];
-Th1=change(Th1,refe=r1);
-Th2=change(Th2,refe=r2);
+Th1=change(Th1,label=r1);
+Th2=change(Th2,label=r2);
 
 plot( Th1, Th2, wait=1 );
 
