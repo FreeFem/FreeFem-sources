@@ -11,6 +11,7 @@
 # add check of FLIBS and X11_LIBS  v2.24-2
 
 AC_INIT(FreeFem++,3.8,hecht@ann.jussieu.fr,freefem++)
+AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
@@ -617,7 +618,8 @@ fi
 
 if test "$with_mpi" != no
 then
-
+	AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
+	AC_CHECK_PROGS(MPICXX, mpic++ mpiCC mpicxx mpCC hcp mpxlC mpxlC_r cmpic++, $CXX)
 	AC_MSG_CHECKING(for $ff_mpicxx)
 	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
@@ -684,6 +686,26 @@ ff_mpi=no)
 ##		fi
 	else
 	        AC_SUBST(MPICXX,$ff_save_cxx)
+	fi
+	if test "$ff_mpi" = yes;
+	then
+	    
+	    AC_ARG_VAR(MPICC,[MPI C compiler command])
+	    AC_CHECK_PROGS(MPICC, mpicc hcc mpcc mpcc_r mpxlc cmpicc, $CC)
+	    AC_SUBST(MPICC)
+	    
+	    if test "$enable_fortran" != no
+	    then	
+		
+		AC_ARG_VAR(MPIF77,[MPI Fortran compiler command])
+		AC_CHECK_PROGS(MPIF77, mpif77 hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, $F77)
+		AC_SUBST(MPIF77)
+		
+		AC_ARG_VAR(MPIFC,[MPI Fortran compiler command])
+		AC_CHECK_PROGS(MPIFC, mpif90 mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, $FC)
+		AC_SUBST(MPIFC)
+	    fi
+	    
 	fi
 	CXX="$ff_save_cxx"
 fi
