@@ -35,12 +35,17 @@ echo >config_LIB_INFO
 AC_PROG_CC
 AC_PROG_CXX
 
-AC_SIZEOF_TYPE(int)
-AC_SIZEOF_TYPE(long)
+
+
 
 if test -z "$CXX"; then
   AC_MSG_ERROR(" Sorry no c++ compiler !")
 fi
+AC_COMPUTE_INT(ff_size_long,sizeof(long))
+AC_COMPUTE_INT(ff_size_int,sizeof(int))
+AC_SUBST(SIZEOF_LONG,$ff_size_long)
+AC_SUBST(SIZEOF_INT,$ff_size_int)
+
 # dur dur car sous MacOsX le fortran n'est pas standard. 
 ff_AR="ar"
 ff_ARFLAGS="rv"
@@ -174,7 +179,28 @@ AC_LANG_PUSH([Fortran 77])
 ## AC_LANG(C++)
  AC_LANG_POP([Fortran 77])
  AC_MSG_RESULT($ff_f77intsize)
- AC_F77_WRAPPERS			
+ AC_F77_WRAPPERS
+   echo   " ------ ac_cv_f77_mangling : $ac_cv_f77_mangling"       
+ff_cfagsf77
+case $ac_cv_f77_mangling in
+#  "lower case, no underscore, no extra underscore")
+#  "lower case, no underscore, extra underscore")
+# ;;
+  "lower case, underscore, no extra underscore")
+	ff_cfagsf77="-DAdd_";;
+  "lower case, underscore, extra underscore")
+	ff_cfagsf77="-DAdd_";;
+  "upper case, no underscore, no extra underscore")
+   ff_cfagsf77="-DUPPER";;
+  "upper case, no underscore, extra underscore")
+   ff_cfagsf77="-DUPPER";;
+    "upper case, underscore, no extra underscore")
+        ff_cfagsf77="-DUPPER -DAdd_";;
+  "upper case, underscore, extra underscore")
+        ff_cfagsf77="-DUPPER -DAdd_";;
+  *) ;;
+esac
+AC_SUBST(CFLAGSF77,$ff_cfagsf77)
  if test $ff_f77intsize -eq  8
  then
      AC_MSG_ERROR([ Fatal Error: Your fortran 77  compiler have by 8 bytes integer ],1);  

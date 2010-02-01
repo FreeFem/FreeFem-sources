@@ -170,12 +170,6 @@
 /* A pure windows applications no cygwin dll */
 #undef PURE_WIN32
 
-/* The size of `int', as computed by sizeof. */
-#undef SIZEOF_INT
-
-/* The size of `long', as computed by sizeof. */
-#undef SIZEOF_LONG
-
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
