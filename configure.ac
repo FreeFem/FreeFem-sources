@@ -32,7 +32,12 @@ AM_MAINTAINER_MODE
 echo >config_LIB_INFO
 
 # Necessary compilers
+AC_PROG_CC
 AC_PROG_CXX
+
+AC_SIZEOF_TYPE(int)
+AC_SIZEOF_TYPE(long)
+
 if test -z "$CXX"; then
   AC_MSG_ERROR(" Sorry no c++ compiler !")
 fi
@@ -46,6 +51,8 @@ AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPAC
 if test "$enable_fortran" != no
 then
 	AC_PROG_F77(g77 f77 gfortran g77 f90 xlf xlf90 fort77)
+	AC_PROG_FC(gfortran  f90  xlf90 )
+
 #	if test -n "$F77" 
 #	then
         ff_flibs=""
