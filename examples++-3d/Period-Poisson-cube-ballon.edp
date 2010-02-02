@@ -45,7 +45,7 @@ real x0=0.3,y0=0.4,z0=06;
 func f= sin(x*2*pi+x0)*sin(y*2*pi+y0)*sin(z*2*pi+z0);
 real gn = 1.;
 real cf= 1;
-problem P(uh,vh,solver=GMRES)=
+problem P(uh,vh,solver=sparsesolver)=
      int3d(Th,1)( Grad(uh)'*Grad(vh)*100) 
   +  int3d(Th,2)( Grad(uh)'*Grad(vh)*2) 
   + int3d(Th) (vh*f)

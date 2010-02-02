@@ -1518,7 +1518,7 @@ Serialize GenericMesh<T,B,V>::serialize() const
 	set(nnv,nnt,nnbe);
 	for (int i=0;i<nv;i++)
 	  {
-	      double r[d];
+	      //double r[d];
 	      for(int j=0;j<d;++j)
 		  serialized.get(pp,vertices[i][j]);
 	      serialized.get(pp,vertices[i].lab);
