@@ -27,7 +27,7 @@
  */
 
 #include "ff++.hpp"
-
+#include "array_resize.hpp"
 using Fem2D::Mesh;
 using Fem2D::MeshPoint;
 
@@ -62,7 +62,7 @@ map<pair<int,int>,int>::iterator closeto(map<pair<int,int>,int> & m, pair<int,in
 }
 
 bool BuildPeriodic( 
-		   int nbcperiodic,
+		   int nbc ,
 		   Expression *periodic,
 		   const Mesh3 &Th,Stack stack,
 		   KN<int> & ndfe) 
@@ -1390,6 +1390,44 @@ class Op4_Mesh32mp : public quad_function<pmesh3*,R,R,R,MeshPoint *> { public:
 
 // FH
 
+// add Feb. 2010 FH 
+template<class A> inline AnyType DestroyKN(Stack,const AnyType &x){
+    KN<A> * a=GetAny<KN<A>*>(x);
+    for (int i=0;i<a->N(); i++)
+	(*a)[i]->destroy();
+    a->destroy(); 
+    return  Nothing;
+}
+template<class RR,class A,class B>  
+RR * get_elementp_(const A & a,const B & b){ 
+    if( b<0 || a->N() <= b) 
+      { cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " array type = " << typeid(A).name() << endl;
+	  ExecError("Out of bound in operator []");}
+    return  &((*a)[b]);}
+
+template<class R>  R * set_initinit( R* const & a,const long & n){ 
+    SHOWVERB( cout << " set_init " << typeid(R).name() << " " << n << endl);
+    a->init(n);
+    for (int i=0;i<n;i++)
+	(*a)[i]=0;
+    return a;}
+
+void init_mesh3_array()
+{
+    Dcl_Type<KN<pmesh3> *>(0,::DestroyKN<pmesh3> );
+    atype<KN<pmesh3>* >()->Add("[","",new OneOperator2_<pmesh3*,KN<pmesh3>*,long >(get_elementp_<pmesh3,KN<pmesh3>*,long>));
+    TheOperators->Add("<-", 
+		      new OneOperator2_<KN<pmesh3> *,KN<pmesh3> *,long>(&set_initinit));
+    map_type_of_map[make_pair(atype<long>(),atype<pmesh3>())]=atype<KN<pmesh3>*>(); // vector
+    
+    Dcl_Type< Resize<KN<pmesh3> > > ();
+    Add<KN<pmesh3>*>("resize",".",new OneOperator1< Resize<KN<pmesh3> >,KN<pmesh3>*>(to_Resize));
+    Add<Resize<KN<pmesh3> > >("(","",new OneOperator2_<KN<pmesh3> *,Resize<KN<pmesh3> > , long   >(resizeandclean1));
+    
+    
+}
+
+
 void init_lgmesh3() {
    if(verbosity)  cout <<"lg_mesh3 ";
 
@@ -1587,6 +1625,7 @@ void init_lgmesh3() {
     
  
  Add<pfes3*>("(","", new OneTernaryOperator<pVh3_ndf,pVh3_ndf::Op>  );
+init_mesh3_array();   
  
 }
 //#include "InitFunct.hpp"

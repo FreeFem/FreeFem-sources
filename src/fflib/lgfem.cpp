@@ -292,7 +292,7 @@ bool In(long *viso,int n,long v)
 
 
 class  LinkToInterpreter { public:
- Type_Expr   P,N,x,y,z,label,region,nu_triangle,nu_edge,lenEdge,hTriangle,area,inside;
+ Type_Expr   P,N,x,y,z,label,region,nu_triangle,nu_edge,lenEdge,hTriangle,area,inside,volume;
   LinkToInterpreter() ; 
 };
 
@@ -483,6 +483,26 @@ class E_P_Stack_areaTriangle   :public  E_F0mps { public:
 	  ffassert(0); // undef 
       }
     return SetAny<double>(l);} 
+    operator aType () const { return atype<double>();}         
+    
+}; 
+
+// add FH
+class E_P_Stack_VolumeTet   :public  E_F0mps { public: 
+    AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+	MeshPoint * mp=MeshPointStack(s);
+	assert(mp->T) ;
+	double l=-1; // unset ...
+	if (mp->d==3 && mp->T3 )
+	  {	
+	      l= mp->T3->mesure();
+	  }
+	else 
+	  {
+	    cout << "erreur : E_P_Stack_VolumeTet" << mp->d << " " << mp->f << endl;
+	    ffassert(0); // undef 
+	  }
+	return SetAny<double>(l);} 
     operator aType () const { return atype<double>();}         
     
 }; 
@@ -2531,6 +2551,7 @@ LinkToInterpreter::LinkToInterpreter()
    lenEdge    = make_Type_Expr(atype<R>(),new E_P_Stack_lenEdge);
    hTriangle  = make_Type_Expr(atype<R>(),new E_P_Stack_hTriangle);
    area       = make_Type_Expr(atype<R>(),new E_P_Stack_areaTriangle);
+   volume       = make_Type_Expr(atype<R>(),new E_P_Stack_VolumeTet);
    inside     = make_Type_Expr(atype<R>(),new E_P_Stack_inside);
   Global.New("x",x);
   Global.New("y",y);
@@ -2544,6 +2565,7 @@ LinkToInterpreter::LinkToInterpreter()
   
   Global.New("lenEdge",lenEdge);   
   Global.New("area",area);   
+  Global.New("volume",volume);   
   Global.New("hTriangle",hTriangle);
   Global.New("inside",inside);   
   Global.New("nTonEdge",make_Type_Expr(atype<long>(),new E_P_Stack_nTonEdge));   

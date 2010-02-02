@@ -662,7 +662,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     fprintf(fpoints,"%i\n",nbv_surf);
     
     for (int k=0; k<nbv_surf; k++) {
-      int k0 = liste_v_num_surf[k];
+      //int k0 = liste_v_num_surf[k];
       const  Vertex & P = this->vertices[k];
       fprintf(fpoints,"%f %f %f %i\n",P.x,P.y,P.z,P.lab);
     }
@@ -864,7 +864,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	if (l[2]<=-eps ) neg[k++]=2;
 	if (l[3]<=-eps ) neg[k++]=3;
 	
-	R eps1 = T.mesure()   * 1.e-5;
+	//R eps1 = T.mesure()   * 1.e-5;
 	   if(ddd)  cout << " k= " << k << endl;
     
 	if (k==3) //  3 face de sortie possible 

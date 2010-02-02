@@ -878,8 +878,8 @@ Fem2D::Mesh *  buildmeshbamg( string * const & s, int nbvxin) {
   using bamg::Triangles;
   using bamg::Geometry;
   Geometry Gh(s->c_str());
-  double	 hmin = Gh.MinimalHmin();
-  double	 hmax = Gh.MaximalHmax();
+  //double	 hmin = Gh.MinimalHmin();
+  //double	 hmax = Gh.MaximalHmax();
   int nbvx = nbvxin ? nbvxin : ((Gh.nbv*Gh.nbv)/9 +1000); 
   Triangles * bTh=  new Triangles(nbvx,Gh);
   // bTh->inquire();
