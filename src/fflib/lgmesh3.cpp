@@ -62,7 +62,7 @@ map<pair<int,int>,int>::iterator closeto(map<pair<int,int>,int> & m, pair<int,in
 }
 
 bool BuildPeriodic( 
-		   int nbc ,
+		   int nbcperiodic ,
 		   Expression *periodic,
 		   const Mesh3 &Th,Stack stack,
 		   KN<int> & ndfe) 
