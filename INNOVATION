@@ -1,4 +1,7 @@
-  - change configure.ac for mpifc, mpif77,  mpicc, ...  ,   -llapack search 
+v 3.8
+  - plot of complex field  and 3d vector .. 
+  - upgrade the documentation in 3d mesh example
+  - change configure.ac for mpifc, mpif77,  mpicc, ...  
   - correct  include seach path 
   - uniformize named parameter  in change, movemesh, in load "msh" , glumesh, ...
      add synonyme:  
@@ -8,10 +11,13 @@
 	labebup=
 	labebdown=
 	labelmib=
-  - writing a 3d schwarz-nm-3d.edp
+  - writing  schwarz-nm-3d.edp examples
+     - add array of 3d mesh
      - add  word  volume to get the volume of the current tet element
      - correct  metis.cpp in 3d case 
   - correct in fflapack.cpp (example++-load, computation of eigenvalue of complex matrix)
+         -llapack search in configure.ac 
+        and unify fflapack.cpp lapack.cpp are the same file.
 v 3.7-1 13 jan 2010.. 
   - EqPoisson.edp (SOlve Poison equation in 3d fish)
   - add possibility to put array  (int[int] )  to set a set of label/region in
