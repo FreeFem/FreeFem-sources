@@ -34,7 +34,7 @@ KN<long> * partmetis(Stack s,KN<long> * const & part,Mesh * const & pTh,long con
     int numflag=0;
     int nparts=lparts;
     int edgecut;
-    int etype =1; // triangle
+    int etype =nve-2; // triangle or tet .  change FH fevr 2010 
     if(NO==0)
      METIS_PartMeshNodal(&nt, &nv, elmnts, &etype , &numflag, &nparts, &edgecut, epart, npart);
     else

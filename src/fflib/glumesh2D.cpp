@@ -235,9 +235,9 @@ public:
 public:
   SetMesh_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
     args.SetNameParam(n_name_param,name_param,nargs);
-      if( nargs[0] && nargs[1] ) 
+      if( nargs[0] && nargs[2] ) 
 	  CompileError("uncompatible change (Th, label= , refe=  ");
-      if( nargs[1] && nargs[2] ) 
+      if( nargs[1] && nargs[3] ) 
 	  CompileError("uncompatible change (Th, region= , reft=  ");
       
   } 
