@@ -340,7 +340,9 @@ void GetEnvironment()
   if(ff_loadpath)
     GetEnvironment("loadpath",ff_loadpath);
   if(ff_incpath)
-    GetEnvironment("includepaths",ff_incpath);
+    GetEnvironment("includepath",ff_incpath);
+
+   EnvironmentInsert("includepath","","");//    always add "" the first include path  
   if( verbosity >2) 
     {
       EnvironmentData::iterator loadpath=ffenvironment.find("loadpath");

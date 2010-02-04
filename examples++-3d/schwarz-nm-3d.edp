@@ -1,4 +1,4 @@
-bool withmetis=0;
+bool withmetis=1;
 bool RAS=0;
 int sizeoverlaps=2; // size off overlap 
 int nnx=2,nny=2,nnz=2;

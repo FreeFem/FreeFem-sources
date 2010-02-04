@@ -627,7 +627,12 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
    else
       filename=new  string(ff);
   if (!f || !*f) {
-    lex->cout << " Error openning file " <<ff<< endl;
+    lex->cout << " Error openning file " <<ff<< " in: " <<endl;
+      for (ICffincludedir k=lex->ffincludedir.begin();
+	   k!=lex->ffincludedir.end();
+	   ++k)
+	  lex->cout  << "  -- try  :\"" << *k+ff  << "\"\n";
+
     lgerror("lex: Error input openning file ");};
 }
 void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name)//,int nbparam,int bstackparam) 
@@ -700,7 +705,7 @@ bool mylex::close() {
  mylex::mylex(ostream & out):
     linenumber(1),
     charnumber(0),
-    ffincludedir(ffenvironment["include"]),
+    ffincludedir(ffenvironment["includepath"]),
     firsttime(true),
     level(-1),
     echo(mpirank == 0 && verbosity),
