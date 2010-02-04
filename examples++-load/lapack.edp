@@ -1,5 +1,5 @@
 load "lapack"
-load "fflapack"
+// load "fflapack" obsolete (F. Hecht version 3.8)
 {
 int n=5;
 real[int,int] A(n,n),A1(n,n),B(n,n);
