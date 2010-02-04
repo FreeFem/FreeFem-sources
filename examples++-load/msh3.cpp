@@ -2337,7 +2337,7 @@ class Movemesh2D_3D_surf_Op : public E_F0mps
 public:
   Expression eTh;
   Expression xx,yy,zz; 
-  static const int n_name_param =5+2; 
+  static const int n_name_param =5+1; 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ 
@@ -2355,7 +2355,7 @@ public:
     if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
     int err =0;
     if( nargs[2] && nargs[5] ) 
-	CompileError("uncompatible movemesh23 (Th, label= , refface=  ");
+    	CompileError("uncompatible movemesh23 (Th, label= , refface=  ");
     if(a1) {
       if(a1->size() !=3) 
 	CompileError("movemesh23 (Th,transfo=[X,Y,Z],) ");
