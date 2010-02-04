@@ -1080,13 +1080,18 @@ AC_SUBST(G2CLIB,$ff_g2c_lib)
 # warning $$ because the make eat one 
 ff_lapack_ok=no;
 ff_lapack_lib=
-AC_MSG_CHECKING(for lapack in $LIBS and $ff_blas_libs, )
+AC_MSG_CHECKING([for lapack in $LIBS, $ff_blas_libs and -llapack] )
     if test "$ff_blas_ok" = yes ; then
         AC_LINK_IFELSE( [AC_LANG_CALL(,dgeqr2_)], ff_lapack_ok=yes)
 	if test "$ff_lapack_ok" = no ; then
 	    ff_save_libs=$LIBS	  
-	    LIBS="$LIBS $ff_blas_libs"
+	    LIBS="$ff_save_libs $ff_blas_libs"
             AC_LINK_IFELSE( [AC_LANG_CALL(,dgeqr2_)], ff_lapack_ok=yes)	
+	    if test "$ff_lapack_ok" = no ; then
+	    LIBS="$ff_save_libs -llapack $ff_blas_libs"
+            AC_LINK_IFELSE( [AC_LANG_CALL(,dgeqr2_)], [ff_lapack_ok=yes
+	    ff_lapack_libs="-llapack"] )	
+	    fi		    
 	    LIBS="$ff_save_libs"	   
 	fi
     fi

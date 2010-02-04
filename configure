@@ -16262,8 +16262,8 @@ G2CLIB=$ff_g2c_lib
 # warning $$ because the make eat one
 ff_lapack_ok=no;
 ff_lapack_lib=
-{ echo "$as_me:$LINENO: checking for lapack in $LIBS and $ff_blas_libs" >&5
-echo $ECHO_N "checking for lapack in $LIBS and $ff_blas_libs... $ECHO_C" >&6; }
+{ echo "$as_me:$LINENO: checking for lapack in $LIBS, $ff_blas_libs and -llapack " >&5
+echo $ECHO_N "checking for lapack in $LIBS, $ff_blas_libs and -llapack ... $ECHO_C" >&6; }
     if test "$ff_blas_ok" = yes ; then
         cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -16325,7 +16325,7 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_lapack_ok" = no ; then
 	    ff_save_libs=$LIBS
-	    LIBS="$LIBS $ff_blas_libs"
+	    LIBS="$ff_save_libs $ff_blas_libs"
             cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -16384,6 +16384,68 @@ fi
 
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
+	    if test "$ff_lapack_ok" = no ; then
+	    LIBS="$ff_save_libs -llapack $ff_blas_libs"
+            cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dgeqr2_ ();
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+return dgeqr2_ ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ff_lapack_ok=yes
+	    ff_lapack_libs="-llapack"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+	    fi
 	    LIBS="$ff_save_libs"
 	fi
     fi
