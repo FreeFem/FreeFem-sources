@@ -30,7 +30,7 @@ matrix<complex> ML(ml[]); // matrix diagonal
 cout << "ML="<<ML << endl;
 cout << "B="<<B << endl;
 matrix<complex> BML=B*ML; // a faire 
-matrix<complex> tB=B';        // transpose and conjugate 
+matrix<complex> tB=B';        //'; transpose and conjugate 
 cout << "tB=" << tB << endl;
 matrix<complex> MLtB=ML'*B'; // 
 
@@ -42,30 +42,30 @@ cout << "MLtB=" << MLtB << endl;
 //  but LU need skyline matrix 
 if(HaveUMFPACK)
   set(A,solver=UMFPACK); // set a solver 
-else 
+ else 
   set(A,solver=GMRES); // set a solver 
-  VH<complex> uH=0;
-  Vh<complex> uh=x+y+1i*(x-y);
-  uH[]= B*uh[];
-  Vh uHr = imag(uH);
-  plot(uHr,wait=1);
-  matrix<complex> BtA = BB'*A;
-  matrix<complex> BtAB = BtA*BB;
+VH<complex> uH=0;
+Vh<complex> uh=x+y+1i*(x-y);
+uH[]= B*uh[];
+Vh uHr = imag(uH);
+plot(uHr,wait=1);
+matrix<complex> BtA = BB'*A;//';
+matrix<complex> BtAB = BtA*BB;
 if(HaveUMFPACK)  
   set(BtAB,solver=UMFPACK);  
-else 
+ else 
   set(BtAB,solver=GMRES);  
   Vh<complex> ff=1+1i;
-  Vh<complex> xx;
-  Vh xxr;
-  cout << " ------ " << endl;
-  
-  xx[]=BtAB^-1*ff[];
-  cout << " ------ " << endl;
-  xx[]=BtAB^-1*ff[];
-  cout << " ------ " << endl;
-  xxr=imag(xx);
-  plot(xxr, wait=1);
+Vh<complex> xx;
+Vh xxr;
+cout << " ------ " << endl;
+
+xx[]=BtAB^-1*ff[];
+cout << " ------ " << endl;
+xx[]=BtAB^-1*ff[];
+cout << " ------ " << endl;
+xxr=imag(xx);
+plot(xxr, wait=1);
 
 {
   int N=10;
@@ -79,15 +79,15 @@ else
       a[i]=i*(1.+2i);
     }
   b=A*a;
-
+  
   cout << " b =" << b << endl ;
   cout << " a =" << a << endl ;
-  cout << " b'*b (hermissian product) = " << b'*b << endl;
-  cout << " a'*a = " << a'*a << endl;
-  assert( abs(imag(b'*b)) <1e-5);
+  cout << " b'*b (hermissian product) = " << b'*b << endl; //';
+  cout << " a'*a = " << a'*a << endl;//';;
+  assert( abs(imag(b'*b)) <1e-5);//')));
   cout << "xxxx\n"; 
   matrix<complex> sparseA=A;
-
+  
   cout << sparseA << endl;
   sparseA = 2*sparseA+sparseA;
   sparseA = 4*sparseA+sparseA*(5+1i); //  * 27
@@ -111,4 +111,25 @@ else
   cout << " ||b.||_2  " << b.l2 << endl;
   cout << " ||b.||_infty  " << b.linfty << endl;
   assert(b.l1 < 1e-10);
+}
+{// version 3.8    
+  mesh Th=square(2,2);
+  fespace Xh(Th,P1);
+  varf vv(u,v)= int2d(Th)( ((2+1i)*u*v)');//');
+  matrix<complex> A=vv(Xh,Xh);
+  cout << A(0,0)  << endl;
+  cout << [ 1i, 1i]'*[ 1i, 1i] <<endl;//'; 
+  macro Grada(u) [  phia*dx(u) + phiax*u ,dy(u) ]// ...
+    func phia = exp(-2i*pi*x);
+  func phiax = -2i*pi*exp(-2i*pi*x);
+
+  varf va(u,v)= int2d(Th)( Grada(v)'*Grada(u) ) ;//');
+  A = va(Xh,Xh);
+  matrix<complex> At=A';
+  cout << A(1,2)' << " ==  " << At(2,1) << endl;
+  A = A+ (-1)*At;
+  cout << A << endl;
+ 
+
+
 }

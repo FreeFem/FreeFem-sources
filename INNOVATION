@@ -1,4 +1,10 @@
 v 3.8
+  - correct ' operator do alway in complex case the conj and trans (hermisian stuff)
+     in  formal array with [ ]' 
+     in  linear comb of complex matrix  
+        now  A + (-1)*A' is zero  is A is hermisian .
+     in varf term  (a*dx(u)*dy(v) )'  <=>  a' dx(u)*dy(v)
+    now you can  [a*dx(v),dy(v)] ' *[a*dx(u),dy(u)] in complex case.. 
   - plot of complex field  and 3d vector .. 
   - upgrade the documentation in 3d mesh example
   - change configure.ac for mpifc, mpif77,  mpicc, ...  

@@ -73,7 +73,7 @@ double  VersionNumber();
 OneOperator::pair_find OneOperator::Find(const ArrayOfaType & at)const
  { 
       const OneOperator *w=0,*oo;
-      int nn=0,p=0;
+      int nn=0,p=-10000;
  /*     for (oo=this;oo;oo=oo->next)
         if (oo->pref>=p && oo->WithOutCast(at)) 
           {
@@ -83,7 +83,7 @@ OneOperator::pair_find OneOperator::Find(const ArrayOfaType & at)const
       if (nn) return make_pair(w,nn);*/
       for (int ncast=0;ncast<=n;ncast++) // loop on the number of cast 
        {
-         p=0;
+         p=-10000;
          for (oo=this;oo;oo=oo->next)
           if (oo->pref>=p && oo->WithCast(at,ncast)) 
           { 

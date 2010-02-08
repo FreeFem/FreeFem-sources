@@ -1130,6 +1130,7 @@ template<class R>
 template<class R>
  triplet<int,int,bool> BuildCombMat(std::map< pair<int,int>, R> & mij,const list<triplet<R,MatriceCreuse<R> *,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
   {
+    // modif FH feb 2010  cnj =>  transpose ->  conj &  trans 
     typedef typename list<triplet<R,MatriceCreuse<R> *,bool> >::const_iterator lconst_iterator;
     
     lconst_iterator begin=lM.begin();
@@ -1153,7 +1154,7 @@ template<class R>
 	    //  change to max FH dec 2007 to hard to satisfy
 	   /* if (n==0)*/ { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}// Modif mars 2007 FH
 	   /* else { if(transpose)  ffassert(n== M.m && m==M.n); else ffassert(n== M.n && m==M.m);}*/
-	    sym = M.addMatTo(coef,mij,transpose,ii00,jj00,cnj) && sym;  
+	    sym = M.addMatTo(coef,mij,transpose,ii00,jj00,transpose&&cnj) && sym;  
 	}
      } 
     int nbcoef=mij.size();

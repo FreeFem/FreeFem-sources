@@ -99,6 +99,16 @@ void mylex::dump(ostream & f )
     }
 }   
 
+inline bool isNLCR(istream & f,int c)
+{
+    // eat  CR NL or NL CR paire  
+    int cc= f.peek();
+    bool ret=(c == 10 || c == 13) ;
+    if(ret && ( cc != c) && (cc == 10 || cc == 13) )
+     f.get();
+    return ret;
+}
+
 int mylex::EatCommentAndSpace(string *data)
 {
  // if data is !0 then add reading char in data
@@ -114,7 +124,7 @@ int mylex::EatCommentAndSpace(string *data)
     while (isspace(c) || c == 10 || c == 13 )
      {
       c = source().get();
-      if(c==10 || c==13) c='\n';
+      if(isNLCR(source(),c)) c='\n';
       if (echo) cout << (char) c;
       if(c=='\n') { linenumber++; if (echo) cout << setw(5) <<linenumber << " : " ;};             
        if(data) *data+=char(c);
@@ -137,7 +147,7 @@ int mylex::EatCommentAndSpace(string *data)
         if(data) *data+="//";
 
         do {c=source().get();            
-        if(c==10 || c==13) c='\n';
+        if(isNLCR(source(),c)) c='\n';
         if (echo) cout << (char) c;
         if(data) *data+=char(c);
         if(c=='\n') { linenumber++; if (echo) cout << setw(5) <<linenumber << " : " ;};             
@@ -152,7 +162,7 @@ int mylex::EatCommentAndSpace(string *data)
         source().get();
         do {    
           c=source().get(); 
-          if(c==10 || c==13) c='\n';
+          if(isNLCR(source(),c)) c='\n';
           if (echo) cout << (char) c ;
           if(data) *data+=char(c);
           if(c=='\n') { linenumber++; if (echo) cout << setw(5) <<linenumber << " : " ;};             
@@ -241,7 +251,7 @@ int mylex::basescan()
   else  if (c=='"')
     {
       int i;
-      char cc;
+      char cc,ccc;
       for (     i = 0,cc=source().peek(); 
                 i < 256 &&  (isprint(cc) && cc !='\n'  && cc !='"');
                 cc=source().peek(),++i
@@ -250,13 +260,15 @@ int mylex::basescan()
           if ( cc == '\\')  //   escape 
             {
               cc= source().get();
-              cc= source().get();      
+              cc= source().get(); 
+	      ccc= source().peek(); 
               switch (cc) {
               case 'n': buf[i]='\n';break;
               case 'f': buf[i]='\f';break;
               case 10:
               case 13:
 		cc='\n';
+		if(ccc!=cc && (ccc==10 || ccc==13)) source().get();// NL CR eat ...
 		linenumber++;
 		//if (echo) cout << setw(5) <<linenumber << " : " ;		
               default : buf[i]=cc  ;break;              
@@ -604,7 +616,7 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
   l=0;
   nf=f=0;
   if(lex->ffincludedir.empty()) // if no liste 
-    nf=f= new ifstream(ff); 
+      nf=f= new ifstream(ff,ios_base::binary); //  modif of win32
   if (!f || !*f)
    {
    if ( f)  { delete f; f=0; }
@@ -614,7 +626,7 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
    {
     string dif_ff(*k+ff);
     if (verbosity>=50) lex->cout  << "  --lex open :" << dif_ff << endl;
-    nf=f= new ifstream(dif_ff.c_str()); 
+    nf=f= new ifstream(dif_ff.c_str(),ios_base::binary); 
     if ( f)  {
       if ( f->good()) {  
         filename = new string(dif_ff);

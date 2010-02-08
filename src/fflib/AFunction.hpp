@@ -1967,13 +1967,13 @@ class  OneOperator1 : public OneOperator {
     E_F0 * code(const basicAC_F0 & args) const 
      { return  new CODE(f,t0->CastTo(args[0]));} 
      
-    OneOperator1(func  ff): 
+    OneOperator1(func  ff,int ppref=0): 
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),
-      t0( map_type[typeid(A).name()] ), f(ff) {}
+    t0( map_type[typeid(A).name()] ), f(ff) {pref=ppref;}
       
-    OneOperator1(func  ff,aType tt0): 
+    OneOperator1(func  ff,aType tt0,int ppref=0): 
       OneOperator(map_type[typeid(R).name()],tt0),
-      t0( map_type[typeid(A).name()] ), f(ff) {}
+      t0( map_type[typeid(A).name()] ), f(ff) {pref=ppref;}
 };
 
 
@@ -2487,11 +2487,11 @@ class  OneOperator1_ : public OneOperator {
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
      { return  new CODE(f,t[0]->CastTo(args[0]));} 
-    OneOperator1_(func  ff): 
-      OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),t0( map_type[typeid(A).name()] ),f(ff){}
-    OneOperator1_(func  ff,aType tt0): 
+    OneOperator1_(func  ff,int ppref=0): 
+    OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),t0( map_type[typeid(A).name()] ),f(ff){pref=ppref;}
+    OneOperator1_(func  ff,aType tt0,int ppref=0): 
 	OneOperator(map_type[typeid(R).name()],tt0),
-	t0( map_type[typeid(A).name()]), f(ff) {}
+	t0( map_type[typeid(A).name()]), f(ff) {pref=ppref;}
     
 };
 
