@@ -582,8 +582,21 @@ public:
     C_F0  code2(const basicAC_F0 &args) const;       
 };
 // fin nov 2007
-// avril 2007
-
+//  add 2010 feb.  FH
+C_F0 TryConj(const C_F0 & c) {
+    //   here put the conj   operator ... 
+    ArrayOfaType at(c.left()); 
+    basicAC_F0_wa p(c);
+    const  OneOperator *  ff=TheOperators->Find("\'",at);
+	if (ff) { 
+	    if(verbosity>10) 
+	    cout << " ( do Conj) "  ;
+	     return ff->code2(p);
+	}
+	
+    return c; }
+// fin add 2010 feb.	  
+// avril 2007	  
 C_F0  formalMatTrace(const basicAC_F0 &args)       
 {
     bool ta =args[0].left()==atype<TransE_Array>();
@@ -617,12 +630,12 @@ C_F0  formalMatTrace(const basicAC_F0 &args)
 	    ffassert(li);
 	    for (int j=0; j<ma;++j)
 		if(!ta)  A(i,j) = (*li)[j];
-		else     A(j,i) = (*li)[j];
+		else     A(j,i) = TryConj((*li)[j]);
 	} 
 	    else
 		for (int i=0;i<na;++i)
 		    if(!ta)  A(i,0) = a[i];
-		    else     A(0,i) = a[i];
+		    else     A(0,i) = TryConj(a[i]);
     
     
     CC_F0 s;
@@ -666,12 +679,12 @@ C_F0  formalMatDet(const basicAC_F0 &args)
 	    ffassert(li);
 	    for (int j=0; j<ma;++j)
 		if(!ta)  A(i,j) = (*li)[j];
-		else     A(j,i) = (*li)[j];
+		else     A(j,i) = TryConj((*li)[j]);
 	} 
 	    else
 		for (int i=0;i<na;++i)
 		    if(!ta)  A(i,0) = a[i];
-		    else     A(0,i) = a[i];
+		    else     A(0,i) = TryConj(a[i]);
     
     
     if(na1==1)
@@ -1227,7 +1240,7 @@ void Init_map_type()
      Global.Add("min","(",new OneOperator2_<long,long>(Min));
      Global.Add("atan2","(",new OneOperator2<double>(atan2));
      Global.Add("atan","(",new OneOperator2<double>(atan2));
-     Global.Add("sqrt","(",new OneOperator1<double>(sqrt));
+     Global.Add("sqrt","(",new OneOperator1<double>(sqrt,2));
      Global.Add("abs","(",new OneOperator1<double>(Abs));
      Global.Add("abs","(",new OneOperator1<long>(Abs));
      Global.Add("cos","(",new OneOperator1_<Complex>(cos));
@@ -1239,9 +1252,11 @@ void Init_map_type()
      //     Global.Add("tan","(",new OneOperator1_<Complex>(tan));
      Global.Add("exp","(",new OneOperator1_<Complex>(exp));
      Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow));
-     Global.Add("sqrt","(",new OneOperator1_<Complex>(sqrt));
-     Global.Add("conj","(",new OneOperator1_<Complex>(conj));
-     TheOperators->Add("\'",new OneOperator1_<Complex>(conj));       
+     Global.Add("sqrt","(",new OneOperator1_<Complex>(sqrt,0));
+     Global.Add("conj","(",new OneOperator1_<Complex>(conj,0));
+     Global.Add("conj","(",new OneOperator1_<double>(conj,1));
+     TheOperators->Add("\'",new OneOperator1_<Complex>(conj,0));       
+     TheOperators->Add("\'",new OneOperator1_<double>(conj,1));       //  add F.  Feb 2010  of conj of varf.. 
      
      
      Global.Add("imag","(",new OneOperator1_<double,Complex>(Imag));
@@ -1401,12 +1416,12 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 	    ffassert(li);
 	    for (int j=0; j<ma;++j)
 		if(!ta)  A(i,j) = (*li)[j];
-		else     A(j,i) = (*li)[j];
+		else     A(j,i) = TryConj((*li)[j]);
 	} 
     else
 	for (int i=0;i<na;++i)
 	    if(!ta)  A(i,0) = a[i];
-	    else     A(0,i) = a[i];
+	    else     A(0,i) = TryConj(a[i]);
 	 
     if(mab)
 	for (int i=0;i<nb;++i)
@@ -1415,12 +1430,12 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 	    ffassert(li);
 	    for (int j=0; j<mb;++j)
 		if(!tb)  B(i,j) = (*li)[j];
-		else     B(j,i) = (*li)[j];
+		else     B(j,i) = TryConj((*li)[j]);
 	} 
     else
 	for (int i=0;i<nb;++i)
 	    if(!tb)  B(i,0) = b[i];
-	    else     B(0,i) = b[i];
+	    else     B(0,i) = TryConj(b[i]);
     
     KNM<CC_F0> C(na1,mb1);
     CC_F0 s,abi;
@@ -1517,7 +1532,7 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
     AC_F0  v;
     v = 0; // empty
 	for (int i=0;i<na;++i)	
-	    v += C_F0(TheOperators,op,a[i],b[i]);
+	    v += C_F0(TheOperators,op,ta ? TryConj(a[i]) : a[i],tb ? TryConj(b[i]): b[i]) ;
 	return C_F0(TheOperators,"[]",v);
     
 }

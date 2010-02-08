@@ -3256,6 +3256,7 @@ Also \texttt{P.z} is reserved.
     edge (integer ).\index{nTonEdge}
 
     \itemtt[area] give the area of the current triangle (real value). \index{area}
+    \itemtt[volume] give the volume of the current tetrahedra (real value). \index{volume}
 
 \itemtt[cout]  is the standard output device (default is console).
 On MS-Windows, the standard output is only to console, in this time.
@@ -3621,7 +3622,7 @@ The construction of \ttCC{fh} (=$f_h$) is explained in
 \refSec{Finite Elements}.
 
 \begin{note}
-The command \ttCC{@plot} is valid only for real  FE-functions.
+The command \ttCC{@plot} is valid only for real or complex   FE-functions (2d or 3d).
 \end{note}
 Complex valued functions create functions with 2 variables \ttCC{x, y} as follows,
 \bFF
@@ -10229,9 +10230,13 @@ cout << "lambda,mu,gravity ="<<lambda<< " " << mu << " " << gravity << endl;
 @int[@int] ref2=[1,0,2,0];
 @mesh3 Thm=movemesh3(Th,transfo=[x+u1*coef,y+u2*coef,z+u3*coef],label=ref2);
 Thm=change(Thm,label=ref2);
-@plot(Th,Thm, wait=1,cmm="coef  amplification = "+coef );
+@plot(Th,Thm, wait=1,cmm="coef  amplification = "+coef );// see fig \ref{fig-beam-3d}
 \eFF
 \end{example}
+
+\plot[height=8cm]{beam-3d}{3d Beam deformed and undeformed box \label{fig-beam-3d}  }
+
+
 \subsubsection{Fracture Mechanics}
 Consider the plate with the crack whose undeformed shape is
 a curve $\Sigma$ with the two edges $\gamma_1,\, \gamma_2$.

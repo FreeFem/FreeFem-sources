@@ -390,16 +390,29 @@ template<class L>
      throwassert(u);
      L * r= new  L(*u);
     for (typename L::iterator i=r->v.begin();i!=r->v.end();i++)
-      {   operatortype & dd=i->first.second;
+      {   
+	  operatortype & dd=i->first.second;
+	  if (dd != op_id)
+	    { ffassert(0); i->first.second = op_id;  } // a faire          
+	  else {
+	      ffassert(i->second.EvaluableWithOutStack());// a faire derivation des fonctions
+	      dd = d ; }
           
-         if (dd != op_id)
-           { ffassert(0); i->first.second = op_id;  } // a faire          
-         else {
-           ffassert(i->second.EvaluableWithOutStack());// a faire derivation des fonctions
-           dd = d ; }
     }
     return r;}
-    
+
+template<class L>
+L *  CONJ_op(const L *   u) { 
+    throwassert(u);
+    L * r= new  L(*u);
+    for (typename L::iterator i=r->v.begin();i!=r->v.end();i++)
+      {   typename L::TR  & cc=i->second;
+	  if( cc.right()==atype<Complex>() ) 
+	      i->second= C_F0(TheOperators,"\'",cc);
+          
+      }
+    return r;}
+	    
 
 
 template<class L>
@@ -515,6 +528,16 @@ class CODE_Diff { public:
     throwassert( a );
     return  Diff(a,op);}
    static ArrayOfaType  typeargs() {return ArrayOfaType(atype<Result>());}
+};
+
+template<class L>
+class CODE_conj { public:
+    typedef const L* Result;
+    static  E_F0 * f(const basicAC_F0 & args) { 
+	const L * a=dynamic_cast<const L*>((Expression) args[0]) ;
+	throwassert( a );
+	return  CONJ_op(a);}
+    static ArrayOfaType  typeargs() {return ArrayOfaType(atype<Result>());}
 };
 
 enum TheCode_VF { Code_Jump=1, Code_Mean=2, Code_OtherSide=3};

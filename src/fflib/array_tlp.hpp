@@ -852,7 +852,11 @@ void ArrayOperator()
    //-  typedef KN<Z> ZN;
       
     // add  dec 2009.  ne marche pas ( incompatible  avec MatrixBlock) a comprendre ????? FH. 
-   //  map_type[typeid(KN_<K>).name()]->AddCast(new OneOperator_2KN_<K>);
+    //  //   xxxxxxxxxx  2010 feb.   retest .. FH 
+    //   il y a plusieurs problems
+    //    1)   [1,2,3.] ->  tableau de quel type  int, real , complex ????
+    //
+     //   map_type[typeid(KN_<K>).name()]->AddCast(new OneOperator_2KN_<K>);
     // fin add 
     // ----
      aType knlp=  aaaa_knlp ;

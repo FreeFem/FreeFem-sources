@@ -4628,6 +4628,13 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("otherside","(",new OneOperatorCode<Code_VF<Ftest,Code_OtherSide> >);
  Global.Add("otherside","(",new OneOperatorCode<Code_VF<Finconnue,Code_OtherSide> >);
 
+ Global.Add("conj","(",new OneOperatorCode<CODE_conj<Finconnue> >);
+ Global.Add("conj","(",new OneOperatorCode<CODE_conj<Ftest> >);
+ Global.Add("conj","(",new OneOperatorCode<CODE_conj<Foperator> >);
+ TheOperators->Add("\'", new OneOperatorCode<CODE_conj<Finconnue> >); 
+ TheOperators->Add("\'", new OneOperatorCode<CODE_conj<Ftest> >);   
+ TheOperators->Add("\'", new OneOperatorCode<CODE_conj<Foperator> >);   
+    
  Global.Add("dx","(",new OneOperatorCode<CODE_Diff<Ftest,op_dx> >);
  Global.Add("dy","(",new OneOperatorCode<CODE_Diff<Ftest,op_dy> >);
  Global.Add("dx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dx> >);
