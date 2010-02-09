@@ -1,5 +1,5 @@
 v 3.8
-  - correct ' operator do alway in complex case the conj and trans (hermisian stuff)
+  - correct ' operator do alway in complex case the conj and trans (Hermissian stuff)
      in  formal array with [ ]' 
      in  linear comb of complex matrix  
         now  A + (-1)*A' is zero  is A is hermisian .
@@ -24,6 +24,8 @@ v 3.8
   - correct in fflapack.cpp (example++-load, computation of eigenvalue of complex matrix)
          -llapack search in configure.ac 
         and unify fflapack.cpp lapack.cpp are the same file.
+  - add seekp, tellp  method  on ostream type 
+  - add seekg, teeg   method on istream type
 v 3.7-1 13 jan 2010.. 
   - EqPoisson.edp (SOlve Poison equation in 3d fish)
   - add possibility to put array  (int[int] )  to set a set of label/region in

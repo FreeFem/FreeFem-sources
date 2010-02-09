@@ -386,22 +386,22 @@ class ostream_seekp { public:
     operator long () const {return f->tellp();}
 };
 
-/*
-class istream_seekp { public:
-    istream_seekp(istream * ff) :f(ff) {}
+
+class istream_seekg { public:
+    istream_seekg(istream * ff) :f(ff) {}
     istream * f;
- //   operator long () const {return f->tellp();}
+    operator long () const {return f->tellg();}
 };
-*/
+
 ostream_seekp ff_oseekp(ostream **f){ return ostream_seekp(*f);}
 ostream_seekp ff_oseekp(ostream *f){ return ostream_seekp(f);}
-//istream_seekp ff_iseekp(istream **f){ return istream_seekp(*f);}
-//istream_seekp ff_iseekp(istream *f){ return istream_seekp(f);}
+istream_seekg ff_iseekg(istream **f){ return istream_seekg(*f);}
+istream_seekg ff_iseekg(istream *f){ return istream_seekg(f);}
 
 long ffseekp( ostream_seekp  pf, long  l) { long ll= pf.f->tellp(); return pf.f->seekp(l),ll;}
- long fftellp( ostream_seekp  pf) { return pf.f->tellp() ;}
-//long ffseekp( istream_seekp  pf, long  l) {return pf.f->seekp(l),l;}
-// long fftellp( istream_seekp  pf) { return pf.f->tellp() ;}
+long fftellp( ostream_seekp  pf) { return pf.f->tellp() ;}
+long ffseekg( istream_seekg  pf, long  l) {return pf.f->seekg(l),l;}
+long fftellg( istream_seekg  pf) { return pf.f->tellg() ;}
 
  class istream_good { public:
   istream_good(istream * ff) :f(ff) {}
@@ -762,7 +762,7 @@ void Init_map_type()
     Dcl_TypeandPtr<istream*>(0,0,::InitializePtr<istream*>,::DeletePtr<istream*>);
     Dcl_Type< ostream_precis > ();
     Dcl_Type< ostream_seekp > ();
-  //  Dcl_Type< istream_seekp > ();
+    Dcl_Type< istream_seekg > ();
     Dcl_Type< istream_good > ();
     Dcl_Type< NothingType > ();
     
@@ -813,8 +813,8 @@ void Init_map_type()
        new E_F1_funcT<long,double>(Cast<long,double>),
        new E_F1_funcT<long,bool>(Cast<long,bool>),
        new E_F1_funcT<long,ostream_precis>(Cast<long,ostream_precis>),
-       new E_F1_funcT<long,ostream_seekp>(Cast<long,ostream_seekp>)
-      // new E_F1_funcT<long,ostream_precis>(Cast<long,istream_seekp>)
+       new E_F1_funcT<long,ostream_seekp>(Cast<long,ostream_seekp>),
+       new E_F1_funcT<long,istream_seekg>(Cast<long,istream_seekg>)
        );
        
        
@@ -1140,13 +1140,15 @@ void Init_map_type()
     Add<ostream**>("seekp",".",new OneOperator1<ostream_seekp,ostream**>(ff_oseekp));
     Add<ostream*>("seekp",".",new OneOperator1<ostream_seekp,ostream*>(ff_oseekp));
     
-//    Add<istream**>("seekp",".",new OneOperator1<istream_seekp,ostream**>(ff_iseekp));
- //   Add<istream*>("seekp",".",new OneOperator1<istream_seekp,ostream*>(ff_iseekp));
+    Add<istream**>("seekg",".",new OneOperator1<istream_seekg,istream**>(ff_iseekg));
+    Add<istream*>("seekg",".",new OneOperator1<istream_seekg,istream*>(ff_iseekg));
      
  //   Add<istream_seekp>("(","",new OneOperator1<long,istream_seekp>(fftellp),
 //			new OneOperator2<long,istream_seekp,long>(ffseekp));    
     Add<ostream_seekp>("(","",new OneOperator1<long,ostream_seekp>(fftellp),
 		       new OneOperator2<long,ostream_seekp,long>(ffseekp));
+    Add<istream_seekg>("(","",new OneOperator1<long,istream_seekg>(fftellg),
+		       new OneOperator2<long,istream_seekg,long>(ffseekg));
     // end add .. 
     Add<ostream_precis>("(","",new OneOperator1<long,ostream_precis>(get_precis),
                                 new OneOperator2<long,ostream_precis,long>(set_precis));
