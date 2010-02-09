@@ -398,9 +398,9 @@ ostream_seekp ff_oseekp(ostream *f){ return ostream_seekp(f);}
 istream_seekg ff_iseekg(istream **f){ return istream_seekg(*f);}
 istream_seekg ff_iseekg(istream *f){ return istream_seekg(f);}
 
-long ffseekp( ostream_seekp  pf, long  l) { long ll= pf.f->tellp(); return pf.f->seekp(l),ll;}
-long fftellp( ostream_seekp  pf) { return pf.f->tellp() ;}
-long ffseekg( istream_seekg  pf, long  l) {return pf.f->seekg(l),l;}
+long ffseekp( ostream_seekp  pf, long  l) {  pf.f->clear();long ll= pf.f->tellp(); return pf.f->seekp(l),ll;}
+long fftellp( ostream_seekp  pf) { pf.f->clear(); return pf.f->tellp() ;}
+long ffseekg( istream_seekg  pf, long  l) { pf.f->clear(); return pf.f->seekg(l),l;}
 long fftellg( istream_seekg  pf) { return pf.f->tellg() ;}
 
  class istream_good { public:
@@ -1142,14 +1142,19 @@ void Init_map_type()
     
     Add<istream**>("seekg",".",new OneOperator1<istream_seekg,istream**>(ff_iseekg));
     Add<istream*>("seekg",".",new OneOperator1<istream_seekg,istream*>(ff_iseekg));
-     
+    Add<ostream**>("tellp",".",new OneOperator1<ostream_seekp,ostream**>(ff_oseekp));
+    Add<ostream*>("tellp",".",new OneOperator1<ostream_seekp,ostream*>(ff_oseekp));
+    
+    Add<istream**>("tellg",".",new OneOperator1<istream_seekg,istream**>(ff_iseekg));
+    Add<istream*>("tellg",".",new OneOperator1<istream_seekg,istream*>(ff_iseekg));
+    
  //   Add<istream_seekp>("(","",new OneOperator1<long,istream_seekp>(fftellp),
 //			new OneOperator2<long,istream_seekp,long>(ffseekp));    
     Add<ostream_seekp>("(","",new OneOperator1<long,ostream_seekp>(fftellp),
 		       new OneOperator2<long,ostream_seekp,long>(ffseekp));
     Add<istream_seekg>("(","",new OneOperator1<long,istream_seekg>(fftellg),
 		       new OneOperator2<long,istream_seekg,long>(ffseekg));
-    // end add .. 
+    // end add  jan 2010 .. 
     Add<ostream_precis>("(","",new OneOperator1<long,ostream_precis>(get_precis),
                                 new OneOperator2<long,ostream_precis,long>(set_precis));
 //  add v 1.41   
