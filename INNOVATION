@@ -25,7 +25,8 @@ v 3.8
          -llapack search in configure.ac 
         and unify fflapack.cpp lapack.cpp are the same file.
   - add seekp, tellp  method  on ostream type 
-  - add seekg, teeg   method on istream type
+        seekg, teeg   method on istream type
+        see examples++-tutorial/readmesh.edp examples 
 v 3.7-1 13 jan 2010.. 
   - EqPoisson.edp (SOlve Poison equation in 3d fish)
   - add possibility to put array  (int[int] )  to set a set of label/region in

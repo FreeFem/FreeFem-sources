@@ -11,15 +11,28 @@ savemesh(th,"toto.msh"); //format freefem
 mesh th2 = readmesh("toto.msh");
 fespace femp1(th,P1);
 femp1 f = sin(x)*cos(y),g;
+int where;
+real xx;
 {
-
-ofstream file("f.txt");
-file.precision(16);
-file << f[] << endl;
+  
+  ofstream file("f.txt");
+  file.precision(16);
+  file << f[] << endl;
+  where=file.tellp();
+  file << 0.1 ;
+  //  file << " " << 0.2 ;
+  cout << " where in file " << where << endl;
 }
 {
-ifstream file("f.txt");
-file >> g[] ;
+  ifstream file("f.txt");
+  cout << " where " << file.seekg << endl; 
+  file.seekg(where);
+  file >> xx;
+  cout <<  " xx = " << xx << " good ? " << file.good() << endl;
+  assert(xx==0.1);
+  file.seekg(0);
+  cout << " where " << file.tellg() << " " << file.good() << endl; 
+  file >> g[] ;
 }
 fespace Vh2(th2,P1);
 Vh2 u,v;
