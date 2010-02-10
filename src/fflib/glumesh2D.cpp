@@ -226,7 +226,7 @@ class SetMesh_Op : public E_F0mps
 public:
   Expression a; 
   
-  static const int n_name_param =2+2; //  add nbiter FH 30/01/2007 11 -> 12 
+  static const int n_name_param =2+2+2; //  add nbiter FH 30/01/2007 11 -> 12 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
@@ -249,7 +249,10 @@ basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
   {  "refe", &typeid(KN_<long> )},
   {  "reft", &typeid(KN_<long> )},
   {  "label", &typeid(KN_<long> )},
-  {  "region", &typeid(KN_<long> )}
+  {  "region", &typeid(KN_<long> )},
+  {  "renumv",&typeid(KN_<long>)},
+  {  "renumt",&typeid(KN_<long>)}
+        
     
 };
 
@@ -269,13 +272,19 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   int nbv=Th.nv; // nombre de sommet 
   int nbt=Th.nt; // nombre de triangles
   int neb=Th.neb; // nombre d'aretes fontiere
-  if(verbosity>1)
-  cout << "  -- SetMesh_Op: nb vertices" << nbv<< " nb Trai "<< nbt << " nb b. edges  "<< neb << endl;  
   KN<long> zz;
   KN<long> nre (arg(0,stack,arg(2,stack,zz)));  
   KN<long> nrt (arg(1,stack,arg(3,stack,zz)));  
+  KN<long> rv (arg(4,stack,zz));  
+  KN<long> rt (arg(5,stack,zz));  
 
-  if(nre.N() <=0 && nrt.N()<=0 ) return m;
+  bool rV =  (rv.size()== nbv);
+  bool rT =  (rt.size()== nbt);
+    if(verbosity>1)
+	cout << "  -- SetMesh_Op: nb vertices" << nbv<< " nb Trai "<< nbt << " nb b. edges  "
+	     << neb << "renum V " << rV << " , renum T "<< rT << endl;  
+    
+  if(nre.N() <=0 && nrt.N()<=0  && !rV && ! rT ) return m;
   ffassert( nre.N() %2 ==0);
   ffassert( nrt.N() %2 ==0);
   map<int,int> mape,mapt;
@@ -302,11 +311,13 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   // copie des anciens sommets (remarque il n'y a pas operateur de copy des sommets)
   for (int i=0;i<nbv;i++)
     {
+      int ii=rV? rv(i): i;
+      vv = v + ii;
      Vertex & V=Th(i);
      vv->x=V.x;
      vv->y=V.y;
      vv->lab = V.lab;
-     vv++;      
+	
    }
 
   //  generation des triangles 
@@ -315,9 +326,15 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
    
   for (int i=0;i<nbt;i++)
     {
-      int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
+      int ii= rT ? rt(i) : i;
+      int i0=Th(ii,0), i1=Th(ii,1),i2=Th(ii,2);
+      if(rV) {
+	  i0=rv(i0);
+	  i1=rv(i1);
+	  i2=rv(i2);
+      }
       // les 3 triangles par triangles origines 
-      (*tt++).set(v,i0,i1,i2,ChangeLab(mapt,Th[i].lab));
+      (*tt++).set(v,i0,i1,i2,ChangeLab(mapt,Th[ii].lab));
     }  
   
   // les arete frontieres qui n'ont pas change
@@ -326,6 +343,11 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
     {        
       int i1=Th(Th.bedges[i][0]);
       int i2=Th(Th.bedges[i][1]);
+	if(rV) {
+	    i1=rv(i1);
+	    i2=rv(i2);
+	}
+	
       int l0,l1=ChangeLab(mape,l0=m->bedges[i].lab) ;
       *bb++ = BoundaryEdge(v,i1,i2,l1);   
     }
