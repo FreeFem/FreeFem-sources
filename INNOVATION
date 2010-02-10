@@ -1,4 +1,6 @@
 v 3.8
+  - add in change mesh2 tool to make a renumbering of vertex for periodic 3d mesh. 
+     Th= change(Th,renumv=old2new);
   - correct ' operator do alway in complex case the conj and trans (Hermissian stuff)
      in  formal array with [ ]' 
      in  linear comb of complex matrix  
