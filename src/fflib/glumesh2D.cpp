@@ -321,20 +321,19 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
    }
 
   //  generation des triangles 
-  Triangle *tt= t; 
   int nberr=0;
    
   for (int i=0;i<nbt;i++)
     {
       int ii= rT ? rt(i) : i;
-      int i0=Th(ii,0), i1=Th(ii,1),i2=Th(ii,2);
+      int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
       if(rV) {
 	  i0=rv(i0);
 	  i1=rv(i1);
 	  i2=rv(i2);
       }
       // les 3 triangles par triangles origines 
-      (*tt++).set(v,i0,i1,i2,ChangeLab(mapt,Th[ii].lab));
+      t[ii].set(v,i0,i1,i2,ChangeLab(mapt,Th[i].lab));
     }  
   
   // les arete frontieres qui n'ont pas change
