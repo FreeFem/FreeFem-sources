@@ -1163,7 +1163,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   TypeSolveMat tmat=  ( & Uh == & Vh  ? TypeSolveMat::GMRES : TypeSolveMat::NONESQUARE);
   ds.typemat=&tmat;
   ds.initmat=true;
-  SetEnd_Data_Sparse_Solver(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
+  SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
   /*  
   if (b->nargs[0]) initmat= ! GetAny<bool>((*b->nargs[0])(stack));
   if (b->nargs[1]) typemat= *GetAny<TypeSolveMat *>((*b->nargs[1])(stack));

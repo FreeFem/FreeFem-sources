@@ -2,6 +2,8 @@
 //ff-c++-LIBRARY-dep:   blas
 #include "ff++.hpp"
 #include "RNM.hpp"
+#include "AFunction_ext.hpp" // Extension of "AFunction.hpp" to deal with more than 3 parameters function
+
 using namespace std;
 
 
@@ -150,6 +152,71 @@ long lapack_zgeev(KNM<Complex> *const &A,KN<Complex> *const &vp,KNM<Complex> *co
       (*vectp)=Complex();
     }
   return nvp;
+}
+
+// VL, 10/02/2010
+long lapack_dggev(KNM<double> *const &A,KNM<double> *const &B,KN<Complex> *const &vpa,KN<double> *const &vpb,KNM<Complex> *const &vectp)
+{
+    intblas nvp =0,zero=0;
+    intblas n= A->N();
+    ffassert(A->M()==n);
+    ffassert(B->M()==n);
+    ffassert(B->N()==n);
+    ffassert(vectp->M()>=n);
+    ffassert(vectp->N()>=n);
+    ffassert(vpa->N()>=n);
+    ffassert(vpb->N()>=n);
+    
+    KN<double> war(n),wai(n),wb(n),vr(n*n),vl(n*n);
+    KNM<double> matA(*A);
+    KNM<double> matB(*B);
+    intblas info,lw=-1;  
+    KN<double> w(1);
+    //char N='N',V='V'; VL: do not compute eigenvectors (if yes, switch with following line)
+    char VL='N',VR='N';
+    
+    dggev_(&VL,&VR,&n,matA,&n,matB,&n,war,wai,wb,vl,&n,vr,&n,w,&lw,&info);
+    lw=w[0];
+    // cout << lw << endl;
+    w.resize(lw);
+    dggev_(&VL,&VR,&n,matA,&n,matB,&n,war,wai,wb,vl,&n,vr,&n,w,&lw,&info);
+    if(info)
+	cout << " info =  " << info << endl;
+    if(!info)
+      {
+	int k=0;
+	for(int i=0;i<n;++i)
+	  {
+	    (*vpa)[i]=Complex(war[i],wai[i]);
+	    (*vpb)[i]=wb[i];
+	    if(verbosity>2)
+		cout << "   dggev: vp "<< i << " : "  << (*vpa)[i] << " ; " << (*vpb)[i] << endl;
+	    if( wai[i] == 0)
+		for(int j=0;j<n;++j)
+		    (*vectp)(j,i)=vr[k++];
+	    else if (  wai[i] >  0)
+	      {
+		int ki= k+n;
+		for(int j=0;j<n;++j)
+		    (*vectp)(j,i)=Complex(vr[k++],vr[ki++]);	      
+	      }
+	    else 
+	      {
+		int kr= k-n;
+		for(int j=0;j<n;++j)
+		    (*vectp)(j,i)=Complex(vr[kr++],-vr[k++]);	      
+	      }
+	    if(verbosity>5)
+		cout << "   dggev :   " << (*vectp)(':',i) <<endl;
+	  }
+      }
+    else
+      {
+	nvp=0;
+	(*vpa)=Complex();
+	(*vectp)=Complex();
+      }
+    return nvp;
 }
 
 template<class T>
@@ -337,6 +404,8 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
       Global.Add("inv","(",new  OneOperator1<bool,KNM<double>*>(lapack_inv));  
       Global.Add("dgeev","(",new  OneOperator3_<long,KNM<double>*,KN<Complex>*,KNM<Complex>*>(lapack_dgeev));  
       Global.Add("zgeev","(",new  OneOperator3_<long,KNM<Complex>*,KN<Complex>*,KNM<Complex>*>(lapack_zgeev));  
+      Global.Add("dggev","(",new  OneOperator5_<long,KNM<double>*,KNM<double>*,KN<Complex>*,KN<double>*,KNM<Complex>*>(lapack_dggev));  
+
     }
  else
    cout << "( load: lapack <=> fflapack , skeep ) ";

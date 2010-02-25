@@ -9,6 +9,39 @@ extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
 extern const char *  prognamearg;
 extern const char *  edpfilenamearg;
 extern bool  waitatend;
+char * Shell_Space(const char * s)
+{
+    const char *c=s;
+    int nbspace;
+    int i;
+    for( i=0;i<100000;++i) 
+	if (! s[i]) break;
+ 	else if(isspace(s[i])) ++nbspace;
+    if (!(i<100000))
+      {
+	cerr << " Bug Shell_Space routine " <<endl;
+	exit(1);
+      }
+
+#if WIN32
+    char * p= new char[i+1+nbspace];
+    char * q=p;
+    for( i=0;i<100000;++i) 
+	if (! s[i]) break;
+        else if(isspace(s[i])) *q++='^', *q++=s[i];
+	    else *q++=s[i];
+#else
+    char * p= new char[i+nbspace];
+    char * q=p;
+    for( i=0;i<100000;++i) 
+	if (! s[i]) break;
+        else if(isspace(s[i])) *q++='\\', *q++=s[i];
+	else *q++=s[i];
+#endif
+    *q++='\0';
+    assert( q-p <= i+nbspace);
+    return p;
+}
 int getprog(char* fn,int argc, char **argv)
 {
   waitatend=true;  // attent 
@@ -75,6 +108,11 @@ int getprog(char* fn,int argc, char **argv)
 	  progffglut=argv[++i];
 	  noffglut=true;
 	}
+      else if(strcmp(argv[i],"-gff")==0 && i+1 < argc)
+	{
+	  progffglut=Shell_Space(argv[++i]);
+	  noffglut=true;
+	}    
       else if(strcmp(argv[i],"-?")==0 )
 	ret=2;
       else if( strcmp(argv[i],"-f")==0 && i+1 < argc) 

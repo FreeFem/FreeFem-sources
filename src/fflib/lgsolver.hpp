@@ -486,7 +486,7 @@ BuildSolverGMRES(DCL_ARG_SPARSE_SOLVER(R,A))
     else 
 	ret=new SolveGMRESDiag<R>(*A,ds.NbSpace,ds.itmax,ds.epsilon);
     
-    return ret;
+    return ret;	
 }
 
 template<class R>
@@ -553,14 +553,20 @@ const int NB_NAME_PARM_MAT =  21  ;
  
 */  
     
-
+template<class R>
 inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expression const *nargs ,int n_name_param)
     {
 	int kk = n_name_param-NB_NAME_PARM_MAT-1;
 	if (nargs[++kk]) ds.initmat= ! GetAny<bool>((*nargs[kk])(stack));	
 	if (nargs[++kk]) ds.typemat= GetAny<TypeSolveMat *>((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.epsilon= GetAny<double>((*nargs[kk])(stack));
-	if (nargs[++kk]) ds.precon= GetAny<const void *>((*nargs[kk])(stack));	
+	if (nargs[++kk])
+	{// modif FH fev 2010 ...
+	  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[kk]);
+	  if(op)
+	   ds.precon = op->Find("(",ArrayOfaType(atype<KN<R>* >(),false)); // strange bug in g++ is R become a double
+	}
+      
 	if (nargs[++kk]) ds.NbSpace= GetAny<long>((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.tgv= GetAny<double>((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.factorize= GetAny<bool>((*nargs[kk])(stack));	

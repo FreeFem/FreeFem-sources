@@ -3746,7 +3746,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   if (nargs[21]) ds.file_param_perm_r = GetAny< string* >((*nargs[21])(stack));
   if (nargs[22]) ds.file_param_perm_c = GetAny< string* >((*nargs[22])(stack));  //
  */
-    SetEnd_Data_Sparse_Solver(stack,ds,nargs,n_name_param);
+    SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
 
 
   //  for the gestion of the PTR. 
