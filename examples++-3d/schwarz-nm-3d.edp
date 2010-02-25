@@ -42,7 +42,7 @@ func bool AddLayers(mesh3 & Th,real[int] &ssd,int n,real[int] &unssd)
 
 int withplot=3;
 include "cube.idp" 
- int[int]  NN=[10,10,10]; //  the number of step in each  direction                                                                                                                    
+ int[int]  NN=[50,50,50]; //  the number of step in each  direction                                                                                                                    
  real [int,int]  BB=[[0,1],[0,1],[0,1]]; // bounding box                                                                                                             
  int [int,int]  L=[[1,1],[1,1],[1,1]]; // the label of the 6 face left,right,
 //  front, back, down, right

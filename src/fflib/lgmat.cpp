@@ -459,7 +459,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
   if(   tmat !=  TypeSolveMat::SparseSolver  )    
     tmat=TypeSolveMat::GMRES;
  ds.typemat=&tmat; 
- SetEnd_Data_Sparse_Solver(stack,ds,nargs,n_name_param);  
+ SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);  
 /*     
   TypeSolveMat    *typemat=&tmat;
   bool initmat=true;
