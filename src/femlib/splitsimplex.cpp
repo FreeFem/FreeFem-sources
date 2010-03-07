@@ -374,8 +374,8 @@ void  SplitSimplex(int N,int & nv, R2 *& P, int & nk , int *& K)
     { 
       Rd G=Rd::diag(1./(d+1));
       R2 Khat[d+1];
-      for (int i=1;i<=d;++i)
-	Khat[i][i]=1;
+      for (int i=0;i<d;++i)
+	Khat[i+1][i]=1; //  modit  25/2/2009
       for(int i=0;i<=d;++i)
 	{
 	  Rd S=Khat[i];
