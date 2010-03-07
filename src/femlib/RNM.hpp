@@ -54,7 +54,7 @@ inline void Check_Kn(const char * str,const char * file,int line)
 }
 
 #define K_bigassert(i)  if (!(i)) Check_Kn(#i,__FILE__,__LINE__);
-
+#define RNM_FATAL_ERROR(i) Check_Kn(i,__FILE__,__LINE__);
 #ifdef CHECK_KN
 
 #define K_throwassert(i)  if (!(i)) Check_Kn(#i,__FILE__,__LINE__);
@@ -143,6 +143,7 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //  correct y += A*x ; when y is unset 
 //  re-correct += sep 2007
 //  add size of the matrix in VirtualMatrix class.
+//   mars 2010 add  unset KNM case ...
 // ----------------
 inline double  conj(const double & x){return x;}
 inline float  conj(const float &x){return x;}
@@ -734,6 +735,8 @@ template<class R>
 struct outProduct_KN_ {
     const KN_<R>  a,b;
     R c;
+    long N() const {return a.N();    }
+    long M() const {return b.N();    }
     outProduct_KN_(const KN_<R> & aa, const KN_<R> &bb,R cc=(R)1) : a(aa),b(bb),c(cc) {}
     outProduct_KN_(const KN_<R> * aa, const KN_<R> &bb,R cc=(R)1) : a(*aa),b(bb),c(cc) {}
     outProduct_KN_(const KN_<R> * aa, const KN_<R> *bb,R cc=(R)1) : a(*aa),b(*bb),c(cc) {}
@@ -1134,38 +1137,38 @@ class KNM: public KNM_<R>{ public:
   ~KNM(){delete [] this->v;}
   
    KNM& operator=(const KNM_<const_R> & u)   
-        { KNM_<R>::operator=(u);return *this;}
+    { if(this->unset()) this->init(u.N(),u.M()) ; KNM_<R>::operator=(u);return *this;}
    KNM& operator=(const_R a)                 
-        { KNM_<R>::operator=(a);return *this;}
+    { if(this->unset()) RNM_FATAL_ERROR(" KNM operator=(double)"); KNM_<R>::operator=(a);return *this;}
    KNM& operator+=(const_R  a)               
-        { KNM_<R>::operator+=(a);return *this;}
+        { if(this->unset()) RNM_FATAL_ERROR(" KNM operator+=(double)"); KNM_<R>::operator+=(a);return *this;}
    KNM& operator-=(const_R  a)               
-        { KNM_<R>::operator-=(a);return *this;}
+        {if(this->unset()) RNM_FATAL_ERROR(" KNM operator-=(double)"); KNM_<R>::operator-=(a);return *this;}
    KNM& operator/=(const_R  a)               
-        { KNM_<R>::operator/=(a);return *this;}
+        {if(this->unset()) RNM_FATAL_ERROR(" KNM operator/=(double)"); KNM_<R>::operator/=(a);return *this;}
    KNM& operator*=(const_R  a)               
-        { KNM_<R>::operator*=(a);return *this;}
+        {if(this->unset()) RNM_FATAL_ERROR(" KNM operator*=(double)"); KNM_<R>::operator*=(a);return *this;}
    KNM& operator+=(const KNM_<const_R> & u)  
-        { KNM_<R>::operator+=(u);return *this;}
+        { if(this->unset()) this->init(u.N(),u.M()) ; KNM_<R>::operator+=(u);return *this;}
    KNM& operator-=(const KNM_<const_R> & u)  
-        { KNM_<R>::operator-=(u);return *this;}
+        {  if(this->unset()) this->init(u.N(),u.M()) ;KNM_<R>::operator-=(u);return *this;}
 
    KNM& operator/=(const KNM_<const_R> & u)  
-        { KNM_<R>::operator/=(u);return *this;}
+        {  if(this->unset()) this->init(u.N(),u.M()) ;KNM_<R>::operator/=(u);return *this;}
    KNM& operator*=(const KNM_<const_R> & u)  
-        { KNM_<R>::operator*=(u);return *this;}
+        { if(this->unset()) this->init(u.N(),u.M()) ; KNM_<R>::operator*=(u);return *this;}
 
 
    KNM &operator  =(const outProduct_KN_<R> & u)
-        { KNM_<R>::operator =(u);return *this;}
+        { if(this->unset()) this->init(u.N(),u.M()) ; KNM_<R>::operator =(u);return *this;}
    KNM &operator +=(const outProduct_KN_<R> & u)
-        { KNM_<R>::operator+=(u);return *this;}
+        { if(this->unset()) this->init(u.N(),u.M()) ; KNM_<R>::operator+=(u);return *this;}
    KNM &operator -=(const outProduct_KN_<R> & u)
-        { KNM_<R>::operator-=(u);return *this;}
+        { if(this->unset()) this->init(u.N(),u.M()) ; KNM_<R>::operator-=(u);return *this;}
    KNM &operator /=(const outProduct_KN_<R> & u) 
-        { KNM_<R>::operator/=(u);return *this;}
+        {  if(this->unset()) this->init(u.N(),u.M()) ;KNM_<R>::operator/=(u);return *this;}
    KNM &operator *=(const outProduct_KN_<R> & u)
-        { KNM_<R>::operator*=(u);return *this;}
+        {  if(this->unset()) this->init(u.N(),u.M()) ;KNM_<R>::operator*=(u);return *this;}
   
         
   //  two opertors to cast to un array of constant        
@@ -1178,6 +1181,12 @@ class KNM: public KNM_<R>{ public:
 //          { return *  (KNM<const_R>*) this;}
 //    operator KNM<const_R> const & ()  const 
 //          { return *(const KNM<const_R>*) this;}
+ 
+    void init() { //  add mars 2010 ...
+	this->n=0;this->step=1;this->next=-1;this->v=0;
+	this->shapei.init(0);
+	this->shapej.init(0);}
+    
   void init(long nn,long mm) {
     ShapeOfArray::init(nn*mm);
     this->shapei.init(nn,1,nn);
