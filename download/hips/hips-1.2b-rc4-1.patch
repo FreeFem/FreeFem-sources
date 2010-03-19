@@ -1,0 +1,11 @@
+diff -ur hips-1.2b-rc4/SRC/INCLUDE/hips.h hips-1.2b-rc4-okk/hips.h
+--- hips-1.2b-rc4/SRC/INCLUDE/hips.h	2009-06-21 23:12:59.000000000 +0200
++++ hips-1.2b-rc4-okk/hips.h	2010-02-09 11:30:36.000000000 +0100
+@@ -122,6 +122,7 @@
+ #ifndef HIPS_H
+ #define HIPS_H
+ #include <stdio.h>
++#include <ctype.h>
+ #include "type.h"
+ 
+ #ifdef INTL
