@@ -1,0 +1,21 @@
+load "msh3"
+load "medit"
+load "yams"
+int nn=20;
+mesh Th2=square(nn,nn);
+fespace Vh2(Th2,P2);
+Vh2 ux,uz,p2;
+int[int] rup=[0,2],  rdown=[0,1], rmid=[1,1,2,1,3,1,4,1];
+real zmin=0,zmax=1;
+mesh3 Th=buildlayers(Th2,nn,
+  zbound=[zmin,zmax],
+  reffacemid=rmid, 
+  reffaceup = rup,
+  reffacelow = rdown);
+
+
+mesh3 ThS = readmesh3("yamssurf.mesh");
+mesh3 Th3 = yams(Th);
+//savesurfacemesh(Th,"yamssurf.mesh");
+medit("maillagesurfacique",Th3,wait=1);
+//savemesh(Th3,"yamssurf2.mesh");
