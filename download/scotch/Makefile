@@ -1,0 +1,55 @@
+# Downloading and compiling extra libraries
+# -----------------------------------------
+
+# $Id$
+include Makefile.inc
+
+all-local: scotch
+
+# Downloading and compiling scotch
+# -------------------------------
+# http://gforge.inria.fr/frs/download.php/23391/scotch_5.1.7_esmumps.tar.gz
+# Scotch information
+DIRPKG=../pkg
+SRCDIR=scotch_$(scotch_VERSION)
+PACKAGE=$(DIRPKG)/scotch_$(scotch_VERSION_LOCAL).tar.gz
+SERVER=http://gforge.inria.fr/frs/download.php/23391
+INSTALL=../..
+scotch_VERSION=5.1_esmumps
+scotch_VERSION_LOCAL=5.1.7_esmumps
+
+scotch: FAIRE
+
+$(SRCDIR)/FAIT:
+	$(MAKE) $(SRCDIR)/$(INSTALL)  
+	touch $(SRCDIR)/FAIT
+
+FAIRE: $(SRCDIR)/FAIT
+
+Makefile.inc: ../../config.status	Makefile
+	../../config.status  --file="Makefile.inc:Makefile-scotch.inc"
+	case `uname` in *CYGWIN*)  cp Makefile.inc Makefile.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.inn > Makefile.inc; rm Makefile.inn ;; esac 
+
+$(SRCDIR)/$(INSTALL): $(SRCDIR)
+	cp Makefile.inc $(SRCDIR)/src/
+	cd $(SRCDIR)/src/; make scotch
+	cd $(SRCDIR)/src/; make ptscotch
+	mkdir -p $(SRCDIR)/$(INSTALL)/include/scotch
+	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/scotch/
+	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
+
+$(SRCDIR): $(PACKAGE)
+	tar xvzf $(PACKAGE)
+	cd $(SRCDIR)/src/libscotch/; patch -p1 < ../../../scotch_5.1_esmumps.patch;
+	touch $(SRCDIR)
+
+$(PACKAGE):
+	-mkdir $(DIRPKG);
+	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
+
+clean-local:
+	-cd $(SRCDIR)/src; make realclean 
+clean: clean-local
+	-rm Makefile.inc
+	-rm -rf $(SRCDIR)
+.PHONY:$(SRCDIR)/$(INSTALL)
