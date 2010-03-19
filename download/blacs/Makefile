@@ -1,0 +1,77 @@
+# Downloading and compiling extra libraries
+# -----------------------------------------
+
+# $Id$
+include Bmake.inc
+
+all-local: blacs 
+
+# Downloading and compiling BLACS
+# ------------------------------
+# http://www.netlib.org/blacs/
+# Hips information
+DIRPKG=../pkg
+SRCDIR=BLACS
+PACKAGE1=$(DIRPKG)/mpiblacs.tgz
+PACKAGE2=$(DIRPKG)/mpiblacs-patch03.tgz
+PACKAGE3=$(DIRPKG)/blacstester.tgz
+SERVER=http://www.netlib.org/blacs/
+INSTALL=../..
+
+SYSERRORS = 
+
+blacs: FAIRE
+
+$(SRCDIR)/FAIT:
+	$(MAKE) $(SRCDIR)/$(INSTALL)  
+	touch $(SRCDIR)/FAIT
+
+FAIRE: $(SRCDIR)/FAIT
+
+Bmake.inc: ../../config.status	Makefile
+	grep 'abs_top_builddir *=' ../Makefile >> dirflags
+	cat dirflags Bmake-blacs.inc > Bmake-tmp.inc
+	rm dirflags
+	../../config.status  --file="Bmake.inc:Bmake-tmp.inc"
+	case `uname` in *CYGWIN*)  cp Bmake.inc Bmake.incn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Bmake.incn > Bmake.inc; rm Bmake.incn ;; esac 
+	rm Bmake-tmp.inc
+
+$(SRCDIR)/$(INSTALL): $(SRCDIR) 
+	cp Bmake.inc $(SRCDIR)
+	mv $(SRCDIR)/SRC/MPI/Makefile $(SRCDIR)/SRC/MPI/Makefile.tmp
+	sed -e 's;\.C;\.oo;g'\
+	< $(SRCDIR)/SRC/MPI/Makefile.tmp \
+	> $(SRCDIR)/SRC/MPI/Makefile
+	cd $(SRCDIR)/SRC/MPI; patch -p1 < ../../../BLACS.patch
+	#cd $(SRCDIR)/INSTALL/;$(MAKE) xintface xsyserrors xcmpi_sane xfmpi_sane xtc_CsameF77 xtc_UseMpich
+	cd $(SRCDIR);$(MAKE) mpi 
+	mkdir -p $(SRCDIR)/$(INSTALL)/lib/blacs
+	cp $(SRCDIR)/LIB/*.a $(SRCDIR)/$(INSTALL)/lib/blacs/
+
+$(SRCDIR): $(PACKAGE1) $(PACKAGE2) $(PACKAGE3)
+	gunzip -c $(PACKAGE1) | tar xvf -
+	gunzip -c $(PACKAGE2) | tar xvf -
+	gunzip -c $(PACKAGE3) | tar xvf -
+	touch $(SRCDIR)
+
+$(PACKAGE1):
+	-mkdir $(DIRPKG)
+	cd $(DIRPKG);$(WGET)  $(SERVER)/`basename $(PACKAGE1)`
+
+$(PACKAGE2):
+	-mkdir $(DIRPKG)
+	cd $(DIRPKG);$(WGET) $(SERVER)/`basename $(PACKAGE2)`
+
+$(PACKAGE3):
+	-mkdir $(DIRPKG)
+	cd $(DIRPKG);$(WGET) $(SERVER)/`basename $(PACKAGE3)`
+
+clean-local:
+	-cd $(SRCDIR)/SRC/MPI; make clean 
+
+clean: clean-local
+	-rm Bmake.inc
+	-rm $(SRCDIR)/$(INSTALL)/lib/blacs/*.a
+	-rm -rf $(SRCDIR)
+
+.PHONY:$(SRCDIR)/$(INSTALL)
