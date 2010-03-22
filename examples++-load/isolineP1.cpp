@@ -846,7 +846,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
   cout << "NbVertex= " << NbVertex << endl;
   cout << "label =" << label << endl;
   assert(inv == NbVertex);
-
+  cout << " file point \"" << ffname->c_str() <<"\""<< endl;
   FILE *fpoints = fopen(ffname->c_str(),"w");
   for (int k=0; k<NbVertex; k++) {   
     //fprintf(fpoints,"%f %f %d\n",VertexIsoP[k].x,VertexIsoP[k].y,VertexIsoP[k].lab);

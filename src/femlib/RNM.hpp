@@ -1114,8 +1114,8 @@ class KN :public KN_<R> { public:
        if(this->v && vo) 
          for(long i=0,j=0;j<no;i++,j+=so) 
            this->v[i]=vo[j]; 
-        delete [] vo;} }
-    void destroy(){assert(this->next<0);  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}}
+        delete [] vo;} }//  mars 2010
+    void destroy(){assert(this->next<0);  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}}//  mars 2010
     void increment() {assert(this->next<0);  this->next--;}
 };
 
@@ -1195,6 +1195,8 @@ class KNM: public KNM_<R>{ public:
     
   void resize(long nn,long mm) {     
     long kk=nn*mm;
+      
+    long lso = this->size();
     long n = this->shapei.n;
     long m = this->shapej.n;
     
@@ -1218,7 +1220,7 @@ class KNM: public KNM_<R>{ public:
     }
         
    }
-    void destroy(){assert(this->next<0);  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}}
+    void destroy(){assert(this->next<0);  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}} 
     void increment() {assert(this->next<0);  this->next--;}
     
 //  void destroy(){delete [] this->v;this->n=0 ;}

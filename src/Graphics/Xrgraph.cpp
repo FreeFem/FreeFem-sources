@@ -62,6 +62,7 @@ typedef char *caddr_t;
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
 #endif
+#undef index 
 #include "rgraph.hpp"
 
 #ifdef macintoshxx

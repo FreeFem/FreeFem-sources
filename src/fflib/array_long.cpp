@@ -72,6 +72,28 @@ class OneBinaryOperatorInv_KN_long : public OneOperator { public:
        return  new E_F_F0<Inv_KN_long,KN_<long> >(Build<Inv_KN_long,KN_<long> >,to< KN_<long> >(args[0])); 
     }
 };
+// end Hack 
+// Add mars 2010 
+template<class R>  R * set_init_init( R* const & a,const long & n){ 
+    SHOWVERB( cout << " set_init " << typeid(R).name() << " " << n << endl);
+    a->init(n);
+    for (int i=0;i<n;i++)
+	(*a)[i].init();
+    return a;}
+inline   string ** get_elements( KN<String> *  const  &  a,long  const   & b)
+{   ffassert( a && b >=0 && b < a->size());
+    String & Sret =  (*a)[b]; // correction FH feb 2004
+    // delete b; la chaine est detruire automatiquement en fin d'instruction  FH jan 2010
+    return Sret.getap();}
+
+template<class A> inline AnyType Destroy_KN(Stack,const AnyType &x){
+    KN<A> * a=GetAny<KN<A>*>(x);
+    for (int i=0;i<a->N(); i++)
+	(a)[i].destroy();
+    a->destroy(); 
+    return  Nothing;
+}
+// fin add
 
 
 void initArrayOperatorlong()
@@ -89,6 +111,16 @@ void initArrayOperatorlong()
      
      
 //     ArrayDCL<long>();
+    
+    Dcl_TypeandPtr_<KN_<String>,KN<String> *>(0,0,0,::Destroy<KN<String> >, ::ClearReturnKK_<K,KN<String>,KN_<String> >,::ClearReturnpKK<String,KN<String> >);
+    atype<KN<String>* >()->Add("[","",new OneOperator2_<string**,KN<String>*,long >(get_elements));
+    TheOperators->Add("<-", 
+		      new OneOperator2_<KN<String> *,KN<String> *,long>(&set_init_init));
+    map_type_of_map[make_pair(atype<long>(),atype<string*>())]=atype<KN<String>*>(); // vector
+    Add<KN<String> *>("n",".",new OneOperator1<long,KN<String> *>(get_n));  
+    extern   KN<String> *pkarg;
+    Global.New("ARGV",CPValue<KN<String> >(*pkarg));// add FH mars 2010
+    
 }
 
  void xxxx() {

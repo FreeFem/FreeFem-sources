@@ -3960,7 +3960,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   
  
   if (verbosity) 
-    {cout << "  -- Solve : " ; 
+    {cout << "  -- Solve : \n" ; 
     for (int i=0;i<Nb;i++) 
       cout  << "          min " << (u_h[i])->x()->min() << "  max " << (u_h[i])->x()->max() << endl ;
     }

@@ -738,7 +738,15 @@ template<>
 class ForEachType<void *>:  public basicForEachType{public:// correction july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...) 
     ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(void *),sizeof(void *),0,0,iv,id,OOnReturn) { }
 };
-// end Hack 
+
+inline long walltime(){ // add for Pichon mars 2010 
+    time_t currentWallTime;
+    time(&currentWallTime);
+    return (long)currentWallTime;
+}
+
+long atoi(string* p) {return atoi(p->c_str());}// add march 2010
+long atof(string* p) {return atof(p->c_str());}// add march 2010
 
 void Init_map_type()
 {
@@ -1208,6 +1216,10 @@ void Init_map_type()
      Global.Add("sinh","(",new OneOperator1<double>(sinh));
      Global.Add("cosh","(",new OneOperator1<double>(cosh));
      Global.Add("tanh","(",new OneOperator1<double>(tanh));
+
+    Global.Add("atoi","(",new OneOperator1<long,string*>(atoi));// add march 2010
+    Global.Add("atof","(",new OneOperator1<long,string*>(atof));// add march 2010
+    
 #ifdef HAVE_ATANH
      Global.Add("atanh","(",new OneOperator1<double>(atanh));
 #endif
@@ -1282,6 +1294,8 @@ void Init_map_type()
      Global.Add("assert","(",new OneOperator1<bool>(Assert));     
      
      Global.Add("clock","(",new OneOperator0<double>(CPUtime));
+    Global.Add("time","(",new OneOperator0<long>(walltime));// add mars 2010 for Pichon. 
+    
      Global.Add("dumptable","(",new OneOperator1<ostream*,ostream*>(dumptable));
      Global.Add("exec","(",new OneOperator1<long,string* >(exec));  //FH string * mars 2006 
     
@@ -1306,12 +1320,18 @@ void Init_map_type()
        
 
 typedef MyMap<String,String> MyMapSS;
-     map_type[typeid(MyMapSS*).name()] = new ForEachType<MyMapSS*>(Initialize<MyMapSS >,Delete<MyMapSS >) ;         
+    
+     map_type[typeid(MyMapSS*).name()] = new ForEachType<MyMapSS*>(Initialize<MyMapSS >,Delete<MyMapSS >) ; 
+//Dcl_TypeandPtr_<KN_<string*> ,KN<string*>*  > (0,0,0,::Destroy<KN<K> >, ::ClearReturnKK_<K,KN<K>,KN_<K> >,::ClearReturnpKK<K,KN<K> >);
+    
+  //  map_type[typeid(KN2String*).name()] = new ForEachType<MyMapIS*>(Initialize<KN2String >,Delete<MyMapIS >) ;         
      map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMapSS*>();      
      atype<MyMapSS*>()->Add("[","",new OneOperator2_<string**,MyMapSS*,string*>(get_elements));
-     
+
+    
           
      tables_of_identifier.push_back(&Global);
+  
 
 }
 int ShowAlloc(const char *s,size_t & lg); 
@@ -1457,7 +1477,7 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 	};
     if( na1==1 && mb1 ==1)
 	return C(0,0);
-    else if (( mb1 ==1) || (na1==1))
+    else if (( mb1 ==1) ) // || (na1==1)) // correct du car ' on conj encore r . mars 2010 
     {
 	AC_F0  v;
 	v=C(0,0);
@@ -1465,8 +1485,8 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 	for (int i=1;i<nn;++i)
 	    v+=C(i0*i,j0*i);
 	C_F0  r(TheOperators,"[]",v);
-	if(mb1==1) return r;
-	else return C_F0(TheOperators,"\'",r);
+	if(mb1==1) return r;                                                                                                                                                                                         
+	else return C_F0(TheOperators,"\'",r);// Bug car on conj encore r . mars 2010 
     }
     else
     {
