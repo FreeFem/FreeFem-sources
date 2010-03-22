@@ -35,6 +35,7 @@
 
 // ./ff-c++ mshmet.cpp -I/Users/morice/Desktop/adaptmesh3d/mshmet.2009.09.16/sources -L/Users/morice/Desktop/adaptmesh3d/mshmet.2009.09.16/objects/i386/ -lmshmet -L/Users/morice/work/postdoc/freefem++prod/src/libMesh/ -lMesh
 
+// ./ff-c++ mshmet.cpp -I../download/include/mshmet/ -L../download/lib/mshmet/ -lmshmet -L/Users/morice/work/postdoc/freefem++prod/src/libMesh/ -lMesh
 
 #include "ff++.hpp" 
 #include "msh3.hpp"
