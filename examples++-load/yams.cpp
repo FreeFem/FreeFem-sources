@@ -37,6 +37,8 @@
 ./ff-c++ yams.cpp -I/Users/morice/work/postdoc/freefem++prod/src/libMesh/ -I/Users/morice/Desktop/adaptmesh3d/yams2.2010.02.22/sourcesnew -L/Users/morice/Desktop/adaptmesh3d/yams2.2010.02.22/objects/i386/ -lyams2 -L/Users/morice/work/postdoc/freefem++prod/src/libMesh/ -lMesh
 */
 
+// ./ff-c++ yams.cpp -I../src/libMesh/ -I../download/include/yams/ -L../download/lib/yams/ -lyams2 -L/Users/morice/work/postdoc/freefem++prod/src/libMesh/ -lMesh
+
 #include "ff++.hpp" 
 #include "msh3.hpp"
 //#define ADAPTLIBRARY
@@ -104,7 +106,7 @@ void mesh3_to_yams_pSurfMesh( const Mesh3 &Th3 , int memory, int choix,
   /* tetrahedra */
   if( meshyams->ntet ){
     yams_pTetra ptetra;
-    meshyams->tetra = (yams_Tetra*)M_malloc((meshyams->ntet+1)*sizeof(yams_Tetra),"loadMesh");
+    meshyams->tetra = (yams_Tetra*)calloc((meshyams->ntet+1)*sizeof(yams_Tetra));
     assert(meshyams->tetra);
     
     for (k=1; k<=meshyams->ntet; k++) {
@@ -580,7 +582,7 @@ AnyType yams_Op::operator()(Stack stack)  const
   }
   // mesh for yams
   yams_pSurfMesh yamsmesh;
-  yamsmesh = (yams_pSurfMesh)M_calloc(1,sizeof(yams_SurfMesh),"yams");
+  yamsmesh = (yams_pSurfMesh)calloc(1,sizeof(yams_SurfMesh));
   if ( !yamsmesh ){
     cerr << "allocation error for SurfMesh for yams" << endl;
   }
