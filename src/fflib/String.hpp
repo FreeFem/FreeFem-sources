@@ -101,6 +101,8 @@ class String {
   public: 
 //  String( string & pp) : p(&pp) {}
   String() : p(new string()) {/*cout << "String" << p <<","<<  *p << endl;*/}
+  void init() { p= new string();} // Add FH march 2010 
+void destroy() { delete p;p=0;} // Add FH march 2010 
 //  String( string * c) : p(c) {cout << "String" << p <<","<< *p << endl;} 
   String(const String & c) : p(new string(c)) {/*cout << "String" << p <<","<< *p << endl;*/} 
   String(const string & c) : p(new string(c)) {/*cout << "String" << p <<","<< *p << endl;*/} 

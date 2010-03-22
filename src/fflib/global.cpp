@@ -32,6 +32,7 @@
 #include "AFunction.hpp"
 #include "error.hpp"
 #include "lex.hpp"
+#include "RNM.hpp"
 #include <queue>
 #include "environment.hpp"
 
@@ -44,7 +45,7 @@
  long searchMethod = 0; //pichon
  FILE *ThePlotStream=0; //  Add for new plot. FH oct 2008
 
- 
+  KN<String> *pkarg;//  for the list of argument  mars 2010 
  Map_type_of_map map_type_of_map ; //  to store te type 
 Map_type_of_map map_pair_of_type ; //  to store te type 
 

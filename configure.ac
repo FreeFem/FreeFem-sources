@@ -40,7 +40,9 @@ AC_PROG_CXX
 
 if test -z "$CXX"; then
   AC_MSG_ERROR(" Sorry no c++ compiler !")
+  AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
 fi
+
 AC_COMPUTE_INT(ff_size_long,sizeof(long))
 AC_COMPUTE_INT(ff_size_int,sizeof(int))
 AC_SUBST(SIZEOF_LONG,$ff_size_long)
@@ -180,8 +182,8 @@ AC_LANG_PUSH([Fortran 77])
  AC_LANG_POP([Fortran 77])
  AC_MSG_RESULT($ff_f77intsize)
  AC_F77_WRAPPERS
-   echo   " ------ ac_cv_f77_mangling : $ac_cv_f77_mangling"       
-ff_cfagsf77
+#   echo   " ------ ac_cv_f77_mangling : $ac_cv_f77_mangling"       
+ff_cfagsf77=""
 case $ac_cv_f77_mangling in
 #  "lower case, no underscore, no extra underscore")
 #  "lower case, no underscore, extra underscore")
@@ -722,7 +724,15 @@ ff_mpi=no)
 	fi
 	if test "$ff_mpi" = yes;
 	then
-	    
+		
+	    ff_MPI_INCLUDE=`$MPICXX -showme:compile`
+	    ff_MPI_LIB_DIRS=""
+	    ff_MPI_LIB=`$MPICXX -showme:link`
+	    AC_SUBST(MPI_INCLUDE,$ff_MPI_INCLUDE)
+	    AC_SUBST(MPI_LIB_DIRS,$ff_MPI_LIB_DIRS)
+	    AC_SUBST(MPI_LIB,$ff_MPI_LIB)
+
+	    AC_SUBST(MPICXX,$MPICXX)		
 	    AC_ARG_VAR(MPICC,[MPI C compiler command])
 	    AC_CHECK_PROGS(MPICC, mpicc hcc mpcc mpcc_r mpxlc cmpicc, $CC)
 	    AC_SUBST(MPICC)
@@ -1299,6 +1309,9 @@ AC_SUBST(UMFPACKLIBS,$ff_umfpack_libs)
 # ----------------------------------------------------------
 
 # asinh acosh atanh are not in Mingw yet
+ff_malloc_h=""
+AC_CHECK_HEADERS(malloc.h,ff_malloc_h=1)
+AC_SUBST(FF_MALLOC_H,$ff_malloc_h)
 AC_CHECK_FUNCS(asinh acosh atanh getenv jn erfc tgamma)
 AC_CHECK_FUNCS(srandomdev)
 

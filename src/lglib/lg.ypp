@@ -64,7 +64,8 @@ class Iden;
 #include "environment.hpp"
 
     extern FILE *ThePlotStream;
-    
+    extern KN<String> *pkarg;
+
 class Routine;
 bool load(string s);
 
@@ -734,13 +735,20 @@ int mainff (int  argc, char **argv)
 
   char *  cc= new char [1024];
   //  istream * ccin=0;
-  if ( ! (getprog(cc,argc,argv)>0) ) 
-    return 1; 
+  if ( ! (getprog(cc,argc,argv) >0)  ) 
+    {
+      cout << "-- FreeFem++ v" << StrVersionNumber() << " (error parameter!)\n"  ;
+      return 1; 
+    }
   if(verbosity) { 
       cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
       if(verbosity>1) cout << "   file :" << cc << " " << " verbosity= " << verbosity << endl;
   }
-  
+    
+    KN<String> karg(argc);
+    for(int i=0;i< argc;++i)
+	karg[i]=argv[i];
+    pkarg= &karg;
   zzzfff = Newlex(cout);
     
   
@@ -775,7 +783,7 @@ int mainff (int  argc, char **argv)
    init_lgmesh() ;
    init_lgmesh3() ;
    init_algo();
-   
+
 #ifdef HAVE_LIBARPACK
    init_eigenvalue();
 #endif   

@@ -319,3 +319,8 @@ sort(d,ii); // sort array d and ii in parallele
 cout << " d " << d << "\n ii = " << ii << endl;
 
 }
+//  version 3.8-1
+for(int i=0;i<ARGV.n;++i)
+  {
+    cout << ARGV[i] << endl;
+  }

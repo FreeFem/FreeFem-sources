@@ -429,10 +429,43 @@ The syntax of tools on the command-line  are same
  
 \paragraph{Link with other text editor}
 \begin{description}
-\item[\texttt{Crimson Editor}]
+\item[{notepad++}] at \url{http://notepad-plus.sourceforge.net/uk/site.htm}
+
+
+\begin{itemize} 
+
+\item  Open Notepad++ and Enter  F5
+\item   In the new window  enter  the command
+\verb!FreeFem++ "$(FULL_CURRENT_PATH)"!
+\item Click on  Save,  and enter  \texttt{FreeFem++} in the box  "Name", now  choose  
+the  short cut keyboard  to launch directly FreeFem++  for example \texttt{alt+shift+R}
+ \item To add  the  Color Syntax Compatible to FreeFem++ In Notepad++,
+ \begin{itemize}
+\item In  Menu "Parameters"->"Configuration of the  Color Syntax".
+\item In the list "Language" select C++
+\item Add "edp" in the  field  "add ext"
+\item Select  "INSTRUCTION WORD" in the  list "Description" and in the field 
+"supplementary key word", cut and past the following list:
+
+\Blue{P0 P1 P2 P3 P4 P5 P1dc P2dc P3dc P4dc P5dc RT0 RT1 RT2 RT3 RT4 RT5 macro plot int1d int2d 
+solve movemesh adaptmesh trunc checkmovemesh on func buildmesh square Eigenvalue min max
+imag exec LinearCG NLCG Newton BFGS LinearGMRES 
+catch try intalledges jump average mean load savemesh convect abs
+sin cos tan atan asin acos cotan sinh cosh tanh cotanh atanh asinh acosh pow
+exp log log10 sqrt dx dy endl cout}
+
+\item Select "TYPE WORD" in the list "Description" and ... " "supplementary key word",  
+cut and past the following list
+
+\Blue{mesh real fespace varf matrix problem string border complex ifstream ofstream}
+
+\item Click on \texttt{Save \& Close}.  Now nodepad++ is configure. 
+\end{itemize}
+\end{itemize}
+
+
+\item[{Crimson}] {\bf Editor}
 at \url{http://www.crimsoneditor.com/} and adapt it as follows:
-
-
 
 \begin{itemize}
 \item Go to the \texttt{Tools/Preferences/File} association menu and add the .edp extension set
@@ -4668,7 +4701,7 @@ Adding the  named  parameter \texttt{flags=icase} with icase:
   @mesh Th=@square(n,m,[x0+(x1-x0)*x,y0+(y1-y0)*y],flags=icase);
 \eFF
 Adding the  named  parameter \texttt{label=labs}, you can change the 4 defaults
-label number to \texttt{labs[i-1]} where can be for for example \texttt{int[int] labs=[10,11,12,13,14]},
+label number to \texttt{labs[i-1]} where can be for for example \texttt{int[int] labs=[11,12,13,14]},
 and adding the  named parameter \texttt{region=10} to change  the region number from $0$  to $10$ for example (v 3.8). 
 
 To see all this fags, you can try the example \texttt{examples++/square-mesh.edp} :
