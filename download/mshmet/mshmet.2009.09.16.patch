@@ -1,0 +1,23 @@
+diff -u mshmet.2009.09.16/sources/mshmet.c mshmet.2009.09.16-okk/mshmet.c
+--- mshmet.2009.09.16/sources/mshmet.c	2009-08-28 14:56:26.000000000 +0200
++++ mshmet.2009.09.16-okk/mshmet.c	2010-03-22 08:51:09.000000000 +0100
+@@ -8,7 +8,7 @@
+ #include "mshmet.h"
+ #include "compil.date"
+ 
+-char     idir[5]     = {0,1,2,0,1};
++//char     idir[5]     = {0,1,2,0,1};
+ mytime   ctim[TIMEMAX];
+ 
+ 
+@@ -78,7 +78,7 @@
+   info->width  = 0.05;
+   info->ddebug = 0;
+   info->imprim = -99;
+-	info->nlis   = 0;
++  info->nlis   = 0;
+ 
+   i = 1;
+   while ( i < argc ) {
+
+diff -u mshmet.2009.09.16/sources/mshmet.h mshmet.2009.09.16-okk/mshmet.h
