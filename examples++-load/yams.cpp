@@ -323,14 +323,29 @@ void solyams_pSurfMesh( yams_pSurfMesh sm, const int &type, const KN<double> & t
      
 }
 
+
+static const int wrapper_intopt[13] = {  0,  3,  7,  8, 9,
+				       11, 12, 13, 14, 15,
+				       17, 18, 22};
+
+/*
+static const int wrapper_fopt[12] = {  0, 1, 3,  4,  6,
+                                       7, 8, 9, 10, 11,
+				      12, 13};
+*/
+static const int wrapper_fopt[11] = { 1, 3,  4,  6,
+                                      7, 8, 9, 10, 11,
+				      12, 13};
+
 void yams_inival(int intopt[23],double fopt[14]){
+
 /*
     intopt : 0  !! anisotropie
              1  !! ecp  // enl
-             2  !! extended out put file 
+             2  !! extended out put file // enl
 	     3  !! FE correction 
-	     4  !! Formatted (ascii) output file
-	     5  !! save metric file
+	     4  !! Formatted (ascii) output file // enl
+	     5  !! save metric file // enl
 	     6  !! msh2  // enl
 	     7  !! Split multiple connected points
 	     8  !! memory
@@ -347,14 +362,15 @@ void yams_inival(int intopt[23],double fopt[14]){
 	    19  !! no  : No output file  // enl
 	    20  !! ref : Ignore face references // enl
 	    // rajouter lors de l'ouverture du fichiers yams
-	    21  !! absolute : opts.ctrl &= ~REL;
+	    21  !! absolute : opts.ctrl &= ~REL; par default 1 // enl
 	    22  !! set optim option
 
     fopt   : 0  !! iso 
              1  !! eps 
+	     pas de 2
 	     3  !! opts.lambda
 	     4  !! opts.mu
-	     5  !! set optim option
+	     pas de 5
 	     6  !! hgrad  :: opts.shock
 	     7  !! hmin   :: opts.hmin
 	     8  !! hmax   :: opts.hmax
@@ -366,7 +382,7 @@ void yams_inival(int intopt[23],double fopt[14]){
 	     13 !! ridge  :: opts.ridge
    */
 
-/* set default values for options */
+/* Set default values for options */
   // fopt 5,
   fopt[7]   = -2.0;    
   fopt[8]   = -2.0;
@@ -527,7 +543,7 @@ basicAC_F0::name_and_type  yams_Op::name_param[]= {
   {  "metric", &typeid(KN_<double>)}
 };
 
-AnyType yams_Op::operator()(Stack stack)  const 
+Anytype yams_Op::operator()(Stack stack)  const 
 {
   // initialisation
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
@@ -543,6 +559,42 @@ AnyType yams_Op::operator()(Stack stack)  const
   defaultintopt = 0;
   defaultfopt   = 0.;
   yams_inival( defaultintopt, defaultfopt);
+
+  KN<int> intopt(23);
+  for(int ii=0; ii< 23; ii++){
+    intopt[ii]=defaultintopt[ii];
+  }
+  KN<double> fopt(14);
+  for(int ii=0; ii< 14; ii++){
+    fopt[ii]=defaultfopt[ii];
+  }
+  assert( fopt.N() == 14 );
+
+  if( nargs[0] ){
+    KN<int> intopttmp =  GetAny<KN_<long> >( (*nargs[0])(stack) );
+    if( intopttmp.N() != 13 ){
+      cerr <<"the size of vector loptions is 13 "  << endl;
+      exit(1);
+    }
+    else{
+      for(int ii=0; ii<13; ii++){
+	intopt[ wrapper_intopt[ii] ] = intopttmp[ii];
+      }
+    }
+  }
+  
+  if( nargs[1] ){
+    KN<double> fopttmp =  GetAny<KN_<double> >( (*nargs[1])(stack) );
+    if( fopttmp.N() != 11 ){
+      cerr <<"the size of vector loptions is 12 "  << endl;
+      exit(1);
+    }
+    else{
+      for(int ii=0; ii<12; ii++){
+	fopt[ wrapper_fopt[ii] ] = fopttmp[ii];
+      }
+    }
+  }
 
   KN<int> intopt(arg(0,stack,defaultintopt));
   assert( intopt.N() == 23 );
@@ -639,17 +691,15 @@ AnyType yams_Op::operator()(Stack stack)  const
   // recuperer la solution ????
   cout << &yamsmesh->point << " " << &yamsmesh->tria << " "  <<&yamsmesh->geom << " "  << &yamsmesh->tgte << endl;
   cout << &yamsmesh << endl;
-  M_free(yamsmesh->point);
-  M_free(yamsmesh->tria);
-  M_free(yamsmesh->geom);
-  M_free(yamsmesh->tgte);
-  if ( yamsmesh->metric ) M_free(yamsmesh->metric);
-  if ( yamsmesh->edge )   M_free(yamsmesh->edge);
-  if ( yamsmesh->tetra )   M_free(yamsmesh->tetra);
-  M_free(yamsmesh);
+  free(yamsmesh->point);
+  free(yamsmesh->tria);
+  free(yamsmesh->geom);
+  free(yamsmesh->tgte);
+  if ( yamsmesh->metric ) free(yamsmesh->metric);
+  if ( yamsmesh->edge )   free(yamsmesh->edge);
+  if ( yamsmesh->tetra )   free(yamsmesh->tetra);
+  free(yamsmesh);
 
-  /* check for mem leaks */
-  if ( M_memLeak() )  M_memDump();
   *mp=mps;
   return SetAny<pmesh3>(Th3_T);
 }
