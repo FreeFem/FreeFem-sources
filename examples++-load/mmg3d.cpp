@@ -34,6 +34,8 @@
  */
 
 
+//  ./ff-c++ mmg3d.cpp -I../src/libMesh/ -I../download/include/mmg3d/ -L../download/lib/mmg3d/ -lmmg3d -L../src/libMesh/ -lMesh
+
 #include "ff++.hpp" 
 #include "msh3.hpp"
 //#define ADAPTLIBRARY
@@ -89,7 +91,7 @@ Mesh3 * MMG_pMesh_to_msh3(MMG_pMesh meshMMG){
  return T_TH3;
 }
 
-MMG_pMesh mesh3_to_MMG_pMesh(const Mesh3 &Th3, const int & nvmax, const int &ntrimax, const int & ntetmax){
+MMG_pMesh mesh3_to_MMG_pMesh(const Mesh3 &Th3, const int & nvmax, const int &ntrimax, const int & ntetmax , const bool & boolMoving , const KN<double> &Moving){
   MMG_pMesh meshMMG;
   meshMMG = (MMG_pMesh)calloc(1,sizeof(MMG_Mesh)) ;
 
@@ -105,7 +107,16 @@ MMG_pMesh mesh3_to_MMG_pMesh(const Mesh3 &Th3, const int & nvmax, const int &ntr
   meshMMG->tetra = (MMG_pTetra)calloc(meshMMG->nemax+1,sizeof(MMG_Tetra));
   meshMMG->tria = (MMG_pTria) calloc(meshMMG->ntmax+1,sizeof(MMG_Tria));
   meshMMG->disp = NULL;
-  //meshMMG->disp = (MMG_pDispl)calloc(meshMMG->npmax+1,sizeof(MMG_Displ));
+  if( boolMoving ){
+    MMG_pDispl pd;
+    meshMMG->disp = (MMG_pDispl)calloc(meshMMG->npmax+1,sizeof(MMG_Displ));
+    for(int ii=1; ii <= meshMMG->np; ii++){
+      pd = &meshMMG->disp[ii];
+      pd->mv[0] = Moving[3*(ii-1)];
+      pd->mv[1] = Moving[3*(ii-1)+1];
+      pd->mv[2] = Moving[3*(ii-1)+2];
+    }
+  }
   meshMMG->adja = (int*)calloc(4*meshMMG->nemax+5,sizeof(int));
   
   int k;
@@ -201,7 +212,7 @@ void metric_mmg3d_to_ff_metric(MMG_pSol sol, KN<double> &metric){
 class mmg3d_Op: public E_F0mps 
 {
 public:
-  Expression eTh;
+  Expression eTh,xx,yy,zz;
   static const int n_name_param = 5; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
@@ -222,6 +233,16 @@ public:
     cout << "mmg3d"<< endl;
     args.SetNameParam(n_name_param,name_param,nargs);
     
+    const E_Array * a1=0 ;
+    if(nargs[5])  a1  = dynamic_cast<const E_Array *>(nargs[5]);
+  
+    if(a1) {
+      if(a1->size() !=3) 
+	CompileError("mmg3d(Th,deplacement=[X,Y,Z],) ");
+      xx=to<double>( (*a1)[0]); 
+      yy=to<double>( (*a1)[1]);
+      zz=to<double>( (*a1)[2]);
+    }    
   } 
   
   AnyType operator()(Stack stack)  const ;
@@ -229,11 +250,13 @@ public:
 
 
 basicAC_F0::name_and_type  mmg3d_Op::name_param[]= {
-  {  "nvmax", &typeid(long)}, 
-  {  "ntrimax", &typeid(long)},
-  {  "ntetmax", &typeid(long)}, 
-  {  "options", &typeid(KN_<long>)},
-  {  "metric", &typeid(KN_<double>)}
+  {  "nvmax", &typeid(long)},     // 0
+  {  "ntrimax", &typeid(long)},   // 1
+  {  "ntetmax", &typeid(long)},   // 2
+  {  "options", &typeid(KN_<long>)},    // 3
+  {  "metric", &typeid(KN_<double>)},   // 4
+  {  "displacement", &typeid(E_Array)},  // 5
+  {  "displTabular", &typeid(KN_<double>)}   // 6 
 };
 
 class mmg3d_ff : public OneOperator { public:  
@@ -282,11 +305,38 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
     assert(metric.N()==Th3.nv || metric.N()==6*Th3.nv);
   }
 
-  //MMG_pMesh MMG_Th3=mesh3_to_MMG_pMesh(Th3, nvmax, ntrimax, ntetmax);
+ 
+  bool BoolMoving=0;
+  KN<double> Moving(0);
+  
+  if( nargs[5] || nargs[6] ){
+    BoolMoving=1;
+    if( nargs[6] ){
+      Moving = GetAny<double>( (*nargs[6])(stack) );
+      assert( Moving.N() == 3*Th3.nv );
+      if( Moving.N() != 3*Th3.nv ){ cerr << " Deplacement vector is of size 3*Th.nv" << endl; exit(1);} 
+    }
+    else{ 
+      MeshPoint *mp3(MeshPointStack(stack));
+      Moving.resize(3*Th3.nv);
+      for( int i=0; i<Th3.nv; ++i){
+	mp3->set( Th3.vertices[i].x, Th3.vertices[i].y, Th3.vertices[i].z );
+	if(xx) Moving[3*i]   = GetAny<double>((*xx)(stack)); 
+	if(yy) Moving[3*i+1] = GetAny<double>((*yy)(stack));
+	if(zz) Moving[3*i+2] = GetAny<double>((*zz)(stack));  
+      }
+    }
+  }
 
+
+  MMG_pMesh MMG_Th3=mesh3_to_MMG_pMesh(Th3, nvmax, ntrimax, ntetmax,BoolMoving, Moving);
+
+  /*
+    
+    MMG_pMesh MMG_Th3=mesh3_to_MMG_pMesh(Th3, nvmax, ntrimax, ntetmax);
   MMG_pMesh meshMMG;
   meshMMG = (MMG_pMesh)calloc(1,sizeof(MMG_Mesh)) ;
-
+  
   meshMMG->np = Th3.nv;
   meshMMG->nt = Th3.nbe;
   meshMMG->ne = Th3.nt;
@@ -336,11 +386,9 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
   
  
   MMG_Mesh *MMG_Th3= meshMMG;
+  */
   MMG_pSol sol=metric_mmg3d(nv, nvmax, metric);
   
-  cout << meshMMG->np << " "<< meshMMG->npmax << endl;
-  cout << meshMMG->nt << " "<< meshMMG->ntmax << endl;
-  cout << meshMMG->ne << " "<< meshMMG->nemax << endl;
   int res=MMG_mmg3dlib( opt, MMG_Th3, sol);
 
   if( res > 0){
