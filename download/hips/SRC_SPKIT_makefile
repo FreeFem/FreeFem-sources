@@ -6,12 +6,11 @@ ifneq ($(FC),true)
 	OBJ   = $(TMP:.f90=.o)
 else
 	OBJ   = 
+	AR    = echo do nothing : ar 
 endif
 
 default: $(OBJ)
-ifneq ($(FC),true)
 	$(AR) $(ARFLAGS) $(LIBSPKIT) $(OBJ)
-endif
 
 %.o: %.f90
 	$(FC) $(FC_OPT) $< -c -o $@

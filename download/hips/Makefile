@@ -9,6 +9,7 @@ all-local: hips
 # ------------------------------
 # http://hips.gforge.inria.fr/release/hips-1.2b-rc4.tar.gz
 # Hips information
+
 DIRPKG=../pkg
 SRCDIR=hips-$(hips_VERSION)
 PACKAGE=$(DIRPKG)/hips-$(hips_VERSION).tar.gz
@@ -49,7 +50,7 @@ ObjBlockDBMATRIX   = $(SRCDIR)/SRC/BLOCK/DBMATRIX/amalgamate.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMATRIX_SEQ.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_Setup.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_SetupHID.o \
-	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_solve2.o \
+  	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_solve2.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_solve.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_TRSM.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBPrec_FACTO_TRSM_GEMM_LL.o \
@@ -145,7 +146,7 @@ FAIT:
 
 FAIRE: FAIT
 
-makefile.inc: ../Makefile   ../../config.status 	Makefile     
+makefile.inc: ../Makefile   ../../config.status makefile-hips.inc Makefile     
 	grep 'abs_top_builddir *=' ../Makefile >> dirflags	
 	grep 'RANLIB *=' ../Makefile >> dirflags
 	cat dirflags makefile-hips.inc > makefile-hips-tmp.inc
@@ -164,8 +165,10 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)
 	$(RANLIB) $(SRCDIR)/LIB/libhipssequential.a
 	$(AR) $(ARFLAGS) $(SRCDIR)/LIB/libio.a $(OBJLIBIO) 
 	$(RANLIB) $(SRCDIR)/LIB/libio.a
-	$(AR) $(ARFLAGS) $(SRCDIR)/LIB/libspkit.a $(OBJLIBSPKIT) 
-	$(RANLIB) $(SRCDIR)/LIB/libspkit.a
+	if [ -n "$(OBJLIBSPKIT)" ] ; then \
+	$(AR) $(ARFLAGS) $(SRCDIR)/LIB/libspkit.a $(OBJLIBSPKIT) ;\
+	$(RANLIB) $(SRCDIR)/LIB/libspkit.a;\
+	fi
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/hips
 	cp $(SRCDIR)/LIB/*.h $(SRCDIR)/$(INSTALL)/include/hips/
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/hips
@@ -175,6 +178,11 @@ $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
 	cd $(SRCDIR)/SRC/INCLUDE/; patch -p1 < ../../../hips-1.2b-rc4-1.patch;
 	cd $(SRCDIR)/SRC/IO/; patch -p1 < ../../../hips-1.2b-rc4-2.patch;
+	cd $(SRCDIR); for d in SRC/INCLUDE SRC/IO SRC/SPKIT TESTS/PARALLEL; do \
+	  cp $$d/makefile $$d/makefile.orig; \
+	  sed 's/\$$(CC).*-E/$$(CPP) $$(CFLAGS) $$(CC_OPT)/' >$$d/makefile <$$d/makefile.orig;\
+	done
+	cp  SRC_SPKIT_makefile $(SRCDIR)/SRC/SPKIT/makefile
 	touch $(SRCDIR)
 
 $(PACKAGE):

@@ -44,13 +44,14 @@ ARCH       = -DLINUX
 
 CC	   = @CC@       # C compiler 
 MPICC      = @MPICC@ 
-FC         = @FC@  # Fortran compiler 
+CPP	   = cpp
+FC         = 
 MPIFC      = @MPIFC@
-LD	   = $(FC)     # Linker
-MPILD      = $(MPIFC)
+LD	   = $(CC)     # Linker
+MPILD      = $(MPICC)
 
 CFLAGS	   =  -std=c99       # Additional C compiler flags
-FFLAGS	   =  -std=c99         # Additional Fortran compiler flags
+FFLAGS	   =           # Additional Fortran compiler flags
 LFLAGS     =           # Additional linker flags
 
 
@@ -71,7 +72,7 @@ LMPI       =  $(FFMPILIB)  -lsupc++ @FLIBS@  # Additional MPI linker flags
 
 ##   METIS_DIR : path to METIS
 METIS_DIR  =  $(DOWNLOADFF)#
-IMETIS     = -I$(METIS_DIR)include/parmetis/
+IMETIS     = -I$(METIS_DIR)include/metis/
 LMETIS     = -L$(METIS_DIR)lib/parmetis/ -lmetis
 
 ##   SCOTCH_DIR : path to SCOTCH
@@ -84,8 +85,8 @@ LSCOTCH    = -L$(SCOTCH_DIR)lib/ -lscotch -lscotcherr
 ###
 
 MAKE	   = make
-AR	   = @AR@       //ar
-ARFLAGS	   = @ARFLAGS@ //-crs  
+AR	   = @AR@       #//ar
+ARFLAGS	   = @ARFLAGS@ #//-crs  
 LN	   = ln
 CP	   = cp
 
