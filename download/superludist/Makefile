@@ -18,6 +18,7 @@ SERVER=http://crd.lbl.gov/~xiaoye/SuperLU/
 INSTALL=../..
 SUPERLU_DIST_VERSION=2.3
 DISTSUPERLULIB=../$(INSTALL)/lib/libsuperlu_dist_2.3.a
+WGET=wget
 
 include make.inc
 

@@ -1,3 +1,5 @@
+abs_top_builddir = @abs_top_builddir@
+WGET=@WGET@
 include $(abs_top_builddir)/download/headers-sparsesolver.inc
 # path for this directory 
 PARMS_ROOT	= $(abs_top_builddir)/download/parms/pARMS_2.2

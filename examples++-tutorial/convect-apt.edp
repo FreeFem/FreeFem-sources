@@ -76,7 +76,7 @@ for ( i=0; i< 20/kt ; i++) {
         real errl2= sqrt(int2d(th)(square(vp-v))) ;
         cout << " interation " << k << "  err l2 = " << errl2 << " --------------- " <<endl; 
         vp=v;
-	error=errl2;
+  	error=errl2;
         if (errl2  < tol2) break;
      }
      vT=v; 

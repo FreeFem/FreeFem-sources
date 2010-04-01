@@ -6,7 +6,7 @@ CC = @CC@
 OPTFLAGS = @CFLAGS@ 
 
 # What options to be used by the compiler
-COPTIONS = 
+COPTIONS = @FFMETIS_CFLAGS@
 
 # What options to be used by the loader
 LDOPTIONS = @LDFLAGS@

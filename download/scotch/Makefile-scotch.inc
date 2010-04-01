@@ -1,15 +1,15 @@
-include $(abs_top_builddir)/download/headers-sparsesolver.inc
+include @abs_top_builddir@/download/headers-sparsesolver.inc
 EXE	=
 LIB	= .a
 OBJ	= .o
-DIRMPI  = $(FFMPIDIR)
+DIRMPI  = @FFMPIDIR@
 MAKE	= make
 AR	= @AR@
 ARFLAGS	= @ARFLAGS@
 CAT	= cat
-CCS     = $(DIRMPI)bin/mpicc -I$(DIRMPI)include/
-CCP	= $(DIRMPI)bin/mpicc -I$(DIRMPI)include/
-CCD     = $(DIRMPI)bin/mpicc -I$(DIRMPI)include/
+CCS     = @MPICC@ @MPI_INCLUDE@
+CCP	= @MPICC@ @MPI_INCLUDE@
+CCD     = @MPICC@ @MPI_INCLUDE@
 CFLAGS	= @CFLAGS@ $(FFINTSCOTCH) -Drestrict=__restrict -DCOMMON_PTHREAD -DCOMMON_FILE_COMPRESS_GZ -DCOMMON_RANDOM_FIXED_SEED -DCOMMON_TIMING_OLD -DSCOTCH_RENAME -DSCOTCH_DETERMINISTIC #enlever -DSCOTCH_PTHREAD do not allow thread
 LDFLAGS	= @LDFLAGS@ -lz -lm @LIBSPTHREAD@  #-L/usr/local/lib/gcc/
 CP	= cp

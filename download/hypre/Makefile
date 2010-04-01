@@ -52,9 +52,9 @@ FAIRE: $(SRCDIR)
 	cd $(SRCDIR)/src && $(MAKE)
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/hypre
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/hypre
-	chmod 644 $(SRCDIR)/$(INSTALL)/include/hypre/HYPRE.h
 	cp $(SRCDIR)/src/hypre/include/* $(SRCDIR)/$(INSTALL)/include/hypre
 	cp $(SRCDIR)/src/hypre/lib/* $(SRCDIR)/$(INSTALL)/lib/hypre
+	chmod 644 $(SRCDIR)/$(INSTALL)/include/hypre/HYPRE.h
 	rm -rf $(SRCDIR)/src/hypre
 	touch FAIT
 
