@@ -1,4 +1,4 @@
-include $(abs_top_builddir)/download/hearders_sparsesolver.inc
+include $(abs_top_builddir)/download/headers-sparsesolver.inc
 #################
 WGET = @WGET@
 ############################################################################

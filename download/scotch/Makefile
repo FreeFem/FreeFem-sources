@@ -16,7 +16,7 @@ PACKAGE=$(DIRPKG)/scotch_$(scotch_VERSION_LOCAL).tar.gz
 SERVER=http://gforge.inria.fr/frs/download.php/23391
 INSTALL=../..
 scotch_VERSION=5.1_esmumps
-scotch_VERSION_LOCAL=5.1.7_esmumps
+scotch_VERSION_LOCAL=5.1.6_esmumps
 
 scotch: FAIRE
 
@@ -26,7 +26,7 @@ $(SRCDIR)/FAIT:
 
 FAIRE: $(SRCDIR)/FAIT
 
-Makefile.inc: ../../config.status	Makefile
+Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
 	../../config.status  --file="Makefile.inc:Makefile-scotch.inc"
 	case `uname` in *CYGWIN*)  cp Makefile.inc Makefile.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.inn > Makefile.inc; rm Makefile.inn ;; esac 
 

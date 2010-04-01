@@ -10,7 +10,7 @@
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.8-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.8-2,hecht@ann.jussieu.fr,freefem++)
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
@@ -303,6 +303,7 @@ case $ff_uname in
 CYGWIN*|MINGW*)
 	ff_suffix_dylib="dll";
         ff_win32=yes;
+	AC_SUBST(FFMETIS_CFLAGS,"-D__VC__")
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
 	then
@@ -310,7 +311,7 @@ CYGWIN*|MINGW*)
                 ff_mingw=yes 
                 enable_cygwindll=no;
 		ff_pthread="-mthread"
-		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
+		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
 		FFLAGS="$FFLAGS $ff_nocygwin"
 		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32" 
@@ -696,29 +697,9 @@ ff_mpi=no)
 		# We do not AC_DEFINE any special flag for parallel
 		# computation here, because it must only be set when the
  		# parallel program is compiled (see src/mpi/Makfile.am)
-#  no use of mpi++.h now
-# more simple ...  FH  version 3.4-2
-##        AC_CHECK_HEADERS(mpicxx.h mpi/cxx/mpicxx.h ompi/mpi/cxx/mpicxx.h openmpi/ompi/mpi/cxx/mpicxx.h mpi++.h, ff_mpicxx_include=yes)
-#
-#                AC_CHECK_HEADER(mpicxx.h,
-#                        AC_DEFINE(HAVE_MPICXX_H,1, mpicxx.h  have include file))
-#                AC_CHECK_HEADER(mpi/cxx/mpicxx.h,
-#                        AC_DEFINE(HAVE_MPI_CXX_MPICXX_H,1, mpi/cxx/mpicxx.h  have include file))
-#                AC_CHECK_HEADER(ompi/mpi/cxx/mpicxx.h,
-#                        AC_DEFINE(HAVE_OMPI_MPI_CXX_MPICXX_H,1, ompi/mpi/cxx/mpicxx.h  have include file))
-#                AC_CHECK_HEADER(openmpi/ompi/mpi/cxx/mpicxx.h,
-#                        AC_DEFINE(HAVE_OPENMPI_OMPI_MPI_CXX_MPICXX_H,1, ompi/mpi/cxx/mpicxx.h  have include file))
-#
-#                AC_CHECK_HEADER(mpi++.h,
-#                        AC_DEFINE(HAVE_MPICPP_H,1, mpi++.h  have include file))
 		ff_mpiprog="FreeFem++-mpi${EXEEXT}"
-##		if test "$ff_mpicxx_include" = yes ; then
    		  AC_SUBST(MPIPROG,$ff_mpiprog)
                   AC_SUBST(MPICXX,$ff_mpicxx)
-##		else
-##		  ff_mpi=no
-##	          AC_SUBST(MPICXX,$ff_save_cxx)
-##		fi
 	else
 	        AC_SUBST(MPICXX,$ff_save_cxx)
 	fi
@@ -728,6 +709,11 @@ ff_mpi=no)
 	    ff_MPI_INCLUDE=`$MPICXX -showme:compile`
 	    ff_MPI_LIB_DIRS=""
 	    ff_MPI_LIB=`$MPICXX -showme:link`
+	    ff_MPI_INCLUDE_DIR=`$MPICXX -showme:incdirs`
+	    if [ -z "$ff_MPI_INCLUDE_DIR" -a -f /usr/include/mpi.h ] ;then
+	      ff_MPI_INCLUDE_DIR=/usr/include/
+	    fi
+
 	    AC_SUBST(MPI_INCLUDE,$ff_MPI_INCLUDE)
 	    AC_SUBST(MPI_LIB_DIRS,$ff_MPI_LIB_DIRS)
 	    AC_SUBST(MPI_LIB,$ff_MPI_LIB)
@@ -740,15 +726,18 @@ ff_mpi=no)
 	    if test "$enable_fortran" != no
 	    then	
 		
-		AC_ARG_VAR(MPIF77,[MPI Fortran compiler command])
+		AC_ARG_VAR(MPIF77,[MPI Fortran 77 compiler command])
 		AC_CHECK_PROGS(MPIF77, mpif77 hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, $F77)
 		AC_SUBST(MPIF77)
 		
-		AC_ARG_VAR(MPIFC,[MPI Fortran compiler command])
+		AC_ARG_VAR(MPIFC,[MPI Fortran 90  compiler command])
 		AC_CHECK_PROGS(MPIFC, mpif90 mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, $FC)
 		AC_SUBST(MPIFC)
 	    fi
-	    
+	    if [ ! -f "$ff_MPI_INCLUDE_DIR/fmpi.h" ] ; then
+	        AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/fmpi.h"  ])
+  	    fi 	    
+	    AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		
 	fi
 	CXX="$ff_save_cxx"
 fi

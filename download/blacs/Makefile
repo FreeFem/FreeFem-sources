@@ -28,13 +28,9 @@ $(SRCDIR)/FAIT:
 
 FAIRE: $(SRCDIR)/FAIT
 
-Bmake.inc: ../../config.status	Makefile
-	grep 'abs_top_builddir *=' ../Makefile >> dirflags
-	cat dirflags Bmake-blacs.inc > Bmake-tmp.inc
-	rm dirflags
-	../../config.status  --file="Bmake.inc:Bmake-tmp.inc"
-	case `uname` in *CYGWIN*)  cp Bmake.inc Bmake.incn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Bmake.incn > Bmake.inc; rm Bmake.incn ;; esac 
-	rm Bmake-tmp.inc
+Bmake.inc: ../../config.status	Makefile Bmake-blacs.inc
+	../../config.status  --file="Bmake.inc:Bmake-blacs.inc"
+
 
 $(SRCDIR)/$(INSTALL): $(SRCDIR) 
 	cp Bmake.inc $(SRCDIR)
@@ -42,7 +38,6 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)
 	sed -e 's;\.C;\.oo;g'\
 	< $(SRCDIR)/SRC/MPI/Makefile.tmp \
 	> $(SRCDIR)/SRC/MPI/Makefile
-	cd $(SRCDIR)/SRC/MPI; patch -p1 < ../../../BLACS.patch
 	#cd $(SRCDIR)/INSTALL/;$(MAKE) xintface xsyserrors xcmpi_sane xfmpi_sane xtc_CsameF77 xtc_UseMpich
 	cd $(SRCDIR);$(MAKE) mpi 
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/blacs
@@ -52,6 +47,7 @@ $(SRCDIR): $(PACKAGE1) $(PACKAGE2) $(PACKAGE3)
 	gunzip -c $(PACKAGE1) | tar xvf -
 	gunzip -c $(PACKAGE2) | tar xvf -
 	gunzip -c $(PACKAGE3) | tar xvf -
+	cd $(SRCDIR)/SRC/MPI; patch -p1 < ../../../BLACS.patch
 	touch $(SRCDIR)
 
 $(PACKAGE1):

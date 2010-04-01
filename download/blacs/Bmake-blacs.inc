@@ -1,4 +1,5 @@
-include $(abs_top_builddir)/download/hearders_sparsesolver.inc
+abs_top_builddir=@abs_top_builddir@
+include $(abs_top_builddir)/download/headers-sparsesolver.inc
 #=============================================================================
 #====================== SECTION 0: FREEFEM++  ================================
 #=============================================================================
@@ -59,9 +60,9 @@ WGET = @WGET@
    MPIdir = $(FFMPIDIR) 
    MPIdev =  
    MPIplat = 
-   MPILIBdir = $(MPIdir)lib
-   MPIINCdir = $(MPIdir)include
-   MPILIB = $(FFMPILIB) 
+   MPILIBdir = @MPI_LIB_DIRS@
+   MPIINCdir = @MPI_INC_DIR@
+   MPILIB = @MPI_LIB@
 
 #  -------------------------------------
 #  All libraries required by the tester.

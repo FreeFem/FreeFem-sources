@@ -25,10 +25,8 @@ $(SRCDIR)/FAIT:
 
 FAIRE: $(SRCDIR)/FAIT
 
-Makefile.in: ../../config.status	Makefile
-	grep 'abs_top_builddir *=' ../Makefile >> dirflags
-	cat dirflags Makefile-parms.in > Makefile-parms-tmp.in
-	../../config.status  --file="Makefile.in:Makefile-parms-tmp.in"
+Makefile.in: ../../config.status	Makefile makefile-parms.in
+	../../config.status  --file="Makefile.in:makefile-parms.in"
 	case `uname` in *CYGWIN*)  cp Makefile.in Makefile.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.inn > Makefile.in; rm Makefile.inn ;; esac 
 
 $(SRCDIR)/$(INSTALL): $(SRCDIR)

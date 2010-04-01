@@ -36,16 +36,8 @@ $(SRCDIR)/FAIT:
 FAIRE: $(SRCDIR)/FAIT
 
 config.in: ../Makefile ../../config.status	Makefile
-	grep 'abs_top_builddir *=' ../Makefile >> dirflags
-	cat dirflags config-pastix-real.in > config-pastix-real-tmp.in
-	cat dirflags config-pastix-complex.in > config-pastix-complex-tmp.in
-	rm dirflags
-	../../config.status  --file="config.in:config-pastix-real-tmp.in"
-	case `uname` in *CYGWIN*)  cp config.in config.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <config.inn > config.in; rm config.inn ;; esac
-	../../config.status  --file="config-complex.in:config-pastix-complex-tmp.in"
-	case `uname` in *CYGWIN*)  cp config-complex.in config-complex.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <config-complex.inn > config-complex.in; rm config-complex.inn ;; esac
-	rm config-pastix-real-tmp.in
-	rm config-pastix-complex-tmp.in
+	../../config.status  --file="config.in:config-pastix-real.in"
+	../../config.status  --file="config-complex.in:config-pastix-complex.in"
 
 
 $(SRCDIR)/$(INSTALL): $(SRCDIR) 

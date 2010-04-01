@@ -1,9 +1,11 @@
+abs_top_builddir=@abs_top_builddir@
 include $(abs_top_builddir)/download/headers-sparsesolver.inc
 HOSTARCH    = i686_mac
 VERSIONBIT  = _32bit
 EXEEXT      =
 OBJEXT      = .o
 LIBEXT      = .a
+WGET        = @WGET@
 CCPROG      = @CC@ -Wall -DX_ARCH$(HOSTARCH)
 CFPROG      = @F77@ 
 CF90PROG    = @F77@ -ffree-form

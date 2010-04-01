@@ -1,4 +1,4 @@
-include $(abs_top_builddir)/download/hearders_sparsesolver.inc
+include $(abs_top_builddir)/download/headers-sparsesolver.inc
 DOWNLOADFF= $(abs_top_builddir)/download
 ###############################################################################
 #
@@ -43,7 +43,7 @@ DOWNLOADFF= $(abs_top_builddir)/download
 #
 
 SCOTCHDIR  = $(DOWNLOADFF)/
-ISCOTCH    = -I$(SCOTCHDIR)/include/scotch/ 
+ISCOTCH    = -I$(SCOTCHDIR)/include/scotch
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
 # sequential analysis choose the first (remember to add -Dscotch in the ORDERINGSF

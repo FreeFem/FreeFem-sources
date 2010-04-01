@@ -13,7 +13,7 @@ DIRPKG= ../pkg
 SRCDIR= ./yams2$(yams_VERSION)
 #-$(yams_VERSION)
 PACKAGE=$(DIRPKG)/yams2$(yams_VERSION).tgz
-SERVER=
+SERVER=http://www.ann.jussieu.fr/~frey/ftp/archives/
 INSTALL=../..
 yams_VERSION=.2010.02.22
 WGET =
@@ -28,6 +28,7 @@ YAMS_OBJDIR = $(YAMS_DIR)/objects
 
 yams: FAIRE
 
+
 $(SRCDIR)/FAIT:
 	$(MAKE) $(SRCDIR)/$(INSTALL)  
 	touch $(SRCDIR)/FAIT
@@ -37,10 +38,10 @@ FAIRE: $(SRCDIR)/FAIT
 $(SRCDIR)/$(INSTALL): $(SRCDIR)
 	cd $(YAMS_DIR); make
 	-mkdir $(SRCDIR)/$(INSTALL)/include/yams/
-	cp $(YAMS_SRCDIR)/yamslib.h  $(SRCDIR)/$(INSTALL)/include/yams/yamslib.h
-	cp $(YAMS_SRCDIR)/defines.h  $(SRCDIR)/$(INSTALL)/include/yams/
-	-mkdir $(SRCDIR)/$(INSTALL)/lib/yams/
-	cp $(YAMS_OBJDIR)/libyams2.a  $(SRCDIR)/$(INSTALL)/lib/yams/libyams2.a
+	sed  s/defines.h/yams_defines.h/ <$(YAMS_SRCDIR)/yamslib.h  >$(SRCDIR)/$(INSTALL)/include/yamslib.h
+	cp $(YAMS_SRCDIR)/defines.h  $(SRCDIR)/$(INSTALL)/yams_defines.h
+	-mkdir $(SRCDIR)/$(INSTALL)/lib	
+	cp $(YAMS_OBJDIR)/libyams2.a  $(SRCDIR)/$(INSTALL)/lib/libyams2.a
 
 $(SRCDIR): $(PACKAGE)
 	-mkdir yams2$(yams_VERSION)
@@ -57,16 +58,14 @@ $(PACKAGE):
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 clean-local: 
-	cd $(YAMS_DIR); make clean;
+	cd $(YAMS_DIR); make  clean;
 	-rm $(YAMS_OBJDIR)/libyams2.a
 
 clean: clean-local
 	-rm ff-flags
-	-rm -r $(YAMS_DIR)
-	-rm $(SRCDIR)/$(INSTALL)/lib/yams/*.a
-	-rm $(SRCDIR)/$(INSTALL)/include/yams/*.h
-	-rm -r $(SRCDIR)/$(INSTALL)/lib/yams
-	-rm -r $(SRCDIR)/$(INSTALL)/include/yams
+	-rm -rf $(YAMS_DIR)
+	-rm $(SRCDIR)/$(INSTALL)/lib/libyams.a
+	-rm $(SRCDIR)/$(INSTALL)/include/yams*.h
 	-rm -rf $(SRCDIR)
 	-rm FAIT
 

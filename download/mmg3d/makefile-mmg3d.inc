@@ -31,7 +31,7 @@ $(objs):$(header)
 $(DIRDIR):
 	@[ -d $@ ] || mkdir $@
 
-lib:	$(objs)
+lib:	$(DIRDIR) $(objs)
 	$(AR) $(ARFLAGS) $(lib) $(OBJDIR)/*.o  
 	$(RANLIB) $(lib)
 	@echo 'Fin Archivage' $@

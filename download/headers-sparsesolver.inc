@@ -1,21 +1,21 @@
 # BLAS
-FFBLASINCLUDE = -I/Users/morice/librairie/PATCHVECLIB/
-FFBLASDIRLIBS = 
-FFBLASLIB     = -L/Users/morice/librairie/PATCHVECLIB/ -lwrapperdotblas -framework veclib
-FFBLASLIB2    = -lblas
+#FFBLASINCLUDE = -I/Users/morice/librairie/PATCHVECLIB/
+#FFBLASDIRLIBS = 
+#FFBLASLIB     = -L/Users/morice/librairie/PATCHVECLIB/ -lwrapperdotblas -framework veclib
+#FFBLASLIB2    = -lblas
 
 
 # LAPACK
-FFLAPACKDIRLIBS = 
-FFLAPACKLIB     = -framework veclib
-FFLAPACKLIB2    = -llapack
+#FFLAPACKDIRLIBS = 
+#FFLAPACKLIB     = -framework veclib
+#FFLAPACKLIB2    = -llapack
 
 # MPI
-FFMPIDIR      = /Users/morice/librairie/openmpi-gcc-gfortran-4.4/
-FFMPIINCLUDE  = -I/Users/morice/librairie/openmpi-gcc-gfortran-4.4/include/
-FFMPILIB      = -L/Users/morice/librairie/openmpi-gcc-gfortran-4.4/lib/ -lmpi -lmpi_cxx -lopen-pal -lopen-rte -lotf -lvt
-FFMPIDIRLIBS  = /Users/morice/librairie/openmpi-gcc-gfortran-4.4/lib/
-FFMPILIB2     = mpi mpi_cxx open-pal open-rte otf vt
+#FFMPIDIR      = /Users/morice/librairie/openmpi-gcc-gfortran-4.4/
+#FFMPIINCLUDE  = -I/Users/morice/librairie/openmpi-gcc-gfortran-4.4/include/
+#FFMPILIB      = -L/Users/morice/librairie/openmpi-gcc-gfortran-4.4/lib/ -lmpi -lmpi_cxx -lopen-pal -lopen-rte -lotf -lvt
+#FFMPIDIRLIBS  = /Users/morice/librairie/openmpi-gcc-gfortran-4.4/lib/
+#FFMPILIB2     = mpi mpi_cxx open-pal open-rte otf vt
 
 # INT
 
