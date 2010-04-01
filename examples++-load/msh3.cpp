@@ -698,21 +698,21 @@ void Tet_mesh3_mes_neg(Mesh3 & Th3){
     int iv[4];
     int lab;
     
-	for(int ii=0; ii< Th3.nt; ii++){
-	  const Tet & K(Th3.t(ii));
- 	lab   = K.lab;
+    for(int ii=0; ii< Th3.nt; ii++){
+      const Tet & K(Th3.t(ii));
+      lab   = K.lab;
  
-    iv[0] = Th3.operator()(K[0]);
-    iv[2] = Th3.operator()(K[1]);
-    iv[1] = Th3.operator()(K[2]);
-    iv[3] = Th3.operator()(K[3]);
-    R3 A(Th3.vertices[iv[0]]);
-    R3 B(Th3.vertices[iv[1]]);
-    R3 C(Th3.vertices[iv[2]]);
-    R3 D(Th3.vertices[iv[3]]);
-    double mes=det(A,B,C,D)/6.;
-    Th3.t(ii).set(Th3.vertices, iv, lab,mes);	
-	}
+      iv[0] = Th3.operator()(K[0]);
+      iv[2] = Th3.operator()(K[1]);
+      iv[1] = Th3.operator()(K[2]);
+      iv[3] = Th3.operator()(K[3]);
+      R3 A(Th3.vertices[iv[0]]);
+      R3 B(Th3.vertices[iv[1]]);
+      R3 C(Th3.vertices[iv[2]]);
+      R3 D(Th3.vertices[iv[3]]);
+      double mes=det(A,B,C,D)/6.;
+      Th3.t(ii).set(Th3.vertices, iv, lab,mes);	
+    }
 }
 
 //=======================================================================//
@@ -1890,7 +1890,7 @@ public:
   Expression eTh;
   Expression xx,yy,zz;
   //Expression  lab,reg;  
-  static const int n_name_param =7+2; // add FH for cleanning name  
+  static const int n_name_param =7+2; // add FH for cleanning name  //  "+1" add to reorient tetrahedrons
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,int ii,Stack stack,KN_<long> a ) const
@@ -1933,7 +1933,6 @@ basicAC_F0::name_and_type Movemesh3D_Op::name_param[]= {
   {  "orientation",&typeid(long)},
   {  "region", &typeid(KN_<long> )}, //7 
   {  "label", &typeid(KN_<long> )} // 8
-    
   // option a rajouter
   // facemerge 0,1 + label
 };
@@ -2099,16 +2098,26 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
 
   if(nbt != 0)
     {    
-      if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
+      long orientationelement( arg(6,stack,1) );
+      if( orientationelement == -1){
+	// change all orientation of borderelements and elements
+	for (int i=0;i<T_Th3->nt;i++)
+	  { 
+	    const Tet &K( T_Th3->elements[i] );
+	    int iv[4];       
+	    
+	    iv[0] = T_Th3->operator()(K[0]);
+	    iv[1] = T_Th3->operator()(K[1]);
+	    iv[2] = T_Th3->operator()(K[2]);
+	    iv[3] = T_Th3->operator()(K[3]);
+	    
+	    int iv_temp=iv[1];
+	    iv[1]=iv[2];
+	    iv[2]=iv_temp;
+	    T_Th3->elements[i].set( T_Th3->vertices, iv, K.lab );
+	  }
 
-      T_Th3->BuildGTree();
-    }
-  else
-    {
-      // parameter orientation for a 3D surface mesh
-      long orientationsurf( arg(6,stack,0) );
-      if( orientationsurf == 1){
-	// change all orientation of borderelements
+
 	for (int i=0;i<T_Th3->nbe;i++)
 	  { 
 	    const Triangle3 &K( T_Th3->be(i) );
@@ -2125,6 +2134,32 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
 	  }
       }
 
+      if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
+
+      T_Th3->BuildGTree();
+    }
+  else
+    {
+      // parameter orientation for a 3D surface mesh
+      long orientationsurf( arg(6,stack,1) );
+      if( orientationsurf == -1){
+	// change all orientation of borderelements
+	for (int i=0;i<T_Th3->nbe;i++)
+	  { 
+	    const Triangle3 &K( T_Th3->be(i) );
+	    int iv[3];       
+	    
+	    iv[0] = T_Th3->operator()(K[0]);
+	    iv[1] = T_Th3->operator()(K[1]);
+	    iv[2] = T_Th3->operator()(K[2]);
+	    
+	    int iv_temp=iv[1];
+	    iv[1]=iv[2];
+	    iv[2]=iv_temp;
+	    T_Th3->be(i).set( T_Th3->vertices, iv, K.lab );
+	  }
+      }
+      
       if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
     }
   Add2StackOfPtr2FreeRC(stack,T_Th3);
@@ -4989,17 +5024,18 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
   SplitSimplex<R3>( kksplit, nvsub, vertexsub, ntetsub, tetsub);
   SplitSurfaceSimplex( kksplit, ntrisub, trisub);
   
-  for( int iii=0; iii< nvsub; iii++){
+  /*
+    for( int iii=0; iii< nvsub; iii++){
     cout << "vertexsub["<< iii <<"]=" << " "<< vertexsub[iii].x << " "<< vertexsub[iii].y << " "<< vertexsub[iii].z << endl;
-  }
-  for( int iii=0; iii< ntetsub; iii++){
+    }
+    for( int iii=0; iii< ntetsub; iii++){
     cout << "tetsub=" << tetsub[4*iii] << " "<< tetsub[4*iii+1] << " "<< tetsub[4*iii+2] << " "<< tetsub[4*iii+3] <<endl;
-  }
+    }
 
-  for( int iii=0; iii< 4*kksplit2; iii++){
+    for( int iii=0; iii< 4*kksplit2; iii++){
     cout << iii << " tetsub=" << trisub[3*iii] << " "<< trisub[3*iii+1] << " " << trisub[3*iii+2] << endl;
-  }
-  
+    }
+  */
   cout << "Th.nv= " << Th.nv << "kksplit="<< kksplit << endl;
   // determination de nv 
   /*if(kksplit == 1)
