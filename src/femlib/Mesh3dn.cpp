@@ -141,7 +141,9 @@ namespace Fem2D
   
   Mesh3::Mesh3(const string  filename)
   {
-    int ok=load(filename);		
+    int ok=load(filename);
+    cout << "read mesh ok " << ok  << endl;
+    cout << ", nt " << nt << ", nv " << nv << " nbe:  = " << nbe << endl;
     if(ok)
       {
 	ifstream f(filename.c_str());
@@ -177,6 +179,7 @@ namespace Fem2D
     int i;
     //	f >> nv >> nt >> neb ;
     string str;
+    
     while(!f.eof())
       {
 	f >> str;
@@ -256,22 +259,44 @@ namespace Fem2D
     int ver,inm,dim;
     int lf=filename.size()+20;
     KN<char>  fileb(lf),filef(lf);
-    char * pfile;
-    strcpy(filef,filename.c_str());
-    strcpy(fileb,filef);
-    strcat(filef,".mesh");
-    strcat(fileb,".meshb");
-    if( (inm=GmfOpenMesh(pfile=fileb, GmfRead,&ver,&dim)) ) 
-      bin=true;
-    else if( (inm=GmfOpenMesh(pfile=filef, GmfRead,&ver,&dim)) ) 
-      bin=false;
-    else
-      { 
+    char *data = new char[filename.size()+1];
+    size_t ssize = filename.size()+1;
+    char *ptr;
+    char *pfile;
+
+    strncpy( data, filename.c_str(),ssize);
+    
+    //size_t ssize = filename.size()+1;
+    //char * pfile = new char[filename.size()+1];
+    //strncpy( pfile, filename.c_str(),ssize);
+    //cout << filename.size()+1 << endl;
+    
+    ptr = strstr(data,".mesh");
+    if(verbosity>5) cout << (char *) ptr  << endl;
+    if( !ptr ){
+      strcpy(filef,filename.c_str());
+      strcpy(fileb,filef);
+      strcat(filef,".mesh");
+      strcat(fileb,".meshb");
+      if( (inm=GmfOpenMesh(pfile=fileb, GmfRead,&ver,&dim)) ) 
+	bin=true;
+      else if( (inm=GmfOpenMesh(pfile=filef, GmfRead,&ver,&dim)) ) 
+	bin=false;
+      else 
+	if(verbosity>5){
+	  cerr << " Erreur ouverture file " << (char *) fileb  << " " << (char *) fileb  <<endl;
+	  return   1;
+	}
+    }
+    else{
+      if( !(inm=GmfOpenMesh(data, GmfRead,&ver,&dim)) ){
 	if(verbosity>5)
-	  cerr << " Erreur ouverture file " << (char *) fileb << " " << (char *) filef << endl;
+	  cerr << " Erreur ouverture file " << (char *) data  << endl;
 	return   1;
       }
-    int nv,nt,neb;
+    }
+    
+    int nv=-1,nt=-1,neb=-1;
     nv = GmfStatKwd(inm,GmfVertices);
     nt = GmfStatKwd(inm,GmfTetrahedra);
     neb= GmfStatKwd(inm,GmfTriangles);
@@ -361,9 +386,8 @@ namespace Fem2D
 	    mes += this->elements[i].mesure();	    
 	  }
       }
-    GmfCloseMesh(inm);    
-    return(0); // OK
-    
+    GmfCloseMesh(inm);  
+    return 0; // OK
   }
   
 const     string Gsbegin="Mesh3::GSave v0",Gsend="end";  
