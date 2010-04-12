@@ -67,7 +67,8 @@ MSHMET_pMesh mesh_to_MSHMET_pMesh( const Mesh &Th ){
     ppt = &meshMSHMET->point[k];
     ppt->c[0] = Th.vertices[k-1].x;
     ppt->c[1] = Th.vertices[k-1].y;
-    ppt->mark  = Th.vertices[k-1].lab;
+    ppt->c[2] = 0.;
+    //ppt->mark  = Th.vertices[k-1].lab;
   }
 
  
@@ -81,7 +82,7 @@ MSHMET_pMesh mesh_to_MSHMET_pMesh( const Mesh &Th ){
     ptriangle->v[0] = Th.operator()(K[0])+1;
     ptriangle->v[1] = Th.operator()(K[1])+1;
     ptriangle->v[2] = Th.operator()(K[2])+1;
-    ptriangle->mark = K.lab;
+    //ptriangle->mark = K.lab;
 
     for (i=0; i<3; i++) {    
       ppt = &meshMSHMET->point[ptriangle->v[i]];
@@ -145,7 +146,7 @@ MSHMET_pMesh mesh3_to_MSHMET_pMesh( const Mesh3 &Th3 ){
     ppt->c[0] = Th3.vertices[k-1].x;
     ppt->c[1] = Th3.vertices[k-1].y;
     ppt->c[2] = Th3.vertices[k-1].z;
-    //ppt->mark  = Th3.vertices[k-1].lab;
+    //ppt->mark  = 0; //Th3.vertices[k-1].lab;
   }
 
 
@@ -159,7 +160,7 @@ MSHMET_pMesh mesh3_to_MSHMET_pMesh( const Mesh3 &Th3 ){
     ptetra->v[1] = Th3.operator()(K[1])+1;
     ptetra->v[2] = Th3.operator()(K[2])+1;
     ptetra->v[3] = Th3.operator()(K[3])+1;
-    //ptetra->mark = K.lab;
+    //ptetra->mark = 0;//K.lab;
     
     for (i=0; i<4; i++) {
       ppt = &meshMSHMET->point[ptetra->v[i]];
@@ -232,10 +233,6 @@ void metric_mshmet( MSHMET_pSol sol, MSHMET_Info *info, const KN<double> &metric
 
 void metric_mshmet_to_ff_metric(MSHMET_pSol sol, MSHMET_Info *info, KN<double> &metric){
   static const int invwrapperMetric[6]={0,1,2,3,4,5};
-  cout << " info->iso " << info->iso << endl;
-  cout << " info->iso " << info->iso << endl;
-  cout << " info->iso " << info->iso << endl;
-  cout << " info->iso " << info->iso << endl;
   int k,ia,i;
   if( info->iso == 1 ){
     cout << " info->iso " << " metric "<< metric.N() <<" " << sol->np << endl;
@@ -255,7 +252,6 @@ void metric_mshmet_to_ff_metric(MSHMET_pSol sol, MSHMET_Info *info, KN<double> &
 }
 
 
-// question :: est ce que l'on renvoie le gradient ???
 class mshmet3d_Op: public E_F0mps 
 {
 public:
@@ -377,7 +373,7 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   KN<long> defaultintopt(7);
   /*
     info->nnu    = intopt[0]; //  0;
-    info->iso    = intopt[1]; //  0;
+    info->iso    = intopt[1]; //  1;
     info->ls     = intopt[2]; //  0;
     info->ddebug = intopt[3]; //  0;
     info->imprim = intopt[4]; // 10;
@@ -387,19 +383,18 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   defaultintopt(0)= 0;
   defaultintopt(1)= 1;
   defaultintopt(2)= 0;
-  defaultintopt(3)= 0;
+  defaultintopt(3)= 1;
   defaultintopt(4)= 10;
   defaultintopt(5)= 0;
   defaultintopt(6)= 0;
 
   KN<int> intopt(arg(0,stack,defaultintopt));
   KN<double> fopt(arg(1,stack,defaultfopt));
-  KN<double> metric;
-  if( intopt[1]== 1){
-    metric.resize(Th3.nv);
-    metric=0.;
-  }
-  else{
+  KN<double> *pmetric=new KN<double>(Th3.nv);
+  KN<double> &metric=*pmetric;
+  metric=0.;
+
+  if( intopt[1]==0){ 
     metric.resize(6*Th3.nv);
     metric=0.;
   }
@@ -408,8 +403,9 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   if( nargs[2]  ){ 
     metric = GetAny<KN_<double> >( (*nargs[2])(stack) ); 
     assert(metric.N()==Th3.nv || metric.N()==6*Th3.nv);
-    fopt(6)=1;
+    intopt[6]=1;
     if(metric.N()==Th3.nv) intopt[1]=1;
+    if(metric.N()==6*Th3.nv) intopt[1]=0;
   }
 
 
@@ -448,6 +444,216 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   if( nargs[2]  ) metric_mshmet( mshmetsol, &mshmetmesh->info, metric);
 
   int res = MSHMET_mshmet(intopt, fopt, mshmetmesh, mshmetsol);
+  
+  if( res > 0){
+    cout << " problem with mshmet :: error " <<  res << endl; 
+    exit(1);
+  }
+  
+  metric_mshmet_to_ff_metric( mshmetsol, &mshmetmesh->info, metric);
+  
+  // faire les free
+  
+  Add2StackOfPtr2Free(stack,pmetric);
+  *mp=mps;
+  return SetAny< KN<double> >(metric);
+}
+
+
+
+
+// mshmet2d
+class mshmet2d_Op: public E_F0mps 
+{
+public:
+  typedef KN_<double>  Result;
+  Expression eTh;
+  int nbsol;
+  int nbsolsize;
+  int typesol[GmfMaxTyp];
+  int dim;
+  vector<Expression> sol;
+
+  static const int n_name_param = 3; // 
+  static basicAC_F0::name_and_type name_param[] ;
+  Expression nargs[n_name_param];
+  
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
+  { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
+  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  
+  
+public:
+  mshmet2d_Op(const basicAC_F0 &  args) : sol( args.size()-1 )
+  {
+    
+    cout << "mshmet2d"<< endl;
+    args.SetNameParam(n_name_param,name_param,nargs);
+    eTh=to<pmesh>(args[0]); 
+    dim=3;
+    nbsol = args.size()-1;
+    int ksol=0; 
+    ffassert(nbsol<GmfMaxTyp);
+
+    for (int i=1;i<nbsol+1;i++)       
+      if (args[i].left()==atype<E_Array>())
+	{
+	  const E_Array * a = dynamic_cast<const E_Array *>(args[i].LeftValue());
+	  ffassert(a);
+	  ksol+=a->size(); 
+	}
+      else
+	ksol++;
+    sol.resize(ksol); 
+
+    // typesol :: 1 sca, 2 vector, 3 symtensor
+
+    ksol=0; 
+    nbsolsize=0;
+    for (int i=1;i<nbsol+1;i++)       
+      if (args[i].left()==atype<E_Array>())
+	{
+	  const E_Array * a = dynamic_cast<const E_Array *>(args[i].LeftValue());
+	  ffassert(a);
+	  int N=a->size();
+	  nbsolsize=nbsolsize+N;
+	  switch (N){
+	  case 2 :
+	    typesol[i-1]=2; 
+	    for (int j=0;j<N;j++)             
+	      sol[ksol++]=to<double>((*a)[j]);
+	    break;
+	  case 3 :
+	    typesol[i-1]=3;   
+	    for (int j=0;j<N;j++)             
+	      sol[ksol++]=to<double>((*a)[j]); 
+	    break;
+	  default :
+	    CompileError(" 2D solution for mshmest is vector (2 comp) or symetric tensor (3 comp)");
+	    break;
+	  }
+	}
+      else 
+	{
+	  typesol[i-1]=1;
+	  nbsolsize=nbsolsize+1;
+	  sol[ksol++]=to<double>(args[i]);
+	} 
+  }
+    
+  static ArrayOfaType  typeargs() { return  ArrayOfaType( atype< pmesh >(), true); }// all type
+  static  E_F0 * f(const basicAC_F0 & args) { return new mshmet2d_Op(args);} 
+  AnyType operator()(Stack stack)  const ;
+  operator aType () const { return atype< KN_<double> >();} 
+};
+
+
+basicAC_F0::name_and_type  mshmet2d_Op::name_param[]= {
+  {  "loptions", &typeid(KN_<long>)},
+  {  "doptions", &typeid(KN_<double>)},
+  {  "metric", &typeid(KN_<double>)}
+};
+
+AnyType mshmet2d_Op::operator()(Stack stack)  const 
+{
+  // initialisation
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
+  ffassert( pTh );
+  Mesh &Th=*pTh;
+  int nv=Th.nv;
+  int nt=Th.nt;
+  int nbe=Th.neb;
+
+ 
+  KN<double> defaultfopt(4);
+  /*
+  info->hmin   = fopt[0]; // 0.01;
+  info->hmax   = fopt[1]; // 1.0;
+  info->eps    = fopt[2]; // 0.01;
+  info->width  = fopt[3]; // 0.05;
+  */
+  defaultfopt(0)= 0.01;
+  defaultfopt(1)= 1.0;
+  defaultfopt(2)= 0.01;
+  defaultfopt(3)= 0.05;
+  KN<long> defaultintopt(7);
+  /*
+    info->nnu    = intopt[0]; //  0;
+    info->iso    = intopt[1]; //  1;
+    info->ls     = intopt[2]; //  0;
+    info->ddebug = intopt[3]; //  0;
+    info->imprim = intopt[4]; // 10;
+    info->nlis   = intopt[5]; //  0;
+    info->metric =  intopt[6]; // 0; // metric given besoin ???
+  */  
+  defaultintopt(0)= 0;
+  defaultintopt(1)= 1;
+  defaultintopt(2)= 0;
+  defaultintopt(3)= 1;
+  defaultintopt(4)= 10;
+  defaultintopt(5)= 0;
+  defaultintopt(6)= 0;
+
+  KN<int> intopt(arg(0,stack,defaultintopt));
+  KN<double> fopt(arg(1,stack,defaultfopt));
+  
+  KN<double> *pmetric = new KN<double>(Th.nv);
+  KN<double> &metric = *pmetric; 
+ 
+  if( intopt[1]== 1){
+    metric.resize(6*Th.nv);
+    metric=0.;
+  }
+ 
+  // definiton d'une metric par default
+  if( nargs[2]  ){ 
+    metric = GetAny<KN_<double> >( (*nargs[2])(stack) ); 
+    assert(metric.N()==Th.nv || metric.N()==6*Th.nv);
+    intopt[6]=1;
+    if(metric.N()==Th.nv) intopt[1]=1;
+    if(metric.N()==6*Th.nv) intopt[1]=0;
+  }
+
+
+  MSHMET_pMesh mshmetmesh = mesh_to_MSHMET_pMesh( Th );
+  int TypTab[nbsol];
+  for(int ii=0; ii<nbsol;ii++)
+    TypTab[ii] = typesol[ii];
+
+  KN<double> tabsol(nbsolsize*nv);
+  tabsol=0.;
+  {
+    MeshPoint *mp3(MeshPointStack(stack)); 
+    
+    KN<bool> takemesh(nv);
+    takemesh=false;
+    for(int it=0;it<nt;it++){
+      for(int iv=0;iv<3;iv++){
+	int i=Th(it,iv);
+	
+	if(takemesh[i]==false){
+	  mp3->setP(&Th,it,iv);
+	  
+	  for(int ii=0;ii<nbsolsize;ii++){
+	    tabsol[i*nbsolsize+ii] = GetAny< double >( (*sol[ii])(stack) );
+	  }
+	  takemesh[i] = true; 
+	}
+      }
+    }
+  }
+  MSHMET_pSol mshmetsol = sol_mshmet(dim, nv, nbsol, nbsolsize, TypTab, tabsol);
+  if( intopt[1] == 1) 
+    mshmetmesh->info.iso = 1;
+  else
+    mshmetmesh->info.iso = 0;
+  if( nargs[2]  ) metric_mshmet( mshmetsol, &mshmetmesh->info, metric);
+
+  int res = MSHMET_mshmet(intopt, fopt, mshmetmesh, mshmetsol);
   cout << " problem with mshmet :: error " <<  res << endl; 
   if( res > 0){
     cout << " problem with mshmet :: error " <<  res << endl; 
@@ -455,13 +661,12 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   }
   
   metric_mshmet_to_ff_metric( mshmetsol, &mshmetmesh->info, metric);
-  for (int k=1; k<=metric.N(); k++) {
-    cout << "k " << k << " " << metric[ k-1 ] << endl;
-  }
-
+  
   // faire les free
   
   *mp=mps;
+
+  Add2StackOfPtr2Free(stack,pmetric);
   return SetAny< KN<double> >(metric);
 }
 
@@ -476,8 +681,9 @@ static Init1 init1;  //  une variable globale qui serat construite  au chargemen
 Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   
   //if (verbosity)
-  if(verbosity) cout << " load: mshmet3d  " << endl;
+  if(verbosity) cout << " load: mshmet  " << endl;
   
+   Global.Add("mshmet","(",new OneOperatorCode<mshmet2d_Op>);
   Global.Add("mshmet","(",new OneOperatorCode<mshmet3d_Op>);
   //Global.Add("mshmet","(",new OneOperatorCode<mshmet2d_Op> );
   
