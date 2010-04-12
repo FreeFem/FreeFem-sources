@@ -266,13 +266,7 @@ namespace Fem2D
 
     strncpy( data, filename.c_str(),ssize);
     
-    //size_t ssize = filename.size()+1;
-    //char * pfile = new char[filename.size()+1];
-    //strncpy( pfile, filename.c_str(),ssize);
-    //cout << filename.size()+1 << endl;
-    
     ptr = strstr(data,".mesh");
-    if(verbosity>5) cout << (char *) ptr  << endl;
     if( !ptr ){
       strcpy(filef,filename.c_str());
       strcpy(fileb,filef);
@@ -284,7 +278,7 @@ namespace Fem2D
 	bin=false;
       else 
 	if(verbosity>5){
-	  cerr << " Erreur ouverture file " << (char *) fileb  << " " << (char *) fileb  <<endl;
+	  cerr << " Erreur ouverture file " << (char *) fileb  << " " << (char *) filef  <<endl;
 	  return   1;
 	}
     }
@@ -302,7 +296,7 @@ namespace Fem2D
     neb= GmfStatKwd(inm,GmfTriangles);
     this->set(nv,nt,neb);
     if(verbosity>1)
-      cout << "  -- Mesh3(load): "<<pfile <<", ver " << ver << ", d "<< dim  
+      cout << "  -- Mesh3(load): "<< (char *) data <<", ver " << ver << ", d "<< dim  
 	   << ", nt " << nt << ", nv " << nv << " nbe:  = " << nbe << endl;
     if(dim  != 3) { 
       cerr << "Err dim == " << dim << " !=3 " <<endl;
