@@ -52,6 +52,209 @@ bool  NoWait=false;
 using namespace std;
 using namespace Fem2D;
 
+//*******************************
+//
+// read solution of .sol or .solb
+//
+//*******************************
+
+class readsol_Op : public E_F0mps 
+{
+public:
+  typedef KN_<double> Result;
+  Expression eTh;
+  Expression filename;
+
+  static const int n_name_param = 1;  
+  static basicAC_F0::name_and_type name_param[];
+  Expression nargs[n_name_param];
+  long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+ 
+public:
+  /*
+  readsol_Op(const basicAC_F0 &  args, Expression ffname) : filename(ffname)
+  {
+    if(verbosity)  cout << "readsol"<< endl;
+    args.SetNameParam(n_name_param,name_param,nargs);    
+  }
+  */
+  readsol_Op(const basicAC_F0 &  args) 
+  {
+    if(verbosity)  cout << "readsol"<< endl;
+    args.SetNameParam(n_name_param,name_param,nargs);    
+    if ( BCastTo<string *>(args[0]) ) 
+      filename = CastTo<string *>(args[0]);
+    else 
+      CompileError("no filename given");
+
+  }
+  static ArrayOfaType  typeargs() { return  ArrayOfaType( atype<string *>(),true ); }// all type
+  static  E_F0 * f(const basicAC_F0 & args) { return new readsol_Op(args);} 
+  AnyType operator()(Stack stack)  const ;
+  operator aType () const { return atype< KN_<double> >();} 
+};
+
+basicAC_F0::name_and_type readsol_Op::name_param[]= {
+  {  "number",&typeid(long) }
+};
+
+AnyType readsol_Op::operator()(Stack stack)  const 
+{ 
+  string * ffname= GetAny<string *>( (*filename)(stack) );
+  int         k,i,isol,type,inm,ver,dim,typtab[GmfMaxTyp],offset;
+  char        *ptr,data[128];
+  //          rajout freefem++
+  int         nv=0,ntet=0,ntri=0;
+  int         nsol;
+  int         key;
+
+  int numsol(arg(0,stack,-1)); 
+  assert(abs(numsol)>=1);
+
+  char * charfile= new char[ffname->size()+1];
+  strncpy(charfile,ffname->c_str(),ffname->size()+1);
+
+  strcpy(data,charfile);
+  ptr = strstr(data,".sol");
+  if ( ptr )  *ptr = '\0';
+  strcat(data,".solb");
+  if( !(inm = GmfOpenMesh(data, GmfRead, &ver,&dim)) ) {
+    ptr  = strstr(data,".solb");
+    *ptr = '\0';
+    strcat(data,".sol");
+    if( !(inm = GmfOpenMesh(data, GmfRead, &ver,&dim)) ) {
+      cerr << "  ** "<< (char *) data << " NOT FOUND.\n" << endl;
+      exit(1);
+    }
+  }
+  cout <<"  %%%%" << (char *) data <<  " OPENED\n" << endl;
+
+  nv = GmfStatKwd(inm,GmfSolAtVertices,&type,&offset,&typtab);
+  if( nv ){
+    key  = GmfSolAtVertices;
+    nsol = nv;
+  }
+  else{
+    ntri = GmfStatKwd(inm,GmfSolAtTriangles,&type,&offset,&typtab);
+    if( ntri ){
+      key = GmfSolAtTriangles;
+      nsol = ntri;
+    }
+    else
+      ntet = GmfStatKwd(inm,GmfSolAtTetrahedra,&type,&offset,&typtab);
+    if( ntet ){
+      key = GmfSolAtTetrahedra;
+      nsol = ntet;
+    }
+  }
+
+  if ( (nv == 0) && (ntri == 0)  && (ntet == 0) ){
+    cerr << "  ** MISSING DATA" << endl;
+    exit(1);
+  }
+
+  int nbsol = nsol*offset;
+  int offsettab = 0;
+  int firstelem = 0;
+  if(numsol != -1){
+    if( typtab[numsol-1] == 1){
+      nbsol=nsol;
+      offsettab = 1;
+    }
+    else  if( typtab[numsol-1] == 2){
+      nbsol=nsol*dim;
+      offsettab = dim;
+    }
+    else  if( typtab[numsol-1] == 3){
+      nbsol=nsol*dim*(dim+1)/2;
+      offsettab = dim*(dim+1)/2;
+    }
+    else{
+      cerr << "bug in the definition of type of solution: 1 scalar, 2 vector, 3 symetric tensor" << endl;
+      exit(1);
+    }
+    
+    for(int ii=0; ii< (numsol-1); ii++)
+      if( typtab[ii] == 1)
+	firstelem=firstelem+1;
+      else  if( typtab[ii] == 2){
+	firstelem=firstelem+dim;
+      }
+      else  if( typtab[ii] == 3){
+	firstelem=firstelem+dim*(dim+1)/2;;
+      }
+      else{
+	cerr << "bug in the definition of type of solution: 1 scalar, 2 vector, 3 symetric tensor" << endl;
+	exit(1);
+      }
+  }
+  
+  if(verbosity >5) 
+    cout << "nbsol " << nbsol << " offset " << offset << "  " << nsol << " "<< endl;
+  
+  float       *buf =new float[offset];
+  double      tmp;
+  double      *bufd=new double[offset];
+  
+  KN<double> *ptabsol = new KN<double>(nbsol);
+  KN<double>  &tabsol =*ptabsol;
+  
+  if(numsol == -1){
+    GmfGotoKwd(inm,key);
+    if( ver == GmfFloat ){
+      for (k=1; k<=nsol; k++) {
+	isol = (k-1) * offset ;	
+	GmfGetLin(inm,key,buf);
+	for (i=0; i<offset; i++)
+	  tabsol[isol + i] = (double) buf[i];
+      }
+    }
+    else{
+      for (k=1; k<=nsol; k++) {
+	isol = (k-1) * offset ;	
+	GmfGetLin(inm,key,bufd);
+	for (i=0; i<offset; i++)
+	  tabsol[isol + i] = bufd[i];		
+      }
+    }
+  }
+  else{   
+    GmfGotoKwd(inm,key);
+    if( ver == GmfFloat ){
+      for (k=1; k<=nsol; k++) {
+	isol = (k-1)*offsettab;	
+	GmfGetLin(inm,key,buf);
+	for (i=0; i<offsettab; i++)
+	  tabsol[isol + i] = buf[i+firstelem];		
+	
+      }
+    }
+    else{
+      for (k=1; k<=nsol; k++) {
+	isol = (k-1)*offsettab;
+	GmfGetLin(inm,key,bufd);
+	for (i=0; i<offset; i++)
+	  tabsol[isol + i] = bufd[i+firstelem];		
+      }
+    }
+  }
+  /* // A prendre en compte dans la définition de la metriques dans MMG
+     // MMG_swap data 
+     if ( sol->offset == 6 ) {
+     tmp                = sol->met[isol + 2];
+     sol->met[isol + 2] = sol->met[isol + 3];
+     sol->met[isol + 3] = tmp;
+  */
+  
+  GmfCloseMesh(inm);
+  delete [] buf;
+  delete [] bufd;
+ 
+  Add2StackOfPtr2Free(stack,ptabsol);
+  return SetAny< KN<double> >(tabsol);  
+}
+  
+
 
 //*************************
 //
@@ -110,8 +313,7 @@ public:
 	{
 	  l[jj].what=1;
 	  l[jj].nbfloat=1;
-	  l[jj][0]=to<double>( args[i] );
-	  
+	  l[jj][0]=to<double>( args[i] );	  
 	}
       else if ( args[i].left()==atype<E_Array>() )
 	{
@@ -219,7 +421,7 @@ AnyType datasolMesh2_Op::operator()(Stack stack)  const
     GmfSetKwd(outm,GmfSolAtTriangles, nbsol, nbtype, TypTab);
     for (int k=0; k<nbsol; k++){
       for (int i=0; i<solnbfloat ;i++){
-	OutSolTab[i] =  valsol(k*solnbfloat+i);
+	OutSolTab[i] = valsol(k*solnbfloat+i);
       }
       GmfSetLin(outm, GmfSolAtTriangles, OutSolTab); 
     }
@@ -565,8 +767,36 @@ static char * meditcmd(long filebin, int nbsol, int smedit, const string &meditf
   meditcmm += meditsol; 
    
   meditcmm += ' ';
-  meditcmm += ffnn;
-	  
+
+  char * ret1= new char[ffnn.size()+1];
+  strcpy( ret1, ffnn.c_str()); 
+  
+  int nbstrings=1;
+  char *tictac;
+  tictac= strtok(ret1," \n");
+  
+  meditcmm += ' ';
+  meditcmm += tictac;
+  while( tictac != NULL && nbstrings < nbsol){
+    tictac = strtok(NULL," \n");
+     meditcmm += ' ';
+     meditcmm += tictac;
+    nbstrings++;
+  }
+  if(nbstrings != smedit ){
+    cout << "The number of string defined in string parameter is different of the number of solution" << endl;
+    if( nbstrings < smedit ){
+      // Add strings
+      while( nbstrings < smedit ){
+	nbstrings++;
+	char newsol[10];
+	sprintf(newsol," ffsol%i",nbstrings);
+	meditcmm += newsol;
+      }
+    }
+  }
+  
+
   char * ret= new char[meditcmm.size()+1];
   //char ret[meditcmm.size()+1];
   strcpy( ret, meditcmm.c_str()); 
@@ -649,20 +879,34 @@ public:
     int nbofsol;
     int ddim=2;
     int stsize=3;
-    
+    char   *tictac;
+
     args.SetNameParam(n_name_param,name_param,nargs);   
-   
-    if (BCastTo<string *>(args[0])) filename = CastTo<string *>(args[0]);
   
+    if(BCastTo<string *>(args[0])) filename = CastTo<string *>(args[0]);
+    /*
+      string * ffname  = GetAny<string *>( args[0] );
+      
+      char * ret= new char[ffname->size()+1];
+      strcpy( ret, ffname->c_str()); 
+      
+      int nbstrings=1;
+      tictac = strtok(ret," \n");
+      cout << "tictac" << tictac << endl;
+      while( tictac != NULL ){
+      tictac = strtok(NULL," \n");
+      nbstrings++;
+      }
+    */
+
     for (size_t i=1;i<args.size();i++){
       size_t jj=i-1;
-
+      
       if (  BCastTo<double>(args[i])  )
 	{
 	  l[jj].what=1;
 	  l[jj].nbfloat=1;
-	  l[jj][0]=to<double>( args[i] );
-	  
+	  l[jj][0]=to<double>( args[i] );	  
 	}
       else if ( args[i].left()==atype<E_Array>() )
 	{
@@ -697,7 +941,45 @@ public:
 	CompileError("medit in 2D: Sorry no way to save this kind of data");
       }
     }
+    
+    offset=0;
+    nbTh=1;
+    // determination of the number of solutions
+    //  =============================
+    //  0 2 3 2 ! 0 2 3 2 ! 0 2  3  2
+    //  0 1 2 3 ! 4 5 6 7 ! 8 9 10 11
+    //  =============================
+    for(size_t jj=1; jj<l.size(); jj++){
+      if(l[jj].what==0 && offset==0) offset=jj;
+      if(l[jj].what==0){
+	nbTh++;
+	if( jj != (nbTh-1)*offset ){ 
+	   CompileError("the number of solution by mesh is different");
+	}
+      }
+    }    
 
+    /*
+      if( offset-1 != nbstrings ){
+      CompileError("The number of string defined in string parameter is different of the number of solution");
+      }
+    */
+
+    if( nbTh==1){
+      // case of one mesh
+      offset=l.size();
+    }
+    else{
+      // analyse of the different solution
+      for(size_t jj=offset; jj<l.size(); jj++){
+	if( l[jj].what != l[ jj%offset ].what ){
+	  char StringError[256]; 
+	  snprintf(StringError,256,"compile error ::  The solution %d of mesh 1 and mesh %d is not the same type",jj%offset,jj/offset+1);
+	  CompileError(StringError);
+	}
+      }
+    }
+    /*
     // determination of the number of solutions.
     size_t lastTh=0;
     long offset1;
@@ -715,7 +997,8 @@ public:
 	}
       }
     }
-    if(offset==0) offset=l.size(); 
+    if(offset==0) offset=l.size();
+    */
     // The number of solution is exactly:  offset-1
 
     // verification que la nature des solutions sont identiques pour les differents maillages.
@@ -762,6 +1045,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
 
   long filebin (arg(4,stack,1));
   int smedit=max(1,nbsol);
+  
   char * commandline = meditcmd( filebin, nbsol, smedit, *meditff, *ffname);
   printf("version de medit %s\n",commandline);
 
@@ -2104,7 +2388,8 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
 //  truc pour que la fonction 
 // Init::Init() soit appele a moment du chargement dynamique
 // du fichier 
-//  
+//
+  
 
 class Init { public:
   Init();
@@ -2115,7 +2400,6 @@ static Init init;  //  une variable globale qui serat construite  au chargement 
 Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   
   typedef Mesh *pmesh;
-  //typedef Mesh2 *pmesh2;
   typedef Mesh3 *pmesh3;
   
   if (verbosity)
@@ -2129,4 +2413,6 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Global.Add("medit","(",new OneOperatorCode< PopenMeditMesh3_Op<v_fes3> >);
   Global.Add("savesol","(",new OneOperatorCode< datasolMesh3_Op<v_fes3> >);
   
+
+  Global.Add("readsol","(",new OneOperatorCode< readsol_Op >);
 }
