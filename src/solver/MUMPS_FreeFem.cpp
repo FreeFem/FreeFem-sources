@@ -162,7 +162,7 @@ public:
     int ierr;
 
      if(mpicommw==0){
-	comm=comm;
+	comm=MPI_COMM_WORLD;
 	}
 	else
 	comm= *mpicommw;
@@ -277,30 +277,23 @@ public:
 	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, comm );
 	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, comm );
 
-<<<<<<< MUMPS_FreeFem.cpp
-	  MPI_Bcast(  dataint, 40, MPI_INT,  0, comm );
-	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, comm );
-=======
 	  cout << "myid =" << myid << " init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
 
-	  MPI_Bcast(  dataint, 40, MPI_INT,  0, MPI_COMM_WORLD );
-	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, MPI_COMM_WORLD );
->>>>>>> 1.7
+	  MPI_Bcast(  dataint, 40, MPI_INT,  0, comm );
+	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, comm );
+
 
 	  fclose(pFile);
 	  delete [] retfile;
 	}
 	else{
 	  
-<<<<<<< MUMPS_FreeFem.cpp
+
 	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, comm );
 	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, comm );
-=======
-	  MPI_Bcast(  &SYM, 1, MPI_INT,  0, MPI_COMM_WORLD );
-	  MPI_Bcast(  &PAR, 1, MPI_INT,  0, MPI_COMM_WORLD );
 	  
 	  cout << "myid =" << myid << "  init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
->>>>>>> 1.7
+
 
 	  MPI_Bcast(  dataint, 40, MPI_INT,  0, comm );
 	  MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, comm );
@@ -312,7 +305,8 @@ public:
     id.job=JOB_INIT; 
     id.par=PAR; 
     id.sym=SYM;
-    id.comm_fortran=USE_COMM_WORLD;
+    id.comm_fortran= (MUMPS_INT) MPI_Comm_c2f( comm );
+    //id.comm_fortran= (F_INT) comm;
 
     if(verbosity) cout << "init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
 
@@ -1354,6 +1348,7 @@ class zSolveMUMPSmpi :   public MatriceMorse<Complex>::VirtualSolver   {
   mutable double  epsr;
   double tgv;
   double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
+  mutable MPI_Comm comm;
 
   Complex           *a;
   int       *irn, *jcn;
@@ -1392,7 +1387,7 @@ class zSolveMUMPSmpi :   public MatriceMorse<Complex>::VirtualSolver   {
 public:
   zSolveMUMPSmpi(const MatriceMorse<Complex> &AA,int strategy,double ttgv, double epsilon,
 		 double pivot,double pivot_sym, string param_string, string datafile, KN<long> &param_int, 
-		 KN<double> &param_double, KN<long> &pperm_r, KN_<long> &pperm_c, KN<double> &pscale_r,KN<double> &pscale_c) : 
+		 KN<double> &param_double, KN<long> &pperm_r, KN_<long> &pperm_c, KN<double> &pscale_r,KN<double> &pscale_c, MPI_Comm  * mpicommw) : 
     eps(epsilon),epsr(0),
     tgv(ttgv), string_option(param_string), data_option(datafile), perm_r(pperm_r), perm_c(pperm_c), 
     tol_pivot_sym(pivot_sym),tol_pivot(pivot), scale_r(pscale_r), scale_c(pscale_c)
@@ -1404,9 +1399,31 @@ public:
     double datadouble[15];
     int ierr;
 
-    n    = AA.n;
-    m    = AA.m; 
-    nz   = AA.nbcoef;
+    if(mpicommw==0){
+      comm=MPI_COMM_WORLD;
+    }
+    else
+      comm= *mpicommw;
+    
+    /* ------------------------------------------------------------
+       INITIALIZE THE MUMPS PROCESS GRID. 
+       ------------------------------------------------------------*/
+    ierr = MPI_Comm_rank(comm, &myid);
+    if( myid ==0){
+      n    = AA.n;
+      m    = AA.m; 
+      nz   = AA.nbcoef;
+    
+      MPI_Bcast(  &n, 1, MPI_INT,  0, comm );
+      MPI_Bcast(  &m, 1, MPI_INT,  0, comm );
+      MPI_Bcast( &nz, 1, MPI_INT,  0, comm );
+    }
+    else{
+      MPI_Bcast(  &n, 1, MPI_INT,  0, comm );
+      MPI_Bcast(  &m, 1, MPI_INT,  0, comm );
+      MPI_Bcast( &nz, 1, MPI_INT,  0, comm );
+    }
+   
 
     if( !(param_int==NULL) ) 
       assert( param_int.N() == 42);
@@ -1425,9 +1442,6 @@ public:
        INITIALIZE THE MUMPS PROCESS GRID. 
        ------------------------------------------------------------*/
    
-    //ierr = MPI_Init(&argc, &argv);
-    ierr = MPI_Comm_rank(comm, &myid);
-
     // initialisation par defaut
  
     SYM=0; PAR=1;
@@ -1502,7 +1516,7 @@ public:
     id.job=JOB_INIT; 
     id.par=PAR; 
     id.sym=SYM;
-    id.comm_fortran=USE_COMM_WORLD;
+    id.comm_fortran=(MUMPS_INT) MPI_Comm_c2f(comm); 
 
     zmumps_c(&id);
 
@@ -2490,7 +2504,7 @@ BuildSolverMUMPSmpi(DCL_ARG_SPARSE_SOLVER(double,A))
     if(verbosity>9)
       cout << " BuildSolverMUMPS<double>" << endl;
     return new dSolveMUMPSmpi(*A,ds.strategy, ds.tgv, ds.epsilon, ds.tol_pivot, ds.tol_pivot_sym, ds.sparams, ds.data_filename,
-			      ds.lparams, ds.dparams, ds.perm_r, ds.perm_c, ds.scale_r, ds.scale_c);
+			      ds.lparams, ds.dparams, ds.perm_r, ds.perm_c, ds.scale_r, ds.scale_c,(MPI_Comm *)ds.commworld);
 }
 
 
@@ -2502,7 +2516,7 @@ BuildSolverMUMPSmpi(DCL_ARG_SPARSE_SOLVER(Complex,A))
     if(verbosity>9)
       cout << " BuildSolverMUMPS<Complex>" << endl;
     return new zSolveMUMPSmpi(*A,ds.strategy, ds.tgv, ds.epsilon, ds.tol_pivot, ds.tol_pivot_sym, ds.sparams, ds.data_filename,  
-			      ds.lparams, ds.dparams, ds.perm_r, ds.perm_c, ds.scale_r, ds.scale_c);
+			      ds.lparams, ds.dparams, ds.perm_r, ds.perm_c, ds.scale_r, ds.scale_c,(MPI_Comm *)ds.commworld);
 }
 
 
