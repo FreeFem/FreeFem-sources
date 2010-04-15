@@ -7037,6 +7037,312 @@ medit(``velocity pressure'',Th,[u1,u2],p,order=1);
 \eFF
 \end{example}
 
+%%% frey et al. software
+
+\subsubsection{mmg3d}
+\label{sec:mmg3d}
+Mmg3d is a 3D remeshing software developped by C. Dobrzynski and P. Frey (http://www.math.u-bordeaux1.fr/$\sim$dobj/logiciels/mmg3d.php). To obtain a version of library send an e-mail at : cecile.dobrzynski@math.ubordeaux1.fr or frey@ann.jussieu.fr. 
+
+This software allows to remeshing an initial mesh with tetrahedron. This initial mesh are adapted to a geometric metric tensor field or to a deplacement vector (moving rigid body). The metric can be obtained with mshmet (see section \ref{sec:mshmet}).\\
+
+Remark : (a) If no metric is given, an isotropic metric is computed in analysing the size of edges in the initial mesh.
+(b) if a deplacement is given, the vertices of triangles surfaces are moving without verified the geometrical structure of the new surface mesh.
+
+The parameter of the keyword mmg3d are :
+\begin{itemize}
+%\item [\texttt{nvmax}=] integer expresion. It's correspond to the number of maximum vertices in the solution mesh.
+%\item [\texttt{ntrimax}=] integer expresion. It's correspond to the number of maximum triangles in the solution mesh.
+%\item [\texttt{ntetmax}=] integer expresion. It's correspond to the number of maximum triangles in the solution mesh.
+\item[\texttt{options}=] vector expression. This vector contains the option parameters of mmg3d. It is a vector of size 6.
+ 
+options(0)   optimization parameters : (default 1) \\
+                     \hspace*{0.3cm}  0 : mesh optimization. \\
+                     \hspace*{0.3cm}  1 : adaptation with metric (deletion and insertion vertices) and optimization. \\
+                     \hspace*{0.3cm} -1: adaptation with metric (deletion and insertion vertices) without optimization. \\
+                     \hspace*{0.3cm}  4 : split tetrahedrons (be careful modify the surface). \\
+                     \hspace*{0.3cm}  9 : moving mesh with optimization. \\
+                     \hspace*{0.3cm} -9: moving mesh without optimization. 
+          
+options(1)  debug mode :  (default 0)\\
+		 \hspace*{0.3cm} 1 : turn on debug mode.\\
+		 \hspace*{0.3cm} 0 : otherwise.
+		 
+options(2) Specify the size of bucket per dimension ( default 64)
+
+options(3) swapping mode : (default 0)\\
+		\hspace*{0.3cm} 1 : no edge or face flipping. \\
+		\hspace*{0.3cm} 0 : otherwise.
+
+options(4) insert points mode : (default 0)\\
+		\hspace*{0.3cm} 1 : no edge splitting or collapsing and no insert points. \\
+		\hspace*{0.3cm} 0 : otherwise.		
+		
+options(5) verbosity level (default 3)
+\item[\texttt{memory}=] integer expression. Set the maximum memory size of new mesh in Mbytes. By default the number of maximum vertices, tetrahedrons and triangles are respectively 500 000,  3000 000, 100000 which represent approximately a memory of 100 Mo. 
+\item[\texttt{metric}=] vector expression. This vector contains the metric given at mmg3d. It is a vector of size $nv$ or 6 $nv$ respectively for an istropic and anisotropic metric where $nv$ is the number of vertices in the initial mesh. The structure of \texttt{metric} vector is described in the mshmet's section(section \ref{sec:mshmet}).
+\item[\texttt{displacement}=] \texttt{[$\Phi$1, $\Phi$2, $\Phi$3]} set the displacement vector of the initial mesh \\
+$\Phi(x,y) = [\Phi1(x,y), \Phi2(x,y), \Phi3(x,y) ]$.
+\item[\texttt{displVect=}] set the vector displacement in a vector expression. This vector contains the deplacement at each point of the initial mesh. It is a vector of size 3 $nv$.
+\end{itemize}
+
+An example of using this function is given in "mmg3d.edp":
+\begin{example}[mmg3d.edp]
+\label{mmg3dsimple}~
+\bFF
+// test mmg3d
+load "msh3"
+load "medit"
+load "mmg3d"
+include "../examples++-3d/cube.idp"
+
+int n=6;
+int[int]  Nxyz=[12,12,12];
+real [int,int]  Bxyz=[[0.,1.],[0.,1.],[0.,1.]];
+int [int,int]  Lxyz=[[1,1],[2,2],[2,2]];
+mesh3 Th=Cube(Nxyz,Bxyz,Lxyz);
+
+real[int] isometric(Th.nv);
+{
+  for( int ii=0; ii<Th.nv; ii++)
+    isometric[ii]=0.17;
+}
+
+mesh3 Th3=mmg3d(  Th,  memory=100, metric=isometric);
+				
+medit("init",Th);
+medit("isometric",Th3);
+\eFF
+\end{example}
+
+An example of moving mesh is given in "mmg3d-moving.edp":
+\begin{example}[mmg3d-moving.edp]
+\label{mmg3dmoving}~
+\bFF
+load "msh3"
+load "tetgen"
+load "medit"
+load "mmg3d"
+include "MeshSurface.idp"
+
+
+real hs = 0.1;  // mesh size on sphere 
+int[int]  NN=[22,18,20];
+real [int,int]  BB=[[-1.1,1.1],[-.9,.9],[-1,1]];
+int [int,int]  LL=[[1,2],[3,4],[5,6]];
+
+mesh3 ThHS = SurfaceHex(NN,BB,LL,1)+Sphere(0.25,hs,7,1); // "gluing" surface meshs to tolat boundary meshes
+real voltet=(hs^3)/6.;
+cout << " voltet = " << voltet << endl;
+real[int] domaine = [0,0,0,1,voltet,0,0,0.7,2,voltet];
+
+mesh3 Th = tetg(ThHS,switch="pqaAYY",nbofregions=2,regionlist=domaine);    
+// Tetrahelize the interior of the cube with tetgen
+
+real Vmax=0.1;
+int[int] opt=[9,0,64,0,0,3];
+fespace Vh(Th,P1);
+macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
+func fz=Vmax*(z-1)/(2.);
+func zero=0.;
+Vh uh,vh;
+problem Lap(uh,vh) =  int3d(Th)( Grad(uh)'*Grad(vh))  // ' for emacs
+				   + on(7,uh=fz) +on(1,2,3,4,5,6,uh=0.);
+// the Laplacian problem is used to obtained the displacement vector in all the mesh
+for(int it=0; it<4; it++){
+  Lap;
+  Th=mmg3d(Th,options=opt,displacement=[zero,zero,uh]);   
+}  
+medit( "Th",Th);
+\eFF
+\end{example}
+
+
+\subsubsection{Mshmet}
+\label{sec:mshmet}
+
+Mshmet is a software developped by P. Frey that allows to compute anisotropic metric based on solution variations (i.e. Hessian-based). This sofware can be returned also an isotropic metric. Moreover,  mshmet can construct also a metric suitable for level set interface capturing. The solution can be defined on 2D or 3D structured/unstructured meshes. For example, the solution can be an error estimate of a FE solutions. 
+
+%%Error estimate for 2d and 3d unstructured meshes.
+%%Compute anisotropic metric based on solution variations (i.e. Hessian-based). 
+%%One option allows to construct a metric suitable for level set interface capturing.
+
+Solutions for mshmet are given as an argument. The solution can be a func, a vector func, a symmetric tensor, a FE func, a FE vector func and a FE symmetric tensor. The symmetric tensor argument is defined as this type of data for datasol argument. This software accepts more than one solution.
+
+For example, the metric $M$ computed with mshmet  for the solution $u$ defined on the mesh $Th$ is obtained in writing.
+\bFF
+fespace Vh(Th,P1);
+Vh u; // a scalar FE func
+real[int] M = mshmet(Th,u);
+\eFF 
+
+The parameters of the keyword mshmet are :
+\begin{itemize}
+\item [\texttt{loptions}=] a vector of integer of size 7. This vector contains the integer parameters of mshmet.\\
+loptions(0): normalization level (default 0).\\
+loptions(1): isotropic parameters (default 0). 1 for isotropic metric results otherwise 0.\\
+loptions(2): level set parameters (default 0). 1 for building level set metric otherwise 0.\\ 
+loptions(3): debug parameters (default 0). 1 for turning on debug mode otherwise 0.\\
+loptions(4): level of verbosity (default 10).\\
+loptions(5): number of regularization's iteration of solutions given (default 0). \\
+loptions(6): previously metric parameter (default 0). 1 for using previous metric otherwise 0.\\
+\item [\texttt{doptions}=] a vector of double of size 4. This vector contains the real parameters of mshmet\.\
+doptions(0):  hmin : min size parameters  (default 0.01).\\
+doptions(1):  hmax : max size parameters (default 1.0).\\
+doptions(2):  eps : tolerance parameters ( default 0.01).\\
+doptions(2):  width : relative width for Level Set ($0<w<1$) ( default 0.05).\\
+\item [\texttt{metric}=] a vector of double. This vector contains an initial metric given to mshmet. The structure of the metric vector is described in the next paragraph.
+\end{itemize} 
+
+The result of the keyword mshmet is a \texttt{real[int]} which contains the metric computed by mshmet at the different vertices $V_{i}$ on the mesh.  
+
+With $nv$ is the number of vertices, the structure of this vector is
+$$ M_{iso}= ( m(V_0), m(V_1), \ldots, m(V_{nv}) )^t$$  for a isotropic metric $m$. For a symmetric tensor metric 
+$
+h=\left(
+\begin{array}{ccc}
+h_{1 1} & h_{1 2} & h_{1 3}\\
+h_{2 1} & h_{2 2} & h_{2 3} \\
+h_{3 1} & h_{3 2} & h_{3 3}
+\end{array}
+\right)$, the result of the keyword \texttt{mshmet} is $$M_{aniso}= ( H(V_{0}), \ldots, H(V_{nv}) )^t $$
+where $H(V_{i})$ is the vector of size 6 defined by $( h_{1 1}(V_{i}), h_{2 1}(V_{i}),h_{3 1}(V_{i}), h_{3 2}(V_{i}), h_{3 3}(V_{i}) )^t$.
+
+\begin{example}[mshmet.edp]
+\label{mshmet}~
+\bFF
+load "mshmet"
+load "medit"
+load "msh3"
+
+border a(t=0,1.0){x=t;   y=0;  label=1;};
+border b(t=0,0.5){x=1;   y=t;  label=2;};
+border c(t=0,0.5){x=1-t; y=0.5;label=3;};
+border d(t=0.5,1){x=0.5; y=t;  label=4;};
+border e(t=0.5,1){x=1-t; y=1;  label=5;};
+border f(t=0.0,1){x=0;   y=1-t;label=6;};
+mesh Th = buildmesh (a(6) + b(4) + c(4) +d(4) + e(4) + f(6));
+savemesh(Th,"th.msh");
+fespace Vh(Th,P1);
+Vh u,v;
+real error=0.01;
+problem Problem1(u,v,solver=CG,eps=1.0e-6) =
+    int2d(Th,qforder=2)( u*v*1.0e-10+  dx(u)*dx(v) + dy(u)*dy(v)) 
+  + int2d(Th,qforder=2)( (x-y)*v);
+
+func zmin=0;
+func zmax=1;
+int MaxLayer=10;
+mesh3 Th3 = buildlayers(Th,MaxLayer,zbound=[zmin,zmax]);
+fespace Vh3(Th3,P2);
+fespace Vh3P1(Th3,P1);
+Vh3 u3,v3;
+Vh3P1 usol;
+problem Problem2(u3,v3,solver=sparsesolver) =
+    int3d(Th3)( u3*v3*1.0e-10+ dx(u3)*dx(v3) + dy(u3)*dy(v3) + dz(u3)*dz(v3)) 
+  - int3d(Th3)( v3) +on(0,1,2,3,4,5,6,u3=0);
+Problem2;
+cout << u3[].min << " " << u3[].max << endl;
+savemesh(Th3,"metrictest.bis.mesh");
+savesol("metrictest.sol",Th3,u3);
+
+ 
+real[int] bb=mshmet(Th3,u3);
+cout << bb << endl;
+for(int ii=0; ii<Th3.nv; ii++)
+  usol[][ii]=bb[ii];
+savesol("metrictest.bis.sol",Th3,usol);
+\eFF
+\end{example}
+
+
+
+\subsubsection{FreeYams}
+\label{sec:freeyams}
+FreeYams is a surface mesh adaptation software which is developed by P. Frey. This software is a new version of yams. The adapted surface mesh is constructed with a geometric metric tensor field. This  field is based on the intrinsic properties of the discrete surface. Also this software allows to construct a simplification of a mesh. This decimation is  based on the Hausdorff distance between the initial and the current triangulation. Compared to the software yams, FreeYams  can be used also to produce anisotropic triangulations adapted to levelset simulations. A technical report on FreeYams can be not available yet but a documentation on yams are on the web page http://www.ann.jussieu.fr/$\sim$frey/software.html \cite{tech.freeyams}.
+
+To call FreeYams in Freefem++, we used the keyword freeyams. The arguments of this function are the initial mesh and/or metric. The metric with freeyams are a function, a FE function, a symmetric tensor function, a symmetric tensor FE function or a vector of double. If the metric is vector of double, this data must be given in \texttt{metric} parameter. Otherwise, the metric is given in the argument. 
+
+For example, the  adapted mesh of $Thinit$ defined by the metric $u$ defined as FE function is obtained in writing.
+\bFF
+fespace Vh(Thinit,P1);
+Vh u;
+mesh3 Th=freeyams(Thinit,u);
+\eFF 
+The symmetric tensor argument for freeyams keyword is defined as this type of data for datasol argument.
+
+\begin{itemize}
+\item [\texttt{loptions}=] a vector of integer of size 13. This vectors contains the integer options of FreeYams.
+loptions(0):  anisotropic parameter (default 0). If you give an anisotropic metric 1 otherwise 0.\\
+loptions(1):  Finite Element correction parameter (default 0). 1 for {\it{no}} Finite Element correction otherwise 0.\\
+loptions(2):  Split multiple connected points parameter (default 1). 1 for splitting multiple connected points otherwise 0.\\
+loptions(3):  maximum value of memory size in Mbytes (default -1: the size is given by freeyams). \\	  
+loptions(4):  set the value of the connected component which we want to obtain. (Remark: freeyams give an automatic value at each connected component).\\
+loptions(5):  level of verbosity\\
+loptions(6):  Create point on straight edge (no mapping) parameter  (default 0). 1 for creating point on straight edge otherwise 0.\\
+loptions(7):  validity check during smoothing parameter. This parameter is only used with No-Shrinkage Vertex Smoothing optimization (optimization option parameter 9). 1 for No validity checking during smoothing otherwise 0.\\
+loptions(8):  number of desired's vertices  (default -1).\\
+loptions(9):  number of iteration of  optimizations (default 30).\\
+loptions(10): ridge detection parameter (default 0) . 1 for detecting the ridge on the mesh otherwise 0. The ridge definition is given in the parameter doptions(12).\\
+loptions(11): vertex smoothing parameter (default 0). 1 for smoothing the vertices otherwise 0.\\
+loptions(12):  Optimization level parameter (default 0). \\
+ \hspace*{0.3cm}  0 : mesh optimization (smoothing+swapping)\\
+ \hspace*{0.3cm}  1 :  decimation+enrichment adaptated to a metric map. \\
+ \hspace*{0.3cm} -1: decimation adaptated to a metric map. \\
+ \hspace*{0.3cm}  2 : decimation+enrichment with a Hausdorff-like method\\
+ \hspace*{0.3cm} -2:  decimation  with a Hausdorff-like method\\
+ \hspace*{0.3cm}  4 : split triangles recursively. \\
+ \hspace*{0.3cm}  9 : No-Shrinkage Vertex Smoothing\\
+\item [\texttt{doptions}=] a vector of double of size 11. This vectors contains the real options of freeyams.\\
+%%doptions(0): 0  !! iso (default 0.0). ????\\
+doptions(0):  Set  the geometric approximation (Tangent plane deviation)  (default 0.01).\\  
+doptions(1):  Set the lamda parameter (default -1. ).\\
+doptions(2):  Set the mu parmeter (default  -1. ).\\
+doptions(3):  Set the 	 gradation value  (Mesh density control)  (default 1.3).\\
+doptions(4):  Set the minimal size(hmin) (default -2.0: the size is automatically computed).  \\
+doptions(5):  Set the maximal size(hmax)	(default -2.0: the size is automatically computed). \\
+doptions(6):  Set the tolerance of the control of Chordal deviation (default -2.0).\\ 	    
+doptions(7):  Set the quality of degradation  (default 0.599).\\
+doptions(8):  Set the declic parameter (default 2.0).\\
+doptions(9): Set the angular walton limitation parameter (default 45 degree).	\\
+doptions(10):  Set the angular ridge detection (default 45 degree). \\
+\item [\texttt{metric}=] vector expression. This parameters contains the metric at the different vertices on the initial mesh. With $nv$ is the number of vertices, this vector is $$ M_{iso}= ( m(V_0), m(V_1), \ldots, m(V_{nv}) )^t$$  for a scalar metric $m$. For a symmetric tensor metric 
+$
+h=\left(
+\begin{array}{ccc}
+h_{1 1} & h_{1 2} & h_{1 3}\\
+h_{2 1} & h_{2 2} & h_{2 3} \\
+h_{3 1} & h_{3 2} & h_{3 3}
+\end{array}
+\right)$, the parameters \texttt{metric}  is $$M_{aniso}= ( H(V_{0}), \ldots, H(V_{nv}) )^t $$
+where $H(V_{i})$ is the vector of size 6 defined by $( h_{1 1}(V_{i}), h_{2 1}(V_{i}),h_{3 1}(V_{i}), h_{3 2}(V_{i}), h_{3 3}(V_{i}) )^t$
+\end{itemize} 
+ 
+
+\begin{example}[freeyams.edp]
+\label{freeyams}~
+\bFF
+
+load "msh3"
+load "medit"
+load "freeyams"
+int nn=20;
+mesh Th2=square(nn,nn);
+fespace Vh2(Th2,P2);
+Vh2 ux,uz,p2;
+int[int] rup=[0,2],  rdown=[0,1], rmid=[1,1,2,1,3,1,4,1];
+real zmin=0,zmax=1; P
+mesh3 Th=buildlayers(Th2,nn,
+  zbound=[zmin,zmax],
+  reffacemid=rmid, 
+  reffaceup = rup,
+  reffacelow = rdown);
+
+mesh3 Th3 = freeyams(Th);
+medit("maillagesurfacique",Th3,wait=1);
+
+\eFF
+\end{example}
+
 
 %%%  fin 3d
 \section{\setS{Finite Elements}} \index{finite element space}\label{finite elements}
@@ -17710,7 +18016,7 @@ Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integrati
  \bibitem{wilmott} Wilmott, Paul and Howison, Sam and Dewynne, Jeff :
  A student introduction to mathematical finance, Cambridge University Press (1995).
  
-
+ \bibitem{tech.freeyams}{ P. Frey. A fully automatic adaptive isotropic surface remeshing procedure. INRIA RT--0252,  2001.}
 
 
 \end{thebibliography}
