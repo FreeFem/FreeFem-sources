@@ -26,7 +26,10 @@ if [   -d $DIR/lib -a -d $DIR/include  ] ; then
     INC="$DIR/include"
     cd "$LIB"
 #  set -x
-    for la in arpack umfpack amd fftw3 blas lapack superlu superlu_dist metis parmetis tet; do
+    for la in arpack umfpack amd fftw3 blas lapack superlu superlu_dist metis parmetis tet mumps scotch hips hipssequential mmg3d; do
+       if [ -f $LIB/WHERE-$la ] then
+         sed 's/@DIR/$DIR/' <$LIB/WHERE-$la 
+       else   
         l=`echo $la |sed -e s/^tet$/tetgen/`
 	if [ -z "$l" ];then l="$la";fi  
 	if  ( ls  "lib$la"[-._0-9]*a 1>/dev/null 2>/dev/null ) ; then 
@@ -40,6 +43,7 @@ if [   -d $DIR/lib -a -d $DIR/include  ] ; then
 		    echo $l INCLUDE "'"-I$INC"'"
 		fi
 	    fi
+	fi
 	fi
     done
 else
