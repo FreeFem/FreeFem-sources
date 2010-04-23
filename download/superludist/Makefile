@@ -29,7 +29,7 @@ FAIT:
 	touch FAIT
 
 
-FAIRE: $(SRCDIR)/SRC/$(DSUPERLULIB) 
+FAIRE: $(SRCDIR)/SRC/$(DSUPERLULIB)  WHERE
 	touch FAIT
 
 make.inc: ../../config.status  Makefile
@@ -45,6 +45,10 @@ $(SRCDIR)/SRC/$(DSUPERLULIB): $(SRCDIR)
 	cd $(SRCDIR)/SRC; $(MAKE)
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/superludist
 	cp $(SRCDIR)/SRC/*.h  $(SRCDIR)/$(INSTALL)/include/superludist
+WHERE:
+	echo "superlu_dist LD '-L@DIR@/lib -lsuperlu_dist_2.3'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.superlu_dist
+	echo "superlu_dist INCLUDE '-I@DIR@/include/superludist'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.superlu_dist
+
 
 $(SRCDIR): $(PACKAGE_PATH)
 	tar xvzf $(PACKAGE_PATH)

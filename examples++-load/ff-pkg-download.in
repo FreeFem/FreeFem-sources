@@ -11,12 +11,15 @@ if [ $bb = $ff -a  \( '.' = "$DIR" -o -z "$DIR" \) ] ;  then
 fi
 case $DIR in 
 /*) ;;
+[.])  DIR=$pp;;
 *)  DIR="$pp/$DIR"
 esac
-if [ -d "$DIR/../download/lib" -a -d "$DIR/../download/include"  ] ; then
-    DIR="$DIR/../download"
-elif [ -d "$DIR/../lib" -a -d "$DIR/../include"  ] ; then
-    DIR="$DIR/.."
+DIRP=`dirname $DIR`
+#echo "WWWWW"  $DIRP 
+if [ -d "$DIRP/download/lib" -a -d "$DIRP/download/include"  ] ; then
+    DIR="$DIRP/download"
+elif [ -d "$DIRP/lib" -a -d "$DIRP/include"  ] ; then
+    DIR="$DIRP"
 else
   DIR=@ff_prefix_dir@
 fi
@@ -26,26 +29,28 @@ if [   -d $DIR/lib -a -d $DIR/include  ] ; then
     INC="$DIR/include"
     cd "$LIB"
 #  set -x
-    for la in arpack umfpack amd fftw3 blas lapack superlu superlu_dist metis parmetis tet mumps scotch hips hipssequential mmg3d; do
-       if [ -f $LIB/WHERE-$la ] then
-         sed 's/@DIR/$DIR/' <$LIB/WHERE-$la 
-       else   
+    for i in $LIB/WHERE.* ; do
+	sed "s;@DIR@;$DIR;" <$i 
+    done
+#    return
+    for la in arpack umfpack amd fftw3 blas lapack   mmg3d; do
         l=`echo $la |sed -e s/^tet$/tetgen/`
-	if [ -z "$l" ];then l="$la";fi  
-	if  ( ls  "lib$la"[-._0-9]*a 1>/dev/null 2>/dev/null ) ; then 
-	    ll=`ls  "lib$la"[-._0-9]*a|grep [.]a`
-	    if [ -n "$ll" ]; then 
-		lib=`expr "$ll" : lib'\(.*\).a'`
-		echo $l LD "'"-L$LIB"'" "'"-l$lib"'"
-		if [ -d $INC/$la ] ; then
-		    echo $l INCLUDE "'"-I$INC/$la"'"
-		else
-		    echo $l INCLUDE "'"-I$INC"'"
-		fi
-	    fi
-	fi
-	fi
+       if [ ! -f $LIB/WHERE.$l ]; then
+	   if [ -z "$l" ];then l="$la";fi  
+	   if  ( ls  "lib$la"[-._0-9]*a 1>/dev/null 2>/dev/null ) ; then 
+	       ll=`ls  "lib$la"[-._0-9]*a|grep [.]a`
+	       if [ -n "$ll" ]; then 
+		   lib=`expr "$ll" : lib'\(.*\).a'`
+		   echo $l LD "'"-L$LIB"'" "'"-l$lib"'"
+		   if [ -d $INC/$la ] ; then
+		       echo $l INCLUDE "'"-I$INC/$la"'"
+		   else
+		       echo $l INCLUDE "'"-I$INC"'"
+		   fi
+	       fi
+	   fi
+       fi
     done
 else
-    echo error not directory $DIR/lib and $DIR/include 
+    echo error not directory $DIR/lib and $DIR/include  $DIRP 
 fi

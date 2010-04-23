@@ -85,7 +85,7 @@ FAIT:
 	touch FAIT
 
 
-FAIRE: $(SRCDIR)/SRC/$(SUPERLULIB) 
+FAIRE: $(SRCDIR)/SRC/$(SUPERLULIB) WHER
 	touch FAIT
 
 $(SRCDIR)/SRC/$(SUPERLULIB): $(SRCDIR)
@@ -93,6 +93,11 @@ $(SRCDIR)/SRC/$(SUPERLULIB): $(SRCDIR)
 	cd $(SRCDIR)/SRC; $(AR) $(ARFLAGS) $(SUPERLULIB)  $(OBJ_SUPERLU)
 	cd $(SRCDIR)/SRC; $(RANLIB) $(SUPERLULIB) 
 	cp $(SRCDIR)/SRC/s*h  $(SRCDIR)/$(INSTALL)/include
+WHERE:
+	echo superlu LD '-L@DIR@/lib -lsuperlu'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
+	echo superlu INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
+
+
 
 
 $(SRCDIR)/$(INSTALL): 

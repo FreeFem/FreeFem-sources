@@ -24,7 +24,7 @@ FAITwin32-dll-target:
 	echo "On Pure Win32 (to hard to compile) "
 
 FAIT:	
-	$(MAKE) FAIRE
+	$(MAKE) FAIRE WHERE
 	touch FAIT
 
 
@@ -56,7 +56,10 @@ FAIRE: $(SRCDIR)
 	cp $(SRCDIR)/src/hypre/lib/* $(SRCDIR)/$(INSTALL)/lib/hypre
 	chmod 644 $(SRCDIR)/$(INSTALL)/include/hypre/HYPRE.h
 	rm -rf $(SRCDIR)/src/hypre
-	touch FAIT
+WHERE:
+	echo hypre LD '-L@DIR@/lib/hypre  -lHYPRE'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.hypre
+	echo hypre INCLUDE '-I@DIR@/include/hypre'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hypre
+
 
 $(SRCDIR): $(PACKAGE) 
 	tar xvzf $(PACKAGE)

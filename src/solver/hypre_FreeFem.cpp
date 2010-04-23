@@ -1,3 +1,4 @@
+
 // ORIG-DATE: 02/2009
 // -*- Mode : c++ -*-
 //
@@ -7,6 +8,8 @@
 // AUTHOR   : Guy Atenekeng
 // E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
 //
+//ff-c++-LIBRARY-dep: metis hypre  blas 
+//ff-c++-cpp-dep: 
 
 /* 
  This file is part of Freefem++
@@ -28,6 +31,7 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
+
 
 #include  <iostream>
 using namespace std;

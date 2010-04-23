@@ -16,39 +16,38 @@ VERSION=4.9.2
 
 mumps: FAIRE
 
-$(SRCDIR)/FAIT:
-	$(MAKE) $(SRCDIR)/$(INSTALL)  
-	touch $(SRCDIR)/FAIT
-
-FAIRE: $(SRCDIR)/FAIT
-
-Makefile.inc: ../../config.status	Makefile
-	grep 'abs_top_builddir *=' ../Makefile >> dirflags
-	cat dirflags  Makefile-mumps-$(VERSION).inc > Makefile-mumps-tmp.inc
-	../../config.status  --file="Makefile.inc:Makefile-mumps-tmp.inc"
-	case `uname` in *CYGWIN*)  cp Makefile.inc Makefile.incn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.incn > Makefile.inc; rm Makefile.incn ;; esac
-	rm dirflags
-	rm Makefile-mumps-tmp.inc
-
-$(SRCDIR)/$(INSTALL): $(SRCDIR)
+$(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp Makefile.inc $(SRCDIR)
 	cd $(SRCDIR);make d z
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/mumps
-	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/mumps/
-	mkdir -p $(SRCDIR)/$(INSTALL)/lib/mumps
-	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/mumps/
+	-mkdir -p $(SRCDIR)/$(INSTALL)/include
+	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/
+	-mkdir -p $(SRCDIR)/$(INSTALL)/lib
+	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
+	touch $(SRCDIR)/FAIT
+WHERE:
+	echo "mumps LD '-L@DIR@//lib  -lpord -lmumps_common -libdmumps -libzmumps -lpord'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps
+	echo "mumps INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps
 
-$(SRCDIR):
+
+FAIRE: $(SRCDIR)/FAIT WHERE
+
+Makefile.inc: ../../config.status	Makefile
+	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"
+
+$(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-tar
+
+$(SRCDIR)/tag-tar:
 	tar xvzf $(PACKAGE1)
-	touch $(SRCDIR)
+	patch -d MUMPS_4.9.2   -p 1    <MUMPS_4.9.2.patch
+	touch $(SRCDIR)/tag-tar
 
 clean-local:
 	-cd $(SRCDIR); make clean
 
 clean: clean-local
 	rm Makefile.inc
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/mumps/
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/mumps/
+	-rm -rf $(SRCDIR)/$(INSTALL)/include/*mumps*
+	-rm -rf $(SRCDIR)/$(INSTALL)/lib/lib*mumps* $(SRCDIR)/$(INSTALL)/lib/libpord*.a
 	-rm -rf $(SRCDIR)
 
 .PHONY:$(SRCDIR)/$(INSTALL)

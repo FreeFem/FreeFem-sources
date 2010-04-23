@@ -17,13 +17,13 @@ SERVER=http://tetgen.berlios.de/files
 INSTALL=../..
 tetgen_VERSION=1.4.3
 
-tetgen: FAIT
+tetgen: FAIT 
 
 FAIT:
-	$(MAKE) FAIRE
+	$(MAKE) FAIRE 
 	touch FAIT
 
-FAIRE:$(SRCDIR)/$(INSTALL) cxxflags
+FAIRE:$(SRCDIR)/$(INSTALL) cxxflags WHERE
 	touch FAIT
 
 $(SRCDIR)/$(INSTALL): $(SRCDIR) cxxflags
@@ -31,6 +31,10 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR) cxxflags
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
 	cd $(SRCDIR);$(AR) $(ARFLAGS)  $(INSTALL)/lib/libtet.a tetgen.o predicates.o
 	cp $(SRCDIR)/tetgen.h $(SRCDIR)/$(INSTALL)/include 
+WHERE:
+	echo tetgen LD '-L@DIR@/lib -ltet'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
+	echo tetgen  INCLUDE '-I@DIR@/include/'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
+
 
 
 $(SRCDIR): $(PACKAGE)

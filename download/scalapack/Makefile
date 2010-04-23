@@ -15,49 +15,41 @@ SRCDIR=scalapack-1.8.0
 PACKAGE1=$(DIRPKG)/scalapack-1.8.0.tgz
 SERVER=http://www.netlib.org/scalapack/
 INSTALL=../..
-#WGET  = curl -O 
-#TOOLS
 DIR1 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/TOOLS/LAPACK/*.o
 DIR2 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/TOOLS/*.o
-#PBLAS
 DIR3 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/PBBLAS/*.o
 DIR4 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/PTZBLAS/*.o
 DIR5 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/PTOOLS/*.o
 DIR6 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/*.o
-#REDIST
 DIR7 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/REDIST/SRC/*.o
-#SRC LAPACK
 DIR8 =  $(abs_top_builddir)/download/scalapack/$(SRCDIR)/SRC/*.o
 
 scalapack: FAIRE
 
-$(SRCDIR)/FAIT:
-	$(MAKE) $(SRCDIR)/$(INSTALL)  
-	touch $(SRCDIR)/FAIT
-
-FAIRE: $(SRCDIR)/FAIT
-
-SLmake.inc: ../../config.status	Makefile
-	grep 'abs_top_builddir *=' ../Makefile >> dirflags
-	cat dirflags SLmake-scalapack.inc > SLmake-tmp.inc
-	../../config.status  --file="SLmake.inc:SLmake-tmp.inc"
-	case `uname` in *CYGWIN*)  cp SLmake.inc SLmake.incn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <SLmake.incn > SLmake.inc; rm SLmake.incn ;; esac 
-	rm dirflags
-	rm SLmake-tmp.inc
-$(SRCDIR)/$(INSTALL): $(SRCDIR)
+$(SRCDIR)/FAIT:$(SRCDIR)/tag-tar
 	cp SLmake.inc $(SRCDIR)
 	cd $(SRCDIR);$(MAKE) lib
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/scalapack
-	cp $(SRCDIR)/SRC/*.h $(SRCDIR)/$(INSTALL)/include/scalapack/
-	mkdir -p $(SRCDIR)/$(INSTALL)/lib/scalapack
+	mkdir -p $(SRCDIR)/$(INSTALL)/include
+	cp $(SRCDIR)/SRC/*.h $(SRCDIR)/$(INSTALL)/include
+	mkdir -p $(SRCDIR)/$(INSTALL)/lib
 	rm $(SRCDIR)/libscalapack.a
 	$(ARCH) $(ARCHFLAGS) $(SRCDIR)/libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8)
 	$(RANLIB) $(SRCDIR)/libscalapack.a
-	cp $(SRCDIR)/libscalapack.a $(SRCDIR)/$(INSTALL)/lib/scalapack/
+	cp $(SRCDIR)/libscalapack.a $(SRCDIR)/$(INSTALL)/lib
+	touch $(SRCDIR)/FAIT
 
-$(SRCDIR): $(PACKAGE1) 
+WHERE:
+	echo "scalapack LD '-L@DIR@/lib  -lscalapack '"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.scalack
+	echo "scalapack INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scalack
+
+FAIRE: $(SRCDIR)/FAIT	WHERE
+
+SLmake.inc: ../../config.status	Makefile
+	../../config.status  --file="SLmake.inc:SLmake-scalapack.inc"
+
+$(SRCDIR)/tag-tar: $(PACKAGE1)
 	gunzip -c $(PACKAGE1) | tar xvf -
-	touch $(SRCDIR)
+	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE1):
 	-mkdir $(DIRPKG)
@@ -68,8 +60,8 @@ clean-local:
 
 clean: clean-local
 	rm SLmake.inc
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/scalapack/
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/scalapack/
+	-rm -rf $(SRCDIR)/$(INSTALL)/include/{pblas.h,pxsyevx.h,tools.h}
+	-rm -rf $(SRCDIR)/$(INSTALL)/lib/libscalapack.a
 	-rm -rf $(SRCDIR)
 
 .PHONY:$(SRCDIR)/$(INSTALL)
