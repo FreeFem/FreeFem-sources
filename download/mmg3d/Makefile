@@ -16,36 +16,35 @@ INSTALL=../..
 mmg3d_VERSION=
 # mmg3d pas sur internet
 SERVER=
-WGET =
+WGET=
+LIBMMG3D=$(SRCDIR)/$(INSTALL)/lib/libmmg3d.a
+
 
 mmg3d: FAIRE
 
-$(SRCDIR)/FAIT:
-	$(MAKE) $(SRCDIR)/$(INSTALL)  
+$(SRCDIR)/FAIT: $(PACKAGE) $(SRCDIR) 
+	cp makefile-mmg3d.inc $(SRCDIR)/makefile
+	cd $(SRCDIR); $(MAKE) lib
+	-mkdir $(SRCDIR)/$(INSTALL)/include
+	cp $(SRCDIR)/sources/libmmg3d.h  $(SRCDIR)/$(INSTALL)/include/libmmg3d.h
+	-mkdir $(SRCDIR)/$(INSTALL)/lib
+	cp $(SRCDIR)/objects/libmmg3d.a  $(LIBMMG3D)
 	touch FAIT
 
 FAIRE: $(SRCDIR)/FAIT
 
-$(SRCDIR)/$(INSTALL): $(PACKAGE) $(SRCDIR)
-	cp makefile-mmg3d.inc $(SRCDIR)/makefile
-	cd $(SRCDIR); $(MAKE) lib
-	-mkdir $(SRCDIR)/$(INSTALL)/include/mmg3d/
-	cp $(SRCDIR)/sources/libmmg3d.h  $(SRCDIR)/$(INSTALL)/include/mmg3d/libmmg3d.h
-	-mkdir $(SRCDIR)/$(INSTALL)/lib/mmg3d/
-	cp $(SRCDIR)/objects/libmmg3d.a  $(SRCDIR)/$(INSTALL)/lib/mmg3d/libmmg3d.a
-
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
 
-$(PACKAGE):
+$(PACKAGE): 
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
+	cd $(DIRPKG); $(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 
 clean: 
 	-rm ff-flags
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/mmg3d/
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/mmg3d/
+	-rm -rf $(SRCDIR)/$(INSTALL)/lib/libmmg3d.a
+	-rm -rf $(SRCDIR)/$(INSTALL)/include/libmmg3d.a
 	-rm -r $(SRCDIR)
 	-rm FAIT
 

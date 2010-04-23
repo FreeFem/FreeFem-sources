@@ -18,13 +18,13 @@ INSTALL=../..
 scotch_VERSION=5.1_esmumps
 scotch_VERSION_LOCAL=5.1.6_esmumps
 
-scotch: FAIRE
+scotch: FAIRE 
 
 $(SRCDIR)/FAIT:
 	$(MAKE) $(SRCDIR)/$(INSTALL)  
 	touch $(SRCDIR)/FAIT
 
-FAIRE: $(SRCDIR)/FAIT
+FAIRE: $(SRCDIR)/FAIT WHERE
 
 Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
 	../../config.status  --file="Makefile.inc:Makefile-scotch.inc"
@@ -37,6 +37,12 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/scotch
 	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/scotch/
 	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
+WHERE:
+	echo "ptscotch LD '-L@DIR@/lib  -lptesmumps -lptscotch -lptscotcherr '"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo "ptscotch INCLUDE '-I@DIR@/include/scotch'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo "scotch LD '-L@DIR@/lib   -lscotch -lscotcherr '"  >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo "scotch INCLUDE '-I@DIR@/include/scotch'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)

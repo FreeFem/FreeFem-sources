@@ -1,3 +1,4 @@
+abs_top_builddir=@abs_top_builddir@
 include $(abs_top_builddir)/download/headers-sparsesolver.inc
 DOWNLOADFF= $(abs_top_builddir)/download
 ###############################################################################
@@ -85,7 +86,7 @@ IORDERINGSC = $(IMETIS) $(IPORD) $(ISCOTCH)
 # DEFINE HERE SOME COMMON COMMANDS, THE COMPILER NAMES, ETC...
 
 # PLAT : use it to add a default suffix to the generated libraries
-PLAT    = FREEFEM
+PLAT    = # FREEFEM
 # RM : remove files
 RM      = /bin/rm -f
 # CC : C compiler

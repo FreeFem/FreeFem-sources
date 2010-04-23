@@ -7,6 +7,8 @@
 // AUTHOR   : Jacques Morice
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
+//ff-c++-LIBRARY-dep: metis mumps  blas 
+//ff-c++-cpp-dep: 
 
 /* 
  This file is part of Freefem++
@@ -317,7 +319,7 @@ public:
     /* set parameter of mumps */
     if( !(param_int == NULL) || !(param_double == NULL) ){
       if(!data_option.empty()){ 
-	printf("MUMPS ERROR:  parameters are given on the file %s and in the array lparams and dparams => double definition of parameters.",&data_option);
+	printf("MUMPS ERROR:  parameters are given on the file %s and in the array lparams and dparams => double definition of parameters.",data_option.c_str());
 	exit(1);
       }
       
@@ -1212,7 +1214,7 @@ public:
 	  printf( "RINFOG[%d]= %f \n", ii, id.RINFOG(ii+1) );
 	printf("=====================================================\n");
 	for(int ii=0; ii< Sinfo; ii++) 
-	  printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
+	  printf( "INFOG[%d]= %d \n", ii, id.INFOG(ii+1) );
 	printf("=====================================================\n");
       }
     }
@@ -1297,7 +1299,7 @@ public:
 	  printf( "RINFOG[%d]= %f \n", ii, id.RINFOG(ii+1) );
 	printf("=====================================================\n");
 	for(int ii=0; ii< Sinfo; ii++) 
-	  printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
+	  printf( "INFOG[%d]= %d \n", ii, id.INFOG(ii+1) );
 	printf("=====================================================\n");
       }
     }
@@ -1523,7 +1525,7 @@ public:
      /* set parameter of mumps */
     if( !(param_int==NULL) || !(param_double==NULL) ){
       if(!data_option.empty()){ 
-	printf("read option before with the file %s\n",&data_option);
+	printf("read option before with the file %s\n",data_option.c_str());
 	exit(1);
       }
       
@@ -2378,7 +2380,7 @@ public:
 	  printf( "RINFOG[%d]= %f \n", ii, id.RINFOG(ii+1) );
 	printf("=====================================================\n");
 	for(int ii=0; ii< Sinfo; ii++) 
-	  printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
+	  printf( "INFOG[%d]= %d \n", ii, id.INFOG(ii+1) );
 	printf("=====================================================\n");
       }
     }
@@ -2463,7 +2465,7 @@ public:
 	  printf( "RINFOG[%d]= %f \n", ii, id.RINFOG(ii+1) );
 	printf("=====================================================\n");
 	for(int ii=0; ii< Sinfo; ii++) 
-	  printf( "INFOG[%d]= %f \n", ii, id.INFOG(ii+1) );
+	  printf( "INFOG[%d]= %d \n", ii, id.INFOG(ii+1) );
 	printf("=====================================================\n");
       }
     }

@@ -23,7 +23,7 @@ $(SRCDIR)/FAIT:
 	$(MAKE) $(SRCDIR)/$(INSTALL)  
 	touch $(SRCDIR)/FAIT
 
-FAIRE: $(SRCDIR)/FAIT
+FAIRE: $(SRCDIR)/FAIT WHERE
 
 Makefile.in: ../../config.status Makefile-metis.in
 	../../config.status  --file="Makefile.in:Makefile-metis.in"
@@ -35,6 +35,10 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)/tags
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/metis
 	cp $(SRCDIR)/Lib/*.h $(SRCDIR)/$(INSTALL)/include/metis
 	-cd $(SRCDIR)/Programs;make 
+WHERE:
+	echo metis LD '-L@DIR@/lib -lmetis'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis
+	echo metis INCLUDE '-I@DIR@/include/metis'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis
+
 
 
 

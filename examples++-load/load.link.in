@@ -22,6 +22,8 @@ if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
 if [ -z "$INCFF" ] ; then
     if [ -f "@INCFF@/ff++.hpp" ] ; then
 	INCFF="-I@INCFF@"
+    elif [ -f ${dircommand}/include/ff++.hpp ]; then
+	INCFF="-I${dircommand}/include"
     elif [ -f include/ff++.hpp ]; then
 	INCFF="-Iinclude"
     elif [ -f "FFAPPLI_INC/ff++.hpp" ] ; then 
