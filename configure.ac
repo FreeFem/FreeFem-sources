@@ -182,7 +182,7 @@ AC_LANG_PUSH([Fortran 77])
  AC_LANG_POP([Fortran 77])
  AC_MSG_RESULT($ff_f77intsize)
  AC_F77_WRAPPERS
-#   echo   " ------ ac_cv_f77_mangling : $ac_cv_f77_mangling"       
+
 ff_cfagsf77=""
 case $ac_cv_f77_mangling in
 #  "lower case, no underscore, no extra underscore")
@@ -191,7 +191,7 @@ case $ac_cv_f77_mangling in
   "lower case, underscore, no extra underscore")
 	ff_cfagsf77="-DAdd_";;
   "lower case, underscore, extra underscore")
-	ff_cfagsf77="-DAdd_";;
+	ff_cfagsf77="-DAdd__";;
   "upper case, no underscore, no extra underscore")
    ff_cfagsf77="-DUPPER";;
   "upper case, no underscore, extra underscore")
@@ -199,7 +199,7 @@ case $ac_cv_f77_mangling in
     "upper case, underscore, no extra underscore")
         ff_cfagsf77="-DUPPER -DAdd_";;
   "upper case, underscore, extra underscore")
-        ff_cfagsf77="-DUPPER -DAdd_";;
+        ff_cfagsf77="-DUPPER -DAdd__";;
   *) ;;
 esac
 AC_SUBST(CFLAGSF77,$ff_cfagsf77)

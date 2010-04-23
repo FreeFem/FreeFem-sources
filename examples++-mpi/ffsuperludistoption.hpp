@@ -322,6 +322,43 @@ void read_options_freefem(string *string_option, superlu_options_t *options, Dia
 //   }
 // }
 
+void read_nprow_npcol_matrixdist_superlu_datafile(string *data_option, int_t *nprow, int_t *npcol, int *matrixdist){
+ 
+  char datafile[data_option->size()+1];  
+  strcpy( datafile, data_option->c_str()); 
+  
+  FILE* pfile= fopen( datafile,"rt");
+  char data[256];
+  char *tictac;
+  
+  fgets(data,256,pfile);
+  cout << "data=" << data << endl;
+  tictac = strtok(data," /!#\t\n");
+  *nprow = (int) atol(tictac);
+  if(verbosity) printf("nprow=%d\n",*nprow);
+
+  fgets(data,256,pfile);
+  tictac = strtok(data," /!#\t\n");
+  *npcol = (int) atol(tictac);
+  if(verbosity) printf("npcol=%d\n",*npcol);
+
+  fgets(data,256,pfile);
+  tictac = strtok(data," /!#\t\n");
+  if(strcmp(tictac,"assembled") == 0)
+    *matrixdist = 0;
+  else if(strcmp(tictac,"distributedglobal") == 0) 
+    *matrixdist = 1;
+  else if(strcmp(tictac,"distributed") == 0) 
+    *matrixdist = 2;
+  else{
+    printf("matrix input %s for superlu_dist is not correct\n", tictac );
+    exit(1);
+  }
+ 
+  fclose(pfile);
+}
+
+
 void read_options_superlu_datafile(string *data_option, superlu_options_t *options, int_t *nprow, int_t *npcol, int *matrixdist, DiagScale_t *diag){
   static const yes_no_t  enumyes_no_t[2] = {NO, YES};
   static const fact_t  enumfact_t[4] = {DOFACT, SamePattern, SamePattern_SameRowPerm, FACTORED};

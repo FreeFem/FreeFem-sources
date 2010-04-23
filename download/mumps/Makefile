@@ -25,7 +25,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
 	touch $(SRCDIR)/FAIT
 WHERE:
-	echo "mumps LD '-L@DIR@//lib  -lpord -lmumps_common -libdmumps -libzmumps -lpord'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps
+	echo "mumps LD '-L@DIR@//lib  -lpord -lmumps_common -ldmumps -lzmumps -lpord'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps
 	echo "mumps INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps
 
 

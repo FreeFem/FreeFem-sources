@@ -6101,7 +6101,7 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-#   echo   " ------ ac_cv_f77_mangling : $ac_cv_f77_mangling"
+
 ff_cfagsf77=""
 case $ac_cv_f77_mangling in
 #  "lower case, no underscore, no extra underscore")
@@ -6110,7 +6110,7 @@ case $ac_cv_f77_mangling in
   "lower case, underscore, no extra underscore")
 	ff_cfagsf77="-DAdd_";;
   "lower case, underscore, extra underscore")
-	ff_cfagsf77="-DAdd_";;
+	ff_cfagsf77="-DAdd__";;
   "upper case, no underscore, no extra underscore")
    ff_cfagsf77="-DUPPER";;
   "upper case, no underscore, extra underscore")
@@ -6118,7 +6118,7 @@ case $ac_cv_f77_mangling in
     "upper case, underscore, no extra underscore")
         ff_cfagsf77="-DUPPER -DAdd_";;
   "upper case, underscore, extra underscore")
-        ff_cfagsf77="-DUPPER -DAdd_";;
+        ff_cfagsf77="-DUPPER -DAdd__";;
   *) ;;
 esac
 CFLAGSF77=$ff_cfagsf77

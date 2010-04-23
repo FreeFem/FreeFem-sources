@@ -656,18 +656,16 @@ all-local: $(DOWNLOADCOMPILE)
 compile-pkg:
 	-if [ -n "$(WGET)" ] ; then \
 	for d in tetgen superlu fftw metis yams mmg3d ; do \
-	 echo "(cd $$d; $(MAKE) ) " ;\
-	  ( cd "$$d"; $(MAKE) ) ; \
+	 echo "(cd $$d;$(MAKE) ) " ;\
+	  ( cd "$$d";$(MAKE) ) ; \
 	done ;\
-	fi
-
-	-if [ -n "$(MPICC)" -a -n "$(WGET)" ] ; then \
-	for d in $(MPI_SOFT) ; do \
-	 echo "(cd $$d; $(MAKE) ) " ;\
-	  ( cd "$$d"; $(MAKE) ) ; \
+	-if [ -n "$(MPICC)" ] ; then \
+	for d in $MPI_SOFT ; do \
+	 echo "(cd $$d;$(MAKE) ) " ;\
+	  ( cd "$$d";$(MAKE) ) ; \
 	done ;\
-	fi
- 
+	fi; \
+	fi 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

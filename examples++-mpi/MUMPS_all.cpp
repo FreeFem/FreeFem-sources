@@ -1,3 +1,6 @@
+//ff-c++-LIBRARY-dep: metis mumps  blas 
+//ff-c++-cpp-dep: 
+
 #include  <iostream>
 using namespace std;
 
@@ -200,7 +203,7 @@ public:
     /* set parameter of mumps */
     if(param_int){
       if(!data_option.empty()){ 
-	printf("read option before with the file %s\n",&data_option);
+	printf("read option before with the file %s\n",data_option.c_str());
 	exit(1);
       }
       for(int ii=0; ii<40; ii++)
@@ -816,7 +819,7 @@ public:
 	{
 	  
 	  char * retfile= new char[data_option.size()+1];
-	  strcpy(retfile, (&data_option)->c_str());
+	  strcpy(retfile, data_option.c_str());
 	  printf("read data from file %s\n", retfile);
 	  FILE *pFile=fopen(retfile,"rt");
 	  
@@ -856,7 +859,7 @@ public:
      /* set parameter of mumps */
     if(param_int){
       if(!data_option.empty()){ 
-	printf("read option before with the file %s\n",&data_option);
+	printf("read option before with the file %s\n",data_option.c_str());
 	exit(1);
       }
       for(int ii=0; ii<40; ii++)

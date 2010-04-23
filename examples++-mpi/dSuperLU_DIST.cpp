@@ -15,7 +15,7 @@ using namespace std;
 #include "MatriceCreuse_tpl.hpp"
 #include "mpi.h"
 #include "superlu_ddefs.h"
-#include "ffsuperludistoption.hpp"
+#include "ffsuperludistoption-1.hpp"
 
 template <class R> struct SuperLUmpiDISTDriver
 {
