@@ -1,5 +1,5 @@
-load "../src/solver/real_SuperLU_DIST_FreeFem"
-load "../src/solver/complex_SuperLU_DIST_FreeFem"
+load "real_SuperLU_DIST_FreeFem"
+load "complex_SuperLU_DIST_FreeFem"
 assert(mpisize>=2);
 int[int] procs=[0,1];
 mpiGroup gpr(procs);
