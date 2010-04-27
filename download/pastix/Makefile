@@ -112,7 +112,7 @@ $(SRCDIR): $(PACKAGE1)
 
 $(PACKAGE1):
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE1)`
+	cd $(DIRPKG);$(WGET) --no-check-certificate  $(SERVER)/`basename $(PACKAGE1)`
 
 clean-local:
 	-cd $(SRCDIR)/src/; $(MAKE) clean

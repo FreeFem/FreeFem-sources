@@ -18,11 +18,10 @@ INSTALL=../..
 scotch_VERSION=5.1_esmumps
 scotch_VERSION_LOCAL=5.1.6_esmumps
 
-scotch: FAIRE 
+scotch: FAIRE
 
-$(SRCDIR)/FAIT:
-	$(MAKE) $(SRCDIR)/$(INSTALL)  
-	touch $(SRCDIR)/FAIT
+$(SRCDIR)/AFAIRE:
+	$(MAKE) install
 
 FAIRE: $(SRCDIR)/FAIT WHERE
 
@@ -30,19 +29,23 @@ Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
 	../../config.status  --file="Makefile.inc:Makefile-scotch.inc"
 	case `uname` in *CYGWIN*)  cp Makefile.inc Makefile.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.inn > Makefile.inc; rm Makefile.inn ;; esac 
 
-$(SRCDIR)/$(INSTALL): $(SRCDIR)
+$(SRCDIR)/FAIT: $(SRCDIR)
 	cp Makefile.inc $(SRCDIR)/src/
 	cd $(SRCDIR)/src/; make scotch
 	cd $(SRCDIR)/src/; make ptscotch
+	touch $(SRCDIR)/FAIT
+
+install:$(SRCDIR)/FAIT
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/scotch
 	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/scotch/
 	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
 WHERE:
-	echo "ptscotch LD '-L@DIR@/lib  -lptesmumps -lptscotch -lptscotcherr '"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo "ptscotch INCLUDE '-I@DIR@/include/scotch'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo "scotch LD '-L@DIR@/lib   -lscotch -lscotcherr '"  >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo "scotch INCLUDE '-I@DIR@/include/scotch'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-
+	if [ -f  $(SRCDIR)/FAIT ] ; then \
+	echo "ptscotch LD '-L@DIR@/lib  -lptesmumps -lptscotch -lptscotcherr '"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
+	echo "ptscotch INCLUDE '-I@DIR@/include/scotch'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
+	echo "scotch LD '-L@DIR@/lib   -lscotch -lscotcherr '"  >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
+	echo "scotch INCLUDE '-I@DIR@/include/scotch'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
+	fi
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
@@ -51,7 +54,7 @@ $(SRCDIR): $(PACKAGE)
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
+	cd $(DIRPKG);$(WGET)  --no-check-certificate  $(SERVER)/`basename $(PACKAGE)`
 
 clean-local:
 	-cd $(SRCDIR)/src; make realclean 

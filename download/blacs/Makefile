@@ -22,24 +22,19 @@ SYSERRORS =
 
 blacs: FAIRE
 
-$(SRCDIR)/FAIT:
-	$(MAKE) $(SRCDIR)/$(INSTALL)  
-	touch $(SRCDIR)/FAIT
 
-FAIRE: $(SRCDIR)/FAIT
+FAIRE: $(SRCDIR)/FAIT install
 
 Bmake.inc: ../../config.status	Makefile Bmake-blacs.inc
 	../../config.status  --file="Bmake.inc:Bmake-blacs.inc"
 
 
-$(SRCDIR)/$(INSTALL): $(SRCDIR) 
-	cp Bmake.inc $(SRCDIR)
-	mv $(SRCDIR)/SRC/MPI/Makefile $(SRCDIR)/SRC/MPI/Makefile.tmp
-	sed -e 's;\.C;\.oo;g'\
-	< $(SRCDIR)/SRC/MPI/Makefile.tmp \
-	> $(SRCDIR)/SRC/MPI/Makefile
+$(SRCDIR)/FAIT: $(SRCDIR)
 	#cd $(SRCDIR)/INSTALL/;$(MAKE) xintface xsyserrors xcmpi_sane xfmpi_sane xtc_CsameF77 xtc_UseMpich
 	cd $(SRCDIR);$(MAKE) mpi 
+	touch $(SRCDIR)/FAIT
+
+install: $(SRCDIR)/FAIT
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/blacs
 	cp $(SRCDIR)/LIB/*.a $(SRCDIR)/$(INSTALL)/lib/blacs/
 
@@ -48,6 +43,11 @@ $(SRCDIR): $(PACKAGE1) $(PACKAGE2) $(PACKAGE3)
 	gunzip -c $(PACKAGE2) | tar xvf -
 	gunzip -c $(PACKAGE3) | tar xvf -
 	cd $(SRCDIR)/SRC/MPI; patch -p1 < ../../../BLACS.patch
+	cp Bmake.inc $(SRCDIR)
+	mv $(SRCDIR)/SRC/MPI/Makefile $(SRCDIR)/SRC/MPI/Makefile.tmp
+	sed -e 's;\.C;\.oo;g'\
+	< $(SRCDIR)/SRC/MPI/Makefile.tmp \
+	> $(SRCDIR)/SRC/MPI/Makefile
 	touch $(SRCDIR)
 
 $(PACKAGE1):
@@ -70,4 +70,4 @@ clean: clean-local
 	-rm $(SRCDIR)/$(INSTALL)/lib/blacs/*.a
 	-rm -rf $(SRCDIR)
 
-.PHONY:$(SRCDIR)/$(INSTALL)
+.PHONY:$(SRCDIR)/$(INSTALL)  compile install

@@ -25,7 +25,7 @@ FAITwin32-dll-target:
 
 FAIT:	
 	$(MAKE) FAIRE WHERE
-	touch FAIT
+
 
 
 #====== 
@@ -36,29 +36,33 @@ FAIT:
 #  --with-lapack-lib-dirs --with-lapack-lib
 #======
 
-FAIRE: $(SRCDIR) 
-	cd $(SRCDIR)/src && ./configure  CXX="$(CXX)" CC="$(CC)" CFLAGS="$(CFLAGS)" CPP="$(CC) -E" CXXFLAGS="$(CXXFLAGS)" F77="$(F77)" FFLAGS="$(FFLAGS)" FLIBS="$(FLIBS)" LDFLAGS="$(LDFLAGS)" --with-MPI-include="$(FFMPIDIR)" --with-MPI-lib-dirs="$(FFMPIDIRLIBS)" --with-MPI-libs="$(FFMPILIB2)" # --with-lapack --with-blas  #// to add lapack to test
+FAIRE: $(SRCDIR)/FAIT
+
+$(SRCDIR)/FAIT:$(SRCDIR)
+	cd $(SRCDIR)/src && ./configure  CXX="$(CXX)" CC="$(CC)" CFLAGS="$(CFLAGS)" CPP="$(CC) -E" CXXFLAGS="$(CXXFLAGS)" F77="$(F77)" FFLAGS="$(FFLAGS)" FLIBS="$(FLIBS)" LDFLAGS="$(LDFLAGS)" --with-MPI-include="$(FFMPIDIR)" --with-MPI-lib-dirs="$(FFMPIDIRLIBS)" --with-MPI-libs="$(FFMPILIB2)" --prefix="${abs_top_builddir}/download"  --includedir="${abs_top_builddir}/download"/include/hypre  --libdir="${abs_top_builddir}/download"/lib/hypre 
+# --with-lapack --with-blas  #// to add lapack to test
 	# the following line is to avoid compilation of local blas and local lapack of hypre
 	# begin patch
-	cd $(SRCDIR)/src/config/; mv Makefile.config Makefile-tmp.config; 
-	sed -e 's;${abs_top_builddir}/download/hypre/${SRCDIR}/src/lapack; ;'\
-	<$(SRCDIR)/src/config/Makefile-tmp.config\
-	>$(SRCDIR)/src/config/Makefile.config
-	cd $(SRCDIR)/src/config/; mv Makefile.config Makefile-tmp.config; 
-	sed -e 's;${abs_top_builddir}/download/hypre/${SRCDIR}/src/blas; ;'\
-	<$(SRCDIR)/src/config/Makefile-tmp.config\
-	>$(SRCDIR)/src/config/Makefile.config
-	# end patch
+#	cd $(SRCDIR)/src/config/; mv Makefile.config Makefile-tmp.config; 
+#	sed -e 's;${abs_top_builddir}/download/hypre/${SRCDIR}/src/lapack; ;'\
+#	<$(SRCDIR)/src/config/Makefile-tmp.config\
+#	>$(SRCDIR)/src/config/Makefile.config
+#	cd $(SRCDIR)/src/config/; mv Makefile.config Makefile-tmp.config; 
+#	sed -e 's;${abs_top_builddir}/download/hypre/${SRCDIR}/src/blas; ;'\
+#	<$(SRCDIR)/src/config/Makefile-tmp.config\
+#	>$(SRCDIR)/src/config/Makefile.config
+#	# end patch
 	cd $(SRCDIR)/src && $(MAKE)
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/hypre
-	mkdir -p $(SRCDIR)/$(INSTALL)/lib/hypre
-	cp $(SRCDIR)/src/hypre/include/* $(SRCDIR)/$(INSTALL)/include/hypre
-	cp $(SRCDIR)/src/hypre/lib/* $(SRCDIR)/$(INSTALL)/lib/hypre
-	chmod 644 $(SRCDIR)/$(INSTALL)/include/hypre/HYPRE.h
-	rm -rf $(SRCDIR)/src/hypre
+	cd $(SRCDIR)/src && $(MAKE) install
+	touch $(SRCDIR)/FAIT
+install: 
+	cd $(SRCDIR)/src && $(MAKE) install
 WHERE:
-	echo hypre LD '-L@DIR@/lib/hypre  -lHYPRE'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.hypre
-	echo hypre INCLUDE '-I@DIR@/include/hypre'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hypre
+	if [ -f $(SRCDIR)/FAIT ] ; then  \
+	make install ; \
+	echo hypre LD '-L@DIR@/lib/hypre  -lHYPRE'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.hypre ;\
+	echo hypre INCLUDE '-I@DIR@/include/hypre'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hypre ;\
+	fi
 
 
 $(SRCDIR): $(PACKAGE) 
@@ -67,7 +71,7 @@ $(SRCDIR): $(PACKAGE)
 
 $(PACKAGE):
 	-mkdir $(DIRPKG)
-	cd $(PKGDIR); $(WGET)  $(SERVER)/`basename $(PACKAGE)`
+	cd $(PKGDIR); $(WGET) --no-check-certificate  $(SERVER)/`basename $(PACKAGE)`
 
 clean: clean-local
 	-rm ff-flags

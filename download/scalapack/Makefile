@@ -29,18 +29,22 @@ scalapack: FAIRE
 $(SRCDIR)/FAIT:$(SRCDIR)/tag-tar
 	cp SLmake.inc $(SRCDIR)
 	cd $(SRCDIR);$(MAKE) lib
-	mkdir -p $(SRCDIR)/$(INSTALL)/include
-	cp $(SRCDIR)/SRC/*.h $(SRCDIR)/$(INSTALL)/include
-	mkdir -p $(SRCDIR)/$(INSTALL)/lib
 	rm $(SRCDIR)/libscalapack.a
 	$(ARCH) $(ARCHFLAGS) $(SRCDIR)/libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8)
 	$(RANLIB) $(SRCDIR)/libscalapack.a
-	cp $(SRCDIR)/libscalapack.a $(SRCDIR)/$(INSTALL)/lib
 	touch $(SRCDIR)/FAIT
+install:
+	mkdir -p $(SRCDIR)/$(INSTALL)/include
+	cp $(SRCDIR)/SRC/*.h $(SRCDIR)/$(INSTALL)/include
+	mkdir -p $(SRCDIR)/$(INSTALL)/lib
+	cp $(SRCDIR)/libscalapack.a $(SRCDIR)/$(INSTALL)/lib
 
 WHERE:
-	echo "scalapack LD '-L@DIR@/lib  -lscalapack '"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.scalack
-	echo "scalapack INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scalack
+	if [ -f $(SRCDIR)/FAIT ] ; then \
+	make install;  \
+	echo "scalapack LD '-L@DIR@/lib  -lscalapack '"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.scalack ;\
+	echo "scalapack INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scalack ;\
+	fi
 
 FAIRE: $(SRCDIR)/FAIT	WHERE
 

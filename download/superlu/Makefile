@@ -16,7 +16,7 @@ PACKAGE_PATH=$(DIRPKG)/$(PACKAGE)
 SERVER=http://crd.lbl.gov/~xiaoye/SuperLU/
 INSTALL=../..
 SUPERLU_VERSION=4.0
-SUPERLULIB=../$(INSTALL)/lib/libsuperlu_4.0.a
+SUPERLULIB=../$(INSTALL)/lib/libsuperlu_$(SUPERLU_VERSION).a
 include  ff-FLAGS
 
 ### LAPACK 
@@ -94,7 +94,7 @@ $(SRCDIR)/SRC/$(SUPERLULIB): $(SRCDIR)
 	cd $(SRCDIR)/SRC; $(RANLIB) $(SUPERLULIB) 
 	cp $(SRCDIR)/SRC/s*h  $(SRCDIR)/$(INSTALL)/include
 WHERE:
-	echo superlu LD '-L@DIR@/lib -lsuperlu'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
+	echo superlu LD '-L@DIR@/lib -lsuperlu_$(SUPERLU_VERSION)'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
 	echo superlu INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
 
 
