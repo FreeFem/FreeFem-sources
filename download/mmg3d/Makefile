@@ -20,11 +20,16 @@ WGET=
 LIBMMG3D=$(SRCDIR)/$(INSTALL)/lib/libmmg3d.a
 
 
-mmg3d: FAIRE
+mmg3d: 	
+	-if [ -f $(PACKAGE) ] ;then \
+	   $(MAKE) FAIRE; \
+	else \
+	   echo " file $(PACKAGE)  not found => no mmg3d tar file (download by hand) "; \
+	fi
 
-$(SRCDIR)/FAIT: $(PACKAGE) $(SRCDIR) 
+$(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp makefile-mmg3d.inc $(SRCDIR)/makefile
-	cd $(SRCDIR); $(MAKE) lib
+	$(MAKE) -C $(SRCDIR) lib
 	-mkdir $(SRCDIR)/$(INSTALL)/include
 	cp $(SRCDIR)/sources/libmmg3d.h  $(SRCDIR)/$(INSTALL)/include/libmmg3d.h
 	-mkdir $(SRCDIR)/$(INSTALL)/lib
@@ -33,8 +38,9 @@ $(SRCDIR)/FAIT: $(PACKAGE) $(SRCDIR)
 
 FAIRE: $(SRCDIR)/FAIT
 
-$(SRCDIR): $(PACKAGE)
+$(SRCDIR)/tag-tar: $(PACKAGE)
 	tar xvzf $(PACKAGE)
+	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE): 
 	-mkdir $(DIRPKG);

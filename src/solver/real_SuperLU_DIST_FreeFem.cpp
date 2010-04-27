@@ -1,5 +1,5 @@
 //   for automatic  compilation with ff-c++
-//ff-c++-LIBRARY-dep: superlu_dist  blas parmetis
+//ff-c++-LIBRARY-dep: superlu_dist parmetis metis  blas 
 //ff-c++-cpp-dep: 
 //
 // ORIG-DATE: 02/2009
