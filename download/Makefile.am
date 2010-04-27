@@ -32,8 +32,8 @@ compile-pkg:
 	 echo "(cd $$d;$(MAKE) ) " ;\
 	  ( cd "$$d";$(MAKE) ) ; \
 	done ;\
-	-if [ -n "$(MPICC)" ] ; then \
-	for d in $MPI_SOFT ; do \
+	if [ -n "$(MPICC)" ] ; then \
+	for d in $(MPI_SOFT) ; do \
 	 echo "(cd $$d;$(MAKE) ) " ;\
 	  ( cd "$$d";$(MAKE) ) ; \
 	done ;\

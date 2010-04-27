@@ -1,9 +1,9 @@
-include $(abs_top_builddir)/download/headers-sparsesolver.inc
+include @abs_top_builddir@/download/headers-sparsesolver.inc
 # Which compiler to use
 CC = @MPICC@
 
 # What optimization level to use  
-OPTFLAGS = @CFLAGS@   
+OPTFLAGS = @CFLAGS@   -DHAVE_CONFIG_H -I@abs_top_builddir@
 
 # Include directories for the compiler
 INCDIR =  @CPPFLAGS@ 
