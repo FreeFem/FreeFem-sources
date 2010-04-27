@@ -19,17 +19,22 @@ mumps: FAIRE
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp Makefile.inc $(SRCDIR)
 	cd $(SRCDIR);make d z
+	touch $(SRCDIR)/FAIT	
+install: $(SRCDIR)/FAIT
 	-mkdir -p $(SRCDIR)/$(INSTALL)/include
 	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/
 	-mkdir -p $(SRCDIR)/$(INSTALL)/lib
 	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
-	touch $(SRCDIR)/FAIT
-WHERE:
-	echo "mumps LD '-L@DIR@//lib  -lpord -lmumps_common -ldmumps -lzmumps -lpord'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps
-	echo "mumps INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps
+
+WHERE: 
+	if [ -f $(SRCDIR)/FAIT  ] ;then \
+	$(MAKE) install ; \
+	echo "mumps LD '-L@DIR@//lib  -lpord -lmumps_common -ldmumps -lzmumps -lpord'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
+	echo "mumps INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
+	fi
 
 
-FAIRE: $(SRCDIR)/FAIT WHERE
+FAIRE:  WHERE
 
 Makefile.inc: ../../config.status	Makefile
 	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"

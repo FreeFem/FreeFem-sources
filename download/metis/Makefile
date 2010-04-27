@@ -20,24 +20,32 @@ metis_VERSION=4.0
 metis: FAIRE
 
 $(SRCDIR)/FAIT:
-	$(MAKE) $(SRCDIR)/$(INSTALL)  
+	$(MAKE) install
 	touch $(SRCDIR)/FAIT
 
 FAIRE: $(SRCDIR)/FAIT WHERE
 
+
 Makefile.in: ../../config.status Makefile-metis.in
 	../../config.status  --file="Makefile.in:Makefile-metis.in"
 
-$(SRCDIR)/$(INSTALL): $(SRCDIR)/tags
+$(SRCDIR)/tag-compile: $(SRCDIR)/tags
 	cp Makefile.in $(SRCDIR)
-	cd $(SRCDIR)/Lib;make 
-#	cp $(SRCDIR)/libmetis.a $(SRCDIR)/$(INSTALL)/lib/
+	cd $(SRCDIR)/Lib;make
+	-cd $(SRCDIR)/Programs;make 
+	touch $(SRCDIR)/tag-compile
+
+install: $(SRCDIR)/tag-compile
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/metis
 	cp $(SRCDIR)/Lib/*.h $(SRCDIR)/$(INSTALL)/include/metis
-	-cd $(SRCDIR)/Programs;make 
-WHERE:
-	echo metis LD '-L@DIR@/lib -lmetis'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis
-	echo metis INCLUDE '-I@DIR@/include/metis'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis
+
+
+WHERE: 
+	-if [ -f $(SRCDIR)/FAIT ] ; then \
+	make install;  \
+	echo metis LD '-L@DIR@/lib -lmetis'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	echo metis INCLUDE '-I@DIR@/include/metis'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	fi
 
 
 
@@ -69,4 +77,3 @@ clean: clean-local
 	-rm $(SRCDIR)/$(INSTALL)/lib/libmetis.a
 	-rm $(SRCDIR)/$(INSTALL)/include/metis.h
 	-rm -rf $(SRCDIR)
-.PHONY:$(SRCDIR)/$(INSTALL)

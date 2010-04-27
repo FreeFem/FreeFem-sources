@@ -17,23 +17,22 @@ SERVER=http://tetgen.berlios.de/files
 INSTALL=../..
 tetgen_VERSION=1.4.3
 
-tetgen: FAIT 
+tetgen: FAIRE 
 
-FAIT:
-	$(MAKE) FAIRE 
-	touch FAIT
 
-FAIRE:$(SRCDIR)/$(INSTALL) cxxflags WHERE
-	touch FAIT
+FAIRE:$(SRCDIR)/FAIT cxxflags WHERE
 
-$(SRCDIR)/$(INSTALL): $(SRCDIR) cxxflags
+
+$(SRCDIR)/FAIT: $(SRCDIR) cxxflags
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
-	cd $(SRCDIR);$(AR) $(ARFLAGS)  $(INSTALL)/lib/libtet.a tetgen.o predicates.o
-	cp $(SRCDIR)/tetgen.h $(SRCDIR)/$(INSTALL)/include 
-WHERE:
+	touch $(SRCDIR)/FAIT
+WHERE:install
 	echo tetgen LD '-L@DIR@/lib -ltet'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
 	echo tetgen  INCLUDE '-I@DIR@/include/'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
+install:$(SRCDIR)/FAIT
+	cd $(SRCDIR);$(AR) $(ARFLAGS)  $(INSTALL)/lib/libtet.a tetgen.o predicates.o
+	cp $(SRCDIR)/tetgen.h $(SRCDIR)/$(INSTALL)/include 
 
 
 

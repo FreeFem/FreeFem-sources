@@ -140,11 +140,9 @@ endif
 
 hips: FAIRE
 
-FAIT:
-	$(MAKE) $(SRCDIR)/$(INSTALL)  
-	touch FAIT
 
-FAIRE: FAIT
+FAIRE:
+	$(MAKE) install
 
 makefile.inc: ../Makefile   ../../config.status makefile-hips.inc Makefile     
 	grep 'abs_top_builddir *=' ../Makefile >> dirflags	
@@ -155,9 +153,11 @@ makefile.inc: ../Makefile   ../../config.status makefile-hips.inc Makefile
 	case `uname` in *CYGWIN*)  cp makefile.inc makefile.incn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <makefile.incn > makefile.inc; rm makefile.incn ;; esac
 	rm makefile-hips-tmp.inc 
 
-$(SRCDIR)/$(INSTALL): $(SRCDIR)
+$(SRCDIR)/FAIT: $(SRCDIR)
 	cp makefile.inc $(SRCDIR)
 	cd $(SRCDIR); $(MAKE)
+	touch $(SRCDIR)/FAIT
+install:
 	-rm $(SRCDIR)/LIB/*.a
 	$(AR) $(ARFLAGS) $(SRCDIR)/LIB/libhips.a $(OBJLIBHIPS)
 	$(RANLIB) $(SRCDIR)/LIB/libhips.a
