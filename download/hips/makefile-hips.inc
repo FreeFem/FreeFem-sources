@@ -64,8 +64,8 @@ FOPTFLAGS  = -O3 #-fno-inline      #
 ###  Library
 ###
 
-IBLAS      =  $(FFBLASINCLUDE)   # BLAS include path
-LBLAS      =  $(FFBLASLIB)  @LIBSPTHREAD@ # BLAS linker flags
+IBLAS      =  @BLASINC@   # BLAS include path
+LBLAS      =  @BLASLIBS@   @LIBSPTHREAD@ # BLAS linker flags
 
 IMPI       =  $(FFMPIINCLUDE)      # Additional MPI include path
 LMPI       =  $(FFMPILIB)  -lsupc++ @FLIBS@  # Additional MPI linker flags

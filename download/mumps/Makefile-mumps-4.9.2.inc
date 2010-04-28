@@ -52,7 +52,7 @@ ISCOTCH    = -I$(SCOTCHDIR)/include/scotch
 # line (remember to add -Dptscotch in the ORDERINGSF variable below)
 
 #LSCOTCH    = -L$(SCOTCHDIR)/lib/scotch/ -lesmumps -lscotch -lscotcherr
-LSCOTCH    = -L$(SCOTCHDIR)/lib/scotch/ -lptesmumps -lptscotch -lptscotcherr
+LSCOTCH    = -L$(SCOTCHDIR)/lib -lptesmumps -lptscotch -lptscotcherr
 
 
 LPORDDIR = $(topdir)/PORD/lib/
@@ -69,7 +69,7 @@ LMETISDIR = $(DOWNLOADFF)
 # line (remember to add -Dparmetis in the ORDERINGSF variable below)
 
 #LMETIS    = -L$(LMETISDIR) -lmetis
-LMETIS    = -L$(LMETISDIR)/lib/parmetis -lparmetis -lmetis
+LMETIS    = -L$(LMETISDIR)/lib -lparmetis -lmetis
 
 # The following variables will be used in the compilation process.
 # Please note that -Dptscotch and -Dparmetis imply -Dscotch and -Dmetis respectively.
@@ -86,7 +86,7 @@ IORDERINGSC = $(IMETIS) $(IPORD) $(ISCOTCH)
 # DEFINE HERE SOME COMMON COMMANDS, THE COMPILER NAMES, ETC...
 
 # PLAT : use it to add a default suffix to the generated libraries
-PLAT    = # FREEFEM
+PLAT    =  FREEFEM
 # RM : remove files
 RM      = /bin/rm -f
 # CC : C compiler
@@ -120,7 +120,7 @@ LIBSEQ  = -L$(topdir)/libseq -lmpiseq
 
 # DEFINE HERE YOUR BLAS LIBRARY
 
-LIBBLAS =  $(FFBLASLIB)
+LIBBLAS =  @BLASLIBS@
 
 # DEFINE YOUR PTHREAD LIBRARY
 LIBOTHERS = @LIBSPTHREAD@ @FLIBS@ $(FFLIBOTHERSMUMPS) 

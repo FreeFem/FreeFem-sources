@@ -382,7 +382,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
+install-exec-am: install-exec-local
 
 install-html: install-html-am
 
@@ -428,18 +428,17 @@ uninstall-am:
 	clean-local distclean distclean-generic distdir dvi dvi-am \
 	html html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am uninstall uninstall-am
+	install-exec-am install-exec-local install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am
 
 
 all-local: $(DOWNLOAD_FLTK)
 
 fltk: $(SRCDIR)/F
-# Using system JPEG and PNG lib is a problem under Cygwin                                                                                                                                                                                  
 
 # Using system JPEG and PNG lib is a problem under Cygwin
 $(SRCDIR)/FFF: $(SRCDIR)
@@ -457,7 +456,6 @@ $(SRCDIR)/FFF: $(SRCDIR)
 	 fi
 	touch $(SRCDIR)/FFF
 
-
 $(SRCDIR)/FF: $(SRCDIR)/FFF
 	cd $(SRCDIR) && make
 	touch FF
@@ -466,7 +464,6 @@ install-exec-local::
 
 $(SRCDIR)/F: $(SRCDIR)/FF
 	cd $(SRCDIR) && make install
-
 
 $(SRCDIR): $(PACKAGE)
 	tar xvjf $(PACKAGE)
