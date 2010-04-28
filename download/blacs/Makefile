@@ -23,16 +23,23 @@ SYSERRORS =
 blacs: FAIRE
 
 
-FAIRE: $(SRCDIR)/FAIT install
+FAIRE: $(SRCDIR)/FAIT WHERE
 
 Bmake.inc: ../../config.status	Makefile Bmake-blacs.inc
-	../../config.status  --file="Bmake.inc:Bmake-blacs.inc"
-
+	../../config.status  --file="Bmake.inc1:Bmake-blacs.inc"
+	sed s/-DAdd__/-Df77IsF2C/ <Bmake.inc1 >Bmake.inc
+	rm Bmake.inc1
 
 $(SRCDIR)/FAIT: $(SRCDIR)
 	#cd $(SRCDIR)/INSTALL/;$(MAKE) xintface xsyserrors xcmpi_sane xfmpi_sane xtc_CsameF77 xtc_UseMpich
 	cd $(SRCDIR);$(MAKE) mpi 
 	touch $(SRCDIR)/FAIT
+
+WHERE: 
+	-if [ -f $(SRCDIR)/FAIT ] ; then \
+	make install;  \
+	echo metis LD '-L@DIR@/lib/blacs -lblacsCinit_MPI-FREEFEM-0	-lblacsF77init_MPI-FREEFEM-0	-lblacs_MPI-FREEFEM-0'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.blacs ;\
+	fi
 
 install: $(SRCDIR)/FAIT
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/blacs

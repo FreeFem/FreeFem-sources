@@ -29,14 +29,14 @@ install: $(SRCDIR)/FAIT
 WHERE: 
 	if [ -f $(SRCDIR)/FAIT  ] ;then \
 	$(MAKE) install ; \
-	echo "mumps LD '-L@DIR@//lib  -lpord -lmumps_common -ldmumps -lzmumps -lpord'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
+	echo "mumps LD '-L@DIR@//lib  -lpord -lmumps_commonFREEFEM -ldmumpsFREEFEM -lzmumpsFREEFEM -lpordFREEFEM'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
 	echo "mumps INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
 	fi
 
 
-FAIRE:  WHERE
+FAIRE:  install WHERE 
 
-Makefile.inc: ../../config.status	Makefile
+Makefile.inc: ../../config.status	Makefile Makefile-mumps-$(VERSION).inc
 	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"
 
 $(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-tar

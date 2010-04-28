@@ -188,18 +188,12 @@ case $ac_cv_f77_mangling in
 #  "lower case, no underscore, no extra underscore")
 #  "lower case, no underscore, extra underscore")
 # ;;
-  "lower case, underscore, no extra underscore")
-	ff_cfagsf77="-DAdd_";;
-  "lower case, underscore, extra underscore")
-	ff_cfagsf77="-DAdd__";;
-  "upper case, no underscore, no extra underscore")
-   ff_cfagsf77="-DUPPER";;
-  "upper case, no underscore, extra underscore")
-   ff_cfagsf77="-DUPPER";;
-    "upper case, underscore, no extra underscore")
-        ff_cfagsf77="-DUPPER -DAdd_";;
-  "upper case, underscore, extra underscore")
-        ff_cfagsf77="-DUPPER -DAdd__";;
+  "lower case, underscore, no extra underscore") 	ff_cfagsf77="-DAdd_";;
+  "lower case, underscore, extra underscore")       	ff_cfagsf77="-DAdd__ -Df77IsF2C";;
+  "upper case, no underscore, no extra underscore")     ff_cfagsf77="-DUPPER";;
+  "upper case, no underscore, extra underscore")        ff_cfagsf77="-DUPPER -DAdd__";;
+  "upper case, underscore, no extra underscore")      ff_cfagsf77="-DUPPER -DAdd_";;
+  "upper case, underscore, extra underscore")           ff_cfagsf77="-DUPPER -DAdd__";;
   *) ;;
 esac
 AC_SUBST(CFLAGSF77,$ff_cfagsf77)
