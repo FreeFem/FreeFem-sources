@@ -28,19 +28,29 @@ mmg3d:
 	fi
 
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
-	cp makefile-mmg3d.inc $(SRCDIR)/makefile
 	$(MAKE) -C $(SRCDIR) lib
+	touch $(SRCDIR)/FAIT
+install: $(SRCDIR)/FAIT
 	-mkdir $(SRCDIR)/$(INSTALL)/include
 	cp $(SRCDIR)/sources/libmmg3d.h  $(SRCDIR)/$(INSTALL)/include/libmmg3d.h
 	-mkdir $(SRCDIR)/$(INSTALL)/lib
 	cp $(SRCDIR)/objects/libmmg3d.a  $(LIBMMG3D)
-	touch FAIT
 
-FAIRE: $(SRCDIR)/FAIT
+WHERE: 
+	-if [ -f $(SRCDIR)/FAIT ] ; then \
+	make install;  \
+	echo mmg3d  LD '-L@DIR@/lib -lmmg3d'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mmg3d ;\
+	echo mmg3d INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mmg3d ;\
+	fi
+
+
+FAIRE: $(SRCDIR)/FAIT install
 
 $(SRCDIR)/tag-tar: $(PACKAGE)
 	tar xvzf $(PACKAGE)
 	touch $(SRCDIR)/tag-tar
+	cp makefile-mmg3d.inc $(SRCDIR)/makefile
+
 
 $(PACKAGE): 
 	-mkdir $(DIRPKG);

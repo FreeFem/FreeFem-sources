@@ -148,6 +148,7 @@ MPICXX = @MPICXX@
 MPIF77 = @MPIF77@
 MPIFC = @MPIFC@
 MPIPROG = @MPIPROG@
+MPIRUN = @MPIRUN@
 MPI_INCLUDE = @MPI_INCLUDE@
 MPI_INC_DIR = @MPI_INC_DIR@
 MPI_LIB = @MPI_LIB@
@@ -255,6 +256,7 @@ EXTRA_DIST = *.edp *.idp  regtests.sh
 all: all-am
 
 .SUFFIXES:
+.SUFFIXES: .$(DYLIB_SUFFIX) .cpp
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -523,6 +525,9 @@ uninstall-am:
 	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am uninstall \
 	uninstall-am
 
+
+.cpp.$(DYLIB_SUFFIX): ff-c++
+	 ../examples++-load//ff-c++ -auto  $< 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -671,6 +671,7 @@ MPICC
 MPI_LIB
 MPI_LIB_DIRS
 MPI_INCLUDE
+MPIRUN
 MPIPROG
 ff_mpirun
 MPICXX
@@ -4852,10 +4853,10 @@ if test "${enable_fortran+set}" = set; then :
   enableval=$enable_fortran;
 fi
 
-     ff_g2c_lib="";
+ff_g2c_lib="";
 if test "$enable_fortran" != no
 then
-	ac_ext=f
+    ac_ext=f
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
@@ -5066,7 +5067,7 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-	ac_ext=${ac_fc_srcext-f}
+    ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
@@ -5275,7 +5276,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 #	if test -n "$F77"
 #	then
-        ff_flibs=""
+    ff_flibs=""
         # modif FH
 
 ac_ext=f
@@ -5585,70 +5586,70 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-	# correct pb of double def under macos
-	case $F77 in
+    	# correct pb of double def under macos
+    case $F77 in
 	 *fort77)
-	   if test -z "$FLIBS" ; then
+	    if test -z "$FLIBS" ; then
 #             FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print $(NF-2),$(NF-1)}'`
 #  FH to remove " "
-	     FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print "echo",$(NF-2),$(NF-1)}'|sh`
+		FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print "echo",$(NF-2),$(NF-1)}'|sh`
 
-             { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:   fort77   FLIBS :  $FLIBS " >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:   fort77   FLIBS :  $FLIBS " >&5
 $as_echo "$as_me: WARNING:   fort77   FLIBS :  $FLIBS " >&2;}
-	   fi
-	   ;;
-	 *g77)
-	 for i in $FLIBS; do
-          case $i in
+	    fi
+	    ;;
+	*g77)
+	    for i in $FLIBS; do
+		case $i in
 # save last directory of the list
-	   -L*)
-	   d=`expr $i : '-L\(.*\)'`;
-	   echo " try $d "
-	   if test -e "$d/libg2c.so" ; then
-	     ff_flibs="$d/libg2c.so"
-	   elif test -e "$d/libg2c.dylib" ; then
-	     ff_flibs="$d/libg2c.dylib"
-	   elif test -e "$d/libg2c.a" ; then
-	     ff_flibs="$d/libg2c.a"
-	   elif test  -e $d/libg2c.so -o	-e $d/libg2c.a ; then
-	      ff_flibs="$i"
-	   fi;;
-          esac
-	 done
-	 if test -e "$ff_flibs"  ;then
-          FLIBS="$ff_flibs"
-	 else
-	  FLIBS="$ff_flibs -lg2c"
-	 fi
-	 { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:   get dir of -lg2c  FLIBS :  $FLIBS " >&5
+		    -L*)
+			d=`expr $i : '-L\(.*\)'`;
+			echo " try $d "
+			if test -e "$d/libg2c.so" ; then
+			    ff_flibs="$d/libg2c.so"
+			elif test -e "$d/libg2c.dylib" ; then
+			    ff_flibs="$d/libg2c.dylib"
+			elif test -e "$d/libg2c.a" ; then
+			    ff_flibs="$d/libg2c.a"
+			elif test  -e $d/libg2c.so -o	-e $d/libg2c.a ; then
+			    ff_flibs="$i"
+			fi;;
+		esac
+	    done
+	    if test -e "$ff_flibs"  ;then
+		FLIBS="$ff_flibs"
+	    else
+		FLIBS="$ff_flibs -lg2c"
+	    fi
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:   get dir of -lg2c  FLIBS :  $FLIBS " >&5
 $as_echo "$as_me: WARNING:   get dir of -lg2c  FLIBS :  $FLIBS " >&2;}
-	 ;;
+	    ;;
 # add FH sep 2006 / modif  2009
-         *gfortran)
-         for i in $FLIBS; do
-          case $i in
-           -L*)
-	   d=`expr $i : '-L\(.*\)'`;
-	   if test -e "$d/libgfortran.so" ; then
-	     ff_flibs="$d/libgfortran.so"
-	   elif test -e "$d/libgfortran.dylib" ; then
-	     ff_flibs="$d/libgfortran.dylib"
-	   elif test -e "$d/libgfortran.a" ; then
-	     ff_flibs="$d/libgfortran.a"
-	   elif test -e $d/libgfortran.so -o -e $d/libgfortran.a -o -e $d/libgfortran.dylib ; then
-	      ff_flibs="$i"
-	   fi;;
-          esac
-         done
-	 if test -e "$ff_flibs"  ;then
-          FLIBS="$ff_flibs"
-	 else
-         FLIBS="$ff_flibs -lgfortran"
-	 fi
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:   get dir of -lgfortran  FLIBS :  $FLIBS " >&5
+        *gfortran)
+            for i in $FLIBS; do
+		case $i in
+		    -L*)
+			d=`expr $i : '-L\(.*\)'`;
+			if test -e "$d/libgfortran.so" ; then
+			    ff_flibs="$d/libgfortran.so"
+			elif test -e "$d/libgfortran.dylib" ; then
+			    ff_flibs="$d/libgfortran.dylib"
+			elif test -e "$d/libgfortran.a" ; then
+			    ff_flibs="$d/libgfortran.a"
+			elif test -e $d/libgfortran.so -o -e $d/libgfortran.a -o -e $d/libgfortran.dylib ; then
+			    ff_flibs="$i"
+			fi;;
+		esac
+            done
+	    if test -e "$ff_flibs"  ;then
+		FLIBS="$ff_flibs"
+	    else
+		FLIBS="$ff_flibs -lgfortran"
+	    fi
+            { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:   get dir of -lgfortran  FLIBS :  $FLIBS " >&5
 $as_echo "$as_me: WARNING:   get dir of -lgfortran  FLIBS :  $FLIBS " >&2;}
-         ;;
-	esac
+            ;;
+    esac
 
 # Check whether --with-flib was given.
 if test "${with_flib+set}" = set; then :
@@ -5656,37 +5657,37 @@ if test "${with_flib+set}" = set; then :
 fi
 
 #  correct FH sep 2006 -o -> -a
-	if test "$with_flib" != no -a -n  "$with_flib"
-	then
-	  ff_g2c_lib="$with_flib"
-	  FLIBS="$with_flib"
-	fi
+    if test "$with_flib" != no -a -n  "$with_flib"
+    then
+	ff_g2c_lib="$with_flib"
+	FLIBS="$with_flib"
+    fi
 # add FH oct 2007 for download f2c
-	if test -z "$F77"  ; then
-	  ff_f77=`pwd`/download/bin/fort77
-	  ff_flibs=`pwd`/download/lib/libf2c.a
-	  if test -x $ff_f77  -a -f $ff_flibs ; then
+    if test -z "$F77"  ; then
+	ff_f77=`pwd`/download/bin/fort77
+	ff_flibs=`pwd`/download/lib/libf2c.a
+	if test -x $ff_f77  -a -f $ff_flibs ; then
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:  no fortran, but find download f2c/fort" >&5
 $as_echo "$as_me: WARNING:  no fortran, but find download f2c/fort" >&2;};
 	    F77=$ff_f77
 	    FLIBS=$ff_flibs
-	   else
-	     { $as_echo "$as_me:${as_lineno-$LINENO}:  fatal error : no fortran  " >&5
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:  fatal error : no fortran  " >&5
 $as_echo "$as_me:  fatal error : no fortran  " >&6;};
-	     { $as_echo "$as_me:${as_lineno-$LINENO}: add ---without-fortran   " >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: add ---without-fortran   " >&5
 $as_echo "$as_me: add ---without-fortran   " >&6;};
-	     { $as_echo "$as_me:${as_lineno-$LINENO}: or try to compile f2c in directory download/f2c   " >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: or try to compile f2c in directory download/f2c   " >&5
 $as_echo "$as_me: or try to compile f2c in directory download/f2c   " >&6;};
-	     { $as_echo "$as_me:${as_lineno-$LINENO}:   just do:  make install  " >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:   just do:  make install  " >&5
 $as_echo "$as_me:   just do:  make install  " >&6;};
 	    { as_fn_set_status 1
 as_fn_error " Fatal error No Fortran compiler . " "$LINENO" 5; };
-	  fi
 	fi
+    fi
 #  check if the FLIBS is correct
-  ff_libs="$LIBS"
-  LIBS="$ff_libs $FLIBS"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+    ff_libs="$LIBS"
+    LIBS="$ff_libs $FLIBS"
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -5711,39 +5712,39 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext;
-  if test "$ff_err" = "ok" ; then  { as_fn_set_status 1
+    if test "$ff_err" = "ok" ; then  { as_fn_set_status 1
 as_fn_error " Fatal FLIBS: $FLIBS is incorrect. " "$LINENO" 5; }; fi
-  LIBS="$ff_libs"
-  echo "F77 LD $ff_libs" >config_LIB_INFO
+    LIBS="$ff_libs"
+    echo "F77 LD $ff_libs" >config_LIB_INFO
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking  Size of fortran 77 integer " >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking  Size of fortran 77 integer " >&5
 $as_echo_n "checking  Size of fortran 77 integer ... " >&6; }
 
 
 
 ##   AC_LANG(fortran);
-ac_ext=f
+    ac_ext=f
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
 
- if test "$cross_compiling" = yes; then :
+    if test "$cross_compiling" = yes; then :
   ff_f77intsize=4
 else
   cat > conftest.$ac_ext <<_ACEOF
 
-      program test
-      integer  p,i
-      p=1024*1024
-      i= p*p
-      open(7,file="conftest.out")
-      if (i>0) then
-         write(7,*) 8
-      else
+		program test
+		integer  p,i
+		p=1024*1024
+		i= p*p
+		open(7,file="conftest.out")
+		if (i>0) then
+		    write(7,*) 8
+		else
          write(7,*) 4
-      endif
-      close(7)
-      end
+	 endif
+	 close(7)
+	 end
 
 _ACEOF
 if ac_fn_f77_try_run "$LINENO"; then :
@@ -5756,15 +5757,15 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
 fi
 
 ## AC_LANG(C++)
- ac_ext=c
+    ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_f77intsize" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_f77intsize" >&5
 $as_echo "$ff_f77intsize" >&6; }
- ac_ext=f
+    ac_ext=f
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
@@ -6102,29 +6103,30 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-ff_cfagsf77=""
-case $ac_cv_f77_mangling in
+    ff_cfagsf77=""
+    case $ac_cv_f77_mangling in
 #  "lower case, no underscore, no extra underscore")
 #  "lower case, no underscore, extra underscore")
 # ;;
-  "lower case, underscore, no extra underscore") 	ff_cfagsf77="-DAdd_";;
-  "lower case, underscore, extra underscore")       	ff_cfagsf77="-DAdd__ -Df77IsF2C";;
-  "upper case, no underscore, no extra underscore")     ff_cfagsf77="-DUPPER";;
-  "upper case, no underscore, extra underscore")        ff_cfagsf77="-DUPPER -DAdd__";;
-  "upper case, underscore, no extra underscore")      ff_cfagsf77="-DUPPER -DAdd_";;
-  "upper case, underscore, extra underscore")           ff_cfagsf77="-DUPPER -DAdd__";;
-  *) ;;
-esac
-CFLAGSF77=$ff_cfagsf77
+	"lower case, underscore, no extra underscore") 	ff_cfagsf77="-DAdd_";;
+	"lower case, underscore, extra underscore")       	ff_cfagsf77="-DAdd__ -Df77IsF2C";;
+	"upper case, no underscore, no extra underscore")     ff_cfagsf77="-DUPPER";;
+	"upper case, no underscore, extra underscore")        ff_cfagsf77="-DUPPER -DAdd__";;
+	"upper case, underscore, no extra underscore")      ff_cfagsf77="-DUPPER -DAdd_";;
+	"upper case, underscore, extra underscore")           ff_cfagsf77="-DUPPER -DAdd__";;
+	*) ;;
+    esac
+    CFLAGSF77=$ff_cfagsf77
 
- if test $ff_f77intsize -eq  8
- then
-     { as_fn_set_status 1
+    if test $ff_f77intsize -eq  8
+    then
+	{ as_fn_set_status 1
 as_fn_error " Fatal Error: Your fortran 77  compiler have by 8 bytes integer " "$LINENO" 5; };
- fi
+    fi
 # AC_DEFINE_UNQUOTED(FF_F77_INTEGER_SIZE,$ff_f77intsize,[ size of F77 integer ])
 fi
-
+#  fin test FORTRAN ..........
+# -----------------------------
 # Check whether --enable-c was given.
 if test "${enable_c+set}" = set; then :
   enableval=$enable_c;
@@ -6132,7 +6134,7 @@ fi
 
 if test "$enable_c" != no
 then
-	ac_ext=c
+    ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -6845,8 +6847,8 @@ else
 	# the message "configure: error: conditional "am__fastdepCC"
 	# was never defined".
 
-	am__fastdepCC_TRUE=
-	am__fastdepCC_FALSE='#'
+    am__fastdepCC_TRUE=
+    am__fastdepCC_FALSE='#'
 fi
 
 for ac_prog in flex lex
@@ -11140,6 +11142,13 @@ fi
 
 if test "$with_mpi" != no
 then
+	ff_mpi_path=`dirname "$ff_mpicxx"`;
+#	echo "ff_mpi_path $ff_mpi_path .............."
+	case "$ff_mpi_path" in
+	    .) ff_mpi_path="";ff_mpipath=$PATH;;
+	    *) ff_mpi_path="$ff_mpi_path";ff_mpipath="$ff_mpi_path:$PATH";;
+	esac
+#	echo "ff_mpi_path $ff_mpi_path ..............."
 
 	for ac_prog in mpic++ mpiCC mpicxx mpCC hcp mpxlC mpxlC_r cmpic++
 do
@@ -11147,20 +11156,22 @@ do
 set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_MPICXX+set}" = set; then :
+if test "${ac_cv_path_MPICXX+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$MPICXX"; then
-  ac_cv_prog_MPICXX="$MPICXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
+  case $MPICXX in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_MPICXX="$MPICXX" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in path=$ff_mpipath
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_MPICXX="$ac_prog"
+    ac_cv_path_MPICXX="$as_dir/$ac_word$ac_exec_ext"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -11168,9 +11179,10 @@ done
   done
 IFS=$as_save_IFS
 
+  ;;
+esac
 fi
-fi
-MPICXX=$ac_cv_prog_MPICXX
+MPICXX=$ac_cv_path_MPICXX
 if test -n "$MPICXX"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPICXX" >&5
 $as_echo "$MPICXX" >&6; }
@@ -11182,7 +11194,7 @@ fi
 
   test -n "$MPICXX" && break
 done
-test -n "$MPICXX" || MPICXX="$CXX"
+test -n "$MPICXX" || MPICXX="no"
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ff_mpicxx" >&5
 $as_echo_n "checking for $ff_mpicxx... " >&6; }
@@ -11211,7 +11223,6 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_mpi" >&5
 $as_echo "$ff_mpi" >&6; }
 
@@ -11220,24 +11231,28 @@ $as_echo "$ff_mpi" >&6; }
 
 	if test "$ff_mpi" = yes;
 	then
-		# Extract the first word of "mpirun", so it can be a program name with args.
-set dummy mpirun; ac_word=$2
+		for ac_prog in mpirun mpiexec
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_ff_mpirun+set}" = set; then :
+if test "${ac_cv_path_ff_mpirun+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$ff_mpirun"; then
-  ac_cv_prog_ff_mpirun="$ff_mpirun" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
+  case $ff_mpirun in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ff_mpirun="$ff_mpirun" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in path=$ff_mpipath
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_ff_mpirun="yes"
+    ac_cv_path_ff_mpirun="$as_dir/$ac_word$ac_exec_ext"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -11245,10 +11260,10 @@ done
   done
 IFS=$as_save_IFS
 
-  test -z "$ac_cv_prog_ff_mpirun" && ac_cv_prog_ff_mpirun="no"
+  ;;
+esac
 fi
-fi
-ff_mpirun=$ac_cv_prog_ff_mpirun
+ff_mpirun=$ac_cv_path_ff_mpirun
 if test -n "$ff_mpirun"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_mpirun" >&5
 $as_echo "$ff_mpirun" >&6; }
@@ -11257,6 +11272,10 @@ else
 $as_echo "no" >&6; }
 fi
 
+
+  test -n "$ff_mpirun" && break
+done
+test -n "$ff_mpirun" || ff_mpirun="no"
 
 		if test "$ff_mpirun" = no
 		then
@@ -11273,6 +11292,8 @@ fi
  		# parallel program is compiled (see src/mpi/Makfile.am)
 		ff_mpiprog="FreeFem++-mpi${EXEEXT}"
    		  MPIPROG=$ff_mpiprog
+
+   		  MPIRUN=$ff_mpirun
 
                   MPICXX=$ff_mpicxx
 
@@ -11307,20 +11328,22 @@ do
 set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_MPICC+set}" = set; then :
+if test "${ac_cv_path_MPICC+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$MPICC"; then
-  ac_cv_prog_MPICC="$MPICC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
+  case $MPICC in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_MPICC="$MPICC" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in path=$ff_mpipath
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_MPICC="$ac_prog"
+    ac_cv_path_MPICC="$as_dir/$ac_word$ac_exec_ext"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -11328,9 +11351,10 @@ done
   done
 IFS=$as_save_IFS
 
+  ;;
+esac
 fi
-fi
-MPICC=$ac_cv_prog_MPICC
+MPICC=$ac_cv_path_MPICC
 if test -n "$MPICC"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPICC" >&5
 $as_echo "$MPICC" >&6; }
@@ -11342,7 +11366,7 @@ fi
 
   test -n "$MPICC" && break
 done
-test -n "$MPICC" || MPICC="$CC"
+test -n "$MPICC" || MPICC=""""
 
 
 
@@ -11356,20 +11380,22 @@ do
 set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_MPIF77+set}" = set; then :
+if test "${ac_cv_path_MPIF77+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$MPIF77"; then
-  ac_cv_prog_MPIF77="$MPIF77" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
+  case $MPIF77 in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_MPIF77="$MPIF77" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in path=$ff_mpipath
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_MPIF77="$ac_prog"
+    ac_cv_path_MPIF77="$as_dir/$ac_word$ac_exec_ext"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -11377,9 +11403,10 @@ done
   done
 IFS=$as_save_IFS
 
+  ;;
+esac
 fi
-fi
-MPIF77=$ac_cv_prog_MPIF77
+MPIF77=$ac_cv_path_MPIF77
 if test -n "$MPIF77"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPIF77" >&5
 $as_echo "$MPIF77" >&6; }
@@ -11391,7 +11418,7 @@ fi
 
   test -n "$MPIF77" && break
 done
-test -n "$MPIF77" || MPIF77="$F77"
+test -n "$MPIF77" || MPIF77=""""
 
 
 
@@ -11402,20 +11429,22 @@ do
 set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_MPIFC+set}" = set; then :
+if test "${ac_cv_path_MPIFC+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$MPIFC"; then
-  ac_cv_prog_MPIFC="$MPIFC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
+  case $MPIFC in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_MPIFC="$MPIFC" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in path=$ff_mpipath
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_MPIFC="$ac_prog"
+    ac_cv_path_MPIFC="$as_dir/$ac_word$ac_exec_ext"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -11423,9 +11452,10 @@ done
   done
 IFS=$as_save_IFS
 
+  ;;
+esac
 fi
-fi
-MPIFC=$ac_cv_prog_MPIFC
+MPIFC=$ac_cv_path_MPIFC
 if test -n "$MPIFC"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPIFC" >&5
 $as_echo "$MPIFC" >&6; }
@@ -11437,13 +11467,16 @@ fi
 
   test -n "$MPIFC" && break
 done
-test -n "$MPIFC" || MPIFC="$FC"
+test -n "$MPIFC" || MPIFC=""""
 
 
 	    fi
 	    if  ! -f "$ff_MPI_INCLUDE_DIR/fmpi.h"  ; then
 	        { $as_echo "$as_me:${as_lineno-$LINENO}:  MPI without fortran no file \"$ff_MPI_INCLUDE_DIR/fmpi.h\"  " >&5
 $as_echo "$as_me:  MPI without fortran no file \"$ff_MPI_INCLUDE_DIR/fmpi.h\"  " >&6;}
+	    else
+		echo mpifc LD `$MPIFC -showme:link`  >$ff_where_lib_conf
+		echo mpifc INCLUDE `$MPIFC -showme:compile`  >$ff_where_lib_conf
   	    fi
 	    MPI_INC_DIR=$ff_MPI_INCLUDE_DIR
 
@@ -12012,6 +12045,7 @@ then
 fi
 #echo "LIBS = " $LIBS
 # If all else fails, download!
+
 if test "$ff_blas_ok" = no -a "$enable_download" = yes \
    -a "$enable_fortran" != no -a "$enable_c" != no
 then
@@ -12115,6 +12149,7 @@ BLASLIBS=$ff_blas_libs
 BLASINC=$ff_blas_inc
 
 #looking for cblas.h  FH
+
 if test "$ff_blas_ok" = yes -a "$ff_cblas_libs" = yes ;
 then
   for ac_header in cblas.h
