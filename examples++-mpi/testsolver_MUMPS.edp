@@ -1,4 +1,4 @@
-load "./MUMPS_FreeFem.dylib"  // load the library dynamic correspond to MUMPS interface
+load "MUMPS_FreeFem"  // load the library dynamic correspond to MUMPS interface
 verbosity = 0;
 int[int] ICNTL(40); // declaration of ICNTL parameter for MUMPS
 

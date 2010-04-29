@@ -37,7 +37,8 @@ EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  fig.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp \
  DxWriter.cpp  metis.cpp pcm.cpp pcm.hpp pcm2rnm.cpp \
  UMFPACK64.cpp iovtk.cpp gmsh.cpp MetricKuate.cpp  \
- ffnewuoa.cpp	ffnewuoa.edp	newuoa.f Element_P1dc1.cpp ilut.cpp ilut.edp
+ ffnewuoa.cpp	ffnewuoa.edp	newuoa.f Element_P1dc1.cpp ilut.cpp ilut.edp \
+ freeyams.cpp mmg3d.cpp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -55,7 +56,8 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) \
 	metis.$(DYLIB_SUFFIX) UMFPACK64.$(DYLIB_SUFFIX) NewSolver.$(DYLIB_SUFFIX) \
-	lapack.$(DYLIB_SUFFIX)  fflapack.$(DYLIB_SUFFIX) ffnewuoa.$(DYLIB_SUFFIX) ilut.$(DYLIB_SUFFIX) 
+	lapack.$(DYLIB_SUFFIX)  fflapack.$(DYLIB_SUFFIX) ffnewuoa.$(DYLIB_SUFFIX) ilut.$(DYLIB_SUFFIX) \
+	freeyams.$(DYLIB_SUFFIX) mmg3d.$(DYLIB_SUFFIX)
 
 bin_PROGRAMS=
 

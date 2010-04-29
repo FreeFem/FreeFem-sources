@@ -1,8 +1,11 @@
 #!/bin/sh
 # ff-c++ `./ff-get-dep -ff metis.cpp`
 wherelib=WHERE_LIBRARY
+dircommand=`dirname $0`
 if [   -f "$wherelib-download" ] ; then
     wherelib=WHERE_LIBRARY
+elif [   -f "$dircommand/$wherelib-download" ] ; then
+    wherelib=$dircommand/WHERE_LIBRARY
 elif [ -f '@ff_prefix_dir@/WHERE_LIBRARY-download' ] ; then
     wherelib='@ff_prefix_dir@/WHERE_LIBRARY'
 else

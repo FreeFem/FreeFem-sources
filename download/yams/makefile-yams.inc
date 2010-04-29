@@ -3,7 +3,7 @@ include ../ff-flags
 # working dirs
 EXEDIR = #$()/executable
 
-YAMS2DIR =$(abs_top_builddir)/download/yams/yams2$(yams_VERSION)
+YAMS2DIR =$(abs_top_builddir)/download/yams/freeyams$(yams_VERSION)
 EXEDIR = $(YAMS2DIR)/executable
 SRCDIR = $(YAMS2DIR)/sourceslib
 OBJDIR = $(YAMS2DIR)/objects
@@ -18,7 +18,7 @@ src    = $(wildcard $(SRCDIR)/*.c)
 header = $(wildcard $(SRCDIR)/*.h)
 objs   = $(patsubst $(SRCDIR)%,$(OBJDIR)%,$(src:.c=.o))
 prog   = yams2
-lib    = $(OBJDIR)/libyams2.a
+lib    = $(OBJDIR)/libyams.a
 
 #.SILENT:
 

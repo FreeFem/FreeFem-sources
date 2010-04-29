@@ -10,48 +10,53 @@ include ff-flags
 # -------------------------------
 # 
 DIRPKG= ../pkg
-SRCDIR= ./yams2$(yams_VERSION)
+SRCDIR= ./freeyams$(yams_VERSION)
 #-$(yams_VERSION)
-PACKAGE=$(DIRPKG)/yams2$(yams_VERSION).tgz
+PACKAGE=$(DIRPKG)/freeyams$(yams_VERSION).tgz
 SERVER=http://www.ann.jussieu.fr/~frey/ftp/archives/
 INSTALL=../..
 yams_VERSION=.2010.02.22
-WGET =
 
 # ---------------------- 
 #     yamslib
 
-YAMS_DIR = $(abs_top_builddir)/download/yams/yams2$(yams_VERSION)
+YAMS_DIR = $(abs_top_builddir)/download/yams/$(SRCDIR)
 YAMS_SRCDIRNOLIB = $(YAMS_DIR)/sources
 YAMS_SRCDIR = $(YAMS_DIR)/sourceslib
 YAMS_OBJDIR = $(YAMS_DIR)/objects
 
-yams: FAIRE
+yams: FAIRE  WHERE
 
 
-$(SRCDIR)/FAIT:
-	$(MAKE) $(SRCDIR)/$(INSTALL)  
-	touch $(SRCDIR)/FAIT
 
-FAIRE: $(SRCDIR)/FAIT
+FAIRE: 
+	$(MAKE)  install
 
-$(SRCDIR)/$(INSTALL): $(SRCDIR)
+$(SRCDIR)/FAIT: $(SRCDIR)
 	cd $(YAMS_DIR); make
-	-mkdir $(SRCDIR)/$(INSTALL)/include/yams/
-	sed  s/defines.h/yams_defines.h/ <$(YAMS_SRCDIR)/yamslib.h  >$(SRCDIR)/$(INSTALL)/include/yamslib.h
-	cp $(YAMS_SRCDIR)/defines.h  $(SRCDIR)/$(INSTALL)/yams_defines.h
+	touch $(SRCDIR)/FAIT
+install: $(SRCDIR)/FAIT
+	sed  s/defines.h/freeyams_defines.h/ <$(YAMS_SRCDIR)/yamslib.h  >$(SRCDIR)/$(INSTALL)/include/freeyamslib.h
+	cp $(YAMS_SRCDIR)/defines.h  $(SRCDIR)/$(INSTALL)/include/freeyams_defines.h
 	-mkdir $(SRCDIR)/$(INSTALL)/lib	
-	cp $(YAMS_OBJDIR)/libyams2.a  $(SRCDIR)/$(INSTALL)/lib/libyams2.a
+	cp $(YAMS_OBJDIR)/libyams.a  $(SRCDIR)/$(INSTALL)/lib/libfreeyams.a
+WHERE: 
+	-if [ -f $(SRCDIR)/FAIT ] ; then \
+	make install;  \
+	echo freeyams  LD '-L@DIR@/lib -lfreeyams'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams ;\
+	echo freeyams INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams ;\
+	fi
+
 
 $(SRCDIR): $(PACKAGE)
-	-mkdir yams2$(yams_VERSION)
-	cd yams2$(yams_VERSION); tar xvzf ../$(PACKAGE)
+	-mkdir -p $(SRCDIR)
+	cd $(SRCDIR); tar xvzf ../$(PACKAGE)
 	-mkdir $(YAMS_SRCDIR)
 	cp $(YAMS_SRCDIRNOLIB)/*.c $(YAMS_SRCDIRNOLIB)/*.h $(YAMS_SRCDIR)
 	cp $(YAMS_SRCDIRNOLIB)/compil.date $(YAMS_SRCDIR)
 	cp yamslib_internal.h yamslib.c yamslib.h $(YAMS_SRCDIR)/
 	cp makefile-yams.inc $(YAMS_DIR)/makefile
-	cd $(YAMS_SRCDIR); patch -p1 < ../../yams2$(yams_VERSION).patch
+	cd $(YAMS_SRCDIR); patch -p1 < ../../freeyams$(yams_VERSION).patch
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
@@ -59,18 +64,19 @@ $(PACKAGE):
 
 clean-local: 
 	cd $(YAMS_DIR); make  clean;
-	-rm $(YAMS_OBJDIR)/libyams2.a
+	-rm $(YAMS_OBJDIR)/libyams.a
 
 clean: clean-local
 	-rm ff-flags
 	-rm -rf $(YAMS_DIR)
 	-rm $(SRCDIR)/$(INSTALL)/lib/libyams.a
-	-rm $(SRCDIR)/$(INSTALL)/include/yams*.h
+	-rm $(SRCDIR)/$(INSTALL)/include/*freeyams*.h
+	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams
 	-rm -rf $(SRCDIR)
 	-rm FAIT
 
 ff-flags: ../Makefile 
-	grep 'abs_top_builddir *=' ../Makefile >> ff-flags
+	grep 'abs_top_builddir *=' ../Makefile > ff-flags
 	grep 'CC *=' ../Makefile >> ff-flags
 	grep 'CFLAGS *=' ../Makefile >> ff-flags
 	grep 'LDFLAGS *=' ../Makefile >> ff-flags
@@ -78,6 +84,7 @@ ff-flags: ../Makefile
 	grep 'ARFLAGS *=' ../Makefile >> ff-flags
 	grep 'RANLIB *=' ../Makefile >> ff-flags
 	grep 'yams_VERSION *=' ./Makefile >> ff-flags
+	grep 'WGET *=' ../Makefile >> ff-flags
 
 
 .PHONY: $(SRCDIR)/$(INSTALL)

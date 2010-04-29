@@ -54,168 +54,169 @@ ff_ARFLAGS="rv"
 ff_RANLIB="ranlib" 
 
 AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPACK need it)])
-     ff_g2c_lib="";	 
+ff_g2c_lib="";	 
 if test "$enable_fortran" != no
 then
-	AC_PROG_F77(g77 f77 gfortran g77 f90 xlf xlf90 fort77)
-	AC_PROG_FC(gfortran  f90  xlf90 )
-
+    AC_PROG_F77(g77 f77 gfortran g77 f90 xlf xlf90 fort77)
+    AC_PROG_FC(gfortran  f90  xlf90 )
+    
 #	if test -n "$F77" 
 #	then
-        ff_flibs=""
+    ff_flibs=""
         # modif FH		
-	AC_F77_LIBRARY_LDFLAGS  
-dnl	AC_F77_WRAPPERS
+    AC_F77_LIBRARY_LDFLAGS  
+    dnl	AC_F77_WRAPPERS
 	# correct pb of double def under macos 
-	case $F77 in
+    case $F77 in
 	 *fort77)
-	   if test -z "$FLIBS" ; then
+	    if test -z "$FLIBS" ; then
 #             FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print $(NF-2),$(NF-1)}'`
 #  FH to remove " "  
-	     FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print "echo",$(NF-2),$(NF-1)}'|sh`
-
-             AC_MSG_WARN([  fort77   FLIBS :  $FLIBS ])	     
-	   fi
-	   ;;
-	 *g77)  
-	 for i in $FLIBS; do
-          case $i in 	  
+		FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print "echo",$(NF-2),$(NF-1)}'|sh`
+		
+		AC_MSG_WARN([  fort77   FLIBS :  $FLIBS ])	     
+	    fi
+	    ;;
+	*g77)  
+	    for i in $FLIBS; do
+		case $i in 	  
 # save last directory of the list 
-	   -L*) 
-	   d=`expr $i : '-L\(.*\)'`; 
-	   echo " try $d "
-	   if test -e "$d/libg2c.so" ; then
-	     ff_flibs="$d/libg2c.so"
-	   elif test -e "$d/libg2c.dylib" ; then
-	     ff_flibs="$d/libg2c.dylib"
-	   elif test -e "$d/libg2c.a" ; then
-	     ff_flibs="$d/libg2c.a"
-	   elif test  -e $d/libg2c.so -o	-e $d/libg2c.a ; then   
-	      ff_flibs="$i" 
-	   fi;;
-          esac
-	 done 
-	 if test -e "$ff_flibs"  ;then
-          FLIBS="$ff_flibs"
-	 else 	 
-	  FLIBS="$ff_flibs -lg2c"
-	 fi
-	 AC_MSG_WARN([  get dir of -lg2c  FLIBS :  $FLIBS ])
-	 ;;
+		    -L*) 
+			d=`expr $i : '-L\(.*\)'`; 
+			echo " try $d "
+			if test -e "$d/libg2c.so" ; then
+			    ff_flibs="$d/libg2c.so"
+			elif test -e "$d/libg2c.dylib" ; then
+			    ff_flibs="$d/libg2c.dylib"
+			elif test -e "$d/libg2c.a" ; then
+			    ff_flibs="$d/libg2c.a"
+			elif test  -e $d/libg2c.so -o	-e $d/libg2c.a ; then   
+			    ff_flibs="$i" 
+			fi;;
+		esac
+	    done 
+	    if test -e "$ff_flibs"  ;then
+		FLIBS="$ff_flibs"
+	    else 	 
+		FLIBS="$ff_flibs -lg2c"
+	    fi
+	    AC_MSG_WARN([  get dir of -lg2c  FLIBS :  $FLIBS ])
+	    ;;
 # add FH sep 2006 / modif  2009  
-         *gfortran)
-         for i in $FLIBS; do
-          case $i in
-           -L*)  
-	   d=`expr $i : '-L\(.*\)'`;
-	   if test -e "$d/libgfortran.so" ; then
-	     ff_flibs="$d/libgfortran.so"
-	   elif test -e "$d/libgfortran.dylib" ; then
-	     ff_flibs="$d/libgfortran.dylib"
-	   elif test -e "$d/libgfortran.a" ; then
-	     ff_flibs="$d/libgfortran.a"
-	   elif test -e $d/libgfortran.so -o -e $d/libgfortran.a -o -e $d/libgfortran.dylib ; then   
-	      ff_flibs="$i" 
-	   fi;;
-          esac
-         done
-	 if test -e "$ff_flibs"  ;then
-          FLIBS="$ff_flibs"
-	 else 
-         FLIBS="$ff_flibs -lgfortran"
-	 fi
-         AC_MSG_WARN([  get dir of -lgfortran  FLIBS :  $FLIBS ])
-         ;;
-	esac
-	AC_ARG_WITH(flib,[  --with-flib= the fortran library ])
+        *gfortran)
+            for i in $FLIBS; do
+		case $i in
+		    -L*)  
+			d=`expr $i : '-L\(.*\)'`;
+			if test -e "$d/libgfortran.so" ; then
+			    ff_flibs="$d/libgfortran.so"
+			elif test -e "$d/libgfortran.dylib" ; then
+			    ff_flibs="$d/libgfortran.dylib"
+			elif test -e "$d/libgfortran.a" ; then
+			    ff_flibs="$d/libgfortran.a"
+			elif test -e $d/libgfortran.so -o -e $d/libgfortran.a -o -e $d/libgfortran.dylib ; then   
+			    ff_flibs="$i" 
+			fi;;
+		esac
+            done
+	    if test -e "$ff_flibs"  ;then
+		FLIBS="$ff_flibs"
+	    else 
+		FLIBS="$ff_flibs -lgfortran"
+	    fi
+            AC_MSG_WARN([  get dir of -lgfortran  FLIBS :  $FLIBS ])
+            ;;
+    esac
+    AC_ARG_WITH(flib,[  --with-flib= the fortran library ])
 #  correct FH sep 2006 -o -> -a 
-	if test "$with_flib" != no -a -n  "$with_flib"
-	then 
-	  ff_g2c_lib="$with_flib"
-	  FLIBS="$with_flib"
-	fi
+    if test "$with_flib" != no -a -n  "$with_flib"
+    then 
+	ff_g2c_lib="$with_flib"
+	FLIBS="$with_flib"
+    fi
 # add FH oct 2007 for download f2c
-	if test -z "$F77"  ; then 
-	  ff_f77=`pwd`/download/bin/fort77
-	  ff_flibs=`pwd`/download/lib/libf2c.a
-	  if test -x $ff_f77  -a -f $ff_flibs ; then
+    if test -z "$F77"  ; then 
+	ff_f77=`pwd`/download/bin/fort77
+	ff_flibs=`pwd`/download/lib/libf2c.a
+	if test -x $ff_f77  -a -f $ff_flibs ; then
 	    AC_MSG_WARN([ no fortran, but find download f2c/fort]);
 	    F77=$ff_f77
 	    FLIBS=$ff_flibs
-	   else
-	     AC_MSG_NOTICE( [ fatal error : no fortran ] );
-	     AC_MSG_NOTICE( [add ---without-fortran  ] );
-	     AC_MSG_NOTICE( [or try to compile f2c in directory download/f2c  ] );
-	     AC_MSG_NOTICE( [  just do:  make install ] );
+	else
+	    AC_MSG_NOTICE( [ fatal error : no fortran ] );
+	    AC_MSG_NOTICE( [add ---without-fortran  ] );
+	    AC_MSG_NOTICE( [or try to compile f2c in directory download/f2c  ] );
+	    AC_MSG_NOTICE( [  just do:  make install ] );
 	    AC_MSG_ERROR([ Fatal error No Fortran compiler . ],1);  
-	  fi
 	fi
+    fi
 #  check if the FLIBS is correct
-  ff_libs="$LIBS"
-  LIBS="$ff_libs $FLIBS"
-  AC_TRY_LINK_FUNC(exit,ff_err=,ff_err=ok);
-  if test "$ff_err" = "ok" ; then  AC_MSG_ERROR([ Fatal FLIBS: $FLIBS is incorrect. ],1); fi
-  LIBS="$ff_libs"
-  echo "F77 LD $ff_libs" >config_LIB_INFO
+    ff_libs="$LIBS"
+    LIBS="$ff_libs $FLIBS"
+    AC_TRY_LINK_FUNC(exit,ff_err=,ff_err=ok);
+    if test "$ff_err" = "ok" ; then  AC_MSG_ERROR([ Fatal FLIBS: $FLIBS is incorrect. ],1); fi
+    LIBS="$ff_libs"
+    echo "F77 LD $ff_libs" >config_LIB_INFO
 
-  AC_MSG_CHECKING([ Size of fortran 77 integer ])	
-
-
-
+    AC_MSG_CHECKING([ Size of fortran 77 integer ])	
+    
+    
+    
 ##   AC_LANG(fortran);
-AC_LANG_PUSH([Fortran 77])
- AC_RUN_IFELSE([[
-      program test
-      integer  p,i
-      p=1024*1024
-      i= p*p
-      open(7,file="conftest.out")
-      if (i>0) then
-         write(7,*) 8
-      else
+    AC_LANG_PUSH([Fortran 77])
+    AC_RUN_IFELSE([[
+		program test
+		integer  p,i
+		p=1024*1024
+		i= p*p
+		open(7,file="conftest.out")
+		if (i>0) then
+		    write(7,*) 8
+		else
          write(7,*) 4
-      endif
-      close(7)
-      end
+	 endif
+	 close(7)
+	 end
  ]],ff_f77intsize=`cat conftest.out`,ff_f77intsize=4,ff_f77intsize=4)
 ## AC_LANG(C++)
- AC_LANG_POP([Fortran 77])
- AC_MSG_RESULT($ff_f77intsize)
- AC_F77_WRAPPERS
-
-ff_cfagsf77=""
-case $ac_cv_f77_mangling in
+    AC_LANG_POP([Fortran 77])
+    AC_MSG_RESULT($ff_f77intsize)
+    AC_F77_WRAPPERS
+    
+    ff_cfagsf77=""
+    case $ac_cv_f77_mangling in
 #  "lower case, no underscore, no extra underscore")
 #  "lower case, no underscore, extra underscore")
 # ;;
-  "lower case, underscore, no extra underscore") 	ff_cfagsf77="-DAdd_";;
-  "lower case, underscore, extra underscore")       	ff_cfagsf77="-DAdd__ -Df77IsF2C";;
-  "upper case, no underscore, no extra underscore")     ff_cfagsf77="-DUPPER";;
-  "upper case, no underscore, extra underscore")        ff_cfagsf77="-DUPPER -DAdd__";;
-  "upper case, underscore, no extra underscore")      ff_cfagsf77="-DUPPER -DAdd_";;
-  "upper case, underscore, extra underscore")           ff_cfagsf77="-DUPPER -DAdd__";;
-  *) ;;
-esac
-AC_SUBST(CFLAGSF77,$ff_cfagsf77)
- if test $ff_f77intsize -eq  8
- then
-     AC_MSG_ERROR([ Fatal Error: Your fortran 77  compiler have by 8 bytes integer ],1);  
- fi
+	"lower case, underscore, no extra underscore") 	ff_cfagsf77="-DAdd_";;
+	"lower case, underscore, extra underscore")       	ff_cfagsf77="-DAdd__ -Df77IsF2C";;
+	"upper case, no underscore, no extra underscore")     ff_cfagsf77="-DUPPER";;
+	"upper case, no underscore, extra underscore")        ff_cfagsf77="-DUPPER -DAdd__";;
+	"upper case, underscore, no extra underscore")      ff_cfagsf77="-DUPPER -DAdd_";;
+	"upper case, underscore, extra underscore")           ff_cfagsf77="-DUPPER -DAdd__";;
+	*) ;;
+    esac
+    AC_SUBST(CFLAGSF77,$ff_cfagsf77)
+    if test $ff_f77intsize -eq  8
+    then
+	AC_MSG_ERROR([ Fatal Error: Your fortran 77  compiler have by 8 bytes integer ],1);  
+    fi
 # AC_DEFINE_UNQUOTED(FF_F77_INTEGER_SIZE,$ff_f77intsize,[ size of F77 integer ])
 fi
-
+#  fin test FORTRAN ..........
+# -----------------------------
 AC_ARG_ENABLE(c,[  --disable-c		No C compiler available (C BLAS need it)])
 if test "$enable_c" != no
 then
-	AC_PROG_CC
+    AC_PROG_CC
 else
 
 	# We need to define this otherwise ./configure crashes with
 	# the message "configure: error: conditional "am__fastdepCC"
 	# was never defined".
-
-	am__fastdepCC_TRUE=
-	am__fastdepCC_FALSE='#'
+    
+    am__fastdepCC_TRUE=
+    am__fastdepCC_FALSE='#'
 fi
 
 AM_PROG_LEX
@@ -648,8 +649,15 @@ fi
 
 if test "$with_mpi" != no
 then
+	ff_mpi_path=`dirname "$ff_mpicxx"`;
+#	echo "ff_mpi_path $ff_mpi_path .............."
+	case "$ff_mpi_path" in
+	    .) ff_mpi_path="";ff_mpipath=$PATH;;
+	    *) ff_mpi_path="$ff_mpi_path";ff_mpipath="$ff_mpi_path:$PATH";;
+	esac	
+#	echo "ff_mpi_path $ff_mpi_path ..............."
 	AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
-	AC_CHECK_PROGS(MPICXX, mpic++ mpiCC mpicxx mpCC hcp mpxlC mpxlC_r cmpic++, $CXX)
+	AC_PATH_PROGS(MPICXX, mpic++ mpiCC mpicxx mpCC hcp mpxlC mpxlC_r cmpic++,no,path=$ff_mpipath)
 	AC_MSG_CHECKING(for $ff_mpicxx)
 	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
@@ -669,7 +677,6 @@ int main(int argc,char **argv){
 }],
 ff_mpi=yes,
 ff_mpi=no)
-
 	AC_MSG_RESULT($ff_mpi)
 
 	# Also check that mpirun is there. If it isn't, then MPI is
@@ -677,7 +684,7 @@ ff_mpi=no)
 
 	if test "$ff_mpi" = yes;
 	then
-		AC_CHECK_PROG(ff_mpirun,mpirun,yes,no)
+		AC_PATH_PROGS(ff_mpirun,mpirun mpiexec,no,path=$ff_mpipath)
 		if test "$ff_mpirun" = no
 		then
 			ff_mpi=no
@@ -693,13 +700,14 @@ ff_mpi=no)
  		# parallel program is compiled (see src/mpi/Makfile.am)
 		ff_mpiprog="FreeFem++-mpi${EXEEXT}"
    		  AC_SUBST(MPIPROG,$ff_mpiprog)
+   		  AC_SUBST(MPIRUN,$ff_mpirun)
                   AC_SUBST(MPICXX,$ff_mpicxx)
 	else
 	        AC_SUBST(MPICXX,$ff_save_cxx)
 	fi
 	if test "$ff_mpi" = yes;
 	then
-		
+
 	    ff_MPI_INCLUDE=`$MPICXX -showme:compile`
 	    ff_MPI_LIB_DIRS=""
 	    ff_MPI_LIB=`$MPICXX -showme:link`
@@ -714,22 +722,25 @@ ff_mpi=no)
 
 	    AC_SUBST(MPICXX,$MPICXX)		
 	    AC_ARG_VAR(MPICC,[MPI C compiler command])
-	    AC_CHECK_PROGS(MPICC, mpicc hcc mpcc mpcc_r mpxlc cmpicc, $CC)
+	    AC_PATH_PROGS(MPICC, mpicc hcc mpcc mpcc_r mpxlc cmpicc, "",path=$ff_mpipath)
 	    AC_SUBST(MPICC)
 	    
 	    if test "$enable_fortran" != no
 	    then	
 		
 		AC_ARG_VAR(MPIF77,[MPI Fortran 77 compiler command])
-		AC_CHECK_PROGS(MPIF77, mpif77 hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, $F77)
+		AC_PATH_PROGS(MPIF77, mpif77 hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, "",path=$ff_mpipath)
 		AC_SUBST(MPIF77)
 		
 		AC_ARG_VAR(MPIFC,[MPI Fortran 90  compiler command])
-		AC_CHECK_PROGS(MPIFC, mpif90 mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, $FC)
+		AC_PATH_PROGS(MPIFC, mpif90 mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",path=$ff_mpipath)
 		AC_SUBST(MPIFC)
 	    fi
 	    if [ ! -f "$ff_MPI_INCLUDE_DIR/fmpi.h" ] ; then
 	        AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/fmpi.h"  ])
+	    else
+		echo mpifc LD `$MPIFC -showme:link`  >$ff_where_lib_conf
+		echo mpifc INCLUDE `$MPIFC -showme:compile`  >$ff_where_lib_conf
   	    fi 	    
 	    AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		
 	fi
@@ -957,6 +968,7 @@ then
 fi
 #echo "LIBS = " $LIBS
 # If all else fails, download!
+
 if test "$ff_blas_ok" = no -a "$enable_download" = yes \
    -a "$enable_fortran" != no -a "$enable_c" != no
 then
@@ -1014,7 +1026,8 @@ fi
 AC_MSG_RESULT($ff_blas_inc)
 AC_SUBST(BLASLIBS,$ff_blas_libs)
 AC_SUBST(BLASINC,$ff_blas_inc)
-#looking for cblas.h  FH 
+#looking for cblas.h  FH
+
 if test "$ff_blas_ok" = yes -a "$ff_cblas_libs" = yes ;
 then
   AC_CHECK_HEADERS(cblas.h,
