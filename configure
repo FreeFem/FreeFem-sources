@@ -4824,7 +4824,7 @@ fi
 
 
 if test -z "$CXX"; then
-  as_fn_error "\" Sorry no c++ compiler !\"" "$LINENO" 5
+  as_fn_error " Sorry no c++ compiler !" "$LINENO" 5
   { $as_echo "$as_me:${as_lineno-$LINENO}:  fatal error : c++ compiler !  " >&5
 $as_echo "$as_me:  fatal error : c++ compiler !  " >&6;};
 fi
@@ -7214,6 +7214,10 @@ CYGWIN*|MINGW*)
 		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
 		FFLAGS="$FFLAGS $ff_nocygwin"
 		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
+                if ac_fn_cxx_try_compile "$LINENO"; then :
+
+fi
+rm -f core conftest.err conftest.$ac_objext (int a;,,as_fn_error "Sorry $ff_nocygwin, but try with gcc-3.3" "$LINENO" 5)
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32"
 		LIBSNOCONSOLE="-mwindows"
 		FLIBS="$ff_nocygwin -lg2c"
@@ -11308,7 +11312,7 @@ test -n "$ff_mpirun" || ff_mpirun="no"
 	    ff_MPI_LIB_DIRS=""
 	    ff_MPI_LIB=`$MPICXX -showme:link`
 	    ff_MPI_INCLUDE_DIR=`$MPICXX -showme:incdirs`
-	    if  -z "$ff_MPI_INCLUDE_DIR" -a -f /usr/include/mpi.h  ;then
+	    if test -z "$ff_MPI_INCLUDE_DIR" -a -f /usr/include/mpi.h  ;then
 	      ff_MPI_INCLUDE_DIR=/usr/include/
 	    fi
 
@@ -11471,7 +11475,7 @@ test -n "$MPIFC" || MPIFC=""""
 
 
 	    fi
-	    if  ! -f "$ff_MPI_INCLUDE_DIR/fmpi.h"  ; then
+	    if test ! -f "$ff_MPI_INCLUDE_DIR/fmpi.h"  ; then
 	        { $as_echo "$as_me:${as_lineno-$LINENO}:  MPI without fortran no file \"$ff_MPI_INCLUDE_DIR/fmpi.h\"  " >&5
 $as_echo "$as_me:  MPI without fortran no file \"$ff_MPI_INCLUDE_DIR/fmpi.h\"  " >&6;}
 	    else
@@ -15550,6 +15554,29 @@ if test "$enable_download" = yes  ;then
 $as_echo "$as_me:       use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT " >&6;}
    	{ $as_echo "$as_me:${as_lineno-$LINENO}:       use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE " >&5
 $as_echo "$as_me:       use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE " >&6;}
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}:       use of download freeyams  see download/yams/freeyams.2010.02.22 (suface mesh adaptation)  " >&5
+$as_echo "$as_me:       use of download freeyams  see download/yams/freeyams.2010.02.22 (suface mesh adaptation)  " >&6;}
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}:       use of download superlu, metis" >&5
+$as_echo "$as_me:       use of download superlu, metis" >&6;}
+if test -n "$MPICC" ; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}:       try to download: blacs parmetis  scalapack scotch superludist pastix hypre hips library" >&5
+$as_echo "$as_me:       try to download: blacs parmetis  scalapack scotch superludist pastix hypre hips library" >&6;}
+fi
+if test -f download/pkg/MUMPS_4.9.2.tar.gz  ;then
+   { $as_echo "$as_me:${as_lineno-$LINENO}:       try to compile : MUMPS parallele software " >&5
+$as_echo "$as_me:       try to compile : MUMPS parallele software " >&6;}
+else
+     { $as_echo "$as_me:${as_lineno-$LINENO}:      missing download/pkg/MUMPS_4.9.2.tar.gz, see http://mumps.enseeiht.fr/ to download by hand " >&5
+$as_echo "$as_me:      missing download/pkg/MUMPS_4.9.2.tar.gz, see http://mumps.enseeiht.fr/ to download by hand " >&6;}
+fi
+if test -f download/pkg/mmg3dlib.tar.gz  ;then
+     { $as_echo "$as_me:${as_lineno-$LINENO}:       Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)" >&5
+$as_echo "$as_me:       Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)" >&6;}
+else
+     { $as_echo "$as_me:${as_lineno-$LINENO}:    sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> " >&5
+$as_echo "$as_me:    sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> " >&6;}
+fi
+
 fi
 if test "$ff_download_blas" = "generic"  ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}:       use of download generic blas and cblas freefem may be slow  " >&5
