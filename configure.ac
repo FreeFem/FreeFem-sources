@@ -39,7 +39,7 @@ AC_PROG_CXX
 
 
 if test -z "$CXX"; then
-  AC_MSG_ERROR(" Sorry no c++ compiler !")
+  AC_MSG_ERROR([ Sorry no c++ compiler !])
   AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
 fi
 
@@ -309,6 +309,7 @@ CYGWIN*|MINGW*)
 		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
 		FFLAGS="$FFLAGS $ff_nocygwin"
 		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
+                AC_COMPILE_IFELSE ([int a;],,AC_MSG_ERROR([Sorry $ff_nocygwin, but try with gcc-3.3])) 
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32" 
 		LIBSNOCONSOLE="-mwindows"
 		FLIBS="$ff_nocygwin -lg2c"
@@ -712,7 +713,7 @@ ff_mpi=no)
 	    ff_MPI_LIB_DIRS=""
 	    ff_MPI_LIB=`$MPICXX -showme:link`
 	    ff_MPI_INCLUDE_DIR=`$MPICXX -showme:incdirs`
-	    if [ -z "$ff_MPI_INCLUDE_DIR" -a -f /usr/include/mpi.h ] ;then
+	    if test -z "$ff_MPI_INCLUDE_DIR" -a -f /usr/include/mpi.h  ;then
 	      ff_MPI_INCLUDE_DIR=/usr/include/
 	    fi
 
@@ -736,7 +737,7 @@ ff_mpi=no)
 		AC_PATH_PROGS(MPIFC, mpif90 mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",path=$ff_mpipath)
 		AC_SUBST(MPIFC)
 	    fi
-	    if [ ! -f "$ff_MPI_INCLUDE_DIR/fmpi.h" ] ; then
+	    if test ! -f "$ff_MPI_INCLUDE_DIR/fmpi.h"  ; then
 	        AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/fmpi.h"  ])
 	    else
 		echo mpifc LD `$MPIFC -showme:link`  >$ff_where_lib_conf
@@ -1688,6 +1689,22 @@ fi
 if test "$enable_download" = yes  ;then
         AC_MSG_NOTICE([      use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT ])
    	AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE ])
+   	AC_MSG_NOTICE([      use of download freeyams  see download/yams/freeyams.2010.02.22 (suface mesh adaptation)  ])
+   	AC_MSG_NOTICE([      use of download superlu, metis])
+if test -n "$MPICC" ; then
+   	AC_MSG_NOTICE([      try to download: blacs parmetis  scalapack scotch superludist pastix hypre hips library])
+fi
+if test -f download/pkg/MUMPS_4.9.2.tar.gz  ;then
+   AC_MSG_NOTICE([      try to compile : MUMPS parallele software ])
+else
+     AC_MSG_NOTICE([     missing download/pkg/MUMPS_4.9.2.tar.gz, see http://mumps.enseeiht.fr/ to download by hand ])
+fi
+if test -f download/pkg/mmg3dlib.tar.gz  ;then
+     AC_MSG_NOTICE([      Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)])
+else
+     AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
+fi
+ 
 fi
 if test "$ff_download_blas" = "generic"  ; then
         AC_MSG_NOTICE([      use of download generic blas and cblas freefem may be slow  ])
