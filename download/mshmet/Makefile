@@ -32,15 +32,22 @@ $(SRCDIR)/FAIT:
 	$(MAKE) $(SRCDIR)/$(INSTALL)  
 	touch $(SRCDIR)/FAIT
 
-FAIRE: $(SRCDIR)/FAIT
-
-$(SRCDIR)/$(INSTALL): $(SRCDIR)
+$(SRCDIR)/FAIT:$(SRCDIR)
 	cd $(MSHMET_DIR); make
+	touch $(SRCDIR)/FAIT
+
+install:$(SRCDIR)/FAIT 
 	-mkdir $(SRCDIR)/$(INSTALL)/include/mshmet/
 	cp $(MSHMET_SRCDIR)/mshmetlib.h  $(SRCDIR)/$(INSTALL)/include/mshmet/mshmetlib.h
 	-mkdir $(SRCDIR)/$(INSTALL)/lib/mshmet/
 	cp $(MSHMET_OBJDIR)/libmshmet.a  $(SRCDIR)/$(INSTALL)/lib/mshmet/libmshmet.a
 
+WHERE: 
+	-if [ -f $(SRCDIR)/FAIT ] ; then \
+	make install;  \
+	echo mshmet  LD '-L@DIR@/lib -lmshmet'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
+	echo mshmet INCLUDE '-I@DIR@/include/mshmet'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
+	fi
 
 
 $(SRCDIR): $(PACKAGE)

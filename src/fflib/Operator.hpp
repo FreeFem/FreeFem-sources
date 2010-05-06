@@ -456,7 +456,8 @@ struct set_eq_arraypd_div: public binary_function<A,B,A> {
 
 template<class A>
 struct PrintP: public binary_function<ostream*,A,ostream*> {
-  static ostream* f(ostream* const  & a,const A & b)  {  *a << *b;
+    static ostream* f(ostream* const  & a,const A & b)  {  *a << *b; 
+	// a->flush();// ADD FH MAi 2010 to empty the buffer  baf idea  add flush of ostream 
   //delete b; mars 2006 FH 
    return a;}
 };

@@ -656,7 +656,7 @@ all-local: $(DOWNLOADCOMPILE)
 
 compile-pkg:
 	-if [ -n "$(WGET)" ] ; then \
-	for d in tetgen superlu fftw metis yams mmg3d ; do \
+	for d in tetgen superlu fftw metis yams mshmet mmg3d ; do \
 	 echo "(cd $$d;$(MAKE) ) " ;\
 	  ( cd "$$d";$(MAKE) ) ; \
 	done ;\
