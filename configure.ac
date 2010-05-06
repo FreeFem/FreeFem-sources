@@ -309,7 +309,10 @@ CYGWIN*|MINGW*)
 		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
 		FFLAGS="$FFLAGS $ff_nocygwin"
 		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
-                AC_COMPILE_IFELSE ([int a;],,AC_MSG_ERROR([Sorry $ff_nocygwin, but try with gcc-3.3])) 
+                AC_COMPILE_IFELSE ([int a;],,ff_error_gcc=1)
+                if test "$ff_error_gcc" -eq 1 ; then
+ 		  AC_MSG_ERROR([Sorry $ff_nocygwin, but try with gcc-3.3]	
+		fi
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32" 
 		LIBSNOCONSOLE="-mwindows"
 		FLIBS="$ff_nocygwin -lg2c"
