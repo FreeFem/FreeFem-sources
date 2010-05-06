@@ -422,10 +422,20 @@ ios_base&  default1(ios_base& f)
     return f;
 }
 
+
 template< ostream_manipulateur pf> 
 inline ostream **set_os(ostream **f)
 { 
     **f << pf  ; return f;
+}
+
+inline ostream **set_os_flush(ostream **f)
+{ 
+    (**f).flush()  ; return f;
+}
+inline ostream *set_os_flush(ostream *f)
+{ 
+    (*f).flush()  ; return f;
 }
 template< ostream_manipulateur pf> 
 inline ostream *set_os1(ostream *f)
@@ -1180,6 +1190,7 @@ void Init_map_type()
      Add<ostream**>("showpos",".",new OneOperator1<ostream**,ostream**>(set_os<showpos>));
      Add<ostream**>("noshowpos",".",new OneOperator1<ostream**,ostream**>(set_os<noshowpos>));
      Add<ostream**>("default",".",new OneOperator1<ostream**,ostream**>(set_os<default1>));
+     Add<ostream**>("flush",".",new OneOperator1<ostream**,ostream**>(set_os_flush));// ADD may 2010
      
      Add<ostream*>("scientific",".",new OneOperator1<ostream*,ostream*>(set_os1<scientific>));
      Add<ostream*>("fixed",".",new OneOperator1<ostream*,ostream*>(set_os1<fixed>));
@@ -1188,6 +1199,7 @@ void Init_map_type()
      Add<ostream*>("showpos",".",new OneOperator1<ostream*,ostream*>(set_os1<showpos>));
      Add<ostream*>("noshowpos",".",new OneOperator1<ostream*,ostream*>(set_os1<noshowpos>));
      Add<ostream*>("default",".",new OneOperator1<ostream*,ostream*>(set_os1<default1>));
+     Add<ostream*>("flush",".",new OneOperator1<ostream*,ostream*>(set_os_flush));// ADD may 2010
      
     Global.Add("getline","(",new OneOperator2<istream*,istream*,string **>(Getline));
 // add 2.16
