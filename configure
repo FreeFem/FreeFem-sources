@@ -7217,20 +7217,23 @@ CYGWIN*|MINGW*)
                 if ac_fn_cxx_try_compile "$LINENO"; then :
 
 fi
-rm -f core conftest.err conftest.$ac_objext (int a;,,as_fn_error "Sorry $ff_nocygwin, but try with gcc-3.3" "$LINENO" 5)
-		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32"
-		LIBSNOCONSOLE="-mwindows"
-		FLIBS="$ff_nocygwin -lg2c"
-                ff_glutname="glut32"
+rm -f core conftest.err conftest.$ac_objext (int a;,,ff_error_gcc=1)
+                if test "$ff_error_gcc" -eq 1 ; then
+ 		  as_fn_error "Sorry $ff_nocygwin, but try with gcc-3.3
+		fi
+		LIBS=\"$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32\"
+		LIBSNOCONSOLE=\"-mwindows\"
+		FLIBS=\"$ff_nocygwin -lg2c\"
+                ff_glutname=\"glut32\"
 		#  check abort a existing function just to find in glut32.dll exist in the path
 		#  because glutInit is not the real symbol on win32 dur dur FH !!!!!!!!!
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for abort in -lglut32" >&5
-$as_echo_n "checking for abort in -lglut32... " >&6; }
-if test "${ac_cv_lib_glut32_abort+set}" = set; then :
-  $as_echo_n "(cached) " >&6
+		{ $as_echo \"$as_me:${as_lineno-$LINENO}: checking for abort in -lglut32\" >&5
+$as_echo_n \"checking for abort in -lglut32... \" >&6; }
+if test \"${ac_cv_lib_glut32_abort+set}\" = set; then :
+  $as_echo_n \"(cached) \" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lglut32  $LIBS"
+LIBS=\"-lglut32  $LIBS\"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -7238,13 +7241,13 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
 #ifdef __cplusplus
-extern "C"
+extern \"C\"
 #endif
 char abort ();
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
-     extern "C"
+     extern \"C\"
 #  endif
    int F77_DUMMY_MAIN() { return 1; }
 
@@ -7257,7 +7260,7 @@ return abort ();
   return 0;
 }
 _ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
+if ac_fn_cxx_try_link \"$LINENO\"; then :
   ac_cv_lib_glut32_abort=yes
 else
   ac_cv_lib_glut32_abort=no
@@ -7266,23 +7269,23 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_glut32_abort" >&5
-$as_echo "$ac_cv_lib_glut32_abort" >&6; }
-if test "x$ac_cv_lib_glut32_abort" = x""yes; then :
-  ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32"
+{ $as_echo \"$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_glut32_abort\" >&5
+$as_echo \"$ac_cv_lib_glut32_abort\" >&6; }
+if test \"x$ac_cv_lib_glut32_abort\" = x\"\"yes; then :
+  ff_glut=\"-l$ff_glutname -mthreads -lglu32 -lopengl32\"
 else
-  ff_glut=""
+  ff_glut=\"\"
 fi
 
-		if test -z "$ff_glut" ; then
-                ff_glutname="freeglut"
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for abort in -lfreeglut" >&5
-$as_echo_n "checking for abort in -lfreeglut... " >&6; }
-if test "${ac_cv_lib_freeglut_abort+set}" = set; then :
-  $as_echo_n "(cached) " >&6
+		if test -z \"$ff_glut\" ; then
+                ff_glutname=\"freeglut\"
+		{ $as_echo \"$as_me:${as_lineno-$LINENO}: checking for abort in -lfreeglut\" >&5
+$as_echo_n \"checking for abort in -lfreeglut... \" >&6; }
+if test \"${ac_cv_lib_freeglut_abort+set}\" = set; then :
+  $as_echo_n \"(cached) \" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lfreeglut  $LIBS"
+LIBS=\"-lfreeglut  $LIBS\"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -7290,13 +7293,13 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
 #ifdef __cplusplus
-extern "C"
+extern \"C\"
 #endif
 char abort ();
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
-     extern "C"
+     extern \"C\"
 #  endif
    int F77_DUMMY_MAIN() { return 1; }
 
@@ -7309,7 +7312,7 @@ return abort ();
   return 0;
 }
 _ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
+if ac_fn_cxx_try_link \"$LINENO\"; then :
   ac_cv_lib_freeglut_abort=yes
 else
   ac_cv_lib_freeglut_abort=no
@@ -7318,10 +7321,10 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_freeglut_abort" >&5
-$as_echo "$ac_cv_lib_freeglut_abort" >&6; }
-if test "x$ac_cv_lib_freeglut_abort" = x""yes; then :
-  ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32"
+{ $as_echo \"$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_freeglut_abort\" >&5
+$as_echo \"$ac_cv_lib_freeglut_abort\" >&6; }
+if test \"x$ac_cv_lib_freeglut_abort\" = x\"\"yes; then :
+  ff_glut=\"-l$ff_glutname -mthreads -lglu32 -lopengl32\"
 else
   ff_glut_ok=no
 fi
@@ -7337,14 +7340,14 @@ fi
                 WIN32DLLTARGET=win32-dll-target
 
 
-$as_echo "#define PURE_WIN32 1" >>confdefs.h
+$as_echo \"#define PURE_WIN32 1\" >>confdefs.h
 
 		ff_dynload=yes
 	fi
 
 
 	;;
-*)ff_win32=no;;
+*" "$LINENO" 5ff_win32=no;;
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_win32" >&5
 $as_echo "$ff_win32" >&6; }
