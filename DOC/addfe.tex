@@ -1,6 +1,6 @@
-\section{Add new finite element}
+\section{Addition of a  new finite element}
 \label{AddnewFE}
-\subsection{Some notation}
+\subsection{Some notations}
 \def\Fb#1{\boldsymbol{\omega}^{K}_{#1}}
 \def\fbi{\mathbf{\omega}^{K}_{ij}}
 
@@ -29,7 +29,7 @@ In the formula (\ref{eq-interpo}), the list $ p_{k},\, j_{k},\, i_{k}$ depend ju
 
 \medskip
 %\begin{example}
- Example 1: classical scalar  Lagrange finite element, first we have $\mathtt{kPi}=\mathtt{npPi}=\mathtt{NbOfNode}$ and
+ Example 1: with the classical scalar  Lagrange finite element, we have $\mathtt{kPi}=\mathtt{npPi}=\mathtt{NbOfNode}$ and
 \begin{itemize}
 \item $P_{p}$ is the point of the nodal points
 \item  the $\alpha_k=1$, because we take the value  of the function at the point $P_{k}$
@@ -46,13 +46,13 @@ In the formula (\ref{eq-interpo}), the list $ p_{k},\, j_{k},\, i_{k}$ depend ju
          \vecttwo{\alpha_{K}}{\beta_{K}} + \gamma_{K}\vecttwo{x}{y}  \}
          \label{eq:RT0-fe}
 \end{equation}
- The degree of freedom are the flux   throw an edge $e$ of the mesh, where the flux of
+ The degrees of freedom are the flux   through an edge $e$ of the mesh, where the flux of
  the function $\mathbf{f} : \R^2 \longrightarrow \R^2 $ is $\int_{e} \mathbf{f}.n_{e}$,
  $n_{e}$ is the unit normal of edge $e$ (this implies a orientation of all the edges of the mesh,
  for example we can use the global numbering of the edge vertices and we just go to small to large number).
 
 
-  To compute this flux, we use an quadrature formula with one point, the middle point of the edge. Consider a triangle $T$ with three vertices $(\mathbf{a},\mathbf{b},\mathbf{c})$.
+  To compute this flux, we use a quadrature formula with one point, the middle point of the edge. Consider a triangle $T$ with three vertices $(\mathbf{a},\mathbf{b},\mathbf{c})$.
 Let denote the  vertices numbers by $i_{a},i_{b},i_{c}$, and define the three edge vectors $\mathbf{e}^{0},\mathbf{e}^{1},\mathbf{e}^{2}$
 by $ sgn(i_{b}-i_{c})(\mathbf{b}-\mathbf{c})$, $sgn(i_{c}-i_{a})(\mathbf{c}-\mathbf{a})$, $sgn(i_{a}-i_{b})(\mathbf{a}-\mathbf{b})$,
 
@@ -81,7 +81,7 @@ P_{p} = \left\{\frac{\mathbf{b}+\mathbf{c}}{2},
 %\end{example}
 
 
-\subsection{Which class of add}
+\subsection{Which class to add?}
 
 Add file \texttt{FE\_ADD.cpp} in directory \texttt{src/femlib} for example
 first to initialize :
@@ -97,7 +97,7 @@ using namespace std;
 namespace  Fem2D {
 \eFF
 
-Second, you are just a class which derive for \texttt{ public  TypeOfFE} like:
+Then add a class which derive for \texttt{ public  TypeOfFE} like:
 \bFF
 @class TypeOfFE_RTortho : public  TypeOfFE { public:
   static int Data[]; // some numbers \hfilll
