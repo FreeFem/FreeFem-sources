@@ -710,11 +710,11 @@ ff_mpi=no)
 	if test "$ff_mpi" = yes;
 	then
 
-#	    ff_MPI_INCLUDE=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'`
+#	    ff_MPI_INCLUDE=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`
 	    ff_MPI_INCLUDE=
 	    ff_MPI_LIB_DIRS=""
-	    ff_MPI_LIB=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'`
-	    ff_mpi_idir=`$MPICXX -show|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//`' /usr/include/'
+	    ff_MPI_LIB=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`
+	    ff_mpi_idir=`$MPICXX -show|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include/'
 	    for i in $ff_mpi_idir; do
 	    if test -f "$i/mpi.h"  ;then
 	      ff_MPI_INCLUDE_DIR=$i
@@ -744,8 +744,8 @@ ff_mpi=no)
 	    if test ! -f "$ff_MPI_INCLUDE_DIR/fmpi.h"  ; then
 	        AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/fmpi.h"  ])
 	    else
-		echo mpifc LD `$MPIFC -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'`  >$ff_where_lib_conf
-		echo mpifc INCLUDE `$MPIFC -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'`  >$ff_where_lib_conf
+		echo mpifc LD `$MPIFC -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`  >$ff_where_lib_conf
+		echo mpifc INCLUDE `$MPIFC -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'|tr '\n' ' '`  >$ff_where_lib_conf
   	    fi 	    
 	    AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		
 	fi
