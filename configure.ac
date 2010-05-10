@@ -1694,6 +1694,7 @@ LIBS=$ff_save_libs
 
 ])dnl end m4_define AC_FF_WHERELIB
 
+ff_with_mpi=-openmpi; 
 m4_map([AC_FF_WHERELIB],[ 
 [[mumps],[-lpord -lmumps_common -ldmumps -lzmumps -lpord],[dmumps_c.h]],
 [[fftw3],[-lfftw3],[fftw3.h]],

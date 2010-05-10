@@ -14000,6 +14000,7 @@ ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11p
 # mmg3d INCLUDE '-I/Users/hecht/work/freefem++/download/include'
 
 
+ff_with_mpi=-openmpi;
   	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking check mumps" >&5
 $as_echo_n "checking check mumps... " >&6; }
 ff_save_libs=$LIBS
