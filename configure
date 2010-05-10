@@ -11747,100 +11747,6 @@ else
 $as_echo "$as_me:  without cadna ***** " >&6;}
 fi
 
-# Looking for the FFTW3
-# --------------------
-ff_fftw_ok=no
-ff_libs_old="$LIBS"
-ff_ldflags_old="$LDFLAGS"
-ff_cppflags_old="$CPPFLAGS"
-for ff_fftw_dir in "" "${curdir}/download/install";
-do
-   if test "$ff_fftw_ok" = no
-	then
-	  if test -n "$ff_fftw_dir"
-	  then
-           LDFLAGS="$LDFLAGS -L${ff_fftw_dir}/lib"
-           CPPFLAGS="$CPPFLAGS -I${ff_fftw_dir}/include"
-       	  fi
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fftw_execute in -lfftw3" >&5
-$as_echo_n "checking for fftw_execute in -lfftw3... " >&6; }
-if test "${ac_cv_lib_fftw3_fftw_execute+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lfftw3  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char fftw_execute ();
-#ifdef F77_DUMMY_MAIN
-
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int F77_DUMMY_MAIN() { return 1; }
-
-#endif
-int
-main ()
-{
-return fftw_execute ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_fftw3_fftw_execute=yes
-else
-  ac_cv_lib_fftw3_fftw_execute=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_fftw3_fftw_execute" >&5
-$as_echo "$ac_cv_lib_fftw3_fftw_execute" >&6; }
-if test "x$ac_cv_lib_fftw3_fftw_execute" = x""yes; then :
-  ff_fftw_ok=yes
-fi
-
-  for ac_header in fftw3.h
-do :
-  ac_fn_cxx_check_header_mongrel "$LINENO" "fftw3.h" "ac_cv_header_fftw3_h" "$ac_includes_default"
-if test "x$ac_cv_header_fftw3_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_FFTW3_H 1
-_ACEOF
- ff_fftw_h=yes
-else
-  ff_fftw_h=no
-fi
-
-done
-
-
-   if test "$ff_fftw_ok" = yes  -a "$ff_fftw_h" = yes
-    then
-
-$as_echo "#define HAVE_FFTW 1" >>confdefs.h
-
-    echo "fftw3 LD $LDFLAGS" >config_LIB_INFO
-    echo "fftw3 INCLUDE $CPPFLAGS" >config_LIB_INFO
-
-   else
-       LIBS="$ff_libs_old"
-       LDFLAGS="$ff_ldflags_old"
-       CPPFLAGS="$ff_cppflags_old"
-   fi
-fi
-done
 
 # Modif: morice 2008
 # Looking for the tetgen
@@ -12817,7 +12723,9 @@ fi
   if test "$ff_umfpack_ok" = yes
   then
       echo  amd LD \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
-      echo LD umfpack \'$ff_umfpack_libs\'   >>$ff_where_lib_conf
+      echo  amd INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
+      echo  umfpack LD  '$ff_umfpack_libs\'   >>$ff_where_lib_conf
+      echo  umfpack  INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
   fi
 
 LIBS="$ff_save_libs"
@@ -14118,12 +14026,37 @@ _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   ff_WHERE=yes
 else
-  ff_WHERE==no
+  ff_WHERE=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-if test "$ff_where" = "yesy" ; then
+if test "$ff_where" = "yes" ; then
      echo "mumps LD '-lpord -lmumps_common -ldmumps -lzmumps -lpord'"  >$ff_where_lib_conf
+if test -n "dmumps_c.h" ; then
+       echo "mumps INCLUDE  /usr/include/$as_dirname --  ||
+$as_expr X : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X : 'X\(//\)[^/]' \| \
+	 X : 'X\(//\)$' \| \
+	 X : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'dmumps_c.h  >$ff_where_lib_conf
+fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
 $as_echo "$ff_WHERE" >&6; }
@@ -14135,7 +14068,379 @@ ff_save_libs=$LIBS
 LIBS="$LIBS -lfftw3"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <fftw3.h
+#include <fftw3.h>
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ff_WHERE=yes
+else
+  ff_WHERE=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+if test "$ff_where" = "yes" ; then
+     echo "fftw3 LD '-lfftw3'"  >$ff_where_lib_conf
+if test -n "fftw3.h" ; then
+       echo "fftw3 INCLUDE  /usr/include/$as_dirname --  ||
+$as_expr X : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X : 'X\(//\)[^/]' \| \
+	 X : 'X\(//\)$' \| \
+	 X : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'fftw3.h  >$ff_where_lib_conf
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
+$as_echo "$ff_WHERE" >&6; }
+LIBS=$ff_save_libs
+
+  	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking check superlu" >&5
+$as_echo_n "checking check superlu... " >&6; }
+ff_save_libs=$LIBS
+LIBS="$LIBS -lsuperlu"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <superlu_defs.h>
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ff_WHERE=yes
+else
+  ff_WHERE=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+if test "$ff_where" = "yes" ; then
+     echo "superlu LD '-lsuperlu'"  >$ff_where_lib_conf
+if test -n "superlu_defs.h" ; then
+       echo "superlu INCLUDE  /usr/include/$as_dirname --  ||
+$as_expr X : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X : 'X\(//\)[^/]' \| \
+	 X : 'X\(//\)$' \| \
+	 X : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'superlu_defs.h  >$ff_where_lib_conf
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
+$as_echo "$ff_WHERE" >&6; }
+LIBS=$ff_save_libs
+
+  	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking check blacs" >&5
+$as_echo_n "checking check blacs... " >&6; }
+ff_save_libs=$LIBS
+LIBS="$LIBS  -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ff_WHERE=yes
+else
+  ff_WHERE=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+if test "$ff_where" = "yes" ; then
+     echo "blacs LD ' -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi'"  >$ff_where_lib_conf
+if test -n "" ; then
+       echo "blacs INCLUDE  /usr/include/$as_dirname --  ||
+$as_expr X : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X : 'X\(//\)[^/]' \| \
+	 X : 'X\(//\)$' \| \
+	 X : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'  >$ff_where_lib_conf
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
+$as_echo "$ff_WHERE" >&6; }
+LIBS=$ff_save_libs
+
+  	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking check scalapack" >&5
+$as_echo_n "checking check scalapack... " >&6; }
+ff_save_libs=$LIBS
+LIBS="$LIBS -lscalapack"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ff_WHERE=yes
+else
+  ff_WHERE=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+if test "$ff_where" = "yes" ; then
+     echo "scalapack LD '-lscalapack'"  >$ff_where_lib_conf
+if test -n "" ; then
+       echo "scalapack INCLUDE  /usr/include/$as_dirname --  ||
+$as_expr X : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X : 'X\(//\)[^/]' \| \
+	 X : 'X\(//\)$' \| \
+	 X : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'  >$ff_where_lib_conf
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
+$as_echo "$ff_WHERE" >&6; }
+LIBS=$ff_save_libs
+
+  	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking check scotch" >&5
+$as_echo_n "checking check scotch... " >&6; }
+ff_save_libs=$LIBS
+LIBS="$LIBS -lscotch -lscotcherr"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ff_WHERE=yes
+else
+  ff_WHERE=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+if test "$ff_where" = "yes" ; then
+     echo "scotch LD '-lscotch -lscotcherr'"  >$ff_where_lib_conf
+if test -n "" ; then
+       echo "scotch INCLUDE  /usr/include/$as_dirname --  ||
+$as_expr X : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X : 'X\(//\)[^/]' \| \
+	 X : 'X\(//\)$' \| \
+	 X : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'  >$ff_where_lib_conf
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
+$as_echo "$ff_WHERE" >&6; }
+LIBS=$ff_save_libs
+
+  	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking check metis" >&5
+$as_echo_n "checking check metis... " >&6; }
+ff_save_libs=$LIBS
+LIBS="$LIBS -lmetis"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <metis/metis.h>
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ff_WHERE=yes
+else
+  ff_WHERE=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+if test "$ff_where" = "yes" ; then
+     echo "metis LD '-lmetis'"  >$ff_where_lib_conf
+if test -n "metis/metis.h" ; then
+       echo "metis INCLUDE  /usr/include/$as_dirname --  ||
+$as_expr X : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X : 'X\(//\)[^/]' \| \
+	 X : 'X\(//\)$' \| \
+	 X : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'metis/metis.h  >$ff_where_lib_conf
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
+$as_echo "$ff_WHERE" >&6; }
+LIBS=$ff_save_libs
+
+  	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking check parmetis" >&5
+$as_echo_n "checking check parmetis... " >&6; }
+ff_save_libs=$LIBS
+LIBS="$LIBS -lparmetis"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <parmetis/parmetis.h
 
 >
 #ifdef F77_DUMMY_MAIN
@@ -14157,12 +14462,41 @@ _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   ff_WHERE=yes
 else
-  ff_WHERE==no
+  ff_WHERE=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-if test "$ff_where" = "yesy" ; then
-     echo "fftw3 LD '-lfftw3'"  >$ff_where_lib_conf
+if test "$ff_where" = "yes" ; then
+     echo "parmetis LD '-lparmetis'"  >$ff_where_lib_conf
+if test -n "parmetis/parmetis.h
+
+" ; then
+       echo "parmetis INCLUDE  /usr/include/$as_dirname --  ||
+$as_expr X : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X : 'X\(//\)[^/]' \| \
+	 X : 'X\(//\)$' \| \
+	 X : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'parmetis/parmetis.h
+
+  >$ff_where_lib_conf
+fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
 $as_echo "$ff_WHERE" >&6; }
