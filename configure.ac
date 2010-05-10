@@ -843,40 +843,40 @@ else
     AC_MSG_NOTICE([ without cadna ***** ])
 fi
 
-# Looking for the FFTW3
-# --------------------
-ff_fftw_ok=no
-ff_libs_old="$LIBS"
-ff_ldflags_old="$LDFLAGS"
-ff_cppflags_old="$CPPFLAGS"
-for ff_fftw_dir in "" "${curdir}/download/install";
-do
-   if test "$ff_fftw_ok" = no
-	then
-	  if test -n "$ff_fftw_dir"
-	  then
-           LDFLAGS="$LDFLAGS -L${ff_fftw_dir}/lib"
-           CPPFLAGS="$CPPFLAGS -I${ff_fftw_dir}/include"
-       	  fi
-
-  AC_CHECK_LIB(fftw3,fftw_execute,
-                ff_fftw_ok=yes)
-  AC_CHECK_HEADERS(fftw3.h,
-             ff_fftw_h=yes, ff_fftw_h=no)
-
-   if test "$ff_fftw_ok" = yes  -a "$ff_fftw_h" = yes 
-    then
-      AC_DEFINE(HAVE_FFTW,1, fftw is compute fft)
-    echo "fftw3 LD $LDFLAGS" >config_LIB_INFO
-    echo "fftw3 INCLUDE $CPPFLAGS" >config_LIB_INFO
-
-   else
-       LIBS="$ff_libs_old"
-       LDFLAGS="$ff_ldflags_old"
-       CPPFLAGS="$ff_cppflags_old"    
-   fi
-fi
-done
+dnl # : Looking for the FFTW3
+dnl # : --------------------
+dnl # :ff_fftw_ok=no
+dnl # :ff_libs_old="$LIBS"
+dnl # :ff_ldflags_old="$LDFLAGS"
+dnl # :ff_cppflags_old="$CPPFLAGS"
+dnl # :for ff_fftw_dir in "" "${curdir}/download/install";
+dnl # :do
+dnl # :   if test "$ff_fftw_ok" = no
+dnl # :	then
+dnl # :	  if test -n "$ff_fftw_dir"
+dnl # :	  then
+dnl # :           LDFLAGS="$LDFLAGS -L${ff_fftw_dir}/lib"
+dnl # :           CPPFLAGS="$CPPFLAGS -I${ff_fftw_dir}/include"
+dnl # :       	  fi
+dnl # :
+dnl # :  AC_CHECK_LIB(fftw3,fftw_execute,
+dnl # :                ff_fftw_ok=yes)
+dnl # :  AC_CHECK_HEADERS(fftw3.h,
+dnl # :             ff_fftw_h=yes, ff_fftw_h=no)
+dnl # :
+dnl # :   if test "$ff_fftw_ok" = yes  -a "$ff_fftw_h" = yes 
+dnl # :    then
+dnl # :      AC_DEFINE(HAVE_FFTW,1, fftw is compute fft)
+dnl # :    echo "fftw3 LD $LDFLAGS" >config_LIB_INFO
+dnl # :    echo "fftw3 INCLUDE $CPPFLAGS" >config_LIB_INFO
+dnl # :
+dnl # :   else
+dnl # :       LIBS="$ff_libs_old"
+dnl # :       LDFLAGS="$ff_ldflags_old"
+dnl # :       CPPFLAGS="$ff_cppflags_old"    
+dnl # :   fi
+dnl # :fi
+dnl # :done
 
 # Modif: morice 2008
 # Looking for the tetgen
@@ -1275,7 +1275,9 @@ fi
   if test "$ff_umfpack_ok" = yes 
   then
       echo  amd LD \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
-      echo LD umfpack \'$ff_umfpack_libs\'   >>$ff_where_lib_conf     
+      echo  amd INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
+      echo  umfpack LD  '$ff_umfpack_libs\'   >>$ff_where_lib_conf     
+      echo  umfpack  INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
   fi   
 
 LIBS="$ff_save_libs"
@@ -1680,10 +1682,13 @@ m4_define([AC_FF_WHERELIB],
 [  	AC_MSG_CHECKING(check $1)
 ff_save_libs=$LIBS
 LIBS="$LIBS $2"
-AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE==no]) 
-if test "$ff_where" = "yesy" ; then
+AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE=no]) 
+if test "$ff_where" = "yes" ; then
      echo "$1 LD '$2'"  >$ff_where_lib_conf
+if test -n "$3" ; then
+       echo "$1 INCLUDE  /usr/include/AS_DIRNAME[$3]  >$ff_where_lib_conf
 fi 
+fi
 AC_MSG_RESULT($ff_WHERE)
 LIBS=$ff_save_libs
 
@@ -1691,7 +1696,13 @@ LIBS=$ff_save_libs
 
 m4_map([AC_FF_WHERELIB],[ 
 [[mumps],[-lpord -lmumps_common -ldmumps -lzmumps -lpord],[dmumps_c.h]],
-[[fftw3],[-lfftw3], [fftw3.h]  ]
+[[fftw3],[-lfftw3],[fftw3.h]],
+[[superlu],[-lsuperlu],[superlu_defs.h]],
+[[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
+[[scalapack],[-lscalapack],[]],
+[[scotch],[-lscotch -lscotcherr],[]],	
+[[metis],[-lmetis],[metis/metis.h]],
+[[parmetis],[-lparmetis],[parmetis/parmetis.h]]
 ]
 )
 
