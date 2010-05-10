@@ -1,4 +1,4 @@
-# Configuration script using Automake + Autoconf for FreeFem++
+g# Configuration script using Automake + Autoconf for FreeFem++
 # ------------------------------------------------------------
 
 # Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
@@ -1690,8 +1690,8 @@ LIBS=$ff_save_libs
 ])dnl end m4_define AC_FF_WHERELIB
 
 m4_map([AC_FF_WHERELIB],[ 
-[ [mumps], [-lpord -lmumps_common -ldmumps -lzmumps -lpord], [dmumps_c.h]  ],
-[ [fftw3], [-lfftw3], [fftw3.h]  ]
+[[mumps],[-lpord -lmumps_common -ldmumps -lzmumps -lpord],[dmumps_c.h]],
+[[fftw3],[-lfftw3], [fftw3.h]  ]
 ]
 )
 
