@@ -1680,7 +1680,7 @@ m4_define([AC_FF_WHERELIB],
 [  	AC_MSG_CHECKING(check $1)
 ff_save_libs=$LIBS
 LIBS="$LIBS $2"
-AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[exit(1);])], [ff_WHERE=yes],[ff_WHERE==no]) 
+AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE==no]) 
 if test "$ff_where" = "yesy" ; then
      echo "$1 LD '$2'"  >$ff_where_lib_conf
 fi 
