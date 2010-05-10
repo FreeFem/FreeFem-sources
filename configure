@@ -14056,6 +14056,120 @@ IDE_TESTS=$ff_idetest
 
 ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_ideprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 
+# hips LD -L/Users/hecht/work/freefem++/download/lib/hips -lio -lhips
+# hips INCLUDE -I/Users/hecht/work/freefem++/download/include/hips
+# hipssequential LD -L/Users/hecht/work/freefem++/download/lib/hips -lio -lhipssequential
+# hipssequential INCLUDE -I/Users/hecht/work/freefem++/download/include/hips
+# hypre LD -L/Users/hecht/work/freefem++/download/lib/hypre  -lHYPRE
+# hypre INCLUDE -I/Users/hecht/work/freefem++/download/include/hypre
+#metis LD -L/Users/hecht/work/freefem++/download/lib -lmetis
+#metis INCLUDE -I/Users/hecht/work/freefem++/download/include/metis
+# mumps LD '-L/Users/hecht/work/freefem++/download//lib  -lpord -lmumps_common -ldmumps -lzmumps -lpord'
+# mumps INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# parmetis LD -L/Users/hecht/work/freefem++/download/lib -lparmetis -lmetis
+# parmetis INCLUDE -I/Users/hecht/work/freefem++/download/include/metis
+# scalapack LD '-L/Users/hecht/work/freefem++/download/lib  -lscalapack '
+# scalapack INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# ptscotch LD '-L/Users/hecht/work/freefem++/download/lib  -lptesmumps -lptscotch -lptscotcherr '
+# ptscotch INCLUDE '-I/Users/hecht/work/freefem++/download/include/scotch'
+# scotch LD '-L/Users/hecht/work/freefem++/download/lib   -lscotch -lscotcherr '
+# scotch INCLUDE '-I/Users/hecht/work/freefem++/download/include/scotch'
+# superlu LD -L/Users/hecht/work/freefem++/download/lib -lsuperlu
+# superlu INCLUDE -I/Users/hecht/work/freefem++/download/include
+# superlu_dist LD '-L/Users/hecht/work/freefem++/download/lib -lsuperlu_dist_2.3'
+# superlu_dist INCLUDE '-I/Users/hecht/work/freefem++/download/include/superludist'
+# tetgen LD -L/Users/hecht/work/freefem++/download/lib -ltet
+# tetgen INCLUDE -I/Users/hecht/work/freefem++/download/include/
+# arpack LD '-L/Users/hecht/work/freefem++/download/lib' '-larpack'
+# arpack INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# umfpack LD '-L/Users/hecht/work/freefem++/download/lib' '-lumfpack'
+# umfpack INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# amd LD '-L/Users/hecht/work/freefem++/download/lib' '-lamd'
+# amd INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# fftw3 LD '-L/Users/hecht/work/freefem++/download/lib' '-lfftw3'
+# fftw3 INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# mmg3d LD '-L/Users/hecht/work/freefem++/download/lib' '-lmmg3d'
+# mmg3d INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+
+
+  	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking check mumps" >&5
+$as_echo_n "checking check mumps... " >&6; }
+ff_save_libs=$LIBS
+LIBS="$LIBS -lpord -lmumps_common -ldmumps -lzmumps -lpord"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <dmumps_c.h  >
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+exit(1);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ff_WHERE=yes
+else
+  ff_WHERE==no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+if test "$ff_where" = "yesy" ; then
+     echo "mumps LD '-lpord -lmumps_common -ldmumps -lzmumps -lpord'"  >$ff_where_lib_conf
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
+$as_echo "$ff_WHERE" >&6; }
+LIBS=$ff_save_libs
+
+  	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking check fftw3" >&5
+$as_echo_n "checking check fftw3... " >&6; }
+ff_save_libs=$LIBS
+LIBS="$LIBS -lfftw3"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <fftw3.h
+
+>
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+exit(1);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ff_WHERE=yes
+else
+  ff_WHERE==no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+if test "$ff_where" = "yesy" ; then
+     echo "fftw3 LD '-lfftw3'"  >$ff_where_lib_conf
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
+$as_echo "$ff_WHERE" >&6; }
+LIBS=$ff_save_libs
+
+
+
 # All makefiles
 ac_config_files="$ac_config_files Makefile download/Makefile download/blas/Makefile download/arpack/Makefile download/umfpack/Makefile download/fltk/Makefile src/Makefile src/bamglib/Makefile src/Graphics/Makefile src/femlib/Makefile src/Algo/Makefile src/lglib/Makefile src/fflib/Makefile src/std/Makefile src/x11/Makefile src/ide/Makefile src/nw/Makefile src/mpi/Makefile src/agl/Makefile src/glx/Makefile src/bamg/Makefile src/libMesh/Makefile src/medit/Makefile src/bin-win32/Makefile examples++/Makefile examples++-eigen/Makefile examples++-tutorial/Makefile examples++-mpi/Makefile examples++-load/Makefile examples++-chapt3/Makefile examples++-bug/Makefile examples++-other/Makefile examples++-3d/Makefile DOC/Makefile"
 
