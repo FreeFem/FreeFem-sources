@@ -1640,6 +1640,61 @@ AC_SUBST(TESTIDEPROG,$ff_testideprog)
 AC_SUBST(IDE_TESTS,$ff_idetest)
 ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_ideprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 
+# hips LD -L/Users/hecht/work/freefem++/download/lib/hips -lio -lhips
+# hips INCLUDE -I/Users/hecht/work/freefem++/download/include/hips
+# hipssequential LD -L/Users/hecht/work/freefem++/download/lib/hips -lio -lhipssequential
+# hipssequential INCLUDE -I/Users/hecht/work/freefem++/download/include/hips
+# hypre LD -L/Users/hecht/work/freefem++/download/lib/hypre  -lHYPRE
+# hypre INCLUDE -I/Users/hecht/work/freefem++/download/include/hypre
+#metis LD -L/Users/hecht/work/freefem++/download/lib -lmetis
+#metis INCLUDE -I/Users/hecht/work/freefem++/download/include/metis
+# mumps LD '-L/Users/hecht/work/freefem++/download//lib  -lpord -lmumps_common -ldmumps -lzmumps -lpord'
+# mumps INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# parmetis LD -L/Users/hecht/work/freefem++/download/lib -lparmetis -lmetis
+# parmetis INCLUDE -I/Users/hecht/work/freefem++/download/include/metis
+# scalapack LD '-L/Users/hecht/work/freefem++/download/lib  -lscalapack '
+# scalapack INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# ptscotch LD '-L/Users/hecht/work/freefem++/download/lib  -lptesmumps -lptscotch -lptscotcherr '
+# ptscotch INCLUDE '-I/Users/hecht/work/freefem++/download/include/scotch'
+# scotch LD '-L/Users/hecht/work/freefem++/download/lib   -lscotch -lscotcherr '
+# scotch INCLUDE '-I/Users/hecht/work/freefem++/download/include/scotch'
+# superlu LD -L/Users/hecht/work/freefem++/download/lib -lsuperlu
+# superlu INCLUDE -I/Users/hecht/work/freefem++/download/include
+# superlu_dist LD '-L/Users/hecht/work/freefem++/download/lib -lsuperlu_dist_2.3'
+# superlu_dist INCLUDE '-I/Users/hecht/work/freefem++/download/include/superludist'
+# tetgen LD -L/Users/hecht/work/freefem++/download/lib -ltet
+# tetgen INCLUDE -I/Users/hecht/work/freefem++/download/include/
+# arpack LD '-L/Users/hecht/work/freefem++/download/lib' '-larpack'
+# arpack INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# umfpack LD '-L/Users/hecht/work/freefem++/download/lib' '-lumfpack'
+# umfpack INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# amd LD '-L/Users/hecht/work/freefem++/download/lib' '-lamd'
+# amd INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# fftw3 LD '-L/Users/hecht/work/freefem++/download/lib' '-lfftw3'
+# fftw3 INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+# mmg3d LD '-L/Users/hecht/work/freefem++/download/lib' '-lmmg3d'
+# mmg3d INCLUDE '-I/Users/hecht/work/freefem++/download/include'
+
+dnl saech of associad software 
+m4_define([AC_FF_WHERELIB],
+[  	AC_MSG_CHECKING(check $1)
+ff_save_libs=$LIBS
+LIBS="$LIBS $2"
+AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[exit(1);])], [ff_WHERE=yes],[ff_WHERE==no]) 
+if test "$ff_where" = "yesy" ; then
+     echo "$1 LD '$2'"  >$ff_where_lib_conf
+fi 
+AC_MSG_RESULT($ff_WHERE)
+LIBS=$ff_save_libs
+
+])dnl end m4_define AC_FF_WHERELIB
+
+m4_map([AC_FF_WHERELIB],[ 
+[ [mumps], [-lpord -lmumps_common -ldmumps -lzmumps -lpord], [dmumps_c.h]  ],
+[ [fftw3], [-lfftw3], [fftw3.h]  ]
+]
+)
+
 # All makefiles
 AC_OUTPUT(Makefile
 	download/Makefile
