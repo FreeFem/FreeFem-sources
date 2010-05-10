@@ -14098,7 +14098,7 @@ ff_save_libs=$LIBS
 LIBS="$LIBS -lpord -lmumps_common -ldmumps -lzmumps -lpord"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <dmumps_c.h  >
+#include <dmumps_c.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
