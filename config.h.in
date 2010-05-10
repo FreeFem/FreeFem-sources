@@ -47,12 +47,6 @@
 /* Define to 1 if you have the `erfc' function. */
 #undef HAVE_ERFC
 
-/* fftw is compute fft */
-#undef HAVE_FFTW
-
-/* Define to 1 if you have the <fftw3.h> header file. */
-#undef HAVE_FFTW3_H
-
 /* Define to 1 if you have the `getenv' function. */
 #undef HAVE_GETENV
 
