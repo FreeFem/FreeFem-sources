@@ -5357,6 +5357,492 @@ AnyType Op_trunc_mesh3::Op::operator()(Stack stack)  const {
   return Tht; 
  };
  
+//////////////////
+// new functions added by J. Morice 05/10
+//  --  extractmesh2D
+//  --  extractmesh
+//  --  movemesh32       // projection
+
+class ExtractMesh2D_Op : public E_F0mps 
+	{
+	public:
+		Expression eTh;
+		static const int n_name_param = 4; // 
+		static basicAC_F0::name_and_type name_param[] ;
+		Expression nargs[n_name_param];
+		KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+		{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+	        KN_<long>  arg(int i,int j,Stack stack,KN_<long> a ) const
+	        { 
+		  if( nargs[i]) 
+		    return GetAny<KN_<long> >( (*nargs[i])(stack) );
+		  else 
+		    return nargs[j] ? GetAny<KN_<long> >( (*nargs[j])(stack) ): a;
+		}
+		double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+		//long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+		int    arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+	public:
+		ExtractMesh2D_Op(const basicAC_F0 &  args,Expression tth) 
+		: eTh(tth)
+		{
+			if(verbosity >1) cout << "construction par ExtractMesh_Op" << endl;
+			args.SetNameParam(n_name_param,name_param,nargs); 
+			if( nargs[1] && nargs[3] ) 
+			  CompileError("uncompatible extractmesh (Th, region= , reft=  ");
+			if( nargs[0] && nargs[2] ) 
+			  CompileError("uncompatible extractmesh (Th, label= , refe=  ");
+		} 
+		
+		AnyType operator()(Stack stack)  const ;
+	};
+
+basicAC_F0::name_and_type ExtractMesh2D_Op::name_param[]= {
+{  "refe", &typeid(KN_<long>)},
+{  "reft", &typeid(KN_<long>)},
+{  "label", &typeid(KN_<long>)},
+{  "region", &typeid(KN_<long>)}
+};
+
+
+class   ExtractMesh2D : public OneOperator { public:  
+    ExtractMesh2D() : OneOperator(atype<pmesh>(),atype<pmesh>()) {}
+	
+	E_F0 * code(const basicAC_F0 & args) const 
+	{
+		return  new ExtractMesh2D_Op(args,t[0]->CastTo(args[0])); 
+	}
+};
+
+AnyType ExtractMesh2D_Op::operator()(Stack stack)  const 
+{
+	MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+	Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
+	Mesh &Th=*pTh;
+	
+	int nbv=Th.nv; // nombre de sommet 
+	int nbt=Th.nt; // nombre de triangles
+	int nbe=Th.neb; // nombre d'aretes fontiere
+	
+	KN<long> zzempty(0);
+	// recuperation des labels pour les surfaces et les elements
+	KN<long> labelface (arg(0,2,stack,zzempty));  
+	KN<long> labelelement (arg(1,3,stack,zzempty));  
+	
+	// a trier les tableaux d'entier 
+	
+	int nv=0, nt=0, ns=0;
+	int boolsurf=0;
+	int boolelement=0;
+	if( nargs[0] || nargs[2]){
+	  boolsurf=1;
+	}
+	if( nargs[1] || nargs[3]){
+	  boolelement=1;
+	  if( boolsurf == 0){ 
+	    cerr << "we need edge label to extract the mesh "<< " (This will be changed in a new version of freefem++)" << endl;
+	    exit(1);
+	  }
+	  // a prevoir une fonction pour recalculer les differents labels des surfaces	  
+	}
+	
+	if( boolsurf==1 && boolelement==1 ){
+		// Volumetric mesh
+		
+		KN<int> takevertex(Th.nv,-1);
+		KN<int> takeelem(Th.nt,0);
+		KN<int> takebe(Th.neb,0);
+		int neLab=0;
+		for(int ie=0; ie<Th.nt; ie++){
+		  const Mesh::Triangle & K(Th.t(ie));			
+		  for(int ii=0; ii<labelelement.N(); ii++){
+		    if( K.lab == labelelement[ii] ){
+		      neLab++;
+		      takeelem[ie] = 1;
+		      for(int jj=0; jj<3; jj++){
+			if( takevertex[ Th.operator()(K[jj]) ] != -1) continue;
+			takevertex[ Th.operator()(K[jj]) ] = nv;
+			nv++;
+		      }
+		      break;		      
+		    }
+		  }
+		}
+		
+		
+		int nbeLab=0;
+		for(int ibe=0; ibe<Th.neb; ibe++){
+		  const Mesh::BorderElement & K(Th.be(ibe));			
+		  for(int ii=0; ii<labelface.N(); ii++){
+		    if( K.lab == labelface[ii] ){
+		      nbeLab++;
+		      takebe[ibe] = 1;
+		      for(int jj=0; jj<2; jj++){
+			if( takevertex[ Th.operator()(K[jj]) ] == -1){
+			  cerr << "Volumetric extract mesh: error in the definition of surface mesh " <<endl;
+			  cerr << "The edges of label "<< labelface[ii]  << " is not the extract mesh " << endl;
+			}
+		      }
+		      break;
+		    }
+		  }
+		}
+		
+		ns = nbeLab;
+		nt = neLab;
+		
+		if( nt == 0) { cerr << " The label of 2D element is not correct :: there is no element" << endl; exit(1); } 
+		Mesh::Vertex   *v  = new Mesh::Vertex[nv]; 
+		Mesh::Triangle *t  = new Mesh::Triangle[nt];
+		Mesh::Triangle *tt = t;
+		Mesh::BorderElement *b  = new Mesh::BorderElement[ns];
+		Mesh::BorderElement *bb = b;
+		
+		for(int ii=0; ii<Th.nv; ii++){
+		  if( takevertex[ ii ] == -1) continue;
+		  int iv = takevertex[ii];
+		  assert(iv>=0 && iv< nv);
+		  v[iv].x = Th.vertices[ii].x;
+		  v[iv].y = Th.vertices[ii].y;
+		  v[iv].lab = Th.vertices[ii].lab;
+		}
+		
+		for(int ie=0; ie<Th.nt; ie++){
+		  if( takeelem[ ie ] != 1) continue;
+		  const Mesh::Triangle & K(Th.t(ie));	
+		  int ivv[3];
+		  for(int jj=0; jj<3; jj++) ivv[jj] =  takevertex[ Th.operator()(K[jj]) ];      
+		  (tt++)->set(v,ivv[0],ivv[1],ivv[2],K.lab);
+		}
+		
+		
+		for(int ibe=0; ibe<Th.neb; ibe++){
+		  if( takebe[ ibe ] != 1) continue;
+		  const Mesh::BorderElement &K( Th.be(ibe) );
+		  int ivv[2];
+		  for(int jj=0; jj<2; jj++) ivv[jj] =  takevertex[ Th.operator()(K[jj]) ];      
+		  (bb++)->set(v,ivv[0],ivv[1],K.lab);
+		}
+		
+		
+		Mesh *pThnew = new Mesh(nv,nt,ns,v,t,b);  // attention aux composantes connexes.
+		return pThnew;
+		
+	}
+	
+	
+	
+	
+	if( boolsurf==1 && boolelement==0 ){
+		// case only surface mesh
+		// demander ‡ F. pour la pertinence
+		KN<int> takevertex(Th.nv,-1);
+		KN<int> takebe(Th.neb,0);
+		int nbeLab=0;
+		for(int ibe=0; ibe<Th.neb; ibe++){
+		  const Mesh::BorderElement & K(Th.be(ibe));			
+		  for(int ii=0; ii<labelface.N(); ii++){
+		    if( K.lab == labelface[ii] ){
+		      nbeLab++;
+		      takebe[ibe] = 1;
+		      for(int jj=0; jj<2; jj++){
+			if( takevertex[ Th.operator()(K[jj]) ] != -1) continue;
+			takevertex[ Th.operator()(K[jj]) ] = nv;
+			nv++;
+		      }
+		      break;
+		    }
+		  }
+		}
+		
+		ns = nbeLab;
+		
+		Mesh::Vertex        *v  = new Mesh::Vertex[nv]; 
+		Mesh::BorderElement *b  = new Mesh::BorderElement[ns];
+		Mesh::BorderElement *bb = b;
+		
+		for(int ii=0; ii<Th.nv; ii++){
+			if( takevertex[ ii ] == -1) continue;
+			int iv = takevertex[ii];
+			assert(iv>=0 && iv< nv);
+			v[iv].x = Th.vertices[ii].x;
+			v[iv].y = Th.vertices[ii].y;
+			v[iv].lab = Th.vertices[ii].lab;
+		}
+		
+		for(int ibe=0; ibe<Th.neb; ibe++){
+		  if( takebe[ ibe ] != 1) continue;
+		  const Mesh::BorderElement &K( Th.be(ibe) );
+		  int ivv[2];
+		  for(int jj=0; jj<2; jj++) ivv[jj] =  takevertex[ Th.operator()(K[jj]) ];      
+		  (bb++)->set(v,ivv[0],ivv[1],K.lab);
+		}
+		
+		
+		Mesh *pThnew;// = new Mesh(nv,ns,v,b);  // a definir
+		// attention aux composantes connexes.
+		
+		
+		return pThnew;
+		
+	}
+	
+}
+
+//////////////////////////////////
+//
+//
+//      Fin du 2D
+//
+//
+//////////////////////////////////
+
+//////////////////////////////////
+//
+//
+//      Debut du 3D
+//
+//
+///////////////////////////////////////////////////////////
+//  recuperer une partie du maillage ‡ l'aide des labels
+
+class ExtractMesh_Op : public E_F0mps 
+{
+public:
+  Expression eTh;
+  static const int n_name_param = 4; // 
+  static basicAC_F0::name_and_type name_param[];
+  Expression nargs[n_name_param];
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  KN_<long>  arg(int i,int j,Stack stack,KN_<long> a ) const
+  { 
+    if( nargs[i]) 
+      return GetAny<KN_<long> >( (*nargs[i])(stack) );
+    else 
+      return nargs[j] ? GetAny<KN_<long> >( (*nargs[j])(stack) ): a;
+  }
+  double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  //long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  int    arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+public:
+  ExtractMesh_Op(const basicAC_F0 &  args,Expression tth) 
+    : eTh(tth)
+  {
+    if(verbosity >1) cout << "construction par ExtractMesh_Op" << endl;
+    args.SetNameParam(n_name_param,name_param,nargs);    
+
+    if( nargs[1] && nargs[3] ) 
+      CompileError("uncompatible extractmesh (Th, region= , reftet=  ");
+    if( nargs[0] && nargs[2] ) 
+      CompileError("uncompatible extractmesh (Th, label= , refface=  ");
+  } 
+  
+  AnyType operator()(Stack stack)  const ;
+};
+
+basicAC_F0::name_and_type ExtractMesh_Op::name_param[]= {
+  {  "refface", &typeid(KN_<long>)},
+  {  "reftet", &typeid(KN_<long>)},
+  {  "label", &typeid(KN_<long>)},
+  {  "region", &typeid(KN_<long>)},
+};
+
+
+class   ExtractMesh : public OneOperator { public:  
+    ExtractMesh() : OneOperator(atype<pmesh3>(),atype<pmesh3>()) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  {
+    return  new ExtractMesh_Op(args,t[0]->CastTo(args[0])); 
+  }
+};
+
+AnyType ExtractMesh_Op::operator()(Stack stack)  const 
+{
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+  Mesh3 *pTh= GetAny<Mesh3 *>((*eTh)(stack));
+  Mesh3  &Th=*pTh;
+  
+  int nbv=Th.nv; // nombre de sommet 
+  int nbt=Th.nt; // nombre de triangles
+  int nbe=Th.nbe; // nombre d'aretes fontiere
+  
+  KN<long> zzempty(0);
+  KN<long> labelface (arg(0,2,stack,zzempty));  
+  KN<long> labelelement  (arg(1,3,stack,zzempty));  
+ 
+  // a trier les tableaux d'entier 
+
+  int nv=0, nt=0, ns=0;
+  int boolsurf=0;
+  int boolelement=0;
+  if( nargs[0] || nargs[2] ){
+    boolsurf=1;
+  }
+  if( nargs[1] || nargs[3] ){
+    boolelement=1;
+  }
+  cout << " labelface.N()  " << labelface.N() << endl;
+  for(int ii=0; ii<labelface.N(); ii++)
+    cout << ii << " " << labelface[ii] << endl;
+ 
+  cout << " labelelement.N()  " << labelelement.N() << endl;
+  for(int ii=0; ii<labelelement.N(); ii++)
+    cout << ii << " " << labelelement[ii] << endl;
+
+
+  if( boolsurf==1 && boolelement==1 ){
+    // case only surface mesh
+    KN<int> takevertex(Th.nv,-1);
+    KN<int> takeelem(Th.nt,0);
+    KN<int> takebe(Th.nbe,0);
+    int neLab=0;
+
+    for(int ie=0; ie<Th.nt; ie++){
+      const Tet & K(Th.elements[ie]);		
+      for(int ii=0; ii<labelelement.N(); ii++){
+	if( K.lab == labelelement[ii] ){	  
+	  neLab++;
+	  takeelem[ie] = 1;
+	  for(int jj=0; jj<4; jj++){
+	    if( takevertex[ Th.operator()(K[jj]) ] != -1) continue;
+	    takevertex[ Th.operator()(K[jj]) ] = nv;
+	    nv++;
+	  }
+	  break;
+	}
+      }
+    }
+        
+    int nbeLab=0;
+    for(int ibe=0; ibe<Th.nbe; ibe++){
+      const Triangle3 & K(Th.be(ibe));			
+      for(int ii=0; ii<labelface.N(); ii++){
+	if( K.lab == labelface[ii] ){
+	  nbeLab++;
+	  takebe[ibe] = 1;
+	  for(int jj=0; jj<3; jj++){
+	    if( takevertex[ Th.operator()(K[jj]) ] == -1){
+	      int iivv=Th.operator()(K[jj]);
+	      cerr << "Error(Extract Mesh):: the vertex ("<< Th.vertices[iivv].x  << ", " <<Th.vertices[iivv].y << ", " <<Th.vertices[iivv].z <<") is not in the volume mesh" << endl;
+	    }
+	    //continue;
+	    //takevertex[ Th.operator()(K[jj]) ] = nv;
+	    //nv++;
+	  }
+	  break;
+	}
+      }
+    }
+    
+    ns = nbeLab;
+    nt = neLab;
+    cout << nt <<" " << ns << endl;
+    if( nt == 0) { cerr << " The label of 3D element is not correct :: there is no element" << endl; exit(1); } 
+    Vertex3 *v  = new Vertex3[nv]; 
+    Tet *t  = new Tet[nt];
+    Tet *tt = t;
+    Triangle3 *b  = new Triangle3[ns];
+    Triangle3 *bb = b;
+    
+    for(int ii=0; ii<Th.nv; ii++){
+      if( takevertex[ ii ] == -1) continue;
+      int iv = takevertex[ii];
+      assert(iv>=0 && iv< nv);
+      v[iv].x = Th.vertices[ii].x;
+      v[iv].y = Th.vertices[ii].y;
+      v[iv].z = Th.vertices[ii].z;
+      v[iv].lab = Th.vertices[ii].lab;
+    }
+    
+    for(int ie=0; ie<Th.nt; ie++){
+      if( takeelem[ ie ] != 1) continue;
+      const Tet & K(Th.elements[ie]);	
+      int ivv[4];
+      for(int jj=0; jj<4; jj++) ivv[jj] =  takevertex[ Th.operator()(K[jj]) ];      
+      (tt++)->set(v,ivv,K.lab);
+    }
+		
+    
+    for(int ibe=0; ibe<Th.nbe; ibe++){
+      if( takebe[ ibe ] != 1) continue;
+      const Triangle3 &K( Th.be(ibe) );
+      int ivv[3];
+      for(int jj=0; jj<3; jj++) ivv[jj] =  takevertex[ Th.operator()(K[jj]) ];      
+      (bb++)->set(v,ivv,K.lab);
+    }
+    
+    
+    Mesh3 *pThnew = new Mesh3(nv,nt,ns,v,t,b);  // peut etre a d√©finir ???
+    // attention aux composantes connexes.
+		
+    
+    return pThnew;
+    
+  }
+  
+  if( boolsurf==1 && boolelement==0 ){
+		
+		
+    KN<int> takevertex(Th.nv,-1);
+    for(int iv=0; iv<Th.nv; iv++) takevertex[iv]=-1;
+    KN<int> takebe(Th.nbe,-1);
+    for(int iv=0; iv<Th.nv; iv++) takebe[iv]=-1;
+    int nbeLab=0;
+    for(int ibe=0; ibe<Th.nbe; ibe++){
+      const Triangle3 &K( Th.be(ibe) );
+      
+      for(int ii=0; ii<labelface.N(); ii++){
+	
+	if( K.lab == labelface[ii] ){
+	  nbeLab++;
+	  cout << "takeface" << endl;
+	  takebe[ibe] = 1;
+	  for(int jj=0; jj<3; jj++){
+	    if( takevertex[ Th.operator()(K[jj]) ] != -1) continue;
+	    takevertex[ Th.operator()(K[jj]) ] = nv;
+	    nv++;
+	  }
+					
+	  //break;
+	}
+      }
+    }
+    
+    ns = nbeLab;
+    
+    Vertex3   *v  = new Vertex3[nv]; 
+    Triangle3 *b  = new Triangle3[ns];
+    Triangle3 *bb = b;
+    
+    for(int ii=0; ii<Th.nv; ii++){
+      if( takevertex[ ii ] == -1) continue;
+      int iv = takevertex[ii];
+      assert(iv>=0 && iv< nv);
+      v[iv].x = Th.vertices[ii].x;
+      v[iv].y = Th.vertices[ii].y;
+      v[iv].z = Th.vertices[ii].z;
+		  v[iv].lab = Th.vertices[ii].lab;
+    }
+    
+    for(int ibe=0; ibe<Th.nbe; ibe++){
+      if( takebe[ ibe ] != 1) continue;
+      const Triangle3 &K( Th.be(ibe) );
+      int ivv[3];
+      for(int jj=0; jj<3; jj++) ivv[jj] =  takevertex[ Th.operator()(K[jj]) ];      
+      (bb++)->set(v,ivv,K.lab);
+    }
+    
+    
+    cout <<" nv" << nv << " ns " << endl;  
+    Mesh3 *pThnew = new Mesh3(nv,ns,v,b);  
+		
+    return pThnew;    
+  }
+
+}
+
 
 
 
@@ -5397,6 +5883,9 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Global.Add("checkbemesh","(",new CheckManifoldMesh);  
   Global.Add("buildlayers","(",new  BuildLayerMesh);  
   Global.Add("trunc","(", new Op_trunc_mesh3);
+
+  Global.Add("extractmesh","(",new ExtractMesh);
+  Global.Add("extractmesh","(",new ExtractMesh2D);
 }
 /*
 class Init { public:
