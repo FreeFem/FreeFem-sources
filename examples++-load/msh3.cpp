@@ -5884,8 +5884,8 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Global.Add("buildlayers","(",new  BuildLayerMesh);  
   Global.Add("trunc","(", new Op_trunc_mesh3);
 
-  Global.Add("extractmesh","(",new ExtractMesh);
-  Global.Add("extractmesh","(",new ExtractMesh2D);
+  Global.Add("extract","(",new ExtractMesh);
+  Global.Add("extract","(",new ExtractMesh2D);
 }
 /*
 class Init { public:
