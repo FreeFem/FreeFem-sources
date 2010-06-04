@@ -12620,14 +12620,15 @@ vh u=0,v; VH U,V;
 vh lambda=0;
 @int i=0;
 
-@problem PB(U,V,init=i,solver=Cholesky) =
+@problem PB(U,V,init=i,solver=Cholesky) = 
     @int2d(TH)( dx(U)*dx(V)+dy(U)*dy(V) )
-  + @int2d(TH)( -V)
-  + @int1d(TH,inside)(-lambda*V) +    on(outside,U= 0 ) ;
-@problem pb(u,v,init=i,solver=Cholesky) =
+  + @int2d(TH)( -V) 
+  + @int1d(TH,inside)(lambda*V) +    on(outside,U= 0 ) ;
+@problem pb(u,v,init=i,solver=Cholesky) = 
     @int2d(th)( dx(u)*dx(v)+dy(u)*dy(v) )
-  + @int2d(th)( -v)
-  + @int1d(th,inside)(+lambda*v) +    on(outside,u = 0 ) ;
+  + @int2d(th)( -v) 
+  + @int1d(th,inside)(-lambda*v) +    on(outside,u = 0 ) ;
+
 
 
 @for ( i=0 ;i< 10; i++)

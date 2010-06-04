@@ -63,7 +63,9 @@ struct set_substring: public binary_function<SubString,string *,SubString> {
      s.replace(a.i,a.j,*b);
      * a.s = s; // bofbof pour windows
      return a;}
-};    
+};
+
+
 
 SubString fSubString( string ** const & a,const SubArray & b)
  { return SubString(a,b);}
@@ -109,7 +111,10 @@ template<bool B>
 template<bool B>
  long string_find( String_find<B> const & sf,string *const &s,long const &i)
  {  return sf.find(s,i); }
- 
+string *  TOString(SubString const  & a)
+{
+    return new string(a.s->substr(a.j,a.i));
+}
 istream* getlinep( istream* f, string ** s)
  {
    getline(*f,**s);
@@ -124,7 +129,8 @@ void     initStringOperator()
   
    Dcl_Type< String_find<true> > ();
    Dcl_Type< String_find<false> > ();
-
+    map_type[typeid(string*).name()]->AddCast(
+    new E_F1_funcT<string*,SubString>(FCast<string*,SubString,TOString>));
 // ajoute pour les chaines
  Add<string **>("size",".",new OneOperator1<long,string **>(get_sizep) );
  Add<string **>("length",".",new OneOperator1<long,string **>(get_sizep) );

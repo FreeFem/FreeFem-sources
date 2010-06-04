@@ -1964,8 +1964,8 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
    
  R TypeOfFE::operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const 
   {
-   R v[1000],vf[100];
-   assert(N*3*NbDoF<=1000 && NbDoF <100 );
+   R v[10000],vf[1000];
+   assert(N*3*NbDoF<=10000 && NbDoF <1000 );
    KNMK_<R> fb(v,NbDoF,N,op+1); //  the value for basic fonction
    KN_<R> fk(vf,NbDoF);
    for (int i=0;i<NbDoF;i++) // get the local value
