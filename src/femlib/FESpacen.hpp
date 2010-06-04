@@ -685,8 +685,8 @@ inline  complex<R> GFElement<Mesh>::operator()(const RdHat & PHat,const KN_<comp
 template<class Mesh>
 R GTypeOfFE<Mesh>::operator()(const GFElement<Mesh> & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const 
 {
-    R v[5000],vf[100];
-    assert(N*last_operatortype*NbDoF<=5000 && NbDoF <100 );
+    R v[10000],vf[500];
+    ffassert(N*last_operatortype*NbDoF<=10000 && NbDoF <500 );
     KNMK_<R> fb(v,NbDoF,N,last_operatortype); //  the value for basic fonction
     KN_<R> fk(vf,NbDoF);
     for (int i=0;i<NbDoF;i++) // get the local value

@@ -41,6 +41,7 @@ if(0)
 // new operator
 t2 ="12340005678";
 t2(4:3) = "abcdefghijk-"; 
+string t55=t2(4:3);
 //t2 = "12340abcdefghijk-005678";
 cout << t2 << endl;
 cout << "  find abc " << t2.find("abc") << endl;
@@ -48,6 +49,7 @@ cout << "r find abc " << t2.rfind("abc") << endl;
 cout << " find abc from 10  " << t2.find("abc",10) << endl;
 cout << " ffind abc from 10 " <<t2.rfind("abc",10) << endl;
 cout << "   " << string("abcc").length << endl; 
+cout << " t55 " << t55 << endl;
 {  // add getline version 3.0-6 jan 2009 FH
 string s;
 ifstream toto("xyf");
