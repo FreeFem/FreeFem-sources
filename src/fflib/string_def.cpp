@@ -22,10 +22,10 @@
 
 class SubString {  public:
   string * s;
-  long i,j;
-  SubString(string **ss,long ii,long jj) :s(*ss),i(ii),j(jj)
+  long i,n;
+  SubString(string **ss,long ii,long jj) :s(*ss),i(ii),n(jj)
      {}
-  SubString(string **ss,const SubArray & sb) :s(*ss),i(sb.start),j(sb.n)
+  SubString(string **ss,const SubArray & sb) :s(*ss),i(sb.start),n(sb.n)
      {ffassert(sb.step==1);}
 };
 
@@ -60,7 +60,7 @@ struct set_substring: public binary_function<SubString,string *,SubString> {
   static SubString f(SubString const  & a, string  *const  & b)  
   {  
      string s=*a.s;
-     s.replace(a.i,a.j,*b);
+     s.replace(a.i,a.n,*b);
      * a.s = s; // bofbof pour windows
      return a;}
 };
@@ -113,7 +113,7 @@ template<bool B>
  {  return sf.find(s,i); }
 string *  TOString(SubString const  & a)
 {
-    return new string(a.s->substr(a.j,a.i));
+    return new string(a.s->substr(a.i,a.n));
 }
 istream* getlinep( istream* f, string ** s)
  {
