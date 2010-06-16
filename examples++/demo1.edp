@@ -1,0 +1,53 @@
+border aaa(t=0,1){x=t;y=0;label=1;};
+border bbb(t=0,0.5){x=1;y=t;label=2;};
+border ccc(t=0,0.5){x=1-t;y=0.5;label=3;};
+border ddd(t=0.5,1){x=0.5;y=t;label=4;};
+border eee(t=0.5,1){x=1-t;y=1;label=5;};
+border fff(t=0,1){x=0;y=1-t;label=6;};
+mesh Th = buildmesh (aaa(6) + bbb(4) + ccc(4) +ddd(4) + eee(4) + fff(6));
+// mesh Th2 = movemesh(Th,[x+1.1,y]);
+fespace Ph(Th,P0);
+fespace Vh(Th,P1);
+fespace Vh2(Th,P2);
+fespace Vh21(Th,P1);
+
+Vh u,v,zero;
+Vh2 u2,v2;
+Vh21 dxu2,dyu2;
+Ph eh;
+u=0;
+u2=0;
+zero=0;
+func f= 1;
+func g= 0;
+int i=0;
+real error=0.1, coef= 0.1^(1./5.);
+problem Probem1(u,v,solver=CG,init=i,eps=-1.0e-6) =
+    int2d(Th)(  dx(u)*dx(v) + dy(u)*dy(v)) 
+  + int2d(Th) ( v*f ) 
+  + on(1,2,3,4,5,6,u=g)  ;
+  
+problem Probem2(u2,v2,solver=CG,init=i,eps=-1.0e-6) =
+    int2d(Th)(  dx(u2)*dx(v2) + dy(u2)*dy(v2)) 
+  + int2d(Th) ( v2*f ) 
+  + on(1,2,3,4,5,6,u2=g)  ;
+  
+real cpu=clock();
+
+for (i=0;i< 10;i++)
+{ 
+  
+  real d = clock();
+  Probem1; 
+  Probem2; 
+  plot(Th,u,wait=1);
+  eh= abs(u-u2);
+  plot(Th,eh,fill=1,wait=1);
+  
+  Th=adaptmesh(Th,u,inquire=1,err=error,anisomax=1e6);
+  
+  cout << " CPU = " << clock()-d << endl;
+  error = error * coef;
+} ;
+
+ cout << " CPU = " << clock()-cpu << endl;

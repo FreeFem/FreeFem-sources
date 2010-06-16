@@ -1,0 +1,29 @@
+include @abs_top_builddir@/download/headers-sparsesolver.inc
+# Which compiler to use
+CC = @MPICC@
+
+# What optimization level to use  
+OPTFLAGS = @CFLAGS@   -DHAVE_CONFIG_H -I@abs_top_builddir@
+
+# Include directories for the compiler
+INCDIR =  @CPPFLAGS@ 
+
+# What options to be used by the compiler
+COPTIONS = 
+
+# Which loader to use
+LD = @MPICC@ @LDFLAGS@
+
+# In which directories to look for any additional libraries
+LIBDIR = @LDFLAGS@
+
+# What additional libraries to link the programs with (eg., -lmpi)
+XTRALIBS = $(FFMPILIB)
+
+# What archiving to use
+AR = @AR@ @ARFLAGS@
+
+# What to use for indexing the archive
+RANLIB = @RANLIB@
+
+WGET = @WGET@
