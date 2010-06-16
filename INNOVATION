@@ -1,3 +1,6 @@
+v 3.8-2
+  - add cast operator from SubString to String 
+  - correct the SubString tools 
 v 3.8
   - add in change mesh2 tool to make a renumbering of vertex for periodic 3d mesh. 
      Th= change(Th,renumv=old2new);

@@ -1948,7 +1948,7 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   int nbv=Th.nv; // nombre de sommet 
   int nbt=Th.nt; // nombre de triangles
   int nbe=Th.nbe; // nombre d'aretes fontiere
-  cout << "before movemesh: Vertex " << nbv<< " Tetrahedra " << nbt << " triangles "<< nbe << endl; 
+  if(verbosity>5)  cout << "before movemesh: Vertex " << nbv<< " Tetrahedra " << nbt << " triangles "<< nbe << endl; 
  
  // lecture des references
    
@@ -2422,8 +2422,8 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
   int nbv=Th.nv;  // nombre de sommet 
   int nbt=Th.nt;  // nombre de triangles
   int nbe=Th.neb; // nombre d'aretes fontiere
-  
-  cout << "before movemesh: Vertex Triangle Edge"<< nbv << nbt << nbe << endl;  
+  if(verbosity>5)
+    cout << "before movemesh: Vertex Triangle Edge"<< nbv << " "  << nbt << " " << nbe << endl;  
   
   KN<long> zzempty;
   //int intempty=0;
@@ -3244,7 +3244,7 @@ Mesh3 * MoveMesh2_func( const double &precis_mesh, const Mesh & Th2, const doubl
 	ind_nv_t   = new int[Th2.nv];
 	ind_nbe_t  = new int[Th2.nt];   
 	label_nbe_t = new int[Th2.nt];
-	
+	if(verbosity>5)
 	cout << "before movemesh::Vertex  triangle2  border " << Th2.nv << " "<<Th2.nt<< " " << Th2.neb<< endl;
 	
 	for(int ii=0; ii<Th2.nv; ii++){ 
@@ -4552,6 +4552,7 @@ AnyType DeplacementTab_Op::operator()(Stack stack)  const
   int nbv=Th.nv; // nombre de sommet 
   int nbt=Th.nt; // nombre de triangles
   int nbe=Th.nbe; // nombre d'aretes fontiere
+  if(verbosity>5)
   cout << "before movemesh: Vertex " << nbv<< " Tetrahedra " << nbt << " triangles "<< nbe << endl; 
  
  // lecture des references
