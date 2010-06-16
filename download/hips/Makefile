@@ -1,6 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
-# $Id$
+# $Id: Makefile,v 1.2 2010/03/31 08:50:56 hecht Exp $
 include makefile.inc
 
 all-local: hips
@@ -138,26 +138,21 @@ else
 OBJLIBSPKIT = $(ObjSPKIT)
 endif
 
-hips: FAIRE
+hips: FAIRE  
 
+FAIT:  
+	$(MAKE) $(SRCDIR)/$(INSTALL)  
+	touch FAIT
 
-FAIRE:
-	$(MAKE) install
+FAIRE: FAIT WHERE
 
 makefile.inc: ../Makefile   ../../config.status makefile-hips.inc Makefile     
-	grep 'abs_top_builddir *=' ../Makefile >> dirflags	
-	grep 'RANLIB *=' ../Makefile >> dirflags
-	cat dirflags makefile-hips.inc > makefile-hips-tmp.inc
-	rm dirflags
-	../../config.status  --file="makefile.inc:makefile-hips-tmp.inc"
-	case `uname` in *CYGWIN*)  cp makefile.inc makefile.incn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <makefile.incn > makefile.inc; rm makefile.incn ;; esac
-	rm makefile-hips-tmp.inc 
+	../../config.status  --file="makefile.inc:makefile-hips.inc"
 
-$(SRCDIR)/FAIT: $(SRCDIR)
+
+$(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-ff++
 	cp makefile.inc $(SRCDIR)
 	cd $(SRCDIR); $(MAKE)
-	touch $(SRCDIR)/FAIT
-install:
 	-rm $(SRCDIR)/LIB/*.a
 	$(AR) $(ARFLAGS) $(SRCDIR)/LIB/libhips.a $(OBJLIBHIPS)
 	$(RANLIB) $(SRCDIR)/LIB/libhips.a
@@ -172,9 +167,15 @@ install:
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/hips
 	cp $(SRCDIR)/LIB/*.h $(SRCDIR)/$(INSTALL)/include/hips/
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/hips
-	cp $(SRCDIR)/LIB/*.a $(SRCDIR)/$(INSTALL)/lib/hips/
+	cp $(SRCDIR)/LIB/*.a $(SRCDIR)/$(INSTALL)/lib/hips
+WHERE:
+	echo hips LD '-L@DIR@/lib/hips -lio -lhips'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.hips
+	echo hips INCLUDE '-I@DIR@/include/hips'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hips
+	echo hipssequential LD '-L@DIR@/lib/hips -lio -lhipssequential'  >>$(SRCDIR)/$(INSTALL)/lib/WHERE.hips
+	echo hipssequential INCLUDE '-I@DIR@/include/hips'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hips
 
-$(SRCDIR): $(PACKAGE)
+
+$(SRCDIR)/tag-ff++: $(PACKAGE)
 	tar xvzf $(PACKAGE)
 	cd $(SRCDIR)/SRC/INCLUDE/; patch -p1 < ../../../hips-1.2b-rc4-1.patch;
 	cd $(SRCDIR)/SRC/IO/; patch -p1 < ../../../hips-1.2b-rc4-2.patch;
@@ -183,7 +184,7 @@ $(SRCDIR): $(PACKAGE)
 	  sed 's/\$$(CC).*-E/$$(CPP) $$(CFLAGS) $$(CC_OPT)/' >$$d/makefile <$$d/makefile.orig;\
 	done
 	cp  SRC_SPKIT_makefile $(SRCDIR)/SRC/SPKIT/makefile
-	touch $(SRCDIR)
+	touch $(SRCDIR)/tag-ff++
 
 $(PACKAGE):
 	-mkdir $(DIRPKG)
@@ -194,6 +195,7 @@ clean-local:
 
 clean: clean-local
 	rm makefile.inc
+	-rm $(SRCDIR)/$(INSTALL)/WHERE/hips
 	-rm $(SRCDIR)/$(INSTALL)/lib/hips/*
 	-rm -rf $(SRCDIR)/$(INSTALL)/lib/hips/
 	-rm $(SRCDIR)/$(INSTALL)/include/hips/*

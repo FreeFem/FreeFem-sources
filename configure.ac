@@ -2,7 +2,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # ------------------------------------------------------------
 
 # Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
-# $Id$
+# $Id: configure.ac,v 1.338 2010/05/10 21:35:07 hecht Exp $
 
 # Version numbering: x.xx-pp where "pp" is the package version (when
 # the same FreeFem++ version is packaged several times). For
@@ -1496,7 +1496,7 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 #  AC_ARG_WITH(xfltk,[  --with-xfltk	When recompiling FLTK, use X libraries instead of native Win32 or MacOS])
 #  remove all fltk stuff
 # to remove of FLTK
-AC_MSG_NOTICE(without ide/ fltk ..... Please wait the next version.... ) 
+#AC_MSG_NOTICE(without ide/ fltk ..... Please wait the next version.... ) 
 if test 0 != 0 
  then  
 if test "$with_fltk" = no 
@@ -1713,7 +1713,6 @@ AC_OUTPUT(Makefile
 	download/blas/Makefile
 	download/arpack/Makefile
 	download/umfpack/Makefile
-	download/fltk/Makefile
 	src/Makefile
 	src/bamglib/Makefile
 	src/Graphics/Makefile
