@@ -1,5 +1,0 @@
-include
-ListOfUnAllocPtr.bin
-machinefile
-regtests-*.log
-Makefile
