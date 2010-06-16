@@ -1,0 +1,45 @@
+#-*-mode:org;ispell-local-dictionary:british;-*-
+
+Using Mercurial for FreeFem++ source files management
+-----------------------------------------------------
+Antoine Le Hyaric (http://www.ann.jussieu.fr/~lehyaric)
+
+The main difference with the previous CVS setup is that every working
+copy of FreeFem++ contains a complete Mercurial database of all source
+files (in a subdirectory called '.hg').
+
+* Creating a local copy of the FreeFem++ repository
+** from the web
+   hg clone http://www.freefem.org/freefem++
+** from another local directory
+   hg clone /another/local/dir
+** from another directory on a remote machine via ssh
+   hg clone ssh://myself@remotemachine//another/directory
+
+* Working with a repository
+
+  All the commands below should be run from a directory of the current
+  working copy.
+
+** Adding a file
+   hg add filename
+** Deleting a file
+   hg remove filename
+** Commiting all local changes to the local repository
+   hg commit -m "description of changes"
+** Checking if there are some uncommitted local changes
+   hg status
+
+* Exchanging changes with other repositories
+** Pulling changes from another (readable) repository
+  hg pull -u http://www.freefem.org/freefem++
+  hg pull -u /another/local/dir
+  hg pull -u ssh://myself@remotemachine//another/directory
+
+** Pushing changes into another (writable) repository
+  hg push http://www.freefem.org/freefem++
+  hg push /another/local/dir
+  hg push ssh://myself@remotemachine//another/directory
+
+* Official Mercurial documentation
+  http://mercurial.selenic.com/guide

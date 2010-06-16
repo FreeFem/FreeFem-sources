@@ -1723,7 +1723,6 @@ AC_OUTPUT(Makefile
 	src/fflib/Makefile
 	src/std/Makefile
 	src/x11/Makefile
-	src/ide/Makefile
 	src/nw/Makefile
 	src/mpi/Makefile
 	src/agl/Makefile
