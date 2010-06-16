@@ -1,4 +1,5 @@
 #-*-mode:org;ispell-local-dictionary:british;-*-
+#+STARTUP: showall
 
 Using Mercurial for FreeFem++ source files management
 -----------------------------------------------------
