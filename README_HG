@@ -15,7 +15,7 @@ files (in a subdirectory called '.hg').
 ** from another local directory
    hg clone /another/local/dir
 ** from another directory on a remote machine via ssh
-   hg clone ssh://myself@remotemachine//another/directory
+   hg clone ssh://myself@remotemachine/remote/directory
 
 * Working with a repository
 
@@ -35,11 +35,11 @@ files (in a subdirectory called '.hg').
 ** Pulling changes from another (readable) repository
   hg pull -u http://www.freefem.org/ff++/ff++
   hg pull -u /another/local/dir
-  hg pull -u ssh://myself@remotemachine//another/directory
+  hg pull -u ssh://myself@remotemachine/remote/directory
 
 ** Pushing changes into another (writable) repository
   hg push /another/local/dir
-  hg push ssh://myself@remotemachine//another/directory
+  hg push ssh://myself@remotemachine/another/directory
 
 * Official Mercurial documentation
   http://mercurial.selenic.com/guide
