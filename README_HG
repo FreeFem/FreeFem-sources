@@ -1,6 +1,7 @@
 #-*-mode:org;ispell-local-dictionary:british;-*-
 #+STARTUP: showall
 
+
 Using Mercurial for FreeFem++ source files management
 -----------------------------------------------------
 Antoine Le Hyaric (http://www.ann.jussieu.fr/~lehyaric)
@@ -15,7 +16,11 @@ files (in a subdirectory called '.hg').
 ** from another local directory
    hg clone /another/local/dir
 ** from another directory on a remote machine via ssh
-   hg clone ssh://myself@remotemachine/remote/directory
+   hg clone ssh://myself@remotemachine//another/directory
+** create the ~/.hgrc  file  for commit 
+[ui]
+username = Nathan Phillip Brink <jsmith@ohnopublishing.net>  
+
 
 * Working with a repository
 

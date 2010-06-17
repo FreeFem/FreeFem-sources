@@ -1,9 +1,9 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
+# $Id: Makefile.am,v 1.16 2010/05/06 21:20:38 hecht Exp $
 
-SUBDIRS=blas arpack umfpack fltk 
+SUBDIRS=blas arpack umfpack  
 EXTRA_DIST=f2c/Makefile f2c/f2c.h-int   f2c/fort77.sed	f2c/Makefile-MacOs tetgen/Makefile \
 tetgen/tetgen1.4.2.patch superlu/Makefile \
 fftw/Makefile metis/Makefile metis/Makefile-metis.in metis/patch-metis

@@ -1,5 +1,6 @@
+abs_top_builddir=@abs_top_builddir@
 DOWNLOADFF=$(abs_top_builddir)/download/
-include $(abs_top_builddir)/download/headers-sparsesolver.inc
+include $(DOWNLOADFF)/headers-sparsesolver.inc
 ### ADD for freefem++
 ###
 ###  HIPS specific compilation flags
@@ -41,7 +42,7 @@ INTSIZE      =
 ###
 
 ARCH       = -DLINUX
-
+RANLIB     = @RANLIB@ 
 CC	   = @CC@       # C compiler 
 MPICC      = @MPICC@ 
 CPP	   = cpp
@@ -50,22 +51,22 @@ MPIFC      = @MPIFC@
 LD	   = $(CC)     # Linker
 MPILD      = $(MPICC)
 
-CFLAGS	   =  -std=c99       # Additional C compiler flags
-FFLAGS	   =           # Additional Fortran compiler flags
-LFLAGS     =           # Additional linker flags
+CFLAGS	   =  @CFLAGS@         # Additional C compiler flags
+FFLAGS	   =  @FCFLAGS@        # Additional Fortran compiler flags
+LFLAGS     =  @LDFLAGS@         # Additional linker flags
 
 
 
 
-COPTFLAGS  = -O3 #-fno-inline      # Optimization flags
-FOPTFLAGS  = -O3 #-fno-inline      # 
+COPTFLAGS  =  #-fno-inline      # Optimization flags
+FOPTFLAGS  =  #-fno-inline      # 
 
 ###
 ###  Library
 ###
 
-IBLAS      =  @BLASINC@   # BLAS include path
-LBLAS      =  @BLASLIBS@   @LIBSPTHREAD@ # BLAS linker flags
+IBLAS      =  $(FFBLASINCLUDE)   # BLAS include path
+LBLAS      =  $(FFBLASLIB)  @LIBSPTHREAD@ # BLAS linker flags
 
 IMPI       =  $(FFMPIINCLUDE)      # Additional MPI include path
 LMPI       =  $(FFMPILIB)  -lsupc++ @FLIBS@  # Additional MPI linker flags
@@ -73,10 +74,10 @@ LMPI       =  $(FFMPILIB)  -lsupc++ @FLIBS@  # Additional MPI linker flags
 ##   METIS_DIR : path to METIS
 METIS_DIR  =  $(DOWNLOADFF)#
 IMETIS     = -I$(METIS_DIR)include/metis/
-LMETIS     = -L$(METIS_DIR)lib/parmetis/ -lmetis
+LMETIS     = -L$(METIS_DIR)lib/ -lmetis
 
 ##   SCOTCH_DIR : path to SCOTCH
-SCOTCH_DIR = $(DOWNLOADFF)#/Users/morice/work/postdoc/freefem++prod/download/
+SCOTCH_DIR = $(DOWNLOADFF)
 ISCOTCH    = -I$(SCOTCH_DIR)include/scotch
 LSCOTCH    = -L$(SCOTCH_DIR)lib/ -lscotch -lscotcherr
 
