@@ -28,7 +28,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.8}
+\def\VERSION{3.8-2}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -5641,9 +5641,8 @@ Another way to split mesh triangles is to use {\tt splitmesh}, for example:
 {  //  new stuff 2004 splitmesh (version 1.37)
   assert(version>=1.37);
   @border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
-  @plot(Th,wait=1,ps="nosplitmesh.eps"); // see figure \ref{fig nosplitmesh}
   @mesh Th=@buildmesh(a(20));
-  @plot(Th,wait=1);
+  @plot(Th,wait=1,ps="nosplitmesh.eps"); // see figure \ref{fig nosplitmesh}
   @Th=@splitmesh(Th,1+5*(square(x-0.5)+y*y));
   @plot(Th,wait=1,ps="splitmesh.eps"); // see figure \ref{fig splitmesh}
 }
@@ -16939,7 +16938,7 @@ To,  try the simple example under Linux or MacOS, do
  Load: lg_fem lg_mesh eigenvalue  UMFPACK
     1 : // Example of dynamic function load
     2 : // --------------------------------
-    3 : // $Id$
+    3 : // $Id: freefem++doc.tex,v 1.110 2010/06/04 11:27:24 hecht Exp $
     4 :
     5 :  @load "myfunction"
 
@@ -17023,7 +17022,7 @@ To test ,
  Load: lg_fem cadna lg_mesh eigenvalue  UMFPACK
     1 : // Example of dynamic function load
     2 : // --------------------------------
-    3 : // $Id$
+    3 : // $Id: freefem++doc.tex,v 1.110 2010/06/04 11:27:24 hecht Exp $
     4 : //   Discret Fast Fourier Transform
     5 : // -------------------------------
     6 :  @load "dfft" lood: init dfft
@@ -17110,7 +17109,7 @@ the associed edp file is  \texttt{examples++-load/convect\_dervieux.edp}
 \bFF
 //  Implementation of P1-P0 FVM-FEM
 // ---------------------------------------------------------------------
-// $Id$
+// $Id: freefem++doc.tex,v 1.110 2010/06/04 11:27:24 hecht Exp $
 // compile and link with ff-c++  mat\_dervieux.cpp  (i.e. the file name without .cpp)
 #include  <iostream>
 #include  <cfloat>

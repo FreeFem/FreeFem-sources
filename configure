@@ -13740,8 +13740,7 @@ STD_LIBS=$ff_std_libs
 #  AC_ARG_WITH(xfltk,[  --with-xfltk	When recompiling FLTK, use X libraries instead of native Win32 or MacOS])
 #  remove all fltk stuff
 # to remove of FLTK
-{ $as_echo "$as_me:${as_lineno-$LINENO}: without ide/ fltk ..... Please wait the next version.... " >&5
-$as_echo "$as_me: without ide/ fltk ..... Please wait the next version.... " >&6;}
+#AC_MSG_NOTICE(without ide/ fltk ..... Please wait the next version.... )
 if test 0 != 0
  then
 if test "$with_fltk" = no
@@ -14506,7 +14505,7 @@ LIBS=$ff_save_libs
 
 
 # All makefiles
-ac_config_files="$ac_config_files Makefile download/Makefile download/blas/Makefile download/arpack/Makefile download/umfpack/Makefile download/fltk/Makefile src/Makefile src/bamglib/Makefile src/Graphics/Makefile src/femlib/Makefile src/Algo/Makefile src/lglib/Makefile src/fflib/Makefile src/std/Makefile src/x11/Makefile src/ide/Makefile src/nw/Makefile src/mpi/Makefile src/agl/Makefile src/glx/Makefile src/bamg/Makefile src/libMesh/Makefile src/medit/Makefile src/bin-win32/Makefile examples++/Makefile examples++-eigen/Makefile examples++-tutorial/Makefile examples++-mpi/Makefile examples++-load/Makefile examples++-chapt3/Makefile examples++-bug/Makefile examples++-other/Makefile examples++-3d/Makefile DOC/Makefile"
+ac_config_files="$ac_config_files Makefile download/Makefile download/blas/Makefile download/arpack/Makefile download/umfpack/Makefile src/Makefile src/bamglib/Makefile src/Graphics/Makefile src/femlib/Makefile src/Algo/Makefile src/lglib/Makefile src/fflib/Makefile src/std/Makefile src/x11/Makefile src/nw/Makefile src/mpi/Makefile src/agl/Makefile src/glx/Makefile src/bamg/Makefile src/libMesh/Makefile src/medit/Makefile src/bin-win32/Makefile examples++/Makefile examples++-eigen/Makefile examples++-tutorial/Makefile examples++-mpi/Makefile examples++-load/Makefile examples++-chapt3/Makefile examples++-bug/Makefile examples++-other/Makefile examples++-3d/Makefile DOC/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -15237,7 +15236,6 @@ do
     "download/blas/Makefile") CONFIG_FILES="$CONFIG_FILES download/blas/Makefile" ;;
     "download/arpack/Makefile") CONFIG_FILES="$CONFIG_FILES download/arpack/Makefile" ;;
     "download/umfpack/Makefile") CONFIG_FILES="$CONFIG_FILES download/umfpack/Makefile" ;;
-    "download/fltk/Makefile") CONFIG_FILES="$CONFIG_FILES download/fltk/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "src/bamglib/Makefile") CONFIG_FILES="$CONFIG_FILES src/bamglib/Makefile" ;;
     "src/Graphics/Makefile") CONFIG_FILES="$CONFIG_FILES src/Graphics/Makefile" ;;
@@ -15247,7 +15245,6 @@ do
     "src/fflib/Makefile") CONFIG_FILES="$CONFIG_FILES src/fflib/Makefile" ;;
     "src/std/Makefile") CONFIG_FILES="$CONFIG_FILES src/std/Makefile" ;;
     "src/x11/Makefile") CONFIG_FILES="$CONFIG_FILES src/x11/Makefile" ;;
-    "src/ide/Makefile") CONFIG_FILES="$CONFIG_FILES src/ide/Makefile" ;;
     "src/nw/Makefile") CONFIG_FILES="$CONFIG_FILES src/nw/Makefile" ;;
     "src/mpi/Makefile") CONFIG_FILES="$CONFIG_FILES src/mpi/Makefile" ;;
     "src/agl/Makefile") CONFIG_FILES="$CONFIG_FILES src/agl/Makefile" ;;
