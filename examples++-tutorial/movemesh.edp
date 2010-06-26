@@ -1,0 +1,27 @@
+// simple movemesh example
+mesh Th=square(10,10);
+fespace Vh(Th,P1); 
+real t=0;
+// ---
+//  problem is how to build data without interpolation
+//  so the data u is moving with the mesh hse you can see in the plot
+// ---
+Vh u=y;
+for (int i=0;i<4;i++)
+{ 
+ t=i*0.1;
+ Vh f= x*t;
+ real minarea=checkmovemesh(Th,[x,y+f]);
+ if (minarea >0 ) //  the movemesh will be ok
+   Th=movemesh(Th,[x,y+f]);
+ cout << " Min area  " << minarea << endl;
+//  u=(Vh,u[]);  // the new syntaxe  FH
+ Vh tmp;     // =u[],  sorry no init of FEspace function with array. 
+ tmp[]=u[];  //save the value  
+ u=0;        // to change the FEspace and mesh  associated to u
+ u[]=tmp[];  // set le value of the array without no mesh update 
+ plot(Th,u,wait=1);
+};
+//  remark, in this programme we have no solution with link to a previous mesh
+// so all the previoux are delete in memory
+//   -------- 

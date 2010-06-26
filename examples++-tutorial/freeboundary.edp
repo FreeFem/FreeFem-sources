@@ -1,0 +1,76 @@
+//  
+//   calcul d'une zone saturation en eau (nappe phréatique)
+//
+real L=10;        // longueur du domaine					   	
+real q=0.02;      // flux entrant
+real K=0.5;	      //permeabilité	
+
+real  erradap=0.001;
+real  coef=1;
+
+
+
+real h=2.1;	 // hauteur du bord gauche
+real h1=0.35;    // hauteur du bord droite
+
+//  maillage d'un tapeze
+border a(t=0,L){x=t;y=0;};       // bas			   	
+border b(t=0,h1){x=L;y=t;};      // droite
+border f(t=L,0){x=t;y=t*(h1-h)/L+h;}; //  free surface
+border d(t=h,0){x=0;y=t;};      // gauche
+
+int n=10;
+mesh Th=buildmesh (a(L*n)+b(h1*n)+f(sqrt(L^2+(h-h1)^2)*n)+d(h*n));
+plot(Th,ps="dTh.eps");
+
+fespace Vh(Th,P1);
+int j=0,ii=0;
+
+Vh u,v,uu,vv;
+
+problem Pu(u,uu,solver=CG) = int2d(Th)( dx(u)*dx(uu)+dy(u)*dy(uu)) 
+  + on(b,f,u=y) ;
+
+problem Pv(v,vv,solver=CG) = int2d(Th)( dx(v)*dx(vv)+dy(v)*dy(vv)) 
+  +  on (a, v=0) + int1d(Th,f)(vv*((q/K)*N.y- (dx(u)*N.x+dy(u)*N.y))); 
+  
+
+real errv=1;
+verbosity=1;
+while(errv>1e-6)
+{
+  j++;       
+  Pu;
+  Pv;
+  plot(Th,u,v ,wait=0);
+  errv=int1d(Th,f)(v*v);
+  
+//  if (j%10==0)
+//    Th=adaptmesh(Th,u,err=erradap ) ;
+  real coef=1;
+  real mintcc = checkmovemesh(Th,[x,y])/5.; 
+  real mint = checkmovemesh(Th,[x,y-v*coef]); 
+  
+  if (mint<mintcc ||  j%10==0) {  
+    Th=adaptmesh(Th,u,err=erradap ) ;
+    v=v;
+    u=u;
+    mintcc = checkmovemesh(Th,[x,y])/5.;     
+  }
+  
+  while (1) 
+  {  	    
+    real mint = checkmovemesh(Th,[x,y-v*coef]); 
+    
+    if (mint>mintcc) break;
+    
+    cout << " min |T]  " << mint << endl;    
+    coef /= 1.5;
+  }
+  
+  Th=movemesh(Th,[x,y-coef*v]); // calcul de la deformation 
+  cout << "\n\n"<<j <<"------------ errv = " << errv << "\n\n";
+
+}
+plot(Th,ps="d_Thf.eps");
+plot(u,wait=1,ps="d_u.eps",fill=1);

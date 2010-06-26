@@ -1,0 +1,123 @@
+// correct bug in CahuetChabard routine 
+// sign of pressure correct 
+// and change Bx, By in Bx' By' (back and forth) in  version>1.18
+//  correction in CahouetChabard routine in version 1.26
+ 
+assert(version>1.18); //  for big bug is non symetric matrix see HISTORY 
+real s0=clock();
+mesh Th=square(10,10);
+fespace Xh(Th,P2),Mh(Th,P1);
+Xh u1,u2,v1,v2;
+Mh p,q,ppp;
+real[int] pwork(p.n);
+
+int i=0;
+real one =1;
+varf bx(u1,q) = int2d(Th,qforder=4)( dx(u1)*q ); 
+
+varf by(u1,q) = int2d(Th,qforder=4)( dy(u1)*q );
+
+varf a(u1,u2)= int2d(Th,qforder=4)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
+                   +  on(3,u1=1)  +  on(1,2,4,u1=0)  ;
+
+
+varf vfMass(p,q) = int2d(Th)(p*q);
+matrix MassMh=vfMass(Mh,Mh,solver=CG);
+p[]=1;
+ppp[]= MassMh*p[];
+real aire = ppp[].sum;
+cout << " area of Omega = " << aire << endl;
+Xh bc1; bc1[] = a(0,Xh);
+Xh b;
+                   
+matrix A= a(Xh,Xh,solver=CG); 
+matrix Bx= bx(Xh,Mh); //  Mh corresponding to line and Xh to column
+matrix By= by(Xh,Mh);
+Xh bcx=(1-x)*x*4,bcy=0;
+Xh b1=0,b2=0;  //  right hand side (0) for Stokes 
+
+func real[int] divup(real[int] & pp)
+{ 
+   pwork= MassMh*pp;
+   cout << " pp moy = " << pwork.sum/aire << " " ;
+   pp -= pwork.sum/aire;;
+   b = b1; b[]  += Bx'*pp; b[] += bc1[] .*bcx[];
+   u1[] = A^-1*b[];
+   b = b2; b[]  += By'*pp; b[] += bc1[] .*bcy[];
+   u2[] = A^-1*b[];
+   ppp[]  =   Bx*u1[];
+   ppp[] +=   By*u2[];
+   pwork= MassMh*ppp[];
+   cout << " moy = " << pwork.sum/aire << endl;
+ //   ppp[] -=  pwork.sum/aire;
+   return ppp[] ;
+};
+
+
+p=0;q=0;u1=0;v1=0;
+//cout << " -------- A = " << A << endl;
+        
+LinearCG(divup,p[],q[],eps=1.e-6,nbiter=50);
+divup(p[]);
+
+plot([u1,u2],p,wait=1,value=true,coef=0.1);
+
+real dt=0.05, alpha=1/dt;
+if ( alpha > 1e30) exit(1);
+real xnu=1./400.;
+cout << " alpha = " << alpha << " nu = " << xnu << endl;
+cout << "------------------------------------------ " << endl;
+varf at(u1,u2)=   int2d(Th)( xnu*dx(u1)*dx(u2) + xnu*dy(u1)*dy(u2)  + u1*u2*alpha  ) 
+               +  on(3,u1=1)  +  on(1,2,4,u1=0)  ;
+
+A = at(Xh,Xh,solver=CG);
+//cout << " -------- AA = " << AA << endl;
+
+varf  vfconv1(uu,vv)  = int2d(Th,qforder=5) (convect([u1,u2],-dt,u1)*vv*alpha);
+varf  vfconv2(v2,v1)  = int2d(Th,qforder=5) (convect([u1,u2],-dt,u2)*v1*alpha);
+int idt;
+real temps=0; 
+
+Mh pprec,prhs;
+
+varf vfLap(p,q)  = int2d(Th)(dx(p)*dx(q) + dy(p)*dy(q) + p*q*1e-3);
+matrix LapMh= vfLap(Mh,Mh,solver=Cholesky,factorize=true);
+
+real[int] unMh(pprec.n);
+pprec[]=1; 
+unMh = MassMh*pprec[]; 
+ 
+   
+
+func real[int]  CahouetChabart(real[int] & xx)
+{   //  xx = \int (div u) w_i
+   //   $ \alpha \Delta^{-1}  + \nu I $ 
+   //   $ \alpha \LapMh ^{-1}  + \nu MassMh^-1 $ 
+   real mxx= unMh'*xx;
+   xx -= mxx*Th.area;
+   pprec[]= LapMh^-1* xx; 
+   prhs[] =  MassMh^-1*xx;
+   pprec[] = alpha*pprec[]+xnu* prhs[];
+//   xx = LapMh*pprec[];
+//   pprec[] -= xx.sum;
+   return pprec[];
+};
+
+Xh up1,up2;
+for (idt = 1; idt < 50; idt++)
+ {
+    up1=u1;
+    up2=u2;
+   temps += dt;
+   cout << " --------- temps " << temps << " \n ";
+   b1[] =  vfconv1(0,Xh);
+   b2[] =  vfconv2(0,Xh);
+   cout << "  min b1 b2  " << b1[].min << " " << b2[].min 
+        << "  max b1 b2  " << b1[].max << " " << b2[].max << endl;
+   LinearCG(divup,p[],q[],eps=-1.e-6,nbiter=50,precon=CahouetChabart);
+   divup(p[]); 
+   real errl2 = sqrt(int2d(Th)( (u1-up1)^2 + (u2-up2)^2 ) );
+   cout << " errl2 " << errl2 << endl;
+   plot([u1,u2],p,wait=!(idt%10),value= 1,coef=0.1,cmm="[u1,u2],p || u^n+1 - u^n ]]_L2 ="+errl2);     
+   if (errl2 < 1e-4) break;
+ }

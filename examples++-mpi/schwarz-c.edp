@@ -1,0 +1,60 @@
+//  a new coding  methode de schwarz 
+// with 2 proc. 
+//  -------------------------------
+// F.Hecht december 2003
+// ----------------------------------
+//  to test the broadcast instruction 
+//  and array of mesh 
+//  add add the stop test 
+//  ---------------------------------
+
+if ( mpisize != 2 ) {
+cout << " sorry number of processeur !=2 " << endl;
+exit(1);}
+verbosity=3;
+real pi=4*atan(1);
+int inside = 2;
+int outside = 1;
+border a(t=1,2){x=t;y=0;label=outside;};
+border b(t=0,1){x=2;y=t;label=outside;};
+border c(t=2,0){x=t ;y=1;label=outside;};
+border d(t=1,0){x = 1-t; y = t;label=inside;};
+border e(t=0, pi/2){ x= cos(t); y = sin(t);label=inside;};
+border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=outside;}; 
+int n=4;
+mesh[int]  Th(mpisize);
+if (mpirank == 0) 
+ Th[0] = buildmesh( a(5*n) + b(5*n) + c(10*n) + d(5*n));
+else
+ Th[1] = buildmesh ( e(5*n) + e1(25*n) );
+
+broadcast(processor(0),Th[0]);
+broadcast(processor(1),Th[1]);
+
+fespace Vh(Th[mpirank],P1);
+fespace Vhother(Th[1-mpirank],P1);
+
+Vh u=0,v;
+Vhother U=0;
+int i=0;
+
+problem pb(u,v,init=i,solver=Cholesky) = 
+    int2d(Th[mpirank])( dx(u)*dx(v)+dy(u)*dy(v) )
+  + int2d(Th[mpirank])( -v) + on(inside,u = U)  +    on(outside,u= U ) ;
+
+for ( i=0 ;i< 20; i++) 
+{ 
+  cout << mpirank << " looP " << i << endl;
+   pb; 
+   //  send u  to the other proc, receive in U
+   processor(1-mpirank) << u[];    processor(1-mpirank) >> U[];
+   real err0,err1;
+   err0 = int1d(Th[mpirank],inside)(square(U-u)) ;
+   // send err0  to the other proc, receive in err1
+   processor(1-mpirank)<<err0;   processor(1-mpirank)>>err1;
+   real err= sqrt(err0+err1);
+   cout <<" err = " << err << " err0 = " << err0 << ", err1 = " << err1 << endl;
+   if(err<1e-3) break;
+};
+if (mpirank==0)  
+    plot(u,U,ps="uU.eps");

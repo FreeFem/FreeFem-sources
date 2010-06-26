@@ -1,0 +1,9 @@
+load "ffrandom"
+srandomdev();
+cout << random() << endl;
+cout << random() << endl;
+cout << random() << endl;
+srandom(10);
+cout << random() << endl;
+cout << random() << endl;
+cout << random() << endl;

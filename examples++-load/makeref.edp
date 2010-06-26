@@ -1,0 +1,200 @@
+// Regression tests
+// ----------------
+
+// $Id$
+
+// Regression tests
+// ----------------
+
+// The tests are checked against reference values by "make check" in
+// each examples subdirectory
+
+// "ref.edp" contains all reference values and may be rebuilt with
+// "make Ref"
+
+// $Id$
+
+// The values tested here may not have a physical or mathematical
+// meaning. Their main property is to gather numerical values from the
+// whole domain, to be checked for consistency with previous runs.
+
+NoUseOfWait=true;
+int verbosityy=verbosity;
+
+
+
+
+ofstream ref("ref.edp");
+
+
+
+
+
+// The values tested here may not have a physical or mathematical
+// meaning. Their main property is to gather numerical values from the
+// whole domain, to be checked for consistency with previous runs.
+cout << "--------- file : load.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "load.edp";
+	real TESTload=uh[].max;
+		ref<<"real REFload="<<TESTload<<";"<<endl;
+};
+
+cout << "--------- file : testFE.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "testFE.edp";
+	
+};
+
+cout << "--------- file : testFEMorley.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "testFEMorley.edp";
+	
+};
+
+cout << "--------- file : funcTemplate.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "funcTemplate.edp";
+	
+};
+
+cout << "--------- file : LapDG3.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "LapDG3.edp";
+	
+};
+
+cout << "--------- file : LapDG4.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "LapDG4.edp";
+	
+};
+
+cout << "--------- file : LaplaceP3.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "LaplaceP3.edp";
+	
+};
+
+cout << "--------- file : LaplaceP4.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "LaplaceP4.edp";
+	
+};
+
+cout << "--------- file : bilapMorley.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "bilapMorley.edp";
+	
+};
+
+cout << "--------- file : plot-fb-P3.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "plot-fb-P3.edp";
+	
+};
+
+cout << "--------- file : plot-fb-P3dc.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "plot-fb-P3dc.edp";
+	
+};
+
+cout << "--------- file : plot-fb-P4.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "plot-fb-P4.edp";
+	
+};
+
+cout << "--------- file : plot-fb-P4dc.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "plot-fb-P4dc.edp";
+	
+};
+
+cout << "--------- file : splitmesh3.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "splitmesh3.edp";
+	
+};
+
+cout << "--------- file : splitmesh6.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "splitmesh6.edp";
+	
+};
+
+cout << "--------- file : testFE-PkEdge.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "testFE-PkEdge.edp";
+	
+};
+
+cout << "--------- file : testFE.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "testFE.edp";
+	
+};
+
+cout << "--------- file : testFEMorley.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "testFEMorley.edp";
+	
+};
+
+
+
