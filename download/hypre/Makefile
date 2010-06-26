@@ -71,7 +71,7 @@ $(SRCDIR): $(PACKAGE)
 
 $(PACKAGE):
 	-mkdir $(DIRPKG)
-	cd $(PKGDIR); $(WGET) --no-check-certificate  $(SERVER)/`basename $(PACKAGE)`
+	cd $(PKGDIR); $(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 clean: clean-local
 	-rm ff-flags

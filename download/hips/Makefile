@@ -177,13 +177,14 @@ WHERE:
 
 $(SRCDIR)/tag-ff++: $(PACKAGE)
 	tar xvzf $(PACKAGE)
-	cd $(SRCDIR)/SRC/INCLUDE/; patch -p1 < ../../../hips-1.2b-rc4-1.patch;
-	cd $(SRCDIR)/SRC/IO/; patch -p1 < ../../../hips-1.2b-rc4-2.patch;
-	cd $(SRCDIR); for d in SRC/INCLUDE SRC/IO SRC/SPKIT TESTS/PARALLEL; do \
-	  cp $$d/makefile $$d/makefile.orig; \
-	  sed 's/\$$(CC).*-E/$$(CPP) $$(CFLAGS) $$(CC_OPT)/' >$$d/makefile <$$d/makefile.orig;\
-	done
-	cp  SRC_SPKIT_makefile $(SRCDIR)/SRC/SPKIT/makefile
+	cd $(SRCDIR); patch -p1 <../hips-1.2b-rc4.patch
+#	cd $(SRCDIR)/SRC/INCLUDE/; patch -p1 < ../../../hips-1.2b-rc4-1.patch;
+#	cd $(SRCDIR)/SRC/IO/; patch -p1 < ../../../hips-1.2b-rc4-2.patch;
+#	cd $(SRCDIR); for d in SRC/INCLUDE SRC/IO SRC/SPKIT TESTS/PARALLEL; do \
+#	  cp $$d/makefile $$d/makefile.orig; \
+#	  sed 's/\$$(CC).*-E/$$(CPP) $$(CFLAGS) $$(CC_OPT)/' >$$d/makefile <$$d/makefile.orig;\
+#	done
+#	cp  SRC_SPKIT_makefile $(SRCDIR)/SRC/SPKIT/makefile
 	touch $(SRCDIR)/tag-ff++
 
 $(PACKAGE):

@@ -201,6 +201,12 @@ then
     then
 	AC_MSG_ERROR([ Fatal Error: Your fortran 77  compiler have by 8 bytes integer ],1);  
     fi
+    [echo f77 LD  $FLIBS  >>$ff_where_lib_conf]
+    [echo f77 INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf]
+#  bof bof -- FH ... 
+    [echo fc LD  $FLIBS  >>$ff_where_lib_conf]
+    [echo fc INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf]
+
 # AC_DEFINE_UNQUOTED(FF_F77_INTEGER_SIZE,$ff_f77intsize,[ size of F77 integer ])
 fi
 #  fin test FORTRAN ..........
@@ -630,6 +636,7 @@ fi
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
 dnl m4_include(ax_mpi.m4)
+ff_save_path="$PATH"
 # We need to choose between mpich, openmpi  and lam for the Debian package
 AC_ARG_WITH(mpi,[  --with-mpi=[yes/no/mpiCC/mpic++/... ]	or --without-mpi	Choose MPI implementation (default is mpic++)])
 
@@ -652,14 +659,14 @@ fi
 if test "$with_mpi" != no
 then
 	ff_mpi_path=`dirname "$ff_mpicxx"`;
-#	echo "ff_mpi_path $ff_mpi_path .............."
+dnl	echo "ff_mpi_path '$ff_mpi_path' .............."
 	case "$ff_mpi_path" in
 	    .) ff_mpi_path="";ff_mpipath=$PATH;;
 	    *) ff_mpi_path="$ff_mpi_path";ff_mpipath="$ff_mpi_path:$PATH";;
 	esac	
-#	echo "ff_mpi_path $ff_mpi_path ..............."
+#	export PATH="$ff_mpi_path:$PATH"
 	AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
-	AC_PATH_PROGS(MPICXX, mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++,no,path=$ff_mpipath)
+	AC_PATH_PROGS(MPICXX, mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++,no,$ff_mpi_path)
 	AC_MSG_CHECKING(for $ff_mpicxx)
 	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
@@ -686,7 +693,8 @@ ff_mpi=no)
 
 	if test "$ff_mpi" = yes;
 	then
-		AC_PATH_PROGS(ff_mpirun,mpirun mpiexec,no,path=$ff_mpipath)
+	echo "ff_mpi_path::$ff_mpi_path:"
+		AC_PATH_PROGS(ff_mpirun,mpirun mpiexec,no,"$ff_mpi_path")
 		if test "$ff_mpirun" = no
 		then
 			ff_mpi=no
@@ -709,14 +717,25 @@ ff_mpi=no)
 	fi
 	if test "$ff_mpi" = yes;
 	then
+          ff_mpishow=`$MPICXX -show`
+          case $ff_mpishow  in
+	  *openmpi*) echo openmpi;;
+	  *lam*) echo lam mpi;;
+	  *mpich2*) echo mpich2 ;;
+	  *) echo unknwow mpi;;
+	  esac
 
-#	    ff_MPI_INCLUDE=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`
-	    ff_MPI_INCLUDE=
+
+	    [ff_MPI_INCLUDE=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`]
+#	    ff_MPI_INCLUDE=
 	    ff_MPI_LIB_DIRS=""
-	    ff_MPI_LIB=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`
-	    ff_mpi_idir=`$MPICXX -show|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include/'
+	    [ff_MPI_LIB=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
+	    [ff_mpi_idir=`$MPICXX -show|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
+            ff_MPI_INCLUDE_DIR=""
+	    echo ff_MPI_INCLUDE $ff_MPI_INCLUDE
+	    echo ff_MPI_LIB $ff_MPI_LIB
 	    for i in $ff_mpi_idir; do
-	    if test -f "$i/mpi.h"  ;then
+	    if test -f "$i/mpi.h" -a -z "$ff_MPI_INCLUDE_DIR"  ;then
 	      ff_MPI_INCLUDE_DIR=$i
 	    fi
 	    done
@@ -726,32 +745,43 @@ ff_mpi=no)
 	    AC_SUBST(MPI_LIB,$ff_MPI_LIB)
 
 	    AC_SUBST(MPICXX,$MPICXX)		
-	    AC_ARG_VAR(MPICC,[MPI C compiler command])
-	    AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",path=$ff_mpipath)
+	    AC_ARG_VAR(MPICC,[MPI C compiler command in $ff_mpi_path])
+	    AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
 	    AC_SUBST(MPICC,$MPICC)
 	    
 	    if test "$enable_fortran" != no
 	    then	
 		
 		AC_ARG_VAR(MPIF77,[MPI Fortran 77 compiler command])
-		AC_PATH_PROGS(MPIF77, mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, "",path=$ff_mpipath)
+		AC_PATH_PROGS(MPIF77, mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, "",$ff_mpi_path)
 		AC_SUBST(MPIF77)
 		
 		AC_ARG_VAR(MPIFC,[MPI Fortran 90  compiler command])
-		AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",path=$ff_mpipath)
+		AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",$ff_mpi_path)
 		AC_SUBST(MPIFC)
 	    fi
-	    if test ! -f "$ff_MPI_INCLUDE_DIR/fmpi.h"  ; then
-	        AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/fmpi.h"  ])
+	    if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
+	        AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/mpif.h"  ])
 	    else
-		echo mpifc LD `$MPIFC -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`  >$ff_where_lib_conf
-		echo mpifc INCLUDE `$MPIFC -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'|tr '\n' ' '`  >$ff_where_lib_conf
-  	    fi 	    
+		if test -n "$MPIFC" ; then
+		    [echo mpifc LD `$MPIFC -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`  >>$ff_where_lib_conf]
+		    [echo mpifc INCLUDE `$MPIFC -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'|tr '\n' ' '`  >>$ff_where_lib_conf]
+		fi
+		if test -n "$MPIF77" ; then
+		    [echo mpif77 LD `$MPIF77 -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`  >>$ff_where_lib_conf]
+		    [echo mpif77 INCLUDE `$MPIF77 -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'|tr '\n' ' '`  >>$ff_where_lib_conf]
+		fi
+  	    fi
+	    if test -n "$MPICXX" ; then 	    
+#	        [echo " ********* MPICXX $MPICXX " mpi LD `$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '` ]
+		[echo mpi LD `$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`  >>$ff_where_lib_conf]
+		[echo mpi INCLUDE `$MPICXX -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'|tr '\n' ' '`  >>$ff_where_lib_conf]
+	    fi
 	    AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		
 	fi
 	CXX="$ff_save_cxx"
 fi
-
+#export PATH="$ff_save_path"
 # Looking for useful configuration utilities
 # ------------------------------------------
 
@@ -761,7 +791,7 @@ AC_ARG_ENABLE(generic_blas,[  --enable-generic_blas	Download generic blas (impli
 AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK,FLTK)])
 
 #replacing wget with another command
-ff_wget_command=wget
+ff_wget_command="wget --no-check-certificate"
 ff_wget=no
 
 AC_ARG_WITH(wget,
@@ -781,7 +811,7 @@ fi
 if test  "$ff_wget" =  no 
 then
 	ff_wget=""	
-	AC_CHECK_PROG(ff_wget,wget,yes,no)
+	AC_CHECK_PROG(ff_wget,wget --no-check-certificate,yes,no)
 fi	
 if test  "$ff_wget" = no 
 then

@@ -1,5 +1,5 @@
-load "../src/solver/real_pastix_FreeFem"
-load "../src/solver/complex_pastix_FreeFem"
+load "real_pastix_FreeFem"
+load "complex_pastix_FreeFem"
 verbosity=1;
 
 //#################################

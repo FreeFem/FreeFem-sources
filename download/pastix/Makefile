@@ -29,18 +29,23 @@ endif
 
 pastix: FAIRE
 
-$(SRCDIR)/FAIT:
-	$(MAKE) $(SRCDIR)/$(INSTALL) 
-	touch $(SRCDIR)/FAIT
 
-FAIRE: $(SRCDIR)/FAIT
+WHERE: 
+	if [ -f $(SRCDIR)/FAIT  ] ;then \
+	echo "double_pastix LD '-L@DIR@/lib/pastix/double   -lpastix'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;\
+	echo "double_pastix INCLUDE '-I@DIR@/include/pastix/double'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.patix ;\
+	echo "complex_pastix LD '-L@DIR@/lib/pastix/complex   -lpastix'"  >>$(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;\
+	echo "complex_pastix INCLUDE '-I@DIR@/include/pastix/complex'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.patix ;\
+	fi
+
+FAIRE: $(SRCDIR)/FAIT  WHERE
 
 config.in: ../Makefile ../../config.status	Makefile
 	../../config.status  --file="config.in:config-pastix-real.in"
 	../../config.status  --file="config-complex.in:config-pastix-complex.in"
 
 
-$(SRCDIR)/$(INSTALL): $(SRCDIR) 
+$(SRCDIR)/FAIT: $(SRCDIR) 
 	cp config.in $(SRCDIR)/src/
 	cd $(SRCDIR)/src; $(MAKE) expor
 	#ifndef (,$(OBJLIBTOOL)) # redefinition of "cd $(SRCDIR)/src; $(MAKE) install" for libtool
@@ -103,6 +108,9 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)
 	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/complex/
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/complex
 	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/complex/
+	touch $(SRCDIR)/FAIT
+
+
 
 $(SRCDIR): $(PACKAGE1)
 	tar xvfj $(PACKAGE1)
@@ -112,13 +120,14 @@ $(SRCDIR): $(PACKAGE1)
 
 $(PACKAGE1):
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET) --no-check-certificate  $(SERVER)/`basename $(PACKAGE1)`
+	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE1)`
 
 clean-local:
 	-cd $(SRCDIR)/src/; $(MAKE) clean
 
 clean: clean-local
-	rm config.in
+	-rm config.in
+	-rm $(SRCDIR)/FAIT:
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/pastix/double
 	-rm -rf $(SRCDIR)/$(INSTALL)/lib/pastix/double
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/pastix/complex

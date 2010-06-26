@@ -1527,7 +1527,7 @@ Some influential environment variables:
   XMKMF       Path to xmkmf, Makefile generator for X Window System
   CXXCPP      C++ preprocessor
   MPICXX      MPI C++ compiler command
-  MPICC       MPI C compiler command
+  MPICC       MPI C compiler command in $ff_mpi_path
   MPIF77      MPI Fortran 77 compiler command
   MPIFC       MPI Fortran 90 compiler command
 
@@ -6123,6 +6123,12 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 	{ as_fn_set_status 1
 as_fn_error " Fatal Error: Your fortran 77  compiler have by 8 bytes integer " "$LINENO" 5; };
     fi
+    echo f77 LD  $FLIBS  >>$ff_where_lib_conf
+    echo f77 INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf
+#  bof bof -- FH ...
+    echo fc LD  $FLIBS  >>$ff_where_lib_conf
+    echo fc INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf
+
 # AC_DEFINE_UNQUOTED(FF_F77_INTEGER_SIZE,$ff_f77intsize,[ size of F77 integer ])
 fi
 #  fin test FORTRAN ..........
@@ -11127,6 +11133,7 @@ $as_echo "yes" >&6; }
 
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
+ff_save_path="$PATH"
 # We need to choose between mpich, openmpi  and lam for the Debian package
 
 # Check whether --with-mpi was given.
@@ -11154,12 +11161,11 @@ fi
 if test "$with_mpi" != no
 then
 	ff_mpi_path=`dirname "$ff_mpicxx"`;
-#	echo "ff_mpi_path $ff_mpi_path .............."
 	case "$ff_mpi_path" in
 	    .) ff_mpi_path="";ff_mpipath=$PATH;;
 	    *) ff_mpi_path="$ff_mpi_path";ff_mpipath="$ff_mpi_path:$PATH";;
 	esac
-#	echo "ff_mpi_path $ff_mpi_path ..............."
+#	export PATH="$ff_mpi_path:$PATH"
 
 	for ac_prog in mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++
 do
@@ -11176,7 +11182,7 @@ else
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in path=$ff_mpipath
+for as_dir in $ff_mpi_path
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -11242,6 +11248,7 @@ $as_echo "$ff_mpi" >&6; }
 
 	if test "$ff_mpi" = yes;
 	then
+	echo "ff_mpi_path::$ff_mpi_path:"
 		for ac_prog in mpirun mpiexec
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -11257,7 +11264,7 @@ else
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in path=$ff_mpipath
+for as_dir in "$ff_mpi_path"
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -11314,14 +11321,25 @@ test -n "$ff_mpirun" || ff_mpirun="no"
 	fi
 	if test "$ff_mpi" = yes;
 	then
+          ff_mpishow=`$MPICXX -show`
+          case $ff_mpishow  in
+	  *openmpi*) echo openmpi;;
+	  *lam*) echo lam mpi;;
+	  *mpich2*) echo mpich2 ;;
+	  *) echo unknwow mpi;;
+	  esac
 
-#	    ff_MPI_INCLUDE=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`
-	    ff_MPI_INCLUDE=
+
+	    ff_MPI_INCLUDE=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`
+#	    ff_MPI_INCLUDE=
 	    ff_MPI_LIB_DIRS=""
-	    ff_MPI_LIB=`$MPICXX -show|tr ' ' '\n'| grep -E '^-Llp|^-Wl,'|tr '\n' ' '`
-	    ff_mpi_idir=`$MPICXX -show|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include/'
+	    ff_MPI_LIB=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`
+	    ff_mpi_idir=`$MPICXX -show|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include'
+            ff_MPI_INCLUDE_DIR=""
+	    echo ff_MPI_INCLUDE $ff_MPI_INCLUDE
+	    echo ff_MPI_LIB $ff_MPI_LIB
 	    for i in $ff_mpi_idir; do
-	    if test -f "$i/mpi.h"  ;then
+	    if test -f "$i/mpi.h" -a -z "$ff_MPI_INCLUDE_DIR"  ;then
 	      ff_MPI_INCLUDE_DIR=$i
 	    fi
 	    done
@@ -11351,7 +11369,7 @@ else
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in path=$ff_mpipath
+for as_dir in $ff_mpi_path
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -11404,7 +11422,7 @@ else
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in path=$ff_mpipath
+for as_dir in $ff_mpi_path
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -11453,7 +11471,7 @@ else
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in path=$ff_mpipath
+for as_dir in $ff_mpi_path
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -11486,19 +11504,30 @@ test -n "$MPIFC" || MPIFC=""""
 
 
 	    fi
-	    if test ! -f "$ff_MPI_INCLUDE_DIR/fmpi.h"  ; then
-	        { $as_echo "$as_me:${as_lineno-$LINENO}:  MPI without fortran no file \"$ff_MPI_INCLUDE_DIR/fmpi.h\"  " >&5
-$as_echo "$as_me:  MPI without fortran no file \"$ff_MPI_INCLUDE_DIR/fmpi.h\"  " >&6;}
+	    if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
+	        { $as_echo "$as_me:${as_lineno-$LINENO}:  MPI without fortran no file \"$ff_MPI_INCLUDE_DIR/mpif.h\"  " >&5
+$as_echo "$as_me:  MPI without fortran no file \"$ff_MPI_INCLUDE_DIR/mpif.h\"  " >&6;}
 	    else
-		echo mpifc LD `$MPIFC -show|tr ' ' '\n'| grep -E '^-Llp|^-Wl,'|tr '\n' ' '`  >$ff_where_lib_conf
-		echo mpifc INCLUDE `$MPIFC -show|tr ' ' '\n'| grep -E '^-ID|^-Wp,'|tr '\n' ' '`  >$ff_where_lib_conf
+		if test -n "$MPIFC" ; then
+		    echo mpifc LD `$MPIFC -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`  >>$ff_where_lib_conf
+		    echo mpifc INCLUDE `$MPIFC -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'|tr '\n' ' '`  >>$ff_where_lib_conf
+		fi
+		if test -n "$MPIF77" ; then
+		    echo mpif77 LD `$MPIF77 -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`  >>$ff_where_lib_conf
+		    echo mpif77 INCLUDE `$MPIF77 -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'|tr '\n' ' '`  >>$ff_where_lib_conf
+		fi
   	    fi
+	    if test -n "$MPICXX" ; then
+#	        [echo " ********* MPICXX $MPICXX " mpi LD `$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '` ]
+		echo mpi LD `$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`  >>$ff_where_lib_conf
+		echo mpi INCLUDE `$MPICXX -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'|tr '\n' ' '`  >>$ff_where_lib_conf
+	    fi
 	    MPI_INC_DIR=$ff_MPI_INCLUDE_DIR
 
 	fi
 	CXX="$ff_save_cxx"
 fi
-
+#export PATH="$ff_save_path"
 # Looking for useful configuration utilities
 # ------------------------------------------
 
@@ -11516,7 +11545,7 @@ fi
 
 
 #replacing wget with another command
-ff_wget_command=wget
+ff_wget_command="wget --no-check-certificate"
 ff_wget=no
 
 
@@ -11539,8 +11568,8 @@ fi
 if test  "$ff_wget" =  no
 then
 	ff_wget=""
-	# Extract the first word of "wget", so it can be a program name with args.
-set dummy wget; ac_word=$2
+	# Extract the first word of "wget --no-check-certificate", so it can be a program name with args.
+set dummy wget --no-check-certificate; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
 if test "${ac_cv_prog_ff_wget+set}" = set; then :

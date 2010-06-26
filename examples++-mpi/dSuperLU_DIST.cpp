@@ -1,3 +1,5 @@
+//ff-c++-LIBRARY-dep: metis  superlu_dist
+//ff-c++-cpp-dep: 
 /*
   Interface freefem++ et SuperLU_DIST_2.3 
 

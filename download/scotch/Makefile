@@ -55,7 +55,7 @@ $(SRCDIR): $(PACKAGE)
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)  --no-check-certificate  $(SERVER)/`basename $(PACKAGE)`
+	cd $(DIRPKG);$(WGET)    $(SERVER)/`basename $(PACKAGE)`
 
 clean-local:
 	-cd $(SRCDIR)/src; make realclean 
