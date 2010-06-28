@@ -779,7 +779,7 @@ class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatr
   SolveGCDiag(const MatriceMorse<R> &A,int itmax,double epsilon=1e-6) : 
     VirtualMatrice<R>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),D1(n)
-  { throwassert(A.sym());
+  { //throwassert(A.sym());
     for (int i=0;i<n;i++)
       D1[i] = 1./A(i,i);}
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
