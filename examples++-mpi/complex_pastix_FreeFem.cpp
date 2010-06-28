@@ -74,8 +74,7 @@ using namespace std;
 #ifdef __cplusplus
 extern "C" {
 #endif
-*/
-extern "C" {
+
 #define pastix_int_t     long
 #define pastix_uint_t    unsigned long
 #define MPI_PASTIX_INT   MPI_LONG
@@ -84,10 +83,15 @@ extern "C" {
 #define INT              pastix_int_t
 #define UINT             pastix_uint_t
 #define FLOAT            pastix_float_t
+  struct pastix_data_t;
+  typedef struct pastix_data_t pastix_data_t;
+
+
 
 void pastix(pastix_data_t **pastix_data, MPI_Comm pastix_comm, INT n, INT *colptr, INT *row, 
 	    FLOAT *avals, INT *perm, INT *invp, FLOAT *b, INT rhs, INT *iparm, double *dparm);
-}
+
+
   //#include "pastix.h"
 #include "cscd_utils.h"
 #ifdef __cplusplus
