@@ -28,7 +28,7 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
-//ff-c++-LIBRARY-dep: complex_pastix   blas parmetis metis mpi fc
+//ff-c++-LIBRARY-dep: complex_pastix   blas parmetis metis scotch mpi fc
 //ff-c++-cpp-dep: 
 /*
   Interface entre freefem++ et pastix
@@ -54,50 +54,7 @@ using namespace std;
 
 
 #include <mpi.h>
-
-// #include <ctype.h>
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <unistd.h>
-// //#include <pthread.h>
-// #include <string.h>
-// #include <time.h>
-// #include <sys/time.h>
-// #include "mpi.h"
-   
-// #include <assert.h>
-// #include "pastix.h"
-// #include "cscd_utils.h"
-// #include "read_matrix.h"
-
-#include <assert.h>
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#define pastix_int_t     long
-#define pastix_uint_t    unsigned long
-#define MPI_PASTIX_INT   MPI_LONG
-#define pastix_float_t   Complex
-#define MPI_PASTIX_FLOAT GetMpiType()
-#define INT              pastix_int_t
-#define UINT             pastix_uint_t
-#define FLOAT            pastix_float_t
-  struct pastix_data_t;
-  typedef struct pastix_data_t pastix_data_t;
-
-
-
-void pastix(pastix_data_t **pastix_data, MPI_Comm pastix_comm, INT n, INT *colptr, INT *row, 
-	    FLOAT *avals, INT *perm, INT *invp, FLOAT *b, INT rhs, INT *iparm, double *dparm);
-
-
-  //#include "pastix.h"
-#include "cscd_utils.h"
-#ifdef __cplusplus
-}
-#endif
-//#include "read_matrix.h"
+#include "pastix_long_complex.h"
 
 #undef memFree_null
 #define memFree_null(x) {if (x ==NULL) {fprintf(stdout,"%s:%d freeing NULL\n",__FILE__,__LINE__);} free(x); x=NULL;}

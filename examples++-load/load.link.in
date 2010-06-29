@@ -139,6 +139,12 @@ done
 if [ -n "$autodep"  ] ; then
 #    echo "$thecommand" $args  `eval $dircommand/ff-get-dep -ff $files`
     argsdep=`eval $dircommand/ff-get-dep -ff $files`
+    
+     error=`echo "$argsdep"| grep ERROR`
+     if [ -n "$error" ] ; then
+	 echo " ERROR in  auto dependance seach.  sorry : $error "
+	 exit 0;
+     fi
     echo eval "$thecommand" $args  $argsdep
     eval "$thecommand" $args  $argsdep
     exit 0;

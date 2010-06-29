@@ -7,7 +7,7 @@
 // AUTHOR   : Jacques Morice
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
-//ff-c++-LIBRARY-dep: double_pastix   blas parmetis metis mpi fc
+//ff-c++-LIBRARY-dep: double_pastix   blas parmetis metis scotch  mpi fc
 //ff-c++-cpp-dep: 
 
 /* 
