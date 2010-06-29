@@ -43,10 +43,22 @@ if test -z "$CXX"; then
   AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
 fi
 
-AC_COMPUTE_INT(ff_size_long,sizeof(long))
-AC_COMPUTE_INT(ff_size_int,sizeof(int))
+AC_COMPUTE_INT(ff_size_long,[sizeof(long]))
+AC_COMPUTE_INT(ff_size_int,[sizeof(int)])
+AC_COMPUTE_INT(ff_size_ptr,[sizeof(int*)])
+
 AC_SUBST(SIZEOF_LONG,$ff_size_long)
 AC_SUBST(SIZEOF_INT,$ff_size_int)
+AC_SUBST(SIZEOF_PTR,$ff_size_ptr)
+if [ "$ff_size_ptr" -eq 4 ] ;then
+ AC_SUBST(SIZEOF_PTRINBIT,32)
+elif [ "$ff_size_ptr" -eq 8 ] ;then
+ AC_SUBST(SIZEOF_PTRINBIT,64)
+else
+  AC_MSG_ERROR([ Sorry no sizeof c++ pointer are not  4 or 8])
+  AC_MSG_NOTICE( [ fatal error : sizeof pointer ! ] ); 
+fi
+
 
 # dur dur car sous MacOsX le fortran n'est pas standard. 
 ff_AR="ar"

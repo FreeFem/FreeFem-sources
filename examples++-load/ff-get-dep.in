@@ -27,7 +27,8 @@ case "$1" in
     -l*)
 	shift;
 	for i in $@ ; do   
-	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first) {first=1; for (i=3;i<=NF;++i) {print $i," "};}' "$wherelib"  "$wherelib"-config "$wherelib"-download 
+	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first) {first=1; for (i=3;i<=NF;++i) {print $i," "};} 
+          END  { if(!first) print "ERROR-missing-lib:" p;} ' "$wherelib"  "$wherelib"-config "$wherelib"-download 
 	done
 	;;
     -dlib)
