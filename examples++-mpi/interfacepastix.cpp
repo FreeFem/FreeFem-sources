@@ -1,6 +1,9 @@
 /*
   Interface entre freefem++ et pastix
 */
+//ff-c++-LIBRARY-dep: double_pastix   blas parmetis metis scotch  mpi fc
+//ff-c++-cpp-dep: 
+
 #include  <iostream>
 using namespace std;
    

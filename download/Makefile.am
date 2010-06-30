@@ -29,13 +29,11 @@ all-local: $(DOWNLOADCOMPILE)
 compile-pkg:
 	-if [ -n "$(WGET)" ] ; then \
 	for d in tetgen superlu fftw metis yams mshmet mmg3d ; do \
-	 echo "(cd $$d;$(MAKE) ) " ;\
-	  ( cd "$$d";$(MAKE) ) ; \
+	if [ -d "$$d" ] ; then  echo "(cd $$d;$(MAKE) ) " ;   ( cd "$$d";$(MAKE) ) ;  fi \
 	done ;\
 	if [ -n "$(MPICC)" ] ; then \
 	for d in $(MPI_SOFT) ; do \
-	 echo "(cd $$d;$(MAKE) ) " ;\
-	  ( cd "$$d";$(MAKE) ) ; \
+	if [ -d "$$d" ] ; then  echo "(cd $$d;$(MAKE) ) " ;   ( cd "$$d";$(MAKE) ) ;  fi \
 	done ;\
 	fi; \
 	fi 
