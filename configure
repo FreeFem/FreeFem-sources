@@ -708,6 +708,8 @@ FC
 ac_ct_F77
 FFLAGS
 F77
+SIZEOF_PTRINBIT
+SIZEOF_PTR
 SIZEOF_INT
 SIZEOF_LONG
 am__fastdepCXX_FALSE
@@ -4830,7 +4832,7 @@ $as_echo "$as_me:  fatal error : c++ compiler !  " >&6;};
 fi
 
 
-if ac_fn_c_compute_int "$LINENO" "sizeof(long)" "ff_size_long"        ""; then :
+if ac_fn_c_compute_int "$LINENO" "sizeof(long" "ff_size_long"        ""; then :
 
 fi
 
@@ -4838,9 +4840,28 @@ if ac_fn_c_compute_int "$LINENO" "sizeof(int)" "ff_size_int"        ""; then :
 
 fi
 
+if ac_fn_c_compute_int "$LINENO" "sizeof(int*)" "ff_size_ptr"        ""; then :
+
+fi
+
+
 SIZEOF_LONG=$ff_size_long
 
 SIZEOF_INT=$ff_size_int
+
+SIZEOF_PTR=$ff_size_ptr
+
+if test "$ff_size_ptr" -eq 4  ;then
+ SIZEOF_PTRINBIT=32
+
+elif test  "$ff_size_ptr" -eq 8  ;then
+ SIZEOF_PTRINBIT=64
+
+else
+  as_fn_error " Sorry no sizeof c++ pointer are not  4 or 8" "$LINENO" 5
+  { $as_echo "$as_me:${as_lineno-$LINENO}:  fatal error : sizeof pointer !  " >&5
+$as_echo "$as_me:  fatal error : sizeof pointer !  " >&6;};
+fi
 
 
 # dur dur car sous MacOsX le fortran n'est pas standard.
