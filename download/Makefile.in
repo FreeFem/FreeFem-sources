@@ -318,10 +318,10 @@ hips/makefile-hips.inc			scotch/Makefile-scotch.inc \
 hypre/Makefile				scotch/scotch_5.1_esmumps.patch \
 hypre/ff-flags				superludist/Makefile \
 parmetis/Makefile-parmetis.in		superludist/make-superlu.inc \
-superludist/superludist_2.3.patch   \
+superludist/superludist_2.3.patch  \
 headers-sparsesolver.inc
 
-MPI_SOFT = blacs parmetis  scalapack scotch superludist mumps pastix hypre hips	
+MPI_SOFT = blacs parmetis  scalapack scotch superludist MUMPS pastix hypre hips	
 all: all-recursive
 
 .SUFFIXES:
@@ -686,7 +686,7 @@ compile-pkg:
 	done ;\
 	if [ -n "$(MPICC)" ] ; then \
 	for d in $(MPI_SOFT) ; do \
-	if [ -d "$$d" ] ; then  echo "(cd $$d;$(MAKE) ) " ;   ( cd "$$d";$(MAKE) ) ; else echo ** missing "$$d" directory  ; fi; \
+	if [ -d "$$d" ] ; then  echo "(cd $$d;$(MAKE) ) " ;   ( cd "$$d";$(MAKE) ) ; else echo ** missing "$$d" directory ;  fi; \
 	done ;\
 	fi; \
 	fi 
