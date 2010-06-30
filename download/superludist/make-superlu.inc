@@ -19,7 +19,7 @@ RANLIB       	= @RANLIB@
 # C compiler setup
 CC           	= @CC@
 # CFLAGS should be set to be the C flags that include optimization
-CFLAGS          = @CFLAGS@
+CFLAGS          = @CFLAGS@ @MPI_INCLUDE@
 # NOOPTS should be set to be the C flags that turn off any optimization
 NOOPTS		= 
 ############################################################################
