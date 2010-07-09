@@ -802,13 +802,15 @@ AnyType Adaptation::operator()(Stack stack) const
   // computation of the metric --- 
   // better thing -> create keyword in the language 
   //    a faire F Hecht .
+    
   Metric Mhmax(hmax);
+    double  ch2=2/(hmax*hmax);
   for ( iv=0;iv<Th.nbv;iv++) 
     Th[iv].m = Mhmax;
     
    if (mtx) 
     for ( iv=0;iv<Th.nbv;iv++) 
-      if ( ::Max(m11[iv],m12[iv],m22[iv]) > hmax) 
+      if ( (m11[iv]+m22[iv]) < ch2) // modif FH (Thank to J-F Remacle 07/2010)
        Th[iv].m = MetricAnIso(m11[iv],m12[iv],m22[iv]);
    
   if ( givenmetric)
