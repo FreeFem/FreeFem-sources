@@ -316,7 +316,7 @@ hips/hips-1.2b-rc4.patch		scalapack/SLmake-scalapack.inc \
 scotch/Makefile \
 hips/makefile-hips.inc			scotch/Makefile-scotch.inc \
 hypre/Makefile				scotch/scotch_5.1_esmumps.patch \
-hypre/ff-flags				superludist/Makefile \
+	superludist/Makefile \
 parmetis/Makefile-parmetis.in		superludist/make-superlu.inc \
 superludist/superludist_2.3.patch  \
 headers-sparsesolver.inc

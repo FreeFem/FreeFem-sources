@@ -1,3 +1,15 @@
+v 3.9  July 2009.
+  - add lots of automaque compilation of download soffware,
+   
+	tetgen superlu fftw metis yams mshmet 
+	blacs parmetis scalapack scotch superludist MUMPS pastix hypre hips 
+
+        For the link with mmg3d software put the tar.gz archive in .../dowload/pgk directory.
+    add interface with freeyams, mmg3d, mshmet (3d mesh adatation) software,
+    add automatique compilation of // solver with 
+      flags -auto in ff-c++ commands
+        
+
 v 3.8-2
   - add cast operator from SubString to String 
   - correct the SubString tools 
