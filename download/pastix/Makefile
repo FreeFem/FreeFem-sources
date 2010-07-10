@@ -109,7 +109,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/complex
 	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/complex/
 	patch $(SRCDIR)/$(INSTALL)/include/pastix/complex/pastix_long_complex.h   <patch-pastix_long_complex.h
-	patch $(SRCDIR)/$(INSTALL)/include/pastix/complex/pastix <patch-pastix_long_complex.h
+	patch $(SRCDIR)/$(INSTALL)/include/pastix/complex/pastix.h <patch-pastix_long_complex.h
 	touch $(SRCDIR)/FAIT
 
 
