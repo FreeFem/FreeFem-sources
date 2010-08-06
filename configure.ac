@@ -650,13 +650,13 @@ fi
 dnl m4_include(ax_mpi.m4)
 ff_save_path="$PATH"
 # We need to choose between mpich, openmpi  and lam for the Debian package
-AC_ARG_WITH(mpi,[  --with-mpi=[yes/no/mpiCC/mpic++/... ]	or --without-mpi	Choose MPI implementation (default is mpic++)])
+AC_ARG_WITH(mpi,[  --with-mpi=[yes|no|mpic++|lam|mpich|openmpi|/usr/local/bin/mpic++|... ]	or --without-mpi	Choose MPI implementation (default is mpic++)])
 
 #if test "$with_mpi" != no ; then
 #AX_MPI(with_mpi=yes, with_mpi=no)
 #fi
 
-# Default is mpich
+# Default is mpic++ 
 ff_mpi_suffix="";
 if test "$with_mpi" = yes -o -z "$with_mpi" 
 then
@@ -668,18 +668,21 @@ else
  esac
 fi
 
+dnl  correct ff_mpi_path august 2010 -- FH ...  
 if test "$with_mpi" != no
 then
-	ff_mpi_path=`dirname "$ff_mpicxx"`;
+	ff_mpi_path=`AS_DIRNAME(["$ff_mpicxx"])`
 dnl	echo "ff_mpi_path '$ff_mpi_path' .............."
 	case "$ff_mpi_path" in
-	    .) ff_mpi_path="";ff_mpipath=$PATH;;
-	    *) ff_mpi_path="$ff_mpi_path";ff_mpipath="$ff_mpi_path:$PATH";;
+	    .|"") ff_mpi_path="$PATH";ff_defmpicxx="$ff_mpicxx";;
+	    *) ff_mpi_path="$ff_mpi_path";ff_defmpicxx=`expr "//$ff_mpicxx" : '.*/\(.*\)'`;; 
+dnl if also  add $PATH they  could be missing some different mpi version... 
 	esac	
-#	export PATH="$ff_mpi_path:$PATH"
+        
 	AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
-	AC_PATH_PROGS(MPICXX, mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++,no,$ff_mpi_path)
-	AC_MSG_CHECKING(for $ff_mpicxx)
+	AC_PATH_PROGS(MPICXX,$ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++,no,$ff_mpi_path)
+	AC_MSG_CHECKING(for $MPICXX)
+	ff_mpicxx="$MPICXX"
 	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
 	AC_LINK_IFELSE(
@@ -706,7 +709,7 @@ ff_mpi=no)
 	if test "$ff_mpi" = yes;
 	then
 	echo "ff_mpi_path::$ff_mpi_path:"
-		AC_PATH_PROGS(ff_mpirun,mpirun mpiexec,no,"$ff_mpi_path")
+		AC_PATH_PROGS(ff_mpirun,mpirun mpiexec,no,$ff_mpi_path)
 		if test "$ff_mpirun" = no
 		then
 			ff_mpi=no
@@ -730,12 +733,12 @@ ff_mpi=no)
 	if test "$ff_mpi" = yes;
 	then
           ff_mpishow=`$MPICXX -show`
-          case $ff_mpishow  in
-	  *openmpi*) echo openmpi;;
-	  *lam*) echo lam mpi;;
-	  *mpich2*) echo mpich2 ;;
-	  *) echo unknwow mpi;;
-	  esac
+#          case $ff_mpishow in
+#	  *openmpi*) echo which mpi : openmpi;;
+#	  *lam*) echo lam mpi;;
+#	  *mpich2*) echo mpich2 ;;
+#	  *) echo unknow mpi;;
+#	  esac
 
 
 	    [ff_MPI_INCLUDE=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`]
@@ -744,8 +747,8 @@ ff_mpi=no)
 	    [ff_MPI_LIB=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
 	    [ff_mpi_idir=`$MPICXX -show|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
             ff_MPI_INCLUDE_DIR=""
-	    echo ff_MPI_INCLUDE $ff_MPI_INCLUDE
-	    echo ff_MPI_LIB $ff_MPI_LIB
+#	    echo ff_MPI_INCLUDE $ff_MPI_INCLUDE
+#	    echo ff_MPI_LIB $ff_MPI_LIB
 	    for i in $ff_mpi_idir; do
 	    if test -f "$i/mpi.h" -a -z "$ff_MPI_INCLUDE_DIR"  ;then
 	      ff_MPI_INCLUDE_DIR=$i
