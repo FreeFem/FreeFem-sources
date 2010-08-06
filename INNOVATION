@@ -1,3 +1,6 @@
+v 3.9-1  August 2009
+  - correct the mpi configure seach tool
+      miss when no full path are given  ( only change in configure.ac) 
 v 3.9  July 2009.
   - add lots of automaque compilation of download soffware,
    

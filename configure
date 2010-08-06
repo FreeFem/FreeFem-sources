@@ -1498,7 +1498,7 @@ Optional Packages:
   --with-suffix=G3/G4/G4,P4,.. or --without-suffix (default no suffix to package name)
   --with-x                use the X Window System
   --with-suffix=G3/G4/G4,P4,.. or --without-suffix (default no suffix package name)
-  --with-mpi=yes/no/mpiCC/mpic++/... 	or --without-mpi	Choose MPI implementation (default is mpic++)
+  --with-mpi=yes|no|mpic++|lam|mpich|openmpi|/usr/local/bin/mpic++|... 	or --without-mpi	Choose MPI implementation (default is mpic++)
   --with-wget=command	Replace "wget" with another command. Implies --enable-download
   --with-cadna= cadna library --without-cadna
   --with-blas=library	Use a specific version of the Blas
@@ -11167,7 +11167,7 @@ fi
 #AX_MPI(with_mpi=yes, with_mpi=no)
 #fi
 
-# Default is mpich
+# Default is mpic++
 ff_mpi_suffix="";
 if test "$with_mpi" = yes -o -z "$with_mpi"
 then
@@ -11181,14 +11181,36 @@ fi
 
 if test "$with_mpi" != no
 then
-	ff_mpi_path=`dirname "$ff_mpicxx"`;
+	ff_mpi_path=`$as_dirname -- "$ff_mpicxx" ||
+$as_expr X"$ff_mpicxx" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$ff_mpicxx" : 'X\(//\)[^/]' \| \
+	 X"$ff_mpicxx" : 'X\(//\)$' \| \
+	 X"$ff_mpicxx" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"$ff_mpicxx" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'`
 	case "$ff_mpi_path" in
-	    .) ff_mpi_path="";ff_mpipath=$PATH;;
-	    *) ff_mpi_path="$ff_mpi_path";ff_mpipath="$ff_mpi_path:$PATH";;
+	    .|"") ff_mpi_path="$PATH";ff_defmpicxx="$ff_mpicxx";;
+	    *) ff_mpi_path="$ff_mpi_path";ff_defmpicxx=`expr "//$ff_mpicxx" : '.*/\(.*\)'`;;
 	esac
-#	export PATH="$ff_mpi_path:$PATH"
 
-	for ac_prog in mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++
+
+	for ac_prog in $ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -11234,8 +11256,9 @@ fi
 done
 test -n "$MPICXX" || MPICXX="no"
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ff_mpicxx" >&5
-$as_echo_n "checking for $ff_mpicxx... " >&6; }
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $MPICXX" >&5
+$as_echo_n "checking for $MPICXX... " >&6; }
+	ff_mpicxx="$MPICXX"
 	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -11285,7 +11308,7 @@ else
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in "$ff_mpi_path"
+for as_dir in $ff_mpi_path
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -11343,12 +11366,12 @@ test -n "$ff_mpirun" || ff_mpirun="no"
 	if test "$ff_mpi" = yes;
 	then
           ff_mpishow=`$MPICXX -show`
-          case $ff_mpishow  in
-	  *openmpi*) echo openmpi;;
-	  *lam*) echo lam mpi;;
-	  *mpich2*) echo mpich2 ;;
-	  *) echo unknwow mpi;;
-	  esac
+#          case $ff_mpishow in
+#	  *openmpi*) echo which mpi : openmpi;;
+#	  *lam*) echo lam mpi;;
+#	  *mpich2*) echo mpich2 ;;
+#	  *) echo unknow mpi;;
+#	  esac
 
 
 	    ff_MPI_INCLUDE=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`
@@ -11357,8 +11380,8 @@ test -n "$ff_mpirun" || ff_mpirun="no"
 	    ff_MPI_LIB=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`
 	    ff_mpi_idir=`$MPICXX -show|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include'
             ff_MPI_INCLUDE_DIR=""
-	    echo ff_MPI_INCLUDE $ff_MPI_INCLUDE
-	    echo ff_MPI_LIB $ff_MPI_LIB
+#	    echo ff_MPI_INCLUDE $ff_MPI_INCLUDE
+#	    echo ff_MPI_LIB $ff_MPI_LIB
 	    for i in $ff_mpi_idir; do
 	    if test -f "$i/mpi.h" -a -z "$ff_MPI_INCLUDE_DIR"  ;then
 	      ff_MPI_INCLUDE_DIR=$i
