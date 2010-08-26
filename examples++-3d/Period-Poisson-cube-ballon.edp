@@ -23,7 +23,7 @@ catch(...)
     
     mesh3 Th = tetg(ThHS,switch="pqaAYY",nbofregions=2,regionlist=domaine);    
     // Tetrahelize the interior of the cube with tetgen
-    medit("tetg",Th);
+    medit("tetg",Th,wait=1);
     savemesh(Th,"Th-hex-sph.mesh");
  }
 
@@ -57,6 +57,6 @@ problem P(uh,vh,solver=sparsesolver)=
   P;
 
 plot(uh,wait=1, nbiso=6);
-medit("   uh ",Th, uh); 
+medit("   uh ",Th, uh,wait=1); 
 
 

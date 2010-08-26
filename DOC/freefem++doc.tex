@@ -1702,7 +1702,7 @@ the problem is now:
 \begin{eqnarray}&&
 r\p_t u-\p _r(r\p _r u) - \p _z(r\p _z u) = 0 \hbox{ in } \Omega,
 \cr&&
-u(t=0) = u_0 + \frac z{L_z} (u_1-u_)
+u(t=0) = u_0 + \frac z{L_z} (u_1-u)
 \cr&&
 u|_{\Gamma_4} = u_0,\quad  u|_{\Gamma_2} = u_1,
 \quad \alpha(u-u_e) + {\p u\over \p n} |_{\Gamma_1\cup\Gamma_3} = 0.
@@ -4721,7 +4721,40 @@ To see all these fags at work,  try the file \texttt{examples++/square-mesh.edp}
 
 \subsubsection{\setS{Border}}\index{border}\index{label}
 
-Boundaries are defined piecewise  by paramtrized curves. The pieces can only intersect at their end points.
+Boundaries are defined piecewise by parametrized curves.
+The pieces can only intersect at their endpoints, but it is possible to 
+join more than two endpoints. This can be used to structure the mesh
+if an area thouches a border and create new regions by dividing larger ones:
+\bFF
+@int upper = 1;
+@int others = 2;
+@int inner = 3;
+
+@border C01(t=0,1){x = 0;         y = -1+t;        label = upper;}
+@border C02(t=0,1){x = 1.5-1.5*t; y = -1;          label = upper;}
+@border C03(t=0,1){x = 1.5;       y = -t;          label = upper;}
+@border C04(t=0,1){x = 1+0.5*t;   y = 0;           label = others;}
+@border C05(t=0,1){x = 0.5+0.5*t; y = 0;           label = others;}
+@border C06(t=0,1){x = 0.5*t;     y = 0;           label = others;}
+@border C11(t=0,1){x = 0.5;       y = -0.5*t;      label = inner;}
+@border C12(t=0,1){x = 0.5+0.5*t; y = -0.5;        label = inner;}
+@border C13(t=0,1){x = 1;         y = -0.5+0.5*t;  label = inner;}
+
+@int n = 10;
+@plot(C01(-n)+C02(-n)+C03(-n)+C04(-n)+C05(-n)+C06(-n)+
+      C11(n)+C12(n)+C13(n), wait=true);
+
+@mesh Th = buildmesh(C01(-n)+C02(-n)+C03(-n)+C04(-n)+C05(-n)+C06(-n)+
+      C11(n)+C12(n)+C13(n));
+
+@plot(Th, wait=true); // figure \ref{multiendmesh}
+
+@cout << "Part 1 has region number " << Th(0.75, -0.25).region << endl;
+@cout << "Part 2 has redion number " << Th(0.25, -0.25).region << endl;
+\eFF
+
+%###
+\twoplot[height=6cm]{multiendborder}{multiendmesh}{Multiple border ends intersect}{Generated mesh}
 
 Triangulation keywords assume that the domain is defined as being on the \emph{left} (resp right) of its
 oriented parameterized boundary

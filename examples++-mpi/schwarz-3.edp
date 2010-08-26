@@ -25,7 +25,7 @@ if (mpirank == 0)
  {
  th2 = buildmesh( a(5*n) + b(5*n) + c(10*n) + d(5*n));
  th =  buildlayers(th2,n,
-	     zbound=[zmin,zmax],  reffacemid=rmid, 
+	     zbound=[zmin,zmax],  labelmid=rmid, 
 	     reffaceup = rup,     reffacelow = rdown);
 
  cout << " end th  " << endl;
@@ -34,7 +34,7 @@ else
  {
  TH2 = buildmesh ( e(5*n) + e1(25*n) );
  TH =  buildlayers(TH2,n,
-	     zbound=[zmin,zmax],  reffacemid=rmid, 
+	     zbound=[zmin,zmax],  labelmid=rmid, 
 	     reffaceup = rup,     reffacelow = rdown);
 
  cout << " end TH  " << endl;

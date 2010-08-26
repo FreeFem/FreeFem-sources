@@ -1311,7 +1311,7 @@ class MeshCarre2 :   public E_F0mps { public:
 	long flags=arg(0,s,0);
 	KN<long> zz;
 	KN<long> label=arg(1,s,zz);
-	long region=arg(2,s,2);
+	long region=arg(2,s,0L);// correct aout 2010 FH ... 2-> 0 
 	return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)),0,0,s,flags,label,region ));}
     operator aType () const { return atype<pmesh>();} 
       

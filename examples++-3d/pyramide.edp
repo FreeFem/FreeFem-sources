@@ -22,6 +22,6 @@ plot(fp2,wait=1,dim=3);
 int[int] r1T=[0,0], r2up=[0,1],r2down=[0,1];
 int[int] r4T=[0,2]; 
 mesh3 Th3=buildlayers(Th2,coef= max(fpyramide/HH,0.01), nn,zbound=[0,fpyramide],
- reftet=r1T, reffaceup=r2up, reffacelow=r2down);
+ region=r1T, labelup=r2up, labeldown=r2down);
 
 medit("Pyramide",Th3);

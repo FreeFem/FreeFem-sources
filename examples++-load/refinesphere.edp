@@ -43,11 +43,11 @@ mesh3 Th3sph=tetg(Th3,switch="paAAQYY",nbofregions=1,regionlist=domain);
 
 int[int] newlabel = [145,18];
 real[int] domainrefine = [0.,0.,0.,145,0.0001];
-mesh3 Th3sphrefine=tetgreconstruction(Th3sph,switch="raAQ",reftet=newlabel,nbofregions=1,regionlist=domainrefine);
+mesh3 Th3sphrefine=tetgreconstruction(Th3sph,switch="raAQ",region=newlabel,nbofregions=1,regionlist=domainrefine);
 
 int[int] newlabel2 = [145,53];
 func fsize = 0.01/(( 1 + 5*sqrt( (x-0.5)^2+(y-0.5)^2+(z-0.5)^2) )^3);
-mesh3 Th3sphrefine2=tetgreconstruction(Th3sph,switch="raAQ",reftet=newlabel2,sizeofvolume=fsize);
+mesh3 Th3sphrefine2=tetgreconstruction(Th3sph,switch="raAQ",region=newlabel2,sizeofvolume=fsize);
 
 medit("sphere",Th3sph);
 medit("sphererefinedomain",Th3sphrefine);

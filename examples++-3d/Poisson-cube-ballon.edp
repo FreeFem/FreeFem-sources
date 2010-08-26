@@ -29,12 +29,12 @@ int[int] refx=[0,1];  // gauche
 int[int] refX=[0,2];   // droite 
 
 
-mesh3 Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-1,refface=refx);
-mesh3 Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=1,refface=refX);
-mesh3 Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+1,refface=refy);
-mesh3 Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-1,refface=refY);
-mesh3 Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-1,refface=refz);
-mesh3 Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+1,refface=refZ);
+mesh3 Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-1,label=refx);
+mesh3 Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=1,label=refX);
+mesh3 Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+1,label=refy);
+mesh3 Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-1,label=refY);
+mesh3 Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-1,label=refz);
+mesh3 Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+1,label=refZ);
 
 //medit("  --- ", Thx0,Thx1,Thy0,Thy1,Thz0,Thz1);
  ThHex = Thx0+Thx1+Thy0+Thy1+Thz0+Thz1;
@@ -89,7 +89,7 @@ medit("Bounday mesh",ThS,wait=1);
 real[int] domaine = [0,0,0,1,volumetet,0,0,0.7,2,volumetet];
 mesh3 Th = tetg(ThS,switch="pqaAAYYQ",nbofregions=2,regionlist=domaine);    
 // Tetrahelize the interior of the cube with tetgen
-medit("tetg",Th);
+medit("tetg",Th,wait=1);
 savemesh(Th,"Th-hex-sph.mesh");
 
 fespace Ph(Th,P03d);
@@ -117,6 +117,6 @@ problem P(uh,vh)=
   P;
 
 plot(uh,wait=1, nbiso=6);
-medit("   uh ",Th, uh); 
+medit("   uh ",Th, uh,wait=1); 
 
 

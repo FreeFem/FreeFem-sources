@@ -1,6 +1,6 @@
 load "msh3"
 int nn=10;;
-mesh Th2=square(nn,nn);
+mesh Th2=square(nn,nn,region=0);
 fespace Vh2(Th2,P2);
 // // label  face  numbering 
 //      1 :  ( x == xmin)        2 :  ( x == xmax) 
@@ -12,8 +12,8 @@ real zmin=0,zmax=1;
 
 mesh3 Th=buildlayers(Th2,nn,
   zbound=[zmin,zmax],
-  // reftet=r1, 
-  reffacemid=rmid, 
+  // region=r1, 
+  labelmid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
 cout << "Th :  nv = " << Th.nv << " nt =" << Th.nt << endl;
