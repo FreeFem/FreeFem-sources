@@ -12,7 +12,8 @@
 // ****  2 paramters with the stack
 //  class OneOperator2s_
 //  class E_F_F0F0s_                                                                                                                                                      
-
+#ifndef AFUNCTION_EXT_HPP__
+#define  AFUNCTION_EXT_HPP__
 template<class R,class A0,class A1, class E=E_F0>   // extend (4th arg.)
 class E_F_F0F0s_ :public  E { public:                               // extend 
     typedef  R (*func)(Stack s,const  A0 &,const  A1 & ) ; // extend (statck +2th arg.)
@@ -541,3 +542,4 @@ public:
 };
 
 */
+#endif

@@ -24,7 +24,7 @@ real maxdeep = deep[].min;
 mesh3 Th=buildlayers(Th2,nn,
   coef= deep/maxdeep,
   zbound=[deep,0],
-  reffacemid=rmid, 
+  labelmid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
 //medit("Leman",Th);

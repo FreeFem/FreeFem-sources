@@ -9,8 +9,8 @@ real zmin=-1,zmax=1.;
 
 mesh3 Th=buildlayers(Th2,nn,
   zbound=[zmin,zmax],
-  // reftet=r1, 
-  reffacemid=rmid, 
+  // region=r1, 
+  labelmid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
 func  real hill(real r2){return exp(-10.*(r2));};

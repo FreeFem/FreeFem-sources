@@ -13,7 +13,7 @@ mesh Th2=buildmesh(bord);
 plot(Th2,wait=1);
 int[int] l23=[0,0,1,1]; 
 mesh3 Th=buildlayers(Th2,coef= max(.15,y/max(f,0.05)), 50 ,zbound=[0,2*pi]
-   ,transfo=[x,y*cos(z),y*sin(z)],facemerge=1,reffacemid=l23);
+   ,transfo=[x,y*cos(z),y*sin(z)],facemerge=1,labelmid=l23);
 macro Grad(u) [dx(u),dy(u),dz(u)] //
 fespace Vh(Th,P1);  Vh u,v;
 solve Poisson(u,v) = int3d(Th)( Grad(u)'*Grad(v) ) - int3d(Th)( v) + on(1,u=1);

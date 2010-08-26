@@ -1,8 +1,16 @@
-v 3.9-1  August 2009
+v 3.9-1  August 2009   (For FreeFem++ days )
+  - coorect mistake in mpi 
+   add:  gatherv, allgatherv, scatterv, alltoallv   
+   and complex data type in:  allgather, gather, scatter, alltoall, ..
+   - correction bug : gather,  scatter
+
+  - correct default  region number in square build mesh function  now 0 , (2 beetween  v3.8 -- 3.9)  
+  - change in all example  reffacexx= in labelxx= ..., etc to be correct with v 3.8 change.
+  - correct a mistake of type  region= parameter in tetgen all functions.  
   - correct the mpi configure seach tool
       miss when no full path are given  ( only change in configure.ac) 
 v 3.9  July 2009.
-  - add lots of automaque compilation of download soffware,
+  - add lots of automatic  compilation of download soffware,
    
 	tetgen superlu fftw metis yams mshmet 
 	blacs parmetis scalapack scotch superludist MUMPS pastix hypre hips 

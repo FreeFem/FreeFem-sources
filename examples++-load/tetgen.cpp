@@ -1712,7 +1712,7 @@ basicAC_F0::name_and_type ReconstructionRefine_Op::name_param[]= {
   {  "nboffacetcl", &typeid(long)},
   {  "facetcl", &typeid(KN_<double>)},
   {  "sizeofvolume", &typeid(double)},
-    {  "region", &typeid(long)}, //10
+    {  "region", &typeid(KN_<long>)}, //10
     {  "label", &typeid(KN_<long>)}//11
     
 };

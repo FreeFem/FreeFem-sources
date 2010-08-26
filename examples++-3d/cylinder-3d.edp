@@ -12,7 +12,7 @@ int nlayer=100;
 mesh3 Th=buildlayers(Baseh,nlayer,
   coef= 1.,
   zbound=[zmin,zmax],
-  reffacemid=rmid, 
+  labelmid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
 medit("Cyl",Th);

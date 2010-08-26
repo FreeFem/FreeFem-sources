@@ -8,6 +8,9 @@
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
+// FH: I have move AFunction_ext.hpp  to fflib dir.
+#include "AFunction_ext.hpp" 
+// Add J. Morice for AFunction_ext.hpp 
 #include "ufunction.hpp"
 using namespace std;  
 #include "rgraph.hpp"
@@ -58,7 +61,7 @@ struct fMPI {
   void operator=(const MPI_type vv) { v=vv;}
   fMPI(const MPI_type vv=0) : v(vv){}
   bool operator!=(MPI_type vv) const {return vv !=v;}
-    bool operator==(MPI_type vv) const {return vv ==v;}
+  bool operator==(MPI_type vv) const {return vv ==v;}
   
 };
 
@@ -617,6 +620,22 @@ struct Op_All2All : public binary_function<KN_<R>,KN_<R>,long> {
   }
 };
 
+
+template<class R>
+struct Op_Allgather1 : public binary_function<R*,KN_<R>,long> {
+  static long  f( R*  const  & s, KN_<R>  const  &r)  
+    { 
+      MPI_Comm comm=MPI_COMM_WORLD;
+      int mpisizew;
+      MPI_Comm_size(comm, &mpisizew); /* local */ 
+      int chunk = 1;
+      ffassert(r.N()==mpisizew);
+      
+      return MPI_Allgather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
+			    (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(), comm);	
+    }
+};
+
 template<class R>
 struct Op_Allgather : public binary_function<KN_<R>,KN_<R>,long> {
   static long  f( KN_<R>  const  & s, KN_<R>  const  &r)  
@@ -624,8 +643,8 @@ struct Op_Allgather : public binary_function<KN_<R>,KN_<R>,long> {
       MPI_Comm comm=MPI_COMM_WORLD;
       int mpisizew;
       MPI_Comm_size(comm, &mpisizew); /* local */ 
-      int chunk = s.N()/mpisizew;
-      ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+      int chunk = r.N()/mpisizew;
+      ffassert(r.N()==mpisizew*chunk && chunk==s.N());
       
       return MPI_Allgather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
 			    (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(), comm);	
@@ -654,13 +673,156 @@ struct Op_Allgather3 : public ternary_function<KN_<R>,KN_<R>,fMPI_Comm,long> {
     MPI_Comm comm=cmm;
     int mpisizew;
     MPI_Comm_size(comm, &mpisizew); /* local */ 
-    int chunk = s.N()/mpisizew;
-    ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+    int chunk = r.N()/mpisizew;    // bug corrected by J. Morice
+    //ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+    ffassert(s.N()==chunk && r.N()==s.N()*mpisizew);
 	
     return MPI_Allgather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
 			  (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(), comm);	
   }
 };
+
+
+template<class R>
+struct Op_Allgather13 : public ternary_function<R*,KN_<R>,fMPI_Comm,long> {
+  static long  f(Stack, R*  const  & s, KN_<R>  const  &r,fMPI_Comm const & cmm)  
+  { 
+    MPI_Comm comm=cmm;
+    int mpisizew;
+    MPI_Comm_size(comm, &mpisizew); /* local */ 
+    int chunk = 1;    // bug corrected by J. Morice
+    //ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+    ffassert( r.N()==mpisizew);
+	
+    return MPI_Allgather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
+			  (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(), comm);	
+  }
+};
+// Add J. Morice
+
+template<class R>
+long  Op_All2Allv( KN_<R>  const  & s, KN_<R>  const  &r, KN_<long> const &sendcnts, KN_<long> const &sdispls, KN_<long> const &recvcnts, KN_<long> const &rdispls)  
+{ 
+  MPI_Comm comm=MPI_COMM_WORLD;
+  int mpirankv=MPI_UNDEFINED;
+  MPI_Comm_rank(comm, &mpirankv); 
+  
+  int mpisizew;
+  MPI_Comm_size(comm, &mpisizew); /* local */ 
+  ffassert( sendcnts.N() == sdispls.N() && sendcnts.N() == recvcnts.N() && sendcnts.N() == rdispls.N() && sendcnts.N() == mpisizew );
+  
+  KN<int> INTsendcnts(sendcnts.N());
+  KN<int> INTsdispls(sdispls.N());
+  KN<int> INTrecvcnts(recvcnts.N());
+  KN<int> INTrdispls(rdispls.N());
+  
+  for(int ii=0; ii< sendcnts.N(); ii++){
+    INTsendcnts[ii] = sendcnts[ii];
+    INTsdispls[ii]  = sdispls[ii];
+    INTrecvcnts[ii]  = recvcnts[ii];
+    INTrdispls[ii]  = rdispls[ii];
+  }
+  
+  return MPI_Alltoallv( (void *) (R*) s, INTsendcnts, INTsdispls, MPI_TYPE<R>::TYPE(),
+			(void *) (R*) r, INTrecvcnts, INTrdispls, MPI_TYPE<R>::TYPE(), comm);	
+}
+
+
+
+template<class R>
+struct Op_Allgatherv : public quad_function<KN_<R>,KN_<R>,KN_<long>,KN_<long>,long> {
+  static long f( Stack ,KN_<R>  const  & s, KN_<R>  const  &r, KN_<long> const & recvcount, KN_<long> const & displs)  
+  { 
+    MPI_Comm comm=MPI_COMM_WORLD;
+    int mpisizew;
+    MPI_Comm_size(comm, &mpisizew); 
+    ffassert( recvcount.N() == displs.N() && recvcount.N() == mpisizew);
+    long sum=0;
+    for(int ii=0; ii< recvcount.N(); ii++)
+      sum+=recvcount[ii];
+    ffassert( sum == r.N() );
+    
+    KN<int> INTrecvcount(recvcount.N());
+    KN<int> INTdispls(displs.N());
+    for(int ii=0; ii< recvcount.N(); ii++){
+      INTrecvcount[ii]= recvcount[ii];
+      INTdispls[ii]= displs[ii];
+    }
+    return MPI_Allgatherv( (void *) (R*) s, s.N(), MPI_TYPE<R>::TYPE(),
+			   (void *) (R*) r, INTrecvcount, INTdispls,MPI_TYPE<R>::TYPE(), comm);	
+  }
+};
+
+template<class R>
+long  Op_All2All3v(KN_<R>  const  & s, KN_<R>  const  &r,fMPI_Comm const & cmm, KN_<long> const &sendcnts, KN_<long> const &sdispls, KN_<long> const &recvcnts, KN_<long> const &rdispls )  
+{ 
+  MPI_Comm comm=cmm;
+  int mpirankv=MPI_UNDEFINED;
+  MPI_Comm_rank(comm, &mpirankv); 
+      
+  int mpisizew;
+  MPI_Comm_size(comm, &mpisizew); /* local */ 
+  ffassert( sendcnts.N() == sdispls.N() && sendcnts.N() == recvcnts.N() && sendcnts.N() == rdispls.N() && sendcnts.N() == mpisizew );
+      
+  //ffassert(s.N()==sendcnts[mpirankv] && r.N()==recvbuf[mpirankv]);
+      
+  KN<int> INTsendcnts(sendcnts.N());
+  KN<int> INTsdispls(sdispls.N());
+  KN<int> INTrecvcnts(recvcnts.N());
+  KN<int> INTrdispls(rdispls.N());
+      
+  for(int ii=0; ii< sendcnts.N(); ii++){
+    INTsendcnts[ii] = sendcnts[ii];
+    INTsdispls[ii]  = sdispls[ii];
+    INTrecvcnts[ii]  = recvcnts[ii];
+    INTrdispls[ii]  = rdispls[ii];
+  }
+
+  return MPI_Alltoallv( (void *) (R*) s, INTsendcnts, INTsdispls, MPI_TYPE<R>::TYPE(),
+			(void *) (R*) r, INTrecvcnts, INTrdispls, MPI_TYPE<R>::TYPE(), comm);	
+}
+
+
+template<class R>
+long Op_Allgatherv3(KN_<R>  const  & s, KN_<R>  const  &r,fMPI_Comm const & cmm, KN_<long> const & recvcount, KN_<long> const & displs)
+{ 
+  MPI_Comm comm=cmm;
+  int mpisizew;
+  MPI_Comm_size(comm, &mpisizew); 
+  ffassert( recvcount.N() == displs.N() && recvcount.N() == mpisizew);
+  long sum=0;
+  for(int ii=0; ii< recvcount.N(); ii++)
+    sum+=recvcount[ii];
+  ffassert( sum == r.N() );
+  KN<int> INTrecvcount(recvcount.N());
+  KN<int> INTdispls(displs.N());
+  for(int ii=0; ii< recvcount.N(); ii++){
+    INTrecvcount[ii]= recvcount[ii];
+    INTdispls[ii]= displs[ii];
+  }
+
+  return MPI_Allgatherv( (void *) (R*) s, s.N(), MPI_TYPE<R>::TYPE(),
+			 (void *) (R*) r, INTrecvcount, INTdispls,MPI_TYPE<R>::TYPE(), comm);	
+}
+
+
+template<class R>
+struct Op_Scatter1 : public   ternary_function<KN_<R>, R* ,MPIrank,long> {
+  static long  f(Stack, KN_<R>  const  & s, R*  const  &r,  MPIrank const & root)  
+  { 
+    
+    int mpisizew;
+    MPI_Comm_size(root.comm, &mpisizew); 
+    int chunk = 1;
+    ffassert(s.N()==mpisizew*chunk);
+    
+    return MPI_Scatter( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
+			(void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
+  }
+};
+
+
+// Fin add J. Morice
 
 
 template<class R>
@@ -671,12 +833,46 @@ struct Op_Scatter3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
     int chunk = s.N()/mpisizew;
-    ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+    ffassert(s.N()==mpisizew*chunk && r.N()==chunk);
     
     return MPI_Scatter( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
 			(void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
   }
 };
+
+// Add J. Morice
+template<class R>
+//struct Op_Scatterv3 : public   penta_function< KN_<R>, KN_<R>, MPIrank, KN_<long>, KN_<long>, long> {
+long Op_Scatterv3( KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root, KN_<long> const &sendcnts, KN_<long> const &displs)  
+{ 
+  
+  int mpirankv=MPI_UNDEFINED;
+  if(root.comm != MPI_COMM_NULL)
+    MPI_Comm_rank(root.comm, &mpirankv); 
+  
+  int mpisizew;
+  MPI_Comm_size(root.comm, &mpisizew); /* local */ 
+  ffassert( sendcnts.N() == displs.N() && sendcnts.N() == mpisizew );
+  // size control 
+  ffassert( r.N() == sendcnts[mpirankv] );
+  long sumsize=0;
+  for(int ii=0; ii<sendcnts.N(); ii++){
+    sumsize += sendcnts[ii];
+  }
+  ffassert( s.N() == sumsize );
+  
+  KN<int> INTsendcnts(sendcnts.N());
+  KN<int> INTdispls(displs.N());
+  for(int ii=0; ii< sendcnts.N(); ii++){
+    INTsendcnts[ii]= sendcnts[ii];
+    INTdispls[ii]= displs[ii];
+  }
+  
+  return MPI_Scatterv( (void *) (R*) s, INTsendcnts, INTdispls, MPI_TYPE<R>::TYPE(),
+		       (void *) (R*) r, r.N(), MPI_TYPE<R>::TYPE(),root.who,root.comm);
+}
+
+// fin J. Morice
 
 template<class R>
 struct Op_Reduce  : public   quad_function<KN_<R>,KN_<R>,MPIrank,fMPI_Op,long> {
@@ -720,6 +916,25 @@ struct Op_Reduce1  : public   quad_function<R*,R*,MPIrank,fMPI_Op,long> {
   }
 };
 
+// Add J. Morice
+template<class R>
+struct Op_Gather1 : public   ternary_function<R*,KN_<R>,MPIrank,long> {
+    static long  f(Stack, R* const  & s, KN_<R>  const  &r,  MPIrank const & root)  
+  { 
+    
+    int mpisizew;
+    MPI_Comm_size(root.comm, &mpisizew); 
+    int chunk = 1;
+    ffassert(r.N()==mpisizew*chunk );
+    
+    return MPI_Gather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
+			   (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
+  }
+};
+
+// Fin Add J. Morice
+
+
 template<class R>
 struct Op_Gather3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
     static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root)  
@@ -727,15 +942,546 @@ struct Op_Gather3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
     
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
-    int chunk = s.N()/mpisizew;
-    ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+    int chunk = r.N()/mpisizew;
+    ffassert(r.N()==mpisizew*chunk && chunk==s.N());
     
     return MPI_Gather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
 			   (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
   }
 };
 
+// Add by J. Morice
 
+template<class R>
+//struct Op_Gatherv3 : public penta_function<KN_<R>,KN_<R>, MPIrank, KN_<long>, KN_<long>, long> {
+long  Op_Gatherv3(KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root, KN_<long> const & recvcount, KN_<long> const & displs)  
+{ 
+    
+  int mpirankw;
+  MPI_Comm_rank(root.comm, &mpirankw); 
+  int mpisizew;
+  MPI_Comm_size(root.comm, &mpisizew); 
+  ffassert( recvcount.N() == displs.N() && recvcount.N() == mpisizew);
+  
+  if( mpirankw == root.who){
+    long sum=0;
+    for(int ii=0; ii< recvcount.N(); ii++)
+      sum+=recvcount[ii];
+    ffassert( sum == r.N() );
+  }
+  KN<int> INTrecvcount(recvcount.N());
+  KN<int> INTdispls(displs.N());
+  for(int ii=0; ii< recvcount.N(); ii++){
+    INTrecvcount[ii]= recvcount[ii];
+    INTdispls[ii]= displs[ii];
+  }
+  
+  return MPI_Gatherv( (void *) (R*) s, s.N(), MPI_TYPE<R>::TYPE(),
+		      (void *) (R*) r, INTrecvcount, INTdispls,MPI_TYPE<R>::TYPE(),root.who,root.comm);	
+}
+
+// Fin Add J. Morice
+
+
+// Add J. Morice communications entre processeurs complex
+
+template<>
+struct Op_All2All<Complex> : public binary_function<KN_<Complex>,KN_<Complex>,long> {
+  static long  f( KN_<Complex>  const  & s, KN_<Complex>  const  &r)  
+  { 
+    MPI_Comm comm=MPI_COMM_WORLD;
+    int mpisizew;
+    MPI_Comm_size(comm, &mpisizew); /* local */ 
+    int chunk = s.N()/mpisizew;
+    ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+   
+#ifdef MPI_DOUBLE_COMPLEX 
+    return MPI_Alltoall( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
+			 (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);	
+#else
+    chunk*=2;
+    return MPI_Alltoall( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
+			 reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);	
+#endif
+  }
+};
+
+template<>
+struct Op_Allgather1<Complex> : public binary_function<Complex *,KN_<Complex>,long> {
+  static long  f( Complex *  const  & s, KN_<Complex>  const  &r)  
+  { 
+    MPI_Comm comm=MPI_COMM_WORLD;
+    int mpisizew;
+    MPI_Comm_size(comm, &mpisizew); /* local */ 
+    int chunk = 1;    
+    ffassert( r.N()== mpisizew);
+#ifdef MPI_DOUBLE_COMPLEX
+    return MPI_Allgather( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
+			  (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);
+#else
+    chunk*2=;
+    return MPI_Allgather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
+			  reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);
+#endif
+  }
+};
+
+
+template<>
+struct Op_Allgather<Complex> : public binary_function<KN_<Complex>,KN_<Complex>,long> {
+  static long  f( KN_<Complex>  const  & s, KN_<Complex>  const  &r)  
+    { 
+      MPI_Comm comm=MPI_COMM_WORLD;
+      int mpisizew;
+      MPI_Comm_size(comm, &mpisizew); /* local */ 
+      int chunk = r.N()/mpisizew;
+      ffassert( r.N()==chunk*mpisizew && chunk==s.N() );
+#ifdef MPI_DOUBLE_COMPLEX 
+      return MPI_Allgather( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
+			    (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);
+#else
+      chunk*=2;
+      return MPI_Allgather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
+			     reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);
+#endif
+    }
+};
+
+template<>
+struct Op_All2All3<Complex> : public ternary_function<KN_<Complex>,KN_<Complex>,fMPI_Comm,long> {
+  static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,fMPI_Comm const & cmm )  
+    { 
+      MPI_Comm comm=cmm;
+      int mpisizew;
+      MPI_Comm_size(comm, &mpisizew); /* local */ 
+      int chunk = s.N()/mpisizew;
+      ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+#ifdef MPI_DOUBLE_COMPLEX       
+      return MPI_Alltoall( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
+			   (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);
+#else
+      chunk*=2;
+      return MPI_Alltoall( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
+			   reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);
+#endif	
+    }
+};
+
+template<>
+struct Op_Allgather3<Complex> : public ternary_function<KN_<Complex>,KN_<Complex>,fMPI_Comm,long> {
+  static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,fMPI_Comm const & cmm)  
+  { 
+    MPI_Comm comm=cmm;
+    int mpisizew;
+    MPI_Comm_size(comm, &mpisizew); /* local */ 
+    int chunk = r.N()/mpisizew;    // bug corrected by J. Morice
+    //ffassert(s.N()==mpisizew*chunk && r.N()==s.N());
+    ffassert(s.N()==chunk && r.N()==s.N()*mpisizew);
+#ifdef MPI_DOUBLE_COMPLEX
+    return MPI_Allgather( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
+			  (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);
+#else
+    chunk*2=;
+    return MPI_Allgather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
+			  reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);
+#endif
+  }
+};
+
+template<>
+struct Op_Allgather13<Complex> : public ternary_function<Complex *,KN_<Complex>,fMPI_Comm,long> {
+  static long  f(Stack, Complex *  const  & s, KN_<Complex>  const  &r,fMPI_Comm const & cmm)  
+  { 
+    MPI_Comm comm=cmm;
+    int mpisizew;
+    MPI_Comm_size(comm, &mpisizew); /* local */ 
+    int chunk = 1;    
+    ffassert( r.N()==mpisizew);
+#ifdef MPI_DOUBLE_COMPLEX
+    return MPI_Allgather( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
+			  (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);
+#else
+    chunk*2=;
+    return MPI_Allgather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
+			  reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);
+#endif
+  }
+};
+
+
+template<>
+long  Op_All2Allv<Complex>( KN_<Complex>  const  & s, KN_<Complex>  const  &r, KN_<long> const &sendcnts, KN_<long> const &sdispls, KN_<long> const &recvcnts, KN_<long> const &rdispls)  
+{ 
+  MPI_Comm comm=MPI_COMM_WORLD;
+  int mpirankv=MPI_UNDEFINED;
+  MPI_Comm_rank(comm, &mpirankv); 
+  
+  int mpisizew;
+  MPI_Comm_size(comm, &mpisizew); /* local */ 
+  ffassert( sendcnts.N() == sdispls.N() && sendcnts.N() == recvcnts.N() && sendcnts.N() == rdispls.N() && sendcnts.N() == mpisizew );
+  
+  KN<int> INTsendcnts(sendcnts.N());
+  KN<int> INTsdispls(sdispls.N());
+  KN<int> INTrecvcnts(recvcnts.N());
+  KN<int> INTrdispls(rdispls.N());
+  
+  
+#ifdef MPI_DOUBLE_COMPLEX
+  for(int ii=0; ii< sendcnts.N(); ii++){
+    INTsendcnts[ii] = sendcnts[ii];
+    INTsdispls[ii]  = sdispls[ii];
+    INTrecvcnts[ii]  = recvcnts[ii];
+    INTrdispls[ii]  = rdispls[ii];
+  }
+  return MPI_Alltoallv( (void *) (Complex*) s, INTsendcnts, INTsdispls, MPI_DOUBLE_COMPLEX,
+			(void *) (Complex*) r, INTrecvcnts, INTrdispls, MPI_DOUBLE_COMPLEX, comm);	
+#else
+  for(int ii=0; ii< sendcnts.N(); ii++){
+    INTsendcnts[ii] = 2*sendcnts[ii];
+    INTsdispls[ii]  = 2*sdispls[ii];
+    INTrecvcnts[ii] = 2*recvcnts[ii];
+    INTrdispls[ii]  = 2*rdispls[ii];
+  }
+  return MPI_Alltoallv( reinterpret_cast<void*> (s), INTsendcnts, INTsdispls, MPI_DOUBLE,
+			reinterpret_cast<void*> (r), INTrecvcnts, INTrdispls, MPI_DOUBLE, comm);
+#endif
+}
+
+
+
+template<>
+struct Op_Allgatherv<Complex> : public quad_function<KN_<Complex>,KN_<Complex>,KN_<long>,KN_<long>,long> {
+  static long f( Stack ,KN_<Complex>  const  & s, KN_<Complex>  const  &r, KN_<long> const & recvcount, KN_<long> const & displs)  
+  { 
+    MPI_Comm comm=MPI_COMM_WORLD;
+    int mpisizew;
+    MPI_Comm_size(comm, &mpisizew); 
+    ffassert( recvcount.N() == displs.N() && recvcount.N() == mpisizew);
+    long sum=0;
+    for(int ii=0; ii< recvcount.N(); ii++)
+      sum+=recvcount[ii];
+    ffassert( sum == r.N() );
+  
+  
+    KN<int> INTrecvcount(recvcount.N());
+    KN<int> INTdispls(displs.N());
+#ifdef MPI_DOUBLE_COMPLEX
+    for(int ii=0; ii< recvcount.N(); ii++){
+      INTrecvcount[ii]= recvcount[ii];
+      INTdispls[ii]= displs[ii];
+    }
+    return MPI_Allgatherv( (void *) (Complex*)s, s.N(), MPI_DOUBLE_COMPLEX,
+			   (void *) (Complex*)r, INTrecvcount, INTdispls,MPI_DOUBLE_COMPLEX, comm);
+#else
+    for(int ii=0; ii< recvcount.N(); ii++){
+      INTrecvcount[ii]= 2*recvcount[ii];
+      INTdispls[ii]= 2*displs[ii];
+    }
+    return MPI_Allgatherv( reinterpret_cast<void*> (s), 2*s.N(), MPI_DOUBLE,
+			   reinterpret_cast<void*> (r), INTrecvcount, INTdispls,MPI_DOUBLE, comm);
+#endif	
+  }
+};
+
+template<>
+long  Op_All2All3v<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,fMPI_Comm const & cmm, KN_<long> const &sendcnts, KN_<long> const &sdispls, KN_<long> const &recvcnts, KN_<long> const &rdispls )  
+{ 
+  MPI_Comm comm=cmm;
+  int mpirankv=MPI_UNDEFINED;
+  MPI_Comm_rank(comm, &mpirankv); 
+      
+  int mpisizew;
+  MPI_Comm_size(comm, &mpisizew); /* local */ 
+  ffassert( sendcnts.N() == sdispls.N() && sendcnts.N() == recvcnts.N() && sendcnts.N() == rdispls.N() && sendcnts.N() == mpisizew );
+      
+  //ffassert(s.N()==sendcnts[mpirankv] && r.N()==recvbuf[mpirankv]);
+      
+  KN<int> INTsendcnts(sendcnts.N());
+  KN<int> INTsdispls(sdispls.N());
+  KN<int> INTrecvcnts(recvcnts.N());
+  KN<int> INTrdispls(rdispls.N());
+    
+#ifdef MPI_DOUBLE_COMPLEX  
+  for(int ii=0; ii< sendcnts.N(); ii++){
+    INTsendcnts[ii] = sendcnts[ii];
+    INTsdispls[ii]  = sdispls[ii];
+    INTrecvcnts[ii]  = recvcnts[ii];
+    INTrdispls[ii]  = rdispls[ii];
+  }
+
+  return MPI_Alltoallv( (void *) (Complex*)s, INTsendcnts, INTsdispls, MPI_DOUBLE_COMPLEX,
+			(void *) (Complex*)r, INTrecvcnts, INTrdispls, MPI_DOUBLE_COMPLEX, comm);	
+#else
+  for(int ii=0; ii< sendcnts.N(); ii++){
+    INTsendcnts[ii] = 2*sendcnts[ii];
+    INTsdispls[ii]  = 2*sdispls[ii];
+    INTrecvcnts[ii]  = 2*recvcnts[ii];
+    INTrdispls[ii]  = 2*rdispls[ii];
+  }
+
+  return MPI_Alltoallv( reinterpret_cast<void*> (s), INTsendcnts, INTsdispls, MPI_DOUBLE,
+			reinterpret_cast<void*> (r), INTrecvcnts, INTrdispls, MPI_DOUBLE, comm);
+#endif
+}
+
+
+template<>
+long Op_Allgatherv3<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,fMPI_Comm const & cmm, KN_<long> const & recvcount, KN_<long> const & displs)
+{ 
+  MPI_Comm comm=cmm;
+  int mpisizew;
+  MPI_Comm_size(comm, &mpisizew); 
+  ffassert( recvcount.N() == displs.N() && recvcount.N() == mpisizew);
+  long sum=0;
+  for(int ii=0; ii< recvcount.N(); ii++)
+    sum+=recvcount[ii];
+  ffassert( sum == r.N() );
+  KN<int> INTrecvcount(recvcount.N());
+  KN<int> INTdispls(displs.N());
+  
+#ifdef MPI_DOUBLE_COMPLEX 
+  for(int ii=0; ii< recvcount.N(); ii++){
+    INTrecvcount[ii]= recvcount[ii];
+    INTdispls[ii]= displs[ii];
+  }
+
+  return MPI_Allgatherv( (void *) (Complex*)s, s.N(), MPI_DOUBLE_COMPLEX,
+			 (void *) (Complex*)r, INTrecvcount, INTdispls,MPI_DOUBLE_COMPLEX, comm);	
+
+#else
+  for(int ii=0; ii< recvcount.N(); ii++){
+    INTrecvcount[ii]= 2*recvcount[ii];
+    INTdispls[ii]= 2*displs[ii];
+  }
+
+  return MPI_Allgatherv( reinterpret_cast<void*> (s), 2*s.N(), MPI_DOUBLE,
+			 reinterpret_cast<void*> (r), INTrecvcount, INTdispls,MPI_DOUBLE, comm);
+#endif
+
+}
+
+template<>
+struct Op_Scatter1<Complex> : public   ternary_function<KN_<Complex>,Complex *,MPIrank,long> {
+  static long  f(Stack, KN_<Complex> const  & s, Complex *  const  &r,  MPIrank const & root)  
+  { 
+    
+    int mpisizew;
+    MPI_Comm_size(root.comm, &mpisizew); 
+    int chunk = 1;
+    ffassert(s.N()==mpisizew*chunk );
+#ifdef MPI_DOUBLE_COMPLEX      
+    return MPI_Scatter( (void *) (Complex*)s, chunk, MPI_DOUBLE_COMPLEX,
+			(void *) (Complex*)r, chunk, MPI_DOUBLE_COMPLEX,root.who,root.comm);	
+#else
+    chunk*=2;
+    return MPI_Scatter( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
+			reinterpret_cast<void*> (r), chunk, MPI_DOUBLE,root.who,root.comm);
+#endif
+  }
+};
+
+
+template<>
+struct Op_Scatter3<Complex> : public   ternary_function<KN_<Complex>,KN_<Complex>,MPIrank,long> {
+  static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,  MPIrank const & root)  
+  { 
+    
+    int mpisizew;
+    MPI_Comm_size(root.comm, &mpisizew); 
+    int chunk = s.N()/mpisizew;
+    ffassert(s.N()==mpisizew*chunk && r.N()==chunk);
+#ifdef MPI_DOUBLE_COMPLEX      
+    return MPI_Scatter( (void *) (Complex*)s, chunk, MPI_DOUBLE_COMPLEX,
+			(void *) (Complex*)r, chunk, MPI_DOUBLE_COMPLEX,root.who,root.comm);	
+#else
+    chunk*=2;
+    return MPI_Scatter( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
+			reinterpret_cast<void*> (r), chunk, MPI_DOUBLE,root.who,root.comm);
+#endif
+  }
+};
+
+template<>
+long Op_Scatterv3<Complex>( KN_<Complex>  const  & s, KN_<Complex>  const  &r,  MPIrank const & root, KN_<long> const &sendcnts, KN_<long> const &displs)  
+{ 
+  
+  int mpirankv=MPI_UNDEFINED;
+  if(root.comm != MPI_COMM_NULL)
+    MPI_Comm_rank(root.comm, &mpirankv); 
+  
+  int mpisizew;
+  MPI_Comm_size(root.comm, &mpisizew); /* local */ 
+  ffassert( sendcnts.N() == displs.N() && sendcnts.N() == mpisizew );
+  // size control 
+  ffassert( r.N() == sendcnts[mpirankv] );
+  long sumsize=0;
+  for(int ii=0; ii<sendcnts.N(); ii++){
+    sumsize += sendcnts[ii];
+  }
+  ffassert( s.N() == sumsize );
+  
+  KN<int> INTsendcnts(sendcnts.N());
+  KN<int> INTdispls(displs.N());
+#ifdef MPI_DOUBLE_COMPLEX  
+  for(int ii=0; ii< sendcnts.N(); ii++){
+    INTsendcnts[ii]= sendcnts[ii];
+    INTdispls[ii]= displs[ii];
+  }
+
+  return MPI_Scatterv( (void *) (Complex*)s, INTsendcnts, INTdispls, MPI_DOUBLE_COMPLEX,
+		       (void *) (Complex*)r, r.N(), MPI_DOUBLE_COMPLEX,root.who,root.comm);
+#else
+  for(int ii=0; ii< sendcnts.N(); ii++){
+    INTsendcnts[ii]= 2*sendcnts[ii];
+    INTdispls[ii]= 2*displs[ii];
+  }
+
+  return MPI_Scatterv( reinterpret_cast<void*> (s), INTsendcnts, INTdispls, MPI_DOUBLE,
+		       reinterpret_cast<void*> (r), 2*r.N(), MPI_DOUBLE,root.who,root.comm);
+#endif
+
+}
+
+
+template<>
+struct Op_Reduce<Complex>  : public   quad_function<KN_<Complex>,KN_<Complex>,MPIrank,fMPI_Op,long> {
+  static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,  MPIrank const & root, fMPI_Op const &op)  
+  { 
+    int chunk = s.N();
+    ffassert(chunk==r.N());
+#ifdef MPI_DOUBLE_COMPLEX     
+    return MPI_Reduce( (void *) (Complex*)s,(void *) (Complex*)r, chunk , MPI_DOUBLE_COMPLEX,op,root.who,root.comm);
+#else
+    chunk*=2;
+    return MPI_Reduce( reinterpret_cast<void*> (s), reinterpret_cast<void*> (r), chunk , MPI_DOUBLE,op,root.who,root.comm);
+#endif	
+  }
+};
+
+template<>
+struct Op_AllReduce<Complex>  : public   quad_function<KN_<Complex>,KN_<Complex>,fMPI_Comm,fMPI_Op,long> {
+  static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,  fMPI_Comm const & comm,fMPI_Op const &op)  
+  { 
+    int chunk = s.N();
+    ffassert(chunk==r.N());
+#ifdef MPI_DOUBLE_COMPLEX
+    return MPI_Allreduce( (void *) (Complex*)s,(void *) (Complex*)r, chunk , MPI_DOUBLE_COMPLEX,op,comm);
+#else
+    chunk *=2;
+    return MPI_Allreduce( reinterpret_cast<void*> (s), reinterpret_cast<void*> (r), chunk , MPI_DOUBLE,op,comm);
+#endif	
+  }
+};
+// /*
+// template<>
+// struct Op_Reducescatter  : public   quad_function<KN_<Complex>,KN_<Complex>,fMPI_Comm,fMPI_Op,long> {
+//     static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,  fMPI_Comm const & comm,fMPI_Op const &op)  
+//     { 
+// 	int chunk = s.N();
+// 	ffassert(chunk==r.N());
+//         //    chunk est un tableau ????
+// 	MPI_Op oop = reinterpret_cast<MPI_Op> (op);
+// 	return MPI_Reduce_scatter( (void *) (Complex*)s,(void *) (Complex*)r, chunk , MPI_DOUBLE_COMPLEX,op,comm);	
+//     }
+// };*/
+
+template<>
+struct Op_Reduce1<Complex>  : public   quad_function<R*,R*,MPIrank,fMPI_Op,long> {
+  static long  f(Stack, R*  const  & s, R*  const  &r,  MPIrank const & root, fMPI_Op const &op)  
+  { 
+#ifdef MPI_DOUBLE_COMPLEX
+    int chunk = 1;
+    return MPI_Reduce( (void *) (Complex*)s, (void *) (Complex*)r, chunk , MPI_DOUBLE_COMPLEX,op,root.who,root.comm);
+#else
+    int chunk = 2;
+    return MPI_Reduce( reinterpret_cast<void*> (s), reinterpret_cast<void*> (r), chunk , MPI_DOUBLE,op,root.who,root.comm);
+#endif
+  }
+};
+
+// Add J. Morice
+template<>
+struct Op_Gather1<Complex> : public   ternary_function<Complex* ,KN_<Complex>,MPIrank,long> {
+    static long  f(Stack, Complex * const  & s, KN_<Complex>  const  &r,  MPIrank const & root)  
+  { 
+    
+    int mpisizew;
+    MPI_Comm_size(root.comm, &mpisizew); 
+    int chunk = 1;
+    ffassert(r.N()==mpisizew*chunk );
+#ifdef MPI_DOUBLE_COMPLEX  
+   
+    return MPI_Gather( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
+			   (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, root.who, root.comm);
+#else
+    chunk = 2;
+    return MPI_Gather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
+			   reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, root.who, root.comm);
+#endif	
+  }
+};
+
+// Fin Add J. Morice
+
+
+template<>
+struct Op_Gather3<Complex> : public   ternary_function<KN_<Complex>,KN_<Complex>,MPIrank,long> {
+    static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,  MPIrank const & root)  
+  { 
+    
+    int mpisizew;
+    MPI_Comm_size(root.comm, &mpisizew); 
+    int chunk = r.N()/mpisizew;
+    ffassert(r.N()==mpisizew*chunk && chunk==s.N());
+#ifdef MPI_DOUBLE_COMPLEX     
+    return MPI_Gather( (void *) (Complex*)s, chunk, MPI_DOUBLE_COMPLEX,
+			   (void *) (Complex*)r, chunk, MPI_DOUBLE_COMPLEX,root.who,root.comm);	
+#else
+    chunk *= 2; 
+    return MPI_Gather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
+		       reinterpret_cast<void*> (r), chunk, MPI_DOUBLE,root.who,root.comm);
+#endif
+  }
+};
+
+
+template<>
+//struct Op_Gatherv3 : public penta_function<KN_<Complex>,KN_<Complex>, MPIrank, KN_<long>, KN_<long>, long> {
+long  Op_Gatherv3<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,  MPIrank const & root, KN_<long> const & recvcount, KN_<long> const & displs)  
+{ 
+    
+  int mpirankw;
+  MPI_Comm_rank(root.comm, &mpirankw); 
+  int mpisizew;
+  MPI_Comm_size(root.comm, &mpisizew); 
+  ffassert( recvcount.N() == displs.N() && recvcount.N() == mpisizew);
+  
+  if( mpirankw == root.who){
+    long sum=0;
+    for(int ii=0; ii< recvcount.N(); ii++)
+      sum+=recvcount[ii];
+    ffassert( sum == r.N() );
+  }
+  KN<int> INTrecvcount(recvcount.N());
+  KN<int> INTdispls(displs.N());
+#ifdef MPI_DOUBLE_COMPLEX   
+  for(int ii=0; ii< recvcount.N(); ii++){
+    INTrecvcount[ii]= recvcount[ii];
+    INTdispls[ii]= displs[ii];
+  }
+  return MPI_Gatherv( (void *) (Complex*)s, s.N(), MPI_DOUBLE_COMPLEX,
+		      (void *) (Complex*)r, INTrecvcount, INTdispls,MPI_DOUBLE_COMPLEX,root.who,root.comm);
+#else
+  for(int ii=0; ii< recvcount.N(); ii++){
+    INTrecvcount[ii]= 2*recvcount[ii];
+    INTdispls[ii]= 2*displs[ii];
+  }
+  return MPI_Gatherv( reinterpret_cast<void*> (s), 2*s.N(), MPI_DOUBLE,
+		      reinterpret_cast<void*> (r), INTrecvcount, INTdispls,MPI_DOUBLE,root.who,root.comm);
+#endif
+}
+
+// Fin Add J. Morice communication entre complexe
 
 MPIrank mpiwho(long i) { return MPIrank(i);}
 MPIrank mpiwho(long i,fMPI_Comm comm) { return MPIrank(i,comm,Syncro_block);}
@@ -1006,6 +1752,7 @@ public:
 };
 
 
+// Fin add J. Morice
 void initparallele(int &argc, char **& argv)
 {
   MPI_Init(&argc, &argv);
@@ -1185,18 +1932,81 @@ void init_lgparallele()
       Global.Add("mpiAllgather","(",new OneTernaryOperator3<Op_Allgather3< long > >);
       Global.Add("mpiAllgather","(",new OneTernaryOperator3<Op_Allgather3< double > >);
       
+      Global.Add("mpiAllgather","(",new OneBinaryOperator<Op_Allgather1< long > >);   // Add J. Morice
+      Global.Add("mpiAllgather","(",new OneBinaryOperator<Op_Allgather1< double > >); // Add J. Morice
+
+      Global.Add("mpiAllgather","(",new OneTernaryOperator3<Op_Allgather13< long > >);  // Add J. Morice
+      Global.Add("mpiAllgather","(",new OneTernaryOperator3<Op_Allgather13< double > >);// Add J. Morice
+      
+      Global.Add("mpiScatter","(",new OneTernaryOperator3<Op_Scatter1< long > >);    // Add J. Morice
+      Global.Add("mpiScatter","(",new OneTernaryOperator3<Op_Scatter1< double > >);  // Add J. Morice
       Global.Add("mpiScatter","(",new OneTernaryOperator3<Op_Scatter3< long > >);
       Global.Add("mpiScatter","(",new OneTernaryOperator3<Op_Scatter3< double > >);
-      Global.Add("mpiGather","(",new OneTernaryOperator3<Op_Scatter3< long > >);
+
+      Global.Add("mpiGather","(",new OneTernaryOperator3<Op_Gather1< long > >);   // Add J. Morice
+      Global.Add("mpiGather","(",new OneTernaryOperator3<Op_Gather1< double > >); // Add J. Morice
+      Global.Add("mpiGather","(",new OneTernaryOperator3<Op_Gather3< long > >); // correction J. Morice Scatter --> Gather
       Global.Add("mpiGather","(",new OneTernaryOperator3<Op_Gather3< double > >);
       
+      // Add J. Morice communication with vector of different size    
+      Global.Add("mpiAlltoallv","(",new OneOperator6_<long, KN_<double>, KN_<double>, KN_<long>, KN_<long>, KN_<long>, KN_<long> >( Op_All2Allv<double> ) );
+      Global.Add("mpiAlltoallv","(",new OneOperator6_<long, KN_<long>, KN_<long>, KN_<long>, KN_<long>, KN_<long>, KN_<long> >( Op_All2Allv<long> ) );
+      
+      Global.Add("mpiAlltoallv","(",new OneOperator7_<long, KN_<long>, KN_<long>, fMPI_Comm, KN_<long>, KN_<long>, KN_<long>, KN_<long> >( Op_All2All3v<long> ) ); 
+      Global.Add("mpiAlltoallv","(",new OneOperator7_<long, KN_<double>, KN_<double>, fMPI_Comm, KN_<long>, KN_<long>, KN_<long>, KN_<long> >( Op_All2All3v<double> ) ); 
+
+      Global.Add("mpiAllgatherv","(",new OneQuadOperator<Op_Allgatherv< long >, Quad_Op<Op_Allgatherv< long > > > );
+      Global.Add("mpiAllgatherv","(",new OneQuadOperator<Op_Allgatherv< double >, Quad_Op<Op_Allgatherv< double > > >);
+      Global.Add("mpiAllgatherv","(",new OneOperator5_<long, KN_<long>, KN_<long>, fMPI_Comm, KN_<long>, KN_<long> >(Op_Allgatherv3< long >) );
+      Global.Add("mpiAllgatherv","(",new OneOperator5_<long, KN_<double>, KN_<double>, fMPI_Comm, KN_<long>, KN_<long> >(Op_Allgatherv3< double >) );
+
+      Global.Add("mpiScatterv","(",new OneOperator5_<long, KN_<long>, KN_<long>, MPIrank, KN_<long>, KN_<long> >(Op_Scatterv3< long >) );
+      Global.Add("mpiScatterv","(",new OneOperator5_<long, KN_<double>, KN_<double>, MPIrank, KN_<long>, KN_<long> >(Op_Scatterv3< double >) );
+
+      Global.Add("mpiGatherv","(",new OneOperator5_<long, KN_<long>, KN_<long>, MPIrank, KN_<long>, KN_<long> >( Op_Gatherv3< long > ) );
+      Global.Add("mpiGatherv","(",new OneOperator5_<long, KN_<double>, KN_<double>, MPIrank, KN_<long>, KN_<long> >( Op_Gatherv3< double > ) );
+      // Fin Add J. Morice
+
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce< double >, Quad_Op<Op_Reduce< double > > >);
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce1< double >, Quad_Op<Op_Reduce1< double > > >);
       Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce< double >, Quad_Op<Op_AllReduce< double > > >);
       //    Global.Add("mpiReduceScatter","(",new OneQuadOperator<Op_Reducescatter< double >, Quad_Op<Op_Reducescatter< double > > >);
+
+      // Add J. Morice
+      Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce< long >, Quad_Op<Op_Reduce< long > > >);
+      Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce1< long >, Quad_Op<Op_Reduce1< long > > >);
+      Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce< long >, Quad_Op<Op_AllReduce< long > > >);
+      //    Global.Add("mpiReduceScatter","(",new OneQuadOperator<Op_Reducescatter< long >, Quad_Op<Op_Reducescatter< long > > >);
+      // fin Add J. Morice
+
+      // Add J. Morice :: complex communication between processor 
+      Global.Add("mpiAlltoall","(",new OneBinaryOperator<Op_All2All< Complex > >);
+      Global.Add("mpiAllgather","(",new OneBinaryOperator<Op_Allgather< Complex > >);    
+      Global.Add("mpiAlltoall","(",new OneTernaryOperator3<Op_All2All3< Complex > >);     
+      Global.Add("mpiAllgather","(",new OneTernaryOperator3<Op_Allgather3< Complex > >);
+        
+      Global.Add("mpiAllgather","(",new OneBinaryOperator<Op_Allgather1< Complex > >);
+      Global.Add("mpiAllgather","(",new OneTernaryOperator3<Op_Allgather13< Complex > >);
+
+      Global.Add("mpiScatter","(",new OneTernaryOperator3<Op_Scatter3< Complex > >);
+      Global.Add("mpiGather","(",new OneTernaryOperator3<Op_Gather3< Complex > >);
+
+      Global.Add("mpiScatter","(",new OneTernaryOperator3<Op_Scatter1< Complex > >);
+      Global.Add("mpiGather","(",new OneTernaryOperator3<Op_Gather1< Complex > >);
       
-      
-      
+      // Add J. Morice communication with vector of different size    
+      Global.Add("mpiAlltoallv","(",new OneOperator6_<long, KN_<Complex>, KN_<Complex>, KN_<long>, KN_<long>, KN_<long>, KN_<long> >( Op_All2Allv<Complex> ) );   
+      Global.Add("mpiAlltoallv","(",new OneOperator7_<long, KN_<Complex>, KN_<Complex>, fMPI_Comm, KN_<long>, KN_<long>, KN_<long>, KN_<long> >( Op_All2All3v<Complex> ) ); 
+      Global.Add("mpiAllgatherv","(",new OneQuadOperator<Op_Allgatherv< Complex>, Quad_Op<Op_Allgatherv< Complex > > >);
+   
+      Global.Add("mpiAllgatherv","(",new OneOperator5_<long, KN_<Complex>, KN_<Complex>, fMPI_Comm, KN_<long>, KN_<long> >(Op_Allgatherv3< Complex >) );
+      Global.Add("mpiScatterv","(",new OneOperator5_<long, KN_<Complex>, KN_<Complex>, MPIrank, KN_<long>, KN_<long> >(Op_Scatterv3< Complex >) );
+      Global.Add("mpiGatherv","(",new OneOperator5_<long, KN_<Complex>, KN_<Complex>, MPIrank, KN_<long>, KN_<long> >( Op_Gatherv3< Complex > ) );
+     
+      Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce< Complex >, Quad_Op<Op_Reduce< Complex > > >);
+      Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce1< Complex >, Quad_Op<Op_Reduce1< Complex > > >);
+      Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce< Complex >, Quad_Op<Op_AllReduce< Complex > > >);
+      // Fin Add J. Morice :: complex communication between processor 
       
       Global.New("mpirank",CConstant<long>(mpirank));
       Global.New("mpisize",CConstant<long>(mpisize));

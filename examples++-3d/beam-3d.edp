@@ -31,7 +31,7 @@ real dmax= u1[].max;
 cout << " max deplacement = " << dmax << endl;
 real coef= 0.1/dmax;
 int[int] ref2=[1,0,2,0];
-mesh3 Thm=movemesh3(Th,transfo=[x+u1*coef,y+u2*coef,z+u3*coef],refface=ref2);
-Thm=change(Thm,refface=ref2);
+mesh3 Thm=movemesh3(Th,transfo=[x+u1*coef,y+u2*coef,z+u3*coef],label=ref2);
+Thm=change(Thm,label=ref2);
 plot(Th,Thm, wait=1,cmm="coef  amplification = "+coef );
 

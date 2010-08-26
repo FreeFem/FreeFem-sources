@@ -5,14 +5,14 @@
 verbosity=2;
 load "msh3"
 int nn=20;
-mesh Th2=square(nn,nn);
+mesh Th2=square(nn,nn,region=0);
 fespace Vh2(Th2,P2);
 Vh2 ux,uz,p2;
 int[int] rup=[0,2],  rdown=[0,1], rmid=[1,1,2,1,3,1,4,1];
 real zmin=0,zmax=1;
 mesh3 Th=buildlayers(Th2,nn,
   zbound=[zmin,zmax],
-  reffacemid=rmid, 
+  labelmid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
 
