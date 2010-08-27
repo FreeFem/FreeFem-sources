@@ -1,5 +1,4 @@
 v 3.9-1  August 2009   (For FreeFem++ days )
-  Warning pastix (download) do no compile to day soory (no time to correct)
   - correct configure (find lapack lib change $ll_lapack_libs in $ll_lapack_lib)
   - correct mistake in mpi 
     add:  gatherv, allgatherv, scatterv, alltoallv   
