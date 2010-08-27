@@ -2442,6 +2442,52 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
 
 } # ac_fn_cxx_check_header_compile
+
+# ac_fn_fc_try_link LINENO
+# ------------------------
+# Try to link conftest.$ac_ext, and return whether this succeeded.
+ac_fn_fc_try_link ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  rm -f conftest.$ac_objext conftest$ac_exeext
+  if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_retval=1
+fi
+  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
+  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
+  # interfere with the next link command; also delete a directory that is
+  # left behind by Apple's compiler.  We do this before executing the actions.
+  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+  eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
+  as_fn_set_status $ac_retval
+
+} # ac_fn_fc_try_link
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -5293,7 +5339,6 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
 
 #	if test -n "$F77"
 #	then
@@ -12409,7 +12454,7 @@ return dgeqr2_ ();
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   ff_lapack_ok=yes
-	    ff_lapack_libs="-llapack"
+	    ff_lapack_lib="-llapack"
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -12426,8 +12471,8 @@ if test "$ff_lapack_ok" = no; then
 # Check whether --with-lapack was given.
 if test "${with_lapack+set}" = set; then :
   withval=$with_lapack; ff_lapack_ok=yes
-	ff_lapack_libs="${withval}"
-	LIBS="$ff_lapack_libs $LIBS"
+	ff_lapack_lib="${withval}"
+	LIBS="$ff_lapack_lib $LIBS"
 
 fi
 
@@ -12439,11 +12484,11 @@ if  test "$ff_lapack_ok" = yes ; then
   ff_lapackdir=
   if test "$ff_lapack_ok" = yes
   then
-      echo lapack LD  \'$ff_lapack_libs\'  >>$ff_where_lib_conf
+      echo lapack LD  \'$ff_lapack_lib\'  >>$ff_where_lib_conf
   fi
 
 else
-  ff_lapack_libs=-llapack
+  ff_lapack_lib=-llapack
 fi
 # Arpack itself
 
@@ -13382,7 +13427,52 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
+	if test "$enable_fortran" != no
+	 then
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran compiler accepts -fPIC" >&5
+$as_echo_n "checking whether the Fortran compiler accepts -fPIC... " >&6; }
+	check_save_flags="$FFLAGS"
+	ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+	FFLAGS="$FFLAGS -fPIC"
+
+	# The program needs to contain something for the test source
+	# file to be created by autoconf.
+
+	# Some options really need to be linked (not only compiled) to
+	# check whether they work.
+
+	cat > conftest.$ac_ext <<_ACEOF
+      program main
+
+      end
+_ACEOF
+if ac_fn_fc_try_link "$LINENO"; then :
+  check_flag_ok=yes
+else
+  check_flag_ok=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $check_flag_ok" >&5
+$as_echo "$check_flag_ok" >&6; }
+	if test "$check_flag_ok" = no;
+	then
+		FFLAGS="$check_save_flags"
+	fi
+
+	ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+	fi
 fi
 DYLIB_SUFFIX=$ff_suffix_dylib
 

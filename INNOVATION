@@ -1,4 +1,5 @@
 v 3.9-1  August 2009   (For FreeFem++ days )
+  - correct configure (find lapack lib change $ll_lapack_libs in $ll_lapack_lib)
   - correct mistake in mpi 
     add:  gatherv, allgatherv, scatterv, alltoallv   
         and complex data type in:  allgather, gather, scatter, alltoall, ..

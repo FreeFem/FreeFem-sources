@@ -335,6 +335,7 @@ plots/cube.eps plots/cone.eps \
 plots/Hex-Sphere.eps plots/Cube-With-Ball.eps \
 plots/multiendborder.eps plots/multiendmesh.eps
 
+
 #  Pour la page de garde FH
 FIGS_JPG = plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg  \
 figures/mi.jpg plots/LogoUPMC.jpg \

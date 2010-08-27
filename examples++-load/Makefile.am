@@ -9,7 +9,7 @@ TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  BernadiRaugel.cpp Morley.cpp dfft.cpp  \
  funcTemplate.cpp mat_dervieux.cpp mat_psi.cpp myfunction.cpp \
- mat_dervieux.cpp convect_dervieux.edp funcTemplate.cpp AFunction_ext.hpp \
+ mat_dervieux.cpp convect_dervieux.edp funcTemplate.cpp \
  regtests.m4  makeref.edp ref.edp myType.edp addNewType.cpp \
   qf11to25.cpp  Element_P3.cpp  Element_P3.hpp  Element_P4.cpp  Element_P4.hpp \
   plot-fb-P3.edp  plot-fb-P4.edp  LaplaceP3.edp   LaplaceP4.edp \

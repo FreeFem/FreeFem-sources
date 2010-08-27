@@ -71,7 +71,6 @@ if test "$enable_fortran" != no
 then
     AC_PROG_F77(g77 f77 gfortran g77 f90 xlf xlf90 fort77)
     AC_PROG_FC(gfortran  f90  xlf90 )
-    
 #	if test -n "$F77" 
 #	then
     ff_flibs=""
@@ -1146,7 +1145,7 @@ AC_MSG_CHECKING([for lapack in $LIBS, $ff_blas_libs and -llapack] )
 	    if test "$ff_lapack_ok" = no ; then
 	    LIBS="$ff_save_libs -llapack $ff_blas_libs"
             AC_LINK_IFELSE( [AC_LANG_CALL(,dgeqr2_)], [ff_lapack_ok=yes
-	    ff_lapack_libs="-llapack"] )	
+	    ff_lapack_lib="-llapack"] )	
 	    fi		    
 	    LIBS="$ff_save_libs"	   
 	fi
@@ -1158,8 +1157,8 @@ if test "$ff_lapack_ok" = no; then
 AC_ARG_WITH(lapack,
 	[  --with-lapack=library	Use a specific version of the Lapack],
 	ff_lapack_ok=yes
-	ff_lapack_libs="${withval}"
-	LIBS="$ff_lapack_libs $LIBS"
+	ff_lapack_lib="${withval}"
+	LIBS="$ff_lapack_lib $LIBS"
 )
 fi
 
@@ -1169,11 +1168,11 @@ if  test "$ff_lapack_ok" = yes ; then
   ff_lapackdir=
   if test "$ff_lapack_ok" = yes   
   then
-      echo lapack LD  \'$ff_lapack_libs\'  >>$ff_where_lib_conf
+      echo lapack LD  \'$ff_lapack_lib\'  >>$ff_where_lib_conf
   fi   
 
 else
-  ff_lapack_libs=-llapack
+  ff_lapack_lib=-llapack
 fi
 # Arpack itself
 
@@ -1460,7 +1459,10 @@ then
 	fi
 	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
 	CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS)
-
+	if test "$enable_fortran" != no 
+	 then 
+	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FFLAGS)	
+	fi
 fi
 AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
 
