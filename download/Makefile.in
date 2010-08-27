@@ -311,6 +311,7 @@ blacs/BLACS.patch			pastix/config-pastix-complex.in \
 blacs/Bmake-blacs.inc			pastix/config-pastix-real.in \
 blacs/Makefile				pastix/pastix_release_2200-blend.patch \
 hips/Makefile				pastix/pastix_release_2200-gen.patch \
+pastix/pastix_long_complex.h		pastix/patch-pastix_long_complex.h \
 hips/SRC_SPKIT_makefile			scalapack/Makefile \
 hips/hips-1.2b-rc4.patch		scalapack/SLmake-scalapack.inc \
 scotch/Makefile \

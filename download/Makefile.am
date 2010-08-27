@@ -20,6 +20,7 @@ mumps/Makefile-mumps-4.9.2.inc		pastix/Makefile \
 blacs/BLACS.patch			pastix/config-pastix-complex.in \
 blacs/Bmake-blacs.inc			pastix/config-pastix-real.in \
 blacs/Makefile				pastix/pastix_release_2200-blend.patch \
+pastix/pastix_long_complex.h		pastix/patch-pastix_long_complex.h \
 hips/Makefile				pastix/pastix_release_2200-gen.patch \
 hips/SRC_SPKIT_makefile			scalapack/Makefile \
 hips/hips-1.2b-rc4.patch		scalapack/SLmake-scalapack.inc \
