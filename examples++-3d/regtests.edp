@@ -33,5 +33,18 @@ include "ref.edp";
 // The values tested here may not have a physical or mathematical
 // meaning. Their main property is to gather numerical values from the
 // whole domain, to be checked for consistency with previous runs.
+cout << "--------- file : 3d-Leman.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "3d-Leman.edp";
+	real TEST3dXLeman=vregtest;
+		cout<<"3d-Leman reference value = "<<REF3dXLeman
+				<<" test value ="<<TEST3dXLeman<<endl;
+			assert(TEST3dXLeman<REF3dXLeman*(1+0.1));
+				assert(TEST3dXLeman>REF3dXLeman*(1-0.1));
+};
+
 
 

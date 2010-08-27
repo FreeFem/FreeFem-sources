@@ -24,4 +24,4 @@ int[int] r4T=[0,2];
 mesh3 Th3=buildlayers(Th2,coef= max(fpyramide/HH,0.01), nn,zbound=[0,fpyramide],
  region=r1T, labelup=r2up, labeldown=r2down);
 
-medit("Pyramide",Th3);
+medit("Pyramide",Th3,wait=1);

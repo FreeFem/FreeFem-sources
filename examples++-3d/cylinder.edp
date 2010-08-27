@@ -28,4 +28,4 @@ real[int] domaine = [1.5,0.,0.,1,voltet];
 mesh3 Th=tetg(Thsurf,switch="pqaaAAYYQ",nbofregions=1,regionlist=domaine);
 
 savemesh(Th,"cyl.mesh");
-medit("cyl",Th);
+medit("cyl",Th,wait=1);

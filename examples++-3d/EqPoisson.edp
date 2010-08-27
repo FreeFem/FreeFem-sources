@@ -18,4 +18,4 @@ macro Grad(u) [dx(u),dy(u),dz(u)] //
 fespace Vh(Th,P1);  Vh u,v;
 solve Poisson(u,v) = int3d(Th)( Grad(u)'*Grad(v) ) - int3d(Th)( v) + on(1,u=1);
 plot(u,wait=1,nbiso=20,value=1);
-medit("u",Th,u);
+medit("u",Th,u,wait=1);
