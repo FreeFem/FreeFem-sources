@@ -11,6 +11,7 @@ FFFLIBS='@FLIBS@'
 INCFF=
 if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
 if [ -z "$MPICXX" ] ; then MPICXX='@MPICXX@' ; fi
+if [ -z "$MPI_LIB" ] ; then MPI_LIB='@MPI_LIB@' ; fi
 if [ -z "$F77" ] ; then F77='@F77@' ; fi
 if [ "$CXX" = '@'CXX'@' ] ; then CXX=""; fi
 if [ "$MPICXX" = '@'MPICXX'@' ] ; then MPICXX=""; fi
@@ -222,9 +223,9 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	fi
     fi
     if [ "$CONLY" != yes ]; then
-	echo $CXX $SHARED $FLAGS $CXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER
+	echo $CXX $SHARED $FLAGS $CXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $MPI_LIB
 	if [  $do = yes ] ; then 
-	   eval $CXX $SHARED $FLAGS $CXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER
+	   eval $CXX $SHARED $FLAGS $CXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $MPI_LIB
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
 	if [  "$bin" != "." ]; then
