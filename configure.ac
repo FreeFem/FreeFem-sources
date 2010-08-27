@@ -22,7 +22,7 @@ AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 
 ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
-
+ff_HOSTARCH_pastix=
 echo "#  Build with freefem++ with ./configure " `date`  >$ff_where_lib_conf
 # To allow anonymous CVS version to contain a "./configure" and
 # Makefiles
@@ -265,6 +265,7 @@ ff_mac=no
 ff_aglprog=
 if test `uname` = Darwin;
 then
+	ff_HOSTARCH_pastix=i686_mac
 	ff_suffix_dylib="dylib"
 	ff_mac=yes
 #	ff_aglprog=FreeFem++-agl${EXEEXT}
@@ -762,7 +763,7 @@ ff_mpi=no)
 	    AC_ARG_VAR(MPICC,[MPI C compiler command in $ff_mpi_path])
 	    AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
 	    AC_SUBST(MPICC,$MPICC)
-	    
+	    AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
 	    if test "$enable_fortran" != no
 	    then	
 		

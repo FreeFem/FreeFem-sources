@@ -308,6 +308,7 @@ Some configure flags use to build the current version
    gcc g++  g77
    wget 
    m4 bison flex patch
+   libzip-dev
    libx11-dev libxt-dev libxext-dev 
     libxpm4 libxpm4-dbg 
     libsuitesparse-dev libarpack2-devlibarpack2 libarpack2-dev

@@ -667,6 +667,7 @@ ff_wget
 MPI_INC_DIR
 MPIFC
 MPIF77
+PASTIX_HOSTARCH
 MPICC
 MPI_LIB
 MPI_LIB_DIRS
@@ -3471,7 +3472,7 @@ fi
 
 
 ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
-
+ff_HOSTARCH_pastix=
 echo "#  Build with freefem++ with ./configure " `date`  >$ff_where_lib_conf
 # To allow anonymous CVS version to contain a "./configure" and
 # Makefiles
@@ -7209,6 +7210,7 @@ ff_mac=no
 ff_aglprog=
 if test `uname` = Darwin;
 then
+	ff_HOSTARCH_pastix=i686_mac
 	ff_suffix_dylib="dylib"
 	ff_mac=yes
 #	ff_aglprog=FreeFem++-agl${EXEEXT}
@@ -11491,6 +11493,7 @@ test -n "$MPICC" || MPICC=""""
 
 	    MPICC=$MPICC
 
+	    PASTIX_HOSTARCH=$ff_HOSTARCH_pastix
 
 	    if test "$enable_fortran" != no
 	    then
