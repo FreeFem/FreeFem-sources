@@ -32,7 +32,7 @@ FAIRE: $(SRCDIR)
 	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
-	touch FAIT
+	touch FAIRE
 
 $(SRCDIR): $(PKGDIR)/$(PACKAGE)
 	gunzip -c   $^ | tar xvf - 
@@ -43,7 +43,7 @@ $(PKGDIR)/$(PACKAGE):
 clean: clean-local
 
 clean-local:
-	-rm -rf fftw-* FAIT 
+	-rm -rf fftw-* FAIT FAIRE
 
 cxxflags: ../Makefile
 	grep 'CXX *=' ../Makefile >cxxflags
