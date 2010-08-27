@@ -3,6 +3,7 @@ v 3.9-1  August 2009   (For FreeFem++ days )
     add:  gatherv, allgatherv, scatterv, alltoallv   
         and complex data type in:  allgather, gather, scatter, alltoall, ..
     correction bug : gather,  scatter
+    coorect essai.edp mpi example 
   - correct problem of compatibility of dynamic lib  with and without MPI 
      change ff-cc++ to add all MPI libs if MPI version exist. 
   - correct default  region number in square build mesh function  now 0 , (2 beetween  v3.8 -- 3.9)  

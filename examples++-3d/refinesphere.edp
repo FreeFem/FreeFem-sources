@@ -49,6 +49,6 @@ int[int] newlabel2 = [145,53];
 func fsize = 0.01/(( 1 + 5*sqrt( (x-0.5)^2+(y-0.5)^2+(z-0.5)^2) )^3);
 mesh3 Th3sphrefine2=tetgreconstruction(Th3sph,switch="raAQ",region=newlabel2,sizeofvolume=fsize);
 
- medit("sphere",Th3sph);
- medit("sphererefinedomain",Th3sphrefine);
-  medit("sphererefinelocal",Th3sphrefine2);
+ medit("sphere",Th3sph,wait=1);
+ medit("sphererefinedomain",wait=1,Th3sphrefine);
+  medit("sphererefinelocal",wait=1,Th3sphrefine2);

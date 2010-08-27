@@ -15,4 +15,4 @@ mesh3 Th=buildlayers(Baseh,nlayer,
   labelmid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
-medit("Cyl",Th);
+medit("Cyl",Th,wait=1);

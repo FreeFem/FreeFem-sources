@@ -15,4 +15,4 @@ mesh3 Th=buildlayers(Th2,nn,
   labelmid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
-medit("Lac",Th);
+medit("Lac",Th,wait=1);
