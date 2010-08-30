@@ -1,0 +1,408 @@
+Compilation of FreeFem++ under unix, MacOs X or cygwin (Windows)
+and bamg (mesh generator)
+----------------------------------------------------------------
+
+New:  Test version 3.9  F. Hecht & J. Morice July  2010.
+
+Try to downlaod and compile (add --enable-download flags to configure)
+ lot of related  sofware, (Please read the licence of all with software,
+if you use freefee++ for commercial purpose) 
+
+tetgen superlu fftw metis yams mshmet 
+blacs parmetis œôøèÒscalapack scotch superludist MUMPS pastix hypre hips 
+
+For the link with mmg3d software put the tar.gz archive in .../dowload/pgk directory.
+
+Remark, you can alsy copy all the donwload file in ../dowload/pgk if you have not internet connection.
+
+Brochet-2:download hecht$ ls -1 pkg/*
+pkg/MUMPS_4.9.2.tar.gz
+pkg/ParMetis-3.1.1.tar.gz
+pkg/SuiteSparse-2.4.0.tar.gz
+pkg/arpack96.tar.gz
+pkg/blacstester.tgz
+pkg/fftw-3.2.1.tar.gz
+pkg/freeyams.2010.02.22.tgz
+pkg/hips-1.2b-rc4.tar.gz
+pkg/hypre-2.4.0b.tar.gz
+pkg/metis-4.0.tar.gz
+pkg/mmg3dlib.tar.gz
+pkg/mpiblacs-patch03.tgz
+pkg/mpiblacs.tgz
+pkg/pastix_release_2200.tar.bz2
+pkg/patch.tar.gz
+pkg/scalapack-1.8.0.tgz
+pkg/scotch_5.1.6_esmumps.tar.gz
+pkg/superlu_4.0.tar.gz
+pkg/superlu_dist_2.3.tar.gz
+pkg/tetgen1.4.3.tar.gz
+Brochet-2:download hecht$ 
+
+TO simplify the link and compilation part, 
+
+I have add 3 files
+examples++-load/WHERE_LIBRARY		examples++-load/WHERE_LIBRARY-download
+examples++-load/WHERE_LIBRARY-config
+
+the file 
+examples++-load/WHERE_LIBRARY-config
+examples++-load/WHERE_LIBRARY-download
+are restectively created with ./configure commande ,
+the compilation of all downlaod software.
+and the  examples++-load/Makefile.
+
+
+The use of commande
+../exemples++-load/ff-cc++ -auto MUMPS_FreeFem.cpp
+compile a do all the link edition for MUMPS freefem++ interface.
+
+Brochet-2:examples++-mpi hecht$ make MUMPS_FreeFem.dylib
+../examples++-load//ff-c++ -auto  MUMPS_FreeFem.cpp 
+eval ../examples++-load//ff-c++ MUMPS_FreeFem.cpp -I/Users/hecht/ff/ff-MacIntel/download/include/metis '-I/Users/hecht/ff/ff-MacIntel/download/include' '-I/Users/hecht/ff/ff-MacIntel/download/include/scotch' '-I/Users/hecht/ff/ff-MacIntel/download/include' -I/usr/local/include -I/usr/local/lib -DAdd__ -Df77IsF2C -L/Users/hecht/ff/ff-MacIntel/download/lib -lmetis '-L/Users/hecht/ff/ff-MacIntel/download/lib -lmumps_commonFREEFEM -ldmumpsFREEFEM -lzmumpsFREEFEM -lpordFREEFEM' '-framework vecLib' '-L/Users/hecht/ff/ff-MacIntel/download/lib -lptesmumps -lptscotch -lptscotcherr ' -L/Users/hecht/ff/ff-MacIntel/download/lib/blacs -lblacsCinit_MPI-FREEFEM-0 -lblacsF77init_MPI-FREEFEM-0 -lblacs_MPI-FREEFEM-0 '-L/Users/hecht/ff/ff-MacIntel/download/lib -lscalapack ' -L/usr/local/lib -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -lutil /opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a
+g++ -c -m64 -fPIC -DNDEBUG -O3 -DDRAWING -DBAMG_LONG_LONG -DNCHECKPTR -fPIC -I/opt/local/include -I../examples++-load/include '-I/Users/hecht/ff/ff-MacIntel/download/include/metis' '-I/Users/hecht/ff/ff-MacIntel/download/include' '-I/Users/hecht/ff/ff-MacIntel/download/include/scotch' '-I/Users/hecht/ff/ff-MacIntel/download/include' '-I/usr/local/include' '-I/usr/local/lib' '-DAdd__' '-Df77IsF2C' 'MUMPS_FreeFem.cpp'
+g++ -bundle -undefined dynamic_lookup -m64 -fPIC -DNDEBUG -O3 -DDRAWING -DBAMG_LONG_LONG -DNCHECKPTR -fPIC -I/opt/local/include 'MUMPS_FreeFem.o' -o MUMPS_FreeFem.dylib -L/Users/hecht/ff/ff-MacIntel/download/lib -lmetis -L/Users/hecht/ff/ff-MacIntel/download/lib -lmumps_commonFREEFEM -ldmumpsFREEFEM -lzmumpsFREEFEM -lpordFREEFEM -L/Users/hecht/ff/ff-MacIntel/download/lib -lptesmumps -lptscotch -lptscotcherr -L/Users/hecht/ff/ff-MacIntel/download/lib/blacs -lblacsCinit_MPI-FREEFEM-0 -lblacsF77init_MPI-FREEFEM-0 -lblacs_MPI-FREEFEM-0 -L/Users/hecht/ff/ff-MacIntel/download/lib -lscalapack -L/usr/local/lib -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -lutil /opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a -framework vecLib
+
+we just use the 2 lines  in MUMPS_FreeFem.cpp
+//ff-c++-LIBRARY-dep: metis mumps  blas ptscotch blacs scalapack mpifc  fc  
+//ff-c++-cpp-dep: 
+
+
+Remark:
+     *  the graphique is now base of Open/Glut lib.
+     *  IN CASE  of problem under UBUNTU/GLUT  (no graphics window tilte: (march 2009) 
+        they are a know bug with compiz package so  try
+	To disable/enable it graphically, install the compiz-swith package with synatic. Or try this in command line:
+	killall compiz.real && killall compiz && metacity --replace --display :0 & 
+
+     *  to today the ide  version is  currently available
+	you can get  from http://www.ann.jussieu.fr/~lehyaric/ffcs/index.htm
+
+This part of the software under construction.
+F. Hecht.
+-
+
+
+For debian, ubuntu, MacOS, Windows  see the the prerequisite
+
+installed packages before configuration and compilatation.
+
+This file details specific configuration details for FreeFem++. For
+a standard installation, please refer to the file named "INSTALL".
+
+annd see the end of this file to have some 
+configure example:
+
+Full version 3d need automatic download option
+----------------------------------
+For a Full 3d  version , some external piece of software
+can by usefull, the simplest wait is to add "--enable-download"
+to the "./configure" (need of  "wget" or "curl" unix  command). 
+The download archive are store in : 
+download/pkg/SuiteSparse-2.4.0.tar.gz  # umpack 
+download/pkg/arpack96.tar.gz           # arpack
+download/pkg/f2c.tar                   # f2c if no fortran 77
+download/pkg/fftw-3.2.1.tar.gz         # fft
+download/pkg/patch.tar.gz              # arpack
+download/pkg/superlu_3.1.tar.gz        # superlu
+download/pkg/tetgen1.4.2.tar.gz        # tetgen
+download/blas/cblas.tgz                # blas 
+if you have not internet access juste copie this files at the same  place.
+
+
+Debugging and optimization
+--------------------------
+
+Without any option, "./configure" selects the best optimization
+options for the local machine. To produce optimized binaries that can
+be ported to other machines, add the option "--enable-generic".
+
+
+To produce FreeFem++ programs containing debugging symbols and no
+optimization, use "--enable-debug".
+
+If you need to add specific flags to the ones that ./configure
+chooses, just define the corresponding automake variable before
+running configure. For instance, to add flag "-x" to C++ compilations,
+say:
+
+> CXXFLAGS=-x ./configure
+
+Other useful configuration variables include:
+- CFLAGS for C compilation
+- FFLAGS for Fortran compilation
+- LIBS libraries for the linking stage
+- LDFLAGS linking flags
+- LDADD extra options for the linking stage
+- F77  the fortran compile (if not fortran is installed  see section NOFORTRAN)
+- CC  the cc compiler
+- CXX the c++ compiler
+
+
+Linear algebra libraries and eigen value problem
+-----------------------------------------------
+By default, "./configure" looks for the X11, BLAS, ARPACK and UMFPACK, OpenGL, GLUT
+libraries on the local system.
+ARPACK is use to compute eigenvalue.
+and UMFPACK is a new fast sparse linear solver.
+
+ If configure cannot find the libraries
+by itself, you can specify the full path to a library file (ending
+with ".a") or the options use by the linker (ex: "-L/usr/local/lib -lblas")
+with the following options:
+
+--with-blas="blas linker options"  
+--with-arpack="arpack linker options"
+--with-amd="amd linker options"
+--with-umfpack="umfpack linker options"
+
+Or, if the configuration flag "--enable-download" is specified, the
+compilation step ("make") will try to download the missing libraries
+(from their official websites) and compile them.
+
+Remark, under linux or window the simplest way to get
+a not to bad version is
+./configure --enable-generic_blas
+
+
+
+and reconfigure for example: 
+./configure --enable-generic_blas 
+
+Here are the different versions of FreeFem++ produced by one
+compilation (some versions may be missing if your system does not
+support them):
+
+* FreeFem++: standard version (using X11 graphics on Linux and MacOS
+  10, Win32 on Windows and  MacOS X) (located in src/std)
+
+* FreeFem++-nw: without graphics (located in src/nw)
+
+* FreeFem++: graphics based on OpenGL (located in src/nw)
+* ffglut: the graphic tools
+
+* FreeFem++-mpi: parallel version, without graphics (located in src/mpi)
+
+The compilation procedure (produced with automake) builds all the
+libraries and executables sequentially. Running "make" in a
+subdirectory does not rebuild dependencies in other directories.
+
+The compilation has been tested under linux and MacOs/Darwin with g++
+version  3.3. 4.0 4.4 It take 30 mn to compile all on
+my PowerBook G4 1Mhz 1024MB.
+
+Rebuilding "configure"
+------------------------
+
+Developers of FreeFem++ can rebuild the configuration system using
+Automake and Autoconf with the command:
+
+> autoreconf
+# to reconfigure with the same parameter 
+> ./reconfigure 
+
+Extra utilities
+---------------
+
+To run an interactive test of FreeFem++:
+> make visualcheck
+
+To run a speed test:
+> make speedtest
+
+To create the documentation in .ps and .pdf format (in the "DOC" directory):
+> make documentation
+
+Examples
+--------
+
+All the Examples are in the two directories examples++ and
+examples++-tutorial. The suffix is .edp ("equations aux derivees
+partielles" in French)
+
+To test all the examples under unix: 
+
+> cd examples++; ../src/std/FreeFem++ all.edp
+> cd examples++-tutorial; ../src/std/FreeFem++ all.edp
+
+To try the  dynamic linking loader example: 
+remark: some adaptation must be done with the suffix probleme (.dll, .so, .dylib )
+and directory  to seach dynamic lib  (shell variable LD_LIBRARY_PATH)
+ 
+
+warning under  Window XP,  first install the cygwin environnent (see http://www.cygwin.com)
+> cd example++-load build a dll file with the following shell script:
+> ./ff-c++  myfunction 
+
+to execute the examples try  
+  under window xp
+ FreeFem++-nw  load.edp 
+  or otherwise 
+ ../src/nw/FreeFem++-nw load.edp
+
+
+
+-- FreeFem++ v1.38 (date Tue Feb 10 12:04:30 CET 2004)
+ file : load.edp
+ Load: lg_fem  --  no UMFPACK => replace UMFPACK  by LU  
+lg_mesh eigenvalue 
+ load "myfunction" lood: myfunction 
+load: dlopen(./myfunction.so) = 0x84be700
+
+    1 :  mesh Th=square(5,5);
+    2 :  fespace Vh(Th,P1);
+    3 :  Vh uh=myfunction(); // warning  do not forget () 
+    4 :  cout << uh[].min << " " << uh[].max << endl;
+    5 : 
+    6 : 
+    7 :  sizestack + 1024 =1224  ( 200 )
+----------CheckPtr:-----init execution ------ NbUndelPtr  996  Alloc: 79131  NbPtr 1011 
+
+   Nb of edges on Mortars  = 0
+   Nb of edges on Boundary = 20, neb = 20
+ Nb Of Nodes = 36
+ Nb of DF = 36
+0 0.841471
+times: compile 0.01s, execution -2.0837e-19s
+----------CheckPtr:-----end execution -- ------ NbUndelPtr  996  Alloc: 79131  NbPtr 1048 
+Bien: On a fini Normalement
+                CheckPtr:Nb of undelete pointer is 995 last 101
+                CheckPtr:Max Memory used     93.672 kbytes  Memory undelete 78619 
+
+Note 1: if this does not work, please check the manual page of dlopen
+for your system.
+
+
+Note 2. Fast fourier exemple ( FFT )  is in dfft.edp  file
+need of fftw3 
+
+
+Some configure flags use to build the current version
+-----------------------------------------------------
+
+*  Under Debian: ( 2008)
+----------------
+  the installed packages + dependance are:   
+
+  gcc g++ g77
+  libsuitesparse-dev
+  libarpack2-dev
+  libx11-dev libxt-dev libxext-dev
+  patch
+  wget
+  freeglut3-dev
+ - bluid the parallel version
+   openmpi-dev openmpi
+
+ - to rebuild de documentation:  
+  imagemagick 
+  tetex-base   tetex-bin  tetex-extra 
+
+ ./configure 
+  make 
+  make check    (to test de version)
+  make install  (under root)
+   
+*  Under Ubuntu (2008)
+---------------
+  the installed packages + dependance are:   
+   gcc g++  g77
+   wget 
+   m4 bison flex patch
+   libzip-dev
+   libx11-dev libxt-dev libxext-dev 
+    libxpm4 libxpm4-dbg 
+    libsuitesparse-dev libarpack2-devlibarpack2 libarpack2-dev
+    libfltk1.1 libfltk1.1-dbg libfltk1.1-dev
+    libopenmpi1 libopenmpi-dev
+    libopenmpi-dbg libxpm-dev 
+    freeglut3 freeglut3-dev
+    libx11-dev  libxt-dev  libxext-dev 
+    libglut3-dev	
+ - bluid the parallel version
+    openmpi-dev openmpi
+ - to rebuild de documentation:  
+    imagemagick 
+    tetex-base   tetex-bin  tetex-extra 
+ 
+
+ ./configure --enable-download  --with-mpi=mpic++
+#  utility of parameter:
+#  --enable-download :  for fft and tetgen ... 
+#  --with-mpi=mpic++ : for mpi version 
+  make 
+  make check    (to test de version)
+  make install  (under root)
+  
+
+
+* Under Red Hat Enterprise Linux AS release 3:
+----------------------------------------------
+the following rpm:
+blas-3.0-20 gcc-3.2.3-53 tetex-1.0.7-67.9 lapack-3.0-20 ImageMagick-5.5.6-15 wget-1.10.2-0.30E curl-7.10.6-7.rhel3
+are install
+./configure  '--enable-download' '--with-blas=-lblas -llapack'
+
+
+* Under MacOs: (2010)  snow leopard
+-------------
+ 
+ 1) intall Apple's Developer Tools from de Apple DVD
+    Warning the default compile is now 64 bits, 
+ 2) install g95  fortron (to have a fortran  64 bits by default)
+     or add flags   -m64  to the fortran command (not tested).
+	cd download/f2c
+	make install-10.6
+ 3)  recompile openmpi with the use of g95  
+ './configure'  'FC=/opt/local/bin/g95' 'F77=/opt/local/bin/g95' 
+  make 
+  sudo make install
+
+ 4) TeXLive-teTeX Current Release in http://www.ctan.org/tex-archive/systems/mac/mactex/
+
+
+./configure '-with-suffix=snow-leopard'  '--enable-download' 'build_alias=snow-leopard' 'host_alias=snow-leopard' 'target_alias=snow-leopard' 'F77=/opt/local/bin/g95' '-with-mpi=/usr/local/bin/mpic++' '--enable-m64' 'FLIBS=/opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a' 'MPIF77=/usr/local/bin/mpif77' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90'
+
+* Under MacOC macIntel 
+----------------------
+  1) install Apple's Developer Tools
+  2) install do the NOFORTRAN section. 
+  3) install the TexMac for the documentation:
+ http://ctan.org/get/systems/mac/mactex/MacTeX-20071201.dmg
+
+# to build a good freefem for your Mac:
+
+./configure '-with-suffix=snow-leopard'  '--enable-download' 'build_alias=snow-leopard' 'host_alias=snow-leopard' 'target_alias=snow-leopard' 'F77=/opt/local/bin/g95' '-with-mpi=/usr/local/bin/mpic++' '--enable-m64' 'FLIBS=/opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a' 'MPIF77=/usr/local/bin/mpif77' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90'
+
+./configure -without-fltk' '--enable-download' '-with-mpi=mpic++' 'F77=fort77' '--with-flib=-L/usr/local/lib -lf2c'
+
+or if you have compile the download/f2c   with : (cd download/f2c;make install)
+
+./configure '-with-suffix' 'MacIntel'  '--enable-download' '-with-mpi=mpic++' '-enable-download' 
+
+# to build universal FreeFem++ of 10.4 macOS (ppc , i386):
+
+/configure '-with-suffix=Universal' '-without-fltk' '--enable-download' '-with-mpi=mpic++' 'F77=/usr/local/bin/fort77' '--with-flib=-L/usr/local/lib -lf2c' 'CXX=g++ -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386 -mmacosx-version-min=10.4' 'CC=gcc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386 -mmacosx-version-min=10.4' 'FFLAGS=-Wc,-isysroot,/Developer/SDKs/MacOSX10.4u.sdk,-arch,ppc,-arch,i386,-mmacosx-version-min=10.4' 'CXXCPP=g++ -E'
+
+
+* Under Windows: 
+----------------
+see the end of README_WINDOW  files 
+
+* NOFORTRAN:
+------------
+You have not fortran compiler use f2c and the use the  script fort77
+by the way just do:
+cd  download/f2c
+# to build and install fort77,  linf2c.a in download/bin  download/lib
+make install
+# to install in /usr/local/
+make install-sudo
+
+# to build and universal f2c library on MacOS 10.4 and install in /usr/local/bin  /usr/local/lib
+# and in download/bin  download/lib download/bin  download/include
+#    32/ 64   bits architecture on    intel and ppc
+make -n install-10.4 
+
+for the 64 on intel   version 10.6 (SDK)
+make -n install-10.6
+

@@ -1,0 +1,78 @@
+// file netgencube.edp
+load "msh3"
+load "netgen"
+load "medit"
+
+real x0,x1,y0,y1;
+x0=1.; x1=2.; y0=0.; y1=2*pi;
+mesh Thsq1 = square(5,35,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+
+func ZZ1min = 0;
+func ZZ1max = 1.5;
+func XX1 = x;
+func YY1 = y;
+
+int[int] r31h=[0,1];
+int[int] r31b=[0,2];  
+mesh3 Th31h = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1max],label=r31h,orientation=-1);
+mesh3 Th31b = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1min],label=r31b,orientation=-1);
+
+/////////////////////////////////
+x0=1.; x1=2.; y0=0.; y1=1.5;
+mesh Thsq2 = square(5,8,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+
+func ZZ2 = y;
+func XX2 = x;
+func YY2min = 0.;
+func YY2max = 2*pi;
+
+int[int] r32h=[0,3];
+int[int] r32b=[0,4];
+
+mesh3 Th32h = movemesh23(Thsq2,transfo=[XX2,YY2max,ZZ2],label=r32h,orientation=-1);  
+mesh3 Th32b = movemesh23(Thsq2,transfo=[XX2,YY2min,ZZ2],label=r32b,orientation=1);
+
+/////////////////////////////////
+x0=0.; x1=2*pi; y0=0.; y1=1.5;
+mesh Thsq3 = square(35,8,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+func XX3min = 1.;
+func XX3max = 2.;
+
+func YY3 = x;
+func ZZ3 = y;
+
+int[int] r33h=[0,5];
+int[int] r33b=[0,6];
+
+mesh3 Th33h = movemesh23(Thsq3,transfo=[XX3max,YY3,ZZ3],label=r33h,orientation=1);  
+mesh3 Th33b = movemesh23(Thsq3,transfo=[XX3min,YY3,ZZ3],label=r33b,orientation=-1); 
+
+////////////////////////////////
+mesh3 Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
+//savemesh(Th33,"Th33.mesh");
+//savesurfacemesh(Th33,"Th33.points","Th33.faces");
+// build a mesh of a axis parallel box with TetGen
+
+//mesh3 Thbid = netgload("microcoil.vol",renum=1);
+
+
+//mesh3 Thfinal = netg(Th33,maxh=0.08,secondorder=0);    // Tetrahelize the interior of the cube with tetgen
+//medit("netgencube",Thbid,wait=1);
+
+
+//medit("surface",Th33);
+mesh3 Thfinal = netg(Th33,maxh=0.08,secondorder=0);    // Tetrahelize the interior of the cube with tetgen
+medit("netgencube",Thfinal,wait=1);
+//savemesh(Thfinal,"Thfinal.mesh");
+/*
+mesh3 Thfinal3 = netg(Th33,maxh=0.1,secondorder=0);    // Tetrahelize the interior of the cube with tetgen
+medit("netgencube2",Thfinal3,wait=1);
+
+mesh3 Thfinal2 = netgstl("hinge.stl",maxh=100,secondorder=0);    // Tetrahelize the interior of the cube with tetgen
+medit("netgenhinge",Thfinal2,wait=1);
+
+mesh3 Thfinal4 = netgstl("hinge.stl",maxh=100,secondorder=0);    // Tetrahelize the interior of the cube with tetgen
+medit("netgenhinge2",Thfinal4,wait=1);
+*/
+
+

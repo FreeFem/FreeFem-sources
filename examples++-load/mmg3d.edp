@@ -1,0 +1,28 @@
+// test mmg3d
+load "msh3"
+load "medit"
+load "mmg3d"
+include "../examples++-3d/cube.idp"
+
+int n=6;
+int[int]  Nxyz=[12,12,12];
+real [int,int]  Bxyz=[[0.,1.],[0.,1.],[0.,1.]];
+int [int,int]  Lxyz=[[1,1],[2,2],[2,2]];
+mesh3 Th=Cube(Nxyz,Bxyz,Lxyz);
+
+
+int nvmax1  =  1000000;
+int ntrimax1 = 1000000;
+int ntetmax1 = 1000000;
+
+real[int] isometric(Th.nv);
+{
+  for( int ii=0; ii<Th.nv; ii++)
+    isometric[ii]=0.17;
+
+}
+
+mesh3 Th3=mmg3d( Th, nvmax=nvmax1, ntrimax=ntrimax1,ntetmax=ntetmax1, metric=isometric);
+				
+medit("init",Th);
+medit("isometric",Th3);

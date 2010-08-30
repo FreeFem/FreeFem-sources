@@ -1,0 +1,73 @@
+#!/bin/bash
+VERSION=$1
+date=`date`
+ftp=~/public_html/ftp/freefem
+dir=ftp/freefem/
+if [ "$2" = "cdrom" ]; then
+ftp=~/www_gamma/gamma/cdrom/ftp/freefem
+dir=../../ftp/freefem/
+ffdir=""
+cd $ftp
+ftgz=`ls  freefem++*.tar.gz|tail -1`
+fapp=`ls  freefem++*_macosx.tgz|tail -1`
+fsit=`ls  freefem++*.sit|tail -1`
+fexe=`ls  freefem++*.exe|tail -1`
+flinux=`ls  freefem++*linux.tgz|tail -1`
+else
+cd $ftp
+ffdir="freefem/"
+ftgz=`ls  freefem++-*.tar.gz|tail -1`
+fapp=`ls  FreeFem++v*_MacOsX.tgz|tail -1`
+fsit=`ls  FreeFem++v*.sit|tail -1`
+fexe=`ls  FreeFem++-*.exe|tail -1`
+flinux=`ls FreeFem++v*_linux-2.4.21_libc-2.3.2.tgz|tail -1`
+fi
+#awkprog='{print $5, $6,$7,$8,$9}'
+awkprog='{print $5/1024,"kb" , $6,$7,$8}'
+
+
+
+fmanpdf=`ls  manual-full.pdf`
+fomanpdf=`ls  manual.pdf`
+fmanps=`ls  manual-full.ps.gz`
+fomanps=`ls  manual.ps.gz`
+
+
+tgz=`ls -l $ftgz|awk "$awkprog"`
+app=`ls -l $fapp|awk "$awkprog"`
+#zip=`ls -l $fzip|awk "$awkprog"`
+sit=`ls -l $fsit|awk "$awkprog"`
+exe=`ls -l $fexe|awk "$awkprog"`
+linux=`ls -l $flinux|awk "$awkprog"`
+manpdf=`ls -l $fmanpdf|awk "$awkprog"`
+omanpdf=`ls -l $fomanpdf|awk "$awkprog"`
+
+if [ "$2"! = "cdrom" ]; then
+
+ln -sf $ftgz freefem++.tgz
+ln -sf $ftgz freefem++.tar.gz
+ln -sf $fapp freefem++_MacOsX.tgz
+ln -sf $fexe freefem++.exe
+ln -sf $fsit  freefem++.sit
+ln -sf $flinux freefem++-linux.tgz
+fi
+cd -
+  sed  \
+-e "s%@ver@%$VERSION%g" \
+-e "s%@manpdf@%$manpdf%g" \
+-e "s%@omanpdf@%$omanpdf%g" \
+-e "s%@sit@%$sit%g" \
+-e "s%@fsit@%$fsit%g" \
+-e "s%@tgz@%$tgz%g" \
+-e "s%@ftgz@%$ftgz%g" \
+-e "s%@app@%$app%g" \
+-e "s%@fapp@%$fapp%g" \
+-e "s%@exe@%$exe%g" \
+-e "s%@flinux@%$flinux%g" \
+-e "s%@linux@%$linux%g" \
+-e "s%@fexe@%$fexe%g" \
+-e "s%@last@%v${VERSION}%g" \
+-e "s%@date@%$date%g" \
+-e "s%@dir@%$dir%g" \
+-e "s%@ffd@%$ffdir%g" \
+-e "s%~/public_html/%%g"

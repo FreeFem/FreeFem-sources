@@ -1,0 +1,43 @@
+diff -ur pastix_release_2200/src/make_gen pastix_release_2200-okk/make_gen
+--- pastix_release_2200/src/make_gen	2009-04-01 11:03:42.000000000 +0200
++++ pastix_release_2200-okk/make_gen	2010-02-10 10:41:25.000000000 +0100
+@@ -33,7 +33,7 @@
+ 
+ VERSIONTYPE=${VERSIONINT}${VERSIONPRC}${VERSIONFLT}
+ VERSIONNAME=${VERSIONBIT}${VERSIONMPI}${VERSIONSMP}${VERSIONBUB}${VERSIONTYPE}${VERSIONORD}_${HOSTARCH}
+-PASTIX_DIR?="`pwd`/../install"
++PASTIX_DIR="`pwd`/../install"
+ 
+ ##
+ ##  General rules.
+@@ -195,17 +195,19 @@
+ 						utils/src/pastix-conf.sh 	\
+ 						$(PASTIX_DIR)
+ 				cp utils/src/pastix-conf.sh $(PASTIX_DIR)/pastix-conf${VERSIONNAME}.sh
+-				cat $(PASTIX_DIR)/pastix-conf${VERSIONNAME}.sh				| \
+-				sed -e s+\_LIBS\_+"-L$(PASTIX_DIR) -lpastix ${EXTRALIB}"+		| \
+-				sed -e s+\_INC\_+"-I$(PASTIX_DIR)"+					| \
+-				sed -e s+\_CC\_+"${MPCCPROG}"+						| \
+-				sed -e s+\_FC\_+"${MCFPROG} ${CF90CCPOPT}"+				| \
+-				sed -e s+\_CL\_+"${MPCCPROG}"+				   		| \
+-				sed -e s+\_FL\_+"${MCFPROG}"+						| \
+-				sed -e s+\_BLAS\_+"${BLASLIB}"+						| \
+-				sed -e s+\_VERSION\_+"`cd sopalin/src && ../../myversion.sh `"+	        | \
+-				sed -e s+\_OPTS\_+"${CCTYPES} ${CCPASTIX}"+ > $(PASTIX_DIR)/pastix-conf${VERSIONNAME}.sh.tmp
+-				mv $(PASTIX_DIR)/pastix-conf${VERSIONNAME}.sh.tmp $(PASTIX_DIR)/pastix-conf${VERSIONNAME}.sh
++				mv $(PASTIX_DIR)/pastix-conf${VERSIONNAME}.sh $(PASTIX_DIR)/pastix-conf${VERSIONNAME}.sh.tmp
++				sed -e 's;\_LIBS\_;-L$(PASTIX_DIR) -lpastix ${EXTRALIB};'		\
++				     -e 's;\_INC\_;-I$(PASTIX_DIR);'					\
++				     -e 's;\_CC\_;${MPCCPROG};'						\
++				     -e 's;\_FC\_;${MCFPROG} ${CF90CCPOPT};'				\
++				     -e 's;\_CL\_;${MPCCPROG};'				   		\
++				     -e 's;\_FL\_;${MCFPROG};'						\
++				     -e 's;\_BLAS\_;${BLASLIB};'						\
++				     -e 's;\_VERSION\_;"`cd sopalin/src \&\& ../../myversion.sh `";'	        \
++				     -e 's;\_OPTS\_;${CCTYPES} ${CCPASTIX};'\
++				     -e 's;\_VERSION\_\_VERSION\_;&&;'\
++				     < $(PASTIX_DIR)/pastix-conf${VERSIONNAME}.sh.tmp \
++				     > $(PASTIX_DIR)/pastix-conf${VERSIONNAME}.sh
+ 				chmod +x $(PASTIX_DIR)/pastix-conf${VERSIONNAME}.sh
+ 				ln -fs $(PASTIX_DIR)/pastix-conf${VERSIONNAME}.sh $(PASTIX_DIR)/pastix-conf
+ 

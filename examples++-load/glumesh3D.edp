@@ -1,0 +1,51 @@
+load "msh3"
+
+real x0=-1.,x1=-0.5;
+real y0=-0.5,y1=0.5;
+
+mesh Th1=square(5,8,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+
+x0=-0.5;
+x1=-0.1;
+y0=-1;
+y1=1;
+mesh Th2=square(10,16,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+
+
+int[int] r1=[2,0],  r2=[4,0];
+Th1=change(Th1,label=r1);
+Th2=change(Th2,label=r2);
+
+plot( Th1, Th2, wait=1 );
+
+verbosity=2;
+
+cout << "================" << endl;
+cout << "   gluing mesh  " << endl;
+mesh Th2D=Th1+Th2;
+cout << "Vertex, Triangle, Border " << Th2D.nv << " "<< Th2D.nt << " " <<  endl; 
+//plot( Th2D, wait=1 );
+savemesh( Th2D, "glu2D.mesh");
+
+
+func zmin=0.;
+func zmax=1.;
+int MaxLayer=10;
+
+mesh3 Th31=buildlayers(Th1,MaxLayer,zbound=[zmin,zmax]); 
+savemesh( Th31, "bl31.mesh");
+
+mesh3 Th32=buildlayers(Th2,MaxLayer,zbound=[zmin,zmax]); 
+savemesh( Th32, "bl32.mesh");
+
+mesh3 Tht=Th31+Th32;
+savemesh( Tht, "glu3D.mesh");
+
+cout << "Vertex, Tet, Triangle " << Tht.nv << " "<< Tht.nt << " " << Tht.nbe << endl; 
+
+
+func mv1x = 1+x;
+func mv1y = y;
+func mv1z = z;
+mesh3 Thmvs1 = movemesh3(Tht, transfo=[mv1x,mv1y,mv1z]);
+savemesh(Thmvs1,"movemeshglumesh.mesh");
