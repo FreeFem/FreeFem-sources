@@ -16,6 +16,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+//ff-c++-LIBRARY-dep:   gmm
+//ff-c++-cpp-dep: 
+
 #include <cmath>
 #include <iostream>
 #include "AFunction.hpp"
