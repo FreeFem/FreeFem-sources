@@ -35,7 +35,8 @@ compile-10.6:f2c Makefile-MacOs
 
 
 install:  ../lib ../include ../bin ../bin/fort77 ../bin/mpifort77
-	cp f2c/src/f2c ../bin
+	-mkdir ../bin
+	cp f2c/src/f2c ../bin/.
 	cp f2c/src/f2c.h ../include
 	cp f2c/libf2c/libf2c.a ../lib
 	../bin/fort77 tt.f

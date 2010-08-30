@@ -36,10 +36,12 @@ headers-sparsesolver.inc
 
 MPI_SOFT=blacs parmetis  scalapack scotch superludist MUMPS pastix hypre hips	
 
-all-recursive: lib include pkg
+all-recursive: bin lib include pkg
 
 lib: 
 	mkdir lib
+bin: 
+	mkdir bin
 include:
 	mkdir  include
 pkg:

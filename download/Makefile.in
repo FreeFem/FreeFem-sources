@@ -665,10 +665,12 @@ uninstall-am:
 	tags-recursive uninstall uninstall-am
 
 
-all-recursive: lib include pkg
+all-recursive: bin lib include pkg
 
 lib: 
 	mkdir lib
+bin: 
+	mkdir bin
 include:
 	mkdir  include
 pkg:
