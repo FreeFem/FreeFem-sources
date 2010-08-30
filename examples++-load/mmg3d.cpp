@@ -47,6 +47,10 @@ using namespace  mmg3d;
 Mesh3 * MMG_pMesh_to_msh3(MMG_pMesh meshMMG){
   int i;
    
+  cout << "transformation maillage --> msh3 " << endl;
+  cout << "meshMMG->np =" << meshMMG->np << endl;
+  cout << "meshMMG->ne =" << meshMMG->ne << endl;
+  cout << "meshMMG->nt =" << meshMMG->nt << endl;
   Vertex3 *v = new Vertex3[meshMMG->np];
   Tet *t  = new Tet[meshMMG->ne];
   Tet *tt = t;
@@ -88,10 +92,15 @@ Mesh3 * MMG_pMesh_to_msh3(MMG_pMesh meshMMG){
 
 
  Mesh3 *T_TH3 = new Mesh3(meshMMG->np, meshMMG->ne, meshMMG->nt, v, t, b);
+ cout << "transformation maillage --> msh3 " << endl;
+ cout << "meshMMG->np =" << meshMMG->np << endl;
+ cout << "meshMMG->ne =" << meshMMG->ne << endl;
+ cout << "meshMMG->nt =" << meshMMG->nt << endl;
+ cout << "T_TH3" << T_TH3->nv  << " " << T_TH3->nt  << " " << T_TH3->nbe <<endl;
  return T_TH3;
 }
 
-MMG_pMesh mesh3_to_MMG_pMesh(const Mesh3 &Th3, const int & nvmax, const int &ntrimax, const int & ntetmax , const bool & boolMoving , const KN<double> &Moving){
+MMG_pMesh mesh3_to_MMG_pMesh(const Mesh3 &Th3, const int & nvmax, const int &ntrimax, const int & ntetmax , const bool & boolMoving , KN<double> &Moving){
   MMG_pMesh meshMMG;
   meshMMG = (MMG_pMesh)calloc(1,sizeof(MMG_Mesh)) ;
 
@@ -106,16 +115,25 @@ MMG_pMesh mesh3_to_MMG_pMesh(const Mesh3 &Th3, const int & nvmax, const int &ntr
   meshMMG->point = (MMG_pPoint)calloc(meshMMG->npmax+1,sizeof(MMG_Point));
   meshMMG->tetra = (MMG_pTetra)calloc(meshMMG->nemax+1,sizeof(MMG_Tetra));
   meshMMG->tria = (MMG_pTria) calloc(meshMMG->ntmax+1,sizeof(MMG_Tria));
-  meshMMG->disp = NULL;
+  //meshMMG->disp = NULL;
+ 
   if( boolMoving ){
-    MMG_pDispl pd;
-    meshMMG->disp = (MMG_pDispl)calloc(meshMMG->npmax+1,sizeof(MMG_Displ));
-    for(int ii=1; ii <= meshMMG->np; ii++){
-      pd = &meshMMG->disp[ii];
-      pd->mv[0] = Moving[3*(ii-1)];
-      pd->mv[1] = Moving[3*(ii-1)+1];
-      pd->mv[2] = Moving[3*(ii-1)+2];
+    MMG_pDispl ppd;
+    meshMMG->disp = (MMG_pDispl)calloc(1,sizeof(MMG_Displ));
+    ppd = meshMMG->disp;
+    ppd->np = meshMMG->np;
+    ppd->mv = (double *) calloc(3*(meshMMG->np+1),sizeof(double));
+    assert(mesh->disp->mv);
+    ppd->alpha = (short *) calloc( meshMMG->np+1,sizeof(short));
+    assert(mesh->disp->alpha);
+    for(int ii=0; ii < meshMMG->np; ii++){      
+      ppd->mv[3*ii+1] = Moving[3*ii];
+      ppd->mv[3*ii+2] = Moving[3*ii+1];
+      ppd->mv[3*ii+3] = Moving[3*ii+2];
     }
+  }
+  else{
+    meshMMG->disp = NULL;
   }
   meshMMG->adja = (int*)calloc(4*meshMMG->nemax+5,sizeof(int));
   
@@ -168,31 +186,43 @@ MMG_pSol metric_mmg3d(const int & nv, const int & nvmax, const KN<double> &metri
   MMG_pSol sol;
   
   sol= (MMG_pSol)calloc(1,sizeof(MMG_Sol)) ;
-  sol->np = nv;
-  sol->npmax=nvmax;
 
-  if(metric.N() == nv){ 
-    const int ic=1;
-    char newvalue[sizeof(int)];
-    sprintf(newvalue,"%s", (char*)&ic);
-    sol->offset = *newvalue;
+  cout << metric.N() << " taille de la metrique "<< endl;
+  if( metric.N() > 0){
+    sol->np = nv;
+    sol->npmax=nvmax;
+    
+    if(metric.N() == nv){ 
+      const int ic=1;
+      char newvalue[sizeof(int)];
+      sprintf(newvalue,"%s", (char*)&ic);
+      sol->offset = *newvalue;
+    }
+    else{
+      const int ic=6;
+      char newvalue[sizeof(int)];
+      sprintf(newvalue,"%s", (char*)&ic);
+      sol->offset = *newvalue;
+    }
+    
+    sol->met = (double*)calloc(sol->npmax+1,sol->offset*sizeof(double));
+    int k,isol,i;
+    double tmp;
+    for (k=1; k<=sol->np; k++) {
+      isol = (k-1)*sol->offset + 1;
+      for (i=0; i< sol->offset; i++){
+	sol->met[isol + i] = metric[(isol-1)+i];
+      }
+      // MMG_swap data
+      tmp                = sol->met[isol + 2];
+      sol->met[isol + 2] = sol->met[isol + 3];
+      sol->met[isol + 3] = tmp;
+    }
   }
   else{
-    const int ic=6;
-    char newvalue[sizeof(int)];
-    sprintf(newvalue,"%s", (char*)&ic);
-    sol->offset = *newvalue;
+    sol->np=0;
+    sol->offset=1;
   }
-  cout << "sol->offset" << sol->offset << " " << nv << " " << metric.N() << endl;
-  cout << "sol->offset" << sol->np << " " <<  sol->npmax << endl;
-  sol->met = (double*)calloc(sol->npmax+1,sol->offset*sizeof(double));
-  int k,isol,i;
-  for (k=1; k<=sol->np; k++) {
-    isol = (k-1)*sol->offset + 1;
-    for (i=0; i< sol->offset; i++)
-      sol->met[isol + i] = metric[(isol-1)+i];
-  }
-
   return sol;
 }
 
@@ -234,11 +264,11 @@ public:
     args.SetNameParam(n_name_param,name_param,nargs);
     
     const E_Array * a1=0 ;
-    if(nargs[5])  a1  = dynamic_cast<const E_Array *>(nargs[5]);
+    if(nargs[2])  a1  = dynamic_cast<const E_Array *>(nargs[2]);
   
     if(a1) {
       if(a1->size() !=3) 
-	CompileError("mmg3d(Th,deplacement=[X,Y,Z],) ");
+	CompileError("mmg3d(Th,displacement=[X,Y,Z],) ");
       xx=to<double>( (*a1)[0]); 
       yy=to<double>( (*a1)[1]);
       zz=to<double>( (*a1)[2]);
@@ -250,13 +280,16 @@ public:
 
 
 basicAC_F0::name_and_type  mmg3d_Op::name_param[]= {
+  /*
   {  "nvmax", &typeid(long)},     // 0
   {  "ntrimax", &typeid(long)},   // 1
   {  "ntetmax", &typeid(long)},   // 2
-  {  "options", &typeid(KN_<long>)},    // 3
-  {  "metric", &typeid(KN_<double>)},   // 4
-  {  "displacement", &typeid(E_Array)},  // 5
-  {  "displTabular", &typeid(KN_<double>)}   // 6 
+  */
+  {  "options", &typeid(KN_<long>)},    // 3 -> 0
+  {  "metric", &typeid(KN_<double>)},   // 4 -> 1
+  {  "displacement", &typeid(E_Array)},  // 5 -> 2
+  {  "displVect", &typeid(KN_<double>)},   // 6 ->3 
+  {  "memory", &typeid(long)} // 7->4
 };
 
 class mmg3d_ff : public OneOperator { public:  
@@ -281,9 +314,9 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
 
   // default value for max nv,ntri,ntet  max
   // division of tetrahedrons in the middle of edges 
-  int defaultnvmax= 3*nv;       
-  int defaultntrimax= 4*nbe;   
-  int defaultntetmax= 8*nt;     
+  int defaultnvmax=    500000;       
+  int defaultntrimax= 1000000;   
+  int defaultntetmax= 3000000;     
   
   KN<long> defaultopt(6);
   defaultopt(0)= 1;
@@ -293,15 +326,39 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
   defaultopt(4)= 0;
   defaultopt(5)= 3;
 
-  int  nvmax(arg(0,stack,defaultnvmax));  
-  int  ntrimax(arg(1,stack,defaultntrimax));
-  int  ntetmax(arg(2,stack,defaultntetmax));
-  KN<int> opt(arg(3,stack,defaultopt));
-  KN<double> metric;
+  int  nvmax;   //(arg(0,stack,-1));  
+  int  ntrimax; //(arg(1,stack,-1));
+  int  ntetmax; //(arg(2,stack,-1));
+  KN<int> opt(arg(0,stack,defaultopt));
+
+  int memory(arg(4,stack,-1));
   
+  if( memory < 0 ){
+    nvmax   = max( (int) 1.5*nv,defaultnvmax);
+    ntrimax = max( (int) 1.5*nbe,defaultntrimax);
+    ntetmax = max( (int) 1.5*nt,defaultntetmax);
+  }     
+  else{
+    int million = 1048576L;
+    int bytes = sizeof(MMG_Point)   + 0.2*sizeof(MMG_Tria)	
+      + 6*sizeof(MMG_Tetra) + 4*sizeof(int) 
+      + sizeof(MMG_Sol) + sizeof(MMG_Displ) 
+      + sizeof(int) + 5*sizeof(int);
+    int npask = (double)memory / bytes * million;
+    nvmax   = max( (int) 1.5*nv,npask);
+    ntetmax = max( (int) 1.5*nt,6*npask);
+    ntrimax = max( (int) 1.5*nbe,(int)(0.3*npask));
+
+    cout << " nvmax " << nvmax << endl;
+    cout << " ntrimax " << ntrimax << endl;
+    cout << " ntetmax " << ntetmax << endl;
+  }										   
+  
+  KN<double> metric;
+  if(metric.N() != 0) exit(1);
   // definiton d'une metric par default
-  if( nargs[4]  ){ 
-    metric = GetAny<KN_<double> >( (*nargs[4])(stack) ); 
+  if( nargs[1]  ){ 
+    metric = GetAny<KN_<double> >( (*nargs[1])(stack) ); 
     assert(metric.N()==Th3.nv || metric.N()==6*Th3.nv);
   }
 
@@ -309,12 +366,12 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
   bool BoolMoving=0;
   KN<double> Moving(0);
   
-  if( nargs[5] || nargs[6] ){
+  if( nargs[2] || nargs[3] ){
     BoolMoving=1;
-    if( nargs[6] ){
-      Moving = GetAny<double>( (*nargs[6])(stack) );
+    if( nargs[3] ){
+      Moving = GetAny<double>( (*nargs[3])(stack) );
       assert( Moving.N() == 3*Th3.nv );
-      if( Moving.N() != 3*Th3.nv ){ cerr << " Deplacement vector is of size 3*Th.nv" << endl; exit(1);} 
+      if( Moving.N() != 3*Th3.nv ){ cerr << " Displacement vector is of size 3*Th.nv" << endl; exit(1);} 
     }
     else{ 
       MeshPoint *mp3(MeshPointStack(stack));
@@ -326,8 +383,10 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
 	if(zz) Moving[3*i+2] = GetAny<double>((*zz)(stack));  
       }
     }
+    //if(verbosity > 2) 
+    if(verbosity >2) cout << "displacement vector is loading" << endl;
   }
-
+  
 
   MMG_pMesh MMG_Th3=mesh3_to_MMG_pMesh(Th3, nvmax, ntrimax, ntetmax,BoolMoving, Moving);
 
@@ -387,6 +446,7 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
  
   MMG_Mesh *MMG_Th3= meshMMG;
   */
+
   MMG_pSol sol=metric_mmg3d(nv, nvmax, metric);
   
   int res=MMG_mmg3dlib( opt, MMG_Th3, sol);
@@ -397,11 +457,31 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
   }
   
   Mesh3 *Th3_T = MMG_pMesh_to_msh3( MMG_Th3 );
+  if(verbosity > 10) cout << "buildGtree" << endl;
+  Th3_T->BuildGTree();
 
-  free(MMG_Th3);
+  /* free mem */
+  if(verbosity > 10) cout << "mesh" << endl;
+  free( MMG_Th3->point );
+  free( MMG_Th3->tria  );
+  free( MMG_Th3->tetra );
+  /*la desallocation de ce pointeur plante dans certains cas...*/
+  if(verbosity > 10) cout << "mesh: adja" << endl;
+  free( MMG_Th3->adja);
+  if(verbosity > 10) cout << "mesh: disp" << endl;
+  if( BoolMoving ){
+    free( MMG_Th3->disp->alpha );
+    free( MMG_Th3->disp->mv );
+  }
+  free( MMG_Th3->disp );
+  free( MMG_Th3 );
+
+  if(verbosity > 10) cout << "sol" << endl;
+  free(sol->met);
   free(sol);
   
   *mp=mps;
+  Add2StackOfPtr2FreeRC(stack,Th3_T);
   return Th3_T;
 }
 

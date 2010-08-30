@@ -1,3 +1,6 @@
+v 3.9-1
+  - correction  mmg3d interface (J Morice) 
+  - correct of mmg3d and freeyams under wind32 (ld problom)
 v 3.9-1  August 2009   (For FreeFem++ days )
   - correct configure (find lapack lib change $ll_lapack_libs in $ll_lapack_lib)
   - correct mistake in mpi 
