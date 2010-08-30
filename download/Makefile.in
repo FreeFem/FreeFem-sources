@@ -299,6 +299,7 @@ tetgen/tetgen1.4.2.patch superlu/Makefile \
 fftw/Makefile metis/Makefile metis/Makefile-metis.in metis/patch-metis \
 mmg3d/Makefile			mshmet/mshmetlib.h \
 mmg3d/makefile-mmg3d.inc	yams/Makefile \
+yams/freeyams.2010.02.22.patch \
 mshmet/Makefile			yams/makefile-yams.inc \
 mshmet/Makefile-mshmet.inc	yams/yamslib.c \
 mshmet/mshmet.2009.09.16.patch	yams/yamslib.h \
