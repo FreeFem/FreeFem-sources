@@ -19,7 +19,8 @@ FFTW_VERSION=3.2.1
 INSTALL=../..
 
 
-fftw:FAIT$(WIN32DLLTARGET)
+fftw:FAIT
+#   $(WIN32DLLTARGET)  
 
 FAITwin32-dll-target:
 	echo "On Pure Win32 (to hard to compile) "

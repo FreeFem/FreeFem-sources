@@ -1,3 +1,8 @@
+v 3.9-2
+  - correction of lib on win32 for freeyams and mmg3d
+  - correction download/Makefile.am to be sure than bin is a directory.
+  - add fftw of win32 
+
 v 3.9-1
   - correction  mmg3d interface (J Morice) 
   - correct of mmg3d and freeyams under wind32 (ld problom)
