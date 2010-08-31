@@ -315,7 +315,7 @@ LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 LIST_COMPILE_PKG = tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) \
 	metis.$(DYLIB_SUFFIX) UMFPACK64.$(DYLIB_SUFFIX) NewSolver.$(DYLIB_SUFFIX) \
 	lapack.$(DYLIB_SUFFIX)  fflapack.$(DYLIB_SUFFIX) ffnewuoa.$(DYLIB_SUFFIX) ilut.$(DYLIB_SUFFIX) \
-	freeyams.$(DYLIB_SUFFIX) mmg3d.$(DYLIB_SUFFIX)
+	freeyams.$(DYLIB_SUFFIX) mmg3d.$(DYLIB_SUFFIX) mshmet.$(DYLIB_SUFFIX)
 
 all: all-am
 
