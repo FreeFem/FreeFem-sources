@@ -369,9 +369,11 @@ are install
   3) install the TexMac for the documentation:
  http://ctan.org/get/systems/mac/mactex/MacTeX-20071201.dmg
 
-# to build a good freefem for your Mac:
+# to build a full  freefem++  for your Mac:
+first install g95, and recompile openmpi (little tricky)
 
-./configure '-with-suffix=snow-leopard'  '--enable-download' 'build_alias=snow-leopard' 'host_alias=snow-leopard' 'target_alias=snow-leopard' 'F77=/opt/local/bin/g95' '-with-mpi=/usr/local/bin/mpic++' '--enable-m64' 'FLIBS=/opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a' 'MPIF77=/usr/local/bin/mpif77' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90'
+./configure '-with-suffix=snow-leopard' '-without-fltk' '--enable-download' 'F77=/opt/local/bin/g95' '-with-mpi=/usr/local/bin/mpic++' '--enable-m64' 'FLIBS=/opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a' 'MPIF77=/usr/local/bin/mpif77' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90'
+
 
 ./configure -without-fltk' '--enable-download' '-with-mpi=mpic++' 'F77=fort77' '--with-flib=-L/usr/local/lib -lf2c'
 
@@ -380,8 +382,9 @@ or if you have compile the download/f2c   with : (cd download/f2c;make install)
 ./configure '-with-suffix' 'MacIntel'  '--enable-download' '-with-mpi=mpic++' '-enable-download' 
 
 # to build universal FreeFem++ of 10.4 macOS (ppc , i386):
+( cd  download/f2c; make  -n compile-10.4 install)
+./configure '-with-suffix=Universal' '-without-fltk' '--enable-download' 'F77=/Users/hecht/ff/ff-univ/download/bin/fort77' '--with-flib=/Users/hecht/ff/ff-univ/download/lib/libf2c.a' 'CXX=g++-4.0 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386 -mmacosx-version-min=10.4' 'CC=gcc-4.0 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386 -mmacosx-version-min=10.4' 'FFLAGS=-Wc,-isysroot,/Developer/SDKs/MacOSX10.4u.sdk,-arch,ppc,-arch,i386,-mmacosx-version-min=10.4' 'CXXCPP=g++ -E' '--disable-dependency-tracking' '--x-libraries=/usr/X11R6/lib/'
 
-/configure '-with-suffix=Universal' '-without-fltk' '--enable-download' '-with-mpi=mpic++' 'F77=/usr/local/bin/fort77' '--with-flib=-L/usr/local/lib -lf2c' 'CXX=g++ -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386 -mmacosx-version-min=10.4' 'CC=gcc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386 -mmacosx-version-min=10.4' 'FFLAGS=-Wc,-isysroot,/Developer/SDKs/MacOSX10.4u.sdk,-arch,ppc,-arch,i386,-mmacosx-version-min=10.4' 'CXXCPP=g++ -E'
 
 
 * Under Windows: 
