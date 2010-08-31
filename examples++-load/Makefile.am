@@ -63,7 +63,7 @@ bin_PROGRAMS=
 
 
 
-load_compile:ff-c++ freefem++.pref include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
+load_compile:ff-c++ freefem++.pref WHERE_LIBRARY-download  include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
 	echo " finish build list $(DYLIB_SUFFIX)"
 
 
@@ -75,6 +75,7 @@ include: include.tar.gz
 	rm -rf include 
 	gunzip -c include.tar.gz| tar xvf -
 	-rm -f include/._*
+	touch include 
 #	-cp -rf ../download/include/* include/.
 
 Ref: makeref.edp
