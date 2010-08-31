@@ -1,4 +1,5 @@
 v 3.9-2
+  - correct compilation of mshmet lib
   - correct pb of compile of superludist ( add CNOFLAGS no optimze CFLAGS)
   - correction of lib on win32 for freeyams and mmg3d
   - correction download/Makefile.am to be sure than bin is a directory.
