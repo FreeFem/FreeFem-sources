@@ -37,16 +37,14 @@ $(SRCDIR)/FAIT:$(SRCDIR)
 	touch $(SRCDIR)/FAIT
 
 install:$(SRCDIR)/FAIT 
-	-mkdir $(SRCDIR)/$(INSTALL)/include/mshmet/
-	cp $(MSHMET_SRCDIR)/mshmetlib.h  $(SRCDIR)/$(INSTALL)/include/mshmet/mshmetlib.h
-	-mkdir $(SRCDIR)/$(INSTALL)/lib/mshmet/
-	cp $(MSHMET_OBJDIR)/libmshmet.a  $(SRCDIR)/$(INSTALL)/lib/mshmet/libmshmet.a
+	cp $(MSHMET_SRCDIR)/mshmetlib.h  $(SRCDIR)/$(INSTALL)/include/mshmetlib.h
+	cp $(MSHMET_OBJDIR)/libmshmet.a  $(SRCDIR)/$(INSTALL)/lib/libmshmet.a
 
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	make install;  \
 	echo mshmet  LD '-L@DIR@/lib -lmshmet'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
-	echo mshmet INCLUDE '-I@DIR@/include/mshmet'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
+	echo mshmet INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
 	fi
 
 
