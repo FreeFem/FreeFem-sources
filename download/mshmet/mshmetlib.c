@@ -10,7 +10,7 @@
 #include "mshmet.h"
 #include "compil.date"
 
-char     idir[5]     = {0,1,2,0,1};
+/*char     idir[5]     = {0,1,2,0,1};*/
 mytime   mshmet_ctim[TIMEMAX];
 
 

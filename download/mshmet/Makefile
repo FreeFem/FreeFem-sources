@@ -13,10 +13,10 @@ DIRPKG= ../pkg
 SRCDIR= ./mshmet$(mshmet_VERSION)
 #-$(mshmet_VERSION)
 PACKAGE=$(DIRPKG)/mshmet$(mshmet_VERSION).tgz
-SERVER=
+SERVER=http://www.ann.jussieu.fr/~frey/ftp/archives/
 INSTALL=../..
 mshmet_VERSION=.2009.09.16
-WGET =
+
 
 # ---------------------- 
 #     mshmetlib
@@ -28,7 +28,7 @@ MSHMET_OBJDIR = $(MSHMET_DIR)/objects
 
 mshmet: FAIRE
 
-$(SRCDIR)/FAIT:
+FAIRE:$(SRCDIR)/FAIT
 	$(MAKE) $(SRCDIR)/$(INSTALL)  
 	touch $(SRCDIR)/FAIT
 
@@ -65,7 +65,7 @@ $(PACKAGE):
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 clean-local: 
-	cd $(MSHMET_DIR); make clean;
+	-make -C $(MSHMET_DIR) clean;
 	-rm $(MSHMET_OBJDIR)/libmshmet.a
 
 clean: clean-local
@@ -86,6 +86,7 @@ ff-flags: ../Makefile
 	grep 'AR *=' ../Makefile >> ff-flags
 	grep 'ARFLAGS *=' ../Makefile >> ff-flags
 	grep 'RANLIB *=' ../Makefile >> ff-flags
+	grep 'WGET *=' ../Makefile >> ff-flags
 	grep 'mshmet_VERSION *=' ./Makefile >> ff-flags
 
 
