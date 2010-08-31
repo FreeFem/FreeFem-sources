@@ -634,7 +634,7 @@ uninstall-am: uninstall-binPROGRAMS
 
 all-local: @LOAD_COMPILE@
 
-load_compile:ff-c++ freefem++.pref include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
+load_compile:ff-c++ freefem++.pref WHERE_LIBRARY-download  include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
 	echo " finish build list $(DYLIB_SUFFIX)"
 
 .cpp.$(DYLIB_SUFFIX): ff-c++
@@ -645,6 +645,7 @@ include: include.tar.gz
 	gunzip -c include.tar.gz| tar xvf -
 	-rm -f include/._*
 #	-cp -rf ../download/include/* include/.
+	touch include
 
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
