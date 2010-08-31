@@ -1,0 +1,64 @@
+Compiling FreeFem++ from CVS sources
+------------------------------------
+
+$Id$
+
+Download
+--------
+
+# To download a working copy from the CVS repository:
+
+export "CVSROOT=:ext:$USER@melis.ann.jussieu.fr:/Users/hecht/FreeFem++-cvs"
+export CVS_RSH=ssh
+cvs checkout [-d dirname] freefem++
+
+# To update you freefem++ tree
+cvs update 
+
+# To update if new directory is created 
+cvs update -d
+# (this produces a directory named "freefem++" containing the most
+# recent version of all the source files)
+
+A complete guide to CVS commands can be found at:
+https://www.cvshome.org/docs/manual/cvs-1.11.12/cvs_16.html#SEC113
+
+Configuration
+-------------
+
+To update all the makefiles and the "configure" script if
+"configure.ac" has been modified:
+
+> autoreconf
+
+Compilation
+-----------
+
+# To compile, check and install FreeFem++:
+
+./configure [--enable-debug] [other options found in README and INSTALL...]
+# or
+./reconfigure
+
+make
+make check
+make install
+
+Change log
+----------
+
+To update the contents of "changelog" (which lists all modified files
+and the related commit messages):
+# 
+make changelog  # (needs "cvs2cl" to be installed on the machine)
+
+Distributing
+------------
+
+# To build an archive containing all the source files:
+
+make dist
+
+# To build a Debian package
+
+make deb

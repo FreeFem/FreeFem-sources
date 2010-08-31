@@ -1,0 +1,240 @@
+#!/bin/sh
+# Create a loadable object from a C++ function defined in a .cpp file
+# $Id$
+thecommand="$0"
+dircommand=`dirname $0`
+
+FFVERSION='@VERSION@'
+FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@'
+FFFFLAGS='@FFLAGS@'
+FFFLIBS='@FLIBS@'
+INCFF=
+if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
+if [ -z "$MPICXX" ] ; then MPICXX='@MPICXX@' ; fi
+if [ -z "$MPI_LIB" ] ; then MPI_LIB='@MPI_LIB@' ; fi
+if [ -z "$F77" ] ; then F77='@F77@' ; fi
+if [ "$CXX" = '@'CXX'@' ] ; then CXX=""; fi
+if [ "$MPICXX" = '@'MPICXX'@' ] ; then MPICXX=""; fi
+if [ "$F77" = '@'F77'@' ] ; then F77=""; fi
+if [ "$FFCXXFLAGS" = '@'CXXFLAGS'@' ] ; then FFCXXFLAGS=""; fi
+if [ "$FFFFLAGS" = '@'FFLAGS'@' ] ; then FFFFLAGS=""; fi
+if [ "$FFFLIBS" = '@'FLIBS'@' ] ; then FFFLIBS=""; fi
+if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
+if [ -z "$INCFF" ] ; then
+    if [ -f "@INCFF@/ff++.hpp" ] ; then
+	INCFF="-I@INCFF@"
+    elif [ -f ${dircommand}/include/ff++.hpp ]; then
+	INCFF="-I${dircommand}/include"
+    elif [ -f ../examples++-load/include/ff++.hpp ]; then
+	INCFF="-Iinclude"
+    elif [ -f "FFAPPLI_INC/ff++.hpp" ] ; then 
+	INCFF="-IFFAPPLI_INC" 
+    elif [ -f '@ff_prefix_dir@/include/ff++.hpp' ] ; then 
+	INCFF='-I@ff_prefix_dir@/include' 
+    else
+	ff=`which freefem++.exe`;
+	ffinc=`dirname "$ff"`/examples++-load/include
+	if [ -f "$ffinc/ff++.hpp" ]; then
+	  INCFF=-I"'$ffinc'";
+        else	
+	  echo " erreur PB include freefem++ directory " ;
+	  exit 1;
+	fi
+    fi
+fi
+do="yes"
+DEBUG=""
+CONLY="false"
+uu=`uname -s` 
+INC=""
+LIBS=""
+DLL=""
+bin="."
+out=""
+files=""
+fileso=""
+OTHER="";
+WIN32="";
+
+case "$uu" in
+  CYGWIN*)
+  if [ -z "@WIN32DLLTARGET@" ] ; then 
+      onwin32=1; uu="cygwin-version";
+  else
+      onwin32=1; uu="win32"; # pure windows 
+  fi
+  WIN32="win32-"
+  wff=`which FreeFem++.exe`
+  dff=`dirname "$wff"`
+  if [ "$bin" = "." -a  -f ../src/bin-win32/libff.dll  ]; then
+    bin=../src/bin-win32 
+  elif [  -f "$dff/libff.dll"  ]; then
+#  modif for install on cygwin
+    bin="$dff"
+  elif [ "$bin" = "." -a  -f ../libff.dll  ]; then
+    bin=..
+  elif [ "$bin" = "." -a  -f ../../libff.dll  ]; then
+    bin=../..
+  fi;; 
+esac
+autodep=""
+withmpi=""
+args=""
+
+while [ $# -ne 0 ]  ; do
+    argsp=$args
+    args="$args '$1'"
+    case "$1" in
+	-[h?]*) echo usage $0 "[-n] [-g] [-win32] [-l libfile] [-I includedir]  files"
+	    echo "    -auto :  build automaticaly the dependance (in test FH) "
+	    echo "    -n  :  do nothing just print"
+	    echo "    -g  :  compile with -g option"
+	    echo "    -c  : compile only"
+	    echo "    -mpi:  with  mpi"
+	    echo "    -O*  :  compile with -O* option"
+	    echo "    -cygwin: compile for cygwin/win32 OS (Window XP, ...)"
+	    echo "    -win32:  compile for win32 OS (Window XP, ...) default under cygwin"
+	    echo "    -l files  add files to the ld process (link)"
+	    echo "    -I dir  add dir in include seach dir for compilation"
+	    echo "    -b dir  to change the default install  dir " 
+	    echo "    -dll file  add  dll and this file copie in the install dir"
+	    echo "    -o outputfile without suffix"
+	    echo "    file.{cpp,cp,cxx,c,f,F}"
+	    exit 0;
+	    ;;
+	F77=*) F77=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	CXX=*) CXX=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	MPICXX=*) MPICXX=`echo $1|sed 's/[A-Z0-9]*=//'`;withmpi=yes ;;
+	F77=*) F77=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	CXXFLAGS=*) CXXFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	FFLAGS=*) FFFFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	-auto) autodep=yes;args=$argsp;;
+	-mpi) withmpi=yes;;
+	-n)  do="no";;
+	-g)  DEBUG="$DEBUG $1";;
+	-c)  CONLY=yes;;
+	-O*) DEBUG="$DEBUG $1";;
+	-cygwin)  onwin32=1; uu="cygwin-version";; 
+	-win32)   onwin32=1; uu="win32";; 
+	-b)     bin=$2  ; shift;;
+	-I*)    INC="$INC '$1'";;
+	-D*)    INC="$INC '$1'";;
+	-dll)   DLL="$DLL '$2'";shift;;
+	-[Ll]*)    LIBS="$LIBS $1" ;;
+	*.a)     LIBS="$LIBS $1" ;;
+	*.so)    LIBS="$LIBS $1" ;;
+	*.dll)   LIBS="$LIBS $1" ;;
+	-Wl*)    LIBS="$LIBS $1" ;;
+	*.cpp) files="$files '$1'";  o=`basename "$1" .cpp` ; fileso="$fileso '$o.o'"; args=$argsp;; 
+	*.cp)  files="$files '$1'";  o=`basename "$1" .cp`   ; fileso="$fileso '$o.o'"; args=$argsp;; 
+	*.cxx) files="$files '$1'";  o=`basename "$1" .cxx` ; fileso="$fileso '$o.o'"; args=$argsp;;
+	*.c)   files="$files '$1'";  o=`basename "$1" .c` ; fileso="$fileso '$o.o'"; args=$argsp;;  
+	*.f)   ffiles="$ffiles '$1'";  o=`basename "$1" .f` ; fileso="$fileso '$o.o'";; 
+	*.F)   ffiles="$ffiles '$1'";  o=`basename "$1" .F` ; fileso="$fileso '$o.o'";; 
+	*.o)   fileso="$fileso '$1'"; o=`basename "$1" .o` ;; 
+	-o)    out="$2"; shift;;
+	*) OTHER="$OTHER $1";;
+    esac
+    shift
+done
+if [ -n "$autodep"  ] ; then
+#    echo "$thecommand" $args  `eval $dircommand/ff-get-dep -ff $files`
+    argsdep=`eval $dircommand/ff-get-dep -ff $files`
+    
+     error=`echo "$argsdep"| grep ERROR`
+     if [ -n "$error" ] ; then
+	 echo " ERROR in  auto dependance seach.  sorry : $error "
+	 exit 0;
+     fi
+    echo eval "$thecommand" $args  $argsdep
+    eval "$thecommand" $args  $argsdep
+    exit 0;
+fi
+
+if [  -n "$onwin32" -a ! -f "$bin/libff.dll"  ] ; then 
+    echo " Error the file libff.dll  must be exist in '$bin' the install directory," 
+    echo " to link on windows OS "
+    echo " Use the parameter -b to set the correct install directory " 
+    exit 1;
+fi
+
+if [ -z "$out" ] ; then  out=$o  ; fi;
+# Default compiler
+if [ -z "$CXX"  ];then  CXX=g++ ; fi
+if [ -n "$withmpi" ]; then  CXX=$MPICXX;fi
+
+INC="$INCFF $INC"  
+SUF=so
+SHARED="-shared"
+case "$WIN32$uu" in
+    Darwin*) 
+#        echo "export MACOSX_DEPLOYMENT_TARGET=10.3"
+	export MACOSX_DEPLOYMENT_TARGET=10.4
+	SUF=dylib
+	SHARED="-bundle -undefined dynamic_lookup"  ;;
+    win32-CYGWIN*|win32-win32)
+        echo " Window without cygwin "
+        b="$bin"
+        LIBS=" '$b/libff.dll' $LIBS $DLL"
+        SHARED="-shared --unresolved-symbols=ignore-all -Wl,--enable-auto-import"
+        FLAGS='  -mno-cygwin '
+        SUF=dll;;
+    win32-cygwin-version)
+        echo " cygwin-version "
+        b=$bin
+        FLAGS=' '
+        LIBS="'$b/libff.dll' $LIBS $DLL"
+        SUF=dll;;
+    FreeBSD|NetBSD)
+	SHARED="-shared" 
+	FLAGS='-fPIC';;
+	# 64 bit Linux needs -fPIC (ALH)
+    SunOS)
+        SHARED="-shared"
+        FLAGS='-fPIC';;
+        # 64 bit Linux needs -fPIC (ALH)
+    Linux)
+	FLAGS='-fPIC'
+	SHARED="-shared " ;;
+    *)
+	echo "sorry unknown achitecture "`uname`
+	exit 1;;
+esac
+FLAGS="$FLAGS $DEBUG $FFCXXFLAGS"
+if [ -n "$ffiles$files$fileso" ] ; then
+    if [  -n "$WIN32"  -a  ! -f "$bin/libff.dll"  ]; then
+	echo " Sorry, no freefem .dll file (libff.dll)  in $bin dir "
+	echo " try with -b dir-path where the file libff.dll exist"
+	exit 1;
+    fi
+    if [ "$files" ] ;then 
+	echo $CXX -c $FLAGS $CXXFLAGS $INC $PIC $files
+	if [  $do = yes ] ; then 
+	    eval $CXX -c $INC $FLAGS $CXXFLAGS $PIC  $files
+	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
+	fi
+    fi
+    if [ "$ffiles" ] ;then 
+	echo $F77 -c $FLAGS $FFFFLAGS $INC $PIC $ffiles
+	LIBS="$FFFLIBS $LIBS"
+	if [  $do = yes ] ; then 
+	    eval $F77 -c $INC $FLAGS $FFFFLAGS $PIC  $ffiles
+	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
+	fi
+    fi
+    if [ "$CONLY" != yes ]; then
+	echo $CXX $SHARED $FLAGS $CXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $MPI_LIB
+	if [  $do = yes ] ; then 
+	   eval $CXX $SHARED $FLAGS $CXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $MPI_LIB
+	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
+	fi
+	if [  "$bin" != "." ]; then
+	    echo cp $out.$SUF  $bin
+	    test $do = yes &&   cp $out.$SUF  "$bin"
+	fi
+	if [ -n "$DLL" ] ; then
+	    echo cp $DLL $bin
+	    test $do = yes &&   cp $DLL "$bin"
+	fi
+    fi
+fi
