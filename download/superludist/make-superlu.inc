@@ -21,7 +21,7 @@ CC           	= @CC@
 # CFLAGS should be set to be the C flags that include optimization
 CFLAGS          = @CFLAGS@ @MPI_INCLUDE@
 # NOOPTS should be set to be the C flags that turn off any optimization
-NOOPTS		= 
+NOOPTS		=  @CNOFLAGS@ 
 ############################################################################
 # FORTRAN compiler setup
 FORTRAN         = @F77@

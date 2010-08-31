@@ -1456,10 +1456,12 @@ then
 	if test "$ff_mac" = "no" -a "$ff_win32"  = "no" -a "$ff_sunos"  = "no" ;
 	then
 		CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
+		CHECK_COMPILE_FLAG(C,-rdynamic,CNOFLAGS)
 		CHECK_COMPILE_FLAG(C,-rdynamic,CFLAGS)
 	fi
 	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
 	CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS)
+	CHECK_COMPILE_FLAG(C,-fPIC,CNOFLAGS)
 	if test "$enable_fortran" != no 
 	 then 
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FFLAGS)	
@@ -1676,6 +1678,7 @@ if test "$ff_x11" = yes -o  "$ff_win32" = yes   ; then
 ff_bamgprog="$ff_bamgprog drawbdmesh${EXEEXT}"
 fi
 
+AC_SUBST(CNOFLAGS,$CNOFLAGS) dnl for superludist CFLAGS without optim  ...
 # The final list of executable programs
 AC_SUBST(MEDITPROG,$ff_meditprog)
 AC_SUBST(FFGLUTPROG,$ff_ffglutprog)
