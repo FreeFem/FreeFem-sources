@@ -2,7 +2,7 @@
 # Create a loadable object from a C++ function defined in a .cpp file
 # $Id$
 thecommand="$0"
-dircommand=`dirname $0`
+dircommand=`dirname "$0"`
 
 FFVERSION='@VERSION@'
 FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@'
@@ -23,7 +23,7 @@ if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
 if [ -z "$INCFF" ] ; then
     if [ -f "@INCFF@/ff++.hpp" ] ; then
 	INCFF="-I@INCFF@"
-    elif [ -f ${dircommand}/include/ff++.hpp ]; then
+    elif [ -f "${dircommand}/include/ff++.hpp" ]; then
 	INCFF="-I${dircommand}/include"
     elif [ -f ../examples++-load/include/ff++.hpp ]; then
 	INCFF="-Iinclude"
@@ -138,8 +138,8 @@ while [ $# -ne 0 ]  ; do
     shift
 done
 if [ -n "$autodep"  ] ; then
-#    echo "$thecommand" $args  `eval $dircommand/ff-get-dep -ff $files`
-    argsdep=`eval $dircommand/ff-get-dep -ff $files`
+#    echo "$thecommand" $args  `eval "'$dircommand/ff-get-dep'" -ff $files`
+    argsdep=`eval "'$dircommand/ff-get-dep'" -ff $files`
     
      error=`echo "$argsdep"| grep ERROR`
      if [ -n "$error" ] ; then

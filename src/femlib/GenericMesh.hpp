@@ -709,7 +709,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
     for(int i=0;i<nv;++i)
 	if (ElementConteningVertex[i]<0) 
 	    kerr++; 
-    assert(kerr==0);
+    ffassert(kerr==0);//  Sure Error.
 
 } 
 template<typename T,typename B,typename V>
