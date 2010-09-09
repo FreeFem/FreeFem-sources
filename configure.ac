@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.9-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.9-3,hecht@ann.jussieu.fr,freefem++)
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
@@ -888,40 +888,25 @@ else
     AC_MSG_NOTICE([ without cadna ***** ])
 fi
 
-dnl # : Looking for the FFTW3
-dnl # : --------------------
-dnl # :ff_fftw_ok=no
-dnl # :ff_libs_old="$LIBS"
-dnl # :ff_ldflags_old="$LDFLAGS"
-dnl # :ff_cppflags_old="$CPPFLAGS"
-dnl # :for ff_fftw_dir in "" "${curdir}/download/install";
-dnl # :do
-dnl # :   if test "$ff_fftw_ok" = no
-dnl # :	then
-dnl # :	  if test -n "$ff_fftw_dir"
-dnl # :	  then
-dnl # :           LDFLAGS="$LDFLAGS -L${ff_fftw_dir}/lib"
-dnl # :           CPPFLAGS="$CPPFLAGS -I${ff_fftw_dir}/include"
-dnl # :       	  fi
-dnl # :
-dnl # :  AC_CHECK_LIB(fftw3,fftw_execute,
-dnl # :                ff_fftw_ok=yes)
-dnl # :  AC_CHECK_HEADERS(fftw3.h,
-dnl # :             ff_fftw_h=yes, ff_fftw_h=no)
-dnl # :
-dnl # :   if test "$ff_fftw_ok" = yes  -a "$ff_fftw_h" = yes 
-dnl # :    then
-dnl # :      AC_DEFINE(HAVE_FFTW,1, fftw is compute fft)
-dnl # :    echo "fftw3 LD $LDFLAGS" >config_LIB_INFO
-dnl # :    echo "fftw3 INCLUDE $CPPFLAGS" >config_LIB_INFO
-dnl # :
-dnl # :   else
-dnl # :       LIBS="$ff_libs_old"
-dnl # :       LDFLAGS="$ff_ldflags_old"
-dnl # :       CPPFLAGS="$ff_cppflags_old"    
-dnl # :   fi
-dnl # :fi
-dnl # :done
+dnl  : Looking for the FFTW3
+dnl --------------------------
+AC_CHECK_LIB(fftw3,fftw_execute,ff_fftw_ok=yes)
+AC_CHECK_HEADERS(fftw3.h,ff_fftw_h=yes, ff_fftw_h=no)
+if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
+then
+    [echo fftw3 LD  -lffw3   >>$ff_where_lib_conf]
+fi
+dnl ---------------------------
+dnl   Looking for the tetgen
+dnl --------------------------
+AC_CHECK_LIB(tet,fftw_execute,ff_fftet_ok=yes)
+AC_CHECK_HEADERS(tetgen.h,ff_tet_h=yes, ff_tet_h=no)
+if test "$ff_tet_ok" = yes -a "$ff_tet_h" = yes
+then
+    [echo tetgen LD  -ltet   >>$ff_where_lib_conf]
+fi
+dnl ---------------------------
+
 
 # Modif: morice 2008
 # Looking for the tetgen

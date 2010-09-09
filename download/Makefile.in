@@ -323,7 +323,8 @@ hypre/Makefile				scotch/scotch_5.1_esmumps.patch \
 superludist/Makefile \
 parmetis/Makefile-parmetis.in		superludist/make-superlu.inc \
 superludist/superludist_2.3.patch  \
-headers-sparsesolver.inc
+headers-sparsesolver.inc \
+gmm/Makefile	gmm/cxxflags
 
 MPI_SOFT = blacs parmetis  scalapack scotch superludist MUMPS pastix hypre hips	
 all: all-recursive
@@ -687,7 +688,7 @@ all-local: $(DOWNLOADCOMPILE)
 
 compile-pkg:
 	-if [ -n "$(WGET)" ] ; then \
-	for d in tetgen superlu fftw metis yams mshmet mmg3d ; do \
+	for d in tetgen superlu fftw metis yams mshmet mmg3d gmm ; do \
 	if [ -d "$$d" ] ; then  echo "(cd $$d;$(MAKE) ) " ;   ( cd "$$d";$(MAKE) ) ; else echo ** missing "$$d" directory ; fi; \
 	done ;\
 	if [ -n "$(MPICC)" ] ; then \
