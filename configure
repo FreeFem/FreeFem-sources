@@ -14430,7 +14430,7 @@ else
 	*) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
     esac
     ff_mmg3dlib=""
-    if test "$wget" != no   ; then
+    if test "$ff_wget" != no   ; then
 	if test "$ff_mac" = yes ; then
 	    MACOS=10.4
 	    ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
@@ -14439,8 +14439,9 @@ else
 	else
 	    ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
 	fi
-	$wget $ff_mmg3dlib
+	$ff_wget_command  http://www.freefem.org/ff++/ftp/libmmg3d/$ff_mmg3dlib
 	tar zxvf $ff_mmg3dlib -C download
+
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for MMG_mmg3dlib in mmg3dlib " >&5
 $as_echo_n "checking for MMG_mmg3dlib in mmg3dlib ... " >&6; }
 	    ff_save_libs="$LIBS"
@@ -14476,6 +14477,7 @@ if ac_fn_cxx_try_link "$LINENO"; then :
 else
   ff_mmg3d_ok=no
 		rm download/lib/libmmg3d.a download/include/libmmg3d.a
+                ff_mmg3d_ok=
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
@@ -14484,10 +14486,8 @@ rm -f core conftest.err conftest.$ac_objext \
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_mmg3d_ok" >&5
 $as_echo "$ff_mmg3d_ok" >&6; }
     fi
-    if "$ff_mmg3d_ok" = ok ; then
-	MMG3DLIB_TAR=$ff_mmg3dlib
+    MMG3DLIB_TAR=$ff_mmg3dlib
 
-    fi
 fi
 
 ff_with_mpi=-openmpi;
