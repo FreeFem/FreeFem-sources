@@ -88,6 +88,7 @@ size_t CodeAlloc::nbt,CodeAlloc::nbdl=0;
 CodeAlloc ** CodeAlloc::mem=0;
 bool CodeAlloc::sort=true;
 bool  CodeAlloc::cleanning=false;
+bool echo_edp=true; // add F.H of remove script dump 
 
 //  add F. Hecht 
 EnvironmentData  ffenvironment;

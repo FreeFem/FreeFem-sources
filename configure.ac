@@ -1678,6 +1678,8 @@ AC_SUBST(TESTIDEPROG,$ff_testideprog)
 AC_SUBST(IDE_TESTS,$ff_idetest)
 ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11prog $ff_ideprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 
+
+#echo xxxxxxxxxxx
 # hips LD -L/Users/hecht/work/freefem++/download/lib/hips -lio -lhips
 # hips INCLUDE -I/Users/hecht/work/freefem++/download/include/hips
 # hipssequential LD -L/Users/hecht/work/freefem++/download/lib/hips -lio -lhipssequential
@@ -1713,116 +1715,169 @@ ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11p
 # mmg3d LD '-L/Users/hecht/work/freefem++/download/lib' '-lmmg3d'
 # mmg3d INCLUDE '-I/Users/hecht/work/freefem++/download/include'
 
-dnl saech of associad software 
-m4_define([AC_FF_WHERELIB],
-[  	AC_MSG_CHECKING(check $1)
-ff_save_libs=$LIBS
-LIBS="$LIBS $2"
-AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE=no]) 
-if test "$ff_where" = "yes" ; then
-     echo "$1 LD '$2'"  >$ff_where_lib_conf
-if test -n "$3" ; then
-       echo "$1 INCLUDE  /usr/include/AS_DIRNAME[$3]  >$ff_where_lib_conf
-fi 
-fi
-AC_MSG_RESULT($ff_WHERE)
-LIBS=$ff_save_libs
 
-])dnl end m4_define AC_FF_WHERELIB
+if test -f download/pkg/mmg3dlib.tar.gz  ;then
+    AC_MSG_NOTICE([      Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)])
+else
+    ff_MACOS=`expr "xx $CXXFLAGS" : '.*-mmacosx-version-min=\([0-9.]*\).*'`
+    
+    case $ff_MACOS  in
+	[0-9.]*) ff_MACOS="$ff_MACOS";;
+	*) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
+    esac
+    ff_mmg3dlib=""
+    if test "$wget" != no   ; then  
+	if test "$ff_mac" = yes ; then
+	    MACOS=10.4
+	    ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
+	elif test "$ff_win32" = yes ; then
+	    ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz"
+	else 
+	    ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
+	fi
+	$wget $ff_mmg3dlib
+	tar zxvf $ff_mmg3dlib -C download 
+	AC_MSG_CHECKING(for MMG_mmg3dlib in mmg3dlib )
+	    ff_save_libs="$LIBS"
+	    LIBS="$LIBS -Ldownload/lib -lmmg3d"
+	    AC_LINK_IFELSE(
+		[AC_LANG_CALL(,MMG_mmg3dlib)],
+		ff_mmg3d_ok=yes ,
+		ff_mmg3d_ok=no
+		rm download/lib/libmmg3d.a download/include/libmmg3d.a
+		)
+	    LIBS="$ff_save_libs"
+	    AC_MSG_RESULT($ff_mmg3d_ok)
+    fi
+    if "$ff_mmg3d_ok" = ok ; then
+	AC_SUBST(MMG3DLIB_TAR,$ff_mmg3dlib) 
+    fi
+fi
 
 ff_with_mpi=-openmpi; 
+
+dnl search of associad software 
+m4_define([AC_FF_WHERELIB],
+    [  	AC_MSG_CHECKING(check $1)
+	ff_save_libs=$LIBS
+	LIBS="$LIBS $2"
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE=no]) 
+	if test "$ff_where" = "yes" ; then
+	    echo "$1 LD '$2'"  >$ff_where_lib_conf
+	    if test -n "$3" ; then
+		echo "$1 INCLUDE  /usr/include/AS_DIRNAME[$3]"  >$ff_where_lib_conf
+	    fi 
+	fi
+	AC_MSG_RESULT($ff_WHERE)
+	LIBS=$ff_save_libs
+	
+    ])dnl end m4_define AC_FF_WHERELIB
+
 m4_map([AC_FF_WHERELIB],[ 
-[[mumps],[-lpord -lmumps_common -ldmumps -lzmumps -lpord],[dmumps_c.h]],
-[[fftw3],[-lfftw3],[fftw3.h]],
-[[superlu],[-lsuperlu],[superlu_defs.h]],
-[[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
-[[scalapack],[-lscalapack],[]],
-[[scotch],[-lscotch -lscotcherr],[]],	
-[[metis],[-lmetis],[metis/metis.h]],
-[[parmetis],[-lparmetis],[parmetis/parmetis.h]]
-]
-)
+	[[mumps],[-lpord -lmumps_common -ldmumps -lzmumps -lpord],[dmumps_c.h]],
+	[[fftw3],[-lfftw3],[fftw3.h]],
+	[[superlu],[-lsuperlu],[superlu_defs.h]],
+	[[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
+	[[scalapack],[-lscalapack],[]],
+	[[scotch],[-lscotch -lscotcherr],[]],	
+	[[metis],[-lmetis],[metis/metis.h]],
+	[[parmetis],[-lparmetis],[parmetis/parmetis.h]]
+    ]
+    )
+
 
 # All makefiles
 AC_OUTPUT(Makefile
-	download/Makefile
-	download/blas/Makefile
-	download/arpack/Makefile
-	download/umfpack/Makefile
-	src/Makefile
-	src/bamglib/Makefile
-	src/Graphics/Makefile
-	src/femlib/Makefile
-	src/Algo/Makefile
-	src/lglib/Makefile
-	src/fflib/Makefile
-	src/std/Makefile
-	src/x11/Makefile
-	src/nw/Makefile
-	src/mpi/Makefile
-	src/agl/Makefile
-	src/glx/Makefile
-	src/bamg/Makefile
-	src/libMesh/Makefile
-	src/medit/Makefile
-	src/bin-win32/Makefile
-	examples++/Makefile
-	examples++-eigen/Makefile
-	examples++-tutorial/Makefile
-	examples++-mpi/Makefile
-	examples++-load/Makefile
-	examples++-chapt3/Makefile
-	examples++-bug/Makefile
-	examples++-other/Makefile
-	examples++-3d/Makefile
-	DOC/Makefile)
-        AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
-	AC_MSG_NOTICE([	 	 --  Dynamic load facility: $ff_dynload ])
-        AC_MSG_NOTICE([		 --  ARPACK (eigen value): $ff_arpack_ok ])
-        AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
-        AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
-        AC_MSG_NOTICE([		 --  FLTK (ide package) $ff_fltk ])
-        AC_MSG_NOTICE([		 --  with X11             $ff_x11])
-        AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
-	AC_MSG_NOTICE([    progs: $ff_progs ])
+    download/Makefile
+    download/blas/Makefile
+    download/arpack/Makefile
+    download/umfpack/Makefile
+    src/Makefile
+    src/bamglib/Makefile
+    src/Graphics/Makefile
+    src/femlib/Makefile
+    src/Algo/Makefile
+    src/lglib/Makefile
+    src/fflib/Makefile
+    src/std/Makefile
+    src/x11/Makefile
+    src/nw/Makefile
+    src/mpi/Makefile
+    src/agl/Makefile
+    src/glx/Makefile
+    src/bamg/Makefile
+    src/libMesh/Makefile
+    src/medit/Makefile
+    src/bin-win32/Makefile
+    examples++/Makefile
+    examples++-eigen/Makefile
+    examples++-tutorial/Makefile
+    examples++-mpi/Makefile
+    examples++-load/Makefile
+    examples++-chapt3/Makefile
+    examples++-bug/Makefile
+    examples++-other/Makefile
+    examples++-3d/Makefile
+    DOC/Makefile)
+AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
+AC_MSG_NOTICE([	 	 --  Dynamic load facility: $ff_dynload ])
+AC_MSG_NOTICE([		 --  ARPACK (eigen value): $ff_arpack_ok ])
+AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
+AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
+AC_MSG_NOTICE([		 --  FLTK (ide package) $ff_fltk ])
+AC_MSG_NOTICE([		 --  with X11             $ff_x11])
+AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
+AC_MSG_NOTICE([    progs: $ff_progs ])
 if test  "$ff_umfpack_download" = yes  ;then
-   	AC_MSG_NOTICE([      use of download UMFPACK see  download/umfpack/SuiteSparse/UMFPACK/README.txt for the License])
+    AC_MSG_NOTICE([      use of download UMFPACK see  download/umfpack/SuiteSparse/UMFPACK/README.txt for the License])
 fi
 if test "$ff_arpack_download" = yes  ; then
-   	AC_MSG_NOTICE([      use of download ARPACK see  download/arpack/ARPACK/README  no License ])
+    AC_MSG_NOTICE([      use of download ARPACK see  download/arpack/ARPACK/README  no License ])
 fi
+
 if test "$enable_download" = yes  ;then
-        AC_MSG_NOTICE([      use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT ])
-   	AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE ])
-   	AC_MSG_NOTICE([      use of download freeyams  see download/yams/freeyams.2010.02.22 (suface mesh adaptation)  ])
-   	AC_MSG_NOTICE([      use of download superlu, metis])
-if test -n "$MPICC" ; then
+    AC_MSG_NOTICE([      use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT ])
+    AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE ])
+    AC_MSG_NOTICE([      use of download freeyams  see download/yams/freeyams.2010.02.22 (suface mesh adaptation)  ])
+    AC_MSG_NOTICE([      use of download superlu, metis])
+    if test -n "$MPICC" ; then
    	AC_MSG_NOTICE([      try to download: blacs parmetis  scalapack scotch superludist pastix hypre hips library])
-fi
-if test -f download/pkg/MUMPS_4.9.2.tar.gz  ;then
-   AC_MSG_NOTICE([      try to compile : MUMPS parallele software ])
-else
-     AC_MSG_NOTICE([     missing download/pkg/MUMPS_4.9.2.tar.gz, see http://mumps.enseeiht.fr/ to download by hand ])
-fi
-if test -f download/pkg/mmg3dlib.tar.gz  ;then
-     AC_MSG_NOTICE([      Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)])
-else
-     AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
-fi
- 
-fi
-if test "$ff_download_blas" = "generic"  ; then
+    fi
+    if test -f download/pkg/MUMPS_4.9.2.tar.gz  ;then
+	AC_MSG_NOTICE([      try to compile : MUMPS parallele software ])
+    else
+	AC_MSG_NOTICE([     missing download/pkg/MUMPS_4.9.2.tar.gz, see http://mumps.enseeiht.fr/ to download by hand ])
+    fi
+    if test -f download/lib/libmmg3d.a ; then
+	echo "mmg3d LD '-L`pwd`/download/lib' '-lmmg3d'" >>$ff_where_lib_conf
+	echo "mmg3d INCLUDE '-I`pwd`/download/include'" >>$ff_where_lib_conf
+    else 
+	AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
+    fi
+    
+    if test "$ff_download_blas" = "generic"  ; then
         AC_MSG_NOTICE([      use of download generic blas and cblas freefem may be slow  ])
-        AC_MSG_NOTICE([        you can try to use the  Kazushige Goto's BLAS at http://www.cs.utexas.edu/users/flame/goto/  ])
+        AC_MSG_NOTICE([      you can try to use the  Kazushige Goto s BLAS at http://www.cs.utexas.edu/users/flame/goto/  ])
         AC_MSG_NOTICE([          or at  http://www.tacc.utexas.edu/~kgoto/ for the best BLAS .])
         AC_MSG_NOTICE([      or try to download/compile the altas blas .])
-fi
+    fi
+
+    if test -f download/pkg/mmg3dlib.tar.gz  ; then
+	AC_MSG_NOTICE([      Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)])
+    elif test 	  "$ff_mmg3d_ok" = yes ; then
+	AC_MSG_NOTICE([      Use of precompile version : download/pkg/$ff_mmg3dlib  (3d mesh adapaton)])
+    else
+	AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
+    fi	
+fi  # ---  test "$enable_download" = yes  ;then
+
+
 if test "$ff_glut_ok" != yes  ; then
- 	AC_MSG_NOTICE([     *********************************************** ])
- 	AC_MSG_NOTICE([     WARNING: you do not have the new grachics tools ])
- 	AC_MSG_NOTICE([         because the configure do not find OpenGL, GLUT or pthread  developer stuff ])
- 	AC_MSG_NOTICE([         read the README to find missing package  ])
- 	AC_MSG_NOTICE([         F. Hecht  ])
- 	AC_MSG_NOTICE([     *********************************************** ])
+    AC_MSG_NOTICE([     *********************************************** ])
+    AC_MSG_NOTICE([     WARNING: you do not have the new grachics tools ])
+    AC_MSG_NOTICE([         because the configure do not find OpenGL, GLUT or pthread  developer stuff ])
+    AC_MSG_NOTICE([         read the README to find missing package  ])
+    AC_MSG_NOTICE([         F. Hecht  ])
+    AC_MSG_NOTICE([     *********************************************** ])
 fi
 

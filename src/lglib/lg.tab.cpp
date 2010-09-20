@@ -3283,8 +3283,11 @@ static void SetcppIo()
 }
 // pour l'environement.
 extern const char *  prognamearg;
+ bool echo_edp=true;
 int mainff (int  argc, char **argv)
 {
+    
+
   if(argc)  
     prognamearg=argv[0];
 
@@ -3315,6 +3318,7 @@ int mainff (int  argc, char **argv)
       cout << "-- FreeFem++ v" << StrVersionNumber() << " (error parameter!)\n"  ;
       return 1; 
     }
+   
   if(verbosity) { 
       cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
       if(verbosity>1) cout << "   file :" << cc << " " << " verbosity= " << verbosity << endl;
@@ -3324,8 +3328,9 @@ int mainff (int  argc, char **argv)
     for(int i=0;i< argc;++i)
 	karg[i]=argv[i];
     pkarg= &karg;
-  zzzfff = Newlex(cout);
-    
+
+  zzzfff = Newlex(cout,echo_edp);
+  
   
 /*  
   ccin= new ifstream(cc);

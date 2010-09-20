@@ -84,7 +84,7 @@ class mylex : public CodeAlloc {
   list<MapMacroParam> *listMacroParam;
   public:
   
-  mylex(ostream & out);
+  mylex(ostream & out,bool eecho=true);
   string token() const;
   void print(ostream &f) const; 
   int scan(int lvl=0);
@@ -141,7 +141,7 @@ private:
   
 } ;
 
- mylex * Newlex(  ostream & out);
+mylex * Newlex(  ostream & out,bool =true);
  void Destroylex(mylex * m);
 
 extern mylex *zzzfff;

@@ -12,7 +12,7 @@ if test "$enable_m64" = yes -a "$enable_m32"
 then
   	    AC_MSG_ERROR([ Choose  32 or 64 architecture not the both ],1);  
 fi
-AC_ARG_ENABLE(profiling,[  --enable-m64	Turn on 64 bits architecture])
+AC_ARG_ENABLE(m64,[  --enable-m64	Turn on 64 bits architecture])
 if test "$enable_m64" = yes
 then
 	ff_m64=-m64	
@@ -25,7 +25,7 @@ then
 	CHECK_COMPILE_FLAG(Fortran 77,-fPIC,FFLAGS)	
 
 fi
-AC_ARG_ENABLE(profiling,[  --enable-m32	Turn on 32 bits architecture])
+AC_ARG_ENABLE(m32,[  --enable-m32	Turn on 32 bits architecture])
 if test "$enable_m32" = yes 
 then
 	ff_m32=-m32	
