@@ -1743,7 +1743,9 @@ else
 	    LIBS="$LIBS -Ldownload/lib -lmmg3d"
 	    AC_LINK_IFELSE(
 		[AC_LANG_CALL(,MMG_mmg3dlib)],
-		ff_mmg3d_ok=yes ,
+		ff_mmg3d_ok=yes 
+		mv $ff_mmg3dlib download/pkg/.
+		,
 		ff_mmg3d_ok=no
 		rm download/lib/libmmg3d.a download/include/libmmg3d.a
                 ff_mmg3d_ok=

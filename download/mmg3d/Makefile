@@ -18,37 +18,53 @@ mmg3d_VERSION=
 SERVER=
 WGET=
 LIBMMG3D=$(SRCDIR)/$(INSTALL)/lib/libmmg3d.a
+ifeq "$(MMG3DLIB_TAR)" ""
+OPT=1 
+else
+OPT=2
+endif
 
+mmg3d: mmg3d-$(OPT)
 
-mmg3d: 	
-	-if [ -f $(PACKAGE) ] ;then \
-	   $(MAKE) FAIRE; \
+mmg3d-1: 	
+	if [ -f $(PACKAGE) ] ;then \
+	   $(MAKE) FAIRE-1; \
 	else \
 	   echo " file $(PACKAGE)  not found => no mmg3d tar file (download by hand) "; \
 	fi
+mmg3d-2: FAIT-2
+FAIT-2: WHERE	
+	if [ -f ../pkg/$(MMG3DLIB_TAR) ] ;then \
+	   tar zvf ../pkg/$(MMG3DLIB_TAR)  -C .. ;\
+	   touch FAIT-2 ;\
+	else \
+	   echo " file ../pkg/$(MMG3DLIB_TAR)  not found => no mmg3d tar file (download by hand) "; \
+	fi
 
-$(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
+FAIT-1: tag-tar
 	$(MAKE) -C $(SRCDIR) lib
-	touch $(SRCDIR)/FAIT
-install: $(SRCDIR)/FAIT
+	touch FAIT-1
+install:install-$(OPT)
+install-1: FAIT-1
 	-mkdir $(SRCDIR)/$(INSTALL)/include
 	cp $(SRCDIR)/sources/libmmg3d.h  $(SRCDIR)/$(INSTALL)/include/libmmg3d.h
 	-mkdir $(SRCDIR)/$(INSTALL)/lib
 	cp $(SRCDIR)/objects/libmmg3d.a  $(LIBMMG3D)
+install-2:
 
 WHERE: 
-	-if [ -f $(SRCDIR)/FAIT ] ; then \
-	make install;  \
+	-if [ -f FAIT-$(OPT) ] ; then \
+	make install-$(OPT);  \
 	echo mmg3d  LD '-L@DIR@/lib -lmmg3d'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mmg3d ;\
 	echo mmg3d INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mmg3d ;\
 	fi
 
 
-FAIRE: $(SRCDIR)/FAIT install
+FAIRE: FAIT install
 
-$(SRCDIR)/tag-tar: $(PACKAGE)
+tag-tar: $(PACKAGE)
 	tar xvzf $(PACKAGE)
-	touch $(SRCDIR)/tag-tar
+	touch tag-tar
 	cp makefile-mmg3d.inc $(SRCDIR)/makefile
 
 
@@ -72,6 +88,7 @@ ff-flags: ../Makefile
 	grep 'AR *=' ../Makefile >> ff-flags
 	grep 'ARFLAGS *=' ../Makefile >> ff-flags
 	grep 'RANLIB *=' ../Makefile >> ff-flags
+	grep 'MMG3DLIB_TAR *=' ../Makefile >> ff-flags
 
 
 .PHONY:$(SRCDIR)/$(INSTALL)
