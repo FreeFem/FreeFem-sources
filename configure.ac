@@ -1726,7 +1726,7 @@ else
 	*) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
     esac
     ff_mmg3dlib=""
-    if test "$wget" != no   ; then  
+    if test "$ff_wget" != no   ; then  
 	if test "$ff_mac" = yes ; then
 	    MACOS=10.4
 	    ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
@@ -1735,8 +1735,9 @@ else
 	else 
 	    ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
 	fi
-	$wget $ff_mmg3dlib
+	$ff_wget_command  http://www.freefem.org/ff++/ftp/libmmg3d/$ff_mmg3dlib
 	tar zxvf $ff_mmg3dlib -C download 
+
 	AC_MSG_CHECKING(for MMG_mmg3dlib in mmg3dlib )
 	    ff_save_libs="$LIBS"
 	    LIBS="$LIBS -Ldownload/lib -lmmg3d"
@@ -1745,13 +1746,12 @@ else
 		ff_mmg3d_ok=yes ,
 		ff_mmg3d_ok=no
 		rm download/lib/libmmg3d.a download/include/libmmg3d.a
+                ff_mmg3d_ok=
 		)
 	    LIBS="$ff_save_libs"
 	    AC_MSG_RESULT($ff_mmg3d_ok)
     fi
-    if "$ff_mmg3d_ok" = ok ; then
-	AC_SUBST(MMG3DLIB_TAR,$ff_mmg3dlib) 
-    fi
+    AC_SUBST(MMG3DLIB_TAR,$ff_mmg3dlib) 
 fi
 
 ff_with_mpi=-openmpi; 
