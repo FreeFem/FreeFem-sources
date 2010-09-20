@@ -148,6 +148,7 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MEDITPROG = @MEDITPROG@
 MKDIR_P = @MKDIR_P@
+MMG3DLIB_TAR = @MMG3DLIB_TAR@
 MPICC = @MPICC@
 MPICXX = @MPICXX@
 MPIF77 = @MPIF77@
@@ -644,8 +645,8 @@ include: include.tar.gz
 	rm -rf include 
 	gunzip -c include.tar.gz| tar xvf -
 	-rm -f include/._*
+	touch include 
 #	-cp -rf ../download/include/* include/.
-	touch include
 
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
@@ -697,7 +698,7 @@ install-exec-local:: load_compile
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
-	$(INSTALL_DATA)  include/* $(DESTDIR)$(ff_prefix_dir)/include
+	$(INSTALL_DATA)  clapack.h ppmimg.h include/* $(DESTDIR)$(ff_prefix_dir)/include
 	$(INSTALL)  -m 555 $(LIST_COMPILE) $(DESTDIR)$(ff_prefix_dir)/lib
 	echo loadpath += \"./\"  >$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
 	echo loadpath += \"$(ff_prefix_dir)/lib\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref

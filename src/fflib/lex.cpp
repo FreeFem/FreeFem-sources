@@ -714,13 +714,13 @@ bool mylex::close() {
    }
 }
 
- mylex::mylex(ostream & out):
+ mylex::mylex(ostream & out,bool eecho):
     linenumber(1),
     charnumber(0),
     ffincludedir(ffenvironment["includepath"]),
     firsttime(true),
     level(-1),
-    echo(mpirank == 0 && verbosity),
+    echo(eecho && (mpirank == 0) && verbosity),
     cout(out),
     listMacroDef(new list<MapMacroDef>),
     listMacroParam(0)
@@ -728,9 +728,9 @@ bool mylex::close() {
     listMacroDef->push_front(MapMacroDef());
    };
    
- mylex * Newlex(  ostream & out)
+mylex * Newlex(  ostream & out,bool eecho)
   {
-    return new mylex(out);
+    return new mylex(out,eecho);
   }
 void Destroylex(mylex * m)
  {

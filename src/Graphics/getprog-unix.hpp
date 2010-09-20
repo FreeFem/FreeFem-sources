@@ -9,6 +9,7 @@ extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
 extern const char *  prognamearg;
 extern const char *  edpfilenamearg;
 extern bool  waitatend;
+extern bool echo_edp;
 char * Shell_Space(const char * s)
 {
     const char *c=s;
@@ -77,7 +78,7 @@ int getprog(char* fn,int argc, char **argv)
     
   if(argc)
     prognamearg=argv[0];
-
+   echo_edp=true;
   if(argc)
     for (int i=1; i<argc;i++)
       if  (ret ==0 && strcmp(argv[i],"-f")==0 && i+1 < argc  ) 
@@ -94,6 +95,10 @@ int getprog(char* fn,int argc, char **argv)
 	}
       else if  (strcmp(argv[i],"-nw")==0 ) 
 	noffglut=true;
+      else if  (strcmp(argv[i],"-ne")==0 ) // no edp 
+	  echo_edp=false;
+      else if  (strcmp(argv[i],"-ns")==0 ) // no script  
+	  echo_edp=false;
       else if  (strcmp(argv[i],"-nowait")==0 ) 
 	waitatend=false;
       else if  (strcmp(argv[i],"-wait")==0 ) 
@@ -164,12 +169,15 @@ int getprog(char* fn,int argc, char **argv)
     {
       const char * ff = argc ? argv[0] : "FreeFem++" ;
       cout << " Syntaxe = " << ff  << " [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  \n"
-	   << "        -v      verbosity :  0 -- 1000000 level of freefem output \n"
-	   << "        -fglut  filepath  :  the file name of save all plots (replot with ffglut command ) \n"
-	   << "        -glut    command  :  the command name of ffglut  \n"
+	   << "        -v      verbosity : 0 -- 1000000 level of freefem output \n"
+	   << "        -fglut  filepath  : the file name of save all plots (replot with ffglut command ) \n"
+	   << "        -glut    command  : the command name of ffglut  \n"
 	   << "        -nowait           : nowait at the end on window   \n"
 	   << "        -wait             : wait at the end on window   \n"
-	   << "        -nw               :  no ffglut (=> no graphics windows) \n";
+	   << "        -nw               : no ffglut (=> no graphics windows) \n"
+	   << "        -ne               : no edp script output\n"
+	;
+
       if(noffglut)  cout << " without     default ffglut : " << ffglut << endl;
       else          cout << " with        default ffglut : " << ffglut << endl;
       cout   << endl;

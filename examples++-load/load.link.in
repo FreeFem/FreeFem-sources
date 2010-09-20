@@ -123,7 +123,12 @@ while [ $# -ne 0 ]  ; do
 	-[Ll]*)    LIBS="$LIBS $1" ;;
 	*.a)     LIBS="$LIBS $1" ;;
 	*.so)    LIBS="$LIBS $1" ;;
-	*.dll)   LIBS="$LIBS $1" ;;
+	*.dll)   if [ -f "$1" ] ; then  LIBS="$LIBS '$1'"  
+	    elif [ -f "$bin/$1" ] ; then  LIBS="$LIBS '$bin/$1'"
+	    else
+	      echo " erreur file not found $1" ;
+	      exit 1;
+	    fi;;
 	-Wl*)    LIBS="$LIBS $1" ;;
 	*.cpp) files="$files '$1'";  o=`basename "$1" .cpp` ; fileso="$fileso '$o.o'"; args=$argsp;; 
 	*.cp)  files="$files '$1'";  o=`basename "$1" .cp`   ; fileso="$fileso '$o.o'"; args=$argsp;; 
