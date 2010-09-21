@@ -123,9 +123,9 @@ MMG_pMesh mesh3_to_MMG_pMesh(const Mesh3 &Th3, const int & nvmax, const int &ntr
     ppd = meshMMG->disp;
     ppd->np = meshMMG->np;
     ppd->mv = (double *) calloc(3*(meshMMG->np+1),sizeof(double));
-    assert(mesh->disp->mv);
+    assert(meshMMG->disp->mv);
     ppd->alpha = (short *) calloc( meshMMG->np+1,sizeof(short));
-    assert(mesh->disp->alpha);
+    assert(meshMMG->disp->alpha);
     for(int ii=0; ii < meshMMG->np; ii++){      
       ppd->mv[3*ii+1] = Moving[3*ii];
       ppd->mv[3*ii+2] = Moving[3*ii+1];
@@ -171,8 +171,8 @@ MMG_pMesh mesh3_to_MMG_pMesh(const Mesh3 &Th3, const int & nvmax, const int &ntr
   
   /*  // pour le deplacement des corps rigides
   MMG_pDispl pd;
-  for (k=1; k<mesh->np; k++) {
-    pd = &mesh->disp[k];
+  for (k=1; k<meshMMG->np; k++) {
+    pd = &meshMMG->disp[k];
     pd->mv[0] = depx;
     pd->mv[1] = depy;
     pd->mv[2] = depz;

@@ -34,8 +34,9 @@ mmg3d-1:
 	fi
 mmg3d-2: FAIT-2
 FAIT-2: WHERE	
-	if [ -f ../pkg/$(MMG3DLIB_TAR) ] ;then \
-	   tar zvf ../pkg/$(MMG3DLIB_TAR)  -C .. ;\
+	@if [ -f ../pkg/$(MMG3DLIB_TAR) ] ;then \
+	   echo tar zxf ../pkg/$(MMG3DLIB_TAR)  -C .. ;\
+	   tar zxf ../pkg/$(MMG3DLIB_TAR)  -C .. ;\
 	   touch FAIT-2 ;\
 	else \
 	   echo " file ../pkg/$(MMG3DLIB_TAR)  not found => no mmg3d tar file (download by hand) "; \
@@ -53,10 +54,11 @@ install-1: FAIT-1
 install-2:
 
 WHERE: 
-	-if [ -f FAIT-$(OPT) ] ; then \
+	@-if [ -f FAIT-$(OPT) ] ; then \
 	make install-$(OPT);  \
-	echo mmg3d  LD '-L@DIR@/lib -lmmg3d'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mmg3d ;\
-	echo mmg3d INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mmg3d ;\
+	echo mmg3d  LD '-L@DIR@/lib -lmmg3d'  >../lib/WHERE.mmg3d ;\
+	echo mmg3d INCLUDE '-I@DIR@/include'>> ../lib/WHERE.mmg3d ;\
+	echo build WHERE ./lib/WHERE.mmg3d ;\
 	fi
 
 
