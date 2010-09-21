@@ -609,6 +609,7 @@ GLXPROG
 BAMGPROG
 FFGLUTPROG
 MEDITPROG
+FNOFLAGS
 CNOFLAGS
 LIBC_VERSION
 KERNEL_VERSION
@@ -13726,6 +13727,133 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
+	 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran compiler accepts -fPIC" >&5
+$as_echo_n "checking whether the Fortran compiler accepts -fPIC... " >&6; }
+	check_save_flags="$FNOFLAGS"
+	ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+	FNOFLAGS="$FNOFLAGS -fPIC"
+
+	# The program needs to contain something for the test source
+	# file to be created by autoconf.
+
+	# Some options really need to be linked (not only compiled) to
+	# check whether they work.
+
+	cat > conftest.$ac_ext <<_ACEOF
+      program main
+
+      end
+_ACEOF
+if ac_fn_fc_try_link "$LINENO"; then :
+  check_flag_ok=yes
+else
+  check_flag_ok=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $check_flag_ok" >&5
+$as_echo "$check_flag_ok" >&6; }
+	if test "$check_flag_ok" = no;
+	then
+		FNOFLAGS="$check_save_flags"
+	fi
+
+	ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+	 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran compiler accepts -rdynamic" >&5
+$as_echo_n "checking whether the Fortran compiler accepts -rdynamic... " >&6; }
+	check_save_flags="$FNOFLAGS"
+	ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+	FNOFLAGS="$FNOFLAGS -rdynamic"
+
+	# The program needs to contain something for the test source
+	# file to be created by autoconf.
+
+	# Some options really need to be linked (not only compiled) to
+	# check whether they work.
+
+	cat > conftest.$ac_ext <<_ACEOF
+      program main
+
+      end
+_ACEOF
+if ac_fn_fc_try_link "$LINENO"; then :
+  check_flag_ok=yes
+else
+  check_flag_ok=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $check_flag_ok" >&5
+$as_echo "$check_flag_ok" >&6; }
+	if test "$check_flag_ok" = no;
+	then
+		FNOFLAGS="$check_save_flags"
+	fi
+
+	ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+	 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran compiler accepts -rdynamic" >&5
+$as_echo_n "checking whether the Fortran compiler accepts -rdynamic... " >&6; }
+	check_save_flags="$FFLAGS"
+	ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+	FFLAGS="$FFLAGS -rdynamic"
+
+	# The program needs to contain something for the test source
+	# file to be created by autoconf.
+
+	# Some options really need to be linked (not only compiled) to
+	# check whether they work.
+
+	cat > conftest.$ac_ext <<_ACEOF
+      program main
+
+      end
+_ACEOF
+if ac_fn_fc_try_link "$LINENO"; then :
+  check_flag_ok=yes
+else
+  check_flag_ok=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $check_flag_ok" >&5
+$as_echo "$check_flag_ok" >&6; }
+	if test "$check_flag_ok" = no;
+	then
+		FFLAGS="$check_save_flags"
+	fi
+
+	ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+
 	fi
 fi
 DYLIB_SUFFIX=$ff_suffix_dylib
@@ -14357,6 +14485,7 @@ ff_bamgprog="$ff_bamgprog drawbdmesh${EXEEXT}"
 fi
 
 CNOFLAGS=$CNOFLAGS
+ FNOFLAGS=$FNOFLAGS
  # The final list of executable programs
 MEDITPROG=$ff_meditprog
 
