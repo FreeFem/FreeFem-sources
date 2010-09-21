@@ -1,5 +1,6 @@
 
 v 3.9-3
+  - correct compilation of gmm, mumps on linux
   - add parameter -ne in FreeFem++ commands  to remove edp script print
   - correct mistake in --enable-m64 or --enable-m32 (suppress the confugure warning)
   - correct of ff-c++ script if whith space in path (for windows)
