@@ -210,14 +210,14 @@ WGET = @WGET@
 #  macros should be obvious from the names.
 #=============================================================================
    F77            = @MPIF77@ #--prefix /Users/morice/librairie/openmpi-gcc-gfortran-4.4/
-   F77NO_OPTFLAGS =  
-   F77FLAGS       = $(F77NO_OPTFLAGS) -O
+   F77NO_OPTFLAGS =  @FNOFLAGS@
+   F77FLAGS       = @FFLAGS@
    F77LOADER      = $(F77)
-   F77LOADFLAGS   = 
+   F77LOADFLAGS   = @FFLAGS@ @LDFLAGS@ 
    CC             = @MPICC@ #--prefix /Users/morice/librairie/openmpi-gcc-gfortran-4.4/ 
-   CCFLAGS        = -O3 #-fnested-functions
+   CCFLAGS        = @CFLAGS@ #-fnested-functions
    CCLOADER       = $(CC)
-   CCLOADFLAGS    = 
+   CCLOADFLAGS    = @LDFLAGS@ 
 
 #  --------------------------------------------------------------------------
 #  The archiver and the flag(s) to use when building an archive (library).

@@ -1450,6 +1450,10 @@ then
 	if test "$enable_fortran" != no 
 	 then 
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FFLAGS)	
+	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FNOFLAGS)	
+	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FNOFLAGS)
+	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FFLAGS)
+
 	fi
 fi
 AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
@@ -1664,6 +1668,7 @@ ff_bamgprog="$ff_bamgprog drawbdmesh${EXEEXT}"
 fi
 
 AC_SUBST(CNOFLAGS,$CNOFLAGS) dnl for superludist CFLAGS without optim  ...
+AC_SUBST(FNOFLAGS,$FNOFLAGS) dnl for blacs CFLAGS without optim  ...
 # The final list of executable programs
 AC_SUBST(MEDITPROG,$ff_meditprog)
 AC_SUBST(FFGLUTPROG,$ff_ffglutprog)
