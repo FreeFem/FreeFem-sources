@@ -3283,7 +3283,7 @@ static void SetcppIo()
 }
 // pour l'environement.
 extern const char *  prognamearg;
- bool echo_edp=true;
+extern  bool echo_edp;
 int mainff (int  argc, char **argv)
 {
     
