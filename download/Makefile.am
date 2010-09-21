@@ -49,14 +49,14 @@ pkg:
 	mkdir pkg
 
 clean-local:
-	-rm -rf  lib include 
+	-rm -rf  lib include bin 
 	-rm */FAIT 
 	for d in tetgen superlu fftw; do \
 	  ( cd "$$d";$(MAKE) clean ) ; \
 	done 
-all-local: $(DOWNLOADCOMPILE) 
+all-local:bin lib include pkg  $(DOWNLOADCOMPILE) 
 
-compile-pkg:
+compile-pkg: bin lib include pkg
 	-if [ -n "$(WGET)" ] ; then \
 	for d in tetgen superlu fftw metis yams mshmet mmg3d gmm ; do \
 	if [ -d "$$d" ] ; then  echo "(cd $$d;$(MAKE) ) " ;   ( cd "$$d";$(MAKE) ) ; else echo ** missing "$$d" directory ; fi; \
