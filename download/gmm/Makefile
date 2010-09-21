@@ -23,8 +23,8 @@ $(PKG):FAIT
 FAITwin32-dll-target:
 	echo "On Pure Win32 (to hard to compile) "
 
-FAIT:	 
-	$(MAKE) install
+FAIT: 	 
+	$(MAKE) install 
 	touch FAIT
 
 FAIRE: $(SRCDIR) 
