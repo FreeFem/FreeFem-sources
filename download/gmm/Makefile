@@ -23,15 +23,17 @@ $(PKG):FAIT
 FAITwin32-dll-target:
 	echo "On Pure Win32 (to hard to compile) "
 
-FAIT:	
-	$(MAKE) FAIRE
+FAIT:	 
+	$(MAKE) install
 	touch FAIT
 
 FAIRE: $(SRCDIR) 
 	cd $(SRCDIR) && ./configure --disable-dependency-tracking   --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make
-	cd $(SRCDIR) && make install
 	touch FAIRE
+install: FAIRE WHERE
+	cd $(SRCDIR) && make install
+
 
 $(SRCDIR): $(PKGDIR)/$(PACKAGE)
 	gunzip -c   $^ | tar xvf - 
@@ -54,6 +56,6 @@ cxxflags: ../Makefile
 
 WHERE: 
 	-if [ -f FAIT ] ; then \
-#	echo   LD '-L@DIR@/lib -lfreeyams'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams ;\
 	echo gmm INCLUDE '-I@DIR@/include'> $(SRCDIR)/$(INSTALL)/lib/WHERE.gmm ;\
+	echo gmm LD '-L@DIR@/lib'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.gmm ;\
 	fi
