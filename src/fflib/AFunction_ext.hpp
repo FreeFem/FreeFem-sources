@@ -40,7 +40,10 @@ class  OneOperator2s_ : public OneOperator {     //
   func f;
 public: 
   E_F0 * code(const basicAC_F0 & args) const 
-  { return  new CODE(f,
+    {     if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	CompileError( " They are used Named parameter ");
+
+      return  new CODE(f,
 		     t[0]->CastTo(args[0]),
 		     t[1]->CastTo(args[1]));}     // extend
   OneOperator2s_(func  ff):                        // 3->4
@@ -84,7 +87,11 @@ class  OneOperator3s_ : public OneOperator {     //
   func f;
 public: 
   E_F0 * code(const basicAC_F0 & args) const 
-  { return  new CODE(f,
+  { 
+      if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	  CompileError( " They are used Named parameter ");
+
+      return  new CODE(f,
 		     t[0]->CastTo(args[0]),
 		     t[0]->CastTo(args[1]),
 		     t[1]->CastTo(args[2]));}     // extend
@@ -129,7 +136,11 @@ class  OneOperator4_ : public OneOperator {     // 3->4
   func f;
 public: 
   E_F0 * code(const basicAC_F0 & args) const 
-  { return  new CODE(f,
+    {  
+	if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	    CompileError( " They are used Named parameter ");
+	
+	return  new CODE(f,
 		     t[0]->CastTo(args[0]),
 		     t[1]->CastTo(args[1]),
 		     t[2]->CastTo(args[2]),
@@ -184,7 +195,11 @@ class  OneOperator5_ : public OneOperator {     // 3->4
   func f;
 public: 
   E_F0 * code(const basicAC_F0 & args) const 
-  { return  new CODE(f,
+    {  
+	if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	    CompileError( " They are used Named parameter ");
+	
+	return  new CODE(f,
 		     t[0]->CastTo(args[0]),
 		     t[1]->CastTo(args[1]),
 		     t[2]->CastTo(args[2]),
@@ -242,7 +257,11 @@ class  OneOperator6_ : public OneOperator {     // 3->4
   func f;
 public: 
   E_F0 * code(const basicAC_F0 & args) const 
-  { return  new CODE(f,
+    {  
+	if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	    CompileError( " They are used Named parameter ");
+	
+	return  new CODE(f,
 		     t[0]->CastTo(args[0]),
 		     t[1]->CastTo(args[1]),
 		     t[2]->CastTo(args[2]),
@@ -305,7 +324,11 @@ class  OneOperator7_ : public OneOperator {     // 3->4
   func f;
 public: 
   E_F0 * code(const basicAC_F0 & args) const 
-  { return  new CODE(f,
+    {  
+	if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	    CompileError( " They are used Named parameter ");
+	
+	return  new CODE(f,
 		     t[0]->CastTo(args[0]),
 		     t[1]->CastTo(args[1]),
 		     t[2]->CastTo(args[2]),
@@ -370,7 +393,11 @@ class  OneOperator8_ : public OneOperator {     // 3->4
   func f;
 public: 
   E_F0 * code(const basicAC_F0 & args) const 
-  { return  new CODE(f,
+    {  
+	if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	    CompileError( " They are used Named parameter ");
+	
+	return  new CODE(f,
 		     t[0]->CastTo(args[0]),
 		     t[1]->CastTo(args[1]),
 		     t[2]->CastTo(args[2]),

@@ -1927,7 +1927,7 @@ map< pair<int,int>, R> *Matrixmapp2mapIJ (map< pair<int,int>, R> *const &  B,con
 	    }
 	}   
     }
-    A[make_pair(n,m)] =+ R(); // Hack to be sure that the last term existe 
+    A[make_pair(n,m)] += R(); // Hack to be sure that the last term existe 
     delete B;
     
     return pA;

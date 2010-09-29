@@ -1,4 +1,6 @@
-
+ -correct bug renumbering  of matrix :  B= A(I,J),
+   the last term N,M was force to zero  =+ -> += (line 1885 of file lgmat.cpp) 
+   where N= I.max, M=J.max 
 v 3.9-3
   - correct compilation of gmm, mumps on linux
   - add parameter -ne in FreeFem++ commands  to remove edp script print

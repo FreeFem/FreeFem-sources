@@ -95,6 +95,9 @@
 		3D71697B0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */; };
 		3D71697E0F371F9E00031DA8 /* glumesh2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */; };
 		3D71697F0F371F9E00031DA8 /* glumesh2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */; };
+		3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */; };
+		3D8EF15B1251123A00D38A94 /* libmpi_cxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D8EF15A1251123A00D38A94 /* libmpi_cxx.dylib */; };
+		3D8EF15D1251124600D38A94 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D8EF15C1251124600D38A94 /* libmpi.dylib */; };
 		3D9B0EB50C8495C0008A8F03 /* BamgFreeFem.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EA40C8495C0008A8F03 /* BamgFreeFem.hpp */; };
 		3D9B0EB60C8495C0008A8F03 /* CGNL.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EA50C8495C0008A8F03 /* CGNL.hpp */; };
 		3D9B0EB70C8495C0008A8F03 /* DOperator.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EA60C8495C0008A8F03 /* DOperator.hpp */; };
@@ -159,9 +162,11 @@
 		3D7169740F371E0800031DA8 /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = ../download/lib/libumfpack.a; sourceTree = SOURCE_ROOT; };
 		3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = UMFPack_Solver.cpp; sourceTree = "<group>"; };
 		3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = glumesh2D.cpp; sourceTree = "<group>"; };
+		3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = parallelempi.cpp; path = ../src/mpi/parallelempi.cpp; sourceTree = SOURCE_ROOT; };
+		3D8EF15A1251123A00D38A94 /* libmpi_cxx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi_cxx.dylib; path = /usr/local/lib/libmpi_cxx.dylib; sourceTree = "<absolute>"; };
+		3D8EF15C1251124600D38A94 /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = /usr/local/lib/libmpi.dylib; sourceTree = "<absolute>"; };
 		3D90DC9E0970155D002A1826 /* lg.tab.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = lg.tab.cpp; sourceTree = "<group>"; };
 		3D90DCA00970155D002A1826 /* lg.tab.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = lg.tab.hpp; sourceTree = "<group>"; };
-		3D90DCA20970155D002A1826 /* lg.y */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.yacc; path = lg.y; sourceTree = "<group>"; };
 		3D90DCDC097015B4002A1826 /* AddNewFE.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; path = AddNewFE.h; sourceTree = "<group>"; };
 		3D90DCDD097015B4002A1826 /* AFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = AFunction.cpp; sourceTree = "<group>"; };
 		3D90DCDE097015B4002A1826 /* AFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; path = AFunction.hpp; sourceTree = "<group>"; };
@@ -301,6 +306,8 @@
 				3D71696F0F371DEC00031DA8 /* libamd.a in Frameworks */,
 				3D7169710F371DEC00031DA8 /* libarpack.a in Frameworks */,
 				3D7169760F371E0800031DA8 /* libumfpack.a in Frameworks */,
+				3D8EF15B1251123A00D38A94 /* libmpi_cxx.dylib in Frameworks */,
+				3D8EF15D1251124600D38A94 /* libmpi.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,6 +364,7 @@
 		3D90DC95097014FF002A1826 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				3DE786BB124C7ACB00A2C49C /* MPI */,
 				3DC62A010972532900D487F6 /* Graphics */,
 				3DC629C1097242A600D487F6 /* femlib */,
 				3DC629A309723FFE00D487F6 /* Eigen */,
@@ -374,7 +382,6 @@
 				3D90DC9E0970155D002A1826 /* lg.tab.cpp */,
 				3DBBD5E50C3573DA007E5F45 /* mymain.cpp */,
 				3D90DCA00970155D002A1826 /* lg.tab.hpp */,
-				3D90DCA20970155D002A1826 /* lg.y */,
 			);
 			name = lglib;
 			path = ../src/lglib;
@@ -435,6 +442,8 @@
 		3D90DDE309704FA0002A1826 /* Lib */ = {
 			isa = PBXGroup;
 			children = (
+				3D8EF15A1251123A00D38A94 /* libmpi_cxx.dylib */,
+				3D8EF15C1251124600D38A94 /* libmpi.dylib */,
 				3DED22BB0D22C9B700200751 /* libf2c.a */,
 				3D7169690F371DEC00031DA8 /* libamd.a */,
 				3D7169740F371E0800031DA8 /* libumfpack.a */,
@@ -555,6 +564,14 @@
 				3DC62AE80972994000D487F6 /* macglrgraf.cpp */,
 			);
 			name = Graphics;
+			sourceTree = "<group>";
+		};
+		3DE786BB124C7ACB00A2C49C /* MPI */ = {
+			isa = PBXGroup;
+			children = (
+				3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */,
+			);
+			name = MPI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -768,6 +785,7 @@
 				3D71697B0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */,
 				3D71697F0F371F9E00031DA8 /* glumesh2D.cpp in Sources */,
 				3D2D5C9B0F43095A00F41F4C /* splitsimplex.cpp in Sources */,
+				3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
