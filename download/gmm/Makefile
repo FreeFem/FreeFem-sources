@@ -23,15 +23,15 @@ $(PKG):FAIT
 FAITwin32-dll-target:
 	echo "On Pure Win32 (to hard to compile) "
 
-FAIT: 	 
-	$(MAKE) install 
+FAIT: 
+	$(MAKE) install  WHERE
 	touch FAIT
 
 FAIRE: $(SRCDIR) 
 	cd $(SRCDIR) && ./configure --disable-dependency-tracking   --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make
 	touch FAIRE
-install: FAIRE WHERE
+install: FAIRE 
 	cd $(SRCDIR) && make install
 
 
