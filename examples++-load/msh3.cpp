@@ -5329,7 +5329,7 @@ AnyType Op_trunc_mesh3::Op::operator()(Stack stack)  const {
   for (int k=0;k<Th.nt;k++)
     { 
       const Tet & K( Th.elements[k] );
-      R3 B(1./3.,1./3.,1./3.);
+      R3 B(1./4.,1./4.,1./4.);  // 27/09/10 : J.Morice error in msh3.cpp
       mp->set(Th,K(B),B,K,0);
       if (  GetAny<bool>( (*bbb)(stack) )  ) kk++;
       else  split[k]=0  ;    

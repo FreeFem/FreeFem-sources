@@ -578,6 +578,7 @@ struct Op_Writempi : public binary_function<MPIrank,A,MPIrank> {
   }
 };
 
+
 template<class A>
 struct Op_Bcastmpi : public binary_function<MPIrank,A*,MPIrank> {
   static MPIrank  f(MPIrank const  & f,A *  const  & a)  

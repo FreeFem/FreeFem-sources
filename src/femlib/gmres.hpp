@@ -133,8 +133,12 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
     }
   }
   
+ if(verbosity)
+    cout << "WARNING: GMRES do not converges: " << j <<"/" << max_iter << ",  resid = " << resid 
+         << ", tol=  " << tol << ", normb "<< normb << endl;
   tol = resid;
   delete [] v;
+    
   return 1;
 }
 

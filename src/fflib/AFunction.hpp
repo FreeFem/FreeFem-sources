@@ -2290,6 +2290,9 @@ class  OneBinaryOperator : public OneOperator{
 public: 
   E_F0 * code(const basicAC_F0 & args) const 
   { //cout << "A op B \n" ;
+    if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	CompileError( " They are used Named parameter ");
+ 
     return  new Op(t0->CastTo(args[0]),t1->CastTo(args[1]));} 
   OneBinaryOperator(): 
     OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]), 
@@ -2371,6 +2374,8 @@ class  Operator_Aritm_If : public OneOperator{
 public: 
   E_F0 * code(const basicAC_F0 & args) const 
   { //cout << "A op B \n" ;
+      if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	  CompileError( " They are used Named parameter "); 
     return  new Op(t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]));} 
   Operator_Aritm_If(): 
     OneOperator(map_type[typeid(R).name()],map_type[typeid(bool).name()],map_type[typeid(B).name()],map_type[typeid(B).name()])
@@ -2460,7 +2465,9 @@ class  OneUnaryOperator : public OneOperator{
     aType tA;
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new Op(tA->CastTo(args[0]));} 
+    {     if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	CompileError( " They are used Named parameter ");
+	 return  new Op(tA->CastTo(args[0]));} 
     OneUnaryOperator(aType tt0=map_type[typeid(A).name()]): 
       OneOperator(map_type[typeid(R).name()],tt0), 
       tA(map_type[typeid(A).name()])
@@ -2474,7 +2481,9 @@ class  OneOperator1s_ : public OneOperator {
     func  f;
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new E_F_F0s_<R,A>(f,t[0]->CastTo(args[0]));} 
+    {     if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	CompileError( " They are used Named parameter ");
+	 return  new E_F_F0s_<R,A>(f,t[0]->CastTo(args[0]));} 
     OneOperator1s_(func  ff): 
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),f(ff){}
 };
@@ -2486,7 +2495,11 @@ class  OneOperator1_ : public OneOperator {
     func  f;
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new CODE(f,t[0]->CastTo(args[0]));} 
+     { 
+	 if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	     CompileError( " They are used Named parameter ");
+
+	 return  new CODE(f,t[0]->CastTo(args[0]));} 
     OneOperator1_(func  ff,int ppref=0): 
     OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),t0( map_type[typeid(A).name()] ),f(ff){pref=ppref;}
     OneOperator1_(func  ff,aType tt0,int ppref=0): 
@@ -2507,7 +2520,11 @@ class  OneOperator2_ : public OneOperator {
     func f;
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new CODE(f,t0->CastTo(args[0]),t1->CastTo(args[1]));} 
+     { 
+	 if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	     CompileError( " They are used Named parameter ");
+
+	 return  new CODE(f,t0->CastTo(args[0]),t1->CastTo(args[1]));} 
     OneOperator2_(func  ff): 
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
       t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
@@ -2529,7 +2546,11 @@ class  OneOperator3_ : public OneOperator {
     func f;
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new CODE(f,tA->CastTo(args[0]),tB->CastTo(args[1]),tC->CastTo(args[2]));} 
+     { 
+	 if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	     CompileError( " They are used Named parameter ");
+
+	 return  new CODE(f,tA->CastTo(args[0]),tB->CastTo(args[1]),tC->CastTo(args[2]));} 
     OneOperator3_(func  ff,
 		  aType tt0=map_type[typeid(A).name()],
 		  aType tt1=map_type[typeid(B).name()],
@@ -2777,7 +2798,11 @@ inline 	 C_F0 basicForEachType::CastTo(const C_F0 & e) const
 class E_F1_funcT_Type: public OneOperator{ public:
 //  const basicForEachType *r,*a;
   Function1 f;
-    E_F0 * code(const basicAC_F0 & args) const   { return  new  E_F0_Func1(f,args[0]);} 
+    E_F0 * code(const basicAC_F0 & args) const   { 
+	if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	    CompileError( " They are used Named parameter ");
+
+	return  new  E_F0_Func1(f,args[0]);} 
   
   E_F1_funcT_Type(const basicForEachType *rr,const basicForEachType *aa,Function1 ff)
     : OneOperator(rr,aa), f(ff) {}
@@ -3032,8 +3057,12 @@ class  OneOperator0 : public OneOperator {public:
     typedef  R (*func)() ; 
     func  f;
 public: 
-	E_F0 * code(const basicAC_F0 & ) const 
-    { return  new E_F0_F(f);} 
+	E_F0 * code(const basicAC_F0 & args) const 
+    { 
+	if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	    CompileError( " They are used Named parameter ");
+
+	return  new E_F0_F(f);} 
     OneOperator0(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
 };
 

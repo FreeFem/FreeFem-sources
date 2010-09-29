@@ -3873,7 +3873,11 @@ AnyType Convect::eval2(Stack s) const
 	      l[(j+1)%3] = b;
 	      l[(j+2)%3] = a;
 	      mpc.change(R2(l[1],l[2]),Th[it],0);             
-	      ffassert(k++<1000);
+	      if(k++>1000)
+		{
+		  cerr << "Fatal  error  in Convect (R2) operator: loop  => velocity to hight ???? or NaN F. Hecht  " << endl;
+		  ffassert(0);
+		}
 	    }
 
 	  mpc.change(R2(l[1],l[2]),Th[it],0);
