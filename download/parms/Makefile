@@ -8,12 +8,12 @@ all-local: parms
 
 # Downloading and compiling parms
 # -------------------------------
-# http://www-users.cs.umm.edu/~saad/software/pARMS/pARMS_2.2.php
+# http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php
 # Parms information
 DIRPKG=../pkg
 SRCDIR=pARMS_$(parms_VERSION)
 PACKAGE=$(DIRPKG)/parms_$(parms_VERSION).tar.gz
-SERVER= http://www-users.cs.umm.edu/~saad/software/pARMS/pARMS_2.2.php
+SERVER= http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php
 INSTALL=../..
 parms_VERSION=2.2
 
@@ -42,7 +42,7 @@ $(SRCDIR): $(PACKAGE)
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
+	cd $(DIRPKG);$(WGET)   $(SERVER)
 
 clean-local:
 	-cd $(SRCDIR)/src; make cleanall
