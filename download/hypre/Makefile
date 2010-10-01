@@ -78,17 +78,6 @@ clean: clean-local
 clean-local:
 	-rm -rf $(SRCDIR) FAIT 
 
-ff-flags: ../Makefile
-	grep 'abs_top_builddir *=' ../Makefile >> ff-flags
-	grep 'CXX *=' ../Makefile >> ff-flags
-	grep 'CC *=' ../Makefile >> ff-flags
-	grep 'FLIBS *=' ../Makefile >> ff-flags
-	grep 'CXXFLAGS *=' ../Makefile >> ff-flags
-	grep 'CFLAGS *=' ../Makefile >> ff-flags
-	grep 'F77 *=' ../Makefile >> ff-flags
-	grep 'FFLAGS *=' ../Makefile >> ff-flags
-	grep 'LDFLAGS *=' ../Makefile >> ff-flags
-	grep 'FLIBS *=' ../Makefile >> ff-flags
-	grep 'WGET *=' ../Makefile >> ff-flags
-	grep 'WIN32DLLTARGET *=' ../Makefile >>ff-flags
+ff-flags: ../Makefile ff-flags.inc 
+	../../config.status  --file="ff-flags:ff-flags.inc"
 
