@@ -33,9 +33,9 @@ pastix: FAIRE
 WHERE: 
 	if [ -f $(SRCDIR)/FAIT  ] ;then \
 	echo "double_pastix LD '-L@DIR@/lib/pastix/double   -lpastix'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;\
-	echo "double_pastix INCLUDE '-I@DIR@/include/pastix/double'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.patix ;\
+	echo "double_pastix INCLUDE '-I@DIR@/include/pastix/double'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;\
 	echo "complex_pastix LD '-L@DIR@/lib/pastix/complex   -lpastix'"  >>$(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;\
-	echo "complex_pastix INCLUDE '-I@DIR@/include/pastix/complex'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.patix ;\
+	echo "complex_pastix INCLUDE '-I@DIR@/include/pastix/complex'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;\
 	fi
 
 FAIRE: $(SRCDIR)/FAIT  WHERE

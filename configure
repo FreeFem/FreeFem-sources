@@ -14603,6 +14603,7 @@ return MMG_mmg3dlib ();
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   ff_mmg3d_ok=yes
+		mkdir download/pkg
 		mv $ff_mmg3dlib download/pkg/.
 
 else
