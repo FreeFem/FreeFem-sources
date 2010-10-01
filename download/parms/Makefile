@@ -23,7 +23,7 @@ $(SRCDIR)/FAIT:
 	$(MAKE) $(SRCDIR)/$(INSTALL)  
 	touch $(SRCDIR)/FAIT
 
-FAIRE: $(SRCDIR)/FAIT
+FAIRE: $(SRCDIR)/FAIT WHERE
 
 Makefile.in: ../../config.status	Makefile makefile-parms.in
 	../../config.status  --file="Makefile.in:makefile-parms.in"
@@ -45,9 +45,15 @@ $(PACKAGE):
 	cd $(DIRPKG);$(WGET)   $(SERVER)
 
 clean-local:
-	-cd $(SRCDIR)/src; make cleanall
+	-make cleanall -C $(SRCDIR)/src
 
-clean: clean-local
+clean: 
 	-rm Makefile.in
 	-rm -rf $(SRCDIR)
+
+WHERE:
+	echo parms LD '-L@DIR@/lib -lparms-O3'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parms
+	echo parms INCLUDE '-I@DIR@/include/parms '>> $(SRCDIR)/$(INSTALL)/lib/WHERE.parms
+
 .PHONY:$(SRCDIR)/$(INSTALL)
+

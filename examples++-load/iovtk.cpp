@@ -713,12 +713,12 @@ void VTU_WRITE_MESH( FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
     fprintf(fp,"format=\"ascii\" >\n");
     long nelem=4;
     for (long i=nelem; i <= nelem*Th.nt; i+=nelem){   
-      fprintf(fp,"%d ",i);
+      fprintf(fp,"%ld ",i);
     }
     if(surface){
       nelem=3;
       for (long i=nelem+4*Th.nt; i <= nelem*Th.nbe+4*Th.nt; i+=nelem){
-	fprintf(fp,"%d ",i);
+	fprintf(fp,"%ld ",i);
       }
     }
   }
@@ -3191,7 +3191,7 @@ public:
 	     valsol[iv*(*this).nbfloat+j] = valsol[ iv*(*this).nbfloat+j ]/takemesh[iv];
 	     float value = valsol[iv*(*this).nbfloat+j];
 	     
-	     fprintf(fp," %.8e\n");
+	     fprintf(fp," %.8e\n",value);
 	   }
 	 }
        }
