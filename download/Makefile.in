@@ -319,6 +319,7 @@ EXTRA_DIST = \
 ./hips/hips-1.2b-rc4.patch \
 ./hips/makefile-hips.inc \
 ./hypre/Makefile \
+./hypre/ff-flags.inc \
 ./metis/Makefile \
 ./metis/Makefile-metis.in \
 ./metis/patch-metis \

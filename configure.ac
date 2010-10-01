@@ -1749,6 +1749,7 @@ else
 	    AC_LINK_IFELSE(
 		[AC_LANG_CALL(,MMG_mmg3dlib)],
 		ff_mmg3d_ok=yes 
+		mkdir download/pkg
 		mv $ff_mmg3dlib download/pkg/.
 		,
 		ff_mmg3d_ok=no
