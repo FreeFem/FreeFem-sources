@@ -7,7 +7,7 @@
 // AUTHOR   : Guy Atenekeng
 // E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
 //
-//ff-c++-LIBRARY-dep: metis parms  blas 
+//ff-c++-LIBRARY-dep: metis parms  blas mpifc 
 //ff-c++-cpp-dep: 
 
 /* 
