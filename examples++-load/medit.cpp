@@ -974,7 +974,7 @@ public:
       for(size_t jj=offset; jj<l.size(); jj++){
 	if( l[jj].what != l[ jj%offset ].what ){
 	  char StringError[256]; 
-	  snprintf(StringError,256,"compile error ::  The solution %d of mesh 1 and mesh %d is not the same type",jj%offset,jj/offset+1);
+	  snprintf(StringError,256,"compile error ::  The solution %ld of mesh 1 and mesh %ld is not the same type",jj%offset,jj/offset+1);
 	  CompileError(StringError);
 	}
       }
@@ -1580,14 +1580,17 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
   bool plotting = true;   
   //  drawing part  ------------------------------
   
-  if (wait && !NoWait) 
+  //  suppression du no wait car plante sur mac
+  //  il faut faire thread qui lance ca de maniere asyncrone ... 
+  //   a faire .. FH ...
+  //  if (wait && !NoWait) 
     {
       pclose(popenstream);
     }
-  else
-    {
-      fclose(popenstream);
-    }
+    //else
+    // {
+    //  fclose(popenstream);
+    //}
   
   // rajout pout la sauvegarde de la solution
   if(boolsave){
@@ -2338,14 +2341,14 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
   bool plotting = true;   
   //  drawing part  ------------------------------
   
-  if (wait && !NoWait) 
+  //    if (wait && !NoWait) 
     {
       pclose(popenstream);
     }
-  else
+    /*else
     {
       fclose(popenstream);
-    }
+      }*/
   
   if(boolsave){
     int outm;
