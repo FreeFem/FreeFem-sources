@@ -18,7 +18,7 @@ PKG_VERSION=4.1
 INSTALL=../..
 
 
-$(PKG):FAIT
+$(PKG):FAIT WHERE
 
 FAITwin32-dll-target:
 	echo "On Pure Win32 (to hard to compile) "
