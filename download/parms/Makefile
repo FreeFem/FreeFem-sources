@@ -52,7 +52,7 @@ clean:
 	-rm -rf $(SRCDIR)
 
 WHERE:
-	echo parms LD '-L@DIR@/lib -lparms-$(DBG)'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parms
+	echo parms LD '-L@DIR@/lib -lparms$(DBG)'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parms
 	echo parms INCLUDE '-I@DIR@/include/parms '>> $(SRCDIR)/$(INSTALL)/lib/WHERE.parms
 
 .PHONY:$(SRCDIR)/$(INSTALL)
