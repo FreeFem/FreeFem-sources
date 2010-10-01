@@ -12,8 +12,8 @@ all-local: parms
 # Parms information
 DIRPKG=../pkg
 SRCDIR=pARMS_$(parms_VERSION)
-PACKAGE=$(DIRPKG)/parms_$(parms_VERSION).tar.gz
-SERVER= http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php
+PACKAGE=$(DIRPKG)/pARMS_$(parms_VERSION).tar.gz
+SERVER= http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.tar.gz
 INSTALL=../..
 parms_VERSION=2.2
 
@@ -30,7 +30,7 @@ Makefile.in: ../../config.status	Makefile makefile-parms.in
 	case `uname` in *CYGWIN*)  cp Makefile.in Makefile.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.inn > Makefile.in; rm Makefile.inn ;; esac 
 
 $(SRCDIR)/$(INSTALL): $(SRCDIR)
-	cp Makefile.in $(SRCDIR)
+	cp Makefile.in $(SRCDIR)/makefile.in
 	cd $(SRCDIR); $(MAKE) ./LIB/libparms$(DBG).a
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/parms
 	cp $(SRCDIR)/INCLUDE/*.h $(SRCDIR)/$(INSTALL)/include/parms/
@@ -52,7 +52,7 @@ clean:
 	-rm -rf $(SRCDIR)
 
 WHERE:
-	echo parms LD '-L@DIR@/lib -lparms-O3'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parms
+	echo parms LD '-L@DIR@/lib -lparms-$(DBG)'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parms
 	echo parms INCLUDE '-I@DIR@/include/parms '>> $(SRCDIR)/$(INSTALL)/lib/WHERE.parms
 
 .PHONY:$(SRCDIR)/$(INSTALL)
