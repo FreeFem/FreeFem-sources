@@ -119,7 +119,7 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 	   nbvx=nbv;
 	   vertices=new Vertex[nbvx];
 	   assert(vertices);
-	   ordre=new (Vertex* [nbvx]);
+	   ordre=new Vertex* [nbvx];
 	   assert(ordre);
 	   
 	   nbiv = nbv;
@@ -399,7 +399,7 @@ void Triangles::Read_am_fmt(MeshIstream & f_in)
      triangles =new Triangle[nbtx];
      assert(triangles);
      vertices=new Vertex[nbvx];
-     ordre=new (Vertex* [nbvx]);
+     ordre=new Vertex* [nbvx];
      
      for (     i=0;i<nbt;i++)
        {
@@ -448,7 +448,7 @@ void  Triangles::Read_am(MeshIstream &ff)
   triangles =new Triangle[nbtx];
   assert(triangles);
   vertices=new Vertex[nbvx];
-  ordre=new (Vertex* [nbvx]);
+  ordre=new Vertex* [nbvx];
   
 
   Int4 i;
@@ -547,7 +547,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
   triangles =new Triangle[nbtx];
   assert(triangles);
   vertices=new Vertex[nbvx];
-  ordre=new (Vertex* [nbvx]);
+  ordre=new Vertex* [nbvx];
 
 
  f_in >> l;
@@ -711,7 +711,7 @@ void  Triangles::Read_nopo(MeshIstream & ff)
   triangles =new Triangle[nbtx];
   assert(triangles);
   vertices=new Vertex[nbvx];
-  ordre=new (Vertex* [nbvx]);
+  ordre=new Vertex* [nbvx];
   Int4 k=0;
   
   for ( i=0;i<ne;i++) 
@@ -774,7 +774,7 @@ void  Triangles::Read_msh(MeshIstream &f_in)
      triangles =new Triangle[nbtx];
      assert(triangles);
      vertices=new Vertex[nbvx];
-     ordre=new (Vertex* [nbvx]);
+     ordre=new Vertex* [nbvx];
       edges = new Edge[nbe];
      for ( i=0;i<nbv;i++)
 	{
@@ -822,7 +822,7 @@ void  Triangles::Read_amdba(MeshIstream &f_in )
      triangles =new Triangle[nbtx];
      assert(triangles);
      vertices=new Vertex[nbvx];
-     ordre=new (Vertex* [nbvx]);
+     ordre=new Vertex* [nbvx];
      Int4 j;
       for ( i=0;i<nbv;i++)
 	{

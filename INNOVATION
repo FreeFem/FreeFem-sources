@@ -1,4 +1,5 @@
 v 3.10 ( 1 oct 2010)
+  - do correction for g++-4.6 compiler 
   - add  MPICG  for Parallel Conjugate Gradient for full split matrix
      see MPICG
   - correct Makefiles in dowload ( add WHERE interface) 
