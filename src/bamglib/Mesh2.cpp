@@ -3201,7 +3201,7 @@ void Triangles::PreInit(Int4 inbvx,char *fname)
   if (inbvx) {
     vertices=new Vertex[nbvx];
     assert(vertices);
-    ordre=new (Vertex* [nbvx]);
+    ordre=new Vertex* [nbvx];
     assert(ordre);
     triangles=new Triangle[nbtx];
     assert(triangles);}
@@ -3977,7 +3977,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 Edge** Triangles::MakeGeometricalEdgeToEdge()
  {
   assert(Gh.nbe);
-  Edge **e= new (Edge* [Gh.nbe]);
+  Edge **e= new Edge* [Gh.nbe];
   
   Int4 i;
   for ( i=0;i<Gh.nbe ; i++)
