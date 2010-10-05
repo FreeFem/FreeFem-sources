@@ -33,3 +33,11 @@ all-local:$(LIST_COMPILE)
 
 .cpp.$(DYLIB_SUFFIX): ff-c++
 	 ../examples++-load//ff-c++ -auto  $< 
+install-exec-local:: load_compile
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
+	$(INSTALL_DATA)  clapack.h ppmimg.h include/* $(DESTDIR)$(ff_prefix_dir)/include
+	-for i in $(LIST_COMPILE); do \
+	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
+
