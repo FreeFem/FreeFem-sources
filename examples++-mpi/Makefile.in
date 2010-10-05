@@ -559,7 +559,7 @@ all-local:$(LIST_COMPILE)
 
 .cpp.$(DYLIB_SUFFIX): ff-c++
 	 ../examples++-load//ff-c++ -auto  $< 
-install-exec-local:: load_compile
+install-exec-local::
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
