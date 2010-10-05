@@ -1492,7 +1492,7 @@ Optional Features:
   --enable-optim	Turn on compiler optimization
   --enable-generic	Turn off hardware-dependant optimization options
   --enable-opengl         Enable/disable support for OpenGL
-  --enable-generic_blas	Download generic blas (implie --enable-download)
+  --enable-generic_blas	Downloadc generic blas (implie --enable-download)
   --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK,FLTK)
   --enable-static	Build binaries with no shared library dependencies
   --disable-pdf	Disable PDF documentation building
@@ -12180,11 +12180,11 @@ done
 ff_cblas_libs=no
 if test "$ff_blas_ok" = yes
 then
-       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for blas_zdotu_sub in $ff_blas_libs" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for blas_zdotu_sub in $ff_blas_libs" >&5
 $as_echo_n "checking for blas_zdotu_sub in $ff_blas_libs... " >&6; }
-        ff_save_libs="$LIBS"
-        LIBS="$LIBS $ff_blas_libs $FLIBS"
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+    ff_save_libs="$LIBS"
+    LIBS="$LIBS $ff_blas_libs $FLIBS"
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -12215,9 +12215,9 @@ if ac_fn_cxx_try_link "$LINENO"; then :
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_cblas_libs" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_cblas_libs" >&5
 $as_echo "$ff_cblas_libs" >&6; }
-	LIBS="$ff_save_libs"
+    LIBS="$ff_save_libs"
 fi
 if test "$ff_blas_ok" = yes
 then
@@ -12227,9 +12227,9 @@ fi
 # If all else fails, download!
 
 if test "$ff_blas_ok" = no -a "$enable_download" = yes \
-   -a "$enable_fortran" != no -a "$enable_c" != no
+    -a "$enable_fortran" != no -a "$enable_c" != no
 then
-	# Extract the first word of "unzip", so it can be a program name with args.
+    # Extract the first word of "unzip", so it can be a program name with args.
 set dummy unzip; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
@@ -12268,7 +12268,7 @@ fi
 
 
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for BLAS version to download" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for BLAS version to download" >&5
 $as_echo_n "checking for BLAS version to download... " >&6; }
 
 	# Do not update $LIBS, but create an extra LIB variable,
@@ -12280,17 +12280,17 @@ $as_echo_n "checking for BLAS version to download... " >&6; }
 
 #	if test "$enable_generic" = yes -o "$enable_generic_blas" = yes
 #   supress the automatic compilation of atlas, to expencive  (FH version 3.0-5)
-	if true
-	then
-		ff_download_blas=generic
-		ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
-		ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
+    if true
+    then
+	ff_download_blas=generic
+	ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
+	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
-		GENERIC_BLAS="libf77blas.a libcblas.a"
+	GENERIC_BLAS="libf77blas.a libcblas.a"
 
-		GENERIC_BLAS_BUILT_SOURCES='BLAS CBLAS  $(F77BLAS_SOURCES) $(CBLAS_SOURCES)'
+	GENERIC_BLAS_BUILT_SOURCES='BLAS CBLAS  $(F77BLAS_SOURCES) $(CBLAS_SOURCES)'
 
-	else
+    else
 		# There are precompiled versions for Windows. We cannot
 		# distinguish the different versions easily so we just
 		# download the most generic one. A more specific version can
@@ -12300,30 +12300,28 @@ $as_echo_n "checking for BLAS version to download... " >&6; }
 		# the precompiled version (e.g. _dgemm_).
 
 ###	if test "$ff_win32" = yes -a "$enable_generic" = yes -a "$ff_unzip" = yes
-		if false
-		then
-			ff_download_blas=atlas-binary
-			ff_blas_libs="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -llapack -lf77blas -latlas"
-			ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
-			ff_lapack_ok=ok
-		else
-			ff_download_blas=atlas-source
-			ff_blas_libs="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
-			ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
-			ff_lapack_ok=ok
-		fi
+	if false
+	then
+	    ff_download_blas=atlas-binary
+	    ff_blas_libs="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -llapack -lf77blas -latlas"
+	    ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
+	    ff_lapack_ok=ok
+	else
+	    ff_download_blas=atlas-source
+	    ff_blas_libs="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
+	    ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
+	    ff_lapack_ok=ok
 	fi
+    fi
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_download_blas" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_download_blas" >&5
 $as_echo "$ff_download_blas" >&6; }
-	DOWNLOAD_BLAS=$ff_download_blas
+    DOWNLOAD_BLAS=$ff_download_blas
 
-	ff_blas_ok=yes
-        ff_cblas_h=yes
-	ff_cblas_libs=yes
+    ff_blas_ok=yes
+    ff_cblas_h=yes
+    ff_cblas_libs=yes
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_blas_inc" >&5
-$as_echo "$ff_blas_inc" >&6; }
 BLASLIBS=$ff_blas_libs
 
 BLASINC=$ff_blas_inc
@@ -12332,7 +12330,7 @@ BLASINC=$ff_blas_inc
 
 if test "$ff_blas_ok" = yes -a "$ff_cblas_libs" = yes ;
 then
-  for ac_header in cblas.h
+    for ac_header in cblas.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "cblas.h" "ac_cv_header_cblas_h" "$ac_includes_default"
 if test "x$ac_cv_header_cblas_h" = x""yes; then :
@@ -12346,7 +12344,7 @@ fi
 
 done
 
-  for ac_header in vecLib/cblas.h
+    for ac_header in vecLib/cblas.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "vecLib/cblas.h" "ac_cv_header_vecLib_cblas_h" "$ac_includes_default"
 if test "x$ac_cv_header_vecLib_cblas_h" = x""yes; then :
@@ -12354,12 +12352,12 @@ if test "x$ac_cv_header_vecLib_cblas_h" = x""yes; then :
 #define HAVE_VECLIB_CBLAS_H 1
 _ACEOF
  ff_cblas_h=yes
-       ff_cblas_h=no
+	ff_cblas_h=no
 fi
 
 done
 
-  for ac_header in atlas/cblas.h
+    for ac_header in atlas/cblas.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "atlas/cblas.h" "ac_cv_header_atlas_cblas_h" "$ac_includes_default"
 if test "x$ac_cv_header_atlas_cblas_h" = x""yes; then :
@@ -12367,14 +12365,14 @@ if test "x$ac_cv_header_atlas_cblas_h" = x""yes; then :
 #define HAVE_ATLAS_CBLAS_H 1
 _ACEOF
  ff_cblas_h=yes
-       ff_cblas_h=no
+	ff_cblas_h=no
 fi
 
 done
 
 
 fi
-
+# end of BLAS -------------------
 
 
 # Looking for ARPACK
@@ -14559,18 +14557,25 @@ else
 	*) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
     esac
     ff_mmg3dlib=""
-    if test "$ff_wget" != no   ; then
-	if test "$ff_mac" = yes ; then
-	    MACOS=10.4
-	    ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
-	elif test "$ff_win32" = yes ; then
-	    ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz"
-	else
-	    ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
-	fi
-	$ff_wget_command  http://www.freefem.org/ff++/ftp/libmmg3d/$ff_mmg3dlib
-	tar zxvf $ff_mmg3dlib -C download
+    if test "$ff_mac" = yes ; then
+	MACOS=10.4
+	ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
+    elif test "$ff_win32" = yes ; then
+	ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz"
+    else
+	ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
+    fi
 
+    if test -f  download/pkg/$ff_mmg3dlib ; then
+        tar zxf download/pkg/$ff_mmg3dlib -C download
+    elif test "enable_download" = yes ; then
+	mkdir download/pkg
+	( cd download/pkg
+	    $ff_wget_command  http://www.freefem.org/ff++/ftp/libmmg3d/$ff_mmg3dlib
+	    tar zxf $ff_mmg3dlib -C ..
+	    )
+    fi
+    if test -f "download/lib/libmmg3d.a" ; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for MMG_mmg3dlib in mmg3dlib " >&5
 $as_echo_n "checking for MMG_mmg3dlib in mmg3dlib ... " >&6; }
 	    ff_save_libs="$LIBS"
@@ -14603,8 +14608,6 @@ return MMG_mmg3dlib ();
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   ff_mmg3d_ok=yes
-		mkdir download/pkg
-		mv $ff_mmg3dlib download/pkg/.
 
 else
   ff_mmg3d_ok=no

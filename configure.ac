@@ -801,7 +801,7 @@ fi
 # ------------------------------------------
 
 #getting utility software archives through the internet
-AC_ARG_ENABLE(generic_blas,[  --enable-generic_blas	Download generic blas (implie --enable-download)])
+AC_ARG_ENABLE(generic_blas,[  --enable-generic_blas	Downloadc generic blas (implie --enable-download)])
 
 AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK,FLTK)])
 
@@ -988,14 +988,14 @@ done
 ff_cblas_libs=no
 if test "$ff_blas_ok" = yes 
 then
-       AC_MSG_CHECKING(for blas_zdotu_sub in $ff_blas_libs)
-        ff_save_libs="$LIBS"
-        LIBS="$LIBS $ff_blas_libs $FLIBS"
-        AC_LINK_IFELSE(
-                [AC_LANG_CALL(,cblas_zdotu_sub)],
-                ff_cblas_libs=yes)
-        AC_MSG_RESULT($ff_cblas_libs)
-	LIBS="$ff_save_libs"	
+    AC_MSG_CHECKING(for blas_zdotu_sub in $ff_blas_libs)
+    ff_save_libs="$LIBS"
+    LIBS="$LIBS $ff_blas_libs $FLIBS"
+    AC_LINK_IFELSE(
+        [AC_LANG_CALL(,cblas_zdotu_sub)],
+        ff_cblas_libs=yes)
+    AC_MSG_RESULT($ff_cblas_libs)
+    LIBS="$ff_save_libs"	
 fi
 if test "$ff_blas_ok" = yes 
 then
@@ -1005,78 +1005,77 @@ fi
 # If all else fails, download!
 
 if test "$ff_blas_ok" = no -a "$enable_download" = yes \
-   -a "$enable_fortran" != no -a "$enable_c" != no
+    -a "$enable_fortran" != no -a "$enable_c" != no
 then
-	AC_CHECK_PROG(ff_unzip,unzip,yes,no)
-
-	AC_MSG_CHECKING(for BLAS version to download)
-
+    AC_CHECK_PROG(ff_unzip,unzip,yes,no)
+    
+    AC_MSG_CHECKING(for BLAS version to download)
+    
 	# Do not update $LIBS, but create an extra LIB variable,
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
-
+    
 	# When compiling a generic version, we do not need an
 	# optimized version of the BLAS.
-
+    
 #	if test "$enable_generic" = yes -o "$enable_generic_blas" = yes 
 #   supress the automatic compilation of atlas, to expencive  (FH version 3.0-5)
-	if true 
-	then
-		ff_download_blas=generic
-		ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
-		ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
-
-		AC_SUBST(GENERIC_BLAS,"libf77blas.a libcblas.a")
-		AC_SUBST(GENERIC_BLAS_BUILT_SOURCES,'BLAS CBLAS  $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
-	else
+    if true 
+    then
+	ff_download_blas=generic
+	ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
+	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
+	
+	AC_SUBST(GENERIC_BLAS,"libf77blas.a libcblas.a")
+	AC_SUBST(GENERIC_BLAS_BUILT_SOURCES,'BLAS CBLAS  $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
+    else
 		# There are precompiled versions for Windows. We cannot
 		# distinguish the different versions easily so we just
 		# download the most generic one. A more specific version can
 		# always be downloaded by hand.
-
+	
 		# BUG: at the moment, some necessary symbols are missing from
 		# the precompiled version (e.g. _dgemm_).
-
+	
 ###	if test "$ff_win32" = yes -a "$enable_generic" = yes -a "$ff_unzip" = yes
-		if false
-		then
-			ff_download_blas=atlas-binary
-			ff_blas_libs="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -llapack -lf77blas -latlas"
-			ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
-			ff_lapack_ok=ok
-		else
-			ff_download_blas=atlas-source
-			ff_blas_libs="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
-			ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
-			ff_lapack_ok=ok
-		fi
+	if false
+	then
+	    ff_download_blas=atlas-binary
+	    ff_blas_libs="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -llapack -lf77blas -latlas"
+	    ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
+	    ff_lapack_ok=ok
+	else
+	    ff_download_blas=atlas-source
+	    ff_blas_libs="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
+	    ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
+	    ff_lapack_ok=ok
 	fi
+    fi
 
-	AC_MSG_RESULT($ff_download_blas)
-	AC_SUBST(DOWNLOAD_BLAS,$ff_download_blas)
-	ff_blas_ok=yes
-        ff_cblas_h=yes
-	ff_cblas_libs=yes
+    AC_MSG_RESULT($ff_download_blas)
+    AC_SUBST(DOWNLOAD_BLAS,$ff_download_blas)
+    ff_blas_ok=yes
+    ff_cblas_h=yes
+    ff_cblas_libs=yes
 fi
-AC_MSG_RESULT($ff_blas_inc)
 AC_SUBST(BLASLIBS,$ff_blas_libs)
 AC_SUBST(BLASINC,$ff_blas_inc)
 #looking for cblas.h  FH
 
 if test "$ff_blas_ok" = yes -a "$ff_cblas_libs" = yes ;
 then
-  AC_CHECK_HEADERS(cblas.h,
-       ff_cblas_h=yes,
-       ff_cblas_h=no)
-  AC_CHECK_HEADERS(vecLib/cblas.h,
-       ff_cblas_h=yes
-       ff_cblas_h=no)
-  AC_CHECK_HEADERS(atlas/cblas.h,
-       ff_cblas_h=yes
-       ff_cblas_h=no)
-
+    AC_CHECK_HEADERS(cblas.h,
+	ff_cblas_h=yes,
+	ff_cblas_h=no)
+    AC_CHECK_HEADERS(vecLib/cblas.h,
+	ff_cblas_h=yes
+	ff_cblas_h=no)
+    AC_CHECK_HEADERS(atlas/cblas.h,
+	ff_cblas_h=yes
+	ff_cblas_h=no)
+    
 fi
-
+# end of BLAS -------------------
 
 
 # Looking for ARPACK
@@ -1731,26 +1730,31 @@ else
 	*) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
     esac
     ff_mmg3dlib=""
-    if test "$ff_wget" != no   ; then  
-	if test "$ff_mac" = yes ; then
-	    MACOS=10.4
-	    ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
-	elif test "$ff_win32" = yes ; then
-	    ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz"
-	else 
-	    ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
-	fi
-	$ff_wget_command  http://www.freefem.org/ff++/ftp/libmmg3d/$ff_mmg3dlib
-	tar zxvf $ff_mmg3dlib -C download 
-
+    if test "$ff_mac" = yes ; then
+	MACOS=10.4
+	ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
+    elif test "$ff_win32" = yes ; then
+	ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz"
+    else 
+	ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
+    fi
+    
+    if test -f  download/pkg/$ff_mmg3dlib ; then 
+        tar zxf download/pkg/$ff_mmg3dlib -C download
+    elif test "enable_download" = yes ; then
+	mkdir download/pkg 
+	( cd download/pkg
+	    $ff_wget_command  http://www.freefem.org/ff++/ftp/libmmg3d/$ff_mmg3dlib
+	    tar zxf $ff_mmg3dlib -C .. 	
+	    )
+    fi
+    if test -f "download/lib/libmmg3d.a" ; then
 	AC_MSG_CHECKING(for MMG_mmg3dlib in mmg3dlib )
 	    ff_save_libs="$LIBS"
 	    LIBS="$LIBS -Ldownload/lib -lmmg3d"
 	    AC_LINK_IFELSE(
 		[AC_LANG_CALL(,MMG_mmg3dlib)],
 		ff_mmg3d_ok=yes 
-		mkdir download/pkg
-		mv $ff_mmg3dlib download/pkg/.
 		,
 		ff_mmg3d_ok=no
 		rm download/lib/libmmg3d.a download/include/libmmg3d.a

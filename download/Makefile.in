@@ -365,7 +365,7 @@ EXTRA_DIST = \
 ./yams/yamslib.h \
 ./yams/yamslib_internal.h 
 
-MPI_SOFT = blacs parmetis  scalapack scotch superludist MUMPS pastix hypre hips	 parms 
+MPI_SOFT = blacs parmetis  scalapack scotch superludist MUMPS pastix hypre hips parms 
 all: all-recursive
 
 .SUFFIXES:
