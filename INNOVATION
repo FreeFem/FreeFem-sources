@@ -1,4 +1,5 @@
-v 3.10 ( 1 oct 2010)
+v 3.10 ( 5 oct 2010)
+  add argument  "-cd"  to FreeFem++ command to change  current directory  to edp script directory 
   - clear configure.ac 
   - do correction for g++-4.6 compiler 
   - add  MPICG  for Parallel Conjugate Gradient for full split matrix
