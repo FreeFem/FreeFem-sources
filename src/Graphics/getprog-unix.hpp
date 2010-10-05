@@ -24,7 +24,7 @@ char * Shell_Space(const char * s)
 	exit(1);
       }
 
-#if WIN32
+#ifdef WIN32
     char * p= new char[i+1+nbspace];
     char * q=p;
     for( i=0;i<100000;++i) 
@@ -48,7 +48,7 @@ int getprog(char* fn,int argc, char **argv)
   waitatend=true;  // attent 
   int ret=0;
   *fn='\0';
-#if WIN32
+#ifdef WIN32
  const  int lsuffix= 4;
 #else 
  const  int lsuffix= 0;
@@ -75,7 +75,7 @@ int getprog(char* fn,int argc, char **argv)
       // pm = 0= > pas de moin -> freefem++ -> ffglut
     }
 #endif
-    
+  bool ch2edpdir = false;
   if(argc)
     prognamearg=argv[0];
    echo_edp=true;
@@ -97,6 +97,9 @@ int getprog(char* fn,int argc, char **argv)
 	noffglut=true;
       else if  (strcmp(argv[i],"-ne")==0 ) // no edp 
 	  echo_edp=false;
+      else if  (strcmp(argv[i],"-cd")==0 ) // 
+	  ch2edpdir=true;
+   
       else if  (strcmp(argv[i],"-ns")==0 ) // no script  
 	  echo_edp=false;
       else if  (strcmp(argv[i],"-nowait")==0 ) 
@@ -132,7 +135,42 @@ int getprog(char* fn,int argc, char **argv)
 	  edpfilenamearg=argv[i];	 
 	  ret=1;
 	}
-
+if( ch2edpdir && edpfilenamearg)
+  {
+    int i=0;
+    int l= strlen(edpfilenamearg);
+#ifdef WIN32	
+    const char sepdir='\\';
+#else
+   const char sepdir='/';
+#endif    
+    
+    for(i=l-1;i>=0;i--)
+	if(edpfilenamearg[i]==sepdir) break;
+ 	
+    if(i>0) {
+	char *dir= new char [l+1];
+	strcpy(dir,edpfilenamearg);
+	dir[i]=0;
+	int err=0;
+	if(verbosity>1) 
+	    cout << " chdir '" << dir <<"'"<< endl;
+#if WIN32	
+	err=_chdir(dir);
+#else
+	err=chdir(dir);
+#endif
+	//cout << err << endl;
+         if(err) {
+	     cerr << " error : chdir  " << dir << endl;
+	     exit(1);
+	 }
+	delete [] dir;
+	
+    }
+      
+    
+  }
   if( ! progffglut && !noffglut)
     progffglut=ffglut;
   
@@ -176,6 +214,8 @@ int getprog(char* fn,int argc, char **argv)
 	   << "        -wait             : wait at the end on window   \n"
 	   << "        -nw               : no ffglut (=> no graphics windows) \n"
 	   << "        -ne               : no edp script output\n"
+           << "        -cd               : Change dir to script dir\n"
+
 	;
 
       if(noffglut)  cout << " without     default ffglut : " << ffglut << endl;
