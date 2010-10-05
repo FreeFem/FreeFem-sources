@@ -25,13 +25,13 @@ ARFLAGS	= @ARFLAGS@ #cr
 # Options for a generic LINUX configuration 
 #################################
  CC	=	@MPICC@
- Cflags	=	$(DBG) $(DARCH) $(DCHNAME) -std=c99 
+ CFLAGS	= $(DBG) $(DARCH) $(DCHNAME)  @CFLAGS@
  INCLUDE_METIS =     #-I
  METIS_HOME  =       #-L/Users/morice/work/ParMetis-3.1.1/ -lparmetis -lmetis 
 
 # fortran compiler / linker 
  FC	=	@MPIFC@
- FFLAGS	= $(DBG)  $(DARCH) -I/usr/include
+ FFLAGS	= $(DBG)  $(DARCH)  @FFLAGS@
 #
 # the directory of MPI library. for example -L/usr/local/mpich/lib
  LFLAGS_MPI 	= $(FFMPIINCLUDE) 
