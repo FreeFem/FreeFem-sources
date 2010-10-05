@@ -500,7 +500,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
+install-exec-am: install-exec-local
 
 install-html: install-html-am
 
@@ -546,12 +546,12 @@ uninstall-am:
 	clean-generic distclean distclean-generic distdir dvi dvi-am \
 	html html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am uninstall uninstall-am
+	install-exec-am install-exec-local install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am
 
 
 all-local:$(LIST_COMPILE)
@@ -559,6 +559,13 @@ all-local:$(LIST_COMPILE)
 
 .cpp.$(DYLIB_SUFFIX): ff-c++
 	 ../examples++-load//ff-c++ -auto  $< 
+install-exec-local:: load_compile
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
+	$(INSTALL_DATA)  clapack.h ppmimg.h include/* $(DESTDIR)$(ff_prefix_dir)/include
+	-for i in $(LIST_COMPILE); do \
+	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
