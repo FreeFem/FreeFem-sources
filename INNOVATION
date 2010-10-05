@@ -1,10 +1,11 @@
 v 3.10 ( 5 oct 2010)
+  - add install of missing MPI  dynamics lib. 
   add argument  "-cd"  to FreeFem++ command to change  current directory  to edp script directory 
-  - clear configure.ac 
-  - do correction for g++-4.6 compiler 
+  - clean configure.ac 
+  - do correction for g++-4.6 compiler (lambda expressions , and trap ..)
   - add  MPICG  for Parallel Conjugate Gradient for full split matrix
      see MPICG
-  - correct Makefiles in dowload ( add WHERE interface) 
+  - correct Makefiles in download ( add WHERE interface) 
   - remove wait option in medit because the code is wrong , always waiting  now 
   - correct bug renumbering  of matrix :  B= A(I,J),
     the last term N,M was force to zero  =+ -> += (line 1885 of file lgmat.cpp) 
