@@ -45,7 +45,7 @@ real dout=-1./aout;
 solve P(p,q)= int3d(Th)(Grad(p)'*Grad(q)+1e-5*p*q)-int2d(Th,1)(q*din)+int2d(Th,2)(q*dout);
 
 plot(p,wait=1,nbiso=30,value=1);
-medit("potentiel",Th,p,wait=1);
+if(NoUseOfWait) medit("potentiel",Th,p,wait=1);
 
 real vregtest = p[].max ;
 cout << " p max " << vregtest << endl; 
