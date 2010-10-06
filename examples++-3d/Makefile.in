@@ -538,7 +538,7 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am
 
 
-all-local: all.edp regtests.edp 
+all-local: all.edp regtests.edp freefem++.pref
 
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \

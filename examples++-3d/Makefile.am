@@ -1,6 +1,6 @@
 # $Id$
 
-all-local: all.edp regtests.edp 
+all-local: all.edp regtests.edp  freefem++.pref
 TESTS=../regtests.sh
 TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
@@ -11,7 +11,9 @@ LIST_IDP=MeshSurface.idp cube.idp
 EXTRA_DIST=*.edp  all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh \
   lac-leman-v4.msh $(LIST_IDP)
 
-all.edp:
+
+
+all.edp: 
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
@@ -21,8 +23,8 @@ all.edp:
 	done) > $@
 
 # To create a new set of reference values in "ref.edp"
-Ref: makeref.edp
-	../src/nw/FreeFem++-nw makeref.edp
+Ref: makeref.edp freefem++.pref
+	export  FF_LOADPATH=../examples++-load/.;../src/nw/FreeFem++-nw makeref.edp
 
 makeref.edp: regtests.m4 ../regtests.m4
 	m4 regtests.m4 > makeref.edp
