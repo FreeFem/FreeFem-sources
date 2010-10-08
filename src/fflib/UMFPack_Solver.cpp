@@ -121,7 +121,7 @@ public:
     
      umfpack_di_defaults (Control) ;
      // change UMFPACK_At to UMFPACK_Aat in complex 
-    int status = umfpack_di_solve (UMFPACK_Aat, A.lg, A.cl, A.a, x, b, Numeric,Control,Info) ;
+    int status = umfpack_di_solve (UMFPACK_Aat, A.lg, A.cl, A.a, KN_2Ptr<R>(x), KN_2Ptr<R>(b), Numeric,Control,Info) ;
     if (status != 0)
     {
 	umfpack_di_report_info (Control, Info) ;

@@ -20,10 +20,11 @@ parms_VERSION=2.2
 parms: FAIRE
 
 $(SRCDIR)/FAIT:
-	$(MAKE) $(SRCDIR)/$(INSTALL)  
+	$(MAKE) $(SRCDIR)/$(INSTALL)  WHERE
 	touch $(SRCDIR)/FAIT
+install:$(SRCDIR)/$(INSTALL)
 
-FAIRE: $(SRCDIR)/FAIT WHERE
+FAIRE: $(SRCDIR)/FAIT
 
 Makefile.in: ../../config.status	Makefile makefile-parms.in
 	../../config.status  --file="Makefile.in:makefile-parms.in"

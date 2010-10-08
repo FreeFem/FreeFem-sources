@@ -25,12 +25,13 @@ YAMS_SRCDIRNOLIB = $(YAMS_DIR)/sources
 YAMS_SRCDIR = $(YAMS_DIR)/sourceslib
 YAMS_OBJDIR = $(YAMS_DIR)/objects
 
-yams: FAIRE  WHERE
+yams: FAIRE  
 
 
 
 FAIRE: 
-	$(MAKE)  install
+	$(MAKE)  install  WHERE
+	touch FAIRE
 
 $(SRCDIR)/FAIT: $(SRCDIR)
 	cd $(YAMS_DIR); make

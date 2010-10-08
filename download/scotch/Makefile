@@ -21,10 +21,11 @@ scotch_VERSION_LOCAL=5.1.6_esmumps
 scotch: FAIRE
 
 $(SRCDIR)/AFAIRE:
-	$(MAKE) install
+	$(MAKE) install 
 
-FAIRE: $(SRCDIR)/FAIT WHERE
-
+FAIRE: $(SRCDIR)/FAIT
+	$(MAKE)  WHERE
+	touch FAIRE
 Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
 	../../config.status  --file="Makefile.inc:Makefile-scotch.inc"
 	case `uname` in *CYGWIN*)  cp Makefile.inc Makefile.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.inn > Makefile.inc; rm Makefile.inn ;; esac 

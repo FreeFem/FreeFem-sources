@@ -75,7 +75,7 @@ EXTRA_DIST= \
 
 
 MPI_SOFT=blacs parmetis  scalapack scotch superludist MUMPS pastix hypre hips parms 
-
+LIST_SOFT=tetgen superlu fftw metis yams mshmet mmg3d gmm 
 all-recursive: bin lib include pkg
 
 lib: 
@@ -87,22 +87,54 @@ include:
 pkg:
 	mkdir pkg
 
-clean-local:
-	-rm -rf  lib include bin 
-	-rm */FAIT 
-	for d in tetgen superlu fftw; do \
-	  ( cd "$$d";$(MAKE) clean ) ; \
-	done 
+
+
 all-local:bin lib include pkg  $(DOWNLOADCOMPILE) 
 
 compile-pkg: bin lib include pkg
 	-if [ -n "$(WGET)" ] ; then \
-	for d in tetgen superlu fftw metis yams mshmet mmg3d gmm ; do \
-	if [ -d "$$d" ] ; then  echo "(cd $$d;$(MAKE) ) " ;   ( cd "$$d";$(MAKE) ) ; else echo ** missing "$$d" directory ; fi; \
+	for d in $(LIST_SOFT) ; do \
+	if [ -d "$$d" ] ; then  echo "$(MAKE) -C $$d " ;  $(MAKE) -C $$d ; else echo ** missing "$$d" directory ; fi; \
 	done ;\
 	if [ -n "$(MPICC)" ] ; then \
 	for d in $(MPI_SOFT) ; do \
-	if [ -d "$$d" ] ; then  echo "(cd $$d;$(MAKE) ) " ;   ( cd "$$d";$(MAKE) ) ; else echo ** missing "$$d" directory ;  fi; \
+	if [ -d "$$d" ] ; then  echo "$(MAKE) -C $$d " ;   $(MAKE) -C $$d  ; else echo ** missing "$$d" directory ;  fi; \
+	done ;\
+	fi; \
+	fi 
+re-install:
+	-if [ -n "$(WGET)" ] ; then \
+	for d in $(LIST_SOFT) ; do \
+	if [ -d "$$d" ] ; then  echo "$(MAKE) install -C $$d  " ;   $(MAKE) install -C $$d  ; else echo ** missing "$$d" directory ; fi; \
+	done ;\
+	if [ -n "$(MPICC)" ] ; then \
+	for d in $(MPI_SOFT) ; do \
+	if [ -d "$$d" ] ; then  echo "$(MAKE) install -C $$d  " ;   $(MAKE) install  -C $$d  ; else echo ** missing "$$d" directory ;  fi; \
+	done ;\
+	fi; \
+	fi 
+WHERE:
+	-if [ -n "$(WGET)" ] ; then \
+	for d in  $(LIST_SOFT) ; do \
+	if [ -d "$$d" ] ; then  echo "$(MAKE) WHERE -C $$d  " ;   $(MAKE) install -C $$d  ; else echo ** missing "$$d" directory ; fi; \
+	done ;\
+	if [ -n "$(MPICC)" ] ; then \
+	for d in $(MPI_SOFT) ; do \
+	if [ -d "$$d" ] ; then  echo "$(MAKE) WHERE -C $$d  " ;   $(MAKE) install  -C $$d  ; else echo ** missing "$$d" directory ;  fi; \
+	done ;\
+	fi; \
+	fi 
+clean-local:
+	-rm -rf	 include lib bin 
+	mkdir   include lib bin 	
+	-rm */FAIT */FAIRE 
+	-if [ -n "$(WGET)" ] ; then \
+	for d in  $(LIST_SOFT)  ; do \
+	if [ -d "$$d" ] ; then  echo "$(MAKE) clean -C $$d  " ;   $(MAKE) clean -C $$d  ; else echo ** missing "$$d" directory ; fi; \
+	done ;\
+	if [ -n "$(MPICC)" ] ; then \
+	for d in $(MPI_SOFT) ; do \
+	if [ -d "$$d" ] ; then  echo "$(MAKE) clean  -C $$d  " ;   $(MAKE) clean  -C $$d  ; else echo ** missing "$$d" directory ;  fi; \
 	done ;\
 	fi; \
 	fi 

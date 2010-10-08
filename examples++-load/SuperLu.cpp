@@ -659,24 +659,29 @@ public:
     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
 
-        
-    Create_Dense_Matrix(&B, m, 1, b, m, SLU_DN, R_SLU, SLU_GE);
-    Create_Dense_Matrix(&X, m, 1, x, m, SLU_DN, R_SLU, SLU_GE);
-    
-    B.ncol = nrhs;  /* Set the number of right-hand side */
-
-    /* Initialize the statistics variables. */
-    StatInit(&stat);
-    
-  
-    SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
-           &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-           &mem_usage, &stat, &info);
-
-
-
-    if(verbosity>2)
-    printf("Triangular solve: dgssvx() returns info %d\n", info);
+      { 
+	  KN_2Ptr<R> xx(x),bb(b);
+	  // cout << " xx #### " << xx.c.N() << " "<< xx.ca.N() <<  " " << xx.ca.step << endl;
+	  //cout << " bb #### " << bb.c.N() << " "<< bb.ca.N() << " " << bb.ca.step <<endl;
+	  Create_Dense_Matrix(&B, m, 1, bb, m, SLU_DN, R_SLU, SLU_GE);
+	  Create_Dense_Matrix(&X, m, 1, xx, m, SLU_DN, R_SLU, SLU_GE);
+	  
+	  B.ncol = nrhs;  /* Set the number of right-hand side */
+	  
+	  /* Initialize the statistics variables. */
+	  StatInit(&stat);
+	  
+	  
+	  SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
+				  &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
+				  &mem_usage, &stat, &info);
+	  
+	  
+	  
+	  if(verbosity>2)
+	      printf("Triangular solve: dgssvx() returns info %d\n", info);
+	  
+      }
   
    
 

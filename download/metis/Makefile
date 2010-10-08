@@ -19,12 +19,19 @@ metis_VERSION=4.0
 
 metis: FAIRE
 
+
 $(SRCDIR)/FAIT:
-	$(MAKE) install
+	$(MAKE) install WHERE
 	touch $(SRCDIR)/FAIT
 
-FAIRE: $(SRCDIR)/FAIT WHERE
+install:$(SRCDIR)/tag-compile
+#	$(MAKE) install
+	mkdir -p $(SRCDIR)/$(INSTALL)/include/metis
+	cp $(SRCDIR)/Lib/*.h $(SRCDIR)/$(INSTALL)/include/metis
 
+
+FAIRE: $(SRCDIR)/FAIT 
+	touch fAIRE
 
 Makefile.in: ../../config.status Makefile-metis.in
 	../../config.status  --file="Makefile.in:Makefile-metis.in"
@@ -35,14 +42,10 @@ $(SRCDIR)/tag-compile: $(SRCDIR)/tags
 	-cd $(SRCDIR)/Programs;make 
 	touch $(SRCDIR)/tag-compile
 
-install: $(SRCDIR)/tag-compile
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/metis
-	cp $(SRCDIR)/Lib/*.h $(SRCDIR)/$(INSTALL)/include/metis
 
 
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
-	make install;  \
 	echo metis LD '-L@DIR@/lib -lmetis'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
 	echo metis INCLUDE '-I@DIR@/include/metis'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
 	fi
@@ -77,3 +80,4 @@ clean: clean-local
 	-rm $(SRCDIR)/$(INSTALL)/lib/libmetis.a
 	-rm $(SRCDIR)/$(INSTALL)/include/metis.h
 	-rm -rf $(SRCDIR)
+	-rm FAIRE FAIT 

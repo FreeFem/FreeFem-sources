@@ -227,7 +227,6 @@ ff_history = @ff_history@
 ff_latex = @ff_latex@
 ff_libtool = @ff_libtool@
 ff_makeindex = @ff_makeindex@
-ff_mpirun = @ff_mpirun@
 ff_pdf2ps = @ff_pdf2ps@
 ff_pdflatex = @ff_pdflatex@
 ff_prefix_dir = @ff_prefix_dir@

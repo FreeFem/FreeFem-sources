@@ -141,14 +141,16 @@ endif
 hips: FAIRE  
 
 FAIT:  
-	$(MAKE) $(SRCDIR)/$(INSTALL)  
+	$(MAKE) $(SRCDIR)/$(INSTALL)  WHERE
 	touch FAIT
 
-FAIRE: FAIT WHERE
+FAIRE: FAIT 
 
 makefile.inc: ../Makefile   ../../config.status makefile-hips.inc Makefile     
 	../../config.status  --file="makefile.inc:makefile-hips.inc"
 
+
+install:$(SRCDIR)/$(INSTALL)
 
 $(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-ff++
 	cp makefile.inc $(SRCDIR)

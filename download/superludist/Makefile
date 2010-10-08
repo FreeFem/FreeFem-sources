@@ -25,12 +25,12 @@ include make.inc
 superludist: FAIT
 
 FAIT:	
-	$(MAKE) FAIRE
+	$(MAKE) FAIRE install WHERE
 	touch FAIT
 
 
-FAIRE: $(SRCDIR)/SRC/$(DSUPERLULIB)  WHERE
-	touch FAIT
+FAIRE: $(SRCDIR)/SRC/$(DSUPERLULIB)  
+	touch FAIRE
 
 make.inc: ../../config.status  Makefile
 	grep 'abs_top_builddir *=' ../Makefile >> dirflags
@@ -43,6 +43,7 @@ make.inc: ../../config.status  Makefile
 $(SRCDIR)/SRC/$(DSUPERLULIB): $(SRCDIR)
 	cp make.inc $(SRCDIR)/make.inc
 	cd $(SRCDIR)/SRC; $(MAKE)
+install:
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/superludist
 	cp $(SRCDIR)/SRC/*.h  $(SRCDIR)/$(INSTALL)/include/superludist
 WHERE:

@@ -38,12 +38,15 @@ WHERE:
 	echo "complex_pastix INCLUDE '-I@DIR@/include/pastix/complex'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;\
 	fi
 
-FAIRE: $(SRCDIR)/FAIT  WHERE
+FAIRE:$(SRCDIR)/FAIT 
+	$(MAKE) WHERE
+	touch FAIRE
 
 config.in: ../Makefile ../../config.status	Makefile
 	../../config.status  --file="config.in:config-pastix-real.in"
 	../../config.status  --file="config-complex.in:config-pastix-complex.in"
 
+install:$(SRCDIR)/FAIT
 
 $(SRCDIR)/FAIT: $(SRCDIR) 
 	cp config.in $(SRCDIR)/src/
@@ -128,8 +131,8 @@ clean-local:
 	-cd $(SRCDIR)/src/; $(MAKE) clean
 
 clean: clean-local
-	-rm config.in
-	-rm $(SRCDIR)/FAIT:
+	-rm config.in FAIRE 
+	-rm $(SRCDIR)/FAIT
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/pastix/double
 	-rm -rf $(SRCDIR)/$(INSTALL)/lib/pastix/double
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/pastix/complex

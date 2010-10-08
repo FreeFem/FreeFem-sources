@@ -17,7 +17,7 @@ SERVER=http://www.fftw.org
 PKGDIR=../pkg
 FFTW_VERSION=3.2.1
 INSTALL=../..
-
+THIS=fftw3
 
 fftw:FAIT
 #   $(WIN32DLLTARGET)  
@@ -27,13 +27,19 @@ FAITwin32-dll-target:
 
 FAIT:	
 	$(MAKE) FAIRE
-	touch FAIT
+	touch FAIT 
 
 FAIRE: $(SRCDIR) 
 	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
-	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 	touch FAIRE
+install:  WHERE
+	cd $(SRCDIR) && make install
+WHERE: 
+	-if [ FAIT ] ; then \
+	echo $(THIS)  LD '-L@DIR@/lib -l$(THIS)'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.$(THIS) ;\
+	echo fftw3  INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.$(THIS) ;\
+	fi
 
 $(SRCDIR): $(PKGDIR)/$(PACKAGE)
 	gunzip -c   $^ | tar xvf - 

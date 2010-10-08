@@ -34,7 +34,9 @@ WHERE:
 	fi
 
 
-FAIRE:  install WHERE 
+FAIRE:
+	$(MAKE) install WHERE 
+	touch FAIRE
 
 Makefile.inc: ../../config.status	Makefile Makefile-mumps-$(VERSION).inc
 	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"
@@ -50,7 +52,7 @@ clean-local:
 	-cd $(SRCDIR); make clean
 
 clean: clean-local
-	rm Makefile.inc
+	rm Makefile.inc FAIRE
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/*mumps*
 	-rm -rf $(SRCDIR)/$(INSTALL)/lib/lib*mumps* $(SRCDIR)/$(INSTALL)/lib/libpord*.a
 	-rm -rf $(SRCDIR)
