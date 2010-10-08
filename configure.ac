@@ -320,6 +320,7 @@ CYGWIN*|MINGW*)
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
 	then
+# 	        CHECK_COMPILE_FLAG(C++,-mwindows,CXXFLAGS)
 	        ff_glut_ok=yes
                 ff_mingw=yes 
                 enable_cygwindll=no;
@@ -327,7 +328,13 @@ CYGWIN*|MINGW*)
 		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
 		FFLAGS="$FFLAGS $ff_nocygwin"
 		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
-                AC_COMPILE_IFELSE([int a;],[],[AC_MSG_ERROR([Sorry $ff_nocygwin, but try with gcc-3.3])])
+                AC_COMPILE_IFELSE([int a;],[],
+                    [ff_nocygwin="";
+		     AC_MSG_NOTICE([Sorry $ff_nocygwin optio is wrong try whitout , but try with gcc-3.3])
+                    ])
+		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
+		FFLAGS="$FFLAGS $ff_nocygwin"
+		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32" 
 		LIBSNOCONSOLE="-mwindows"
 		FLIBS="$ff_nocygwin -lg2c"
@@ -677,11 +684,10 @@ dnl	echo "ff_mpi_path '$ff_mpi_path' .............."
 	    .|"") ff_mpi_path="$PATH";ff_defmpicxx="$ff_mpicxx";;
 	    *) ff_mpi_path="$ff_mpi_path";ff_defmpicxx=`expr "//$ff_mpicxx" : '.*/\(.*\)'`;; 
 dnl if also  add $PATH they  could be missing some different mpi version... 
-	esac	
-        
+	esac	 
 	AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
 	AC_PATH_PROGS(MPICXX,$ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++,no,$ff_mpi_path)
-	AC_MSG_CHECKING(for $MPICXX)
+	AC_MSG_CHECKING(for MPICXX)
 	ff_mpicxx="$MPICXX"
 	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
@@ -708,12 +714,15 @@ ff_mpi=no)
 
 	if test "$ff_mpi" = yes;
 	then
-	echo "ff_mpi_path::$ff_mpi_path:"
-		AC_PATH_PROGS(ff_mpirun,mpirun mpiexec,no,$ff_mpi_path)
-		if test "$ff_mpirun" = no
+        AC_ARG_VAR(MPIRUN,[MPI run command ])
+#	echo "ff_mpi_path::$ff_mpi_path:"
+#        AC_MSG_CHECKING(for MPIRUN)
+	AC_PATH_PROGS(MPIRUN,mpirun mpiexec,no,$ff_mpi_path)
+		if test "$MPIRUN" = no
 		then
 			ff_mpi=no
 		fi
+	AC_MSG_RESULT($MPIRUN)
 	fi
 
 	if test "$ff_mpi" = yes;
@@ -725,7 +734,7 @@ ff_mpi=no)
  		# parallel program is compiled (see src/mpi/Makfile.am)
 		ff_mpiprog="FreeFem++-mpi${EXEEXT}"
    		  AC_SUBST(MPIPROG,$ff_mpiprog)
-   		  AC_SUBST(MPIRUN,$ff_mpirun)
+   		  AC_SUBST(MPIRUN,$MPIRUN)
                   AC_SUBST(MPICXX,$ff_mpicxx)
 	else
 	        AC_SUBST(MPICXX,$ff_save_cxx)

@@ -141,7 +141,7 @@ public:
       Acl[i]=A.cl[i];
 
      // change UMFPACK_At to UMFPACK_Aat in complex 
-    int status = umfpack_dl_solve (UMFPACK_Aat, Alg, Acl, A.a, x, b, Numeric,Control,Info) ;
+    int status = umfpack_dl_solve (UMFPACK_Aat, Alg, Acl, A.a,KN_2Ptr<R>(x), KN_2Ptr<R>(b), Numeric,Control,Info) ;
     if (status != 0)
     {
 	umfpack_dl_report_info (Control, Info) ;

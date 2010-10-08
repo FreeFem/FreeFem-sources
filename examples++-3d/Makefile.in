@@ -226,7 +226,6 @@ ff_history = @ff_history@
 ff_latex = @ff_latex@
 ff_libtool = @ff_libtool@
 ff_makeindex = @ff_makeindex@
-ff_mpirun = @ff_mpirun@
 ff_pdf2ps = @ff_pdf2ps@
 ff_pdflatex = @ff_pdflatex@
 ff_prefix_dir = @ff_prefix_dir@
@@ -538,9 +537,9 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am
 
 
-all-local: all.edp regtests.edp freefem++.pref
+all-local: all.edp regtests.edp  freefem++.pref
 
-all.edp:
+all.edp: 
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
@@ -550,8 +549,8 @@ all.edp:
 	done) > $@
 
 # To create a new set of reference values in "ref.edp"
-Ref: makeref.edp
-	../src/nw/FreeFem++-nw makeref.edp
+Ref: makeref.edp freefem++.pref
+	export  FF_LOADPATH=../examples++-load/.;../src/nw/FreeFem++-nw makeref.edp
 
 makeref.edp: regtests.m4 ../regtests.m4
 	m4 regtests.m4 > makeref.edp

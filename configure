@@ -675,9 +675,8 @@ MPICC
 MPI_LIB
 MPI_LIB_DIRS
 MPI_INCLUDE
-MPIRUN
 MPIPROG
-ff_mpirun
+MPIRUN
 MPICXX
 LIBSPTHREAD
 LIBSGLUT
@@ -855,6 +854,7 @@ YFLAGS
 XMKMF
 CXXCPP
 MPICXX
+MPIRUN
 MPICC
 MPIF77
 MPIFC'
@@ -1535,6 +1535,7 @@ Some influential environment variables:
   XMKMF       Path to xmkmf, Makefile generator for X Window System
   CXXCPP      C++ preprocessor
   MPICXX      MPI C++ compiler command
+  MPIRUN      MPI run command
   MPICC       MPI C compiler command in $ff_mpi_path
   MPIF77      MPI Fortran 77 compiler command
   MPIFC       MPI Fortran 90 compiler command
@@ -7286,6 +7287,7 @@ CYGWIN*|MINGW*)
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
 	then
+# 	        CHECK_COMPILE_FLAG(C++,-mwindows,CXXFLAGS)
 	        ff_glut_ok=yes
                 ff_mingw=yes
                 enable_cygwindll=no;
@@ -7300,9 +7302,15 @@ _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
 
 else
-  as_fn_error "Sorry $ff_nocygwin, but try with gcc-3.3" "$LINENO" 5
+  ff_nocygwin="";
+		     { $as_echo "$as_me:${as_lineno-$LINENO}: Sorry $ff_nocygwin optio is wrong try whitout , but try with gcc-3.3" >&5
+$as_echo "$as_me: Sorry $ff_nocygwin optio is wrong try whitout , but try with gcc-3.3" >&6;}
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
+		FFLAGS="$FFLAGS $ff_nocygwin"
+		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32"
 		LIBSNOCONSOLE="-mwindows"
 		FLIBS="$ff_nocygwin -lg2c"
@@ -11261,7 +11269,6 @@ $as_echo X"$ff_mpicxx" |
 	    *) ff_mpi_path="$ff_mpi_path";ff_defmpicxx=`expr "//$ff_mpicxx" : '.*/\(.*\)'`;;
 	esac
 
-
 	for ac_prog in $ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -11308,8 +11315,8 @@ fi
 done
 test -n "$MPICXX" || MPICXX="no"
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $MPICXX" >&5
-$as_echo_n "checking for $MPICXX... " >&6; }
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPICXX" >&5
+$as_echo_n "checking for MPICXX... " >&6; }
 	ff_mpicxx="$MPICXX"
 	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
@@ -11344,19 +11351,21 @@ $as_echo "$ff_mpi" >&6; }
 
 	if test "$ff_mpi" = yes;
 	then
-	echo "ff_mpi_path::$ff_mpi_path:"
-		for ac_prog in mpirun mpiexec
+
+#	echo "ff_mpi_path::$ff_mpi_path:"
+#        AC_MSG_CHECKING(for MPIRUN)
+	for ac_prog in mpirun mpiexec
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_path_ff_mpirun+set}" = set; then :
+if test "${ac_cv_path_MPIRUN+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
-  case $ff_mpirun in
+  case $MPIRUN in
   [\\/]* | ?:[\\/]*)
-  ac_cv_path_ff_mpirun="$ff_mpirun" # Let the user override the test with a path.
+  ac_cv_path_MPIRUN="$MPIRUN" # Let the user override the test with a path.
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
@@ -11366,7 +11375,7 @@ do
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_path_ff_mpirun="$as_dir/$ac_word$ac_exec_ext"
+    ac_cv_path_MPIRUN="$as_dir/$ac_word$ac_exec_ext"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -11377,24 +11386,26 @@ IFS=$as_save_IFS
   ;;
 esac
 fi
-ff_mpirun=$ac_cv_path_ff_mpirun
-if test -n "$ff_mpirun"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_mpirun" >&5
-$as_echo "$ff_mpirun" >&6; }
+MPIRUN=$ac_cv_path_MPIRUN
+if test -n "$MPIRUN"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPIRUN" >&5
+$as_echo "$MPIRUN" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
 
 
-  test -n "$ff_mpirun" && break
+  test -n "$MPIRUN" && break
 done
-test -n "$ff_mpirun" || ff_mpirun="no"
+test -n "$MPIRUN" || MPIRUN="no"
 
-		if test "$ff_mpirun" = no
+		if test "$MPIRUN" = no
 		then
 			ff_mpi=no
 		fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPIRUN" >&5
+$as_echo "$MPIRUN" >&6; }
 	fi
 
 	if test "$ff_mpi" = yes;
@@ -11407,7 +11418,7 @@ test -n "$ff_mpirun" || ff_mpirun="no"
 		ff_mpiprog="FreeFem++-mpi${EXEEXT}"
    		  MPIPROG=$ff_mpiprog
 
-   		  MPIRUN=$ff_mpirun
+   		  MPIRUN=$MPIRUN
 
                   MPICXX=$ff_mpicxx
 

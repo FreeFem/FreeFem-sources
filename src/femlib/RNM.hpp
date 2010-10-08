@@ -1485,6 +1485,21 @@ class Inv_KN_long{ public:
   operator const KN_<long> & () const {return t;}
 };
 
+// For  sparce solve to set array to be consecutif (step==1) if neccessarly 
+template<class R>
+class KN_2Ptr { public:
+    // transfo de KN_ peut etre non concecutif (a.step != 1) en 
+    // un tableau concecutif en memoire si necessaire 
+    //  avec recopie du tableau dans le tableau d'origne a la destruction. 
+    KN_<R>   a;
+    const KN_<R>   ca;
+    KN<R> c; // tableau copie si non vide  
+    KN_2Ptr(KN_<R> & vv) : a(vv),ca(vv),c() { assert(a.N()); if (ca.step !=1 ) c=ca;} // copy if non consecutif
+    KN_2Ptr(const KN_<R> & vv) : a(0,0),ca(vv),c() { assert(ca.N()); if (ca.step !=1 ) c=ca; }// copy if non consecutif
+    operator R *() { return c.unset() ? (R *) ca:(R *) c ;}
+    operator const R *() const  { return c.unset() ? (R *) ca:(R *) c ;}
+    ~KN_2Ptr() { if(!a.unset() && !c.unset() ) {a=c; } } // recopy 	
+}; 
 
 template<class R,typename A,typename B=R> class  F_KN_ 
 { 

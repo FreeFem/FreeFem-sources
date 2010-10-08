@@ -20,10 +20,12 @@ INSTALL=../..
 
 SYSERRORS = 
 
-blacs: FAIRE
+blacs:FAIRE
 
 
-FAIRE: $(SRCDIR)/FAIT WHERE
+FAIRE:$(SRCDIR)/FAIT
+	$(make) WHERE
+	touch FAIRE
 
 Bmake.inc: ../../config.status	Makefile Bmake-blacs.inc
 	../../config.status  --file="Bmake.inc1:Bmake-blacs.inc"
@@ -73,7 +75,7 @@ clean-local:
 	-cd $(SRCDIR)/SRC/MPI; make clean 
 
 clean: clean-local
-	-rm Bmake.inc
+	-rm Bmake.inc FAIRE
 	-rm $(SRCDIR)/$(INSTALL)/lib/blacs/*.a
 	-rm -rf $(SRCDIR)
 

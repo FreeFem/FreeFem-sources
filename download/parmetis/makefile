@@ -42,7 +42,9 @@ WHERE:
 	echo parmetis INCLUDE '-I@DIR@/include/metis'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
 	fi
 
-FAIRE: $(SRCDIR)/FAIT WHERE
+FAIRE: $(SRCDIR)/FAIT 
+	$(MAKE) WHERE
+	touch FAIRE
 
 Makefile.in: ../../config.status Makefile-parmetis.in
 	../../config.status  --file="Makefile.in:Makefile-parmetis.in"

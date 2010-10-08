@@ -64,6 +64,7 @@ SuiteSparse/UFconfig/UFconfig.mk:SuiteSparse/DATE Makefile UFconfig_mk.m4
 	   cd ../AMD && make clean; \
 	   cd ..;find . -name '*.exe'|xargs rm;  \
 	fi; 
+	touch SuiteSparse/UFconfig/UFconfig.mk
 
 UMFPACK_Make.m4: Makefile UMFPACKv4.4
 	m4   -DFF_CC="$(CC)" \
