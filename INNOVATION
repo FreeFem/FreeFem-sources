@@ -1,3 +1,6 @@
+  - correct  problem of  a=A^-1*b whaen a, or b is not consecutive array
+   ie. expression like  M(2,:)  
+  - correct problem of Makefile in download  clean,install,WHERE target
 v 3.10 ( 5 oct 2010)
   - add install of missing MPI  dynamics lib. 
   add argument  "-cd"  to FreeFem++ command to change  current directory  to edp script directory 
