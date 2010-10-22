@@ -1518,9 +1518,9 @@ long mpiWaitAny(KN<MPI_Request>* rq)
 { 
   MPI_Status status;
   int index;
-  cout << "mpiWaitAny " <<rq->N() << " in "  <<  endl ;
+  //cout << "mpiWaitAny " <<rq->N() << " in "  <<  endl ;
   MPI_Waitany(rq->N(),*rq,&index,&status);
-  cout << "mpiWaitAny " <<rq->N() << " out " << index <<  endl ;
+  //cout << "mpiWaitAny " <<rq->N() << " out " << index <<  endl ;
   return index;
 }
 

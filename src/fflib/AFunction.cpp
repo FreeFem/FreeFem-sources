@@ -268,10 +268,15 @@ AnyType TTry(Stack s ,Expression ins,Expression ccatch,Expression fin,Expression
 AnyType FIf(Stack s ,Expression test,Expression i1,Expression i2,Expression )
  {  AnyType a;
    if (GetAny<bool>((*test)(s))) 
-      a=(*i1)(s);
-   	else if (i2) 
-   	  a=(*i2)(s);   	
-   	return a;
+     {
+       if(i1) a=(*i1)(s);//Add if FH oct 2010
+     }
+      else if (i2) 
+    {
+     if(i2) a=(*i2)(s); //Add if FH oct 2010
+    }
+   	     	
+  return a;
  }
 
 
