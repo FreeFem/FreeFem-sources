@@ -53,6 +53,9 @@
 /* Define to 1 if you have the `getenv' function. */
 #undef HAVE_GETENV
 
+/* Define to 1 if you have the `gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
+
 /* Define to 1 if you have the <GLUT/glut.h> header file. */
 #undef HAVE_GLUT_GLUT_H
 
@@ -175,6 +178,9 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#undef TIME_WITH_SYS_TIME
 
 /* Version number of package */
 #undef VERSION

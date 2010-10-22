@@ -585,7 +585,7 @@ class LinearCG : public OneOperator
 
   class E_LCG: public E_F0mps { public:
    const int cas;// <0 => Nolinear
-   static const int n_name_param=4;
+   static const int n_name_param=5;
 
    static basicAC_F0::name_and_type name_param[] ;
 
@@ -622,11 +622,15 @@ class LinearCG : public OneOperator
       int n=x.N();
       MatF_O AA(n,stack,A);
       double eps = 1.0e-6;
+	  double *veps=0;
       int nbitermax=  100;
+      long verb = verbosity;  
       if (nargs[0]) eps= GetAny<double>((*nargs[0])(stack));
       if (nargs[1]) nbitermax = GetAny<long>((*nargs[1])(stack));
-      if (nargs[3]) eps= *GetAny<double*>((*nargs[3])(stack));
-     
+      if (nargs[3]) veps=GetAny<double*>((*nargs[3])(stack));
+      if (nargs[4]) verb=Abs(GetAny<long>((*nargs[4])(stack)));
+      long gcverb=51L-Min(Abs(verb),50L);
+      if(veps) eps= *veps;
       KN<R>  bzero(B?1:n); // const array zero
       bzero=R(); 
       KN<R> *bb=&bzero; 
@@ -642,17 +646,17 @@ class LinearCG : public OneOperator
       if (cas<0) {
        if (C) 
          { MatF_O CC(n,stack,C);
-           ret = NLCG(AA,CC,x,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
+           ret = NLCG(AA,CC,x,nbitermax,eps, gcverb );}
         else 
-           ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
+           ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, gcverb);
         }
       else 
       if (C) 
        { MatF_O CC(n,stack,C);
-         ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
+         ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, gcverb );}
       else 
-         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
-      if( nargs[3]) *GetAny<double*>((*nargs[3])(stack)) = -(eps);
+         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, gcverb);
+      if(veps) *veps = -(eps);
       }
       catch(...)
       {
@@ -685,7 +689,8 @@ basicAC_F0::name_and_type  LinearCG<R>::E_LCG::name_param[]= {
   {   "eps", &typeid(double)  },
   {   "nbiter",&typeid(long) },
   {   "precon",&typeid(Polymorphic*)},
-  {   "veps" ,  &typeid(double*) }
+  {   "veps" ,  &typeid(double*) },
+  {   "verbosity" ,  &typeid(long) }    
 };
 
 
@@ -700,12 +705,13 @@ class LinearGMRES : public OneOperator
    Stack stack;
    mutable  Kn x;
    C_F0 c_x;
+   Kn *b;
    Expression  mat1,mat;
    typedef  typename VirtualMatrice<R>::plusAx plusAx;
-   MatF_O(int n,Stack stk,const OneOperator * op) 
+   MatF_O(int n,Stack stk,const OneOperator * op,Kn *bb) 
      : VirtualMatrice<R>(n),
        stack(stk),
-       x(n),c_x(CPValue(x)),
+       x(n),c_x(CPValue(x)),b(bb),
        mat1(op->code(basicAC_F0_wa(c_x))), 
        mat( CastTo<Kn_>(C_F0(mat1,(aType)*op))  /*op->code(basicAC_F0_wa(c_x))*/) {
       // ffassert(atype<Kn_ >() ==(aType) *op);
@@ -715,6 +721,7 @@ class LinearGMRES : public OneOperator
       ffassert(xx.N()==Ax.N());
       x =xx;
       Ax  += GetAny<Kn_>((*mat)(stack));
+      if(b && &Ax!=b) Ax += *b; // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b 
       WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008 
    } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
@@ -727,7 +734,7 @@ class LinearGMRES : public OneOperator
   class E_LGMRES: public E_F0mps { public:
    const int cas;// <0 => Nolinear
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =5;
+   static const int n_name_param =6;
    Expression nargs[n_name_param];
   const OneOperator *A, *C; 
   Expression X,B;
@@ -758,14 +765,17 @@ class LinearGMRES : public OneOperator
       else     b=0.;
       int n=x.N();
       int dKrylov=50;
-      MatF_O AA(n,stack,A);
       double eps = 1.0e-6;
       int nbitermax=  100;
+      long verb = verbosity;
       if (nargs[0]) eps= GetAny<double>((*nargs[0])(stack));
       if (nargs[1]) nbitermax = GetAny<long>((*nargs[1])(stack));
       if (nargs[3]) eps= *GetAny<double*>((*nargs[3])(stack));
       if (nargs[4]) dKrylov= GetAny<long>((*nargs[4])(stack));
-      
+      if (nargs[5]) verb=Abs(GetAny<long>((*nargs[5])(stack)));
+	 long gcverb=51L-Min(Abs(verb),50L);
+	 
+     
       int ret;
       if(verbosity>4)
         cout << "  ..GMRES: eps= " << eps << " max iter " << nbitermax 
@@ -774,6 +784,22 @@ class LinearGMRES : public OneOperator
 	int k=dKrylov;//,nn=n;
        double epsr=eps;
       // int res=GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
+	 KN<R>  bzero(B?1:n); // const array zero
+	 bzero=R(); 
+	 KN<R> *bb=&bzero; 
+	 if (B) {
+	     Kn &b = *GetAny<Kn *>((*B)(stack));
+	     R p = (b,b);
+	     if (p) 
+	       {
+		 // ExecError("Sorry MPILinearCG work only with nul right hand side, so put the right hand in the function");
+	       }
+	     bb = &b;
+	 }
+	 KN<R> * bbgmres =0;
+	 if ( !B) bbgmres=bb; // none zero if gmres without B 		
+	 MatF_O AA(n,stack,A,bbgmres);
+
       if (cas<0) {
         ErrorExec("NL GMRES:  to do! sorry ",1);
 /*       if (C) 
@@ -786,10 +812,10 @@ class LinearGMRES : public OneOperator
       else 
        {
        if (C)
-        { MatF_O CC(n,stack,C); 
-         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,CC,H,k,nbitermax,epsr);}
+        { MatF_O CC(n,stack,C,bbgmres); 
+         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,CC,H,k,nbitermax,epsr,verb);}
        else
-         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,MatriceIdentite<R>(n),H,k,nbitermax,epsr);       
+         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,MatriceIdentite<R>(n),H,k,nbitermax,epsr,verb);       
        }
        /*
       if (C) 
@@ -825,7 +851,8 @@ basicAC_F0::name_and_type  LinearGMRES<R>::E_LGMRES::name_param[]= {
   {   "nbiter",&typeid(long) },
   {   "precon",&typeid(Polymorphic*)},
   {   "veps" ,  &typeid(double*) },
-  {   "dimKrylov", &typeid(long) }
+  {   "dimKrylov", &typeid(long) },
+  {   "verbosity", &typeid(long) }
 };
 
 template<typename int2>
@@ -4615,7 +4642,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
  Global.Add("LinearCG","(",new LinearCG<R>()); // old form  with rhs (must be zer
  Global.Add("LinearGMRES","(",new LinearGMRES<R>()); // old form  with rhs (must be zer
-// Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  with rhs (must be zer
+ Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  without rhs 
  Global.Add("LinearCG","(",new LinearCG<R>(1)); //  without right handsize
  Global.Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
  zzzfff->AddF("varf",t_form);    //  var. form ~

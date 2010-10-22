@@ -255,7 +255,7 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
       int k=dKrylov,nn=nbitermax;
 
       //int res=
-      GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
+      GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr,verbosity);
 
    }
 plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
@@ -315,7 +315,7 @@ class SolveGMRESDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualM
          KNM<R> H(dKrilov+1,dKrilov+1);
       int k=dKrilov,nn=nbitermax;
       //int res=
-      GMRES(a,(KN<R> &)x,(const KN<R> &)b,*this,H,k,nn,epsr);
+      GMRES(a,(KN<R> &)x,(const KN<R> &)b,*this,H,k,nn,epsr,verbosity);
 
  }
 
@@ -366,7 +366,7 @@ class SolveGMRESDiag<Complex> :   public MatriceMorse<Complex>::VirtualSolver , 
       VA AR(a);
       VC CR(*this);
       //int res=
-      GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr);
+      GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr,verbosity);
 
  }
 
@@ -437,7 +437,7 @@ class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver 
       VA AR(a);
       VC CR(*this);
       //int res=
-	GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr);
+	GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr,verbosity);
       
       // assert(0); // a faire 
       //int res=GMRES(a,(KN<double> &)x, (const KN<double> &)b,*this,H,k,nn,epsr);

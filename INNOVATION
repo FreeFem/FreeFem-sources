@@ -1,4 +1,8 @@
-  - correct  problem of  a=A^-1*b whaen a, or b is not consecutive array
+  - add named parameter verbosity= in add GMRES and GC function 
+     for show algo evolution .
+  - add MPIGC dynamic LIB for // GC and GMRES , add fully // scharwz RAS
+     in MPIGMRES2d.edp 
+  - correct  problem of  a=A^-1*b when a, or b is not consecutive array
    ie. expression like  M(2,:)  
   - correct problem of Makefile in download  clean,install,WHERE target
 v 3.10 ( 5 oct 2010)

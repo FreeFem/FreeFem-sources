@@ -749,10 +749,29 @@ class ForEachType<void *>:  public basicForEachType{public:// correction july 20
     ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(void *),sizeof(void *),0,0,iv,id,OOnReturn) { }
 };
 
-inline long walltime(){ // add for Pichon mars 2010 
+inline double walltime(){
+#ifdef HAVE_GETTIMEOFDAY
+
+    
+    struct              timeval currentWallTime;
+    double             msecTime;
+    
+    gettimeofday(&currentWallTime, NULL);
+    
+    //time with milliseconds
+    msecTime = ( currentWallTime.tv_sec*1000. + currentWallTime.tv_usec/1000. )/1000.0;
+    
+    // return time with milliseconds
+    return msecTime;
+
+    
+#else
+
+    // add for Pichon mars 2010 
     time_t currentWallTime;
     time(&currentWallTime);
-    return (long)currentWallTime;
+    return (double)currentWallTime;
+#endif
 }
 
 long atoi(string* p) {return atoi(p->c_str());}// add march 2010
@@ -1306,7 +1325,7 @@ void Init_map_type()
      Global.Add("assert","(",new OneOperator1<bool>(Assert));     
      
      Global.Add("clock","(",new OneOperator0<double>(CPUtime));
-    Global.Add("time","(",new OneOperator0<long>(walltime));// add mars 2010 for Pichon. 
+    Global.Add("time","(",new OneOperator0<double>(walltime));// add mars 2010 for Pichon. 
     
      Global.Add("dumptable","(",new OneOperator1<ostream*,ostream*>(dumptable));
      Global.Add("exec","(",new OneOperator1<long,string* >(exec));  //FH string * mars 2006 
