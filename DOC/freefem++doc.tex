@@ -13924,9 +13924,9 @@ and \texttt{processorblock} with a special \verb!MPI_Request!.
     @mpiAllgather(a,b[,comm]) ;
     @mpiGather(a,b,@processor(..) ) ;
     @mpiScatter(a,b,@processor(..)) ;
-    @mpiReduce(a,b,@processor(..),mpiMax) ;
-    @mpiAllReduce(a,b,comm,mpiMax) ;
-    @mpiReduceScatter(a,b,comm,mpiMax) ;
+    @mpiReduce(a,b,@processor(..),mpiMAX) ;
+    @mpiAllReduce(a,b,comm, mpiMAX) ;
+    @mpiReduceScatter(a,b,comm, mpiMAX) ;
 \eFF
 See the
   \texttt{examples++-mpi/essai.edp} to test of all this functionality and

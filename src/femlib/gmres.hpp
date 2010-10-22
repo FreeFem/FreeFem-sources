@@ -56,7 +56,7 @@ template < class Operator, class Vector, class Preconditioner,
 int 
 GMRES(const Operator &A, Vector &x, const Vector &b,
       const Preconditioner &M, Matrix &H, int &m, int &max_iter,
-      Real &tol)
+      Real &tol,long verbosity)
 {
   Real resid;
   int i, j = 1, k;
@@ -116,7 +116,7 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
         return 0;
       }
     }
-    Update(x, m - 1, H, s, v);
+    Update(x, i - 1, H, s, v);// chanhe FH oct 2010  m -1 -> i -1 (bug max_iter < m)
     Ax = A*x;
     Ax = b-Ax;
     

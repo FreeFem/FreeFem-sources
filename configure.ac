@@ -240,6 +240,7 @@ AM_PROG_LEX
 AC_PROG_YACC
 AC_LANG(C++)
 
+
 # Some useful libraries
 
 AC_CHECK_LIB(pthread,pthread_create,ff_pthread="-lpthread",ff_pthread="")
@@ -1349,11 +1350,12 @@ AC_SUBST(UMFPACKLIBS,$ff_umfpack_libs)
 # Checking for some functions that may not appear everywhere
 # ----------------------------------------------------------
 
-# asinh acosh atanh are not in Mingw yet
+# asinh acosh atanh are not in Mingw yet gettimeofday
 ff_malloc_h=""
+AC_HEADER_TIME
 AC_CHECK_HEADERS(malloc.h,ff_malloc_h=1)
 AC_SUBST(FF_MALLOC_H,$ff_malloc_h)
-AC_CHECK_FUNCS(asinh acosh atanh getenv jn erfc tgamma)
+AC_CHECK_FUNCS(asinh acosh atanh getenv jn erfc tgamma gettimeofday)
 AC_CHECK_FUNCS(srandomdev)
 
 AC_CHECK_FUNCS(second_,ff_second="",ff_second=second.o)

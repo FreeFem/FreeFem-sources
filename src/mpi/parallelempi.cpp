@@ -517,7 +517,13 @@ Serialize::Serialize(const MPIrank & rank,const char * wht,long tag,const void *
   if(verbosity>100) 
     cout << " -- waiting " << mpirank << " from  " << rank << " serialized " << what 
 	 << " tag = " << tag <<  endl;
-  ffassert(rq==0 || rq == Syncro_block);
+  if(!(rq==0 || rq == Syncro_block))
+    {
+      ExecError("Not async recv of complex  objet!  Sorry to hard to code (FH!).");
+      ffassert(rq==0 || rq == Syncro_block); 
+    }
+      
+ 
   char * buf= new char [sizempibuf];
   WRecv(buf, sizempibuf,  rank, tag,comm,rq);
   lg = * (long *) (void *) buf;

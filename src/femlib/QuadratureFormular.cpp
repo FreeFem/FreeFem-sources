@@ -741,4 +741,11 @@ PQP3  QF_TET_5[]=
   template<> const GQuadratureFormular<R2> * GQuadratureFormular<R2>::Default= & QuadratureFormular_T_5;
   template<> const GQuadratureFormular<R3> * GQuadratureFormular<R3>::Default= & QuadratureFormular_Tet_5;
 
+    // Instanciation explicite of icpc   compiler  Version 11.1   (FH  oct 2010) 
+    template void  GQuadratureFormular<R1>::Verification();
+    template void  GQuadratureFormular<R2>::Verification();
+    template void  GQuadratureFormular<R3>::Verification();
+    
+   
+    
 } // end namespace Fem2D

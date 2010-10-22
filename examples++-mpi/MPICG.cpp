@@ -38,6 +38,7 @@ using namespace std;
 
 #include "ff++.hpp"
 #include "CGNL.hpp"
+//#include "gmres.hpp"
 #include "mpi.h"
 
 template<class R,class DJ,class P> 
@@ -160,24 +161,119 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
     return 0; 
 }
 
+
+template < class Operator, class Vector, class Preconditioner,
+class Matrix, class Real >
+int 
+GMRES_MPI(const Operator &A, Vector &x, const Vector &b,
+      const Preconditioner &M, Matrix &H, int &m, int &max_iter,
+      Real &tol,MPI_Comm * commworld,long verbosity)
+{
+    Real resid;
+    int i, j = 1, k;
+    Vector s(m+1), cs(m+1), sn(m+1), w,r,Ax;
+    r=M*b;
+    Real normb = sqrt(ReduceSum1((r,r),commworld));
+    
+    Ax=A * x;
+    Ax=b-Ax;
+    r = M*(Ax);
+    Real beta = sqrt(ReduceSum1((r,r),commworld));
+    
+    if ( abs(normb) < 1.e-30)
+	normb = 1;
+    
+    if ((resid = beta / normb) <= tol) {
+	tol = resid;
+	max_iter = 0;
+	return 0;
+    }
+    
+    Vector *v = new Vector[m+1];
+    
+    while (j <= max_iter) {
+	v[0] = r / beta;    
+	s = 0.0;
+	s(0) = beta;
+	
+	for (i = 0; i < m && j <= max_iter; i++, j++) {
+	    w = M*(Ax=A * v[i]);
+	    for (k = 0; k <= i; k++) {
+		H(k, i) = ReduceSum1((w, v[k]),commworld);
+		w -= H(k, i) * v[k];
+	    }
+	    H(i+1, i) = sqrt(ReduceSum1((w,w),commworld));
+	    v[i+1] = w  / H(i+1, i) ; 
+	    
+	    for (k = 0; k < i; k++)
+		ApplyPlaneRotation(H(k,i), H(k+1,i), cs(k), sn(k));
+	    
+	    GeneratePlaneRotation(H(i,i), H(i+1,i), cs(i), sn(i));
+	    ApplyPlaneRotation(H(i,i), H(i+1,i), cs(i), sn(i));
+	    ApplyPlaneRotation(s(i), s(i+1), cs(i), sn(i));
+	    if(verbosity>5 || (verbosity>2 && j%100==0) )
+		cout << "GMRES: " << j << " " << abs(s(i+1)) << " " <<  normb << " " 
+		<<  abs(s(i+1)) / normb << " < " << tol << endl;
+	    
+	    if ((resid = abs(s(i+1)) / normb) < tol) {
+		if(verbosity)
+		    cout << "GMRES converges: " << j << " " << abs(s(i+1)) << " " <<  normb << " " 
+		    <<  abs(s(i+1)) / normb << " < " << tol << endl;
+		
+		Update(x, i, H, s, v);
+		tol = resid;
+		max_iter = j;
+		delete [] v;
+		return 0;
+	    }
+	}
+	if(!(j <= max_iter)) break;
+	Update(x, i-1 , H, s, v);
+	Ax = A*x;
+	Ax = b-Ax;
+	
+	r = M*(Ax);
+	beta = sqrt(ReduceSum1((r,r),commworld));
+	if(verbosity>4)
+	    cout << "GMRES: restart" << j << " " << beta << " " <<  normb << " " 
+	    <<  beta / normb << " < " << tol << endl;
+	if ((resid = beta / normb) < tol) {
+	    tol = resid;
+	    max_iter = j;
+	    delete [] v;
+	    return 0;
+	}
+    }
+    
+    if(verbosity)
+	cout << "WARNING: GMRES do not converges: " << j <<"/" << max_iter << ",  resid = " << resid 
+	<< ", tol=  " << tol << ", normb "<< normb << endl;
+    tol = resid;
+    delete [] v;
+    
+    return 1;
+}
+
+
 template<class R>
 class MPILinearCG : public OneOperator 
 { 
 public:
     typedef KN<R> Kn;
     typedef KN_<R> Kn_;
-    const int cas;
+    const int cas,CG;
     
     class MatF_O: VirtualMatrice<R> { public:
 	Stack stack;
-	mutable  Kn x;
+	mutable  Kn x;       
 	C_F0 c_x;
+	Kn *b;
 	
 	Expression  mat1,mat;
 	typedef  typename VirtualMatrice<R>::plusAx plusAx;
-	MatF_O(int n,Stack stk,const OneOperator * op) 
+	MatF_O(int n,Stack stk,const OneOperator * op,Kn *bb=0) 
 	: VirtualMatrice<R>(n),stack(stk),
-	x(n),c_x(CPValue(x)),
+	x(n),c_x(CPValue(x)),b(bb),
 	mat1(op->code(basicAC_F0_wa(c_x))),
 	mat( CastTo<Kn_>(C_F0(mat1,(aType)*op))) {
 	    //ffassert(atype<Kn_ >() ==(aType) *op);
@@ -200,6 +296,7 @@ public:
 	    ffassert(xx.N()==Ax.N());
 	    x =xx;
 	    Ax  += GetAny<Kn_>((*mat)(stack));
+	    if(b && &Ax!=b) Ax += *b; // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b 
 	    WhereStackOfPtr2Free(stack)->clean();
 	} 
 	plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
@@ -211,7 +308,8 @@ public:
     
     class E_LCG: public E_F0mps { public:
 	const int cas;// <0 => Nolinear
-	static const int n_name_param=5;
+	const int CG; 
+	static const int n_name_param=7;
 	
 	static basicAC_F0::name_and_type name_param[] ;
 	
@@ -221,7 +319,7 @@ public:
 	const OneOperator *A, *C; 
 	Expression X,B;
 	
-	E_LCG(const basicAC_F0 & args,int cc) :cas(cc)
+	E_LCG(const basicAC_F0 & args,int cc,int gc) :cas(cc),CG(gc) 
 	{
 	  args.SetNameParam(n_name_param,name_param,nargs);
 	  {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[0].LeftValue());
@@ -246,14 +344,19 @@ public:
 	    try {
 		Kn &x = *GetAny<Kn *>((*X)(stack));
 		int n=x.N();
-		MatF_O AA(n,stack,A);
 		double eps = 1.0e-6;
 		int nbitermax=  100;
+		long verb = verbosity;
+		
 		pcommworld vcommworld=0;
+		long dKrylov=50; 
 		if (nargs[0]) eps= GetAny<double>((*nargs[0])(stack));
 		if (nargs[1]) nbitermax = GetAny<long>((*nargs[1])(stack));
 		if (nargs[3]) eps= *GetAny<double*>((*nargs[3])(stack));
 		if (nargs[4]) vcommworld = GetAny<pcommworld>((*nargs[4])(stack));
+		if (nargs[5])  dKrylov= GetAny<long>((*nargs[5])(stack));
+                if (nargs[6]) verb=Abs(GetAny<long>((*nargs[6])(stack)));
+		long gcverb=51L-Min(Abs(verb),50L);
 		MPI_Comm mpiCommWorld = MPI_COMM_WORLD;
 		MPI_Comm * commworld= vcommworld ? (MPI_Comm *) vcommworld: & mpiCommWorld ;
 		KN<R>  bzero(B?1:n); // const array zero
@@ -268,19 +371,59 @@ public:
 		      }
 		    bb = &b;
 		}
-		if (cas<0) {
-		    if (C) 
-		      { MatF_O CC(n,stack,C);
-			ret = NLCG(AA,CC,x,nbitermax,eps, 51L-Min(Abs(verbosity),50L),commworld );}
-		    else 
-		      ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L),commworld);
+		KN<R> * bbgmres =0;
+		if ( !B && !CG) bbgmres=bb; // none zero if gmres without B 		
+		MatF_O AA(n,stack,A,bbgmres);
+		if(bbgmres ){
+		    *bbgmres= AA* *bbgmres; // Ok Ax == b -> not translation of b .
+		    *bbgmres = - *bbgmres;
+		    if(verbosity>1) cout << "  ** GMRES set b =  -A(0);  : max=" << bbgmres->max() << " " << bbgmres->min()<<endl;
 		}
-		else 
+		
+		if(CG)
+		  {
+		    
+		  
+		 if (cas<0) {
 		    if (C) 
 		      { MatF_O CC(n,stack,C);
-			ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L),commworld);}
+			ret = NLCG(AA,CC,x,nbitermax,eps, gcverb ,commworld );}
 		    else 
-		      ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L),commworld);
+		      ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, gcverb ,commworld);
+		}
+		 else 
+		    if (C) 
+		      { MatF_O CC(n,stack,C);
+			ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, gcverb ,commworld);}
+		    else 
+		      ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, gcverb ,commworld);
+		  }
+		else {// GMRES 
+		    
+		    KNM<R> H(dKrylov+1,dKrylov+1);
+		    int k=dKrylov;//,nn=n;
+		    if (cas<0) {
+			ErrorExec("NL GMRES:  to do! sorry ",1);
+			/*       if (C) 
+			 { MatF_O CC(n,stack,C);
+			 ret = NLGMRES(AA,CC,x,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
+			 else 
+			 ret = NLGMRES(AA,MatriceIdentite<R>(n),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
+			 ConjuguedGradient  */
+		    }
+		    else 
+		      {
+			if (C)
+			  { MatF_O CC(n,stack,C); 
+			      ret=GMRES_MPI(AA,(KN<R> &)x, *bb,CC,H,k,nbitermax,eps,commworld,verb);}
+			else
+			    ret=GMRES_MPI(AA,(KN<R> &)x, *bb,MatriceIdentite<R>(n),H,k,nbitermax,eps,commworld,verb);       
+		      }
+		    
+		}
+		
+		
+
 		if( nargs[3]) *GetAny<double*>((*nargs[3])(stack)) = -(eps);
 	    }
 	    catch(...)
@@ -298,15 +441,27 @@ public:
     };
     
     E_F0 * code(const basicAC_F0 & args) const {
-	return new E_LCG(args,cas);}
+	return new E_LCG(args,cas,CG);}
+
     MPILinearCG() :   OneOperator(atype<long>(),
 			       atype<Polymorphic*>(),
-			       atype<KN<R> *>(),atype<KN<R> *>()),cas(2){}
+ 			       atype<KN<R> *>(),atype<KN<R> *>()),cas(2),CG(1){}
+    
+    MPILinearCG(int cc,int CGG) :   OneOperator(atype<long>(),
+			       atype<Polymorphic*>(),
+			       atype<KN<R> *>(),atype<KN<R> *>()),cas(cc),CG(CGG){}
+
+    MPILinearCG(int cc,int CGG,int ) :   OneOperator(atype<long>(),
+						atype<Polymorphic*>(),
+						atype<KN<R> *>()),cas(cc),CG(CGG){}
+    
     MPILinearCG(int cc) :   OneOperator(atype<long>(),
 				     atype<Polymorphic*>(),
-				     atype<KN<R> *>()),cas(cc){}
+				     atype<KN<R> *>()),cas(cc),CG(1){}
     
 };
+
+
 
 
 template<class R>
@@ -315,8 +470,13 @@ basicAC_F0::name_and_type  MPILinearCG<R>::E_LCG::name_param[]= {
     {   "nbiter",&typeid(long) },
     {   "precon",&typeid(Polymorphic*)},
     {   "veps" ,  &typeid(double*) },
-    { "comm", &typeid(pcommworld)} 
+    { "comm", &typeid(pcommworld)} ,
+    {   "dimKrylov", &typeid(long) },
+    {   "verbosity", &typeid(long) }
 };
+
+
+
 
 
 class Init { public:
@@ -328,9 +488,9 @@ Init::Init()
 { 
 
     Global.Add("MPILinearCG","(",new MPILinearCG<R>()); // old form  with rhs (must be zer
-    //Global.Add("MPILinearGMRES","(",new LinearGMRES<R>()); // old form  with rhs (must be zer
-    // Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  with rhs (must be zer
-    Global.Add("MPILinearCG","(",new MPILinearCG<R>(1)); //  without right handsize
+    Global.Add("MPIAffineCG","(",new MPILinearCG<R>(1)); //  without right handsize
+    Global.Add("MPILinearGMRES","(",new MPILinearCG<R>(0,0)); //  with  right handsize
+    Global.Add("MPIAffineGMRES","(",new MPILinearCG<R>(0,0,0)); //  with  right handsize
     Global.Add("MPINLCG","(",new MPILinearCG<R>(-1)); //  without right handsize
     
 }

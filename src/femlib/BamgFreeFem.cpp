@@ -662,6 +662,30 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
       Triangles *Th = 0;
       try { 
 	  Th =new Triangles( nbtx ,*Gh);
+	  Th->SetVertexFieldOn();
+	  for( int i=0;i<Th->nbv;++i)
+	    {
+	      VertexOnGeom *on=0;
+	      if( (on =Th->vertices[i].on) ) // we are on geometrie
+		{
+		  if(on->abscisse <0) {
+		      bamg::GeometricalVertex * gv= on->gv;
+		      int iold = Gh->Number(gv);
+		  }
+		   else {// erreur car un point est sur un arete en non un sommet
+		       bamg::GeometricalEdge * ge= on->ge;
+		       int eold = Gh->Number(ge); //
+		       int iold = Gh->Number( (*ge)[0] );
+		       int jold = Gh->Number( (*ge)[1] );
+		       int s = on->abscisse;
+		       
+		       cout << " error bizarre " << ge << endl;
+		   }  
+				    
+		  
+		}      
+		
+	    }
       }
       catch(...)
       {
