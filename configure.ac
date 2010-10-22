@@ -687,8 +687,10 @@ dnl	echo "ff_mpi_path '$ff_mpi_path' .............."
 dnl if also  add $PATH they  could be missing some different mpi version... 
 	esac	 
 	AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
-	AC_PATH_PROGS(MPICXX,$ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++,no,$ff_mpi_path)
-	AC_MSG_CHECKING(for MPICXX)
+	if test -z "$MPICXX" ; then
+	    AC_PATH_PROGS(MPICXX,$ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++,no,$ff_mpi_path)
+	    AC_MSG_CHECKING(for MPICXX)
+	fi
 	ff_mpicxx="$MPICXX"
 	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
@@ -715,15 +717,17 @@ ff_mpi=no)
 
 	if test "$ff_mpi" = yes;
 	then
-        AC_ARG_VAR(MPIRUN,[MPI run command ])
+            AC_ARG_VAR(MPIRUN,[MPI run command ])
 #	echo "ff_mpi_path::$ff_mpi_path:"
 #        AC_MSG_CHECKING(for MPIRUN)
-	AC_PATH_PROGS(MPIRUN,mpirun mpiexec,no,$ff_mpi_path)
+	    if test -z "$MPIRUN" ; then
+		AC_PATH_PROGS(MPIRUN,mpirun mpiexec,no,$ff_mpi_path)
 		if test "$MPIRUN" = no
 		then
-			ff_mpi=no
+		    ff_mpi=no
 		fi
-	AC_MSG_RESULT($MPIRUN)
+		AC_MSG_RESULT($MPIRUN)
+	    fi
 	fi
 
 	if test "$ff_mpi" = yes;
@@ -771,18 +775,24 @@ ff_mpi=no)
 
 	    AC_SUBST(MPICXX,$MPICXX)		
 	    AC_ARG_VAR(MPICC,[MPI C compiler command in $ff_mpi_path])
-	    AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
+	    if test -z "$MPICC" ; then		
+		AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
+	    fi
 	    AC_SUBST(MPICC,$MPICC)
 	    AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
 	    if test "$enable_fortran" != no
 	    then	
 		
 		AC_ARG_VAR(MPIF77,[MPI Fortran 77 compiler command])
-		AC_PATH_PROGS(MPIF77, mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, "",$ff_mpi_path)
+		if test -z "$MPIF77" ; then    
+		    AC_PATH_PROGS(MPIF77, mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, "",$ff_mpi_path)
+		fi
 		AC_SUBST(MPIF77)
 		
 		AC_ARG_VAR(MPIFC,[MPI Fortran 90  compiler command])
-		AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",$ff_mpi_path)
+		if test -z "$MPIFC" ; then
+		    AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",$ff_mpi_path)
+		fi		
 		AC_SUBST(MPIFC)
 	    fi
 	    if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then

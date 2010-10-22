@@ -11270,7 +11270,8 @@ $as_echo X"$ff_mpicxx" |
 	    *) ff_mpi_path="$ff_mpi_path";ff_defmpicxx=`expr "//$ff_mpicxx" : '.*/\(.*\)'`;;
 	esac
 
-	for ac_prog in $ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++
+	if test -z "$MPICXX" ; then
+	    for ac_prog in $ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -11316,8 +11317,9 @@ fi
 done
 test -n "$MPICXX" || MPICXX="no"
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPICXX" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPICXX" >&5
 $as_echo_n "checking for MPICXX... " >&6; }
+	fi
 	ff_mpicxx="$MPICXX"
 	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
@@ -11355,7 +11357,8 @@ $as_echo "$ff_mpi" >&6; }
 
 #	echo "ff_mpi_path::$ff_mpi_path:"
 #        AC_MSG_CHECKING(for MPIRUN)
-	for ac_prog in mpirun mpiexec
+	    if test -z "$MPIRUN" ; then
+		for ac_prog in mpirun mpiexec
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -11403,10 +11406,11 @@ test -n "$MPIRUN" || MPIRUN="no"
 
 		if test "$MPIRUN" = no
 		then
-			ff_mpi=no
+		    ff_mpi=no
 		fi
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPIRUN" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPIRUN" >&5
 $as_echo "$MPIRUN" >&6; }
+	    fi
 	fi
 
 	if test "$ff_mpi" = yes;
@@ -11462,7 +11466,8 @@ $as_echo "$MPIRUN" >&6; }
 	    MPICXX=$MPICXX
 
 
-	    for ac_prog in mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc
+	    if test -z "$MPICC" ; then
+		for ac_prog in mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -11508,6 +11513,7 @@ fi
 done
 test -n "$MPICC" || MPICC=""""
 
+	    fi
 	    MPICC=$MPICC
 
 	    PASTIX_HOSTARCH=$ff_HOSTARCH_pastix
@@ -11516,7 +11522,8 @@ test -n "$MPICC" || MPICC=""""
 	    then
 
 
-		for ac_prog in mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c
+		if test -z "$MPIF77" ; then
+		    for ac_prog in mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -11562,10 +11569,12 @@ fi
 done
 test -n "$MPIF77" || MPIF77=""""
 
+		fi
 
 
 
-		for ac_prog in mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c
+		if test -z "$MPIFC" ; then
+		    for ac_prog in mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -11611,6 +11620,7 @@ fi
 done
 test -n "$MPIFC" || MPIFC=""""
 
+		fi
 
 	    fi
 	    if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
