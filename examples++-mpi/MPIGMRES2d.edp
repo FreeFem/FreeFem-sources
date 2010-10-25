@@ -1,6 +1,6 @@
 // /usr/local/bin/mpirun -np 4 FreeFem++-mpi MPICGLap2d.edp 
 
-
+mpiBarrier(mpiCommWorld);
 load "MPICG"
 verbosity=0;
 int vdebug=0; 
@@ -27,7 +27,9 @@ include "AddLayer2d.idp"
 
 int njpart=0; // nb of part with intersection (a jpart) with ipart without ipart
 int[int] jpart(npart); //  list of jpart ..
+int ksplit=10;
 int nloc = 5*sqrt(real(npart));
+if(ipart==0)  cout << " Final N=" << ksplit*nloc << endl;
 int[int] ll=[1,1,1,1]; 
 mesh Thg=square(nloc,nloc,label= ll);
 mesh Thi,Thin;//  with overlap, without olverlap  
@@ -201,7 +203,7 @@ for(int jp=0;jp<njpart;++jp)
   
 //  send/recv  the i,j mesh intersect 
 SendRecvAny(comm,jpart,aThij,aThji);
-int ksplit=1;
+
 for(int jp=0;jp<njpart;++jp)
   aThij[jp]  = trunc(aThij[jp],1,split=ksplit);
 for(int jp=0;jp<njpart;++jp)
@@ -280,7 +282,7 @@ func bool Update(real[int] &ui, real[int] &vi)
    
   Whi u=0,v;
   verbosity=1;
- 
+  real t0=mpiWtime();
   MPIAffineGMRES(DJ0,u[],eps=1.e-10,nbiter=100,comm=comm,dimKrylov=100,verbosity=ipart ? 0: 50);
   
   real errg =1,umaxg;
@@ -289,10 +291,10 @@ func bool Update(real[int] &ui, real[int] &vi)
    mpiAllReduce(aa,bb,comm,mpiMAX);
    errg=bb[0];
    if(ipart==0)
-    cout << " umax global  = " << bb[0] << endl;
+    cout << " umax global  = " << bb[0] << " Wtime = " << mpiWtime() - t0 << " s " << endl;
   }
-  // after a classical Shwarz algho with fixe point ..
- for(int iter=0;iter <10; ++iter)
+  // after a classical Shwarz algo with fixe point ..
+ for(int iter=0;iter <1; ++iter)
  {
    real[int] b= onG .* u[];
    b  = onG ? b : Bi ;
