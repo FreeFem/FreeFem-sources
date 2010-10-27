@@ -47,10 +47,11 @@ macro   ISendRecvAny(comm,jpart,Si,Ri)
 
 
 macro   SendRecvAny(comm,jpart,Si,Ri)
-{
+{  verbosity=200;
  	int n= jpart.n;
  	for (int j=0;j<n;++j)
        processor(comm,jpart[j]) << Si[j];
+    cout << " ** wait revc " << endl;
  	for (int j=0;j<n;++j)
        processor(comm,jpart[j]) >> Ri[j];
 }
