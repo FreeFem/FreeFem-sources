@@ -124,7 +124,7 @@ extern long mpisize ;
 //  for syncro communication
 MPI_Request *  Syncro_block = reinterpret_cast<MPI_Request * > (1); 
 
-const size_t sizempibuf = 1024*32;
+const size_t sizempibuf = 1024*32*32;
 
 template<class R> 
 long  WSend( R * v,int l,int who,int tag,MPI_Comm comm,MPI_Request *rq)
