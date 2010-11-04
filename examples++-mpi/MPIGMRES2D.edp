@@ -1,4 +1,3 @@
-{int kk;cin >>kk;}
 // /usr/local/bin/mpirun -np 4 FreeFem++-mpi MPICGLap2d.edp 
 
 mpiBarrier(mpiCommWorld);
