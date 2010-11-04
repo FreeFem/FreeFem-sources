@@ -1,3 +1,8 @@
+v 3.10 
+  - add true Domain Decomposition example in 2d and 3d. 
+      see    MPIGMRES2D.edp	  MPIGMRES3D.edp in MPI  examples 
+  - add mpi Isend/Irevd for complex struct like matix, meshes 
+     for send/recv Huge objet 
   - add named parameter verbosity= in add GMRES and GC function 
      for show algo evolution .
   - add MPIGC dynamic LIB for // GC and GMRES , add fully // scharwz RAS

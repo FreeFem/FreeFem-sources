@@ -78,6 +78,7 @@ if( mpirank==0)
    A=[[1+1i,1i],[0,2-1i]];
 broadcast(processor(0),A);
 
+
 if (mpirank==1)
   { A=A+A;
     processor(0) << A;
