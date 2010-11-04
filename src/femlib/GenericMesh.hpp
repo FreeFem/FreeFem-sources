@@ -1448,8 +1448,8 @@ Serialize GenericMesh<T,B,V>::serialize() const
     l += nt*(sizeof(int)*(nve + 1));
     l += nv*( sizeof(int) + sizeof(double)*d);
     l += nbe*(sizeof(int)*(nvbe+1));
-    
-    cout << "Serialize gmesh " << l << " " << nve << " " << nvbe << endl;
+    if(verbosity>1)
+       cout << "Serialize gmesh " << l << " " << nve << " " << nvbe << endl;
     Serialize  serialized(l,GenericMesh_magicmesh);
     // cout << l << magicmesh << endl;
     size_t pp=0;
