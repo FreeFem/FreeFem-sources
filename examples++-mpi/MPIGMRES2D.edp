@@ -1,6 +1,5 @@
 // /usr/local/bin/mpirun -np 4 FreeFem++-mpi MPICGLap2d.edp 
 
-mpiBarrier(mpiCommWorld);
 load "MPICG"
 verbosity=0;
 int vdebug=0; 
@@ -202,10 +201,9 @@ for(int jp=0;jp<njpart;++jp)
    
   
 //  send/recv  the i,j mesh intersect 
-verbosity=101;
 
 ISendRecvAny(comm,jpart,aThij,aThji);
-verbosity=1;
+
 for(int jp=0;jp<njpart;++jp)
   aThij[jp]  = trunc(aThij[jp],1,split=ksplit);
 for(int jp=0;jp<njpart;++jp)
