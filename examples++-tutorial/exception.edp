@@ -1,0 +1,35 @@
+real a;
+try { 
+  a=1./0.;
+}
+catch  (...) 
+{
+  cout << " get a ExecError " << endl;
+  a =0;
+}
+
+verbosity=10;
+
+int nn=5	;
+mesh Th=square(nn,nn);
+verbosity=5;
+fespace Vh(Th,P1);     // P1 FE space
+Vh uh,vh;              // unkown and test function. 
+func f=1;                 //  right hand side function 
+func g=0;                 //  boundary condition function
+real   cpu=clock(); 
+problem laplace(uh,vh,solver=Cholesky,tolpivot=1e-6) =                    //  definion of  the problem 
+int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  + int2d(Th)( -f*vh )                          //  linear form
+  ;
+
+try {
+  cout << " Try Cholesky \n";
+  laplace; // solve the problem plot(uh); // to see the result
+  cout << "-- lap Cholesky " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
+} 
+catch(...) {
+  cout << " Catch cholesky PB " << endl;
+}
+
+

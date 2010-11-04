@@ -1,0 +1,3044 @@
+2008-02-04 15:07  hecht
+
+	*    add lazst modification in the doc.
+
+2008-02-01 22:09  hecht
+
+	*   add Th=triangule(xx,yy);
+	    pass to version 2.23-2
+
+2008-01-29 23:29  hecht
+
+	*   add info   INNOVATION file
+
+2008-01-29 23:20  hecht
+
+	*   correct rare bug in bamg (missing initialisation variable
+	  edges[].adj
+
+2008-01-24 09:26  hecht
+
+	*   correct assert fail in case of no UMFPACK in make check
+
+2008-01-23 11:04  hecht
+
+	*  add mortar (Neuman to Dirichlet )  example in scalar and
+	  parallel version
+	     with preconditionner
+
+2008-01-22 17:23  hecht
+
+	*    add vectorial operator ( a ? b : c)  on array where b and c
+	  can be scalar
+
+2008-01-16 12:37  hecht
+
+	* correct mpi (receive	is now synchrone  and send is asychrone)
+	  correct configure.ac pb in FLIBS with fort
+
+2008-01-11 10:59  hecht
+
+	*   nothing
+
+2008-01-09 22:33  hecht
+
+	*   correct README of debian and cnfigure.ac of checking umfpack
+	  lib.
+	    correct a check message in problem specification ( only on mesh
+	  par
+	    problem or solve).
+
+2008-01-05 16:50  hecht
+
+	*  correct Makefile to build universal executable file	on MacOS
+	   coorect  readme file
+
+2007-12-26 17:30  hecht
+
+	*  cvs ranlib and ar  in umfpack compilation process of universal
+	  file on apple.
+
+2007-12-26 16:44  hecht
+
+	*   Make big change un configure.ac and makefiel.am to build
+	  universal binarie file on apple (ppc and i386)
+
+2007-12-20 13:11  hecht
+
+	* correct freefem++-doc  and add default font 6x10 in case of no
+	  6x9 font in Xrgraph.cpp
+
+2007-12-18 18:35  hecht
+
+	*   missing file
+
+2007-12-18 18:19  hecht
+
+	* change ref value  correct elastycity.
+
+2007-12-18 18:04  hecht
+
+	* just change in UFconfig_mk.m4 for freebsd for comment
+
+2007-12-18 16:43  hecht
+
+	*   see innovation correct bug in function with string argument
+	    correct mistake in elacticity problem.
+
+2007-12-11 21:18  hecht
+
+	* type correct Pcrgraph
+
+2007-11-30 13:54  hecht
+
+	*   correct   error on mpi version
+
+2007-11-29 12:20  hecht
+
+	*   suite
+
+2007-11-29 12:18  hecht
+
+	* [no log message]
+
+2007-11-29 12:15  hecht
+
+	*   next
+
+2007-11-29 12:11  hecht
+
+	* correct missing preprocessing  variable
+
+2007-11-29 07:42  hecht
+
+	*   correct configure.ac for umfpack (sometime missng a library)
+
+2007-11-20 16:49  hecht
+
+	*   correct missing tapping error in test build drawbdmesh on
+	  windows.
+
+2007-11-20 16:13  hecht
+
+	*  correct bamg on windows missing drawbdmesh.exe
+
+2007-11-20 15:38  hecht
+
+	*   coorect   missing exe extension on bamg program in confure.ac
+
+2007-11-19 21:40  hecht
+
+	*    correct mpi for macos leopard,
+	     remove CHECKPTR in case of optimize
+
+2007-11-19 18:13  hecht
+
+	* correct MPI configure.ac
+
+2007-11-19 14:41  hecht
+
+	*    continuing
+
+2007-11-19 14:39  hecht
+
+	*   missing mpiprog
+
+2007-11-19 14:25  hecht
+
+	*   correct configure.ac missing FreeFem++ with X11
+
+2007-11-19 14:17  hecht
+
+	*    correct configure.ac without x11
+
+2007-11-18 13:20  hecht
+
+	*   correct  documentation for new edition
+	    add better check of  X11 and UMFPACK
+
+2007-11-13 16:40  hecht
+
+	*  correct doc,
+
+2007-10-24 22:17  hecht
+
+	*   see INNOVATION file
+	     pass to version 2.20-1
+
+2007-10-22 18:17  hecht
+
+	*   add format + - , trace and det of array
+
+2007-10-02 17:55  hecht
+
+	*   correct missing parameter SolveGCPrecon and SolveGCDiag
+
+2007-10-02 16:49  hecht
+
+	* correct miss-spelling  CVS:
+	  ----------------------------------------------------------------------
+
+2007-10-02 16:07  hecht
+
+	*   -  add in download automatic generation of f2c and fort77 to
+	  get a free  fortran compiler
+		  just	go in
+		  (download/f2d;make install)
+	    -  add automatic find of libf2c in case of F77=fort77 (driver
+	  of f2c) in configure
+
+2007-09-30 17:45  hecht
+
+	*  Add	sparse solver in documentation
+
+2007-09-20 21:53  hecht
+
+	*   add SuperSolevr
+
+2007-09-09 21:16  hecht
+
+	*   add f2d in case of no fortran
+
+2007-09-07 17:09  hecht
+
+	* add f2c download
+
+2007-09-07 00:13  hecht
+
+	*   recorrect operator += Virtual matrix operator (introduction in
+	  august)
+	    symptome : Sous CG no not converge. (tank to the test)
+
+2007-09-06 16:23  hecht
+
+	*   correct SuperLU and UMFPACK driver + add comparaison
+
+2007-09-06 16:02  hecht
+
+	* add missing files
+
+2007-09-06 15:58  hecht
+
+	*   correct 2 def defaulttoGMRES
+
+2007-09-06 15:14  hecht
+
+	*  correct tool to add other sparse (morse) linear solver with
+	  dynamic load
+	   two examples NewSolver.cpp  SuperLU.cpp
+
+2007-09-05 23:27  hecht
+
+	*   add set sparce solver (morse)
+	    set version to 2.20
+
+2007-09-05 20:15  hecht
+
+	*   correct complex part of superLU
+
+2007-09-05 18:03  hecht
+
+	*  Add tools to change Sparce Linear Solver
+	   add SuperLU driver in example++-load
+
+2007-08-28 21:57  hecht
+
+	*  add N,M in class VirtualMatrix, to correct probleme in RNM class
+	   when unset array.
+
+2007-08-28 17:16  hecht
+
+	*   add missing oiperator in array:
+	       build array form all operation may be.
+	    improve the doc of vartionnal form part section 6.10.
+
+2007-08-24 09:12  hecht
+
+	*   update doc comtinuing
+
+2007-08-24 08:27  hecht
+
+	*  update the doc.
+	   improve varf example.
+
+2007-08-20 21:29  hecht
+
+	* add missing file
+
+2007-08-20 21:28  hecht
+
+	*   correct mean and jump operator in interpolation
+	    change SetAdj  in MeshPoint.hpp
+	    add missing file in examples++-load/Makefile.am
+
+2007-08-20 20:07  hecht
+
+	*  upgrade INNOVATION
+
+2007-08-20 18:07  hecht
+
+	*  correct,  problem of automatic ptr managenemt in
+	  plot::operator()
+
+2007-08-19 22:05  hecht
+
+	*   pass to version 2.19.
+	    add tools to get mesh infomation.
+	    correct builmesh form bamg geometric file.
+
+2007-08-07 22:05  hecht
+
+	*   correct cin on windows and and type on bogus buildmesh.
+
+2007-07-19 19:22  hecht
+
+	*   correct AdaptResidualErrorIndicator and download/Makefile.am to
+	     create dir lib and include
+
+2007-07-19 13:19  hecht
+
+	*   add missing compile file in example++-load
+
+2007-07-19 11:41  hecht
+
+	*   see INNOVATION file, past version 2.18
+
+2007-07-16 14:47  hecht
+
+	*  add quantile
+
+2007-07-13 17:33  hecht
+
+	*  add code  to sort  array
+
+2007-06-29 22:21  hecht
+
+	*    xcode projet
+
+2007-06-28 22:12  hecht
+
+	*  correct compile error with gcc 3.2.2  lgmat.cpp
+	    the meassage is
+	  ../femlib/MatriceCreuse_tpl.hpp:1486: excess elements in
+	  aggregate initializer  or with gcc 3.3.6 ../femlib/RNM.hpp:223:
+	  error: too many initializers for `const
+	  __class_type_info_pseudo'
+
+2007-06-21 07:58  hecht
+
+	* correct ../fflib/environment.hpp:41:24: warning: no newline at
+	  end of file
+
+2007-06-20 22:42  hecht
+
+	*  correct bilapMorley.edp add missing term in var. formulation.
+	    add test in configure to add on not -lXpm  in X11
+
+2007-06-18 22:58  hecht
+
+	*   set 2.17-2
+
+2007-06-18 22:42  hecht
+
+	*   add mesh example
+
+2007-06-18 22:20  hecht
+
+	*   correct old bug in bamg, in case of bogus boundary (auto
+	  crossing)
+	    add to to hand this error correctly with exception handling.
+
+2007-06-15 13:39  hecht
+
+	*   clean the example
+
+2007-06-15 11:02  hecht
+
+	* correct FreeFem++-Cocoa to add option  -v 0
+
+2007-06-15 10:01  hecht
+
+	* add missing files
+
+2007-06-15 09:33  hecht
+
+	*   end of 2.17-1  modif
+
+2007-06-14 23:03  hecht
+
+	* [no log message]
+
+2007-06-14 22:35  hecht
+
+	* next
+
+2007-06-14 21:49  hecht
+
+	* add -v xx on pc version
+
+2007-06-14 11:54  hecht
+
+	*    suite
+
+2007-06-14 10:27  hecht
+
+	* [no log message]
+
+2007-06-14 09:51  hecht
+
+	*   clear output when verbosity = 0
+	    launching FreeFem++ toto.edp -v 0
+	    of setting environment variable FF_VERBOSITY=0  to remove all
+	  spurious
+	    output.
+
+2007-06-11 15:37  hecht
+
+	* correct automatique choose of color in plot of arrow correct
+	  double use of $(BLASLIB) flag in configure.ac
+
+2007-06-09 12:15  hecht
+
+	*  add boundary= ...  flag in plot fonction.
+
+2007-06-07 12:15  hecht
+
+	* [no log message]
+
+2007-06-07 11:52  hecht
+
+	* [no log message]
+
+2007-06-07 10:53  hecht
+
+	* correct mistake in tgamma call
+
+2007-06-07 10:37  hecht
+
+	*   correct missing update
+
+2007-06-07 08:17  hecht
+
+	*   add bessel function   j0, j1, jn, y0, y1, yn -- bessel
+	  functions of first and second kind
+	    add  erf, erfc -- error function operators
+	    add   tgamma, lgamma  -- gamma and log of gamma
+	    add   set and get	line,colunm and value of a sparce matrix
+	     [I,J,C]=A; // resizing  array I,J,C
+	     A=[I,J,C] ;
+	    where
+	     int[int] I(k),J(k); real[int] C(k);
+
+2007-06-05 18:02  hecht
+
+	*   same for complex eigen value
+
+2007-06-05 17:44  hecht
+
+	*   add rawvector= in eigenvector
+
+2007-06-04 23:03  hecht
+
+	*  correct qforder= automatic choose in quadature formular in
+	  computation of integrale
+
+2007-05-16 00:21  hecht
+
+	* just add missing files
+
+2007-05-16 00:09  hecht
+
+	*   correct  Makefile.am for  examples++-load/include  missing file
+
+2007-05-15 23:48  hecht
+
+	*   do autoreconf
+
+2007-05-15 22:01  hecht
+
+	* coorect mistake with libcblas
+
+2007-05-10 12:05  hecht
+
+	*   correct very old bug in meshptg in case aligne point
+	    correct configure.ac for umfpack in debian
+	    correct exemple+-load/load.link use variable CXX
+
+2007-05-03 10:36  hecht
+
+	* correct   Makefile.am dans examples++-load
+
+2007-05-02 17:29  hecht
+
+	*   - Add read sparce matrix form a file
+	    -  Correct mistake in boundary condition in complex case.
+	    if the boundary condition is real in a complex  problem
+	    then the imaginary part is unset.
+
+2007-04-25 09:28  hecht
+
+	*   coorect splitmesh next step
+
+2007-04-24 22:20  hecht
+
+	*   coorect meshsplit function
+
+2007-04-24 17:18  hecht
+
+	*   correct  the variable ff_testideprog="testhighlight${EXEEXT}"
+	    is imply error is when building   src/ide on windows computer1
+
+2007-04-23 17:28  hecht
+
+	*   remove  dump for debbuging in fem.cpp ( mesh() constructor
+	  call splitmesh function)
+
+2007-04-21 11:31  hecht
+
+	*   correct miss speeling and fig ref/label
+
+2007-04-20 17:18  hecht
+
+	*   remove  all compilation in ide dir if --without-fltk  configure
+	  flags is set.
+
+2007-04-20 16:01  hecht
+
+	*   correct error when writing mesh, in case of different region
+	  (sub-domain)
+	     with the same number, we write just one region not the full
+	  mesh.
+
+2007-04-20 14:56  hecht
+
+	*   do autoreconf
+
+2007-04-20 14:54  hecht
+
+	*   - correct mshptg.cpp  (add swap) , this is used in case of
+	    splitmesh.	The error appear when the difference of two
+	  adjacent
+	    are splited by a ratio greater than 5. We can get very flat
+	  traingle.
+	    - add cpp flags for ufsparce/umfpach.h include
+
+2007-04-18 12:01  hecht
+
+	*   correct ligne pof Sun  SS -S vss in fem.cpp
+
+2007-04-17 22:34  hecht
+
+	*  same next
+
+2007-04-17 22:27  hecht
+
+	*     same continuing
+
+2007-04-17 22:12  hecht
+
+	*   correct fltk configure process on windows
+
+2007-04-17 21:47  hecht
+
+	*  coorect mistake on  window akefile+ change fltk dowload install
+	  dir
+
+2007-04-17 12:52  hecht
+
+	* [no log message]
+
+2007-04-17 12:51  hecht
+
+	*  add file
+
+2007-04-17 12:08  hecht
+
+	*   remove umfpack directory  form src
+	    use the SuiteSparse for Univ of Foriad (CISE) for UMFPACK
+	    add  read of string in file
+
+2007-04-06 17:42  hecht
+
+	*   correct regularity, suite.
+
+2007-04-06 14:53  hecht
+
+	*    regularity mistake, suite.
+
+2007-04-06 13:18  hecht
+
+	*   correct impressin of mesh regularity
+
+2007-04-04 21:20  hecht
+
+	*   go to version 2.15-1, see innovation file
+
+2007-04-02 11:45  hecht
+
+	* correct examples++-tutorial/sparse-matrix.edp
+
+2007-04-02 11:36  hecht
+
+	*   correct splitmesh with intenals bourdary
+	    add sparce matrix fonctionnality	a(I,J) a(I^-1,J^-1)
+
+	  Cvs:
+	  ----------------------------------------------------------------------
+
+2007-03-25 11:41  hecht
+
+	*   correct bug in vectorial operation	 (a+3.14*b)
+	    add merge RNM package and freefem++ RNM sources.
+
+2007-03-22 12:01  hecht
+
+	*   Correct  integration problem in varf of int1d(Th) .. u_Th1 ..
+	  v_Th2 ..
+
+2007-03-11 21:22  hecht
+
+	* correct licence hearder.
+
+2007-03-09 23:10  hecht
+
+	*    correct missing speeling in  configure.ac	mpi++.h -> mpi++.h
+	  for mpich.1.2
+	     add computing linear form of 2 meshes  (ex. v on mesh Th1, and
+	   compute int2d(Th1)(v) )
+
+2007-03-07 13:51  hecht
+
+	*     see INNOVATION for detail.
+	      and converstion of matrix.
+
+2007-02-14 21:00  hecht
+
+	*   correct mistake in bluid matrice from  varf with  3 meshes
+
+2007-02-04 12:19  hecht
+
+	*   add scalar term in block matrix as 1x1 sub matrix.
+
+2007-02-03 15:17  hecht
+
+	*  do autoreconf
+
+2007-02-03 14:25  hecht
+
+	*   pass to version 2.13  and
+	     Add formal operator * and ' (to day just transpose)
+	     on vector [ .. ]  and matrix [ [],...,  []]
+	     so we can write
+	      macro grad(u) [ dx(u),dy(u)] // EOM
+	      int2d(Th)( grad(u)'*grad(v) )
+
+2007-01-24 14:01  hecht
+
+	*     correct  mistake in function
+		   Mesh::Mesh(const Mesh & Th,int * split,bool
+	  WithMortar,int label)
+		and coorect mshptg_ in case of sub-domain with 1 element
+
+2007-01-15 14:13  hecht
+
+	*  correct when return a local new pointeur in freefem++ function
+	    like in string.edp
+	    return toto+"dfsdf";
+	    do not remove the pointer when catching return exeption is
+	  block
+	    see method ListOfInst::operator()
+
+2007-01-10 13:12  hecht
+
+	* add comment
+
+2007-01-10 11:59  hecht
+
+	*   pass to 2-12 et correct mistake in no square block matrix
+
+2006-12-22 13:33  hecht
+
+	*  coorect missing spell in configure.ac  (ff_libs => ff_flibs)
+	  (fortran libs)
+
+2006-12-17 09:36  hecht
+
+	*    change PPC in PP_C in problem.cpp, because PPC macro is
+	  defined
+	     on some linux.
+	     Set   version  to 2.11-3
+
+2006-12-01 21:03  hecht
+
+	*   coorect LaplaceRT.edp
+
+2006-11-30 14:48  hecht
+
+	*   correct dependance in  examples++-load/Makefile.am
+
+2006-11-30 14:45  hecht
+
+	*   correct build matrices from varf with different mesh in case
+	  for mortar mesh.
+	    See INNOVATION for full detail.
+
+2006-11-28 13:53  hecht
+
+	*  correct bug in interpolation  fespace Wf(Th,[RT0,P0]) function
+	   passe to version 2.11-1
+
+2006-11-10 22:09  hecht
+
+	*  I correct the problem in arpack (computation of eigen value)
+	  under i383 processor.
+	   After 2 weeks of hard work, a found the bug.
+	   In new version of LAPACK second is a real function
+	   and in ARPACK second is a subroutine (Thank the fortran).
+	   So I change the Makefile to change the name of function second
+	  into secnd2.
+
+2006-11-06 13:55  hecht
+
+	*   correct -Wall continuing
+
+2006-11-06 09:55  hecht
+
+	*   correct all -Wall warning,	to try to solve probleme in eigen
+	  value computation
+	    before add tag release_2_10_2_before_Wall
+	    add change the version to 2.11.
+	    remark:   all the dynamic library  must be recompiled
+
+2006-10-26 15:36  hecht
+
+	*   remove debug  dump
+
+2006-10-26 14:17  hecht
+
+	*   correct mistake in configure
+
+2006-10-26 14:13  hecht
+
+	*  remove Makefile~
+
+2006-10-26 14:09  hecht
+
+	*   correct error in lapack of arpack  (remove div  by 0)
+	    the patch files  is in  arpack/arpack-patch-lapack.tar.gz
+	    set version to 10-2
+
+2006-10-24 21:22  hecht
+
+	*   add flags -with-lapack in configure
+
+2006-10-20 11:26  hecht
+
+	*  add HIDDEN PARAMETER to fortran route with character parameters
+
+2006-10-19 15:53  hecht
+
+	*  coorect 70 in 70.
+
+2006-10-19 15:13  hecht
+
+	* misa a jour de README_CVS
+
+2006-10-18 21:39  hecht
+
+	*   ATTENTION le serveur CVS a change
+	    :ext:hecht@melis:/Users/hecht/FreeFem++-cvs
+	    + correct trouble on configure.ac with blas on macos
+	    because libblas now exist in /usr/lib
+
+2006-10-18 21:28  hecht
+
+	* correct configure.ac for MacOs compile
+
+2006-10-11 18:23  hecht
+
+	*   change version 2.10-1
+	    correct a ? b : c; operator in case of array
+	    correct load.link
+	    add new example of dynamic load
+
+2006-10-10 20:48  hecht
+
+	*   add modif in the doc
+
+2006-10-10 17:42  hecht
+
+	*  QF continuing
+
+2006-10-10 17:35  hecht
+
+	*  add QF gauss Legendre  4 and 5 points
+	   to coorect Problem when using qforder=9.
+
+2006-09-29 22:30  hecht
+
+	*  change in all source file the LGPL flags. (FH)
+
+2006-09-21 14:58  hecht
+
+	*   update ide highighting
+
+2006-09-20 10:23  hecht
+
+	*   correct tool with crimson editor under Windows
+
+2006-09-20 10:19  hecht
+
+	*   coorect comment on crimson editor
+
+2006-09-19 22:08  hecht
+
+	*   bluid HISTORY files
+
+2006-09-19 21:36  hecht
+
+	*   correct openmpi trouble (async communication)
+	    set version to 2.9
+
+2006-09-19 17:07  hecht
+
+	*   update INNIVATION
+
+2006-09-19 16:24  hecht
+
+	*   change include.tar.gz file
+
+2006-09-19 16:02  hecht
+
+	*   add format output routine
+	      see calculus.edp for examples
+	      scientific, fixed, showpos, ....
+
+2006-09-19 11:47  hecht
+
+	*   correct configure.ac
+	     problem with FLIBS flags with gfortan on macos
+	    correct example++-load/install.tar.gz files
+
+2006-09-18 17:41  hecht
+
+	* change under	windows OS  the installed files   take the static
+	  freefem++-cs because bug in dll version   put by default programm
+	  in \Program Files\FreeFem++ folder   to remove automaticaly new
+	  installation (For O. Pironneau) set the current version to 2.8-3
+
+2006-07-21 18:35  hecht
+
+	*   passe to version  2.8-2
+
+2006-07-21 17:02  hecht
+
+	*  correct bug with mpi (MPICH-2)
+	   change the fortran in MacIntel (bug in complex eigenvalue) to
+	  f2c.
+
+2006-06-30 11:16  hecht
+
+	*  add print in arpack error
+	   correct missing speeling ciel in ceil function
+	   add rint function
+
+2006-06-28 18:01  hecht
+
+	*  add missing file in make dist process
+
+2006-06-28 17:50  hecht
+
+	* [no log message]
+
+2006-06-28 17:49  hecht
+
+	* add missing file
+
+2006-06-28 17:46  hecht
+
+	*  add tool to remove cadna in ./configure -without-cadna
+
+2006-06-27 23:24  hecht
+
+	*   do	correction for	openmpi but the
+	  openmpi is not asyncromous so some examples++-mpi do not work.
+
+2006-06-27 23:14  hecht
+
+	*   version 2.6-1
+
+2006-06-16 16:04  hecht
+
+	*   correct doc netx step.
+
+2006-06-16 13:49  hecht
+
+	*    coorect lame.edp in chap 3 of the doc.
+
+2006-06-12 21:15  hecht
+
+	*  add correction from	christophe.trophime@grenoble.cnrs.fr
+	   to  complie on FC5 with gcc 4.1
+
+2006-06-01 09:28  hecht
+
+	*  add h flag to: Don't write symlinks as symlinks; write the data
+	  of the files
+	    they name in OtherMacOsLib.tgz archive
+
+2006-05-30 15:37  hecht
+
+	*  correct OpenGL flag under MacOS configure.ac
+
+2006-05-26 16:57  hecht
+
+	*   correct FLIBS in configure.ac
+
+2006-05-24 22:25  hecht
+
+	*  correct configure.ac
+	     setting FLIBS variable with g77 compiler to
+	      -Ldir -lg2c
+
+2006-05-19 19:53  hecht
+
+	*   cleanning FLIBS configure variable in case of g77
+
+2006-05-18 16:48  hecht
+
+	* correct small error for New macOS install
+
+2006-05-18 14:04  hecht
+
+	*  correct for lam mpi
+
+2006-05-18 13:59  hecht
+
+	* add missing file
+
+2006-05-18 13:57  hecht
+
+	*   correct INNOVATION
+
+2006-05-18 13:51  hecht
+
+	*   Correct bug in case of vectorial problem with same FE space.
+	    Some time freefem++ do  renumbering of the original space.
+	    Thank to Carolina C. Manica
+
+2006-05-17 15:35  hecht
+
+	*  add missing file in distribution
+
+2006-05-16 15:09  hecht
+
+	*   remove missing speel in configure.ac
+
+2006-05-16 15:00  hecht
+
+	*   try to correct X11 link problem on Linux 64bits architecture
+
+2006-05-15 20:01  hecht
+
+	*  correct pb on 64bits achitecture in file src/fflib/AnyType.hpp
+
+2006-05-05 22:55  hecht
+
+	*   do correction geometric data base with RequiredEdge.
+
+2006-04-26 14:15  hecht
+
+	*   correct configure.ac :
+		  if "wget" do not exist then try "curl -O"  work now
+		  use FLIBS to add fortran library and not just -lf2c
+
+2006-04-15 18:05  hecht
+
+	*  correct missing spellibg  line 920
+
+2006-04-15 12:00  hecht
+
+	*   correct probele when compioling with g++ 3.2
+
+2006-04-13 18:36  hecht
+
+	*   correct the mpi version for macos lam mpi
+
+2006-04-13 13:39  hecht
+
+	*  pass to version 2.7 and correct missing file in mpi Makefile.am
+
+2006-04-13 10:27  hecht
+
+	*   coorect misstake in rc/femlib/FESpace.cpp
+
+2006-04-13 08:37  hecht
+
+	*   correct trouble  in Boundary condition  when we mixte some
+	    composite FE et atomic FE.	Example:
+	      fespace Xh(Th,[P2,P2]);
+	      fespace Mh(Th,P1);
+	      Xh [u1,u2], [w1,w2];
+	      Mh p, r;
+	      solve stokes([u1,u2,p],[w1,w2,r]) =
+	     This imply change in FEspace.hpp so all tke .dll must bee
+	  recompiled
+	     Thanks To stefano.micheletti@polimi.it
+
+2006-04-12 14:03  hecht
+
+	*   remove check suffix .edp to be compatible with drawbdmesh.exe
+
+2006-04-12 12:59  hecht
+
+	*   add line un INNOTAVION
+
+2006-04-12 11:31  hecht
+
+	*   add bamg example an correct problem beetween bamg and freefem
+	  graphic
+	    set the version to 2.6-1
+
+2006-04-12 07:38  hecht
+
+	*  correct load.link under windows with new list of .dll files.
+
+2006-04-11 23:26  hecht
+
+	*   correct load.link script (change list of ff++ dll)
+
+2006-04-11 22:06  hecht
+
+	*   Now the all.edp of tutorial run under winder (very hard word).
+	  FH
+
+2006-04-11 21:57  hecht
+
+	*   correct bug under window in Mesh:Find (very rare)
+
+2006-04-11 13:52  hecht
+
+	*  change for window free/delete pair
+
+2006-04-11 10:46  hecht
+
+	*   the new version of the dll file begin to work on windows (no
+	  trap in alloction)
+
+2006-04-10 22:53  hecht
+
+	*   next.
+
+2006-04-10 22:51  hecht
+
+	*   dur dur Windows, 
+
+2006-04-10 06:59  hecht
+
+	*  continuing malloc/free for window
+
+2006-04-09 22:19  hecht
+
+	*   suite??
+
+2006-04-09 21:50  hecht
+
+	*   suite, ..
+
+2006-04-09 20:56  hecht
+
+	*  in progress malloc/free ??
+
+2006-04-09 20:38  hecht
+
+	*   try find pair of malloc /free for windows .dll
+
+2006-04-09 18:13  hecht
+
+	*   make change for  windows dll because the pair malloc and free
+	     must be in same .dll (file); in progress (very hard).
+
+2006-04-07 08:38  hecht
+
+	*   correct missing delete pointeur in a=vmass(0,Vh); where vmass
+	  in a varf
+	    and a real[int].
+
+2006-04-07 08:35  hecht
+
+	*   CheckPtr add flag when deleting  after cleanning
+
+2006-04-06 18:19  hecht
+
+	*   remove impression
+
+2006-04-06 16:59  hecht
+
+	*  add cfloat include
+
+2006-04-06 16:53  hecht
+
+	* add missing include climits in src/femlib/fem.cpp
+
+2006-04-06 16:49  hecht
+
+	*   correct mistake in interpolation procedure, (in Mesh::Find
+	  methode)
+	    complete writting (more clean ??)
+
+2006-04-04 23:31  hecht
+
+	*  correct bug in freeboundary;edp (trap on  windows some time )
+
+2006-04-04 11:25  hecht
+
+	*  coorect consistance beetween movmesh and checkmovemesh
+
+2006-04-04 09:11  hecht
+
+	*  add CR  at end of file src/fflib/ffstack.hpp
+
+2006-04-03 22:39  hecht
+
+	*  correct misspelling
+
+2006-04-03 22:18  hecht
+
+	*  correct misspeling
+
+2006-04-03 22:11  hecht
+
+	*   pass to 2.5-1
+	    add vim color syntaxe file
+
+2006-04-03 22:09  hecht
+
+	*   correct randon error on window
+	    change newtow in newton
+	    nbev= in nev=
+	    add key work in ide hightlighting
+
+2006-04-02 21:59  hecht
+
+	* add bamg.exe, cvmsh2.exe and drawbdmesh.exe in  Inno setup
+	  package for windows
+
+2006-04-02 21:53  hecht
+
+	*   and bamg and string_def.o files
+
+2006-04-01 17:41  hecht
+
+	*  add new example  AdaptResidualErrorIndicator in the doc
+
+2006-03-31 23:15  hecht
+
+	*  add ResidualErrorIndicor example
+
+2006-03-31 20:41  hecht
+
+	*  add 2 files
+
+2006-03-31 18:26  hecht
+
+	*  add string method and correct bug une string parameter.
+
+2006-03-30 08:50  hecht
+
+	*   some optimization on new auto free ptr.
+
+2006-03-29 19:29  hecht
+
+	*  add missing clear language ptr in while and for loops.
+
+2006-03-29 14:49  hecht
+
+	*   pass to version 2.5-0
+
+2006-03-29 14:47  hecht
+
+	*  *  add automatic gestion of free language pointeur to correct
+	    to correct bug with string argument in routine.
+	    Very fist version, in progress,
+	    to day the job is do just for the string type.
+	    Now the examples++-bug/bug-arg-string.edp work find.
+
+2006-03-27 23:21  hecht
+
+	*   add mode for mo text editor on MacOs see the freefem++-doc.pdf
+	  for full detail
+
+2006-03-27 22:34  hecht
+
+	*   add freefem++  mode for mi editor on macos
+	  http://www.mimikaki.net/en/
+	    in mode-mi-edp.zip archive
+
+2006-03-27 21:25  hecht
+
+	*   * add lot missing vectorial operation with sub array
+	    * if u is a complex array (i.e. complex[int u] ..;)
+	       then  u.re (resp u.im) are  the real array of the real
+	  (resp. imag )
+	       part of the vector u
+	    * in block matrix add utilisation of array to build the block
+	  matrix
+	      see new Laplace-lagrange-mult.edp file to have an example
+
+2006-03-20 18:10  hecht
+
+	*   add init of array with a linear form.
+	    add vector and matrix term in block matrix
+	    correct missing  conj() in complex block matrix with operator '
+
+2006-03-17 23:18  hecht
+
+	*   add missing operator on sub array (type KN_<R>)
+
+2006-03-17 10:45  hecht
+
+	*   add new operator on complex array to get real or imag part
+	    complex[int] c(10);
+	    real[int] r(10);
+	    r = c.im ; // imag part of complex array
+	    r = c.re ; // real part of complex array
+	    add florr and ceil function.
+
+2006-03-17 07:36  hecht
+
+	*  add	 x=exp(y);  when x,y are array	for exp;log,sin,tan , ....
+
+2006-03-16 11:40  hecht
+
+	*   add new kind on interplate matrix
+
+2006-03-13 14:40  hecht
+
+	*  correct freefem-doc.tex until page 29 example 6.
+
+2006-03-12 12:10  hecht
+
+	*   do autoreconf
+
+2006-03-12 10:47  hecht
+
+	*  change version number
+
+2006-03-11 18:47  hecht
+
+	*  array of matrix work now.
+
+2006-03-11 09:45  hecht
+
+	*   correct error in build array of sparce matrix.
+
+2006-03-10 18:35  hecht
+
+	*   pl with matrix arry -> remove
+
+2006-03-10 17:46  hecht
+
+	*   make big change in the DOC with O. Kavian
+	    Add array of matrix.
+
+2006-03-07 20:10  hecht
+
+	*   tag release_2_4
+
+2006-03-07 20:05  hecht
+
+	*   pass to  to version 2.4.0
+
+2006-03-07 17:49  hecht
+
+	*   same as previous commit (just on the top dir)
+
+2006-03-07 17:48  hecht
+
+	*  add new operator outer product, change the doc, ....
+	    pass to version 2.3-3
+
+2006-03-03 23:29  hecht
+
+	*   add matric operator like in matlab	mat(I,J) where I,J are
+	    integer array
+
+2006-03-03 13:21  hecht
+
+	* [no log message]
+
+2006-03-03 13:15  hecht
+
+	*  add an exemple with 1D lagrange multiplier.
+
+2006-03-01 23:15  hecht
+
+	*  add out product of 2 vectors  to build full matrix
+
+2006-02-28 10:18  lehyaric
+
+	* Debian packaging for version 2.3-2
+
+2006-02-22 18:12  hecht
+
+	*   correct exec on PC
+
+2006-02-21 15:08  hecht
+
+	*   tag release_2_3_2
+	    correct print mistake in gmres
+	    add drawbdmesh program in bamg
+	    correct pb in bamg if the subdomain have only one element.
+
+2006-02-20 18:15  hecht
+
+	*   Correct missing sub domain problem when
+	    we have only one triangle per  sub domain in  bammg mesh
+	  generator.
+
+2006-02-10 10:41  lehyaric
+
+	* Improved "make clean", which did not seem to be cleaning
+	  correctly anymore.
+
+2006-02-09 16:32  hecht
+
+	*   add configure examples un README files
+
+2006-02-09 15:11  hecht
+
+	*   correct miss spelling, and error in configure.ac
+	       --enable-download  have be automatic set
+	       but it wrong.
+
+2006-02-07 21:32  hecht
+
+	*   reglage in the doc,
+
+2006-02-07 20:25  hecht
+
+	*  add new example
+
+2006-02-07 20:25  hecht
+
+	*   Correct missing free   memory in case of  exception in problem.
+	  add tolpivot= to set the pivot tolerence in LU,choslesky, crout
+	  factorisation in problem, ... function.    change the test of
+	  return UMFPACK status to be more safe  if the status != 0 then we
+	  get a error, see the UMFPACK doc to the full implication.
+	  Write the  change in documentation, and add the 3 new keywords:
+	  try, catch, throw.
+
+2006-02-03 16:18  hecht
+
+	*   add exception in freefem++ language, the first test is working
+	    syntaxe: try { code ; } catch(...) { code ;}
+	    know bug in memory management .
+
+2006-01-27 22:47  hecht
+
+	*  add conf flag in README_WINDOWS
+
+2006-01-27 22:33  hecht
+
+	*   correct missing bluid of  lapack in ARPACK if no lapack
+	    plus add comment README_WINDOWS
+
+2006-01-27 21:07  hecht
+
+	*  correct missing include and link order under pure win32
+	  architecture.
+
+2006-01-27 18:24  hecht
+
+	*  correct PB optim on G4
+
+2006-01-27 16:43  hecht
+
+	*  correct PB optim on G5
+
+2006-01-27 15:59  hecht
+
+	*  correct pb in configure to find wget or curl for download
+
+2006-01-27 14:42  hecht
+
+	*   build hl_yacc files
+
+2006-01-27 14:39  hecht
+
+	*   correct highlight (diag, p2h)
+
+2006-01-27 13:57  hecht
+
+	*   remove highlight test is no ide
+
+2006-01-27 13:53  hecht
+
+	*   build yacc file
+
+2006-01-27 13:41  hecht
+
+	*  correct highlighting
+
+2006-01-27 13:24  hecht
+
+	*   build  generate files for highlight.
+
+2006-01-27 13:21  hecht
+
+	*  add buildmesh("  ") in hightlight syntex
+
+2006-01-27 11:33  hecht
+
+	*  correct pb in installing apple version (zcat -> gunzip -c)
+
+2006-01-27 10:58  hecht
+
+	*    take account of mac intel
+
+2006-01-26 10:16  hecht
+
+	*  add comment in configure.ac
+
+2006-01-23 22:13  hecht
+
+	*   correct small problem in configure.ac to build freefem on mac
+	  intel
+	    work in progress, we use f2c / fort77 to compile arpack
+
+2006-01-11 22:22  hecht
+
+	*   correct xcode projet + warning
+
+2006-01-11 21:13  hecht
+
+	*   add xcode 2.2 build project for macos (see README_XCODE)
+	    add init file to set paths and do load automaticaly dynamic
+	  library
+	    see INNOVATION for full detail.
+
+2006-01-09 15:42  hecht
+
+	*   small correct to use xcode of macos and to build bamg shell
+	  command
+
+2006-01-06 11:28  lehyaric
+
+	* Changed ARPACK library reference for static compiling
+
+2006-01-06 10:51  lehyaric
+
+	* Changed Debian packages documentation format from PS to PDF to
+	  reflect changes in the DOC directory.
+
+2006-01-06 10:00  hecht
+
+	*  add building of bamg and cvsmsh2 command
+	   so now bamg is a part of freefem++ software
+
+2006-01-05 15:43  hecht
+
+	*   merging the source of bamg and the the bamg freefem++ part
+
+2006-01-04 11:37  hecht
+
+	*   add read bamg geometry file with buildmesh function.
+
+2006-01-04 11:27  hecht
+
+	*  add build mesh from bamg geometry
+
+2006-01-04 10:18  lehyaric
+
+	* New Debian package.
+
+2005-12-30 21:13  hecht
+
+	*   add forget file distribution
+
+2005-12-30 15:37  hecht
+
+	*   correct pb under Windows change environment to ffenvironment
+	  (Global variable)
+
+2005-12-30 12:23  hecht
+
+	*   pb global.cpp
+
+2005-12-30 12:02  hecht
+
+	*  correct compile error
+
+2005-12-30 11:53  hecht
+
+	*   correct pb uneder Windows with environment, put the def in
+	  Global.cpp
+
+2005-12-30 10:57  hecht
+
+	*   The search directory of  load and include seems ok.
+	    pass to version 2.2-0
+
+2005-12-30 08:34  hecht
+
+	* correct environment.cpp under Windows (Pure) and add to
+	  bin-win32/Makefile
+
+	  CV
+	  ----------------------------------------------------------------------
+
+2005-12-29 17:30  hecht
+
+	*   add 3 environments varialbe FF_VERBOSITY, FF_INCLUDEPATH,
+	  FF_LOADPATH
+	     remark the separator is the ";" (in  test FH)
+
+2005-12-29 08:00  hecht
+
+	*  reman NSP1BR.edp in NSP2BRP0.edp
+
+2005-12-29 07:59  hecht
+
+	*  correct load.link (return compile compile error).
+
+2005-12-29 07:46  hecht
+
+	*  add missing files
+
+2005-12-28 15:00  hecht
+
+	* [no log message]
+
+2005-12-28 14:49  hecht
+
+	*   I make a huge cleanning in the figure of the DOC
+	    Now, all the missing figure is recreate in subdir cpfigs
+	    The archive is more than 3Mb less than the previous version.
+
+2005-12-27 22:26  hecht
+
+	*  correct the example++-load test
+
+2005-12-27 17:32  hecht
+
+	* Add two new finite element in examples++-load and change the doc
+	  for add new finite element and passe version 2-1.3.
+
+2005-12-27 07:54  hecht
+
+	*   add new Finite Element Bernardi-Raugel for Stokes or
+	  Navier-Stokes
+	    equation with dynamic link in  example++-load
+
+2005-12-26 17:28  hecht
+
+	*   Correct problem in boundary edge (lossing label numbers)  in
+	  adapated mesh, savemesh,
+	    in case of domain with internal unconnected boundary   (Thanks
+	  to O. Pironneau)
+
+2005-12-13 13:44  lehyaric
+
+	* Added first support for Doxygen documentation. Inline comments
+	  still need to be formatted to Doxygen standards.
+
+2005-12-12 16:46  lehyaric
+
+	* Changed --with-suffix configuration in configure.ac to avoid
+	  adding a single dash when no suffix is needed.
+
+2005-12-09 15:09  hecht
+
+	*    do autoreconf
+
+2005-12-09 15:08  hecht
+
+	*  correct CCFLAGS in umfpack for test
+
+2005-12-09 11:34  hecht
+
+	*   add number of parameter in OneOperator class to 10
+	    for F. Dortu, and set version to 2-1-2
+
+2005-12-09 10:20  lehyaric
+
+	* <cr> symbols still showed in the Cygwin (not Mingw) version. This
+	  is now corrected.
+
+2005-12-09 09:36  hecht
+
+	*  add missing files in DOPC dist
+
+2005-12-08 16:56  lehyaric
+
+	* New Debian package version 2.1-1.
+
+2005-12-08 10:01  lehyaric
+
+	* Removed option --disable-tagging from configure.ac since
+	  @TAGGINGDEPEND@ is not used in src/fflib/Makefile.am any more.
+
+2005-12-08 07:59  hecht
+
+	*   correct LIBRARY problem for umfpack Demo
+
+2005-12-07 21:40  hecht
+
+	*   * correct mistake in quadarture formule in integral computation
+	  (nota
+	     in variationnal computation) we alway use the qf2pE or qf2pT
+	  formula.
+	    * correct mistake in umfpack makefile.
+	    * set version to 2-1_1
+
+2005-12-07 17:43  hecht
+
+	*   correct problem in umfpack with cblas
+
+2005-12-06 22:10  hecht
+
+	*   correct mistake in cblas on configure.ac
+
+2005-12-06 16:56  hecht
+
+	*  add new file
+
+2005-12-06 16:55  hecht
+
+	*  Use umfpack 4.4, and correct some mistake in configure.ac
+
+2005-12-06 12:18  lehyaric
+
+	* Now compiles with gcc (GCC) 4.0.3 20051201 (prerelease) (Debian
+	  4.0.2-5)
+
+2005-12-02 11:01  hecht
+
+	*   Add the generation of an error if you try to set a solver on
+	  none square matrix,
+	    to remove so segmention fault.
+
+2005-11-30 13:18  hecht
+
+	* /tmp/cvsBIs12d
+
+2005-11-29 11:45  lehyaric
+
+	* Now dlopen() works even when ARPACK is downloaded
+
+2005-11-28 16:28  hecht
+
+	*    add optimization of  a*b expression if a ou b is zero.
+	     add new state of expression (read only)  of optimization
+
+2005-11-23 22:02  hecht
+
+	* add roland correction in the doc.
+
+2005-11-23 10:40  lehyaric
+
+	* Added examples++-chapt3/all.edp into cleanregen.sh
+
+2005-11-22 16:34  hecht
+
+	*   correct problem in algo and Newtow exemple (forgot 1/2 and 2)
+	  coef
+	    remove duplicate examples++-tutorial algowithmacro.edp , ...
+	    add lost examples in chap3 dir
+	    try idea for memory management (ffstack.hpp file is added (in
+	  progresse))
+
+2005-11-22 10:10  lehyaric
+
+	* Arbitrary "wget" commands and parameters can be defined through
+	  the configure.ac script with the option "--with-wget=xxx".
+
+2005-11-19 21:53  hecht
+
+	*   I just try autoreconf on my new mac.
+
+2005-11-19 21:46  hecht
+
+	*  remove the wrong BlackShocle.edp example
+	   correct mistake the gradient and hessian computation in algo.edp
+	   (forgotten  1./2 , etc ..), correct also freefem++.doc
+
+2005-11-16 11:56  hecht
+
+	*    correct the following trouble
+	     when we write  A=vNS( ..) where A is ma matrix and vNS is a
+	  varf
+	     old version we build the new matrix and after delete old
+	     new version  we delete  and after we build
+	     Thank to Denis Sipp
+
+2005-11-14 22:00  hecht
+
+	*   correct probleme when resize of full matrix, before the coef of
+	  the matrix
+	      was losed.
+	    correct missing in the freefem++doc.tex  in quadrature
+	  formular.
+
+2005-11-09 15:13  lehyaric
+
+	* New Debian packaging
+
+2005-11-09 15:11  lehyaric
+
+	* Changed Debian dependency from libfltk1.1c102 to libfltk1.1
+
+2005-11-08 11:26  hecht
+
+	*   change  in	grammar lg.y  misplaced  ternary operator
+
+2005-11-06 20:36  hecht
+
+	*   uodate INNOVATION file
+
+2005-11-06 20:26  hecht
+
+	*   change the tolerance value un mshptg form  2^-15 to 2^-30 if
+	  the computation in long long
+	    if it's possible.
+	    this correct trouble in trunc, splitmesh, triangulate if the
+	  mesh is to fine
+
+2005-11-02 22:29  hecht
+
+	*  add files
+
+2005-11-02 22:06  hecht
+
+	*   addinf missing files
+
+2005-11-02 22:04  hecht
+
+	*   correct small mistake in the doc
+	    add --with-suffix to build special precompile version under mac
+	  and windows
+
+2005-11-02 10:46  lehyaric
+
+	* New Debian packages
+
+2005-11-01 17:52  hecht
+
+	*  correct windows install file and load.link under windows
+
+2005-11-01 17:08  hecht
+
+	*   correct problem in array operator /=
+	    add test the array.edp
+
+2005-11-01 16:55  hecht
+
+	*   correct src/bin-win32 Makefile.am
+
+2005-11-01 14:14  hecht
+
+	*    split AFunction3.cpp in 3 files array_{long,real,double}.cpp
+	     to solve ld trap under cygwin (memory full)
+
+2005-10-31 22:34  hecht
+
+	* [no log message]
+
+2005-10-31 22:29  hecht
+
+	*   add new item in highlight
+
+2005-10-31 17:45  hecht
+
+	*   - Correction de bug UMFPACK resolution complex problem
+	      before we  solve conj(A) x = b and not A x = b;
+	    - add tool to compute classical norm of array l1,l2,linfty
+	    x.l2 , x.l1, x.linfty (see sparse-cmatrix.edp) example
+	   - way of get all the coef of the matrix (no tested)
+
+2005-10-30 17:26  hecht
+
+	* [no log message]
+
+2005-10-30 17:06  hecht
+
+	*      correct problem in eigen value computation
+	       under Windows (infinite loop ), change
+	       compile optimization option of LAPACK routine
+	       see README_WINDOWS for full detail. ( version 2.0-1)
+
+2005-10-27 19:09  lehyaric
+
+	* Change MPI package name to keep up with Debian Unstable
+
+2005-10-27 18:22  lehyaric
+
+	* Places examples++-other last because it contains speed tests
+	  which take longer to run. There is no need to run these tests
+	  before making sure that the other, faster, tests work.
+
+2005-10-27 17:51  lehyaric
+
+	* - Improved the way configure finds libXxf86vm.a - Added support
+	  for types like "Vh<complex>[int]" in FreeFem++-cs highlighting
+
+2005-10-21 18:18  hecht
+
+	*   Try to correct problem in win32 version
+	    random trap on very big job (all.edp)
+
+2005-10-21 17:27  hecht
+
+	*  add .edp file in example++-eigen dir
+
+2005-10-20 16:22  lehyaric
+
+	* Compiling with the Cygwin DLL is now OK again
+
+2005-10-20 15:46  lehyaric
+
+	* configure.ac now dynamically checks for libXxf86vm.a
+
+2005-10-20 11:56  lehyaric
+
+	* New manual included in Debian packages
+
+2005-10-19 16:05  hecht
+
+	* [no log message]
+
+2005-10-19 16:01  hecht
+
+	*   correct doc file in Mac vercion
+
+2005-10-19 15:27  hecht
+
+	*   add link on Desktop to example
+
+2005-10-19 15:23  lehyaric
+
+	* HISTORY update
+
+2005-10-19 15:22  lehyaric
+
+	* Packaging version 2.
+
+2005-10-19 14:31  hecht
+
+	*  correct misspelling in previous  modif
+
+2005-10-19 14:20  hecht
+
+	*  coorect PB LogoUMPC
+
+2005-10-19 14:14  hecht
+
+	*   correct overflow in elem mat when assembling  skyline matrix
+	    passe to 2.0-0 version for the book.
+
+2005-10-18 17:27  hecht
+
+	* [no log message]
+
+2005-10-18 13:40  hecht
+
+	* [no log message]
+
+2005-10-18 13:29  hecht
+
+	*   add .cpp in load.link command in example++-load/Makefile.am
+
+2005-10-18 13:14  hecht
+
+	*  correct return type probleme LinearCG
+
+2005-10-18 11:56  hecht
+
+	*     correct same problem when passing array as argument.
+	      The error is if we forgot &  the array type when the array is
+	  delete
+	      at return time.
+
+2005-10-17 09:54  pironnea
+
+	* [no log message]
+
+2005-10-17 07:26  hecht
+
+	*   DOC upgrading
+
+2005-10-16 19:48  hecht
+
+	*
+	       correct small listake in window version
+
+2005-10-15 16:28  hecht
+
+	*  in configure in case off --enable_download don't locat to find
+	  an arpack library
+
+2005-10-14 11:52  hecht
+
+	*     doc book continuing
+
+2005-10-13 16:23  hecht
+
+	*     change the title page of the doc for publishing
+
+2005-10-13 11:48  pironnea
+
+	* [no log message]
+
+2005-10-13 11:34  pironnea
+
+	* [no log message]
+
+2005-10-12 22:22  hecht
+
+	* [no log message]
+
+2005-10-12 21:20  hecht
+
+	*  add forgotten  files
+
+2005-10-12 21:09  hecht
+
+	*   update HISTORY
+
+2005-10-12 21:08  hecht
+
+	*    Add makefile to build automaticaly the FreeFem++ version with
+	  dll
+	     under Windows
+
+2005-10-12 18:20  pironnea
+
+	* [no log message]
+
+2005-10-12 17:50  hecht
+
+	*   coorect freefem++doc.tex
+
+2005-10-12 16:09  hecht
+
+	*   just add mising eps file
+
+2005-10-12 15:42  hecht
+
+	*   do correct in the manual, make big change in the dynamic load,
+	  see the maunal
+	    and add random generator number randind32, randin31, ...
+	    see manual page 62 , section 5.6.
+
+2005-10-04 20:31  hecht
+
+	*   correct small mistake in load.cpp i -> j
+	    add _APPLE_ -> __APPLE__
+
+2005-10-04 18:17  hecht
+
+	*    change the version number to build new window version.
+
+2005-10-04 17:26  hecht
+
+	*   correct overflow integer array in elementary martix
+	    symptome random trap under win32 version on very long job
+	  (all.edp)
+
+2005-10-04 11:44  hecht
+
+	*   correct small proble in load.cpp
+
+2005-09-27 22:35  hecht
+
+	*  correct load.cpp to change suffix and prefix
+
+2005-09-26 18:03  hecht
+
+	*   small correction for buildng the Window version
+
+2005-09-26 14:42  hecht
+
+	*  add bin-win32 dir to bluid  win32 executable with .dll files
+
+2005-09-23 17:11  hecht
+
+	*   version 1.48-1
+	    split AFonction.cpp in AFonction.cpp and AFonction3.cpp for
+	    compilation uner cygwin and win32 (build dll).
+
+2005-09-22 12:01  lehyaric
+
+	* FreeFem++ works on Linux (Debian Testing) thanks to the following
+	  modifications:
+
+	  - src/ide/server.cpp is modified to call Compile() from
+	  runfreefem()	 the same way as mymain() (from lg.tab.ccp) does.
+
+	  - A new X11 required default library is added (libXxf86vm)
+
+	  - examples++-load/load.edp is modified back to load
+	  "myfunction.so" rather   than "myfunction". This probably means
+	  that a system-independant way   to specify dynamically-loaded
+	  functions remains to be found.
+
+2005-09-21 21:04  hecht
+
+	*  correct bug in  set array of array to array of reverse
+	   + add sum, min max of sub array.
+
+2005-09-21 14:52  lehyaric
+
+	* Added new examples++-chapt3 directory to Windows distribution
+
+2005-09-21 13:34  lehyaric
+
+	* server.cpp/runfreefem() updated according to lg.tab.cpp/mymain()
+	  modifications
+
+2005-09-09 15:27  hecht
+
+	* change the reconstruction of strversionnumber.cpp
+
+2005-09-09 15:19  hecht
+
+	*   create ref.edp file (empty today)
+
+2005-09-09 15:17  hecht
+
+	* add examples++-chapt3  stuff
+
+2005-09-09 14:30  hecht
+
+	*   add new include file
+
+2005-09-09 13:45  hecht
+
+	* correct missing .esp file in Makefile.am
+
+2005-09-09 13:27  hecht
+
+	* [no log message]
+
+2005-09-09 13:25  hecht
+
+	* add threehsv.eps file
+
+2005-08-31 15:53  hecht
+
+	*   add new arithmetic if expression   ( (a ? b : c) like in c++
+	    for basic type and for array with integer index (see array.edp)
+
+2005-08-30 16:56  hecht
+
+	* correct unmissing print in case of  verbosity = 0 .
+
+2005-08-30 14:58  hecht
+
+	*     correct color in window version
+
+2005-08-30 13:36  hecht
+
+	*  Add tool to change the color table of plot:
+	   see plot.edp  example:
+
+	  real[int] colorhsv=[	// color hsv model   4./6., 1 , 0.5, //
+	  dark blue   4./6., 1 , 1, //	blue   5./6., 1 , 1, //  magenta
+	  1, 1. , 1, //  red   1, 0.5 , 1 // light red	  ]; .....
+
+
+	  plot(uh,viso=viso(0:viso.n-1),value=1,fill=1,wait=1,hsv=colorhsv);
+
+2005-08-25 14:23  hecht
+
+	* add new freefem++ documentation freefem++doc.pdf ( from O.
+	  Pironneau) add vectorial instruction (int rel, complex or int)
+	  real[int] a(5),b(7),c(3);    ...     real[int] x([a,b,c]); //
+	  build vector size 5+7+3  from concatenation of a,b,c	   or	  x
+	  = [a,b,c,c] ; //  set vector x and resize    from concatenation
+	  of a,b,c,c	 [a,b,c] = x(0:14); // set the vector a,b,c form
+	  corresponding part of      //  the 3 parts are respectively
+	  x(0:4),x(5:11),x(11:13)
+
+2005-07-15 14:11  lehyaric
+
+	* Removed "restricted" option from FreeFem++-cs (the Web service
+	  does not need this option any more)
+
+2005-07-13 13:40  lehyaric
+
+	* Removed references to undefined class "TheSubFMortars" Added
+	  treatments for restricting "exec" keyword
+
+2005-07-13 12:10  hecht
+
+	*      OK, we can make dll under window.   first test
+	       try the scrip mkdll in dir src/fflib
+	       the example++-load/load.edp run if all the .dll and .exe
+	  files is put
+	       in the example dir.
+
+2005-07-12 11:22  hecht
+
+	*   Big modif to buil .dll under window ( it's hard)
+
+2005-07-07 09:50  hecht
+
+	*   find a new bug in cas if we declare new variable after a break,
+	  continue or a return
+	    correction in progress, change all the examples in this case.
+	    for full desciption of the bug,  see BUGS file.
+
+2005-07-05 16:24  hecht
+
+	*   correct problem in meshsplit function in case of final mesh
+	  with hole and
+	    initial mesh without hole.
+
+2005-07-05 13:11  hecht
+
+	*   change version to 1.47-3
+	    try to correct recurrente trap under window, (in progress)
+	    correct bug un meshpslit routine, bug threshold value (foregore
+	  a square)
+
+2005-07-05 11:48  lehyaric
+
+	* Tuning scripts for Debian amd64 packaging
+
+2005-07-04 17:29  lehyaric
+
+	* Re-enables PDF and PS documentation in Windows packaging after
+	  finding the proper Latex tools under Cygwin.
+
+2005-07-04 16:42  lehyaric
+
+	* Removed wrong dynamic linking option bug from configure.ac
+
+2005-07-04 16:26  lehyaric
+
+	* Added "-fPIC" in compilation options for 64 bit Linux
+
+2005-07-04 15:55  hecht
+
+	*    correct problem in antype castting under window
+
+2005-07-04 14:57  lehyaric
+
+	* Removed documentation from Windows executable package because PDF
+	  and PS builds do not work well under cygwin and the documentation
+	  is large.
+
+2005-07-04 13:59  lehyaric
+
+	* Changed Debian package dependency from "arpack++" to
+	  "libarpack++2-dev"
+
+2005-07-04 13:30  lehyaric
+
+	* Changing packaging procedure to include new FreeFem++-cs binaries
+
+2005-07-04 13:28  lehyaric
+
+	* Changing packaging procedure to include FreeFem++-cs binaries.
+
+2005-07-01 17:04  lehyaric
+
+	* Added 64bit debian package (amd64)
+
+2005-07-01 15:21  lehyaric
+
+	* Changed makefile to be able to run the Debian packaging
+	  procedure.
+
+2005-07-01 14:23  lehyaric
+
+	* Minor modifications in 'clean' goal.
+
+2005-07-01 12:08  lehyaric
+
+	* New package (1.47-2) currently being built
+
+2005-07-01 11:59  lehyaric
+
+	* Building a new package
+
+2005-07-01 11:43  hecht
+
+	*   correct problem with splitmesh with internal boundary
+	    previously the internal boundary was lost. (FH)
+
+2005-07-01 10:57  lehyaric
+
+	* Test examples++-tutorial/freeboundary-weak also disabled from
+	  regression tests for the same reason as
+	  examples++-tutorial/freeboundary (crashes).
+
+2005-07-01 10:34  lehyaric
+
+	* Disabling example examples++-tutorial/freeboundary.edp from
+	  regression tests because it does not run under Mingw ("Error move
+	  mesh triangles was reverse").
+
+2005-06-30 13:33  lehyaric
+
+	* Added "P0edge" in FreeFem++-cs highlighting
+
+2005-06-30 12:22  lehyaric
+
+	* Configuration procedure updated with new Cygin/Mingw parameters
+
+2005-06-30 12:08  lehyaric
+
+	* Standard libraries locations have changed under Cygwin/Mingw
+
+2005-06-30 08:10  hecht
+
+	*  add FE-medit.edp example to show  plot of FE a basis function
+	  (FH)
+
+2005-06-29 21:40  hecht
+
+	*  Add a new finite element P0edge to build new error indicator
+	   on edge, this finite element is constant around each edge.
+
+2005-06-29 15:00  lehyaric
+
+	* configure.ac now checks whether flex is compatible with bison.
+	  Otherwise it touches src/ide/hl_lex.c++ to make sure that flex
+	  won't be called on src/ide/hl_lex.l++
+
+2005-06-29 13:59  lehyaric
+
+	* Added some comments inside lex files about producing
+	  bison-compatible lexers (flex 2.5.31 should be used).
+
+2005-06-29 11:57  lehyaric
+
+	* Options bison-bridge and bison-locations are not recognized undef
+	  cygwin flex 2.5.4. No solution found for that problem yet.
+
+2005-06-29 11:52  lehyaric
+
+	* At the moment, FreeFem++ does not compile under Cygwin because of
+	  problems with gcc 3.4 and flex 2.5.4. These modifications are
+	  starting to address this.
+
+2005-06-29 10:10  lehyaric
+
+	* Added a new configure option "--disable-tagging" to speed up
+	  recompilations when debugging: with this option, the date and
+	  time tag is not rebuilt into the compiled program at each "make".
+
+2005-06-28 16:57  lehyaric
+
+	* Some comments rewritten
+
+2005-06-28 16:52  lehyaric
+
+	* The highlighting regression test for highlighting passes again
+	  (the problem was with multi-line comments ending with an odd
+	  number of stars, like '*******/').
+
+2005-06-28 14:01  hecht
+
+	* correct compilaion of ide under macos with version of xcode 2.1
+	  juste swap include in cs.cpp
+
+2005-06-28 11:44  hecht
+
+	*   add instruction to copy sub array in array
+
+2005-06-28 11:27  lehyaric
+
+	* Color-coding in FreeFem++-cs now colors multi-line comments (/*
+	  ... */) only up to the first '*/', and not the last '*/' as
+	  before. So examples++-tutorial/schwarz-gc.edp is correctly
+	  highlighted.
+
+2005-06-28 11:07  lehyaric
+
+	* FreeFem++-cs no longer crashes under Windows when loading a
+	  second EDP program
+
+2005-06-28 10:23  hecht
+
+	*   correct trouble in block matrix with transpiose sub matrix
+	    and cleaning output.
+
+2005-06-27 16:23  hecht
+
+	*  add tools to build bock matrices like
+	    A = [[ 0,A],[A',0]];
+	   see sparce-matrice.edp for an example.
+
+2005-06-23 13:27  hecht
+
+	*   to add Highlighting Patterns for nedit editor of .edp file., do
+	    nedit -import edp.nedit
+
+2005-06-19 21:09  hecht
+
+	*   Add way to bluid matrix with varf on different meshes.
+	    I add this for mortar computation. (FH)
+
+2005-06-10 16:33  hecht
+
+	*   coorect error  in add
+	      Global.Add("intallVFedges","(",new
+	  OneOperatorCode<CDomainOfIntegrationVFEdges>);
+
+2005-06-10 16:23  hecht
+
+	*   correct some spelling error
+	    try to add fft coding (in progress)
+	    in progress add Finite Volume element
+
+2005-06-09 15:48  hecht
+
+	* add computation of eigen value for complex matrix correct
+	  problem  complex linear solving  Ax=b with UMFPACK ( mistake
+	  between real and imag part)
+
+2005-06-02 15:56  hecht
+
+	* correct une function name in Pcrgraph.cpp
+
+2005-06-02 15:02  hecht
+
+	*     try to build a dll file  continuing.
+
+2005-06-02 13:58  hecht
+
+	* [no log message]
+
+2005-06-02 13:56  hecht
+
+	* correct doible name (CodeAlloc.cpp)  in fflib/Makefile.am
+
+2005-06-02 13:54  hecht
+
+	*   continuing solve problem to make a dll file  of freefem
+
+2005-06-01 22:52  hecht
+
+	* Do big modification in rgraph.hpp:	now all the graphical
+	  function are now store in pointer to a functio    and this
+	  pointer  "xxxx" is  set to fonction "xxxx_"	 all is do
+	  automaticaly, I have just add INGRAPH macro parameter    in files
+	  we is defined all the graphics function Pcrgraph.cpp, Xrgraph.cpp
+	  macrgraf.cpp	  etc ...     I  do that for dynamical link under
+	  window.  FH
+
+2005-05-12 11:16  hecht
+
+	*   correct  problem of  CFMessagePort: bootstrap_register()
+
+2005-05-11 15:17  hecht
+
+	* cosmetic change in PC version
+
+2005-05-11 11:20  hecht
+
+	*   correct problem in acoptim.m4 (g++-4 and -fast optim flags)
+
+2005-05-11 10:09  hecht
+
+	* add CXX and CC setting  in fltk  configure parameters
+
+2005-05-10 21:19  hecht
+
+	*   add include <errno.hpp> in some ide files  (FH)
+	    change some assert in ffassert ( un removable assert) to
+	  correct
+	    forgotted trap like (  memory problem)
+
+2005-05-04 22:29  hecht
+
+	* add  examples++tutorial/xyf file in window distribution
+
+2005-05-04 22:04  hecht
+
+	* add aile.msh in window distribution
+
+2005-05-04 21:59  hecht
+
+	* correct  line endding in aile.msh file (make as unix file)
+
+2005-05-04 21:13  hecht
+
+	* correct DOC/Makefile.am
+
+2005-05-04 21:01  hecht
+
+	* correct the DOC directory and do autoreconf CV
+	  ----------------------------------------------------------------------
+
+2005-05-04 19:56  hecht
+
+	*   clean the DOC directory to build manual-full and
+	    add make target to build automaticaly .pdf figures from .eps
+	  files
+
+2005-05-04 14:26  hecht
+
+	*   rebuil all.edp in examples++-tutorial (to remove ref to
+	  bug.edp)
+
+2005-05-04 13:09  hecht
+
+	*      do autoreconf to rebuild Makefile.in files
+
+2005-05-04 13:06  hecht
+
+	*      add  10^10 and  10.^10 operator (due to error in sphere
+	  .edp)
+	       and set the version number to 1.46-2
+
+2005-05-03 16:25  hecht
+
+	*   remove pascal in "\p  "  macos version
+
+2005-05-03 15:12  hecht
+
+	*   try to compile with de idm compiler xlc++
+	    work in progress
+	    remove  10^10 an 10.^10  (FH)
+
+2005-05-02 10:57  hecht
+
+	*     do correction for g++-4.0
+	      remove const in Expression type
+
+2005-04-27 14:23  hecht
+
+	*     do correction for g++ version 4.0  (new apple compiler on
+	  Tiger)
+	      small change in RNM and cadna  (FH)
+
+2005-04-22 11:58  lehyaric
+
+	* Debug checks are ok on Debian Testing
+
+2005-04-17 18:44  hecht
+
+	* add page to explain how to bluid weak form with Robin / Neumann
+	  coundary condition
+
+2005-04-16 21:36  hecht
+
+	*  add tool to solve variationnal inequality
+	   add change version to 1.46-1
+
+2005-04-15 22:48  hecht
+
+	*  the 2  new example have probleme with testhighlight.sh
+	   we disable the test in chech (FH)
+
+2005-04-15 22:06  hecht
+
+	* add tools to solve variationnal inequality   let d en array and A
+	  a square matrix (in .edp)    d=A.diag; // get the diagonal  of
+	  the matrix	A.diag = d; //set the diagonal	  set(A,solver=CG);
+	  // important to change precondiconning before solving
+
+2005-04-13 11:58  lehyaric
+
+	* IDE compiles again under MingW (an include file was missing)
+
+2005-04-12 18:37  hecht
+
+	*   add Modification Kohji Ohtsuka in a manual
+	    try too correct problem in eigen value in no symetric cas (??)
+
+2005-04-12 12:07  hecht
+
+	*  add flags to build unionkjack mesh on square
+	   example:  mesh Th=square(nn,mm,[x/ddx,y/ddy] ,flags=1);
+
+2005-04-05 15:08  lehyaric
+
+	* FreeFem+-ide compiles on MacOS X
+
+2005-04-05 14:33  lehyaric
+
+	* First version of FreeFem++-ide without sockets compiles under
+	  Linux
+
+2005-03-30 11:38  hecht
+
+	*   correct name of example  blakschol.edp in BlackSchole.edp
+	    add file in distribution archive (logo2.ico)
+
+2005-03-30 11:05  hecht
+
+	*      add  src/ide/testhighlight.sh in distributed file
+	  (src/ide/Makefile.am) FH
+
+2005-03-30 11:02  lehyaric
+
+	* Not regenerating HISTORY if not in a CVS working area
+
+2005-03-30 10:42  hecht
+
+	* correct some mistake in Makefile.am (in: examples++-load/,
+	  src/ide/)
+
+2005-03-30 09:31  hecht
+
+	*    adding 2 new files for allocation (forgot in previous commit)
+
+2005-03-29 23:13  hecht
+
+	*	Big change in code generation alloc  (work in progress)
+		   to remove all undelete pointer.
+		May be correct trap in arpack++ (alloction problem not
+	  sure,
+		  very strange thing)
+		Put 1-46-0 version number
+		Inforce compile in example-load
+		remark, all test work on my Mac, FH.
+
+2005-03-25 17:59  hecht
+
+	*   correct bug in trunc function:
+	      The bug is  the mesh have hole the we get a mesh with
+	  triangle in the hole:
+	       border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+	       border b(t=0,2*pi){ x=0.3+0.3*cos(t); y=0.3*sin(t);label=2;}
+	       mesh Thwithhole	 = buildmesh(a(50)+b(-30));
+	       mesh Th2=trunc(Thwithhole,1,split=2,label=2);
+
+2005-03-25 14:54  lehyaric
+
+	* Compiling ok on Linux
+
+2005-03-25 12:37  lehyaric
+
+	* Client and server merged into one unique executable to make sure
+	  that the client can find its server program, even through
+	  symbolic links.
+
+2005-03-17 14:15  lehyaric
+
+	* Included src/lglib/lg.tab.?pp in cleanregen.sh
+
+2005-03-17 14:13  lehyaric
+
+	* Replaced sem_getvalue() with a separate counter on MacOSX.
+
+2005-03-16 22:28  hecht
+
+	*   add tool to get number of mesh triangle  contening a point
+	  (x,y)
+	    or to get the region number
+	    example:
+	     int it00 = Th(0.55,0.6).nuTriangle; // get the number of Th's
+	  triangle contening (0.55,0.6)
+	     int nr00 = Th(0.55,0.6).region;; // get the region number of
+	  Th's triangle contening (0.55,0.6)
+
+2005-03-16 15:37  hecht
+
+	* correct prototype of StrVersionNumber in macrgraf
+
+2005-03-16 15:05  lehyaric
+
+	* Updates to the no-F77 no-C configuration
+
+2005-03-16 14:41  lehyaric
+
+	* Fortran and C compilers are now optional (if they are missing, we
+	  just don't compile the libraries that need them).
+
+2005-03-16 12:08  hecht
+
+	* correct error in prototype of StrVersionNumber and add precision
+	  to show the correct version number
+
+2005-03-13 16:32  hecht
+
+	* correct compilation problem in RNM (resize) with g++3.4 (add
+	  this->)
+
+2005-03-02 11:50  lehyaric
+
+	* Correcting compilation problem on RedHat
+
+2005-03-02 11:29  lehyaric
+
+	* New packaging including FreeFem++-cs features: fast graphics,
+	  grammar highlighting, error-line display
+
+2005-03-02 11:22  lehyaric
+
+	* FreeFem++-cs MinGW bug corrected: does not crash anymore when
+	  reading a file name from the command line
+
+2005-03-01 16:06  lehyaric
+
+	* Removed unnecessary #includes
+
+2005-03-01 15:33  lehyaric
+
+	* Simplified startup code. Hopefully, this will stop the MinGW
+	  segmentation fault bug (at startup when a filename is specified
+	  on the command line), but this is not proven yet.
+
+2005-03-01 14:21  lehyaric
+
+	* Segmentation violation error while loading a file from the
+	  command line in FreeFem++-cs. Debugging in progress.
+
+2005-02-28 18:06  lehyaric
+
+	* Now compiling fine under Cygwin
+
+2005-02-28 11:40  lehyaric
+
+	* Now compiling fine on MinGW
+
+2005-02-28 11:27  lehyaric
+
+	* Removed use of regex.h since it is not available under MinGW.
+
+2005-02-25 16:28  lehyaric
+
+	* Corrected a small compilation error.
+
+2005-02-25 16:14  lehyaric
+
+	* FreeFem++-cs: compile-time or runtime errors are now highlighted
+	  in the editor (the corresponding line number is extracted from
+	  all the server messages thanks to a regex).
+
+2005-02-25 13:10  lehyaric
+
+	* More coherency checks in configure.ac for a correct MPI
+	  installation.
+
+2005-02-25 10:50  lehyaric
+
+	* Added new "resize" reserved word into the highlighting grammar.
+
+2005-02-24 21:27  hecht
+
+	* correct the documentation
+
+2005-02-24 20:44  hecht
+
+	* correct  mistake in return type in complex mean and jump new
+	  function (FH)
+
+2005-02-24 15:33  hecht
+
+	* resize of array and matrices, continuing
+
+2005-02-24 15:32  hecht
+
+	* add resize of int,real and complex array or matrices, exemple:
+	  real [int] tab2=[1,2,3,3.14]; tab2.resize(10); // to set the new
+	  siez of array to 10
+
+2005-02-24 15:08  lehyaric
+
+	* Grammar-driven highlighting works. Regression tests for it are
+	  included in "make check". Include file and macros are not scanned
+	  during highlighting.
+
+2005-02-24 09:44  hecht
+
+	* correct bug  in array of complex FE function like
+	  Vh<complex>[int]  Wh(10); // where Vh is a fespace
+
+2005-02-23 15:51  lehyaric
+
+	* Highlighting test procedure not ready for regression tests yet:
+	  disabled from "make check".
+
+2005-02-23 15:40  lehyaric
+
+	* Renamed some FreeFem++ tokens to avoid collisions with
+	  system-dependant defines.
+
+2005-02-23 15:37  lehyaric
+
+	* Properly compiled lex and yacc source, for machines that do not
+	  have working versions of lex or yacc.
+
+2005-02-23 15:35  lehyaric
+
+	* No CVS keyword in lex and yacc source files to avoid recompiling
+	  them after a "cvs commit" on machines that do not have proper
+	  versions of this software.
+
+2005-02-23 15:22  lehyaric
+
+	* "testhighlight" regression tests now work up to (but not
+	  including) array.edp
+
+2005-02-23 14:50  lehyaric
+
+	* Added highlighting grammar files into CVS, in case the compiling
+	  environment does not include a working version of bison or lex.
+
+2005-02-23 13:44  lehyaric
+
+	* The HISTORY file is now created from CVS logs thanks to "cvs2cl".
+	  Previous HISTORY items are saved as HISTORY_BEFORE_2005.
+
+2005-02-23 12:45  lehyaric
+
+	*     FreeFem++-cs: grammar-driven syntax highlighting works on
+	      (examples++-tutorial/...) Laplace.edp, adapt.edp and
+	      adaptindicatorP1.edp (ALH)
+
+2005-02-23 10:49  hecht
+
+	* add jump and mean of complex function.
+
+2005-02-22 17:37  lehyaric
+
+	* FreeFem++-cs: grammar-driven highlighting procedure works on
+	  (examples++-tutorial/) Laplace.edp and adapt.edp.
+
+2005-02-18 20:13  lehyaric
+
+	* FreeFem++-cs syntax highlighting is now highlights keywords based
+	  on their location in the input buffer, which removes any need for
+	  backtracking in the bison grammar. The grammar is now much
+	  simpler thanks to this.
+
+2005-02-18 18:00  hecht
+
+	* ajoute d'un test d'erreur
+
+2005-02-17 16:54  lehyaric
+
+	* Progressive updates to the highlighting grammar.
+
+2005-02-17 16:02  lehyaric
+
+	* Added new developments
+
+2005-02-17 15:05  lehyaric
+
+	* Compiles on MacOS X.
+
+2005-02-17 15:05  lehyaric
+
+	* Grammar-driven highlighting now includes macros (but it stops
+	  highlighting a macro at the first "/").
+
+2005-02-17 14:27  lehyaric
+
+	* First working version of syntax highlighting through grammar file
+	  in FreeFem++-cs editor.
+
+2005-02-16 18:13  hecht
+
+	* 3D continuing +  truc
+
+2005-02-16 13:44  lehyaric
+
+	* Socket buffering is now limited to avoid random communication
+	  errors.
+
+2005-02-16 12:29  lehyaric
+
+	* Buffered socket writes implemented in FreeFem++-cs
+
+2005-02-15 14:30  lehyaric
+
+	* Corrected comments
+
+2005-02-15 14:19  lehyaric
+
+	* FreeFem++-cs binary TCP flux optimized.
+
+2005-02-14 17:22  lehyaric
+
+	* Socket communication between client and server in FreeFem++-cs
+	  has been translated into binary format for speed.
+
+2005-02-14 11:50  lehyaric
+
+	* Small spelling mistake
+
+2005-02-11 22:20  hecht
+
+	* complet DOC
+
+2005-02-11 18:00  hecht
+
+	*    add 2 new quadrature formular qf7pT and qf9pT with
+	  respectively 15 and 21 points
+	     add  P2b a new finite element  : P2 + bubble
+
+2005-02-11 15:57  lehyaric
+
+	* Now drag'n'drop and copy/paste work concurrently in the
+	  FreeFem++-cs editor window.
+
+2005-02-08 17:26  hecht
+
+	* add 3D stuff in quadtree
+
+2005-02-08 16:52  lehyaric
+
+	* Updated TODO list for FreeFem++-cs
+
+2005-02-08 16:18  lehyaric
+
+	* Dynamic loading is now disabled if dlopen() does not link
+	  properly (bug reported by Haiko Etzel)
+
+2005-02-08 15:18  hecht
+
+	* add  buildmesh example with nbvx=  named parameter
+
+2005-02-08 14:23  lehyaric
+
+	* New Debian package
+
+2005-02-04 16:47  lehyaric
+
+	* Now checks that FLTK is compiled with threads before accepting
+	  it.
+
+2005-02-04 16:24  lehyaric
+
+	* Patchs de configuration proposés par Thierry Thomas pour FreeBSD
+	  intégrés.
+
+2005-02-04 15:30  hecht
+
+	* beginning of	3D version
+
+2005-02-01 17:17  lehyaric
+
+	* Compiles on MacOS X
+
+2005-02-01 16:49  lehyaric
+
+	* New script to remove generated files (in order to prevent CVS
+	  conflicts)
+
+2005-02-01 16:04  lehyaric
+
+	* FreeFem++-cs compiling and running on Windows with fully blocking
+	  sockets
+
+2005-02-01 15:01  lehyaric
+
+	* Cosmetic change
+
+2005-02-01 14:38  lehyaric
+
+	* FreeFem++-cs works with fully-blocking sockets on Linux.
+	  src/fflib/strversionnumber.m4 added to distribution list.
+
+2005-02-01 12:40  lehyaric
+
+	* Still problems with blocking communication. But FreeFem++-cs
+	  compiles
+
+2005-02-01 12:20  lehyaric
+
+	* Reverting FreeFem++-cs to blocking IO because of Microsoft
+	  Windows problems
+
+2005-01-31 15:21  lehyaric
+
+	* New version number in makefiles.
+
+2005-01-31 15:17  lehyaric
+
+	* Default version number now includes package number.  Build date
+	  changes at each build.
+
+2005-01-31 14:07  lehyaric
+
+	* Problem with busy waiting under Windows solved.  Change in
+	  version numbering variables (see configure.ac).
+
+2005-01-29 10:15  hecht
+
+	* end g++3.4 correction on hydre CV:
+	  ----------------------------------------------------------------------
+
+2005-01-29 09:56  hecht
+
+	* correct some compile error with g++ 3.4 CV
+	  ----------------------------------------------------------------------
+
+2005-01-28 14:52  lehyaric
+
+	* Corrected "cannot open '-psn_xxx' document" error on MacOS.
+
+2005-01-28 14:00  lehyaric
+
+	* FreeFem++-cs compiles+runs ok on MacOS X
+
+2005-01-28 13:27  lehyaric
+
+	* Windows packaging for new improved socket implementation
+
+2005-01-28 12:01  lehyaric
+
+	* ecompiling ok on Windows.
+
+2005-01-28 11:28  lehyaric
+
+	* Still trying to resolve discrepancies between Linux and Windows
+	  sockets.
+
+2005-01-27 19:01  hecht
+
+	* correct ; placement in if ...
+
+2005-01-27 18:30  hecht
+
+	* pour mettre les makefile.in ok
+
+2005-01-27 18:14  hecht
+
+	* mac install continuing
+
+2005-01-27 18:07  hecht
+
+	* continuing coorect of macos application installation
+
+2005-01-27 17:16  lehyaric
+
+	* Reorganising socket communication in FreeFem++-cs because of
+	  instabilities on Windows.
+
+2005-01-27 10:59  lehyaric
+
+	* Drag'n'drop works with Mozilla Firefox for Windows.  FreeFem++-cs
+	  documentation updated.
+
+2005-01-26 23:34  hecht
+
+	* add .app.tgz of macos application
+
+2005-01-26 23:31  hecht
+
+	* correct pb dvi pdf in manual.tex
+
+2005-01-26 23:25  hecht
+
+	* correct stuff in dist generation correct trouble in configure.ac
+	  and tar.gz file
+
+2005-01-26 23:22  hecht
+
+	* correct problem dvi and pdf chose make lot of small change in
+	  configure.ac ...
+
+2005-01-26 17:50  hecht
+
+	* coorect macos X application)
+
+2005-01-26 17:35  lehyaric
+
+	* Drag'n'drop works with mozilla-firefox under X11.
+
+2005-01-26 13:58  lehyaric
+
+	* In configure.ac, PACKAGE_VERSION is already used by autoconf, so
+	  we create 'FREEFEM_PACKAGING' instead.
+
+2005-01-26 12:11  lehyaric
+
+	* Drag'n'drop is now working in FreeFem++-cs.
+
+2005-01-26 11:30  lehyaric
+
+	* Drag'n'drop being implemented.
+
+2005-01-24 11:28  hecht
+
+	*   add  named parameter nbtx=..  in buildmesh	function to change
+	  the default
+	     maximal number of vertex in the build mesh.
+
+2005-01-20 20:10  hecht
+
+	*     Correct a segfault if second derivative of test function
+	  exist in
+	      problem definition.  The Change in problem.cpp:
+	      resize : KN<double> buf(Vh.MaximalNbOfDF()*3*Vh.N);
+	      to     : KN<double>
+	  buf(Vh.MaximalNbOfDF()*last_operatortype*Vh.N);
+
+2005-01-20 10:39  hecht
+
+	* correct parameter passing () in macro argument correct linear
+	  combination of sparce matrix.
+
+2005-01-11 13:38  lehyaric
+
+	* FreeFem++-cs compiles with cygwin. It is not tested yet. File
+	  paths may be a problem.
+
+2005-01-10 22:19  hecht
+
+	* change c i C in speedtest.sh to get Cholesky cpu time
+
+2005-01-10 14:03  hecht
+
+	* add forgotten file .pdf
+
+2005-01-10 12:07  hecht
+
+	* window problem continue
+
+2005-01-10 10:41  hecht
+
+	*  correct ????  configure.ac under window
+
+2005-01-07 17:05  hecht
+
+	*  correct expand string in macro
+
+2005-01-07 15:55  hecht
+
+	* add config.h.in
+
+2005-01-07 12:25  lehyaric
+
+	* Cosmetic change
+
+2005-01-07 11:50  hecht
+
+	* correct initialisation in solve in case of un set variable
+
+2005-01-06 21:58  hecht
+
+	*    rewrite the macro generation tool to be more to suppress some
+	  bug
+	     in argument subtition
+	     correct error in line numbering in case of newline in string
+	     cosmetic change in output
+
+2005-01-05 23:10  hecht
+
+	* update HISTORY file
+
+2005-01-05 21:50  hecht
+
+	* correct segmentation violation  error if some FE variable is un
+	  set before solving problem because we use this variable  to
+	  initialise data.
+
+2005-01-04 16:58  hecht
+
+	* continuing	   int1d(Th,3,qfe=qf1pElump)(
+
+2005-01-04 16:45  hecht
+
+	* add qf1pElump   new quadrature formular in int1d() ...
+

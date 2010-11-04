@@ -1,0 +1,14 @@
+CXX = g++
+MPICXX = /usr/local/bin/mpic++
+ac_ct_CXX = g++
+CC = gcc
+MPICC = /usr/local/bin/mpicc
+YACC = bison -y
+ac_ct_CC = gcc
+CXXFLAGS = -g  -m64 -fPIC -DDRAWING -DBAMG_LONG_LONG -DCHECK_KN -fno-inline  -fexceptions -fPIC
+CFLAGS = -g  -m64 -fPIC -fPIC
+FCFLAGS = 
+FFMETIS_CFLAGS = 
+X_CFLAGS = 
+WGET = wget --no-check-certificate
+WIN32DLLTARGET = 

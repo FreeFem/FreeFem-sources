@@ -1,0 +1,69 @@
+//  a new coding  methode de schwarz 
+//  -------------------------------
+// F.Hecht december 2003
+// ----------------------------------
+//  to test the broadcast instruction 
+//  add add the stop test 
+//  ---------------------------------
+if ( mpisize != 2 ) {
+cout << " sorry number of processeur !=2 " << endl;
+exit(1);}
+verbosity=3;
+real pi=4*atan(1);
+int inside = 2;
+int outside = 1;
+border a(t=1,2){x=t;y=0;label=outside;};
+border b(t=0,1){x=2;y=t;label=outside;};
+border c(t=2,0){x=t ;y=1;label=outside;};
+border d(t=1,0){x = 1-t; y = t;label=inside;};
+border e(t=0, pi/2){ x= cos(t); y = sin(t);label=inside;};
+border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=outside;}; 
+int n=4;
+mesh Th0,Th1;
+
+if (mpirank == 0) 
+ Th0 = buildmesh( a(5*n) + b(5*n) + c(10*n) + d(5*n));
+else
+ Th1 = buildmesh ( e(5*n) + e1(25*n) );
+
+broadcast(processor(0),Th0);
+broadcast(processor(1),Th1);
+
+fespace Vh1(Th1,P1);
+fespace Vh0(Th0,P1);
+Vh0 u0,v0;	
+Vh1 u1=0,v1;
+
+int i=0;
+
+problem pb0(u0,v0,init=i,solver=Cholesky) = 
+    int2d(Th0)( dx(u0)*dx(v0)+dy(u0)*dy(v0) )
+  + int2d(Th0)( -v0) + on(inside,u0 = u1)  +    on(outside,u0= 0 ) ;
+
+problem pb1(u1,v1,init=i,solver=Cholesky) = 
+    int2d(Th1)( dx(u1)*dx(v1)+dy(u1)*dy(v1) )
+  + int2d(Th1)( -v1) + on(inside ,u1 = u0) +    on(outside,u1 = 0 ) ;
+
+
+for ( i=0 ;i< 20; i++) 
+{ 
+  cout << mpirank << " looP " << i << endl;
+  if (mpirank == 0)
+    pb0; 
+   else
+    pb1;
+   broadcast(processor(0),u0[]);
+   broadcast(processor(1),u1[]);
+   real err0,err1;
+   if (mpirank == 0)
+     err0 = int1d(Th0,inside)(square(u0-u1)) ;
+   else 
+     err1= int1d(Th1,inside)(square(u0-u1)) ;
+   broadcast(processor(0),err0);
+   broadcast(processor(1),err1);  
+   real err= sqrt(err0+err1);
+   cout <<" err = " << err << " err0 = " << err0 << ", err1 = " << err1 << endl;
+   if(err<1e-3) break;
+};
+ if (mpirank==0)  
+    plot(u0,u1,ps="u0-u1.eps");
