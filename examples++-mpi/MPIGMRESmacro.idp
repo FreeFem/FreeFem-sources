@@ -30,18 +30,22 @@ for(int j=0;j<n;++j)
 
 macro   ISendRecvAny(comm,jpart,Si,Ri)
 { /* sorry no Irecv of complex objet ...*/
- 	int n= jpart.n;
- 	if(vdebug) cout << mpirank << " --ISendRecvAny " << n << endl;
-	mpiRequest[int] rq(n);
-	
- 	for (int j=0;j<n;++j)
-       Irecv(processor(jpart[j],comm,rq[j]),Ri[j]);
-    if(vdebug) cout << mpirank << " ++SendRecvAny " << n << endl;
-
- 	for (int j=0;j<n;++j)
-       processor(jpart[j],comm) << Si[j];
-    for (int j=0;j<n;++j)
-	   int k= mpiWaitAny(rq);
+  int n= jpart.n,nn=n+n;
+  if(vdebug) cout << mpirank << " --ISendRecvAny " << n << endl;
+  mpiRequest[int] rq(nn);
+  
+  for (int j=0;j<n;++j)
+    Irecv(processor(jpart[j],comm,rq[j]),Ri[j]);
+  if(vdebug) cout << mpirank << " ++ISendRecvAny " << n << endl;
+  
+  for (int j=0;j<n;++j)
+    Isend(processor(jpart[j],comm,rq[n+j]),Si[j]);
+for (int j=0;j<nn;++j)
+  {
+  int k= mpiWaitAny(rq);
+  if(vdebug)
+    cout << " ++ISendRecvAny wait: get " << k << endl;
+  }
 }
 //EOM
 

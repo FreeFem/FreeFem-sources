@@ -33,7 +33,7 @@ struct MPIrank;
  class Serialize {  
    // we store a refcounter in the pointer p a adresse p-sizeof(long)
    // so we can use the copy constructor
-   private: 
+   protected: 
    
   size_t lg;
   const char *what;
@@ -43,7 +43,16 @@ struct MPIrank;
     lg(lgg), what(wht) , p((new char[lg+sizeof(long)])+sizeof(long)) 
    { //cout << " begin count()=0 " << endl;
     count()=0; }
-  
+     void resize(size_t lgn) { // Add nov 2010 FH of asyncrone recv MPI ... 
+	 if (lgn>lg) 
+	   {
+	     char *p0= new char[lgn+sizeof(long)];
+	     memcpy(p0,p-sizeof(long),lg+sizeof(long));
+	     delete [] (p-sizeof(long));
+	     p= p0+sizeof(long);
+	   }
+	 lg=lgn;
+     }
   ~Serialize(){ if(count()--==0) delete [] (p-sizeof(long));}
   size_t size() const { return lg;}
   //  mpi routine
@@ -80,9 +89,11 @@ struct MPIrank;
      k += sizeof(T);
    }
    
- private:
+ protected:
    long & count() const  { return * (long*) (void*) (p-sizeof(long));}
+ private:
    void operator=(Serialize & s) ; // no affectation
+
 
  };
 #endif
