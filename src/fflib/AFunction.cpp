@@ -780,7 +780,7 @@ inline double walltime(){
 }
 
 long atoi(string* p) {return atoi(p->c_str());}// add march 2010
-long atof(string* p) {return atof(p->c_str());}// add march 2010
+double atof(string* p) {return atof(p->c_str());}// add march 2010
 
 void Init_map_type()
 {
@@ -1254,7 +1254,7 @@ void Init_map_type()
      Global.Add("tanh","(",new OneOperator1<double>(tanh));
 
     Global.Add("atoi","(",new OneOperator1<long,string*>(atoi));// add march 2010
-    Global.Add("atof","(",new OneOperator1<long,string*>(atof));// add march 2010
+    Global.Add("atof","(",new OneOperator1<double,string*>(atof));// add march 2010
     
 #ifdef HAVE_ATANH
      Global.Add("atanh","(",new OneOperator1<double>(atanh));

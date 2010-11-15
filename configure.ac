@@ -1017,10 +1017,6 @@ then
     AC_MSG_RESULT($ff_cblas_libs)
     LIBS="$ff_save_libs"	
 fi
-if test "$ff_blas_ok" = yes 
-then
-    echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
-fi
 #echo "LIBS = " $LIBS
 # If all else fails, download!
 
@@ -1095,6 +1091,11 @@ then
 	ff_cblas_h=no)
     
 fi
+if test "$ff_blas_ok" = yes 
+then
+    echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
+fi
+
 # end of BLAS -------------------
 
 

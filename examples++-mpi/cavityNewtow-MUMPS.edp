@@ -1,5 +1,6 @@
-load "real_SuperLU_DIST_FreeFem"
-string ssparams="nprow=1, npcol="+mpisize;;
+load "MUMPS_FreeFem"
+
+string ssparams="";//nprow="+npr+", npcol="+npc;
 real ttgv=1e10;
 
 /*

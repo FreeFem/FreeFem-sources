@@ -29,7 +29,7 @@ include  "cube.idp"
 
 int njpart=0; // nb of part with intersection (a jpart) with ipart without ipart
 int[int] jpart(npart); //  list of jpart ..
-int ksplit=1;
+int ksplit=2;
 int nloc = 10;//5*sqrt(real(npart));
 if(ipart==0)  cout << " Final N=" << ksplit*nloc << endl;
 int[int,int] LL=[[1,1],[1,1],[1,1]];

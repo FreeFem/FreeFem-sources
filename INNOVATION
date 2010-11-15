@@ -1,3 +1,5 @@
+  - correct WHERE_LIBRARY-config  for blas find in configure
+  - correct atof 
 v 3.10 
   - add true Domain Decomposition example in 2d and 3d. 
       see    MPIGMRES2D.edp	  MPIGMRES3D.edp in MPI  examples 
