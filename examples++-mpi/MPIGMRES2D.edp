@@ -196,7 +196,7 @@ fespace Whji(Thji,Pk);//
 
  // construction of the mesh intersect i,j part 
 for(int jp=0;jp<njpart;++jp)
-    aThij[jp]  = trunc(Thi,pij[jp]>0,label=10); // mesh of the supp of pij
+    aThij[jp]  = trunc(Thi,pij[jp]>0.01,label=10); // mesh of the supp of pij
     
    
   
@@ -210,11 +210,11 @@ for(int jp=0;jp<njpart;++jp)
   aThji[jp]  = trunc(aThji[jp],1,split=ksplit);
 Thi =   trunc(Thi,1,split=ksplit);
 
-if(vdebug) // seem  ok 
+//if(vdebug) // seem  ok 
 for(int jp=0;jp<njpart;++jp)
 {
-	cout << ipart << " " << jpart[jp] << "  " << aThij[jp].nv << " iijj ::: " << endl; 
-    cout << jpart[jp] << " " << ipart << "  " << aThji[jp].nv << " jjii ::: " << endl; 
+	cout << ipart << " " << jpart[jp] << "  " << aThij[jp].nv << " ** " << aThij[jp].area << " iijj ::: " << endl; 
+        cout << jpart[jp] << " " << ipart << "  " << aThji[jp].nv << " ** " << aThji[jp].area << " jjii ::: " << endl; 
 }
  if(ipart==0) cout << " *** end build mesh  intersection  " << endl;
 // construction of transfert  matrix
