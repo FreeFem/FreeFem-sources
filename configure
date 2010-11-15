@@ -12241,10 +12241,6 @@ rm -f core conftest.err conftest.$ac_objext \
 $as_echo "$ff_cblas_libs" >&6; }
     LIBS="$ff_save_libs"
 fi
-if test "$ff_blas_ok" = yes
-then
-    echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
-fi
 #echo "LIBS = " $LIBS
 # If all else fails, download!
 
@@ -12394,6 +12390,11 @@ done
 
 
 fi
+if test "$ff_blas_ok" = yes
+then
+    echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
+fi
+
 # end of BLAS -------------------
 
 
