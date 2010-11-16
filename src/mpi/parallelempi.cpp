@@ -1897,36 +1897,36 @@ long mpiRank(fMPI_Comm  cmm) {
 
 AnyType InitializeGroup(Stack stack,const AnyType &x){
     MPI_Group *g=*PGetAny<fMPI_Group>(x);
-    *g=0;
-    MPI_Comm_group(MPI_COMM_WORLD, g);
+    *g=MPI_GROUP_NULL;
+     MPI_Comm_group(MPI_COMM_WORLD, g);
     return  g;
 }
 AnyType DeleteGroup(Stack stack,const AnyType &x){
     MPI_Group *g=*PGetAny<fMPI_Group>(x);
-    MPI_Group_free(g);
+    if(g && (*g != MPI_GROUP_NULL))MPI_Group_free(g);
     return  Nothing;
 }
 AnyType InitializeComm(Stack stack,const AnyType &x){
     MPI_Comm *comm= *PGetAny<fMPI_Comm>(x);
-    *comm=0;
+    *comm=MPI_COMM_NULL;
     MPI_Comm_dup(MPI_COMM_WORLD, comm);
     return  comm;
 }
 AnyType DeleteComm(Stack stack,const AnyType &x){
     MPI_Comm *comm= *PGetAny<fMPI_Comm>(x);
-    if(comm && (*comm != MPI_COMM_NULL))
-    MPI_Comm_free(comm);
+    if(comm && (*comm != MPI_COMM_NULL && *comm != MPI_COMM_WORLD))// add MPI_COMM_WORLD FH 11/2010 FH
+      MPI_Comm_free(comm);
     return  Nothing;
 }
 AnyType InitializeRequest(Stack stack,const AnyType &x){
     MPI_Request *comm=*PGetAny<fMPI_Request>(x);
-    *comm=0;
+    *comm=MPI_REQUEST_NULL;
     
     return  comm;
 }
 AnyType DeleteRequest(Stack stack,const AnyType &x){
     MPI_Request *comm=*PGetAny<fMPI_Request>(x);
-    if(comm) MPI_Request_free(comm);
+    if(comm && ( *comm!=MPI_REQUEST_NULL )) MPI_Request_free(comm);
     return  Nothing;
 }
 //  Hack to Bypass a bug in freefem FH  ... 

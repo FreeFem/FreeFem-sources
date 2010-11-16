@@ -32,14 +32,14 @@
  */
 
 
-
+#include "mpi.h"
 #include  <iostream>
 using namespace std;
 
 #include "ff++.hpp"
 #include "CGNL.hpp"
 //#include "gmres.hpp"
-#include "mpi.h"
+
 
 template<class R,class DJ,class P> 
 int NLCG(const DJ & dJ,const P & C,KN_<R> &x,const int nbitermax, double &eps,long kprint,MPI_Comm * )

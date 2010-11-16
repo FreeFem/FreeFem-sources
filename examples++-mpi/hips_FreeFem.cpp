@@ -30,7 +30,7 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
-
+#include <mpi.h>
 #include  <iostream>
 using namespace std;
 
@@ -38,7 +38,7 @@ using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
 #include "MatriceCreuse_tpl.hpp"
-#include "mpi.h"
+
 
 extern "C" {
   #include "hips.h"  

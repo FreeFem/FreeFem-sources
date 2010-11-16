@@ -1,5 +1,6 @@
 v 3.10-1
-  correct pb of computation of area, lenbord in mesh type in some case .
+  - correct MPI for MPI icc on gnome 
+  - correct pb of computation of area, lenbord in mesh type in some case .
   - correct WHERE_LIBRARY-config  for blas find in configure
   - correct atof 
 v 3.10 

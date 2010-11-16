@@ -12,13 +12,14 @@ func Pk=P2;
 int sizeoverlaps=2; // size of overlap
 bool dplot=0;
 
-
-mpiComm comm(mpiCommWorld,0,0);// trick : make a no split mpiWorld 
-// remark bug if def. via: func comm= mpiComm; // at end ???? FH ..
+//mpiComm commW(mpiCommWorld,0,0);// trick : make a no split mpiWorld 
+func commW= mpiCommWorld; // ok 
+//macro  commW()  mpiCommWorld //
+// remark bug if def. via: func commW= mpiComm; // at end ???? FH ..
  
-int npart=mpiSize(comm); // total number of partion
+int npart=mpiSize(commW); // total number of partion
 //int mpirank=1; 
-int ipart= mpiRank(comm); // current partition number 
+int ipart= mpiRank(commW); // current partition number 
 
 load "metis"
 include "AddLayer2d.idp" 
@@ -28,7 +29,9 @@ int njpart=0; // nb of part with intersection (a jpart) with ipart without ipart
 int[int] jpart(npart); //  list of jpart ..
 int ksplit=4;
 int nloc = 50*sqrt(real(npart));
-if(ipart==0)  cout << " Final N=" << ksplit*nloc << endl;
+if(ARGV.n>2) nloc = atoi(ARGV[2]); 
+if(ARGV.n>3) ksplit = atoi(ARGV[3]); 
+if(ipart==0)  cout << " Final N=" << ksplit*nloc << " n coarse  = " << nloc << " n slpit =" << ksplit <<  endl;
 int[int] ll=[1,1,1,1]; 
 mesh Thg=square(nloc,nloc,label= ll);
 mesh Thi,Thin;//  with overlap, without olverlap  
@@ -49,7 +52,7 @@ Phg  part;
  if(npart>1 && ipart==0)
    metisdual(nupart,Thg,npart); 
    
- broadcast(processor(0,comm),nupart);
+ broadcast(processor(0,commW),nupart);
  for(int i=0;i<nupart.n;++i)
     part[][i]=nupart[i];
   
@@ -202,7 +205,7 @@ for(int jp=0;jp<njpart;++jp)
   
 //  send/recv  the i,j mesh intersect 
 
-ISendRecvAny(comm,jpart,aThij,aThji);
+ISendRecvAny(commW,jpart,aThij,aThji);
 
 for(int jp=0;jp<njpart;++jp)
   aThij[jp]  = trunc(aThij[jp],1,split=ksplit);
@@ -210,7 +213,7 @@ for(int jp=0;jp<njpart;++jp)
   aThji[jp]  = trunc(aThji[jp],1,split=ksplit);
 Thi =   trunc(Thi,1,split=ksplit);
 
-//if(vdebug) // seem  ok 
+if(vdebug) // seem  ok 
 for(int jp=0;jp<njpart;++jp)
 {
 	cout << ipart << " " << jpart[jp] << "  " << aThij[jp].nv << " ** " << aThij[jp].area << " iijj ::: " << endl; 
@@ -242,7 +245,7 @@ for(int jp=0;jp<njpart;++jp)
 InitU(njpart,Whji,Thji,aThji,Usend)  // initU(n,Vh,Th,aTh,U)
 InitU(njpart,Whij,Thij,aThij,Vrecv) // ...
 if(ipart==0) cout << " *** end init  data for send/revc  " << endl;
-// CheckUV(comm,jpart,Usend,Vrecv)
+// CheckUV(commW,jpart,Usend,Vrecv)
 
 Whi ui,vi; 
 
@@ -250,7 +253,7 @@ func bool Update(real[int] &ui, real[int] &vi)
 {
   for(int j=0;j<njpart;++j)
     Usend[j][]=sMj[j]*ui; 
-   SendRecvUV(comm,jpart,Usend,Vrecv)
+   SendRecvUV(commW,jpart,Usend,Vrecv)
    vi = Pii*ui;
   for(int j=0;j<njpart;++j)
     vi += rMj[j]*Vrecv[j][]; 
@@ -283,15 +286,15 @@ func bool Update(real[int] &ui, real[int] &vi)
   Whi u=0,v;
   verbosity=1;
   real t0=mpiWtime();
-  MPIAffineGMRES(DJ0,u[],eps=1.e-10,nbiter=100,comm=comm,dimKrylov=100,verbosity=ipart ? 0: 50);
+  MPIAffineGMRES(DJ0,u[],eps=1.e-10,nbiter=100,comm=commW,dimKrylov=100,verbosity=ipart ? 0: 50);
   
   real errg =1,umaxg;
   { real umax = u[].max,umaxg;
-   real[int] aa=[umax], bb(1);
-   mpiAllReduce(aa,bb,comm,mpiMAX);
+   real[int] aa=[umax], bb(aa);
+   mpiAllReduce(aa,bb,commW,mpiMAX);
    errg=bb[0];
    if(ipart==0)
-    cout << " umax global  = " << bb[0] << " Wtime = " << mpiWtime() - t0 << " s " << endl;
+    cout << " umax global  = " << bb[0] << " Wtime = " << mpiWtime() - t0 << " s " << " " << umax << endl;
   }
   // after a classical Shwarz algo with fixe point ..
  for(int iter=0;iter <1; ++iter)
@@ -308,7 +311,7 @@ func bool Update(real[int] &ui, real[int] &vi)
    real err = v[].linfty;
    real umax = u[].max;
    real[int] aa=[err,umax], bb(2);
-   mpiAllReduce(aa,bb,comm,mpiMAX);
+   mpiAllReduce(aa,bb,commW,mpiMAX);
    errg = bb[0];
    umaxg = bb[1];
    
