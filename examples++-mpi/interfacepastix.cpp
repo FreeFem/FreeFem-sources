@@ -3,7 +3,7 @@
 */
 //ff-c++-LIBRARY-dep: double_pastix   blas parmetis metis scotch  mpi fc
 //ff-c++-cpp-dep: 
-
+#include <mpi.h>
 #include  <iostream>
 using namespace std;
    
@@ -24,7 +24,7 @@ using namespace std;
 #include <sys/time.h>
 
 
-#include <mpi.h>
+
 
 // #include <ctype.h>
 // #include <stdio.h>

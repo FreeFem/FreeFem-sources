@@ -38,6 +38,7 @@
   /bin/sh ff-mpic++ zSuperLU_DIST.cpp -I/Users/morice/librairie/SuperLU_DIST_2.3/SRC/ -L/Users/morice/librairie/openmpi/lib/ -lmpi -lopen-pal -lopen-rte -L/Users/morice/librairie/PATCHVECLIB/ -lwrapperdotblas -framework veclib -L/Users/morice/librairie/ParMetis-3.1/ -lparmetis -lmetis -L/Users/morice/librairie/SuperLU_DIST_2.3/lib/ -lsuperlu_dist_2.3
 
 */
+#include <mpi.h>
 #include  <iostream>
 using namespace std;
 
@@ -47,7 +48,6 @@ using namespace std;
 
 //#include "lex.hpp"
 #include "MatriceCreuse_tpl.hpp"
-#include "mpi.h"
 #include "superlu_zdefs.h"
 #include "ffsuperludistoption.hpp"
 

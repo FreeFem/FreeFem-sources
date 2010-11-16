@@ -32,6 +32,7 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
+#include <mpi.h>
 
 #include  <iostream>
 using namespace std;
@@ -42,7 +43,7 @@ using namespace std;
 
 //#include "lex.hpp"
 #include "MatriceCreuse_tpl.hpp"
-#include "mpi.h"
+
 #include "superlu_ddefs.h"
 #include "ffsuperludistoption.hpp"
 

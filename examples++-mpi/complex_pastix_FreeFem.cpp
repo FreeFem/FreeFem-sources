@@ -33,6 +33,8 @@
 /*
   Interface entre freefem++ et pastix
 */
+#include <mpi.h>
+
 #include  <iostream>
 using namespace std;
    
@@ -53,7 +55,6 @@ using namespace std;
 #include <sys/time.h>
 
 
-#include <mpi.h>
 #include "pastix_long_complex.h"
 
 #undef memFree_null
@@ -137,7 +138,7 @@ void read_datafile_pastixff(const string &datafile, int &mpi_flag, pastix_int_t 
 
   if(!m_File)
     {
-      printf("error in reading filename %s\n",&filename);
+      printf("error in reading filename %s\n",filename);
     }
 
   fgets(szbuff,MAX_CHAR_PER_LINE,m_File);
