@@ -769,7 +769,7 @@ long MPIrank::Send(Fem2D::Mesh *  a) const {
       cout << " MPI << (mesh *) " << a << endl;
     ffassert(a);
     SendWMeshd<Mesh> *rwm= new SendWMeshd<Mesh>(this,&a);
-    cout << " ... "<< endl;
+    //cout << " ... "<< endl;
     if( rwm->DoSR() ) delete rwm;
     return MPI_SUCCESS;
   }
