@@ -39,7 +39,8 @@ KN<long> * partmetis(Stack s,KN<long> * const & part,Mesh * const & pTh,long con
      METIS_PartMeshNodal(&nt, &nv, elmnts, &etype , &numflag, &nparts, &edgecut, epart, npart);
     else
      METIS_PartMeshDual(&nt, &nv, elmnts, &etype , &numflag, &nparts, &edgecut, epart, npart);
-    printf("  %d-way Edge-Cut: %7d, Balance: %5.2f\n", nparts, nve, ComputeElementBalance(nt, nparts, epart));
+    if(verbosity)
+      printf("  --metis: %d-way Edge-Cut: %7d, Balance: %5.2f Nodal=0/Dual %d\n", nparts, nve, ComputeElementBalance(nt, nparts, epart,NO));
     part->resize(nt);
     *part=epart;
     return part;
