@@ -11959,7 +11959,7 @@ done
 
 if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
-    echo fftw3 LD  -lffw3   >>$ff_where_lib_conf
+    echo fftw3 LD  -lfftw3   >>$ff_where_lib_conf
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fftw_execute in -ltet" >&5
 $as_echo_n "checking for fftw_execute in -ltet... " >&6; }

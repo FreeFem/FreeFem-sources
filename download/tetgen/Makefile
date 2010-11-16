@@ -20,7 +20,7 @@ tetgen_VERSION=1.4.3
 tetgen: FAIRE 
 
 
-FAIRE:$(SRCDIR)/FAIT cxxflags 
+FAIRE:install $(SRCDIR)/FAIT cxxflags 
 	touch FAIRE
 
 

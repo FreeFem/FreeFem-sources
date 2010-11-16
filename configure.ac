@@ -914,7 +914,7 @@ AC_CHECK_LIB(fftw3,fftw_execute,ff_fftw_ok=yes)
 AC_CHECK_HEADERS(fftw3.h,ff_fftw_h=yes, ff_fftw_h=no)
 if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
-    [echo fftw3 LD  -lffw3   >>$ff_where_lib_conf]
+    [echo fftw3 LD  -lfftw3   >>$ff_where_lib_conf]
 fi
 dnl ---------------------------
 dnl   Looking for the tetgen
