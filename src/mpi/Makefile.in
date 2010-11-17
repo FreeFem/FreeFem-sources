@@ -651,7 +651,7 @@ uninstall-am: uninstall-binPROGRAMS
 	uninstall-am uninstall-binPROGRAMS
 
 ff-mpirun:ff-mpirun.in Makefile
-	../config.status  --file=$@:$@.in
+	../../config.status  --file=$@:$@.in
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
