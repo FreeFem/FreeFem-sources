@@ -1,4 +1,5 @@
 v 3.10-1
+  - add ff-mpirun script to simplify the launch of FreeFem++-mpi version
   - correct MPI for MPI icc on gnome 
   - correct pb of computation of area, lenbord in mesh type in some case .
   - correct WHERE_LIBRARY-config  for blas find in configure
