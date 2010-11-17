@@ -552,7 +552,7 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am
 
 
-all-local:$(LIST_COMPILE)
+all-local:$(LIST_COMPILE) freefem++.pref
 	echo "finish compile load mpi solver !"
 
 .cpp.$(DYLIB_SUFFIX): ff-c++
@@ -563,6 +563,10 @@ install-exec-local::
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
 	-for i in $(LIST_COMPILE); do \
 	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
+
+freefem++.pref:
+	echo loadpath = \"../examples++-load/\" >freefem++.pref
+	echo loadpath += \"./\" >>freefem++.pref
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
