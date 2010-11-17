@@ -738,7 +738,7 @@ ff_mpi=no)
 		# computation here, because it must only be set when the
  		# parallel program is compiled (see src/mpi/Makfile.am)
 		ff_mpiprog="FreeFem++-mpi${EXEEXT}"
-   		  AC_SUBST(MPIPROG,$ff_mpiprog)
+   		  AC_SUBST(MPIPROG,$ff_mpiprog ff-mpirun)
    		  AC_SUBST(MPIRUN,$MPIRUN)
                   AC_SUBST(MPICXX,$ff_mpicxx)
 	else
