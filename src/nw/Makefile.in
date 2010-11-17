@@ -290,6 +290,7 @@ top_srcdir = @top_srcdir@
 
 # To create statically linked executables (see configure.ac)
 CXXLD = $(STATICTOOL) $(CXX)
+EXTRA_DIST = ff-mpirun.in
 ffglut_SOURCES = ../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads.cpp \
 ../Graphics/ffthreads.hpp \
 ../femlib/fem.cpp ../femlib/Mesh3dn.cpp ../femlib/Mesh2dn.cpp  ../femlib/Mesh1dn.cpp ../femlib/GQuadTree.cpp  ../femlib/FQuadTree.cpp \
@@ -727,7 +728,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-binPROGRAMS install-exec-local
 
 install-html: install-html-am
 
@@ -775,14 +776,18 @@ uninstall-am: uninstall-binPROGRAMS
 	distclean-generic distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-binPROGRAMS \
 	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-binPROGRAMS
+	install-exec install-exec-am install-exec-local install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-binPROGRAMS
 
+install-exec-local::ff-mpirun
+	$(INSTALL_SCRIPT) ff-mpirun  $(DESTDIR)${bindir}	
+ff-mpirun:ff-mpirun.in Makefile
+	../config.status  --file=$@:$@.in
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

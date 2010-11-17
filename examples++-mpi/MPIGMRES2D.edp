@@ -286,7 +286,8 @@ func bool Update(real[int] &ui, real[int] &vi)
   Whi u=0,v;
   verbosity=1;
   real t0=mpiWtime();
-  MPIAffineGMRES(DJ0,u[],eps=1.e-10,nbiter=100,comm=commW,dimKrylov=100,verbosity=ipart ? 0: 50);
+  real epss=1e-6;
+  MPIAffineGMRES(DJ0,u[],eps=epss,nbiter=100,comm=commW,dimKrylov=100,verbosity=ipart ? 0: 50,veps=epss);
   
   real errg =1,umaxg;
   { real umax = u[].max,umaxg;
@@ -294,7 +295,7 @@ func bool Update(real[int] &ui, real[int] &vi)
    mpiAllReduce(aa,bb,commW,mpiMAX);
    errg=bb[0];
    if(ipart==0)
-    cout << " umax global  = " << bb[0] << " Wtime = " << mpiWtime() - t0 << " s " << " " << umax << endl;
+    cout << " umax global  = " << bb[0] << " Wtime = " << mpiWtime() - t0 << " s " << " " << umax << " resid =" << abs(epss) << endl;
   }
   // after a classical Shwarz algo with fixe point ..
  for(int iter=0;iter <1; ++iter)

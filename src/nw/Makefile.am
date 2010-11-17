@@ -4,7 +4,7 @@
 
 # To create statically linked executables (see configure.ac)
 CXXLD=$(STATICTOOL) $(CXX)
-
+EXTRA_DIST=ff-mpirun.in
 bin_PROGRAMS=FreeFem++ FreeFem++-nw @FFGLUTPROG@
 EXTRA_PROGRAMS=ffglut
 ffglut_SOURCES=../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads.cpp \
@@ -22,3 +22,7 @@ FreeFem___DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
 
 LDADD=../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
 INCLUDES=-I../fflib -I../Graphics -I../.. -I../femlib 
+install-exec-local::ff-mpirun
+	$(INSTALL_SCRIPT) ff-mpirun  $(DESTDIR)${bindir}	
+ff-mpirun:ff-mpirun.in Makefile
+	../config.status  --file=$@:$@.in
