@@ -19,5 +19,5 @@ LDADD=../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
 AM_CXXFLAGS=-DPARALLELE
 INCLUDES=-I../fflib -I../Graphics -I../femlib
 ff-mpirun:ff-mpirun.in Makefile
-	../config.status  --file=$@:$@.in
+	../../config.status  --file=$@:$@.in
 
