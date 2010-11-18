@@ -675,6 +675,7 @@ MPICC
 MPI_LIB
 MPI_LIB_DIRS
 MPI_INCLUDE
+MPISCRIPT
 MPIPROG
 MPIRUN
 MPICXX
@@ -11421,7 +11422,9 @@ $as_echo "$MPIRUN" >&6; }
 		# computation here, because it must only be set when the
  		# parallel program is compiled (see src/mpi/Makfile.am)
 		ff_mpiprog="FreeFem++-mpi${EXEEXT}"
-   		  MPIPROG="$ff_mpiprog ff-mpirun"
+   		  MPIPROG="$ff_mpiprog"
+
+   		  MPISCRIPT="ff-mpirun"
 
    		  MPIRUN=$MPIRUN
 
