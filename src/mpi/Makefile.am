@@ -9,7 +9,10 @@ CXXLD=$(STATICTOOL) $(CXX)
 
 # MPI may not be installed. Checked in configure.ac
 bin_PROGRAMS=$(MPIPROG)
-EXTRA_PROGRAMS=FreeFem++-mpi ff-mpirun
+bin_SCRIPTS=$(MPISCRIPT)
+EXTRA_PROGRAMS=FreeFem++-mpi
+EXTRA_SCRIPTS=ff-mpirun
+EXTRA_DIST=ff-mpirun.in
 
 FreeFem___mpi_SOURCES=../Graphics/sansrgraph.cpp ../lglib/mymain.cpp   parallelempi.cpp	\
 ../lglib/lg.tab.cpp
