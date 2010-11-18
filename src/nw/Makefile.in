@@ -290,7 +290,6 @@ top_srcdir = @top_srcdir@
 
 # To create statically linked executables (see configure.ac)
 CXXLD = $(STATICTOOL) $(CXX)
-EXTRA_DIST = ff-mpirun.in
 ffglut_SOURCES = ../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads.cpp \
 ../Graphics/ffthreads.hpp \
 ../femlib/fem.cpp ../femlib/Mesh3dn.cpp ../femlib/Mesh2dn.cpp  ../femlib/Mesh1dn.cpp ../femlib/GQuadTree.cpp  ../femlib/FQuadTree.cpp \
