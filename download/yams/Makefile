@@ -64,17 +64,18 @@ $(PACKAGE):
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 clean-local: 
+	-rm FAIRE FAIT
 	cd $(YAMS_DIR); make  clean;
 	-rm $(YAMS_OBJDIR)/libyams.a
 
 clean: clean-local
 	-rm ff-flags
-	-rm -rf $(YAMS_DIR)
 	-rm $(SRCDIR)/$(INSTALL)/lib/libyams.a
 	-rm $(SRCDIR)/$(INSTALL)/include/*freeyams*.h
 	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams
+	-rm -rf $(YAMS_DIR)
 	-rm -rf $(SRCDIR)
-	-rm FAIT
+	-rm FAIT FAIRE
 
 ff-flags: ../Makefile 
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags

@@ -10,7 +10,7 @@
 #include "mshmet.h"
 #include "compil.date"
 
-/*char     idir[5]     = {0,1,2,0,1};*/
+//char     idir[5]     = {0,1,2,0,1};
 mytime   mshmet_ctim[TIMEMAX];
 
 
@@ -206,7 +206,7 @@ int MSHMET_mshmet(int intopt[7], double fopt[4], pMesh mesh, pSol sol){
   signal(SIGSEGV,mshmet_excfun);
   signal(SIGTERM,mshmet_excfun);
   signal(SIGINT,mshmet_excfun);
-  atexit(mshmet_endcod);
+  //atexit(mshmet_endcod);
 
   tminit(mshmet_ctim,TIMEMAX);
   chrono(ON,&mshmet_ctim[0]);
@@ -260,10 +260,15 @@ int MSHMET_mshmet(int intopt[7], double fopt[4], pMesh mesh, pSol sol){
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %.2f sec.\n",gttime(mshmet_ctim[3]));
   
   fprintf(stdout,"\n  %s\n   END OF MODULE MSHMET \n  %s\n",MS_STR,MS_STR);
-
+  /*
   sol->outn="zzzz";
   if ( !saveMet(sol,&mesh->info,sol->outn) )  exit(1);
+  */
+  if ( mesh->info.imprim )
+    mshmet_endcod();
+
   fprintf(stdout,"\n  %s\n   END OF MODULE MSHMET \n  %s\n",MS_STR,MS_STR);
   if ( mesh->info.imprim < -4 || mesh->info.ddebug )  M_memDump();
+
   return(0);
 }

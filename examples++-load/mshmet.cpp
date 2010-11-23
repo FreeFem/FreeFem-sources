@@ -8,8 +8,8 @@
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
 //   for automatic  compilation with ff-c++
-//ff-c++-LIBRARY-dep:  mshmet
-//ff-c++-cpp-dep: 
+//ff-c++-LIBRARY-dep:  mshmet libMesh
+//ff-c++-cpp-dep:
 //  
 
 /* 
@@ -239,7 +239,7 @@ void metric_mshmet_to_ff_metric(MSHMET_pSol sol, MSHMET_Info *info, KN<double> &
     // isotrope
     for (k=1; k<=sol->np; k++) {
       metric[ k-1 ] = sol->met[k]; 
-      cout << "k " << k << " " << sol->met[k] << endl;
+      //cout << "k " << k << " " << sol->met[k] << endl;
     }
   }
   else{
@@ -654,7 +654,7 @@ AnyType mshmet2d_Op::operator()(Stack stack)  const
   if( nargs[2]  ) metric_mshmet( mshmetsol, &mshmetmesh->info, metric);
 
   int res = MSHMET_mshmet(intopt, fopt, mshmetmesh, mshmetsol);
-  cout << " problem with mshmet :: error " <<  res << endl; 
+  
   if( res > 0){
     cout << " problem with mshmet :: error " <<  res << endl; 
     exit(1);

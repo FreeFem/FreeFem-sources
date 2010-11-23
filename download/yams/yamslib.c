@@ -131,6 +131,7 @@ void yams_printval() {
 
 
 int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int infocc ) {
+  hash=NULL;
   float       declic;
   float       ridge=RIDG;
   int         option,absopt,ret,memory,corr;
@@ -144,7 +145,7 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
   signal(SIGSEGV,yams_excfun);
   signal(SIGTERM,yams_excfun);
   signal(SIGINT,yams_excfun);
-  atexit(yams_endcod);
+  //atexit(yams_endcod);
 
   /* init time and calls */
   tminit(ctim,TIMEMAX);
@@ -363,7 +364,7 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
   }
 
 
-  yams_printval();
+  if ( imprim ) yams_printval();
 
 
   /* set adjacencies  */
@@ -531,10 +532,9 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
   }
   if ( abs(imprim) > 1 )  primsg(0001);
 
-  /* write resulting mesh */
-    // a voir 
+  /* write resulting mesh */ // pertinence freefem++ ??? J. Morice
   if ( sm->type & M_OUTPUT ) {
-    printf("freefem++:: outputfile yams\n");
+    
     chrono(ON,&ctim[5]);
     out = yams8(sm,sm->outfile,absopt);
     chrono(OFF,&ctim[5]);
@@ -544,7 +544,7 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
     out=1;
   }
 
-  yams_printval();
+  if ( imprim ) yams_printval();
 
   /* print CPU requirements */
   chrono(OFF,&ctim[0]);
@@ -553,10 +553,12 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
     pritim(sm,option);
   }
 
+  if ( imprim ) yams_endcod();
+  
   M_free(hash);
-
-  ///* check for mem leaks */
-  //if ( imprim < 0 && M_memLeak() )  M_memDump();
+  hash=NULL;
+  /* check for mem leaks */
+  if ( imprim < 0 && M_memLeak() )  M_memDump();
 
 #ifdef DISTRIB
   /* free token */

@@ -39,12 +39,19 @@ $(SRCDIR)/FAIT:$(SRCDIR)
 install:$(SRCDIR)/FAIT 
 	cp $(MSHMET_SRCDIR)/mshmetlib.h  $(SRCDIR)/$(INSTALL)/include/mshmetlib.h
 	cp $(MSHMET_OBJDIR)/libmshmet.a  $(SRCDIR)/$(INSTALL)/lib/libmshmet.a
+	cp ../../src/libMesh/libMesh.a  $(SRCDIR)/$(INSTALL)/lib/libMesh.a
+	mkdir -p $(SRCDIR)/$(INSTALL)/include/libMesh
+	cp ../../src/libMesh/*h  $(SRCDIR)/$(INSTALL)/include/libMesh
+
+
 
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	make install;  \
 	echo mshmet  LD '-L@DIR@/lib -lmshmet'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
 	echo mshmet INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
+	echo libMesh  LD '-L@DIR@/lib -lMesh'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.libMesh ;\
+	echo libMesh INCLUDE '-I@DIR@/include/libMesh'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.libMesh ;\
 	fi
 
 
@@ -69,10 +76,11 @@ clean-local:
 clean: clean-local
 	-rm ff-flags
 	-rm -r $(MSHMET_DIR)
-	-rm $(SRCDIR)/$(INSTALL)/lib/mshmet/*.a
-	-rm $(SRCDIR)/$(INSTALL)/include/mshmet/*.h
-	-rm -r $(SRCDIR)/$(INSTALL)/lib/mshmet
-	-rm -r $(SRCDIR)/$(INSTALL)/include/mshmet
+	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.libMesh $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet 
+	-rm $(SRCDIR)/$(INSTALL)/include/mshmetlib.h
+	-rm $(SRCDIR)/$(INSTALL)/lib/libmshmet.a
+	-rm -r $(SRCDIR)/$(INSTALL)/lib/libMesh.a
+	-rm -r $(SRCDIR)/$(INSTALL)/include/libMesh
 	-rm -rf $(SRCDIR)
 	-rm FAIT
 
