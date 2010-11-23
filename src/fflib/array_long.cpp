@@ -120,6 +120,7 @@ void initArrayOperatorlong()
     Add<KN<String> *>("n",".",new OneOperator1<long,KN<String> *>(get_n));  
     extern   KN<String> *pkarg;
     Global.New("ARGV",CPValue<KN<String> >(*pkarg));// add FH mars 2010
+    Global.Add("toZarray","(",new OneOperator_2KN_<long>);
     
 }
 
