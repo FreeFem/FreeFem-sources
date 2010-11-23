@@ -732,6 +732,7 @@ AnyType yams_Op::operator()(Stack stack)  const
   free(yamsmesh);
 
   *mp=mps;
+  Add2StackOfPtr2FreeRC(stack,Th3_T);
   return SetAny<pmesh3>(Th3_T);
 }
 

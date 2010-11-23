@@ -1,0 +1,200 @@
+
+load "msh3"
+load "tetgen"
+load "mshmet"
+load "freeyams"
+load "mmg3d"
+load "medit"
+
+include "MeshSurface.idp"
+
+
+ 
+int nn  = 6;
+
+cout << toiarray([1,1,1,1]) <<endl;
+mesh Th = square(nn,nn,region=0,label=toEarray([1,1,1,1]));
+
+
+real zmin=0,zmax=1;
+mesh3 Th3=buildlayers(Th,nn,
+  zbound=[zmin,zmax],
+  labelmid=toZarray([1,1]), 
+  reffaceup = toZarray([0,1]),
+  reffacelow = toZarray([0,1]));
+
+Th3 = trunc(Th3,(x<0.5) | (y < 0.5) | (z < 0.5) ,label=1);
+medit("Th3",Th3,wait=1);
+
+fespace Vh(Th3,P1);
+Vh u,v,usol;
+
+macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
+
+problem Lapl(u,v,solver=CG) = int3d(Th3)( Grad(u)'*Grad(v) )  // ') for emacs 
+  -int3d(Th3)( 1*v ) + on(1,u=0);
+
+// ==================
+// parametre mshmet
+// ==================
+/*
+loptions= a vector of integer of size 7. This vector contains the integer parameters of mshmet.
+loptions(0): normalization level (default 0).
+loptions(1): isotropic parameters (default 0). 1 for isotropic metric results otherwise
+0.
+loptions(2): level set parameters (default 0). 1 for building level set metric otherwise
+0.
+loptions(3): debug parameters (default 0). 1 for turning on debug mode otherwise 0.
+loptions(4): level of verbosity (default 10).
+loptions(5): number of regularization's iteration of solutions given (default 0).
+loptions(6): previously metric parameter (default 0). 1 for using previous metric oth-
+erwise 0.
+*/
+int[int] MSHloptions=[0,1,0,0,10,0,0];
+/*
+doptions= a vector of double of size 4. This vector contains the real parameters of mshmet_ dop-
+tions(0): hmin : min size parameters (default 0.01).
+doptions(1): hmax : max size parameters (default 1.0).
+doptions(2): eps : tolerance parameters ( default 0.01).
+doptions(3): width : relative width for Level Set (0 < w < 1) ( default 0.05).
+*/
+real[int] MSHdoptions=[0.01,0.1,0.01,0];
+
+// remarque baisse de la tolerance sur mshmet ==> besoin de raffiner plus grand
+/*
+metric= a vector of double. This vector contains an initial metric given to mshmet. The
+structure of the metric vector is described in the next paragraph.
+ */
+// conclusion :: 
+//
+
+//=======================
+//  parametre mmg3d
+//====================== 
+// autre parametres : metric, displacement, displVect
+int[int] options=[1,0,64,0,0,3];
+  /* optimization parameter : 0 (optimization), 1 (adaptation with metric), 4 splitting, 9 moving+adaptation */  
+// attention a la place memoire, on donne la valeur en Mb
+int MMG3dmemory=1000;
+
+// conclusion :: Le parametre le plus important est la "metrique" pour mmg3d
+// ==> Il est important de bien connaitre mshmet
+
+//============================
+//   parametre freeyams
+//============================
+// autre parametre : metric
+/*
+loptions= a vector of integer of size 13. This vectors contains the integer options of FreeYams.
+loptions(0): anisotropic parameter (default 0). If you give an anisotropic metric 1
+otherwise 0.
+loptions(1): Finite Element correction parameter (default 0). 1 for no Finite Element
+correction otherwise 0.
+loptions(2): Split multiple connected points parameter (default 1). 1 for splitting mul-
+tiple connected points otherwise 0
+6
+loptions(3): maximum value of memory size in Mbytes (default -1: the size is given by
+freeyams).
+loptions(4): set the value of the connected component which we want to obtain. (Re-
+mark: freeyams give an automatic value at each connected component).
+loptions(5): level of verbosity
+loptions(6): Create point on straight edge (no mapping) parameter (default 0). 1 for
+creating point on straight edge otherwise 0.
+loptions(7): validity check during smoothing parameter. This parameter is only used
+with No-Shrinkage Vertex Smoothing optimization (optimization option parameter 9).
+1 for No validity checking during smoothing otherwise 0.
+loptions(8): number of desired's vertices (default -1).
+loptions(9): number of iteration of optimizations (default 30).
+loptions(10): ridge detection parameter (default 0) . 1 for detecting the ridge on the
+mesh otherwise 0. The ridge denition is given in the parameter doptions(12).
+loptions(11): vertex smoothing parameter (default 0). 1 for smoothing the vertices
+otherwise 0.
+loptions(12): Optimization level parameter (default 0).
+0 : mesh optimization (smoothing+swapping)
+1 : decimation+enrichment adaptated to a metric map.
+-1: decimation adaptated to a metric map.
+2 : decimation+enrichment with a Hausdorf-like method
+-2: decimation with a Hausdorf-like method
+4 : split triangles recursively.
+9 : No-Shrinkage Vertex Smoothing
+*/
+int[int] FYamsloptions=[0,1,1,-1,0  ,10,0,0,-1,30   ,0,0,1];
+
+FYamsloptions(0) = 0;   // 1: anisotropic parameter, 0: isotropic parameter
+FYamsloptions(1) = 1;   // Finite Element correction parameter
+FYamsloptions(2) = 1;   // split multiple connected point
+FYamsloptions(3) = -1;  // memory in Mb
+FYamsloptions(4) = 0;    // obligatoire == 0 : mettre le paramétre par défaut 
+FYamsloptions(5) = 10;  // verbosity level
+FYamsloptions(6) = 0;   // straight edge
+FYamsloptions(7) = 0;   // with optimization option parameter 9
+FYamsloptions(8) = -1;  // number of desired vertices
+FYamsloptions(9) = 30;  // optimization iteration
+FYamsloptions(10) = 0;  // ridge detection on/off 
+FYamsloptions(11) = 0;  // smoothing vertex parameter (permet de mettre de points sur une courbure et non sur un segment)   
+FYamsloptions(12) = 1;  // optimiztion level parameter
+
+/*
+doptions= a vector of double of size 11. This vectors contains the real options of freeyams.
+doptions(0): Set the geometric approximation (Tangent plane deviation) (default 0.01).
+doptions(1): Set the lamda parameter (default -1. ).
+doptions(2): Set the mu parmeter (default -1. ).
+doptions(3): Set the gradation value (Mesh density control) (default 1.3).
+doptions(4): Set the minimal size(hmin) (default -2.0: the size is automatically com-
+puted).
+doptions(5): Set the maximal size(hmax) (default -2.0: the size is automatically com-
+puted).
+doptions(6): Set the tolerance of the control of Chordal deviation (default -2.0).
+doptions(7): Set the quality of degradation (default 0.599).
+doptions(8): Set the declic parameter (default 2.0).
+doptions(9): Set the angular walton limitation parameter (default 45 degree).
+doptions(10): Set the angular ridge detection (default 45 degree).
+*/
+
+real[int] FYamsdoptions=[0.01,-1,-1,1.3,-2,   -2,-2,0.599,2.,45,  45];
+
+FYamsdoptions(0)= 0.01;
+FYamsdoptions(1)= -1;
+FYamsdoptions(2)= -1; 
+FYamsdoptions(3)= 1.3;
+FYamsdoptions(4)= -2.0;  // hmin
+FYamsdoptions(5)= -2.0;  // hmax
+FYamsdoptions(6)=-2.0;  // chordal deviation
+FYamsdoptions(7)= 0.599; //
+FYamsdoptions(8)= 2.0;   // declic parameter
+FYamsdoptions(9)= 45;   // angular walton limitation (in degree)
+FYamsdoptions(10)= 45; // angular ridge detection (in degree)
+
+real sizeofvolume = 0.001; //1./6*(1.*nn)^3;
+real[int] ldomain=[0.1,0.1,0.1,10,sizeofvolume];//,0.5,0.5,0.5,11,sizeofvolume];
+//real[int] lhole=[0.5,0.5,0.5];
+
+for(int ii=0; ii<4; ii++)
+{
+//cout << "ii =" << ii << endl;
+  Lapl;
+  
+  cout << "mshmet -1- " << ii << endl;
+  real[int] bb=mshmet(Th3,u,loptions=MSHloptions,doptions=MSHdoptions);
+  cout << bb << endl;
+  cout << "freeyams --- " << ii << endl;
+  Th3 = freeyams(Th3,loptions=FYamsloptions,doptions=FYamsdoptions,metric=bb);
+  //medit("Th3",Th3,wait=1);
+  cout << "tetg --- " << ii << endl;
+  Th3 = tetg(Th3,switch="pqaACCYY",nbofregions=1,regionlist=ldomain); 
+  medit("Th3",Th3,wait=1);
+  Lapl;
+  cout << "mshmet -2- " << ii << endl;
+  real[int] bb1=mshmet(Th3,u,loptions=MSHloptions,doptions=MSHdoptions);
+  cout << "mmg3d --- " << ii << endl;
+  Th3 = mmg3d(Th3,options=options,memory= MMG3dmemory,metric=bb1);
+  // In parameter metric := metric at the new vertices of Th3
+  cout << " size metric " << bb1.n << endl;  
+  options(0)=0;  // Optimize the 3d-mesh with mmg3d
+  Th3 = mmg3d(Th3,options=options,memory= MMG3dmemory,metric=bb1);
+  options(0)=1;  // Optimize for a given metric 
+}
+Lapl;
+medit("solution-newmesh",Th3,u,wait=1);
+
+
