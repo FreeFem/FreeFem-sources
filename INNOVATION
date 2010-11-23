@@ -1,4 +1,6 @@
 v 3.10-1
+  - at convection function form formal array to int,real,complex array
+   (resp.     toZarray, toRarray, toCarray)
   - correct ffrandom.cpp to read /dev/random to get a true random seed
     srandomdev 
   - add ff-mpirun script to simplify the launch of FreeFem++-mpi version
