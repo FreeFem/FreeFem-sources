@@ -1,3 +1,5 @@
+v 3.10-2
+  - coorect configure to scotch compilati on gnone (phtread) 
 v 3.10-1
   - at convection function form formal array to int,real,complex array
    (resp.     toZarray, toRarray, toCarray)
