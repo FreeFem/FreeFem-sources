@@ -393,10 +393,10 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   KN<double> *pmetric=new KN<double>(Th3.nv);
   KN<double> &metric=*pmetric;
   metric=0.;
-  if(fopt.N() != 7 )
-    ExecError(" Size of array of doption are wrong != 7");
+  if(intopt.N() != 7 )
+    ExecError(" Size of array of loption are wrong != 7");
   if(fopt.N() != 4 )
-    ExecError(" Size of array of ioption are wrong != 4");
+    ExecError(" Size of array of doption are wrong != 4");
   if( intopt[1]==0){ 
     metric.resize(6*Th3.nv);
     metric=0.;
