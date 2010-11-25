@@ -32,19 +32,21 @@ macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
 problem Lapl(u,v,solver=CG) = int3d(Th3)( Grad(u)'*Grad(v) )  // ') for emacs 
   -int3d(Th3)( 1*v ) + on(1,u=0);
 
-
-int[int] MSHloptions=[0,1,0,0,10,0,0];
-real[int] MSHdoptions=[0.0001,0.1,0.01,0];
+int nbregu=3;
+int[int] MSHloptions=[0,1,0,0,verbosity,nbregu,0];
+real[int] MSHdoptions=[1e-2,0.3,0.01,0];
 
 for(int ii=0; ii<4; ii++)
 {
   Lapl;
   h=0;
-  h[]=mshmet(Th3,u,loptions=MSHloptions,doptions=MSHdoptions);
+  cout <<" u min, max = " <<  u[].min << " "<< u[].max << endl;
+  real cc=(u[].max-u[].min);
+  h[]=mshmet(Th3,u/cc,loptions=MSHloptions,doptions=MSHdoptions);
   cout <<" h min, max = " <<  h[].min << " "<< h[].max << endl;
   medit("h",Th3,h,wait=1);
   plot(h,wait=1);
-  MSHdoptions[0]*= 0.8;
+  MSHdoptions[0]*= 0.6;
   cout << " Th3" << Th3.nv < " " << Th3.nt << endl;
   Th3=tetgreconstruction(Th3,switch="raAQ",sizeofvolume=h*h*h/6.);
   medit("U-adap-iso",Th3,u,wait=1);

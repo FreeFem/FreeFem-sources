@@ -24,7 +24,7 @@ blacs:FAIRE
 
 
 FAIRE:$(SRCDIR)/FAIT
-	$(make) WHERE
+	$(MAKE) WHERE
 	touch FAIRE
 
 Bmake.inc: ../../config.status	Makefile Bmake-blacs.inc
