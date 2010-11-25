@@ -385,7 +385,7 @@ void init_glumesh2D()
   
   //Dcl_Type<listMesh3>();
   //typedef Mesh3 *pmesh3;
-  
+  if(verbosity>2)
     cout << " glumesh2D " ;
   //cout << " je suis dans Init " << endl; 
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );

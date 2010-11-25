@@ -327,6 +327,7 @@ static bool SetUMFPACK()
 
 void init_UMFPack_solver()
 {
+  if(verbosity>2) 
   cout << " UMFPACK ";
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
