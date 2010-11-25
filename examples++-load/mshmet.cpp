@@ -279,7 +279,7 @@ public:
   mshmet3d_Op(const basicAC_F0 &  args) : sol( args.size()-1 )
   {
     
-    cout << "mshmet3d"<< endl;
+    //cout << "mshmet3d"<< endl;
     args.SetNameParam(n_name_param,name_param,nargs);
     eTh=to<pmesh3>(args[0]); 
     dim=3;
@@ -439,6 +439,7 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
       }
     }
   }
+  cout << " min/max tabsol:  " << tabsol.min() << " " <<tabsol.max() << endl;
   MSHMET_pSol mshmetsol = sol_mshmet(dim, nv, nbsol, nbsolsize, TypTab, tabsol);
   if( intopt[1] == 1) 
     mshmetmesh->info.iso = 1;
