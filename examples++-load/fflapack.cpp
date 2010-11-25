@@ -407,7 +407,8 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
       Global.Add("dggev","(",new  OneOperator5_<long,KNM<double>*,KNM<double>*,KN<Complex>*,KN<double>*,KNM<Complex>*>(lapack_dggev));  
 
     }
- else
-   cout << "( load: lapack <=> fflapack , skeep ) ";
+  else
+    if(verbosity)
+      cout << "( load: lapack <=> fflapack , skeep ) ";
 }
 

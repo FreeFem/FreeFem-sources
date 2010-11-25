@@ -365,6 +365,7 @@ Init::Init(){
 
 bool SetGMRES();
 void init_UMFPack_solver() {
+  if(verbosity) 
   cout << " no UMFPACK -> replace by LU or GMRES  "; 
   Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetGMRES));
   Global.New("HaveUMFPACK",CConstant<bool>(false)); 

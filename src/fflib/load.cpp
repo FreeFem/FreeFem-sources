@@ -51,7 +51,7 @@ bool load(string ss)
 {
   if(SetLoadFile.find(ss) != SetLoadFile.end())
     { 
-      if(mpirank==0)
+      if( (mpirank==0)&& verbosity)
 	cout << " (already loaded : " <<  ss << " ) " ;
     }
     else
