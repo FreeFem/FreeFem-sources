@@ -7,7 +7,7 @@
 // AUTHOR   : Jacques Morice
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
-//ff-c++-LIBRARY-dep: metis mumps  blas ptscotch blacs scalapack mpifc  fc  
+//ff-c++-LIBRARY-dep:  mumps parmetis ptscotch  scalapack blacs blas  mpifc  fc  
 //ff-c++-cpp-dep: 
 
 /* 

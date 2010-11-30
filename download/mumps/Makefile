@@ -29,7 +29,7 @@ install: $(SRCDIR)/FAIT
 WHERE: 
 	if [ -f $(SRCDIR)/FAIT  ] ;then \
 	$(MAKE) install ; \
-	echo "mumps LD '-L@DIR@/lib   -lmumps_commonFREEFEM -ldmumpsFREEFEM -lzmumpsFREEFEM -lpordFREEFEM'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
+	echo "mumps LD '-L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM '"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
 	echo "mumps INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
 	fi
 
