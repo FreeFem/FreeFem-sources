@@ -719,39 +719,27 @@ pkg:
 
 all-local:bin lib include pkg  $(DOWNLOADCOMPILE) 
 
-compile-pkg: bin lib include pkg
-	-if [ -n "$(WGET)" ] ; then \
-	for d in $(LIST_SOFT) ; do \
-	if [ -d "$$d" ] ; then  echo "$(MAKE) -C $$d " ;  $(MAKE) -C $$d ; else echo ** missing "$$d" directory ; fi; \
-	done ;\
-	if [ -n "$(MPICC)" ] ; then \
-	for d in $(MPI_SOFT) ; do \
-	if [ -d "$$d" ] ; then  echo "$(MAKE) -C $$d " ;   $(MAKE) -C $$d  ; else echo ** missing "$$d" directory ;  fi; \
-	done ;\
-	fi; \
+WHERE-LD:
+	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
+	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
+compile-dir:
+	@echo "\n\n ****** $(COMPILEDIR) ****** \n\n";
+	-@if [ 0 -eq `egrep ':$(COMPILEDIR)' WHERE-LD | wc -l` ] ;then \
+	  cd $(COMPILEDIR) && $(MAKE) $(DIRTARGET) ; \
+	else \
+	 echo $(COMPILEDIR) is in WHERE- files ;\
 	fi 
-re-install:
-	-if [ -n "$(WGET)" ] ; then \
-	for d in $(LIST_SOFT) ; do \
-	if [ -d "$$d" ] ; then  echo "$(MAKE) install -C $$d  " ;   $(MAKE) install -C $$d  ; else echo ** missing "$$d" directory ; fi; \
-	done ;\
+compile-pkg: bin lib include pkg WHERE-LD
+	-@if [ -n "$(WGET)" ] ; then \
+	for d in $(LIST_SOFT) ; do $(MAKE) compile-dir COMPILEDIR=$$d ;done ;\
 	if [ -n "$(MPICC)" ] ; then \
-	for d in $(MPI_SOFT) ; do \
-	if [ -d "$$d" ] ; then  echo "$(MAKE) install -C $$d  " ;   $(MAKE) install  -C $$d  ; else echo ** missing "$$d" directory ;  fi; \
-	done ;\
-	fi; \
-	fi 
+	for d in $(MPI_SOFT) ; do 	$(MAKE) compile-dir COMPILEDIR=$$d ; done;\
+	fi;fi
+re-install: 
+	$(MAKE) compile-pkg DIRTARGET=install
 WHERE:
-	-if [ -n "$(WGET)" ] ; then \
-	for d in  $(LIST_SOFT) ; do \
-	if [ -d "$$d" ] ; then  echo "$(MAKE) WHERE -C $$d  " ;   $(MAKE) install -C $$d  ; else echo ** missing "$$d" directory ; fi; \
-	done ;\
-	if [ -n "$(MPICC)" ] ; then \
-	for d in $(MPI_SOFT) ; do \
-	if [ -d "$$d" ] ; then  echo "$(MAKE) WHERE -C $$d  " ;   $(MAKE) install  -C $$d  ; else echo ** missing "$$d" directory ;  fi; \
-	done ;\
-	fi; \
-	fi 
+	$(MAKE) compile-pkg DIRTARGET=WHERE
+
 clean-local:
 	-rm -rf	 include lib bin 
 	mkdir   include lib bin 	

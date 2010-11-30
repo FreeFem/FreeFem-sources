@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.10-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.10-3,hecht@ann.jussieu.fr,freefem++)
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
@@ -1809,7 +1809,7 @@ m4_define([AC_FF_WHERELIB],
     ])dnl end m4_define AC_FF_WHERELIB
 
 m4_map([AC_FF_WHERELIB],[ 
-	[[mumps],[-lpord -lmumps_common -ldmumps -lzmumps -lpord],[dmumps_c.h]],
+	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h]],
 	[[fftw3],[-lfftw3],[fftw3.h]],
 	[[superlu],[-lsuperlu],[superlu_defs.h]],
 	[[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
