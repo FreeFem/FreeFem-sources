@@ -36,14 +36,15 @@ $(SRCDIR)/FAIT:$(SRCDIR)
 	cd $(MSHMET_DIR); make
 	touch $(SRCDIR)/FAIT
 
-install:$(SRCDIR)/FAIT 
+install:$(SRCDIR)/FAIT  ../../src/libMesh/libMesh.a 
 	cp $(MSHMET_SRCDIR)/mshmetlib.h  $(SRCDIR)/$(INSTALL)/include/mshmetlib.h
 	cp $(MSHMET_OBJDIR)/libmshmet.a  $(SRCDIR)/$(INSTALL)/lib/libmshmet.a
 	cp ../../src/libMesh/libMesh.a  $(SRCDIR)/$(INSTALL)/lib/libMesh.a
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/libMesh
 	cp ../../src/libMesh/*h  $(SRCDIR)/$(INSTALL)/include/libMesh
 
-
+../../src/libMesh/libMesh.a :
+	cd ../../src/libMesh && make 
 
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
