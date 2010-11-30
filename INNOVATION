@@ -1,5 +1,10 @@
 v 3.10-2
-  - coorect configure to scotch compilati on gnone (phtread) 
+ - add operator to inverse permuation to set or initial int[int] array
+   I=J^-1; 
+   if J is a permuation of 0:n-1  then we have :   I[j[i]]=i 
+ - correct comment problem of periodic bounary condition in 3D
+    see examples++-3d/periodic-3d.edp
+ - correct configure to scotch compilation on gnone (phtread) 
 v 3.10-1
   - at convection function form formal array to int,real,complex array
    (resp.     toZarray, toRarray, toCarray)
