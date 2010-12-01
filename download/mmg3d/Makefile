@@ -80,7 +80,7 @@ clean:
 	-rm -rf $(SRCDIR)/$(INSTALL)/lib/libmmg3d.a
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/libmmg3d.a
 	-rm -r $(SRCDIR)
-	-rm FAIT
+	-rm FAIT* mmg*
 
 ff-flags: ../Makefile
 	grep 'abs_top_builddir *=' ../Makefile >> ff-flags
