@@ -1,0 +1,56 @@
+#!/bin/bash
+if [ "$1" != "www" -a "$1" != "doc" ]; then
+   echo "usage : $0 www    or $0 doc "
+   exit 
+fi
+if [ -n "$2" ] ; then
+VERSION="$2"
+else
+VERSION=`awk '/#define VersionFreeFempp/ {print $3}' config-version.h`
+fi
+listf=(freefem++-${VERSION}.tar.gz FreeFem++v${VERSION}_MacOsX.tgz FreeFem++v${VERSION}_Win.zip  FreeFem++v${VERSION}_MacOS.sit)
+listcd=(freefem++.tar.gz           "freefem++_macosx.tgz"          freefem++.zip                 freefem++.sit)
+dwww="www_gamma/Gamma/cdrom/ftp/freefem/"
+www=hecht@tazard.inria.fr:"$dwww"
+ftp=hecht@tazard.inria.fr:/ftp_gamma/freefem/
+ftpk=hecht@baobab.ann.jussieu.fr:public_html/ftp/freefem/
+
+if [ -f Output/FreeFem++-$VERSION.exe ]; then
+  scp Output/FreeFem++-${VERSION}.exe  $ftpk
+#  scp Output/FreeFem++-${VERSION}.exe  $ftp
+  scp Output/FreeFem++-${VERSION}.exe  $www/freefem++.exe
+else
+list1="HISTORY HISTORY_BEFORE_2005  DOC/manual-full.pdf DOC/manual-full.ps.gz "
+
+
+if [ "$1" = "doc"  ]; then
+ set -x 
+ rsync -vzupogt --rsh="ssh -l hecht" $list1  $ftpk
+ rsync -vzupogt --rsh="ssh -l hecht"  HISTORY HISTORY_BEFORE_2005  baobab.ann.jussieu.fr:www/.
+# scp HISTORY hecht@tazard.inria.fr:www_gamma/Gamma/cdrom/www/freefem/
+ scp  $list1  $www
+
+fi
+if [ "$1" = "www"  ]; then
+for ((i=0;${#listf[$i]};i++)); do
+f=${listf[$i]}
+lcd=${listcd[$i]}
+echo file : $f 
+if [ -f $f ]; then
+    rsync -vzupogt --rsh="ssh -l hecht" $f  $ftpk
+#    scp $f $ftp
+    if [ -n "$lcd" ] ; then
+      scp $f $www$lcd
+    fi
+
+fi
+done;
+fi
+# update the 2  web page 
+#scp update_www ff++.htmx hecht@tazard.inria.fr:/tmp
+#scp update_www ff++.htmx hecht@baobab.ann.jussieu.fr:/tmp
+#ssh  hecht@baobab.ann.jussieu.fr "cd www/.;  /tmp/update_www ${VERSION}   >freefem++.htm </tmp/ff++.htmx"
+#ssh tazard.inria.fr  "cd $dwww; /tmp/update_www ${VERSION} cdrom  >index.html </tmp/ff++.htmx"
+fi
+
+

@@ -1,0 +1,118 @@
+\chardef\other=12
+\renewcommand{\ttdefault}{pcr}
+\renewcommand{\bfdefault}{b}
+\DeclareFixedFont{\MotClefFont}{\encodingdefault}{pcr}{b}{\shapedefault}{9pt}
+\gdef\myendgraf{\catcode`\{=\active % left brace is begin-group character
+\catcode`\}=\active\catcode`\^=\other\catcode`\_=11
+ % right brace is end-group character
+\ \upshape\endgraf\textBlack}
+
+\catcode`\@=\active
+\def@{\bgroup\MotClefFont%\bfserie\ttfamily
+      \catcode`\0 = 11
+      \catcode`\1 = 11
+      \catcode`\2 = 11
+      \catcode`\3 = 11
+      \catcode`\4 = 11
+      \catcode`\5 = 11
+      \catcode`\6 = 11
+      \catcode`\7 = 11
+      \catcode`\8 = 11
+      \catcode`\9 = 11
+      \catcode`\_ = 11
+      \afterassignment\lecturecar\let\next= }
+\catcode`\@=11
+
+\def\lecturecar{%
+     \ifcat\noexpand\next a%
+     {\Blue{\next}}%
+     \def \nextnext{\afterassignment\lecturecar\let\next= }%
+     \else
+     \global\let\nextnext\next\egroup
+     \fi
+     \nextnext}
+{
+  \catcode`\>=2
+  \catcode`\<=1
+  \catcode`\}=\active
+  \catcode`\{=\active
+  \catcode`\[=\active
+  \catcode`\]=\active
+  \gdef\SetBrace<
+  \gdef}<\texttt<\string}>>
+  \gdef{<\texttt<\string{>>
+  \gdef[<\texttt<\string[>>
+  \gdef]<\texttt<\string]>>
+>
+  \catcode`\}=2
+  \catcode`\{=1
+  \catcode`\>=\other
+  \catcode`\<=\other
+}
+
+\def\ttCC{\bgroup\catcode`\@=\active\ttCCC}
+\def\ttCCC#1{{\small\texttt{#1}}\egroup} 
+{
+ \catcode`\<=\active
+  \catcode`\>=\active
+ \catcode`\/ = \active
+%\gdef
+
+\gdef\FFverbatim{\begingroup\let\par=\myendgraf\small
+\let\it=\itshape
+ % \catcode`\$=\other
+  \def\expo##1{^{##1}}
+  \def\expo!##1!{^{##1}}
+  \def\indice##1{_{##1}}
+  \catcode`\&=\other
+  \catcode`\%=\other
+  \catcode`\#=\other
+  \catcode`\%=\other
+  \catcode`\~=\active\def~{\string~}
+%  \catcode`\_=\other  
+  \catcode`\^=\other%\def\^{\string^}
+  \catcode`\}=\other
+  \catcode`\{=\other
+  \catcode`\[=\other%\def[{$]$}
+  \catcode`\]=\other%\def]{$[$}
+  \catcode`\<=\other%\active\def<{\texttt{\string<}}
+  \catcode`\>=\other%\active\def>{\texttt{\string>}}
+  \catcode`\@= 13
+  \catcode`\0 = 11
+  \catcode`\1 = 11
+  \catcode`\2 = 11
+  \catcode`\3 = 11
+  \catcode`\4 = 11
+  \catcode`\5 = 11
+  \catcode`\6 = 11
+  \catcode`\7 = 11
+  \catcode`\8 = 11
+  \catcode`\9 = 11
+  \catcode`\_ = 11
+  \def\"{\string\"}
+  \def\n{\string\n}
+  \def\0{\string\0}
+  \def\t{\string\t}
+  \def\f{\string\f}
+  \def\\{\string\\}
+  \def\commentaire{\textRed\itshape\string/\string/ \catcode`\{=1 % left brace is begin-group character
+\catcode`\}=2 % right brace is end-group character
+\catcode`\$=3 % dollar sign is math shift
+\catcode`\^=7
+\catcode`\_=8
+ }%
+  \catcode`\/ = \active
+  \def/{\afterassignment\FFcomment\let\next= }
+  \def\FFcomment{\ifx/\next\commentaire  \else \string/\next \fi}   
+  \obeyspaces\obeylines}
+{\obeyspaces\gdef {\ }}\SetBrace}
+
+\outer\def\bFF{\smallskip\par%\parskip=\z@\rightskip-5pc\medskip 
+\FFverbatim  \small \tt}
+\def\eFF{\endgroup\par\medskip}
+%\outer\def\bFF{\smallskip\par\let\par=\myendgraf  \FFverbatim\parskip=\z@\rightskip-5pc \FFfinish}
+%{ \obeylines% end of line is active
+% OLD   \gdef\FFfinish#1^^M#2\eFF{\sffamily  #1 \dimen0=\hsize\advance\dimen0 by -\hangindent%
+% OLD                             \hsize=\dimen0\vbox{\sffamily\small #2 }\endgroup}}
+%\gdef\FFfinish#1^^M#2\eFF{\small \tt #1 \par #2\endgroup}\par\smallskip}
+

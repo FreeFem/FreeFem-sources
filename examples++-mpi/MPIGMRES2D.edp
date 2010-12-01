@@ -1,0 +1,324 @@
+// /usr/local/bin/mpirun -np 4 FreeFem++-mpi MPICGLap2d.edp 
+
+load "MPICG"
+verbosity=0;
+int vdebug=0; 
+include "MPIGMRESmacro.idp"
+int withplot=0;
+bool withmetis=1;
+int isplit=1;
+bool RAS=1; //     
+func Pk=P2; 
+int sizeoverlaps=2; // size of overlap
+bool dplot=0;
+
+//mpiComm commW(mpiCommWorld,0,0);// trick : make a no split mpiWorld 
+func commW= mpiCommWorld; // ok 
+//macro  commW()  mpiCommWorld //
+// remark bug if def. via: func commW= mpiComm; // at end ???? FH ..
+ 
+int npart=mpiSize(commW); // total number of partion
+//int mpirank=1; 
+int ipart= mpiRank(commW); // current partition number 
+
+load "metis"
+include "AddLayer2d.idp" 
+
+
+int njpart=0; // nb of part with intersection (a jpart) with ipart without ipart
+int[int] jpart(npart); //  list of jpart ..
+int ksplit=4;
+int nloc = 50*sqrt(real(npart));
+if(ARGV.n>2) nloc = atoi(ARGV[2]); 
+if(ARGV.n>3) ksplit = atoi(ARGV[3]); 
+if(ipart==0)  cout << " Final N=" << ksplit*nloc << " n coarse  = " << nloc << " n slpit =" << ksplit <<  endl;
+int[int] ll=[1,1,1,1]; 
+mesh Thg=square(nloc,nloc,label= ll);
+mesh Thi,Thin;//  with overlap, without olverlap  
+fespace Phg(Thg,P0);
+fespace Vhg(Thg,P1);
+
+
+ 
+ 
+
+Phg  part;
+
+// build the partitioning ... 
+ 
+{    
+ int[int] nupart(Thg.nt);
+ nupart=0; 
+ if(npart>1 && ipart==0)
+   metisdual(nupart,Thg,npart); 
+   
+ broadcast(processor(0,commW),nupart);
+ for(int i=0;i<nupart.n;++i)
+    part[][i]=nupart[i];
+  
+} // build ... 
+
+
+if(withplot>1)
+plot(part,fill=1,cmm="dual",wait=1);
+
+// overlapping partition
+
+ Phg suppi= abs(part-ipart)<0.1; 
+ Vhg unssd;                       // boolean function 1 in the subdomain 0 elswhere 
+ Thin=trunc(Thg,suppi>0,label=10,split=isplit); // non-overlapping mesh, interfaces have label 10
+ int nnn = sizeoverlaps*2;// to be sure 
+ AddLayers(Thg,suppi[],nnn,unssd[]);    // see above ! suppi and unssd are modified  
+ unssd[] *= nnn;  //  to put value nnn a 0  
+ 
+ real nnn0 = nnn - sizeoverlaps +  0.001   ;
+ Thi=trunc(Thg,unssd>nnn0 ,label=10,split=isplit); // overlapping mesh, interfaces have label 10
+ 
+ 
+ fespace Vhi(Thi,P1);
+ int npij=npart;
+ Vhi[int] pij(npij);// local partition of unit + pii 
+ Vhi pii;  
+ 
+ 
+ 
+ real nnn1=  + 0.001  ;
+ { /*
+   construction of the partition of the unit,
+    let phi_i P1 FE function 1 on Thin and zero ouside of Thi and positive
+    the partition is build with  
+  $$  p_i = phi_i/ \sum phi_i 
+    
+    to build the partition of one domain i
+    we nned to find all j such that supp(phi_j) \cap supp(phi_j) is not empty
+    <=> int phi_j
+ */
+ //   build a local mesh of thii such that all compuation of the unit partition are
+ //   exact in thii
+ mesh Thii=trunc(Thg,unssd>nnn1 ,label=10,split=isplit); // overlapping mesh, interfaces have label 10
+
+ if(0) {
+ 	fespace Phii(Thii,P0);
+ 	Phii ff=part;
+ 	plot(ff,fill=1,wait=1);
+ }
+ 
+ if(withplot) plot(unssd,wait=1);
+ {  
+ 	// find all j  mes (supp(p_j) \cap supp(p_i)) >0  
+    // compute all phi_j on Thii
+    //  remark supp p_i include in Thi 
+    //  
+    fespace Phii(Thii,P0);
+    fespace Vhii(Thii,P1);
+    // matrix I01 =interpolate(Phii,Vhii,t=true);//  ( P1 to P0  by interpolation )^t 
+    Vhi sumphi=0;
+ 	jpart=0;
+ 	njpart=0;
+ 	int nlayer=RAS?1:sizeoverlaps;
+ 	if(ipart==0) 
+ 	   cout <<" nlayer=" << nlayer << endl;
+ 	pii= max(unssd-nnn+nlayer,0.)/nlayer;
+ 	if(dplot) plot(pii,wait=1,cmm=" 0000");
+    sumphi[] +=  pii[];
+   // jpart[njpart++]=ipart; 
+    if(dplot) plot(sumphi,wait=1,cmm=" summ 0000");
+    Vhii phii=0;
+  	for (int i=0;i<npart;++i)
+  	  if(i != ipart ) 
+  	  { 
+  	  	Phii suppii=abs(i-part)<0.2; 
+  	  	if(suppii[].max > 0.5) 
+  	  	{
+  	  	AddLayers(Thii,suppii[],nlayer,phii[]);
+  	  	real interij = int2d(Thi)(  phii); 
+  	  	if(interij>0) 
+  	  	 {  //if(njpart>=npij) pij.resize(npij+=10);
+  	  	    pij[njpart]=phii;
+  	  	  if(dplot)  plot(pij[njpart],wait=1,cmm=" j = "+ i + " " + njpart);
+  	  	    sumphi[] += pij[njpart][]; 
+  	  	  if(dplot)  plot(sumphi,wait=1,cmm=" sum j = "+ i + " " + njpart);
+  	  	    jpart[njpart++]=i;
+  	  	 }}
+  	  }
+  	cout << endl;
+  	if(dplot) plot(sumphi,wait=1,dim=3,cmm="sum ",fill=1 );
+  	pii[]=pii[] ./ sumphi[];
+  	for (int j=0;j<njpart;++j)
+  	  pij[j][] = pij[j][] ./ sumphi[];
+  	jpart.resize(njpart);	
+  	
+  	{
+  	cout << ipart << " number of jpart " << njpart << " : ";
+  	  for (int j=0;j<njpart;++j)
+  	  	cout << jpart[j] << " ";
+  	cout << endl;
+  	}
+  	sumphi[]=pii[];
+  	for (int j=0;j<njpart;++j)
+  	  sumphi[]+= pij[j][];
+  	if(vdebug)  
+  	  cout << " sum min " <<sumphi[].min << " " << sumphi[].max << endl;
+  	assert(sumphi[].min> 1.-1e-6 && sumphi[].max< 1.+1e-6);  
+  	//  verification 
+  	
+   } 
+ }// (Thii is remove here) 
+  // end of the construction of the local partition of the unity ...
+  // on Thi ...  
+  // -----------------------------------------------------------------
+  if(ipart==0) cout << " *** end build partition " << endl;
+
+//fespace Vhin(Thin,P1); 
+//  computation of  number of intersection ..
+// ------------------------------------------
+
+// here  pii and the pij is the locate partition of the unite on 
+// Thi ( mesh with overlap )....
+//Thi=splitmesh(Thi,2);
+if(dplot) plot(Thi,wait=1);
+if(dplot) 
+for(int j=0;j<njpart;++j)
+{
+  //aThj[j]= trunc(Thg,abs(part-jpart[j])<0.5,label=10,split=1);
+  plot(pij[j],cmm=" j="+j ,wait=1);
+} 
+//  Partition of the unity on Thi ..
+// computation of message.
+// all j> we have to recive 
+// data on intersection of the support of pij[0] and pij[j]
+mesh[int] aThij(njpart),aThji(njpart); 
+matrix Pii; // 
+matrix[int] sMj(njpart); // M of send to j
+matrix[int] rMj(njpart); // M to recv from j
+fespace Whi(Thi,Pk);
+mesh Thij=Thi;
+mesh Thji=Thi;
+fespace Whij(Thij,Pk);// 
+fespace Whji(Thji,Pk);// 
+
+ // construction of the mesh intersect i,j part 
+for(int jp=0;jp<njpart;++jp)
+    aThij[jp]  = trunc(Thi,pij[jp]>0.01,label=10); // mesh of the supp of pij
+    
+   
+  
+//  send/recv  the i,j mesh intersect 
+
+ISendRecvAny(commW,jpart,aThij,aThji);
+
+for(int jp=0;jp<njpart;++jp)
+  aThij[jp]  = trunc(aThij[jp],1,split=ksplit);
+for(int jp=0;jp<njpart;++jp)
+  aThji[jp]  = trunc(aThji[jp],1,split=ksplit);
+Thi =   trunc(Thi,1,split=ksplit);
+
+if(vdebug) // seem  ok 
+for(int jp=0;jp<njpart;++jp)
+{
+	cout << ipart << " " << jpart[jp] << "  " << aThij[jp].nv << " ** " << aThij[jp].area << " iijj ::: " << endl; 
+        cout << jpart[jp] << " " << ipart << "  " << aThji[jp].nv << " ** " << aThji[jp].area << " jjii ::: " << endl; 
+}
+ if(ipart==0) cout << " *** end build mesh  intersection  " << endl;
+// construction of transfert  matrix
+ {
+ 	Whi wpii=pii;
+ 	if(mpirank==0) plot(wpii,cmm="wpii",wait=1);
+ 	Pii = wpii[];
+    for(int jp=0;jp<njpart;++jp)
+    {
+    	int j=jpart[jp];
+    	Thij = aThij[jp];
+    	Thji = aThji[jp];
+  	    if(vdebug)savemesh(aThji[jp],"m/aThji-"+ipart+"-"+jpart[jp]+".msh");
+	    if(vdebug)savemesh(aThij[jp],"m/aThij-"+ipart+"-"+jpart[jp]+".msh");
+  
+      matrix I = interpolate(Whji,Whi); // Whji <- Whi
+      sMj[jp] = I*Pii;  // Whi -> s Whij  
+ 	  rMj[jp] = interpolate(Whij,Whi,t=1);   // Whji -> Whi
+    }}
+ if(ipart==0) cout << " *** end build transfert matrix " << endl;
+// alloc array of send and revd data ..
+
+
+
+InitU(njpart,Whji,Thji,aThji,Usend)  // initU(n,Vh,Th,aTh,U)
+InitU(njpart,Whij,Thij,aThij,Vrecv) // ...
+if(ipart==0) cout << " *** end init  data for send/revc  " << endl;
+// CheckUV(commW,jpart,Usend,Vrecv)
+
+Whi ui,vi; 
+
+func bool Update(real[int] &ui, real[int] &vi)
+{
+  for(int j=0;j<njpart;++j)
+    Usend[j][]=sMj[j]*ui; 
+   SendRecvUV(commW,jpart,Usend,Vrecv)
+   vi = Pii*ui;
+  for(int j=0;j<njpart;++j)
+    vi += rMj[j]*Vrecv[j][]; 
+  return true;
+}
+
+ func G=0.; // ok 
+ func F=1.; // ok 
+ macro grad(u) [dx(u),dy(u)] // 
+ varf vPb(U,V)= int2d(Thi)(grad(U)'*grad(V)) + int2d(Thi)(F*V) +on(1,U=G) + on(10,U=G);
+ varf vPbon(U,V)=on(10,U=1);
+ 
+ matrix Ai = vPb(Whi,Whi,solver=sparsesolver);
+ real[int] onG = vPbon(0,Whi);
+ real[int] Bi=vPb(0,Whi);
+ 
+
+ func real[int] DJ0(real[int]& U)
+ { 
+   real[int] V(U.n); 
+   real[int] b= onG .* U;
+   b  = onG ? b : Bi ;  
+   V = Ai^-1*b;	
+   Update(V,U);
+   V -= U;
+   return V; 
+   }
+   
+   
+  Whi u=0,v;
+  verbosity=1;
+  real t0=mpiWtime();
+  real epss=1e-6;
+  MPIAffineGMRES(DJ0,u[],eps=epss,nbiter=100,comm=commW,dimKrylov=100,verbosity=ipart ? 0: 50,veps=epss);
+  
+  real errg =1,umaxg;
+  { real umax = u[].max,umaxg;
+   real[int] aa=[umax], bb(aa);
+   mpiAllReduce(aa,bb,commW,mpiMAX);
+   errg=bb[0];
+   if(ipart==0)
+    cout << " umax global  = " << bb[0] << " Wtime = " << mpiWtime() - t0 << " s " << " " << umax << " resid =" << abs(epss) << endl;
+  }
+  // after a classical Shwarz algo with fixe point ..
+ for(int iter=0;iter <1; ++iter)
+ {
+   real[int] b= onG .* u[];
+   b  = onG ? b : Bi ;
+   v[] = Ai^-1*b;	
+ 
+   Update(v[],u[]);
+    
+   plot(u,v,wait=1,dim=3,cmm=" u,v "+ipart );
+   v[] -= u[];
+
+   real err = v[].linfty;
+   real umax = u[].max;
+   real[int] aa=[err,umax], bb(2);
+   mpiAllReduce(aa,bb,commW,mpiMAX);
+   errg = bb[0];
+   umaxg = bb[1];
+   
+   if(ipart==0)
+   cout << ipart << " err = " << errg << " u. max  " << umaxg << endl;
+   if(errg< 1e-5) break;
+ }
+assert(errg<1e-5);
+ 
