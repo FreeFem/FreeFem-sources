@@ -72,7 +72,7 @@ int getprog(char* fn,int argc, char **argv)
       else   noffglut==  false;
       //      cout << " noffglut= " << noffglut << endl;
       //  suffix ++-glx.exe -> no ffglut
-      // pm = 0= > pas de moin -> freefem++ -> ffglut
+      // pm = 0= > pas de moins -> freefem++ -> ffglut
     }
 #endif
   bool ch2edpdir = false;
@@ -85,6 +85,7 @@ int getprog(char* fn,int argc, char **argv)
 	{
 	  strcpy(fn,argv[i+1]);
 	  i++;	
+	  edpfilenamearg=argv[i];
 	  ret=1;
 	}
       else if  (strcmp(argv[i],"-v")==0 && i+1 < argc) 
@@ -206,10 +207,11 @@ if( ch2edpdir && edpfilenamearg)
   if(ret !=1) 
     {
       const char * ff = argc ? argv[0] : "FreeFem++" ;
-      cout << " Syntaxe = " << ff  << " [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  \n"
+      cout << " Syntaxe = " << ff  << " [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  [SCRIPT-arguments]\n"
 	   << "        -v      verbosity : 0 -- 1000000 level of freefem output \n"
 	   << "        -fglut  filepath  : the file name of save all plots (replot with ffglut command ) \n"
-	   << "        -glut    command  : the command name of ffglut  \n"
+	   << "        -glut    command  : change  command  compatible with ffglut  \n"
+           << "        -gff     command  : change  command  compatible with ffglut (with space quoting)\n"
 	   << "        -nowait           : nowait at the end on window   \n"
 	   << "        -wait             : wait at the end on window   \n"
 	   << "        -nw               : no ffglut (=> no graphics windows) \n"

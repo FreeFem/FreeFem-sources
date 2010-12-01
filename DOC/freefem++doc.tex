@@ -398,11 +398,11 @@ and \texttt{README} files. The following programs are produced,
 depending on the system you are running :
 \begin{enumerate}
 \item \texttt{FreeFem++}, standard version, with a graphical interface
-based on GLUT/OpenGL (use ffglut visualizator) or not just add \texttt{ -nw } parameter.
-\item \texttt{ffglut} the visualisator through a pipe of freefem++ (remark: {\it if ffglut is not in the system path,
+based on GLUT/OpenGL (use ffglut visualization tool) or not just add \texttt{ -nw } parameter.
+\item \texttt{ffglut} the visualization tools  through a pipe of freefem++ (remark: {\it if ffglut is not in the system path,
 you will have no plot})
-\item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no graphics windows via ffglut )
-\item \texttt{FreeFem++-mpi}, parallel version, postscript output only
+\item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no graphics windows via \texttt{ffglut} )
+\item \texttt{FreeFem++-mpi}, parallel version, postscript output only 
 %\item \texttt{FreeFem++-glx}, graphics using OpenGL and X11
 %\item \texttt{FreeFem++-cs}, integrated development environment
 %\item \texttt{FreeFem++-ag}, integrated development environment
@@ -419,8 +419,25 @@ Application
 \item \texttt{ffmedit} the freefem++ version of medit software (thanks to P. Frey)
 \end{enumerate}
 
+The FreeFem++ parameter command:
+{\small \begin{verbatim}
+Brochet-2:~ hecht$ FreeFem++
+ Syntaxe:
+   FreeFem++ [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  
+        -v      verbosity : 0 -- 1000000 level of freefem output 
+        -fglut  filepath  : the file name of save all plots (replot with ffglut command ) 
+        -glut    command  : change the command  ffglut 
+        -gff     command  : change the command  ffglut   with  space quotting
+        -nowait           : nowait at the end on window   
+        -wait             : wait at the end on window   
+        -nw               : no ffglut (=> no graphics windows) 
+        -ne               : no edp script output
+        -cd               : Change directory  to script dir 
+ with        default ffglut : ffglut
+\end{verbatim}}
 \begin{remark} In most cases you can set the level of output (verbosity\index{verbosity}) to value \texttt{nn} by adding the parameters
 \texttt{-v nn} on the command line.
+
 \end{remark}
 
 As an installation test, under unix:  go into the directory
@@ -4529,7 +4546,8 @@ at the exit of the enclosing block,
 \eFF
 
 
-\end{example}
+
+  
 
 Some functions are available  to format the output.
 \index{precision}\index{scientific}\index{fixed}\index{showbase}\index{noshowbase}\index{showpos}\index{noshowpos}\index{default}
@@ -4549,12 +4567,35 @@ Remark, all these methods except the first return the stream \texttt{f}, so they
 \bFF
     cout.scientific.showpos << 3 << endl;
 \eFF
+
+\subsubsection{\setS{Script arguments}}
+There is a very useful predefined array in Freefem++ \texttt{ARGV} that contains all the arguments of the script used in the command line. The following code prints out the first three of these arguments:\index{ARGV} 
+\bFF
+//  version 3.8-1
+@for(int i=0;i<ARGV.n;++i)
+  {
+    cout << ARGV[i] << endl;
+  }
+\eFF
+\end{example}
+
+
+
+And to get argument unused in \texttt{getARGV.idp} include script file, 
+\bFF
+@getARGV(n,defaultvalue) // get the nth parameter  unused if exist (n = 1, ...)
+@getARGV(after,defaultvalue) // get the arg after the string after if exist
+\eFF
+The type of default value can be \texttt{int}, \texttt{real}, \texttt{string},
+
+
 \subsection{Exception handling}\index{exception}\index{catch}\index{try}
 
  In the version \texttt{2.3} of \texttt{FreeFem++}, exception handing was added as in \texttt{C++}.
  But today only the \texttt{C++} exceptions are caught. Note that  in \texttt{C++} all the errors attached to
 \texttt{ExecError, assert, exit, ...} call exceptions  too so it may be hard to find the cause of the error.
  The exceptions handle all \texttt{ExecError}:
+
 
 
 \begin{example} A simple example:    catch a  division by zero:
@@ -4643,6 +4684,7 @@ Try:: catch (...) exception
  Catch cholesky PB
 \end{verbatim}
 }
+
 
 \section{\setS{Mesh Generation}}
 \subsection{Commands for Mesh Generation}\label{sec:InitialMesh}
@@ -13670,10 +13712,10 @@ and \texttt{processorblock} with a special \verb!MPI_Request!.
 // Error asynchronously without request .
 @broadcast(@processor(comm,a)); //  Broadcast to all process of \texttt{comm}
 \eFF
-  where the data type of \texttt{a} can be of type of \texttt{int},\texttt{real}, \texttt{complex}, \texttt{int[int]}, \texttt{double[int]}, \hfill\break\texttt{complex[int]}, \texttt{int[int,int]}, \texttt{double[int,int]},\texttt{complex[int,int]}
-  and for  communication with no request the type can be also
-     \texttt{mesh},\texttt{mesh3},\texttt{mesh[int]},\texttt{mesh3[int]},\texttt{matrix},\texttt{matrix<complex}
-     because in this case  the communication are multiple (header + data).
+  where the data type of \texttt{a} can be of type of \texttt{int},\texttt{real}, \texttt{complex}, \texttt{int[int]}, \texttt{double[int]}, 
+  \texttt{complex[int]}, \texttt{int[int,int]}, \texttt{double[int,int]}, \texttt{complex[int,int]},
+       \texttt{mesh}, \texttt{mesh3}, \texttt{mesh[int]}, \texttt{mesh3[int]}, \texttt{matrix}, \texttt{matrix<complex>}
+    % because in this case  the communication are multiple (header + data).
 \bFF
     processor(10,rq) << a ; // send asynchronously to the process 10
     // the data a  with request
@@ -13773,6 +13815,256 @@ Vhother U=0;
 @if (mpirank==0)
     @plot(u,U,ps="uU.eps");
 \eFF
+
+\subsubsection{True parallel Schwarz example}
+
+This is a explaination of the two script  \texttt{examples++-mpi/MPIGMRES[2]D.edp}, 
+a schwarz parallel with a complexity almost independent of the number of process. 
+\def\vh{{v_h}}
+\def\uh^#1{{u_h^{#1}}}
+\def\Nh{{\mathcal{N}_h}}
+\def\Nhg{{\mathcal{N}^\Gamma_h}}
+\def\Nhgi_#1{{\mathcal{N}^{\Gamma_i}_{h#1}}}
+\def\Th{{\mathcal{T}_h}}
+\def\Vh{{V_h}}
+\def\VOh{{V_{0h}}}
+\newcommand{\1}{\mathrm{1\!\!I}}
+To solve the following Poisson problem 
+on domain $\Omega$ with boundary $\Gamma$ in $L^2(\Omega)$ :
+
+$$
+ -\Delta u = f,  \mbox{ in } \Omega,\mbox{ and } u= g \mbox{ on } \Gamma,
+$$
+ where $ f$ and $g$ are two given functions of $L^2(\Omega)$ and of $H^{\frac12}(\Gamma)$,
+
+
+
+Let introduce   $(\pi_i)_{i=1,.., N_p}$ a regular partition of the unity  of $\Omega$, q-e-d:
+$$ \pi_i \in \mathcal{C}^0(\Omega) : \quad  \pi_i\ge 0 \mbox{ and } \sum_{i=1}^{N_p} \pi_i =1 .$$
+Denote $ \Omega_i$ the sub domain which is the support of $\pi_i$ function and also denote $\Gamma_i$ the boundary 
+of $\Omega_i$.
+
+The parallel Schwarz 	method is 
+Let $\ell=0$ the iterator and a initial guest $u^0$  respecting the boundary condition (i.e. 
+$u^0_{|\Gamma} = g$). 
+
+
+\begin{eqnarray}
+\label{eq:lapl} \forall i = 1 .., N_p: & \displaystyle   -\Delta u_i^\ell = f, \mbox{ in }	 \Omega_i ,&\mbox{ and } u_i^\ell= u^\ell \mbox{ on }  \Gamma_i \setminus \Gamma,\; u_i^\ell=g \mbox{ on }  \Gamma_i \cap  \Gamma     \\
+\label{eq:pu1}&u^{\ell+1} = \sum_{i=1}^{N_p} \pi_i u_i^\ell &   
+\end{eqnarray}
+
+
+After discretization with the Lagrange finite element method, with a compatible mesh $\Th_i$ of $\Omega_i$,
+i. e., the exist a global mesh $\Th$ such that  $\Th_i$ is include in $\Th$. 
+Let us denote:
+\begin{itemize}
+\item $\Vh_i$ the finite element space corresponding to domain $\Omega_i$, 
+\item  $\Nh_i$ is the set of the   degree of freedom $\sigma_i^k $,
+\item  $\Nhgi_i$ is the set of 
+the   degree of freedom of $\Vh_i$ on the boundary $\Gamma_i$ of $\Omega_i$, 
+\item  $\sigma_i^k(\vh)$  is the value  the degree of freedom $k$,
+\item $\VOh_i=  \{ \vh \in \Vh_i :\forall  k \in  \Nhgi_i , \quad \sigma_i^k(\vh)=0 \}$,
+\item the conditional expression $ a\;?\;b:c $ is defined like in \texttt{C} of \texttt{C++} language by 
+$$  a?b: c \equiv
+\left\{
+\begin{array}{l}
+\mbox{if  $a$ is true  then return $b$}\\
+\mbox{else return $c$}  \\
+\end{array}
+\right..
+$$
+
+\end{itemize}
+ 
+ 
+\medskip 
+
+
+{\bf Remark} we never use finite element space associated to the full domain $\Omega$ because it to expensive.
+
+\medskip 
+
+
+
+We have to defined to operator to build the  previous algorithm:
+
+We denote $\uh^{\ell}_{|i}$  the restriction of $ u_h^\ell$ on $\Vh_i$, so  the discrete problem on $\Omega_i$ 
+of problem (\ref{eq:lapl}) is find $\uh^\ell_{i}\in \Vh_i$ such that:
+\begin{equation} 
+\forall \vh_i\in V_{0i}: \int_{\Omega_i} \nabla \vh_i . \nabla \uh^\ell_{i} = \int_{\Omega_i} f  \vh_i ,\quad \forall  k \in \Nhgi_i\;:\;  \sigma_i^k(\uh^\ell_i) =  (k\in \Gamma) \; ? \; g_i^k : \sigma_i^k(\uh^{\ell}_{|i}) 
+\end{equation}
+where $g_i^k$ is the value of $g$ associated to the degree of freedom $k\in \Nhgi_i $.
+
+In FreeFem++, it can be written has with \texttt{U} is the vector corresponding to $\uh^{\ell}_{|i}$ and the 
+vector \texttt{U1}  is the vector corresponding to $\uh^\ell_{i}$  is the solution of: 
+
+\bFF
+  @real[int] U1(Ui.n); 
+  @real[int] b= onG .* U; 
+  b  = onG ? b : Bi ;  
+  U1 = Ai^-1*b;	
+  
+\eFF
+where 
+ $\mathtt{onG}[i] =(i \in \Gamma_i\setminus\Gamma) ? 1 : 0   $, and $\mathtt{Bi}$
+the right of side of the problem, are defined  by 
+
+
+\bFF
+  @fespace Whi(Thi,P2); // def of the Finite element space.
+  @varf vPb(U,V)= @int3d(Thi)(grad(U)'*grad(V)) + int3d(Thi)(F*V) +on(1,U=g) + on(10,U=G);  
+  @varf vPbon(U,V)=@on(10,U=1);
+  @matrix Ai = vPb(Whi,Whi,solver=sparsesolver);
+  @real[int] onG = vPbon(0,Whi);
+  @real[int] Bi=vPb(0,Whi);  
+\eFF\smallskip
+where  the freefem++  label of $\Gamma$ is 1 and the label of
+$\Gamma_i\setminus \Gamma$ is $10$.
+
+
+\medskip
+To build the transfer/update part corresponding to (\ref{eq:pu1}) equation  
+ on process $i$, let us call  \texttt{njpart} the number  the neighborhood of domain of $\Omega_i$
+(i.e: $\pi_j$ is none $0$ of $\Omega_i$), we store in an array \texttt{jpart} of size  \texttt{njpart} 
+ all this  neighborhood. 
+Let us introduce two  array of  matrix,
+\texttt{Smj[j]} to defined the vector to send from $i$ to $j$ a neighborhood process,
+and the matrix $rMj[j]$ to after to  reduce owith  neighborhood $j$ domain.   
+
+So the tranfert and update part  compute 
+$v_i= \pi_i u_i + \sum_{j\in J_i} \pi_j  u_j  $ and  can be write  the
+freefem++ function Update:
+\bFF
+@func @bool Update(@real[@int] &ui, @real[@int] &vi)
+{ @int n= jpart.n;
+  @for(@int j=0;j<njpart;++j)  Usend[j][]=sMj[j]*ui;  	
+  @mpiRequest[int] rq(n*2);
+  @for (int j=0;j<n;++j) @Irecv(processor(jpart[j],comm,rq[j  ]), Ri[j][]);       
+  @for (int j=0;j<n;++j) @Isend(processor(jpart[j],comm,rq[j+n]), Si[j][]); 
+  @for (int j=0;j<n*2;++j) @int k= mpiWaitAny(rq);
+  // apply the unity local partition .\hfilll
+   vi = Pii*ui;// set to $ \pi_i u_i$
+   @for(@int j=0;j<njpart;++j)  vi += rMj[j]*Vrecv[j][]; // add $\pi_j  u_j$ 
+   @return @true; }
+\eFF\smallskip
+where the buffer are defined by:
+\smallskip\bFF
+  InitU(njpart,Whji,Thji,aThji,Usend)  // defined the send buffer\hfilll
+  InitU(njpart,Whij,Thij,aThij,Vrecv)  //  defined the revc buffer\hfilll
+\eFF\smallskip
+with the following macro definition: 
+\smallskip\bFF
+@macro InitU(n,Vh,Th,aTh,U) Vh[int] U(n); @for(@int j=0;j<n;++j) {Th=aTh[j];  U[j]=0;}//
+\eFF
+Finally  you can easily accelerate  the fixe point algorithm by using  a parallel \texttt{GMRES} algorithm  after the introduction the following affine $\mathcal{A}_i$ operator
+sub domain $\Omega_i$. 
+\smallskip\bFF
+@func @real[@int] Ai(@real[@int]& U) { 
+ @real[int] V(U.n)   ,  b= onG .* U;
+  b  = onG ? b : Bi ;  
+  V = Ai^-1*b;	
+  Update(V,U);
+  V -= U;   return V; }
+\eFF\smallskip
+ Where the  parallel \texttt{MPIGMRES} or \texttt{MPICG}  algorithm is just a simple way to solve in 
+ parallel the following $A_i x_i = b_i, i = 1, .., N_p$ by just changing the dot product by reduce the local dot product of all process
+ with the following MPI code:
+\smallskip\bFF
+@template<@class R> @R ReduceSum1(@R s,MPI_Comm * comm)
+{   @R r=0;
+    @MPI@_@Allreduce( &s, &r, 1 ,MPI_TYPE<@R>::TYPE(),   MPI_SUM,  *comm );
+    @return r; }
+\eFF
+This is done in \texttt{MPIGC} dynamics library tool. 
+\medskip
+
+We  have all ingredient to solve in parallel if we have et the partitions of the unity.
+To build this partition we do:
+the initial step 
+on process $1$ tp 
+build a coarse mesh, $\Th^*$ of the full domain,
+and build the partition $\pi$  function constant equal to $i$ on each 
+sub domain $\mathcal{O}_i, i =1 ,.., N_p$,  of the grid with the \texttt{Metis} graph  partitioner  \cite{metis}
+ and on each process $i$ in $1..,N_p$ do 
+\begin{enumerate}
+\item Broadcast from process $1$, the mesh  $\Th^*$ (call \texttt{Thii} in freefem++ script), and $\pi$ function,
+\item remark that the characteristic function  $\1_{\mathcal{O}_i}$ of domain $\mathcal{O}_i$,   is defined  by $(\pi=i) ? 1 : 0 $, 
+\item let us call $\Pi^2_P$ (resp. $\Pi^2_V$) the $L^2$ on $P_h^*$ the space of the constant finite element function per element on $\Th^*$ (resp.
+$V_h^*$ the space of the affine continuous finite element per element on $\Th^*$).
+and build in parallel the  $\pi_i$ and $\Omega_i$, such that   $ \mathcal{O}_i\ \subset \Omega_i$  where
+ $ \mathcal{O}_i= supp ( (\Pi^2_V \Pi^2_C)^m \1_{O_i} )$, 
+ and $m$ is a the overlaps size on the coarse mesh (generally one),
+ 
+  (this is done in function \verb!AddLayers(Thii,suppii[],nlayer,phii[]);!
+  We choose a function $\pi^*_i = (\Pi^2_1 \Pi^2_0)^m \1_{\mathcal{O}_i}   $ 
+ so the partition of the unity is simply defined by
+ \begin{equation}
+  \pi_i = \frac{\pi_i^*}{\sum_{j=1}^{N_p} \pi_j^*} 
+\end{equation}
+ The set $J_i$ of  neighborhood of the domain $\Omega_i$, and the local version on $V_{hi}$  can be defined  the array \texttt{jpart} and \texttt{njpart} with:
+ \def\piff,#1{$\pi^*_#1$}\smallskip
+ \bFF 
+      Vhi pii=\piff,i ;  Vhi[int] pij(npij);// local partition of 1 = pii + $\sum_j$ pij[j]  
+       
+      @int[@int] jpart(npart);   @int njpart=0;
+      Vhi sumphi =  \piff,i  ;
+      @for (@int i=0;i<@npart;++i)
+        @if(i != ipart ) { 
+           @if(int3d(Thi)( \piff,j)>0) {             
+             pij[njpart]=\piff,j;
+             sumphi[] += pij[njpart][]; 
+             jpart[njpart++]=i;}}}
+           pii[]=pii[] ./ sumphi[];
+          @for (int j=0;j<njpart;++j) pij[j][] = pij[j][] ./ sumphi[];
+          @jpart.resize(njpart);
+ \eFF
+\item 
+ We call $\Th^*_{ij}$ the sub mesh part of $\Th_i$ where $\pi_j$ are none zero. 
+ and tank to the function \texttt{trunc} to build this array,\smallskip
+\bFF
+       @for(@int jp=0;jp<njpart;++jp)
+         aThij[jp]  = trunc(Thi,pij[jp]>0,label=10); 
+\eFF\smallskip
+\item we exchange all sub mesh $\Th_{ij}$ of the process $i$ to to all process $j$
+and we call the mesh on process $i$ the mesh $\Th_{ji}$, this part is the most tricky 
+part because we send / receive large  complex data form all to all, with no real order.
+The only way do  that in MPI is to
+make asynchronous  Isend / Irecv with a wait at end otherwise we break all MPI buffer.
+This imply the implementation of this  send/recv/wait
+ of meshes (not so simple code), but after this we can write\smallskip
+\bFF
+     @macro  ISendRecvAny(comm,jpart,Si,Ri) { 
+       @int n= jpart.n,nn=n+n;
+       @mpiRequest[int] rq(nn);
+       @for (@int j=0;j<n;++j)
+         Irecv(processor(jpart[j],comm,rq[j]),Ri[j]);
+       @for (@int j=0;j<n;++j)
+         Isend(processor(jpart[j],comm,rq[n+j]),Si[j]);
+       @for (@int j=0;j<nn;++j)
+         mpiWaitAny(rq); }//EndofMacro\hfilll
+         
+     @ISendRecvAny(comm,jpart,aThij,Thij) 
+\eFF
+\item At this step we have send/receive all the coarse mesh , so we can 
+build the fine final mesh by splitting all meshes : \verb!Thi, Thij[j],Thij[j]! 
+with freefem++ \texttt{trunc} mesh function which do restriction and slipping. 
+\smallskip
+\item The construction of the send/recv  matrices  \verb!sMj! and \verb!rMj! :
+can done with this code:\smallskip
+\bFF
+     @mesh3 Thij=Thi, Thji=Thi; // variable meshes 
+     @fespace Whij(Thij,Pk), Whji(Thji,Pk);// variable fespace .. 
+     @matrix Pii; Whi wpii=pii; Pii = wpii[]; // Diagonal matrix corresponding $\times \pi_i$
+     @matrix[int] sMj(njpart), rMj(njpart); // M  send/rend case..      
+      @for(int jp=0;jp<njpart;++jp)
+        { @int j=jpart[jp];
+          Thij = aThij[jp];   Thji = aThji[jp];//change mesh to change Whij,Whij
+          @matrix I = interpolate(Whji,Whi); // Whji <- Whi
+          sMj[jp] = I*Pii;  // Whi -> s Whij  
+          rMj[jp] = interpolate(Whij,Whi,t=1); }}  // Whji -> Whi    
+\eFF
+\end{enumerate}
 
 %%\include{docFFGUI}
 
