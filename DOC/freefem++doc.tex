@@ -13952,7 +13952,7 @@ freefem++ function Update:
 \eFF\smallskip
 where the buffer are defined by:
 \smallskip\bFF
-  InitU(njpart,Whji,Thji,aThji,Usend)  // defined the send buffer\hfilll
+  InitU(njpart,Whij,Thij,aThij,Usend)  // defined the send buffer\hfilll
   InitU(njpart,Whij,Thij,aThij,Vrecv)  //  defined the revc buffer\hfilll
 \eFF\smallskip
 with the following macro definition: 
@@ -14026,50 +14026,71 @@ and build in parallel the  $\pi_i$ and $\Omega_i$, such that   $ \mathcal{O}_i\ 
  and tank to the function \texttt{trunc} to build this array,\smallskip
 \bFF
        @for(@int jp=0;jp<njpart;++jp)
-         aThij[jp]  = trunc(Thi,pij[jp]>0,label=10); 
+         aThij[jp]  = trunc(Thi,pij[jp]>1e-10,label=10); 
 \eFF\smallskip
-\item we exchange all sub mesh $\Th_{ij}$ of the process $i$ to to all process $j$
-and we call the mesh on process $i$ the mesh $\Th_{ji}$, this part is the most tricky 
-part because we send / receive large  complex data form all to all, with no real order.
-The only way do  that in MPI is to
-make asynchronous  Isend / Irecv with a wait at end otherwise we break all MPI buffer.
-This imply the implementation of this  send/recv/wait
- of meshes (not so simple code), but after this we can write\smallskip
-\bFF
-     @macro  ISendRecvAny(comm,jpart,Si,Ri) { 
-       @int n= jpart.n,nn=n+n;
-       @mpiRequest[int] rq(nn);
-       @for (@int j=0;j<n;++j)
-         Irecv(processor(jpart[j],comm,rq[j]),Ri[j]);
-       @for (@int j=0;j<n;++j)
-         Isend(processor(jpart[j],comm,rq[n+j]),Si[j]);
-       @for (@int j=0;j<nn;++j)
-         mpiWaitAny(rq); }//EndofMacro\hfilll
-         
-     @ISendRecvAny(comm,jpart,aThij,Thij) 
-\eFF
-\item At this step we have send/receive all the coarse mesh , so we can 
+%\item we exchange all sub mesh $\Th_{ij}$ of the process $i$ to to all process $j$
+%and we call the mesh on process $i$ the mesh $\Th_{ji}$, this part is the most tricky 
+%part because we send / receive large  complex data form all to all, with no real order.
+%The only way do  that in MPI is to
+%make asynchronous  Isend / Irecv with a wait at end otherwise we break all MPI buffer.
+%This imply the implementation of this  send/recv/wait
+% of meshes (not so simple code), but after this we can write\smallskip
+%\bFF
+%     @macro  ISendRecvAny(comm,jpart,Si,Ri) { 
+%       @int n= jpart.n,nn=n+n;
+%       @mpiRequest[int] rq(nn);
+%       @for (@int j=0;j<n;++j)
+%         Irecv(processor(jpart[j],comm,rq[j]),Ri[j]);
+%       @for (@int j=0;j<n;++j)
+%         Isend(processor(jpart[j],comm,rq[n+j]),Si[j]);
+%       @for (@int j=0;j<nn;++j)
+%         mpiWaitAny(rq); }//EndofMacro\hfilll
+%         
+%     @ISendRecvAny(comm,jpart,aThij,Thij) 
+%\eFF
+\item At this step we have  all on  the coarse mesh , so we can 
 build the fine final mesh by splitting all meshes : \verb!Thi, Thij[j],Thij[j]! 
 with freefem++ \texttt{trunc} mesh function which do restriction and slipping. 
 \smallskip
 \item The construction of the send/recv  matrices  \verb!sMj! and \verb!rMj! :
 can done with this code:\smallskip
 \bFF
-     @mesh3 Thij=Thi, Thji=Thi; // variable meshes 
-     @fespace Whij(Thij,Pk), Whji(Thji,Pk);// variable fespace .. 
+     @mesh3 Thij=Thi; // variable meshes 
+     @fespace Whij(Thij,Pk);// variable fespace .. 
      @matrix Pii; Whi wpii=pii; Pii = wpii[]; // Diagonal matrix corresponding $\times \pi_i$
      @matrix[int] sMj(njpart), rMj(njpart); // M  send/rend case..      
       @for(int jp=0;jp<njpart;++jp)
         { @int j=jpart[jp];
-          Thij = aThij[jp];   Thji = aThji[jp];//change mesh to change Whij,Whij
-          @matrix I = interpolate(Whji,Whi); // Whji <- Whi
+          Thij = aThij[jp];//change mesh to change Whij,Whij
+          @matrix I = interpolate(Whij,Whi); // Whij <- Whi
           sMj[jp] = I*Pii;  // Whi -> s Whij  
-          rMj[jp] = interpolate(Whij,Whi,t=1); }}  // Whji -> Whi    
+          rMj[jp] = interpolate(Whij,Whi,t=1); }}  // Whij -> Whi    
 \eFF
 \end{enumerate}
 
+To buil a not to bad application, I have add code tout change variable from parametre value
+with the following code 
+\bFF
+@include "getARGV.idp"
+verbosity=getARGV("-vv",0);
+@int vdebug=getARGV("-d",0);
+@int ksplit=getARGV("-k",2);
+@int nloc = getARGV("-n",10);
+@string sff=getARGV("-p,","");
+@bool gmres=getARGV("-gmres",1); 
+@bool dplot=getARGV("-dp",0);
+\eFF
 %%\include{docFFGUI}
 
+ And  small include to make graphic in parallel
+of distribute solution of vector $u$ on mesh $T_h$
+with the following interface:
+\bFF
+@include "MPIplot.idp"
+@func bool  plotMPIall(mesh3 &Th,real[int] & u,string  cm)
+{ PLOTMPIALL(mesh3,Pk, Th, u, cm,3); return 1;}
+\eFF
+where $3$ is the number of is value , and \texttt{cm} the comment. 
 \section{Parallel sparse solvers}
 %%%%%%%%%%%%%%%%%%%
 Parallel sparse solvers use several processors to solve linear systems of equation. Like  sequential,
