@@ -1,0 +1,33 @@
+macro PLOTMPIALL(mesh,Pk, Th, u, cm,niso)
+{ int ver=verbosity;
+  verbosity=0;
+  if(mpirank==0)
+    {
+      mesh Thi=Th;
+      mesh[int] ath(mpisize);
+      fespace Xh(Thi,Pk);
+      Xh[int] uh(mpisize);
+      uh[0][]=u;
+      ath[0]=Th;
+      mpiRequest[int] rq(mpisize);
+      for(int i= 1; i <mpisize;++i)
+	   Irecv(processor(i,rq[i]),ath[i]);
+      for (int i=1;i<mpisize;++i)
+       	int k= mpiWaitAny(rq);
+      for (int i=1;i<mpisize;++i)
+	   { Thi=ath[i];
+	     Irecv(processor(i,rq[i]),uh[i][]);}
+      for (int i=1;i<mpisize;++i)
+       	int k= mpiWaitAny(rq); 
+      plot(uh,wait=1,cmm=cm,nbiso=niso,dim=3,fill=1);
+    }
+  else
+    {
+      processor(0)<<Th;
+      processor(0)<<u;
+    }
+  mpiBarrier(mpiCommWorld);
+  verbosity=ver;
+  return true;
+}
+//EOM ...

@@ -1,4 +1,8 @@
 v 3.10-2
+   - try to compile with MKL libs.
+   - correct MPIGMRES[23]d.edp example 
+     add doc on this example.  
+v 3.10-2
  - add operator to inverse permuation to set or initial int[int] array
    I=J^-1; 
    if J is a permuation of 0:n-1  then we have :   I[j[i]]=i 
