@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.10-3,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.11,hecht@ann.jussieu.fr,freefem++)
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
@@ -836,6 +836,12 @@ AC_ARG_WITH(wget,
 	   ff_wget=yes
 	   ff_wget_command="${withval}")
 
+ff_mkl_libpath=yes
+AC_ARG_WITH(mkl,
+	[  --with-mkl= the  MKL LIBPATH : (ie. /opt/intel/mkl/RR.r.y.xxx/lib/<arch>)],
+	   ff_mkl_libpath="${withval}")
+
+
 if test "$enable_generic_blas" = yes
 then
 	enable_download=yes
@@ -964,16 +970,60 @@ fi
 #done
 # Looking for the BLAS
 # --------------------
-
+ffg_blas_ok=no
+ff_blas_inc=""
 # User-specified location
+# add MKL  seach dec 2010  FH ....
+AC_MSG_CHECKING(for MKL )
+ff_mkl_root=""
+if test "$ff_mkl_libpath" != "not" ; then
+    
+    if test "$ff_mkl_libpath"  = "yes"  -a  -n "$MKLROOT" ; then
+      ff_IFS="$IFS"
+      IFS=":"
+      for i in $LIBRARY_PATH;do 
+          case $i in 
+	      */mkl/*) ff_mkl_libpath=$i;;
+	  esac ;
+      done;
+      IFS="$ff_IFS"
+    else 
+	ff_mkl_libpath=no
+    fi
+    if test -d "$ff_mkl_libpath" ; then
+	ff_mkl_root=`expr "//$ff_mkl_libpath" : '//\(.*\)/lib/.*'`
+	ff_mkl_arch=`expr "//$ff_mkl_libpath" : '//.*/lib/\(.*\)'`
+        ff_mkl_lp=
+        case "$ff_mkl_arch" in
+         *64*)  ff_mkl_lp=_lp64
+	esac
+        case $F77 in
+         *ifort*) ff_mkl_cc=intel;;
+         *) ff_mkl_cc=gf;;
+        esac
+#	echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
+	ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread -lmkl_core -lguide -lm -lpthread"
+	ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -llibmkl_lapack"
+	ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_scalapack${ff_mkl_lp}"
+	ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_lp}"
+	ff_blas_ok=yes
+	ff_lapack_ok=yes
+	ff_blas_libs="$ff_mkl_blas"
+	ff_blas_inc="$ff_mkl_root/include"
+    else 
+	ff_mkl_libpath=no
+    fi
+fi
 
-ff_blas_ok=no
+
+AC_MSG_RESULT( root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...)
+
 AC_ARG_WITH(blas,
 	[  --with-blas=library	Use a specific version of the Blas],
 	ff_blas_ok=yes
 	ff_blas_libs="${withval}")
 
-ff_blas_inc=""
+
 
 # Specific BLAS library location for FreeBSD
 ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
@@ -981,7 +1031,7 @@ ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
 # Trying  blas library
 #echo "LIBS = " $LIBS
 for iblas in \
-"-framework vecLib" "-lblas"  "-L/usr/lib/atlas -lblas" \
+"$ff_mkl_blas" "-framework vecLib" "-lblas"  "-L/usr/lib/atlas -lblas" \
 $ff_freebsd_blas
 do
 #   
@@ -1092,6 +1142,8 @@ then
 	ff_cblas_h=no)
     
 fi
+
+
 if test "$ff_blas_ok" = yes 
 then
     echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
@@ -1748,12 +1800,12 @@ if test -f download/pkg/mmg3dlib.tar.gz  ;then
 else
     ff_MACOS=`expr "xx $CXXFLAGS" : '.*-mmacosx-version-min=\([0-9.]*\).*'`
     
-    case $ff_MACOS  in
-	[0-9.]*) ff_MACOS="$ff_MACOS";;
-	*) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
-    esac
     ff_mmg3dlib=""
     if test "$ff_mac" = yes ; then
+        case $ff_MACOS  in
+	     [0-9.]*) ff_MACOS="$ff_MACOS";;
+	     *) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
+    	esac
 	MACOS=10.4
 	ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
     elif test "$ff_win32" = yes ; then
@@ -1791,16 +1843,25 @@ fi
 
 ff_with_mpi=-openmpi; 
 
+ff_blacs="-lblacsCinit$ff_with_mpi     -lblacsF77init$ff_with_mpi      -lblacs$ff_with_mpi"
+ff_scalapack=-lscalapack
+
+# change MKL interface ...
+test -n "$ff_mkl_blacs" && ff_blacs="$ff_mkl_blacs"
+test -n "$ff_mkl_scalapack" && ff_scalapack="$ff_mkl_scalapack"
+test -n "$ff_mkl_root" && ff_winc="$ff_mkl_root/include/mkl_blas.h"
+
 dnl search of associad software 
 m4_define([AC_FF_WHERELIB],
     [  	AC_MSG_CHECKING(check $1)
 	ff_save_libs=$LIBS
-	LIBS="$LIBS $2"
+	LIBS="$LIBS $2 $4"
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE=no]) 
-	if test "$ff_where" = "yes" ; then
-	    echo "$1 LD '$2'"  >$ff_where_lib_conf
-	    if test -n "$3" ; then
-		echo "$1 INCLUDE  /usr/include/AS_DIRNAME[$3]"  >$ff_where_lib_conf
+	if test "$ff_WHERE" = "yes" ; then
+	    echo "$1 LD '$2'"  >>$ff_where_lib_conf
+	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
+	    if test -n "$ff_WHERE_INC" ; then
+		echo "$1 INCLUDE '$ff_WHERE_INC' "  >>$ff_where_lib_conf
 	    fi 
 	fi
 	AC_MSG_RESULT($ff_WHERE)
@@ -1809,14 +1870,14 @@ m4_define([AC_FF_WHERELIB],
     ])dnl end m4_define AC_FF_WHERELIB
 
 m4_map([AC_FF_WHERELIB],[ 
-	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h]],
-	[[fftw3],[-lfftw3],[fftw3.h]],
-	[[superlu],[-lsuperlu],[superlu_defs.h]],
-	[[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
-	[[scalapack],[-lscalapack],[]],
-	[[scotch],[-lscotch -lscotcherr],[]],	
-	[[metis],[-lmetis],[metis/metis.h]],
-	[[parmetis],[-lparmetis],[parmetis/parmetis.h]]
+	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],
+	[[fftw3],[-lfftw3],[fftw3.h],[]],
+	[[superlu],[-lsuperlu],[superlu_defs.h],[]],
+	[[blacs],[$ff_blacs],$ff_winc,[]],
+	[[scalapack],[$ff_scalapack],$ff_winc,[$ff_blacs  $ff_blas_libs $ff_MPI_LIB]],
+	[[scotch],[-lscotch -lscotcherr],[],[]],	
+	[[metis],[-lmetis],[metis/metis.h],[]],
+	[[parmetis],[-lparmetis],[parmetis/parmetis.h],[]]
     ]
     )
 

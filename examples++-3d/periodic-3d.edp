@@ -13,20 +13,15 @@ mesh Th=buildmesh(b1(-nnb)+b3(nnb)+b2(-nnb)+b4(nnb)+i1(nni));//, fixeborder=true
 //Th=adaptmesh(Th,0.1,IsMetric=1,periodic=[[1,x],[3,x],[2,y],[4,y]]);
 int nz=3;
 { // for cleanning  memory..
-fespace Vh2p(Th,P1,periodic=[[1,x],[3,x],[2,y],[4,y]]);
-
 int[int] old2new(0:Th.nv-1);
 fespace Vh2(Th,P1);
 Vh2 sorder=x+y; 
 sort(sorder[],old2new);
-plot(sorder);
 int[int]  new2old=old2new^-1;   // inverse the permuation 
 //for(int i=0;i< Th.nv;++i) // so by hand. 
 //  new2old[old2new[i]]=i;
-
 Th= change(Th,renumv=new2old);
 sorder[]=0:Th.nv-1;
-plot(sorder,wait=1);
 }
 {
   fespace Vh2(Th,P1);
