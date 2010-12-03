@@ -336,8 +336,8 @@ freefem++.spec crimson-freefem++.zip \
 Install-MacOS.command.in \
 examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \
 examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \
-examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp \
-WHERE_LIBRARY-mkl 
+examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp  \
+WHERE_LIBRARY-mkl
 
 FF_MAC_PREFIX = FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
 FF_EXAMPLES_FILES = COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX INNOVATION \

@@ -2,7 +2,7 @@
 
 TESTS=regtests.sh
 TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src EXEEXT=$(EXEEXT) MPIPROG=$(MPIPROG)
-LIST_IDP=AddLayer2d.idp	AddLayer3d.idp	MPIGMRESmacro.idp getARGV.idp
+LIST_IDP=AddLayer2d.idp	AddLayer3d.idp	MPIGMRESmacro.idp getARGV.idp MPIplot.idp
 EXTRA_DIST=*.edp *.idp  regtests.sh  \
 MPICG.cpp \
 MUMPS_FreeFem.cpp \
