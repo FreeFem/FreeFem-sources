@@ -1860,8 +1860,8 @@ m4_define([AC_FF_WHERELIB],
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "$1 LD '$2'"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
-	    if test -n "$ff_WHERE_INC" ; then
-		echo "$1 INCLUDE '$ff_WHERE_INC' "  >>$ff_where_lib_conf
+	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
+		echo "$1 INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
 	    fi 
 	fi
 	AC_MSG_RESULT($ff_WHERE)

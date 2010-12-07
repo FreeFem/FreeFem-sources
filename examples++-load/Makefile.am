@@ -120,9 +120,10 @@ ff-get-dep:ff-get-dep.in Makefile
 	../config.status  --file=$@:$@.in
 	chmod a+x $@
 	-if [ -d ../download/bin ] ;then cp $@ ../download/bin; fi
-WHERE_LIBRARY-download:ff-pkg-download 
+WHERE_LIBRARY-download:ff-pkg-download FORCE
 	@./ff-pkg-download >$@-new
 	@diff $@-new $@  || (cp $@-new $@ ;touch WHERE_LIBRARY)
+FORCE: ;
 freefem++.pref:
 	echo loadpath = \"./\" >freefem++.pref
 install-exec-local:: load_compile

@@ -322,8 +322,9 @@ void solyams_pSurfMesh( yams_pSurfMesh sm, const int &type, const KN<double> & t
     
     for (k=1; k<=sm->npfixe; k++) {
       ppt = &sm->point[k];    
-      pm  = &sm->metric[k];
+     
       memset(pm->m,6*sizeof(float),0.);
+      pm  = &sm->metric[k];// coorrection FH dec 2010..
       for (i=0; i<6; i++)
 	m[i] = (float) tabsol[(k-1)*6+i];
       
