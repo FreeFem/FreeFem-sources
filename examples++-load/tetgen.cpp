@@ -51,6 +51,12 @@
 
 using namespace  Fem2D;
 
+/*
+// function to return inside point in a volume mesh 
+// A rajouter par la suite //
+void insidepoint( const Mesh3 &Th3
+
+*/
 // subroutine use for tetegen call
 
 void mesh3_tetgenio_out(const tetgenio &out, Mesh3 & Th3);
@@ -148,11 +154,11 @@ basicAC_F0::name_and_type Build2D3D_Op::name_param[]= {
   {  "nbofregions", &typeid(long)},
   {  "regionlist", &typeid(KN_<double>)},
   {  "nboffacetcl", &typeid(long)},
-    {  "facetcl", &typeid(KN_<double>)},//11
+  {  "facetcl", &typeid(KN_<double>)},//11
   // mesure mesh
   {  "mesuremesh", &typeid(long)},
-    {  "region", &typeid(long)}, //13
-    {  "label", &typeid(KN_<long>)}//14
+  {  "region", &typeid(long)}, //13
+  {  "label", &typeid(KN_<long>)}//14
     
 };
 
@@ -1040,6 +1046,138 @@ Mesh3 * RemplissageSurf3D_tetgen_new(char *switch_tetgen,const Mesh3 & Th3, cons
   return T_Th3;
 }
 
+Mesh3 * RemplissageSurf3D_tetgen_new(char *switch_tetgen,const Mesh3 & Th3, const int & label_tet,
+				     const int &nbhole, const double *tabhole, 
+				     const int & nbregion, const double *tabregion, 
+				     const int &nbfacecl, const double *tabfacecl, 
+				     const int &nbinside, const double *InsidePoint, 
+				     const int &sizeofmetric, const double *metric){
+	
+  //Mesh3 *T_Th3= new Mesh3;
+	
+  assert(Th3.nt == 0 );
+  int nv_t = Th3.nv;
+  int nt_t = Th3.nt;
+  int nbe_t = Th3.nbe;
+
+ 
+  if(verbosity) cout << "3D RemplissageSurf3D:: Vertex  triangle2  border " << nv_t << " "<< nt_t << " " << nbe_t<< endl;
+  // Creation des tableau de tetgen
+	
+  tetgenio in,out;
+  tetgenio addin;
+
+  if(verbosity) cout << " tetgenio: vertex " << endl;
+  int itet,jtet;
+  // All indices start from 1.
+  in.firstnumber = 1;
+  in.numberofpoints = nv_t;
+  in.pointlist = new REAL[in.numberofpoints*3];
+  in.pointmarkerlist = new int[in.numberofpoints];
+  itet=0;
+  jtet=0;
+  for(int nnv=0; nnv < nv_t; nnv++)
+    {
+      in.pointlist[itet]      = Th3.vertices[nnv].x;
+      in.pointlist[itet+1]    = Th3.vertices[nnv].y;
+      in.pointlist[itet+2]    = Th3.vertices[nnv].z;       
+      in.pointmarkerlist[nnv] = Th3.vertices[nnv].lab;   
+      itet=itet+3;
+    }
+  assert(itet==in.numberofpoints*3);
+   
+  // Add inside point
+  if( nbinside ){
+    cout << "nbinside=" << nbinside << endl;
+    addin.firstnumber = 1;
+    addin.numberofpoints = nbinside;
+    addin.pointlist= new REAL[3*nbinside];
+    addin.pointmarkerlist = new int[addin.numberofpoints];
+    for(int nnv=0; nnv < 3*nbinside; nnv++)
+      addin.pointlist[nnv] = InsidePoint[nnv];
+    for(int nnv=0; nnv < nbinside; nnv++)
+      addin.pointmarkerlist[nnv] = 111;
+  }
+
+  // Add metric
+  if( sizeofmetric ){
+    cout << "sizeofmetric=" << sizeofmetric << endl;
+    in.numberofpointmtrs = sizeofmetric;
+    in.pointmtrlist = new REAL[in.numberofpointmtrs*in.numberofpoints];
+    for(int nnv=0; nnv < in.numberofpointmtrs*in.numberofpoints; nnv++)
+      in.pointmtrlist[nnv]=metric[nnv]; 
+  }
+ 
+ if(verbosity) cout << " tetgenio: facet " << endl;
+  // Version avec des facettes
+  in.numberoffacets = nbe_t;
+  in.facetlist = new tetgenio::facet[in.numberoffacets];
+  in.facetmarkerlist = new int[in.numberoffacets];
+	  
+  for(int ibe=0; ibe < nbe_t; ibe++){
+    tetgenio::facet *f;
+    tetgenio::polygon *p;
+    f = &in.facetlist[ibe];
+    f->numberofpolygons = 1;
+    f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
+    f->numberofholes = 0;
+    f->holelist = NULL;
+		
+    p = &f->polygonlist[0];
+    p->numberofvertices = 3;
+    p->vertexlist = new int[3];
+		
+    // creation of elements
+    const Triangle3 & K(Th3.be(ibe)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
+    p->vertexlist[0] = Th3.operator()(K[0])+1;
+    p->vertexlist[1] = Th3.operator()(K[1])+1;
+    p->vertexlist[2] = Th3.operator()(K[2])+1;
+		
+    for( int kkk=0; kkk<3; kkk++){ 
+      assert( p->vertexlist[kkk]<= in.numberofpoints && p->vertexlist[kkk]>0);
+    }
+		
+    in.facetmarkerlist[ibe] = K.lab; 
+		
+  }  
+  // mise a jour des nouvelles variables
+ 
+  in.numberofholes = nbhole;
+  in.holelist = new REAL[3*nbhole];
+  
+  for(int ii=0; ii<3*in.numberofholes; ii++){
+    in.holelist[ii]   = tabhole[ii];
+  }
+
+  in.numberofregions = nbregion;
+  in.regionlist = new REAL[5*nbregion];
+  for(int ii=0; ii<5*in.numberofregions; ii++){
+    in.regionlist[ii] = tabregion[ii];
+  }
+
+  in.numberoffacetconstraints = nbfacecl;
+  in.facetconstraintlist = new REAL[2*in.numberoffacetconstraints];
+
+  for(int ii=0; ii<2*in.numberoffacetconstraints; ii++){
+    in.facetconstraintlist[ii+1] = tabfacecl[ii+1];
+  }
+
+
+  cout << "tetgen: before tetrahedralize( , &in, &out);" << endl;
+  cout << "numberof regions "<<  in.numberofregions  << endl;
+  cout << "numberof hole "<<  in.numberofholes  << endl;
+	
+  tetrahedralize(switch_tetgen, &in, &out, &addin);
+	 
+  cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
+  //mesh3_tetgenio_out( out, *T_Th3);
+  Mesh3* T_Th3=mesh3_tetgenio_out( out);
+  cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
+  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
+  return T_Th3;
+}
+
+
 Mesh3 * Transfo_Mesh2_tetgen(const double &precis_mesh, char *switch_tetgen,const Mesh & Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
 	int &border_only, int &recollement_border, int &point_confondus_ok, 
 	const int &label_tet, const map<int, int> &maptri ){
@@ -1316,8 +1454,7 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
 				     const int &nbfacecl, const double *tabfacecl, const double *tsizevol){
 
   // verif option refine
-  int i;
-  //Mesh3 *T_Th3= new Mesh3;	
+  int i;	
   assert(Th3.nt != 0 );
   {
     size_t testr, testp;
@@ -1326,9 +1463,7 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
     
     testr = strcspn(test_tetgen,"r");
     testp = strcspn(test_tetgen,"p");
-    //cout << "switch_tetgen=" << switch_tetgen << endl;
-    //cout << "testr=" << testr  <<" testp="<< testp <<  endl;
-    //cout << "strlen(test_tetgen)" << strlen(test_tetgen) << endl; 
+    
     if( testr == strlen(test_tetgen) )
       { 
 	cout << "The option 'r' of tetgen is not used" << endl;
@@ -1391,17 +1526,7 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
     in.tetrahedronlist[i+2] = Th3.operator()(K[2])+1;
     in.tetrahedronlist[i+3] = Th3.operator()(K[3])+1;
 
-    /*
-    if( Th3.vertices[Th3.operator()(K[0])].y > 3.14) {
-    in.tetrahedronvolumelist[nnt] = 0.001;
-    }
-    else{
-    in.tetrahedronvolumelist[nnt] = 0.01;
-    }
-    */
-    
     in.tetrahedronvolumelist[nnt] = tsizevol[nnt];
-
     in.tetrahedronattributelist[nnt] = K.lab;
     
     i=i+4;
@@ -1423,43 +1548,6 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
 
   }
   
-  
-  /*
-  cout << " tetgenio: facet " << endl;
-  // Version avec des facettes
-
-  in.numberoffacets = nbe_t;
-  in.facetlist = new tetgenio::facet[in.numberoffacets];
-  in.facetmarkerlist = new int[in.numberoffacets];
-	  
-  for(int ibe=0; ibe < nbe_t; ibe++){
-    tetgenio::facet *f;
-    tetgenio::polygon *p;
-    f = &in.facetlist[ibe];
-    f->numberofpolygons = 1;
-    f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
-    f->numberofholes = 0;
-    f->holelist = NULL;
-		
-    p = &f->polygonlist[0];
-    p->numberofvertices = 3;
-    p->vertexlist = new int[3];
-		
-    // creation of elements
-    const Triangle3 & K(Th3.be(ibe)); // const Triangle2 & K(Th2.elements[ii]); // Version Mesh2  
-    p->vertexlist[0] = Th3.operator()(K[0])+1;
-    p->vertexlist[1] = Th3.operator()(K[1])+1;
-    p->vertexlist[2] = Th3.operator()(K[2])+1;
-		
-    for( int kkk=0; kkk<3; kkk++){ 
-      assert( p->vertexlist[kkk]<= in.numberofpoints && p->vertexlist[kkk]>0);
-    }
-		
-    in.facetmarkerlist[ibe] = K.lab; 
-		
-  }  
-  */
-
   // mise a jour des nouvelles variables
  
   in.numberofholes = nbhole;
@@ -1484,28 +1572,190 @@ Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3,
     in.facetconstraintlist[ii+1] = tabfacecl[ii+1];
   }
 
-  cout << "tetgen: before tetrahedralize( , &in, &out);" << endl;
-  cout << "numberof regions "<<  in.numberofregions  << endl;
-  cout << "numberof hole "<<  in.numberofholes  << endl;
-	
+  if(verbosity > 0){
+    cout << "tetgen: before tetrahedralize( , &in, &out);" << endl;
+    cout << "numberof regions "<<  in.numberofregions  << endl;
+    cout << "numberof hole "<<  in.numberofholes  << endl;
+  }
   tetrahedralize(switch_tetgen, &in, &out);
-	 
-  cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
-  //mesh3_tetgenio_out( out, *T_Th3);
+
+  if(verbosity > 0)
+    cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
+ 
   Mesh3 *T_Th3=mesh3_tetgenio_out( out);
-  cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
-  cout << "FreeFem++: End check mesh given by tetgen" << endl;  
+  if(verbosity > 0){
+    cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
+    cout << "FreeFem++: End check mesh given by tetgen" << endl;  
+  }
   return T_Th3;
 }
 
+
+// Fonction Refine avec tetgen à l'aide d'une metrique
+
+Mesh3 * ReconstructionRefine_tetgen(char *switch_tetgen,const Mesh3 & Th3, 
+				     const int &nbhole, const double *tabhole, 
+				     const int & nbregion, const double *tabregion, 
+				     const int &nbfacecl, const double *tabfacecl, 
+				     const double *tsizevol, const int &sizeofmetric, const double *metric){
+
+  // verif option refine
+  int i;	
+  assert(Th3.nt != 0 );
+  {
+    size_t testr, testp;
+    int lenswitch;
+    const char* test_tetgen = switch_tetgen;
+    
+    testr = strcspn(test_tetgen,"r");
+    testp = strcspn(test_tetgen,"p");
+    
+    if( testr == strlen(test_tetgen) )
+      { 
+	cout << "The option 'r' of tetgen is not used" << endl;
+	exit(1);
+      }
+    testp = strcspn(test_tetgen,"p");
+    if( testp != strlen(test_tetgen) )
+      { 
+	cout << "With TetGen :: the option 'p' is not possible to use with option 'r' " << endl;
+	exit(1);
+      }
+  }
+
+  int nv_t = Th3.nv;
+  int nt_t = Th3.nt;
+  int nbe_t = Th3.nbe;
+	
+  if(verbosity) cout << "3D RemplissageSurf3D:: Vertex  triangle2  border "  << nv_t << " "<< nt_t << " " << nbe_t<< endl;
+  // Creation des tableau de tetgen
+	
+  tetgenio in,out;
+  //tetgenio::facet *f;
+  //tetgenio::polygon *p;
+	
+  if(verbosity) cout << " tetgenio: vertex " << endl;
+  int itet,jtet;
+  // All indices start from 1.
+  in.firstnumber = 1;
+  in.numberofpoints = nv_t;
+  in.pointlist = new REAL[in.numberofpoints*3];
+  in.pointmarkerlist = new int[in.numberofpoints];
+  itet=0;
+  jtet=0;
+  for(int nnv=0; nnv < nv_t; nnv++)
+    {
+      in.pointlist[itet]   = Th3.vertices[nnv].x;
+      in.pointlist[itet+1] = Th3.vertices[nnv].y;
+      in.pointlist[itet+2] = Th3.vertices[nnv].z;       
+      in.pointmarkerlist[nnv] =  Th3.vertices[nnv].lab;   
+      itet=itet+3;
+    }
+  assert(itet==in.numberofpoints*3);
+
+  if( verbosity ) 
+    cout << "sizeofmetric=" << sizeofmetric << endl;
+  in.numberofpointmtrs = sizeofmetric;
+  in.pointmtrlist = new REAL[in.numberofpointmtrs*in.numberofpoints];
+  for(int nnv=0; nnv < in.numberofpointmtrs*in.numberofpoints; nnv++)
+    in.pointmtrlist[nnv]=metric[nnv]; 
+
+  // Tetrahedrons
+  if(verbosity) cout << "tetrahedrons" << endl;
+  in.numberofcorners = 4;
+  in.numberoftetrahedra = Th3.nt;
+  in.tetrahedronlist = new int[in.numberofcorners*in.numberoftetrahedra];
+  in.numberoftetrahedronattributes = 1;
+  in.tetrahedronattributelist = new REAL[in.numberoftetrahedronattributes*in.numberoftetrahedra];
+  
+  in.tetrahedronvolumelist = new REAL[in.numberoftetrahedra];
+
+  i=0;
+  for(int nnt=0; nnt < Th3.nt; nnt++){
+    const Tet & K(Th3.elements[nnt]);
+
+    in.tetrahedronlist[i]   = Th3.operator()(K[0])+1;
+    in.tetrahedronlist[i+1] = Th3.operator()(K[1])+1;
+    in.tetrahedronlist[i+2] = Th3.operator()(K[2])+1;
+    in.tetrahedronlist[i+3] = Th3.operator()(K[3])+1;
+
+    in.tetrahedronvolumelist[nnt] = tsizevol[nnt];
+    in.tetrahedronattributelist[nnt] = K.lab;
+    
+    i=i+4;
+  }
+
+  
+  if(verbosity) cout << "lecture des facettes" << endl;
+  in.numberoftrifaces = Th3.nbe;
+  in.trifacelist = new int[3*in.numberoftrifaces];
+  in.trifacemarkerlist = new int[in.numberoftrifaces];
+
+  for(int ibe=0; ibe < Th3.nbe; ibe++){
+    const Triangle3 & K(Th3.be(ibe));
+    
+    in.trifacelist[3*ibe]   = Th3.operator()(K[0])+1;
+    in.trifacelist[3*ibe+1] = Th3.operator()(K[1])+1;
+    in.trifacelist[3*ibe+2] = Th3.operator()(K[2])+1; 					      
+    in.trifacemarkerlist[ibe] = K.lab;
+
+  }
+  
+  // mise a jour des nouvelles variables
+ 
+  in.numberofholes = nbhole;
+  in.holelist = new REAL[3*nbhole];
+  
+  for(int ii=0; ii<3*in.numberofholes; ii++){
+    in.holelist[ii]   = tabhole[ii];
+    if(verbosity) cout << "in.holelist[ii]=" << in.holelist[ii] << endl;
+  }
+
+  in.numberofregions = nbregion;
+  in.regionlist = new REAL[5*nbregion];
+  for(int ii=0; ii<5*in.numberofregions; ii++){
+    in.regionlist[ii] = tabregion[ii];
+    if(verbosity) cout << "in.regionlist[ii]=" << in.regionlist[ii] << endl;
+  }
+
+  in.numberoffacetconstraints = nbfacecl;
+  in.facetconstraintlist = new REAL[2*in.numberoffacetconstraints];
+
+  for(int ii=0; ii<2*in.numberoffacetconstraints; ii++){
+    in.facetconstraintlist[ii+1] = tabfacecl[ii+1];
+  }
+
+  if(verbosity > 0){
+    cout << "tetgen: before tetrahedralize( , &in, &out);" << endl;
+    cout << "numberof regions "<<  in.numberofregions  << endl;
+    cout << "numberof hole "<<  in.numberofholes  << endl;
+  }
+  tetrahedralize(switch_tetgen, &in, &out);
+
+  if(verbosity > 0)
+    cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
+ 
+  Mesh3 *T_Th3=mesh3_tetgenio_out( out);
+  if(verbosity > 0){
+    cout <<" Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " "<< T_Th3->nt << " " << T_Th3->nbe << endl;
+    cout << "FreeFem++: End check mesh given by tetgen" << endl;  
+  }
+  return T_Th3;
+}
 
 // declaration pour FreeFem++
 
 class Remplissage_Op : public E_F0mps 
 {
 public:
-  Expression eTh;
-  static const int n_name_param =9+2; // 
+  //typedef pmesh3 Result;
+  Expression eTh;    // Surface mesh
+  // ====================
+  // This parameter allow to add inside points of this initial volume mesh
+  Expression eVolTh;  
+  bool bVol;
+  // ====================
+  static const int n_name_param =9+2+1+1; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
@@ -1526,8 +1776,34 @@ public:
     if( nargs[3] && nargs[10] ) 
 	CompileError("uncompatible movemesh3 (Th, label= , refface=  ");
     
-  } 
-  
+    bVol=false;
+    /*
+    if( BCastTo<Mesh3 *>(args[1]) ){
+      eVolTh = CastTo<Mesh3 *>(args[1]);
+      bVol=true;
+    }
+    else{
+      bVol=false;
+    } 
+    */
+  }
+  Remplissage_Op(const basicAC_F0 &  args,Expression tth, Expression vth) 
+    : eTh(tth),eVolTh(vth)
+  {
+    if(verbosity >1) cout << "Remplissage du bord" << endl;
+    args.SetNameParam(n_name_param,name_param,nargs);
+    if( nargs[2] && nargs[9] ) 
+	CompileError("uncompatible movemesh3 (Th, region= , reftet=  ");
+    if( nargs[3] && nargs[10] ) 
+	CompileError("uncompatible movemesh3 (Th, label= , refface=  ");
+    
+    bVol=true;
+  }
+  /*
+    static ArrayOfaType  typeargs() { return  ArrayOfaType( atype<pmesh3>(),true ); }// all type
+    static  E_F0 * f(const basicAC_F0 & args) { return new Remplissage_Op(args);} 
+    operator aType () const { return atype<pmesh3>();} 
+  */
   AnyType operator()(Stack stack)  const ;
 };
 
@@ -1543,9 +1819,10 @@ basicAC_F0::name_and_type Remplissage_Op::name_param[]= {
   {  "regionlist", &typeid(KN_<double>)},
   {  "nboffacetcl", &typeid(long)},
   {  "facetcl", &typeid(KN_<double>)},
-    {  "region", &typeid(long)}, //9
-    {  "label", &typeid(KN_<long>)}//10
-    
+  {  "region", &typeid(long)}, //9
+  {  "label", &typeid(KN_<long>)},//10
+  {  "addpointlist", &typeid(KN_<long>)}, // 11
+  {  "metric", &typeid(KN_<long>)}
 };
 
 class  Remplissage : public OneOperator { public:  
@@ -1554,6 +1831,16 @@ class  Remplissage : public OneOperator { public:
   E_F0 * code(const basicAC_F0 & args) const 
   { 
 	return  new Remplissage_Op( args,t[0]->CastTo(args[0]) ); 
+  }
+};
+
+
+class  RemplissageAddPoint : public OneOperator { public:  
+    RemplissageAddPoint() : OneOperator(atype<pmesh3>(),atype<pmesh3>(),atype<pmesh3>()) {}
+  
+  E_F0 * code(const basicAC_F0 & args) const 
+  { 
+    return  new Remplissage_Op( args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]) ); 
   }
 };
 
@@ -1584,8 +1871,68 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   KN<double> tabregion (arg(6,stack,zdzempty));
   int nbfacecl (arg(7,stack,0));
   KN<double> tabfacecl (arg(8,stack,zdzempty));
+  // parameter inside point
+  // need to add "i" to the switch
+  KN<double> InsidePoint(arg(11,stack,zdzempty)); // Add inside point in the volume mesh generated by tetgen
+  // need to add "m" to the switch
+  KN<double> metric(arg(12,stack,zdzempty)); // Add metric for tetgen
 
+  //=========================
+  // Add  a metric
+  int sizeofmetric= metric.N()/Th.nv;
+  if( nargs[12] ){
+    cout << " size of the metric " << metric.N()/Th.nv << endl;
+    assert( (metric.N()/Th.nv)*Th.nv == metric.N() );
+  }
+  // fin add a metric
+  //==========================
   
+  //==========================
+  // Add inside points
+
+  if( nargs[11] )
+    assert( ((InsidePoint.N()/3)*3) == InsidePoint.N() );
+  // case with a inside meshes
+
+  if( bVol ){
+    // Inside point is given by a mesh
+    Mesh3 *pvolTh = GetAny<Mesh3 *>((*eVolTh)(stack));
+    Mesh3 &volTh=*pvolTh;
+    
+    KN<int> takevertex(volTh.nv);
+    takevertex = 1;
+    // determination of vertices in the border
+    for(int ibe=0; ibe<volTh.nbe; ibe++){
+      const Triangle3 & K(volTh.be(ibe));
+      takevertex[volTh.operator()(K[0])] = 0;
+      takevertex[volTh.operator()(K[1])] = 0;
+      takevertex[volTh.operator()(K[2])] = 0;
+    }
+    int nvInside=0;
+    // number of vertices inside the volume mesh
+    for(int iv=0; iv<volTh.nv; iv++){ 
+      if( takevertex[iv] == 1)
+	nvInside++;      
+    }
+    InsidePoint.resize(3*nvInside);
+    int loopnv=0;
+    for(int iv=0; iv<volTh.nv; iv++){ 
+      if( takevertex[iv] == 1){
+	InsidePoint[loopnv]   = volTh.vertices[iv].x;
+	InsidePoint[loopnv+1] = volTh.vertices[iv].y;
+	InsidePoint[loopnv+2] = volTh.vertices[iv].z;
+	loopnv=loopnv+3;
+      }      
+    }
+    assert( loopnv/3 == nvInside );
+  }
+  
+  if( !bVol && !nargs[11] ) assert( 	InsidePoint.N() == 0 ); 
+
+  //  fin add inisde point
+  //=========================
+
+
   // assertion au niveau de la taille 
   ffassert( tabhole.N()   == 3*nbhole);
   ffassert( tabregion.N() == 5*nbregion);
@@ -1612,9 +1959,8 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
 	mapf[nrf[i]]=nrf[i+1];
       }
     }
-  //Mesh3 *Th3 = Th3 = RemplissageSurf3D_tetgen( switch_tetgen, Th, label_tet);
   
-  cout << "tetgen:" << "nbhole="   << nbhole << "nbregion=" << nbregion << endl;
+  if(verbosity>1) cout << "tetgen:" << "nbhole="   << nbhole << "nbregion=" << nbregion << endl;
 
   /*
     int addcheckorientation=0;
@@ -1625,8 +1971,18 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
     }
   */
 
-  Mesh3 *Th3 = RemplissageSurf3D_tetgen_new( switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl);
-	
+  int nbinside=InsidePoint.N()/3;
+  Mesh3 *Th3 = 0;
+
+  if( nargs[11] || nargs[12]){
+    Th3 = RemplissageSurf3D_tetgen_new( switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl, tabfacecl, nbinside, InsidePoint, sizeofmetric, metric);
+    // delete multiple vertex
+    Th3->TrueVertex();
+  }
+  else
+    Th3 = RemplissageSurf3D_tetgen_new( switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl, tabfacecl);
+  
+
   cout << "finish tetgen " << endl;
   // changement de label 
   if( nrf.N() > 0){
@@ -1673,7 +2029,7 @@ class ReconstructionRefine_Op : public E_F0mps
 {
 public:
   Expression eTh;
-  static const int n_name_param =10+2; // 
+  static const int n_name_param =10+2+1; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
@@ -1712,8 +2068,9 @@ basicAC_F0::name_and_type ReconstructionRefine_Op::name_param[]= {
   {  "nboffacetcl", &typeid(long)},
   {  "facetcl", &typeid(KN_<double>)},
   {  "sizeofvolume", &typeid(double)},
-    {  "region", &typeid(KN_<long>)}, //10
-    {  "label", &typeid(KN_<long>)}//11
+  {  "region", &typeid(KN_<long>)}, //10
+  {  "label", &typeid(KN_<long>)},//11
+  {  "metric", &typeid(KN_<double>)}//12  // parameter for tetgen
     
 };
 
@@ -1757,7 +2114,18 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
   int nbfacecl (arg(7,stack,0));
   KN<double> tabfacecl (arg(8,stack,zdzempty));
 
-  
+  KN<double> metric(arg(12,stack,zdzempty)); // Add metric for tetgen
+
+  //=========================
+  // Add  a metric
+  int sizeofmetric = metric.N()/Th.nv;
+  if( nargs[12] ){
+    cout << " size of the metric " << metric.N()/Th.nv << endl;
+    assert( (metric.N()/Th.nv)*Th.nv == metric.N() );
+  }
+  // fin add a metric
+  //==========================
+
   // assertion au niveau de la taille
   ffassert( tabhole.N()   == 3*nbhole);
   ffassert( tabregion.N() == 5*nbregion);
@@ -1815,8 +2183,25 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
 
   cout << "Before reconstruction:" << " nbhole="   << nbhole << " nbregion=" << nbregion << endl;
  
-  Mesh3 *Th3 = ReconstructionRefine_tetgen(switch_tetgen, Th, nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl,tsizevol);
-	
+  Mesh3 *Th3=0; 
+  
+  int RefineMethod=-1;
+  if( nargs[9] ) 
+    RefineMethod=1;
+  if( nargs[12] ) 
+    RefineMethod=0;
+  
+  // Add parameter "perhaps' with add a metric which defined sizeofvolume
+
+  if( RefineMethod == 1) 
+    Th3 = ReconstructionRefine_tetgen(switch_tetgen, Th, nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl,tsizevol);
+  else if( RefineMethod == 0) 
+    Th3 = ReconstructionRefine_tetgen(switch_tetgen, Th, nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl,tsizevol,sizeofmetric,metric);
+  else{
+    cerr << " We can't refine the initial mesh with tetgen. No sizeofvolume or metric is given " << endl;
+    exit(1);
+  }
+
   cout << "finish reconstruction " << endl;
   // changement de label 1
  
@@ -2120,6 +2505,7 @@ Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freef
   Global.Add("tetgconvexhull","(",new ConvexHull3D_tetg);
   Global.Add("tetgtransfo","(",new Build2D3D);
   Global.Add("tetg","(",new Remplissage);
+  Global.Add("tetg","(",new RemplissageAddPoint);
   Global.Add("tetgreconstruction","(",new ReconstructionRefine);
 
 }

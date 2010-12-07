@@ -208,14 +208,15 @@ MMG_pMesh mesh3_to_MMG_pMesh(const Mesh3 &Th3, const int & nvmax, const int &ntr
   return meshMMG;
 }
 
-MMG_pSol metric_mmg3d(const int & nv, const int & nvmax, const KN<double> &metric){
-  static const int wrapperMetric[6]={0,1,2,3,4,5};
+MMG_pSol metric_mmg3d(const int & nv, const int & nvmax, const KN<double> *pmetric){
+  static const int wrapperMetric[6]={0,1,3,2,4,5};
   MMG_pSol sol;
   
   sol= (MMG_pSol)calloc(1,sizeof(MMG_Sol)) ;
 
   //cout << metric.N() << " taille de la metrique "<< endl;
-  if( metric.N() > 0){
+  if( pmetric && pmetric->N() > 0){
+    const KN<double> & metric=*pmetric;
     sol->np = nv;
     sol->npmax=nvmax;
     
@@ -243,7 +244,7 @@ MMG_pSol metric_mmg3d(const int & nv, const int & nvmax, const KN<double> &metri
       for (i=0; i< sol->offset; i++){
 	sol->met[isol + i] = metric[(isol-1)+i];
       }
-      /*
+
 	// On a besoin de swap car on utilise celui donner par mshmet
       if(sol->offset == 6){
       // MMG_swap data
@@ -251,10 +252,12 @@ MMG_pSol metric_mmg3d(const int & nv, const int & nvmax, const KN<double> &metri
 	sol->met[isol + 2] = sol->met[isol + 3];
 	sol->met[isol + 3] = tmp;
 	}
-      */
+
     }
   }
   else{
+    sol->met=0;
+    sol->metold=0;
     sol->np=0;
     sol->offset=1;
   }
@@ -401,20 +404,13 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
     cout << " ntetmax " << ntetmax << endl;
   }
 
-  
-  KN<double> *metric1=0;
+  KN<double> *metric=0;
   
   if( nargs[1] ){ 
-    //cout << " metric1->N() " << endl;
-    metric1 = GetAny< KN<double> *>( (*nargs[1])(stack) );
-    //cout << " metric1->N() " << metric1.N() << endl;   
-  }
-  else{
-    assert( metric1->N()!=0 );
+    metric = GetAny< KN<double> *>( (*nargs[1])(stack) );
   }
 
-  KN<double> &metric = *metric1;
-  cout << metric.N() << endl;
+
  
  
   bool BoolMoving=0;
@@ -444,62 +440,6 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
 
   MMG_pMesh MMG_Th3=mesh3_to_MMG_pMesh(Th3, nvmax, ntrimax, ntetmax,BoolMoving, Moving);
 
-  /*
-    
-    MMG_pMesh MMG_Th3=mesh3_to_MMG_pMesh(Th3, nvmax, ntrimax, ntetmax);
-  MMG_pMesh meshMMG;
-  meshMMG = (MMG_pMesh)calloc(1,sizeof(MMG_Mesh)) ;
-  
-  meshMMG->np = Th3.nv;
-  meshMMG->nt = Th3.nbe;
-  meshMMG->ne = Th3.nt;
-
-  meshMMG->npmax = nvmax;
-  meshMMG->ntmax = ntrimax;
-  meshMMG->nemax = ntetmax;
-
-  meshMMG->point = (MMG_pPoint)calloc(meshMMG->npmax+1,sizeof(MMG_Point));
-  meshMMG->tetra = (MMG_pTetra)calloc(meshMMG->nemax+1,sizeof(MMG_Tetra));
-  meshMMG->tria = (MMG_pTria) calloc(meshMMG->ntmax+1,sizeof(MMG_Tria));
-  //meshMMG->disp = (MMG_pDispl)calloc(meshMMG->npmax+1,sizeof(MMG_Displ));
-  meshMMG->disp = NULL;
-  meshMMG->adja = (int*)calloc(4*meshMMG->nemax+5,sizeof(int));
-  
-  int k;
-  MMG_pPoint ppt;
-  for (k=1; k<=meshMMG->np; k++) {
-    ppt = &meshMMG->point[k];
-    ppt->c[0] = Th3.vertices[k-1].x;
-    ppt->c[1] = Th3.vertices[k-1].y;
-    ppt->c[2] = Th3.vertices[k-1].z;
-    ppt->ref  = Th3.vertices[k-1].lab;
-  }
-
-  
-  MMG_pTetra ptetra;
-  for (k=1; k<=meshMMG->ne; k++) {
-    const Tet & K(Th3.elements[k-1]);
-    ptetra = &meshMMG->tetra[k];
-    ptetra->v[0] = Th3.operator()(K[0])+1;
-    ptetra->v[1] = Th3.operator()(K[1])+1;
-    ptetra->v[2] = Th3.operator()(K[2])+1;
-    ptetra->v[3] = Th3.operator()(K[3])+1;
-    ptetra->ref = K.lab;
-  }
-
-  MMG_pTria ptriangle;
-  for (k=1; k<=meshMMG->nt; k++) {
-    const Triangle3 & K(Th3.be(k-1));
-    ptriangle = &meshMMG->tria[k];
-    ptriangle->v[0] = Th3.operator()(K[0])+1;
-    ptriangle->v[1] = Th3.operator()(K[1])+1;
-    ptriangle->v[2] = Th3.operator()(K[2])+1;
-    ptriangle->ref = K.lab;
-  }
-  
- 
-  MMG_Mesh *MMG_Th3= meshMMG;
-  */
 
   MMG_pSol sol=metric_mmg3d(nv, nvmax, metric);
   
@@ -514,21 +454,23 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
   // return new metric in the parameter nargs
   
   int nvv = Th3_T->nv;    // number of vertices
-  metric.resize(sol->offset*nvv);
-  if(verbosity > 1) cout << " sol->met " << nvv*sol->offset << endl;
-  {
-    int k,isol,i;
-    MMG_pPoint ppt;
-    for (k=1; k<=MMG_Th3->np; k++) {
-      ppt = &MMG_Th3 ->point[k];
-      if ( ppt->tag & M_UNUSED )  continue;
-      isol = (k-1)*sol->offset + 1;
-      for (i=0; i< sol->offset; i++){
-	metric[(isol-1)+i] = sol->met[isol + i]; 
+  if(metric)
+    {
+      metric->resize(sol->offset*nvv);
+      if(verbosity > 1) cout << " sol->met " << nvv*sol->offset << endl;
+      {
+	int k,isol,i;
+	MMG_pPoint ppt;
+	for (k=1; k<=MMG_Th3->np; k++) {
+	  ppt = &MMG_Th3 ->point[k];
+	  if ( ppt->tag & M_UNUSED )  continue;
+	  isol = (k-1)*sol->offset + 1;
+	  for (i=0; i< sol->offset; i++){
+	    (*metric)[(isol-1)+i] = sol->met[isol + i]; 
+	  }
+	}
       }
     }
-  }
-  
  
   if(verbosity > 10) cout << "buildGtree" << endl;
   Th3_T->BuildGTree();
@@ -550,7 +492,8 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
   free( MMG_Th3 );
 
   free(sol->met);
-  free(sol->metold);
+  if (abs(opt[0])!=9)
+    free(sol->metold);  //9 -> free in mmg3dlib.c 
   free(sol);
   
   *mp=mps;

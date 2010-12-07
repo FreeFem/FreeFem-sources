@@ -173,7 +173,370 @@ namespace Fem2D
       ffassert(mes>=0); // add F. Hecht sep 2009.
   }
 
-  
+  // Add by J. Morice 11/10
+  // compute the hmin in a 3d mesh 
+  // Remark: on peut le mettre dans generic mesh
+  //         (attention aux boucles sur les arrêtes)
+  double Mesh3::hmin() const{
+    R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremité de la boîte englobante
+    double hmin=1e10;
+    
+    for (int ii=0;ii< this->nv;ii++){ 
+      R3 P( vertices[ii].x, vertices[ii].y, vertices[ii].z);
+      Pinf=Minc(P,Pinf);
+      Psup=Maxc(P,Psup);     
+    }
+
+    for (int k=0;k<this->nt;k++){
+      for (int e=0;e<6;e++){
+	if( this->elements[k].lenEdge(e) < Norme2(Psup-Pinf)/1e9 )
+	  {
+	    const Tet & K(this->elements[k]);
+	    int iv[4];
+	    for(int jj=0; jj <4; jj++){
+	      iv[jj] = this->operator()(K[jj]);
+	    }
+	    for (int eh=0;eh<6;eh++){
+	      if(verbosity>2) cout << "tetrahedra: " << k << " edge : " << eh << " lenght "<<  this->elements[k].lenEdge(eh) << endl;
+	    }
+	    if(verbosity>2) cout << " A tetrahedra with a very small edge was created " << endl;
+	    
+	    return 1;
+	  }
+	hmin=min(hmin,this->elements[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+      }
+      
+    }
+    
+    for (int k=0;k<this->nbe;k++){
+      for (int e=0;e<3;e++){
+	if( this->be(k).lenEdge(e) < Norme2(Psup-Pinf)/1e9 )
+	  {
+	    for (int eh=0;eh<3;e++){
+	      cout << "triangles: " << k << " edge : " << eh << " lenght "<<  this->be(k).lenEdge(e) << endl;
+	    }
+	      cout << " A triangle with a very small edges was created " << endl;
+	      return 1;
+	  }
+	hmin=min(hmin,this->be(k).lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+      }
+    }
+    ffassert(hmin>Norme2(Psup-Pinf)/1e9);
+    return hmin;
+  } 
+
+
+  // Read a mesh with correct the mesh : 
+  // 1) delete multiple points defined
+  // 2) delete points which is not in element or in border element
+  Mesh3::Mesh3(const string  filename, const long change)
+  {
+    int ok=load(filename);
+    cout << "read mesh ok " << ok  << endl;
+    cout << ", nt " << nt << ", nv " << nv << " nbe:  = " << nbe << endl;
+    if(ok)
+      {
+	ifstream f(filename.c_str());
+	if(!f) {	
+	  cerr << "  --  Mesh3::Mesh3 Erreur openning " << filename<<endl;ffassert(0);exit(1);}	
+	if(verbosity>2)
+	  cout << "  -- Mesh3:  Read On file \"" <<filename<<"\""<<  endl;
+	if(filename.rfind(".msh")==filename.length()-4) 
+	    readmsh(f);
+        else 
+	    read(f);
+      }
+
+    if(change){
+      // verification multiple points
+      double hseuil=hmin();
+      hseuil = hseuil/10;
+      cout << " hseuil = " << hseuil << endl;
+      KN<int> Numero_Som(this->nv);
+      Vertex *vv=new Vertex[this->nv];
+      int nv_t=0;
+      {	
+	R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);
+	for (int ii=0;ii< this->nv;ii++){ 
+	  R3 P( vertices[ii].x, vertices[ii].y, vertices[ii].z);
+	  Pinf=Minc(P,Pinf);
+	  Psup=Maxc(P,Psup);     
+	}
+
+	EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(vv,Pinf,Psup,0);
+	// creation of octree
+	for (int ii=0;ii<this->nv;ii++){
+	  const R3 r3vi( this->vertices[ii].x, this->vertices[ii].y, this->vertices[ii].z );
+	  const Vertex3 &vi(r3vi);
+	  
+	  Vertex3 * pvi=gtree->ToClose(vi,hseuil);
+	  
+	  if(!pvi){
+	    vv[nv_t].x = vi.x;
+	    vv[nv_t].y = vi.y;
+	    vv[nv_t].z = vi.z;
+	    vv[nv_t].lab = this->vertices[ii].lab; // lab mis a zero par default
+	    Numero_Som[ii] = nv_t; 
+	    gtree->Add( vv[nv_t] );
+	    nv_t=nv_t+1;
+	  }
+	  else{
+	    Numero_Som[ii] = pvi-vv;
+	  }
+	}
+	
+	delete gtree;
+	//delete [] vv;
+      }
+
+      // general case
+
+      KN<int> takevertex(nv_t,0);
+      for (int k=0; k<nbe; k++) {
+	const BorderElement & K(this->borderelements[k]);     
+	for(int jj=0; jj<3; jj++){
+	  takevertex[ Numero_Som[this->operator()(K[jj])] ] = 1;
+	}
+      }
+      for(int k=0; k< this->nt; k++){
+	const Element & K(this->elements[k]);
+	for(int jj=0; jj<4; jj++){
+	  takevertex[ Numero_Som[this->operator()(K[jj])] ] = 1;
+	}
+      }
+
+      int newvertex=0;
+      for(int iv=0; iv<nv_t; iv++){
+	newvertex+=takevertex[iv];
+      }
+
+      if( newvertex != this->nv){
+	
+	// determination of vertex
+	Vertex *vvv = new Vertex[ newvertex ];
+	KN<int> newNumero_Som(nv_t);
+	int iii=0;
+	for(int iv=0;  iv< nv_t; iv++){
+	  if( takevertex[iv ] == 1  ){
+	     vvv[iii].x = vv[iv].x;
+	     vvv[iii].y = vv[iv].y;
+	     vvv[iii].z = vv[iv].z;
+	     vvv[iii].lab = vv[iv].lab; // lab mis a zero par default
+	     newNumero_Som[iv] = iii;
+	     iii++;
+	  }
+	}
+	ffassert( newvertex== iii );
+	
+	Element *tt;
+	if(this->nt !=0) tt=new Element[this->nt];
+	BorderElement *bb = new BorderElement[this->nbe];
+
+	Element *ttt=tt;
+	BorderElement *bbb=bb;
+
+	for (int k=0; k<this->nbe; k++) {
+	  const BorderElement & K(this->borderelements[k]);    
+	  int iv[3];
+	  for(int jj=0; jj<3; jj++){
+	    iv[jj] = Numero_Som[this->operator()(K[jj])];
+	    iv[jj] = newNumero_Som[iv[jj]];
+	  }
+	  (bbb++)->set(vvv,iv,K.lab);
+	}
+
+	for(int k=0; k< this->nt; k++){
+	  const Element & K(this->elements[k]);
+	  int iv[4];
+	  for(int jj=0; jj<4; jj++){
+	    iv[jj] = Numero_Som[this->operator()(K[jj])];
+	    iv[jj] = newNumero_Som[iv[jj]];
+	  }
+	  (ttt++)->set(vvv,iv,K.lab);
+	}
+	cout << " delete vertices + autre " << endl;
+	delete [] vertices;
+	delete [] elements;
+	delete [] borderelements;
+	
+	nv = newvertex;
+
+       	vertices = vvv;
+	elements = tt;
+	borderelements = bb;
+
+        //&this = new Mesh3(newvertex,this->nt,this-nbe,vvv,tt,bb);
+	
+	delete [] newNumero_Som;
+      }
+      else{
+	cout << " no need to change the mesh " << endl;
+      }
+      delete [] Numero_Som;
+    }
+    
+    BuildBound();
+    if(nt > 0){ 
+      BuildAdj();
+      Buildbnormalv();  
+      BuildjElementConteningVertex();  
+    }
+      
+    if(verbosity>2)
+      cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
+    if(verbosity)
+      cout << "  -- Mesh3 : "<<filename  << ", d "<< 3  << ", n Tet " << nt << ", n Vtx "
+	   << nv << " n Bord " << nbe << endl;
+      ffassert(mes>=0); // add F. Hecht sep 2009.
+  }
+   // Fin Add by J. Morice nov 2010
+   // Add J. Morice 12/2010
+   void Mesh3::TrueVertex() 
+	{
+			// verification multiple points
+		double hseuil=hmin();
+		hseuil =hseuil/10;
+		cout << " hseuil = " << hseuil << endl;
+		KN<int> Numero_Som(this->nv);
+		Vertex *vv=new Vertex[this->nv];
+		int nv_t=0;
+		{	
+			R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);
+			for (int ii=0;ii< this->nv;ii++){ 
+				R3 P( vertices[ii].x, vertices[ii].y, vertices[ii].z);
+				Pinf=Minc(P,Pinf);
+				Psup=Maxc(P,Psup);     
+			}
+			
+			EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(vv,Pinf,Psup,0);
+			// creation of octree
+			for (int ii=0;ii<this->nv;ii++){
+				const R3 r3vi( this->vertices[ii].x, this->vertices[ii].y, this->vertices[ii].z );
+				const Vertex3 &vi(r3vi);
+				
+				Vertex3 * pvi=gtree->ToClose(vi,hseuil);
+				
+				if(!pvi){
+					vv[nv_t].x = vi.x;
+					vv[nv_t].y = vi.y;
+					vv[nv_t].z = vi.z;
+					vv[nv_t].lab = this->vertices[ii].lab; // lab mis a zero par default
+					Numero_Som[ii] = nv_t; 
+					gtree->Add( vv[nv_t] );
+					nv_t=nv_t+1;
+				}
+				else{
+					Numero_Som[ii] = pvi-vv;
+				}
+			}
+			
+			delete gtree;
+			//delete [] vv;
+		}
+		
+		// general case
+		
+		KN<int> takevertex(nv_t,0);
+		for (int k=0; k<nbe; k++) {
+			const BorderElement & K(this->borderelements[k]);     
+			for(int jj=0; jj<3; jj++){
+				takevertex[ Numero_Som[this->operator()(K[jj])] ] = 1;
+			}
+		}
+		for(int k=0; k< this->nt; k++){
+			const Element & K(this->elements[k]);
+			for(int jj=0; jj<4; jj++){
+				takevertex[ Numero_Som[this->operator()(K[jj])] ] = 1;
+			}
+		}
+		
+		int newvertex=0;
+		for(int iv=0; iv<nv_t; iv++){
+			newvertex+=takevertex[iv];
+		}
+		
+		if( newvertex != this->nv){
+			
+			// determination of vertex
+			Vertex *vvv = new Vertex[ newvertex ];
+			KN<int> newNumero_Som(nv_t);
+			int iii=0;
+			for(int iv=0;  iv< nv_t; iv++){
+				if( takevertex[iv ] == 1  ){
+					vvv[iii].x = vv[iv].x;
+					vvv[iii].y = vv[iv].y;
+					vvv[iii].z = vv[iv].z;
+					vvv[iii].lab = vv[iv].lab; // lab mis a zero par default
+					newNumero_Som[iv] = iii;
+					iii++;
+				}
+			}
+			ffassert( newvertex== iii );
+			
+			Element *tt;
+			if(this->nt !=0) tt=new Element[this->nt];
+			BorderElement *bb = new BorderElement[this->nbe];
+			
+			Element *ttt=tt;
+			BorderElement *bbb=bb;
+			
+			for (int k=0; k<this->nbe; k++) {
+				const BorderElement & K(this->borderelements[k]);    
+				int iv[3];
+				for(int jj=0; jj<3; jj++){
+					iv[jj] = Numero_Som[this->operator()(K[jj])];
+					iv[jj] = newNumero_Som[iv[jj]];
+				}
+				(bbb++)->set(vvv,iv,K.lab);
+			}
+			
+			for(int k=0; k< this->nt; k++){
+				const Element & K(this->elements[k]);
+				int iv[4];
+				for(int jj=0; jj<4; jj++){
+					iv[jj] = Numero_Som[this->operator()(K[jj])];
+					iv[jj] = newNumero_Som[iv[jj]];
+				}
+				(ttt++)->set(vvv,iv,K.lab);
+			}
+			cout << " delete vertices + autre " << endl;
+			delete [] vertices;
+			delete [] elements;
+			delete [] borderelements;
+			
+			nv = newvertex;
+			
+			vertices = vvv;
+			elements = tt;
+			borderelements = bb;
+			
+			//&this = new Mesh3(newvertex,this->nt,this-nbe,vvv,tt,bb);
+			
+			delete [] newNumero_Som;
+		}
+		else{
+			cout << " no need to change the mesh " << endl;
+		}
+		delete [] Numero_Som;
+    
+    
+		BuildBound();
+		if(nt > 0){ 
+			BuildAdj();
+			Buildbnormalv();  
+			BuildjElementConteningVertex();  
+		}
+	
+		if(verbosity>2)
+			cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;  
+			if(verbosity)
+				cout << "  -- Mesh3 :  d "<< 3  << ", n Tet " << nt << ", n Vtx "
+				<< nv << " n Bord " << nbe << endl;
+			ffassert(mes>=0); // add F. Hecht sep 2009.
+	}
+	
+  // Fin Add J. Morice 12/2010
+	
   void  Mesh3::read(istream &f)
   { // read the mesh
     int i;
