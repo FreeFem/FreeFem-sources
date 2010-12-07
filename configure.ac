@@ -970,7 +970,7 @@ fi
 #done
 # Looking for the BLAS
 # --------------------
-ffg_blas_ok=no
+ff_blas_ok=no
 ff_blas_inc=""
 # User-specified location
 # add MKL  seach dec 2010  FH ....
@@ -979,27 +979,27 @@ ff_mkl_root=""
 if test "$ff_mkl_libpath" != "not" ; then
     
     if test "$ff_mkl_libpath"  = "yes"  -a  -n "$MKLROOT" ; then
-      ff_IFS="$IFS"
-      IFS=":"
-      for i in $LIBRARY_PATH;do 
-          case $i in 
-	      */mkl/*) ff_mkl_libpath=$i;;
-	  esac ;
-      done;
+	ff_IFS="$IFS"
+	IFS=":"
+	for i in $LIBRARY_PATH;do 
+            case $i in 
+		*/mkl/*) ff_mkl_libpath=$i;;
+	    esac ;
+	done;
       IFS="$ff_IFS"
     else 
 	ff_mkl_libpath=no
     fi
-    if test -d "$ff_mkl_libpath" ; then
+    if test "$ff_mkl_libpath" != "no" -a -d "$ff_mkl_libpath" ; then
 	ff_mkl_root=`expr "//$ff_mkl_libpath" : '//\(.*\)/lib/.*'`
 	ff_mkl_arch=`expr "//$ff_mkl_libpath" : '//.*/lib/\(.*\)'`
         ff_mkl_lp=
         case "$ff_mkl_arch" in
-         *64*)  ff_mkl_lp=_lp64
+            *64*)  ff_mkl_lp=_lp64
 	esac
         case $F77 in
-         *ifort*) ff_mkl_cc=intel;;
-         *) ff_mkl_cc=gf;;
+            *ifort*) ff_mkl_cc=intel;;
+            *) ff_mkl_cc=gf;;
         esac
 #	echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
 	ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread -lmkl_core -lguide -lm -lpthread"
@@ -1019,7 +1019,7 @@ fi
 AC_MSG_RESULT( root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...)
 
 AC_ARG_WITH(blas,
-	[  --with-blas=library	Use a specific version of the Blas],
+    [  --with-blas=library	Use a specific version of the Blas],
 	ff_blas_ok=yes
 	ff_blas_libs="${withval}")
 
@@ -1029,10 +1029,10 @@ AC_ARG_WITH(blas,
 ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
 #  zmach is in lapack 
 # Trying  blas library
-#echo "LIBS = " $LIBS
+# echo "LIBS =  $LIBS blas --- $ff_blas_ok"
 for iblas in \
-"$ff_mkl_blas" "-framework vecLib" "-lblas"  "-L/usr/lib/atlas -lblas" \
-$ff_freebsd_blas
+     "-framework vecLib" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
+    $ff_freebsd_blas
 do
 #   
 #"-L${curdir}/download/blas -lcblas -lf77blas" \
