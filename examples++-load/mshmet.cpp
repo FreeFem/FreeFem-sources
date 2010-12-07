@@ -175,7 +175,7 @@ MSHMET_pMesh mesh3_to_MSHMET_pMesh( const Mesh3 &Th3 ){
 
 
 MSHMET_pSol sol_mshmet(const int &dim, const int & np, const int &type, const int &size, int *typtab, const KN<double> &solutions){
-  static const int wrapperMetric[6]={0,1,2,3,4,5};
+  static const int wrapperMetric[6]={0,1,3,2,4,5};
   MSHMET_pSol sol;
   int k,ia,i;
 
@@ -202,7 +202,7 @@ MSHMET_pSol sol_mshmet(const int &dim, const int & np, const int &type, const in
 }
 
 void metric_mshmet( MSHMET_pSol sol, MSHMET_Info *info, const KN<double> &metric){
-  static const int wrapperMetric[6]={0,1,2,3,4,5};
+  static const int wrapperMetric[6]={0,1,3,2,4,5};
   int k,ia,i;
   
   cout << " info->iso " << info->iso << endl;
@@ -232,7 +232,7 @@ void metric_mshmet( MSHMET_pSol sol, MSHMET_Info *info, const KN<double> &metric
 
 
 void metric_mshmet_to_ff_metric(MSHMET_pSol sol, MSHMET_Info *info, KN<double> &metric){
-  static const int invwrapperMetric[6]={0,1,2,3,4,5};
+  static const int invwrapperMetric[6]={0,1,3,2,4,5};
   int k,ia,i;
   if( info->iso == 1 ){
     cout << " info->iso " << " metric "<< metric.N() <<" " << sol->np << endl;
