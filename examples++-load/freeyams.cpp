@@ -316,15 +316,17 @@ void solyams_pSurfMesh( yams_pSurfMesh sm, const int &type, const KN<double> & t
     }
   }
   else if( type == 3 ){
-    if( !sm->metric ){
-      cerr << " we give metric solution bug" << endl;
-    }
+  if ( !sm->metric && !zaldy3(sm,3) )  {
+      ExecError("Pb alloc metric in freeyam ??? ");
+  }
+  
+ 
     
     for (k=1; k<=sm->npfixe; k++) {
       ppt = &sm->point[k];    
-     
-      memset(pm->m,6*sizeof(float),0.);
       pm  = &sm->metric[k];// coorrection FH dec 2010..
+      memset(pm->m,6*sizeof(float),0.);
+    
       for (i=0; i<6; i++)
 	m[i] = (float) tabsol[(k-1)*6+i];
       
