@@ -1,3 +1,7 @@
+v 3.11 
+   - configure is compatible with MKL lib (on gnome)
+   - correct doc 
+   - add quoting argument in macro argument 
 v 3.10-2
    - try to compile with MKL libs.
    - correct MPIGMRES[23]d.edp example 

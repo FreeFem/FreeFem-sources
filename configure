@@ -14819,8 +14819,8 @@ $as_echo X"dmumps_c.h" |
 	    q
 	  }
 	  s/.*/./; q'`
-	    if test -n "$ff_WHERE_INC" ; then
-		echo "mumps INCLUDE '$ff_WHERE_INC' "  >>$ff_where_lib_conf
+	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
+		echo "mumps INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -14882,8 +14882,8 @@ $as_echo X"fftw3.h" |
 	    q
 	  }
 	  s/.*/./; q'`
-	    if test -n "$ff_WHERE_INC" ; then
-		echo "fftw3 INCLUDE '$ff_WHERE_INC' "  >>$ff_where_lib_conf
+	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
+		echo "fftw3 INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -14945,8 +14945,8 @@ $as_echo X"superlu_defs.h" |
 	    q
 	  }
 	  s/.*/./; q'`
-	    if test -n "$ff_WHERE_INC" ; then
-		echo "superlu INCLUDE '$ff_WHERE_INC' "  >>$ff_where_lib_conf
+	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
+		echo "superlu INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15008,8 +15008,8 @@ $as_echo X"$ff_winc" |
 	    q
 	  }
 	  s/.*/./; q'`
-	    if test -n "$ff_WHERE_INC" ; then
-		echo "blacs INCLUDE '$ff_WHERE_INC' "  >>$ff_where_lib_conf
+	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
+		echo "blacs INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15071,8 +15071,8 @@ $as_echo X"$ff_winc" |
 	    q
 	  }
 	  s/.*/./; q'`
-	    if test -n "$ff_WHERE_INC" ; then
-		echo "scalapack INCLUDE '$ff_WHERE_INC' "  >>$ff_where_lib_conf
+	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
+		echo "scalapack INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15134,8 +15134,8 @@ $as_echo X"" |
 	    q
 	  }
 	  s/.*/./; q'`
-	    if test -n "$ff_WHERE_INC" ; then
-		echo "scotch INCLUDE '$ff_WHERE_INC' "  >>$ff_where_lib_conf
+	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
+		echo "scotch INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15197,8 +15197,8 @@ $as_echo X"metis/metis.h" |
 	    q
 	  }
 	  s/.*/./; q'`
-	    if test -n "$ff_WHERE_INC" ; then
-		echo "metis INCLUDE '$ff_WHERE_INC' "  >>$ff_where_lib_conf
+	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
+		echo "metis INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15262,8 +15262,8 @@ $as_echo X"parmetis/parmetis.h" |
 	    q
 	  }
 	  s/.*/./; q'`
-	    if test -n "$ff_WHERE_INC" ; then
-		echo "parmetis INCLUDE '$ff_WHERE_INC' "  >>$ff_where_lib_conf
+	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
+		echo "parmetis INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5

@@ -22,7 +22,7 @@ problem Poisson(u,v,solver=CG) = int3d(Th3)( Grad(u)'*Grad(v) )  // ') for emacs
   -int3d(Th3)( 1*v ) + on(1,u=0);
 
 int nbregu=1;
-int[int]  MSHloptions=[0,1,0,0,verbosity,nbregu,0];
+int[int]  MSHloptions=[1,1,0,0,verbosity,nbregu,0];
 real[int] MSHdoptions=[1e-2,0.3,0.01,0];
 
 for(int ii=0; ii<5; ii++)
@@ -31,7 +31,7 @@ for(int ii=0; ii<5; ii++)
   h=0;
   cout <<" u min, max = " <<  u[].min << " "<< u[].max << endl;
   real cc=(u[].max-u[].min);// rescale coefficiant 
-  h[]=mshmet(Th3,u/cc,loptions=MSHloptions,doptions=MSHdoptions);
+  h[]=mshmet(Th3,u,loptions=MSHloptions,doptions=MSHdoptions);
   cout <<" h min, max = " <<  h[].min << " "<< h[].max << endl;
   plot(u,wait=1);
   MSHdoptions[0]*= 0.6;// change the level of error
