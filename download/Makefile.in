@@ -717,24 +717,30 @@ include:
 pkg:
 	mkdir pkg
 
+
 all-local:bin lib include pkg  $(DOWNLOADCOMPILE) 
 
-WHERE-LD:
+WHERE-LD: tag-compile-pkg
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
-compile-dir:
+
+compile-dir: 
 	@echo "\n\n ****** $(COMPILEDIR) ****** \n\n";
 	-@if [ 0 -eq `egrep ':$(COMPILEDIR)' WHERE-LD | wc -l` ] ;then \
 	  cd $(COMPILEDIR) && $(MAKE) $(DIRTARGET) ; \
 	else \
 	 echo $(COMPILEDIR) is in WHERE- files ;\
 	fi 
-compile-pkg: bin lib include pkg WHERE-LD
+compile-pkg: tag-compile-pkg WHERE-LD
+tag-compile-pkg: bin lib include pkg FORCE
 	-@if [ -n "$(WGET)" ] ; then \
 	for d in $(LIST_SOFT) ; do $(MAKE) compile-dir COMPILEDIR=$$d ;done ;\
 	if [ -n "$(MPICC)" ] ; then \
 	for d in $(MPI_SOFT) ; do 	$(MAKE) compile-dir COMPILEDIR=$$d ; done;\
 	fi;fi
+	touch tag-compile-pkg
+FORCE:
+
 re-install: 
 	$(MAKE) compile-pkg DIRTARGET=install
 WHERE:

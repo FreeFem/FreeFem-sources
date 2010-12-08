@@ -29,11 +29,13 @@ yams: FAIRE
 
 
 
-FAIRE: 
+FAIRE: yamslib_internal.h yamslib.c yamslib.h  ../Makefile
 	$(MAKE)  install  WHERE
 	touch FAIRE
 
-$(SRCDIR)/FAIT: $(SRCDIR)
+$(SRCDIR)/FAIT: $(SRCDIR)  yamslib_internal.h yamslib.c yamslib.h 
+	cp yamslib_internal.h yamslib.c yamslib.h $(YAMS_SRCDIR)/
+	cp makefile-yams.inc $(YAMS_DIR)/makefile
 	cd $(YAMS_DIR); make
 	touch $(SRCDIR)/FAIT
 install: $(SRCDIR)/FAIT
@@ -49,14 +51,12 @@ WHERE:
 	fi
 
 
-$(SRCDIR): $(PACKAGE)
+$(SRCDIR): $(PACKAGE) 
 	-mkdir -p $(SRCDIR)
 	cd $(SRCDIR); tar xvzf ../$(PACKAGE)
 	-mkdir $(YAMS_SRCDIR)
 	cp $(YAMS_SRCDIRNOLIB)/*.c $(YAMS_SRCDIRNOLIB)/*.h $(YAMS_SRCDIR)
 	cp $(YAMS_SRCDIRNOLIB)/compil.date $(YAMS_SRCDIR)
-	cp yamslib_internal.h yamslib.c yamslib.h $(YAMS_SRCDIR)/
-	cp makefile-yams.inc $(YAMS_DIR)/makefile
 	cd $(YAMS_SRCDIR); patch -p1 < ../../freeyams$(yams_VERSION).patch
 
 $(PACKAGE):
@@ -70,7 +70,7 @@ clean-local:
 
 clean: clean-local
 	-rm ff-flags
-	-rm $(SRCDIR)/$(INSTALL)/lib/libyams.a
+	-rm $(SRCDIR)/$(INSTALL)/lib/libfreeyams.a
 	-rm $(SRCDIR)/$(INSTALL)/include/*freeyams*.h
 	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams
 	-rm -rf $(YAMS_DIR)
