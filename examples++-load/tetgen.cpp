@@ -203,7 +203,9 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   KN<double> tabregion (arg(9,stack,zdzempty));
   int nbfacecl (arg(10,stack,0));
   KN<double> tabfacecl (arg(11,stack,zdzempty));
-  
+  if(nbhole && nbhole*3 != tabhole.N())
+    {ExecError(" nbhole and holes are incompatibale ");}
+  if(!nbhole) nbhole=tabhole.N()/3; // modif FH dec 2010...
   // mesuremesh parameters
   int mesureM(arg(12,stack,1));
   int surface_orientation=1; 
