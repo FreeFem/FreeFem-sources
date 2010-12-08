@@ -717,7 +717,6 @@ include:
 pkg:
 	mkdir pkg
 
-
 all-local:bin lib include pkg  $(DOWNLOADCOMPILE) 
 
 WHERE-LD: tag-compile-pkg
@@ -747,7 +746,7 @@ WHERE:
 	$(MAKE) compile-pkg DIRTARGET=WHERE
 
 clean-local:
-	-rm -rf	 include lib bin 
+	-rm -rf	 tag-* include lib bin 
 	mkdir   include lib bin 	
 	-rm */FAIT */FAIRE 
 	-if [ -n "$(WGET)" ] ; then \

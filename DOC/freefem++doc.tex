@@ -7196,45 +7196,49 @@ An example using this function is given in "mmg3d.edp":
 \eFF
 \end{example}
 
-An example of a moving mesh is given in "mmg3d-moving.edp":
-\begin{example}[mmg3d-moving.edp]
-\label{mmg3dmoving}~
+An example of a moving mesh is given in \texttt{fallingspheres.edp}":
+\begin{example}[fallingspheres.edp]
 \bFF
-@load "msh3"
-@load "tetgen"
-@load "medit"
-@load "mmg3d"
+@load "msh3"  @load "tetgen"  @load "medit"  @load "mmg3d"                                                               
 @include "MeshSurface.idp"
 
+// build mesh of a box (311)  wit 2 holes  (300,310)
 
-@real hs = 0.1;  // mesh size on sphere
-@int[int]  NN=[22,18,20];
-@real [int,int]  BB=[[-1.1,1.1],[-.9,.9],[-1,1]];
-@int [int,int]  LL=[[1,2],[3,4],[5,6]];
+@real hs = 0.8; 
+@int[@int]  N=[4/hs,8/hs,11.5/hs];
+@real [int,int]  B=[[-2,2],[-2,6],[-10,1.5]];
+@int [@int,@int]  L=[[311,311],[311,311],[311,311]];
+@mesh3 ThH = SurfaceHex(N,B,L,1);
+@mesh3 ThSg =Sphere(1,hs,300,-1); 
+@mesh3 ThSd =Sphere(1,hs,310,-1);   ThSd=movemesh3(ThSd,transfo=[x,4+y,z]);
+@mesh3 ThHS=ThH+ThSg+ThSd;// gluing surface meshes 
+@medit("ThHS", ThHS); // see surface mesh
 
-@mesh3 ThHS = SurfaceHex(NN,BB,LL,1)+Sphere(0.25,hs,7,1); // "gluing" surface meshs to tolat boundary meshes
 @real voltet=(hs^3)/6.;
-@cout << " voltet = " << voltet << endl;
-@real[int] domaine = [0,0,0,1,voltet,0,0,0.7,2,voltet];
+@real[int] domaine = [0,0,-4,1,voltet];
+@real [int] holes=[0,0,0,0,4,0];
+@mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",nbofregions=1,regionlist=domaine, nbofholes=2,holelist=holes);    
+@medit("Box-With-two-Ball",Th);
+// End build mesh 
 
-@mesh3 Th = @tetg(ThHS,switch="pqaAYY",nbofregions=2,regionlist=domaine);
-// Tetrahelize the interior of the cube with tetgen
+@int[@int] opt=[9,0,64,0,0,3];   // options  of mmg3d see freeem++ doc 
+real[@int] vit=[0,0,-0.3];
+@func zero = 0.;
+@func dep  = vit[2];
 
-@real Vmax=0.1;
-@int[int] opt=[9,0,64,0,0,3];
-@fespace Vh(Th,P1);
-@macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
-@func fz=Vmax*(z-1)/(2.);
-@func zero=0.;
-Vh uh,vh;
-@problem Lap(uh,vh) =  @int3d(Th)( Grad(uh)'*Grad(vh))  // ' for emacs
-				   + on(7,uh=fz) +on(1,2,3,4,5,6,uh=0.);
-// the Laplacian problem is used to obtained the displacement vector in all the mesh
-@for(int it=0; it<4; it++){
+@fespace Vh(Th,P1); 
+@macro Grad(u) [dx(u),dy(u),dz(u)] //
+
+@Vh uh,vh; //  to compute the displacemnt field 
+@problem Lap(uh,vh,solver=CG) = @int3d(Th)(@Grad(uh)'*@Grad(vh))  //') for emacs
+				  + @on(310,300,uh=dep) +@on(311,uh=0.); 
+
+@for(@int it=0; it<29; it++){ 
+  cout<<"  ITERATION       "<<it<<endl;
   Lap;
-  Th=@mmg3d(Th,options=opt,displacement=[zero,zero,uh]);
-}
-@medit( "Th",Th);
+  plot(Th,uh);
+  Th=mmg3d(Th,options=opt,displacement=[zero,zero,uh],memory=1000); 
+ }
 \eFF
 \end{example}
 
@@ -7258,36 +7262,51 @@ real[int] M = mshmet(Th,u);
 \eFF
 
 The parameters of the keyword mshmet are :
-\begin{itemize}
-\item [\texttt{loptions}=] a vector of integer of size 7. This vector contains the integer parameters of mshmet.\\
-loptions(0): normalization level (default 0).\\
-loptions(1): isotropic parameters (default 0). 1 for isotropic metric results otherwise 0.\\
-loptions(2): level set parameters (default 0). 1 for building level set metric otherwise 0.\\
-loptions(3): debug parameters (default 0). 1 for turning on debug mode otherwise 0.\\
-loptions(4): level of verbosity (default 10).\\
-loptions(5): number of regularization's iteration of solutions given (default 0). \\
-loptions(6): previously metric parameter (default 0). 1 for using previous metric otherwise 0.\\
-\item [\texttt{doptions}=] a vector of double of size 4. This vector contains the real parameters of mshmet\.\
-doptions(0):  hmin : min size parameters  (default 0.01).\\
-doptions(1):  hmax : max size parameters (default 1.0).\\
-doptions(2):  eps : tolerance parameters ( default 0.01).\\
-doptions(2):  width : relative width for Level Set ($0<w<1$) ( default 0.05).\\
-\item [\texttt{metric}=] a vector of double. This vector contains an initial metric given to mshmet. The structure of the metric vector is described in the next paragraph.
+\begin{itemize}\parskip=0cm
+%\item	\texttt{metric =  <3KN_IdE>} 
+\item	\texttt{normalization =  <b>} do a normalisation of all solution in $[0,1]$.
+\item	\texttt{aniso =  <b>} build aniso metric if 1 ( delault 0: iso) 
+\item	\texttt{levelset =  <b>} {build metric for level set method (default: false)}
+\item	\texttt{verbosity =  <l>}
+\item	\texttt{nbregul =  <l>} number of regularization's iteration of solutions given (default 0).
+\item	\texttt{hmin =  <d>}
+\item	\texttt{hmax =  <d>}
+\item	\texttt{err =  <d>} level of error. 
+\item	\texttt{width =  <d>} the width 
+\item \texttt{metric}= a vector of double. This vector contains an initial metric given to mshmet. The structure of the metric vector is described in the next paragraph.
+
+\item \texttt{loptions}=]a vector of integer of size 7. This vector contains the integer parameters of mshmet(for expert only).
+\begin{itemize} \item loptions(0): normalization (default 1).
+\item loptions(1): isotropic parameters (default 0). 1 for isotropic metric results otherwise 0.
+\item loptions(2): level set parameters (default 0). 1 for building level set metric otherwise 0.
+\item loptions(3): debug parameters (default 0). 1 for turning on debug mode otherwise 0.
+\item loptions(4): level of verbosity (default 10).
+\item loptions(5): number of regularization's iteration of solutions given (default 0). 
+\item loptions(6): previously metric parameter (default 0). 1 for using previous metric otherwise 0.
 \end{itemize}
 
-The result of the keyword mshmet is a \texttt{real[int]} which contains the metric computed by mshmet at the different vertices $V_{i}$ on the mesh.
+\item \texttt{doptions}= a vector of double of size 4. This vector contains the real parameters of mshmet (for expert only).
+\begin{itemize}
+\item doptions(0):  hmin : min size parameters  (default 0.01).
+\item doptions(1):  hmax : max size parameters (default 1.0).
+\item doptions(2):  eps : tolerance parameters ( default 0.01).
+\item doptions(2):  width : relative width for Level Set ($0<w<1$) ( default 0.05).
+\end{itemize}
+\end{itemize}
+The result of the keyword \texttt{mshmet} is a \texttt{real[int]} which contains the metric computed by  \texttt{mshmet}  at the different vertices $V_{i}$ of the mesh.
 
 With $nv$ is the number of vertices, the structure of this vector is
 $$ M_{iso}= ( m(V_0), m(V_1), \ldots, m(V_{nv}) )^t$$  for a isotropic metric $m$. For a symmetric tensor metric
 $
 h=\left(
 \begin{array}{ccc}
-h_{1 1} & h_{1 2} & h_{1 3}\\
-h_{2 1} & h_{2 2} & h_{2 3} \\
-h_{3 1} & h_{3 2} & h_{3 3}
+m_{1 1} & m_{1 2} & m_{1 3}\\
+m_{2 1} & m_{2 2} & m_{2 3} \\
+m_{3 1} & m_{3 2} & m_{3 3}
 \end{array}
-\right)$, the result of the keyword \texttt{mshmet} is $$M_{aniso}= ( H(V_{0}), \ldots, H(V_{nv}) )^t $$
-where $H(V_{i})$ is the vector of size 6 defined by $( h_{1 1}(V_{i}), h_{2 1}(V_{i}),h_{3 1}(V_{i}), h_{3 2}(V_{i}), h_{3 3}(V_{i}) )^t$.
+\right)$, the parameters \texttt{metric}  is $$M_{aniso}= ( H(V_{0}), \ldots, H(V_{nv}) )^t $$
+where $H(V_{i})$ is the vector of size 6 defined by \verb![m11,m21,m22,m31,m32,m33]!
+
 
 \begin{example}[mshmet.edp]
 \label{mshmet}~
@@ -7350,52 +7369,85 @@ Vh u;
 @mesh3 Th=@freeyams(Thinit,u);
 \eFF
 The symmetric tensor argument for freeyams keyword is defined as this type of data for datasol argument.
-
+%\let\oldparskip=\parskip
 \begin{itemize}
-\item [\texttt{loptions}=] a vector of integer of size 13. This vectors contains the integer options of FreeYams.
-loptions(0):  anisotropic parameter (default 0). If you give an anisotropic metric 1 otherwise 0.\\
-loptions(1):  Finite Element correction parameter (default 0). 1 for {\it{no}} Finite Element correction otherwise 0.\\
-loptions(2):  Split multiple connected points parameter (default 1). 1 for splitting multiple connected points otherwise 0.\\
-loptions(3):  maximum value of memory size in Mbytes (default -1: the size is given by freeyams). \\	
-loptions(4):  set the value of the connected component which we want to obtain. (Remark: freeyams give an automatic value at each connected component).\\
-loptions(5):  level of verbosity\\
-loptions(6):  Create point on straight edge (no mapping) parameter  (default 0). 1 for creating point on straight edge otherwise 0.\\
-loptions(7):  validity check during smoothing parameter. This parameter is only used with No-Shrinkage Vertex Smoothing optimization (optimization option parameter 9). 1 for No validity checking during smoothing otherwise 0.\\
-loptions(8):  number of desired's vertices  (default -1).\\
-loptions(9):  number of iteration of  optimizations (default 30).\\
-loptions(10): ridge detection parameter (default 0) . 1 for detecting the ridge on the mesh otherwise 0. The ridge definition is given in the parameter doptions(12).\\
-loptions(11): vertex smoothing parameter (default 0). 1 for smoothing the vertices otherwise 0.\\
-loptions(12):  Optimization level parameter (default 0). \\
- \hspace*{0.3cm}  0 : mesh optimization (smoothing+swapping)\\
- \hspace*{0.3cm}  1 :  decimation+enrichment adaptated to a metric map. \\
- \hspace*{0.3cm} -1: decimation adaptated to a metric map. \\
- \hspace*{0.3cm}  2 : decimation+enrichment with a Hausdorff-like method\\
- \hspace*{0.3cm} -2:  decimation  with a Hausdorff-like method\\
- \hspace*{0.3cm}  4 : split triangles recursively. \\
- \hspace*{0.3cm}  9 : No-Shrinkage Vertex Smoothing\\
-\item [\texttt{doptions}=] a vector of double of size 11. This vectors contains the real options of freeyams.\\
-%%doptions(0): 0  !! iso (default 0.0). ????\\
-doptions(0):  Set  the geometric approximation (Tangent plane deviation)  (default 0.01).\\
-doptions(1):  Set the lamda parameter (default -1. ).\\
-doptions(2):  Set the mu parmeter (default  -1. ).\\
-doptions(3):  Set the 	 gradation value  (Mesh density control)  (default 1.3).\\
-doptions(4):  Set the minimal size(hmin) (default -2.0: the size is automatically computed).  \\
-doptions(5):  Set the maximal size(hmax)	(default -2.0: the size is automatically computed). \\
-doptions(6):  Set the tolerance of the control of Chordal deviation (default -2.0).\\ 	
-doptions(7):  Set the quality of degradation  (default 0.599).\\
-doptions(8):  Set the declic parameter (default 2.0).\\
-doptions(9): Set the angular walton limitation parameter (default 45 degree).	\\
-doptions(10):  Set the angular ridge detection (default 45 degree). \\
-\item [\texttt{metric}=] vector expression. This parameters contains the metric at the different vertices on the initial mesh. With $nv$ is the number of vertices, this vector is $$ M_{iso}= ( m(V_0), m(V_1), \ldots, m(V_{nv}) )^t$$  for a scalar metric $m$. For a symmetric tensor metric
+\parskip=0pt
+\item	\texttt{aniso =  <b>}  aniso or iso metric  (default 0, iso)
+\item	\texttt{mem =  <l>}  memory of for freeyams in Mb (delaulf -1, freeyams choose)
+\item	\texttt{hmin =  <d>}  
+\item	\texttt{hmax =  <d>}
+\item	\texttt{gradation =  <d>}  
+\item	\texttt{option =  <l>}
+%\parskip=\oldparskip
+\begin{description}
+
+ \item  [0] : mesh optimization (smoothing+swapping)
+ \item  [1] :  decimation+enrichment adaptated to a metric map.  (default)
+ \item [-1]: decimation adaptated to a metric map. 
+ \item  [2] : decimation+enrichment with a Hausdorff-like method
+ \item [-2]:  decimation  with a Hausdorff-like method
+ \item  [4] : split triangles recursively. 
+ \item  [9] : No-Shrinkage Vertex Smoothing
+ \end{description}
+
+\item	\texttt{ridgeangle =  <d>}
+\item	\texttt{absolute =  <b>}
+\item	\texttt{verbosity =  <i>}
+
+
+\item \texttt{metric=} vector expression. This parameters contains the metric at the different vertices on the initial mesh. With $nv$ is the number of vertices, this vector is $$ M_{iso}= ( m(V_0), m(V_1), \ldots, m(V_{nv}) )^t$$  for a scalar metric $m$. For a symmetric tensor metric
 $
 h=\left(
 \begin{array}{ccc}
-h_{1 1} & h_{1 2} & h_{1 3}\\
-h_{2 1} & h_{2 2} & h_{2 3} \\
-h_{3 1} & h_{3 2} & h_{3 3}
+m_{1 1} & m_{1 2} & m_{1 3}\\
+m_{2 1} & m_{2 2} & m_{2 3} \\
+m_{3 1} & m_{3 2} & m_{3 3}
 \end{array}
 \right)$, the parameters \texttt{metric}  is $$M_{aniso}= ( H(V_{0}), \ldots, H(V_{nv}) )^t $$
-where $H(V_{i})$ is the vector of size 6 defined by $( h_{1 1}(V_{i}), h_{2 1}(V_{i}),h_{3 1}(V_{i}), h_{3 2}(V_{i}), h_{3 3}(V_{i}) )^t$
+where $H(V_{i})$ is the vector of size 6 defined by \verb![m11,m21,m22,m31,m32,m33]!
+\item \texttt{loptions=} a vector of integer of size 13. This vectors contains the integer options of FreeYams. (just for the expert )
+\begin{itemize}
+\item loptions(0):  anisotropic parameter (default 0). If you give an anisotropic metric 1 otherwise 0.
+\item loptions(1):  Finite Element correction parameter (default 0). 1 for {\it{no}} Finite Element correction otherwise 0.
+\item loptions(2):  Split multiple connected points parameter (default 1). 1 for splitting multiple connected points otherwise 0.
+\item loptions(3):  maximum value of memory size in Mbytes (default -1: the size is given by freeyams). 	
+\item loptions(4):  set the value of the connected component which we want to obtain. (Remark: freeyams give an automatic value at each connected component).
+\item loptions(5):  level of verbosity
+\item loptions(6):  Create point on straight edge (no mapping) parameter  (default 0). 1 for creating point on straight edge otherwise 0.
+\item loptions(7):  validity check during smoothing parameter. This parameter is only used with No-Shrinkage Vertex Smoothing optimization (optimization option parameter 9). 1 for No validity checking during smoothing otherwise 0.
+\item loptions(8):  number of desired's vertices  (default -1).
+\item loptions(9):  number of iteration of  optimizations (default 30).
+\item loptions(10): ridge detection parameter (default 0) . 1 for detecting the ridge on the mesh otherwise 0. The ridge definition is given in the parameter doptions(12).
+\item loptions(11): vertex smoothing parameter (default 0). 1 for smoothing the vertices otherwise 0.
+\item loptions(12):  Optimization level parameter (default 0). 
+\begin{itemize}
+
+ \item\hspace*{0.3cm}  0 : mesh optimization (smoothing+swapping)
+ \item\hspace*{0.3cm}  1 :  decimation+enrichment adaptated to a metric map. 
+ \item\hspace*{0.3cm} -1: decimation adaptated to a metric map. 
+ \item\hspace*{0.3cm}  2 : decimation+enrichment with a Hausdorff-like method
+ \item\hspace*{0.3cm} -2:  decimation  with a Hausdorff-like method
+ \item\hspace*{0.3cm}  4 : split triangles recursively. 
+ \item\hspace*{0.3cm}  9 : No-Shrinkage Vertex Smoothing
+ \end{itemize}
+
+ \end{itemize}
+\item [\texttt{doptions}=] a vector of double of size 11. This vectors contains the real options of freeyams.
+\begin{itemize}
+%%doptions(0): 0  !! iso (default 0.0). ????
+\item doptions(0):  Set  the geometric approximation (Tangent plane deviation)  (default 0.01).
+\item doptions(1):  Set the lamda parameter (default -1. ).
+\item doptions(2):  Set the mu parmeter (default  -1. ).
+\item doptions(3):  Set the 	 gradation value  (Mesh density control)  (default 1.3).
+\item doptions(4):  Set the minimal size(hmin) (default -2.0: the size is automatically computed).  
+\item doptions(5):  Set the maximal size(hmax)	(default -2.0: the size is automatically computed). 
+\item doptions(6):  Set the tolerance of the control of Chordal deviation (default -2.0). 	
+\item doptions(7):  Set the quality of degradation  (default 0.599).
+\item doptions(8):  Set the declic parameter (default 2.0).
+\item doptions(9): Set the angular walton limitation parameter (default 45 degree).	
+\item doptions(10):  Set the angular ridge detection (default 45 degree). 
+\end{itemize}
+
 \end{itemize}
 
 

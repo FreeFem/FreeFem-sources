@@ -24,25 +24,20 @@ real voltet=(hs^3)/6.;
 cout << " voltet = " << voltet << endl;
 real[int] domaine = [0,0,-4,1,voltet];
 real [int] holes=[0,0,0,0,4,0];
-mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",nbofregions=1,regionlist=domaine, nbofholes=2,holelist=holes);    
+mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",nbofregions=1,regionlist=domaine,nbofholes=2,holelist=holes);    
 medit("Box-With-two-Ball",Th);
 // End build mesh 
 
 int[int] opt=[9,0,64,0,0,3];   // options  of mmg3d see freeem++ doc 
 
-real[int] vit(3);
-
-vit[0] = 0.;
-vit[1] = 0.;
-vit[2] = -0.3;
-
+real[int] vit=[0,0,-0.3];
 func zero = 0.;
 func dep  = vit[2];
 
 fespace Vh(Th,P1); 
 macro Grad(u) [dx(u),dy(u),dz(u)] //
 
-Vh uh,vh; 
+Vh uh,vh; //  to compute the displacemnt field 
 problem Lap(uh,vh,solver=CG) = int3d(Th)(Grad(uh)'*Grad(vh))  //') for emacs
 				  + on(310,300,uh=dep) +on(311,uh=0.); 
 

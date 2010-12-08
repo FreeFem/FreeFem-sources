@@ -17,6 +17,7 @@ if test "$enable_m64" = yes
 then
 	ff_m64=-m64	
         CHECK_COMPILE_FLAG(C,$ff_m64,CFLAGS)
+        CHECK_COMPILE_FLAG(C,$ff_m64,CNOFLAGS)
 	CHECK_COMPILE_FLAG(C++,$ff_m64,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,$ff_m64,FFLAGS)	
 #  add -fPIC on on 64 architecture 
@@ -30,6 +31,7 @@ if test "$enable_m32" = yes
 then
 	ff_m32=-m32	
         CHECK_COMPILE_FLAG(C,$ff_m32,CFLAGS)
+        CHECK_COMPILE_FLAG(C,$ff_m32,CNOFLAGS)
 	CHECK_COMPILE_FLAG(C++,$ff_m32,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,$ff_m32,FFLAGS)	
 #  add -fPIC on on 64 architecture 

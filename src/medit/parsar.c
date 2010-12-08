@@ -86,7 +86,7 @@ int parsar(int argc,char *argv[]) {
 	  {
 	    //printf("valeur de i=%i \n",i);
 	    cv.nbm = atoi(argv[i+1]);
-	    printf("number of mesh= %i\n",cv.nbm);
+	    //printf("number of mesh= %i\n",cv.nbm);
 	    i++;
 	    if( cv.nbm==0) return(0);
 	  }
