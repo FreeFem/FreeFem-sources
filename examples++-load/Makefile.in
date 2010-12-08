@@ -691,7 +691,7 @@ ff-get-dep:ff-get-dep.in Makefile
 	../config.status  --file=$@:$@.in
 	chmod a+x $@
 	-if [ -d ../download/bin ] ;then cp $@ ../download/bin; fi
-WHERE_LIBRARY-download:ff-pkg-download FORCE WHERE_LIBRARY-config WHERE_LIBRARY
+WHERE_LIBRARY-download:ff-pkg-download FORCE  WHERE_LIBRARY-config WHERE_LIBRARY
 	@./ff-pkg-download >$@-new
 	@diff $@-new $@  || (cp $@-new $@ ;touch WHERE_LIBRARY)
 FORCE: ;

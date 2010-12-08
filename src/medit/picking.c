@@ -429,11 +429,11 @@ static int getColorRange(Color *c,pMesh mesh) {
   if ( nbits < 32 ) {
     nbmax = 2 << (nbits-1);
     if ( nbmax < mesh->nt+mesh->nq+mesh->ntet+mesh->nhex ) {
-      fprintf(stderr,"  Sorry. Picking disabled. (%d,%d)\n",nbmax,mesh->nt+mesh->nq);
+      fprintf(stderr,"  Sorry. Picking disabled. (%ld,%d)\n",nbmax,mesh->nt+mesh->nq);
       return(0);
     }
     else if ( nbmax < 0.1*(mesh->ntet+mesh->nhex) ) {
-      fprintf(stderr,"  Sorry. Picking disabled. (%d,%d)\n",nbmax,mesh->nt+mesh->nq);
+      fprintf(stderr,"  Sorry. Picking disabled. (%ld,%d)\n",nbmax,mesh->nt+mesh->nq);
       return(0);
     }
   }

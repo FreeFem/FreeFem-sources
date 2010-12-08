@@ -23,4 +23,13 @@ BUILT_SOURCES=compil.date
 compil.date: $(ffmedit_SOURCES)
 	echo "#define COMPIL " '"' `date` '(with ff++ $(VERSION))''"' > compil.date
 #.PHONY: compil.date
+all-local: pinking.no-opt
+
+pinking.no-opt:picking.c
+	rm picking.$(OBJEXT)
+	$(MAKE) picking.o ffmedit CFLAGS="$(CNOFLAGS)"
+	touch pinking.no-opt
+clean-local:
+	-rm pinking.no-opt
+
 

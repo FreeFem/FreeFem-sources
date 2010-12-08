@@ -273,6 +273,7 @@ public:
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
   int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< long  >( (*nargs[i])(stack) ): a;}
+  int  arg(int i,Stack stack, bool a ) const{ return nargs[i] ? GetAny< bool  >( (*nargs[i])(stack) ): a;}
   
   
 public:
@@ -412,15 +413,15 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   KN<double> &metric=*pmetric;
 
 
-  intopt[0]=arg(3,stack,intopt[0]);
-  intopt[1]=!arg(4,stack,intopt[1]==0);
-  intopt[2]=arg(5,stack,intopt[2]!=0);
-  intopt[4]=arg(6,stack,intopt[4]);
-  intopt[5]=arg(7,stack,intopt[5]);
-  fopt[0]=arg(8,stack,fopt[0]);
-  fopt[1]=arg(9,stack,fopt[1]);
-  fopt[2]=arg(10,stack,fopt[2]);
-  fopt[3]=arg(11,stack,fopt[3]);
+  intopt[0]=arg(3,stack, intopt[0]!=0);// normaliz
+  intopt[1]=!arg(4,stack,intopt[1]==0);//  aniso
+  intopt[2]=arg(5,stack,intopt[2]!=0);// levelset 
+  intopt[4]=arg(6,stack,intopt[4]); // verbo
+  intopt[5]=arg(7,stack,intopt[5]); // nbregul
+  fopt[0]=arg(8,stack,fopt[0]); //hmin
+  fopt[1]=arg(9,stack,fopt[1]); //hmax
+  fopt[2]=arg(10,stack,fopt[2]);// err
+  fopt[3]=arg(11,stack,fopt[3]);// width
 
 
   if(verbosity>2) 
