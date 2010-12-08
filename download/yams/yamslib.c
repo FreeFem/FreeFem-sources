@@ -292,10 +292,12 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
   if( intopt[13] == 1 ) opts.check = 0;
   opts.minnp = intopt[14];
   opts.iter = intopt[15];
+  printf(" type = %d  %d \n", sm->type,intopt[17]);
   if( intopt[16] == 1 ) sm->type |= M_QUADS;
   if( intopt[17] == 1 ) sm->type &= ~M_DETECT;
   if( intopt[18] == 1 ) sm->type &= ~M_SMOOTH;
   //if( intopt[19] == 1 ) sm->type &= ~M_OUTPUT;
+  printf(" type = %d  %d \n", sm->type,intopt[17]);
   sm->type &= ~M_OUTPUT;
   // parsar -r 
   if( intopt[20] == 1 ) opts.noreff = 1;
@@ -321,10 +323,10 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
   else
     memory = -1;
   /*
-  if ( abs(*choix) > 4 && !(sm->type & M_QUADS) )
+  if ( (abs(*choix) > 4) && !(sm->type & M_QUADS) )
     sm->type &= ~M_SMOOTH;
   */
-  if ( !(opts.ctrl & ISO) && abs(option) != 1 && abs(option) != 6 )
+  if ( !(opts.ctrl & ISO) && (abs(option) != 1) && (abs(option) != 6) )
     opts.ctrl ^= ISO;
 
   if ( imprim )   fprintf(stdout,"  -- INPUT DATA\n");
@@ -336,11 +338,15 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
 
   // parsop check
   /* check parameters consistency */
+
   ridge = fopt[13];
-  if ( ridge < 0.0 || !(sm->type & M_DETECT) )
+  if ( (ridge < 0.0) || !(sm->type & M_DETECT) )
     opts.ridge = -1.0;
   else
     opts.ridge  = cos(ridge*M_PI / 180.0);
+ 
+
+
   opts.degrad = min(opts.degrad,1.0);
   opts.degrad = max(opts.degrad,0.001);
 

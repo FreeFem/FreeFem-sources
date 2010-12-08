@@ -1,7 +1,6 @@
 include ../ff-flags
 
 # working dirs
-EXEDIR = #$()/executable
 
 YAMS2DIR =$(abs_top_builddir)/download/yams/freeyams$(yams_VERSION)
 EXEDIR = $(YAMS2DIR)/executable
@@ -27,8 +26,8 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 
 $(EXEDIR)/$(prog):$(DIRDIR) $(objs) 
 	echo "#define COMPIL " '"' `date` '"' > $(SRCDIR)/compil.date
-	#$(CC) -c $(CFLAGS) $(INCDIR) $(SRCDIR)/yams0.c -o $(OBJDIR)/yams0.o
-	#$(CC) $(LDFLAGS) $(OPT64) $(LDLDIR) $(objs) -o $@ -lm
+	$(CC) -c $(CFLAGS) $(INCDIR) $(SRCDIR)/yams0.c -o $(OBJDIR)/yams0.o -I../../../src/libMesh/ 
+	$(CC) $(LDFLAGS) $(OPT64) $(LDLDIR) $(objs) -o $@ -lm -L../../../src/libMesh/ -lMesh
 	$(AR) $(ARFLAGS) $(lib) $(objs)
 	$(RANLIB) $(lib)
 

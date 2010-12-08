@@ -263,7 +263,7 @@ public:
   int dim;
   vector<Expression> sol;
 
-  static const int n_name_param = 3; // 
+  static const int n_name_param = 12; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   
@@ -272,7 +272,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< long  >( (*nargs[i])(stack) ): a;}
   
   
 public:
@@ -342,10 +342,28 @@ public:
 
 
 basicAC_F0::name_and_type  mshmet3d_Op::name_param[]= {
-  {  "loptions", &typeid(KN_<long>)},
+  {  "loptions", &typeid(KN_<long>)}, //0
   {  "doptions", &typeid(KN_<double>)},
-  {  "metric", &typeid(KN_<double>)}
+  {  "metric", &typeid(KN_<double>)},
+  {  "normalization", &typeid(bool)},
+  {  "aniso", &typeid(bool)},
+  {  "levelset", &typeid(bool)},// 5
+  {  "verbosity", &typeid(long)},
+  {  "nbregul", &typeid(long)},
+  {  "hmin", &typeid(double)},
+  {  "hmax", &typeid(double)},//9
+  {  "err", &typeid(double)},//10
+  {  "width", &typeid(double)}//11
+
 };
+
+template<class T>
+ostream & dumpp(const T * p,int n,ostream & f)
+{
+  for(int i=0;i<n;++i)
+    f << p[i] << " ";
+  return f; 
+}
 
 AnyType mshmet3d_Op::operator()(Stack stack)  const 
 {
@@ -369,7 +387,7 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   defaultfopt(0)= 0.01;
   defaultfopt(1)= 1.0;
   defaultfopt(2)= 0.01;
-  defaultfopt(3)= 0.05;
+  defaultfopt(3)= 0.00;
   KN<long> defaultintopt(7);
   /*
     info->nnu    = intopt[0]; //  0;
@@ -380,23 +398,44 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
     info->nlis   = intopt[5]; //  0;
     info->metric =  intopt[6]; // 0; // metric given besoin ???
   */  
-  defaultintopt(0)= 0;
+  defaultintopt(0)= 1;
   defaultintopt(1)= 1;
   defaultintopt(2)= 0;
-  defaultintopt(3)= 1;
-  defaultintopt(4)= 10;
+  defaultintopt(3)= 0; 
+  defaultintopt(4)= verbosity;
   defaultintopt(5)= 0;
   defaultintopt(6)= 0;
-
+  if(nargs[11]) {defaultintopt[2]=1;defaultfopt[3]=0;}//  level set ...  
   KN<int> intopt(arg(0,stack,defaultintopt));
   KN<double> fopt(arg(1,stack,defaultfopt));
   KN<double> *pmetric=new KN<double>(Th3.nv);
   KN<double> &metric=*pmetric;
+
+
+  intopt[0]=arg(3,stack,intopt[0]);
+  intopt[1]=!arg(4,stack,intopt[1]==0);
+  intopt[2]=arg(5,stack,intopt[2]!=0);
+  intopt[4]=arg(6,stack,intopt[4]);
+  intopt[5]=arg(7,stack,intopt[5]);
+  fopt[0]=arg(8,stack,fopt[0]);
+  fopt[1]=arg(9,stack,fopt[1]);
+  fopt[2]=arg(10,stack,fopt[2]);
+  fopt[3]=arg(11,stack,fopt[3]);
+
+
+  if(verbosity>2) 
+    {
+      cout<< "    -- mshmet : lopt " ;  dumpp((int*) intopt,intopt.N(),cout)  <<endl;
+      cout<< "              : dopt " ; dumpp((double*)fopt,fopt.N(),cout)  <<endl;
+    }
+
   metric=0.;
   if(intopt.N() != 7 )
     ExecError(" Size of array of loption are wrong != 7");
   if(fopt.N() != 4 )
     ExecError(" Size of array of doption are wrong != 4");
+
+
   if( intopt[1]==0){ 
     metric.resize(6*Th3.nv);
     metric=0.;
@@ -416,6 +455,7 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   int TypTab[nbsol];
   for(int ii=0; ii<nbsol;ii++)
     TypTab[ii] = typesol[ii];
+
 
   KN<double> tabsol(nbsolsize*nv);
   tabsol=0.;
@@ -439,7 +479,8 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
       }
     }
   }
-  cout << " min/max tabsol:  " << tabsol.min() << " " <<tabsol.max() << endl;
+  if(verbosity>5)
+    cout << "    min/max tabsol:  " << tabsol.min() << " " <<tabsol.max() << endl;
   MSHMET_pSol mshmetsol = sol_mshmet(dim, nv, nbsol, nbsolsize, TypTab, tabsol);
   if( intopt[1] == 1) 
     mshmetmesh->info.iso = 1;
@@ -478,7 +519,7 @@ public:
   int dim;
   vector<Expression> sol;
 
-  static const int n_name_param = 3; // 
+  static const int n_name_param = 12; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   
