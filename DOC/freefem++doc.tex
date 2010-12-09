@@ -4587,7 +4587,104 @@ And to get argument unused in \texttt{getARGV.idp} include script file,
 @getARGV(after,defaultvalue) // get the arg after the string after if exist
 \eFF
 The type of default value can be \texttt{int}, \texttt{real}, \texttt{string},
+\subsection{preprocessor}\index{include}
+The preprocessor handles directives for source file inclusion (\texttt{include} "script-name.idp"), macro definitions.
 
+There are two types of macros, object-like and function-like. Object-like macros do not take parameters; function-like macros do. The generic syntax for declaring an identifier as a macro of each type is, respectively,
+\bFF
+@macro <identifier>@(@)  <replacement token list>  //EOM  a // comment  to end the macro
+@macro <identifier>@(<parameter list>@) <replacement token list> //EOM 
+\eFF
+
+An example of macro without parameter 
+\bFF
+@macro xxx() {real i=0;int j=0;cout << i << " " << j << endl;}//
+xxx \it/* replace xxx by the <replacement token list> */
+\eFF
+ The freefem++ code associated:
+\begin{verbatim}
+    1 : // macro without parameter 
+    2 :  macro xxx {real i=0;int j=0;cout << i << " " << j << endl;}//
+    3 : 
+    4 :             {real i=0;int j=0;cout << i << " " << j << endl;}
+\end{verbatim}
+
+An example of macro parameter \index{macro}\index{macro!quoting}
+
+\bFF
+@macro toto(i) i //
+// quoting parameter the \{\} are remove
+toto({real i=0;int j=0;cout << i << " " << j << endl;})
+// and only one level of \{\} are remove 
+toto({{real i=0;int j=0;cout << i << " " << j << endl;}})
+\eFF
+ The freefem++ code created :
+\begin{verbatim}
+    6 :  macro toto(i )   i // 
+    8 : // quoting parameter the \{\} are remove
+    9 :              real i=0;int j=0;cout << i << " " << j << endl; 
+   10 : // and only one level of \{\} are remove 
+   11 :              {real i=0;int j=0;cout << i << " " << j << endl;} 
+\end{verbatim}
+
+Use a  macro as parameter of macro 
+to transforme full matrix in formal array like in :
+
+\bFF
+@real[@int,@int] CC(7,7),EE(6,3),EEps(4,4);
+
+	@macro VIL6(v,i) [ v(1,i), v(2,i),v(4,i), v(5,i),v(6,i) ]  //  EOM
+	@macro VIL3(v,i) [ v(1,i), v(2,i) ]  //  EOM
+	// apply v on array element : 
+	@macro VV6(v,vv) [ v(vv,1), v(vv,2),
+	 v(vv,4), v(vv,5), v(vv,6) ]  //  EOM
+	@macro VV3(v,vv) [ v(vv,1), v(vv,2) ]  //  EOM  
+// so formal matrix to build problem.. 
+	@func C5x5 = VV6(VIL6,CC); 
+	@func E5x2 = VV6(VIL3,EE);
+	@func Eps =  VV3(VIL3,EEps);
+\eFF
+The freefem++ code created :
+\begin{verbatim}
+   16 : real[int,int] CC(7,7),EE(6,3),EEps(4,4);
+   17 : 
+   18 : 	 macro VIL6(v,i )   [ v(1,i), v(2,i),v(4,i), v(5,i),v(6,i) ]  //  EOM
+   19 : 	 macro VIL3(v,i )   [ v(1,i), v(2,i) ]  //  EOM
+   20 : 	// apply v on array element : 
+   21 : 	 macro VV6(v,vv )   [ v(vv,1), v(vv,2),
+   22 : 	 v(vv,4), v(vv,5), v(vv,6) ]  //  EOM
+   23 : 	 macro VV3(v,vv )   [ v(vv,1), v(vv,2) ]  //  EOM  
+   24 : // so formal matrix to build problem.. 
+   25 : 	func C5x5 =    
+    1 : 	       [         [ CC(1,1), CC(2,1),CC(4,1), CC(5,1),CC(6,1) ]  ,
+                  [ CC(1,2), CC(2,2),CC(4,2), CC(5,2),CC(6,2) ]  ,
+    1 : 	         [ CC(1,4), CC(2,4),CC(4,4), CC(5,4),CC(6,4) ]  ,     
+                   [ CC(1,5), CC(2,5),CC(4,5), CC(5,5),CC(6,5) ]  ,   
+                         [ CC(1,6), CC(2,6),CC(4,6), CC(5,6),CC(6,6) ]   ]  ; 
+   26 : 	func E5x2 =    
+    1 : 	       [        [ EE(1,1), EE(2,1) ]  ,        [ EE(1,2), EE(2,2) ]  ,
+    1 : 	        [ EE(1,4), EE(2,4) ]  ,        [ EE(1,5), EE(2,5) ]  , 
+                  [ EE(1,6), EE(2,6) ]   ]  ;
+   27 : 	func Eps =         [        [ EEps(1,1), EEps(2,1) ]  ,  
+           [ EEps(1,2), EEps(2,2) ]   ]  ;
+   28 : 
+\end{verbatim}
+ finaly the operator \verb!#! to do concatenation of parameter:
+ to build vectorial operation, like in
+\bFF
+@macro div(u) (dx(u#1)+ dy(u#2)) //EOM 
+@mesh Th=square(2,2); fespace Vh(Th,P1);
+Vh v1=x,v2=y;
+cout << int2d(Th)(div(v)) << endl;
+\eFF
+The freefem++ code created :
+
+\begin{verbatim}
+   31 :  macro div(u )   (dx(u#1)+ dy(u#2)) //EOM 
+   32 : mesh Th=square(2,2); fespace Vh(Th,P1);
+   33 : Vh v1=x,v2=y;
+   34 : cout << int2d(Th)(    (dx(v1)+ dy(v2)) ) << endl;
+\end{verbatim}
 
 \subsection{Exception handling}\index{exception}\index{catch}\index{try}
 

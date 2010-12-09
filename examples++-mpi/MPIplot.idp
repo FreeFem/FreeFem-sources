@@ -1,4 +1,4 @@
-macro PLOTMPIALL(mesh,Pk, Th, u, cm,niso)
+macro PLOTMPIALL(mesh,Pk, Th, u, plotparm)
 { int ver=verbosity;
   verbosity=0;
   if(mpirank==0)
@@ -19,7 +19,7 @@ macro PLOTMPIALL(mesh,Pk, Th, u, cm,niso)
 	     Irecv(processor(i,rq[i]),uh[i][]);}
       for (int i=1;i<mpisize;++i)
        	int k= mpiWaitAny(rq); 
-      plot(uh,wait=1,cmm=cm,nbiso=niso,dim=3,fill=1);
+      plot(uh,plotparm);
     }
   else
     {

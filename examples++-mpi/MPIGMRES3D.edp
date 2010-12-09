@@ -55,7 +55,7 @@ string sPk="P1-3d";
 func Pk=P2;
 
 func bool  plotMPIall(mesh3 &Th,real[int] & u,string  cm)
-{ PLOTMPIALL(mesh3,Pk, Th, u, cm,3); return 1;}
+{ PLOTMPIALL(mesh3,Pk, Th, u,{ cmm=cm,nbiso=5,fill=0,dim=3,value=1}); return 1;}
 
 int sizeoverlaps=1; // size of overlap
 

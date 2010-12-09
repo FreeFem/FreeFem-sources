@@ -1,4 +1,4 @@
-// ff-mpirun -np 4 ex3d.edp -glut ffglut  -n 11 -k 1  -d 1 -ns -gmres 1
+// ff-mpirun -np 4 MPIGMRES2D.edp -glut ffglut  -n 11 -k 1  -d 1 -ns -gmres 1
 /*
   a first true parallele example fisrt freefem++ 
   Ok up to 200 proc for a Poisson equation.. 
@@ -53,7 +53,7 @@ string sPk="P1-2gd";
 func Pk=P2;
 
 func bool  plotMPIall(mesh &Th,real[int] & u,string  cm)
-{ PLOTMPIALL(mesh,Pk, Th, u, cm,20); return 1;}
+{ PLOTMPIALL(mesh,Pk, Th, u,{ cmm=cm,nbiso=20,fill=1,dim=3,value=1}); return 1;}
 
 int sizeoverlaps=1; // size of overlap
 
