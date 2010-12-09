@@ -292,7 +292,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack, long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   
   
 public:
@@ -366,12 +366,12 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
   defaultopt(4)= 0;
   defaultopt(5)= 3;
 
-  int  nvmax;   //(arg(0,stack,-1));  
-  int  ntrimax; //(arg(1,stack,-1));
-  int  ntetmax; //(arg(2,stack,-1));
+  int  nvmax;   //(arg(0,stack,-1L));  
+  int  ntrimax; //(arg(1,stack,-1L));
+  int  ntetmax; //(arg(2,stack,-1L));
   KN<int> opt(arg(0,stack,defaultopt));
 
-  int memory(arg(4,stack,-1));
+  int memory(arg(4,stack,-1L));
   
   cout << "memory =" << memory << endl;
   if( memory < 0 ){

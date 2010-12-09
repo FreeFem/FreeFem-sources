@@ -111,7 +111,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  long   arg(int i,Stack stack, long  a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
 public:
   Build2D3D_Op(const basicAC_F0 &  args,Expression tth) 
@@ -190,24 +190,24 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   KN<long> zzempty;
   string  stringempty = string("pqaAAYCQ");
   string* switch_tet= (arg(1,stack,&stringempty));  
-  int label_tet(arg(2,stack,arg(13,stack,0)));  
+  int label_tet(arg(2,stack,arg(13,stack,0L)));  
   KN<long> nrf (arg(3,stack,arg(14,stack,zzempty)));
-  int point_confondus_ok(arg(4,stack,0));
-  double precis_mesh(arg(5,stack,-1));
+  int point_confondus_ok(arg(4,stack,0L));
+  double precis_mesh(arg(5,stack,-1.));
 
   // new parameters
   KN<double> zdzempty;
-  int nbhole (arg(6,stack,0));
+  int nbhole (arg(6,stack,0L));
   KN<double> tabhole (arg(7,stack,zdzempty));
-  int nbregion (arg(8,stack,0));
+  int nbregion (arg(8,stack,0L));
   KN<double> tabregion (arg(9,stack,zdzempty));
-  int nbfacecl (arg(10,stack,0));
+  int nbfacecl (arg(10,stack,0L));
   KN<double> tabfacecl (arg(11,stack,zdzempty));
   if(nbhole && nbhole*3 != tabhole.N())
     {ExecError(" nbhole and holes are incompatibale ");}
   if(!nbhole) nbhole=tabhole.N()/3; // modif FH dec 2010...
   // mesuremesh parameters
-  int mesureM(arg(12,stack,1));
+  int mesureM(arg(12,stack,1L));
   int surface_orientation=1; 
   if( mesureM <0 ){
     surface_orientation=-1;
@@ -1770,7 +1770,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  long   arg(int i,Stack stack, long  a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a ) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
 public:
   Remplissage_Op(const basicAC_F0 &  args,Expression tth) 
@@ -1867,16 +1867,16 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   //int intempty=0;
   string stringempty= string("pqaAAYQC");
   string* switch_tet(arg(0,stack,&stringempty));
-  int label_tet(arg(1,stack,arg(9,stack,0)));  
+  int label_tet(arg(1,stack,arg(9,stack,0L)));  
   KN<long> nrf (arg(2,stack,arg(10,stack,zzempty)));
 
   // new parameters
   KN<double> zdzempty;
-  int nbhole (arg(3,stack,0));
+  int nbhole (arg(3,stack,0L));
   KN<double> tabhole (arg(4,stack,zdzempty));
-  int nbregion (arg(5,stack,0));
+  int nbregion (arg(5,stack,0L));
   KN<double> tabregion (arg(6,stack,zdzempty));
-  int nbfacecl (arg(7,stack,0));
+  int nbfacecl (arg(7,stack,0L));
   KN<double> tabfacecl (arg(8,stack,zdzempty));
   // parameter inside point
   // need to add "i" to the switch
@@ -2048,7 +2048,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  long   arg(int i,Stack stack, long  a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a ) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
 public:
   ReconstructionRefine_Op(const basicAC_F0 &  args,Expression tth) 
@@ -2118,11 +2118,11 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
 
   // new parameters
   KN<double> zdzempty;
-  int nbhole (arg(3,stack,0));
+  int nbhole (arg(3,stack,0L));
   KN<double> tabhole (arg(4,stack,zdzempty));
-  int nbregion (arg(5,stack,0));
+  int nbregion (arg(5,stack,0L));
   KN<double> tabregion (arg(6,stack,zdzempty));
-  int nbfacecl (arg(7,stack,0));
+  int nbfacecl (arg(7,stack,0L));
   KN<double> tabfacecl (arg(8,stack,zdzempty));
 
   KN<double> metric(arg(12,stack,zdzempty)); // Add metric for tetgen
@@ -2298,7 +2298,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  long   arg(int i,Stack stack, long  a ) const{ return nargs[i] ? GetAny< long  >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a ) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
   
 public:
@@ -2356,8 +2356,8 @@ AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
   //int intempty=0;
   string stringempty= string("YqaAAQC");
   string* switch_tet(arg(0,stack,&stringempty));
-  int label_tet(arg(1,stack,arg(3,stack,0)));  
-  int label_face(arg(2,stack,arg(4,stack,1)));
+  int label_tet(arg(1,stack,arg(3,stack,0L)));  
+  int label_face(arg(2,stack,arg(4,stack,1L)));
 
   //====================================
   //  How to change string* into char* 
@@ -2397,7 +2397,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack, long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a ) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
   
 public:
@@ -2476,8 +2476,8 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
   //int intempty=0;
   string stringempty= string("YQV");
   string* switch_tet(arg(0,stack,&stringempty));
-  int label_tet(arg(1,stack,arg(3,stack,0)));  
-  int label_face(arg(2,stack,arg(4,stack,1)));
+  int label_tet(arg(1,stack,arg(3,stack,0L)));  
+  int label_face(arg(2,stack,arg(4,stack,1L)));
 
   //====================================
   //  How to change string* into char* 

@@ -44,8 +44,7 @@ public:
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
   { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  //long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
-  int    arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
 public:
   BuildLayeMesh_Op(const basicAC_F0 &  args,Expression tth,Expression nmaxx) 
     : eTh(tth),enmax(nmaxx), ezmin(0),ezmax(0),xx(0),yy(0),zz(0)
@@ -145,8 +144,8 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   KN<long> nrfmid (arg(4,stack,zzempty));  
   KN<long> nrfup  (arg(5,stack,zzempty));  
   KN<long> nrfdown (arg(6,stack,zzempty));  
-  int point_confondus_ok (arg(7,stack,0));
-  double precis_mesh (arg(8,stack,-1));
+  int point_confondus_ok (arg(7,stack,0L));
+  double precis_mesh (arg(8,stack,-1.));
 
   cout << nrtet.N() <<  nrfmid.N() << nrfup.N() << nrfdown.N() << endl;
   

@@ -2159,7 +2159,7 @@ produces a fluid recirculation zone that must be captured correctly.
 This can only be done if the triangulation is sufficiently fine, or
 well adapted to the flow.
 
-\begin{example}[NSprojection.edp]
+\begin{example}[NSprojection.edp]\index{adaptmesh}\index{mesh!adaptation}
 \bFF
 // file NSprojection.edp
 
@@ -2908,8 +2908,8 @@ the NonLinear Conjugate Gradient \texttt{NLCG} (also a key word
 of \texttt{FreeFem++}).  See the file algo.edp in the examples folder.
 
 \subsection{A Flow with Shocks}
-Compressible Euler  equations should be discretized with Finite Volumes or FEM with flux upwinding scheme but these are not implemented in \freefempp.  Nevertheless acceptable results can be obtained with the method of characteristiscs
-provided that the mean values $\bar f=\frac12(f^++f^-)$ are used at shocks in the scheme.%
+Compressible Euler  equations should be discretized with Finite Volumes or FEM with flux up-winding scheme but these are not implemented in \freefempp.  Nevertheless acceptable results can be obtained with the method of characteristics
+provided that the mean values $\bar f=\frac12(f^++f^-)$ are used at shocks in the scheme, and finally  mesh adaptation \index{adaptmesh}\index{mesh!adaptation}.%
 \begin{eqnarray}\label{euler}&&
     \p_t\rho+\bar u\n\rho + \bar\rho\n\cdot u=0
     \cr&&
@@ -5401,7 +5401,7 @@ Ph h = @hTriangle;
 @cout << "size of mesh = " << h[].max << @endl;
 \eFF
 
-\subsection{Adaptmesh}\index{adaptmesh}
+\subsection{Adaptmesh}\index{adaptmesh}\index{adaptation}\index{mesh!adaptation}
 \label{sec:Adaptmesh}
 The function
 \[
@@ -6267,11 +6267,12 @@ Meshes in three dimension can be refined using TetGen with the command line \tex
 
 The parameter of this keyword are
 \begin{description}
-\item [\texttt{reftet=}] an integer array that allow to change the label of tetrahedra.
+\item [\texttt{region=}] an integer array that allow to change the region number  of tetrahedra.
 This array is defined as the parameter \texttt{reftet} in the keyword \texttt{change}.
 \item [\texttt{label=}] an integer array that allow to change the label of boundary triangles.
 This array is defined as the parameter \texttt{label} in the keyword \texttt{change}.
-\item [\texttt{sizevolume=}] a function. This function allows to constraint volume size of tetrahedra in the domain.
+\item [\texttt{sizevolume=}] a reel function. This function allows to constraint volume size of tetrahedra in the domain. (see example \ref{ex:tetg-adap} to build 3d adapt mesh
+\index{adaptation})
 \end{description}
 
 The parameter \texttt{switch} \texttt{nbofregions}, \texttt{regionlist},
@@ -6512,10 +6513,8 @@ The unit cube example:
 
 
 The cone example (an axisymtric mesh on a triangle with degenerateness).
-\begin{example}[cone.edp]\index{cone}
+\begin{example}[cone.edp]\index{cone}~
 \bFF
-
-
 @load "msh3"
 @load "medit"
 // cone using buildlayers with a triangle
@@ -6715,7 +6714,7 @@ cout << "=============================" << endl;
 \eFF
 \end{example}
 
-\subsubsection{Build a 3d mesh of a cube with a balloon incrust}
+\subsubsection{Build a 3d mesh of a cube with a balloon}
 \label{cube-ballon}
 
 First the \texttt{MeshSurface.idp} file to build boundary mesh of a Hexaedra and of a Sphere.
@@ -7014,11 +7013,11 @@ at vertices of the mesh Th1 and Th2 respectively  are obtained using
 
 // Initial Problem:
 //Resolution of the following EDP:
-//$- \Delta u = f$ on   $\Omega =\{ (x,y) |  1 \leq sqrt(x^2+y^2) \geq 2 \}$
-//$- \Delta u = f1$ on  $\Omega_{1}=\{ (x,y) |  0.5 \leq sqrt(x^2+y^2) \geq 1. \}$
-//$u = 1$ on $\Gamma$  +  Null Neumman condition on $\Gamma_{1}$ and on $\Gamma_{2}$
-//We find the solution $u$ in solving two EDP defined on domain $\Omega$ and $\Omega_{1}$
-//This solution is vizualize with medit
+//$- \Delta u_s = f$ on   $\Omega =\{ (x,y) |  1 \leq sqrt(x^2+y^2) \geq 2 \}$\hfilll
+//$- \Delta u_1 = f1$ on  $\Omega_{1}=\{ (x,y) |  0.5 \leq sqrt(x^2+y^2) \geq 1. \}$\hfilll
+//$u = 1$ on $\Gamma$  +  Null Neumman condition on $\Gamma_{1}$ and on $\Gamma_{2}$\hfilll
+//We find the solution $u$ in solving two EDP defined on domain $\Omega$ and $\Omega_{1}$\hfilll
+//This solution is visualize with medit
 
 verbosity=3;
 
@@ -7034,11 +7033,11 @@ verbosity=3;
 Vh us,v;
 @macro Grad2(us) [dx(us),dy(us)]  // EOM
 
-@problem Lap2dOmega(us,v,init=false)=int2d(Th)(Grad2(v)' *Grad2(us)) - int2d(Th)(f*v)+on(Gamma,us=1) ;
-//  Resolution of EDP defined on the domain $\Omega$
-// $- \Delta u = f$ on $\Omega$
-//     $u = 1$ on $\Gamma$
-//   + Null Neumann condition on $\Gamma_{1}$
+@problem Lap2dOmega(us,v,init=false)=int2d(Th)(Grad2(v)' *Grad2(us)) 
+   - int2d(Th)(f*v)+on(1,us=1) ;
+
+//   Definition of EDP defined on the domain $\Omega$\hfilll
+// $- \Delta u_s = f_1$ on $\Omega_{1}$,     $u_s = 1$ on $\Gamma_1$, $\frac{\partial u_s}{\partial n} =0 $ on $\Gamma_{2}$\hfilll
 Lap2dOmega;
 
 // construction of mesh of domain $\Omega_{1}$
@@ -7049,11 +7048,10 @@ Lap2dOmega;
 Vh1 u1,v1;
 @macro Grad21(u1) [dx(u1),dy(u1)]  // EOM
 
-@problem Lap2dOmega1(u1,v1,init=false)=int2d(Th1)(Grad21(v1)' *Grad21(u1)) - int2d(Th1)(f1*v1)+on(Gamma,u1=1) ;
-//   Resolution of EDP defined on the domain $\Omega_{1}$
-// $- \Delta u = f1$ on $\Omega_{1}$
-//      $u = 1$ on $\Gamma$
-//   + Null Neumann condition on $\Gamma_{2}$
+@problem Lap2dOmega1(u1,v1,init=false)=int2d(Th1)(Grad21(v1)' *Grad21(u1)) 
+            - int2d(Th1)(f1*v1)+on(1,u1=1) ;
+//   Resolution of EDP defined on the domain $\Omega_{1}$\hfilll
+// $- \Delta u_1 = f_1$ on $\Omega_{1}$,     $u-1 = 1$ on $\Gamma_1$, $\frac{\partial u_1}{\partial n} =0 $ on $\Gamma_{2}$\hfilll
 Lap2dOmega1;
 
 // vizualisation of solution of the initial problem
@@ -7064,32 +7062,30 @@ Lap2dOmega1;
 \begin{example}[StockesUzawa.edp]
 \bFF
 //  signe of pressure is correct
-assert(version>1.18);
-real s0=clock();
-mesh Th=square(10,10);
-fespace Xh(Th,P2),Mh(Th,P1);
-Xh u1,u2,v1,v2;
-Mh p,q,ppp;
+@assert(version>1.18);
+@real s0=clock();
+@mesh Th=square(10,10);
+@fespace Xh(Th,P2),Mh(Th,P1);
+@Xh u1,u2,v1,v2;
+@Mh p,q,ppp;
 
 
-varf bx(u1,q) = int2d(Th)( (dx(u1)*q));
-
-varf by(u1,q) = int2d(Th)( (dy(u1)*q));
-
-varf a(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
-                    +  on(1,2,4,u1=0)  +  on(3,u1=1) ;
+@varf bx(u1,q) = @int2d(Th)( (dx(u1)*q));
+@varf by(u1,q) = @int2d(Th)( (dy(u1)*q));
+@varf a(u1,u2)=  @int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
+                    +  @on(1,2,4,u1=0)  +  @on(3,u1=1) ;
 
 Xh bc1; bc1[] = a(0,Xh);
 Xh b;
 
-matrix A= a(Xh,Xh,solver=CG);
-matrix Bx= bx(Xh,Mh);
-matrix By= by(Xh,Mh);
+@matrix A= a(Xh,Xh,solver=CG);
+@matrix Bx= bx(Xh,Mh);
+@matrix By= by(Xh,Mh);
 Xh bcx=1,bcy=0;
 
-func real[int] divup(real[int] & pp)
+@func @real[@int] divup(@real[@int] & pp)
 {
-  int verb=verbosity;
+  @int verb=verbosity;
    verbosity=0;
    b[]  = Bx'*pp; b[] += bc1[] .*bcx[];
    u1[] = A^-1*b[];
@@ -7098,17 +7094,17 @@ func real[int] divup(real[int] & pp)
    ppp[] =   Bx*u1[];
    ppp[] +=  By*u2[];
    verbosity=verb;
-   return ppp[] ;
+   @return ppp[] ;
 };
 p=0;q=0;u1=0;v1=0;
 
 
-LinearCG(divup,p[],q[],eps=1.e-6,nbiter=50);
+@LinearCG(divup,p[],q[],eps=1.e-6,nbiter=50);
 
 divup(p[]);
 
-plot([u1,u2],p,wait=1,value=true,coef=0.1);
-medit(``velocity pressure'',Th,[u1,u2],p,order=1);
+@plot([u1,u2],p,wait=1,value=true,coef=0.1);
+@medit("velocity pressure",Th,[u1,u2],p,order=1);
 \eFF
 \end{example}
 
@@ -7362,13 +7358,13 @@ This software allows to remesh an initial mesh made of tetrahedra. This initial 
 \end{description}
 \end{remark}
 The parameters of  mmg3d are :
-\begin{itemize}
+\begin{itemize}\parskip=0cm
 %\item [\texttt{nvmax}=] integer expresion. It's correspond to the number of maximum vertices in the solution mesh.
 %\item [\texttt{ntrimax}=] integer expresion. It's correspond to the number of maximum triangles in the solution mesh.
 %\item [\texttt{ntetmax}=] integer expresion. It's correspond to the number of maximum triangles in the solution mesh.
-\item[\texttt{options}=] vector expression. This vector contains the option parameters of mmg3d. It is a vector of size 6.
-
-options(0)   optimization parameters : (default 1) \\
+\item \texttt{options}= vector expression. This vector contains the option parameters of \texttt{mmg3d}. It is a vector of $6$ values, with the following meaning:
+\begin{description}
+\item[(0)]   optimization parameters : (default 1) \\
                      \hspace*{0.3cm}  0 : mesh optimization. \\
                      \hspace*{0.3cm}  1 : adaptation with metric (deletion and insertion vertices) and optimization. \\
                      \hspace*{0.3cm} -1: adaptation with metric (deletion and insertion vertices) without optimization. \\
@@ -7376,26 +7372,27 @@ options(0)   optimization parameters : (default 1) \\
                      \hspace*{0.3cm}  9 : moving mesh with optimization. \\
                      \hspace*{0.3cm} -9: moving mesh without optimization.
 
-options(1)  debug mode :  (default 0)\\
+\item[(1)]  debug mode :  (default 0)\\
 		 \hspace*{0.3cm} 1 : turn on debug mode.\\
 		 \hspace*{0.3cm} 0 : otherwise.
 		
-options(2) Specify the size of bucket per dimension ( default 64)
+\item[(2)] Specify the size of bucket per dimension ( default 64)
 
-options(3) swapping mode : (default 0)\\
+\item[(3)] swapping mode : (default 0)\\
 		\hspace*{0.3cm} 1 : no edge or face flipping. \\
 		\hspace*{0.3cm} 0 : otherwise.
 
-options(4) insert points mode : (default 0)\\
+\item[(4)] insert points mode : (default 0)\\
 		\hspace*{0.3cm} 1 : no edge splitting or collapsing and no insert points. \\
 		\hspace*{0.3cm} 0 : otherwise.		
 		
-options(5) verbosity level (default 3)
-\item[\texttt{memory}=] integer expression. Set the maximum memory size of new mesh in Mbytes. By default the number of maximum vertices, tetrahedra and triangles are respectively 500 000,  3000 000, 100000 which represent approximately a memory of 100 Mo.
-\item[\texttt{metric}=] vector expression. This vector contains the metric given at mmg3d. It is a vector of size $nv$ or 6 $nv$ respectively for an istropic and anisotropic metric where $nv$ is the number of vertices in the initial mesh. The structure of \texttt{metric} vector is described in the mshmet's section(section \ref{sec:mshmet}).
-\item[\texttt{displacement}=] \texttt{[$\Phi$1, $\Phi$2, $\Phi$3]} set the displacement vector of the initial mesh \\
+\item[(5)] verbosity level (default 3)
+\end{description}
+\item \texttt{memory}= integer expression. Set the maximum memory size of new mesh in Mbytes. By default the number of maximum vertices, tetrahedra and triangles are respectively 500 000,  3000 000, 100000 which represent approximately a memory of 100 Mo.
+\item \texttt{metric}= vector expression. This vector contains the metric given at mmg3d. It is a vector of size $nv$ or 6 $nv$ respectively for an istropic and anisotropic metric where $nv$ is the number of vertices in the initial mesh. The structure of \texttt{metric} vector is described in the mshmet's section(section \ref{sec:mshmet}).
+\item \texttt{displacement}= \texttt{[$\Phi$1, $\Phi$2, $\Phi$3]} set the displacement vector of the initial mesh \\
 $\Phi(x,y) = [\Phi1(x,y), \Phi2(x,y), \Phi3(x,y) ]$.
-\item[\texttt{displVect=}] sets the vector displacement in a vector expression. This vector contains the displacement at each point of the initial mesh. It is a vector of size 3 $nv$.
+\item \texttt{displVect=} sets the vector displacement in a vector expression. This vector contains the displacement at each point of the initial mesh. It is a vector of size 3 $nv$.
 \end{itemize}
 
 An example using this function is given in "mmg3d.edp":
@@ -7476,51 +7473,40 @@ real[@int] vit=[0,0,-0.3];
 %%%  fin 3d
 
 \subsection{A first 3d isotope mesh adaptation process}
-
+\index{adaptation}
 \begin{example}[Laplace-Adapt-3d.edp]
-
+\label{ex:tetg-adap}~\hfill\break
 \bFF
-
-@load "msh3"
-@load "tetgen"
-@load "mshmet"
-@load "medit"
- 
+@load "msh3" @load "tetgen" @load "mshmet" @load "medit"
+//build initial mesh
 @int nn  = 6;
-
-@int[int] l1111=[1,1,1,1],l01=[0,1],l11=[1,1];//   label numbering 
-
+@int[@int] l1111=[1,1,1,1],l01=[0,1],l11=[1,1];//label numbering to have all label to 1 
 @mesh3 Th3=buildlayers(square(nn,nn,region=0,label=l1111),
-      nn,  zbound=[0,1],  labelmid=l11,   reffaceup = l01,  reffacelow = l01);
-// remove the $]0.5,1[^3 cube$
-@Th3 = trunc(Th3,(x<0.5) | (y < 0.5) | (z < 0.5) ,label=1);
-
+      nn,  zbound=[0,1],  labelmid=l11,   labelup = l01,  labeldown = l01);
+Th3 = trunc(Th3,(x<0.5) | (y < 0.5) | (z < 0.5) ,label=1);// remove the $]0.5,1[^3 cube$
+//end of build initial mesh
 @fespace Vh(Th3,P1);
-@Vh u,v,usol,h;
+Vh u,v,usol,h;
 
-macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
+@macro @Grad(u) [dx(u),dy(u),dz(u)] // EOM
 
-@problem Poisson(u,v,solver=CG) = int3d(Th3)( Grad(u)'*Grad(v) )  // ') for emacs 
-  -int3d(Th3)( 1*v ) + on(1,u=0);
+@problem Poisson(u,v,solver=CG) = @int3d(Th3)( @Grad(u)'*@Grad(v) )  
+                                 -@int3d(Th3)( 1*v ) + @on(1,u=0);
 
-@int nbregu=1;
-@int[int]  MSHloptions=[0,1,0,0,verbosity,nbregu,0];
-@real[int] MSHdoptions=[1e-2,0.3,0.01,0];
-
-@for(@int ii=0; ii<10; ii++)
+@real errm=1e-2;// level of error 
+@for(@int ii=0; ii<5; ii++)
 {
-  Poisson;
-  h=0;
+  Poisson;// solve Poisson equation. 
   cout <<" u min, max = " <<  u[].min << " "<< u[].max << endl;
-  @real cc=(u[].max-u[].min);
-  h[]=mshmet(Th3,u/cc,loptions=MSHloptions,doptions=MSHdoptions);
-  cout <<" h min, max = " <<  h[].min << " "<< h[].max << endl;
-  @plot(u,wait=1);
-  MSHdoptions[0]*= 0.6;
+  h=0. ;// for resizing h[] because the mesh change 
+  h[]=mshmet(Th3,u,normalization=1,aniso=0,nbregul=1,hmin=1e-3,hmax=0.3,err=errm);
+  cout <<" h min, max = " <<  h[].min << " "<< h[].max 
+       << " " << h[].n << " " << Th3.nv << endl;
+  plot(u,wait=1);
+  errm*= 0.8;// change the level of error
   cout << " Th3" << Th3.nv < " " << Th3.nt << endl;
-  Th3=tetgreconstruction(Th3,switch="raAQ",sizeofvolume=h*h*h/6.);
-  medit("U-adap-iso-"+ii,Th3,u,wait=1);
-}
+  Th3=tetgreconstruction(Th3,switch="raAQ",sizeofvolume=h*h*h/6.);// rebuidl mesh
+  medit("U-adap-iso-"+ii,Th3,u,wait=1);}
 \eFF
 \end{example}
 \section{\setS{Finite Elements}} \index{finite element space}\label{finite elements}

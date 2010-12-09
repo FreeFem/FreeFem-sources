@@ -36,6 +36,7 @@ verbosity=4;
 for(int ii=0; ii<5; ii++)
 {
   Poisson;
+  plot(u,wait=1);
   h3=0;
   [m11,m21,m22,m31,m32,m33]=[0,0,0,0,0,0];
   cout <<" u min, max = " <<  u[].min << " "<< u[].max << endl;
@@ -51,19 +52,25 @@ for(int ii=0; ii<5; ii++)
   cout << " met size "<< met.n << " " << m11[].n << endl;
   
   verbosity=1;
-    mesh3 Thb=freeyams(Th3,metric=m11[],hmin=0.0001,hmax=0.3,gradation=2.);
+    mesh3 Thb=freeyams(Th3,metric=m11[],hmin=0.0001,hmax=0.3,gradation=2.,verbosity=-10);
     h3=det3s(m11,m21,m31,m22,m32,m33);
-  Th3=tetg(Thb,switch="aAQpYY",sizeofvolume=h3/6);
+    real[int] rltetg = [0.1,0.1,.1,1,lerr*5];
+  Th3=tetg(Thb,switch="aAQpYY",regionlist=rltetg);
   [m11,m21,m22,m31,m32,m33]=[m11,m21,m22,m31,m32,m33];
-  int[int] mopt=[1,0,64,0,0,-10];
-  medit("met3",Th3,[m11,m21,m22,m31,m32,m33]); 
-  Th3=mmg3d(Th3,options=mopt,memory=1000,metric=m11[]); 
-
-  medit("Thb-"+ii,Th3,wait=1);
-
-  h3 = 1/sqrt(det3s(m11,m21,m31,m22,m32,m33));
+   h3 = 1/sqrt(det3s(m11,m21,m31,m22,m32,m33));
   cout <<" h3 min, max = " <<  h3[].min << " "<< h3[].max << endl;
-  ,plot(u,wait=1);
+  Th3=tetgreconstruction(Th3,switch="raAQYY",sizeofvolume=h3/6.);
+  [m11,m21,m22,m31,m32,m33]=[m11,m21,m22,m31,m32,m33];
+  medit("met3",Th3,[m11,m21,m22,m31,m32,m33]);
+  int[int] mopt=[1,0,64,0,0,-10];
+   
+  Th3=mmg3d(Th3,options=mopt,memory=1000,metric=m11[]); 
+  [m11,m21,m22,m31,m32,m33]=[m11,m21,m22,m31,m32,m33];
+   Th3=mmg3d(Th3,options=mopt,memory=1000,metric=m11[]); 
+  medit("Th3-"+ii,Th3,wait=1);
+
+ 
+  
   lerr *= 0.6;// change the level of error
   cout << " Th3" << Th3.nv < " " << Th3.nt << endl;
   

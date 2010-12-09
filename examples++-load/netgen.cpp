@@ -96,7 +96,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  int  arg(int i,Stack stack, int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
 public:
   RemplissageNetgen_Op(const basicAC_F0 &  args,Expression tth) 
@@ -126,36 +126,36 @@ basicAC_F0::name_and_type RemplissageNetgen_Op::name_param[]= {
   {  "optimize2d", &typeid(string*)},
   {  "optsteps2d", &typeid(long)}, 
   {  "opterrpow", &typeid(double)},
-  {  "blockfill", &typeid(int)},
+  {  "blockfill", &typeid(long)},
   {  "filldist", &typeid(double)},
   {  "safety", &typeid(double)},
   {  "relinnersafety", &typeid(double)},
-  {  "uselocalh", &typeid(int)},
+  {  "uselocalh", &typeid(long)},
   {  "grading", &typeid(double)},
-  {  "delaunay", &typeid(int)},
+  {  "delaunay", &typeid(long)},
 
   {  "minh", &typeid(double)},
-  {  "startinsurface", &typeid(int)},
-  {  "checkoverlap", &typeid(int)}, // debug
-  {  "checkoverlappingboundary", &typeid(int)}, 
-  {  "checkchartboundary", &typeid(int)},
+  {  "startinsurface", &typeid(long)},
+  {  "checkoverlap", &typeid(long)}, // debug
+  {  "checkoverlappingboundary", &typeid(long)}, 
+  {  "checkchartboundary", &typeid(long)},
   {  "curvaturesafety", &typeid(double)},
   {  "segmentsperedge", &typeid(double)},
-  {  "parthread",&typeid(int)}, //use parallel threads
+  {  "parthread",&typeid(long)}, //use parallel threads
   {  "elsizeweight", &typeid(double)}, // weight of element size w.r.t element shape
   // from mp3:
-  {  "giveuptol", &typeid(int)},
-  {  "maxoutersteps", &typeid(int)},
-  {  "starshapeclass", &typeid(int)},
-  {  "baseelnp", &typeid(int)},
-  {  "sloppy", &typeid(int)},
+  {  "giveuptol", &typeid(long)},
+  {  "maxoutersteps", &typeid(long)},
+  {  "starshapeclass", &typeid(long)},
+  {  "baseelnp", &typeid(long)},
+  {  "sloppy", &typeid(long)},
   {  "badellimit", &typeid(double)}, /// limit for max element angle (150-180)
   {  "check_impossible", &typeid(bool)}, 
-  {  "elementorder", &typeid(int)}, 
-  {  "quad", &typeid(int)}, 
-  {  "inverttets", &typeid(int)}, 
-  {  "inverttrigs", &typeid(int)}, 
-  {  "autozrefine", &typeid(int)}
+  {  "elementorder", &typeid(long)}, 
+  {  "quad", &typeid(long)}, 
+  {  "inverttets", &typeid(long)}, 
+  {  "inverttrigs", &typeid(long)}, 
+  {  "autozrefine", &typeid(long)}
   */
 };
 
@@ -235,7 +235,7 @@ AnyType RemplissageNetgen_Op::operator()(Stack stack)  const
   }
 
   if(nargs[3]){
-    int  netgen_secondorder = GetAny< int >( (*nargs[3])(stack) ); 
+    int  netgen_secondorder = GetAny< long >( (*nargs[3])(stack) ); 
     netgen_mp.secondorder = netgen_secondorder;  
   }
 
@@ -355,7 +355,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  int  arg(int i,Stack stack, int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
 public:
   Netgen_STL_Op(const basicAC_F0 &  args,Expression ffname) 
@@ -411,7 +411,7 @@ AnyType Netgen_STL_Op::operator()(Stack stack)  const
   }
   
   if(nargs[1]){
-    int  netgen_secondorder = GetAny< int >( (*nargs[1])(stack) ); 
+    int  netgen_secondorder = GetAny< long >( (*nargs[1])(stack) ); 
     netgen_mp.secondorder = netgen_secondorder;  
   }
 
@@ -1399,7 +1399,7 @@ AnyType Netgen_LoadMesh_Op::operator()(Stack stack)  const
  
   string * pffname= GetAny<string *>((*filename)(stack));
   int renumsurf = 0; 
-  if( nargs[1] )  renumsurf = GetAny< int >( (*nargs[1])(stack) );
+  if( nargs[1] )  renumsurf = GetAny< long >( (*nargs[1])(stack) );
   assert( renumsurf <=1 && renumsurf >= 0);
 
   Mesh3 * Th3_t = NETGEN_Load( *pffname, renumsurf ); 

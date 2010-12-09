@@ -500,11 +500,10 @@ public:
   
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
   { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
-  //  KN_<int>  arg(int i,Stack stack,KN_<int> a ) const
-  //{ return nargs[i] ? GetAny<KN_<int> >( (*nargs[i])(stack) ): a;}
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack, long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   bool  arg(int i,Stack stack, bool a ) const{ return nargs[i] ? GetAny< bool >( (*nargs[i])(stack) ): a;}
   
@@ -597,7 +596,7 @@ basicAC_F0::name_and_type  yams_Op::name_param[]= {
   {  "option", &typeid(long)} , // 8
   {  "ridgeangle", &typeid(double)} ,//9
   {  "absolute", &typeid(bool)}, //10 
-  {  "verbosity", &typeid(int)} //11 
+  {  "verbosity", &typeid(long)} //11 
 
 };
 
