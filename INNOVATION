@@ -1,7 +1,8 @@
 v 3.11 
+   - update the documentation of 3d adaption process
+     and  freeyams,mshmet, mmg3  interface and example
    - configure is compatible with MKL lib (on gnome)
-   - correct doc 
-   - add quoting argument in macro argument 
+   - add quoting argument in macro argument with { }
 v 3.10-2
    - try to compile with MKL libs.
    - correct MPIGMRES[23]d.edp example 

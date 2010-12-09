@@ -114,7 +114,8 @@ int mylex::EatCommentAndSpace(string *data)
  // if data is !0 then add reading char in data
  // return the last read char c
  //  --------------------
-  int c,caux;
+  int c,caux,sep=0;
+    const int space=(int) ' ';
   int incomment =0;
   do {
     incomment = 0;
@@ -122,7 +123,7 @@ int mylex::EatCommentAndSpace(string *data)
     
     // eat spaces 
     while (isspace(c) || c == 10 || c == 13 )
-     {
+      {sep=space;
       c = source().get();
       if(isNLCR(source(),c)) c='\n';
       if (echo) cout << (char) c;
@@ -142,7 +143,7 @@ int mylex::EatCommentAndSpace(string *data)
       
       
     if(incomment==1) 
-      {
+      { sep=space;
         if (echo) cout << "//" ;source().get();
         if(data) *data+="//";
 
@@ -155,7 +156,7 @@ int mylex::EatCommentAndSpace(string *data)
       while( (c!= '\n') && (c!= 10)  && (c!= 13)  &&  ( c != EOF) );
       }
     else if(incomment==2) 
-      {
+      { sep=space;
         if (echo) cout << "/*" ;
         if(data) *data+="/*";
 
@@ -177,7 +178,7 @@ int mylex::EatCommentAndSpace(string *data)
         else erreur( " Unterminated comment");
       }
   } while (incomment);
-  return c;
+    return (c==EOF) ? c : sep;
 }
 int mylex::basescan()
 {
@@ -553,11 +554,21 @@ bool mylex::CallMacro(int &ret)
 	      string p;
 	      int kend= ( k+1 == nbparam) ? ')' : ',';
 	      int lvl=0;
+	      int lvll=0;
 	      while (1) {
+		int sep =  EatCommentAndSpace();
 		int rr = basescan();// basescan -> scan1 change 2/2/2007  ( not change to pass macro name as a parameter)
 		if(lvl && rr==')') lvl--; //   if ( then  we eat next ) 
+		else if(lvl && rr=='}') {
+		    lvl--; 
+		     if(lvll--==1) continue; // remove first {
+		}//   if ( then  we eat next ) 
 		else if(lvl && rr==']') lvl--; //   if ( then  we eat next ) 
-		else if (rr=='(') lvl++ ;  //  eat next 		
+		else if (rr=='(') lvl++ ;  //  eat next 
+		else if (rr=='{') {
+		    lvl++; //  eat next 
+		    if(++lvll==1) continue; // remove last }
+		}		  
 		else if (rr=='[') lvl++ ;  //  eat next 		
 		else if (lvl<=0) {
 		  if (rr==kend ) break;
@@ -569,7 +580,9 @@ bool mylex::CallMacro(int &ret)
 		}}
 		
 		if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
+		if(sep==' ') p+=' ';
 		p += token(); // Correction FH 2/06/2004 of string parameter
+		
 	      }
 	      if(debugmacro)
 		cout << "macro arg "<< k << " :" << macroparm[k] << " -> " <<  p << endl;
