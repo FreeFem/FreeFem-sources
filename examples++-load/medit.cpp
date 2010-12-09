@@ -108,7 +108,7 @@ AnyType readsol_Op::operator()(Stack stack)  const
   int         nsol;
   int         key;
 
-  int numsol(arg(0,stack,-1)); 
+  int numsol(arg(0,stack,-1L)); 
   assert(abs(numsol)>=1);
 
   char * charfile= new char[ffname->size()+1];
@@ -373,7 +373,7 @@ AnyType datasolMesh2_Op::operator()(Stack stack)  const
   int solnbfloat;
   int TypTab[l.size()];
  
-  int resultorder= arg(0, stack, 1);
+  int resultorder= arg(0, stack, 1L);
   long longdefault;
 
   int ver = GmfFloat, outm;
@@ -871,7 +871,7 @@ public:
   static const int n_name_param =5;  
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  long arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a ) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
   
 public:
@@ -1667,7 +1667,7 @@ public:
   static const int n_name_param = 5;  
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  long arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a ) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
 
 public:
@@ -1762,7 +1762,7 @@ template<class v_fes>
 AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const 
 {
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-  long order (arg(0,stack,1));
+  long order (arg(0,stack,1L));
   //
   int ver = GmfFloat;
   int dimp =3;
@@ -1781,7 +1781,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
   string * ffname  = GetAny<string *>( (*filename)(stack) );
   string * meditff(arg(1,stack,&stringffmedit));
 
-  long filebin (arg(4,stack,1));
+  long filebin (arg(4,stack,1L));
   int smedit=max(1,nbsol);     
   char * commandline = meditcmd( filebin, nbsol, smedit, *meditff, *ffname);
   

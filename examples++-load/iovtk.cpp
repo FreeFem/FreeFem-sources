@@ -1253,9 +1253,9 @@ AnyType VTK_LoadMesh_Op::operator()(Stack stack)  const
   bool swap = false;
   int reftri = 1;
   int refedges = 1;
-  if( nargs[0] )  reftri = GetAny< int >((*nargs[0])(stack));
+  if( nargs[0] )  reftri = GetAny<long>((*nargs[0])(stack));
   if( nargs[1] )  swap = GetAny< bool >((*nargs[1])(stack));
-  if( nargs[2] )  refedges = GetAny< int >((*nargs[2])(stack));
+  if( nargs[2] )  refedges = GetAny<long>((*nargs[2])(stack));
 
   string *DataLabel;
   if( nargs[3] ) DataLabel = GetAny<string *>((*nargs[3])(stack));
@@ -2756,9 +2756,9 @@ AnyType VTK_LoadMesh3_Op::operator()(Stack stack)  const
   int reftetra=1; 
   int reftri = 1;
   
-  if( nargs[0] )  reftetra = GetAny<int >((*nargs[0])(stack));
+  if( nargs[0] )  reftetra = GetAny<long>((*nargs[0])(stack));
   if( nargs[1] )  swap = GetAny< bool >((*nargs[1])(stack));
-  if( nargs[2] )  reftri = GetAny<int >((*nargs[2])(stack));
+  if( nargs[2] )  reftri = GetAny<long>((*nargs[2])(stack));
 
   string *DataLabel;
   if( nargs[3] ) DataLabel = GetAny<string *>((*nargs[3])(stack));

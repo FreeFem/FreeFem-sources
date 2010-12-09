@@ -428,7 +428,7 @@ AnyType GMSH_LoadMesh_Op::operator()(Stack stack)  const
  
   string * pffname= GetAny<string *>((*filename)(stack));
   int renumsurf = 0; 
-  if( nargs[1] )  renumsurf = GetAny< int >( (*nargs[1])(stack) );
+  if( nargs[1] )  renumsurf = GetAny<long>( (*nargs[1])(stack) );
   assert( renumsurf <=1 && renumsurf >= 0);
 
   Mesh * Th = GMSH_Load( *pffname ); 
@@ -805,7 +805,7 @@ AnyType GMSH_LoadMesh3_Op::operator()(Stack stack)  const
  
   string * pffname= GetAny<string *>((*filename)(stack));
   int renumsurf = 0; 
-  if( nargs[1] )  renumsurf = GetAny< int >( (*nargs[1])(stack) );
+  if( nargs[1] )  renumsurf = GetAny<long>( (*nargs[1])(stack) );
   assert( renumsurf <=1 && renumsurf >= 0);
 
   Mesh3 * Th3_t = GMSH_Load3( *pffname); 

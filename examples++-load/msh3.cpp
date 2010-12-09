@@ -1897,7 +1897,7 @@ public:
     {  ffassert( ! (nargs[i] && nargs[ii]) ); i= nargs[i] ? i : ii;
 	return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  long  arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
 public:
   Movemesh3D_Op(const basicAC_F0 &  args,Expression tth) 
     : eTh(tth), xx(0) , yy(0) , zz(0)
@@ -1956,8 +1956,8 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   KN<long> nrtet  (arg(1,7,stack,zzempty));  
   KN<long> nrf (arg(2,8,stack,zzempty)); 
   double precis_mesh( arg(3,stack,1e-7));
-  long  mergefacemesh( arg(4,stack,1) );
-  long  flagsurfaceall( arg(5,stack,0) );
+  long  mergefacemesh( arg(4,stack,1L) );
+  long  flagsurfaceall( arg(5,stack,0L) );
 
   //if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
   ffassert( nrtet.N() %2 ==0);
@@ -2098,7 +2098,7 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
 
   if(nbt != 0)
     {    
-      long orientationelement( arg(6,stack,1) );
+      long orientationelement( arg(6,stack,1L) );
       if( orientationelement == -1){
 	// change all orientation of borderelements and elements
 	for (int i=0;i<T_Th3->nt;i++)
@@ -2141,7 +2141,7 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   else
     {
       // parameter orientation for a 3D surface mesh
-      long orientationsurf( arg(6,stack,1) );
+      long orientationsurf( arg(6,stack,1L) );
       if( orientationsurf == -1){
 	// change all orientation of borderelements
 	for (int i=0;i<T_Th3->nbe;i++)
@@ -2377,7 +2377,7 @@ public:
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ 
       return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
-  int arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny<int>( (*nargs[i])(stack) ): a;}
+  long arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
   double arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
 public:
   Movemesh2D_3D_surf_Op(const basicAC_F0 &  args,Expression tth) : 
@@ -2427,10 +2427,10 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
   
   KN<long> zzempty;
   //int intempty=0;
-  int mesureM (arg(1,stack,0));
+  int mesureM (arg(1,stack,0L));
   KN<long> nrface (arg(2,stack,arg(5,stack,zzempty)));
-  double precis_mesh(arg(3,stack,-1));
-  long flagsurfaceall(arg(4,stack,-1));
+  double precis_mesh(arg(3,stack,-1.));
+  long flagsurfaceall(arg(4,stack,-1L));
   
   if(nrface.N()<0 ) return m;
   ffassert( nrface.N() %2 ==0);
@@ -4178,8 +4178,8 @@ public:
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
   { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  //long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
-  int    arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  //int    arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 public:
   BuildLayeMesh_Op(const basicAC_F0 &  args,Expression tth,Expression nmaxx) 
     : eTh(tth),enmax(nmaxx), ezmin(0),ezmax(0),xx(0),yy(0),zz(0)
@@ -4293,8 +4293,8 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   KN<long> nrfmid (arg(4,stack,arg(4+6,stack,zzempty)));  
   KN<long> nrfup  (arg(5,stack,arg(5+6,stack,zzempty)));  
   KN<long> nrfdown (arg(6,stack,arg(6+6,stack,zzempty)));  
-  int point_confondus_ok (arg(7,stack,0));
-  double precis_mesh (arg(8,stack,-1));
+  int point_confondus_ok (arg(7,stack,0L));
+  double precis_mesh (arg(8,stack,-1L));
 
   
   //if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
@@ -4520,7 +4520,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
 public:
   DeplacementTab_Op(const basicAC_F0 &  args,Expression tth) 
     : eTh(tth)  //, xx(0) , yy(0) , zz(0)
@@ -4581,8 +4581,8 @@ AnyType DeplacementTab_Op::operator()(Stack stack)  const
   int recollement_elem=0;
   int recollement_border,point_confondus_ok;
   
-  int  mergefacemesh( arg(4,stack,0) );
-  long  flagsurfaceall( arg(5,stack,1) );
+  int  mergefacemesh( arg(4,stack,0L) );
+  long  flagsurfaceall( arg(5,stack,1L) );
 
    if(mergefacemesh == 0)
     {
@@ -4746,7 +4746,7 @@ public:
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
   { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  long  arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
 public:
   CheckManifoldMesh_Op(const basicAC_F0 &  args,Expression tth) 
     : eTh(tth)
@@ -5385,7 +5385,7 @@ class ExtractMesh2D_Op : public E_F0mps
 		}
 		double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
 		//long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
-		int    arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+		long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 	public:
 		ExtractMesh2D_Op(const basicAC_F0 &  args,Expression tth) 
 		: eTh(tth)
@@ -5627,8 +5627,7 @@ public:
       return nargs[j] ? GetAny<KN_<long> >( (*nargs[j])(stack) ): a;
   }
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  //long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
-  int    arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 public:
   ExtractMesh_Op(const basicAC_F0 &  args,Expression tth) 
     : eTh(tth)
