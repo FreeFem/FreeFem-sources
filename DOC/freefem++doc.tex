@@ -1986,7 +1986,7 @@ that $c^+$ refers to the value on the right of the oriented edge.
 Vh w, ccold, v1 = y, v2 = -x, cc = exp(-10*((x-0.3)^2 +(y-0.3)^2));
 @real u, al=0.5;  dt = 0.05;
 
-@macro n() (N.x*v1+N.y*v2) // Macro without parameter 
+@macro n() (N.x*v1+N.y*v2) // Macro without parameter \index{macro!without parameter}
 @problem  Adual(cc,w) =
 @int2d(Th)((cc/dt+(v1*@dx(cc)+v2*@dy(cc)))*w)
   + @intalledges(Th)((1-@nTonEdge)*w*(al*abs(n)-n/2)*@jump(cc))
@@ -2297,7 +2297,7 @@ approach and write:
 @fespace Vh(Th,P2);
 Vh u,v,uu,vv;
 @real sqrt2=sqrt(2.);
-@macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
+@macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM  \index{macro!with parameter}
 //the sqrt2 is because we want: epsilon(u1,u2)'* epsilon(v1,v2) $==  \epsilon(\bm{u}): \epsilon(\bm{v})$
 @macro div(u,v) ( dx(u)+dy(v) ) // EOM
 
@@ -4601,7 +4601,7 @@ An example of macro without parameter
 @macro xxx() {real i=0;int j=0;cout << i << " " << j << endl;}//
 xxx \it/* replace xxx by the <replacement token list> */
 \eFF
- The freefem++ code associated:
+ The freefem++ code associated: 
 \begin{verbatim}
     1 : // macro without parameter 
     2 :  macro xxx {real i=0;int j=0;cout << i << " " << j << endl;}//
@@ -4627,7 +4627,7 @@ toto({{real i=0;int j=0;cout << i << " " << j << endl;}})
    11 :              {real i=0;int j=0;cout << i << " " << j << endl;} 
 \end{verbatim}
 
-Use a  macro as parameter of macro 
+Use a  macro as parameter of macro \index{macro!parameter}
 to transforme full matrix in formal array like in :
 
 \bFF
@@ -4669,7 +4669,7 @@ The freefem++ code created :
            [ EEps(1,2), EEps(2,2) ]   ]  ;
    28 : 
 \end{verbatim}
- finaly the operator \verb!#! to do concatenation of parameter:
+ finally the operator \verb!#! to do concatenation of parameter:
  to build vectorial operation, like in
 \bFF
 @macro div(u) (dx(u#1)+ dy(u#2)) //EOM 
@@ -4684,6 +4684,20 @@ The freefem++ code created :
    32 : mesh Th=square(2,2); fespace Vh(Th,P1);
    33 : Vh v1=x,v2=y;
    34 : cout << int2d(Th)(    (dx(v1)+ dy(v2)) ) << endl;
+\end{verbatim}
+
+And to finish a amazing test to verified the quoting : \index{macro!quoting}
+\bFF
+@macro foo(i,j,k) i j k//EOM
+foo(,,)  //  empty line
+foo( {int [}, {int] a(10},{);}) 
+\eFF
+the result:
+\begin{verbatim}
+   36 :  macro foo(i,j,k )   i j k//EOM
+   37 :       //  empty line
+   38 :         int [ int] a(10 ); 
+
 \end{verbatim}
 
 \subsection{Exception handling}\index{exception}\index{catch}\index{try}
@@ -8490,7 +8504,7 @@ The parameters are:
 Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
 
   After the "=" sign, one may find sums of:
-  \index{int1d}\index{int2d}\index{intalledges}
+  \index{int1d}\index{int2d}\index{int3d}\index{intalledges}
 
 \begin{itemize}
     \item identifier(s); this is the name given earlier to the
