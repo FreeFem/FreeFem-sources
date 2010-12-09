@@ -266,13 +266,14 @@ MMG_pSol metric_mmg3d(const int & nv, const int & nvmax, const KN<double> *pmetr
 }
 
 void metric_mmg3d_to_ff_metric(MMG_pSol sol, KN<double> &metric){
-  static const int wrapperMetric[6]={0,1,2,3,4,5};
+  static const int wrapperMetric[6]={0,1,3,2,4,5};
 
-  int k,isol,i;
+  int k,isol,jsol,i;
   for (k=1; k<=sol->np; k++) {
     isol = (k-1)*sol->offset + 1;
+    jsol = (wrapperMetric[k]-1)*sol->offset ;
     for (i=0; i< sol->offset; i++)
-      metric[(isol-1)+i]= sol->met[isol + i];
+      metric[jsol+i]= sol->met[isol + i];
   }
 }
 
