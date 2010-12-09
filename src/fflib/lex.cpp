@@ -549,42 +549,41 @@ bool mylex::CallMacro(int &ret)
 	MapMacroParam  lp;
 	if (nbparam > 0 ) { 
 	  match('(');
-	  for (int k=0;k<nbparam;k++)
-	    { 
-	      string p;
-	      int kend= ( k+1 == nbparam) ? ')' : ',';
-	      int lvl=0;
-	      int lvll=0;
-	      while (1) {
-		int sep =  EatCommentAndSpace();
-		int rr = basescan();// basescan -> scan1 change 2/2/2007  ( not change to pass macro name as a parameter)
-		if(lvl && rr==')') lvl--; //   if ( then  we eat next ) 
-		else if(lvl && rr=='}') {
-		    lvl--; 
-		     if(lvll--==1) continue; // remove first {
-		}//   if ( then  we eat next ) 
-		else if(lvl && rr==']') lvl--; //   if ( then  we eat next ) 
-		else if (rr=='(') lvl++ ;  //  eat next 
-		else if (rr=='{') {
-		    lvl++; //  eat next 
-		    if(++lvll==1) continue; // remove last }
-		}		  
-		else if (rr=='[') lvl++ ;  //  eat next 		
-		else if (lvl<=0) {
-		  if (rr==kend ) break;
-		  else if  (rr==')' || rr==',')  {// Correction FH 2/06/2004
-		  cerr << "Error in macro expantion "<< j->first 
-		       << ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
-		  cerr << " number of macro parameter in definition is " << nbparam << endl;
-		  ErrorScan(" Wrong number of parameter in  macro call");
-		}}
-		
-		if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
-		if(sep==' ') p+=' ';
-		p += token(); // Correction FH 2/06/2004 of string parameter
-		
-	      }
-	      if(debugmacro)
+	    for (int k=0;k<nbparam;k++)
+	      { 
+		  string p;
+		  int kend= ( k+1 == nbparam) ? ')' : ',';
+		  int lvl=0;
+		  int lvll=0;
+		  while (1) {
+		      int sep =  EatCommentAndSpace();
+		      int rr = basescan();// basescan -> scan1 change 2/2/2007  ( not change to pass macro name as a parameter)
+		      if ( (rr=='}') && (--lvll==0) ) 
+			   continue; // remove first {
+		      else if ( (rr=='{') && (++lvll==1) )
+			  continue; // remove last }	
+		      else if(lvll==0) //  count the open close () [] 
+			{  
+			if(lvl && rr==')') lvl--; //   if ( then  we eat next ) 
+			else if(lvl && rr==']') lvl--; //   if ( then  we eat next ) 
+			else if (rr=='(') lvl++ ;  //  eat next 
+			else if (rr=='[') lvl++ ;  //  eat next 
+			else if (lvl<=0) 
+			  {
+			    if (rr==kend ) break;
+			    else if  (rr==')' || rr==',')  {// Correction FH 2/06/2004
+				cerr << "Error in macro expantion "<< j->first 
+				<< ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
+				cerr << " number of macro parameter in definition is " << nbparam << endl;
+				ErrorScan(" Wrong number of parameter in  macro call");
+			    }}}
+		      
+		      if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
+		      if(sep==' ') p+=' ';
+		      p += token(); // Correction FH 2/06/2004 of string parameter
+		      
+		  }
+		  if(debugmacro)
 		cout << "macro arg "<< k << " :" << macroparm[k] << " -> " <<  p << endl;
 	      lp.insert(make_pair<string,string>(macroparm[k],p));
 	      //lp[macroparm[k]] = p; 
