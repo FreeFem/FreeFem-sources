@@ -24,7 +24,7 @@ real voltet=(hs^3)/6.;
 cout << " voltet = " << voltet << endl;
 real[int] domaine = [0,0,-4,1,voltet];
 real [int] holes=[0,0,0,0,4,0];
-mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",nbofregions=1,regionlist=domaine,nbofholes=2,holelist=holes);    
+mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",regionlist=domaine,holelist=holes);    
 medit("Box-With-two-Ball",Th);
 // End build mesh 
 

@@ -212,7 +212,12 @@ AnyType Build2D3D_Op::operator()(Stack stack)  const
   if( mesureM <0 ){
     surface_orientation=-1;
   }
-
+    
+    
+    if(nbregion==0) nbregion=tabregion.N()/5;
+    if(nbhole==0) nbhole=tabhole.N()/3;
+    if(nbfacecl==0) nbfacecl=tabfacecl.N()/2;
+    
   // assertion au niveau de la taille
   ffassert( tabhole.N()   == 3*nbhole);
   ffassert( tabregion.N() == 5*nbregion);
@@ -1933,7 +1938,11 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
 
   //  fin add inisde point
   //=========================
-
+    
+    if(nbregion==0) nbregion=tabregion.N()/5;
+    if(nbhole==0) nbhole=tabhole.N()/3;
+    if(nbfacecl==0) nbfacecl=tabfacecl.N()/2;
+    
 
   // assertion au niveau de la taille 
   ffassert( tabhole.N()   == 3*nbhole);
@@ -2127,8 +2136,12 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
   }
   // fin add a metric
   //==========================
-
+    if(nbregion==0) nbregion=tabregion.N()/5;
+    if(nbhole==0) nbhole=tabhole.N()/3;
+    if(nbfacecl==0) nbfacecl=tabfacecl.N()/2;
+    
   // assertion au niveau de la taille
+    
   ffassert( tabhole.N()   == 3*nbhole);
   ffassert( tabregion.N() == 5*nbregion);
   ffassert( tabfacecl.N() == 2*nbfacecl);
