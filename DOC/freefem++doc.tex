@@ -6082,18 +6082,18 @@ The launch of Tetgen is done with the keyword \texttt{tetg}. The parameters of t
 \item [\texttt{label =}] is a vector of integer that contains the old labels number at index $2i$  and the new labels number at index $2i+1$ of Triangles.
 This parameters is initialized as label for the keyword change (\ref{eq.org.vector.change.label}).
 \item [\texttt{switch  =}] A string expression. This string corresponds to the command line switch of Tetgen see Section 3.2 of \cite{tetgen}.
-\item [\texttt{nbofholes=}] Number of holes.
+\item [\texttt{nbofholes=}] Number of holes (default value \verb!size of holelist/3! (version 3.11) ).
 \item [\texttt{holelist =}] This array correspond to {\bf{holelist}} of tetgenio data structure \cite{tetgen}.
 A real vector of size $3\times \texttt{nbofholes}$. In TetGen, each hole is associated with a point inside this domain.
 This vector is $x_{1}^{h}, y_{1}^{h}, z_{1}^{h}, x_{2}^{h}, y_{2}^{h}, z_{2}^{h}, \cdots,$ where $x_{i}^{h},y_{i}^{h},z_{i}^{h}$
 is the associated point with the $i^{\mathrm{th}}$ hole.
-\item [\texttt{nbofregions =}] Number of regions.
+\item [\texttt{nbofregions =}] Number of regions (\verb!size of regionlist/5! (version 3.11) ). 
 \item [\texttt{regionlist =}] This array corresponds to {\bf{regionlist}} of tetgenio data structure \cite{tetgen}.
 The attribute and the volume constraint of region are given in this real vector of size $5\times \texttt{nbofregions}$.
 The $i^{\mathrm{th}}$ region is described by five elements: $x-$coordinate, $y-$coordinate and $z-$coordinate of
 a point inside this domain ($x_{i},y_{i},z_{i}$); the attribute ($at_{i}$) and the maximum volume for tetrahedra ($mvol_{i}$) for this region.
 The \texttt{regionlist} vector is: $x_{1}, y_{1}, z_{1}, at_{1}, mvol_{1}, x_{2}, y_{2}, z_{2}, at_{2}, mvol_{2}, \cdots  $.
-\item [\texttt{nboffacetcl=}] Number of facets constraints.
+\item [\texttt{nboffacetcl=}] Number of facets constraints \verb!size of facetcl/2! (version 3.11) ).
 \item [\texttt{facetcl=}] This array corresponds to {\bf{facetconstraintlist}} of tetgenio data structure \cite{tetgen}.
 The $i^{th}$ facet constraint is defined by the facet marker $Ref_{i}^{fc}$ and the maximum area for faces $marea_{i}^{fc}$.
 The \texttt{facetcl} array is: $Ref_{1}^{fc}, marea_{1}^{fc}, Ref_{2}^{fc}, marea_{2}^{fc}, \cdots$.
@@ -6201,7 +6201,7 @@ x0=0.; x1=2*pi; y0=0.; y1=1.5;
 
 // build a mesh of a axis parallel box with TetGen
 @real[int] domain =[1.5,pi,0.75,145,0.0025];
-@mesh3 Thfinal = @tetg(Th33,switch="paAAQY",nbofregions=1,regionlist=domain);    // Tetrahelize the interior of the cube with tetgen
+@mesh3 Thfinal = @tetg(Th33,switch="paAAQY",regionlist=domain);    // Tetrahelize the interior of the cube with tetgen
 @savemesh(Thfinal,"Thfinal.mesh");
 
 // build a mesh of a half cylindrical shell of interior radius 1. and exterior radius 2 and heigh 1.5
@@ -7115,133 +7115,6 @@ medit(``velocity pressure'',Th,[u1,u2],p,order=1);
 
 %%% frey et al. software
 
-\subsection{mmg3d}
-\label{sec:mmg3d}
-Mmg3d is a 3D remeshing software developed by C. Dobrzynski and P. Frey 
-
-(http://www.math.u-bordeaux1.fr/$\sim$dobj/logiciels/mmg3d.php). To obtain a version of this library send an e-mail at : 
-
-cecile.dobrzynski@math.ubordeaux1.fr or pascal.frey@upmc.fr.
-
-This software allows to remesh an initial mesh made of tetrahedra. This initial mesh is adapted to a geometric metric tensor field or to a displacement vector (moving rigid body). The metric can be obtained with mshmet (see section \ref{sec:mshmet}).\\
-
-\begin{remark} : 
-\begin{description}
-\item[(a)] If no metric is given, an isotropic metric is computed by analyzing the size of the edges in the initial mesh.
-\item[(b)] if a displacement is given, the vertices of the surface triangles are moved without verifying the geometrical structure of the new surface mesh.
-\end{description}
-\end{remark}
-The parameters of  mmg3d are :
-\begin{itemize}
-%\item [\texttt{nvmax}=] integer expresion. It's correspond to the number of maximum vertices in the solution mesh.
-%\item [\texttt{ntrimax}=] integer expresion. It's correspond to the number of maximum triangles in the solution mesh.
-%\item [\texttt{ntetmax}=] integer expresion. It's correspond to the number of maximum triangles in the solution mesh.
-\item[\texttt{options}=] vector expression. This vector contains the option parameters of mmg3d. It is a vector of size 6.
-
-options(0)   optimization parameters : (default 1) \\
-                     \hspace*{0.3cm}  0 : mesh optimization. \\
-                     \hspace*{0.3cm}  1 : adaptation with metric (deletion and insertion vertices) and optimization. \\
-                     \hspace*{0.3cm} -1: adaptation with metric (deletion and insertion vertices) without optimization. \\
-                     \hspace*{0.3cm}  4 : split tetrahedra (be careful modify the surface). \\
-                     \hspace*{0.3cm}  9 : moving mesh with optimization. \\
-                     \hspace*{0.3cm} -9: moving mesh without optimization.
-
-options(1)  debug mode :  (default 0)\\
-		 \hspace*{0.3cm} 1 : turn on debug mode.\\
-		 \hspace*{0.3cm} 0 : otherwise.
-		
-options(2) Specify the size of bucket per dimension ( default 64)
-
-options(3) swapping mode : (default 0)\\
-		\hspace*{0.3cm} 1 : no edge or face flipping. \\
-		\hspace*{0.3cm} 0 : otherwise.
-
-options(4) insert points mode : (default 0)\\
-		\hspace*{0.3cm} 1 : no edge splitting or collapsing and no insert points. \\
-		\hspace*{0.3cm} 0 : otherwise.		
-		
-options(5) verbosity level (default 3)
-\item[\texttt{memory}=] integer expression. Set the maximum memory size of new mesh in Mbytes. By default the number of maximum vertices, tetrahedra and triangles are respectively 500 000,  3000 000, 100000 which represent approximately a memory of 100 Mo.
-\item[\texttt{metric}=] vector expression. This vector contains the metric given at mmg3d. It is a vector of size $nv$ or 6 $nv$ respectively for an istropic and anisotropic metric where $nv$ is the number of vertices in the initial mesh. The structure of \texttt{metric} vector is described in the mshmet's section(section \ref{sec:mshmet}).
-\item[\texttt{displacement}=] \texttt{[$\Phi$1, $\Phi$2, $\Phi$3]} set the displacement vector of the initial mesh \\
-$\Phi(x,y) = [\Phi1(x,y), \Phi2(x,y), \Phi3(x,y) ]$.
-\item[\texttt{displVect=}] sets the vector displacement in a vector expression. This vector contains the displacement at each point of the initial mesh. It is a vector of size 3 $nv$.
-\end{itemize}
-
-An example using this function is given in "mmg3d.edp":
-\begin{example}[mmg3d.edp]
-\label{mmg3dsimple}~
-\bFF
-// test mmg3d
-@load "msh3"
-@load "medit"
-@load "mmg3d"
-@include "../examples++-3d/cube.idp"
-
-@int n=6;
-@int[int]  Nxyz=[12,12,12];
-@real [int,int]  Bxyz=[[0.,1.],[0.,1.],[0.,1.]];
-@int [int,int]  Lxyz=[[1,1],[2,2],[2,2]];
-@mesh3 Th=Cube(Nxyz,Bxyz,Lxyz);
-
-@real[int] isometric(Th.nv);{
-  @for( int ii=0; ii<Th.nv; ii++)
-    isometric[ii]=0.17;
-}
-
-@mesh3 Th3=mmg3d(  Th,  memory=100, metric=isometric);
-				
-@medit("init",Th);
-@medit("isometric",Th3);
-\eFF
-\end{example}
-
-An example of a moving mesh is given in \texttt{fallingspheres.edp}":
-\begin{example}[fallingspheres.edp]
-\bFF
-@load "msh3"  @load "tetgen"  @load "medit"  @load "mmg3d"                                                               
-@include "MeshSurface.idp"
-
-// build mesh of a box (311)  wit 2 holes  (300,310)
-
-@real hs = 0.8; 
-@int[@int]  N=[4/hs,8/hs,11.5/hs];
-@real [int,int]  B=[[-2,2],[-2,6],[-10,1.5]];
-@int [@int,@int]  L=[[311,311],[311,311],[311,311]];
-@mesh3 ThH = SurfaceHex(N,B,L,1);
-@mesh3 ThSg =Sphere(1,hs,300,-1); 
-@mesh3 ThSd =Sphere(1,hs,310,-1);   ThSd=movemesh3(ThSd,transfo=[x,4+y,z]);
-@mesh3 ThHS=ThH+ThSg+ThSd;// gluing surface meshes 
-@medit("ThHS", ThHS); // see surface mesh
-
-@real voltet=(hs^3)/6.;
-@real[int] domaine = [0,0,-4,1,voltet];
-@real [int] holes=[0,0,0,0,4,0];
-@mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",nbofregions=1,regionlist=domaine, nbofholes=2,holelist=holes);    
-@medit("Box-With-two-Ball",Th);
-// End build mesh 
-
-@int[@int] opt=[9,0,64,0,0,3];   // options  of mmg3d see freeem++ doc 
-real[@int] vit=[0,0,-0.3];
-@func zero = 0.;
-@func dep  = vit[2];
-
-@fespace Vh(Th,P1); 
-@macro Grad(u) [dx(u),dy(u),dz(u)] //
-
-@Vh uh,vh; //  to compute the displacemnt field 
-@problem Lap(uh,vh,solver=CG) = @int3d(Th)(@Grad(uh)'*@Grad(vh))  //') for emacs
-				  + @on(310,300,uh=dep) +@on(311,uh=0.); 
-
-@for(@int it=0; it<29; it++){ 
-  cout<<"  ITERATION       "<<it<<endl;
-  Lap;
-  plot(Th,uh);
-  Th=mmg3d(Th,options=opt,displacement=[zero,zero,uh],memory=1000); 
- }
-\eFF
-\end{example}
-
 
 \subsection{Mshmet}
 \label{sec:mshmet}
@@ -7469,6 +7342,133 @@ Vh2 ux,uz,p2;
 @mesh3 Th3 = freeyams(Th);
 @medit("maillagesurfacique",Th3,wait=1);
 
+\eFF
+\end{example}
+
+\subsection{mmg3d}
+\label{sec:mmg3d}
+Mmg3d is a 3D remeshing software developed by C. Dobrzynski and P. Frey 
+
+(http://www.math.u-bordeaux1.fr/$\sim$dobj/logiciels/mmg3d.php). To obtain a version of this library send an e-mail at : 
+
+cecile.dobrzynski@math.ubordeaux1.fr or pascal.frey@upmc.fr.
+
+This software allows to remesh an initial mesh made of tetrahedra. This initial mesh is adapted to a geometric metric tensor field or to a displacement vector (moving rigid body). The metric can be obtained with mshmet (see section \ref{sec:mshmet}).\\
+
+\begin{remark} : 
+\begin{description}
+\item[(a)] If no metric is given, an isotropic metric is computed by analyzing the size of the edges in the initial mesh.
+\item[(b)] if a displacement is given, the vertices of the surface triangles are moved without verifying the geometrical structure of the new surface mesh.
+\end{description}
+\end{remark}
+The parameters of  mmg3d are :
+\begin{itemize}
+%\item [\texttt{nvmax}=] integer expresion. It's correspond to the number of maximum vertices in the solution mesh.
+%\item [\texttt{ntrimax}=] integer expresion. It's correspond to the number of maximum triangles in the solution mesh.
+%\item [\texttt{ntetmax}=] integer expresion. It's correspond to the number of maximum triangles in the solution mesh.
+\item[\texttt{options}=] vector expression. This vector contains the option parameters of mmg3d. It is a vector of size 6.
+
+options(0)   optimization parameters : (default 1) \\
+                     \hspace*{0.3cm}  0 : mesh optimization. \\
+                     \hspace*{0.3cm}  1 : adaptation with metric (deletion and insertion vertices) and optimization. \\
+                     \hspace*{0.3cm} -1: adaptation with metric (deletion and insertion vertices) without optimization. \\
+                     \hspace*{0.3cm}  4 : split tetrahedra (be careful modify the surface). \\
+                     \hspace*{0.3cm}  9 : moving mesh with optimization. \\
+                     \hspace*{0.3cm} -9: moving mesh without optimization.
+
+options(1)  debug mode :  (default 0)\\
+		 \hspace*{0.3cm} 1 : turn on debug mode.\\
+		 \hspace*{0.3cm} 0 : otherwise.
+		
+options(2) Specify the size of bucket per dimension ( default 64)
+
+options(3) swapping mode : (default 0)\\
+		\hspace*{0.3cm} 1 : no edge or face flipping. \\
+		\hspace*{0.3cm} 0 : otherwise.
+
+options(4) insert points mode : (default 0)\\
+		\hspace*{0.3cm} 1 : no edge splitting or collapsing and no insert points. \\
+		\hspace*{0.3cm} 0 : otherwise.		
+		
+options(5) verbosity level (default 3)
+\item[\texttt{memory}=] integer expression. Set the maximum memory size of new mesh in Mbytes. By default the number of maximum vertices, tetrahedra and triangles are respectively 500 000,  3000 000, 100000 which represent approximately a memory of 100 Mo.
+\item[\texttt{metric}=] vector expression. This vector contains the metric given at mmg3d. It is a vector of size $nv$ or 6 $nv$ respectively for an istropic and anisotropic metric where $nv$ is the number of vertices in the initial mesh. The structure of \texttt{metric} vector is described in the mshmet's section(section \ref{sec:mshmet}).
+\item[\texttt{displacement}=] \texttt{[$\Phi$1, $\Phi$2, $\Phi$3]} set the displacement vector of the initial mesh \\
+$\Phi(x,y) = [\Phi1(x,y), \Phi2(x,y), \Phi3(x,y) ]$.
+\item[\texttt{displVect=}] sets the vector displacement in a vector expression. This vector contains the displacement at each point of the initial mesh. It is a vector of size 3 $nv$.
+\end{itemize}
+
+An example using this function is given in "mmg3d.edp":
+\begin{example}[mmg3d.edp]
+\label{mmg3dsimple}~
+\bFF
+// test mmg3d
+@load "msh3"
+@load "medit"
+@load "mmg3d"
+@include "../examples++-3d/cube.idp"
+
+@int n=6;
+@int[int]  Nxyz=[12,12,12];
+@real [int,int]  Bxyz=[[0.,1.],[0.,1.],[0.,1.]];
+@int [int,int]  Lxyz=[[1,1],[2,2],[2,2]];
+@mesh3 Th=Cube(Nxyz,Bxyz,Lxyz);
+
+@real[int] isometric(Th.nv);{
+  @for( int ii=0; ii<Th.nv; ii++)
+    isometric[ii]=0.17;
+}
+
+@mesh3 Th3=mmg3d(  Th,  memory=100, metric=isometric);
+				
+@medit("init",Th);
+@medit("isometric",Th3);
+\eFF
+\end{example}
+
+An example of a moving mesh is given in \texttt{fallingspheres.edp}":
+\begin{example}[fallingspheres.edp]
+\bFF
+@load "msh3"  @load "tetgen"  @load "medit"  @load "mmg3d"                                                               
+@include "MeshSurface.idp"
+
+// build mesh of a box (311)  wit 2 holes  (300,310)
+
+@real hs = 0.8; 
+@int[@int]  N=[4/hs,8/hs,11.5/hs];
+@real [int,int]  B=[[-2,2],[-2,6],[-10,1.5]];
+@int [@int,@int]  L=[[311,311],[311,311],[311,311]];
+@mesh3 ThH = SurfaceHex(N,B,L,1);
+@mesh3 ThSg =Sphere(1,hs,300,-1); 
+@mesh3 ThSd =Sphere(1,hs,310,-1);   ThSd=movemesh3(ThSd,transfo=[x,4+y,z]);
+@mesh3 ThHS=ThH+ThSg+ThSd;// gluing surface meshes 
+@medit("ThHS", ThHS); // see surface mesh
+
+@real voltet=(hs^3)/6.;
+@real[int] domaine = [0,0,-4,1,voltet];
+@real [int] holes=[0,0,0,0,4,0];
+@mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",nbofregions=1,regionlist=domaine, nbofholes=2,holelist=holes);    
+@medit("Box-With-two-Ball",Th);
+// End build mesh 
+
+@int[@int] opt=[9,0,64,0,0,3];   // options  of mmg3d see freeem++ doc 
+real[@int] vit=[0,0,-0.3];
+@func zero = 0.;
+@func dep  = vit[2];
+
+@fespace Vh(Th,P1); 
+@macro Grad(u) [dx(u),dy(u),dz(u)] //
+
+@Vh uh,vh; //  to compute the displacemnt field 
+@problem Lap(uh,vh,solver=CG) = @int3d(Th)(@Grad(uh)'*@Grad(vh))  //') for emacs
+				  + @on(310,300,uh=dep) +@on(311,uh=0.); 
+
+@for(@int it=0; it<29; it++){ 
+  cout<<"  ITERATION       "<<it<<endl;
+  Lap;
+  plot(Th,uh);
+  Th=mmg3d(Th,options=opt,displacement=[zero,zero,uh],memory=1000); 
+ }
 \eFF
 \end{example}
 
