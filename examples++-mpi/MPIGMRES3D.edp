@@ -1,3 +1,4 @@
+// NBPROC 4 
 // ff-mpirun -np 4 ex3d.edp -glut ffglut  -n 11 -k 1  -d 1 -ns -gmres 1
 /*
   a first true parallele example firt freefem++ 
@@ -30,11 +31,11 @@ searchMethod=1; // more safe seach algo .. (FH for PICHON ??)
 
 
 verbosity=getARGV("-vv",0);
-int vdebug=getARGV("-d",0);
+int vdebug=getARGV("-d",1);
 int ksplit=getARGV("-k",2);
 int nloc = getARGV("-n",10);
 string sff=getARGV("-p,","");
-bool gmres=getARGV("-gmres",1); 
+bool gmres=getARGV("-gmres",0); 
 bool dplot=getARGV("-dp",0);
 if(mpirank==0 && verbosity)
 {
