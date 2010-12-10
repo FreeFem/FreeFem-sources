@@ -126,8 +126,8 @@ speedtest: all
 win32:WindowsPackage.iss
 	cd examples++-load;tar zxvf include.tar.gz;mkdir include-tmp;cp -Lr *.h include/* include-tmp
 WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
-	m4 -DVERSION=$(VERSION)$(ADD_PACKAGE_NAME) \
-		WindowsPackage.m4 > WindowsPackage.iss
+	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
+	-DMPIPROG='$MPIPROG' WindowsPackage.m4 > WindowsPackage.iss
 
 # Debian package
 # --------------

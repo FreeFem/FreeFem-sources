@@ -50,7 +50,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_FreeFem___x11_OBJECTS = Xrgraph.$(OBJEXT)
+am_FreeFem___x11_OBJECTS = Xrgraph.$(OBJEXT) \
+	parallelempi-empty.$(OBJEXT)
 FreeFem___x11_OBJECTS = $(am_FreeFem___x11_OBJECTS)
 FreeFem___x11_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -277,7 +278,7 @@ top_srcdir = @top_srcdir@
 # To create statically linked executables (see configure.ac)
 CXXLD = $(STATICTOOL) $(CXX)
 bin_PROGRAMS = $(X11PROG)
-FreeFem___x11_SOURCES = ../Graphics/Xrgraph.cpp
+FreeFem___x11_SOURCES = ../Graphics/Xrgraph.cpp  ../mpi/parallelempi-empty.cpp
 FreeFem___x11_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
 LDADD = ../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @X11_LIBS@
 INCLUDES = -I../fflib -I../Graphics -I../.. -I../femlib @X_CFLAGS@ 
@@ -363,6 +364,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Xrgraph.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parallelempi-empty.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -391,6 +393,20 @@ Xrgraph.obj: ../Graphics/Xrgraph.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/Xrgraph.cpp' object='Xrgraph.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Xrgraph.obj `if test -f '../Graphics/Xrgraph.cpp'; then $(CYGPATH_W) '../Graphics/Xrgraph.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/Xrgraph.cpp'; fi`
+
+parallelempi-empty.o: ../mpi/parallelempi-empty.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parallelempi-empty.o -MD -MP -MF $(DEPDIR)/parallelempi-empty.Tpo -c -o parallelempi-empty.o `test -f '../mpi/parallelempi-empty.cpp' || echo '$(srcdir)/'`../mpi/parallelempi-empty.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/parallelempi-empty.Tpo $(DEPDIR)/parallelempi-empty.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../mpi/parallelempi-empty.cpp' object='parallelempi-empty.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parallelempi-empty.o `test -f '../mpi/parallelempi-empty.cpp' || echo '$(srcdir)/'`../mpi/parallelempi-empty.cpp
+
+parallelempi-empty.obj: ../mpi/parallelempi-empty.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parallelempi-empty.obj -MD -MP -MF $(DEPDIR)/parallelempi-empty.Tpo -c -o parallelempi-empty.obj `if test -f '../mpi/parallelempi-empty.cpp'; then $(CYGPATH_W) '../mpi/parallelempi-empty.cpp'; else $(CYGPATH_W) '$(srcdir)/../mpi/parallelempi-empty.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/parallelempi-empty.Tpo $(DEPDIR)/parallelempi-empty.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../mpi/parallelempi-empty.cpp' object='parallelempi-empty.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parallelempi-empty.obj `if test -f '../mpi/parallelempi-empty.cpp'; then $(CYGPATH_W) '../mpi/parallelempi-empty.cpp'; else $(CYGPATH_W) '$(srcdir)/../mpi/parallelempi-empty.cpp'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

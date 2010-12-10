@@ -33,6 +33,7 @@ Source: "0ldUserReadMe.txt"; DestDir: "{app}"
 
 ; Programs
 Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
+ifelse(len(MPIPROG),0,; ,)Source: "src\bin-win32\FreeFem++-mpi.exe"; DestDir: "{app}"
 Source: "src\bin-win32\launchff++.exe"; DestDir: "{app}"
 ;  to day the dll version do not works so we use the static one (FH)
 ;Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
@@ -72,6 +73,8 @@ Source: "examples++-3d\*.edp"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\dodecaedre01.mesh"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\lac-leman-v4.msh"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\*.idp"; DestDir: "{app}\examples++-3d"
+ifelse(len(MPIPROG),0,; ,)Source: "examples++-mpi\*.idp"; DestDir: "{app}\examples++-mpi"
+ifelse(len(MPIPROG),0,; ,)Source: "examples++-mpi\*.edp"; DestDir: "{app}\examples++-mpi"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-load"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-tutorial"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-chapt3"

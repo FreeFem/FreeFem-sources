@@ -5,7 +5,7 @@
 bin_PROGRAMS=$(AGLPROG)
 EXTRA_PROGRAMS=FreeFem++-agl
 EXTRA_DIST=FreeFem++.app.tgz Info-plist.am 
-FreeFem___agl_SOURCES=../Graphics/glrgraph.hpp ../Graphics/macglrgraf.cpp
+FreeFem___agl_SOURCES=../Graphics/glrgraph.hpp ../Graphics/macglrgraf.cpp  ../mpi/parallelempi-empty.cpp
 FreeFem___agl_DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
 LDADD=../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
 INCLUDES=-I../fflib -I../Graphics -I../femlib

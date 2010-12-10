@@ -258,11 +258,11 @@ bool load(string s);
  template <class R,int d,int i> class FE_;
 
 extern mylex *zzzfff;
-#ifdef PARALLELE
+//#ifdef PARALLELE
   void initparallele(int &, char **&);
   void init_lgparallele();
   void end_parallele();
-#endif
+//#endif
 #ifdef HAVE_LIBARPACK
   void init_eigenvalue();
 #endif
@@ -3300,9 +3300,9 @@ int mainff (int  argc, char **argv)
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;
-#ifdef PARALLELE
+//#ifdef PARALLELE
    initparallele(argc,argv);
-#endif
+//#endif
   CPUcompileInit= CPUtime();
   withrgraphique = false;
    atexit(ForDebug);
@@ -3367,9 +3367,9 @@ int mainff (int  argc, char **argv)
 #ifdef HAVE_LIBARPACK
    init_eigenvalue();
 #endif   
-#ifdef PARALLELE
+//#ifdef PARALLELE
    init_lgparallele(); 
-#endif 
+//#endif 
    //#ifdef HAVE_LIBUMFPACK   
      //if(verbosity)  cout << " UMFPACK ";  
    // #endif
@@ -3381,9 +3381,9 @@ int mainff (int  argc, char **argv)
     
   retvalue= Compile(); 
       
-#ifdef PARALLELE
+//#ifdef PARALLELE
   end_parallele();
-#endif
+//#endif
   //  currentblock->close(currentblock).eval(thestack);
   fingraphique();
   if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}  
