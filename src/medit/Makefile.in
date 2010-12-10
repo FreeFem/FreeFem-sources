@@ -662,7 +662,7 @@ all-local: pinking.no-opt
 
 pinking.no-opt:picking.c
 	rm picking.$(OBJEXT)
-	$(MAKE) picking.o CFLAGS="$(CNOFLAGS)"
+	$(MAKE) picking.o ffmedit CFLAGS="$(CNOFLAGS)"
 	touch pinking.no-opt
 clean-local:
 	-rm pinking.no-opt

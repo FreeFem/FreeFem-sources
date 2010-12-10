@@ -13,8 +13,8 @@ ffglut_SOURCES=../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads
 
 ffglut_DEPENDENCIES= ../libMesh/libMesh.a
 ffglut_LDADD= ../libMesh/libMesh.a @LIBSGLUT@ @LIBSPTHREAD@ 
-FreeFem___nw_SOURCES=../Graphics/sansrgraph.cpp 
-FreeFem___SOURCES=../Graphics/sansrgraph.cpp 
+FreeFem___nw_SOURCES=../Graphics/sansrgraph.cpp ../mpi/parallelempi-empty.cpp
+FreeFem___SOURCES=../Graphics/sansrgraph.cpp  ../mpi/parallelempi-empty.cpp 
 
 FreeFem___nw_DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
 FreeFem___DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a

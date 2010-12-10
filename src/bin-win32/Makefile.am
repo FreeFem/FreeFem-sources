@@ -35,21 +35,19 @@ LIBS_FF = libff.dll
 all-local: $(WIN32DLLTARGET) 
 	-for i in $(LDADD2) ; do case $$i in  *.dll) echo cp -p $$i .; cp -p $$i . ;;	  esac ; done
 	echo done
-win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe launchff++.exe ff-c++ 
+win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe launchff++.exe ff-c++ $(MPIPROG)
 	echo "on a fini"
 
 libff.dll: $(FFD_OBJ0)  $(FFD_OBJ_AR)  $(FFD_OBJ_AC)  $(FFD_OBJ_AL)  $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o
 	$(CXX) $(GCCNOCYGWIN)  -shared  -Wl,--enable-auto-import $^  -o $@ $(LDADD2)
 
 
-#FreeFem++.exe: ../std/Pcrgraph.o ../lglib/mymain.o $(LIBS_FF)
-#	$(CXX)   $(GCCNOCYGWIN) -mwindows -mthreads  -Wl,--enable-auto-import $^  -o $@
-FreeFem++-nw.exe: ../nw/sansrgraph.o   ../lglib/mymain.o $(LIBS_FF)
+FreeFem++-nw.exe: ../nw/sansrgraph.o ../nm/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
-FreeFem++.exe: ../nw/sansrgraph.o    ../lglib/mymain.o $(LIBS_FF)
+FreeFem++.exe: ../nw/sansrgraph.o    ../nm/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
-##FreeFem++-cs.exe:$(FFD_OBJIDE)  ../lglib/lg.tab.o $(LIBS_FF)
-##	$(CXX)  $^  `$(FLTK_CONFIG) --ldflags` $(GCCNOCYGWIN)    -o $@
+FreeFem++-mpi.exe:	../src/sansrgraph.o ../mpi/parallelempi.o   ../lglib/mymain.o $(LIBS_FF)
+	$(MPICXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32 
 bamg.exe:  libff.dll $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) ../bamg/bamg.o  -Wl,--enable-auto-import $^ -o $@ 
 cvmsh2.exe:  $(LIBS_FF)
@@ -65,7 +63,7 @@ ff-c++:../../examples++-load/load.link.in
 install-exec-local:: install-exec-local--$(WIN32DLLTARGET)
 
 install-exec-local--win32-dll-target::
-	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe ff-c++  $(DESTDIR)${bindir} 
+	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe ff-c++ $(MPIPROG) $(DESTDIR)${bindir} 
 	$(INSTALL_SCRIPT) *.dll   $(DESTDIR)${bindir} 
 install-exec-local--::
 
