@@ -114,6 +114,11 @@ inline void fingraphique()
 
 void lgerror (const char* s) ;
 
+
+ // mpi ptr to function ... 
+void (*initparallele)(int &argc, char **& argv)=0 ;
+void (*init_lgparallele)()=0;
+void (*end_parallele)()=0;
 %}
 
 %union{ 
@@ -815,4 +820,4 @@ int mainff (int  argc, char **argv)
 }
 
 
- 
+
