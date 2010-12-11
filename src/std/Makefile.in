@@ -278,7 +278,7 @@ top_srcdir = @top_srcdir@
 CXXLD = $(STATICTOOL) $(CXX)
 bin_PROGRAMS = $(STDPROG)
 FreeFem___std_SOURCES = 
-EXTRA_FreeFem___std_SOURCES = ../Graphics/Xrgraph.cpp ../Graphics/Pcrgraph.cpp
+EXTRA_FreeFem___std_SOURCES = ../Graphics/Xrgraph.cpp ../Graphics/Pcrgraph.cpp  ../mpi/parallelempi-empty.cpp
 FreeFem___std_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a @STD_GRAPH_OBJ@ 
 LDADD = @STD_GRAPH_OBJ@ ../lglib/liblg.a ../fflib/libff.a \
 	@UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @STD_LIBS@ @LIBSNOCONSOLE@
@@ -368,6 +368,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Pcrgraph.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Xrgraph.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parallelempi-empty.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -410,6 +411,20 @@ Pcrgraph.obj: ../Graphics/Pcrgraph.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../Graphics/Pcrgraph.cpp' object='Pcrgraph.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Pcrgraph.obj `if test -f '../Graphics/Pcrgraph.cpp'; then $(CYGPATH_W) '../Graphics/Pcrgraph.cpp'; else $(CYGPATH_W) '$(srcdir)/../Graphics/Pcrgraph.cpp'; fi`
+
+parallelempi-empty.o: ../mpi/parallelempi-empty.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parallelempi-empty.o -MD -MP -MF $(DEPDIR)/parallelempi-empty.Tpo -c -o parallelempi-empty.o `test -f '../mpi/parallelempi-empty.cpp' || echo '$(srcdir)/'`../mpi/parallelempi-empty.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/parallelempi-empty.Tpo $(DEPDIR)/parallelempi-empty.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../mpi/parallelempi-empty.cpp' object='parallelempi-empty.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parallelempi-empty.o `test -f '../mpi/parallelempi-empty.cpp' || echo '$(srcdir)/'`../mpi/parallelempi-empty.cpp
+
+parallelempi-empty.obj: ../mpi/parallelempi-empty.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parallelempi-empty.obj -MD -MP -MF $(DEPDIR)/parallelempi-empty.Tpo -c -o parallelempi-empty.obj `if test -f '../mpi/parallelempi-empty.cpp'; then $(CYGPATH_W) '../mpi/parallelempi-empty.cpp'; else $(CYGPATH_W) '$(srcdir)/../mpi/parallelempi-empty.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/parallelempi-empty.Tpo $(DEPDIR)/parallelempi-empty.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../mpi/parallelempi-empty.cpp' object='parallelempi-empty.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parallelempi-empty.obj `if test -f '../mpi/parallelempi-empty.cpp'; then $(CYGPATH_W) '../mpi/parallelempi-empty.cpp'; else $(CYGPATH_W) '$(srcdir)/../mpi/parallelempi-empty.cpp'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
