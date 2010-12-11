@@ -432,6 +432,7 @@ int main (int argc, char **argv)
 }
 #else
 extern int mymain(int argc,char **argv);
+extern void   Set_pparallele();
 string StrVersionNumber();
 
 int main (int argc, char **argv)
@@ -443,8 +444,9 @@ int main (int argc, char **argv)
    strcat(wn,StrVersionNumber().c_str());
    
    int ret=15;  
-   try {                  
-          ret=mymain(argc,argv);}
+   try {    
+     Set_pparallele();              
+     ret=mymain(argc,argv);}
    catch( Error & err) {
      ret=err.errcode();
      cerr  << err.what() << endl;                        

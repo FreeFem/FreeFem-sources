@@ -73,11 +73,11 @@ bool load(string s);
  template <class R,int d,int i> class FE_;
 
 extern mylex *zzzfff;
-//#ifdef PARALLELE
-  void initparallele(int &, char **&);
-  void init_lgparallele();
-  void end_parallele();
-//#endif
+// modif FH for window to have 1 dll  for mpi and none mpi ..
+extern  void (*initparallele)(int &, char **&);
+extern  void (*init_lgparallele)();
+extern  void (*end_parallele)();
+// 
 #ifdef HAVE_LIBARPACK
   void init_eigenvalue();
 #endif
@@ -725,9 +725,9 @@ int mainff (int  argc, char **argv)
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;
-//#ifdef PARALLELE
-   initparallele(argc,argv);
-//#endif
+
+   if (initparallele)initparallele(argc,argv);
+
   CPUcompileInit= CPUtime();
   withrgraphique = false;
    atexit(ForDebug);
@@ -792,23 +792,19 @@ int mainff (int  argc, char **argv)
 #ifdef HAVE_LIBARPACK
    init_eigenvalue();
 #endif   
-//#ifdef PARALLELE
-   init_lgparallele(); 
-//#endif 
-   //#ifdef HAVE_LIBUMFPACK   
-     //if(verbosity)  cout << " UMFPACK ";  
-   // #endif
- // callInitsFunct(); Pb opimisation 
-  if(verbosity)  cout << endl;
+
+   if(init_lgparallele)  init_lgparallele(); 
+
+   if(verbosity)  cout << endl;
   zzzfff->input(cc);
   EnvironmentLoad(); // just before compile
   verbosity=vvold; 
     
   retvalue= Compile(); 
       
-//#ifdef PARALLELE
-  end_parallele();
-//#endif
+
+  if(end_parallele) end_parallele();
+
   //  currentblock->close(currentblock).eval(thestack);
   fingraphique();
   if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}  

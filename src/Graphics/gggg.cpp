@@ -47,6 +47,10 @@ void ShowDebugStack(){}
 
 bool showCPU= false;
 
+void (*initparallele)(int &argc, char **& argv) =0;
+void (*init_lgparallele)() =0;
+void (*end_parallele)() =0; 
+
 
 //  add F. Hecht 
 EnvironmentData  ffenvironment;
