@@ -3358,7 +3358,7 @@ int mainff (int  argc, char **argv)
    zzzfff->Add("catch",CATCH);
    zzzfff->Add("throw",THROW);
    Init_map_type();
-   if(verbosity) cout << " Load: ";
+   if(verbosity && (mpirank==0 ) ) cout << " Load: ";
    init_lgfem() ;
    init_lgmesh() ;
    init_lgmesh3() ;

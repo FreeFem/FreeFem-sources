@@ -143,10 +143,8 @@ int main (int argc, char **argv)
 }
 #else
 extern int mymain(int argc,char **argv);
-extern void   Set_pparallele();
 int main (int argc, char **argv)
 {
-  Set_pparallele();
  return mymain(argc,argv);
 }
 

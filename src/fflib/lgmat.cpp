@@ -2638,30 +2638,30 @@ void  init_lgmat()
   
   Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes>);
   Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes>(1));
-    Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes3>);
-    Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes3>(1,1));
+  Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes3>);
+  Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes3>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfes>);
   Global.Add("interpolate","(",new MatrixInterpolation<pfes>(1));
-    Global.Add("interpolate","(",new MatrixInterpolation<pfes3>);
-    Global.Add("interpolate","(",new MatrixInterpolation<pfes3>(1,1));
- Global.Add("interplotematrix","(",new  OneOperatorCode<PrintErrorCompileIM>);
- zzzfff->Add("mapmatrix",atype<map< pair<int,int>, double> *>());
- zzzfff->Add("Cmapmatrix",atype<map< pair<int,int>, Complex> *>()); // a voir
-
- Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
- Global.Add("defaulttoCG","(",new OneOperator0<bool>(SetCG));
- Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
-    
- Dcl_Type< Resize<Matrice_Creuse<double> > > ();
-    
- Add<Matrice_Creuse<double> *>("resize",".",new OneOperator1< Resize<Matrice_Creuse<double>  >,Matrice_Creuse<double> *>(to_Resize));
- Add<Resize<Matrice_Creuse<double> > >("(","",new OneOperator3_<Matrice_Creuse<double>  *,Resize<Matrice_Creuse<double>  > , long, long  >(resize2)); 
-    // add missing in
+  Global.Add("interpolate","(",new MatrixInterpolation<pfes3>);
+  Global.Add("interpolate","(",new MatrixInterpolation<pfes3>(1,1));
+  Global.Add("interplotematrix","(",new  OneOperatorCode<PrintErrorCompileIM>);
+  zzzfff->Add("mapmatrix",atype<map< pair<int,int>, double> *>());
+  zzzfff->Add("Cmapmatrix",atype<map< pair<int,int>, Complex> *>()); // a voir
+  
+  Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
+  Global.Add("defaulttoCG","(",new OneOperator0<bool>(SetCG));
+  Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
+  
+  Dcl_Type< Resize<Matrice_Creuse<double> > > ();
+  
+  Add<Matrice_Creuse<double> *>("resize",".",new OneOperator1< Resize<Matrice_Creuse<double>  >,Matrice_Creuse<double> *>(to_Resize));
+  Add<Resize<Matrice_Creuse<double> > >("(","",new OneOperator3_<Matrice_Creuse<double>  *,Resize<Matrice_Creuse<double>  > , long, long  >(resize2)); 
+  // add missing in
  Dcl_Type< Resize<Matrice_Creuse<Complex> > > ();
  Add<Matrice_Creuse<Complex> *>("resize",".",new OneOperator1< Resize<Matrice_Creuse<Complex>  >,Matrice_Creuse<Complex> *>(to_Resize));
  Add<Resize<Matrice_Creuse<Complex> > >("(","",new OneOperator3_<Matrice_Creuse<Complex>  *,Resize<Matrice_Creuse<Complex>  > , long, long  >(resize2));   
-    
-
+ 
+ 
  Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefaultSolver));
  
  // pour compatibiliter 

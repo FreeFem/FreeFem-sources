@@ -1,4 +1,4 @@
-#include "parallempi.hpp" 
+
 #include <fstream>
 #include <iostream>
 #include <cfloat>
@@ -2438,11 +2438,16 @@ void f_end_parallele()
     if(mpirank==0) cout << "FreeFem++-mpi finalize correctly .\n" << flush ; 
     else if(verbosity>5)  cout << '.' << endl ;
 }
-//   MPI::COMM_WORLD.Recv(&msg, 1, MPI::INT, from, MPI::ANY_TAG);
-//    MPI::COMM_WORLD.Isend(&msg, 1, MPI::INT, to, 4);
-void Set_pparallele()
-{
-  initparallele=f_initparallele;
-  init_lgparallele=f_init_lgparallele;
-  end_parallele=f_end_parallele
-}
+
+// set the 3 ptr 
+extern void (*initparallele)(int &argc, char **& argv) ;
+extern void (*init_lgparallele)();
+extern void (*end_parallele)();
+
+
+void init_ptr_parallelepmi();
+void init_ptr_parallelepmi(){
+initparallele=&f_initparallele ;
+init_lgparallele=&f_init_lgparallele;
+end_parallele=&f_end_parallele;
+};
