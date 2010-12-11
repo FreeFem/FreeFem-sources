@@ -42,13 +42,13 @@ libff.dll: $(FFD_OBJ0)  $(FFD_OBJ_AR)  $(FFD_OBJ_AC)  $(FFD_OBJ_AL)  $(FFD_OBJ1)
 	$(CXX) $(GCCNOCYGWIN)  -shared  -Wl,--enable-auto-import $^  -o $@ $(LDADD2)
 
 
-FreeFem++-nw.exe: ../nw/sansrgraph.o ../nm/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
+FreeFem++-nw.exe: ../nw/sansrgraph.o ../nw/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
-FreeFem++.exe: ../nw/sansrgraph.o    ../nm/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
+FreeFem++.exe: ../nw/sansrgraph.o    ../nw/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 FreeFem++-mpi.exe:	../src/sansrgraph.o ../mpi/parallelempi.o   ../lglib/mymain.o $(LIBS_FF)
 	$(MPICXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32 
-bamg.exe:  libff.dll $(LIBS_FF)
+bamg.exe:  ../nw/parallelempi-empty.o libff.dll $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) ../bamg/bamg.o  -Wl,--enable-auto-import $^ -o $@ 
 cvmsh2.exe:  $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN)  -Wl,--enable-auto-import ../bamg/cvmsh2.o  $^ -o $@ 

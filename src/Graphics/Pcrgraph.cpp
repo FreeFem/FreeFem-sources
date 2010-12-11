@@ -1193,6 +1193,8 @@ int WINAPI WinMain(HINSTANCE  hInstance,
 
 
 extern int mymain(int argc,char **argv);
+ extern void Set_pparallele();
+
 
 // main() in FreeFEM+ for PCs
 BOOL mainFreeFEM()
@@ -1225,6 +1227,7 @@ BOOL mainFreeFEM()
  int ret=1;
  try {
  	//compile(fullName);
+        Set_pparallele();
  	ret=mymain(argc,argv);
  	cout << fullName << endl;
  	rattente(1);

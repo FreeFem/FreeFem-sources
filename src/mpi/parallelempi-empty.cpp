@@ -1,13 +1,10 @@
 // empty parallele interface if no MPI to build dll
 // with or without mpi..
-
-void initparallele(int &argc, char **& argv);
-void init_lgparallele();
-void end_parallele();
-
-
-void initparallele(int &argc, char **& argv){}
-
-void init_lgparallele() { }
-void end_parallele(){}
+#Include "parallelepmi.hpp" 
+void Set_pparallele()
+{
+  initparallele=0;
+  init_lgparallele=0;
+  end_parallele=0; 
+}
 

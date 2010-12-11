@@ -87,6 +87,7 @@ ff-flags: ../Makefile
 	grep 'RANLIB *=' ../Makefile >> ff-flags
 	grep 'yams_VERSION *=' ./Makefile >> ff-flags
 	grep 'WGET *=' ../Makefile >> ff-flags
+	grep 'LIBS *=' ../Makefile >> ff-flags
 
 
 .PHONY: $(SRCDIR)/$(INSTALL)

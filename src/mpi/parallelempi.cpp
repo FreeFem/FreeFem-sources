@@ -1,3 +1,4 @@
+#include "parallempi.hpp" 
 #include <fstream>
 #include <iostream>
 #include <cfloat>
@@ -122,8 +123,8 @@ template<> struct MPI_TAG<Mesh3 *>   {static const int TAG=1010;};
 template<> struct MPI_TAG<Matrice_Creuse<double> *>   {static const int TAG=1020;};
 template<> struct MPI_TAG<Matrice_Creuse<Complex> *>   {static const int TAG=1030;};
 
-void initparallele(int &, char **&);
-void init_lgparallele();  
+void f_initparallele(int &, char **&);
+void f_init_lgparallele();  
 
 extern long mpirank ;
 extern long mpisize ;
@@ -2116,7 +2117,7 @@ public:
 
 
 // Fin add J. Morice
-void initparallele(int &argc, char **& argv)
+void f_initparallele(int &argc, char **& argv)
 {
   MPI_Init(&argc, &argv);
   
@@ -2129,7 +2130,7 @@ void initparallele(int &argc, char **& argv)
   cout << "initparallele rank " <<  mpirank << " on " << mpisize << endl;
 }
 
-void init_lgparallele()
+void f_init_lgparallele()
   {
     if(verbosity && mpirank == 0) cout << "parallelempi ";
     using namespace Fem2D;
@@ -2431,7 +2432,7 @@ void init_lgparallele()
       atype<KN<MPI_Request>* >()->Add("[","",new OneOperator2_<fMPI_Request*,KN<MPI_Request>*,long >(get_elementp_));    
       
   }
-void end_parallele()
+void f_end_parallele()
 {
     MPI_Finalize();
     if(mpirank==0) cout << "FreeFem++-mpi finalize correctly .\n" << flush ; 
@@ -2439,3 +2440,9 @@ void end_parallele()
 }
 //   MPI::COMM_WORLD.Recv(&msg, 1, MPI::INT, from, MPI::ANY_TAG);
 //    MPI::COMM_WORLD.Isend(&msg, 1, MPI::INT, to, 4);
+void Set_pparallele()
+{
+  initparallele=f_initparallele;
+  init_lgparallele=f_init_lgparallele;
+  end_parallele=f_end_parallele
+}

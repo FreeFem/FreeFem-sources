@@ -192,9 +192,11 @@ void doatexitff()
 
 }
 extern int mymain(int argc,char **argv);
+extern void   Set_pparallele();
 int main (int argc, char **argv)
 {
   atexit(doatexitff);
+  Set_pparallele();
   int ret=mymain(argc,argv);
   return ret;
 }
