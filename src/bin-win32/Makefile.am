@@ -46,7 +46,7 @@ FreeFem++-nw.exe: ../nw/sansrgraph.o ../nw/parallelempi-empty.o ../lglib/mymain.
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 FreeFem++.exe: ../nw/sansrgraph.o    ../nw/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
-FreeFem++-mpi.exe:	../src/nw/sansrgraph.o ../mpi/parallelempi.o   ../lglib/mymain.o $(LIBS_FF)
+FreeFem++-mpi.exe:	../nw/sansrgraph.o ../mpi/parallelempi.o   ../lglib/mymain.o $(LIBS_FF)
 	$(MPICXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32 
 bamg.exe:  libff.dll $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) ../bamg/bamg.o  -Wl,--enable-auto-import $^ -o $@ 
