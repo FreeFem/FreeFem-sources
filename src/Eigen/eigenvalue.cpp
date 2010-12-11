@@ -807,7 +807,7 @@ return (long) nconv;
 #ifndef DYNM_LOAD
 void init_eigenvalue()
 {
-    if(verbosity) cout << "eigenvalue ";
+  if(verbosity&& (mpirank==0) ) cout << "eigenvalue ";
     Global.Add("EigenValue","(",new EigenValue(1));  //  j + dJ
     Global.Add("EigenValue","(",new EigenValueC(1));  //  j + dJ
     
@@ -817,7 +817,7 @@ class Init {
 public:
   Init()
   {
-    if(verbosity) cout << "eigenvalue ";
+    if(verbosity&&(mpirank==0) ) cout << "eigenvalue ";
     Global.Add("EigenValue2","(",new EigenValue(1));  //  j + dJ
     Global.Add("EigenValue2","(",new EigenValueC(1));  //  j + dJ
   }

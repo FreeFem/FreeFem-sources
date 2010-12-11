@@ -1429,7 +1429,7 @@ void init_mesh3_array()
 
 
 void init_lgmesh3() {
-   if(verbosity)  cout <<"lg_mesh3 ";
+  if(verbosity&&(mpirank==0))  cout <<"lg_mesh3 ";
 
     //   Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh3>);
     // Global.Add("buildmesh","(",new OneOperatorCode<BuildMeshFile3>);

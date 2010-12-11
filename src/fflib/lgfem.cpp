@@ -4333,7 +4333,7 @@ Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
 void  init_lgfem() 
 {
  // ThePlotStream = new ofstream("ttttt.plot");
-  if(verbosity) cout <<"lg_fem ";
+  if(verbosity&& mpirank) cout <<"lg_fem ";
 #ifdef HAVE_CADNA
   cout << "cadna ";
   cadna_init(-1); // pas de fichier 

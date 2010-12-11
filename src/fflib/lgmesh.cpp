@@ -1679,7 +1679,7 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 
 
 void init_lgmesh() {
-   if(verbosity)  cout <<"lg_mesh ";
+  if(verbosity&&(mpirank==0) )  cout <<"lg_mesh ";
     bamg::MeshIstreamErrorHandler = MeshErrorIO;
 //   Global.Add("buildmesh","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMesh));
    Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh>);

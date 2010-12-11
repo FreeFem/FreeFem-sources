@@ -444,7 +444,6 @@ int main (int argc, char **argv)
 }
 #else
 extern int mymain(int argc,char **argv);
-extern void   Set_pparallele();
 string StrVersionNumber();
 
 int main (int argc, char **argv)
@@ -460,7 +459,6 @@ int main (int argc, char **argv)
    SIOUXSetTitle((unsigned char *) wn);
    int ret=15;  
                         try {                  
-			  Set_pparallele();
                           ret=mymain(argc,argv);}
                         catch( ...) { cerr << "catch exception ???";}
                         catch( Error & err) {
