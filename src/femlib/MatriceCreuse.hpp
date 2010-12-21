@@ -350,6 +350,7 @@ public:
   virtual void Solve(KN_<R> & x,const KN_<R> & b) const =0;
   virtual ~MatriceCreuse(){}
   virtual R & diag(int i)=0;
+  virtual void SetBC(int i,double tgv)=0; 
   virtual R & operator()(int i,int j)=0;
   virtual R * pij(int i,int j) const =0; // Add FH 
   virtual  void  resize(int n,int m)  {AFAIRE("MatriceCreuse::resize");}  // a faire dans les classe derive ... // add march 2009  FH 
@@ -454,6 +455,10 @@ public:
   void crout(double = EPSILON/8.) const ; //
   void LU(double = EPSILON/8.) const ; //
   R & diag(int i) { return D[i];}
+  void SetBC (int i,double tgv) {
+      if( tgv>=0) D[i]=tgv;
+      else  { ffassert(tgv<0); }  // to hard ..
+  }
   R & operator()(int i,int j) { if(i!=j) ffassert(0); return D[i];} // a faire 
   R * pij(int i,int j) const { if(i!=j) ffassert(0); return &D[i];} // a faire  Modif FH 31102005
   MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
@@ -586,7 +591,17 @@ MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=
   R  operator()(int i,int j) const {R * p= pij(i,j) ;throwassert(p); return *p;}
   R & operator()(int i,int j)  {R * p= pij(i,j) ;throwassert(p); return *p;}
   R & diag(int i)  {R * p= pij(i,i) ;throwassert(p); return *p;}
-  
+  void SetBC (int i,double tgv) {
+	R * p= pij(i,i) ;
+	ffassert(p);
+	if( tgv>=0) *p=tgv;
+	else  {
+	    ffassert(!symetrique); 
+	    for (int k=lg[i];k<lg[i+1]; ++k) a[k]=0;// put the line to Zero.
+	    *p = 1. ; // and the diag coef to 1.
+	}  
+    }
+    
   void SetSolver(const VirtualSolver & s){solver=&s;}
   void SetSolverMaster(const VirtualSolver * s){solver.master(s);}
   bool sym() const {return symetrique;}

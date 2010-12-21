@@ -1985,7 +1985,7 @@ AnyType Remplissage_Op::operator()(Stack stack)  const
   int nbinside=InsidePoint.N()/3;
   Mesh3 *Th3 = 0;
 
-  if( nargs[11] || nargs[12]){
+  if( nargs[11] || nargs[12] || bVol){
     Th3 = RemplissageSurf3D_tetgen_new( switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl, tabfacecl, nbinside, InsidePoint, sizeofmetric, metric);
     // delete multiple vertex
     Th3->TrueVertex();

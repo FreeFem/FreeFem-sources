@@ -1,3 +1,6 @@
+    21 dec 2010
+      -   add hack of ILU precond, if tgv is < 0 then
+        we remove all the line and put 1 on the diag term ..
 v 3.11 9 dec 2010 
    - update the documentation of 3d adaption process
      and / correct  freeyams,mshmet, mmg3d  interface and associaded  example
