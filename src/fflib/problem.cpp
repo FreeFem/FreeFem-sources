@@ -2658,7 +2658,7 @@ void Check(const Opera &Op,int N,int  M)
     KN<double>   Aipj(ipj.N());
     KNM<R>  Vp(dim,PtHat.N());
     
-    
+    double tgv1=tgv <0? 1: tgv; // change 21 dec 2010 FH (Hack of ILU)
     for (int ib=0;ib<Th.neb;ib++)
       {
         int ie;
@@ -2737,8 +2737,8 @@ void Check(const Opera &Op,int N,int  M)
                       // cout << k << " df=" << df <<  " g= " << gg[df] <<" " << gg(FromTo(0,2)) << endl;
                       int ddf=K(df);
                       // AA(ddf,ddf) =tgv;
-                      if (Aii)  A->diag(ddf)=tgv;
-                      if (B) (*B)[ddf]=tgv*gg[df]; 
+                      if (Aii)  A->SetBC(ddf, tgv);// change 21 dec 2010 FH (Hack of ILU)
+                      if (B) (*B)[ddf]=  tgv1*gg[df]; 
                       if (X) (*X)[ddf]=gg[df];
                     }
                    }
@@ -2803,7 +2803,7 @@ template<class R>
     KNM<R>   Vp(npPh,dim);
     Vp=R();
     KN<R>  Vdf(Vh.MaxNbDFPerElement);
-    
+    double tgv1=tgv <0? 1: tgv; 
     map<int,int> lll;
     for (int ib=0;ib<Th.nbe;ib++)
       {
@@ -2878,8 +2878,8 @@ template<class R>
 		      {
 			int ddf=K(df);
 			// cout << ddf << " " << df << " " << Vdf[df] << " " << it << " ib = " << ib  << " == " << Th(Th[it][df]) <<  endl;
-			if (Aii)  A->diag(ddf)=tgv;
-			if (B) (*B)[ddf]=tgv*Vdf[df]; 
+			if (Aii)  A->SetBC(ddf,tgv);// change 21 dec 2010 FH (Hack of ILU)
+			if (B) (*B)[ddf]=tgv1*Vdf[df]; 
 			if (X) (*X)[ddf]=Vdf[df];
 		      }
 		  }
