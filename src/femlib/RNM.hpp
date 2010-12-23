@@ -44,13 +44,17 @@
 
 using namespace std;
 #define const_R   R
-
 #include <cstdlib>
 inline void Check_Kn(const char * str,const char * file,int line)
 {
  cerr << "CHECK_KN: " << str << " in file: " << file << ", line " << line <<endl;
- assert(0);
- abort();
+#ifdef VersionFreeFempp
+    ffassert(0); 
+#else
+    assert(0);
+#endif
+    
+  abort();
 }
 
 #define K_bigassert(i)  if (!(i)) Check_Kn(#i,__FILE__,__LINE__);
