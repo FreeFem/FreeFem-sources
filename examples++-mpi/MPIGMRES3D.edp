@@ -1,21 +1,24 @@
-// NBPROC 4 
-// ff-mpirun -np 4 ex3d.edp -glut ffglut  -n 11 -k 1  -d 1 -ns -gmres 1
+// NBPROC 50
+// ff-mpirun -np 4 MPIGMRES2D.edp -glut ffglut  -n 11 -k 1  -d 1 -ns -gmres 1
 /*
-  a first true parallele example firt freefem++ 
+  a first true parallele example fisrt freefem++ 
   Ok up to 200 proc for a Poisson equation.. 
   See the Doc for full explaiantion
 
   F Hecht Dec. 2010. 
   -------------------
 usage :
-ff-mpirun [mpi parameter] MPIGMRES3d.edp  [-glut ffglut]  [-n N] [-k K]  [-d D] [-ns] [-gmres [0|1]
+ff-mpirun [mpi parameter] MPIGMRES3d.edp  [-glut ffglut]  [-n N] [-k K]  [-d D] [-ns] [-gmres [0|1|2|3]
  argument: 
    -glut ffglut : to see graphicaly the process
-   -n N:  set the mesh cube split NxNxN
+   -n N:  set the mesh3 cube split NxNxN
    -d D:  set debug flag D must be one for mpiplot 
    -k K:  to refined by K all  elemnt
    -ns: reomove script dump
-   -gmres 0   : use iterative shwarz algo. / or gmres algo. 
+   -gmres 0   : use iterative schwarz algo.  
+          1   :  Algo GMRES on residu of schwarz algo.
+          2   :  DDM GMRES 
+          3   :  DDM GMRES with coarse grid preconditionner (Good one)  
 */
 load "MPICG"  load "medit"  load "metis"
 include "getARGV.idp"
@@ -24,10 +27,11 @@ include "MPIGMRESmacro.idp"
 include "AddLayer3d.idp" 
 include  "cube.idp"
 
+
+searchMethod=1; // more safe seach algo (warning can be very expensive in case lot of ouside point) 
+assert(version >3.11);
 real[int] ttt(10);int ittt=0;
 macro settt {ttt[ittt++]=mpiWtime();}//
-
-searchMethod=1; // more safe seach algo .. (FH for PICHON ??) 
 
 
 verbosity=getARGV("-vv",0);
@@ -35,8 +39,10 @@ int vdebug=getARGV("-d",1);
 int ksplit=getARGV("-k",2);
 int nloc = getARGV("-n",10);
 string sff=getARGV("-p,","");
-bool gmres=getARGV("-gmres",0); 
+int gmres=getARGV("-gmres",3); 
 bool dplot=getARGV("-dp",0);
+int nC = getARGV("-N" ,max(nloc/10,4)); 
+
 if(mpirank==0 && verbosity)
 {
   cout << "ARGV : ";
@@ -52,11 +58,11 @@ if(mpirank==0 && verbosity)
 int withplot=0;
 bool withmetis=1;
 bool RAS=1; 
-string sPk="P1-3d";     
+string sPk="P2-3gd";     
 func Pk=P2;
 
 func bool  plotMPIall(mesh3 &Th,real[int] & u,string  cm)
-{ PLOTMPIALL(mesh3,Pk, Th, u,{ cmm=cm,nbiso=5,fill=0,dim=3,value=1}); return 1;}
+{ PLOTMPIALL(mesh3,Pk, Th, u,{ cmm=cm,nbiso=3,fill=0,dim=3,value=1}); return 1;}
 
 int sizeoverlaps=1; // size of overlap
 
@@ -68,15 +74,22 @@ int ipart= mpiRank(comm); // current partition number
 int njpart=0; // nb of part with intersection (a jpart) with ipart without ipart
 int[int] jpart(npart); //  list of jpart ..
 if(ipart==0)  cout << " Final N=" << ksplit*nloc << " nloc =" << nloc << " split =" << ksplit <<  endl;
+int[int] l111=[1,1,1,1]; 
+settt 
+
 int[int,int] LL=[[1,1],[1,1],[1,1]];
 real[int,int] BB=[[0,1],[0,1],[0,1]];
 int[int] NN=[nloc,nloc,nloc]; 
+int[int] NNC=[nC,nC,nC]; 
 settt 
 mesh3 Thg=Cube(NN,BB,LL);
+mesh3 ThC=Cube(NNC,BB,LL);
 
 mesh3 Thi,Thin;//  with overlap, without olverlap  
 fespace Phg(Thg,P0);
 fespace Vhg(Thg,P1);
+fespace VhC(ThC,P1); // of the coarse problem.. 
+
 
 Phg  part;
 
@@ -201,7 +214,7 @@ if(ipart==0) cout << " *** end build partition " << endl;
 
 // here  pii and the pij is the locate partition of the unite on 
 // Thi ( mesh3 with overlap )....
-//Thi=splitmesh3(Thi,2);
+//Thi=splitmesh(Thi,2);
 if(dplot ) 
   { plot(Thi,wait=1); 
     for(int j=0;j<njpart;++j)
@@ -212,6 +225,8 @@ if(dplot )
 // all j> we have to recive 
 // data on intersection of the support of pij[0] and pij[j]
 settt 
+
+ plotMPIall(Thi,pii[],"pi_i");
 
 mesh3[int] aThij(njpart); 
 matrix Pii;  
@@ -268,17 +283,93 @@ func bool Update(real[int] &ui, real[int] &vi)
    return true;
 }
 
+
+// the definition of the Problem ....
 func G=0.; // ok 
 func F=1.; // ok 
 macro grad(u) [dx(u),dy(u),dz(u)] // 
 varf vPb(U,V)= int3d(Thi)(grad(U)'*grad(V)) + int3d(Thi)(F*V) +on(1,U=G) + on(10,U=G); //');// for emacs
+varf vPbC(U,V)= int3d(ThC)(grad(U)'*grad(V))  +on(1,U=0) ; //');// for emacs
 varf vPbon(U,V)=on(10,U=1);
+varf vPboni(U,V)=on(10,U=1)+on(1,U=1);
+
+
+//----  
 
 matrix Ai = vPb(Whi,Whi,solver=sparsesolver);
+matrix AC,Rci,Pci;// 
+
+
+if(mpiRank(comm)==0)
+  AC = vPbC(VhC,VhC,solver=sparsesolver);
+
+Pci=   interpolate(Whi,VhC);
+Rci =  Pci'*Pii; 
+
+real[int] onGi = vPboni(0,Whi);
 real[int] onG = vPbon(0,Whi);
 real[int] Bi=vPb(0,Whi);
 
-int kiter=-2;
+
+
+
+
+
+
+
+int kiter=-1;
+
+
+func bool  CoarseSolve(real[int]& V,real[int]& U,mpiComm& comm)
+{
+   //  solvibg the coarse probleme 
+   real[int] Uc(Rci.n),Bc(Uc.n); 
+   Uc= Rci*U;
+   mpiReduce(Uc,Bc,processor(0,comm),mpiSUM);
+   if(mpiRank(comm)==0) 
+      Uc = AC^-1*Bc;
+    broadcast(processor(0,comm),Uc);
+   V = Pci*Uc;
+}//EOF ...
+func real[int] DJ(real[int]& U)
+{ 
+  ++kiter;
+  real[int] V(U.n); 
+   V =  Ai*U;
+  V = onGi ? 0.: V;  
+  return V; 
+}
+
+func real[int] PDJ(real[int]& U) // C1
+{ 
+  real[int] V(U.n); 
+  
+  real[int] b= onG ? 0. :  U; 
+  V =  Ai^-1*b;	
+  Update(V,U);
+  return U; 
+}
+
+func real[int] PDJC(real[int]& U) // 
+{ // Precon  C1= Precon //, C2  precon Coarse
+// Idea : F. Nataf. 
+  //  0 ~  (I C1A)(I-C2A) => I ~  - C1AC2A +C1A +C2A 
+  //  New Prec P= C1+C2 - C1AC2   = C1(I- A C2) +C2
+  // (  C1(I- A C2) +C2 ) Uo 
+  //   V =  - C2*Uo
+  // .... 
+  real[int] V(U.n); 
+  CoarseSolve(V,U,comm);
+  V = -V; //  -C2*Uo 
+  U  += Ai*V; // U =  (I-A C2) Uo 
+  real[int] b= onG ? 0. :  U; 
+  U =  Ai^-1*b;	//  ( C1( I -A C2) Uo 
+  V = U -V; //  
+  Update(V,U);
+  return U; 
+}
+
+
  func real[int] DJ0(real[int]& U)
 { 
   ++kiter;
@@ -304,15 +395,20 @@ Whi u=0,v;
 settt
 
 real epss=1e-6;
-if(gmres)
+int rgmres=0;
+if(gmres==1)
   {
-   MPIAffineGMRES(DJ0,u[],veps=epss,nbiter=300,comm=comm,dimKrylov=100,verbosity=ipart ? 0: 50);
+   rgmres=MPIAffineGMRES(DJ0,u[],veps=epss,nbiter=300,comm=comm,dimKrylov=100,verbosity=ipart ? 0: 50);
    real[int] b= onG .* u[];
    b  = onG ? b : Bi ;
    v[] = Ai^-1*b;	
    Update(v[],u[]);
   }
-else
+else if(gmres==2)
+  rgmres= MPILinearGMRES(DJ,precon=PDJ,u[],Bi,veps=epss,nbiter=300,comm=comm,dimKrylov=100,verbosity=ipart ? 0: 50);
+else if(gmres==3)
+   rgmres= MPILinearGMRES(DJ,precon=PDJC,u[],Bi,veps=epss,nbiter=300,comm=comm,dimKrylov=100,verbosity=ipart ? 0: 50);
+else // algo Shwarz for demo ...
    for(int iter=0;iter <10; ++iter)
      {
        real[int] b= onG .* u[];
@@ -345,7 +441,7 @@ real errg =1,umaxg;
   mpiAllReduce(aa,bb,comm,mpiMAX);
   errg=bb[0];
   if(ipart==0)
-    cout << " umax global  = " << bb[0] << " Wtime = " << (ttt[ittt-1]-ttt[ittt-2])  << " s " << endl;
+    cout << " umax global  = " << bb[0] << " Wtime = " << (ttt[ittt-1]-ttt[ittt-2])  << " s " <<  " " << kiter <<  endl;
 }
 
 if(sff != "")
@@ -364,9 +460,9 @@ if(sff != "")
       4 nloc
       5 sizeoverlaps
       6 kiter
-      7 mesh & part build  
+      7 mesh3 & part build  
       8 build the partion 
-      9 build mesh, transfere , and the fine mesh .. 
+      9 build mesh3, transfere , and the fine mesh3 .. 
       10 build the matrix,  the trans matrix, factorizatioon 
       11 GMRES 
     */
@@ -374,6 +470,6 @@ if(sff != "")
     ff <<  ksplit << " " << nloc << " " << sizeoverlaps << " " << kiter  ;  
     for (int i=1; i<ittt;++i)	
       ff << " " << ttt[i]-ttt[i-1] << " ";
-    ff << epss << " " << Ai.nbcoef << " " << Ai.n << endl;
+    ff << epss << " " << Ai.nbcoef << " " << Ai.n << " " << gmres << endl;
     
   }

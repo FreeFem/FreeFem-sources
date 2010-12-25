@@ -1,4 +1,6 @@
-    21 dec 2010
+v 3.11_1     25 dec 2010
+     - Add coarse preconditioner in MPIGMRES[23]d.edp (to be optimal)
+       now the number of iteration is close to 10.  
      - Show ff++ line number in case of  assertion  in RNM class. 
      - add Coarse Preconditionner for  MPIGMRES[23]d.edp (Good)
      - solve bug For MPIGMRES2D.edp  due to interpolation bug in rare case
