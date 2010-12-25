@@ -28,7 +28,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.11}
+\def\VERSION{3.11-1}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -434,7 +434,8 @@ Brochet-2:~ hecht$ FreeFem++
         -ne               : no edp script output
         -cd               : Change directory  to script dir 
  with        default ffglut : ffglut
-\end{verbatim}}
+\end{verbatim}
+}
 \begin{remark} In most cases you can set the level of output (verbosity\index{verbosity}) to value \texttt{nn} by adding the parameters
 \texttt{-v nn} on the command line.
 
@@ -13967,8 +13968,11 @@ Vhother U=0;
 
 \subsubsection{True parallel Schwarz example}
 
-This is a explaination of the two script  \texttt{examples++-mpi/MPIGMRES[2]D.edp}, 
-a schwarz parallel with a complexity almost independent of the number of process. 
+This is a explanation of the two script  \texttt{examples++-mpi/MPIGMRES[2]D.edp}, 
+a Schwarz parallel with a complexity almost independent of the number of process (with a coarse grid preconditioner).
+
+
+\hfill Thank to F. Nataf. 
 
 \bigskip 
 \def\vh{{v_h}}
@@ -14108,10 +14112,12 @@ with the following macro definition:
 \smallskip\bFF
 @macro InitU(n,Vh,Th,aTh,U) Vh[int] U(n); @for(@int j=0;j<n;++j) {Th=aTh[j];  U[j]=0;}//
 \eFF
-Finally  you can easily accelerate  the fixe point algorithm by using  a parallel \texttt{GMRES} algorithm  after the introduction the following affine $\mathcal{A}_i$ operator
+
+\bigskip
+{\bf First \texttt{gmres} algorithm:}  you can easily accelerate  the fixe point algorithm by using  a parallel \texttt{GMRES} algorithm  after the introduction the following affine $\mathcal{A}_i$ operator
 sub domain $\Omega_i$. 
 \smallskip\bFF
-@func @real[@int] Ai(@real[@int]& U) { 
+@func @real[@int] DJ0(@real[@int]& U) { 
  @real[int] V(U.n)   ,  b= onG .* U;
   b  = onG ? b : Bi ;  
   V = Ai^-1*b;	
@@ -14128,7 +14134,106 @@ sub domain $\Omega_i$.
     @return r; }
 \eFF
 This is done in \texttt{MPIGC} dynamics library tool. 
-\medskip
+
+
+
+\bigskip
+{\bf Second \texttt{gmres} algorithm:} Use scharwz  algorithm as a preconditioner of basic GMRES 
+method to solving the parallel problem.
+
+\bFF
+@func @real[@int] @DJ(real[int]& U) // the original problem
+{ 
+  ++kiter;
+  @real[int] V(U.n); 
+   V =  Ai*U;
+  V = onGi ? 0.: V;  //  remove boundary term ...
+  @return V; 
+}
+
+@func @real[int] @PDJ(real[int]& U) // the preconditioner 
+{ 
+  @real[@int] V(U.n); 
+  @real[@int] b= onG ? 0. :  U; 
+  V =  Ai^-1*b;	
+  Update(V,U);
+  @return U; 
+}
+\eFF
+
+\bigskip
+{\bf Third  \texttt{gmres} algorithm:} Add a coarse solver to the previous algorithm
+
+First build  a coarse grid on processor 0, and the
+\bFF
+@matrix AC,Rci,Pci;// 
+@if(mpiRank(comm)==0)
+  AC = vPbC(VhC,VhC,solver=sparsesolver);// the corase problem
+
+Pci=   interpolate(Whi,VhC); // the projection on coarse grid.
+Rci =  Pci'*Pii; // the Restiction on Process $i$  grid with the partition  $\pi_i$ 
+
+@func bool  CoarseSolve(@real[@int]& V,real[int]& U,@mpiComm& comm)
+{
+   //  solvibg the coarse probleme 
+   @real[@int] Uc(Rci.n),Bc(Uc.n); 
+   Uc= Rci*U;
+   @mpiReduce(Uc,Bc,processor(0,comm),mpiSUM);
+   @if(mpiRank(comm)==0) 
+      Uc = AC^-1*Bc;
+    @broadcast(processor(0,comm),Uc);
+   V = Pci*Uc;
+}
+\eFF
+
+The New precondtionner 
+\bFF
+@func @real[int] PDJC(@real[@int]& U) // 
+{ // Precon  C1= Precon //, C2  precon Coarse\hfilll 
+// Idea : F. Nataf. \hfilll 
+  //  0 ~  (I C1A)(I-C2A) => I ~  - C1AC2A +C1A +C2A \hfilll 
+  //  New Prec P= C1+C2 - C1AC2   = C1(I- A C2) +C2\hfilll 
+  // (  C1(I- A C2) +C2 ) Uo \hfilll 
+  //   V =  - C2*Uo\hfilll 
+  // .... \hfilll 
+  @real[int] V(U.n); 
+  @CoarseSolve(V,U,comm);
+  V = -V; //  -C2*Uo 
+  U  += Ai*V; // U =  (I-A C2) Uo 
+  @real[@int] b= onG ? 0. :  U; 
+  U =  Ai^-1*b;	//  ( C1( I -A C2) Uo 
+  V = U -V; //  
+  Update(V,U);
+  @return U; 
+}
+
+\eFF  
+
+
+The code to the 4 algorithms:
+\bFF
+@real epss=1e-6;
+@int rgmres=0;
+@if(gmres==1)
+  {
+   rgmres=@MPIAffineGMRES(DJ0,u[],veps=epss,nbiter=300,comm=comm,
+                         dimKrylov=100,verbosity=ipart ? 0: 50);
+   real[int] b= onG .* u[];
+   b  = onG ? b : Bi ;
+   v[] = Ai^-1*b;	
+   Update(v[],u[]);
+  }
+@else @if(gmres==2)
+  rgmres= @MPILinearGMRES(DJ,precon=PDJ,u[],Bi,veps=epss,nbiter=300,comm=comm
+                        ,dimKrylov=100,verbosity=ipart ? 0: 50);
+@else @if(gmres==3)
+   rgmres= @MPILinearGMRES(DJ,precon=PDJC,u[],Bi,veps=epss,nbiter=300,comm=comm,
+                          dimKrylov=100,verbosity=ipart ? 0: 50);
+@else // algo Shwarz for demo ...
+   @for(@int iter=0;iter <10; ++iter)
+     ....
+    
+\eFF
 
 We  have all ingredient to solve in parallel if we have et the partitions of the unity.
 To build this partition we do:
@@ -14222,12 +14327,13 @@ with the following code
 \bFF
 @include "getARGV.idp"
 verbosity=getARGV("-vv",0);
-@int vdebug=getARGV("-d",0);
-@int ksplit=getARGV("-k",2);
-@int nloc = getARGV("-n",10);
+@int vdebug=getARGV("-d",1);
+@int ksplit=getARGV("-k",10);
+@int nloc = getARGV("-n",25);
 @string sff=getARGV("-p,","");
-@bool gmres=getARGV("-gmres",1); 
+@int gmres=getARGV("-gmres",3); 
 @bool dplot=getARGV("-dp",0);
+@int nC = getARGV("-N" ,max(nloc/10,4)); 
 \eFF
 %%\include{docFFGUI}
 
@@ -14236,10 +14342,13 @@ of distribute solution of vector $u$ on mesh $T_h$
 with the following interface:
 \bFF
 @include "MPIplot.idp"
-@func bool  plotMPIall(mesh3 &Th,real[int] & u,string  cm)
-{ PLOTMPIALL(mesh3,Pk, Th, u, cm,3); return 1;}
+@func bool  plotMPIall(mesh &Th,real[int] & u,string  cm)
+{ PLOTMPIALL(mesh,Pk, Th, u,{ cmm=cm,nbiso=20,fill=1,dim=3,value=1}); return 1;}
 \eFF
-where $3$ is the number of is value , and \texttt{cm} the comment. 
+remark the \verb!{cmm=cm,  ... =1}! in the macro argument is a way to quote macro argument \index{macro!quote}
+so the argument is \verb!cmm=cm,  ... =1!.
+
+
 \section{Parallel sparse solvers}
 %%%%%%%%%%%%%%%%%%%
 Parallel sparse solvers use several processors to solve linear systems of equation. Like  sequential,
