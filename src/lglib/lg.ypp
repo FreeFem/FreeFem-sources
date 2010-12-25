@@ -749,7 +749,7 @@ int mainff (int  argc, char **argv)
       return 1; 
     }
    
-  if(verbosity && mpirank) { 
+  if(verbosity && (mpirank==0)) { 
       cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
       if(verbosity>1) cout << "   file :" << cc << " " << " verbosity= " << verbosity << endl;
   }

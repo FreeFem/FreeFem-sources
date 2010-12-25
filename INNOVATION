@@ -1,4 +1,9 @@
     21 dec 2010
+     - Show ff++ line number in case of  assertion  in RNM class. 
+     - add Coarse Preconditionner for  MPIGMRES[23]d.edp (Good)
+     - solve bug For MPIGMRES2D.edp  due to interpolation bug in rare case
+       by Add brute force for seach of point in 2d like in 3d in the seach in find ouside 
+       set global variable :  searchMethod=1;  // more safe seach algo (can be expensive in case of lot of ouside point) 
       -   add hack of ILU precond, if tgv is < 0 then
         we remove all the line and put 1 on the diag term ..
 v 3.11 9 dec 2010 
