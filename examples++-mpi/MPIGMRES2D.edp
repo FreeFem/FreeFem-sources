@@ -57,7 +57,7 @@ int withplot=0;
 bool withmetis=1;
 bool RAS=1; 
 string sPk="P2-2gd";     
-func Pk=P1;
+func Pk=P2;
 
 func bool  plotMPIall(mesh &Th,real[int] & u,string  cm)
 { PLOTMPIALL(mesh,Pk, Th, u,{ cmm=cm,nbiso=20,fill=1,dim=3,value=1}); return 1;}
@@ -192,7 +192,7 @@ if(withplot>1)
    sumphi[]=pii[];
    for (int j=0;j<njpart;++j)
      sumphi[]+= pij[j][];
-   if(vdebug)  
+   if(vdebug>2)  
      cout << " sum min " <<sumphi[].min << " " << sumphi[].max << endl;
    assert(sumphi[].min> 1.-1e-6 && sumphi[].max< 1.+1e-6);  
    //  verification 
@@ -219,7 +219,7 @@ if(dplot )
 // data on intersection of the support of pij[0] and pij[j]
 settt 
 
- plotMPIall(Thi,pii[],"pi_i");
+ if(vdebug) plotMPIall(Thi,pii[],"pi_i");
 
 mesh[int] aThij(njpart); 
 matrix Pii;  
