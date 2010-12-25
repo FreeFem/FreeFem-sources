@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.11,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.11-1,hecht@ann.jussieu.fr,freefem++)
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
@@ -34,6 +34,7 @@ echo >config_LIB_INFO
 # Necessary compilers
 AC_PROG_CC
 AC_PROG_CXX
+AC_LANG(C++)
 
 
 
@@ -175,7 +176,7 @@ then
     
 ##   AC_LANG(fortran);
     AC_LANG_PUSH([Fortran 77])
-    AC_RUN_IFELSE([[
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
 		program test
 		integer  p,i
 		p=1024*1024
@@ -188,7 +189,7 @@ then
 	 endif
 	 close(7)
 	 end
- ]],ff_f77intsize=`cat conftest.out`,ff_f77intsize=4,ff_f77intsize=4)
+ ]])] ,ff_f77intsize=`cat conftest.out`,ff_f77intsize=4,ff_f77intsize=4)
 ## AC_LANG(C++)
     AC_LANG_POP([Fortran 77])
     AC_MSG_RESULT($ff_f77intsize)
@@ -329,7 +330,7 @@ CYGWIN*|MINGW*)
 		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
 		FFLAGS="$FFLAGS $ff_nocygwin"
 		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
-                AC_COMPILE_IFELSE([int a;],[],
+                AC_COMPILE_IFELSE([AC_LANG_SOURCE([int a;])],[],
                     [ff_nocygwin="";
 		     AC_MSG_NOTICE([Sorry $ff_nocygwin optio is wrong try whitout , but try with gcc-3.3])
                     ])
@@ -696,7 +697,7 @@ dnl if also  add $PATH they  could be missing some different mpi version...
 	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
 	AC_LINK_IFELSE(
-[
+[AC_LANG_SOURCE([
 #include <mpi.h>
 #include <stdio.h>
 int main(int argc,char **argv){
@@ -708,7 +709,7 @@ int main(int argc,char **argv){
   printf("%s: hello world\n", name);
   MPI_Finalize();
   return 0;
-}],
+}])],
 ff_mpi=yes,
 ff_mpi=no)
 	AC_MSG_RESULT($ff_mpi)
@@ -1479,7 +1480,7 @@ then
 	# Cygwin) when it does not compile (in Mingw).
 
 	AC_MSG_CHECKING(for dlfcn.h)
-	AC_COMPILE_IFELSE([#include <dlfcn.h>],
+	AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <dlfcn.h>]])],
 		ff_dynload=yes,
 		ff_dynload=no)
 	AC_MSG_RESULT($ff_dynload)
@@ -1493,11 +1494,11 @@ then
 	# Checks that everythings works ok
 	AC_MSG_CHECKING(whether dlopen links ok)
 	AC_LINK_IFELSE(
-[#include <dlfcn.h>
+[AC_LANG_SOURCE([[#include <dlfcn.h>
 int main(int argc,char **argv){
   dlopen("",RTLD_LAZY);
   return 0;
-}],
+}]])],
 	ff_dynload=yes,
 	ff_dynload=no)
 	AC_MSG_RESULT($ff_dynload)
@@ -1639,11 +1640,11 @@ else
 	# Checks that FLTK is compiled with threads enabled
 	AC_MSG_CHECKING(that FLTK is compiled with threads)
 	AC_COMPILE_IFELSE(
-[#include <FL/Fl.H>
+[AC_LANG_SOURCE([[#include <FL/Fl.H>
 main(){
   Fl::lock();
 }
-],
+]])],
 		ff_fltk_threads=yes,
 		ff_fltk_threads=no)
 	AC_MSG_RESULT($ff_fltk_threads)
