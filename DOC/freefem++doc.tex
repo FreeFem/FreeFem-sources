@@ -9177,23 +9177,36 @@ available for example
 \subsection{Interpolation matrix}
 
 It is also possible to store the matrix of a linear interpolation operator from
- a finite element space $V_h$ to  another $W_h$ to  \texttt{interpolate} a function.
+ a finite element space $V_h$ to  another $W_h$ to  \texttt{interpolate($W_h$,$V_h$,...)} a function.
 Note that the continuous finite functions are extended by continuity
  outside of the domain.
-
+	
 The named parameters of function \texttt{interpolate} are:
 \begin{description}
 \item[\texttt{inside=}] set true to create zero-extension.
 \item[\texttt{t=}] set true to get the transposed matrix
 \item[\texttt{op=}] set an integer written below
-
 \begin{description}
 \item[0] the default value and interpolate of the function
 \item[1] interpolate the $\p_x$
 \item[2] interpolate the $\p_y$
+\item[3] interpolate the $\p_z$
 \end{description}
-
-
+\item[\texttt{U2Vc=}] set the which is the  component of $W_h$ come in $V_h$ in interpolate  process in a int array
+so the size of the array is number of component of $W_h$, if the put $-1$ then component is set to $0$, like in the following example:
+(by default the component number is unchanged). 
+\bFF
+@fespace V4h(Th4,[P1,P1,P1,P1]);
+@fespace V3h(Th,[P1,P1,P1]);
+@int[@int] u2vc=[1,3,-1];// -1 => put zero on the component 
+@matrix IV34= @interpolate(V3h,V4h,inside=0,U2Vc=u2vc);//  V3h <- V4h 
+V4h [a1,a2,a3,a4]=[1,2,3,4];
+V3h [b1,b2,b3]=[10,20,30];
+b1[]=IV34*a1[]; 
+\eFF
+So here we have:
+\texttt{
+b1 == 2,  b2 == 4, b3 == 0}
  \index{inside=}\index{interpolate!inside=}
  \index{interpolate!t=}\index{interpolate!t=}.
  \index{interpolate!op=}\index{interpolate!op=}.
@@ -9215,7 +9228,7 @@ v=v4;              vv[]= IV*v4[];   // here   v  == vv    =>
 @real[int]  diff= vv[] - v[];
 @cout << " || v - vv || = " <<  diff.linfty << endl;
 @assert( diff.linfty<= 1e-6);
-@matrix IV0= interpolate(Vh,Vh4,inside=1); // here the fonction is
+@matrix IV0= interpolate(Vh,Vh4,inside=1); // here the function is
 // exended by zero
 @cout << " IV Vh<-Vh4 (inside=1)  " << IV0 << endl;
 @matrix IVt0= interpolate(Vh,Vh4,inside=1,t=1);
@@ -14069,7 +14082,7 @@ the right of side of the problem, are defined  by
 \bFF
   @fespace Whi(Thi,P2); // def of the Finite element space.
   @varf vPb(U,V)= @int3d(Thi)(grad(U)'*grad(V)) + int3d(Thi)(F*V) +on(1,U=g) + on(10,U=G);  
-  @varf vPbon(U,V)=@on(10,U=1);
+  @varf vPbon(U,V)=@on(10,U=1)+@on(1,U=0);
   @matrix Ai = vPb(Whi,Whi,solver=sparsesolver);
   @real[int] onG = vPbon(0,Whi);
   @real[int] Bi=vPb(0,Whi);  

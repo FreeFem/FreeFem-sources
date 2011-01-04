@@ -871,7 +871,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
     R * v = kv;
     KN<int> ik(nbp); // the Triangle number
     //   KNMK_<R> fb(v+ik[i],VhV0.NbDoF,VhV0.N,1); //  the value for basic fonction
-    
+    op= op==3 ? op_dz : op; //   renumber op ????  dec 2010 FH. 
     What_d whatd= 1<< op;
     KN<bool> fait(Uh.NbOfDF);
     fait=false;
