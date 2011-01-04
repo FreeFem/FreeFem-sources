@@ -37,7 +37,7 @@ int vdebug=getARGV("-d",1);
 int ksplit=getARGV("-k",3);
 int nloc = getARGV("-n",10);
 string sff=getARGV("-p,","");
-int gmres=getARGV("-gmres",3); 
+int gmres=getARGV("-gmres",2); 
 bool dplot=getARGV("-dp",0);
 int nC = getARGV("-N" ,max(nloc/10,4)); 
 
@@ -278,13 +278,15 @@ func bool Update(real[int] &ui, real[int] &vi)
 
 
 // the definition of the Problem ....
-func G=0.; // ok 
+func G=x*0.1; // ok 
 func F=1.; // ok 
 macro grad(u) [dx(u),dy(u)] // 
-varf vPb(U,V)= int2d(Thi)(grad(U)'*grad(V)) + int2d(Thi)(F*V) +on(1,U=G) + on(10,U=G); //');// for emacs
+varf vBC(U,V)=  on(1,U=G); 
+varf vPb(U,V)= int2d(Thi)(grad(U)'*grad(V)) + int2d(Thi)(F*V) + on(10,U=0)+on(1,U=G) ; //');// for emacs
 varf vPbC(U,V)= int2d(ThC)(grad(U)'*grad(V))  +on(1,U=0) ; //');// for emacs
-varf vPbon(U,V)=on(10,U=1);
-varf vPboni(U,V)=on(10,U=1)+on(1,U=1);
+varf vPbon(U,V)=on(10,U=1)+on(1,U=1);
+varf vPbon10only(U,V)=on(10,U=1)+on(1,U=0); 
+// remark the order is important we want 0 part on 10 and 1
 
 
 //----  
@@ -299,12 +301,9 @@ if(mpiRank(comm)==0)
 Pci=   interpolate(Whi,VhC);
 Rci =  Pci'*Pii; 
 
-real[int] onGi = vPboni(0,Whi);
+real[int] onG10 = vPbon10only(0,Whi);
 real[int] onG = vPbon(0,Whi);
 real[int] Bi=vPb(0,Whi);
-
-
-
 
 
 
@@ -315,7 +314,7 @@ int kiter=-1;
 
 func bool  CoarseSolve(real[int]& V,real[int]& U,mpiComm& comm)
 {
-   //  solvibg the coarse probleme 
+   //  solving the coarse probleme 
    real[int] Uc(Rci.n),Bc(Uc.n); 
    Uc= Rci*U;
    mpiReduce(Uc,Bc,processor(0,comm),mpiSUM);
@@ -329,7 +328,7 @@ func real[int] DJ(real[int]& U)
   ++kiter;
   real[int] V(U.n); 
    V =  Ai*U;
-  V = onGi ? 0.: V;  
+  V = onG10 ? 0.: V;  // remove internal boundary  
   return V; 
 }
 
@@ -337,7 +336,7 @@ func real[int] PDJ(real[int]& U) // C1
 { 
   real[int] V(U.n); 
   
-  real[int] b= onG ? 0. :  U; 
+  real[int] b= onG10 ? 0. :  U; 
   V =  Ai^-1*b;	
   Update(V,U);
   return U; 
@@ -355,7 +354,7 @@ func real[int] PDJC(real[int]& U) //
   CoarseSolve(V,U,comm);
   V = -V; //  -C2*Uo 
   U  += Ai*V; // U =  (I-A C2) Uo 
-  real[int] b= onG ? 0. :  U; 
+  real[int] b= onG10 ? 0. :  U; 
   U =  Ai^-1*b;	//  ( C1( I -A C2) Uo 
   V = U -V; //  
   Update(V,U);
@@ -386,6 +385,7 @@ Whi u=0,v;
 
 
 settt
+u[]=vBC(0,Whi,tgv=1); // set u with tge BC value ...
 
 real epss=1e-6;
 int rgmres=0;

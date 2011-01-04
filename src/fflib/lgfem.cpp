@@ -2277,7 +2277,8 @@ class Plot :  public E_F0mps { public:
 	    	else break;
 	    nn++;
 	    int n = f[0]->N;
-	    cout << "add  N = " << n << " " << nn  << " "<< what << endl;
+	    if(verbosity>50) // add 01/2011 FH ????
+	      cout << "add  N = " << n << " " << nn  << " "<< what << endl;
 	    for(int j=0;j<n;++j)
 	      {
 		
@@ -4517,6 +4518,7 @@ void  init_lgfem()
  Add<pfer>("n",".",new OneOperator1<long,pfer>(pfer_nbdf<R>));
  Add<pfec>("n",".",new OneOperator1<long,pfec>(pfer_nbdf<Complex>));
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
+ Add<pmesh*>("mesure",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
  Add<pmesh*>("nbe",".",new OneOperator1<long,pmesh*>(pmesh_nbe));
     
@@ -4622,6 +4624,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Add<lgElement>("label",".",new OneOperator1_<long,lgElement>(getlab));
  Add<lgElement>("region",".",new OneOperator1_<long,lgElement>(getlab));
  Add<lgElement>("area",".",new OneOperator1_<double,lgElement>(getarea));
+ Add<lgElement>("mesure",".",new OneOperator1_<double,lgElement>(getarea));
  Add<lgBoundaryEdge>("length",".",new OneOperator1_<double,lgBoundaryEdge>(getlength));
  Add<lgBoundaryEdge>("label",".",new OneOperator1_<long,lgBoundaryEdge>(getlab));
  Add<lgBoundaryEdge>("Element",".",new OneOperator1_<lgElement,lgBoundaryEdge>(getElement));
