@@ -57,7 +57,7 @@ OTHER="";
 WIN32="";
 
 case "$uu" in
-  CYGWIN*)
+  CYGWIN*|MINGW*)
   if [ -z "@WIN32DLLTARGET@" ] ; then 
       onwin32=1; uu="cygwin-version";
   else
