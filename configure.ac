@@ -340,7 +340,13 @@ CYGWIN*|MINGW*)
 		CNOFLAGS="$CNOFLAGS $ff_nocygwin -I/usr/include/mingw"
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32" 
 		LIBSNOCONSOLE="-mwindows"
-		FLIBS="$ff_nocygwin -lg2c"
+		if test "$enable_fortran" != no  -or  "$with_flib" != no ;   then
+		    case "$F77" in
+	 		*gfortran) FLIBS="$ff_nocygwin -lgfortran";;
+	 		*g77) FLIBS="$ff_nocygwin -lg2c";;
+			*)   AC_MSG_ERROR([ Sorry no known FLIBS with this $F77  !]) ;;
+		    esac 
+		fi
                 ff_glutname="glut32"
 		#  check abort a existing function just to find in glut32.dll exist in the path 
 		#  because glutInit is not the real symbol on win32 dur dur FH !!!!!!!!!
