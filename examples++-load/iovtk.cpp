@@ -670,7 +670,7 @@ void VTU_WRITE_MESH( FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
   else{
     fprintf(fp," format=\"ascii\">\n");   
     for (long i=0; i<Th.nt; i++){
-      fprintf(fp,"%ld %ld %ld %ld ",ien[i*3+0],ien[i*3+1],ien[i*3+2],ien[i*3+3]); 
+      fprintf(fp,"%ld %ld %ld %ld ",ien[i*4+0],ien[i*4+1],ien[i*4+2],ien[i*4+3]);  // J.Morice 01/11 
     }  
     if(surface){
       for (long i=0; i<Th.nbe; i++){
@@ -755,12 +755,12 @@ void VTU_WRITE_MESH( FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
   else{
     fprintf(fp,"format=\"ascii\" >\n");
     for (long i=0; i<Th.nt; i++){   
-      unsigned int types= 5;
+      unsigned int types= 10;
       fprintf(fp,"%d ",types);
     }
     if(surface){
       for (long i=0; i<Th.nbe; i++){   
-	unsigned int types= 3;
+	unsigned int types= 5;
 	fprintf(fp,"%d ",types);
       }
     }

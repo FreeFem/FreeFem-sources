@@ -1,4 +1,7 @@
-v 3.11_1     25 dec 2010
+     - Add interface with special function  og gls  http://www.gnu.org/software/gsl/
+        the full list is in the example examples++-loal/gsl.edp  
+     
+v 3.11-1     25 dec 2010
      - Add coarse preconditioner in MPIGMRES[23]d.edp (to be optimal)
        now the number of iteration is close to 10.  
      - Show ff++ line number in case of  assertion  in RNM class. 
