@@ -1,3 +1,8 @@
+v 3.12    17 jan 2011
+     - Add New syntaxe in macro generation
+        NewMacro a(i) 
+        EndMacro <
+       with // comment and macro definition, first trik
      - Add interface with special function  og gls  http://www.gnu.org/software/gsl/
         the full list is in the example examples++-loal/gsl.edp  
      
