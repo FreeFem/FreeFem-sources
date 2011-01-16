@@ -459,8 +459,12 @@ char * mylex::match(int i)
 
 bool mylex::SetMacro(int &ret)
 { 
+  char endmacro[]="EndMacro";
+  char newmacro[]="NewMacro";
+    
   bool rt=false;
-  if (strcmp(buf,"macro")==0)
+  int oldmacro=1;
+  if (strcmp(buf,"macro")==0 || (oldmacro=strcmp(buf,newmacro))==0 )
     {
       char *macroname=newcopy(match(ID));
       int nbparam =0;
@@ -491,13 +495,41 @@ bool mylex::SetMacro(int &ret)
 	      
 	    } while(1); 
 	}
+      int kmacro=0;
       
+
       do {
+	int lk=0;
+	string item;
 	int i = source().get();
 	if (i == EOF) {  cerr << "in macro " <<macroname <<  endl;
 	ErrorScan(" ENDOFFILE in macro definition. remark:a macro end with // ");}
 	int ii = source().peek();
-	if (i == '/' && ii == '/') { source().putback('/'); break;} 
+	if(isspace(i) && isalpha(ii) ) {
+	    def +=char(i);
+	    i = source().get();
+	    item = "";
+	    while(isalpha(i))
+	      {
+		item += char(i);
+		i = source().get();
+	      }
+	    if( item == newmacro)  kmacro++;
+	    if( item == endmacro)  {
+		if (kmacro==0)  
+		    { source().putback(i); break;}
+		kmacro--;
+	    }
+	    def += item;
+	    item ="";
+	    ii = source().peek();
+	}
+	
+	if(oldmacro)
+	  {
+	    if (i == '/' && ii == '/') { source().putback('/'); break;} 
+	  }
+
 	def +=char(i);        
       } while(1);
       macroparm.push_back(def);

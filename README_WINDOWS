@@ -1,6 +1,61 @@
 How to compile FreeFem++ on Microsoft Windows
 ---------------------------------------------
 
+WARNING NOW the window is compile under MINGW  (from version 3.11  14/01/2011 FH)
+
+  So the old dll are incompatible with the new version. 
+  -----------------------------------------------------
+
+NEW version with MINGW 32 to have a not to bad FC compiler. 
+----------------------------------------------------------
+
+1) Download and install MINGW32 
+from: 
+http://sunet.dl.sourceforge.net/project/mingw/Automated%20MinGW%20Installer/mingw-get-inst/mingw-get-inst-20101030/mingw-get-inst-20101030.exe
+`
+2) Download un insatll wget for --enable-download in configure
+http://puzzle.dl.sourceforge.net/project/mingw/mingwPORT/Current%20Releases/wget-1.9.1-mingwPORT.tar.bz2
+
+3) the glut of win32 
+
+http://web.cs.wpi.edu/~gogo/courses/mingw/winglut.zip
+
+install in .h file in 
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/GL/glut.h
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/GL/gl.h
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/GL/glu.h
+
+add the glut32.dll in you directory in the 2 directories:
+
+$ find /c/MinGW -name glut
+/c/MinGW/bin/glut32.dll
+/c/MinGW/lib/glut32.dll
+ 
+3) the good blas 
+http://www.tacc.utexas.edu/index.php?eID=tx_nawsecuredl&u=0&file=fileadmin/images/GotoBLAS2-1.13_bsd.tar.gz&t=1294842550&hash=638c44fa086136fc2b661b98b52e0ee4
+
+try to compile 
+
+4) MPI for // verion 
+http://www.mcs.anl.gov/research/projects/mpich2/downloads/tarballs/1.3.1/mpich2-1.3.1-win-ia32.msi
+
+5) inno setup to build instraller: 
+http://www.xs4all.nl/~mlaan2/ispack/isetup-5.4.0.exe
+
+6) GSL for gsl interface 
+
+the configure argument are:
+
+
+./configure '--enable-download' 'FC=mingw32-gfortran' 'F77=mingw32-gfortran' 'CC=mingw32-gcc' 'CXX=mingw32-g++' '-with-blas=/home/hecht/blas-x86/libgoto2.dll' 'CXXFLAGS=-I/home/hecht/blas-x86' '--enable-generic'
+
+
+
+OLD Version with cygwin: (obsolete comment) 
+--------------------------------------------
+
+
 1) Download and install Cygwin from http://www.cygwin.com. Make sure
 that the development tools Automake, Autoconf and GNU C++ , C , g77,
 OPENGL, GLUT  are installed.
