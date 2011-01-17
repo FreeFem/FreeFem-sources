@@ -3363,7 +3363,7 @@ int mainff (int  argc, char **argv)
    zzzfff->Add("catch",CATCH);
    zzzfff->Add("throw",THROW);
    Init_map_type();
-   if(verbosity && (mpirank==0 ) ) cout << " Load: ";
+   if(verbosity>2 || (mpirank==0 ) ) cout << " Load: ";
    init_lgfem() ;
    init_lgmesh() ;
    init_lgmesh3() ;
@@ -3375,7 +3375,7 @@ int mainff (int  argc, char **argv)
 
    if(init_lgparallele)  init_lgparallele(); 
 
-   if(verbosity)  cout << endl;
+   if(verbosity>2 || mpirank==0)  cout << endl;
   zzzfff->input(cc);
   EnvironmentLoad(); // just before compile
   verbosity=vvold; 
