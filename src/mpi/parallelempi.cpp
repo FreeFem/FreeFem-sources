@@ -2127,6 +2127,7 @@ void f_initparallele(int &argc, char **& argv)
   
   mpirank = mpirank1;//MPI::COMM_WORLD.Get_rank();
   mpisize =mpisize1;// MPI::COMM_WORLD.Get_size();
+  if(verbosity> 2 || (mpirank ==0))
   cout << "initparallele rank " <<  mpirank << " on " << mpisize << endl;
 }
 
@@ -2435,7 +2436,7 @@ void f_init_lgparallele()
 void f_end_parallele()
 {
     MPI_Finalize();
-    if(mpirank==0) cout << "FreeFem++-mpi finalize correctly .\n" << flush ; 
+    if(mpirank==0 || verbosity>2) cout << "FreeFem++-mpi finalize correctly .\n" << flush ; 
     else if(verbosity>5)  cout << '.' << endl ;
 }
 
