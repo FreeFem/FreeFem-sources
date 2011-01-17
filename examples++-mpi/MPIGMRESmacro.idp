@@ -64,6 +64,7 @@ macro   SendRecvAny(comm,jpart,Si,Ri)
 
 macro CheckUV(comm,jpart,Si,Ri)
 {
+	    int ipart=mpiRank(comm);
 	 	int n= jpart.n;
   		int[int] rn(n),sn(n),in(n);
  		for (int j=0;j<n;++j) 
