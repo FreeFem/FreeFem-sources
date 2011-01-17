@@ -851,8 +851,8 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
   int lab=VertexIsoP[0].lab;
   for (int k=0; k<NbVertex; k++) {   
     //fprintf(fpoints,"%f %f %d\n",VertexIsoP[k].x,VertexIsoP[k].y,VertexIsoP[k].lab);
-    fprintf(fpoints,"%f %f \n",VertexIsoP[k].x,VertexIsoP[k].y);
     if(VertexIsoP[k].lab != lab) fprintf(fpoints,"\n\n");
+    fprintf(fpoints,"%f %f \n",VertexIsoP[k].x,VertexIsoP[k].y);
     lab=VertexIsoP[k].lab;
   }
   fclose(fpoints);
