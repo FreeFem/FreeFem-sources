@@ -1,5 +1,13 @@
 v 3.12    17 jan 2011
-     - Add New syntaxe in macro generation
+    - Add lots of DDM Schwarz GMRES precondionned with a coarse grid solver por overlapping : 
+      DDM-Schwarz-Lame-2d.edp		DDM-Schwarz-Lap-2dd.edp		DDM-Schwarz-Stokes-2d.edp	
+      DDM-funcs-v2.idp DDM-Schwarz-Lame-3d.edp  			DDM-Schwarz-Lap-3d.edp			
+      DDM-Schwarz-macro.idp
+      I will add the explanation in the doc in the future; 
+      
+
+    - Add a true exemple to buld mesh form a image (lg.pgm) ,  Leman-mesh.edp 
+    - Add New syntaxe in macro generation
         NewMacro a(i) 
         EndMacro <
        with // comment and macro definition, first trik

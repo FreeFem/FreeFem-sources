@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.11-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.12,hecht@ann.jussieu.fr,freefem++)
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
@@ -316,6 +316,7 @@ case $ff_uname in
 esac
 case $ff_uname in
 CYGWIN*|MINGW*)
+
 	ff_suffix_dylib="dll";
         ff_win32=yes;
 	AC_SUBST(FFMETIS_CFLAGS,"-D__VC__")
@@ -666,6 +667,7 @@ fi
 dnl m4_include(ax_mpi.m4)
 ff_save_path="$PATH"
 # We need to choose between mpich, openmpi  and lam for the Debian package
+AC_ARG_WITH(mpipath,[  --with-mpich= the path of mpich under windows (no command  mpic++, ... )])
 AC_ARG_WITH(mpi,[  --with-mpi=[yes|no|mpic++|lam|mpich|openmpi|/usr/local/bin/mpic++|... ]	or --without-mpi	Choose MPI implementation (default is mpic++)])
 
 #if test "$with_mpi" != no ; then
@@ -683,6 +685,25 @@ else
  *)  ff_mpicxx="$with_mpi" ;;
  esac
 fi
+
+if test "$with_mpipath" != no -a -n  "$with_mpipath"  ; then 
+    for i in 'c:\Program Files (x86)\MPICH2' 'c:\Program Files\MPICH2' ; do
+	if test -f "$i" ; then with_mpipath="$i"; fi
+    done
+    if test -f "$i" ; then with_mpipath="$i"; fi
+    sed "s?@MPIDIR@?$i?"  <mpic++.in >mpic++
+    chmod a+rx mpic++ 
+    for i in mpicc mpif90 mpif77 ; do cp mpic++ $i; done 
+    ff_pwd=`pwd`
+    with_mpi="$ff_pwd"/mpic++
+    ff_mpi_path="$ff_pwd"/mpic++
+    MPICXX="$ff_pwd/mpic++"
+    MPIF77="$ff_pwd/mpif77"
+    MPIFC="$ff_pwd/mpif90"
+    MPICC="$ff_pwd/mpicc"     
+fi
+
+
 
 dnl  correct ff_mpi_path august 2010 -- FH ...  
 if test "$with_mpi" != no

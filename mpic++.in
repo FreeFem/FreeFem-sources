@@ -1,0 +1,19 @@
+MPIDIR='@MPIDIR@' 
+MPIINC="$MPIDIR/include"
+MPILIB="-L'$MPIDIR'/lib -lmpicxx -lfmpich2g -lmpi"
+CXX=mingw32-g++.exe
+GCC=mingw32-gcc.exe
+F77=mingw32-gfortran.exe
+F90=mingw32-gfortran.exe
+INC="'"-I"$MPIINC""'"
+LIB="$MPILIB"
+echo=eval 
+for i in $*; do  if [ "$i" = "-c" ] ; then LIB=""; fi; done;
+for i in $*; do  if [ "$i" = "-v" ] ; then echo="echo" ; fi; done;
+case $0 in
+*c++*)  $echo  "$CXX" "$INC" "$@" $LIB;;
+*77*)   $echo  "$F77" "$INC" "$@" $LIB;;
+*90*)   $echo  "$F90" "$INC" "$@" $LIB;;
+*cc*)   $echo "$CC" "$INC" "$@" $LIB;;
+esac
+
