@@ -39,7 +39,7 @@ EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  UMFPACK64.cpp iovtk.cpp gmsh.cpp MetricKuate.cpp  \
  ffnewuoa.cpp	ffnewuoa.edp	newuoa.f Element_P1dc1.cpp ilut.cpp ilut.edp \
  freeyams.cpp mmg3d.cpp  mshmet.cpp \
- BinaryIO.cpp	gsl.cpp gsl.awk ff_gsl_awk.hpp isolineP1.cpp
+ BinaryIO.cpp	gsl.cpp gsl.awk ff_gsl_awk.hpp isolineP1.cpp lg.pgm Leman-mesh.edp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \

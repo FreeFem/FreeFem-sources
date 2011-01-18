@@ -195,7 +195,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 	      NbIsoNonVertex++;
 	    }       
 	    
-	    if(it <=10) cout << "vertex (it="<< it << ", i="<< ii << ") :: " << j0 << " " << j1 <<" xlam= "<< xlam << endl;
+	    if(it <=10 && verbosity>10) cout << "vertex (it="<< it << ", i="<< ii << ") :: " << j0 << " " << j1 <<" xlam= "<< xlam << endl;
 	  }
 
       }
@@ -483,7 +483,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
  
 
   int NbBordVertex=0;
-  cout << " NbInterBord = " << NbInterBord << endl;
+  if(verbosity>10)cout << " NbInterBord = " << NbInterBord << endl;
   if(NbInterBord>0){
     //#################################
     // boucle sur le bord    
@@ -511,7 +511,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
       if( VertexIso[ j0bid ] > 0 ){	
 	// cas fi == isovalue
 	if( VertexIso[ j1bid ] > 0 ){     
-	  cout << "the edge is a isovalue :: link is previously computed "<< endl;
+	  if(verbosity>10)cout << "the edge is a isovalue :: link is previously computed "<< endl;
 	  //assert( VertexIso[ j0bid ] == 2);
 	  //assert( VertexIso[ j1bid ] == 2);
 	}
@@ -530,7 +530,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 	    NbBordVertex++;
 	  }
 	  if( VertexIso[ j0bid ] == 1 ){
-	    cout << "j0bid, j1bid, ffbid " << j0bid << " "<< j1bid << " " << ffbid << endl; 
+	    if(verbosity>10) cout << "j0bid, j1bid, ffbid " << j0bid << " "<< j1bid << " " << ffbid << endl; 
 	    //assert( VertexIsoTri[2*j0bid] == ffbid );
 	    //if( VertexIsoTri[2*j0bid] == ffbid ){
 	    ElementLink[  Th.nt + Th.NumberOfTheBoundaryEdge(j0bid,j1bid) ] = VertexIsoTri[2*j0bid];
@@ -576,15 +576,18 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
     //   -2 : pas d'élement à prendre en compte. 
   }
 
-  cout << " NbInterBord = " << NbInterBord << endl;
-  for(int iijj=0; iijj<10; iijj++){
-    cout << "ElementLink["<< iijj <<"]=" << ElementLink[iijj] <<endl;
-  }
-
-  cout << " NbInterBord = " << NbInterBord << endl;
-  for(int iijj=Th.nt; iijj<Th.nt+Th.neb; iijj++){
-    cout << "ElementLink["<< iijj <<"]=" << ElementLink[iijj] <<endl;
-  }
+  if(verbosity>10)
+    {
+      cout << " NbInterBord = " << NbInterBord << endl;
+      for(int iijj=0; iijj<10; iijj++){
+	cout << "ElementLink["<< iijj <<"]=" << ElementLink[iijj] <<endl;
+      }
+      
+      cout << " NbInterBord = " << NbInterBord << endl;
+      for(int iijj=Th.nt; iijj<Th.nt+Th.neb; iijj++){
+	cout << "ElementLink["<< iijj <<"]=" << ElementLink[iijj] <<endl;
+      }
+    }
 
   //#################################
 
@@ -604,7 +607,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
   int label = 0;
   for(int it1=0; it1< Th.nt; it1++){
     if( TriangleVu[it1] == 1 || taketriangle[2*it1]== -1) continue;
-    cout << "it1 = " << it1 << " Th.nt "<< Th.nt << endl;
+    if(verbosity>10) cout << "it1 = " << it1 << " Th.nt "<< Th.nt << endl;
     // First point is taken
     TriangleVu[it1] = 1;
     {
@@ -646,7 +649,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
      
       if( it< Th.nt){
 	// sur un triangle
-	cout << "it = " << it << " <--->  it2=" << it2 << " Th.nt "<< Th.nt << endl;
+	if(verbosity>10) cout << "it = " << it << " <--->  it2=" << it2 << " Th.nt "<< Th.nt << endl;
 	assert( TriangleVu[it] == -1);  
 	TriangleVu[it] = 1;
 
@@ -683,14 +686,14 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
       }
       else{
 	int ibe=it-Th.nt;
-	cout << "ibe = " << ibe << " <--->  it2=" << it2 << " Th.nt "<< Th.nt << endl;
+	if(verbosity>10) cout << "ibe = " << ibe << " <--->  it2=" << it2 << " Th.nt "<< Th.nt << endl;
 	// sur le bord
 	int edgebid;
 	//int newit;
 	int ffbid   = Th.BoundaryElement( ibe, edgebid );     // ii : number of edge => sortie :: ffbid = numero triangles, edgebid = numero edges
 	int j0bid,j1bid;
 	Th.VerticesNumberOfEdge( Th.t(ffbid), edgebid, j0bid, j1bid);
-	cout << "Edge Vertex Number "<< j0bid+1 << " " << j1bid+1 << " number of triangle " << ffbid << endl;
+	if(verbosity>10) cout << "Edge Vertex Number "<< j0bid+1 << " " << j1bid+1 << " number of triangle " << ffbid << endl;
 	if( taketriangle[2*ffbid+1] == edgebid && VertexIso[j1bid] == 0){
 	  //if( taketriangle[2*ffbid+1] == edgebid && VertexIso[j0bid] == 0){ // old version
 	  if( EdgeIter[3*ffbid+edgebid] > -0.1){ 
@@ -842,11 +845,11 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 
 //     label=label+1;
 //   } 
-  cout << "inv= " << inv << endl;
-  cout << "NbVertex= " << NbVertex << endl;
-  cout << "label =" << label << endl;
+  if(verbosity) cout << " IsolineP1 :inv= " << inv << endl;
+  if(verbosity) cout << "            NbVertex= " << NbVertex << endl;
+  if(verbosity) cout << "            label =" << label << endl;
   assert(inv == NbVertex);
-  cout << " file point \"" << ffname->c_str() <<"\""<< endl;
+  if(verbosity>2) cout << "     file point \"" << ffname->c_str() <<"\""<< endl;
   FILE *fpoints = fopen(ffname->c_str(),"w");
   int lab=VertexIsoP[0].lab;
   for (int k=0; k<NbVertex; k++) {   
