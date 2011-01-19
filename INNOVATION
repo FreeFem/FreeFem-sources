@@ -1,4 +1,7 @@
 v 3.12    17 jan 2011
+    - correct link proble in hips and hypre under linux
+    - Add thresholdings.cpp	thresholdings.edp in examples++-load to remove to small coef
+       in a matrix . 
     - Add lots of DDM Schwarz GMRES precondionned with a coarse grid solver por overlapping : 
       DDM-Schwarz-Lame-2d.edp		DDM-Schwarz-Lap-2dd.edp		DDM-Schwarz-Stokes-2d.edp	
       DDM-funcs-v2.idp DDM-Schwarz-Lame-3d.edp  			DDM-Schwarz-Lap-3d.edp			

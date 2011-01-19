@@ -271,9 +271,9 @@ template<class R>
                 :  make_pair<int,int>(i+ii00,j+jj00) ; }
  
 template<class R>
-bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj)
+bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold)
 {
-   double eps0=numeric_limits<double>::min();
+   double eps0=max(numeric_limits<double>::min(), threshold);
  if( norm(coef)<eps0) return  L == U ;
  int i,j,kf,k;
   if(D)
@@ -1175,9 +1175,9 @@ template<class R>
      
   }
 template<class R>
-bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj)
+bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold)
 {
-  double eps0=numeric_limits<double>::min();
+  double eps0=max(numeric_limits<double>::min(),threshold);
   int i,j,k;
   if (symetrique)
    {
