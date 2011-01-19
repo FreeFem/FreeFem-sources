@@ -280,17 +280,19 @@ class dSolvepastixmpi :   public MatriceMorse<double>::VirtualSolver   {
   mutable pastix_int_t   *perm;
   mutable pastix_int_t   *invp;
   mutable pastix_data_t  *pastix_data;
-  
+  MPI_Comm commworld ;
 
 public:
 
   dSolvepastixmpi(const MatriceMorse<double> &AA, int strategy, double ttgv, double epsilon,
 		  double pivot, double pivot_sym, string datafile, KN<long> &pparam_int, KN<double> &pparam_double, 
-		  KN<long> &pperm_r, KN<long> &pperm_c) : 
+		  KN<long> &pperm_r, KN<long> &pperm_c,void * ccommworld ) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),tol_pivot_sym(pivot_sym),tol_pivot(pivot),
     data_option(datafile) 
   { 
+    commworld = ccommworld ? *static_cast<MPI_Comm*>( ccommworld) : MPI_COMM_WORLD;    
+
     KN_<long> param_int(pparam_int);
     KN_<double> param_double(pparam_double);
 
@@ -312,9 +314,9 @@ public:
     pastix_data = NULL;
     
     // matrix assembled on host
-    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    MPI_Comm_rank(commworld, &myid);
     printf("- Rang MPI : %d\n", myid);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_size(commworld, &mpi_size);
     // SYMETRIQUE
     // MPI_flag need to unselect for non distributed matrix
     mpi_flag  = 0;
@@ -365,7 +367,7 @@ public:
       Morse_to_CSC( AA.n , AA.m, AA.nbcoef, AA.a, AA.cl, AA.lg, &avals, &ja, &ia);
       // ia : pointeurs des colonnes
       // ja : indices des lignes
-      
+      if(verbosity)
       cout << "AA.n= "<< AA.n << " AA.m=" <<  AA.m << " AA.nbcoef=" << AA.nbcoef << endl;
     
      
@@ -376,29 +378,29 @@ public:
       for(int ii=0; ii < ia[Ncol]-1; ii++){
 	ja[ii] = ja[ii]+1; 
       }
-            
-      MPI_Bcast( &Ncol,   1,    MPI_INT,   0, MPI_COMM_WORLD );
-      MPI_Bcast( &Nrow,   1,    MPI_INT,   0, MPI_COMM_WORLD );
-      MPI_Bcast( &nnz,    1,    MPI_INT,   0, MPI_COMM_WORLD );
+      //cout << " put  " << Ncol << " " << Nrow << " " << nnz << endl;            
+      MPI_Bcast( &Ncol,   1,    MPI_PASTIX_INT,   0, commworld );
+      MPI_Bcast( &Nrow,   1,    MPI_PASTIX_INT,   0, commworld );
+      MPI_Bcast( &nnz,    1,    MPI_PASTIX_INT,   0, commworld );
 
-      MPI_Bcast( avals, nnz,    MPI_PASTIX_FLOAT, 0, MPI_COMM_WORLD );
-      MPI_Bcast(    ia, Ncol+1, MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
-      MPI_Bcast(    ja, nnz,    MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
+      MPI_Bcast( avals, nnz,    MPI_PASTIX_FLOAT, 0, commworld );
+      MPI_Bcast(    ia, Ncol+1, MPI_PASTIX_INT,   0, commworld );
+      MPI_Bcast(    ja, nnz,    MPI_PASTIX_INT,   0, commworld );
     }
     else{
-      MPI_Bcast( &Ncol, 1,        MPI_INT,  0, MPI_COMM_WORLD );
-      MPI_Bcast( &Nrow, 1,        MPI_INT,  0, MPI_COMM_WORLD );
-      MPI_Bcast( &nnz,  1,        MPI_INT,  0, MPI_COMM_WORLD );
-      
+      MPI_Bcast( &Ncol, 1,        MPI_PASTIX_INT,  0, commworld );
+      MPI_Bcast( &Nrow, 1,        MPI_PASTIX_INT,  0, commworld );
+      MPI_Bcast( &nnz,  1,        MPI_PASTIX_INT,  0, commworld );
+      //cout << " get " << Ncol << " " << Nrow << " " << nnz << endl;
       avals = (pastix_float_t *) malloc( nnz*sizeof(pastix_float_t) );
       ia = (pastix_int_t *) malloc( (Ncol+1)*sizeof(pastix_int_t) );
       ja = (pastix_int_t *) malloc( nnz*sizeof(pastix_int_t) );
 
-      MPI_Bcast( avals, nnz,  MPI_PASTIX_FLOAT,   0, MPI_COMM_WORLD );
-      MPI_Bcast(    ia, Ncol+1, MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
-      MPI_Bcast(    ja, nnz,    MPI_PASTIX_INT,   0, MPI_COMM_WORLD );
+      MPI_Bcast( avals, nnz,  MPI_PASTIX_FLOAT,   0, commworld );
+      MPI_Bcast(    ia, Ncol+1, MPI_PASTIX_INT,   0, commworld );
+      MPI_Bcast(    ja, nnz,    MPI_PASTIX_INT,   0, commworld );
     }
-
+    //cout << " " << Ncol << " " << endl; 
     perm = (pastix_int_t *) malloc(Ncol*sizeof(pastix_int_t));
     invp = (pastix_int_t *) malloc(Ncol*sizeof(pastix_int_t));
     
@@ -418,7 +420,7 @@ public:
     iparm[IPARM_SYM] = API_SYM_NO; // Matrix is considered nonsymetric    
 
     if(mpi_flag == 0)
-      pastix(&pastix_data, MPI_COMM_WORLD, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm); 
+      pastix(&pastix_data, commworld, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm); 
     else
       cerr << "error :: mpi_flag = 0 for calling pastix" << endl; 
     fprintf(stdout,"-- FIN INIT PARAMETERS --\n");
@@ -439,7 +441,7 @@ public:
       dparm[DPARM_EPSILON_MAGN_CTRL] = 1e-32;
     }
 
-//    cscd_checksym(Ncol, ia, ja, loc2glob, MPI_COMM_WORLD);
+//    cscd_checksym(Ncol, ia, ja, loc2glob, commworld);
     
 //     if (iparm[IPARM_SYM]==API_SYM_YES)
 //       {
@@ -481,7 +483,7 @@ public:
     iparm[IPARM_START_TASK] = API_TASK_ORDERING;
     iparm[IPARM_END_TASK]   = API_TASK_ORDERING; 
     if(mpi_flag == 0)
-      pastix(&pastix_data, MPI_COMM_WORLD, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
+      pastix(&pastix_data, commworld, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
     else
       cerr << "error :: mpi_flag = 0 for calling pastix" << endl;  
     iparm[IPARM_SYM] = API_SYM_NO;
@@ -490,7 +492,7 @@ public:
     iparm[IPARM_START_TASK] = API_TASK_SYMBFACT;
     iparm[IPARM_END_TASK]   = API_TASK_SYMBFACT;
     if(mpi_flag == 0)
-      pastix(&pastix_data, MPI_COMM_WORLD, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
+      pastix(&pastix_data, commworld, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
     else
       cerr << "error :: mpi_flag = 0 for calling pastix" << endl; 
     /* Blend */
@@ -506,7 +508,7 @@ public:
       iparm[IPARM_FACTORIZATION] = API_FACT_LU;
     }
     if(mpi_flag == 0)
-      pastix(&pastix_data, MPI_COMM_WORLD, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
+      pastix(&pastix_data, commworld, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
     else
       cerr << "error :: mpi_flag = 0 for calling pastix" << endl; 
    
@@ -516,7 +518,7 @@ public:
     gettimeofday(&tv1, NULL);
     fprintf(stdout,"-- SOPALIN --\n");
     if(mpi_flag == 0)
-      pastix(&pastix_data, MPI_COMM_WORLD, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
+      pastix(&pastix_data, commworld, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
     else
        cerr << "error :: mpi_flag = 0 for calling pastix" << endl; 
     gettimeofday(&tv2, NULL);
@@ -572,7 +574,7 @@ public:
     iparm[IPARM_RHS_MAKING] = API_RHS_B;
     gettimeofday(&tv1, NULL);
     if(mpi_flag == 0)
-      pastix(&pastix_data, MPI_COMM_WORLD, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
+      pastix(&pastix_data, commworld, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
     else
       cerr << "error :: mpi_flag = 0 for calling pastix" << endl; 
     gettimeofday(&tv2, NULL);
@@ -595,7 +597,7 @@ public:
     iparm[IPARM_ITERMAX]    = init_raff;
     gettimeofday(&tv1, NULL);
     if(mpi_flag == 0)
-      pastix(&pastix_data, MPI_COMM_WORLD, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
+      pastix(&pastix_data, commworld, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
     else
       cerr << "error :: mpi_flag = 0 for calling pastix" << endl; 
     gettimeofday(&tv2, NULL);
@@ -631,7 +633,7 @@ public:
     iparm[IPARM_START_TASK] = API_TASK_CLEAN;
     iparm[IPARM_END_TASK]   = API_TASK_CLEAN;
     
-    pastix(&pastix_data, MPI_COMM_WORLD, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
+    pastix(&pastix_data, commworld, Ncol,ia,ja,avals,perm,invp,rhs,1,iparm,dparm);
       
     //if( sizeof(pastix_int_t) != sizeof(int) )
     //  {
@@ -662,7 +664,7 @@ BuildSolverpastix_real_mpi(DCL_ARG_SPARSE_SOLVER(double,A))
     if(verbosity>9)
     cout << " BuildSolverpastix_real_mpi<double>" << endl;
     return new dSolvepastixmpi(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym, ds.data_filename, 
-			       ds.lparams, ds.dparams, ds.perm_r, ds.perm_c);
+			       ds.lparams, ds.dparams, ds.perm_r, ds.perm_c, ds.commworld);
 }
 
 

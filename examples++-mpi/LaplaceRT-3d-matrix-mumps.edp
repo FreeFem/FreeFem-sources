@@ -152,7 +152,7 @@ cout << " v : = " << v1(.1,.2,.001)  << " " << v2(.1,.2,.001) << " " << v3(.1,.2
 
 
 /*
-problem laplaceMixte([u1,u2,u3,p],[v1,v2,v3,q],solver=sparsesolver,tgv=1e30,sparams="nprow=1, npcol=2", dimKrylov=400) = 
+problem laplaceMixte([u1,u2,u3,p],[v1,v2,v3,q],solver=sparsesolver,tgv=1e30,sparams="nprow=1, npcol="+mpisize, dimKrylov=400) = 
 int3d(Th)( p*q*1e-15+ u1*v1 + u2*v2 + u3*v3 + p*div(v1,v2,v3) + div(u1,u2,u3)*q )
  + int3d(Th) ( f*q)
  - int2d(Th,1)( gd*(v1*N.x +v2*N.y + v3*N.z) )  //  int on gamma 
