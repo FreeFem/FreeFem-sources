@@ -74,7 +74,7 @@ EXTRA_DIST= \
 
 
 
-MPI_SOFT=blacs parmetis  scalapack scotch superludist MUMPS pastix hypre hips parms 
+MPI_SOFT=blacs parmetis  scalapack scotch superludist mumps pastix hypre hips parms 
 LIST_SOFT=tetgen superlu fftw metis yams mshmet mmg3d gmm 
 all-recursive: bin lib include pkg
 
