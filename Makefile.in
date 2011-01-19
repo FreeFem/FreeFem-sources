@@ -329,7 +329,7 @@ SUBDIRS = download src DOC examples++-tutorial examples++	\
 EXTRA_DIST = regtests.sh config-wrapper.h  \
 FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 INSTALL INSTALL-MacOSX INNOVATION \
-WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS \
+WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS README_MAC \
 logo.ico copysharedlibs.sh COPYRIGHT edp.nedit  reconfigure \
 mode-mi-edp.zip aclocal.m4  acmacros.m4   acoptim.m4    \
 freefem++.spec crimson-freefem++.zip \
@@ -340,7 +340,7 @@ examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp  \
 WHERE_LIBRARY-mkl
 
 FF_MAC_PREFIX = FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
-FF_EXAMPLES_FILES = COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX INNOVATION \
+FF_EXAMPLES_FILES = COPYRIGHT HISTORY HISTORY_BEFORE_2005 README README_WINDOWS README_MAC BUGS TODO INSTALL INSTALL-MacOSX INNOVATION \
 mode-mi-edp.zip \
 examples++-tutorial/aile.msh examples++-tutorial/xyf \
 examples++-3d/dodecaedre01.mesh  \
@@ -951,15 +951,9 @@ install-exec-local::
 	tar cvf - $(FF_EXAMPLES_FILES)| (cd $(DESTDIR)$(pkgdatadir)/$(VERSION); tar xvf -)
 
 ListFiles-natives: .FORCE 
-#	echo COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX INNOVATION >$@	
-#	echo mode-mi-edp.zip >> $@
 	echo $(FF_EXAMPLES_FILES) >$@
-#	echo examples++-tutorial/aile.msh examples++-tutorial/xyf >> $@
-#	echo examples++-3d/dodecaedre01.mesh  >> $@
-#	echo examples++-load/load.link >> $@
-#	echo ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh >> $@
 	echo ./download/fftw/Makefile ./download/fftw/Makefile.am  >>$@
-	find .  -name '*.[ei]dp' -o -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
+	find .  -name '*.[ei]dp' -o -name '*.h*' -o -name '*.cpp' -o '*.pgm'  |egrep  '[.]/examples++' >>$@
 	find .   -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
 List-agl-dylib: src/nw/FreeFem++
 	otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}' >$@
