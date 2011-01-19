@@ -1,22 +1,12 @@
-/*
-//brochet
-load "/Users/morice/work/postdoc/freefem++prod/examples++-load/msh3"
-load "/Users/morice/work/postdoc/freefem++prod/examples++-load/medit"
-load "/Users/morice/work/postdoc/freefem++prod/src/solver/real_pastix_FreeFem"
-*/
-// melis
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-load/msh3"
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-load/medit"
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-load/real_pastix_FreeFem"
-/*
+
 // other
 load "msh3"
 load "medit"
 load "real_pastix_FreeFem"
-*/
+
 
 real ttgv=1e10;
-string ssparams="nprow=1, npcol=2";
+string ssparams="nprow=1, npcol="+mpisize;
 
 int nn=10;
 mesh Th2=square(nn,nn);
@@ -53,7 +43,7 @@ matrix MStokes=vStokes(VVh,VVh,tgv=ttgv);
 time1=clock()-time1;
 
 real timeF=clock();
-set(Mstokes,solver=sparsesolver,tgv=ttgv,sparams=ssparams);
+set(MStokes,solver=sparsesolver,tgv=ttgv,sparams=ssparams);
 timeF=clock()-timeF;
 
 real time2=clock();
@@ -75,5 +65,6 @@ cout << "                          ------------" << endl;
 cout << " all                     " <<  timeI << endl;
 cout << "============= CPU TIME ============" << endl;
 
+if(mpirank==0) 
 medit("UV2 PV2",Th,[u1,u2,u3],p);
 

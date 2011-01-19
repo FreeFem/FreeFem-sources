@@ -3,16 +3,9 @@
    after the signe is correct and now the noral was exterior normal. 
  */
 verbosity=2;
-load "../../examples++-load/msh3"
-load "../../examples++-load/thresholdings"
-//load "hypre_FreeFem"
-//load "parms_FreeFem"
+load "msh3"
 load "hips_FreeFem"
-//load "real_pastix_FreeFem"
-//load "MUMPS_FreeFem"
-//load "real_SuperLU_DIST_FreeFem"
 
-// for hips
 int[int] iparm(14);
 real[int] dparm(6);
 for(int iii=0;iii<14;iii++)iparm[iii]=-1;
@@ -72,9 +65,9 @@ Lapl3d;
   + on(1,u=ue);
 
 
-matrix A = Lapl3d(Vh,Vh);
+matrix A = Lapl3d(Vh,Vh,tgv=-1);//  to remove line this BC. 
 cout << A.n  << " " << A.m << " " << A.nbcoef << endl;
-A.thresholding(1e-15);
+
 set(A,solver=sparsesolver,dparams=dparm, lparams=iparm);
 cout <<A.n  <<" " << A.m << " " << A.nbcoef << endl;
 

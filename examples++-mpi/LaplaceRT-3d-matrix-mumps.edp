@@ -20,29 +20,16 @@ and $ u.n = (g1n,g2n).n$ on $\Gamma_2$
 */
 
 // brochet
-load "/Users/morice/work/postdoc/freefem++prod/examples++-load/medit"
-load "/Users/morice/work/postdoc/freefem++prod/src/solver/MUMPS_FreeFem"
-include "/Users/morice/work/postdoc/freefem++prod/examples++-3d/cube.idp"
-
-/*
-// melis 
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-load/medit"
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/src/solver/MUMPS_FreeFem"
-include "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-3d/cube_me.idp"
-*/
-
-/*
-// other
 load "medit"
-load "../src/solver/MUMPS_FreeFem"
-include "../examples++-3d/cube_me.idp"
-*/
+load "MUMPS_FreeFem"
+include "cube.idp"
+
 
 real ttgv = 1e30;
-string ssparams = "nprow=1, npcol=2";
+string ssparams = "nprow=1, npcol="+mpisize;
 
     //int[int]  Nxyz=[18,18,18];
-    int[int]  Nxyz=[8,8,8];
+    int[int]  Nxyz=[10,10,10];
     real [int,int]  Bxyz=[[0,1],[0,1],[0,1]];
     int [int,int]  Lxyz=[[1,1],[1,1],[2,1]];
 mesh3 Th=Cube(Nxyz,Bxyz,Lxyz);
