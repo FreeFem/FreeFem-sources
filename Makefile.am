@@ -22,7 +22,7 @@ Install-MacOS.command.in \
 examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \
 examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \
 examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp  \
-WHERE_LIBRARY-mkl
+WHERE_LIBRARY-mkl FreeFem++-CoCoa
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
@@ -152,6 +152,9 @@ clean-local::
 install-exec-local:: 
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(pkgdatadir)/$(VERSION)
 	tar cvf - $(FF_EXAMPLES_FILES)| (cd $(DESTDIR)$(pkgdatadir)/$(VERSION); tar xvf -)
+	$(mkinstalldirs) -m 755 $(DESTDIR)${bindir}
+	-test `uname` = Darwin && $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)${bindir}
+
 
 ListFiles-natives: .FORCE 
 	echo $(FF_EXAMPLES_FILES) >$@
