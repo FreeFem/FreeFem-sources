@@ -23,6 +23,7 @@ real_pastix_FreeFem.cpp
 
 
 LIST_COMPILE=MUMPS_FreeFem.$(DYLIB_SUFFIX) hips_FreeFem.$(DYLIB_SUFFIX) \
+ hypre_FreeFem.$(DYLIB_SUFFIX) \
  interfacepastix.$(DYLIB_SUFFIX) \
 complex_SuperLU_DIST_FreeFem.$(DYLIB_SUFFIX) real_SuperLU_DIST_FreeFem.$(DYLIB_SUFFIX) \
 complex_pastix_FreeFem.$(DYLIB_SUFFIX) real_pastix_FreeFem.$(DYLIB_SUFFIX) \
@@ -31,8 +32,8 @@ dSuperLU_DIST.$(DYLIB_SUFFIX) MPICG.$(DYLIB_SUFFIX) parms_FreeFem.$(DYLIB_SUFFIX
 all-local:$(LIST_COMPILE) freefem++.pref
 	echo "finish compile load mpi solver !"
 
-.cpp.$(DYLIB_SUFFIX): ff-c++
-	 ../examples++-load//ff-c++ -auto  $< 
+.cpp.$(DYLIB_SUFFIX): ../examples++-load/ff-c++ ../examples++-load/WHERE_LIBRARY-download
+	- ../examples++-load/ff-c++ -auto  $< 
 install-exec-local:: 
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
