@@ -80,7 +80,7 @@ if ( bool(comm))
     /////////////////////////////
     // read parameter for SuperLU\_DIST from file
     mpiBarrier(comm);
-    if(1)
+    if(mpisize==2) // bug otherwie ???? FH .....
     {
       // Resolution avec SuperLU_DIST COMPLEX
       int N=40;
@@ -98,9 +98,10 @@ if ( bool(comm))
       for(int j=0;j<N;j++) xx[j] = 0+j*1i;
       xx[0]= N+N*1i;
       b = A*xx;
-      
+      cout << " ################### " << endl;      
       set(A,solver=sparsesolver,datafilename="ffsuperlu_dist_fileparam.txt",commworld=comm); // reading SuperLU_DIST parameter on file ffsuperlu_dist_fileparam.txt
       
+
       x = A^-1*b;
       if(mpirank==0){
 	cout << "x=  "<< x << endl;
@@ -108,6 +109,8 @@ if ( bool(comm))
 	di=(xx-x);
 	cout << "error " << sqrt( abs(di'*di) ) << endl;//'));
       }
+
+    
     }
     
     // give parameter for superlu in this file with string parameter (sparams) 
@@ -149,4 +152,6 @@ if ( bool(comm))
     }
     
   }
+cout << " ************  Fin.." <<mpirank <<endl;
+mpiBarrier(mpiCommWorld);	
 cout << " Fin.." <<mpirank <<endl;
