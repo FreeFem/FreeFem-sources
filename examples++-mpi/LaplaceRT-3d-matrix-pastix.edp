@@ -1,3 +1,4 @@
+{ int iii; cin >>iii;}
 /*
    $ - \Delta p = f $   on $\Omega$, 
    $ dp / dn = (g1d,g2d). n  $ on $\Gamma_{1}$ 

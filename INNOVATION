@@ -1,4 +1,5 @@
 v 3.12    17 jan 2011
+    - correct medit Makefile.am in case of no compilation of medit ..
     - correct a lot of MPI parallel solver example 
         a bug pastix interface ???
 	MUMPS, superludist, hypre , hips works 
