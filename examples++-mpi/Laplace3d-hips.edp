@@ -71,7 +71,7 @@ cout << A.n  << " " << A.m << " " << A.nbcoef << endl;
 set(A,solver=sparsesolver,dparams=dparm, lparams=iparm);
 cout <<A.n  <<" " << A.m << " " << A.nbcoef << endl;
 
-real[int] b = Lapl3d(0,Vh);
+real[int] b = Lapl3d(0,Vh,tgv=-1);
  
 u[] = A^-1*b;
 cout << " b min:: " << b.min << " max: " << b.max << endl;
@@ -93,6 +93,6 @@ func uuu= 2.+x;
 cout << uuu(1,1,1) << endl;
 assert( abs(aire2-1.) < 1e-6);
 plot(u,wait=1);
-
-assert( err < 1e-6);
+if(mpirank==0) cout << " err = " << err<<endl;
+assert( err < 1e-5);
 

@@ -96,5 +96,5 @@ cout << uuu(1,1,1) << endl;
 assert( abs(aire2-1.) < 1e-6);
 plot(u,wait=1);
 
-assert( err < 1e-4);
+assert( err < 1e-3);
 
