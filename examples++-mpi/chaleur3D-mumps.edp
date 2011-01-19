@@ -1,17 +1,3 @@
-//
-// Equation de la chaleur en dimension 3
-// =======================================
-/* // brochet
-load "/Users/morice/work/postdoc/freefem++prod/examples++-load/msh3"
-load "/Users/morice/work/postdoc/freefem++prod/examples++-load/medit"
-load "/Users/morice/work/postdoc/freefem++prod/src/solver/MUMPS_FreeFem"
-*/
-
-/* // melis
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-load/msh3"
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-load/medit"
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/src/solver/MUMPS_FreeFem"
-*/
 
  // other
 load "msh3"
@@ -19,7 +5,7 @@ load "medit"
 load "MUMPS_FreeFem"
 
 real ttgv=1e10;
-string ssparams="nprow=1, npcol=2"; 
+string ssparams="nprow=1, npcol="+mpisize; 
 
 func bool GetNoBC(matrix & A,real[int] & in)
 { // def a array in such what

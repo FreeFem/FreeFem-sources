@@ -3,7 +3,7 @@
    after the signe is correct and now the noral was exterior normal. 
  */
 verbosity=2;
-load "../../examples++-load/msh3"
+load "msh3"
 load "hypre_FreeFem"
 
 // for hypre
@@ -24,7 +24,7 @@ dparm[2]=5e-4; // truncation factor
 
 int nn=10;
 mesh Th2=square(nn,nn,region=0);
-fespace Vh2(Th2,P2);
+fespace Vh2(Th2,P1);
 Vh2 ux,uz,p2;
 int[int] rup=[0,2],  rdown=[0,1], rmid=[1,1,2,1,3,1,4,1];
 real zmin=0,zmax=1;
@@ -35,7 +35,7 @@ mesh3 Th=buildlayers(Th2,nn,
   reffacelow = rdown);
 
 
-fespace Vh(Th,P2);
+fespace Vh(Th,P1);
 
 func ue =   2*x*x + 3*y*y + 4*z*z + 5*x*y+6*x*z+1;
 func uex=   4*x+  5*y+6*z;
@@ -67,13 +67,13 @@ Lapl3d;
   + int2d(Th,2) ( ue*v + (uex*N.x +uey*N.y +uez*N.z)*v )
   + on(1,u=ue);
 
-
-matrix A = Lapl3d(Vh,Vh);
+real tgv = -1;
+matrix A = Lapl3d(Vh,Vh,tgv=tgv);
 cout << A.n  << " " << A.m << " " << A.nbcoef << endl;
 set(A,solver=sparsesolver,dparams=dparm, lparams=iparm);
 cout <<A.n  <<" " << A.m << " " << A.nbcoef << endl;
 
-real[int] b = Lapl3d(0,Vh);
+real[int] b = Lapl3d(0,Vh,tgv=tgv);
  
 u[] = A^-1*b;
 cout << " b min:: " << b.min << " max: " << b.max << endl;
@@ -96,5 +96,5 @@ cout << uuu(1,1,1) << endl;
 assert( abs(aire2-1.) < 1e-6);
 plot(u,wait=1);
 
-assert( err < 1e-6);
+assert( err < 1e-4);
 

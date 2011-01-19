@@ -19,12 +19,12 @@ and $ u.n = (g1n,g2n).n$ on $\Gamma_2$
 
 */
 
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-load/medit"
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/src/solver/real_SuperLU_DIST_FreeFem"
-include "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-3d/cube_me.idp"
+load "medit"
+load "real_SuperLU_DIST_FreeFem"
+include "cube.idp"
 
 real ttgv = 1e30;
-string ssparams ="nprow=1, npcol=2";
+string ssparams ="nprow=1, npcol="+mpisize;
 
     //int[int]  Nxyz=[18,18,18];
     int[int]  Nxyz=[8,8,8];

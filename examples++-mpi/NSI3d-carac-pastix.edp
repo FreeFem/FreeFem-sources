@@ -1,10 +1,10 @@
-load "/Users/morice/work/postdoc/freefem++prod/examples++-load/msh3"
-load "/Users/morice/work/postdoc/freefem++prod/src/solver/real_pastix_FreeFem"
+load "msh3"
+load "real_pastix_FreeFem"
 ////////////////////
 //  parameters
 
 real ttgv=1e10;
-string ssparams="nprow=1, npcol=2";
+string ssparams="nprow=1, npcol="+mpisize;
 ////////////////////
 real nu=0.01,dt=0.3;
 real alpha=1./dt,alpha2=sqrt(alpha);

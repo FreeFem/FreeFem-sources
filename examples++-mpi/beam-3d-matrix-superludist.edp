@@ -1,24 +1,11 @@
-/*
-//brochet
-load "/Users/morice/work/postdoc/freefem++prod/examples++-load/msh3"
-load "/Users/morice/work/postdoc/freefem++prod/examples++-load/medit"
-load "/Users/morice/work/postdoc/freefem++prod/src/solver/real_SuperLU_DIST_FreeFem"
-include "/Users/morice/work/postdoc/freefem++prod/examples++-3d/cube.idp"
-*/
-// melis
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-load/msh3"
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-load/medit"
-load "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-load/real_SuperLU_DIST_FreeFem"
-include "/Network/Servers/malus.cluster.private/Volumes/Home/morice/freefem++-2010/examples++-3d/cube.idp"
-/*
 // other
 load "msh3"
 load "medit"
 load "real_SuperLU_DIST_FreeFem"
-include "../examples++-3d/cube.idp"
-*/
+include "cube.idp"
+
 real ttgv=1e10;
-string ssparams="nprow=1, npcol=2";
+string ssparams="nprow=1, npcol="+mpisize;
 
 int[int]  Nxyz=[40,8,8];
 real [int,int]  Bxyz=[[0.,5.],[0.,1.],[0.,1.]];

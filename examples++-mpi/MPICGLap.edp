@@ -165,7 +165,7 @@ load "MPICG"
       
       u=0;
       verbosity=100;
-      MPILinearCG(DJJ,u[],eps=1.e-4,nbiter=200,precon=matId,comm=comm);
+      MPIAffineCG(DJJ,u[],eps=1.e-4,nbiter=200,precon=matId,comm=comm);
       projD(u[]);
       Plot(u[]);
       if(rank==0)

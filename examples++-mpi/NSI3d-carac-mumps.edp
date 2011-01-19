@@ -1,10 +1,10 @@
-load "/Users/morice/work/postdoc/freefem++prod/examples++-load/msh3"
-load "/Users/morice/work/postdoc/freefem++prod/src/solver/MUMPS_FreeFem"
+load "msh3"
+load "MUMPS_FreeFem"
 ////////////////////
 //  parameters
 
 real ttgv=1e30;
-string ssparams="nprow=1, npcol=2";
+string ssparams="nprow=1, npcol="+mpisize;
 ////////////////////
 real nu=0.01,dt=0.3;
 real alpha=1./dt,alpha2=sqrt(alpha);
@@ -52,7 +52,7 @@ t2=clock();
 real[int] b= vStokes(0,VVh);
 t2=clock()-t2;
 
-Vh [u1,u2,u3,p];
+VVh [u1,u2,u3,p];
 VVh [X1,X2,X3,Xp];
 VVh [x1,x2,x3,xp]=[x,y,z,0];
 
@@ -92,7 +92,7 @@ time5=clock()-time5;
 
 time4=clock();
 real t=0;
-int nbtemps=10;
+int nbtemps=5;
 for(int i=0;i<nbtemps;++i)
   {
     real time2tmp,time3tmp;
