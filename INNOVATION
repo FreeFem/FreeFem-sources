@@ -1,4 +1,7 @@
 v 3.12    17 jan 2011
+    - correct a lot of MPI parallel solver example 
+        a bug pastix interface ???
+	MUMPS, superludist, hypre , hips works 
     - correct link proble in hips and hypre under linux
     - Add thresholdings.cpp	thresholdings.edp in examples++-load to remove to small coef
        in a matrix . 
