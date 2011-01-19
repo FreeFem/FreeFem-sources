@@ -349,13 +349,17 @@ are install
  1) intall Apple's Developer Tools from de Apple DVD
     Warning the default compile is now 64 bits, 
  2) install g95  fortron (to have a fortran  64 bits by default)
+        install macport  from http://www.macports.org/
+        sudo port install g95
+
      or add flags   -m64  to the fortran command (not tested).
 	cd download/f2c
 	make install-10.6
  3)  recompile openmpi with the use of g95  
- './configure'  'FC=/opt/local/bin/g95' 'F77=/opt/local/bin/g95' 
-  make 
-  sudo make install
+
+   './configure'  'FC=/opt/local/bin/g95' 'F77=/opt/local/bin/g95' 
+     make 
+    sudo make install
 
  4) TeXLive-teTeX Current Release in http://www.ctan.org/tex-archive/systems/mac/mactex/
 
