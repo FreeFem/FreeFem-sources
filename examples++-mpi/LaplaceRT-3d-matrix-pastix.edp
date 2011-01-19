@@ -1,4 +1,4 @@
-{ int iii; cin >>iii;}
+
 /*
    $ - \Delta p = f $   on $\Omega$, 
    $ dp / dn = (g1d,g2d). n  $ on $\Gamma_{1}$ 
@@ -158,7 +158,7 @@ matrix MlaplaceMixte = vlaplaceMixte(RPh,RPh,tgv=ttgv,solver=sparsesolver);
 tMatrix=clock()-tMatrix;
 
 real tFact=clock();
-set(MlaplaceMixte,solver=sparsesolver,tgv=ttgv,sparams="nprow=1, npcol=2", dimKrylov=400);
+set(MlaplaceMixte,solver=sparsesolver,tgv=ttgv,sparams="nprow=1, npcol="+mpisize, dimKrylov=400);
 tFact=clock()-tFact;
 
 real tscd=clock();

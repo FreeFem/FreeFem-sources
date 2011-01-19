@@ -137,7 +137,7 @@ class SolveSuperLUmpi :   public MatriceMorse<R>::VirtualSolver, public SuperLUm
 
 public:
   SolveSuperLUmpi(const MatriceMorse<R> &AA,string datafile,
-		  string param_char, KN<long> &pperm_r, KN<long> &pperm_c) : 
+		  string param_char, KN<long> &pperm_r, KN<long> &pperm_c, MPI_Comm  * mpicommw) : 
     string_option(param_char),data_option(datafile)
   { 
     
@@ -183,7 +183,10 @@ public:
 	 INITIALIZE THE SUPERLU PROCESS GRID. 
 	 ------------------------------------------------------------*/
     cout << "superlu_gridinit" <<endl;
-    superlu_gridinit(MPI::COMM_WORLD, nprow, npcol, &grid);
+    if(mpicommw)
+      superlu_gridinit(*mpicommw, nprow, npcol, &grid);
+    else
+      superlu_gridinit(MPI::COMM_WORLD, nprow, npcol, &grid);
     
     /* Bail out if I do not belong in the grid. */
     iam = grid.iam;
@@ -676,7 +679,7 @@ BuildSolverSuperLUmpi(DCL_ARG_SPARSE_SOLVER(double,A))
 {
     if(verbosity>9)
     cout << " BuildSolverSuperLUmpi<double>" << endl;
-    return new SolveSuperLUmpi<double>(*A,ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c);
+    return new SolveSuperLUmpi<double>(*A,ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c,static_cast<MPI_Comm*>(ds.commworld));
 }
 
 

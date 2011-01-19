@@ -190,7 +190,7 @@ class ZSolveSuperLUmpi :   public MatriceMorse<R>::VirtualSolver, public SuperLU
 public:
   ZSolveSuperLUmpi(const MatriceMorse<R> &AA,int strategy,double ttgv, double epsilon,
 		  double pivot,double pivot_sym, string datafile,
-		   string param_char, KN<long> &pperm_r, KN<long> &pperm_c, void * ccommworld=0 ) : 
+		   string param_char, KN<long> &pperm_r, KN<long> &pperm_c, void * ccommworld ) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),string_option(param_char),data_option(datafile),
     tol_pivot_sym(pivot_sym),tol_pivot(pivot)
@@ -224,7 +224,8 @@ public:
     /* lecture de nprow and npcol */
     // Cas max deux procs
     nprow = 1;
-    npcol = 1;
+    MPI_Comm_size(commworld,&npcol);
+
     matrixdist=0;
     /* set the default options */
     set_default_options_dist(&options);
@@ -772,7 +773,7 @@ BuildSolverSuperLUmpi(DCL_ARG_SPARSE_SOLVER(Complex,A))
   if(verbosity>9)
       cout << " BuildSolverSuperLUmpi<double>" << endl;
   return new ZSolveSuperLUmpi<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym,
-				       ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c);
+				       ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c, ds.commworld);
 }
 
 
