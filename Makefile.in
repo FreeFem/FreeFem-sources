@@ -955,7 +955,7 @@ install-exec-local::
 ListFiles-natives: .FORCE 
 	echo $(FF_EXAMPLES_FILES) >$@
 	echo ./download/fftw/Makefile ./download/fftw/Makefile.am  >>$@
-	find .  -name '*.[ei]dp' -o -name '*.h*' -o -name '*.cpp' -o '*.pgm'  |egrep  '[.]/examples++' >>$@
+	find .  -name '*.[ei]dp' -o -name '*.h*' -o -name '*.cpp' -o -name '*.pgm'  |egrep  '[.]/examples++' >>$@
 	find .   -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
 List-agl-dylib: src/nw/FreeFem++
 	otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}' >$@
