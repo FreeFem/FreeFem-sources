@@ -2,7 +2,7 @@
 
 TESTS=regtests.sh
 TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src EXEEXT=$(EXEEXT) MPIPROG=$(MPIPROG)
-LIST_IDP= AddLayer2d.idp		DDM-Schwarz-macro.idp	MPIGMRESmacro.idp	getARGV.idp\
+LIST_IDP= AddLayer2d.idp		DDM-Schwarz-macro.idp	MPIGMRESmacro.idp	getARGV.idp \
 AddLayer3d.idp		DDM-funcs-v2.idp	MPIplot.idp		mortar-msh.idp
 
 EXTRA_DIST=*.edp *.idp  regtests.sh  \
