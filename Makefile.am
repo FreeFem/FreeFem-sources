@@ -52,7 +52,7 @@ all-local:: @HISTORY@
 # uses fakeroot.
 history:
 	if test "$$FAKED_MODE" = ""; then\
-		cvs2cl --hide-filenames -l "-d>01/01/2005" --file HISTORY;\
+		hg log >HISTORY ;\
 		fi
 
 documentation:
