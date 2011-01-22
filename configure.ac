@@ -341,7 +341,7 @@ CYGWIN*|MINGW*)
 		CNOFLAGS="$CNOFLAGS $ff_nocygwin -I/usr/include/mingw"
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32" 
 		LIBSNOCONSOLE="-mwindows"
-		if test "$enable_fortran" != no  -or  "$with_flib" != no ;   then
+		if test "$enable_fortran" != no  -o  "$with_flib" != no ;   then
 		    case "$F77" in
 	 		*gfortran) FLIBS="$ff_nocygwin -lgfortran";;
 	 		*g77) FLIBS="$ff_nocygwin -lg2c";;
@@ -686,22 +686,28 @@ else
  esac
 fi
 
-if test "$with_mpipath" != no -a -n  "$with_mpipath"  ; then 
-    for i in 'c:\Program Files (x86)\MPICH2' 'c:\Program Files\MPICH2' ; do
-	if test -f "$i" ; then with_mpipath="$i"; fi
+AC_MSG_CHECKING(for mpipath )
+	
+if test "$with_mpi" != no -a ! -d  "$with_mpipath" -a "$ff_win32" = yes  ; then 
+    for i in '/c/Program Files (x86)/MPICH2' '/c/Program Files/MPICH2' 'c:\Program Files (x86)\MPICH2' 'c:\Program Files\MPICH2' ; do
+	test -d "$i" &&  with_mpipath="$i" && break 
     done
-    if test -f "$i" ; then with_mpipath="$i"; fi
-    sed "s?@MPIDIR@?$i?"  <mpic++.in >mpic++
+fi
+if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
+    sed -e "s?@MPIDIR@?$with_mpipath?" -e "s?@F77@?$F77?" -e "s?@CC@?$CC?" -e "s?@CXX@?$CXX?"   -e "s?@FC@?$FC?"  <mpic++.in >mpic++
     chmod a+rx mpic++ 
     for i in mpicc mpif90 mpif77 ; do cp mpic++ $i; done 
     ff_pwd=`pwd`
     with_mpi="$ff_pwd"/mpic++
-    ff_mpi_path="$ff_pwd"/mpic++
     MPICXX="$ff_pwd/mpic++"
     MPIF77="$ff_pwd/mpif77"
     MPIFC="$ff_pwd/mpif90"
-    MPICC="$ff_pwd/mpicc"     
+    MPICC="$ff_pwd/mpicc"   
+    MPIRUN="$with_mpipath/mpirun.exe"
+else 
+    with_mpipath=no	   
 fi
+AC_MSG_RESULT($ff_mpi_path  $MPICC)
 
 
 
@@ -1838,7 +1844,11 @@ else
 	MACOS=10.4
 	ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
     elif test "$ff_win32" = yes ; then
-	ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz"
+        case `uname` in 
+	 MINGW32*)    	ff_mmg3dlib="libmmg3d-1001-MINGW32.tar.gz";;
+	 MINGW64*)    	ff_mmg3dlib="libmmg3d-1001-MINGW64.tar.gz";;
+	 CYWIN*)    	ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz";;
+	 esac 
     else 
 	ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
     fi

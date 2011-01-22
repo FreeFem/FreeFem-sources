@@ -658,7 +658,6 @@ uninstall-am: uninstall-binPROGRAMS
 compil.date: $(ffmedit_SOURCES)
 	echo "#define COMPIL " '"' `date` '(with ff++ $(VERSION))''"' > compil.date
 #.PHONY: compil.date
-
 all-local: pinking.no-opt$(MEDITPROG)
 
 pinking.no-optffmedit$(EXEEXT):picking.c
@@ -667,9 +666,8 @@ pinking.no-optffmedit$(EXEEXT):picking.c
 	touch pinking.no-optffmedit$(EXEEXT)
 pinking.no-opt:picking.c
 	touch pinking.no-opt
-
 clean-local:
-	-rm pinking.no-opt
+	-rm pinking.no-opt pinking.no-optffmedit$(EXEEXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
