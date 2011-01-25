@@ -1246,6 +1246,15 @@ struct Op_AllReduce  : public   quad_function<KN_<R>,KN_<R>,fMPI_Comm,fMPI_Op,lo
     return MPI_Allreduce( (void *) (R*) s,(void *) (R*) r, chunk , MPI_TYPE<R>::TYPE(),op,comm);	
   }
 };
+
+template<class R>
+struct Op_AllReduce1  : public   quad_function<R *,R *,fMPI_Comm,fMPI_Op,long> {
+    static long  f(Stack, R *  const  & s, R *  const  &r,  fMPI_Comm const & comm,fMPI_Op const &op)  
+    { 
+	int chunk = 1;
+	return MPI_Allreduce( (void *) (R*) s,(void *) (R*) r, 1 , MPI_TYPE<R>::TYPE(),op,comm);	
+    }
+};
 /*
 template<class R>
 struct Op_Reducescatter  : public   quad_function<KN_<R>,KN_<R>,fMPI_Comm,fMPI_Op,long> {
@@ -2335,12 +2344,14 @@ void f_init_lgparallele()
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce< double >, Quad_Op<Op_Reduce< double > > >);
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce1< double >, Quad_Op<Op_Reduce1< double > > >);
       Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce< double >, Quad_Op<Op_AllReduce< double > > >);
+      Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce1< double >, Quad_Op<Op_AllReduce1< double > > >); // add FH jan 2011 
       //    Global.Add("mpiReduceScatter","(",new OneQuadOperator<Op_Reducescatter< double >, Quad_Op<Op_Reducescatter< double > > >);
 
       // Add J. Morice
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce< long >, Quad_Op<Op_Reduce< long > > >);
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce1< long >, Quad_Op<Op_Reduce1< long > > >);
       Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce< long >, Quad_Op<Op_AllReduce< long > > >);
+      Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce1< long >, Quad_Op<Op_AllReduce1< long > > >); // add FH jan 2011 
       //    Global.Add("mpiReduceScatter","(",new OneQuadOperator<Op_Reducescatter< long >, Quad_Op<Op_Reducescatter< long > > >);
       // fin Add J. Morice
 
@@ -2371,6 +2382,9 @@ void f_init_lgparallele()
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce< Complex >, Quad_Op<Op_Reduce< Complex > > >);
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce1< Complex >, Quad_Op<Op_Reduce1< Complex > > >);
       Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce< Complex >, Quad_Op<Op_AllReduce< Complex > > >);
+#ifdef MPI_DOUBLE_COMPLEX_
+    Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce1< Complex >, Quad_Op<Op_AllReduce1< Complex > > >);// add FH jan 2011 
+#endif
       // Fin Add J. Morice :: complex communication between processor 
       
       Global.New("mpirank",CConstant<long>(mpirank));

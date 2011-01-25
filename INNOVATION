@@ -1,4 +1,5 @@
-    -add tag verson 3.12-win32 
+    - add mpiAllReduce(umax,dmaxg,comm,mpiMAX);  where for real umax,dmaxg;
+    - add tag verson 3.12-win32 
     - add inferface for mpi in win32 architecture (form 32 version)
 v 3.12    17 jan 2011
     - coorect probleme of comm world on SuperLuDist (complex version)
