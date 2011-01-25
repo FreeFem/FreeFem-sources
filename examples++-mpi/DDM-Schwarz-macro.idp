@@ -269,7 +269,7 @@ if(dplot1 )
 /* data on intersection of the support of pij[0] and pij[j] */
 settt 
 
- if(vdebug1) plotMPIall(Thi,pii[],"pi_i");
+
   
  aThij.resize(njpart);
 /* construction of the mesh intersect i,j part  */
