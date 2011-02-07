@@ -961,48 +961,16 @@ fi
 dnl ---------------------------
 dnl   Looking for the tetgen
 dnl --------------------------
-AC_CHECK_LIB(tet,fftw_execute,ff_fftet_ok=yes)
+AC_CHECK_LIB(tet,tetrahedralize,ff_fftet_ok=yes)
 AC_CHECK_HEADERS(tetgen.h,ff_tet_h=yes, ff_tet_h=no)
 if test "$ff_tet_ok" = yes -a "$ff_tet_h" = yes
 then
     [echo tetgen LD  -ltet   >>$ff_where_lib_conf]
+    AC_DEFINE(HAVE_TETGEN,1, tetgen is compute tetrahedralize volume of an enclosed surface)
 fi
 dnl ---------------------------
 
 
-# Modif: morice 2008
-# Looking for the tetgen
-# --------------------
-ff_tetgen_ok=no
-ff_tetgen_dir="${curdir}/download"
-ff_libs_old="$LIBS"
-ff_ldflags_old="$LDFLAGS"
-ff_cppflags_old="$CPPFLAGS"
-#for ff_tetgendir in "" "${curdir}/download";
-#do
-if test "$ff_tetgen_ok" = no
-	then
-	  if test -n "$ff_tetgen_dir"
-	  then
-           LDFLAGS="$LDFLAGS -L${ff_tetgen_dir}/lib"
-           CPPFLAGS="$CPPFLAGS -I${ff_tetgen_dir}/include"
-      fi
-
-  AC_CHECK_LIB(tet,tetrahedralize,
-                ff_tetgen_ok=yes)
-  AC_CHECK_HEADERS(tetgen.h,
-             ff_tetgen_h=yes, ff_tetgen_h=no)
-
-   if test "$ff_tetgen_ok" = yes  -a "$ff_tetgen_h" = yes 
-    then
-      AC_DEFINE(HAVE_TETGEN,1, tetgen is compute tetrahedralize volume of an enclosed surface)
-   else
-       LIBS="$ff_libs_old"
-       LDFLAGS="$ff_ldflags_old"
-       CPPFLAGS="$ff_cppflags_old"    
-   fi
-fi
-#done
 # Looking for the BLAS
 # --------------------
 ff_blas_ok=no
@@ -1909,14 +1877,26 @@ m4_define([AC_FF_WHERELIB],
     ])dnl end m4_define AC_FF_WHERELIB
 
 m4_map([AC_FF_WHERELIB],[ 
-	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],
-	[[fftw3],[-lfftw3],[fftw3.h],[]],
-	[[superlu],[-lsuperlu],[superlu_defs.h],[]],
-	[[blacs],[$ff_blacs],$ff_winc,[]],
-	[[scalapack],[$ff_scalapack],$ff_winc,[$ff_blacs  $ff_blas_libs $ff_MPI_LIB]],
-	[[scotch],[-lscotch -lscotcherr],[],[]],	
-	[[metis],[-lmetis],[metis/metis.h],[]],
-	[[parmetis],[-lparmetis],[parmetis/parmetis.h],[]]
+	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[/usr/include/dmumps_c.h],[]],
+	[[mumps_ptscotch],[-lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch],[/usr/include/dmumps_c.h]],
+	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[/usr/include/dmumps_c.h]],
+	[[hypre],[-lHYPRE]],
+	[[fftw3],[-lfftw3],[/usr/include/fftw3.h],[]],
+	[[superlu_dist],[-lsuperlu-dist],[/usr/include/superlu-dist/superlu_defs.h],[]],
+	[[superlu],[-lsuperlu],[/usr/include/superlu/slu_ddefs.h],[]],
+	[[Superlu4],[-lsuperlu4],[/usr/include/superlu4/slu_ddefs.h],[]],
+        [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
+        [[scalapack],[-lscalapack$ff_with_mpi],[]],
+        [[scotch],[-lscotch -lscotcherr],[]],
+        [[ptscotch],[-lptscotch -lptscotcherr],[]],
+	[[metis],[-lscotch -lmetis],[/usr/include/metis/metis.h],[]],
+	[[parmetis],[-lptscotch -lparmetis],[],[]],
+	[[freeyams],[-lfreeyams],[/usr/include/freeyamslib.h],[]],
+	[[mmg3d],[-lmmg3d],[/usr/include/libmmg3d.h],[]],
+	[[mshmet],[-lmshmet],[],[]],
+	[[gsl],[-lgsl -lgslcblas -lm],[/usr/include/gsl/gsl_sf.h],[]],
+	[[parms],[-lparms -litsol -llapack -lblas -lm],[],[]],
+	[[tetgen],[-ltet],[/usr/include/tetgen.h],[]],
     ]
     )
 

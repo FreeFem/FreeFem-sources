@@ -49,14 +49,6 @@ AC_MSG_CHECKING(whether to generate debugging information)
 AC_ARG_ENABLE(debug,[  --enable-debug	Turn on debug versions of FreeFem++])
 AC_ARG_ENABLE(optim,[  --enable-optim	Turn on compiler optimization])
 
-# Autoconf always chooses -O2. -O2 in gcc makes some functions
-# disappear. This is not ideal for debugging. And when we optimize, we
-# do not use -O2 anyway.
-
-CFLAGS="`echo $CFLAGS | sed 's/-O2//g'`"
-FFLAGS="`echo $FFLAGS | sed 's/-O2//g'`"
-CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
-
 if test "$enable_debug" = yes;
 then
 	AC_MSG_RESULT(yes)
@@ -65,9 +57,9 @@ else
 
 	# No debugging information in optimized code
 
-	CFLAGS="`echo $CFLAGS | sed 's/-g//g'` -DNDEBUG"
-	FFLAGS="`echo $FFLAGS | sed 's/-g//g'` -DNDEBUG"
-	CXXFLAGS="`echo $CXXFLAGS | sed 's/-g//g'` -DNDEBUG"
+	CFLAGS="$CFLAGS -DNDEBUG"
+	FFLAGS="$FFLAGS -DNDEBUG"
+	CXXFLAGS="$CXXFLAGS -DNDEBUG"
 fi
 
 # Hardware-independant optimization
@@ -100,6 +92,14 @@ if test "$enable_debug" != yes \
     -a "$enable_optim" != no \
     -a "$enable_generic" != yes
 then
+
+# Autoconf always chooses -O2. -O2 in gcc makes some functions
+# disappear. This is not ideal for debugging. And when we optimize, we
+# do not use -O2 anyway.
+
+CFLAGS="`echo $CFLAGS | sed 's/-O2//g'`"
+FFLAGS="`echo $FFLAGS | sed 's/-O2//g'`"
+CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
 
     # MacOS X Darwin
     if test -x /usr/bin/hostinfo
