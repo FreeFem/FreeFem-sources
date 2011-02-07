@@ -245,7 +245,7 @@ class BC_set : public E_F0mps { public:
 	  k->second=CastTo<Complex>(C_F0(k->second,rr)) ;}
   // fin ajout
 */    
-  static ArrayOfaType  typeargs() { return ArrayOfaType(atype<long>(),true);}
+  static ArrayOfaType  typeargs() { return ArrayOfaType(/*atype<long>(),*/true);} //  change frev 2011 FH...
   AnyType operator()(Stack ) const  { return SetAny<Result>(this);}
   operator aType () const { return atype<Result>();}         
   

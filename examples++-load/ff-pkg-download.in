@@ -1,3 +1,5 @@
+#!/bin/sh
+
 ff=$0;
 bb=`basename $0`
 DIR=`dirname $ff`
@@ -29,8 +31,8 @@ if [   -d $DIR/lib -a -d $DIR/include  ] ; then
     INC="$DIR/include"
     cd "$LIB"
 #  set -x
-    for i in $LIB/WHERE.* ; do
-	sed "s;@DIR@;$DIR;" <$i 
+    for i in $LIB/WHERE.* ; do            
+	test -f $i && ( sed "s;@DIR@;$DIR;" <$i  )
     done
 #    return
     for la in arpack umfpack amd fftw3 blas lapack   mmg3d; do
