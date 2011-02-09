@@ -34,7 +34,7 @@ EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
   medit.cpp  \
   bmo.cpp lgbmo.cpp bmo.hpp \
  fflapack.cpp	lapack.cpp	clapack.h lapack.edp \
- fig.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp \
+ fig.pgm lg.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp \
  DxWriter.cpp  metis.cpp pcm.cpp pcm.hpp pcm2rnm.cpp \
  UMFPACK64.cpp iovtk.cpp gmsh.cpp MetricKuate.cpp  \
  ffnewuoa.cpp	ffnewuoa.edp	newuoa.f Element_P1dc1.cpp ilut.cpp ilut.edp \
