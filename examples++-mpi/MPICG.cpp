@@ -70,10 +70,10 @@ int NLCG(const DJ & dJ,const P & C,KN_<R> &x,const int nbitermax, double &eps,lo
 	  Cg = C*g;
 	  R g2p=g2; 
 	  g2 = (Cg,g);
-	  if (  kprint >1 )
+	  if (  kprint < nbitermax )
 	      cout << "CGNL:" <<iter <<  ",  ro = " << ro << " ||g||^2 = " << g2 << endl; 
 	  if (g2 < reps2) { 
-	      if (kprint )
+	      if (kprint< nbitermax )
 		  cout << "CGNL converge: " << iter <<",  ro = " << ro << " ||g||^2 = " << g2 << endl; 
 	      return 1;// ok 
 	  }
@@ -109,7 +109,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
     throwassert(&x  && &A && &C);
     typedef KN<R> Rn;
     int n=x.N();
-    if (verbosity>99) kprint=1;
+   // if (verbosity>99) kprint=1;
     R ro=1;
     Rn g(n),h(n),Ah(n), & Cg(Ah);  // on utilise Ah pour stocke Cg  
     g = A*x;
@@ -118,10 +118,10 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
     h =-Cg; 
     R g2 = ReduceSum1((Cg,g),commworld);
     if (g2 < 1e-30) 
-      { if(verbosity>1)
+      { if(kprint<=nbitermax)
 	  cout << "GC  g^2 =" << g2 << " < 1.e-30  Nothing to do " << endl;
 	  return 2;  }
-    if (verbosity>5 ) 
+    if (kprint<5 ) 
 	cout << " 0 GC  g^2 =" << g2 << endl;
     R reps2 =eps >0 ?  eps*eps*g2 : -eps; // epsilon relatif 
     eps = reps2;
@@ -145,10 +145,10 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
 	  Cg = C*g;
 	  R g2p=g2; 
 	  g2 = ReduceSum1((Cg,g),commworld);
-	  if ( ( (iter%kprint) == kprint-1)  &&  verbosity >1 )
+	  if ( ( (iter%kprint) == kprint-1)  )
 	      cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
 	  if (g2 < reps2) { 
-	      if (verbosity )
+	      if (kprint <= nbitermax)
 		  cout << "CG converges " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
 	      return 1;// ok 
           }
@@ -156,7 +156,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
 	  h *= gamma;
 	  h -= Cg;  //  h = -Cg * gamma* h       
       }
-    if (verbosity )
+    if (nbitermax <= nbitermax  )
 	cout << "CG does'nt converge: " << nbitermax <<   " ||g||^2 = " << g2 << " reps2= " << reps2 << endl; 
     return 0; 
 }
@@ -357,6 +357,8 @@ public:
 		if (nargs[5])  dKrylov= GetAny<long>((*nargs[5])(stack));
                 if (nargs[6]) verb=Abs(GetAny<long>((*nargs[6])(stack)));
 		long gcverb=51L-Min(Abs(verb),50L);
+		if(verb==0) gcverb = 1000000000;// no print 
+
 		MPI_Comm mpiCommWorld = MPI_COMM_WORLD;
 		MPI_Comm * commworld= vcommworld ? (MPI_Comm *) vcommworld: & mpiCommWorld ;
 		KN<R>  bzero(B?1:n); // const array zero

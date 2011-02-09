@@ -100,7 +100,7 @@ template<> struct MPI_TYPE<int>      {static const MPI_Datatype TYPE(){return MP
 template<> struct MPI_TYPE<double>    {static const MPI_Datatype TYPE(){return MPI_DOUBLE;}};
 template<> struct MPI_TYPE<char>    {static const MPI_Datatype TYPE(){return MPI_BYTE;}};
 
-#ifdef MPI_DOUBLE_COMPLEX_
+#ifdef MPI_DOUBLE_COMPLEX
 template<> struct MPI_TYPE<Complex>   {static const MPI_Datatype TYPE(){return MPI_DOUBLE_COMPLEX;}};
 #endif
 template<class T> struct MPI_WHAT {};
@@ -196,7 +196,7 @@ template<>
 long  WRecv<Complex> (Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
 {
   MPI_Status status;
-#ifdef MPI_DOUBLE_COMPLEX_
+#ifdef MPI_DOUBLE_COMPLEX
   if(rq && (rq != Syncro_block)) 
     return MPI_Irecv(reinterpret_cast<void*> (v), n, MPI_DOUBLE_COMPLEX, who, tag,comm,rq);
   else 
@@ -221,7 +221,7 @@ template<>
 void  WBcast<Complex>(Complex * v,int  n,int who,MPI_Comm comm)  
 {
   assert(v && n>0);
-#ifdef MPI_DOUBLE_COMPLEX_
+#ifdef MPI_DOUBLE_COMPLEX
   MPI_Bcast(reinterpret_cast<void*> (v), n, MPI_TYPE<R>::TYPE(), who,comm);
 #else
   n *=2;
@@ -1750,12 +1750,12 @@ struct Op_AllReduce<Complex>  : public   quad_function<KN_<Complex>,KN_<Complex>
 // };*/
 
 template<>
-struct Op_Reduce1<Complex>  : public   quad_function<R*,R*,MPIrank,fMPI_Op,long> {
-  static long  f(Stack, R*  const  & s, R*  const  &r,  MPIrank const & root, fMPI_Op const &op)  
+struct Op_Reduce1<Complex>  : public   quad_function<Complex*,Complex*,MPIrank,fMPI_Op,long> {
+  static long  f(Stack, Complex*  const  & s, Complex*  const  &r,  MPIrank const & root, fMPI_Op const &op)  
   { 
 #ifdef MPI_DOUBLE_COMPLEX
     int chunk = 1;
-    return MPI_Reduce( (void *) (Complex*)s, (void *) (Complex*)r, chunk , MPI_DOUBLE_COMPLEX,op,root.who,root.comm);
+    return MPI_Reduce( (void *) s, (void *) r, chunk , MPI_DOUBLE_COMPLEX,op,root.who,root.comm);
 #else
     int chunk = 2;
     return MPI_Reduce( reinterpret_cast<void*> (s), reinterpret_cast<void*> (r), chunk , MPI_DOUBLE,op,root.who,root.comm);
@@ -2385,7 +2385,7 @@ void f_init_lgparallele()
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce< Complex >, Quad_Op<Op_Reduce< Complex > > >);
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce1< Complex >, Quad_Op<Op_Reduce1< Complex > > >);
       Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce< Complex >, Quad_Op<Op_AllReduce< Complex > > >);
-#ifdef MPI_DOUBLE_COMPLEX_
+#ifdef MPI_DOUBLE_COMPLEX
     Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce1< Complex >, Quad_Op<Op_AllReduce1< Complex > > >);// add FH jan 2011 
 #endif
       // Fin Add J. Morice :: complex communication between processor 

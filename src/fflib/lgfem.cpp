@@ -630,6 +630,7 @@ class LinearCG : public OneOperator
       if (nargs[3]) veps=GetAny<double*>((*nargs[3])(stack));
       if (nargs[4]) verb=Abs(GetAny<long>((*nargs[4])(stack)));
       long gcverb=51L-Min(Abs(verb),50L);
+      if(verb==0) gcverb = 1000000000;// no print 
       if(veps) eps= *veps;
       KN<R>  bzero(B?1:n); // const array zero
       bzero=R(); 

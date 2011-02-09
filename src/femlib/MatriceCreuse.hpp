@@ -719,7 +719,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
    throwassert(&x  && &A && &C);
    typedef KN<R> Rn;
    int n=x.N();
-   if (verbosity>99) kprint=1;
+  // if (verbosity>99) kprint=1;
    R ro=1;
    Rn g(n),h(n),Ah(n), & Cg(Ah);  // on utilise Ah pour stocke Cg  
    g = A*x;
@@ -753,10 +753,10 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
        Cg = C*g;
        R g2p=g2; 
        g2 = (Cg,g);
-       if ( ( (iter%kprint) == kprint-1)  &&  verbosity >1 )
+       if ( ( (iter%kprint) == kprint-1)  /*&&  verbosity >1*/ )
          cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
        if (g2 < reps2) { 
-         if (verbosity )
+         if (kprint <= nbitermax )
             cout << "CG converges " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
           return 1;// ok 
           }
@@ -764,7 +764,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
        h *= gamma;
        h -= Cg;  //  h = -Cg * gamma* h       
      }
-     if (verbosity )
+     if (nbitermax <= nbitermax )
       cout << "CG does'nt converge: " << nbitermax <<   " ||g||^2 = " << g2 << " reps2= " << reps2 << endl; 
    return 0; 
 }
