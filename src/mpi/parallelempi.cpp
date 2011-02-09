@@ -222,7 +222,7 @@ void  WBcast<Complex>(Complex * v,int  n,int who,MPI_Comm comm)
 {
   assert(v && n>0);
 #ifdef MPI_DOUBLE_COMPLEX
-  MPI_Bcast(reinterpret_cast<void*> (v), n, MPI_TYPE<R>::TYPE(), who,comm);
+    MPI_Bcast(reinterpret_cast<void*> (v), n, MPI_DOUBLE_COMPLEX /*MPI_TYPE<R>::TYPE()*/, who,comm);
 #else
   n *=2;
   MPI_Bcast(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who,comm);

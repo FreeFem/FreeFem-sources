@@ -1,3 +1,4 @@
+    - correct mpiReduce for complex and real data.  
     - add mpiAllReduce(umax,dmaxg,comm,mpiMAX);  where for real umax,dmaxg;
     - add tag verson 3.12-win32 
     - add inferface for mpi in win32 architecture (form 32 version)
