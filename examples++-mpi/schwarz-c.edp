@@ -9,18 +9,17 @@
 //  ---------------------------------
 
 if ( mpisize != 2 ) {
-cout << " sorry number of processeur !=2 " << endl;
+cout << " sorry, number of processors !=2 " << endl;
 exit(1);}
 verbosity=3;
-real pi=4*atan(1);
-int inside = 2;
-int outside = 1;
-border a(t=1,2){x=t;y=0;label=outside;};
-border b(t=0,1){x=2;y=t;label=outside;};
-border c(t=2,0){x=t ;y=1;label=outside;};
-border d(t=1,0){x = 1-t; y = t;label=inside;};
-border e(t=0, pi/2){ x= cos(t); y = sin(t);label=inside;};
-border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=outside;}; 
+int interior = 2;
+int exterior = 1;
+border a(t=1,2){x=t;y=0;label=exterior;};
+border b(t=0,1){x=2;y=t;label=exterior;};
+border c(t=2,0){x=t ;y=1;label=exterior;};
+border d(t=1,0){x = 1-t; y = t;label=interior;};
+border e(t=0, pi/2){ x= cos(t); y = sin(t);label=interior;};
+border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=exterior;}; 
 int n=4;
 mesh[int]  Th(mpisize);
 if (mpirank == 0) 
@@ -40,7 +39,7 @@ int i=0;
 
 problem pb(u,v,init=i,solver=Cholesky) = 
     int2d(Th[mpirank])( dx(u)*dx(v)+dy(u)*dy(v) )
-  + int2d(Th[mpirank])( -v) + on(inside,u = U)  +    on(outside,u= U ) ;
+  + int2d(Th[mpirank])( -v) + on(interior,u = U)  +    on(exterior,u= 0 ) ;
 
 for ( i=0 ;i< 20; i++) 
 { 
@@ -49,7 +48,7 @@ for ( i=0 ;i< 20; i++)
    //  send u  to the other proc, receive in U
    processor(1-mpirank) << u[];    processor(1-mpirank) >> U[];
    real err0,err1;
-   err0 = int1d(Th[mpirank],inside)(square(U-u)) ;
+   err0 = int1d(Th[mpirank],interior)(square(U-u)) ;
    // send err0  to the other proc, receive in err1
    processor(1-mpirank)<<err0;   processor(1-mpirank)>>err1;
    real err= sqrt(err0+err1);

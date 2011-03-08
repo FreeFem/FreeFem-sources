@@ -168,7 +168,7 @@ template<class RR> RR LDecremantation(RR* a){ return --(*a);}
 template<class RR> RR RDecremantation(RR* a){ return (*a)--;}
 
 template<class RR,class B>
- RR * New_form_string(string * s) {B * r=  new B(s);delete *s;return r;}
+ RR * New_form_string(string * s) {B * r=  new B(s);delete s;return r;}// correct Mars 2011 remove * if delete
  
  
 
@@ -1334,6 +1334,7 @@ void Init_map_type()
     
      Global.Add("dumptable","(",new OneOperator1<ostream*,ostream*>(dumptable));
      Global.Add("exec","(",new OneOperator1<long,string* >(exec));  //FH string * mars 2006 
+     Global.Add("system","(",new OneOperator1<long,string* >(exec));  //FH string fevr 2011 
     
      Global.Add("polar","(",new OneOperator2_<Complex,double,double>(polar));
  // rand generator ---

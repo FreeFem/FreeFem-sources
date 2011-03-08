@@ -1,8 +1,8 @@
 # Makefile using Automake + Autoconf
 # ----------------------------------
 # $Id$
-# change FH 
-CXX=@MPICXX@
+# change FH mars 2010 for sgi mpiu .... 
+#CXX=@MPICXX@
 
 # To create statically linked executables (see configure.ac)
 CXXLD=$(STATICTOOL) $(CXX)
@@ -17,10 +17,10 @@ EXTRA_DIST=ff-mpirun.in
 FreeFem___mpi_SOURCES=../Graphics/sansrgraph.cpp ../lglib/mymain.cpp   parallelempi.cpp	\
 ../lglib/lg.tab.cpp
 FreeFem___mpi_DEPENDENCIES=../fflib/libff.a
-LDADD=../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
+LDADD=../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @MPI_LIB@
 
 AM_CXXFLAGS=-DPARALLELE
-INCLUDES=-I../fflib -I../Graphics -I../femlib
+INCLUDES=-I../fflib -I../Graphics -I../femlib @MPI_INCLUDE@
 ff-mpirun:ff-mpirun.in Makefile
 	../../config.status  --file=$@:$@.in
 

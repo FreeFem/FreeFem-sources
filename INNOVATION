@@ -1,3 +1,7 @@
+v 3.12-1 10 10 fevr 2011 
+    - add VTK write for paraview, examples++-load/VTK_writer.cpp		examples++-load/VTK_writer_3d.cpp (see source for moe details) 
+    - put comment in the documentation about negative tgv 
+    - correct pb blacs mkl  (unde with mumps) 
     - correct mpiReduce for complex and real data.  
     - add mpiAllReduce(umax,dmaxg,comm,mpiMAX);  where for real umax,dmaxg;
     - add tag verson 3.12-win32 
@@ -21,7 +25,7 @@ v 3.12    17 jan 2011
     - Add a true exemple to buld mesh form a image (lg.pgm) ,  Leman-mesh.edp 
     - Add New syntaxe in macro generation
         NewMacro a(i) 
-        EndMacro <
+        EndMacro 
        with // comment and macro definition, first trik
      - Add interface with special function  og gls  http://www.gnu.org/software/gsl/
         the full list is in the example examples++-loal/gsl.edp  
