@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.12,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.12-1,hecht@ann.jussieu.fr,freefem++)
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
@@ -70,8 +70,8 @@ AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPAC
 ff_g2c_lib="";	 
 if test "$enable_fortran" != no
 then
-    AC_PROG_F77(g77 f77 gfortran g77 f90 xlf xlf90 fort77)
-    AC_PROG_FC(gfortran  f90  xlf90 )
+    AC_PROG_FC(gfortran  f90  xlf90 g95  )
+    AC_PROG_F77( gfortran  f90 xlf xlf90 g95 f77 fort77 "$FC" )
 #	if test -n "$F77" 
 #	then
     ff_flibs=""
@@ -156,7 +156,7 @@ then
 	    FLIBS=$ff_flibs
 	else
 	    AC_MSG_NOTICE( [ fatal error : no fortran ] );
-	    AC_MSG_NOTICE( [add ---without-fortran  ] );
+	    AC_MSG_NOTICE( [add --disable-fortran  ] );
 	    AC_MSG_NOTICE( [or try to compile f2c in directory download/f2c  ] );
 	    AC_MSG_NOTICE( [  just do:  make install ] );
 	    AC_MSG_ERROR([ Fatal error No Fortran compiler . ],1);  
@@ -668,6 +668,8 @@ dnl m4_include(ax_mpi.m4)
 ff_save_path="$PATH"
 # We need to choose between mpich, openmpi  and lam for the Debian package
 AC_ARG_WITH(mpipath,[  --with-mpich= the path of mpich under windows (no command  mpic++, ... )])
+AC_ARG_WITH(mpilibs,[  --with-mpilibs= the libs to add to c,c++,fc, ... (no mpicc++, just use the compiler) ])
+AC_ARG_WITH(mpiinc,[  --with-mpiinc= the include directory directive and preprocess directive  (no mpicc++, just use the compiler)) ])
 AC_ARG_WITH(mpi,[  --with-mpi=[yes|no|mpic++|lam|mpich|openmpi|/usr/local/bin/mpic++|... ]	or --without-mpi	Choose MPI implementation (default is mpic++)])
 
 #if test "$with_mpi" != no ; then
@@ -686,17 +688,49 @@ else
  esac
 fi
 
+dnl AC_MSG_NOTICE([ xxxxxxxxxxxxxxxxxxxx --$with_mpilibs--]);
+if test -n "$with_mpiinc"  -a "$with_mpiinc" != no ; then
+  if test  "$with_mpi" = 'no' ; then with_mpi='yes'; fi
+  ff_MPI_INCLUDE="$with_mpiinc"
+fi
+if test -n "$with_mpilibs" -a "$with_mpilibs" != no ; then
+    ff_MPI_LIB="$with_mpilibs"
+    ff_MPI_LIBFC="$with_mpilibs"
+    MPICXX="$CXX $ff_MPI_INCLUDE"
+    MPIF77="$F77 $ff_MPI_INCLUDE"
+    MPIFC="$FC  $ff_MPI_INCLUDE"
+    MPICC="$CC  $ff_MPI_INCLUDE"
+    AC_MSG_NOTICE([   ---  set  all MPI compile to compiler:   $MPICC , $MPIF77, $MPIFC, $MPICC  ])
+fi
+
+AC_ARG_VAR(MPIRUN,[MPI run command ])
+AC_MSG_CHECKING(for MPIRUN)
+
+if test -z "$MPIRUN" ; then
+    AC_PATH_PROGS(MPIRUN,mpirun mpiexec,no,$ff_mpi_path)
+    if test "$MPIRUN" = no
+    then
+	ff_mpi=no
+    fi
+fi
+AC_MSG_RESULT($MPIRUN)
+
 AC_MSG_CHECKING(for mpipath )
 	
-if test "$with_mpi" != no -a ! -d  "$with_mpipath" -a "$ff_win32" = yes  ; then 
+if test "$with_mpi" != no -a ! -d  "$with_mpipath" -a "$ff_win32" = yes ; then 
     for i in '/c/Program Files (x86)/MPICH2' '/c/Program Files/MPICH2' 'c:\Program Files (x86)\MPICH2' 'c:\Program Files\MPICH2' ; do
 	test -d "$i" &&  with_mpipath="$i" && break 
     done
 fi
+
+dnl if test "$with_mpilibs" != "no" ; then
+dnl fi
+
+    
 if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
     sed -e "s?@MPIDIR@?$with_mpipath?" -e "s?@F77@?$F77?" -e "s?@CC@?$CC?" -e "s?@CXX@?$CXX?"   -e "s?@FC@?$FC?"  <mpic++.in >mpic++
     chmod a+rx mpic++ 
-    for i in mpicc mpif90 mpif77 ; do cp mpic++ $i; done 
+    for i in mpicc mpif90 mpifc mpif77 ; do cp mpic++ $i; done 
     ff_pwd=`pwd`
     with_mpi="$ff_pwd"/mpic++
     MPICXX="$ff_pwd/mpic++"
@@ -707,14 +741,23 @@ if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
 else 
     with_mpipath=no	   
 fi
-AC_MSG_RESULT($ff_mpi_path  $MPICC)
+
+
+AC_MSG_RESULT($ff_mpi_path)
+
 
 
 
 dnl  correct ff_mpi_path august 2010 -- FH ...  
+
+
+ff_save_cxx="$CXX"
+ff_save_libs="$LIBS"
+
+
 if test "$with_mpi" != no
 then
-	ff_mpi_path=`AS_DIRNAME(["$ff_mpicxx"])`
+	ff_mpi_path=`AS_DIRNAME(["$MPIRUN"])`
 dnl	echo "ff_mpi_path '$ff_mpi_path' .............."
 	case "$ff_mpi_path" in
 	    .|"") ff_mpi_path="$PATH";ff_defmpicxx="$ff_mpicxx";;
@@ -727,8 +770,9 @@ dnl if also  add $PATH they  could be missing some different mpi version...
 	    AC_MSG_CHECKING(for MPICXX)
 	fi
 	ff_mpicxx="$MPICXX"
-	ff_save_cxx="$CXX"
 	CXX=$ff_mpicxx
+	LIBS="$LIBS $ff_MPI_LIB"
+	
 	AC_LINK_IFELSE(
 [AC_LANG_SOURCE([
 #include <mpi.h>
@@ -750,20 +794,6 @@ ff_mpi=no)
 	# Also check that mpirun is there. If it isn't, then MPI is
 	# not fully installed.
 
-	if test "$ff_mpi" = yes;
-	then
-            AC_ARG_VAR(MPIRUN,[MPI run command ])
-#	echo "ff_mpi_path::$ff_mpi_path:"
-#        AC_MSG_CHECKING(for MPIRUN)
-	    if test -z "$MPIRUN" ; then
-		AC_PATH_PROGS(MPIRUN,mpirun mpiexec,no,$ff_mpi_path)
-		if test "$MPIRUN" = no
-		then
-		    ff_mpi=no
-		fi
-		AC_MSG_RESULT($MPIRUN)
-	    fi
-	fi
 
 	if test "$ff_mpi" = yes;
 	then
@@ -782,75 +812,83 @@ ff_mpi=no)
 	fi
 	if test "$ff_mpi" = yes;
 	then
-          ff_mpishow=`$MPICXX -show`
-#          case $ff_mpishow in
-#	  *openmpi*) echo which mpi : openmpi;;
-#	  *lam*) echo lam mpi;;
-#	  *mpich2*) echo mpich2 ;;
-#	  *) echo unknow mpi;;
-#	  esac
+	ff_MPI_INCLUDE="$with_mpiinc"
+        ff_mpishow=`$MPICXX -show` 2>/dev/null
+        ff_mpifcshow=`$MPIFC -show` 2>/dev/null
+	if test "$with_mpilibs" == no ; then	 
+	      [ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`]
+	      ff_MPI_LIB_DIRS=""
+	      [ff_MPI_LIB=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
+	      [ff_MPI_LIBFC=`echo $ff_mpifcshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
+	      [ff_mpi_idir=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
+	  fi
+	    [ff_mpi_idir=`echo $ff_MPI_INCLUDE|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
+	    [ff_mpi_ldir=`echo $ff_MPI_LIB|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|sed -e 's/^-[Llp]//' -e 's/^-Wl,]//'  |tr '\n' ' '`' /usr/lib']
 
+          ff_MPI_INCLUDE_DIR=""
+	  for i in $ff_mpi_idir; do
+	      if test -f "$i/mpi.h" -a -z "$ff_MPI_INCLUDE_DIR"  ;then
+		  ff_MPI_INCLUDE_DIR=$i
+	      fi
+	      done
+	  for i in $ff_mpi_ldir; do
+	      ff_tmp=`ls $i/libmpi.*|head -1`
+	      if test  -f "$ff_tmp"  -a -z "$ff_MPI_LIB_DIRS"  ;then
+		  ff_MPI_LIB_DIRS=$i
+	      fi
+	      done
+	  
+	  AC_SUBST(MPICXX,$MPICXX)		
+	  AC_ARG_VAR(MPICC,[MPI C compiler command in $ff_mpi_path])
+	  if test -z "$MPICC" ; then		
+	      AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
+	  fi
+	  AC_SUBST(MPICC,$MPICC)
+	  AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
+	  if test "$enable_fortran" != no
+	  then	
+	      
+	      AC_ARG_VAR(MPIF77,[MPI Fortran 77 compiler command])
+	      if test -z "$MPIF77" ; then    
+		  AC_PATH_PROGS(MPIF77, mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, "",$ff_mpi_path)
+	      fi
+	      AC_SUBST(MPIF77)
+	      if test "$with_mpilibs" == no -a -n "$MPIF77" ; then	  
+		  [ff_MPI_LIBFC=`$MPIF77 -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
+	      fi	      
+	      AC_ARG_VAR(MPIFC,[MPI Fortran 90  compiler command])
+	      if test -z "$MPIFC" ; then
+		  AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",$ff_mpi_path)
+	      fi		
+	      AC_SUBST(MPIFC)
+	      if test "$with_mpilibs" == no -a -n "$MPIFC" ; then	  
+		  [ff_MPI_LIBFC=`$MPIFC -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
+	      fi	      
+	      
+	  fi
 
-	    [ff_MPI_INCLUDE=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`]
-#	    ff_MPI_INCLUDE=
-	    ff_MPI_LIB_DIRS=""
-	    [ff_MPI_LIB=`$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
-	    [ff_mpi_idir=`$MPICXX -show|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
-            ff_MPI_INCLUDE_DIR=""
-#	    echo ff_MPI_INCLUDE $ff_MPI_INCLUDE
-#	    echo ff_MPI_LIB $ff_MPI_LIB
-	    for i in $ff_mpi_idir; do
-	    if test -f "$i/mpi.h" -a -z "$ff_MPI_INCLUDE_DIR"  ;then
-	      ff_MPI_INCLUDE_DIR=$i
-	    fi
-	    done
-
-	    AC_SUBST(MPI_INCLUDE,$ff_MPI_INCLUDE)
-	    AC_SUBST(MPI_LIB_DIRS,$ff_MPI_LIB_DIRS)
-	    AC_SUBST(MPI_LIB,$ff_MPI_LIB)
-
-	    AC_SUBST(MPICXX,$MPICXX)		
-	    AC_ARG_VAR(MPICC,[MPI C compiler command in $ff_mpi_path])
-	    if test -z "$MPICC" ; then		
-		AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
-	    fi
-	    AC_SUBST(MPICC,$MPICC)
-	    AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
-	    if test "$enable_fortran" != no
-	    then	
-		
-		AC_ARG_VAR(MPIF77,[MPI Fortran 77 compiler command])
-		if test -z "$MPIF77" ; then    
-		    AC_PATH_PROGS(MPIF77, mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, "",$ff_mpi_path)
-		fi
-		AC_SUBST(MPIF77)
-		
-		AC_ARG_VAR(MPIFC,[MPI Fortran 90  compiler command])
-		if test -z "$MPIFC" ; then
-		    AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",$ff_mpi_path)
-		fi		
-		AC_SUBST(MPIFC)
-	    fi
-	    if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
-	        AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/mpif.h"  ])
-	    else
-		if test -n "$MPIFC" ; then
-		    [echo mpifc LD `$MPIFC -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`  >>$ff_where_lib_conf]
-		    [echo mpifc INCLUDE `$MPIFC -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'|tr '\n' ' '`  >>$ff_where_lib_conf]
-		fi
-		if test -n "$MPIF77" ; then
-		    [echo mpif77 LD `$MPIF77 -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`  >>$ff_where_lib_conf]
-		    [echo mpif77 INCLUDE `$MPIF77 -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'|tr '\n' ' '`  >>$ff_where_lib_conf]
-		fi
-  	    fi
-	    if test -n "$MPICXX" ; then 	    
-#	        [echo " ********* MPICXX $MPICXX " mpi LD `$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '` ]
-		[echo mpi LD `$MPICXX -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`  >>$ff_where_lib_conf]
-		[echo mpi INCLUDE `$MPICXX -show|tr ' ' '\n'| grep -E '^-[ID]|^-Wp,'|tr '\n' ' '`  >>$ff_where_lib_conf]
-	    fi
-	    AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		
+	  if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
+	      AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/mpif.h"  ])
+	  else
+	      if test -n "$MPIFC" ; then
+		  [echo mpifc LD "'$ff_MPI_LIBFC'"]   >>$ff_where_lib_conf]
+		  [echo mpifc INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf]
+		  [echo mpif77 LD "'$ff_MPI_LIBFC'"]   >>$ff_where_lib_conf]
+		  [echo mpif77 INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf]
+	      fi
+  	  fi
+	  if test -n "$MPICXX" ; then 	    
+              [echo mpi LD "'$ff_MPI_LIB'"]   >>$ff_where_lib_conf]
+              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf]
+	  fi
+	  AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		
+	  AC_SUBST(MPI_INCLUDE,$ff_MPI_INCLUDE)
+	  AC_SUBST(MPI_LIB_DIRS,$ff_MPI_LIB_DIRS)
+	  AC_SUBST(MPI_LIB,$ff_MPI_LIB)
+	  AC_SUBST(MPI_LIBFC,$ff_MPI_LIBFC)
 	fi
 	CXX="$ff_save_cxx"
+	LIBS="$ff_save_libs"
 fi
 #export PATH="$ff_save_path"
 # Looking for useful configuration utilities
@@ -984,7 +1022,7 @@ if test "$ff_mkl_libpath" != "not" ; then
     if test "$ff_mkl_libpath"  = "yes"  -a  -n "$MKLROOT" ; then
 	ff_IFS="$IFS"
 	IFS=":"
-	for i in $LIBRARY_PATH;do 
+	for i in $LD_LIBRARY_PATH:$LIBRARY_PATH ; do 
             case $i in 
 		*/mkl/*) ff_mkl_libpath=$i;;
 	    esac ;
@@ -1004,15 +1042,24 @@ if test "$ff_mkl_libpath" != "not" ; then
             *ifort*) ff_mkl_cc=intel;;
             *) ff_mkl_cc=gf;;
         esac
+#        intelmpi=_intelmpi;
 #	echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
-	ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread -lmkl_core -lguide -lm -lpthread"
-	ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -llibmkl_lapack"
-	ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_scalapack${ff_mkl_lp}"
-	ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_lp}"
+	if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.so ; then
+	  mkl_blas=rt
+	  mkk_lapack=rt 
+          ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lpthread"
+          ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lpthread"
+	else
+	  ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread -lmkl_core -lguide -lm -lpthread"
+	  ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -llibmkl_lapack"
+	fi
+        ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_scalapack${ff_mkl_lp}"
+        ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch --lmkl_blacs_intelmpi${ff_mkl_lp}"
 	ff_blas_ok=yes
 	ff_lapack_ok=yes
 	ff_blas_libs="$ff_mkl_blas"
-	ff_blas_inc="$ff_mkl_root/include"
+	ff_blas_inc="-I$ff_mkl_root/include"
+
     else 
 	ff_mkl_libpath=no
     fi
@@ -1517,9 +1564,9 @@ then
 	# still complains about it.
 	if test "$ff_mac" = "no" -a "$ff_win32"  = "no" -a "$ff_sunos"  = "no" ;
 	then
-		CHECK_COMPILE_FLAG(C++,-rdynamic,CXXFLAGS)
-		CHECK_COMPILE_FLAG(C,-rdynamic,CNOFLAGS)
-		CHECK_COMPILE_FLAG(C,-rdynamic,CFLAGS)
+		CHECK_COMPILE_FLAG(C++,-rdynamic,LDFLAGS)
+dnl		CHECK_COMPILE_FLAG(C,-rdynamic,CNOFLAGS)
+dnl		CHECK_COMPILE_FLAG(C,-rdynamic,CFLAGS)
 	fi
 	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
 	CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS)
@@ -1528,8 +1575,8 @@ then
 	 then 
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FFLAGS)	
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FNOFLAGS)	
-	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FNOFLAGS)
-	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FFLAGS)
+dnl	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FNOFLAGS)
+dnl	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FFLAGS)
 
 	fi
 fi

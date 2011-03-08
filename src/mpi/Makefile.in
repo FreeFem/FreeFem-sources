@@ -15,6 +15,12 @@
 
 @SET_MAKE@
 
+# Makefile using Automake + Autoconf
+# ----------------------------------
+# $Id$
+# change FH mars 2010 for sgi mpiu .... 
+#CXX=@MPICXX@
+
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -107,12 +113,7 @@ CFLAGS = @CFLAGS@
 CFLAGSF77 = @CFLAGSF77@
 CNOFLAGS = @CNOFLAGS@
 CPPFLAGS = @CPPFLAGS@
-
-# Makefile using Automake + Autoconf
-# ----------------------------------
-# $Id$
-# change FH 
-CXX = @MPICXX@
+CXX = @CXX@
 CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
@@ -198,6 +199,7 @@ MPISCRIPT = @MPISCRIPT@
 MPI_INCLUDE = @MPI_INCLUDE@
 MPI_INC_DIR = @MPI_INC_DIR@
 MPI_LIB = @MPI_LIB@
+MPI_LIBFC = @MPI_LIBFC@
 MPI_LIB_DIRS = @MPI_LIB_DIRS@
 OBJEXT = @OBJEXT@
 OPTIM_TYPE = @OPTIM_TYPE@
@@ -311,9 +313,9 @@ FreeFem___mpi_SOURCES = ../Graphics/sansrgraph.cpp ../lglib/mymain.cpp   paralle
 ../lglib/lg.tab.cpp
 
 FreeFem___mpi_DEPENDENCIES = ../fflib/libff.a
-LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
+LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @MPI_LIB@
 AM_CXXFLAGS = -DPARALLELE
-INCLUDES = -I../fflib -I../Graphics -I../femlib
+INCLUDES = -I../fflib -I../Graphics -I../femlib @MPI_INCLUDE@
 all: all-am
 
 .SUFFIXES:

@@ -24,7 +24,7 @@ include "getARGV.idp"
 include "DDM-Schwarz-macro.idp"
 include "AddLayer3d.idp"
 include "DDM-funcs-v2.idp"
-include "Cube.idp" 
+include "cube.idp" 
 include "MPIplot.idp"
 
 searchMethod=1; // more safe seach algo (warning can be very expensive in case lot of ouside point) 

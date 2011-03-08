@@ -28,7 +28,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.11-1}
+\def\VERSION{3.12}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -1025,7 +1025,7 @@ by using (see section \ref{matrix-varf} page \pageref{matrix-varf} for details)
 The vector $F$ \index{[]@\verb=[]=}
 in (\ref{eqn:Equation}) can also be constructed manually
 \bFF
-@varf l(unused,v) = @int2d(Th)(f*v)+@on(C,u=0);
+@varf l(unused,v) = @int2d(Th)(f*v)+@on(C,unused=0);
 Vh F;  F[] = l(0,Vh); //  F[] is the vector associated to the function \texttt{F}
 \eFF
 The problem can then be solved by
@@ -1855,7 +1855,7 @@ Note that an incidence angle has been added here (see Chapter 9).}
 
  \subsubsection{Heat Convection around the airfoil}
 Now let us assume that the airfoil is hot and that air is there to cool it.
-Much like in the previous section the heat equation for the temperature $u$ is
+Much like in the previous section the heat equation for the temperature $v$ is
 $$
 \p_t v -\n\cdot(\kappa\n v) + u\cdot\n v =0,~~v(t=0)=v_0, ~~\frac{\p v}{\p n}|_C=0
 $$
@@ -3342,9 +3342,12 @@ Here is how to show all the types, and all the operator and functions of a \free
 \bFF
  @dumptable(@cout);
 \eFF \index{dumptable}
-To execute a system command in the string (not implemented on Carbon MacOS)
+To execute a system command in the string (not implemented on Carbon MacOS), which  return 
+the value of the system call. 
 \bFF
-  @exec("shell command");
+  @system("shell command"); // after version 3.12-1
+  @exec("shell command");  
+  
 \eFF
 This is useful to launch another executable from within \freefempp.
 On MS-Windows, the full path of the executable. For example, if there is the command
@@ -3507,6 +3510,34 @@ conjugate of (2.45+1.41421i) is (2.45-1.41421i)
 (2.45+5.33i)^(2.45+1.41421i) is (8.37072-12.7078i)
 \eFF
 \end{example}
+\subsection{string expression}
+In the following example you some example string expression 
+\bFF
+@string tt="toto1"+1+" -- 77"; // string concatenation \index{string!concatenation}\index{string!find} \index{getline} 
+@string t1="0123456789";
+@string t2;
+// new operator
+@t2 ="12340005678";
+@t2(4:3) = "abcdefghijk-"; 
+@string t55=t2(4:3);
+//t2 = "12340abcdefghijk-005678";
+@cout << t2 << endl;
+@cout << "  find abc " << t2.find("abc") << endl;
+@cout << "r find abc " << t2.rfind("abc") << endl;
+@cout << " find abc from 10  " << t2.find("abc",10) << endl;
+@cout << " ffind abc from 10 " <<t2.rfind("abc",10) << endl;
+@cout << "   " << string("abcc").length << endl; 
+@cout << " t55 " << t55 << endl;
+{  // add getline version 3.0-6 jan 2009 FH
+@string s;
+@ifstream toto("xyf");
+@for (@int i=0;i<10;++i)
+  {
+   @getline(toto,s);
+   @cout << i << " : " << s << endl;
+  }
+}
+\eFF
 
 \subsection{\setS{Functions of one Variable}}
 \index{functions}
@@ -4701,6 +4732,10 @@ the result:
 
 \end{verbatim}
 
+To defined \texttt{macro} in a \texttt{macro} you can use 
+the two new word \texttt{NewMacro} , \texttt{EndMacro} key word to set and
+and claose de macro definition (version 3.11, and not well tested). 
+
 \subsection{Exception handling}\index{exception}\index{catch}\index{try}
 
  In the version \texttt{2.3} of \texttt{FreeFem++}, exception handing was added as in \texttt{C++}.
@@ -5429,7 +5464,7 @@ verbosity=4;
 {
   @real minT=@checkmovemesh(Th,[x+coef*uu,y+coef*vv]);//the min triangle area
   if (minT > minT0/5) break ; // if big enough
-  coef=/1.5;
+  coef/=1.5;
 }
 
 Th=@movemesh(Th,[x+coef*uu,y+coef*vv]);
@@ -5763,12 +5798,12 @@ The additional paramters of  adaptmesh not written here, hence the  "..."
 %%%alh proofreading ok up to here
 
 
-\begin{example}{uniformmesh.edp}
-
  We can use the command \ttCC{adaptmesh} to build uniform mesh with a
  contant mesh size. \index{mesh!uniform}\index{adaptmesh!uniform}
 
- So to buid a mesh with a constant mesh size equal to $\frac{1}{30}$ do
+ So to build a mesh with a constant mesh size equal to $\frac{1}{30}$ try:
+
+\begin{example}{uniformmesh.edp} 
 \bFF
 @mesh Th=square(2,2); // to have initial mesh
 plot(Th,wait=1,ps="square-0.eps");
@@ -5779,7 +5814,6 @@ Th= @adaptmesh(Th,1./30.,IsMetric=1,nbvx=10000);//  more the one time du to
 Th= @adaptmesh(Th,1./30.,IsMetric=1,nbvx=10000);//  adaptation  bound \texttt{maxsubdiv=}
 plot(Th,wait=1,ps="square-2.eps");
 \eFF
-
 \threeplot[width=5cm]%
 {square-0}{Initial mesh}%
 {square-1}{first iteration}%
@@ -8342,7 +8376,7 @@ with $ \p_x u = \frac{\p u}{\p x}$
 , $\p_y u = \frac{\p u}{\p y}$ and , $\p_z u = \frac{\p u}{\p z}$
 
 \item the border $\Gamma=\p \Omega$ is split in $\Gamma_d$ and $\Gamma_n$
-such that $\Gamma_d \cup \Gamma_n = \emptyset$ and $ \Gamma_d \cap \Gamma_n = \p \Omega$,
+such that $\Gamma_d \cap \Gamma_n = \emptyset$ and $ \Gamma_d \cup \Gamma_n = \p \Omega$,
 \item $\kappa$ is a given positive function, such that $\exists \kappa_0 \in \R ,\quad 0 < \kappa_0  \leq \kappa $.
 \item  $a$ a given non negative function,
 \item  $ b$ a given function.
@@ -8355,8 +8389,8 @@ In this case the function appears in the problem just by its derivatives, so it 
 \end{note}
 
 Let  ${ v} $  a regular test function  null  on  $\Gamma_d$ , by integration by parts we get
- \begin{equation}-\int_{\Omega}  \nabla.(\kappa \nabla  u) \, { v} \,d\omega = \int_{\Omega}  \kappa \nabla{ v} . \nabla u  \,d\omega= \int_{\Omega} f {v}  \,d\omega - \int_{\Gamma} {v}
- \kappa \frac{  \p u}{\p \bm{n}}  \,d\gamma,
+ \begin{equation}-\int_{\Omega}  \nabla.(\kappa \nabla  u) \, { v} \,d\omega = \int_{\Omega}  \kappa \nabla{ v} . \nabla u  \,d\omega  - \int_{\Gamma} {v}
+ \kappa \frac{  \p u}{\p \bm{n}}  \,d\gamma,= \int_{\Omega} f {v}  \,d\omega 
   \end{equation}
 
 where if $d=2$ the $ \nabla{ v} . \nabla u = (\frac{\p u}{\p x}\frac{\p { v}}{\p x}
@@ -8490,7 +8524,7 @@ The parameters are:
     @func @real[@int]  P(@real[@int] & xx) ;
 \eFF
       \item[tgv=]  \index{problem!tgv=}  \index{solve!tgv=}  Huge value ($10^{30}$) used to implement
-      Dirichlet boundary conditions.
+      Dirichlet boundary conditions,   see page \pageref{imple-tgv} for description.
 
       \item[tolpivot=] \index{problem!tolpivot =} \index{solve!tolpivot=} set the tolerence of the pivot in UMFPACK ($10^{-1}$)  and, LU, Crout, Cholesky
       factorisation ($10^{-20}$).
@@ -8547,11 +8581,14 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
         \item  An "on" scalar form (for Dirichlet ) :\index{on!scalar}
          \texttt{ on(1, u = g )}\index{on}
 
-        The meaning is
+        The meaning is \label{imple-tgv}
         for all degree of freedom $i$ of the boundary refered by "1",  the diagonal
         term  of the matrix $a_{ii}= tgv$  with the   {\em terrible geant value} \ttCC{tgv} (=$10^{30}$ by default)
           and   the right hand side $b[i] = "(\Pi_h g)[i]" \times tgv $,
                 where the $"(\Pi_h g)g[i]"$ is the boundary node value given by  the interpolation of $g$.
+             
+             remark, if $\mathrm{tgv} < 0$ then we put to $0$  all term of the line $i$ in the matrix,
+             except diagonal term $a_{ii}=1$, and $b[i] = "(\Pi_h g)[i]"$. \index{tgv=!$<0$} (version > 3.10) .
          \item  An "on" vectorial  form (for Dirichlet ) :\index{on!scalar}
              \texttt{ on(1,u1=g1,u2=g2) }
                 If you have vectorial finite element like \texttt{RT0}, the 2 components are coupled, and so
@@ -8964,6 +9001,7 @@ Possible named parameters in \texttt{" [, ... ] "} are
     \texttt{Crout}, \texttt{Cholesky}, \texttt{GMRES}, \texttt{sparsesolver}, \texttt{UMFPACK} ...
 
     The default solver is \texttt{GMRES}.
+
     The storage mode of the matrix of the underlying linear system
     depends on
     the type of solver chosen; for \texttt{LU}  the matrix is sky-line non
@@ -8983,7 +9021,7 @@ Possible named parameters in \texttt{" [, ... ] "} are
         $$  || A x - b || < \frac{|\varepsilon|}{|| A x_{0} - b ||} $$
 
 
-    \item[precon=]  \index{matrix!varf!precon=} name of a function (for example \texttt{P}) to set the precondioner. \index{precon=}
+    \item[precon=]  \index{matrix!varf!precon=} name of a function (for example \texttt{P}) to set the preconditioner. \index{precon=}
     The prototype for the function \texttt{P} must be
 \bFF
     @func @real[@int]  P(@real[@int] & xx) ;
@@ -8991,7 +9029,7 @@ Possible named parameters in \texttt{" [, ... ] "} are
       \item[tgv=]  \index{matrix!varf!tgv=}    Huge value ($10^{30}$) used to implement
       Dirichlet boundary conditions.
 
-      \item[tolpivot=] \index{matrix!varf!tolpivot =}  set the tolerence of the pivot in UMFPACK ($10^-1$)  and, LU, Crout, Cholesky
+      \item[tolpivot=] \index{matrix!varf!tolpivot =}  set the tolerance of the pivot in UMFPACK ($10^-1$)  and, LU, Crout, Cholesky
       factorisation ($10^{-20}$).
 
       \item[tolpivotsym=] \index{problem!tolpivotsym =} \index{solve!tolpivotsym=} set the tolerance of the pivot sym in UMFPACK
@@ -9015,7 +9053,7 @@ To build the dual vector b (of type real[int])  from the linear part of the vari
 A first example to compute the area of each triangle $K$ of mesh $Th$,  just do:
 
 \bFF
-  @fespace Nh(Th,P0); // the  space function contant / triangle
+  @fespace Nh(Th,P0); // the  space function constant / triangle
    Nh areaK;
    @varf varea(unused,chiK) =  @int2d(Th)(chiK);	
    etaK[]= varea(0,Ph);
@@ -13926,18 +13964,17 @@ LAM 6.5.9/MPI 2 C++/ROMIO - Indiana University
 //  --------------------------------- \hfilll
 
 @if ( mpisize != 2 ) {
-    @cout << " sorry number of processeur !=2 " << endl;
+    @cout << " sorry, number of processors !=2 " << endl;
      exit(1);}
 @verbosity=3;
-@real pi=4*atan(1);
-@int inside = 2;
-@int outside = 1;
-@border a(t=1,2){x=t;y=0;label=outside;};
-@border b(t=0,1){x=2;y=t;label=outside;};
-@border c(t=2,0){x=t ;y=1;label=outside;};
-@border d(t=1,0){x = 1-t; y = t;label=inside;};
-@border e(t=0, pi/2){ x= cos(t); y = sin(t);label=inside;};
-@border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=outside;};
+@int interior = 2;
+@int exterior = 1;
+@border a(t=1,2){x=t;y=0;label=exterior;};
+@border b(t=0,1){x=2;y=t;label=exterior;};
+@border c(t=2,0){x=t ;y=1;label=exterior;};
+@border d(t=1,0){x = 1-t; y = t;label=interior;};
+@border e(t=0, pi/2){ x= cos(t); y = sin(t);label=interior;};
+@border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=exterior;};
 @int n=4;
 @mesh[int]  Th(mpisize);
 @if (mpirank == 0)
@@ -13958,7 +13995,7 @@ Vhother U=0;
 @problem pb(u,v,init=i,solver=Cholesky) =
     @int2d(Th[mpirank])( dx(u)*dx(v)+dy(u)*dy(v) )
   - @int2d(Th[mpirank])( v)
-  + @on(inside,u = U)  +  @on(outside,u= U ) ;
+  + @on(interior,u = U)  +  @on(exterior,u= 0 ) ;
 
 @for ( i=0 ;i< 20; i++)
 {
@@ -13967,7 +14004,7 @@ Vhother U=0;
    //  send u  to the other proc, receive in U
    @processor(1-mpirank) << u[];   @processor(1-mpirank) >> U[];
    @real err0,err1;
-   err0 = int1d(Th[mpirank],inside)(square(U-u)) ;
+   err0 = int1d(Th[mpirank],interior)(square(U-u)) ;
    // send err0  to the other proc, receive in err1
    @processor(1-mpirank)<<err0;   @processor(1-mpirank)>>err1;
    @real err= sqrt(err0+err1);
