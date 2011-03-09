@@ -887,15 +887,15 @@ fi
 	      AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/mpif.h"  ])
 	  else
 	      if test -n "$MPIFC" ; then
-		  [echo mpifc LD "'$ff_MPI_LIBFC'"]   >>$ff_where_lib_conf]
-		  [echo mpifc INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf]
-		  [echo mpif77 LD "'$ff_MPI_LIBFC'"]   >>$ff_where_lib_conf]
-		  [echo mpif77 INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf]
+		  [echo mpifc LD "'$ff_MPI_LIBFC'"   >>$ff_where_lib_conf ]
+		  [echo mpifc INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
+		  [echo mpif77 LD "'$ff_MPI_LIBFC'"   >>$ff_where_lib_conf ]
+		  [echo mpif77 INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
 	      fi
   	  fi
 	  if test -n "$MPICXX" ; then 	    
-              [echo mpi LD "'$ff_MPI_LIB'"]   >>$ff_where_lib_conf]
-              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf]
+              [echo mpi LD "'$ff_MPI_LIB'"    >>$ff_where_lib_conf ]
+              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
 	  fi
 	  AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		
 	  AC_SUBST(MPI_INCLUDE,$ff_MPI_INCLUDE)
