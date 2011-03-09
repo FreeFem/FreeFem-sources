@@ -65,7 +65,7 @@ $(PACKAGE):
 
 clean-local: 
 	-rm FAIRE FAIT
-	cd $(YAMS_DIR); make  clean;
+	-cd $(YAMS_DIR) &&  make -C $(YAMS_DIR)  clean;
 	-rm $(YAMS_OBJDIR)/libyams.a
 
 clean: clean-local
