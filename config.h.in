@@ -89,6 +89,9 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* mpi_double_complex */
+#undef HAVE_MPI_DOUBLE_COMPLEX
+
 /* Define to 1 if you have the <OpenGL/gl.h> header file. */
 #undef HAVE_OPENGL_GL_H
 
