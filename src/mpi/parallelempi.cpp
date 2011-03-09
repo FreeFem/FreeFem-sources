@@ -1364,8 +1364,8 @@ struct Op_All2All<Complex> : public binary_function<KN_<Complex>,KN_<Complex>,lo
 			 (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);	
 #else
     chunk*=2;
-    return MPI_Alltoall( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
-			 reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);	
+    return MPI_Alltoall( reinterpret_cast<void*> ( (Complex*) s), chunk, MPI_DOUBLE,
+			 reinterpret_cast<void*> ( (Complex*) r), chunk, MPI_DOUBLE, comm);	
 #endif
   }
 };
@@ -1383,9 +1383,9 @@ struct Op_Allgather1<Complex> : public binary_function<Complex *,KN_<Complex>,lo
     return MPI_Allgather( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
 			  (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);
 #else
-    chunk*2=;
-    return MPI_Allgather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
-			  reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);
+    chunk*=2;
+    return MPI_Allgather( reinterpret_cast<void*> ( (Complex*) s), chunk, MPI_DOUBLE,
+			  reinterpret_cast<void*> ( (Complex*) r), chunk, MPI_DOUBLE, comm);
 #endif
   }
 };
@@ -1405,8 +1405,8 @@ struct Op_Allgather<Complex> : public binary_function<KN_<Complex>,KN_<Complex>,
 			    (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);
 #else
       chunk*=2;
-      return MPI_Allgather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
-			     reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);
+      return MPI_Allgather( reinterpret_cast<void*> (  (Complex*) s), chunk, MPI_DOUBLE,
+			    reinterpret_cast<void*> ( (Complex*) r), chunk, MPI_DOUBLE, comm);
 #endif
     }
 };
@@ -1506,8 +1506,8 @@ long  Op_All2Allv<Complex>( KN_<Complex>  const  & s, KN_<Complex>  const  &r, K
     INTrecvcnts[ii] = 2*recvcnts[ii];
     INTrdispls[ii]  = 2*rdispls[ii];
   }
-  return MPI_Alltoallv( reinterpret_cast<void*> (s), INTsendcnts, INTsdispls, MPI_DOUBLE,
-			reinterpret_cast<void*> (r), INTrecvcnts, INTrdispls, MPI_DOUBLE, comm);
+  return MPI_Alltoallv( reinterpret_cast<void*> ( (Complex*) s), INTsendcnts, INTsdispls, MPI_DOUBLE,
+			reinterpret_cast<void*> ( (Complex*) r), INTrecvcnts, INTrdispls, MPI_DOUBLE, comm);
 #endif
 }
 
@@ -1541,8 +1541,8 @@ struct Op_Allgatherv<Complex> : public quad_function<KN_<Complex>,KN_<Complex>,K
       INTrecvcount[ii]= 2*recvcount[ii];
       INTdispls[ii]= 2*displs[ii];
     }
-    return MPI_Allgatherv( reinterpret_cast<void*> (s), 2*s.N(), MPI_DOUBLE,
-			   reinterpret_cast<void*> (r), INTrecvcount, INTdispls,MPI_DOUBLE, comm);
+    return MPI_Allgatherv( reinterpret_cast<void*> ( (Complex*) s), 2*s.N(), MPI_DOUBLE,
+			   reinterpret_cast<void*> ( (Complex*) r), INTrecvcount, INTdispls,MPI_DOUBLE, comm);
 #endif	
   }
 };
@@ -1583,8 +1583,8 @@ long  Op_All2All3v<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,fM
     INTrdispls[ii]  = 2*rdispls[ii];
   }
 
-  return MPI_Alltoallv( reinterpret_cast<void*> (s), INTsendcnts, INTsdispls, MPI_DOUBLE,
-			reinterpret_cast<void*> (r), INTrecvcnts, INTrdispls, MPI_DOUBLE, comm);
+  return MPI_Alltoallv( reinterpret_cast<void*> ( (Complex*) s), INTsendcnts, INTsdispls, MPI_DOUBLE,
+			reinterpret_cast<void*> ( (Complex*) r), INTrecvcnts, INTrdispls, MPI_DOUBLE, comm);
 #endif
 }
 
@@ -1618,8 +1618,8 @@ long Op_Allgatherv3<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,f
     INTdispls[ii]= 2*displs[ii];
   }
 
-  return MPI_Allgatherv( reinterpret_cast<void*> (s), 2*s.N(), MPI_DOUBLE,
-			 reinterpret_cast<void*> (r), INTrecvcount, INTdispls,MPI_DOUBLE, comm);
+  return MPI_Allgatherv( reinterpret_cast<void*> ( (Complex*) s), 2*s.N(), MPI_DOUBLE,
+			 reinterpret_cast<void*> ( (Complex*) r), INTrecvcount, INTdispls,MPI_DOUBLE, comm);
 #endif
 
 }
@@ -1638,8 +1638,8 @@ struct Op_Scatter1<Complex> : public   ternary_function<KN_<Complex>,Complex *,M
 			(void *) (Complex*)r, chunk, MPI_DOUBLE_COMPLEX,root.who,root.comm);	
 #else
     chunk*=2;
-    return MPI_Scatter( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
-			reinterpret_cast<void*> (r), chunk, MPI_DOUBLE,root.who,root.comm);
+    return MPI_Scatter( reinterpret_cast<void*> ( (Complex*) s), chunk, MPI_DOUBLE,
+			reinterpret_cast<void*> ( (Complex*) r), chunk, MPI_DOUBLE,root.who,root.comm);
 #endif
   }
 };
@@ -1659,8 +1659,8 @@ struct Op_Scatter3<Complex> : public   ternary_function<KN_<Complex>,KN_<Complex
 			(void *) (Complex*)r, chunk, MPI_DOUBLE_COMPLEX,root.who,root.comm);	
 #else
     chunk*=2;
-    return MPI_Scatter( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
-			reinterpret_cast<void*> (r), chunk, MPI_DOUBLE,root.who,root.comm);
+    return MPI_Scatter( reinterpret_cast<void*> ( (Complex*) s), chunk, MPI_DOUBLE,
+			reinterpret_cast<void*> ( (Complex*) r), chunk, MPI_DOUBLE,root.who,root.comm);
 #endif
   }
 };
@@ -1700,8 +1700,8 @@ long Op_Scatterv3<Complex>( KN_<Complex>  const  & s, KN_<Complex>  const  &r,  
     INTdispls[ii]= 2*displs[ii];
   }
 
-  return MPI_Scatterv( reinterpret_cast<void*> (s), INTsendcnts, INTdispls, MPI_DOUBLE,
-		       reinterpret_cast<void*> (r), 2*r.N(), MPI_DOUBLE,root.who,root.comm);
+  return MPI_Scatterv( reinterpret_cast<void*> ( (Complex*) s), INTsendcnts, INTdispls, MPI_DOUBLE,
+		       reinterpret_cast<void*> ( (Complex*) r), 2*r.N(), MPI_DOUBLE,root.who,root.comm);
 #endif
 
 }
@@ -1717,7 +1717,7 @@ struct Op_Reduce<Complex>  : public   quad_function<KN_<Complex>,KN_<Complex>,MP
     return MPI_Reduce( (void *) (Complex*)s,(void *) (Complex*)r, chunk , MPI_DOUBLE_COMPLEX,op,root.who,root.comm);
 #else
     chunk*=2;
-    return MPI_Reduce( reinterpret_cast<void*> (s), reinterpret_cast<void*> (r), chunk , MPI_DOUBLE,op,root.who,root.comm);
+    return MPI_Reduce( reinterpret_cast<void*> ( (Complex*) s), reinterpret_cast<void*> ( (Complex*) r), chunk , MPI_DOUBLE,op,root.who,root.comm);
 #endif	
   }
 };
@@ -1732,7 +1732,7 @@ struct Op_AllReduce<Complex>  : public   quad_function<KN_<Complex>,KN_<Complex>
     return MPI_Allreduce( (void *) (Complex*)s,(void *) (Complex*)r, chunk , MPI_DOUBLE_COMPLEX,op,comm);
 #else
     chunk *=2;
-    return MPI_Allreduce( reinterpret_cast<void*> (s), reinterpret_cast<void*> (r), chunk , MPI_DOUBLE,op,comm);
+    return MPI_Allreduce( reinterpret_cast<void*> ( (Complex*) s), reinterpret_cast<void*> ( (Complex*) r), chunk , MPI_DOUBLE,op,comm);
 #endif	
   }
 };
@@ -1758,7 +1758,7 @@ struct Op_Reduce1<Complex>  : public   quad_function<Complex*,Complex*,MPIrank,f
     return MPI_Reduce( (void *) s, (void *) r, chunk , MPI_DOUBLE_COMPLEX,op,root.who,root.comm);
 #else
     int chunk = 2;
-    return MPI_Reduce( reinterpret_cast<void*> (s), reinterpret_cast<void*> (r), chunk , MPI_DOUBLE,op,root.who,root.comm);
+    return MPI_Reduce( reinterpret_cast<void*> ( (Complex*) s), reinterpret_cast<void*> ( (Complex*) r), chunk , MPI_DOUBLE,op,root.who,root.comm);
 #endif
   }
 };
@@ -1779,8 +1779,8 @@ struct Op_Gather1<Complex> : public   ternary_function<Complex* ,KN_<Complex>,MP
 			   (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, root.who, root.comm);
 #else
     chunk = 2;
-    return MPI_Gather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
-			   reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, root.who, root.comm);
+    return MPI_Gather( reinterpret_cast<void*> ( (Complex*) s), chunk, MPI_DOUBLE,
+		       reinterpret_cast<void*> ( (Complex*) r), chunk, MPI_DOUBLE, root.who, root.comm);
 #endif	
   }
 };
@@ -1802,8 +1802,8 @@ struct Op_Gather3<Complex> : public   ternary_function<KN_<Complex>,KN_<Complex>
 			   (void *) (Complex*)r, chunk, MPI_DOUBLE_COMPLEX,root.who,root.comm);	
 #else
     chunk *= 2; 
-    return MPI_Gather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
-		       reinterpret_cast<void*> (r), chunk, MPI_DOUBLE,root.who,root.comm);
+    return MPI_Gather( reinterpret_cast<void*> ( (Complex*) s), chunk, MPI_DOUBLE,
+		       reinterpret_cast<void*> ( (Complex*) r), chunk, MPI_DOUBLE,root.who,root.comm);
 #endif
   }
 };
@@ -1840,8 +1840,8 @@ long  Op_Gatherv3<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,  M
     INTrecvcount[ii]= 2*recvcount[ii];
     INTdispls[ii]= 2*displs[ii];
   }
-  return MPI_Gatherv( reinterpret_cast<void*> (s), 2*s.N(), MPI_DOUBLE,
-		      reinterpret_cast<void*> (r), INTrecvcount, INTdispls,MPI_DOUBLE,root.who,root.comm);
+  return MPI_Gatherv( reinterpret_cast<void*> ( (Complex*) s), 2*s.N(), MPI_DOUBLE,
+		      reinterpret_cast<void*> ( (Complex*) r), INTrecvcount, INTdispls,MPI_DOUBLE,root.who,root.comm);
 #endif
 }
 
