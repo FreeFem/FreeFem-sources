@@ -1896,13 +1896,13 @@ MPIrank * set_copympi( MPIrank* const & a,const MPIrank & b){ *a=b;return a;}
 long mpiSize(fMPI_Comm  cmm) { 
     int s=0;
  //   fMPI_Comm_rank(MPI_COMM_WORLD, &s); /* local */ 
-    if(cmm != MPI_COMM_NULL)
+    if(cmm !=  (MPI_Comm) MPI_COMM_NULL)
     MPI_Comm_size(cmm, &s); /* local */ 
     return s;
 }
 long mpiRank(fMPI_Comm  cmm) { 
     int s=MPI_UNDEFINED;
-    if(cmm != MPI_COMM_NULL)
+    if(cmm != (MPI_Comm)MPI_COMM_NULL)
     MPI_Comm_rank(cmm, &s); /* local */ 
  //   MPI_Comm_size(MPI_COMM_WORLD, &s); /* local */ 
     return s;
@@ -2101,7 +2101,7 @@ KN<MPI_Request> * set_init0( KN<MPI_Request> * const & a,const long & b)
    }
 bool toBool(fMPI_Comm *comm)
 {
-  return (comm && (*comm !=MPI_COMM_NULL)); 
+  return (comm && (*comm != (MPI_Comm)MPI_COMM_NULL)); 
 }
 void * topVoid(fMPI_Comm *comm) {    return comm; }
 
