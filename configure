@@ -11606,6 +11606,32 @@ $as_echo "$ff_mpi" >&6; }
 
 	if test "$ff_mpi" = yes;
 	then
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking MPI_DOUBLE_COMPLEX" >&5
+$as_echo_n "checking MPI_DOUBLE_COMPLEX... " >&6; }
+
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <mpi.h>
+MPI_Datatype xxxx=MPI_DOUBLE_COMPLEX;
+
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ff_mpi_double_complex=yes
+else
+  ff_mpi_double_complex=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_mpi_double_complex" >&5
+$as_echo "$ff_mpi_double_complex" >&6; }
+if test "$ff_mpi_double_complex" = yes  ; then
+
+$as_echo "#define HAVE_MPI_DOUBLE_COMPLEX 1" >>confdefs.h
+
+fi
+
+
 	  echo "MPI CC $ff_mpi" >config_LIB_INFO
 
 		# We do not AC_DEFINE any special flag for parallel

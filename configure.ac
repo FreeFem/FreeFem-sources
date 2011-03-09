@@ -797,6 +797,22 @@ ff_mpi=no)
 
 	if test "$ff_mpi" = yes;
 	then
+
+AC_MSG_CHECKING( MPI_DOUBLE_COMPLEX)
+
+	AC_COMPILE_IFELSE(
+[AC_LANG_SOURCE([
+#include <mpi.h>
+MPI_Datatype xxxx=MPI_DOUBLE_COMPLEX;
+])],
+ff_mpi_double_complex=yes,
+ff_mpi_double_complex=no)
+	AC_MSG_RESULT($ff_mpi_double_complex)
+if test "$ff_mpi_double_complex" = yes  ; then
+AC_DEFINE(HAVE_MPI_DOUBLE_COMPLEX,1, mpi_double_complex)
+fi
+
+
 	  echo "MPI CC $ff_mpi" >config_LIB_INFO
 
 		# We do not AC_DEFINE any special flag for parallel
