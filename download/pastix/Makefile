@@ -79,7 +79,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/double/
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/double
 	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/double/
-	cd $(SRCDIR)/src/; $(MAKE) clean
+	cd $(SRCDIR)/src/ &&  $(MAKE) clean -C $(SRCDIR)/src
 	#complex version
 	cp config-complex.in $(SRCDIR)/src/config.in	
 	cd $(SRCDIR)/src/;$(MAKE) expor
@@ -105,7 +105,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 	cp $(PASTIX_DIR)/../bin/$(HOSTARCH)/libpastix_murge.a $(PASTIX_DIR)/libpastix_murge$(VERSIONNAME).a
 	ln -sf $(PASTIX_DIR)/libpastix_murge$(VERSIONNAME).a $(PASTIX_DIR)/libpastix_murge.a
 #else
-	#cd $(SRCDIR)/src/;$(MAKE) install
+	#cd $(SRCDIR)/src/ && $(MAKE) install -C $(SRCDIR)/src
 #endif
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/pastix/complex
 	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/complex/
@@ -128,7 +128,7 @@ $(PACKAGE1):
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE1)`
 
 clean-local:
-	-cd $(SRCDIR)/src/; $(MAKE) clean
+	-cd $(SRCDIR)/src &&  $(MAKE) clean -C $(SRCDIR)/src
 
 clean: clean-local
 	-rm config.in FAIRE 

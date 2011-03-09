@@ -62,7 +62,7 @@ $(PACKAGE1):
 	cd $(DIRPKG);$(WGET)  $(SERVER)/`basename $(PACKAGE1)`
 
 clean-local:
-	-cd $(SRCDIR); $(MAKE) cleanlib 
+	-cd $(SRCDIR) && $(MAKE) cleanlib  -C $(SRCDIR)
 
 clean: clean-local
 	rm SLmake.inc FAIRE FAIT

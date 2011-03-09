@@ -74,7 +74,7 @@ $(PACKAGE):
 
 
 clean-local:
-	-cd $(SRCDIR); make realclean 
+	-cd $(SRCDIR) && $(MAKE) realclean  -C $(SRCDIR)
 	-rm -rf metis*
 clean: clean-local
 	-rm $(SRCDIR)/$(INSTALL)/lib/libmetis.a

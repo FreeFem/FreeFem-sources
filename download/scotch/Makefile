@@ -59,7 +59,7 @@ $(PACKAGE):
 	cd $(DIRPKG);$(WGET)    $(SERVER)/`basename $(PACKAGE)`
 
 clean-local:
-	-cd $(SRCDIR)/src; make realclean 
+	-cd $(SRCDIR)/src && $(MAKE)  realclean  -C $(SRCDIR)/src
 clean: clean-local
 	-rm Makefile.inc
 	-rm -rf $(SRCDIR)

@@ -49,7 +49,7 @@ $(SRCDIR)/tag-tar:
 	touch $(SRCDIR)/tag-tar
 
 clean-local:
-	-cd $(SRCDIR); make clean
+	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 
 clean: clean-local
 	rm Makefile.inc FAIRE
