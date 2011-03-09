@@ -163,7 +163,7 @@ nodist_libf77blas_a_SOURCES=$(F77BLAS_SOURCES)
 nodist_libcblas_a_SOURCES=$(CBLAS_SOURCES)
 BUILT_SOURCES=@GENERIC_BLAS_BUILT_SOURCES@
 
-libcblas_a_CFLAGS=-DADD_
+libcblas_a_CFLAGS=-DADD_ -ICBLAS/include 
 
 # "xerbla" exists in both BLAS and CBLAS. So we need to rename it to
 # obtain two different object files.
