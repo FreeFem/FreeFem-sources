@@ -79,7 +79,7 @@ $(PACKAGE):
 
 
 clean-local:
-	-cd $(SRCDIR); make realclean 
+	-cd $(SRCDIR) && $(MAKE) realclean  -C  $(SRCDIR)
 	rm Makefile.in $(SRCDIR)/tags $(SRCDIR)/FAIT
 
 clean: clean-local

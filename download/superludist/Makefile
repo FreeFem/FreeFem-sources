@@ -61,7 +61,7 @@ $(PACKAGE_PATH):
 	cd $(DIRPKG);$(WGET)  $(SERVER)$(PACKAGE)
 
 clean-local:
-	-cd $(SRCDIR); $(MAKE) clean
+	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR)
 
 clean: clean-local
 	-rm -rf $(SRCDIR)

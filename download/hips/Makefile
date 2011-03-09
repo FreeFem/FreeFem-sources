@@ -194,7 +194,7 @@ $(PACKAGE):
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 clean-local:
-	-cd $(SRCDIR); $(MAKE) clean 
+	-cd $(SRCDIR) && $(MAKE) clean  -C $(SRCDIR)
 
 clean: clean-local
 	rm makefile.inc
