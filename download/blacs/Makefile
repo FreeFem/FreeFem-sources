@@ -72,7 +72,7 @@ $(PACKAGE3):
 	cd $(DIRPKG);$(WGET) $(SERVER)/`basename $(PACKAGE3)`
 
 clean-local:
-	-cd $(SRCDIR)/SRC/MPI; make clean 
+	-cd $(SRCDIR)/SRC/MPI &&  make clean -C $(SRCDIR)/SRC/MPI
 
 clean: clean-local
 	-rm Bmake.inc FAIRE
