@@ -36,7 +36,11 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_LANG(C++)
 
-
+AC_CHECK_PROG(ff_m4,m4,yes,no)
+AC_CHECK_PROG(ff_bison,bison,yes,no)
+case "$ff_m4 $ff_bison" in 
+*no*)   AC_MSG_ERROR([ Sorry no m4,bison command !]);;
+esac
 
 
 if test -z "$CXX"; then
