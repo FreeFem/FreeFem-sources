@@ -15,7 +15,7 @@ SRCDIR= ./mshmet$(mshmet_VERSION)
 PACKAGE=$(DIRPKG)/mshmet$(mshmet_VERSION).tgz
 SERVER=http://www.ann.jussieu.fr/~frey/ftp/archives/
 INSTALL=../..
-mshmet_VERSION=.2009.09.16
+mshmet_VERSION=.2011.03.06
 
 
 # ---------------------- 
@@ -63,8 +63,9 @@ $(SRCDIR): $(PACKAGE)
 	cp $(MSHMET_SRCDIRNOLIB)/*.c $(MSHMET_SRCDIRNOLIB)/*.h $(MSHMET_SRCDIR)
 	cp $(MSHMET_SRCDIRNOLIB)/compil.date $(MSHMET_SRCDIR)
 	cp mshmetlib-internal.h mshmetlib.c mshmetlib.h $(MSHMET_SRCDIR)/
+	rm $(MSHMET_SRCDIR)/mshmet.c
 	cp Makefile-mshmet.inc $(MSHMET_DIR)/makefile
-	cd $(MSHMET_SRCDIR); patch -p1 < ../../mshmet.2009.09.16.patch
+	# cd $(MSHMET_SRCDIR); patch -p1 < ../../mshmet.211.03.07.patch
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);

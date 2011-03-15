@@ -103,21 +103,21 @@ MSHMET_pMesh mesh_to_MSHMET_pMesh( const Mesh &Th ){
       ux = p2->c[0] - p1->c[0];
       uy = p2->c[1] - p1->c[1];
       h3 = sqrt(ux*ux + uy*uy);
-
+      /*
       pe        = 0.5 * (h1 + h2 + h3);
-      ptriangle->aire = pe * (pe-h1) * (pe-h2) * (pe-h3);
-      ptriangle->aire = sqrt(ptriangle->aire);
-      rins      = 2.0 * ptriangle->aire / pe;
+      double aire = pe * (pe-h1) * (pe-h2) * (pe-h3);
+      //aire = sqrt(ptriangle->aire);
+      //rins      = 2.0 * aire / pe;
 
-      p0->aire += ptriangle->aire;
-      p0->rins += rins;
+      //p0->aire += ptriangle->aire;
+      //p0->rins += rins;
 
-      p1->aire += ptriangle->aire;
-      p1->rins += rins;
+      //p1->aire += ptriangle->aire;
+      //p1->rins += rins;
 
-      p2->aire += ptriangle->aire;
-      p2->rins += rins;
-
+      //p2->aire += ptriangle->aire;
+      //p2->rins += rins;
+      */
   }
   
   return meshMSHMET;
