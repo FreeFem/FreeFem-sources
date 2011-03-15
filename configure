@@ -11730,12 +11730,13 @@ fi
 	        MPICXX=$ff_save_cxx
 
 	fi
+
 	if test "$ff_mpi" = yes;
 	then
 	ff_MPI_INCLUDE="$with_mpiinc"
         ff_mpishow=`$MPICXX -show` 2>/dev/null
         ff_mpifcshow=`$MPIFC -show` 2>/dev/null
-	if test "$with_mpilibs" == no ; then
+	if test "$with_mpilibs" = no -o -z "$with_mpilibs" ; then
 	      ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`
 	      ff_MPI_LIB_DIRS=""
 	      ff_MPI_LIB=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`
