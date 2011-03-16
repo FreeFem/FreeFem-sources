@@ -30,8 +30,8 @@ func f = 1.;
 Vh [u1,u2],[v1,v2];
 Ph p,q; 
 
-problem laplaceMixte([u1,u2,p],[v1,v2,q],solver=GMRES,eps=1.0e-10,tgv=1e30,dimKrylov=150) =
-   int2d(Th)( p*q*1e-15+ u1*v1 + u2*v2 + p*(dx(v1)+dy(v2)) + (dx(u1)+dy(u2))*q )
+problem laplaceMixte([u1,u2,p],[v1,v2,q],solver=UMFPACK,eps=1.0e-10,tgv=1e30,dimKrylov=150) =
+   int2d(Th)( p*q*0e-10+ u1*v1 + u2*v2 + p*(dx(v1)+dy(v2)) + (dx(u1)+dy(u2))*q )
  + int2d(Th) ( f*q)
  - int1d(Th,1,2,3)( gd*(v1*N.x +v2*N.y))   //  int on gamma 
  + on(4,u1=g1n,u2=g2n);
