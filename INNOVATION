@@ -1,3 +1,5 @@
+   - correct intersection of given metrix in adaptmesh (bug introduc in 07/10 verion 3.9 
+     in case of convect-apt  example  
 v 3.12-1 10 10 fevr 2011 
     - add VTK write for paraview, examples++-load/VTK_writer.cpp		examples++-load/VTK_writer_3d.cpp (see source for moe details) 
     - put comment in the documentation about negative tgv 
