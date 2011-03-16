@@ -5,7 +5,7 @@ int kloop=5;
 int nbadap=5;
 
 bool inq=0;
-real tol=0.005;
+real tol=0.05;
 real tol2=1e-4;
 
 border a(t=0, 2*pi)     {    x = cos(t);    y = sin(t);  }; // the unit circle
@@ -67,7 +67,7 @@ for ( i=0; i< 20/kt ; i++) {
           t = t+dt;
           vo[]=v[];
           v=convect([u1,u2],-dt,vo);                          // convect v by u1,u2, dt seconds, results in f
-          plot(v,cmm="convection: t="+t + ", min=" + v[].min + ", max=" +  v[].max,wait=1,dim=3);
+          plot(v,cmm="convection: t="+t + ", min=" + v[].min + ", max=" +  v[].max,wait=0,dim=3);
           adaptmesh(th,v,err=tol,metric=[m11[],m12[],m22[]],nomeshgeneration= true);
         }
         th=adaptmesh(th,v,err=tol,metric=[m11[],m12[],m22[]]);

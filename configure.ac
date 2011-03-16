@@ -833,6 +833,22 @@ fi
 
 	if test "$ff_mpi" = yes;
 	then
+	  if test "$enable_fortran" != no
+	  then	
+	      
+	      AC_ARG_VAR(MPIF77,[MPI Fortran 77 compiler command])
+	      if test -z "$MPIF77" ; then    
+		  AC_PATH_PROGS(MPIF77, mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, "",$ff_mpi_path)
+	      fi
+	      AC_SUBST(MPIF77)
+	      AC_ARG_VAR(MPIFC,[MPI Fortran 90  compiler command])
+	      if test -z "$MPIFC" ; then
+		  AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",$ff_mpi_path)
+	      fi		
+	      AC_SUBST(MPIFC)
+	  fi
+
+
 	ff_MPI_INCLUDE="$with_mpiinc"
         ff_mpishow=`$MPICXX -show` 2>/dev/null
         ff_mpifcshow=`$MPIFC -show` 2>/dev/null
@@ -866,27 +882,6 @@ fi
 	  fi
 	  AC_SUBST(MPICC,$MPICC)
 	  AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
-	  if test "$enable_fortran" != no
-	  then	
-	      
-	      AC_ARG_VAR(MPIF77,[MPI Fortran 77 compiler command])
-	      if test -z "$MPIF77" ; then    
-		  AC_PATH_PROGS(MPIF77, mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, "",$ff_mpi_path)
-	      fi
-	      AC_SUBST(MPIF77)
-	      if test "$with_mpilibs" == no -a -n "$MPIF77" ; then	  
-		  [ff_MPI_LIBFC=`$MPIF77 -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
-	      fi	      
-	      AC_ARG_VAR(MPIFC,[MPI Fortran 90  compiler command])
-	      if test -z "$MPIFC" ; then
-		  AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",$ff_mpi_path)
-	      fi		
-	      AC_SUBST(MPIFC)
-	      if test "$with_mpilibs" == no -a -n "$MPIFC" ; then	  
-		  [ff_MPI_LIBFC=`$MPIFC -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
-	      fi	      
-	      
-	  fi
 
 	  if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
 	      AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/mpif.h"  ])
