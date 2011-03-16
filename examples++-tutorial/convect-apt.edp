@@ -47,7 +47,7 @@ real dt = 0.17,t=0;                                                 // time step
 
 vT[]=v[];
 
-real error;
+real error=0;
 for ( i=0; i< 20/kt ; i++) {
     real T=t; 
     vp=0;
@@ -67,7 +67,7 @@ for ( i=0; i< 20/kt ; i++) {
           t = t+dt;
           vo[]=v[];
           v=convect([u1,u2],-dt,vo);                          // convect v by u1,u2, dt seconds, results in f
-          plot(v,cmm="convection: t="+t + ", min=" + v[].min + ", max=" +  v[].max,wait=0,dim=3);
+          plot(v,cmm="convection: t="+t + ", min=" + v[].min + ", max=" +  v[].max,wait=1,dim=3);
           adaptmesh(th,v,err=tol,metric=[m11[],m12[],m22[]],nomeshgeneration= true);
         }
         th=adaptmesh(th,v,err=tol,metric=[m11[],m12[],m22[]]);
