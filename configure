@@ -680,10 +680,10 @@ MPI_LIB
 MPI_LIB_DIRS
 MPI_INCLUDE
 MPI_INC_DIR
-MPIFC
-MPIF77
 PASTIX_HOSTARCH
 MPICC
+MPIFC
+MPIF77
 MPISCRIPT
 MPIPROG
 MPICXX
@@ -883,9 +883,9 @@ XMKMF
 CXXCPP
 MPIRUN
 MPICXX
-MPICC
 MPIF77
-MPIFC'
+MPIFC
+MPICC'
 
 
 # Initialize some variables set by options.
@@ -1570,9 +1570,9 @@ Some influential environment variables:
   CXXCPP      C++ preprocessor
   MPIRUN      MPI run command
   MPICXX      MPI C++ compiler command
-  MPICC       MPI C compiler command in $ff_mpi_path
   MPIF77      MPI Fortran 77 compiler command
   MPIFC       MPI Fortran 90 compiler command
+  MPICC       MPI C compiler command in $ff_mpi_path
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -11733,6 +11733,112 @@ fi
 
 	if test "$ff_mpi" = yes;
 	then
+	  if test "$enable_fortran" != no
+	  then
+
+
+	      if test -z "$MPIF77" ; then
+		  for ac_prog in mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_MPIF77+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $MPIF77 in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_MPIF77="$MPIF77" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $ff_mpi_path
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_MPIF77="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+MPIF77=$ac_cv_path_MPIF77
+if test -n "$MPIF77"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPIF77" >&5
+$as_echo "$MPIF77" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$MPIF77" && break
+done
+test -n "$MPIF77" || MPIF77=""""
+
+	      fi
+
+
+	      if test -z "$MPIFC" ; then
+		  for ac_prog in mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_MPIFC+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $MPIFC in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_MPIFC="$MPIFC" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $ff_mpi_path
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_MPIFC="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+MPIFC=$ac_cv_path_MPIFC
+if test -n "$MPIFC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPIFC" >&5
+$as_echo "$MPIFC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$MPIFC" && break
+done
+test -n "$MPIFC" || MPIFC=""""
+
+	      fi
+
+	  fi
+
+
 	ff_MPI_INCLUDE="$with_mpiinc"
         ff_mpishow=`$MPICXX -show` 2>/dev/null
         ff_mpifcshow=`$MPIFC -show` 2>/dev/null
@@ -11814,117 +11920,6 @@ test -n "$MPICC" || MPICC=""""
 
 	  PASTIX_HOSTARCH=$ff_HOSTARCH_pastix
 
-	  if test "$enable_fortran" != no
-	  then
-
-
-	      if test -z "$MPIF77" ; then
-		  for ac_prog in mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_path_MPIF77+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  case $MPIF77 in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_MPIF77="$MPIF77" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $ff_mpi_path
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_path_MPIF77="$as_dir/$ac_word$ac_exec_ext"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  ;;
-esac
-fi
-MPIF77=$ac_cv_path_MPIF77
-if test -n "$MPIF77"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPIF77" >&5
-$as_echo "$MPIF77" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$MPIF77" && break
-done
-test -n "$MPIF77" || MPIF77=""""
-
-	      fi
-
-	      if test "$with_mpilibs" == no -a -n "$MPIF77" ; then
-		  ff_MPI_LIBFC=`$MPIF77 -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`
-	      fi
-
-	      if test -z "$MPIFC" ; then
-		  for ac_prog in mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_path_MPIFC+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  case $MPIFC in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_MPIFC="$MPIFC" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $ff_mpi_path
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_path_MPIFC="$as_dir/$ac_word$ac_exec_ext"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  ;;
-esac
-fi
-MPIFC=$ac_cv_path_MPIFC
-if test -n "$MPIFC"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPIFC" >&5
-$as_echo "$MPIFC" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$MPIFC" && break
-done
-test -n "$MPIFC" || MPIFC=""""
-
-	      fi
-
-	      if test "$with_mpilibs" == no -a -n "$MPIFC" ; then
-		  ff_MPI_LIBFC=`$MPIFC -show|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`
-	      fi
-
-	  fi
 
 	  if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
 	      { $as_echo "$as_me:${as_lineno-$LINENO}:  MPI without fortran no file \"$ff_MPI_INCLUDE_DIR/mpif.h\"  " >&5
