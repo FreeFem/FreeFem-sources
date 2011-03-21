@@ -38,7 +38,7 @@ verbosity=getARGV("-vv",0);
 int vdebug=getARGV("-d",1);
 int ksplit=getARGV("-k",1);
 int nloc = getARGV("-n",10);
-string sff=getARGV("-p,","");
+string sff=getARGV("-p","");
 int gmres=getARGV("-gmres",3); 
 int nC = getARGV("-N" ,max(nloc/10,5)); 
 int sizeoverlaps=1; // size of overlap
@@ -52,7 +52,7 @@ func Pk=P2;
 int Pknbcomp=1; 
 
 func bool  plotMPIall(mesh3 &Th,real[int] & u,string  cm)
-{ PLOTMPIALL(mesh3,Pk, Th, u,{ cmm=cm,nbiso=4,fill=1,dim=3,value=1}); return 1;}
+{ if(vdebug) PLOTMPIALL(mesh3,Pk, Th, u,{ cmm=cm,nbiso=4,fill=1,dim=3,value=1}); return 1;}
 
 mpiComm comm(mpiCommWorld,0,0);// trick : make a no split mpiWorld 
 
