@@ -38,7 +38,7 @@ verbosity=getARGV("-vv",0);
 int vdebug=getARGV("-d",1);
 int ksplit=getARGV("-k",1);
 int nloc = getARGV("-n",10);
-string sff=getARGV("-p,","");
+string sff=getARGV("-p","");
 int gmres=getARGV("-gmres",0); 
 int nC = getARGV("-N" ,max(nloc/10,5)); 
 bool RAS=1; 
@@ -54,7 +54,7 @@ func Pk=[P2,P2,P1];
 //int  Pknbcomp=3; 
 
 func bool  plotMPIall(mesh &Th,real[int] & u,string  cm)
-{ PLOTMPIALLU(mesh,Pk, defPk3, Th, u, allu1, { cmm=cm,nbiso=10,fill=1,dim=3,value=1}); return 1;}
+{if(vdebug) PLOTMPIALLU(mesh,Pk, defPk3, Th, u, allu1, { cmm=cm,nbiso=10,fill=1,dim=3,value=1}); return 1;}
 
 
 mpiComm comm(mpiCommWorld,0,0);// trick : make a no split mpiWorld 
