@@ -1063,8 +1063,8 @@ if test "$ff_mkl_libpath" != "not" ; then
 	if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.so ; then
 	  mkl_blas=rt
 	  mkk_lapack=rt 
-          ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lpthread"
-          ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lpthread"
+          ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt  -liomp5 -lpthread"
+          ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -liomp5 -lpthread"
 	else
 	  ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread -lmkl_core -lguide -lm -lpthread"
 	  ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -llibmkl_lapack"
