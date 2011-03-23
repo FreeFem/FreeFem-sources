@@ -91,6 +91,17 @@ const int nTypeSolveMat=10;
 int kTypeSolveMat;
 TypeSolveMat *dTypeSolveMat[nTypeSolveMat];
 
+ AnyType Long2TypeSolveMat(Stack, const AnyType &ll) {
+      long l=GetAny<long>(ll);
+    ffassert( l>=0 && l <kTypeSolveMat);
+    return dTypeSolveMat[l];
+}
+ AnyType  TypeSolveMat2Long(Stack,const AnyType  &tt ) {
+     const TypeSolveMat *t = GetAny<TypeSolveMat *>(tt);
+    for(long l=0;  l <kTypeSolveMat; ++l)
+	if( t==dTypeSolveMat[l]) return l;
+    return long (kTypeSolveMat-1); // sparse solver case 
+}
 
 basicAC_F0::name_and_type  OpCall_FormBilinear_np::name_param[]= {
 {   "bmat",&typeid(Matrice_Creuse<R>* )},
@@ -4559,7 +4570,9 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("sparsesolver",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
 
  ffassert(kTypeSolveMat<nTypeSolveMat);
-
+ map_type[typeid(TypeSolveMat*).name()]->AddCast(new E_F1_funcT<TypeSolveMat*,long>(Long2TypeSolveMat) );    
+ map_type[typeid(long).name()]->AddCast(  new E_F1_funcT<long,TypeSolveMat*>(TypeSolveMat2Long) );                                     
+    
 //  init pmesh  
 /*
 

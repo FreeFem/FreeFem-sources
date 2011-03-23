@@ -40,10 +40,10 @@ cout << "MLtB=" << MLtB << endl;
 // WARNING if UMFPACK is not install
 // the UMFPACK solver is replace by LU 
 //  but LU need skyline matrix 
-if(HaveUMFPACK)
-  set(A,solver=UMFPACK); // set a solver 
- else 
-  set(A,solver=GMRES); // set a solver 
+int typesolver=UMFPACK;
+if(HaveUMFPACK) typesolver=GMRES; 
+  set(A,solver=typesolver); // set a solver 
+
 VH<complex> uH=0;
 Vh<complex> uh=x+y+1i*(x-y);
 uH[]= B*uh[];
