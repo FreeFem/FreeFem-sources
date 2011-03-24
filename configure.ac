@@ -1070,7 +1070,7 @@ if test "$ff_mkl_libpath" != "not" ; then
 	  ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -llibmkl_lapack"
 	fi
         ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_scalapack${ff_mkl_lp}"
-        ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch --lmkl_blacs_intelmpi${ff_mkl_lp}"
+        ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs_intelmpi${ff_mkl_lp}"
 	ff_blas_ok=yes
 	ff_lapack_ok=yes
 	ff_blas_libs="$ff_mkl_blas"
@@ -1277,7 +1277,9 @@ AC_MSG_CHECKING([for lapack in $LIBS, $ff_blas_libs and -llapack] )
     fi
 
 AC_MSG_RESULT($ff_lapack_ok)
-
+if test "$ff_lapack_ok" != no ; then
+AC_SUBST(LAPACKLIBS,$ff_lapack_libs)
+fi
 if test "$ff_lapack_ok" = no; then
 AC_ARG_WITH(lapack,
 	[  --with-lapack=library	Use a specific version of the Lapack],
