@@ -664,6 +664,7 @@ LAPACKLIB
 ARPACKLIB
 FF_LAPACKdir
 DOWNLOAD_ARPACK
+LAPACKLIBS
 G2CLIB
 BLASINC
 BLASLIBS
@@ -12389,7 +12390,7 @@ if test "$ff_mkl_libpath" != "not" ; then
 	  ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -llibmkl_lapack"
 	fi
         ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_scalapack${ff_mkl_lp}"
-        ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch --lmkl_blacs_intelmpi${ff_mkl_lp}"
+        ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs_intelmpi${ff_mkl_lp}"
 	ff_blas_ok=yes
 	ff_lapack_ok=yes
 	ff_blas_libs="$ff_mkl_blas"
@@ -12905,7 +12906,10 @@ rm -f core conftest.err conftest.$ac_objext \
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_lapack_ok" >&5
 $as_echo "$ff_lapack_ok" >&6; }
+if test "$ff_lapack_ok" != no ; then
+LAPACKLIBS=$ff_lapack_libs
 
+fi
 if test "$ff_lapack_ok" = no; then
 
 # Check whether --with-lapack was given.

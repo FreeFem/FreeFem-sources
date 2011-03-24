@@ -40,7 +40,7 @@ FAIT:
 FAIRE: $(SRCDIR)/FAIT
 
 $(SRCDIR)/FAIT:$(SRCDIR)
-	cd $(SRCDIR)/src && ./configure  CXX="$(CXX)" CC="$(CC)" CFLAGS="$(CFLAGS)" CPP="$(CC) -E" CXXFLAGS="$(CXXFLAGS)" F77="$(F77)" FFLAGS="$(FFLAGS)" FLIBS="$(FLIBS)" LDFLAGS="$(LDFLAGS)" --with-MPI-include="$(FFMPIDIR)" --with-MPI-lib-dirs="$(FFMPIDIRLIBS)" --with-MPI-libs="$(FFMPILIB2)" --prefix="${abs_top_builddir}/download"  --includedir="${abs_top_builddir}/download"/include/hypre  --libdir="${abs_top_builddir}/download"/lib/hypre 
+	cd $(SRCDIR)/src && ./configure  CXX="$(CXX)" CC="$(CC)" CFLAGS="$(CFLAGS)" CPP="$(CC) -E" CXXFLAGS="$(CXXFLAGS)" F77="$(F77)" FFLAGS="$(FFLAGS)" FLIBS="$(FLIBS)" LDFLAGS="$(LDFLAGS)" --with-MPI-include="$(FFMPIDIR)" --with-MPI-lib-dirs="$(FFMPIDIRLIBS)" --with-MPI-libs="$(FFMPILIB2)" --prefix="${abs_top_builddir}/download"  --includedir="${abs_top_builddir}/download"/include/hypre  --libdir="${abs_top_builddir}/download"/lib/hypre  --with-lapack-libs="$(LAPACKLIBS)" --with-blas-libs="$(BLASLIBS)"
 # --with-lapack --with-blas  #// to add lapack to test
 	# the following line is to avoid compilation of local blas and local lapack of hypre
 	# begin patch

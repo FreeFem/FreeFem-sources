@@ -39,7 +39,8 @@ int vdebug=getARGV("-d",1);
 int ksplit=getARGV("-k",1);
 int nloc = getARGV("-n",10);
 string sff=getARGV("-p","");
-int gmres=getARGV("-gmres",3); 
+int gmres=getARGV("-gmres",3);
+int tsolver = getARGV("-ts",int(CG)); 
 int nC = getARGV("-N" ,max(nloc/10,5)); 
 int sizeoverlaps=1; // size of overlap
 bool RAS=1; 
@@ -108,7 +109,7 @@ real[int] onG10 = vPbon10(0,Whi); // on 1
 real[int] Bi=vPb(0,Whi);
 
 
-matrix Ai = vPb(Whi,Whi,solver=sparsesolver); 
+matrix Ai = vPb(Whi,Whi,solver=tsolver); 
 
 DMMDeffuncAndGlobals(Lap3,comm,jpart,Whi,Vhc,1,Ai,vPbC,onG10,Pii,Usend,Vrecv,[0])
 

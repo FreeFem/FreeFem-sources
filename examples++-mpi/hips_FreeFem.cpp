@@ -39,6 +39,9 @@ using namespace std;
 #include "AFunction.hpp"
 #include "MatriceCreuse_tpl.hpp"
 
+#ifndef  MPI_SUCCESS
+#define  MPI_SUCCESS
+#endif
 
 extern "C" {
   #include "hips.h"  
