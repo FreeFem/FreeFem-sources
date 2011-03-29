@@ -273,7 +273,7 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 //    cout << (xx)[0] << "  " << endl;
     R dii;
     for (int i=0;i<n;i++) 
-       Ax[i] += ((dii=D1[i])==1.0) ? (xx)[i] : x[i]*dii;
+       Ax[i] += ((dii=D1[i])==1.0) ? (xx)[i] : x[i];//  remove dii ... mars 2011
   }
 
     

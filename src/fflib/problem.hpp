@@ -1193,13 +1193,15 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
      ExecError("A solver is set on a none square matrix!");
     ds.typemat= &(tmat =TypeSolveMat::NONESQUARE);
    }
+    /*
   const OneOperator *precon = static_cast<const OneOperator *> (ds.precon); //  a changer 
-  if ( precon)
+  if ( ds.precon)
     {
-      const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(precon);
-      ffassert(op);
-      precon = op->Find("(",ArrayOfaType(atype<KN<double>* >(),false));
+     // const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(precon);
+      //ffassert(op);
+      precon =  ds.precon op->Find("(",ArrayOfaType(atype<KN<double>* >(),false));
     }
+     */ // change mars 2011
   //  for the gestion of the PTR. 
   WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007 
   
