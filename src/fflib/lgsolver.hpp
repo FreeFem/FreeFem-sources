@@ -243,8 +243,11 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
       throwassert(precon);
       R aii;
       A.getdiag(D1);
+      double tgv = D1.linfty(); 
+      if( tgv < 1e5) tgv = 1e100; // if no tgv remove .. 
+      if(verbosity>10 ) cout << "        in Precon GMRES, find tgv = " << tgv << endl;
       for (int i=0;i<n;i++)
-        D1[i] = (norm(aii=D1[i]) < 1e-20 ? R(1.) : R(1.)/aii);
+        D1[i] = (std::abs(D1[i]) <  tgv ) ? R(1.)  : R() ; // remove the tgv ...
       
 }
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
@@ -267,14 +270,14 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
       
     xx=x;
    // cout << x[0] << "  ";
-    xx=GetAny<KN_<R> >((*precon)(stack));
+    xx=GetAny<KN_<R> >((*precon)(stack)); // xx value of the preoco 
     WhereStackOfPtr2Free(stack)->clean(); 
 
 //    cout << (xx)[0] << "  " << endl;
  //   R dii;
- //   for (int i=0;i<n;i++) 
- //      Ax[i] += ((dii=D1[i])==1.0) ? (xx)[i] : x[i];//  remove dii ... mars 2011
-      Ax += xx; 
+     for (int i=0;i<n;i++) // take on value 
+       Ax[i] += (D1[i]) ? xx[i] : x[i];//  remove dii ... mars 2011
+    //  Ax += xx; 
   }
 
     

@@ -1,3 +1,4 @@
+   - correct the precond of gmres algo in A^-1 : (29 mars 2011) to build a correct Navier-Stokes 
    - add cast TypeOfSolver  on int to parametrize the choise of linear solver.
    - correct intersection of given metrix in adaptmesh (bug introduc in 07/10 verion 3.9 
      in case of convect-apt  example  
