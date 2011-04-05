@@ -42,7 +42,7 @@ map<pair<int,int>,int>::iterator closeto(map<pair<int,int>,int> & m, pair<int,in
     for (int i=-1;i<2;++i)
 	for (int j=-1;j<2;++j)
 	  {
-	      pair<int,int>  kk(k.first+i,k.second+i);
+	      pair<int,int>  kk(k.first+i,k.second+j);// bug corrigie april 2011 FH. tanks . J. Morice
 	      it=  m.find(kk);
 	      if(it != m.end()) return it;
 	  }
