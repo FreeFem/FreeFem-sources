@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.12-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.12-2,hecht@ann.jussieu.fr,freefem++)
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
@@ -22,6 +22,38 @@ AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 
 ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
+dnl search of associad software 
+m4_define([AC_FF_ADDWHERELIB],
+  [	if test -z "$ff_where_lib_conf_$1" ; then
+	    echo "$1 LD '$2'"  >>$ff_where_lib_conf 
+	    test -n "$3" && echo "$1 INCLUDE '$3' "  >>$ff_where_lib_conf
+            ff_where_lib_conf_$1=1
+	    AC_MSG_NOTICE([    ++ add $1 : $2 $3 in  $ff_where_lib_conf "])
+	else
+	    AC_MSG_NOTICE([    -- do not add $1 : $2 $3 in  $ff_where_lib_conf "])
+        fi
+]) dnl 
+m4_define([AC_FF_WHERELIB],
+    [  	if test -z "$ff_where_lib_conf_$1" ; then
+        AC_MSG_CHECKING(check $1)
+	ff_save_libs=$LIBS
+	LIBS="$LIBS $2 $4"
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE=no]) 
+	if test "$ff_WHERE" = "yes" ; then
+	    echo "$1 LD '$2'"  >>$ff_where_lib_conf
+	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
+	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
+		echo "$1 INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+	    fi 
+	fi
+	AC_MSG_RESULT($ff_WHERE)
+
+        ff_where_lib_conf_$1=1
+	LIBS=$ff_save_libs
+	fi	
+    ])dnl end m4_define AC_FF_WHERELIB
+
+
 ff_HOSTARCH_pastix=
 echo "#  Build with freefem++ with ./configure " `date`  >$ff_where_lib_conf
 # To allow anonymous CVS version to contain a "./configure" and
@@ -217,11 +249,15 @@ then
     then
 	AC_MSG_ERROR([ Fatal Error: Your fortran 77  compiler have by 8 bytes integer ],1);  
     fi
-    [echo f77 LD  $FLIBS  >>$ff_where_lib_conf]
-    [echo f77 INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf]
+
+    AC_FF_ADDWHERELIB(f77,$FLIBS,$ff_cfagsf77)
+    AC_FF_ADDWHERELIB(fc,$FLIBS,$ff_cfagsf77)
+
+dnl    [echo f77 LD  $FLIBS  >>$ff_where_lib_conf]
+dnl    [echo f77 INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf]
 #  bof bof -- FH ... 
-    [echo fc LD  $FLIBS  >>$ff_where_lib_conf]
-    [echo fc INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf]
+dnl    [echo fc LD  $FLIBS  >>$ff_where_lib_conf]
+dnl    [echo fc INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf]
 
 # AC_DEFINE_UNQUOTED(FF_F77_INTEGER_SIZE,$ff_f77intsize,[ size of F77 integer ])
 fi
@@ -887,15 +923,18 @@ fi
 	      AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/mpif.h"  ])
 	  else
 	      if test -n "$MPIFC" ; then
-		  [echo mpifc LD "'$ff_MPI_LIBFC'"   >>$ff_where_lib_conf ]
-		  [echo mpifc INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
-		  [echo mpif77 LD "'$ff_MPI_LIBFC'"   >>$ff_where_lib_conf ]
-		  [echo mpif77 INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
+	           AC_FF_ADDWHERELIB(mpifc,$ff_MPI_LIBFC,$ff_MPI_INCLUDE)
+	           AC_FF_ADDWHERELIB(mpif77,$ff_MPI_LIBFC,$ff_MPI_INCLUDE)
+dnl		  [echo mpifc LD "'$ff_MPI_LIBFC'"   >>$ff_where_lib_conf ]
+dnl		  [echo mpifc INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
+dnl		  [echo mpif77 LD "'$ff_MPI_LIBFC'"   >>$ff_where_lib_conf ]
+dnl		  [echo mpif77 INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
 	      fi
   	  fi
 	  if test -n "$MPICXX" ; then 	    
-              [echo mpi LD "'$ff_MPI_LIB'"    >>$ff_where_lib_conf ]
-              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
+              AC_FF_ADDWHERELIB(mpi,$ff_MPI_LIB,$ff_MPI_INCLUDE)
+dnl              [echo mpi LD "'$ff_MPI_LIB'"    >>$ff_where_lib_conf ]
+dnl              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
 	  fi
 	  AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		
 	  AC_SUBST(MPI_INCLUDE,$ff_MPI_INCLUDE)
@@ -1010,7 +1049,8 @@ AC_CHECK_LIB(fftw3,fftw_execute,ff_fftw_ok=yes)
 AC_CHECK_HEADERS(fftw3.h,ff_fftw_h=yes, ff_fftw_h=no)
 if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
-    [echo fftw3 LD  -lfftw3   >>$ff_where_lib_conf]
+AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
+dnl    [echo fftw3 LD  -lfftw3   >>$ff_where_lib_conf]
 fi
 dnl ---------------------------
 dnl   Looking for the tetgen
@@ -1019,7 +1059,8 @@ AC_CHECK_LIB(tet,tetrahedralize,ff_fftet_ok=yes)
 AC_CHECK_HEADERS(tetgen.h,ff_tet_h=yes, ff_tet_h=no)
 if test "$ff_tet_ok" = yes -a "$ff_tet_h" = yes
 then
-    [echo tetgen LD  -ltet   >>$ff_where_lib_conf]
+   AC_FF_ADDWHERELIB(tetgen,-ltet,)
+dnl    [echo tetgen LD  -ltet   >>$ff_where_lib_conf]
     AC_DEFINE(HAVE_TETGEN,1, tetgen is compute tetrahedralize volume of an enclosed surface)
 fi
 dnl ---------------------------
@@ -1075,6 +1116,16 @@ if test "$ff_mkl_libpath" != "not" ; then
 	ff_lapack_ok=yes
 	ff_blas_libs="$ff_mkl_blas"
 	ff_blas_inc="-I$ff_mkl_root/include"
+        AC_FF_ADDWHERELIB(scalapack,$ff_mkl_scalapack,$ff_blas_inc)
+        AC_FF_ADDWHERELIB(blacs,$ff_mkl_blacs,$ff_blas_inc)
+        AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
+        
+dnl	echo scalapack  LD  \'$ff_mkl_scalapack\'  >>$ff_where_lib_conf	
+dnl	echo blacs  LD  \'$ff_mkl_blacs\'  >>$ff_where_lib_conf	
+dnl	echo lapack  LD  \'$ff_mkl_lapack\'  >>$ff_where_lib_conf	
+dnl	echo scalapack  INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
+dnl	echo blacs  INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
+dnl	echo lapack INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
 
     else 
 	ff_mkl_libpath=no
@@ -1212,7 +1263,8 @@ fi
 
 if test "$ff_blas_ok" = yes 
 then
-    echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
+AC_FF_ADDWHERELIB(blas,$ff_blas_libs,)
+dnl    echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
 fi
 
 # end of BLAS -------------------
@@ -1295,7 +1347,8 @@ if  test "$ff_lapack_ok" = yes ; then
   ff_lapackdir=
   if test "$ff_lapack_ok" = yes   
   then
-      echo lapack LD  \'$ff_lapack_lib\'  >>$ff_where_lib_conf
+AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
+dnl      echo lapack LD  \'$ff_lapack_lib\'  >>$ff_where_lib_conf
   fi   
 
 else
@@ -1338,6 +1391,7 @@ then
     fi
   if test "$ff_arpack_ok" = yes 
   then
+      AC_FF_ADDWHERELIB(arpack,$ff_arpack_libs,)
       echo  arpack LD \'$ff_arpack_libs\'  >>$ff_where_lib_conf
   fi   
   
@@ -1445,10 +1499,13 @@ then
 fi
   if test "$ff_umfpack_ok" = yes 
   then
-      echo  amd LD \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
-      echo  amd INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
-      echo  umfpack LD  '$ff_umfpack_libs\'   >>$ff_where_lib_conf     
-      echo  umfpack  INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
+      AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
+      AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
+
+dnl      echo  amd LD \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
+dnl      echo  amd INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
+dnl      echo  umfpack LD  '$ff_umfpack_libs\'   >>$ff_where_lib_conf     
+dnl       echo  umfpack  INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
   fi   
 
 LIBS="$ff_save_libs"
@@ -1925,23 +1982,6 @@ test -n "$ff_mkl_blacs" && ff_blacs="$ff_mkl_blacs"
 test -n "$ff_mkl_scalapack" && ff_scalapack="$ff_mkl_scalapack"
 test -n "$ff_mkl_root" && ff_winc="$ff_mkl_root/include/mkl_blas.h"
 
-dnl search of associad software 
-m4_define([AC_FF_WHERELIB],
-    [  	AC_MSG_CHECKING(check $1)
-	ff_save_libs=$LIBS
-	LIBS="$LIBS $2 $4"
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE=no]) 
-	if test "$ff_WHERE" = "yes" ; then
-	    echo "$1 LD '$2'"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
-	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "$1 INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
-	    fi 
-	fi
-	AC_MSG_RESULT($ff_WHERE)
-	LIBS=$ff_save_libs
-	
-    ])dnl end m4_define AC_FF_WHERELIB
 
 m4_map([AC_FF_WHERELIB],[ 
 	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[/usr/include/dmumps_c.h],[]],
@@ -2031,8 +2071,9 @@ if test "$enable_download" = yes  ;then
 	AC_MSG_NOTICE([     missing download/pkg/MUMPS_4.9.2.tar.gz, see http://mumps.enseeiht.fr/ to download by hand ])
     fi
     if test -f download/lib/libmmg3d.a ; then
-	echo "mmg3d LD '-L`pwd`/download/lib' '-lmmg3d'" >>$ff_where_lib_conf
-	echo "mmg3d INCLUDE '-I`pwd`/download/include'" >>$ff_where_lib_conf
+        AC_FF_ADDWHERELIB(mmg3d,-L`pwd`/download/lib,-I`pwd`/download/include)
+dnl	echo "mmg3d LD '-L`pwd`/download/lib' '-lmmg3d'" >>$ff_where_lib_conf
+dnl	echo "mmg3d INCLUDE '-I`pwd`/download/include'" >>$ff_where_lib_conf
     else 
 	AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
     fi
