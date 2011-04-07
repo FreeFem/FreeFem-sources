@@ -79,7 +79,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/double/
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/double
 	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/double/
-	cd $(SRCDIR)/src/ &&  $(MAKE) clean -C $(SRCDIR)/src
+	cd $(SRCDIR)/src/ &&  $(MAKE) clean 
 	#complex version
 	cp config-complex.in $(SRCDIR)/src/config.in	
 	cd $(SRCDIR)/src/;$(MAKE) expor
@@ -128,7 +128,7 @@ $(PACKAGE1):
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE1)`
 
 clean-local:
-	-cd $(SRCDIR)/src &&  $(MAKE) clean -C $(SRCDIR)/src
+	-cd $(SRCDIR)/src &&  $(MAKE) clean 
 
 clean: clean-local
 	-rm config.in FAIRE 

@@ -319,7 +319,8 @@ class MeshPointBase { public:
      Th3=&aTh; 
      region = T3->lab;
      label = ll;
-     t=v=f=e=-1;  
+     t=(*Th3)(T3);
+     v=f=e=-1;  
      N.x=0;   
      N.y=0;   
      N.z=0;   

@@ -4,7 +4,7 @@ load "msh3"
 load "medit"
 load "MUMPS_FreeFem"
 
-real ttgv=1e10;
+real ttgv=-1;
 string ssparams="nprow=1, npcol="+mpisize;
 
 
@@ -16,8 +16,13 @@ real zmin=0,zmax=1;
 mesh3 Th=buildlayers(Th2,nn,
   zbound=[zmin,zmax],  labelmid=rmid, 
   reffaceup = rup,     reffacelow = rdown);
-  
-//medit("c10x10x10",Th);
+
+real ccc = mpisize/real(Th.nt) ;
+Th=change(Th,fregion= min(mpisize-1,int(nuTriangle* ccc+1e-10)));
+if(mpirank==0)
+for(int i=0;i<=mpisize;++i)
+	 cout<< " Volume region  " <<  i << " " << int3d(Th,i)(1.) << endl;
+if(mpirank==0) medit("c10x10x10",Th);
 fespace VVh(Th,[P2,P2,P2,P1]);
 fespace UUh(Th,[P2,P2,P2]);
 fespace Uh(Th,P2);
@@ -67,8 +72,8 @@ real time2=clock();
 real[int] b(VVh.ndof);
 real[int] xx(VVh.ndof);
 { 
-  real[int] b1 = vlaplace1(0,Uh);
-  real[int] b2 = vlaplacenull(0,Uh);
+  real[int] b1 = vlaplace1(0,Uh,tgv=ttgv);
+  real[int] b2 = vlaplacenull(0,Uh,tgv=ttgv);
   
   for(int ii=0; ii<Uh.ndof; ii++)
     {

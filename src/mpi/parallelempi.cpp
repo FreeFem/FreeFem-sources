@@ -1230,6 +1230,43 @@ long Op_Scatterv3( KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root,
 // fin J. Morice
 
 template<class R>
+struct Op_ReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<R> *,MPIrank,fMPI_Op,long> {
+    static long  f(Stack, Matrice_Creuse<R>*  const  & s,Matrice_Creuse<R>*  const  &r,  MPIrank const & root, fMPI_Op const &op)  
+    { 
+	ffassert( r && s);
+	MatriceCreuse<R> * sA=s->A;
+	MatriceCreuse<R> * rA=r->A;
+	ffassert( sA && rA); 
+	MatriceMorse<R> & sM = *dynamic_cast<MatriceMorse<R>* > (sA);
+	MatriceMorse<R> & rM = *dynamic_cast<MatriceMorse<R>* > (rA);
+	ffassert( &sM && &rM);
+	int chunk = sM.nbcoef;
+	ffassert(chunk==rM.nbcoef);
+	
+	return MPI_Reduce( (void *)  sM.a,(void *)  rM.a, chunk , MPI_TYPE<R>::TYPE(),op,root.who,root.comm);	
+    }
+};
+template<class R>
+struct Op_AllReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<R> *,MPIrank,fMPI_Op,long> {
+    static long  f(Stack, Matrice_Creuse<R>*  const  & s,Matrice_Creuse<R>*  const  &r,  MPIrank const & root, fMPI_Op const &op)  
+    { 
+	ffassert( r && s);
+	MatriceCreuse<R> * sA=s->A;
+	MatriceCreuse<R> * rA=r->A;
+	ffassert( sA && rA); 
+	MatriceMorse<R> & sM = *dynamic_cast<MatriceMorse<R>* > (sA);
+	MatriceMorse<R> & rM = *dynamic_cast<MatriceMorse<R>* > (rA);
+	ffassert( &sM && &rM);
+	int chunk = sM.nbcoef;
+	ffassert(chunk==rM.nbcoef);
+	
+	return MPI_Allreduce( (void *)  sM.a,(void *)  rM.a, chunk , MPI_TYPE<R>::TYPE(),op,root.comm);	
+    }
+};
+
+
+
+template<class R>
 struct Op_Reduce  : public   quad_function<KN_<R>,KN_<R>,MPIrank,fMPI_Op,long> {
   static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root, fMPI_Op const &op)  
   { 
@@ -2382,6 +2419,13 @@ void f_init_lgparallele()
       Global.Add("mpiScatterv","(",new OneOperator5_<long, KN_<Complex>, KN_<Complex>, MPIrank, KN_<long>, KN_<long> >(Op_Scatterv3< Complex >) );
       Global.Add("mpiGatherv","(",new OneOperator5_<long, KN_<Complex>, KN_<Complex>, MPIrank, KN_<long>, KN_<long> >( Op_Gatherv3< Complex > ) );
      
+   
+    
+      Global.Add("mpiReduce","(",new OneQuadOperator<Op_ReduceMat< Complex >, Quad_Op<Op_ReduceMat< Complex > > >);// add FH april 2011
+      Global.Add("mpiReduce","(",new OneQuadOperator<Op_ReduceMat< double >, Quad_Op<Op_ReduceMat< double > > >);// add FH april 2011
+      Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduceMat< Complex >, Quad_Op<Op_AllReduceMat< Complex > > >);// add FH april 2011
+      Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduceMat< double >, Quad_Op<Op_AllReduceMat< double > > >);// add FH april 2011
+    
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce< Complex >, Quad_Op<Op_Reduce< Complex > > >);
       Global.Add("mpiReduce","(",new OneQuadOperator<Op_Reduce1< Complex >, Quad_Op<Op_Reduce1< Complex > > >);
       Global.Add("mpiAllReduce","(",new OneQuadOperator<Op_AllReduce< Complex >, Quad_Op<Op_AllReduce< Complex > > >);
