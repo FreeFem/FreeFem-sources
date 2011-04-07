@@ -225,8 +225,8 @@ class SetMesh_Op : public E_F0mps
 {
 public:
   Expression a; 
-  
-  static const int n_name_param =2+2+2; //  add nbiter FH 30/01/2007 11 -> 12 
+   
+  static const int n_name_param =2+2+2+2; //  add nbiter FH 30/01/2007 11 -> 12 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
@@ -251,7 +251,9 @@ basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
   {  "label", &typeid(KN_<long> )},
   {  "region", &typeid(KN_<long> )},
   {  "renumv",&typeid(KN_<long>)},
-  {  "renumt",&typeid(KN_<long>)}
+  {  "renumt",&typeid(KN_<long>)},
+  {  "flabel", &typeid(long)},
+  {  "fregion", &typeid(long)}
         
     
 };
@@ -266,6 +268,7 @@ int  ChangeLab(const map<int,int> & m,int lab)
 
 AnyType SetMesh_Op::operator()(Stack stack)  const 
 {
+    MeshPoint *mp=MeshPointStack(stack),smp=*mp; 
   Mesh * pTh= GetAny<Mesh *>((*a)(stack));
   Mesh & Th=*pTh;
   Mesh *m= pTh;
@@ -277,14 +280,16 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   KN<long> nrt (arg(1,stack,arg(3,stack,zz)));  
   KN<long> rv (arg(4,stack,zz));  
   KN<long> rt (arg(5,stack,zz));  
-
+  Expression flab = nargs[6] ;
+  Expression freg = nargs[7] ;
+    
   bool rV =  (rv.size()== nbv);
   bool rT =  (rt.size()== nbt);
     if(verbosity>1)
 	cout << "  -- SetMesh_Op: nb vertices" << nbv<< " nb Trai "<< nbt << " nb b. edges  "
 	     << neb << "renum V " << rV << " , renum T "<< rT << endl;  
     
-  if(nre.N() <=0 && nrt.N()<=0  && !rV && ! rT ) return m;
+  if(nre.N() <=0 && nrt.N()<=0  && !rV && ! rT  && ! flab && ! freg ) return m;
   ffassert( nre.N() %2 ==0);
   ffassert( nrt.N() %2 ==0);
   map<int,int> mape,mapt;
@@ -322,7 +327,7 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
 
   //  generation des triangles 
   int nberr=0;
-   
+  R2 PtHat(0.5,0.5);
   for (int i=0;i<nbt;i++)
     {
       int ii= rT ? rt(i) : i;
@@ -334,6 +339,12 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
       }
       // les 3 triangles par triangles origines 
       t[ii].set(v,i0,i1,i2,ChangeLab(mapt,Th[i].lab));
+      if(freg)
+	{
+	  mp->set(Th,Th[i](PtHat),PtHat,Th[i],Th[i].lab);
+	  t[ii].lab =GetAny<long>( (* freg)(stack)) ;  
+	}
+	
     }  
   
   // les arete frontieres qui n'ont pas change
@@ -358,6 +369,7 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);   
   //  m->decrement();
   Add2StackOfPtr2FreeRC(stack,m);
+    *mp=smp;
   return m;
 }
 

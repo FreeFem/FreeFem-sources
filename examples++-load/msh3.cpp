@@ -2193,7 +2193,7 @@ class SetMesh3D_Op : public E_F0mps
 public:
   Expression a; 
   
-  static const int n_name_param =2+2; //  add nbiter FH 30/01/2007 11 -> 12 
+  static const int n_name_param =2+2+2; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
@@ -2219,7 +2219,9 @@ basicAC_F0::name_and_type SetMesh3D_Op::name_param[]= {
   {  "reftet", &typeid(KN_<long> )},
   {  "refface", &typeid(KN_<long> )},
   {  "region", &typeid(KN_<long> )},
-  {  "label", &typeid(KN_<long> )}
+  {  "label", &typeid(KN_<long> )},
+    {  "fregion", &typeid(long)},
+    {  "flabel", &typeid(long )}
    
 };
 //  besoin en cas de fichier 2D / fichier 3D 
@@ -2234,6 +2236,7 @@ int  ChangeLab3D(const map<int,int> & m,int lab)
 
 AnyType SetMesh3D_Op::operator()(Stack stack)  const 
 {
+  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
   Mesh3 * pTh= GetAny<Mesh3 *>((*a)(stack));
   Mesh3 & Th=*pTh;
   Mesh3 *m= pTh;
@@ -2244,8 +2247,10 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
   KN<long> zz;
   KN<long> nrtet (arg(0,stack,zz));  
   KN<long> nrface (arg(1,stack,zz));  
-
-  if(nrface.N() <=0 && nrtet.N() <=0) return m; // modf J.M. oct 2010 
+  Expression freg = nargs[4];
+  Expression flab = nargs[5];
+ // cout << " Chnage " << freg << " " << flab << endl;   
+  if(nrface.N() <=0 && nrtet.N() <=0 && (!freg) && (!flab)  ) return m; // modf J.M. oct 2010 
   ffassert( nrtet.N() %2 ==0);
   ffassert( nrface.N() %2 ==0);
   
@@ -2292,9 +2297,11 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
 
   //  generation des triangles 
   Tet *tt= t; 
+  int lmn= 2000000000;
+  int lmx= -2000000000;
   int nberr=0;
-   
-  for (int i=0;i<nbt;i++)
+   R3 PtHat(1./4.,1./4.,1./4.);
+    for (int i=0;i<nbt;i++)
     {
       const Tet &K( Th.elements[i] );	
       int iv[4];
@@ -2306,15 +2313,30 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
       // les 3 triangles par triangles origines 
       int lab=K.lab;
       
-      (*tt++).set( v, iv, ChangeLab3D(maptet,lab));
+      tt->set( v, iv, ChangeLab3D(maptet,lab));
+      if(freg)
+	{//      R3 B(1./4.,1./4.,1./4.);  // 27/09/10 : J.Morice error in msh3.cpp
+	      mp->set(Th,K(PtHat),PtHat,K,0);
+	      tt->lab =GetAny<long>( (* freg)(stack)) ;  
+	      lmn= min (lmn,tt->lab);
+	      lmx= max (lmx,tt->lab);
+	    }
+      tt++;
+	
     }  
-  
-  // les arete frontieres qui n'ont pas change
+    if(freg && verbosity> 1 ) cout << "    -- Change : new region number bound : " << lmn << " "<< lmx << endl;
+    // les arete frontieres qui n'ont pas change
+     lmn= 2000000000;
+     lmx= -2000000000;
   
   Triangle3 * bb=b;
+     R2 PtHat2(1./3.,1./3.);
   for (int i=0;i<nbe;i++)
     { 
       const Triangle3 &K( Th.be(i) );
+      int fk,ke = Th.BoundaryElement(i,fk); // element co
+      const Tet & KE(Th[ke]);
+      R3 B= KE.PBord(fk,PtHat2);
       int iv[3];       
     
       iv[0] = Th.operator()(K[0]);
@@ -2322,11 +2344,20 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
       iv[2] = Th.operator()(K[2]);
       
       int l0,l1=ChangeLab3D(mapface,l0=K.lab) ;
-      (*bb++).set( v, iv, l1);   
+      (*bb).set( v, iv, l1);   
+	if(flab)
+	  {//      R3 B(1./4.,1./4.,1./4.);  // 27/09/10 : J.Morice error in msh3.cpp
+	      mp->set(Th,KE(B),B,KE,K.lab);
+	      bb->lab =GetAny<long>( (* freg)(stack)) ;  
+	      lmn= min (lmn,bb->lab);
+	      lmx= max (lmx,bb->lab);
+	  }
+	
+	bb++;
     }
     
   assert(nben==bb-b);
-
+  *mp=mps; 
   if(nbt != 0)
     {
       Mesh3 *mpq = new Mesh3(nbv,nbt,nbe,v,t,b);
