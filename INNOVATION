@@ -1,3 +1,9 @@
+   - add tool to change the region and label number 
+       change(Th,fregion= integer function to set the region number )
+   - nuTriangle now given the tet number in 3D.  
+   - add mpireduce of matrix to build parallele matrix
+v 3.12-1 april/2011 
+      see remove examples++-mpi/chaleur3D-superludist.edp
    - correct the precond of gmres algo in A^-1 : (29 mars 2011) to build a correct Navier-Stokes 
    - add cast TypeOfSolver  on int to parametrize the choise of linear solver.
    - correct intersection of given metrix in adaptmesh (bug introduc in 07/10 verion 3.9 
