@@ -70,6 +70,7 @@ void read_nprow_npcol_freefem(string *string_option, int *nprow, int *npcol, int
     tictac2 = tictac;
     tictac = strtok(NULL," =,\t\n");
     int val_options;
+    if(verbosity>4)
     printf("param %s = value %s , id_option %d\n",tictac2,tictac,id_option);
     switch (id_option)
       { 
@@ -80,7 +81,7 @@ void read_nprow_npcol_freefem(string *string_option, int *nprow, int *npcol, int
 	*npcol = atoi(tictac);
 	break;
       case 15: // matrix
-	printf("parameter matrix \n");
+	if(verbosity>4) printf("parameter matrix \n");
 	if(strcmp(tictac,"assembled") == 0)
 	  *matrixdist = 0;
 	else if(strcmp(tictac,"distributedglobal") == 0) 
@@ -88,7 +89,7 @@ void read_nprow_npcol_freefem(string *string_option, int *nprow, int *npcol, int
 	else if(strcmp(tictac,"distributed") == 0) 
 	  *matrixdist = 2;
 	else{
-	  printf("value of parameter matrix is not correct %s \n", tictac );
+	  if(verbosity>4)printf("value of parameter matrix is not correct %s \n", tictac );
 	}
 	break;
       default: // Equivalent of case default
@@ -135,6 +136,7 @@ void read_options_freefem(string *string_option, superlu_options_t *options, Dia
 
   char data[string_option->size()+1];  
   strcpy( data, string_option->c_str()); 
+  if(verbosity>4)
   cout << "data=" << data << endl;
   char *tictac;
   char *tictac2;
@@ -332,15 +334,16 @@ void read_nprow_npcol_matrixdist_superlu_datafile(string *data_option, int_t *np
   char *tictac;
   
   fgets(data,256,pfile);
+  if(verbosity>4)
   cout << "data=" << data << endl;
   tictac = strtok(data," /!#\t\n");
   *nprow = (int) atol(tictac);
-  if(verbosity) printf("nprow=%d\n",*nprow);
+  if(verbosity>1) printf("nprow=%d\n",*nprow);
 
   fgets(data,256,pfile);
   tictac = strtok(data," /!#\t\n");
   *npcol = (int) atol(tictac);
-  if(verbosity) printf("npcol=%d\n",*npcol);
+  if(verbosity>1) printf("npcol=%d\n",*npcol);
 
   fgets(data,256,pfile);
   tictac = strtok(data," /!#\t\n");
@@ -391,6 +394,7 @@ void read_options_superlu_datafile(string *data_option, superlu_options_t *optio
   char *tictac;
   
   fgets(data,256,pfile);
+  if(verbosity>4)
   cout << "data=" << data << endl;
   tictac = strtok(data," /!#\t\n");
   *nprow = (int) atol(tictac);

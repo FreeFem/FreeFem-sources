@@ -172,7 +172,9 @@ public:
     tgv(ttgv),string_option(param_char),data_option(datafile),
     tol_pivot_sym(pivot_sym),tol_pivot(pivot)
   { 
-    commworld = ccommworld ? *static_cast<MPI_Comm*>( ccommworld) : MPI_COMM_WORLD;    
+    commworld = ccommworld ? *static_cast<MPI_Comm*>( ccommworld) : MPI_COMM_WORLD;  
+    int rank;
+    MPI_Comm_rank(commworld, &rank); 
     R*      B;
     //R*      X;
     SuperLUStat_t stat;
@@ -215,7 +217,7 @@ public:
      /* ------------------------------------------------------------
 	 INITIALIZE THE SUPERLU PROCESS GRID. 
 	 ------------------------------------------------------------*/
-
+    if( (verbosity>1) && (rank ==0))
     cout << "Real superlu_gridinit" << " " << commworld << " " << ccommworld <<endl;
     superlu_gridinit(commworld, nprow, npcol, &grid);
 
@@ -237,16 +239,19 @@ public:
 	if( matrixdist == assembled ){
 	  
 	  if(!iam){
-	    cout <<  "iam=" << iam << endl;
+	    if(verbosity>5)
+	      {
+		
+	    cout <<  "iam=" << iam << " " ;
 	    printf("\tProcess grid\t%d X %d\n", grid.nprow, grid.npcol);
-	    
+	      }
 	    /* create the matrix for superlu_dist */
 	    n=AA.n;
 	    m=AA.m;
 	    nnz=AA.nbcoef;
 	  
 	    assert( AA.lg[n] == nnz );	   
-	    printf("\tDimension\t%dx%d\t # nonzeros %d\n", m, n, nnz);
+	    if(verbosity>5) printf("\tDimension\t%dx%d\t # nonzeros %d\n", m, n, nnz);
 	    
 	    /* transform Row to Col */
 	    // cela coute cher comme fonction //
@@ -283,9 +288,10 @@ public:
 	  }
 	  
 	  Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
-	  
+	  if(verbosity>6)
 	  cout << "Debut: Create_CompCol_Matrix_dist" <<endl;
-	  Create_CompCol_Matrix_dist(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);      
+	  Create_CompCol_Matrix_dist(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE); 
+	  if(verbosity>6)
 	  cout << "Fin: Create_CompCol_Matrix_dist" <<endl;
 	  /* creation of pseudo solution + second member */
 	  
@@ -294,7 +300,7 @@ public:
 	    exit(1);
 	  }
 	  
-	  if(verbosity)
+	  if(verbosity>2 && rank ==0)
 	    printf("Dimension %dx%d; # nonzeros %d\n", A.nrow, A.ncol, nnz);
 
 	  
@@ -323,7 +329,7 @@ public:
 	  }
 	  berr[0]=0.;
     	
-	  if(verbosity)
+	  if(verbosity && rank ==0)
 	    printf("Dimension %dx%d; # nonzeros %d\n", A.nrow, A.ncol, nnz);
 	
 	  /* INIT LU struct*/
@@ -335,7 +341,7 @@ public:
 	  SuperLUmpiDISTDriver<R>::pgssvx_ABglobal(&options, &A,  &ScalePermstruct, B, ldb, nrhs, &grid,
 					       &LUstruct, berr, &stat, &info);
 	
-	  if(verbosity)
+	  if(verbosity>2 && rank ==0)
 	    printf("LU factorization: pdgssvx()/p returns info %d\n", info);
 	  
 	  if ( verbosity) PStatPrint(&options,&stat,&grid);
@@ -350,7 +356,7 @@ public:
 	else if( matrixdist == distributedglobal) {
 	   if(!iam){
 
-	     printf("\tProcess grid\t%d X %d iam=%d \n", grid.nprow, grid.npcol,iam);
+	     if(verbosity>2) printf("\tProcess grid\t%d X %d iam=%d \n", grid.nprow, grid.npcol,iam);
 	
 	     /* create the matrix for superlu_dist */
 	     n=AA.n;
@@ -361,7 +367,7 @@ public:
 	     xa=AA.lg;
 	     
 	     xa[n] = nnz;
-	     printf("\tDimension\t%dx%d\t # nonzeros %d\n", m, n, nnz);
+	     if(verbosity>6) printf("\tDimension\t%dx%d\t # nonzeros %d\n", m, n, nnz);
 	     
 	     /* Broadcast matrix A to the other PEs. */
 	     MPI_Bcast( &m,   1,   mpi_int_t,  0, grid.comm );
@@ -376,7 +382,7 @@ public:
 	   }
 	   else{
 	     
-	     printf("\tProcess grid\t%d X %d iam=%d \n", grid.nprow, grid.npcol,iam);
+	     if(verbosity>6)printf("\tProcess grid\t%d X %d iam=%d \n", grid.nprow, grid.npcol,iam);
 	     /* Receive matrix A from PE 0. */
 	     MPI_Bcast( &m,   1,   mpi_int_t,  0, grid.comm );
 	     MPI_Bcast( &n,   1,   mpi_int_t,  0, grid.comm );
@@ -429,10 +435,10 @@ public:
 	   }
 	   Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
 	   
-	   cout << "Debut: Create_CompRowCol_Matrix_dist" <<endl;
+	   if(verbosity>6) cout << "Debut: Create_CompRowCol_Matrix_dist" <<endl;
 	   dCreate_CompRowLoc_Matrix_dist(&A, m, n, nnz_loc, m_loc, fst_row, aloc, asubloc, xaloc, SLU_NR_loc, R_SLU, SLU_GE);
 	   
-	   cout << "Fin: Create_CompRowCol_Matrix_dist" <<endl;
+	   if(verbosity>6) cout << "Fin: Create_CompRowCol_Matrix_dist" <<endl;
 	   /* creation of pseudo solution + second member */
 	   
 	   
@@ -445,7 +451,7 @@ public:
 	     B[ii] = 1.; //BB[fst_row+ii];
 	   }
      
-	   if(verbosity)
+	   if(verbosity >2 && rank ==0)
 	     printf("Dimension %dx%d; # nonzeros %d\n", A.nrow, A.ncol, nnz);
 	   
 	   /* set the default options */
@@ -455,7 +461,7 @@ public:
 	   	   
 	   m=A.nrow;
 	   n=A.ncol;
-	   printf("Dimension %dx%d; # nonzeros %d\n", A.nrow, A.ncol, nnz);
+	   //printf("Dimension %dx%d; # nonzeros %d\n", A.nrow, A.ncol, nnz);
 	   /* Initialize ScalePermstruct and LUstruct. */
 	   ScalePermstructInit(m, n, &ScalePermstruct);
 	   if(pperm_r  ||  pperm_c ) ScalePermstruct.DiagScale=optionDiagScale;
@@ -485,10 +491,10 @@ public:
 	   SuperLUmpiDISTDriver<R>::pgssvx(&options, &A,  &ScalePermstruct, B, ldb, nrhs, &grid,
 					   &LUstruct, &SOLVEstruct, berr, &stat, &info);
 	   
-	   if(verbosity)
+	   if(verbosity >1 && rank ==0)
 	     printf("LU factorization: pdgssvx()/p returns info %d\n", info);
 	   
-	   if ( verbosity) PStatPrint(&options,&stat,&grid);
+	   if ( verbosity > 2 ) PStatPrint(&options,&stat,&grid);
 	   PStatFree(&stat);
 	}
 	else if( matrixdist == distributed) {
@@ -508,9 +514,13 @@ public:
 	if(iam==0){
 	  finishtime = clock();
 	  timeused= (finishtime-starttime)/(1000 );
+	  if(verbosity>1)
+	    {
+	      
 	  printf("=====================================================\n");
 	  cout << "SuperLU_DIST : time factorisation :: " << timeused << " ms" <<endl;
 	  printf("=====================================================\n");
+	    }
 	}
       }
   }
@@ -572,7 +582,7 @@ public:
 	SuperLUmpiDISTDriver<R>::pgssvx_ABglobal (&options, &A, &ScalePermstruct, B, ldb, nrhs, &grid,
 						  &LUstruct, berr, &stat, &info );
 	
-	if(verbosity)
+	if(verbosity>3)
 	  printf("Triangular solve: dgssvx() returns info %d\n", info);
 	
 	if(verbosity) PStatPrint(&options, &stat, &grid);   
@@ -581,7 +591,7 @@ public:
 	  x[ii] = B[ii]; 
 	}
 	
-	if(verbosity) cout << "   x min max " << x.min() << " " <<x.max() << endl;
+	if(verbosity>2) cout << "   x min max " << x.min() << " " <<x.max() << endl;
 	
       }
       else if( matrixdist == distributedglobal) {
@@ -629,7 +639,7 @@ public:
 	SuperLUmpiDISTDriver<R>::pgssvx(&options, &A, &ScalePermstruct, B, ldb, nrhs, &grid,
 					&LUstruct, &SOLVEstruct, berr, &stat, &info );
 	
-	if(verbosity)
+	if(verbosity>3)
 	  printf("Triangular solve: dgssvx() returns info %d\n", info);
 	
 	if ( !(xtemp = doubleMalloc_dist(AA.n)) ){
@@ -672,9 +682,14 @@ public:
       if(iam==0){
 	finishtime = clock();
 	timeused= (finishtime-starttime)/(1000 );
+	if(verbosity>1)
+	  {
+	    
+	  
 	printf("=====================================================\n");
 	cout << "SuperLu_DIST: time solve step :: " << timeused << " ms" <<endl;
 	printf("=====================================================\n");
+	  }
       }
     }
     
@@ -684,7 +699,7 @@ public:
     //int iam;
     //iam = grid.iam;
     if(iam < nprow*npcol){
-      if(verbosity)
+      if(verbosity>4)
 	cout << "~SolveSuperLUmpi double:" << endl;
       
       if( matrixdist == assembled) {
