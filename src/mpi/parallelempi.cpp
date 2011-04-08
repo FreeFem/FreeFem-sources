@@ -1247,20 +1247,32 @@ struct Op_ReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<
     }
 };
 template<class R>
-struct Op_AllReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<R> *,MPIrank,fMPI_Op,long> {
-    static long  f(Stack, Matrice_Creuse<R>*  const  & s,Matrice_Creuse<R>*  const  &r,  MPIrank const & root, fMPI_Op const &op)  
+struct Op_AllReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<R> *,fMPI_Comm,fMPI_Op,long> {
+    static long  f(Stack, Matrice_Creuse<R>*  const  & s,Matrice_Creuse<R>*  const  &r,  fMPI_Comm const & comm, fMPI_Op const &op)  
     { 
 	ffassert( r && s);
 	MatriceCreuse<R> * sA=s->A;
 	MatriceCreuse<R> * rA=r->A;
-	ffassert( sA && rA); 
+	ffassert( &sA );
+
 	MatriceMorse<R> & sM = *dynamic_cast<MatriceMorse<R>* > (sA);
+        ffassert( &sM );
+	if( ! rA ) { // build a zero matric copy of sM
+	    MatriceMorse<R> *rm=new MatriceMorse<R>(sM.n,sM.m,sM.nbcoef,sM.symetrique,0,sM.lg,sM.cl);
+	    *rm=R(); // set the matrix to Zero ..
+	    r->A.master(rm);
+	    rA=r->A;
+	    
+	}
+	ffassert( sA && rA); 
+	
 	MatriceMorse<R> & rM = *dynamic_cast<MatriceMorse<R>* > (rA);
+	
 	ffassert( &sM && &rM);
 	int chunk = sM.nbcoef;
 	ffassert(chunk==rM.nbcoef);
 	
-	return MPI_Allreduce( (void *)  sM.a,(void *)  rM.a, chunk , MPI_TYPE<R>::TYPE(),op,root.comm);	
+	return MPI_Allreduce( (void *)  sM.a,(void *)  rM.a, chunk , MPI_TYPE<R>::TYPE(),op,comm);	
     }
 };
 
