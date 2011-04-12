@@ -56,8 +56,8 @@ install-2:
 WHERE: 
 	@-if [ -f FAIT-$(OPT) ] ; then \
 	make install-$(OPT);  \
-	echo mmg3d  LD '-L@DIR@/lib -lmmg3d'  >../lib/WHERE.mmg3d ;\
-	echo mmg3d INCLUDE '-I@DIR@/include'>> ../lib/WHERE.mmg3d ;\
+	echo mmg3d  LD -L@DIR@/lib -lmmg3d  >../lib/WHERE.mmg3d ;\
+	echo mmg3d INCLUDE -I@DIR@/include>> ../lib/WHERE.mmg3d ;\
 	echo build WHERE ./lib/WHERE.mmg3d ;\
 	fi
 

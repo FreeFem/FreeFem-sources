@@ -94,8 +94,8 @@ install: FAIRE WHERE
 	cd $(SRCDIR)/SRC; $(RANLIB) $(SUPERLULIB) 
 	cp $(SRCDIR)/SRC/s*h  $(SRCDIR)/$(INSTALL)/include
 WHERE:
-	echo superlu LD '-L@DIR@/lib -lsuperlu_$(SUPERLU_VERSION)'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
-	echo superlu INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
+	echo superlu LD -L@DIR@/lib -lsuperlu_$(SUPERLU_VERSION)  >$(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
+	echo superlu INCLUDE -I@DIR@/include >> $(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
 
 
 

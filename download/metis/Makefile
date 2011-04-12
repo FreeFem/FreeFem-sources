@@ -46,8 +46,8 @@ $(SRCDIR)/tag-compile: $(SRCDIR)/tags
 
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
-	echo metis LD '-L@DIR@/lib -lmetis'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
-	echo metis INCLUDE '-I@DIR@/include/metis'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	echo metis LD -L@DIR@/lib -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	echo metis INCLUDE -I@DIR@/include/metis>> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
 	fi
 
 

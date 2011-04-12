@@ -25,8 +25,8 @@ ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
 dnl search of associad software 
 m4_define([AC_FF_ADDWHERELIB],
   [	if test -z "$ff_where_lib_conf_$1" ; then
-	    echo "$1 LD '$2'"  >>$ff_where_lib_conf 
-	    test -n "$3" && echo "$1 INCLUDE '$3' "  >>$ff_where_lib_conf
+	    echo "$1 LD $2"  >>$ff_where_lib_conf 
+	    test -n "$3" && echo "$1 INCLUDE $3 "  >>$ff_where_lib_conf
             ff_where_lib_conf_$1=1
 	    AC_MSG_NOTICE([    ++ add $1 : $2 $3 in  $ff_where_lib_conf "])
 	else
@@ -40,10 +40,10 @@ m4_define([AC_FF_WHERELIB],
 	LIBS="$LIBS $2 $4"
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE=no]) 
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "$1 LD '$2'"  >>$ff_where_lib_conf
+	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "$1 INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi 
 	fi
 	AC_MSG_RESULT($ff_WHERE)
@@ -1392,7 +1392,7 @@ then
   if test "$ff_arpack_ok" = yes 
   then
       AC_FF_ADDWHERELIB(arpack,$ff_arpack_libs,)
-      echo  arpack LD \'$ff_arpack_libs\'  >>$ff_where_lib_conf
+      echo  arpack LD "'$ff_arpack_libs'"  >>$ff_where_lib_conf
   fi   
   
 	# If all else fails, download!

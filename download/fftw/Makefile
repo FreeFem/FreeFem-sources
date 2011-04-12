@@ -37,8 +37,8 @@ install:  WHERE
 	cd $(SRCDIR) && make install
 WHERE: 
 	-if [ FAIT ] ; then \
-	echo $(THIS)  LD '-L@DIR@/lib -l$(THIS)'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.$(THIS) ;\
-	echo fftw3  INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.$(THIS) ;\
+	echo $(THIS)  LD -L@DIR@/lib -l$(THIS)  >$(SRCDIR)/$(INSTALL)/lib/WHERE.$(THIS) ;\
+	echo $(THIS) INCLUDE -I@DIR@/include   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.$(THIS) ;\
 	fi
 
 $(SRCDIR): $(PKGDIR)/$(PACKAGE)

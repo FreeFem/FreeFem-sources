@@ -6281,8 +6281,8 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
     fi
 
     	if test -z "$ff_where_lib_conf_f77" ; then
-	    echo "f77 LD '$FLIBS'"  >>$ff_where_lib_conf
-	    test -n "$ff_cfagsf77" && echo "f77 INCLUDE '$ff_cfagsf77' "  >>$ff_where_lib_conf
+	    echo "f77 LD $FLIBS"  >>$ff_where_lib_conf
+	    test -n "$ff_cfagsf77" && echo "f77 INCLUDE $ff_cfagsf77 "  >>$ff_where_lib_conf
             ff_where_lib_conf_f77=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add f77 : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add f77 : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&6;}
@@ -6292,8 +6292,8 @@ $as_echo "$as_me:     -- do not add f77 : $FLIBS $ff_cfagsf77 in  $ff_where_lib_
         fi
 
     	if test -z "$ff_where_lib_conf_fc" ; then
-	    echo "fc LD '$FLIBS'"  >>$ff_where_lib_conf
-	    test -n "$ff_cfagsf77" && echo "fc INCLUDE '$ff_cfagsf77' "  >>$ff_where_lib_conf
+	    echo "fc LD $FLIBS"  >>$ff_where_lib_conf
+	    test -n "$ff_cfagsf77" && echo "fc INCLUDE $ff_cfagsf77 "  >>$ff_where_lib_conf
             ff_where_lib_conf_fc=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add fc : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add fc : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&6;}
@@ -11950,8 +11950,8 @@ $as_echo "$as_me:  MPI without fortran no file \"$ff_MPI_INCLUDE_DIR/mpif.h\"  "
 	  else
 	      if test -n "$MPIFC" ; then
 	           	if test -z "$ff_where_lib_conf_mpifc" ; then
-	    echo "mpifc LD '$ff_MPI_LIBFC'"  >>$ff_where_lib_conf
-	    test -n "$ff_MPI_INCLUDE" && echo "mpifc INCLUDE '$ff_MPI_INCLUDE' "  >>$ff_where_lib_conf
+	    echo "mpifc LD $ff_MPI_LIBFC"  >>$ff_where_lib_conf
+	    test -n "$ff_MPI_INCLUDE" && echo "mpifc INCLUDE $ff_MPI_INCLUDE "  >>$ff_where_lib_conf
             ff_where_lib_conf_mpifc=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add mpifc : $ff_MPI_LIBFC $ff_MPI_INCLUDE in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add mpifc : $ff_MPI_LIBFC $ff_MPI_INCLUDE in  $ff_where_lib_conf \"" >&6;}
@@ -11961,8 +11961,8 @@ $as_echo "$as_me:     -- do not add mpifc : $ff_MPI_LIBFC $ff_MPI_INCLUDE in  $f
         fi
 
 	           	if test -z "$ff_where_lib_conf_mpif77" ; then
-	    echo "mpif77 LD '$ff_MPI_LIBFC'"  >>$ff_where_lib_conf
-	    test -n "$ff_MPI_INCLUDE" && echo "mpif77 INCLUDE '$ff_MPI_INCLUDE' "  >>$ff_where_lib_conf
+	    echo "mpif77 LD $ff_MPI_LIBFC"  >>$ff_where_lib_conf
+	    test -n "$ff_MPI_INCLUDE" && echo "mpif77 INCLUDE $ff_MPI_INCLUDE "  >>$ff_where_lib_conf
             ff_where_lib_conf_mpif77=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add mpif77 : $ff_MPI_LIBFC $ff_MPI_INCLUDE in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add mpif77 : $ff_MPI_LIBFC $ff_MPI_INCLUDE in  $ff_where_lib_conf \"" >&6;}
@@ -11975,8 +11975,8 @@ $as_echo "$as_me:     -- do not add mpif77 : $ff_MPI_LIBFC $ff_MPI_INCLUDE in  $
   	  fi
 	  if test -n "$MPICXX" ; then
               	if test -z "$ff_where_lib_conf_mpi" ; then
-	    echo "mpi LD '$ff_MPI_LIB'"  >>$ff_where_lib_conf
-	    test -n "$ff_MPI_INCLUDE" && echo "mpi INCLUDE '$ff_MPI_INCLUDE' "  >>$ff_where_lib_conf
+	    echo "mpi LD $ff_MPI_LIB"  >>$ff_where_lib_conf
+	    test -n "$ff_MPI_INCLUDE" && echo "mpi INCLUDE $ff_MPI_INCLUDE "  >>$ff_where_lib_conf
             ff_where_lib_conf_mpi=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add mpi : $ff_MPI_LIB $ff_MPI_INCLUDE in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add mpi : $ff_MPI_LIB $ff_MPI_INCLUDE in  $ff_where_lib_conf \"" >&6;}
@@ -12321,8 +12321,8 @@ done
 if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
 	if test -z "$ff_where_lib_conf_fftw3" ; then
-	    echo "fftw3 LD '-lfftw3'"  >>$ff_where_lib_conf
-	    test -n "" && echo "fftw3 INCLUDE '' "  >>$ff_where_lib_conf
+	    echo "fftw3 LD -lfftw3"  >>$ff_where_lib_conf
+	    test -n "" && echo "fftw3 INCLUDE  "  >>$ff_where_lib_conf
             ff_where_lib_conf_fftw3=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add fftw3 : -lfftw3  in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add fftw3 : -lfftw3  in  $ff_where_lib_conf \"" >&6;}
@@ -12397,8 +12397,8 @@ done
 if test "$ff_tet_ok" = yes -a "$ff_tet_h" = yes
 then
    	if test -z "$ff_where_lib_conf_tetgen" ; then
-	    echo "tetgen LD '-ltet'"  >>$ff_where_lib_conf
-	    test -n "" && echo "tetgen INCLUDE '' "  >>$ff_where_lib_conf
+	    echo "tetgen LD -ltet"  >>$ff_where_lib_conf
+	    test -n "" && echo "tetgen INCLUDE  "  >>$ff_where_lib_conf
             ff_where_lib_conf_tetgen=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add tetgen : -ltet  in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add tetgen : -ltet  in  $ff_where_lib_conf \"" >&6;}
@@ -12465,8 +12465,8 @@ if test "$ff_mkl_libpath" != "not" ; then
 	ff_blas_libs="$ff_mkl_blas"
 	ff_blas_inc="-I$ff_mkl_root/include"
         	if test -z "$ff_where_lib_conf_scalapack" ; then
-	    echo "scalapack LD '$ff_mkl_scalapack'"  >>$ff_where_lib_conf
-	    test -n "$ff_blas_inc" && echo "scalapack INCLUDE '$ff_blas_inc' "  >>$ff_where_lib_conf
+	    echo "scalapack LD $ff_mkl_scalapack"  >>$ff_where_lib_conf
+	    test -n "$ff_blas_inc" && echo "scalapack INCLUDE $ff_blas_inc "  >>$ff_where_lib_conf
             ff_where_lib_conf_scalapack=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add scalapack : $ff_mkl_scalapack $ff_blas_inc in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add scalapack : $ff_mkl_scalapack $ff_blas_inc in  $ff_where_lib_conf \"" >&6;}
@@ -12476,8 +12476,8 @@ $as_echo "$as_me:     -- do not add scalapack : $ff_mkl_scalapack $ff_blas_inc i
         fi
 
         	if test -z "$ff_where_lib_conf_blacs" ; then
-	    echo "blacs LD '$ff_mkl_blacs'"  >>$ff_where_lib_conf
-	    test -n "$ff_blas_inc" && echo "blacs INCLUDE '$ff_blas_inc' "  >>$ff_where_lib_conf
+	    echo "blacs LD $ff_mkl_blacs"  >>$ff_where_lib_conf
+	    test -n "$ff_blas_inc" && echo "blacs INCLUDE $ff_blas_inc "  >>$ff_where_lib_conf
             ff_where_lib_conf_blacs=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add blacs : $ff_mkl_blacs $ff_blas_inc in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add blacs : $ff_mkl_blacs $ff_blas_inc in  $ff_where_lib_conf \"" >&6;}
@@ -12487,8 +12487,8 @@ $as_echo "$as_me:     -- do not add blacs : $ff_mkl_blacs $ff_blas_inc in  $ff_w
         fi
 
         	if test -z "$ff_where_lib_conf_lapack" ; then
-	    echo "lapack LD '$ff_mkl_lapack'"  >>$ff_where_lib_conf
-	    test -n "$ff_blas_inc" && echo "lapack INCLUDE '$ff_blas_inc' "  >>$ff_where_lib_conf
+	    echo "lapack LD $ff_mkl_lapack"  >>$ff_where_lib_conf
+	    test -n "$ff_blas_inc" && echo "lapack INCLUDE $ff_blas_inc "  >>$ff_where_lib_conf
             ff_where_lib_conf_lapack=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add lapack : $ff_mkl_lapack $ff_blas_inc in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add lapack : $ff_mkl_lapack $ff_blas_inc in  $ff_where_lib_conf \"" >&6;}
@@ -12775,8 +12775,8 @@ fi
 if test "$ff_blas_ok" = yes
 then
 	if test -z "$ff_where_lib_conf_blas" ; then
-	    echo "blas LD '$ff_blas_libs'"  >>$ff_where_lib_conf
-	    test -n "" && echo "blas INCLUDE '' "  >>$ff_where_lib_conf
+	    echo "blas LD $ff_blas_libs"  >>$ff_where_lib_conf
+	    test -n "" && echo "blas INCLUDE  "  >>$ff_where_lib_conf
             ff_where_lib_conf_blas=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add blas : $ff_blas_libs  in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add blas : $ff_blas_libs  in  $ff_where_lib_conf \"" >&6;}
@@ -13042,8 +13042,8 @@ if  test "$ff_lapack_ok" = yes ; then
   if test "$ff_lapack_ok" = yes
   then
 	if test -z "$ff_where_lib_conf_lapack" ; then
-	    echo "lapack LD '$ff_lapack_lib'"  >>$ff_where_lib_conf
-	    test -n "" && echo "lapack INCLUDE '' "  >>$ff_where_lib_conf
+	    echo "lapack LD $ff_lapack_lib"  >>$ff_where_lib_conf
+	    test -n "" && echo "lapack INCLUDE  "  >>$ff_where_lib_conf
             ff_where_lib_conf_lapack=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add lapack : $ff_lapack_lib  in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add lapack : $ff_lapack_lib  in  $ff_where_lib_conf \"" >&6;}
@@ -13173,8 +13173,8 @@ $as_echo "$ff_arpack_ok" >&6; }
   if test "$ff_arpack_ok" = yes
   then
       	if test -z "$ff_where_lib_conf_arpack" ; then
-	    echo "arpack LD '$ff_arpack_libs'"  >>$ff_where_lib_conf
-	    test -n "" && echo "arpack INCLUDE '' "  >>$ff_where_lib_conf
+	    echo "arpack LD $ff_arpack_libs"  >>$ff_where_lib_conf
+	    test -n "" && echo "arpack INCLUDE  "  >>$ff_where_lib_conf
             ff_where_lib_conf_arpack=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add arpack : $ff_arpack_libs  in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add arpack : $ff_arpack_libs  in  $ff_where_lib_conf \"" >&6;}
@@ -13183,7 +13183,7 @@ $as_echo "$as_me:     ++ add arpack : $ff_arpack_libs  in  $ff_where_lib_conf \"
 $as_echo "$as_me:     -- do not add arpack : $ff_arpack_libs  in  $ff_where_lib_conf \"" >&6;}
         fi
 
-      echo  arpack LD \'$ff_arpack_libs\'  >>$ff_where_lib_conf
+      echo  arpack LD "'$ff_arpack_libs'"  >>$ff_where_lib_conf
   fi
 
 	# If all else fails, download!
@@ -13418,8 +13418,8 @@ fi
   if test "$ff_umfpack_ok" = yes
   then
       	if test -z "$ff_where_lib_conf_amd" ; then
-	    echo "amd LD '$ff_umfpack_libs'"  >>$ff_where_lib_conf
-	    test -n "-I/usr/include/$ff_umfpack_dir" && echo "amd INCLUDE '-I/usr/include/$ff_umfpack_dir' "  >>$ff_where_lib_conf
+	    echo "amd LD $ff_umfpack_libs"  >>$ff_where_lib_conf
+	    test -n "-I/usr/include/$ff_umfpack_dir" && echo "amd INCLUDE -I/usr/include/$ff_umfpack_dir "  >>$ff_where_lib_conf
             ff_where_lib_conf_amd=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add amd : $ff_umfpack_libs -I/usr/include/$ff_umfpack_dir in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add amd : $ff_umfpack_libs -I/usr/include/$ff_umfpack_dir in  $ff_where_lib_conf \"" >&6;}
@@ -13429,8 +13429,8 @@ $as_echo "$as_me:     -- do not add amd : $ff_umfpack_libs -I/usr/include/$ff_um
         fi
 
       	if test -z "$ff_where_lib_conf_umfpack" ; then
-	    echo "umfpack LD '$ff_umfpack_libs'"  >>$ff_where_lib_conf
-	    test -n "-I/usr/include/$ff_umfpack_dir" && echo "umfpack INCLUDE '-I/usr/include/$ff_umfpack_dir' "  >>$ff_where_lib_conf
+	    echo "umfpack LD $ff_umfpack_libs"  >>$ff_where_lib_conf
+	    test -n "-I/usr/include/$ff_umfpack_dir" && echo "umfpack INCLUDE -I/usr/include/$ff_umfpack_dir "  >>$ff_where_lib_conf
             ff_where_lib_conf_umfpack=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add umfpack : $ff_umfpack_libs -I/usr/include/$ff_umfpack_dir in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add umfpack : $ff_umfpack_libs -I/usr/include/$ff_umfpack_dir in  $ff_where_lib_conf \"" >&6;}
@@ -15056,7 +15056,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "mumps LD '-ldmumps -lzmumps  -lmumps_common  -lpord'"  >>$ff_where_lib_conf
+	    echo "mumps LD -ldmumps -lzmumps  -lmumps_common  -lpord"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/dmumps_c.h" ||
 $as_expr X"/usr/include/dmumps_c.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/dmumps_c.h" : 'X\(//\)[^/]' \| \
@@ -15081,7 +15081,7 @@ $as_echo X"/usr/include/dmumps_c.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "mumps INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "mumps INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15122,7 +15122,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "mumps_ptscotch LD '-lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch'"  >>$ff_where_lib_conf
+	    echo "mumps_ptscotch LD -lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/dmumps_c.h" ||
 $as_expr X"/usr/include/dmumps_c.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/dmumps_c.h" : 'X\(//\)[^/]' \| \
@@ -15147,7 +15147,7 @@ $as_echo X"/usr/include/dmumps_c.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "mumps_ptscotch INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "mumps_ptscotch INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15188,7 +15188,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "mumps_scotch LD '-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch'"  >>$ff_where_lib_conf
+	    echo "mumps_scotch LD -lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/dmumps_c.h" ||
 $as_expr X"/usr/include/dmumps_c.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/dmumps_c.h" : 'X\(//\)[^/]' \| \
@@ -15213,7 +15213,7 @@ $as_echo X"/usr/include/dmumps_c.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "mumps_scotch INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "mumps_scotch INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15254,7 +15254,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "hypre LD '-lHYPRE'"  >>$ff_where_lib_conf
+	    echo "hypre LD -lHYPRE"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "" ||
 $as_expr X"" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"" : 'X\(//\)[^/]' \| \
@@ -15279,7 +15279,7 @@ $as_echo X"" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "hypre INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "hypre INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15320,7 +15320,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "fftw3 LD '-lfftw3'"  >>$ff_where_lib_conf
+	    echo "fftw3 LD -lfftw3"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/fftw3.h" ||
 $as_expr X"/usr/include/fftw3.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/fftw3.h" : 'X\(//\)[^/]' \| \
@@ -15345,7 +15345,7 @@ $as_echo X"/usr/include/fftw3.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "fftw3 INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "fftw3 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15386,7 +15386,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "superlu_dist LD '-lsuperlu-dist'"  >>$ff_where_lib_conf
+	    echo "superlu_dist LD -lsuperlu-dist"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/superlu-dist/superlu_defs.h" ||
 $as_expr X"/usr/include/superlu-dist/superlu_defs.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/superlu-dist/superlu_defs.h" : 'X\(//\)[^/]' \| \
@@ -15411,7 +15411,7 @@ $as_echo X"/usr/include/superlu-dist/superlu_defs.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "superlu_dist INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "superlu_dist INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15452,7 +15452,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "superlu LD '-lsuperlu'"  >>$ff_where_lib_conf
+	    echo "superlu LD -lsuperlu"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/superlu/slu_ddefs.h" ||
 $as_expr X"/usr/include/superlu/slu_ddefs.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/superlu/slu_ddefs.h" : 'X\(//\)[^/]' \| \
@@ -15477,7 +15477,7 @@ $as_echo X"/usr/include/superlu/slu_ddefs.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "superlu INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "superlu INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15518,7 +15518,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "Superlu4 LD '-lsuperlu4'"  >>$ff_where_lib_conf
+	    echo "Superlu4 LD -lsuperlu4"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/superlu4/slu_ddefs.h" ||
 $as_expr X"/usr/include/superlu4/slu_ddefs.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/superlu4/slu_ddefs.h" : 'X\(//\)[^/]' \| \
@@ -15543,7 +15543,7 @@ $as_echo X"/usr/include/superlu4/slu_ddefs.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "Superlu4 INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "Superlu4 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15584,7 +15584,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "blacs LD ' -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi'"  >>$ff_where_lib_conf
+	    echo "blacs LD  -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "" ||
 $as_expr X"" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"" : 'X\(//\)[^/]' \| \
@@ -15609,7 +15609,7 @@ $as_echo X"" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "blacs INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "blacs INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15650,7 +15650,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "scalapack LD '-lscalapack$ff_with_mpi'"  >>$ff_where_lib_conf
+	    echo "scalapack LD -lscalapack$ff_with_mpi"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "" ||
 $as_expr X"" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"" : 'X\(//\)[^/]' \| \
@@ -15675,7 +15675,7 @@ $as_echo X"" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "scalapack INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "scalapack INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15716,7 +15716,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "scotch LD '-lscotch -lscotcherr'"  >>$ff_where_lib_conf
+	    echo "scotch LD -lscotch -lscotcherr"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "" ||
 $as_expr X"" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"" : 'X\(//\)[^/]' \| \
@@ -15741,7 +15741,7 @@ $as_echo X"" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "scotch INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "scotch INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15782,7 +15782,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "ptscotch LD '-lptscotch -lptscotcherr'"  >>$ff_where_lib_conf
+	    echo "ptscotch LD -lptscotch -lptscotcherr"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "" ||
 $as_expr X"" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"" : 'X\(//\)[^/]' \| \
@@ -15807,7 +15807,7 @@ $as_echo X"" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "ptscotch INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "ptscotch INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15848,7 +15848,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "metis LD '-lscotch -lmetis'"  >>$ff_where_lib_conf
+	    echo "metis LD -lscotch -lmetis"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/metis/metis.h" ||
 $as_expr X"/usr/include/metis/metis.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/metis/metis.h" : 'X\(//\)[^/]' \| \
@@ -15873,7 +15873,7 @@ $as_echo X"/usr/include/metis/metis.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "metis INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "metis INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15914,7 +15914,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "parmetis LD '-lptscotch -lparmetis'"  >>$ff_where_lib_conf
+	    echo "parmetis LD -lptscotch -lparmetis"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "" ||
 $as_expr X"" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"" : 'X\(//\)[^/]' \| \
@@ -15939,7 +15939,7 @@ $as_echo X"" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "parmetis INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "parmetis INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -15980,7 +15980,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "freeyams LD '-lfreeyams'"  >>$ff_where_lib_conf
+	    echo "freeyams LD -lfreeyams"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/freeyamslib.h" ||
 $as_expr X"/usr/include/freeyamslib.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/freeyamslib.h" : 'X\(//\)[^/]' \| \
@@ -16005,7 +16005,7 @@ $as_echo X"/usr/include/freeyamslib.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "freeyams INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "freeyams INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -16046,7 +16046,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "mmg3d LD '-lmmg3d'"  >>$ff_where_lib_conf
+	    echo "mmg3d LD -lmmg3d"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/libmmg3d.h" ||
 $as_expr X"/usr/include/libmmg3d.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/libmmg3d.h" : 'X\(//\)[^/]' \| \
@@ -16071,7 +16071,7 @@ $as_echo X"/usr/include/libmmg3d.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "mmg3d INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "mmg3d INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -16112,7 +16112,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "mshmet LD '-lmshmet'"  >>$ff_where_lib_conf
+	    echo "mshmet LD -lmshmet"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "" ||
 $as_expr X"" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"" : 'X\(//\)[^/]' \| \
@@ -16137,7 +16137,7 @@ $as_echo X"" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "mshmet INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "mshmet INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -16178,7 +16178,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "gsl LD '-lgsl -lgslcblas -lm'"  >>$ff_where_lib_conf
+	    echo "gsl LD -lgsl -lgslcblas -lm"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/gsl/gsl_sf.h" ||
 $as_expr X"/usr/include/gsl/gsl_sf.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/gsl/gsl_sf.h" : 'X\(//\)[^/]' \| \
@@ -16203,7 +16203,7 @@ $as_echo X"/usr/include/gsl/gsl_sf.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "gsl INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "gsl INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -16244,7 +16244,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "parms LD '-lparms -litsol -llapack -lblas -lm'"  >>$ff_where_lib_conf
+	    echo "parms LD -lparms -litsol -llapack -lblas -lm"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "" ||
 $as_expr X"" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"" : 'X\(//\)[^/]' \| \
@@ -16269,7 +16269,7 @@ $as_echo X"" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "parms INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "parms INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -16310,7 +16310,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
-	    echo "tetgen LD '-ltet'"  >>$ff_where_lib_conf
+	    echo "tetgen LD -ltet"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`$as_dirname -- "/usr/include/tetgen.h" ||
 $as_expr X"/usr/include/tetgen.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"/usr/include/tetgen.h" : 'X\(//\)[^/]' \| \
@@ -16335,7 +16335,7 @@ $as_echo X"/usr/include/tetgen.h" |
 	  }
 	  s/.*/./; q'`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "tetgen INCLUDE '-I$ff_WHERE_INC' "  >>$ff_where_lib_conf
+		echo "tetgen INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
 	    fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
@@ -17902,8 +17902,8 @@ $as_echo "$as_me:      missing download/pkg/MUMPS_4.9.2.tar.gz, see http://mumps
     fi
     if test -f download/lib/libmmg3d.a ; then
         	if test -z "$ff_where_lib_conf_mmg3d" ; then
-	    echo "mmg3d LD '-L`pwd`/download/lib'"  >>$ff_where_lib_conf
-	    test -n "-I`pwd`/download/include" && echo "mmg3d INCLUDE '-I`pwd`/download/include' "  >>$ff_where_lib_conf
+	    echo "mmg3d LD -L`pwd`/download/lib"  >>$ff_where_lib_conf
+	    test -n "-I`pwd`/download/include" && echo "mmg3d INCLUDE -I`pwd`/download/include "  >>$ff_where_lib_conf
             ff_where_lib_conf_mmg3d=1
 	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add mmg3d : -L\`pwd\`/download/lib -I\`pwd\`/download/include in  $ff_where_lib_conf \"" >&5
 $as_echo "$as_me:     ++ add mmg3d : -L\`pwd\`/download/lib -I\`pwd\`/download/include in  $ff_where_lib_conf \"" >&6;}

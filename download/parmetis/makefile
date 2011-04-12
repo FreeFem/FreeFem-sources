@@ -36,10 +36,10 @@ install:
 WHERE:
 	if [ -f $(SRCDIR)/FAIT ] ;then \
 	make install ;\
-	echo metis LD '-L@DIR@/lib -lmetis'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
-	echo metis INCLUDE '-I@DIR@/include/metis'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
-	echo parmetis LD '-L@DIR@/lib -lparmetis -lmetis'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
-	echo parmetis INCLUDE '-I@DIR@/include/metis'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+	echo metis LD -L@DIR@/lib -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	echo metis INCLUDE -I@DIR@/include/metis >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	echo parmetis LD -L@DIR@/lib -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+	echo parmetis INCLUDE -I@DIR@/include/metis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
 	fi
 
 FAIRE: $(SRCDIR)/FAIT 

@@ -49,10 +49,10 @@ install:$(SRCDIR)/FAIT  ../../src/libMesh/libMesh.a
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	make install;  \
-	echo mshmet  LD '-L@DIR@/lib -lmshmet'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
-	echo mshmet INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
-	echo libMesh  LD '-L@DIR@/lib -lMesh'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.libMesh ;\
-	echo libMesh INCLUDE '-I@DIR@/include/libMesh'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.libMesh ;\
+	echo mshmet  LD -L@DIR@/lib -lmshmet  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
+	echo mshmet INCLUDE -I@DIR@/include>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
+	echo libMesh  LD -L@DIR@/lib -lMesh  >$(SRCDIR)/$(INSTALL)/lib/WHERE.libMesh ;\
+	echo libMesh INCLUDE -I@DIR@/include/libMesh >> $(SRCDIR)/$(INSTALL)/lib/WHERE.libMesh ;\
 	fi
 
 

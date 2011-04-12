@@ -42,8 +42,8 @@ install:
 WHERE:
 	if [ -f $(SRCDIR)/FAIT ] ; then \
 	make install;  \
-	echo "scalapack LD '-L@DIR@/lib  -lscalapack '"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.scalapack ;\
-	echo "scalapack INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scalapack ;\
+	echo scalapack LD -L@DIR@/lib  -lscalapack   >$(SRCDIR)/$(INSTALL)/lib/WHERE.scalapack ;\
+	echo scalapack INCLUDE -I@DIR@/include  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scalapack ;\
 	fi
 
 FAIRE: $(SRCDIR)/FAIT
