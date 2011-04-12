@@ -21,16 +21,20 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cd $(SRCDIR);make d z
 	touch $(SRCDIR)/FAIT	
 install: $(SRCDIR)/FAIT
-	-mkdir -p $(SRCDIR)/$(INSTALL)/include
+	-mkdir -p $(SRCDIR)/$(INSTALL)/include/libseq
 	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/
+	cp $(SRCDIR)/libseq/*.h  $(SRCDIR)/$(INSTALL)/include/libseq
 	-mkdir -p $(SRCDIR)/$(INSTALL)/lib
 	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
+	cp $(SRCDIR)/libseq/libmpiseqFREEFEM.a $(SRCDIR)/$(INSTALL)/lib/
 
 WHERE: 
 	if [ -f $(SRCDIR)/FAIT  ] ;then \
 	$(MAKE) install ; \
-	echo "mumps LD '-L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM '"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
-	echo "mumps INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
+	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM   >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
+	echo mumps INCLUDE -I@DIR@/include  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
+	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
+	echo libseq INCLUDE -I@DIR@/include/libseq>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
 	fi
 
 
@@ -54,7 +58,7 @@ clean-local:
 clean: clean-local
 	rm Makefile.inc FAIRE
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/*mumps*
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/lib*mumps* $(SRCDIR)/$(INSTALL)/lib/libpord*.a
+	-rm -rf $(SRCDIR)/$(INSTALL)/lib/lib*mumps* $(SRCDIR)/$(INSTALL)/lib/libpord*.a $(SRCDIR)/$(INSTALL)/lib/libmpiseq*.a
 	-rm -rf $(SRCDIR)
 
 .PHONY:$(SRCDIR)/$(INSTALL)

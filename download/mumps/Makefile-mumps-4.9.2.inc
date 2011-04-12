@@ -153,5 +153,5 @@ OPTL    = -O3 @FFLAGS@
 #Parallel:
 INC = $(INCPAR)
 LIB = $(LIBPAR)
-LIBSEQNEEDED = 
+LIBSEQNEEDED = libseqneeded
 

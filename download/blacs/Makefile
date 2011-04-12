@@ -40,7 +40,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	make install;  \
-	echo blacs LD '-L@DIR@/lib/blacs -lblacsCinit_MPI-FREEFEM-0	-lblacsF77init_MPI-FREEFEM-0	-lblacs_MPI-FREEFEM-0'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.blacs ;\
+	echo blacs LD -L@DIR@/lib/blacs -lblacsCinit_MPI-FREEFEM-0	-lblacsF77init_MPI-FREEFEM-0	-lblacs_MPI-FREEFEM-0  >$(SRCDIR)/$(INSTALL)/lib/WHERE.blacs ;\
 	fi
 
 install: $(SRCDIR)/FAIT

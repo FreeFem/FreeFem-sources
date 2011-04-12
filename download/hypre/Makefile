@@ -60,8 +60,8 @@ install:
 	cd $(SRCDIR)/src && $(MAKE) install
 WHERE:
 	if [ -f $(SRCDIR)/FAIT ] ; then  \
-	echo hypre LD '-L@DIR@/lib/hypre  -lHYPRE'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.hypre ;\
-	echo hypre INCLUDE '-I@DIR@/include/hypre'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hypre ;\
+	echo hypre LD -L@DIR@/lib/hypre  -lHYPRE  >$(SRCDIR)/$(INSTALL)/lib/WHERE.hypre ;\
+	echo hypre INCLUDE -I@DIR@/include/hypre  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.hypre ;\
 	fi
 
 

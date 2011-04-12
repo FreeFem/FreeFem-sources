@@ -58,6 +58,6 @@ cxxflags: ../Makefile
 WHERE: 
 	-@if [ -f FAIT ] ; then \
 	echo build $(SRCDIR)/$(INSTALL)/lib/WHERE.gmm ;\
-	echo gmm INCLUDE '-I@DIR@/include'> $(SRCDIR)/$(INSTALL)/lib/WHERE.gmm ;\
-	echo gmm LD '-L@DIR@/lib'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.gmm ;\
+	echo gmm INCLUDE -I@DIR@/include  > $(SRCDIR)/$(INSTALL)/lib/WHERE.gmm ;\
+	echo gmm LD -L@DIR@/lib   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.gmm ;\
 	fi

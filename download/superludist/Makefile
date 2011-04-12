@@ -47,8 +47,8 @@ install:
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/superludist
 	cp $(SRCDIR)/SRC/*.h  $(SRCDIR)/$(INSTALL)/include/superludist
 WHERE:
-	echo "superlu_dist LD '-L@DIR@/lib -lsuperlu_dist_2.3'"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.superlu_dist
-	echo "superlu_dist INCLUDE '-I@DIR@/include/superludist'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.superlu_dist
+	echo superlu_dist LD -L@DIR@/lib -lsuperlu_dist_2.3  >$(SRCDIR)/$(INSTALL)/lib/WHERE.superlu_dist
+	echo superlu_dist INCLUDE -I@DIR@/include/superludist  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.superlu_dist
 
 
 $(SRCDIR): $(PACKAGE_PATH)

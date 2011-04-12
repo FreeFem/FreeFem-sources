@@ -171,10 +171,10 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-ff++
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/hips
 	cp $(SRCDIR)/LIB/*.a $(SRCDIR)/$(INSTALL)/lib/hips
 WHERE:
-	echo hips LD '-L@DIR@/lib/hips -lio -lhips'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.hips
-	echo hips INCLUDE '-I@DIR@/include/hips'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hips
-	echo hipssequential LD '-L@DIR@/lib/hips -lio -lhipssequential'  >>$(SRCDIR)/$(INSTALL)/lib/WHERE.hips
-	echo hipssequential INCLUDE '-I@DIR@/include/hips'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hips
+	echo hips LD -L@DIR@/lib/hips -lio -lhips  >$(SRCDIR)/$(INSTALL)/lib/WHERE.hips
+	echo hips INCLUDE -I@DIR@/include/hips>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hips
+	echo hipssequential LD -L@DIR@/lib/hips -lio -lhipssequential  >>$(SRCDIR)/$(INSTALL)/lib/WHERE.hips
+	echo hipssequential INCLUDE -I@DIR@/include/hips  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.hips
 
 
 $(SRCDIR)/tag-ff++: $(PACKAGE)

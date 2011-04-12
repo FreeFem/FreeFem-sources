@@ -46,8 +46,8 @@ install: $(SRCDIR)/FAIT
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	make install;  \
-	echo freeyams  LD '-L@DIR@/lib -lfreeyams'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams ;\
-	echo freeyams INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams ;\
+	echo freeyams  LD -L@DIR@/lib -lfreeyams  >$(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams ;\
+	echo freeyams INCLUDE -I@DIR@/include>> $(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams ;\
 	fi
 
 

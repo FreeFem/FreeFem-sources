@@ -29,8 +29,8 @@ $(SRCDIR)/FAIT: $(SRCDIR) cxxflags
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
 	touch $(SRCDIR)/FAIT
 WHERE: $(SRCDIR)/FAIT
-	echo tetgen LD '-L@DIR@/lib -ltet'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
-	echo tetgen  INCLUDE '-I@DIR@/include/'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
+	echo tetgen LD -L@DIR@/lib -ltet  >$(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
+	echo tetgen  INCLUDE -I@DIR@/include >> $(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
 install:$(SRCDIR)/FAIT WHERE
 	cd $(SRCDIR);$(AR) $(ARFLAGS)  $(INSTALL)/lib/libtet.a tetgen.o predicates.o
 	cp $(SRCDIR)/tetgen.h $(SRCDIR)/$(INSTALL)/include 

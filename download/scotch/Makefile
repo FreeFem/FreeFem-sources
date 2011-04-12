@@ -43,10 +43,10 @@ install:$(SRCDIR)/FAIT
 WHERE:
 	if [ -f  $(SRCDIR)/FAIT ] ; then \
 	$(MAKE) install; \
-	echo "ptscotch LD '-L@DIR@/lib  -lptesmumps -lptscotch -lptscotcherr '"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
-	echo "ptscotch INCLUDE '-I@DIR@/include/scotch'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
-	echo "scotch LD '-L@DIR@/lib   -lscotch -lscotcherr '"  >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
-	echo "scotch INCLUDE '-I@DIR@/include/scotch'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
+	echo ptscotch LD -L@DIR@/lib  -lptesmumps -lptscotch -lptscotcherr   >$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
+	echo ptscotch INCLUDE -I@DIR@/include/scotch  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
+	echo scotch LD -L@DIR@/lib   -lscotch -lscotcherr   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
+	echo scotch INCLUDE -I@DIR@/include/scotch  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
 	fi
 
 $(SRCDIR): $(PACKAGE)
