@@ -1,0 +1,156 @@
+  * New upstream release
+ -- frederic Hecht
+freefem++ (2.21-2) testing unstable; urgency=low
+
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Tue, 28 Feb 2006 10:16:30 +0100
+freefem++ (2.2-0) testing unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 04 Jan 2006 10:16:24 +0100
+freefem++ (2.1-1) testing unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Thu, 08 Dec 2005 16:45:39 +0100
+freefem++ (2.0-4) testing unstable; urgency=low
+
+  * New upstream release
+  * Changed dependency from libfltk1.1c102 to libfltk1.1
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 09 Nov 2005 15:12:45 +0100
+freefem++ (2.0-3) testing unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 02 Nov 2005 10:45:41 +0100
+freefem++ (2.0-1) testing unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Thu, 20 Oct 2005 16:02:26 +0200
+freefem++ (2.0-0) testing unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 19 Oct 2005 15:09:41 +0200
+freefem++ (1.47-2) testing unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Fri, 01 Jul 2005 11:46:15 +0200
+freefem++ (1.45-7) testing unstable; urgency=low
+
+  * FreeFem++-cs: faster graphics, grammar-driven highlighting,
+    runtime error-line hihglighting.
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 02 Mar 2005 11:18:18 +0100
+freefem++ (1.45-6) testing unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Tue, 08 Feb 2005 14:20:59 +0100
+freefem++ (1.44-9) testing unstable; urgency=low
+
+  * Postscript files now work in FreeFem++-cs
+  * New package release number and optimization type in binary package names
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 15 Dec 2004 17:32:13 +0100
+freefem++ (1.44-8) testing unstable; urgency=low
+
+  * FreeFem++-cs updated
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Fri, 26 Nov 2004 16:53:20 +0100
+freefem++ (1.44-7) testing unstable; urgency=low
+
+  * Added mpich binary package
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Fri, 19 Nov 2004 11:59:42 +0100
+freefem++ (1.44-6) testing unstable; urgency=low
+
+  * Created package for "testing" distribution
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Thu, 18 Nov 2004 10:39:46 +0100
+freefem++ (1.44-5) unstable; urgency=low
+
+  * Default package set to -x11
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 17 Nov 2004 15:36:08 +0100
+freefem++ (1.44-4) unstable; urgency=low
+
+  * Upstream bug fix: FreeFem++-cs-server was not called properly
+    when FreeFem++-cs was started through an alias
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 17 Nov 2004 11:49:30 +0100
+freefem++ (1.44-3) unstable; urgency=low
+
+  * Bug correction: libarpack not found, added shlibs.local to fix this.
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 17 Nov 2004 10:47:51 +0100
+freefem++ (1.44-2) unstable; urgency=low
+
+  * Bug correction: FreeFem++-cs-server was missing from freefem++-cs package
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 17 Nov 2004 09:53:01 +0100
+freefem++ (1.44-1) unstable; urgency=low
+
+  * New upstream release
+  * Added FreeFem++-cs
+	
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Mon, 15 Nov 2004 16:56:53 +0100
+freefem++ (1.43-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed,  2 Oct 2004 17:11:55 +0200
+freefem++ (1.41-2) unstable; urgency=low
+
+  * New upstream release
+
+ -- Antoine Le Hyaric <lehyaric@ann.jussieu.fr>  Wed, 23 Jun 2004 17:11:55 +0200
+freefem++ (1.41-1) unstable; urgency=low
+
+  * New upstream release
+  * Integrated the debian part in the upstream sources
+  * Put the documentation in a separate package
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Wed, 23 Jun 2004 17:11:55 +0200
+
+freefem++ (1.40-2) unstable; urgency=low
+
+  * Splitted to one binary package per flavor of FreeFem++
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Wed, 23 Jun 2004 17:11:55 +0200
+
+freefem++ (1.40-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Sat,  8 May 2004 19:27:57 +0200
+
+freefem++ (1.38-3) unstable; urgency=low
+
+  * Added the manual in the documentation
+  * Created a man page pointing to the manual
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Mon, 29 Mar 2004 01:16:34 +0200
+
+freefem++ (1.38-2) unstable; urgency=low
+
+  * Added the rest of the examples
+  * Added Freefem++-glx
+  * Changed g++ to c++ in the Makefile
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Tue, 23 Mar 2004 02:39:26 +0100
+
+freefem++ (1.38-1) unstable; urgency=low
+
+  * Initial Release.
+  * This is my first Debian package.
+  * Adjusted src/Makefile-Debian to fix $BIN_DIR problems.
+
+ -- Alexis Darrasse <darrasse@ortsa.com>  Tue, 17 Feb 2004 22:52:53 +0100
+

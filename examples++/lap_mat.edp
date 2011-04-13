@@ -1,0 +1,34 @@
+//  laplace with matrix  
+verbosity=10;
+mesh Th=square(10,10);
+fespace Vh(Th,P1);
+Vh u1,u2;
+                    
+varf  a(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
+                    +  on(1,2,3,4,u1=1);
+                   
+varf b([u1],[u2]) = int2d(Th)(  u1*u2 );
+
+matrix A= a(Vh,Vh,solver=CG); 
+matrix B= b(Vh,Vh,solver=CG,eps=1e-20); 
+
+Vh bb ,bc,rhs;
+bc[]= a(0,Vh);       // to save the
+u1=x;
+bb[] = bc[] .* u1[];
+u1[] = A^-1*bb[];
+//plot(u1,cmm="solution = x ",wait=1,value=1);
+u1=x*y;
+bb[] = bc[] .* u1[];
+u1[] = A^-1*bb[];
+//plot(u1,cmm="solution = x*y ",wait=1,value=1);
+u1=-4;  //  $-\Delta (x^2 + y^2) $
+bb[] = B*u1[];
+u1= x^2 + y^2 ;
+bb[] += bc[] .* u1[];
+u1[] = A^-1*bb[];
+u2= x^2 + y^2;
+
+cout << "  u1(1,2) =" <<  u1(.1,.2) << " ~= " << u2(.1,.2) 
+     << " ==  " << .1^2+.2^2 <<  endl;
+plot(u1,cmm="solution = $x^2 + y^2$ ",wait=1,value=1);

@@ -1,0 +1,185 @@
+%%%%  This is pdfsync.sty
+%%%%  Ascii text file
+%%%%  2004-01-31:
+%%%%  \@@par is patched instead of \par
+%%%%  The pdfsync anchor is now after the \@@par
+%%%%  2004-01-20:
+%%%%  \input{foo} is now supported, \input foo not
+%%%%  no more underfull hbox
+%%%%  cr and vbox are no longer supported, except in latex extras
+%%%%  2004-01-13:
+%%%%  A layout bug is fixed thanks to J.L. Varona:
+%%%%  extra space was added in math mode $\sin$, $\notin$
+%%%%  Patched LaTeX commands:
+%%%%  \verse, \put, \emph, \comment, \href
+%%%%  2003-12-18:
+%%%%  The nothing option has been replaced by off 
+%%%%  Patched LaTeX commands:
+%%%%  2003-12-08:
+%%%%  There is a bug in using everyvbox... novbox is now the default
+%%%%  bug fixed: $0$ was not visible 
+%%%%  2003-11-28:
+%%%%  comment characters added to fix an error. Don't know exactly the cause...
+%%%%  Default option is all...
+%%%%  Could not use \everydisplay... (bug in eqnarray)
+%%%%  2003-11-19
+%%%%  first version
+%%%%
+%%%%  Version 0.6 usage: \usepackage[options]{pdfsync}
+%%%%  ==================
+%%%%  appends reference points before each \par and at each \hbox, inline math;
+%%%%  Known commands:
+%%%%  \pdfsync: add this command everywhere you want to reference a point
+%%%%  \pdfsyncstop, \pdfsyncstart: if pdfsync beaks your code, enclose the dangerous part in stop start group
+%%%%  option: nopar
+%%%%  don't insert reference point at par's
+%%%%  option: nomath
+%%%%  don't insert reference point at math's
+%%%%  option: nohbox
+%%%%  don't insert reference point at hboxes
+%%%%  option: noextra
+%%%%  don't insert reference point at LaTeX extra commands
+%%%%  option: off
+%%%%  All the pdfsync related commands are \relax'ed
+%%%%
+%%%%  If you want additional files to be parsed, please use the command
+%%%%  \include{foo} or \input{foo},
+%%%%  the \input foo will break up the synchronization
+%%%%
+%%%%  Credits:
+%%%%  ========
+%%%%  This file is due to Piero D'Ancona and jlaurens@users.sourceforge.net
+%%%%  iTeXMac and TeXShop are supporting pdfsync
+%%%%  Copy this file to ~/Library/texmf/tex/latex or ~/Library/TeX/texmf/tex/latex if available
+%%%%  This file is distributed under the GPL and the "smart licence": please make things better if you can
+%%%%  copyright 2004, jlaurens@users.sourceforge.net
+%
+\NeedsTeXFormat{LaTeX2e}%
+\ProvidesPackage{pdfsync}[2004/01/31 v0.6]%
+\newif\ifPDFSYNCOK%
+\newif\ifPDFSYNCStar%
+\newif\ifPDFSYNCPar\PDFSYNCPartrue%
+\newif\ifPDFSYNCMath\PDFSYNCMathtrue%
+\newif\ifPDFSYNCHBox\PDFSYNCHBoxtrue%
+\newif\ifPDFSYNCExtra\PDFSYNCExtratrue%
+\newif\ifPDFSYNCOn\PDFSYNCOntrue%
+\newwrite\PDFPOS%
+\newcount\PDFSYNC@folio\PDFSYNC@folio=0%
+\newcount\PDFSYNC@rder\PDFSYNC@rder=0%
+\DeclareOption{nopar}{\PDFSYNCParfalse}%
+\DeclareOption{nomath}{\PDFSYNCMathfalse}%
+\DeclareOption{nocr}{\wlog{****  pdfsync.sty: Synchronizing cr no longer supported}}%
+\DeclareOption{nohbox}{\PDFSYNCHBoxfalse}%
+\DeclareOption{vbox}{\wlog{****  pdfsync.sty: Synchronizing vbox no longer supported}}%
+\DeclareOption{novbox}{\wlog{****  pdfsync.sty: Synchronizing vbox no longer supported}}%
+\DeclareOption{noextra}{\PDFSYNCExtrafalse}%
+\DeclareOption{nothing}{\let\pdfsyncstart\pdfsyncstop}%
+\DeclareOption{off}{\PDFSYNCOnfalse}%
+\ProcessOptions\relax%
+\def\PDFSYNC@shipout{%
+   \afterassignment\PDFSYNC@output
+   \global\setbox\@cclv= %
+   }%
+\def\PDFSYNC@output{%
+   \ifvoid\@cclv\relax
+      \aftergroup\PDFSYNC@@output
+   \else
+      \PDFSYNC@@output
+   \fi%
+   }%
+\def\PDFSYNC@@output{%
+	\global\advance\PDFSYNC@folio by 1%
+	\immediate\write\PDFPOS{s\space\the\PDFSYNC@folio}%
+	\PDFSYNC@oldshipout\box\@cclv%
+   }%
+\ifx\pdfsavepos\undefined%
+  \wlog{****  pdfsync.sty: Synchronization is only available with pdf. Use a dvi viewer instead.}%
+  \let\pdfsyncstart\relax%
+  \let\pdfsyncstop\relax%
+  \let\pdfsync\relax%
+  \let\@PDFSYNC\relax%
+\else%
+ \def\pdfsyncstart{\global\PDFSYNCOKtrue}%
+  \def\pdfsyncstop{\global\PDFSYNCOKfalse}%
+  \def\configure@PDFSYNC{%
+  \ifPDFSYNCOn%
+    \wlog{****  pdfsync.sty: Synchronization is enabled.}%
+    \let\PDFSYNC@oldshipout\shipout%
+    \let\shipout\PDFSYNC@shipout%
+    \immediate\openout\PDFPOS\jobname.pdfsync%
+    \immediate\write\PDFPOS{\jobname}%            control info
+    \immediate\write\PDFPOS{version 0}%            control info
+    % patching LaTeX \InputIfFileExists for \include and \input
+    \let\PDFSYNC@InputIfFileExists\InputIfFileExists%
+    \long\def \InputIfFileExists##1##2##3{%
+	  \immediate\write\PDFPOS{(##1}%
+      \PDFSYNC@InputIfFileExists{##1}{##2}{##3}%
+      \immediate\write\PDFPOS{)}}%
+	\def\PDFSYNC@position{\the\pdflastxpos\space\the\pdflastypos}%
+    \def\@PDFSYNC{%
+    \relax%
+    \ifPDFSYNCOK%
+	\pdfsavepos%
+	\immediate\write\PDFPOS{l\space\the\PDFSYNC@rder\space\the\inputlineno}%
+	\ifPDFSYNCStar%
+	    \edef\argument%
+		    {{p*\space\the\PDFSYNC@rder\space\noexpand\PDFSYNC@position}}%
+	\else%
+	    \edef\argument%
+		    {{p\space\the\PDFSYNC@rder\space\noexpand\PDFSYNC@position}}%
+	\fi%
+	\expandafter\write\expandafter\PDFPOS\argument%
+	\global\advance\PDFSYNC@rder by 1%
+    \fi\relax}%
+    \ifPDFSYNCPar\wlog{****  pdfsync.sty: Synchronizing par}%
+	    \global\let\PDFSYNC@par\@@par\gdef\@@par{\PDFSYNC@par\@PDFSYNC}\fi%
+    \ifPDFSYNCMath\wlog{****  pdfsync.sty: Synchronizing math}%
+	    \everymath{\@PDFSYNC\relax}\fi%
+    \ifPDFSYNCHBox\wlog{****  pdfsync.sty: Synchronizing hbox}%
+	    \everyhbox{\@PDFSYNC\relax}\fi%
+%	    \everyhbox{\aftergroup\@PDFSYNC\relax}\fi%
+    \ifPDFSYNCExtra\wlog{****  pdfsync.sty: Synchronizing extra}\PDFSYNC@Extra\fi%
+    \def\pdfsync{\global\PDFSYNCStartrue\@PDFSYNC\global\PDFSYNCStarfalse}%
+  \else%
+    \wlog{****  pdfsync.sty: Synchronization is disabled.}%
+    \let\pdfsyncstart\relax%
+    \let\pdfsyncstop\relax%
+    \let\pdfsync\relax%
+    \let\@PDFSYNC\relax%  
+  \fi%
+  }%
+ \def\PDFSYNC@Extra{%
+%  patching the new line
+  \let\PDFSYNC@newline\\\def\\{{\@PDFSYNC}\PDFSYNC@newline}%
+%  patching the verse
+  \global\let\PDFSYNC@verse\verse%
+  \global\def\verse%
+	  {\PDFSYNC@verse\let\PDFSYNC@newline\\\def\\{{\@PDFSYNC}\PDFSYNC@newline}}%
+%  patching put
+  \global\let\PDFSYNC@put\put%
+  \global\def\put(##1,##2)##3{\PDFSYNC@put(##1,##2){##3\@PDFSYNC}}%
+%  patching emph
+  \global\let\PDFSYNC@emph\emph%
+  \global\def\emph{{\@PDFSYNC}\PDFSYNC@emph}%
+%  patching index
+  \ifx\undefined\index\relax\else%
+    \global\let\PDFSYNC@index\index%
+    \global\def\index{{\@PDFSYNC}\PDFSYNC@index}%
+  \fi%
+%  patching comment
+  \ifx\undefined\comment\relax\else%
+    \global\let\PDFSYNC@comment\comment%
+    \global\def\comment{{\@PDFSYNC}\PDFSYNC@comment}%
+  \fi%
+%  patching href
+  \ifx\undefined\href\relax\else%
+    \global\let\PDFSYNC@href\href%
+    \global\def\href{{\@PDFSYNC}\PDFSYNC@href}%
+  \fi%
+  }%
+\AtBeginDocument{%
+\pdfsyncstart%
+\configure@PDFSYNC%
+}%
+\fi%
+\endinput%
