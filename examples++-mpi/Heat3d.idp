@@ -9,6 +9,8 @@ real dt=getARGV("-dt",0.01);
 int nn=getARGV("-n",20);
 int imax=getARGV("-niter",10);
 int op=getARGV("-op",1);
+int pplot=getARGV("-plot",0);
+
 mesh Th2D=square(nn,nn);
 int[int] refm=[1,1,2,1,3,1,4,1];
 int[int] refu=[0,1];
@@ -84,7 +86,7 @@ time5=time5+(clock()-time5tmp);
 //savesol("Heat-Time-"+imax+"-nn-"+nn+"-superludist.sol",Th,uh);
 //savemesh(Th,"Heat-Time-"+imax+"-nn-"+nn+"-superludist.mesh");
 cout << "Time resolution " << clock()-temps << endl;
-if( mpirank==0) medit("Heat",Th,uh);
+if( mpirank==0 && pplot) medit("Heat",Th,uh);
 cout << "======================================" << endl;
 cout << " CPU TIME :                  " << endl;
 cout << " matrix A                    " << time1 << endl;
