@@ -707,8 +707,9 @@ fi
 dnl m4_include(ax_mpi.m4)
 ff_save_path="$PATH"
 # We need to choose between mpich, openmpi  and lam for the Debian package
-AC_ARG_WITH(mpipath,[  --with-mpich= the path of mpich under windows (no command  mpic++, ... )])
-AC_ARG_WITH(mpilibs,[  --with-mpilibs= the libs to add to c,c++,fc, ... (no mpicc++, just use the compiler) ])
+AC_ARG_WITH(mpipath,[  --with-mpipach= the path of mpich under windows (no command  mpic++, ... )])
+AC_ARG_WITH(mpilibs,[  --with-mpilibs= the libs to add to c++,fc, ... (to link with c++ - ex:   -L/usr/local/lib -lmpi_f90  -lmpi_cxx -lmpi -lopen-rte -lopen-pal -lutil) ])
+AC_ARG_WITH(mpilibsc,[  --with-mpilibsc= the libs to add to c  ... (to link with cc (for pastix lib)  ex:   -L/usr/local/lib -lmpi -lopen-rte -lopen-pal -lutil) ])
 AC_ARG_WITH(mpiinc,[  --with-mpiinc= the include directory directive and preprocess directive  (no mpicc++, just use the compiler)) ])
 AC_ARG_WITH(mpi,[  --with-mpi=[yes|no|mpic++|lam|mpich|openmpi|/usr/local/bin/mpic++|... ]	or --without-mpi	Choose MPI implementation (default is mpic++)])
 
@@ -735,12 +736,17 @@ if test -n "$with_mpiinc"  -a "$with_mpiinc" != no ; then
 fi
 if test -n "$with_mpilibs" -a "$with_mpilibs" != no ; then
     ff_MPI_LIB="$with_mpilibs"
+    ff_MPI_LIBC="$with_mpilibs"
     ff_MPI_LIBFC="$with_mpilibs"
-    MPICXX="$CXX $ff_MPI_INCLUDE"
-    MPIF77="$F77 $ff_MPI_INCLUDE"
-    MPIFC="$FC  $ff_MPI_INCLUDE"
-    MPICC="$CC  $ff_MPI_INCLUDE"
+    MPICXX="eval $CXX $ff_MPI_INCLUDE"
+    MPIF77="eval $F77 $ff_MPI_INCLUDE"
+    MPIFC="eval $FC  $ff_MPI_INCLUDE"
+    MPICC="eval $CC  $ff_MPI_INCLUDE"
     AC_MSG_NOTICE([   ---  set  all MPI compile to compiler:   $MPICC , $MPIF77, $MPIFC, $MPICC  ])
+fi
+
+if test -n "$with_mpilibsc" -a "$with_mpilibsc" != no ; then
+ ff_MPI_LIBC="$with_mpilibsc"
 fi
 
 AC_ARG_VAR(MPIRUN,[MPI run command ])
@@ -768,16 +774,27 @@ dnl fi
 
     
 if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
-    sed -e "s?@MPIDIR@?$with_mpipath?" -e "s?@F77@?$F77?" -e "s?@CC@?$CC?" -e "s?@CXX@?$CXX?"   -e "s?@FC@?$FC?"  <mpic++.in >mpic++
-    chmod a+rx mpic++ 
-    for i in mpicc mpif90 mpifc mpif77 ; do cp mpic++ $i; done 
-    ff_pwd=`pwd`
-    with_mpi="$ff_pwd"/mpic++
-    MPICXX="$ff_pwd/mpic++"
-    MPIF77="$ff_pwd/mpif77"
-    MPIFC="$ff_pwd/mpif90"
-    MPICC="$ff_pwd/mpicc"   
-    MPIRUN="$with_mpipath/mpirun.exe"
+#    sed -e "s?@MPIDIR@?$with_mpipath?" -e "s?@F77@?$F77?" -e "s?@CC@?$CC?" -e "s?@CXX@?$CXX?"   -e "s?@FC@?$FC?"  <mpic++.in >mpic++
+ #   chmod a+rx mpic++ 
+  #  for i in mpicc mpif90 mpifc mpif77 ; do cp mpic++ $i; done 
+#    ff_pwd=`pwd`
+ #   with_mpi="$ff_pwd"/mpic++
+ #   MPICXX="$ff_pwd/mpic++"
+ #   MPIF77="$ff_pwd/mpif77"
+ #   MPIFC="$ff_pwd/mpif90"
+ #   MPICC="$ff_pwd/mpicc"   
+    ff_MPI_INCLUDE_DIR="$with_mpipath/include"
+    ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR'"
+    with_mpiinc="$ff_MPI_INCLUDE"
+    with_mpilibs="-L'$with_mpipath'/lib -lmpicxx -lfmpich2g -lmpi"
+    test -z "$MPIRUN" && MPIRUN="$with_mpipath/bin/mpirun.exe"
+    ff_MPI_LIBC="-L'$with_mpipath'/lib -lmpi"
+    ff_MPI_LIB="-L'$with_mpipath'/lib -lmpicxx -lmpi"
+    ff_MPI_LIBFC="-L'$with_mpipath'/lib -lmpicxx -lfmpich2g -lmpi"
+    test -z "$MPICXX" && MPICXX="eval $CXX $ff_MPI_INCLUDE"
+    test -z "$MPIF77" && MPIF77="eval $F77 $ff_MPI_INCLUDE"
+    test -z "$MPIFC"  && MPIFC="eval $FC  $ff_MPI_INCLUDE"
+    test -z "$MPICC"  && MPICC="eval $CC  $ff_MPI_INCLUDE"
 else 
     with_mpipath=no	   
 fi
@@ -887,23 +904,26 @@ fi
 
 	ff_MPI_INCLUDE="$with_mpiinc"
         ff_mpishow=`$MPICXX -show` 2>/dev/null
+        ff_mpicshow=`$MPICC -show` 2>/dev/null
         ff_mpifcshow=`$MPIFC -show` 2>/dev/null
 	if test "$with_mpilibs" = no -o -z "$with_mpilibs" ; then	 
 	      [ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`]
 	      ff_MPI_LIB_DIRS=""
 	      [ff_MPI_LIB=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
+	      [ff_MPI_LIBC=`echo $ff_mpicshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
 	      [ff_MPI_LIBFC=`echo $ff_mpifcshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
 	      [ff_mpi_idir=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
 	  fi
 	    [ff_mpi_idir=`echo $ff_MPI_INCLUDE|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
 	    [ff_mpi_ldir=`echo $ff_MPI_LIB|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|sed -e 's/^-[Llp]//' -e 's/^-Wl,]//'  |tr '\n' ' '`' /usr/lib']
-
-          ff_MPI_INCLUDE_DIR=""
+	  
+	  if  test -z "$ff_MPI_INCLUDE_DIR" ; then  
 	  for i in $ff_mpi_idir; do
 	      if test -f "$i/mpi.h" -a -z "$ff_MPI_INCLUDE_DIR"  ;then
 		  ff_MPI_INCLUDE_DIR=$i
 	      fi
-	      done
+	  done
+	  fi
 	  for i in $ff_mpi_ldir; do
 	      ff_tmp=`ls $i/libmpi.*|head -1`
 	      if test  -f "$ff_tmp"  -a -z "$ff_MPI_LIB_DIRS"  ;then
@@ -940,6 +960,7 @@ dnl              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
 	  AC_SUBST(MPI_INCLUDE,$ff_MPI_INCLUDE)
 	  AC_SUBST(MPI_LIB_DIRS,$ff_MPI_LIB_DIRS)
 	  AC_SUBST(MPI_LIB,$ff_MPI_LIB)
+	  AC_SUBST(MPI_LIBC,$ff_MPI_LIBC)
 	  AC_SUBST(MPI_LIBFC,$ff_MPI_LIBFC)
 	fi
 	CXX="$ff_save_cxx"
