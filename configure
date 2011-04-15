@@ -11772,7 +11772,7 @@ fi
 
    		  MPIRUN=$MPIRUN
 
-                  MPICXX=$ff_mpicxx
+                  MPICXX=$MPICXX
 
 	else
 	        MPICXX=$ff_save_cxx
