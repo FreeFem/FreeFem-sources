@@ -11698,7 +11698,7 @@ test -n "$MPICXX" || MPICXX="no"
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPICXX" >&5
 $as_echo_n "checking for MPICXX... " >&6; }
 	fi
-	ff_mpicxx="$MPICXX"
+	ff_mpicxx="eval $MPICXX"
 	CXX=$ff_mpicxx
 	LIBS="$LIBS $ff_MPI_LIB"
 

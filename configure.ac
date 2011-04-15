@@ -826,7 +826,7 @@ dnl if also  add $PATH they  could be missing some different mpi version...
 	    AC_PATH_PROGS(MPICXX,$ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++,no,$ff_mpi_path)
 	    AC_MSG_CHECKING(for MPICXX)
 	fi
-	ff_mpicxx="$MPICXX"
+	ff_mpicxx="eval $MPICXX"
 	CXX=$ff_mpicxx
 	LIBS="$LIBS $ff_MPI_LIB"
 	
