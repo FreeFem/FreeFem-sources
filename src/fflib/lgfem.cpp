@@ -2387,7 +2387,9 @@ class Plot :  public E_F0mps { public:
     };
 
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =21 ;
+
+  // FFCS: added new parameters for VTK graphics
+  static const int n_name_param =41 ;
    Expression bb[4];
     vector<Expression2> l;
     Expression nargs[n_name_param];
@@ -2538,8 +2540,30 @@ class Plot :  public E_F0mps { public:
   {   "dim", &typeid(long)}, // 2 or 3 
   {   "add", &typeid(bool)}, // add to previous plot
   {   "prev", &typeid(bool)}, // keep previou  view point  
-  {   "ech", &typeid(double)} // keep previou  view point 
+  {   "ech", &typeid(double)}, // keep previou  view point 
      
+  // FFCS: more options for VTK graphics (numbers are required for
+  // processing)
+  {"ZScale",&typeid(double)}, // #1
+  {"WhiteBackground",&typeid(bool)}, // #2
+  {"OpaqueBorders",&typeid(bool)}, // #3
+  {"BorderAsMesh",&typeid(bool)}, // #4
+  {"ShowMeshes",&typeid(bool)}, // #5
+  {"ColorScheme",&typeid(long)}, // #6
+  {"ArrowShape",&typeid(long)}, // #7
+  {"ArrowSize",&typeid(double)}, // #8
+  {"ComplexDisplay",&typeid(long)}, // #9
+  {"LabelColors",&typeid(bool)}, // #10
+  {"ShowAxes",&typeid(bool)}, // #11
+  {"CutPlane",&typeid(bool)}, // #12
+  {"CameraPosition",&typeid(KN_<double>)}, // #13
+  {"CameraFocalPoint",&typeid(KN_<double>)}, // #14
+  {"CameraViewUp",&typeid(KN_<double>)}, // #15
+  {"CameraViewAngle",&typeid(double)}, // #16
+  {"CameraClippingRange",&typeid(KN_<double>)}, // #17
+  {"CutPlaneOrigin",&typeid(KN_<double>)}, // #18
+  {"CutPlaneNormal",&typeid(KN_<double>)}, // #19
+  {"WindowIndex",&typeid(long)} // #20
 
    };
 
@@ -2961,7 +2985,8 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
     {    
 	int lg,nsb;
 	lli.eval(fe3,cmp);
-	if(what==6)
+	// FFCS is able to display 3d complex data
+	//if(what==6)
 	  {
 	    if (fe3[0]->x()) 
 	      {		 
@@ -2986,7 +3011,8 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
       {    
 	  int lg,nsb;
 	  lli.eval(fe3,cmp);
-	  if(what==7) // ve
+	  // FFCS is able to display 3d complex data
+	  //if(what==7) // ve
 	    {
 	      if (fe3[0]->x()&& fe3[1]->x() && fe3[2]->x()) 
 		{		 
@@ -3010,7 +3036,8 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
 		    V123(0,'.')=V1;
 		    V123(1,'.')=V2;
 		    V123(2,'.')=V3;
-		    theplot << (KN_<double>&) V123;
+		    // FFCS: should be able to deal with complex as well
+		    theplot << (KN_<K>&) V123;
 		    
 		}
 	    }
@@ -3120,6 +3147,37 @@ AnyType Plot::operator()(Stack s) const  {
 	if (nargs[18]) theplot<< 18L  <= GetAny<bool>((*nargs[18])(s));	
 	if (nargs[19]) theplot<< 19L  <= GetAny<bool>((*nargs[19])(s));	
 	if (nargs[20]) theplot<< 20L  <= (echelle=GetAny<double>((*nargs[20])(s)));	
+
+	// FFCS: extra plot options for VTK (indexed from 1 to keep
+	// these lines unchanged even if the number of standard FF
+	// parameters above changes)
+
+#define VTK_START 20
+#define SEND_VTK_PARAM(index,type)					\
+	  if(nargs[VTK_START+index])					\
+	    theplot<<(long)(VTK_START+index)				\
+	      <=GetAny<type>((*nargs[VTK_START+index])(s));
+
+	SEND_VTK_PARAM(1,double); // ZScale
+	SEND_VTK_PARAM(2,bool); // WhiteBackground
+	SEND_VTK_PARAM(3,bool); // OpaqueBorders
+	SEND_VTK_PARAM(4,bool); // BorderAsMesh
+	SEND_VTK_PARAM(5,bool); // ShowMeshes
+	SEND_VTK_PARAM(6,long); // ColorScheme
+	SEND_VTK_PARAM(7,long); // ArrowShape
+	SEND_VTK_PARAM(8,double); // ArrowSize
+	SEND_VTK_PARAM(9,long); // ComplexDisplay
+	SEND_VTK_PARAM(10,bool); // LabelColors
+	SEND_VTK_PARAM(11,bool); // ShowAxes
+	SEND_VTK_PARAM(12,bool); // CutPlane
+	SEND_VTK_PARAM(13,KN_<double>); // CameraPosition
+	SEND_VTK_PARAM(14,KN_<double>); // CameraFocalPoint
+	SEND_VTK_PARAM(15,KN_<double>); // CameraViewUp
+	SEND_VTK_PARAM(16,double); // CameraViewAngle
+	SEND_VTK_PARAM(17,KN_<double>); // CameraClippingRange
+	SEND_VTK_PARAM(18,KN_<double>); // CutPlaneOrigin
+	SEND_VTK_PARAM(19,KN_<double>); // CutPlaneNormal
+	SEND_VTK_PARAM(20,long); // WindowIndex
 
 	theplot.SendEndArgPlot();
 	map<const Mesh *,long> mapth;
@@ -3665,7 +3723,7 @@ AnyType Plot::operator()(Stack s) const  {
 			 tab x=l[i].evalt(0,s);
 			 tab y=l[i].evalt(1,s);
 			 long k= Min(x.N(),y.N());
-			 // cout << " ˆ faire " << endl;
+			 // cout << " a faire " << endl;
 			 // cout << " plot :\n" << * l[i].evalt(0,s) << endl << * l[i].evalt(1,s) << endl;
 			 rmoveto(x[0],y[0]);
 			 couleur(2+i);
