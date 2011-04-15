@@ -879,7 +879,7 @@ fi
    		  AC_SUBST(MPIPROG,"$ff_mpiprog")
    		  AC_SUBST(MPISCRIPT,"ff-mpirun")
    		  AC_SUBST(MPIRUN,$MPIRUN)
-                  AC_SUBST(MPICXX,$ff_mpicxx)
+                  AC_SUBST(MPICXX,$MPICXX)
 	else
 	        AC_SUBST(MPICXX,$ff_save_cxx)
 	fi
