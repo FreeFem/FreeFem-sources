@@ -738,10 +738,10 @@ if test -n "$with_mpilibs" -a "$with_mpilibs" != no ; then
     ff_MPI_LIB="$with_mpilibs"
     ff_MPI_LIBC="$with_mpilibs"
     ff_MPI_LIBFC="$with_mpilibs"
-    MPICXX="eval $CXX $ff_MPI_INCLUDE"
-    MPIF77="eval $F77 $ff_MPI_INCLUDE"
-    MPIFC="eval $FC  $ff_MPI_INCLUDE"
-    MPICC="eval $CC  $ff_MPI_INCLUDE"
+    MPICXX="$CXX $ff_MPI_INCLUDE"
+    MPIF77="$F77 $ff_MPI_INCLUDE"
+    MPIFC="$FC  $ff_MPI_INCLUDE"
+    MPICC="$CC  $ff_MPI_INCLUDE"
     AC_MSG_NOTICE([   ---  set  all MPI compile to compiler:   $MPICC , $MPIF77, $MPIFC, $MPICC  ])
 fi
 
@@ -791,10 +791,10 @@ if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
     ff_MPI_LIBC="-L'$with_mpipath'/lib -lmpi"
     ff_MPI_LIB="-L'$with_mpipath'/lib -lmpicxx -lmpi"
     ff_MPI_LIBFC="-L'$with_mpipath'/lib -lmpicxx -lfmpich2g -lmpi"
-    test -z "$MPICXX" && MPICXX="eval $CXX $ff_MPI_INCLUDE"
-    test -z "$MPIF77" && MPIF77="eval $F77 $ff_MPI_INCLUDE"
-    test -z "$MPIFC"  && MPIFC="eval $FC  $ff_MPI_INCLUDE"
-    test -z "$MPICC"  && MPICC="eval $CC  $ff_MPI_INCLUDE"
+    test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
+    test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
+    test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
+    test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
 else 
     with_mpipath=no	   
 fi

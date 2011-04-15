@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3D08E83B1358B9A300E3380D /* libf95.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D08E83A1358B9A300E3380D /* libf95.a */; };
 		3D15D46D0BD3A65E00CEB4C6 /* sansrgraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62A030972538B00D487F6 /* sansrgraph.cpp */; };
 		3D15D46E0BD3A67700CEB4C6 /* lg.tab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DC9E0970155D002A1826 /* lg.tab.cpp */; };
 		3D15D46F0BD3A68500CEB4C6 /* DefColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62A050972539900D487F6 /* DefColor.cpp */; };
@@ -92,7 +93,6 @@
 		3D751AF7125E0AF3008CDBE1 /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D751AF5125E0AF3008CDBE1 /* libamd.a */; };
 		3D751AF8125E0AF3008CDBE1 /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D751AF6125E0AF3008CDBE1 /* libarpack.a */; };
 		3D751AFA125E0B07008CDBE1 /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D751AF9125E0B07008CDBE1 /* libumfpack.a */; };
-		3D751AFC125E0B61008CDBE1 /* libf2c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D751AFB125E0B61008CDBE1 /* libf2c.a */; };
 		3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */; };
 		3D8EF15B1251123A00D38A94 /* libmpi_cxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D8EF15A1251123A00D38A94 /* libmpi_cxx.dylib */; };
 		3D8EF15D1251124600D38A94 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D8EF15C1251124600D38A94 /* libmpi.dylib */; };
@@ -149,6 +149,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3D08E83A1358B9A300E3380D /* libf95.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libf95.a; path = "/opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a"; sourceTree = "<absolute>"; };
 		3D2B6F620F9CC1C00058C8EB /* R3.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = R3.hpp; path = ../src/femlib/R3.hpp; sourceTree = SOURCE_ROOT; };
 		3D2B6F630F9CC1C00058C8EB /* R2.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = R2.hpp; path = ../src/femlib/R2.hpp; sourceTree = SOURCE_ROOT; };
 		3D2B6F640F9CC1C00058C8EB /* R1.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = R1.hpp; path = ../src/femlib/R1.hpp; sourceTree = SOURCE_ROOT; };
@@ -159,7 +160,6 @@
 		3D751AF5125E0AF3008CDBE1 /* libamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.a; path = ../download/lib/libamd.a; sourceTree = SOURCE_ROOT; };
 		3D751AF6125E0AF3008CDBE1 /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = ../download/lib/libarpack.a; sourceTree = SOURCE_ROOT; };
 		3D751AF9125E0B07008CDBE1 /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = ../download/lib/libumfpack.a; sourceTree = SOURCE_ROOT; };
-		3D751AFB125E0B61008CDBE1 /* libf2c.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libf2c.a; path = /usr/local/lib/libf2c.a; sourceTree = "<absolute>"; };
 		3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = parallelempi.cpp; path = ../src/mpi/parallelempi.cpp; sourceTree = SOURCE_ROOT; };
 		3D8EF15A1251123A00D38A94 /* libmpi_cxx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi_cxx.dylib; path = /usr/local/lib/libmpi_cxx.dylib; sourceTree = "<absolute>"; };
 		3D8EF15C1251124600D38A94 /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = /usr/local/lib/libmpi.dylib; sourceTree = "<absolute>"; };
@@ -304,7 +304,7 @@
 				3D751AF7125E0AF3008CDBE1 /* libamd.a in Frameworks */,
 				3D751AF8125E0AF3008CDBE1 /* libarpack.a in Frameworks */,
 				3D751AFA125E0B07008CDBE1 /* libumfpack.a in Frameworks */,
-				3D751AFC125E0B61008CDBE1 /* libf2c.a in Frameworks */,
+				3D08E83B1358B9A300E3380D /* libf95.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -437,11 +437,11 @@
 			isa = PBXGroup;
 			children = (
 				3D751AF5125E0AF3008CDBE1 /* libamd.a */,
+				3D08E83A1358B9A300E3380D /* libf95.a */,
 				3D751AF6125E0AF3008CDBE1 /* libarpack.a */,
 				3D751AF9125E0B07008CDBE1 /* libumfpack.a */,
 				3D8EF15A1251123A00D38A94 /* libmpi_cxx.dylib */,
 				3D8EF15C1251124600D38A94 /* libmpi.dylib */,
-				3D751AFB125E0B61008CDBE1 /* libf2c.a */,
 				3D90DDED097050AC002A1826 /* vecLib.framework */,
 			);
 			name = Lib;
@@ -839,6 +839,7 @@
 				PRODUCT_NAME = "FreeFem++";
 				SDKROOT = macosx10.6;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited)";
+				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
@@ -856,6 +857,7 @@
 				PRODUCT_NAME = "FreeFem++";
 				SDKROOT = macosx10.4;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited)";
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};
@@ -876,6 +878,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
 					"\"$(SRCROOT)/../download/lib\"",
+					"\"/opt/local/lib/g95/x86_64-apple-darwin10/4.2.4\"",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
@@ -904,6 +907,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
 					"\"$(SRCROOT)/../download/lib\"",
+					"\"/opt/local/lib/g95/x86_64-apple-darwin10/4.2.4\"",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
