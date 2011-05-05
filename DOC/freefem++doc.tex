@@ -5822,8 +5822,9 @@ The additional paramters of  adaptmesh not written here, hence the  "..."
     compute the metric (1 is the default).  \index{adaptmesh!powerin=}
 
 \index{adaptmesh!thetamax=}
-    \item[\texttt{thetamax=}] minimum corner angle in degrees (default
-    is 0).
+    \item[\texttt{thetamax=}] minimum corner  angle of in degrees (default
+    is $10^\circ$) where the corner is $ABC$ and the angle is the angle of the two vectors  ${AB}, {BC}$, 
+    ($0$ imply no corner, $90$ imply perp. corner , ...). 
 
     \item[\texttt{splitin2=}] boolean value. If true, splits all
     triangles of the final mesh into 4

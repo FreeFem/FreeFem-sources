@@ -1,3 +1,4 @@
+   - add matrice matric multy in lapck interface 
    - add tool to change the region and label number 
        change(Th,fregion= integer function to set the region number )
    - nuTriangle now given the tet number in 3D.  
