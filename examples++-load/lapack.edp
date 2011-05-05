@@ -1,4 +1,4 @@
-load "lapack"
+load "fflapack"
 // load "fflapack" obsolete (F. Hecht version 3.8)
 {
 int n=5;
@@ -29,6 +29,8 @@ for(int i=0;i<n;++i)
     for(int k=0;k<n;++k)
       B(i,j) +=A(i,k)*A1(k,j);
 cout << B << endl;
+ B = A*A1; // version 3.13
+cout << B << " ++++++  "<<  endl;
 // A1+A^-1;  attention ne marche pas
 
 inv(A1);
