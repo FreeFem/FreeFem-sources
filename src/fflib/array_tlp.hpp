@@ -805,6 +805,27 @@ template<class R,class A>  R  set_array_( R const & a,const A & b){
     R aa=a;
     aa=b;
 return a;}
+// xxxxxxxxxxx
+template<class K>  KNM<K> * set_initmat_t(KNM<K> * a,Transpose<KNM<K> * > b ){ 
+    KNM_<K>  tb=b.t->t(); ;
+     a->init(tb.N(),tb.M());
+    *a=tb;
+    return a;}
+template<class K>  KNM<K> * set_initmat(KNM<K> * a,KNM<K> *  b ){ 
+    
+    a->init(b->N(),b->M());
+    *a=*b;
+    return a;}
+template<class K>  KNM<K> * set_mat_t(KNM<K> * a,Transpose<KNM<K> * > b ){ 
+    KNM_<K>  tb=b.t->t(); ;
+    a->resize(tb.N(),tb.M());
+    *a=tb;
+    return a;}
+template<class K>  KNM<K> * set_mat(KNM<K> * a,KNM<K> *  b ){ 
+    
+    a->resize(b->N(),b->M());
+    *a=*b;
+    return a;}
 
 template<class K>  
 class  OneOperator_2KN_ : public OneOperator {public:
@@ -949,6 +970,14 @@ void ArrayOperator()
      //Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,KN_<K> >(&set_init));
     // Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,KN<K> * >(&set_initp));
      Add<KNM<K> *>("<-","(",new OneOperator3_<KNM<K> *,KNM<K> *,Z,Z>(&set_init2));
+     TheOperators->Add("<-",new OneOperator2<KNM<K> *,KNM<K> *,Transpose<KNM<K> * > >(&set_initmat_t));// may 2011 FH..
+     TheOperators->Add("=",new OneOperator2<KNM<K> *,KNM<K> *,Transpose<KNM<K> * > >(&set_mat_t));// may 2011 FH..
+   //  Add<KNM<K> *>("<-","(",new OneOperator2<KNM<K> *,KNM<K> *,KNM<K> *  >(&set_initmat));// may 2011 FH..
+   //  Add<KNM<K> *>("=","(",new OneOperator2<KNM<K> *,KNM<K> *,Transpose<KNM<K> * > >(&set_mat_t));// may 2011 FH..
+  //   Add<KNM<K> *>("=","(",new OneOperator2<KNM<K> *,KNM<K> *,KNM<K> *  >(&set_mat));// may 2011 FH..
+
+    // Add<KNM<K> *>("=","(",new OneOperator2_<KNM<K> *,KNM<K> *,Transpose<KNM<K> * > >(&set_tt));
+    
      Add<KN<K> *>("<-","(",new InitArrayfromArray<K,true>);
      Add<KNM<K> *>("<-","(",new InitMatfromAArray<K,true>);
      Add<KN<K> *>("n",".",new OneOperator1<Z,KN<K> *>(get_n));

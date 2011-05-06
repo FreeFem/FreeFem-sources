@@ -33,30 +33,30 @@ namespace  Fem2D {
 				      Data,
 				      2,
 				      1,
-				      3+6, // nb coef to build interpolation
-				      6, // np point to build interpolation
+				      3+9, // nb coef to build interpolation
+				      4, // np point to build interpolation
 				      0)
     {  
       const double gauss1=(1.-sqrt(1./3.))/2;
       const double gauss2=1.-gauss1;
 
-      const R2 Pt[] = { R2(0,0),R2(1,0),R2(0,1),R2(0.5,0.5), R2(0,0.5),R2(0.5,0)}; 
+      const R2 Pt[] = { R2(1./3,1./3.),R2(0.5,0.5), R2(0,0.5),R2(0.5,0)}; 
       // for the 3 vertices 6 coef 
-      int kk=0;
-      for (int p=0;p<3;p++)
-	{ 
-	  P_Pi_h[p]=Pt[p];
-	  pij_alpha[kk]= IPJ(kk,p,0);
-	  kk++;
+      P_Pi_h[0]=Pt[0];
+	int kk=0;   
+      for (int c=0;c<3;c++)
+	{ 	  
+	  pij_alpha[kk++]= IPJ(3+c,0,c);
 	}
       // for 
-      int p=3;
+      int p=1;
       for (int e=0;e<3;++e)
 	{ // point d'integration sur l'arete e 
 	  P_Pi_h[p]= Pt[p];
 	  //	  cout <<"\n" <<  p << " --  " << P_Pi_h[p] << " ::  " << A << " " << B << endl;
-	  pij_alpha[kk++]= IPJ(3+e,p,1); // coef = 0.5* l_e *ne_x * sge	  
-	  pij_alpha[kk++]= IPJ(3+e,p,2); // coef = 0.5* l_e *ne_y * sge	  	  
+	  pij_alpha[kk++]= IPJ(e,1+e,0); // coef = 0.5* l_e *ne_x * sge	  
+	  pij_alpha[kk++]= IPJ(e,1+e,1); // coef = 0.5* l_e *ne_x * sge	  
+	  pij_alpha[kk++]= IPJ(e,1+e,2); // coef = 0.5* l_e *ne_x * sge	  
 	  p++;
 	}
       assert(P_Pi_h.N()==p);
@@ -89,23 +89,23 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
     for (int i=0;i<3;i++)
       {
 	
-        R2 N(T.Edge(i).perp());
-	N  *= T.EdgeOrientation(i);
-        v[k++]= N.x; 
-        v[k++]= N.y;
+        R2 N(T.Edge(i).perp()/ T.lenEdge(i));
+        v[k++]= N.x*N.x; 
+        v[k++]= N.y*N.x;
+	v[k++]= N.y*N.y;
       }
   }
   
   void TypeOfFE_TD_NNS::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
   {
     typedef double R;
-    R2 A(K[0]), B(K[1]),C(K[2]);
+    //R2 A(K[0]), B(K[1]),C(K[2]);
     R l0=1-P.x-P.y,l1=P.x,l2=P.y;
-    cont R c3= 1./3.;
-    R ll3[3]={l0-c3,l1-c3,l3-c3};
-    R ll[3]={l0,l1,l3};
+    const R c3= 1./3.;
+    R ll3[3]={l0-c3,l1-c3,l2-c3};
+    R ll[3]={l0,l1,l2};
     R2 Dl[3]=  {K.H(0), K.H(1), K.H(2) };
-    R2 Rl[3]= { K.E(0),   K.E(1),   K.E(2)};   //  
+    R2 Rl[3]= { K.Edge(0)/ K.lenEdge(0),   K.Edge(1)/ K.lenEdge(1),   K.Edge(2)/ K.lenEdge(2)};   //  
     /* bulle:
       $ B_i = ((Rot L_i+1 ) (Rot L_(i+2)' ))^s  L_i$
          s => symetrise ..
@@ -133,16 +133,18 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
     S1[2][1]=-(S[0][0]*S[1][2]-S[1][0]*S[0][2])/det;
     S1[2][2]=(S[0][0]*S[1][1]-S[1][0]*S[0][1])/det;
     }
-    R B[3][3], BB[3][3]={ 0.,0.,0., 0.,0.,0., 0.,0.,0. };
+    R B[3][3], BB[3][3];
     R cc = 3.;
     for(int j=0;j<3;++j)
       for(int i=0;i<3;++i)
-	B[i][j]= S[i][j]*ll[i];
+	B[i][j]= S[i][j]*ll[j];
     
-      for(int i=0;i<3;++i)
+    for(int i=0;i<3;++i)
 	for(int k=0;k<3;++k)
-	  for(int j=0;j<3;++j)
-	    BB[i][k] += cc*B[i]*[j]*S1[j]*[k];
+	  {  BB[i][k]=0.;	      
+	      for(int j=0;j<3;++j)
+		  BB[i][k] += cc*S[i][j]*ll[j]*S1[j][k];
+	  }
 
     
     // the basic function are
@@ -166,42 +168,50 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
     if (wd[op_id])
       {
 	
-	RNM_ f(val('.','.',,op_id)); 
+	RNM_ f(val('.','.',op_id)); 
 	for(int c=0;c<3;++c)
-	  for(int i=0;i<3;++i){
-	    f(i,c)    = S[c][i]*ll3[i];
-	    f(i+3,c)  = BB[c][i];
-	      
+	    for(int i=0;i<3;++i){
+		f(i,c)    = S[c][i]*ll3[i];
+		f(i+3,c)  = BB[c][i];	      
+	    }
+      }
+    if (wd[op_dx])
+      {
+	RNM_ f_x(val('.','.',op_dx));
+	for(int i=0;i<3;++i)
+	    for(int k=0;k<3;++k)
+	      {  BB[i][k]=0.;	      
+		  for(int j=0;j<3;++j)
+		      BB[i][k] += cc*S[i][j]*Dl[j].x*S1[j][k];
 	      }
-  
-	if (wd[op_dx])
-	  {
-	    RN_ fx(val('.',wd_j[op_dx],wd_op[op_dx])); 
-	    
-	    fx[0] = Dl[0].x;
-	    fx[1] = Dl[1].x;
-	    fx[2] = Dl[2].x;
-	    
-	    fx[3] = dl3*Dl[0].x; 
-	    fx[4] = dl4*Dl[1].x; 
-	    fx[5] = dl5*Dl[2].x;
-	    
-	  }
 	
-	if (wd[op_dy])
-	  {  
-	    //      RN_ fy(val('.',0,op_dy)); 
-	    RN_ fy(val('.',wd_j[op_dy],wd_op[op_dy]));       
-	    fy[0] = Dl[0].y;
-	    fy[1] = Dl[1].y;
-	    fy[2] = Dl[2].y;
-	    
-	    fy[3] = dl3*Dl[0].y; 
-	    fy[4] = dl4*Dl[1].y; 
-	    fy[5] = dl5*Dl[2].y;
-      
-    }
-  
+	for(int c=0;c<3;++c)
+	    for(int i=0;i<3;++i)	    
+		f_x(i+3,c)  = BB[c][i];	      
+	
+	
+      }
+    
+    if (wd[op_dy])
+      {  
+	  
+	  RNM_ f_y(val('.','.',op_dy));
+	  for(int i=0;i<3;++i)
+	      for(int k=0;k<3;++k)
+		{  BB[i][k]=0.	;      
+		    for(int j=0;j<3;++j)
+			BB[i][k] += cc*S[i][j]*Dl[j].y*S1[j][k];
+		}
+	  
+	  for(int c=0;c<3;++c)
+	      for(int i=0;i<3;++i)		    
+		  f_y(i+3,c)  = BB[c][i];	      
+	  
+	  
+	  
+	  
+      }
+    
   }
 
 
