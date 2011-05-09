@@ -339,7 +339,7 @@ template<class R,bool init>
 KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc) 
 { // C=A*B 
     KNM_<R> A= *bc.a; 
-    KNM_<R> B= $bc.b; 
+    KNM_<R> B= *bc.b; 
    
     R alpha=1., beta=0;
     char tA, tB;
@@ -484,10 +484,10 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
       TheOperators->Add("^", new OneBinaryOperatorRNM_inv<Complex>());
       TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Inverse<KNM<double >*> >( Solve) );
       TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Inverse<KNM<Complex >*> >( SolveC) );
-      TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,false,false,false> ) );
-      TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,false,false,false> ) );
-      TheOperators->Add("<-", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,true,false,false> ) );
-      TheOperators->Add("<-", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,true,false,false> ) );
+      TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,false> ) );
+      TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,false> ) );
+      TheOperators->Add("<-", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,true> ) );
+      TheOperators->Add("<-", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,true> ) );
       
       Global.Add("inv","(",new  OneOperator1<bool,KNM<double>*>(lapack_inv));  
       Global.Add("dgeev","(",new  OneOperator3_<long,KNM<double>*,KN<Complex>*,KNM<Complex>*>(lapack_dgeev));  

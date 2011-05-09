@@ -235,6 +235,7 @@ class Mult{ public:
   T  b;
   Mult( T  aa,T bb)
     : a(aa),b(bb) {}
+    
 };
 
 template<class K>
@@ -319,31 +320,61 @@ KNM<R>* Solve(KNM<R>* a,Inverse<KNM<R >*> b)
   return a;
 }
 
-KNM<double>* dmult(KNM<double>* a,Mult<KNM<double >*> bc) 
-{
-    typedef double R;
+// Template interface 
+inline int gemm(char *transa, char *transb, integer *m, integer *
+	   n, integer *k, double *alpha, double *a, integer *lda, 
+	   double *b, integer *ldb, double *beta, double *c, integer 
+	   *ldc) {
+   return  dgemm_(transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc);
+}
+inline int gemm(char *transa, char *transb, integer *m, integer *
+		 n, integer *k, Complex *alpha, Complex *a, integer *lda, 
+		 Complex *b, integer *ldb, Complex *beta, Complex *c, integer 
+		 *ldc) {
+    return  zgemm_(transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc);
+}
+
+
+template<class R,bool init> 
+KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc) 
+{ // C=A*B 
     KNM_<R> A= *bc.a; 
     KNM_<R> B= *bc.b; 
-    KNM<R> & C= *a;
+   
     R alpha=1., beta=0;
     char tA, tB;
-    
+    if(init) a->init();
     int N= A.N();
     int M=B.M();
     int K=A.M();
+    KNM<R> & C= *a;
     C.resize(N,M); 
     ffassert(K==B.N());
     R *A00=&A(0,0), *A10= &A(1,0), *A01= &A(0,1); 
-    R *B00=&A(0,0), *B10= &A(1,0), *B01= &A(0,1); 
-    R *C00=&A(0,0), *C10= &A(1,0), *C01= &A(0,1); 
+    R *B00=&B(0,0), *B10= &B(1,0), *B01= &B(0,1); 
+    R *C00=&C(0,0), *C10= &C(1,0), *C01= &C(0,1); 
     int lsa=A10-A00 ,lsb=B10-B00,lsc=C10-C00;
     int lda=A01-A00 ,ldb=B01-B00,ldc=C01-C00;
-    cout << lsa << " " << lsb << " "<< lsc << endl;
-    cout << lda << " " << ldb << " "<< ldc << endl;
-    tA='N';
-    tB='N';
+    if(verbosity>10) {
+	cout << lsa << " " << lsb << " "<< lsc << " init " << init <<  endl;
+	cout << lda << " " << ldb << " "<< ldc << endl;	
+    }
+    tA=lda==1?'T':'N';
+    tB=ldb==1?'T':'N';
     
-    dgemm_(&tA,&tB,&M,&N,&K,&alpha,A,&lda,B,&ldb,&beta,C,&ldc);
+    if(lda==1) lda=lsa;
+    if(ldb==1) ldb=lsb;
+    
+    C=R(); 
+#ifdef XXXXXXXXXXXXXX
+    
+    for(int i=0;i<N;++i)
+	 for(int j=0;j<M;++j)
+	      for(int k=0;k<K;++k)
+		  C(i,j) += A(i,k)*B(k,j)  ;
+#else    
+    gemm(&tB,&tA,&N,&M,&K,&alpha,A00,&lda,B00,&ldb,&beta,C00,&ldc);
+#endif
     /*
      The Fortran interface for these procedures are:
      SUBROUTINE xGEMM ( TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
@@ -354,42 +385,8 @@ KNM<double>* dmult(KNM<double>* a,Mult<KNM<double >*> bc)
      meaning the memory distance between the start of each row/column, depending on the memory structure (Dongarra et al. 1990).
      */
 }
-KNM<Complex>* zmult(KNM<Complex>* a,Mult<KNM<Complex >*> bc) 
-{
-    typedef Complex R;
-    KNM_<R> A= *bc.a; 
-    KNM_<R> B= *bc.b; 
-    KNM<R> & C= *a;
-    R alpha=1., beta=0;
-    char tA, tB;
-    
-    int N= A.N();
-    int M=B.M();
-    int K=A.M();
-    C.resize(N,M); 
-    ffassert(K==B.N());
-    R *A00=&A(0,0), *A10= &A(1,0), *A01= &A(0,1); 
-    R *B00=&A(0,0), *B10= &A(1,0), *B01= &A(0,1); 
-    R *C00=&A(0,0), *C10= &A(1,0), *C01= &A(0,1); 
-    int lsa=A10-A00 ,lsb=B10-B00,lsc=C10-C00;
-    int lda=A01-A00 ,ldb=B01-B00,ldc=C01-C00;
-    cout << lsa << " " << lsb << " "<< lsc << endl;
-    cout << lda << " " << ldb << " "<< ldc << endl;
-    tA='N';
-    tB='N';
-    
-    zgemm_(&tA,&tB,&M,&N,&K,&alpha,A,&lda,B,&ldb,&beta,C,&ldc);
-    /*
-     The Fortran interface for these procedures are:
-     SUBROUTINE xGEMM ( TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
-     where TRANSA and TRANSB determines if the matrices A and B are to be transposed.
-     M is the number of rows in matrix A and C. N is the number of columns in matrix B and C. 
-     K is the number of columns in matrix A and rows in matrix B. 
-     LDA, LDB and LDC specifies the size of the first dimension of the matrices, as laid out in memory;
-     meaning the memory distance between the start of each row/column, depending on the memory structure (Dongarra et al. 1990).
-     */
-    
-}
+
+
 KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b) 
 {
   /*
@@ -487,9 +484,11 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
       TheOperators->Add("^", new OneBinaryOperatorRNM_inv<Complex>());
       TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Inverse<KNM<double >*> >( Solve) );
       TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Inverse<KNM<Complex >*> >( SolveC) );
-      TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( dmult) );
-      TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( zmult ) );
-     
+      TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,false> ) );
+      TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,false> ) );
+      TheOperators->Add("<-", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,true> ) );
+      TheOperators->Add("<-", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,true> ) );
+      
       Global.Add("inv","(",new  OneOperator1<bool,KNM<double>*>(lapack_inv));  
       Global.Add("dgeev","(",new  OneOperator3_<long,KNM<double>*,KN<Complex>*,KNM<Complex>*>(lapack_dgeev));  
       Global.Add("zgeev","(",new  OneOperator3_<long,KNM<Complex>*,KN<Complex>*,KNM<Complex>*>(lapack_zgeev));  
