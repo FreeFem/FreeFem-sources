@@ -235,6 +235,7 @@ class Mult{ public:
   T  b;
   Mult( T  aa,T bb)
     : a(aa),b(bb) {}
+    
 };
 
 template<class K>
@@ -334,11 +335,11 @@ inline int gemm(char *transa, char *transb, integer *m, integer *
 }
 
 
-template<class R,bool init,bool TA,bool TB> 
-KNM<R>* mult(KNM<R>* a,Mult<KNM<R >*> bc) 
+template<class R,bool init> 
+KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc) 
 { // C=A*B 
-    KNM_<R> A= TA ? bc.a->t() : *bc.a; 
-    KNM_<R> B= TB ? bc.b->t() : *bc.b; 
+    KNM_<R> A= *bc.a; 
+    KNM_<R> B= $bc.b; 
    
     R alpha=1., beta=0;
     char tA, tB;
@@ -358,10 +359,11 @@ KNM<R>* mult(KNM<R>* a,Mult<KNM<R >*> bc)
 	cout << lsa << " " << lsb << " "<< lsc << " init " << init <<  endl;
 	cout << lda << " " << ldb << " "<< ldc << endl;	
     }
-    tA=TA?'T':'N';
-    tB=TB?'T' :'N';
-    if(TA) lda=lsa;
-    if(TB) ldb=lsb;
+    tA=lda==1?'T':'N';
+    tB=ldb==1?'T':'N';
+    
+    if(lda==1) lda=lsa;
+    if(ldb==1) ldb=lsb;
     
     C=R(); 
 #ifdef XXXXXXXXXXXXXX
