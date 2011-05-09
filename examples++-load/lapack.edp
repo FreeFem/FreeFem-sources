@@ -92,3 +92,60 @@ cout << B << endl;
   cout << B << endl;
   // A1+A^-1;  attention ne marche pas 
 }
+
+{
+
+int n=5;
+real [int,int] A(n,n),  B(n,n),  C(n,n);
+macro SETM(A,i,j,fij) { for(int i=0;i<A.n;++i) for(int j=0;j<A.m;++j) A(i,j)= (fij) ;}// 
+SETM(C,i,j,1./(1+i+j)) ; 
+SETM(B,i,j,i==j?2.:1./n) ;
+ 
+A = B*C;
+cout << A << " " << endl;
+A = B + C;
+real[int]  b(n),c(n);
+real[int,int] AA=A;
+AA=A;
+real [int,int] At=A';
+
+b = A*c;
+
+At =A';
+{
+
+real [int,int] A=[[0,-1,2],[4,11,2],[0,-1,2],[4,11,2]];
+real [int,int] B=[[3,-1],[1,2],[6,1]];
+real [int,int] E=[[11,0],[35,20],[11,0],[35,20]];
+real [int,int]  At=A';
+real [int,int] C(A.n,B.m);
+C=A*B;
+cout << " C = " <<  C << endl;
+cout << " E = " <<  E << endl;
+
+C -= E;
+assert( C.linfty < 1e-10);
+C = A*B;
+C -=E; 
+assert( C.linfty < 1e-10);
+}
+{
+
+complex [int,int] A=[[0,-1,2],[4,11,2],[0,-1,2],[4,11,2]];
+complex [int,int] B=[[3,-1],[1,2],[6,1]];
+complex [int,int] E=[[11,0],[35,20],[11,0],[35,20]];
+
+complex [int,int] C(A.n,B.m);
+complex [int,int]  At=A';
+cout << "At = " << At << endl;
+C=A*B;
+cout << " C = " <<  C << endl;
+cout << " E = " <<  E << endl;
+
+C -= E;
+assert( C.linfty < 1e-10);
+C = A*B;
+C -=E; 
+assert( C.linfty < 1e-10);
+}
+}
