@@ -231,10 +231,17 @@ class Inverse{ public:
 
 template<class T>
 class Mult{ public:
-  T  a;
-  T  b;
+    T  a;bool ta;
+  T  b;bool tb;
   Mult( T  aa,T bb)
-    : a(aa),b(bb) {}
+    : a(aa),b(bb),ta(0),tb(0) {}
+    // Transpose<
+  Mult( Transpose<T>  aa,T bb)   
+    : a(aa),b(bb),ta(1),tb(0) {}
+  Mult( Transpose<T>  aa,Transpose<T> bb)   
+    : a(aa),b(bb),ta(1),tb(1) {}
+    Mult( T  aa,Transpose<T> bb)   
+    : a(aa),b(bb),ta(1),tb(1) {}
     
 };
 
@@ -335,13 +342,11 @@ inline int gemm(char *transa, char *transb, integer *m, integer *
 }
 
 
-template<class R,bool init> 
-KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc) 
+template<class R,bool init, int ibeta> 
+KNM<R>* mult(KNM<R >* a,const KNM_<R> & A,const KNM_<R> & B) 
 { // C=A*B 
-    KNM_<R> A= *bc.a; 
-    KNM_<R> B= *bc.b; 
    
-    R alpha=1., beta=0;
+    R alpha=1.,beta=R(ibeta);
     char tA, tB;
     if(init) a->init();
     int N= A.N();
@@ -364,8 +369,8 @@ KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc)
     
     if(lda==1) lda=lsa;
     if(ldb==1) ldb=lsb;
-    
-    C=R(); 
+    if(beta==0.)
+     C=R(); 
 #ifdef XXXXXXXXXXXXXX
     
     for(int i=0;i<N;++i)
@@ -375,6 +380,7 @@ KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc)
 #else    
     gemm(&tB,&tA,&N,&M,&K,&alpha,A00,&lda,B00,&ldb,&beta,C00,&ldc);
 #endif
+    return a;
     /*
      The Fortran interface for these procedures are:
      SUBROUTINE xGEMM ( TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
@@ -385,7 +391,19 @@ KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc)
      meaning the memory distance between the start of each row/column, depending on the memory structure (Dongarra et al. 1990).
      */
 }
+template<class R,bool init, int ibeta> 
+KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc) 
+{
+    if( (bc.ta == 0) && (bc.tb == 0))
+     return  mult<R,init,ibeta>(a,*bc.a,*bc.b) ;
+    else if((bc.ta == 1 )&& (bc.tb == 0))
+     return  mult<R,init,ibeta>(a,bc.a->t(),*bc.b) ;
+    else if((bc.ta == 0) && (bc.tb == 1))
+	return  mult<R,init,ibeta>(a,*bc.a,bc.b->t()) ;
+    else if((bc.ta == 1) && (bc.tb == 1))
+	return  mult<R,init,ibeta>(a,bc.a->t(),bc.b->t()) ;
 
+}
 
 KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b) 
 {
@@ -484,10 +502,17 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
       TheOperators->Add("^", new OneBinaryOperatorRNM_inv<Complex>());
       TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Inverse<KNM<double >*> >( Solve) );
       TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Inverse<KNM<Complex >*> >( SolveC) );
-      TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,false> ) );
-      TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,false> ) );
-      TheOperators->Add("<-", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,true> ) );
-      TheOperators->Add("<-", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,true> ) );
+      TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,false,0> ) );
+      TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,false,0> ) );
+      
+      TheOperators->Add("+=", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,false,1> ) );
+      TheOperators->Add("+=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,false,1> ) );
+      
+      TheOperators->Add("-=", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,false,-1> ) );
+      TheOperators->Add("-=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,false,-1> ) );
+      
+      TheOperators->Add("<-", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,true,0> ) );
+      TheOperators->Add("<-", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,true,0> ) );
       
       Global.Add("inv","(",new  OneOperator1<bool,KNM<double>*>(lapack_inv));  
       Global.Add("dgeev","(",new  OneOperator3_<long,KNM<double>*,KN<Complex>*,KNM<Complex>*>(lapack_dgeev));  
