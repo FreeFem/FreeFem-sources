@@ -1,3 +1,9 @@
+   - add TD-NSS1 (in progress) Elm_TD-NNS.cpp file 
+   - add RT1 and Rt1ortho finite element (in progress) 
+v 3.12-3 
+   - new finite element in 2d for elasticity in test. TD-NSS0 (see these of Astrid Sabine Sinwel)
+      A New Family of Mixed Finite Elements for Elasticity
+   
    - add matrice matric multy in lapck interface 
    - add tool to change the region and label number 
        change(Th,fregion= integer function to set the region number )

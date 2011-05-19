@@ -45,5 +45,5 @@ for(int it=0; it<29; it++){
   cout<<"  ITERATION       "<<it<<endl;
   Lap;
   plot(Th,uh);
-  Th=mmg3d(Th,options=opt,displacement=[zero,zero,uh],memory=1000); 
+  Th=mmg3d(Th,options=opt,displacement=[zero,zero,uh],memory=500); 
  }
