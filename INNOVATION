@@ -1,5 +1,5 @@
    - add TD-NSS1 (in progress) Elm_TD-NNS.cpp file 
-   - add RT1 and Rt1ortho finite element (in progress) 
+   - add RT1 and Rt1ortho finite element (done) 
 v 3.12-3 
    - new finite element in 2d for elasticity in test. TD-NSS0 (see these of Astrid Sabine Sinwel)
       A New Family of Mixed Finite Elements for Elasticity

@@ -260,6 +260,262 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
   }
 
     
+    // ------ P2 TD_NNS  
+    class TypeOfFE_TD_NNS1 : public  TypeOfFE { public:  
+	static int Data[];
+	// double Pi_h_coef[];
+	const QuadratureFormular1d QFE;
+	const  GQuadratureFormular<R2> & QFK;
+	
+	TypeOfFE_TD_NNS1(): TypeOfFE(3*2+3*3,
+				    3,
+				    Data,
+				    2,
+				    1,
+				    3*3*QFE.n+QFK.n*3, // nb coef to build interpolation
+				    3*QFE.n+QFK.n, // np point to build interpolation
+				    0),
+	 QFE(-1+2*2,2,GaussLegendre(2),true), QFK(QuadratureFormular_T_5)	
+	{  
+	    
+	    
+	   
+	    int kk=0,kp=0;
+	    for(int p=0;p<QFK.n;++p)
+	      {
+		P_Pi_h[kp++]=QFK[p];
+	        for (int c=0;c<3;c++)
+	      	  pij_alpha[kk++]= IPJ(3*2+c,p,c);
+	      }
+	   
+	    for (int e=0;e<3;++e) 
+	      {
+		for(int p=0;p<QFE.n;++p)
+		  {
+		    R2 A(TriangleHat[VerticesOfTriangularEdge[e][0]]);
+		    R2 B(TriangleHat[VerticesOfTriangularEdge[e][1]]);
+		    P_Pi_h[kp++]= B*(QFE[p].x)+ A*(1.-QFE[p].x);// X=0 => A  X=1 => B;       
+		    
+		  }
+	      }
+	    
+	    
+	    for (int e=0;e<3;++e)
+	      for(int p=0;p<QFE.n;++p)	
+	      { 
+		int pp=QFK.n+ e*QFE.n+p;
+		pij_alpha[kk++]= IPJ(2*e+0,pp,0);  
+		pij_alpha[kk++]= IPJ(2*e+1,pp,0);  
+		pij_alpha[kk++]= IPJ(2*e+0,pp,1);  
+		pij_alpha[kk++]= IPJ(2*e+1,pp,1);  
+		pij_alpha[kk++]= IPJ(2*e+0,pp,2);  
+		pij_alpha[kk++]= IPJ(2*e+1,pp,2);  
+		    
+		  
+	      }
+	    ffassert(P_Pi_h.N()==kp);
+	    ffassert(pij_alpha.N()==kk);
+	    
+	}
+	void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+	void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const;
+    } ;
+    //                     on what     nu df on node node of df    
+    int TypeOfFE_TD_NNS1::Data[]={
+	3,3, 4,4, 5,5, 6,6,6 ,6,6,6, 6,6,6 ,//  support on what 
+	0,1, 0,1, 0,1, 0,1,2, 0,1,2, 0,1,2,// df on node 
+	0,0, 1,1, 2,2, 3,3,3, 3,3,3, 3,3,3, // th node of df 
+	0,0, 0,0, 0,0, 0,0,0, 0,0,0,  0,0,0,//  df previou FE
+	0,1, 2,3, 4,5, 6,7,9, 9,10,11, 12,13,14,//  which df on prev 
+	0,0,0,
+	0,0,0, 
+	15,15,15 
+    };
+    
+    void TypeOfFE_TD_NNS1::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
+    {
+      const Triangle & T(K.T);
+      int k=0;
+      // coef pour les 3 sommets  fois le 2 composantes 
+      for (int i=0;i<3;i++)
+	  for (int p=0;p<QFK.n;++p) 	
+	    { // wrong ... 
+		// 3 -1 -1    
+		// -1 3 -1    / 4  
+		// -1 -1 3 
+		R l[3]; QFK[p].toBary(l);
+		R c0 = QFK[p].a * T.area/4*(3*l[0]-l[1]-l[2]);
+		R c1 = QFK[p].a * T.area/4*(l[0]+3*l[1]-l[2]);
+		R c2 = QFK[p].a * T.area/4*(l[0]-l[1]+3*l[2]);
+	      v[k++]=c0 * T.area; 
+	      v[k++]=c1 * T.area; 
+	      v[k++]=c2 * T.area; 
+	    }
+      //   integration sur les aretes 
+      for (int i=0;i<3;i++)
+	{
+	  R s = T.EdgeOrientation(i) ;
+	  for (int p=0;p<QFE.n;++p) 
+	    {
+	      R l0 = QFE[p].x, l1 = 1-QFE[p].x;
+	      R p0= (2*l0-l1)*2;// poly othogonaux to \lambda_1
+	      R p1= (2*l1-l0)*2;// poly othogonaux to \lambda_0
+	      R cc1 = p0*QFE[p].a; // 
+	      R cc0 = p1*QFE[p].a; //
+	      if(s<0) Exchange(cc1,cc0); // exch lambda0,lambda1
+	      
+	  
+	  R2 N(T.Edge(i).perp());
+	  v[k++]= cc0*N.x*N.x;
+	  v[k++]= cc1*N.x*N.x;    
+	  v[k++]= cc0*2*N.y*N.x;
+	  v[k++]= cc1*2*N.y*N.x;    
+	  v[k++]= cc0*N.y*N.y;
+	  v[k++]= cc1*N.y*N.y;
+	}
+	}
+      assert(k==3+9); 
+    
+    } 
+    void TypeOfFE_TD_NNS1::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+    {
+      typedef double R;
+      //R2 A(K[0]), B(K[1]),C(K[2]);
+      R l0=1-P.x-P.y,l1=P.x,l2=P.y;
+      const R c3= 1./3.;
+      R ll3[3]={l0-c3,l1-c3,l2-c3};
+      R ll[3]={l0,l1,l2};
+      R2 Dl[3]=  {K.H(0), K.H(1), K.H(2) };
+      /* if T_i=Edge(i) ,N=T.perp :
+       N_i' T_j T_k' N_i =0  if i=j or i=k
+       N_i' T_j = det(T_i,T_j) = aire(K) 
+       */
+      R cK= 2* K.area; 
+      R2 Rl[3]= { K.Edge(0)/cK,   K.Edge(1)/ cK,   K.Edge(2)/ cK};   //  
+      /* bulle:
+       $ B_i = ((Rot L_i+1 ) (Rot L_(i+2)' ))^s  L_i$
+       s => symetrise ..
+       */
+      R S[3][3],S1[3][3];
+      for(int i=0;i<3;++i)
+	{
+	  int i1=(i+1)%3;
+	  int i2=(i+2)%3;
+	  S[0][i]= -Rl[i1].x*Rl[i2].x;
+	  S[1][i]= -(Rl[i1].x*Rl[i2].y+Rl[i1].y*Rl[i2].x)*0.5;
+	  S[2][i]= -Rl[i1].y*Rl[i2].y;
+	  
+	}
+      // s[.] [i] = 
+      { //     //  compute the inv of S with lapack 
+	  for(int j=0;j<3;++j)
+	      for(int i=0;i<3;++i)
+		  S1[i][j]=S[i][j];
+	  
+	  int N=3,LWORK = 9;
+	  double WORK[9] ;
+	  int INFO,IPIV[4];
+	  
+	  dgetrf_(&N,&N,&(S1[0][0]),&N,IPIV,&INFO);
+	  ffassert(INFO==0);
+	  dgetri_(&N,&(S1[0][0]),&N,IPIV,WORK,&LWORK,&INFO);
+	  ffassert(INFO==0);
+	  
+      }
+      R B[3][3], BB[3][3];
+      R cc = 3./K.area; 
+      for(int j=0;j<3;++j)
+	  for(int i=0;i<3;++i)
+	      B[i][j]= S[i][j]*ll[j];
+      
+      for(int i=0;i<3;++i)
+	  for(int k=0;k<3;++k)
+	    {  BB[i][k]=0.;	      
+		for(int j=0;j<3;++j)
+		    BB[i][k] += cc*S[i][j]*ll[j]*S1[j][k];
+	    }
+      if(verbosity>1000)
+	{
+	  
+	  cout << endl;
+	  cout <<  Rl[0] << " "<< Rl[1]  << ",  " <<Rl[2] << endl;	
+	  for(int i=0;i<3;++i)
+	      cout << " *****    " << BB[i][0] << " " << BB[i][1] << " " << BB[i][2] << "\t l " << ll[i] << endl;
+	}
+      
+      // the basic function are
+      //  the space S_i * ( a_i+b_1lambda_i) 
+      //  the base :
+      //  tree egde function: 
+      //   coefe*  S_i*( lambda_i - 1/3)   :  zero a barycenter 
+      //   coefk*BB_i ,withh     B_i =   (S_i * lambda_i),   BB = B * S1 , ok because lambda_i = 1/3 a bary
+      //  so BB_ij = coefk/3  delta_ij  at G the barycenter.
+      // 
+      KN<bool> wd(KN_<const bool>(whatd,last_operatortype));
+      val=0; 
+      
+      throwassert( val.N()>=6);
+      throwassert(val.M()==3);
+      
+      
+      val=0; 
+      
+      
+      if (wd[op_id])
+	{
+	  for(int c=0;c<3;++c)
+	      for(int i=0;i<3;++i){
+		  val(i,c,op_id)    = S[c][i]*(c3-ll[i])/c3; //  (c3-ll[i])/c3 
+		  val(i+3,c,op_id)  = BB[c][i];	      
+	      }
+	}
+      if (wd[op_dx])
+	{
+	  for(int i=0;i<3;++i)
+	      for(int k=0;k<3;++k)
+		{  BB[i][k]=0.;	      
+		    for(int j=0;j<3;++j)
+			BB[i][k] += cc*S[i][j]*Dl[j].x*S1[j][k];
+		}
+	  
+	  for(int c=0;c<3;++c)
+	      for(int i=0;i<3;++i)
+		{
+		  val(i  ,c,op_dx)    = -S[c][i]*Dl[i].x/c3;
+		  val(i+3,c,op_dx)  = BB[c][i];	      
+		  
+		}
+	  
+	  
+	}
+      
+      if (wd[op_dy])
+	{  
+	    
+	    for(int i=0;i<3;++i)
+		for(int k=0;k<3;++k)
+		  {  BB[i][k]=0.	;      
+		      for(int j=0;j<3;++j)
+			  BB[i][k] += cc*S[i][j]*Dl[j].y*S1[j][k];
+		  }
+	    
+	    for(int c=0;c<3;++c)
+		for(int i=0;i<3;++i)
+		  {
+		    val(i  ,c,op_dy)    = -S[c][i]*Dl[i].y/c3;
+		    val(i+3,c,op_dy)  = BB[c][i];	      
+		    
+		  }
+	    
+	    
+	}	  
+      
+      
+      
+      
+    }
+    
+    
 struct  InitTypeOfRTk_2d
   {
     
@@ -640,7 +896,9 @@ struct  InitTypeOfRTk_2d
     static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2d(false);// RT1    
     static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2dOrtho(true);// RT1ortho  
 static TypeOfFE_TD_NNS Elm_TD_NNS;
-static AddNewFE FE__TD_NNS("TDNNS",&Elm_TD_NNS); 
+static TypeOfFE_TD_NNS1 Elm_TD_NNS1;
+static AddNewFE FE__TD_NNS("TDNNS0",&Elm_TD_NNS); 
+static AddNewFE FE__TD_NNS1("TDNNS1",&Elm_TD_NNS1);     
 static AddNewFE Elm__TypeOfFE_RT1_2d("RT1",&Elm_TypeOfFE_RT1_2d); 
 static AddNewFE Elm__TypeOfFE_RT1_2dOrtho("RT1Ortho",&Elm_TypeOfFE_RT1_2dOrtho); 
     
