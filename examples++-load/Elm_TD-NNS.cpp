@@ -618,11 +618,11 @@ struct  InitTypeOfRTk_2d
 	      
 	      for(int df=0;df< 8;++df)
 		{
-		  R2 fd;
+		  R2 fd(0.,0.);
 		  for(int k=0;k<3;++k)
 		      fd += cI[df][k] * (DL[lI[df][k]].y * phi[pI[df][k]] + L[lI[df][k]]* Dphiy);
-		  val(df,ortho0,op_dx)= fd.x;
-		  val(df,ortho1,op_dx)= s1ortho*fd.y;	      
+		  val(df,ortho0,op_dy)= fd.x;
+		  val(df,ortho1,op_dy)= s1ortho*fd.y;	      
 		}
 	      
 	    }
