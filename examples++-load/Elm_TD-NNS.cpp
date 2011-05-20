@@ -118,7 +118,7 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
         v[k++]= 2*N.y*N.x;
 	v[k++]= N.y*N.y;
       }
-    assert(k==6); 
+    assert(k==3+9); 
   }
   
   void TypeOfFE_TD_NNS::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
@@ -318,14 +318,15 @@ struct  InitTypeOfRTk_2d
     class TypeOfFE_RT1_2d :public InitTypeOfRTk_2d, public  TypeOfFE { 
     public:  
 	static double Pi_h_coef[];
+	bool Ortho;
 	
-	
-	TypeOfFE_RT1_2d()
+	TypeOfFE_RT1_2d(bool ortho)
 	:  InitTypeOfRTk_2d(1),
 	TypeOfFE(ndf,2,Data,k,3,
-		 npe*3*QFE.n+QFK.n*2,// nb coef mat interpole
-		 npe*3+QFK.n, // nb P interpolation 
-		 0)
+		 2*2*3*QFE.n+QFK.n*2,// nb coef mat interpole
+		 3*QFE.n+QFK.n, // nb P interpolation 
+		 0),
+	Ortho(ortho)
 	{  
 	    //      cout << " Pk = " << k << endl;
 	    int kkk=0,i=0;
@@ -334,51 +335,57 @@ struct  InitTypeOfRTk_2d
 	      {
 		R2 A(TriangleHat[VerticesOfTriangularEdge[e][0]]);
 		R2 B(TriangleHat[VerticesOfTriangularEdge[e][1]]);
-		for (int k=0;k<npe;k++)
-		  {
+		
 		    pij_alpha[kkk++]= IPJ(2*e,i,0);
 		    pij_alpha[kkk++]= IPJ(2*e,i,1);
 		    pij_alpha[kkk++]= IPJ(2*e+1,i,0);
 		    pij_alpha[kkk++]= IPJ(2*e+1,i,1);
 		    
-		  }
+		  
 		 P_Pi_h[i++]= B*(QFE[p].x)+ A*(1.-QFE[p].x);// X=0 => A  X=1 => B;       
 	      }
 	     for (int p=0;p<QFK.n;++p) 
 	       {
 		 pij_alpha[kkk++]= IPJ(6,i,0);
 		 pij_alpha[kkk++]= IPJ(7,i,1);
-		 P_Pi_h[i++]= QFK[p];// X=0 => A  X=1 => B;    
+		 P_Pi_h[i++]= QFK[p]; 
 	       }
+	    //cout << kkk << " kkk == " << this->pij_alpha.N() << endl;
+	    //cout << i << "  ii == " << this->P_Pi_h.N() << endl;
+	    ffassert(kkk==this->pij_alpha.N());
+	    ffassert(i==this->P_Pi_h.N() );
 	}
 	
 	void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const 
-	{
+	{ // compute the coef of interpolation ...
 	  const Triangle & T(K.T);
 	  int k=0;
-	  for (int i=0,k=0;i<3;i++)
+	  for (int i=0;i<3;i++)
 	    {  
-		R2 E(T.Edge(i));
+		R2 E(Ortho? T.Edge(i) : -T.Edge(i).perp());
 		
 		R s = T.EdgeOrientation(i) ;
 		for (int p=0;p<QFE.n;++p) 
 		  {
-		    
-		    R cc1 = s*QFE[p].x*QFE[p].a; // lambda1
-		    R cc0 = s*(1-QFE[p].x)*QFE[p].a; //lambda_0
+		    R l0 = QFE[p].x, l1 = 1-QFE[p].x;
+		    R p0= (2*l0-l1)*2;// poly othogonaux to \lambda_1
+		    R p1= (2*l1-l0)*2;// poly othogonaux to \lambda_0
+		    R cc1 = s*p0*QFE[p].a; // 
+		    R cc0 = s*p1*QFE[p].a; //
 		    if(s<0) Exchange(cc1,cc0); // exch lambda0,lambda1
-		    v[k++]= cc0*E.y;
-		    v[k++]=-cc0*E.x; 
-		    v[k++]= cc1*E.y;
-		    v[k++]=-cc1*E.x; 
+		    v[k++]= cc0*E.x;
+		    v[k++]= cc0*E.y; 
+		    v[k++]= cc1*E.x;
+		    v[k++]= cc1*E.y; 
 		  }
 	    }
 	   for (int p=0;p<QFK.n;++p) 	
 	     {
-	       v[k++]=QFE[p].a * T.area; 
-	       v[k++]=QFE[p].a * T.area; 
+	       v[k++]=QFK[p].a * T.area; 
+	       v[k++]=QFK[p].a * T.area; 
 	     }
-	
+	 // cout << " k= " << k << " == " << this->pij_alpha.N() << endl;
+	  assert(k==this->pij_alpha.N());
 	}
 	void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
     } ;
@@ -393,9 +400,9 @@ struct  InitTypeOfRTk_2d
       R l0=1-Phat.x-Phat.y,l1=Phat.x,l2=Phat.y; 
       R L[3]={l0,l1,l2};
       
-      static int count=0;
+      static int count=10;
       
-      if( count < 5)
+      if( count < 0)
 	{
 	  cout << "TypeOfFE_RT1_2d "<< " " << A[0]+A[1]+A[2] << " " <<  B[0]+B[1]+B[2] << endl;
 	  cout << det(Q[0],Q[1],Q[2]) << " X = " << X << " Phat ="  << Phat << endl;
@@ -415,7 +422,7 @@ struct  InitTypeOfRTk_2d
        
        edge function j=0,1
        i1= i+j+1, i2= i+2-j  remark : {i,i1,i2} <=> {i,i+1,i+2}  
-       \phi_i ( \lambda_{i1} - 4/3 \lambda_i) + 1/3 \phi_{i2}\lambda_{i2}
+       \phi_i ( \lambda_{i1} - 4/3 \lambda_i) + 1/3 \phi_{i1}\lambda_{i1}
        
        internal function are 
        \sum   bx_i \phi_{i}\lambda_{i}
@@ -423,7 +430,7 @@ struct  InitTypeOfRTk_2d
        \sum bx_i = 1/c0
        \sum by_i = 1/c0 
        we have 
-       \phi_{i} = A_{i+2}  \lambda_{i+1} - A_{i+1}  \lambda_{i+1}
+       \phi_{i} = A_{i+2}  \lambda_{i+1} - A_{i+1}  \lambda_{i+2}
        with
        A_i = Th.edge(i)/ ( 2 |K])    
        B_i = A_{i+2} - A_{i+1}  
@@ -442,7 +449,7 @@ struct  InitTypeOfRTk_2d
       
       
       assert( val.N()>=ndf);
-      assert(val.M()==1);
+      assert(val.M()==2);
       int ee=0;
       
       val=0; 
@@ -461,7 +468,7 @@ struct  InitTypeOfRTk_2d
 	  int ii[2]={(e+1)%3,(e+2)%3};
 	  int i2=(e+2)%3;
 	  R s = K.EdgeOrientation(e)/CKK;
-	  //if(s<0) Exchange(ii[0],ii[1]); // 
+	  if(s<0) Exchange(ii[0],ii[1]); // 
 	  for(int k=0;k<2;++k,df++)
 	    {
 	      pI[df][0]= i;
@@ -479,8 +486,8 @@ struct  InitTypeOfRTk_2d
 	      
 	    }
 	}
-      
-      if(count<1)
+ /*     
+      if(count<0)
 	{
 	 // verif. 
 	  R2 PP[] ={ R2(0.5,0),R2(0.5,0.5),R2(0,0.5)};
@@ -521,6 +528,7 @@ struct  InitTypeOfRTk_2d
 	  ffassert(err==0);
 	
 	}
+  */
       R cK = 18.* K.area;
       R c0 = sqrt(cK);
       R cb = 12/c0;
@@ -530,12 +538,12 @@ struct  InitTypeOfRTk_2d
 	  
 	  R2 PB(0,0);
 	  PB[k]=cb;
-	  if( count <5) cout << " PB = " << PB << " df = " << df << " " << cK << " ==" << det(B[0] ,B[1],B[2]) <<endl;
+	 // if( count <5) cout << " PB = " << PB << " df = " << df << " " << cK << " ==" << det(B[0] ,B[1],B[2]) <<endl;
 	  R b0 = det(PB   ,B[1],B[2])/ ccK;
 	  R b1 = det(B[0],PB   ,B[2])/ ccK;
 	  R b2 = det(B[0],B[1],PB   )/ ccK;
 	  
-	  if( count <5) cout << " S= "<< b0*B[0]+b1*B[1]+b2*B[2] << " s= " << (b0+b1+b2) << " b=" << b0 << " " << b1 << " " << b2 <<  endl;
+	 // if( count <5) cout << " S= "<< b0*B[0]+b1*B[1]+b2*B[2] << " s= " << (b0+b1+b2) << " b=" << b0 << " " << b1 << " " << b2 <<  endl;
 	  pI[df][0]= 0;
 	  lI[df][0]= 0;
 	  cI[df][0]= b0;
@@ -549,7 +557,7 @@ struct  InitTypeOfRTk_2d
 	  cI[df][2]= b2;
 	  
 	}
-      
+/*
       if( count< 5)
 	{
 	  cout << Phat << " " << X << endl; 
@@ -566,6 +574,9 @@ struct  InitTypeOfRTk_2d
 	    }
 	  
 	}
+*/      
+      int ortho0=0,ortho1=1; R s1ortho=1;
+      if(Ortho) { ortho0=1; ortho1=0; s1ortho=-1;}
       
       if (whatd[op_id])
 	{
@@ -575,13 +586,11 @@ struct  InitTypeOfRTk_2d
 	      R2 fd(0.,0.) ;
 	      for(int k=0;k<3;++k) {
 		  fd += (cI[df][k] * L[lI[df][k]]) * phi[pI[df][k]] ;
-		  if( count< 5) cout  <<"+ " << cI[df][k] << " *l" << lI[df][k]  << " *phi" << pI[df][k] << " (" << fd << ")  \t  ";
 	      }
-	      val(df,0,op_id)= fd.x;
-	      val(df,1,op_id)= fd.y;
-	      if( count< 5) cout << " df = " << df << " "<< fd << " P= " << Phat << endl;
+	      
+	      val(df,ortho0,op_id)= fd.x;
+	      val(df,ortho1,op_id)= s1ortho*fd.y;
 	    }
-	  if( count< 5) cout << " val = \n" << val(':',':',op_id) << endl;
 	}
       
       
@@ -599,8 +608,8 @@ struct  InitTypeOfRTk_2d
 		  R2 fd(0.,0.);
 		  for(int k=0;k<3;++k)
 		      fd += cI[df][k] * (DL[lI[df][k]].x * phi[pI[df][k]] + L[lI[df][k]]* Dphix);
-		  val(df,0,op_dx)= fd.x;
-		  val(df,1,op_dx)= fd.y;	      
+		  val(df,ortho0,op_dx)= fd.x;
+		  val(df,ortho1,op_dx)= s1ortho*fd.y;	      
 		}
 	      
 	    }
@@ -612,8 +621,8 @@ struct  InitTypeOfRTk_2d
 		  R2 fd;
 		  for(int k=0;k<3;++k)
 		      fd += cI[df][k] * (DL[lI[df][k]].y * phi[pI[df][k]] + L[lI[df][k]]* Dphiy);
-		  val(df,0,op_dx)= fd.x;
-		  val(df,1,op_dx)= fd.y;	      
+		  val(df,ortho0,op_dx)= fd.x;
+		  val(df,ortho1,op_dx)= s1ortho*fd.y;	      
 		}
 	      
 	    }
@@ -628,11 +637,12 @@ struct  InitTypeOfRTk_2d
     }
     
 // a static variable to add the finite element to freefem++
-    static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2d;    
-    
+    static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2d(false);// RT1    
+    static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2dOrtho(true);// RT1ortho  
 static TypeOfFE_TD_NNS Elm_TD_NNS;
 static AddNewFE FE__TD_NNS("TDNNS",&Elm_TD_NNS); 
 static AddNewFE Elm__TypeOfFE_RT1_2d("RT1",&Elm_TypeOfFE_RT1_2d); 
+static AddNewFE Elm__TypeOfFE_RT1_2dOrtho("RT1Ortho",&Elm_TypeOfFE_RT1_2dOrtho); 
     
 } // FEM2d namespace 
   // --- fin -- 
