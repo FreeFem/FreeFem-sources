@@ -133,178 +133,19 @@ for(int i=0;i<P3h.ndof;++i)
 
  }
 
+{
 assert(err==0);
 
+NewMacro V(u) [u#1,u#2] EndMacro
+NewMacro CheckRT(RT,RTname,xx,yy)
+cout << " Check  ***********" << RTname <<  "\n"; 
+
 {
-fespace Wh1 (Th,RT1);
-fespace Wh0 (Th,RT0);
+fespace Wh1 (Th,RT);
 fespace Ph1 (Th,P1);
 fespace Ph2 (Th,P2dc);
 fespace Kh (Th,P2);
-macro V(u) [u#1,u#2]//
-Wh1 V(u), V(w);
 
-
-for( int j=0;j<8;++j)
-{
-  int i=Wh1(0,j); 
-  u1[] =0;
-  u1[][i]=1;
-  Ph2 U1=u1,U2=u2;
-  U1=u1;
-  U2=u2;
-  cout << j << " " << i << " int K = " << int2d(Th,qforder=3)(u1) << " --- " << int2d(Th,qforder=3)(u2) << "   ---  " << int1d(Th,qforder=2)( u1*N.x + u2*N.y) <<  endl;
-  V(w)=V(u);
-  
-  w1[][i]-=1;
-//  cout << w1[] << endl;
-  cout << " ||w - (\delta_ij)_j=  || " << w1[].linfty << endl;
-  assert( w1[].linfty < 1e-10);
-  macro diff2(op) int2d(Th)(square(op(u1)-op(U1))+square(op(u2)-op(U2))) //
-  assert( diff2( 0+ )) ;
-  assert( diff2(dx)) ;
-  assert( diff2(dy)) ;
-
-
-}
-
-
-
-
-for(int k=0;k<3;++k)
-{
-int i0= Wh0(0,k);
-int j0= Ph1(0,k);
-Wh0 [phix,phiy]=[0,0];
-Ph1 l=0;
-phix[][i0] = 1;
-l[][j0]=1;
-
-cout << j0 << " " <<  12*int2d(Th)( phix*l/area) << " " << 12*int2d(Th)( phiy*l/area) <<endl;
- 
-}
- for( int j=0;j<8;++j)
-{
-  int i=Wh1(0,j);
-  cout << j << " " << i << " " << u1[][i] << endl;
-}
-
-Th=square(5,5,[10*(x+y/3),10*(y-x/3)]);
-V(u)=[0,0];
-V(w)=[0,0];
-
-  func p1=2+x+y*2;
-  func uu1 =  1+x*p1;
-  func uu2 =  2+y*p1;
-
-
- [u1,u2] = [uu1 ,uu2];
- cout << int2d(Th)( square(uu1-u1) )/ Th.area << endl;
- cout << int2d(Th)( square(uu2-u2) )/Th.area << endl;
- plot([u1,u2],wait=1);
-
-for( int i=0;i<Wh1.ndof;++i)
-{
-
-  u1[] =0;
-  u1[][i]=1;
-  V(w)=V(u);
-  w1[][i]-=1;
-  assert( w1[].linfty < 1e-10);
-}
-
-
-}
-
-{
-fespace Wh1 (Th,RT1Ortho);
-fespace Wh0 (Th,RT0Ortho);
-fespace Ph1 (Th,P1);
-fespace Ph2 (Th,P2dc);
-fespace Kh (Th,P2);
-macro V(u) [u#1,u#2]//
-Wh1 V(u), V(w);
-
-
-for( int j=0;j<Wh1.ndofK;++j)
-{
-  int i=Wh1(0,j); 
-  u1[] =0;
-  u1[][i]=1;
-  Ph2 U1=u1,U2=u2;
-  U1=u1;
-  U2=u2;
-  cout << j << " " << i << " int K = " << int2d(Th,qforder=3)(u1) << " --- " << int2d(Th,qforder=3)(u2) << "   ---  " << int1d(Th,qforder=2)( u1*N.x + u2*N.y) <<  endl;
-  V(w)=V(u);
-  
-  w1[][i]-=1;
-  if(w1[].linfty > 1e-10) cout << j << " " << i << " diff = "   << w1[] << endl;
-  cout << " ||w - (\delta_ij)_j=  || " << w1[].linfty << endl;
-  assert( w1[].linfty < 1e-10);
-  macro diff2(op) int2d(Th)(square(op(u1)-op(U1))+square(op(u2)-op(U2))) //
-  assert( diff2( 0+ )) ;
-  assert( diff2(dx)) ;
-  assert( diff2(dy)) ;
-
-
-}
-
-
-
-
-for(int k=0;k<3;++k)
-{
-int i0= Wh0(0,k);
-int j0= Ph1(0,k);
-Wh0 [phix,phiy]=[0,0];
-Ph1 l=0;
-phix[][i0] = 1;
-l[][j0]=1;
-
-cout << j0 << " " <<  12*int2d(Th)( phix*l/area) << " " << 12*int2d(Th)( phiy*l/area) <<endl;
- 
-}
- for( int j=0;j<8;++j)
-{
-  int i=Wh1(0,j);
-  cout << j << " " << i << " " << u1[][i] << endl;
-}
-
-Th=square(5,5,[10*(x+y/3),10*(y-x/3)]);
-V(u)=[0,0];
-V(w)=[0,0];
-
-  func p1=2+x+y*2;
-  func uu1 =  1+-y*p1;
-  func uu2 =  2+x*p1;
-
-
- [u1,u2] = [uu1 ,uu2];
- cout << int2d(Th)( square(uu1-u1) )/ Th.area << endl;
- cout << int2d(Th)( square(uu2-u2) )/Th.area << endl;
- plot([u1,u2],wait=1);
-
-for( int i=0;i<Wh1.ndof;++i)
-{
-
-  u1[] =0;
-  u1[][i]=1;
-  V(w)=V(u);
-  w1[][i]-=1;
-  assert( w1[].linfty < 1e-10);
-}
-
-
-}
-cout << "BDM1Ortho  \n"; 
-
-{
-fespace Wh1 (Th,BDM1Ortho);
-fespace Wh0 (Th,RT0Ortho);
-fespace Ph1 (Th,P1);
-fespace Ph2 (Th,P2dc);
-fespace Kh (Th,P2);
-macro V(u) [u#1,u#2]//
 Wh1 V(u), V(w);
 
 
@@ -323,7 +164,7 @@ for( int j=0;j<Wh1.ndofK;++j)
   if(w1[].linfty > 1e-10) { w1[][i]+=1;cout << j << " " << i << " diff = "   << w1[] << endl;}
   cout << " ||w - (\delta_ij)_j=  || " << w1[].linfty << endl;
   assert( w1[].linfty < 1e-10);
-  macro diff2(op) int2d(Th)(square(op(u1)-op(U1))+square(op(u2)-op(U2))) //
+  NewMacro diff2(op) int2d(Th)(square(op(u1)-op(U1))+square(op(u2)-op(U2))) EndMacro 
   assert( diff2( 0+ )) ;
   assert( diff2(dx)) ;
   assert( diff2(dy)) ;
@@ -332,33 +173,13 @@ for( int j=0;j<Wh1.ndofK;++j)
 }
 
 
-
-
-for(int k=0;k<3;++k)
-{
-int i0= Wh0(0,k);
-int j0= Ph1(0,k);
-Wh0 [phix,phiy]=[0,0];
-Ph1 l=0;
-phix[][i0] = 1;
-l[][j0]=1;
-
-cout << j0 << " " <<  12*int2d(Th)( phix*l/area) << " " << 12*int2d(Th)( phiy*l/area) <<endl;
- 
-}
- for( int j=0;j<8;++j)
-{
-  int i=Wh1(0,j);
-  cout << j << " " << i << " " << u1[][i] << endl;
-}
-
 Th=square(5,5,[10*(x+y/3),10*(y-x/3)]);
 V(u)=[0,0];
 V(w)=[0,0];
 
   func p1=2+x+y*2;
-  func uu1 =  1+-y*p1;
-  func uu2 =  2+x*p1;
+  func uu1 =  1+xx*p1;
+  func uu2 =  2+yy*p1;
 
 
  [u1,u2] = [uu1 ,uu2];
@@ -376,5 +197,12 @@ for( int i=0;i<Wh1.ndof;++i)
   assert( w1[].linfty < 1e-10);
 }
 
+cout << " End  Check  ***********" << RTname <<  " Ok .... \n"; 
+}
+EndMacro
 
+CheckRT(BDM1,"BDM1",x,y)
+CheckRT(BDM1,"BDM1Ortho",-y,x)
+CheckRT(RT1,"RT11",x,y)
+CheckRT(RT1Ortho,"RT1Ortho",-y,x)
 }
