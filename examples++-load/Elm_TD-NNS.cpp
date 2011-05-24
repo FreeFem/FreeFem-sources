@@ -50,40 +50,36 @@ typedef void VOID;
 namespace  Fem2D {
   
   // ------ P2 TD_NNS  
-  class TypeOfFE_TD_NNS : public  TypeOfFE { public:  
+  class TypeOfFE_TD_NNS0 : public  TypeOfFE { public:  
     static int Data[];
     // double Pi_h_coef[];
     
-    TypeOfFE_TD_NNS(): TypeOfFE(3+3,
+    TypeOfFE_TD_NNS0(): TypeOfFE(3,
 				  3,
 				      Data,
-				      2,
 				      1,
-				      3+9, // nb coef to build interpolation
-				      4, // np point to build interpolation
+				      1,
+				      9, // nb coef to build interpolation
+				      3, // np point to build interpolation
 				      0)
     {  
 	
 
       const R c3=1./3.;
-      const R2 Pt[] = { R2(c3,c3),R2(0.5,0.5), R2(0,0.5),R2(0.5,0)}; 
+      const R2 Pt[] = {R2(0.5,0.5), R2(0,0.5),R2(0.5,0)}; 
       // for the 3 vertices 6 coef 
-      P_Pi_h[0]=Pt[0];
+     // P_Pi_h[0]=Pt[0];
 	int kk=0;   
-      for (int c=0;c<3;c++)
-	{ 	  
-	  pij_alpha[kk++]= IPJ(3+c,0,c);
-	}
-    
+     
       for (int e=0;e<3;++e)
 	{ // point d'integration sur l'arete e 
-	  P_Pi_h[e+1]= Pt[e+1];
-	  pij_alpha[kk++]= IPJ(e,1+e,0);   
-	  pij_alpha[kk++]= IPJ(e,1+e,1); 	  
-	  pij_alpha[kk++]= IPJ(e,1+e,2);   
+	  P_Pi_h[e]= Pt[e];
+	  pij_alpha[kk++]= IPJ(e,e,0);   
+	  pij_alpha[kk++]= IPJ(e,e,1); 	  
+	  pij_alpha[kk++]= IPJ(e,e,2);   
 	 
 	}
-      assert(P_Pi_h.N()==4);
+      assert(P_Pi_h.N()==3);
       assert(pij_alpha.N()==kk);
 
      }
@@ -91,24 +87,21 @@ namespace  Fem2D {
     void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const;
   } ;
   //                     on what     nu df on node node of df    
- int TypeOfFE_TD_NNS::Data[]={
-   3,4,5,  6,6,6 ,//  support on what 
-   0,0,0,  0,1,2,// df on node 
-   0,1,2,  3,3,3,// th node of df 
-   0,0,0,  0,0,0,//  df previou FE
-   0,1,2,  3,4,5, //  which df on prev 
+ int TypeOfFE_TD_NNS0::Data[]={
+   3,4,5,  //  support on what 
+   0,0,0,  // df on node 
+   0,1,2,  // th node of df 
+   0,0,0,  //  df previou FE
+   0,1,2,  //  which df on prev 
    0,0,0,
    0,0,0, 
-   6,6,6 
+   3,3,3 
 };
 
-void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
+void TypeOfFE_TD_NNS0::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
   {
     const Triangle & T(K.T);
     int k=0;
-    // coef pour les 3 sommets  fois le 2 composantes 
-    for (int i=0;i<3;i++)
-      v[k++]= T.area; 
     //   integration sur les aretes 
     for (int i=0;i<3;i++)
       {
@@ -118,10 +111,10 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
         v[k++]= 2*N.y*N.x;
 	v[k++]= N.y*N.y;
       }
-    assert(k==3+9); 
+    assert(k==9); 
   }
   
-  void TypeOfFE_TD_NNS::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+  void TypeOfFE_TD_NNS0::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
   {
     typedef double R;
     //R2 A(K[0]), B(K[1]),C(K[2]);
@@ -150,6 +143,18 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
 	S[2][i]= -Rl[i1].y*Rl[i2].y;
 	
       }
+    val=0; 
+    KN<bool> wd(KN_<const bool>(whatd,last_operatortype));
+    
+    if (wd[op_id])
+      {
+	for(int c=0;c<3;++c)
+	    for(int i=0;i<3;++i){
+		val(i,c,op_id)    = S[c][i]; //  (c3-ll[i])/c3 
+	    }
+      }
+    
+    /*
     // s[.] [i] = 
     { //     //  compute the inv of S with lapack 
     for(int j=0;j<3;++j)
@@ -255,7 +260,7 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
       }	  
 	  
 	  
-
+*/
     
   }
 
@@ -264,30 +269,29 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
     class TypeOfFE_TD_NNS1 : public  TypeOfFE { public:  
 	static int Data[];
 	// double Pi_h_coef[];
-	const QuadratureFormular1d QFE;
+	const QuadratureFormular1d & QFE;
 	const  GQuadratureFormular<R2> & QFK;
 	
-	TypeOfFE_TD_NNS1(): TypeOfFE(3*2+3*3,
+	TypeOfFE_TD_NNS1(): TypeOfFE(3*2+3,
 				    3,
 				    Data,
 				    2,
 				    1,
-				    3*3*QFE.n+QFK.n*3, // nb coef to build interpolation
-				    3*QFE.n+QFK.n, // np point to build interpolation
+				    3+6*3*QF_GaussLegendre2.n, // nb coef to build interpolation
+				 QuadratureFormular_T_1.n+3*QF_GaussLegendre2.n, // np point to build interpolation
 				    0),
-	 QFE(-1+2*2,2,GaussLegendre(2),true), QFK(QuadratureFormular_T_5)	
+	 QFE(QF_GaussLegendre2), QFK(QuadratureFormular_T_1)	
 	{  
 	    
 	    
-	   
 	    int kk=0,kp=0;
 	    for(int p=0;p<QFK.n;++p)
 	      {
 		P_Pi_h[kp++]=QFK[p];
 	        for (int c=0;c<3;c++)
-	      	  pij_alpha[kk++]= IPJ(3*2+c,p,c);
+		    pij_alpha[kk++]= IPJ(3*2+c,p,c);
 	      }
-	   
+	    
 	    for (int e=0;e<3;++e) 
 	      {
 		for(int p=0;p<QFE.n;++p)
@@ -301,18 +305,18 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
 	    
 	    
 	    for (int e=0;e<3;++e)
-	      for(int p=0;p<QFE.n;++p)	
-	      { 
-		int pp=QFK.n+ e*QFE.n+p;
-		pij_alpha[kk++]= IPJ(2*e+0,pp,0);  
-		pij_alpha[kk++]= IPJ(2*e+1,pp,0);  
-		pij_alpha[kk++]= IPJ(2*e+0,pp,1);  
-		pij_alpha[kk++]= IPJ(2*e+1,pp,1);  
-		pij_alpha[kk++]= IPJ(2*e+0,pp,2);  
-		pij_alpha[kk++]= IPJ(2*e+1,pp,2);  
-		    
-		  
-	      }
+		for(int p=0;p<QFE.n;++p)	
+		  { 
+		      int pp=QFK.n+ e*QFE.n+p;
+		      pij_alpha[kk++]= IPJ(2*e+0,pp,0);  
+		      pij_alpha[kk++]= IPJ(2*e+1,pp,0);  
+		      pij_alpha[kk++]= IPJ(2*e+0,pp,1);  
+		      pij_alpha[kk++]= IPJ(2*e+1,pp,1);  
+		      pij_alpha[kk++]= IPJ(2*e+0,pp,2);  
+		      pij_alpha[kk++]= IPJ(2*e+1,pp,2);  
+		      
+		      
+		  }
 	    ffassert(P_Pi_h.N()==kp);
 	    ffassert(pij_alpha.N()==kk);
 	    
@@ -322,34 +326,36 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
     } ;
     //                     on what     nu df on node node of df    
     int TypeOfFE_TD_NNS1::Data[]={
-	3,3, 4,4, 5,5, 6,6,6 ,6,6,6, 6,6,6 ,//  support on what 
-	0,1, 0,1, 0,1, 0,1,2, 0,1,2, 0,1,2,// df on node 
-	0,0, 1,1, 2,2, 3,3,3, 3,3,3, 3,3,3, // th node of df 
-	0,0, 0,0, 0,0, 0,0,0, 0,0,0,  0,0,0,//  df previou FE
-	0,1, 2,3, 4,5, 6,7,9, 9,10,11, 12,13,14,//  which df on prev 
+	3,3, 4,4, 5,5, 6,6,6,//  support on what 
+	0,1, 0,1, 0,1, 0,1,2, // df on node 
+	0,0, 1,1, 2,2, 3,3,3,  // th node of df 
+	0,0, 0,0, 0,0, 0,0,0, //  df previou FE
+	0,1, 2,3, 4,5, 6,7,8, //  which df on prev 
 	0,0,0,
 	0,0,0, 
-	15,15,15 
+	9,9,9 
     };
     
     void TypeOfFE_TD_NNS1::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
     {
+
       const Triangle & T(K.T);
       int k=0;
       // coef pour les 3 sommets  fois le 2 composantes 
-      for (int i=0;i<3;i++)
+     // for (int i=0;i<3;i++)
 	  for (int p=0;p<QFK.n;++p) 	
 	    { // wrong ... 
 		// 3 -1 -1    
 		// -1 3 -1    / 4  
 		// -1 -1 3 
-		R l[3]; QFK[p].toBary(l);
+		/*R l[3]; QFK[p].toBary(l);
 		R c0 = QFK[p].a * T.area/4*(3*l[0]-l[1]-l[2]);
 		R c1 = QFK[p].a * T.area/4*(l[0]+3*l[1]-l[2]);
-		R c2 = QFK[p].a * T.area/4*(l[0]-l[1]+3*l[2]);
-	      v[k++]=c0 * T.area; 
-	      v[k++]=c1 * T.area; 
-	      v[k++]=c2 * T.area; 
+		R c2 = QFK[p].a * T.area/4*(l[0]-l[1]+3*l[2]);*/
+		R cc=QFK[p].a * T.area;
+		v[k++]=cc; // * T.area; 
+		v[k++]=cc;// * T.area; 
+		v[k++]=cc;// * T.area; 
 	    }
       //   integration sur les aretes 
       for (int i=0;i<3;i++)
@@ -374,13 +380,11 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
 	  v[k++]= cc1*N.y*N.y;
 	}
 	}
-      assert(k==3+9); 
-    
+      ffassert(pij_alpha.N()==k);    
     } 
     void TypeOfFE_TD_NNS1::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
     {
       typedef double R;
-      //R2 A(K[0]), B(K[1]),C(K[2]);
       R l0=1-P.x-P.y,l1=P.x,l2=P.y;
       const R c3= 1./3.;
       R ll3[3]={l0-c3,l1-c3,l2-c3};
@@ -397,8 +401,12 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
        s => symetrise ..
        */
       R S[3][3],S1[3][3];
+      int ei0[3]={1,2,0};
+      int ei1[3]={ 2,0,1};
+      
       for(int i=0;i<3;++i)
 	{
+	  if(K.EdgeOrientation(i) < 0) Exchange(ei0[i],ei1[i]);
 	  int i1=(i+1)%3;
 	  int i2=(i+2)%3;
 	  S[0][i]= -Rl[i1].x*Rl[i2].x;
@@ -465,8 +473,10 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
 	{
 	  for(int c=0;c<3;++c)
 	      for(int i=0;i<3;++i){
-		  val(i,c,op_id)    = S[c][i]*(c3-ll[i])/c3; //  (c3-ll[i])/c3 
-		  val(i+3,c,op_id)  = BB[c][i];	      
+		  
+		  val(2*i,c,op_id)      = S[c][i]*(ll[ei0[i]]-ll[i]);  
+		  val(2*i+1,c,op_id)    = S[c][i]*(ll[ei1[i]]-ll[i]);  
+		  val(i+6,c,op_id)  = BB[c][i];	      
 	      }
 	}
       if (wd[op_dx])
@@ -481,8 +491,9 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
 	  for(int c=0;c<3;++c)
 	      for(int i=0;i<3;++i)
 		{
-		  val(i  ,c,op_dx)    = -S[c][i]*Dl[i].x/c3;
-		  val(i+3,c,op_dx)  = BB[c][i];	      
+		  val(2*i,c,op_dx)      = S[c][i]*(Dl[ei0[i]].x-Dl[i].x); 
+		  val(2*i+1,c,op_dx)    = S[c][i]*(Dl[ei1[i]].x-Dl[i].x); 
+		  val(i+6,c,op_dx)  = BB[c][i];	      
 		  
 		}
 	  
@@ -502,8 +513,9 @@ void TypeOfFE_TD_NNS::Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
 	    for(int c=0;c<3;++c)
 		for(int i=0;i<3;++i)
 		  {
-		    val(i  ,c,op_dy)    = -S[c][i]*Dl[i].y/c3;
-		    val(i+3,c,op_dy)  = BB[c][i];	      
+		    val(2*i,c,op_dy)      = S[c][i]*(Dl[ei0[i]].y-Dl[i].y); 
+		    val(2*i+1,c,op_dy)    = S[c][i]*(Dl[ei1[i]].y-Dl[i].y); 
+		    val(i+6,c,op_dy)  = BB[c][i];	      
 		    
 		  }
 	    
@@ -600,10 +612,12 @@ struct  InitTypeOfRTk_2d
 		  
 		 P_Pi_h[i++]= B*(QFE[p].x)+ A*(1.-QFE[p].x);// X=0 => A  X=1 => B;       
 	      }
+	    int i6=6,i7=7;
+	    if(Ortho) Exchange(i6,i7); // x,y -> -y, x 
 	     for (int p=0;p<QFK.n;++p) 
 	       {
-		 pij_alpha[kkk++]= IPJ(6,i,0);
-		 pij_alpha[kkk++]= IPJ(7,i,1);
+		 pij_alpha[kkk++]= IPJ(i6,i,0);
+		 pij_alpha[kkk++]= IPJ(i7,i,1);
 		 P_Pi_h[i++]= QFK[p]; 
 	       }
 	    //cout << kkk << " kkk == " << this->pij_alpha.N() << endl;
@@ -635,9 +649,11 @@ struct  InitTypeOfRTk_2d
 		    v[k++]= cc1*E.y; 
 		  }
 	    }
+	    R sy= Ortho ? -1 : 1; 
+
 	   for (int p=0;p<QFK.n;++p) 	
 	     {
-	       v[k++]=QFK[p].a * T.area; 
+	       v[k++]=sy*QFK[p].a * T.area; 
 	       v[k++]=QFK[p].a * T.area; 
 	     }
 	 // cout << " k= " << k << " == " << this->pij_alpha.N() << endl;
@@ -895,7 +911,7 @@ struct  InitTypeOfRTk_2d
 // a static variable to add the finite element to freefem++
     static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2d(false);// RT1    
     static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2dOrtho(true);// RT1ortho  
-static TypeOfFE_TD_NNS Elm_TD_NNS;
+static TypeOfFE_TD_NNS0 Elm_TD_NNS;
 static TypeOfFE_TD_NNS1 Elm_TD_NNS1;
 static AddNewFE FE__TD_NNS("TDNNS0",&Elm_TD_NNS); 
 static AddNewFE FE__TD_NNS1("TDNNS1",&Elm_TD_NNS1);     
