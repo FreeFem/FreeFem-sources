@@ -184,6 +184,7 @@ CBLAS:CBLAS/fait
 
 CBLAS/fait: $(CBLAS_TGZ)
 	tar xvzf $(CBLAS_TGZ)
+	cp CBLAS/include/*.h  CBLAS/src
 	touch CBLAS/fait
 $(CBLAS_SOURCES): CBLAS/fait
 
