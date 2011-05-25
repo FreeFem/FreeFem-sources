@@ -4,6 +4,8 @@ load "Element_Mixte"
 
 macro DD(f,hx,hy) ( (f(x1+hx,y1+hy)-f(x1-hx,y1-hy))/(2*(hx+hy))) //
 macro dn(f) ( N.x*dx(f)+N.y*dy(f)) //
+macro ccn(f) ( N.x*f#1+N.y*f#2) //
+macro cctau(f) ( -N.y*f#1+N.x*f#2) //
 macro dnn(f) ( N.x*N.x*f#11+2.*N.y*N.x*f#12+ N.y*N.y*f#22) //
 mesh Th=square(1,1,flags=1);//,[10*(x+y/3),10*(y-x/3)]);
 Th=trunc(Th,(x+y)<1.1);plot(Th,wait=1);
@@ -77,7 +79,7 @@ cout << a11[].n << " a = "<< a11[] <<endl;
  cout << " 00 = " << int2d(Th)(square(a11-f11)) << endl;
  cout << " 00 = " << int2d(Th)(square(a22-f22)) << endl;
  cout << " 00 = " << int2d(Th)(square(a12-f12)) << endl;
-plot(a11,wait=1);
+//plot(a11,wait=1);
 
 //Th=square(1,1,[10*(x+y/3),10*(y-x/3)]);
 //it1=Th(x1,y1).nuTriangle;
@@ -104,8 +106,8 @@ for (int i=0;i<Vh.ndofK;++i)
   Zh c11=a11,c12=a12,c22=a22;
  
     
-  plot(a12,wait=1,cmm="a12 "+i );
-  plot(c12,wait=1,cmm="c12 "+i );
+ // plot(a12,wait=1,cmm="a12 "+i );
+ // plot(c12,wait=1,cmm="c12 "+i );
   diff(err, ,c11,a11," ");
   diff(err, ,c12,a12," ");
   diff(err, ,c22,a22," ");
@@ -137,7 +139,7 @@ for(int i=0;i<P3h.ndof;++i)
 assert(err==0);
 
 NewMacro V(u) [u#1,u#2] EndMacro
-NewMacro CheckRT(RT,RTname,xx,yy)
+NewMacro CheckRT(RT,RTname,xx,yy,dxxx,V)
 cout << " Check  ***********" << RTname <<  "\n"; 
 
 {
@@ -145,10 +147,10 @@ fespace Wh1 (Th,RT);
 fespace Ph1 (Th,P1);
 fespace Ph2 (Th,P2dc);
 fespace Kh (Th,P2);
-
+fespace Eh0 (Th,P1nc);
 Wh1 V(u), V(w);
 
-
+int err1=0;
 for( int j=0;j<Wh1.ndofK;++j)
 {
   int i=Wh1(0,j); 
@@ -159,7 +161,15 @@ for( int j=0;j<Wh1.ndofK;++j)
   U2=u2;
   cout << j << " " << i << " int K = " << int2d(Th,qforder=3)(u1) << " --- " << int2d(Th,qforder=3)(u2) << "   ---  " << int1d(Th,qforder=2)( u1*N.x + u2*N.y) <<  endl;
   V(w)=V(u);
-  
+  varf veeee(uu,E) = intalledges(Th)( (nTonEdge==2) *E*( jump(dxxx(u))));
+  real ddcc=intalledges(Th)( (nTonEdge==2) *square( jump(dxxx(u))));
+  if(ddcc > 1e-10) {err1++;  cout << j<< " " << i << " err disc " << ddcc << endl;
+  Eh0 eee; eee[]=veeee(0,Eh0);
+  plot(eee,cmm=" jump ",fill=1,wait=1); 
+   mesh Tg=trunc(Th,1,split=5);
+  fespace WWh(Tg,P2dc);
+  WWh  gu1=u1,gu2=u2;
+   plot([gu1,gu2],wait=1,cmm=" dof "+j+" K=0 ");}
   w1[][i]-=1;
   if(w1[].linfty > 1e-10) { w1[][i]+=1;cout << j << " " << i << " diff = "   << w1[] << endl;}
   cout << " ||w - (\delta_ij)_j=  || " << w1[].linfty << endl;
@@ -171,7 +181,7 @@ for( int j=0;j<Wh1.ndofK;++j)
 
 
 }
-
+assert(err1==0);
 
 Th=square(5,5,[10*(x+y/3),10*(y-x/3)]);
 V(u)=[0,0];
@@ -201,8 +211,9 @@ cout << " End  Check  ***********" << RTname <<  " Ok .... \n";
 }
 EndMacro
 
-CheckRT(BDM1,"BDM1",x,y)
-CheckRT(BDM1,"BDM1Ortho",-y,x)
-CheckRT(RT1,"RT11",x,y)
-CheckRT(RT1Ortho,"RT1Ortho",-y,x)
+CheckRT(RT1,"RT11",x,y,ccn,V)
+CheckRT(RT1Ortho,"RT1Ortho",-y,x,cctau,V)
+CheckRT(BDM1,"BDM1",x,y,ccn,V)
+CheckRT(BDM1Ortho,"BDM1Ortho",-y,x,cctau,V)
+
 }

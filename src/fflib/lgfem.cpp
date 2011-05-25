@@ -5116,9 +5116,26 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
   TEF2dto3d[FindFE2("P0")]=&DataFE<Mesh3>::P0;
   TEF2dto3d[FindFE2("P1b")]=&P1bLagrange3d;
   TEF2dto3d[FindFE2("RT0")]=&RT03d;
-    
-}   
+ /*
+// add may 2011 F. HEcHt   
+  //    in progress ?????  to set varaible to store FinitELEMEnt type.  
+    zzzfff->Add("FiniteElement",atype<TypeOfFE*>());
+    zzzfff->Add("FiniteElement3",atype<TypeOfFE3*>());
 
+    TheOperators->Add("=",new OneOperator2<TypeOfFE*,TypeOfFE*,TypeOfFE*>(&setFE<1>) );    
+    TheOperators->Add("<-",new OneOperator2_<pfes*,pfes*,pfes>(&setFE<0>));
+  
+  */
+}
+
+/*   in progress ?????  to set varaible to store FinitELEMEnt type.  
+template<int init>
+TypeOfFE* setFE(TypeOfFE* a,TypeOfFE* b) 
+{
+    if(init) 
+    return a;    
+}
+*/
 void clean_lgfem()
 {
   for (int i=0;i<kTypeSolveMat;++i)

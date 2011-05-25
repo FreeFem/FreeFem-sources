@@ -1,16 +1,30 @@
 //  add some mixte finite element  
+// RT1 et BDM1  conforme in H(div) space,  ie u.n  continuous (n = is the normal) 
+// RT1Ortho , BDM1 are conforme in H(curl) space ie u.t  continuous  (t = is the tangent) 
 //  RT1 , RT1Ortho  ( Neledec type I order 1)
-//  BDM1 (Brezzi, Douglas, Marini) ,  , BDM1rtho  ( Neledec type Iï order 1)
-//   TDNNS  
-// DM
+//  BDM1 (Brezzi, Douglas, Marini) ,  , BDM1Ortho  ( Neledec type Iï order 1)
+// the 
+//   TDNNS1   finite element for symetrix 2x2 matrix conforme in H(div div)
+//    : Snn are continious 
+// See Thesis of Astrid Sabine Sinwel, A New Family of Mixed Finite Elements for Elasticity, 2009
+//  http://www.numa.uni-linz.ac.at/Teaching/PhD/Finished/sinwel-diss.pdf 
+//       JOHANNES KEPLER UNIVERSITA,T LINZ
+//  Thesis of Sabine Zaglmayr, High Order Finite Element Methods for Electromagnetic Field Computation, 2006
+//     JOHANNES KEPLER UNIVERSITA,T LINZ
+// http://www.numerik.math.tugraz.at/~zaglmayr/pub/szthesis.pdf
+// 
 // F. Hecht  May 2011
-// ----------------------------
-
-//             NORTH-HOLLAND 
-// -----------------------  related files: 
-//  to check  and validate  : test_MIXTE.edp 
-//  to get a real example   :  bilapMorley.edp
 // ------------------------------------------------------------
+//   test 
+/*
+
+--  edp script associed: 
+ LaplaceRT1.edp
+ lame-TD-NSS.edp
+ test-ElementMixte.edp
+ 
+ */
+
 //ff-c++-LIBRARY-dep:   lapack
 //ff-c++-LIBRARY-dep:   blas
 
@@ -973,7 +987,7 @@ namespace  Fem2D {
     
   int  TypeOfFE_BDM1_2d::Data[]={
 	3,3, 4,4, 5,5,  //  support on what 
-	0,1, 0,1, 1,0,  // df on node 
+	0,1, 0,1, 0,1,  // df on node 
 	0,0, 1,1, 2,2,  // th node of df 
 	0,0,0, 0,0,0, //  df previou FE
 	0,1,2,3,4,5,  //  which df on prev 
