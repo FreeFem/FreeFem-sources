@@ -1,5 +1,8 @@
-   - add TD-NSS1 (in progress) Elm_TD-NNS.cpp file 
-   - add RT1 and Rt1ortho finite element (done) 
+v 3.13 (25 may 2011)   
+   - add (load "Element-Mixte")  NEW FINITE ELEMENT 2D
+         TDNSS1    sym matrix 2x2 conforme in $\{H(div div) / div(div s)) \in H^{-1} \}$
+         RT1 and BDM1  conforme in H(div) Raviert Thomas of Degre 1 and Bezzi, Douglas, Marini 
+         RT1 and BDM1ortho   conforme in H(curl) 2 Nedelec Finite Elemeny
 v 3.12-3 
    - new finite element in 2d for elasticity in test. TD-NSS0 (see these of Astrid Sabine Sinwel)
       A New Family of Mixed Finite Elements for Elasticity

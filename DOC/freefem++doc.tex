@@ -31,7 +31,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.12-2}
+\def\VERSION{3.13}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -3319,46 +3319,46 @@ defines a new type of finite element space, see Section \refSec{Finite Elements}
  The names \ttCC{x,y,z,label,region,P,N,nu_triangle...} are reserved words used to link
 the language to the finite element tools:
 \begin{description}
-    \itemtt[x]  is the $x$ coordinate of the current point (real value) \index{x}
-    \itemtt[y]  is the $y$ coordinate  of the current point (real value) \index{y}
-    \itemtt[z]  is the $z$ coordinate of the current point (real value) \index{z}, but is reserved for future use.
+    \itemtt[x]  is the $x$ coordinate of the current point (real value) \index{x}\index{global!x}
+    \itemtt[y]  is the $y$ coordinate  of the current point (real value) \index{y}\index{global!y}
+    \itemtt[z]  is the $z$ coordinate of the current point (real value) \index{z}\index{global!z}
 \itemtt[label] contains the label number of a boundary if the  current point is
-on a boundary, 0 otherwise  (int value). \index{label}
-    \item[region]   returns the region number of  the current point (x,y) (int value). \index{region}
+on a boundary, 0 otherwise  (int value). \index{label}\index{global!label}
+    \item[region]   returns the region number of  the current point (x,y) (int value). \index{region}\index{global!region}
 \itemtt[P]  gives the  current point  ($\R^{2}$ value. \index{P}).
 By \texttt{P.x}, \texttt{P.y}, we can get the $x,\, y$ components of \texttt{P} .
 Also \texttt{P.z} is reserved and can be used in 3D.
     \itemtt[N]  gives the outward unit normal vector at the  current point if it is on a
-     curve defined by \texttt{border} ($\R^{3}$ value).
+     curve defined by \texttt{border} ($\R^{3}$ value).\index{global!N}
 \texttt{N.x} and \texttt{N.y} are $x$ and $y$ components of the normal vector.
 \texttt{N.z} is reserved. \index{N}.
-    \itemtt[lenEdge] gives the length of the current edge\index{lenEdge}\\
+    \itemtt[lenEdge] gives the length of the current edge\index{lenEdge}\index{global!lenEdge}\\
     \[
     \texttt{lenEdge} = |q^i-q^j|\quad \textrm{if the current edge is }[q^i,q^j]
     \]
-    \itemtt[hTriangle] gives the size of the current triangle \index{hTriangle}
+    \itemtt[hTriangle] gives the size of the current triangle \index{hTriangle}\index{global!hTriangle}
 
     \itemtt[nuTriangle] gives the index of the current triangle (int value).
-    \index{nuTriangle}
+    \index{nuTriangle}\index{global!nuTriangle}
 
     \itemtt[nuEdge]  gives the index of the current edge in the triangle (int value).
-    \index{nuEdge}
+    \index{nuEdge}\index{global!nuEdge}
 
     \itemtt[nTonEdge] gives the number of adjacent triangle of the current
-    edge (integer ).\index{nTonEdge}
+    edge (integer ).\index{nTonEdge}\index{global!nTonEgde}
 
-    \itemtt[area] give the area of the current triangle (real value). \index{area}
+    \itemtt[area] give the area of the current triangle (real value). \index{area}\index{global!area}
 
-    \itemtt[volume] give the volume of the current tetrahedra (real value). \index{volume}
+    \itemtt[volume] give the volume of the current tetrahedra (real value). \index{volume}\index{global!volume}
 
 \itemtt[cout]  is the standard output device (default is console).
 On MS-Windows, the standard output is only the console, at this time.
   \Ostream \index{cout}
-\itemtt[cin]  is the standard input device (default is keyboard). (\Istream value). \index{cin}
-\itemtt[endl] adds an "end of line" to the input/output flow.
-\itemtt[true]   means ``true'' in  \Bool\  value. \index{true}
-\itemtt[false]  means ``false'' in  \Bool\ value. \index{false}
-\itemtt[pi]   is the \Real value  ~approximation value of $\pi$.\index{pi}
+\itemtt[cin]  is the standard input device (default is keyboard). (\Istream value). \index{cin}\index{global!cin}
+\itemtt[endl] adds an "end of line" to the input/output flow.\index{global!endl}
+\itemtt[true]   means ``true'' in  \Bool\  value. \index{true}\index{global!true}
+\itemtt[false]  means ``false'' in  \Bool\ value. \index{false}\index{global!false}
+\itemtt[pi]   is the \Real value  ~approximation value of $\pi$.\index{pi}\index{global!pi}
 \end{description}
 
 \subsection{System Commands}
@@ -6146,7 +6146,7 @@ plot(Th,ps="ThreePoint.eps",bw=1); // Fig. \ref{ThreePoint}
 %%%  3d
 
 
-\subsection{How to change the label of elements and border elements of a mesh in FreeFem++ ?}
+\subsection{How to change the label of elements and border elements of a mesh}
 \label{sec.changelab.gluemesh}
 Changing the label of elements and border elements will be done using the keyword {\bf{change}}. The parameters for this
 command line are for a two dimensional and dimensional case:
@@ -7854,6 +7854,7 @@ types of finite element are: \index{type of finite element}
      \end{equation}
      where
      $P_{2}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 2$.
+    
      \item[P2b] piecewise $P_{2} $ continuous finite element  plus bubble,
      \index{P2|textbf}\index{fespace!P2}
      \begin{equation}
@@ -7870,7 +7871,86 @@ types of finite element are: \index{type of finite element}
     Warning, due to interpolation problem, the degree of freedom is not the six  P2 nodes  but six  nodes  move
      inside with $T(X)= G + .99  (X-G) $ where $G$ is the barycenter, (version 2.24-4).
 
-     \item[RT0,RT03d]  Raviart-Thomas finite element of degree $0$.
+      \item[P3] piecewise $P_{3}$  continuous finite element (2d)  (need \ttCC{@load "Element_P3"}, 
+     \index{P3|textbf}\index{fespace!P3}
+     \begin{equation}
+     P2_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
+        \quad v_{|K} \in P_{3} \right.\right\}
+     \end{equation}
+     where
+     $P_{3}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$.
+     
+      \item[P3dc] piecewise $P_{3}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_P3dc"}, 
+     \index{P3dc|textbf}\index{fespace!P3dc}
+     \begin{equation}
+     P2_{h} = \left\{ v \in L^2(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
+        \quad v_{|K} \in P_{3} \right.\right\}
+     \end{equation}
+     where
+     $P_{3}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$.
+
+      \item[P4] piecewise $P_{4}$  continuous finite element (2d)  (need \ttCC{@load "Element_P4"}, 
+     \index{P4|textbf}\index{fespace!P4}
+     \begin{equation}
+     P2_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
+        \quad v_{|K} \in P_{4} \right.\right\}
+     \end{equation}
+     where
+     $P_{4}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 4$.
+     
+      \item[P4dc] piecewise $P_{4}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_P4dc"}, 
+     \index{P4dc|textbf}\index{fespace!P4dc}
+     \begin{equation}
+     P2_{h} = \left\{ v \in L^2(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
+        \quad v_{|K} \in P_{3} \right.\right\}
+     \end{equation}
+     where
+     $P_{4}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$.
+
+
+
+     \item[Morlay] piecewise $P_{2}$  non conform finite element (2d)  (need \ttCC{@load "Morley"})
+     \index{Morlay|textbf}\index{fespace!Morlay}
+     \begin{equation}
+     P2_{h} = \left\{ v \in L^2(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
+        \quad v_{|K} \in P_{3}, 
+        \left\{\begin{array}{c} 
+        v \mbox{ continuous  at vertices,}\\
+        \p_n{v} \mbox{ continuous  at middle of edge,} 
+        \end{array}\right. 
+         \right.\right\}
+     \end{equation}
+     where
+     $P_{2}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$.
+
+      Warning to build the interplant of a function $u$ (scalar) for this  finite element,
+       we need the function and 2 partial derivatives $(u,u_x, u_y)$,
+      so  this vectorial finite element with 3 components  $(u,u_x,u_y)$.
+      
+      See example \texttt{bilapMorley.edp} of \verb!examples++-load! for solving BiLaplacien problem : 
+      \index{BiLaplacien}
+\bFF
+         @load "Morley" 
+         @fespace Vh(Th,P2Morley);      // the Morlay finite element space
+         @macro bilaplacien(u,v) ( dxx(u)*dxx(v)+dyy(u)*dyy(v)+2.*dxy(u)*dxy(v)) // fin macro 
+         @real f=1;
+         Vh [u,ux,uy],[v,vx,vy];
+
+         @solve bilap([u,ux,uy],[v,vx,vy]) =
+             @int2d(Th)(  bilaplacien(u,v) )
+           - @int2d(Th)(f*v)
+           + @on(1,2,3,4,u=0,ux=0,uy=0)      
+\eFF
+ 
+      \item[P2BR]  \index{P2BR|textbf}\index{fespace!P2BR}(need \ttCC{@load "BernadiRaugel"})  the Bernadi Raugel Finite Elemen is a Vectorial   element (2d)  with 2 components,
+ See Bernardi, C., Raugel, G.: Analysis of some finite elements for the Stokes problem. Math. Comp. 44, 71-79 (1985).
+ It is  a 2d coupled FE, with 
+ the Polynomial space is $ P1^2$ + 3 normals bubbles edges function $(P_2)$
+and  the degre of freedom is 6 values at of the $2$ components at the  $3$ vertices
+and the $3$ flux on the $3$ edges  
+So the number  degrees of freedom is 9.      
+      
+      \item[RT0,RT03d]  Raviart-Thomas finite element of degree $0$.
      \index{RT0|textbf}\index{fespace!RT0}
 
      The 2d case:
@@ -7897,12 +7977,22 @@ types of finite element are: \index{type of finite element}
       $$
       and where
       $\alpha^1_{K},\alpha^2_{K},\alpha^3_{K},\beta_{K} $ are real numbers.
+      
+   \item[RT0Ortho]  Raviart-Thomas Orthogonal, or Nedelec finite element type I of degree $0$ in dimension 2
+     \index{RT0Ortho|textbf}\index{fespace!RT0Ortho}
+     \begin{equation}
+         RT0Ortho{h} = \left\{ \mathbf{v} \in H(\textrm{curl}) \left|\; \forall K \in
+         \mathcal{T}_{h} \quad  \mathbf{v}_{|K}(x,y) =
+         \vecttwo{\alpha^1_{K}}{\alpha^2_{K}} + \beta_{K}\vecttwo{-y}{x}  \right.\right\}
+         \label{RT0Ortho}
+     \end{equation}      
+      
      \item[Edge03d]  Nedelec finite element or Edge  Element of degree $0$.
      \index{Edge03d|textbf}\index{fespace!Edge03d}
 
      The 3d case:
      \begin{equation}
-         RT0_{h} = \left\{ \mathbf{v} \in H(\textrm{Curl}) \left|\; \forall K \in
+         Edge0_{h} = \left\{ \mathbf{v} \in H(\textrm{Curl}) \left|\; \forall K \in
          \mathcal{T}_{h} \quad  \mathbf{v}_{|K}(x,y,z) =
          \vectthree{\alpha^1_{K}}{\alpha^2_{K}}{\alpha^3_{K}} + \vectthree{\beta^1_{K}}{\beta^2_{K}}{\beta^3_{K}}\times\vectthree{x}{y}{z}  \right.\right\}
          \label{eq:Edge03d}
@@ -7918,9 +8008,48 @@ types of finite element are: \index{type of finite element}
       and
       $\alpha^1_{K},\alpha^2_{K},\alpha^3_{K},\beta^1_{K},\beta^2_{K},\beta^3_{K} $ are real numbers.
      \item[P1nc] \index{P1nc|textbf}\index{fespace!P1nc} piecewise linear   element continuous at
-     the middle of edge only.
+     the middle of edge only in 2D ?????.
+    \item[RT1] \index{RT1|textbf}\index{fespace!RT1} (need \ttCC{@load "Element_Mixte"}, version 3.13)
+     \begin{equation}
+         RT1_{h} = \left\{ \mathbf{v} \in H(\textrm{div}) \left|\; \forall K \in
+         \mathcal{T}_{h} \quad  ( \alpha^2_{K}, \alpha^2_{K}, \beta_{K}) \in P_1^3,  \mathbf{v}_{|K}(x,y) = 
+         \vecttwo{\alpha^1_{K}}{\alpha^2_{K}} + \beta_{K}\vecttwo{x}{y}   \right.\right\}
+         \label{eq:RT1}
+     \end{equation}
+    
+    \item[RT1Ortho] \index{RT1Ortho|textbf}\index{fespace!RT1Ortho} (need \ttCC{@load "Element_Mixte"}, version 3.13, dimension 2)
+         \begin{equation}
+         RT1_{h} = \left\{ \mathbf{v} \in H(\textrm{curl}) \left|\; \forall K \in
+         \mathcal{T}_{h} \quad  ( \alpha^2_{K}, \alpha^2_{K}, \beta_{K}) \in P_1^3,  \mathbf{v}_{|K}(x,y) = 
+         \vecttwo{\alpha^1_{K}}{\alpha^2_{K}} + \beta_{K}\vecttwo{-y}{x}   \right.\right\}
+         \label{eq:RT1Ortho}
+     \end{equation}
 
-\end{description}
+    \item[BDM1] \index{BDM1|textbf}\index{fespace!BDM1} (need \ttCC{@load "Element_Mixte"}, version 3.13, dimension 2) the Brezzi-Douglas-Marini finite element 
+     \begin{equation}
+         BDM1_{h} = \left\{ \mathbf{v} \in H(\textrm{div}) \left|\; \forall K \in
+         \mathcal{T}_{h} \quad   \mathbf{v}_{|K} \in P_1^2
+         \right.\right\}
+         \label{eq:BDM1}
+     \end{equation}
+        
+    \item[BDM1Ortho] \index{BDM1Ortho|textbf}\index{fespace!BDM1Ortho} (need \ttCC{@load "Element_Mixte"}, version 3.13, dimension 2) the Brezzi-Douglas-Marini Orthogonal also call
+    Nedelec of type II , finite element 
+       \begin{equation}
+         BDM1Ortho_{h} = \left\{ \mathbf{v} \in H(\textrm{curl}) \left|\; \forall K \in
+         \mathcal{T}_{h} \quad   \mathbf{v}_{|K} \in P_1^2
+         \right.\right\}
+         \label{eq:BDM1Ortho}
+     \end{equation}
+   \item[TDNNS1]  \index{TDNNS1|textbf}\index{fespace!TDNNS1} (need \ttCC{@load "Element_Mixte"}, version 3.13, dimension 2) A new element finite element to approximation symetrique 2x2 matrix in $H(div div)$ (i.e $\sigma_{nn}$ is continuous accross edge).  
+      \begin{equation}
+         TDNNS1{h} = \left\{ \bm{\sigma} \in (L^2)^{2,2}  \left|\; \forall K \in
+         \mathcal{T}_{h} \quad   \bm{\sigma}_{|K} \in P_1^2, \sigma_{12}=\sigma_{21}, \sigma_{nn} \mbox{is continuous}
+         \right.\right\}
+         \label{TDNNS1}
+     \end{equation}
+     where $ \sigma_{nn}= n^t \sigma n$, and $n$ is a normal to the edge (see \cite[section 4.2.2.3]{sinwel} for full detail)
+     \end{description}
 \subsection{Use of ``fespace" in 2d}
 With the 2d finite element spaces
 $$  X_{h} = \{ v \in H^{1}(]0,1[^2) |\; \forall K \in \mathcal{T}_{h}
@@ -8390,7 +8519,16 @@ Two problems need to be solved:
  outside the domain in a special list. Hence in step 5 we can use that list
  to step over holes if needed.
 \end{itemize}
-
+\begin{note}
+ Some time in rare case the interpolation process miss some point, we cane change the 
+ seach algorithm through global variable \ttCC{searchMethod} \index{global!searchMethod}\index{searchMethod}
+\bFF
+ @searchMethod=0; // default value for  fast search algorithm
+ @searchMethod=1; //  safe seach algo,  use brute force in case of missing point 
+ // (warning can be very expensive in case of lot point  of ouside domain)
+ @searchMethod=2; //  use alway the  brute force very very expensive  
+\eFF
+\end{note}
 \begin{note}
  Step 3 requires an array of pointers
  such that each vertex points to one triangle
@@ -18809,6 +18947,9 @@ Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integrati
 
 
  \bibitem{tech.freeyams}{ {\sc P. Frey},  A fully automatic adaptive isotropic surface remeshing procedure. INRIA RT--0252,  2001.}
+
+\bibitem{sinwel}{\sc Astrid Sabine Sinwel},  {\it A New Family of Mixed Finite Elements for Elasticity}
+\url{http://www.numa.uni-linz.ac.at/Teaching/PhD/Finished/sinwel-diss.pdf}, Thesis,  2009,  Johannes Kepler Universität, Austria
 
 
 \end{thebibliography}
