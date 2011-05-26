@@ -906,17 +906,34 @@ are the vertices.
 \index{fespace!P2dc}
 \index{fespace!P1b}
 \index{fespace!P2b}
+\index{fespace!P3}\index{fespace!P4}\index{fespace!RT1}\index{fespace!BDM1}\index{fespace!Morley}\index{fespace!P3dc}\index{fespace!P4dc}\index{fespace!RT0Ortho}\index{fespace!RT1Ortho}\index{fespace!BDM1Ortho}\index{fespace!P2BR}\index{fespace!P2h}
 Currently \freefempp implements the following elements \index{elements} in 2d, (see section \ref{finite elements} for the full description)
 {\parskip=0cm
 \par \ttCC{P0} piecewise constant,
 \par \ttCC{P1} continuous piecewise linear,
 \par \ttCC{P2} continuous piecewise quadratic,
+\par \ttCC{P3} continuous piecewise cubic, (need  \ttCC{@load "Element_P3"})
+\par \ttCC{P4} continuous piecewise quartic,(need  \ttCC{@load "Element_P4"})
 \par \ttCC{RT0} Raviart-Thomas piecewise constant,
+\par \ttCC{RT1} Raviart-Thomas degree 1  piecewise constant (need  \ttCC{@load "Element_Mixte"})
+\par \ttCC{BDM1} Brezzi-Douglas-Marini degree 1  piecewise constant (need  \ttCC{@load "Element_Mixte"})
+\par \ttCC{RT0Ortho} Nedelec type 1 degree 0  piecewise constant 
+\par \ttCC{RT1Ortho} Nedelec type 1 degree 1  piecewise constant (need  \ttCC{@load "Element_Mixte"})
+\par \ttCC{BDM1Ortho} Brezzi-Douglas-Marini degree 1  piecewise constant (need  \ttCC{@load "Element_Mixte"})
 \par \ttCC{P1nc} piecewise linear non-conforming,
 \par \ttCC{P1dc} piecewise linear discontinuous,
 \par \ttCC{P2dc} piecewise quadratic discontinuous,
+\par \ttCC{P2h}  quadratic homogene continuous (without P1)
+\par \ttCC{P3dc} piecewise cubic discontinuous,(need  \ttCC{@load "Element_P3dc"})
+\par \ttCC{P4dc} piecewise quartic discontinuous,(need  \ttCC{@load "Element_P4dc"})
 \par \ttCC{P1b} piecewise linear continuous plus bubble,
 \par \ttCC{P2b} piecewise quadratic continuous plus bubble.
+\par \ttCC{Morlay} Morlay finite element (need   \ttCC{@load "Morley"})
+\par \ttCC{P2BR} P2 Bernardi-Raugel finite element  (need   \ttCC{@load "BernadiRaugel.cpp"})
+
+\par \ttCC{P0edge} a finite element constant per edge 
+\par \ttCC{P1edge} to \ttCC{P5edge}  a finite element polynomial  on edge (need   \ttCC{@load "Element_PkEdge"})
+
 \par {...} \par
 }
 
