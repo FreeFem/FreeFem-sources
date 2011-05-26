@@ -928,7 +928,7 @@ Currently \freefempp implements the following elements \index{elements} in 2d, (
 \par \ttCC{P4dc} piecewise quartic discontinuous,(need  \ttCC{@load "Element_P4dc"})
 \par \ttCC{P1b} piecewise linear continuous plus bubble,
 \par \ttCC{P2b} piecewise quadratic continuous plus bubble.
-\par \ttCC{Morlay} Morlay finite element (need   \ttCC{@load "Morley"})
+\par \ttCC{Morley} Morley finite element (need   \ttCC{@load "Morley"})
 \par \ttCC{P2BR} P2 Bernardi-Raugel finite element  (need   \ttCC{@load "BernadiRaugel.cpp"})
 
 \par \ttCC{P0edge} a finite element constant per edge 
@@ -6288,7 +6288,7 @@ licence utilization, a commercial licence is available upon request to Hang Si.
 
 This software is a tetrahedral mesh generator of a three dimensional domain defined by its boundary.
 The input domain take into account a polyhedral or a piecewise linear complex.
-This tetrahelization is a constrained Delaunay tetrahelization.
+This tetrahedralization is a constrained Delaunay tetrahedralization.
 
 The method used in TetGen to control the quality of the mesh is a Delaunay refinement due to 
 Shewchuk \cite{tetgenshewchuk}. The quality measure of this algorithm is the Radius-Edge
@@ -6478,8 +6478,8 @@ An example of this keyword can be found in line  of file ``buildlayers.edp''
 
 \paragraph{The keyword "tetgconvexhull"}\index{tetgconvexhull}
 
-\freefempp, using tetgen, is able to build a tetrahelization from a set of points. This
-tetrahelization is a Delaunay mesh of the convex hull of the set of points.
+\freefempp, using tetgen, is able to build a tetrahedralization from a set of points. This
+tetrahedralization is a Delaunay mesh of the convex hull of the set of points.
 
 The coordinates of the points can be initialized in two ways. The first is a file that contains
 the coordinate of points $X_{i}=(x_{i}, y_{i}, z_{i})$. This files is organized as follows:
@@ -7926,8 +7926,8 @@ types of finite element are: \index{type of finite element}
 
 
 
-     \item[Morlay] piecewise $P_{2}$  non conform finite element (2d)  (need \ttCC{@load "Morley"})
-     \index{Morlay|textbf}\index{fespace!Morlay}
+     \item[Morley] piecewise $P_{2}$  non conform finite element (2d)  (need \ttCC{@load "Morley"})
+     \index{Morley|textbf}\index{fespace!Morley}
      \begin{equation}
      P2_{h} = \left\{ v \in L^2(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{3}, 
@@ -7948,7 +7948,7 @@ types of finite element are: \index{type of finite element}
       \index{BiLaplacien}
 \bFF
          @load "Morley" 
-         @fespace Vh(Th,P2Morley);      // the Morlay finite element space
+         @fespace Vh(Th,P2Morley);      // the Morley finite element space
          @macro bilaplacien(u,v) ( dxx(u)*dxx(v)+dyy(u)*dyy(v)+2.*dxy(u)*dxy(v)) // fin macro 
          @real f=1;
          Vh [u,ux,uy],[v,vx,vy];
@@ -9072,7 +9072,7 @@ where * stands for the name of quadrature formula or the order of the Gauss form
 
 \begin{tabular}{|c|c|c|c|c|c|}
     \hline
-      \multicolumn{6}{|c|}{ Quadature formula on a tetraedron} \\
+      \multicolumn{6}{|c|}{ Quadature formula on a tetrahedron} \\
     \hline
     $L$ & \texttt{qfV=} & \texttt{qforder=} &
     point in $T_k\in \R^3$ & $\omega_\ell$~~~  &exact on $P_k, k=$  \\
@@ -9098,7 +9098,7 @@ where * stands for the name of quadrature formula or the order of the Gauss form
  $G6 (a,b,b) $ such that $2a+2b=1$ is the set of the six points in barycentric coordinate
  $$\{ (a,a,b,b),(a,b,a,b),(a,b,b,a), (b,b,a,a),(b,a,b,a),(b,a,a,b) \}.$$
 
-\begin{note} These tetraedral quadrature formulae come from \url{http://www.cs.kuleuven.be/~nines/research/ecf/mtables.html}
+\begin{note} These tetrahedral quadrature formulae come from \url{http://www.cs.kuleuven.be/~nines/research/ecf/mtables.html}
 \end{note}
 \index{quadrature:qfV1} \index{quadrature:qfV2}\index{quadrature: qfV5}
 \index{quadrature:qfV1lump}
