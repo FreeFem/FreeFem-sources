@@ -170,9 +170,9 @@ namespace  Fem2D {
        for(int i=0;i<3;++i)
        S1[i][j]=S[i][j];
        
-       int N=3,LWORK = 9;
+       intblas N=3,LWORK = 9;
        double WORK[9] ;
-       int INFO,IPIV[4];
+       intblas INFO,IPIV[4];
        
        dgetrf_(&N,&N,&(S1[0][0]),&N,IPIV,&INFO);
        ffassert(INFO==0);
@@ -429,9 +429,9 @@ namespace  Fem2D {
 	      for(int i=0;i<3;++i)
 		  S1[i][j]=S[i][j];
 	  
-	  int N=3,LWORK = 9;
+	  intblas N=3,LWORK = 9;
 	  double WORK[9] ;
-	  int INFO,IPIV[4];
+	  intblas  INFO,IPIV[4];
 	  
 	  dgetrf_(&N,&N,&(S1[0][0]),&N,IPIV,&INFO);
 	  ffassert(INFO==0);

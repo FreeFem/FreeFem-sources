@@ -231,10 +231,17 @@ class Inverse{ public:
 
 template<class T>
 class Mult{ public:
-  T  a;
-  T  b;
+    T  a;bool ta;
+  T  b;bool tb;
   Mult( T  aa,T bb)
-    : a(aa),b(bb) {}
+    : a(aa),b(bb),ta(0),tb(0) {}
+    // Transpose<
+  Mult( Transpose<T>  aa,T bb)   
+    : a(aa),b(bb),ta(1),tb(0) {}
+  Mult( Transpose<T>  aa,Transpose<T> bb)   
+    : a(aa),b(bb),ta(1),tb(1) {}
+    Mult( T  aa,Transpose<T> bb)   
+    : a(aa),b(bb),ta(1),tb(1) {}
     
 };
 
@@ -336,10 +343,8 @@ inline int gemm(char *transa, char *transb, integer *m, integer *
 
 
 template<class R,bool init, int ibeta> 
-KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc) 
+KNM<R>* mult(KNM<R >* a,const KNM_<R> & A,const KNM_<R> & B) 
 { // C=A*B 
-    KNM_<R> A= *bc.a; 
-    KNM_<R> B= *bc.b; 
    
     R alpha=1.,beta=R(ibeta);
     char tA, tB;
@@ -375,6 +380,7 @@ KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc)
 #else    
     gemm(&tB,&tA,&N,&M,&K,&alpha,A00,&lda,B00,&ldb,&beta,C00,&ldc);
 #endif
+    return a;
     /*
      The Fortran interface for these procedures are:
      SUBROUTINE xGEMM ( TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
@@ -385,7 +391,19 @@ KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc)
      meaning the memory distance between the start of each row/column, depending on the memory structure (Dongarra et al. 1990).
      */
 }
+template<class R,bool init, int ibeta> 
+KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc) 
+{
+    if( (bc.ta == 0) && (bc.tb == 0))
+     return  mult<R,init,ibeta>(a,*bc.a,*bc.b) ;
+    else if((bc.ta == 1 )&& (bc.tb == 0))
+     return  mult<R,init,ibeta>(a,bc.a->t(),*bc.b) ;
+    else if((bc.ta == 0) && (bc.tb == 1))
+	return  mult<R,init,ibeta>(a,*bc.a,bc.b->t()) ;
+    else if((bc.ta == 1) && (bc.tb == 1))
+	return  mult<R,init,ibeta>(a,bc.a->t(),bc.b->t()) ;
 
+}
 
 KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b) 
 {
