@@ -349,17 +349,17 @@ KNM<R>* mult(KNM<R >* a,const KNM_<R> & A,const KNM_<R> & B)
     R alpha=1.,beta=R(ibeta);
     char tA, tB;
     if(init) a->init();
-    int N= A.N();
-    int M=B.M();
-    int K=A.M();
+    intblas N= A.N();
+    intblas M=B.M();
+    intblas K=A.M();
     KNM<R> & C= *a;
     C.resize(N,M); 
     ffassert(K==B.N());
     R *A00=&A(0,0), *A10= &A(1,0), *A01= &A(0,1); 
     R *B00=&B(0,0), *B10= &B(1,0), *B01= &B(0,1); 
     R *C00=&C(0,0), *C10= &C(1,0), *C01= &C(0,1); 
-    int lsa=A10-A00 ,lsb=B10-B00,lsc=C10-C00;
-    int lda=A01-A00 ,ldb=B01-B00,ldc=C01-C00;
+    intblas lsa=A10-A00 ,lsb=B10-B00,lsc=C10-C00;
+    intblas lda=A01-A00 ,ldb=B01-B00,ldc=C01-C00;
     if(verbosity>10) {
 	cout << lsa << " " << lsb << " "<< lsc << " init " << init <<  endl;
 	cout << lda << " " << ldb << " "<< ldc << endl;	
