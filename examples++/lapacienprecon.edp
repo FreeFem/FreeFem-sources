@@ -1,0 +1,34 @@
+// Warning we forgot to remove 3 pointer in this exemple
+// precon=Precon correct in version 1.26 
+verbosity=4;
+
+mesh Th=square(10,10,[10*x,5*y]);
+fespace Vh(Th,P1);
+
+Vh u,v;
+
+u=0;
+func f= 0;
+func g= 5*x+y;
+int i=0;
+real error=0.1, coef= 0.1^(1./5.);
+
+func real[int]  Precon(real[int] & xx)
+{
+// cout << xx[0] << " -----" ;
+  xx[0]=1001;
+  return xx;
+};
+
+problem Probem1(u,v,solver=CG,init=i,eps=-1.0e-6,precon=Precon) =
+    int2d(Th)(  dx(u)*dx(v) + dy(u)*dy(v)) 
+  + int1d(Th,1) ( u*v ) 
+  + int2d(Th) ( v*f ) 
+  + int1d(Th,2) (-5*v)
+  + int1d(Th,1) ( (+1-g)*v)
+  + on(3,4,u=g)  ;
+  
+real cpu=clock();
+Probem1; // SOLVE THE PROBLEM 1
+plot(u);
+cout << " CPU = " << clock()-cpu << endl;

@@ -1,0 +1,33 @@
+#!/bin/sh
+# mpi mingw  driver  F. Hecht..  21/01/2011  
+# ------------------------------------------
+#set -x
+MPIDIR='@MPIDIR@' 
+MPIINC="$MPIDIR/include"
+LDIR="-L$MPIDIR/lib"
+MPILIB="-lmpicxx -lfmpich2g -lmpi"
+CXX=@CXX@
+CC=@CC@
+F77=@F77@
+F90=@FC@
+INC=-I"$MPIINC"
+LIB="$MPILIB"
+
+for i in $*; do  if [ "$i" = "-c" ] ; then LIB=""; fi; done;
+for i in $*; do  if [ "$i" = "-show" ] ; then echo="echo" ;else ss="ss '$i'";fi; done;
+if [ "$echo" = echo ]; then
+case "$0" in
+*c++*)  echo  "$CXX" "'$INC'" $ss "'$LDIR'" $LIB;;
+*77*)   echo  "$F77" "'$INC'" $ss "'$LDIR'" $LIB;;
+*90*)   echo  "$F90" "'$INC'" $ss "'$LDIR'" $LIB;;
+*cc*)   echo "$CC" "'$INC'" $ss "'$LDIR'" $LIB;;
+esac
+else
+case "$0" in
+*c++*) "$CXX" "$INC" "$@" "$LDIR" $LIB;;
+*77*)  "$F77" "$INC" "$@" "$LDIR" $LIB;;
+*90*)  "$F90" "$INC" "$@" "$LDIR" $LIB;;
+*cc*)  "$CC" "$INC" "$@" "$LDIR" $LIB;;
+esac
+fi
+

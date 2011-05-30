@@ -1,0 +1,82 @@
+// variationnal inequality 
+// --------------------------
+//  Probleme:
+//  $ - \Delta u = f , \quad u=gd \on \Gamma, \quad u < g $
+//  algo of   Primal-Dual Active set strategy as a semi smoth Newton Method
+//   HinterMuller , K. Ito, K. Kunisch 
+//  to appeared in SIAM Option
+// Thank to O. Pironneau 
+// --------------------------
+// F. Hecht april 2005
+//  -----------------------
+ mesh Th=square(20,20);
+ real eps=1e-5;
+ fespace Vh(Th,P1);     // P1 FE space
+ int n = Vh.ndof; // number of Degree of freedom
+ Vh uh,uhp;              // solution and previous one
+ Vh Ik; //  to def the set where the containt is reached. 
+ real[int] rhs(n); // to store the right and side of the equation 
+ real c=10;  // the parameter of the algoritme
+ func f=1;         //  right hand side function 
+ func fd=0;         // Dirichlet   boundary condition function
+ Vh g=0.05;
+// array to store   
+real[int] Aii(n),Aiin(n); // store the diagonal of the matrix
+
+
+
+
+ real tgv = 1e30; // a hude value of exact penalisation of boundary condition
+//  the variatonnal form of the problem:
+ varf a(uh,vh) =                    //  definion of  the problem 
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  - int2d(Th)( f*vh )                          //  linear form
+  + on(1,2,3,4,uh=fd) ;                      //  boundary condition form
+
+
+
+// two version of the problem  
+matrix A=a(Vh,Vh,tgv=tgv,solver=CG);
+matrix AA=a(Vh,Vh);
+
+//  the mass Matrix construction: 
+varf vM(uh,vh) = int2d(Th)(uh*vh);
+matrix M=vM(Vh,Vh); // to do a fast computing of $L^2$ norm : sqrt( u'*(w=M*u)) 
+Aii=A.diag; // get the diagonal of the matrix 
+
+rhs = a(0,Vh,tgv=tgv);
+Ik =0;
+uhp=0;
+Vh lambda=0;
+for(int iter=0;iter<100;++iter)
+{
+  real[int] b(n) ; b=rhs;  //  get a copy of the Right hand side 
+  real[int] Ak(n); //  the complementary of Ik ( !Ik = (Ik-1))
+  // Today  the operator Ik- 1. is not implement so we do:
+  Ak= 1.; Ak  -= Ik[];  // build Ak  = ! Ik 
+  //  adding new locking  condition on b and on the diagonal if (Ik ==1 )
+  b = Ik[] .* g[];      b *= tgv;     b  -=  Ak .* rhs;
+  Aiin = Ik[] *  tgv;      Aiin  +=  Ak  .* Aii;  //set  Aii= tgv  $ i \in Ik $
+  A.diag = Aiin; //  set the matrix diagonal 
+  set(A,solver=CG); // important to change precondiconning  for solving
+  uh[] = A^-1* b;   //  solve the problem with more locking condition
+  lambda[] = AA * uh[]; //  compute the resudal ( fast with matrix)
+  lambda[] += rhs; // remark rhs = $-\int f v $ 
+
+  Ik = ( lambda + c*( g- uh)) < 0.;  //  set the new value 
+  
+   plot(Ik, wait=1,cmm=" lock set ",value=1 );
+   plot(uh,wait=1,cmm="uh");
+   // trick to compute  $L^2$ norm of the variation
+      real[int] diff(n),Mdiff(n);  
+      diff= uh[]-uhp[];    
+      Mdiff = M*diff; 
+      real err = sqrt(Mdiff'*diff);
+  cout << "  || u_{k=1} - u_{k} ||_2 " << err << endl;
+  if(err< eps) break; // stop test 
+  uhp[]=uh[] ; // set the previous solution 
+} 
+savemesh(Th,"mm",[x,y,uh*10]);
+  
+  
+  

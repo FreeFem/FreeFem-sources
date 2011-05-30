@@ -1,0 +1,229 @@
+//  sparse matrix test  ---
+// example of the new matrix feature in version 1.40
+// -------------------------------------------------
+mesh  TH = square(3,4);
+mesh  th = square(2,3);
+mesh  Th = square(4,4);
+
+
+fespace VH(TH,P1);
+fespace Vh(th,P1);
+fespace Wh(Th,P1);
+
+matrix B= interpolate(VH,Vh);  // build interpolation matrix Vh->Vh 
+matrix BB= interpolate(Wh,Vh);  // build interpolation matrix
+varf vA(u,v) = int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v))+ int1d(Th)(u*v); 
+matrix A=vA(Wh,Wh);
+
+
+
+Vh ml=0;
+varf vML(u,v) = int2d(th)(1*v);
+ml[]=vML(0,Vh); // build the P1 mass lump of P1
+cout << ml[] << endl;
+matrix ML(ml[]); // matrix diagonal
+cout << "ML="<<ML << endl;
+cout << "B="<<B << endl;
+matrix BML=B*ML;
+matrix tB=B';        //'; transpose 
+//cout << "tB=" << tB << endl;
+matrix MLtB=ML'*B'; // 
+
+//cout << "BML="<<BML << endl;
+//cout << "MLtB=" << MLtB << endl;
+
+// WARNING if UMFPACK is not install
+// the UMFPACK solver is replace by LU 
+//  but LU need skyline matrix 
+if(HaveUMFPACK)
+  set(A,solver=UMFPACK); // set a solver 
+ else 
+   set(A,solver=GMRES); // set a solver 
+VH uH=0;
+Vh uh=x+y;
+uH[]= B*uh[];
+plot(uH,wait=1);
+matrix BtA = BB'*A;//';
+matrix BtAB = BtA*BB;
+if(HaveUMFPACK)  
+  set(BtAB,solver=UMFPACK);  
+ else 
+   set(BtAB,solver=GMRES);  
+Vh ff=1;
+Vh xx;
+cout << " ------ " << xx[].n << " = " << BtAB.n << "x" << BtAB.m << " " << ff[].n <<  endl;
+
+xx[]=BtAB^-1*ff[];
+cout << " ------ " << endl;
+xx[]=BtAB^-1*ff[];
+cout << " ------ " << endl;
+plot(xx, wait=1);
+
+{
+  int N=10;
+  real [int,int] A(N,N);
+  real [int] a(N),b(N),c(N);
+  int [int] II(N);
+  int [int] JJ(N);
+  int [int] III(N);
+  int [int] JJJ(N);
+  for (int i=0;i<N;i++)
+    {
+      II(i)=i*2;
+      III(i)=(i*1023)%N;
+      JJJ(i)=(i*7)%N;
+      JJ(i)=20-i;
+    }	
+  A =0;
+  for (int i=0;i<N;i++)
+    {
+      A(i,i)=1+i;
+      if(i+1 < N)    A(i,i+1)=-i;
+      a[i]=i;
+    }
+  b=a(III);  //  b(i)=a(iii(i))
+  c(III)=a;  //  c(III(i)) = a(i)
+  cout << " III = " << III << endl;
+  cout << " a(III)     " <<  b << endl;
+  cout << " a(III^1) = " << c  << endl;
+  for (int i=0;i<N;i++)
+    assert( int(c[int(b[i])]) == i);
+  
+  matrix sA=A;
+  {
+    {
+      ofstream ff("A.matrix");
+      ff  << sA; 
+    }
+    matrix ssA;
+    {
+      ifstream ff("A.matrix");
+      ff >> ssA;
+      ssA = (1.)*sA+ (-1.)*ssA;
+      cout  << ssA << endl; 
+    }
+  }
+  
+  matrix tAA=sA+sA';//';
+  matrix ttAA=sA'+sA;//';
+  // matrix tttAA=sA'-sA;
+  // matrix ttAA=sA'-sA;
+  A += 2*a*a';  //'//  produit tensoriel
+  matrix A1=   A(II^-1,JJ^-1);   //  do A1(II(i),JJ(j)) = A(i),j) $
+  matrix A2=   A(III,JJJ);   //  do   $A2(i,j) = A(III(i),JJJ(i)) $
+  matrix sA1=   sA(II^-1,JJ^-1); //  do A1(II(i),JJ(i)) = A( 
+  matrix sA2=   sA(III,JJJ);   //  do A = A 
+  
+  matrix A0 = (a*a')(II^-1,JJ^-1); //');
+  matrix A3 = (a*a')(III,JJJ);//');
+  
+  cout << " ------------------- " << endl;
+  // cout <<  " A  = " << A << endl;
+  // cout <<  " A1 = " << A1 <<endl;
+  cout << " 8,9 -> " <<II[8] << " " <<  JJ[9] <<" " << A(9,8)<< " " << A1(II[9],JJ[8]) << endl;
+  assert(A(9,1) == 2*a[9]*a[1]);  
+  
+  for (int i9=0;i9<N;++i9)
+    for (int j9=0;j9<N;++j9)
+      {
+	
+	if( abs(A(j9,i9))> 0.01) 
+	  assert(A1(II[j9],JJ[i9]) == A(j9,i9));
+	if( abs(A(III(j9),JJJ(i9))) > 0.01) 
+	  assert(A2(j9,i9) == A(III(j9),JJJ(i9) )) ;
+	//     cout << " i9,j9 -> " <<II[i9] << " " <<  JJ[j9] <<endl;
+	if( abs(a[i9]*a[j9])> 0.01) 
+	  assert(A0(II[i9],JJ[j9]) == a[i9]*a[j9]);
+	if( abs(a[III[i9]]*a[JJJ[j9]])> 0.01) 
+	  assert(A3(i9,j9) == a[III[i9]]*a[JJJ[j9]]);
+      }
+  b=A*a;
+  c=-9;
+  cout << "xxxx\n"; 
+  matrix sparseA=A;
+  //cout << sparseA << endl;
+  sparseA = 2*sparseA+sparseA;
+  sparseA = 4*sparseA+sparseA*5; //  * 27
+  matrix sparseB=sparseA+sparseA+sparseA; ;
+  //cout << sparseA << endl;
+  //cout << sparseB << endl; // *81 
+  cout << "sparseB = " << sparseB(0,0) << endl;
+  
+  cout << " -------- block matrix \n " << endl;
+  matrix B = [ [sparseA, 0 , sparseA ], 
+               [ 0, sparseA , 0 ] ,
+               [0, 0, sparseB' ]];//']];
+  matrix B2 = [ [sparseA], [sparseA]];
+  
+  assert( B2.n == sparseA.n*2);
+  assert( B2.m == sparseA.m);
+  
+  matrix B1 = [ [sparseA, sparseA] ];
+  assert( B1.m == sparseA.m*2); // FH. bug before version  2.11-4 (10/01/2007)
+  assert( B1.n == sparseA.n);
+  
+  
+  real[int] x([a,b,c]); //  construct the block vector x form a,b,c,
+  //  where the size is  sum of size of a,b,c, 
+  x=[a,b,c]; // set x to to the block vector (the vector x is  resize if it necessary
+  cout << " abc =" << a[2] << " " << b[3] << " "<< c[4] << endl;
+  cout << " xxx =" << x[2] << " " << x[3+N] << " "<< x[4+N*2] << endl;
+  x = x*10;
+  [a,b,c]=x; // set the block vector a,b,c  from concecutive part of  x;
+  cout << " abc*10 == "  << a[2] << " " << b[3] << " "<< c[4] << endl;
+  
+  
+  // remark  the size of sum of size must be equal to the size of x.  
+  //cout << " B = " << B << endl; 
+  cout << B(8,29) << " ===  " <<  sparseA(8,9) << endl;
+  cout << B(28,27)
+       << " ===  " <<  sparseB(7,8) << endl;
+  B(8,29)=100;  // change the value an existing coef 
+  cout << " B(8,29) " <<  B(8,29) << endl;
+  cout << " -------- block matrix \n " << endl;
+}
+//  build FE  matrice with differente meshes (here 3) 
+varf vM(u,v)=int1d(Th,qforder=1)(u*v);
+matrix MM=vM(Vh,VH);
+//cout << MM << endl;
+Vh unVh=0,wVh=0;
+VH unVH=0,wVH=0;
+unVh[]=1;
+unVH[]=1;
+wVh[] = MM' * unVH[] ; 
+wVH[] = MM * unVh[] ; 
+
+//cout << "wWh : " << wVh[] << endl;
+//cout <<" wVH : " << wVH[] << endl;
+// array of matrix v2.4-1 
+cout << " array of matrix   \n" ;
+matrix[int]  aM(10);
+aM[0]= MM;
+aM[3]= MM;
+aM[9]= MM;
+// aM.resize(4);
+//  aM.resize(10);  bug on debian ? FH 
+
+//  add version 2.17 --- 
+{
+  real[int] coef([1,2,3,5,6]);
+  int[int]  lg(  [1,3,6,9,100]);
+  int[int]  cl(  [1,4,9,0,0]);
+  
+  // a diagonal matrix
+  matrix A=[coef];
+  cout << " A = " << A << endl;
+  // a raw matrix  
+  matrix B=[lg,cl,coef];
+  cout << " B = " << B << endl;
+  [lg,cl,coef] = A; 
+  cout<< " lg    : "  << lg << endl;
+  cout << " cl   : " << cl << endl;
+  cout << " coef = "<< coef << endl;
+  
+}
+
+// version 3.1-1
+cout << MM << endl;
+MM.resize(10,100);
+cout << MM << endl;

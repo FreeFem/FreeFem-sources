@@ -1,0 +1,51 @@
+//  test all FEspace
+verbosity=2;
+real a=real(1+1i);
+verbosity=2;
+mesh Th=square(5,5);
+verbosity = 2;
+cout << " P0 " << endl;
+fespace Ph(Th,P0);
+cout << " P1 " << endl;
+fespace Vh(Th,P1);
+fespace Wh(Th,RT0);
+Vh<real> v=x,diff;
+Vh<complex> w=x+1i*y;
+cout << "w[][10] "  << " " << w[][10] << endl;
+w=y+1i*y;
+cout << "w[][10] " << w[][10] << " " << (w[][10])' << endl;
+Wh<complex> [wx,wy]=[x+1i*y,y];
+[wx,wy]=[x+1i*y,y];
+
+func ue= (x*x+2.*y*y+(x*y*y+3.*x*x*y)*1i);
+func uexx = 2.+6.i*y;
+func ueyy = 4.+2.i*x;
+
+func f= (-uexx-(2i+1)*ueyy);
+func g= ue;
+Vh<complex> uh,vh;
+ problem laplace(uh,vh,solver=LU,tgv=1e5) =                    //  definion of  the problem 
+    int2d(Th,optimize=1)( dx(uh)*dx(vh) + (2i+1)*dy(uh)*dy(vh) ) //  bilinear form
+  - int2d(Th,optimize=1)( f*vh )                          //  linear form
+  + on(1,2,3,4,uh=g) ;                      //  boundary condition form
+//verbosity=102;
+  laplace; // solve the problem plot(uh); // to see the result
+  real err = int2d(Th)(norm(uh-ue));
+  cout << " -- err = " << err << endl;
+  assert(err<0.01);
+//  cout << " -- uh = " << uh[] << endl;
+  cout << " uh(0.5,0.5) = " << uh(0.5,0.5) << " ~  " << ue(0.5,0.5) << endl;
+  Vh vr=real(uh(x,y));
+  Vh vi=imag(uh(x,y));
+  vr = real(uh);
+  vi = imag(uh);
+  Vh ver = real(ue);
+  Vh vei = imag(ue);
+
+ // for (int i=0;i<vi[].n;i++)
+ // vi[][i] = imag(uh[][i]);
+
+// now no complex plot 
+  plot(vr,ver,ps="Lr.eps",cmm="real",value=true,wait=1);
+  plot(vi,vei,ps="Li.eps",cmm="imag",value=true,wait=1);
+
