@@ -8,7 +8,7 @@
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
 //   for automatic  compilation with ff-c++
-//ff-c++-LIBRARY-dep:   freeyams
+//ff-c++-LIBRARY-dep:   freeyams libMesh
 //ff-c++-cpp-dep: 
 //  
 
