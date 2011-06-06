@@ -494,7 +494,7 @@ public:
   int dim;
   vector<Expression> sol;
 
-  static const int n_name_param = 12; // 
+  static const int n_name_param = 14; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   
@@ -596,8 +596,10 @@ basicAC_F0::name_and_type  yams_Op::name_param[]= {
   {  "option", &typeid(long)} , // 8
   {  "ridgeangle", &typeid(double)} ,//9
   {  "absolute", &typeid(bool)}, //10 
-  {  "verbosity", &typeid(long)} //11 
-
+  {  "verbosity", &typeid(long)}, //11 
+    
+  {  "nr", &typeid(long)}, // 12 no ridge
+  {  "ns", &typeid(long)} // 13 no point smoothing
 };
 
 AnyType yams_Op::operator()(Stack stack)  const 
@@ -644,8 +646,8 @@ AnyType yams_Op::operator()(Stack stack)  const
   if( nargs[1] ){
     KN<double> fopttmp =  GetAny<KN_<double> >( (*nargs[1])(stack) );
     if( fopttmp.N() != 11 ){
-      cerr <<"the size of vector loptions is 11 "  << endl;
-      exit(1);
+      cerr <<"the size of vector loptions is 11 not "  << fopttmp.N()<< endl;
+	ExecError("FreeYams");
     }
     else{
       for(int ii=0; ii<11; ii++){
@@ -664,12 +666,17 @@ AnyType yams_Op::operator()(Stack stack)  const
   fopt[13] = arg(9,stack,fopt[13]); // ridge angle
   intopt[21] = arg(10,stack, intopt[21] ); // absolue 
   intopt[11] = arg(11,stack,(int) verbosity); // verbosity 
-  cout << " fopt = [";
-  for(int i=0;i<11;++i)
-   cout   << fopt[wrapper_fopt[i]]  <<  (i < 10 ? ",": "];\n") ;       
-  cout << " intopt = [";
-  for(int i=0;i<13;++i)
-    cout << intopt[wrapper_intopt[i]]  <<  (i < 12 ? ",": "];\n" );  
+  intopt[17] = arg(12,stack,intopt[17]); // no ridge 
+  intopt[18] = arg(13,stack,intopt[18]); // nb smooth 
+  if(verbosity>1)
+     {
+       cout << " fopt = [";
+       for(int i=0;i<11;++i)
+	   cout   << fopt[wrapper_fopt[i]]  <<  (i < 10 ? ",": "];\n") ;       
+       cout << " intopt = [";
+       for(int i=0;i<13;++i)
+	   cout << intopt[wrapper_intopt[i]]  <<  (i < 12 ? ",": "];\n" );         
+     }
 
     
  
@@ -753,6 +760,7 @@ AnyType yams_Op::operator()(Stack stack)  const
       }
       }
     }
+  if(verbosity>10)    
   cout << "nbsol  " <<  nargs[2] << endl;
   if( nargs[2] || (nbsol > 0) ){ 
     float hmin,hmax;
@@ -768,18 +776,22 @@ AnyType yams_Op::operator()(Stack stack)  const
   }
   int infondang=0, infocc=0;
   int res = yams_main( yamsmesh, intopt, fopt, infondang, infocc);
-
-  cout << " yamsmesh->dim " << yamsmesh->dim << endl;
+  if(verbosity>10)
+   cout << " yamsmesh->dim " << yamsmesh->dim << endl;
   if( res > 0){
     cout << " problem with yams :: error " <<  res << endl; 
-    exit(1);
+      ExecError("Freeyams error");
   }
   
   Mesh3 *Th3_T = yams_pSurfMesh_to_mesh3( yamsmesh, infondang, infocc ,intopt[22] );
   
   // recuperer la solution ????
-  cout << &yamsmesh->point << " " << &yamsmesh->tria << " "  <<&yamsmesh->geom << " "  << &yamsmesh->tgte << endl;
-  cout << &yamsmesh << endl;
+  if(verbosity>10)
+    {
+      cout << &yamsmesh->point << " " << &yamsmesh->tria << " "  <<&yamsmesh->geom << " "  << &yamsmesh->tgte << endl;
+      cout << &yamsmesh << endl;
+      
+    }
   free(yamsmesh->point);
   free(yamsmesh->tria);
   free(yamsmesh->geom);
@@ -804,7 +816,7 @@ static Init1 init1;  //  une variable globale qui serat construite  au chargemen
 
 Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   //typedef Mesh3 *pmesh3;
-  if(verbosity) cout << " load: yams  " << endl;
+  if(verbosity) cout << " load: freeyams  " << endl;
   
   Global.Add("freeyams","(",new OneOperatorCode<yams_Op>);
  
