@@ -98,36 +98,37 @@ static void yams_inival(){
 }
 
 void yams_printval() {
-   if(verbosity<5) return;
+   if(verbosity<1) return;
       
   /* set default values for options */
-  printf("opts.hmin %f\n",opts.hmin);
-  printf("opts.hmax %f\n",opts.hmax);
-  printf("opts.kmin %f\n",opts.kmin);
-  printf("opts.kmax %f\n",opts.kmax);
-  printf("opts.eps %f\n",opts.eps);
-  printf("opts.iso %f\n",opts.iso);
-  printf(" opts.alpha %f\n", opts.alpha );
-  printf(" opts.gap %f\n", opts.gap );
-  printf(" opts.degrad %f\n", opts.degrad);
-  printf("opts.ridge %f\n", opts.ridge);
-  printf(" opts.geom %f\n", opts.geom);
-  printf("opts.shock %f\n",opts.shock);
-  printf(" opts.bande %f\n", opts.bande );
-  printf(" opts.walton %f\n", opts.walton);
-  printf("opts.declic %f\n", opts.declic);
-  printf("opts.lambda %f\n",opts.lambda);
-  printf("opts.mu %f\n",opts.mu);
+  printf("-- freeyams options value    \n");
+  printf("       - hmin %f\n",opts.hmin);
+  printf("       - hmax %f\n",opts.hmax);
+  printf("       - kmin %f\n",opts.kmin);
+  printf("       - kmax %f\n",opts.kmax);
+  printf("       - eps %f\n",opts.eps);
+  printf("       - iso %f\n",opts.iso);
+  printf("       - alpha %f\n", opts.alpha );
+  printf("       - gap %f\n", opts.gap );
+  printf("       - degrad %f\n", opts.degrad);
+  printf("       - ridge %f\n", opts.ridge);
+  printf("       - geom %f\n", opts.geom);
+  printf("       - shock %f\n",opts.shock);
+  printf("       - bande %f\n", opts.bande );
+  printf("       - walton %f\n", opts.walton);
+  printf("       - declic %f\n", opts.declic);
+  printf("       - lambda %f\n",opts.lambda);
+  printf("       - mu %f\n",opts.mu);
    
-  printf(" opts.ctrl %d\n", opts.ctrl );
-  printf(" opts.iter %d\n", opts.iter );
-  printf(" opts.choix %d\n", opts.choix );
-  printf(" opts.minnp %d\n", opts.minnp );
+  printf("       - ctrl %d\n", opts.ctrl );
+  printf("       - iter %d\n", opts.iter );
+  printf("       - choix %d\n", opts.choix );
+  printf("       - minnp %d\n", opts.minnp );
   
-  printf(" opts.check %X\n", (unsigned char) opts.check);
-  printf(" opts.ptmult %X\n",  (unsigned char) opts.ptmult);
-  printf(" opts.noreff %X\n",  (unsigned char) opts.noreff);
-  printf(" opts.ffem %X\n",  (unsigned char) opts.ffem );
+  printf("       - check %X\n", (unsigned char) opts.check);
+  printf("       - ptmult %X\n",  (unsigned char) opts.ptmult);
+  printf("       - noreff %X\n",  (unsigned char) opts.noreff);
+  printf("       - ffem %X\n",  (unsigned char) opts.ffem );
  
 }
 

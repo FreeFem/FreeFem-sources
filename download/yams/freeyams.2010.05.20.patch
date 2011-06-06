@@ -336,3 +336,15 @@ diff -u yams2.2010.02.22/sourceslib/zaldy3.c yams2.2010.02.22-okk/zaldy3.c
      }
      sm->nvmax = nvsize;
      yerr.inderr[0] = sm->nvmax;
+
+diff -u  yams2.2010.02.22/sourceslib/yams.c yams2.2010.02.22-okk/yams.c
+--- yams2.2010.02.22/sourceslib/yams.c	2011-06-06 21:07:41.000000000 +0200
++++ yams2.2010.02.22-okk/yams.c			2011-06-06 21:35:36.000000000 +0200
+@@ -24,6 +24,7 @@
+ ubyte     ddebug;
+ ubyte     ecp;
+ 
++long verbosity; 
+ 
+ static void excfun(int sigid) {
+   switch(sigid){
