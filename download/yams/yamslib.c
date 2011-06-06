@@ -10,7 +10,7 @@
 #include "defines.h"
 #include "sproto.h"
 
-
+extern long verbosity;
 /* globals (see globals.h) */
 Error       yerr;
 Info        info;
@@ -98,6 +98,8 @@ static void yams_inival(){
 }
 
 void yams_printval() {
+   if(verbosity<5) return;
+      
   /* set default values for options */
   printf("opts.hmin %f\n",opts.hmin);
   printf("opts.hmax %f\n",opts.hmax);
@@ -292,11 +294,13 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
   if( intopt[13] == 1 ) opts.check = 0;
   opts.minnp = intopt[14];
   opts.iter = intopt[15];
+  if(verbosity>9) 
   printf(" type = %d  %d \n", sm->type,intopt[17]);
   if( intopt[16] == 1 ) sm->type |= M_QUADS;
   if( intopt[17] == 1 ) sm->type &= ~M_DETECT;
   if( intopt[18] == 1 ) sm->type &= ~M_SMOOTH;
   //if( intopt[19] == 1 ) sm->type &= ~M_OUTPUT;
+    if(verbosity>9) 
   printf(" type = %d  %d \n", sm->type,intopt[17]);
   sm->type &= ~M_OUTPUT;
   // parsar -r 
@@ -438,11 +442,13 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
       prigap(sm);
     }
   }
-
+  if(verbosity>9) {
+      
   printf("absopt= %d\n", absopt);
   printf("imprim= %d\n", imprim);
   printf("sm->np %d\n", sm->np);
   printf("sm->dim %d\n", sm->dim);
+  }
   /* surface remeshing */
   yerr.inderr[0] = ++phase;
   if ( absopt && absopt <= 6 ) {
