@@ -151,6 +151,14 @@ long  WSend( R * v,int l,int who,int tag,MPI_Comm comm,MPI_Request *rq)
     }
 }
 
+template<class T>
+void CheckContigueKN(const KN_<T> &t)
+{
+    if( t.step != 1 && t.N()>1) {
+	cout<< " step= "<< t.step << " size " << t.N() << " " << & t[0] << " " << & t[1] << endl;
+	ExecError("Sorry the array is not contigue (step != 1) ");
+    }
+}
 template<> 
 long  WSend<Complex> ( Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
 {
@@ -268,8 +276,10 @@ struct MPIrank {
   template<class R>
   long Recv(KN<R> & a) const {
     assert(&a);
+      CheckContigueKN(a);
+  
     if(verbosity>99)
-      cout << " ---- " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R>* >::TAG 
+      cout << " ---- " << who  << "  >> " << & a << " " << a.N() << " " << a.step << " " << MPI_TAG<KN<R>* >::TAG 
 	       <<" from " << mpirank << "  "<<  (R *) a << endl;
     int n= a.N();
     long ll=WRecv((R *) a, n, who, MPI_TAG<KN<R>* >::TAG ,comm,rq);
@@ -285,8 +295,9 @@ struct MPIrank {
     const KN<R> & a=*aa;
     ffassert(&a); 
     int n= a.N();
+    CheckContigueKN(*aa);
     if(verbosity>99)
-	  cout << " .... " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R>* >::TAG 
+	  cout << " .... " << who  << "  >> " << & a << " " << a.N() << " " << a.step<< " " << MPI_TAG<KN<R>* >::TAG 
 	       <<" from  " << mpirank << "  "<<  (R *) a << endl;
     return WSend((R *) a,n,who,MPI_TAG<KN<R>* >::TAG,comm,rq);
   }
@@ -296,6 +307,8 @@ struct MPIrank {
     //const KN<R> & a=*aa;
     assert(&a); 
     int n= a.N();
+    CheckContigueKN(a);
+
     WBcast((R *) a, n, who,comm);
     ffassert(a.N()==n);
     return *this;
@@ -961,6 +974,9 @@ template<class R>
 struct Op_All2All : public binary_function<KN_<R>,KN_<R>,long> {
   static long  f( KN_<R>  const  & s, KN_<R>  const  &r)  
   { 
+      CheckContigueKN(s);
+      CheckContigueKN(r);
+
     MPI_Comm comm=MPI_COMM_WORLD;
     int mpisizew;
     MPI_Comm_size(comm, &mpisizew); /* local */ 
@@ -979,6 +995,8 @@ struct Op_Allgather1 : public binary_function<R*,KN_<R>,long> {
     { 
       MPI_Comm comm=MPI_COMM_WORLD;
       int mpisizew;
+	CheckContigueKN(r);
+
       MPI_Comm_size(comm, &mpisizew); /* local */ 
       int chunk = 1;
       ffassert(r.N()==mpisizew);
@@ -992,6 +1010,9 @@ template<class R>
 struct Op_Allgather : public binary_function<KN_<R>,KN_<R>,long> {
   static long  f( KN_<R>  const  & s, KN_<R>  const  &r)  
     { 
+	CheckContigueKN(s);
+	CheckContigueKN(r);
+
       MPI_Comm comm=MPI_COMM_WORLD;
       int mpisizew;
       MPI_Comm_size(comm, &mpisizew); /* local */ 
@@ -1010,6 +1031,9 @@ template<class R>
 struct Op_All2All3 : public ternary_function<KN_<R>,KN_<R>,fMPI_Comm,long> {
   static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,fMPI_Comm const & cmm )  
     { 
+	CheckContigueKN(s);
+	CheckContigueKN(r);
+
       MPI_Comm comm=cmm;
       int mpisizew;
       MPI_Comm_size(comm, &mpisizew); /* local */ 
@@ -1025,6 +1049,9 @@ template<class R>
 struct Op_Allgather3 : public ternary_function<KN_<R>,KN_<R>,fMPI_Comm,long> {
   static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,fMPI_Comm const & cmm)  
   { 
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     MPI_Comm comm=cmm;
     int mpisizew;
     MPI_Comm_size(comm, &mpisizew); /* local */ 
@@ -1042,6 +1069,9 @@ template<class R>
 struct Op_Allgather13 : public ternary_function<R*,KN_<R>,fMPI_Comm,long> {
   static long  f(Stack, R*  const  & s, KN_<R>  const  &r,fMPI_Comm const & cmm)  
   { 
+      
+      CheckContigueKN(r);
+
     MPI_Comm comm=cmm;
     int mpisizew;
     MPI_Comm_size(comm, &mpisizew); /* local */ 
@@ -1058,6 +1088,9 @@ struct Op_Allgather13 : public ternary_function<R*,KN_<R>,fMPI_Comm,long> {
 template<class R>
 long  Op_All2Allv( KN_<R>  const  & s, KN_<R>  const  &r, KN_<long> const &sendcnts, KN_<long> const &sdispls, KN_<long> const &recvcnts, KN_<long> const &rdispls)  
 { 
+    CheckContigueKN(s);
+    CheckContigueKN(r);
+
   MPI_Comm comm=MPI_COMM_WORLD;
   int mpirankv=MPI_UNDEFINED;
   MPI_Comm_rank(comm, &mpirankv); 
@@ -1088,6 +1121,9 @@ template<class R>
 struct Op_Allgatherv : public quad_function<KN_<R>,KN_<R>,KN_<long>,KN_<long>,long> {
   static long f( Stack ,KN_<R>  const  & s, KN_<R>  const  &r, KN_<long> const & recvcount, KN_<long> const & displs)  
   { 
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     MPI_Comm comm=MPI_COMM_WORLD;
     int mpisizew;
     MPI_Comm_size(comm, &mpisizew); 
@@ -1111,6 +1147,9 @@ struct Op_Allgatherv : public quad_function<KN_<R>,KN_<R>,KN_<long>,KN_<long>,lo
 template<class R>
 long  Op_All2All3v(KN_<R>  const  & s, KN_<R>  const  &r,fMPI_Comm const & cmm, KN_<long> const &sendcnts, KN_<long> const &sdispls, KN_<long> const &recvcnts, KN_<long> const &rdispls )  
 { 
+    CheckContigueKN(r);
+    CheckContigueKN(s);
+
   MPI_Comm comm=cmm;
   int mpirankv=MPI_UNDEFINED;
   MPI_Comm_rank(comm, &mpirankv); 
@@ -1141,6 +1180,9 @@ long  Op_All2All3v(KN_<R>  const  & s, KN_<R>  const  &r,fMPI_Comm const & cmm, 
 template<class R>
 long Op_Allgatherv3(KN_<R>  const  & s, KN_<R>  const  &r,fMPI_Comm const & cmm, KN_<long> const & recvcount, KN_<long> const & displs)
 { 
+    CheckContigueKN(r);
+    CheckContigueKN(s);
+
   MPI_Comm comm=cmm;
   int mpisizew;
   MPI_Comm_size(comm, &mpisizew); 
@@ -1165,7 +1207,9 @@ template<class R>
 struct Op_Scatter1 : public   ternary_function<KN_<R>, R* ,MPIrank,long> {
   static long  f(Stack, KN_<R>  const  & s, R*  const  &r,  MPIrank const & root)  
   { 
-    
+      CheckContigueKN(s);
+      
+
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
     int chunk = 1;
@@ -1185,6 +1229,9 @@ struct Op_Scatter3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
   static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root)  
   { 
     
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
     int chunk = s.N()/mpisizew;
@@ -1200,7 +1247,9 @@ template<class R>
 //struct Op_Scatterv3 : public   penta_function< KN_<R>, KN_<R>, MPIrank, KN_<long>, KN_<long>, long> {
 long Op_Scatterv3( KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root, KN_<long> const &sendcnts, KN_<long> const &displs)  
 { 
-  
+    CheckContigueKN(r);
+    CheckContigueKN(s);
+
   int mpirankv=MPI_UNDEFINED;
   if(root.comm != MPI_COMM_NULL)
     MPI_Comm_rank(root.comm, &mpirankv); 
@@ -1282,6 +1331,9 @@ template<class R>
 struct Op_Reduce  : public   quad_function<KN_<R>,KN_<R>,MPIrank,fMPI_Op,long> {
   static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root, fMPI_Op const &op)  
   { 
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     int chunk = s.N();
     ffassert(chunk==r.N());
     
@@ -1293,6 +1345,9 @@ template<class R>
 struct Op_AllReduce  : public   quad_function<KN_<R>,KN_<R>,fMPI_Comm,fMPI_Op,long> {
   static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  fMPI_Comm const & comm,fMPI_Op const &op)  
   { 
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     int chunk = s.N();
     ffassert(chunk==r.N());
     return MPI_Allreduce( (void *) (R*) s,(void *) (R*) r, chunk , MPI_TYPE<R>::TYPE(),op,comm);	
@@ -1352,7 +1407,9 @@ template<class R>
 struct Op_Gather3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
     static long  f(Stack, KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root)  
   { 
-    
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
     int chunk = r.N()/mpisizew;
@@ -1370,6 +1427,9 @@ template<class R>
 long  Op_Gatherv3(KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root, KN_<long> const & recvcount, KN_<long> const & displs)  
 { 
     
+    CheckContigueKN(r);
+    CheckContigueKN(s);
+
   int mpirankw;
   MPI_Comm_rank(root.comm, &mpirankw); 
   int mpisizew;
@@ -1402,6 +1462,9 @@ template<>
 struct Op_All2All<Complex> : public binary_function<KN_<Complex>,KN_<Complex>,long> {
   static long  f( KN_<Complex>  const  & s, KN_<Complex>  const  &r)  
   { 
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     MPI_Comm comm=MPI_COMM_WORLD;
     int mpisizew;
     MPI_Comm_size(comm, &mpisizew); /* local */ 
@@ -1423,6 +1486,9 @@ template<>
 struct Op_Allgather1<Complex> : public binary_function<Complex *,KN_<Complex>,long> {
   static long  f( Complex *  const  & s, KN_<Complex>  const  &r)  
   { 
+      CheckContigueKN(r);
+      
+
     MPI_Comm comm=MPI_COMM_WORLD;
     int mpisizew;
     MPI_Comm_size(comm, &mpisizew); /* local */ 
@@ -1444,6 +1510,9 @@ template<>
 struct Op_Allgather<Complex> : public binary_function<KN_<Complex>,KN_<Complex>,long> {
   static long  f( KN_<Complex>  const  & s, KN_<Complex>  const  &r)  
     { 
+	CheckContigueKN(r);
+	CheckContigueKN(s);
+
       MPI_Comm comm=MPI_COMM_WORLD;
       int mpisizew;
       MPI_Comm_size(comm, &mpisizew); /* local */ 
@@ -1464,6 +1533,9 @@ template<>
 struct Op_All2All3<Complex> : public ternary_function<KN_<Complex>,KN_<Complex>,fMPI_Comm,long> {
   static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,fMPI_Comm const & cmm )  
     { 
+	CheckContigueKN(r);
+	CheckContigueKN(s);
+
       MPI_Comm comm=cmm;
       int mpisizew;
       MPI_Comm_size(comm, &mpisizew); /* local */ 
@@ -1484,6 +1556,9 @@ template<>
 struct Op_Allgather3<Complex> : public ternary_function<KN_<Complex>,KN_<Complex>,fMPI_Comm,long> {
   static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,fMPI_Comm const & cmm)  
   { 
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     MPI_Comm comm=cmm;
     int mpisizew;
     MPI_Comm_size(comm, &mpisizew); /* local */ 
@@ -1505,6 +1580,9 @@ template<>
 struct Op_Allgather13<Complex> : public ternary_function<Complex *,KN_<Complex>,fMPI_Comm,long> {
   static long  f(Stack, Complex *  const  & s, KN_<Complex>  const  &r,fMPI_Comm const & cmm)  
   { 
+      CheckContigueKN(r);
+     
+
     MPI_Comm comm=cmm;
     int mpisizew;
     MPI_Comm_size(comm, &mpisizew); /* local */ 
@@ -1525,6 +1603,9 @@ struct Op_Allgather13<Complex> : public ternary_function<Complex *,KN_<Complex>,
 template<>
 long  Op_All2Allv<Complex>( KN_<Complex>  const  & s, KN_<Complex>  const  &r, KN_<long> const &sendcnts, KN_<long> const &sdispls, KN_<long> const &recvcnts, KN_<long> const &rdispls)  
 { 
+    CheckContigueKN(r);
+    CheckContigueKN(s);
+
   MPI_Comm comm=MPI_COMM_WORLD;
   int mpirankv=MPI_UNDEFINED;
   MPI_Comm_rank(comm, &mpirankv); 
@@ -1566,6 +1647,9 @@ template<>
 struct Op_Allgatherv<Complex> : public quad_function<KN_<Complex>,KN_<Complex>,KN_<long>,KN_<long>,long> {
   static long f( Stack ,KN_<Complex>  const  & s, KN_<Complex>  const  &r, KN_<long> const & recvcount, KN_<long> const & displs)  
   { 
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     MPI_Comm comm=MPI_COMM_WORLD;
     int mpisizew;
     MPI_Comm_size(comm, &mpisizew); 
@@ -1599,6 +1683,9 @@ struct Op_Allgatherv<Complex> : public quad_function<KN_<Complex>,KN_<Complex>,K
 template<>
 long  Op_All2All3v<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,fMPI_Comm const & cmm, KN_<long> const &sendcnts, KN_<long> const &sdispls, KN_<long> const &recvcnts, KN_<long> const &rdispls )  
 { 
+    CheckContigueKN(r);
+    CheckContigueKN(s);
+
   MPI_Comm comm=cmm;
   int mpirankv=MPI_UNDEFINED;
   MPI_Comm_rank(comm, &mpirankv); 
@@ -1641,6 +1728,9 @@ long  Op_All2All3v<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,fM
 template<>
 long Op_Allgatherv3<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,fMPI_Comm const & cmm, KN_<long> const & recvcount, KN_<long> const & displs)
 { 
+    CheckContigueKN(r);
+    CheckContigueKN(s);
+
   MPI_Comm comm=cmm;
   int mpisizew;
   MPI_Comm_size(comm, &mpisizew); 
@@ -1677,7 +1767,9 @@ template<>
 struct Op_Scatter1<Complex> : public   ternary_function<KN_<Complex>,Complex *,MPIrank,long> {
   static long  f(Stack, KN_<Complex> const  & s, Complex *  const  &r,  MPIrank const & root)  
   { 
-    
+     
+      CheckContigueKN(s);
+
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
     int chunk = 1;
@@ -1698,7 +1790,9 @@ template<>
 struct Op_Scatter3<Complex> : public   ternary_function<KN_<Complex>,KN_<Complex>,MPIrank,long> {
   static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,  MPIrank const & root)  
   { 
-    
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
     int chunk = s.N()/mpisizew;
@@ -1718,6 +1812,9 @@ template<>
 long Op_Scatterv3<Complex>( KN_<Complex>  const  & s, KN_<Complex>  const  &r,  MPIrank const & root, KN_<long> const &sendcnts, KN_<long> const &displs)  
 { 
   
+    CheckContigueKN(r);
+    CheckContigueKN(s);
+
   int mpirankv=MPI_UNDEFINED;
   if(root.comm != MPI_COMM_NULL)
     MPI_Comm_rank(root.comm, &mpirankv); 
@@ -1760,6 +1857,9 @@ template<>
 struct Op_Reduce<Complex>  : public   quad_function<KN_<Complex>,KN_<Complex>,MPIrank,fMPI_Op,long> {
   static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,  MPIrank const & root, fMPI_Op const &op)  
   { 
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     int chunk = s.N();
     ffassert(chunk==r.N());
 #ifdef HAVE_MPI_DOUBLE_COMPLEX     
@@ -1775,6 +1875,9 @@ template<>
 struct Op_AllReduce<Complex>  : public   quad_function<KN_<Complex>,KN_<Complex>,fMPI_Comm,fMPI_Op,long> {
   static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,  fMPI_Comm const & comm,fMPI_Op const &op)  
   { 
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     int chunk = s.N();
     ffassert(chunk==r.N());
 #ifdef HAVE_MPI_DOUBLE_COMPLEX
@@ -1818,6 +1921,9 @@ struct Op_Gather1<Complex> : public   ternary_function<Complex* ,KN_<Complex>,MP
     static long  f(Stack, Complex * const  & s, KN_<Complex>  const  &r,  MPIrank const & root)  
   { 
     
+      CheckContigueKN(r);
+      
+
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
     int chunk = 1;
@@ -1841,7 +1947,9 @@ template<>
 struct Op_Gather3<Complex> : public   ternary_function<KN_<Complex>,KN_<Complex>,MPIrank,long> {
     static long  f(Stack, KN_<Complex>  const  & s, KN_<Complex>  const  &r,  MPIrank const & root)  
   { 
-    
+      CheckContigueKN(r);
+      CheckContigueKN(s);
+
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
     int chunk = r.N()/mpisizew;
@@ -1862,7 +1970,9 @@ template<>
 //struct Op_Gatherv3 : public penta_function<KN_<Complex>,KN_<Complex>, MPIrank, KN_<long>, KN_<long>, long> {
 long  Op_Gatherv3<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,  MPIrank const & root, KN_<long> const & recvcount, KN_<long> const & displs)  
 { 
-    
+    CheckContigueKN(r);
+    CheckContigueKN(s);
+
   int mpirankw;
   MPI_Comm_rank(root.comm, &mpirankw); 
   int mpisizew;

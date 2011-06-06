@@ -8,7 +8,7 @@
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
 //   for automatic  compilation with ff-c++
-//ff-c++-LIBRARY-dep:   freeyams
+//ff-c++-LIBRARY-dep:   freeyams libMesh
 //ff-c++-cpp-dep: 
 //  
 
@@ -664,8 +664,14 @@ AnyType yams_Op::operator()(Stack stack)  const
   fopt[13] = arg(9,stack,fopt[13]); // ridge angle
   intopt[21] = arg(10,stack, intopt[21] ); // absolue 
   intopt[11] = arg(11,stack,(int) verbosity); // verbosity 
-  cout << " fopt = " << fopt << endl;  
-  cout << " intopt = " << intopt << endl;  
+  cout << " fopt = [";
+  for(int i=0;i<11;++i)
+   cout   << fopt[wrapper_fopt[i]]  <<  (i < 10 ? ",": "];\n") ;       
+  cout << " intopt = [";
+  for(int i=0;i<13;++i)
+    cout << intopt[wrapper_intopt[i]]  <<  (i < 12 ? ",": "];\n" );  
+
+    
  
   
   /*
