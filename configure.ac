@@ -1120,7 +1120,12 @@ if test "$ff_mkl_libpath" != "not" ; then
             *ifort*) ff_mkl_cc=intel;;
             *) ff_mkl_cc=gf;;
         esac
-#        intelmpi=_intelmpi;
+#   bof bof .... 
+	case "$MPIRUN" in
+	*/sgi/*)         ff_mkl_mpi=_sgimpt;;
+	*/intel/*)         ff_mkl_mpi=_intelmpi;;
+	*)        ff_mkl_mpi=_openmpi;;
+	esac
 #	echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
 	if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.so ; then
 	  mkl_blas=rt
@@ -1132,7 +1137,7 @@ if test "$ff_mkl_libpath" != "not" ; then
 	  ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -llibmkl_lapack"
 	fi
         ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_scalapack${ff_mkl_lp}"
-        ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs_intelmpi${ff_mkl_lp}"
+        ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp}"
 	ff_blas_ok=yes
 	ff_lapack_ok=yes
 	ff_blas_libs="$ff_mkl_blas"
