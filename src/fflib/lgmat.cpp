@@ -725,7 +725,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 				      //  cout << " Mat inter " << i << " , "<< j << " = " << c << " " <<step << " " << it << " " <<  endl; 
 				      if(Abs(c)>eps)
 					  //
-					  sij[make_pair(ii,jj)] = c;
+					  sij[make_pair(ii,jj)] += c;// correct du to periodic BC. June 2011
 				      /*   
 				       if(step==0)
 				       sij.insert(make_pair(i,j));
@@ -947,7 +947,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
 			      //  cout << " Mat inter " << i << " , "<< j << " = " << c << " " <<step << " " << it << " " <<  endl; 
 			      if(Abs(c)>eps)
 				  //
-				  sij[make_pair(ii,jj)] = c;
+				  sij[make_pair(ii,jj)] += c;// correct du to periodic BC. June 2011
 			      /*   
 			       if(step==0)
 			       sij.insert(make_pair(i,j));
@@ -1074,7 +1074,7 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
         if(transpose) Exchange(i,j);
         R c = Fwi(idfu);
 	if(Abs(c)>eps)
-	  sij[make_pair(i,j)] = c;
+	  sij[make_pair(i,j)] += c;// correct du to periodic BC. June 2011
       }
       }
   
@@ -1158,7 +1158,7 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace3 & Uh,const KN_<doubl
 	    if(transpose) Exchange(i,j);
 	    R c = Fwi(idfu);
 	    if(Abs(c)>eps)
-		sij[make_pair(i,j)] = c;
+		sij[make_pair(i,j)] += c;// correct du to periodic BC. June 2011
 	  }
       }
     
