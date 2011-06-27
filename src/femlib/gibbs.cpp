@@ -651,6 +651,9 @@ return 0;} /* gibbsb_ */
 	*mxz = mmax(i__2,i__3);
 	i__2 = nv[i + 1];
 	for (j = nv[i] + 1; j <= i__2; ++j) {
+	    if(nv[j] > *n) 
+	     printf(" bug ??? ##### %ld %ld %ld %ld \n",j,nv[j],i,*niveau );
+	    if(nv[j] <= *n) 
 	    nz[nv[j]] = i;
 /* L20: */
 	}
@@ -1099,7 +1102,7 @@ int FESpace::renum()
     int nnx= SizeToStoreAllNodeofElement();
   	ptvois = new long[nv+1]; 		
 	nn = 	 new long[nnx]; 		
-	vois = 	 new long[nbvoisin+10];	
+	vois = 	 new long[nbvoisin+100];	
 	r = 	 new long[nv+1];			
 	if((!ptvois)||(!nn)||(!vois)||(!r)) return -1;
 	err = gibbsv(ptvois,vois,&nbvoisin,r,nn) ;
