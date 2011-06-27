@@ -1,3 +1,4 @@
+ - coorect bug in gibbs renumbering in 1 case veru sample mesh)
   - correct bug in interpolation operator with periodic BC
     mesh Th1=square(2,1), Th2=square(2,2);
     fespace Vh2(Th2, P1),Ph2(Th&,P1,periodic=[[1,x],[3,x]]);//  une couche
