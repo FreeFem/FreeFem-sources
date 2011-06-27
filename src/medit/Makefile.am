@@ -17,7 +17,7 @@ chrono.h	extern.h	image.h		mesh.h \
 eigenv.h	grafic.h	medit.h		sproto.h 
 
 
-LDADD= ../libMesh/libMesh.a $(LIBSGLUT)
+LDADD= ../libMesh/libMesh.a $(LIBSGLUT) -lm
 INCLUDES=-I../libMesh
 BUILT_SOURCES=compil.date
 compil.date: $(ffmedit_SOURCES)
