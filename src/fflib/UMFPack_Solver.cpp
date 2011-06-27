@@ -257,7 +257,7 @@ public:
     RR2C(n,xr,xi,x);
     if(verbosity>1)
     {
-      cout << "  -- umfpack_zi_solve, peack Mem : " <<  long(Info[UMFPACK_PEAK_MEMORY])/(1024*1024)*Info[UMFPACK_SIZE_OF_UNIT] << "Mbytes " << endl;
+      cout << "  -- umfpack_zi_solve, peak Mem : " <<  long(Info[UMFPACK_PEAK_MEMORY])/(1024*1024)*Info[UMFPACK_SIZE_OF_UNIT] << "Mbytes " << endl;
       
      if(verbosity>3)     (void)  umfpack_zi_report_info(Control,Info);
     
