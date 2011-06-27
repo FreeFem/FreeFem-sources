@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.13,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.13-1,hecht@ann.jussieu.fr,freefem++)
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
@@ -712,7 +712,7 @@ AC_ARG_WITH(mpilibs,[  --with-mpilibs= the libs to add to c++,fc, ... (to link w
 AC_ARG_WITH(mpilibsc,[  --with-mpilibsc= the libs to add to c  ... (to link with cc (for pastix lib)  ex:   -L/usr/local/lib -lmpi -lopen-rte -lopen-pal -lutil) ])
 AC_ARG_WITH(mpiinc,[  --with-mpiinc= the include directory directive and preprocess directive  (no mpicc++, just use the compiler)) ])
 AC_ARG_WITH(mpi,[  --with-mpi=[yes|no|mpic++|lam|mpich|openmpi|/usr/local/bin/mpic++|... ]	or --without-mpi	Choose MPI implementation (default is mpic++)])
-
+if test "$with_mpi" != no ; then  
 #if test "$with_mpi" != no ; then
 #AX_MPI(with_mpi=yes, with_mpi=no)
 #fi
@@ -965,6 +965,22 @@ dnl              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
 	fi
 	CXX="$ff_save_cxx"
 	LIBS="$ff_save_libs"
+fi
+
+else
+          
+	  AC_SUBST(MPIRUN,"")      		
+	  AC_SUBST(MPICC,"")      		
+	  AC_SUBST(MPICXX,"")      		
+	  AC_SUBST(MPIF77,"")      		
+	  AC_SUBST(MPIFC,"")      		
+	  AC_SUBST(MPI_INCLUDE,"")
+	  AC_SUBST(MPI_LIB_DIRS,"")
+	  AC_SUBST(MPI_LIB,"")
+	  AC_SUBST(MPI_LIBC,"")
+	  AC_SUBST(MPI_LIBFC,"")
+	  ff_mpi=no
+
 fi
 #export PATH="$ff_save_path"
 # Looking for useful configuration utilities

@@ -1,3 +1,5 @@
+v 3.13-1
+   - correct compilation problem on fedora 13 WITH MPI
 v 3.13 (25 may 2011)   
    - update the finite element list in  documention 
    - add (load "Element-Mixte")  NEW FINITE ELEMENT 2D

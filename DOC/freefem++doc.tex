@@ -9531,6 +9531,20 @@ v=v4;              vv[]= IV*v4[];   // here   v  == vv    =>
 \eFF
 \end{example}
 
+ Build interpolation matrix $A$ at a array of  points $(xx[j],yy[j]),  i = 0, 2$ here
+$$  a_ij = dop(w^i_c (xx[j],yy[j]))$$
+where $w_i$ is the basic finite element  function, $c$ the component number, $dop$ the type 
+of diff operator like in op def. 
+\bFF
+@real[int] xx=[.3,.4],yy=[.1,.4];
+int c=0,dop=0; 
+@matrix Ixx= interpolate(Vh,xx,yy,op=dop,composante=c);
+@cout << Ixx << endl;
+Vh ww;
+@real[int] dd=[1,2]; 
+ww[]= Ixx*dd;
+\eFF
+
 \subsection{Finite elements connectivity}
 Here, we show how to get  informations on a finite element space $W_h({\cal T}_n,*)$, where ``*'' may be P1, P2, P1nc, etc.
 \index{nt} \index{ndof} \index{ndofK} \index{connectivity}

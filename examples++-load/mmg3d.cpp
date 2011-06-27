@@ -391,18 +391,18 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
     ntrimax = max( (int) 1.5*nbe,(int)(0.3*npask));
 
     if(verbosity>10){
-      cout << "npask=" << npask << endl;
-      cout <<" memory is given " << endl;
-      cout << " nvmax " << nvmax << endl;
-      cout << " ntrimax " << ntrimax << endl;
-      cout << " ntetmax " << ntetmax << endl;
+      cout << " mmg3d : npask=" << npask << endl;
+      cout << "      memory is given " << endl;
+      cout << "        nvmax " << nvmax << endl;
+      cout << "        ntrimax " << ntrimax << endl;
+      cout << "        ntetmax " << ntetmax << endl;
     }
   }
 									       
   if(verbosity>10){
-    cout << " nvmax " << nvmax << endl;
-    cout << " ntrimax " << ntrimax << endl;
-    cout << " ntetmax " << ntetmax << endl;
+    cout << " mmg3d: nvmax " << nvmax << endl;
+    cout << "        ntrimax " << ntrimax << endl;
+    cout << "        ntetmax " << ntetmax << endl;
   }
 
   KN<double> *metric=0;
@@ -448,7 +448,26 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
 
   if( res > 0){
     cout << " problem of remeshing with mmg3d :: error" <<  res << endl; 
-    exit(1);
+    free( MMG_Th3->point );
+    free( MMG_Th3->tria  );
+    free( MMG_Th3->tetra );
+    /*la desallocation de ce pointeur plante dans certains cas...*/
+    if(verbosity > 10) cout << "mesh: adja" << endl;
+    free( MMG_Th3->adja);
+    if(verbosity > 10) cout << "mesh: disp" << endl;
+    if( BoolMoving ){
+      free( MMG_Th3->disp->alpha );
+      free( MMG_Th3->disp->mv );
+    }
+    free( MMG_Th3->disp );
+    free( MMG_Th3 );
+    
+    free(sol->met);
+    if (abs(opt[0])!=9)
+      free(sol->metold);  //9 -> free in mmg3dlib.c 
+    free(sol);
+
+    ExecError("mmg3d ??? ");
   }
   
   Mesh3 *Th3_T = MMG_pMesh_to_msh3( MMG_Th3 );
