@@ -1309,7 +1309,7 @@ public:
 	finishtime = clock();
 	timeused= (finishtime-starttime)/(1000 );
 	printf("=====================================================\n");
-	cout << "MUMPS : time solve step  :: " << timeused << " ms" <<endl;
+	cout << "MUMPS : time solve step  :: " << timeused << " ms,  Mem usage " << id.INFOG(16) << "Mb  \n";
 	printf("=====================================================\n");
       }
     }
