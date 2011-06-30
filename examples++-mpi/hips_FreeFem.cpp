@@ -315,6 +315,17 @@ public:
   HipsSolver(const MatriceMorse<double> &AA,string datafile, const KN<long> &param_int1, const KN<double> &param_double1,  MPI_Comm  * mpicommw  ) 
     : data_option(datafile) ,param_int(17), param_double(6),id(GetId())
   {
+    
+    if(mpicommw==0)
+	comm=MPI_COMM_WORLD;
+    else 
+	comm= *mpicommw;
+    
+    MPI_Comm_rank(comm, &proc_id);
+    MPI_Comm_size(comm, &nproc);
+    if(proc_id==0  || verbosity>2)
+	cout << "  Hips Comm " << proc_id<< " / "<< nproc << endl;
+    
     Def_iopt(param_int);
     Def_dopt(param_double);
 
@@ -348,10 +359,8 @@ public:
     }     ; 
     
     int ic,sym=AA.symetrique ,symm=AA.symetrique; 
-    
-    cout << " Hips INT  opts " << param_int << endl;
-    cout << " Hips REAL  opts " << param_double << endl;
 
+ 
     if(!data_option.empty())
       parm_param(datafile,param_int,param_double);
     else
@@ -361,19 +370,16 @@ public:
 	for(int i=0;i< min(param_double.N(),param_double1.N()); ++i) 
 	  if(param_double1[i]>-0.9999)  param_double[i]=param_double1[i];	    
       }
-    // get value ... 
+    // force param  value ... 
     param_int[0]=min(max(param_int[0],2L),1L);
     param_int[5]= sym;
     param_int[4]= symm;
-
+    
     ic = param_int[0];
-    symm=param_int[4]; // if 0 => use half of matrix
-    sym=param_int[5];
     scale=param_int[9];
-    if(verbosity>1)
+    
+    if(verbosity>3 && proc_id==0  )
       {
-	cout << " Hips INT  opts " << param_int1 << endl;
-	cout << " Hips REAL  opts " << param_double1 << endl;
 	cout << " Hips INT  opts " << param_int << endl;
 	cout << " Hips REAL  opts " << param_double << endl;
       }
@@ -385,15 +391,6 @@ public:
     for(int i=0;i<param_double.N();++i)    
       HIPS_SetOptionREAL(id,dopt_wrapper[i],param_double[i] );
  
-    if(mpicommw==0)
-      comm=MPI_COMM_WORLD;
-    else 
-      comm= *mpicommw;
-    
-    MPI_Comm_rank(comm, &proc_id);
-    MPI_Comm_size(comm, &nproc);
-    if(proc_id==0  || verbosity>4)
-      cout << "Comm " << proc_id<< " / "<< nproc << endl;
     if(!data_option.empty()) 
       parm_param(datafile,param_int,param_double);
     
@@ -487,11 +484,12 @@ public:
       for(int i=0;i<n;i++) 
 	if(riord[i]==proc_id)
 	  {
-	    nnzz=(AA.lg[i+1]-AA.lg[i])+nnzz;
+	    nnzz+=(AA.lg[i+1]-AA.lg[i]);
 	  }
       ierr = HIPS_GraphBegin(id, n, nnzz);
       HIPS_ExitOnError(ierr);
-      
+      if(verbosity > 5)
+	  cout << "   Hips : proc " << proc_id << " / nzz = " << nnzz << endl;
       
       
       for(int i=0;i<n;i++)
@@ -524,19 +522,21 @@ public:
 	{	  
 	  ierr = HIPS_AssemblyBegin(id, nnzz, HIPS_ASSEMBLY_OVW, HIPS_ASSEMBLY_OVW, HIPS_ASSEMBLY_FOOL,symm);
 	  HIPS_ExitOnError(ierr);
-	  
+	    int kkk;
 	  for(int i=0;i<n;i++)
 	    {
 	      if(riord[i]==proc_id){
 		  for(int k=AA.lg[i];k<AA.lg[i+1];k++)
-		      //      if( symm!=0 || (AA.cl[k] >= i)) 
-		    {					
+		    {			
+			kkk++;
+			if(verbosity >100) cout << "       " << proc_id << " a( " << i << ", " <<AA.cl[k] << ")= " << AA.a[k] << endl;
 			ierr = HIPS_AssemblySetValue(id, i, AA.cl[k], AA.a[k]);
 			HIPS_ExitOnError(ierr);
 		    }
 	      }
 	      
 	    }
+	    ffassert(kkk);
 	  ierr = HIPS_AssemblyEnd(id);
 	  
 	  HIPS_ExitOnError(ierr);
@@ -624,13 +624,13 @@ public:
 							 
   ~HipsSolver()
   {
-    HIPS_SetOptionINT(id,HIPS_DISABLE_PRECOND,0);
-    HIPS_ExitOnError(ierr);
+    if( (verbosity>3 && proc_id==0 ) ||(verbosity>9) )
+	cout << "   ~Hips_Solver S:" << id << endl;
+  //  HIPS_SetOptionINT(id,HIPS_DISABLE_PRECOND,0);
+  //  HIPS_ExitOnError(ierr);
     ierr = HIPS_Clean(id);
     HIPS_ExitOnError(ierr);	
 
-    if(verbosity>3)
-      cout << "~Hips_Solver S:" << id << endl;
     delete [] iwork1;
     delete [] mapptr;
 
