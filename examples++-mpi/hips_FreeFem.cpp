@@ -371,7 +371,7 @@ public:
 	  if(param_double1[i]>-0.9999)  param_double[i]=param_double1[i];	    
       }
     // force param  value ... 
-    param_int[0]=min(max(param_int[0],2L),1L);
+    param_int[0]=max(min(param_int[0],2L),0L);
     param_int[5]= sym;
     param_int[4]= symm;
     
