@@ -40,6 +40,7 @@ EXTRA_DIST= \
 ./mumps/MUMPS_4.9.2.patch \
 ./mumps/Makefile \
 ./mumps/Makefile-mumps-4.9.2.inc \
+./mumps/Makefile-mumps-4.10.0.inc \
 ./parmetis/Makefile-parmetis.in \
 ./parmetis/ParMetis-3.1.1-ok/stdheaders.h \
 ./parmetis/makefile \
