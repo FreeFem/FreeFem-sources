@@ -624,6 +624,7 @@ public:
 							 
   ~HipsSolver()
   {
+    assert(id>=0);
     if( (verbosity>3 && proc_id==0 ) ||(verbosity>9) )
 	cout << "   ~Hips_Solver S:" << id << endl;
   //  HIPS_SetOptionINT(id,HIPS_DISABLE_PRECOND,0);
@@ -637,12 +638,9 @@ public:
     delete [] iwork;
     delete [] maptmp;
     
-    HIPS_SetOptionINT(id,HIPS_DISABLE_PRECOND,0);
-    HIPS_ExitOnError(ierr);
     if(id>0 && id< MaxIds) Ids[id]=-2;
     id=-2; 
-    ierr = HIPS_Clean(id);
-    HIPS_ExitOnError(ierr);	
+ 	
   }
   
   
@@ -651,6 +649,9 @@ public:
     ffassert(x.N()==Ax.N());
     Ax +=  (const MatriceMorse<double> &) (*this) * x; 
   }
+private:// no copy
+    HipsSolver(const HipsSolver &);  
+    HipsSolver & operator=(const HipsSolver &); 
 };  // CLASS HipsSolver
   
 int HipsSolver::Ids[HipsSolver::MaxIds];
