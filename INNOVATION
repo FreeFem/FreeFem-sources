@@ -1,5 +1,5 @@
 v 3.13-3 ( 30 june 2011 Seville)
-  - correct the Hips interface (not to bad but bug with 4 proc) 
+  - correct the Hips interface (not to bad , in test)
      load "hips_FreeFem"
      int[int] iparm(1);real[int] dparm(1);
      HipsDefaults(iparm,dparm);) // set def option 
