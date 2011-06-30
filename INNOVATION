@@ -1,3 +1,8 @@
+  - correct the Hips interface (not to bad
+     load "hips_FreeFem"
+     int[int] iparm(1);real[int] dparm(1);
+     HipsDefaults(iparm,dparm);) // set def option 
+     ( limit to 100 Hips active linear system ).
   - add interface with MUMPS_4.10.0 version  (with automatic download )
   - add P1dc3d finite element in pluging  "Element_P1dc1" 
   - correct bug in gibbs renumbering in 1 case veru sample mesh)
