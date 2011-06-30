@@ -162,3 +162,4 @@ INCS = $(INCPAR)
 LIBS = $(LIBPAR)
 LIBSEQNEEDED = libseqneeded
 
+WGET = @WGET@
