@@ -14,7 +14,7 @@ PACKAGE1=$(DIRPKG)/MUMPS_$(VERSION).tar.gz
 INSTALL=../..
 VERSION=4.10.0
 
-mumps: FAIRE
+mumps: FAIRE-$(VERSION)
 
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp Makefile.inc $(SRCDIR)
@@ -38,9 +38,9 @@ WHERE:
 	fi
 
 
-FAIRE:
+FAIRE-$(VERSION):
 	$(MAKE) install WHERE 
-	touch FAIRE
+	touch FAIRE-$(VERSION)
 
 Makefile.inc: ../../config.status	Makefile Makefile-mumps-$(VERSION).inc
 	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"

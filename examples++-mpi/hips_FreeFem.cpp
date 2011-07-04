@@ -4,7 +4,8 @@
 // SUMMARY  :  
 // USAGE    : LGPL      
 // ORG      : INRIA FUTUR
-// AUTHOR   : Guy Atenekeng
+// AUTHOR   : Guy Atenekeng 
+//         Modif by F. Hecht 2011
 // E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
 //
 //ff-c++-LIBRARY-dep:  hips metis  blas  mpi
@@ -232,7 +233,7 @@ class HipsSolver :   public MatriceMorse<double>::VirtualSolver   {
     mutable double *x;
     mutable INTS   ln;
     mutable INTS ierr;
-    mutable INTS n,nnz;
+  mutable INTS n,nnz,nnzl;
     mutable double * a;
     mutable INTS *ia, *ja;
     mutable int *pp;
@@ -256,8 +257,8 @@ private:
     if(!Initialized)
       {
 	Initialized=true;
-	if(verbosity)
-	cout << " Hips HIPS_Initialize " << MaxIds <<endl;
+	if(verbosity>2)
+	cout << "  Hips HIPS_Initialize " << MaxIds <<endl;
 	INTS ierr = HIPS_Initialize(MaxIds);
 	HIPS_ExitOnError(ierr);
 	for(int i=0;i<MaxIds;++i)
@@ -270,7 +271,7 @@ private:
       if( Ids[i] <0)  
 	{
 	  Ids[i]=i;
-	  if(verbosity) cout << "   find HipsSoler :  id = " << i << "/" <<   MaxIds << endl;
+	  if(verbosity>8) cout << "   find HipsSoler :  id = " << i << "/" <<   MaxIds << endl;
 	  return i;
 	}
     cerr<< " All id of Hips are busy " << MaxIds << " try to store less matrix or change MaxIds (FH.) in " << endl; 
@@ -293,7 +294,7 @@ public:
     param_intd[10]= 1  ; //  HIPS_REORDER
     param_intd[11]= 1  ; //  HIPS_DOF
     param_intd[12]= 2  ; //  HIPS_SCALENBR
-    param_intd[13]= verbosity  ; //  HIPS_VERBOSE
+    param_intd[13]=  max(0L,verbosity-2)  ; //  HIPS_VERBOSE
     param_intd[14]= 2  ; //  HIPS_DOMSIZE
     param_intd[15]= 2  ; //  HIPS_SCHUR_METHOD
     param_intd[16]= 2  ; //  HIPS_ITMAX_SCHUR
@@ -312,8 +313,8 @@ public:
 public:
   
   
-  HipsSolver(const MatriceMorse<double> &AA,string datafile, const KN<long> &param_int1, const KN<double> &param_double1,  MPI_Comm  * mpicommw  ) 
-    : data_option(datafile) ,param_int(17), param_double(6),id(GetId())
+  HipsSolver(const MatriceMorse<double> &AA,double eeps,string datafile, const KN<long> &param_int1, const KN<double> &param_double1,  MPI_Comm  * mpicommw  ) 
+    : eps(eeps),data_option(datafile) ,param_int(17), param_double(6),id(GetId())
   {
     
     if(mpicommw==0)
@@ -374,7 +375,10 @@ public:
     param_int[0]=max(min(param_int[0],2L),0L);
     param_int[5]= sym;
     param_int[4]= symm;
-    
+
+    if(eps>0 &&( param_double1.N() ==0 ||  param_double1[0]<0) ) param_double[0]= eps;
+    else eps = param_double[0];
+
     ic = param_int[0];
     scale=param_int[9];
     
@@ -488,8 +492,9 @@ public:
 	  }
       ierr = HIPS_GraphBegin(id, n, nnzz);
       HIPS_ExitOnError(ierr);
+      nnzl=nnzz;
       if(verbosity > 5)
-	  cout << "   Hips : proc " << proc_id << " / nzz = " << nnzz << endl;
+	cout << "   Hips : proc " << proc_id << " / nzz   = " << nnzz << " / nzzg " << nnz <<  endl;
       
       
       for(int i=0;i<n;i++)
@@ -540,7 +545,9 @@ public:
 	  ierr = HIPS_AssemblyEnd(id);
 	  
 	  HIPS_ExitOnError(ierr);
+
 	}
+
    }
 
   void Solver(const MatriceMorse<double> &AA,KN_<double> &x,const KN_<double> &b) const  {
@@ -583,6 +590,9 @@ public:
     ierr = HIPS_GetSolution(id, nloc, unknownlist, xx, HIPS_ASSEMBLY_FOOL);
     
     HIPS_ExitOnError(ierr);
+    INTL nnzp;
+    ierr= HIPS_GetInfoINT(id,HIPS_INFO_NNZ_PEAK,&nnzp); 
+
     
     int *perm = new int[n], *invp= new int[n];
     
@@ -593,24 +603,33 @@ public:
     
     for(int i=0;i<n;i++) 
       invp[perm[i]]=i;
-    if(scale)
+
       {
 	for(int i=0;i<n;i++) 
 	  {
 	    x[i]=xz[invp[i]];
-	    x[i]=x[i]*scaletmpc[i];
+	    if(scale) x[i]=x[i]*scaletmpc[i];
 	  }
       }
-    
-    
+    REAL residu;
+    INTL ninner,nouter;
+
+    ierr= HIPS_GetInfoREAL (id,HIPS_INFO_RES_NORM,&residu);
+    ierr= HIPS_GetInfoINT(id,HIPS_INFO_INNER_ITER,&ninner); 
+    ierr= HIPS_GetInfoINT(id,HIPS_INFO_OUTER_ITER,&nouter); 
+    if(residu >eps) 
+      cout << "\n\n WARNING Hips Do not Converge " << id << " Resudual = " <<residu<< " / " <<eps 
+	   << " Itertion ninner :"<< ninner 
+	   <<" , outer : " << nouter <<"\n\n"<< endl; 
+      else if( verbosity > 1 && proc_id==0 )
+	cout << "  Hips " << id << ", Res = " <<residu << " / " <<eps 
+	 << " Iter  inner : "<< ninner 
+	     <<" , outer : " << nouter << " nzz peak =" <<nnzp << " nnz " << nnz  <<  endl; 
     /**************************************************/
     /* Free HIPS internal structure for problem "id"  */
     /*************************************************/
+    //HIPS_INFO_RES_NORM
       /*
-      INTL nnzp;
-     ierr= HIPS_GetInfoINT(id,HIPS_INFO_NNZ_PEAK,&nnzp);
-    if(verbosity>1 && ierr==HIPS_SUCCESS ) 
-	cout << "  Hips Peak nnz  = " << nnzp  << "   ( id = " << id << ")" << endl; ;
     */
     delete [] xz;
     delete [] perm;
@@ -664,7 +683,7 @@ BuildSolverHipsSolvermpi(DCL_ARG_SPARSE_SOLVER(double,A))
 {
   if(verbosity>9)
     cout << " BuildSolverSuperLU<double>" << endl;
-  return new HipsSolver(*A,ds.data_filename, ds.lparams, ds.dparams,(MPI_Comm *)ds.commworld);
+  return new HipsSolver(*A,ds.epsilon,ds.data_filename, ds.lparams, ds.dparams,(MPI_Comm *)ds.commworld);
 		    }
 class Init { public:
     Init();
@@ -723,7 +742,8 @@ Init::Init()
   if(! Global.Find("defaultsolver").NotNull() )
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   Global.Add("defaulttoHips","(",new OneOperator0<bool>(SetHipsSolver));
-  Global.Add("HipsDefaults","(",new OneOperator2<bool,KN<long>*,KN<double> *>(HipsDefaults));
+  if(! Global.Find("HipsDefaults").NotNull() )
+    Global.Add("HipsDefaults","(",new OneOperator2<bool,KN<long>*,KN<double> *>(HipsDefaults));
   
 }
 		      
