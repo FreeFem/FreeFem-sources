@@ -1,3 +1,5 @@
+  - correct trap in check convect-apt.edp  example
+  - add the existance of patch in configure 
 v 3.13-3 ( 30 june 2011 Seville)
   - correct the Hips interface (not to bad , in test)
      load "hips_FreeFem"

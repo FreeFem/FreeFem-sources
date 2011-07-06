@@ -70,14 +70,17 @@ AC_LANG(C++)
 
 AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
-case "$ff_m4 $ff_bison" in 
-*no*)   AC_MSG_ERROR([ Sorry no m4,bison command !]);;
+AC_CHECK_PROG(ff_patch,patch,yes,no)
+case "$ff_m4 $ff_bison $ff_patch" in 
+*no*)
+    AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch ])	
+    AC_MSG_ERROR([ Sorry missing  m4,bison,patch command !]);;
 esac
 
 
 if test -z "$CXX"; then
-  AC_MSG_ERROR([ Sorry no c++ compiler !])
   AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
+  AC_MSG_ERROR([ Sorry no c++ compiler !])
 fi
 
 AC_COMPUTE_INT(ff_size_long,[sizeof(long])
@@ -92,8 +95,8 @@ if test "$ff_size_ptr" -eq 4  ;then
 elif test  "$ff_size_ptr" -eq 8  ;then
  AC_SUBST(SIZEOF_PTRINBIT,64)
 else
-  AC_MSG_ERROR([ Sorry no sizeof c++ pointer are not  4 or 8])
   AC_MSG_NOTICE( [ fatal error : sizeof pointer ! ] ); 
+  AC_MSG_ERROR([ Sorry  sizeof c++ pointer are not  4 or 8])
 fi
 
 
@@ -2143,6 +2146,7 @@ if test "$ff_glut_ok" != yes  ; then
     AC_MSG_NOTICE([         because the configure do not find OpenGL, GLUT or pthread  developer stuff ])
     AC_MSG_NOTICE([         read the README to find missing package  ])
     AC_MSG_NOTICE([         F. Hecht  ])
+    AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install freeglut3-dev ])	
     AC_MSG_NOTICE([     *********************************************** ])
 fi
 
