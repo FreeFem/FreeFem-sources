@@ -1546,8 +1546,8 @@ struct Op_All2All3<Complex> : public ternary_function<KN_<Complex>,KN_<Complex>,
 			   (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);
 #else
       chunk*=2;
-      return MPI_Alltoall( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
-			   reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);
+      return MPI_Alltoall( (void *) (Complex*) s, chunk, MPI_DOUBLE,
+			   (void *) (Complex*)  (r), chunk, MPI_DOUBLE, comm);
 #endif	
     }
 };
@@ -1569,9 +1569,9 @@ struct Op_Allgather3<Complex> : public ternary_function<KN_<Complex>,KN_<Complex
     return MPI_Allgather( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
 			  (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);
 #else
-    chunk*2=;
-    return MPI_Allgather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
-			  reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);
+    chunk*=2;
+    return MPI_Allgather( (void *) (Complex*) (s), chunk, MPI_DOUBLE,
+			 (void *) (Complex*) (r), chunk, MPI_DOUBLE, comm);
 #endif
   }
 };
@@ -2021,10 +2021,10 @@ long mpiWait(fMPI_Request * frq) {
  long res=MPI_SUCCESS;
   while(rq && *rq!=MPI_REQUEST_NULL)
     {
-      res == MPI_Wait(rq,&status); 
+      res = MPI_Wait(rq,&status); 
       DoOnWaitMPIRequest(rq);
     }
-   
+    return res;  
 
 }
 

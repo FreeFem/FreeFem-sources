@@ -289,6 +289,7 @@ basicAC_F0::name_and_type  OptimAlgo::E_LCG::name_param[]= {
  { "nbiter",&typeid(long) },
    { "nbiterline",&typeid(long)}
 };
+void init_algo();
 
 void init_algo()
 {
