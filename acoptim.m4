@@ -51,6 +51,11 @@ AC_ARG_ENABLE(optim,[  --enable-optim	Turn on compiler optimization])
 
 if test "$enable_debug" = yes;
 then
+        CHECK_COMPILE_FLAG(C,-g,CFLAGS)
+        CHECK_COMPILE_FLAG(C,-g,CNOFLAGS)
+	CHECK_COMPILE_FLAG(C++,-g,CXXFLAGS)
+	CHECK_COMPILE_FLAG(Fortran 77,-g,FFLAGS)	
+
 	AC_MSG_RESULT(yes)
 else
 	AC_MSG_RESULT(no)

@@ -3840,7 +3840,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
          }
     }          
                
-  const FESpace & Uh(*data->Uh);
+  const FESpace & Uh(*data->Uh);    
   const FESpace & Vh(*data->Vh);
   throwassert(Nbcomp==Uh.N && Nbcomp==Vh.N); 
   KN<R> *B=new KN<R>(Vh.NbOfDF);

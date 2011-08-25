@@ -45,7 +45,7 @@ using namespace std;
 #define  MPICH_SKIP_MPICXX
 #undef MPICH_IGNORE_CXX_SEEK
 #define MPICH_IGNORE_CXX_SEEK
-#include "mpi.h"
+#include <mpi.h>
 
 // Remark on mipich  MPI_Comm, MPI_Resquest, MPI_Group, MPI_Op are int 
 //  => encapsulation
@@ -94,7 +94,7 @@ map<MPI_Request*,DoOnWaitMPI_Request *> ToDoOnWaitMPI_Request;
 void GetPendingWait() ;
 
 
-template<class T> struct MPI_TYPE {};
+template<class T> struct MPI_TYPE {static const MPI_Datatype  TYPE(){return MPI_BYTE;}};;
 template<> struct MPI_TYPE<long>      {static const MPI_Datatype  TYPE(){return MPI_LONG;}};
 template<> struct MPI_TYPE<int>      {static const MPI_Datatype TYPE(){return MPI_INT;}};
 template<> struct MPI_TYPE<double>    {static const MPI_Datatype TYPE(){return MPI_DOUBLE;}};
@@ -1592,9 +1592,9 @@ struct Op_Allgather13<Complex> : public ternary_function<Complex *,KN_<Complex>,
     return MPI_Allgather( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
 			  (void *) (Complex*) r, chunk, MPI_DOUBLE_COMPLEX, comm);
 #else
-    chunk*2=;
-    return MPI_Allgather( reinterpret_cast<void*> (s), chunk, MPI_DOUBLE,
-			  reinterpret_cast<void*> (r), chunk, MPI_DOUBLE, comm);
+    chunk*=2;
+    return MPI_Allgather((void *) (Complex*)(s), chunk, MPI_DOUBLE,
+			   (void *) (Complex*) (r), chunk, MPI_DOUBLE, comm);
 #endif
   }
 };
