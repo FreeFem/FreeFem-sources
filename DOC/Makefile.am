@@ -30,9 +30,9 @@ clean:
 	-rm -r cpfigs
 
 cpfigs/%.pdf:plots/%.eps
-	$(EPSTOPDF) $^ --outfile=$@
+	$(EPSTOPDF) $^ -o $@
 cpfigs/%.pdf:figures/%.eps
-	$(EPSTOPDF) $^ --outfile=$@
+	$(EPSTOPDF) $^ -o $@
 cpfigs/%.eps:plots/%.jpg
 	convert $^  $@
 cpfigs/%.eps:plots/%.pdf

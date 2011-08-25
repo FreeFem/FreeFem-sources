@@ -1,3 +1,6 @@
+  - correct problem on lion missing function second in arpack 
+    change Makefile.am to change second in secnd2 in all instrinc 
+    in arpack source. 
 v 3.14 
   - correct in configure remove the default -O2 -g autoconf value 
     and add -g in case of --enable-debug 
