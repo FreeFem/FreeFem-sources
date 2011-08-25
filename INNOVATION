@@ -1,3 +1,12 @@
+v 3.14 
+  - correct in configure remove the default -O2 -g autoconf value 
+    and add -g in case of --enable-debug 
+  - a very old error in the on() functionnal
+    the bug is with  a vectorial finite element like RT0, .. 
+     the name of vectorial must     be in lexicographic order 
+     so   u1,u2  is ok but v,u is wrong
+    is correct in version 3.14 the 24/08/2011
+
   - correct trap in check convect-apt.edp  example
   - add the existance of patch in configure 
 v 3.13-3 ( 30 june 2011 Seville)

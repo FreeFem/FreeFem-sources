@@ -474,8 +474,8 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
   
   // cout << "~SolveGMRESPrecon; " << endl;
  }
-   virtual bool ChecknbLine(int n) const { return true;}  
-  virtual bool ChecknbColumn(int m) const { return true;} 
+   virtual bool ChecknbLine(int ) const { return true;}  
+  virtual bool ChecknbColumn(int ) const { return true;} 
 
  
 };     

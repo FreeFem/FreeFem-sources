@@ -209,13 +209,21 @@ class BC_set : public E_F0mps { public:
         ffassert(uu);
         const MGauche *ui=uu->simple();
         ffassert(ui && ui->second == op_id);
-        // cout << ii->first << " n¡" << ui->first <<   " = ? " << endl;
+        if(verbosity>9)
+         cout << " on : " << ii->first << " n¡" << ui->first <<   " = ? " << endl;
         if (complextype)
         bc[kk]= make_pair(ui->first,CastTo<Complex>(ii->second));
         else
         bc[kk]= make_pair(ui->first,CastTo<double>(ii->second));
-        ii->second;
-      }     
+        //ii->second;
+      } 
+    //  sort bc / num de composante
+        
+        std::sort(bc.begin(),bc.end());
+        if(verbosity>9)
+        for (vector<pair<int,Expression> >::iterator i=bc.begin(); i !=bc.end();++i)
+            cout <<"  on " <<  i->first << " " << i->second << endl;
+        
     for (int i=0;i<n;i++)
       if( ! BCastTo<KN_<long> >(args[i]))
          {

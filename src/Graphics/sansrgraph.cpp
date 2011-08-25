@@ -132,6 +132,7 @@ static reel echx,echy,rxmin,rxmax,rymin,rymax;
 static int  lacouleur=0, width, height, currx=0, curry=0;
 #define call(i) i
 static int INITGRAPH=0;
+void myend();
 void myend()
 {
  if (INITGRAPH)
@@ -171,7 +172,7 @@ int main (int argc, char **argv)
   return 0;
 }
 #else
-
+void doatexitff();
 void doatexitff()
 {
 #ifdef WIN32
@@ -201,13 +202,13 @@ int main (int argc, char **argv)
 
 
 #endif
-
+void message(char *s);
 void message(char *s)
 {  printf("%s	\n",s);}
 
 void erreur(char *s)
 { message(s); exit(0);}
-
+void *safecalloc(size_t nb, size_t  size);
 void *safecalloc(size_t nb, size_t  size)
 {
   void* p=NULL;
@@ -215,12 +216,12 @@ void *safecalloc(size_t nb, size_t  size)
   if (p == NULL) printf("Run out of Memory!\n");
   return p;
 }
-
+void safefree(void** f);
 void safefree(void** f)
 {
   if(*f){ free((char*) *f); *f=NULL;}
 }
-
+void rflush();
 void rflush()
 {
 }
@@ -412,8 +413,10 @@ int InPtScreen( reel x, reel y)
 }
 
 
-
-
+float scali(int i);
+float scalj(int i);
+float scalx(int i);
+float scaly(int i);
 float scali(int i)
 {
   return i/echx  + rxmin;
@@ -478,6 +481,7 @@ void plotstring (const char *  string)
 void showgraphic()
 {
 }
+void x11draw3(int * ptype);
 
 void x11draw3(int * ptype)
 {
@@ -499,7 +503,7 @@ void penthickness(int pepais)
   if (psfile) fprintf(psfile,"%d setlinewidth\n",pepais);
 }
 
-
+void x11linsrn(int * ,int * ,int * ,int * );
 void x11linsrn(int * ,int * ,int * ,int * )
   //int *x1,*x2,*y1,*y2;
 {   
@@ -511,7 +515,7 @@ void viderbuff()
 }
 
 
-
+void cercle(reel , reel , reel );
 void cercle(reel , reel , reel )
 {
   //int r = (int) (rayon * echx);
@@ -540,6 +544,7 @@ int  execute (const char * str)
  return  system(str);
 }
 
+char Getijc(int *x1,int *y1);
 char Getijc(int *x1,int *y1)
 {
   //char char1;
@@ -577,7 +582,7 @@ void openPS(const char *filename )
   if(psfile_save) closePS();
   time_t t_loc;
   int  widthA4PS=596;
-  int heightA4PS=842;
+  //int heightA4PS=842;
   float s= (double)widthA4PS/width;
   char  username[10];
   /*if (!cuserid(username)) */ strcpy(username,"inconnue");
@@ -661,7 +666,7 @@ static void     FillRect(float x0,float y0, float x1, float y1)
      r[6]=x0;r[7]=y1;
      fillpoly(4,r);
  }
-
+int PutLevel(int lineno, float xf, int col);
 int PutLevel(int lineno, float xf, int col)
 {
   float xmin,xmax,ymin,ymax;
@@ -700,6 +705,9 @@ int PutLevel(int lineno, float xf, int col)
   int getgrey(){ return grey;}
 
 class Grid;
+void SaveMesh(Grid &);
+void SavePlot(int , Grid& , double *);
+void SavePlot(int , Grid& , float *);
 
 void SaveMesh(Grid &){}
 void SavePlot(int , Grid& , double *){}
