@@ -11,10 +11,10 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # add check of FLIBS and X11_LIBS  v2.24-2
 
 AC_INIT(FreeFem++,3.14,hecht@ann.jussieu.fr,freefem++)
-: ${CFLAGS=""}
-: ${CXXFLAGS=""}
-: ${FCFLAGS=""}
-: ${FFLAGS=""}
+dnl : ${CFLAGS=""}
+dnl : ${CXXFLAGS=""}
+dnl : ${FCFLAGS=""}
+dnl : ${FFLAGS=""}
 
 
 AC_PREREQ(2.50) dnl for AC_LANG_CASE

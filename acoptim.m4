@@ -51,8 +51,12 @@ AC_ARG_ENABLE(optim,[  --enable-optim	Turn on compiler optimization])
 
 if test "$enable_debug" = yes;
 then
+	CFLAGS="`echo $CFLAGS | sed 's/-O2//g'`"
+	FFLAGS="`echo $FFLAGS | sed 's/-O2//g'`"
+	FCFLAGS="`echo $FCFLAGS | sed 's/-O2//g'`"
+	CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
+
         CHECK_COMPILE_FLAG(C,-g,CFLAGS)
-        CHECK_COMPILE_FLAG(C,-g,CNOFLAGS)
 	CHECK_COMPILE_FLAG(C++,-g,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,-g,FFLAGS)	
 
