@@ -651,6 +651,9 @@ return 0;} /* gibbsb_ */
 	*mxz = mmax(i__2,i__3);
 	i__2 = nv[i + 1];
 	for (j = nv[i] + 1; j <= i__2; ++j) {
+	    if(nv[j] > *n) 
+	     printf(" bug in gibbsc_ ##### %ld %ld %ld %ld \n",j,nv[j],i,*niveau );
+	    if(nv[j] <= *n) 
 	    nz[nv[j]] = i;
 /* L20: */
 	}
@@ -663,7 +666,7 @@ return 0;} /* gibbsc_ */
     integer i__1, i__2;
 
     /* Local variables */
-    static integer i, k, s, sv, stk, stk1, stk2;
+    static integer i, k, s, sv, stk, stk1, stk2, nvni=-1;
 
 /* -----------------------------------------------------------------------
  */
@@ -700,7 +703,7 @@ return 0;} /* gibbsc_ */
 
 /*    initialisation */
 
-    stk = *n - 1;
+    stk = *n ;// correct bug FH june 2011 ....
     nv[0] = stk;
     stk2 = stk;
     *niveau = 0;
@@ -711,6 +714,7 @@ L20:
     if (stk2 < stk) {
 	++(*niveau);
 	stk1 = stk2 + 1;
+	nvni=nv[*niveau];/* save value */
 	nv[*niveau] = stk;
 	stk2 = stk;
 /*        print *,' ------- niveau =',niveau,' stk=',stk1,stk2 */
@@ -737,6 +741,7 @@ L20:
 	}
 	goto L20;
     }
+ // if(nvni>0)  nv[*niveau]=nvni;
     --(*niveau);
 /*      call pnv(' gibbsd ',n,nv,niveau) */
 return 0;} /* gibbsd_ */
@@ -1099,7 +1104,7 @@ int FESpace::renum()
     int nnx= SizeToStoreAllNodeofElement();
   	ptvois = new long[nv+1]; 		
 	nn = 	 new long[nnx]; 		
-	vois = 	 new long[nbvoisin+10];	
+	vois = 	 new long[nbvoisin+100];	
 	r = 	 new long[nv+1];			
 	if((!ptvois)||(!nn)||(!vois)||(!r)) return -1;
 	err = gibbsv(ptvois,vois,&nbvoisin,r,nn) ;

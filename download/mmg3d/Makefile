@@ -28,7 +28,7 @@ mmg3d: mmg3d-$(OPT)
 
 mmg3d-1: 	
 	if [ -f $(PACKAGE) ] ;then \
-	   $(MAKE) FAIRE-1; \
+	   $(MAKE) FAIT-1; \
 	else \
 	   echo " file $(PACKAGE)  not found => no mmg3d tar file (download by hand) "; \
 	fi

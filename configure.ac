@@ -10,7 +10,13 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.13,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.14,hecht@ann.jussieu.fr,freefem++)
+dnl : ${CFLAGS=""}
+dnl : ${CXXFLAGS=""}
+dnl : ${FCFLAGS=""}
+dnl : ${FFLAGS=""}
+
+
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
@@ -70,14 +76,17 @@ AC_LANG(C++)
 
 AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
-case "$ff_m4 $ff_bison" in 
-*no*)   AC_MSG_ERROR([ Sorry no m4,bison command !]);;
+AC_CHECK_PROG(ff_patch,patch,yes,no)
+case "$ff_m4 $ff_bison $ff_patch" in 
+*no*)
+    AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch ])	
+    AC_MSG_ERROR([ Sorry missing  m4,bison,patch command !]);;
 esac
 
 
 if test -z "$CXX"; then
-  AC_MSG_ERROR([ Sorry no c++ compiler !])
   AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
+  AC_MSG_ERROR([ Sorry no c++ compiler !])
 fi
 
 AC_COMPUTE_INT(ff_size_long,[sizeof(long])
@@ -92,8 +101,8 @@ if test "$ff_size_ptr" -eq 4  ;then
 elif test  "$ff_size_ptr" -eq 8  ;then
  AC_SUBST(SIZEOF_PTRINBIT,64)
 else
-  AC_MSG_ERROR([ Sorry no sizeof c++ pointer are not  4 or 8])
   AC_MSG_NOTICE( [ fatal error : sizeof pointer ! ] ); 
+  AC_MSG_ERROR([ Sorry  sizeof c++ pointer are not  4 or 8])
 fi
 
 
@@ -712,7 +721,7 @@ AC_ARG_WITH(mpilibs,[  --with-mpilibs= the libs to add to c++,fc, ... (to link w
 AC_ARG_WITH(mpilibsc,[  --with-mpilibsc= the libs to add to c  ... (to link with cc (for pastix lib)  ex:   -L/usr/local/lib -lmpi -lopen-rte -lopen-pal -lutil) ])
 AC_ARG_WITH(mpiinc,[  --with-mpiinc= the include directory directive and preprocess directive  (no mpicc++, just use the compiler)) ])
 AC_ARG_WITH(mpi,[  --with-mpi=[yes|no|mpic++|lam|mpich|openmpi|/usr/local/bin/mpic++|... ]	or --without-mpi	Choose MPI implementation (default is mpic++)])
-
+if test "$with_mpi" != no ; then  
 #if test "$with_mpi" != no ; then
 #AX_MPI(with_mpi=yes, with_mpi=no)
 #fi
@@ -966,6 +975,22 @@ dnl              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
 	CXX="$ff_save_cxx"
 	LIBS="$ff_save_libs"
 fi
+
+else
+          
+	  AC_SUBST(MPIRUN,"")      		
+	  AC_SUBST(MPICC,"")      		
+	  AC_SUBST(MPICXX,"")      		
+	  AC_SUBST(MPIF77,"")      		
+	  AC_SUBST(MPIFC,"")      		
+	  AC_SUBST(MPI_INCLUDE,"")
+	  AC_SUBST(MPI_LIB_DIRS,"")
+	  AC_SUBST(MPI_LIB,"")
+	  AC_SUBST(MPI_LIBC,"")
+	  AC_SUBST(MPI_LIBFC,"")
+	  ff_mpi=no
+
+fi
 #export PATH="$ff_save_path"
 # Looking for useful configuration utilities
 # ------------------------------------------
@@ -1120,7 +1145,12 @@ if test "$ff_mkl_libpath" != "not" ; then
             *ifort*) ff_mkl_cc=intel;;
             *) ff_mkl_cc=gf;;
         esac
-#        intelmpi=_intelmpi;
+#   bof bof .... 
+	case "$MPIRUN" in
+	*/sgi/*)         ff_mkl_mpi=_sgimpt;;
+	*/intel/*)         ff_mkl_mpi=_intelmpi;;
+	*)        ff_mkl_mpi=_openmpi;;
+	esac
 #	echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
 	if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.so ; then
 	  mkl_blas=rt
@@ -1132,7 +1162,7 @@ if test "$ff_mkl_libpath" != "not" ; then
 	  ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -llibmkl_lapack"
 	fi
         ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_scalapack${ff_mkl_lp}"
-        ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs_intelmpi${ff_mkl_lp}"
+        ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp}"
 	ff_blas_ok=yes
 	ff_lapack_ok=yes
 	ff_blas_libs="$ff_mkl_blas"
@@ -2122,6 +2152,7 @@ if test "$ff_glut_ok" != yes  ; then
     AC_MSG_NOTICE([         because the configure do not find OpenGL, GLUT or pthread  developer stuff ])
     AC_MSG_NOTICE([         read the README to find missing package  ])
     AC_MSG_NOTICE([         F. Hecht  ])
+    AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install freeglut3-dev ])	
     AC_MSG_NOTICE([     *********************************************** ])
 fi
 

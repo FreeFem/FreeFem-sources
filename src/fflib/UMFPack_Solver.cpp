@@ -132,7 +132,7 @@ public:
 	ffassert(0);
     }
      if(verbosity>2)
-    cout << "  -- umfpack_di_solve " << endl;
+    cout << "  -- umfpack_di_solve,  peak Mem: " << long(Info[UMFPACK_PEAK_MEMORY])/(1024*1024)*Info[UMFPACK_SIZE_OF_UNIT] << "Mbytes " << endl;
     if(verbosity>3)
     cout << "   b min max " << b.min() << " " <<b.max() << endl;
     if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
@@ -257,7 +257,8 @@ public:
     RR2C(n,xr,xi,x);
     if(verbosity>1)
     {
-     cout << "  -- umfpack_zi_solve " << endl;
+      cout << "  -- umfpack_zi_solve, peak Mem : " <<  long(Info[UMFPACK_PEAK_MEMORY])/(1024*1024)*Info[UMFPACK_SIZE_OF_UNIT] << "Mbytes " << endl;
+      
      if(verbosity>3)     (void)  umfpack_zi_report_info(Control,Info);
     
       cout << "   b min max " << b.min() << " " <<b.max() << endl;

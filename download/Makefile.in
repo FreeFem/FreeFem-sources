@@ -273,6 +273,7 @@ ff_latex = @ff_latex@
 ff_libtool = @ff_libtool@
 ff_m4 = @ff_m4@
 ff_makeindex = @ff_makeindex@
+ff_patch = @ff_patch@
 ff_pdf2ps = @ff_pdf2ps@
 ff_pdflatex = @ff_pdflatex@
 ff_prefix_dir = @ff_prefix_dir@
@@ -339,6 +340,7 @@ EXTRA_DIST = \
 ./mumps/MUMPS_4.9.2.patch \
 ./mumps/Makefile \
 ./mumps/Makefile-mumps-4.9.2.inc \
+./mumps/Makefile-mumps-4.10.0.inc \
 ./parmetis/Makefile-parmetis.in \
 ./parmetis/ParMetis-3.1.1-ok/stdheaders.h \
 ./parmetis/makefile \

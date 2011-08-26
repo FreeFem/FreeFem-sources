@@ -1,88 +1,367 @@
 <!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 <html>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta http-equiv="Content-Type" content="text/html; charset==utf-8"">
    <meta name="Description" content="FreeFem++ is a language that allows 
 the resolution of partial      differential equation using the finite 
 element method">
    <meta name="Keywords" content="language, c++, Multi-platform, free      
 software, Navier-Stokes, elasticity, convection-diffusion, heat      
-equation, linear elliptic PDE's">
-   <title>Freefem++ Home Page (03-december-2004)</title>
-<!-- SUMMARY:                                -->
-<!-- AUTHOR:       Frederic hecht     -->
-<!-- ORG:                                    -->
-<!-- ORIG-DATE:    23 nov 2001     -->
-<!-- DESCRIPTION:                            -->
-<!-- DESCRIP-END.                            -->
-<link href="mailto:hecht@ann.jussieu.fr" rev="Author">
+equation, linear elliptic PDE's",MPI,"Scientific computing">
+
+   <title>Freefem++ Home Page (20-janvier-2010)</title>
+
+   <!-- SUMMARY:                                -->
+   <!-- AUTHOR:       Frederic hecht & Antoine Le Hyaric    -->
+   <!-- ORG:                                    -->
+   <!-- ORIG-DATE:    23 nov 2001     -->
+   <!-- DESCRIPTION:                            -->
+   <!-- DESCRIP-END.                            -->
+
+   <link href="mailto:hecht@ann.jussieu.fr" rev="Author">
 </head>
+
 <body text="#14277D" bgcolor="#FFFFFF" link="#9026D0" vlink="#609F98" 
 alink="#F0000F">
-&nbsp;
-<center><table WIDTH="500" 
-BACKGROUND="@imagedir@bar.jpg" >
-<tr>
-<td ALIGN=LEFT><font color="#0000FF"><font 
-size=+2>FreeFem++  version @ver@
- <img src="@imagedir@new.gif">
-</font></font></td> <td ALIGN=left><font size=+3 
-color="#FF0000"><b><A HREF="#download"> download </font></b></A></td>
-</tr>
-</table></center>
 
-<center><table BORDER=0 WIDTH="600" >
-<tr>
-<center>
-<a href="http://www.upmc.fr"> Universit&eacute Pierre et Marie Curie</a> <a href="http://www.ann.jussieu.fr">  Laboratoire Jacques-Louis Lions</a>
-</font>
+<!-- ---------------------------------------------------------------------- -->
+<center><table WIDTH="500" BACKGROUND="@imagedir@bar.jpg" ><tr>
+
+<td ALIGN=center><font color="#0000FF"><font size=+3>FreeFem++ version
+@ver@  (2d and 3d) </font></td>
+
+</tr></table></center>
+
+<center><table BORDER=0 WIDTH="600"><tr>
+
+<td ALIGN=center><a href="http://www.upmc.fr">Universit&eacute Pierre
+et Marie Curie</a> <a href="http://www.ann.jussieu.fr">Laboratoire
+Jacques-Louis Lions</a></td>
+
+
+</table>
+Financ&eacute par l'<a href="http://www-anr-ci.cea.fr" target="main">ANR</A>
+ / <a href="http://www.freefem.org/ff2a3/" target="main">FF2A3</A>,  R&eacute;f.  : ANR-07-CIS7-002-01 
+	
+
+
 </center>
-<tr>
 
-<td ALIGN=LEFT><b>FreeFem++</b> is an implementation of a language dedicated
-to the finite element method. It provides you a way to solve Partial 
-Differential
-Equations (PDE) simply.&nbsp; Problems involving partial differential 
-equations
-(pde) of&nbsp; several branches of physics such as fluid-structure 
-interactions
-require interpolations of data on several meshes and their manipulation
-within one program. In this report we build on a fast quadtree-based 
-interpolation
-algorithm, propose a language for the manipulation of data on multiple
-meshes (generated with <a 
-href="http://www-rocq.inria.fr/gamma/cdrom/www/freefem/../bamg/eng.htm">bamg</a>) 
-and test by designing an&nbsp; extension of 
-<a href="freefem/fraold.htm">freefem</a>,&nbsp;
-<a href="freefemplus.htm">freefem+</a>.&nbsp; For more detail see the
-<a href="@dir@manual-full.pdf"> the full manual (manual-full) </a> (@manpdf@) ; 
-<a href="@dir@manual.pdf"> or the old version but shorter </a> (@omanpdf@).
-
-<br><b>FreeFem++</b> is written in a C++ idioms, this software run on all
-unix OS (with g++ 2.95.2 or more and  X11R6 or OpenGL with GLUT)) , 
- on  Window95, 98, 2000, NT, and&nbsp;&nbsp;
- on  MacOS 9 (carbon version) and a full MacOS X version with OpenGL.
+<p ALIGN=center>FreeFem++ team&nbsp;: 
+<font color="#FF0000"><a href="http://www.ann.jussieu.fr/~pironnea">Olivier Pironneau</a></font>, 
+<font color="#FF0000"><a href="http://www.ann.jussieu.fr/~hecht">Fr&eacute;d&eacute;ric Hecht</a></font>,
+<font color="#FF0000"><a href="http://www.ann.jussieu.fr/~lehyaric">Antoine Le Hyaric</a></font>,
+ <font> Jacques Morice </font>,
 
 
-<br><b>Remark:</b> the <a href="HISTORY"> history<a/> file give all the life of the software.
-<br> <font size +1 color="#0000FF"> Before downloading you can try  freefem++ on the web :
-<a href="http://www.freefem.org/ffw/index.php"> just click here  (ffw) </a> </font>
-<p>You may ask questions, send comments or bug reports to <a 
-href="mailto:hecht@ann.jussieu.fr">Fr&eacute;d&eacute;ric
-Hecht&nbsp;</a> .
-<p>the <b>FreeFem++ </b>team is:&nbsp; 
-<font color="#FF0000"><a href="http://www.ann.jussieu.fr/~pironnea">Olivier Pironneau</a></font> ,
-<font color="#FF0000"><a href="http://www.ann.jussieu.fr/~hecht">Fr&eacute;d&eacute;ric Hecht</a></font>.
-<font color="#FF0000"><a href="http://www.ann.jussieu.fr/~lehyaric">Antoine Le Hyaric</a></font>.
+
+<p ALIGN=center>Please send questions, comments and bug reports to <a
+href="mailto:hecht@ann.jussieu.fr">Fr&eacute;d&eacute;ric Hecht</a> or
+to the <a
+href="http://www.ann.jussieu.fr/mailman/listinfo/freefempp">FreeFem++
+mailing list</a>.
+
+<p>&nbsp;
+
+<!-- ---------------------------------------------------------------------- -->
 
 
-<p><img SRC="@imagedir@bar.jpg" 
-ALT="bar"  align=CENTER>
-<menu>&nbsp;</menu>
-A very small example of what you can do to solve&nbsp; Poisson&nbsp; 
-equation
-on L shape.
-<br>&nbsp;
+
+<table WIDTH="500" BACKGROUND="@imagedir@bar.jpg" ><tr>
+<td><font color="#0000FF"><font size=+1>Introduction</font></td>
+</tr></table>
+
+<p>&nbsp;
+
+<table><tr>
+
+<td><img src="@imagedir@csSnapSmall.jpg"></td>
+
+<td><b>FreeFem++</b> is
+an implementation of a language dedicated to the finite element
+method. It enables you to solve Partial Differential Equations (PDE)
+easily.
+
+<p>Problems involving PDE (2d, 3d)  from several branches of physics such as
+fluid-structure interactions require interpolations of data on several
+meshes and their manipulation within one program. FreeFem++ includes a
+fast 2^d-tree-based interpolation algorithm and a language for the
+manipulation of data on multiple meshes (as a follow up of <a
+href="http://www-rocq.inria.fr/gamma/cdrom/www/freefem/../bamg/eng.htm">bamg</a>).
+
+<p>FreeFem++ is written in C++ and the FreeFem++ language is a C++
+idiom. It runs on any <b>Unix</b>-like OS (with g++ version 3 or
+higher, X11R6 or OpenGL with GLUT) Linux, FreeBSD, <b>Solaris 10</b>, Microsoft <b>Windows</b> (
+2000, NT, XP, Vista,7 ) and <b>MacOS X</b> (native version using
+OpenGL). FreeFem++ replaces the older <a
+href="freefem/fraold.htm">freefem</a> and <a
+href="freefem/frap.htm">freefem+</a>.  </td>
+
+</tr></table>
+
+<p>&nbsp;
+
+<!-- ---------------------------------------------------------------------- -->
+
+<table WIDTH="500" BACKGROUND="@imagedir@bar.jpg" ><tr>
+<td><font color="#0000FF"><font size=+1>Quick Start</font></td>
+
+</tr></table>
+
+<p>&nbsp;
+<p> <font size=+1> The 
+<A href="http://www.ann.jussieu.fr/~lehyaric/ffcs/index.htm"> <tt> FreeFem++-cs  </tt>  (IDE:  an integrated development environment)   </A> 
+by <A href="http://www.ann.jussieu.fr/~lehyaric"> Antoine Le Hyaric  </A>  is a excellent tool  to develop FreeFem++ scripts.</font>
+</p><p>&nbsp;</p>
+<table width=100% bgcolor=black><tr><td>
+
+<table width=100% bgcolor=white>
+
+<!-- titles -->
+<tr align=center>
+<td><b><u>Unix</u></b> <br> Linux, FreeBSD,  ...  </Td>
+<td><b><u>Windows</u></b><br> 98, NT, 2000, XP</td>
+<td><b><u>MacOS X</u></b><br>Universal ( 10.3 or + ) </td>
+<td><b><u>Documentation</u></b></td>
+<!--
+<td><b><u>Online Demonstration</u></b></td>
+-->
+</tr>
+
+<!-- space -->
+<tr><td><p>&nbsp;</td></tr>
+
+<!-- links -->
+<tr align=center>
+
+<td>Download  <a href="@quickstartlinux@">this sources  archive</a>,
+<br>decompress, compile;</td>
+
+<td>Download <a href="@quickstartwindows@">this EXE</a> <br>and
+run it</td>
+
+<td>Download <br> <a href="@quickstartmacosx@"> Universal (Intel, G3)</a>,<br> 
+decompress, install (see INSTALL-MacOSX) </td> 
+
+<td>Full documentation&nbsp;:<br><a
+href="@dir@/freefem++doc.pdf">freefem++doc.pdf</a></td>
+
+<!--
+<td>Try FreeFem++ online at&nbsp;: <br><a
+href="http://titi.ann.jussieu.fr">LJLL Software Online</a></td>
+-->
+</tr>
+</tr>
+
+<!-- space -->
+<tr><td><p>&nbsp;</td></tr>
+
+<!-- links -->
+<tr align=center>
+
+<td> , install  and run</td>
+
+<td></td>
+
+<td> <A HREF="#mac10.6"> for Snow Leopard version </A> with 
+<A HREF="#macmpi"> with mpi </A></td> 
+
+<td></td>
+
+<!--
+<td></td>
+-->
+</tr>
+
+
+</table>
+
+</td></tr></table><lu>
+<p>&nbsp;
+
+
+<!--  <img src="freefem/new.gif"> <font color="#0000FF" >
+<li> I have built a precompiled version on ubuntu 32bits, 
+to install do under root in /usr/local (with openmpi )
+<br><font color="#000000" ><tt>tar zxvf freefem++-v3.5-1-ubuntu.tar.gz  -C / 
+ </tt></font>
+<br> If some lib is missing, use the -k option (existing files are kept missing ones are
+installed in /usr/lib):
+<br><font color="#000000" ><tt>tar zxvf freefem++-v3.2-usr-lib.tar.gz  -C /  -k 
+<br> </font>
+ ---------------------------------------------------------------------- -->
+
+
+<!--
+<li> Bug under UBUNTU/GLUT: <font color="#FF0000" >missing graphics window title</font> , problem with compiz package
+and freeglut, you can try to kill compiz with
+<br><font color="#000000" >killall compiz.real && killall compiz && metacity --replace --display :0 &</font>
+<br>or To disable/enable it graphically, install the compiz-swith package with synaptic.</font><p>
+-->
+
+<li>To compile FreeFem++, go into the FreeFem++ directory and
+type&nbsp;:
+<br><tt>./configure --enable-download</tt>
+<br><tt>make</tt>
+<br><tt>make install</tt> (as root).
+
+<p>
+
+<li>For all other platforms and versions, please refer to the <a
+href="#download">full list of downloads</a>.
+
+</ul>
+
+<p>
+
+<!-- ---------------------------------------------------------------------- 
+
+<table WIDTH="500" BACKGROUND="@imagedir@bar.jpg" ><tr>
+<td><font color="#0000FF"><font size=+1>Documentation</font></td>
+</tr></table>
+
+<p>&nbsp;
+
+<table width=500 align=center><tr>
+
+<td><img align=left src="@imagedir@booksmall.jpg" border=1></td>
+
+<td>To receive the manual of FreeFem++ 2.21 in book 
+form, send three blank  DVDs and your postal address to&nbsp;:
+
+<p>Dr FREEFEM++
+<br>Laboratoire JL Lions
+<br>University of Paris VI
+<br>175 rue du Chevaleret
+<br>75013 Paris France
+
+<p><font color=red>A Sorry thys  edition of the book is  not  available </font>
+</td>
+
+</tr></table>
+-->
+<p>&nbsp;
+
+<ul>
+
+<li><a
+href="@dir@/freefem++doc.pdf">New Manual (freefem++doc.pdf)</a>
+(@manpdf@). This is a complete rewrite with lots of examples.
+
+<li><img src="freefem/new.gif"> Una documentation es espa&ntilde;ol &nbsp;
+<a href="@dir@/freefem++Spanish.pdf">freefem++Spanish.pdf</a> (7.3 Mb, 22/05/2010), Thank to Eliseo Chacón Vera (eliseo at us.es) </li>
+
+<li><a href="@dir@/INNOVATION">INNOVATION<a/>&nbsp;: last news.
+
+<li><a href="@dir@/HISTORY">HISTORY<a/>&nbsp;: life of the software
+from 2005.
+
+<li><a href="@dir@/HISTORY_BEFORE_2005">HISTORY_BEFORE_2005<a/>&nbsp;: life
+of the software before 2005.
+
+<li>Old obsolete but shorter version of the full manual still available as <a
+href="@dir@/manual.pdf">manual.pdf</a> (@omanpdf@).
+
+
+
+
+</ul>
+
+<p>&nbsp;
+
+<!-- ---------------------------------------------------------------------- -->
+
+<table WIDTH="500" BACKGROUND="@imagedir@bar.jpg" ><tr>
+<td><font color="#0000FF"><font size=+1>News</font></td>
+</tr></table>
+
+
+<p><b>1/10/2005</b> Read or participate in general discussions about
+FreeFEM++ with the <a
+href="http://www.ann.jussieu.fr/mailman/listinfo/freefempp">FreeFEM++
+mailing list</a>
+
+<p><b>23/9/2005</b> FreeFem++ and OpenFEM presentation day at IHP
+(Paris)&nbsp;: <a
+href="http://www.cmap.polytechnique.fr/~allaire/gamni/fem.html">details</a>,
+<a href="Journee-Gamni-2005">slides and examples</a>
+
+<p><b>16/10/2008</b> Ateliers de Simualtion Num&eacute;rique, (Setif,Alg&eacute;rie)
+ &nbsp;: <a
+href="http://www.cmap.polytechnique.fr/spip.php?article239"> details</a>, par 
+<a href="http://www.cmap.polytechnique.fr/spip.php?article105"> Olivier Pantz </a>
+
+<p><b>14-15/09/2009</b></b> 
+<font color=black>  The first tutorial and Workshop on FreeFem++  ,   held September 14th and 15th, 2009, in Paris at IHP,  amphi Hermite ,11 Rue Pierre et Marie Curie.</font>
+ <A HREF="http://www.ann.jussieu.fr/~hecht/ftp/ff++days"> All Presentation, examples, and data are here  </A>
+</p>
+
+<p><b>1-2/09/2010</b> 
+<font color=purple size=+1> <A HREF="http://www.ann.jussieu.fr/FreeFem++"> 
+The second tutorial and Workshop on FreeFem++  </A>, 
+ held September 1st and 2nd, 2010, in Paris at Universit&eacute Pierre
+et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</font>
+<A HREF="http://www.freefem.org/ff2a3/ff++days-2010/"> All Presentation, examples, and data are here </A>
+
+<p><p><p><b>Some Freefem++ presentation (with useful information):<img src="freefem/new.gif"> </b> 
+   <ul>
+         <li>
+ A seminar at <A HREF="http:http://departamento.us.es/edan/">  Departamento de Ecuaciones Diferenciales y Análisis Numérico
+ </A> de la Universidad de Sevilla, Espagne, Jan, 2011   <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/FF-conf/FF-Seville-2011-MPI-Schwarz-DDM.zip"> Coarse grid Schwarz DDM parellel solver in FreeFem++ (y &epsilon;) </A> </li>
+
+        <li>to install
+  my  freefem++ mpi version (3.13-2) on your Mac 10.6 (Snow leopard)   <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/FF-conf/InstallMac10.6.html" > See this page </A>. 
+</li>
+  
+        <li>
+ A seminar at <A HREF="http://www-math.univ-paris13.fr/laga/">  laga  </A>
+ at Villetaneuse, france , jan, 2010   <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/FF-conf/ff++-laga-2010.pdf">FreeFem++, a tool to solve PDE’s numerically. </A>
+</li>
+ 
+      <li>
+ A presentation at <A HREF="http://lma.univ-pau.fr/meet/mamern09/">  MAMERN 09 .</A>
+ at Pau, france , june 11th, 2009,   <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/FH-Mamerm09.pdf">the slide  Error indicator and mesh
+adaption, in FreeFem++ </A>.
+</li>
+      <li>
+ A presentation and   all the data files at <A HREF="http://math.tkk.fi/numericsyear/fefair/"> Finite element fair .</A>
+Helsinki University of Technology 
+Institute of Mathematics, june 5-6Th 2009 , the zip file :<A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/HECHT-FEFE09-dir.zip "> FreeFem++, 3d tools for 
+PDE simulation </A>.</li>
+</li>
+   
+     <li>
+ <A HREF="http://www.cimpa-icpam.org/index.php"> CIMPA</A>-UNESCO-
+ <A HREF="http://www.univ-ag.fr/aoc/?guadeloupe09">GUADELOUPE School  </A>
+January, 03-18, 2009, Pointe-à-Pitre, the <A HREF="ftp/CIMPA/CIMPA-Guadeloupe-FF.pdf"> pdf  of my lecture (742Ko)</A> on freefem++ and the  <A HREF="ftp/CIMPA/FF-CIMPA.zip">  archive (.zip) of all the examples (6.2Mo) </A>
+</li>
+</ul>
+</p>
+
+<!-- ---------------------------------------------------------------------- -->
+
+<table WIDTH="500" BACKGROUND="@imagedir@bar.jpg" ><tr>
+<td><font color="#0000FF"><font size=+1>Examples in 2d and 3d.</font></td>
+</tr></table>
+
+<ul>
+
+<li><a href="http:@imagedir@ff.mp4">A small movie (340Kb)</a>&nbsp;:
+Cool air (green) comes from the lower left and mix with hot air
+(magenta), the right boundary is free. This is
+Navier-Stokes-Boussinesq integrated with P1-bubblle P1 mixte finite
+element.
+
+</ul>
+
+<ul>
+<li>A very small example 2d of how to solve the Poisson equation on a L
+shape&nbsp;:
+
+<table><tr>
+
+<td>
 <blockquote><TT><font size=-1><PRE>
 border aaa(t=0,1){x=t;y=0;};
 border bbb(t=0,0.5){x=1;y=t;};
@@ -112,75 +391,169 @@ for (i=0;i< 10;i++)
 } ;
 
 </PRE></TT></blockquote>
-<p><img SRC="@imagedir@bar.jpg" 
-ALT="bar"  align=CENTER>
-<center>
-<p><img SRC="@imagedir@u4.jpg" 
-BORDER=0 height=250 width=250><img 
-SRC="@imagedir@th4.jpg" BORDER=0 
-height=250 width=250> </p>
-<p> Solution on adapted mesh and associated mesh. </p>
-</center>
-<br>&nbsp;
-<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</pre>
-
-There is some on going work:
-<menu>
-<li>
-3D implementation: new solver, new mesh tools, new kind of finite element </li>
-
-<li>
-There will be some changes in the general policy for FreeFEM (GNU Public
-License, GPL)&nbsp;</li>
-</menu>
 </td>
+
+<td>
+<img SRC="@imagedir@u4.jpg" BORDER=0 height=250 width=250><img
+SRC="@imagedir@th4.jpg" BORDER=0 height=250 width=250> </p>
+<p align=CENTER> Solution on adapted mesh and associated mesh. </p>
+</td>
+
 </tr>
-</table></center>
-<A NAME="download">
+</table>
 
-<p><font size=0>This 
-<a href="http://www.ann.jussieu.fr/~hecht/ftp/freefem"> directory </A>
-contains the different version of <i>FreeFem</i>.</font>
-<p><font size=0>The latest version of  <i>Freefem++</i> is 
-<tt><font color="#FF0000"> @ver@ </font> </tt></font>
-and you can get  the source from a csv server, do the following unix shell commands:
-<PRE><tt>
-cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs login
-<font color="#FF0000">(password = freefem++)</font>
-cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs co freefem++
-cvs -d :pserver:anonymous@idared.ann.jussieu.fr:/Users/pubcvs/cvs co FFedit
+</ul>
 
+A 3d example 
+
+<ul>
+<li>A very small example of how to solve the Stokes equation 3d on cube
+shape&nbsp;:
+
+<table><tr>
+
+<td>
+<blockquote><TT><font size=-1><PRE>
+load "msh3" load "medit" <font color=red> // dynamics load tools for 3d.</font>
+int nn=8;
+mesh Th2=square(nn,nn);
+fespace Vh2(Th2,P2);  Vh2 ux,uz,p2;
+int[int] rup=[0,2],  rdown=[0,1], rmid=[1,1,2,1,3,1,4,1];
+real zmin=0,zmax=1;
+mesh3 Th=buildlayers(Th2,nn,
+  zbound=[zmin,zmax],  reffacemid=rmid, 
+  reffaceup = rup,     reffacelow = rdown);
+  
+medit("c10x10x10",Th); <font color=red> // see the 3d mesh with medit software</font>
+Fe<ce VVh(Th,[P23d,P23d,P23d,P13d]);
+
+<font color=blue> macro Grad(u) [dx(u),dy(u),dz(u)] // EOM</font>
+<font color=blue> macro div(u1,u2,u3) (dx(u1)+dy(u2)+dz(u3))  //EOM</font>
+
+VVh [u1,u2,u3,p];
+VVh [v1,v2,v3,q];
+  
+solve vStokes([u1,u2,u3,p],[v1,v2,v3,q]) = 
+  int3d(Th,qforder=3)( Grad(u1)'*Grad(v1) +  Grad(u2)'*Grad(v2) +  Grad(u3)'*Grad(v3)
+                  - div(u1,u2,u3)*q - div(v1,v2,v3)*p + 1e-10*q*p ) 
+  + on(2,u1=1.,u2=0,u3=0) + on(1,u1=0,u2=0,u3=0) ;
+ plot(p,wait=1, nbiso=5); <font color=red> // a 3d plot of iso  pressure. in progress... march 2009</font>
+<font color=red> //  to see the 10 cut plan in 2d </font>
+for(int i=1;i<10;i++)
+{
+ real yy=i/10.; <font color=red>// compute yy.</font>
+ <font color=red> // do 3d -> 2d interpolation.</font>
+ ux= u1(x,yy,y); uz= u3(x,yy,y);  p2= p(x,yy,y);
+ plot([ux,uz],p2,cmm=" cut y = "+yy,wait= 1);
+}
+</PRE></TT></blockquote>
+</td>
+
+<td>
+<img SRC="@imagedir@Stokes3d.jpg" BORDER=0 height=250 width=250><img
+SRC="@imagedir@Th-Stokes3d.jpg" BORDER=0 height=250 width=250> </p>
+<p align=CENTER> Solution on cup plan y=0.5 and mesh 10x10x10  and associated mesh. </p>
+</td>
+
+</tr>
+</table>
+
+</ul>
+
+<!-- ---------------------------------------------------------------------- -->
+
+<table WIDTH="500" BACKGROUND="@imagedir@bar.jpg" ><tr>
+<td><font color="#0000FF"><font size=+1>Ongoing Work</font></td>
+</tr></table>
+
+<ul>
+<li>
+<img src="@imagedir@new.gif">FreeVol: Finite Vol thecnics in freefem for hyperbolic PDEs </li>
+<li>
+3D implementation: new solver, new mesh tools, new kind of finite
+element </li>
+
+<li> Stabilize and test all // linear solver interface</li>
+
+</ul>
+
+<p>&nbsp;
+
+<!-- ---------------------------------------------------------------------- -->
+
+<table WIDTH="500" BACKGROUND="@imagedir@bar.jpg" ><tr>
+
+<td><font color="#0000FF"><font size=+1><a name="download">Full List
+of Downloads</a></font></td>
+
+</tr></table>
+
+<p><img src="freefem/new.gif"> The current version of <i>Freefem++</i> is <tt><font
+color="#FF0000"> @ver@</tt></font>. You can get the latest source from
+an anonymous <A href="http://mercurial.selenic.com/" > Mercurial SCM </A> copy with the following unix shell commands&nbsp;:
+
+<PRE>
+<tt>hg clone  http://www.freefem.org/ff++/ff++
 </tt></PRE>
 
-<menu>
-<UL>
+
+<p><A NAME="macmpi"> <img src="@imagedir@new.gif">To install a precompile version of freefem++ with mpi interface freefem++ mpi on your Mac in under version 10.6 (Snow leopard)   <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/FF-conf/InstallMac10.6.html" > See this page </A>.<p>
+
+<p><img src="@imagedir@new.gif">To recompile freefem++ with mpi interface freefem++ mpi under Windows   <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/FF-conf/InstallWin32.html" > See this page </A>.<p>
+
+<!-- 
+
+<p>To install and update FreeFem++ automatically on a Debian system,
+insert one of the following lines in the file 
+<tt>/etc/apt/sources.list</tt> then run (as root) &quot;<tt>apt-get
+update</tt>&quot; and &quot;<tt>apt-get install freefem++-x11
+freefem++-nw </tt>&quot;&nbsp;:
+
+<ul>
+
+<li>for Debian &quot;testing&quot;&nbsp;: <tt>deb
+http://www.freefem.org/ff++/debian testing ff++</tt>
+
+<li>for Debian &quot;unstable&quot;&nbsp;: <tt>deb
+http://www.freefem.org/ff++/debian unstable ff++</tt>
+
+<li>for Debian &quot;amd64&quot;&nbsp;: <tt>deb
+http://www.freefem.org/ff++/debian debian64 ff++</tt>
+
+<li> for FreeBSD port you can see <a href="http://www.freshports.org/math/freefem++/">  http://www.freshports.org/math/freefem++/ </a> page 
+
+
+</ul>
+
+-->
+<p>Self-contained archives for all other systems&nbsp;:
+
+<A NAME="mac10.6"> <menu>
 @download@
-<li> To install the current debian package for PC/linux
-<OL>
-<li>  Add in  /etc/apt/sources.list the following ligne 
-<BR>   <FONT >    deb http://www.freefem.org/debian testing ff++ </font>  </li>
-<li>  Do: <FONT > apt-get update </FONT> </li>
-<li>  Do: <FONT > apt-get install freefem++ </FONT> </li>
-</OH>
-</li>
-</UL>
 </menu>
 
-<center><img SRC="@imagedir@bar.jpg" ALT="bar"  
-align=CENTER></center>
+<p>This <a href="ftp"> directory</A> contains all the different
+versions of <i>FreeFem</i>.</font>
 
-<p><br>
-<br>
-    <ADDRESS>Page cr&eacute;e par <A 
-HREF="mailto:hecht@ann.jussieu.fr">Fr&eacute;d&eacute;ric
-	Hecht</A></ADDRESS>
+<p>&nbsp;
+
+<!-- ---------------------------------------------------------------------- -->
+
+<table WIDTH="500" BACKGROUND="@imagedir@bar.jpg" ><tr>
+
+<td><font color="#0000FF"><font size=+1>Page written by</font></td>
+
+</tr></table>
+
+<p>
+<A HREF="mailto:hecht@ann.jussieu.fr">Fr&eacute;d&eacute;ric Hecht</A> et 
+<A HREF="http://www.ann.jussieu.fr/~lehyaric"> Antoine Le Hyaric</A>
     
     <P>
-<!-- Created: from ff++.hmtx file with ListeFF.pl   -->
-<!-- hhmts start -->
-Last modified:  @dateofday@
-<!-- hhmts end -->
-    <HR>
+<!-- Created: from ff++.hmtx file -->
+Last modified&nbsp;:  @dateofday@
+
+<img src="http://www.ann.jussieu.fr/~lehyaric/stats/stats.php3?page=FreeFemppHome&image=black">
     
 </body>
 </html>

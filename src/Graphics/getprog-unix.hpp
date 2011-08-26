@@ -10,6 +10,8 @@ extern const char *  prognamearg;
 extern const char *  edpfilenamearg;
 extern bool  waitatend;
 extern bool echo_edp;
+char * Shell_Space(const char * s);
+
 char * Shell_Space(const char * s)
 {
     const char *c=s;
