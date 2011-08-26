@@ -149,6 +149,7 @@ long  WSend( R * v,int l,int who,int tag,MPI_Comm comm,MPI_Request *rq)
       if(rq) *rq=*request;
       else MPI_Request_free(request); 
     }
+    return ret;
 }
 
 template<class T>
