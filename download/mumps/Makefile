@@ -12,9 +12,9 @@ DIRPKG=../pkg
 SRCDIR=MUMPS_$(VERSION)
 PACKAGE1=$(DIRPKG)/MUMPS_$(VERSION).tar.gz
 INSTALL=../..
-VERSION=4.9.2
+VERSION=4.10.0
 
-mumps: FAIRE
+mumps: FAIRE-$(VERSION)
 
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp Makefile.inc $(SRCDIR)
@@ -38,20 +38,22 @@ WHERE:
 	fi
 
 
-FAIRE:
+FAIRE-$(VERSION):
 	$(MAKE) install WHERE 
-	touch FAIRE
+	touch FAIRE-$(VERSION)
 
 Makefile.inc: ../../config.status	Makefile Makefile-mumps-$(VERSION).inc
 	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"
 
 $(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-tar
 
-$(SRCDIR)/tag-tar:
+$(SRCDIR)/tag-tar:$(PACKAGE1)
 	tar xvzf $(PACKAGE1)
-	patch -d MUMPS_4.9.2   -p 1    <MUMPS_4.9.2.patch
+#	patch -d MUMPS_4.9.2   -p 1    <MUMPS_4.9.2.patch
 	touch $(SRCDIR)/tag-tar
 
+$(PACKAGE1):
+	cd `dirname $@`; $(WGET)   http://graal.ens-lyon.fr/MUMPS/`basename $(PACKAGE1)`
 clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 

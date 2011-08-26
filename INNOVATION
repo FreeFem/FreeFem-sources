@@ -1,3 +1,30 @@
+v 3.14 
+  - correct in configure remove the default -O2 -g autoconf value 
+    and add -g in case of --enable-debug 
+  - a very old error in the on() functionnal
+    the bug is with  a vectorial finite element like RT0, .. 
+     the name of vectorial must     be in lexicographic order 
+     so   u1,u2  is ok but v,u is wrong
+    is correct in version 3.14 the 24/08/2011
+
+  - correct trap in check convect-apt.edp  example
+  - add the existance of patch in configure 
+v 3.13-3 ( 30 june 2011 Seville)
+  - correct the Hips interface (not to bad , in test)
+     load "hips_FreeFem"
+     int[int] iparm(1);real[int] dparm(1);
+     HipsDefaults(iparm,dparm);) // set def option 
+     ( limit to 100 Hips active linear system ).
+  - add interface with MUMPS_4.10.0 version  (with automatic download )
+  - add P1dc3d finite element in pluging  "Element_P1dc1" 
+  - correct bug in gibbs renumbering in 1 case veru sample mesh)
+  - correct bug in interpolation operator with periodic BC
+    mesh Th1=square(2,1), Th2=square(2,2);
+    fespace Vh2(Th2, P1),Ph2(Th&,P1,periodic=[[1,x],[3,x]]);//  une couche
+    matrix Jh=interpolate(Vh2,Ph2,op=0,inside=0);
+    Ph2 w=1.;Vh2 wi; wi[]= Jh*w; // wi must be 1, now this ok. 
+v 3.13-1
+   - correct compilation problem on fedora 13 WITH MPI
 v 3.13 (25 may 2011)   
    - update the finite element list in  documention 
    - add (load "Element-Mixte")  NEW FINITE ELEMENT 2D

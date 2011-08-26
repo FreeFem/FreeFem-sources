@@ -45,16 +45,11 @@
 
 using namespace  Fem2D;
 using namespace  mmg3d;
-
+extern "C" {
+int   MMG_markBdry(MMG_pMesh);
+}
 Mesh3 * MMG_pMesh_to_msh3(MMG_pMesh meshMMG){
   int i;
-   
-  if(verbosity>1){ 
-    cout << "transformation maillage --> msh3 " << endl;
-    cout << "meshMMG->np =" << meshMMG->np << endl;
-    cout << "meshMMG->ne =" << meshMMG->ne << endl;
-    cout << "meshMMG->nt =" << meshMMG->nt << endl;
-  }
 
   // determination of exact :: vertices, triangles, tetrahedrons
   int nv=0,nt=0,nbe=0;
@@ -64,55 +59,67 @@ Mesh3 * MMG_pMesh_to_msh3(MMG_pMesh meshMMG){
   for (int k=1; k<=meshMMG->np; k++) {
     ppt = &meshMMG->point[k];
     if ( ppt->tag & M_UNUSED )  continue;
-    ppt->tmp = ++nv;
+    ppt->tmp = nv++;
   }
   
   nt = 0;
   for (int k=1; k<=meshMMG->ne; k++) {
     ptetra = &meshMMG->tetra[k];
     if ( !ptetra->v[0] )  continue;
-	  nt++;  
+    nt++;  
   }  
 
-
+  meshMMG->nt=0;
+  if(MMG_markBdry(meshMMG)){
+    nbe =  meshMMG->nt;
+  } 
+  
+  if(verbosity>1){ 
+    cout << "transformation maillage --> msh3 " << endl;
+    cout << "meshMMG->np =" << meshMMG->np <<  " -> nv  = " << nv <<endl;
+    cout << "meshMMG->ne =" << meshMMG->ne << "  -> nt  = " << nt <<endl;
+    cout << "meshMMG->nt =" << meshMMG->nt << "  -> nbe = " << nbe << endl;
+  }
+  
   Vertex3 *v = new Vertex3[nv];
   Tet *t  = new Tet[nt];
   Tet *tt = t;
-  Triangle3 *b  = new Triangle3[meshMMG->nt];
+  Triangle3 *b  = new Triangle3[nbe];
   Triangle3 *bb = b;
-     
-  int k;
   
-  for (k=1; k<=meshMMG->np; k++) {
-    ppt = &meshMMG->point[k];
-    v[k-1].x   = ppt->c[0] ;
-    v[k-1].y   = ppt->c[1] ;
-    v[k-1].z   = ppt->c[2] ;
-    v[k-1].lab = ppt->ref  ;
-  }
-
+  int k;
+  Vertex3 *v3=v;
+  for (k=1; k<=meshMMG->np; k++) 
+    {
+      ppt = &meshMMG->point[k];
+      if ( ppt->tag & M_UNUSED )  continue;
+      v3->x   = ppt->c[0] ;
+      v3->y   = ppt->c[1] ;
+      v3->z   = ppt->c[2] ;
+      v3->lab = ppt->ref  ;
+      v3++;
+    }
+  
   
   for (k=1; k<=meshMMG->ne; k++) {
     int iv[4],lab;
     ptetra = &meshMMG->tetra[k];
     if ( !ptetra->v[0] )  continue;
-    iv[0]=meshMMG->point[ptetra->v[0]].tmp-1;
-    iv[1]=meshMMG->point[ptetra->v[1]].tmp-1;
-    iv[2]=meshMMG->point[ptetra->v[2]].tmp-1;
-    iv[3]=meshMMG->point[ptetra->v[3]].tmp-1;
+    for(int i=0;i< 4;++i)
+      iv[i]=meshMMG->point[ptetra->v[i]].tmp;
+    
     lab  =ptetra->ref;
-    (*tt++).set( v, iv, lab);   
+    tt++->set( v, iv, lab);   
   }
  
   
   for (k=1; k<=meshMMG->nt; k++) {
     int iv[3],lab;
     ptriangle = &meshMMG->tria[k];
-    iv[0]=meshMMG->point[ptriangle->v[0]].tmp-1;
-    iv[1]=meshMMG->point[ptriangle->v[1]].tmp-1;
-    iv[2]=meshMMG->point[ptriangle->v[2]].tmp-1;
+    for(int i=0;i< 3;++i)
+      iv[i]=meshMMG->point[ptriangle->v[i]].tmp;
     lab=ptriangle->ref;
-    (*bb++).set( v, iv, lab);
+    bb++->set( v, iv, lab);
   }
 
 
@@ -358,13 +365,25 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
   int defaultntrimax= 1000000;   
   int defaultntetmax= 3000000;     
   
-  KN<long> defaultopt(6);
+  KN<long> defaultopt(9);
+  /*
   defaultopt(0)= 1;
   defaultopt(1)= 0;
   defaultopt(2)= 64;
   defaultopt(3)= 0;
   defaultopt(4)= 0;
   defaultopt(5)= 3;
+  */
+  defaultopt[0]=4; //splitting
+  defaultopt[1]=0; //debug
+  defaultopt[2]=64; //par default 64
+  defaultopt[3]=0;//noswap
+  defaultopt[4]=0;//noinsert
+  defaultopt[5]=0;//nomove
+  defaultopt[6]=5; //imprim
+  defaultopt[7]=3;  //renum (not use scotch ..)
+  defaultopt[8]=500; //renum (not use scotch ..)
+  
 
   int  nvmax;   //(arg(0,stack,-1L));  
   int  ntrimax; //(arg(1,stack,-1L));
@@ -391,18 +410,18 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
     ntrimax = max( (int) 1.5*nbe,(int)(0.3*npask));
 
     if(verbosity>10){
-      cout << "npask=" << npask << endl;
-      cout <<" memory is given " << endl;
-      cout << " nvmax " << nvmax << endl;
-      cout << " ntrimax " << ntrimax << endl;
-      cout << " ntetmax " << ntetmax << endl;
+      cout << " mmg3d : npask=" << npask << endl;
+      cout << "      memory is given " << endl;
+      cout << "        nvmax " << nvmax << endl;
+      cout << "        ntrimax " << ntrimax << endl;
+      cout << "        ntetmax " << ntetmax << endl;
     }
   }
 									       
   if(verbosity>10){
-    cout << " nvmax " << nvmax << endl;
-    cout << " ntrimax " << ntrimax << endl;
-    cout << " ntetmax " << ntetmax << endl;
+    cout << " mmg3d: nvmax " << nvmax << endl;
+    cout << "        ntrimax " << ntrimax << endl;
+    cout << "        ntetmax " << ntetmax << endl;
   }
 
   KN<double> *metric=0;
@@ -448,7 +467,26 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
 
   if( res > 0){
     cout << " problem of remeshing with mmg3d :: error" <<  res << endl; 
-    exit(1);
+    free( MMG_Th3->point );
+    free( MMG_Th3->tria  );
+    free( MMG_Th3->tetra );
+    /*la desallocation de ce pointeur plante dans certains cas...*/
+    if(verbosity > 10) cout << "mesh: adja" << endl;
+    free( MMG_Th3->adja);
+    if(verbosity > 10) cout << "mesh: disp" << endl;
+    if( BoolMoving ){
+      free( MMG_Th3->disp->alpha );
+      free( MMG_Th3->disp->mv );
+    }
+    free( MMG_Th3->disp );
+    free( MMG_Th3 );
+    
+    free(sol->met);
+    if (abs(opt[0])!=9)
+      free(sol->metold);  //9 -> free in mmg3dlib.c 
+    free(sol);
+
+    ExecError("mmg3d ??? ");
   }
   
   Mesh3 *Th3_T = MMG_pMesh_to_msh3( MMG_Th3 );

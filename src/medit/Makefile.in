@@ -263,6 +263,7 @@ ff_latex = @ff_latex@
 ff_libtool = @ff_libtool@
 ff_m4 = @ff_m4@
 ff_makeindex = @ff_makeindex@
+ff_patch = @ff_patch@
 ff_pdf2ps = @ff_pdf2ps@
 ff_pdflatex = @ff_pdflatex@
 ff_prefix_dir = @ff_prefix_dir@
@@ -309,7 +310,7 @@ critip.c		ilists.c		keyboard.c		morphing.c		path.c			status.c		zaldy1.c \
 chrono.h	extern.h	image.h		mesh.h \
 eigenv.h	grafic.h	medit.h		sproto.h 
 
-LDADD = ../libMesh/libMesh.a $(LIBSGLUT)
+LDADD = ../libMesh/libMesh.a $(LIBSGLUT) -lm
 INCLUDES = -I../libMesh
 BUILT_SOURCES = compil.date
 all: $(BUILT_SOURCES)

@@ -4376,22 +4376,22 @@ AnyType AddIncrement(Stack stack, const AnyType & a)
     cout << "AddIncrement:: increment + Add2StackOfPtr2FreeRC " << endl;
     return a;
 }
-
+/* 
 class EConstantTypeOfFE3 :public E_F0
     { public:
 	//  using namespace   Fem2D;
 	typedef Fem2D::TypeOfFE3 * T;
 	T  v;
     public:
-	AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<T>(v);}
-	EConstantTypeOfFE3( T o):v(o) { /*cout << "New constant " << o << endl;*/}
+	AnyType operator()(Stack ) const { ;return SetAny<T>(v);}
+	EConstantTypeOfFE3( T o):v(o) {}
 	size_t nbitem() const { assert(v);
 	cout << " nb item = " << v->N << endl;
 	return v->N ;} 
 	operator aType () const { return atype<T>();} 
     };
 
-
+*/ 
 Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
 {
     throwassert(map_type[typeid( EConstantTypeOfFE3::T).name()]);

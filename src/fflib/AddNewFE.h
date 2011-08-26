@@ -51,3 +51,53 @@ struct AddNewFE {
     Global.New(FEname, Type_Expr(atype<Fem2D::TypeOfFE*>() ,new  EConstantTypeOfFE(tfe)));
   }
 };
+
+// 3d case 
+
+
+class EConstantTypeOfFE3 :public E_F0
+{ public:
+    //  using namespace   Fem2D;
+    typedef Fem2D::TypeOfFE3 * T;
+    T  v;
+public:
+    AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<T>(v);}
+    EConstantTypeOfFE3( T o):v(o) { /*cout << "New constant " << o << endl;*/}
+    size_t nbitem() const { assert(v);
+	cout << " nb item = " << v->N << endl;
+	return v->N ;} 
+    operator aType () const { return atype<T>();} 
+};
+
+
+Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v);
+
+/*
+class EConstantTypeOfFE3 :public E_F0
+{ 
+    //  using namespace   Fem2D;
+    Fem2D::TypeOfFE3 * v;
+    size_t N;
+    bool isconst;
+public:
+    AnyType operator()(Stack ) const { return SetAny<Fem2D::TypeOfFE3*>(v);}
+    EConstantTypeOfFE3( Fem2D::TypeOfFE3 * o,bool ic=true):v(o),N(v->N),isconst(ic) {assert(v); //cout << "New constant " << o << endl;}
+    size_t nbitem() const { return N ;} 
+    EConstantTypeOfFE3 & operator=(Fem2D::TypeOfFE3 * vv) {
+	ffassert( !isconst  && vv && (vv->N == N)); //  same type 
+	v = vv;       
+    }
+    operator aType () const { assert(v);return atype<Fem2D::TypeOfFE3*>();} 
+};
+*/
+extern map<TypeOfFE *,TypeOfFE3 *> TEF2dto3d;
+TypeOfFE * FindFE2(const char * s);
+struct AddNewFE3 {  
+    AddNewFE3 (const char * FEname,Fem2D::TypeOfFE3* tfe,const char * FEname2=0) 
+    {
+      ffassert(tfe); // check 
+      Global.New(FEname, Type_Expr(atype<Fem2D::TypeOfFE3*>() ,new  EConstantTypeOfFE3(tfe)));
+      if(FEname2 && strlen(FEname2))
+	  TEF2dto3d[FindFE2(FEname2)]=tfe;
+    }
+};

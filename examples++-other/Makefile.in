@@ -232,6 +232,7 @@ ff_latex = @ff_latex@
 ff_libtool = @ff_libtool@
 ff_m4 = @ff_m4@
 ff_makeindex = @ff_makeindex@
+ff_patch = @ff_patch@
 ff_pdf2ps = @ff_pdf2ps@
 ff_pdflatex = @ff_pdflatex@
 ff_prefix_dir = @ff_prefix_dir@

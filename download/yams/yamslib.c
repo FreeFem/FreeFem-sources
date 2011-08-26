@@ -10,7 +10,7 @@
 #include "defines.h"
 #include "sproto.h"
 
-
+extern long verbosity;
 /* globals (see globals.h) */
 Error       yerr;
 Info        info;
@@ -98,34 +98,37 @@ static void yams_inival(){
 }
 
 void yams_printval() {
+   if(verbosity<1) return;
+      
   /* set default values for options */
-  printf("opts.hmin %f\n",opts.hmin);
-  printf("opts.hmax %f\n",opts.hmax);
-  printf("opts.kmin %f\n",opts.kmin);
-  printf("opts.kmax %f\n",opts.kmax);
-  printf("opts.eps %f\n",opts.eps);
-  printf("opts.iso %f\n",opts.iso);
-  printf(" opts.alpha %f\n", opts.alpha );
-  printf(" opts.gap %f\n", opts.gap );
-  printf(" opts.degrad %f\n", opts.degrad);
-  printf("opts.ridge %f\n", opts.ridge);
-  printf(" opts.geom %f\n", opts.geom);
-  printf("opts.shock %f\n",opts.shock);
-  printf(" opts.bande %f\n", opts.bande );
-  printf(" opts.walton %f\n", opts.walton);
-  printf("opts.declic %f\n", opts.declic);
-  printf("opts.lambda %f\n",opts.lambda);
-  printf("opts.mu %f\n",opts.mu);
+  printf("-- freeyams options value    \n");
+  printf("       - hmin %f\n",opts.hmin);
+  printf("       - hmax %f\n",opts.hmax);
+  printf("       - kmin %f\n",opts.kmin);
+  printf("       - kmax %f\n",opts.kmax);
+  printf("       - eps %f\n",opts.eps);
+  printf("       - iso %f\n",opts.iso);
+  printf("       - alpha %f\n", opts.alpha );
+  printf("       - gap %f\n", opts.gap );
+  printf("       - degrad %f\n", opts.degrad);
+  printf("       - ridge %f\n", opts.ridge);
+  printf("       - geom %f\n", opts.geom);
+  printf("       - shock %f\n",opts.shock);
+  printf("       - bande %f\n", opts.bande );
+  printf("       - walton %f\n", opts.walton);
+  printf("       - declic %f\n", opts.declic);
+  printf("       - lambda %f\n",opts.lambda);
+  printf("       - mu %f\n",opts.mu);
    
-  printf(" opts.ctrl %d\n", opts.ctrl );
-  printf(" opts.iter %d\n", opts.iter );
-  printf(" opts.choix %d\n", opts.choix );
-  printf(" opts.minnp %d\n", opts.minnp );
+  printf("       - ctrl %d\n", opts.ctrl );
+  printf("       - iter %d\n", opts.iter );
+  printf("       - choix %d\n", opts.choix );
+  printf("       - minnp %d\n", opts.minnp );
   
-  printf(" opts.check %X\n", (unsigned char) opts.check);
-  printf(" opts.ptmult %X\n",  (unsigned char) opts.ptmult);
-  printf(" opts.noreff %X\n",  (unsigned char) opts.noreff);
-  printf(" opts.ffem %X\n",  (unsigned char) opts.ffem );
+  printf("       - check %X\n", (unsigned char) opts.check);
+  printf("       - ptmult %X\n",  (unsigned char) opts.ptmult);
+  printf("       - noreff %X\n",  (unsigned char) opts.noreff);
+  printf("       - ffem %X\n",  (unsigned char) opts.ffem );
  
 }
 
@@ -292,11 +295,13 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
   if( intopt[13] == 1 ) opts.check = 0;
   opts.minnp = intopt[14];
   opts.iter = intopt[15];
+  if(verbosity>9) 
   printf(" type = %d  %d \n", sm->type,intopt[17]);
   if( intopt[16] == 1 ) sm->type |= M_QUADS;
   if( intopt[17] == 1 ) sm->type &= ~M_DETECT;
   if( intopt[18] == 1 ) sm->type &= ~M_SMOOTH;
   //if( intopt[19] == 1 ) sm->type &= ~M_OUTPUT;
+    if(verbosity>9) 
   printf(" type = %d  %d \n", sm->type,intopt[17]);
   sm->type &= ~M_OUTPUT;
   // parsar -r 
@@ -438,11 +443,13 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
       prigap(sm);
     }
   }
-
+  if(verbosity>9) {
+      
   printf("absopt= %d\n", absopt);
   printf("imprim= %d\n", imprim);
   printf("sm->np %d\n", sm->np);
   printf("sm->dim %d\n", sm->dim);
+  }
   /* surface remeshing */
   yerr.inderr[0] = ++phase;
   if ( absopt && absopt <= 6 ) {

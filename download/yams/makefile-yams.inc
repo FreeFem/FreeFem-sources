@@ -3,13 +3,13 @@ include ../ff-flags
 # working dirs
 
 YAMS2DIR =$(abs_top_builddir)/download/yams/freeyams$(yams_VERSION)
-EXEDIR = $(YAMS2DIR)/executable
+EXEDIR = $(abs_top_builddir)/download/bin
 SRCDIR = $(YAMS2DIR)/sourceslib
 OBJDIR = $(YAMS2DIR)/objects
 ARCDIR = $(YAMS2DIR)/archives
 DIRDIR = $(EXEDIR) $(OBJDIR) $(ARCDIR)
 INCDIR = -I$(YAMS2DIR)/sourcesnew -I$(abs_top_builddir)/src/libMesh/
-LDLDIR = -L$(abs_top_builddir)src/libMesh/ -lMesh 
+LDLDIR = -L$(abs_top_builddir)/src/libMesh/ -lMesh 
 VPATH  = $(SRCDIR)
 
 # objects list
