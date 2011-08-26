@@ -8802,60 +8802,60 @@ CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
 FCFLAGS="`echo $FCFLAGS | sed 's/-O2//g'`"
 
     # MacOS X Darwin
-    if test -x /usr/bin/hostinfo
-	then
+if test -x /usr/bin/hostinfo
+then
 
 
 	# If we are on MacOS X to choise the optimisaztion
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking GCC version" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking GCC version" >&5
 $as_echo_n "checking GCC version... " >&6; }
 
-        ff_gcc4=`$CC  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'`
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_gcc4" >&5
+    ff_gcc4=`$CC  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_gcc4" >&5
 $as_echo "$ff_gcc4" >&6; }
 
 	# At the moment, we do not know how to produce correct
 	# optimizated code on G5.
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking PowerPC architecture" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking PowerPC architecture" >&5
 $as_echo_n "checking PowerPC architecture... " >&6; }
-	ff_machine=`/usr/bin/machine`
-        ff_fast="-O3"
-	if test `uname` = Darwin
-	    then
+    ff_machine=`/usr/bin/machine`
+    ff_fast="-O3"
+    if test `uname` = Darwin
+    then
 	    # Optimization flags: -fast option do not work because the
 	    # -malign-natural flags create wrong IO code
-            if test  "$ff_gcc4" -eq 4
-	    then
-               ff_fast='-fast -fPIC'
-            else
-	      ff_fast='-fPIC -O3 -funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math  -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
-	    fi
+        if test  "$ff_gcc4" -eq 4
+	then
+	    ff_fast='-fast -fPIC'
+        else
+	    ff_fast='-fPIC -O3 -funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math  -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
 	fi
+    fi
 
 
         # CPU detection
 
-	case $ff_machine  in
-	  ppc7450) # G4
-		ff_fast="$ff_fast -mtune=G4 -mcpu=G4";;
-          ppc970) # G5
+    case $ff_machine  in
+	ppc7450) # G4
+	    ff_fast="$ff_fast -mtune=G4 -mcpu=G4";;
+        ppc970) # G5
 	        # remove -fstrict-aliasing on G5 to much optim the
 	        # code cash in GC
-		ff_fast="`echo $ff_fast -mtune=G5 -mcpu=G5| sed 's/-fstrict-aliasing //g'`";;
-          ppc*) # G3 ????
-	       ff_fast="-O3";;
-	  i486)
-	    ff_fast="-O3 -march=pentium4";;
-	  *)
+	    ff_fast="`echo $ff_fast -mtune=G5 -mcpu=G5| sed 's/-fstrict-aliasing //g'`";;
+        ppc*) # G3 ????
+	    ff_fast="-O3";;
+	i486)
+	    ff_fast="$ff_fast -O3 -march=native";;
+	*)
 	    as_fn_error $? "cannot determine apple cpu type " "$LINENO" 5
 	    ff_fast="-O3";;
-	 esac
+    esac
 
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_fast" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_fast" >&5
 $as_echo "$ff_fast" >&6; }
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts $ff_fast" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts $ff_fast" >&5
 $as_echo_n "checking whether the C compiler accepts $ff_fast... " >&6; }
 	check_save_flags="$CFLAGS"
 	ac_ext=c
@@ -8912,7 +8912,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C++ compiler accepts $ff_fast" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C++ compiler accepts $ff_fast" >&5
 $as_echo_n "checking whether the C++ compiler accepts $ff_fast... " >&6; }
 	check_save_flags="$CXXFLAGS"
 	ac_ext=cpp
@@ -8969,7 +8969,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran 77 compiler accepts $ff_fast" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran 77 compiler accepts $ff_fast" >&5
 $as_echo_n "checking whether the Fortran 77 compiler accepts $ff_fast... " >&6; }
 	check_save_flags="$FFLAGS"
 	ac_ext=f
@@ -9013,41 +9013,41 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
     # Linux
-    elif test -f /proc/cpuinfo
-	then
+elif test -f /proc/cpuinfo
+then
 
 	# Specific processors
-	proc_type=unknown
-	ff_optim_type=
-	if test `grep 'Pentium III (Coppermine)' /proc/cpuinfo|wc -l` -gt 0
-	    then
-	    proc_type=pentium3
-	    ff_optim_type=-P3
-	elif test `grep 'Intel(R) Pentium(R) III ' /proc/cpuinfo|wc -l` -gt 0
-	    then
-	    proc_type=pentium3
-	    ff_optim_type=-P3
-	elif test `grep 'Intel(R) Pentium(R) 4 ' /proc/cpuinfo|wc -l` -gt 0
-	    then
-	    proc_type=pentium4
-	    ff_optim_type=-P4
-	elif test `grep 'Intel(R) Xeon(TM) CPU' /proc/cpuinfo|wc -l` -gt 0
-	    then
-	    proc_type=pentium4
-	    ff_optim_type=-P4
-	elif test `grep 'AMD Athlon(tm) Processor' /proc/cpuinfo|wc -l` -gt 0
-	    then
+    proc_type=unknown
+    ff_optim_type=
+    if test `grep 'Pentium III (Coppermine)' /proc/cpuinfo|wc -l` -gt 0
+    then
+	proc_type=pentium3
+	ff_optim_type=-P3
+    elif test `grep 'Intel(R) Pentium(R) III ' /proc/cpuinfo|wc -l` -gt 0
+    then
+	proc_type=pentium3
+	ff_optim_type=-P3
+    elif test `grep 'Intel(R) Pentium(R) 4 ' /proc/cpuinfo|wc -l` -gt 0
+    then
+	proc_type=pentium4
+	ff_optim_type=-P4
+    elif test `grep 'Intel(R) Xeon(TM) CPU' /proc/cpuinfo|wc -l` -gt 0
+    then
+	proc_type=pentium4
+	ff_optim_type=-P4
+    elif test `grep 'AMD Athlon(tm) Processor' /proc/cpuinfo|wc -l` -gt 0
+    then
 	    proc_type=athlon
 	    ff_optim_type=-Athlon
-	elif test `grep 'AMD Athlon(tm) XP' /proc/cpuinfo|wc -l` -gt 0
-	    then
-	    proc_type=athlon-xp
-	    ff_optim_type=-AthlonXP
-	fi
+    elif test `grep 'AMD Athlon(tm) XP' /proc/cpuinfo|wc -l` -gt 0
+    then
+	proc_type=athlon-xp
+	ff_optim_type=-AthlonXP
+    fi
 
-	if test "$proc_type" != unknown
-	    then
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -march=$proc_type" >&5
+    if test "$proc_type" != unknown
+    then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -march=$proc_type" >&5
 $as_echo_n "checking whether the C compiler accepts -march=$proc_type... " >&6; }
 	check_save_flags="$CFLAGS"
 	ac_ext=c
@@ -9104,7 +9104,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C++ compiler accepts -march=$proc_type" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C++ compiler accepts -march=$proc_type" >&5
 $as_echo_n "checking whether the C++ compiler accepts -march=$proc_type... " >&6; }
 	check_save_flags="$CXXFLAGS"
 	ac_ext=cpp
@@ -9161,7 +9161,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran 77 compiler accepts -march=$proc_type" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran 77 compiler accepts -march=$proc_type" >&5
 $as_echo_n "checking whether the Fortran 77 compiler accepts -march=$proc_type... " >&6; }
 	check_save_flags="$FFLAGS"
 	ac_ext=f
@@ -9202,16 +9202,16 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	fi
+    fi
 
 	# If we did not find a processor type (this happens with
 	# cygwin), try and select separate capabilities instead.
 
-	if test "$proc_type" = unknown
-	    then
-	    if test `grep -e '^flags.*mmx' /proc/cpuinfo|wc -l` -gt 0
-		then
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -mmmx" >&5
+    if test "$proc_type" = unknown
+    then
+	if test `grep -e '^flags.*mmx' /proc/cpuinfo|wc -l` -gt 0
+	then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -mmmx" >&5
 $as_echo_n "checking whether the C compiler accepts -mmmx... " >&6; }
 	check_save_flags="$CFLAGS"
 	ac_ext=c
@@ -9268,7 +9268,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C++ compiler accepts -mmmx" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C++ compiler accepts -mmmx" >&5
 $as_echo_n "checking whether the C++ compiler accepts -mmmx... " >&6; }
 	check_save_flags="$CXXFLAGS"
 	ac_ext=cpp
@@ -9325,7 +9325,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran 77 compiler accepts -mmmx" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran 77 compiler accepts -mmmx" >&5
 $as_echo_n "checking whether the Fortran 77 compiler accepts -mmmx... " >&6; }
 	check_save_flags="$FFLAGS"
 	ac_ext=f
@@ -9366,10 +9366,10 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	    fi
-	    if test `grep -e '^flags.*sse ' /proc/cpuinfo|wc -l` -gt 0
-		then
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -msse" >&5
+	fi
+	if test `grep -e '^flags.*sse ' /proc/cpuinfo|wc -l` -gt 0
+	then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -msse" >&5
 $as_echo_n "checking whether the C compiler accepts -msse... " >&6; }
 	check_save_flags="$CFLAGS"
 	ac_ext=c
@@ -9426,7 +9426,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C++ compiler accepts -msse" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C++ compiler accepts -msse" >&5
 $as_echo_n "checking whether the C++ compiler accepts -msse... " >&6; }
 	check_save_flags="$CXXFLAGS"
 	ac_ext=cpp
@@ -9483,7 +9483,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran 77 compiler accepts -msse" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran 77 compiler accepts -msse" >&5
 $as_echo_n "checking whether the Fortran 77 compiler accepts -msse... " >&6; }
 	check_save_flags="$FFLAGS"
 	ac_ext=f
@@ -9525,9 +9525,9 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 	    fi
-	    if test `grep -e '^flags.*sse2' /proc/cpuinfo|wc -l` -gt 0
-		then
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -msse2" >&5
+	if test `grep -e '^flags.*sse2' /proc/cpuinfo|wc -l` -gt 0
+	then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -msse2" >&5
 $as_echo_n "checking whether the C compiler accepts -msse2... " >&6; }
 	check_save_flags="$CFLAGS"
 	ac_ext=c
@@ -9682,10 +9682,10 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	    fi
-	    if test `grep -e '^flags.*3dnow' /proc/cpuinfo|wc -l` -gt 0
+	fi
+	if test `grep -e '^flags.*3dnow' /proc/cpuinfo|wc -l` -gt 0
 		then
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -m3dnow" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -m3dnow" >&5
 $as_echo_n "checking whether the C compiler accepts -m3dnow... " >&6; }
 	check_save_flags="$CFLAGS"
 	ac_ext=c
@@ -9742,7 +9742,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C++ compiler accepts -m3dnow" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C++ compiler accepts -m3dnow" >&5
 $as_echo_n "checking whether the C++ compiler accepts -m3dnow... " >&6; }
 	check_save_flags="$CXXFLAGS"
 	ac_ext=cpp
@@ -9799,7 +9799,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran 77 compiler accepts -m3dnow" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Fortran 77 compiler accepts -m3dnow" >&5
 $as_echo_n "checking whether the Fortran 77 compiler accepts -m3dnow... " >&6; }
 	check_save_flags="$FFLAGS"
 	ac_ext=f
@@ -9840,9 +9840,9 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-	    fi
 	fi
     fi
+fi
 fi
 
 # Defines a variable containing the optimization type, to be used in
