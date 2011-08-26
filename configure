@@ -8845,7 +8845,7 @@ $as_echo_n "checking PowerPC architecture... " >&6; }
         ppc*) # G3 ????
 	    ff_fast="-O3";;
 	i486)
-	    ff_fast="$ff_fast -O3 -march=native";;
+	    ff_fast="$ff_fast -O3 ";;
 	*)
 	    as_fn_error $? "cannot determine apple cpu type " "$LINENO" 5
 	    ff_fast="-O3";;

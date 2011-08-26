@@ -152,7 +152,7 @@ then
         ppc*) # G3 ????
 	    ff_fast="-O3";;
 	i486)
-	    ff_fast="$ff_fast -O3 -march=native";;
+	    ff_fast="$ff_fast -O3 ";;
 	*)
 	    AC_MSG_ERROR(cannot determine apple cpu type )
 	    ff_fast="-O3";;
