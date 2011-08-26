@@ -1018,7 +1018,7 @@ struct Op_Allgather : public binary_function<KN_<R>,KN_<R>,long> {
       int mpisizew;
       MPI_Comm_size(comm, &mpisizew); /* local */ 
       int chunk = r.N()/mpisizew;
-      if( ! 	     (r.N()==mpisizew*chunk && chunk==s.N()) )
+      if( ! 	     (r.N()==mpisizew*chunk && chunk*mpisizew==s.N()) )
 	{
 	  cout << " ???? Error size buf  r.N " << r.N() << " s.N = " << s.N() << " mpisizew " << mpisizew << endl; 
 	  ffassert(r.N()==mpisizew*chunk && chunk==s.N());

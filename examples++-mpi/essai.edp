@@ -142,9 +142,9 @@ for(int i=0;i<mpisize;i++)
     aa(i,j)=100*i+j;
 mpiAlltoall(aa,bb);
 mpiAlltoall(aa,bb,mpiCommWorld);
-mpiAllgather(aa(:,mpirank),bb);
-mpiGather (aa(:,mpirank),bb,processor(0,mpiCommWorld));
-mpiScatter(aa,bb(:,mpirank),processor(0,mpiCommWorld));
+//mpiAllgather(aa(:,mpirank),bb);
+//mpiGather (aa(:,mpirank),bb,processor(0,mpiCommWorld));
+//mpiScatter(aa,bb(:,mpirank),processor(0,mpiCommWorld));
 
 cout << " all2all " << mpirank << " " << mpiWtime()-s0 << "s :  "  ;
 cout << mpirank << " aa = " << aa << endl;
