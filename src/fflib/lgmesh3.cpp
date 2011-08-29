@@ -1018,13 +1018,10 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
   KNM<K>   Vp(npPh,dim);
   KN<K>  Vdf(Vh.MaxNbDFPerElement);
   
-  
   if (Vh.isFEMesh() )
     {
-      RdHat KHat[Element::nv];
-      for (int i=1 ; i< Element::nv;++i)
-	KHat[i+1][i] = 1;
-      
+      // crrect bug 29/08/2011 (thanks to rychet@fzu.cz)
+      // remove wrong bulid of KHat (memory out of bound)
       ffassert(Vh.NbOfDF == Th.nv && dim == 1 );
       for (int iv=0;iv<Th.nv;iv++)
 	{
@@ -1036,7 +1033,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
           for(int k=0;k<Element::nv;++k)
             if  ( &Kv[k] == &v) il=k;
           assert(il>=0);
-          mps->set(Th,v,KHat[il],Kv,v.lab);
+          mps->set(Th,v,RdHat::KHat[il],Kv,v.lab);
 	  if (copt) {
 	    if (optiexpK) (*optiexpK)(s); 
 	    yy[iv] =  *(copt[0]);
@@ -1045,7 +1042,6 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
 	    yy[iv] = GetAny<K>( ff(s) );
 	  sptr->clean(); // modif FH mars 2006  clean Ptr
        }
-      
     }
   else
     {

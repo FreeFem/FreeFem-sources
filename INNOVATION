@@ -1,3 +1,7 @@
+  -   remove old bug 3D in interpolation P1 operator 
+      correct bug 29/08/2011 (thanks to rychet@fzu.cz)
+      remove wrong bulid of KHat (memory out of bound)
+
 v 3.14 
   - correct in configure remove the default -O2 -g autoconf value 
     and add -g in case of --enable-debug 
