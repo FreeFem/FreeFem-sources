@@ -30,7 +30,7 @@ EXTRA_DIST= \
 ./metis/Makefile-metis.in \
 ./metis/patch-metis \
 ./mmg3d/Makefile \
-./mmg3d/makefile-mmg3d.inc \
+./mmg3d/patch-mmg3dv4.diff \
 ./mshmet/Makefile \
 ./mshmet/Makefile-mshmet.inc \
 ./mshmet/mshmet.2009.09.16.patch \
