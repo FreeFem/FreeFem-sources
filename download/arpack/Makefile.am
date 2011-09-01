@@ -36,7 +36,7 @@ ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
 	gunzip -c $(PATCH_TAR_GZ) | tar xf -
 	gunzip -c arpack-patch-lapack.tar.gz | tar xf -
 	for i in ARPACK/SRC/*.f ; do \
-	    mv  $$i $$i.cpy; sed 's/call *second/call secnd2/' <$$i.cpy >$$i;rm $$i.cpy; done 
+	    mv  $$i $$i.cpy; sed -e 's/, second/, secnd2/' -e 's/call *second/call secnd2/' <$$i.cpy >$$i;rm $$i.cpy; done 
 	for i in  ARPACK/UTIL/second.f;  do  \
 	   mv  $$i $$i.cpy; cat $$i.cpy| sed 's/ SECOND *(/ secnd2(/'|grep -v EXTERNAL  >$$i;rm $$i.cpy; done 
 	m4  -DFF_BLASLIB="$(BLASLIB)" \
