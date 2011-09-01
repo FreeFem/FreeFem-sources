@@ -2,7 +2,7 @@
 load "msh3" 
 load "tetgen" 
 load "medit" 
-load "mmg3d"                                                               
+load "mmg3d-v4.0"                                                               
 include "MeshSurface.idp"
 
 // build mesh of a box (311)  wit 2 holes  (300,310)
@@ -45,5 +45,5 @@ for(int it=0; it<29; it++){
   cout<<"  ITERATION       "<<it<<endl;
   Lap;
   plot(Th,uh);
-  Th=mmg3d(Th,options=opt,displacement=[zero,zero,uh],memory=500); 
+  Th=mmg3d(Th,opt="-O 9",displacement=[zero,zero,uh]); 
  }
