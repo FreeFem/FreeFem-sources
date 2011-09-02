@@ -23,7 +23,7 @@ mmg3d: build-4
 
 build-4: 
 	-make tag-tar
-	if [ -d mmg3d4  ] ; then  make $(LIBMMG3D) install-4; else echo "Sorry no source " ; fi
+	if [ -d mmg3d4  ] ; then  make $(LIBMMG3D) install-4 WHERE ; else echo "Sorry no source " ; fi
 $(LIBMMG3D):
 	cd mmg3d4/build/sources/; $(CC) -c $(COPT) *.c;
 	$(AR) $(ARFLAGS) $(LIBMMG3D) mmg3d4/build/sources/*.o
