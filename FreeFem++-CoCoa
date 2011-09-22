@@ -23,7 +23,7 @@ for i in "$@"; do
      np=`awk -v npo=$np '$1=="//" && $2=="NBPROC" { if( vv == ""){ print $3;}; vv=1}' $i`
      npa=`awk -v npo=$np '$1=="//" && $2=="PARAM" { if( vv == ""){ for(i=3;i<=NF;++i)print $i;}; vv=1}' $i`
      echo  --- $np -- $npa  --------
-     if [ -n "$np" -a "$np" -gt 1 ] ; then ff="/usr/local/bin/ff-mpirun -np $np"; fi
+     if [  "0$np" -gt 1 ] ; then ff="/usr/local/bin/ff-mpirun -np $np"; fi
      if [ -n "$npa"  ] ; then fa="$fa $npa"; fi
      cmd="$cmd cd $q$d$q; $ff   $q$f$q $fa ;"
   fi

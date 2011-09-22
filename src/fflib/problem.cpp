@@ -2713,7 +2713,7 @@ void Check(const Opera &Op,int N,int  M)
             for (int j=0;j<dim;j++)
              if (tabexp[j]) 
 	       {  
-		  if(bc->complextype) // FH may 2007  
+		  if(bc->complextype) // FH may 2007  MatriceCreuse
                    Vpp[j]=GetAny<R>( (*tabexp[j])(stack) );
 		  else 
 		   Vpp[j]=GetAny<double>( (*tabexp[j])(stack) );
