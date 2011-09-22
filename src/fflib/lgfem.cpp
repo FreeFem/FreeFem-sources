@@ -649,7 +649,7 @@ class LinearCG : public OneOperator
       if (B) {
         Kn &b = *GetAny<Kn *>((*B)(stack));
         R p = (b,b);
-       if (p) 
+       if (p== R()) 
          {
           // ExecError("Sorry LinearCG work only with nul right hand side, so put the right hand in the function");
           }
@@ -774,7 +774,7 @@ class LinearGMRES : public OneOperator
       Kn b(x.n);
      
       if (B)   b = *GetAny<Kn *>((*B)(stack));
-      else     b=0.;
+      else     b= R();
       int n=x.N();
       int dKrylov=50;
       double eps = 1.0e-6;
@@ -802,7 +802,7 @@ class LinearGMRES : public OneOperator
 	 if (B) {
 	     Kn &b = *GetAny<Kn *>((*B)(stack));
 	     R p = (b,b);
-	     if (p) 
+	     if (p== R()) 
 	       {
 		 // ExecError("Sorry MPILinearCG work only with nul right hand side, so put the right hand in the function");
 	       }
@@ -4720,6 +4720,14 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  without rhs 
  Global.Add("LinearCG","(",new LinearCG<R>(1)); //  without right handsize
  Global.Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
+
+ //   Global.Add("LinearCG","(",new LinearCG<Complex>()); // old form  with rhs (must be zer
+ //   Global.Add("LinearGMRES","(",new LinearGMRES<Complex>()); // old form  with rhs (must be zer
+ //   Global.Add("LinearGMRES","(",new LinearGMRES<Complex>(1)); // old form  without rhs 
+//    Global.Add("LinearCG","(",new LinearCG<Complex>(1)); //  without right handsize
+//    Global.Add("NLCG","(",new LinearCG<Complex>(-1)); //  without right handsize
+   
+    
  zzzfff->AddF("varf",t_form);    //  var. form ~
  zzzfff->AddF("solve",t_solve);
  zzzfff->AddF("problem",t_problem);

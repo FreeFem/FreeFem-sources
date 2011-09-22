@@ -1,7 +1,7 @@
 load "msh3"
 load "tetgen"
 load "mshmet"
-load "mmg3d"
+load "mmg3d-v4.0"
 load "freeyams"
 load "medit"
 searchMethod=1; // more safe seach algo ..
@@ -66,12 +66,12 @@ for(int ii=0; ii<5; ii++)
    fespace Ph(Th3,P0);
    Ph vol= volume;
   medit("Vol",Th3,vol,order=0);
-  /* d'not work bug ????  FH 
-  Th3=mmg3d(Th3,options=mopt,memory=1000,metric=m11[]); 
+
+  Th3=mmg3d(Th3,metric=m11[]); 
   [m11,m21,m22,m31,m32,m33]=[m11,m21,m22,m31,m32,m33];
-   Th3=mmg3d(Th3,options=mopt,memory=1000,metric=m11[]); 
+  Th3=mmg3d(Th3,metric=m11[]); 
   medit("Th3-"+ii,Th3,wait=1);
-*/
+
  
   
   lerr *= 0.6;// change the level of error
