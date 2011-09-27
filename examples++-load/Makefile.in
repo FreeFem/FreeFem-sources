@@ -291,7 +291,7 @@ EXTRA_DIST = ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
   all.edp                 makeref.edp             testFE-P3dc.edp \
   bilapMorley.edp         myType.edp              testFE.edp \
   convect_dervieux.edp    testFEMorley.edp \
-  testFE-PkEdge.edp \
+  testFE-PkEdge.edp metis.edp schwarz-nm.edp \
   splitmesh3.cpp  splitmesh3.edp  splitmesh6.cpp  splitmesh6.edp \
   README_SuperLU \
   tetgen.cpp\
