@@ -18,7 +18,7 @@ SERVER=http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis
 INSTALL=../..
 metis_VERSION=5.0.1
 
-metis: FAIRE
+metis: FAIRE_$(metis_VERSION)
 
 
 $(SRCDIR)/FAIT:
@@ -33,8 +33,8 @@ install:$(SRCDIR)/tag-compile
 	cd $(SRCDIR); make install 
 
 
-FAIRE: $(SRCDIR)/FAIT 
-	touch fAIRE
+FAIRE_$(metis_VERSION): $(SRCDIR)/FAIT 
+	touch FAIRE_$(metis_VERSION)
 
 Makefile.in: ../../config.status Makefile-metis.in
 	../../config.status  --file="Makefile.in:Makefile-metis.in"
@@ -86,4 +86,4 @@ clean: clean-local
 	-rm $(SRCDIR)/$(INSTALL)/lib/libmetis.a
 	-rm $(SRCDIR)/$(INSTALL)/include/metis.h
 	-rm -rf $(SRCDIR)
-	-rm FAIRE FAIT 
+	-rm FAIRE* FAIT 
