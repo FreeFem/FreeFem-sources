@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.14-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.14-2,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -18,7 +18,7 @@ dnl : ${FFLAGS=""}
 
 
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
-AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
+dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.4 is too old
 AM_INIT_AUTOMAKE(1.6.3 dist-zip)
 
@@ -76,11 +76,12 @@ AC_LANG(C++)
 
 AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
+AC_CHECK_PROG(ff_cmake,cmake,yes,no)
 AC_CHECK_PROG(ff_patch,patch,yes,no)
-case "$ff_m4 $ff_bison $ff_patch" in 
+case "$ff_m4 $ff_bison $ff_patch" $ff_cmake  in 
 *no*)
-    AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch ])	
-    AC_MSG_ERROR([ Sorry missing  m4,bison,patch command !]);;
+    AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch cmake ])	
+    AC_MSG_ERROR([ Sorry missing  m4,bison,patch,cmake command !]);;
 esac
 
 
@@ -101,8 +102,8 @@ if test "$ff_size_ptr" -eq 4  ;then
 elif test  "$ff_size_ptr" -eq 8  ;then
  AC_SUBST(SIZEOF_PTRINBIT,64)
 else
-  AC_MSG_NOTICE( [ fatal error : sizeof pointer ! ] ); 
-  AC_MSG_ERROR([ Sorry  sizeof c++ pointer are not  4 or 8])
+  AC_MSG_NOTICE( [ fatal error : sizeof pointer $ff_size_ptr ! ] ); 
+  AC_MSG_ERROR([ Sorry  sizeof c++ pointer $ff_size_ptr are not  4 or 8 ])
 fi
 
 
