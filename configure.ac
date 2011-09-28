@@ -78,7 +78,7 @@ AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
 AC_CHECK_PROG(ff_cmake,cmake,yes,no)
 AC_CHECK_PROG(ff_patch,patch,yes,no)
-case "$ff_m4 $ff_bison $ff_patch" $ff_cmake  in 
+case "$ff_m4 $ff_bison $ff_patch  $ff_cmake"  in 
 *no*)
     AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch cmake ])	
     AC_MSG_ERROR([ Sorry missing  m4,bison,patch,cmake command !]);;
