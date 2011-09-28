@@ -5037,7 +5037,7 @@ $as_echo "no" >&6; }
 fi
 
 
-case "$ff_m4 $ff_bison $ff_patch" $ff_cmake  in
+case "$ff_m4 $ff_bison $ff_patch $ff_cmake"  in
 *no*)
     { $as_echo "$as_me:${as_lineno-$LINENO}:  to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch cmake " >&5
 $as_echo "$as_me:  to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch cmake " >&6;}
