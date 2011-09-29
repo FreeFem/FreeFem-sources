@@ -8,8 +8,8 @@ all-local: parmetis
 
 # Downloading and compiling Tetgen
 # ------------------------------
-# http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-4.0.tar.gz
-# Metis information
+# http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.tar.gz
+# Parmetis information
 DIRPKG=../pkg
 SRCDIR=ParMetis-$(parmetis_VERSION)
 PACKAGE=$(DIRPKG)/ParMetis-$(parmetis_VERSION).tar.gz

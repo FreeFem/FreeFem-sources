@@ -1,5 +1,5 @@
 DOTUVECLIB = wrapper_dotblas.o
-F77 = gfortran
+F77 = g95
 ARCH = ar
 RANLIB = ranlib
 ARCHFLAGS = cr
