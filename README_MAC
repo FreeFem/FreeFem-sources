@@ -38,7 +38,7 @@ and install
 hg clone  http://www.freefem.org/ff++/ff++
 cd ff++ 
 
-./configure '-with-suffix=snow-leopard' '--enable-download''F77=/opt/local/bin/g95' '-with-mpi=/usr/local/bin/mpic++' '--enable-m64' 'FLIBS=/opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a' 'MPIF77=/usr/local/bin/mpif77' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90'
+./configure '-with-suffix=snow-leopard' '--enable-download' 'F77=/opt/local/bin/g95' '-with-mpi=/usr/local/bin/mpic++' '--enable-m64' 'FLIBS=/opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a' 'MPIF77=/usr/local/bin/mpif77' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90' 'MPI_INC_DIR=/usr/local/include' 'MPICXX=/usr/local/bin/mpic++'
 
 make 
 make install

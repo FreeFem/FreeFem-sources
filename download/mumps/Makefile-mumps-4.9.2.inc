@@ -1,4 +1,4 @@
-abs_top_builddir=@abs_top_builddir@
+abs_top_builddir=/Volumes/Ike/cazeaux/ff++/
 include $(abs_top_builddir)/download/headers-sparsesolver.inc
 DOWNLOADFF= $(abs_top_builddir)/download
 ###############################################################################

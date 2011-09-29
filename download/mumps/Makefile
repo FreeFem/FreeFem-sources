@@ -58,7 +58,7 @@ clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 
 clean: clean-local
-	rm Makefile.inc FAIRE
+	rm Makefile.inc FAIRE*
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/*mumps*
 	-rm -rf $(SRCDIR)/$(INSTALL)/lib/lib*mumps* $(SRCDIR)/$(INSTALL)/lib/libpord*.a $(SRCDIR)/$(INSTALL)/lib/libmpiseq*.a
 	-rm -rf $(SRCDIR)
