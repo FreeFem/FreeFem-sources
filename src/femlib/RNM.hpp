@@ -181,7 +181,8 @@ inline complex<double> Max(const complex<double> &a,const complex<double> &b)
 template<class R> class KNMK_ ;
 template<class R> class KNM_ ;
 template<class R> class KN_ ;
-template<class R> class TKN_ ; // KN_ transpose 
+template<class R> class TKN_ ; // KN_ Hermitain 
+template<class R> class TKNM_ ;// KN_ Hermitain
 template<class R> class notKN_ ; // KN_ not 
 template<class R> class notnotKN_ ; // KN_ not not 
 
@@ -588,15 +589,18 @@ class KNM_: public KN_<R> {
   long N() const {return shapei.n;}
   long M() const {return shapej.n;}  
   long size() const { return shapei.n*shapej.n;}
+    
+  TKNM_<R>  h() ; // hermitian
+  const TKNM_<R>  h() const ; // hermitian
   
   KNM_(R* u,const ShapeOfArray & s,
             const ShapeOfArray & si,
             const ShapeOfArray & sj)
              : KN_<R>(u,s),shapei(si),shapej(sj){} 
-  KNM_(R* u,long n,long m)
-             : KN_<R>(u,ShapeOfArray(n*m)),shapei(n,1,n),shapej(m,n,1){}
-  KNM_(R* u,long n,long m,long s)
-             : KN_<R>(u,ShapeOfArray(n*m,s)),shapei(n,1,n),shapej(m,n,1){}                     
+  KNM_(R* u,long nn,long mm)
+             : KN_<R>(u,ShapeOfArray(nn*mm)),shapei(nn,1,nn),shapej(mm,nn,1){}
+  KNM_(R* u,long nn,long mm,long s)
+             : KN_<R>(u,ShapeOfArray(nn*mm,s)),shapei(nn,1,nn),shapej(mm,nn,1){}                     
   KNM_(KN_<R> u,long n,long m) 
              : KN_<R>(u,ShapeOfArray(m*n)),shapei(n,1,n),shapej(m,n,1){ }
              
@@ -660,6 +664,12 @@ class KNM_: public KN_<R> {
    KNM_ &operator /=(const outProduct_KN_<R> &); // bofbof
    KNM_ &operator *=(const outProduct_KN_<R> &); // bofbof
 
+    KNM_ &operator  =(const TKNM_<R> &);
+    KNM_ &operator +=(const TKNM_<R> &);
+    KNM_ &operator -=(const TKNM_<R> &);
+    KNM_ &operator /=(const TKNM_<R> &); // bofbof
+    KNM_ &operator *=(const TKNM_<R> &); // bofbof
+    
 private:  
   KNM_& operator++() {this->v += this->next;return *this;} // ++U
   KNM_& operator--() {this->v -= this->next;return *this;} // ++U
@@ -703,6 +713,11 @@ struct TKN_:public KN_<R> {
 };
 
 template<class R>
+struct TKNM_:public KNM_<R> {
+    TKNM_(const KNM_<R> &x) : KNM_<R>(x) {}
+};
+
+template<class R>
 struct notKN_:public KN_<R> {
     notKN_(const KN_<R> &x) : KN_<R>(x) {}
     notnotKN_<R>  operator!()  ; //  not
@@ -718,9 +733,13 @@ struct notnotKN_:public KN_<R> {
 
 template<class R>
 TKN_<R>  KN_<R>::t() { return *this;} // transpose
+template<class R>
+TKNM_<R>  KNM_<R>::h() { return *this;} // transpose
 
 template<class R>
 const TKN_<R>  KN_<R>::t() const { return *this;} // transpose
+template<class R>
+const TKNM_<R>  KNM_<R>::h() const { return *this;} // transpose
 
 template<class R>
 notKN_<R>  KN_<R>::operator!() { return *this;} // not
