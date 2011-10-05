@@ -111,8 +111,8 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/complex/
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/complex
 	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/complex/
-	patch $(SRCDIR)/$(INSTALL)/include/pastix/complex/pastix_long_complex.h   <patch-pastix_long_complex.h
-	patch $(SRCDIR)/$(INSTALL)/include/pastix/complex/pastix.h <patch-pastix_long_complex.h
+	(cd $(SRCDIR)/$(INSTALL)/include/pastix/complex/; patch pastix_long_complex.h)   <patch-pastix_long_complex.h
+	(cd $(SRCDIR)/$(INSTALL)/include/pastix/complex/; patch pastix.h) <patch-pastix_long_complex.h
 	touch $(SRCDIR)/FAIT
 
 
