@@ -1,3 +1,4 @@
+  - reput metis 4.0 form netlib ... (pb of compatibilite with other // soft hips)
 v 3.14-1
   -   change interface with metis 5.0.1 
   -   Complete writing of mmg3d interface with version 4 of mmg3d
