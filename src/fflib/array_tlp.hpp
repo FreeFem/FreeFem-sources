@@ -807,8 +807,8 @@ template<class R,class A>  R  set_array_( R const & a,const A & b){
 return a;}
 // xxxxxxxxxxx
 template<class K>  KNM<K> * set_initmat_t(KNM<K> * a,Transpose<KNM<K> * > b ){ 
-    KNM_<K>  tb=b.t->t(); ;
-     a->init(tb.N(),tb.M());
+    TKNM_<K>  tb=b.t->h(); ;
+     a->init(tb.M(),tb.N());
     *a=tb;
     return a;}
 template<class K>  KNM<K> * set_initmat(KNM<K> * a,KNM<K> *  b ){ 
@@ -817,8 +817,8 @@ template<class K>  KNM<K> * set_initmat(KNM<K> * a,KNM<K> *  b ){
     *a=*b;
     return a;}
 template<class K>  KNM<K> * set_mat_t(KNM<K> * a,Transpose<KNM<K> * > b ){ 
-    KNM_<K>  tb=b.t->t(); ;
-    a->resize(tb.N(),tb.M());
+    TKNM_<K>  tb=b.t->t(); ;
+    a->resize(tb.M(),tb.N());
     *a=tb;
     return a;}
 template<class K>  KNM<K> * set_mat(KNM<K> * a,KNM<K> *  b ){ 

@@ -53,6 +53,19 @@ KNM_<R> & KNM_<R>::operator oper (const outProduct_KN_<R> & u)
        }
     return *this;
  }
+template<class R>  
+KNM_<R> & KNM_<R>::operator oper (const TKNM_<R> & u)  
+{
+    const TKNM_<R> ut=u.t(); 
+    //   *this  oper  A* t B 
+    K_throwassert (shapei.SameShape(u.shapej) && shapej.SameShape(u.shapei) );
+    KN_<R>  lj(operator()('.',0)); //  (.,O)
+    KN_<const_R>  uj(ut('.',0));
+    long  j=M();
+    while ( j--)
+    { lj oper conj(uj) ;++lj;++uj;} 
+    return *this;
+}
 
 
 template<class R>
