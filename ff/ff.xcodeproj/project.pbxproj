@@ -840,7 +840,7 @@
 				3D90DC82097012B3002A1826 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		3DAA7DBF0BBFF3B20054E435 /* Build configuration list for PBXNativeTarget "fflib" */ = {
 			isa = XCConfigurationList;
@@ -849,7 +849,7 @@
 				3DAA7DC10BBFF3B20054E435 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		3DC62AA909728DA400D487F6 /* Build configuration list for PBXNativeTarget "sansrgraph" */ = {
 			isa = XCConfigurationList;
@@ -858,7 +858,7 @@
 				3DC62AAB09728DA400D487F6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		3DC62AE50972990C00D487F6 /* Build configuration list for PBXNativeTarget "macglrgaph" */ = {
 			isa = XCConfigurationList;
@@ -867,7 +867,7 @@
 				3DC62AE70972990C00D487F6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
