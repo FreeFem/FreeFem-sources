@@ -25,9 +25,9 @@ build-4:
 	-make tag-tar
 	if [ -d mmg3d4  ] ; then  make $(LIBMMG3D) install-4 WHERE ; else echo "Sorry no source " ; fi
 $(LIBMMG3D):
-	cd mmg3d4/build/sources/; $(CC) -c $(COPT) *.c;
+	cd mmg3d4/build/sources/; $(CC) -c $(CFLAGS) *.c;
 	$(AR) $(ARFLAGS) $(LIBMMG3D) mmg3d4/build/sources/*.o
-	$(CC) mmg3d4/build/sources/*.o -o ../bin/mmg3d
+	$(CC) $(CFLAGS) mmg3d4/build/sources/*.o -o ../bin/mmg3d
 	touch build-4 FAIT-4
 install-4:
 	-mkdir ../include/mmg3d-v4/		
