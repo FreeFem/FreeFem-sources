@@ -97,7 +97,7 @@ old-$(PACKAGE):
 
 clean: 
 	-rm ff-flags
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/libmmg3d*.a
+	-rm -rf $(SRCDIR)/$(INSTALL)/lib/libmmg3d*.a  ../lib/libmmg3d-v4.a
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/mmg3d-v4
 	-rm -r $(SRCDIR)
 	-rm FAIT* mmg* flags-* build-4 tag-tar
