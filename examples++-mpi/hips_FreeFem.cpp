@@ -391,9 +391,9 @@ public:
     HIPS_SetDefaultOptions(id, param_int[0] );
     
     for(int i=1;i<param_int.N();++i)     // the fist value is teh STRATEGIE KING not aoption
-      HIPS_SetOptionINT(id,iopt_wrapper[i],param_int[i] );
+      if(param_int[i]>=0) HIPS_SetOptionINT(id,iopt_wrapper[i],param_int[i] );
     for(int i=0;i<param_double.N();++i)    
-      HIPS_SetOptionREAL(id,dopt_wrapper[i],param_double[i] );
+      if(param_double[i]>=0.)HIPS_SetOptionREAL(id,dopt_wrapper[i],param_double[i] );
  
     if(!data_option.empty()) 
       parm_param(datafile,param_int,param_double);
