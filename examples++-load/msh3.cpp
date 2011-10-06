@@ -2577,8 +2577,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
    
     return Th3;
   }
-  
-  if( vertex_out == 0){
+  else   if( vertex_out == 0){
 	  
     //Tet       *t = new Tet[1];
     Vertex3   *v = new Vertex3[nbv];
@@ -2640,6 +2639,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
     Add2StackOfPtr2FreeRC(stack,Th3);
     return Th3;
   }
+  return (Mesh3*) 0;
 }
 
 
@@ -3266,7 +3266,7 @@ Mesh3 * MoveMesh2_func( const double &precis_mesh, const Mesh & Th2, const doubl
 	int* Numero_Som;
 	
 	int* ind_nv_t;
-	int* ind_nt_t;
+	int* ind_nt_t=0;
 	int* ind_nbe_t;
 	int* label_nbe_t;
 	
@@ -5614,13 +5614,14 @@ AnyType ExtractMesh2D_Op::operator()(Stack stack)  const
 		}
 		
 		
-		Mesh *pThnew;// = new Mesh(nv,ns,v,b);  // a definir
+		Mesh *pThnew =0; //= new Mesh(nv,ns,v,b);  // a definir
 		// attention aux composantes connexes.
-		
+		ffassert(0); 
 		
 		return pThnew;
 		
 	}
+	return (Mesh*) 0;
 	
 }
 
