@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.14-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.16,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -78,7 +78,7 @@ AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
 AC_CHECK_PROG(ff_cmake,cmake,yes,no)
 AC_CHECK_PROG(ff_patch,patch,yes,no)
-case "$ff_m4 $ff_bison $ff_patch  $ff_cmake"  in 
+case "$ff_m4 $ff_bison $ff_patch "  in 
 *no*)
     AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch cmake ])	
     AC_MSG_ERROR([ Sorry missing  m4,bison,patch,cmake command !]);;
