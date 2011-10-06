@@ -1,3 +1,8 @@
+v 3.15 
+  - correct version old bug when full matrix (arry)
+    A=A;' is now coorect (set and  initialization )
+    and add  A+=A';    A-=A';
+
   - reput metis 4.0 form netlib ... (pb of compatibilite with other // soft hips)
 v 3.14-1
   -   change interface with metis 5.0.1 
