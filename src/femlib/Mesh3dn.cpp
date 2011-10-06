@@ -205,7 +205,7 @@ namespace Fem2D
 	  }
 	hmin=min(hmin,this->elements[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
       }
-      
+        return hmin;
     }
     
     for (int k=0;k<this->nbe;k++){
