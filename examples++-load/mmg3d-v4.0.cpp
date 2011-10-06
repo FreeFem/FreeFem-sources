@@ -328,7 +328,7 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
 	  dff.typesol=6;
 	  dff.np = Th3.nv;
 	  for(int i=0;i <m; i += 6)
- 	   std:swap(cmetric[i+2],cmetric[i+3]); 
+	    std::swap(cmetric[i+2],cmetric[i+3]); 
 	  dff.sol= &cmetric[0];
 	  dff.solname="metrix-aniso";
 	}

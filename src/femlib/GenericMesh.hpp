@@ -41,7 +41,7 @@ extern long searchMethod; //pichon
 #include "assertion.hpp" 
 #include <cstdlib>
 #include <utility>
-
+#include <limits>
 //#include <algorithm>
 //#include <Functional>
 
@@ -1157,7 +1157,7 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
   const GenericMesh & Th(*this);
   int nnodeK = T::NbNodes(ndfon);
   int *p = 0, *pp=0; 
-  unsigned int tinfty=-1;
+    unsigned int tinfty=std::numeric_limits<unsigned int>::max()   ; 
     
   const int nkv= T::nv;
   const int nkf= T::nf;
