@@ -26,13 +26,13 @@ $(SRCDIR)/FAIT:
 	touch $(SRCDIR)/FAIT
 
 install:$(SRCDIR)/tag-compile
-#	$(MAKE) install
+	cd $(SRCDIR);$(MAKE) install
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/metis
 	cp $(SRCDIR)/Lib/*.h $(SRCDIR)/$(INSTALL)/include/metis
 
 
 FAIRE: $(SRCDIR)/FAIT 
-	touch fAIRE
+	touch FAIRE
 
 Makefile.in: ../../config.status Makefile-metis.in
 	../../config.status  --file="Makefile.in:Makefile-metis.in"
