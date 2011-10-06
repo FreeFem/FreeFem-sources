@@ -76,6 +76,7 @@ inline KN_<R>&  KN_<R>::operator oper (const KN_<const_R> & u)   {
 template<class R> 
 inline    KNM_<R> & KNM_<R>::operator oper (const KNM_<const_R> & u)    
 { 
+  K_throwassert( N() == u.N() && M() == u.M() );   
   if(IsVector1() && u.IsVector1() && shapei.step == u.shapei.step ) // modif 2011 (thank to Oka) 
         KN_<R>::operator oper(u); // modif FH jan 2004
   else {  
@@ -92,6 +93,8 @@ inline    KNM_<R> & KNM_<R>::operator oper (const KNM_<const_R> & u)
 template<class R> 
 inline  KNMK_<R> & KNMK_<R>::operator oper (const KNMK_<const_R> & u)    
 { 
+  K_throwassert( N() == u.N() && M() == u.M() &&   K() == u.K() ); 
+
   if(IsVector1() && u.IsVector1() && u.N() == N() &&  shapei.step == u.shapei.step) // modif 2011 (thank to Oka) 
         KN_<R>::operator oper(u); // modif FH 2004
   else {  

@@ -54,16 +54,12 @@ KNM_<R> & KNM_<R>::operator oper (const outProduct_KN_<R> & u)
     return *this;
  }
 template<class R>  
-KNM_<R> & KNM_<R>::operator oper (const TKNM_<R> & u)  
+KNM_<R> & KNM_<R>::operator oper (const ConjKNM_<R> & u)  
 {
-    const TKNM_<R> ut=u.t(); 
-    //   *this  oper  A* t B 
-    K_throwassert (shapei.SameShape(u.shapej) && shapej.SameShape(u.shapei) );
-    KN_<R>  lj(operator()('.',0)); //  (.,O)
-    KN_<const_R>  uj(ut('.',0));
-    long  j=M();
-    while ( j--)
-    { lj oper conj(uj) ;++lj;++uj;} 
+    K_throwassert( N() == u.N() && M() == u.M() ); 
+  for(int i=0;i<N();++i)
+    for(int j=0;j<M();++j)
+        KNM_<R>::operator () (i,j) oper conj( u(i,j));
     return *this;
 }
 

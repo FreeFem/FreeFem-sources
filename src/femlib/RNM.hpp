@@ -182,7 +182,7 @@ template<class R> class KNMK_ ;
 template<class R> class KNM_ ;
 template<class R> class KN_ ;
 template<class R> class TKN_ ; // KN_ Hermitain 
-template<class R> class TKNM_ ;// KN_ Hermitain
+template<class R> class ConjKNM_ ;//  take the conj of the matrix.
 template<class R> class notKN_ ; // KN_ not 
 template<class R> class notnotKN_ ; // KN_ not not 
 
@@ -590,8 +590,8 @@ class KNM_: public KN_<R> {
   long M() const {return shapej.n;}  
   long size() const { return shapei.n*shapej.n;}
     
-  TKNM_<R>  h() ; // hermitian
-  const TKNM_<R>  h() const ; // hermitian
+  ConjKNM_<R>  h() ; // take the conj for hermian operator
+  const ConjKNM_<R>  h() const ; // take the conj for hermian operator
   
   KNM_(R* u,const ShapeOfArray & s,
             const ShapeOfArray & si,
@@ -664,11 +664,11 @@ class KNM_: public KN_<R> {
    KNM_ &operator /=(const outProduct_KN_<R> &); // bofbof
    KNM_ &operator *=(const outProduct_KN_<R> &); // bofbof
 
-    KNM_ &operator  =(const TKNM_<R> &);
-    KNM_ &operator +=(const TKNM_<R> &);
-    KNM_ &operator -=(const TKNM_<R> &);
-    KNM_ &operator /=(const TKNM_<R> &); // bofbof
-    KNM_ &operator *=(const TKNM_<R> &); // bofbof
+    KNM_ &operator  =(const ConjKNM_<R> &);
+    KNM_ &operator +=(const ConjKNM_<R> &);
+    KNM_ &operator -=(const ConjKNM_<R> &);
+    KNM_ &operator /=(const ConjKNM_<R> &); // bofbof
+    KNM_ &operator *=(const ConjKNM_<R> &); // bofbof
     
 private:  
   KNM_& operator++() {this->v += this->next;return *this;} // ++U
@@ -713,8 +713,8 @@ struct TKN_:public KN_<R> {
 };
 
 template<class R>
-struct TKNM_:public KNM_<R> {
-    TKNM_(const KNM_<R> &x) : KNM_<R>(x) {}
+struct ConjKNM_:public KNM_<R> {
+    ConjKNM_(const KNM_<R> &x) : KNM_<R>(x) {}
 };
 
 template<class R>
@@ -734,12 +734,12 @@ struct notnotKN_:public KN_<R> {
 template<class R>
 TKN_<R>  KN_<R>::t() { return *this;} // transpose
 template<class R>
-TKNM_<R>  KNM_<R>::h() { return *this;} // transpose
+ConjKNM_<R>  KNM_<R>::h() { return *this;} // conj of the matrix
 
 template<class R>
 const TKN_<R>  KN_<R>::t() const { return *this;} // transpose
 template<class R>
-const TKNM_<R>  KNM_<R>::h() const { return *this;} // transpose
+const ConjKNM_<R>  KNM_<R>::h() const { return *this;} //  conj of the matrix
 
 template<class R>
 notKN_<R>  KN_<R>::operator!() { return *this;} // not
@@ -1192,7 +1192,15 @@ class KNM: public KNM_<R>{ public:
         {  if(this->unset()) this->init(u.N(),u.M()) ;KNM_<R>::operator/=(u);return *this;}
    KNM &operator *=(const outProduct_KN_<R> & u)
         {  if(this->unset()) this->init(u.N(),u.M()) ;KNM_<R>::operator*=(u);return *this;}
-  
+ 
+    
+    KNM &operator  =(const ConjKNM_<R> &u)  {  if(this->unset()) this->init(u.N(),u.M()) ;KNM_<R>::operator=(u);return *this;}
+    KNM &operator +=(const ConjKNM_<R> &u)  {  if(this->unset()) this->init(u.N(),u.M()) ;KNM_<R>::operator+=(u);return *this;}
+    KNM &operator -=(const ConjKNM_<R> &u)  {  if(this->unset()) this->init(u.N(),u.M()) ;KNM_<R>::operator-=(u);return *this;}
+    KNM &operator /=(const ConjKNM_<R> &u)  {  if(this->unset()) this->init(u.N(),u.M()) ;KNM_<R>::operator/=(u);return *this;}
+    KNM &operator *=(const ConjKNM_<R> &u)  {  if(this->unset()) this->init(u.N(),u.M()) ;KNM_<R>::operator*=(u);return *this;}
+ // bofbof
+
         
   //  two opertors to cast to un array of constant        
 //    operator KNM_<const_R> & ()  
