@@ -139,9 +139,10 @@ ILUT_Vector apply_ilut_precond(KN<double> * const & v) {
 	return ILUT_Vector(v);
 }
 
-class Init {
+class IluInit {
 	public:
-		Init() {
+		IluInit() {
+		  if(verbosity) cout << " -- load ilut init : " << endl;
 			Dcl_Type<ILUT_Matrix>();
 			Dcl_Type<ILUT_Vector>();
 			Global.Add("applyIlutPrecond","(",new OneOperator1_<ILUT_Vector,KN<double>* >(apply_ilut_precond));
@@ -151,4 +152,4 @@ class Init {
 		}
 };
 
-Init init;
+static IluInit init;

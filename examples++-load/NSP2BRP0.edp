@@ -46,7 +46,7 @@ plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ps="StokesP2P1.eps",value=1,wait=1
 }
 
 dt = 0.1;
-int nbiter = 5;
+int nbiter = 3;
 real coefdt  = 0.25^(1./nbiter);
 real coefcut = 0.25^(1./nbiter) , cut=0.01;
 real tol=0.3,coeftol = 0.25^(1./nbiter);
@@ -56,7 +56,7 @@ for (iter=1;iter<=nbiter;iter++)
 {
   cout << " dt = " << dt << " ------------------------ " << endl;
   alpha=1/dt;
-  for (i=0;i<=50;i++)
+  for (i=0;i<=10;i++)
    {
      up1[]=u1[]; // copie vectoriel 
 

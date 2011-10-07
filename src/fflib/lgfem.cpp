@@ -77,6 +77,7 @@ namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso);
 
 static bool TheWait=false;
 bool  NoWait=false;
+extern bool  NoGraphicWindow;
 
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
@@ -4534,6 +4535,8 @@ void  init_lgfem()
  
  Global.New("wait",CConstant<bool*>(&TheWait));
  Global.New("NoUseOfWait",CConstant<bool*>(&NoWait));
+ Global.New("NoGraphicWindow",CConstant<bool*>(&NoGraphicWindow));
+
  Dcl_Type<MeshPoint *>();
  Dcl_Type<finconnue *>();
  Dcl_Type<ftest *>();

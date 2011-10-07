@@ -48,7 +48,7 @@ const char *medit_debug="-d";
 
 static bool TheWait=false;
 bool  NoWait=false;
-
+extern bool  NoGraphicWindow;
 using namespace std;
 using namespace Fem2D;
 
@@ -1024,6 +1024,7 @@ basicAC_F0::name_and_type PopenMeditMesh_Op::name_param[]= {
 
 AnyType PopenMeditMesh_Op::operator()(Stack stack)  const 
 {
+  if(NoGraphicWindow) return Nothing;
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
   long order (arg(0,stack,1));
   //
@@ -1761,6 +1762,7 @@ basicAC_F0::name_and_type PopenMeditMesh3_Op<v_fes>::name_param[]= {
 template<class v_fes>
 AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const 
 {
+  if(NoGraphicWindow) return Nothing;
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
   long order (arg(0,stack,1L));
   //
