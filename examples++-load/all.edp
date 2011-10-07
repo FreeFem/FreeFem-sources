@@ -1,4 +1,4 @@
-NoUseOfWait=true;int verbosityy=verbosity;
+NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;
  cout << "--------- file : LapDG3.edp --------------------------------------------------------" << endl;
 verbosity=verbosityy;
 { include "LapDG3.edp";};
