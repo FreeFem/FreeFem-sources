@@ -43,7 +43,7 @@ EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
 thresholdings.cpp	thresholdings.edp \
 VTK_writer_3d.cpp VTK_writer.cpp splitedges.cpp splitedges.edp \
 Element_Mixte.cpp LaplaceRT1.edp lame-TD-NSS.edp test-ElementMixte.edp \
-myfunction2.cpp myfunction2.edp
+myfunction2.cpp myfunction2.edp ttestio.edp
 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \

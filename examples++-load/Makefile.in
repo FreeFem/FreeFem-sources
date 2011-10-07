@@ -674,7 +674,7 @@ makeref.edp: regtests.m4 ../regtests.m4
 all-local: all.edp regtests.edp load_compile
 
 all.edp: Makefile
-	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
+	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;" ; \
