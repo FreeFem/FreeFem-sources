@@ -41,7 +41,7 @@ func bool AddLayers(mesh & Th,real[int] &ssd,int n,real[int] &unssd)
 }
 
 int withplot=3;
-mesh Th=square(100,100);
+mesh Th=square(50,50);
 int[int] chlab=[1,1  ,2,1  ,3,1  ,4,1  ];
 Th=change(Th,refe=chlab);
 int npart= nn*mm;
@@ -159,7 +159,7 @@ int nitermax=1000;
         }
       err= sqrt(err);
       cout << iter << " Err = " << err << endl;
-      if(err<1e-3) break;
+      if(err<1e-2) break;
       //    plot(un1,wait=1);
       un[]=un1[];
       if(withplot>2)

@@ -10,6 +10,8 @@ extern const char *  prognamearg;
 extern const char *  edpfilenamearg;
 extern bool  waitatend;
 extern bool echo_edp;
+extern bool 	  NoGraphicWindow;
+
 char * Shell_Space(const char * s);
 
 char * Shell_Space(const char * s)
@@ -97,7 +99,10 @@ int getprog(char* fn,int argc, char **argv)
 	  if(verbosity>10) printf(" verbosity : %ld\n",verbosity);
 	}
       else if  (strcmp(argv[i],"-nw")==0 ) 
-	noffglut=true;
+	{
+	  noffglut=true;
+	  NoGraphicWindow=true; 
+	}
       else if  (strcmp(argv[i],"-ne")==0 ) // no edp 
 	  echo_edp=false;
       else if  (strcmp(argv[i],"-cd")==0 ) // 
@@ -118,11 +123,13 @@ int getprog(char* fn,int argc, char **argv)
 	{
 	  progffglut=argv[++i];
 	  noffglut=true;
+	  NoGraphicWindow=false;
 	}
       else if(strcmp(argv[i],"-gff")==0 && i+1 < argc)
 	{
 	  progffglut=Shell_Space(argv[++i]);
 	  noffglut=true;
+	  NoGraphicWindow=false;
 	}    
       else if(strcmp(argv[i],"-?")==0 )
 	ret=2;

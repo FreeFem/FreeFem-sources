@@ -1,4 +1,6 @@
 v 3.15 
+  - correct all examples++  load and 3d rebuilde the all.edp 
+    and test this examples. 
   - correct version old bug when full matrix (arry)
     A=A;' is now coorect (set and  initialization )
     and add  A+=A';    A-=A';

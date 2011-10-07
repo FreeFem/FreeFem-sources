@@ -1,3 +1,4 @@
+
 load "msh3"
 load "tetgen"
 load "mshmet"
@@ -33,7 +34,7 @@ int[int]  MSHloptions=[1,0,0,0,verbosity,nbregu,0];// mesh aniso ..
 real[int] MSHdoptions=[1e-3,0.2,0.01,0];
 real lerr=0.01;
 verbosity=4;
-for(int ii=0; ii<5; ii++)
+for(int ii=0; ii<2; ii++) //  BUG trap  in interation 3 
 {
   Poisson;
   plot(u,wait=1);
@@ -79,6 +80,6 @@ for(int ii=0; ii<5; ii++)
   
   medit("U-adap-iso-"+ii,Th3,u,wait=1);
 }
-
+cout <<"end Laplace  Adapt aniso 3d. edp " <<endl;
 
 

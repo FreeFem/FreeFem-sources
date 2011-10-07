@@ -16,6 +16,9 @@ problem  A(v,vh) = int3d(th)(v*vh/dt)   - int3d(th)(vo*vh/dt) + rhs[];
 
 real[int] viso=[-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,10,100,1000];
 verbosity = 4;
+if(1)
+ cout << "\n\n\n  MatUpWind0 3d not yet implemented FH. (To DO) \n\n\n" << endl; 
+else
 for ( t=0; t< tmax ; t+=dt)
 {
   vo=v;

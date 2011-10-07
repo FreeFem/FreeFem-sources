@@ -1,4 +1,5 @@
 // file tetgencube.edp
+// this is  a BUGGUS  file work in progress F. Hecht .... Oct 2011
 load "msh3"
 load "tetgen"
 load "medit"
@@ -64,7 +65,9 @@ cout << "movemesh ::new mesh" <<endl;
 mesh3 Th33mv = movemesh3(Th33, transfo=[mv2x,mv2y,mv2z]);
 int[int] r1=[12,11,11,21,13,23,14,24,15,25,16,26];
 cout << "change ::new mesh" <<endl;
-Th33mv=change(Th33mv,label=r1);
+//medit("Th33mv",Th33mv);
+if(0) {
+Th33mv=change(Th33mv,label=r1);  // bug change if non tet in mesh .... HERE ...
 cout << "add ::new mesh" <<endl;
 mesh3 Thall = Th33+Th33mv;  // The vertex of faces of labels 11 of Th33 and Th33mv must be same. The faces of label 11 of Thall correspond to the faces of the first in the sum : Th33.
 
@@ -76,3 +79,4 @@ cout << "check gluing 2" << endl;
 checkbemesh(Thall,manifolds=[ [[11,-1],[21,1],[23,1],[24,1],[25,1],[26,1]] ]);   
 cout << "check exterior" << endl;
 checkbemesh(Thall,manifolds=[ [[12,1],[13,1],[14,1],[15,1],[16,1],[21,1],[23,1],[24,1],[25,1],[26,1]] ]); // check the exterior manifold 
+}
