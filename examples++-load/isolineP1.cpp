@@ -124,8 +124,8 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 
   
   // calcul des isolines dans les triangles
-  double EdgeIter[3*Th.nt];
-  int taketriangle[2*Th.nt];
+  KN<double> EdgeIter(3*Th.nt);
+  KN<int> taketriangle(2*Th.nt);
   
   for(int ii=0; ii< 3*Th.nt; ii++){
     EdgeIter[ii] = -1;
@@ -321,7 +321,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
   
   //#################################  
   int NbInterBord=0;
-  int ElementLink[Th.nt+Th.neb];
+  KN<int> ElementLink(Th.nt+Th.neb);
   for(int it=0; it< Th.nt+Th.neb; it++)
     ElementLink[it]=-1;
 
@@ -599,7 +599,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
   
   Vertex *VertexIsoP = new Vertex[NbVertex];
   
-  int TriangleVu[Th.nt];
+  KN<int> TriangleVu(Th.nt);
   for(int iii=0; iii< Th.nt; iii++)
     TriangleVu[iii]= -1;
 
