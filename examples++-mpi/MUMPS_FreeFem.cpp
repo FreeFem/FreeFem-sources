@@ -2569,3 +2569,21 @@ Init::Init()
   Global.Add("defaulttoMUMPS","(",new OneOperator0<bool>(SetMUMPSmpi));
 }
 
+
+void ffinit()
+{
+
+  SparseMatSolver_R= DefSparseSolver<double>::solver;
+  SparseMatSolver_C= DefSparseSolver<Complex>::solver;
+
+  if(verbosity>1)
+    cout << "\n Add: MUMPS ,  defaultsolver defaultsolverMUMPS " << endl;
+  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
+  DefSparseSolver<double>::solver =BuildSolverMUMPSmpi;
+  DefSparseSolver<Complex>::solver =BuildSolverMUMPSmpi;
+  if(! Global.Find("defaultsolver").NotNull() )
+    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
+  Global.Add("defaulttoMUMPS","(",new OneOperator0<bool>(SetMUMPSmpi));
+}
+addingInitFunct FFinit(100,ffinit);
+
