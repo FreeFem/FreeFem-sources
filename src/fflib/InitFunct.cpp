@@ -55,6 +55,7 @@ bool comp(const InitFunct a,const InitFunct b)
  //  cout << " callInitsFunct : " << l->size() << endl;
    for_each(l->begin(),l->end(),show);   
    for_each(l->begin(),l->end(),call);
+    l->clear();
  }
  
 void  addInitFunct(int i,void  (* f)()) 
@@ -62,4 +63,6 @@ void  addInitFunct(int i,void  (* f)())
   getInitFunctlist()->push_back(make_pair(i,f));
 //  cout << " addInitFunct: " << i << " " << f << endl; 
 }
+
+
 

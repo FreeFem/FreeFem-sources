@@ -227,7 +227,7 @@
 #include "error.hpp"
 class Iden;
 #include "strversionnumber.hpp"
-
+#include "InitFunct.hpp"
 #ifdef __MWERKS__
 #ifdef __INTEL__
 #include <malloc.h>
@@ -3374,6 +3374,7 @@ int mainff (int  argc, char **argv)
 #endif   
 
    if(init_lgparallele)  init_lgparallele(); 
+   callInitsFunct() ; //  init for dynamique libs ...
 
    if(verbosity>2 || mpirank==0)  cout << endl;
   zzzfff->input(cc);
