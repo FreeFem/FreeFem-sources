@@ -39,10 +39,15 @@ deque<InitFunct> * getInitFunctlist()
   return data;
 }
 
-
-void call(const InitFunct & a) { (*a.second)();}
-void show(const InitFunct & a) { cout << a.first << " " <<a.second << endl;}
-
+extern long verbosity;
+void call(const InitFunct & a) { 
+  if(verbosity) 
+    {
+      cout << " addInitFunct : " << a.first << " call : " <<a.second ;
+      (*a.second)();
+    }
+  if(verbosity) cout << " addInitFunct : " << a.first << " call : " <<a.second ;
+}
 bool comp(const InitFunct a,const InitFunct b)
  { 
    return a.first < b.first;
@@ -52,8 +57,8 @@ bool comp(const InitFunct a,const InitFunct b)
  {
    deque<InitFunct> *  l(getInitFunctlist()); 
    sort(l->begin(),l->end(),comp);
- //  cout << " callInitsFunct : " << l->size() << endl;
-   for_each(l->begin(),l->end(),show);   
+   cout << " callInitsFunct : " << l->size() << endl;
+   //   for_each(l->begin(),l->end(),show);   
    for_each(l->begin(),l->end(),call);
     l->clear();
  }
@@ -61,7 +66,7 @@ bool comp(const InitFunct a,const InitFunct b)
 void  addInitFunct(int i,void  (* f)()) 
 { 
   getInitFunctlist()->push_back(make_pair(i,f));
-//  cout << " addInitFunct: " << i << " " << f << endl; 
+  cout << " addInitFunct: " << i << " " << f << endl; 
 }
 
 
