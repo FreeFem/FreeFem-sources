@@ -2585,5 +2585,6 @@ void ffinit()
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   Global.Add("defaulttoMUMPS","(",new OneOperator0<bool>(SetMUMPSmpi));
 }
+#include "InitFunct.hpp"
 addingInitFunct FFinit(100,ffinit);
 
