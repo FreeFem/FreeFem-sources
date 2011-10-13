@@ -297,3 +297,6 @@ void init_algo()
   Global.Add("Newton","(",new OptimAlgo(2,2,2));  //  j + dJ
   Global.Add("Newtow","(",new OneOperatorCode<PrintErrorCompileNewtow>);  //  error 
 }
+
+//#include "InitFunct.hpp"
+//static addingInitFunct TheaddingInitFunct(-9,init_algo);
