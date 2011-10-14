@@ -28,9 +28,9 @@
 #ifndef INITSFUNCT
 #define INITSFUNCT_HPP_
 
-void  addInitFunct(int i,void  (* f)()) ;
+void  addInitFunct(int i,void  (* f)(),const char *name) ;
 void  callInitsFunct() ;
 struct  addingInitFunct { 
-  addingInitFunct(int i,void  (* f)()) { addInitFunct(i,f);}
+  addingInitFunct(int i,void  (* f)(),const char *name=0) { addInitFunct(i,f,name);}
 } ;
 #endif

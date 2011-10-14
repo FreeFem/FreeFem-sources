@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <deque>
 #include <iostream>
+#include <set> 
 using namespace std;
 typedef void  (* afunc)(); 
 typedef pair<int,afunc> InitFunct;
@@ -40,6 +41,7 @@ deque<InitFunct> * getInitFunctlist()
 }
 
 extern long verbosity;
+set<string> ff_SetofInitFunct;
 void call(const InitFunct & a) { 
   if(verbosity) 
     {
@@ -63,10 +65,16 @@ bool comp(const InitFunct a,const InitFunct b)
     l->clear();
  }
  
-void  addInitFunct(int i,void  (* f)()) 
+void  addInitFunct(int i,void  (* f)(),const char *name) 
 { 
-  getInitFunctlist()->push_back(make_pair(i,f));
-  cout << " addInitFunct: " << i << " " << f << endl; 
+  if(!name || ff_SetofInitFunct.insert(name).second)
+    { 
+    getInitFunctlist()->push_back(make_pair(i,f));
+    cout << " addInitFunct: " << i << " " << f << (name ? name : " -- " ) <<endl; 
+    }
+  else 
+    cout << " addInitFunct "<< name << " is always load (skip) !" << endl; 
+
 }
 
 
