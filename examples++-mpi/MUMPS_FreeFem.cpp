@@ -2586,5 +2586,5 @@ void ffinit()
   Global.Add("defaulttoMUMPS","(",new OneOperator0<bool>(SetMUMPSmpi));
 }
 #include "InitFunct.hpp"
-addingInitFunct FFinit(100,ffinit);
+addingInitFunct FFinit(100,ffinit,"MUMPS_FreeFem");
 
