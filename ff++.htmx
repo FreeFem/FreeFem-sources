@@ -122,7 +122,7 @@ by <A href="http://www.ann.jussieu.fr/~lehyaric"> Antoine Le Hyaric  </A>  is a 
 <tr align=center>
 <td><b><u>Unix</u></b> <br> Linux, FreeBSD,  ...  </Td>
 <td><b><u>Windows</u></b><br> 98, NT, 2000, XP</td>
-<td><b><u>MacOS X</u></b><br>Universal ( 10.3 or + ) </td>
+<td><b><u>MacOS X</u></b><br>Universal ( 10.3 to 10.6 ) <br> <A HREF="#macmpi10.7">Note the Freefem++.app do not run on 10.7  </></td>
 <td><b><u>Documentation</u></b></td>
 <!--
 <td><b><u>Online Demonstration</u></b></td>
@@ -164,8 +164,9 @@ href="http://titi.ann.jussieu.fr">LJLL Software Online</a></td>
 
 <td></td>
 
-<td> <A HREF="#mac10.6"> for Snow Leopard version </A> with 
-<A HREF="#macmpi"> with mpi </A></td> 
+<td> <A HREF="#mac10.6"> for Snow Leopard version (10.6) </A> with 
+<A HREF="#macmpi"> with mpi </A>,   
+<A HREF="#macmpi10.7"> with mpi </A></td> 
 
 <td></td>
 
@@ -297,13 +298,21 @@ href="http://www.cmap.polytechnique.fr/spip.php?article239"> details</a>, par
  <A HREF="http://www.ann.jussieu.fr/~hecht/ftp/ff++days"> All Presentation, examples, and data are here  </A>
 </p>
 
+
 <p><b>1-2/09/2010</b> 
-<font color=purple size=+1> <A HREF="http://www.ann.jussieu.fr/FreeFem++"> 
-The second tutorial and Workshop on FreeFem++  </A>, 
+<font >  
+The second tutorial and Workshop on FreeFem++  , 
  held September 1st and 2nd, 2010, in Paris at Universit&eacute Pierre
 et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</font>
 <A HREF="http://www.freefem.org/ff2a3/ff++days-2010/"> All Presentation, examples, and data are here </A>
 
+<p><b>5-7/12/2011</b><font  color=purple size=+2> <bf> 
+ <A HREF="http://www.ljll.math.upmc.fr/FreeFem++"> 
+The THIRD tutorial and Workshop on FreeFem++  </A>, 
+ in Paris at Universit&eacute Pierre
+et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</bf> 
+<A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2011/index.htm"> All Infomation  are here  </li>
+</font>
 <p><p><p><b>Some Freefem++ presentation (with useful information):<img src="freefem/new.gif"> </b> 
    <ul>
          <li>
@@ -312,6 +321,9 @@ et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</font>
 
         <li>to install
   my  freefem++ mpi version (3.13-2) on your Mac 10.6 (Snow leopard)   <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/FF-conf/InstallMac10.6.html" > See this page </A>. 
+          <li>to install
+  my  freefem++ mpi version (3.14) on your Mac 10.7 (Lion)   <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/FF-conf/InstallMac10.7.html" > See this page </A>. 
+
 </li>
   
         <li>
@@ -498,6 +510,8 @@ an anonymous <A href="http://mercurial.selenic.com/" > Mercurial SCM </A> copy w
 
 
 <p><A NAME="macmpi"> <img src="@imagedir@new.gif">To install a precompile version of freefem++ with mpi interface freefem++ mpi on your Mac in under version 10.6 (Snow leopard)   <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/FF-conf/InstallMac10.6.html" > See this page </A>.<p>
+
+<p><A NAME="macmpi10.7"> <img src="@imagedir@new.gif"><b><font color="#FF0000"> First the FreeFem++.app do not work under Lion (to old) </font></b>  but the terminal command work, and to install a precompile version of freefem++ with mpi interface freefem++ mpi on your Mac in under version 10.7 (Lion)   <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/FF-conf/InstallMac10.7.html" > See this page </A>.<p>
 
 <p><img src="@imagedir@new.gif">To recompile freefem++ with mpi interface freefem++ mpi under Windows   <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/FF-conf/InstallWin32.html" > See this page </A>.<p>
 

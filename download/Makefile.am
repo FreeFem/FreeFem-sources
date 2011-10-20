@@ -5,6 +5,7 @@
 
 SUBDIRS=blas arpack umfpack  
 EXTRA_DIST= \
+./nlopt/Make.inc ./nlopt/Makefile \
 ./blacs/BLACS.patch \
 ./blacs/Bmake-blacs.inc \
 ./blacs/Makefile \
@@ -76,7 +77,7 @@ EXTRA_DIST= \
 
 
 MPI_SOFT=blacs parmetis  scalapack scotch superludist mumps pastix hypre hips parms 
-LIST_SOFT=tetgen superlu fftw metis mshmet yams mmg3d gmm 
+LIST_SOFT=tetgen superlu fftw metis mshmet yams mmg3d gmm  nlopt
 all-recursive: bin lib include pkg
 
 lib: 
