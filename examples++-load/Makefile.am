@@ -43,7 +43,8 @@ EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
 thresholdings.cpp	thresholdings.edp \
 VTK_writer_3d.cpp VTK_writer.cpp splitedges.cpp splitedges.edp \
 Element_Mixte.cpp LaplaceRT1.edp lame-TD-NSS.edp test-ElementMixte.edp \
-myfunction2.cpp myfunction2.edp ttestio.edp
+myfunction2.cpp myfunction2.edp ttestio.edp \
+ff-NLopt.cpp VarIneq2.edp
 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
@@ -62,7 +63,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
         isolineP1.$(DYLIB_SUFFIX)  thresholdings.$(DYLIB_SUFFIX) \
         VTK_writer_3d.$(DYLIB_SUFFIX)  VTK_writer.$(DYLIB_SUFFIX) \
 	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) \
-	myfunction2.$(DYLIB_SUFFIX)
+	myfunction2.$(DYLIB_SUFFIX) ff-NLopt.$(DYLIB_SUFFIX) 
 
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) \
 	metis.$(DYLIB_SUFFIX) UMFPACK64.$(DYLIB_SUFFIX) NewSolver.$(DYLIB_SUFFIX) \
