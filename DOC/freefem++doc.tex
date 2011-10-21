@@ -31,7 +31,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.14}
+\def\VERSION{3.16}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -9956,18 +9956,59 @@ LinearGMRES($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsil
 For detail of these algorithms, refer to \cite{Lucquin}[Chapter IV, 1.3].
 
 \subsection{Optimization}
+%Two algorithms of
+%COOOL  a package \cite{coool} are interfaced with
+%the Newton Raphson method  (call \texttt{Newton}) and
+%the  \texttt{BFGS} method. \index{Newton}\index{BFGS}
+%Be careful of these algorithms, because their
+%implementation use full matrices.
+%
+%Example of utilization
+%%\begin{example}[{algo.edp}
+%\bFF
+%  real[int] b(10),u(10);
+%  func @real J(@real[int] & u)
+%    {
+%      @real s=0;
+%      @for (@int i=0;i<u.n;i++)
+%          s +=(i+1)*u[i]*u[i]*0.5 - b[i]*u[i];
+%      @cout << "J ="<< s << " u =" <<  u[0] << " " << u[1] << "...\n" ;
+%      @return s;
+%    }
+%
+%//  the grad of J (this is a affine version (the RHS is in  )
+%  @func @real[int] DJ(@real[int] &u)
+%    {
+%      @for (@int i=0;i<u.n;i++)
+%        u[i]=(i+1)*u[i]-b[i];
+%      @return u;  // return of global variable ok
+%    };
+%
+%  b=1; u=2; // set  right hand side and initial gest
+%  @BFGS(J,dJ,u,eps=1.e-6,nbiter=20,nbiterline=20);
+%  @cout << "BFGS: J(u) = " << J(u) << endl;
+%
+%\eFF
+%%\end{example}
 Two algorithms of
 COOOL  a package \cite{coool} are interfaced with
 the Newton Raphson method  (call \texttt{Newton}) and
 the  \texttt{BFGS} method. \index{Newton}\index{BFGS}
-Be careful of these algorithms, because their
-implementation use full matrices.
+These two ones are directly available in FreeFem (no dynamical link to load).
+Be careful with these algorithms, because their
+implementation uses full matrices. We also provide several
+optimization algorithms from the NLopt library  \cite{nlopt} as well 
+as an interface for Hansen's  implementation of CMAES 
+(a MPI version of this one is also available). These last algorithms can
+be found as dynamical links in the \texttt{example++-load} folder
+as the \texttt{ff-NLopt} and \texttt{CMA\_ES} files (\texttt{CMA\_ES\_MPI}
+from the \texttt{example++-mpi} folder for the mpi version).
 
-Example of utilization
+\subsubsection{Example of utilization for BFGS or CMAES}
 %\begin{example}[{algo.edp}
 \bFF
-  real[int] b(10),u(10);
-  func @real J(@real[int] & u)
+  @real[int] b(10),u(10);
+  @func @real J(@real[int] & u)
     {
       @real s=0;
       @for (@int i=0;i<u.n;i++)
@@ -9990,6 +10031,338 @@ Example of utilization
 
 \eFF
 %\end{example}
+
+Using the CMA evolution strategy is almost the same, except that, as it is
+a derivative free optimizer, the \texttt{dJ} argument is omitted and there are
+some other named parameters to control the behaviour of the algorithm. With the same 
+objective function as above, an example of utilization would be (see \texttt{cmaes-VarIneq.edp} for a complete example):
+\bFF
+  @load "ff-cmaes"
+  ... //define J, u and all here
+  @real min = cmaes(J,u,stopTolFun=1e-6,stopMaxIter=3000);
+  @cout << "minimal value is " << min << " for u = " << u << @endl;
+\eFF
+This algorithm works with a normal multivariate distribution in the parameters
+space and try to adapt its covariance matrix using the information provides by
+the successive function evaluations (see \cite{hansen} for more details). Thus, some specific parameters can be passed
+to control the starting distribution, size of the sample generations etc... Named parameters
+for this are the following :
+\index{CMAES}
+\begin{description}
+
+    \item[\texttt{seed=}] Seed for random number generator  \index{CMAES!seed=}
+    ({\tt val} is an integer). No specified value will lead to a clock based seed initialization.
+    
+    \item[\texttt{initialStdDev=}] Value for the standard deviations of the initial covariance matrix \index{CMAES!initialStdDev=}
+    ({\tt val} is a real). If the value $\sigma$ is passed, the initial covariance matrix will be set to $\sigma I$. The 
+            expected initial distance between initial $X$ and the $argmin$
+            should be roughly initialStdDev. Default is $0.3$.
+    
+    \item[\texttt{initialStdDevs=}] Same as above except that the argument is an array allowing to set a value of the initial standard deviation
+    for each parameter. Entries differing by several orders of magnitude should be avoided (if it can't be, try rescaling the problem).
+    
+    \item[\texttt{stopTolFun=}]  Stops the algorithm if function values differences are smaller than the passed one, default is $10^{-12}$.
+    
+    \item[\texttt{stopTolFunHist=}]  Stops the algorithm if function value differences of the best values are smaller than the passed one, default is $0$ (unused).
+    
+    \item[\texttt{stopTolX=}]  Stopping criteria triggered if step sizes in the parameters space are 
+                 smaller than this real value, default is $0$.
+                 
+    \item[\texttt{stopTolXFactor=}]  Stopping criteria triggered when the standard deviation increases more than this value. The default value is $10^{3}$.
+       
+    \item[\texttt{stopMaxFunEval=}]  Stops the algorithm when {\tt stopMaxFunEval} function evaluations have been done. Set to $900(n+3)^{2}$ by default, where $n$ is the parameters space dimension .
+                 
+    \item[\texttt{stopMaxIter=}]  Integer stopping the search when {\tt stopMaxIter} generations has been sampled. Unused by default.
+    
+    \item[\texttt{popsize=}]  Integer value used to change the sample size. The default value is $4+ \lfloor 3\ln (n) \rfloor$, see \cite{hansen}
+    for more details. Increasing the population size usually improves the global search capabilities at the cost of an at most linear reduction of the convergence speed with respect to {\tt popsize}.
+    
+    \item[\texttt{paramFile=}] This {\tt string} type parameter allows the user to pass all the parameters using an extern file as in Hansen's original code. More parameters related to the CMA-ES algorithm 
+    can be changed with this file. A sample of it can be found in the {\tt examples++-load/ffCMAES/} folder under the name {\tt initials.par}. Note that the parameters passed to the CMAES function in the 
+    FreeFem script will be ignored if an input parameters file is given.
+                 
+\end{description}
+
+
+\subsubsection{The nlOpt optimizers}
+The {\tt ff-NLopt}  package provides a FreeFem interface to the free/open-source library for nonlinear optimization, thus easing the use of several different free optimization (constrained or not) routines available
+online along with the PDE solver. All the algorithms are well documented in \cite{nlopt}, thus no exhaustive informations concerning their mathematical specificities will be found here and we will focus on 
+the way they are called in a FreeFem script. One needing detailed informations about these algorithms should visit the said cite where a description of each of them is given, as well as many bibliographical links.
+
+All the nlOpt features are called that way :
+
+\bFF
+  @load "ff-NLopt"
+  ... //define J, u, and maybe grad(J), some constraints etc...
+  @real min = nloptXXXXXX(J,u,   //unavoidable part
+                         grad = <name of grad(J)> , //if needed
+                         lb = //lower bounds array
+                         ub= //upper bounds array
+                         ...//   some optional arguments :
+                            //constraints functions names,
+                            //                 stopping criterions,
+                            //     algo. specific parameters,
+                            //                                           etc...
+                         );
+\eFF
+
+{\tt XXXXXX} refers to the algorithm tag (not necessarily 6 characters long). {\tt u} is the starting position (a {\tt real[int]} type array) which will be overwritten by the algorithm, the value at the end being the found argmin. And as usual, {\tt J} is a function taking a {\tt real[int]} type array as argument and returning a {\tt real}. {\tt grad}, {\tt lb} and {\tt ub} are "half-optionnal" arguments, in the sense that they are obligatory for some routines but not all.
+
+The possible optional named parameters are the following, note that they are not used by all algorithm s (some does not supports constraints, or a type of constraints, some are gradient-based and other are derivative free, etc...). One can refer to the table after the parameters description to check which are the named parameters supported by a specific algorithm. Using an unsupported parameter will not stop 
+the compiler work and seldom breaks runtime, it will just be ignored. That said, when it is obvious you are missusing a routine, you will get a warning message at runtime (for exemple if you pass a gradient 
+to a derivative free algorithm, or set the population of a non-genetic one, etc...). In the following description, $n$ stands for the dimension of the search space.\\ \\
+
+
+\index{ffNLOpt}
+\begin{description}
+
+\item[\textbf{Half-optional parameters :}]
+\begin{description}
+    \item[ ]
+    \item[\texttt{grad=}]  The name of the function which computes the gradient of the cost function (prototype should be {\tt real[int]} $\rightarrow$ {\tt real[int]}, both argument and result should have the size $n$). 
+    This is needed as soon s a gradient-based method is involved, ignored if defined in a derivative free context. 
+    \item[\texttt{lb}/\texttt{ub} =] Lower and upper bounds arrays ({\tt real[int]} type) of size $n$. Used to define the bounds within which the search variable is allowed to move. 
+    Needed for some algorithms, optional or unsupported for others.
+    \item[\texttt{subOpt} :] Only enabled for the Augmented Lagrangian and MLSL method who need a sub-optimizer in order to work. Just pass the tag of the desired local algorithm with a {\tt string}.
+\end{description}
+
+\item[\textbf{Constraints related parameters (optional - unused if not specified):}]
+\begin{description}
+  \item[ ]
+  \item[\texttt{IConst}/\texttt{EConst} :] Allows to pass the name of a function implementing some inequality (resp. equality) constraints on the search space. The function type must be 
+  {\tt real[int]} $\rightarrow$ {\tt real[int]} where the size of the returned array is equal to the number of constraints (of the same type - it means that all the constraints are computed in one vectorial function).
+  In order to mix inequality and equality constraints in a same minimization attempt, two vectorial functions have to be defined and passed. See example \ref{varineqex} for more details about how these
+  constraints have to be implemented.
+  \item[\texttt{gradIConst}/\texttt{gradEConst} :] Use to provide the inequality (resp. equality) constraints gradient. These are {\tt real[int]} $\rightarrow$ {\tt real[int,int]} type functions. Assuming we have defined
+  a constraint function (either inequality or equality) with $p$ constraints, the size of the matrix returned by its associated gradient must be $p\times n$ (the $i$-th line of the matrix is the gradient of the $i$-th
+  constraint). It is needed in a gradient-based context as soon as an inequality or equality constraint function is passed to the optimizer and ignored in all other cases.
+  \item[\texttt{tolIConst}/\texttt{tolEConst} :] Tolerance values for each constraint. This is an array of size equal to the number of inequality (resp. equality) constraints. Default value os set to $10^{-12}$
+  for each constraint of any type.  
+\end{description}
+
+\item[\textbf{Stopping criteria :}]
+\begin{description}
+  \item[ ]
+  \item[\texttt{stopFuncValue} :] Makes the algorithm end when the objective function reaches this {\tt real} value.
+  \item[\texttt{stopRelXTol} :] Stops the algorithm when the relative moves in each direction of the search space is smaller than this {\tt real} value.
+  \item[\texttt{stopAbsXTol} :] Stops the algorithm when the moves in each direction of the search space is smaller than the corresponding value in this {\tt real[int]} array.
+  \item[\texttt{stopRelFTol} :] Stops the algorithm when the relative variation of the objective function is smaller than this {\tt real} value.
+  \item[\texttt{stopAbsFTol} :] Stops the algorithm when the variation of the objective function is smaller than this {\tt real} value.
+  \item[\texttt{stopMaxFEval} :] Stops the algorithm when the number of fitness evaluations reaches this {\tt integer} value.
+  \item[\texttt{stopTime} :] Stops the algorithm when the otpimization time in second exceeds this {\tt real} value. This is not a strict maximum: the time may exceed it slightly, 
+  depending upon the algorithm and on how slow your function evaluation is.
+ \end{description}
+ Note that when an AUGLAG or MLSL method is used, the meta-algorithm and the sub-algorithm may have different termination criteria. Thus, for algorithms of this kind, the following
+ named parameters has been defined (just adding the SO prefix - for Sub-Optimizer) to set the ending condition of the sub-algorithm (the meta one uses the ones above) : {\tt SOStopFuncValue}, 
+ {\tt SOStopRelXTol}, and so on... If these ones are not used, the sub-optimizer will use those of the master routine.
+ 
+ \item[\textbf{Other named parameters :}]
+ \begin{description}
+   \item[ ]
+   \item[\texttt{popSize} :] {\tt integer} used to change the size of the sample for stochastic search methods. Default value is a peculiar heuristic to the chosen algorithm.
+   \item[\texttt{SOPopSize} :] Same as above, but when the stochastic search is passed to a meta-algorithm.
+   \item[\texttt{nGradStored} :] The number ({\tt interger} type) of gradients to "remember" from previous optimization steps: increasing this increases the memory requirements but may speed convergence.
+   It is set to a heuristic value by default. If used with AUGLAG or MLSL, it will only affect the given subsidiary algorithm.
+ \end{description}
+
+\end{description}
+
+The following table resume the main characteristics of each algorithm, providing the more important information about which features are supported by which algorithm and what are the unavoidable arguments 
+they need. More details can be found in \cite{nlopt}.
+\begin{center}
+\includegraphics [height=\textheight]{nlopttab}   
+\end{center}
+
+
+\begin{example}[VarIneq.edp]
+\label{varineqex}
+Let $\Omega$ be a domain of $\mathbb{R}^{2}$, $f_{1}, f_{2}\in L^{2}(\Omega)$ and $g_{1}, g_{2} \in L^{2}(\partial\Omega)$ four given functions with $g_{1}\leq g_{2}$ almost everywhere.
+We define the space : 
+$$V = \left\lbrace (v_{1},v_{2})\in H^{1}(\Omega)^{2} ; v_{1}\vert_{\partial\Omega}=g_{1}, v_{2}\vert_{\partial\Omega}=g_{2}, v_{1}\leq v_{2}\ \mathrm{a.e.}\ \right\rbrace$$
+as well as the functional $J:H^{1}(\Omega)^{2}\longrightarrow \mathbb{R}$:
+$$J(v_{1},v_{2}) = \displaystyle{\frac{1}{2}\int_{\Omega}\vert\nabla v_{1}\vert^{2} - \int_{\Omega} f_{1}v_{1} +  \frac{1}{2}\int_{\Omega}\vert\nabla v_{2}\vert^{2} - \int_{\Omega} f_{1}v_{2}}$$
+The problem consists in finding (numerically) two functions $(u_{1},u_{2}) = \underset{(v_{1},v_{2})\in V}{\operatorname{argmin}} J(v_{1},v_{2}) $.
+
+This can be interpreted as finding $u_{1}, u_{2}$ as close as possible (in a certain sense) to the solutions of Laplace equation with respectively $f_{1}, f_{2}$ second members
+ and $g_{1}, g_{2}$ Dirichlet boundary conditions with the $u_{1}\leq u_{2}$ almost everywhere constraint.
+\end{example}
+
+Here is the corresponding script to treat this variational inequality problem with one of the NLOpt algorithms. The whole script is in the \texttt{VarIneq2.edp}.
+\bFF
+  @load "ff-NLopt" //Loading nlopt
+  @int NN = 10;
+  @mesh Th = @square(NN,NN);
+  @func f1=1.; //Datas
+  @func f2=-1.; 
+  @func g1=0.;
+  @func g2=0.1;
+  @int nadapt=3,iter=0;
+  @real starttol=1e-12,bctol=6.e-12;
+  @fespace Vh(Th,P1);
+\eFF
+
+Instead of defining the $J$ functional with explicit integral on the domain, we will write it in quadratic/linear form, since the corresponding matrix and vector will not change
+along with the iterations and the FreeFem matrix-vector product is optimized, this method will significantly speed up the approximation of the solution.
+
+\bFF
+  @varf BVF(v,w) = @int2d(Th)(0.5*@dx(v)*@dx(w) + 0.5*@dy(v)*@dy(w)); //bilinear
+  @varf LVF1(v,w) = @int2d(Th)(f1*w);//and linear parts
+  @varf LVF2(v,w) = @int2d(Th)(f2*w);
+  @matrix A =  BVF(Vh,Vh);//corresponding matrix
+  @real[@int] b1 = LVF1(0,Vh) , b2 = LVF2(0,Vh); //and vectors
+\eFF
+Then follows a trick that we will use later to pass the boundary conditions as non-linear equality constraints (although these are of course linear ones, but this approach
+demonstrate how to use all the features of NLOpt in one shot).
+\bFF
+  @varf Vbord(v,w) = @on(1,2,3,4,v=1);
+  Vh In,Bord;
+  Bord[] = Vbord(0,Vh,@tgv=1); //Bord=1 on the border
+  In[] = Bord[] ? 0:1; //and 0 inside
+  Vh gh1=Bord*g1,gh2=Bord*g2; //gh1=g1 on the border and 0 inside
+  
+  //The functional :
+  @func @real J(@real[@int] &X)
+  {
+    Vh u1,u2;
+    u1[] = X(0:Vh.ndof-1); //splitting the vector
+    u2[] = X(Vh.ndof:2*Vh.ndof-1); 
+    iter++;
+	    @real[@int] Au1 = A*u1[], Au2 = A*u2[]; 
+	    Au1 -= b1;
+	    Au2 -= b2;
+	    @real val = u1[]'*Au1 + u2[]'*Au2;
+	    @plot(u1,u2,...); //parameters omitted
+	    @return val;
+  }
+\eFF
+To be able to play with gradient-based algorithm, we must have a gradient ready :
+\bFF
+  @varf dBFV(v,w) = @int2d(Th)(@dx(v)*@dx(w)+@dy(v)*@dy(w)); 
+  @matrix dA = dBFV(Vh,Vh);
+  @func @real[@int] dJ(@real[@int] &X)
+  {
+	    Vh u1,u2;
+	    u1[] = X(0:Vh.ndof-1);
+	    u2[] = X(Vh.ndof:2*Vh.ndof-1);
+	    @real[@int] grad1 = dA*u1[], grad2 = dA*u2[];
+	    grad1 -= b1;
+	    grad2 -= b2;
+	    @real[@int] Grad(X.n);
+	    Grad(0:Vh.ndof-1) = grad1;
+	    Grad(Vh.ndof:2*Vh.ndof-1) = grad2; 
+	    @return Grad;
+  }
+\eFF
+As we use P1 Lagrange finite elements, the $u_{1}\leq u_{2} $ constraint can be expressed directly upon the degree of freedom. In NLOpt, one constraint must have the form $f(X)\leq 0$.
+The function is vectorial in order to handle multiple constraints :
+\bFF
+  @func @real[@int] IneqC(@real[@int] &X)
+  {
+	    @real[@int] constraints(Vh.ndof);
+	    @for(@int i=0;i<Vh.ndof;++i) constraints[i] = X[i] - X[i+Vh.ndof];
+	    @return constraints; //u1i - u2i <= 0
+  }
+\eFF
+One also has to define a gradient for each constraint if a gradient search is to be used. Constraint gradient must be a function which returns a matrix. The $i$-th line of this matrix is the gradient of
+the $i$-th constraint with respect to the variables of the search space.
+\bFF
+  @func @real[@int,@int] dIneqC(@real[@int] &X)
+  {
+	    @real[@int,@int] dconst(Vh.ndof,2*Vh.ndof);//so sparse... shame!
+	    dconst=0;
+	    @for(@int i=0;i<Vh.ndof;++i)
+	    {
+		      dconst(i,i) = 1.;
+		      dconst(i,i+Vh.ndof) = -1.;
+	    }
+	    @return dconst;
+  }
+\eFF
+As mentioned earlier, we also define a set of equality constraints and their derivatives in order to handle the boundary conditions. One could also use the {\tt lb} and {\tt ub} parameters to impose them, this also would avoid the use of large sparse matrix returned by the gradient function (it can be found in the script file, where we set {\tt lb} to $g-\epsilon$ and {\tt ub} to $g+\epsilon$).
+Here again, we can work directly on the degree of freedom because of the P1 finite element. The script could not work with other finite elements without modifications.
+\bFF
+  @real[@int] BordIndex(Th.nbe); //Indexes of border d.f.
+  
+  {
+	    @int k=0; //filling the index array
+	    @for(@int i=0;i<Bord.n;++i) if(Bord[][i]) {BordIndex[k]=i; ++k;}
+  }
+  
+  @func @real[@int] BC(@real[@int] &X)
+  {
+	    @real[@int] bc(2*Th.nbe);
+	    @for(@int i=0;i<Th.nbe;++i)
+	    {
+		      @int I = BordIndex[i];
+		      bc[i] = X[I] - gh1[][I];
+		      bc[i+Th.nbe] = X[I+Th.nv] - gh2[][I];
+	    }
+	    @return bc;
+  }
+  @func @real[@int,@int] dBC(@real[@int] &X) //Gradient of boundary conditions
+  {
+	    @real[@int,@int] dbc(2*Th.nbe,2*Th.nv);//even sparser...:(
+	    dbc=0.;
+	    @for(@int i=0;i<Th.nbe;++i)
+	    {
+		      @int I=BordIndex[i];
+		      dbc(i,I) = 1.;
+		      dbc(i+Th.nbe,I+Th.nv) = 1.;
+	    }
+	    @return dbc;
+  }
+\eFF
+Now we fill an initial vector and start the algorithm :
+\bFF
+  @real[@int] start(2*Vh.ndof);
+  start(0:Vh.ndof-1) = 0.; //starting with u1=u2=0 is bad
+  start(Vh.ndof:2*Vh.ndof-1) = 0.01; //a small difference is needed
+  
+  @real mini = @nloptAUGLAG(J, start, @grad=dJ,
+                          @IConst=IneqC, @gradIConst=dIneqC,
+                          @EConst=BC, @gradEConst=dBC,
+                          @subOpt="LBFGS", 
+                          @stopMaxFEval=10000, @stopAbsFTol=starttol
+                         );
+\eFF
+Here we wrap a BFGS algorithm (which only works with unconstraint problems) in the augmented lagrangian method for both equality and inequality constraints. Another legit choice would be to use
+SLSQP, the only gradient-based search of the package supporting these two kinds of constraints (note that the {\tt subOpt} parameter is gone ) :
+\bFF
+  @real mini = @nloptSLSQP(J, start, @grad=dJ,
+                          @IConst=IneqC, @gradIConst=dIneqC,
+                          @EConst=BC, @gradEConst=dBC,
+                          @stopMaxFEval=10000, @stopAbsFTol=starttol
+                         );
+\eFF
+One can also try to pass derivative free algorithms to AUGLAG and discard the gradients to see what happens, or directly one which handles the two kinds of constraints. Just check 
+the tag in the table. The true script also has a loop in which the algorithm is restarted after mesh adaptation, nothing was said about that to avoid complicating an already relatively long
+script comment.
+
+
+\begin{figure}
+\includegraphics[width=8cm] {VarIneqFill}
+\includegraphics[width=8cm] {VarIneqIso}
+\caption{Numerical Approximation of the Variational Inequality \label{VarIneqF}}
+\end{figure}
+
+
+\subsubsection{Optimization with MPI}
+The only quick way to use the previously presented algorithms on a parallel architecture lies in parallelizing the used cost function (which is in most real life case, the expensive part of the algorithm).
+ Somehow, we provide a parallel version of the CMA-ES algorithm. The parallelization principle is the trivial one of evolving/genetic algorithms : at each iteration the cost function has to be evaluated $N$ 
+ times without any dependence at all, these $N$ calculus are then equally distributed to each processes. Calling the MPI version of CMA-ES is nearly the same as calling its sequential version (a 
+ complete example of use can be found in the \texttt{cmaes-mpi-VarIneq.edp} file).:
+
+\bFF
+  @load "mpi-cmaes"
+  ... //define J, u and all here
+  @real min = cmaesMPI(J,u,stopTolFun=1e-6,stopMaxIter=3000);
+  @cout << "minimal value is " << min << " for u = " << u << @endl;
+\eFF
+
+If the population size is not changed using the {\tt popsize} parameter, it will use the heuristic value slightly changed to be equal to the closest greater multiple of the size of the communicator used by 
+the optimizer. 
+The FreeFem {\tt mpicommworld} is used by default. The user can specify his own MPI communicator with the named parameter "{ \tt comm=}", see the MPI section of this manual for more informations about 
+communicators in \texttt{FreeFem++}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Mathematical Models}
@@ -18981,6 +19354,12 @@ Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integrati
 
 \bibitem{sinwel}{\sc Astrid Sabine Sinwel},  {\it A New Family of Mixed Finite Elements for Elasticity}
 \url{http://www.numa.uni-linz.ac.at/Teaching/PhD/Finished/sinwel-diss.pdf}, Thesis,  2009,  Johannes Kepler Universität, Austria
+
+\bibitem{nlopt}{\sc Steven G. Johnson}, The NLopt nonlinear-optimization package,
+\url{http://ab-initio.mit.edu/nlopt}
+
+\bibitem{hansen}{\sc N. Hansen}, The CMA Evolution Strategy,
+\url{http://www.lri.fr/~hansen/cmaesintro.html}
 
 
 \end{thebibliography}
