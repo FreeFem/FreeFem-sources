@@ -1,3 +1,5 @@
+ - cmaes interface in scalar and MPI case  (thank to S. Auliac)
+    see doc and examples : cmaes-mpi-VarIneq.edp , cmaes--VarIneq.edp
  - add NLopt interface (thank to S. Auliac)
 v 3.16 
   technical stuff: 
