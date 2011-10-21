@@ -19,7 +19,7 @@ hypre_FreeFem.cpp \
 interfacepastix.cpp \
 parms_FreeFem.cpp \
 real_SuperLU_DIST_FreeFem.cpp \
-real_pastix_FreeFem.cpp 
+real_pastix_FreeFem.cpp mpi-cmaes.cpp 
 
 
 
@@ -29,7 +29,8 @@ LIST_COMPILE=MUMPS_FreeFem.$(DYLIB_SUFFIX) hips_FreeFem.$(DYLIB_SUFFIX) \
  interfacepastix.$(DYLIB_SUFFIX) \
 complex_SuperLU_DIST_FreeFem.$(DYLIB_SUFFIX) real_SuperLU_DIST_FreeFem.$(DYLIB_SUFFIX) \
 complex_pastix_FreeFem.$(DYLIB_SUFFIX) real_pastix_FreeFem.$(DYLIB_SUFFIX) \
-dSuperLU_DIST.$(DYLIB_SUFFIX) MPICG.$(DYLIB_SUFFIX) parms_FreeFem.$(DYLIB_SUFFIX)
+dSuperLU_DIST.$(DYLIB_SUFFIX) MPICG.$(DYLIB_SUFFIX) parms_FreeFem.$(DYLIB_SUFFIX) \
+mpi-cmaes.$(DYLIB_SUFFIX) 
 
 all-local:$(LIST_COMPILE) freefem++.pref
 	echo "finish compile load mpi solver !"
