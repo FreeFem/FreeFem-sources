@@ -6,10 +6,10 @@
 
 # $Id$
 
-SUBDIRS=download src DOC examples++-tutorial examples++	\
+SUBDIRS=download src  examples++-tutorial examples++	\
 	examples++-eigen examples++-load examples++-mpi	\
 	examples++-bug examples++-chapt3 examples++-other \
-	examples++-3d
+	examples++-3d DOC 
 
 EXTRA_DIST=regtests.sh config-wrapper.h  \
 FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \

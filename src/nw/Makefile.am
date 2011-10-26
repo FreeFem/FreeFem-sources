@@ -20,4 +20,4 @@ FreeFem___nw_DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
 FreeFem___DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
 
 LDADD=../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
-INCLUDES=-I../fflib -I../Graphics -I../.. -I../femlib 
+INCLUDES=-I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../.. -I$(srcdir)/../femlib 

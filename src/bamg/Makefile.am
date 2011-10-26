@@ -17,6 +17,6 @@ drawbdmesh_SOURCES=drawbdmesh.cpp
 drawbdmesh_LDADD = @STD_GRAPH_OBJ@ $(LDADD)  @STD_LIBS@ @LIBSNOCONSOLE@
 
 LDADD= ../fflib/libff.a
-INCLUDES=-I../fflib -I../bamglib -I../Graphics
+INCLUDES=-I$(srcdir)/../fflib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics
 
 

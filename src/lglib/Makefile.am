@@ -4,7 +4,7 @@
 
 noinst_LIBRARIES=liblg.a
 liblg_a_SOURCES=lg.tab.hpp lg.tab.cpp  mymain.cpp
-INCLUDES=-I../fflib -I../bamglib -I../Graphics -I../femlib
+INCLUDES=-I$(srcdir)/../fflib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib
 
 BUILT_SOURCES=lg.tab.hpp lg.tab.cpp
 

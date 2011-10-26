@@ -51,7 +51,7 @@ EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
 libff_a_LIBADD=@EIGENOBJ@
 libff_a_DEPENDENCIES=@EIGENOBJ@
 
-INCLUDES=-I../lglib -I../bamglib -I../Graphics -I../femlib
+INCLUDES=-I$(srcdir)/../lglib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib
 # -I$(top_srcdir)/arpack/arpack++/include
 
 # Build date changes at every change

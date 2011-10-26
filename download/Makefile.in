@@ -375,7 +375,7 @@ EXTRA_DIST = \
 ./yams/yamslib_internal.h 
 
 MPI_SOFT = blacs parmetis  scalapack scotch superludist mumps pastix hypre hips parms 
-LIST_SOFT = tetgen superlu fftw metis mshmet yams mmg3d gmm nlopt
+LIST_SOFT = tetgen superlu fftw metis mshmet yams mmg3d gmm  nlopt
 all: all-recursive
 
 .SUFFIXES:

@@ -312,7 +312,7 @@ chrono.h	extern.h	image.h		mesh.h \
 eigenv.h	grafic.h	medit.h		sproto.h 
 
 LDADD = ../libMesh/libMesh.a $(LIBSGLUT) -lm
-INCLUDES = -I../libMesh
+INCLUDES = -I$(srcdir)/../libMesh
 BUILT_SOURCES = compil.date
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
