@@ -35,6 +35,7 @@
 #define MESH3DN_HPP_
 
 
+#include <cstdio>
 
 // definition R
 #include <cstdlib>

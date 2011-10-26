@@ -328,10 +328,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = download src DOC examples++-tutorial examples++	\
+SUBDIRS = download src  examples++-tutorial examples++	\
 	examples++-eigen examples++-load examples++-mpi	\
 	examples++-bug examples++-chapt3 examples++-other \
-	examples++-3d
+	examples++-3d DOC
 
 EXTRA_DIST = regtests.sh config-wrapper.h  \
 FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \

@@ -282,7 +282,7 @@ hypre_FreeFem.cpp \
 interfacepastix.cpp \
 parms_FreeFem.cpp \
 real_SuperLU_DIST_FreeFem.cpp \
-real_pastix_FreeFem.cpp  mpi-cmaes.cpp
+real_pastix_FreeFem.cpp mpi-cmaes.cpp 
 
 LIST_COMPILE = MUMPS_FreeFem.$(DYLIB_SUFFIX) hips_FreeFem.$(DYLIB_SUFFIX) \
  hypre_FreeFem.$(DYLIB_SUFFIX) \
@@ -291,7 +291,6 @@ complex_SuperLU_DIST_FreeFem.$(DYLIB_SUFFIX) real_SuperLU_DIST_FreeFem.$(DYLIB_S
 complex_pastix_FreeFem.$(DYLIB_SUFFIX) real_pastix_FreeFem.$(DYLIB_SUFFIX) \
 dSuperLU_DIST.$(DYLIB_SUFFIX) MPICG.$(DYLIB_SUFFIX) parms_FreeFem.$(DYLIB_SUFFIX) \
 mpi-cmaes.$(DYLIB_SUFFIX) 
-
 
 all: all-am
 

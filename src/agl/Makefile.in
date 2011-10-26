@@ -291,7 +291,7 @@ EXTRA_DIST = FreeFem++.app.tgz Info-plist.am
 FreeFem___agl_SOURCES = ../Graphics/glrgraph.hpp ../Graphics/macglrgraf.cpp  ../mpi/parallelempi-empty.cpp
 FreeFem___agl_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
 LDADD = ../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
-INCLUDES = -I../fflib -I../Graphics -I../femlib
+INCLUDES = -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib
 
 # Automake does not want to see "-framework" in LDADD
 AM_LDFLAGS = -framework Carbon -framework OpenGL -framework AGL

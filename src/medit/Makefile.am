@@ -18,7 +18,7 @@ eigenv.h	grafic.h	medit.h		sproto.h
 
 
 LDADD= ../libMesh/libMesh.a $(LIBSGLUT) -lm
-INCLUDES=-I../libMesh
+INCLUDES=-I$(srcdir)/../libMesh
 BUILT_SOURCES=compil.date
 compil.date: $(ffmedit_SOURCES)
 	echo "#define COMPIL " '"' `date` '(with ff++ $(VERSION))''"' > compil.date
