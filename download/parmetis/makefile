@@ -13,13 +13,15 @@ all-local: parmetis
 DIRPKG=../pkg
 SRCDIR=ParMetis-$(parmetis_VERSION)
 PACKAGE=$(DIRPKG)/ParMetis-$(parmetis_VERSION).tar.gz
-SERVER=http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis
+SERVER=http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/OLD
 INSTALL=../..
 parmetis_VERSION=3.1.1
 
 parmetis: FAIRE
 
 $(SRCDIR)/FAIT:$(SRCDIR)/tags 
+	-mkdir -p "../lib/parmetis"
+	-mkdir -p "../include/parmetis"
 	cp Makefile.in $(SRCDIR)
 	cd $(SRCDIR)/METISLib;make 
 	cd $(SRCDIR)/ParMETISLib;make 
@@ -27,19 +29,18 @@ $(SRCDIR)/FAIT:$(SRCDIR)/tags
 install: 
 #	cp $(SRCDIR)/libparmetis.a $(SRCDIR)/$(INSTALL)/lib
 #	cp $(SRCDIR)/libmetis.a $(SRCDIR)/$(INSTALL)/lib
-	cp $(SRCDIR)/parmetis.h $(SRCDIR)/$(INSTALL)/include
-	-mkdir -p "$(SRCDIR)/$(INSTALL)/include/metis"
-#	cp $(SRCDIR)/METISLib/*.h "$(SRCDIR)/$(INSTALL)/include/metis"
+	cp $(SRCDIR)/parmetis.h ../include/parmetis
+	cp $(SRCDIR)/METISLib/*.h ../include/parmetis
 	-cd $(SRCDIR)/Programs;make 
 
 
 WHERE:
 	if [ -f $(SRCDIR)/FAIT ] ;then \
 	make install ;\
-	echo metis LD -L@DIR@/lib -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
-	echo metis INCLUDE -I@DIR@/include/metis >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
-	echo parmetis LD -L@DIR@/lib -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
-	echo parmetis INCLUDE -I@DIR@/include/metis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+	echo metis LD -L@DIR@/lib/parmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	echo metis INCLUDE -I@DIR@/include/parmetis >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+	echo parmetis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
 	fi
 
 FAIRE: $(SRCDIR)/FAIT 
@@ -56,19 +57,19 @@ $(SRCDIR)/tags: $(PACKAGE)
 	patch -p0  <parmetis-3.1.1.patch
 	mv  $(SRCDIR)/Programs/Makefile $(SRCDIR)/Programs/Makefile-orig
 	sed -e 's;BINDIR = .*$$;BINDIR = ../$(INSTALL)/bin;' \
-            -e 's;../libparmetis.a;../$(INSTALL)/lib/libparmetis.a;' \
-            -e 's;../libmetis.a;../$(INSTALL)/lib/libmetis.a;' \
+            -e 's;../libparmetis.a;../$(INSTALL)/lib/parmetis/libparmetis.a;' \
+            -e 's;../libmetis.a;../$(INSTALL)/lib/parmetis/libmetis.a;' \
             -e 's;-L[.][.];-L../$(INSTALL)/lib;' \
           <$(SRCDIR)/Programs/Makefile-orig \
           >$(SRCDIR)/Programs/Makefile
 	mv $(SRCDIR)/ParMETISLib/Makefile $(SRCDIR)/ParMETISLib/Makefile-orig
-	sed   -e 's;../libparmetis.a;../$(INSTALL)/lib/libparmetis.a;' \
-	      -e 's;../libmetis.a;../$(INSTALL)/lib/libmetis.a;' \
+	sed   -e 's;../libparmetis.a;../$(INSTALL)/lib/parmetis/libparmetis.a;' \
+	      -e 's;../libmetis.a;../$(INSTALL)/lib/parmetis/libmetis.a;' \
           <$(SRCDIR)/ParMETISLib/Makefile-orig \
           >$(SRCDIR)/ParMETISLib/Makefile
 	mv $(SRCDIR)/METISLib/Makefile $(SRCDIR)/METISLib/Makefile-orig
-	sed   -e 's;../libparmetis.a;../$(INSTALL)/lib/libparmetis.a;' \
-	      -e 's;../libmetis.a;../$(INSTALL)/lib/libmetis.a;' \
+	sed   -e 's;../libparmetis.a;../$(INSTALL)/lib/parmetis/libparmetis.a;' \
+	      -e 's;../libmetis.a;../$(INSTALL)/lib/parmetis/libmetis.a;' \
           <$(SRCDIR)/METISLib/Makefile-orig \
           >$(SRCDIR)/METISLib/Makefile
 	touch $(SRCDIR)/tags

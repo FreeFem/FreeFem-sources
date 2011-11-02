@@ -37,8 +37,8 @@ http://www.tacc.utexas.edu/index.php?eID=tx_nawsecuredl&u=0&file=fileadmin/image
 
 try to compile 
 
-4) MPI for // verion 
-http://www.mcs.anl.gov/research/projects/mpich2/downloads/tarballs/1.3.1/mpich2-1.3.1-win-ia32.msi
+4) MPI for // version 
+use HPC Pack 2008 SDK with Service Pack 2 (SP2) 
 
 5) inno setup to build instraller: 
 http://www.xs4all.nl/~mlaan2/ispack/isetup-5.4.0.exe
@@ -48,8 +48,11 @@ http://www.xs4all.nl/~mlaan2/ispack/isetup-5.4.0.exe
 the configure argument are:
 
 
-./configure '--enable-download' 'FC=mingw32-gfortran' 'F77=mingw32-gfortran' 'CC=mingw32-gcc' 'CXX=mingw32-g++' '-with-blas=/home/hecht/blas-x86/libgoto2.dll' 'CXXFLAGS=-I/home/hecht/blas-x86' '--enable-generic'
+./configure '--enable-download' 'FC=mingw32-gfortran' 'F77=mingw32-gfortran' 'CC=mingw32-gcc' 'CXX=mingw32-g++' '-with-blas=/home/hecht/blas-x86/libgoto2.dll' 'CXXFLAGS=-I/home/hecht/blas-x86' '--enable-generic' '--with-wget=wget' 'MPIRUN=/c/Program Files/Microsoft HPC Pack 2008 R2/Bin/mpiexec.exe'
 
+$ cat examples++-load/WHERE_LIBRARY
+gsl LD -L'"/c/Program Files (x86)/GSL-1.13"'/lib -lgsl
+gsl INCLUDE -I'/c/Program Files (x86)/GSL-1.13/include'
 
 
 OLD Version with cygwin: (obsolete comment) 

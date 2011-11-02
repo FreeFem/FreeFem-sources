@@ -2302,7 +2302,8 @@ void f_initparallele(int &argc, char **& argv)
   if(verbosity> 2 || (mpirank ==0))
   cout << "initparallele rank " <<  mpirank << " on " << mpisize << endl;
 }
-
+double ffMPI_Wtime() {return MPI_Wtime();}
+double ffMPI_Wtick() {return MPI_Wtick();}
 void f_init_lgparallele()
   {
     if(verbosity && mpirank == 0) cout << "parallelempi ";
@@ -2572,8 +2573,8 @@ void f_init_lgparallele()
       // add FH 
       
       
-     Global.Add("mpiWtime","(",new OneOperator0<double>(MPI_Wtime));    
-     Global.Add("mpiWtick","(",new OneOperator0<double>(MPI_Wtick));    
+     Global.Add("mpiWtime","(",new OneOperator0<double>(ffMPI_Wtime));    
+     Global.Add("mpiWtick","(",new OneOperator0<double>(ffMPI_Wtick));    
      Global.Add("processor","(",new OneOperator3_<MPIrank,long,fMPI_Comm,fMPI_Request*>(mpiwho_));
      Global.Add("processor","(",new OneOperator2_<MPIrank,long,fMPI_Request*>(mpiwho_));
      Global.Add("mpiWait","(",new OneOperator1<long,fMPI_Request*>(mpiWait));

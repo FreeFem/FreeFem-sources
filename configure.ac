@@ -391,6 +391,7 @@ CYGWIN*|MINGW*)
 		CNOFLAGS="$CNOFLAGS $ff_nocygwin -I/usr/include/mingw"
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32" 
 		LIBSNOCONSOLE="-mwindows"
+		test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe` 
 		if test "$enable_fortran" != no  -o  "$with_flib" != no ;   then
 		    case "$F77" in
 	 		*gfortran) FLIBS="$ff_nocygwin -lgfortran";;
@@ -717,7 +718,7 @@ fi
 dnl m4_include(ax_mpi.m4)
 ff_save_path="$PATH"
 # We need to choose between mpich, openmpi  and lam for the Debian package
-AC_ARG_WITH(mpipath,[  --with-mpipach= the path of mpich under windows (no command  mpic++, ... )])
+AC_ARG_WITH(mpipath,[  --with-mpipath= the path of mpich under windows (no command  mpic++, ... )])
 AC_ARG_WITH(mpilibs,[  --with-mpilibs= the libs to add to c++,fc, ... (to link with c++ - ex:   -L/usr/local/lib -lmpi_f90  -lmpi_cxx -lmpi -lopen-rte -lopen-pal -lutil) ])
 AC_ARG_WITH(mpilibsc,[  --with-mpilibsc= the libs to add to c  ... (to link with cc (for pastix lib)  ex:   -L/usr/local/lib -lmpi -lopen-rte -lopen-pal -lutil) ])
 AC_ARG_WITH(mpiinc,[  --with-mpiinc= the include directory directive and preprocess directive  (no mpicc++, just use the compiler)) ])
@@ -763,7 +764,7 @@ AC_ARG_VAR(MPIRUN,[MPI run command ])
 AC_MSG_CHECKING(for MPIRUN)
 
 if test -z "$MPIRUN" ; then
-    AC_PATH_PROGS(MPIRUN,mpirun mpiexec,no,$ff_mpi_path)
+    AC_PATH_PROGS(MPIRUN,mpirun mpiexec mpiexec.exe,no,$ff_mpi_path)
     if test "$MPIRUN" = no
     then
 	ff_mpi=no
@@ -773,10 +774,15 @@ AC_MSG_RESULT($MPIRUN)
 
 AC_MSG_CHECKING(for mpipath )
 	
-if test "$with_mpi" != no -a ! -d  "$with_mpipath" -a "$ff_win32" = yes ; then 
-    for i in '/c/Program Files (x86)/MPICH2' '/c/Program Files/MPICH2' 'c:\Program Files (x86)\MPICH2' 'c:\Program Files\MPICH2' ; do
-	test -d "$i" &&  with_mpipath="$i" && break 
-    done
+if test "$with_mpi" != no -a ! -d  "$with_mpipath" -a "$ff_win32" = yes -a "$MPIRUN" != no ; then 
+#   if "$MPIRUN" != no ; tehn 
+    with_mpipath=`AS_DIRNAME(["$MPIRUN"])`
+    with_mpipath=`AS_DIRNAME(["$with_mpipath"])`
+#    else 
+#    for i in '/c/Program Files (x86)/MPICH2' '/c/Program Files/MPICH2' 'c:\Program Files (x86)\MPICH2' 'c:\Program Files\MPICH2' ; do
+#	test -d "$i" &&  with_mpipath="$i" && break 
+#    done
+#    fi
 fi
 
 dnl if test "$with_mpilibs" != "no" ; then
@@ -792,15 +798,21 @@ if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
  #   MPICXX="$ff_pwd/mpic++"
  #   MPIF77="$ff_pwd/mpif77"
  #   MPIFC="$ff_pwd/mpif90"
- #   MPICC="$ff_pwd/mpicc"   
-    ff_MPI_INCLUDE_DIR="$with_mpipath/include"
-    ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR'"
+ #   MPICC="$ff_pwd/mpicc" zzzzzzzzzzz   
+    case "$ff_size_ptr"  in 
+     4) with_mpipathlib="$with_mpipath/Lib/i386";;
+     8) with_mpipathlib="$with_mpipath/Lib/amd64";;
+     *) with_mpipath=no;;
+    esac
+    test -d "$with_mpipath/Inc" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/Inc"
+    test -d "$with_mpipath/Include" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/Include"
+    ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR' '-D__int64=long long'"
     with_mpiinc="$ff_MPI_INCLUDE"
-    with_mpilibs="-L'$with_mpipath'/lib -lmpicxx -lfmpich2g -lmpi"
-    test -z "$MPIRUN" && MPIRUN="$with_mpipath/bin/mpirun.exe"
-    ff_MPI_LIBC="-L'$with_mpipath'/lib -lmpi"
-    ff_MPI_LIB="-L'$with_mpipath'/lib -lmpicxx -lmpi"
-    ff_MPI_LIBFC="-L'$with_mpipath'/lib -lmpicxx -lfmpich2g -lmpi"
+    with_mpilibs="-L'$with_mpipathlib' -lmsmpi"
+    test -z "$MPIRUN" && MPIRUN="$with_mpipath/bin/mpiexe.exe"
+    ff_MPI_LIBC="-L'$with_mpipathlib' -lmsmpi"
+    ff_MPI_LIB="-L'$with_mpipathlib' -lmsmpi"
+    ff_MPI_LIBFC="-L'$with_mpipathlib' -lmsmpi"
     test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
     test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
     test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
