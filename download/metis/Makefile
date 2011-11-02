@@ -27,8 +27,8 @@ $(SRCDIR)/FAIT:
 
 install:$(SRCDIR)/tag-compile
 	cd $(SRCDIR);$(MAKE) 
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/metis
-	cp $(SRCDIR)/Lib/*.h $(SRCDIR)/$(INSTALL)/include/metis
+	-mkdir -p ../include/metis
+	cp $(SRCDIR)/Lib/*.h ../include/metis
 
 
 FAIRE: $(SRCDIR)/FAIT 
