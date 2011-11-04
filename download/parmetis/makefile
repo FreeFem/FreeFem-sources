@@ -19,26 +19,25 @@ parmetis_VERSION=3.1.1
 
 parmetis: FAIRE
 
-$(SRCDIR)/FAIT:$(SRCDIR)/tags 
+$(SRCDIR)/FAIT:$(SRCDIR)/tags Makefile.in
 	-mkdir -p "../lib/parmetis"
 	-mkdir -p "../include/parmetis"
 	cp Makefile.in $(SRCDIR)
-	cd $(SRCDIR)/METISLib;make 
-	cd $(SRCDIR)/ParMETISLib;make 
+	cd $(SRCDIR)/METISLib; $(MAKE) 
+	cd $(SRCDIR)/ParMETISLib;$(MAKE) 
 	touch $(SRCDIR)/FAIT
 install: 
 #	cp $(SRCDIR)/libparmetis.a $(SRCDIR)/$(INSTALL)/lib
 #	cp $(SRCDIR)/libmetis.a $(SRCDIR)/$(INSTALL)/lib
 	cp $(SRCDIR)/parmetis.h ../include/parmetis
 	cp $(SRCDIR)/METISLib/*.h ../include/parmetis
+	sed  's;../parmetis.h;parmetis.h;' <$(SRCDIR)/METISLib/metis.h >../include/parmetis/metis.h
 	-cd $(SRCDIR)/Programs;make 
 
 
 WHERE:
 	if [ -f $(SRCDIR)/FAIT ] ;then \
 	make install ;\
-	echo metis LD -L@DIR@/lib/parmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
-	echo metis INCLUDE -I@DIR@/include/parmetis >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
 	echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
 	echo parmetis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
 	fi

@@ -55,7 +55,7 @@ double gsl_sf_bessel_zero_Jnu (double nu,long s) {return gsl_sf_bessel_zero_Jnu(
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init(){
   init_gsl_sf() ; 
   /*

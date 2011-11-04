@@ -2552,7 +2552,7 @@ bool SetMUMPSmpi()
 
 
 
-Init init;
+LOADINIT(Init);
 Init::Init()
 { 
   

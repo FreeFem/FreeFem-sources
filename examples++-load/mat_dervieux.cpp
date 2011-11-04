@@ -150,7 +150,7 @@ AnyType MatrixUpWind0::operator()(Stack stack) const
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init()
 {
   cout << " lood: init Mat Chacon " << endl;

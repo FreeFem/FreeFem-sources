@@ -326,7 +326,7 @@ void* call_addtimeseries( DxWriter * const & mt,string * const & name, Fem2D::Me
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init(){
 
   Dcl_Type<DxWriter*>(InitP<DxWriter>,Destroy<DxWriter>); // declare deux nouveau type pour freefem++  un pointeur et 

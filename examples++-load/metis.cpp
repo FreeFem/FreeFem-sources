@@ -95,7 +95,7 @@ class Init { public:
 };
 // E_F_StackF0F0
 
-Init init;
+LOADINIT(Init);
 Init::Init(){
   if(verbosity && mpirank == 0) 
   cout << " lood: init metis  " << endl;

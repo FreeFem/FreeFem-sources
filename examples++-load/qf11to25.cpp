@@ -781,7 +781,7 @@ const QuadratureFormular QuadratureFormular_T_25(25 ,120,P_QuadratureFormular_T_
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init(){
   /*
 grep QuadratureFormular QF.cpp|grep ^const|awk -F"[_(]" '{print "Global.New(@qf" $3 "pT@,CConstant<const QuadratureFormular *>(&QuadratureFormular_T_"$3"));"}'|sed -e 's/@/"/g'

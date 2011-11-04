@@ -229,7 +229,7 @@ AnyType SplitEdges::operator()(Stack stack) const
     return SetAny<pmesh>( Split_Edges(pTh,(long *) dK));      
   }
  
-static Init init;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   if (verbosity)

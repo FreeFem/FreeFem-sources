@@ -46,7 +46,7 @@ R3 * get_myType_uv_N(const myType_uv & muv)
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init(){
 
   Dcl_Type<myType*>(InitP<myType >,Destroy<myType>); // declare deux nouveau type pour freefem++  un pointeur et 

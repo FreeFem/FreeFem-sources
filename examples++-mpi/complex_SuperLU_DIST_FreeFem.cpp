@@ -807,7 +807,7 @@ bool SetSuperLUmpi()
 
 
 
-Init init;
+LOADINIT(Init);
 Init::Init()
 { 
   

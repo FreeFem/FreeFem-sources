@@ -660,7 +660,7 @@ AnyType MetricKuate::operator()(Stack stack) const
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init()
 {
   cout << "\n  -- lood: init MetricKuate\n";

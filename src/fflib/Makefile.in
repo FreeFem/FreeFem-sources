@@ -67,7 +67,7 @@ am__objects_1 = UMFPack_Solver.$(OBJEXT) AFunction.$(OBJEXT) \
 	P012_1d.$(OBJEXT) P012_2d.$(OBJEXT) P012_3d.$(OBJEXT) \
 	Mesh1dn.$(OBJEXT) Mesh2dn.$(OBJEXT) Mesh3dn.$(OBJEXT) \
 	GQuadTree.$(OBJEXT) libmesh5.$(OBJEXT) glumesh2D.$(OBJEXT) \
-	splitsimplex.$(OBJEXT)
+	splitsimplex.$(OBJEXT) ffapi.$(OBJEXT)
 am_libff_a_OBJECTS = $(am__objects_1) strversionnumber.$(OBJEXT)
 libff_a_OBJECTS = $(am_libff_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -341,7 +341,8 @@ PlotStream.hpp \
 endian.hpp \
 ff++.hpp \
 ../Eigen/arpackff.hpp \
-../femlib/splitsimplex.cpp AFunction_ext.hpp
+../femlib/splitsimplex.cpp AFunction_ext.hpp \
+ffapi.hpp ffapi.cpp 
 
 libff_a_SOURCES = $(libff_a_SOURCES2)  strversionnumber.cpp 
 
@@ -443,6 +444,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eigenvalue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/environment.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fem.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffapi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gibbs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/global.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/glumesh2D.Po@am__quote@

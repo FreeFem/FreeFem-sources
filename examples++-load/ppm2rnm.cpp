@@ -304,7 +304,7 @@ class Init { public:
   Init();
 };
 
-Init init;
+LOADINIT(Init);
 Init::Init(){
   cout << " lood: init ppm2rmn  " << endl;
 

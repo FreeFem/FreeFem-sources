@@ -63,7 +63,7 @@ KN<Complex> * dfft_eq(  KN<Complex> * const   &x,const DFFT_1dor2d & d)
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init(){
   cout << " lood: init dfft " << endl;
   Dcl_Type<DFFT_1dor2d >();

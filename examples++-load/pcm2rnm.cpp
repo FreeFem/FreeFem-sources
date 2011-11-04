@@ -72,7 +72,7 @@ long read_pcm(string * const &filename,KNM<double> * const &u,KNM<double> * cons
   Init();
 };
 
-Init init;
+LOADINIT(Init);
 Init::Init(){
   cout << " load: init pcm2rmn  " << endl;
  

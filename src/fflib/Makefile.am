@@ -42,7 +42,8 @@ PlotStream.hpp \
 endian.hpp \
 ff++.hpp \
 ../Eigen/arpackff.hpp \
-../femlib/splitsimplex.cpp AFunction_ext.hpp
+../femlib/splitsimplex.cpp AFunction_ext.hpp \
+ffapi.hpp ffapi.cpp 
 
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp 
 

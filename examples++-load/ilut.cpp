@@ -152,4 +152,5 @@ class IluInit {
 		}
 };
 
-static IluInit init;
+//static IluInit init;
+LOADINIT(IluInit) 
