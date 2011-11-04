@@ -33,4 +33,11 @@ void  callInitsFunct() ;
 struct  addingInitFunct { 
   addingInitFunct(int i,void  (* f)(),const char *name=0) { addInitFunct(i,f,name);}
 } ;
+
+template<class TI> void  AutoLoadInit() { static TI init; }
+//
+  
+#define LOADINIT(TI) static addingInitFunct  loadinit(1000,AutoLoadInit<TI>,__FILE__) ; 
+
+
 #endif

@@ -43,5 +43,5 @@ using namespace std;
 
 #include "Mesh2.h"
 #include "BamgFreeFem.hpp"
-
+#include "ffapi.hpp" 
 #endif

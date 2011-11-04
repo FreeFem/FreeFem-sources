@@ -29,7 +29,7 @@
 #ifndef __AFONCTION__
 #define __AFONCTION__
 #include "showverb.hpp" 
-
+#include "InitFunct.hpp"
 
 #include <typeinfo>
 #include <cstddef>

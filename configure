@@ -11880,24 +11880,33 @@ if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
  #   MPIF77="$ff_pwd/mpif77"
  #   MPIFC="$ff_pwd/mpif90"
  #   MPICC="$ff_pwd/mpicc" zzzzzzzzzzz
-    case "$ff_size_ptr"  in
-     4) with_mpipathlib="$with_mpipath/Lib/i386";;
-     8) with_mpipathlib="$with_mpipath/Lib/amd64";;
-     *) with_mpipath=no;;
-    esac
-    test -d "$with_mpipath/Inc" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/Inc"
-    test -d "$with_mpipath/Include" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/Include"
-    ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR' '-D__int64=long long'"
-    with_mpiinc="$ff_MPI_INCLUDE"
-    with_mpilibs="-L'$with_mpipathlib' -lmsmpi"
-    test -z "$MPIRUN" && MPIRUN="$with_mpipath/bin/mpiexe.exe"
-    ff_MPI_LIBC="-L'$with_mpipathlib' -lmsmpi"
-    ff_MPI_LIB="-L'$with_mpipathlib' -lmsmpi"
-    ff_MPI_LIBFC="-L'$with_mpipathlib' -lmsmpi"
-    test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
-    test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
-    test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
-    test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
+    if  with_mpilibs=`which msmpi.dll`
+    then
+	case "$ff_size_ptr"  in
+	    4) with_mpipathlib="$with_mpipath/Lib/i386";;
+	    8) with_mpipathlib="$with_mpipath/Lib/amd64";;
+	    *) with_mpipath=no;;
+	esac
+
+
+	test -d "$with_mpipath/Inc" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/Inc"
+	test -d "$with_mpipath/Include" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/Include"
+	ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR' '-D_MSC_VER' '-D__int64=long long'"
+	with_mpiinc="$ff_MPI_INCLUDE"
+	test -z "$MPIRUN" && MPIRUN="$with_mpipath/bin/mpiexe.exe"
+	ff_MPI_LIBC="$with_mpilibs"
+	ff_MPI_LIB="$with_mpilibs"
+	ff_MPI_LIBFC="$with_mpilibs"
+	test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
+	test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
+	test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
+	test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
+    else
+	echo " #### no msmpi.dll  => no mpi under windows .... (FH) " >&AS_MESSAGE_LOG_FD
+	echo " #### no msmpi.dll  => no mpi under windows .... (FH) " >&AS_MESSAGE_FD
+	with_mpipath=no
+	with_mpi=no
+    fi
 else
     with_mpipath=no
 fi

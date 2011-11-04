@@ -892,7 +892,7 @@ KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b)
   return a;
 }
 /*
-static Init init;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   // avec de matrice plein 
@@ -911,7 +911,7 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
 }
 
 */
-static Init init;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 template<class R,class A,class B> R Build2(A a,B b) {
     return R(a,b);

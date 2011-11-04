@@ -30,6 +30,7 @@
 #include <deque>
 #include <iostream>
 #include <set> 
+#include "ffapi.hpp"  
 using namespace std;
 typedef void  (* afunc)(); 
 typedef pair<int,afunc> InitFunct;
@@ -66,7 +67,15 @@ bool comp(const InitFunct a,const InitFunct b)
  }
  
 void  addInitFunct(int i,void  (* f)(),const char *name) 
-{ 
+{
+  streambuf * so =ffapi::cout()->rdbuf() ;
+  streambuf * si =ffapi::cin()->rdbuf() ;
+  streambuf * se =ffapi::cerr()->rdbuf() ;
+  //  update the cout of DLL .... ??   test F. hecht .... 
+  if( so &&  cout.rdbuf() != so ) cout.rdbuf(so);
+  if( si &&  cin.rdbuf() != si ) cin.rdbuf(si);
+  if( se &&  cerr.rdbuf() != se ) cerr.rdbuf(se);
+
   if(!name || ff_SetofInitFunct.insert(name).second)
     { 
     getInitFunctlist()->push_back(make_pair(i,f));

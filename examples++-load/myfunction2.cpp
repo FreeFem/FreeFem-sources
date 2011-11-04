@@ -12,7 +12,7 @@ double myf(string * s) {
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init(){
   Global.Add("myfunction","(",new OneOperator1<double,string*>(myf));
 }

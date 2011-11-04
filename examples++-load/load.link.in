@@ -171,7 +171,8 @@ if [ -z "$out" ] ; then  out=$o  ; fi;
 if [ -z "$CXX"  ];then  CXX=g++ ; fi
 if [ -n "$withmpi" ]; then  CXX=$MPICXX;fi
 
-WMPI_LIB="$MPI_LIB"
+test "$withmpi" = "yes" && WMPI_LIB="$MPI_LIB"
+
 INC="$INCFF $INC"  
 SUF=so
 SHARED="-shared"

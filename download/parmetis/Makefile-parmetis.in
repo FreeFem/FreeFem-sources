@@ -6,10 +6,11 @@ LD=  @MPICC@
 OPTFLAGS = @CFLAGS@ 
 
 # What options to be used by the compiler
-COPTIONS =  -DHAVE_CONFIG_H -I../../../.. @FFMETIS_CFLAGS@
+COPTIONS =  -DHAVE_CONFIG_H -I. -I../../../.. @FFMETIS_CFLAGS@ -D_MSC_VER
 
 # What options to be used by the loader
-LDOPTIONS = @LDFLAGS@
+LDOPTIONS = @LDFLAGS@ 
+XTRALIBS= @MPI_LIBC@
 
 # What archiving to use
 AR =  @AR@ @ARFLAGS@

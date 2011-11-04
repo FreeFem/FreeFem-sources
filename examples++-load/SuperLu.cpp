@@ -779,7 +779,7 @@ bool SetSuperLU()
 
 
 
-Init init;
+LOADINIT(Init);
 Init::Init()
 { 
   

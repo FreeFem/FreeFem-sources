@@ -1,3 +1,12 @@
+v 3.17 
+ - build mpi for windows with msmpi ( begin) 
+    memory error after end .. 
+ - change the init of dynamics load to make compatible 
+   le freefem++  plugin with freefem++cs  ( solve pb with
+  cin,cout, cerr in  dll).
+   LOADINIT(Init); // where init is a class 
+or do 
+   addingInitFunct FFinit(100,ffinit,"MUMPS_FreeFem"); // where ffinit the init function ...
 v 3.16-1
  - cmaes interface in scalar and MPI case  (thank to S. Auliac)
     see doc and examples : cmaes-mpi-VarIneq.edp , cmaes--VarIneq.edp

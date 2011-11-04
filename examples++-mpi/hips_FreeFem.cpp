@@ -728,7 +728,7 @@ bool SetHipsSolver()
   TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
   return 1;
 }
-Init init;
+LOADINIT(Init);
 Init::Init()
 {   
   SparseMatSolver_R= DefSparseSolver<double>::solver;

@@ -112,7 +112,7 @@ double funcs1(Stack s,const double &a){  return a;}
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init(){
   // Add function with 3 arguments
   Global.Add("funcs1","(",new OneOperator1s_<double, double>(funcs1)); 

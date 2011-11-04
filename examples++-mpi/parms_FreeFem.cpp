@@ -1024,7 +1024,7 @@ bool SetdSolvePARMS()
      TypeSolveMat::defaultvalue  = TypeSolveMatdefaultvalue;
      return TRUE;
 }
-Init init;
+LOADINIT(Init);
 Init::Init()
 { 
   

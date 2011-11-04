@@ -328,7 +328,7 @@ bool SetUMFPACK()
 class Init { public:
     Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init(){    
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;

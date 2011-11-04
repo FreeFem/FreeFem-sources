@@ -70,7 +70,7 @@ return 0;}
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 
 
 

@@ -26,7 +26,7 @@ $(SRCDIR)/FAIT:
 	touch $(SRCDIR)/FAIT
 
 install:$(SRCDIR)/tag-compile
-	cd $(SRCDIR);$(MAKE) 
+	cd $(SRCDIR)/Programs ;$(MAKE) 
 	-mkdir -p ../include/metis
 	cp $(SRCDIR)/Lib/*.h ../include/metis
 
