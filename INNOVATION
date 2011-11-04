@@ -1,9 +1,10 @@
 v 3.17 
  - build mpi for windows with msmpi ( begin) 
     memory error after end .. 
- - change the init of dynamics load to make compatible 
-   le freefem++  plugin with freefem++cs  ( solve pb with
-  cin,cout, cerr in  dll).
+ - remove add by default $LIB_MPI in ff-c++ 
+ - change the way add thing in freefem++ in case of  dynamics load 
+   to be  compatible   plugin with freefem++cs  ( solve pb with
+     cin,cout, cerr in  dll may be..).
    LOADINIT(Init); // where init is a class 
 or do 
    addingInitFunct FFinit(100,ffinit,"MUMPS_FreeFem"); // where ffinit the init function ...
