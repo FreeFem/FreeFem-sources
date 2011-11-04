@@ -25,7 +25,7 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef INITSFUNCT
+#ifndef INITSFUNCT_HPP_
 #define INITSFUNCT_HPP_
 
 void  addInitFunct(int i,void  (* f)(),const char *name) ;
