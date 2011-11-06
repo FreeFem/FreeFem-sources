@@ -42,14 +42,13 @@ deque<InitFunct> * getInitFunctlist()
 }
 
 extern long verbosity;
-set<string> ff_SetofInitFunct;
+set<string> & ff_SetofInitFunct() { static set<string> sset; return sset;}
 void call(const InitFunct & a) { 
-  if(verbosity) 
-    {
-      cout << " addInitFunct : " << a.first << " call : " <<a.second ;
-      (*a.second)();
-    }
-  if(verbosity) cout << " addInitFunct : " << a.first << " call : " <<a.second ;
+  if(verbosity>5) 
+    cout << "\n addInitFunct : " << a.first << " call : " <<a.second  << " ( " ; 
+  (*a.second)();  
+  if(verbosity>5)
+    cout <<  " ) " ;
 }
 bool comp(const InitFunct a,const InitFunct b)
  { 
@@ -60,7 +59,7 @@ bool comp(const InitFunct a,const InitFunct b)
  {
    deque<InitFunct> *  l(getInitFunctlist()); 
    sort(l->begin(),l->end(),comp);
-   cout << " callInitsFunct : " << l->size() << endl;
+   if(verbosity>5) cout << " callInitsFunct : " << l->size() << endl;
    //   for_each(l->begin(),l->end(),show);   
    for_each(l->begin(),l->end(),call);
     l->clear();
@@ -68,21 +67,15 @@ bool comp(const InitFunct a,const InitFunct b)
  
 void  addInitFunct(int i,void  (* f)(),const char *name) 
 {
-  streambuf * so =ffapi::cout()->rdbuf() ;
-  streambuf * si =ffapi::cin()->rdbuf() ;
-  streambuf * se =ffapi::cerr()->rdbuf() ;
-  //  update the cout of DLL .... ??   test F. hecht .... 
-  if( so &&  cout.rdbuf() != so ) cout.rdbuf(so);
-  if( si &&  cin.rdbuf() != si ) cin.rdbuf(si);
-  if( se &&  cerr.rdbuf() != se ) cerr.rdbuf(se);
 
-  if(!name || ff_SetofInitFunct.insert(name).second)
+  if(!name || (! *name ) ||  ff_SetofInitFunct().insert(name).second)
     { 
     getInitFunctlist()->push_back(make_pair(i,f));
-    cout << " addInitFunct: " << i << " " << f << (name ? name : " -- " ) <<endl; 
+      cout << " -- addInitFunct: " << i << " " << f 
+			  << " " <<  (name ? name : " -- " ) <<endl; 
     }
   else 
-    cout << " addInitFunct "<< name << " is always load (skip) !" << endl; 
+    cout << " ********  addInitFunct "<< name << " is always load (skip) !" << endl; 
 
 }
 

@@ -2407,7 +2407,11 @@ class Init { public:
 LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
-  
+  cout << " ---------------------- " << endl;  
+  cout << " ---------------------- " << endl;  
+  cout << " ---------------------- " << endl;  
+  cout << " ---------------------- " << endl;  
+  cout << " ---------------------- " << endl;  
   typedef Mesh *pmesh;
   typedef Mesh3 *pmesh3;
   
