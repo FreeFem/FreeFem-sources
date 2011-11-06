@@ -228,6 +228,27 @@ namespace ffapi{
 #endif
 #endif
   }
+
+void init()
+{
+  ffapi::fwriteinit ;
+  ffapi::winbinmode ;
+  ffapi::wintextmode ;
+  ffapi::mpi_finalize ;
+  ffapi::cin ;
+  ffapi::cerr ;
+  ffapi::cout ;
+  ffapi::ff_feof ;
+  ffapi::newplot ;
+  ffapi::ff_popen ;
+  ffapi::mpi_init ;
+  ffapi::ff_ferror ;
+  ffapi::ff_fflush ;
+  ffapi::ff_fwrite ;
+  ffapi::ff_pclose ;
+;
+
+}
 }
 
 /// Local Variables:

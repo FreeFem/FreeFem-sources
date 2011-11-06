@@ -3292,7 +3292,7 @@ extern  bool echo_edp;
 int mainff (int  argc, char **argv)
 {
     
-
+   ffapi::init(); 
   if(argc)  
     prognamearg=argv[0];
 

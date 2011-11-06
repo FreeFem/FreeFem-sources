@@ -27,17 +27,32 @@
  */
 #ifndef INITSFUNCT_HPP_
 #define INITSFUNCT_HPP_
-
+#include "ffapi.hpp" 
 void  addInitFunct(int i,void  (* f)(),const char *name) ;
 void  callInitsFunct() ;
-struct  addingInitFunct { 
-  addingInitFunct(int i,void  (* f)(),const char *name=0) { addInitFunct(i,f,name);}
+
+class  addingInitFunct {  public:
+  addingInitFunct(int i,void  (* f)(),const char *name="") { addInitFunct(i,f,name);}
 } ;
 
-template<class TI> void  AutoLoadInit() { static TI init; }
 //
+#define LOADINITIO1
+#define LOADINITIO { \
+      streambuf * so =ffapi::cout()->rdbuf() ;	\
+  streambuf * si =ffapi::cin()->rdbuf() ; \
+  streambuf * se =ffapi::cerr()->rdbuf() ; \
+  if( so &&  cout.rdbuf() != so ) cout.rdbuf(so); \
+  if( si &&  cin.rdbuf() != si ) cin.rdbuf(si); \
+if( se &&  cerr.rdbuf() != se ) cerr.rdbuf(se); }
   
-#define LOADINIT(TI) static addingInitFunct  loadinit(1000,AutoLoadInit<TI>,__FILE__) ; 
+#define LOADINIT(TI) \
+static  void  AutoLoadInit() { LOADINITIO ; 	\
+  if(verbosity>9) cout << "\n loadfile " __FILE__ "\n" ;  \
+  static TI init; }                                    \
+ struct  zzzzzzzzzzz  {  zzzzzzzzzzz() {cout << " ****  " __FILE__ "****\n" ; addInitFunct(10000,AutoLoadInit,__FILE__);}}; \
+\
+zzzzzzzzzzz  xxxxxxxxxxxxxxxx; 
 
+// const   FFaddingInitFunct initxxxxxxxxxx(1000,AutoLoadInit,__FILE__) ;  
 
 #endif
