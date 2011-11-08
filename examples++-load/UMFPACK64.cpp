@@ -362,14 +362,14 @@ bool SetUMFPACK64()
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
 }
 
-class Init { public:
-    Init();
+class Init22 { public:
+    Init22();
 };
-LOADINIT(Init);
-Init::Init(){    
+LOADINIT(Init22);
+Init22::Init22(){    
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
-  if(verbosity>1)
+  //  if(verbosity>1)
     cout << "\n Add: UMFPACK64:  defaultsolver defaultsolverUMFPACK64" << endl;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   
