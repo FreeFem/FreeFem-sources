@@ -71,8 +71,8 @@ void  addInitFunct(int i,void  (* f)(),const char *name)
   if(!name || (! *name ) ||  ff_SetofInitFunct().insert(name).second)
     { 
     getInitFunctlist()->push_back(make_pair(i,f));
-      cout << " -- addInitFunct: " << i << " " << f 
-			  << " " <<  (name ? name : " -- " ) <<endl; 
+    if(verbosity>9)   cout << " -- addInitFunct: " << i << " " << f 
+			   << " " <<  (name ? name : "" ) <<endl; 
     }
   else 
     cout << " ********  addInitFunct "<< name << " is always load (skip) !" << endl; 

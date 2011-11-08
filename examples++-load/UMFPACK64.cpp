@@ -362,25 +362,25 @@ bool SetUMFPACK64()
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
 }
 
-class Init22 { public:
-    Init22();
-};
-LOADINIT(Init22);
-Init22::Init22(){    
+
+void init22()
+{    
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
-  //  if(verbosity>1)
+  if(verbosity>1)
     cout << "\n Add: UMFPACK64:  defaultsolver defaultsolverUMFPACK64" << endl;
-  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
-  
+  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver; 
   DefSparseSolver<double>::solver =BuildSolverIUMFPack64;
   DefSparseSolver<Complex>::solver =BuildSolverIUMFPack64;
   if(! Global.Find("defaultsolver").NotNull() )
-    {    cout << "\n add defaultsolver (64)" << endl;
-    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-  }
+    { 
+      if(verbosity)
+	cout << "\n add defaultsolver (64)" << endl;
+      Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
+    }
   if(! Global.Find("defaulttoUMFPACK64").NotNull() )
     Global.Add("defaulttoUMFPACK64","(",new OneOperator0<bool>(SetUMFPACK64));  
 }
 
 
+LOADFUNC(init22);

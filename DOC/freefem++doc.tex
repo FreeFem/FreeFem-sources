@@ -31,7 +31,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.16-1}
+\def\VERSION{3.17}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -17986,15 +17986,14 @@ and for more details see \cite{FHcpp}.
 
  To finish we must add this new function in \texttt{FreeFem++} table ,
  to do that include :
+ 
 \bFF
-@class Init { @public:  Init();  };
-
-Init init;
-
-Init::Init(){
+@void init(){
   Global.Add("myfunction","(",new OneOperator0s<double>(myfunction));
 }
+@LOADFUNC(init);
 \eFF
+
 It will be called automatically at load module time.
 
 \medskip
@@ -18312,16 +18311,14 @@ AnyType MatrixUpWind0::operator()(Stack stack) @const
  @return sparse_mat;
 }
 
-
-@class Init { @public:
-  Init();
-};
- Init init;
- Init::Init()
+@void init()
    {
      @cout << " lood: init Mat Chacon " << endl;
      Global.Add("MatUpWind0","(", new OneOperatorCode<MatrixUpWind0 >( ));
    }
+ 
+@LOADFUNC(init);
+  
 \eFF
 \subsection{More on Adding a new finite element}
 
@@ -18647,8 +18644,7 @@ To add new function/name \texttt{defaultsolver,defaulttoSuperLU}in \texttt{freef
 and set the default  solver to the new solver., just do:
 
 \bFF
-Init init;
-Init::Init()
+void init()
 {
 
   SparseMatSolver_R= DefSparseSolver<@double>::solver;
@@ -18664,6 +18660,8 @@ Init::Init()
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   Global.Add("defaulttoSuperLU","(",new OneOperator0<bool>(SetSuperLU));
 }
+
+LOADFUNC(init);
 
 \eFF
 

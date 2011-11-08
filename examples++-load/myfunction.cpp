@@ -42,12 +42,21 @@ public:
   OneOperator0s(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
 };
 
-//  Hack to do something at initialisation time
-//   to add the name myfunction to the freefem++ table 
-class Init { public:
-  Init();
-};
-LOADINIT(Init);
-Init::Init(){
-  Global.Add("myfunction","(",new OneOperator0s<double>(myfunction));
+double testio(Stack stack)
+{
+  double x=M_PI;
+  long l= (1<<9) ;
+  cout << " test cout " << x << endl;
+  cout << " test cout " << l << endl;
+
+  cerr << " test cerr " << x << endl;
+  cerr << " test cerr " << l << endl;
+  return 0.; 
 }
+
+void init(){
+  Global.Add("myfunction","(",new OneOperator0s<double>(myfunction));
+  Global.Add("testio","(",new OneOperator0s<double>(testio));
+}
+
+LOADFUNC(init);
