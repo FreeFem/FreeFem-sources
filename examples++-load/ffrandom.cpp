@@ -57,6 +57,19 @@ public:
   OneOperator_0(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
 };
 
+#ifdef WIN32
+
+void init_by_array(unsigned long init_key[], int key_length);
+long genrand_int31(void);
+void init_genrand(unsigned long);
+//  hach for window ... F. HEcht 
+long ffsrandom(long  s) { init_genrand( (unsigned int ) s); return 0;}
+long random() { return genrand_int31();}
+long ffsrandomdev() { 
+  init_genrand(good_seed());
+  return 0;}
+#else 
+
 long ffsrandom(long  s) { srandom( (unsigned int ) s); return 0;}
 long ffsrandomdev() { 
 #ifdef HAVE_SRANDOMDEV
@@ -67,18 +80,13 @@ long ffsrandomdev() {
 
 return 0;}
 
-class Init { public:
-  Init();
-};
-LOADINIT(Init);
+#endif
 
-
-
-Init::Init(){
+void init(){
   Global.Add("srandomdev","(",new OneOperator_0<long>(ffsrandomdev));
   Global.Add("srandom","(",new OneOperator1<long>(ffsrandom));
   Global.Add("random","(",new OneOperator_0<long>(random));
 }
- 
+LOADFUNC(init); 
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
 
