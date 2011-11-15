@@ -58,7 +58,7 @@ $(SRCDIR)/tags: $(PACKAGE)
 	sed -e 's;BINDIR = .*$$;BINDIR = ../$(INSTALL)/bin;' \
             -e 's;../libparmetis.a;../$(INSTALL)/lib/parmetis/libparmetis.a;' \
             -e 's;../libmetis.a;../$(INSTALL)/lib/parmetis/libmetis.a;' \
-            -e 's;-L[.][.];-L../$(INSTALL)/lib;' \
+            -e 's;-L[.][.];-L../$(INSTALL)/lib/parmetis;' \
           <$(SRCDIR)/Programs/Makefile-orig \
           >$(SRCDIR)/Programs/Makefile
 	mv $(SRCDIR)/ParMETISLib/Makefile $(SRCDIR)/ParMETISLib/Makefile-orig
