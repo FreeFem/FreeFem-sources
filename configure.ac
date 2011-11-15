@@ -764,7 +764,7 @@ AC_ARG_VAR(MPIRUN,[MPI run command ])
 AC_MSG_CHECKING(for MPIRUN)
 
 if test -z "$MPIRUN" ; then
-    AC_PATH_PROGS(MPIRUN,mpirun mpiexec mpiexec.exe,no,$ff_mpi_path)
+    AC_PATH_PROGS(MPIRUN,mpirun mpiexec mpiexec.exe,no)
     if test "$MPIRUN" = no
     then
 	ff_mpi=no
