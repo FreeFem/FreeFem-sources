@@ -311,11 +311,9 @@ thresholdings.cpp	thresholdings.edp \
 VTK_writer_3d.cpp VTK_writer.cpp splitedges.cpp splitedges.edp \
 Element_Mixte.cpp LaplaceRT1.edp lame-TD-NSS.edp test-ElementMixte.edp \
 myfunction2.cpp myfunction2.edp ttestio.edp \
-myfunction2.cpp myfunction2.edp ttestio.edp \
 cmaes-VarIneq.edp cmaes-oven.edp cmaes.cpp \
 cmaes.h cmaes_interface.h ff-cmaes.cpp \
 VarIneq2.edp ff-NLopt.cpp
-
 
 LIST_COMPILE = myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \

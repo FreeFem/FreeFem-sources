@@ -108,7 +108,7 @@ while [ $# -ne 0 ]  ; do
 	MPICXX=*) MPICXX=`echo $1|sed 's/[A-Z0-9]*=//'`;withmpi=yes ;;
 	F77=*) F77=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	CXXFLAGS=*) CXXFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
-	FFLAGS=*) FFFFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	FFLAGS=*) FFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	MPI_LIB=*) MPI_LIB=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	-auto) autodep=yes;args=$argsp;;
 	-mpi) withmpi=yes;;
@@ -214,7 +214,10 @@ case "$WIN32$uu" in
 esac
 
 
-FLAGS="$FLAGS $DEBUG $FFCXXFLAGS"
+#FLAGS="$FLAGS $DEBUG $FFCXXFLAGS"
+#  change F. H Version 3.17 
+FLAGS="$FLAGS $DEBUG"
+
 if [ -n "$ffiles$files$fileso" ] ; then
     if [  -n "$WIN32"  -a  ! -f "$bin/libff.dll"  ]; then
 	echo " Sorry, no freefem .dll file (libff.dll)  in $bin dir "
@@ -222,24 +225,24 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	exit 1;
     fi
     if [ "$files" ] ;then 
-	echo $CXX -c $FLAGS $CXXFLAGS $INC $PIC $files
+	echo $CXX -c $FLAGS $CXXFLAGS $FFCXXFLAGS $INC $PIC $files
 	if [  $do = yes ] ; then 
-	    eval $CXX -c $INC $FLAGS $CXXFLAGS $PIC  $files
+	    eval $CXX -c $INC $FLAGS $CXXFLAGS $FFCXXFLAGS  $PIC  $files
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
     fi
     if [ "$ffiles" ] ;then 
-	echo $F77 -c $FLAGS $FFFFLAGS $INC $PIC $ffiles
+	echo $F77 -c $FLAGS $FFLAGS $FFFFLAGS $INC $PIC $ffiles
 	LIBS="$FFFLIBS $LIBS"
 	if [  $do = yes ] ; then 
-	    eval $F77 -c $INC $FLAGS $FFFFLAGS $PIC  $ffiles
+	    eval $F77 -c $INC $FFLAGS $FLAGS $FFFFLAGS $PIC  $ffiles
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
     fi
     if [ "$CONLY" != yes ]; then
-	echo $CXX $SHARED $FLAGS $CXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB
+	echo $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB
 	if [  $do = yes ] ; then 
-	   eval $CXX $SHARED $FLAGS $CXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB
+	   eval $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
 	if [  "$bin" != "." ]; then
