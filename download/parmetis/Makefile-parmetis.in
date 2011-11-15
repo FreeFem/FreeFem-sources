@@ -6,7 +6,7 @@ LD=  @MPICC@
 OPTFLAGS = @CFLAGS@ 
 
 # What options to be used by the compiler
-COPTIONS =  -DHAVE_CONFIG_H -I. -I../../../.. @FFMETIS_CFLAGS@ -D_MSC_VER
+COPTIONS =  -DHAVE_CONFIG_H -I. -I../../../.. @FFMETIS_CFLAGS@ #-D_MSC_VER
 
 # What options to be used by the loader
 LDOPTIONS = @LDFLAGS@ 

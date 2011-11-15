@@ -369,7 +369,7 @@ CYGWIN*|MINGW*)
 
 	ff_suffix_dylib="dll";
         ff_win32=yes;
-	AC_SUBST(FFMETIS_CFLAGS,"-D__VC__")
+	AC_SUBST(FFMETIS_CFLAGS,"-D__VC__ -D_MSC_VER")
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
 	then
