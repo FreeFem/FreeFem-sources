@@ -67,7 +67,7 @@ EXTRA_DIST= \
 ./tetgen/Makefile \
 ./tetgen/tetgen1.4.2.patch \
 ./yams/Makefile \
-./yams/freeyams.2010.05.20.patch \
+./yams/freeyams.2011.09.23.patch \
 ./yams/makefile-yams.inc \
 ./yams/yamslib.c \
 ./yams/yamslib.h \
