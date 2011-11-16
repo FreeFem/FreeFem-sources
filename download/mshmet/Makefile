@@ -65,7 +65,7 @@ $(SRCDIR): $(PACKAGE)
 	cp mshmetlib-internal.h mshmetlib.c mshmetlib.h $(MSHMET_SRCDIR)/
 	rm $(MSHMET_SRCDIR)/mshmet.c
 	cp Makefile-mshmet.inc $(MSHMET_DIR)/makefile
-	# cd $(MSHMET_SRCDIR); patch -p1 < ../../mshmet.211.03.07.patch
+	cd $(MSHMET_SRCDIR); patch -p2 < ../../mshmet.2011.03.06.patch
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
@@ -84,7 +84,7 @@ clean: clean-local
 	-rm -r $(SRCDIR)/$(INSTALL)/lib/libMesh.a
 	-rm -r $(SRCDIR)/$(INSTALL)/include/libMesh
 	-rm -rf $(SRCDIR)
-	-rm FAIT
+	-rm FAIT FAIRE 
 
 ff-flags: ../Makefile 
 	grep 'abs_top_builddir *=' ../Makefile >> ff-flags

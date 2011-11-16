@@ -10,8 +10,20 @@
 #include "mshmet.h"
 #include "compil.date"
 
-//char     idir[5]     = {0,1,2,0,1};
+char     idir[5]     = {0,1,2,0,1};
 mytime   mshmet_ctim[TIMEMAX];
+int   (*boulep)(pMesh ,int ,int ,int *);
+int   (*hashel)(pMesh );
+int   (*gradLS)(pMesh ,pSol ,int ,int );
+int   (*hessLS)(pMesh ,pSol ,int ,int );
+int   (*avgval)(pMesh ,pSol ,int );
+int   (*clsval)(pMesh ,pSol ,int );
+int   (*nrmhes)(pMesh ,pSol ,int );
+int   (*redsim)(double *,double *,double *);
+int   (*defmet)(pMesh ,pSol ,int );
+double (*getSol)(pSol ,int ,int );
+int   (*metrLS)(pMesh mesh,pSol );
+int   (*lissag)(pMesh ,pSol , int ,int );
 
 
 static void mshmet_excfun(int sigid) {
