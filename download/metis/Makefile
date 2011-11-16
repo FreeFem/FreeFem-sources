@@ -22,7 +22,7 @@ metis: FAIRE
 
 
 $(SRCDIR)/FAIT:
-	$(MAKE) install WHERE
+	$(MAKE) install
 	touch $(SRCDIR)/FAIT
 
 install:$(SRCDIR)/tag-compile
@@ -32,6 +32,7 @@ install:$(SRCDIR)/tag-compile
 
 
 FAIRE: $(SRCDIR)/FAIT 
+	$(MAKE) WHERE
 	touch FAIRE
 
 Makefile.in: ../../config.status Makefile-metis.in
