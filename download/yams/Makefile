@@ -15,7 +15,7 @@ SRCDIR= ./freeyams$(yams_VERSION)
 PACKAGE=$(DIRPKG)/freeyams$(yams_VERSION).tgz
 SERVER=http://www.ann.jussieu.fr/~frey/ftp/archives/
 INSTALL=../..
-yams_VERSION=.2010.05.20
+yams_VERSION=.2011.09.23
 
 # ---------------------- 
 #     yamslib
@@ -57,7 +57,8 @@ $(SRCDIR)/PATCH: $(PACKAGE)
 	-mkdir $(YAMS_SRCDIR)
 	cp $(YAMS_SRCDIRNOLIB)/*.c $(YAMS_SRCDIRNOLIB)/*.h $(YAMS_SRCDIR)
 	cp $(YAMS_SRCDIRNOLIB)/compil.date $(YAMS_SRCDIR)
-	cd $(YAMS_SRCDIR); patch -p1 < ../../freeyams$(yams_VERSION).patch
+	cd $(YAMS_SRCDIR); patch -p2 < ../../freeyams$(yams_VERSION).patch
+	mv  $(YAMS_SRCDIR)/yams.c $(YAMS_SRCDIR)/..
 	touch $(SRCDIR)/PATCH
 
 $(PACKAGE):
@@ -78,7 +79,7 @@ clean: clean-local
 	-rm -rf $(SRCDIR)
 	-rm FAIT FAIRE
 
-ff-flags: ../Makefile 
+ff-flags: ../Makefile Makefile
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags
 	grep 'CC *=' ../Makefile >> ff-flags
 	grep 'CFLAGS *=' ../Makefile >> ff-flags
