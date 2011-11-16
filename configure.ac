@@ -377,7 +377,7 @@ CYGWIN*|MINGW*)
 	        ff_glut_ok=yes
                 ff_mingw=yes 
                 enable_cygwindll=no;
-		ff_pthread="-mthread"
+		#ff_pthread="-mthread"
 		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
 		FFLAGS="$FFLAGS $ff_nocygwin"
 		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"

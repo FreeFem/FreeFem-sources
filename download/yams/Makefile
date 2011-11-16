@@ -56,6 +56,7 @@ $(SRCDIR)/PATCH: $(PACKAGE)
 	cd $(SRCDIR); tar xvzf ../$(PACKAGE)
 	-mkdir $(YAMS_SRCDIR)
 	cp $(YAMS_SRCDIRNOLIB)/*.c $(YAMS_SRCDIRNOLIB)/*.h $(YAMS_SRCDIR)
+	rm $(YAMS_SRCDIR)/memory.c 
 	cp $(YAMS_SRCDIRNOLIB)/compil.date $(YAMS_SRCDIR)
 	cd $(YAMS_SRCDIR); patch -p2 < ../../freeyams$(yams_VERSION).patch
 	mv  $(YAMS_SRCDIR)/yams.c $(YAMS_SRCDIR)/..
