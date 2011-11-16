@@ -28,8 +28,8 @@ $(EXEDIR)/$(prog):$(DIRDIR) $(objs)
 	echo "#define COMPIL " '"' `date` '"' > $(SRCDIR)/compil.date
 	$(CC) -c $(CFLAGS) $(INCDIR) $(SRCDIR)/yams0.c -o $(OBJDIR)/yams0.o -I../../../src/libMesh/ 
 	$(CC) -c $(CFLAGS) $(INCDIR) $(SRCDIR)/../yams.c -I$(SRCDIR)  -o $(OBJDIR)/yams.o -I../../../src/libMesh/ 
-	$(CC)  $(LDFLAGS) $(OPT64) $(LDLDIR) $(OBJDIR)/yams.o $(objs) -o $@ -lm -L../../../src/libMesh/ -lMesh $(LIBS)
 	$(AR) $(ARFLAGS) $(lib) $(objs)
+	$(CC)  $(LDFLAGS) $(OPT64) $(LDLDIR) $(OBJDIR)/yams.o -o $@ $(lib) -lm -L../../../src/libMesh/ -lMesh $(LIBS)
 	$(RANLIB) $(lib)
 
 $(objs):$(header)
