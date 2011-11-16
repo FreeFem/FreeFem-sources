@@ -1995,55 +1995,55 @@ ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11p
 # mmg3d INCLUDE '-I/Users/hecht/work/freefem++/download/include'
 
 
-if test -f download/pkg/mmg3dlib.tar.gz  ;then
-    AC_MSG_NOTICE([      Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)])
-else
-    ff_MACOS=`expr "xx $CXXFLAGS" : '.*-mmacosx-version-min=\([0-9.]*\).*'`
+#if test -f download/pkg/mmg3dlib.tar.gz  ;then
+#    AC_MSG_NOTICE([      Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)])
+#else
+#    ff_MACOS=`expr "xx $CXXFLAGS" : '.*-mmacosx-version-min=\([0-9.]*\).*'`
+#    
+#    ff_mmg3dlib=""
+#    if test "$ff_mac" = yes ; then
+#        case $ff_MACOS  in
+#	     [0-9.]*) ff_MACOS="$ff_MACOS";;
+#	     *) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
+#    	esac
+#	MACOS=10.4
+#	ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
+#    elif test "$ff_win32" = yes ; then
+#        case `uname` in 
+#	 MINGW32*)    	ff_mmg3dlib="libmmg3d-1001-MINGW32.tar.gz";;
+#	 MINGW64*)    	ff_mmg3dlib="libmmg3d-1001-MINGW64.tar.gz";;
+#	 CYWIN*)    	ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz";;
+#	 esac 
+#    else 
+#	ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
+#    fi
     
-    ff_mmg3dlib=""
-    if test "$ff_mac" = yes ; then
-        case $ff_MACOS  in
-	     [0-9.]*) ff_MACOS="$ff_MACOS";;
-	     *) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
-    	esac
-	MACOS=10.4
-	ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
-    elif test "$ff_win32" = yes ; then
-        case `uname` in 
-	 MINGW32*)    	ff_mmg3dlib="libmmg3d-1001-MINGW32.tar.gz";;
-	 MINGW64*)    	ff_mmg3dlib="libmmg3d-1001-MINGW64.tar.gz";;
-	 CYWIN*)    	ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz";;
-	 esac 
-    else 
-	ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
-    fi
-    
-    if test -f  download/pkg/$ff_mmg3dlib ; then 
-        tar zxf download/pkg/$ff_mmg3dlib -C download
-    elif test "enable_download" = yes ; then
-	mkdir download/pkg 
-	( cd download/pkg
-	    $ff_wget_command  http://www.freefem.org/ff++/ftp/libmmg3d/$ff_mmg3dlib
-	    tar zxf $ff_mmg3dlib -C .. 	
-	    )
-    fi
-    if test -f "download/lib/libmmg3d.a" ; then
-	AC_MSG_CHECKING(for MMG_mmg3dlib in mmg3dlib )
-	    ff_save_libs="$LIBS"
-	    LIBS="$LIBS -Ldownload/lib -lmmg3d"
-	    AC_LINK_IFELSE(
-		[AC_LANG_CALL(,MMG_mmg3dlib)],
-		ff_mmg3d_ok=yes 
-		,
-		ff_mmg3d_ok=no
-		rm download/lib/libmmg3d.a download/include/libmmg3d.a
-                ff_mmg3d_ok=
-		)
-	    LIBS="$ff_save_libs"
-	    AC_MSG_RESULT($ff_mmg3d_ok)
-    fi
-    AC_SUBST(MMG3DLIB_TAR,$ff_mmg3dlib) 
-fi
+#    if test -f  download/pkg/$ff_mmg3dlib ; then 
+#        tar zxf download/pkg/$ff_mmg3dlib -C download
+#    elif test "enable_download" = yes ; then
+#	mkdir download/pkg 
+#	( cd download/pkg
+#	    $ff_wget_command  http://www.freefem.org/ff++/ftp/libmmg3d/$ff_mmg3dlib
+#	    tar zxf $ff_mmg3dlib -C .. 	
+#	    )
+#    fi
+#    if test -f "download/lib/libmmg3d.a" ; then
+#	AC_MSG_CHECKING(for MMG_mmg3dlib in mmg3dlib )
+#	    ff_save_libs="$LIBS"
+#	    LIBS="$LIBS -Ldownload/lib -lmmg3d"
+#	    AC_LINK_IFELSE(
+#		[AC_LANG_CALL(,MMG_mmg3dlib)],
+#		ff_mmg3d_ok=yes 
+#		,
+#		ff_mmg3d_ok=no
+#		rm download/lib/libmmg3d.a download/include/libmmg3d.a
+#                ff_mmg3d_ok=
+#		)
+#	    LIBS="$ff_save_libs"
+#	    AC_MSG_RESULT($ff_mmg3d_ok)
+#    fi
+#    AC_SUBST(MMG3DLIB_TAR,$ff_mmg3dlib) 
+#fi
 
 ff_with_mpi=-openmpi; 
 
@@ -2133,7 +2133,8 @@ fi
 if test "$enable_download" = yes  ;then
     AC_MSG_NOTICE([      use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT ])
     AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE ])
-    AC_MSG_NOTICE([      use of download freeyams  see download/yams/freeyams.2010.02.22 (suface mesh adaptation)  ])
+    AC_MSG_NOTICE([      use of download freeyams  see download/yams/freeyams.2011.02.22 (suface mesh adaptation)  ])
+    AC_MSG_NOTICE([      use of download mmg3d (v4)   see download/mmg3d/mmg3d4/LICENCE.txt  ])
     AC_MSG_NOTICE([      use of download superlu, metis])
     if test -n "$MPICC" ; then
    	AC_MSG_NOTICE([      try to download: blacs parmetis  scalapack scotch superludist pastix hypre hips library])
@@ -2143,13 +2144,13 @@ if test "$enable_download" = yes  ;then
     else
 	AC_MSG_NOTICE([     missing download/pkg/MUMPS_4.9.2.tar.gz, see http://mumps.enseeiht.fr/ to download by hand ])
     fi
-    if test -f download/lib/libmmg3d.a ; then
-        AC_FF_ADDWHERELIB(mmg3d,-L`pwd`/download/lib,-I`pwd`/download/include)
+dnl    if test -f download/lib/libmmg3d.a ; then
+dnl        AC_FF_ADDWHERELIB(mmg3d,-L`pwd`/download/lib,-I`pwd`/download/include)
 dnl	echo "mmg3d LD '-L`pwd`/download/lib' '-lmmg3d'" >>$ff_where_lib_conf
 dnl	echo "mmg3d INCLUDE '-I`pwd`/download/include'" >>$ff_where_lib_conf
-    else 
-	AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
-    fi
+dnl    else 
+dnl 	AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
+dnl    fi
     
     if test "$ff_download_blas" = "generic"  ; then
         AC_MSG_NOTICE([      use of download generic blas and cblas freefem may be slow  ])
@@ -2158,13 +2159,13 @@ dnl	echo "mmg3d INCLUDE '-I`pwd`/download/include'" >>$ff_where_lib_conf
         AC_MSG_NOTICE([      or try to download/compile the altas blas .])
     fi
 
-    if test -f download/pkg/mmg3dlib.tar.gz  ; then
-	AC_MSG_NOTICE([      Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)])
-    elif test 	  "$ff_mmg3d_ok" = yes ; then
-	AC_MSG_NOTICE([      Use of precompile version : download/pkg/$ff_mmg3dlib  (3d mesh adapaton)])
-    else
-	AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
-    fi	
+dnl    if test -f download/pkg/mmg3dlib.tar.gz  ; then
+dnl	AC_MSG_NOTICE([      Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)])
+dnl    elif test 	  "$ff_mmg3d_ok" = yes ; then
+dnl	AC_MSG_NOTICE([      Use of precompile version : download/pkg/$ff_mmg3dlib  (3d mesh adapaton)])
+dnl    else
+dnl	AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
+dnl    fi	
 fi  # ---  test "$enable_download" = yes  ;then
 
 

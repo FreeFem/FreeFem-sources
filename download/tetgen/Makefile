@@ -24,7 +24,7 @@ FAIRE:install $(SRCDIR)/FAIT cxxflags
 	touch FAIRE
 
 
-$(SRCDIR)/FAIT: $(SRCDIR) cxxflags 
+$(SRCDIR)/FAIT: $(SRCDIR)/tags  cxxflags 
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
 	touch $(SRCDIR)/FAIT
@@ -37,8 +37,9 @@ install:$(SRCDIR)/FAIT WHERE
 
 
 
-$(SRCDIR): $(PACKAGE)
+$(SRCDIR)/tags: $(PACKAGE)
 	tar xvzf $(PACKAGE)
+	touch $(SRCDIR)/tags
 #	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
 
 $(PACKAGE):
