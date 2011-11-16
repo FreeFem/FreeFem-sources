@@ -605,7 +605,6 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
-MMG3DLIB_TAR
 IDE_TESTS
 TESTIDEPROG
 IDEPROG
@@ -7471,7 +7470,7 @@ CYGWIN*|MINGW*)
 
 	ff_suffix_dylib="dll";
         ff_win32=yes;
-	FFMETIS_CFLAGS="-D__VC__"
+	FFMETIS_CFLAGS="-D__VC__ -D_MSC_VER"
 
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
@@ -7480,7 +7479,7 @@ CYGWIN*|MINGW*)
 	        ff_glut_ok=yes
                 ff_mingw=yes
                 enable_cygwindll=no;
-		ff_pthread="-mthread"
+		#ff_pthread="-mthread"
 		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
 		FFLAGS="$FFLAGS $ff_nocygwin"
 		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
@@ -15297,88 +15296,55 @@ ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_glxprog $ff_aglprog $ff_x11p
 # mmg3d INCLUDE '-I/Users/hecht/work/freefem++/download/include'
 
 
-if test -f download/pkg/mmg3dlib.tar.gz  ;then
-    { $as_echo "$as_me:${as_lineno-$LINENO}:       Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)" >&5
-$as_echo "$as_me:       Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)" >&6;}
-else
-    ff_MACOS=`expr "xx $CXXFLAGS" : '.*-mmacosx-version-min=\(0-9.*\).*'`
+#if test -f download/pkg/mmg3dlib.tar.gz  ;then
+#    AC_MSG_NOTICE([      Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)])
+#else
+#    ff_MACOS=`expr "xx $CXXFLAGS" : '.*-mmacosx-version-min=\([0-9.]*\).*'`
+#
+#    ff_mmg3dlib=""
+#    if test "$ff_mac" = yes ; then
+#        case $ff_MACOS  in
+#	     [0-9.]*) ff_MACOS="$ff_MACOS";;
+#	     *) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
+#    	esac
+#	MACOS=10.4
+#	ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
+#    elif test "$ff_win32" = yes ; then
+#        case `uname` in
+#	 MINGW32*)    	ff_mmg3dlib="libmmg3d-1001-MINGW32.tar.gz";;
+#	 MINGW64*)    	ff_mmg3dlib="libmmg3d-1001-MINGW64.tar.gz";;
+#	 CYWIN*)    	ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz";;
+#	 esac
+#    else
+#	ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
+#    fi
 
-    ff_mmg3dlib=""
-    if test "$ff_mac" = yes ; then
-        case $ff_MACOS  in
-	     0-9.*) ff_MACOS="$ff_MACOS";;
-	     *) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
-    	esac
-	MACOS=10.4
-	ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
-    elif test "$ff_win32" = yes ; then
-        case `uname` in
-	 MINGW32*)    	ff_mmg3dlib="libmmg3d-1001-MINGW32.tar.gz";;
-	 MINGW64*)    	ff_mmg3dlib="libmmg3d-1001-MINGW64.tar.gz";;
-	 CYWIN*)    	ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz";;
-	 esac
-    else
-	ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
-    fi
-
-    if test -f  download/pkg/$ff_mmg3dlib ; then
-        tar zxf download/pkg/$ff_mmg3dlib -C download
-    elif test "enable_download" = yes ; then
-	mkdir download/pkg
-	( cd download/pkg
-	    $ff_wget_command  http://www.freefem.org/ff++/ftp/libmmg3d/$ff_mmg3dlib
-	    tar zxf $ff_mmg3dlib -C ..
-	    )
-    fi
-    if test -f "download/lib/libmmg3d.a" ; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for MMG_mmg3dlib in mmg3dlib " >&5
-$as_echo_n "checking for MMG_mmg3dlib in mmg3dlib ... " >&6; }
-	    ff_save_libs="$LIBS"
-	    LIBS="$LIBS -Ldownload/lib -lmmg3d"
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MMG_mmg3dlib ();
-#ifdef F77_DUMMY_MAIN
-
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int F77_DUMMY_MAIN() { return 1; }
-
-#endif
-int
-main ()
-{
-return MMG_mmg3dlib ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ff_mmg3d_ok=yes
-
-else
-  ff_mmg3d_ok=no
-		rm download/lib/libmmg3d.a download/include/libmmg3d.a
-                ff_mmg3d_ok=
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-	    LIBS="$ff_save_libs"
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_mmg3d_ok" >&5
-$as_echo "$ff_mmg3d_ok" >&6; }
-    fi
-    MMG3DLIB_TAR=$ff_mmg3dlib
-
-fi
+#    if test -f  download/pkg/$ff_mmg3dlib ; then
+#        tar zxf download/pkg/$ff_mmg3dlib -C download
+#    elif test "enable_download" = yes ; then
+#	mkdir download/pkg
+#	( cd download/pkg
+#	    $ff_wget_command  http://www.freefem.org/ff++/ftp/libmmg3d/$ff_mmg3dlib
+#	    tar zxf $ff_mmg3dlib -C ..
+#	    )
+#    fi
+#    if test -f "download/lib/libmmg3d.a" ; then
+#	AC_MSG_CHECKING(for MMG_mmg3dlib in mmg3dlib )
+#	    ff_save_libs="$LIBS"
+#	    LIBS="$LIBS -Ldownload/lib -lmmg3d"
+#	    AC_LINK_IFELSE(
+#		[AC_LANG_CALL(,MMG_mmg3dlib)],
+#		ff_mmg3d_ok=yes
+#		,
+#		ff_mmg3d_ok=no
+#		rm download/lib/libmmg3d.a download/include/libmmg3d.a
+#                ff_mmg3d_ok=
+#		)
+#	    LIBS="$ff_save_libs"
+#	    AC_MSG_RESULT($ff_mmg3d_ok)
+#    fi
+#    AC_SUBST(MMG3DLIB_TAR,$ff_mmg3dlib)
+#fi
 
 ff_with_mpi=-openmpi;
 
@@ -18252,8 +18218,10 @@ if test "$enable_download" = yes  ;then
 $as_echo "$as_me:       use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT " >&6;}
     { $as_echo "$as_me:${as_lineno-$LINENO}:       use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE " >&5
 $as_echo "$as_me:       use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE " >&6;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}:       use of download freeyams  see download/yams/freeyams.2010.02.22 (suface mesh adaptation)  " >&5
-$as_echo "$as_me:       use of download freeyams  see download/yams/freeyams.2010.02.22 (suface mesh adaptation)  " >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}:       use of download freeyams  see download/yams/freeyams.2011.02.22 (suface mesh adaptation)  " >&5
+$as_echo "$as_me:       use of download freeyams  see download/yams/freeyams.2011.02.22 (suface mesh adaptation)  " >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}:       use of download mmg3d (v4)   see download/mmg3d/mmg3d4/LICENCE.txt  " >&5
+$as_echo "$as_me:       use of download mmg3d (v4)   see download/mmg3d/mmg3d4/LICENCE.txt  " >&6;}
     { $as_echo "$as_me:${as_lineno-$LINENO}:       use of download superlu, metis" >&5
 $as_echo "$as_me:       use of download superlu, metis" >&6;}
     if test -n "$MPICC" ; then
@@ -18267,22 +18235,6 @@ $as_echo "$as_me:       try to compile : MUMPS parallele software " >&6;}
 	{ $as_echo "$as_me:${as_lineno-$LINENO}:      missing download/pkg/MUMPS_4.9.2.tar.gz, see http://mumps.enseeiht.fr/ to download by hand " >&5
 $as_echo "$as_me:      missing download/pkg/MUMPS_4.9.2.tar.gz, see http://mumps.enseeiht.fr/ to download by hand " >&6;}
     fi
-    if test -f download/lib/libmmg3d.a ; then
-        	if test -z "$ff_where_lib_conf_mmg3d" ; then
-	    echo "mmg3d LD -L`pwd`/download/lib"  >>$ff_where_lib_conf
-	    test -n "-I`pwd`/download/include" && echo "mmg3d INCLUDE -I`pwd`/download/include "  >>$ff_where_lib_conf
-            ff_where_lib_conf_mmg3d=1
-	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add mmg3d : -L\`pwd\`/download/lib -I\`pwd\`/download/include in  $ff_where_lib_conf \"" >&5
-$as_echo "$as_me:     ++ add mmg3d : -L\`pwd\`/download/lib -I\`pwd\`/download/include in  $ff_where_lib_conf \"" >&6;}
-	else
-	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add mmg3d : -L\`pwd\`/download/lib -I\`pwd\`/download/include in  $ff_where_lib_conf \"" >&5
-$as_echo "$as_me:     -- do not add mmg3d : -L\`pwd\`/download/lib -I\`pwd\`/download/include in  $ff_where_lib_conf \"" >&6;}
-        fi
-
-    else
-	{ $as_echo "$as_me:${as_lineno-$LINENO}:    sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> " >&5
-$as_echo "$as_me:    sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> " >&6;}
-    fi
 
     if test "$ff_download_blas" = "generic"  ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}:       use of download generic blas and cblas freefem may be slow  " >&5
@@ -18295,16 +18247,6 @@ $as_echo "$as_me:           or at  http://www.tacc.utexas.edu/~kgoto/ for the be
 $as_echo "$as_me:       or try to download/compile the altas blas ." >&6;}
     fi
 
-    if test -f download/pkg/mmg3dlib.tar.gz  ; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}:       Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)" >&5
-$as_echo "$as_me:       Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)" >&6;}
-    elif test 	  "$ff_mmg3d_ok" = yes ; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}:       Use of precompile version : download/pkg/$ff_mmg3dlib  (3d mesh adapaton)" >&5
-$as_echo "$as_me:       Use of precompile version : download/pkg/$ff_mmg3dlib  (3d mesh adapaton)" >&6;}
-    else
-	{ $as_echo "$as_me:${as_lineno-$LINENO}:    sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> " >&5
-$as_echo "$as_me:    sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> " >&6;}
-    fi
 fi  # ---  test "$enable_download" = yes  ;then
 
 
