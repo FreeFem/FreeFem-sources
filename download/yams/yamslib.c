@@ -12,17 +12,17 @@
 
 extern long verbosity;
 /* globals (see globals.h) */
-extern Error       yerr;
-extern Info        info;
-extern Options     opts;
-extern pHashtable  hash;
-extern mytime      ctim[TIMEMAX];
+Error       yerr;
+Info        info;
+Options     opts;
+pHashtable  hash;
+mytime      ctim[TIMEMAX];
 
-extern long      nhmax,hnext,hsize;
-extern  int       out; //,yams_idir[5] = {0,1,2,0,1},yams_idirq[7] = {0,1,2,3,0,1,2};
-extern short     imprim;
-extern ubyte     ddebug;
-extern ubyte     ecp;
+long      nhmax,hnext,hsize;
+int       out,idir[5] = {0,1,2,0,1},idirq[7] = {0,1,2,3,0,1,2};
+short     imprim;
+ubyte     ddebug;
+ubyte     ecp;
 
 
 static void yams_excfun(int sigid) {
