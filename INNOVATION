@@ -1,5 +1,6 @@
-v 3.17 
- - the new laod interface 
+v 3.17  (17/11/2011) 
+ - correct PB of pugins: MUMPS, parmetis, metis, mmg34, mshmet 
+ - the new load interface  (for more safe IO)
  - build mpi for windows with msmpi ( begin) 
     memory error after end .. 
  - remove add by default $LIB_MPI in ff-c++ 
