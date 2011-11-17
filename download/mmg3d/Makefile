@@ -27,7 +27,7 @@ build-4:
 $(LIBMMG3D):
 	cd mmg3d4/build/sources/; $(CC) -c $(CFLAGS) *.c;
 	$(AR) $(ARFLAGS) $(LIBMMG3D) mmg3d4/build/sources/*.o
-	$(CC) $(CFLAGS) mmg3d4/build/sources/*.o -o ../bin/mmg3d
+	$(CC) $(CFLAGS) mmg3d4/build/sources/*.o -o ../bin/mmg3d $(STD_LIBS)
 	touch build-4 FAIT-4
 install-4:
 	-mkdir ../include/mmg3d-v4/		
@@ -57,7 +57,8 @@ mmg3d-4:$(PACKAGE)
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET) http://www.math.u-bordeaux1.fr/~dobj/logiciels/download.php?file=`basename $(PACKAGE)`
+	cd $(DIRPKG);$(WGET) http://www.math.u-bordeaux1.fr/~dobj/logiciels/download/mmg3d4.0.tgz 
+#http://www.math.u-bordeaux1.fr/~dobj/logiciels/download.php?file=`basename $(PACKAGE)`
 
 FAIT-1: tag-tar
 	$(MAKE) -C $(SRCDIR) lib
@@ -102,7 +103,7 @@ clean:
 	-rm -r $(SRCDIR)
 	-rm FAIT* mmg* flags-* build-4 tag-tar
 
-ff-flags: ../Makefile
+ff-flags: ../Makefile Makefile
 	grep 'abs_top_builddir *=' ../Makefile >> ff-flags
 	grep 'CC *=' ../Makefile >> ff-flags
 	grep 'CFLAGS *=' ../Makefile >> ff-flags
@@ -110,8 +111,7 @@ ff-flags: ../Makefile
 	grep 'AR *=' ../Makefile >> ff-flags
 	grep 'ARFLAGS *=' ../Makefile >> ff-flags
 	grep 'RANLIB *=' ../Makefile >> ff-flags
-	grep 'MMG3DLIB_TAR *=' ../Makefile >> ff-flags
 	grep 'WGET *=' ../Makefile >> ff-flags
-
+	grep 'STD_LIBS *=' ../Makefile >> ff-flags
 
 .PHONY:$(SRCDIR)/$(INSTALL)

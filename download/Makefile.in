@@ -334,7 +334,7 @@ EXTRA_DIST = \
 ./mmg3d/patch-mmg3dv4.diff \
 ./mshmet/Makefile \
 ./mshmet/Makefile-mshmet.inc \
-./mshmet/mshmet.2009.09.16.patch \
+./mshmet/mshmet.2011.03.06.patch \
 ./mshmet/mshmetlib-internal.h \
 ./mshmet/mshmetlib.c \
 ./mshmet/mshmetlib.h \

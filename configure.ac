@@ -2139,11 +2139,7 @@ if test "$enable_download" = yes  ;then
     if test -n "$MPICC" ; then
    	AC_MSG_NOTICE([      try to download: blacs parmetis  scalapack scotch superludist pastix hypre hips library])
     fi
-    if test -f download/pkg/MUMPS_4.9.2.tar.gz  ;then
-	AC_MSG_NOTICE([      try to compile : MUMPS parallele software ])
-    else
-	AC_MSG_NOTICE([     missing download/pkg/MUMPS_4.9.2.tar.gz, see http://mumps.enseeiht.fr/ to download by hand ])
-    fi
+
 dnl    if test -f download/lib/libmmg3d.a ; then
 dnl        AC_FF_ADDWHERELIB(mmg3d,-L`pwd`/download/lib,-I`pwd`/download/include)
 dnl	echo "mmg3d LD '-L`pwd`/download/lib' '-lmmg3d'" >>$ff_where_lib_conf
