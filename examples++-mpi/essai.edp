@@ -136,7 +136,7 @@ cout << endl;
 
 real s0=mpiWtime();
 real[int,int] aa(10,mpisize),bb(10,mpisize);
-real [int] ss(10,mpisize);
+real [int,int] ss(10,mpisize);
 for(int i=0;i<10;i++)
   for(int j=0;j<mpisize;j++) 
     aa(i,j)=100*i+j;
