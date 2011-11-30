@@ -2895,52 +2895,10 @@ template<class R>
       }
     *mps =mp;            
   }
-void  Expandsetoflab(Stack stack,const BC_set & bc,set<long> & setoflab)
-    {
-      for (size_t i=0;i<bc.on.size();i++)
-	  if(bc.onis[i] ==0)
-	    {
-	      long  lab  = GetAny<long>( (*bc.on[i])(stack));
-	      setoflab.insert(lab);
-	      if ( verbosity>99) cout << lab << " ";
-	     
-	    }
-	  else 
-	    {
-	      KN<long>  labs( GetAny<KN_<long> >( (*bc.on[i])(stack)));
-	      for (long j=0; j<labs.N(); ++j) {	      
-		  setoflab.insert(labs[j]);
-		  if ( verbosity>99) cout << labs[j] << " ";
-	      }	  
-	      	  
-	    }
-      if(verbosity>99) 
-	  cout << endl;
-
-    }
-  
-void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all)
-    {
-      for (size_t i=0;i<di.what.size();i++)
-	  if(di.whatis[i] ==0)
-	    {
-	      long  lab  = GetAny<long>( (*di.what[i])(stack));
-	      setoflab.insert(lab);
-	      if ( verbosity>3) cout << lab << " ";
-	      all=false;
-	    }
-	  else 
-	    {
-	      KN<long>  labs( GetAny<KN_<long> >( (*di.what[i])(stack)));
-	      for (long j=0; j<labs.N(); ++j) {	      
-		  setoflab.insert(labs[j]);
-		  if ( verbosity>3) cout << labs[j] << " ";
-	      }	  
-	      all=false;	  
-	    }
-      
-    }
+void  Expandsetoflab(Stack stack,const BC_set & bc,set<long> & setoflab);
+void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all);
     
+
 template<class R>
  void AssembleLinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * l )
 {

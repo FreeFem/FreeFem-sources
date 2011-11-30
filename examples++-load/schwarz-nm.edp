@@ -1,7 +1,7 @@
 bool withmetis=0;
 bool RAS=0;
 int sizeoverlaps=2; // size off overlap 
-int nn=5,mm=5;
+int nn=2,mm=2;
 
 func bool AddLayers(mesh & Th,real[int] &ssd,int n,real[int] &unssd)
 {
