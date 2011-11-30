@@ -136,14 +136,19 @@ cout << endl;
 
 real s0=mpiWtime();
 real[int,int] aa(10,mpisize),bb(10,mpisize);
-real [int] ss(10);
+real [int] ss(10,mpisize);
 for(int i=0;i<10;i++)
   for(int j=0;j<mpisize;j++) 
     aa(i,j)=100*i+j;
 mpiAlltoall(aa,bb);
 mpiAlltoall(aa,bb,mpiCommWorld);
 mpiAllgather(aa(:,mpirank),ss);
+if(mpirank == 1) // just printing the result of one process ..
+    cout << " AllGather " << ss << endl;
 mpiGather (aa(:,mpirank),ss,processor(0,mpiCommWorld));
+if(mpirank == 0)
+    cout << " Gather " << ss << endl;
+
 mpiScatter(aa,bb(:,mpirank),processor(0,mpiCommWorld));
 
 cout << " all2all " << mpirank << " " << mpiWtime()-s0 << "s :  "  ;

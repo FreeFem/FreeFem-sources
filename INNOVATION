@@ -1,3 +1,8 @@
+
+ - correct assert in MPI
+ - correct bug in case of return  in loop for or while. 
+ - correct a=int2d(Th,l)(1) in case simple expression  when l is a  arry.
+ - build a pkg under macos for distribution .
 v 3.17  (17/11/2011) 
  - correct PB of pugins: MUMPS, parmetis, metis, mmg34, mshmet 
  - the new load interface  (for more safe IO)

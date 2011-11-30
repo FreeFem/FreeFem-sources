@@ -222,6 +222,7 @@ AnyType FWhile(Stack s ,Expression test,Expression ins)
         if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
        if (e.code == E_exception::e_break) break;
        else if  (e.code == E_exception::e_continue) continue;
+       else throw e;
        }
   return a;
 }
@@ -243,6 +244,7 @@ AnyType FFor(Stack s ,Expression i0,Expression i1,Expression i2,Expression ins)
         if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
        if (e.code == E_exception::e_break) break;
        else if  (e.code == E_exception::e_continue) continue;
+       else throw e;
        }
    }
   return a;
