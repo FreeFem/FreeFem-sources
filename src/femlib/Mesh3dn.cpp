@@ -138,7 +138,11 @@ namespace Fem2D
     
     return onWhatIsFace;
   }
-  
+  void Add(int *p,int n,int o)
+    {
+        for(int i=0;i<n;++i)
+            p[i] += o;
+    }
   Mesh3::Mesh3(const string  filename)
   {
     int ok=load(filename);
@@ -152,7 +156,7 @@ namespace Fem2D
 	if(verbosity>2)
 	  cout << "  -- Mesh3:  Read On file \"" <<filename<<"\""<<  endl;
 	if(filename.rfind(".msh")==filename.length()-4) 
-	    readmsh(f);
+	    readmsh(f,-1);
         else 
 	    read(f);
       }
@@ -242,7 +246,7 @@ namespace Fem2D
 	if(verbosity>2)
 	  cout << "  -- Mesh3:  Read On file \"" <<filename<<"\""<<  endl;
 	if(filename.rfind(".msh")==filename.length()-4) 
-	    readmsh(f);
+	    readmsh(f,-1);
         else 
 	    read(f);
       }
@@ -748,7 +752,7 @@ namespace Fem2D
   }
   
 const     string Gsbegin="Mesh3::GSave v0",Gsend="end";  
-  void Mesh3::GSave(FILE * ff) const
+  void Mesh3::GSave(FILE * ff,int offset) const
   {  
     PlotStream f(ff);
     
@@ -763,10 +767,11 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
       
       for (int k=0; k<nt; k++) {
 	const Element & K(this->elements[k]);
-	int i0=this->operator()(K[0]);
-	int i1=this->operator()(K[1]);
-	int i2=this->operator()(K[2]);
-	int i3=this->operator()(K[3]);
+	int i0=this->operator()(K[0])+offset;
+	int i1=this->operator()(K[1])+offset;
+	int i2=this->operator()(K[2])+offset;
+	int i3=this->operator()(K[3])+offset;
+    
 	int lab=K.lab;
 	f << i0 << i1 << i2 << i3 << lab;
       }
@@ -775,9 +780,9 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     
     for (int k=0; k<nbe; k++) {
       const BorderElement & K(this->borderelements[k]);
-      int i0=this->operator()(K[0]);
-      int i1=this->operator()(K[1]);
-      int i2=this->operator()(K[2]);
+      int i0=this->operator()(K[0])+offset;
+      int i1=this->operator()(K[1])+offset;
+      int i2=this->operator()(K[2])+offset;
       int lab=K.lab;
       f << i0 << i1 << i2  << lab;
     }
@@ -806,7 +811,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
   Mesh3::Mesh3(FILE *f)
   {
     
-    GRead(f);
+    GRead(f,-1);// remove 1 
     assert( (nt >= 0 || nbe>=0)  && nv>0) ;
     BuildBound();
     if(verbosity>2)
@@ -826,7 +831,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
       ffassert(mes>=0); // add F. Hecht sep 2009.
   }
   
-  void Mesh3::GRead(FILE * ff)
+  void Mesh3::GRead(FILE * ff,int offset)
   {  
     PlotStream f(ff);
     string s;
@@ -852,6 +857,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	  int i[4],lab;
 	  Element & K(this->elements[k]);
 	  f >> i[0] >> i[1] >> i[2] >> i[3] >> lab;
+      Add(i,4,offset);  
 	  K.set(this->vertices,i,lab);
 	  mes += K.mesure();	    
 	  
@@ -863,6 +869,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
       int i[4],lab;
       BorderElement & K(this->borderelements[k]);
       f >> i[0] >> i[1] >> i[2]  >> lab;
+      Add(i,3,offset);  
       K.set(this->vertices,i,lab);
       mesb += K.mesure();	    
       
@@ -870,7 +877,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     f >> s;
     ffassert( s== Gsend);
   }
-    void Mesh3::readmsh(ifstream & f)
+    void Mesh3::readmsh(ifstream & f,int offset)
     {  
 
 	f >> nv >> nt >> nbe;
@@ -893,6 +900,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 		  int i[4],lab;
 		  Element & K(this->elements[k]);
 		  f >> i[0] >> i[1] >> i[2] >> i[3] >> lab;
+          Add(i,4,offset);
 		  K.set(this->vertices,i,lab);
 		  mes += K.mesure();	    
 		  
@@ -904,6 +912,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	    int i[4],lab;
 	    BorderElement & K(this->borderelements[k]);
 	    f >> i[0] >> i[1] >> i[2]  >> lab;
+        Add(i,3,offset);
 	    K.set(this->vertices,i,lab);
 	    mesb += K.mesure();	    
 	    
