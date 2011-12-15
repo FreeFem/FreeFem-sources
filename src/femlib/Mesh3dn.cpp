@@ -808,10 +808,10 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	ffassert(mes>=0); // add F. Hecht sep 2009.
 
     }
-  Mesh3::Mesh3(FILE *f)
+  Mesh3::Mesh3(FILE *f,int offset)
   {
     
-    GRead(f,-1);// remove 1 
+    GRead(f,offset);// remove 1 
     assert( (nt >= 0 || nbe>=0)  && nv>0) ;
     BuildBound();
     if(verbosity>2)
