@@ -1391,7 +1391,7 @@ struct Op_Gather1 : public   ternary_function<R*,KN_<R>,MPIrank,long> {
     MPI_Comm_size(root.comm, &mpisizew); 
     MPI_Comm_rank( root.comm, &myrank)  ;
     int chunk = 1;
-    ffassert( (myrank == root.who) && (r.N()>=mpisizew*chunk) );
+    ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
     
     return MPI_Gather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
 			   (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
@@ -1412,7 +1412,7 @@ struct Op_Gather3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
       MPI_Comm_rank(root.comm, &myrank)  ;
 
     int chunk = s.N();
-    ffassert( (myrank == root.who) && (r.N()==mpisizew*chunk) );
+    ffassert( (myrank != root.who) || (r.N()==mpisizew*chunk) );
     
     return MPI_Gather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
 			   (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
@@ -1928,7 +1928,7 @@ struct Op_Gather1<Complex> : public   ternary_function<Complex* ,KN_<Complex>,MP
       MPI_Comm_rank( root.comm, &myrank)  ;
       
     int chunk = 1;
-    ffassert( (myrank == root.who) && (r.N()>=mpisizew*chunk) );
+    ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
 #ifdef HAVE_MPI_DOUBLE_COMPLEX  
        
     return MPI_Gather( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
@@ -1956,7 +1956,7 @@ struct Op_Gather3<Complex> : public   ternary_function<KN_<Complex>,KN_<Complex>
       MPI_Comm_rank( root.comm, &myrank)  ;
 
     int chunk = s.N();
-    ffassert( (myrank == root.who) && (r.N()>=mpisizew*chunk) );
+    ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
 #ifdef HAVE_MPI_DOUBLE_COMPLEX    
        
     return MPI_Gather( (void *) (Complex*)s, chunk, MPI_DOUBLE_COMPLEX,
