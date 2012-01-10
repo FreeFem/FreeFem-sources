@@ -28,8 +28,8 @@ varf Ans(u,v)=
        // remark: nTonEdge =1 on border edge and =2 on internal 
        // we are in a triange th normal is the exterior normal
        // def: jump = external - internal value; on border exter value =0
-       //      average = (external + internal value)/2, on border just internal value
-            ( jump(v)*average(dn(u)) -  jump(u)*average(dn(v)) 
+       //      mean = (external + internal value)/2, on border just internal value
+            ( jump(v)*mean(dn(u)) -  jump(u)*mean(dn(v)) 
           + pena*jump(u)*jump(v) ) / nTonEdge 
 )
 ;

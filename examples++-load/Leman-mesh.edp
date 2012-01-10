@@ -1,11 +1,13 @@
 load "ppm2rnm"
-load "isolineP1"
+load "isoline"
 bool wait=false;
 string leman="lg.pgm";
 real AreaLac =  580.03; // Km^2
 int nbsmooth = 200; 
 int hsize= 1; 
-
+real[int] xx(1),yy(1);
+int[int] be(1);
+int nc;
 { // build the curve file xy.txt ... 
 real[int,int] ff1(leman); // read  image and set to an rect. array 
 //  remark (0,0) is the upper, left corner.
@@ -22,52 +24,51 @@ Vh fu,fv;
 f1[]=ff1; //  transforme array in finite element function.
 
 f2= min(f1, 0.25);
+verbosity=3;
+/*
+ Usage of isoline
+ the named parameter :
+ iso=0.25   // value of iso 
+ close=1, //   to force to have closing curve ... 
+ beginend=be, // begin  and end of curve
+ smoothing=.01, //   nb of smoothing process = size^ratio * 0.01 
+ where  size is the size of the curve ...  
+ ratio=0.5
+ file="filename"
+ 
+ ouptut:
+  xx, yy  the array of point of the iso value 
 
-real[int] v=isolineP1(Th,"xy.txt",f1,iso=0.25);
+a closed curve  number n is
+
+in fortran notation the point of the curve are: 
+(xx[i],yy[i], i = i0, i1) 
+with :  i0=be[2*n],  i1=be[2*n+1];
+
+*/
+nc=isoline(Th,f1,iso=0.25,close=1,xx,yy,beginend=be,smoothing=.01,ratio=0.5); 
+verbosity=1; 
 }
 
-int bcurve,ecurve;
-{ // Analyse the file to get the longest curve ....
-  int i=0,p=0,il=0,k=0,i0=0,i1=0;
-  ifstream f("xy.txt");
-  string l;
-  while ( f.good()  )
-    {
-      getline(f,l);       
-      if( l=="") { 
-	il = i-p;       
-	if(il > i1-i0) {i1=i;i0=p;} ; 
-	p=i  ;
-      }
-       else  ++i;
-    }
-  if(il > i1-i0) {i1=i+1;i0=p;} ;    
-  cout << "The  longest  curve  = " << i0 << " " << i1 << " " << i1-i0 << endl;  
-  bcurve=i0;
-  ecurve=i1;
-}
-real[int,int] Curve(2,ecurve-bcurve);
+int bcurve=0,ecurve=0;
+for( int i=0;i < be.n;i)
 {
-  ifstream f("xy.txt");
-  real px,py;
-  int k=0,i=0;
-  while (i<=ecurve)
-    {
-      i++; 
-      real px,py;
-      f >> px >> py;
-      //cout << i << px << " " << py << endl; 
-      if(  bcurve < i   && i <= ecurve)
-	{
-	  Curve(0,k)=px;
-	  Curve(1,k)=py;
-	 k++;
-	}
-      
-    }
+int i0=be[i++];
+int i1=be[i++]-1; // remove the closure of the curve ... 
+if( ecurve -bcurve < i1-i0)
+{
+  bcurve = i0;
+  ecurve = i1;
 }
+}
+
+real[int,int] Curve(2,ecurve-bcurve);
+   Curve(0,:) = xx(bcurve:ecurve-1);
+   Curve(1,:) = yy(bcurve:ecurve-1);
+
 
 //  Smoothing the curve  
+if(0)
 {
   real[int,int] CurveO(Curve);
   int nC=Curve.m;
@@ -108,7 +109,7 @@ border G(t=0,Curve.m)
 } 
 
 plot(G(100),wait=1); 
-mesh Th=buildmesh(G(500));
+mesh Th=buildmesh(G(-500));
 plot(Th,wait=1);
 
 real scale = sqrt(AreaLac/Th.area);

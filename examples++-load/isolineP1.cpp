@@ -45,7 +45,7 @@ using namespace std;
 
 #include <set>
 #include <vector>
-#include "msh3.hpp"
+//#include "msh3.hpp"
 
 using namespace  Fem2D;
 
@@ -71,11 +71,11 @@ public:
       {	 
 	ff=to<double>( args[2] );  
       }
-    else {
-      CompileError("no function to isolines \n");
+    else {ffassert(0);
+      // ErrorCompile("no function to isolines \n");
     }    
-    if( !nargs[0]) 
-      CompileError("no isolines selected \n");
+    if( !nargs[0]) ffassert(0); 
+      //   ErrorCompile("no isolines selected \n");
   } 
     
   AnyType operator()(Stack stack)  const ;
@@ -884,8 +884,11 @@ LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dy
 Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
  
   typedef Mesh *pmesh;
-  
-  Global.Add("isolineP1","(",new ISOLINE_P1);
+  cerr << " Warning obsolete load file version now use isolineP1 -> isoline " << endl;  
+  cerr << " see example for the syntaxe " << endl; 
+  cerr << " F . Hecht " << endl;   
+  CompileError("obsolet load filee (sorry) use: load \"isoline\" "); 
+  //Global.Add("isolineP1","(",new ISOLINE_P1);
 
 }
    
