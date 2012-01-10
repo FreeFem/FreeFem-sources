@@ -1412,6 +1412,7 @@ struct Op_Gather3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
       MPI_Comm_rank(root.comm, &myrank)  ;
 
     int chunk = s.N();
+    //  cout << myrank << " " << root.who << " " << r.N() << " "<< s.N() << " " << chunk << " " << mpisizew << endl;
     ffassert( (myrank != root.who) || (r.N()==mpisizew*chunk) );
     
     return MPI_Gather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
