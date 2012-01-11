@@ -35,6 +35,7 @@ calcul demander par F. Hecht
 
 #ifndef WITH_NO_INIT
 #include "ff++.hpp"
+#include "AFunction_ext.hpp"
 #endif
 
 
@@ -43,7 +44,8 @@ using namespace std;
 #include <set>
 #include <vector>
 #include <map> 
-#include "msh3.hpp"
+#include <algorithm>
+//#include "msh3.hpp"
 
 using namespace  Fem2D;
 
@@ -54,7 +56,7 @@ class ISOLINE_P1_Op : public E_F0mps
 {
 public:
    
-  Expression eTh,eff,emat,exx,eyy,iso;
+  Expression eTh,eff,emat,exx,eyy,exy,iso;
   static const int n_name_param = 7; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
@@ -69,7 +71,12 @@ public:
  
 public:
   ISOLINE_P1_Op(const basicAC_F0 &  args,Expression tth, Expression fff,Expression xxx,Expression yyy) 
-    : eTh(tth),emat(0),eff(fff),exx(xxx),eyy(yyy)
+    : eTh(tth),emat(0),eff(fff),exx(xxx),eyy(yyy),exy(0) 
+  {
+    args.SetNameParam(n_name_param,name_param,nargs);
+  } 
+  ISOLINE_P1_Op(const basicAC_F0 &  args,Expression tth, Expression fff,Expression xxyy) 
+    : eTh(tth),emat(0),eff(fff),exx(0),eyy(0),exy(xxyy) 
   {
     args.SetNameParam(n_name_param,name_param,nargs);
   } 
@@ -259,8 +266,17 @@ int next(int k0,multimap<int,int> & L,int rm=0)
 AnyType ISOLINE_P1_Op::operator()(Stack stack)  const 
 {
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-  KN<double> * pxx= GetAny<KN<double>*>((*exx)(stack));
-  KN<double> * pyy= GetAny<KN<double>*>((*eyy)(stack));
+  KNM<double> * pxy=0;
+  KN<double> * pxx=0; 
+  KN<double> * pyy=0;
+  if(exy)
+    pxy = GetAny<KNM<double>*>((*exy)(stack));
+  if(exx)
+    pxx = GetAny<KN<double>*>((*exx)(stack));
+  if(eyy) 
+    pyy = GetAny<KN<double>*>((*eyy)(stack));
+  //  cout << pxx << " " << pyy << " " << pxy << endl; 
+  ffassert( (pxx || pyy) ==  !pxy ) ;  
   Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
   ffassert(pTh);
   Mesh &Th=*pTh;
@@ -478,7 +494,23 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 
 	  }
     }
-
+  // sort iQ
+  if(iQ.size()>2)
+    {
+      vector< pair<int , pair<int,int> > > sQ(iQ.size()/2);
+      for(int i=0,j=0; i<iQ.size();i+=2,++j)
+	{
+	  int i0=iQ[i];
+	  int i1=iQ[i+1];
+	  sQ[j] = make_pair(i0-i1,make_pair(i0,i1));
+	}
+      std::sort(sQ.begin(), sQ.end());
+      for(int i=0,j=0; i<iQ.size();i+=2,++j)
+	{
+	  iQ[i]   =sQ[j].second.first;
+	  iQ[i+1] =sQ[j].second.second;
+	}
+    }
 if(smoothing>0)
   {
    KN<R2> P1(QQ.size()),P2(QQ.size());
@@ -498,7 +530,7 @@ if(smoothing>0)
 	int i1=iQ[i++]-1; 
 	int nbsmoothing = pow((i1-i0),ratio)*smoothing;
 	if(verbosity>2) 
-	  cout << "     curve " << i << " size = " << i1-i0 << " nbsmoothing = " << nbsmoothing << endl;
+	  cout << "     curve " << i << " size = " << i1-i0 << " nbsmoothing = " << nbsmoothing << " " << i0 << " " << i1 << endl;
 	P2=P1;
 	for( int step=0;step<nbsmoothing;++step)
 	  {
@@ -527,18 +559,41 @@ if(smoothing>0)
   	  (*pbeginend)[i]=iQ[i];
   }
   
-  
-  pxx->resize(QQ.size());
-  pyy->resize(QQ.size());
-  for(int i=0;i<QQ.size();++i)
-  {
-  	int j=QQ[i];
-  	(*pxx)[i]=  P[j].P.x ;
-  	(*pyy)[i]=  P[j].P.y ;
-  	
-  }
- 
+  if(pxx && pyy )
+    {
+      pxx->resize(QQ.size());      
+      pyy->resize(QQ.size());
+      for(int i=0;i<QQ.size();++i)
+	{
+	  int j=QQ[i];
+	  (*pxx)[i]=  P[j].P.x ;
+	  (*pyy)[i]=  P[j].P.y ;
+	  
+	}
+    }
+  else if(pxy) 
+    {
+      pxy->resize(3,QQ.size()); 
 
+      
+      for(int k=0; k<iQ.size();k+=2)
+	{
+	  int i0=iQ[k],i1=iQ[k+1];
+	  double lg=0;
+	  R2 Po=P[QQ[i0]].P;
+	  for(int i=i0;i<i1;++i)
+	    {
+	      int j=QQ[i];
+	      (*pxy)(0,i)=  P[j].P.x ;
+	      (*pxy)(1,i)=  P[j].P.y ;
+	      lg += R2(P[j].P,Po).norme() ; 
+	      (*pxy)(2,i)=  lg; 
+	      Po = P[j].P;
+	    }
+	}
+    }
+  else ffassert(0); 
+  
 
   nbc = iQ.size()/2; 
   if(file) 
@@ -555,7 +610,7 @@ if(smoothing>0)
 	for(int l=i0;l<i1;++l)
 	{
 	  int j=QQ[l];	
-	  fqq << P[j].P.x << " " << P[j].P.y << " " << k << " "<< j << endl;
+	  fqq << P[j].P.x << " " << P[j].P.y << " " << k << " "<< j <<  endl;
 	}
 	fqq << endl;
       }
@@ -587,18 +642,79 @@ if(smoothing>0)
 
 class  ISOLINE_P1: public OneOperator { public:  
 typedef Mesh *pmesh;
-  ISOLINE_P1() : OneOperator(atype<long>(),atype<pmesh>(),atype<double>(), atype<KN<double>*>(),atype<KN<double>* >() ) {}
+  int cas;
+
+  ISOLINE_P1() : OneOperator(atype<long>(),atype<pmesh>(),atype<double>(), atype<KN<double>*>(),atype<KN<double>* >() ) ,cas(4){}
+  ISOLINE_P1(int ) : OneOperator(atype<long>(),atype<pmesh>(),atype<double>(), atype<KNM<double>*>() ),cas(3) {}
   
   E_F0 * code(const basicAC_F0 & args) const 
   { 
-    return  new ISOLINE_P1_Op( args,
-			       t[0]->CastTo(args[0]),
-			       t[1]->CastTo(args[1]),
-			       t[2]->CastTo(args[2]),
-			       t[3]->CastTo(args[3]) ); 
+    if(cas==4)
+      return  new ISOLINE_P1_Op( args,
+				 t[0]->CastTo(args[0]),
+				 t[1]->CastTo(args[1]),
+				 t[2]->CastTo(args[2]),
+				 t[3]->CastTo(args[3]) ); 
+    else if(cas==3) 
+      return  new ISOLINE_P1_Op( args,
+				 t[0]->CastTo(args[0]),
+				 t[1]->CastTo(args[1]),
+				 t[2]->CastTo(args[2]) ); 
+    else ffassert(0); // bug 
   }
+
+
+  
+
+
 };
 
+
+
+R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1,const double & ss)
+{
+  assert(b.N() >=3);
+  int i0=li0,i1=li1,im;
+  if(i0<0) i0=0;
+  if(i1<0) i1=b.M()-1;
+  double lg=b(2,i1);
+  R3 Q;
+  ffassert(lg>0 && b(2,0)==0.); 
+  double s = ss*lg;
+  int k=0,k1=i1;
+  while(i0 < i1-1)
+    {
+      ffassert(k++ < k1);
+      im = (i0+i1)/2;
+      if(s <b(2,im)  )
+	{ i1=im;
+	}
+      else if(s>b(2,im)  )
+	{ i0= im;
+	}
+      else {  Q=R3(b(0,im),b(1,im),0);  i0=i1=im;break;}
+    }
+  if(i0<i1)
+    {
+      ffassert(b(2,i0) <= s );
+      ffassert(b(2,i1) >= s );
+      R2 A(b(0,i0),b(1,i0));
+      R2 B(b(0,i1),b(1,i1));
+      double l1=(b(2,i1)-s);
+      double l0=s-b(2,i0);
+      Q= (l1*A + l0*B)/(l1+l0);
+    }
+  R3 *pQ = Add2StackOfPtr2Free(stack,new R3(Q));
+  // MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value 
+  //mp.P.x=Q.x; // get the current x value
+  //mp.P.y=Q.y; // get the current y value
+  return pQ; 
+}
+
+R3   * Curve(Stack stack,const KNM_<double> &b,const double & ss)
+{
+  return Curve(stack,b,-1,-1,ss);
+}
 
 
 
@@ -608,7 +724,9 @@ void finit()
   typedef Mesh *pmesh;
   
   Global.Add("isoline","(",new ISOLINE_P1);
-
+  Global.Add("isoline","(",new ISOLINE_P1(1));
+  Global.Add("Curve","(",new OneOperator2s_<R3*,KNM_<double>,double>(Curve));
+  Global.Add("Curve","(",new OneOperator4s_<R3*,KNM_<double>,long,long,double>(Curve));
 }
 
 LOADFUNC(finit);  //  une variable globale qui serat construite  au chargement dynamique    

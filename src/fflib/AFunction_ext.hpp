@@ -154,6 +154,56 @@ public:
     f(ff){}
 };
 
+
+
+template<class R,class A0,class A1,class A2, class A3, class E=E_F0>   // extend (4th arg.)
+class E_F_F0F0F0F0s_ :public  E { public:                               // extend 
+    typedef  R (*func)(Stack, const  A0 &,const  A1 & , const A2 &, const A3 & ) ; // extend (4th arg.)
+  func f;
+  Expression a0,a1,a2,a3;          // extend
+  E_F_F0F0F0F0s_(func ff,
+		Expression aa0,
+		Expression aa1,
+		Expression aa2,
+		Expression aa3)   // extend 
+    : f(ff), a0(aa0), a1(aa1), a2(aa2), a3(aa3) {}  // extend (4th arg.)
+  AnyType operator()(Stack s)  const 
+  {return SetAny<R>( f( s, GetAny<A0>((*a0)(s)),
+			  GetAny<A1>((*a1)(s)),
+			  GetAny<A2>((*a2)(s)),
+			  GetAny<A3>((*a3)(s))  ) );}   // extend (4th arg.)
+  virtual size_t nbitem() const {return a3->nbitem(); } // modif
+      bool MeshIndependent() const 
+      {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()&& a3->MeshIndependent();} // extend (4th arg.)
+
+};
+
+template<class R,class A=R,class B=A,class C=B, class D=C ,class CODE=E_F_F0F0F0F0s_<R,A,B,C,D,E_F0> >    // extend (4th arg.)
+class  OneOperator4s_ : public OneOperator {     // 3->4
+  aType r; //  return type 
+    typedef typename  CODE::func  func;
+  func f;
+public: 
+  E_F0 * code(const basicAC_F0 & args) const 
+    {  
+	if ( args.named_parameter && !args.named_parameter->empty()  ) 
+	    CompileError( " They are used Named parameter ");
+	
+	return  new CODE(f,
+		     t[0]->CastTo(args[0]),
+		     t[1]->CastTo(args[1]),
+		     t[2]->CastTo(args[2]),
+		     t[3]->CastTo(args[3]));}     // extend
+  OneOperator4s_(func  ff):                        // 3->4
+    OneOperator(map_type[typeid(R).name()],
+		map_type[typeid(A).name()],
+		map_type[typeid(B).name()],
+		map_type[typeid(C).name()],
+		map_type[typeid(D).name()]),      // extens
+    f(ff){}
+};
+
+
 // ***********************************************
 // **** 5 parameters
 // ***********************

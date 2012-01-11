@@ -5,7 +5,7 @@ string leman="lg.pgm";
 real AreaLac =  580.03; // Km^2
 int nbsmooth = 200; 
 int hsize= 1; 
-real[int] xx(1),yy(1);
+real[int,int] Curves(3,1);
 int[int] be(1);
 int nc;
 { // build the curve file xy.txt ... 
@@ -46,70 +46,25 @@ in fortran notation the point of the curve are:
 with :  i0=be[2*n],  i1=be[2*n+1];
 
 */
-nc=isoline(Th,f1,iso=0.25,close=1,xx,yy,beginend=be,smoothing=.01,ratio=0.5); 
+
+nc=isoline(Th,f1,iso=0.25,close=1,Curves,beginend=be,smoothing=.1,ratio=0.5); 
 verbosity=1; 
 }
 
-int bcurve=0,ecurve=0;
-for( int i=0;i < be.n;i)
-{
-int i0=be[i++];
-int i1=be[i++]-1; // remove the closure of the curve ... 
-if( ecurve -bcurve < i1-i0)
-{
-  bcurve = i0;
-  ecurve = i1;
-}
-}
+int ic0=be(0), ic1=be(1)-1;		
+  plot([Curves(0,ic0:ic1),Curves(1,ic0:ic1)], wait=1);
 
-real[int,int] Curve(2,ecurve-bcurve);
-   Curve(0,:) = xx(bcurve:ecurve-1);
-   Curve(1,:) = yy(bcurve:ecurve-1);
-
-
-//  Smoothing the curve  
-if(0)
-{
-  real[int,int] CurveO(Curve);
-  int nC=Curve.m;
-  // lissage 
-  real[int,int] P(Curve),PP(Curve);
-  real c1=1, c0=4, ct=2*c1+c0;
-  c1/=ct;
-  c0/=ct;
-  for(int step=0;step<nbsmooth ;++step)
-    {
-      for(int j=0;j<nC;++j)
-      {	
-	int j0= (j+ nC-1)%nC;
-	int j1= (j+ 1)%nC;
-	P(0,j) = c0*PP(0,j) +c1*PP(0,j0) +c1*PP(0,j1);
-	P(1,j) = c0*PP(1,j) +c1*PP(1,j0) +c1*PP(1,j1);
-      }
-      PP=P;
-    }
-  Curve=PP;
-  plot([Curve(0,:),Curve(1,:)],[CurveO(0,:),CurveO(1,:)], wait=1);
-}
 // end smoothing the curve ....
 
-border G(t=0,Curve.m) 
+border G(t=0,1) 
 {    
-  int n= Curve.m;
-  int i=int(t), i1= (i+1)%n;
-  real t1=t-i, t0=1-t1;
-  i = i%n; 
-  assert(t1>=0 && t1<1.);
-  assert(i>=0 && i < n ) ;
-  assert(i1>=0 && i1 < n ) ;
-
-  x = Curve(0,i)*t0 + Curve(0,i1)*t1;   
-  y = Curve(1,i)*t0 + Curve(1,i1)*t1;  
-  label=1; 
-} 
-
-plot(G(100),wait=1); 
-mesh Th=buildmesh(G(-500));
+  P=Curve(Curves,ic0,ic1,t);
+  label=1;	
+} 		
+cout << " .. "<<endl;
+plot(G(100),wait	=1); 
+mesh Th=buildmesh(G(-500     ));
+cout << " ...  "<<endl;
 plot(Th,wait=1);
 
 real scale = sqrt(AreaLac/Th.area);
