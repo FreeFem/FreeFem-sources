@@ -4405,7 +4405,7 @@ Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
 
 //  end --- call meth be .. 
 
-
+R3 * set_eqp(R3 *a,R3 *b) { *a=*b; return a;}
 void  init_lgfem() 
 {
  // ThePlotStream = new ofstream("ttttt.plot");
@@ -4668,7 +4668,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		   new OpMake_pfes<pfes,Mesh,TypeOfFE,pfes_tefk>,
 		   new OpMake_pfes<pfes3,Mesh3,TypeOfFE3,pfes3_tefk>
         );
-      
+    TheOperators->Add("=",new OneOperator2<R3*,R3*,R3* >(&set_eqp));
  
  Add<MeshPoint*>("P",".", new OneOperator_Ptr_o_R<R3,MeshPoint>(  & MeshPoint::P));
  Add<MeshPoint*>("N",".", new OneOperator_Ptr_o_R<R3,MeshPoint>(  & MeshPoint::N));

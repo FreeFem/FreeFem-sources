@@ -1210,7 +1210,7 @@ struct Op_Scatter1 : public   ternary_function<KN_<R>, R* ,MPIrank,long> {
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
     int chunk = 1;
-    ffassert(s.N()==mpisizew*chunk);
+   // ffassert(s.N()==mpisizew*chunk);
     
     return MPI_Scatter( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
 			(void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
@@ -1231,8 +1231,8 @@ struct Op_Scatter3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
 
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
-    int chunk = s.N()/mpisizew;
-    ffassert(s.N()==mpisizew*chunk && r.N()==chunk);
+    int chunk = r.N(); // FH  correct  jan 2012 ... 
+    // ffassert(s.N()==mpisizew*chunk && r.N()==chunk);
     
     return MPI_Scatter( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
 			(void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
@@ -1253,14 +1253,14 @@ long Op_Scatterv3( KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root,
   
   int mpisizew;
   MPI_Comm_size(root.comm, &mpisizew); /* local */ 
-  ffassert( sendcnts.N() == displs.N() && sendcnts.N() == mpisizew );
+ //  ffassert( sendcnts.N() == displs.N() && sendcnts.N() == mpisizew );
   // size control 
-  ffassert( r.N() == sendcnts[mpirankv] );
+ // ffassert( r.N() == sendcnts[mpirankv] );
   long sumsize=0;
   for(int ii=0; ii<sendcnts.N(); ii++){
     sumsize += sendcnts[ii];
   }
-  ffassert( s.N() == sumsize );
+ // ffassert( s.N() == sumsize );
   
   KN<int> INTsendcnts(sendcnts.N());
   KN<int> INTdispls(displs.N());
@@ -1391,7 +1391,7 @@ struct Op_Gather1 : public   ternary_function<R*,KN_<R>,MPIrank,long> {
     MPI_Comm_size(root.comm, &mpisizew); 
     MPI_Comm_rank( root.comm, &myrank)  ;
     int chunk = 1;
-    ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
+    // ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
     
     return MPI_Gather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
 			   (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
@@ -1413,7 +1413,7 @@ struct Op_Gather3 : public   ternary_function<KN_<R>,KN_<R>,MPIrank,long> {
 
     int chunk = s.N();
     //  cout << myrank << " " << root.who << " " << r.N() << " "<< s.N() << " " << chunk << " " << mpisizew << endl;
-    ffassert( (myrank != root.who) || (r.N()==mpisizew*chunk) );
+    //ffassert( (myrank != root.who) || (r.N()==mpisizew*chunk) );
     
     return MPI_Gather( (void *) (R*) s, chunk, MPI_TYPE<R>::TYPE(),
 			   (void *) (R*) r, chunk, MPI_TYPE<R>::TYPE(),root.who,root.comm);	
@@ -1434,13 +1434,13 @@ long  Op_Gatherv3(KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root, 
   MPI_Comm_rank(root.comm, &mpirankw); 
   int mpisizew;
   MPI_Comm_size(root.comm, &mpisizew); 
-  ffassert( recvcount.N() == displs.N() && recvcount.N() == mpisizew);
+ // ffassert( recvcount.N() == displs.N() && recvcount.N() == mpisizew);  fait dans mpi.. 
   
   if( mpirankw == root.who){
     long sum=0;
     for(int ii=0; ii< recvcount.N(); ii++)
       sum+=recvcount[ii];
-    ffassert( sum == r.N() );
+   // ffassert( sum == r.N() );
   }
   KN<int> INTrecvcount(recvcount.N());
   KN<int> INTdispls(displs.N());
@@ -1773,7 +1773,7 @@ struct Op_Scatter1<Complex> : public   ternary_function<KN_<Complex>,Complex *,M
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
     int chunk = 1;
-    ffassert(s.N()==mpisizew*chunk );
+    // ffassert(s.N()==mpisizew*chunk ); fait dans mpi
 #ifdef HAVE_MPI_DOUBLE_COMPLEX      
     return MPI_Scatter( (void *) (Complex*)s, chunk, MPI_DOUBLE_COMPLEX,
 			(void *) (Complex*)r, chunk, MPI_DOUBLE_COMPLEX,root.who,root.comm);	
@@ -1795,8 +1795,8 @@ struct Op_Scatter3<Complex> : public   ternary_function<KN_<Complex>,KN_<Complex
 
     int mpisizew;
     MPI_Comm_size(root.comm, &mpisizew); 
-    int chunk = s.N()/mpisizew;
-    ffassert(s.N()==mpisizew*chunk && r.N()==chunk);
+    int chunk = r.N();// correct 2012 FH
+   // ffassert(s.N()==mpisizew*chunk && r.N()==chunk);
 #ifdef HAVE_MPI_DOUBLE_COMPLEX      
     return MPI_Scatter( (void *) (Complex*)s, chunk, MPI_DOUBLE_COMPLEX,
 			(void *) (Complex*)r, chunk, MPI_DOUBLE_COMPLEX,root.who,root.comm);	
@@ -1821,14 +1821,14 @@ long Op_Scatterv3<Complex>( KN_<Complex>  const  & s, KN_<Complex>  const  &r,  
   
   int mpisizew;
   MPI_Comm_size(root.comm, &mpisizew); /* local */ 
-  ffassert( sendcnts.N() == displs.N() && sendcnts.N() == mpisizew );
+  //  ffassert( sendcnts.N() == displs.N() && sendcnts.N() == mpisizew );
   // size control 
-  ffassert( r.N() == sendcnts[mpirankv] );
+  // ffassert( r.N() == sendcnts[mpirankv] );
   long sumsize=0;
   for(int ii=0; ii<sendcnts.N(); ii++){
     sumsize += sendcnts[ii];
   }
-  ffassert( s.N() == sumsize );
+  //ffassert( s.N() == sumsize );
   
   KN<int> INTsendcnts(sendcnts.N());
   KN<int> INTdispls(displs.N());
@@ -1929,7 +1929,7 @@ struct Op_Gather1<Complex> : public   ternary_function<Complex* ,KN_<Complex>,MP
       MPI_Comm_rank( root.comm, &myrank)  ;
       
     int chunk = 1;
-    ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
+   // ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
 #ifdef HAVE_MPI_DOUBLE_COMPLEX  
        
     return MPI_Gather( (void *) (Complex*) s, chunk, MPI_DOUBLE_COMPLEX,
@@ -1957,7 +1957,7 @@ struct Op_Gather3<Complex> : public   ternary_function<KN_<Complex>,KN_<Complex>
       MPI_Comm_rank( root.comm, &myrank)  ;
 
     int chunk = s.N();
-    ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
+    // ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
 #ifdef HAVE_MPI_DOUBLE_COMPLEX    
        
     return MPI_Gather( (void *) (Complex*)s, chunk, MPI_DOUBLE_COMPLEX,
@@ -1982,7 +1982,7 @@ long  Op_Gatherv3<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,  M
   MPI_Comm_rank(root.comm, &mpirankw); 
   int mpisizew;
   MPI_Comm_size(root.comm, &mpisizew); 
-  ffassert( recvcount.N() == displs.N() && recvcount.N() == mpisizew);
+  //ffassert((mpirankw != root.who) || ( recvcount.N() == displs.N() && recvcount.N() == mpisizew));
   
   if( mpirankw == root.who){
     long sum=0;

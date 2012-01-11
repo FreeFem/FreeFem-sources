@@ -1231,28 +1231,28 @@ class KNM: public KNM_<R>{ public:
     long n = this->shapei.n;
     long m = this->shapej.n;
     
-    if( n !=nn && m != mm) 
+    if( (n !=nn) || ( m != mm))  // correct FH Jav 2012 ..
      {
-    KNM_ <R> old(*this); 
-    long no=std::min(n,nn);
-    long mo=std::min(m,mm);
-    R *vo=this->v;
+       KNM_ <R> old(*this); 
+       long no=std::min(n,nn);
+       long mo=std::min(m,mm);
+       R *vo=this->v;
+       
+       // new mat 
+       ShapeOfArray::init(kk);
+       this->v=new R[this->n];
+       this->shapei.init(nn,1,nn);
+       this->shapej.init(mm,nn,1);
+       
+       if(this->v && vo)  // copy
+	 (*this)(SubArray(no),SubArray(mo)) = old(SubArray(no),SubArray(mo));
+       
+       delete []vo;
+     }
     
-    // new mat 
-    ShapeOfArray::init(kk);
-    this->v=new R[this->n];
-    this->shapei.init(nn,1,nn);
-    this->shapej.init(mm,nn,1);
-    
-    if(this->v && vo)  // copy
-        (*this)(SubArray(no),SubArray(mo)) = old(SubArray(no),SubArray(mo));
-      
-    delete []vo;
-    }
-        
-   }
-    void destroy(){assert(this->next<0);  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}} 
-    void increment() {assert(this->next<0);  this->next--;}
+  }
+  void destroy(){assert(this->next<0);  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}} 
+  void increment() {assert(this->next<0);  this->next--;}
     
 //  void destroy(){delete [] this->v;this->n=0 ;}
 
