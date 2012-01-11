@@ -1,5 +1,9 @@
-
- - correct assert in MPI
+v 3.18 (11/01/2012)
+ - rewrite the isoline-P1 plugins (new name isoline.{dll,so,dylib} )
+     see example Leman-mesh.edp and isoline.edp in 
+     examples++-load directory 
+ - bug in cas of resize of array with 2 index (full matrix)
+ - correct assert in MPI  in gather and scatter
  - correct bug in case of return  in loop for or while. 
  - correct a=int2d(Th,l)(1) in case simple expression  when l is a  arry.
  - build a pkg under macos for distribution .

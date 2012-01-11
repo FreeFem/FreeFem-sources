@@ -1,0 +1,35 @@
+load "isoline"
+
+real[int,int] xy(3,1);
+int[int] be(1);
+{
+mesh Th=square(10,10);//,[x*.5,y*0.5]);
+fespace Vh(Th,P1);
+Vh u= abs(x*(1-x)*(x-2)*y*(1-y));
+real iso= 0.01;
+real[int] viso=[iso];
+//plot(u,viso=viso,Th);
+
+
+//verbosity=200;
+isoline(Th,u,xy,close=1,iso=iso,beginend=be,smoothing=0.1);
+
+cout << " n = " << xy.m << endl;
+cout << "be = " << be << endl; 
+
+plot([xy(0,:),xy(1,:)],Th,u,wait=1,viso=viso);
+}
+
+
+cout << " len of the curve = " << xy(2,xy.m-1) << endl;; 
+border Curve(t=0,1) 
+{    
+  P=Curve(xy,t); 
+  label=1; 
+} 
+
+plot(Curve(100)); 
+mesh Th= buildmesh(Curve(100));
+plot(Th,wait=1);
+
+
