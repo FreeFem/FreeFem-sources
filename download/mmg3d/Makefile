@@ -26,32 +26,14 @@ build-4:
 	if [ -d mmg3d4  ] ; then  make $(LIBMMG3D) install-4 WHERE ; else echo "Sorry no source " ; fi
 $(LIBMMG3D):
 	cd mmg3d4/build/sources/; $(CC) -c $(CFLAGS) *.c;
+	 cd mmg3d4/build/sources/mmg3dmain; $(CC) -c $(CFLAGS) mmg3d.c -I..
 	$(AR) $(ARFLAGS) $(LIBMMG3D) mmg3d4/build/sources/*.o
-	$(CC) $(CFLAGS) mmg3d4/build/sources/*.o -o ../bin/mmg3d $(STD_LIBS)
+	$(CC) $(CFLAGS) mmg3d4/build/sources/mmg3dmain/mmg3d.o   mmg3d4/build/sources/*.o -o ../bin/mmg3d $(STD_LIBS)
 	touch build-4 FAIT-4
 install-4:
 	-mkdir ../include/mmg3d-v4/		
 	cp mmg3d4/build/sources/*.h ../include/mmg3d-v4/
 	touch FAIT-4
-
-
-mmg3d: mmg3d-$(OPT)
-
-mmg3d-1xxxx: 	
-	if [ -f $(PACKAGE) ] ;then \
-	   $(MAKE) FAIT-1; \
-	else \
-	   echo " file $(PACKAGE)  not found => no mmg3d tar file (download by hand) "; \
-	fi
-mmg3d-2xxx: FAIT-2xxx
-FAIT-2xxx: 	
-	@if [ -f ../pkg/$(MMG3DLIB_TAR) ] ;then \
-	   echo tar zxf ../pkg/$(MMG3DLIB_TAR)  -C .. ;\
-	   tar zxf ../pkg/$(MMG3DLIB_TAR)  -C .. ;\
-	   touch FAIT-2 ;\
-	else \
-	   echo " file ../pkg/$(MMG3DLIB_TAR)  not found => no mmg3d tar file (download by hand) "; \
-	fi
 
 mmg3d-4:$(PACKAGE)
 
@@ -60,16 +42,8 @@ $(PACKAGE):
 	cd $(DIRPKG);$(WGET) http://www.math.u-bordeaux1.fr/~dobj/logiciels/download/mmg3d4.0.tgz 
 #http://www.math.u-bordeaux1.fr/~dobj/logiciels/download.php?file=`basename $(PACKAGE)`
 
-FAIT-1: tag-tar
-	$(MAKE) -C $(SRCDIR) lib
-	touch FAIT-1
+
 install:install-4 WHERE
-install-1: FAIT-1
-	-mkdir $(SRCDIR)/$(INSTALL)/include
-	cp $(SRCDIR)/sources/libmmg3d.h  $(SRCDIR)/$(INSTALL)/include/libmmg3d.h
-	-mkdir $(SRCDIR)/$(INSTALL)/lib
-	cp $(SRCDIR)/objects/libmmg3d.a  $(LIBMMG3D)
-install-2:
 
 WHERE: 
 	@-if [ -f FAIT-4 ] ; then \
@@ -90,10 +64,6 @@ tag-tar: $(PACKAGE)
 	touch tag-tar
 #	cp makefile-mmg3d.inc $(SRCDIR)/makefile
 
-
-old-$(PACKAGE): 
-	-mkdir $(DIRPKG);
-	cd $(DIRPKG); $(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 
 clean: 

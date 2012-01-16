@@ -9,7 +9,7 @@ FAIRE: ../pkg $(SRCDIR)/FAIT
 
 $(SRCDIR)/FAIT: $(TARGZ)
 	tar zxvf $(TARGZ)
-	cd $(SRCDIR); ./configure  --with-cxx --prefix="$(FFDOWNLOAD)" CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" CC="$(CC)" CFLAGS="$(CFLAGS)" 
+	cd $(SRCDIR); ./configure  --with-cxx --prefix="$(FFDOWNLOAD)" CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" CC="$(CC)" CFLAGS="$(CFLAGS)"  CP="$(CXXCPP)"
 	cd $(SRCDIR); $(MAKE) install
 	touch $(SRCDIR)/FAIT
 	$(MAKE) WHERE

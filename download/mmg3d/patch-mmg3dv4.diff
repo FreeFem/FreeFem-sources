@@ -627,9 +627,9 @@ diff -u mmg3d4/build/sources/mesh.h mmg3d4-new/build/sources/mesh.h
  
  #endif
 Only in mmg3d4-new/build/sources/: met
-diff -u mmg3d4/build/sources/mmg3d.c mmg3d4-new/build/sources/mmg3d.c
---- mmg3d4/build/sources/mmg3d.c	2011-05-12 17:50:36.000000000 +0200
-+++ mmg3d4-new/build/sources/mmg3d.c	2011-09-01 19:36:51.000000000 +0200
+diff -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3dmain/mmg3d.c
+--- mmg3d4/build/sources/mmg3dmain/mmg3d.c	2011-05-12 17:50:36.000000000 +0200
++++ mmg3d4-new/build/sources/mmg3dmain/mmg3d.c	2011-09-01 19:36:51.000000000 +0200
 @@ -46,7 +46,7 @@
  #include "compil.date"
  #include "mesh.h"
@@ -796,9 +796,9 @@ diff -u mmg3d4/build/sources/mmg3dConfig.h mmg3d4-new/build/sources/mmg3dConfig.
  
 -#define USE_SCOTCH
 +/* #undef USE_SCOTCH */
-diff -u mmg3d4/build/sources/mmg3dlib.c mmg3d4-new/build/sources/mmg3dlib.c
---- mmg3d4/build/sources/mmg3dlib.c	2011-04-15 15:32:59.000000000 +0200
-+++ mmg3d4-new/build/sources/mmg3dlib.c	2011-07-07 11:23:59.000000000 +0200
+diff -u mmg3d4/build/sources/mmg3dlib/mmg3dlib.c mmg3d4-new/build/sources/mmg3dlib/mmg3dlib.c
+--- mmg3d4/build/sources/mmg3dlib/mmg3dlib.c	2011-04-15 15:32:59.000000000 +0200
++++ mmg3d4-new/build/sources/mmg3dlib/mmg3dlib.c	2011-07-07 11:23:59.000000000 +0200
 @@ -332,7 +332,7 @@
    if ( !MMG_hashTetra(mesh) )    return(1);
    if ( !MMG_markBdry(mesh) )     return(1);
