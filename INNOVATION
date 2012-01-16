@@ -1,3 +1,4 @@
+ - correct NSprojection.edp chap3 example (PB in out flow BC.) 
  - correct compile of mmg3d v4 plugins (small change un distrib archive) 
 v 3.18 (11/01/2012)
  - rewrite the isoline-P1 plugins (new name isoline.{dll,so,dylib} )
