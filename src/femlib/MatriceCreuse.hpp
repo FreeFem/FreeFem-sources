@@ -764,7 +764,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
        h *= gamma;
        h -= Cg;  //  h = -Cg * gamma* h       
      }
-     if (nbitermax <= nbitermax )
+     //if (nbitermax <= nbitermax )
       cout << "CG does'nt converge: " << nbitermax <<   " ||g||^2 = " << g2 << " reps2= " << reps2 << endl; 
    return 0; 
 }

@@ -210,7 +210,7 @@ int mylex::basescan()
       if (close() )  goto debut; 
       buf[0]=0;
       return ENDOFFILE;}
-  else if (isdigit(c) || c=='.' && isdigit(nc)) {
+  else if (isdigit(c) || (c=='.' && isdigit(nc))) {
     //  a number
     int i=1;
     buf[0]=c;

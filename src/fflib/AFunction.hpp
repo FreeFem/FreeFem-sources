@@ -917,7 +917,7 @@ class E_F_F0_Opt: public E_F_F0<R,TA0,RO>  { public :
   {
     // A0 x =  *static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia));
     // cout << " opt f (" << x << " ) = "   << ": " << ia << endl; 
-    return SetAny<R>( f( *static_cast<typename E_F_F0<R,TA0>::A0 *>(static_cast<void*>(static_cast<char *>(s)+ia))  ) );}  
+    return SetAny<R>( this->f( *static_cast<typename E_F_F0<R,TA0>::A0 *>(static_cast<void*>(static_cast<char *>(s)+ia))  ) );}  
   
 };   
 
@@ -991,7 +991,7 @@ class E_F_F0F0_Opt: public E_F_F0F0<R,TA0,TA1>  { public :
     //A0 aa =*static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia));
     //A1 bb=*static_cast<A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ;
     //cout << ia << " " << ib <<  "f( " << aa << "," << bb  << " )   = "<< f(aa,bb) << endl;
-    return SetAny<R>( f( *static_cast<typename E_F_F0F0<R,TA0,TA1>::A0 *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
+    return SetAny<R>( this->f( *static_cast<typename E_F_F0F0<R,TA0,TA1>::A0 *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
 			 *static_cast<typename E_F_F0F0<R,TA0,TA1>::A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ) );}  
   
 };     
@@ -2605,6 +2605,30 @@ template<>  struct binary_trait<long,complex<double> > { typedef  complex<double
 template<>  struct binary_trait<double,complex<double> > { typedef  complex<double> R ;}; 
 template<class A>  struct binary_trait<A,string* > { typedef  string*  R ;}; 
 
+//  1 variable pour les operation de cast 
+class E_F1_funcT_Type: public OneOperator{ public:
+    //  const basicForEachType *r,*a;
+    Function1 f;
+    E_F0 * code(const basicAC_F0 & args) const   { 
+        if ( args.named_parameter && !args.named_parameter->empty()  ) 
+            CompileError( " They are used Named parameter ");
+        
+        return  new  E_F0_Func1(f,args[0]);} 
+    
+    E_F1_funcT_Type(const basicForEachType *rr,const basicForEachType *aa,Function1 ff)
+    : OneOperator(rr,aa), f(ff) {}
+    
+    //: r(rr),a(aa),f(ff) {}
+    //  friend ostream & operator<<(ostream & f,const E_F1_funcT_Type & e) { f << *e.a << " -> " << *e.r ;return f;}
+};
+
+template<class R,class A>
+class E_F1_funcT :public  E_F1_funcT_Type{ public:   
+    E_F1_funcT(Function1 ff) : E_F1_funcT_Type(map_type[typeid(R).name()],map_type[typeid(A).name()],ff){}
+    E_F1_funcT(aType rr,aType a,Function1 ff) : E_F1_funcT_Type(rr,a,ff){}
+};
+
+
 template<class T,class PT> 
  ForEachTypePtr<T,PT>::ForEachTypePtr(): 
          basicForEachType(typeid(PT),sizeof(PT),
@@ -2807,29 +2831,6 @@ inline 	 C_F0 basicForEachType::CastTo(const C_F0 & e) const
            CompileError();} 
  return C_F0();
 }
-//  1 variable pour les operation de cast 
-class E_F1_funcT_Type: public OneOperator{ public:
-//  const basicForEachType *r,*a;
-  Function1 f;
-    E_F0 * code(const basicAC_F0 & args) const   { 
-	if ( args.named_parameter && !args.named_parameter->empty()  ) 
-	    CompileError( " They are used Named parameter ");
-
-	return  new  E_F0_Func1(f,args[0]);} 
-  
-  E_F1_funcT_Type(const basicForEachType *rr,const basicForEachType *aa,Function1 ff)
-    : OneOperator(rr,aa), f(ff) {}
-  
-//: r(rr),a(aa),f(ff) {}
-//  friend ostream & operator<<(ostream & f,const E_F1_funcT_Type & e) { f << *e.a << " -> " << *e.r ;return f;}
-};
-
-template<class R,class A>
-class E_F1_funcT :public  E_F1_funcT_Type{ public:   
-   E_F1_funcT(Function1 ff) : E_F1_funcT_Type(map_type[typeid(R).name()],map_type[typeid(A).name()],ff){}
-   E_F1_funcT(aType rr,aType a,Function1 ff) : E_F1_funcT_Type(rr,a,ff){}
-};
-
 inline Expression  basicForEachType::RightValueExpr(Expression f) const 
 {
   if (un_ptr) return new  E_F0_Func1(un_ptr->f,f);
