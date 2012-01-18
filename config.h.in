@@ -1,0 +1,202 @@
+/* config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Define to dummy `main' function (if any) required to link to the Fortran
+   libraries. */
+#undef F77_DUMMY_MAIN
+
+/* Define to a macro mangling the given C identifier (in lower and upper
+   case), which must not contain underscores, for linking with Fortran. */
+#undef F77_FUNC
+
+/* As F77_FUNC, but for C identifiers containing underscores. */
+#undef F77_FUNC_
+
+/* Define if F77 and FC dummy `main' functions are identical. */
+#undef FC_DUMMY_MAIN_EQ_F77
+
+/* FreeFem prefix dir */
+#undef FF_PREFIX_DIR
+
+/* FreeFem prefix dir */
+#undef FF_PREFIX_DIR_APPLE
+
+/* Define to 1 if you have the `acosh' function. */
+#undef HAVE_ACOSH
+
+/* Define to 1 if you have the `asinh' function. */
+#undef HAVE_ASINH
+
+/* Define to 1 if you have the `atanh' function. */
+#undef HAVE_ATANH
+
+/* Define to 1 if you have the <atlas/cblas.h> header file. */
+#undef HAVE_ATLAS_CBLAS_H
+
+/* If umfpack.h is located in UMFPACK subdir */
+#undef HAVE_BIG_UMFPACK_UMFPACK_H
+
+/* freecadna is use to evalute the round-off error propagation */
+#undef HAVE_CADNA
+
+/* Define to 1 if you have the <cblas.h> header file. */
+#undef HAVE_CBLAS_H
+
+/* Dynamic loading - not mandatory */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the `erfc' function. */
+#undef HAVE_ERFC
+
+/* Define to 1 if you have the <fftw3.h> header file. */
+#undef HAVE_FFTW3_H
+
+/* Define to 1 if you have the `getenv' function. */
+#undef HAVE_GETENV
+
+/* Define to 1 if you have the `gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define to 1 if you have the <GLUT/glut.h> header file. */
+#undef HAVE_GLUT_GLUT_H
+
+/* Define to 1 if you have the <GL/glut.h> header file. */
+#undef HAVE_GL_GLUT_H
+
+/* Define to 1 if you have the <GL/glx.h> header file. */
+#undef HAVE_GL_GLX_H
+
+/* Define to 1 if you have the <GL/gl.h> header file. */
+#undef HAVE_GL_GL_H
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `jn' function. */
+#undef HAVE_JN
+
+/* Arpack is used for eigenvalue computation */
+#undef HAVE_LIBARPACK
+
+/* Define to 1 if you have the `dl' library (-ldl). */
+#undef HAVE_LIBDL
+
+/* UMFPACK */
+#undef HAVE_LIBUMFPACK
+
+/* Define to 1 if you have the <malloc.h> header file. */
+#undef HAVE_MALLOC_H
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* mpi_double_complex */
+#undef HAVE_MPI_DOUBLE_COMPLEX
+
+/* Define to 1 if you have the <OpenGL/gl.h> header file. */
+#undef HAVE_OPENGL_GL_H
+
+/* Define to 1 if you have the `second_' function. */
+#undef HAVE_SECOND_
+
+/* Define to 1 if you have the `srandomdev' function. */
+#undef HAVE_SRANDOMDEV
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the <suitesparse/umfpack.h> header file. */
+#undef HAVE_SUITESPARSE_UMFPACK_H
+
+/* Define to 1 if you have the `sysconf' function. */
+#undef HAVE_SYSCONF
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* tetgen is compute tetrahedralize volume of an enclosed surface */
+#undef HAVE_TETGEN
+
+/* Define to 1 if you have the <tetgen.h> header file. */
+#undef HAVE_TETGEN_H
+
+/* Define to 1 if you have the `tgamma' function. */
+#undef HAVE_TGAMMA
+
+/* Define to 1 if you have the `times' function. */
+#undef HAVE_TIMES
+
+/* Define to 1 if you have the <ufsparse/umfpack.h> header file. */
+#undef HAVE_UFSPARSE_UMFPACK_H
+
+/* Define to 1 if you have the <umfpack.h> header file. */
+#undef HAVE_UMFPACK_H
+
+/* Define to 1 if you have the <umfpack/umfpack.h> header file. */
+#undef HAVE_UMFPACK_UMFPACK_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <vecLib/cblas.h> header file. */
+#undef HAVE_VECLIB_CBLAS_H
+
+/* Name of package */
+#undef PACKAGE
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* the ffglut application for the new graphics */
+#undef PROG_FFGLUT
+
+/* A pure windows applications no cygwin dll */
+#undef PURE_WIN32
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#undef TIME_WITH_SYS_TIME
+
+/* Version number of package */
+#undef VERSION
+
+/* FreeFem++ build date */
+#undef VersionFreeFemDate
+
+/* FreeFem++ version as a float */
+#undef VersionFreeFempp
+
+/* Define to 1 if the X Window System is missing or not being used. */
+#undef X_DISPLAY_MISSING
+
+/* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
+   `char[]'. */
+#undef YYTEXT_POINTER

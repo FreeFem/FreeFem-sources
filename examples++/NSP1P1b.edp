@@ -1,0 +1,76 @@
+// remark: the sign of p is correct 
+real s0=clock();
+mesh Th=square(20,20);
+  Th=adaptmesh(Th,1./20.,IsMetric=1,splitpbedge=1);
+fespace Vh2(Th,P1b);
+fespace Vh(Th,P1);
+Vh2 u2,v2,up1,up2;
+Vh2 u1,v1; 
+Vh  u1x=0,u1y,u2x,u2y, vv;
+
+real reylnods=400;
+//cout << " Enter the reynolds number :"; cin >> reylnods;
+assert(reylnods>1 && reylnods < 100000); 
+up1=0;
+up2=0; 
+func g=(x)*(1-x)*4; 
+Vh p=0,q;
+real alpha=0;
+real  nu=1;
+int i=0,iter=0;
+real dt=0;
+solve NS ([u1,u2,p],[v1,v2,q],solver=Crout,init=i) =
+    int2d(Th)(
+             alpha*( u1*v1 + u2*v2) 
+            + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
+            +        dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+            + p*q*(0.000001) 
+            - p*dx(v1) - p*dy(v2)
+            - dx(u1)*q - dy(u2)*q
+           )
+  + int2d(Th) ( -alpha*convect([up1,up2],-dt,up1)*v1 -alpha*convect([up1,up2],-dt,up2)*v2 )
+  + on(3,u1=g,u2=0) 
+  + on(1,2,4,u1=0,u2=0) ;
+plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ps="StokesP2P1.eps",value=1,wait=1);
+{
+  real[int] xx(21),yy(21),pp(21);
+  for (int i=0;i<21;i++)
+   {
+     yy[i]=i/20.;
+     xx[i]=u1(0.5,i/20.);
+     pp[i]=p(i/20.,0.999);
+    }
+      cout << " " << yy << endl;
+     plot([xx,yy],wait=1,cmm="u1 x=0.5 cup");
+     plot([yy,pp],wait=1,cmm="pressure y=0.999 cup");
+}
+
+dt = 0.05;
+int nbiter = 3;
+real coefdt = 0.25^(1./nbiter);
+real coefcut = 0.25^(1./nbiter) , cut=0.01;
+real tol=0.5,coeftol = 0.5^(1./nbiter);
+nu=1./reylnods;   
+
+for (iter=1;iter<=nbiter;iter++)
+{
+  cout << " dt = " << dt << " ------------------------ " << endl;
+  alpha=1/dt;
+  for (i=0;i<=50;i++)
+   {
+     up1=u1;
+     up2=u2;
+     NS;
+     if ( !(i % 10)) 
+     plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ps="plotNS_"+iter+"_"+i+".eps");  
+     cout << "CPU " << clock()-s0 << "s " << endl;     
+   } 
+ 
+  if (iter>= nbiter) break;
+   Th=adaptmesh(Th,[dx(u1),dy(u1),dx(u1),dy(u2)],splitpbedge=1,abserror=0,cutoff=cut,err=tol, inquire=0,ratio=1.5,hmin=1./1000);
+  plot(Th,ps="ThNS.eps");
+  dt = dt*coefdt;
+  tol = tol *coeftol;
+  cut = cut *coefcut;
+}
+cout << "CPU " << clock()-s0 << "s " << endl;     

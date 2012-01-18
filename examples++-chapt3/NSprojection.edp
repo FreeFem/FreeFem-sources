@@ -1,0 +1,68 @@
+// file NSprojection.edp
+
+border a0(t=1,0){ x=0;      y=t;      label=1;}
+border a1(t=0,1){ x=2*t;    y=0;        label=2;}
+border a2(t=0,1){ x=2;      y=-t/2;       label=2;}
+border a3(t=0,1){ x=2+18*t^1.2;  y=-0.5;       label=2;}
+border a4(t=0,1){ x=20;     y=-0.5+1.5*t;   label=3;}
+border a5(t=1,0){ x=20*t; y=1;        label=4;}
+int n=1;
+mesh Th= buildmesh(a0(3*n)+a1(20*n)+a2(10*n)+a3(150*n)+a4(5*n)+a5(100*n));
+plot(Th);
+fespace Vh(Th,P1);
+real nu = 0.0025, dt = 0.2; // Reynolds=200
+func uBCin =  4*y*(1-y)*(y>0)*(x<2) ; 
+func uBCout =  4./1.5*(y+0.5)*(1-y) *(x>19);
+Vh w,u = uBCin, v =0, p = 0, q=0;
+real area= int2d(Th)(1.);
+Vh ubc  = uBCin + uBCout; 
+real influx0  = int1d(Th,1) (ubc*N.x),
+     outflux0 = int1d(Th,3) (ubc*N.x);
+ if(verbosity>2) cout <<  " flux in " << influx0 << " out : " << outflux0 << endl;
+ verbosity=1;
+for(int n=0;n<300;n++){
+	
+  Vh uold = u,  vold = v, pold=p;
+  Vh f=convect([uold,vold],-dt,uold); //  not used ,  g=convect([u,v],-dt,vold);
+  real outflux = int1d(Th,3) (f*N.x);
+  if(verbosity>2)  cout <<  " flux  =  "<< influx0+outflux << "  -- " ;
+
+  f = f - (influx0+outflux)/outflux0 * uBCout; 
+  outflux = int1d(Th,3) (f*N.x);
+   if(verbosity>2) cout << "  out flux " << influx0+outflux << endl;
+  assert( abs(influx0+outflux) < 1e-10);
+  // WARNING the the output flux must be 0 ..
+  
+  solve pb4u(u,w,init=n,solver=LU)
+        =int2d(Th)(u*w/dt +nu*(dx(u)*dx(w)+dy(u)*dy(w)))
+        -int2d(Th)((convect([uold,vold],-dt,uold)/dt-dx(p))*w)
+        + on(1,u = 4*y*(1-y)) + on(2,4,u = 0) + on(3,u=f);
+  plot(u);
+
+  solve pb4v(v,w,init=n,solver=LU)
+        = int2d(Th)(v*w/dt +nu*(dx(v)*dx(w)+dy(v)*dy(w)))
+        -int2d(Th)((convect([uold,vold],-dt,vold)/dt-dy(p))*w)
+        +on(1,2,3,4,v = 0);
+
+ real meandiv = int2d(Th)(dx(u)+dy(v))/area;
+
+ solve pb4p(q,w,init=n,solver=LU)= int2d(Th)(dx(q)*dx(w)+dy(q)*dy(w))
+    - int2d(Th)((dx(u)+ dy(v)-meandiv)*w/dt)+ on(3,q=0);
+
+ real meanpq = int2d(Th)(pold - q)/area;
+ if(n%50==49){
+    Th = adaptmesh(Th,[u,v],q,err=0.04,nbvx=100000);
+    plot(Th, wait=true);
+    ubc = uBCin + uBCout; // reinterpolate B.C. 
+    influx0 = int1d(Th,1) (ubc*N.x);
+    outflux0 = int1d(Th,3) (ubc*N.x);
+ }
+ p = pold-q-meanpq;
+ u = u + dx(q)*dt;
+ v = v + dy(q)*dt;
+ real err = sqrt(int2d(Th)(square(u-uold)+square(v-vold))/Th.area) ;
+ cout << " iter " << n << " Err L2 = " << err << endl;
+ if(err < 1e-3) break;
+}
+plot(p,wait=1,ps="NSprojP.eps");
+plot(u,wait=1,ps="NSprojU.eps");

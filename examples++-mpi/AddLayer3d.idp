@@ -1,0 +1,62 @@
+// AddLayer2d.idf file..  version 0. 
+// Frederic Hecht 2010 
+// LGPL licence 
+// Author Frederic.Hecht@upmc.fr
+// ------------------------------- 
+
+func bool same(mesh3 & Th1,mesh3 & Th2)
+{
+  bool ret=0; 
+  //cout << mpirank << " same Th ?? " << Th1.nt << " "<< Th2.nt << " " << Th1.nv << " "<< Th2.nv << endl;
+  if(Th1.nt == Th2.nt && Th1.nv == Th2.nv)
+  {
+  	fespace V1(Th1,P1);
+  	fespace V2(Th2,P1);
+  	V1 x1=x,y1=y,z1=z;
+  	V2 x2=x,y2=y,z2=z;
+  	real err1= sqrt(int3d(Th1,qft=qf1pTlump)( square(x-x2) + square(y-y2)+ square(z-z2)));
+  	real err2= sqrt(int3d(Th2,qft=qf1pTlump)( square(x-x1) + square(y-y1)+ square(z-z1)));
+  	if(err1+err2 < Th1.nv*1e-6) ret=1;
+  	else if(verbosity>1) cout << "same no same mesh " << err1 << " " << err2 << endl; 
+  }
+  return  ret;
+}
+
+func bool AddLayers(mesh3 & Th,real[int] &ssd,int n,real[int] &unssd)
+{
+  //  build a continuous function  uussd (P1) and modifies ssd :
+  //  IN: ssd in the caracteristics function on the input sub domain.
+  //  OUT: ssd and unssd
+  //  such that : 
+  //   ssd is a boolean function 
+  //   unssd is a smooth function
+  //   ssd = 1 when   unssd >0;
+  //   add n layer of element (size of the overlap)
+  //   and unssd = 0 ouside of this layer ...
+  // ---------------------------------
+  fespace Vh(Th,P1);
+  fespace Ph(Th,P0);
+  Ph s;
+  assert(ssd.n==Ph.ndof);
+  assert(unssd.n==Vh.ndof);
+  unssd=0;
+  s[]= ssd;
+  Vh u;
+  varf vM(uuuu,v)=int3d(Th,qforder=1)(uuuu*v/volume);
+  matrix M=vM(Ph,Vh);
+  
+  for(int i=0;i<n;++i)
+    {
+      u[]= M*s[];
+      u = u>.1; 
+      unssd+= u[];
+      s[]= M'*u[];
+      s = s >0.1;
+    }
+  unssd /= (n);
+  u[]=unssd;
+  ssd=s[];      
+  return true;
+}
+
+

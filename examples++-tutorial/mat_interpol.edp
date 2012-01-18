@@ -1,0 +1,62 @@
+mesh Th=square(4,4);
+mesh Th4=square(2,2,[x*0.5,y*0.5]);
+plot(Th,Th4,ps="ThTh4.eps",wait=1);
+fespace Vh(Th,P1);
+fespace Vh4(Th4,P1);
+fespace Wh(Th,P0);
+fespace Wh4(Th4,P0);
+
+// remark in previous version (before v1.44)
+// the name of interpolate function is interplotematrix
+
+matrix IV= interpolate(Vh,Vh4); //  here the function is 
+// exended by continuity
+
+cout << " IV Vh<-Vh4 " << IV << endl;
+Vh v;          Vh4 v4=x*y;
+v=v4;           real[int]   vv= IV*v4[];
+// here   v[]  == vv    =>  
+real[int]  diff= vv - v[]; 
+cout << " || v - vv || = " <<  diff.linfty << endl;
+assert( diff.linfty<= 1e-6); // 
+
+matrix IV0= interpolate(Vh,Vh4,inside=0);//  here the function is 
+// exended by zero
+
+cout << " IV Vh<-Vh4 (inside=1)  " << IV0 << endl;
+
+matrix IVt0= interpolate(Vh,Vh4,inside=1,t=1);
+cout << " IV Vh<-Vh4^t (inside=1)  " << IVt0 << endl;
+
+matrix IV4t0= interpolate(Vh4,Vh);
+cout << " IV Vh4<-Vh^t  " << IV4t0 << endl;
+
+matrix IW4= interpolate(Wh4,Wh);
+cout << " IV Wh4<-Wh  " << IW4  << endl;
+
+matrix IW4V= interpolate(Wh4,Vh);
+cout << " IV Wh4<-Vh  " << IW4  << endl;
+
+
+
+fespace V4h(Th4,[P1,P1,P1,P1]);
+fespace V3h(Th,[P1,P1,P1]);
+int[int] u2vc=[1,3,-1];// -1 => put zero on the componante ;
+matrix IV34= interpolate(V3h,V4h,inside=0,U2Vc=u2vc);//  here the function is 
+V4h [a1,a2,a3,a4]=[1,2,3,4];
+V3h [b1,b2,b3]=[10,20,30];
+b1[]=IV34*a1[];
+
+cout << "b1 = " << b1(.25,.25) << " == " << 2 << endl;
+cout << "b2 = " << b2(.25,.25) << " == " << 4 <<endl;
+cout << "b3 = " << b3(.25,.25) << " == " << 0 <<endl;
+// Build interplation matrix a_ij at points (xx[j],yy[j]) j = 0, 1 :
+//  $a_ij = d_op(w^i_c (xx[j],yy[j]))$ where $w_i$ is the basic function.  
+real[int] xx=[.3,.4],yy=[.1,.4];
+int c=0,dop=0; //  component and d operator 
+matrix Ixx= interpolate(Vh,xx,yy,op=dop,composante=c);
+cout << Ixx << endl;
+Vh ww;
+real[int] dd=[1,2]; 
+ww[]= Ixx*dd;
+plot(ww,wait=1);

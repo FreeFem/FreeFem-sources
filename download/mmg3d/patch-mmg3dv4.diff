@@ -1,0 +1,982 @@
+Only in mmg3d4-new/build/sources/: dataff.h
+diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
+--- mmg3d4/build/sources/inout.c	2011-05-12 17:30:16.000000000 +0200
++++ mmg3d4-new/build/sources/inout.c	2011-09-01 19:22:06.000000000 +0200
+@@ -4,7 +4,7 @@
+ Propriétaires :IPB - UPMC -INRIA.
+ 
+ Copyright © 2004-2005-2006-2007-2008-2009-2010-2011, 
+-diffusé sous les termes et conditions de la licence publique générale de GNU
++diffusé sous les termes et conditions de lag licence publique générale de GNU
+ Version 3 ou toute version ultérieure.  
+ 
+ Ce fichier est une partie de MMG3D.
+@@ -44,7 +44,7 @@
+ along with MMG3D. If not, see <http://www.gnu.org/licenses/>.  
+ ****************************************************************************/
+ #include "mesh.h"
+-
++#include "dataff.h"
+ 
+ extern short	       MMG_imprim;
+ #define sw 4
+@@ -100,8 +100,395 @@
+   return(out);
+ }
+ 
++
++int MMG_loadMeshff(pMesh mesh,char *filename,DataFF *dataff) {  
++   
++    
++    Hedge    				 hed,hed2;
++    pPoint       	   ppt;
++    pTetra           pt;
++    pTria            pt1;
++    int i,j,k; 
++    int nhex=0, npris=0, netmp=0,nq=0, pp[10] , ned=0, ncor=0;
++    int p0,p1,p2,p3,p4,p5,p6,ref ;
++    int data[10],ldata=10;
++    dataff->get_mesh(dataff,data,10);
++    mesh->np = data[ff_id_vertex];
++    ned = data[ff_id_seg];
++    mesh->nt = data[ff_id_tria];
++    mesh->ne = data[ff_id_tet];
++    netmp=mesh->ne;
++    nhex=data[ff_id_hex];
++    npris=data[ff_id_prism]; 
++    nq=data[ff_id_quad];
++    ncor= data[ff_id_corner];
++
++    if( nhex || npris) {
++	printf("mmg3d ff interface , hex or prism NOT SUPPORTED  to day (sorry  FH) \n");
++	goto L0; 
++    }
++    
++    mesh->ncor = 0; 
++    mesh->ver =1;
++    if ( abs(mesh->info.option)==10 ) {
++	fprintf(stdout,"  -- READING %8d HEXA %8d PRISMS\n",nhex,npris);  
++	if(!mesh->ne) netmp = 0;  
++	mesh->ne += 6*nhex + 3*npris; 
++    }
++    
++    if ( abs(mesh->info.imprim) > 5 )
++	fprintf(stdout,"  -- READING DATA for ff interface ");
++    
++    if ( !mesh->np || !mesh->ne ) {
++	fprintf(stdout,"  ** MISSING DATA yy\n");
++	goto L0; ;
++    }
++    if ( !MMG_zaldy(mesh) )  goto L0; 
++    
++    /* read mesh vertices */
++    mesh->npfixe = mesh->np;
++    
++    for (k=1; k<=mesh->np; k++) {
++	ppt = &mesh->point[k];
++	dataff->get_v3(dataff,k,ppt->c,&ppt->ref);
++	ppt->tag  = M_UNUSED;    
++    }
++    
++    /* read mesh triangles */
++    mesh->ntfixe = mesh->nt;
++
++    for (k=1; k<=mesh->nt; k++) {
++	pt1 = &mesh->tria[k]; 
++	dataff->get_elmt(dataff,ff_id_tria,k,pt1->v,&pt1->ref);
++	 
++	}  
++    
++
++
++    /* read mesh quads (option 10)*/ 
++    if(abs(mesh->info.option)==10) { 
++	fprintf(stdout,"     QUADS READING %d\n",nq);
++	mesh->ntfixe += 4*nq;
++        for (k=1; k<=nq; k++) {
++	    dataff->get_elmt(dataff, ff_id_quad ,k,pp,&ref);
++	
++	    pt1 = &mesh->tria[++mesh->nt]; 
++	    pt1->v[0] = pp[0];
++	    pt1->v[1] = pp[1];
++	    pt1->v[2] = pp[2];
++	    pt1->ref  = ref;
++	    pt1 = &mesh->tria[++mesh->nt]; 
++	    pt1->v[0] = pp[0];
++	    pt1->v[1] = pp[2];
++	    pt1->v[2] = pp[3];
++	    pt1->ref  = ref;
++	    pt1 = &mesh->tria[++mesh->nt]; 
++	    pt1->v[0] = pp[0];
++	    pt1->v[1] = pp[1];
++	    pt1->v[2] = pp[3];
++	    pt1->ref  = ref;
++	    pt1 = &mesh->tria[++mesh->nt]; 
++	    pt1->v[0] = pp[1];
++	    pt1->v[1] = pp[2];
++	    pt1->v[2] = pp[3];
++	    pt1->ref  = ref;
++	    
++	}
++    }
++    
++    /*read and store edges*/
++    if (ned) {         
++	if ( !MMG_zaldy4(&hed,ned) ) {
++	    if ( mesh->info.ddebug )  fprintf(stdout,"  ## MEMORY ALLOCATION PROBLEM : EDGES IGNORED\n"); 
++	    ned = 0;
++	}   
++	mesh->ned = ned;
++	
++	for (k=1; k<=ned; k++) { 
++	   dataff->get_elmt(dataff, ff_id_seg ,k,pp,&ref);
++	   
++	    if(MMG_edgePut(&hed,pp[0],pp[1],2)>1) {
++		fprintf(stdout,"  ## WARNING DOUBLE EDGE : %d %d\n",pp[0],pp[1]);
++	    }
++	}
++    }
++    
++    /* read mesh tetrahedra */
++    mesh->nefixe = mesh->ne;
++ 
++  
++    for (k=1; k<=netmp; k++) { 
++	pt = &mesh->tetra[k];
++	dataff->get_elmt(dataff,ff_id_tet,k,pt->v,&ref);
++	pt->ref  = ref;//0;//ref ;  
++	for(i=0 ; i<4 ; i++)
++	    pt->bdryref[i] = -1;  
++	
++	if (ned) { int nu1,nu2;
++	    for(i=0 ; i<6 ; i++) {                         
++		nu1 = pt->v[MMG_iare[i][0]];
++		nu2 = pt->v[MMG_iare[i][1]];
++		pt->bdryinfo[i] = MMG_edgePoint(&hed,nu1,nu2);
++	    }  			
++	    
++	} else {
++	    for(i=0 ; i<6 ; i++)
++		pt->bdryinfo[i] = 0;  			
++	}
++    }
++    if (ned) M_free(hed.item); 
++    
++    /*read corners*/ 
++    if (ncor) {
++	
++	mesh->ncor = ncor;
++	for (k=1; k<=ncor; k++) { 
++	    dataff->get_elmt(dataff,ff_id_corner,k,&ref,0);
++
++	    ppt = &mesh->point[ref];
++	    ppt->geom = M_CORNER; 
++	} 
++    }
++#ifdef XXXXXXXXXXXXXXX
++    if ( abs(mesh->info.option)==10 ) { 
++	if(bin) {
++	    printf("NOT SUPPORTED\n");
++	    exit(0);
++	} 
++	if ( !MMG_zaldy4(&hed2,3*npris+6*nhex) ) {
++	    if ( mesh->info.ddebug )  fprintf(stdout,"  ## MEMORY ALLOCATION PROBLEM : PRISM IGNORED\n"); 
++	    npris = 0;
++	    nhex  = 0;
++	}   
++	
++	/*read hexa and transform to tetra*/
++	rewind(inm);
++	fseek(inm,posnhex,SEEK_SET);
++	for (k=1; k<=nhex; k++) {   
++	    fscanf(inm,"%d %d %d %d %d %d %d %d %d",&p0,&p1,&p2,&p3,&p4,&p5,&p6,&p7,&ref); 
++	    //fscanf(inm,"%d %d %d %d %d %d %d %d %d",&p0,&p4,&p2,&p1,&p3,&p5,&p6,&p7,&ref); 
++	    //printf("hex %d : %d %d %d %d %d %d %d %d\n",k,p0,p1,p2,p3,p4,p5,p6,p7);   
++	    MMG_cuthex(mesh,&hed2,netmp+(k-1)*6,p0,p1,p2,p3,p4,p5,p6,p7,ref);
++	}  
++	
++	/*read prism and transform to tetra
++	 ---> compatibility pbs ==> hash edge and switch case*/  
++	rewind(inm);
++	fseek(inm,posnpris,SEEK_SET); 
++	nimp = 0; 
++	ne = netmp+6*nhex;
++	for (k=1; k<=npris; k++) {
++	    fscanf(inm,"%d %d %d %d %d %d %d",&p0,&p1,&p2,&p3,&p4,&p5,&ref); 
++	    if(!MMG_cutprism(mesh,&hed2,ne,p0,p1,p2,p3,p4,p5,ref))
++	      {
++		if(mesh->info.imprim < 0 ) fprintf(stdout,"DECOMPOSITION PRISM INVALID \n\n"); 
++		mesh->ne += 5;
++		ne += 8;
++		nimp++; 
++		continue;
++	      }
++	    ne += 3;
++	}
++	if(abs(mesh->info.imprim) > 3 )fprintf(stdout,"     %d INVALID DECOMPOSITION\n\n",nimp);
++    }
++#endif    
++    if ( abs(mesh->info.imprim) > 3 ) {
++	fprintf(stdout,"     NUMBER OF GIVEN VERTICES   %8d\n",mesh->npfixe);
++	if ( mesh->ntfixe )
++	    fprintf(stdout,"     NUMBER OF GIVEN TRIANGLES  %8d\n",mesh->ntfixe);
++	fprintf(stdout,"     NUMBER OF GIVEN TETRAHEDRA %8d\n",mesh->nefixe);
++	if ( ncor )
++	    fprintf(stdout,"     NUMBER OF GIVEN CORNERS    %8d\n",ncor);
++	if ( ned )
++	    fprintf(stdout,"     NUMBER OF GIVEN EDGES      %8d\n",ned);
++    }
++    //    MMG_saveMesh(mesh,"XXXXX.mesh",0);
++   dataff->mesh=0; // used 
++    return 1; 
++L0: 
++    dataff->mesh=0;// used 
++    return 1; 
++}
++
++int MMG_loadSolff(pSol sol,char *filename,int npmax,DataFF *dataff) { 
++   
++     double     tmp , *dsol ;       
++    int         binch,bdim,iswp;
++    int         k,i,isol,type,bin,dim,btyp,bpos;
++    long        posnp;
++    char        *ptr,data[128],chaine[128];
++    if( ! dataff->sol){
++	fprintf(stdout,"  ** MISSING DATA metrix ff \n");
++	return(1);
++    }
++    dsol = dataff->sol;
++    dataff->sol=0;// used 
++    
++
++    btyp = (dataff->typesol== 6)  ?  3: dataff->typesol ;
++    sol->np= dataff->np;
++    
++    if ( !sol->np ) {
++	fprintf(stdout,"  ** MISSING DATA zz\n");
++	return(1);
++    }
++    
++    if ( btyp!= 1 && btyp!=3 ) {
++      fprintf(stdout,"  ** DATA IGNORED (ff) btyp=%d\n",btyp);
++	sol->np = 0;
++	return(1);
++    }
++    
++    sol->offset = (btyp==1) ? 1 : 6;
++    
++    if ( abs(MMG_imprim) > 5 )
++	fprintf(stdout,"  -- READING DATA FILE(ff) %s\n",data);
++    
++    if ( !sol->np ) {
++	fprintf(stdout,"  ** MISSING DATA  no metrix  \n");
++	return(0);
++    }
++    sol->npfixe = sol->np;
++    sol->npmax  = npmax;
++    if ( !MMG_zaldy3(sol) )  return(0);
++    
++    /* read mesh solutions */
++    sol->npfixe = sol->np;
++ 
++    for (k=1; k<=sol->np; k++) {
++	isol = (k-1) * sol->offset + 1;
++	    for (i=0; i<sol->offset; i++) 		     
++		    sol->met[isol + i] = *dsol++;
++
++    }
++    
++    if ( abs(MMG_imprim) > 3 )
++	fprintf(stdout,"     NUMBER OF GIVEN DATA       %8d\n",sol->npfixe);
++    
++ 
++    return(1);  
++
++}
++/* load solution (metric) */
++int MMG_loadVectff(pMesh mesh,char *filename,int npmax,DataFF *dataff) {
++  
++      
++    pDispl       pd;
++    int         binch,bdim,iswp;
++    int         k,i,type,bin,dim,btyp,bpos,iadr;
++    long        posnp;
++    char        *ptr,data[128],chaine[128];
++    double *fsol = dataff->mov;
++    dataff->mov=0;// used 
++    
++    pd = mesh->disp;
++    pd->np =mesh->np ;
++ 
++       if ( !pd->np || !fsol  ) {
++	 fprintf(stdout,"  ** MISSING DATA dep ff %d %p\n",pd->np, fsol);
++	return(0);
++    }
++   
++    
++    if ( abs(mesh->info.imprim) > 5 )
++	fprintf(stdout,"  -- COPY DATA form ff interface  %s\n",data);
++    
++    /* read mesh solutions */
++    for (k=1; k<=pd->np; k++) {
++	iadr = (k - 1) * 3 + 1;
++	
++	    for (i=0; i<3; i++) {
++		    pd->mv[iadr + i] =  *fsol++;
++		}
++	    } 
++           
++    
++    
++    if ( abs(mesh->info.imprim) > 3 )
++	fprintf(stdout,"     NUMBER OF GIVEN DATA       %8d\n",pd->np);
++       return(1);
++  
++    
++}
++int MMG_saveMeshff(pMesh mesh,char *filename,DataFF *dataff) {  
++    
++    pPoint       	   ppt;
++    pTetra           pt;
++    pTria            pt1;
++    int j,k,np,nc,k0;
++    int data[10],ldata=10;
++    int kn[10];
++    np = 0; 
++    nc = 0;
++    for (k=1; k<=mesh->np; k++) {
++      ppt = &mesh->point[k];
++      if ( ppt->tag & M_UNUSED )  continue;  
++      ppt->tmp = ++np;  
++      /*      if ( ppt->geom & M_CORNER )  cor[nc++] = ppt->tmp; */
++    } 
++    mesh->nt=0;
++    if(! MMG_markBdry(mesh)) 
++      mesh->nt=0;
++    data[ff_id_vertex]=np ;
++    //data[ff_id_seg]=ned ;
++    data[ff_id_tria]=mesh->nt ;
++    int ne=0;
++    for ( k=1; k<=mesh->ne; k++) 
++      {
++	pt = &mesh->tetra[k];
++	if ( !pt->v[0] )  continue;  
++	ne++; 
++      }
++    
++    data[ff_id_tet]=ne  ;
++    //data[ff_id_hex]=nhex;
++    //data[ff_id_prism]=npris; 
++    //data[ff_id_quad]=nq;
++    // data[ff_id_corner]=ncor;
++    
++    dataff->set_mesh(dataff,data,10);
++    
++    
++    for ( k=1; k<=mesh->np; k++) 
++      {
++	ppt = &mesh->point[k];
++	if ( ppt->tag & M_UNUSED )  continue;  
++	dataff->set_v(dataff, ppt->tmp,ppt->c,ppt->ref);	    
++      }
++    
++    
++    for (k=1; k<=mesh->nt; k++) 
++      {
++	pt1 = &mesh->tria[k];
++	for(j=0;j<3;++j)
++	  kn[j] = mesh->point[pt1->v[j]].tmp;
++	dataff->set_elmt(dataff,ff_id_tria,k,kn,pt1->ref);
++	
++      }  
++    k0=0;
++    for ( k=1; k<=mesh->ne; k++) 
++      {
++	
++	pt = &mesh->tetra[k];
++	if ( !pt->v[0] )  continue;  
++	k0++;
++	for(j=0;j<4;++j)
++	  kn[j] = mesh->point[pt->v[j]].tmp;
++	dataff->set_elmt(dataff,ff_id_tet,k0,kn,pt->ref);
++	
++    }  
++    dataff->end_mesh(dataff);
++    return 1; 
++}
++int MMG_saveSolff (pMesh mesh,pSol sol,char *filename,DataFF *dataff) {
++  return 1; 
++}
++/*save the node speed : coornew-coorold/dt*/
++int MMG_saveVectff(pMesh mesh,char *filename,DataFF *dataff) {
++   return 1; 
++}
+ /* read mesh data */
+-int MMG_loadMesh(pMesh mesh,char *filename) {  
++int MMG_loadMesh(pMesh mesh,char *filename,void *dataff) {  
+   FILE*            inm;
+   Hedge    				 hed,hed2;
+   pPoint       	   ppt;
+@@ -114,7 +501,8 @@
+   int              p0,p1,p2,p3,p4,p5,p6,p7;  
+   int              binch,bdim,iswp,nu1,nu2,nimp,ne;       
+   float            fc;
+-  
++  if(dataff) 
++    return MMG_loadMeshff( mesh,filename,(DataFF*) dataff);
+ 
+   posnp = posnt = posne = posnhex = posnpris = 0;
+   netmp = ncor = ned = 0;
+@@ -322,7 +710,7 @@
+     fprintf(stdout,"  -- READING DATA FILE %s\n",data);
+ 
+   if ( !mesh->np || !mesh->ne ) {
+-    fprintf(stdout,"  ** MISSING DATA\n");
++    fprintf(stdout,"  ** MISSING DAT qqA\n");
+     return(0);
+   }
+   if ( !MMG_zaldy(mesh) )  return(0);
+@@ -563,7 +951,7 @@
+ 
+ 
+ /* load solution (metric) */
+-int MMG_loadSol(pSol sol,char *filename,int npmax) { 
++int MMG_loadSol(pSol sol,char *filename,int npmax,void *dataff) { 
+   FILE       *inm;   
+   float       fsol;
+   double      tmp;       
+@@ -571,6 +959,8 @@
+   int         k,i,isol,type,bin,dim,btyp,bpos;
+   long        posnp;
+   char        *ptr,data[128],chaine[128];
++    if(dataff) 
++	return MMG_loadSolff( sol,filename,npmax,(DataFF*) dataff);
+   
+   posnp = 0; 
+   bin   = 0;
+@@ -664,12 +1054,12 @@
+     
+   }       
+   if ( !sol->np ) {
+-    fprintf(stdout,"  ** MISSING DATA\n");
++    fprintf(stdout,"  ** MISSING DATA ss\n");
+     return(1);
+   }
+ 
+   if ( btyp!= 1 && btyp!=3 ) {
+-    fprintf(stdout,"  ** DATA IGNORED\n");
++    fprintf(stdout,"  ** DATA IGNORED %d\n",btyp);
+     sol->np = 0;
+     return(1);
+   }
+@@ -680,7 +1070,7 @@
+     fprintf(stdout,"  -- READING DATA FILE %s\n",data);
+ 
+   if ( !sol->np ) {
+-    fprintf(stdout,"  ** MISSING DATA\n");
++    fprintf(stdout,"  ** MISSING DATA xx\n");
+     return(0);
+   }
+   sol->npfixe = sol->np;
+@@ -731,7 +1121,7 @@
+ }
+ 
+ 
+-int MMG_loadVect(pMesh mesh,char *filename,int npmax) {
++int MMG_loadVect(pMesh mesh,char *filename,int npmax,void *dataff) {
+   FILE       *inm;   
+   pDispl       pd;
+   float       fsol;
+@@ -739,7 +1129,10 @@
+   int         k,i,type,bin,dim,btyp,bpos,iadr;
+   long        posnp;
+   char        *ptr,data[128],chaine[128];
+-  
++
++  if(dataff) 
++      return MMG_loadVectff( mesh, filename,npmax,(DataFF*) dataff);
++
+   pd = mesh->disp;
+   
+   posnp = 0; 
+@@ -843,7 +1236,7 @@
+   }
+ 
+   if ( btyp != 2 ) {
+-    fprintf(stdout,"  ** DATA IGNORED\n");
++    fprintf(stdout,"  ** DATA IGNORED %d !=2\n",btyp);
+     return(0);
+   }
+ 
+@@ -887,7 +1280,7 @@
+ 
+ 
+ /* save mesh to disk */
+-int MMG_saveMesh(pMesh mesh,char *filename) {  
++int MMG_saveMesh(pMesh mesh,char *filename,void *dataff) {  
+   FILE*        inm; 
+ 	Hedge				 hed;
+   pPoint       ppt;
+@@ -896,6 +1289,9 @@
+   int          i,k,np,ne,nc,ned,*cor,*ed,ref,bin,bpos;
+   char        *ptr,data[128],chaine[128]; 
+   int          binch,nu1,nu2;
++  if(dataff) 
++      return MMG_saveMeshff( mesh, filename,(DataFF*)  dataff);
++
+   mesh->ver = 2; //double precision
+   bin = 0;
+   strcpy(data,filename);
+@@ -1145,7 +1541,7 @@
+ }
+ 
+ 
+-int MMG_saveSol(pMesh mesh,pSol sol,char *filename) {
++int MMG_saveSol(pMesh mesh,pSol sol,char *filename,void *dataff) {
+   FILE*        inm;
+   pPoint       ppt;
+   float        fsol;
+@@ -1153,6 +1549,8 @@
+   int          i,k,nbl,isol,bin,bpos,typ;
+   char        *ptr,data[128],chaine[128]; 
+   int          binch;
++  if(dataff) 
++      return MMG_saveSolff( mesh, sol, filename,(DataFF*) dataff);
+ 
+   if ( !sol->np )  return(1);
+   bin = 1;
+@@ -1224,7 +1622,7 @@
+ 	  typ = 3;
+     break;
+   default:
+-    fprintf(stdout,"  ** DATA IGNORED\n");
++    fprintf(stdout,"  ** DATA IGNORED not 1 ou 6 == %d\n",sol->offset);
+     return(0);
+   }
+ 
+@@ -1301,7 +1699,7 @@
+ }
+ 
+ /*save the node speed : coornew-coorold/dt*/
+-int MMG_saveVect(pMesh mesh,char *filename) {
++int MMG_saveVect(pMesh mesh,char *filename,void *dataff) {
+   FILE*        inm;  
+   pDispl        pd;
+   pPoint       ppt;
+@@ -1309,6 +1707,8 @@
+   int          i,k,nbl,bin,bpos,typ;
+   char        *ptr,data[128],chaine[128]; 
+   unsigned char binch;
++  if(dataff) 
++      return MMG_saveVectff( mesh, filename,(DataFF*) dataff);
+ 
+   pd      = mesh->disp;
+   pd->ver = 2;
+diff -u mmg3d4/build/sources/libmmg3d.h mmg3d4-new/build/sources/libmmg3d.h
+--- mmg3d4/build/sources/libmmg3d.h	2011-04-14 18:23:46.000000000 +0200
++++ mmg3d4-new/build/sources/libmmg3d.h	2011-06-22 11:54:38.000000000 +0200
+@@ -111,12 +111,12 @@
+ typedef MMG_Sol * MMG_pSol;
+ 
+ /* inout */
+-int  MMG_loadMesh(MMG_pMesh ,char *);
+-int  MMG_loadSol(MMG_pSol ,char *,int );
+-int  MMG_loadVect(MMG_pMesh ,char *,int );
+-int  MMG_saveMesh(MMG_pMesh ,char *);
+-int  MMG_saveSol(MMG_pMesh ,MMG_pSol ,char *);
+-int  MMG_saveVect(MMG_pMesh ,char *);
++int  MMG_loadMesh(MMG_pMesh ,char *,void *);
++int  MMG_loadSol(MMG_pSol ,char *,int ,void *);
++int  MMG_loadVect(MMG_pMesh ,char *,int ,void *);
++int  MMG_saveMesh(MMG_pMesh ,char *,void *);
++int  MMG_saveSol(MMG_pMesh ,MMG_pSol ,char *,void *);
++int  MMG_saveVect(MMG_pMesh ,char *,void *);
+ 
+ #ifdef  __cplusplus
+ namespace mmg3d{
+diff -u mmg3d4/build/sources/mesh.h mmg3d4-new/build/sources/mesh.h
+--- mmg3d4/build/sources/mesh.h	2011-04-14 18:05:40.000000000 +0200
++++ mmg3d4-new/build/sources/mesh.h	2011-07-11 10:29:12.000000000 +0200
+@@ -394,17 +394,17 @@
+ 
+ /* function pointers */
+ typedef int (*MMG_Swap)(pMesh ,pSol ,pList );
+-MMG_Swap MMG_swpptr;
+-double (*MMG_length)(double *,double *,double *,double *);
+-double (*MMG_caltet)(pMesh ,pSol ,int );
+-double (*MMG_calte1)(pMesh ,pSol ,int );
+-int    (*MMG_caltet2)(pMesh ,pSol ,int ,int ,double ,double *);
+-int    (*MMG_cavity)(pMesh ,pSol ,int ,int ,pList ,int );
+-int    (*MMG_buckin)(pMesh ,pSol ,pBucket ,int );
+-int    (*MMG_optlen)(pMesh ,pSol ,double ,int );
+-int    (*MMG_interp)(double *,double *,double *,double );
+-int    (*MMG_optlentet)(pMesh ,pSol ,pQueue ,double ,int ,int );
+-int    (*MMG_movevertex)(pMesh ,pSol ,int ,int );
++extern MMG_Swap MMG_swpptr;
++extern double (*MMG_length)(double *,double *,double *,double *);
++extern double (*MMG_caltet)(pMesh ,pSol ,int );
++extern double (*MMG_calte1)(pMesh ,pSol ,int );
++extern int    (*MMG_caltet2)(pMesh ,pSol ,int ,int ,double ,double *);
++extern int    (*MMG_cavity)(pMesh ,pSol ,int ,int ,pList ,int );
++extern int    (*MMG_buckin)(pMesh ,pSol ,pBucket ,int );
++extern int    (*MMG_optlen)(pMesh ,pSol ,double ,int );
++extern int    (*MMG_interp)(double *,double *,double *,double );
++extern int    (*MMG_optlentet)(pMesh ,pSol ,pQueue ,double ,int ,int );
++extern int    (*MMG_movevertex)(pMesh ,pSol ,int ,int );
+ 
+ 
+ #endif
+Only in mmg3d4-new/build/sources/: met
+diff -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3dmain/mmg3d.c
+--- mmg3d4/build/sources/mmg3dmain/mmg3d.c	2011-05-12 17:50:36.000000000 +0200
++++ mmg3d4-new/build/sources/mmg3dmain/mmg3d.c	2011-09-01 19:36:51.000000000 +0200
+@@ -46,7 +46,7 @@
+ #include "compil.date"
+ #include "mesh.h"
+ #include "eigenv.h"
+-
++#include "dataff.h"
+ TIM_mytime         MMG_ctim[TIMEMAX];
+ short	             MMG_imprim;
+ 
+@@ -395,6 +395,7 @@
+ 	    100.*ttot/ttim[0],call[0],ttot/(float)call[0]);
+   }
+   fprintf(stdout,"\n   ELAPSED TIME  %.2f SEC.  (%.2f)\n",ttim[0],ttot);
++  fflush(stdout);
+ }
+ 
+ 
+@@ -432,13 +433,14 @@
+ }
+ 
+ 
+-int main(int argc,char *argv[]) {
++int mainmmg3d(int argc,char *argv[],DataFF *dataff) {
++    
+   pMesh      	mesh;
+   pSol       	sol;
+   Info     	*info;
+   int        	alert;
+-int k,iadr,i,jj,kk,ii;
+-double	lambda[3],v[3][3],*mold,*m;
++  int k,iadr,i,jj,kk,ii;
++  double	lambda[3],v[3][3],*mold,*m;
+ 
+   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",M_VER,M_REL);
+   fprintf(stdout,"     Copyright (c) LJLL/IMB, 2010\n");
+@@ -477,15 +479,27 @@
+   info->noinsert = 0; 
+   info->dt       = 1.;
+   info->bdry     = 0;
+-
++  /* modif F. Hecht ..*/
++  if(dataff)
++    {
++      mesh->name=dataff->meshname;
++      mesh->move=dataff->movename;
++      sol->name=dataff->solname;
++      /*      printf(" #### %p %p %p --- \n",mesh->name,mesh->move,sol->name); */
++      info->imprim=dataff->imprim;
++      info->memory=dataff->memory;
++    }
++  /* end modf */ 
+   if ( !parsar(argc,argv,mesh,sol) )  return(1);
+   MMG_imprim = info->imprim;
+   
+   /* load data */
+   if ( MMG_imprim )   fprintf(stdout,"\n  -- INPUT DATA\n");
+-  TIM_chrono(ON,&MMG_ctim[1]);
+-  if ( !MMG_loadMesh(mesh,mesh->name) )  return(1); 
+-  if ( !MMG_loadSol(sol,sol->name,mesh->npmax) )  return(1);
++  TIM_chrono(ON,&MMG_ctim[1]); 
++  /* modif FH. for interface with ff++ add dataff param     */
++  if ( !MMG_loadMesh(mesh,mesh->name,dataff ))  return(1); 
++  if ( !MMG_loadSol(sol,sol->name,mesh->npmax,dataff ) )  return(1);
++ 
+   if ( sol->np && sol->np != mesh->np ) {
+     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+     sol->np = 0;
+@@ -493,7 +507,7 @@
+ 
+   if ( !parsop(mesh) )  return(1);
+ 
+-  if ( abs(info->option) == 9 && !MMG_loadVect(mesh,mesh->move,mesh->np) )  return(0);
++  if ( abs(info->option) == 9 && !MMG_loadVect(mesh,mesh->move,mesh->np,dataff) )  return(0);
+ 
+   if ( !MMG_setfunc(sol->offset) ) return(1);
+   if ( !MMG_scaleMesh(mesh,sol) )  return(1);
+@@ -523,7 +537,7 @@
+   if ( !MMG_hashTetra(mesh) )    return(1);
+   if ( !MMG_markBdry(mesh) )     return(1);
+   if (abs(mesh->info.option)==10) {
+-    MMG_saveMesh(mesh,"tetra.mesh");
++    MMG_saveMesh(mesh,"tetra.mesh",dataff);
+     return(0);
+   }           
+ 
+@@ -566,8 +580,8 @@
+     if ( abs(info->option) == 9 ) {
+       if(!MMG_mmg3d9(mesh,sol,&alert)) {
+         if ( !MMG_unscaleMesh(mesh,sol) )  return(1);
+-        MMG_saveMesh(mesh,mesh->outf);
+-	    MMG_saveSol(mesh,sol,mesh->outf);
++        MMG_saveMesh(mesh,mesh->outf,dataff);
++	    MMG_saveSol(mesh,sol,mesh->outf,dataff);
+ 	    return(1);
+       }
+       /*puts("appel 1");
+@@ -669,18 +683,18 @@
+     fprintf(stdout,"\n  ## WARNING: INCOMPLETE MESH  %d , %d\n",
+             mesh->np,mesh->ne);
+ 
+-  if ( MMG_imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->outf);
++  if ( MMG_imprim && !dataff)  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->outf);
+   TIM_chrono(ON,&MMG_ctim[1]);
+   if ( !MMG_unscaleMesh(mesh,sol) )  return(1);
+-  MMG_saveMesh(mesh,mesh->outf);
++  MMG_saveMesh(mesh,mesh->outf,dataff);
+   if ( info->option == 9 ) {
+-    MMG_saveSol(mesh,sol,mesh->outf);
+-    MMG_saveVect(mesh,mesh->move);    
++    MMG_saveSol(mesh,sol,mesh->outf,dataff);
++    MMG_saveVect(mesh,mesh->move,dataff);    
+   }
+   else
+-    MMG_saveSol(mesh,sol,mesh->outf);
++    MMG_saveSol(mesh,sol,mesh->outf,dataff);   
+   TIM_chrono(OFF,&MMG_ctim[1]);
+-  if ( MMG_imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
++  if ( MMG_imprim && !dataff)  fprintf(stdout,"  -- WRITING COMPLETED\n");
+ 
+   /* free mem */
+   M_free(mesh->point);
+@@ -699,3 +713,21 @@
+   M_free(mesh);
+   return(0);
+ }
++
++int main(int argc,char *argv[])  {
++    return  mainmmg3d( argc,argv,0);
++}
++/*
++ def 
++ */
++ MMG_Swap MMG_swpptr;
++ double (*MMG_length)(double *,double *,double *,double *);
++ double (*MMG_caltet)(pMesh ,pSol ,int );
++ double (*MMG_calte1)(pMesh ,pSol ,int );
++ int    (*MMG_caltet2)(pMesh ,pSol ,int ,int ,double ,double *);
++ int    (*MMG_cavity)(pMesh ,pSol ,int ,int ,pList ,int );
++ int    (*MMG_buckin)(pMesh ,pSol ,pBucket ,int );
++ int    (*MMG_optlen)(pMesh ,pSol ,double ,int );
++ int    (*MMG_interp)(double *,double *,double *,double );
++ int    (*MMG_optlentet)(pMesh ,pSol ,pQueue ,double ,int ,int );
++ int    (*MMG_movevertex)(pMesh ,pSol ,int ,int );
+diff -u mmg3d4/build/sources/mmg3d4.c mmg3d4-new/build/sources/mmg3d4.c
+--- mmg3d4/build/sources/mmg3d4.c	2011-04-14 18:05:12.000000000 +0200
++++ mmg3d4-new/build/sources/mmg3d4.c	2011-07-07 11:23:09.000000000 +0200
+@@ -117,8 +117,8 @@
+       if ( *alert ) {
+         fprintf(stdout," \n\n ** UNABLE TO CUT (analarcutting)\n");
+         fprintf(stdout," ** RETRY WITH -m > %6d \n\n",mesh->info.memory);
+-        MMG_saveMesh(mesh,"crash.meshb");
+-        MMG_saveSol(mesh,sol,"crash.solb"); 
++        MMG_saveMesh(mesh,"crash.meshb",0);
++        MMG_saveSol(mesh,sol,"crash.solb",0); 
+         exit(0);
+       }
+       M_free(hash.item);        
+diff -u mmg3d4/build/sources/mmg3dConfig.h mmg3d4-new/build/sources/mmg3dConfig.h
+--- mmg3d4/build/sources/mmg3dConfig.h	2011-06-30 14:09:37.000000000 +0200
++++ mmg3d4-new/build/sources/mmg3dConfig.h	2011-06-16 09:50:58.000000000 +0200
+@@ -2,4 +2,4 @@
+ #define Tutorial_VERSION_MAJOR 
+ #define Tutorial_VERSION_MINOR 
+ 
+-#define USE_SCOTCH
++/* #undef USE_SCOTCH */
+diff -u mmg3d4/build/sources/mmg3dlib/mmg3dlib.c mmg3d4-new/build/sources/mmg3dlib/mmg3dlib.c
+--- mmg3d4/build/sources/mmg3dlib/mmg3dlib.c	2011-04-15 15:32:59.000000000 +0200
++++ mmg3d4-new/build/sources/mmg3dlib/mmg3dlib.c	2011-07-07 11:23:59.000000000 +0200
+@@ -332,7 +332,7 @@
+   if ( !MMG_hashTetra(mesh) )    return(1);
+   if ( !MMG_markBdry(mesh) )     return(1);
+   if (abs(mesh->info.option)==10) {
+-    MMG_saveMesh(mesh,"tetra.mesh");
++    MMG_saveMesh(mesh,"tetra.mesh",0);
+     return(0);
+   }           
+   if ( !sol->np) {
+@@ -378,7 +378,7 @@
+     if ( abs(info->option) == 9 ) {  
+       if(!MMG_mmg3d9(mesh,sol,&alert)) {
+         if ( !MMG_unscaleMesh(mesh,sol) )  return(1);
+-        MMG_saveMesh(mesh,"errormoving.mesh");
++        MMG_saveMesh(mesh,"errormoving.mesh",0);
+ 	      //MMG_saveSol(mesh,sol,mesh->outf);
+ 	      return(1);
+       }
+diff -u mmg3d4/build/sources/sproto.h mmg3d4-new/build/sources/sproto.h
+--- mmg3d4/build/sources/sproto.h	2011-04-14 18:08:32.000000000 +0200
++++ mmg3d4-new/build/sources/sproto.h	2011-06-22 18:36:45.000000000 +0200
+@@ -67,13 +67,13 @@
+ int  MMG_inEdge(pHedge ,int *,int *,int *);
+ int  MMG_markBdry(pMesh );
+ 
+-/* inout */
+-int  MMG_loadMesh(pMesh ,char *);
+-int  MMG_loadSol(pSol ,char *,int );
+-int  MMG_loadVect(pMesh ,char *,int );
+-int  MMG_saveMesh(pMesh ,char *);
+-int  MMG_saveSol(pMesh ,pSol ,char *);
+-int  MMG_saveVect(pMesh ,char *);
++/* inout add param  F.H. june 2011 (dataff) */
++int  MMG_loadMesh(pMesh ,char *,void *);
++int  MMG_loadSol(pSol ,char *,int ,void *);
++int  MMG_loadVect(pMesh ,char *,int ,void *);
++int  MMG_saveMesh(pMesh ,char *,void *);
++int  MMG_saveSol(pMesh ,pSol ,char *,void *);
++int  MMG_saveVect(pMesh ,char *,void *);
+ 
+ int  MMG_loctet(pMesh ,int ,int ,double *,double *);
+ int  MMG_computeMetric(pMesh ,pSol ,int ,double * );
+diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
+--- mmg3d4/build/sources/swapar.c	2011-04-14 18:08:49.000000000 +0200
++++ mmg3d4-new/build/sources/swapar.c	2011-07-07 11:24:44.000000000 +0200
+@@ -77,7 +77,7 @@
+   }
+ 
+   if ( ncas && MMG_swpptr ) {
+-		if(ddebug) MMG_saveMesh(mesh,"avt.mesh");
++		if(ddebug) MMG_saveMesh(mesh,"avt.mesh",0);
+     for (l=1; l<=lon; l++) {
+       jel = list->tetra[l]/6;
+       pt  = &mesh->tetra[jel]; 
+@@ -97,7 +97,7 @@
+       if ( pt->qual >= declic )  MMG_kiuput(q,jel);
+       for (i=0; i<4; i++)  mesh->point[pt->v[i]].flag = mesh->flag; 
+     }
+-		if(ddebug) MMG_saveMesh(mesh,"sw.mesh");
++		if(ddebug) MMG_saveMesh(mesh,"sw.mesh",0);
+     return(1);
+   }
+ 
+--- mmg3d4/build/sources/dataff.h	2011-09-01 22:11:53.000000000 +0200
++++ new-mmg3d4/build/sources/dataff.h	2011-09-01 12:39:39.000000000 +0200
+@@ -0,0 +1,60 @@
++/*
++ *  dataff.h
++ *  
++ *
++ *  Created by Fr�d�ric Hecht on 19/06/11.
++ *  Copyright 2011 UPMC. All rights reserved.
++ *
++ 
++ */
++
++enum ff_data_type {
++    ff_id_vertex =0,
++    ff_id_seg =1,
++    ff_id_tria=2,
++    ff_id_tet =3,
++
++    ff_id_prism =5,
++    ff_id_hex =6,
++    ff_id_quad =7,
++    ff_id_corner=8
++} ;
++
++
++typedef struct  DataFF 
++{
++  const char  * meshname;
++  const char  * movename;
++  const char  * solname;
++  int imprim;
++  int memory;
++  int   np; //  nb of vertices  in/out 
++  int   typesol; //  1 iso , 6 : m11; m12,m13,m22,m23,m33
++  void * mesh;
++  double * sol; /* metric :size typesol*np  */
++  double * mov; /* displac. size :3*np  */ 
++  void (*set_mesh)(void *dataff,int *data,int ldata);
++  void (*end_mesh)(void *dataff);
++  void (*set_v)(void *dataff,int i,double *xyz,int lab);
++  void (*set_elmt)(void *dataff,int ff_id,int i,int *k,int lab);
++  void (*get_mesh)(void *dataff,int *data,int ldata);
++  void (*get_v3)(void *dataff,int i,double *xyz,int *lab);
++  void (*get_elmt)(void *dataff,int ff_id,int i,int *k,int *lab);
++} DataFF;
++
++#ifdef __cplusplus
++extern "C" {
++#endif  
++    int mainmmg3d(int argc,char *argv[],DataFF *dataff); 
++
++#ifdef __cplusplus
++}
++#endif 
++/*
++ m11 = met[0] 
++ m12 = met[1] 
++ m13 = met[2] 
++ m22 = met[3]
++ m23 = met[4] 
++ m33 = met[5]  
++*/
+--- mmg3d4/build/sources/quality.c	2011-04-14 18:08:09.000000000 +0200
++++ new-mmg3d4/build/sources/quality.c	2011-11-15 17:24:57.000000000 +0100
+@@ -46,7 +46,7 @@
+ #include "mesh.h"  
+ 
+ 
+-double MMG_rao(pMesh mesh,int k,int inm);
++double MMG_rao(pMesh mesh,int k,FILE* inm) ;
+ double MMG_caltetrao(pMesh mesh,pSol sol,int iel) {
+ 	return(MMG_rao(mesh,iel,0));
+ }
+--- mmg3d4/build/sources/delaunay.c	2011-04-14 18:06:36.000000000 +0200
++++ new-mmg3d4/build/sources/delaunay.c	2011-11-15 17:31:31.000000000 +0100
+@@ -728,7 +728,7 @@
+   if ( ppt->tag & M_UNUSED )  return(0);
+ 
+   tref = mesh->tetra[list->tetra[1]/6].ref;
+-#warning remove this test
++  // #warning remove this test
+   for (k=1; k<=lon; k++)
+     if(tref!=mesh->tetra[list->tetra[k]/6].ref) 
+        printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list->tetra[k]/6].ref,list->tetra[k]/6);
+--- mmg3d4/build/sources/analarcutting.c	2011-04-14 18:04:05.000000000 +0200
++++ new-mmg3d4/build/sources/analarcutting.c	2011-11-15 17:31:01.000000000 +0100
+@@ -307,7 +307,7 @@
+   printf("6 cut : %8d\n",n6);
+   printf("---------------------------\n"); */  
+ 	if ( !na )  return(na);
+-#warning check memory allocation
++	// #warning check memory allocation
+   
+   //printf("%d cut init --- nb tet %d\n",na,mesh->ne);
+   return(na);
+--- mmg3d4/build/sources/pattern.c	2011-11-15 17:33:06.000000000 +0100
++++ new-mmg3d4/build/sources/pattern.c	2011-11-15 17:23:13.000000000 +0100
+@@ -47,7 +47,7 @@
+ 
+ 
+ unsigned char MMG_arfa[3][4] = { {2,0,1,3}, {1,2,0,3}, {0,1,2,3} }; 
+-extern int MMG_permar[10][4];
++extern int MMG_permar[12][4];
+ extern int MMG_pointar[64][2];
+ extern int ddebug;
+ //insert ip on ia-ib
+--- mmg3d4/build/sources/optlen.c	2011-04-14 18:07:52.000000000 +0200
++++ new-mmg3d4/build/sources/optlen.c	2011-11-15 17:39:10.000000000 +0100
+@@ -48,7 +48,7 @@
+ #define  HQCOEF    0.9 
+ #define  HCRIT     0.98
+ 
+-double MMG_rao(pMesh mesh,int k,int inm);
++double MMG_rao(pMesh mesh,int k,FILE* );
+ int MMG_optlen_ani(pMesh mesh,pSol sol,double declic,int base) {
+   pTetra    pt,pt1;
+   pPoint    ppa,ppb;

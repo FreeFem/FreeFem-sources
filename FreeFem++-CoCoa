@@ -1,0 +1,60 @@
+#!/bin/sh
+#  
+# EXTENSIONS  : ".edp"				# Accepted file extentions
+# OSTYPES     : "****"				# Accepted file types
+# ROLE        : None				# Role (Editor, Viewer, None)
+# SERVICEMENU : FreeFem++     			# Name of Service menu item
+#
+dir=`dirname $0`;
+ff="/usr/local/bin/FreeFem++"
+test -x "/usr/local/bin/FreeFem++-mpi" && ff="/usr/local/bin/FreeFem++-mpi"
+fa="-glut ffglut  "
+q="'"
+end="exit;"
+begin="cd $PWD;"
+
+# begin the cmd generation ----------
+cmd=""
+# -----------------
+for i in "$@"; do
+
+ d=`dirname "$i"`;
+ f=`basename "$i"`;
+ if [ -f "$i"  ] ; then
+     np=`awk -v npo=$np '$1=="//" && $2=="NBPROC" { if( vv == ""){ print $3;}; vv=1}' "$i"`
+     npa=`awk -v npo=$np '$1=="//" && $2=="PARAM" { if( vv == ""){ for(i=3;i<=NF;++i)print $i;}; vv=1}' "$i"`
+     # echo  --- $np -- $npa  --------
+     if [  "0$np" -gt 1 ] ; then ff="/usr/local/bin/ff-mpirun -np $np"; fi
+     if [ -n "$npa"  ] ; then fa="$fa $npa"; fi
+     cmd="$cmd cd $q$d$q; $ff   $q$f$q $fa ;"
+  fi
+done
+# ------------------ 
+if [ -z "$cmd" ]; then
+ cmd="$ff;"
+fi
+# ------------------
+cmd="$cmd"
+# ---- end of cmd generation ----
+echo 'do script "'$cmd'"'
+#
+#
+#  send the command $cmd to the apple terminal via osascript
+#
+# (echo $0;echo $*;echo "--$TERM--";printenv;set)  >/tmp/tutu
+
+if [ -z "$TERM_PROGRAM" ] ; then 
+echo '
+tell application "Terminal"
+	activate
+	try
+	  do script "'$begin$cmd$end'" 
+	end try
+end tell 
+' | osascript 	
+else
+set -e
+eval  $cmd
+fi;
+
+

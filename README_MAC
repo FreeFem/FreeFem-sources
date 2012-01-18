@@ -1,0 +1,51 @@
+To compile a full version of FreeFem++ under MacOS
+---------------------------------------------------
+
+Under Snow Leopard.  Jan 2011
+
+The major problem is take a good f90 to compile new // solver like MUMPS.
+
+Do the follow  instalation process:
+0)  Install the developper tools form the apple DVD's.
+
+1) get macport for http://www.macports.org/  and installation:
+
+  sudo port selfupdate 
+  sudo port install g95
+  sudo port install wget
+
+2) get and install  mercurial form
+   http://mercurial.selenic.com/
+
+3) to  compile  openmpi  with fortran interface  and install
+ do :
+
+wget http://www.open-mpi.org/software/ompi/v1.4/downloads/openmpi-1.4.3.tar.bz2
+
+remark, I have test with version 1.4.1 , but I thing no problem acure  with this new version
+
+ tar zxvf openmpi-1.4.3.tar.bz2
+ cd openmpi-1.4.3
+ ./configure FC=/opt/local/bin/g95 F77=/opt/local/bin/g95 
+ sudo make install 
+ 
+4) get Tex/laTex for the documention build 
+form http://www.tug.org/mactex/
+and install
+
+5) to get download the last freefem++ version , do
+  
+hg clone  http://www.freefem.org/ff++/ff++
+cd ff++ 
+
+./configure '-with-suffix=snow-leopard' '--enable-download' 'F77=/opt/local/bin/g95' '-with-mpi=/usr/local/bin/mpic++' '--enable-m64' 'FLIBS=/opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a' 'MPIF77=/usr/local/bin/mpif77' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90' 'MPI_INC_DIR=/usr/local/include' 'MPICXX=/usr/local/bin/mpic++'
+
+make 
+make install
+
+Good Luck, and  if I miss something sorry,
+ try to add  missing tools with 
+sudo port install missing-tool
+like for exemple:
+
+sudo port install gnuplot

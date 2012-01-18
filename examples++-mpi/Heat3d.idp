@@ -1,0 +1,104 @@
+load "msh3"
+load "medit"
+include "getARGV.idp"
+
+func f= 1. ; // right hand side function
+func g=0.; ; // boundary condition function
+func u0= 0;
+real dt=getARGV("-dt",0.01);
+int nn=getARGV("-n",20);
+int imax=getARGV("-niter",10);
+int op=getARGV("-op",1);
+int pplot=getARGV("-plot",0);
+
+mesh Th2D=square(nn,nn);
+int[int] refm=[1,1,2,1,3,1,4,1];
+int[int] refu=[0,1];
+mesh3 Th=buildlayers(Th2D,nn,zbound=[0.,1.],labelmid=refm,labelup=refu,labeldown=refu);
+
+
+// to slip integral on each processor 
+// set a region number of a processor number 
+real ccc = mpisize/real(Th.nt) ;
+if(op) Th=change(Th,fregion= min(mpisize-1,int(nuTriangle* ccc+1e-10)));
+else Th=change(Th,fregion=0);
+int reg= op ? mpirank : 0;
+//  end of trick
+cout << "  *** Th: vol " << Th.mesure << "  " << int3d(Th,reg)(1.) << endl;
+fespace Vh(Th,P2) ; // P1 FE space
+Vh uh=u0 ; // unkown and test function.
+
+
+real temps=clock();
+
+real time1,time2,time6;
+time1=clock();
+
+// compute only on region number = processor number 
+varf vlaplace(uh,vh) = // definition de problem
+      int3d(Th,reg)( uh*vh+ dt*(dx(uh)*dx(vh) + dy(uh)*dy(vh)+ dz(uh)*dz(vh)) ) // bil. form
+    + int3d(Th,reg)( dt*vh*f) + on(1,uh=g) ;
+varf vmasse(u,v) = int3d(Th,reg)(u*v);
+varf von1(uh,vh) = on(1,uh=1) ;
+
+matrix AA = vlaplace(Vh,Vh,tgv=ttgv) ;
+time1=clock()-time1;
+// reduce the matrice to get the full matrice 
+// warning the tgv number is now mpisize*tgv for B.C.
+matrix A; 
+time6=clock();
+if(op) mpiAllReduce(AA,A,mpiCommWorld,mpiSUM);
+else A=AA;
+time6 = clock()-time6;
+time2=clock();
+set(A,solver=sparsesolver,tgv=ttgv,sparams=ssparams) ; // factorize
+time2=clock()-time2;
+
+real time3=clock();
+matrix M = vmasse(Vh,Vh);
+time3=clock()-time3;
+
+real [int] b(A.n),bb(A.n) ;
+real[int] bcl= vlaplace(0,Vh,tgv=ttgv) ; // The B.C vector   
+real[int] Gamma = von1(0,Vh,tgv=1);  // 
+
+real time4=0,time5=0;
+
+for(int i=0 ;i<imax;i++)
+{
+
+real time4tmp=clock();
+bb = M*uh[];
+bb += bcl ; 
+
+time4=time4+(clock()-time4tmp);
+real time6tmp=clock();
+if(op) mpiAllReduce(bb,b,mpiCommWorld,mpiSUM);
+else b=bb;
+time6=time6+(clock()-time6tmp);
+real time5tmp=clock();
+uh[] = A^-1*b ; // resolution
+time5=time5+(clock()-time5tmp);
+	if(mpirank==0)
+        cout << "  -- time " << (i+1)*dt << " ||uh|| " << uh[].linfty << " ||b|| " << b.linfty << endl;
+
+}
+//savesol("Heat-Time-"+imax+"-nn-"+nn+"-superludist.sol",Th,uh);
+//savemesh(Th,"Heat-Time-"+imax+"-nn-"+nn+"-superludist.mesh");
+cout << "Time resolution " << clock()-temps << endl;
+if( mpirank==0 && pplot) medit("Heat",Th,uh);
+cout << "======================================" << endl;
+cout << " CPU TIME :                  " << endl;
+cout << " matrix A                    " << time1 << endl;
+cout << " factorization               " << time2 << endl;
+cout << " mass matrix                 " << time3 << endl;
+cout << " RHS  (Matrix vector Product with mass matrix)  " << endl;
+cout << "                             " << time4/imax << endl;
+cout << " solving                     " << time5/imax  << endl;
+cout << " MpiReduce                   " << time6  << endl;
+cout << " all                         " << clock()-temps << endl;
+cout << "======================================" << endl;
+
+
+
+
