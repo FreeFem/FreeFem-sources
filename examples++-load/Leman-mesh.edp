@@ -62,7 +62,7 @@ border G(t=0,1)
   label=1;	
 } 		
 cout << " .. "<<endl;
-plot(G(100),wait	=1); 
+plot(G(-500),wait	=1); 
 mesh Th=buildmesh(G(-500     ));
 cout << " ...  "<<endl;
 plot(Th,wait=1);

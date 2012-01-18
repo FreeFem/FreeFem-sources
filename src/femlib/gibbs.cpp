@@ -580,7 +580,7 @@ n+n) */
 		}
 /* L110: */
 	    }
-	    if (h0 < l0 || h0 == l0 && mxcanx <= mxcany) {
+	    if (h0 < l0 || (h0 == l0 && mxcanx <= mxcany)) {
 /*           if(impre.le.-2) write(nfout,*) */
 /*     +       '         h0 = ',h0,',l0 = ',l0,'  ------- XXXX
  --------' */

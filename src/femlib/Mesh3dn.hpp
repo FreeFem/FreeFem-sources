@@ -104,14 +104,16 @@ public:
   
   R3 H(int i) const 
   { ASSERTION(i>=0 && i <4);
-    R3 AB(at(this->nvface[i][0]),at(this->nvface[i][1]));
-    R3 AC(at(this->nvface[i][0]),at(this->nvface[i][2]));
+    int nvface[4][3]=  {{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}};
+    R3 AB(at(nvface[i][0]),at(nvface[i][1]));
+    R3 AC(at(nvface[i][0]),at(nvface[i][2]));
     return AB^AC/(6.*this->mesure());} // heigth 
  
     R3 n(int i) const 
     { ASSERTION(i>=0 && i <4);
-	R3 AB(at(this->nvface[i][0]),at(this->nvface[i][1]));
-	R3 AC(at(this->nvface[i][0]),at(this->nvface[i][2]));
+    int nvface[4][3]=  {{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}};
+	R3 AB(at(nvface[i][0]),at(nvface[i][1]));
+	R3 AC(at(nvface[i][0]),at(nvface[i][2]));
 	R3 N=AB^AC;
     return N/N.norme();} //  exterior normal  
     
