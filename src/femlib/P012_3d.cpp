@@ -503,7 +503,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 R l[5];
 	 for(int i=0;i<4;i++)
 	    l[i]=ll[i]-lb4;  //  1/d1 in G - 1/d1 G =0 
-	 l[5]=lb;
+	 l[4]=lb;
 	 
 	 assert(val.N() >=Element::nv);
 	 assert(val.M()==1 );

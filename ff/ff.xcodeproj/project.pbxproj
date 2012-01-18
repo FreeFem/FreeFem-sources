@@ -87,6 +87,7 @@
 		3DDEA1950DFFF76100F54E1C /* Mesh2dn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1940DFFF76100F54E1C /* Mesh2dn.cpp */; };
 		3DDEA1980DFFF77D00F54E1C /* libmesh5.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1970DFFF77D00F54E1C /* libmesh5.c */; };
 		3DDEA19B0DFFF7D000F54E1C /* Mesh1dn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA19A0DFFF7D000F54E1C /* Mesh1dn.cpp */; };
+		3DEB5BFD14C607C100BA47D8 /* ffapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DEB5BFC14C607C100BA47D8 /* ffapi.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -181,6 +182,7 @@
 		3DDEA1940DFFF76100F54E1C /* Mesh2dn.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh2dn.cpp; path = ../src/femlib/Mesh2dn.cpp; sourceTree = SOURCE_ROOT; };
 		3DDEA1970DFFF77D00F54E1C /* libmesh5.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; name = libmesh5.c; path = ../src/femlib/libmesh5.c; sourceTree = SOURCE_ROOT; };
 		3DDEA19A0DFFF7D000F54E1C /* Mesh1dn.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh1dn.cpp; path = ../src/femlib/Mesh1dn.cpp; sourceTree = SOURCE_ROOT; };
+		3DEB5BFC14C607C100BA47D8 /* ffapi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ffapi.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -279,6 +281,7 @@
 				3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */,
 				3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */,
 				3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */,
+				3DEB5BFC14C607C100BA47D8 /* ffapi.cpp */,
 				3D90DCDD097015B4002A1826 /* AFunction.cpp */,
 				3D90DCE0097015B4002A1826 /* AFunction2.cpp */,
 				3D90DCE5097015B4002A1826 /* array_complex.cpp */,
@@ -568,6 +571,7 @@
 				3D71697F0F371F9E00031DA8 /* glumesh2D.cpp in Sources */,
 				3D2D5C9B0F43095A00F41F4C /* splitsimplex.cpp in Sources */,
 				3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */,
+				3DEB5BFD14C607C100BA47D8 /* ffapi.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -619,7 +623,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "FreeFem++";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.6;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited)";
 				"USER_HEADER_SEARCH_PATHS[arch=*]" = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited)";
 				VALID_ARCHS = x86_64;
@@ -639,7 +643,7 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "FreeFem++";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.6;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited)";
 				VALID_ARCHS = x86_64;
 			};

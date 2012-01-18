@@ -1518,7 +1518,7 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 	};
     if( na1==1 && mb1 ==1)
 	return C(0,0);
-    else if (( mb1 ==1) ) // || (na1==1)) // correct du car ' on conj encore r . mars 2010 
+    else if ( mb1 ==1 ) // || (na1==1)) // correct du car ' on conj encore r . mars 2010 
     {
 	AC_F0  v;
 	v=C(0,0);

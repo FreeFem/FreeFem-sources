@@ -299,7 +299,7 @@ class MeshPointBase { public:
        /*
        e = ll[0]; 
        int i1,i2,I3;
-       /*
+       
        Th3->VerticesNumberOfEdge(K.T,e,i1,i2);
        const BoundaryEdge * be=Th3->TheBoundaryEdge(i1,i2);
        label= be ? be->lab : 0;

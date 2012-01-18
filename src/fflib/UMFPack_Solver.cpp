@@ -306,6 +306,11 @@ DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
+template <>
+DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverIUMFPack;
+template <>
+DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
+
 static bool SetDefault()
 {
     if(verbosity>1)
@@ -346,10 +351,6 @@ void init_UMFPack_solver()
 
 }
 
-template <>
-DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverIUMFPack;
-template <>
-DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
 
 #ifdef LOAD_LINK_
 class Init { public:
