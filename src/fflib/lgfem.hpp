@@ -270,7 +270,8 @@ class pfes3_tef : public v_fes3 { public:
   FESpace3 * buildupdate()   {  return  new FESpace3(**ppTh,*tef);}
   
 };
- 
+
+
 class pfes3_tefk : public v_fes3 { 
 public:
   
@@ -278,8 +279,17 @@ public:
   const int k;  
   KN< GTypeOfFE<Mesh3> const *> atef;
   GTypeOfFESum<Mesh3> tefs;
+  
+   static int sum(const Fem2D::TypeOfFE3 ** l,int const Fem2D::TypeOfFE3::*p,int n)
+    {
+        int r=0;
+        for (int i=0;i<n;i++)
+            r += l[i]->*p;
+        return r;
+    }
+    
   pfes3_tefk(const pmesh3* t,const Fem2D::TypeOfFE3 ** tt,int kk,Stack s=NullStack,int n=0,Expression *p=0 ) 
-    : v_fes3(sum((const dataTypeOfFE **)tt,&Fem2D::TypeOfFE3::N,kk),t,s,n,p),
+    : v_fes3(sum((const Fem2D::TypeOfFE3 **)tt,&Fem2D::TypeOfFE3::N,kk),t,s,n,p),
       tef(tt),k(kk),
       atef(kk,tt),tefs(atef)
       

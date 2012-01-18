@@ -125,7 +125,7 @@ bool load(string ss)
 	return 0;
 #endif  
 	    }
-	if((mpirank ==0))
+	if(mpirank ==0)
 	  {
 	    cerr  <<   "\nload error : " << ss << "\n \t fail : "  << endl;
 	    cerr << "list  prefix: " ;

@@ -1,3 +1,5 @@
+ - add codo to build matrix and vector form varf in 3d in case off  differente meshes
+    in test 
  - correct NSprojection.edp chap3 example (PB in out flow BC.) 
  - correct compile of mmg3d v4 plugins (small change un distrib archive) 
 v 3.18 (11/01/2012)
@@ -7,7 +9,7 @@ v 3.18 (11/01/2012)
  - correct bug in cas of resize of array with 2 index (full matrix)
  - correct assert in MPI  in gather and scatter
  - correct bug in case of return  in loop for or while. 
- - correct a=int2d(Th,l)(1) in case simple expression  when l is a  arry.
+ - correct a=int2d(Th,l)(1) in case simple expression  when l is a  array.
  - build a pkg under macos for distribution .
 v 3.17  (17/11/2011) 
  - correct PB of pugins: MUMPS, parmetis, metis, mmg34, mshmet 
