@@ -63,7 +63,7 @@ while(1)  //  Loop on vicosity
 	    
 	    cout << n << " err = " << err << " " << eps << " rey  =" << 1./nu << endl;
 	    if(err < eps) break; // converge 
-	    if( n>3 && err > 10.) break; //  explose ????           
+	    if( n>3 && err > 10.) break; //  Blowup ????           
 	}
  if(err < eps)  // if converge  decrease nu (more difficulte)
  {
@@ -73,8 +73,8 @@ while(1)  //  Loop on vicosity
    nu = max(nufinal, nu* cnu); // new vicosity 
    u1p=u1;  u2p=u2;  pp=p; //  save correct solution ...
  }
- else {  // if explose increase nu (more simple)
-   assert(cnu< 0.95); // 
+ else {  // if blowup,  increase nu (more simple)
+   assert(cnu< 0.95); // final blowup ...  
    nu = nu/cnu; //  get previous value of viscosity 
    cnu= cnu^(1./1.5); // no conv. => change lower 
    nu = nu* cnu;  // new vicosity

@@ -2162,129 +2162,6 @@ which is programmed as
 It must be inserted into a larger .cpp file, shown in Appendix A,
  which is the load module linked to \freefempp.
 
-\subsection{A Projection Algorithm for the Navier-Stokes equations }
-\paragraph{Summary}\emph{Fluid flows require good algorithms and good triangultions. We show
-here an example of a complex algorithm and or first example of \x{mesh adaptation}}.
-\\\\
-An incompressible viscous fluid satisfies:
-$$ \p _t u + u\cdot\nabla u + \nabla p - \nu\Delta u = 0,\quad  \nabla\cdot u=0
-\quad  \hbox{ in } \Omega\times ]0,T[,
-$$
-$$ u|_{t=0} = u^0,\quad  u|_\Gamma = u_\Gamma.
-$$
-A possible algorithm, proposed by Chorin, is
-$$ {1\over \delta t}[u^{m+1} - u^moX^m] + \nabla p^m -\nu\Delta u^m= 0,\quad  u|_\Gamma
- = u_\Gamma,
- $$
-$$ -\Delta p^{m+1} = -\nabla\cdot  u^moX^m, \quad  \p _n p^{m+1} = 0,
-$$
-where $uoX(x) = u(x-u(x)\delta t)$ since $\p _t u + u\cdot\nabla
-u $ is approximated by the method of characteristics, as in the previous section.
-\\\\
-An improvement over Chorin's algorithm, given by Rannacher, is to compute a correction, q,
-to the pressure (the overline denotes the mean over $\Omega$)
-\[
-    -\Delta q= \n\cdot\vec u - \overline{\n\cdot\vec u}
-\]
-and define
-\[
-    u^{m+1}=\tilde u + \n q\delta t,~~~p^{m+1}=p^m-q-\overline{p^m-q}
-\]
-where $\tilde u$ is the $(u^{m+1},v^{m+1})$ of Chorin's algorithm.
-
-\paragraph{The backward facing step}
-
-The geometry is that of a channel with a backward facing step so that
-the inflow section is smaller than the outflow section. This geometry
-produces a fluid recirculation zone that must be captured correctly.
-
-This can only be done if the triangulation is sufficiently fine, or
-well adapted to the flow.
-
-Remark (FH), The are a technical difficulty is the example, the discret flow flux must be 
-$0$ and in the previous version this is not the case, the correction is not so simple. 
-
-\begin{example}[NSprojection.edp]\index{adaptmesh}\index{mesh!adaptation}
-\bFF
-// file NSprojection.edp
-
-@border a0(t=1,0){ x=0;      y=t;      label=1;}
-@border a1(t=0,1){ x=2*t;    y=0;        label=2;}
-@border a2(t=0,1){ x=2;      y=-t/2;       label=2;}
-@border a3(t=0,1){ x=2+18*t^1.2;  y=-0.5;       label=2;}
-@border a4(t=0,1){ x=20;     y=-0.5+1.5*t;   label=3;}
-@border a5(t=1,0){ x=20*t; y=1;        label=4;}
-@int n=1;
-@mesh Th= buildmesh(a0(3*n)+a1(20*n)+a2(10*n)+a3(150*n)+a4(5*n)+a5(100*n));
-plot(Th);
-@fespace Vh(Th,P1);
-@real nu = 0.0025, dt = 0.2; // Reynolds=200
-@func uBCin =  4*y*(1-y)*(y>0)*(x<2) ; 
-@func uBCout =  4./1.5*(y+0.5)*(1-y) *(x>19);
-Vh w,u = uBCin, v =0, p = 0, q=0;
-@real area= int2d(Th)(1.);
-Vh ubc  = uBCin + uBCout; 
-@real influx0  = int1d(Th,1) (ubc*N.x), // FH add
-      outflux0 = int1d(Th,3) (ubc*N.x); // FH add
-verbosity=1;
-@for(@int n=0;n<300;n++){
-	
-  Vh uold = u,  vold = v, pold=p;
-  Vh f=convect([uold,vold],-dt,uold); 
-  @real outflux = int1d(Th,3) (f*N.x); // FH add
-  f = f - (influx0+outflux)/outflux0 * uBCout; // FH add
-  outflux = int1d(Th,3) (f*N.x); // FH add
-  assert( abs(influx0+outflux) < 1e-10); // WARNING the flux must be 0 ..
-  
-  @solve pb4u(u,w,init=n,solver=LU)
-        =int2d(Th)(u*w/dt +nu*(dx(u)*dx(w)+dy(u)*dy(w)))
-        -int2d(Th)((convect([uold,vold],-dt,uold)/dt-dx(p))*w)
-        + on(1,u = 4*y*(1-y)) + on(2,4,u = 0) + on(3,u=f);
-  plot(u);
-
-  @solve pb4v(v,w,init=n,solver=LU)
-        = int2d(Th)(v*w/dt +nu*(dx(v)*dx(w)+dy(v)*dy(w)))
-        -int2d(Th)((convect([uold,vold],-dt,vold)/dt-dy(p))*w)
-        +on(1,2,3,4,v = 0);
-
- @real meandiv = int2d(Th)(dx(u)+dy(v))/area;
-
- @solve pb4p(q,w,init=n,solver=LU)= int2d(Th)(dx(q)*dx(w)+dy(q)*dy(w))
-    - int2d(Th)((dx(u)+ dy(v)-meandiv)*w/dt)+ on(3,q=0);
-
- @real meanpq = int2d(Th)(pold - q)/area;
- if(n%50==49){
-    Th = adaptmesh(Th,[u,v],q,err=0.04,nbvx=100000);
-    plot(Th, wait=true);
-    ubc = uBCin + uBCout; // reinterpolate B.C. 
-    influx0 = int1d(Th,1) (ubc*N.x); // FH add
-    outflux0 = int1d(Th,3) (ubc*N.x); // FH add
- }
- p = pold-q-meanpq;
- u = u + dx(q)*dt;
- v = v + dy(q)*dt;
- real err = sqrt(int2d(Th)(square(u-uold)+square(v-vold))/Th.area) ;
- cout << " iter " << n << " Err L2 = " << err << endl;
- if(err < 1e-3) break;
-}
-plot(p,wait=1,ps="NSprojP.eps");
-plot(u,wait=1,ps="NSprojU.eps");\eFF
-\end{example}
-
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics[width=15cm]{NSprojTh}\\
-\includegraphics[width=15cm]{NSprojP}\\
-\includegraphics[width=15cm]{NSprojU}
-
-\caption{\label{figNSproj} Rannacher's projection algorithm: result on an adapted mesh (top) showing
-the pressure (middle) and the horizontal velocity $u$ at Reynolds 400.}
-\end{center}
-\end{figure}
-
-We show in figure \ref{figNSproj} the numerical results obtained for a Reynolds
-number of 400 where mesh adaptation is done after 50 iterations on the first mesh.
-
 
  \subsection{The System of elasticity}
 
@@ -2615,6 +2492,326 @@ Results are shown on figure \ref{figstokes}
 %}
 %@cout << "CPU " <<@clock()-s0 << "s " << endl;
 %\eFF
+
+\subsection{A Projection Algorithm for the Navier-Stokes equations }
+\paragraph{Summary}\emph{Fluid flows require good algorithms and good triangultions. We show
+here an example of a complex algorithm and or first example of \x{mesh adaptation}}.
+\\\\
+An incompressible viscous fluid satisfies:
+$$ \p _t u + u\cdot\nabla u + \nabla p - \nu\Delta u = 0,\quad  \nabla\cdot u=0
+\quad  \hbox{ in } \Omega\times ]0,T[,
+$$
+$$ u|_{t=0} = u^0,\quad  u|_\Gamma = u_\Gamma.
+$$
+A possible algorithm, proposed by Chorin, is
+$$ {1\over \delta t}[u^{m+1} - u^moX^m] + \nabla p^m -\nu\Delta u^m= 0,\quad  u|_\Gamma
+ = u_\Gamma,
+ $$
+$$ -\Delta p^{m+1} = -\nabla\cdot  u^moX^m, \quad  \p _n p^{m+1} = 0,
+$$
+where $uoX(x) = u(x-u(x)\delta t)$ since $\p _t u + u\cdot\nabla
+u $ is approximated by the method of characteristics, as in the previous section.
+\\\\
+An improvement over Chorin's algorithm, given by Rannacher, is to compute a correction, q,
+to the pressure (the overline denotes the mean over $\Omega$)
+\[
+    -\Delta q= \n\cdot\vec u - \overline{\n\cdot\vec u}
+\]
+and define
+\[
+    u^{m+1}=\tilde u + \n q\delta t,~~~p^{m+1}=p^m-q-\overline{p^m-q}
+\]
+where $\tilde u$ is the $(u^{m+1},v^{m+1})$ of Chorin's algorithm.
+
+\paragraph{The backward facing step}
+
+The geometry is that of a channel with a backward facing step so that
+the inflow section is smaller than the outflow section. This geometry
+produces a fluid recirculation zone that must be captured correctly.
+
+This can only be done if the triangulation is sufficiently fine, or
+well adapted to the flow.
+
+Remark (FH), The are a technical difficulty is the example, the discret flow flux must be 
+$0$ and in the previous version this is not the case, the correction is not so simple. 
+
+\begin{example}[NSprojection.edp]\index{adaptmesh}\index{mesh!adaptation}
+\bFF
+// file NSprojection.edp
+
+@border a0(t=1,0){ x=0;      y=t;      label=1;}
+@border a1(t=0,1){ x=2*t;    y=0;        label=2;}
+@border a2(t=0,1){ x=2;      y=-t/2;       label=2;}
+@border a3(t=0,1){ x=2+18*t^1.2;  y=-0.5;       label=2;}
+@border a4(t=0,1){ x=20;     y=-0.5+1.5*t;   label=3;}
+@border a5(t=1,0){ x=20*t; y=1;        label=4;}
+@int n=1;
+@mesh Th= buildmesh(a0(3*n)+a1(20*n)+a2(10*n)+a3(150*n)+a4(5*n)+a5(100*n));
+plot(Th);
+@fespace Vh(Th,P1);
+@real nu = 0.0025, dt = 0.2; // Reynolds=200
+@func uBCin =  4*y*(1-y)*(y>0)*(x<2) ; 
+@func uBCout =  4./1.5*(y+0.5)*(1-y) *(x>19);
+Vh w,u = uBCin, v =0, p = 0, q=0;
+@real area= int2d(Th)(1.);
+Vh ubc  = uBCin + uBCout; 
+@real influx0  = int1d(Th,1) (ubc*N.x), // FH add
+      outflux0 = int1d(Th,3) (ubc*N.x); // FH add
+verbosity=1;
+@for(@int n=0;n<300;n++){
+	
+  Vh uold = u,  vold = v, pold=p;
+  Vh f=convect([uold,vold],-dt,uold); 
+  @real outflux = int1d(Th,3) (f*N.x); // FH add
+  f = f - (influx0+outflux)/outflux0 * uBCout; // FH add
+  outflux = int1d(Th,3) (f*N.x); // FH add
+  assert( abs(influx0+outflux) < 1e-10); // WARNING the flux must be 0 ..
+  
+  @solve pb4u(u,w,init=n,solver=LU)
+        =int2d(Th)(u*w/dt +nu*(dx(u)*dx(w)+dy(u)*dy(w)))
+        -int2d(Th)((convect([uold,vold],-dt,uold)/dt-dx(p))*w)
+        + on(1,u = 4*y*(1-y)) + on(2,4,u = 0) + on(3,u=f);
+  plot(u);
+
+  @solve pb4v(v,w,init=n,solver=LU)
+        = int2d(Th)(v*w/dt +nu*(dx(v)*dx(w)+dy(v)*dy(w)))
+        -int2d(Th)((convect([uold,vold],-dt,vold)/dt-dy(p))*w)
+        +on(1,2,3,4,v = 0);
+
+ @real meandiv = int2d(Th)(dx(u)+dy(v))/area;
+
+ @solve pb4p(q,w,init=n,solver=LU)= int2d(Th)(dx(q)*dx(w)+dy(q)*dy(w))
+    - int2d(Th)((dx(u)+ dy(v)-meandiv)*w/dt)+ on(3,q=0);
+
+ @real meanpq = int2d(Th)(pold - q)/area;
+ if(n%50==49){
+    Th = adaptmesh(Th,[u,v],q,err=0.04,nbvx=100000);
+    plot(Th, wait=true);
+    ubc = uBCin + uBCout; // reinterpolate B.C. 
+    influx0 = int1d(Th,1) (ubc*N.x); // FH add
+    outflux0 = int1d(Th,3) (ubc*N.x); // FH add
+ }
+ p = pold-q-meanpq;
+ u = u + dx(q)*dt;
+ v = v + dy(q)*dt;
+ real err = sqrt(int2d(Th)(square(u-uold)+square(v-vold))/Th.area) ;
+ cout << " iter " << n << " Err L2 = " << err << endl;
+ if(err < 1e-3) break;
+}
+plot(p,wait=1,ps="NSprojP.eps");
+plot(u,wait=1,ps="NSprojU.eps");\eFF
+\end{example}
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=15cm]{NSprojTh}\\
+\includegraphics[width=15cm]{NSprojP}\\
+\includegraphics[width=15cm]{NSprojU}
+
+\caption{\label{figNSproj} Rannacher's projection algorithm: result on an adapted mesh (top) showing
+the pressure (middle) and the horizontal velocity $u$ at Reynolds 400.}
+\end{center}
+\end{figure}
+
+We show in figure \ref{figNSproj} the numerical results obtained for a Reynolds
+number of 400 where mesh adaptation is done after 50 iterations on the first mesh.
+
+\subsection{Newton Method for the Steady Navier-Stokes equations}
+
+The problem is find the velocity field $\bm{u}=(u_i)_{i=1}^d$ and the pressure $p$ of a Flow 
+satisfying in the domain $\Omega \subset  \mathbb{R}^d (d=2,3)$:
+\Blue{\begin{eqnarray*}
+ (\bm{u}\cdot\nabla) \bm{u}-\nu \Delta \bm{u}+\nabla p&=&0,\\ \nabla\cdot \bm{u}&=&0
+\end{eqnarray*}}
+where $\nu$ is the viscosity of the fluid, $\nabla = (\p_i )_{i=1}^d $, the dot product is $\cdot$, and  $\Delta = \nabla\cdot\nabla$
+with the some boundary conditions ( $\bm{u}$ is  given on $\Gamma$)
+
+\bigskip
+
+The weak form is 
+find $\bm{u}, p $ such than for $\forall \bm{v}$ (zero on $\Gamma$), and $\forall  q$ 
+\Blue{\begin{equation}
+  \int_\Omega  ((\bm{u}\cdot\nabla) \bm{u} ). \bm v + \nu \nabla \bm{u}:\nabla \bm{v} 
+  - p \nabla\cdot \bm{v} - q \nabla\cdot \bm{u} = 0 
+\end{equation}}
+
+
+The Newton Algorithm to solve nonlinear Problem is
+
+Find  $u\in  V$ such that $F(u)=0$ where 
+$ F : V \mapsto V $. 
+
+\begin{enumerate} \index{Newton Algorithm
+}
+\item choose $u_0\in \R^n $ , ;
+\item for ( $i =0$; $i$ < niter; $i = i+1$) 
+
+\begin{enumerate}
+\item solve $DF(u_i) w_i =  F(u_i)$;
+\item $u_{i+1} = u_i - w_i$;  
+\end{enumerate}
+ break  $|| w_i|| < \varepsilon$.
+\end{enumerate}
+
+Where $DF(u)$ is the differential of $F$ at point  $u$, this is a linear application such that:
+{$
+  F(u+\delta) = F(u) + DF(u) \delta + o(\delta) 
+$}
+
+
+For Navier Stokes, $F$ and $DF$ are  :
+\Blue{\small
+\begin{eqnarray*}F(\bm{u},p) =  \int_\Omega  &&((\bm{u}\cdot\nabla) \bm{u} ). \bm v + \nu \nabla \bm{u}:\nabla \bm{v} 
+  - p \nabla\cdot \bm{v} - q \nabla\cdot \bm{u}\\
+DF(\bm{u},p)(\bm{\delta u} ,\delta p)  =  \int_\Omega  &&((\bm{\delta u}\cdot\nabla) \bm{u} ). \bm v + ((\bm{u}\cdot\nabla) \bm{\delta u} ). \bm v \\
+ &+& \nu \nabla \bm{\delta u}:\nabla \bm{v}  - \delta p \nabla\cdot \bm{v} - q \nabla\cdot \bm{\delta u}
+\end{eqnarray*}}
+
+
+
+So the Newton algorithm become   
+\begin{example}[NSnewton.edp] 
+\bFF
+...   
+	@for( n=0;n< 15;n++)
+	{ @solve Oseen([du1,du2,dp],[v1,v2,q]) =
+          @int2d(Th) (  nu*(Grad(du1,du2)'*Grad(v1,v2) )
+                      + UgradV(du1,du2, u1, u2)'*[v1,v2]
+                      + UgradV( u1, u2,du1,du2)'*[v1,v2]
+                      - div(du1,du2)*q - div(v1,v2)*dp 
+                      - 1e-8*dp*q // stabilization term 
+                     )
+        - @int2d(Th) (  nu*(Grad(u1,u2)'*Grad(v1,v2) )
+                      + UgradV(u1,u2, u1, u2)'*[v1,v2]
+                      - div(u1,u2)*q - div(v1,v2)*p 
+                     )
+        + @on(1,du1=0,du2=0) ;
+      u1[] -= du1[];  u2[] -= du2[]; p[]  -= dp[];
+      err= du1[].linfty + du2[].linfty + dp[].linfty;        
+      @if(err < eps) @break;    
+      @if( n>3 && err > 10.) @break; //  blowup ???? 
+    }
+\eFF
+
+
+With the  operator: 
+\bFF
+@macro Grad(u1,u2) [ dx(u1),dy(u1) , dx(u2),dy(u2) ]// 
+@macro UgradV(u1,u2,v1,v2) [ [u1,u2]'*[dx(v1),dy(v1)] ,
+                            [u1,u2]'*[dx(v2),dy(v2)] ]// 
+@macro div(u1,u2)  (dx(u1)+dy(u2))//
+\eFF
+
+We build a computation mesh the exterior of a 2d cylinder. 
+
+\bFF
+@real R = 5,L=15;
+@border cc(t=0,2*pi){ x=cos(t)/2;y=sin(t)/2;label=1;}
+@border ce(t=pi/2,3*pi/2) { x=cos(t)*R;y=sin(t)*R;label=1;}
+@border beb(tt=0,1) { real t=tt^1.2; x= t*L; y= -R; label = 1;}
+@border beu(tt=1,0) { real t=tt^1.2; x= t*L; y= R; label = 1;}
+@border beo(t=-R,R) {  x= L; y= t; label = 0;}
+@border bei(t=-R/4,R/4) {  x= L/2; y= t; label = 0;}
+@mesh Th=buildmesh(cc(-50)+ce(30)+beb(20)+beu(20)+beo(10)+bei(10));
+@plot(Th);
+
+// bounding box for the plot
+@func bb=[[-1,-2],[4,2]];
+
+/  FE Space Taylor Hood
+@fespace Xh(Th,P2);// for volicity 
+@fespace Mh(Th,P1);// for pressure 
+Xh u1,u2,v1,v2,du1,du2,u1p,u2p;
+Mh p,q,dp,pp;
+
+// intial guess with B.C. 
+u1 = ( x^2+y^2) > 2;
+u2=0;
+\eFF
+
+Finally we use  trick to make continuation on the viscosity $\nu$, because the Newton method blowup 
+owe start with the final viscosity $\nu$
+\bFF
+//  Physical parameter
+real nu= 1./50, nufinal=1/200. ,cnu=0.5;
+
+// stop test for Newton
+real eps=1e-6;
+
+verbosity=0;
+while(1)  //  Loop on viscosity
+{   int n;
+    real err=0; // err on Newton algo ... 
+    
+      ... put the new the Newton  algo here
+        
+	if(err < eps)                                                               
+	 { // converge decrease $\nu$ (more difficult)                                                                                                                           
+	   plot([u1,u2],p,wait=1,cmm=" rey = " + 1./nu , coef=0.3,bb=bb);                                                           
+	   @if( nu == nufinal) break;                                                                                                
+	   @if( n < 4) cnu=cnu^1.5; // fast converge => change faster                                                                
+	   nu = max(nufinal, nu* cnu); // new vicosity                                                                              
+	   u1p=u1;  u2p=u2;  pp=p; //  save correct solution ...                                                                    
+	 }                                                                                                                          
+	 @else 
+	 {   //  blowup increase $\nu$  (more simple)                                                                         
+	   @assert(cnu< 0.95); //  the method  finally  blowup                                                                                               
+	   nu = nu/cnu; //  get previous value of viscosity                                                                         
+	   cnu= cnu^(1./1.5); // no conv. => change lower                                                                           
+	   nu = nu* cnu;  // new viscosity                                                                                           
+	   cout << " restart nu = " << nu << " Rey= "<< 1./nu << "  (cnu = " << cnu << " ) \n";                                     
+	   // restore a correct solution ..                                                                                           
+	   u1=u1p;                                                                                                                  
+	   u2=u2p;                                                                                                                  
+	   p=pp;                                                                                                                    
+	 }     
+}        
+\eFF
+\end{example}
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=8cm]{NSnewtonTh}
+\includegraphics[width=8cm]{NSnewtonUP}
+\caption{\label{NSnewton} Mesh and the velocity and pressure at Reynolds  $ 200$ }
+\end{center}
+\end{figure}
+
+
+%\paragraph{Gag's or Bug with Stokes Equation, with Boundary condition}
+%
+%
+%Denote: \Blue{$\Gamma$} the boundary, \Blue{$\bm{n}$} the unit exterior normal,  
+%\Blue{$\varepsilon(\bm{u}) =  ( ^t \nabla \bm{u}+ \nabla \bm{u})/2 $}, \Blue{$I_d$} the Identity matrix.
+%
+%\begin{enumerate}
+%\item With BC, the incompressibility imply
+%\Red{$ \int_\Gamma \bm{u}.\bm{n} =0 $} at discrete level. 
+%\item 
+% The force in the fluid on surface $\Sigma$ is \Blue{$ \int_\Sigma (\nu\; \varepsilon(\bm{u})  -  p I_d) \bm{n}  $}. The Weak form is  
+%$\forall \bm{v}, q$ :
+%\[  \int_\Omega  \nu \nabla \bm{u}:\nabla \bm{v} 
+%  - p \nabla\cdot \bm{v} - q \nabla\cdot \bm{u} = {\int_\Gamma \;{}^t\bm{n}(\nu \nabla \bm{u} -  p I_d )   \bm{v} }
+%  \]
+%    Or with a more physical formulation (with the true strain $\varepsilon$):
+%\[  \int_\Omega  \nu\; \varepsilon( \bm{u}):\varepsilon( \bm{v}) 
+%  - p \nabla\cdot \bm{v} - q \nabla\cdot \bm{u} = {\int_\Gamma \;{}^t\bm{n}(\nu \varepsilon (\bm{u}) -  p I_d )   \bm{v} }
+%  \]  
+%\end{enumerate}
+%
+%\begin{figure}[htbp]
+%\begin{center}
+%\includegraphics[width=8cm]{NSnewtonU}
+%\includegraphics[width=8cm]{NSnewtonE}
+%
+%\caption{\label{figconvect} The rotated hill after one revolution, left with Characteristics-Galerkin,
+%on the right with Discontinuous $P_1$ Galerkin FEM.}
+%\end{center}
+%\end{figure}
+%
+
+
+
 \subsection{A Large Fluid Problem}
 A friend of one of us in Auroville-India was building a ramp to access an air conditioned room. As I was visiting the construction site he told me that he expected to cool air escaping by the door to the room to slide down the ramp and refrigerate the feet of the coming visitors.  I told him "no way" and decided to check numerically.  The results are on the front page of this book.
 \\

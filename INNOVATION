@@ -1,4 +1,6 @@
- - add codo to build matrix and vector form varf in 3d in case off  differente meshes
+ - New example in in Chapter 3 Navier Stokes Newton NSNewton.edp
+ - add codo to build matrix and vector form varf in 3d in case of
+      different meshes
     in test 
  - correct NSprojection.edp chap3 example (PB in out flow BC.) 
  - correct compile of mmg3d v4 plugins (small change un distrib archive) 
