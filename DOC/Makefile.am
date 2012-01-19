@@ -105,7 +105,8 @@ FIGS_JPG=plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg       
 figures/mi.jpg plots/LogoUPMC.jpg \
 plots/beam-3d.jpg \
 plots/logo-finance-par-anr.jpg \
-plots/VarIneqFill.jpg plots/VarIneqIso.jpg
+plots/VarIneqFill.jpg plots/VarIneqIso.jpg \
+plots/NSNewtonTh.jpg  plots/NSNewtonUP.jpg
 
 FIGS_PDF= plots/LogoCNRS.pdf    plots/LogoLJLL.pdf  plots/ffauteur.pdf  \
 plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf \
