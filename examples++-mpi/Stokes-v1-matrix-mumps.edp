@@ -8,12 +8,17 @@ loadpath += "./"
 load "msh3"
 load "medit"
 load "MUMPS_FreeFem"
+include "getARGV.idp"
 
 verbosity=0;
 real ttgv=1e10;
 string ssparams="nprow=1, npcol="+mpisize;
 
-int nn=10;
+
+
+int nn=getARGV("-n",20);
+int pplot=getARGV("-plot",0);
+
 
 mesh Th2=square(nn,nn);
 fespace Vh2(Th2,P2);  Vh2 ux,uz,p2;
@@ -72,6 +77,6 @@ cout << " solve                   " <<  time3 << endl;
 cout << "                          ------------" << endl;
 cout << " all                     " <<  timeI << endl;
 cout << "============= CPU TIME ============" << endl;
-if(mpirank==0) 
-medit("UV2 PV2",Th,[u1,u2,u3],p);
+if(mpirank==0 && pplot) 
+  medit("UV2 PV2",Th,[u1,u2,u3],p);
 
