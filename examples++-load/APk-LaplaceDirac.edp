@@ -1,0 +1,32 @@
+ // Laplace with RHS sum of Dirac 
+ //  f = sum  cdelta_i \delta_i
+ real[int] xdelta = [0.25,0.6];//  coord x de delta_i
+ real[int] ydelta = [0.25,0.6];//  coord x de delta_j
+ real[int] cdelta=[1.,2.];//  coef    delta_i
+  mesh Th=square(10,10);
+  verbosity=0;
+ for(int iter=0;iter < 20;iter++)
+ {
+
+ fespace Vh(Th,P1);     // P1 FE space
+ 
+ matrix D = interpolate(Vh,xdelta,ydelta); // the interpolation matrix  
+ // at point (xdelta[j],ydelta[i] ) \hfill
+ // so $D_ij = w^i((xdelta[j],ydelta[i]) $ where $w^i$ are the basic function of $V_h$. 
+ 
+ Vh uh,vh;  // unkown and test function. 
+ //func g=0;                 //  boundary condition function
+ Vh b;
+ b[]= D*cdelta;
+ b[]= -b[];
+ problem laplace(uh,vh) =                    //  definion of  the problem 
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  + b[]                         //  linear form of the rhs (so an array)
+  + on(1,2,3,4,uh=0) ;          //  boundary condition form
+
+  laplace; // solve the problem plot(uh); // to see the result
+  cout << "max uh = " << uh[].max << " nv =  "<< Th.nv <<  endl; 
+  plot(uh,wait=1,dim=3,fill=1);
+  plot(Th,wait=1);
+  Th=adaptmesh(Th,uh,nbvx=100000,err= 0.01*1.2^-iter);
+  }
