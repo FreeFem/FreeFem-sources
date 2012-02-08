@@ -313,7 +313,7 @@ myfunction2.cpp myfunction2.edp ttestio.edp \
 cmaes-VarIneq.edp cmaes-oven.edp cmaes.cpp \
 cmaes.h cmaes_interface.h ff-cmaes.cpp \
 VarIneq2.edp ff-NLopt.cpp \
-APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-LaplaceDirac.edp APk-MetricPk.edp \
+APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp  APk-MetricPk.edp \
 MetricPk.cpp GeometryQA.cpp  FreeFemQA.cpp BasicMath.h \
 GeoDiff.h Polynomial.h RZ.h SortedList.h ExampleMetrics.h 
 
