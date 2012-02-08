@@ -1,3 +1,7 @@
+ - add tools for adaptation of P2 and P3 finite elements with metrics
+   see APk-AdaptEpsDeltaPk.edp APk-FreeFemQA.edp	 APk-MetricPk.edp
+    APk-ExplicitPkTest.edp	       APk-LaplaceDirac.edp
+
  - New example in in Chapter 3 Navier Stokes Newton NSNewton.edp
  - add codo to build matrix and vector form varf in 3d in case of
       different meshes

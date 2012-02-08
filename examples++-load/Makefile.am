@@ -46,7 +46,10 @@ Element_Mixte.cpp LaplaceRT1.edp lame-TD-NSS.edp test-ElementMixte.edp \
 myfunction2.cpp myfunction2.edp ttestio.edp \
 cmaes-VarIneq.edp cmaes-oven.edp cmaes.cpp \
 cmaes.h cmaes_interface.h ff-cmaes.cpp \
-VarIneq2.edp ff-NLopt.cpp
+VarIneq2.edp ff-NLopt.cpp \
+APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-LaplaceDirac.edp APk-MetricPk.edp \
+MetricPk.cpp GeometryQA.cpp  FreeFemQA.cpp BasicMath.h \
+GeoDiff.h Polynomial.h RZ.h SortedList.h ExampleMetrics.h 
 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
@@ -65,7 +68,9 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
         isolineP1.$(DYLIB_SUFFIX) isoline.$(DYLIB_SUFFIX)  thresholdings.$(DYLIB_SUFFIX) \
         VTK_writer_3d.$(DYLIB_SUFFIX)  VTK_writer.$(DYLIB_SUFFIX) \
 	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) \
-	myfunction2.$(DYLIB_SUFFIX) ff-NLopt.$(DYLIB_SUFFIX)  ff-cmaes.$(DYLIB_SUFFIX)
+	myfunction2.$(DYLIB_SUFFIX) ff-NLopt.$(DYLIB_SUFFIX)  ff-cmaes.$(DYLIB_SUFFIX) \
+	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX)
+
 
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) \
 	metis.$(DYLIB_SUFFIX) UMFPACK64.$(DYLIB_SUFFIX) NewSolver.$(DYLIB_SUFFIX) \
