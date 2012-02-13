@@ -1,3 +1,5 @@
+ - add generation of error in case of periodic boundary condition 
+   non scalar problem. 
  - add tools for adaptation of P2 and P3 finite elements with metrics
    see APk-AdaptEpsDeltaPk.edp APk-FreeFemQA.edp	 APk-MetricPk.edp
     APk-ExplicitPkTest.edp	       APk-LaplaceDirac.edp
