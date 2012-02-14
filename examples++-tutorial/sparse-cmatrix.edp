@@ -116,7 +116,11 @@ plot(xxr, wait=1);
   mesh Th=square(2,2);
   fespace Xh(Th,P1);
   varf vv(u,v)= int2d(Th)( ((2+1i)*u*v)');//');
+  varf vr(u,v)= int2d(Th)( u*v);//');
+
   matrix<complex> A=vv(Xh,Xh);
+  matrix  Ar=vr(Xh,Xh);
+
   cout << A(0,0)  << endl;
   cout << [ 1i, 1i]'*[ 1i, 1i] <<endl;//'; 
   macro Grada(u) [  phia*dx(u) + phiax*u ,dy(u) ]// ...
@@ -129,7 +133,12 @@ plot(xxr, wait=1);
   cout << A(1,2)' << " ==  " << At(2,1) << endl;
   A = A+ (-1)*At;
   cout << A << endl;
- 
+  // copy and initialisation of complex matric with real matrix. 
+ A = Ar; 
+ matrix<complex> Ac=Ar; 
+  // real part un complex par of matrix . 
+ Ar = A.re;
+ Ar = A.im; 
 
 
 }

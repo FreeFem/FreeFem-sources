@@ -520,6 +520,8 @@ public:
    void operator=(const MatriceProfile & A);
 };
 
+
+                                          
 template <class R> 
 class MatriceMorse:public MatriceCreuse<R> {
 //  numebering  is no-symmetric
@@ -541,6 +543,7 @@ public:
   int * cl;  
 public:
 
+    
  class VirtualSolver :public RefCounter { 
    friend class MatriceMorse;
    virtual void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  =0;
@@ -568,7 +571,7 @@ public:
     :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
   {build(this,Uh,Vh,data);           
   }
-
+ 
 MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=false, const VirtualSolver * s=0,bool transpose=false )
     :MatriceCreuse<R>(nn,mm,dd && !transpose),
      nbcoef(nbc),
@@ -628,7 +631,10 @@ template<class K>
      return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
   bool  addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.);
   
-
+  template<typename RR,typename K> static  RR CastTo(K  b){return b;}
+                                                  
+  template<class K>
+    MatriceMorse(const MatriceMorse<K> & , R (*f)(K) );
   template<class K>
     MatriceMorse(const MatriceMorse<K> & );
 
