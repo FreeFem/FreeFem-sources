@@ -1,3 +1,4 @@
+ - correct Typo error in example 
  - add generation of error in case of periodic boundary condition 
    non scalar problem. 
  - add tools for adaptation of P2 and P3 finite elements with metrics
