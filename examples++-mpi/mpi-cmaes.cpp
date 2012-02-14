@@ -1,5 +1,3 @@
-
-//ff-c++-cpp-dep: ../examples++-load/cmaes.cpp -I../examples++-load
 // -*- Mode : c++ -*-
 //
 // SUMMARY  :      
@@ -28,6 +26,8 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+//ff-c++-LIBRARY-dep: mpi 
+//ff-c++-cpp-dep: ../examples++-load/cmaes.cpp -I../examples++-load
 
 /* 
 	This is a freefem interface of the Hansen's CMA-ES C optimizer.
