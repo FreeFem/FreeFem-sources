@@ -792,7 +792,7 @@ lg[this->n]=this->n;
 
 template<class R>
 template<class K>
- MatriceMorse<R>::MatriceMorse(const MatriceMorse<K> & A)
+ MatriceMorse<R>::MatriceMorse(const MatriceMorse<K> & A,R (*f)(K ))
    : MatriceCreuse<R>(A.n,A.m,A.dummy),nbcoef(A.nbcoef),      
      symetrique(A.symetrique),       
      a(new R[nbcoef]),
@@ -806,9 +806,30 @@ template<class K>
   for (int k=0;k<nbcoef;k++)
     {
       cl[k]=A.cl[k];
-      a[k]=A.a[k];
+      a[k]=f(A.a[k]);
     }
   
+}
+
+template<class R>
+template<class K>
+MatriceMorse<R>::MatriceMorse(const MatriceMorse<K> & A)
+: MatriceCreuse<R>(A.n,A.m,A.dummy),nbcoef(A.nbcoef),      
+symetrique(A.symetrique),       
+a(new R[nbcoef]),
+lg(new int [this->n+1]),
+cl(new int[nbcoef]),
+solver(0)
+{
+    ffassert(a && lg &&  cl);
+    for (int i=0;i<=this->n;i++)
+        lg[i]=A.lg[i];
+    for (int k=0;k<nbcoef;k++)
+    {
+        cl[k]=A.cl[k];
+        a[k]=A.a[k];
+    }
+    
 }
 
 

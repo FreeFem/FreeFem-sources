@@ -1400,7 +1400,7 @@ template<class R>
    return mr;
  }
  };
-template<class R,class RR>
+template<class R,class RR,int init>
 AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
 {
   using namespace Fem2D;
@@ -1418,21 +1418,24 @@ AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
   Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
   //  sparse_mat->pUh=Mat->pUh;
   // sparse_mat->pVh=Mat->pUh;;
+  if(!init) sparse_mat->init() ;
   sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
   sparse_mat->A.master(mrr);
+  //delete mr;
   return sparse_mat;
 }
 
-template<class R,class RR>
+template<class R,class RR,int init>
 AnyType CopyTrans(Stack stack,Expression emat,Expression eA)
 {
- return CopyMat_tt<R,RR>(stack,emat,eA,true);
+ return CopyMat_tt<R,RR,init>(stack,emat,eA,true);
 }
-template<class R,class RR>
+template<class R,class RR,int init>
 AnyType CopyMat(Stack stack,Expression emat,Expression eA)
 {
- return CopyMat_tt<R,RR>(stack,emat,eA,false);
+ return CopyMat_tt<R,RR,init>(stack,emat,eA,false);
 }
+
 
 template<class R>
 AnyType MatFull2Sparse(Stack stack,Expression emat,Expression eA)
@@ -1550,7 +1553,21 @@ struct Op2_mulvirtAv: public binary_function<AA,BB,RR> {
   static RR f(const AA & a,const BB & b)  
   { return RR( (*a).A, b );} 
 };
- 
+
+class Matrice_Creuse_C2R  { public:
+    typedef Complex K;  
+    Matrice_Creuse<K> * A;
+    int cas; //  0 re , 1 im 
+    Matrice_Creuse_C2R(Matrice_Creuse<K> * AA,int cas) : A(AA) {assert(A);}
+    operator MatriceCreuse<K> & () const {return *A->A;}
+    operator Matrice_Creuse<K> * () const {return A;}
+};
+
+template<int cas> 
+Matrice_Creuse_C2R Build_Matrice_Creuse_C2R(Matrice_Creuse<Complex> * pAA)
+{
+  return Matrice_Creuse_C2R(pAA,cas);
+}
  
 template<class K>
 class OneBinaryOperatorA_inv : public OneOperator { public:  
@@ -1570,6 +1587,9 @@ class OneBinaryOperatorA_inv : public OneOperator { public:
        return  new E_F_F0<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>(Build<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>,t[0]->CastTo(args[0])); 
     }
 };
+
+
+
 
 template<class K>
 class Psor :  public E_F0 { public:  
@@ -2225,6 +2245,31 @@ public: // warning hack  A and B
 };
 
 
+R realC(Complex c) {return c.real();}
+R imagC(Complex c) {return c.imag();}
+template<int init>
+AnyType CopyMatC2R(Stack stack,Expression emat,Expression CR2eA)
+{
+    typedef Complex C; 
+    typedef double R; 
+    using namespace Fem2D;
+    Matrice_Creuse_C2R   CRMat =GetAny<Matrice_Creuse_C2R>((*CR2eA)(stack));
+    Matrice_Creuse<C> *Mat=CRMat; 
+    int cas = CRMat.cas; 
+    Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
+    MatriceMorse<C> * mr=Mat->A->toMatriceMorse(false,false);
+    MatriceMorse<R> * mrr = 0;
+    if(cas==0) 
+        mrr = new MatriceMorse<R>(*mr,realC);
+    else 
+        mrr = new MatriceMorse<R>(*mr,imagC);
+    delete mr;
+    if(!init) sparse_mat->init() ; // ???? 
+    sparse_mat->A.master(mrr);
+    //ffassert(0);// a faire 
+    return sparse_mat;
+}
+
 template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
 {
     MatriceMorse<R> * amorse =0; 
@@ -2469,8 +2514,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 //       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R,R>,E_F_StackF0F0>(ProdMat<R,R,R>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat<R>),       
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R>), 
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R>) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R,1>), 
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R,1>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparse<R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R>) ,
@@ -2483,8 +2528,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 //       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R,R>,E_F_StackF0F0>(ProdMat<R,R,R>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat<R>)  ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R>), 
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R>) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R,0>), 
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R,0>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparse<R>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R>) 
@@ -2676,11 +2721,20 @@ void  init_lgmat()
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes3>::Op*,E_F_StackF0F0>(SetMatrixInterpolation3)
 		   );
  // construction of complex matrix form a double matrix
- TheOperators->Add("=", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,E_F_StackF0F0>(CopyMat<R,Complex>)
+ TheOperators->Add("=", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,E_F_StackF0F0>(CopyMat<R,Complex,1>)
 		   );
  
- TheOperators->Add("<-", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,E_F_StackF0F0>(CopyMat<R,Complex>)
+ TheOperators->Add("<-", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,E_F_StackF0F0>(CopyMat<R,Complex,0>)
 		   );
+ // Global.Add("imag","(",new OneOperator1_<double,Complex>(Imag));
+ //   Add<double>("<--","(",new OneOperator1_<double,Complex>(Real));
+    Dcl_Type<Matrice_Creuse_C2R>(); 
+    Add<Matrice_Creuse<Complex>*>("re",".",new OneOperator1<Matrice_Creuse_C2R ,Matrice_Creuse<Complex>* >(Build_Matrice_Creuse_C2R<0> ));
+    Add<Matrice_Creuse<Complex>*>("im",".",new OneOperator1<Matrice_Creuse_C2R ,Matrice_Creuse<Complex>* >(Build_Matrice_Creuse_C2R<1> ));
+    // construction of complex matrix form a double matrix
+    TheOperators->Add("=", new OneOperator2_<Matrice_Creuse<double>*,Matrice_Creuse<double>*,Matrice_Creuse_C2R,E_F_StackF0F0>(CopyMatC2R<1>));
+
+    TheOperators->Add("<-", new OneOperator2_<Matrice_Creuse<double>*,Matrice_Creuse<double>*,Matrice_Creuse_C2R,E_F_StackF0F0>(CopyMatC2R<0>));
 
  extern  void init_UMFPack_solver();
  init_UMFPack_solver();
