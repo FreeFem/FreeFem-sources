@@ -115,13 +115,14 @@ plot(xxr, wait=1);
 {// version 3.8    
   mesh Th=square(2,2);
   fespace Xh(Th,P1);
-  varf vv(u,v)= int2d(Th)( ((2+1i)*u*v)');//');
+  varf vv(u,v)= int2d(Th)( ((2+1i)*u*v)')+int2d(Th)((3+2i)*v);//');
   varf vr(u,v)= int2d(Th)( u*v);//');
 
   matrix<complex> A=vv(Xh,Xh);
   matrix  Ar=vr(Xh,Xh);
-
-
+  complex[int] vc=vv(0,Xh);
+  real[int] vrr=vc.re;
+  vrr=vc.im;
   cout << [ 1i, 1i]'*[ 1i, 1i] <<endl;//'; 
   // real part un complex par of matrix . 
   Ar = A.re;
