@@ -121,8 +121,16 @@ plot(xxr, wait=1);
   matrix<complex> A=vv(Xh,Xh);
   matrix  Ar=vr(Xh,Xh);
 
-  cout << A(0,0)  << endl;
+
   cout << [ 1i, 1i]'*[ 1i, 1i] <<endl;//'; 
+  // real part un complex par of matrix . 
+  Ar = A.re;
+  cout <<" A(0,0) = " << A(0,0)  << "   ";
+  cout << " A.re(0.0) = " << Ar(0,0) << "   " ;
+  Ar = A.im; 
+  cout << " A.im(0.0) = " << Ar(0,0) << endl  ;
+
+  
   macro Grada(u) [  phia*dx(u) + phiax*u ,dy(u) ]// ...
     func phia = exp(-2i*pi*x);
   func phiax = -2i*pi*exp(-2i*pi*x);
@@ -136,9 +144,7 @@ plot(xxr, wait=1);
   // copy and initialisation of complex matric with real matrix. 
  A = Ar; 
  matrix<complex> Ac=Ar; 
-  // real part un complex par of matrix . 
- Ar = A.re;
- Ar = A.im; 
+
 
 
 }

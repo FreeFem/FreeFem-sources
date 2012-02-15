@@ -1558,7 +1558,7 @@ class Matrice_Creuse_C2R  { public:
     typedef Complex K;  
     Matrice_Creuse<K> * A;
     int cas; //  0 re , 1 im 
-    Matrice_Creuse_C2R(Matrice_Creuse<K> * AA,int cas) : A(AA) {assert(A);}
+    Matrice_Creuse_C2R(Matrice_Creuse<K> * AA,int cass) : A(AA),cas(cass) {assert(A);}
     operator MatriceCreuse<K> & () const {return *A->A;}
     operator Matrice_Creuse<K> * () const {return A;}
 };
@@ -1566,6 +1566,7 @@ class Matrice_Creuse_C2R  { public:
 template<int cas> 
 Matrice_Creuse_C2R Build_Matrice_Creuse_C2R(Matrice_Creuse<Complex> * pAA)
 {
+    
   return Matrice_Creuse_C2R(pAA,cas);
 }
  
@@ -2259,10 +2260,15 @@ AnyType CopyMatC2R(Stack stack,Expression emat,Expression CR2eA)
     Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
     MatriceMorse<C> * mr=Mat->A->toMatriceMorse(false,false);
     MatriceMorse<R> * mrr = 0;
+   
     if(cas==0) 
         mrr = new MatriceMorse<R>(*mr,realC);
-    else 
+    else if(cas==1) 
         mrr = new MatriceMorse<R>(*mr,imagC);
+    else {
+         cout << " cas = " << cas <<endl;
+        ffassert(0); 
+    }
     delete mr;
     if(!init) sparse_mat->init() ; // ???? 
     sparse_mat->A.master(mrr);
