@@ -31,7 +31,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.18}
+\def\VERSION{3.18-1}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -81,7 +81,7 @@
 %{\Huge A. Le Hyaric, K. Ohtsuka } }}
 \includegraphics[width=6cm]{ffauteur}
 \vglue 1cm
-\includegraphics[width=15cm]{csSnap}
+\includegraphics[width=15cm]{chesapeake-2}
 \\ \vglue0.5cm
 Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \vglue-2cm
@@ -4453,6 +4453,14 @@ one has:  $ M_{ab}$  a basic matrix with the only  non zero term $m_{ab}=1$.
   B.resize(10,20); //  resize the sparse matrix \index{matrix!resize} and  remove out of bound terms
 \eFF
 where $A$ is a given matrix.
+\item complex versu real sparse matrix: \index{re}\index{matrix!re}\index{im}\index{matrix!im} \index{matrix!real to complex}
+\bFF
+  @matrix<@complex> C=vv(Xh,Xh);
+  @matrix  R=vr(Xh,Xh);
+  @matrix<complex> CR=R; C=R; // create or copy real matrix tp complex matrix 
+  R=C.im; R=C.re; // get real or imagery part of complex sparse matrix 
+  @matrix CI=C.im,  CR=C.re; // get real or imagery part of complex  sparse matrix 
+\eFF
 \end{itemize}
 
 \subsubsection{\setS{Matrix Operations}}
