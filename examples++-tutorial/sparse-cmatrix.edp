@@ -121,8 +121,10 @@ plot(xxr, wait=1);
   matrix<complex> A=vv(Xh,Xh);
   matrix  Ar=vr(Xh,Xh);
   complex[int] vc=vv(0,Xh);
-  real[int] vrr=vc.re;
-  vrr=vc.im;
+  real[int] vrr=vc.re,vii=vc.im;
+  vrr=vc.re;
+  vii=vc.im;
+  cout << "vc[0] = " <<vc[0] << " = " << vc.re[0] << " +i " << vc.im[0] <<endl;
   cout << [ 1i, 1i]'*[ 1i, 1i] <<endl;//'; 
   // real part un complex par of matrix . 
   Ar = A.re;
