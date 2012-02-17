@@ -12,7 +12,7 @@ int nadapt=1;
 real starttol=1e-10,bctol=6.e-12;
 fespace Vh(Th,P1);
 Vh ou1,ou2;
-real pena=1000;
+real pena=100;
 
 
 for(int al=0;al<nadapt;++al)
@@ -95,6 +95,7 @@ func real J(real[int] &X)
 	Au2 -= b2;
 	real val = u1[]'*Au1 + u2[]'*Au2;
 	val +=  pena * IneqC(X);
+	if(iter%200==199) 
 	plot(u1,u2,nbiso=30,fill=1,dim=3,cmm="adapt level " + al + " - iteration " + iter + " - J = " + val,value=1);
 	return val ;
 }
@@ -111,7 +112,7 @@ if(al==0)
 else FEFToSSP(ou1[],ou2[],start);
 
 
-real mini = cmaes(J,start,stopMaxFunEval=10000*(al+1),stopTolX=1.e-4/(10*(al+1)),initialStdDev=(0.025/(pow(100.,al))));
+real mini = cmaes(J,start,stopMaxFunEval=1000*(al+1),stopTolX=1.e-1/(10*(al+1)),initialStdDev=(0.025/(pow(100.,al))));
 Vh best1,best2;
 SSPToFEF(best1[],best2[],start);
 

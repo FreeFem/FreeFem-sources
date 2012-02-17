@@ -12,7 +12,7 @@ int regi=nbres, rege=nbres+1, lext=1;K=1;	K[regi]=10;
 macro Grad(u) [dx(u),dy(u)]//EOM
 macro Resistor(i,cx,cy,lab)
 border Res#i(t=0.,2*pi) {x=cx+R*cos(t); y=cy+R*sin(t); label=lab;}//EOM
-real pena = 10000;
+real pena = 100;
 func target = 100.;
 
 real[int] Xmin(3*nbres),Xmax(3*nbres);
@@ -71,7 +71,7 @@ func real J(real[int] &X)
 	//plot(reg,value=1,fill=1,wait=1);
 	
 	solve Chaleur(u,v) = int2d(Th)( (dx(u)*dx(v) + dy(u)*dy(v)) * K[region]) + int1d(Th,0)(u*v) - int2d(Th)(pr[region]*v) ;
-	
+	if(iter %200 == 199)
 	plot(u,fill=1,nbiso=50,wait=0,dim=2);
 	real meanu = int2d(Th,Th(L/2,l/2).region)(u)/int2d(Th,Th(L/2,l/2).region)(1.);
 	real res = int2d(Th,Th(L/2,l/2).region)(square(u-target));
@@ -157,5 +157,7 @@ real[int] isd  =[1000,isdxy,isdxy,1000,isdxy,isdxy,1000,isdxy,isdxy,1000,isdxy,5
 real[int] start=[pst,L/6,l/6,pst,L/2,l/6,pst,5*L/6,l/6,pst,L/6,5*l/6,pst,L/2,5*l/6,pst,5*L/6,5*l/6];
 
 //dJ(start);
-cout << cmaes(J,start,initialStdDevs=isd,stopTolFun=1e-5);
+cout << cmaes(J,start,initialStdDevs=isd,stopTolFun=1e-1,stopMaxIter=200,stopMaxFunEval=1000);
 //BFGS(J,dJ,start,nbiterline=10,nbiter=3000,eps=1.e-8);
+iter = 1000;
+J(start);

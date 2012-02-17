@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: metis  superlu_dist mpi
+//ff-c++-LIBRARY-dep: metis  superlu_dist parmetis blas mpi fc
 //ff-c++-cpp-dep: 
 /*
   Interface freefem++ et SuperLU_DIST_2.3 
@@ -186,7 +186,7 @@ public:
     if(mpicommw)
       superlu_gridinit(*mpicommw, nprow, npcol, &grid);
     else
-      superlu_gridinit(MPI::COMM_WORLD, nprow, npcol, &grid);
+      superlu_gridinit(MPI_COMM_WORLD, nprow, npcol, &grid);
     
     /* Bail out if I do not belong in the grid. */
     iam = grid.iam;
