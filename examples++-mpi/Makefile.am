@@ -19,7 +19,8 @@ hypre_FreeFem.cpp \
 interfacepastix.cpp \
 parms_FreeFem.cpp \
 real_SuperLU_DIST_FreeFem.cpp \
-real_pastix_FreeFem.cpp mpi-cmaes.cpp 
+real_pastix_FreeFem.cpp mpi-cmaes.cpp \
+ffmumps_fileparam.txt		ffpastix_iparm_dparm.txt	ffsuperlu_dist_fileparam.txt
 
 
 
