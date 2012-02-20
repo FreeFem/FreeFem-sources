@@ -68,6 +68,8 @@ Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
 Source: "examples++-load\*.edp"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\*.cpp"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\*.pgm"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\cube.msh"; DestDir: "{app}\examples++-load"
+
 Source: "examples++-load\load.link"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\include-tmp\*"; DestDir: "{app}\examples++-load\include"
 Source: "examples++-3d\*.edp"; DestDir: "{app}\examples++-3d"
