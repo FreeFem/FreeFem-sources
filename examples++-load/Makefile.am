@@ -50,7 +50,8 @@ VarIneq2.edp ff-NLopt.cpp \
 APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp  APk-MetricPk.edp \
 MetricPk.cpp GeometryQA.cpp  FreeFemQA.cpp BasicMath.h  TensorK.hpp  Geometry.hpp  \
 GeoDiff.h Polynomial.h RZ.h SortedList.h ExampleMetrics.h  \
-cube.msh 
+cube.msh  \
+LapMUMPS_seq.edp MUMPS_seq.cpp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -69,14 +70,14 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
         VTK_writer_3d.$(DYLIB_SUFFIX)  VTK_writer.$(DYLIB_SUFFIX) \
 	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) ff-NLopt.$(DYLIB_SUFFIX)  ff-cmaes.$(DYLIB_SUFFIX) \
-	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX)
+	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) 
 
 
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) \
 	metis.$(DYLIB_SUFFIX) UMFPACK64.$(DYLIB_SUFFIX) NewSolver.$(DYLIB_SUFFIX) \
 	lapack.$(DYLIB_SUFFIX)  fflapack.$(DYLIB_SUFFIX) ffnewuoa.$(DYLIB_SUFFIX) ilut.$(DYLIB_SUFFIX) \
 	freeyams.$(DYLIB_SUFFIX) mmg3d-v4.0.$(DYLIB_SUFFIX) mshmet.$(DYLIB_SUFFIX) \
-       gsl.$(DYLIB_SUFFIX)	
+       gsl.$(DYLIB_SUFFIX) MUMPS_seq.$(DYLIB_SUFFIX) 	
 bin_PROGRAMS=
 
 
