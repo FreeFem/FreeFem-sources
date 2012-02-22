@@ -1,3 +1,5 @@
+version 3.16-2
+ - add plugins with eq mumps ..
  - add conversion of re and im part of complex sparse matrix
    A = C.im; 
    A = C.re; 

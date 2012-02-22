@@ -353,21 +353,22 @@ public:
     }
 
     // uniquement donner au host 
-    if(myid==0){
-      if( !(perm_r==NULL) && id.ICNTL(7)==1){
-	for(int ii=0; ii<n; ii++) id.perm_in[ii] = pperm_r[ii];
-      }
-      // a decommenter
-      //if( !(perm_c==NULL) && id.ICNTL(6)==1){
-      //for(int ii=0; ii<m; ii++) id.perm_in[ii] = pperm_c[ii];
+    if(myid==0)
+      {
+	if( !(perm_r==NULL) && id.ICNTL(7)==1){
+	  for(int ii=0; ii<n; ii++) id.perm_in[ii] = pperm_r[ii];
+	}
+	// a decommenter
+	//if( !(perm_c==NULL) && id.ICNTL(6)==1){
+	//for(int ii=0; ii<m; ii++) id.perm_in[ii] = pperm_c[ii];
       //}
-      if( !(scale_r==NULL) && !(scale_c==NULL) && id.ICNTL(8)==-1 ){
-	// param_double[0::n-1] :: row  
-	// param_double[n::n+m-1] :: column 
-	for(int ii=0; ii<n; ii++) id.rowsca[ii] = scale_r[ii]; 
-	for(int ii=0; ii<m; ii++) id.colsca[ii] = scale_c[ii];
+	if( !(scale_r==NULL) && !(scale_c==NULL) && id.ICNTL(8)==-1 ){
+	  // param_double[0::n-1] :: row  
+	  // param_double[n::n+m-1] :: column 
+	  for(int ii=0; ii<n; ii++) id.rowsca[ii] = scale_r[ii]; 
+	  for(int ii=0; ii<m; ii++) id.colsca[ii] = scale_c[ii];
+	}
       }
-    }
 
     irn = NULL;
     jcn = NULL;
