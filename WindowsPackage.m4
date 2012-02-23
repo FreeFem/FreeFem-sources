@@ -50,8 +50,10 @@ Source: "examples++-load\ff-c++"; DestDir: "{app}"
 ; mingwm10.dll is necessary when "-mthreads" is used as a compilation
 ; flag.
 
-Source: "C:\Cygwin\bin\mingwm10.dll"; DestDir: "{app}"
+Source: "C:\MinGW\bin\mingwm10.dll"; DestDir: "{app}"
 Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
+Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
+Source: "C:\MinGW\bin\libpthread-2.dll"; DestDir: "{app}"
 
 ; Does not include FreeFem++-x11 which would need the Cygwin X-Server
 ; Does not include FreeFem++-glx which would need the Cygwin X-Server
