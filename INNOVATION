@@ -1,9 +1,9 @@
-version 3.16-2
- - add plugins with eq mumps ..
+version 3.18-2
+ - add plugins with sequentiel  mumps without mpi 
  - add conversion of re and im part of complex sparse matrix
    A = C.im; 
    A = C.re; 
-version 3.16-1
+version 3.18-1
  - correct Typo error in example 
  - add generation of error in case of periodic boundary condition 
    non scalar problem. 

@@ -255,9 +255,9 @@ then
 	*) ;;
     esac
     AC_SUBST(CFLAGSF77,$ff_cfagsf77)
-    if test $ff_f77intsize -eq  8
+    if test $ff_f77intsize -ne  4
     then
-	AC_MSG_ERROR([ Fatal Error: Your fortran 77  compiler have by 8 bytes integer ],1);  
+	AC_MSG_ERROR([ Fatal Error: Your fortran 77  compiler have by not 4 bytes integer ( $ff_f77intsize bytes) ],1);  
     fi
 
     AC_FF_ADDWHERELIB(f77,$FLIBS,$ff_cfagsf77)
@@ -295,6 +295,10 @@ AC_LANG(C++)
 # Some useful libraries
 
 AC_CHECK_LIB(pthread,pthread_create,ff_pthread="-lpthread",ff_pthread="")
+
+if test -n "$ff_pthread"  ; then
+    AC_FF_ADDWHERELIB(pthread,$ff_pthread,)
+fi
 
 # Necessary absolute pathname for local directory when some libraries
 # are used from several different locations (for instance locally in

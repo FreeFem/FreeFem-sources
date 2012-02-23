@@ -6358,9 +6358,9 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
     esac
     CFLAGSF77=$ff_cfagsf77
 
-    if test $ff_f77intsize -eq  8
+    if test $ff_f77intsize -ne  4
     then
-	as_fn_error 1 " Fatal Error: Your fortran 77  compiler have by 8 bytes integer " "$LINENO" 5;
+	as_fn_error 1 " Fatal Error: Your fortran 77  compiler have by not 4 bytes integer ( $ff_f77intsize bytes) " "$LINENO" 5;
     fi
 
     	if test -z "$ff_where_lib_conf_f77" ; then
@@ -7380,6 +7380,20 @@ else
   ff_pthread=""
 fi
 
+
+if test -n "$ff_pthread"  ; then
+    	if test -z "$ff_where_lib_conf_pthread" ; then
+	    echo "pthread LD $ff_pthread"  >>$ff_where_lib_conf
+	    test -n "" && echo "pthread INCLUDE  "  >>$ff_where_lib_conf
+            ff_where_lib_conf_pthread=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add pthread : $ff_pthread  in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add pthread : $ff_pthread  in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add pthread : $ff_pthread  in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add pthread : $ff_pthread  in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+fi
 
 # Necessary absolute pathname for local directory when some libraries
 # are used from several different locations (for instance locally in
