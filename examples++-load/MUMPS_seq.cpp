@@ -1,5 +1,5 @@
 //   for automatic  compilation with ff-c++
-//ff-c++-LIBRARY-dep:  mumps-seq blas  libseq  fc  
+//ff-c++-LIBRARY-dep:  mumps-seq blas  libseq  fc  pthread
 //ff-c++-cpp-dep: 
 //  
 //  file to add UMFPACK solver with dynamic load.
