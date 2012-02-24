@@ -1123,7 +1123,8 @@ class KN :public KN_<R> { public:
 //          { return   (KN<const_R> &) *this;}
 //    operator KN<const_R> const & ()  const 
 //          { return (const KN<const_R>& ) *this;}
-  void init(long nn) {this->n=nn;this->step=1;this->next=-1;this->v=new R[nn];}
+    static void fill0(R *v,int n) { if(n && v) for(int i=0;i<n;++i) v[i]=R();} 
+    void init(long nn) {this->n=nn;this->step=1;this->next=-1;this->v=new R[nn];fill0(this->v,this->n) ;}
   void init() {this->n=0;this->step=1;this->next=-1;this->v=0;}
   void init(const KN_<R> & a){init(a.N()); operator=(a);}
   void resize(long nn) {

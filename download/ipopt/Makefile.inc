@@ -1,0 +1,10 @@
+abs_top_builddir=/Users/hecht/work/ff++
+DOWNLOADFF= $(abs_top_builddir)/download
+CC      = gcc
+CXX      = g++
+CXXFLAGS      = -g  -m64 -fPIC -g -DDRAWING -DBAMG_LONG_LONG -DCHECK_KN -fno-inline  -fexceptions -fPIC
+FC      = /opt/local/bin/g95 
+FCFLAGS      = -g -O2 -fPIC 
+LIBBLAS =  -framework vecLib
+LIBLAPACK =
+WGET=wget --no-check-certificate

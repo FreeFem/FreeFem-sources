@@ -32,9 +32,9 @@ WHERE:
 	if [ -f $(SRCDIR)/FAIT  ] ;then \
 	$(MAKE) install ; \
 	echo mumps-seq LD -L@DIR@/lib   -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ  -lmumps_commonFREEFEM-SEQ -lpordFREEFEM-SEQ   >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
-	echo mumps-seq INCLUDE -I@DIR@/include/libseq  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
-	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
-	echo libseq INCLUDE -I@DIR@/include/libseq>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
+	echo mumps-seq INCLUDE -I@DIR@/include/libseq  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;\
+	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;\
+	echo libseq INCLUDE -I@DIR@/include/libseq>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;\
 	fi
 
 

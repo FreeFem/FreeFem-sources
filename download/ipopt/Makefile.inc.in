@@ -1,0 +1,10 @@
+abs_top_builddir=@abs_top_builddir@
+DOWNLOADFF= $(abs_top_builddir)/download
+CC      = @CC@
+CXX      = @CXX@
+CXXFLAGS      = @CXXFLAGS@
+FC      = @FC@ 
+FCFLAGS      = @FCFLAGS@ 
+LIBBLAS =  @BLASLIBS@
+LIBLAPACK =@LAPACKLIBS@
+WGET=@WGET@
