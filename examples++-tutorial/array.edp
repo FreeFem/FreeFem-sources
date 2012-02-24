@@ -121,9 +121,9 @@ b += 2*a;
 cout <<" b += 2*a : " << b << endl;
 b /= 2;
 cout <<" b /= 2 : " << b << endl;
-b *= a; // same b = b .* a 
+b .*= a; // same b = b .* a 
 cout << "b*=a; b =" << b << endl;
-b /= a; // same b = b ./ a 
+b ./= a; // same b = b ./ a 
 cout << "b/=a; b =" << b << endl;
 c = a+b;
 cout << " c =a+b : c=" << c << endl;
