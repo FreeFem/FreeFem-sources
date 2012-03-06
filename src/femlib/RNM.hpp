@@ -1148,7 +1148,7 @@ class KN :public KN_<R> { public:
 
 template<class R>
 class KNM: public KNM_<R>{ public:
-
+  KNM() :KNM_<R>(0,0,0){}
   KNM(long nn,long mm) 
         :KNM_<R>(new R[nn*mm],nn,mm){}
    KNM(const KNM<R> & u)  // PB si stepi ou stepj nulle

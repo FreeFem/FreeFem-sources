@@ -616,7 +616,7 @@ void ArrayDCL()
  
     //Dcl_Type<KN<K> *>(0,::Destroy<KN<K> >,   ::ClearReturnpKK<K,KN<K> > );
     //Dcl_TypeandPtr<KN_<K> >(0,0,0,0,::ClearReturnKK_<K,KN<K>,KN_<K> >,::ClearReturnpKK_<K,KN<K>,KN_<K> >);
-    Dcl_TypeandPtr_<KN_<K> ,KN<K>*  > (0,0,0,::Destroy<KN<K> >, ::ClearReturnKK_<K,KN<K>,KN_<K> >,::ClearReturnpKK<K,KN<K> >);
+    Dcl_TypeandPtr_<KN_<K> ,KN<K>*  > (0,0,::InitP<KN<K> >,::Destroy<KN<K> >, ::ClearReturnKK_<K,KN<K>,KN_<K> >,::ClearReturnpKK<K,KN<K> >); // add init 0
     
     //  Dcl_Type<KN<Complex> *>(0,::Destroy<KN<Complex> >);
    // Dcl_Type<KN<K> *>(0,::Destroy<KN<K> >); // Modif 17102005 
@@ -624,7 +624,9 @@ void ArrayDCL()
 
   //  Dcl_Type<KNM<K> *>(0,::Destroy<KNM<K> > ,::ClearReturnpKK<K,KNM<K> >);
     Dcl_TypeandPtr_<KNM_<K> ,KNM<K>*  > (0,0,0,::Destroy<KNM<K> >, ::ClearReturnKK_<K,KNM<K>,KNM_<K> >,::ClearReturnpKK<K,KNM<K> >);
-
+    Dcl_Type<  KN<KNM<K> >* >();
+    Dcl_Type<  KN<KN<K> >* >();
+    
     Dcl_Type< outProduct_KN_<K>* >();
     Dcl_Type< Transpose<KN_<K> > > ();
     Dcl_Type< Transpose< KNM<K> *> >();
@@ -672,7 +674,10 @@ void ArrayDCL()
        ); */
     map_type_of_map[make_pair(atype<long>(),atype<K>())]=atype<KN<K>*>(); // vector
     map_pair_of_type[make_pair(atype<long>(),atype<long>())] =atype<pair<long,long> >();   
-    map_type_of_map[make_pair(atype<pair<long,long> >(),atype<K>())]=atype<KNM<K>*>(); // matrix                                               
+    map_type_of_map[make_pair(atype<pair<long,long> >(),atype<K>())]=atype<KNM<K>*>(); // matrix 
+    map_type_of_map[make_pair(atype<long>(),atype<KN_<K> >())]=atype<KN<KN<K> >*>();// tableau de tableau
+    map_type_of_map[make_pair(atype<long>(),atype<KNM_<K> >())]=atype<KN<KNM<K> >*>();// tableau de matrix 
+
 }
 
 
@@ -961,6 +966,7 @@ void ArrayOperator()
      Add<Resize<KN<K> > >("(","",new OneOperator2_<KN<K> *,Resize<KN<K> > , Z   >(resize1));
      Add<Resize<KNM<K> > >("(","",new OneOperator3_<KNM<K> *,Resize<KNM<K> > , Z, Z  >(resize2));
 
+    
      TheOperators->Add("<-", 
        new OneOperator2_<KN<K> *,KN<K> *,Z>(&set_init),
        new InitArrayfromArray<K,true>
@@ -968,6 +974,11 @@ void ArrayOperator()
     //   new OneOperator2_<KN<K> *,KN<K> *,KN_<K> >(&set_init)		????       
      //  new OneOperator2_<KN<K> *,KN<K> *,KN<K> * >(&set_initp)
        );
+    TheOperators->Add("<-", 
+                      new OneOperator2_<KN< KN<K> > *,KN< KN<K> > * ,Z  >(&set_init));
+    TheOperators->Add("<-", 
+                      new OneOperator2_<KN< KNM<K> > *,KN< KNM<K> > * ,Z  >(&set_init));
+    
      TheOperators->Add("<-", 
         new OneOperator3_<KNM<K> *,KNM<K> *,Z,Z>(&set_init2),
         new InitMatfromAArray<K,true>
@@ -994,7 +1005,19 @@ void ArrayOperator()
      Add<KN<K> *>("n",".",new OneOperator1<Z,KN<K> *>(get_n));
      Add<KNM<K> *>("n",".",new OneOperator1<Z,KNM<K> *>(get_n));
      Add<KNM<K> *>("m",".",new OneOperator1<Z,KNM<K> *>(get_m));
-     
+ //ajout ars 2012 FH    
+     Add<KN<KN<K> > *>("n",".",new OneOperator1<long,KN<KN<K> > *>(get_n));     
+     Add<KN<KNM<K> > *>("n",".",new OneOperator1<long,KN<KNM<K> > *>(get_n));  
+     atype<KN<KN<K> > * >()->Add("[","",new OneOperator2_<KN<K>*,KN<KN<K> >*,Z >(get_elementp_<KN<K>,KN<KN<K> >*,Z>));
+    atype<KN<KNM<K> > * >()->Add("[","",new OneOperator2_<KNM<K>*,KN<KNM<K> >*,Z >(get_elementp_<KNM<K>,KN<KNM<K> >*,Z>));
+    Dcl_Type< Resize<KN<KN<K> > > > ();
+    Dcl_Type< Resize<KN<KNM<K> > > >();
+    Add<KN<KN<K> > * >("resize",".",new OneOperator1< Resize<KN<KN<K> > >,KN<KN<K> > *>(to_Resize));
+    Add<KN<KNM<K> > * >("resize",".",new OneOperator1< Resize<KN<KNM<K> > >,KN<KNM<K> > *>(to_Resize));
+    Add<Resize<KN<KN<K> > > >("(","",new OneOperator2_<KN<KN<K> >  *,Resize<KN<KN<K> > > , long   >(resize1));
+    Add<Resize<KN<KNM<K> > > >("(","",new OneOperator2_<KN<KNM<K> >  *,Resize<KN<KNM<K> > > , long   >(resize1));
+    
+    
 //     AddOpeqarray<set_eqarray,KN,K>("=");
 
      TheOperators->Add("=", new InitArrayfromArray<K,false>
@@ -1274,7 +1297,11 @@ void ArrayOperator()
        new OneBinaryOperator<Print<KNM_<K> > >,
        new OneBinaryOperator<Print<KN_<K> > >
        ); 
-     
+    TheOperators->Add("<<",
+                      new OneBinaryOperator< PrintPnd< KN< KNM<K> >* > >,
+                      new OneBinaryOperator< PrintPnd< KN< KN<K> >* > >
+                      ); 
+    
        
      TheOperators->Add(">>",
         new OneBinaryOperator<Op_ReadKN<K> >
@@ -1294,6 +1321,7 @@ void ArrayOperator()
 		      new OneTernaryOperator3<SetArray3<K> >);
     TheOperators->Add("<-", 
 		      new OneOperator2_<KN<K> *,KN<K> *,SetArray<K> >(&set_init_array));
+ 
     TheOperators->Add("=", 
 		      new OneOperator2_<KN<K> *,KN<K> *,SetArray<K> >(&set_array),
 		      new OneOperator2_<KN<K> *,KN<K> *,KN<K> * >(&set_arrayp),  //  to reomve ambiguity aug 2009

@@ -2251,7 +2251,7 @@ AnyType ClearReturnKK_(Stack stack, const AnyType & a)
 }
 //template<class RR,class A,class B>  fMPI_Request*,KN<MPI_Request>*,long
 fMPI_Request * get_elementp_( KN<MPI_Request> * const & a,const long & b){ 
-  if( b<0 || a->N() <= b) 
+  if( a || b<0 || a->N() <= b) 
     { cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " KN<MPI_Request> * " << endl;
       ExecError("Out of bound in operator []");}
   return  reinterpret_cast<fMPI_Request *> (&((*a)[b]));}// bofBof ... 
