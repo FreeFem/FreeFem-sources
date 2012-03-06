@@ -224,7 +224,29 @@ KN_<K> fSubArray(const KN_<K> & a,const SubArray & b)
 template<class K>  
 KN_<K> fSubArrayp( KN<K>  * const & a,const SubArray & b)
  { return (*a)(b);}
- 
+
+template<class K>  
+KNM_<K> fSubArraybb(const KNM_<K> & a,const SubArray & b,const SubArray & c)
+{ return a(b,c);}
+template<class K>  
+KNM_<K> fSubArraypbb( KNM<K> * const & a,const SubArray & b,const SubArray & c)
+{ return (*a)(b,c);}
+
+template<class K>  
+KN_<K> fSubArrayib(const KNM_<K> & a,const long &i,const SubArray & b)
+{ return a(i,b);}
+template<class K>  
+KN_<K> fSubArraybi(const KNM_<K> & a,const SubArray & b,const long &i)
+{ return a(b,i);}
+
+template<class K>  
+KN_<K> fSubArraypib( KNM<K> *const & a,const long &i,const SubArray & b)
+{ return (*a)(i,b);}
+template<class K>  
+KN_<K> fSubArraypbi( KNM<K> *const & a,const SubArray & b,const long &i)
+{ return (*a)(b,i);}
+
+
 template<class A>  
 A fSubArrayc(const A & a,const char & b)
  { return a;}
@@ -901,7 +923,17 @@ void ArrayOperator()
      atype<KN_<K> >()->Add("(","",new OneOperator2_<KN_<K>,KN_<K>,SubArray>(fSubArray<K> ));
      atype<KN<K>*>()->Add("(","",new OneOperator2_<KN_<K>,KN<K>*,SubArray>(fSubArrayp<K> ));
      atype<KN<K>* >()->Add("(","",new OneOperator2_<KN<K>*,KN<K>*,char >(fSubArrayc<KN<K>* >));
-
+// 
+    
+    atype<KNM_<K> >()->Add("(","",new OneOperator3_<KNM_<K>,KNM_<K>,SubArray,SubArray>(fSubArraybb<K> ));
+    atype<KNM_<K> >()->Add("(","",new OneOperator3_<KNM_<K>,KNM<K>*,SubArray,SubArray>(fSubArraypbb<K> ));
+    
+     atype<KN_<K> >()->Add("(","",new OneOperator3_<KN_<K>,KNM_<K>,SubArray,long>(fSubArraybi<K> ));
+     atype<KN_<K> >()->Add("(","",new OneOperator3_<KN_<K>,KNM_<K>,long,SubArray>(fSubArrayib<K> ));
+     atype<KN_<K> >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,SubArray,long>(fSubArraypbi<K> ));
+     atype<KN_<K> >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,long,SubArray>(fSubArraypib<K> ));
+//
+    
     atype<KN_<K> >()->Add("[","",new OneOperator2_<K*,KN_<K>,Z >(get_element_<K,KN_<K>,Z>));
     atype<KN_<K> >()->Add("(","",new OneOperator2_<K*,KN_<K>,Z >(get_element_<K,KN_<K>,Z>));
     
