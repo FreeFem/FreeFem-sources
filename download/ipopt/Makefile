@@ -29,7 +29,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
                   --with-mumps='$(LIBMUMPS)' \
 	          --without-hsl \
 	          --with-mumps-incdir='$(INCMUMPS)' \
-	  CXX='$(CXX)' CXXFLAGS='$(CXXFLAGS)' \
+	  CXX='$(CXX)' CXXFLAGS='$(CXXFLAGS) -I$(INCMUMPS)' \
 	  F77='$(FC)' FCFLAGS='$(FCFLAGS)' \
 	 --with-blas='$(LIBBLAS)' --with-lapack='$(LIBLAPACK)' --prefix='$(DOWNLOADFF)'
 	touch $(SRCDIR)/FAIT	

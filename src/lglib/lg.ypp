@@ -352,7 +352,9 @@ parameters_list:
 
 type_of_dcl:   TYPE 
              | TYPE '[' TYPE ']' {$$=TypeArray($1,$3)}
+             | TYPE '[' TYPE ']' '[' TYPE ']' {$$=TypeArray(TypeArray($1,$3),$6)} // Add FH mars 2012 
              | TYPE '[' TYPE ',' TYPE ']' {$$=TypeArray($1,$3,$5)}
+             | TYPE '[' TYPE ',' TYPE ']' '[' TYPE ']' {$$=TypeArray(TypeArray($1,$3,$5),$8)}
              | TYPE '<' TYPE '>' {$$=TypeTemplate($1,$3)}
 	     | TYPE '<' TYPE '>' '[' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6)}
 	     | TYPE '<' TYPE '>' '[' TYPE ',' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6,$8)}

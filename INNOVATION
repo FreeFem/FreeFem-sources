@@ -1,3 +1,8 @@
+  - add new type of array , array of array
+    real[int] a;  
+    real[int,int][int] m(10);
+    real[int][int] v(10);
+   not well tested.
 version 3.18-2
  - add plugins with sequentiel  mumps without mpi 
  - add conversion of re and im part of complex sparse matrix
