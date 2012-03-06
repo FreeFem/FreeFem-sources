@@ -633,7 +633,12 @@ class KNM_: public KN_<R> {
   R & operator()(int i,int j)     const   
             { return this->v[indexij(i,j)];}
             
-            
+   KN_<R> operator()(const SubArray & sa,long j) const 
+    { return this->operator()(':',j)(sa);}  // sub array 
+   
+  KN_<R> operator()(long i,const SubArray & sb) const 
+    { return  this->operator()(i,':')(sb);} 
+    
   KN_<R> operator()(const char,long j    )  const   // une colonne j  ('.',j)
             { return KN_<R>(&this->v[this->index(shapej.index(j))],shapei*this->step);} 
   KN_<R> operator()(long i    ,const char)  const   // une ligne i  (i,'.')
