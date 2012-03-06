@@ -925,13 +925,14 @@ void ArrayOperator()
      atype<KN<K>* >()->Add("(","",new OneOperator2_<KN<K>*,KN<K>*,char >(fSubArrayc<KN<K>* >));
 // 
     
-    atype<KNM_<K> >()->Add("(","",new OneOperator3_<KNM_<K>,KNM_<K>,SubArray,SubArray>(fSubArraybb<K> ));
-    atype<KNM_<K> >()->Add("(","",new OneOperator3_<KNM_<K>,KNM<K>*,SubArray,SubArray>(fSubArraypbb<K> ));
-    
+     atype<KNM_<K> >()->Add("(","",new OneOperator3_<KNM_<K>,KNM_<K>,SubArray,SubArray>(fSubArraybb<K> ));
+     atype<KNM<K>* >()->Add("(","",new OneOperator3_<KNM_<K>,KNM<K>*,SubArray,SubArray>(fSubArraypbb<K> ));
+    /*
      atype<KN_<K> >()->Add("(","",new OneOperator3_<KN_<K>,KNM_<K>,SubArray,long>(fSubArraybi<K> ));
      atype<KN_<K> >()->Add("(","",new OneOperator3_<KN_<K>,KNM_<K>,long,SubArray>(fSubArrayib<K> ));
      atype<KN_<K> >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,SubArray,long>(fSubArraypbi<K> ));
      atype<KN_<K> >()->Add("(","",new OneOperator3_<KN_<K>,KNM<K>*,long,SubArray>(fSubArraypib<K> ));
+     */
 //
     
     atype<KN_<K> >()->Add("[","",new OneOperator2_<K*,KN_<K>,Z >(get_element_<K,KN_<K>,Z>));
