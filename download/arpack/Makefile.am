@@ -23,7 +23,7 @@ $(ARPACKLIB): ARPACK/fait
 	fi; \
 	cd ARPACK && make lib 
 	if test -n '@FF_LAPACKdir@' ; then \
-	$(AR) $(ARFLAGS) $(LAPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ARPACK/LAPACK/*.o ;\
+	$(AR) $(ARFLAGS) $(LAPACK_arpack_LIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ARPACK/LAPACK/*.o ;\
 	else \
 	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ;\
 	fi
@@ -41,7 +41,7 @@ ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
 	   mv  $$i $$i.cpy; cat $$i.cpy| sed 's/ SECOND *(/ secnd2(/'|grep -v EXTERNAL  >$$i;rm $$i.cpy; done 
 	m4  -DFF_BLASLIB="$(BLASLIB)" \
 	    -DFF_ARPACKLIB="$(ARPACKLIB)" \
-            -DFF_LAPACKLIB="$(LAPACKLIB)" \
+            -DFF_LAPACK_arpack_LIB="$(LAPACK_arpack_LIB)" \
 	    -DFF_FC="@F77@" \
             -DFF_FFLAGS="@FFLAGS@" \
 	    -DFF_LAPACKdir='@FF_LAPACKdir@' \
