@@ -1059,7 +1059,7 @@ void ArrayOperator()
        );
      TheOperators->Add("=", new SetArrayofKNfromKN<K>
        );
- if(0)    
+ if(0) //  a  change il faut regle un PB ambiguite ...  
      TheOperators->Add("=",
         new OneBinaryOperator<set_eqarray<KN<K> ,K > > ,
         new OneBinaryOperator<set_eqarray<KN<K> ,Add_KN_<K> > > ,
