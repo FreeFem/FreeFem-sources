@@ -1144,10 +1144,19 @@ ff_blas_ok=no
 ff_blas_inc=""
 # User-specified location
 # add MKL  seach dec 2010  FH ....
+
+ff_mkl_flags=""
+if test "$ff_mkl_libpath" != "not" ; then
+   ff_CFLAGS="$CFLAGS"
+   CHECK_COMPILE_FLAG(C,-mkl,CFLAGS)
+   if test  "$ff_CFLAGS" != "$CFLAGS" ; then
+     ff_mkl_flags="-mkl"
+   fi
+fi
+
 AC_MSG_CHECKING(for MKL )
 ff_mkl_root=""
-if test "$ff_mkl_libpath" != "not" ; then
-    
+if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
     if test "$ff_mkl_libpath"  = "yes"  -a  -n "$MKLROOT" ; then
 	ff_IFS="$IFS"
 	IFS=":"
