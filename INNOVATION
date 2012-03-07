@@ -1,4 +1,5 @@
   - add new type of array , array of array
+    see taboftab:edp in  examples++-tuturial
     real[int] a;  
     real[int,int][int] m(10);
     real[int][int] v(10);
