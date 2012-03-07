@@ -71,13 +71,14 @@ EXTRA_DIST= \
 ./yams/makefile-yams.inc \
 ./yams/yamslib.c \
 ./yams/yamslib.h \
-./yams/yamslib_internal.h 
-
+./yams/yamslib_internal.h \
+ipopt/Makefile	\
+ipopt/Makefile.inc.in
 
 
 
 MPI_SOFT=blacs parmetis  scalapack scotch superludist mumps pastix  hips parms 
-LIST_SOFT=tetgen superlu fftw metis mshmet yams mmg3d gmm  nlopt mumps-seq
+LIST_SOFT=tetgen superlu fftw metis mshmet yams mmg3d gmm  nlopt mumps-seq ipopt 
 all-recursive: bin lib include pkg
 
 lib: 
