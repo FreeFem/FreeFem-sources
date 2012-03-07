@@ -658,7 +658,7 @@ DOWNLOAD_UMFPACK
 EIGENOBJ
 EIGENTEST
 ARPACKLIBS
-LAPACKLIB
+LAPACK_arpack_LIB
 ARPACKLIB
 FF_LAPACKdir
 DOWNLOAD_ARPACK
@@ -13645,7 +13645,8 @@ $as_echo "$as_me: using downloaded Arpack" >&6;}
 
 		ARPACKLIB=${curdir}/download/lib/libarpack.a
 
-		LAPACKLIB=${curdir}/download/lib/liblapack.a
+		LAPACK_arpack_LIB=${curdir}/download/lib/liblapack.a
+
 
 		# Do not update $LIBS, but create an extra LIB variable,
 		# because this lib does not exist yet, and this could make the

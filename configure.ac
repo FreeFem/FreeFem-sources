@@ -1491,7 +1491,8 @@ then
 		AC_SUBST(DOWNLOAD_ARPACK,arpack)
 		AC_SUBST(FF_LAPACKdir,$ff_lapackdir)
 		AC_SUBST(ARPACKLIB,${curdir}/download/lib/libarpack.a)
-		AC_SUBST(LAPACKLIB,${curdir}/download/lib/liblapack.a)
+		AC_SUBST(LAPACK_arpack_LIB,${curdir}/download/lib/liblapack.a)
+
 		# Do not update $LIBS, but create an extra LIB variable,
 		# because this lib does not exist yet, and this could make the
 		# following tests fail.
