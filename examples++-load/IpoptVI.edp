@@ -1,0 +1,52 @@
+load "ff-IpOpt";
+
+mesh Th=square(10,10);
+fespace Vh(Th,P1);
+
+func f = 1.;
+macro Grad(u) [dx(u),dy(u)]//
+varf vP(u,v) = int2d(Th)(u*v+Grad(u)'*Grad(v)) + int2d(Th)(f*v);
+
+matrix A = vP(Vh,Vh,solver=CG);
+real[int] b = vP(0,Vh);
+
+
+func real J(real[int] &X)
+{
+   real[int] Ax = A*X ;
+   real s= Ax'*X *0.5 - b'*X;
+   cout << " J = " << s << endl;
+   return s;
+}
+
+func real[int] dJ(real[int] &X)
+{
+  
+  real[int] Ax = A*X;
+  Ax  -= b;
+   return Ax; 
+}
+
+func matrix  hJ(real[int] &X/*,real objfact,real[int] &lm*/)
+{
+  return A; 
+}
+
+func real[int] C(real[int] &X)
+{
+    return X;
+}
+
+func matrix dC(real[int] &X)
+{
+  return A;
+}
+Vh u=0;
+Vh lb=0;
+varf vGamma(u,v) = on(1,2,3,4,u=1);
+real[int] onGamma=vGamma(0,Vh);
+Vh ub=0.03;
+ub[] = onGamma ? 0. : ub[];
+
+IPOPT(J,dJ,hJ,u[],lb=lb[],ub=ub[]);
+plot(u,wait=1);
