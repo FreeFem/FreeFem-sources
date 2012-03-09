@@ -73,8 +73,8 @@ EXTRA_DIST= \
 ./yams/yamslib.h \
 ./yams/yamslib_internal.h \
 ipopt/Makefile	\
-ipopt/Makefile.inc.in
-
+ipopt/Makefile.inc.in \
+ipopt/patch-IpBlas 
 
 
 MPI_SOFT=blacs parmetis  scalapack scotch superludist mumps pastix  hips parms 
