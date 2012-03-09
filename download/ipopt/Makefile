@@ -55,6 +55,7 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-tar
 
 $(SRCDIR)/tag-tar:$(PACKAGE) $(FHSL) 
 	tar xvzf $(PACKAGE)
+	patch -p0 <patch-IpBlas
 	#cp $(FHSL) $(SRCDIR)/ThirdParty/HSL/
 	touch $(SRCDIR)/tag-tar
 
