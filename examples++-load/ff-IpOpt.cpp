@@ -23,8 +23,7 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
-//ff-c++-LIBRARY-dep:  Ipopt mumps-seq blas  libseq  fc 
+//ff-c++-LIBRARY-dep:  Ipopt mumps-seq blas  libseq  fc  
 
 
 #include  <iostream>
@@ -76,6 +75,8 @@ inline bool operator<=(const std::pair<int,int> &l,const std::pair<int,int> &r)
 {
 	return (l.first < r.first) || (l.first==r.first && l.second <= r.second);
 }
+inline bool XOR(bool a,bool b) {return (!a && b) || (a && !b);}
+inline bool NXOR(bool a,bool b) {return !XOR(a,b);}
 
 
 
@@ -106,8 +107,7 @@ template<> class ffcalfunc<Matrice_Creuse<R> *>
 		ffcalfunc(const ffcalfunc &f) : stack(f.stack),JJ(f.JJ),param(f.param),paramlm(f.paramlm),paramof(f.paramof) {};
 		ffcalfunc(Stack s,Expression JJJ,Expression epar,Expression eparof=0,Expression eparlm=0) 
 			: stack(s),JJ(JJJ),param(epar),paramlm(eparlm),paramof(eparof)
-		{
-          ffassert((!paramlm && !paramof) || (paramlm && paramof));}
+		{ffassert(NXOR(paramlm,paramof));}
 		K J(Rn_  x) const 
 		{
 			KN<double> *p=GetAny<KN<double> *>( (*param)(stack) );
@@ -137,7 +137,8 @@ template<> class ffcalfunc<Matrice_Creuse<R> *>
 		
 };
 
- 
+
+
 
 
 typedef ffcalfunc<double> ScalarFunc;
@@ -387,8 +388,9 @@ bool ffNLP::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,Index& nnz_h_lag, 
 
 bool ffNLP::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Number* g_u)
 {
-	assert(gl.N()==mm);
-	assert(gu.N()==mm);
+	//cout << "n=" << n << " m=" << m << " mm=" << mm << " g_l.N()=" << gl.N() << " g_u.N()=" << gu.N() << endl;
+	ffassert(gl.N()==mm);
+	ffassert(gu.N()==mm);
 	KnToPtr(xl,x_l);
 	KnToPtr(xu,x_u);
 	KnToPtr(gl,g_l);
@@ -497,20 +499,39 @@ bool ffNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, Index
 		if(hessian->paramlm && hessian->paramof) M=hessian->J(X,obj_factor,L); else M=hessian->J(X);
 		MatriceMorse<R> *MM = dynamic_cast<MatriceMorse<R>* >(&(*M->A));//ugly!
 		bool checkstruct_was_disabled = !checkstruct;
-		if(! MM->symetrique) EnableCheckStruct();
-		for(int i=0;i<MM->N;++i)
+		if(checkstruct)
 		{
-			for(int k=MM->lg[i]; k < MM->lg[i+1]; ++k)
+			for(int i=0;i<MM->N;++i)
 			{
-				if(checkstruct) 
+				for(int k=MM->lg[i]; k < MM->lg[i+1]; ++k)
 				{
 					int kipopt = FindIndex(HesStruct.Raws(),HesStruct.Cols(),i,MM->cl[k],0,nele_hess-1);
 					if(kipopt>=0) values[kipopt] = (hessian->paramof &&hessian->paramlm ? 1. : obj_factor) * (MM->a[k]);
+					//else values[k] = (hessian->paramof &&hessian->paramlm ? 1. : obj_factor) * (MM->a[k]);
 				}
-				else values[k] = (hessian->paramof &&hessian->paramlm ? 1. : obj_factor) * (MM->a[k]);
 			}
 		}
-		if(checkstruct_was_disabled && checkstruct) DisableCheckStruct();
+		else if(! MM->symetrique)
+		{
+			for(int i=0,kipopt=0;i<MM->N;++i)
+			{
+				for(int k=MM->lg[i]; k < MM->lg[i+1]; ++k)
+				{
+					if(i >= MM->cl[k]) 
+					{
+						values[kipopt] = (hessian->paramof &&hessian->paramlm ? 1. : obj_factor) * (MM->a[k]);
+						++kipopt;
+					}
+				}
+			}
+		}
+		else
+		{
+			for(int i=0;i<MM->N;++i)
+			{
+				for(int k=MM->lg[i]; k < MM->lg[i+1]; ++k) values[k] = (hessian->paramof &&hessian->paramlm ? 1. : obj_factor) * (MM->a[k]);
+			}
+		}
 	}
 
   return true;
@@ -528,6 +549,23 @@ void ffNLP::finalize_solution(SolverReturn status,
 }
 
 
+static ffNLP::Level ToLevel(long i)
+{
+	switch(i){
+		case 0:
+			return ffNLP::user_defined;
+			break;
+		case 1:
+			return ffNLP::one_evaluation;
+			break;
+		case 2:
+			return ffNLP::basis_analysis;
+			break;
+		default:
+			return ffNLP::do_nothing;
+			break;
+		}
+}
 inline void SONDE() {static int i=1; cout << "SONDE " << i << endl; ++i;}
 
 class OptimIpopt : public OneOperator
@@ -540,23 +578,6 @@ class OptimIpopt : public OneOperator
 			private:
 				bool CompletelyNonLinearConstraints;
 			public:
-				static ffNLP::Level ToLevel(long i)
-				{
-					switch(i){
-						case 0:
-							return ffNLP::user_defined;
-							break;
-						case 1:
-							return ffNLP::one_evaluation;
-							break;
-						case 2:
-							return ffNLP::basis_analysis;
-							break;
-						default:
-							return ffNLP::do_nothing;
-							break;
-						}
-				}
 				const int cas;
 				static basicAC_F0::name_and_type name_param[];
 				static const int n_name_param = 10;
@@ -565,7 +586,7 @@ class OptimIpopt : public OneOperator
 				Rn lm;
 				C_F0 L_m;
 				C_F0 inittheparam,theparam,closetheparam;
-				C_F0 initobjfact,objfact,initlagmult,lagmult;
+				C_F0 initobjfact,objfact;
 				Expression JJ,GradJ,Constraints,GradConstraints,Hessian;
 				bool arg(int i,Stack stack,bool a) const {return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
 				long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
@@ -573,8 +594,7 @@ class OptimIpopt : public OneOperator
 				Rn_ arg(int i,Stack stack,Rn_ a) const {return nargs[i] ? GetAny<Rn_>((*nargs[2])(stack)) : a;}
 				template<typename T> T Arg(int i,Stack s) const {return GetAny<T>( (*nargs[i])(s));}
 				
-				E_Ipopt(const basicAC_F0 & args,int cc) : cas(cc),CompletelyNonLinearConstraints(true),lm()
-                ,L_m(CPValue(lm))
+				E_Ipopt(const basicAC_F0 & args,int cc) : cas(cc),CompletelyNonLinearConstraints(true),lm(),L_m(CPValue(lm))
 				{
 					int nbj= args.size()-1;
 					Block::open(currentblock); // make a new block to 
@@ -583,10 +603,8 @@ class OptimIpopt : public OneOperator
 					//  the expression to init the theparam of all 
 					inittheparam = currentblock->NewVar<LocalVariable>("the parameter",atype<KN<R> *>(),X_n);
 					initobjfact = currentblock->NewVar<LocalVariable>("objective factor",atype<double *>());
-					//initlagmult = currentblock->NewVar<LocalVariable>("lagrange multipliers",atype<KN<R> *>(),L_m);
 					theparam = currentblock->Find("the parameter"); //  the expression for the parameter
 					objfact = currentblock->Find("objective factor");
-					//lagmult = currentblock->Find("lagrange multipliers");
 					args.SetNameParam(n_name_param,name_param,nargs);
 					const  Polymorphic * opJ=0,*opdJ=0,*opH=0;
 					if (nbj>0)
@@ -612,9 +630,10 @@ class OptimIpopt : public OneOperator
 						CompletelyNonLinearConstraints = false; //When constraints are affine, lagrange multipliers are not used in the hessian, obj_factor is also hidden to the user
 						Hessian= to<Matrice_Creuse<R>* >(C_F0(opH,"(",theparam));
 					}
-					else cout << "Error, wrong hessian function prototype." << endl;
+					else CompileError("Error, wrong hessian function prototype Must be either (real[int] &) or (real[int] &,real,real[int] &)");
 					const Polymorphic * constraints = nargs[0] ? dynamic_cast<const Polymorphic *>(nargs[0]) : 0,
 														* dconstraints = nargs[1] ? dynamic_cast<const Polymorphic *>(nargs[1]) : 0;
+					if(XOR(constraints,dconstraints)) CompileError("Constraint or its jacobian has not been passed to the optimizer, while the other one has actually been passed.");
 					if(constraints) Constraints = to<Rn_>(C_F0(constraints,"(",theparam));
 					if(dconstraints) GradConstraints = to<Matrice_Creuse<R>*>(C_F0(dconstraints,"(",theparam));
 					closetheparam=currentblock->close(currentblock);   // the cleanning block expression 
@@ -624,8 +643,6 @@ class OptimIpopt : public OneOperator
 				
 				virtual AnyType operator()(Stack stack)  const
 				{
-                    
-                    cout << " " << this << endl;
 					double cost = 299792458.;
 					WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005 
 					Rn &x = *GetAny<Rn *>((*X)(stack));	
@@ -639,12 +656,13 @@ class OptimIpopt : public OneOperator
 					ScalarFunc ffJ(stack,JJ,theparam);
 					VectorFunc ffdJ(stack,GradJ,theparam);
 					SparseMatFunc ffH(stack,Hessian,theparam);
-					if(CompletelyNonLinearConstraints) ffH = SparseMatFunc(stack,Hessian,theparam,objfact,lagmult);
+					if(CompletelyNonLinearConstraints) ffH = SparseMatFunc(stack,Hessian,theparam,objfact,L_m);
 					VectorFunc *ffC = constrained ? new ffcalfunc<Rn>(stack,Constraints,theparam) : 0;
 					SparseMatFunc *ffdC = gradconst ?  new ffcalfunc<Matrice_Creuse<R>* >(stack,GradConstraints,theparam) : 0; 
 					
 					Rn xl(n),xu(n),gl(nargs[4] ? Arg<Rn_>(4,stack).N() : 0),gu(nargs[5] ? Arg<Rn_>(5,stack).N() : 0);
-					Rn lag_mul(gl.N());
+					int mmm=gl.N()>gu.N() ? gl.N() : gu.N();
+					Rn lag_mul(mmm);
 					//int niter=arg(6,stack,100L);
 					int autostructmode = arg(9,stack,1L);
 					bool checkindex = arg(10,stack,false), cberror=false;
@@ -652,8 +670,8 @@ class OptimIpopt : public OneOperator
 					
 					if(nargs[2]) xl=Arg<Rn_>(2,stack); else xl=-1.e19;
 					if(nargs[3]) xu=Arg<Rn_>(3,stack); else xu=1.e19;
-					if(nargs[4]) gl=Arg<Rn_>(4,stack); else cberror=constrained;
-					if(nargs[5]) gu=Arg<Rn_>(5,stack); else cberror=constrained;
+					if(nargs[4]) gl=Arg<Rn_>(4,stack); else {gl.resize(mmm); gl=-1.e19;}
+					if(nargs[5]) gu=Arg<Rn_>(5,stack); else {gu.resize(mmm); gu=1.e19;}
 					const E_Array * ejacstruct = dynamic_cast<const E_Array *> (nargs[6]),
 												* ehesstruct = dynamic_cast<const E_Array *> (nargs[7]);
 					if(nargs[8]) lag_mul = Arg<Rn_>(8,stack); else lag_mul=1.;
@@ -696,9 +714,8 @@ class OptimIpopt : public OneOperator
 					
 			
 					// Ask Ipopt to solve the problem
-					SONDE();
 					status = app->OptimizeTNLP(optim);
-					SONDE();
+					
 					if (status == Solve_Succeeded) {
 						printf("\n\n*** Ipopt succeeded \n");
 					}
@@ -755,6 +772,7 @@ Init::Init()
 {
   Global.Add("IPOPT",								"(",new OptimIpopt(1)); 
 }
+
 
 
 

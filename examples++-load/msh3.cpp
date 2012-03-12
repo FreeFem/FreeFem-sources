@@ -4904,7 +4904,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
   int nbedge=0;
   double hmin=1e100;
   R3 bmin,bmax;
-  
+    int nbeee=0;
   const int kksplit2 = kksplit*kksplit; 
   const int kksplit3 = kksplit2*kksplit; 
 
@@ -4918,6 +4918,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
 	for (int j=0;j<4;j++)
 	  {
 	    int jt=j,it=Th.ElementAdj(i,jt);
+            if ( (it==i || it <0)  || ! split[it]) nbeee++;   
 	    if(it==i || it <0) nbe += kksplit2;  //on est sur la frontiere
 	    else if (!split[it]) nbe += kksplit2; //le voisin ne doit pas etre decoupe
 	    //else{
@@ -4929,7 +4930,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
 	  hmin=min(hmin,Th[i].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
 	}
       }
- 
+    cout << " nbeee = " << nbeee << " == " << nbe << endl;
   double hseuil = (hmin/kksplit)/10.; 
 
   /* determination de bmin, bmax et hmin */ 
