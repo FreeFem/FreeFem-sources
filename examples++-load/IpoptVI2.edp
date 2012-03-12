@@ -1,0 +1,69 @@
+load "ff-IpOpt";
+
+mesh Th=square(10,10);
+fespace Vh(Th,[P1,P1] );
+fespace Wh(Th,[P1] );
+int iter=0;
+while(++iter)
+{
+func f1 = 10;
+func f2 = -10;
+macro Grad(u) [dx(u),dy(u)]//
+varf vP([u1,u2],[v1,v2]) = int2d(Th)(Grad(u1)'*Grad(v1)+ Grad(u2)'*Grad(v2)*3) 
++ int2d(Th)(f1*v1+f2*v2);
+
+matrix A = vP(Vh,Vh,solver=CG);
+real[int] b = vP(0,Vh);
+int[int] II1=[0],II2=[1]; 
+matrix C1 =  interpolate (Wh,Vh, U2Vc=II1);
+matrix C2 =  interpolate (Wh,Vh, U2Vc=II2);
+matrix CC = -1*C1 + C2; // u2 - u1 >0
+
+func real J(real[int] &X)
+{
+   real[int] Ax = A*X ;
+   real s= Ax'*X *0.5 - b'*X;
+   cout << " J = " << s << endl;
+   return s;
+}
+
+func real[int] dJ(real[int] &X)
+{
+  
+  real[int] Ax = A*X;
+  Ax  -= b;
+   return Ax; 
+}
+
+func matrix  hJ(real[int] &X/*,real objfact,real[int] &lm*/)
+{
+  return A; 
+}
+
+func real[int] C(real[int] &X)
+{
+    real [int] Y=CC*X;
+    return Y;
+}
+
+func matrix dC(real[int] &X)
+{
+  return CC;
+}
+Vh [u1,u2]=[0,0];
+
+varf vGamma([u1,u2],[v1,v2]) = on(1,2,3,4,u1=1,u2=1);
+real[int] onGamma=vGamma(0,Vh);
+Vh [ub1,ub2]=[-0.1,0.1];
+Vh [lb1,lb2]=[-0.1,0.1];
+Wh cl=0;
+ub1[] = onGamma ? ub1[] : 1e10  ; 
+lb1[] = onGamma ? lb1[] : -1e10  ; 
+;
+
+IPOPT(J,dJ,hJ,u1[],lb=lb1[],ub=ub1[],constraints=C,clb=cl[],jacobian=dC);
+plot(u1,u2,wait=1);
+if(iter > 4) break;
+ Th= adaptmesh(Th,[u1,u2],err=0.004,nbvx=100000);
+ plot(Th);
+}
