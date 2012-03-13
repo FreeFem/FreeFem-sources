@@ -580,7 +580,7 @@ class OptimIpopt : public OneOperator
 			public:
 				const int cas;
 				static basicAC_F0::name_and_type name_param[];
-				static const int n_name_param = 10;
+		  static const int n_name_param = 11;
 				Expression nargs[n_name_param];
 				Expression X;
 				Rn lm;
