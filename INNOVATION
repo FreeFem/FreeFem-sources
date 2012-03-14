@@ -1,3 +1,6 @@
+ - add Ipopt interface thank to Sylvain  Auliac
+ - correct 3d trunc bug in case of internal boundary
+      thank to Yoshihiro Tomita <tomita.yoshihiro@gmail.com>. 
   - add new type of array , array of array
     see taboftab:edp in  examples++-tuturial
     real[int] a;  

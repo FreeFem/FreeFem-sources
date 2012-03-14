@@ -769,7 +769,7 @@ static char * meditcmd(long filebin, int nbsol, int smedit, const string &meditf
    
   meditcmm += ' ';
 
-  char * ret1= new char[ffnn.size()+1];
+  KN<char>  ret1(ffnn.size()+1);
   strcpy( ret1, ffnn.c_str()); 
   
   int nbstrings=1;
