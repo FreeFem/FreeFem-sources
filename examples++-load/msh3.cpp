@@ -4907,8 +4907,20 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
     int nbeee=0;
   const int kksplit2 = kksplit*kksplit; 
   const int kksplit3 = kksplit2*kksplit; 
-
-  
+  int tagb[4]={1,2,4,8} ; 
+  KN<int> tagTonB(Th.nt);
+  tagTonB=0; 
+    
+  for( int ibe=0; ibe < Th.nbe; ibe++)
+    {  
+        int iff;
+        int it=Th.BoundaryElement(ibe,iff);
+        tagTonB[it]|= tagb[iff];
+         int ifff=iff,itt=Th.ElementAdj(it,ifff);
+        if(itt >=0 &&  itt != it)
+             tagTonB[itt]|= tagb[ifff];        
+    }
+    
   for (int i=0;i<Th.nt;i++)
     if(split[i]) 
       {	
@@ -4921,16 +4933,19 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
             if ( (it==i || it <0)  || ! split[it]) nbeee++;   
 	    if(it==i || it <0) nbe += kksplit2;  //on est sur la frontiere
 	    else if (!split[it]) nbe += kksplit2; //le voisin ne doit pas etre decoupe
+            else if ( (tagTonB[i]&tagb[j] ) != 0 && i<it) nbe += kksplit2; // internal boundary ..
 	    //else{
 	    // rien a faire
 	    //}
+              
 	  }
 
 	for (int e=0;e<6;e++){
 	  hmin=min(hmin,Th[i].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
 	}
       }
-    cout << " nbeee = " << nbeee << " == " << nbe << endl;
+  if(verbosity>5) 
+  cout << "  number of  not intern boundary faces = " << nbeee << ",  all faces  =  " << nbe << endl;
   double hseuil = (hmin/kksplit)/10.; 
 
   /* determination de bmin, bmax et hmin */ 
@@ -5102,55 +5117,6 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
   Triangle3 *bb = b;
 
   EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,bmin,bmax,0);
-  /*
-  //determination des sommets
-  int np=0;
-  for(int i=0; i<Th.nt; i++){
-    if(split[i]){      
-      const Tet &K(Th.elements[i]);
-      int ivv[4]; 
-      for(int ii=0; ii< 4; ii++){
-	ivv[ii] =Th.operator()(K[ii]);
-      }
-
-      Vertex3 vertextetsub[nvsub];
-      for( int iv=0; iv<nvsub; iv++){
-	double alpha=vertexsub[iv].x;
-	double beta=vertexsub[iv].y;
-	double gamma=vertexsub[iv].z;
-
-	vertextetsub[iv].x = (1-alpha-beta-gamma)*Th.vertices[ivv[0]].x + alpha*Th.vertices[ivv[1]].x + beta*Th.vertices[ivv[2]].x + gamma*Th.vertices[ivv[3]].x;  
-	vertextetsub[iv].y = (1-alpha-beta-gamma)*Th.vertices[ivv[0]].y + alpha*Th.vertices[ivv[1]].y + beta*Th.vertices[ivv[2]].y + gamma*Th.vertices[ivv[3]].y;
-	vertextetsub[iv].z = (1-alpha-beta-gamma)*Th.vertices[ivv[0]].z + alpha*Th.vertices[ivv[1]].z + beta*Th.vertices[ivv[2]].z + gamma*Th.vertices[ivv[3]].z;  
-	vertextetsub[iv].lab = K.lab;
-      }
-      
-
-      int newindex[nvsub];
-      for( int iv=0; iv<nvsub; iv++){
-	//onst R3 viR3(vertextetsub[iv].x,vertextetsub[iv].y,vertextetsub[iv].z);
-	const Vertex3 &vi( vertextetsub[iv] );
-	Vertex3 * pvi=gtree->ToClose(vi,hseuil);
-	 
-	if(!pvi){
-	  v[np].x   = vi.x;
-	  v[np].y   = vi.y;
-	  v[np].z   = vi.z;
-	  v[np].lab = K.lab;
-	  newindex[iv] = np;
-	  gtree->Add( v[np] );
-	  np++;
-	}
-	else{
-	  newindex[iv] = pvi-v;	  
-	}
-      }
-    }
-  }
-  
-  if(np !=nv) cout << "np=" << np << " nv=" << nv << " nvtrunc="<< nvtrunc << endl; 
-  assert( np == nv );
-  */
 
   int np=0;
   for(int i=0; i<Th.nt; i++){
@@ -5210,60 +5176,36 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
       }
       
       for (int j=0;j<4;j++)
-	{
-	  int jt=j,it=Th.ElementAdj(i,jt);
-	 
-	  /*
-	  if( (it==i || it <0) ){
-
-	  
-	    int ivb[3];
-	    int label = 32;
-
-	    for( int ii=0; ii<nfacesub; ii++){
-
-	      int iface = 3*FaceTriangle[j]*nfacesub+3*ii;
-	      if(verbosity > 99) cout << "face " << ie << "iface " << iface << " " << FaceTriangle[j] 
-				     << " " << trisub[iface] 
-				     << " " << trisub[iface+1]  
-				     << " " << trisub[iface+2] << endl; 
-	      
-	      for( int jjj=0; jjj<3; jjj++){
-		ivb[jjj] = newindex[ trisub[iface+jjj] ]; 
-		assert( trisub[ iface+jjj ] < nvsub );
-		if(verbosity > 1) cout << ivb[jjj] << " np:" << np<< endl;
-		assert( ivb[jjj] < np );
-	      }
-	    	      
-	      (bb++)->set( v, ivb, label);
-	      ie++;
-	     
-	    }
-	  }
-	  else 
-	  */
-	  if ( !(it==i || it <0)  && !split[it]) { 
-	    int ivb[3];
-	    
-	    for( int ii=0; ii<nfacesub; ii++){
-	      int iface = 3*FaceTriangle[j]*nfacesub+3*ii;
-
-	      for( int jjj=0; jjj<3; jjj++){
-		ivb[jjj] = newindex[ trisub[iface+jjj] ];
-		assert( trisub[ iface+jjj ] < nvsub );
-		assert( ivb[jjj] < np );
-	      }
-	    
-	      (bb++)->set( v, ivb, newbelabel);
-	      ie++;
-	    } 
-	  }
+      {
+	  int jt=j,it=Th.ElementAdj(i,jt);          
+          
+          if ( ( (tagTonB[i]&tagb[j]) ==0 ) &&  !(it==i || it <0)  && !split[it]) 
+          {   
+              // new border not on boundary 
+              int ivb[3];
+              
+              for( int ii=0; ii<nfacesub; ii++)
+              {
+                  int iface = 3*FaceTriangle[j]*nfacesub+3*ii;
+                  
+                  for( int jjj=0; jjj<3; jjj++)
+                  {
+                      ivb[jjj] = newindex[ trisub[iface+jjj] ];
+                      assert( trisub[ iface+jjj ] < nvsub );
+                      assert( ivb[jjj] < np );
+                  }
+                  
+                  (bb++)->set( v, ivb, newbelabel);
+                  ie++;
+              } 
+          }
 	  assert( ie <= nbe);
-       	}
+      }
       
     }
   }
-
+  if(verbosity>8)
+    cout << "   -- Number of new  border face not on Border " << ie << endl;
   delete [] vertexsub; //[nvsub];
   delete [] tetsub;   //[4*ntetsub];
   delete [] trisub;   //[4*kksplit*kksplit];
@@ -5277,51 +5219,58 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
   SplitSimplex<R2>( kksplit, nv2Dsub, vertex2Dsub, ntri2Dsub, tri2Dsub);
 
 
-  for( int ibe=0; ibe < Th.nbe; ibe++){  
-    int iff;
-    int it=Th.BoundaryElement(ibe,iff);
-    
-    if( split[it] == 0 ) continue;
-    const Triangle3 &K(Th.be(ibe));
-    int ivv[3];
-    
-    ivv[0] = Th.operator()(K[0]);
-    ivv[1] = Th.operator()(K[1]);
-    ivv[2] = Th.operator()(K[2]);
-
-     R3 vertextrisub[nv2Dsub];
-     for( int iv=0; iv<nv2Dsub; iv++){
-       double alpha=vertex2Dsub[iv].x;
-       double beta=vertex2Dsub[iv].y;
-       
-       vertextrisub[iv].x = (1-alpha-beta)*Th.vertices[ivv[0]].x + alpha*Th.vertices[ivv[1]].x + beta*Th.vertices[ivv[2]].x;  
-       vertextrisub[iv].y = (1-alpha-beta)*Th.vertices[ivv[0]].y + alpha*Th.vertices[ivv[1]].y + beta*Th.vertices[ivv[2]].y;
-       vertextrisub[iv].z = (1-alpha-beta)*Th.vertices[ivv[0]].z + alpha*Th.vertices[ivv[1]].z + beta*Th.vertices[ivv[2]].z;  
-       
-     }
-     int newindex[nv2Dsub];
-     for( int iv=0; iv<nv2Dsub; iv++){
-       const Vertex3 &vi( vertextrisub[iv] );
-       Vertex3 * pvi=gtree->ToClose(vi,hseuil);
-       assert(pvi);
-       newindex[iv] = pvi-v;
-     }
-
-     for( int ii=0; ii<nfacesub; ii++){
-       int ivb[3];
-       for( int jjj=0; jjj<3; jjj++){
-	 ivb[jjj] = newindex[ tri2Dsub[3*ii+jjj] ]; 
-	 assert( tri2Dsub[ 3*ii+jjj  ] < nvsub );
-	 if(verbosity > 4 ) cout << "        " << ivb[jjj] << " np:" << np<< endl;
-	 assert( ivb[jjj] < np );
-       }
-       
-       (bb++)->set( v, ivb, K.lab);
-       ie++;
-       
-     }
-
-     
+  for( int ibe=0; ibe < Th.nbe; ibe++)
+  {  
+      int iff;
+      int it=Th.BoundaryElement(ibe,iff);
+      int ifff=iff,itt=Th.ElementAdj(it,ifff);
+      if(itt<0) itt=it; 
+      if( split[it] == 0 && split[itt] == 0) continue; // boundary not on one element 
+ 
+      const Triangle3 &K(Th.be(ibe));
+      int ivv[3];
+      
+      ivv[0] = Th.operator()(K[0]);
+      ivv[1] = Th.operator()(K[1]);
+      ivv[2] = Th.operator()(K[2]);
+      
+      R3 vertextrisub[nv2Dsub];
+      for( int iv=0; iv<nv2Dsub; iv++)
+      {
+          double alpha=vertex2Dsub[iv].x;
+          double beta=vertex2Dsub[iv].y;
+          
+          vertextrisub[iv].x = (1-alpha-beta)*Th.vertices[ivv[0]].x + alpha*Th.vertices[ivv[1]].x + beta*Th.vertices[ivv[2]].x;  
+          vertextrisub[iv].y = (1-alpha-beta)*Th.vertices[ivv[0]].y + alpha*Th.vertices[ivv[1]].y + beta*Th.vertices[ivv[2]].y;
+          vertextrisub[iv].z = (1-alpha-beta)*Th.vertices[ivv[0]].z + alpha*Th.vertices[ivv[1]].z + beta*Th.vertices[ivv[2]].z;  
+          
+      }
+      int newindex[nv2Dsub];
+      for( int iv=0; iv<nv2Dsub; iv++)
+      {
+          const Vertex3 &vi( vertextrisub[iv] );
+          Vertex3 * pvi=gtree->ToClose(vi,hseuil);
+          assert(pvi);
+          newindex[iv] = pvi-v;
+      }
+      
+      for( int ii=0; ii<nfacesub; ii++)
+      {
+          int ivb[3];
+          for( int jjj=0; jjj<3; jjj++)
+          {
+              ivb[jjj] = newindex[ tri2Dsub[3*ii+jjj] ]; 
+              assert( tri2Dsub[ 3*ii+jjj  ] < nvsub );
+              if(verbosity > 4 ) cout << "        " << ivb[jjj] << " np:" << np<< endl;
+              assert( ivb[jjj] < np );
+          }
+          
+          (bb++)->set( v, ivb, K.lab);
+          ie++;
+          assert( ie <= nbe);
+      }
+      
+      
   }
 
   delete [] vertex2Dsub;   //[4*ntetsub];

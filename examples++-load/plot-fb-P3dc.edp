@@ -28,7 +28,7 @@ if(!NoUseOfWait)
     vi[][i]=1;
     vi;
     plot(vi,wait=0,cmm=" v"+i);
-    if(0)
+    if(!NoGraphicWindow && 0 )
       { savemesh(th,"mm",[x,y,vi*0.5]);   //save *.points and *.faces file for medit
       exec("ffmedit mm");
       exec(" rm mm.faces mm.points");
