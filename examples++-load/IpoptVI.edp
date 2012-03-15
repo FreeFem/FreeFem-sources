@@ -1,4 +1,5 @@
-load "ff-IpOpt";
+//  Solver - Delat u = f , u < 0.03 et u = 0 on Gamma 
+load "ff-Ipopt";
 
 mesh Th=square(10,10);
 fespace Vh(Th,P1);
@@ -27,20 +28,10 @@ func real[int] dJ(real[int] &X)
    return Ax; 
 }
 
-func matrix  hJ(real[int] &X/*,real objfact,real[int] &lm*/)
-{
-  return A; 
-}
 
-func real[int] C(real[int] &X)
-{
-    return X;
-}
 
-func matrix dC(real[int] &X)
-{
-  return A;
-}
+// Warning the boundary condition are given with lb and ub on border
+// equal value ... 
 Vh u=0;
 Vh lb=0;
 varf vGamma(u,v) = on(1,2,3,4,u=1);
@@ -48,5 +39,5 @@ real[int] onGamma=vGamma(0,Vh);
 Vh ub=0.03;
 ub[] = onGamma ? 0. : ub[];
 
-IPOPT(J,dJ,hJ,u[],lb=lb[],ub=ub[]);
+IPOPT(J,dJ,A,u[],lb=lb[],ub=ub[]);
 plot(u,wait=1);

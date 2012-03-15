@@ -12,7 +12,7 @@
  *        x = (1.00000000, 4.74299963, 3.82114998, 1.37940829)
  */
  
- load "ff-IpOpt"
+ load "ff-Ipopt"
  
  real[int] xlb=[1.,1.,1.,1.],xub=[5.,5.,5.,5.],glb=[25.,40.],gub=[1.e19,40.];
  
@@ -89,7 +89,7 @@ func matrix HJ(real[int] &X,real jfactor,real[int] &lambda)
  
  real[int] start=[1, 5, 5, 1];
  real[int] optimsol=[1.00000000, 4.74299963, 3.82114998, 1.37940829];
-IPOPT(J,dJ,HJ,start,constraints=G,jacobian=jacG,ub=xub, lb=xlb,clb=glb,cub=gub);
+IPOPT(J,dJ,HJ,G,jacG,start,ub=xub, lb=xlb,clb=glb,cub=gub);
 optimsol -= start;
 cout << "Dist : " << optimsol.l2 << endl;
  

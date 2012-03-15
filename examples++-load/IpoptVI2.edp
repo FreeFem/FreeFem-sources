@@ -1,4 +1,4 @@
-load "ff-IpOpt";
+load "ff-Ipopt";
 
 mesh Th=square(10,10);
 fespace Vh(Th,[P1,P1] );
@@ -35,21 +35,12 @@ func real[int] dJ(real[int] &X)
    return Ax; 
 }
 
-func matrix  hJ(real[int] &X/*,real objfact,real[int] &lm*/)
-{
-  return A; 
-}
-
 func real[int] C(real[int] &X)
 {
     real [int] Y=CC*X;
     return Y;
 }
-
-func matrix dC(real[int] &X)
-{
-  return CC;
-}
+ 
 Vh [u1,u2]=[0,0];
 
 varf vGamma([u1,u2],[v1,v2]) = on(1,2,3,4,u1=1,u2=1);
@@ -61,7 +52,7 @@ ub1[] = onGamma ? ub1[] : 1e10  ;
 lb1[] = onGamma ? lb1[] : -1e10  ; 
 ;
 
-IPOPT(J,dJ,hJ,u1[],lb=lb1[],ub=ub1[],constraints=C,clb=cl[],jacobian=dC);
+IPOPT(J,dJ,A,C,CC,u1[],lb=lb1[],ub=ub1[],clb=cl[]);
 plot(u1,u2,wait=1);
 if(iter > 4) break;
  Th= adaptmesh(Th,[u1,u2],err=0.004,nbvx=100000);

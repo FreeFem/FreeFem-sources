@@ -1,4 +1,4 @@
-load "ff-IpOpt";
+load "ff-Ipopt";
 
 int NN=10;
 
@@ -130,7 +130,7 @@ lll[0] = 1.;
 cout << HJ(start[],0.,lll) << endl;*/
 
 
-IPOPT(J,dJ,HJ,start[],constraints=C,jacobian=dC,ub=xub, lb=xlb,cub=Cub,clb=Clb);
+IPOPT(J,dJ,HJ,C,dC,start[],ub=xub, lb=xlb,cub=Cub,clb=Clb);
 
 Vh uff,v;
 solve LaplaceFF(uff,v) = int2d(Th)(dx(uff)*dx(v) + dy(uff)*dy(v)) - int2d(Th)(v*f) + on(1,2,3,4,uff=0);

@@ -23,10 +23,8 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-//./../freefem++-3.18-1/examples++-load/ff-c++ ff-IpOpt.cpp -L../Ipopt-3.10.2/lib/*.a -I../Ipopt-3.10.2/include/ /opt/local/lib/libf95.a 
+//ff-c++-LIBRARY-dep:  Ipopt mumps-seq blas  libseq  fc  
 
-
-//ff-c++ ff-IpOpt.cpp -lipopt -I/usr/local/include/ipopt/  /opt/local/lib/libf95.a 
 
 #include  <iostream>
 #include <stack>
@@ -666,7 +664,7 @@ class OptimIpopt : public OneOperator
 				static const int n_name_param=12;
 				Expression nargs[n_name_param];
 				Expression X;
-				Rn lm;
+				mutable Rn lm;
 				C_F0 L_m;
 				C_F0 inittheparam,theparam,closetheparam;
 				C_F0 initobjfact,objfact;
@@ -744,7 +742,7 @@ class OptimIpopt : public OneOperator
 				
 				virtual AnyType operator()(Stack stack)  const
 				{
-					cout << "ASSUMPTION = " << A << "  -  WC = " << WC << endl;
+					//cout << "ASSUMPTION = " << A << "  -  WC = " << WC << endl;
 					double cost = 299792458.;
 					WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005 
 					Rn &x = *GetAny<Rn *>((*X)(stack));	
@@ -904,6 +902,7 @@ class OptimIpopt : public OneOperator
 					if(ffdC) delete ffdC;
 					closetheparam.eval(stack); // clean memory 
 					WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
+                                        lm.destroy(); // clean memory of LM 
 					return cost; //SetAny<long>(0);  Modif FH  july 2005       
 				}
 				    
