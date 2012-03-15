@@ -15,7 +15,7 @@ SRCDIR= ./freeyams$(yams_VERSION)
 PACKAGE=$(DIRPKG)/freeyams$(yams_VERSION).tgz
 SERVER=http://www.ann.jussieu.fr/~frey/ftp/archives/
 INSTALL=../..
-yams_VERSION=.2011.09.23
+yams_VERSION=.2012.02.05
 
 # ---------------------- 
 #     yamslib
