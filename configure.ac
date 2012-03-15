@@ -259,9 +259,9 @@ then
     then
 	AC_MSG_ERROR([ Fatal Error: Your fortran 77  compiler have by not 4 bytes integer ( $ff_f77intsize bytes) ],1);  
     fi
-
-    AC_FF_ADDWHERELIB(f77,$FLIBS,$ff_cfagsf77)
-    AC_FF_ADDWHERELIB(fc,$FLIBS,$ff_cfagsf77)
+    test -f /mingw/bin/libpthread-2.dll && ff_pthread_dll=/mingw/bin/libpthread-2.dll ; \
+    AC_FF_ADDWHERELIB(f77,$FLIBS,$ff_cfagsf77 $ff_pthread_dll)
+    AC_FF_ADDWHERELIB(fc,$FLIBS,$ff_cfagsf77 $ff_pthread_dll)
 
 dnl    [echo f77 LD  $FLIBS  >>$ff_where_lib_conf]
 dnl    [echo f77 INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf]

@@ -6362,27 +6362,27 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
     then
 	as_fn_error 1 " Fatal Error: Your fortran 77  compiler have by not 4 bytes integer ( $ff_f77intsize bytes) " "$LINENO" 5;
     fi
-
+    test -f /mingw/bin/libpthread-2.dll && ff_pthread_dll=/mingw/bin/libpthread-2.dll ; \
     	if test -z "$ff_where_lib_conf_f77" ; then
 	    echo "f77 LD $FLIBS"  >>$ff_where_lib_conf
-	    test -n "$ff_cfagsf77" && echo "f77 INCLUDE $ff_cfagsf77 "  >>$ff_where_lib_conf
+	    test -n "$ff_cfagsf77 $ff_pthread_dll" && echo "f77 INCLUDE $ff_cfagsf77 $ff_pthread_dll "  >>$ff_where_lib_conf
             ff_where_lib_conf_f77=1
-	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add f77 : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&5
-$as_echo "$as_me:     ++ add f77 : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&6;}
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add f77 : $FLIBS $ff_cfagsf77 $ff_pthread_dll in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add f77 : $FLIBS $ff_cfagsf77 $ff_pthread_dll in  $ff_where_lib_conf \"" >&6;}
 	else
-	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add f77 : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&5
-$as_echo "$as_me:     -- do not add f77 : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&6;}
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add f77 : $FLIBS $ff_cfagsf77 $ff_pthread_dll in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add f77 : $FLIBS $ff_cfagsf77 $ff_pthread_dll in  $ff_where_lib_conf \"" >&6;}
         fi
 
     	if test -z "$ff_where_lib_conf_fc" ; then
 	    echo "fc LD $FLIBS"  >>$ff_where_lib_conf
-	    test -n "$ff_cfagsf77" && echo "fc INCLUDE $ff_cfagsf77 "  >>$ff_where_lib_conf
+	    test -n "$ff_cfagsf77 $ff_pthread_dll" && echo "fc INCLUDE $ff_cfagsf77 $ff_pthread_dll "  >>$ff_where_lib_conf
             ff_where_lib_conf_fc=1
-	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add fc : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&5
-$as_echo "$as_me:     ++ add fc : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&6;}
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add fc : $FLIBS $ff_cfagsf77 $ff_pthread_dll in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add fc : $FLIBS $ff_cfagsf77 $ff_pthread_dll in  $ff_where_lib_conf \"" >&6;}
 	else
-	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add fc : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&5
-$as_echo "$as_me:     -- do not add fc : $FLIBS $ff_cfagsf77 in  $ff_where_lib_conf \"" >&6;}
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add fc : $FLIBS $ff_cfagsf77 $ff_pthread_dll in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add fc : $FLIBS $ff_cfagsf77 $ff_pthread_dll in  $ff_where_lib_conf \"" >&6;}
         fi
 
 
