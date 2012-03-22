@@ -22,14 +22,16 @@ LIBMUMPS=-L$(DOWNLOADFF)/lib  -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ -lmumps_co
 INCMUMPS=$(DOWNLOADFF)/include/libseq 
 #/Ipopt-3.10.2.tgz
 Ipopt: $(SRCDIR)/FAIRE
-
+#  --enable-static  --disable-shared  
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cd $(SRCDIR) ; \
-	 ./configure  --enable-static  --disable-shared  \
+	 ./configure \
+		   --disable-shared --enable-static \
                   --with-mumps='$(LIBMUMPS)' \
 	          --without-hsl \
 	          --with-mumps-incdir='$(INCMUMPS)' \
 	  CXX='$(CXX)' CXXFLAGS='$(CXXFLAGS) -I$(INCMUMPS)' \
+	  CC='$(CC)' CFLAGS='$(CFLAGS) -I$(INCMUMPS)' \
 	  F77='$(FC)' FCFLAGS='$(FCFLAGS)' \
 	 --with-blas='$(LIBBLAS)' --with-lapack='$(LIBLAPACK)' --prefix='$(DOWNLOADFF)'
 	touch $(SRCDIR)/FAIT	
