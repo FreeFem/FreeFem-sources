@@ -83,27 +83,92 @@ inline bool operator<=(const std::pair<int,int> &l,const std::pair<int,int> &r)
 }
 inline bool XOR(bool a,bool b) {return (!a && b) || (a && !b);}
 inline bool NXOR(bool a,bool b) {return !XOR(a,b);}
-inline void Sonde(int i) {cout << "sonde " << i << endl;}
+inline void SONDE() {static int i=1; cout << "SONDE " << i << endl; ++i;}
 
 
-
-template<class K> class ffcalfunc  //   to call the freefem function .. J, constraints, and derivatives
-{ 
+template<class K> class ffcalfunc
+{
 	public:
 		Stack stack;
+		ffcalfunc(const ffcalfunc &f) : stack(f.stack) {}
+		ffcalfunc(Stack _stack) : stack(_stack) {}
+		virtual K J(Rn_) const = 0;
+};
+template<class K> class GeneralFunc : public ffcalfunc<K>
+{ 
+	public:
 		Expression JJ,theparame;
-		ffcalfunc(const ffcalfunc &f) : stack(f.stack),JJ(f.JJ),theparame(f.theparame) {}
-		ffcalfunc(Stack s,Expression JJJ,Expression epar) : stack(s),JJ(JJJ), theparame(epar) {}
+		GeneralFunc(const GeneralFunc &f) : ffcalfunc<K>(f),JJ(f.JJ),theparame(f.theparame) {}
+		GeneralFunc(Stack s,Expression JJJ,Expression epar) : ffcalfunc<K>(s),JJ(JJJ), theparame(epar) {}
 		K J(Rn_  x) const 
 		{
-			KN<double> *p=GetAny<KN<double> *>( (*theparame)(stack) );
+			KN<double> *p=GetAny<KN<double> *>( (*theparame)(this->stack) );
 			*p=x;
-			K ret= GetAny<K>( (*JJ)(stack));
+			K ret= GetAny<K>( (*JJ)(this->stack) );
 			//cout << "call to ffcalfunc.J with " << *p << " and ret=" << ret << endl;
-			WhereStackOfPtr2Free(stack)->clean();
+			WhereStackOfPtr2Free(this->stack)->clean();
 			return  ret; 
 		}
 };
+class P2ScalarFunc : public ffcalfunc<R>
+{
+	public:
+		const bool vf;
+		Expression M,b; //Matrix of the quadratic part, vector of the linear part
+		P2ScalarFunc(const P2ScalarFunc &f) : ffcalfunc<R>(f),M(f.M),b(f.b),vf(f.vf) {}
+		P2ScalarFunc(Stack s,Expression _M,Expression _b,bool _vf=false) : ffcalfunc<R>(s),M(_M),b(_b),vf(_vf) {}
+		R J(Rn_ x) const
+		{
+			Rn tmp(x.N(),0.);
+			if(M)
+			{
+				Matrice_Creuse<R> * a = GetAny<Matrice_Creuse<R> *>( (*M)(stack) );
+				MatriceMorse<R> *A = dynamic_cast<MatriceMorse<R> *>(&(*a->A));
+				assert(A);
+				tmp  = (*A)*x;
+				if(vf) tmp/=2.;
+			}
+			if(b)
+			{
+				Rn *B = GetAny<Rn*>( (*b)(stack) );
+				if(vf) tmp -= (*B); else tmp += (*B);
+			}
+			R res=0.;
+			for(int i=0;i<x.N();++i) res += x[i]*tmp[i];
+			return res;
+		}
+};
+class P1VectorFunc : public ffcalfunc<Rn>
+{
+	public:
+		const bool vf;
+		Expression M,b;
+		P1VectorFunc(const P1VectorFunc &f) : ffcalfunc<Rn>(f),M(f.M),b(f.b),vf(f.vf) {}
+		P1VectorFunc(Stack s,Expression _M,Expression _b,bool _vf=false) : ffcalfunc<Rn>(s),M(_M),b(_b),vf(_vf) {}
+		Rn J(Rn_ x) const
+		{
+			Rn tmp(0);
+			if(M)
+			{
+				Matrice_Creuse<R> * a = GetAny<Matrice_Creuse<R> *>( (*M)(stack) );
+				MatriceMorse<R> *A = dynamic_cast<MatriceMorse<R> *>(&(*a->A));
+				assert(A);
+				if(tmp.N() != A->n) {tmp.resize(A->n); tmp=0.;}
+				tmp  = (*A)*x;
+			}
+			if(b)
+			{
+				Rn* B = GetAny<Rn *>( (*b)(stack) );
+				if(tmp.N() != B->N()) {tmp.resize(B->N()); tmp=0.;}
+				if(vf) tmp -= (*B); else tmp += (*B);
+			}
+			return tmp;
+		}
+};
+
+
+
+
 template<> class ffcalfunc<Matrice_Creuse<R> *>
 {
 	public:
@@ -115,7 +180,6 @@ template<> class ffcalfunc<Matrice_Creuse<R> *>
 		virtual K J(Rn_,double,Rn_) const = 0;
 		virtual bool NLCHPEnabled() const = 0; //Non Linear Constraints Hessian Prototype 
 };
-
 
 class GeneralSparseMatFunc : public ffcalfunc<Matrice_Creuse<R> *>
 {
@@ -173,7 +237,7 @@ class ConstantSparseMatFunc : public ffcalfunc<Matrice_Creuse<R> *>
 		}
 		K J(Rn_ x,double,Rn_) const {return J(x);}
 };
-		
+
 
 
 
@@ -304,6 +368,7 @@ class ffNLP : public TNLP
 		Rn lambda_start,x_start;
 		double sigma_start;
 		
+		double final_value;
 	private:
 		//algorithm datas
 		Rn *xstart,xl,xu,gl,gu;
@@ -311,7 +376,6 @@ class ffNLP : public TNLP
 		VectorFunc *dfitness,*constraints;
 		SparseMatFunc *hessian,*dconstraints;
 		int mm,nnz_jac,nnz_h;
-		double final_value;
 		//bool sym;
 		bool checkstruct;
 		SparseMatStructure HesStruct,JacStruct;
@@ -593,92 +657,107 @@ void ffNLP::finalize_solution(SolverReturn status,
 }
 
 
-static ffNLP::Level ToLevel(long i)
-{
-	switch(i){
-		case 0:
-			return ffNLP::user_defined;
-			break;
-		case 1:
-			return ffNLP::one_evaluation;
-			break;
-		case 2:
-			return ffNLP::basis_analysis;
-			break;
-		default:
-			return ffNLP::do_nothing;
-			break;
-		}
-}
-inline void SONDE() {static int i=1; cout << "SONDE " << i << endl; ++i;}
 
+enum AssumptionF {undeff,no_assumption_f, P2_f, unavailable_hessian, mv_P2_f, quadratic_f, linear_f};
+enum AssumptionG {undefg,without_constraints, no_assumption_g, P1_g, mv_P1_g, linear_g};
 
-//General case : (no_assumption)
-//  -handles all possibilities
-//  -fitness function, its gradient, the lagrangian hessian, constraint and its jacobian are all passed with functions
-//  -accepts two different prototype for the lagrangian hessian (real[int]&,real,real[int]&) for non linear constraints
-//   as well as (real[int] &) which is meant to be used when the constraints are affine (no contribution to the hessian
-//   since second order derivatives of constraints are null)
-
-//Affine constraints case: (affine_g)
-//  -handles the case when constraints have null second order derivatives
-//  -fitness function, its gradient and hessian, and constraints are still passed by functions
-//  -as it is constant, constraints jacobian can be directly passed with a matrix
-
-//Constant lagrangian hessian case : (quadratic_f_affine_g)
-//  -handles the case of a constant lagrangian hessian (which necessary means that constraints are affine, and fitness function is quadratic)
-//  -only fitness function, gradient and constraints are passed by functions
-//  -all matricial functions are directly passed with a constant matrix
-
-//Constant lagrangian with non affine constraints  : doesn't exist --> spurious case
-
-enum Assumption {no_assumption, affine_g, quadratic_f_affine_g, spurious_assumption, bfgs, bfgs_affine_g};
-const bool with_constraints=true,without_constraints=false;
-template<Assumption A,bool WC> struct Case
+template<AssumptionF AF,AssumptionG AG> struct Case
 {
 	Case() {}
-	static const Assumption a=A;
-	static const bool wc=WC;
+	static const AssumptionF af=AF;
+	static const AssumptionG ag=AG;
 };
 
+
+bool CheckMatrixVectorPair(const E_Array *mv,bool &order)
+{
+	const aType t1 = (*mv)[0].left(), t2 = (*mv)[1].left();
+	if(NXOR(t1 == atype<Matrice_Creuse<R>*>() , t2 == atype<Matrice_Creuse<R>*>())) return false;
+	else if(NXOR(t1 == atype<Rn*>(),t2 == atype<Rn*>())) return false;
+	else 
+	{
+		order = (t1 == atype<Matrice_Creuse<R>*>());
+		return true;
+	}
+}
+
+
+class GenericFitnessFunctionDatas
+{
+	public:
+		static GenericFitnessFunctionDatas* New(AssumptionF,const basicAC_F0 &,Expression const *,const C_F0&,const C_F0&,const C_F0&);
+		bool CompletelyNonLinearConstraints;
+		Expression JJ,GradJ,Hessian;
+		GenericFitnessFunctionDatas() : CompletelyNonLinearConstraints(true),JJ(0),GradJ(0),Hessian(0) {}
+		virtual const AssumptionF A() const {return undeff;}
+		virtual void operator()(Stack,const C_F0&,const C_F0&,const C_F0&,Expression const *,ScalarFunc *&,VectorFunc *&,SparseMatFunc *&,bool) const = 0; //Build the functions
+};
+template<AssumptionF AF> class FitnessFunctionDatas : public GenericFitnessFunctionDatas  //not really a template, since most of the methods of all cases have to be specialized
+{
+	public:
+		FitnessFunctionDatas(const basicAC_F0 &,Expression const *,const C_F0 &,const C_F0 &,const C_F0 &);
+		const AssumptionF A() const {return AF;}
+		void operator()(Stack,const C_F0&,const C_F0&,const C_F0&,Expression const *,ScalarFunc *&,VectorFunc *&,SparseMatFunc *&,bool) const;
+};
+
+class GenericConstraintFunctionDatas
+{
+	public:
+		static GenericConstraintFunctionDatas* New(AssumptionG,const basicAC_F0 &,Expression const *,const C_F0 &);
+		Expression Constraints,GradConstraints;
+		GenericConstraintFunctionDatas() : Constraints(0),GradConstraints(0) {}
+		virtual const AssumptionG A() const {return undefg;}
+		virtual const bool WC() const =0;//with constraints
+		virtual void operator()(Stack,const C_F0 &,Expression const *,VectorFunc *&,SparseMatFunc *&,bool) const = 0;//build the functions
+};
+template<AssumptionG AG> class ConstraintFunctionDatas : public GenericConstraintFunctionDatas
+{
+	public:
+		ConstraintFunctionDatas(const basicAC_F0 &,Expression const *,const C_F0 &);
+		const AssumptionG A() const {return AG;}
+		const bool WC() const {return AG!=without_constraints;}
+		void operator()(Stack,const C_F0&,Expression const *,VectorFunc *&,SparseMatFunc *&,bool) const ;
+};
+		
 
 
 
 class OptimIpopt : public OneOperator
 {
 	public:
-		const Assumption A;
-		const bool WC;
-		
+		const AssumptionF AF;
+		const AssumptionG AG;
 		class E_Ipopt : public E_F0mps
 		{
 			private:
-				bool first;
+				bool spurious_cases;
+			public:
+				const AssumptionF AF;
+				const AssumptionG AG;
+				const bool WC;
 				std::set<unsigned short> unused_name_param;
 				void InitUNP();
-				bool CompletelyNonLinearConstraints;
-			public:
-				const Assumption A;
-				const bool WC;
 				static basicAC_F0::name_and_type name_param[];
-				static const int n_name_param=12;
+				static const int n_name_param=14;
 				Expression nargs[n_name_param];
 				Expression X;
 				mutable Rn lm;
 				C_F0 L_m;
 				C_F0 inittheparam,theparam,closetheparam;
 				C_F0 initobjfact,objfact;
-				Expression JJ,GradJ,Constraints,GradConstraints,Hessian;
+				GenericFitnessFunctionDatas * fitness_datas;
+				GenericConstraintFunctionDatas * constraints_datas;
 				bool arg(int i,Stack stack,bool a) const {return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
 				long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 				R arg(int i,Stack stack,R a) const{ return nargs[i] ? GetAny<R>( (*nargs[i])(stack) ): a;}
 				Rn_ arg(int i,Stack stack,Rn_ a) const {return nargs[i] ? GetAny<Rn_>((*nargs[i])(stack)) : a;}
 				template<typename T> T Arg(int i,Stack s) const {return GetAny<T>( (*nargs[i])(s));}
 				
-				E_Ipopt(const basicAC_F0 & args,Assumption a,bool wc) : CompletelyNonLinearConstraints(true),lm(),L_m(CPValue(lm)),A(a),WC(wc),first(true),unused_name_param()
+				E_Ipopt(const basicAC_F0 & args,AssumptionF af,AssumptionG ag)
+				: lm(),L_m(CPValue(lm)),AF(af),AG(ag),WC(ag!=without_constraints),unused_name_param(),
+					spurious_cases(false),fitness_datas(0),constraints_datas(0)
 				{
-					if(first) {InitUNP(); first=false;}
-					if(A==spurious_assumption && WC) CompileError("IPOPT: impossible to have a constant lagrangian hessian and non linear constraints at the same time (see documentation)\n or if your constraints have a constant jacobian, you should directly pass the matrix to IPOPT, just as you did for the hessian.");
+					InitUNP();
 					int nbj= args.size()-1;
 					Block::open(currentblock); // make a new block to 
 					X = to<Rn*>(args[nbj]);
@@ -686,159 +765,117 @@ class OptimIpopt : public OneOperator
 					//  the expression to init the theparam of all 
 					inittheparam = currentblock->NewVar<LocalVariable>("the parameter",atype<KN<R> *>(),X_n);
 					initobjfact = currentblock->NewVar<LocalVariable>("objective factor",atype<double *>());
+					//C_F0 initlm = currentblock->NewVar<LocalVariable>("lagrange multiplier",atype<KN<R> *>(),L_m);
 					theparam = currentblock->Find("the parameter"); //  the expression for the parameter
 					objfact = currentblock->Find("objective factor");
 					args.SetNameParam(n_name_param,name_param,nargs);
-					const  Polymorphic * opJ=0,*opdJ=0,*opH=0,*opG=0,*opjG=0;
-					if (nbj>0)
-					{
-						opJ = dynamic_cast<const  Polymorphic *>(args[0].LeftValue());
-						assert(opJ);
-						opdJ= dynamic_cast<const Polymorphic *> (args[1].LeftValue());
-						assert(opdJ);
-						if(A!=quadratic_f_affine_g && A!=bfgs && A!=bfgs_affine_g)
-						{
-							opH = dynamic_cast<const Polymorphic *> (args[2].LeftValue());
-							assert(opH);
-						}
-						if(WC)
-						{
-							opG = dynamic_cast<const Polymorphic *> (args[nbj-2].LeftValue());
-							assert(opG);
-							if(A!=affine_g && A!=quadratic_f_affine_g && A!=bfgs_affine_g)
-							{
-								opjG= dynamic_cast<const Polymorphic *> (args[nbj-1].LeftValue());
-								assert(opjG); 
-							}
-						}
-					}      
-					ArrayOfaType hprototype2(atype<KN<R> *>(),atype<double>(),atype<KN<R>*>()),hprototype1(atype<KN<R> *>());
-					JJ =	to<R>(C_F0(opJ,"(",theparam));
-					GradJ = to<Rn_>(C_F0(opdJ,"(",theparam));
-					if(A!=quadratic_f_affine_g && A!=bfgs && A!=bfgs_affine_g)
-					{
-						if(opH->Find("(",hprototype2))
-						{
-							CompletelyNonLinearConstraints = true;
-							Hessian = to<Matrice_Creuse<R>* >(C_F0(opH,"(",theparam,objfact,L_m));
-						}
-						else if(opH->Find("(",hprototype1))
-						{
-							CompletelyNonLinearConstraints = false; //When constraints are affine, lagrange multipliers are not used in the hessian, obj_factor is also hidden to the user
-							Hessian = to<Matrice_Creuse<R>* >(C_F0(opH,"(",theparam));
-						}
-						else CompileError("Error, wrong hessian function prototype. Must be either (real[int] &) or (real[int] &,real,real[int] &)");
-					}
-					else if(A!=bfgs && A!=bfgs_affine_g) Hessian = to<Matrice_Creuse<R> *>(args[2]);
-					if(WC)
-					{
-						Constraints = to<Rn_>(C_F0(opG,"(",theparam));
-						if(A==affine_g || A==quadratic_f_affine_g || A==bfgs_affine_g) GradConstraints = to<Matrice_Creuse<R> *>(args[nbj-1]);
-						else GradConstraints = to<Matrice_Creuse<R>*>(C_F0(opjG,"(",theparam));
-					}
+					fitness_datas = GenericFitnessFunctionDatas::New(AF,args,nargs,theparam,objfact,L_m); //Creates links to the freefem objects
+					constraints_datas = GenericConstraintFunctionDatas::New(AG,args,nargs,theparam);      //defining the functions
+					spurious_cases = AG==no_assumption_g && (AF==P2_f || AF==mv_P2_f || AF==quadratic_f || AF==linear_f);
 					closetheparam=currentblock->close(currentblock);   // the cleanning block expression 
+				}
+				~E_Ipopt()
+				{
+					if(fitness_datas) delete fitness_datas;
+					if(constraints_datas) delete constraints_datas;
 				}
 				
 				
 				virtual AnyType operator()(Stack stack)  const
 				{
-					//cout << "ASSUMPTION = " << A << "  -  WC = " << WC << endl;
 					double cost = 299792458.;
 					WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005 
 					Rn &x = *GetAny<Rn *>((*X)(stack));	
+					{
+						Expression test(theparam); //in some case the KN object associated to the param is never initialized, leading to failed assertion in KN::destroy
+						Rn *tt = GetAny<Rn *>((*test)(stack)); //this lines prevent this to happen
+						*tt = x;
+					}
 					long n=x.N();	
 					bool warned=false;
+					cout << endl;
+					if(spurious_cases)
+					{
+						cout << "IPOPT Spurious case detected : the hessian is defined as a constant matrix but constraints are given in function form." << endl;
+						cout << "If they are not affine, the optimization is likely to fail. In this case, try one of the following suggestions:" << endl;
+						cout << "  - if constraints have computable hessians, use function form for the fitness function and all its derivatives" << endl;
+						cout << "    and check the documentation to know how to express the whole lagrangian hessian." << endl;
+						cout << "  - if constraints hessians are difficult to obtain, force the BFGS mode using named parameter "<< name_param[12].name<< '.' << endl;
+						cout << "Do not worry about this message if you know all your constraints has a constant null hessian." << endl << endl;
+					}
 					for(int i=0;i<n_name_param;++i) 
 						if(nargs[i] && unused_name_param.find(i)!=unused_name_param.end())
 						{
-							cout << "IPOPT Warning: named parameter " << name_param[i].name << " is useless for the problem you set (indications may appear further...)." << endl;
+							cout << "IPOPT Warning: named parameter " << name_param[i].name << " is useless for the problem you have set." << endl;
 							warned = true;
 						}
+					if(nargs[4] && nargs[5] && nargs[7])
+					{
+						cout << "IPOPT Warning: both " << name_param[4].name << " and " << name_param[5].name << " has been defined, so " << name_param[7].name;
+						cout << " will be ignored." << endl;
+					}
 					if(warned)
 					{
-						if(!WC && (nargs[2] || nargs[3])) cout << "  ==> Some constraints bounds have been defined while no constraints function has been passed." << endl;
-						if(!WC && nargs[4]) cout << "  ==> You provided a structure for the constraints jacobian but there is no constraint function." << endl;
-						if(!WC && nargs[6]) cout << "  ==> Unconstrained problem make the use of " << name_param[6].name << " pointless (see the documentation for more details)" << endl;
-						if(!WC && A==bfgs && nargs[8])
+						if(!WC && AF==unavailable_hessian && nargs[8])
 						{
 							cout << "  ==> " << name_param[8].name << " is useless because there should not be any function returning matrix in your problem," << endl;
-							cout << "      (2 functions can only be J and dJ). You may as well have forgotten one function (ipopt will certainly crash if so)." << endl;
+							cout << "      (2 functions can only be J and dJ). You may as well have forgotten one function (IPOPT will certainly crash if so)." << endl;
 						}
-						if(WC && A==bfgs_affine_g && nargs[8])
+						if(AF!=no_assumption_f && AF!=unavailable_hessian && AG!=no_assumption_g && nargs[5])
 						{
-							cout << "  ==> " << name_param[8].name << " is useless because there should not provide any non constant matrix in your problem," << endl;
-							cout << "      (3 functions can only be J, dJ and constraints). You may as well have forgotten one function (ipopt will certainly crash if so)." << endl;
+							cout << "  ==> your lagrangian hessian is a constant matrix, so there is no need to specify its structure with " << name_param[5].name << endl;
+							cout << "      since it is contained in the matrix object." << endl;
 						}
-						if((A==affine_g || A==quadratic_f_affine_g || A==bfgs_affine_g) && WC && nargs[4])
+						if(AF!=no_assumption_f && AF!=unavailable_hessian && AG!=no_assumption_g && nargs[7])
 						{
-							cout << "  ==> your constraints jacobian is a constant matrix, thus there is no need to specify its structure with " << name_param[4].name << endl;
-							cout << "      since it is contained in the matrix you passed." << endl;
-						}
-						/*if((A==affine_g || A==quadratic_f_affine_g) && WC && nargs[6])
-						{
-							cout << "  ==> " << name_param[6].name << " is meant to be used for the automatic determination of the lagrangian hessian structure," << endl;
-							cout << "      but all of your constraints have null hessian, thus they won't contribute to it (see the documentation for more details)." << endl;
-						}*/
-						if(A==quadratic_f_affine_g && nargs[5])
-						{
-							cout << "  ==> your lagrangian hessian is a constant matrix, thus there is no need to specify its structure with " << name_param[5].name << endl;
-							cout << "      since it is contained in the matrix you passed." << endl;
-						}
-						if(A==quadratic_f_affine_g && nargs[7])
-						{
-							cout << "  ==> " << name_param[7].name << " will be ignored since all matricial objects are constants and constraints do not" << endl;
+							cout << "  ==> " << name_param[7].name << " will be ignored since all matrices are constants and constraints do not" << endl;
 							cout << "      contribute to the hessian, matrix structure determination is trivial." << endl;
 						}
-						if(A==bfgs_affine_g && (nargs[7] || nargs[8]))
+						if(AF==unavailable_hessian && AG!=no_assumption_g && (nargs[7] || nargs[8]))
 						{
-							cout << "  ==> " << name_param[7].name << "or" << name_param[7].name << " will be ignored since the only matrix object you have passed is constant " << endl;
-							cout << "      the structure determination is contained in it." << endl;
+							cout << "  ==> " << name_param[7].name << " or " << name_param[8].name << " will be ignored since the only matrix you have passed is constant. " << endl;
+							cout << "      Or maybe did you forget to pass a function (IPOPT will certainly crash if so)." << endl;
 						}
-						if(A==quadratic_f_affine_g && nargs[8])
+						if(AF!=no_assumption_f && AF!=unavailable_hessian && AG!=no_assumption_g && nargs[8])
 						{
-							//if(Arg<bool>(8,stack))
-							cout << "  ==> no need to use " << name_param[8].name << " since all matricial objects are constants, structures won't change through the algorithm," << endl;
+							cout << "  ==> no need to use " << name_param[8].name << " since all matrices are constant, structures won't change through the algorithm," << endl;
 							cout << "      it is automatically set to the default disabling value." << endl;
-						}
-						if(A==bfgs && nargs[5])
-						{
-							cout << "  ==> the number of functions you passed to ipopt is such that the LBFGS mode has been enabled, thus making " << endl;
-							cout << "      " << name_param[5].name << " useless. You may also have forgoten a function (ipopt will certainly crash if so)." << endl;
 						}
 					}
 					
+					long iprint = verbosity;
 					
-					long iprint = verbosity;	
-					ScalarFunc ffJ(stack,JJ,theparam);
-					VectorFunc ffdJ(stack,GradJ,theparam);
-					SparseMatFunc * ffH=0;
-					if(CompletelyNonLinearConstraints) ffH = new GeneralSparseMatFunc(stack,Hessian,theparam,objfact,L_m);
-					else ffH = new GeneralSparseMatFunc(stack,Hessian,theparam);
-					VectorFunc *ffC = WC ? new ffcalfunc<Rn>(stack,Constraints,theparam) : 0;
-					SparseMatFunc *ffdC = WC ?  new GeneralSparseMatFunc(stack,GradConstraints,theparam) : 0; 
+					ScalarFunc *ffJ=0;
+					VectorFunc *ffdJ=0,*ffC=0;
+					SparseMatFunc *ffH=0,*ffdC=0;
+					
+					(*fitness_datas)(stack,theparam,objfact,L_m,nargs,ffJ,ffdJ,ffH,warned);
+					(*constraints_datas)(stack,theparam,nargs,ffC,ffdC,warned);
 					
 					Rn xl(n),xu(n),gl(nargs[2] ? Arg<Rn_>(2,stack).N() : 0),gu(nargs[3] ? Arg<Rn_>(3,stack).N() : 0);
-					if(WC && (gl.N()+gu.N())==0) cout << "IPOPT Warning : constrained problem without constraints bounds" << endl;
-					int mmm=gl.N()>gu.N() ? gl.N() : gu.N();
+					int mmm=0;
+					if(WC && (gl.N()+gu.N())==0)
+					{
+						cout << "IPOPT Warning : constrained problem without constraints bounds (the unconstrained problem" << endl;
+						mmm = ffC->J(x).N();
+					}
+					else mmm=gl.N()>gu.N() ? gl.N() : gu.N();
 					Rn_ *lag_mul=0;//Rn(mmm,1.);
 					//int niter=arg(6,stack,100L);
-					int autostructmode = (A==quadratic_f_affine_g || A==bfgs_affine_g )? ffNLP::one_evaluation : arg(7,stack,1L);
-					bool checkindex = ((A==quadratic_f_affine_g || A==bfgs_affine_g) ? false : arg(8,stack,false)), cberror=false;
-					
+					int autostructmode = (((AF!=no_assumption_f && AF!=unavailable_hessian) || AF==unavailable_hessian) && AG!=no_assumption_g)? ffNLP::one_evaluation : arg(7,stack,2L);
+					bool checkindex = (((AF!=no_assumption_f && AF!=unavailable_hessian )|| AF==unavailable_hessian) && AG!=no_assumption_g) ? false : arg(8,stack,false), cberror=false;
 					
 					if(nargs[0]) xl=Arg<Rn_>(0,stack); else xl=-1.e19;
 					if(nargs[1]) xu=Arg<Rn_>(1,stack); else xu=1.e19;
 					if(nargs[2]) gl=Arg<Rn_>(2,stack); else {gl.resize(mmm); gl=-1.e19;}
 					if(nargs[3]) gu=Arg<Rn_>(3,stack); else {gu.resize(mmm); gu=1.e19;}
-					const E_Array * ejacstruct = (WC && A==no_assumption && nargs[4]) ? dynamic_cast<const E_Array *> (nargs[4]) : 0,
-												* ehesstruct = (A!=bfgs && A!=bfgs_affine_g && A!=quadratic_f_affine_g && nargs[5]) ? dynamic_cast<const E_Array *> (nargs[5]) : 0;
-					//Expression LM = 0;
-					if(nargs[6] && WC)
-					{
-						lag_mul = new Rn_(GetAny<Rn_>((*nargs[6])(stack)));
-					}
+					const E_Array * ejacstruct = (WC && AF==no_assumption_f && AG==no_assumption_g && nargs[4]) ? dynamic_cast<const E_Array *> (nargs[4]) : 0,
+												* ehesstruct = (AG==no_assumption_f && nargs[5]) ? dynamic_cast<const E_Array *> (nargs[5]) : 0;
+												
+					if(nargs[6] && WC) lag_mul = new Rn_(GetAny<Rn_>((*nargs[6])(stack)));
+				
 					
-					SmartPtr<TNLP> optim = new ffNLP(x,xl,xu,gl,gu,&ffJ,&ffdJ,ffH,ffC,ffdC);
+					SmartPtr<TNLP> optim = new ffNLP(x,xl,xu,gl,gu,ffJ,ffdJ,ffH,ffC,ffdC);
 					ffNLP * _optim = dynamic_cast<ffNLP *> (&(*optim));
 					assert(_optim);
 					if(WC && nargs[6]) _optim->lambda_start = *lag_mul;
@@ -865,8 +902,8 @@ class OptimIpopt : public OneOperator
 						Expression raws = (*ehesstruct)[0], cols = (*ehesstruct)[1];
 						_optim->SetHessianStructure(*GetAny<KN<long>*>((*raws)(stack)),*GetAny<KN<long>*>((*cols)(stack)),true);
 					}
-					ffNLP::Level lh=ehesstruct ? ffNLP::user_defined : ToLevel(autostructmode),lj=ejacstruct ? ffNLP::user_defined : ToLevel(autostructmode);
-					if(A==bfgs || A==bfgs_affine_g) lh=ffNLP::do_nothing;
+					ffNLP::Level lh=ehesstruct ? ffNLP::user_defined : ffNLP::Level(autostructmode),lj=ejacstruct ? ffNLP::user_defined : ffNLP::Level(autostructmode);
+					if(AF==unavailable_hessian) lh=ffNLP::do_nothing;
 					_optim->BuildMatrixStructures(lh,lj,mmm);
 					if(checkindex) _optim->EnableCheckStruct();
 					
@@ -876,8 +913,18 @@ class OptimIpopt : public OneOperator
 					if(nargs[9]) app->Options()->SetNumericValue("tol",GetAny<double>((*nargs[9])(stack)));
 					if(nargs[10]) app->Options()->SetIntegerValue("max_iter",GetAny<long>((*nargs[10])(stack)));
 					if(nargs[11]) app->Options()->SetNumericValue("max_cpu_time",GetAny<double>((*nargs[11])(stack)));
+					bool bfgs = nargs[12] ? GetAny<bool>((*nargs[12])(stack)) : false;
 					//app->Options()->SetStringValue("hessian_approximation","limited-memory");
-					if(A==bfgs || A==bfgs_affine_g) app->Options()->SetStringValue("hessian_approximation","limited-memory");
+					if(AF==unavailable_hessian || bfgs)
+					{
+						if(AF==unavailable_hessian && !bfgs) cout << "IPOPT Note : No hessian given ==> LBFGS hessian approximation enabled" << endl;
+						app->Options()->SetStringValue("hessian_approximation","limited-memory");
+					}
+					if(nargs[13])
+					{
+						string derivative_test = *GetAny<string*>((*nargs[13])(stack)) ;
+						app->Options()->SetStringValue("derivative_test",derivative_test.c_str());
+					}
 					app->Options()->SetStringValue("mu_strategy", "adaptive");
 					app->Options()->SetStringValue("output_file", "ipopt.out");
 					//app->Options()->SetStringValue("mehrotra_algorithm", "yes");
@@ -897,64 +944,167 @@ class OptimIpopt : public OneOperator
 						printf("\n\n*** Ipopt failure!\n");
 					}
 					if(lag_mul) delete lag_mul;
+					if(ffJ) delete ffJ;
+					if(ffdJ) delete ffdJ;
 					if(ffH) delete ffH;
 					if(ffC) delete ffC;
 					if(ffdC) delete ffdC;
+					if(lm) lm.destroy(); // clean memory of LM 
 					closetheparam.eval(stack); // clean memory 
 					WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
-                                        lm.destroy(); // clean memory of LM 
-					return cost; //SetAny<long>(0);  Modif FH  july 2005       
+					return _optim->final_value; //SetAny<long>(0);  Modif FH  july 2005       
 				}
 				    
 				operator aType () const { return atype<double>();} 
 				
 		};
 		
-		E_F0 * code(const basicAC_F0 & args) const {return new E_Ipopt(args,A,WC);}
+		E_F0 * code(const basicAC_F0 & args) const {return new E_Ipopt(args,AF,AG);}
 		
 		
-		
-		OptimIpopt(Case<no_assumption,with_constraints>) : 
+		OptimIpopt(Case<no_assumption_f,no_assumption_g>) : 
 			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),
-			A(no_assumption),WC(with_constraints) {}
-		OptimIpopt(Case<no_assumption,without_constraints>) :
+			AF(no_assumption_f),AG(no_assumption_g) {}
+		OptimIpopt(Case<no_assumption_f,without_constraints>) :
 			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),
-			A(no_assumption),WC(without_constraints) {}
-		OptimIpopt(Case<affine_g,with_constraints>) :
+			AF(no_assumption_f),AG(without_constraints) {}
+		OptimIpopt(Case<no_assumption_f,P1_g>) :
 			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<KN<R> *>()),
-			A(affine_g),WC(with_constraints) {}
-		OptimIpopt(Case<quadratic_f_affine_g,with_constraints>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<KN<R> *>()),
-			A(quadratic_f_affine_g),WC(with_constraints) {}
-		OptimIpopt(Case<quadratic_f_affine_g,without_constraints>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<KN<R> *>()),
-			A(quadratic_f_affine_g),WC(without_constraints) {}
-		OptimIpopt(Case<spurious_assumption,with_constraints>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<Polymorphic*>(),atype<Polymorphic *>(),atype<KN<R> *>()),
-			A(spurious_assumption),WC(with_constraints) {}
-		OptimIpopt(Case<bfgs,with_constraints>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),
-			A(bfgs),WC(with_constraints) {}
-		OptimIpopt(Case<bfgs,without_constraints>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),A(bfgs),WC(without_constraints) {}
-		OptimIpopt(Case<bfgs_affine_g,with_constraints>) :
+			AF(no_assumption_f),AG(P1_g) {}
+		OptimIpopt(Case<no_assumption_f,mv_P1_g>) :
+			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<E_Array>(),atype<KN<R> *>()),
+			AF(no_assumption_f),AG(mv_P1_g) {}
+		OptimIpopt(Case<no_assumption_f,linear_g>) :
 			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R> *>()),
-			A(bfgs_affine_g),WC(with_constraints) {}
+			AF(no_assumption_f),AG(linear_g) {}
+
+
+		OptimIpopt(Case<P2_f,P1_g>) :
+			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<KN<R> *>()),
+			AF(P2_f),AG(P1_g) {}
+		OptimIpopt(Case<P2_f,without_constraints>) :
+			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<KN<R> *>()),
+			AF(P2_f),AG(without_constraints) {}
+		OptimIpopt(Case<P2_f,no_assumption_g>) :
+			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<Polymorphic*>(),atype<Polymorphic *>(),atype<KN<R> *>()),
+			AF(P2_f),AG(no_assumption_g) {}
+		OptimIpopt(Case<P2_f,mv_P1_g>) :
+			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<E_Array>(),atype<KN<R> *>()),
+			AF(P2_f),AG(mv_P1_g) {}
+		OptimIpopt(Case<P2_f,linear_g>) :
+			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R> *>()),
+			AF(P2_f),AG(linear_g) {}
 			
+		OptimIpopt(Case<unavailable_hessian,no_assumption_g>) :
+			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),
+			AF(unavailable_hessian),AG(no_assumption_g) {}
+		OptimIpopt(Case<unavailable_hessian,without_constraints>) :
+			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),AF(unavailable_hessian),AG(without_constraints) {}
+		OptimIpopt(Case<unavailable_hessian,P1_g>) :
+			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R> *>()),
+			AF(unavailable_hessian),AG(P1_g) {}
+		OptimIpopt(Case<unavailable_hessian,mv_P1_g>) :
+			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<E_Array>(),atype<KN<R>*>()),
+			AF(unavailable_hessian),AG(mv_P1_g) {}
+		OptimIpopt(Case<unavailable_hessian,linear_g>) :
+			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			AF(unavailable_hessian),AG(linear_g) {}
+			
+		OptimIpopt(Case<mv_P2_f,no_assumption_g>) :
+			OneOperator(atype<double>(),atype<E_Array>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R>*>()),
+			AF(mv_P2_f),AG(no_assumption_g) {}
+		OptimIpopt(Case<mv_P2_f,without_constraints>) :
+			OneOperator(atype<double>(),atype<E_Array>(),atype<KN<R>*>()),
+			AF(mv_P2_f),AG(without_constraints) {}
+		OptimIpopt(Case<mv_P2_f,P1_g>) :
+			OneOperator(atype<double>(),atype<E_Array>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			AF(mv_P2_f),AG(P1_g) {}
+		OptimIpopt(Case<mv_P2_f,mv_P1_g>) :
+			OneOperator(atype<double>(),atype<E_Array>(),atype<E_Array>(),atype<KN<R>*>()),
+			AF(mv_P2_f),AG(mv_P1_g) {}
+		OptimIpopt(Case<mv_P2_f,linear_g>) :
+			OneOperator(atype<double>(),atype<E_Array>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			AF(mv_P2_f),AG(linear_g) {}
+		
+		OptimIpopt(Case<quadratic_f,no_assumption_g>) :
+			OneOperator(atype<double>(),atype<Matrice_Creuse<R>*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R>*>()),
+			AF(quadratic_f),AG(no_assumption_g) {}
+		OptimIpopt(Case<quadratic_f,without_constraints>) :
+			OneOperator(atype<double>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			AF(quadratic_f),AG(without_constraints) {}
+		OptimIpopt(Case<quadratic_f,P1_g>) :
+			OneOperator(atype<double>(),atype<Matrice_Creuse<R>*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			AF(quadratic_f),AG(P1_g) {}
+		OptimIpopt(Case<quadratic_f,mv_P1_g>) :
+			OneOperator(atype<double>(),atype<Matrice_Creuse<R>*>(),atype<E_Array>(),atype<KN<R>*>()),
+			AF(quadratic_f),AG(mv_P1_g) {}
+		OptimIpopt(Case<quadratic_f,linear_g>) :
+			OneOperator(atype<double>(),atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			AF(quadratic_f),AG(linear_g) {}
+			
+			
+		OptimIpopt(Case<linear_f,no_assumption_g>) :
+			OneOperator(atype<double>(),atype<KN<R>*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R>*>()),
+			AF(linear_f),AG(no_assumption_g) {}
+		OptimIpopt(Case<linear_f,without_constraints>) :
+			OneOperator(atype<double>(),atype<KN<R>*>(),atype<KN<R>*>()),
+			AF(linear_f),AG(without_constraints) {}
+		OptimIpopt(Case<linear_f,P1_g>) :
+			OneOperator(atype<double>(),atype<KN<R>*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			AF(linear_f),AG(P1_g) {}
+		OptimIpopt(Case<linear_f,mv_P1_g>) :
+			OneOperator(atype<double>(),atype<KN<R>*>(),atype<E_Array>(),atype<KN<R>*>()),
+			AF(linear_f),AG(mv_P1_g) {}
+		OptimIpopt(Case<linear_f,linear_g>) :
+			OneOperator(atype<double>(),atype<KN<R>*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			AF(linear_f),AG(linear_g) {}
+		
 };
+
+
+
+/*
+enum AssumptionF {no_assumption_f, P2_f, unavailable_hessian, mv_P2_f, quadratic_f,linear_f};
+enum AssumptionG {without_constraints, no_assumption_g, P1_g, mv_P1_g, linear_g};
+*/
 
 void OptimIpopt::E_Ipopt::InitUNP()
 {
-	if(A==no_assumption && WC) {} //no unused named parameter
-	if(A==no_assumption && !WC)					AddElements(unused_name_param,4,2,3,4,6);
-	if(A==affine_g && WC)								AddElements(unused_name_param,1,4);
-	if(A==quadratic_f_affine_g && WC)		AddElements(unused_name_param,4,4,5,7,8);
-	if(A==quadratic_f_affine_g && !WC)	AddElements(unused_name_param,7,2,3,4,5,6,7,8);
-	if(A==spurious_assumption)					AddElements(unused_name_param,12,0,1,2,3,4,5,6,7,8,9,10,11);
-	if(A==bfgs && WC)										AddElements(unused_name_param,1,5);
-	if(A==bfgs && !WC)									AddElements(unused_name_param,7,2,3,4,5,6,7,8);
-	if(A==bfgs_affine_g)								AddElements(unused_name_param,4,4,5,7,8);
+	if(AF==no_assumption_f && AG==no_assumption_g) {} //no unused named parameter
+	if(AF==no_assumption_f && AG==without_constraints)			AddElements(unused_name_param,4,2,3,4,6);
+	if(AF==no_assumption_f && AG==P1_g)											AddElements(unused_name_param,1,4);
+	if(AF==no_assumption_f && AG==mv_P1_g)									AddElements(unused_name_param,1,4);
+	if(AF==no_assumption_f && AG==linear_g)									AddElements(unused_name_param,1,4);
+	if(AF==P2_f	&& AG==P1_g)																AddElements(unused_name_param,5,4,5,7,8,12);
+	if(AF==P2_f && AG==without_constraints)									AddElements(unused_name_param,8,2,3,4,5,6,7,8,12);
+	if(AF==P2_f && AG==no_assumption_g)											AddElements(unused_name_param,1,5);
+	if(AF==P2_f && AG==mv_P1_g)															AddElements(unused_name_param,5,4,5,7,8,12);
+	if(AF==P2_f && AG==linear_g)														AddElements(unused_name_param,5,4,5,7,8,12);
+	if(AF==unavailable_hessian && AG==no_assumption_g)			AddElements(unused_name_param,1,5);
+	if(AF==unavailable_hessian && AG==without_constraints)	AddElements(unused_name_param,7,2,3,4,5,6,7,8);
+	if(AF==unavailable_hessian && AG==P1_g)									AddElements(unused_name_param,4,4,5,7,8);
+	if(AF==unavailable_hessian && AG==mv_P1_g)							AddElements(unused_name_param,4,4,5,7,8);
+	if(AF==unavailable_hessian && AG==linear_g)							AddElements(unused_name_param,4,4,5,7,8);
+	if(AF==mv_P2_f && AG==without_constraints)							AddElements(unused_name_param,8,2,3,4,5,6,7,8,12);
+	if(AF==mv_P2_f && AG==no_assumption_g)									AddElements(unused_name_param,1,5);
+	if(AF==mv_P2_f && AG==P1_g)															AddElements(unused_name_param,5,4,5,7,8,12);
+	if(AF==mv_P2_f && AG==mv_P1_g)													AddElements(unused_name_param,5,4,5,7,8,12);
+	if(AF==mv_P2_f && AG==linear_g)													AddElements(unused_name_param,5,4,5,7,8,12);
+	if(AF==quadratic_f && AG==without_constraints)					AddElements(unused_name_param,8,2,3,4,5,6,7,8,12);
+	if(AF==quadratic_f && AG==no_assumption_g)							AddElements(unused_name_param,1,5);
+	if(AF==quadratic_f && AG==P1_g)													AddElements(unused_name_param,5,4,5,7,8,12);
+	if(AF==quadratic_f && AG==mv_P1_g)											AddElements(unused_name_param,5,4,5,7,8,12);
+	if(AF==quadratic_f && AG==linear_g)											AddElements(unused_name_param,5,4,5,7,8,12);
+	if(AF==linear_f && AG==without_constraints)							AddElements(unused_name_param,8,2,3,4,5,6,7,8,12);
+	if(AF==linear_f && AG==no_assumption_g)									AddElements(unused_name_param,1,5);
+	if(AF==linear_f && AG==P1_g)														AddElements(unused_name_param,5,4,5,7,8,12);
+	if(AF==linear_f && AG==mv_P1_g)													AddElements(unused_name_param,5,4,5,7,8,12);
+	if(AF==linear_f && AG==linear_g)												AddElements(unused_name_param,5,4,5,7,8,12);
 }
+
+
+
+
 
 
 basicAC_F0::name_and_type  OptimIpopt::E_Ipopt::name_param[]= 
@@ -963,14 +1113,16 @@ basicAC_F0::name_and_type  OptimIpopt::E_Ipopt::name_param[]=
 	{"ub",				&typeid(KN_<double>) },									//1
 	{"clb",				&typeid(KN_<double>) },									//2
 	{"cub",				&typeid(KN_<double>) },									//3
-	{"structjac", &typeid(E_Array)},											//4
+	{"structjacc",&typeid(E_Array)},											//4
 	{"structhess",&typeid(E_Array)},											//5
 	{"lm",				&typeid(KN_<double>)},									//6
 	{"autostruct",&typeid(long)},													//7
 	{"checkindex",&typeid(bool)},													//8
 	{"tol",				&typeid(double)},												//9
 	{"maxiter",		&typeid(long)},													//10
-	{"maxcputime",&typeid(double)}												//11
+	{"maxcputime",&typeid(double)},												//11
+	{"bfgs",      &typeid(bool)},													//12
+	{"derivativetest", &typeid(string*)}									//13
 };
 
 
@@ -983,22 +1135,327 @@ static Init init;
 
 Init::Init()  
 {
-  Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption,with_constraints>()));
-  Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption,without_constraints>())); 
-	Global.Add("IPOPT","(",new OptimIpopt(Case<affine_g,with_constraints>()));
-	Global.Add("IPOPT","(",new OptimIpopt(Case<quadratic_f_affine_g,with_constraints>()));
-	Global.Add("IPOPT","(",new OptimIpopt(Case<quadratic_f_affine_g,without_constraints>()));
-	Global.Add("IPOPT","(",new OptimIpopt(Case<spurious_assumption,with_constraints>()));
-	Global.Add("IPOPT","(",new OptimIpopt(Case<bfgs,with_constraints>()));
-	Global.Add("IPOPT","(",new OptimIpopt(Case<bfgs,without_constraints>()));
-	Global.Add("IPOPT","(",new OptimIpopt(Case<bfgs_affine_g,with_constraints>()));
+  Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,no_assumption_g>()));
+  Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,without_constraints>())); 
+	//Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,mv_P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,linear_g>()));
+	/*Global.Add("IPOPT","(",new OptimIpopt(Case<P2_f,P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<P2_f,without_constraints>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<P2_f,no_assumption_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<P2_f,mv_P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<P2_f,linear_g>()));*/
+	Global.Add("IPOPT","(",new OptimIpopt(Case<unavailable_hessian,no_assumption_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<unavailable_hessian,without_constraints>()));
+	//Global.Add("IPOPT","(",new OptimIpopt(Case<unavailable_hessian,P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<unavailable_hessian,mv_P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<unavailable_hessian,linear_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<mv_P2_f,no_assumption_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<mv_P2_f,without_constraints>()));
+	//Global.Add("IPOPT","(",new OptimIpopt(Case<mv_P2_f,P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<mv_P2_f,mv_P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<mv_P2_f,linear_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<quadratic_f,no_assumption_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<quadratic_f,without_constraints>()));
+	//Global.Add("IPOPT","(",new OptimIpopt(Case<quadratic_f,P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<quadratic_f,mv_P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<quadratic_f,linear_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<linear_f,no_assumption_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<linear_f,without_constraints>()));
+	//Global.Add("IPOPT","(",new OptimIpopt(Case<linear_f,P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<linear_f,mv_P1_g>()));
+	Global.Add("IPOPT","(",new OptimIpopt(Case<linear_f,linear_g>()));
 }
 
 
 
 
+template<> FitnessFunctionDatas<no_assumption_f>::FitnessFunctionDatas(const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m)
+	: GenericFitnessFunctionDatas()
+{
+	const Polymorphic * opJ  = dynamic_cast<const Polymorphic *>(args[0].LeftValue()),
+										* opdJ = dynamic_cast<const Polymorphic *>(args[1].LeftValue()),
+										* opH  = dynamic_cast<const Polymorphic *>(args[2].LeftValue()); 
+	ArrayOfaType hprototype2(atype<KN<R> *>(),atype<double>(),atype<KN<R>*>()),hprototype1(atype<KN<R> *>());
+	JJ =	to<R>(C_F0(opJ,"(",theparam));
+	GradJ = to<Rn_>(C_F0(opdJ,"(",theparam));
+	if(opH->Find("(",hprototype2))
+	{
+		CompletelyNonLinearConstraints = true;
+		Hessian = to<Matrice_Creuse<R>* >(C_F0(opH,"(",theparam,objfact,L_m));
+	}
+	else if(opH->Find("(",hprototype1))
+	{
+		CompletelyNonLinearConstraints = false; //When constraints are affine, lagrange multipliers are not used in the hessian, obj_factor is also hidden to the user
+		Hessian = to<Matrice_Creuse<R>* >(C_F0(opH,"(",theparam));
+	}
+	else CompileError("Error, wrong hessian function prototype. Must be either (real[int] &) or (real[int] &,real,real[int] &)");
+}
+template<> void FitnessFunctionDatas<no_assumption_f>::operator()
+(Stack stack,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m,Expression const *nargs,ScalarFunc *&ffJ,VectorFunc *&ffdJ,SparseMatFunc *&ffH,bool warned) const
+{
+	ffJ = new GeneralFunc<R>(stack,JJ,theparam);
+	ffdJ = new GeneralFunc<Rn>(stack,GradJ,theparam);
+	if(CompletelyNonLinearConstraints) ffH = new GeneralSparseMatFunc(stack,Hessian,theparam,objfact,L_m);
+	else ffH = new GeneralSparseMatFunc(stack,Hessian,theparam);
+}
+
+
+template<> FitnessFunctionDatas<P2_f>::FitnessFunctionDatas(const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m)
+	: GenericFitnessFunctionDatas()
+{
+	CompletelyNonLinearConstraints = false;
+	const Polymorphic * opJ  = dynamic_cast<const Polymorphic *>(args[0].LeftValue()),* opdJ = dynamic_cast<const Polymorphic *>(args[1].LeftValue());
+	JJ =	to<R>(C_F0(opJ,"(",theparam));
+	GradJ = to<Rn_>(C_F0(opdJ,"(",theparam));
+	Hessian = to<Matrice_Creuse<R> *>(args[2]);
+}
+template<> void FitnessFunctionDatas<P2_f>::operator()
+(Stack stack,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m,Expression const *nargs,ScalarFunc *&ffJ,VectorFunc *&ffdJ,SparseMatFunc *&ffH,bool warned) const
+{
+	if(warned && nargs[5])
+	{
+		cout << "  ==> your lagrangian hessian is a constant matrix, so there is no need to specify its structure with ";
+		cout << OptimIpopt::E_Ipopt::name_param[5].name << endl;
+		cout << "      since it is contained in the matrix object." << endl;
+	}
+	ffJ = new GeneralFunc<R>(stack,JJ,theparam);
+	ffdJ = new GeneralFunc<Rn>(stack,GradJ,theparam);
+	ffH = new ConstantSparseMatFunc(stack,Hessian);
+}
+
+
+template<> FitnessFunctionDatas<unavailable_hessian>::FitnessFunctionDatas(const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m)
+	: GenericFitnessFunctionDatas()
+{
+	CompletelyNonLinearConstraints = false;
+	const Polymorphic * opJ = dynamic_cast<const Polymorphic *> (args[0].LeftValue()),* opdJ = dynamic_cast<const Polymorphic *>(args[1].LeftValue());
+	JJ =	to<R>(C_F0(opJ,"(",theparam));
+	GradJ = to<Rn_>(C_F0(opdJ,"(",theparam));
+}
+template<> void FitnessFunctionDatas<unavailable_hessian>::operator()
+(Stack stack,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m,Expression const *nargs,ScalarFunc *&ffJ,VectorFunc *&ffdJ,SparseMatFunc *&ffH,bool warned) const
+{
+	if(warned && nargs[5])
+	{
+		cout << "  ==> no hessian has been given, the LBFGS mode has been enabled, thus making ";
+		cout << OptimIpopt::E_Ipopt::name_param[5].name << " useless. You may also" << endl << "      have forgoten a function (IPOPT will certainly crash if so)." << endl;
+	}
+	ffJ = new GeneralFunc<R>(stack,JJ,theparam);
+	ffdJ = new GeneralFunc<Rn>(stack,GradJ,theparam);
+	ffH = 0;
+}
+
+
+template<> FitnessFunctionDatas<mv_P2_f>::FitnessFunctionDatas(const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m)
+	: GenericFitnessFunctionDatas()
+{
+	const E_Array *M_b = dynamic_cast<const E_Array *>(args[0].LeftValue());
+	if(M_b->nbitem() != 2) CompileError("\nSorry, we were expecting an array with one or two componants, either [M,b] or [b,M] for the affine constraints expression." );
+	bool order = true;
+	if(CheckMatrixVectorPair(M_b,order))
+	{
+		Hessian = to<Matrice_Creuse<R> *>((*M_b)[order ? 0:1]);
+		GradJ = to<Rn*>((*M_b)[order ? 1:0]); //This is gradJ evaluated on x=0
+	}
+}
+template<> void FitnessFunctionDatas<mv_P2_f>::operator()
+(Stack stack,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m,Expression const *nargs,ScalarFunc *&ffJ,VectorFunc *&ffdJ,SparseMatFunc *&ffH,bool warned) const
+{
+	if(warned && nargs[5])
+	{
+		cout << "  ==> your lagrangian hessian is a constant matrix, so there is no need to specify its structure with ";
+		cout << OptimIpopt::E_Ipopt::name_param[5].name << endl;
+		cout << "      since it is contained in the matrix object." << endl;
+	}
+	ffJ = new P2ScalarFunc(stack,Hessian,GradJ,true); 
+	ffdJ = new P1VectorFunc(stack,Hessian,GradJ,true);
+	ffH = new ConstantSparseMatFunc(stack,Hessian);
+}
+
+
+template<> FitnessFunctionDatas<quadratic_f>::FitnessFunctionDatas(const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m)
+	: GenericFitnessFunctionDatas() {Hessian = to<Matrice_Creuse<R> *>(args[0]);}
+template<> void FitnessFunctionDatas<quadratic_f>::operator()
+(Stack stack,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m,Expression const *nargs,ScalarFunc *&ffJ,VectorFunc *&ffdJ,SparseMatFunc *&ffH,bool warned) const
+{
+	if(warned && nargs[5])
+	{
+		cout << "  ==> your lagrangian hessian is a constant matrix, so there is no need to specify its structure with ";
+		cout << OptimIpopt::E_Ipopt::name_param[5].name << endl;
+		cout << "      since it is contained in the matrix object." << endl;
+	}
+	ffJ = new P2ScalarFunc(stack,Hessian,0,true); 
+	ffdJ = new P1VectorFunc(stack,Hessian,0,true);
+	ffH = new ConstantSparseMatFunc(stack,Hessian);
+}
+
+
+template<> FitnessFunctionDatas<linear_f>::FitnessFunctionDatas(const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m)
+	: GenericFitnessFunctionDatas() {GradJ = to<Rn *>(args[0]);}
+template<> void FitnessFunctionDatas<linear_f>::operator()
+(Stack stack,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &L_m,Expression const *nargs,ScalarFunc *&ffJ,VectorFunc *&ffdJ,SparseMatFunc *&ffH,bool warned) const
+{
+	if(warned && nargs[5])
+	{
+		cout << "  ==> your lagrangian hessian is a null matrix, so there is no need to specify its structure with ";
+		cout << OptimIpopt::E_Ipopt::name_param[5].name << endl;
+		cout << "      since it is empty." << endl;
+	}
+	ffJ = new P2ScalarFunc(stack,0,GradJ); 
+	ffdJ = new P1VectorFunc(stack,0,GradJ);
+	ffH = 0;
+}
 
 
 
 
+template<> ConstraintFunctionDatas<without_constraints>::ConstraintFunctionDatas(const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam)
+ : GenericConstraintFunctionDatas() {}
+template<> void ConstraintFunctionDatas<without_constraints>::operator()(Stack stack,const C_F0 &theparam,Expression const *nargs,VectorFunc *&ffC,SparseMatFunc *&ffdC,bool warned) const 
+{
+	if(warned)
+	{
+		if(nargs[2] || nargs[3]) cout << "  ==> Some constraints bounds have been defined while no constraints function has been passed." << endl;
+		if(nargs[4]) cout << "  ==> A structure has been provided for the constraints jacobian but there is no constraint function." << endl;
+		if(nargs[6]) cout << "  ==> Unconstrained problem make the use of " << OptimIpopt::E_Ipopt::name_param[6].name << " pointless (see the documentation for more details)." << endl;
+	}
+	ffC = 0;
+	ffdC = 0;
+}
+
+template<> ConstraintFunctionDatas<no_assumption_g>::ConstraintFunctionDatas(const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam)
+ : GenericConstraintFunctionDatas() 
+{
+	int nbj = args.size()-1;
+	const Polymorphic * opG = dynamic_cast<const Polymorphic *> (args[nbj-2].LeftValue()), 
+										* opjG= dynamic_cast<const Polymorphic *> (args[nbj-1].LeftValue());
+	Constraints = to<Rn_>(C_F0(opG,"(",theparam));
+	GradConstraints = to<Matrice_Creuse<R>*>(C_F0(opjG,"(",theparam));
+}
+template<> void ConstraintFunctionDatas<no_assumption_g>::operator()(Stack stack,const C_F0 &theparam,Expression const *nargs,VectorFunc *&ffC,SparseMatFunc *&ffdC,bool) const 
+{
+	ffC = new GeneralFunc<Rn>(stack,Constraints,theparam);
+	ffdC = new GeneralSparseMatFunc(stack,GradConstraints,theparam);
+}
+
+template<> ConstraintFunctionDatas<P1_g>::ConstraintFunctionDatas(const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam)
+ : GenericConstraintFunctionDatas() 
+{
+	int nbj = args.size()-1;
+	const Polymorphic * opG = dynamic_cast<const Polymorphic *> (args[nbj-2].LeftValue());
+	Constraints = to<Rn_>(C_F0(opG,"(",theparam));
+	GradConstraints = to<Matrice_Creuse<R> *>(args[nbj-1]);
+}
+template<> void ConstraintFunctionDatas<P1_g>::operator()(Stack stack,const C_F0 &theparam,Expression const *nargs,VectorFunc *&ffC,SparseMatFunc *&ffdC,bool warned) const 
+{
+	if(warned && nargs[4])
+	{
+		cout << "  ==> your constraints jacobian is a constant matrix, there is no need to specify its structure with " << OptimIpopt::E_Ipopt::name_param[4].name << endl;
+		cout << "      since it is contained in the matrix object." << endl;
+	}
+	ffC = new GeneralFunc<Rn>(stack,Constraints,theparam);
+	ffdC = new ConstantSparseMatFunc(stack,GradConstraints);
+}
+
+template<> ConstraintFunctionDatas<mv_P1_g>::ConstraintFunctionDatas(const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam)
+ : GenericConstraintFunctionDatas() 
+{
+	int nbj = args.size()-1;
+	const E_Array *M_b = dynamic_cast<const E_Array *>(args[nbj-1].LeftValue());
+	if(M_b->nbitem() != 2) CompileError("\nSorry, we were expecting an array with one or two componants, either [M,b] or [b,M] for the affine constraints expression." );
+	bool order=true;
+	if(CheckMatrixVectorPair(M_b,order))
+	{
+		GradConstraints = to<Matrice_Creuse<R> *>((*M_b)[order ? 0:1]);
+		Constraints = to<Rn*>((*M_b)[order ? 1:0]); //Constraint on x=0
+	}
+	else CompileError("\nWrong types in the constraints [matrix,vector] pair, expecting a sparse matrix and real[int].");
+}
+template<> void ConstraintFunctionDatas<mv_P1_g>::operator()(Stack stack,const C_F0 &theparam,Expression const *nargs,VectorFunc *&ffC,SparseMatFunc *&ffdC,bool warned) const 
+{
+	if(warned && nargs[4])
+	{
+		cout << "  ==> your constraints jacobian is a constant matrix, there is no need to specify its structure with " << OptimIpopt::E_Ipopt::name_param[4].name << endl;
+		cout << "      since it is contained in the matrix object." << endl;
+	}
+	ffC = new P1VectorFunc(stack,GradConstraints,Constraints);
+	ffdC = new ConstantSparseMatFunc(stack,GradConstraints);
+}
+
+template<> ConstraintFunctionDatas<linear_g>::ConstraintFunctionDatas(const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam)
+ : GenericConstraintFunctionDatas() 
+{
+	int nbj = args.size()-1;
+	GradConstraints = to<Matrice_Creuse<R> *>(args[nbj-1]);
+}
+template<> void ConstraintFunctionDatas<linear_g>::operator()(Stack stack,const C_F0 &theparam,Expression const *nargs,VectorFunc *&ffC,SparseMatFunc *&ffdC,bool warned) const 
+{
+	if(warned && nargs[4])
+	{
+		cout << "  ==> your constraints jacobian is a constant matrix, there is no need to specify its structure with " << OptimIpopt::E_Ipopt::name_param[4].name << endl;
+		cout << "      since it is contained in the matrix object." << endl;
+	}
+	ffC = new P1VectorFunc(stack,GradConstraints,0);
+	ffdC = new ConstantSparseMatFunc(stack,GradConstraints);
+}
+
+
+GenericFitnessFunctionDatas* GenericFitnessFunctionDatas::New(AssumptionF AF,const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam,const C_F0 &objfact,const C_F0 &lm)
+{
+	switch (AF) 
+	{
+		case no_assumption_f:
+			return new FitnessFunctionDatas<no_assumption_f>(args,nargs,theparam,objfact,lm);
+			break;
+		case P2_f:
+			return new FitnessFunctionDatas<P2_f>(args,nargs,theparam,objfact,lm);
+			break;
+		case unavailable_hessian:
+			return new FitnessFunctionDatas<unavailable_hessian>(args,nargs,theparam,objfact,lm);
+			break;
+		case mv_P2_f:
+			return new FitnessFunctionDatas<mv_P2_f>(args,nargs,theparam,objfact,lm);
+			break;
+		case quadratic_f:
+			return new FitnessFunctionDatas<quadratic_f>(args,nargs,theparam,objfact,lm);
+			break;
+		case linear_f:
+			return new FitnessFunctionDatas<linear_f>(args,nargs,theparam,objfact,lm);
+			break;
+		default:
+			return 0; 
+			break;
+	}
+}
+
+GenericConstraintFunctionDatas* GenericConstraintFunctionDatas::New(AssumptionG AG,const basicAC_F0 &args,Expression const *nargs,const C_F0 &theparam)
+{
+	switch (AG)
+	{
+		case no_assumption_g:
+			return new ConstraintFunctionDatas<no_assumption_g>(args,nargs,theparam);
+			break;
+		case without_constraints:
+			return new ConstraintFunctionDatas<without_constraints>(args,nargs,theparam);
+			break;
+		case P1_g:
+			return new ConstraintFunctionDatas<P1_g>(args,nargs,theparam);
+			break;
+		case mv_P1_g:
+			return new ConstraintFunctionDatas<mv_P1_g>(args,nargs,theparam);
+			break;
+		case linear_g:
+			return new ConstraintFunctionDatas<linear_g>(args,nargs,theparam);
+			break;
+		default:
+			return 0;
+			break;
+	}
+}
+
+/*
+enum AssumptionF {undeff,no_assumption_f, P2_f, unavailable_hessian, mv_P2_f, quadratic_f, linear_f};
+enum AssumptionG {undefg,without_constraints, no_assumption_g, P1_g, mv_P1_g, linear_g};
+*/
 

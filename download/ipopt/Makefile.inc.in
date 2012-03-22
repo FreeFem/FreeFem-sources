@@ -3,6 +3,7 @@ DOWNLOADFF= $(abs_top_builddir)/download
 CC      = @CC@
 CXX      = @CXX@
 CXXFLAGS      = @CXXFLAGS@
+CFLAGS      = @CFLAGS@
 FC      = @FC@ 
 FCFLAGS      = @FCFLAGS@ 
 LIBBLAS =  @BLASLIBS@
