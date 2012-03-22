@@ -52,7 +52,7 @@ MetricPk.cpp GeometryQA.cpp  FreeFemQA.cpp BasicMath.h  TensorK.hpp  Geometry.hp
 GeoDiff.h Polynomial.h RZ.h SortedList.h ExampleMetrics.h  \
 cube.msh  \
 LapMUMPS_seq.edp MUMPS_seq.cpp \
-ff-IpOpt.cpp \
+ff-Ipopt.cpp \
 IpoptLap.edp IpoptVI.edp VarIneq2-Ipopt.edp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
@@ -72,7 +72,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
         VTK_writer_3d.$(DYLIB_SUFFIX)  VTK_writer.$(DYLIB_SUFFIX) \
 	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) ff-NLopt.$(DYLIB_SUFFIX)  ff-cmaes.$(DYLIB_SUFFIX) \
-	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) ff-IpOpt.$(DYLIB_SUFFIX)
+	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) ff-Ipopt.$(DYLIB_SUFFIX)
 
 
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) \
