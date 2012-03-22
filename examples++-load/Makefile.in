@@ -315,7 +315,7 @@ cmaes.h cmaes_interface.h ff-cmaes.cpp \
 VarIneq2.edp ff-NLopt.cpp \
 APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp  APk-MetricPk.edp \
 MetricPk.cpp GeometryQA.cpp  FreeFemQA.cpp BasicMath.h  TensorK.hpp  Geometry.hpp  \
- Polynomial.h RZ.h SortedList.h ExampleMetrics.h  \
+RZ.h SortedList.h ExampleMetrics.h  \
 cube.msh  \
 LapMUMPS_seq.edp MUMPS_seq.cpp \
 ff-Ipopt.cpp \
