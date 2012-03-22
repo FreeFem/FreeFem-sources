@@ -1,0 +1,159 @@
+load "ff-IpOpt"
+
+//A brief script to demonstrate how to use the freefemm interfaced nlopt routines
+//The problem consist in solving a simple variational inequality using one of the
+//optimization algorithm of nlopt. We restart the algorithlm a few times agter
+//performing some mesh adaptation to get a more precise output.
+int jplot=100; 
+
+int NN = 10;
+int[int] l1=[1,1,1,1];
+mesh Th = square(NN,NN,label=l1);
+func f1=1.;
+func f2=-1.;
+func g1=0.;
+func g2=0.1;
+int iter=0;
+int nadapt=2;
+real starttol=1e-6,bctol=6.e-12;
+fespace Vh(Th,P1);
+fespace Wh(Th,[P1,P1]);
+Wh [u1,u2];
+macro grad(u) [dx(u),dy(u)] //
+macro div(u1,u2) (dx(u1)+dy(u2)] //
+	
+varf BVF([u1,u2],[v1,v2]) = int2d(Th)((grad(u1)'*grad(v1) +	(grad(u2)'*grad(v2)))) ;
+varf LVF([u1,u2],[v1,v2]) = int2d(Th)( [v1,v2]'*[f1,f2]) ; 
+matrix A =  BVF(Wh,Wh);	 
+real[int] b = LVF(0,Wh);	
+matrix C ;
+{
+ matrix A1=interpolate(Vh,Wh,composante=0);
+ matrix A2=interpolate(Vh,Wh,composante=1);   
+ C = A1 + -1*A2;
+}
+ 
+varf Vbord([u1,u2],[w]) = on(1,u1=1,u2=1);
+real[int] In = Vbord(0,Wh,tgv=1);
+In = In ? 0:1;
+Wh [g1h,g2h]; 
+func int Plot(real[int] &X,int iter,real val)
+{ 
+ Wh [u1,u2];
+ u1[]=X;
+ plot(u1,u2,nbiso=30,fill=1,dim=3,cmm="  iteration " + iter + " - J = " + val,value=1);
+ return 0;
+}
+
+func real J(real[int] &X)
+{//  1/2 (AX,X)-(b,X)
+	iter++;
+	real[int] w=-2*b;w +=  A*X; 
+	real val = 0.5*(w'*X);
+	if(iter%jplot==jplot-1) Plot(X,iter,val);
+	return val;
+}
+
+func real[int] dJ(real[int] &X)
+{
+  real[int] G=A*X; G= - b; G = In .* G;  
+  return G;
+}
+
+
+func real[int] IneqC(real[int] &X)
+{ 
+    
+	real[int] constraints=C*X;
+	return constraints;
+}
+func real[int,int] dIneqC(real[int] &X)
+{
+	real[int,int] dconst(Vh.ndof,2*Vh.ndof);//so sparse... shame!
+	dconst=0;
+	for(int i=0;i<Vh.ndof;++i)
+	{
+		dconst(i,i) = 1.;
+		dconst(i,i+Vh.ndof) = -1.;
+	}
+	return dconst;
+}
+
+real[int] BordIndex(Th.nbe); //Indexes of border d.f.
+{
+	int k=0;
+	for(int i=0;i<Bord.n;++i) if(Bord[][i]) {BordIndex[k]=i; ++k;}
+}
+func real[int] BC(real[int] &X)
+{
+	real[int] bc(2*Th.nbe);
+	for(int i=0;i<Th.nbe;++i)
+	{
+		int I = BordIndex[i];
+		bc[i] = X[I] - gh1[][I];
+		bc[i+Th.nbe] = X[I+Th.nv] - gh2[][I];
+	}
+	return bc;
+}
+func real[int,int] dBC(real[int] &X)
+{
+	real[int,int] dbc(2*Th.nbe,2*Th.nv);//yet sparser...:(
+	dbc=0.;
+	for(int i=0;i<Th.nbe;++i)
+	{
+		int I=BordIndex[i];
+		dbc(i,I) = 1.;
+		dbc(i+Th.nbe,I+Th.nv) = 1.;
+	}
+	return dbc;
+}}
+
+
+real[int] start(2*Vh.ndof),up(2*Vh.ndof),lo(2*Vh.ndof);
+
+if(al==0)
+{
+	start(0:Vh.ndof-1) = 0.;
+	start(Vh.ndof:2*Vh.ndof-1) = 0.01;//comment this two lines and uncomment what follows to use ub and lb
+	/*Vh g1i=g1,g2i=g2;
+	start(0:Vh.ndof-1) = g1i[];
+	start(Vh.ndof:2*Vh.ndof-1) = g2i[]; */
+}
+else 
+{
+	start(0:Vh.ndof-1) = oldu1[];
+	start(Vh.ndof:2*Vh.ndof-1) = oldu2[]; 
+}
+up=1000000;
+lo=-1000000;
+for(int i=0;i<Vh.ndof;++i)
+{
+	if(Bord[][i])
+	{
+		up[i] = gh1[][i] + bctol;
+		lo[i] = gh1[][i] - bctol;
+		up[i+Vh.ndof] = gh2[][i] + bctol;
+		lo[i+Vh.ndof] = gh2[][i] - bctol;
+	}
+}
+
+//Uncomment this to use ub and lb
+/*
+real[int] diff1 = start - lo , diff2 = up - start;
+for(int i=0;i<diff1.n;++i) 
+{
+	if(diff1[i]<0) start[i]=lo[i];
+	if(diff2[i]<0) start[i]=up[i]; 
+}*/
+
+
+IPOPT(J,dJ,HJ,start,constraints=Jumps,jacobian=dJumps,clb=Clb,cub=Cub);//,clb=Clb,cub=Cub
+
+Vh best1,best2;
+best1[] = start(0:Vh.ndof-1);
+best2[] = start(Vh.ndof:2*Vh.ndof-1);
+
+Th = adaptmesh(Th,best1,best2);
+
+oldu1=best1;
+oldu2=best2;
