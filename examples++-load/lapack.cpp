@@ -33,7 +33,7 @@ class Init { public:
   Init();
 };
 
-bool lapack_inv(KNM<double>* A)
+long lapack_inv(KNM<double>* A)
 {
   intblas n=A->N();
   intblas m=A->M();
@@ -946,7 +946,7 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
       TheOperators->Add("<-", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,true,0> ) );
       TheOperators->Add("<-", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,true,0> ) );
       
-      Global.Add("inv","(",new  OneOperator1<bool,KNM<double>*>(lapack_inv));  
+      Global.Add("inv","(",new  OneOperator1<long,KNM<double>*>(lapack_inv));  
       Global.Add("dgeev","(",new  OneOperator3_<long,KNM<double>*,KN<Complex>*,KNM<Complex>*>(lapack_dgeev));  
       Global.Add("zgeev","(",new  OneOperator3_<long,KNM<Complex>*,KN<Complex>*,KNM<Complex>*>(lapack_zgeev));  
       Global.Add("dggev","(",new  OneOperator5_<long,KNM<double>*,KNM<double>*,KN<Complex>*,KN<double>*,KNM<Complex>*>(lapack_dggev));
