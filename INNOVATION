@@ -1,4 +1,6 @@
- - add Ipopt interface thank to Sylvain  Auliac
+version 3.19 (5 april 2012) 
+ - add Ipopt doc (thanks to Sylvain  Auliac)
+ - add Ipopt interface (thanks to Sylvain  Auliac)
  - correct 3d trunc bug in case of internal boundary
       thank to Yoshihiro Tomita <tomita.yoshihiro@gmail.com>. 
   - add new type of array , array of array
