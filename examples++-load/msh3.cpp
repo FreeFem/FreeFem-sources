@@ -4072,7 +4072,7 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
     }
     if(verbosity >1) cout << "numberofpoints " << numberofpoints << endl;
     if(verbosity >1) cout << "taille boite englobante =" << endl;
-    assert(nv_t==numberofpoints);
+    //    assert(nv_t==numberofpoints);
   }
 }
 
