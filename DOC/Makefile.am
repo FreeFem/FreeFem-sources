@@ -107,7 +107,8 @@ plots/beam-3d.jpg \
 plots/logo-finance-par-anr.jpg \
 plots/VarIneqFill.jpg plots/VarIneqIso.jpg \
 plots/NSNewtonTh.jpg  plots/NSNewtonUP.jpg \
-plots/chesapeake-2.jpg
+plots/chesapeake-2.jpg \
+plots/minsurf3D.jpg
 
 FIGS_PDF= plots/LogoCNRS.pdf    plots/LogoLJLL.pdf  plots/ffauteur.pdf  \
 plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf \
