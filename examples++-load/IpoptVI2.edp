@@ -1,4 +1,4 @@
-load "ff-IpOpt";
+load "ff-Ipopt";
 int nn=10;
 mesh Th=square(nn,nn);
 fespace Vh(Th,[P1,P1] );
