@@ -53,7 +53,7 @@ MetricPk.cpp GeometryQA.cpp  FreeFemQA.cpp BasicMath.h  TensorK.hpp  Geometry.hp
 cube.msh  \
 LapMUMPS_seq.edp MUMPS_seq.cpp \
 ff-Ipopt.cpp \
-IpoptLap.edp IpoptVI.edp VarIneq2-Ipopt.edp
+IpoptLap.edp IpoptVI.edp IpoptVI2.edp IpoptMinSurfVol.edp 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
