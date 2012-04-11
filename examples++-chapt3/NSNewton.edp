@@ -32,14 +32,14 @@ u2=0;
 //  Physical parameter 
 real nu= 1./50, nufinal=1/200. ,cnu=0.5; 
 
-// stop test for Newtow 
+// stop test for Newton 
 real eps=1e-6;
 
 verbosity=0;
 while(1)  //  Loop on vicosity 
 {   int n;
 	real err=0;	
-	for( n=0;n< 15;n++) // Netwon Loop 
+	for( n=0;n< 15;n++) // Newton Loop 
 	{
 	   solve Oseen([du1,du2,dp],[v1,v2,q]) =
 		   int2d(Th) (  nu*(Grad(du1,du2)'*Grad(v1,v2) )
