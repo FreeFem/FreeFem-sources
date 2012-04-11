@@ -10,22 +10,21 @@ real iso= 0.2 ;
 real[int] viso=[iso];
 plot(u,viso=viso,Th);
 
-
-//verbosity=200;
 int nbc= isoline(Th,u,xy,close=1,iso=iso,beginend=be,smoothing=0.1);
 /*
 
   	iso =  value of the iso to compute
 	close =  close the iso line this the border (def. 0). 
-       smoothing =  nb of smoothing process = (size of line) ^ratio * 0.01  (def. 0.) 
-	  ratio =  (def. 1.) 
+       smoothing =  nb of smoothing process =  smoothing * len curve ^ratio  
+                (def. 0.) 
+	   ratio =  (def. 1.) 
 	eps =  relative eps (see code ??)  (def 1e-10 )
 	beginend =  array to get begin end of sub line 
 	file =  filename 
 
 	remark:
-        sense  of the  isoline :  the upper part is a the left or sioline 
-        so here : the minimiun is a 0.5,05 => the curve 1 turn in the sense of  clockwise 
+        sense  of the  isoline :  the upper part is a the left part  isoline 
+        so here : the minimiun is a 0.5,05 => the curve 1 turn in the clockwise sense 
 */
 cout << " nb of the line  componant   = " << nbc << endl; 
 cout << " n = " << xy.m << endl; // nombre of points 
@@ -34,17 +33,14 @@ cout << "be = " << be << endl; //  begin end of the componant
 // show the lines 
 for( int c=0;c<nbc; ++c) 
 {
-    int i0 = be[2*c], i1 = be[2*c+1]-1; // debut et fin de la composante connexe de la ligne 
-    cout << " Curve " << c << endl; 
+    int i0 = be[2*c], i1 = be[2*c+1]-1; // begin and end  the  connexe line comp. c       
     for(int i=i0; i<= i1; ++i)
        cout << " x = " <<  xy(0,i) << " y =  " << xy(1,i) << " s =  " << xy(2,i) << endl; 
-    //int ic0=be(0), ic1=be(1)-1;		
- // plot([Curves(0,ic0:ic1),Curves(1,ic0:ic1)], wait=1);
     plot([xy(0,i0:i1),xy(1,i0:i1)],wait=1,viso=viso,cmm = " curve "+c);
 }
 }
 
-cout << " len of the curve = " << xy(2,xy.m-1) << endl;; 
+cout << " len of the curve 1 = " << xy(2,xy.m-1) << endl;; 
 
 
 border Curve0(t=0,1) 

@@ -1,81 +1,34 @@
-load "ppm2rnm"
-load "isoline"
-bool wait=false;
+load "ppm2rnm" load "isoline"
 string leman="lg.pgm";
-real AreaLac =  580.03; // Km^2
-int nbsmooth = 200; 
-int hsize= 1; 
+real AreaLac =  580.03; // $Km^2$
+real hsize= 5; 
 real[int,int] Curves(3,1);
 int[int] be(1);
-int nc;
-{ // build the curve file xy.txt ... 
-real[int,int] ff1(leman); // read  image and set to an rect. array 
-//  remark (0,0) is the upper, left corner.
-int nx = ff1.n, ny=ff1.m; 
-// build a cartesain mesh such that the origne is qt the right place.
-mesh Th=square(nx-1,ny-1,[(nx-1)*(x),(ny-1)*(1-y)]); 
-mesh Tf=Th;
-// warning  the numbering is of the vertices (x,y) is 
-// given by $  i = x/nx + nx* y/ny $
-fespace Vh(Th,P1);
-fespace Vf(Th,P1);
-Vh f1,f2;
-Vh fu,fv;
-f1[]=ff1; //  transforme array in finite element function.
-
-f2= min(f1, 0.25);
-verbosity=3;
-/*
- Usage of isoline
- the named parameter :
- iso=0.25   // value of iso 
- close=1, //   to force to have closing curve ... 
- beginend=be, // begin  and end of curve
- smoothing=.01, //   nb of smoothing process = size^ratio * 0.01 
- where  size is the size of the curve ...  
- ratio=0.5
- file="filename"
- 
- ouptut:
-  xx, yy  the array of point of the iso value 
-
-a closed curve  number n is
-
-in fortran notation the point of the curve are: 
-(xx[i],yy[i], i = i0, i1) 
-with :  i0=be[2*n],  i1=be[2*n+1];
-
-*/
-
-nc=isoline(Th,f1,iso=0.25,close=1,Curves,beginend=be,smoothing=.1,ratio=0.5); 
-verbosity=1; 
+int nc;// nb of curve 
+{  
+  real[int,int] ff1(leman); // read  image and set to an rect. array 
+  int nx = ff1.n, ny=ff1.m; // grey value beetween 0 to 1 (dark)
+  // build a Cartesian mesh such that the origne is qt the right place.
+  mesh Th=square(nx-1,ny-1,[(nx-1)*(x),(ny-1)*(1-y)]);   
+   // warning  the numbering is of the vertices (x,y) is 
+   // given by $  i = x/nx + nx* y/ny $
+  fespace Vh(Th,P1);
+  Vh f1; f1[]=ff1; //  transforme array in finite element function.
+  nc=isoline(Th,f1,iso=0.25,close=1,Curves,beginend=be,smoothing=.1,ratio=0.5); 
+  verbosity=1; 
 }
-
+// the longuest isoline 
 int ic0=be(0), ic1=be(1)-1;		
-  plot([Curves(0,ic0:ic1),Curves(1,ic0:ic1)], wait=1);
+plot([Curves(0,ic0:ic1),Curves(1,ic0:ic1)], wait=1);
+int NC= Curves(2,ic1)/hsize;
+real xl = Curves(0,ic0:ic1).max-5;
+real yl = Curves(1,ic0:ic1).min+5;
+border G(t=0,1) {  P=Curve(Curves,ic0,ic1,t);  label= 1 + (x>xl)*2 + (y<yl);} 		
 
-// end smoothing the curve ....
-
-border G(t=0,1) 
-{    
-  P=Curve(Curves,ic0,ic1,t);
-  label=1;	
-} 		
-cout << " .. "<<endl;
-plot(G(-500),wait	=1); 
-mesh Th=buildmesh(G(-500     ));
-cout << " ...  "<<endl;
+plot(G(-NC),wait=1); 
+mesh Th=buildmesh(G(-NC));
 plot(Th,wait=1);
-
 real scale = sqrt(AreaLac/Th.area);
-Th=movemesh(Th,[x*scale,y*scale]);
+Th=movemesh(Th,[x*scale,y*scale]); // resize the  mesh to have the correct scale 
 cout << " Th.area = " << Th.area << " Km^2 " << " == " << AreaLac <<  "   Km^2 " << endl ;
-int Thnbvx=AreaLac/(hsize*hsize/5.)+1000;
-
-Th=adaptmesh(Th,hsize,IsMetric=1,nbvx=Thnbvx,errg=5);
-Th=adaptmesh(Th,hsize,IsMetric=1,nbvx=Thnbvx,errg=5);
-Th=adaptmesh(Th,hsize,IsMetric=1,nbvx=Thnbvx,errg=5);
-Th=adaptmesh(Th,hsize,IsMetric=1,nbvx=Thnbvx,errg=5);
- // end of build 2d mesh 
-
-plot(Th,wait=1);
+plot(Th,wait=1,ps="leman.eps");
