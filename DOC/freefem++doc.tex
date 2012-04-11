@@ -7954,11 +7954,150 @@ Vh u,v,usol,h;
   plot(u,wait=1);
   errm*= 0.8;// change the level of error
   cout << " Th3" << Th3.nv < " " << Th3.nt << endl;
-  Th3=tetgreconstruction(Th3,switch="raAQ",sizeofvolume=h*h*h/6.);// rebuidl mesh
+  Th3=tetgreconstruction(Th3,switch="raAQ",sizeofvolume=h*h*h/6.);//rebuild mesh
   medit("U-adap-iso-"+ii,Th3,u,wait=1);}
 \eFF
 \end{example}
+
+\subsection{Build a 2d mesh from a isoline}
+\index{isoline}
+
+ The idea is get the discretization of a isoline to fluid meshes, this tool  can be useful to
+ construct meshes from image. First, we give an example of the isovalue meshes $0.2$  of analytical function $ \sqrt{(x-1/2)^2 +(y-1/2)^2}$,
+ on unit square. 
+\begin{example}[isoline.edp]
+\label{ex:isoline.edp}~\hfill\break
+\bFF
+load "isoline" // load the plugin "isoline"
+
+@real[@int,@int] xy(3,1); // to store the isoline points 
+@int[@int] be(1);// to store the begin , end couple of lines
+{// a block for memory management 
+  @mesh Th=square(10,10);//,[x*.5,y*0.5]);
+  @fespace Vh(Th,P1);
+  Vh u= @sqrt(square(x-0.5)+square(y-0.5));
+  @real iso= 0.2 ;
+  @real[int] viso=[iso];
+  @plot(u,viso=viso,Th);// to see the iso line 
+
+  @int nbc= isoline(Th,u,xy,close=1,iso=iso,beginend=be,smoothing=0.1);
+\eFF
+
+The isoline parameters are \texttt{Th} the mesh, the expression $u$ , the  bidimentionnal array \texttt{xy}
+to store the list coordinate of the points. The list of named parameter are:
+\begin{description}
+\item[iso=]  value of the isoline  to compute ($\bm{0}$ is the default value)
+\item[close=] close the iso line with the border (def. true), we add the part of the mesh border such the value
+ is less than the iso value 
+\item[smoothing=] nb of smoothing process  is  the ${l} ^{r} {s} $ where
+$l$ is the length of the current  line component, $r$ the ratio, $s$ is smoothing  value. The smoothing default value is $\bm{0}$.
+\item[ratio=] the ratio ( $1$ by default). 
+\item[eps=] relative $\varepsilon$  (see code ??)  (def 1e-10 )
+\item[beginend=]  array to get begin, end couple of each of sub line  (resize automatically)
+\item[file=] to save the data  curve in data file for gnu plot
+\end{description}
+
+In the array \texttt{xy} you get the list of vertices of the isoline,
+each connex line go from $i= i_0^c ,\dots, i_1^c-1$ with $i_0^c =be(2*c)$  $i_1^c =be(2*c+1)$, and
+  where $x_i= xy(0,i), y_i=yx( 1,i), l_i=xy(2,i) $. 
+Here  $l_i$ is the length of the line (the origin of the line is point  $i_0^c$).
+
+The  sense  of the  isoline is such that the upper part is at the left  size of the  isoline.
+So here : the minimum is a point $0.5,05$ so  the curve 1 turn in the clockwise  sense, 
+the order of each component are sort such the the number of point by component is decreasing .
+
+\bFF   
+  @cout << " nb of the line  component   = " << nbc << endl; 
+  @cout << " n = " << xy.m << endl; // number  of points 
+  @cout << "be = " << be << endl; //  begin end of the each componant
+
+  // show the lines component 
+  @for( @int c=0;c<nbc; ++c) 
+  {
+    @int i0 = be[2*c], i1 = be[2*c+1]-1;//begin,end of the line component
+    @cout << " Curve " << c << endl; 
+    @for(int i=i0; i<= i1; ++i)
+       @cout << " x= " << xy(0,i) <<" y= " << xy(1,i) << " s= " 
+             << xy(2,i) << endl; 
+    plot([xy(0,i0:i1),xy(1,i0:i1)],wait=1,viso=viso,cmm = " curve "+c);
+  }
+}// end of block for  memory management 
+
+@cout << " len of  last  curve = " << xy(2,xy.m-1) << endl;; 
+\eFF
+
+We also have a  new function to parametrize easly  a
+discret \texttt{Curve} defined by couple $be, xy$. \index{Curve}
+
+\bFF
+@border Curve0(t=0,1) // the extern boundary 
+{ @int c =0; // component 0
+  @int i0 = be[2*c], i1 = be[2*c+1]-1;   
+  P=@Curve(xy,i0,i1,t); // Curve 0
+  label=1; 
+} 
+
+@border Curve1(t=0,1) 
+{ @int c =1; // component 1
+  @int i0 = be[2*c], i1 = be[2*c+1]-1;   
+  P=Curve(xy,i0,i1,t);  // Curve 1
+  label=1; 
+} 
+
+@plot(Curve1(100)); // show curve. 
+@mesh Th= buildmesh(Curve1(-100));// because 
+@plot(Th,wait=1);// 
+\eFF
+\end{example}
+
+Secondly, we use this idea to build meshes from image, we use the plugins
+\texttt{ppm2rnm} to read \texttt{pgm} gray scale image, and we extract the 
+gray contour at level $0.25$.  
+
+\begin{example}[Leman-mesh.edp]
+\label{ex:Leman-mesh.edp}~\hfill\break
+\bFF
+@load "ppm2rnm" @load "isoline"
+@string leman="lg.pgm"; //see figure \ref{fig:lg}
+@real AreaLac =  580.03; // in $Km^2$
+@real hsize= 5; // mesh sir in pixel ..
+@real[int,int] Curves(3,1);
+@int[int] be(1);
+@int nc;// nb of curve 
+{  
+  @real[int,int] ff1(leman); // read  image (figure \ref{fig:lg}) 
+  // and set to an rect.  array \index{ppm2rnm}
+  @int nx = ff1.n, ny=ff1.m; // grey value between 0 to 1 (dark)
+  // build a Cartesian mesh such that the origin is qt the right place.
+  @mesh Th=square(nx-1,ny-1,[(nx-1)*(x),(ny-1)*(1-y)]);   
+   // warning  the numbering is of the vertices (x,y) is 
+   // given by $  i = x/nx + nx* y/ny $
+  @fespace Vh(Th,P1);
+   Vh f1; f1[]=ff1; //  transforme array in finite element function.
+  nc=@isoline(Th,f1,iso=0.25,close=1,Curves,beginend=be,smoothing=.1,ratio=0.5); 
+}
+// the longest isoline : the lac .. 
+@int ic0=be(0), ic1=be(1)-1;		
+plot([Curves(0,ic0:ic1),Curves(1,ic0:ic1)], wait=1);
+@int NC= Curves(2,ic1)/hsize;
+@border G(t=0,1) {  @P=@Curve(Curves,ic0,ic1,t);  @label= 1 + (x>xl)*2 + (y<yl);} 	
+
+plot(G(-NC),wait=1); 
+@mesh Th=buildmesh(G(-NC));
+plot(Th,wait=1);
+@real scale = sqrt(AreaLac/Th.area);
+Th=@movemesh(Th,[x*scale,y*scale]);//resize the mesh  
+@cout << " Th.area = " << Th.area << " Km^2 " << " == " << AreaLac <<  "   Km^2 " << endl ;
+plot(Th,wait=1,ps="leman.eps");//  see figure \ref{fig:leman}
+\eFF
+\end{example}
+
+\twoplot[width=8cm]{lg}{leman}{\label{fig:lg}The image of the leman lac meshes}{\label{fig:leman} the mesh of lac}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\setS{Finite Elements}} \index{finite element space}\label{finite elements}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 As stated in Section \ref{sec:example}.
 FEM approximates all functions $w$ as
