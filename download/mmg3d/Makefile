@@ -22,13 +22,13 @@ mmg3d: build-4
 
 
 build-4: 
-	-make tag-tar
-	if [ -d mmg3d4  ] ; then  make $(LIBMMG3D) install-4 WHERE ; else echo "Sorry no source " ; fi
+	-$(MAKE) tag-tar
+	if [ -d mmg3d4  ] ; then  $(MAKE)  $(LIBMMG3D) install-4 WHERE ; else echo "Sorry no source " ; fi
 $(LIBMMG3D):
-	cd mmg3d4/build/sources/; $(CC) -c $(CFLAGS) *.c;
-	 cd mmg3d4/build/sources/mmg3dmain; $(CC) -c $(CFLAGS) mmg3d.c -I..
-	$(AR) $(ARFLAGS) $(LIBMMG3D) mmg3d4/build/sources/*.o
-	$(CC) $(CFLAGS) mmg3d4/build/sources/mmg3dmain/mmg3d.o   mmg3d4/build/sources/*.o -o ../bin/mmg3d $(STD_LIBS)
+	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS)' `echo *.c |sed 's/[.]c/.o/g'`
+	cd mmg3d4/build/sources/mmg3dmain; $(CC) -c $(CFLAGS) mmg3d.c -I..
+	$(AR) $(ARFLAGS) $(LIBMMG3D) mmg3d4/build/sources/*.o mmg3d4/build/sources/mmg3dmain/mmg3d.o
+	-$(CC) $(CFLAGS) mmg3d4/build/sources/mmg3dmain/mmg3d.o   mmg3d4/build/sources/*.o -o ../bin/mmg3d $(STD_LIBS)
 	touch build-4 FAIT-4
 install-4:
 	-mkdir ../include/mmg3d-v4/		
