@@ -15403,7 +15403,7 @@ The nonlinear elasticity  problem is: find  the displacement $(u_{1},u_{2})$  mi
 $$ \min J(u_{1},u_{2}) = \int_{\Omega} f(F2) -  \int_{\Gamma_{p}} P_{a} \,  u_{2} $$
 where  $F2(u_{1},u_{2}) =  A(E[u_{1},u_{2}],E[u_{1},u_{2}])$ and $A(X,Y)$ is bilinear sym. positive form with respect two matrix $X,Y$.
 where $f$ is a given $\mathcal{C}^2$  function, and $E[u_{1},u_{2}] = (E_{ij})_{i=1,2,\,j=1,2}$ is the Green-Saint Venant deformation tensor defined  with:
-$$  E_{ij} = 0.5 ( \p_i u_j + \p_j u_i ) + \sum_k \p_i u_k {\times} \p_j u_k  $$
+$$  E_{ij} = 0.5 \big( ( \p_i u_j + \p_j u_i ) + \sum_k \p_i u_k {\times} \p_j u_k \big) $$
 
 Denote $\mathbf{u}=(u_{1},u_{2})$, $\mathbf{v}=(v_{1},v_{2})$, $\mathbf{w}=(w_{1},w_{2})$.
 
