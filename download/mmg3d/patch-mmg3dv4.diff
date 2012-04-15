@@ -980,3 +980,25 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  int MMG_optlen_ani(pMesh mesh,pSol sol,double declic,int base) {
    pTetra    pt,pt1;
    pPoint    ppa,ppb;
+--- mmg3d4/build/sources/mmg3d4.c	2012-04-15 21:20:28.000000000 +0200
++++ mmg3d4-v0/build/sources/mmg3d4.c	2012-04-15 21:18:37.000000000 +0200
+@@ -45,13 +45,13 @@
+ ****************************************************************************/
+ #include "mesh.h"
+ 
+-int MMG_npuiss,MMG_nvol,MMG_npres;
+-int MMG_nlen,MMG_ncal,MMG_ntopo,MMG_nex;
+-int MMG_npuisstot,MMG_nvoltot,MMG_nprestot;
+-int MMG_npdtot;
+-int MMG_nplen,MMG_npref,MMG_bouffe;
++extern int MMG_npuiss,MMG_nvol,MMG_npres;
++extern int MMG_nlen,MMG_ncal,MMG_ntopo,MMG_nex;
++extern int MMG_npuisstot,MMG_nvoltot,MMG_nprestot;
++extern int MMG_npdtot;
++extern int MMG_nplen,MMG_npref,MMG_bouffe;
+ 
+-int ddebug;
++int ddebug;
+ 
+ int MMG_mmg3d4(pMesh mesh,pSol sol,int *alert) {
+   Hedge    hash;
