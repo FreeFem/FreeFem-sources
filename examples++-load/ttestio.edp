@@ -27,7 +27,13 @@ int[int] fforder=[0,0,1,0,1];
 savevtk("disque.vtk",Th2,uh,ggg,uh,[uh,ggg],[uh,ggg],dataname="kkdjd jyqql bidule45 vector nnn nn44233T",order=fforder);
 
 
-mesh3 Th3=readmesh3("spherewithtworegion.mesh"); // This .mesh file is obtaing with tetgenholeregion.edp
+mesh3 Th3;
+try {
+Th3=readmesh3("spherewithtworegion.mesh"); // This .mesh file is obtaing with tetgenholeregion.edp
+}
+catch (...) {
+  include "../examples++-3d/tetgenholeregion.edp"
+}
 fespace Vh3(Th3,P1);     // P1 FE space
 func gg2=x+y;
 int[int] fforder2=[0,0,1,1];
