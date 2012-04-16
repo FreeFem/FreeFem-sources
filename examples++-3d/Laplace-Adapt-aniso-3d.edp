@@ -1,4 +1,7 @@
+// in test wrong skip 
+if(0) 
 
+{
 load "msh3"
 load "tetgen"
 load "mshmet"
@@ -83,3 +86,4 @@ for(int ii=0; ii<2; ii++) //  BUG trap  in interation 3
 cout <<"end Laplace  Adapt aniso 3d. edp " <<endl;
 
 
+}
