@@ -248,6 +248,13 @@ b(0:5:2).sort;
 cout << b << endl; 
 cout << b(0:5:2)  << endl; 
 cout << " quantile(0.2)  = " <<  b.quantile(0.2) << endl; 
+p[0] = 1000;
+p[1] = 888;
+cout << "before    p(1:3).sort  " << p  << endl; 
+p(1:3).sort;
+cout << "after   p(1:3).sort " << p  << endl; 
+p.sort; // version 3.19 ##
+cout << "after   p.sort " << p  << endl; 
 
 macro AA [ [1,2],[3,4]] //
 macro BB [ [1,2],[5,10]] //
