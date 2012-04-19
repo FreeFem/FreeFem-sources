@@ -399,7 +399,7 @@ class FEbaseArrayKn { public:// for eigen value
     int N;
     FEbaseArrayKn(int NN):N(NN){}
   virtual  void  set(int i,KN_<K> ) =0;
-
+virtual KN<K>* get(int i) = 0; // for P. Jolivet 
 };
 
 template<class K,class v_fes>
@@ -428,6 +428,9 @@ public:
     return xx+i;}  
     
     void  set(int i,KN_<K>  v){  **(operator[](i))=v;} 
+    
+    KN<K>* get(int i){ return (**(operator[](i))).xx; }
+    
 private: // rule of programming 
   FEbaseArray(const FEbaseArray &);
   void operator= (const FEbaseArray &); 
