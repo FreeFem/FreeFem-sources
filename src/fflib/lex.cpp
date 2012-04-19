@@ -362,6 +362,8 @@ int mylex::basescan()
           nc = source().peek();
           if(nc == '=' )
           {
+              buf[2]='=';// ad FH 19 april 2012 (bug in macro ) 
+              buf[3]=0; 
               source().get();
               ret = (ret == DOTSTAR) ?DOTMULEQ : DOTDIVEQ;
           }
