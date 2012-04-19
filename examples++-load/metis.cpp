@@ -1,14 +1,34 @@
+// SUMMARY  :   add interface with partionning library scotch 
+// USAGE    : LGPL      
+// ORG      : LJLL Universite Pierre et Marie Curie, Paris,  FRANCE 
+// AUTHOR   : F. Hecht
+// E-MAIL   : F. Hecht <hecht@ljll.math.upmc.fr>
+//  date : 2009 ????
+
+/* 
+ This file is part of Freefem++
+ 
+ Freefem++ is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 2.1 of the License, or
+ (at your option) any later version.
+ 
+ Freefem++  is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public License
+ along with Freefem++; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ */
+
 //   for automatic  compilation with ff-c++
 //ff-c++-LIBRARY-dep:   metis
 //ff-c++-cpp-dep: 
 //  
-//   tools to read ppm file 
-/*  use in freefem++ edp
-  see :
-  real[int,int] ff1("tt.pmm"); // read  image and set to an array. 
-  real[int]  ff(ff1.nx*ff1.ny);
-  ff=ff1; 
- */
+
 #include <ff++.hpp>
 #include <cmath>
 typedef KNM<double> * pRnm;
