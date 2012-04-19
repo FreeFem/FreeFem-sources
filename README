@@ -1,4 +1,4 @@
-Compilation of FreeFem++ under unix, MacOs X or cygwin (Windows)
+Compilation of FreeFem++ under unix, MacOs X or mingw  (Windows)
 and bamg (mesh generator)
 ----------------------------------------------------------------
 
@@ -8,7 +8,7 @@ Try to downlaod and compile (add --enable-download flags to configure)
  lot of related  sofware, (Please read the licence of all with software,
 if you use freefee++ for commercial purpose) 
 
-tetgen superlu fftw metis yams mshmet 
+tetgen superlu fftw metis yams mshmet MUMPS
 blacs parmetis œôøèÒscalapack scotch superludist MUMPS pastix hypre hips 
 
 For the link with mmg3d software put the tar.gz archive in .../dowload/pgk directory.
@@ -16,19 +16,24 @@ For the link with mmg3d software put the tar.gz archive in .../dowload/pgk direc
 Remark, you can alsy copy all the donwload file in ../dowload/pgk if you have not internet connection.
 
 Brochet-2:download hecht$ ls -1 pkg/*
-pkg/MUMPS_4.9.2.tar.gz
+MBA-de-FH:download hecht$ ls -1 pkg/*
+pkg/Ipopt-3.10.2.tgz
+pkg/MUMPS_4.10.0.tar.gz
 pkg/ParMetis-3.1.1.tar.gz
 pkg/SuiteSparse-2.4.0.tar.gz
 pkg/arpack96.tar.gz
 pkg/blacstester.tgz
 pkg/fftw-3.2.1.tar.gz
-pkg/freeyams.2010.02.22.tgz
+pkg/freeyams.2012.02.05.tgz
+pkg/gmm-4.1.tar.gz
 pkg/hips-1.2b-rc4.tar.gz
-pkg/hypre-2.4.0b.tar.gz
 pkg/metis-4.0.tar.gz
-pkg/mmg3dlib.tar.gz
+pkg/mmg3d4.0.tgz
 pkg/mpiblacs-patch03.tgz
 pkg/mpiblacs.tgz
+pkg/mshmet.2011.03.06.tgz
+pkg/nlopt-2.2.4.tar.gz
+pkg/pARMS_2.2.tar.gz
 pkg/pastix_release_2200.tar.bz2
 pkg/patch.tar.gz
 pkg/scalapack-1.8.0.tgz
@@ -36,15 +41,23 @@ pkg/scotch_5.1.6_esmumps.tar.gz
 pkg/superlu_4.0.tar.gz
 pkg/superlu_dist_2.3.tar.gz
 pkg/tetgen1.4.3.tar.gz
-Brochet-2:download hecht$ 
-
+MBA-de-FH:download hecht$ 
+ 
 TO simplify the link and compilation part, 
 
 I have add 3 files
-examples++-load/WHERE_LIBRARY		examples++-load/WHERE_LIBRARY-download
+examples++-load/WHERE_LIBRARY		
+examples++-load/WHERE_LIBRARY-download
 examples++-load/WHERE_LIBRARY-config
 
-the file 
+On my mac I have install gsl with MacPorts 
+MBA-de-FH:~ hecht$ more work/ff++/examples++-load/WHERE_LIBRARY
+gsl LD -L/opt/local/lib/ -lgsl
+gsl INCLUDE  -I/opt/local/include/
+MBA-de-FH:~ hecht$ 
+
+
+the files 
 examples++-load/WHERE_LIBRARY-config
 examples++-load/WHERE_LIBRARY-download
 are restectively created with ./configure commande ,
@@ -52,32 +65,32 @@ the compilation of all downlaod software.
 and the  examples++-load/Makefile.
 
 
-The use of commande
+The use of commande compile with search of include and lib. 
 ../exemples++-load/ff-cc++ -auto MUMPS_FreeFem.cpp
 compile a do all the link edition for MUMPS freefem++ interface.
 
 Brochet-2:examples++-mpi hecht$ make MUMPS_FreeFem.dylib
 ../examples++-load//ff-c++ -auto  MUMPS_FreeFem.cpp 
-eval ../examples++-load//ff-c++ MUMPS_FreeFem.cpp -I/Users/hecht/ff/ff-MacIntel/download/include/metis '-I/Users/hecht/ff/ff-MacIntel/download/include' '-I/Users/hecht/ff/ff-MacIntel/download/include/scotch' '-I/Users/hecht/ff/ff-MacIntel/download/include' -I/usr/local/include -I/usr/local/lib -DAdd__ -Df77IsF2C -L/Users/hecht/ff/ff-MacIntel/download/lib -lmetis '-L/Users/hecht/ff/ff-MacIntel/download/lib -lmumps_commonFREEFEM -ldmumpsFREEFEM -lzmumpsFREEFEM -lpordFREEFEM' '-framework vecLib' '-L/Users/hecht/ff/ff-MacIntel/download/lib -lptesmumps -lptscotch -lptscotcherr ' -L/Users/hecht/ff/ff-MacIntel/download/lib/blacs -lblacsCinit_MPI-FREEFEM-0 -lblacsF77init_MPI-FREEFEM-0 -lblacs_MPI-FREEFEM-0 '-L/Users/hecht/ff/ff-MacIntel/download/lib -lscalapack ' -L/usr/local/lib -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -lutil /opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a
-g++ -c -m64 -fPIC -DNDEBUG -O3 -DDRAWING -DBAMG_LONG_LONG -DNCHECKPTR -fPIC -I/opt/local/include -I../examples++-load/include '-I/Users/hecht/ff/ff-MacIntel/download/include/metis' '-I/Users/hecht/ff/ff-MacIntel/download/include' '-I/Users/hecht/ff/ff-MacIntel/download/include/scotch' '-I/Users/hecht/ff/ff-MacIntel/download/include' '-I/usr/local/include' '-I/usr/local/lib' '-DAdd__' '-Df77IsF2C' 'MUMPS_FreeFem.cpp'
-g++ -bundle -undefined dynamic_lookup -m64 -fPIC -DNDEBUG -O3 -DDRAWING -DBAMG_LONG_LONG -DNCHECKPTR -fPIC -I/opt/local/include 'MUMPS_FreeFem.o' -o MUMPS_FreeFem.dylib -L/Users/hecht/ff/ff-MacIntel/download/lib -lmetis -L/Users/hecht/ff/ff-MacIntel/download/lib -lmumps_commonFREEFEM -ldmumpsFREEFEM -lzmumpsFREEFEM -lpordFREEFEM -L/Users/hecht/ff/ff-MacIntel/download/lib -lptesmumps -lptscotch -lptscotcherr -L/Users/hecht/ff/ff-MacIntel/download/lib/blacs -lblacsCinit_MPI-FREEFEM-0 -lblacsF77init_MPI-FREEFEM-0 -lblacs_MPI-FREEFEM-0 -L/Users/hecht/ff/ff-MacIntel/download/lib -lscalapack -L/usr/local/lib -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -lutil /opt/local/lib/g95/x86_64-apple-darwin10/4.2.4/libf95.a -framework vecLib
+.. 
 
-we just use the 2 lines  in MUMPS_FreeFem.cpp
-//ff-c++-LIBRARY-dep: metis mumps  blas ptscotch blacs scalapack mpifc  fc  
+we just add  the 2 lines  in MUMPS_FreeFem.cpp
+//ff-c++-LIBRARY-dep:  mumps parmetis ptscotch  scalapack blacs blas  mpifc  fc  pthread 
 //ff-c++-cpp-dep: 
 
 
-Remark:
+
+
+*  to today the ide  version is  currently available
+	you can get  from http://www.ann.jussieu.fr/~lehyaric/ffcs/index.htm
+
+
+Old Remark (May be obsolete)
      *  the graphique is now base of Open/Glut lib.
      *  IN CASE  of problem under UBUNTU/GLUT  (no graphics window tilte: (march 2009) 
         they are a know bug with compiz package so  try
 	To disable/enable it graphically, install the compiz-swith package with synatic. Or try this in command line:
 	killall compiz.real && killall compiz && metacity --replace --display :0 & 
 
-     *  to today the ide  version is  currently available
-	you can get  from http://www.ann.jussieu.fr/~lehyaric/ffcs/index.htm
-
-This part of the software under construction.
 F. Hecht.
 -
 
@@ -134,6 +147,7 @@ Other useful configuration variables include:
 - LDFLAGS linking flags
 - LDADD extra options for the linking stage
 - F77  the fortran compile (if not fortran is installed  see section NOFORTRAN)
+- FC   the fortran 90 compiler 
 - CC  the cc compiler
 - CXX the c++ compiler
 
@@ -161,12 +175,7 @@ compilation step ("make") will try to download the missing libraries
 
 Remark, under linux or window the simplest way to get
 a not to bad version is
-./configure --enable-generic_blas
-
-
-
-and reconfigure for example: 
-./configure --enable-generic_blas 
+./configure --enable-download 
 
 Here are the different versions of FreeFem++ produced by one
 compilation (some versions may be missing if your system does not
@@ -231,7 +240,7 @@ and directory  to seach dynamic lib  (shell variable LD_LIBRARY_PATH)
 
 warning under  Window XP,  first install the cygwin environnent (see http://www.cygwin.com)
 > cd example++-load build a dll file with the following shell script:
-> ./ff-c++  myfunction 
+> ./ff-c++  myfunction.cpp  
 
 to execute the examples try  
   under window xp
