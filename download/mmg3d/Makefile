@@ -26,7 +26,7 @@ bucket.o	cutelt.o	librnbg.o	movevertex.o	optra4.o	ratio.o		solmap.o	swapar.o \
 		delaunay.o	locate.o	optbdry.o	opttet.o	scalem.o	spledg.o	swaptet.o \
 cenrad.o	eigenv.o	matrix.o	optcoq.o	opttyp.o	simu23.o	swap23.o	typelt.o 
 
-OBJSNOP =  cendel.o
+OBJSNOP =  cendel.o swapar.o
 
 mmg3d: build-4
 
