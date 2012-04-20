@@ -10562,6 +10562,31 @@ Here are some other valid definitions of the problem (cases when $f$ is a pure q
   @IPOPT(/*fitness func args*/, Ac, Xi, /*bounds and named params*/);
 \eFF
 
+\textbf{Returned Value :} The {\tt IPOPT} function returns an error code of type {\tt int}. A zero value is obtained when the algorithm succeeds and positive values reflects the fact that IPOPT encounters minor troubles. Negative values reveals more problematic cases. The associated IPOPT return tags are listed in the table below. The \href{https://projects.coin-or.org/Ipopt/browser/stable/3.10/Ipopt/doc/documentation.pdf?format=raw}{IPOPT pdf documentation} provides more accurate description of these return status :\newline
+
+\begin{tabular}{|cl|cl|}
+   \hline
+   \multicolumn{2}{|c|}{Success}  & \multicolumn{2}{c|}{Failures} \\
+   \hline
+   0 & {\tt Solve\_Succeeded} & -1 & {\tt Maximum\_Iterations\_Exceeded}  \\
+   1 & {\tt Solved\_To\_Acceptable\_Level} & -2 &{\tt Restoration\_Failed} \\
+   2 & {\tt Infeasible\_Problem\_Detected} & -3 & {\tt Error\_In\_Step\_Computation} \\
+   3 & {\tt Search\_Direction\_Becomes\_Too\_Small} & -4 & {\tt Maximum\_CpuTime\_Exceeded} \\
+   4 & {\tt Diverging\_Iterates} & & \\
+   5 & {\tt User\_Requested\_Stop} & & \\
+   6 & {\tt Feasible\_Point\_Found} & & \\
+   \hline
+   \multicolumn{2}{|c|}{Problem definition issues} & \multicolumn{2}{c|}{Critical errors} \\
+   \hline
+   -10 & {\tt Not\_Enough\_Degrees\_Of\_Freedom} & -100 & {\tt Unrecoverable\_Exception} \\
+   -11 & {\tt Invalid\_Problem\_Definition} & -101 & {\tt NonIpopt\_Exception\_Thrown} \\
+   -12 & {\tt Invalid\_Option} & -102 & {\tt Insufficient\_Memory}\\
+   -13 & {\tt Invalid\_Number\_Detected} & -199 & {\tt Internal\_Error} \\
+   \hline
+\end{tabular}
+\newline
+
+
 \textbf{Named Parameters :} The available named parameters in this interface are those we thought to be the most subject to variations from one optimization to another, plus a few ones that are interface specific. Though, as one could see at \url{http://www.coin-or.org/Ipopt/documentation/node59.html}, there are many parameters that can be changed within IPOPT, affecting the algorithm behaviour. These parameters can still be controlled by placing an option file in the execution directory. Note that IPOPT's \href{https://projects.coin-or.org/Ipopt/browser/stable/3.10/Ipopt/doc/documentation.pdf?format=raw}{pdf documentation} may provides more informations than the previously mentioned online version for certain parameters. The in-script available parameters are :
 
 \begin{description}
@@ -10587,6 +10612,7 @@ Here are some other valid definitions of the problem (cases when $f$ is a pure q
   \item[\texttt{muinit} :] {\tt real} positive value for the barrier parameter initialization. It is only relevant when {\tt mustrategy} has been set to {\tt monotone}.
   \item[\texttt{pivtol} :] {\tt real} value to set the pivot tolerance for the linear solver. A smaller number pivots for sparsity, a larger number pivots for stability. The value has to be in the $[0,1]$ interval and is set to $10^{-6}$  by default.
   \item[\texttt{brf} :] Bounds relax factor : before starting the optimization, the bounds given by the user are relaxed. This option sets the factor for this relaxation. If it is set to zero, then the bounds relaxation is disabled. This {\tt real} has to be positive and its default value is $10^{-8}$.
+  \item[\texttt{objvalue} :] An identifier to a {\tt real} type variable to get the last value of the objective function (best value in case of succes).
   
 \end{description}
 
@@ -11266,6 +11292,7 @@ If the population size is not changed using the {\tt popsize} parameter, it will
 the optimizer. 
 The FreeFem {\tt mpicommworld} is used by default. The user can specify his own MPI communicator with the named parameter "{ \tt comm=}", see the MPI section of this manual for more informations about 
 communicators in \texttt{FreeFem++}.
+
 
 
 %%%%%%%%%  old -----

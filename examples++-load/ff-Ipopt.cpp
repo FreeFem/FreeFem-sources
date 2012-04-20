@@ -913,7 +913,7 @@ class OptimIpopt : public OneOperator
 				std::set<unsigned short> unused_name_param; //In some case, some parameter are usless, this is the list of their index in nargs
 				void InitUNP(); //Initialize unusued_name_param at freefem compile time
 				static basicAC_F0::name_and_type name_param[];
-				static const int n_name_param=26;
+				static const int n_name_param=27;
 				Expression nargs[n_name_param];
 				Expression X;
 				mutable Rn lm;
@@ -958,7 +958,7 @@ class OptimIpopt : public OneOperator
 				
 				virtual AnyType operator()(Stack stack)  const
 				{
-					double cost = 299792458.;
+					double cost = nan("");
 					WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005 
 					Rn &x = *GetAny<Rn *>((*X)(stack));	
 					{
@@ -1172,14 +1172,15 @@ class OptimIpopt : public OneOperator
 					if(lag_mul) *lag_mul = _optim->lambda_start;
 					if(l_z) *l_z = _optim->lz_start;
 					if(u_z) *u_z = _optim->uz_start;
-					double ret = nan(""); 
-					if (status == Solve_Succeeded) {
-					  if(verbosity) printf("\n\n*** Ipopt succeeded \n");
-					  ret=_optim->final_value;
+					cost = _optim->final_value;
+					
+					if(nargs[26])
+					{
+						double *pfv = GetAny<double*>((*nargs[26])(stack));
+						*pfv = cost;
 					}
-					else {
-					  if(verbosity) printf("\n\n*** Ipopt failure!\n");
-					}
+					if(verbosity) {if(status == Solve_Succeeded) printf("\n\n*** Ipopt succeeded \n"); else printf("\n\n*** Ipopt failure!\n");}
+					
 					clean(lag_mul);
 					clean(l_z);
 					clean(u_z);
@@ -1191,10 +1192,10 @@ class OptimIpopt : public OneOperator
 					if(lm) lm.destroy(); // clean memory of LM 
 					closetheparam.eval(stack); // clean memory 
 					WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
-					return ret; //_optim->final_value; //SetAny<long>(0);  Modif FH  july 2005       
+					return SetAny<long>(static_cast<long>(status)); //SetAny<long>(0);  Modif FH  july 2005       
 				}
 				    
-				operator aType () const { return atype<double>();} 
+				operator aType () const { return atype<long>();} 
 				
 		};
 		
@@ -1375,7 +1376,8 @@ basicAC_F0::name_and_type  OptimIpopt::E_Ipopt::name_param[]=
 	{"muinit",		&typeid(double) },											//22 -  barrier parameter initialization
 	{"pivtol",		&typeid(double) },											//23 -  pivot tolerance for the linear solver
 	{"brf",				&typeid(double) },											//24 -  bounds relax factor
-	{"mustrategy",&typeid(string*) }											//25 -  strategy for barrier parameter update
+	{"mustrategy",&typeid(string*) },											//25 -  strategy for barrier parameter update
+	{"objvalue",  &typeid(double*) }											//26 -  to get the last objective function value
 	//{"osf",				&typeid(double) }												//26 -  objective function scalling factor
 };
 
