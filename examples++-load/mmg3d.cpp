@@ -392,7 +392,7 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
 
   int memory(arg(4,stack,-1L));
   
-  cout << "memory =" << memory << endl;
+  cout << "memory =" << memory << "Mb " << endl;
   if( memory < 0 ){
     nvmax   = max( (int) 1.5*nv,defaultnvmax);
     ntrimax = max( (int) 1.5*nbe,defaultntrimax);

@@ -234,7 +234,7 @@ class mmg3d_Op: public E_F0mps
 {
 public:
   Expression eTh,xx,yy,zz;
-  static const int n_name_param = 4; // 
+  static const int n_name_param = 5; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>   karg(int i,Stack stack) const
@@ -275,7 +275,8 @@ basicAC_F0::name_and_type  mmg3d_Op::name_param[]= {
   {  "metric", &typeid(KN<double> *)},   // 0
   {  "displacement", &typeid(E_Array)},  // 1
   {  "displVect", &typeid(KN_<double>)},   // 2
-  {  "opt", &typeid(string*)} // 3
+  {  "opt", &typeid(string*)}, // 3
+  {  "Mb",&typeid(long)} // 4
 };
 
 class mmg3d_ff : public OneOperator { public:  
@@ -295,7 +296,9 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
   ffassert( pTh );
   Mesh3 &Th3=*pTh;
     string sarg= arg(3,stack,"");
-    DataFF dff; 
+    DataFF dff;
+    dff.memory= arg(4,stack,128L); // 128 Mb .. ????  
+    ffassert( dff.memory < 2048 );// 2 GiGa bytes   limite of integer .. 
     dff.typesol=0;
     dff.np=pTh->nv;
     dff.mesh=pTh;
