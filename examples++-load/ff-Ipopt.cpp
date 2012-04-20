@@ -25,20 +25,11 @@
  */
 //ff-c++-LIBRARY-dep:  Ipopt mumps-seq blas  libseq  fc  
 
-
-#include  <iostream>
-#include <stack>
-#include <vector>
 using namespace std;
-#include "ff++.hpp"
-
-
 #include "IpTNLP.hpp"
 #include "IpIpoptApplication.hpp"
-#include <list>
-#include <set>
-#include <map>
-#include <cstdarg>
+#include "ff++.hpp"
+
 
 
 extern Block *currentblock;
@@ -58,7 +49,7 @@ typedef KNM<R> Rnm;
  *****************************************************************************************************************************/
  
 //A variadic function to add an undefinite number of elements to a set of short int
-//This is used to define the set of named parameter which are not used when certain assumptions
+//This is used to define the set of named parameter which are not used when some assumptions
 //upon the optimization poblem functions are met 
 void AddElements(std::set<unsigned short> &_set,int amount,int first,...)
 { 
@@ -860,7 +851,7 @@ bool CheckMatrixVectorPair(const E_Array *mv,bool &order)
  *  What should the method do is (exemple at the end of the file with already coded cases):
  *  Constructor : define the Expression members using the arguments passed to the IPOPT function in the script
  *  operator()  : allocate with appropriate dynamic type the ScalarFunc, VectorFunc, SparseMatFunc pointers, and display some
- *                case dependant errors or warnings (note that there is no ScalarFunc ptr to allocate for constraints).
+ *                case dependant errors or warnings (note that there is no ScalarFunc ptr to allocate for constraints)
  *****************************************************************************************************************************/
 class GenericFitnessFunctionDatas
 {
@@ -922,7 +913,7 @@ class OptimIpopt : public OneOperator
 				std::set<unsigned short> unused_name_param; //In some case, some parameter are usless, this is the list of their index in nargs
 				void InitUNP(); //Initialize unusued_name_param at freefem compile time
 				static basicAC_F0::name_and_type name_param[];
-				static const int n_name_param=22;
+				static const int n_name_param=26;
 				Expression nargs[n_name_param];
 				Expression X;
 				mutable Rn lm;
@@ -1042,21 +1033,21 @@ class OptimIpopt : public OneOperator
 					int mmm=0;
 					if(WC && (gl.N()+gu.N())==0)
 					{
-						cout << "IPOPT Warning : constrained problem without constraints bounds (the unconstrained problem" << endl;
+						cout << "IPOPT Warning : constrained problem without constraints bounds." << endl;
 						mmm = ffC->J(x).N();
 					}
 					else mmm=gl.N()>gu.N() ? gl.N() : gu.N();
 					Rn_ *lag_mul=0,*l_z=0,*u_z=0;//Rn(mmm,1.);
 					//int niter=arg(6,stack,100L);
-					int autostructmode = (((AF!=no_assumption_f && AF!=unavailable_hessian) || AF==unavailable_hessian) && AG!=no_assumption_g)? ffNLP::one_evaluation : arg(7,stack,2L);
-					bool checkindex = (((AF!=no_assumption_f && AF!=unavailable_hessian )|| AF==unavailable_hessian) && AG!=no_assumption_g) ? false : arg(8,stack,false), cberror=false;
+					int autostructmode = ffNLP::one_evaluation;
+					bool checkindex = (AF!=no_assumption_f && AG!=no_assumption_g) ? false : arg(8,stack,true), cberror=false;
 					
 					if(nargs[0]) xl=Arg<Rn_>(0,stack); else xl=-1.e19;
 					if(nargs[1]) xu=Arg<Rn_>(1,stack); else xu=1.e19;
 					if(nargs[2]) gl=Arg<Rn_>(2,stack); else {gl.resize(mmm); gl=-1.e19;}
 					if(nargs[3]) gu=Arg<Rn_>(3,stack); else {gu.resize(mmm); gu=1.e19;}
 					const E_Array * ejacstruct = (WC && AF==no_assumption_f && AG==no_assumption_g && nargs[4]) ? dynamic_cast<const E_Array *> (nargs[4]) : 0,
-												* ehesstruct = (AG==no_assumption_f && nargs[5]) ? dynamic_cast<const E_Array *> (nargs[5]) : 0;
+												* ehesstruct = (AF==no_assumption_f && nargs[5]) ? dynamic_cast<const E_Array *> (nargs[5]) : 0;
 												
 					if(nargs[6] && WC) lag_mul = new Rn_(GetAny<Rn_>((*nargs[6])(stack)));
 					if(nargs[21]) l_z = new Rn_(GetAny<Rn_>((*nargs[21])(stack)));
@@ -1081,16 +1072,16 @@ class OptimIpopt : public OneOperator
 					if(ejacstruct)
 					{
 						if(ejacstruct->nbitem()!=2) ExecError("\nSorry, we were expecting an array with two componants in structjac=[iraw,jcol]");
-						if((*ejacstruct)[0].left() != atype<KN<long> *>()) CompileError("Sorry, array componants in structjac=[iraw,jcol] must be integral type vectors");
-						if((*ejacstruct)[1].left() != atype<KN<long> *>()) CompileError("Sorry, array componants in structjac=[iraw,jcol] must be integral type vectors");
+						if((*ejacstruct)[0].left() != atype<KN<long> *>()) CompileError("Sorry, array componants in structjac=[iraw,jcol] must be integer arrays");
+						if((*ejacstruct)[1].left() != atype<KN<long> *>()) CompileError("Sorry, array componants in structjac=[iraw,jcol] must be integer arrays");
 						Expression raws = (*ejacstruct)[0], cols = (*ejacstruct)[1];
 						_optim->SetJacobianStructure(*GetAny<KN<long>*>((*raws)(stack)),*GetAny<KN<long>*>((*cols)(stack)),true);
 					}
 					if(ehesstruct)
 					{
 						if(ehesstruct->nbitem()!=2) ExecError("\nSorry, we were expecting an array with two componants in structhess=[iraw,jcol]");
-						if((*ehesstruct)[0].left() != atype<KN<long> *>()) CompileError("Sorry, array componants in structhess=[iraw,jcol] must be integral type vectors");
-						if((*ehesstruct)[1].left() != atype<KN<long> *>()) CompileError("Sorry, array componants in structhess=[iraw,jcol] must be integral type vectors");
+						if((*ehesstruct)[0].left() != atype<KN<long> *>()) CompileError("Sorry, array componants in structhess=[iraw,jcol] must be integer arrays");
+						if((*ehesstruct)[1].left() != atype<KN<long> *>()) CompileError("Sorry, array componants in structhess=[iraw,jcol] must be integer arrays");
 						Expression raws = (*ehesstruct)[0], cols = (*ehesstruct)[1];
 						_optim->SetHessianStructure(*GetAny<KN<long>*>((*raws)(stack)),*GetAny<KN<long>*>((*cols)(stack)),true);
 					}
@@ -1154,25 +1145,39 @@ class OptimIpopt : public OneOperator
 						if(u_z) _optim->uz_start = *u_z;
 						if(lag_mul) _optim->lambda_start = *lag_mul;
 					}
-					app->Options()->SetStringValue("mu_strategy", "adaptive");
+					
+					if(nargs[22]) app->Options()->SetNumericValue("mu_init",GetAny<double>((*nargs[22])(stack)));
+					else app->Options()->SetStringValue("mu_strategy", "adaptive");
+					if(nargs[23]) app->Options()->SetNumericValue("mumps_pivtol",GetAny<double>((*nargs[23])(stack)));
+					if(nargs[24]) app->Options()->SetNumericValue("bound_relax_factor",GetAny<double>((*nargs[24])(stack)));
+					if(nargs[25]) app->Options()->SetStringValue("mu_strategy",GetAny<string*>((*nargs[25])(stack))->c_str());
+					//if(nargs[26]) app->Options()->SetNumericValue("obj_scaling_factor",GetAny<double>((*nargs[26])(stack)));
+				
 					app->Options()->SetStringValue("output_file", "ipopt.out");
-					//app->Options()->SetStringValue("mehrotra_algorithm", "yes");
+					if(AF!=no_assumption_f && AF!=unavailable_hessian && AG!=no_assumption_g) app->Options()->SetStringValue("mehrotra_algorithm", "yes");
 					
 					ApplicationReturnStatus status;
 					app->Initialize();
 			
 					// Ask Ipopt to solve the problem
-					status = app->OptimizeTNLP(optim);
-					
+					try
+					{
+						status = app->OptimizeTNLP(optim);
+					}
+					catch(...)
+					{
+						cout << "error caught" << endl;
+					}
+				
 					if(lag_mul) *lag_mul = _optim->lambda_start;
 					if(l_z) *l_z = _optim->lz_start;
 					if(u_z) *u_z = _optim->uz_start;
-					double  ret = _optim->final_value; //SetAny<long>(0);  Modif FH  july 2005       
+					double ret = nan(""); 
 					if (status == Solve_Succeeded) {
 					  if(verbosity) printf("\n\n*** Ipopt succeeded \n");
+					  ret=_optim->final_value;
 					}
 					else {
-					  ret=nan("");
 					  if(verbosity) printf("\n\n*** Ipopt failure!\n");
 					}
 					clean(lag_mul);
@@ -1186,7 +1191,7 @@ class OptimIpopt : public OneOperator
 					if(lm) lm.destroy(); // clean memory of LM 
 					closetheparam.eval(stack); // clean memory 
 					WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
-					return ret; 
+					return ret; //_optim->final_value; //SetAny<long>(0);  Modif FH  july 2005       
 				}
 				    
 				operator aType () const { return atype<double>();} 
@@ -1366,7 +1371,12 @@ basicAC_F0::name_and_type  OptimIpopt::E_Ipopt::name_param[]=
 	{"fixedvar",	&typeid(string*)},											//18 -  remove the equality simple bounds from problem
 	{"warmstart", &typeid(bool)},													//19 -  do we initialize multipliers with given values
 	{"uz",				&typeid(KN_<double>) },									//20 -  simple upper bounds dual variable
-	{"lz",				&typeid(KN_<double>) }									//21 -  simple lower bounds dual variable
+	{"lz",				&typeid(KN_<double>) },									//21 -  simple lower bounds dual variable
+	{"muinit",		&typeid(double) },											//22 -  barrier parameter initialization
+	{"pivtol",		&typeid(double) },											//23 -  pivot tolerance for the linear solver
+	{"brf",				&typeid(double) },											//24 -  bounds relax factor
+	{"mustrategy",&typeid(string*) }											//25 -  strategy for barrier parameter update
+	//{"osf",				&typeid(double) }												//26 -  objective function scalling factor
 };
 
 
@@ -1381,7 +1391,7 @@ Init::Init()
 {
   Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,no_assumption_g>()));
   Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,without_constraints>())); 
-	//Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,P1_g>()));
+	//Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,P1_g>())); 
 	Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,mv_P1_g>()));
 	Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,linear_g>()));
 	/*Global.Add("IPOPT","(",new OptimIpopt(Case<P2_f,P1_g>()));
@@ -1500,7 +1510,7 @@ template<> FitnessFunctionDatas<mv_P2_f>::FitnessFunctionDatas(const basicAC_F0 
 	: GenericFitnessFunctionDatas()
 {
 	const E_Array *M_b = dynamic_cast<const E_Array *>(args[0].LeftValue());
-	if(M_b->nbitem() != 2) CompileError("\nSorry, we were expecting an array with one or two componants, either [M,b] or [b,M] for the affine constraints expression." );
+	if(M_b->nbitem() != 2) CompileError("\nSorry, we were expecting an array with two componants, either [M,b] or [b,M] for the affine constraints expression." );
 	bool order = true;
 	if(CheckMatrixVectorPair(M_b,order))
 	{
@@ -1612,7 +1622,7 @@ template<> ConstraintFunctionDatas<mv_P1_g>::ConstraintFunctionDatas(const basic
 {
 	int nbj = args.size()-1;
 	const E_Array *M_b = dynamic_cast<const E_Array *>(args[nbj-1].LeftValue());
-	if(M_b->nbitem() != 2) CompileError("\nSorry, we were expecting an array with one or two componants, either [M,b] or [b,M] for the affine constraints expression." );
+	if(M_b->nbitem() != 2) CompileError("\nSorry, we were expecting an array with two componants, either [M,b] or [b,M] for the affine constraints expression." );
 	bool order=true;
 	if(CheckMatrixVectorPair(M_b,order))
 	{
