@@ -626,153 +626,6 @@ diff -u mmg3d4/build/sources/mesh.h mmg3d4-new/build/sources/mesh.h
  
  
  #endif
-Only in mmg3d4-new/build/sources/: met
-diff -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3dmain/mmg3d.c
---- mmg3d4/build/sources/mmg3dmain/mmg3d.c	2011-05-12 17:50:36.000000000 +0200
-+++ mmg3d4-new/build/sources/mmg3dmain/mmg3d.c	2011-09-01 19:36:51.000000000 +0200
-@@ -46,7 +46,7 @@
- #include "compil.date"
- #include "mesh.h"
- #include "eigenv.h"
--
-+#include "dataff.h"
- TIM_mytime         MMG_ctim[TIMEMAX];
- short	             MMG_imprim;
- 
-@@ -395,6 +395,7 @@
- 	    100.*ttot/ttim[0],call[0],ttot/(float)call[0]);
-   }
-   fprintf(stdout,"\n   ELAPSED TIME  %.2f SEC.  (%.2f)\n",ttim[0],ttot);
-+  fflush(stdout);
- }
- 
- 
-@@ -432,13 +433,14 @@
- }
- 
- 
--int main(int argc,char *argv[]) {
-+int mainmmg3d(int argc,char *argv[],DataFF *dataff) {
-+    
-   pMesh      	mesh;
-   pSol       	sol;
-   Info     	*info;
-   int        	alert;
--int k,iadr,i,jj,kk,ii;
--double	lambda[3],v[3][3],*mold,*m;
-+  int k,iadr,i,jj,kk,ii;
-+  double	lambda[3],v[3][3],*mold,*m;
- 
-   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",M_VER,M_REL);
-   fprintf(stdout,"     Copyright (c) LJLL/IMB, 2010\n");
-@@ -477,15 +479,27 @@
-   info->noinsert = 0; 
-   info->dt       = 1.;
-   info->bdry     = 0;
--
-+  /* modif F. Hecht ..*/
-+  if(dataff)
-+    {
-+      mesh->name=dataff->meshname;
-+      mesh->move=dataff->movename;
-+      sol->name=dataff->solname;
-+      /*      printf(" #### %p %p %p --- \n",mesh->name,mesh->move,sol->name); */
-+      info->imprim=dataff->imprim;
-+      info->memory=dataff->memory;
-+    }
-+  /* end modf */ 
-   if ( !parsar(argc,argv,mesh,sol) )  return(1);
-   MMG_imprim = info->imprim;
-   
-   /* load data */
-   if ( MMG_imprim )   fprintf(stdout,"\n  -- INPUT DATA\n");
--  TIM_chrono(ON,&MMG_ctim[1]);
--  if ( !MMG_loadMesh(mesh,mesh->name) )  return(1); 
--  if ( !MMG_loadSol(sol,sol->name,mesh->npmax) )  return(1);
-+  TIM_chrono(ON,&MMG_ctim[1]); 
-+  /* modif FH. for interface with ff++ add dataff param     */
-+  if ( !MMG_loadMesh(mesh,mesh->name,dataff ))  return(1); 
-+  if ( !MMG_loadSol(sol,sol->name,mesh->npmax,dataff ) )  return(1);
-+ 
-   if ( sol->np && sol->np != mesh->np ) {
-     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-     sol->np = 0;
-@@ -493,7 +507,7 @@
- 
-   if ( !parsop(mesh) )  return(1);
- 
--  if ( abs(info->option) == 9 && !MMG_loadVect(mesh,mesh->move,mesh->np) )  return(0);
-+  if ( abs(info->option) == 9 && !MMG_loadVect(mesh,mesh->move,mesh->np,dataff) )  return(0);
- 
-   if ( !MMG_setfunc(sol->offset) ) return(1);
-   if ( !MMG_scaleMesh(mesh,sol) )  return(1);
-@@ -523,7 +537,7 @@
-   if ( !MMG_hashTetra(mesh) )    return(1);
-   if ( !MMG_markBdry(mesh) )     return(1);
-   if (abs(mesh->info.option)==10) {
--    MMG_saveMesh(mesh,"tetra.mesh");
-+    MMG_saveMesh(mesh,"tetra.mesh",dataff);
-     return(0);
-   }           
- 
-@@ -566,8 +580,8 @@
-     if ( abs(info->option) == 9 ) {
-       if(!MMG_mmg3d9(mesh,sol,&alert)) {
-         if ( !MMG_unscaleMesh(mesh,sol) )  return(1);
--        MMG_saveMesh(mesh,mesh->outf);
--	    MMG_saveSol(mesh,sol,mesh->outf);
-+        MMG_saveMesh(mesh,mesh->outf,dataff);
-+	    MMG_saveSol(mesh,sol,mesh->outf,dataff);
- 	    return(1);
-       }
-       /*puts("appel 1");
-@@ -669,18 +683,18 @@
-     fprintf(stdout,"\n  ## WARNING: INCOMPLETE MESH  %d , %d\n",
-             mesh->np,mesh->ne);
- 
--  if ( MMG_imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->outf);
-+  if ( MMG_imprim && !dataff)  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->outf);
-   TIM_chrono(ON,&MMG_ctim[1]);
-   if ( !MMG_unscaleMesh(mesh,sol) )  return(1);
--  MMG_saveMesh(mesh,mesh->outf);
-+  MMG_saveMesh(mesh,mesh->outf,dataff);
-   if ( info->option == 9 ) {
--    MMG_saveSol(mesh,sol,mesh->outf);
--    MMG_saveVect(mesh,mesh->move);    
-+    MMG_saveSol(mesh,sol,mesh->outf,dataff);
-+    MMG_saveVect(mesh,mesh->move,dataff);    
-   }
-   else
--    MMG_saveSol(mesh,sol,mesh->outf);
-+    MMG_saveSol(mesh,sol,mesh->outf,dataff);   
-   TIM_chrono(OFF,&MMG_ctim[1]);
--  if ( MMG_imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
-+  if ( MMG_imprim && !dataff)  fprintf(stdout,"  -- WRITING COMPLETED\n");
- 
-   /* free mem */
-   M_free(mesh->point);
-@@ -699,3 +713,21 @@
-   M_free(mesh);
-   return(0);
- }
-+
-+int main(int argc,char *argv[])  {
-+    return  mainmmg3d( argc,argv,0);
-+}
-+/*
-+ def 
-+ */
-+ MMG_Swap MMG_swpptr;
-+ double (*MMG_length)(double *,double *,double *,double *);
-+ double (*MMG_caltet)(pMesh ,pSol ,int );
-+ double (*MMG_calte1)(pMesh ,pSol ,int );
-+ int    (*MMG_caltet2)(pMesh ,pSol ,int ,int ,double ,double *);
-+ int    (*MMG_cavity)(pMesh ,pSol ,int ,int ,pList ,int );
-+ int    (*MMG_buckin)(pMesh ,pSol ,pBucket ,int );
-+ int    (*MMG_optlen)(pMesh ,pSol ,double ,int );
-+ int    (*MMG_interp)(double *,double *,double *,double );
-+ int    (*MMG_optlentet)(pMesh ,pSol ,pQueue ,double ,int ,int );
-+ int    (*MMG_movevertex)(pMesh ,pSol ,int ,int );
 diff -u mmg3d4/build/sources/mmg3d4.c mmg3d4-new/build/sources/mmg3d4.c
 --- mmg3d4/build/sources/mmg3d4.c	2011-04-14 18:05:12.000000000 +0200
 +++ mmg3d4-new/build/sources/mmg3d4.c	2011-07-07 11:23:09.000000000 +0200
@@ -1002,3 +855,160 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  
  int MMG_mmg3d4(pMesh mesh,pSol sol,int *alert) {
    Hedge    hash;
+--- mmg3d4/build/sources/mmg3dmain/mmg3d.c	2011-12-02 15:08:08.000000000 +0100
++++ mmg3d4-new/build/sources/mmg3dmain/mmg3d.c	2012-04-20 16:47:08.000000000 +0200
+@@ -46,7 +46,7 @@
+ #include "compil.date"
+ #include "mesh.h"
+ #include "eigenv.h"
+-
++#include "dataff.h"
+ TIM_mytime         MMG_ctim[TIMEMAX];
+ short	             MMG_imprim;
+ 
+@@ -395,6 +395,7 @@
+ 	    100.*ttot/ttim[0],call[0],ttot/(float)call[0]);
+   }
+   fprintf(stdout,"\n   ELAPSED TIME  %.2f SEC.  (%.2f)\n",ttim[0],ttot);
++  fflush(stdout);
+ }
+ 
+ 
+@@ -432,13 +433,14 @@
+ }
+ 
+ 
+-int main(int argc,char *argv[]) {
++int mainmmg3d(int argc,char *argv[],DataFF *dataff) {
++    
+   pMesh      	mesh;
+   pSol       	sol;
+   Info     	*info;
+   int        	alert;
+-int k,iadr,i,jj,kk,ii;
+-double	lambda[3],v[3][3],*mold,*m;
++  int k,iadr,i,jj,kk,ii;
++  double	lambda[3],v[3][3],*mold,*m;
+ 
+   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",M_VER,M_REL);
+   fprintf(stdout,"     Copyright (c) LJLL/IMB, 2010\n");
+@@ -450,7 +452,7 @@
+   signal(SIGSEGV,excfun);
+   signal(SIGTERM,excfun);
+   signal(SIGINT,excfun);
+-  atexit(endcod);
++  if(dataff==0) atexit(endcod);
+ 
+   TIM_tminit(MMG_ctim,TIMEMAX);
+   TIM_chrono(ON,&MMG_ctim[0]);
+@@ -477,15 +479,27 @@
+   info->noinsert = 0; 
+   info->dt       = 1.;
+   info->bdry     = 0;
+-
++  /* modif F. Hecht ..*/
++  if(dataff)
++    {
++      mesh->name=dataff->meshname;
++      mesh->move=dataff->movename;
++      sol->name=dataff->solname;
++      /*      printf(" #### %p %p %p --- \n",mesh->name,mesh->move,sol->name); */
++      info->imprim=dataff->imprim;
++      info->memory=dataff->memory;
++    }
++  /* end modf */ 
+   if ( !parsar(argc,argv,mesh,sol) )  return(1);
+   MMG_imprim = info->imprim;
+   
+   /* load data */
+   if ( MMG_imprim )   fprintf(stdout,"\n  -- INPUT DATA\n");
+-  TIM_chrono(ON,&MMG_ctim[1]);
+-  if ( !MMG_loadMesh(mesh,mesh->name) )  return(1); 
+-  if ( !MMG_loadSol(sol,sol->name,mesh->npmax) )  return(1);
++  TIM_chrono(ON,&MMG_ctim[1]); 
++  /* modif FH. for interface with ff++ add dataff param     */
++  if ( !MMG_loadMesh(mesh,mesh->name,dataff ))  return(1); 
++  if ( !MMG_loadSol(sol,sol->name,mesh->npmax,dataff ) )  return(1);
++ 
+   if ( sol->np && sol->np != mesh->np ) {
+     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+     sol->np = 0;
+@@ -493,7 +507,7 @@
+ 
+   if ( !parsop(mesh) )  return(1);
+ 
+-  if ( abs(info->option) == 9 && !MMG_loadVect(mesh,mesh->move,mesh->np) )  return(0);
++  if ( abs(info->option) == 9 && !MMG_loadVect(mesh,mesh->move,mesh->np,dataff) )  return(0);
+ 
+   if ( !MMG_setfunc(sol->offset) ) return(1);
+   if ( !MMG_scaleMesh(mesh,sol) )  return(1);
+@@ -523,7 +537,7 @@
+   if ( !MMG_hashTetra(mesh) )    return(1);
+   if ( !MMG_markBdry(mesh) )     return(1);
+   if (abs(mesh->info.option)==10) {
+-    MMG_saveMesh(mesh,"tetra.mesh");
++    MMG_saveMesh(mesh,"tetra.mesh",dataff);
+     return(0);
+   }           
+ 
+@@ -566,8 +580,8 @@
+     if ( abs(info->option) == 9 ) {
+       if(!MMG_mmg3d9(mesh,sol,&alert)) {
+         if ( !MMG_unscaleMesh(mesh,sol) )  return(1);
+-        MMG_saveMesh(mesh,mesh->outf);
+-	    MMG_saveSol(mesh,sol,mesh->outf);
++        MMG_saveMesh(mesh,mesh->outf,dataff);
++	    MMG_saveSol(mesh,sol,mesh->outf,dataff);
+ 	    return(1);
+       }
+       /*puts("appel 1");
+@@ -669,18 +683,18 @@
+     fprintf(stdout,"\n  ## WARNING: INCOMPLETE MESH  %d , %d\n",
+             mesh->np,mesh->ne);
+ 
+-  if ( MMG_imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->outf);
++  if ( MMG_imprim && !dataff)  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->outf);
+   TIM_chrono(ON,&MMG_ctim[1]);
+   if ( !MMG_unscaleMesh(mesh,sol) )  return(1);
+-  MMG_saveMesh(mesh,mesh->outf);
++  MMG_saveMesh(mesh,mesh->outf,dataff);
+   if ( info->option == 9 ) {
+-    MMG_saveSol(mesh,sol,mesh->outf);
+-    MMG_saveVect(mesh,mesh->move);    
++    MMG_saveSol(mesh,sol,mesh->outf,dataff);
++    MMG_saveVect(mesh,mesh->move,dataff);    
+   }
+   else
+-    MMG_saveSol(mesh,sol,mesh->outf);
++    MMG_saveSol(mesh,sol,mesh->outf,dataff);   
+   TIM_chrono(OFF,&MMG_ctim[1]);
+-  if ( MMG_imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
++  if ( MMG_imprim && !dataff)  fprintf(stdout,"  -- WRITING COMPLETED\n");
+ 
+   /* free mem */
+   M_free(mesh->point);
+@@ -697,5 +711,24 @@
+ 
+   if ( MMG_imprim < -4 || info->ddebug )  M_memDump();
+   M_free(mesh);
++  if(MMG_imprim && dataff ) endcod();
+   return(0);
+ }
++
++int main(int argc,char *argv[])  {
++    return  mainmmg3d( argc,argv,0);
++}
++/*
++ def 
++ */
++ MMG_Swap MMG_swpptr;
++ double (*MMG_length)(double *,double *,double *,double *);
++ double (*MMG_caltet)(pMesh ,pSol ,int );
++ double (*MMG_calte1)(pMesh ,pSol ,int );
++ int    (*MMG_caltet2)(pMesh ,pSol ,int ,int ,double ,double *);
++ int    (*MMG_cavity)(pMesh ,pSol ,int ,int ,pList ,int );
++ int    (*MMG_buckin)(pMesh ,pSol ,pBucket ,int );
++ int    (*MMG_optlen)(pMesh ,pSol ,double ,int );
++ int    (*MMG_interp)(double *,double *,double *,double );
++ int    (*MMG_optlentet)(pMesh ,pSol ,pQueue ,double ,int ,int );
++ int    (*MMG_movevertex)(pMesh ,pSol ,int ,int );
