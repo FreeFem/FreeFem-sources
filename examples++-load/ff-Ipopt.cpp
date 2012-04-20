@@ -1169,12 +1169,11 @@ class OptimIpopt : public OneOperator
 					if(u_z) *u_z = _optim->uz_start;
 					double  ret = _optim->final_value; //SetAny<long>(0);  Modif FH  july 2005       
 					if (status == Solve_Succeeded) {
-						printf("\n\n*** Ipopt succeeded \n");
+					  if(verbosity) printf("\n\n*** Ipopt succeeded \n");
 					}
 					else {
-					  ret=-1;
-					  ret = sqrt(ret); //  get NaN  
-					  printf("\n\n*** Ipopt failure!\n");
+					  ret=nan("");
+					  if(verbosity) printf("\n\n*** Ipopt failure!\n");
 					}
 					clean(lag_mul);
 					clean(l_z);
