@@ -28,7 +28,7 @@ mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",regionlist=domaine,holelist=holes);
 medit("Box-With-two-Ball",Th);
 // End build mesh 
 
-int[int] opt=[9,0,64,0,0,3];   // options  of mmg3d see freeem++ doc 
+// int[int] opt=[9,0,64,0,0,3];   // options  of mmg3d see freeem++ doc 
 
 real[int] vit=[0,0,-0.3];
 func zero = 0.;
