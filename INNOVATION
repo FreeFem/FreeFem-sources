@@ -1,4 +1,8 @@
-version 3.19 (5 april 2012) 
+version 3.19 (20 april 2012) 
+ - scotch partionner interface see scotch.edp in examples++-loac
+ - add isNaN(x),  isInf(x), IsNormal(x)  function to check flotting point value x
+ - add function NaN() , NaN("") to build NaN real number (double in C) . 
+ - correct error in macro with operator ./=  and .*= 
  - add Ipopt doc (thanks to Sylvain  Auliac)
  - add Ipopt interface (thanks to Sylvain  Auliac)
  - correct 3d trunc bug in case of internal boundary
