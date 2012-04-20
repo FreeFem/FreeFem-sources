@@ -783,6 +783,12 @@ inline double walltime(){
 
 long atoi(string* p) {return atoi(p->c_str());}// add march 2010
 double atof(string* p) {return atof(p->c_str());}// add march 2010
+double NaN(string* p) {return nan(p->c_str());}// add march 2012
+double NaN() {return nan("");}// add march 2012
+
+long isNaN(double x){return isnan(x);}
+long isInf(double x){return isinf(x);}
+long isNormal(double x){return isnormal(x);}
 
 void Init_map_type()
 {
@@ -1358,7 +1364,14 @@ void Init_map_type()
   Global.Add("randres53","(",new OneOperator_0<double>(genrand_res53));
   Global.Add("randinit","(",new OneOperator1<long>(genrandint));
   
-       
+   //  NaN and Inf 
+  Global.Add("NaN","(",new OneOperator0<double>(NaN));
+  Global.Add("NaN","(",new OneOperator1<double,string*   >(NaN));
+    Global.Add("isNaN","(",new OneOperator1<long,double>(isNaN));
+    Global.Add("isInf","(",new OneOperator1<long,double>(isInf));
+    Global.Add("isNormal","(",new OneOperator1<long,double>(isNormal));
+ 
+  
 
 typedef MyMap<String,String> MyMapSS;
     

@@ -1167,12 +1167,14 @@ class OptimIpopt : public OneOperator
 					if(lag_mul) *lag_mul = _optim->lambda_start;
 					if(l_z) *l_z = _optim->lz_start;
 					if(u_z) *u_z = _optim->uz_start;
-					
+					double  ret = _optim->final_value; //SetAny<long>(0);  Modif FH  july 2005       
 					if (status == Solve_Succeeded) {
 						printf("\n\n*** Ipopt succeeded \n");
 					}
 					else {
-						printf("\n\n*** Ipopt failure!\n");
+					  ret=-1;
+					  ret = sqrt(ret); //  get NaN  
+					  printf("\n\n*** Ipopt failure!\n");
 					}
 					clean(lag_mul);
 					clean(l_z);
@@ -1185,7 +1187,7 @@ class OptimIpopt : public OneOperator
 					if(lm) lm.destroy(); // clean memory of LM 
 					closetheparam.eval(stack); // clean memory 
 					WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
-					return _optim->final_value; //SetAny<long>(0);  Modif FH  july 2005       
+					return ret; 
 				}
 				    
 				operator aType () const { return atype<double>();} 
