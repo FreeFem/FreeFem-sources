@@ -18,6 +18,16 @@ mmg3d_VERSION=
 LIBMMG3D=$(INSTALL)/lib/libmmg3d-v4.a
 OPT=4
 
+OBJS= analar.o	chkmsh.o	hash.o		memory.o	optcte.o	outqua.o	simu44.o	swap44.o	zaldy.o \
+analarcutting.o	chrono.o	heap.o		mmg3d1.o	optlap.o	pattern.o	simu56.o	swap56.o \
+baryct.o	colpoi.o	inout.o		mmg3d4.o	optlen.o	quality.o	simu68.o	swap68.o \
+boulep.o	coquil.o	length.o	mmg3d9.o	optlentet.o	queue.o		simu710.o	swap710.o \
+bucket.o	cutelt.o	librnbg.o	movevertex.o	optra4.o	ratio.o		solmap.o	swapar.o \
+		delaunay.o	locate.o	optbdry.o	opttet.o	scalem.o	spledg.o	swaptet.o \
+cenrad.o	eigenv.o	matrix.o	optcoq.o	opttyp.o	simu23.o	swap23.o	typelt.o 
+
+OBJSNOP =  cendel.o
+
 mmg3d: build-4
 
 
@@ -25,10 +35,11 @@ build-4:
 	-$(MAKE) tag-tar
 	if [ -d mmg3d4  ] ; then  $(MAKE)  $(LIBMMG3D) install-4 WHERE ; else echo "Sorry no source " ; fi
 $(LIBMMG3D):
-	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS)' `echo *.c |sed 's/[.]c/.o/g'`
-	cd mmg3d4/build/sources/mmg3dmain; $(CC) -c $(CFLAGS) mmg3d.c -I..
+	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CNOFLAGS)'  $(OBJSNOP) 
+	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS)'  $(OBJS) 
+	cd mmg3d4/build/sources/mmg3dmain; $(CC) -c $(CNOFLAGS)   mmg3d.c -I..
 	$(AR) $(ARFLAGS) $(LIBMMG3D) mmg3d4/build/sources/*.o mmg3d4/build/sources/mmg3dmain/mmg3d.o
-	-$(CC) $(CFLAGS) mmg3d4/build/sources/mmg3dmain/mmg3d.o   mmg3d4/build/sources/*.o -o ../bin/mmg3d $(STD_LIBS)
+	-$(CC) $(CNOFLAGS) mmg3d4/build/sources/mmg3dmain/mmg3d.o   mmg3d4/build/sources/*.o -o ../bin/mmg3d $(STD_LIBS)
 	touch build-4 FAIT-4
 install-4:
 	-mkdir ../include/mmg3d-v4/		
