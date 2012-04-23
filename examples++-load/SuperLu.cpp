@@ -15,7 +15,7 @@ using namespace std;
 #include "MatriceCreuse_tpl.hpp"
 */
 #include "slu_ddefs.h"
-
+#include "superlu_enum_consts.h"
 #define GlobalLU_t GlobalLU_txxxx
 #define countnz countnzxxxx
 #define fixupL fixupLxxxx
@@ -222,7 +222,7 @@ void read_options_freefem(string string_option, superlu_options_t *options){
   static const fact_t  enumfact_t[4] = {DOFACT, SamePattern, SamePattern_SameRowPerm, FACTORED};
   static const colperm_t  enumcolperm_t[5] = {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD, MY_PERMC};
   static const trans_t  enumtrans_t[3] = {NOTRANS, TRANS, CONJ};
-  static const  IterRefine_t enumIterRefine_t[4] = {NOREFINE, SINGLE, DOUBLE, EXTRA};  
+  static const  IterRefine_t enumIterRefine_t[4] = {NOREFINE, SLU_SINGLE, SLU_DOUBLE, SLU_EXTRA};  
 
   static const char*  compyes_no_t[] = {"NO", "YES",0};
   static const char* compfact_t[] = {"DOFACT", "SamePattern", "SamePattern_SameRowPerm", "FACTORED",0};
