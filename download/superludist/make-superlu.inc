@@ -2,7 +2,7 @@ include $(abs_top_builddir)/download/headers-sparsesolver.inc
 #############################################
 #  FLAGS :: FREEFEM TO COMPILE SUPERLU_DIST
 #
-DSUPERLULIB     = $(abs_top_builddir)/download/lib/libsuperlu_dist_2.3.a
+DSUPERLULIB     = $(abs_top_builddir)/download/lib/libsuperlu_dist_3.0.a
 
 BLASDEF	     	= $(FFBLASDEF)
 BLASLIB      	= @BLASLIBS@
