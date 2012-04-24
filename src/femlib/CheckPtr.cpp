@@ -1,4 +1,4 @@
-#define NCHECKPTR // BUg with MPI ??? FH 
+//#define NCHECKPTR // BUg with MPI ??? FH 
 #ifndef NCHECKPTR
 #define DEBUGUNALLOC 1 
 // -*- Mode : c++ -*-
