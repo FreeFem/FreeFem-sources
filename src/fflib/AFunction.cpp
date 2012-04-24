@@ -789,7 +789,10 @@ double NaN() {return nan("");}// add march 2012
 long isNaN(double x){return isnan(x);}
 long isInf(double x){return isinf(x);}
 long isNormal(double x){return isnormal(x);}
-
+//int  ShowAlloc(const char *s, size_t lg);
+int ShowAlloc(const char *s,size_t & lg); 
+long ShowAlloc1(string *  s,long * np) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); *np=lg; return n;}
+long ShowAlloc1(string *  s) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); return n;}
 void Init_map_type()
 {
    TheOperators=new Polymorphic(), 
@@ -1365,6 +1368,8 @@ void Init_map_type()
   Global.Add("randinit","(",new OneOperator1<long>(genrandint));
   
    //  NaN and Inf 
+  Global.Add("ShowAlloc","(",new OneOperator1<long,string*>(ShowAlloc1));// debuging 
+  Global.Add("ShowAlloc","(",new OneOperator2<long,string*,long*>(ShowAlloc1));// debuging 
   Global.Add("NaN","(",new OneOperator0<double>(NaN));
   Global.Add("NaN","(",new OneOperator1<double,string*   >(NaN));
     Global.Add("isNaN","(",new OneOperator1<long,double>(isNaN));
@@ -1388,7 +1393,7 @@ typedef MyMap<String,String> MyMapSS;
   
 
 }
-int ShowAlloc(const char *s,size_t & lg); 
+//int ShowAlloc(const char *s,size_t & lg); 
 
 
 
