@@ -1150,7 +1150,7 @@ if test "$ff_mkl_libpath" != "not" ; then
    ff_CFLAGS="$CFLAGS"
    CHECK_COMPILE_FLAG(C,-mkl,CFLAGS)
    if test  "$ff_CFLAGS" != "$CFLAGS" ; then
-     ff_mkl_flags="-mkl"
+     ff_ff_mkl_flags="-mkl"
    fi
    CFLAGS="$ff_CFLAGS"
 fi
@@ -1158,7 +1158,7 @@ fi
 AC_MSG_CHECKING(for MKL )
 ff_mkl_root=""
 if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
-    if test "$ff_mkl_libpath"  = "yes"  -a  -n "$MKLROOT" ; then
+    if test "$ff_mkl_libpath"  = "yes"  ; then
 	ff_IFS="$IFS"
 	IFS=":"
 	for i in $LD_LIBRARY_PATH:$LIBRARY_PATH ; do 
