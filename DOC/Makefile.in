@@ -343,7 +343,7 @@ plots/overlapTh.eps plots/us-ug.eps plots/vs-vg.eps  \
 plots/square-0.eps      plots/square-1.eps      plots/square-2.eps  \
 plots/cube.eps plots/cone.eps \
 plots/Hex-Sphere.eps plots/Cube-With-Ball.eps \
-plots/multiendborder.eps plots/multiendmesh.eps  \
+plots/multiendborder.eps plots/multiendmesh.eps \
 plots/leman.eps 
 
 
@@ -355,8 +355,8 @@ plots/logo-finance-par-anr.jpg \
 plots/VarIneqFill.jpg plots/VarIneqIso.jpg \
 plots/NSNewtonTh.jpg  plots/NSNewtonUP.jpg \
 plots/chesapeake-2.jpg \
-plots/minsurf3D.jpg plots/lg.jpg 
-
+plots/minsurf3D.jpg \
+plots/lg.jpg 
 
 FIGS_PDF = plots/LogoCNRS.pdf    plots/LogoLJLL.pdf  plots/ffauteur.pdf  \
 plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf \

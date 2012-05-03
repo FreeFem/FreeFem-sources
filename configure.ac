@@ -76,12 +76,12 @@ AC_LANG(C++)
 
 AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
-AC_CHECK_PROG(ff_cmake,cmake,yes,no)
+dnl AC_CHECK_PROG(ff_cmake,cmake,yes,no)
 AC_CHECK_PROG(ff_patch,patch,yes,no)
 case "$ff_m4 $ff_bison $ff_patch "  in 
 *no*)
     AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch cmake ])	
-    AC_MSG_ERROR([ Sorry missing  m4,bison,patch,cmake command !]);;
+    AC_MSG_ERROR([ Sorry missing  m4,bison,patch command !]);;
 esac
 
 
@@ -1152,6 +1152,7 @@ if test "$ff_mkl_libpath" != "not" ; then
    if test  "$ff_CFLAGS" != "$CFLAGS" ; then
      ff_mkl_flags="-mkl"
    fi
+   CFLAGS="$ff_CFLAGS"
 fi
 
 AC_MSG_CHECKING(for MKL )

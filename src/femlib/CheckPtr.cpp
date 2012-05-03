@@ -302,7 +302,7 @@ void AllocExtern::init()
    static int count=0;
    if(0== (count++)) 
     {
-      sprintf(filename,"ListOfUnAllocPtr-%d.bin",(int) sizeof(void*));
+      sprintf(filename,"ListOf>llocPtr-%d.bin",(int) sizeof(void*));
       AllocSize =0;
       MaxUsedSize =0;
       AllocHead =0;  
@@ -426,9 +426,47 @@ int AllocExtern::ShowAlloc(const char *s,size_t & lg) {
 int ShowAlloc(const char *s,size_t & lg) 
 {  return  AllocExternData.ShowAlloc(s,lg);}
 #else
+#define XXXX
+#ifdef XXXX
+#include <cstdlib>
+#include <cerrno>
+#include <cstdio>
+#include <new>
+
+long  CheckPtr___nbptr=0; 
+void* operator new( size_t size ) {
+    CheckPtr___nbptr++;
+    void *p = malloc( size );
+    
+    return p;
+}
+
+void* operator new[]( size_t size ) {  
+    void *p = malloc(size);
+     CheckPtr___nbptr++;
+    return p;
+}
+
+void operator delete( void *p ) {  
+    free(p);
+    CheckPtr___nbptr--;
+
+}
+
+void operator delete[]( void *p ) {
+    free(p);
+    CheckPtr___nbptr--;
+
+}
+
+int ShowAlloc(const char *s,size_t & lg)
+{ lg = 0; return CheckPtr___nbptr;}
+int UnShowAlloc =0;
+#else
 #include <stdlib.h>
+
 int ShowAlloc(const char *s,size_t & lg)
 {lg=0; return 0;}
 int UnShowAlloc =0;
-
+#endif
 #endif
