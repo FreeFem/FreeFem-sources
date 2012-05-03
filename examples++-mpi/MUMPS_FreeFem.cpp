@@ -2528,10 +2528,10 @@ class Init { public:
 };
 
 //  the 2 default sparse solver double and complex
-DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; 
-DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
+static DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; 
+static DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
-TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
+static TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
 bool SetDefault()
 {
