@@ -12858,6 +12858,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
    if test  "$ff_CFLAGS" != "$CFLAGS" ; then
      ff_mkl_flags="-mkl"
    fi
+   CFLAGS="$ff_CFLAGS"
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MKL " >&5
