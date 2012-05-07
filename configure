@@ -12872,6 +12872,7 @@ if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
 	ff_lapack_ok=yes
 	ff_blas_libs="$ff_mkl_blas"
 	ff_blas_inc="-I$ff_mkl_root/include"
+     if test "$ff_mkl_mpi" = "_sgimpt" ; then
         	if test -z "$ff_where_lib_conf_scalapack" ; then
 	    echo "scalapack LD $ff_mkl_scalapack"  >>$ff_where_lib_conf
 	    test -n "$ff_blas_inc" && echo "scalapack INCLUDE $ff_blas_inc "  >>$ff_where_lib_conf
@@ -12894,6 +12895,9 @@ $as_echo "$as_me:     ++ add blacs : $ff_mkl_blacs $ff_blas_inc in  $ff_where_li
 $as_echo "$as_me:     -- do not add blacs : $ff_mkl_blacs $ff_blas_inc in  $ff_where_lib_conf \"" >&6;}
         fi
 
+     else
+       ff_warm=" (We do not use MKL scalapack and blacs with sgi MPI),  "
+     fi
         	if test -z "$ff_where_lib_conf_lapack" ; then
 	    echo "lapack LD $ff_mkl_lapack"  >>$ff_where_lib_conf
 	    test -n "$ff_blas_inc" && echo "lapack INCLUDE $ff_blas_inc "  >>$ff_where_lib_conf
@@ -12913,8 +12917,8 @@ $as_echo "$as_me:     -- do not add lapack : $ff_mkl_lapack $ff_blas_inc in  $ff
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: root: $ff_mkl_root " >&5
-$as_echo "root: $ff_mkl_root " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result:  $ff_warm  root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...  " >&5
+$as_echo " $ff_warm  root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...  " >&6; }
 
 
 # Check whether --with-blas was given.
