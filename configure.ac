@@ -1205,7 +1205,7 @@ if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
 	ff_blas_libs="$ff_mkl_blas"
 	ff_blas_inc="-I$ff_mkl_root/include"
 dnl  scalapack, and blacs don not work with mlk and sgi 
-     if test "$ff_mkl_mpi" = "_sgimpt" ; then  
+     if test "$ff_mkl_mpi" != "_sgimpt" ; then  
         AC_FF_ADDWHERELIB(scalapack,$ff_mkl_scalapack,$ff_blas_inc)
         AC_FF_ADDWHERELIB(blacs,$ff_mkl_blacs,$ff_blas_inc)
      else

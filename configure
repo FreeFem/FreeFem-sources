@@ -12872,7 +12872,7 @@ if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
 	ff_lapack_ok=yes
 	ff_blas_libs="$ff_mkl_blas"
 	ff_blas_inc="-I$ff_mkl_root/include"
-     if test "$ff_mkl_mpi" = "_sgimpt" ; then
+     if test "$ff_mkl_mpi" != "_sgimpt" ; then
         	if test -z "$ff_where_lib_conf_scalapack" ; then
 	    echo "scalapack LD $ff_mkl_scalapack"  >>$ff_where_lib_conf
 	    test -n "$ff_blas_inc" && echo "scalapack INCLUDE $ff_blas_inc "  >>$ff_where_lib_conf
