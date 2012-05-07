@@ -1204,8 +1204,13 @@ if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
 	ff_lapack_ok=yes
 	ff_blas_libs="$ff_mkl_blas"
 	ff_blas_inc="-I$ff_mkl_root/include"
+dnl  scalapack, and blacs don not work with mlk and sgi 
+     if test "$ff_mkl_mpi" = "_sgimpt" ; then  
         AC_FF_ADDWHERELIB(scalapack,$ff_mkl_scalapack,$ff_blas_inc)
         AC_FF_ADDWHERELIB(blacs,$ff_mkl_blacs,$ff_blas_inc)
+     else
+       ff_warm=" (We do not use MKL scalapack and blacs with sgi MPI),  " 
+     fi
         AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
         
 dnl	echo scalapack  LD  \'$ff_mkl_scalapack\'  >>$ff_where_lib_conf	
@@ -1221,7 +1226,7 @@ dnl	echo lapack INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf
 fi
 
 
-AC_MSG_RESULT( root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...)
+AC_MSG_RESULT( [ $ff_warm  root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...  ])
 
 AC_ARG_WITH(blas,
     [  --with-blas=library	Use a specific version of the Blas],
