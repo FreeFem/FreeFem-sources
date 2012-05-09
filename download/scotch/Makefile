@@ -29,6 +29,7 @@ FAIRE: $(SRCDIR)/FAIT
 Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
 	../../config.status  --file="Makefile.inc:Makefile-scotch.inc"
 	case `uname` in *CYGWIN*)  cp Makefile.inc Makefile.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.inn > Makefile.inc; rm Makefile.inn ;; esac 
+	case `uname` in *CYGWIN*|*MINGW*)  cp Makefile.inc Makefile.inn; sed "s/-DCOMMON_RANDOM_FIXED_SEED/-DCOMMON_RANDOM_RAND -DCOMMON_RANDOM_FIXED_SEED -D'pipe(pfds)=_pipe(pfds,1024,0x8000)'/" <Makefile.inn > Makefile.inc; rm Makefile.inn ;; esac 
 
 $(SRCDIR)/FAIT: $(SRCDIR)
 	cp Makefile.inc $(SRCDIR)/src/
@@ -51,7 +52,8 @@ WHERE:
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
-	cd $(SRCDIR)/src/libscotch/; patch -p1 < ../../../scotch_5.1_esmumps.patch;
+	cd $(SRCDIR)/src/libscotch/; patch -p1 < ../../../scotch_5.1_esmumps.patch
+	cd $(SRCDIR)/src/esmumps/; patch -p1 < ../../../Makefile.patch
 	touch $(SRCDIR)
 
 $(PACKAGE):

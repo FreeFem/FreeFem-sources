@@ -54,7 +54,7 @@ $(SRCDIR): $(PACKAGE1) $(PACKAGE2) $(PACKAGE3)
 	cd $(SRCDIR)/SRC/MPI; patch -p1 < ../../../BLACS.patch
 	cp Bmake.inc $(SRCDIR)
 	mv $(SRCDIR)/SRC/MPI/Makefile $(SRCDIR)/SRC/MPI/Makefile.tmp
-	sed -e 's;\.C;\.oo;g'\
+	sed -e 's;\.C;\.oo;g'  -e 's@: $$(MPIINCdir)/mpif.h@:@' \
 	< $(SRCDIR)/SRC/MPI/Makefile.tmp \
 	> $(SRCDIR)/SRC/MPI/Makefile
 	touch $(SRCDIR)

@@ -61,7 +61,7 @@ WGET = @WGET@
    MPIdev =  
    MPIplat = 
    MPILIBdir = @MPI_LIB_DIRS@
-   MPIINCdir = @MPI_INC_DIR@
+   MPIINCdir = '@MPI_INC_DIR@'
    MPILIB = @MPI_LIB@
 
 #  -------------------------------------

@@ -358,6 +358,7 @@ EXTRA_DIST = \
 ./scotch/Makefile \
 ./scotch/Makefile-scotch.inc \
 ./scotch/scotch_5.1_esmumps.patch \
+./scotch/Makefile.patch \
 ./superlu/Makefile \
 ./superlu/make.inc \
 ./superludist/Makefile \

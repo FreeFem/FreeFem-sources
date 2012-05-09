@@ -15,14 +15,14 @@ SRCDIR=scalapack-1.8.0
 PACKAGE1=$(DIRPKG)/scalapack-1.8.0.tgz
 SERVER=http://www.netlib.org/scalapack/
 INSTALL=../..
-DIR1 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/TOOLS/LAPACK/*.o
-DIR2 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/TOOLS/*.o
-DIR3 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/PBBLAS/*.o
-DIR4 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/PTZBLAS/*.o
-DIR5 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/PTOOLS/*.o
-DIR6 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/*.o
-DIR7 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/REDIST/SRC/*.o
-DIR8 =  $(abs_top_builddir)/download/scalapack/$(SRCDIR)/SRC/*.o
+DIR1 = TOOLS/LAPACK/*.o
+DIR2 = TOOLS/*.o
+DIR3 = PBLAS/SRC/PBBLAS/*.o
+DIR4 = PBLAS/SRC/PTZBLAS/*.o
+DIR5 = PBLAS/SRC/PTOOLS/*.o
+DIR6 = PBLAS/SRC/*.o
+DIR7 = REDIST/SRC/*.o
+DIR8 = SRC/*.o
 
 scalapack: FAIRE
 
@@ -30,7 +30,7 @@ $(SRCDIR)/FAIT:$(SRCDIR)/tag-tar
 	cp SLmake.inc $(SRCDIR)
 	cd $(SRCDIR);$(MAKE) lib
 	rm $(SRCDIR)/libscalapack.a
-	$(ARCH) $(ARCHFLAGS) $(SRCDIR)/libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8)
+	cd $(SRCDIR);$(ARCH) $(ARCHFLAGS) libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8)	
 	$(RANLIB) $(SRCDIR)/libscalapack.a
 	touch $(SRCDIR)/FAIT
 install:

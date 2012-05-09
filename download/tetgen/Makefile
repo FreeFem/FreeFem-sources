@@ -13,7 +13,8 @@ all-local: tetgen
 DIRPKG=../pkg
 SRCDIR=tetgen$(tetgen_VERSION)
 PACKAGE=$(DIRPKG)/tetgen$(tetgen_VERSION).tar.gz
-SERVER=http://tetgen.berlios.de/files
+SERVER=http://tetgen.org/files
+#http://tetgen.berlios.de/files
 INSTALL=../..
 tetgen_VERSION=1.4.3
 
