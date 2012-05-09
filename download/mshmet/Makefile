@@ -15,7 +15,7 @@ SRCDIR= ./mshmet$(mshmet_VERSION)
 PACKAGE=$(DIRPKG)/mshmet$(mshmet_VERSION).tgz
 SERVER=http://www.ann.jussieu.fr/~frey/ftp/archives/
 INSTALL=../..
-mshmet_VERSION=.2011.03.06
+mshmet_VERSION=.2012.04.25
 
 
 # ---------------------- 
@@ -33,7 +33,7 @@ FAIRE:$(SRCDIR)/FAIT
 	touch FAIRE
 
 $(SRCDIR)/FAIT:$(SRCDIR)
-	cd $(MSHMET_DIR); make
+	cd $(MSHMET_DIR); $(MAKE)
 	touch $(SRCDIR)/FAIT
 
 install:$(SRCDIR)/FAIT  ../../src/libMesh/libMesh.a 
@@ -44,7 +44,7 @@ install:$(SRCDIR)/FAIT  ../../src/libMesh/libMesh.a
 	cp ../../src/libMesh/*h  $(SRCDIR)/$(INSTALL)/include/libMesh
 
 ../../src/libMesh/libMesh.a :
-	cd ../../src/libMesh && make 
+	cd ../../src/libMesh && $(MAKE) 
 
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
@@ -64,6 +64,7 @@ $(SRCDIR): $(PACKAGE)
 	cp $(MSHMET_SRCDIRNOLIB)/compil.date $(MSHMET_SRCDIR)
 	cp mshmetlib-internal.h mshmetlib.c mshmetlib.h $(MSHMET_SRCDIR)/
 	rm $(MSHMET_SRCDIR)/mshmet.c
+	rm $(MSHMET_SRCDIR)/chrono.c
 	cp Makefile-mshmet.inc $(MSHMET_DIR)/makefile
 	cd $(MSHMET_SRCDIR); patch -p2 < ../../mshmet.2011.03.06.patch
 

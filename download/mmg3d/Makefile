@@ -96,5 +96,5 @@ ff-flags: ../Makefile Makefile
 	grep 'RANLIB *=' ../Makefile >> ff-flags
 	grep 'WGET *=' ../Makefile >> ff-flags
 	grep 'STD_LIBS *=' ../Makefile >> ff-flags
-
+	grep 'CNOFLAGS *=' ../Makefile >> ff-flags
 .PHONY:$(SRCDIR)/$(INSTALL)

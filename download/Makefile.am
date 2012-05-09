@@ -58,6 +58,7 @@ EXTRA_DIST= \
 ./scalapack/SLmake-scalapack.inc \
 ./scotch/Makefile \
 ./scotch/Makefile-scotch.inc \
+./scotch/Makefile.patch \
 ./scotch/scotch_5.1_esmumps.patch \
 ./superlu/Makefile \
 ./superlu/make.inc \
