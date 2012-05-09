@@ -417,10 +417,10 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
    FILE*            inm;
    Hedge    				 hed,hed2;
    pPoint       	   ppt;
-@@ -114,7 +501,8 @@
-   int              p0,p1,p2,p3,p4,p5,p6,p7;  
-   int              binch,bdim,iswp,nu1,nu2,nimp,ne;       
-   float            fc;
+@@ -118,7 +501,8 @@
+  float            fc; 
+	double           volhex,volref;  
+	int iadr;
 -  
 +  if(dataff) 
 +    return MMG_loadMeshff( mesh,filename,(DataFF*) dataff);
@@ -629,17 +629,38 @@ diff -u mmg3d4/build/sources/mesh.h mmg3d4-new/build/sources/mesh.h
 diff -u mmg3d4/build/sources/mmg3d4.c mmg3d4-new/build/sources/mmg3d4.c
 --- mmg3d4/build/sources/mmg3d4.c	2011-04-14 18:05:12.000000000 +0200
 +++ mmg3d4-new/build/sources/mmg3d4.c	2011-07-07 11:23:09.000000000 +0200
-@@ -117,8 +117,8 @@
+@@ -84,9 +84,9 @@
+     if(it && !(it%2) ) {
+       bucket = MMG_newBucket(mesh,M_MAX(mesh->info.bucksiz,BUCKSIZ));
+       if ( !bucket )  return(0);
+-			MMG_saveMesh(mesh,"avtana.mesh");
++			MMG_saveMesh(mesh,"avtana.mesh",0);
+       MMG_analar(mesh,sol,bucket,&na,&nd,&nf,alert);      
+-			MMG_saveMesh(mesh,"apresana.mesh");
++			MMG_saveMesh(mesh,"apresana.mesh",0);
+       if ( abs(mesh->info.imprim) > 5 ) 
+         fprintf(stdout,"     %7d INSERTED  %7d REMOVED   %7d FILTERED\n",na,nd,nf);  
+ 
+@@ -118,8 +118,8 @@
        if ( *alert ) {
          fprintf(stdout," \n\n ** UNABLE TO CUT (analarcutting)\n");
          fprintf(stdout," ** RETRY WITH -m > %6d \n\n",mesh->info.memory);
--        MMG_saveMesh(mesh,"crash.meshb");
--        MMG_saveSol(mesh,sol,"crash.solb"); 
-+        MMG_saveMesh(mesh,"crash.meshb",0);
-+        MMG_saveSol(mesh,sol,"crash.solb",0); 
+-        MMG_saveMesh(mesh,"crash.mesh");
+-        MMG_saveSol(mesh,sol,"crash.sol"); 
++        MMG_saveMesh(mesh,"crash.mesh",0);
++        MMG_saveSol(mesh,sol,"crash.sol",0); 
          exit(0);
        }
-       M_free(hash.item);        
+       M_free(hash.item);      
+@@ -136,7 +136,7 @@
+     }
+     // printf("chkmsh\n");   
+ 		MMG_unscaleMesh(mesh,sol);
+-    MMG_saveMesh(mesh,"chk.mesh");
++    MMG_saveMesh(mesh,"chk.mesh",0);
+     //MMG_chkmsh(mesh,1,-1);
+ 		//if(it==1)exit(0);		
+      /* delaunization */ 
 diff -u mmg3d4/build/sources/mmg3dConfig.h mmg3d4-new/build/sources/mmg3dConfig.h
 --- mmg3d4/build/sources/mmg3dConfig.h	2011-06-30 14:09:37.000000000 +0200
 +++ mmg3d4-new/build/sources/mmg3dConfig.h	2011-06-16 09:50:58.000000000 +0200
@@ -722,7 +743,7 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 + *  dataff.h
 + *  
 + *
-+ *  Created by Frédéric Hecht on 19/06/11.
++ *  Created by Fr\E9d\E9ric Hecht on 19/06/11.
 + *  Copyright 2011 UPMC. All rights reserved.
 + *
 + 
@@ -850,9 +871,8 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 +extern int MMG_npdtot;
 +extern int MMG_nplen,MMG_npref,MMG_bouffe;
  
--int ddebug;
-+int ddebug;
- 
+ int ddebug;
+
  int MMG_mmg3d4(pMesh mesh,pSol sol,int *alert) {
    Hedge    hash;
 --- mmg3d4/build/sources/mmg3dmain/mmg3d.c	2011-12-02 15:08:08.000000000 +0100
