@@ -367,8 +367,8 @@ void initgraphique()
   fcolor=1;  /* des couleurs */
   SetColorTable(8);
   INITGRAPH = 1;
-  width = 1500;
-  height =  1060; // aspect ratio  \sqrt(2)
+  width = 15000;
+  height =  10600; // aspect ratio  \sqrt(2)
 }
 
 void closegraphique()

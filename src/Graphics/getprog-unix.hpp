@@ -223,7 +223,7 @@ if( ch2edpdir && edpfilenamearg)
            << "        -gff     command  : change  command  compatible with ffglut (with space quoting)\n"
 	   << "        -nowait           : nowait at the end on window   \n"
 	   << "        -wait             : wait at the end on window   \n"
-	   << "        -nw               : no ffglut (=> no graphics windows) \n"
+	   << "        -nw               : no ffglut, ffmedit  (=> no graphics windows) \n"
 	   << "        -ne               : no edp script output\n"
            << "        -cd               : Change dir to script dir\n"
 

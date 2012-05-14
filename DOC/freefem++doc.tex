@@ -181,7 +181,7 @@ and to l'Agence Nationale de la Recherche (Paris, France)
 
 \hbox to \hsize{\hss\includegraphics[width=7cm]{sanskrit}}
 
-Fruit of a long maturing process, freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for numerically solving partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.
+Fruit of a long maturing process, freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for numerically solving partial differential equations (PDE) in dimension 2 and 3.  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.
 
 
 \medskip
@@ -201,8 +201,7 @@ are modeled by one or several partial differential equations.
 its name implies, it is a free software (see the copyrights for full detail)
 based  on the Finite Element Method; it is not a package, it is an integrated product with its own
 high level programming language. This software runs on all UNIX
-OS (with g++ 3.3 or later, and X11R6) , on Window 2000,
-NT, XP, Vista and 7 and on
+OS (with g++ 3.3 or later, and X11R6) , on Window  XP, Vista and 7 and on
 MacOS 10 (powerpc, intel) \\\\
 Moreover \freefempp is highly adaptive.  Many phenomena involve
 several  coupled systems, for example: fluid-structure interactions,
@@ -253,8 +252,8 @@ storage of the interpolation matrices.
 \ttCC{P0},\ttCC{P1dc},\ttCC{P2dc} and keywords: \ttCC{jump}, \ttCC{mean}, \ttCC{intalledges}.
 %
 \item A large variety of linear direct and iterative solvers
-(LU, Cholesky, Crout, CG, GMRES, UMFPACK) and eigenvalue and
-eigenvector solvers.
+(LU, Cholesky, Crout, CG, GMRES, UMFPACK, MUMPS, SuperLU, ...) and eigenvalue and
+eigenvector solvers (ARPARK) .
 %
 \item Near optimal execution speed (compared with compiled C++
 implementations programmed directly).
@@ -350,9 +349,9 @@ The syntax for the command-line tools are the same as those of FreeFem.exe.
 
 This section is for those who for some reason do not wish to use the binaries and hence need to recompile \freefempp or install it from the source code:
 
-\paragraph{The documentation archive}: The documentation is also open source; to regenerate it you need a \LaTeX{} environment capable of compiling a CVS archive; under MS-Windows you will have to use  \texttt{cygwin}
+\paragraph{The documentation archive}: The documentation is also open source; to regenerate it you need a \LaTeX{} environment capable of compiling a CVS archive; under MS-Windows you will have to use  \texttt{mingw/msys}
 \begin{center}
-   \url{http://www.cygwin.com}
+   \url{http://www.mingw.org}
 \end{center}
  and under MacOS X we have used Apple's Developer Tools "Xcode" and  \LaTeX{ } from \url{http://www.ctan.org/system/mac/texmac}.
 
@@ -381,7 +380,7 @@ depending on the system you are running :
 based on GLUT/OpenGL (use ffglut visualization tool) or not just add \texttt{ -nw } parameter.
 \item \texttt{ffglut} the visualization tools  through a pipe of freefem++ (remark: {\it if ffglut is not in the system path,
 you will have no plot})
-\item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no graphics windows via \texttt{ffglut} )
+\item \texttt{FreeFem++-nw}, postscript plot output only and  ffmedit (batch version, no graphics windows via \texttt{ffglut} )
 \item \texttt{FreeFem++-mpi}, parallel version, postscript output only 
 %\item \texttt{FreeFem++-glx}, graphics using OpenGL and X11
 %\item \texttt{FreeFem++-cs}, integrated development environment
@@ -399,23 +398,47 @@ Application
 \item \texttt{ffmedit} the freefem++ version of medit software (thanks to P. Frey)
 \end{enumerate}
 
-The FreeFem++ parameter command:
-{\small \begin{verbatim}
-Brochet-2:~ hecht$ FreeFem++
- Syntaxe:
-   FreeFem++ [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  
-        -v      verbosity : 0 -- 1000000 level of freefem output 
-        -fglut  filepath  : the file name of save all plots (replot with ffglut command ) 
-        -glut    command  : change the command  ffglut 
-        -gff     command  : change the command  ffglut   with  space quotting
-        -nowait           : nowait at the end on window   
-        -wait             : wait at the end on window   
-        -nw               : no ffglut (=> no graphics windows) 
-        -ne               : no edp script output
-        -cd               : Change directory  to script dir 
- with        default ffglut : ffglut
-\end{verbatim}
-}
+The syntax of tools \texttt{FreeFem++},\texttt{FreeFem++-nw},\texttt{FreeFem++-mpi}, on the command-line  are
+{ \small
+\begin{itemize}
+\item  \verb!FreeFem++ [-?] [-v nn] [-fglut file1] [-glut file2] [-f]  edpfilepath ! where the
+\item or \verb!FreeFem++-nw -? [-v nn] [-fglut file1] [-glut file2] [-f]  edpfilepath ! where the
+ \begin{description}
+ \item \verb!-?!  show the usage.
+\item \verb!-fglut filename!  to store all the data for graphic in file \verb! filename!, and to replay do
+\verb!ffglut filename!.
+\item \verb!-glut  ffglutprogam!  to change the visualisator program's.
+\item \verb!-nw! no call to ffglut and medit 
+\item \verb!-v nn!  set the level of verbosity to \texttt{nn} before execution of the  script.
+\item \verb!-ne! no edp script output
+\item \verb!-wait! wait an return in text window before  closing \texttt{FreeFem++}
+\item \verb!-nowait! wait an return in text window before  closing \texttt{FreeFem++}
+\item \verb!-ne! no edp script output
+\item \verb!-cd! Change directory  to script dir (the script path must by global)
+\item  if no file path then you get a dialog box to choose the edp file on windows systeme.
+\end{description}
+\end{itemize}}
+\medskip
+The notation \texttt{[]} means "optional".
+
+
+%The FreeFem++ parameter command:
+%{\small \begin{verbatim}
+%Brochet-2:~ hecht$ FreeFem++
+% Syntaxe:
+%   FreeFem++ [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  
+%        -v      verbosity : 0 -- 1000000 level of freefem output 
+%        -fglut  filepath  : the file name of save all plots (replot with ffglut command ) 
+%        -glut    command  : change the command  ffglut 
+%        -gff     command  : change the command  ffglut   with  space quotting
+%        -nowait           : nowait at the end on text window  ( 
+%        -wait             : wait at the end on text window   
+%        -nw               : no ffglut and no medit  (=> no graphics windows) 
+%        -ne               : no edp script output
+%        -cd               : Change directory  to script dir 
+% with        default ffglut : ffglut
+%\end{verbatim}
+%}
 \begin{remark} In most cases you can set the level of output (verbosity\index{verbosity}) to value \texttt{nn} by adding the parameters
 \texttt{-v nn} on the command line.
 
@@ -432,24 +455,6 @@ FreeFem++ LaplaceP1.edp
 If you are using \texttt{nedit} as your text editor,
 do one time \verb!nedit -import edp.nedit! to have coloring syntax for your \ttCC{.edp}
 files.
-
-The syntax of tools \texttt{FreeFem++},\texttt{FreeFem++-nw} on the command-line  are
-{ \small
-\begin{itemize}
-\item  \verb!FreeFem++ [-?] [-vnn] [-fglut file1] [-glut file2] [-f]  edpfilepath ! where the
-\item or \verb!FreeFem++-nw -? [-vnn] [-fglut file1] [-glut file2] [-f]  edpfilepath ! where the
- \begin{description}
- \item \verb!-?!  show the usage.
-\item \verb!-fglut filename!  to store all the data for graphic in file \verb! filename!, and to replay do
-\verb!ffglut filename!.
-\item \verb!-glut  ffglutprogam!  to change the visualisator program's.
-\item \verb!-nw! no call to ffglut
-\item \verb!-v nn!  set the level of verbosity to \texttt{nn} before execution of the  script.
-\item  if no file path then you get a dialog box to choose the edp file on windows systeme.
-\end{description}
-\end{itemize}}
-\medskip
-The notation \texttt{[]} means "optional".
 
 
 \paragraph{Link with other text editors}
@@ -585,7 +590,7 @@ One of the best ways however on the Mac is to use a text editor like \texttt{Smu
    \centering
    \includegraphics[width=10cm]{mi.jpg}
    \caption{The 3 panels of the integrated environment built with the
-\texttt{Smultron Editor} with \freefempp in action. The Tools menu
+\texttt{fraise Editor} with \freefempp in action. The Tools menu
 has an item to launch \freefempp by a Ctrl+1 command.}
 \end{figure}
 
@@ -621,6 +626,7 @@ are searched from  \texttt{loadpath} list.
      #  comment
      load += "funcTemplate"
      load += "myfunction"
+     load += "MUMPS_seq" 
 \end{verbatim}
 
  The possible paths for this file  are
