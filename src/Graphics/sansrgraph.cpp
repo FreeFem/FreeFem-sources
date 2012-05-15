@@ -367,8 +367,8 @@ void initgraphique()
   fcolor=1;  /* des couleurs */
   SetColorTable(8);
   INITGRAPH = 1;
-  width = 15000;
-  height =  10600; // aspect ratio  \sqrt(2)
+  width = 10000;// change FH mai 2012 to have more precis graphic for F.  Ortegon 
+  height =  7071; // aspect ratio  \sqrt(2)
 }
 
 void closegraphique()
@@ -500,7 +500,7 @@ void x11draw3(int * ptype)
 
 void penthickness(int pepais)
 {
-  if (psfile) fprintf(psfile,"%d setlinewidth\n",pepais);
+  if (psfile) fprintf(psfile,"%d setlinewidth\n",pepais*2);
 }
 
 void x11linsrn(int * ,int * ,int * ,int * );
@@ -619,7 +619,7 @@ void openPS(const char *filename )
     fprintf(psfile," /bF  { mark} def \n");
     fprintf(psfile," /eF {newpath moveto counttomark 2 idiv {lineto} repeat closepath fill cleartomark} def\n");
     fprintf(psfile," /P { /yy exch def /xx exch def   xx xx 1 add yy yy 1 add  rec  fill } def\n");
-    fprintf(psfile," 0.5 setlinewidth\n");
+    fprintf(psfile," 2 setlinewidth\n");
   }
   else 
     cerr << " Err openning postscript file " << fps << endl;
