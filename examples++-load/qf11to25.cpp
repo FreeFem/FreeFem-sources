@@ -783,7 +783,7 @@ class Init { public:
 };
 
 template<class Rd>
-GQuadratureFormular<Rd> * BuilQFd(const long & nex,const KNM_<double> & qf) {
+const GQuadratureFormular<Rd> * BuilQFd(const long & nex,const KNM_<double> & qf) {
   ffassert( qf.M()== Rd::d+1) ;
   int np = qf.N(); 
   GQuadraturePoint<Rd> *pq= new GQuadraturePoint<Rd>[np];
@@ -838,9 +838,9 @@ grep QuadratureFormular QF.cpp|grep ^const|awk -F"[_(]" '{print "Global.New(@qf"
 	     Global.New("qf12pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(-1+2*12,12,GaussLegendre(12),true)));
 	     Global.New("qf13pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(-1+2*13,13,GaussLegendre(13),true)));
 
-	     Global.Add("QF1d","(",new OneOperator2_<GQuadratureFormular<R1> *,long,KNM_<double> >(BuilQFd<R1>));
-	     Global.Add("QF2d","(",new OneOperator2_<GQuadratureFormular<R2> *,long,KNM_<double> >(BuilQFd<R2>));
-	     Global.Add("QF3d","(",new OneOperator2_<GQuadratureFormular<R3> *,long,KNM_<double> >(BuilQFd<R3>));
+	     Global.Add("QF1d","(",new OneOperator2_<const GQuadratureFormular<R1> *,long,KNM_<double> >(BuilQFd<R1>));
+	     Global.Add("QF2d","(",new OneOperator2_<const GQuadratureFormular<R2> *,long,KNM_<double> >(BuilQFd<R2>));
+	     Global.Add("QF3d","(",new OneOperator2_<const GQuadratureFormular<R3> *,long,KNM_<double> >(BuilQFd<R3>));
 
 	     Dcl_Type<const GQuadratureFormular<R1> **>(::InitializePtr<const GQuadratureFormular<R1> *>,::DeletePtr<const GQuadratureFormular<R1> *>);
 	     Dcl_Type<const GQuadratureFormular<R2> **>(::InitializePtr<const GQuadratureFormular<R2> *>,::DeletePtr<const GQuadratureFormular<R2> *>);
