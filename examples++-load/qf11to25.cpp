@@ -781,7 +781,46 @@ const QuadratureFormular QuadratureFormular_T_25(25 ,120,P_QuadratureFormular_T_
 class Init { public:
   Init();
 };
+
+template<class Rd>
+GQuadratureFormular<Rd> * BuilQFd(const long & nex,const KNM_<double> & qf) {
+  ffassert( qf.M()== Rd::d+1) ;
+  int np = qf.N(); 
+  GQuadraturePoint<Rd> *pq= new GQuadraturePoint<Rd>[np];
+  for(int i=0;i<np;++i)
+    {
+      pq[i].a = qf(i,0);
+      for(int j=0;j<Rd::d;++j)
+	pq[i][j]=qf(i,j+1);
+      // cout << i << " " << pq[i].a << " " << (const Rd&)  pq[i] << " " << qf(':',i) << endl;
+    }
+  return new GQuadratureFormular<Rd>(nex,np,pq,true) ;
+} 
+
+template<typename T > T* CCopy(T * pr,T  p)
+{
+  *pr = p;
+  return pr; 
+}
+ 
+
+template<class Rd>
+const GQuadratureFormular<Rd> ** pBuilQFd(const GQuadratureFormular<Rd> ** const & pr,const long & nex,const KNM_<double> & qf) 
+{
+  // cout << "pBuilQFd " << pr << " " << *pr << endl; 
+  ffassert(pr );
+  *pr = BuilQFd<Rd>(nex,qf);
+  return pr; 
+}
+
+ 
 LOADINIT(Init);
+
+// to add new FreeFem++ type ... 
+
+#include "lex.hpp"
+extern  mylex *zzzfff;
+
 Init::Init(){
   /*
 grep QuadratureFormular QF.cpp|grep ^const|awk -F"[_(]" '{print "Global.New(@qf" $3 "pT@,CConstant<const QuadratureFormular *>(&QuadratureFormular_T_"$3"));"}'|sed -e 's/@/"/g'
@@ -798,6 +837,33 @@ grep QuadratureFormular QF.cpp|grep ^const|awk -F"[_(]" '{print "Global.New(@qf"
 	     Global.New("qf11pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(-1+2*11,11,GaussLegendre(11),true)));
 	     Global.New("qf12pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(-1+2*12,12,GaussLegendre(12),true)));
 	     Global.New("qf13pE",CConstant<const QuadratureFormular1d *>(new QuadratureFormular1d(-1+2*13,13,GaussLegendre(13),true)));
+
+	     Global.Add("QF1d","(",new OneOperator2_<GQuadratureFormular<R1> *,long,KNM_<double> >(BuilQFd<R1>));
+	     Global.Add("QF2d","(",new OneOperator2_<GQuadratureFormular<R2> *,long,KNM_<double> >(BuilQFd<R2>));
+	     Global.Add("QF3d","(",new OneOperator2_<GQuadratureFormular<R3> *,long,KNM_<double> >(BuilQFd<R3>));
+
+	     Dcl_Type<const GQuadratureFormular<R1> **>(::InitializePtr<const GQuadratureFormular<R1> *>,::DeletePtr<const GQuadratureFormular<R1> *>);
+	     Dcl_Type<const GQuadratureFormular<R2> **>(::InitializePtr<const GQuadratureFormular<R2> *>,::DeletePtr<const GQuadratureFormular<R2> *>);
+	     Dcl_Type<const GQuadratureFormular<R3> **>(::InitializePtr<const GQuadratureFormular<R3> *>,::DeletePtr<const GQuadratureFormular<R3> *>);
+
+	     zzzfff->Add("QF1",atype<const GQuadratureFormular<R1> ** >());
+	     zzzfff->Add("QF2",atype<const GQuadratureFormular<R2> ** >());
+	     zzzfff->Add("QF3",atype<const GQuadratureFormular<R3> ** >());
+
+	     TheOperators->Add("<-",
+			       new OneOperator3_<const GQuadratureFormular<R1> **,const GQuadratureFormular<R1> **,long,KNM_<double>  >(pBuilQFd<R1>),
+			       new OneOperator3_<const GQuadratureFormular<R2> **,const GQuadratureFormular<R2> **,long,KNM_<double>  >(pBuilQFd<R2>),
+			       new OneOperator3_<const GQuadratureFormular<R3> **,const GQuadratureFormular<R3> **,long,KNM_<double>  >(pBuilQFd<R3>)
+			       
+
+        
+			       );
+	     //  cast ** -> * 
+	     map_type[typeid(const GQuadratureFormular<R1> *).name()]->AddCast(   new E_F1_funcT<const GQuadratureFormular<R1> *,const GQuadratureFormular<R1> **>(UnRef<const GQuadratureFormular<R1> *>) );
+	     map_type[typeid(const GQuadratureFormular<R2> *).name()]->AddCast(   new E_F1_funcT<const GQuadratureFormular<R2> *,const GQuadratureFormular<R2> **>(UnRef<const GQuadratureFormular<R2> *>) );
+	     map_type[typeid(const GQuadratureFormular<R3> *).name()]->AddCast(   new E_F1_funcT<const GQuadratureFormular<R3> *,const GQuadratureFormular<R3> **>(UnRef<const GQuadratureFormular<R3> *>) );
+ 
+
 }
 
  
