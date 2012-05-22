@@ -78,7 +78,6 @@ clean-local:
 
 clean: clean-local
 	-rm ff-flags
-	-rm -r $(MSHMET_DIR)
 	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.libMesh $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet 
 	-rm $(SRCDIR)/$(INSTALL)/include/mshmetlib.h
 	-rm $(SRCDIR)/$(INSTALL)/lib/libmshmet.a
