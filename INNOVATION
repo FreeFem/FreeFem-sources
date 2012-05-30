@@ -1,9 +1,21 @@
+ - correct typo poblem (string size) when a change the default
+    window size in postscrip in version 3.19-1 to have more 
+    precise postscript plot
 version 3.19-1
+ - add tool to create Quadrature formlar 1d,2d,3d with 
+   plugind: load "qf11to25"
+   real[int,int] tab1(np,2),tab2(np,3),tab3(np,4);
+   QF1 qfe1(norder,tab1);// 1d
+   QF2 qfe1(norder,tab2);// 2D
+   QF3 qfe1(norder,tab3);// 3D
+   where tab(0,i) = weigth , tab(j,i) =  j coord, norder  order of the
+     quadrature 
+   see examples++-load/LaplaceP4.edp for example 
  - correct download auto compile of
     mmg3d, mshmet, scotch, ...
 version 3.19 (20 april 2012) 
  - scotch partionner interface see scotch.edp in examples++-load
- - add isNaN(x),  isInf(x), IsNormal(x)  function to check floatting point
+ - add isNaN(x),  isInf(x), IsNormal(x)  function to check floating point
       of real value x, see ISO C99. 
  - add function : NaN() and  NaN("") to build NaN real number (double in C) . 
  - correct error in macro with operator ./=  and .*= 
@@ -139,7 +151,7 @@ v 3.12-1 10 10 fevr 2011
     - add tag verson 3.12-win32 
     - add inferface for mpi in win32 architecture (form 32 version)
 v 3.12    17 jan 2011
-    - coorect probleme of comm world on SuperLuDist (complex version)
+    - correct probleme of comm world on SuperLuDist (complex version)
     - correct medit Makefile.am in case of no compilation of medit ..
     - correct a lot of MPI parallel solver example 
         a bug pastix interface ???
@@ -244,7 +256,7 @@ v 3.9-1  August 2009   (For FreeFem++ days )
     add:  gatherv, allgatherv, scatterv, alltoallv   
         and complex data type in:  allgather, gather, scatter, alltoall, ..
     correction bug : gather,  scatter
-    coorect essai.edp mpi example 
+    correct essai.edp mpi example 
   - correct problem of compatibility of dynamic lib  with and without MPI 
      change ff-cc++ to add all MPI libs if MPI version exist. 
   - correct default  region number in square build mesh function  now 0 , (2 beetween  v3.8 -- 3.9)  

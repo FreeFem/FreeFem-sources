@@ -614,7 +614,7 @@ void openPS(const char *filename )
     fprintf(psfile," /rec {newpath 4 copy 8 1 roll moveto 3 -1 roll lineto 4 2 roll exch lineto lineto closepath} def\n");
     fprintf(psfile," %f %f  scale \n",s,s);
     fprintf(psfile," 0 %d 0 %d rec clip\n",int(width),int(height));
-    fprintf(psfile," /Helvetica findfont 24 scalefont setfont\n");
+    fprintf(psfile," /Helvetica findfont %d scalefont setfont\n",int(9/s));
     fprintf(psfile," /S {moveto show} def\n");
     fprintf(psfile," /bF  { mark} def \n");
     fprintf(psfile," /eF {newpath moveto counttomark 2 idiv {lineto} repeat closepath fill cleartomark} def\n");
@@ -637,7 +637,9 @@ void closePS(void)
 // bof bof --- 
  float  GetHeigthFont()
 { 
-  return 15./echy;
+     double  widthA4PS=596;
+    float s=widthA4PS/width; 
+  return 5.5/s/echy;
 }
   void Commentaire(const char * c)  
   {
