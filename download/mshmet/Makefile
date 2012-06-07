@@ -16,7 +16,7 @@ PACKAGE=$(DIRPKG)/mshmet$(mshmet_VERSION).tgz
 SERVER=http://www.ann.jussieu.fr/~frey/ftp/archives/
 INSTALL=../..
 mshmet_VERSION=.2012.04.25
-
+FAIRE=$(SRCDIR)/FAIRE
 
 # ---------------------- 
 #     mshmetlib
@@ -26,13 +26,13 @@ MSHMET_SRCDIRNOLIB = $(MSHMET_DIR)/sources
 MSHMET_SRCDIR = $(MSHMET_DIR)/sourceslib
 MSHMET_OBJDIR = $(MSHMET_DIR)/objects
 
-mshmet: FAIRE 
+mshmet: $(FAIRE) 
 
-FAIRE:$(SRCDIR)/FAIT
+$(FAIRE):$(SRCDIR)/FAIT
 	$(MAKE) WHERE $(SRCDIR)/$(INSTALL)  
-	touch FAIRE
+	touch $(FAIRE)
 
-$(SRCDIR)/FAIT:$(SRCDIR)
+$(SRCDIR)/FAIT:$(SRCDIR)/tag-tar
 	cd $(MSHMET_DIR); $(MAKE)
 	touch $(SRCDIR)/FAIT
 
@@ -56,7 +56,7 @@ WHERE:
 	fi
 
 
-$(SRCDIR): $(PACKAGE)
+$(SRCDIR)/tag-tar: $(PACKAGE)
 	-mkdir mshmet$(mshmet_VERSION)
 	cd mshmet$(mshmet_VERSION); tar xvzf ../$(PACKAGE)
 	-mkdir $(MSHMET_SRCDIR)
@@ -68,6 +68,7 @@ $(SRCDIR): $(PACKAGE)
 	cp ../../src/libMesh/eigenv.c $(MSHMET_SRCDIR)
 	cp Makefile-mshmet.inc $(MSHMET_DIR)/makefile
 	cd $(MSHMET_SRCDIR); patch -p2 < ../../mshmet.2011.03.06.patch
+	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
@@ -85,7 +86,7 @@ clean: clean-local
 	-rm -r $(SRCDIR)/$(INSTALL)/lib/libMesh.a
 	-rm -r $(SRCDIR)/$(INSTALL)/include/libMesh
 	-rm -rf $(SRCDIR)
-	-rm FAIT FAIRE 
+	-rm FAIT $(FAIRE) 
 
 ff-flags: ../Makefile 
 	grep 'abs_top_builddir *=' ../Makefile >> ff-flags
