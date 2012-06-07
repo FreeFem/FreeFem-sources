@@ -1,6 +1,8 @@
 #include "mode_open.hpp"
 #if WIN32
 #include  "ff-win32.cpp"
+#else
+#include <unistd.h>
 #endif
 extern long mpirank;
 extern long verbosity;
