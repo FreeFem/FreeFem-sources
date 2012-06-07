@@ -1,3 +1,6 @@
+version 3.19-2
+ - correct pb of C in/output in pluging (in test) 
+ - correct bugs  mshmet pluging in case of double eigen value in eigen
  - correct typo poblem (string size) when a change the default
     window size in postscrip in version 3.19-1 to have more 
     precise postscript plot
