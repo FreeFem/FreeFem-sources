@@ -47,6 +47,9 @@ namespace ffapi{
   std::istream *cin();
   std::ostream *cout();
   std::ostream *cerr();
+  FILE *stdout();
+  FILE *stderr();
+  FILE *stdin();
 
   /// Initiate graphical pipe output. I need a separate function for
   /// this to warn ffcs to check the corresponding ffglut magic number

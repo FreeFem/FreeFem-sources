@@ -65,6 +65,7 @@ $(SRCDIR): $(PACKAGE)
 	cp mshmetlib-internal.h mshmetlib.c mshmetlib.h $(MSHMET_SRCDIR)/
 	rm $(MSHMET_SRCDIR)/mshmet.c
 	rm $(MSHMET_SRCDIR)/chrono.c
+	cp ../../src/libMesh/eigenv.c $(MSHMET_SRCDIR)
 	cp Makefile-mshmet.inc $(MSHMET_DIR)/makefile
 	cd $(MSHMET_SRCDIR); patch -p2 < ../../mshmet.2011.03.06.patch
 

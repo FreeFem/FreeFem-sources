@@ -45,7 +45,12 @@ class  addingInitFunct {  public:
     if( so &&  cout.rdbuf() != so ) cout.rdbuf(so);	\
     if( si &&  cin.rdbuf() != si ) cin.rdbuf(si);	\
     if( se &&  cerr.rdbuf() != se ) cerr.rdbuf(se);	\
+    stdout = ffapi::stdout();\
+    stderr = ffapi::stderr();\
+    stdin = ffapi::stdin();\
 } 
+
+
   
 #define LOADINITNM(EXEC,NM)						\
   static  void  AutoLoadInit() { LOADINITIO ;				\
