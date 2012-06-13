@@ -1,0 +1,10 @@
+load "shell"
+Directory  c=".";
+
+while(1)
+{
+	string n=readdir(c);
+	if( n != "") 
+	  cout << n << " " << isdir(n) << endl; 
+	else break; 
+}
