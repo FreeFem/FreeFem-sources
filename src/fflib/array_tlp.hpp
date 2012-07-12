@@ -537,6 +537,9 @@ template<class K> long get_n(KNM<K> * p){ return p->N();}
 template<class K> long get_m(KNM<K> * p){ return p->M();}
 template<class K> K get_max(KN<K> * p){ return p->max();}
 template<class K> K get_min(KN<K> * p){ return p->min();}
+template<class K> long get_imax(KN<K> * p){ long  i =0; for(long k=1;k< p->N(); ++k) if(  (*p)[k]>(*p)[i] ) i=k;  return i ;}
+template<class K> long get_imin(KN<K> * p){ long  i =0; for(long k=1;k< p->N(); ++k) if(  (*p)[k]<(*p)[i] ) i=k;  return i ;}
+
 template<class K> K get_sum(KN<K> * p){ return p->sum();}
 template<class K> double get_l2(KN<K> * p){ return p->l2();}
 template<class K> double get_l1(KN<K> * p){ return p->l1();}
@@ -964,6 +967,7 @@ void ArrayOperator()
      Add<KN<K> *>("sum",".",new OneOperator1<K,KN<K> *>(get_sum));
      Add<KN<K> *>("min",".",new OneOperator1<K,KN<K> *>(get_min));
      Add<KN<K> *>("max",".",new OneOperator1<K,KN<K> *>(get_max));
+
      Add<KN<K> *>("l2",".",new OneOperator1<double,KN<K> *>(get_l2));
      Add<KN<K> *>("l1",".",new OneOperator1<double,KN<K> *>(get_l1));
      Add<KN<K> *>("linfty",".",new OneOperator1<double,KN<K> *>(get_linfty));

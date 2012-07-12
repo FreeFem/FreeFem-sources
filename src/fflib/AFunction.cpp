@@ -1169,8 +1169,8 @@ void Init_map_type()
        new OneOperator2_<long*,long*,long>(&set_copyp),
        new OneOperator2_<bool*,bool*,bool>(&set_copyp), //  mars 2006
        new OneOperator2_<Complex*,Complex*,Complex>(&set_copy),
-       new OneOperator2_<istream**,istream**,istream*>(&set_copy),
-       new OneOperator2_<ostream**,ostream**,ostream*>(&set_copy),
+  //     new OneOperator2_<istream**,istream**,istream*>(&set_copy_new<istream>),
+   //    new OneOperator2_<ostream**,ostream**,ostream*>(&set_copy_new<ostream>),
 //       new OneUnaryOperator<Op1_new_pstring<istream*,ifstream> >,
 //       new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >,
        new OneBinaryOperator<Op2_set_pstring<istream**,ifstream> >,  //  FH string * mars 2006 

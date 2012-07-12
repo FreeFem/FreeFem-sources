@@ -159,7 +159,9 @@ void initArrayOperatorlong()
     TheOperators->Add("<-",
 		      new OneBinaryOperator<set_Inv_pKN_longI<KN<long>*,Inv_KN_long > > );
 
-    
+    Add<KN<K> *>("imin",".",new OneOperator1<long,KN<K> *>(get_imin));
+    Add<KN<K> *>("imax",".",new OneOperator1<long,KN<K> *>(get_imax));
+  
     
 }
 

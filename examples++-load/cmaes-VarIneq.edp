@@ -1,7 +1,7 @@
 load "ff-cmaes"
 
 
-int NN = 10;
+int NN = 7;
 mesh Th = square(NN,NN);
 func f1=1.;
 func f2=-1.;
@@ -12,7 +12,7 @@ int nadapt=1;
 real starttol=1e-10,bctol=6.e-12;
 fespace Vh(Th,P1);
 Vh ou1,ou2;
-real pena=100;
+real pena=1000;
 
 
 for(int al=0;al<nadapt;++al)
@@ -112,7 +112,7 @@ if(al==0)
 else FEFToSSP(ou1[],ou2[],start);
 
 
-real mini = cmaes(J,start,stopMaxFunEval=1000*(al+1),stopTolX=1.e-1/(10*(al+1)),initialStdDev=(0.025/(pow(100.,al))));
+real mini = cmaes(J,start,stopMaxFunEval=10000*(al+1),stopTolX=1.e-3/(10*(al+1)),initialStdDev=(0.025/(pow(100.,al))));
 Vh best1,best2;
 SSPToFEF(best1[],best2[],start);
 
