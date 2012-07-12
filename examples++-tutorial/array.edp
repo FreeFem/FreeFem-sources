@@ -158,8 +158,8 @@ cout << " ||a||_1     = " <<  a.l1     << endl;
 cout << " ||a||_2     = " <<  a.l2     << endl;
 cout << " ||a||_infty = " <<  a.linfty << endl;
 cout << " sum a_i     = " <<  a.sum    << endl;
-cout << " max a_i     = " <<  a.max    << endl;
-cout << " min a_i     = " <<  a.min    << endl;
+cout << " max a_i     = " <<  a.max  << " a[  " << a.imax << " ] = " << a[a.imax]     << endl;
+cout << " min a_i     = " <<  a.min  << " a[  " << a.imin << " ] = " << a[a.imin]    << endl;
 cout << " a'*a        = " <<  (a'*a)   << endl;
 cout << " a quantile 0.2 =  " <<  a.quantile(0.2) << endl;
 

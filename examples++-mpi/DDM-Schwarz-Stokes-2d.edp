@@ -55,6 +55,8 @@ func Pk=[P2,P2,P1];
 
 func bool  plotMPIall(mesh &Th,real[int] & u,string  cm)
 {if(vdebug) PLOTMPIALLU(mesh,Pk, defPk3, Th, u, allu1, { cmm=cm,nbiso=10,fill=1,dim=3,value=1}); return 1;}
+func bool  plotMPIallp(mesh &Th,real[int] & u,string  cm)
+{if(vdebug) PLOTMPIALLU(mesh,Pk, defPk3, Th, u, allu2, { cmm=cm,nbiso=10,fill=1,dim=3,value=1}); return 1;}
 
 
 mpiComm comm(mpiCommWorld,0,0);// trick : make a no split mpiWorld 
@@ -142,6 +144,16 @@ u[]=vPb(0,Whi,tgv=1);
 real eps=1e-10;
 Stokes2DDMSolver(Bi,u,v,gmres,eps,vdebug)
 
+
+plotMPIall(Thi,v[],"u-final");
+plotMPIallp(Thi,v[],"p-final");
+{  //  update the pressure 
+   /* find c_i such that 
+    i,j  (O_i \cap O_j)  int(O_i \cap O_j) (p_i -  c_i - p_j + c_j) = 0
+    int (O_i \cap O_j) (c_i - c_j) = int (O_i \cap O_j) p_i - p_j ;  
+   */
+   1;
+}
 
 real errg =1,umaxg;
 { 
