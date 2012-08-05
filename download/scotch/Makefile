@@ -65,4 +65,5 @@ clean-local:
 clean: clean-local
 	-rm Makefile.inc
 	-rm -rf $(SRCDIR)
+	-rm FAIRE 
 .PHONY:$(SRCDIR)/$(INSTALL)

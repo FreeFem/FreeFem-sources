@@ -65,7 +65,7 @@ clean-local:
 	-cd $(SRCDIR) && $(MAKE) cleanlib  -C $(SRCDIR)
 
 clean: clean-local
-	rm SLmake.inc FAIRE FAIT
+	-rm SLmake.inc FAIRE FAIT
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/{pblas.h,pxsyevx.h,tools.h}
 	-rm -rf $(SRCDIR)/$(INSTALL)/lib/libscalapack.a
 	-rm -rf $(SRCDIR)
