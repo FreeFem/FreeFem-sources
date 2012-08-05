@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.19-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.20,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -1632,7 +1632,7 @@ AC_SUBST(UMFPACKLIBS,$ff_umfpack_libs)
 
 # Checking for some functions that may not appear everywhere
 # ----------------------------------------------------------
-
+AC_CHECK_HEADERS([unistd.h])
 # asinh acosh atanh are not in Mingw yet gettimeofday
 ff_malloc_h=""
 AC_HEADER_TIME
