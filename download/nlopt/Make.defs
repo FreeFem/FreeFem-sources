@@ -1,6 +1,0 @@
-FFDOWNLOAD=/Users/hecht/work/ff++/download
-CC=/usr/local/bin/gcc
-CXX=/usr/local/bin/g++
-WGET=curl -O
-CXXFLAGS=-g  -m64 -fPIC -g -DDRAWING -DBAMG_LONG_LONG -DCHECK_KN -fno-inline  -fexceptions -fPIC
-CFLAGS=-g  -m64 -fPIC -g -fPIC
