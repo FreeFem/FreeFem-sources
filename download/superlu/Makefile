@@ -82,7 +82,7 @@ OBJ_SUPERLU = $(ALLAUX) $(LAAUX) \
 superlu: FAIT
 
 FAIT:	
-	$(MAKE)  install 
+	$(MAKE)  install WHERE
 	touch FAIT
 
 
