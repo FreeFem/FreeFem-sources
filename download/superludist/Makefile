@@ -70,4 +70,4 @@ clean: clean-local
 	-rm -r $(SRCDIR)/$(INSTALL)/include/superludist/
 	-rm -r $(SRCDIR)/$(INSTALL)/lib/libsuperlu_dist*.a
 	-rm -r make.inc
-	-rm -rf FAIT
+	-rm -rf FAIT FAIRE
