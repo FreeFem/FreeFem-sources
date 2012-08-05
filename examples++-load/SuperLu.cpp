@@ -529,7 +529,7 @@ public:
     xarow=AA.lg;
 
     /* FreeFem++ use Morse Format */ 
-    CompRow_to_CompCol(m, n, nnz, arow, asubrow, xarow, 
+    this->CompRow_to_CompCol(m, n, nnz, arow, asubrow, xarow, 
 		       &a, &asub, &xa);
 
     /* Defaults */
@@ -578,10 +578,10 @@ public:
 
     Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
 
-    Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);
+    this->Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);
   
-    Create_Dense_Matrix(&B, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
-    Create_Dense_Matrix(&X, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
+    this->Create_Dense_Matrix(&B, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
+    this->Create_Dense_Matrix(&X, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
       
 
       if ( etree.size() ==0 )   etree.resize(n);   
@@ -663,8 +663,8 @@ public:
 	  KN_2Ptr<R> xx(x),bb(b);
 	  // cout << " xx #### " << xx.c.N() << " "<< xx.ca.N() <<  " " << xx.ca.step << endl;
 	  //cout << " bb #### " << bb.c.N() << " "<< bb.ca.N() << " " << bb.ca.step <<endl;
-	  Create_Dense_Matrix(&B, m, 1, bb, m, SLU_DN, R_SLU, SLU_GE);
-	  Create_Dense_Matrix(&X, m, 1, xx, m, SLU_DN, R_SLU, SLU_GE);
+	  this->Create_Dense_Matrix(&B, m, 1, bb, m, SLU_DN, R_SLU, SLU_GE);
+	  this->Create_Dense_Matrix(&X, m, 1, xx, m, SLU_DN, R_SLU, SLU_GE);
 	  
 	  B.ncol = nrhs;  /* Set the number of right-hand side */
 	  
