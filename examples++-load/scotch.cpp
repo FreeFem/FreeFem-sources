@@ -102,7 +102,7 @@ AnyType SCOTCH_Op<T, V>::operator()(Stack stack)  const {
     for (int it = 0; it < nt; ++it) {
         for (int jt = 0; jt < nve; ++jt) {
             int jtt = jt, itt = pTh->ElementAdj(it, jtt);
-            if(itt != it) {
+            if( (itt != it) && (itt >= 0) ) {
                 ++accum;
                 edgevec.push_back(baseval + itt);
             }
