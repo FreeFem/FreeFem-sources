@@ -1,6 +1,31 @@
 To compile a full version of FreeFem++ under MacOS
 ---------------------------------------------------
-
+Under Lion August 2012 ( xcode 4.4 form scratch)
+ 1) install xcode 4.4 , and the xcode command line tools 
+ 2) install  gcc-4.8 form http://hpc.sourceforge.net
+ 3) autoconf and automake is non in xcode
+   I use the macport distribution form http://www.macports.org
+  # sudo port install  autoconfo
+  # sudo port install  automake
+ 4) install tex  form ctan 
+   http://mirrors.ctan.org/systems/mac/mactex/MacTeX.pkg
+ 5) install openmpi form the source 
+   http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-1.6.tar.bz2
+  #  ./configure CC=/usr/local/bin/gcc CXX=/usr/local/bin/g++ F77=/usr/local/bin/gfortran FC=/usr/local/bin/gfortran
+  # make 
+  # sudo make install
+  6) install mecurial from the web http://mercurial.selenic.com
+    
+  7)  downlaad  
+  # hg clone  http://www.freefem.org/ff++/ff++
+  8)  compilation of freefem++ 
+  # cd ff++
+  # ./configure '-with-suffix=snow-leopard' '-without-fltk' '--enable-download' '--enable-optim' 'MPIRUN=/usr/local/bin/mpirun' '--enable-m64' '--without-x' 'CC=/usr/local/bin/gcc' 'CXX=/usr/local/bin/g++' 'F77=/usr/local/bin/gfortran' 'FC=/usr/local/bin/gfortran'  
+  # make
+  # make
+  # make 
+  # sudo make install 
+------------
 Under Snow Leopard.  Jan 2011
 
 The major problem is take a good f90 to compile new // solver like MUMPS.
