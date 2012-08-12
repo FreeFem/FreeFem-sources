@@ -15581,7 +15581,7 @@ $as_echo_n "checking check mumps... " >&6; }
 	LIBS="$LIBS -ldmumps -lzmumps  -lmumps_common  -lpord "
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include </usr/include/dmumps_c.h>
+#include <dmumps_c.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -15607,12 +15607,12 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "mumps LD -ldmumps -lzmumps  -lmumps_common  -lpord"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`$as_dirname -- "/usr/include/dmumps_c.h" ||
-$as_expr X"/usr/include/dmumps_c.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"/usr/include/dmumps_c.h" : 'X\(//\)[^/]' \| \
-	 X"/usr/include/dmumps_c.h" : 'X\(//\)$' \| \
-	 X"/usr/include/dmumps_c.h" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"/usr/include/dmumps_c.h" |
+	    ff_WHERE_INC=`$as_dirname -- "dmumps_c.h" ||
+$as_expr X"dmumps_c.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"dmumps_c.h" : 'X\(//\)[^/]' \| \
+	 X"dmumps_c.h" : 'X\(//\)$' \| \
+	 X"dmumps_c.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"dmumps_c.h" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -15647,7 +15647,7 @@ $as_echo_n "checking check mumps_ptscotch... " >&6; }
 	LIBS="$LIBS -lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch "
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include </usr/include/dmumps_c.h>
+#include <dmumps_c.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -15673,12 +15673,12 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "mumps_ptscotch LD -lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`$as_dirname -- "/usr/include/dmumps_c.h" ||
-$as_expr X"/usr/include/dmumps_c.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"/usr/include/dmumps_c.h" : 'X\(//\)[^/]' \| \
-	 X"/usr/include/dmumps_c.h" : 'X\(//\)$' \| \
-	 X"/usr/include/dmumps_c.h" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"/usr/include/dmumps_c.h" |
+	    ff_WHERE_INC=`$as_dirname -- "dmumps_c.h" ||
+$as_expr X"dmumps_c.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"dmumps_c.h" : 'X\(//\)[^/]' \| \
+	 X"dmumps_c.h" : 'X\(//\)$' \| \
+	 X"dmumps_c.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"dmumps_c.h" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -15713,7 +15713,7 @@ $as_echo_n "checking check mumps_scotch... " >&6; }
 	LIBS="$LIBS -lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch "
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include </usr/include/dmumps_c.h>
+#include <dmumps_c.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -15739,12 +15739,12 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "mumps_scotch LD -lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`$as_dirname -- "/usr/include/dmumps_c.h" ||
-$as_expr X"/usr/include/dmumps_c.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"/usr/include/dmumps_c.h" : 'X\(//\)[^/]' \| \
-	 X"/usr/include/dmumps_c.h" : 'X\(//\)$' \| \
-	 X"/usr/include/dmumps_c.h" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"/usr/include/dmumps_c.h" |
+	    ff_WHERE_INC=`$as_dirname -- "dmumps_c.h" ||
+$as_expr X"dmumps_c.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"dmumps_c.h" : 'X\(//\)[^/]' \| \
+	 X"dmumps_c.h" : 'X\(//\)$' \| \
+	 X"dmumps_c.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"dmumps_c.h" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -15911,7 +15911,7 @@ $as_echo_n "checking check superlu_dist... " >&6; }
 	LIBS="$LIBS -lsuperlu-dist "
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include </usr/include/superlu-dist/superlu_defs.h>
+#include <superlu-dist/superlu_defs.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -15937,12 +15937,12 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "superlu_dist LD -lsuperlu-dist"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`$as_dirname -- "/usr/include/superlu-dist/superlu_defs.h" ||
-$as_expr X"/usr/include/superlu-dist/superlu_defs.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"/usr/include/superlu-dist/superlu_defs.h" : 'X\(//\)[^/]' \| \
-	 X"/usr/include/superlu-dist/superlu_defs.h" : 'X\(//\)$' \| \
-	 X"/usr/include/superlu-dist/superlu_defs.h" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"/usr/include/superlu-dist/superlu_defs.h" |
+	    ff_WHERE_INC=`$as_dirname -- "superlu-dist/superlu_defs.h" ||
+$as_expr X"superlu-dist/superlu_defs.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"superlu-dist/superlu_defs.h" : 'X\(//\)[^/]' \| \
+	 X"superlu-dist/superlu_defs.h" : 'X\(//\)$' \| \
+	 X"superlu-dist/superlu_defs.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"superlu-dist/superlu_defs.h" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -15977,7 +15977,7 @@ $as_echo_n "checking check superlu... " >&6; }
 	LIBS="$LIBS -lsuperlu "
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include </usr/include/superlu/slu_ddefs.h>
+#include <superlu/slu_ddefs.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -16003,12 +16003,12 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "superlu LD -lsuperlu"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`$as_dirname -- "/usr/include/superlu/slu_ddefs.h" ||
-$as_expr X"/usr/include/superlu/slu_ddefs.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"/usr/include/superlu/slu_ddefs.h" : 'X\(//\)[^/]' \| \
-	 X"/usr/include/superlu/slu_ddefs.h" : 'X\(//\)$' \| \
-	 X"/usr/include/superlu/slu_ddefs.h" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"/usr/include/superlu/slu_ddefs.h" |
+	    ff_WHERE_INC=`$as_dirname -- "superlu/slu_ddefs.h" ||
+$as_expr X"superlu/slu_ddefs.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"superlu/slu_ddefs.h" : 'X\(//\)[^/]' \| \
+	 X"superlu/slu_ddefs.h" : 'X\(//\)$' \| \
+	 X"superlu/slu_ddefs.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"superlu/slu_ddefs.h" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -16043,7 +16043,7 @@ $as_echo_n "checking check Superlu4... " >&6; }
 	LIBS="$LIBS -lsuperlu4 "
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include </usr/include/superlu4/slu_ddefs.h>
+#include <superlu4/slu_ddefs.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -16069,12 +16069,12 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "Superlu4 LD -lsuperlu4"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`$as_dirname -- "/usr/include/superlu4/slu_ddefs.h" ||
-$as_expr X"/usr/include/superlu4/slu_ddefs.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"/usr/include/superlu4/slu_ddefs.h" : 'X\(//\)[^/]' \| \
-	 X"/usr/include/superlu4/slu_ddefs.h" : 'X\(//\)$' \| \
-	 X"/usr/include/superlu4/slu_ddefs.h" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"/usr/include/superlu4/slu_ddefs.h" |
+	    ff_WHERE_INC=`$as_dirname -- "superlu4/slu_ddefs.h" ||
+$as_expr X"superlu4/slu_ddefs.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"superlu4/slu_ddefs.h" : 'X\(//\)[^/]' \| \
+	 X"superlu4/slu_ddefs.h" : 'X\(//\)$' \| \
+	 X"superlu4/slu_ddefs.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"superlu4/slu_ddefs.h" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -16373,7 +16373,7 @@ $as_echo_n "checking check metis... " >&6; }
 	LIBS="$LIBS -lscotch -lmetis "
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include </usr/include/metis/metis.h>
+#include <metis/metis.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -16399,12 +16399,78 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "metis LD -lscotch -lmetis"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`$as_dirname -- "/usr/include/metis/metis.h" ||
-$as_expr X"/usr/include/metis/metis.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"/usr/include/metis/metis.h" : 'X\(//\)[^/]' \| \
-	 X"/usr/include/metis/metis.h" : 'X\(//\)$' \| \
-	 X"/usr/include/metis/metis.h" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"/usr/include/metis/metis.h" |
+	    ff_WHERE_INC=`$as_dirname -- "metis/metis.h" ||
+$as_expr X"metis/metis.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"metis/metis.h" : 'X\(//\)[^/]' \| \
+	 X"metis/metis.h" : 'X\(//\)$' \| \
+	 X"metis/metis.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"metis/metis.h" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'`
+	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
+		echo "metis INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
+	    fi
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_WHERE" >&5
+$as_echo "$ff_WHERE" >&6; }
+
+        ff_where_lib_conf_metis=1
+	LIBS=$ff_save_libs
+	fi
+      	if test -z "$ff_where_lib_conf_metis" ; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking check metis" >&5
+$as_echo_n "checking check metis... " >&6; }
+	ff_save_libs=$LIBS
+	LIBS="$LIBS -lscotch -lmetis "
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <metis.h>
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ff_WHERE=yes
+else
+  ff_WHERE=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+	if test "$ff_WHERE" = "yes" ; then
+	    echo "metis LD -lscotch -lmetis"  >>$ff_where_lib_conf
+	    ff_WHERE_INC=`$as_dirname -- "metis.h" ||
+$as_expr X"metis.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"metis.h" : 'X\(//\)[^/]' \| \
+	 X"metis.h" : 'X\(//\)$' \| \
+	 X"metis.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"metis.h" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -16505,7 +16571,7 @@ $as_echo_n "checking check freeyams... " >&6; }
 	LIBS="$LIBS -lfreeyams "
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include </usr/include/freeyamslib.h>
+#include <freeyamslib.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -16531,12 +16597,12 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "freeyams LD -lfreeyams"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`$as_dirname -- "/usr/include/freeyamslib.h" ||
-$as_expr X"/usr/include/freeyamslib.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"/usr/include/freeyamslib.h" : 'X\(//\)[^/]' \| \
-	 X"/usr/include/freeyamslib.h" : 'X\(//\)$' \| \
-	 X"/usr/include/freeyamslib.h" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"/usr/include/freeyamslib.h" |
+	    ff_WHERE_INC=`$as_dirname -- "freeyamslib.h" ||
+$as_expr X"freeyamslib.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"freeyamslib.h" : 'X\(//\)[^/]' \| \
+	 X"freeyamslib.h" : 'X\(//\)$' \| \
+	 X"freeyamslib.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"freeyamslib.h" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -16571,7 +16637,7 @@ $as_echo_n "checking check mmg3d... " >&6; }
 	LIBS="$LIBS -lmmg3d "
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include </usr/include/libmmg3d.h>
+#include <libmmg3d.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -16597,12 +16663,12 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "mmg3d LD -lmmg3d"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`$as_dirname -- "/usr/include/libmmg3d.h" ||
-$as_expr X"/usr/include/libmmg3d.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"/usr/include/libmmg3d.h" : 'X\(//\)[^/]' \| \
-	 X"/usr/include/libmmg3d.h" : 'X\(//\)$' \| \
-	 X"/usr/include/libmmg3d.h" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"/usr/include/libmmg3d.h" |
+	    ff_WHERE_INC=`$as_dirname -- "libmmg3d.h" ||
+$as_expr X"libmmg3d.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"libmmg3d.h" : 'X\(//\)[^/]' \| \
+	 X"libmmg3d.h" : 'X\(//\)$' \| \
+	 X"libmmg3d.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"libmmg3d.h" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -16703,7 +16769,7 @@ $as_echo_n "checking check gsl... " >&6; }
 	LIBS="$LIBS -lgsl -lgslcblas -lm "
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include </usr/include/gsl/gsl_sf.h>
+#include <gsl/gsl_sf.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -16729,12 +16795,12 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "gsl LD -lgsl -lgslcblas -lm"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`$as_dirname -- "/usr/include/gsl/gsl_sf.h" ||
-$as_expr X"/usr/include/gsl/gsl_sf.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"/usr/include/gsl/gsl_sf.h" : 'X\(//\)[^/]' \| \
-	 X"/usr/include/gsl/gsl_sf.h" : 'X\(//\)$' \| \
-	 X"/usr/include/gsl/gsl_sf.h" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"/usr/include/gsl/gsl_sf.h" |
+	    ff_WHERE_INC=`$as_dirname -- "gsl/gsl_sf.h" ||
+$as_expr X"gsl/gsl_sf.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"gsl/gsl_sf.h" : 'X\(//\)[^/]' \| \
+	 X"gsl/gsl_sf.h" : 'X\(//\)$' \| \
+	 X"gsl/gsl_sf.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"gsl/gsl_sf.h" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -16835,7 +16901,7 @@ $as_echo_n "checking check tetgen... " >&6; }
 	LIBS="$LIBS -ltet "
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include </usr/include/tetgen.h>
+#include <tetgen.h>
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -16861,12 +16927,12 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "tetgen LD -ltet"  >>$ff_where_lib_conf
-	    ff_WHERE_INC=`$as_dirname -- "/usr/include/tetgen.h" ||
-$as_expr X"/usr/include/tetgen.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"/usr/include/tetgen.h" : 'X\(//\)[^/]' \| \
-	 X"/usr/include/tetgen.h" : 'X\(//\)$' \| \
-	 X"/usr/include/tetgen.h" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"/usr/include/tetgen.h" |
+	    ff_WHERE_INC=`$as_dirname -- "tetgen.h" ||
+$as_expr X"tetgen.h" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"tetgen.h" : 'X\(//\)[^/]' \| \
+	 X"tetgen.h" : 'X\(//\)$' \| \
+	 X"tetgen.h" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"tetgen.h" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
