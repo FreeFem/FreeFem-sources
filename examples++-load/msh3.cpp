@@ -1860,7 +1860,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 template<class RR,class AA=RR,class BB=AA> 
 struct Op3_addmesh: public binary_function<AA,BB,RR> { 
   static RR f(Stack s,const AA & a,const BB & b)  
-  { cout << "Op3_addmesh" << endl; return RR(s, a, b );} 
+  { return RR(s, a, b );} 
 };
 
 template<bool INIT,class RR,class AA=RR,class BB=AA> 
@@ -1870,7 +1870,6 @@ struct Op3_setmesh: public binary_function<AA,BB,RR> {
     ffassert(a );
     pmesh3  p=GluMesh3(b);
     
-    cout << "INIT=" << INIT << endl;
     if(!INIT && *a){
       //Add2StackOfPtr2FreeRC(stack,*a);
        (**a).destroy();
