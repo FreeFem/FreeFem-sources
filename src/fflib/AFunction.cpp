@@ -1053,6 +1053,7 @@ void Init_map_type()
        ); 
 
      TheOperators->Add("?:",
+       new Operator_Aritm_If<bool >,
        new Operator_Aritm_If<long >,
        new Operator_Aritm_If<double >,
        new Operator_Aritm_If<Complex >,
