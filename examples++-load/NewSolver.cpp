@@ -289,6 +289,7 @@ public:
 inline MatriceMorse<double>::VirtualSolver *
 BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(double,A))
 {
+  if( verbosity>9)
     cout << " BuildSolverUMFPack<double>" << endl;
     return new SolveUMFPACK<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
@@ -296,6 +297,7 @@ BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(double,A))
 inline MatriceMorse<Complex>::VirtualSolver *
 BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(Complex,A))
 {
+  if( verbosity>9)
     cout << " BuildSolverUMFPack<Complex>" << endl;
     return new SolveUMFPACK<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
