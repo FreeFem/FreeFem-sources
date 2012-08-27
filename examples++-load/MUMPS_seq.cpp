@@ -258,6 +258,7 @@ public:
 inline MatriceMorse<double>::VirtualSolver *
 BuildSolverIMUMPSseq(DCL_ARG_SPARSE_SOLVER(double,A))
 {
+  if(verbosity>3)
     cout << " BuildSolverMUMPSseq<double>" << endl;
     return new SolveMUMPS_seq<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
@@ -265,6 +266,7 @@ BuildSolverIMUMPSseq(DCL_ARG_SPARSE_SOLVER(double,A))
 inline MatriceMorse<Complex>::VirtualSolver *
 BuildSolverIMUMPSseq(DCL_ARG_SPARSE_SOLVER(Complex,A))
 {
+  if(verbosity>3)
     cout << " BuildSolverMUMPSseq<Complex>" << endl;
     return new SolveMUMPS_seq<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
