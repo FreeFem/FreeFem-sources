@@ -1019,6 +1019,13 @@ ListFiles-natives: .FORCE
 	find .   -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
 List-agl-dylib: src/nw/FreeFem++
 	otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}' >$@
+CheckMacLib.sh: src/nw/FreeFem++
+	echo "for i in `otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {printf($$1.OFS)  }'` ; do test ! -f $$i && exit 1; done; exit 0"  >$@
+	chmod a+x $@
+CheckMPIMacLib.sh: src/mpi/FreeFem++-mpi
+	echo "for i in `otool -L src/mpi/FreeFem++-mpi|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {printf($$1.OFS)  }'` ; do test ! -f $$i && exit 1; done; exit 0"  >$@
+	chmod a+x $@
+
 .FORCE:
 
 $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives
