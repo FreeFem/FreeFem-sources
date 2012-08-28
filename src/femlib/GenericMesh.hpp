@@ -116,8 +116,8 @@ const int TypeVolume =3;
 	return (k%2)+ ((j[0]+3)%3)*2; // signe + depart*2
     }    
     // build de permutation     
-    template<int d> inline void SetNumPerm(int n,int *p) { ffassert(0);return 0; }// a error}    
-    template<int d> inline void SetNumPerm1(int n,int *p) { ffassert(0);return 0; }// a error}    
+    template<int d> inline void SetNumPerm(int n,int *p) { ffassert(0);return ; }// a error}    
+    template<int d> inline void SetNumPerm1(int n,int *p) { ffassert(0);return ; }// a error}    
     
     template<> inline void SetNumPerm<1>(int ,int *p) { p[0]=0;} // a error}    
     template<> inline void SetNumPerm<2>(int n,int *p) { p[0]=n;p[1]=1-n;} // a error}    
