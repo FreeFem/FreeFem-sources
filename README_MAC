@@ -1,26 +1,44 @@
-To compile a full version of FreeFem++ under MacOS
+To compile a full version of FreeFem++ under MacOS 
 ---------------------------------------------------
+
 Under Lion August 2012 ( xcode 4.4 form scratch)
- 1) install xcode 4.4 , and the xcode command line tools 
+-------------------------------------------------
+ remark: All line beginning by # are  shell command in terminal. 
+ 
+
+ 1) install xcode 4.4 , and the xcode command line tools  
+    xcode 
+      menu preferences -> Downloads -> Components -> Command Line Tools 
+        install
+    install Auxiliary Tools for Xcode (for PackageMaker)
  2) install  gcc-4.8 form http://hpc.sourceforge.net
- 3) autoconf and automake is non in xcode
+  # curl -O http://prdownloads.sourceforge.net/hpc/gcc-lion.tar.gz?download
+  # sudo tar zxvf gcc-lion.tar.gz -C /
+ 3) autoconf and automake now not in xcode
    I use the macport distribution form http://www.macports.org
   # sudo port install  autoconfo
   # sudo port install  automake
- 4) install tex  form ctan 
+ 4) install tex  from  ctan 
    http://mirrors.ctan.org/systems/mac/mactex/MacTeX.pkg
  5) install openmpi form the source 
    http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-1.6.tar.bz2
   #  ./configure CC=/usr/local/bin/gcc CXX=/usr/local/bin/g++ F77=/usr/local/bin/gfortran FC=/usr/local/bin/gfortran
   # make 
   # sudo make install
-  6) install mecurial from the web http://mercurial.selenic.com
+ 6) install gsl 
+  # curl -O http://ftp.gnu.org/gnu/gsl/gsl-1.15.tar.gz
+  # tar zxvf gsl-1.15.tar.gz
+  # cd gsl-1.15.
+  #./configure CC=/usr/local/bin/gcc
+  # make
+  # sudo make install 
+ 7) install mecurial from the web http://mercurial.selenic.com
     
-  7)  downlaad  
+ 8)  downlaad  
   # hg clone  http://www.freefem.org/ff++/ff++
-  8)  compilation of freefem++ 
+ 9)  compilation of freefem++ 
   # cd ff++
-  # ./configure '-with-suffix=snow-leopard' '-without-fltk' '--enable-download' '--enable-optim' 'MPIRUN=/usr/local/bin/mpirun' '--enable-m64' '--without-x' 'CC=/usr/local/bin/gcc' 'CXX=/usr/local/bin/g++' 'F77=/usr/local/bin/gfortran' 'FC=/usr/local/bin/gfortran'  
+  # ./configure '-with-suffix=lion' '-without-fltk' '--enable-download' '--enable-optim' 'MPIRUN=/usr/local/bin/mpirun' '--enable-m64' '--without-x' 'CC=/usr/local/bin/gcc' 'CXX=/usr/local/bin/g++' 'F77=/usr/local/bin/gfortran' 'FC=/usr/local/bin/gfortran'  
   # make
   # make
   # make 
