@@ -90,7 +90,7 @@ if test -z "$CXX"; then
   AC_MSG_ERROR([ Sorry no c++ compiler !])
 fi
 
-AC_COMPUTE_INT(ff_size_long,[sizeof(long])
+AC_COMPUTE_INT(ff_size_long,[sizeof(long)])
 AC_COMPUTE_INT(ff_size_int,[sizeof(int)])
 AC_COMPUTE_INT(ff_size_ptr,[sizeof(int*)])
 

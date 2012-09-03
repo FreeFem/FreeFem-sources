@@ -321,7 +321,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
       char which[3]= "LM";	// larger value
       //      if(mode >2) which[0] ='S'; // smaller value
       int ishift=1; // Auto Shift true by default
-      int iparam[12]= {0,ishift,0,maxit,1,nconv,0,mode,0,0,0,0};
+      int iparam[12]= {0,ishift,0,(int)maxit,1,(int) nconv,0,mode,0,0,0,0};
       int ipntr[12]={ 0,0,0, 0,0,0,  0,0,0, 0,0,0 };
       KN<double> workd(3*n+1);
       int lworkl = ncv*(ncv+9);
@@ -438,7 +438,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
         char bmat='G';
         char which[]="LM";
         int ishift=1; // Auto Shift true by default                                                                                                
-        int iparam[12]= {0,ishift,0,maxit,1,nconv,0,mode,0,0,0,0};
+        int iparam[12]= {0,ishift,0,(int)maxit,1,(int)nconv,0,mode,0,0,0,0};
         int ipntr[15]={ 0,0,0, 0,0,0,  0,0,0, 0,0,0 ,0,0,0};
         KN<double> workd(3*n+1);
         int lworkl = 3*ncv*(ncv+2);
@@ -690,7 +690,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
   char which[]="LM";
   int ishift=1; // Auto Shift true by default                                                                                               \
 
-  int iparam[12]= { 0, ishift, 0, maxit, 1, nconv, 0, mode, 0, 0, 0, 0 };
+  int iparam[12]= { 0, ishift, 0, (int) maxit, 1,(int)  nconv, 0,(int) mode, 0, 0, 0, 0 };
   int ipntr[15]={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   KN<K> workd(3*n+1);
   int lworkl = 3*ncv*ncv+5*ncv;
