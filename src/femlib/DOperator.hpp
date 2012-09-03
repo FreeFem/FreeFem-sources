@@ -74,7 +74,7 @@ template<class I,class R>
 				      where_in_stack_opt(),mesh_indep_stack_opt(),
 				      optiexp0(),optiexpK(),isoptimize(false) 
    {
-     v[0]=make_pair<I,R>(i,r);
+     v[0]=make_pair<I,R>((I)i,(R)r);
    }
    
    LinearComb(const LinearComb &l) 
@@ -126,7 +126,7 @@ template<class I,class R>
    void  add(const I& i,const R &r)  { 
      for (iterator k=v.begin();k!=v.end();k++)
        if (k->first == i) {k->second += r;return ;}
-     v.push_back(make_pair<I,R>(i,r));     
+     v.push_back(make_pair<I,R>((I)i,(R)r));     
    }
    
    size_type size() const { return v.size();}   

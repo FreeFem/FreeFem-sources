@@ -28,10 +28,10 @@ cenrad.o	eigenv.o	matrix.o	optcoq.o	opttyp.o	simu23.o	swap23.o	typelt.o
 
 OBJSNOP =  cendel.o swapar.o
 
-mmg3d: build-4
+mmg3d: mmg3d4/build-4
 
 
-build-4: 
+mmg3d4/build-4: 
 	-$(MAKE) tag-tar
 	if [ -d mmg3d4  ] ; then  $(MAKE)  $(LIBMMG3D) install-4 WHERE ; else echo "Sorry no source " ; fi
 $(LIBMMG3D):
@@ -40,24 +40,26 @@ $(LIBMMG3D):
 	cd mmg3d4/build/sources/mmg3dmain; $(CC) -c $(CNOFLAGS)   mmg3d.c -I..
 	$(AR) $(ARFLAGS) $(LIBMMG3D) mmg3d4/build/sources/*.o mmg3d4/build/sources/mmg3dmain/mmg3d.o
 	-$(CC) $(CNOFLAGS) mmg3d4/build/sources/mmg3dmain/mmg3d.o   mmg3d4/build/sources/*.o -o ../bin/mmg3d $(STD_LIBS)
-	touch build-4 FAIT-4
+	touch mmg3d4/build-4 mmg3d4/FAIT-4
 install-4:
 	-mkdir ../include/mmg3d-v4/		
 	cp mmg3d4/build/sources/*.h ../include/mmg3d-v4/
-	touch FAIT-4
+	touch mmg3d4/FAIT-4
 
 mmg3d-4:$(PACKAGE)
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET) http://www.math.u-bordeaux1.fr/~dobj/logiciels/download/mmg3d4.0.tgz 
+#http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download.php?file=mmg3d4.0.tgz
+#http://www.math.u-bordeaux1.fr/~dobj/logiciels/mmg3d.php
+	cd $(DIRPKG);$(WGET) http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download.php?file=mmg3d4.0.tgz 
 #http://www.math.u-bordeaux1.fr/~dobj/logiciels/download.php?file=`basename $(PACKAGE)`
 
 
 install:install-4 WHERE
 
 WHERE: 
-	@-if [ -f FAIT-4 ] ; then \
+	@-if [ -f mmg3d4/FAIT-4 ] ; then \
 	make install-4;  \
 	echo mmg3d-v4  LD -L@DIR@/lib -lmmg3d-v4  >../lib/WHERE.mmg3d ;\
 	echo mmg3d-v4 INCLUDE -I@DIR@/include/mmg3d-v4>> ../lib/WHERE.mmg3d ;\
@@ -65,7 +67,7 @@ WHERE:
 	fi
 
 
-FAIRE: FAIT-4 install-4
+FAIRE: mmg3d4/FAIT-4 install-4
 
 tag-tar: $(PACKAGE)
 	if tar tfz $(PACKAGE)  mmg3d4/build/sources/mmg3d.c 2>/dev/null  1>/dev/null  ;\

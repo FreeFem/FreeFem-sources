@@ -1450,7 +1450,7 @@ void OneWindow::setLighting()
     {
       if(plotdim==3)
 	{
-	  GLfloat lp0[4] = { cam.x,cam.y,cam.z, 1.0 };
+	  GLfloat lp0[4] = { (float) cam.x,(float)  cam.y, (float)  cam.z, 1.0F };
 	  glLightfv(GL_LIGHT0,GL_POSITION,lp0);	
 	  
 	  if(debug>1)  cout << " Light pos  3d:  " << cam << endl;
@@ -1458,7 +1458,7 @@ void OneWindow::setLighting()
       else
 	{
 	  
-	  GLfloat position[] = {Pvue3.x,Pvue3.y,Pvue3.z+(Bmax3.z-Bmin3.z)*3,1.f} ;
+	  GLfloat position[] = {(float) Pvue3.x,(float) Pvue3.y,(float) (Pvue3.z+(Bmax3.z-Bmin3.z)*3,1.f)} ;
 	  glLightfv(GL_LIGHT0, GL_POSITION, position);
 	  
 	}
