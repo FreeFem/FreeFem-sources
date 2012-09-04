@@ -145,3 +145,15 @@ diff -ur hips-1.2b-rc4/TESTS/PARALLEL/makefile hips-1.2b-rc4-okk/TESTS/PARALLEL/
 Only in hips-1.2b-rc4-okk/TESTS/PARALLEL: makefile.orig
 Only in hips-1.2b-rc4-okk: makefile.inc
 Only in hips-1.2b-rc4-okk: tag-ff++
+diff -ur  hips-1.2b-rc4/SRC/BLOCK/DBMATRIX/HIPS_Fgmresd.c~ hips-1.2b-rc4/SRC/BLOCK/DBMATRIX/HIPS_Fgmresd.c
+--- hips-1.2b-rc4/SRC/BLOCK/DBMATRIX/HIPS_Fgmresd.c~	2009-06-21 23:13:12.000000000 +0200
++++ hips-1.2b-rc4/SRC/BLOCK/DBMATRIX/HIPS_Fgmresd.c	2012-09-04 10:08:08.000000000 +0200
+@@ -80,7 +80,7 @@
+        assert(incx == incy);
+ 
+        for(i=0; i<n; i++) {
+-         dot += conj(x[i]) * y[i];
++         dot += CONJ(x[i]) * y[i];
+        }
+ 
+        return dot;

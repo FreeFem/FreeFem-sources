@@ -123,7 +123,7 @@ AnyType MatrixUpWind0::operator()(Stack stack) const
 	int ii[3] ={  Th(A), Th(B),Th(C)};
 	double q[3][2]= { { A.x,A.y} ,{B.x,B.y},{C.x,C.y} } ;  // coordinates of 3 vertices (input)
 	double c[3]={cc[ii[0]],cc[ii[1]],cc[ii[2]]};
-	double a[3][3], where[3]={A.lab,B.lab,C.lab};
+	double a[3][3], where[3]={(double) A.lab, (double) B.lab, (double)C.lab};
 	if (fvmP1P0(q,u,c,a,where) )
 	  {
 	    for (int i=0;i<3;i++)

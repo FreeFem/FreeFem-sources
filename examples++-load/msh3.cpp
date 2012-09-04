@@ -4006,8 +4006,8 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
 
   //hseuil = hseuil/10.;
 	
-  //Vertex3  *v= new Vertex3[tab_nv];
-  Vertex3  v[tab_nv];
+  Vertex3  *v= new Vertex3[tab_nv];
+  //Vertex3  v[tab_nv];
   
   EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,bmin,bmax,0);
 	
@@ -4048,7 +4048,7 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
   }
 
   delete gtree;
-
+  delete [] v;
 	
   if(verbosity >1) cout << "hseuil=" << hseuil <<endl;
   if(verbosity >1) cout << "nv_t = " << nv_t << " / " << "nv_t(anc)" << tab_nv <<endl;   
@@ -4080,8 +4080,8 @@ void PointCommun_hcode_gtree( const int &dim, const int &NbPoints, const int &po
 			      const R3 & bmin, const R3 & bmax, const double &hmin, int * ind_np, int * ind_label, int & np){
 	
   double hseuil =hmin/10.; 
-  //Vertex3  *v= new Vertex3[NbPoints];
-  Vertex3 v[NbPoints];
+  Vertex3  *v= new Vertex3[NbPoints];
+  //Vertex3 v[NbPoints];
   EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,bmin,bmax,0);
 	
   if(verbosity >1) cout<< "verif hmin vertex3 GTree switch" << point_confondus_ok << endl;
@@ -4166,6 +4166,7 @@ void PointCommun_hcode_gtree( const int &dim, const int &NbPoints, const int &po
   }
 	
   delete gtree;
+  delete [] v; 
 
   /*
     int z_verifnumberofpoints;
@@ -5126,7 +5127,9 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
 	ivv[ii] =Th.operator()(K[ii]);
       }
 
-      R3 vertextetsub[nvsub];
+   {
+      R3 * vertextetsub= new R3 [nvsub];
+        int *newindex = new int [nvsub];
       for( int iv=0; iv<nvsub; iv++){
 	double alpha=vertexsub[iv].x;
 	double beta=vertexsub[iv].y;
@@ -5137,7 +5140,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
 	vertextetsub[iv].z = (1-alpha-beta-gamma)*Th.vertices[ivv[0]].z + alpha*Th.vertices[ivv[1]].z + beta*Th.vertices[ivv[2]].z + gamma*Th.vertices[ivv[3]].z;  
       }
     
-      int newindex[nvsub];
+    
       for( int iv=0; iv<nvsub; iv++){
 	const R3 viR3(vertextetsub[iv].x,vertextetsub[iv].y,vertextetsub[iv].z);
 	const Vertex3 &vi( viR3 );
@@ -5161,7 +5164,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
 	if(np>nv) cout << "np=" << np << " nv=" << nv << endl; 
 	ffassert( np <= nv );
       }
-
+    
       for( int ii=0; ii<ntetsub; ii++){
 	int ivt[4];
 	for( int jj=0; jj< 4; jj++){
@@ -5200,7 +5203,8 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
           }
 	  assert( ie <= nbe);
       }
-      
+     delete [] vertextetsub;
+     delete [] newindex;}
     }
   }
   if(verbosity>8)
@@ -5233,7 +5237,8 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
       ivv[1] = Th.operator()(K[1]);
       ivv[2] = Th.operator()(K[2]);
       
-      R3 vertextrisub[nv2Dsub];
+      R3 *vertextrisub = new R3  [nv2Dsub]; 
+      int *newindex = new int[nv2Dsub];
       for( int iv=0; iv<nv2Dsub; iv++)
       {
           double alpha=vertex2Dsub[iv].x;
@@ -5244,7 +5249,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
           vertextrisub[iv].z = (1-alpha-beta)*Th.vertices[ivv[0]].z + alpha*Th.vertices[ivv[1]].z + beta*Th.vertices[ivv[2]].z;  
           
       }
-      int newindex[nv2Dsub];
+     
       for( int iv=0; iv<nv2Dsub; iv++)
       {
           const Vertex3 &vi( vertextrisub[iv] );
@@ -5268,6 +5273,8 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
           ie++;
           assert( ie <= nbe);
       }
+     delete [] vertextrisub;
+     delete [] newindex;
       
       
   }

@@ -1032,3 +1032,14 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 + int    (*MMG_interp)(double *,double *,double *,double );
 + int    (*MMG_optlentet)(pMesh ,pSol ,pQueue ,double ,int ,int );
 + int    (*MMG_movevertex)(pMesh ,pSol ,int ,int );
+--- mm3d4-old/build/sources/ratio.c	2012-09-04 09:38:10.000000000 +0200
++++ mmg3d4/build/sources/ratio.c	2012-09-04 09:40:22.000000000 +0200
+@@ -365,7 +365,7 @@
+   fprintf(stdout,"           ELEMENT   %d (%d)   %d %d %d %d\n",
+ 	  iel,ielreal,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
+ 
+-  if ( abs(mesh->info.imprim) < 5 )  return;
++  if ( abs(mesh->info.imprim) < 5 )  return (1) ;
+ 
+   fprintf(stdout,"\n     HISTOGRAMM\n");
+   for (k=1; k<9; k++) {

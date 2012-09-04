@@ -339,3 +339,15 @@ diff -ru freeyams.2011.09.23/sourceslib/zaldy3.c freeyams.2011.09.23-orig/source
      }
      sm->nvmax = nvsize;
      yerr.inderr[0] = sm->nvmax;
+diff -u freeyams.2012.02.05/sourceslib/outqua_a.c  freeyams.2011.09.23-orig/sourceslib/outqua_a.c
+--- freeyams.2012.02.05/sourceslib/outqua_a.c	2009-05-13 21:00:03.000000000 +0200
++++ freeyams.2011.09.23-orig/sourceslib/outqua_a.c	2012-09-04 08:51:04.000000000 +0200
+@@ -219,7 +219,7 @@
+   pt = &mesh->tria[iel];
+   fprintf(stdout,"     WORST ELEMENT   %d (%d)   %d %d %d\n",iel,ielr,pt->v[0],pt->v[1],pt->v[2]);
+ 
+-  if ( abs(imprim) < 5 )  return;
++  if ( abs(imprim) < 5 )  return (1) ;
+  
+   fprintf(stdout,"\n     HISTOGRAMM\n");
+   imax = min(9,(int)(10.*rapmax));

@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <dirent.h> 
+//#include <tr1/regex> 
 using namespace Fem2D;
 long ff_chdir(string * c) { return chdir(c->c_str());}
 long ff_rmdir(string * c) { return rmdir(c->c_str());}
