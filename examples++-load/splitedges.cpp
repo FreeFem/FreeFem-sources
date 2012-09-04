@@ -102,7 +102,7 @@ Mesh * Split_Edges(Fem2D::Mesh * const & pTh, long  *dK)
 	  if( dK[k] & (1<<e)) {
 	    Triangle *tn=tt++; 
 	    int iee=  NGP(e,k);
-	    int id[]={ &(Kd[0])-v,&(Kd[1])-v,&(Kd[2])-v};
+	    int id[]={  int(&(Kd[0])-v),int(&(Kd[1])-v), int(&(Kd[2])-v)};
 	    int in[]={ id[0],id[1],id[2]};
 	    id[e1]=iee;
 	    in[e2]=iee;

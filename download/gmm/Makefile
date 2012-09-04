@@ -14,7 +14,7 @@ SRCDIR=$(PKG)-$(PKG_VERSION)
 PACKAGE=$(PKG)-$(PKG_VERSION).tar.gz
 SERVER=http://download.gna.org/getfem/stable
 PKGDIR=../pkg
-PKG_VERSION=4.1
+PKG_VERSION=4.2
 INSTALL=../..
 
 

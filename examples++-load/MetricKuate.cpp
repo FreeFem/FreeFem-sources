@@ -57,7 +57,7 @@ void metrique(int nbpoints, R2 * Point,R &A, R &B,R &C,R epsilon)
   int indiceX0=0;
   
  
-  R2 PPoint[nbpoints];
+  R2 *PPoint = new R2 [nbpoints];
   
   for(int i=0;i<nbpoints;i++)
     {
@@ -447,7 +447,7 @@ void metrique(int nbpoints, R2 * Point,R &A, R &B,R &C,R epsilon)
      A=B=1./(Rmin*Rmin);
      C=0.;
      }
- 
+ delete [] PPoint;  
 }
 
 

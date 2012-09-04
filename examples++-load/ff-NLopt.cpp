@@ -226,8 +226,8 @@ class GenericOptimizer
 		GenericOptimizer& SetSCAbsoluteFunctionTolerance(const double val) {opt.set_ftol_abs(val); return *this;}
 		GenericOptimizer& SetSCMaxFunctionEvaluations(const long val) {opt.set_maxeval(val); return *this;}
 		GenericOptimizer& SetSCEllapsedTime(const double val) {opt.set_maxtime(val); return *this;}
-		GenericOptimizer& SetPopulationSize(const int val) {opt.set_population(static_cast<unsigned>(val));}
-		virtual GenericOptimizer& SetVectorStorage(const int val) {opt.set_vector_storage(static_cast<unsigned>(val));}
+		GenericOptimizer& SetPopulationSize(const int val) {opt.set_population(static_cast<unsigned>(val)); return *this;}
+		virtual GenericOptimizer& SetVectorStorage(const int val) {opt.set_vector_storage(static_cast<unsigned>(val)); return *this;}
 		
 		GenericOptimizer& SetObjectiveFunctionGradient(const ffcalfunc<Rn> &g) {Clean(d_fit) = new ffcalfunc<Rn>(g); return *this;}
 		GenericOptimizer& SetEqualityConstraintFunction(const ffcalfunc<Rn> &f) {Clean(equaconst) = new ffcalfunc<Rn>(f); return *this;}
@@ -395,7 +395,7 @@ template<nlopt::algorithm ALGO> class SAOptimizer : public GenericOptimizer
 		nlopt::algorithm Tag() const {return ALGO;}
 		const char * Name() const {return Info<ALGO>::name;}
 		
-		GenericOptimizer& SetSubOptimizer(const string &,bool);
+		GenericOptimizer& SetSubOptimizer(const string & name=string(),bool save= 1);
 		GenericOptimizer& SetSASCXRelativeTolerance(const double val) {if(subopt) subopt->opt.set_xtol_rel(val); return *this;} //SC = stopping criteria
 		GenericOptimizer& SetSASCXAbsoluteTolerance(const Rn_ &val) {if(subopt) subopt->opt.set_xtol_abs(KnToStdVect(val)); return *this;}
 		GenericOptimizer& SetSASCStopFunctionValue(const double val) {if(subopt) subopt->opt.set_stopval(val); return *this;}
@@ -403,11 +403,11 @@ template<nlopt::algorithm ALGO> class SAOptimizer : public GenericOptimizer
 		GenericOptimizer& SetSASCAbsoluteFunctionTolerance(const double val) {if(subopt) subopt->opt.set_ftol_abs(val); return *this;}
 		GenericOptimizer& SetSASCMaxFunctionEvaluations(const long val) {if(subopt) subopt->opt.set_maxeval(val); return *this;}
 		GenericOptimizer& SetSASCEllapsedTime(const double val) {if(subopt) subopt->opt.set_maxtime(val); return *this;}
-		GenericOptimizer& SetSAPopulationSize(const int val) {if(subopt) subopt->opt.set_population(static_cast<unsigned>(val));}
+		GenericOptimizer& SetSAPopulationSize(const int val) {if(subopt) subopt->opt.set_population(static_cast<unsigned>(val));return *this;}
 		GenericOptimizer& SetVectorStorage(const int val) {if(subopt) subopt->opt.set_vector_storage(static_cast<unsigned>(val)); return *this;}
 		
 };
-template<nlopt::algorithm ALGO> GenericOptimizer& SAOptimizer<ALGO>::SetSubOptimizer(const string &name=string(),bool save=1)
+template<nlopt::algorithm ALGO> GenericOptimizer& SAOptimizer<ALGO>::SetSubOptimizer(const string &name,bool save)
 {
 	if(!subopt)
 	{
