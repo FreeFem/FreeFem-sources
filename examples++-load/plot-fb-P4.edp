@@ -1,4 +1,4 @@
-load "Element_P4"
+load "Element_P4" load "msh3" load "medit"
 mesh Th=square(1,1);
 plot(Th,wait=1);
 mesh th=square(150,150);
@@ -28,11 +28,16 @@ if(!NoUseOfWait)
     vi[][i]=1;
     vi;
     plot(vi,wait=0,cmm=" v"+i);
+    mesh3 Th3= movemesh23(th,transfo=[x,y,vi*0.5]);
+    medit("mm",Th3); 
+/*
+    medit("mm",Th,
     if(1)
       { savemesh(th,"mm",[x,y,vi*0.5]);   //save *.points and *.faces file for medit
       exec("ffmedit mm");
       exec(" rm mm.faces mm.points");
-      }	
+      }
+*/	
     vi=vi;	
     cout << i << " vi = "<< vi[]<<endl;
     vi[]=0;
