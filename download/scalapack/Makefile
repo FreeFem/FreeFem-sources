@@ -11,8 +11,8 @@ all-local: scalapack
 # http://www.netlib.org/scalapack/
 # Hips information
 DIRPKG=../pkg
-SRCDIR=scalapack-1.8.0
-PACKAGE1=$(DIRPKG)/scalapack-1.8.0.tgz
+SRCDIR=scalapack-2.0.2
+PACKAGE1=$(DIRPKG)/scalapack-2.0.2.tgz
 SERVER=http://www.netlib.org/scalapack/
 INSTALL=../..
 DIR1 = TOOLS/LAPACK/*.o
