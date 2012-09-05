@@ -358,7 +358,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	//  Vertex & v = Gh.vertices[j];
 	 // v = vertices[i];
 	   Gh.vertices[j].color =0;
-            ffassert(k==Gh.vertices[j].cas);
+            assert(k==Gh.vertices[j].cas);
 	  VerticesOnGeomVertex[j] = VertexOnGeom(vertices[i], Gh.vertices[j]);
 	}
     
