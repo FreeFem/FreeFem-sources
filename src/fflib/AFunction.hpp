@@ -2763,6 +2763,8 @@ template<class T>
 inline C_F0 operator *(const C_F0 &a,const C_F0 &b)
 {    
   return a==*pOne ? b : ( b ==*pOne ? a : C_F0(TheOperators,"*",a,b)) ;}
+inline C_F0 operator+(const C_F0 &a,const C_F0 &b){ return C_F0(TheOperators,"+",a,b);}
+inline C_F0 operator-(const C_F0 &a,const C_F0 &b){ return C_F0(TheOperators,"-",a,b);}
   
 inline C_F0 &operator +=(C_F0 &a,const C_F0 &b)
 {  
