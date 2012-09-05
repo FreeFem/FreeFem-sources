@@ -339,25 +339,44 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
   VerticesOnGeomVertex = new VertexOnGeom[NbVerticesOnGeomVertex];
   NbVerticesOnGeomEdge =0;
   VerticesOnGeomEdge =0;
+  for (i=0;i<Gh.nbv;i++)
+      Gh.vertices[i].Set();// bug clang ???? FH 09/2012
+     if(verbosity>6){
+         int nbr=0;
+         for (i=0;i<Gh.nbv;i++)
+             if( Gh.vertices[i].Required()) nbr++;
+         cout << " --00 nb  require  v in Gh " << nbr << " on " << Gh.nbv << endl;
+     }
+     
   {
     Int4 j;
     for (i=0;i<nbv;i++) 
       if((j=colorV[i])>=0)
 	{
-	  
-	  Vertex & v = Gh.vertices[j];
-	  v = vertices[i];
-	  v.color =0;
+            int k=Gh.vertices[j].cas;
+            Gh.vertices[j].Set(vertices[i]);
+	//  Vertex & v = Gh.vertices[j];
+	 // v = vertices[i];
+	   Gh.vertices[j].color =0;
+            ffassert(k==Gh.vertices[j].cas);
 	  VerticesOnGeomVertex[j] = VertexOnGeom(vertices[i], Gh.vertices[j]);
 	}
     
   }
+     
   edge4= new SetOfEdges4(nbe,nbv);  
   
   Real4 * len = new Real4[Gh.nbv];
   for(i=0;i<Gh.nbv;i++)
     len[i]=0;
-  
+     if(verbosity>6){
+         int nbr=0;
+         for (i=0;i<Gh.nbv;i++)
+             if( Gh.vertices[i].Required()) nbr++;
+         cout << " --bb nb  require  v in Gh " << nbr << " on " << Gh.nbv
+         <<endl;
+     }
+
   Gh.pmin =  Gh.vertices[0].r;
   Gh.pmax =  Gh.vertices[0].r;
   // recherche des extrema des vertices pmin,pmax
@@ -374,9 +393,9 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
   
   Gh.coefIcoor= (MaxICoor)/(Max(Gh.pmax.x-Gh.pmin.x,Gh.pmax.y-Gh.pmin.y));
   assert(Gh.coefIcoor >0);
-  
+ 
   Real8 hmin = HUGE_VAL;
-     int kreq=0;
+     int kreq=0,kkreq=0;
   for (i=0;i<nbe;i++)
     {
       Int4 i0 = Number(edges[i][0]);
@@ -410,10 +429,11 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
       if(requis)  {  // correction fevr 2009 JYU ...
 	Gh.edges[i].v[0]->SetRequired();
 	Gh.edges[i].v[1]->SetRequired();
-	Gh.edges[i].SetRequired(); // fin modif ... 
+	Gh.edges[i].SetRequired(); // fin modif ...
+          kkreq++;
       }
       R2 x12 = Gh.vertices[j0].r-Gh.vertices[j1].r;
-      Real8 l12=Norme2(x12);        
+      Real8 l12=Norme2(x12);
       hmin = Min(hmin,l12);
       
       Gh.vertices[j1].color++;
@@ -430,7 +450,14 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
       assert(k == i);
       
     }
-  
+     if(verbosity>6){
+         int nbr=0;
+         for (i=0;i<Gh.nbv;i++)
+             if( Gh.vertices[i].Required()) nbr++;
+         cout << " --11 nb  require  v in Gh " << nbr << " on " << Gh.nbv
+              << " kreq =" << kreq<<" kkreq=" << kkreq <<endl;
+     }
+ 
   
   for (i=0;i<Gh.nbv;i++) 
     if (Gh.vertices[i].color > 0) 
@@ -463,8 +490,13 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
   for (i=0;i<nbt;i++)
     for ( j=0;j<3;j++)
       triangles[i].SetAdj2(j,0,triangles[i].GetAllflag(j));
-  
-}
+     if(verbosity>6){
+         int nbr=0;
+         for (i=0;i<Gh.nbv;i++)
+             if( Gh.vertices[i].Required()) nbr++;
+         cout << " -- nb  required  v in Gh " << nbr << " on " << Gh.nbv << endl;
+     }
+ }
 
 
 void Geometry::EmptyGeometry()  // empty geometry
