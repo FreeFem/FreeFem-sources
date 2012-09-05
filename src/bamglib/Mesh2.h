@@ -297,7 +297,7 @@ public:
   void  SetRequired(){ cas |= 2;}
   void  Set(){cas=0;}
   void  Set(const Vertex & v)
-    {
+    { // add for bug in clang++ compile FH very strang and hard  ...
         i=v.i;
         r=v.r;
         m=v.m;
