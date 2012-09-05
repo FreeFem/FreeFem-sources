@@ -500,13 +500,13 @@ m4_include(acoptim.m4)
 # FreeFrem++-specific optimizations -fpascal-strings 
 if test "$enable_debug" = yes;
 then
-	CXXFLAGS="$CXXFLAGS -DDRAWING -DBAMG_LONG_LONG -DCHECK_KN"
+	CXXFLAGS="$CXXFLAGS  -DBAMG_LONG_LONG -DCHECK_KN"
 	if test "$ff_mac" = yes;
 	then
 		CXXFLAGS="$CXXFLAGS -fno-inline  -fexceptions"
 	fi
 else
-	CXXFLAGS="$CXXFLAGS -DDRAWING -DBAMG_LONG_LONG  -DNCHECKPTR"
+	CXXFLAGS="$CXXFLAGS -DBAMG_LONG_LONG  -DNCHECKPTR"
 	if test "$ff_mac" = yes;
 	then
 		CXXFLAGS="$CXXFLAGS "
