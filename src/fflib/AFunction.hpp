@@ -350,6 +350,7 @@ class E_F0 :public CodeAlloc
     virtual size_t nbitem() const {return 1;}
     virtual bool EvaluableWithOutStack() const {return false;} // 
     virtual bool MeshIndependent() const {return true;} // 
+    virtual bool Zero() const {return false;} //
     virtual E_F0 * right_E_F0() const { return 0;}
     virtual bool ReadOnly() const { return true;} // the expression do not change the memory     
     virtual ~E_F0() {}
@@ -632,6 +633,7 @@ class basicAC_F0;
 	  int  TYPEOFID() const { return r ? r->TYPEOFID(): 0;}
 	  int  nbitem() const { return f ? f->nbitem() : 0;}
 	  bool EvaluableWithOutStack() const { return f && f->EvaluableWithOutStack();}
+          bool Zero() const { return !f || f->Zero();}
 	  Expression Destroy() {  return r->Destroy(*this);}
 	  operator const Polymorphic * () const {return  dynamic_cast<const Polymorphic *>(f);}
 	  bool operator==(const C_F0 & a) const {return f==a.f && r == a.r;}
@@ -1232,7 +1234,8 @@ template<class R> class EConstant:public E_F0
   AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<R>(v);}
   EConstant(const R & o):v(o) { /*cout << "New constant " << o << endl;*/}
   bool EvaluableWithOutStack() const {return true;} //   
-  operator aType () const { return atype<R>();} 
+  operator aType () const { return atype<R>();}
+     bool Zero()const  { return v == R();}
   int compare (const E_F0 *t) const { 
         int rr;
         const  EConstant * tt=dynamic_cast<const EConstant *>(t);
