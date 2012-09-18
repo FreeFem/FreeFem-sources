@@ -109,23 +109,24 @@ int IsoLineK(R2 *P,double *f,R2 *Q,int *i0,int *i1,double eps)
       else 
 	vk[i]=0;
     }
-  if(kv>1) //  on vertex on the isoline ....
+  if(debug) cout << " ** " <<     kv << endl;
+  if(kv>1) //  on 2  vertex on the isoline ....
     {
-      if(kv==2 && f[e] > 0.)
-	{  // pb d'unicity, need to see the adj triangle ... 
-	  return 10+e ; // edge number + 10
-	}
-      else if (kv == 1)
-	{
-	  int i = tv[0]; 
-	  int i1= (i +1)%3;
-	  int i2= (i +2)%3;
-	  if( f[i1]*f[i2] < 0.)  // intersect 
-	    {
-	      ffassert(0); 
-	    }
-	  else return 0; 
-	}
+      if(kv==2)
+      {
+        if(f[e] > 0.)
+        {
+         int j0=(e+1)%3;
+         int j1=(e+2)%3;
+          te[ke]=e+3,i0[ke]=j0,i1[ke]=j0,++ke;
+          te[ke]=e,i0[ke]=j1,i1[ke]=j1,++ke;
+              // pb d'unicity, need to see the adj triangle ...
+              //return 10+e ; // edge number + 10
+        }
+        else return 0; // skip edge ...
+        
+      }
+      else return 0; //  const funct... 
     }
   else // see internal edge .. 
     for(int e=0;e<3;++e)
@@ -134,7 +135,7 @@ int IsoLineK(R2 *P,double *f,R2 *Q,int *i0,int *i1,double eps)
 	int j1=(e+2)%3;
 	if( vk[j0]) //  the intial  point on iso line
 	  {
-	    if(0. < f[j1])	    
+	    if(0. < f[j1])
 	      te[ke]=e,i0[ke]=j0,i1[ke]=j0,++ke;     
 	    else 
 	      te[ke]=e+3,i0[ke]=j0,i1[ke]=j0,++ke;
@@ -169,8 +170,7 @@ int IsoLineK(R2 *P,double *f,R2 *Q,int *i0,int *i1,double eps)
 	  else
 	    Q[i] = (P[j0]*(f[j1]) -  P[j1]*(f[j0]) ) /(f[j1]-f[j0]);
 	  if(debug) cout << i << " " << j0 << " " << j1 << " : " 
-	  
-	   << Q[i] << "***" << endl;
+                        << Q[i] << "***" << endl;
 	}
 	if(debug)
 	{
@@ -222,7 +222,7 @@ struct R2_I2 {
   int nx;
   R2_I2(R2 A,int nxx=-1) : P(A),nx(nxx) {}
   bool add(int k0,int k1,multimap<int,int> & L) {
-    if (nx=-1)  nx=k1;
+    if (nx==-1)  nx=k1;
     else {
       if(nx >0) {//  more than 2 seg ... put data in  the multi map .. 
 	L.insert(make_pair(k0,nx));
@@ -322,11 +322,13 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
     
   double tffmax=tff.max(), tffmin=tff.min(); 
   if(verbosity)
-    cout << " -- iosline close="<< close << " iso= "<< isovalue << " " << epsr << endl
+    cout << " -- isoline close="<< close << " iso= "<< isovalue << " " << epsr << endl
 	 << " bound - iso " << tffmin << " " << tffmax << endl;
   double eps = (tffmax-tffmin)*epsr;
   if( (tffmax <0.) || (tffmin > 0.)) return 0L; 
   if(epsr>0) eps = epsr;
+    ostream *fff=0;
+  if(debug>9) fff = new ofstream("g-iso");
   for (int k=0;k<Th.nt;++k)
     {
       int iK[3]={Th(k,0),Th(k,1),Th(k,2)};
@@ -361,10 +363,12 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 	  P[p[0]].add(p[0],p[1],L);
 	  if(debug)
 	  cout <<  " +++ " << Qk[0] << " ->  " << Qk[1] << " :: " << p[0] << " -> " << p[1] << endl;
+            if(fff) *fff << Qk[0] << "\n" << Qk[1] << "\n" << ((Qk[0]*0.4 + Qk[1]*.6)+R2(Qk[0],Qk[1]).perp()*.4) <<  "\n\n";
+               
 
 	}	  	
     }
-
+    if(fff) delete fff;
   if(close)
     {
       if(debug) cout<< " Close path " << endl; 
@@ -450,9 +454,10 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 	  kk+= P[i].count(i,L);
 	  if( P[i].nx>=0) 
 	    start[P[i].nx]=i;
-	  else if(start[i] == -1)
-	    k++;
 	}
+       for(int i=0;i<np;++i) //  correction FH 18/9/2012 ....
+            if(start[i] == -1)
+                k++;
 	if(verbosity>19)
 	  cout << "re starting:  k = " << k << " " << kk << endl;	
 	if(kk==0) 

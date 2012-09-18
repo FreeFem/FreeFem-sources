@@ -111,12 +111,13 @@ class C_args: public E_F0mps  {public:
   typedef list<C_F0> ::const_iterator const_iterator ;
   // il faut expendre 
   C_args() :largs(){}
-  C_args(C_F0 c) : largs() { largs.push_back(c);}
+  C_args(C_F0 c) : largs() { if(!c.Zero() )largs.push_back(c);}
   C_args(  const basicAC_F0 & args) :largs(){ 
     int n=args.size();
     for (int i=0;i< n;i++)
       {
-        if (args[i].left() == atype<const C_args *>())
+       if(args[i].Zero()) ; //  skip zero term ...
+       else  if (args[i].left() == atype<const C_args *>())
           {
             const C_args * a = dynamic_cast<const C_args *>(args[i].LeftValue());
             for (list<C_F0>::const_iterator i=a->largs.begin();i!=a->largs.end();i++)
@@ -128,8 +129,9 @@ class C_args: public E_F0mps  {public:
   static ArrayOfaType  typeargs() { return ArrayOfaType(true);}
   AnyType operator()(Stack ) const  { return SetAny<const C_args *>(this);}
   operator aType () const { return atype<const C_args *>();}         
-
-  static  E_F0 * f(const basicAC_F0 & args) { return new C_args(args);}    
+  
+  static  E_F0 * f(const basicAC_F0 & args) { return new C_args(args);}
+  bool Zero() { return !largs.empty();}
   bool IsLinearOperator() const;
   bool IsBilinearOperator() const;
 };
