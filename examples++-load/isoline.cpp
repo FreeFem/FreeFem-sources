@@ -323,7 +323,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
     double tffmax=tff.max(), tffmin=tff.min();
     if(verbosity)
         cout << " -- isoline close="<< close << " iso= "<< isovalue << " " << epsr << endl
-        << " bound - iso " << tffmin << " " << tffmax << endl;
+        <<      "    bound  isovalue :" << tffmin << " " << tffmax << endl;
     double eps = (tffmax-tffmin)*epsr;
     if( (tffmax <0.) || (tffmin > 0.)) return 0L;
     if(epsr>0) eps = epsr;
@@ -475,17 +475,14 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
           break;
        
         
-	if(verbosity>19)
-            cout << "re starting:  k = " << k << " " << kk << " %%% " << start[340] << endl;
 	int i=-1;
         if(iss<starting.size())
             start[i = starting[iss++]]=-1;
         else            
         for(int ii=0;ii<np;++ii)
           if(  (start[ii]>=0) ) i=ii;
-                
-        if(i<0) break;
         
+        if(i<0) break;
             {
                 if(verbosity>9)
                     cout << "  isolineP1: start curve  = " << i << " -> " << P[i].next(i,L,0) ;
@@ -639,7 +636,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
             k++;
             i0=iQ[i++];
             i1=iQ[i++];
-            cout<< i0 << " " << i1 << endl;
+            //cout<< i0 << " " << i1 << endl;
             for(int l=i0;l<i1;++l)
             {
                 int j=QQ[l];	
