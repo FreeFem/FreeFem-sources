@@ -266,18 +266,18 @@ class BC_set : public E_F0mps { public:
 
 class CDomainOfIntegration: public E_F0mps { 
 public:
-  static const int n_name_param =9;
+  static const int n_name_param =10;
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5 } ; //3d
   typeofkind  kind; //  0 
   int d; // 3d
    typedef const CDomainOfIntegration* Result;
-  Expression Th; 
+  Expression Th;
   vector<Expression> what;
   vector<int> whatis; // 0 -> long , 1 -> array ??? 
   CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2) // 3d
-    :kind(b),d(ddim), what(args.size()-1),whatis(args.size()-1)
+    :kind(b),d(ddim), Th(0), what(args.size()-1),whatis(args.size()-1)
      
   {
     args.SetNameParam(n_name_param,name_param,nargs);
@@ -311,8 +311,10 @@ public:
   const Fem2D::GQuadratureFormular<R3> & FIV(Stack) const ;  // 3d
   bool UseOpt(Stack s) const  {  return nargs[5] ? GetAny<bool>( (*(nargs[5]))(s) )  : 1;}
   double  binside(Stack s) const { return nargs[6] ? GetAny<double>( (*(nargs[6]))(s) )  : 0;} // truc pour FH
-  bool intmortar(Stack s) const { return nargs[7] ? GetAny<bool>( (*(nargs[7]))(s) )  : 1;} // truc  pour 
-
+  bool intmortar(Stack s) const { return nargs[7] ? GetAny<bool>( (*(nargs[7])) (s) )  : 1;} // truc  pour 
+  double levelset(Stack s) const { return nargs[9] ? GetAny<double>( (*(nargs[9]))(s) )  : 0;}
+  bool  islevelset() const { return nargs[9] != 0; }
+    
 };  
 
 class CDomainOfIntegrationBorder: public CDomainOfIntegration { 
