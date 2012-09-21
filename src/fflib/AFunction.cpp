@@ -58,7 +58,7 @@ extern long mpisize,mpirank;
 double  VersionNumber(); 
 double Imag(const  complex<double> & z){ return imag(z);}
 double Real(const  complex<double> & z){ return real(z);}
-
+const  basicForEachType * basicForEachType::type_C_F0 =0; //  for any type un formal operation .... FH add 09/2012
 
 // FH
 
@@ -560,6 +560,7 @@ public:
     bool MeshIndependent() const { return false;}
     
     opColumn(aType A, aType B): OneOperator(atype<C_F0>(),A,B) {}
+    opColumn(aType A): OneOperator(atype<C_F0>(),ArrayOfaType(A,true)) {pref=-100;}
   //  opColumn(): OneOperator(atype<C_F0>(),atype<TransE_Array >(),atype<E_Array>()  ) {}
     
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
@@ -577,6 +578,8 @@ public:
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
     C_F0  code2(const basicAC_F0 &args) const;       
 };
+
+
 /*
 class opArray : public OneOperator{
 public:
@@ -930,7 +933,7 @@ void Init_map_type()
     Dcl_Type<Polymorphic*>();
     
 //    Dcl_Type<C_F0>();
-    map_type[typeid(C_F0).name()] =  new TypeLineFunction; 
+    basicForEachType::type_C_F0 = map_type[typeid(C_F0).name()] =  new TypeLineFunction;
     Dcl_Type<E_Array>();
     Dcl_Type<TransE_Array >();// add
     Dcl_Type<const E_Border *>();
@@ -1219,11 +1222,12 @@ void Init_map_type()
      // TheOperators->Add("\'", new opTTrans); 
       TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
-      //TheOperators->Add("*",new opDot(atype<E_Array >(),atype<C_F0>() )   );  // a faire mais dur
+      TheOperators->Add("*",new opColumn(atype<E_Array >() )   );  //  [ ]* C_F0 (all)
       TheOperators->Add("::",new opColumn(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
       TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-     // car le type de retour depent des objets du tableau 
+ 
+     // car le type de retour depent des objets du tableau
       atype<E_Array >()->Add("[","",new opVI(atype<E_Array >())   );  
       atype<TransE_Array >()->Add("[","",new opVI(atype<TransE_Array >())   );  
       TheOperators->Add("+",new opSum("+",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
@@ -1718,8 +1722,11 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
     else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
     if( tb)  teb = dynamic_cast<const TransE_Array*>((Expression) args[1]);
     else eb = dynamic_cast<const E_Array*>((Expression) args[1]);
-    assert( ea || tea );
-    assert( eb || teb );
+    
+    ffassert( ea || tea );
+
+    if( eb || teb )
+    {
     const E_Array & a=  ta ? *tea->v : *ea;
     const E_Array & b=  tb ? *teb->v : *eb;
     int ma =1;
@@ -1797,15 +1804,28 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
 	};
  //   if( na1==1 && mb1 ==1)
 	return s;
-
+    }
+    else
+    {
+        
+        const E_Array & a=  ta ? *tea->v : *ea;
+        int na=a.size();
+        AC_F0  v;
+        v = 0; // empty
+	for (int i=0;i<na;++i)
+	    v += C_F0(TheOperators,"*",ta ? TryConj(a[i]) : a[i],args[1]) ;
+	return ta ? C_F0(TheOperators,"\'",C_F0(TheOperators,"[]",v)) :   C_F0(TheOperators,"[]",v);
     
+    }
+/*
     cout << "   formal : array or matrix : [ .. ] : [ .. ]   " << na << "x" << nb << endl;
     cout << "   formal : array or matrix : [ .. ] : [ .. ]   " <<  endl;
     cout << " first  array :  matrix " << maa << " trans " << ta << " " << na << "x" << ma <<endl;
     cout << " second array :  matrix " << mab << " trans " << tb << " " << nb << "x" << mb <<endl;
     CompileError("  not implemented sorry ..... (FH) to do ???? ");
-    return C_F0();
-    
+   
+ */
+     return C_F0();
 }
 
 
@@ -1818,7 +1838,7 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
     const TransE_Array * teb=0;
     const E_Array * ea=0;
     const E_Array * eb=0;// E_F0
-	if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
+    if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
     else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
     if( tb)  teb = dynamic_cast<const TransE_Array*>((Expression) args[1]);
     else eb = dynamic_cast<const E_Array*>((Expression) args[1]);
@@ -1838,6 +1858,7 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
 	return C_F0(TheOperators,"[]",v);
     
 }
+
 
 
 
