@@ -1,3 +1,15 @@
+version 3.20
+ - correct isoline plug in case of sadlle point
+ - change the compilation tools under windows gcc 4/7 + freeglut / ...)
+ - change the compile tools on mac pass to clang++
+ - compile ok of c++11  compiler
+ - add formal tools on array [] or matrix [[],[],]  
+    trace(A) , det(A) 
+    A:A 
+   Cofactor(A) ; 
+    A*2 // mul a right array by scalar ..  
+ -add integration on levelset line (in test) 
+ 
 version 3.19-2
  - correct pb of C in/output in pluging (in test) 
  - correct bugs  mshmet pluging in case of double eigen value in eigen

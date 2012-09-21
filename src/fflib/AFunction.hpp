@@ -274,7 +274,9 @@ class basicForEachType : public CodeAlloc {
                             const E_F1_funcT_Type * p=0,basicForEachType *rr=0,
                             Function1 iv=0,Function1 id=0) ;*/
 
-public:    
+public:
+    static  const  basicForEachType * type_C_F0; //  for any type un formal operation .... FH add 09/2012
+    
     const basicForEachType * un_ptr_type;  // type of right exp
    private:
  //   map<aType,CastFunc> mapofcast;
@@ -2802,7 +2804,8 @@ class  OneOpCast: public OneOperator {
 // 
 inline  bool  basicForEachType::CastingFrom(aType t) const  {
      throwassert(this && t);
-     if ( t == this) return true; 
+     if ( t == this) return true;
+   //  else if( t == type_C_F0 ) return true;  FH do work .... 09 / 2012 (use of ellispe ...) 
      return casting->FindSameR(ArrayOfaType(t,false));
   }
 
