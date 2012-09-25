@@ -249,7 +249,7 @@ class basicForEachType : public CodeAlloc {
      const char * name() const  { return this  ?  ktype->name() :"NULL" ;}
      virtual bool CastingFrom(const basicForEachType * t) const ;
      //  modif FH -----  A TESTER  // 
-     virtual bool SametypeRight(const basicForEachType * t) const {return  this == t || t == un_ptr_type;}
+     virtual bool SametypeRight(const basicForEachType * t) const {return  (this == t) || (t == un_ptr_type) || (t == type_C_F0);}
 //     virtual Type_Expr init(const Type_Expr & te) const { return Type_Expr(0,0);}
      virtual int TYPEOFID() const  {return 0;}
 //     bool SametypeLeft(const basicForEachType * t) const {return  t == this;}
@@ -2805,7 +2805,7 @@ class  OneOpCast: public OneOperator {
 inline  bool  basicForEachType::CastingFrom(aType t) const  {
      throwassert(this && t);
      if ( t == this) return true;
-   //  else if( t == type_C_F0 ) return true;  FH do work .... 09 / 2012 (use of ellispe ...) 
+     else if( t ==  type_C_F0 ) return true; // FH do work .... 09 / 2012 (use of ellispe ...)
      return casting->FindSameR(ArrayOfaType(t,false));
   }
 
