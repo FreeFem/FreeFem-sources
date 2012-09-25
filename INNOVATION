@@ -3,11 +3,12 @@ version 3.20
  - change the compilation tools under windows gcc 4/7 + freeglut / ...)
  - change the compile tools on mac pass to clang++
  - compile ok of c++11  compiler
- - add formal tools on array [] or matrix [[],[],]  
-    trace(A) , det(A) 
-    A:A 
-   Cofactor(A) ; 
-    A*2 // mul a right array by scalar ..  
+ - add formal tools on array [] or matrix [[],[],]  for elasitic problem. 
+   let A a formal array 
+   if A is matrix 2x2 or 3x3 : trace(A) , det(A) ,    Cofactor(A) ; 
+    A:A  = sum_ij A_ij * A_ij 
+    2*A,   A*2 // muliplication by a scalar 
+
  -add integration on levelset line (in test) 
  
 version 3.19-2

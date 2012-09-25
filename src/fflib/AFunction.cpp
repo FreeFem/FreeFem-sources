@@ -559,8 +559,9 @@ public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     bool MeshIndependent() const { return false;}
     
-    opColumn(aType A, aType B): OneOperator(atype<C_F0>(),A,B) {}
+    opColumn(aType A, aType B): OneOperator(atype<C_F0>(),A,B) {if( A== basicForEachType::type_C_F0)pref=-100;}
     opColumn(aType A): OneOperator(atype<C_F0>(),ArrayOfaType(A,true)) {pref=-100;}
+    
   //  opColumn(): OneOperator(atype<C_F0>(),atype<TransE_Array >(),atype<E_Array>()  ) {}
     
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
@@ -1223,6 +1224,8 @@ void Init_map_type()
       TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
       TheOperators->Add("*",new opColumn(atype<E_Array >() )   );  //  [ ]* C_F0 (all)
+      TheOperators->Add("*",new opColumn(basicForEachType::type_C_F0,atype<E_Array >() )   );  //  [ ]* C_F0 (all)
+//    type_C_F0
       TheOperators->Add("::",new opColumn(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
       TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
@@ -1723,9 +1726,9 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
     if( tb)  teb = dynamic_cast<const TransE_Array*>((Expression) args[1]);
     else eb = dynamic_cast<const E_Array*>((Expression) args[1]);
     
-    ffassert( ea || tea );
+   // ffassert( ea || tea );
 
-    if( eb || teb )
+    if( (eb || teb) && ( ea || tea ) )
     {
     const E_Array & a=  ta ? *tea->v : *ea;
     const E_Array & b=  tb ? *teb->v : *eb;
@@ -1733,7 +1736,7 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
     int mb =1;
     int na=a.size();
     int nb=b.size();
-    if(na <1 && nb < 1) CompileError(" empty array  [ ...]'*[ ...  ]  ");
+    if(na <1 && nb < 1) CompileError(" empty array  [ ...]':[ ...  ]  ");
     bool mab= b[0].left()==atype<E_Array>();
     bool maa= a[0].left()==atype<E_Array>();
     if(maa) {
@@ -1805,7 +1808,7 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
  //   if( na1==1 && mb1 ==1)
 	return s;
     }
-    else
+    else if ( ea || tea )
     {
         
         const E_Array & a=  ta ? *tea->v : *ea;
@@ -1817,6 +1820,18 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
 	return ta ? C_F0(TheOperators,"\'",C_F0(TheOperators,"[]",v)) :   C_F0(TheOperators,"[]",v);
     
     }
+    else if(eb || teb)
+     {
+         const E_Array & b=  tb ? *teb->v : *eb;
+         int nb=b.size();
+         AC_F0  v;
+         v = 0; // empty
+         for (int i=0;i<nb;++i)
+             v += C_F0(TheOperators,"*",args[0],tb ? TryConj(b[i]) : b[i]) ;
+         return tb ? C_F0(TheOperators,"\'",C_F0(TheOperators,"[]",v)) :   C_F0(TheOperators,"[]",v);
+
+     }
+    else ffassert(0); 
 /*
     cout << "   formal : array or matrix : [ .. ] : [ .. ]   " << na << "x" << nb << endl;
     cout << "   formal : array or matrix : [ .. ] : [ .. ]   " <<  endl;
