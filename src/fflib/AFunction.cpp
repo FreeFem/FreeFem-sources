@@ -1225,6 +1225,7 @@ void Init_map_type()
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
       TheOperators->Add("*",new opColumn(atype<E_Array >() )   );  //  [ ]* C_F0 (all)
       TheOperators->Add("*",new opColumn(basicForEachType::type_C_F0,atype<E_Array >() )   );  //  [ ]* C_F0 (all)
+      TheOperators->Add("*",new opColumn(basicForEachType::type_C_F0,atype<TransE_Array >() )   );  //  [ ]* C_F0 (all)
 //    type_C_F0
       TheOperators->Add("::",new opColumn(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
@@ -1654,6 +1655,7 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 		s = C_F0(TheOperators,"+",s,abi);}
 	    C(i,j)=s;
 	};
+   // cout << "\n ***na1 nb1 == = "<< na1 << " " << nb1 << endl;
     if( na1==1 && mb1 ==1)
 	return C(0,0);
     else if ( mb1 ==1 ) // || (na1==1)) // correct du car ' on conj encore r . mars 2010 
