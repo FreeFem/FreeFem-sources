@@ -10,7 +10,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.19-1}
+\def\VERSION{3.20}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -8507,8 +8507,8 @@ and $U_{h},V_{h} \in R_{h}$
 The functions $U_{h},V_{h}$ have three components so we have
 $$U_{h}=\vectthree{Uxh}{Uyh}{Uzh}  \quad \mbox{and}\quad V_{h}=\vectthree{Vxh}{Vyh}{Vzh}$$
 
-\begin{note}\label{note-p3d} ONe problem of the periodic boundary condition is the mesh mus be the same
-au equivalence face, the BuildLayer mesh generatio split  quadralateral  faces with the diagonal
+\begin{note}\label{note-p3d} One hard  problem of the periodic boundary condition is the mesh must be the same
+au equivalence face, the BuildLayer mesh generator split each  quadrilateral  faces with the diagonal
 passing through vertex with maximal number, so to be sure to have the same mesh one both face periodic
 the 2d numbering in corresponding edges must be compatible (for example the same variation).
 By Default, the numbering of square vertex are correct. 
@@ -8519,7 +8519,7 @@ To change the mesh numbering you can used the \texttt{change} function like:
 { // for cleanning  memory..
 @int[@int] old2new(0:Th.nv-1);// array set on 0, 1, .., nv-1
 @fespace Vh2(Th,P1);
-@Vh2 sorder=x+y; // choose ordering  increasing on 4 square borders with x or y\index{sort}
+@Vh2 sorder=x+y; // choose an ordering  increasing on 4 square borders with x or y\index{sort}
 @sort(sorder[],old2new); // build the inverse permutation 
 @int[@int]  new2old=old2new^-1;   // inverse the permutation 
 Th= @change(Th,renumv=new2old);\index{change}
