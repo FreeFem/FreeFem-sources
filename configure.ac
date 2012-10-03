@@ -1958,9 +1958,9 @@ fi
 # creating all makefiles
 # ----------------------
 ff_bamgprog="bamg${EXEEXT}  cvmsh2${EXEEXT}"
-if test "$ff_x11" = yes -o  "$ff_win32" = yes   ; then
-ff_bamgprog="$ff_bamgprog drawbdmesh${EXEEXT}"
-fi
+#if test "$ff_x11" = yes -o  "$ff_win32" = yes   ; then
+#ff_bamgprog="$ff_bamgprog drawbdmesh${EXEEXT}"
+#fi
 
 AC_SUBST(CNOFLAGS,$CNOFLAGS) dnl for superludist CFLAGS without optim  ...
 AC_SUBST(FNOFLAGS,$FNOFLAGS) dnl for blacs CFLAGS without optim  ...

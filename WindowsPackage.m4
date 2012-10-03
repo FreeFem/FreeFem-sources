@@ -43,7 +43,7 @@ Source: "src\medit\ffmedit.exe"; DestDir: "{app}"
 Source: "src\bin-win32\FreeFem++-nw.exe"; DestDir: "{app}"
 Source: "src\bin-win32\bamg.exe"; DestDir: "{app}"
 Source: "src\bin-win32\cvmsh2.exe"; DestDir: "{app}"
-Source: "src\bin-win32\drawbdmesh.exe"; DestDir: "{app}"
+; Source: "src\bin-win32\drawbdmesh.exe"; DestDir: "{app}"
 Source: "src\bin-win32\*.dll"; DestDir: "{app}"
 Source: "examples++-load\ff-c++"; DestDir: "{app}"
 
@@ -51,8 +51,8 @@ Source: "examples++-load\ff-c++"; DestDir: "{app}"
 ; flag.
 
 Source: "C:\MinGW\bin\mingwm10.dll"; DestDir: "{app}"
-Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
-Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
+; Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
+Source: "C:\MinGW\bin\freeglut.dll"; DestDir: "{app}"
 Source: "C:\MinGW\bin\libpthread-2.dll"; DestDir: "{app}"
 
 ; Does not include FreeFem++-x11 which would need the Cygwin X-Server

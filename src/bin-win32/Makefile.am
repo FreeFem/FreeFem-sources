@@ -35,7 +35,7 @@ LIBS_FF = libff.dll
 all-local: $(WIN32DLLTARGET) 
 	-for i in $(LDADD2) ; do case $$i in  *.dll) echo cp -p $$i .; cp -p $$i . ;;	  esac ; done
 	echo done
-win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe launchff++.exe ff-c++ $(MPIPROG)
+win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe  launchff++.exe ff-c++ $(MPIPROG)
 	echo "on a fini"
 
 libff.dll: $(FFD_OBJ0)  $(FFD_OBJ_AR)  $(FFD_OBJ_AC)  $(FFD_OBJ_AL)  $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o
@@ -63,7 +63,7 @@ ff-c++:../../examples++-load/load.link.in
 install-exec-local:: install-exec-local--$(WIN32DLLTARGET)
 
 install-exec-local--win32-dll-target::
-	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe drawbdmesh.exe ff-c++ $(MPIPROG) $(DESTDIR)${bindir} 
+	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe  ff-c++ $(MPIPROG) $(DESTDIR)${bindir} 
 	$(INSTALL_SCRIPT) *.dll   $(DESTDIR)${bindir} 
 install-exec-local--::
 
