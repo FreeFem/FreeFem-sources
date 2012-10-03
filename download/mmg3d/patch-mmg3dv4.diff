@@ -1,7 +1,113 @@
-Only in mmg3d4-new/build/sources/: dataff.h
-diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
---- mmg3d4/build/sources/inout.c	2011-05-12 17:30:16.000000000 +0200
-+++ mmg3d4-new/build/sources/inout.c	2011-09-01 19:22:06.000000000 +0200
+diff -ur mmg3d4/build/sources/analarcutting.c mmg3d4-new/build/sources/analarcutting.c
+--- mmg3d4/build/sources/analarcutting.c	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/analarcutting.c	2012-10-03 16:58:54.000000000 +0200
+@@ -307,7 +307,7 @@
+   printf("6 cut : %8d\n",n6);
+   printf("---------------------------\n"); */  
+ 	if ( !na )  return(na);
+-#warning check memory allocation
++	// #warning check memory allocation
+   
+   //printf("%d cut init --- nb tet %d\n",na,mesh->ne);
+   return(na);
+diff -ur mmg3d4/build/sources/cutelt.c mmg3d4-new/build/sources/cutelt.c
+--- mmg3d4/build/sources/cutelt.c	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/cutelt.c	2012-10-03 18:17:55.000000000 +0200
+@@ -305,7 +305,7 @@
+ // 	}
+ // 	return(1);
+ // }  
+-int ddebug=0;
++extern int ddebug;
+ 
+ int MMG_decouphex(pMesh mesh, pHedge hed,int k,int* p,int ref) {
+ 	pTetra  pt;
+@@ -1100,4 +1100,4 @@
+ 		  break;
+ 	}	  	
+ 	return(1);
+-}
+\ No newline at end of file
++}
+diff -ur mmg3d4/build/sources/dataff.h mmg3d4-new/build/sources/dataff.h
+--- mmg3d4/build/sources/dataff.h	2012-10-03 18:11:45.000000000 +0200
++++ mmg3d4-new/build/sources/dataff.h	2012-10-03 18:00:01.000000000 +0200
+@@ -0,0 +1,60 @@
++/*
++ *  dataff.h
++ *  
++ *
++ *  Created by Fr\E9d\E9ric Hecht on 19/06/11.
++ *  Copyright 2011 UPMC. All rights reserved.
++ *
++ 
++ */
++
++enum ff_data_type {
++    ff_id_vertex =0,
++    ff_id_seg =1,
++    ff_id_tria=2,
++    ff_id_tet =3,
++
++    ff_id_prism =5,
++    ff_id_hex =6,
++    ff_id_quad =7,
++    ff_id_corner=8
++} ;
++
++
++typedef struct  DataFF 
++{
++  const char  * meshname;
++  const char  * movename;
++  const char  * solname;
++  int imprim;
++  int memory;
++  int   np; //  nb of vertices  in/out 
++  int   typesol; //  1 iso , 6 : m11; m12,m13,m22,m23,m33
++  void * mesh;
++  double * sol; /* metric :size typesol*np  */
++  double * mov; /* displac. size :3*np  */ 
++  void (*set_mesh)(void *dataff,int *data,int ldata);
++  void (*end_mesh)(void *dataff);
++  void (*set_v)(void *dataff,int i,double *xyz,int lab);
++  void (*set_elmt)(void *dataff,int ff_id,int i,int *k,int lab);
++  void (*get_mesh)(void *dataff,int *data,int ldata);
++  void (*get_v3)(void *dataff,int i,double *xyz,int *lab);
++  void (*get_elmt)(void *dataff,int ff_id,int i,int *k,int *lab);
++} DataFF;
++
++#ifdef __cplusplus
++extern "C" {
++#endif  
++    int mainmmg3d(int argc,char *argv[],DataFF *dataff); 
++
++#ifdef __cplusplus
++}
++#endif 
++/*
++ m11 = met[0] 
++ m12 = met[1] 
++ m13 = met[2] 
++ m22 = met[3]
++ m23 = met[4] 
++ m33 = met[5]  
++*/
+diff -ur mmg3d4/build/sources/delaunay.c mmg3d4-new/build/sources/delaunay.c
+--- mmg3d4/build/sources/delaunay.c	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/delaunay.c	2012-10-03 16:58:54.000000000 +0200
+@@ -728,7 +728,7 @@
+   if ( ppt->tag & M_UNUSED )  return(0);
+ 
+   tref = mesh->tetra[list->tetra[1]/6].ref;
+-#warning remove this test
++  // #warning remove this test
+   for (k=1; k<=lon; k++)
+     if(tref!=mesh->tetra[list->tetra[k]/6].ref) 
+        printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list->tetra[k]/6].ref,list->tetra[k]/6);
+diff -ur mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
+--- mmg3d4/build/sources/inout.c	2012-09-17 08:58:57.000000000 +0200
++++ mmg3d4-new/build/sources/inout.c	2012-10-03 17:04:44.000000000 +0200
 @@ -4,7 +4,7 @@
  Propriétaires :IPB - UPMC -INRIA.
  
@@ -415,19 +521,30 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
 -int MMG_loadMesh(pMesh mesh,char *filename) {  
 +int MMG_loadMesh(pMesh mesh,char *filename,void *dataff) {  
    FILE*            inm;
-   Hedge    				 hed,hed2;
-   pPoint       	   ppt;
-@@ -118,7 +501,8 @@
-  float            fc; 
-	double           volhex,volref;  
-	int iadr;
--  
-+  if(dataff) 
+   Hedge            hed,hed2;
+   pPoint           ppt;
+@@ -109,15 +496,17 @@
+   pHexa            ph,listhexa;
+   pTria            pt1;
+   int              k,dim,ref,bin,bpos,i,tmp;  
+-	int              *adjahex; 
++  int              *adjahex; 
+   long             posnp,posnt,posne,posnhex,posnpris,posncor,posned,posnq;
+   char            *ptr,data[128],chaine[128];
+   int              nhex,npris,netmp,ncor,ned,nq;
+   int              p0,p1,p2,p3,p4,p5,p6,p7;  
+   int              binch,bdim,iswp,nu1,nu2,nimp,ne,nbado;       
+   float            fc; 
+-	double           volhex,volref;  
+-	int              iadr,reorient;
++  double           volhex,volref;  
++  int              iadr,reorient;
++  if(dataff)
 +    return MMG_loadMeshff( mesh,filename,(DataFF*) dataff);
+   
  
    posnp = posnt = posne = posnhex = posnpris = 0;
-   netmp = ncor = ned = 0;
-@@ -322,7 +710,7 @@
+@@ -326,7 +715,7 @@
      fprintf(stdout,"  -- READING DATA FILE %s\n",data);
  
    if ( !mesh->np || !mesh->ne ) {
@@ -435,8 +552,8 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
 +    fprintf(stdout,"  ** MISSING DAT qqA\n");
      return(0);
    }
-   if ( !MMG_zaldy(mesh) )  return(0);
-@@ -563,7 +951,7 @@
+ 	if(abs(mesh->info.option)==10) { //allocation
+@@ -614,7 +1003,7 @@
  
  
  /* load solution (metric) */
@@ -445,7 +562,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
    FILE       *inm;   
    float       fsol;
    double      tmp;       
-@@ -571,6 +959,8 @@
+@@ -622,6 +1011,8 @@
    int         k,i,isol,type,bin,dim,btyp,bpos;
    long        posnp;
    char        *ptr,data[128],chaine[128];
@@ -454,7 +571,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
    
    posnp = 0; 
    bin   = 0;
-@@ -664,12 +1054,12 @@
+@@ -715,12 +1106,12 @@
      
    }       
    if ( !sol->np ) {
@@ -469,7 +586,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
      sol->np = 0;
      return(1);
    }
-@@ -680,7 +1070,7 @@
+@@ -731,7 +1122,7 @@
      fprintf(stdout,"  -- READING DATA FILE %s\n",data);
  
    if ( !sol->np ) {
@@ -478,7 +595,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
      return(0);
    }
    sol->npfixe = sol->np;
-@@ -731,7 +1121,7 @@
+@@ -782,7 +1173,7 @@
  }
  
  
@@ -487,7 +604,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
    FILE       *inm;   
    pDispl       pd;
    float       fsol;
-@@ -739,7 +1129,10 @@
+@@ -790,7 +1181,10 @@
    int         k,i,type,bin,dim,btyp,bpos,iadr;
    long        posnp;
    char        *ptr,data[128],chaine[128];
@@ -499,7 +616,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
    pd = mesh->disp;
    
    posnp = 0; 
-@@ -843,7 +1236,7 @@
+@@ -894,7 +1288,7 @@
    }
  
    if ( btyp != 2 ) {
@@ -508,7 +625,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
      return(0);
    }
  
-@@ -887,7 +1280,7 @@
+@@ -938,7 +1332,7 @@
  
  
  /* save mesh to disk */
@@ -517,7 +634,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
    FILE*        inm; 
  	Hedge				 hed;
    pPoint       ppt;
-@@ -896,6 +1289,9 @@
+@@ -947,6 +1341,9 @@
    int          i,k,np,ne,nc,ned,*cor,*ed,ref,bin,bpos;
    char        *ptr,data[128],chaine[128]; 
    int          binch,nu1,nu2;
@@ -527,7 +644,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
    mesh->ver = 2; //double precision
    bin = 0;
    strcpy(data,filename);
-@@ -1145,7 +1541,7 @@
+@@ -1202,7 +1599,7 @@
  }
  
  
@@ -536,7 +653,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
    FILE*        inm;
    pPoint       ppt;
    float        fsol;
-@@ -1153,6 +1549,8 @@
+@@ -1210,6 +1607,8 @@
    int          i,k,nbl,isol,bin,bpos,typ;
    char        *ptr,data[128],chaine[128]; 
    int          binch;
@@ -545,7 +662,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
  
    if ( !sol->np )  return(1);
    bin = 1;
-@@ -1224,7 +1622,7 @@
+@@ -1281,7 +1680,7 @@
  	  typ = 3;
      break;
    default:
@@ -554,7 +671,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
      return(0);
    }
  
-@@ -1301,7 +1699,7 @@
+@@ -1358,7 +1757,7 @@
  }
  
  /*save the node speed : coornew-coorold/dt*/
@@ -563,7 +680,7 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
    FILE*        inm;  
    pDispl        pd;
    pPoint       ppt;
-@@ -1309,6 +1707,8 @@
+@@ -1366,6 +1765,8 @@
    int          i,k,nbl,bin,bpos,typ;
    char        *ptr,data[128],chaine[128]; 
    unsigned char binch;
@@ -572,10 +689,10 @@ diff -u mmg3d4/build/sources/inout.c mmg3d4-new/build/sources/inout.c
  
    pd      = mesh->disp;
    pd->ver = 2;
-diff -u mmg3d4/build/sources/libmmg3d.h mmg3d4-new/build/sources/libmmg3d.h
---- mmg3d4/build/sources/libmmg3d.h	2011-04-14 18:23:46.000000000 +0200
-+++ mmg3d4-new/build/sources/libmmg3d.h	2011-06-22 11:54:38.000000000 +0200
-@@ -111,12 +111,12 @@
+diff -ur mmg3d4/build/sources/libmmg3d.h mmg3d4-new/build/sources/libmmg3d.h
+--- mmg3d4/build/sources/libmmg3d.h	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/libmmg3d.h	2012-10-03 16:58:54.000000000 +0200
+@@ -118,12 +118,12 @@
  typedef MMG_Sol * MMG_pSol;
  
  /* inout */
@@ -594,10 +711,10 @@ diff -u mmg3d4/build/sources/libmmg3d.h mmg3d4-new/build/sources/libmmg3d.h
  
  #ifdef  __cplusplus
  namespace mmg3d{
-diff -u mmg3d4/build/sources/mesh.h mmg3d4-new/build/sources/mesh.h
---- mmg3d4/build/sources/mesh.h	2011-04-14 18:05:40.000000000 +0200
-+++ mmg3d4-new/build/sources/mesh.h	2011-07-11 10:29:12.000000000 +0200
-@@ -394,17 +394,17 @@
+diff -ur mmg3d4/build/sources/mesh.h mmg3d4-new/build/sources/mesh.h
+--- mmg3d4/build/sources/mesh.h	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/mesh.h	2012-10-03 16:58:54.000000000 +0200
+@@ -401,17 +401,17 @@
  
  /* function pointers */
  typedef int (*MMG_Swap)(pMesh ,pSol ,pList );
@@ -626,237 +743,10 @@ diff -u mmg3d4/build/sources/mesh.h mmg3d4-new/build/sources/mesh.h
  
  
  #endif
-diff -u mmg3d4/build/sources/mmg3d4.c mmg3d4-new/build/sources/mmg3d4.c
---- mmg3d4/build/sources/mmg3d4.c	2011-04-14 18:05:12.000000000 +0200
-+++ mmg3d4-new/build/sources/mmg3d4.c	2011-07-07 11:23:09.000000000 +0200
-@@ -84,9 +84,9 @@
-     if(it && !(it%2) ) {
-       bucket = MMG_newBucket(mesh,M_MAX(mesh->info.bucksiz,BUCKSIZ));
-       if ( !bucket )  return(0);
--			MMG_saveMesh(mesh,"avtana.mesh");
-+			MMG_saveMesh(mesh,"avtana.mesh",0);
-       MMG_analar(mesh,sol,bucket,&na,&nd,&nf,alert);      
--			MMG_saveMesh(mesh,"apresana.mesh");
-+			MMG_saveMesh(mesh,"apresana.mesh",0);
-       if ( abs(mesh->info.imprim) > 5 ) 
-         fprintf(stdout,"     %7d INSERTED  %7d REMOVED   %7d FILTERED\n",na,nd,nf);  
- 
-@@ -118,8 +118,8 @@
-       if ( *alert ) {
-         fprintf(stdout," \n\n ** UNABLE TO CUT (analarcutting)\n");
-         fprintf(stdout," ** RETRY WITH -m > %6d \n\n",mesh->info.memory);
--        MMG_saveMesh(mesh,"crash.mesh");
--        MMG_saveSol(mesh,sol,"crash.sol"); 
-+        MMG_saveMesh(mesh,"crash.mesh",0);
-+        MMG_saveSol(mesh,sol,"crash.sol",0); 
-         exit(0);
-       }
-       M_free(hash.item);      
-@@ -136,7 +136,7 @@
-     }
-     // printf("chkmsh\n");   
- 		MMG_unscaleMesh(mesh,sol);
--    MMG_saveMesh(mesh,"chk.mesh");
-+    MMG_saveMesh(mesh,"chk.mesh",0);
-     //MMG_chkmsh(mesh,1,-1);
- 		//if(it==1)exit(0);		
-      /* delaunization */ 
-diff -u mmg3d4/build/sources/mmg3dConfig.h mmg3d4-new/build/sources/mmg3dConfig.h
---- mmg3d4/build/sources/mmg3dConfig.h	2011-06-30 14:09:37.000000000 +0200
-+++ mmg3d4-new/build/sources/mmg3dConfig.h	2011-06-16 09:50:58.000000000 +0200
-@@ -2,4 +2,4 @@
- #define Tutorial_VERSION_MAJOR 
- #define Tutorial_VERSION_MINOR 
- 
--#define USE_SCOTCH
-+/* #undef USE_SCOTCH */
-diff -u mmg3d4/build/sources/mmg3dlib/mmg3dlib.c mmg3d4-new/build/sources/mmg3dlib/mmg3dlib.c
---- mmg3d4/build/sources/mmg3dlib/mmg3dlib.c	2011-04-15 15:32:59.000000000 +0200
-+++ mmg3d4-new/build/sources/mmg3dlib/mmg3dlib.c	2011-07-07 11:23:59.000000000 +0200
-@@ -332,7 +332,7 @@
-   if ( !MMG_hashTetra(mesh) )    return(1);
-   if ( !MMG_markBdry(mesh) )     return(1);
-   if (abs(mesh->info.option)==10) {
--    MMG_saveMesh(mesh,"tetra.mesh");
-+    MMG_saveMesh(mesh,"tetra.mesh",0);
-     return(0);
-   }           
-   if ( !sol->np) {
-@@ -378,7 +378,7 @@
-     if ( abs(info->option) == 9 ) {  
-       if(!MMG_mmg3d9(mesh,sol,&alert)) {
-         if ( !MMG_unscaleMesh(mesh,sol) )  return(1);
--        MMG_saveMesh(mesh,"errormoving.mesh");
-+        MMG_saveMesh(mesh,"errormoving.mesh",0);
- 	      //MMG_saveSol(mesh,sol,mesh->outf);
- 	      return(1);
-       }
-diff -u mmg3d4/build/sources/sproto.h mmg3d4-new/build/sources/sproto.h
---- mmg3d4/build/sources/sproto.h	2011-04-14 18:08:32.000000000 +0200
-+++ mmg3d4-new/build/sources/sproto.h	2011-06-22 18:36:45.000000000 +0200
-@@ -67,13 +67,13 @@
- int  MMG_inEdge(pHedge ,int *,int *,int *);
- int  MMG_markBdry(pMesh );
- 
--/* inout */
--int  MMG_loadMesh(pMesh ,char *);
--int  MMG_loadSol(pSol ,char *,int );
--int  MMG_loadVect(pMesh ,char *,int );
--int  MMG_saveMesh(pMesh ,char *);
--int  MMG_saveSol(pMesh ,pSol ,char *);
--int  MMG_saveVect(pMesh ,char *);
-+/* inout add param  F.H. june 2011 (dataff) */
-+int  MMG_loadMesh(pMesh ,char *,void *);
-+int  MMG_loadSol(pSol ,char *,int ,void *);
-+int  MMG_loadVect(pMesh ,char *,int ,void *);
-+int  MMG_saveMesh(pMesh ,char *,void *);
-+int  MMG_saveSol(pMesh ,pSol ,char *,void *);
-+int  MMG_saveVect(pMesh ,char *,void *);
- 
- int  MMG_loctet(pMesh ,int ,int ,double *,double *);
- int  MMG_computeMetric(pMesh ,pSol ,int ,double * );
-diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
---- mmg3d4/build/sources/swapar.c	2011-04-14 18:08:49.000000000 +0200
-+++ mmg3d4-new/build/sources/swapar.c	2011-07-07 11:24:44.000000000 +0200
-@@ -77,7 +77,7 @@
-   }
- 
-   if ( ncas && MMG_swpptr ) {
--		if(ddebug) MMG_saveMesh(mesh,"avt.mesh");
-+		if(ddebug) MMG_saveMesh(mesh,"avt.mesh",0);
-     for (l=1; l<=lon; l++) {
-       jel = list->tetra[l]/6;
-       pt  = &mesh->tetra[jel]; 
-@@ -97,7 +97,7 @@
-       if ( pt->qual >= declic )  MMG_kiuput(q,jel);
-       for (i=0; i<4; i++)  mesh->point[pt->v[i]].flag = mesh->flag; 
-     }
--		if(ddebug) MMG_saveMesh(mesh,"sw.mesh");
-+		if(ddebug) MMG_saveMesh(mesh,"sw.mesh",0);
-     return(1);
-   }
- 
---- mmg3d4/build/sources/dataff.h	2011-09-01 22:11:53.000000000 +0200
-+++ new-mmg3d4/build/sources/dataff.h	2011-09-01 12:39:39.000000000 +0200
-@@ -0,0 +1,60 @@
-+/*
-+ *  dataff.h
-+ *  
-+ *
-+ *  Created by Fr\E9d\E9ric Hecht on 19/06/11.
-+ *  Copyright 2011 UPMC. All rights reserved.
-+ *
-+ 
-+ */
-+
-+enum ff_data_type {
-+    ff_id_vertex =0,
-+    ff_id_seg =1,
-+    ff_id_tria=2,
-+    ff_id_tet =3,
-+
-+    ff_id_prism =5,
-+    ff_id_hex =6,
-+    ff_id_quad =7,
-+    ff_id_corner=8
-+} ;
-+
-+
-+typedef struct  DataFF 
-+{
-+  const char  * meshname;
-+  const char  * movename;
-+  const char  * solname;
-+  int imprim;
-+  int memory;
-+  int   np; //  nb of vertices  in/out 
-+  int   typesol; //  1 iso , 6 : m11; m12,m13,m22,m23,m33
-+  void * mesh;
-+  double * sol; /* metric :size typesol*np  */
-+  double * mov; /* displac. size :3*np  */ 
-+  void (*set_mesh)(void *dataff,int *data,int ldata);
-+  void (*end_mesh)(void *dataff);
-+  void (*set_v)(void *dataff,int i,double *xyz,int lab);
-+  void (*set_elmt)(void *dataff,int ff_id,int i,int *k,int lab);
-+  void (*get_mesh)(void *dataff,int *data,int ldata);
-+  void (*get_v3)(void *dataff,int i,double *xyz,int *lab);
-+  void (*get_elmt)(void *dataff,int ff_id,int i,int *k,int *lab);
-+} DataFF;
-+
-+#ifdef __cplusplus
-+extern "C" {
-+#endif  
-+    int mainmmg3d(int argc,char *argv[],DataFF *dataff); 
-+
-+#ifdef __cplusplus
-+}
-+#endif 
-+/*
-+ m11 = met[0] 
-+ m12 = met[1] 
-+ m13 = met[2] 
-+ m22 = met[3]
-+ m23 = met[4] 
-+ m33 = met[5]  
-+*/
---- mmg3d4/build/sources/quality.c	2011-04-14 18:08:09.000000000 +0200
-+++ new-mmg3d4/build/sources/quality.c	2011-11-15 17:24:57.000000000 +0100
-@@ -46,7 +46,7 @@
- #include "mesh.h"  
- 
- 
--double MMG_rao(pMesh mesh,int k,int inm);
-+double MMG_rao(pMesh mesh,int k,FILE* inm) ;
- double MMG_caltetrao(pMesh mesh,pSol sol,int iel) {
- 	return(MMG_rao(mesh,iel,0));
- }
---- mmg3d4/build/sources/delaunay.c	2011-04-14 18:06:36.000000000 +0200
-+++ new-mmg3d4/build/sources/delaunay.c	2011-11-15 17:31:31.000000000 +0100
-@@ -728,7 +728,7 @@
-   if ( ppt->tag & M_UNUSED )  return(0);
- 
-   tref = mesh->tetra[list->tetra[1]/6].ref;
--#warning remove this test
-+  // #warning remove this test
-   for (k=1; k<=lon; k++)
-     if(tref!=mesh->tetra[list->tetra[k]/6].ref) 
-        printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list->tetra[k]/6].ref,list->tetra[k]/6);
---- mmg3d4/build/sources/analarcutting.c	2011-04-14 18:04:05.000000000 +0200
-+++ new-mmg3d4/build/sources/analarcutting.c	2011-11-15 17:31:01.000000000 +0100
-@@ -307,7 +307,7 @@
-   printf("6 cut : %8d\n",n6);
-   printf("---------------------------\n"); */  
- 	if ( !na )  return(na);
--#warning check memory allocation
-+	// #warning check memory allocation
-   
-   //printf("%d cut init --- nb tet %d\n",na,mesh->ne);
-   return(na);
---- mmg3d4/build/sources/pattern.c	2011-11-15 17:33:06.000000000 +0100
-+++ new-mmg3d4/build/sources/pattern.c	2011-11-15 17:23:13.000000000 +0100
-@@ -47,7 +47,7 @@
- 
- 
- unsigned char MMG_arfa[3][4] = { {2,0,1,3}, {1,2,0,3}, {0,1,2,3} }; 
--extern int MMG_permar[10][4];
-+extern int MMG_permar[12][4];
- extern int MMG_pointar[64][2];
- extern int ddebug;
- //insert ip on ia-ib
---- mmg3d4/build/sources/optlen.c	2011-04-14 18:07:52.000000000 +0200
-+++ new-mmg3d4/build/sources/optlen.c	2011-11-15 17:39:10.000000000 +0100
-@@ -48,7 +48,7 @@
- #define  HQCOEF    0.9 
- #define  HCRIT     0.98
- 
--double MMG_rao(pMesh mesh,int k,int inm);
-+double MMG_rao(pMesh mesh,int k,FILE* );
- int MMG_optlen_ani(pMesh mesh,pSol sol,double declic,int base) {
-   pTetra    pt,pt1;
-   pPoint    ppa,ppb;
---- mmg3d4/build/sources/mmg3d4.c	2012-04-15 21:20:28.000000000 +0200
-+++ mmg3d4-v0/build/sources/mmg3d4.c	2012-04-15 21:18:37.000000000 +0200
-@@ -45,13 +45,13 @@
+diff -ur mmg3d4/build/sources/mmg3d4.c mmg3d4-new/build/sources/mmg3d4.c
+--- mmg3d4/build/sources/mmg3d4.c	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/mmg3d4.c	2012-10-03 17:22:27.000000000 +0200
+@@ -45,11 +45,11 @@
  ****************************************************************************/
  #include "mesh.h"
  
@@ -872,11 +762,91 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 +extern int MMG_nplen,MMG_npref,MMG_bouffe;
  
  int ddebug;
-
- int MMG_mmg3d4(pMesh mesh,pSol sol,int *alert) {
-   Hedge    hash;
---- mmg3d4/build/sources/mmg3dmain/mmg3d.c	2011-12-02 15:08:08.000000000 +0100
-+++ mmg3d4-new/build/sources/mmg3dmain/mmg3d.c	2012-04-20 16:47:08.000000000 +0200
+ 
+@@ -86,9 +86,9 @@
+     if(it && !(it%2) ) {
+       bucket = MMG_newBucket(mesh,M_MAX(mesh->info.bucksiz,BUCKSIZ));
+       if ( !bucket )  return(0);
+-			//MMG_saveMesh(mesh,"avtana.mesh");
++			//MMG_saveMesh(mesh,"avtana.mesh",0);
+       MMG_analar(mesh,sol,bucket,&na,&nd,&nf,alert);      
+-			//MMG_saveMesh(mesh,"apresana.mesh");
++			//MMG_saveMesh(mesh,"apresana.mesh",0);
+       if ( abs(mesh->info.imprim) > 5 ) 
+         fprintf(stdout,"     %7d INSERTED  %7d REMOVED   %7d FILTERED\n",na,nd,nf);  
+ 
+@@ -119,8 +119,8 @@
+       if ( *alert ) {
+         fprintf(stdout," \n\n ** UNABLE TO CUT (analarcutting)\n");
+         fprintf(stdout," ** RETRY WITH -m > %6d \n\n",mesh->info.memory);
+-        MMG_saveMesh(mesh,"crash.mesh");
+-        MMG_saveSol(mesh,sol,"crash.sol"); 
++        MMG_saveMesh(mesh,"crash.mesh",0);
++        MMG_saveSol(mesh,sol,"crash.sol",0); 
+         exit(0);
+       }
+       M_free(hash.item);        
+@@ -134,7 +134,7 @@
+     }
+     // printf("chkmsh\n");   
+ 		// MMG_unscaleMesh(mesh,sol);
+-		//     MMG_saveMesh(mesh,"chk.mesh");
++		//     MMG_saveMesh(mesh,"chk.mesh",0);
+     //MMG_chkmsh(mesh,1,-1);
+ 		//if(it==1)exit(0);		
+      /* delaunization */
+@@ -162,7 +162,7 @@
+   }
+ 
+ 	//return(1);
+-	//MMG_saveMesh(mesh,"aprescut.mesh");
++	//MMG_saveMesh(mesh,"aprescut.mesh",0);
+ 	fprintf(stdout,"    ---\n");
+   
+   /*analyze standard*/
+@@ -204,7 +204,7 @@
+       }
+       if ( na+nd && abs(mesh->info.imprim) > 3 )
+         fprintf(stdout,"     %7d INSERTED  %7d REMOVED   %7d FILTERED\n",na,nd,nf);    
+-			// MMG_saveMesh(mesh,"chk.mesh");
++			// MMG_saveMesh(mesh,"chk.mesh",0);
+ 			// //if(it==1) exit(0);
+     }
+     while ( na+nd > 0 && ++it < maxtou );
+diff -ur mmg3d4/build/sources/mmg3dConfig.h mmg3d4-new/build/sources/mmg3dConfig.h
+--- mmg3d4/build/sources/mmg3dConfig.h	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/mmg3dConfig.h	2012-10-03 16:58:54.000000000 +0200
+@@ -2,4 +2,4 @@
+ #define Tutorial_VERSION_MAJOR 
+ #define Tutorial_VERSION_MINOR 
+ 
+-#define USE_SCOTCH
++/* #undef USE_SCOTCH */
+diff -ur mmg3d4/build/sources/mmg3dlib/mmg3dlib.c mmg3d4-new/build/sources/mmg3dlib/mmg3dlib.c
+--- mmg3d4/build/sources/mmg3dlib/mmg3dlib.c	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/mmg3dlib/mmg3dlib.c	2012-10-03 16:58:54.000000000 +0200
+@@ -385,7 +385,7 @@
+   if ( !MMG_hashTetra(mesh) )    return(1);
+   if ( !MMG_markBdry(mesh) )     return(1);
+   if (abs(mesh->info.option)==10) {
+-    MMG_saveMesh(mesh,"tetra.mesh");
++    MMG_saveMesh(mesh,"tetra.mesh",0);
+     return(0);
+   }           
+   if ( !sol->np) {
+@@ -431,7 +431,7 @@
+     if ( abs(info->option) == 9 ) {  
+       if(!MMG_mmg3d9(mesh,sol,&alert)) {
+         if ( !MMG_unscaleMesh(mesh,sol) )  return(1);
+-        MMG_saveMesh(mesh,"errormoving.mesh");
++        MMG_saveMesh(mesh,"errormoving.mesh",0);
+ 	      //MMG_saveSol(mesh,sol,mesh->outf);
+ 	      return(1);
+       }
+Only in mmg3d4-new/build/sources/mmg3dlib: mmg3dlib.c.orig
+diff -ur mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3dmain/mmg3d.c
+--- mmg3d4/build/sources/mmg3dmain/mmg3d.c	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/mmg3dmain/mmg3d.c	2012-10-03 17:47:33.000000000 +0200
 @@ -46,7 +46,7 @@
  #include "compil.date"
  #include "mesh.h"
@@ -886,7 +856,7 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  TIM_mytime         MMG_ctim[TIMEMAX];
  short	             MMG_imprim;
  
-@@ -395,6 +395,7 @@
+@@ -397,6 +397,7 @@
  	    100.*ttot/ttim[0],call[0],ttot/(float)call[0]);
    }
    fprintf(stdout,"\n   ELAPSED TIME  %.2f SEC.  (%.2f)\n",ttim[0],ttot);
@@ -894,25 +864,25 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  }
  
  
-@@ -432,13 +433,14 @@
+@@ -433,14 +434,13 @@
+   return(1);
  }
  
- 
+-
 -int main(int argc,char *argv[]) {
-+int mainmmg3d(int argc,char *argv[],DataFF *dataff) {
-+    
++int mainmmg3d(int argc,char *argv[],DataFF *dataff) { 
    pMesh      	mesh;
    pSol       	sol;
    Info     	*info;
    int        	alert;
 -int k,iadr,i,jj,kk,ii;
--double	lambda[3],v[3][3],*mold,*m;
+-double	lambda[3],v[3][3],*mold,*m,declic,maxLES,calLES;
 +  int k,iadr,i,jj,kk,ii;
-+  double	lambda[3],v[3][3],*mold,*m;
- 
++  double	lambda[3],v[3][3],*mold,*m,declic,maxLES,calLES;
    fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",M_VER,M_REL);
    fprintf(stdout,"     Copyright (c) LJLL/IMB, 2010\n");
-@@ -450,7 +452,7 @@
+   fprintf(stdout,"    %s\n",COMPIL);
+@@ -451,7 +451,7 @@
    signal(SIGSEGV,excfun);
    signal(SIGTERM,excfun);
    signal(SIGINT,excfun);
@@ -921,39 +891,40 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  
    TIM_tminit(MMG_ctim,TIMEMAX);
    TIM_chrono(ON,&MMG_ctim[0]);
-@@ -477,15 +479,27 @@
+@@ -478,16 +478,28 @@
    info->noinsert = 0; 
    info->dt       = 1.;
    info->bdry     = 0;
+-	info->optles   = 0;
 -
-+  /* modif F. Hecht ..*/
-+  if(dataff)
-+    {
-+      mesh->name=dataff->meshname;
-+      mesh->move=dataff->movename;
-+      sol->name=dataff->solname;
-+      /*      printf(" #### %p %p %p --- \n",mesh->name,mesh->move,sol->name); */
-+      info->imprim=dataff->imprim;
-+      info->memory=dataff->memory;
-+    }
-+  /* end modf */ 
++  info->optles   = 0;
++   /* modif F. Hecht ..*/
++   if(dataff)
++     {
++       mesh->name=dataff->meshname;
++       mesh->move=dataff->movename;
++       sol->name=dataff->solname;
++       /*      printf(" #### %p %p %p --- \n",mesh->name,mesh->move,sol->name); */
++       info->imprim=dataff->imprim;
++       info->memory=dataff->memory;
++     }
++   /* end modf */ 
    if ( !parsar(argc,argv,mesh,sol) )  return(1);
    MMG_imprim = info->imprim;
    
    /* load data */
    if ( MMG_imprim )   fprintf(stdout,"\n  -- INPUT DATA\n");
--  TIM_chrono(ON,&MMG_ctim[1]);
+   TIM_chrono(ON,&MMG_ctim[1]);
 -  if ( !MMG_loadMesh(mesh,mesh->name) )  return(1); 
 -  if ( !MMG_loadSol(sol,sol->name,mesh->npmax) )  return(1);
-+  TIM_chrono(ON,&MMG_ctim[1]); 
 +  /* modif FH. for interface with ff++ add dataff param     */
-+  if ( !MMG_loadMesh(mesh,mesh->name,dataff ))  return(1); 
++  if ( !MMG_loadMesh(mesh,mesh->name,dataff) )  return(1); 
 +  if ( !MMG_loadSol(sol,sol->name,mesh->npmax,dataff ) )  return(1);
-+ 
++
    if ( sol->np && sol->np != mesh->np ) {
      fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
      sol->np = 0;
-@@ -493,7 +507,7 @@
+@@ -495,7 +507,7 @@
  
    if ( !parsop(mesh) )  return(1);
  
@@ -961,8 +932,8 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 +  if ( abs(info->option) == 9 && !MMG_loadVect(mesh,mesh->move,mesh->np,dataff) )  return(0);
  
    if ( !MMG_setfunc(sol->offset) ) return(1);
-   if ( !MMG_scaleMesh(mesh,sol) )  return(1);
-@@ -523,7 +537,7 @@
+   if ( !MMG_scaleMesh(mesh,sol) )  return(1);   
+@@ -527,7 +539,7 @@
    if ( !MMG_hashTetra(mesh) )    return(1);
    if ( !MMG_markBdry(mesh) )     return(1);
    if (abs(mesh->info.option)==10) {
@@ -971,7 +942,7 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      return(0);
    }           
  
-@@ -566,8 +580,8 @@
+@@ -571,8 +583,8 @@
      if ( abs(info->option) == 9 ) {
        if(!MMG_mmg3d9(mesh,sol,&alert)) {
          if ( !MMG_unscaleMesh(mesh,sol) )  return(1);
@@ -982,7 +953,7 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  	    return(1);
        }
        /*puts("appel 1");
-@@ -669,18 +683,18 @@
+@@ -680,18 +692,18 @@
      fprintf(stdout,"\n  ## WARNING: INCOMPLETE MESH  %d , %d\n",
              mesh->np,mesh->ne);
  
@@ -1007,7 +978,7 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  
    /* free mem */
    M_free(mesh->point);
-@@ -697,5 +711,24 @@
+@@ -708,5 +720,24 @@
  
    if ( MMG_imprim < -4 || info->ddebug )  M_memDump();
    M_free(mesh);
@@ -1032,8 +1003,46 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 + int    (*MMG_interp)(double *,double *,double *,double );
 + int    (*MMG_optlentet)(pMesh ,pSol ,pQueue ,double ,int ,int );
 + int    (*MMG_movevertex)(pMesh ,pSol ,int ,int );
---- mm3d4-old/build/sources/ratio.c	2012-09-04 09:38:10.000000000 +0200
-+++ mmg3d4/build/sources/ratio.c	2012-09-04 09:40:22.000000000 +0200
+Only in mmg3d4-new/build/sources/mmg3dmain: mmg3d.c.orig
+diff -ur mmg3d4/build/sources/optlen.c mmg3d4-new/build/sources/optlen.c
+--- mmg3d4/build/sources/optlen.c	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/optlen.c	2012-10-03 16:58:54.000000000 +0200
+@@ -48,7 +48,7 @@
+ #define  HQCOEF    0.9 
+ #define  HCRIT     0.98
+ 
+-double MMG_rao(pMesh mesh,int k,int inm);
++double MMG_rao(pMesh mesh,int k,FILE* );
+ int MMG_optlen_ani(pMesh mesh,pSol sol,double declic,int base) {
+   pTetra    pt,pt1;
+   pPoint    ppa,ppb;
+diff -ur mmg3d4/build/sources/pattern.c mmg3d4-new/build/sources/pattern.c
+--- mmg3d4/build/sources/pattern.c	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/pattern.c	2012-10-03 16:58:54.000000000 +0200
+@@ -47,7 +47,7 @@
+ 
+ 
+ unsigned char MMG_arfa[3][4] = { {2,0,1,3}, {1,2,0,3}, {0,1,2,3} }; 
+-extern int MMG_permar[10][4];
++extern int MMG_permar[12][4];
+ extern int MMG_pointar[64][2];
+ extern int ddebug;
+ //insert ip on ia-ib
+diff -ur mmg3d4/build/sources/quality.c mmg3d4-new/build/sources/quality.c
+--- mmg3d4/build/sources/quality.c	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/quality.c	2012-10-03 16:58:54.000000000 +0200
+@@ -46,7 +46,7 @@
+ #include "mesh.h"  
+ 
+ 
+-double MMG_rao(pMesh mesh,int k,int inm);
++double MMG_rao(pMesh mesh,int k,FILE* inm) ;
+ double MMG_caltetrao(pMesh mesh,pSol sol,int iel) {
+ 	return(MMG_rao(mesh,iel,0));
+ }
+diff -ur mmg3d4/build/sources/ratio.c mmg3d4-new/build/sources/ratio.c
+--- mmg3d4/build/sources/ratio.c	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/ratio.c	2012-10-03 16:58:54.000000000 +0200
 @@ -365,7 +365,7 @@
    fprintf(stdout,"           ELEMENT   %d (%d)   %d %d %d %d\n",
  	  iel,ielreal,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
@@ -1043,3 +1052,48 @@ diff -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  
    fprintf(stdout,"\n     HISTOGRAMM\n");
    for (k=1; k<9; k++) {
+diff -ur mmg3d4/build/sources/sproto.h mmg3d4-new/build/sources/sproto.h
+--- mmg3d4/build/sources/sproto.h	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/sproto.h	2012-10-03 16:58:54.000000000 +0200
+@@ -67,13 +67,13 @@
+ int  MMG_inEdge(pHedge ,int *,int *,int *);
+ int  MMG_markBdry(pMesh );
+ 
+-/* inout */
+-int  MMG_loadMesh(pMesh ,char *);
+-int  MMG_loadSol(pSol ,char *,int );
+-int  MMG_loadVect(pMesh ,char *,int );
+-int  MMG_saveMesh(pMesh ,char *);
+-int  MMG_saveSol(pMesh ,pSol ,char *);
+-int  MMG_saveVect(pMesh ,char *);
++/* inout add param  F.H. june 2011 (dataff) */
++int  MMG_loadMesh(pMesh ,char *,void *);
++int  MMG_loadSol(pSol ,char *,int ,void *);
++int  MMG_loadVect(pMesh ,char *,int ,void *);
++int  MMG_saveMesh(pMesh ,char *,void *);
++int  MMG_saveSol(pMesh ,pSol ,char *,void *);
++int  MMG_saveVect(pMesh ,char *,void *);
+ 
+ int  MMG_loctet(pMesh ,int ,int ,double *,double *);
+ int  MMG_computeMetric(pMesh ,pSol ,int ,double * );
+diff -ur mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
+--- mmg3d4/build/sources/swapar.c	2012-08-29 11:48:41.000000000 +0200
++++ mmg3d4-new/build/sources/swapar.c	2012-10-03 17:23:26.000000000 +0200
+@@ -76,7 +76,7 @@
+   }
+ 	if(ddebug) printf("on fait swap %d\n",ncas);
+   if ( ncas && MMG_swpptr ) {
+-		if(ddebug) MMG_saveMesh(mesh,"avt.mesh");
++		if(ddebug) MMG_saveMesh(mesh,"avt.mesh",0);
+     for (l=1; l<=lon; l++) {
+       jel = list->tetra[l]/6;
+       pt  = &mesh->tetra[jel]; 
+@@ -98,7 +98,7 @@
+       for (i=0; i<4; i++)  mesh->point[pt->v[i]].flag = mesh->flag;		 
+ 
+    }
+-		if(ddebug) {MMG_saveMesh(mesh,"sw.mesh");    exit(0);}
++    if(ddebug) {MMG_saveMesh(mesh,"sw.mesh",0);    exit(0);}
+     return(1);
+   }
+ 
