@@ -187,8 +187,8 @@ case "$WIN32$uu" in
 	WMPI_LIB=''
         b="$bin"
         LIBS=" '$b/libff.dll' $LIBS $DLL"
-        SHARED="-shared --unresolved-symbols=ignore-all -Wl,--enable-auto-import"
-        FLAGS='  -mno-cygwin '
+        SHARED="-shared  -Wl,--enable-auto-import" #--unresolved-symbols=ignore-all
+        FLAGS= # '  -mno-cygwin '
         SUF=dll;;
     win32-cygwin-version)
         echo " cygwin-version "
