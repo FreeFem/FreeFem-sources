@@ -88,9 +88,9 @@ namespace ffapi{
   std::istream *cin(){return &std::cin;}
   std::ostream *cout(){return &std::cout;}
   std::ostream *cerr(){return &std::cerr;}
-  FILE *stdout(){return ::stdout; };
-  FILE *stderr(){return ::stderr;};
-  FILE *stdin(){return ::stdin;};
+  FILE *ffstdout(){return stdout; };
+  FILE *ffstderr(){return stderr;};
+  FILE *ffstdin(){return stdin;};
 
 
   void newplot(){
