@@ -310,11 +310,11 @@ public:
     id.comm_fortran= (MUMPS_INT) MPI_Comm_c2f( comm );
     //id.comm_fortran= (F_INT) comm;
 
-    if(verbosity) cout << "init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
+    if(verbosity>2) cout << " MUMPS_FreeFem init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
 
     dmumps_c(&id);
 
-    if(verbosity) cout << "fin init parameter" << endl; 
+    if(verbosity>10) cout << "fin init parameter" << endl; 
 
     /* set parameter of mumps */
     if( !(param_int == NULL) || !(param_double == NULL) ){
@@ -348,6 +348,7 @@ public:
       }
       else{
 	// parameter by default
+	if(verbosity>10) 
 	cout << "default parameter" << endl;
 	id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
     }
@@ -1317,7 +1318,7 @@ public:
   }
 
   ~dSolveMUMPSmpi() { 
-    if(verbosity)
+    if(verbosity>10)
       cout << "~SolveMUMPS S:" << endl;
     
      id.job=JOB_END; 
