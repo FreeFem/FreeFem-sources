@@ -11,7 +11,7 @@ extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
 extern const char *  prognamearg;
 extern const char *  edpfilenamearg;
 extern bool  waitatend;
-extern bool  noconsoleatend;
+extern bool  consoleatend;
 extern bool echo_edp;
 extern bool 	  NoGraphicWindow;
 
