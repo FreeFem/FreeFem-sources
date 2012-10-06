@@ -29,7 +29,7 @@ FAIRE: $(SRCDIR)/FAIT
 Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
 	../../config.status  --file="Makefile.inc:Makefile-scotch.inc"
 	case `uname` in *CYGWIN*)  cp Makefile.inc Makefile.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.inn > Makefile.inc; rm Makefile.inn ;; esac 
-	case `uname` in *CYGWIN*|*MINGW*)  cp Makefile.inc Makefile.inn; sed "s/-DCOMMON_RANDOM_FIXED_SEED/-DCOMMON_RANDOM_RAND -DCOMMON_RANDOM_FIXED_SEED -D'pipe(pfds)=_pipe(pfds,1024,0x8000)'/" <Makefile.inn > Makefile.inc; rm Makefile.inn ;; esac 
+	case `uname` in *CYGWIN*|*MINGW*)  cp Makefile.inc Makefile.inn; sed -e "s/-DCOMMON_TIMING_OLD//" -e "s/-DCOMMON_RANDOM_FIXED_SEED/-DCOMMON_RANDOM_RAND  -DCOMMON_RANDOM_FIXED_SEED -D'pipe(pfds)=_pipe(pfds,1024,0x8000)'/" <Makefile.inn > Makefile.inc; rm Makefile.inn ;; esac 
 
 $(SRCDIR)/FAIT: $(SRCDIR)
 	cp Makefile.inc $(SRCDIR)/src/
