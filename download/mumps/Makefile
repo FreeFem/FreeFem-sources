@@ -31,7 +31,7 @@ install: $(SRCDIR)/FAIT
 WHERE: 
 	if [ -f $(SRCDIR)/FAIT  ] ;then \
 	$(MAKE) install ; \
-	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM   >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
+	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM  -lpthread  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
 	echo mumps INCLUDE -I@DIR@/include  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumps ;\
 	fi
 
@@ -47,7 +47,7 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-tar
 
 $(SRCDIR)/tag-tar:$(PACKAGE1)
 	tar xvzf $(PACKAGE1)
-#	patch -d MUMPS_4.9.2   -p 1    <MUMPS_4.9.2.patch
+	patch -d MUMPS_$(VERSION)   -p 1    <MUMPS_$(VERSION).patch
 	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE1):
