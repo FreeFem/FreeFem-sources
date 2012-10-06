@@ -146,6 +146,7 @@ void myexit(int err) {
 
 const char * edpfilenamearg=0;	 	
 bool  waitatend=false;
+bool  consoleatend=false;
 
 #ifdef FREEFEM
 #include <fstream.h>
@@ -177,7 +178,7 @@ void doatexitff()
 {
 #ifdef WIN32
   bool err=true;
-  if(edpfilenamearg)
+  if(edpfilenamearg && consoleatend)
 	{
 	cout << " try getConsole " << edpfilenamearg << endl; 
 	string fn = edpfilenamearg;
