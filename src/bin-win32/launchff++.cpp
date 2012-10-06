@@ -37,7 +37,7 @@ int main(int argc,const char **argv)
      _chdir(dir);
      delete [] dir;
    }
-   cmd += " -wait";
+   cmd += " -wait -log";
    //cout << "exec " << cmd << endl;
    int ret= system(cmd.c_str());
    return ret;
