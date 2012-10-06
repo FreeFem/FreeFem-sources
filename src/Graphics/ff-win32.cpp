@@ -39,6 +39,7 @@ bool GetConsoleBuff(const string &edpname)
 {
   CONSOLE_SCREEN_BUFFER_INFO csbi; //* to get buffer info
   HANDLE hConOut= GetStdHandle(STD_OUTPUT_HANDLE);
+  if( hConOut == 0) return false ;  
   GetConsoleScreenBufferInfo(hConOut, &csbi);
   
   COORD coordLine = {0,0};

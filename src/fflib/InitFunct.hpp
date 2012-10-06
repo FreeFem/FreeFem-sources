@@ -45,9 +45,9 @@ class  addingInitFunct {  public:
     if( so &&  cout.rdbuf() != so ) cout.rdbuf(so);	\
     if( si &&  cin.rdbuf() != si ) cin.rdbuf(si);	\
     if( se &&  cerr.rdbuf() != se ) cerr.rdbuf(se);	\
-    stdout = ffapi::stdout();\
-    stderr = ffapi::stderr();\
-    stdin = ffapi::stdin();\
+    stdout = ffapi::ffstdout();\
+    stderr = ffapi::ffstderr();\
+    stdin = ffapi::ffstdin();\
 } 
 
 

@@ -71,6 +71,7 @@ WHERE:
 FAIRE: mmg3d4/FAIT-4 install-4
 
 tag-tar: $(PACKAGE)
+	-rm -rf mmg3d4
 	if tar tfz $(PACKAGE)  mmg3d4/build/sources/mmg3d.c 2>/dev/null  1>/dev/null  ;\
 	 then  rm $(PACKAGE);   $(MAKe) $(PACKAGE); fi	
 	tar xvzf $(PACKAGE)
