@@ -63,6 +63,7 @@ using namespace std;
 
 const char *  edpfilenamearg=0; 
 bool  waitatend=true;
+bool  consoleatend=true;
 
 #define fill thequikdrawfill
 

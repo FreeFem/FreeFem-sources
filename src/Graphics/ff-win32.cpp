@@ -10,7 +10,7 @@ BOOL ShowOpenDialogBox1(char *fileName)
 {
   OPENFILENAME ofn; 
   char szDirName[256];   
-  char *strFilter="PCgFEM Files (*.edp)\0*.edp\0All Files (*.*)\0*.*\0\0"; 
+  const char *strFilter="PCgFEM Files (*.edp)\0*.edp\0All Files (*.*)\0*.*\0\0"; 
   
   memset(&ofn, 0, sizeof(OPENFILENAME));
   getcwd(szDirName,sizeof(szDirName));

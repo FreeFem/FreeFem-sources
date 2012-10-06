@@ -11,6 +11,7 @@ extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
 extern const char *  prognamearg;
 extern const char *  edpfilenamearg;
 extern bool  waitatend;
+extern bool  noconsoleatend;
 extern bool echo_edp;
 extern bool 	  NoGraphicWindow;
 
@@ -52,6 +53,7 @@ char * Shell_Space(const char * s)
 int getprog(char* fn,int argc, char **argv)
 {
   waitatend=true;  // attent 
+  consoleatend=true;  // attent 
   int ret=0;
   *fn='\0';
 #ifdef WIN32
@@ -114,6 +116,8 @@ int getprog(char* fn,int argc, char **argv)
 	  echo_edp=false;
       else if  (strcmp(argv[i],"-nowait")==0 ) 
 	waitatend=false;
+      else if  (strcmp(argv[i],"-nc")==0 ) 
+	consoleatend=false;
       else if  (strcmp(argv[i],"-wait")==0 ) 
 	  waitatend=true;
       else if(strcmp(argv[i],"-fglut")==0 && i+1 < argc)
