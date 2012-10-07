@@ -14,6 +14,7 @@ int nc;// nb of curve
    // given by $  i = x/nx + nx* y/ny $
   fespace Vh(Th,P1);
   Vh f1; f1[]=ff1; //  transforme array in finite element function.
+  plot(f1,wait=1); 
   nc=isoline(Th,f1,iso=0.25,close=1,Curves,beginend=be,smoothing=.1,ratio=0.5); 
   verbosity=1; 
 }

@@ -40,6 +40,7 @@ Makefile.in: ../../config.status Makefile-metis.in
 
 $(SRCDIR)/tag-compile: $(SRCDIR)/tags
 	cp Makefile.in $(SRCDIR)
+	-mkdir -p ../lib/metis
 	cd $(SRCDIR)/Lib;make
 	-cd $(SRCDIR)/Programs;make 
 	touch $(SRCDIR)/tag-compile
@@ -48,7 +49,7 @@ $(SRCDIR)/tag-compile: $(SRCDIR)/tags
 
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
-	echo metis LD -L@DIR@/lib -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	echo metis LD -L@DIR@/lib/metis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
 	echo metis INCLUDE -I@DIR@/include/metis>> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
 	fi
 
@@ -60,12 +61,12 @@ $(SRCDIR)/tags: $(PACKAGE)
 	patch -p0  <patch-metis
 	mv  $(SRCDIR)/Programs/Makefile $(SRCDIR)/Programs/Makefile-orig
 	sed -e 's;BINDIR = ..;BINDIR = ../$(INSTALL)/bin;' \
-            -e 's;../libmetis.a;../$(INSTALL)/lib/libmetis.a;' \
-            -e 's;-L[.][.];-L../$(INSTALL)/lib;' \
+            -e 's;../libmetis.a;../$(INSTALL)/lib/metis/libmetis.a;' \
+            -e 's;-L[.][.];-L../$(INSTALL)/lib/metis;' \
           <$(SRCDIR)/Programs/Makefile-orig \
           >$(SRCDIR)/Programs/Makefile
 	mv $(SRCDIR)/Lib/Makefile $(SRCDIR)/Lib/Makefile-orig
-	sed   -e 's;../libmetis.a;../$(INSTALL)/lib/libmetis.a;' \
+	sed   -e 's;../libmetis.a;../$(INSTALL)/lib/metis/libmetis.a;' \
           <$(SRCDIR)/Lib/Makefile-orig \
           >$(SRCDIR)/Lib/Makefile
 	touch $(SRCDIR)/tags
