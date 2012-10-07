@@ -10,9 +10,17 @@ using namespace Fem2D;
 long ff_chdir(string * c) { return chdir(c->c_str());}
 long ff_rmdir(string * c) { return rmdir(c->c_str());}
 long ff_unlink(string * c) { return unlink(c->c_str());}
+#ifndef WIN32
 long ff_mkdir(string * c,long mm) {mode_t m=mm;cout << " mkdir " << *c << "mode =" << m << endl;  return mkdir(c->c_str(),m);}
+#endif
 long ff_chmod(string * c,long mm) {mode_t m=mm;cout << " mkdir " << *c << "mode =" << m << endl;  return chmod(c->c_str(),m);}
-long ff_mkdir(string * c) {mode_t m=07777;cout << " mkdir " << *c <<" mode =" << m << endl;  return mkdir(c->c_str(),m);}
+long ff_mkdir(string * c) {mode_t m=07777;
+#ifdef WIN32
+  return mkdir(c->c_str());
+#else
+  return mkdir(c->c_str(),m);
+#endif
+  }
 long ff_stat(string * c) {
 struct stat buff;
 return stat(c->c_str(),&buff);}
@@ -71,7 +79,9 @@ void init(){
   Global.Add("unlink","(",new OneOperator1<long,string*>(ff_unlink));
   Global.Add("rmdir","(",new OneOperator1<long,string*>(ff_rmdir));
   Global.Add("cddir","(",new OneOperator1<long,string*>(ff_chdir));
+  #ifndef WIN32
   Global.Add("mkdir","(",new OneOperator2<long,string*,long>(ff_mkdir));
+  #endif
   Global.Add("chmod","(",new OneOperator2<long,string*,long>(ff_chmod));
   Global.Add("mkdir","(",new OneOperator1<long,string*>(ff_mkdir));
   Global.Add("stat","(",new OneOperator1<long,string*>(ff_stat));

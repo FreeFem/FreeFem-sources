@@ -151,7 +151,7 @@ for(int krey=0;krey<Reynold.n;++krey)
     real rp = (rp1+rp2)/2;
     real rppaper =  krey < 2 ? reattachP(krey,cas) : rp; 
     real err= abs(rppaper - rp)/rp;
-    if( err>0.3 ) nerr++;//  
+    if( err>0.5 ) nerr++;//  
     cout << "\n\n\n";
     cout << "H= " << H << " Re " << re << " Reattach point " << rp << " paper=" << rppaper << " err "<< err 
          << "  psi max = " << psi[].max <<endl; 
