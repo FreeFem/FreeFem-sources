@@ -37,7 +37,16 @@ class  addingInitFunct {  public:
 } ;
 
 //
-
+#if WIN32
+#define LOADINITIO {					\
+    streambuf * so =ffapi::cout()->rdbuf() ;		\
+    streambuf * si =ffapi::cin()->rdbuf() ;		\
+    streambuf * se =ffapi::cerr()->rdbuf() ;		\
+    if( so &&  cout.rdbuf() != so ) cout.rdbuf(so);	\
+    if( si &&  cin.rdbuf() != si ) cin.rdbuf(si);	\
+    if( se &&  cerr.rdbuf() != se ) cerr.rdbuf(se);	\
+} 
+#else
 #define LOADINITIO {					\
     streambuf * so =ffapi::cout()->rdbuf() ;		\
     streambuf * si =ffapi::cin()->rdbuf() ;		\
@@ -49,7 +58,7 @@ class  addingInitFunct {  public:
     stderr = ffapi::ffstderr();\
     stdin = ffapi::ffstdin();\
 } 
-
+#endif
 
   
 #define LOADINITNM(EXEC,NM)						\
