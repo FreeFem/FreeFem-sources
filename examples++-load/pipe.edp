@@ -1,13 +1,15 @@
 // PARAM -cd -ns
 load "pipe"
-// C:\Program Files (x86)\gnuplot\bin\pgnuplot.exe
+// example for with pipe 
 string sgnuplot ="gnuplot -persist";
 string sls ="ls -l";
-if (onWIN32) sls="dir"; 
+if (onWIN32)
+{ // windows command ...
+ sls="dir"; 
+ sgnuplot= "\"C:\\Program Files (x86)\\gnuplot\\bin\\pgnuplot.exe\" -persist";
+}
 
-pstream  f(sgnuplot,"w");
-
-{// input case ..
+if(1) {// input case ..
     pstream  ls(sls,"r");
 
 while (!ls.eof)
@@ -18,11 +20,16 @@ while (!ls.eof)
     
 }
 }
+cout << "pipe on " << sgnuplot << endl; 
+pstream  f(sgnuplot,"w");
 try {
 for(int i=0;i<100; i++)
 {
-  f  << "plot sin(x+" + (i*.01) + ") w l" << endl;
+  cout << "plot sin(x+" + (i*.01) + ") w l;" << endl;
+  f  << "plot sin(x+" + (i*.01) + ") w l;" << endl;
 }
+f << "pause 10"<<endl;
+
 }
 catch (...)
   {cout << " catch  error ??? "<< endl;}

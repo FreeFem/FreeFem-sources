@@ -118,8 +118,12 @@ string *  TOString(SubString const  & a)
 istream* getlinep( istream* f, string ** s)
  {
    getline(*f,**s);
+   size_t l= (**s).length();
+   // clean begin end for win32 file 
+   if( l) { if((**s)[0] == '\r') { (**s).erase(0,1); l--;}}
+   if( l) { if((**s)[l-1] == '\r') { (**s).erase(l-1,1); l--;}}
    return f;
- }
+   }
 void     initStringOperator()
 {
 

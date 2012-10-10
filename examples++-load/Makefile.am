@@ -54,7 +54,8 @@ cube.msh  \
 LapMUMPS_seq.edp MUMPS_seq.cpp \
 ff-Ipopt.cpp \
 IpoptLap.edp IpoptVI.edp IpoptVI2.edp IpoptMinSurfVol.edp  \
-scotch.cpp scotch.edp  shell.edp shell.cpp
+scotch.cpp scotch.edp  shell.edp shell.cpp \
+pipe.cpp pipe.edp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
