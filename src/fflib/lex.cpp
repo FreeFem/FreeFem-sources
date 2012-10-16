@@ -265,7 +265,10 @@ int mylex::basescan()
 	      ccc= source().peek(); 
               switch (cc) {
               case 'n': buf[i]='\n';break;
+              case 'r': buf[i]='\r';break;
               case 'f': buf[i]='\f';break;
+              case 't': buf[i]='\t';break;
+              case 'a': buf[i]='\a';break;
               case 10:
               case 13:
 		cc='\n';
