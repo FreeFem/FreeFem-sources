@@ -34,6 +34,29 @@ template<class R> inline R blas_sdot(const int n,const R *sx,const int incx,cons
     s += *sx * *sy;   
    return  s;
 }
+#ifdef COMMON_H
+// OpenBlas PB with constant  remove const ....
+template<> inline float blas_sdot(const int n,  float *sx, int incx, float *sy, int  incy)
+{
+    return cblas_sdot(n,sx,incx,sy,incy);
+}
+template<> inline double blas_sdot( int n,  double *sx, int incx, double *sy, int  incy)
+{
+    return cblas_ddot(n,sx,incx,sy,incy);
+}
+template<> inline  complex<double> blas_sdot( int n,  complex<double> *sx, int incx, complex<double> *sy, int  incy)
+{
+    complex<double> s;
+    cblas_zdotu_sub(n,( void *)sx,incx,( void *)sy,incy,( void *)&s);
+    return s;
+}
+template<> inline  complex<float> blas_sdot( int n,  complex<float> *sx, int incx, complex<float> *sy, int  incy)
+{
+    complex<float> s;
+    cblas_zdotu_sub(n,( void *)sx,incx,( void *)sy,incy,( void *)&s);
+    return s;
+}
+#else
 template<> inline float blas_sdot(const int n,const  float *sx,const int incx,const float *sy,const int  incy)
 {
   return cblas_sdot(n,sx,incx,sy,incy);
@@ -54,6 +77,7 @@ template<> inline  complex<float> blas_sdot(const int n,const  complex<float> *s
    cblas_zdotu_sub(n,(const void *)sx,incx,(const void *)sy,incy,( void *)&s);
   return s;
 }
+#endif 
 #endif
 //  end modif FH
 using Fem2D::HeapSort;

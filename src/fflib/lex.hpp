@@ -64,12 +64,13 @@ class mylex : public CodeAlloc {
   struct xxxx { 
     int l;
     istream * f;
-    const string * filename; 
+    const string * filename;
+    int macroarg;
     istream * nf;
 
-    xxxx() : l(0), f(0) , filename(0),nf(0)   {}   
+    xxxx() : l(0), f(0) , filename(0),macroarg(0),nf(0)   {}
     void  open(mylex *lexx,const char * ff) ;
-    void  readin(mylex *lexx,const string & s,const string *name=0);
+    void  readin(mylex *lexx,const string & s,const string *name=0,int macroargg=0);
     void close() ;
   };
   
