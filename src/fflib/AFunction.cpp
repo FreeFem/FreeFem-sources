@@ -1563,7 +1563,13 @@ C_F0  opVI::code2(const basicAC_F0 &args) const
     assert( ea || tea );
     const E_Array & a=  ta ? *tea->v : *ea;
    // cout << " pv =" << pv << " size = "<< a.size() << endl;
-    ffassert(pv >=0 && pv <a.size());
+    if(!(pv >=0 && pv <a.size()))
+    {
+      cerr << "\n\nerror [ ... ][" << pv <<" ] " << " the  size of [ ...]  is "<< a.size() << endl;
+      lgerror(" bound of  [ .., .. , ..][ . ] operation  ");
+    }
+    
+    //ffassert(pv >=0 && pv <a.size());
     return (* a.v)[pv];
 }
 

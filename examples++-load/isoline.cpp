@@ -262,6 +262,48 @@ struct R2_I2 {
         else return L.count(k0);
     }
 };
+// Absact mesh for data on grid .... FH ..
+int Th_Grid(const KNM_<double> *g, int k,int ii)
+{
+    int N = g->N()-1;
+    int kq= k/2; // number of the quad
+    int k0 = k%2; // up or down
+    //  (0,0),(1,0),(1,1) Qd <=> (ii !=0,  ii==2)
+    //  (0,0),(1,1),(0,1) Q2  <=> (ii%2, ii != 0
+    int I =  kq%N + ( k0 ?  (ii%2)  : (ii !=0) ) ;
+    int J =  kq/N + ( k0 ?  (ii!=0) : (ii ==2) );
+
+   return J*(N+1)+I;
+}
+R2  V_Grid(const KNM_<double> *g, int k) 
+{
+  int i = k % g->N() , j = k / g->N() ; 
+  return R2( i,j);
+}
+int  EA_Grid(const KNM_<double> *g, int k,int & e) 
+{
+  int N = g->N()-1;
+  int kq= k/2; // number of the quad
+  int k0 = k%2; // up or down
+  bool intern = k0  ? (e==0)  : (e==2);
+  if(intern) {e = 2-e; return 2*kq+ 1-k0;}
+  ffassert(0);
+  return 0;
+}
+
+struct SMesh {
+  const Mesh *pTh;
+  const KNM_<double> *g;
+  int nv,nt, neb; 
+  int operator()(int k,int i) const  { return pTh ? (*pTh)(k,i) : Th_Grid(g,k,i);  }
+  R2  operator()(int i) const  { return pTh ? (*pTh)(i) : V_Grid(g,i);  }
+  int ElementAdj(int k,int &e) { return pTh ? pTh->ElementAdj(k,e) : EA_Grid(g,k,e);  }
+  SMesh(Mesh *PTh) : pTh(PTh),g(0)   , nv(pTh->nv), nt(pTh->nt),neb(pTh->neb) {}
+  SMesh(KNM_<double> *gg): pTh(0),g(gg)   ,
+			   nv(gg->N()*gg->M()),
+			   nt((gg->N()-1) *(gg->M()-1)*2),
+			   neb( ( gg->N()+gg->M()-2 )*2 ) {}
+};
 
 AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 {
@@ -279,7 +321,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
     ffassert( (pxx || pyy) ==  !pxy ) ;
     Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
     ffassert(pTh);
-    Mesh &Th=*pTh;
+    SMesh Th(pTh);
     int nbv=Th.nv; // nombre de sommet
     int nbt=Th.nt; // nombre de triangles
     int nbe=Th.neb; // nombre d'aretes fontiere
@@ -301,17 +343,19 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
     KN<double> tff(nbv, unset);
     
     // loop over triangle
+    if(pTh)
     for (int it=0;it<Th.nt;++it)
     {
         for( int iv=0; iv<3; ++iv)
 	{
             int i=Th(it,iv);
             if(tff[i]==unset){
-                mp->setP(&Th,it,iv);
+                mp->setP(pTh,it,iv);
                 tff[i]=GetAny<double>((*eff)(stack))-isovalue;
             }
 	}
     }
+    else ffassert(0); 
     if(close<0)
     {
         tff=-tff;
@@ -374,7 +418,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
         if(debug) cout<< " Close path " << endl;
         for (int k=0;k<Th.nt;++k)
 	{
-            Triangle &K=Th[k];
+	  // Triangle &K=Th[k];
             for(int e=0;e<3;++e)
 	    {
                 int ee,kk=Th.ElementAdj(k,ee=e);
