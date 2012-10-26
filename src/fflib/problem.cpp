@@ -660,7 +660,7 @@ void Check(const Opera &Op,int N,int  M)
               }
           }
       }
-    else if (di.kind == CDomainOfIntegration::intalledges)
+    else if (di.kind == CDomainOfIntegration::intallfaces  )
       {
         for (int i=0;i< Th.nt; i++) 
           {
@@ -676,7 +676,7 @@ void Check(const Opera &Op,int N,int  M)
       {
 	cerr << " a faire intallVFedges " << endl;
 	ffassert(0);
-        for (int i=0;i< Th.nt; i++) 
+        for (int i=0;i< Th.nt; i++)
           {
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
              for (int ie=0;ie<3;ie++)   
@@ -697,8 +697,11 @@ void Check(const Opera &Op,int N,int  M)
             // AA += mate;
           }
       } 
-    else 
+    else
+    {
+        cerr << " kind of CDomainOfIntegration unkown ?? " << di.kind << endl;
       InternalError(" kind of CDomainOfIntegration unkown");
+    }
     
     if (where_in_stack) delete [] where_in_stack;
     delete &mate;
@@ -3711,7 +3714,25 @@ template<class R>
             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 	  }
     }  
-    else {
+    else  if(kind==CDomainOfIntegration::intallfaces    ) {
+        
+	if(VF) InternalError(" no jump or average in intallfaces of RHS");
+        
+        for(int i=0;i<ThI.nt; i++)
+            for(int ie=0;ie<Mesh3::nea; ie++)
+        {
+            int lab=0;
+            // if face on bord get the lab ??? 
+                if ( sameMesh)
+                    Element_rhs<R>(Vh[i],ie,lab,*l->l,buf,stack,*B,FIT,false);
+                else
+                    Element_rhs<R>(ThI,ThI[i],Vh,ie,lab,*l->l,buf,stack,*B,FIT,false);
+                if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+            
+        }
+    }
+    else 
+    {
       cout << " Strange (unknows) kind = " << kind << endl; 
       ffassert(0);
     }
@@ -4066,7 +4087,8 @@ bool isVF(const list<C_F0> & largs)  // true => VF type of Matrix
         {
           const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
           bool vvf  = bb->VF();
-          if( vvf &&  (bb->di->kind != CDomainOfIntegration::intalledges && bb->di->kind != CDomainOfIntegration::intallVFedges  ))
+          if( vvf &&  (bb->di->kind != CDomainOfIntegration::intalledges && bb->di->kind != CDomainOfIntegration::intallVFedges  )
+             &&  (bb->di->kind != CDomainOfIntegration::intallfaces ))
             CompileError("Sorry, no  jump or moy in bilinear form no of type intalledges or intallVFedges ");
            VVF = vvf || VVF;
           }
