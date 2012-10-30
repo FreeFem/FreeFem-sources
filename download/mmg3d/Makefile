@@ -17,6 +17,8 @@ mmg3d_VERSION=
 # mmg3d pas sur internet
 LIBMMG3D=$(INSTALL)/lib/libmmg3d-v4.a
 OPT=4
+# size of the PKG file ( this file change See Cecile.)
+SIZEPKG=163031
 
 OBJS= analar.o	chkmsh.o	hash.o		memory.o	optcte.o	outqua.o	simu44.o	swap44.o	zaldy.o \
 analarcutting.o	chrono.o	heap.o		mmg3d1.o	optlap.o	pattern.o	simu56.o	swap56.o \
@@ -28,11 +30,17 @@ cenrad.o	eigenv.o	matrix.o	optcoq.o	opttyp.o	simu23.o	swap23.o	typelt.o
 
 OBJSNOP =  cendel.o swapar.o
 
-mmg3d: mmg3d4/build-4
+
+mmg3d: mmg3d4/build-$(SIZEPKG)
 
 
-mmg3d4/build-4: 
-	-$(MAKE) tag-tar
+mmg3d4/build-$(SIZEPKG):
+	pkgs=`stat -f "%z" $(PACKAGE)`; \
+	if  test $(SIZEPKG) -ne "$$pkgs" ; then \
+	echo "++++++ PB version mmg3d version  $(SIZEPKG) != $$pkgs  +++++"  ;\
+	rm $(PACKAGE); \
+	$(MAKE) clean ; \
+	else $(MAKE) tag-tar-$(SIZEPKG); fi 
 	if [ -d mmg3d4  ] ; then  $(MAKE)  $(LIBMMG3D) install-4 WHERE ; else echo "Sorry no source " ; fi
 $(LIBMMG3D):
 	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CNOFLAGS)'  $(OBJSNOP) 
@@ -47,7 +55,6 @@ install-4:
 	touch mmg3d4/FAIT-4
 
 mmg3d-4:$(PACKAGE)
-	-if  test 163031 -ne   `stat -f "%z" $(PACKAGE)` ; then echo ++++++ PB version mmg3d version +++++  ; fi
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
@@ -70,7 +77,7 @@ WHERE:
 
 FAIRE: mmg3d4/FAIT-4 install-4
 
-tag-tar: $(PACKAGE)
+tag-tar-$(SIZEPKG): $(PACKAGE)
 	-rm -rf mmg3d4
 	if tar tfz $(PACKAGE)  mmg3d4/build/sources/mmg3d.c 2>/dev/null  1>/dev/null  ;\
 	 then  rm $(PACKAGE);   $(MAKe) $(PACKAGE); fi	
@@ -78,7 +85,7 @@ tag-tar: $(PACKAGE)
 	touch mmg3d4/build/sources/dataff.h 	
 	cd mmg3d4;patch -p1 <../patch-mmg3dv4.diff
 	cat </dev/null >mmg3d4/build/sources/mmg3dConfig.h
-	touch tag-tar
+	touch tag-tar-$(SIZEPKG)
 #	cp makefile-mmg3d.inc $(SRCDIR)/makefile
 
 
@@ -88,10 +95,10 @@ clean:
 	-rm -rf $(SRCDIR)/$(INSTALL)/lib/libmmg3d*.a  ../lib/libmmg3d-v4.a
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/mmg3d-v4
 	-rm -r $(SRCDIR)
-	-rm FAIT* mmg* flags-* build-4 tag-tar
+	-rm FAIT* mmg* flags-* build-4 tag-tar*
 
 ff-flags: ../Makefile Makefile
-	grep 'abs_top_builddir *=' ../Makefile >> ff-flags
+	grep 'abs_top_builddir *=' ../Makefile > ff-flags
 	grep 'CC *=' ../Makefile >> ff-flags
 	grep 'CFLAGS *=' ../Makefile >> ff-flags
 	grep 'LDFLAGS *=' ../Makefile >> ff-flags
