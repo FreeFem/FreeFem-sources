@@ -13,7 +13,7 @@ class MeshPointBase { public:
   const Tet * T3;
   };
   long region, t,v,f,e,gsens; // triangle,vertex, face or edge
-  long  label;  
+  long  label;
   R3 N; //  if on boundary 
   bool outside;
   int VF; 
@@ -161,7 +161,8 @@ class MeshPointBase { public:
      Th=pTh; 
      region = T->lab;
      label = V.lab;
-     t=v=f=e=0;
+     t=tt;
+     v=f=e=-1;
      v=ss;
      VF=0;
      d=2;  
@@ -174,7 +175,9 @@ class MeshPointBase { public:
      (R2 &) P = (*T)(PH);
      region = T->lab;
      label = ll;
-     t=v=f=e=0;
+     
+     t=(*Th)(T);
+     v=f=e=-1;
      VF=0;
      d=2;  
      
@@ -186,7 +189,9 @@ class MeshPointBase { public:
 	(R3 &) P = (*T3)(PH);
 	region = T3->lab;
 	label = ll;
-	t=v=f=e=0;
+        
+         t=(*Th)(T);
+	v=f=e=-1;
 	VF=0;
 	d=2;  
 	
@@ -340,7 +345,8 @@ class MeshPointBase { public:
      Th3=pTh; 
      region = T3->lab;
      label = V.lab;
-     t=v=f=e=-1;
+     t=tt;
+     v=f=e=-1;
      v=ss;
      VF=0;
      d=3;  
