@@ -140,7 +140,8 @@ class MeshPointBase { public:
      Th=&aTh; 
      region = T->lab;
      label = ll;
-     t=v=f=e=-1;  
+       t= aTh(aK); // Miss correct Nov. 2012 ...
+      v=f=e=-1;
      N.x=0;   
      N.y=0;   
      N.z=0;   

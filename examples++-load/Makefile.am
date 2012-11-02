@@ -39,7 +39,7 @@ EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  UMFPACK64.cpp iovtk.cpp gmsh.cpp MetricKuate.cpp  \
  ffnewuoa.cpp	ffnewuoa.edp	newuoa.f Element_P1dc1.cpp ilut.cpp ilut.edp \
  freeyams.cpp mmg3d-v4.0.cpp  mshmet.cpp \
- BinaryIO.cpp	gsl.cpp gsl.awk ff_gsl_awk.hpp isolineP1.cpp isoline.cpp lg.pgm Leman-mesh.edp \
+ BinaryIO.cpp	gsl.cpp gsl.edp  gsl.awk ff_gsl_awk.hpp isolineP1.cpp isoline.cpp lg.pgm Leman-mesh.edp \
 thresholdings.cpp	thresholdings.edp \
 VTK_writer_3d.cpp VTK_writer.cpp splitedges.cpp splitedges.edp \
 Element_Mixte.cpp LaplaceRT1.edp lame-TD-NSS.edp test-ElementMixte.edp \
