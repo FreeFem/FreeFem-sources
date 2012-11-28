@@ -34,6 +34,7 @@
 
 #include "dmatrix.hpp"
 #include <dmumps_c.h>
+#include <zmumps_c.h>
 #define JOB_INIT -1
 #define JOB_END -2
 #define USE_COMM_WORLD -987654
@@ -41,16 +42,28 @@
 #define INFOG(I) infog[(I)-1] /* macro s.t. indices match documentation */
 #define INFO(I) info[(I)-1]   /* macro s.t. indices match documentation */
 
-static std::string analysis[] = {"AMD", "", "AMF", "SCOTCH", "PORD", "METIS", "QAMD", "automatic sequential", "automatic parallel", "PT-SCOTCH", "ParMetis"};
+template<typename RR> struct MUMPS_STRUC_TRAIT {typedef void MUMPS;  typedef void R; };
+template<> struct MUMPS_STRUC_TRAIT<double>  {typedef DMUMPS_STRUC_C MUMPS; typedef double R;};
+template<> struct MUMPS_STRUC_TRAIT<Complex>  {typedef ZMUMPS_STRUC_C MUMPS; typedef ZMUMPS_COMPLEX R;};
+void mumps_c(DMUMPS_STRUC_C *id) { dmumps_c(id);}  
+void mumps_c(ZMUMPS_STRUC_C *id) { zmumps_c(id);}  
 
-class SolverMumps : public MatriceMorse<double>::VirtualSolver {
+
+static std::string analysis[] = {"AMD", "", "AMF", "SCOTCH", "PORD", "METIS", "QAMD", "automatic sequential", "automatic parallel", "PT-SCOTCH", "ParMetis"};
+template<class R>
+class SolverMumps : public MatriceMorse<R>::VirtualSolver {
+
+
+
     private:
-        mutable DMUMPS_STRUC_C* _id;
+         mutable typename MUMPS_STRUC_TRAIT<R>::MUMPS * _id; 
+  //mutable DMUMPS_STRUC_C* _id;
         mutable unsigned char   _strategy;
 
     public:
-        SolverMumps(const MatriceMorse<double> &A, KN<long> &param_int, KN<double> &param_double, MPI_Comm* comm) {
-            _id = new DMUMPS_STRUC_C;
+        typedef typename  MUMPS_STRUC_TRAIT<R>::R MR; 
+        SolverMumps(const MatriceMorse<R> &A, KN<long> &param_int, KN<double> &param_R, MPI_Comm* comm) {
+	  _id = new typename MUMPS_STRUC_TRAIT<R>::MUMPS ;
             _id->job = JOB_INIT; _id->par = 1;
             if(comm)
                 _id->comm_fortran = MPI_Comm_c2f(*comm);
@@ -58,10 +71,10 @@ class SolverMumps : public MatriceMorse<double>::VirtualSolver {
                 _id->comm_fortran = MPI_Comm_c2f(MPI_COMM_WORLD);
             _id->sym = A.symetrique;
             _strategy = param_int.n > 0 ? param_int[0] : 3;
-            dmumps_c(_id);
+            mumps_c(_id);
             int* I = NULL;
             int* J = NULL;
-            double* C = NULL;
+            MR* C = NULL;
             if((param_int.n > 1 && mpirank == param_int[1]) || (param_int.n < 2 && mpirank == 0)) {
                 _id->n = A.n;
 
@@ -80,7 +93,7 @@ class SolverMumps : public MatriceMorse<double>::VirtualSolver {
                         _id->nz = A.nbcoef;
                         I = new int[A.nbcoef];
                         J = new int[A.nbcoef];
-                        C = new double[A.nbcoef];
+                        C = new MR[A.nbcoef];
                         for(unsigned int i = 0; i < A.n; ++i)
                             C[i] = A.a[A.lg[i + 1] - 1];
                         std::generate(I, I + A.n, step(0, 1));
@@ -98,7 +111,7 @@ class SolverMumps : public MatriceMorse<double>::VirtualSolver {
                         _id->nz = A.n + (A.nbcoef - A.n) / 2;
                         I = new int[A.n + (A.nbcoef - A.n) / 2];
                         J = new int[A.n + (A.nbcoef - A.n) / 2];
-                        C = new double[A.n + (A.nbcoef - A.n) / 2];
+                        C = new MR[A.n + (A.nbcoef - A.n) / 2];
                         trimCSR<false, 'F'>(A.n, I + A.n, A.lg, J + A.n, A.cl, C + A.n, A.a);
                         for(unsigned int i = 0; i < A.n - 1; ++i)
                             C[i] = A.a[A.lg[i + 1] - (I[i + 1 + A.n] - I[i + A.n]) - 1];
@@ -140,7 +153,7 @@ class SolverMumps : public MatriceMorse<double>::VirtualSolver {
             _id->ICNTL(20) = 0;                 // dense RHS
             _id->ICNTL(14) = 30;                // percentage increase in the estimated working space
             _id->job = 4;
-            dmumps_c(_id);
+            mumps_c(_id);
             if(_id->INFOG(1) != 0)
                 std::cout << "BUG MUMPS, INFOG(1) = " << _id->INFOG(1) << std::endl;
             if(I) {
@@ -156,31 +169,41 @@ class SolverMumps : public MatriceMorse<double>::VirtualSolver {
             }
         };
 
-        void Solver(const MatriceMorse<double> &A, KN_<double> &x, const KN_<double> &b) const  {
+        void Solver(const MatriceMorse<R> &A, KN_<R> &x, const KN_<R> &b) const  {
             _id->ICNTL(21) = 0; _id->ICNTL(3) = verbosity > 1 ? 6 : 0;
             x = b;
-            _id->rhs = x;
+            _id->rhs = reinterpret_cast<MR*>((R*) x);
             _id->job = 3;
-            dmumps_c(_id);
+            mumps_c(_id);
         };
 
         ~SolverMumps() {
             _id->job = JOB_END;
-            dmumps_c(_id);
+            mumps_c(_id);
             if(_id)
                 delete _id;
         };
 };
 
 
-MatriceMorse<double>::VirtualSolver* buildSolver(DCL_ARG_SPARSE_SOLVER(double, A)) {
+MatriceMorse<double>::VirtualSolver* buildSolverR(DCL_ARG_SPARSE_SOLVER(R, A)) {
     if(A)
-        return new SolverMumps(*A, ds.lparams, ds.dparams, (MPI_Comm*)ds.commworld);
+      return new SolverMumps<double>(*A, ds.lparams, ds.dparams, (MPI_Comm*)ds.commworld);
     else {
         MatriceMorse<double> empty;
-        return new SolverMumps(empty, ds.lparams, ds.dparams, (MPI_Comm*)ds.commworld);
+        return new SolverMumps<double>(empty, ds.lparams, ds.dparams, (MPI_Comm*)ds.commworld);
     }
 }
+/*
+MatriceMorse<Complex>::VirtualSolver* buildSolverC(DCL_ARG_SPARSE_SOLVER(R, A)) {
+    if(A)
+      return new SolverMumps<Complex>(*A, ds.lparams, ds.dparams, (MPI_Comm*)ds.commworld);
+    else {
+        MatriceMorse<Complex> empty;
+        return new SolverMumps<Complex>(empty, ds.lparams, ds.dparams, (MPI_Comm*)ds.commworld);
+    }
+}
+*/
 
 class Init {
     public:
@@ -193,5 +216,5 @@ LOADINIT(Init);
 
 Init::Init() {
     TypeSolveMat::defaultvalue = TypeSolveMat::SparseSolver;
-    DefSparseSolver<double>::solver = buildSolver;
+    DefSparseSolver<double>::solver = buildSolverR;
 }
