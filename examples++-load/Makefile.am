@@ -55,7 +55,8 @@ LapMUMPS_seq.edp MUMPS_seq.cpp \
 ff-Ipopt.cpp \
 IpoptLap.edp IpoptVI.edp IpoptVI2.edp IpoptMinSurfVol.edp  \
 scotch.cpp scotch.edp  shell.edp shell.cpp \
-pipe.cpp pipe.edp
+pipe.cpp pipe.edp \
+symmetrizeCSR.cpp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -75,7 +76,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
-	pipe.$(DYLIB_SUFFIX) 
+	pipe.$(DYLIB_SUFFIX)  symmetrizeCSR.$(DYLIB_SUFFIX) 
 
 
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) \

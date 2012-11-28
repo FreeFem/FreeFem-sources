@@ -488,7 +488,7 @@ struct  MIMul {
       {
         if (mia && a->EvaluableWithOutStack() )
           {
-            A va = GetAny<A>((*a)(0));
+            A va = GetAny<A>((*a)(NullStack));
            // cout << " va = " << va << endl;
             if ( va == A() )
              { 
@@ -498,7 +498,7 @@ struct  MIMul {
           }
         if (mib && b->EvaluableWithOutStack() )
           {
-            B vb = GetAny<B>((*b)(0));
+            B vb = GetAny<B>((*b)(NullStack));
             // cout << " vb = " << vb << endl;
             if ( vb == B() ) 
             { //cout << " vb = " << vb << endl;
@@ -1554,7 +1554,7 @@ C_F0  opVI::code2(const basicAC_F0 &args) const
 	bool bb=p->EvaluableWithOutStack();
 	//cout << bb << " " <<  * p <<  endl;
 	CompileError(" [...][p], The p must be a constant , sorry");}
-        long pv = GetAny<long>((*p)(0));
+        long pv = GetAny<long>((*p)(NullStack));
     bool ta =args[0].left()==atype<TransE_Array>();
     const TransE_Array * tea=0;
     const E_Array * ea=0;

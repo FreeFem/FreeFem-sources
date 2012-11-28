@@ -1,6 +1,6 @@
 load "MetricPk"
 
-int kDeg=3;
+int kDeg=4;
 int nIter=5;
 mesh Th=square(20,20,[2*x-1,2*y-1]);
 real c=5;

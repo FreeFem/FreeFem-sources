@@ -91,7 +91,13 @@ LIST_NAME_PARM_MAT
  */
 };
 
+struct pair_stack_double
+{
+    Stack first;
+    double *second;
+    pair_stack_double(Stack ss,double* bb) : first(ss),second(bb) {};
 
+};
 
 namespace Fem2D {
 
@@ -177,8 +183,8 @@ void Check(const Opera &Op,int N,int  M)
 			double * p,int ie,int iie, int label,void *bstack)
   {
     
-    pair<void *,double *> * bs=static_cast<pair<void *,double *> *>(bstack);   
-    void * stack= bs->first;
+    pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);   
+    Stack stack= bs->first;
     double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
     assert(mat.onFace); //   Finite Volume or discontinous Galerkine 
     assert(ie>=0 && ie < 3); //  int on edge 
@@ -431,9 +437,9 @@ void Check(const Opera &Op,int N,int  M)
       }
     Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
     void *paramate=stack;
-    pair<void *,double *> parammatElement_OpVF;  
-    parammatElement_OpVF.first = stack;
-    parammatElement_OpVF.second= & binside;
+    pair_stack_double parammatElement_OpVF(stack,& binside);
+   // parammatElement_OpVF.first = stack;
+   // parammatElement_OpVF.second= & binside;
     
     if (verbosity >3) 
       if (all) cout << " all " << endl ;
@@ -614,7 +620,7 @@ void Check(const Opera &Op,int N,int  M)
       }
     Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
     void *paramate=stack;
-    pair<void *,double *> parammatElement_OpVF;  
+    pair_stack_double parammatElement_OpVF(stack, & binside);
     parammatElement_OpVF.first = stack;
     parammatElement_OpVF.second= & binside;
     
@@ -716,8 +722,9 @@ void Check(const Opera &Op,int N,int  M)
 		     const FESpace & Uh,const FESpace & Vh,
 		     const QuadratureFormular & FI,
 		     const QuadratureFormular1d & FIb,
-		     double *p,   void *stack, bool intmortar=false)
+		     double *p,   void *vstack, bool intmortar=false)
     {
+        Stack stack=pvoid2Stack(vstack);
 	MeshPoint mp= *MeshPointStack(stack);
 	R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
 	const Mesh & Thu(Uh.Th);
@@ -937,8 +944,9 @@ void Check(const Opera &Op,int N,int  M)
                      const FESpace3 & Uh,const FESpace3 & Vh,
                      const Fem2D::GQuadratureFormular<R3>  & FI,
                      const  QuadratureFormular & FIb,
-                     double *p,   void *stack, bool intmortar=false)
+                     double *p,   void *vstack, bool intmortar=false)
     {
+         Stack stack=pvoid2Stack(vstack);
         MeshPoint mp= *MeshPointStack(stack);
         static int count =0; // non test FH .........................
         if(count++ < 1) {
@@ -1474,8 +1482,9 @@ void Check(const Opera &Op,int N,int  M)
  
  
   template<class R> 
-  void  Element_Op(MatriceElementairePleine<R,FESpace3> & mat,const FElement3 & Ku,const FElement3 & Kv,double * p,int ie,int label,void *stack)
+  void  Element_Op(MatriceElementairePleine<R,FESpace3> & mat,const FElement3 & Ku,const FElement3 & Kv,double * p,int ie,int label,void *vstack)
   {
+   Stack stack=pvoid2Stack(vstack);    
     //    ffassert(0);
     typedef  FElement3::Element Element;
     MeshPoint mp= *MeshPointStack(stack);
@@ -1635,8 +1644,9 @@ void Check(const Opera &Op,int N,int  M)
   } 
   // xxxxxxxxxxxxxxxxx  modif a faire 
   template<class R> 
-  void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,const FElement & Ku,const FElement & Kv,double * p,int ie,int label,void *stack)
+  void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,const FElement & Ku,const FElement & Kv,double * p,int ie,int label,void *vstack)
   {
+       Stack stack=pvoid2Stack(vstack);
     typedef  FElement::Element Element;
     MeshPoint mp= *MeshPointStack(stack);
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -1879,8 +1889,9 @@ void Check(const Opera &Op,int N,int  M)
   
   
  template<class R>
- void  Element_Op(MatriceElementaireSymetrique<R,FESpace3> & mat,const FElement3 & Ku,double * p,int ie,int label, void * stack)
+ void  Element_Op(MatriceElementaireSymetrique<R,FESpace3> & mat,const FElement3 & Ku,double * p,int ie,int label, void * vstack)
   {
+      Stack stack=pvoid2Stack(vstack);
    typedef FESpace3 FESpace;
    typedef typename FESpace3::Mesh Mesh;
    typedef Mesh *pmesh ;
@@ -2059,8 +2070,9 @@ void Check(const Opera &Op,int N,int  M)
 
   // xxxxxxxxxxxxxxxxx  modif a faire   
  template<class R>
- void  Element_Op(MatriceElementaireSymetrique<R,FESpace> & mat,const FElement & Ku,double * p,int ie,int label, void * stack)
+ void  Element_Op(MatriceElementaireSymetrique<R,FESpace> & mat,const FElement & Ku,double * p,int ie,int label, void * vstack)
   {
+    Stack stack=pvoid2Stack(vstack);
     MeshPoint mp= *MeshPointStack(stack);
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     const Triangle & T  = Ku.T;
@@ -2307,9 +2319,10 @@ void Check(const Opera &Op,int N,int  M)
   
   // #pragma optimization_level 0
  template<class R>
-  void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+  void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular & FI = QuadratureFormular_T_2)
   {
+    Stack stack=pvoid2Stack(vstack);
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     const Triangle & T  = Kv.T;
@@ -2381,9 +2394,10 @@ void Check(const Opera &Op,int N,int  M)
 
   // 3D
  template<class R>
-  void  Element_rhs(const FElement3 & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+  void  Element_rhs(const FElement3 & Kv,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const GQuadratureFormular<R3> & FI = QuadratureFormular_Tet_2)
   {
+    Stack stack=pvoid2Stack(vstack);
     typedef  FElement3::Element Element;
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -2453,9 +2467,10 @@ void Check(const Opera &Op,int N,int  M)
   // 3d
  template<class R>
  void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI,
-                    const FESpace3 & Vh,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+                    const FESpace3 & Vh,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
 		   const GQuadratureFormular<R3> & FI)
  {
+     Stack stack=pvoid2Stack(vstack);
    // AFAIRE("Element_rhs 3d diff meshes");
      static int count=0;
      if(count++<1)
@@ -2536,9 +2551,10 @@ void Check(const Opera &Op,int N,int  M)
   //
  template<class R>
   void  Element_rhs(const  Mesh & ThI,const Triangle & KI,
-                    const FESpace & Vh,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+                    const FESpace & Vh,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular & FI = QuadratureFormular_T_2)
   {
+   Stack stack=pvoid2Stack(vstack);
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
 //    int maxd = Op.MaxOp();
@@ -2609,11 +2625,11 @@ void Check(const Opera &Op,int N,int  M)
   }  
   // 3d 
   template<class R>
-  void  Element_rhs(const FElement3 & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+  void  Element_rhs(const FElement3 & Kv,int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular & FI ,bool alledges=false)
   {
     //   AFAIRE("Element_rhs on border");
-
+    Stack stack=pvoid2Stack(vstack);
     typedef  FElement3::Element Element;
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -2682,9 +2698,10 @@ void Check(const Opera &Op,int N,int  M)
     
     
  template<class R>
-  void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+  void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false)
   {
+    Stack stack=pvoid2Stack(vstack);
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     const Triangle & T  = Kv.T;
@@ -2757,9 +2774,10 @@ void Check(const Opera &Op,int N,int  M)
   }
     
     template<class R>
-    void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+    void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                       const QuadratureFormular1d & FI ,const R2 & PPA,const R2 &PPB)
     {
+        Stack stack=pvoid2Stack(vstack);
         MeshPoint mp=*MeshPointStack(stack) ;
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
         const Triangle & T  = Kv.T;
@@ -2838,8 +2856,8 @@ void Check(const Opera &Op,int N,int  M)
 		      const QuadratureFormular1d & FI = QF_GaussLegendre2)
     // sier of ip
     {
-	pair<void *,double *> * bs=static_cast<pair<void *,double *> *>(bstack);   
-	void * stack= bs->first;
+	pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);   
+	Stack stack= bs->first;
 	double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
 	
 	MeshPoint mp=*MeshPointStack(stack) ;
@@ -2958,9 +2976,11 @@ void Check(const Opera &Op,int N,int  M)
   // 3d  
  template<class R>
  void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 & Vh,
- int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+ int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular & FI,bool alledges=false)
-    {  int intmortar=0; 
+    {
+      Stack stack=pvoid2Stack(vstack);
+      int intmortar=0;
   //  AFAIRE("Element_rhs 3d on surface  2 diff mesh ");
       static int count =0;
       if(count++<1) 
@@ -3050,12 +3070,12 @@ void Check(const Opera &Op,int N,int  M)
   // 3d
  template<class R>
  void  Element_rhs(const  Mesh & ThI,const Triangle & KI, const FESpace & Vh,
- int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+ int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false,bool intmortar=false)
   {
      // integration 1d on 2 diff mesh 
     
-    
+     Stack stack=pvoid2Stack(vstack);
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     
@@ -3647,7 +3667,7 @@ template<class R>
        /*
        if(VF)
 	 {
-	   pair<void *,double *> bstack; 
+	   pair_stack_double bstack; 
 	   
 	   bstack.first = stack;
 	   bstack.second= & binside;
@@ -3998,10 +4018,10 @@ template<class R>
      {	
       if(VF)
         {
-	    pair<void *,double *> bstack; 
+	    pair_stack_double bstack(stack,& binside);
 	    
-	    bstack.first = stack;
-	    bstack.second= & binside;
+	    //bstack.first = stack;
+	    //bstack.second= & binside;
 	    
 	    //InternalError(" Today no jump or average in intalledges of RHS ");
 	    for (int i=0;i< ThI.nt; i++) 
@@ -4246,7 +4266,11 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds )
 	  AA.SetSolverMaster(DefSparseSolver<R>::Build(stack,&AA,ds));
 //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
          break;
-           
+        case TypeSolveMat::SparseSolverSym :
+                AA.SetSolverMaster(DefSparseSolverSym<R>::Build(stack,&AA,ds));
+                //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
+                break;
+          
 //#endif         
         default:
           cerr << " type resolution " << ds.typemat->t << endl;
@@ -4305,6 +4329,10 @@ bool SetUMFPACK()
 
 #endif
 #endif
+template <>
+DefSparseSolverSym<double>::SparseMatSolver  DefSparseSolverSym<double>::solver =BuildSolverGMRES;
+template <>
+DefSparseSolverSym<Complex>::SparseMatSolver  DefSparseSolverSym<Complex>::solver =BuildSolverGMRES;
 
  
 template<class R>
