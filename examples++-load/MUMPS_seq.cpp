@@ -159,7 +159,7 @@ public:
     mumps_c(&id);
     Check("MUMPS-seq analayse and Factorize");
     if(verbosity>3)
-      cout << "  -- MUMPS LU   n=  " << n << ", peak Mem: " << INFOG(22) << " Mb" <<  endl;
+      cout << "  -- MUMPS LU   n=  " << n << ", peak Mem: " << INFOG(22) << " Mb" << " sym: " << id.sym <<  endl;
 
   }
   void Solver(const MatriceMorse<R> &A,KN_<R> &x,const KN_<R> &b) const  {
@@ -275,6 +275,8 @@ BuildSolverIMUMPSseq(DCL_ARG_SPARSE_SOLVER(Complex,A))
 //  the 2 default sparse solver double and complex
 DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
 DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
+DefSparseSolverSym<double>::SparseMatSolver SparseMatSolverSym_R ; ;
+DefSparseSolverSym<Complex>::SparseMatSolver SparseMatSolverSym_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
@@ -284,6 +286,8 @@ bool SetDefault()
 	cout << " SetDefault sparse to default" << endl;
     DefSparseSolver<double>::solver =SparseMatSolver_R;
     DefSparseSolver<Complex>::solver =SparseMatSolver_C;
+    DefSparseSolverSym<double>::solver =SparseMatSolverSym_R;
+    DefSparseSolverSym<Complex>::solver =SparseMatSolverSym_C;
     TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
 }
 
@@ -293,6 +297,8 @@ bool SetMUMPS_seq()
 	cout << " SetDefault sparse solver to MUMPSseq" << endl;
     DefSparseSolver<double>::solver  =BuildSolverIMUMPSseq;
     DefSparseSolver<Complex>::solver =BuildSolverIMUMPSseq;    
+    DefSparseSolverSym<double>::solver  =BuildSolverIMUMPSseq;
+    DefSparseSolverSym<Complex>::solver =BuildSolverIMUMPSseq;    
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
 }
 
@@ -301,6 +307,9 @@ void init22()
 {    
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
+  SparseMatSolverSym_R= DefSparseSolverSym<double>::solver;
+  SparseMatSolverSym_C= DefSparseSolverSym<Complex>::solver;
+
   if(verbosity>1)
     cout << "\n Add: MUMPS_seq:  defaultsolver defaultsolverMUMPS_seq" << endl;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver; 
