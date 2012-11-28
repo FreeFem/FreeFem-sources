@@ -4,7 +4,7 @@
 // AUTHOR   : P. Jolivet 
 // E-MAIL   : Pierre Jolivet <pierre.jolivet@ljll.math.upmc.fr>
 //
-//ff-c++-LIBRARY-dep:  mumps parmetis ptscotch  scalapack blacs blas  mpifc  fc  pthread 
+//ff-c++-LIBRARY-dep:  mumps parmetis ptscotch  scalapack blacs blas  mpifc  fc mpi  pthread 
 //ff-c++-cpp-dep: 
 
 /* 
@@ -129,9 +129,9 @@ class SolverMumps : public MatriceMorse<double>::VirtualSolver {
                 _id->ICNTL(28) = 1;
                 _id->ICNTL(7)  = 7;
             }
-            else if(_strategy > 8 && _strategy < 12) {
-               _id->ICNTL(28) = 2;              // 2: parallel analysis
-               _id->ICNTL(29) = _strategy - 9;  //     0: automatic
+	    if(_strategy > 8 && _strategy < 12) {
+	      _id->ICNTL(28) = 2;              // 2: parallel analysis
+	      _id->ICNTL(29) = _strategy - 9;  //     0: automatic
             }                                   //     1: PT-STOCH
                                                 //     2: ParMetis
             _id->ICNTL(9)  = 1;
