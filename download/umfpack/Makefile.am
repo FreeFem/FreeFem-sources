@@ -35,6 +35,7 @@ $(UMFPACKLIB): SuiteSparse/FF
 	cp -f SuiteSparse/UFconfig/UFconfig.h  ../include
 	cp  SuiteSparse/UMFPACK/Lib/libumfpack.a ../lib/libumfpack.a
 	$(RANLIB) ../lib/libumfpack.a
+
 $(AMDLIB): SuiteSparse/FF 
 	cd SuiteSparse/AMD/Source && make 
 	-mkdir ../include ../lib
@@ -42,6 +43,12 @@ $(AMDLIB): SuiteSparse/FF
 	cp  SuiteSparse/AMD/Lib/libamd.a ../lib/libamd.a
 	$(RANLIB) ../lib/libamd.a
 
+$(CAMDLIB): SuiteSparse/FF 
+	cd SuiteSparse/CAMD/Source && make 
+	-mkdir ../include ../lib
+	cp -f  SuiteSparse/CAMD/Include/*.h ../include
+	cp  SuiteSparse/CAMD/Lib/libcamd.a ../lib/libcamd.a
+	$(RANLIB) ../lib/libcamd.a
 
 $(CHOLMODLIB): SuiteSparse/FF 
 	cd SuiteSparse/CHOLMOD/Lib && make 
