@@ -325,7 +325,7 @@ LIST_COMPILE = MUMPS_FreeFem.$(DYLIB_SUFFIX) hips_FreeFem.$(DYLIB_SUFFIX) \
 complex_SuperLU_DIST_FreeFem.$(DYLIB_SUFFIX) real_SuperLU_DIST_FreeFem.$(DYLIB_SUFFIX) \
 complex_pastix_FreeFem.$(DYLIB_SUFFIX) real_pastix_FreeFem.$(DYLIB_SUFFIX) \
 dSuperLU_DIST.$(DYLIB_SUFFIX) MPICG.$(DYLIB_SUFFIX) parms_FreeFem.$(DYLIB_SUFFIX) \
-mpi-cmaes.$(DYLIB_SUFFIX) 
+mpi-cmaes.$(DYLIB_SUFFIX) MUMPS.$(DYLIB_SUFFIX)  PARDISO.$(DYLIB_SUFFIX)
 
 all: all-am
 
