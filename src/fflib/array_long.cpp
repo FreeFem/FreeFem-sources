@@ -64,7 +64,7 @@ class OneBinaryOperatorInv_KN_long : public OneOperator { public:
           bool bb=p->EvaluableWithOutStack();
           cout << bb << " " <<  * p <<  endl;
           CompileError("Inverse:  int[int] I,  array, with  I^p, The p must be a constant == -1, sorry");}
-       long pv = GetAny<long>((*p)(0));
+       long pv = GetAny<long>((*p)(NullStack));
         if (pv !=-1)   
          { char buf[100];
            sprintf(buf,"Inverse:  int[int] I,  array, I^%ld, The pow must be  == -1, sorry",pv);

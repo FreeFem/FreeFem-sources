@@ -822,13 +822,13 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 };
 
 struct TypeSolveMat {
-    enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6 };
+    enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6, SparseSolverSym=7 };
     TSolveMat t;
     bool sym;
     bool profile;
     TypeSolveMat(TSolveMat tt=LU) :t(tt),
-    sym(t == CROUT || t ==CHOLESKY  ||  t==GC ),
-    profile(t != GC && t != GMRES && t != NONESQUARE && t != SparseSolver ) {}
+    sym(t == CROUT || t ==CHOLESKY  ||  t==GC || t==SparseSolverSym ),
+    profile(t == CROUT || t ==CHOLESKY  || t ==LU ) {}
     bool operator==(const TypeSolveMat & a) const { return t == a.t;}                               
     bool operator!=(const TypeSolveMat & a) const { return t != a.t;}
     static TSolveMat defaultvalue;
@@ -943,6 +943,25 @@ template<class R> struct DefSparseSolver {
       ret =(solver)(ARG_SPARSE_SOLVER(A));
     return ret;	
   }
+};
+
+// add Dec 2012 F.H. for optimisation .. 
+template<class R> struct DefSparseSolverSym {
+    typedef typename MatriceMorse<R>::VirtualSolver *
+    (*SparseMatSolver)(DCL_ARG_SPARSE_SOLVER(R,A) );
+    
+    static SparseMatSolver solver;
+    
+    static  typename MatriceMorse<R>::VirtualSolver *
+    
+    Build( DCL_ARG_SPARSE_SOLVER(R,A) )
+    
+    {
+        typename MatriceMorse<R>::VirtualSolver *ret=0;
+        if(solver)
+            ret =(solver)(ARG_SPARSE_SOLVER(A));
+        return ret;	
+    }
 };
 
 // End Sep 2007 for generic Space solver

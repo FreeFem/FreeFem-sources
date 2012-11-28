@@ -14,8 +14,14 @@ SUITESPARSE_TGZ=$(DIRPKG)/SuiteSparse-2.4.0.tar.gz
 
 UMFPACKLIB=../lib/libumfpack.a 
 AMDLIB=../lib/libamd.a
+CAMDLIB=../lib/libcamd.a
+CHOLMODLIB=../lib/libcholmod.a
 
-umfpack:$(UMFPACKLIB) $(AMDLIB)
+
+all: umfpack cholmod
+
+umfpack:$(AMDLIB)  $(UMFPACKLIB) 
+cholmod:$(CAMDLIB)  $(AMDLIB)  $(CHOLMODLIB) 
 
 # The 'lib' goal is replaced with 'libb' to avoid problems with the
 # existing 'Lib' subdirectory on case-insensitive file systems
@@ -35,6 +41,15 @@ $(AMDLIB): SuiteSparse/FF
 	cp -f  SuiteSparse/AMD/Include/*.h ../include
 	cp  SuiteSparse/AMD/Lib/libamd.a ../lib/libamd.a
 	$(RANLIB) ../lib/libamd.a
+
+
+$(CHOLMODLIB): SuiteSparse/FF 
+	cd SuiteSparse/CHOLMOD/Lib && make 
+	-mkdir ../include ../lib
+	cp -f  SuiteSparse/CHOLMOD/Include/*.h ../include
+	cp  SuiteSparse/CHOLMOD/Lib/libcholmod.a ../lib/libcholmod.a
+	$(RANLIB) ../lib/libcholmod.a
+
 UMFPACKv4.4:
 	tar xzf UMFPACKv4.4.tar.gz
 UMFPACKv4.4/AMD/Makefile2 UMFPACKv4.4/UMFPACK/Makefile2: UMFPACKv4.4  
@@ -54,6 +69,7 @@ SuiteSparse/UFconfig/UFconfig.mk:SuiteSparse/DATE Makefile UFconfig_mk.m4
 	     -DFF_RANLIB="@RANLIB@" \
              -DFF_LIB="@BLASLIB@ @LIBS@" \
 	     -DFF_CONFIG="@FF_UMFPACK_CONFIG@" \
+	     -DFF_DWL="@abs_srcdir@/.." \ 
               UFconfig_mk.m4 > UFconfig.mk
 	-if  diff UFconfig.mk SuiteSparse/UFconfig/UFconfig.mk  2>&1 >/dev/null; then \
 	    echo " same flags => no recompilation !  " ; \
@@ -61,6 +77,7 @@ SuiteSparse/UFconfig/UFconfig.mk:SuiteSparse/DATE Makefile UFconfig_mk.m4
 	   echo "  recompile umfpack (some flags change) => clean umfpack" ;\
 	   cp UFconfig.mk SuiteSparse/UFconfig/UFconfig.mk ; \
 	   cd SuiteSparse/UMFPACK && make clean; \
+	   cd SuiteSparse/COLAMD && make clean; \
 	   cd ../AMD && make clean; \
 	   cd ..;find . -name '*.exe'|xargs rm;  \
 	fi; 

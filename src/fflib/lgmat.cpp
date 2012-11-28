@@ -526,12 +526,18 @@ bool SetDefaultSolver()
     if(verbosity>1)
 	cout << " SetDefault sparse solver to UMFPACK" << endl;
     DefSparseSolver<double>::solver  =BuildSolverUMFPack;
-    DefSparseSolver<Complex>::solver =BuildSolverUMFPack;    
+    DefSparseSolver<Complex>::solver =BuildSolverUMFPack;
+    DefSparseSolverSym<double>::solver  =BuildSolverGMRES<double>;
+    DefSparseSolverSym<Complex>::solver =BuildSolverGMRES<Complex>;
+    
 #else
     if(verbosity>1)
 	cout << " SetDefault sparse solver to GMRES (no UMFPACK)" << endl;
     DefSparseSolver<double>::solver  =BuildSolverGMRES<double>;
-    DefSparseSolver<Complex>::solver =BuildSolverGMRES<Complex>;    
+    DefSparseSolver<Complex>::solver =BuildSolverGMRES<Complex>;
+    DefSparseSolverSym<double>::solver  =BuildSolverGMRES<double>;
+    DefSparseSolverSym<Complex>::solver =BuildSolverGMRES<Complex>;
+    
 #endif
     return true;
 
@@ -1580,7 +1586,7 @@ class OneBinaryOperatorA_inv : public OneOperator { public:
           bool bb=p->EvaluableWithOutStack();
           cout << bb << " " <<  * p <<  endl;
           CompileError(" A^p, The p must be a constant == -1, sorry");}
-       long pv = GetAny<long>((*p)(0));
+       long pv = GetAny<long>((*p)(NullStack));
         if (pv !=-1)   
          { char buf[100];
            sprintf(buf," A^%ld, The pow must be  == -1, sorry",pv);
@@ -2094,7 +2100,7 @@ template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args)
 	    aType rij = c_Mij.left();
 	    if ( rij == atype<long>() &&  eij->EvaluableWithOutStack() )
 	    {
-		long contm = GetAny<long>((*eij)(0));
+		long contm = GetAny<long>((*eij)(NullStack));
 		/*  prev  version
 		if(contm !=0) 
 		CompileError(" Block matrix , Just 0 matrix");

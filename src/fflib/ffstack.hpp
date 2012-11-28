@@ -50,13 +50,13 @@ const int BeginOffset = 6;
 #define NEWFFSTACKxxx
 
 #ifndef NEWFFSTACK
-
+typedef void StackType;
 typedef void *Stack;
 
 
  const Stack  NullStack=0;
 //typedef StackType& Stack;
-
+inline Stack pvoid2Stack(void * pv) { return pv;}
 
 template<class T>
 T * Stack_offset (Stack stack,size_t offset)  
@@ -89,7 +89,6 @@ struct PtrArrayType: public VOIDPtrType {
 };
 
 
-
 #else
 
 struct StackType;
@@ -106,6 +105,7 @@ struct StackType {
  operator void *() { return stack;}
  operator long *() { return (long *)(void *)stack;}
  operator void **() {return (void **) (void *) stack;}
+ operator StackType *() { return this;}
  template<class T> 
  T * Offset(size_t offset){ return (T*) (void*) (stack+offset);}
  template<class T> 
@@ -121,8 +121,9 @@ struct StackType {
  void clean() { delete []stack; delete [] MeshPointStack; }
 };
 
-StackType * NullStackPtr= 0;
-StackType & NullStack(*NullStackPtr);
+inline Stack pvoid2Stack(void * pv) { return *static_cast<StackType *>(pv) ;}
+static  StackType * NullStackPtr= 0;
+static StackType & NullStack(*NullStackPtr);
 //typedef StackType& Stack;
 
 
@@ -351,7 +352,7 @@ inline void deleteStack(Stack s)
  // s.clean();
  }
 #else
-  a faire ....
+//  a faire ....
 inline Stack newStack(size_t l)
  {
 /*  Stack thestack = new char[l];

@@ -1253,18 +1253,9 @@ long Op_Scatterv3( KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root,
   
   int mpisizew;
   MPI_Comm_size(root.comm, &mpisizew); /* local */ 
- //  ffassert( sendcnts.N() == displs.N() && sendcnts.N() == mpisizew );
-  // size control 
- // ffassert( r.N() == sendcnts[mpirankv] );
-  long sumsize=0;
-  for(int ii=0; ii<sendcnts.N(); ii++){
-    sumsize += sendcnts[ii];
-  }
- // ffassert( s.N() == sumsize );
-  
-  KN<int> INTsendcnts(sendcnts.N());
-  KN<int> INTdispls(displs.N());
-  for(int ii=0; ii< sendcnts.N(); ii++){
+  KN<int> INTsendcnts(mpirankv == root.who ? sendcnts.N() : 0);
+  KN<int> INTdispls(mpirankv == root.who ? sendcnts.N() : 0);
+  for(int ii=0; ii< INTsendcnts.N(); ii++){
     INTsendcnts[ii]= sendcnts[ii];
     INTdispls[ii]= displs[ii];
   }
@@ -1434,17 +1425,9 @@ long  Op_Gatherv3(KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root, 
   MPI_Comm_rank(root.comm, &mpirankw); 
   int mpisizew;
   MPI_Comm_size(root.comm, &mpisizew); 
- // ffassert( recvcount.N() == displs.N() && recvcount.N() == mpisizew);  fait dans mpi.. 
-  
-  if( mpirankw == root.who){
-    long sum=0;
-    for(int ii=0; ii< recvcount.N(); ii++)
-      sum+=recvcount[ii];
-   // ffassert( sum == r.N() );
-  }
-  KN<int> INTrecvcount(recvcount.N());
-  KN<int> INTdispls(displs.N());
-  for(int ii=0; ii< recvcount.N(); ii++){
+  KN<int> INTrecvcount(mpirankw == root.who ? recvcount.N() : 0);
+  KN<int> INTdispls(mpirankw == root.who ? recvcount.N() : 0);
+  for(int ii=0; ii< INTrecvcount.N(); ii++){
     INTrecvcount[ii]= recvcount[ii];
     INTdispls[ii]= displs[ii];
   }

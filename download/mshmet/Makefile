@@ -63,6 +63,7 @@ $(SRCDIR)/tag-tar: $(PACKAGE)
 	cp $(MSHMET_SRCDIRNOLIB)/*.c $(MSHMET_SRCDIRNOLIB)/*.h $(MSHMET_SRCDIR)
 	cp $(MSHMET_SRCDIRNOLIB)/compil.date $(MSHMET_SRCDIR)
 	cp mshmetlib-internal.h mshmetlib.c mshmetlib.h $(MSHMET_SRCDIR)/
+	cp ../../src/libMesh/chrono.h $(MSHMET_SRCDIR)
 	rm $(MSHMET_SRCDIR)/mshmet.c
 	rm $(MSHMET_SRCDIR)/chrono.c
 	cp ../../src/libMesh/eigenv.c $(MSHMET_SRCDIR)

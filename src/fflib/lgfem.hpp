@@ -399,7 +399,8 @@ class FEbaseArrayKn { public:// for eigen value
     int N;
     FEbaseArrayKn(int NN):N(NN){}
   virtual  void  set(int i,KN_<K> ) =0;
-virtual KN<K>* get(int i) = 0; // for P. Jolivet 
+virtual KN<K>* get (int i) const = 0; // for P. Jolivet 
+virtual void resize(int i) = 0; // for P. Jolivet 
 };
 
 template<class K,class v_fes>
@@ -422,14 +423,36 @@ public:
     delete [] xx;} 
   void destroy() { //cout << " destroy ~FEbaseArray " << endl; 
     delete this;}         
-  FEbase<K,v_fes>** operator[](int i)  {
+  FEbase<K,v_fes>** operator[](int i) const  {
     if(xx==0 || i <0 || i>=this->N) 
       ExecError("Out of bound in FEbaseArray");
     return xx+i;}  
     
+    void resize(int i) {
+        if(xx != 0 && i > 0 && i != this->N) {
+            FEbase<K,v_fes>** yy = new FEbase<K,v_fes>*[i];
+            if(i > this->N) {
+                for(unsigned int j = 0; j < this->N; ++j)
+                    yy[j] = xx[j];
+                for(unsigned int j = this->N; j < i; ++j)
+                    yy[j] = new FEbase<K,v_fes>(xx[0]->pVh);
+            }
+            else {
+                for(unsigned int j = 0; j < i; ++j)
+                    yy[j] = xx[j];
+                for(unsigned int j = i; j < this->N; ++j)
+                    xx[j]->destroy();
+            }
+             FEbase<K,v_fes>  **oldXx = this->xx;
+             this->xx = yy;
+             delete [] oldXx;
+             this->N = i;
+        }
+    }
+
     void  set(int i,KN_<K>  v){  **(operator[](i))=v;} 
     
-    KN<K>* get(int i){ return (**(operator[](i))).xx; }
+    KN<K>* get(int i)const { return (**(operator[](i))).xx; }
     
 private: // rule of programming 
   FEbaseArray(const FEbaseArray &);
@@ -440,8 +463,9 @@ void GetPeriodic(const int d,Expression perio,    int & nbcperiodic ,    Express
 int GetPeriodic(Expression  bb, Expression & b,Expression & f);
 int GetPeriodic(Expression  bb, Expression & b,Expression & f1,Expression & f2);
 
+
 /*
-template<class K>
+template<class K,int dim>
 class FE  { public:
 
   const pfes  *pVh; // pointeur sur la variable stockant FESpace;
@@ -465,7 +489,7 @@ class FE  { public:
      void operator= (const FE &); 
 };
 // bof bof pour test 
-
+/*
 template<class K,int comp>
 class FE_ : public FE<K>{public:
 

@@ -34,7 +34,7 @@ Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
 $(SRCDIR)/FAIT: $(SRCDIR)
 	cp Makefile.inc $(SRCDIR)/src/
 	cd $(SRCDIR)/src/; make scotch
-	test -n "$(CCP)" && ( cd $(SRCDIR)/src/; make ptscotch)
+	test -z "$(CCP)" || ( cd $(SRCDIR)/src/; make ptscotch)
 	touch $(SRCDIR)/FAIT
 
 install:$(SRCDIR)/FAIT
