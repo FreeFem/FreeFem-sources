@@ -2673,6 +2673,27 @@ class PrintErrorCompileIM :  public E_F0info { public:
 
 };
 
+//  the 2 default sparse solver double and complex
+DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
+DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
+DefSparseSolverSym<double>::SparseMatSolver SparseMatSolverSym_R ; ;
+DefSparseSolverSym<Complex>::SparseMatSolver SparseMatSolverSym_C;
+// the default probleme solver 
+TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
+
+bool SetDefault()
+{
+    if(verbosity>1)
+	cout << " SetDefault sparse to default" << endl;
+    DefSparseSolver<double>::solver =SparseMatSolver_R;
+    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
+    DefSparseSolverSym<double>::solver =SparseMatSolverSym_R;
+    DefSparseSolverSym<Complex>::solver =SparseMatSolverSym_C;
+    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
+    return  true;
+}
+
+
 bool SparseDefault()
 {
     return TypeSolveMat::SparseSolver== TypeSolveMat::defaultvalue;
@@ -2684,6 +2705,11 @@ bool Have_UMFPACK() { return Have_UMFPACK_;}
 void  init_lgmat() 
 
 {
+  SparseMatSolver_R= DefSparseSolver<double>::solver;
+  SparseMatSolver_C= DefSparseSolver<Complex>::solver;
+  SparseMatSolverSym_R= DefSparseSolverSym<double>::solver;
+  SparseMatSolverSym_C= DefSparseSolverSym<Complex>::solver;
+
   
   Dcl_Type<const  MatrixInterpolation<pfes>::Op *>(); 
   Dcl_Type<const  MatrixInterpolation<pfes3>::Op *>(); 
@@ -2708,6 +2734,7 @@ void  init_lgmat()
   Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
   Global.Add("defaulttoCG","(",new OneOperator0<bool>(SetCG));
   Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
+  Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   
   Dcl_Type< Resize<Matrice_Creuse<double> > > ();
   

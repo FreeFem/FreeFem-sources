@@ -309,14 +309,7 @@ DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
-bool SetDefault()
-{
-    if(verbosity>1)
-	cout << " SetDefault sparse to default" << endl;
-    DefSparseSolver<double>::solver =SparseMatSolver_R;
-    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
-    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
-}
+
 
 bool SetUMFPACK()
 {
@@ -325,6 +318,7 @@ bool SetUMFPACK()
     DefSparseSolver<double>::solver  =BuildSolverIUMFPack;
     DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;    
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+    return  true;
 }
 
 class Init { public:
@@ -340,10 +334,7 @@ Init::Init(){
   
   DefSparseSolver<double>::solver =BuildSolverIUMFPack;
   DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
-  if(! Global.Find("defaultsolver").NotNull() )
-    {    cout << "\n add defaultsolver" << endl;
-    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-  }
+
   if(! Global.Find("defaulttoUMFPACK").NotNull() )
     Global.Add("defaulttoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));  
 }

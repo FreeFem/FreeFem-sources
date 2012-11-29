@@ -759,14 +759,6 @@ DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
-bool SetDefault()
-{
-    if(verbosity>1)
-	cout << " SetDefault sparse to default" << endl;
-    DefSparseSolver<double>::solver =SparseMatSolver_R;
-    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
-    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
-}
 
 bool SetSuperLU()
 {
@@ -775,6 +767,7 @@ bool SetSuperLU()
     DefSparseSolver<double>::solver  =BuildSolverSuperLU;
     DefSparseSolver<Complex>::solver =BuildSolverSuperLU;    
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+    return  true;
 }
 
 
@@ -791,8 +784,6 @@ Init::Init()
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   DefSparseSolver<double>::solver =BuildSolverSuperLU;
   DefSparseSolver<Complex>::solver =BuildSolverSuperLU;
-  if(! Global.Find("defaultsolver").NotNull() )
-    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   Global.Add("defaulttoSuperLU","(",new OneOperator0<bool>(SetSuperLU));
 }
 
