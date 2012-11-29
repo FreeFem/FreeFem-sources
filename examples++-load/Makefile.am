@@ -56,7 +56,8 @@ ff-Ipopt.cpp \
 IpoptLap.edp IpoptVI.edp IpoptVI2.edp IpoptMinSurfVol.edp  \
 scotch.cpp scotch.edp  shell.edp shell.cpp \
 pipe.cpp pipe.edp \
-symmetrizeCSR.cpp
+symmetrizeCSR.cpp \
+PARDISO.edp    dmatrix.hpp PARDISO.cpp             
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -78,13 +79,14 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
 	pipe.$(DYLIB_SUFFIX)  symmetrizeCSR.$(DYLIB_SUFFIX) 
 
-
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) \
 	metis.$(DYLIB_SUFFIX) UMFPACK64.$(DYLIB_SUFFIX) NewSolver.$(DYLIB_SUFFIX) \
 	lapack.$(DYLIB_SUFFIX)  fflapack.$(DYLIB_SUFFIX) ffnewuoa.$(DYLIB_SUFFIX) ilut.$(DYLIB_SUFFIX) \
 	freeyams.$(DYLIB_SUFFIX) mmg3d-v4.0.$(DYLIB_SUFFIX) mshmet.$(DYLIB_SUFFIX) \
 	gsl.$(DYLIB_SUFFIX) MUMPS_seq.$(DYLIB_SUFFIX) 	 ff-Ipopt.$(DYLIB_SUFFIX) \
-	ff-NLopt.$(DYLIB_SUFFIX)  ff-cmaes.$(DYLIB_SUFFIX) scotch.$(DYLIB_SUFFIX) 
+	ff-NLopt.$(DYLIB_SUFFIX)  ff-cmaes.$(DYLIB_SUFFIX) scotch.$(DYLIB_SUFFIX) \
+	PARDISO.$(DYLIB_SUFFIX)
+
 bin_PROGRAMS=
 
 
