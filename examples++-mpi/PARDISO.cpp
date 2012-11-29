@@ -36,28 +36,42 @@
 #include "MatriceCreuse.hpp"
 #include "dmatrix.hpp"
 
-class SolverPardiso : public MatriceMorse<double>::VirtualSolver {
+template<typename RR> struct  PARDISO_STRUC_TRAIT {  typedef void R;static  const int unSYM=0;static const int SYM=0;};
+template<> struct PARDISO_STRUC_TRAIT<double>  { typedef double R;static const int unSYM=11;static const int SYM=2;};
+template<> struct PARDISO_STRUC_TRAIT<Complex>  { typedef Complex R;static const int unSYM=13;static const int SYM=-4;};
+
+void mkl_csrcsc (MKL_INT * job, MKL_INT * n, Complex *Acsr, MKL_INT * AJ0, MKL_INT * AI0, Complex *Acsc, MKL_INT * AJ1, MKL_INT * AI1, MKL_INT * info)
+{ mkl_zcsrcsc (job,n,reinterpret_cast<MKL_Complex16*>(Acsr),AJ0,AI0,reinterpret_cast<MKL_Complex16*>(Acsc),AJ1,AI1,info);}
+
+void mkl_csrcsc (MKL_INT * job, MKL_INT * n, double *Acsr, MKL_INT * AJ0, MKL_INT * AI0, double *Acsc, MKL_INT * AJ1, MKL_INT * AI1, MKL_INT * info)
+{ mkl_dcsrcsc (job,n,Acsr,AJ0,AI0,Acsc,AJ1,AI1,info);}
+
+
+template<class R>
+class SolverPardiso : public MatriceMorse<R>::VirtualSolver {
     private:
         mutable void* _pt[64];
         mutable MKL_INT _mtype;
         mutable MKL_INT _iparm[64];
-        mutable MatriceMorse<double>* ptA;
+        mutable MatriceMorse<R>* ptA;
         MKL_INT* _I;
         MKL_INT* _J;
-
+    
     public:
-        SolverPardiso(const MatriceMorse<double> &A, KN<long> &param_int, KN<double> &param_double, MPI_Comm* comm) {
-            ptA = (MatriceMorse<double>*)(&A);
+    typedef typename  PARDISO_STRUC_TRAIT<R>::R MR;
+
+        SolverPardiso(const MatriceMorse<R> &A, KN<long> &param_int, KN<double> &param_double, MPI_Comm* comm) {
+            ptA = (MatriceMorse<R>*)(&A);
             MKL_INT phase, error, msglvl;
-            double ddum;
-            double* _C;
+            MR ddum;
+            R* _C;
             if(A.symetrique)
-                _mtype = 2;
+                _mtype =  PARDISO_STRUC_TRAIT<R>::SYM;
             else {
                 if(param_int)
                     _mtype = param_int[0];
                 else
-                    _mtype = 11;
+                    _mtype = PARDISO_STRUC_TRAIT<R>::unSYM;
             }
             for (unsigned short i = 0; i < 64; ++i) {
                 _iparm[i] = 0;
@@ -101,32 +115,32 @@ class SolverPardiso : public MatriceMorse<double>::VirtualSolver {
                     int job[6] = { 0, 0, 0, 0, 0, 1 };
                     _I = new MKL_INT[n + 1];
                     _J = new MKL_INT[A.nbcoef];
-                    _C = new double[A.nbcoef];
-                    mkl_dcsrcsc(job, &n, A.a, A.cl, A.lg, _C, _J, _I, &error);
+                    _C = new R[A.nbcoef];
+                    mkl_csrcsc(job, &n, reinterpret_cast<MR*>( A.a), A.cl, A.lg, reinterpret_cast<MR*>(_C), _J, _I, &error);
                 }
                 else {
                     _I = new MKL_INT[n + 1];
                     _J = new MKL_INT[n + (A.nbcoef - n) / 2];
-                    _C = new double[n + (A.nbcoef - n) / 2];
-                    trimCSR<true, 'C'>(n, _I, A.lg, _J, A.cl, _C, A.a);
+                    _C = new R[n + (A.nbcoef - n) / 2];
+                    trimCSR<true, 'C',R>(n, _I, A.lg, _J, A.cl, _C, A.a);
                 }
             }
             PARDISO(_pt, &one, &one, &_mtype, &phase,
-                    &n, _C, _I, _J, &one, &one, _iparm, &msglvl, &ddum, &ddum, &error);
+                    &n, reinterpret_cast<MR*>(_C), _I, _J, &one, &one, _iparm, &msglvl, &ddum, &ddum, &error);
             if(_C != A.a)
                 delete [] _C;
         };
 
-        void Solver(const MatriceMorse<double> &A, KN_<double> &x, const KN_<double> &b) const  {
+        void Solver(const MatriceMorse<R> &A, KN_<R> &x, const KN_<R> &b) const  {
             MKL_INT one    = 1;
             MKL_INT msglvl = 0;
             if(verbosity > 1)
                 msglvl = 1;
             MKL_INT error  = 0;
             MKL_INT phase = 33;
-            double ddum;
+            MR ddum;
             MKL_INT n = A.n;
-            PARDISO(_pt, &one, &one, &_mtype, &phase, &n, &ddum, _I, _J, &one, &one, _iparm, &msglvl, b, x, &error);
+            PARDISO(_pt, &one, &one, &_mtype, &phase, &n, &ddum, _I, _J, &one, &one, _iparm, &msglvl, reinterpret_cast<MR*>((R*)b), reinterpret_cast<MR*>((R*)x), &error);
         };
 
         ~SolverPardiso() {
@@ -134,7 +148,7 @@ class SolverPardiso : public MatriceMorse<double>::VirtualSolver {
             MKL_INT one = 1;
             MKL_INT msglvl = 0;
             MKL_INT error;
-            double ddum;
+            MR ddum;
             MKL_INT idum;
             MKL_INT n = ptA->n;
             PARDISO(_pt, &one, &one, &_mtype, &phase, &n, &ddum, &idum, &idum, &one, &one, _iparm, &msglvl, &ddum, &ddum, &error);
@@ -147,21 +161,52 @@ class SolverPardiso : public MatriceMorse<double>::VirtualSolver {
         };
 };
 
-
-MatriceMorse<double>::VirtualSolver* buildSolver(DCL_ARG_SPARSE_SOLVER(double, A)) {
-    return new SolverPardiso(*A, ds.lparams, ds.dparams, (MPI_Comm*)ds.commworld);
+template<class R>
+typename MatriceMorse<R>::VirtualSolver* buildSolver(DCL_ARG_SPARSE_SOLVER(R, A)) {
+    return new SolverPardiso<R>(*A, ds.lparams, ds.dparams, (MPI_Comm*)ds.commworld);
 }
-
+TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
+bool SetPARDISO()
+{
+    if(verbosity>1)
+        cout << " SetDefault sparse solver to MUMPS" << endl;
+    DefSparseSolver<double>::solver  = buildSolver<double>;
+    DefSparseSolver<Complex>::solver = buildSolver<Complex>;
+    DefSparseSolverSym<double>::solver  = buildSolver<double>;
+    DefSparseSolverSym<Complex>::solver = buildSolver<Complex>;
+    TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+    return 0;
+}
+/*
 class Init {
     public:
         Init();
 };
 
-DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R;
+
 
 LOADINIT(Init);
 
 Init::Init() {
     TypeSolveMat::defaultvalue = TypeSolveMat::SparseSolver;
-    DefSparseSolver<double>::solver = buildSolver;
+    DefSparseSolver<double>::solver = buildSolver<double>;
+    DefSparseSolver<Complex>::solver = buildSolver<Complex>;
 }
+*/
+
+void initPARDISO()
+{
+    
+    if(verbosity>1)
+        cout << "\n Add: PARDISO:  defaultsolver defaultsolverPARDISO" << endl;
+    DefSparseSolver<double>::solver  = buildSolver;
+    DefSparseSolver<Complex>::solver = buildSolver;
+    DefSparseSolverSym<double>::solver  = buildSolver;
+    DefSparseSolverSym<Complex>::solver = buildSolver;
+    TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+     if(! Global.Find("defaulttoPARDISO").NotNull() )
+        Global.Add("defaulttoPARDISO","(",new OneOperator0<bool>(SetPARDISO));
+}
+
+
+LOADFUNC(initPARDISO);
