@@ -21,11 +21,8 @@ parms_FreeFem.cpp \
 real_SuperLU_DIST_FreeFem.cpp \
 real_pastix_FreeFem.cpp mpi-cmaes.cpp \
 ffmumps_fileparam.txt		ffpastix_iparm_dparm.txt	ffsuperlu_dist_fileparam.txt \
-MUMPS.cpp               PARDISO.edp     \
-MUMPS.edp               dmatrix.hpp \
-PARDISO.cpp             
-
-
+MUMPS.cpp   \
+MUMPS.edp  dmatrix.hpp              
 
 
 LIST_COMPILE=MUMPS_FreeFem.$(DYLIB_SUFFIX) hips_FreeFem.$(DYLIB_SUFFIX) \
@@ -33,7 +30,7 @@ LIST_COMPILE=MUMPS_FreeFem.$(DYLIB_SUFFIX) hips_FreeFem.$(DYLIB_SUFFIX) \
 complex_SuperLU_DIST_FreeFem.$(DYLIB_SUFFIX) real_SuperLU_DIST_FreeFem.$(DYLIB_SUFFIX) \
 complex_pastix_FreeFem.$(DYLIB_SUFFIX) real_pastix_FreeFem.$(DYLIB_SUFFIX) \
 dSuperLU_DIST.$(DYLIB_SUFFIX) MPICG.$(DYLIB_SUFFIX) parms_FreeFem.$(DYLIB_SUFFIX) \
-mpi-cmaes.$(DYLIB_SUFFIX) MUMPS.$(DYLIB_SUFFIX)  PARDISO.$(DYLIB_SUFFIX)
+mpi-cmaes.$(DYLIB_SUFFIX) MUMPS.$(DYLIB_SUFFIX)  
 
 all-local:$(LIST_COMPILE) freefem++.pref
 	echo "finish compile load mpi solver !"
