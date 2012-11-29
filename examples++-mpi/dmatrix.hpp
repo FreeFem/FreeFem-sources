@@ -58,8 +58,8 @@ static void CSR2COO(unsigned int n, int* compressedI, int* uncompressedI) {
     }
 };
 
-template<bool WithDiagonal, unsigned char N>
-static unsigned int trimCSR(unsigned int n, int* trimmedI, int* untrimmedI, int* trimmedJ, int* untrimmedJ, double* trimmedC, double* untrimmedC) {
+template<bool WithDiagonal, unsigned char N,typename Scalar>
+static unsigned int trimCSR(unsigned int n, int* trimmedI, int* untrimmedI, int* trimmedJ, int* untrimmedJ, Scalar* trimmedC, Scalar* untrimmedC) {
     unsigned int upper = 0;
     for(unsigned int i = 0; i < n - WithDiagonal; ++i) {
         trimmedI[i] = upper + (N == 'F');
