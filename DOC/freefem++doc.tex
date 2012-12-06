@@ -4513,6 +4513,17 @@ A=[I,J,C]; // set a new matrix
 matrix D=[diagofA] ; // set a diagonal matrix D from the array diagofA. \index{diagonal matrix}
 cout << " D = " << D << endl;
 \eFF
+ For the second case, it is just
+ a map of the STL\footnote{Standard template Library, now part of standard \Cpp}\cite{cpp}
+ so no  operations on vector are allowed,   except the
+ selection of an item  . \index{dot product}\index{transpose}
+
+The transpose or Hermitian conjugation operator is \texttt{\string'} as in  Matlab or Scilab, so the way
+to compute the dot product of two array \ttCC{a,b} is  \ttCC{@real\ ab=\ a'*b}\index{product!dot}.
+\index{dot}\index{array!dot}
+
+
+
 The resizing of a sparse matrix $A$ \index{resize}\index{matrix!resize} is also allowed:
 \bFF
 A.resize(10,100);
@@ -4690,7 +4701,15 @@ the library lapack on you system and try in directory \texttt{examples++-load}
 
 It is also possible to make an array of FE functions, with the same syntax,
 and we can treat them as \emph{vector valued function} if we need them.
-\index{array}\index{array!FE function}
+\index{array}\index{array!FE function}, the syntax for space or vector finite function is
+\bFF
+@int n = 100; // size of the array. 
+Vh[@int] wh(n);// real scalar case 
+Wh[@int] [uh,vh](n); // real vectorial case 
+Vh<@complex>[@int] cwh(n);// complex scalar  case
+Wh<@complex>[@int] [cuh,cvh](n); // complex vectorial case 
+[cuh[2],cvh[2]]= [x,y]; // set interpolation of index 2.  
+\eFF
 \begin{example}
 In the following example, Poisson's equation is solved for 3 different given
 functions $f=1,\, \sin(\pi x)\cos(\pi y),\, |x-1||y-1|$, whose solutions are
@@ -4702,38 +4721,26 @@ Vh u, v, f;
 @problem @Poisson(u,v) =
     @int2d(Th)( @dx(u)*@dx(v) + @dy(u)*@dy(v))
      + @int2d(Th)( -f*v ) + @on(1,2,3,4,u=0) ;
-Vh[int] uu(3); // an array of FE function
+Vh[@int] uu(3); // an array of FE function
 f=1;   // problem1
 Poisson; uu[0] = u;
 f=sin(pi*x)*cos(pi*y);  // problem2
 Poisson; uu[1] = u;
 f=abs(x-1)*abs(y-1);    // problem3
 Poisson; uu[2] = u;
-@for (int i=0; i<3; i++)  // plots all solutions
+@for (@int i=0; i<3; i++)  // plots all solutions
   @plot(uu[i], @wait=true);
 \eFF
 \end{example}
 
+\subsection{Map arrays}
  For the second case, it is just
  a map of the STL\footnote{Standard template Library, now part of standard \Cpp}\cite{cpp}
  so no  operations on vector are allowed,   except the
  selection of an item  . \index{dot product}\index{transpose}
-
-The transpose or Hermitian conjugation operator is \texttt{\string'} as in  Matlab or Scilab, so the way
-to compute the dot product of two array \ttCC{a,b} is  \ttCC{@real\ ab=\ a'*b}\index{product!dot}.
 \index{min}\index{array!min}
 \bFF
-@int i;
-@real [int] tab(10), tab1(10); // 2 array of 10 real
-  \it  real [int] tab2;    //  Error: array with no size
-tab = 1;                //  set all the array to 1
-tab[1]=2;
-@cout << tab[1] << " " << tab[9] << " size of tab = "
-     << tab.n << " " << tab.min << " " << tab.max << " " <<  @endl;
-tab1=tab; tab=tab+tab1; tab=2*tab+tab1*5; tab1=2*tab-tab1*5;
-tab+=tab; @cout << " dot product " << tab'*tab << @endl; //${}^{t}{tab}\,{tab} $
-@cout << tab << @endl; @cout << tab[1] << " "
-<< tab[9] <<  @endl; @real[string] map;        //  a dynamic array
+@real[string] map;        //  a dynamic array
 @for (i=0;i<10;i=i+1)
   {
     tab[i] = i*i;
@@ -4745,6 +4752,7 @@ map[2]=3.0;             //  2 is automatically cast to the string "2"
 
 @cout << " map[\"1\"] = " << map["1"] << "; "<< @endl;
 @cout << " map[2] = " << map[2] << "; "<< @endl;
+
 \eFF
 
 
@@ -10161,7 +10169,7 @@ Now with version 3.2 or better
 @mesh Th=square(10,10,[2*x-1,2*y-1]);
 @fespace Vh(Th,P1);
 Vh u=2-x*x-y*y;
-@medit("mm",u);
+@medit("mm",Th,u);
 \eFF
 
 \index{medit}\index{exec}

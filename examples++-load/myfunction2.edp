@@ -4,5 +4,6 @@
 
  load "myfunction2"
   string toto="xxxx";
- myfunction(toto);
- myfunction("qqsdqs.wwc.dqqs");
+ Why(toto);
+ Why("qqsdqs.wwc.dqqs");
+ cout << f(3.) << endl; 
