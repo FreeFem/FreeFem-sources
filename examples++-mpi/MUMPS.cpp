@@ -245,17 +245,6 @@ DefSparseSolverSym<Complex>::SparseMatSolver SparseMatSolverSym_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
-bool SetDefault()
-{
-    if(verbosity>1)
-	cout << " SetDefault sparse to default" << endl;
-    DefSparseSolver<double>::solver =SparseMatSolver_R;
-    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
-    DefSparseSolverSym<double>::solver =SparseMatSolverSym_R;
-    DefSparseSolverSym<Complex>::solver =SparseMatSolverSym_C;
-    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
-}
-
 bool SetMUMPS()
 {
     if(verbosity>1)
@@ -265,6 +254,7 @@ bool SetMUMPS()
     DefSparseSolverSym<double>::solver  = buildSolver<double>;
     DefSparseSolverSym<Complex>::solver = buildSolver<Complex>; 
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+    return  true;
 }
 
 
@@ -282,12 +272,6 @@ void initMUMPS()
   DefSparseSolverSym<double>::solver  = buildSolver;
   DefSparseSolverSym<Complex>::solver = buildSolver; 
   TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
-  if(! Global.Find("defaultsolver").NotNull() )
-    { 
-      if(verbosity)
-	cout << "\n add defaultsolver " << endl;
-      Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-    }
   if(! Global.Find("defaulttoMUMPS").NotNull() )
     Global.Add("defaulttoMUMPS","(",new OneOperator0<bool>(SetMUMPS));  
 }

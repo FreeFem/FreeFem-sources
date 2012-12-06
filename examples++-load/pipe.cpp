@@ -2,10 +2,12 @@
 //  warning do not compile under windows...
 #include "ff++.hpp"
 #include <ext/stdio_filebuf.h>
+#include <cstdio> 
 //#include "pstream.h"
 
 typedef __gnu_cxx::stdio_filebuf<char> stdiofilebuf;
-
+long ffsleep(long  s) { return sleep(s);}
+long ffusleep(long  s) { return usleep(s);}
 struct pstream {
     FILE * f; 
     stdiofilebuf * fb;
@@ -79,7 +81,13 @@ class istream_good { public:
     istream * f;
     operator bool () const {return f->good();}
 };
-
+long cflush(pstream ** ppf) 
+{
+  pstream & f = **ppf;
+  if( f.os ) f.os->flush();
+  if( f.f) fflush(f.f);
+  return  0; 
+}; 
 inline istream_good to_istream_good(pstream **f){ ffassert((**f).is) ; return istream_good((**f).is);}
 inline bool get_eof(pstream ** p){ return (**p).is ? (**p).is->eof(): EOF;}
 void inittt()
@@ -92,6 +100,9 @@ void inittt()
   zzzfff->Add("pstream",atype< pstream ** >());
   Add<pstream**>("good",".",new OneOperator1<istream_good,pstream**>(to_istream_good));
   Add<pstream**>("eof",".",new OneOperator1<bool,pstream**>(get_eof));
+  Global.Add("flush","(",new OneOperator1<long,pstream **> ( cflush)) ; 
+  Global.Add("sleep","(",new OneOperator1<long,long> ( ffsleep)) ; 
+  Global.Add("usleep","(",new OneOperator1<long,long> ( ffusleep)) ; 
 #ifdef WIN32
    Global.New("onWIN32",CConstant<bool>(true));
 #else    

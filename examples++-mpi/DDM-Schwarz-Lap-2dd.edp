@@ -1,4 +1,4 @@
-// NBPROC 50
+// NBPROC 10
 /*
   a first true parallele example fisrt freefem++ 
   Ok up to 200 proc for a Poisson equation.. 
