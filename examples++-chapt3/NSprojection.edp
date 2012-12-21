@@ -20,6 +20,25 @@ real influx0  = int1d(Th,1) (ubc*N.x),
      outflux0 = int1d(Th,3) (ubc*N.x);
  if(verbosity>2) cout <<  " flux in " << influx0 << " out : " << outflux0 << endl;
  verbosity=1;
+ real epsv = 1e-6;
+ real epsu = 1e-6;
+ real epsp = 1e-6;
+ // def of Matrix dtMx and dtMy
+ matrix dtM1x,dtM1y; 
+ { // for memory managenemt ...
+   varf vM(unused,v) = int2d(Th)(v) ;
+   varf vdx(u,v) = int2d(Th)(v*dx(u)*dt) ;
+   varf vdy(u,v) = int2d(Th)(v*dy(u)*dt) ;
+
+   real[int] Mlump = vM(0,Vh); 
+   real[int] one(Vh.ndof); one = 1;  
+   real[int] M1 =  one ./ Mlump; 
+   matrix dM1 = M1;
+   matrix Mdx = vdx(Vh,Vh);
+   matrix Mdy = vdy(Vh,Vh);
+   dtM1x = dM1*Mdx;
+   dtM1y = dM1*Mdy; 
+ }
 for(int n=0;n<300;n++){
 	
   Vh uold = u,  vold = v, pold=p;
@@ -33,33 +52,60 @@ for(int n=0;n<300;n++){
   assert( abs(influx0+outflux) < 1e-10);
   // WARNING the the output flux must be 0 ..
   
-  solve pb4u(u,w,init=n,solver=LU)
+  solve pb4u(u,w,init=n,solver=CG,eps=epsu)
         =int2d(Th)(u*w/dt +nu*(dx(u)*dx(w)+dy(u)*dy(w)))
         -int2d(Th)((convect([uold,vold],-dt,uold)/dt-dx(p))*w)
         + on(1,u = 4*y*(1-y)) + on(2,4,u = 0) + on(3,u=f);
   plot(u);
 
-  solve pb4v(v,w,init=n,solver=LU)
+  solve pb4v(v,w,init=n,solver=CG,eps=epsv)
         = int2d(Th)(v*w/dt +nu*(dx(v)*dx(w)+dy(v)*dy(w)))
         -int2d(Th)((convect([uold,vold],-dt,vold)/dt-dy(p))*w)
         +on(1,2,3,4,v = 0);
 
  real meandiv = int2d(Th)(dx(u)+dy(v))/area;
 
- solve pb4p(q,w,init=n,solver=LU)= int2d(Th)(dx(q)*dx(w)+dy(q)*dy(w))
+ solve pb4p(q,w,solver=CG,init=n,eps=epsp) = int2d(Th)(dx(q)*dx(w)+dy(q)*dy(w))
     - int2d(Th)((dx(u)+ dy(v)-meandiv)*w/dt)+ on(3,q=0);
 
  real meanpq = int2d(Th)(pold - q)/area;
- if(n%50==49){
+
+ // to have absolute epsilon in CG algorithm. 
+ cout << epsv << endl; 
+  epsv = -abs(epsv);
+  epsu = -abs(epsu);
+  epsp = -abs(epsp);
+
+ p = pold-q-meanpq;
+ pold[] = dtM1x*q[];
+ u[] += pold[];
+ pold[] = dtM1y*q[];
+ v[] += pold[];
+ /*
+ u = u + dx(q)*dt;
+ v = v + dy(q)*dt;
+ */
+  if(n%50==49){
     Th = adaptmesh(Th,[u,v],q,err=0.04,nbvx=100000);
     plot(Th, wait=true);
     ubc = uBCin + uBCout; // reinterpolate B.C. 
     influx0 = int1d(Th,1) (ubc*N.x);
     outflux0 = int1d(Th,3) (ubc*N.x);
+   varf vM(unused,v) = int2d(Th)(v) ;
+   varf vdx(u,v) = int2d(Th)(v*dx(u)*dt) ;
+   varf vdy(u,v) = int2d(Th)(v*dy(u)*dt) ;
+
+   real[int] Mlump = vM(0,Vh); 
+   real[int] one(Vh.ndof); one = 1;  
+   real[int] M1 =  one ./ Mlump; 
+   matrix dM1 = M1;
+   matrix Mdx = vdx(Vh,Vh);
+   matrix Mdy = vdy(Vh,Vh);
+   dtM1x = dM1*Mdx;
+   dtM1y = dM1*Mdy; 
+   pold = pold;
  }
- p = pold-q-meanpq;
- u = u + dx(q)*dt;
- v = v + dy(q)*dt;
+ 
  real err = sqrt(int2d(Th)(square(u-uold)+square(v-vold))/Th.area) ;
  cout << " iter " << n << " Err L2 = " << err << endl;
  if(err < 1e-3) break;
