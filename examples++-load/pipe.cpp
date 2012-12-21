@@ -34,7 +34,7 @@ struct pstream {
 };
 
 //typedef redi::pstream pstream;
-typedef std::string string;
+// typedef std::string string;
 
 static pstream **  pstream_init(pstream **const & p,string * const & a,string * const & b)
 {

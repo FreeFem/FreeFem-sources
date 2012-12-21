@@ -50,7 +50,7 @@ FAIRE: $(SRCDIR)/FAIT
 	$(MAKE) WHERE
 	touch FAIRE 
 
-SLmake.inc: ../../config.status	Makefile
+SLmake.inc: ../../config.status	Makefile SLmake-scalapack.inc
 	../../config.status  --file="SLmake.inc:SLmake-scalapack.inc"
 
 $(SRCDIR)/tag-tar: $(PACKAGE1)
