@@ -58,3 +58,5 @@ SCALAPACKLIB  = libscalapack.a
 BLASLIB       = $(FFBLASLIB)
 LAPACKLIB     = $(FFLAPACKLIB)
 LIBS          = $(LAPACKLIB) $(BLASLIB)
+
+WGET = @WGET@
