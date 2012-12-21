@@ -3,6 +3,7 @@
 #include "ff++.hpp"
 #include <ext/stdio_filebuf.h>
 #include <cstdio> 
+#include <unistd.h>
 //#include "pstream.h"
 
 typedef __gnu_cxx::stdio_filebuf<char> stdiofilebuf;
