@@ -28,9 +28,9 @@ CDEFS         = @CFLAGSF77@ -DNO_IEEE $(USEMPI)
 
 FC            = @MPIF77@ 
 CC            = @MPICC@ 
-NOOPT         = -O0
-FCFLAGS       = -O3
-CCFLAGS       = -O3
+NOOPT         = -O0 $(CNOFLAGS)
+FCFLAGS       = -O3 $(CNOFLAGS)
+CCFLAGS       = -O3 $(CNOFLAGS)
 FCLOADER      = $(FC)
 CCLOADER      = $(CC)
 FCLOADFLAGS   = $(FCFLAGS)
