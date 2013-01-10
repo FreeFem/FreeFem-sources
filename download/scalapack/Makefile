@@ -23,6 +23,7 @@ DIR5 = PBLAS/SRC/PTOOLS/*.o
 DIR6 = PBLAS/SRC/*.o
 DIR7 = REDIST/SRC/*.o
 DIR8 = SRC/*.o
+DIR9 = BLACS/SRC/*.o
 
 scalapack: FAIRE
 
@@ -30,7 +31,7 @@ $(SRCDIR)/FAIT:$(SRCDIR)/tag-tar
 	cp SLmake.inc $(SRCDIR)
 	cd $(SRCDIR);$(MAKE) lib
 	rm $(SRCDIR)/libscalapack.a
-	cd $(SRCDIR);$(ARCH) $(ARCHFLAGS) libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8)	
+	cd $(SRCDIR);$(ARCH) $(ARCHFLAGS) libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8) $(DIR9)	
 	$(RANLIB) $(SRCDIR)/libscalapack.a
 	touch $(SRCDIR)/FAIT
 install:
