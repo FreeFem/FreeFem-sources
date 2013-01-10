@@ -78,8 +78,8 @@ ipopt/Makefile	\
 ipopt/Makefile.inc.in \
 ipopt/patch-IpBlas 
 
-
-MPI_SOFT=blacs parmetis  scalapack scotch superludist mumps pastix  hips parms 
+# blacs is include in  scalapack 2.0.2 
+MPI_SOFT= parmetis  scalapack scotch superludist mumps pastix  hips parms 
 LIST_SOFT=tetgen superlu fftw metis mshmet yams mmg3d gmm  nlopt mumps-seq ipopt 
 all-recursive: bin lib include pkg
 
