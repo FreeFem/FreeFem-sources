@@ -27,13 +27,13 @@ DIR9 = BLACS/SRC/*.o BLACS/SRC/*.oo
 
 scalapack: FAIRE
 
-$(SRCDIR)/FAIT:$(SRCDIR)/tag-tar
+$(SRCDIR)/FAIT-202:$(SRCDIR)/tag-tar
 	cp SLmake.inc $(SRCDIR)
 	cd $(SRCDIR);$(MAKE) lib
 	rm $(SRCDIR)/libscalapack.a
 	cd $(SRCDIR);$(ARCH) $(ARCHFLAGS) libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8) $(DIR9)	
 	$(RANLIB) $(SRCDIR)/libscalapack.a
-	touch $(SRCDIR)/FAIT
+	touch $(SRCDIR)/FAIT-202
 install:
 	mkdir -p $(SRCDIR)/$(INSTALL)/include
 	cp $(SRCDIR)/SRC/*.h $(SRCDIR)/$(INSTALL)/include
@@ -41,13 +41,13 @@ install:
 	cp $(SRCDIR)/libscalapack.a $(SRCDIR)/$(INSTALL)/lib
 
 WHERE:
-	if [ -f $(SRCDIR)/FAIT ] ; then \
+	if [ -f $(SRCDIR)/FAIT-202 ] ; then \
 	make install;  \
 	echo scalapack LD -L@DIR@/lib  -lscalapack   >$(SRCDIR)/$(INSTALL)/lib/WHERE.scalapack ;\
 	echo scalapack INCLUDE -I@DIR@/include  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scalapack ;\
 	fi
 
-FAIRE: $(SRCDIR)/FAIT
+FAIRE: $(SRCDIR)/FAIT-202
 	$(MAKE) WHERE
 	touch FAIRE 
 
@@ -66,7 +66,7 @@ clean-local:
 	-cd $(SRCDIR) && $(MAKE) cleanlib  -C $(SRCDIR)
 
 clean: clean-local
-	-rm SLmake.inc FAIRE FAIT
+	-rm SLmake.inc FAIRE 
 	-rm -rf $(SRCDIR)/$(INSTALL)/include/{pblas.h,pxsyevx.h,tools.h}
 	-rm -rf $(SRCDIR)/$(INSTALL)/lib/libscalapack.a
 	-rm -rf $(SRCDIR)
