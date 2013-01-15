@@ -22,5 +22,6 @@ LDADD=../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @MPI_LIB@
 AM_CXXFLAGS=-DPARALLELE
 INCLUDES=-I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib @MPI_INCLUDE@
 ff-mpirun:ff-mpirun.in Makefile
-	../../config.status  --file=$@:$@.in
+	../../config.status  --file=ff-mpirun:ff-mpirun.in
+	chmod a+x  ff-mpirun
 

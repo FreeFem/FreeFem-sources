@@ -23,7 +23,7 @@ DIR5 = PBLAS/SRC/PTOOLS/*.o
 DIR6 = PBLAS/SRC/*.o
 DIR7 = REDIST/SRC/*.o
 DIR8 = SRC/*.o
-DIR9 = BLACS/SRC/*.o
+DIR9 = BLACS/SRC/*.o BLACS/SRC/*.oo
 
 scalapack: FAIRE
 
