@@ -2779,4 +2779,4 @@ void  init_lgmat()
  init_UMFPack_solver();
 }
 
-
+int Data_Sparse_Solver_version() { return VDATASPARSESOLVER;}

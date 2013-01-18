@@ -91,7 +91,7 @@ void end_mesh(void *dataff)
 
     //  Add FH to be consitant we all constructor ...  July 09
     Th.BuildBound();
-    Th.Save("TTTh.mesh");
+    //Th.Save("TTTh.mesh");
     if(verbosity>5)
       cout << "end_mesh:  Th.mes = " << Th.mes << " Th.mesb = " << Th.mesb << endl;
     if(Th.nt > 0){ 

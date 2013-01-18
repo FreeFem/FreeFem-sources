@@ -131,7 +131,7 @@ class MatC2R : public VirtualMatrice<double> { public:
 
   plusAx operator*(const KN<double> &  x) const {return plusAx(this,x);}
   virtual bool ChecknbLine(int n) const { return !N ||n==N;}  
-  virtual bool ChecknbColumn(int m) const { return !M ||m==M;} 
+  virtual bool ChecknbColumn(int m) const { return !M ||m==M;}
 
 
 };
@@ -506,7 +506,7 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
     return ret;
 }
 
-    
+
 #define LIST_NAME_PARM_MAT \
     {  "init", &typeid(bool)}, \
     {  "solver", &typeid(TypeSolveMat*)}, \
@@ -528,10 +528,12 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
     { "scaler", &typeid(KN_<double>)}, \
     { "scalec", &typeid(KN_<double>)}, \
     { "sparams", &typeid(string*)}, \
-    { "commworld", &typeid(pcommworld)} \
+    { "commworld", &typeid(pcommworld)}, \
+    { "master", &typeid(long)} \
 
 
-const int NB_NAME_PARM_MAT =  21  ;
+
+const int NB_NAME_PARM_MAT =  22  ;
     
 /*
  {  "init", &typeid(bool)},
@@ -589,6 +591,9 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
 	if (nargs[++kk]) ds.scale_c = GetAny<KN_<double> >((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.sparams = *GetAny<string*>((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.commworld = GetAny<pcommworld>((*nargs[kk])(stack));
+#ifdef VDATASPARSESOLVER
+        if (nargs[++kk]) ds.master = GetAny<long>((*nargs[kk])(stack));
+#endif
   /* de datafilename a scalec */
 /*	
 	if (nargs[++kk]) ds.param_int= GetAny< KN<int> >((*nargs[kk+12])(stack));  // Add J. Morice 02/09 

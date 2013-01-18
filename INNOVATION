@@ -1,3 +1,10 @@
+  - add master= in solver of MUMPS interface to set the master mpirank 
+        <0 => distributed matrix. 
+  - correct problem in label generation in freeyams (18/01/2013)
+     all label border was set on 1  before. 
+version 3.20-2
+  - add MUMPS parallel version (in test)
+  - add paradiso seq solver ..
 version 3.20
  - correct isoline plug in case of sadlle point
  - change the compilation tools under windows gcc 4/7 + freeglut / ...)
