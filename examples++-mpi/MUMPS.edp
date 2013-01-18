@@ -2,10 +2,11 @@ load "MUMPS"
 load "symmetrizeCSR"
 int[int] l = [1, 1, 2, 2];
 mesh Th = square(150, 150, label = l);
-if(mpirank != 0) // no need to store the matrix on ranks other than 0
+int master = 0; //  no choose se MUMPS doc sect 4.3 
+if(mpirank != master) // no need to store the matrix on ranks other than 0
     Th = square(1, 1, label = l);
 fespace Vh(Th, P2);
-Vh u, v;
+
 varf lap(u,v) = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v)) + int2d(Th)(v) + on(1, u = 1);
 real[int] b = lap(0, Vh);
 matrix A = lap(Vh, Vh);
@@ -30,11 +31,26 @@ verbosity = 2;
 // If one wants to use SCOTCH with a matrix stored on mpirank == 1
 // int[int] t(2); t(0) = 4; t(1) = 1;
 // set(A, solver = sparsesolver, lparams = t);
-set(A, solver = sparsesolver);
-set(B, solver = sparsesolver);
+set(A, solver = sparsesolver,master=master);
+set(B, solver = sparsesolver,master=master);
 verbosity = 0;
-Vh x;
-x[] = A^-1 * b;
-plot(Th, x, wait = 1, dim = 3, fill = 1, cmm = "sparsesolver unsymmetric", value = 1);
-x[] = B^-1 * b;
-plot(Th, x, wait = 1, dim = 3, fill = 1, cmm = "sparsesolver symmetric", value = 1);
+Vh u;
+u[] = A^-1 * b;
+if(mpirank==master) cout << " A :  u " << u[].l1 << " " << u[].linfty << endl; 
+if(mpirank==0-master)
+plot(Th, u, wait = 1, dim = 3, fill = 1, cmm = "sparsesolver unsymmetric", value = 1);
+u[] = B^-1 * b;
+if(mpirank==master) cout << " B :  u " << u[].l1 << " " << u[].linfty << endl; 
+if(mpirank==master)
+plot(Th, u, wait = 1, dim = 3, fill = 1, cmm = "sparsesolver symmetric", value = 1);
+//  try distribu version ...
+ Th = square(150, 150, label = l);
+u=0; // resize u..
+b.resize(Vh.ndof);
+Th=change(Th,fregion= nuTriangle%mpisize);
+varf lapd(u,v) = int2d(Th,mpirank)(dx(u)*dx(v) + dy(u)*dy(v)) + int2d(Th,mpirank)(v) + on(1, u = 1);
+A = lapd(Vh, Vh);
+set(A, solver = sparsesolver,master=-1);// distruteb
+b = lapd(0, Vh);
+u[] = A^-1 * b;
+cout << " D u " << u[].l1 << " " << u[].linfty << " " << mpirank << endl; 

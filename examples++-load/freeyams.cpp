@@ -240,12 +240,14 @@ Mesh3 * yams_pSurfMesh_to_mesh3( yams_pSurfMesh sm, int infondang, int infocc, i
   for (k=1; k<=sm->ne; k++) {
     int iv[3],lab;
     pt1  = &sm->tria[k];
+    //    lab = pt1->ref; 
     if ( !pt1->v[0] )  continue;
     else if ( sm->connex > 0 && pt1->cc != sm->connex ) continue;
     iv[0] = sm->point[pt1->v[0]].tmp-1;
     iv[1] = sm->point[pt1->v[1]].tmp-1;
     iv[2] = sm->point[pt1->v[2]].tmp-1;
-    lab = (int)(sm->connex < 0 ? pt1->cc : pt1->ref);
+    lab =  pt1->ref; //  change fh 02/2013
+    //cout << " lab : " << sm->connex  << " " << pt1->cc << " " << pt1->ref<< " " << endl;
     (*ff_bb++).set( ff_v, iv, lab);
     
     for (i=0; i<3; i++) {

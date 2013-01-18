@@ -18,7 +18,7 @@ mmg3d_VERSION=
 LIBMMG3D=$(INSTALL)/lib/libmmg3d-v4.a
 OPT=4
 # size of the PKG file ( this file change See Cecile.)
-SIZEPKG=163031
+SIZEPKG=158547
 
 OBJS= analar.o	chkmsh.o	hash.o		memory.o	optcte.o	outqua.o	simu44.o	swap44.o	zaldy.o \
 analarcutting.o	chrono.o	heap.o		mmg3d1.o	optlap.o	pattern.o	simu56.o	swap56.o \

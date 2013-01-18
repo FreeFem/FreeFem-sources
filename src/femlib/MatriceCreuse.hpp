@@ -837,8 +837,10 @@ struct TypeSolveMat {
 // add FH , JM  avril 2009 
 template<class K,class V> class MyMap;
 class String; 
-typedef void *    pcommworld; // to get the pointeur to the comm word ... in mpi 
-
+typedef void *    pcommworld; // to get the pointeur to the comm word ... in mpi
+//  to build 
+#define VDATASPARSESOLVER  1
+int Data_Sparse_Solver_version() ; //{ return VDATASPARSESOLVER;}
 struct Data_Sparse_Solver {
   bool initmat;
   TypeSolveMat* typemat;
@@ -863,6 +865,7 @@ struct Data_Sparse_Solver {
   KN<double> scale_c; 
   string sparams;  
   pcommworld commworld;  // pointeur sur le commworld
+    int master; //  master rank in comm add FH 02/2013 for MUMPS ... => VDATASPARSESOLVER exist 
  /*   
   int *param_int;
   double *param_double;
@@ -909,8 +912,10 @@ struct Data_Sparse_Solver {
     file_param_perm_c(0),
      */
     //sparams, 
-    commworld(0)
+    commworld(0),
+    master(0)
     {}
+    
 private:
     Data_Sparse_Solver(const Data_Sparse_Solver& ); // pas de copie 
 };
