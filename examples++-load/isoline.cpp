@@ -507,7 +507,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
              starting.push_back(i);
     while(1)
     {
-        ffassert(kkk++ < 1000);
+        ffassert(kkk++ < 100000);
         int kk=0,k=0;
         for(int i=0;i<np;++i) //  correction FH 18/9/2012 ....
         {
