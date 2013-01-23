@@ -2746,7 +2746,7 @@ void  init_lgmat()
  Add<Resize<Matrice_Creuse<Complex> > >("(","",new OneOperator3_<Matrice_Creuse<Complex>  *,Resize<Matrice_Creuse<Complex>  > , long, long  >(resize2));   
  
  
- Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefaultSolver));
+ //Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefaultSolver));
  
  // pour compatibiliter 
  

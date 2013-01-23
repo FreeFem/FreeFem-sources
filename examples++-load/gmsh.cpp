@@ -417,6 +417,11 @@ Mesh * GMSH_Load(const string & filename)
     fclose(fp);
 
     Mesh *pTh = new Mesh(nv,nt,nbe,vff,tff,bff);
+    R2 Pn,Px;
+    pTh->BoundingBox(Pn,Px);
+    if(!pTh->quadtree)
+        pTh->quadtree=new Fem2D::FQuadTree(pTh,Pn,Px,pTh->nv);
+
     return pTh;
 
   }
