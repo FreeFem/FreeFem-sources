@@ -780,7 +780,7 @@ Init::Init()
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   
   if(verbosity>1)
-    cout << "\n Add: SuperLU,  defaultsolver defaultsolverSuperLU" << endl;
+    cout << "\n Add: SuperLU,  defaultsolverSuperLU" << endl;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   DefSparseSolver<double>::solver =BuildSolverSuperLU;
   DefSparseSolver<Complex>::solver =BuildSolverSuperLU;
