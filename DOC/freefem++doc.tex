@@ -6408,7 +6408,7 @@ For example, we have
 %%%ALH-25/2/10-compilation error
 %%%where $O_{i}$ is the $i^\mathrm{nd}$ old number (label or region) to change in new number $N_{i}$.
 
-An example of using this function is given in "glumesh2D.edp":  \index{mesh!change}\index{change}
+An example of using this function is given in "glumesh2D.edp":  \index{mesh!change}\index{change}\index{label!change}\index{region!change}\index{flabel!change}\index{fregion!change}
 \begin{example}[glumesh2D.edp]
 \label{changelabel}~
 \bFF
@@ -6419,9 +6419,9 @@ An example of using this function is given in "glumesh2D.edp":  \index{mesh!chan
  4: verbosity=3;
  5: @int[int] r1=[2,0],  r2=[4,0];
  6: @plot(Th1,wait=1);
- 7: Th1=@change(Th1,label=r1);//Change the label of Edges of Th1 with label 2 in 0.
+ 7: Th1=@change(Th1,label=r1);//Change the label of Edges  2 in 0.
  8: @plot(Th1,wait=1);
- 9: Th2=@change(Th2,label=r2);//Change the label of Edges of Th2 with label 4 in 0.
+ 9: Th2=@change(Th2,label=r2);//Change the label of Edges  4 in 0.
 10: @mesh Th=Th1+Th2;         //  ``gluing together'' of meshes Th1 and Th2
 11: @cout << " nb lab = " << int1d(Th1,1,3,4)(1./lenEdge)+int1d(Th2,1,2,3)(1./lenEdge)
 12:          << " == " << int1d(Th,1,2,3,4)(1./lenEdge) <<" == " << ((10+20)+10)*2 << endl;
