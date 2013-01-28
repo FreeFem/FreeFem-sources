@@ -327,7 +327,7 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
 
   //  generation des triangles 
   int nberr=0;
-  R2 PtHat(0.5,0.5);
+  R2 PtHat(1./3.,1./3.);
   for (int i=0;i<nbt;i++)
     {
       int ii= rT ? rt(i) : i;
@@ -350,15 +350,31 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   // les arete frontieres qui n'ont pas change
   BoundaryEdge * bb=b;
   for (int i=0;i<neb;i++)
-    {        
+    {
+      int ke,k =Th.BoundaryElement(i,ke);
+      const   Triangle &K(Th[k]);
       int i1=Th(Th.bedges[i][0]);
       int i2=Th(Th.bedges[i][1]);
+ 
 	if(rV) {
 	    i1=rv(i1);
 	    i2=rv(i2);
 	}
 	
       int l0,l1=ChangeLab(mape,l0=m->bedges[i].lab) ;
+      mp->set(Th,Th[k](PtHat),PtHat,Th[i],l1);
+      if(flab)
+      {
+          R2 E=K.Edge(ke);
+          double le = sqrt((E,E));
+          double sa=0.5,sb=1-sa;
+          R2 PA(TriangleHat[VerticesOfTriangularEdge[ke][0]]),
+          PB(TriangleHat[VerticesOfTriangularEdge[ke][1]]);
+          R2 Pt(PA*sa+PB*sb ); //
+          //  void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge,int VFF=0)
+          MeshPointStack(stack)->set(Th,K(Pt),Pt,K,l1,R2(E.y,-E.x)/le,ke);
+	  l1 =GetAny<long>( (*flab)(stack)) ;
+      }
       *bb++ = BoundaryEdge(v,i1,i2,l1);   
     }
   assert(nebn==bb-b);

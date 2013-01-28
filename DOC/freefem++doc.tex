@@ -6387,6 +6387,8 @@ command line are for a two dimensional and dimensional case:
 \begin{description}
 \item [\texttt{label =}] is a vector of integer that contains successive pair of the old label number to  the new label number .
 \item [\texttt{region =}] is a vector of integer that contains successive pair of the old region number to new region number.
+\item [\texttt{flabel =}]  is a integer function with given the new value of the label (version 3.21).
+\item [\texttt{fregion =}] is a integer function with given the new value of the region .
 \end{description}
 %and for a three dimensional case:
 %\begin{description}
@@ -6400,7 +6402,7 @@ For example, we have
 \begin{eqnarray}
 \label{eq.org.vector.change.label}
 \mathtt{label} &= &[ O_{1}, N_{1},  ..., O_{n_{l}},N_{n_{l}} ] \\
-\mathtt{region} & =& [ O_{1}, N_{1},  ..., O_{n_{l}},N_{n_{l}} ]
+\mathtt{region} & =& [ O_{1}, N_{1},  ..., O_{n_{l}},N_{n_{l}} ] 
 \end{eqnarray}
 
 %%%ALH-25/2/10-compilation error
@@ -6435,7 +6437,7 @@ An example of using this function is given in "glumesh2D.edp":  \index{mesh!chan
 
 \paragraph{``gluing'' different mesh}
 In line 10 of previous file, the method to ``gluing'' different mesh of the same dimension in FreeFem++ is using.
-This function is just called using the symbol addition "+" between meshes. \index{mesh!+}
+This function is the operator "+" between meshes. \index{mesh!+}
 The method implemented need that the point in adjacent mesh are the same.
 %%The method implemented need that the result's mesh of ``gluing'' meshes is conformal.
 
