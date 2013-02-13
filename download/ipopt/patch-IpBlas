@@ -118,3 +118,14 @@
      char UPLO='L';
  
      F77_FUNC(dsymv,DSYMV)(&UPLO, &N, &alpha, A, &LDA, x,
+--- Ipopt-3.10.2/Ipopt/src/Algorithm/IpIpoptAlg.cpp	2011-06-11 11:23:59.000000000 -0500
++++ Ipopt-3.10.2-okk/Ipopt/src/Algorithm/IpIpoptAlg.cpp	2013-02-12 14:07:39.000000000 -0600
+@@ -262,7 +262,7 @@
+     }
+ 
+     if (!isResto) {
+-      Jnlst().Printf(J_ITERSUMMARY, J_MAIN, "This is Ipopt version "IPOPT_VERSION", running with linear solver %s.\n\n", linear_solver_.c_str());
++      Jnlst().Printf(J_ITERSUMMARY, J_MAIN, "This is Ipopt version " IPOPT_VERSION ", running with linear solver %s.\n\n", linear_solver_.c_str());
+     }
+ 
+     SolverReturn retval = UNASSIGNED;
