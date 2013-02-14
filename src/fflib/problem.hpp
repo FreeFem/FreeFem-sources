@@ -212,7 +212,7 @@ class BC_set : public E_F0mps { public:
         const MGauche *ui=uu->simple();
         ffassert(ui && ui->second == op_id);
         if(verbosity>9)
-         cout << " on : " << ii->first << " n¡" << ui->first <<   " = ? " << endl;
+         cout << " on : " << ii->first << " n " << ui->first <<   " = ? " << endl;
         if (complextype)
         bc[kk]= make_pair(ui->first,CastTo<Complex>(ii->second));
         else
