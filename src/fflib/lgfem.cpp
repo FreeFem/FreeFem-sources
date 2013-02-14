@@ -4155,6 +4155,34 @@ class MeanOp : public E_F0mps  { public:
        MeanOp(Expression aa) : a(aa) {} 
     };
 
+long get_size(pferarray const & a)
+{
+  return a.first->N;
+}
+long get_size(pfecarray const & a)
+{
+    return a.first->N;
+}
+long get_size(pferbasearray *const & a)
+{
+    return (**a).N;
+}
+long get_size(pfecbasearray *const & a)
+{
+    return (**a).N;
+}
+long resize(pferbasearray *const & a, long const & n)
+{
+    (**a).resize(n);
+    return n; 
+}
+
+long resize(pfecbasearray *const & a, long const & n)
+{
+    (**a).resize(n);
+    return n;
+}
+
 pferbase* get_element(pferbasearray *const & a, long const & n)
 {
   return (**a)[n];
@@ -4403,7 +4431,14 @@ Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
     return make_pair(map_type[typeid( EConstantTypeOfFE3::T).name()],new EConstantTypeOfFE3(v));
 }
 
-//  end --- call meth be .. 
+//  end --- call meth be ..
+// 2013 resize of array of fe function..
+template<typename  T> T fepresize(const Resize1<T> & rt,const long &n) {
+    (**(rt.v)).resize(n);
+    return rt.v;}
+template<typename  T> T feresize(const Resize1<T> & rt,const long &n) {
+    rt.v.first->resize(n);
+    return rt.v;}
 
 R3 * set_eqp(R3 *a,R3 *b) { *a=*b; return a;}
 void  init_lgfem() 
@@ -4922,7 +4957,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::plusAtx > >  ,      
 		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::solveAxeqb > >  ,  
 		   
-		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
+		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,      
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >    
 		   
@@ -5086,8 +5121,31 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
  
  // Add<pferbasearray*>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element)); 
-  Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // use ???? FH sep. 2009 
-  Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));  //  use ???? FH sep. 2009 
+  Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // use FH sep. 2009 
+  Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));  //  use ???? FH sep. 2009
+    // bof bof ..
+    // resize of array of Finite element ..  a little hard 2013 FH
+    Dcl_Type< Resize1<pfecbasearray* > > ();
+    Dcl_Type< Resize1<pferbasearray* > > ();
+    Dcl_Type< Resize1<pfecarray > > ();
+    Dcl_Type< Resize1<pferarray > > ();
+    Add<pfecbasearray*>("resize",".",new OneOperator1<Resize1<pfecbasearray* >,pfecbasearray*>(to_Resize1));  //  FH fev 2013
+    Add<pferbasearray*>("resize",".",new OneOperator1<Resize1<pferbasearray* >,pferbasearray*>(to_Resize1));  //   FH fev. 2013
+    Add<pferarray>("resize",".",new OneOperator1<Resize1<pferarray >,pferarray>(to_Resize1));  //  FH fev 2013
+    Add<pfecarray>("resize",".",new OneOperator1<Resize1<pfecarray >,pfecarray>(to_Resize1));  //   FH fev. 2013
+    new OneOperator2_<pferbasearray*,Resize1<pferbasearray* > , long  >(fepresize<pferbasearray*>);
+    Add<Resize1<pferbasearray* > >("(","",new  OneOperator2_<pferbasearray*,Resize1<pferbasearray* > , long  >(fepresize));
+    Add<Resize1<pfecbasearray* > >("(","",new OneOperator2_<pfecbasearray*,Resize1<pfecbasearray* > , long  >(fepresize));
+    Add<Resize1<pferarray > >("(","",new OneOperator2_<pferarray,Resize1<pferarray > , long  >(feresize));
+    Add<Resize1<pfecarray > >("(","",new OneOperator2_<pfecarray,Resize1<pfecarray > , long  >(feresize));
+// end of resize ...
+   
+  Add<pfecbasearray*>("n",".",new OneOperator1_<long,pfecbasearray*>(get_size));  //  FH fev 2013
+  Add<pferbasearray*>("n",".",new OneOperator1_<long,pferbasearray*>(get_size));  //   FH fev. 2013
+  Add<pferarray>("n",".",new OneOperator1_<long,pferarray>(get_size));  //  FH fev 2013
+  Add<pfecarray>("n",".",new OneOperator1_<long,pfecarray>(get_size));  //   FH fev. 2013
+    
+    
   Add<pferarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());// new version FH sep 2009
   Add<pfecarray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes>());
    

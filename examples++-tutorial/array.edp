@@ -331,3 +331,18 @@ for(int i=0;i<ARGV.n;++i)
   {
     cout << ARGV[i] << endl;
   }
+// Array of FE.
+{
+mesh Th=square(2,2);
+fespace Vh(Th,P1);// scalar 
+fespace Wh(Th,[P1,P1]);// vector
+Vh[int] vh(10);
+Wh[int] [uh,wh](10); 
+vh[2]=x;
+[uh[2],wh[2]]=[y,x];
+[uh[2],wh[2]]=[y,x]; // set 3rd value 
+cout << wh.n << endl;
+cout << vh.n <<endl;
+vh.resize(20);
+cout << vh.n <<endl;
+}
