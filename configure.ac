@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 # add check of FLIBS and X11_LIBS  v2.24-2
 
-AC_INIT(FreeFem++,3.20-3,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.21,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -1615,7 +1615,7 @@ if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
 	# because this lib does not exist yet, and this could make the
 	# following tests fail.
 
-	ff_umfpack_libs="${curdir}/download/lib/libumfpack.a ${curdir}/download/lib/libamd.a"
+	ff_umfpack_libs="-L${curdir}/download/lib -lumfpack -lcholmod -lcolamd -lamd -lsuitesparseconfig"
 	AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
 	if test "$ff_win32" = yes; then
   	AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS)

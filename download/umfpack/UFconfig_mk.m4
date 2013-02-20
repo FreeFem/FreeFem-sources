@@ -103,8 +103,8 @@ MEX = mex -O
 # The path is relative to where it is used, in CHOLMOD/Lib, CHOLMOD/MATLAB, etc.
 # You may wish to use an absolute path.  METIS is optional.  Compile
 # CHOLMOD with -DNPARTITION if you do not wish to use METIS.
-METIS_PATH = FF_DWL/include
-METIS = FF_DWL/lib/libmetis.a
+METIS_PATH = # FF_DWL/include
+METIS = # FF_DWL/lib/metis/libmetis.a
 
 # If you use CHOLMOD_CONFIG = -DNPARTITION then you must use the following
 # options:
