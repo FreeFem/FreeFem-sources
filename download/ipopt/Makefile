@@ -33,6 +33,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	  CXX='$(CXX)' CXXFLAGS='$(CXXFLAGS) -I$(INCMUMPS)' \
 	  CC='$(CC)' CFLAGS='$(CFLAGS) -I$(INCMUMPS)' \
 	  F77='$(FC)' FFLAGS='$(FCFLAGS)' \
+	  CXXCPP='$(CXXCPP)'  CPP='$(CXXCPP)' \
 	 --with-blas='$(LIBBLAS)' --with-lapack='$(LIBLAPACK)' --prefix='$(DOWNLOADFF)'
 	touch $(SRCDIR)/FAIT	
 install: $(SRCDIR)/FAIT

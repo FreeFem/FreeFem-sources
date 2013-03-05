@@ -60,7 +60,8 @@ $(PACKAGE):
 	-mkdir $(DIRPKG);
 #http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download.php?file=mmg3d4.0.tgz
 #http://www.math.u-bordeaux1.fr/~dobj/logiciels/mmg3d.php
-	cd $(DIRPKG);$(WGET) http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download.php?file=mmg3d4.0.tgz -O mmg3d4.0.tgz
+	cd $(DIRPKG);$(WGET) 'http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download/mmg3d4.0.tgz'
+# http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download.php?file=mmg3d4.0.tgz -O mmg3d4.0.tgz
 #http://www.math.u-bordeaux1.fr/~dobj/logiciels/download.php?file=`basename $(PACKAGE)`
 
 
