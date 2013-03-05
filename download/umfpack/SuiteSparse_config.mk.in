@@ -60,11 +60,14 @@
 # C and C++ compiler flags.  The first three are standard for *.c and *.cpp
 # Add -DNTIMER if you do use any timing routines (otherwise -lrt is required).
 # CF = $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -O3 -fexceptions -fPIC -DNTIMER
-  CF = $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -O3 -fexceptions -fPIC
+  CF = $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -O3 -fexceptions -fPIC -DNTIMER
 
 # ranlib, and ar, for generating libraries.  If you don't need ranlib,
 # just change it to RANLAB = echo
-RANLIB = ranlib
+AR = @AR@ 
+RANLIB = @RANLIB@
+ARFLAGS =@ARFLAGS@
+
 ARCHIVE = $(AR) $(ARFLAGS)
 
 # copy and delete a file
@@ -255,7 +258,8 @@ TBB =
 #------------------------------------------------------------------------------
 
 # Using default compilers:
-# CC = gcc
+CC = @CC@
+CFLAGS = @CFLAGS@
 # CF = $(CFLAGS) -O3 -fexceptions
 
 # alternatives:

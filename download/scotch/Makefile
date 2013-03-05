@@ -13,7 +13,7 @@ all-local: scotch
 DIRPKG=../pkg
 SRCDIR=scotch_$(scotch_VERSION)
 PACKAGE=$(DIRPKG)/scotch_$(scotch_VERSION_LOCAL).tar.gz
-SERVER=http://gforge.inria.fr/frs/download.php/23391
+SERVER=https://gforge.inria.fr/frs/download.php/23391
 INSTALL=../..
 scotch_VERSION=5.1_esmumps
 scotch_VERSION_LOCAL=5.1.6_esmumps

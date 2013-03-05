@@ -24,7 +24,7 @@
 
  */
 
-#include <mpi.h>
+//#include <mpi.h>
 #include <mkl_pardiso.h>
 #include <mkl_spblas.h>
 #include <mkl_types.h>
