@@ -1,5 +1,11 @@
+version 3.21-1 
+ - correct bug  a=b' ; of full matrix 
+ - bug in assert on 3d mesh of huge dimension with periodic condition.
+ - correct build Delaunay 3d mesh of set of point. 
+   see examples++-load/convexehull3d.edp
+version 3.21 frev 2013
  - n, resize in array of finite element function ... 
-     see ednd array.edp file 
+     see edp  array.edp file 
  - correct pb of compilation of Ipopt with clang++ -std=c++11
  - correct une NSCahouetChabart.epd examples , and correct un doc. 
     this is a complete rewritting. FH. 12/02/2013.

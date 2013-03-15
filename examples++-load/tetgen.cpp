@@ -2289,7 +2289,7 @@ class ConvexHull3D_tetg_Op : public E_F0mps
 public:
   Expression numofpts;
   Expression xx,yy,zz;
-  static const int n_name_param =3+1; // 
+  static const int n_name_param =5; //
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   
@@ -2388,7 +2388,7 @@ class ConvexHull3D_tetg_file_Op: public E_F0mps
 {
 public:
   Expression filename;
-  static const int n_name_param =3; // 
+  static const int n_name_param =5; //
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   
@@ -2406,9 +2406,9 @@ public:
   {
     if(verbosity) cout << "Convex Hull with TetGen" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
-    if( nargs[2] && nargs[3] ) 
+    if( nargs[1] && nargs[3] )
 	CompileError("uncompatible ... (Th, region= , reftet=  ");
-    if( nargs[3] && nargs[4] ) 
+    if( nargs[2] && nargs[4] )
 	CompileError("uncompatible ... (Th, label= , refface=  ");
     
   } 
