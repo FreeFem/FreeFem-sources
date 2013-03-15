@@ -203,8 +203,8 @@ bool BuildPeriodic(
 		    double y0 = Pmin.y;
 		    if (verbosity > 2)
 			cout << "  --Update: periodic " << Pmin << " " << Pmax << " " << " h=" << hmn 
-			<< " ,  coef = "<< coef << endl;
-		    ffassert(coef>1e-10 && (Pmax-Pmin).norme2()*coef < 1.e7 );
+			<< " ,  coef = "<< coef << " / " << (Pmax-Pmin).norme2()*coef*coef << endl;
+		    ffassert(coef>1e-10 && (Pmax-Pmin).norme2()*coef*coef < 1.e14 ); // correct  FH mars 2013 
 		    
 		    //  map construction ----
 		    for (int i1=0;i1<n1;i1++)

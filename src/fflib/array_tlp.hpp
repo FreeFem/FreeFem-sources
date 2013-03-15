@@ -857,7 +857,7 @@ template<class K>  KNM<K> * set_initmat(KNM<K> * a,KNM<K> *  b ){
     return a;}
 template<class K>  KNM<K> * set_mat_t(KNM<K> * a,Transpose<KNM<K> * > b ){ 
     ConjKNM_<K>  tb=b.t->t(); ;
-    a->resize(tb.M(),tb.N());
+    a->resize(tb.N(),tb.M());// correction mars 2013 
     *a=tb;
     return a;}
 template<class K>  KNM<K> * addto_mat_t(KNM<K> * a,Transpose<KNM<K> * > b ){ 
