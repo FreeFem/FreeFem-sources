@@ -1,3 +1,4 @@
+ - correct bug in gestion off outsite flag is 3d in case of bute force (searchMethod>0) 
 version 3.21-1 
  - correct bug  a=b' ; of full matrix 
  - bug in assert on 3d mesh of huge dimension with periodic condition.
