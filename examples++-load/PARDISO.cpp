@@ -23,7 +23,7 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
  */
-
+//ff-c++-LIBRARY-dep:  mkl
 //#include <mpi.h>
 #include <mkl_pardiso.h>
 #include <mkl_spblas.h>
