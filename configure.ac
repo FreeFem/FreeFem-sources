@@ -1199,7 +1199,7 @@ if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
 	  ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
 	  ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
 	  ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
-	else
+0	else
 	  ff_mkl_mlt="-Wl,-( -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread -Wl,-) -lm -lpthread"
 	  ff_mkl_blas="-Wl,-( -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential -Wl,-) -lm -lpthread"
 	  ff_mkl_lapack=""
@@ -1215,12 +1215,12 @@ dnl  scalapack, and blacs don not work with mlk and sgi
      if test "$ff_mkl_mpi" != "_sgimpt" ; then  
         AC_FF_ADDWHERELIB(scalapack,$ff_mkl_scalapack,$ff_blas_inc)
         AC_FF_ADDWHERELIB(blacs,$ff_mkl_blacs,$ff_blas_inc)
-        AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
 
      else
        ff_warm=" (We do not use MKL scalapack and blacs with sgi MPI),  " 
      fi
         AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
+        AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
         
 dnl	echo scalapack  LD  \'$ff_mkl_scalapack\'  >>$ff_where_lib_conf	
 dnl	echo blacs  LD  \'$ff_mkl_blacs\'  >>$ff_where_lib_conf	
