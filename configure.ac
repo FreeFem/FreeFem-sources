@@ -1188,16 +1188,23 @@ if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
 	*)        ff_mkl_mpi=_openmpi;;
 	esac
 #	echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
-	if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.so ; then
+	if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.a ; then
 	  mkl_blas=rt
 	  mkk_lapack=rt 
+          ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_intel_thread -lmkl_core  -liomp5 -lpthread"
           ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core  -liomp5 -lpthread"
           ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core -liomp5 -lpthread"
+	else 
+	if test -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_lapack.a ; then
+	  ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide -lm -lpthread"
+	  ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
+	  ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
 	else
-	  ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
+	  ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lguide -lm -lpthread"
+	  ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
 	  ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
 	fi
-
+	fi
         ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
         ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
 	ff_blas_ok=yes
@@ -1208,6 +1215,8 @@ dnl  scalapack, and blacs don not work with mlk and sgi
      if test "$ff_mkl_mpi" != "_sgimpt" ; then  
         AC_FF_ADDWHERELIB(scalapack,$ff_mkl_scalapack,$ff_blas_inc)
         AC_FF_ADDWHERELIB(blacs,$ff_mkl_blacs,$ff_blas_inc)
+        AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
+
      else
        ff_warm=" (We do not use MKL scalapack and blacs with sgi MPI),  " 
      fi
