@@ -60,7 +60,7 @@ class SolverPardiso : public MatriceMorse<R>::VirtualSolver {
     public:
     typedef typename  PARDISO_STRUC_TRAIT<R>::R MR;
 
-        SolverPardiso(const MatriceMorse<R> &A, KN<long> &param_int, KN<double> &param_double, MPI_Comm* comm) {
+        SolverPardiso(const MatriceMorse<R> &A, KN<long> &param_int, KN<double> &param_double) {
             ptA = (MatriceMorse<R>*)(&A);
             MKL_INT phase, error, msglvl;
             MR ddum;
@@ -163,7 +163,7 @@ class SolverPardiso : public MatriceMorse<R>::VirtualSolver {
 
 template<class R>
 typename MatriceMorse<R>::VirtualSolver* buildSolver(DCL_ARG_SPARSE_SOLVER(R, A)) {
-    return new SolverPardiso<R>(*A, ds.lparams, ds.dparams, (MPI_Comm*)ds.commworld);
+    return new SolverPardiso<R>(*A, ds.lparams, ds.dparams);
 }
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 bool SetPARDISO()
