@@ -302,7 +302,7 @@ void AllocExtern::init()
    static int count=0;
    if(0== (count++)) 
     {
-      sprintf(filename,"ListOf>llocPtr-%d.bin",(int) sizeof(void*));
+      sprintf(filename,"ListOfAllocPtr-%d.bin",(int) sizeof(void*));
       AllocSize =0;
       MaxUsedSize =0;
       AllocHead =0;  

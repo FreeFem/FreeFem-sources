@@ -1,3 +1,4 @@
+ - correct pb un trunc for 3d mesh with too flat element (sliver) , and cleanning code .
  - correct bug in gestion off outsite flag is 3d in case of bute force (searchMethod>0) 
 version 3.21-1 
  - correct bug  a=b' ; of full matrix 
