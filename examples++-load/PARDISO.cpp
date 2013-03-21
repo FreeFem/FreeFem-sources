@@ -165,7 +165,7 @@ template<class R>
 typename MatriceMorse<R>::VirtualSolver* buildSolver(DCL_ARG_SPARSE_SOLVER(R, A)) {
     return new SolverPardiso<R>(*A, ds.lparams, ds.dparams);
 }
-TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
+extern  TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue;
 bool SetPARDISO()
 {
     if(verbosity>1)
