@@ -5,7 +5,11 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <dirent.h> 
-#include <strings.h> 
+#include <strings.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 //#include <tr1/regex> 
 using namespace Fem2D;
 long ff_chdir(string * c) { return chdir(c->c_str());}
@@ -52,7 +56,7 @@ string * ReadDir(Stack s,DIR ** const &dirpp){
   *dirpp=0;
   return  Nothing;
 }
-#ifdef PURE_WIN32 
+#ifdef WIN32 
 string * ffgetenv(Stack s,string * const & k)
 {
     const int LEN = 4096;
@@ -68,8 +72,8 @@ long  ffsetenv(string * const & k,string * const & v)
  
     char * vv = strcpy((char*)malloc(v->size()+2),v->c_str());
     char * kk = strcpy((char*)malloc(k->size()+2),k->c_str());
-    GetEnvironmentVariable(vv,kk);
-    return 0; ;
+    SetEnvironmentVariable(vv,kk);
+    return SetEnvironmentVariable(vv,kk) ;
 }
 long  ffunsetenv(string * const & k)
 {
