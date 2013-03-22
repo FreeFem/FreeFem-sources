@@ -1,4 +1,5 @@
 //load "PARDISO"
+setenv("OMP_NUM_THREADS",10);
 load "symmetrizeCSR"
 int[int] l = [1, 1, 2, 2];
 mesh Th = square(150, 150, label = l);
