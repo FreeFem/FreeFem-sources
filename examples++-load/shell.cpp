@@ -52,7 +52,31 @@ string * ReadDir(Stack s,DIR ** const &dirpp){
   *dirpp=0;
   return  Nothing;
 }
+#ifdef PURE_WIN32 
+string * ffgetenv(Stack s,string * const & k)
+{
+    const int LEN = 4096;
+    char envv[LEN];
 
+     GetEnvironmentVariable(k->c_str(),envv,LEN);
+    
+    return Add2StackOfPtr2Free(s,new string(envv));
+}
+
+long  ffsetenv(string * const & k,string * const & v)
+{
+ 
+    char * vv = strcpy((char*)malloc(v->size()+2),v->c_str());
+    char * kk = strcpy((char*)malloc(k->size()+2),k->c_str());
+    GetEnvironmentVariable(vv,kk);
+    return 0; ;
+}
+long  ffunsetenv(string * const & k)
+{
+    SetEnvironmentVariable(k->c_str(),0);
+    return 0 ;
+}
+#else
 string * ffgetenv(Stack s,string * const & k)
 {
     const char *env = getenv(k->c_str());
@@ -72,7 +96,7 @@ long  ffunsetenv(string * const & k)
     long r= unsetenv(k->c_str());
     return r ;
 }
-
+#endif
 
 extern  mylex *zzzfff;
 
