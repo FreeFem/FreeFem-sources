@@ -32,10 +32,10 @@ pastix: FAIRE
 
 WHERE: 
 	if [ -f $(SRCDIR)/FAIT  ] ;then \
-	echo double_pastix LD -L@DIR@/lib/pastix/double   -lpastix   >$(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;\
-	echo double_pastix INCLUDE -I@DIR@/include/pastix/double >> $(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;\
-	echo complex_pastix LD -L@DIR@/lib/pastix/complex   -lpastix   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;\
-	echo complex_pastix INCLUDE -I@DIR@/include/pastix/complex >> $(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;\
+	echo double_pastix LD -L@DIR@/lib/pastix/double   -lpastix   >../lib/WHERE.pastix ;\
+	echo double_pastix INCLUDE -I@DIR@/include/pastix/double >> ../lib/WHERE.pastix ;\
+	echo complex_pastix LD -L@DIR@/lib/pastix/complex   -lpastix   >>../lib/WHERE.pastix ;\
+	echo complex_pastix INCLUDE -I@DIR@/include/pastix/complex >> ../lib/WHERE.pastix ;\
 	fi
 
 FAIRE:$(SRCDIR)/FAIT 
@@ -75,10 +75,10 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 	#else
 	#cd $(SRCDIR)/src; $(MAKE) install
 	#endif 
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/pastix/double
-	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/double/
-	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/double
-	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/double/
+	mkdir -p ../include/pastix/double
+	cp $(SRCDIR)/install/*.h ../include/pastix/double/
+	mkdir -p ../lib/pastix/double
+	cp $(SRCDIR)/install/*.a ../lib/pastix/double/
 	cd $(SRCDIR)/src/ &&  $(MAKE) clean 
 	#complex version
 	cp config-complex.in $(SRCDIR)/src/config.in	
@@ -107,12 +107,12 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 #else
 	#cd $(SRCDIR)/src/ && $(MAKE) install -C $(SRCDIR)/src
 #endif
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/pastix/complex
-	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/complex/
-	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/complex
-	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/complex/
-	(cd $(SRCDIR)/$(INSTALL)/include/pastix/complex/; patch pastix_long_complex.h)   <patch-pastix_long_complex.h
-	(cd $(SRCDIR)/$(INSTALL)/include/pastix/complex/; patch pastix.h) <patch-pastix_long_complex.h
+	mkdir -p ../include/pastix/complex
+	cp $(SRCDIR)/install/*.h ../include/pastix/complex/
+	mkdir -p ../lib/pastix/complex
+	cp $(SRCDIR)/install/*.a ../lib/pastix/complex/
+	(cd ../include/pastix/complex/; patch pastix_long_complex.h)   <patch-pastix_long_complex.h
+	(cd ../include/pastix/complex/; patch pastix.h) <patch-pastix_long_complex.h
 	touch $(SRCDIR)/FAIT
 
 
@@ -128,15 +128,16 @@ $(PACKAGE1):
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE1)`
 
 clean-local:
+	-rm config.in FAIRE ../lib/WHERE.parms
+	-rm $(SRCDIR)/FAIT
+	-rm -rf ../include/pastix/double
+	-rm -rf ../lib/pastix/double
+	-rm -rf ../include/pastix/complex
+	-rm -rf ../lib/pastix/complex
+	-rm -rf $(SRCDIR)
 	-cd $(SRCDIR)/src &&  $(MAKE) clean 
 
 clean: clean-local
-	-rm config.in FAIRE 
-	-rm $(SRCDIR)/FAIT
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/pastix/double
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/pastix/double
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/pastix/complex
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/pastix/complex
-	-rm -rf $(SRCDIR)
+
 
 .PHONY:$(SRCDIR)/$(INSTALL)

@@ -27,8 +27,6 @@ $(SRCDIR)/FAIT:$(SRCDIR)/tags Makefile.in
 	cd $(SRCDIR)/ParMETISLib;$(MAKE) 
 	touch $(SRCDIR)/FAIT
 install: 
-#	cp $(SRCDIR)/libparmetis.a $(SRCDIR)/$(INSTALL)/lib
-#	cp $(SRCDIR)/libmetis.a $(SRCDIR)/$(INSTALL)/lib
 	cp $(SRCDIR)/parmetis.h ../include/parmetis
 	cp $(SRCDIR)/METISLib/*.h ../include/parmetis
 	sed  's;../parmetis.h;parmetis.h;' <$(SRCDIR)/METISLib/metis.h >../include/parmetis/metis.h
@@ -38,8 +36,8 @@ install:
 WHERE:
 	if [ -f $(SRCDIR)/FAIT ] ;then \
 	make install ;\
-	echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
-	echo parmetis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+	echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >../lib/WHERE.parmetis ;\
+	echo parmetis INCLUDE -I@DIR@/include/parmetis   >> ../lib/WHERE.parmetis ;\
 	fi
 
 FAIRE: $(SRCDIR)/FAIT 
@@ -81,11 +79,11 @@ $(PACKAGE):
 clean-local:
 	-cd $(SRCDIR) && $(MAKE) realclean  -C  $(SRCDIR)
 	rm Makefile.in $(SRCDIR)/tags $(SRCDIR)/FAIT
+	-rm ../lib/WHERE.parmetis
+	-rm -rf  ../include/parmetis
+	-rm -rf  ../lib/parmetis
+	-rm -rf $(SRCDIR)
 
 clean: clean-local
-	-rm $(SRCDIR)/$(INSTALL)/libparmetis.a
-	-rm $(SRCDIR)/$(INSTALL)/libmetis.a
-	-rm $(SRCDIR)/$(INSTALL)/include/parmetis.h
-	-rm -rf  $(SRCDIR)/$(INSTALL)/include/metis
-	-rm -rf $(SRCDIR)
+
 .PHONY:$(SRCDIR)/$(INSTALL)

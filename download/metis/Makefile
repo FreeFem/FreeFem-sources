@@ -73,14 +73,12 @@ $(SRCDIR)/tags: $(PACKAGE)
 
 $(PACKAGE):
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
-
-
-
 clean-local:
 	-cd $(SRCDIR) && $(MAKE) realclean  -C $(SRCDIR)
 	-rm -rf metis*
-clean: clean-local
-	-rm $(SRCDIR)/$(INSTALL)/lib/metis/libmetis.a
-	-rm $(SRCDIR)/$(INSTALL)/include/metis.h
+	-rm -rf ../lib/metis ../lib/WHERE.metis
+	-rm -rf ../include/metis
 	-rm -rf $(SRCDIR)
 	-rm FAIRE FAIT 
+
+clean: clean-local

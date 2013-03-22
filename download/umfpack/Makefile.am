@@ -121,6 +121,13 @@ $(SUITESPARSE_TGZ):
 	cd $(DIRPKG);@WGET@ -N http://www.cise.ufl.edu/research/sparse/SuiteSparse/`basename $(SUITESPARSE_TGZ)`
 
 clean-local:
+	-rm $AMDLIB $CAMDLIB $CHOLMODLIB $COLAMDLIB $SUITESPARSECONFIGLIB
+	-rm ../include/amd*.h 
+	-rm ../include/umfpack*.h 
+	-rm ../include/colmod*.h 
+	-rm ../include/camd*.h 
+	-rm ../include/amd*.h
+	-rm ../include/SuiteSparse_config.h 
 	-rm -rf UMFPACKv4.?.tar.gz UMFPACKv4.?
 	-rm SuiteSparse*gz 
 	-rm -rf SuiteSparse

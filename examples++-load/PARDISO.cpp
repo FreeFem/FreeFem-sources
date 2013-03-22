@@ -194,6 +194,11 @@ Init::Init() {
 }
 */
 
+static long ffompgetnumthreads(){return omp_get_num_threads();}
+static long ffompgetmaxthreads(){return omp_get_max_threads();}
+
+static long ffompsetnumthreads(long n){omp_set_num_threads(n); return n;}
+
 void initPARDISO()
 {
     
@@ -206,6 +211,13 @@ void initPARDISO()
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
      if(! Global.Find("defaulttoPARDISO").NotNull() )
         Global.Add("defaulttoPARDISO","(",new OneOperator0<bool>(SetPARDISO));
+    if(! Global.Find("ompsetnumthreads").NotNull() )
+    Global.Add("ompsetnumthreads","(",new OneOperator1<long,long>(ffompsetnumthreads));
+    if(! Global.Find("ompgetnumthreads").NotNull() )
+    Global.Add("ompgetnumthreads","(",new OneOperator0<long>(ffompgetnumthreads));
+    if(! Global.Find("ompgetmaxthreads").NotNull() )
+        Global.Add("ompgetmaxthreads","(",new OneOperator0<long>(ffompgetmaxthreads));
+
 }
 
 

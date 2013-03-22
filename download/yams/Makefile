@@ -39,15 +39,15 @@ $(SRCDIR)/FAIT: $(SRCDIR)/PATCH  yamslib_internal.h yamslib.c yamslib.h
 	cd $(YAMS_DIR); make
 	touch $(SRCDIR)/FAIT
 install: $(SRCDIR)/FAIT
-	sed  s/defines.h/freeyams_defines.h/ <$(YAMS_SRCDIR)/yamslib.h  >$(SRCDIR)/$(INSTALL)/include/freeyamslib.h
-	cp $(YAMS_SRCDIR)/defines.h  $(SRCDIR)/$(INSTALL)/include/freeyams_defines.h
-	-mkdir $(SRCDIR)/$(INSTALL)/lib	
-	cp $(YAMS_OBJDIR)/libyams.a  $(SRCDIR)/$(INSTALL)/lib/libfreeyams.a
+	sed  s/defines.h/freeyams_defines.h/ <$(YAMS_SRCDIR)/yamslib.h  >../include/freeyamslib.h
+	cp $(YAMS_SRCDIR)/defines.h  ../include/freeyams_defines.h
+	-mkdir ../lib	
+	cp $(YAMS_OBJDIR)/libyams.a  ../lib/libfreeyams.a
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	make install;  \
-	echo freeyams  LD -L@DIR@/lib -lfreeyams  >$(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams ;\
-	echo freeyams INCLUDE -I@DIR@/include>> $(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams ;\
+	echo freeyams  LD -L@DIR@/lib -lfreeyams  >../lib/WHERE.freeyams ;\
+	echo freeyams INCLUDE -I@DIR@/include>> ../lib/WHERE.freeyams ;\
 	fi
 
 
@@ -70,15 +70,16 @@ clean-local:
 	-rm FAIRE FAIT  $(SRCDIR)/FAIT
 	-cd $(YAMS_DIR) &&  $(MAKE) -C $(YAMS_DIR)  clean
 	-rm $(YAMS_OBJDIR)/libyams.a
-
-clean: clean-local
 	-rm ff-flags
-	-rm $(SRCDIR)/$(INSTALL)/lib/libfreeyams.a
-	-rm $(SRCDIR)/$(INSTALL)/include/*freeyams*.h
-	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams
+	-rm ../lib/libfreeyams.a
+	-rm ../include/*freeyams*.h
+	-rm ../lib/WHERE.freeyams
 	-rm -rf $(YAMS_DIR)
 	-rm -rf $(SRCDIR)
 	-rm FAIT FAIRE
+
+clean: clean-local
+
 
 ff-flags: ../Makefile Makefile
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags

@@ -29,7 +29,7 @@ MSHMET_OBJDIR = $(MSHMET_DIR)/objects
 mshmet: $(FAIRE) 
 
 $(FAIRE):$(SRCDIR)/FAIT
-	$(MAKE) WHERE $(SRCDIR)/$(INSTALL)  
+	$(MAKE) WHERE  
 	touch $(FAIRE)
 
 $(SRCDIR)/FAIT:$(SRCDIR)/tag-tar
@@ -37,22 +37,22 @@ $(SRCDIR)/FAIT:$(SRCDIR)/tag-tar
 	touch $(SRCDIR)/FAIT
 
 install:$(SRCDIR)/FAIT  ../../src/libMesh/libMesh.a 
-	cp $(MSHMET_SRCDIR)/mshmetlib.h  $(SRCDIR)/$(INSTALL)/include/mshmetlib.h
-	cp $(MSHMET_OBJDIR)/libmshmet.a  $(SRCDIR)/$(INSTALL)/lib/libmshmet.a
-	cp ../../src/libMesh/libMesh.a  $(SRCDIR)/$(INSTALL)/lib/libMesh.a
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/libMesh
-	cp ../../src/libMesh/*h  $(SRCDIR)/$(INSTALL)/include/libMesh
+	cp $(MSHMET_SRCDIR)/mshmetlib.h  ../include/mshmetlib.h
+	cp $(MSHMET_OBJDIR)/libmshmet.a  ../lib/libmshmet.a
+	cp ../../src/libMesh/libMesh.a  ../lib/libMesh.a
+	mkdir -p ../include/libMesh
+	cp ../../src/libMesh/*h  ../include/libMesh
 
-../../src/libMesh/libMesh.a :
+../../src/libMesh/libMesh.a:
 	cd ../../src/libMesh && $(MAKE) 
 
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	make install;  \
-	echo mshmet  LD -L@DIR@/lib -lmshmet  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
-	echo mshmet INCLUDE -I@DIR@/include>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet ;\
-	echo libMesh  LD -L@DIR@/lib -lMesh  >$(SRCDIR)/$(INSTALL)/lib/WHERE.libMesh ;\
-	echo libMesh INCLUDE -I@DIR@/include/libMesh >> $(SRCDIR)/$(INSTALL)/lib/WHERE.libMesh ;\
+	echo mshmet  LD -L@DIR@/lib -lmshmet  >../lib/WHERE.mshmet ;\
+	echo mshmet INCLUDE -I@DIR@/include>> ../lib/WHERE.mshmet ;\
+	echo libMesh  LD -L@DIR@/lib -lMesh  >../lib/WHERE.libMesh ;\
+	echo libMesh INCLUDE -I@DIR@/include/libMesh >> ../lib/WHERE.libMesh ;\
 	fi
 
 
@@ -78,16 +78,17 @@ $(PACKAGE):
 clean-local: 
 	-make -C $(MSHMET_DIR) clean;
 	-rm $(MSHMET_OBJDIR)/libmshmet.a
-
-clean: clean-local
-	-rm ff-flags
-	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.libMesh $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet 
-	-rm $(SRCDIR)/$(INSTALL)/include/mshmetlib.h
-	-rm $(SRCDIR)/$(INSTALL)/lib/libmshmet.a
-	-rm -r $(SRCDIR)/$(INSTALL)/lib/libMesh.a
-	-rm -r $(SRCDIR)/$(INSTALL)/include/libMesh
+	-rm ff-flags ../lib/WHERE.mshmet
+	-rm ../lib/WHERE.libMesh ../lib/WHERE.mshmet 
+	-rm ../include/mshmetlib.h
+	-rm ../lib/libmshmet.a
+	-rm -r ../lib/libMesh.a
+	-rm -r ../include/libMesh
 	-rm -rf $(SRCDIR)
 	-rm FAIT $(FAIRE) 
+
+clean: clean-local
+
 
 ff-flags: ../Makefile 
 	grep 'abs_top_builddir *=' ../Makefile >> ff-flags
@@ -101,4 +102,4 @@ ff-flags: ../Makefile
 	grep 'mshmet_VERSION *=' ./Makefile >> ff-flags
 
 
-.PHONY: $(SRCDIR)/$(INSTALL)
+.PHONY:

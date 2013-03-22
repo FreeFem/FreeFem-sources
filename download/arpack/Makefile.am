@@ -65,4 +65,4 @@ $(PATCH_TAR_GZ):
 	cd $(DIRPKG);@WGET@ -N http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz
 
 clean-local:
-	-rm -r ARPACK 
+	-rm -r ARPACK ../lib/libarpack.a

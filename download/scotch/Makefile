@@ -38,16 +38,16 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 	touch $(SRCDIR)/FAIT
 
 install:$(SRCDIR)/FAIT
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/scotch
-	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/scotch/
-	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
+	mkdir -p ../include/scotch
+	cp $(SRCDIR)/include/*.h ../include/scotch/
+	cp $(SRCDIR)/lib/*.a ../lib/
 WHERE:
 	if [ -f  $(SRCDIR)/FAIT ] ; then \
 	$(MAKE) install; \
-	test -n "$(CCP)" && echo ptscotch LD -L@DIR@/lib  -lptesmumps -lptscotch -lptscotcherr   >$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
-	test -n "$(CCP)" && echo ptscotch INCLUDE -I@DIR@/include/scotch  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
-	echo scotch LD -L@DIR@/lib   -lscotch -lscotcherr   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
-	echo scotch INCLUDE -I@DIR@/include/scotch  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch ;\
+	test -n "$(CCP)" && echo ptscotch LD -L@DIR@/lib  -lptesmumps -lptscotch -lptscotcherr   >../lib/WHERE.scotch ;\
+	test -n "$(CCP)" && echo ptscotch INCLUDE -I@DIR@/include/scotch  >> ../lib/WHERE.scotch ;\
+	echo scotch LD -L@DIR@/lib   -lscotch -lscotcherr   >>../lib/WHERE.scotch ;\
+	echo scotch INCLUDE -I@DIR@/include/scotch  >> ../lib/WHERE.scotch ;\
 	fi
 
 $(SRCDIR): $(PACKAGE)
@@ -62,8 +62,11 @@ $(PACKAGE):
 
 clean-local:
 	-cd $(SRCDIR)/src && $(MAKE)  realclean  -C $(SRCDIR)/src
-clean: clean-local
-	-rm Makefile.inc
+	-rm Makefile.inc ../lib/WHERE.scotch 
 	-rm -rf $(SRCDIR)
+	-rm -fr ../lib/scotch ../lib/WHERE.scotch
+	-rm -fr ../include/scotch 
 	-rm FAIRE 
+clean: clean-local
+
 .PHONY:$(SRCDIR)/$(INSTALL)

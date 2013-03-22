@@ -1,6 +1,9 @@
-//load "PARDISO"
-setenv("OMP_NUM_THREADS",10);
+//load "PARDISO" 
 load "symmetrizeCSR"
+load "shell"
+//if(ompgetnumthreads() < 2 & getenv("OMP_NUM_THREAD") =="" ) 
+//  ompsetnumthreads(10);// set number of thread for PARDISO ..  
+//cout << " OMP NUM THREAD = " << ompgetnumthreads()  << " " << ompgetmaxthreads() << endl;; 
 int[int] l = [1, 1, 2, 2];
 mesh Th = square(150, 150, label = l);
 fespace Vh(Th, P2);
@@ -8,7 +11,7 @@ Vh u, v;
 varf lap(u,v) = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v)) + int2d(Th)(v) + on(1, u = 1);
 real[int] b = lap(0, Vh);
 matrix A = lap(Vh, Vh);
-matrix B = A;
+matrix B = A; //lap(Vh, Vh,solver=CG);;
 symmetrizeCSR(B);
 verbosity = 2;
 // If you want, you can pass an array of integer (int[int] t)
